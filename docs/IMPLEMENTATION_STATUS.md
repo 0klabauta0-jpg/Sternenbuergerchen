@@ -10,11 +10,11 @@
 
 ## Aktueller Startzustand
 ### RuntimeLeader / FTL
-- Status: offen
-- Stand: noch nicht implementiert
-- Offene Punkte: komplette Einführung
-- Risiken: Kernsystem
-- Nächster Schritt: TASK_001_runtime_leader.md
+- Status: implementiert
+- Stand: `RuntimeLeader` als eigene `Node`-Komponente mit `class_name`, Signalen fuer Promotion, Demotion, Assignment und Command-Weitergabe sowie der API `promote()`, `demote()`, `assign(entity)` und `command(order)` eingefuehrt.
+- Offene Punkte: keine FTL-Ausfuehrungslogik, keine Befehlsinterpretation, keine EventRouter- oder SimulationRoot-Anbindung, keine Szenenverdrahtung.
+- Risiken: Signalvertraege und Zustandsbasis stehen, die spaetere Einbindung in autoritative Gameplay-Systeme muss konsistent bleiben.
+- Nächster Schritt: RuntimeLeader an EventRouter und SimulationRoot anbinden, sobald die Folgesysteme implementiert sind.
 
 ### EventRouter
 - Status: offen
