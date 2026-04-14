@@ -9,6 +9,7 @@
 - Naechster Schritt:
 
 ## Aktueller Startzustand
+
 ### RuntimeLeader / FTL
 - Status: implementiert
 - Stand: `RuntimeLeader` als eigene `Node`-Komponente mit `class_name`, Signalen fuer Promotion, Demotion, Assignment und Command-Weitergabe sowie der API `promote()`, `demote()`, `assign(entity)` und `command(order)` eingefuehrt.
@@ -17,11 +18,11 @@
 - Naechster Schritt: RuntimeLeader an EventRouter und SimulationRoot anbinden, sobald die Folgesysteme implementiert sind.
 
 ### EventRouter
-- Status: offen
-- Stand: noch nicht implementiert
-- Offene Punkte: Signale definieren
-- Risiken: Systemkopplung
-- Naechster Schritt: TASK_002_event_router.md
+- Status: implementiert
+- Stand: `EventRouter` als eigene `Node`-Komponente mit Signalen fuer Squad-Commands, Unit-Ausfaelle, Threat-Meldungen, Leader-Wechsel und Respawn-Anfragen sowie schlanken Routing-Methoden eingefuehrt.
+- Offene Punkte: keine RuntimeLeader-Anbindung, keine Missionslogik, kein Autoload, keine SimulationRoot- oder Registry-Integration.
+- Risiken: Die Signalvertraege stehen, die spaetere Einbindung muss ohne harte Direktkopplung zwischen Runtime-Systemen, UI und Autoritaetslogik erfolgen.
+- Naechster Schritt: EventRouter an kommende Systeme anbinden, sobald SimulationRoot und weitere Laufzeitkomponenten existieren.
 
 ### SimulationRoot
 - Status: implementiert
