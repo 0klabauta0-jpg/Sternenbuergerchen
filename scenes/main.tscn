@@ -1,0 +1,22 @@
+[gd_scene load_steps=7 format=3 uid="uid://b4q8jvofa0pj4"]
+
+[ext_resource type="Script" path="res://scripts/core/simulation_root.gd" id="1_xe8k6"]
+[ext_resource type="Script" path="res://scripts/core/event_router.gd" id="2_fmqqm"]
+[ext_resource type="Script" path="res://scripts/registries/unit_registry.gd" id="3_6pywe"]
+[ext_resource type="Script" path="res://scripts/registries/ftl_registry.gd" id="4_se2ev"]
+[ext_resource type="Script" path="res://scripts/core/update_manager.gd" id="5_4rx4m"]
+[ext_resource type="Script" path="res://scripts/ftl/runtime_leader.gd" id="6_y0b6f"]
+
+[node name="Main" type="Node"]
+
+[node name="SimulationRoot" type="Node" parent="." script=ExtResource("1_xe8k6")]
+
+[node name="EventRouter" type="Node" parent="." script=ExtResource("2_fmqqm")]
+
+[node name="UnitRegistry" type="Node" parent="." script=ExtResource("3_6pywe")]
+
+[node name="FTLRegistry" type="Node" parent="." script=ExtResource("4_se2ev")]
+
+[node name="UpdateManager" type="Node" parent="." script=ExtResource("5_4rx4m")]
+
+[node name="RuntimeLeaderTest" type="Node" parent="." script=ExtResource("6_y0b6f")]
