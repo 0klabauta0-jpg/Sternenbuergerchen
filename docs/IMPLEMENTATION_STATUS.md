@@ -23,6 +23,13 @@
 - Risiken: Systemkopplung
 - Naechster Schritt: TASK_002_event_router.md
 
+### Registries
+- Status: implementiert
+- Stand: `UnitRegistry` und `FTLRegistry` als zentrale Lookup- und Verwaltungsstellen fuer Units bzw. FTLs mit Guard-Checks, stabilen ID-Team-ID-Lookups und Ausgabe aller registrierten Eintraege eingefuehrt.
+- Offene Punkte: kein `TileRegistry`, keine Autoload-Einbindung, keine Umstellung weiterer Systeme auf Registry-Nutzung.
+- Risiken: Die Registry-Vertraege stehen, spaetere Laufzeitsysteme muessen Registrierungen konsistent pflegen, damit keine veralteten Referenzen liegen bleiben.
+- Naechster Schritt: Registries minimal in kommende Laufzeitsysteme integrieren, sobald deren Verkabelung benoetigt wird.
+
 ### SimulationRoot
 - Status: implementiert
 - Stand: `SimulationRoot` als eigene `Node`-Komponente mit Command- und Effects-Queues, deterministischer Tick-Verarbeitung in `_physics_process()`, Guard-Checks, Stub-Apply-Methoden und `tick_processed`-Signal eingefuehrt.
