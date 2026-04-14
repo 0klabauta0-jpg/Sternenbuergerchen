@@ -29,3 +29,10 @@
 - Offene Punkte: keine Gameplay-Mechanik, keine Missionslogik, keine Registry- oder UpdateManager-Anbindung, keine Zustandsmutation an fremden Nodes.
 - Risiken: Die autoritative Verarbeitungsstruktur steht, die spaetere Befehls- und Effektsemantik muss strikt innerhalb von `SimulationRoot` bleiben.
 - Naechster Schritt: konkrete Command- und Effect-Typen einfuehren, sobald die Folgesysteme definiert sind.
+
+### UpdateManager
+- Status: implementiert
+- Stand: `UpdateManager` als eigene `Node`-Komponente mit separaten Dirty-Queues fuer AI- und HUD-Updates, begrenzter Batch-Verarbeitung pro Frame und optionalen Hook-Aufrufen fuer `ai_update()` bzw. `refresh_hud()` eingefuehrt.
+- Offene Punkte: keine Einbindung in konkrete Laufzeitsysteme, keine erweiterten Scheduler-Regeln, keine Priorisierung zwischen Dirty-Eintraegen.
+- Risiken: Der Manager selbst bleibt klein, spaetere aufrufende Systeme muessen Dirty-Markierungen konsistent setzen, damit keine unnoetigen oder fehlenden Folgeupdates entstehen.
+- Naechster Schritt: `UpdateManager` bei Bedarf minimal an bestehende Laufzeitsysteme anschliessen, ohne Vollupdates einzufuehren.
