@@ -30,10 +30,16 @@
 - Offene Punkte: keine Gameplay-Mechanik, keine Missionslogik, keine Registry- oder UpdateManager-Anbindung, keine Zustandsmutation an fremden Nodes.
 - Risiken: Die autoritative Verarbeitungsstruktur steht, die spaetere Befehls- und Effektsemantik muss strikt innerhalb von `SimulationRoot` bleiben.
 - Naechster Schritt: konkrete Command- und Effect-Typen einfuehren, sobald die Folgesysteme definiert sind.
-
-### RuntimeLeader Integration Test
+### UpdateManager
 - Status: implementiert
-- Stand: eine minimale Testszene unter `res://scenes/tests/runtimeleader_integration_test.tscn` verbindet `RuntimeLeader`, `EventRouter` und `SimulationRoot` ueber einen kleinen Adapter, der einen Test-Command ausloest und sichtbar von `command_issued(order)` ueber `route_squad_command(...)` nach `enqueue_command(...)` weiterreicht.
-- Offene Punkte: keine echte FTL-Logik, keine Gameplay-Ausfuehrung, keine UI, keine Missionsmechanik und keine Einbindung weiterer Systeme.
-- Risiken: Der Test deckt bewusst nur die minimale Signal- und Queue-Integration ab; spaetere echte Gameplay-Vertraege muessen weiterhin separat aufgebaut und getestet werden.
-- Naechster Schritt: bei Bedarf weitere Integrationspfade zwischen Kernsystemen in kleinen, expliziten Tests absichern.
+- Stand: `UpdateManager` als eigene `Node`-Komponente mit separaten Dirty-Queues fuer AI- und HUD-Updates, begrenzter Batch-Verarbeitung pro Frame und optionalen Hook-Aufrufen fuer `ai_update()` bzw. `refresh_hud()` eingefuehrt.
+- Offene Punkte: keine Einbindung in konkrete Laufzeitsysteme, keine erweiterten Scheduler-Regeln, keine Priorisierung zwischen Dirty-Eintraegen.
+- Risiken: Der Manager selbst bleibt klein, spaetere aufrufende Systeme muessen Dirty-Markierungen konsistent setzen, damit keine unnoetigen oder fehlenden Folgeupdates entstehen.
+- Naechster Schritt: `UpdateManager` bei Bedarf minimal an bestehende Laufzeitsysteme anschliessen, ohne Vollupdates einzufuehren.
+
+### Unit Stub / Registry Integration Test
+- Status: implementiert
+- Stand: `TestUnit` als minimale Node-Komponente mit stabiler `unit_id` eingefuehrt und in einer kleinen Testszene mit `UnitRegistry`, `RuntimeLeader` und einem schlanken Adapter verbunden, der Registrierung, Lookup und `assign(test_unit)` beim Start prueft.
+- Offene Punkte: keine echte Unit-Logik, keine Bewegung, keine AI, keine Missionslogik und keine Einbindung weiterer Systeme.
+- Risiken: Der Test deckt bewusst nur den minimalen Registry- und Assignment-Pfad ab; spaetere echte Unit- und Gameplay-Vertraege muessen separat aufgebaut und getestet werden.
+- Naechster Schritt: bei Bedarf weitere Unit-bezogene Integrationspfade in kleinen, expliziten Tests absichern.

@@ -1,0 +1,26 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/registries/unit_registry.gd" id="1_g0g1d"]
+[ext_resource type="Script" path="res://scripts/ftl/runtime_leader.gd" id="2_vq4oq"]
+[ext_resource type="Script" path="res://scripts/npc/test_unit.gd" id="3_7r5sn"]
+[ext_resource type="Script" path="res://scripts/tests/unit_registry_integration_adapter.gd" id="4_7esle"]
+
+[node name="UnitRegistryIntegrationTest" type="Node"]
+
+[node name="UnitRegistry" type="Node" parent="."]
+script = ExtResource("1_g0g1d")
+
+[node name="RuntimeLeader" type="Node" parent="."]
+script = ExtResource("2_vq4oq")
+
+[node name="TestUnit" type="Node" parent="."]
+script = ExtResource("3_7r5sn")
+unit_id = "unit_test_001"
+display_name = "Registry Test Unit"
+team_id = "team_test"
+
+[node name="IntegrationAdapter" type="Node" parent="."]
+script = ExtResource("4_7esle")
+unit_registry_path = NodePath("../UnitRegistry")
+runtime_leader_path = NodePath("../RuntimeLeader")
+test_unit_path = NodePath("../TestUnit")
