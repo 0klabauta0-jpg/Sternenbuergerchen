@@ -30,3 +30,10 @@
 - Offene Punkte: keine Gameplay-Mechanik, keine Missionslogik, keine Registry- oder UpdateManager-Anbindung, keine Zustandsmutation an fremden Nodes.
 - Risiken: Die autoritative Verarbeitungsstruktur steht, die spaetere Befehls- und Effektsemantik muss strikt innerhalb von `SimulationRoot` bleiben.
 - Naechster Schritt: konkrete Command- und Effect-Typen einfuehren, sobald die Folgesysteme definiert sind.
+
+### SimulationRoot Command Tick Test
+- Status: implementiert
+- Stand: eine minimale Testszene unter `res://scenes/tests/minimal_command_flow_test.tscn` verbindet `TestUnit`, `UnitRegistry`, `RuntimeLeader`, `EventRouter` und `SimulationRoot`; ein Test-Command wird erzeugt, an `SimulationRoot` enqueued und im naechsten Physics-Tick als bekannter `move`-Test-Command bestaetigt.
+- Offene Punkte: keine echte Befehlsausfuehrung, keine Unit-Bewegung, keine Missionslogik, keine AI und keine UI.
+- Risiken: Der Test belegt bewusst nur den minimalen Queue-und-Tick-Durchlauf; spaetere echte Gameplay-Semantik und weitere Command-Typen brauchen eigene Integrations- und Verhaltenstests.
+- Naechster Schritt: weitere Command-Typen und Folgepfade in kleinen, expliziten Tests absichern, sobald die spaetere Semantik feststeht.

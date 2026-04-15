@@ -1,0 +1,36 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/simulation_root.gd" id="1_pr7ts"]
+[ext_resource type="Script" path="res://scripts/core/event_router.gd" id="2_i7ruw"]
+[ext_resource type="Script" path="res://scripts/registries/unit_registry.gd" id="3_8l3xr"]
+[ext_resource type="Script" path="res://scripts/ftl/runtime_leader.gd" id="4_slhqo"]
+[ext_resource type="Script" path="res://scripts/npc/test_unit.gd" id="5_o0sf2"]
+[ext_resource type="Script" path="res://scripts/tests/minimal_command_flow_adapter.gd" id="6_6kbfk"]
+
+[node name="MinimalCommandFlowTest" type="Node"]
+
+[node name="SimulationRoot" type="Node" parent="."]
+script = ExtResource("1_pr7ts")
+
+[node name="EventRouter" type="Node" parent="."]
+script = ExtResource("2_i7ruw")
+
+[node name="UnitRegistry" type="Node" parent="."]
+script = ExtResource("3_8l3xr")
+
+[node name="RuntimeLeader" type="Node" parent="."]
+script = ExtResource("4_slhqo")
+
+[node name="TestUnit" type="Node" parent="."]
+script = ExtResource("5_o0sf2")
+unit_id = "unit_test_001"
+display_name = "Command Flow Test Unit"
+team_id = "team_test"
+
+[node name="IntegrationAdapter" type="Node" parent="."]
+script = ExtResource("6_6kbfk")
+unit_registry_path = NodePath("../UnitRegistry")
+runtime_leader_path = NodePath("../RuntimeLeader")
+event_router_path = NodePath("../EventRouter")
+simulation_root_path = NodePath("../SimulationRoot")
+test_unit_path = NodePath("../TestUnit")

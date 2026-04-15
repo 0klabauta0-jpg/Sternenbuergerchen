@@ -2,11 +2,14 @@ class_name SimulationRoot
 extends Node
 
 signal tick_processed(tick: int)
+signal command_processed(cmd: Dictionary)
 
 var command_queue: Array = []
 var effects_queue: Array = []
 var tick_counter: int = 0
 var is_processing_tick: bool = false
+var last_processed_command: Dictionary = {}
+var processed_command_count: int = 0
 
 
 func enqueue_command(cmd: Dictionary) -> void:
@@ -72,7 +75,22 @@ func _apply_command(cmd: Dictionary, delta: float) -> void:
 		push_warning("SimulationRoot received a negative physics delta while applying a command.")
 		return
 
-	# TODO: Authoritative gameplay state commits belong here once systems exist.
+	if not cmd.has("type"):
+		push_warning("SimulationRoot command is missing a type.")
+		return
+
+	var command_type: Variant = cmd["type"]
+	if typeof(command_type) != TYPE_STRING:
+		push_warning("SimulationRoot command type must be a String.")
+		return
+
+	if command_type != "move":
+		push_warning("SimulationRoot does not handle command type '%s' yet." % String(command_type))
+		return
+
+	last_processed_command = cmd.duplicate(true)
+	processed_command_count += 1
+	command_processed.emit(last_processed_command.duplicate(true))
 
 
 func _apply_effect(effect: Dictionary, delta: float) -> void:
