@@ -30,3 +30,10 @@
 - Offene Punkte: keine Gameplay-Mechanik, keine Missionslogik, keine Registry- oder UpdateManager-Anbindung, keine Zustandsmutation an fremden Nodes.
 - Risiken: Die autoritative Verarbeitungsstruktur steht, die spaetere Befehls- und Effektsemantik muss strikt innerhalb von `SimulationRoot` bleiben.
 - Naechster Schritt: konkrete Command- und Effect-Typen einfuehren, sobald die Folgesysteme definiert sind.
+
+### Unit Target Command Test
+- Status: implementiert
+- Stand: eine minimale Testszene unter `res://scenes/tests/minimal_command_flow_test.tscn` verbindet `TestUnit`, `UnitRegistry`, `RuntimeLeader`, `EventRouter` und `SimulationRoot`; ein Test-Command mit `unit_id` wird erzeugt, ueber den bestehenden Command-Flow enqueued, im Physics-Tick verarbeitet und die Ziel-Unit ueber `UnitRegistry` aufgeloest.
+- Offene Punkte: keine echte Befehlsausfuehrung, keine Bewegung, keine Missionslogik, keine AI und keine UI.
+- Risiken: Der Test bestaetigt bewusst nur die minimale Zielauflosung im autoritativen Tick; spaetere echte Command-Semantik und Fehlerpfade brauchen weitere kleine Integrations- und Verhaltenstests.
+- Naechster Schritt: weitere Command-Typen und negative Aufloesungsfaelle mit separaten Tests absichern, sobald die Folgepfade feststehen.
