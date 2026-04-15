@@ -30,3 +30,10 @@
 - Offene Punkte: keine Gameplay-Mechanik, keine Missionslogik, keine Registry- oder UpdateManager-Anbindung, keine Zustandsmutation an fremden Nodes.
 - Risiken: Die autoritative Verarbeitungsstruktur steht, die spaetere Befehls- und Effektsemantik muss strikt innerhalb von `SimulationRoot` bleiben.
 - Naechster Schritt: konkrete Command- und Effect-Typen einfuehren, sobald die Folgesysteme definiert sind.
+
+### RuntimeLeader Integration Test
+- Status: implementiert
+- Stand: eine minimale Testszene unter `res://scenes/tests/runtimeleader_integration_test.tscn` verbindet `RuntimeLeader`, `EventRouter` und `SimulationRoot` ueber einen kleinen Adapter, der einen Test-Command ausloest und sichtbar von `command_issued(order)` ueber `route_squad_command(...)` nach `enqueue_command(...)` weiterreicht.
+- Offene Punkte: keine echte FTL-Logik, keine Gameplay-Ausfuehrung, keine UI, keine Missionsmechanik und keine Einbindung weiterer Systeme.
+- Risiken: Der Test deckt bewusst nur die minimale Signal- und Queue-Integration ab; spaetere echte Gameplay-Vertraege muessen weiterhin separat aufgebaut und getestet werden.
+- Naechster Schritt: bei Bedarf weitere Integrationspfade zwischen Kernsystemen in kleinen, expliziten Tests absichern.

@@ -1,0 +1,23 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/simulation_root.gd" id="1_djvxs"]
+[ext_resource type="Script" path="res://scripts/core/event_router.gd" id="2_k5w5u"]
+[ext_resource type="Script" path="res://scripts/ftl/runtime_leader.gd" id="3_onlx4"]
+[ext_resource type="Script" path="res://scripts/tests/runtimeleader_integration_adapter.gd" id="4_r43im"]
+
+[node name="RuntimeLeaderIntegrationTest" type="Node"]
+
+[node name="SimulationRoot" type="Node" parent="."]
+script = ExtResource("1_djvxs")
+
+[node name="EventRouter" type="Node" parent="."]
+script = ExtResource("2_k5w5u")
+
+[node name="RuntimeLeader" type="Node" parent="."]
+script = ExtResource("3_onlx4")
+
+[node name="IntegrationAdapter" type="Node" parent="."]
+script = ExtResource("4_r43im")
+runtime_leader_path = NodePath("../RuntimeLeader")
+event_router_path = NodePath("../EventRouter")
+simulation_root_path = NodePath("../SimulationRoot")
