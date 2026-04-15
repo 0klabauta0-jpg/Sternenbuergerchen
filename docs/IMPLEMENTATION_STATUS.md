@@ -30,3 +30,10 @@
 - Offene Punkte: keine Gameplay-Mechanik, keine Missionslogik, keine Registry- oder UpdateManager-Anbindung, keine Zustandsmutation an fremden Nodes.
 - Risiken: Die autoritative Verarbeitungsstruktur steht, die spaetere Befehls- und Effektsemantik muss strikt innerhalb von `SimulationRoot` bleiben.
 - Naechster Schritt: konkrete Command- und Effect-Typen einfuehren, sobald die Folgesysteme definiert sind.
+
+### Minimal Command Flow Test
+- Status: implementiert
+- Stand: eine minimale Testszene unter `res://scenes/tests/minimal_command_flow_test.tscn` verbindet `TestUnit`, `UnitRegistry`, `RuntimeLeader`, `EventRouter` und `SimulationRoot` ueber einen kleinen Adapter, der Registrierung, `assign(test_unit)`, `command(order)`, Routing und `enqueue_command(...)` in klarer Form ausloest.
+- Offene Punkte: keine echte Befehlsausfuehrung, keine Unit-Bewegung, keine Missionslogik, keine AI und keine UI.
+- Risiken: Der Test deckt bewusst nur den minimalen Command-Durchlauf ab; spaetere echte Gameplay- und Unit-Vertraege muessen weiterhin separat aufgebaut und getestet werden.
+- Naechster Schritt: bei Bedarf weitere Integrationspfade zwischen RuntimeLeader, Router, Registry und SimulationRoot in kleinen, expliziten Tests absichern.
