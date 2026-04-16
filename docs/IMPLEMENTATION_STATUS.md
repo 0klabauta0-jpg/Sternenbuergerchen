@@ -325,3 +325,10 @@
 - Offene Punkte: keine tieferen Fail-Grundtypen, keine Objective-Loss-Regel fuer Feindkontrolle, keine ausgebaute Gegner-KI und keine respawn-sensitive Missionsfortsetzung nach Squad-Wipe.
 - Risiken: der Schritt bleibt bewusst klein und slice-orientiert; ein kompletter Friendly-Wipe beendet die Mission aktuell sofort, noch bevor der bereits vorhandene verzoegerte FOB-Respawn den ganzen Trupp wieder in den Einsatz bringen koennte. Eine spaetere echte V1-Respawn-Policy muss diese Vereinfachung explizit ersetzen statt weitere Sonderfaelle darum zu stapeln.
 - Naechster Schritt: spaeter nur bei eigenem Task den bestehenden Debrief-Rueckfluss und die Objective-/Fail-Gruende weiter schaerfen, falls das fuer den Mission-Loop wirklich benoetigt wird.
+
+### Minimal Debrief Result Clarity
+- Status: implementiert
+- Stand: der bestehende Meta-Rueckfluss traegt jetzt neben `won/lost` auch das aktive Missionsziel, den konkreten Missionsendgrund und den letzten kleinen Objective-Zustand in den vorhandenen Debrief- und FOB-Pfad. `MetaLayerFlow` sammelt dafuer direkt aus dem vorhandenen `MissionCombatLoopDriver` nur `mission_goal`, `resolution_reason` und `objective_state`; `DebriefScreen` und `FOBScreen` zeigen daraus im bestehenden Textblock klarer an, ob der Einsatz z. B. ueber `OBJECTIVE SECURED`, `ENEMY FORCE NEUTRALIZED` oder `FRIENDLY FORCE NEUTRALIZED` beendet wurde.
+- Offene Punkte: keine ausgebaute Debrief-Architektur, keine Missionschronik, keine tieferen Statistiken und keine neuen Panels oder Meta-Manager.
+- Risiken: der Schritt bleibt bewusst nur Text-/Rueckflussklarheit im vorhandenen Screen-Pfad; spaetere echte Ergebnis- oder Kampagnenauswertung sollte diese kleinen Hilfstexte explizit ersetzen statt weitere Logik in UI-Skripten zu sammeln.
+- Naechster Schritt: spaeter nur bei eigenem Task weitere kleine Missionsgruende oder Follow-up-Folgen ergaenzen, wenn das fuer den V1-Loop wirklich gebraucht wird.

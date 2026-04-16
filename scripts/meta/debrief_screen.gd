@@ -39,7 +39,19 @@ func _render_result() -> void:
 
 	var winner_team_id: String = String(_mission_result.get("winning_team_id", ""))
 	var mission_outcome: String = String(_mission_result.get("mission_outcome", "ended"))
-	result_label.text = "Mission %s\nWinner: %s" % [mission_outcome, winner_team_id]
+	var mission_goal: String = String(_mission_result.get("mission_goal", ""))
+	var resolution_reason: String = String(_mission_result.get("resolution_reason", ""))
+	var objective_state: String = String(_mission_result.get("objective_state", ""))
+	var result_lines: PackedStringArray = []
+	result_lines.append("Mission %s" % mission_outcome.to_upper())
+	if not mission_goal.is_empty():
+		result_lines.append("Goal: %s" % _format_goal_text(mission_goal))
+	if not resolution_reason.is_empty():
+		result_lines.append("Result: %s" % _format_resolution_text(resolution_reason))
+	if objective_state != "inactive" and not objective_state.is_empty():
+		result_lines.append("Objective state: %s" % objective_state.to_upper())
+	result_lines.append("Winner: %s" % winner_team_id)
+	result_label.text = "\n".join(result_lines)
 
 	var team_state_lines: PackedStringArray = []
 	for member_state in _mission_result.get("team_states", []):
@@ -53,6 +65,28 @@ func _render_result() -> void:
 		return
 
 	team_state_label.text = "Returned team state:\n%s" % "\n".join(team_state_lines)
+
+
+func _format_goal_text(mission_goal: String) -> String:
+	match mission_goal:
+		"secure_target":
+			return "SECURE TARGET"
+		"neutralize_enemies":
+			return "NEUTRALIZE ENEMIES"
+		_:
+			return mission_goal.replace("_", " ").to_upper()
+
+
+func _format_resolution_text(resolution_reason: String) -> String:
+	match resolution_reason:
+		"objective_secured":
+			return "OBJECTIVE SECURED"
+		"enemy_neutralized":
+			return "ENEMY FORCE NEUTRALIZED"
+		"friendly_force_neutralized":
+			return "FRIENDLY FORCE NEUTRALIZED"
+		_:
+			return resolution_reason.replace("_", " ").to_upper()
 
 
 func _on_return_to_fob_pressed() -> void:

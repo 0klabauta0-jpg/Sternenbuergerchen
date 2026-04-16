@@ -163,6 +163,9 @@ func _on_mission_combat_resolved(winning_team_id: String, _neutralized_enemy_cou
 
 
 func _build_mission_result(mission_instance: Node, winning_team_id: String) -> Dictionary:
+	var mission_goal: String = _get_mission_goal(mission_instance)
+	var resolution_reason: String = _get_resolution_reason(mission_instance)
+	var objective_state: String = _get_objective_state(mission_instance)
 	var team_states: Array = []
 	for unit_id in _selected_unit_ids:
 		var node_name: String = String(FRIENDLY_NODE_NAMES_BY_ID.get(unit_id, ""))
@@ -193,6 +196,9 @@ func _build_mission_result(mission_instance: Node, winning_team_id: String) -> D
 	return {
 		"winning_team_id": winning_team_id,
 		"mission_outcome": _get_mission_outcome(winning_team_id),
+		"mission_goal": mission_goal,
+		"resolution_reason": resolution_reason,
+		"objective_state": objective_state,
 		"selected_unit_ids": _selected_unit_ids.duplicate(),
 		"team_states": team_states,
 	}
@@ -211,6 +217,30 @@ func _release_active_mission() -> void:
 
 	_active_mission.queue_free()
 	_active_mission = null
+
+
+func _get_mission_goal(mission_instance: Node) -> String:
+	var combat_driver = mission_instance.get_node_or_null("CombatLoopDriver")
+	if combat_driver == null:
+		return DEFAULT_MISSION_GOAL
+
+	return String(combat_driver.get("mission_goal"))
+
+
+func _get_resolution_reason(mission_instance: Node) -> String:
+	var combat_driver = mission_instance.get_node_or_null("CombatLoopDriver")
+	if combat_driver == null or not combat_driver.has_method("get_resolution_reason"):
+		return ""
+
+	return String(combat_driver.call("get_resolution_reason"))
+
+
+func _get_objective_state(mission_instance: Node) -> String:
+	var combat_driver = mission_instance.get_node_or_null("CombatLoopDriver")
+	if combat_driver == null or not combat_driver.has_method("get_objective_state"):
+		return "inactive"
+
+	return String(combat_driver.call("get_objective_state"))
 
 
 func _build_selected_friendly_paths(selected_unit_ids: PackedStringArray) -> Array[NodePath]:

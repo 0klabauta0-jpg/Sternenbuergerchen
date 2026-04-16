@@ -96,6 +96,17 @@ func _build_mission_result_text() -> String:
 			String(_last_mission_result.get("winning_team_id", "unknown")),
 		]
 	)
+	var mission_goal: String = String(_last_mission_result.get("mission_goal", ""))
+	if not mission_goal.is_empty():
+		lines.append("Goal: %s" % _format_goal_text(mission_goal))
+
+	var resolution_reason: String = String(_last_mission_result.get("resolution_reason", ""))
+	if not resolution_reason.is_empty():
+		lines.append("Result: %s" % _format_resolution_text(resolution_reason))
+
+	var objective_state: String = String(_last_mission_result.get("objective_state", ""))
+	if objective_state != "inactive" and not objective_state.is_empty():
+		lines.append("Objective: %s" % objective_state.to_upper())
 
 	for member_state in _last_mission_result.get("team_states", []):
 		lines.append(
@@ -132,6 +143,18 @@ func _format_goal_text(mission_goal: String) -> String:
 			return "NEUTRALIZE ENEMIES"
 		_:
 			return mission_goal.replace("_", " ").to_upper()
+
+
+func _format_resolution_text(resolution_reason: String) -> String:
+	match resolution_reason:
+		"objective_secured":
+			return "OBJECTIVE SECURED"
+		"enemy_neutralized":
+			return "ENEMY FORCE NEUTRALIZED"
+		"friendly_force_neutralized":
+			return "FRIENDLY FORCE NEUTRALIZED"
+		_:
+			return resolution_reason.replace("_", " ").to_upper()
 
 
 func _on_back_button_pressed() -> void:
