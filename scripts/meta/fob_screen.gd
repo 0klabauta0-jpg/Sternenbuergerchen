@@ -105,8 +105,11 @@ func _build_mission_result_text() -> String:
 		lines.append("Result: %s" % _format_resolution_text(resolution_reason))
 
 	var objective_state: String = String(_last_mission_result.get("objective_state", ""))
-	if objective_state != "inactive" and not objective_state.is_empty():
-		lines.append("Objective: %s" % objective_state.to_upper())
+	var objective_owner_team_id: String = String(_last_mission_result.get("objective_owner_team_id", ""))
+	var winner_team_id: String = String(_last_mission_result.get("winning_team_id", ""))
+	var objective_summary: String = _format_objective_summary(objective_state, objective_owner_team_id, winner_team_id)
+	if not objective_summary.is_empty():
+		lines.append("Objective: %s" % objective_summary)
 
 	for member_state in _last_mission_result.get("team_states", []):
 		lines.append(
@@ -149,12 +152,28 @@ func _format_resolution_text(resolution_reason: String) -> String:
 	match resolution_reason:
 		"objective_secured":
 			return "OBJECTIVE SECURED"
+		"objective_lost":
+			return "OBJECTIVE LOST"
 		"enemy_neutralized":
 			return "ENEMY FORCE NEUTRALIZED"
 		"friendly_force_neutralized":
 			return "FRIENDLY FORCE NEUTRALIZED"
 		_:
 			return resolution_reason.replace("_", " ").to_upper()
+
+
+func _format_objective_summary(objective_state: String, objective_owner_team_id: String, winner_team_id: String) -> String:
+	if objective_state.is_empty() or objective_state == "inactive":
+		return ""
+
+	if objective_state == "secured":
+		if winner_team_id == "team_bravo":
+			return "LOST"
+		if not objective_owner_team_id.is_empty() and objective_owner_team_id != "team_alpha":
+			return "LOST"
+		return "SECURED"
+
+	return objective_state.to_upper()
 
 
 func _on_back_button_pressed() -> void:

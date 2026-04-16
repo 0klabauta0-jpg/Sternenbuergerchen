@@ -166,6 +166,7 @@ func _build_mission_result(mission_instance: Node, winning_team_id: String) -> D
 	var mission_goal: String = _get_mission_goal(mission_instance)
 	var resolution_reason: String = _get_resolution_reason(mission_instance)
 	var objective_state: String = _get_objective_state(mission_instance)
+	var objective_owner_team_id: String = _get_objective_owner_team_id(mission_instance)
 	var team_states: Array = []
 	for unit_id in _selected_unit_ids:
 		var node_name: String = String(FRIENDLY_NODE_NAMES_BY_ID.get(unit_id, ""))
@@ -199,6 +200,7 @@ func _build_mission_result(mission_instance: Node, winning_team_id: String) -> D
 		"mission_goal": mission_goal,
 		"resolution_reason": resolution_reason,
 		"objective_state": objective_state,
+		"objective_owner_team_id": objective_owner_team_id,
 		"selected_unit_ids": _selected_unit_ids.duplicate(),
 		"team_states": team_states,
 	}
@@ -241,6 +243,14 @@ func _get_objective_state(mission_instance: Node) -> String:
 		return "inactive"
 
 	return String(combat_driver.call("get_objective_state"))
+
+
+func _get_objective_owner_team_id(mission_instance: Node) -> String:
+	var combat_driver = mission_instance.get_node_or_null("CombatLoopDriver")
+	if combat_driver == null or not combat_driver.has_method("get_objective_owner_team_id"):
+		return ""
+
+	return String(combat_driver.call("get_objective_owner_team_id"))
 
 
 func _build_selected_friendly_paths(selected_unit_ids: PackedStringArray) -> Array[NodePath]:

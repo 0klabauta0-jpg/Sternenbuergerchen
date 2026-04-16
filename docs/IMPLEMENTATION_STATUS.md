@@ -332,3 +332,10 @@
 - Offene Punkte: keine ausgebaute Debrief-Architektur, keine Missionschronik, keine tieferen Statistiken und keine neuen Panels oder Meta-Manager.
 - Risiken: der Schritt bleibt bewusst nur Text-/Rueckflussklarheit im vorhandenen Screen-Pfad; spaetere echte Ergebnis- oder Kampagnenauswertung sollte diese kleinen Hilfstexte explizit ersetzen statt weitere Logik in UI-Skripten zu sammeln.
 - Naechster Schritt: spaeter nur bei eigenem Task weitere kleine Missionsgruende oder Follow-up-Folgen ergaenzen, wenn das fuer den V1-Loop wirklich gebraucht wird.
+
+### Minimal Enemy Objective Loss
+- Status: implementiert
+- Stand: der bestehende Objective-Punkt kann jetzt nicht nur von `team_alpha`, sondern auch minimal von der Gegenseite gesichert werden. `MissionCombatLoopDriver` fuehrt dafuer neben dem Friendly-Capture auch einen kleinen Enemy-Capture-Fortschritt; wenn fitte Gegner den Punkt allein halten, steigt ein kleiner Pressure-Wert und der Einsatz endet nach denselben Hold-Ticks ueber `objective_lost`. In der Taktikszene zeigt der Marker dann `LOST`, der Siegerhinweis wechselt auf `OBJECTIVE LOST`, und der vorhandene Debrief-/FOB-Rueckfluss kann diesen Objective-Verlustgrund direkt anzeigen.
+- Offene Punkte: keine feindliche Bewegungs- oder Objective-KI, keine aktive Rueckeroberung, keine Mehrziel-Architektur und keine tieferen Objective-Owner-Regeln ausserhalb dieses kleinen Slice-Pfads.
+- Risiken: der Schritt bleibt bewusst symmetrischer Minimal-Glue auf dem vorhandenen Objective-System; spaetere echte Objective- oder Missionslogik sollte diesen Proto-Pfad explizit ersetzen statt viele weitere Sonderregeln in denselben Combat-Driver zu schichten.
+- Naechster Schritt: spaeter nur bei eigenem Task einen echten Godot-Spieltest-Pass ueber `take -> objective -> phase -> victory/fail -> debrief` fahren und nur gezielt nachschaerfen, falls der Loop dabei noch kippt.

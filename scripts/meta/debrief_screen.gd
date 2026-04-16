@@ -42,14 +42,16 @@ func _render_result() -> void:
 	var mission_goal: String = String(_mission_result.get("mission_goal", ""))
 	var resolution_reason: String = String(_mission_result.get("resolution_reason", ""))
 	var objective_state: String = String(_mission_result.get("objective_state", ""))
+	var objective_owner_team_id: String = String(_mission_result.get("objective_owner_team_id", ""))
 	var result_lines: PackedStringArray = []
 	result_lines.append("Mission %s" % mission_outcome.to_upper())
 	if not mission_goal.is_empty():
 		result_lines.append("Goal: %s" % _format_goal_text(mission_goal))
 	if not resolution_reason.is_empty():
 		result_lines.append("Result: %s" % _format_resolution_text(resolution_reason))
-	if objective_state != "inactive" and not objective_state.is_empty():
-		result_lines.append("Objective state: %s" % objective_state.to_upper())
+	var objective_summary: String = _format_objective_summary(objective_state, objective_owner_team_id, winner_team_id)
+	if not objective_summary.is_empty():
+		result_lines.append("Objective state: %s" % objective_summary)
 	result_lines.append("Winner: %s" % winner_team_id)
 	result_label.text = "\n".join(result_lines)
 
@@ -81,12 +83,28 @@ func _format_resolution_text(resolution_reason: String) -> String:
 	match resolution_reason:
 		"objective_secured":
 			return "OBJECTIVE SECURED"
+		"objective_lost":
+			return "OBJECTIVE LOST"
 		"enemy_neutralized":
 			return "ENEMY FORCE NEUTRALIZED"
 		"friendly_force_neutralized":
 			return "FRIENDLY FORCE NEUTRALIZED"
 		_:
 			return resolution_reason.replace("_", " ").to_upper()
+
+
+func _format_objective_summary(objective_state: String, objective_owner_team_id: String, winner_team_id: String) -> String:
+	if objective_state.is_empty() or objective_state == "inactive":
+		return ""
+
+	if objective_state == "secured":
+		if winner_team_id == "team_bravo":
+			return "LOST"
+		if not objective_owner_team_id.is_empty() and objective_owner_team_id != "team_alpha":
+			return "LOST"
+		return "SECURED"
+
+	return objective_state.to_upper()
 
 
 func _on_return_to_fob_pressed() -> void:
