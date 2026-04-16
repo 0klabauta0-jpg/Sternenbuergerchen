@@ -119,3 +119,10 @@
 - Offene Punkte: keine Formation, keine echte Untereinheitensteuerung, keine taktische Verteilung.
 - Risiken: Bisher nur Integrations- und Strukturbeweis; spaetere Gruppenlogik darf nicht still in Registries oder RuntimeLeader versteckt werden.
 - Naechster Schritt: mehrere Units in einer minimalen Missions-Testszene sichtbar reagieren lassen.
+
+### TASK_024 – minimale Missions-Testszene
+- Status: implementiert
+- Stand: eine minimale Start- und Testszene unter `res://scenes/tests/mission_reactivity_test.tscn` haelt jetzt `SimulationRoot`, `EventRouter`, `UnitRegistry`, `FTLRegistry`, `UpdateManager`, einen `RuntimeLeader`, drei `TestUnit`-Instanzen und einen einfachen Zielmarker zusammen; ein kleiner Setup-Node registriert Units und FTL ueber direkte Referenzen.
+- Offene Punkte: noch keine Move-Daten, keine sichtbare Reaktion, keine echte Missionslogik und keine autoritative Positionsveraenderung.
+- Risiken: die Szene ist bewusst nur ein kontrolliertes Integrationsfeld; spaetere sichtbare Reaktion muss weiter ohne globale SceneTree-Suchen und ohne verdeckte Logik im Setup-Glue folgen.
+- Naechster Schritt: eine minimale Zielposition als Daten an die Unit-Ebene haengen.

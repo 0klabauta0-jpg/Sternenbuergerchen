@@ -1,0 +1,58 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/simulation_root.gd" id="1_simulation"]
+[ext_resource type="Script" path="res://scripts/core/event_router.gd" id="2_router"]
+[ext_resource type="Script" path="res://scripts/registries/unit_registry.gd" id="3_units"]
+[ext_resource type="Script" path="res://scripts/registries/ftl_registry.gd" id="4_ftls"]
+[ext_resource type="Script" path="res://scripts/core/update_manager.gd" id="5_updates"]
+[ext_resource type="Script" path="res://scripts/ftl/runtime_leader.gd" id="6_leader"]
+[ext_resource type="Script" path="res://scripts/npc/test_unit.gd" id="7_unit"]
+[ext_resource type="Script" path="res://scripts/tests/mission_test_setup.gd" id="8_setup"]
+
+[node name="MissionReactivityTest" type="Node2D"]
+
+[node name="SimulationRoot" type="Node" parent="."]
+script = ExtResource("1_simulation")
+
+[node name="EventRouter" type="Node" parent="."]
+script = ExtResource("2_router")
+
+[node name="UnitRegistry" type="Node" parent="."]
+script = ExtResource("3_units")
+
+[node name="FTLRegistry" type="Node" parent="."]
+script = ExtResource("4_ftls")
+
+[node name="UpdateManager" type="Node" parent="."]
+script = ExtResource("5_updates")
+
+[node name="RuntimeLeader" type="Node" parent="."]
+script = ExtResource("6_leader")
+
+[node name="TargetMarker" type="Marker2D" parent="."]
+position = Vector2(320, 180)
+
+[node name="UnitAlpha" type="Node" parent="."]
+script = ExtResource("7_unit")
+unit_id = "unit_alpha"
+display_name = "Unit Alpha"
+team_id = "team_alpha"
+
+[node name="UnitBravo" type="Node" parent="."]
+script = ExtResource("7_unit")
+unit_id = "unit_bravo"
+display_name = "Unit Bravo"
+team_id = "team_alpha"
+
+[node name="UnitCharlie" type="Node" parent="."]
+script = ExtResource("7_unit")
+unit_id = "unit_charlie"
+display_name = "Unit Charlie"
+team_id = "team_alpha"
+
+[node name="MissionSetup" type="Node" parent="."]
+script = ExtResource("8_setup")
+runtime_leader_path = NodePath("../RuntimeLeader")
+unit_registry_path = NodePath("../UnitRegistry")
+ftl_registry_path = NodePath("../FTLRegistry")
+unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie")])
