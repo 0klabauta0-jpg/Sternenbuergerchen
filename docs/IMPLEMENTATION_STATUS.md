@@ -227,3 +227,10 @@
 - Offene Punkte: die Fireteam- und Phase-Umschaltung bleibt bewusst szenenlokal; es gibt keine grosse Commander-UI, keine Auswahlarchitektur und noch keine tiefere Phase-Wirkung im Combat-Loop.
 - Risiken: der UI-Pfad darf keine Gameplay-Wahrheit uebernehmen; er bleibt ein leichter Command-Ausloeser fuer den bestehenden Commander -> FTL -> Unit -> SimulationRoot-Flow. Spaetere echte Commander- oder HUD-Systeme sollten diesen kleinen Szenen-Controller explizit ersetzen statt ihn still auszubauen.
 - Naechster Schritt: nur bei eigenem Task gezielt weiter verfeinern, etwa Marker-/Objective-Lesbarkeit oder spaetere echte Fireteam-/Phasenwirkung, ohne neue UI- oder Input-Architektur aufzubauen.
+
+### Minimal Mouse Target Placement
+- Status: implementiert
+- Stand: der bestehende gelbe `TargetMarker` der Missions-Testszene kann jetzt direkt per Linksklick neu gesetzt werden. Der kleine `MissionTacticalSandboxController` uebersetzt dafuer die Screen-Mausposition sauber ueber den aktuellen Canvas-/Viewport-Transform in eine Weltposition und setzt nur den vorhandenen Marker neu; die bestehenden `move`-, `defend`-, `flank`- und `take`-Commands greifen danach unveraendert auf diese Marker-Position zu. Die Minimalregel ist bewusst klein: Klicks ueber Control-UI werden ignoriert, andere Klicks werden auf den aktuell sichtbaren Viewport-Weltbereich geklemmt.
+- Offene Punkte: keine Kontextmenues, kein Picking-Framework, keine Drag-Selection und keine tiefere Zielvalidierung gegen Terrain, Deckung oder LOS.
+- Risiken: der Klickpfad bleibt bewusst testszenenbezogen; spaetere echte Commander-Eingabe sollte diesen kleinen Marker-Setter explizit ersetzen statt ihn still zu einer grossen Auswahlarchitektur auszubauen.
+- Naechster Schritt: nur bei eigenem Task spaeter auf echte Map-Grenzen oder Terrain-Daten binden, falls dafuer ein klarer weiterer Bedienpfad noetig wird.
