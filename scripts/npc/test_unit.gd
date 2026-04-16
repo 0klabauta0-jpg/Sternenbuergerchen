@@ -9,10 +9,15 @@ const STATUS_LABEL_OFFSET: Vector2 = Vector2(-54.0, -48.0)
 const EVENT_LABEL_OFFSET: Vector2 = Vector2(-42.0, -70.0)
 const EVENT_DURATION_SECONDS: float = 1.2
 const DEFAULT_COMBAT_ROLE: String = "anchor"
+const DEFAULT_FIRETEAM_ID: String = "blue"
 const ALLOWED_COMBAT_ROLES: PackedStringArray = [
 	"anchor",
 	"recon",
 	"assault",
+]
+const ALLOWED_FIRETEAM_IDS: PackedStringArray = [
+	"blue",
+	"gold",
 ]
 
 signal runtime_status_changed(runtime_status)
@@ -25,6 +30,7 @@ signal vital_status_changed(vital_status)
 @export var team_id: String = "team_test"
 @export var team_display_name: String = ""
 @export var role_name: String = ""
+@export var fireteam_id: String = DEFAULT_FIRETEAM_ID
 @export var combat_role: String = DEFAULT_COMBAT_ROLE
 @export var max_health_points: int = 100
 
@@ -42,6 +48,7 @@ var _contact_target_id: String = ""
 
 
 func _ready() -> void:
+	_sanitize_fireteam_id()
 	_sanitize_combat_role()
 	_ensure_readability_labels()
 	_runtime_status = _build_runtime_status("idle")
@@ -92,6 +99,13 @@ func get_team_display_name() -> String:
 
 func get_role_name() -> String:
 	return role_name
+
+
+func get_fireteam_id() -> String:
+	if ALLOWED_FIRETEAM_IDS.has(fireteam_id):
+		return fireteam_id
+
+	return DEFAULT_FIRETEAM_ID
 
 
 func get_combat_role() -> String:
@@ -241,6 +255,14 @@ func show_event_text(event_text: String, event_color: Color = Color(1.0, 0.95, 0
 	_current_event_color = event_color
 	_event_time_remaining = duration_seconds
 	_refresh_event_label()
+
+
+func _sanitize_fireteam_id() -> void:
+	if ALLOWED_FIRETEAM_IDS.has(fireteam_id):
+		return
+
+	push_warning("TestUnit.fireteam_id expects one of: blue, gold.")
+	fireteam_id = DEFAULT_FIRETEAM_ID
 
 
 func _sanitize_combat_role() -> void:

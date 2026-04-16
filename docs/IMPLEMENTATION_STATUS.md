@@ -241,3 +241,10 @@
 - Offene Punkte: keine neue Rollenarchitektur, keine Persoenlichkeiten, keine Fireteam-Logik, keine neue Commander-UI und keine tieferen Datenpipelines fuer Rollen ausserhalb der Test-Units.
 - Risiken: der Schritt ist bewusst klein gehalten und haengt nur an bereits bestehenden Order-Ableitungen; spaetere echte Rollen- oder Squad-Systeme muessen diesen Minimalpfad explizit erweitern statt versteckte Regeln ueber viele Systeme zu verteilen.
 - Naechster Schritt: spaeter nur bei eigenem Task weitere kleine funktionale Unterschiede ergaenzen, falls sie fuer Fireteams oder Commander-Befehle wirklich gebraucht werden.
+
+### Minimal Fireteam Command Split
+- Status: implementiert
+- Stand: der taktische Sandbox-Slice kann Friendly-Orders jetzt minimal nach Fireteam filtern, ohne neue Commander- oder Squad-Architektur. `TestUnit` traegt dafuer ein kleines `fireteam_id`-Feld mit `blue` oder `gold`, die Friendly-Szene ist als `BLUE` (Unit Alpha + Unit Bravo) und `GOLD` (Unit Charlie) aufgeteilt, und der bestehende `MissionTacticalSandboxController` kann per `Q/E` zwischen `ALL`, `BLUE` und `GOLD` umschalten. `move`, `defend` und `flank` werden dadurch nur noch an die passenden bestehenden Flow-Driver weitergereicht.
+- Offene Punkte: keine mehreren RuntimeLeader, keine echte Fireteam-Hierarchie, keine getrennten Commander-Panels und keine persistente Teamorganisation ausserhalb der Testszene.
+- Risiken: der Schritt ist bewusst ein kleiner Sandbox-Filter auf bestehende Orders; spaetere echte Fireteam-/FTL-Struktur muss diesen Debug-Pfad explizit ersetzen statt ihn still zum Kernsystem werden zu lassen.
+- Naechster Schritt: spaeter nur bei eigenem Task weitere kleine Fireteam-Funktionen wie getrennte Zielmarker oder zweite FTL-Instanzen pruefen, wenn das fuer den Vertical Slice wirklich noetig wird.

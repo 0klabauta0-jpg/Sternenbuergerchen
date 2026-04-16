@@ -26,7 +26,7 @@ offset_left = 16.0
 offset_top = 220.0
 offset_right = 248.0
 offset_bottom = 318.0
-text = "TEAM ALPHA\nFTL: Unit Alpha\nRIFLE: Unit Bravo\nFLANK: Unit Charlie"
+text = "TEAM ALPHA\nBLUE: Unit Alpha, Unit Bravo\nGOLD: Unit Charlie"
 
 [node name="EnemyIdentityLabel" type="Label" parent="."]
 offset_left = 544.0
@@ -40,7 +40,7 @@ offset_left = 544.0
 offset_top = 16.0
 offset_right = 860.0
 offset_bottom = 110.0
-text = "ALPHA TEAM ORDER\nAWAITING INPUT\n1 MOVE   2 DEFEND   3 FLANK"
+text = "ALPHA TEAM ORDER\nACTIVE FT: ALL\nAWAITING INPUT\nQ/E FT   1 MOVE   2 DEFEND   3 FLANK"
 
 [node name="SimulationRoot" type="Node" parent="."]
 script = ExtResource("1_simulation")
@@ -80,6 +80,7 @@ display_name = "Unit Alpha"
 team_id = "team_alpha"
 team_display_name = "ALPHA"
 role_name = "FTL"
+fireteam_id = "blue"
 combat_role = "anchor"
 
 [node name="Visual" type="Polygon2D" parent="UnitAlpha"]
@@ -94,6 +95,7 @@ display_name = "Unit Bravo"
 team_id = "team_alpha"
 team_display_name = "ALPHA"
 role_name = "RIFLE"
+fireteam_id = "blue"
 combat_role = "recon"
 
 [node name="Visual" type="Polygon2D" parent="UnitBravo"]
@@ -108,6 +110,7 @@ display_name = "Unit Charlie"
 team_id = "team_alpha"
 team_display_name = "ALPHA"
 role_name = "FLANK"
+fireteam_id = "gold"
 combat_role = "assault"
 
 [node name="Visual" type="Polygon2D" parent="UnitCharlie"]
@@ -151,6 +154,7 @@ unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo")
 script = ExtResource("9_flow")
 auto_run_on_ready = false
 commander_command_type = "defend"
+fireteam_id = "blue"
 runtime_leader_path = NodePath("../RuntimeLeader")
 event_router_path = NodePath("../EventRouter")
 simulation_root_path = NodePath("../SimulationRoot")
@@ -162,6 +166,7 @@ script = ExtResource("9_flow")
 auto_run_on_ready = false
 commander_command_type = "move"
 unit_id = "unit_bravo"
+fireteam_id = "blue"
 runtime_leader_path = NodePath("../RuntimeLeader")
 event_router_path = NodePath("../EventRouter")
 simulation_root_path = NodePath("../SimulationRoot")
@@ -173,6 +178,7 @@ script = ExtResource("9_flow")
 auto_run_on_ready = false
 commander_command_type = "flank"
 unit_id = "unit_charlie"
+fireteam_id = "gold"
 runtime_leader_path = NodePath("../RuntimeLeader")
 event_router_path = NodePath("../EventRouter")
 simulation_root_path = NodePath("../SimulationRoot")
