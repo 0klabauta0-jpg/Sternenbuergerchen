@@ -6,6 +6,8 @@ const TYPE_HOLD_POSITION: String = "hold_position"
 const TYPE_ENGAGE_AREA: String = "engage_area"
 const TYPE_RETREAT: String = "retreat"
 const TYPE_SEEK_COVER: String = "seek_cover"
+const FIRE_STATUS_FIRE_AT_WILL: String = "fire_at_will"
+const FIRE_STATUS_HOLD_FIRE: String = "hold_fire"
 const ALLOWED_COMMAND_TYPES: PackedStringArray = [
 	TYPE_MOVE_TO_POSITION,
 	TYPE_HOLD_POSITION,
@@ -13,11 +15,16 @@ const ALLOWED_COMMAND_TYPES: PackedStringArray = [
 	TYPE_RETREAT,
 	TYPE_SEEK_COVER,
 ]
+const ALLOWED_FIRE_STATUSES: PackedStringArray = [
+	FIRE_STATUS_FIRE_AT_WILL,
+	FIRE_STATUS_HOLD_FIRE,
+]
 
 var command_type: String = ""
 var priority: int = 0
 var unit_id: String = ""
 var team_id: String = ""
+var fire_status: String = FIRE_STATUS_FIRE_AT_WILL
 var target_position: Variant = null
 var target_area_id: String = ""
 var source_task_type: String = ""
@@ -42,6 +49,9 @@ func is_valid() -> bool:
 	if not is_allowed_command_type(command_type):
 		return false
 
+	if not ALLOWED_FIRE_STATUSES.has(fire_status):
+		return false
+
 	if not _has_valid_target_position():
 		return false
 
@@ -54,6 +64,7 @@ func to_dict() -> Dictionary:
 		"priority": priority,
 		"unit_id": unit_id,
 		"team_id": team_id,
+		"fire_status": fire_status,
 	}
 
 	if target_position != null:
@@ -85,6 +96,9 @@ func _apply_dict(data: Dictionary) -> void:
 
 	if data.has("team_id"):
 		team_id = String(data["team_id"])
+
+	if data.has("fire_status"):
+		fire_status = String(data["fire_status"])
 
 	if data.has("target_position"):
 		target_position = data["target_position"]

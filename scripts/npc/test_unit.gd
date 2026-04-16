@@ -54,6 +54,10 @@ func get_vital_state() -> String:
 	return String(_vital_status.state)
 
 
+func get_fire_status() -> String:
+	return String(_runtime_status.fire_status)
+
+
 func get_last_damage_context() -> Dictionary:
 	return _last_damage_context.duplicate(true)
 
@@ -90,6 +94,7 @@ func set_target_position(target_position: Variant) -> bool:
 		String(_runtime_status.status),
 		String(_runtime_status.active_command_type),
 		int(_runtime_status.priority),
+		String(_runtime_status.fire_status),
 		int(_runtime_status.phase),
 		target_position
 	)
@@ -107,6 +112,7 @@ func assign_unit_command(command) -> bool:
 		status_name,
 		String(command.get("command_type")),
 		int(command.get("priority")),
+		String(command.get("fire_status")),
 		int(command.get("phase")),
 		command.get("target_position")
 	):
@@ -120,10 +126,11 @@ func set_runtime_status(
 	status_name: String,
 	active_command_type: String = "",
 	priority: int = 0,
+	fire_status: String = "fire_at_will",
 	phase: int = -1,
 	target_position: Variant = null
 ) -> bool:
-	var runtime_status = _build_runtime_status(status_name, active_command_type, priority, phase, target_position)
+	var runtime_status = _build_runtime_status(status_name, active_command_type, priority, fire_status, phase, target_position)
 	if not bool(runtime_status.call("is_valid")):
 		push_warning("TestUnit.set_runtime_status expects a valid UnitRuntimeStatus-compatible value.")
 		return false
@@ -137,6 +144,7 @@ func _build_runtime_status(
 	status_name: String,
 	active_command_type: String = "",
 	priority: int = 0,
+	fire_status: String = "fire_at_will",
 	phase: int = -1,
 	target_position: Variant = null
 ):
@@ -146,6 +154,7 @@ func _build_runtime_status(
 	runtime_status.priority = priority
 	runtime_status.unit_id = unit_id
 	runtime_status.team_id = team_id
+	runtime_status.fire_status = fire_status
 	runtime_status.target_position = target_position
 	runtime_status.phase = phase
 	return runtime_status
@@ -173,6 +182,8 @@ func _map_unit_command_to_status(command_type: String) -> String:
 	match command_type:
 		"move_to_position":
 			return "pending_move"
+		"engage_area":
+			return "engaging"
 		"hold_position":
 			return "holding"
 		_:

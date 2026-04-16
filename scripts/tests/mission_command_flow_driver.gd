@@ -4,6 +4,7 @@ const COMMANDER_COMMAND_SCRIPT: GDScript = preload("res://scripts/command/comman
 const TRANSLATOR_SCRIPT: GDScript = preload("res://scripts/command/command_to_ftltask_translator.gd")
 
 @export var auto_run_on_ready: bool = true
+@export var commander_command_type: String = "take"
 @export var team_id: String = "team_alpha"
 @export var unit_id: String = "unit_alpha"
 @export var runtime_leader_path: NodePath
@@ -45,7 +46,7 @@ func run_flow() -> void:
 		return
 
 	var command = COMMANDER_COMMAND_SCRIPT.new()
-	command.command_type = "move"
+	command.command_type = commander_command_type
 	command.priority = 10
 	command.unit_id = unit_id
 	command.team_id = team_id

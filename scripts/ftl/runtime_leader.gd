@@ -229,6 +229,7 @@ func _build_unit_command_from_ftl_task(task, unit: Node):
 	if unit_command.unit_id.is_empty():
 		unit_command.unit_id = String(unit.call("get_unit_id"))
 	unit_command.team_id = String(task.get("team_id"))
+	unit_command.fire_status = _map_task_type_to_fire_status(String(task.get("task_type")))
 	unit_command.target_position = task.get("target_position")
 	unit_command.target_area_id = String(task.get("target_area_id"))
 	unit_command.source_task_type = String(task.get("task_type"))
@@ -250,3 +251,11 @@ func _map_task_type_to_unit_command_type(task_type: String) -> String:
 			return "retreat"
 		_:
 			return ""
+
+
+func _map_task_type_to_fire_status(task_type: String) -> String:
+	match task_type:
+		"engage_in_area", "hold_position":
+			return "fire_at_will"
+		_:
+			return "hold_fire"

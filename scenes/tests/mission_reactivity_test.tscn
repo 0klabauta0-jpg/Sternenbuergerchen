@@ -13,6 +13,13 @@
 
 [node name="MissionReactivityTest" type="Node2D"]
 
+[node name="StatusLabel" type="Label" parent="."]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 280.0
+offset_bottom = 88.0
+text = "Combat: waiting"
+
 [node name="SimulationRoot" type="Node" parent="."]
 script = ExtResource("1_simulation")
 unit_registry_path = NodePath("../UnitRegistry")
@@ -103,6 +110,7 @@ unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo")
 
 [node name="CommandFlowDriver" type="Node" parent="."]
 script = ExtResource("9_flow")
+commander_command_type = "take"
 runtime_leader_path = NodePath("../RuntimeLeader")
 event_router_path = NodePath("../EventRouter")
 simulation_root_path = NodePath("../SimulationRoot")
@@ -111,6 +119,8 @@ target_marker_path = NodePath("../TargetMarker")
 
 [node name="CombatLoopDriver" type="Node" parent="."]
 script = ExtResource("10_combat")
+contact_range = 220.0
 simulation_root_path = NodePath("../SimulationRoot")
-friendly_unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie")])
+status_label_path = NodePath("../StatusLabel")
+friendly_unit_paths = Array[NodePath]([NodePath("../UnitAlpha")])
 enemy_unit_paths = Array[NodePath]([NodePath("../EnemyDelta"), NodePath("../EnemyEcho")])
