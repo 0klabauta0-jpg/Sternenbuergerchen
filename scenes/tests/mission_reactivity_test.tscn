@@ -13,6 +13,7 @@
 
 [node name="SimulationRoot" type="Node" parent="."]
 script = ExtResource("1_simulation")
+unit_registry_path = NodePath("../UnitRegistry")
 
 [node name="EventRouter" type="Node" parent="."]
 script = ExtResource("2_router")
@@ -32,20 +33,23 @@ script = ExtResource("6_leader")
 [node name="TargetMarker" type="Marker2D" parent="."]
 position = Vector2(320, 180)
 
-[node name="UnitAlpha" type="Node" parent="."]
+[node name="UnitAlpha" type="Node2D" parent="."]
 script = ExtResource("7_unit")
+position = Vector2(72, 120)
 unit_id = "unit_alpha"
 display_name = "Unit Alpha"
 team_id = "team_alpha"
 
-[node name="UnitBravo" type="Node" parent="."]
+[node name="UnitBravo" type="Node2D" parent="."]
 script = ExtResource("7_unit")
+position = Vector2(72, 180)
 unit_id = "unit_bravo"
 display_name = "Unit Bravo"
 team_id = "team_alpha"
 
-[node name="UnitCharlie" type="Node" parent="."]
+[node name="UnitCharlie" type="Node2D" parent="."]
 script = ExtResource("7_unit")
+position = Vector2(72, 240)
 unit_id = "unit_charlie"
 display_name = "Unit Charlie"
 team_id = "team_alpha"

@@ -3,6 +3,10 @@ extends Node
 
 signal tick_processed(tick: int)
 
+const MOVE_SPEED_PER_SECOND: float = 120.0
+
+@export var unit_registry_path: NodePath
+
 var command_queue: Array = []
 var effects_queue: Array = []
 var tick_counter: int = 0
@@ -72,7 +76,12 @@ func _apply_command(cmd: Dictionary, delta: float) -> void:
 		push_warning("SimulationRoot received a negative physics delta while applying a command.")
 		return
 
-	# TODO: Authoritative gameplay state commits belong here once systems exist.
+	match _extract_command_type(cmd):
+		"move_to_position":
+			_apply_move_command(cmd, delta)
+		_:
+			# TODO: Authoritative gameplay state commits belong here once systems exist.
+			pass
 
 
 func _apply_effect(effect: Dictionary, delta: float) -> void:
@@ -141,3 +150,62 @@ func _sort_payload_entries(a: Dictionary, b: Dictionary) -> bool:
 		return int(a["index"]) < int(b["index"])
 
 	return a_priority > b_priority
+
+
+func _extract_command_type(cmd: Dictionary) -> String:
+	if cmd.has("command_type"):
+		return String(cmd["command_type"])
+
+	if cmd.has("type"):
+		return String(cmd["type"])
+
+	return ""
+
+
+func _apply_move_command(cmd: Dictionary, delta: float) -> void:
+	var unit_id: String = String(cmd.get("unit_id", ""))
+	if unit_id.is_empty():
+		push_warning("SimulationRoot move command expects a non-empty unit_id.")
+		return
+
+	var target_position: Variant = cmd.get("target_position", null)
+	if typeof(target_position) != TYPE_VECTOR2:
+		push_warning("SimulationRoot move command expects a Vector2 target_position.")
+		return
+
+	var unit_registry = _get_unit_registry()
+	if unit_registry == null or not unit_registry.has_method("get_unit"):
+		push_warning("SimulationRoot requires a direct UnitRegistry reference for move commands.")
+		return
+
+	var unit = unit_registry.call("get_unit", unit_id)
+	if unit == null:
+		push_warning("SimulationRoot could not resolve the target unit for a move command.")
+		return
+
+	if not (unit is Node2D):
+		push_warning("SimulationRoot move command expects a Node2D-compatible unit.")
+		return
+
+	if unit.has_method("set_target_position"):
+		unit.call("set_target_position", target_position)
+
+	var node_2d: Node2D = unit
+	var current_position: Vector2 = node_2d.position
+	var direction: Vector2 = target_position - current_position
+	var step_distance: float = MOVE_SPEED_PER_SECOND * delta
+	if direction.length() <= step_distance:
+		node_2d.position = target_position
+		return
+
+	if direction.is_zero_approx():
+		return
+
+	node_2d.position = current_position + direction.normalized() * step_distance
+
+
+func _get_unit_registry():
+	if unit_registry_path.is_empty():
+		return null
+
+	return get_node_or_null(unit_registry_path)

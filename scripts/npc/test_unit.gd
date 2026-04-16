@@ -1,5 +1,5 @@
 class_name TestUnit
-extends Node
+extends Node2D
 
 const UNIT_RUNTIME_STATUS_SCRIPT: GDScript = preload("res://scripts/npc/unit_runtime_status.gd")
 

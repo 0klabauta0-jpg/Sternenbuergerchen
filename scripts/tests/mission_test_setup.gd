@@ -6,8 +6,13 @@ extends Node
 @export var ftl_registry_path: NodePath
 @export var unit_paths: Array[NodePath] = []
 
+var _is_initialized: bool = false
+
 
 func _ready() -> void:
+	if _is_initialized:
+		return
+
 	var runtime_leader = get_node_or_null(runtime_leader_path)
 	var unit_registry = get_node_or_null(unit_registry_path)
 	var ftl_registry = get_node_or_null(ftl_registry_path)
@@ -31,3 +36,4 @@ func _ready() -> void:
 		runtime_leader.call("assign", first_unit)
 
 	ftl_registry.call("register_ftl", team_id, runtime_leader)
+	_is_initialized = true
