@@ -14,6 +14,8 @@ signal combat_resolved(winning_team_id, neutralized_enemy_count)
 @export var base_hit_chance: float = 0.45
 @export var base_damage_multiplier: float = 1.0
 @export var ticks_between_attacks: int = 10
+@export var slice_starts_armed: bool = false
+@export var runtime_leader_path: NodePath
 @export var simulation_root_path: NodePath
 @export var status_label_path: NodePath
 @export var friendly_unit_paths: Array[NodePath] = []
@@ -30,6 +32,7 @@ var _last_event_text: String = "Combat waiting"
 var _contact_line: Line2D = null
 var _event_label: Label = null
 var _winner_label: Label = null
+var _slice_armed: bool = false
 
 
 func _ready() -> void:
@@ -38,11 +41,17 @@ func _ready() -> void:
 		push_warning("MissionCombatLoopDriver requires a direct SimulationRoot reference.")
 		return
 
+	_slice_armed = slice_starts_armed
 	_connect_unit_signals()
 	call_deferred("_finish_readability_setup")
 
 	if not simulation_root.tick_processed.is_connected(_on_tick_processed):
 		simulation_root.tick_processed.connect(_on_tick_processed)
+
+	var runtime_leader = get_node_or_null(runtime_leader_path)
+	if runtime_leader != null and runtime_leader.has_signal("command_issued"):
+		if not runtime_leader.command_issued.is_connected(_on_runtime_leader_command_issued):
+			runtime_leader.command_issued.connect(_on_runtime_leader_command_issued)
 
 	_update_status_label("waiting")
 
@@ -63,6 +72,11 @@ func _on_tick_processed(tick: int) -> void:
 	_current_tick = tick
 	if _combat_finished:
 		_update_status_label("resolved")
+		return
+
+	if not _slice_armed:
+		_clear_contact_visuals()
+		_update_status_label("waiting")
 		return
 
 	var simulation_root = get_node_or_null(simulation_root_path)
@@ -261,6 +275,7 @@ func _update_status_label(state_name: String) -> void:
 func _build_status_text(state_name: String) -> String:
 	var lines: PackedStringArray = []
 	lines.append("Combat: %s" % state_name)
+	lines.append("Slice armed: %s" % _build_slice_arm_text())
 
 	if _combat_finished and not _winning_team_id.is_empty():
 		lines.append("Winner: %s" % _winning_team_id)
@@ -481,10 +496,28 @@ func _count_fit_units(paths: Array[NodePath]) -> int:
 
 
 func _build_attack_readiness_text() -> String:
+	if not _slice_armed:
+		return "awaiting command"
+
 	if _current_tick >= _next_attack_tick:
 		return "ready"
 
 	return "tick %d" % (_next_attack_tick - _current_tick)
+
+
+func _build_slice_arm_text() -> String:
+	if _slice_armed:
+		return "yes"
+
+	return "no"
+
+
+func _on_runtime_leader_command_issued(_order: Dictionary) -> void:
+	if _slice_armed:
+		return
+
+	_slice_armed = true
+	_set_event_text("SLICE ARMED")
 
 
 func _finish_readability_setup() -> void:

@@ -227,3 +227,10 @@
 - Offene Punkte: keine `MapDefinition`-/`MapLoader`-Schicht auf diesem Branch, keine taktische Layout-Verfeinerung, keine Hindernis- oder Hoehenlogik und noch keine Nutzung der Flank-Anker im Runtime-Pfad.
 - Risiken: die Karte bleibt bewusst reine Geometrie plus Positionsmarker; weder Combat noch Simulationswahrheit liegen in der Map-Szene. Spaetere Map- oder Editor-Arbeit sollte diesen kleinen Marker-Hook explizit ersetzen statt ihn still zu einem Framework auszubauen.
 - Naechster Schritt: die Iso-Basis spaeter gezielt in ein kleines lesbares Taktiklayout verfeinern, ohne dabei die Slice-Logik oder Terrain-Daten mit Gameplay-Verantwortung zu beladen.
+
+### Neutral Tactical Slice Start State
+- Status: implementiert
+- Stand: die Missions-Testszene startet jetzt ruhig und beobachtbar; die bestehenden Friendly-`MissionCommandFlowDriver` feuern nicht mehr automatisch in `_ready()`, und `MissionCombatLoopDriver` bleibt mit einem kleinen `slice_armed`-Gate inaktiv, bis ueber den vorhandenen `RuntimeLeader.command(...)`-Pfad der erste echte Commander-Befehl ausgeloest wurde.
+- Offene Punkte: auf diesem Branch gibt es weiterhin keine eigene manuelle Sandbox-/Input-Schicht; das Arming springt deshalb ueber bestehende oder spaetere Command-Quellen an, nicht ueber neue Bedienlogik.
+- Risiken: der Gate-Haken ist bewusst klein und testszenenbezogen; spaetere echte Commander-/Sandbox-Steuerung sollte ihn explizit weiterverwenden oder sauber ersetzen, statt parallel einen zweiten Startzustand einzufuehren.
+- Naechster Schritt: spaeter bei Bedarf eine vorhandene oder eigene manuelle Befehlsausloesung an den neutralen Startzustand anschliessen, ohne Combat- oder Szenenlogik neu zu strukturieren.
