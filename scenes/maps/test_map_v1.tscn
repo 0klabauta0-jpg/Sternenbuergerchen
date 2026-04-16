@@ -1,0 +1,28 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/maps/map_scene_root.gd" id="1_root"]
+[ext_resource type="Resource" path="res://scenes/maps/test_map_v1_definition.tres" id="2_definition"]
+
+[node name="TestMapV1" type="Node2D"]
+script = ExtResource("1_root")
+map_definition = ExtResource("2_definition")
+
+[node name="Ground" type="Polygon2D" parent="."]
+z_index = -10
+color = Color(0.16, 0.18, 0.2, 1)
+polygon = PackedVector2Array(0, 0, 640, 0, 640, 360, 0, 360)
+
+[node name="FriendlySpawnMarker" type="Polygon2D" parent="."]
+position = Vector2(96, 172)
+color = Color(0.25, 0.65, 1, 0.35)
+polygon = PackedVector2Array(-12, 0, 0, -12, 12, 0, 0, 12)
+
+[node name="EnemySpawnMarker" type="Polygon2D" parent="."]
+position = Vector2(412, 169)
+color = Color(1, 0.3, 0.3, 0.35)
+polygon = PackedVector2Array(-12, 0, 0, -12, 12, 0, 0, 12)
+
+[node name="ObjectiveMarker" type="Polygon2D" parent="."]
+position = Vector2(344, 176)
+color = Color(0.95, 0.85, 0.2, 0.3)
+polygon = PackedVector2Array(-16, 0, 0, -16, 16, 0, 0, 16)

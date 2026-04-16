@@ -220,3 +220,10 @@
 - Offene Punkte: keine groessere HUD-/Debug-Architektur, keine Politur, keine Animationen und keine komplexe Zeitsteuerung.
 - Risiken: die Lesbarkeitshilfen bleiben bewusst testszenenbezogen; spaetere echte UI- oder Debug-Systeme sollten diesen kleinen Pfad explizit ersetzen statt ihn still zu einer grossen Overlay-Schicht auszubauen.
 - Naechster Schritt: spaeter nur bei eigenem Task weitere gezielte Beobachtbarkeit wie einfache Threat-/Objective-Hinweise ergaenzen, ohne die Szene in eine Debug-Framework-Struktur zu ziehen.
+
+### Minimal Map Definition / Loader
+- Status: implementiert
+- Stand: unter `res://scripts/maps/` existiert jetzt ein sehr kleines Kartenfundament aus `MapDefinition` als Resource-Datentraeger und `MapLoader` als kleinem Lade-/Aufloese-Helfer. Eine erste Karten-Szene `res://scenes/maps/test_map_v1.tscn` traegt eine exportierte `MapDefinition`-Ressource mit `map_id`, `spawn_alpha`, `spawn_bravo`, `objective_position` sowie kleinen Friendly-/Enemy-Spawnlisten. Der bestehende `MissionTestSetup` kann diese Daten jetzt direkt lesen und damit Friendly-Spawns, Enemy-Spawns und die Objective-/Target-Position im bestehenden Missions-Testpfad setzen.
+- Offene Punkte: keine Tile-/Grid-Architektur, kein Map-Editor, keine Gameplay-Logik in der Karte, keine Registry- oder SimulationRoot-Autoritaet in Map/Loader und keine dynamische Kartenbibliothek ueber diesen kleinen Testpfad hinaus.
+- Risiken: das Fundament ist bewusst nur daten- und setupbezogen; spaetere echte Karten- oder Missionssysteme sollten diese kleine Datenquelle explizit erweitern statt Logik still in Karten-Szenen oder Loader-Helfer zu verlagern.
+- Naechster Schritt: spaeter nur bei eigenem Task weitere kleine Kartenfelder wie mehrere Objective-Punkte oder alternative Spawnsets ergaenzen, wenn der Mission-Loop das wirklich braucht.

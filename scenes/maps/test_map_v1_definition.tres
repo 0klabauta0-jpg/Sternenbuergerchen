@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="MapDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/maps/map_definition.gd" id="1_script"]
+
+[resource]
+script = ExtResource("1_script")
+map_id = "test_map_v1"
+spawn_alpha = Vector2(96, 112)
+spawn_bravo = Vector2(408, 128)
+objective_position = Vector2(344, 176)
+friendly_spawn_points = Array[Vector2]([Vector2(96, 112), Vector2(96, 172), Vector2(96, 232)])
+enemy_spawn_points = Array[Vector2]([Vector2(408, 128), Vector2(416, 210)])
