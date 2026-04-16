@@ -248,3 +248,10 @@
 - Offene Punkte: keine mehreren RuntimeLeader, keine echte Fireteam-Hierarchie, keine getrennten Commander-Panels und keine persistente Teamorganisation ausserhalb der Testszene.
 - Risiken: der Schritt ist bewusst ein kleiner Sandbox-Filter auf bestehende Orders; spaetere echte Fireteam-/FTL-Struktur muss diesen Debug-Pfad explizit ersetzen statt ihn still zum Kernsystem werden zu lassen.
 - Naechster Schritt: spaeter nur bei eigenem Task weitere kleine Fireteam-Funktionen wie getrennte Zielmarker oder zweite FTL-Instanzen pruefen, wenn das fuer den Vertical Slice wirklich noetig wird.
+
+### Minimal Commander Take Order
+- Status: implementiert
+- Stand: der bestehende taktische Sandbox-Slice kann jetzt neben `move`, `defend` und `flank` auch den V1-Commander-Befehl `take` direkt ausloesen. Der `MissionTacticalSandboxController` bietet dafuer einen kleinen manuellen `take`-Pfad ueber Taste `4`, zeigt `TAKE / ENGAGE` im bestehenden Befehlsblock an und markiert den gelben Marker als `ENGAGE AREA`. Die Ausfuehrung laeuft weiter ueber die bereits vorhandene Kette `CommanderCommand -> CommandToFTLTaskTranslator -> RuntimeLeader -> SimulationRoot`, ohne neue Combat- oder Commander-Struktur einzufuehren.
+- Offene Punkte: keine grosse Commander-UI, keine neue Zielwahl, keine komplexe Phasen- oder Objective-Logik und keine weitere Befehlsfamilie ueber die bestehenden V1-Orders hinaus.
+- Risiken: der `take`-Pfad bleibt bewusst ein kleiner Sandbox-Befehl im vorhandenen Slice; spaetere echte Commander-Bedienung sollte diese Debug-Eingabe explizit ersetzen statt sie still auszubauen.
+- Naechster Schritt: spaeter nur bei eigenem Task den naechsten kleinen Vertical-Slice-Baustein wie Objective-/Phase-Logik oder Siegbedingungen anschliessen.

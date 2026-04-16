@@ -4,6 +4,7 @@ const DEFAULT_MARKER_COLOR: Color = Color(0.95, 0.85, 0.2, 1.0)
 const MOVE_COLOR: Color = Color(0.95, 0.85, 0.2, 1.0)
 const DEFEND_COLOR: Color = Color(0.4, 0.9, 1.0, 1.0)
 const FLANK_COLOR: Color = Color(1.0, 0.65, 0.3, 1.0)
+const TAKE_COLOR: Color = Color(1.0, 0.42, 0.42, 1.0)
 const FIRETEAM_ALL: String = "all"
 const FIRETEAM_BLUE: String = "blue"
 const FIRETEAM_GOLD: String = "gold"
@@ -50,6 +51,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			issue_defend()
 		KEY_3:
 			issue_flank()
+		KEY_4:
+			issue_take()
 		KEY_Q, KEY_TAB:
 			cycle_active_fireteam(-1)
 		KEY_E:
@@ -66,6 +69,10 @@ func issue_defend() -> int:
 
 func issue_flank() -> int:
 	return _issue_team_command("flank")
+
+
+func issue_take() -> int:
+	return _issue_team_command("take")
 
 
 func set_active_fireteam(fireteam_id: String) -> void:
@@ -140,7 +147,7 @@ func _refresh_command_feedback_label() -> void:
 	else:
 		lines.append(_get_command_feedback_text(_last_command_type))
 
-	lines.append("Q/E FT   1 MOVE   2 DEFEND   3 FLANK")
+	lines.append("Q/E FT   1 MOVE   2 DEFEND   3 FLANK   4 TAKE")
 	command_feedback_label.text = "\n".join(lines)
 	command_feedback_label.modulate = _get_command_color(_last_command_type)
 
@@ -183,6 +190,8 @@ func _get_command_feedback_text(command_type: String) -> String:
 			return "HOLD / DEFEND"
 		"flank":
 			return "FLANK"
+		"take":
+			return "TAKE / ENGAGE"
 		_:
 			return "ORDER"
 
@@ -205,6 +214,8 @@ func _get_target_label_text(command_type: String) -> String:
 			return "DEFEND POINT"
 		"flank":
 			return "FLANK TARGET"
+		"take":
+			return "ENGAGE AREA"
 		_:
 			return "ORDER TARGET"
 
@@ -217,5 +228,7 @@ func _get_command_color(command_type: String) -> Color:
 			return DEFEND_COLOR
 		"flank":
 			return FLANK_COLOR
+		"take":
+			return TAKE_COLOR
 		_:
 			return DEFAULT_MARKER_COLOR

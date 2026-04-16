@@ -40,7 +40,7 @@ offset_left = 544.0
 offset_top = 16.0
 offset_right = 860.0
 offset_bottom = 110.0
-text = "ALPHA TEAM ORDER\nACTIVE FT: ALL\nAWAITING INPUT\nQ/E FT   1 MOVE   2 DEFEND   3 FLANK"
+text = "ALPHA TEAM ORDER\nACTIVE FT: ALL\nAWAITING INPUT\nQ/E FT   1 MOVE   2 DEFEND   3 FLANK   4 TAKE"
 
 [node name="SimulationRoot" type="Node" parent="."]
 script = ExtResource("1_simulation")
