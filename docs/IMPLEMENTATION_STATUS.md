@@ -147,3 +147,10 @@
 - Offene Punkte: keine Formation, keine Taktiklogik, keine Mehrfachverteilung ueber den Commander-Pfad und keine Missionsmechanik.
 - Risiken: der sichtbare Flow ist bewusst ein einzelner Happy Path fuer `move`; spaetere Kommandotypen und Team-Flows muessen explizit und separat folgen.
 - Naechster Schritt: nach Batch-Abschluss Godot-Start und Integrationsstand erneut pruefen, bevor weitere sichtbare Systeme folgen.
+
+### Visible Move Flow Debug
+- Status: implementiert
+- Stand: der minimale sichtbare Move-Flow in der Missions-Testszene wurde repariert; `SimulationRoot` verarbeitet `move_to_position` jetzt nicht nur einmalig, sondern requeued den bestehenden Test-Command bis die Zielposition erreicht ist, sodass `UnitAlpha` ueber mehrere Physics-Ticks sichtbar Richtung Zielmarker laeuft.
+- Offene Punkte: weiterhin nur ein sehr kleiner Testpfad ohne Navigation, Kollisionslogik oder komplexe Bewegungssteuerung.
+- Risiken: der kontinuierliche Move bleibt bewusst auf den vorhandenen Test-Command begrenzt; spaetere echte Bewegungslogik sollte diesen Pfad explizit ersetzen statt ihn still auszuweiten.
+- Naechster Schritt: bei weiteren Sichtbarkeitsproblemen zuerst den sichtbaren Testpfad pruefen, bevor neue Bewegungslogik ergaenzt wird.

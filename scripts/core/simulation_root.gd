@@ -193,15 +193,17 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 	var node_2d: Node2D = unit
 	var current_position: Vector2 = node_2d.position
 	var direction: Vector2 = target_position - current_position
+	if direction.is_zero_approx():
+		node_2d.position = target_position
+		return
+
 	var step_distance: float = MOVE_SPEED_PER_SECOND * delta
 	if direction.length() <= step_distance:
 		node_2d.position = target_position
 		return
 
-	if direction.is_zero_approx():
-		return
-
 	node_2d.position = current_position + direction.normalized() * step_distance
+	command_queue.append(cmd.duplicate(true))
 
 
 func _get_unit_registry():
