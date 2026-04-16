@@ -3,6 +3,11 @@ extends Node2D
 
 const UNIT_RUNTIME_STATUS_SCRIPT: GDScript = preload("res://scripts/npc/unit_runtime_status.gd")
 const UNIT_VITAL_STATUS_SCRIPT: GDScript = preload("res://scripts/npc/unit_vital_status.gd")
+const STATUS_LABEL_NAME: String = "DebugStatusLabel"
+const EVENT_LABEL_NAME: String = "DebugEventLabel"
+const STATUS_LABEL_OFFSET: Vector2 = Vector2(-54.0, -48.0)
+const EVENT_LABEL_OFFSET: Vector2 = Vector2(-42.0, -70.0)
+const EVENT_DURATION_SECONDS: float = 1.2
 
 signal runtime_status_changed(runtime_status)
 signal unit_command_assigned(command)
@@ -18,12 +23,30 @@ var _runtime_status: RefCounted = UNIT_RUNTIME_STATUS_SCRIPT.new()
 var _current_unit_command: RefCounted = null
 var _vital_status: RefCounted = UNIT_VITAL_STATUS_SCRIPT.new()
 var _last_damage_context: Dictionary = {}
+var _status_label: Label = null
+var _event_label: Label = null
+var _current_event_text: String = ""
+var _current_event_color: Color = Color(1.0, 0.95, 0.5, 1.0)
+var _event_time_remaining: float = 0.0
+var _contact_active: bool = false
+var _contact_target_id: String = ""
 
 
 func _ready() -> void:
+	_ensure_readability_labels()
 	_runtime_status = _build_runtime_status("idle")
 	_vital_status = _build_vital_status("fit", max_health_points, 0)
 	_apply_vital_visual()
+	_refresh_readability()
+
+
+func _process(delta: float) -> void:
+	_sync_readability_positions()
+	if _event_time_remaining > 0.0:
+		_event_time_remaining = maxf(_event_time_remaining - delta, 0.0)
+		if _event_time_remaining == 0.0:
+			_current_event_text = ""
+			_refresh_event_label()
 
 
 func get_unit_id() -> String:
@@ -89,6 +112,7 @@ func apply_damage(amount: int, hit_context: Dictionary = {}) -> bool:
 
 	_set_vital_status(next_state, next_health, int(_vital_status.bleedout_ticks))
 	_last_damage_context = hit_context.duplicate(true)
+	show_event_text("HIT -%d" % amount, Color(1.0, 0.8, 0.35, 1.0))
 	damage_applied.emit(amount, next_health, _last_damage_context)
 	return true
 
@@ -98,6 +122,7 @@ func advance_bleedout() -> bool:
 		return false
 
 	_set_vital_status("bleedout", get_health(), int(_vital_status.bleedout_ticks) + 1)
+	show_event_text("BLEEDOUT", Color(0.95, 0.55, 0.55, 1.0))
 	return true
 
 
@@ -137,6 +162,7 @@ func assign_unit_command(command) -> bool:
 		return false
 
 	unit_command_assigned.emit(command)
+	_refresh_readability()
 	return true
 
 
@@ -168,7 +194,21 @@ func set_runtime_status(
 
 	_runtime_status = runtime_status
 	runtime_status_changed.emit(_runtime_status)
+	_refresh_readability()
 	return true
+
+
+func set_contact_state(is_active: bool, target_unit_id: String = "") -> void:
+	_contact_active = is_active
+	_contact_target_id = target_unit_id
+	_refresh_status_label()
+
+
+func show_event_text(event_text: String, event_color: Color = Color(1.0, 0.95, 0.5, 1.0), duration_seconds: float = EVENT_DURATION_SECONDS) -> void:
+	_current_event_text = event_text
+	_current_event_color = event_color
+	_event_time_remaining = duration_seconds
+	_refresh_event_label()
 
 
 func _build_runtime_status(
@@ -213,6 +253,7 @@ func _set_vital_status(state: String, health_points: int, bleedout_ticks: int) -
 	_vital_status = vital_status
 	_apply_vital_visual()
 	vital_status_changed.emit(_vital_status)
+	_refresh_readability()
 
 
 func _map_unit_command_to_status(command_type: String) -> String:
@@ -238,3 +279,133 @@ func _apply_vital_visual() -> void:
 		_:
 			modulate = Color(1.0, 1.0, 1.0, 1.0)
 			rotation_degrees = 0.0
+
+
+func _ensure_readability_labels() -> void:
+	_status_label = get_node_or_null(STATUS_LABEL_NAME) as Label
+	if _status_label == null:
+		_status_label = Label.new()
+		_status_label.name = STATUS_LABEL_NAME
+		_status_label.top_level = true
+		add_child(_status_label)
+
+	_event_label = get_node_or_null(EVENT_LABEL_NAME) as Label
+	if _event_label == null:
+		_event_label = Label.new()
+		_event_label.name = EVENT_LABEL_NAME
+		_event_label.top_level = true
+		add_child(_event_label)
+
+	_status_label.add_theme_font_size_override("font_size", 11)
+	_event_label.add_theme_font_size_override("font_size", 12)
+	_status_label.add_theme_constant_override("outline_size", 2)
+	_event_label.add_theme_constant_override("outline_size", 2)
+	_status_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
+	_event_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
+	_sync_readability_positions()
+
+
+func _sync_readability_positions() -> void:
+	if _status_label != null:
+		_status_label.visible = is_visible_in_tree()
+		_status_label.global_position = global_position + STATUS_LABEL_OFFSET
+
+	if _event_label != null:
+		_event_label.visible = is_visible_in_tree() and not _current_event_text.is_empty()
+		_event_label.global_position = global_position + EVENT_LABEL_OFFSET
+
+
+func _refresh_readability() -> void:
+	_refresh_status_label()
+	_refresh_event_label()
+	_sync_readability_positions()
+
+
+func _refresh_status_label() -> void:
+	if _status_label == null:
+		return
+
+	var lines: PackedStringArray = []
+	lines.append(_build_unit_name_label())
+	lines.append(_build_primary_status_label())
+	lines.append(_build_secondary_status_label())
+	_status_label.text = "\n".join(lines)
+	_status_label.modulate = _build_status_label_color()
+
+
+func _refresh_event_label() -> void:
+	if _event_label == null:
+		return
+
+	_event_label.text = _current_event_text
+	_event_label.modulate = _current_event_color
+	_event_label.visible = not _current_event_text.is_empty()
+
+
+func _build_unit_name_label() -> String:
+	if not display_name.is_empty():
+		return display_name
+
+	return unit_id
+
+
+func _build_primary_status_label() -> String:
+	var vital_state: String = String(_vital_status.state)
+	match vital_state:
+		"down":
+			return "DOWN"
+		"bleedout":
+			return "BLEEDOUT"
+
+	var source_command_type: String = String(_runtime_status.source_command_type)
+	match source_command_type:
+		"move":
+			return "MOVE"
+		"defend":
+			return "DEFEND"
+		"flank":
+			return "FLANK"
+		"take":
+			return "ENGAGE"
+
+	match String(_runtime_status.status):
+		"engaging":
+			return "ENGAGE"
+		"holding":
+			return "HOLD"
+		"pending_move":
+			return "MOVE"
+		"assigned":
+			return "ASSIGNED"
+		_:
+			return "IDLE"
+
+
+func _build_secondary_status_label() -> String:
+	var parts: PackedStringArray = []
+	var fire_status: String = String(_runtime_status.fire_status)
+	if fire_status == "hold_fire":
+		parts.append("HF")
+	elif fire_status == "fire_at_will":
+		parts.append("FAW")
+
+	if _contact_active:
+		parts.append("LOS")
+
+	if get_health() < max_health_points and String(_vital_status.state) == "fit":
+		parts.append("HP %d" % get_health())
+
+	return " ".join(parts)
+
+
+func _build_status_label_color() -> Color:
+	if String(_vital_status.state) == "down":
+		return Color(1.0, 0.78, 0.78, 1.0)
+
+	if String(_vital_status.state) == "bleedout":
+		return Color(0.82, 0.82, 0.82, 1.0)
+
+	if team_id == "team_alpha":
+		return Color(0.85, 0.95, 1.0, 1.0)
+
+	return Color(1.0, 0.88, 0.88, 1.0)
