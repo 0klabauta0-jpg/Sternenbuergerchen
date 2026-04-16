@@ -2,6 +2,7 @@ class_name RuntimeLeader
 extends Node
 
 const FTL_RUNTIME_STATUS_SCRIPT: GDScript = preload("res://scripts/ftl/ftl_runtime_status.gd")
+const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 
 signal promoted(new_leader)
 signal demoted(old_leader)
@@ -12,6 +13,7 @@ signal ftl_task_processed(task)
 signal ftl_task_enqueued(task)
 signal ftl_task_dequeued(task)
 signal runtime_status_changed(runtime_status)
+signal unit_command_assigned(unit, command)
 
 var _current_entity: Node = null
 var _is_leader: bool = false
@@ -101,6 +103,27 @@ func get_runtime_status():
 	return _runtime_status
 
 
+func assign_current_ftl_task_to_unit() -> bool:
+	if _current_entity == null or not _is_assignable_unit(_current_entity):
+		push_warning("RuntimeLeader.assign_current_ftl_task_to_unit expects an assigned unit-like node.")
+		return false
+
+	if _current_ftl_task == null or not _is_valid_ftl_task(_current_ftl_task):
+		push_warning("RuntimeLeader.assign_current_ftl_task_to_unit expects a valid current FTLTask.")
+		return false
+
+	var unit_command = _build_unit_command_from_ftl_task(_current_ftl_task, _current_entity)
+	if unit_command == null or not bool(unit_command.call("is_valid")):
+		push_warning("RuntimeLeader could not derive a valid UnitCommand from the current FTLTask.")
+		return false
+
+	if not bool(_current_entity.call("assign_unit_command", unit_command)):
+		return false
+
+	unit_command_assigned.emit(_current_entity, unit_command)
+	return true
+
+
 # Orders are only forwarded; execution belongs to later systems.
 func command(order: Dictionary) -> void:
 	if typeof(order) != TYPE_DICTIONARY:
@@ -112,6 +135,10 @@ func command(order: Dictionary) -> void:
 
 func _is_valid_ftl_task(task) -> bool:
 	return task != null and task.has_method("is_valid") and bool(task.call("is_valid"))
+
+
+func _is_assignable_unit(unit: Node) -> bool:
+	return unit != null and unit.has_method("assign_unit_command") and unit.has_method("get_unit_id")
 
 
 func _update_runtime_status_from_ftl_task(task) -> void:
@@ -146,5 +173,40 @@ func _map_task_type_to_runtime_status(task_type: String) -> String:
 			return "holding_position"
 		"retreat":
 			return "retreating"
+		_:
+			return ""
+
+
+func _build_unit_command_from_ftl_task(task, unit: Node):
+	var command_type: String = _map_task_type_to_unit_command_type(String(task.get("task_type")))
+	if command_type.is_empty():
+		return null
+
+	var unit_command = UNIT_COMMAND_SCRIPT.new()
+	unit_command.command_type = command_type
+	unit_command.priority = int(task.get("priority"))
+	unit_command.unit_id = String(task.get("unit_id"))
+	if unit_command.unit_id.is_empty():
+		unit_command.unit_id = String(unit.call("get_unit_id"))
+	unit_command.team_id = String(task.get("team_id"))
+	unit_command.target_position = task.get("target_position")
+	unit_command.target_area_id = String(task.get("target_area_id"))
+	unit_command.source_task_type = String(task.get("task_type"))
+	unit_command.phase = int(task.get("phase"))
+	return unit_command
+
+
+func _map_task_type_to_unit_command_type(task_type: String) -> String:
+	match task_type:
+		"seek_cover":
+			return "seek_cover"
+		"move_to_area":
+			return "move_to_position"
+		"engage_in_area":
+			return "engage_area"
+		"hold_position":
+			return "hold_position"
+		"retreat":
+			return "retreat"
 		_:
 			return ""
