@@ -68,6 +68,9 @@ func issue_command(command_type_override: String = "", target_position_override:
 
 	var target_unit_ids: PackedStringArray = _resolve_target_unit_ids()
 	if target_unit_ids.is_empty():
+		if broadcast_to_fireteam:
+			return false
+
 		push_warning("MissionCommandFlowDriver could not resolve any target units for the current order.")
 		return false
 

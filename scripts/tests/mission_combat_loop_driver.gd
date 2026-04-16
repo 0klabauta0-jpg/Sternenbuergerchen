@@ -29,6 +29,7 @@ signal combat_resolved(winning_team_id, neutralized_enemy_count)
 @export var objective_state_label_path: NodePath
 @export var objective_capture_radius: float = 42.0
 @export var objective_hold_ticks_required: int = 10
+@export var enemy_objective_push_delay_ticks: int = 300
 @export var friendly_unit_paths: Array[NodePath] = []
 @export var enemy_unit_paths: Array[NodePath] = []
 
@@ -47,6 +48,7 @@ var _objective_progress_ticks: int = 0
 var _enemy_objective_progress_ticks: int = 0
 var _objective_state: String = OBJECTIVE_STATE_NEUTRAL
 var _objective_owner_team_id: String = ""
+var _enemy_objective_push_started_by_unit_id: Dictionary = {}
 var _contact_line: Line2D = null
 var _event_label: Label = null
 var _winner_label: Label = null
@@ -113,6 +115,7 @@ func _on_tick_processed(tick: int) -> void:
 	_queue_bleedout_for_downed_units(simulation_root, friendly_unit_paths)
 	_try_enqueue_friendly_attacks(simulation_root)
 	_try_enqueue_enemy_attacks(simulation_root)
+	_try_enqueue_enemy_objective_push(simulation_root)
 	_update_objective_control()
 	if _combat_finished:
 		_update_status_label("resolved")
@@ -310,6 +313,50 @@ func _update_objective_control() -> void:
 		return
 
 	_process_friendly_objective_pressure()
+
+
+func _try_enqueue_enemy_objective_push(simulation_root: Node) -> void:
+	if mission_goal != "secure_target" or _combat_finished:
+		return
+
+	if not _has_active_friendly_orders():
+		return
+
+	if _current_tick < maxi(enemy_objective_push_delay_ticks, 1):
+		return
+
+	var target_marker = get_node_or_null(target_marker_path)
+	if not (target_marker is Node2D):
+		return
+
+	var objective_position: Vector2 = (target_marker as Node2D).position
+	var started_push: bool = false
+	for enemy in _get_units(enemy_unit_paths):
+		if enemy == null or not _can_target_receive_attack(enemy) or not enemy.has_method("get_unit_id"):
+			continue
+
+		var enemy_id: String = String(enemy.call("get_unit_id"))
+		if enemy_id.is_empty() or _enemy_objective_push_started_by_unit_id.get(enemy_id, false):
+			continue
+
+		if enemy is Node2D and (enemy as Node2D).position.distance_to(objective_position) <= objective_capture_radius:
+			_enemy_objective_push_started_by_unit_id[enemy_id] = true
+			continue
+
+		simulation_root.call(
+			"enqueue_command",
+			{
+				"command_type": "move_to_position",
+				"priority": 8,
+				"unit_id": enemy_id,
+				"target_position": objective_position,
+			}
+		)
+		_enemy_objective_push_started_by_unit_id[enemy_id] = true
+		started_push = true
+
+	if started_push:
+		_set_event_text("ENEMY PUSH OBJECTIVE")
 
 
 func _process_friendly_objective_pressure() -> void:
@@ -595,6 +642,9 @@ func _build_status_text(state_name: String) -> String:
 	lines.append("Enemies fit: %d" % _count_fit_units(enemy_unit_paths))
 	lines.append("Friendlies fit: %d" % _count_fit_units(friendly_unit_paths))
 	lines.append("Objective: %s" % _build_objective_state_text())
+	var enemy_push_text: String = _build_enemy_objective_push_text()
+	if not enemy_push_text.is_empty():
+		lines.append(enemy_push_text)
 	if mission_goal == "secure_target" and _objective_state == OBJECTIVE_STATE_NEUTRAL and not _combat_finished:
 		lines.append("Objective progress: %d/%d" % [_objective_progress_ticks, maxi(objective_hold_ticks_required, 1)])
 	elif mission_goal == "secure_target" and _objective_state == OBJECTIVE_STATE_CONTESTED and not _combat_finished and _enemy_objective_progress_ticks > 0:
@@ -961,6 +1011,28 @@ func _build_attack_readiness_text() -> String:
 		return "ready"
 
 	return "tick %d" % (_next_attack_tick - _current_tick)
+
+
+func _build_enemy_objective_push_text() -> String:
+	if mission_goal != "secure_target" or _combat_finished:
+		return ""
+
+	if not _has_active_friendly_orders():
+		return "Enemy push: WAITING"
+
+	if _has_enemy_objective_push_started():
+		return "Enemy push: ACTIVE"
+
+	var remaining_ticks: int = maxi(enemy_objective_push_delay_ticks - _current_tick, 0)
+	return "Enemy push: %dt" % remaining_ticks
+
+
+func _has_enemy_objective_push_started() -> bool:
+	for started in _enemy_objective_push_started_by_unit_id.values():
+		if bool(started):
+			return true
+
+	return false
 
 
 func _finish_readability_setup() -> void:

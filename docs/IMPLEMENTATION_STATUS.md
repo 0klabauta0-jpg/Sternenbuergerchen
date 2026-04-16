@@ -339,3 +339,10 @@
 - Offene Punkte: keine feindliche Bewegungs- oder Objective-KI, keine aktive Rueckeroberung, keine Mehrziel-Architektur und keine tieferen Objective-Owner-Regeln ausserhalb dieses kleinen Slice-Pfads.
 - Risiken: der Schritt bleibt bewusst symmetrischer Minimal-Glue auf dem vorhandenen Objective-System; spaetere echte Objective- oder Missionslogik sollte diesen Proto-Pfad explizit ersetzen statt viele weitere Sonderregeln in denselben Combat-Driver zu schichten.
 - Naechster Schritt: spaeter nur bei eigenem Task einen echten Godot-Spieltest-Pass ueber `take -> objective -> phase -> victory/fail -> debrief` fahren und nur gezielt nachschaerfen, falls der Loop dabei noch kippt.
+
+### Tactical Core Slice Hardening
+- Status: implementiert
+- Stand: der bestehende `secure_target`-Loop im Taktik-Slice wurde auf dem vorhandenen Glue gehärtet, ohne neue Architektur einzufuehren. Der minimale Enemy-Objective-Push startet jetzt erst, wenn der Einsatz ueber echte Friendly-Orders laeuft; dadurch bleibt die Szene ohne Eingabe offen, `objective_lost` ist aber ueber denselben laufenden Missionspfad natuerlich erreichbar. Zusaetzlich behandeln die bestehenden Fireteam-Flow-Driver leere Fireteams bei reduzierter Teamzusammenstellung jetzt still als No-Op statt als Warnfehler, sodass der Debrief-/FOB-Rueckfluss auch mit kleineren Teams sauber bleibt.
+- Offene Punkte: keine echte Enemy-Objective-KI, keine Rueckeroberung, keine Balancing-Passagen ueber diesen kleinen Hardening-Schritt hinaus und keine weitere Meta- oder UI-Ausweitung.
+- Risiken: der Slice bleibt bewusst testszenennah; spaetere echte Missions- und Gegnerlogik sollte diesen Proto-Druck explizit ersetzen statt weitere Sonderfaelle in denselben Combat-/Driver-Glue zu stapeln.
+- Naechster Schritt: den bestehenden Mission-Loop gezielt im echten Godot-Lauf durchspielen und nur konkrete Balance- oder Lesbarkeitsfunde nachziehen, statt neue Systeme anzubauen.
