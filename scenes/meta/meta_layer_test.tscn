@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/meta/meta_layer_flow.gd" id="1_flow"]
+[ext_resource type="PackedScene" path="res://scenes/meta/homebase_test_screen.tscn" id="2_homebase"]
+[ext_resource type="PackedScene" path="res://scenes/meta/fob_test_screen.tscn" id="3_fob"]
+
+[node name="MetaLayerTest" type="Node"]
+script = ExtResource("1_flow")
+
+[node name="HomebaseScreen" parent="." instance=ExtResource("2_homebase")]
+
+[node name="FOBScreen" parent="." instance=ExtResource("3_fob")]
+
+[node name="MissionHost" type="Node" parent="."]

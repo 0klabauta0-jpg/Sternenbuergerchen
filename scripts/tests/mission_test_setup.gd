@@ -5,6 +5,7 @@ extends Node
 @export var unit_registry_path: NodePath
 @export var ftl_registry_path: NodePath
 @export var unit_paths: Array[NodePath] = []
+@export var selected_team_unit_ids: PackedStringArray = []
 
 var _is_initialized: bool = false
 
@@ -27,10 +28,19 @@ func _ready() -> void:
 			continue
 
 		var unit_id: String = String(unit.call("get_unit_id"))
-		unit_registry.call("register_unit", unit_id, unit)
 		var unit_team_id: String = ""
 		if unit.has_method("get_team_id"):
 			unit_team_id = String(unit.call("get_team_id"))
+
+		if unit_team_id == team_id and not _is_selected_friendly_unit(unit_id):
+			if unit is CanvasItem:
+				unit.visible = false
+			continue
+
+		if unit is CanvasItem:
+			unit.visible = true
+
+		unit_registry.call("register_unit", unit_id, unit)
 
 		if unit_team_id == team_id:
 			runtime_leader.call("add_unit_member", unit)
@@ -43,3 +53,10 @@ func _ready() -> void:
 
 	ftl_registry.call("register_ftl", team_id, runtime_leader)
 	_is_initialized = true
+
+
+func _is_selected_friendly_unit(unit_id: String) -> bool:
+	if selected_team_unit_ids.is_empty():
+		return true
+
+	return selected_team_unit_ids.has(unit_id)

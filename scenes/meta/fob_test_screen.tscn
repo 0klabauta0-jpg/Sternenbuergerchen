@@ -1,0 +1,62 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/meta/fob_screen.gd" id="1_script"]
+
+[node name="FOBScreen" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TitleLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "FOB Test Screen"
+
+[node name="SubtitleLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "Review the transferred team and start the existing mission test scene."
+autowrap_mode = 3
+
+[node name="TeamStatusLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "FOB team: none"
+autowrap_mode = 3
+
+[node name="ButtonRow" type="HBoxContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="BackButton" type="Button" parent="Panel/Margin/VBox/ButtonRow"]
+layout_mode = 2
+text = "Back to Homebase"
+
+[node name="StartMissionButton" type="Button" parent="Panel/Margin/VBox/ButtonRow"]
+layout_mode = 2
+text = "Start Mission"
