@@ -160,35 +160,24 @@ mission_brief_label_path = NodePath("../MissionBriefLabel")
 combat_driver_path = NodePath("../CombatLoopDriver")
 unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie"), NodePath("../EnemyDelta"), NodePath("../EnemyEcho")])
 
-[node name="DefendFlowDriver" type="Node" parent="."]
+[node name="BlueFireteamFlowDriver" type="Node" parent="."]
 script = ExtResource("9_flow")
 auto_run_on_ready = false
-commander_command_type = "defend"
+unit_id = "unit_alpha"
 fireteam_id = "blue"
+broadcast_to_fireteam = true
 runtime_leader_path = NodePath("../RuntimeLeader")
 event_router_path = NodePath("../EventRouter")
 simulation_root_path = NodePath("../SimulationRoot")
 unit_registry_path = NodePath("../UnitRegistry")
 target_marker_path = NodePath("../TargetMarker")
 
-[node name="MoveFlowDriver" type="Node" parent="."]
+[node name="GoldFireteamFlowDriver" type="Node" parent="."]
 script = ExtResource("9_flow")
 auto_run_on_ready = false
-commander_command_type = "move"
-unit_id = "unit_bravo"
-fireteam_id = "blue"
-runtime_leader_path = NodePath("../RuntimeLeader")
-event_router_path = NodePath("../EventRouter")
-simulation_root_path = NodePath("../SimulationRoot")
-unit_registry_path = NodePath("../UnitRegistry")
-target_marker_path = NodePath("../TargetMarker")
-
-[node name="FlankFlowDriver" type="Node" parent="."]
-script = ExtResource("9_flow")
-auto_run_on_ready = false
-commander_command_type = "flank"
 unit_id = "unit_charlie"
 fireteam_id = "gold"
+broadcast_to_fireteam = true
 runtime_leader_path = NodePath("../RuntimeLeader")
 event_router_path = NodePath("../EventRouter")
 simulation_root_path = NodePath("../SimulationRoot")
@@ -203,7 +192,7 @@ command_feedback_label_path = NodePath("../CommandFeedbackLabel")
 target_marker_path = NodePath("../TargetMarker")
 target_visual_path = NodePath("../TargetMarker/TargetVisual")
 target_label_path = NodePath("../TargetMarker/TargetLabel")
-flow_driver_paths = Array[NodePath]([NodePath("../DefendFlowDriver"), NodePath("../MoveFlowDriver"), NodePath("../FlankFlowDriver")])
+flow_driver_paths = Array[NodePath]([NodePath("../BlueFireteamFlowDriver"), NodePath("../GoldFireteamFlowDriver")])
 
 [node name="CombatLoopDriver" type="Node" parent="."]
 script = ExtResource("10_combat")

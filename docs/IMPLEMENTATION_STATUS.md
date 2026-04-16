@@ -290,3 +290,10 @@
 - Offene Punkte: keine groessere Missionsziel-Auswahl, keine Missionsgeneratoren, keine verzweigten Objective-Ketten und keine weitergehende Ergebnisdarstellung im Meta-Layer.
 - Risiken: der Schritt bleibt bewusst nur ein kleiner Meta-/Mission-Glue-Haken; spaetere echte Missionsziel-Systeme sollten diese Auswahl explizit ersetzen statt den kleinen FOB-Button still zu einer grossen Missionsarchitektur auszubauen.
 - Naechster Schritt: spaeter nur bei eigenem Task weitere kleine Missionsparameter wie Spawnart, Zeitdruck oder Objective-Varianten ergaenzen, wenn das fuer V1 wirklich gebraucht wird.
+
+### Minimal Fireteam FTL Order Spread
+- Status: implementiert
+- Stand: der bestehende taktische Sandbox-Slice gibt Friendly-Orders jetzt nicht mehr nur technisch pro einzelner Unit weiter, sondern minimal pro Fireteam/FTL-Pfad. `MissionCommandFlowDriver` kann dafuer in einem kleinen Broadcast-Modus alle passenden Friendly-Units eines Fireteams ueber `UnitRegistry` aufloesen und fuer dieselbe Commander-Order jeweils den bestehenden `CommanderCommand -> FTLTask -> RuntimeLeader -> UnitCommand -> SimulationRoot`-Pfad ausloesen. In der Testszene gibt es dafuer jetzt einen `BLUE`- und einen `GOLD`-Fireteam-Driver statt der frueheren unitweisen Flow-Aufteilung.
+- Offene Punkte: keine mehrere RuntimeLeader-Instanzen, keine echte FTL-Hierarchie pro Fireteam, keine zweite Commander-Schicht und keine persistente Fireteam-Organisation ausserhalb der Testszene.
+- Risiken: der Schritt bleibt bewusst Glue-Code fuer den vorhandenen Slice; spaetere echte Fireteam-/FTL-Struktur sollte diesen kleinen Driver explizit ersetzen statt ihn still zu einer grossen Befehlsarchitektur werden zu lassen.
+- Naechster Schritt: spaeter nur bei eigenem Task weitere kleine Fireteam-Schritte wie getrennte Marker oder zusaetzliche FTL-Instanzen pruefen, wenn das fuer V1 wirklich gebraucht wird.
