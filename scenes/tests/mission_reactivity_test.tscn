@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/core/simulation_root.gd" id="1_simulation"]
 [ext_resource type="Script" path="res://scripts/core/event_router.gd" id="2_router"]
@@ -10,6 +10,9 @@
 [ext_resource type="Script" path="res://scripts/tests/mission_test_setup.gd" id="8_setup"]
 [ext_resource type="Script" path="res://scripts/tests/mission_command_flow_driver.gd" id="9_flow"]
 [ext_resource type="Script" path="res://scripts/tests/mission_combat_loop_driver.gd" id="10_combat"]
+[ext_resource type="Script" path="res://scripts/tests/mission_tactical_sandbox_controller.gd" id="11_input"]
+[ext_resource type="Texture2D" path="res://Assets/kenney_space-kit/Isometric/astronautA_SW.png" id="12_astronaut_a"]
+[ext_resource type="Texture2D" path="res://Assets/kenney_space-kit/Isometric/astronautB_SW.png" id="13_astronaut_b"]
 
 [node name="MissionReactivityTest" type="Node2D"]
 
@@ -53,9 +56,10 @@ unit_id = "unit_alpha"
 display_name = "Unit Alpha"
 team_id = "team_alpha"
 
-[node name="Visual" type="Polygon2D" parent="UnitAlpha"]
-color = Color(0.2, 0.8, 1, 1)
-polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+[node name="Visual" type="Sprite2D" parent="UnitAlpha"]
+position = Vector2(0, -26)
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("12_astronaut_a")
 
 [node name="UnitBravo" type="Node2D" parent="."]
 script = ExtResource("7_unit")
@@ -64,9 +68,10 @@ unit_id = "unit_bravo"
 display_name = "Unit Bravo"
 team_id = "team_alpha"
 
-[node name="Visual" type="Polygon2D" parent="UnitBravo"]
-color = Color(0.2, 0.65, 1, 1)
-polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+[node name="Visual" type="Sprite2D" parent="UnitBravo"]
+position = Vector2(0, -26)
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("12_astronaut_a")
 
 [node name="UnitCharlie" type="Node2D" parent="."]
 script = ExtResource("7_unit")
@@ -75,9 +80,10 @@ unit_id = "unit_charlie"
 display_name = "Unit Charlie"
 team_id = "team_alpha"
 
-[node name="Visual" type="Polygon2D" parent="UnitCharlie"]
-color = Color(0.2, 0.5, 1, 1)
-polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+[node name="Visual" type="Sprite2D" parent="UnitCharlie"]
+position = Vector2(0, -26)
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("12_astronaut_a")
 
 [node name="EnemyDelta" type="Node2D" parent="."]
 script = ExtResource("7_unit")
@@ -86,9 +92,10 @@ unit_id = "enemy_delta"
 display_name = "Enemy Delta"
 team_id = "team_bravo"
 
-[node name="Visual" type="Polygon2D" parent="EnemyDelta"]
-color = Color(0.95, 0.3, 0.3, 1)
-polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+[node name="Visual" type="Sprite2D" parent="EnemyDelta"]
+position = Vector2(0, -26)
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("13_astronaut_b")
 
 [node name="EnemyEcho" type="Node2D" parent="."]
 script = ExtResource("7_unit")
@@ -97,9 +104,10 @@ unit_id = "enemy_echo"
 display_name = "Enemy Echo"
 team_id = "team_bravo"
 
-[node name="Visual" type="Polygon2D" parent="EnemyEcho"]
-color = Color(0.85, 0.2, 0.2, 1)
-polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+[node name="Visual" type="Sprite2D" parent="EnemyEcho"]
+position = Vector2(0, -26)
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("13_astronaut_b")
 
 [node name="MissionSetup" type="Node" parent="."]
 script = ExtResource("8_setup")
@@ -108,17 +116,20 @@ unit_registry_path = NodePath("../UnitRegistry")
 ftl_registry_path = NodePath("../FTLRegistry")
 unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie"), NodePath("../EnemyDelta"), NodePath("../EnemyEcho")])
 
-[node name="DefendFlowDriver" type="Node" parent="."]
+[node name="AlphaFlowDriver" type="Node" parent="."]
 script = ExtResource("9_flow")
+auto_run_on_ready = false
 commander_command_type = "defend"
+unit_id = "unit_alpha"
 runtime_leader_path = NodePath("../RuntimeLeader")
 event_router_path = NodePath("../EventRouter")
 simulation_root_path = NodePath("../SimulationRoot")
 unit_registry_path = NodePath("../UnitRegistry")
 target_marker_path = NodePath("../TargetMarker")
 
-[node name="MoveFlowDriver" type="Node" parent="."]
+[node name="BravoFlowDriver" type="Node" parent="."]
 script = ExtResource("9_flow")
+auto_run_on_ready = false
 commander_command_type = "move"
 unit_id = "unit_bravo"
 runtime_leader_path = NodePath("../RuntimeLeader")
@@ -127,8 +138,9 @@ simulation_root_path = NodePath("../SimulationRoot")
 unit_registry_path = NodePath("../UnitRegistry")
 target_marker_path = NodePath("../TargetMarker")
 
-[node name="FlankFlowDriver" type="Node" parent="."]
+[node name="CharlieFlowDriver" type="Node" parent="."]
 script = ExtResource("9_flow")
+auto_run_on_ready = false
 commander_command_type = "flank"
 unit_id = "unit_charlie"
 runtime_leader_path = NodePath("../RuntimeLeader")
@@ -144,3 +156,57 @@ simulation_root_path = NodePath("../SimulationRoot")
 status_label_path = NodePath("../StatusLabel")
 friendly_unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie")])
 enemy_unit_paths = Array[NodePath]([NodePath("../EnemyDelta"), NodePath("../EnemyEcho")])
+
+[node name="TacticalUI" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="Panel" type="PanelContainer" parent="TacticalUI"]
+offset_left = 542.0
+offset_top = 16.0
+offset_right = 904.0
+offset_bottom = 164.0
+
+[node name="VBox" type="VBoxContainer" parent="TacticalUI/Panel"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 354.0
+offset_bottom = 140.0
+theme_override_constants/separation = 6
+
+[node name="CommandFeedbackLabel" type="Label" parent="TacticalUI/Panel/VBox"]
+text = "ACTIVE TEAM: ALL\nACTIVE PHASE: APPROACH\nLAST ORDER: AWAITING INPUT"
+
+[node name="HotkeyLegendLabel" type="Label" parent="TacticalUI/Panel/VBox"]
+text = "1 Move | 2 Defend | 3 Flank | 4 Take | Q/E Team | R/F Phase"
+autowrap_mode = 3
+
+[node name="ButtonRow" type="HBoxContainer" parent="TacticalUI/Panel/VBox"]
+theme_override_constants/separation = 6
+
+[node name="MoveButton" type="Button" parent="TacticalUI/Panel/VBox/ButtonRow"]
+focus_mode = 0
+text = "Move [1]"
+
+[node name="DefendButton" type="Button" parent="TacticalUI/Panel/VBox/ButtonRow"]
+focus_mode = 0
+text = "Defend [2]"
+
+[node name="FlankButton" type="Button" parent="TacticalUI/Panel/VBox/ButtonRow"]
+focus_mode = 0
+text = "Flank [3]"
+
+[node name="TakeButton" type="Button" parent="TacticalUI/Panel/VBox/ButtonRow"]
+focus_mode = 0
+text = "Take [4]"
+
+[node name="TacticalController" type="Node" parent="."]
+script = ExtResource("11_input")
+alpha_flow_driver_path = NodePath("../AlphaFlowDriver")
+bravo_flow_driver_path = NodePath("../BravoFlowDriver")
+charlie_flow_driver_path = NodePath("../CharlieFlowDriver")
+command_feedback_label_path = NodePath("../TacticalUI/Panel/VBox/CommandFeedbackLabel")
+hotkey_legend_label_path = NodePath("../TacticalUI/Panel/VBox/HotkeyLegendLabel")
+move_button_path = NodePath("../TacticalUI/Panel/VBox/ButtonRow/MoveButton")
+defend_button_path = NodePath("../TacticalUI/Panel/VBox/ButtonRow/DefendButton")
+flank_button_path = NodePath("../TacticalUI/Panel/VBox/ButtonRow/FlankButton")
+take_button_path = NodePath("../TacticalUI/Panel/VBox/ButtonRow/TakeButton")

@@ -220,3 +220,10 @@
 - Offene Punkte: keine groessere HUD-/Debug-Architektur, keine Politur, keine Animationen und keine komplexe Zeitsteuerung.
 - Risiken: die Lesbarkeitshilfen bleiben bewusst testszenenbezogen; spaetere echte UI- oder Debug-Systeme sollten diesen kleinen Pfad explizit ersetzen statt ihn still zu einer grossen Overlay-Schicht auszubauen.
 - Naechster Schritt: spaeter nur bei eigenem Task weitere gezielte Beobachtbarkeit wie einfache Threat-/Objective-Hinweise ergaenzen, ohne die Szene in eine Debug-Framework-Struktur zu ziehen.
+
+### Minimal Tactical Input UI
+- Status: implementiert
+- Stand: die Missions-Testszene startet jetzt neutral ohne automatische Initial-Orders; drei kleine Unit-gebundene `MissionCommandFlowDriver` koennen wiederholt genutzt werden, und ein schlanker `MissionTacticalSandboxController` ergaenzt Hotkeys plus vier kleine Buttons fuer `move`, `defend`, `flank` und `take`. Die finalen Tasten sind jetzt klar: `1 = move`, `2 = defend`, `3 = flank`, `4 = take`, `Q/E = Fireteam ALL/BLUE/GOLD`, `R/F = Phase APPROACH/ASSAULT/HOLD`. Friendly-Units nutzen in der Testszene `astronautA_SW`, Enemy-Units `astronautB_SW` statt Polygon-Placeholdern.
+- Offene Punkte: die Fireteam- und Phase-Umschaltung bleibt bewusst szenenlokal; es gibt keine grosse Commander-UI, keine Auswahlarchitektur und noch keine tiefere Phase-Wirkung im Combat-Loop.
+- Risiken: der UI-Pfad darf keine Gameplay-Wahrheit uebernehmen; er bleibt ein leichter Command-Ausloeser fuer den bestehenden Commander -> FTL -> Unit -> SimulationRoot-Flow. Spaetere echte Commander- oder HUD-Systeme sollten diesen kleinen Szenen-Controller explizit ersetzen statt ihn still auszubauen.
+- Naechster Schritt: nur bei eigenem Task gezielt weiter verfeinern, etwa Marker-/Objective-Lesbarkeit oder spaetere echte Fireteam-/Phasenwirkung, ohne neue UI- oder Input-Architektur aufzubauen.

@@ -7,6 +7,7 @@ const TRANSLATOR_SCRIPT: GDScript = preload("res://scripts/command/command_to_ft
 @export var commander_command_type: String = "take"
 @export var team_id: String = "team_alpha"
 @export var unit_id: String = "unit_alpha"
+@export var phase: int = -1
 @export var runtime_leader_path: NodePath
 @export var event_router_path: NodePath
 @export var simulation_root_path: NodePath
@@ -15,7 +16,7 @@ const TRANSLATOR_SCRIPT: GDScript = preload("res://scripts/command/command_to_ft
 
 var last_translated_task: RefCounted = null
 var last_enqueued_command: Dictionary = {}
-var _has_run_flow: bool = false
+var last_issued_order: Dictionary = {}
 
 
 func _ready() -> void:
@@ -35,28 +36,31 @@ func _ready() -> void:
 		run_flow()
 
 
-func run_flow() -> void:
-	if _has_run_flow:
-		return
+func run_flow() -> bool:
+	return issue_command()
 
+
+func issue_command(command_type_override: String = "", phase_override: int = -1) -> bool:
 	var runtime_leader = get_node_or_null(runtime_leader_path)
 	var target_marker = get_node_or_null(target_marker_path)
 	if runtime_leader == null or not (target_marker is Node2D):
 		push_warning("MissionCommandFlowDriver requires a RuntimeLeader and a Node2D target marker.")
-		return
+		return false
 
 	var command = COMMANDER_COMMAND_SCRIPT.new()
-	command.command_type = commander_command_type
+	command.command_type = commander_command_type if command_type_override.is_empty() else command_type_override
 	command.priority = 10
 	command.unit_id = unit_id
 	command.team_id = team_id
 	command.target_position = target_marker.position
+	command.phase = phase if phase_override < 0 else phase_override
 	if not bool(command.call("is_valid")):
 		push_warning("MissionCommandFlowDriver could not build a valid CommanderCommand.")
-		return
+		return false
 
-	_has_run_flow = true
-	runtime_leader.call("command", command.call("to_dict"))
+	last_issued_order = command.call("to_dict")
+	runtime_leader.call("command", last_issued_order)
+	return true
 
 
 func _on_runtime_leader_command_issued(order: Dictionary) -> void:
