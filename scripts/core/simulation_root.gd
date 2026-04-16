@@ -77,6 +77,10 @@ func _apply_command(cmd: Dictionary, delta: float) -> void:
 		push_warning("SimulationRoot received a negative physics delta while applying a command.")
 		return
 
+	if _is_command_deferred(cmd):
+		enqueue_command(cmd.duplicate(true))
+		return
+
 	match _extract_command_type(cmd):
 		"move_to_position":
 			_apply_move_command(cmd, delta)
@@ -170,6 +174,17 @@ func _extract_command_type(cmd: Dictionary) -> String:
 		return String(cmd["type"])
 
 	return ""
+
+
+func _is_command_deferred(cmd: Dictionary) -> bool:
+	if not cmd.has("not_before_tick"):
+		return false
+
+	var raw_not_before_tick: Variant = cmd["not_before_tick"]
+	if typeof(raw_not_before_tick) != TYPE_INT and typeof(raw_not_before_tick) != TYPE_FLOAT:
+		return false
+
+	return tick_counter < int(raw_not_before_tick)
 
 
 func _extract_effect_type(effect: Dictionary) -> String:

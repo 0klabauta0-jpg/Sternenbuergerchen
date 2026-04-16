@@ -228,6 +228,12 @@ func assign_unit_command(command) -> bool:
 		return false
 
 	unit_command_assigned.emit(command)
+	var execution_delay_ticks: int = 0
+	var raw_execution_delay_ticks: Variant = command.get("execution_delay_ticks")
+	if typeof(raw_execution_delay_ticks) == TYPE_INT or typeof(raw_execution_delay_ticks) == TYPE_FLOAT:
+		execution_delay_ticks = maxi(int(raw_execution_delay_ticks), 0)
+	if execution_delay_ticks > 0:
+		show_event_text("ACK %dt" % execution_delay_ticks, Color(0.95, 0.92, 0.55, 1.0), 0.9)
 	_refresh_readability()
 	return true
 

@@ -28,6 +28,7 @@ var fire_status: String = FIRE_STATUS_FIRE_AT_WILL
 var source_command_type: String = ""
 var cover_score: float = 0.0
 var attack_bonus: float = 0.0
+var execution_delay_ticks: int = 0
 var target_position: Variant = null
 var target_area_id: String = ""
 var source_task_type: String = ""
@@ -71,6 +72,7 @@ func to_dict() -> Dictionary:
 		"source_command_type": source_command_type,
 		"cover_score": cover_score,
 		"attack_bonus": attack_bonus,
+		"execution_delay_ticks": execution_delay_ticks,
 	}
 
 	if target_position != null:
@@ -118,6 +120,11 @@ func _apply_dict(data: Dictionary) -> void:
 		var raw_attack_bonus: Variant = data["attack_bonus"]
 		if typeof(raw_attack_bonus) == TYPE_INT or typeof(raw_attack_bonus) == TYPE_FLOAT:
 			attack_bonus = float(raw_attack_bonus)
+
+	if data.has("execution_delay_ticks"):
+		var raw_execution_delay_ticks: Variant = data["execution_delay_ticks"]
+		if typeof(raw_execution_delay_ticks) == TYPE_INT or typeof(raw_execution_delay_ticks) == TYPE_FLOAT:
+			execution_delay_ticks = maxi(int(raw_execution_delay_ticks), 0)
 
 	if data.has("target_position"):
 		target_position = data["target_position"]

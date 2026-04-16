@@ -11,6 +11,13 @@ const MOVE_RECON_LATERAL_OFFSET: float = 28.0
 const MOVE_ASSAULT_FORWARD_OFFSET: float = 24.0
 const FLANK_RECON_LATERAL_SCALE: float = 1.45
 const FLANK_ASSAULT_FORWARD_OFFSET: float = 28.0
+const DELAY_ANCHOR_MOVE: int = 3
+const DELAY_ANCHOR_FLANK: int = 4
+const DELAY_ANCHOR_TAKE: int = 2
+const DELAY_RECON_DEFEND: int = 1
+const DELAY_RECON_MOVE: int = 1
+const DELAY_ASSAULT_DEFEND: int = 2
+const DELAY_ASSAULT_MOVE: int = 1
 
 signal promoted(new_leader)
 signal demoted(old_leader)
@@ -243,6 +250,7 @@ func _build_unit_command_from_ftl_task(task, unit: Node):
 	unit_command.source_command_type = source_command_type
 	unit_command.cover_score = _derive_cover_score(task_type, source_command_type, unit)
 	unit_command.attack_bonus = _derive_attack_bonus(task_type, source_command_type, unit)
+	unit_command.execution_delay_ticks = _derive_execution_delay_ticks(task_type, source_command_type, unit)
 	unit_command.target_position = _derive_target_position(task, unit, command_type, source_command_type)
 	unit_command.target_area_id = String(task.get("target_area_id"))
 	unit_command.source_task_type = task_type
@@ -387,6 +395,40 @@ func _derive_target_position(task, unit: Node, command_type: String, source_comm
 			return raw_target_position + flank_offset + forward_direction * FLANK_ASSAULT_FORWARD_OFFSET
 		_:
 			return raw_target_position + flank_offset
+
+
+func _derive_execution_delay_ticks(task_type: String, source_command_type: String, unit: Node) -> int:
+	var combat_role: String = _get_unit_combat_role(unit)
+	match combat_role:
+		ROLE_ANCHOR:
+			match source_command_type:
+				"move":
+					return DELAY_ANCHOR_MOVE
+				"flank":
+					return DELAY_ANCHOR_FLANK
+				"take":
+					return DELAY_ANCHOR_TAKE
+				_:
+					if task_type == "hold_position":
+						return 0
+		ROLE_RECON:
+			match source_command_type:
+				"defend":
+					return DELAY_RECON_DEFEND
+				"move", "take":
+					return DELAY_RECON_MOVE
+				"flank":
+					return 0
+		ROLE_ASSAULT:
+			match source_command_type:
+				"defend":
+					return DELAY_ASSAULT_DEFEND
+				"move":
+					return DELAY_ASSAULT_MOVE
+				"take", "flank":
+					return 0
+
+	return 0
 
 
 func _get_unit_combat_role(unit: Node) -> String:

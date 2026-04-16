@@ -297,3 +297,10 @@
 - Offene Punkte: keine mehrere RuntimeLeader-Instanzen, keine echte FTL-Hierarchie pro Fireteam, keine zweite Commander-Schicht und keine persistente Fireteam-Organisation ausserhalb der Testszene.
 - Risiken: der Schritt bleibt bewusst Glue-Code fuer den vorhandenen Slice; spaetere echte Fireteam-/FTL-Struktur sollte diesen kleinen Driver explizit ersetzen statt ihn still zu einer grossen Befehlsarchitektur werden zu lassen.
 - Naechster Schritt: spaeter nur bei eigenem Task weitere kleine Fireteam-Schritte wie getrennte Marker oder zusaetzliche FTL-Instanzen pruefen, wenn das fuer V1 wirklich gebraucht wird.
+
+### Minimal Order Reaction Delay
+- Status: implementiert
+- Stand: der bestehende Commander -> FTL -> Unit-Pfad traegt jetzt einen kleinen, rein datenbasierten Reaktionsversatz pro Unit. `RuntimeLeader` leitet dafuer `execution_delay_ticks` direkt aus bestehendem `combat_role` und `source_command_type` ab. `MissionCommandFlowDriver` stempelt daraus einen kleinen `not_before_tick` auf den bereits existierenden `UnitCommand`-Dictionary-Pfad, und `SimulationRoot` wartet damit lediglich bis zum passenden Tick, statt neue Scheduler- oder AI-Logik einzufuehren. So reagieren `anchor`, `recon` und `assault` auf dieselbe Order nicht mehr im exakt selben Tick.
+- Offene Punkte: keine Unsicherheits-/Persoenlichkeitslogik, keine komplexe Befehlsverweigerung, keine neue Timing-Architektur und keine tieferen FTL-Entscheidungen.
+- Risiken: der Schritt ist bewusst klein und deterministisch; spaetere echte Verhaltenssimulation sollte diesen Proto-Versatz explizit ersetzen statt viele weitere Sonderregeln auf denselben Tick-Haken zu stapeln.
+- Naechster Schritt: spaeter nur bei eigenem Task weitere kleine Unterschiede wie alternative Commander-Freigaben oder echte Fireteam-FTLs pruefen, wenn das fuer V1 wirklich gebraucht wird.

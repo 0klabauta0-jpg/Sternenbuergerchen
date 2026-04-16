@@ -194,6 +194,12 @@ func _on_squad_command(_squad: Node, order: Dictionary) -> void:
 
 	last_translated_task = translated_task
 	last_enqueued_command = unit_command.call("to_dict")
+	var execution_delay_ticks: int = 0
+	var raw_execution_delay_ticks: Variant = unit_command.get("execution_delay_ticks")
+	if typeof(raw_execution_delay_ticks) == TYPE_INT or typeof(raw_execution_delay_ticks) == TYPE_FLOAT:
+		execution_delay_ticks = maxi(int(raw_execution_delay_ticks), 0)
+	if execution_delay_ticks > 0 and simulation_root.has_method("get_tick"):
+		last_enqueued_command["not_before_tick"] = int(simulation_root.call("get_tick")) + execution_delay_ticks
 	simulation_root.call("enqueue_command", last_enqueued_command)
 
 
