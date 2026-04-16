@@ -234,6 +234,16 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		push_warning("SimulationRoot damage effect expects a unit with apply_damage().")
 		return
 
+	var attacker_team_id: String = String(effect.get("attacker_team_id", ""))
+	var target_team_id: String = ""
+	if unit.has_method("get_team_id"):
+		target_team_id = String(unit.call("get_team_id"))
+
+	var is_friendly_fire: bool = not attacker_team_id.is_empty() and not target_team_id.is_empty() and attacker_team_id == target_team_id
+	var allow_friendly_fire: bool = bool(effect.get("allow_friendly_fire", true))
+	if is_friendly_fire and not allow_friendly_fire:
+		return
+
 	var base_damage: int = _extract_int(effect.get("damage", 0))
 	if base_damage <= 0:
 		push_warning("SimulationRoot damage effect expects a positive damage value.")
@@ -253,6 +263,8 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 	var hit_context: Dictionary = {
 		"effect_type": "damage",
 		"unit_id": unit_id,
+		"attacker_team_id": attacker_team_id,
+		"friendly_fire": is_friendly_fire,
 	}
 	unit.call("apply_damage", resolved_damage, hit_context)
 

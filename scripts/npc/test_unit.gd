@@ -41,6 +41,10 @@ func get_health() -> int:
 	return int(_vital_status.health_points)
 
 
+func get_team_id() -> String:
+	return team_id
+
+
 func get_vital_status():
 	return _vital_status
 
