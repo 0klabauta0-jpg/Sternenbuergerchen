@@ -43,7 +43,7 @@ script = ExtResource("5_updates")
 script = ExtResource("6_leader")
 
 [node name="TargetMarker" type="Marker2D" parent="."]
-position = Vector2(320, 180)
+position = Vector2(320, 204)
 
 [node name="TargetVisual" type="Polygon2D" parent="TargetMarker"]
 color = Color(0.95, 0.85, 0.2, 1)
@@ -51,7 +51,7 @@ polygon = PackedVector2Array(-10, 0, 0, -10, 10, 0, 0, 10)
 
 [node name="UnitAlpha" type="Node2D" parent="."]
 script = ExtResource("7_unit")
-position = Vector2(72, 120)
+position = Vector2(48, 128)
 unit_id = "unit_alpha"
 display_name = "Unit Alpha"
 team_id = "team_alpha"
@@ -63,7 +63,7 @@ texture = ExtResource("12_astronaut_a")
 
 [node name="UnitBravo" type="Node2D" parent="."]
 script = ExtResource("7_unit")
-position = Vector2(72, 180)
+position = Vector2(64, 212)
 unit_id = "unit_bravo"
 display_name = "Unit Bravo"
 team_id = "team_alpha"
@@ -75,7 +75,7 @@ texture = ExtResource("12_astronaut_a")
 
 [node name="UnitCharlie" type="Node2D" parent="."]
 script = ExtResource("7_unit")
-position = Vector2(72, 240)
+position = Vector2(80, 296)
 unit_id = "unit_charlie"
 display_name = "Unit Charlie"
 team_id = "team_alpha"
@@ -87,7 +87,7 @@ texture = ExtResource("12_astronaut_a")
 
 [node name="EnemyDelta" type="Node2D" parent="."]
 script = ExtResource("7_unit")
-position = Vector2(220, 130)
+position = Vector2(452, 156)
 unit_id = "enemy_delta"
 display_name = "Enemy Delta"
 team_id = "team_bravo"
@@ -99,7 +99,7 @@ texture = ExtResource("13_astronaut_b")
 
 [node name="EnemyEcho" type="Node2D" parent="."]
 script = ExtResource("7_unit")
-position = Vector2(228, 212)
+position = Vector2(472, 256)
 unit_id = "enemy_echo"
 display_name = "Enemy Echo"
 team_id = "team_bravo"
@@ -151,7 +151,9 @@ target_marker_path = NodePath("../TargetMarker")
 
 [node name="CombatLoopDriver" type="Node" parent="."]
 script = ExtResource("10_combat")
-contact_range = 220.0
+contact_range = 190.0
+damage_per_hit = 24
+ticks_between_attacks = 36
 simulation_root_path = NodePath("../SimulationRoot")
 status_label_path = NodePath("../StatusLabel")
 friendly_unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie")])

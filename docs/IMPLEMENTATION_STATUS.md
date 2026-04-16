@@ -227,3 +227,10 @@
 - Offene Punkte: die Fireteam- und Phase-Umschaltung bleibt bewusst szenenlokal; es gibt keine grosse Commander-UI, keine Auswahlarchitektur und noch keine tiefere Phase-Wirkung im Combat-Loop.
 - Risiken: der UI-Pfad darf keine Gameplay-Wahrheit uebernehmen; er bleibt ein leichter Command-Ausloeser fuer den bestehenden Commander -> FTL -> Unit -> SimulationRoot-Flow. Spaetere echte Commander- oder HUD-Systeme sollten diesen kleinen Szenen-Controller explizit ersetzen statt ihn still auszubauen.
 - Naechster Schritt: nur bei eigenem Task gezielt weiter verfeinern, etwa Marker-/Objective-Lesbarkeit oder spaetere echte Fireteam-/Phasenwirkung, ohne neue UI- oder Input-Architektur aufzubauen.
+
+### Tactical Slice Tempo and Distance
+- Status: implementiert
+- Stand: der bestehende Taktik-Slice wurde nur ueber vorhandene Szenenwerte entschleunigt: Friendly- und Enemy-Startpositionen in `mission_reactivity_test.tscn` stehen jetzt deutlich weiter auseinander, der `TargetMarker` liegt etwas weiter in der Mitte des Beobachtungsraums, `contact_range` wurde leicht reduziert und der Combat-Loop feuert mit hoeherem `ticks_between_attacks` plus niedrigerem `damage_per_hit` spuerbar seltener und weniger abrupt. Dadurch kommt Erstkontakt spaeter und der laufende Kampf bleibt laenger beobachtbar, ohne neue Combat- oder KI-Logik einzufuehren.
+- Offene Punkte: der Slice bleibt weiterhin eine kleine Testszenen-Combat-Annäherung ohne echte Gegner-KI, ohne terrainbasiertes LOS und ohne feinere Missions-/Objective-Distanzen.
+- Risiken: die Tempo-Wirkung haengt weiterhin an wenigen Tuning-Werten in der Szene; spaetere echte Karten- oder Combat-Systeme sollten diese Testwerte explizit ersetzen statt sie still weiter auszubauen.
+- Naechster Schritt: nur bei eigenem Task weiter nachschaerfen, falls echte Godot-Playtests noch zeigen, dass Kontakt oder Kampfabschluss trotz der groesseren Startdistanz zu hektisch bleiben.
