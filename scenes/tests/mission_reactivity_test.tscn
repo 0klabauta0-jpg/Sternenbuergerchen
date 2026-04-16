@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/core/simulation_root.gd" id="1_simulation"]
 [ext_resource type="Script" path="res://scripts/core/event_router.gd" id="2_router"]
@@ -10,6 +10,7 @@
 [ext_resource type="Script" path="res://scripts/tests/mission_test_setup.gd" id="8_setup"]
 [ext_resource type="Script" path="res://scripts/tests/mission_command_flow_driver.gd" id="9_flow"]
 [ext_resource type="Script" path="res://scripts/tests/mission_combat_loop_driver.gd" id="10_combat"]
+[ext_resource type="Script" path="res://scripts/tests/mission_tactical_sandbox_controller.gd" id="11_sandbox"]
 
 [node name="MissionReactivityTest" type="Node2D"]
 
@@ -19,6 +20,13 @@ offset_top = 16.0
 offset_right = 520.0
 offset_bottom = 212.0
 text = "Combat: waiting"
+
+[node name="SandboxLabel" type="Label" parent="."]
+offset_left = 544.0
+offset_top = 16.0
+offset_right = 840.0
+offset_bottom = 132.0
+text = "Sandbox"
 
 [node name="SimulationRoot" type="Node" parent="."]
 script = ExtResource("1_simulation")
@@ -40,7 +48,7 @@ script = ExtResource("5_updates")
 script = ExtResource("6_leader")
 
 [node name="TargetMarker" type="Marker2D" parent="."]
-position = Vector2(320, 180)
+position = Vector2(272, 180)
 
 [node name="TargetVisual" type="Polygon2D" parent="TargetMarker"]
 color = Color(0.95, 0.85, 0.2, 1)
@@ -48,7 +56,7 @@ polygon = PackedVector2Array(-10, 0, 0, -10, 10, 0, 0, 10)
 
 [node name="UnitAlpha" type="Node2D" parent="."]
 script = ExtResource("7_unit")
-position = Vector2(72, 120)
+position = Vector2(96, 120)
 unit_id = "unit_alpha"
 display_name = "Unit Alpha"
 team_id = "team_alpha"
@@ -59,7 +67,7 @@ polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 
 [node name="UnitBravo" type="Node2D" parent="."]
 script = ExtResource("7_unit")
-position = Vector2(72, 180)
+position = Vector2(96, 180)
 unit_id = "unit_bravo"
 display_name = "Unit Bravo"
 team_id = "team_alpha"
@@ -70,7 +78,7 @@ polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 
 [node name="UnitCharlie" type="Node2D" parent="."]
 script = ExtResource("7_unit")
-position = Vector2(72, 240)
+position = Vector2(96, 240)
 unit_id = "unit_charlie"
 display_name = "Unit Charlie"
 team_id = "team_alpha"
@@ -81,7 +89,7 @@ polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 
 [node name="EnemyDelta" type="Node2D" parent="."]
 script = ExtResource("7_unit")
-position = Vector2(220, 130)
+position = Vector2(528, 132)
 unit_id = "enemy_delta"
 display_name = "Enemy Delta"
 team_id = "team_bravo"
@@ -92,7 +100,7 @@ polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 
 [node name="EnemyEcho" type="Node2D" parent="."]
 script = ExtResource("7_unit")
-position = Vector2(228, 212)
+position = Vector2(548, 236)
 unit_id = "enemy_echo"
 display_name = "Enemy Echo"
 team_id = "team_bravo"
@@ -110,6 +118,7 @@ unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo")
 
 [node name="DefendFlowDriver" type="Node" parent="."]
 script = ExtResource("9_flow")
+auto_run_on_ready = false
 commander_command_type = "defend"
 runtime_leader_path = NodePath("../RuntimeLeader")
 event_router_path = NodePath("../EventRouter")
@@ -119,6 +128,7 @@ target_marker_path = NodePath("../TargetMarker")
 
 [node name="MoveFlowDriver" type="Node" parent="."]
 script = ExtResource("9_flow")
+auto_run_on_ready = false
 commander_command_type = "move"
 unit_id = "unit_bravo"
 runtime_leader_path = NodePath("../RuntimeLeader")
@@ -129,6 +139,7 @@ target_marker_path = NodePath("../TargetMarker")
 
 [node name="FlankFlowDriver" type="Node" parent="."]
 script = ExtResource("9_flow")
+auto_run_on_ready = false
 commander_command_type = "flank"
 unit_id = "unit_charlie"
 runtime_leader_path = NodePath("../RuntimeLeader")
@@ -137,9 +148,19 @@ simulation_root_path = NodePath("../SimulationRoot")
 unit_registry_path = NodePath("../UnitRegistry")
 target_marker_path = NodePath("../TargetMarker")
 
+[node name="SandboxController" type="Node" parent="."]
+script = ExtResource("11_sandbox")
+sandbox_label_path = NodePath("../SandboxLabel")
+target_marker_path = NodePath("../TargetMarker")
+flow_driver_paths = Array[NodePath]([NodePath("../DefendFlowDriver"), NodePath("../MoveFlowDriver"), NodePath("../FlankFlowDriver")])
+target_positions = Array[Vector2]([Vector2(272, 180), Vector2(404, 144), Vector2(428, 248)])
+
 [node name="CombatLoopDriver" type="Node" parent="."]
 script = ExtResource("10_combat")
-contact_range = 220.0
+contact_range = 170.0
+damage_per_hit = 28
+base_hit_chance = 0.4
+ticks_between_attacks = 32
 simulation_root_path = NodePath("../SimulationRoot")
 status_label_path = NodePath("../StatusLabel")
 friendly_unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie")])

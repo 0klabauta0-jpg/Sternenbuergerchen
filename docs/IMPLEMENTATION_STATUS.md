@@ -220,3 +220,10 @@
 - Offene Punkte: keine groessere HUD-/Debug-Architektur, keine Politur, keine Animationen und keine komplexe Zeitsteuerung.
 - Risiken: die Lesbarkeitshilfen bleiben bewusst testszenenbezogen; spaetere echte UI- oder Debug-Systeme sollten diesen kleinen Pfad explizit ersetzen statt ihn still zu einer grossen Overlay-Schicht auszubauen.
 - Naechster Schritt: spaeter nur bei eigenem Task weitere gezielte Beobachtbarkeit wie einfache Threat-/Objective-Hinweise ergaenzen, ohne die Szene in eine Debug-Framework-Struktur zu ziehen.
+
+### Minimal Playable Tactical Slice
+- Status: implementiert
+- Stand: die bestehende Missions-Testszene laeuft jetzt als kleiner spielbarer Slice mit mehr Raum zwischen Friendly- und Enemy-Startpositionen, ohne automatischen Start der drei bestehenden Command-Flow-Driver. Ein kleiner `MissionTacticalSandboxController` erlaubt manuelle Befehle `move`, `defend` und `flank` per Tastendruck sowie das Umschalten des sichtbaren Zielmarkers; gleichzeitig sorgen entschleunigtes Kontakt- und Angriffstiming dafuer, dass der Kampf nicht sofort nach dem ersten Input kippt.
+- Offene Punkte: keine echte Commander-UI, keine Maus-Selektion, kein Reset-/Replay-Modus und keine groessere Gegner-KI.
+- Risiken: der Slice bleibt bewusst test- und tastaturbasiert; spaetere echte Bedienung oder Taktikfuehrung sollte diesen Glue-Code explizit ersetzen statt ihn still zur grossen Eingabearchitektur auszubauen.
+- Naechster Schritt: spaeter nur bei eigenem Task weitere kleine Spielmodus-Hilfen wie Reset, Engage-Befehl oder einfache Objective-Ziele ergaenzen, ohne Pathfinding oder UI-Frameworks einzufuehren.

@@ -35,28 +35,48 @@ func _ready() -> void:
 		run_flow()
 
 
-func run_flow() -> void:
+func run_flow() -> bool:
 	if _has_run_flow:
-		return
+		return false
+
+	var did_issue: bool = issue_command()
+	if did_issue:
+		_has_run_flow = true
+
+	return did_issue
+
+
+func issue_command(command_type_override: String = "", target_position_override = null) -> bool:
+	var resolved_command_type: String = commander_command_type
+	if not command_type_override.is_empty():
+		resolved_command_type = command_type_override
 
 	var runtime_leader = get_node_or_null(runtime_leader_path)
 	var target_marker = get_node_or_null(target_marker_path)
-	if runtime_leader == null or not (target_marker is Node2D):
-		push_warning("MissionCommandFlowDriver requires a RuntimeLeader and a Node2D target marker.")
-		return
+	if runtime_leader == null:
+		push_warning("MissionCommandFlowDriver requires a direct RuntimeLeader reference.")
+		return false
+
+	var resolved_target_position = target_position_override
+	if resolved_target_position == null:
+		if not (target_marker is Node2D):
+			push_warning("MissionCommandFlowDriver requires a Node2D target marker when no target override is provided.")
+			return false
+
+		resolved_target_position = target_marker.position
 
 	var command = COMMANDER_COMMAND_SCRIPT.new()
-	command.command_type = commander_command_type
+	command.command_type = resolved_command_type
 	command.priority = 10
 	command.unit_id = unit_id
 	command.team_id = team_id
-	command.target_position = target_marker.position
+	command.target_position = resolved_target_position
 	if not bool(command.call("is_valid")):
 		push_warning("MissionCommandFlowDriver could not build a valid CommanderCommand.")
-		return
+		return false
 
-	_has_run_flow = true
 	runtime_leader.call("command", command.call("to_dict"))
+	return true
 
 
 func _on_runtime_leader_command_issued(order: Dictionary) -> void:
