@@ -37,3 +37,10 @@
 - Offene Punkte: keine FTLTask-Queue, kein Runtime-State-Modell, keine Status-Uebergaenge und keine Ausfuehrungslogik.
 - Risiken: Der erste Durchlauf ist bewusst nur ein einzelner Single-Task-Pfad; spaetere Queue- und Statuslogik muss darauf aufsetzen, ohne Signalvertraege oder Datenvertrag zu brechen.
 - Naechster Schritt: eine kleine FTLTask-Queue im `RuntimeLeader` einfuehren.
+
+### TASK_017 – FTLTask-Queue im RuntimeLeader
+- Status: implementiert
+- Stand: `RuntimeLeader` verwaltet jetzt eine kleine FIFO-`FTLTask`-Queue; gueltige Tasks koennen ueber `enqueue_ftl_task(...)` eingereiht und ueber `process_next_queued_ftl_task()` in den bestehenden Single-Task-Pfad uebernommen und verarbeitet werden.
+- Offene Punkte: kein Runtime-State-Modell, keine Runtime-Status-Uebergaenge und keine Ausfuehrungslogik.
+- Risiken: Die Queue ist bewusst schlicht und arbeitet in stabiler Einfuegereihenfolge; spaetere Priorisierung oder Parallelitaet muss separat und explizit eingefuehrt werden.
+- Naechster Schritt: ein minimales FTL-State-Modell fuer den Laufzeitstatus ergaenzen.
