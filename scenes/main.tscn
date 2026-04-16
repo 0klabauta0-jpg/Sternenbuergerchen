@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://b4q8jvofa0pj4"]
+
+[node name="Main" type="Node" unique_id=565588598]
+
+[node name="SimulationRoot" type="Node" parent="." unique_id=1223189752]
+
+[node name="EventRouter" type="Node" parent="." unique_id=963220089]
+
+[node name="UnitRegistry" type="Node" parent="." unique_id=350593148]
+
+[node name="FTLRegistry" type="Node" parent="." unique_id=1179346766]
+
+[node name="UpdateManager" type="Node" parent="." unique_id=1308763398]
+
+[node name="RuntimeLeaderTest" type="Node" parent="." unique_id=1076235564]
