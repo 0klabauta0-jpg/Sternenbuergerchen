@@ -54,6 +54,10 @@ layout_mode = 2
 text = "Last mission: none"
 autowrap_mode = 3
 
+[node name="MissionGoalButton" type="Button" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "Mission Goal: SECURE TARGET"
+
 [node name="ButtonRow" type="HBoxContainer" parent="Panel/Margin/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 12

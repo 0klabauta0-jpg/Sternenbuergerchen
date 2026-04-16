@@ -283,3 +283,10 @@
 - Offene Punkte: keine Rover-/Homebase-Respawnpfade, keine echten V1-Zeiten aus dem Brief, keine Transportlogik, keine Respawn-UI und kein Meta-Layer-Rueckfluss dieses Hooks.
 - Risiken: der Hook ist bewusst nur ein kleiner Friendly-Testpfad fuer den bestehenden Slice; spaetere echte Respawn-Systeme muessen diesen Glue-Code explizit ersetzen statt ihn still zur Voll-Loesung werden zu lassen.
 - Naechster Schritt: spaeter nur bei eigenem Task den Respawn-Zieltyp, die Wartezeit oder den Meta-Rueckfluss weiter differenzieren, wenn das fuer V1 wirklich noetig wird.
+
+### Minimal Alternate Mission Goal
+- Status: implementiert
+- Stand: die FOB kann jetzt zwischen genau zwei kleinen Missionszielen fuer den bestehenden Slice umschalten: `secure_target` und `neutralize_enemies`. `FOBScreen` bietet dafuer nur einen kleinen Ziel-Button, `MetaLayerFlow` reicht die Auswahl direkt in `MissionTestSetup` weiter, und der bestehende Missionsbrief zeigt das aktive Ziel in der Testszene an. Mechanisch nutzt der Slice damit bereits vorhandenes Verhalten: `secure_target` laesst den Objective-Siegpfad aktiv, waehrend `neutralize_enemies` den Einsatz auf den bestehenden Elimination-Pfad reduziert.
+- Offene Punkte: keine groessere Missionsziel-Auswahl, keine Missionsgeneratoren, keine verzweigten Objective-Ketten und keine weitergehende Ergebnisdarstellung im Meta-Layer.
+- Risiken: der Schritt bleibt bewusst nur ein kleiner Meta-/Mission-Glue-Haken; spaetere echte Missionsziel-Systeme sollten diese Auswahl explizit ersetzen statt den kleinen FOB-Button still zu einer grossen Missionsarchitektur auszubauen.
+- Naechster Schritt: spaeter nur bei eigenem Task weitere kleine Missionsparameter wie Spawnart, Zeitdruck oder Objective-Varianten ergaenzen, wenn das fuer V1 wirklich gebraucht wird.

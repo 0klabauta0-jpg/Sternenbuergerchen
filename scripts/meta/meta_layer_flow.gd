@@ -28,6 +28,7 @@ const FRIENDLY_NODE_NAMES_BY_ID: Dictionary = {
 }
 
 var _selected_unit_ids: PackedStringArray = ["unit_alpha", "unit_bravo"]
+var _selected_mission_goal: String = DEFAULT_MISSION_GOAL
 var _active_mission = null
 var _last_mission_result: Dictionary = {}
 
@@ -57,6 +58,7 @@ func _ready() -> void:
 
 	homebase_screen.setup_roster(AVAILABLE_TEAM_UNITS, _selected_unit_ids)
 	fob_screen.set_team(_selected_unit_ids)
+	fob_screen.set_mission_goal(_selected_mission_goal)
 	fob_screen.set_last_mission_result(_last_mission_result)
 	_show_homebase()
 
@@ -79,8 +81,9 @@ func _on_fob_back_requested() -> void:
 	_show_homebase()
 
 
-func _on_fob_mission_start_requested(selected_unit_ids: PackedStringArray) -> void:
+func _on_fob_mission_start_requested(selected_unit_ids: PackedStringArray, mission_goal: String) -> void:
 	_selected_unit_ids = selected_unit_ids.duplicate()
+	_selected_mission_goal = mission_goal
 	_start_mission()
 
 
@@ -119,7 +122,7 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 		mission_setup.set("selected_team_unit_ids", selected_unit_ids)
 		mission_setup.set("mission_name", DEFAULT_MISSION_NAME)
 		mission_setup.set("deployment_source", DEFAULT_DEPLOYMENT_SOURCE)
-		mission_setup.set("mission_goal", DEFAULT_MISSION_GOAL)
+		mission_setup.set("mission_goal", _selected_mission_goal)
 
 	var command_flow_driver = mission_instance.get_node_or_null("CommandFlowDriver")
 	if command_flow_driver != null:
@@ -244,6 +247,7 @@ func _show_fob() -> void:
 	if fob_screen != null:
 		fob_screen.visible = true
 		fob_screen.set_team(_selected_unit_ids)
+		fob_screen.set_mission_goal(_selected_mission_goal)
 		fob_screen.set_last_mission_result(_last_mission_result)
 	if debrief_screen != null:
 		debrief_screen.visible = false
