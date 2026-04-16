@@ -64,7 +64,6 @@ func to_dict() -> Dictionary:
 	if not target_area_id.is_empty():
 		data["target_area_id"] = target_area_id
 
-	# This can later preserve the originating commander order without adding translation logic yet.
 	if not source_command_type.is_empty():
 		data["source_command_type"] = source_command_type
 

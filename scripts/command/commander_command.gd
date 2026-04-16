@@ -34,7 +34,7 @@ static func is_allowed_command_type(value: String) -> bool:
 	return ALLOWED_COMMAND_TYPES.has(value)
 
 
-# This only validates the lightweight data contract, not gameplay semantics.
+# This validates only the lightweight data contract, not gameplay semantics.
 func is_valid() -> bool:
 	if not is_allowed_command_type(command_type):
 		return false
@@ -45,7 +45,7 @@ func is_valid() -> bool:
 	return true
 
 
-# Existing runtime systems still consume loose Dictionaries with the "type" key.
+# Existing runtime systems still consume loose dictionaries with the "type" key.
 func to_dict() -> Dictionary:
 	var data: Dictionary = {
 		"type": command_type,
