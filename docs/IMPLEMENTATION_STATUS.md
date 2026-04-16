@@ -220,3 +220,10 @@
 - Offene Punkte: keine groessere HUD-/Debug-Architektur, keine Politur, keine Animationen und keine komplexe Zeitsteuerung.
 - Risiken: die Lesbarkeitshilfen bleiben bewusst testszenenbezogen; spaetere echte UI- oder Debug-Systeme sollten diesen kleinen Pfad explizit ersetzen statt ihn still zu einer grossen Overlay-Schicht auszubauen.
 - Naechster Schritt: spaeter nur bei eigenem Task weitere gezielte Beobachtbarkeit wie einfache Threat-/Objective-Hinweise ergaenzen, ohne die Szene in eine Debug-Framework-Struktur zu ziehen.
+
+### Command Feedback Marker
+- Status: implementiert
+- Stand: die taktische Missions-Testszene zeigt jetzt einen kleinen festen Befehlsstatus mit `MOVE ORDER`, `HOLD / DEFEND` und `FLANK`; der gelbe Marker ist ueber einen kleinen `MissionTacticalSandboxController` als `ORDER TARGET` lesbar und wechselt je nach aktivem Befehl Text und Farbe. Die Friendly-Flow-Driver lassen sich dadurch direkt und wiederholt per Debug-Tasten `1`, `2` und `3` ausloesen, ohne dass eine groessere UI- oder Commander-Schicht eingefuehrt wurde.
+- Offene Punkte: keine grosse Commander-UI, keine Mausselektion, keine komplexe Marker- oder Overlay-Logik und keine ueber den Testbedarf hinausgehende Eingabearchitektur.
+- Risiken: der Feedback-Pfad bleibt bewusst testszenenbezogen; spaetere echte Commander- oder Taktik-UI sollte diese kleine Debug-Steuerung explizit ersetzen statt sie still auszubauen.
+- Naechster Schritt: spaeter nur bei eigenem Task weitere kleine Bedienhilfen wie Zielwechsel oder Reset ergaenzen, falls der Taktik-Slice das wirklich braucht.

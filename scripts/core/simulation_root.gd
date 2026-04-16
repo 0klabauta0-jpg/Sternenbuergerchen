@@ -202,6 +202,9 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 		push_warning("SimulationRoot move command expects a Node2D-compatible unit.")
 		return
 
+	if not _is_current_move_command(unit, cmd):
+		return
+
 	if unit.has_method("set_target_position"):
 		unit.call("set_target_position", target_position)
 
@@ -218,6 +221,20 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 
 	node_2d.position = current_position + direction.normalized() * step_distance
 	enqueue_command(cmd.duplicate(true))
+
+
+func _is_current_move_command(unit, cmd: Dictionary) -> bool:
+	if unit == null or not unit.has_method("get_current_unit_command"):
+		return true
+
+	var current_command = unit.call("get_current_unit_command")
+	if current_command == null or not current_command.has_method("get"):
+		return true
+
+	if String(current_command.get("command_type")) != "move_to_position":
+		return false
+
+	return current_command.get("target_position") == cmd.get("target_position")
 
 
 func _apply_damage_effect(effect: Dictionary) -> void:
