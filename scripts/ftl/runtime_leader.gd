@@ -5,9 +5,13 @@ signal promoted(new_leader)
 signal demoted(old_leader)
 signal assigned(entity)
 signal command_issued(order)
+signal ftl_task_assigned(task)
+signal ftl_task_processed(task)
 
 var _current_entity: Node = null
 var _is_leader: bool = false
+var _current_ftl_task: RefCounted = null
+var _processed_ftl_task_count: int = 0
 
 
 func promote() -> void:
@@ -31,6 +35,36 @@ func assign(entity: Node) -> void:
 	assigned.emit(entity)
 
 
+func assign_ftl_task(task) -> bool:
+	if not _is_valid_ftl_task(task):
+		push_warning("RuntimeLeader.assign_ftl_task expects a valid FTLTask-like object.")
+		return false
+
+	_current_ftl_task = task
+	ftl_task_assigned.emit(task)
+	return true
+
+
+func process_current_ftl_task() -> void:
+	if _current_ftl_task == null:
+		return
+
+	if not _is_valid_ftl_task(_current_ftl_task):
+		push_warning("RuntimeLeader cannot process an invalid FTLTask-like object.")
+		return
+
+	_processed_ftl_task_count += 1
+	ftl_task_processed.emit(_current_ftl_task)
+
+
+func get_current_ftl_task():
+	return _current_ftl_task
+
+
+func get_processed_ftl_task_count() -> int:
+	return _processed_ftl_task_count
+
+
 # Orders are only forwarded; execution belongs to later systems.
 func command(order: Dictionary) -> void:
 	if typeof(order) != TYPE_DICTIONARY:
@@ -38,3 +72,7 @@ func command(order: Dictionary) -> void:
 		return
 
 	command_issued.emit(order)
+
+
+func _is_valid_ftl_task(task) -> bool:
+	return task != null and task.has_method("is_valid") and bool(task.call("is_valid"))

@@ -30,3 +30,10 @@
 - Offene Punkte: keine Gameplay-Mechanik, keine Missionslogik, keine Registry- oder UpdateManager-Anbindung, keine Zustandsmutation an fremden Nodes.
 - Risiken: Die autoritative Verarbeitungsstruktur steht, die spaetere Befehls- und Effektsemantik muss strikt innerhalb von `SimulationRoot` bleiben.
 - Naechster Schritt: konkrete Command- und Effect-Typen einfuehren, sobald die Folgesysteme definiert sind.
+
+### TASK_016 – erster FTLTask-Durchlauf im RuntimeLeader
+- Status: implementiert
+- Stand: ein leichtgewichtiges `FTLTask`-Modell unter `res://scripts/ftl/ftl_task.gd` wurde als notwendige Basis ergaenzt; `RuntimeLeader` kann jetzt einen einzelnen gueltigen FTLTask ueber `assign_ftl_task(...)` annehmen und ihn ueber `process_current_ftl_task()` minimal als verarbeitet bestaetigen.
+- Offene Punkte: keine FTLTask-Queue, kein Runtime-State-Modell, keine Status-Uebergaenge und keine Ausfuehrungslogik.
+- Risiken: Der erste Durchlauf ist bewusst nur ein einzelner Single-Task-Pfad; spaetere Queue- und Statuslogik muss darauf aufsetzen, ohne Signalvertraege oder Datenvertrag zu brechen.
+- Naechster Schritt: eine kleine FTLTask-Queue im `RuntimeLeader` einfuehren.
