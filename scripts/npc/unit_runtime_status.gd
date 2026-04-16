@@ -17,6 +17,7 @@ var active_command_type: String = ""
 var priority: int = 0
 var unit_id: String = ""
 var team_id: String = ""
+var target_position: Variant = null
 var phase: int = -1
 
 
@@ -35,7 +36,10 @@ static func is_allowed_status(value: String) -> bool:
 
 
 func is_valid() -> bool:
-	return is_allowed_status(status)
+	if not is_allowed_status(status):
+		return false
+
+	return _has_valid_target_position()
 
 
 func to_dict() -> Dictionary:
@@ -46,6 +50,9 @@ func to_dict() -> Dictionary:
 		"unit_id": unit_id,
 		"team_id": team_id,
 	}
+
+	if target_position != null:
+		data["target_position"] = target_position
 
 	if phase >= 0:
 		data["phase"] = phase
@@ -71,7 +78,18 @@ func _apply_dict(data: Dictionary) -> void:
 	if data.has("team_id"):
 		team_id = String(data["team_id"])
 
+	if data.has("target_position"):
+		target_position = data["target_position"]
+
 	if data.has("phase"):
 		var raw_phase: Variant = data["phase"]
 		if typeof(raw_phase) == TYPE_INT or typeof(raw_phase) == TYPE_FLOAT:
 			phase = int(raw_phase)
+
+
+func _has_valid_target_position() -> bool:
+	if target_position == null:
+		return true
+
+	var value_type: int = typeof(target_position)
+	return value_type == TYPE_VECTOR2 or value_type == TYPE_VECTOR3

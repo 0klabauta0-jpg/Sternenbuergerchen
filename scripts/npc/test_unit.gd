@@ -30,6 +30,20 @@ func get_current_unit_command():
 	return _current_unit_command
 
 
+func get_target_position():
+	return _runtime_status.target_position
+
+
+func set_target_position(target_position: Variant) -> bool:
+	return set_runtime_status(
+		String(_runtime_status.status),
+		String(_runtime_status.active_command_type),
+		int(_runtime_status.priority),
+		int(_runtime_status.phase),
+		target_position
+	)
+
+
 func assign_unit_command(command) -> bool:
 	if command == null or not command.has_method("is_valid") or not bool(command.call("is_valid")):
 		push_warning("TestUnit.assign_unit_command expects a valid UnitCommand-like object.")
@@ -38,15 +52,27 @@ func assign_unit_command(command) -> bool:
 	_current_unit_command = command
 
 	var status_name: String = _map_unit_command_to_status(String(command.get("command_type")))
-	if not set_runtime_status(status_name, String(command.get("command_type")), int(command.get("priority")), int(command.get("phase"))):
+	if not set_runtime_status(
+		status_name,
+		String(command.get("command_type")),
+		int(command.get("priority")),
+		int(command.get("phase")),
+		command.get("target_position")
+	):
 		return false
 
 	unit_command_assigned.emit(command)
 	return true
 
 
-func set_runtime_status(status_name: String, active_command_type: String = "", priority: int = 0, phase: int = -1) -> bool:
-	var runtime_status = _build_runtime_status(status_name, active_command_type, priority, phase)
+func set_runtime_status(
+	status_name: String,
+	active_command_type: String = "",
+	priority: int = 0,
+	phase: int = -1,
+	target_position: Variant = null
+) -> bool:
+	var runtime_status = _build_runtime_status(status_name, active_command_type, priority, phase, target_position)
 	if not bool(runtime_status.call("is_valid")):
 		push_warning("TestUnit.set_runtime_status expects a valid UnitRuntimeStatus-compatible value.")
 		return false
@@ -56,13 +82,20 @@ func set_runtime_status(status_name: String, active_command_type: String = "", p
 	return true
 
 
-func _build_runtime_status(status_name: String, active_command_type: String = "", priority: int = 0, phase: int = -1):
+func _build_runtime_status(
+	status_name: String,
+	active_command_type: String = "",
+	priority: int = 0,
+	phase: int = -1,
+	target_position: Variant = null
+):
 	var runtime_status = UNIT_RUNTIME_STATUS_SCRIPT.new()
 	runtime_status.status = status_name
 	runtime_status.active_command_type = active_command_type
 	runtime_status.priority = priority
 	runtime_status.unit_id = unit_id
 	runtime_status.team_id = team_id
+	runtime_status.target_position = target_position
 	runtime_status.phase = phase
 	return runtime_status
 
