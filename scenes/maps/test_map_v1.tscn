@@ -1,7 +1,11 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/maps/map_scene_root.gd" id="1_root"]
 [ext_resource type="Resource" path="res://scenes/maps/test_map_v1_definition.tres" id="2_definition"]
+[ext_resource type="Texture2D" path="res://Assets/kenney_space-kit/Isometric/platform_large_NE.png" id="3_platform"]
+[ext_resource type="Texture2D" path="res://Assets/kenney_space-kit/Isometric/hangar_smallA_NE.png" id="4_hangar"]
+[ext_resource type="Texture2D" path="res://Assets/kenney_space-kit/Isometric/gate_simple_NE.png" id="5_gate"]
+[ext_resource type="Texture2D" path="res://Assets/kenney_space-kit/Isometric/rover_NE.png" id="6_rover"]
 
 [node name="TestMapV1" type="Node2D"]
 script = ExtResource("1_root")
@@ -11,6 +15,33 @@ map_definition = ExtResource("2_definition")
 z_index = -10
 color = Color(0.16, 0.18, 0.2, 1)
 polygon = PackedVector2Array(0, 0, 640, 0, 640, 360, 0, 360)
+
+[node name="FriendlyPad" type="Sprite2D" parent="."]
+position = Vector2(96, 172)
+scale = Vector2(0.42, 0.42)
+texture = ExtResource("3_platform")
+
+[node name="EnemyPad" type="Sprite2D" parent="."]
+position = Vector2(412, 169)
+scale = Vector2(0.42, 0.42)
+modulate = Color(1, 0.82, 0.82, 1)
+texture = ExtResource("3_platform")
+
+[node name="FriendlyHangar" type="Sprite2D" parent="."]
+position = Vector2(58, 86)
+scale = Vector2(0.48, 0.48)
+texture = ExtResource("4_hangar")
+
+[node name="FriendlyRover" type="Sprite2D" parent="."]
+position = Vector2(146, 250)
+scale = Vector2(0.58, 0.58)
+texture = ExtResource("6_rover")
+
+[node name="EnemyGate" type="Sprite2D" parent="."]
+position = Vector2(466, 110)
+scale = Vector2(0.52, 0.52)
+modulate = Color(1, 0.88, 0.88, 1)
+texture = ExtResource("5_gate")
 
 [node name="FriendlySpawnMarker" type="Polygon2D" parent="."]
 position = Vector2(96, 172)

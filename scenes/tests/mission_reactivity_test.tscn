@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://scripts/core/simulation_root.gd" id="1_simulation"]
 [ext_resource type="Script" path="res://scripts/core/event_router.gd" id="2_router"]
@@ -11,6 +11,10 @@
 [ext_resource type="Script" path="res://scripts/tests/mission_command_flow_driver.gd" id="9_flow"]
 [ext_resource type="Script" path="res://scripts/tests/mission_combat_loop_driver.gd" id="10_combat"]
 [ext_resource type="PackedScene" path="res://scenes/maps/test_map_v1.tscn" id="11_map"]
+[ext_resource type="Texture2D" path="res://Assets/kenney_space-kit/Isometric/astronautA_NE.png" id="12_astronaut_a"]
+[ext_resource type="Texture2D" path="res://Assets/kenney_space-kit/Isometric/astronautB_NE.png" id="13_astronaut_b"]
+[ext_resource type="Texture2D" path="res://Assets/kenney_space-kit/Isometric/alien_NE.png" id="14_alien"]
+[ext_resource type="Texture2D" path="res://Assets/kenney_space-kit/Isometric/satelliteDish_NE.png" id="15_dish"]
 
 [node name="MissionReactivityTest" type="Node2D"]
 
@@ -49,6 +53,11 @@ position = Vector2(320, 180)
 color = Color(0.95, 0.85, 0.2, 1)
 polygon = PackedVector2Array(-10, 0, 0, -10, 10, 0, 0, 10)
 
+[node name="TargetDish" type="Sprite2D" parent="TargetMarker"]
+position = Vector2(0, -18)
+scale = Vector2(0.55, 0.55)
+texture = ExtResource("15_dish")
+
 [node name="UnitAlpha" type="Node2D" parent="."]
 script = ExtResource("7_unit")
 position = Vector2(72, 120)
@@ -59,6 +68,10 @@ team_id = "team_alpha"
 [node name="Visual" type="Polygon2D" parent="UnitAlpha"]
 color = Color(0.2, 0.8, 1, 1)
 polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+
+[node name="Sprite" type="Sprite2D" parent="UnitAlpha"]
+scale = Vector2(0.45, 0.45)
+texture = ExtResource("12_astronaut_a")
 
 [node name="UnitBravo" type="Node2D" parent="."]
 script = ExtResource("7_unit")
@@ -71,6 +84,10 @@ team_id = "team_alpha"
 color = Color(0.2, 0.65, 1, 1)
 polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 
+[node name="Sprite" type="Sprite2D" parent="UnitBravo"]
+scale = Vector2(0.45, 0.45)
+texture = ExtResource("13_astronaut_b")
+
 [node name="UnitCharlie" type="Node2D" parent="."]
 script = ExtResource("7_unit")
 position = Vector2(72, 240)
@@ -81,6 +98,11 @@ team_id = "team_alpha"
 [node name="Visual" type="Polygon2D" parent="UnitCharlie"]
 color = Color(0.2, 0.5, 1, 1)
 polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+
+[node name="Sprite" type="Sprite2D" parent="UnitCharlie"]
+scale = Vector2(0.45, 0.45)
+modulate = Color(0.86, 0.92, 1, 1)
+texture = ExtResource("12_astronaut_a")
 
 [node name="EnemyDelta" type="Node2D" parent="."]
 script = ExtResource("7_unit")
@@ -93,6 +115,10 @@ team_id = "team_bravo"
 color = Color(0.95, 0.3, 0.3, 1)
 polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 
+[node name="Sprite" type="Sprite2D" parent="EnemyDelta"]
+scale = Vector2(0.45, 0.45)
+texture = ExtResource("14_alien")
+
 [node name="EnemyEcho" type="Node2D" parent="."]
 script = ExtResource("7_unit")
 position = Vector2(228, 212)
@@ -103,6 +129,11 @@ team_id = "team_bravo"
 [node name="Visual" type="Polygon2D" parent="EnemyEcho"]
 color = Color(0.85, 0.2, 0.2, 1)
 polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
+
+[node name="Sprite" type="Sprite2D" parent="EnemyEcho"]
+scale = Vector2(0.45, 0.45)
+modulate = Color(0.9, 1, 0.9, 1)
+texture = ExtResource("14_alien")
 
 [node name="MissionSetup" type="Node" parent="."]
 script = ExtResource("8_setup")

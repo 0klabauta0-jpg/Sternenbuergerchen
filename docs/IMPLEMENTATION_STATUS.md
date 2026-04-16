@@ -227,3 +227,10 @@
 - Offene Punkte: keine Tile-/Grid-Architektur, kein Map-Editor, keine Gameplay-Logik in der Karte, keine Registry- oder SimulationRoot-Autoritaet in Map/Loader und keine dynamische Kartenbibliothek ueber diesen kleinen Testpfad hinaus.
 - Risiken: das Fundament ist bewusst nur daten- und setupbezogen; spaetere echte Karten- oder Missionssysteme sollten diese kleine Datenquelle explizit erweitern statt Logik still in Karten-Szenen oder Loader-Helfer zu verlagern.
 - Naechster Schritt: spaeter nur bei eigenem Task weitere kleine Kartenfelder wie mehrere Objective-Punkte oder alternative Spawnsets ergaenzen, wenn der Mission-Loop das wirklich braucht.
+
+### Minimal Asset Hookup
+- Status: implementiert
+- Stand: der lokale Ordner `Assets/kenney_space-kit` ist jetzt fuer die bestehende Missions-Testszene minimal eingehaengt. Das Paket enthaelt vor allem isometrische 2D-Sprites (`Isometric`), side-view 2D-Sprites (`Side`) sowie 3D-Modelle in mehreren Formaten (`GLTF`, `DAE`, `OBJ`, `FBX`, `STL`). Fuer den aktuellen Testpfad wird nur ein sehr kleiner isometrischer Ausschnitt genutzt: Karten-Landmarks in `test_map_v1.tscn` (Friendly-/Enemy-Pad, Hangar, Rover, Gate) sowie einfache Unit-/Objective-Sprites in `mission_reactivity_test.tscn` (Astronauten, Alien, Satellite Dish).
+- Offene Punkte: keine Asset-Pipeline ueber diesen kleinen Szenen-Hook hinaus, keine neue Visual-Architektur, keine Animationen, keine automatische Variantenwahl und keine allgemeine Umstellung aller Test- oder Meta-Szenen auf die neuen Assets.
+- Risiken: die Assets bleiben bewusst reine Darstellung und nicht Gameplay-Wahrheit; spaetere echte Visual-/Content-Systeme sollten diese Szenenverdrahtung explizit ersetzen statt immer mehr Logik an Asset-Knoten zu haengen.
+- Naechster Schritt: spaeter nur bei eigenem Task weitere gezielte Visual-Hooks wie bessere Objective-Landmarks oder Fireteam-/Team-Readability ergaenzen, ohne daraus eine neue Rendering- oder UI-Schicht zu machen.
