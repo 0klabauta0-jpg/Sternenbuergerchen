@@ -44,3 +44,10 @@
 - Offene Punkte: kein Runtime-State-Modell, keine Runtime-Status-Uebergaenge und keine Ausfuehrungslogik.
 - Risiken: Die Queue ist bewusst schlicht und arbeitet in stabiler Einfuegereihenfolge; spaetere Priorisierung oder Parallelitaet muss separat und explizit eingefuehrt werden.
 - Naechster Schritt: ein minimales FTL-State-Modell fuer den Laufzeitstatus ergaenzen.
+
+### TASK_018 – minimales FTL-State-Modell
+- Status: implementiert
+- Stand: `FTLRuntimeStatus` unter `res://scripts/ftl/ftl_runtime_status.gd` formalisiert jetzt einen kleinen Laufzeitstatus fuer FTLs mit den erlaubten Werten `idle`, `seeking_cover`, `moving_to_area`, `engaging_in_area`, `holding_position` und `retreating` sowie einem einfachen Dictionary-Roundtrip.
+- Offene Punkte: noch keine RuntimeLeader-Anbindung, keine Status-Uebergaenge aus FTLTasks und keine Ausfuehrungslogik.
+- Risiken: Das Modell ist bewusst klein und statuszentriert; spaetere Erweiterungen sollten keine versteckte Gameplay-Logik in den Datentraeger ziehen.
+- Naechster Schritt: einen minimalen Uebergang von `FTLTask` zu `FTLRuntimeStatus` im `RuntimeLeader` abbilden.
