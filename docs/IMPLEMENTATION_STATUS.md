@@ -318,3 +318,10 @@
 - Offene Punkte: keine feindliche Objective-Einnahme, keine Mehrziel-Architektur, keine grosse Objective-UI und keine tieferen Missionsphasen ueber diesen kleinen Markerzustand hinaus.
 - Risiken: der Schritt bleibt bewusst nur ein kleiner Vertical-Slice-Haken fuer den bestehenden Einsatzkern; spaetere echte Objective-Systeme sollten diesen Proto-Pfad explizit ersetzen statt weitere Sonderlogik auf denselben Combat-Driver zu stapeln.
 - Naechster Schritt: spaeter nur bei eigenem Task den kleinen Objective-Zustand an klare Victory/Fail- und Debrief-Pfade anbinden, wenn das fuer den Mission-Loop gebraucht wird.
+
+### Minimal Mission Fail Condition
+- Status: implementiert
+- Stand: der bestehende `MissionCombatLoopDriver` kann den taktischen Slice jetzt nicht mehr nur ueber `enemy_neutralized` oder `objective_secured` beenden, sondern auch ueber eine kleine Niederlagenbedingung `friendly_force_neutralized`. Dafuer nutzt der Driver denselben vorhandenen LOS-/Damage-Pfad nun auch minimal fuer gegnerisches Gegenfeuer, sobald der Friendly-Trupp tatsaechlich Orders im Einsatz hat. Wenn danach keine Friendly-Unit mehr `fit` ist, wird der Einsatz mit `team_bravo` als Sieger aufgeloest und der bestehende Debrief-/Meta-Rueckfluss kann den Verlustzustand direkt uebernehmen.
+- Offene Punkte: keine tieferen Fail-Grundtypen, keine Objective-Loss-Regel fuer Feindkontrolle, keine ausgebaute Gegner-KI und keine respawn-sensitive Missionsfortsetzung nach Squad-Wipe.
+- Risiken: der Schritt bleibt bewusst klein und slice-orientiert; ein kompletter Friendly-Wipe beendet die Mission aktuell sofort, noch bevor der bereits vorhandene verzoegerte FOB-Respawn den ganzen Trupp wieder in den Einsatz bringen koennte. Eine spaetere echte V1-Respawn-Policy muss diese Vereinfachung explizit ersetzen statt weitere Sonderfaelle darum zu stapeln.
+- Naechster Schritt: spaeter nur bei eigenem Task den bestehenden Debrief-Rueckfluss und die Objective-/Fail-Gruende weiter schaerfen, falls das fuer den Mission-Loop wirklich benoetigt wird.

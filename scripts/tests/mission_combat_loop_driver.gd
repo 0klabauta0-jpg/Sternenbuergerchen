@@ -41,6 +41,7 @@ var _resolution_reason: String = ""
 var _last_contact: Dictionary = {}
 var _current_tick: int = 0
 var _next_attack_tick: int = 1
+var _next_enemy_attack_tick: int = 1
 var _last_event_text: String = "Combat waiting"
 var _objective_progress_ticks: int = 0
 var _objective_state: String = OBJECTIVE_STATE_NEUTRAL
@@ -103,8 +104,10 @@ func _on_tick_processed(tick: int) -> void:
 	if simulation_root == null:
 		return
 
-	_queue_bleedout_for_downed_enemy(simulation_root)
-	_try_enqueue_attacks(simulation_root)
+	_queue_bleedout_for_downed_units(simulation_root, enemy_unit_paths)
+	_queue_bleedout_for_downed_units(simulation_root, friendly_unit_paths)
+	_try_enqueue_friendly_attacks(simulation_root)
+	_try_enqueue_enemy_attacks(simulation_root)
 	_update_objective_control()
 	if _combat_finished:
 		_update_status_label("resolved")
@@ -114,16 +117,16 @@ func _on_tick_processed(tick: int) -> void:
 		_update_status_label("active")
 
 
-func _queue_bleedout_for_downed_enemy(simulation_root: Node) -> void:
-	for enemy in _get_units(enemy_unit_paths):
-		if enemy == null or not enemy.has_method("get_vital_state") or not enemy.has_method("get_unit_id"):
+func _queue_bleedout_for_downed_units(simulation_root: Node, unit_paths: Array[NodePath]) -> void:
+	for unit in _get_units(unit_paths):
+		if unit == null or not unit.has_method("get_vital_state") or not unit.has_method("get_unit_id"):
 			continue
 
-		var unit_id: String = String(enemy.call("get_unit_id"))
+		var unit_id: String = String(unit.call("get_unit_id"))
 		if unit_id.is_empty() or _queued_bleedout_by_unit_id.get(unit_id, false):
 			continue
 
-		if String(enemy.call("get_vital_state")) != "down":
+		if String(unit.call("get_vital_state")) != "down":
 			continue
 
 		simulation_root.call(
@@ -139,8 +142,8 @@ func _queue_bleedout_for_downed_enemy(simulation_root: Node) -> void:
 		return
 
 
-func _try_enqueue_attacks(simulation_root: Node) -> void:
-	var contact_pair: Dictionary = _find_first_contact_pair()
+func _try_enqueue_friendly_attacks(simulation_root: Node) -> void:
+	var contact_pair: Dictionary = _find_first_contact_pair_for_paths(friendly_unit_paths, enemy_unit_paths)
 	if contact_pair.is_empty():
 		_clear_contact_visuals()
 		return
@@ -182,9 +185,54 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 	_next_attack_tick = _current_tick + max(ticks_between_attacks, 1)
 
 
+func _try_enqueue_enemy_attacks(simulation_root: Node) -> void:
+	if not _has_active_friendly_orders():
+		return
+
+	var contact_pair: Dictionary = _find_first_contact_pair_for_paths(enemy_unit_paths, friendly_unit_paths, true)
+	if contact_pair.is_empty():
+		return
+
+	var attacker = contact_pair["attacker"]
+	var target = contact_pair["target"]
+	var attacker_id: String = String(contact_pair["attacker_id"])
+	var target_id: String = String(contact_pair["target_id"])
+	if attacker_id.is_empty() or target_id.is_empty():
+		return
+
+	_last_contact = {
+		"attacker_id": attacker_id,
+		"target_id": target_id,
+	}
+	_set_contact_visuals(attacker, target)
+	_update_status_label("contact")
+	if _current_tick < _next_enemy_attack_tick:
+		return
+
+	contact_established.emit(attacker, target)
+	_set_event_text("%s ENGAGE %s" % [attacker_id, target_id])
+	simulation_root.call(
+		"enqueue_effect",
+		{
+			"effect_type": "damage",
+			"priority": 30,
+			"unit_id": target_id,
+			"attacker_unit_id": attacker_id,
+			"attacker_team_id": String(attacker.call("get_team_id")),
+			"allow_friendly_fire": false,
+			"damage": damage_per_hit,
+			"hit_chance": base_hit_chance,
+			"damage_multiplier": base_damage_multiplier,
+			"roll_override": 0.4,
+		}
+	)
+	_next_enemy_attack_tick = _current_tick + max(ticks_between_attacks, 1)
+
+
 func _update_combat_resolution() -> void:
 	var enemy_units: Array = _get_units(enemy_unit_paths)
-	if enemy_units.is_empty():
+	var friendly_units: Array = _get_units(friendly_unit_paths)
+	if enemy_units.is_empty() or friendly_units.is_empty():
 		return
 
 	var enemy_fit_count: int = 0
@@ -195,13 +243,32 @@ func _update_combat_resolution() -> void:
 		if String(enemy.call("get_vital_state")) == "fit":
 			enemy_fit_count += 1
 
-	if enemy_fit_count > 0:
+	if enemy_fit_count <= 0:
+		_combat_finished = true
+		_winning_team_id = friendly_team_id
+		_resolution_reason = "enemy_neutralized"
+		_set_event_text("ENEMY FORCE NEUTRALIZED")
+		_clear_contact_visuals()
+		_update_status_label("resolved")
+		_update_winner_label()
+		combat_resolved.emit(_winning_team_id, _count_neutralized_units(enemy_unit_paths))
+		return
+
+	var friendly_fit_count: int = 0
+	for friendly in friendly_units:
+		if friendly == null or not friendly.has_method("get_vital_state"):
+			continue
+
+		if String(friendly.call("get_vital_state")) == "fit":
+			friendly_fit_count += 1
+
+	if friendly_fit_count > 0:
 		return
 
 	_combat_finished = true
-	_winning_team_id = friendly_team_id
-	_resolution_reason = "enemy_neutralized"
-	_set_event_text("ENEMY FORCE NEUTRALIZED")
+	_winning_team_id = _get_enemy_team_id()
+	_resolution_reason = "friendly_force_neutralized"
+	_set_event_text("FRIENDLY FORCE NEUTRALIZED")
 	_clear_contact_visuals()
 	_update_status_label("resolved")
 	_update_winner_label()
@@ -310,17 +377,17 @@ func _get_units(paths: Array[NodePath]) -> Array:
 	return units
 
 
-func _pick_target_for_attacker(attacker):
-	for enemy in _get_units(enemy_unit_paths):
-		if not _is_target_attackable(attacker, enemy):
+func _pick_target_for_attacker(attacker, target_paths: Array[NodePath]):
+	for target in _get_units(target_paths):
+		if not _is_target_attackable(attacker, target):
 			continue
 
-		return enemy
+		return target
 
 	return null
 
 
-func _can_unit_attack(unit) -> bool:
+func _can_unit_attack(unit, allow_passive_engage: bool = false) -> bool:
 	if unit == null:
 		return false
 
@@ -335,6 +402,9 @@ func _can_unit_attack(unit) -> bool:
 
 	if not _is_phase_attack_allowed(unit):
 		return false
+
+	if allow_passive_engage:
+		return true
 
 	return _is_engage_ready(unit)
 
@@ -536,23 +606,50 @@ func _describe_enemy_unit(unit) -> String:
 	]
 
 
-func _find_first_contact_pair() -> Dictionary:
-	for friendly in _get_units(friendly_unit_paths):
-		if not _can_unit_attack(friendly):
+func _find_first_contact_pair_for_paths(attacker_paths: Array[NodePath], target_paths: Array[NodePath], allow_passive_engage: bool = false) -> Dictionary:
+	for attacker in _get_units(attacker_paths):
+		if not _can_unit_attack(attacker, allow_passive_engage):
 			continue
 
-		var enemy = _pick_target_for_attacker(friendly)
-		if enemy == null:
+		var target = _pick_target_for_attacker(attacker, target_paths)
+		if target == null:
 			continue
 
 		return {
-			"attacker": friendly,
-			"target": enemy,
-			"attacker_id": String(friendly.call("get_unit_id")),
-			"target_id": String(enemy.call("get_unit_id")),
+			"attacker": attacker,
+			"target": target,
+			"attacker_id": String(attacker.call("get_unit_id")),
+			"target_id": String(target.call("get_unit_id")),
 		}
 
 	return {}
+
+
+func _has_active_friendly_orders() -> bool:
+	for unit in _get_units(friendly_unit_paths):
+		if unit == null or not unit.has_method("get_runtime_status"):
+			continue
+
+		var runtime_status = unit.call("get_runtime_status")
+		if runtime_status == null or not runtime_status.has_method("get"):
+			continue
+
+		if String(runtime_status.get("status")) != "idle":
+			return true
+
+	return false
+
+
+func _get_enemy_team_id() -> String:
+	for enemy in _get_units(enemy_unit_paths):
+		if enemy == null or not enemy.has_method("get_team_id"):
+			continue
+
+		var enemy_team_id: String = String(enemy.call("get_team_id"))
+		if not enemy_team_id.is_empty():
+			return enemy_team_id
+
+	return "team_bravo"
 
 
 func _ensure_readability_nodes() -> void:
@@ -664,6 +761,7 @@ func _on_unit_vital_status_changed(vital_status, unit) -> void:
 			if unit.has_method("show_event_text"):
 				unit.call("show_event_text", "BLEEDOUT", Color(0.92, 0.6, 0.6, 1.0), 1.6)
 		"fit":
+			_queued_bleedout_by_unit_id.erase(unit_id)
 			_queued_respawn_request_by_unit_id.erase(unit_id)
 	_update_status_label("active")
 
@@ -710,8 +808,10 @@ func _update_winner_label() -> void:
 	if _combat_finished and not _winning_team_id.is_empty():
 		if _resolution_reason == "objective_secured":
 			_winner_label.text = "OBJECTIVE SECURED\nWinner: %s" % _winning_team_id
-		else:
+		elif _winning_team_id == friendly_team_id:
 			_winner_label.text = "COMBAT FINISHED\nWinner: %s" % _winning_team_id
+		else:
+			_winner_label.text = "MISSION FAILED\nWinner: %s" % _winning_team_id
 		return
 
 	_winner_label.text = ""
