@@ -220,3 +220,10 @@
 - Offene Punkte: keine groessere HUD-/Debug-Architektur, keine Politur, keine Animationen und keine komplexe Zeitsteuerung.
 - Risiken: die Lesbarkeitshilfen bleiben bewusst testszenenbezogen; spaetere echte UI- oder Debug-Systeme sollten diesen kleinen Pfad explizit ersetzen statt ihn still zu einer grossen Overlay-Schicht auszubauen.
 - Naechster Schritt: spaeter nur bei eigenem Task weitere gezielte Beobachtbarkeit wie einfache Threat-/Objective-Hinweise ergaenzen, ohne die Szene in eine Debug-Framework-Struktur zu ziehen.
+
+### Terrain Asset Manifest
+- Status: implementiert
+- Stand: aus dem lokal vorhandenen Kenney-Space-Kit wurden die isometrischen Terrain-/Map-Bausteine mit den Praefixen `corridor`, `platform`, `stairs`, `structure`, `supports` und `terrain` nach `res://Assets/kenney_space/terrain/isometric/` kopiert. Die Originaldateien bleiben dabei unveraendert; die Orientierung wird ausschliesslich ueber das erhaltene Dateinamensuffix (`N`, `NE`, `NW`, `S`, `SE`, `SW`, `E`, `W`) und `res://Assets/kenney_space/terrain/manifest/terrain_manifest.json` abgebildet.
+- Offene Punkte: keine Nutzung im MapLoader, keine Tile-/Grid-Logik, keine Props-/Unit-Importe und keine Editor-Werkzeuge fuer die neuen Terrain-Dateien.
+- Risiken: das Manifest ist bewusst nur Asset-Vorbereitung; spaetere Loader- oder Editor-Schritte sollten darauf explizit aufbauen statt Orientierung still aus Bildern oder Rotationen abzuleiten.
+- Naechster Schritt: spaeter bei Bedarf Manifest-Daten gezielt im Map- oder Editor-Kontext konsumieren, ohne daraus schon jetzt eine neue Asset- oder Map-Architektur abzuleiten.

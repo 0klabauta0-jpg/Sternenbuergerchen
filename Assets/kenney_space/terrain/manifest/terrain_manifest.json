@@ -1,0 +1,1602 @@
+﻿{
+    "imported_count":  199,
+    "source_root":  "res://Assets/kenney_space/terrain/isometric",
+    "notes":  [
+                  "Original PNGs were copied without rotation or mirroring.",
+                  "Orientation is preserved from the filename suffix."
+              ],
+    "assets":  [
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_corner_NE.png",
+                       "file_name":  "corridor_corner_NE.png",
+                       "base_name":  "corridor_corner",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_corner_NW.png",
+                       "file_name":  "corridor_corner_NW.png",
+                       "base_name":  "corridor_corner",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_corner_SE.png",
+                       "file_name":  "corridor_corner_SE.png",
+                       "base_name":  "corridor_corner",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_corner_SW.png",
+                       "file_name":  "corridor_corner_SW.png",
+                       "base_name":  "corridor_corner",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_cornerRound_NE.png",
+                       "file_name":  "corridor_cornerRound_NE.png",
+                       "base_name":  "corridor_cornerRound",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_cornerRound_NW.png",
+                       "file_name":  "corridor_cornerRound_NW.png",
+                       "base_name":  "corridor_cornerRound",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_cornerRound_SE.png",
+                       "file_name":  "corridor_cornerRound_SE.png",
+                       "base_name":  "corridor_cornerRound",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_cornerRound_SW.png",
+                       "file_name":  "corridor_cornerRound_SW.png",
+                       "base_name":  "corridor_cornerRound",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_cornerRoundWindow_NE.png",
+                       "file_name":  "corridor_cornerRoundWindow_NE.png",
+                       "base_name":  "corridor_cornerRoundWindow",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_cornerRoundWindow_NW.png",
+                       "file_name":  "corridor_cornerRoundWindow_NW.png",
+                       "base_name":  "corridor_cornerRoundWindow",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_cornerRoundWindow_SE.png",
+                       "file_name":  "corridor_cornerRoundWindow_SE.png",
+                       "base_name":  "corridor_cornerRoundWindow",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_cornerRoundWindow_SW.png",
+                       "file_name":  "corridor_cornerRoundWindow_SW.png",
+                       "base_name":  "corridor_cornerRoundWindow",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_cross_NE.png",
+                       "file_name":  "corridor_cross_NE.png",
+                       "base_name":  "corridor_cross",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_cross_NW.png",
+                       "file_name":  "corridor_cross_NW.png",
+                       "base_name":  "corridor_cross",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_cross_SE.png",
+                       "file_name":  "corridor_cross_SE.png",
+                       "base_name":  "corridor_cross",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_cross_SW.png",
+                       "file_name":  "corridor_cross_SW.png",
+                       "base_name":  "corridor_cross",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_detailed_NE.png",
+                       "file_name":  "corridor_detailed_NE.png",
+                       "base_name":  "corridor_detailed",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_detailed_NW.png",
+                       "file_name":  "corridor_detailed_NW.png",
+                       "base_name":  "corridor_detailed",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_detailed_SE.png",
+                       "file_name":  "corridor_detailed_SE.png",
+                       "base_name":  "corridor_detailed",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_detailed_SW.png",
+                       "file_name":  "corridor_detailed_SW.png",
+                       "base_name":  "corridor_detailed",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_end_NE.png",
+                       "file_name":  "corridor_end_NE.png",
+                       "base_name":  "corridor_end",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_end_NW.png",
+                       "file_name":  "corridor_end_NW.png",
+                       "base_name":  "corridor_end",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_end_SE.png",
+                       "file_name":  "corridor_end_SE.png",
+                       "base_name":  "corridor_end",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_end_SW.png",
+                       "file_name":  "corridor_end_SW.png",
+                       "base_name":  "corridor_end",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_NE.png",
+                       "file_name":  "corridor_NE.png",
+                       "base_name":  "corridor",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_NW.png",
+                       "file_name":  "corridor_NW.png",
+                       "base_name":  "corridor",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_open_NE.png",
+                       "file_name":  "corridor_open_NE.png",
+                       "base_name":  "corridor_open",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_open_NW.png",
+                       "file_name":  "corridor_open_NW.png",
+                       "base_name":  "corridor_open",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_open_SE.png",
+                       "file_name":  "corridor_open_SE.png",
+                       "base_name":  "corridor_open",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_open_SW.png",
+                       "file_name":  "corridor_open_SW.png",
+                       "base_name":  "corridor_open",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_roof_NE.png",
+                       "file_name":  "corridor_roof_NE.png",
+                       "base_name":  "corridor_roof",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "roof"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_roof_NW.png",
+                       "file_name":  "corridor_roof_NW.png",
+                       "base_name":  "corridor_roof",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "roof"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_roof_SE.png",
+                       "file_name":  "corridor_roof_SE.png",
+                       "base_name":  "corridor_roof",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "roof"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_roof_SW.png",
+                       "file_name":  "corridor_roof_SW.png",
+                       "base_name":  "corridor_roof",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "roof"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_SE.png",
+                       "file_name":  "corridor_SE.png",
+                       "base_name":  "corridor",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_split_NE.png",
+                       "file_name":  "corridor_split_NE.png",
+                       "base_name":  "corridor_split",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_split_NW.png",
+                       "file_name":  "corridor_split_NW.png",
+                       "base_name":  "corridor_split",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_split_SE.png",
+                       "file_name":  "corridor_split_SE.png",
+                       "base_name":  "corridor_split",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_split_SW.png",
+                       "file_name":  "corridor_split_SW.png",
+                       "base_name":  "corridor_split",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_SW.png",
+                       "file_name":  "corridor_SW.png",
+                       "base_name":  "corridor",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_wall_NE.png",
+                       "file_name":  "corridor_wall_NE.png",
+                       "base_name":  "corridor_wall",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "wall"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_wall_NW.png",
+                       "file_name":  "corridor_wall_NW.png",
+                       "base_name":  "corridor_wall",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "wall"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_wall_SE.png",
+                       "file_name":  "corridor_wall_SE.png",
+                       "base_name":  "corridor_wall",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "wall"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_wall_SW.png",
+                       "file_name":  "corridor_wall_SW.png",
+                       "base_name":  "corridor_wall",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "wall"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_wallCorner_NE.png",
+                       "file_name":  "corridor_wallCorner_NE.png",
+                       "base_name":  "corridor_wallCorner",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "wall"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_wallCorner_NW.png",
+                       "file_name":  "corridor_wallCorner_NW.png",
+                       "base_name":  "corridor_wallCorner",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "wall"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_wallCorner_SE.png",
+                       "file_name":  "corridor_wallCorner_SE.png",
+                       "base_name":  "corridor_wallCorner",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "wall"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_wallCorner_SW.png",
+                       "file_name":  "corridor_wallCorner_SW.png",
+                       "base_name":  "corridor_wallCorner",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "wall"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_window_NE.png",
+                       "file_name":  "corridor_window_NE.png",
+                       "base_name":  "corridor_window",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_window_NW.png",
+                       "file_name":  "corridor_window_NW.png",
+                       "base_name":  "corridor_window",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_window_SE.png",
+                       "file_name":  "corridor_window_SE.png",
+                       "base_name":  "corridor_window",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_window_SW.png",
+                       "file_name":  "corridor_window_SW.png",
+                       "base_name":  "corridor_window",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_windowClosed_NE.png",
+                       "file_name":  "corridor_windowClosed_NE.png",
+                       "base_name":  "corridor_windowClosed",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_windowClosed_NW.png",
+                       "file_name":  "corridor_windowClosed_NW.png",
+                       "base_name":  "corridor_windowClosed",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_windowClosed_SE.png",
+                       "file_name":  "corridor_windowClosed_SE.png",
+                       "base_name":  "corridor_windowClosed",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/corridor_windowClosed_SW.png",
+                       "file_name":  "corridor_windowClosed_SW.png",
+                       "base_name":  "corridor_windowClosed",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "corridor"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_center_NE.png",
+                       "file_name":  "platform_center_NE.png",
+                       "base_name":  "platform_center",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_center_NW.png",
+                       "file_name":  "platform_center_NW.png",
+                       "base_name":  "platform_center",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_center_SE.png",
+                       "file_name":  "platform_center_SE.png",
+                       "base_name":  "platform_center",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_center_SW.png",
+                       "file_name":  "platform_center_SW.png",
+                       "base_name":  "platform_center",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_corner_NE.png",
+                       "file_name":  "platform_corner_NE.png",
+                       "base_name":  "platform_corner",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_corner_NW.png",
+                       "file_name":  "platform_corner_NW.png",
+                       "base_name":  "platform_corner",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_corner_SE.png",
+                       "file_name":  "platform_corner_SE.png",
+                       "base_name":  "platform_corner",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_corner_SW.png",
+                       "file_name":  "platform_corner_SW.png",
+                       "base_name":  "platform_corner",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_cornerOpen_NE.png",
+                       "file_name":  "platform_cornerOpen_NE.png",
+                       "base_name":  "platform_cornerOpen",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_cornerOpen_NW.png",
+                       "file_name":  "platform_cornerOpen_NW.png",
+                       "base_name":  "platform_cornerOpen",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_cornerOpen_SE.png",
+                       "file_name":  "platform_cornerOpen_SE.png",
+                       "base_name":  "platform_cornerOpen",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_cornerOpen_SW.png",
+                       "file_name":  "platform_cornerOpen_SW.png",
+                       "base_name":  "platform_cornerOpen",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_cornerRound_NE.png",
+                       "file_name":  "platform_cornerRound_NE.png",
+                       "base_name":  "platform_cornerRound",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_cornerRound_NW.png",
+                       "file_name":  "platform_cornerRound_NW.png",
+                       "base_name":  "platform_cornerRound",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_cornerRound_SE.png",
+                       "file_name":  "platform_cornerRound_SE.png",
+                       "base_name":  "platform_cornerRound",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_cornerRound_SW.png",
+                       "file_name":  "platform_cornerRound_SW.png",
+                       "base_name":  "platform_cornerRound",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_end_NE.png",
+                       "file_name":  "platform_end_NE.png",
+                       "base_name":  "platform_end",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_end_NW.png",
+                       "file_name":  "platform_end_NW.png",
+                       "base_name":  "platform_end",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_end_SE.png",
+                       "file_name":  "platform_end_SE.png",
+                       "base_name":  "platform_end",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_end_SW.png",
+                       "file_name":  "platform_end_SW.png",
+                       "base_name":  "platform_end",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_high_NE.png",
+                       "file_name":  "platform_high_NE.png",
+                       "base_name":  "platform_high",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_high_NW.png",
+                       "file_name":  "platform_high_NW.png",
+                       "base_name":  "platform_high",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_high_SE.png",
+                       "file_name":  "platform_high_SE.png",
+                       "base_name":  "platform_high",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_high_SW.png",
+                       "file_name":  "platform_high_SW.png",
+                       "base_name":  "platform_high",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_large_NW.png",
+                       "file_name":  "platform_large_NW.png",
+                       "base_name":  "platform_large",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_large_SE.png",
+                       "file_name":  "platform_large_SE.png",
+                       "base_name":  "platform_large",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_large_SW.png",
+                       "file_name":  "platform_large_SW.png",
+                       "base_name":  "platform_large",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_long_NE.png",
+                       "file_name":  "platform_long_NE.png",
+                       "base_name":  "platform_long",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_long_NW.png",
+                       "file_name":  "platform_long_NW.png",
+                       "base_name":  "platform_long",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_long_SE.png",
+                       "file_name":  "platform_long_SE.png",
+                       "base_name":  "platform_long",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_long_SW.png",
+                       "file_name":  "platform_long_SW.png",
+                       "base_name":  "platform_long",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_low_NE.png",
+                       "file_name":  "platform_low_NE.png",
+                       "base_name":  "platform_low",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_low_NW.png",
+                       "file_name":  "platform_low_NW.png",
+                       "base_name":  "platform_low",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_low_SE.png",
+                       "file_name":  "platform_low_SE.png",
+                       "base_name":  "platform_low",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_low_SW.png",
+                       "file_name":  "platform_low_SW.png",
+                       "base_name":  "platform_low",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_side_NE.png",
+                       "file_name":  "platform_side_NE.png",
+                       "base_name":  "platform_side",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_side_NW.png",
+                       "file_name":  "platform_side_NW.png",
+                       "base_name":  "platform_side",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_side_SE.png",
+                       "file_name":  "platform_side_SE.png",
+                       "base_name":  "platform_side",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_side_SW.png",
+                       "file_name":  "platform_side_SW.png",
+                       "base_name":  "platform_side",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_small_NE.png",
+                       "file_name":  "platform_small_NE.png",
+                       "base_name":  "platform_small",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_small_NW.png",
+                       "file_name":  "platform_small_NW.png",
+                       "base_name":  "platform_small",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_small_SE.png",
+                       "file_name":  "platform_small_SE.png",
+                       "base_name":  "platform_small",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_small_SW.png",
+                       "file_name":  "platform_small_SW.png",
+                       "base_name":  "platform_small",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_smallDiagonal_NE.png",
+                       "file_name":  "platform_smallDiagonal_NE.png",
+                       "base_name":  "platform_smallDiagonal",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_smallDiagonal_NW.png",
+                       "file_name":  "platform_smallDiagonal_NW.png",
+                       "base_name":  "platform_smallDiagonal",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_smallDiagonal_SE.png",
+                       "file_name":  "platform_smallDiagonal_SE.png",
+                       "base_name":  "platform_smallDiagonal",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_smallDiagonal_SW.png",
+                       "file_name":  "platform_smallDiagonal_SW.png",
+                       "base_name":  "platform_smallDiagonal",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_straight_NE.png",
+                       "file_name":  "platform_straight_NE.png",
+                       "base_name":  "platform_straight",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_straight_NW.png",
+                       "file_name":  "platform_straight_NW.png",
+                       "base_name":  "platform_straight",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_straight_SE.png",
+                       "file_name":  "platform_straight_SE.png",
+                       "base_name":  "platform_straight",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/platform_straight_SW.png",
+                       "file_name":  "platform_straight_SW.png",
+                       "base_name":  "platform_straight",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "platform"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/stairs_corner_NE.png",
+                       "file_name":  "stairs_corner_NE.png",
+                       "base_name":  "stairs_corner",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/stairs_corner_NW.png",
+                       "file_name":  "stairs_corner_NW.png",
+                       "base_name":  "stairs_corner",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/stairs_corner_SE.png",
+                       "file_name":  "stairs_corner_SE.png",
+                       "base_name":  "stairs_corner",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/stairs_corner_SW.png",
+                       "file_name":  "stairs_corner_SW.png",
+                       "base_name":  "stairs_corner",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/stairs_NE.png",
+                       "file_name":  "stairs_NE.png",
+                       "base_name":  "stairs",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "stairs"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/stairs_NW.png",
+                       "file_name":  "stairs_NW.png",
+                       "base_name":  "stairs",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "stairs"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/stairs_SE.png",
+                       "file_name":  "stairs_SE.png",
+                       "base_name":  "stairs",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "stairs"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/stairs_short_NE.png",
+                       "file_name":  "stairs_short_NE.png",
+                       "base_name":  "stairs_short",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "stairs"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/stairs_short_NW.png",
+                       "file_name":  "stairs_short_NW.png",
+                       "base_name":  "stairs_short",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "stairs"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/stairs_short_SE.png",
+                       "file_name":  "stairs_short_SE.png",
+                       "base_name":  "stairs_short",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "stairs"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/stairs_short_SW.png",
+                       "file_name":  "stairs_short_SW.png",
+                       "base_name":  "stairs_short",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "stairs"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/stairs_SW.png",
+                       "file_name":  "stairs_SW.png",
+                       "base_name":  "stairs",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "stairs"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/structure_closed_NE.png",
+                       "file_name":  "structure_closed_NE.png",
+                       "base_name":  "structure_closed",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "structure"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/structure_closed_NW.png",
+                       "file_name":  "structure_closed_NW.png",
+                       "base_name":  "structure_closed",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "structure"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/structure_closed_SE.png",
+                       "file_name":  "structure_closed_SE.png",
+                       "base_name":  "structure_closed",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "structure"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/structure_closed_SW.png",
+                       "file_name":  "structure_closed_SW.png",
+                       "base_name":  "structure_closed",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "structure"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/structure_detailed_NE.png",
+                       "file_name":  "structure_detailed_NE.png",
+                       "base_name":  "structure_detailed",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "structure"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/structure_detailed_NW.png",
+                       "file_name":  "structure_detailed_NW.png",
+                       "base_name":  "structure_detailed",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "structure"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/structure_detailed_SE.png",
+                       "file_name":  "structure_detailed_SE.png",
+                       "base_name":  "structure_detailed",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "structure"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/structure_detailed_SW.png",
+                       "file_name":  "structure_detailed_SW.png",
+                       "base_name":  "structure_detailed",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "structure"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/structure_diagonal_NE.png",
+                       "file_name":  "structure_diagonal_NE.png",
+                       "base_name":  "structure_diagonal",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "structure"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/structure_diagonal_NW.png",
+                       "file_name":  "structure_diagonal_NW.png",
+                       "base_name":  "structure_diagonal",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "structure"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/structure_diagonal_SE.png",
+                       "file_name":  "structure_diagonal_SE.png",
+                       "base_name":  "structure_diagonal",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "structure"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/structure_diagonal_SW.png",
+                       "file_name":  "structure_diagonal_SW.png",
+                       "base_name":  "structure_diagonal",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "structure"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/structure_NE.png",
+                       "file_name":  "structure_NE.png",
+                       "base_name":  "structure",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "structure"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/structure_NW.png",
+                       "file_name":  "structure_NW.png",
+                       "base_name":  "structure",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "structure"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/structure_SE.png",
+                       "file_name":  "structure_SE.png",
+                       "base_name":  "structure",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "structure"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/structure_SW.png",
+                       "file_name":  "structure_SW.png",
+                       "base_name":  "structure",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "structure"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/supports_high_NE.png",
+                       "file_name":  "supports_high_NE.png",
+                       "base_name":  "supports_high",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "support"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/supports_high_NW.png",
+                       "file_name":  "supports_high_NW.png",
+                       "base_name":  "supports_high",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "support"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/supports_high_SE.png",
+                       "file_name":  "supports_high_SE.png",
+                       "base_name":  "supports_high",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "support"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/supports_high_SW.png",
+                       "file_name":  "supports_high_SW.png",
+                       "base_name":  "supports_high",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "support"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/supports_low_NE.png",
+                       "file_name":  "supports_low_NE.png",
+                       "base_name":  "supports_low",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "support"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/supports_low_NW.png",
+                       "file_name":  "supports_low_NW.png",
+                       "base_name":  "supports_low",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "support"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/supports_low_SE.png",
+                       "file_name":  "supports_low_SE.png",
+                       "base_name":  "supports_low",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "support"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/supports_low_SW.png",
+                       "file_name":  "supports_low_SW.png",
+                       "base_name":  "supports_low",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "support"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_NE.png",
+                       "file_name":  "terrain_NE.png",
+                       "base_name":  "terrain",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_NW.png",
+                       "file_name":  "terrain_NW.png",
+                       "base_name":  "terrain",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_ramp_NE.png",
+                       "file_name":  "terrain_ramp_NE.png",
+                       "base_name":  "terrain_ramp",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_ramp_NW.png",
+                       "file_name":  "terrain_ramp_NW.png",
+                       "base_name":  "terrain_ramp",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_ramp_SE.png",
+                       "file_name":  "terrain_ramp_SE.png",
+                       "base_name":  "terrain_ramp",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_ramp_SW.png",
+                       "file_name":  "terrain_ramp_SW.png",
+                       "base_name":  "terrain_ramp",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_rampLarge_detailed_NE.png",
+                       "file_name":  "terrain_rampLarge_detailed_NE.png",
+                       "base_name":  "terrain_rampLarge_detailed",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_rampLarge_detailed_NW.png",
+                       "file_name":  "terrain_rampLarge_detailed_NW.png",
+                       "base_name":  "terrain_rampLarge_detailed",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_rampLarge_detailed_SE.png",
+                       "file_name":  "terrain_rampLarge_detailed_SE.png",
+                       "base_name":  "terrain_rampLarge_detailed",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_rampLarge_detailed_SW.png",
+                       "file_name":  "terrain_rampLarge_detailed_SW.png",
+                       "base_name":  "terrain_rampLarge_detailed",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_rampLarge_NE.png",
+                       "file_name":  "terrain_rampLarge_NE.png",
+                       "base_name":  "terrain_rampLarge",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_rampLarge_NW.png",
+                       "file_name":  "terrain_rampLarge_NW.png",
+                       "base_name":  "terrain_rampLarge",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_rampLarge_SE.png",
+                       "file_name":  "terrain_rampLarge_SE.png",
+                       "base_name":  "terrain_rampLarge",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_rampLarge_SW.png",
+                       "file_name":  "terrain_rampLarge_SW.png",
+                       "base_name":  "terrain_rampLarge",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_roadCorner_NE.png",
+                       "file_name":  "terrain_roadCorner_NE.png",
+                       "base_name":  "terrain_roadCorner",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_roadCorner_NW.png",
+                       "file_name":  "terrain_roadCorner_NW.png",
+                       "base_name":  "terrain_roadCorner",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_roadCorner_SE.png",
+                       "file_name":  "terrain_roadCorner_SE.png",
+                       "base_name":  "terrain_roadCorner",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_roadCorner_SW.png",
+                       "file_name":  "terrain_roadCorner_SW.png",
+                       "base_name":  "terrain_roadCorner",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_roadCross_NE.png",
+                       "file_name":  "terrain_roadCross_NE.png",
+                       "base_name":  "terrain_roadCross",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_roadCross_NW.png",
+                       "file_name":  "terrain_roadCross_NW.png",
+                       "base_name":  "terrain_roadCross",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_roadCross_SE.png",
+                       "file_name":  "terrain_roadCross_SE.png",
+                       "base_name":  "terrain_roadCross",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_roadCross_SW.png",
+                       "file_name":  "terrain_roadCross_SW.png",
+                       "base_name":  "terrain_roadCross",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_roadEnd_NE.png",
+                       "file_name":  "terrain_roadEnd_NE.png",
+                       "base_name":  "terrain_roadEnd",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_roadEnd_NW.png",
+                       "file_name":  "terrain_roadEnd_NW.png",
+                       "base_name":  "terrain_roadEnd",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_roadEnd_SE.png",
+                       "file_name":  "terrain_roadEnd_SE.png",
+                       "base_name":  "terrain_roadEnd",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_roadEnd_SW.png",
+                       "file_name":  "terrain_roadEnd_SW.png",
+                       "base_name":  "terrain_roadEnd",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_roadSplit_NE.png",
+                       "file_name":  "terrain_roadSplit_NE.png",
+                       "base_name":  "terrain_roadSplit",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_roadSplit_NW.png",
+                       "file_name":  "terrain_roadSplit_NW.png",
+                       "base_name":  "terrain_roadSplit",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_roadSplit_SE.png",
+                       "file_name":  "terrain_roadSplit_SE.png",
+                       "base_name":  "terrain_roadSplit",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_roadSplit_SW.png",
+                       "file_name":  "terrain_roadSplit_SW.png",
+                       "base_name":  "terrain_roadSplit",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_roadStraight_NE.png",
+                       "file_name":  "terrain_roadStraight_NE.png",
+                       "base_name":  "terrain_roadStraight",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_roadStraight_NW.png",
+                       "file_name":  "terrain_roadStraight_NW.png",
+                       "base_name":  "terrain_roadStraight",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_roadStraight_SE.png",
+                       "file_name":  "terrain_roadStraight_SE.png",
+                       "base_name":  "terrain_roadStraight",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_roadStraight_SW.png",
+                       "file_name":  "terrain_roadStraight_SW.png",
+                       "base_name":  "terrain_roadStraight",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_SE.png",
+                       "file_name":  "terrain_SE.png",
+                       "base_name":  "terrain",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_side_NE.png",
+                       "file_name":  "terrain_side_NE.png",
+                       "base_name":  "terrain_side",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_side_NW.png",
+                       "file_name":  "terrain_side_NW.png",
+                       "base_name":  "terrain_side",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_side_SE.png",
+                       "file_name":  "terrain_side_SE.png",
+                       "base_name":  "terrain_side",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_side_SW.png",
+                       "file_name":  "terrain_side_SW.png",
+                       "base_name":  "terrain_side",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_sideCliff_NE.png",
+                       "file_name":  "terrain_sideCliff_NE.png",
+                       "base_name":  "terrain_sideCliff",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_sideCliff_NW.png",
+                       "file_name":  "terrain_sideCliff_NW.png",
+                       "base_name":  "terrain_sideCliff",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_sideCliff_SE.png",
+                       "file_name":  "terrain_sideCliff_SE.png",
+                       "base_name":  "terrain_sideCliff",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_sideCliff_SW.png",
+                       "file_name":  "terrain_sideCliff_SW.png",
+                       "base_name":  "terrain_sideCliff",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_sideCorner_NE.png",
+                       "file_name":  "terrain_sideCorner_NE.png",
+                       "base_name":  "terrain_sideCorner",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_sideCorner_NW.png",
+                       "file_name":  "terrain_sideCorner_NW.png",
+                       "base_name":  "terrain_sideCorner",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_sideCorner_SE.png",
+                       "file_name":  "terrain_sideCorner_SE.png",
+                       "base_name":  "terrain_sideCorner",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_sideCorner_SW.png",
+                       "file_name":  "terrain_sideCorner_SW.png",
+                       "base_name":  "terrain_sideCorner",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_sideCornerInner_NE.png",
+                       "file_name":  "terrain_sideCornerInner_NE.png",
+                       "base_name":  "terrain_sideCornerInner",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_sideCornerInner_NW.png",
+                       "file_name":  "terrain_sideCornerInner_NW.png",
+                       "base_name":  "terrain_sideCornerInner",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_sideCornerInner_SE.png",
+                       "file_name":  "terrain_sideCornerInner_SE.png",
+                       "base_name":  "terrain_sideCornerInner",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_sideCornerInner_SW.png",
+                       "file_name":  "terrain_sideCornerInner_SW.png",
+                       "base_name":  "terrain_sideCornerInner",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "corner"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_sideEnd_NE.png",
+                       "file_name":  "terrain_sideEnd_NE.png",
+                       "base_name":  "terrain_sideEnd",
+                       "orientation":  "NE",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_sideEnd_NW.png",
+                       "file_name":  "terrain_sideEnd_NW.png",
+                       "base_name":  "terrain_sideEnd",
+                       "orientation":  "NW",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_sideEnd_SE.png",
+                       "file_name":  "terrain_sideEnd_SE.png",
+                       "base_name":  "terrain_sideEnd",
+                       "orientation":  "SE",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_sideEnd_SW.png",
+                       "file_name":  "terrain_sideEnd_SW.png",
+                       "base_name":  "terrain_sideEnd",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   },
+                   {
+                       "source_path":  "res://Assets/kenney_space/terrain/isometric/terrain_SW.png",
+                       "file_name":  "terrain_SW.png",
+                       "base_name":  "terrain",
+                       "orientation":  "SW",
+                       "category":  "terrain",
+                       "subcategory":  "terrain"
+                   }
+               ]
+}
