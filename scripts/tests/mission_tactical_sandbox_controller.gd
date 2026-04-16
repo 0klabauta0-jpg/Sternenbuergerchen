@@ -5,6 +5,9 @@ const MOVE_COLOR: Color = Color(0.95, 0.85, 0.2, 1.0)
 const DEFEND_COLOR: Color = Color(0.4, 0.9, 1.0, 1.0)
 const FLANK_COLOR: Color = Color(1.0, 0.65, 0.3, 1.0)
 const TAKE_COLOR: Color = Color(1.0, 0.42, 0.42, 1.0)
+const PHASE_APPROACH: int = 0
+const PHASE_ASSAULT: int = 1
+const PHASE_HOLD: int = 2
 const FIRETEAM_ALL: String = "all"
 const FIRETEAM_BLUE: String = "blue"
 const FIRETEAM_GOLD: String = "gold"
@@ -12,6 +15,11 @@ const FIRETEAM_ORDER: PackedStringArray = [
 	FIRETEAM_ALL,
 	FIRETEAM_BLUE,
 	FIRETEAM_GOLD,
+]
+const PHASE_ORDER: PackedInt32Array = [
+	PHASE_APPROACH,
+	PHASE_ASSAULT,
+	PHASE_HOLD,
 ]
 
 @export var order_team_label: String = "ALPHA TEAM"
@@ -24,6 +32,7 @@ const FIRETEAM_ORDER: PackedStringArray = [
 
 var _last_command_type: String = ""
 var _active_fireteam_id: String = FIRETEAM_ALL
+var _active_order_phase: int = PHASE_APPROACH
 
 
 func _ready() -> void:
@@ -57,6 +66,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			cycle_active_fireteam(-1)
 		KEY_E:
 			cycle_active_fireteam(1)
+		KEY_R:
+			cycle_order_phase(1)
+		KEY_F:
+			cycle_order_phase(-1)
 
 
 func issue_move() -> int:
@@ -87,6 +100,18 @@ func get_active_fireteam() -> String:
 	return _active_fireteam_id
 
 
+func set_active_order_phase(order_phase: int) -> void:
+	if not PHASE_ORDER.has(order_phase):
+		return
+
+	_active_order_phase = order_phase
+	_refresh_feedback()
+
+
+func get_active_order_phase() -> int:
+	return _active_order_phase
+
+
 func cycle_active_fireteam(step: int) -> void:
 	var current_index: int = FIRETEAM_ORDER.find(_active_fireteam_id)
 	if current_index < 0:
@@ -94,6 +119,15 @@ func cycle_active_fireteam(step: int) -> void:
 
 	var next_index: int = posmod(current_index + step, FIRETEAM_ORDER.size())
 	set_active_fireteam(FIRETEAM_ORDER[next_index])
+
+
+func cycle_order_phase(step: int) -> void:
+	var current_index: int = PHASE_ORDER.find(_active_order_phase)
+	if current_index < 0:
+		current_index = 0
+
+	var next_index: int = posmod(current_index + step, PHASE_ORDER.size())
+	set_active_order_phase(PHASE_ORDER[next_index])
 
 
 func _issue_team_command(command_type: String) -> int:
@@ -107,7 +141,7 @@ func _issue_team_command(command_type: String) -> int:
 		if not _matches_active_fireteam(flow_driver):
 			continue
 
-		if bool(flow_driver.call("issue_command", command_type, target_position)):
+		if bool(flow_driver.call("issue_command", command_type, target_position, _active_order_phase)):
 			issue_count += 1
 
 	if issue_count > 0:
@@ -142,12 +176,14 @@ func _refresh_command_feedback_label() -> void:
 	var lines: PackedStringArray = []
 	lines.append("%s ORDER" % order_team_label)
 	lines.append("ACTIVE FT: %s" % _get_fireteam_feedback_text())
+	lines.append("ORDER PHASE: %s" % _get_phase_feedback_text())
 	if _last_command_type.is_empty():
 		lines.append("AWAITING INPUT")
 	else:
 		lines.append(_get_command_feedback_text(_last_command_type))
 
-	lines.append("Q/E FT   1 MOVE   2 DEFEND   3 FLANK   4 TAKE")
+	lines.append("Q/E FT   R/F PHASE")
+	lines.append("1 MOVE   2 DEFEND   3 FLANK   4 TAKE")
 	command_feedback_label.text = "\n".join(lines)
 	command_feedback_label.modulate = _get_command_color(_last_command_type)
 
@@ -204,6 +240,16 @@ func _get_fireteam_feedback_text() -> String:
 			return "GOLD"
 		_:
 			return "ALL"
+
+
+func _get_phase_feedback_text() -> String:
+	match _active_order_phase:
+		PHASE_ASSAULT:
+			return "ASSAULT"
+		PHASE_HOLD:
+			return "HOLD"
+		_:
+			return "APPROACH"
 
 
 func _get_target_label_text(command_type: String) -> String:

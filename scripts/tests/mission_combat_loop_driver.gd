@@ -4,6 +4,9 @@ const LOS_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/los_system.gd")
 const CONTACT_LINE_NAME: String = "CombatContactLine"
 const EVENT_LABEL_NAME: String = "CombatEventLabel"
 const WINNER_LABEL_NAME: String = "CombatWinnerLabel"
+const PHASE_APPROACH: int = 0
+const PHASE_ASSAULT: int = 1
+const PHASE_HOLD: int = 2
 
 signal contact_established(attacker, target)
 signal combat_resolved(winning_team_id, neutralized_enemy_count)
@@ -202,6 +205,9 @@ func _can_unit_attack(unit) -> bool:
 	if unit.has_method("get_fire_status") and String(unit.call("get_fire_status")) != "fire_at_will":
 		return false
 
+	if not _is_phase_attack_allowed(unit):
+		return false
+
 	return _is_engage_ready(unit)
 
 
@@ -248,6 +254,62 @@ func _is_engage_ready(unit) -> bool:
 			return status_name == "pending_move" and String(runtime_status.get("source_command_type")) == "flank"
 
 	return false
+
+
+func _is_phase_attack_allowed(unit) -> bool:
+	var phase: int = _get_unit_phase(unit)
+	if phase < 0:
+		return true
+
+	match phase:
+		PHASE_APPROACH:
+			return false
+		PHASE_HOLD:
+			return _is_hold_phase_ready(unit)
+		_:
+			return true
+
+
+func _is_hold_phase_ready(unit) -> bool:
+	if unit == null:
+		return false
+
+	if unit.has_method("get_current_unit_command"):
+		var command = unit.call("get_current_unit_command")
+		if command != null and command.has_method("get"):
+			var command_type: String = String(command.get("command_type"))
+			if command_type == "engage_area" or command_type == "hold_position":
+				return true
+
+	if unit.has_method("get_runtime_status"):
+		var runtime_status = unit.call("get_runtime_status")
+		if runtime_status != null and runtime_status.has_method("get"):
+			var status_name: String = String(runtime_status.get("status"))
+			if status_name == "engaging" or status_name == "holding":
+				return true
+
+	return false
+
+
+func _get_unit_phase(unit) -> int:
+	if unit == null:
+		return -1
+
+	if unit.has_method("get_current_unit_command"):
+		var command = unit.call("get_current_unit_command")
+		if command != null and command.has_method("get"):
+			var raw_phase: Variant = command.get("phase")
+			if typeof(raw_phase) == TYPE_INT or typeof(raw_phase) == TYPE_FLOAT:
+				return int(raw_phase)
+
+	if unit.has_method("get_runtime_status"):
+		var runtime_status = unit.call("get_runtime_status")
+		if runtime_status != null and runtime_status.has_method("get"):
+			var raw_phase: Variant = runtime_status.get("phase")
+			if typeof(raw_phase) == TYPE_INT or typeof(raw_phase) == TYPE_FLOAT:
+				return int(raw_phase)
+
+	return -1
 
 
 func _update_status_label(state_name: String) -> void:

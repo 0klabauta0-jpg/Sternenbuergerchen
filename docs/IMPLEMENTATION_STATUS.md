@@ -255,3 +255,10 @@
 - Offene Punkte: keine grosse Commander-UI, keine neue Zielwahl, keine komplexe Phasen- oder Objective-Logik und keine weitere Befehlsfamilie ueber die bestehenden V1-Orders hinaus.
 - Risiken: der `take`-Pfad bleibt bewusst ein kleiner Sandbox-Befehl im vorhandenen Slice; spaetere echte Commander-Bedienung sollte diese Debug-Eingabe explizit ersetzen statt sie still auszubauen.
 - Naechster Schritt: spaeter nur bei eigenem Task den naechsten kleinen Vertical-Slice-Baustein wie Objective-/Phase-Logik oder Siegbedingungen anschliessen.
+
+### Minimal Mission Phase Gate
+- Status: implementiert
+- Stand: der taktische Sandbox-Slice nutzt jetzt das bereits vorhandene `phase`-Feld in `CommanderCommand`, `FTLTask`, `UnitCommand` und `UnitRuntimeStatus` als kleinen Missions-Phasenhaken. Der `MissionTacticalSandboxController` kann per `R/F` zwischen `APPROACH`, `ASSAULT` und `HOLD` fuer die naechste Order umschalten und gibt diese Phase an den bestehenden Command-Flow weiter. `MissionCombatLoopDriver` beruecksichtigt diese Phase minimal als Angriffsfreigabe: `APPROACH` blockiert Feuer trotz LOS, `ASSAULT` erlaubt den bisherigen Engage-Pfad, und `HOLD` laesst nur haltende bzw. engagierende Units feuern.
+- Offene Punkte: keine grosse Missions- oder Objective-Logik, keine automatische Phasenumschaltung, keine neue State-Machine und keine Phase-UI ueber den kleinen Sandbox-Hinweis hinaus.
+- Risiken: der Schritt bleibt bewusst ein kleiner Gate-Mechanismus fuer den bestehenden Slice; spaetere echte Missionsphasen sollten diesen Debug-/Proto-Pfad explizit ersetzen statt ihn still zu einer grossen Systemschicht auszubauen.
+- Naechster Schritt: spaeter nur bei eigenem Task eine minimale Siegbedingung oder Objective-Logik an diesen Phase-Haken koppeln, wenn das fuer den Vertical Slice wirklich noetig wird.
