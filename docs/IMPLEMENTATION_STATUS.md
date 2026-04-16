@@ -48,13 +48,6 @@
 ### Command to FTLTask Translator
 - Status: implementiert
 - Stand: ein schlanker `CommandToFTLTaskTranslator` unter `res://scripts/command/command_to_ftltask_translator.gd` uebersetzt gueltige `CommanderCommand`-Daten in `FTLTask`-Daten.
-
-### TASK_038 – Mission Start Flow
-- Status: implementiert
-- Stand: Erweitert FOB-Screen um Loadout-Section mit Rollen-Zuweisung (FTL/Specialist) für Units. Hinzugefügt Dropship-Screen mit Launch-Sequence (3-Sekunden Timer). Aktualisiert Meta-Layer-Flow: FOB -> Dropship -> Mission. Rollen werden in FOB zugewiesen, aber noch nicht in Mission verwendet.
-- Offene Punkte: Rollen-Logik in Mission integrieren (z.B. FTL als Leader setzen), Loadout-Details (Waffen, etc.) fehlen für V1.
-- Risiken: UI-Änderungen könnten bei zukünftigen Updates Konflikte verursachen; Dropship ist minimal, könnte erweitert werden.
-- Naechster Schritt: TASK_039 – Fireteams implementieren, um Rollen in Squad-Mechanik zu integrieren.
 - Offene Punkte: keine echte FTL-Entscheidungslogik, keine Task-Queue, keine RuntimeLeader-Erweiterung und keine Ausfuehrung in `SimulationRoot`.
 - Risiken: Die V1-Abbildung ist bewusst einfach und statisch; spaetere feinere taktische Zerlegung von `take` und `flank` muss explizit und separat eingefuehrt werden.
 - Naechster Schritt: spaeter Integration in RuntimeLeader / SimulationRoot, ohne neue Kopplungen aufzubauen.

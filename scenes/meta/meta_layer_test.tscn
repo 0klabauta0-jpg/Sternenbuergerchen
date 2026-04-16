@@ -4,7 +4,6 @@
 [ext_resource type="PackedScene" path="res://scenes/meta/homebase_test_screen.tscn" id="2_homebase"]
 [ext_resource type="PackedScene" path="res://scenes/meta/fob_test_screen.tscn" id="3_fob"]
 [ext_resource type="PackedScene" path="res://scenes/meta/debrief_test_screen.tscn" id="4_debrief"]
-[ext_resource type="PackedScene" path="res://scenes/meta/dropship_test_screen.tscn" id="5_dropship"]
 
 [node name="MetaLayerTest" type="Node"]
 script = ExtResource("1_flow")
@@ -12,8 +11,6 @@ script = ExtResource("1_flow")
 [node name="HomebaseScreen" parent="." instance=ExtResource("2_homebase")]
 
 [node name="FOBScreen" parent="." instance=ExtResource("3_fob")]
-
-[node name="DropshipScreen" parent="." instance=ExtResource("5_dropship")]
 
 [node name="DebriefScreen" parent="." instance=ExtResource("4_debrief")]
 

@@ -46,11 +46,6 @@ func _ready() -> void:
 	if not fob_screen.mission_start_requested.is_connected(_on_fob_mission_start_requested):
 		fob_screen.mission_start_requested.connect(_on_fob_mission_start_requested)
 
-	var dropship_screen = _get_dropship_screen()
-	if dropship_screen != null:
-		if not dropship_screen.launch_completed.is_connected(_on_dropship_launch_completed):
-			dropship_screen.launch_completed.connect(_on_dropship_launch_completed)
-
 	if not debrief_screen.return_to_fob_requested.is_connected(_on_debrief_return_to_fob_requested):
 		debrief_screen.return_to_fob_requested.connect(_on_debrief_return_to_fob_requested)
 
@@ -83,11 +78,11 @@ func _on_fob_back_requested() -> void:
 
 func _on_fob_mission_start_requested(selected_unit_ids: PackedStringArray) -> void:
 	_selected_unit_ids = selected_unit_ids.duplicate()
-	_show_dropship()
-
-
-func _on_dropship_launch_completed() -> void:
 	_start_mission()
+
+
+func _on_debrief_return_to_fob_requested() -> void:
+	_show_fob()
 
 
 func _on_debrief_return_to_homebase_requested() -> void:
@@ -251,29 +246,11 @@ func _show_fob() -> void:
 func _show_mission() -> void:
 	var homebase_screen = _get_homebase_screen()
 	var fob_screen = _get_fob_screen()
-	var dropship_screen = _get_dropship_screen()
 	var debrief_screen = _get_debrief_screen()
 	if homebase_screen != null:
 		homebase_screen.visible = false
 	if fob_screen != null:
 		fob_screen.visible = false
-	if dropship_screen != null:
-		dropship_screen.visible = false
-	if debrief_screen != null:
-		debrief_screen.visible = false
-
-
-func _show_dropship() -> void:
-	var homebase_screen = _get_homebase_screen()
-	var fob_screen = _get_fob_screen()
-	var dropship_screen = _get_dropship_screen()
-	var debrief_screen = _get_debrief_screen()
-	if homebase_screen != null:
-		homebase_screen.visible = false
-	if fob_screen != null:
-		fob_screen.visible = false
-	if dropship_screen != null:
-		dropship_screen.visible = true
 	if debrief_screen != null:
 		debrief_screen.visible = false
 
@@ -281,14 +258,11 @@ func _show_dropship() -> void:
 func _show_debrief() -> void:
 	var homebase_screen = _get_homebase_screen()
 	var fob_screen = _get_fob_screen()
-	var dropship_screen = _get_dropship_screen()
 	var debrief_screen = _get_debrief_screen()
 	if homebase_screen != null:
 		homebase_screen.visible = false
 	if fob_screen != null:
 		fob_screen.visible = false
-	if dropship_screen != null:
-		dropship_screen.visible = false
 	if debrief_screen != null:
 		debrief_screen.visible = true
 
@@ -299,10 +273,6 @@ func _get_homebase_screen():
 
 func _get_fob_screen():
 	return get_node_or_null("FOBScreen")
-
-
-func _get_dropship_screen():
-	return get_node_or_null("DropshipScreen")
 
 
 func _get_debrief_screen():
