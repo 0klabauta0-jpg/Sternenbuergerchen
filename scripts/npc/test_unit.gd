@@ -2,10 +2,12 @@ class_name TestUnit
 extends Node2D
 
 const UNIT_RUNTIME_STATUS_SCRIPT: GDScript = preload("res://scripts/npc/unit_runtime_status.gd")
+const UNIT_VITAL_STATUS_SCRIPT: GDScript = preload("res://scripts/npc/unit_vital_status.gd")
 
 signal runtime_status_changed(runtime_status)
 signal unit_command_assigned(command)
 signal damage_applied(amount, health_points, hit_context)
+signal vital_status_changed(vital_status)
 
 @export var unit_id: String = "unit_test_001"
 @export var display_name: String = "Test Unit"
@@ -14,13 +16,13 @@ signal damage_applied(amount, health_points, hit_context)
 
 var _runtime_status: RefCounted = UNIT_RUNTIME_STATUS_SCRIPT.new()
 var _current_unit_command: RefCounted = null
-var _health_points: int = max_health_points
+var _vital_status: RefCounted = UNIT_VITAL_STATUS_SCRIPT.new()
 var _last_damage_context: Dictionary = {}
 
 
 func _ready() -> void:
 	_runtime_status = _build_runtime_status("idle")
-	_health_points = max_health_points
+	_vital_status = _build_vital_status("fit", max_health_points, 0)
 
 
 func get_unit_id() -> String:
@@ -36,7 +38,11 @@ func get_current_unit_command():
 
 
 func get_health() -> int:
-	return _health_points
+	return int(_vital_status.health_points)
+
+
+func get_vital_status():
+	return _vital_status
 
 
 func get_last_damage_context() -> Dictionary:
@@ -51,9 +57,22 @@ func apply_damage(amount: int, hit_context: Dictionary = {}) -> bool:
 	if amount <= 0:
 		return false
 
-	_health_points = maxi(_health_points - amount, 0)
+	var next_health: int = maxi(get_health() - amount, 0)
+	var next_state: String = String(_vital_status.state)
+	if next_health == 0 and next_state == "fit":
+		next_state = "down"
+
+	_set_vital_status(next_state, next_health, int(_vital_status.bleedout_ticks))
 	_last_damage_context = hit_context.duplicate(true)
-	damage_applied.emit(amount, _health_points, _last_damage_context)
+	damage_applied.emit(amount, next_health, _last_damage_context)
+	return true
+
+
+func advance_bleedout() -> bool:
+	if String(_vital_status.state) != "down":
+		return false
+
+	_set_vital_status("bleedout", get_health(), int(_vital_status.bleedout_ticks) + 1)
 	return true
 
 
@@ -121,6 +140,23 @@ func _build_runtime_status(
 	runtime_status.target_position = target_position
 	runtime_status.phase = phase
 	return runtime_status
+
+
+func _build_vital_status(state: String, health_points: int, bleedout_ticks: int):
+	var vital_status = UNIT_VITAL_STATUS_SCRIPT.new()
+	vital_status.state = state
+	vital_status.health_points = health_points
+	vital_status.bleedout_ticks = bleedout_ticks
+	return vital_status
+
+
+func _set_vital_status(state: String, health_points: int, bleedout_ticks: int) -> void:
+	var vital_status = _build_vital_status(state, health_points, bleedout_ticks)
+	if not bool(vital_status.call("is_valid")):
+		return
+
+	_vital_status = vital_status
+	vital_status_changed.emit(_vital_status)
 
 
 func _map_unit_command_to_status(command_type: String) -> String:

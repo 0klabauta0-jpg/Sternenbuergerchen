@@ -97,6 +97,8 @@ func _apply_effect(effect: Dictionary, delta: float) -> void:
 	match _extract_effect_type(effect):
 		"damage":
 			_apply_damage_effect(effect)
+		"bleedout":
+			_apply_bleedout_effect(effect)
 		_:
 			# TODO: Deterministic effect commits belong here once systems exist.
 			pass
@@ -253,6 +255,24 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		"unit_id": unit_id,
 	}
 	unit.call("apply_damage", resolved_damage, hit_context)
+
+
+func _apply_bleedout_effect(effect: Dictionary) -> void:
+	var unit_id: String = String(effect.get("unit_id", ""))
+	if unit_id.is_empty():
+		push_warning("SimulationRoot bleedout effect expects a non-empty unit_id.")
+		return
+
+	var unit = _resolve_unit(unit_id)
+	if unit == null:
+		push_warning("SimulationRoot could not resolve the target unit for a bleedout effect.")
+		return
+
+	if not unit.has_method("advance_bleedout"):
+		push_warning("SimulationRoot bleedout effect expects a unit with advance_bleedout().")
+		return
+
+	unit.call("advance_bleedout")
 
 
 func _get_unit_registry():
