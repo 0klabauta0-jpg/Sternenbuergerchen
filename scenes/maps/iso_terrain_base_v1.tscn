@@ -1,0 +1,172 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://Assets/kenney_space-kit/Isometric/terrain_SW.png" id="1_terrain"]
+
+[node name="IsoTerrainBaseV1" type="Node2D"]
+
+[node name="Terrain" type="Node2D" parent="."]
+
+[node name="Tile_0_0" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(64, -243)
+
+[node name="Tile_0_1" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(0, -211)
+
+[node name="Tile_0_2" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(-64, -179)
+
+[node name="Tile_0_3" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(-128, -147)
+
+[node name="Tile_0_4" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(-192, -115)
+
+[node name="Tile_1_0" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(128, -211)
+
+[node name="Tile_1_1" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(64, -179)
+
+[node name="Tile_1_2" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(0, -147)
+
+[node name="Tile_1_3" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(-64, -115)
+
+[node name="Tile_1_4" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(-128, -83)
+
+[node name="Tile_2_0" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(192, -179)
+
+[node name="Tile_2_1" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(128, -147)
+
+[node name="Tile_2_2" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(64, -115)
+
+[node name="Tile_2_3" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(0, -83)
+
+[node name="Tile_2_4" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(-64, -51)
+
+[node name="Tile_3_0" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(256, -147)
+
+[node name="Tile_3_1" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(192, -115)
+
+[node name="Tile_3_2" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(128, -83)
+
+[node name="Tile_3_3" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(64, -51)
+
+[node name="Tile_3_4" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(0, -19)
+
+[node name="Tile_4_0" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(320, -115)
+
+[node name="Tile_4_1" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(256, -83)
+
+[node name="Tile_4_2" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(192, -51)
+
+[node name="Tile_4_3" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(128, -19)
+
+[node name="Tile_4_4" type="Sprite2D" parent="Terrain"]
+z_index = -20
+texture = ExtResource("1_terrain")
+centered = false
+position = Vector2(64, 13)
+
+[node name="spawn_alpha" type="Marker2D" parent="."]
+position = Vector2(128, 232)
+
+[node name="spawn_bravo" type="Marker2D" parent="."]
+position = Vector2(512, 168)
+
+[node name="objective_point" type="Marker2D" parent="."]
+position = Vector2(320, 200)
+
+[node name="flank_anchor_left" type="Marker2D" parent="."]
+position = Vector2(192, 264)
+
+[node name="flank_anchor_right" type="Marker2D" parent="."]
+position = Vector2(448, 136)

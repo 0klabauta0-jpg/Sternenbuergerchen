@@ -220,3 +220,10 @@
 - Offene Punkte: keine groessere HUD-/Debug-Architektur, keine Politur, keine Animationen und keine komplexe Zeitsteuerung.
 - Risiken: die Lesbarkeitshilfen bleiben bewusst testszenenbezogen; spaetere echte UI- oder Debug-Systeme sollten diesen kleinen Pfad explizit ersetzen statt ihn still zu einer grossen Overlay-Schicht auszubauen.
 - Naechster Schritt: spaeter nur bei eigenem Task weitere gezielte Beobachtbarkeit wie einfache Threat-/Objective-Hinweise ergaenzen, ohne die Szene in eine Debug-Framework-Struktur zu ziehen.
+
+### Flat Isometric Terrain Base V1
+- Status: implementiert
+- Stand: `res://scenes/maps/iso_terrain_base_v1.tscn` liefert jetzt eine erste kleine flache Iso-Bodenbasis ausschliesslich aus der Referenzkachel `terrain_SW.png`; die Szene enthaelt nur Terrain und klare Marker fuer `spawn_alpha`, `spawn_bravo`, `objective_point` sowie zwei optionale Flank-Anker. `MissionTestSetup` liest diese Marker ueber direkte `NodePath`-Referenzen und setzt damit Friendly-Spawns, Enemy-Spawns und den bestehenden Zielmarker im Slice minimal aus der Karte.
+- Offene Punkte: keine `MapDefinition`-/`MapLoader`-Schicht auf diesem Branch, keine taktische Layout-Verfeinerung, keine Hindernis- oder Hoehenlogik und noch keine Nutzung der Flank-Anker im Runtime-Pfad.
+- Risiken: die Karte bleibt bewusst reine Geometrie plus Positionsmarker; weder Combat noch Simulationswahrheit liegen in der Map-Szene. Spaetere Map- oder Editor-Arbeit sollte diesen kleinen Marker-Hook explizit ersetzen statt ihn still zu einem Framework auszubauen.
+- Naechster Schritt: die Iso-Basis spaeter gezielt in ein kleines lesbares Taktiklayout verfeinern, ohne dabei die Slice-Logik oder Terrain-Daten mit Gameplay-Verantwortung zu beladen.
