@@ -25,6 +25,9 @@ var priority: int = 0
 var unit_id: String = ""
 var team_id: String = ""
 var fire_status: String = FIRE_STATUS_FIRE_AT_WILL
+var source_command_type: String = ""
+var cover_score: float = 0.0
+var attack_bonus: float = 0.0
 var target_position: Variant = null
 var target_area_id: String = ""
 var source_task_type: String = ""
@@ -65,6 +68,9 @@ func to_dict() -> Dictionary:
 		"unit_id": unit_id,
 		"team_id": team_id,
 		"fire_status": fire_status,
+		"source_command_type": source_command_type,
+		"cover_score": cover_score,
+		"attack_bonus": attack_bonus,
 	}
 
 	if target_position != null:
@@ -99,6 +105,19 @@ func _apply_dict(data: Dictionary) -> void:
 
 	if data.has("fire_status"):
 		fire_status = String(data["fire_status"])
+
+	if data.has("source_command_type"):
+		source_command_type = String(data["source_command_type"])
+
+	if data.has("cover_score"):
+		var raw_cover_score: Variant = data["cover_score"]
+		if typeof(raw_cover_score) == TYPE_INT or typeof(raw_cover_score) == TYPE_FLOAT:
+			cover_score = float(raw_cover_score)
+
+	if data.has("attack_bonus"):
+		var raw_attack_bonus: Variant = data["attack_bonus"]
+		if typeof(raw_attack_bonus) == TYPE_INT or typeof(raw_attack_bonus) == TYPE_FLOAT:
+			attack_bonus = float(raw_attack_bonus)
 
 	if data.has("target_position"):
 		target_position = data["target_position"]

@@ -7,7 +7,9 @@ signal combat_resolved(winning_team_id, neutralized_enemy_count)
 
 @export var friendly_team_id: String = "team_alpha"
 @export var contact_range: float = 180.0
-@export var damage_per_hit: int = 100
+@export var damage_per_hit: int = 40
+@export var base_hit_chance: float = 0.45
+@export var base_damage_multiplier: float = 1.0
 @export var simulation_root_path: NodePath
 @export var status_label_path: NodePath
 @export var friendly_unit_paths: Array[NodePath] = []
@@ -53,7 +55,7 @@ func _on_tick_processed(_tick: int) -> void:
 		return
 
 	_queue_bleedout_for_downed_enemy(simulation_root)
-	_try_enqueue_attack(simulation_root)
+	_try_enqueue_attacks(simulation_root)
 	_update_combat_resolution()
 	if not _combat_finished:
 		_update_status_label("active")
@@ -83,12 +85,14 @@ func _queue_bleedout_for_downed_enemy(simulation_root: Node) -> void:
 		return
 
 
-func _try_enqueue_attack(simulation_root: Node) -> void:
+func _try_enqueue_attacks(simulation_root: Node) -> void:
+	var reserved_target_ids: Dictionary = {}
+
 	for friendly in _get_units(friendly_unit_paths):
 		if not _can_unit_attack(friendly):
 			continue
 
-		var enemy = _pick_target_for_attacker(friendly)
+		var enemy = _pick_target_for_attacker(friendly, reserved_target_ids)
 		if enemy == null:
 			continue
 
@@ -101,6 +105,7 @@ func _try_enqueue_attack(simulation_root: Node) -> void:
 			"attacker_id": attacker_id,
 			"target_id": target_id,
 		}
+		reserved_target_ids[target_id] = true
 		contact_established.emit(friendly, enemy)
 		_update_status_label("contact")
 		simulation_root.call(
@@ -109,14 +114,15 @@ func _try_enqueue_attack(simulation_root: Node) -> void:
 				"effect_type": "damage",
 				"priority": 30,
 				"unit_id": target_id,
+				"attacker_unit_id": attacker_id,
 				"attacker_team_id": String(friendly.call("get_team_id")),
 				"allow_friendly_fire": false,
 				"damage": damage_per_hit,
-				"hit_chance": 1.0,
-				"roll_override": 0.0,
+				"hit_chance": base_hit_chance,
+				"damage_multiplier": base_damage_multiplier,
+				"roll_override": 0.4,
 			}
 		)
-		return
 
 
 func _update_combat_resolution() -> void:
@@ -151,8 +157,15 @@ func _get_units(paths: Array[NodePath]) -> Array:
 	return units
 
 
-func _pick_target_for_attacker(attacker):
+func _pick_target_for_attacker(attacker, reserved_target_ids: Dictionary):
 	for enemy in _get_units(enemy_unit_paths):
+		var enemy_id: String = ""
+		if enemy != null and enemy.has_method("get_unit_id"):
+			enemy_id = String(enemy.call("get_unit_id"))
+
+		if reserved_target_ids.get(enemy_id, false):
+			continue
+
 		if not _is_target_attackable(attacker, enemy):
 			continue
 
@@ -205,13 +218,19 @@ func _is_engage_ready(unit) -> bool:
 		var command = unit.call("get_current_unit_command")
 		if command != null and command.has_method("get"):
 			var command_type: String = String(command.get("command_type"))
-			return command_type == "engage_area" or command_type == "hold_position"
+			if command_type == "engage_area" or command_type == "hold_position":
+				return true
+
+			return command_type == "move_to_position" and String(command.get("source_command_type")) == "flank"
 
 	if unit.has_method("get_runtime_status"):
 		var runtime_status = unit.call("get_runtime_status")
 		if runtime_status != null and runtime_status.has_method("get"):
 			var status_name: String = String(runtime_status.get("status"))
-			return status_name == "engaging" or status_name == "holding"
+			if status_name == "engaging" or status_name == "holding":
+				return true
+
+			return status_name == "pending_move" and String(runtime_status.get("source_command_type")) == "flank"
 
 	return false
 
@@ -231,20 +250,58 @@ func _build_status_text(state_name: String) -> String:
 	if _combat_finished and not _winning_team_id.is_empty():
 		lines.append("Winner: %s" % _winning_team_id)
 
-	var primary_unit = null
-	if not friendly_unit_paths.is_empty():
-		primary_unit = get_node_or_null(friendly_unit_paths[0])
+	lines.append("Friendlies:")
+	for friendly in _get_units(friendly_unit_paths):
+		lines.append(_describe_friendly_unit(friendly))
 
-	if primary_unit != null and primary_unit.has_method("get_fire_status") and primary_unit.has_method("get_runtime_status"):
-		var runtime_status = primary_unit.call("get_runtime_status")
-		var status_name: String = ""
+	lines.append("Enemies:")
+	for enemy in _get_units(enemy_unit_paths):
+		lines.append(_describe_enemy_unit(enemy))
+
+	if not _last_contact.is_empty():
+		lines.append("Last contact: %s -> %s" % [String(_last_contact.get("attacker_id", "")), String(_last_contact.get("target_id", ""))])
+
+	return "\n".join(lines)
+
+
+func _describe_friendly_unit(unit) -> String:
+	if unit == null:
+		return "- missing"
+
+	var runtime_status = null
+	var status_name: String = ""
+	if unit.has_method("get_runtime_status"):
+		runtime_status = unit.call("get_runtime_status")
 		if runtime_status != null and runtime_status.has_method("get"):
 			status_name = String(runtime_status.get("status"))
 
-		lines.append("Primary fire: %s" % String(primary_unit.call("get_fire_status")))
-		lines.append("Primary state: %s" % status_name)
+	var unit_command = null
+	var command_type: String = ""
+	if unit.has_method("get_current_unit_command"):
+		unit_command = unit.call("get_current_unit_command")
+		if unit_command != null and unit_command.has_method("get"):
+			command_type = String(unit_command.get("command_type"))
 
-	if not _last_contact.is_empty():
-		lines.append("Last target: %s" % String(_last_contact.get("target_id", "")))
+	return "%s %s %s %s c%.2f a%.2f" % [
+		String(unit.call("get_unit_id")),
+		status_name,
+		command_type,
+		String(unit.call("get_fire_status")),
+		float(unit.call("get_cover_score")),
+		float(unit.call("get_attack_bonus")),
+	]
 
-	return "\n".join(lines)
+
+func _describe_enemy_unit(unit) -> String:
+	if unit == null:
+		return "- missing"
+
+	var health: int = 0
+	if unit.has_method("get_health"):
+		health = int(unit.call("get_health"))
+
+	return "%s %s hp=%d" % [
+		String(unit.call("get_unit_id")),
+		String(unit.call("get_vital_state")),
+		health,
+	]

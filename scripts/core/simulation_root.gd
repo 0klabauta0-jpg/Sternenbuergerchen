@@ -217,6 +217,7 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 		return
 
 	node_2d.position = current_position + direction.normalized() * step_distance
+	enqueue_command(cmd.duplicate(true))
 
 
 func _apply_damage_effect(effect: Dictionary) -> void:
@@ -235,6 +236,7 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		return
 
 	var attacker_team_id: String = String(effect.get("attacker_team_id", ""))
+	var attacker_unit_id: String = String(effect.get("attacker_unit_id", ""))
 	var target_team_id: String = ""
 	if unit.has_method("get_team_id"):
 		target_team_id = String(unit.call("get_team_id"))
@@ -249,9 +251,15 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		push_warning("SimulationRoot damage effect expects a positive damage value.")
 		return
 
+	var attacker_unit = _resolve_attacker_unit(attacker_unit_id)
+	var target_cover_score: float = _extract_unit_cover_score(unit)
+	var attacker_attack_bonus: float = _extract_unit_attack_bonus(attacker_unit)
+	var attacker_cover_score: float = _extract_unit_cover_score(attacker_unit)
 	var hit_chance: float = _extract_float(effect.get("hit_chance", 1.0), 1.0)
+	hit_chance = clampf(hit_chance + attacker_attack_bonus + (attacker_cover_score * 0.05) - (target_cover_score * 0.35), 0.05, 1.0)
 	var roll_override: float = _extract_float(effect.get("roll_override", -1.0), -1.0)
 	var damage_multiplier: float = _extract_float(effect.get("damage_multiplier", 1.0), 1.0)
+	damage_multiplier = maxf(damage_multiplier + attacker_attack_bonus - (target_cover_score * 0.2), 0.1)
 	var damage_model = DAMAGE_MODEL_SCRIPT.new()
 	if not bool(damage_model.call("resolve_hit", hit_chance, roll_override)):
 		return
@@ -263,7 +271,10 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 	var hit_context: Dictionary = {
 		"effect_type": "damage",
 		"unit_id": unit_id,
+		"attacker_unit_id": attacker_unit_id,
 		"attacker_team_id": attacker_team_id,
+		"attacker_attack_bonus": attacker_attack_bonus,
+		"target_cover_score": target_cover_score,
 		"friendly_fire": is_friendly_fire,
 	}
 	unit.call("apply_damage", resolved_damage, hit_context)
@@ -301,6 +312,27 @@ func _resolve_unit(unit_id: String):
 		return null
 
 	return unit_registry.call("get_unit", unit_id)
+
+
+func _resolve_attacker_unit(attacker_unit_id: String):
+	if attacker_unit_id.is_empty():
+		return null
+
+	return _resolve_unit(attacker_unit_id)
+
+
+func _extract_unit_cover_score(unit) -> float:
+	if unit == null or not unit.has_method("get_cover_score"):
+		return 0.0
+
+	return float(unit.call("get_cover_score"))
+
+
+func _extract_unit_attack_bonus(unit) -> float:
+	if unit == null or not unit.has_method("get_attack_bonus"):
+		return 0.0
+
+	return float(unit.call("get_attack_bonus"))
 
 
 func _extract_int(value: Variant) -> int:

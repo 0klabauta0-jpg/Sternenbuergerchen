@@ -16,8 +16,8 @@
 [node name="StatusLabel" type="Label" parent="."]
 offset_left = 16.0
 offset_top = 16.0
-offset_right = 280.0
-offset_bottom = 88.0
+offset_right = 520.0
+offset_bottom = 212.0
 text = "Combat: waiting"
 
 [node name="SimulationRoot" type="Node" parent="."]
@@ -108,9 +108,29 @@ unit_registry_path = NodePath("../UnitRegistry")
 ftl_registry_path = NodePath("../FTLRegistry")
 unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie"), NodePath("../EnemyDelta"), NodePath("../EnemyEcho")])
 
-[node name="CommandFlowDriver" type="Node" parent="."]
+[node name="DefendFlowDriver" type="Node" parent="."]
 script = ExtResource("9_flow")
-commander_command_type = "take"
+commander_command_type = "defend"
+runtime_leader_path = NodePath("../RuntimeLeader")
+event_router_path = NodePath("../EventRouter")
+simulation_root_path = NodePath("../SimulationRoot")
+unit_registry_path = NodePath("../UnitRegistry")
+target_marker_path = NodePath("../TargetMarker")
+
+[node name="MoveFlowDriver" type="Node" parent="."]
+script = ExtResource("9_flow")
+commander_command_type = "move"
+unit_id = "unit_bravo"
+runtime_leader_path = NodePath("../RuntimeLeader")
+event_router_path = NodePath("../EventRouter")
+simulation_root_path = NodePath("../SimulationRoot")
+unit_registry_path = NodePath("../UnitRegistry")
+target_marker_path = NodePath("../TargetMarker")
+
+[node name="FlankFlowDriver" type="Node" parent="."]
+script = ExtResource("9_flow")
+commander_command_type = "flank"
+unit_id = "unit_charlie"
 runtime_leader_path = NodePath("../RuntimeLeader")
 event_router_path = NodePath("../EventRouter")
 simulation_root_path = NodePath("../SimulationRoot")
@@ -122,5 +142,5 @@ script = ExtResource("10_combat")
 contact_range = 220.0
 simulation_root_path = NodePath("../SimulationRoot")
 status_label_path = NodePath("../StatusLabel")
-friendly_unit_paths = Array[NodePath]([NodePath("../UnitAlpha")])
+friendly_unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie")])
 enemy_unit_paths = Array[NodePath]([NodePath("../EnemyDelta"), NodePath("../EnemyEcho")])

@@ -60,6 +60,10 @@ func run_flow() -> void:
 
 
 func _on_runtime_leader_command_issued(order: Dictionary) -> void:
+	var ordered_unit_id: String = String(order.get("unit_id", unit_id))
+	if ordered_unit_id != unit_id:
+		return
+
 	var runtime_leader = get_node_or_null(runtime_leader_path)
 	var event_router = get_node_or_null(event_router_path)
 	if runtime_leader == null or event_router == null:
@@ -69,6 +73,10 @@ func _on_runtime_leader_command_issued(order: Dictionary) -> void:
 
 
 func _on_squad_command(_squad: Node, order: Dictionary) -> void:
+	var ordered_unit_id: String = String(order.get("unit_id", unit_id))
+	if ordered_unit_id != unit_id:
+		return
+
 	var runtime_leader = get_node_or_null(runtime_leader_path)
 	var simulation_root = get_node_or_null(simulation_root_path)
 	var unit_registry = get_node_or_null(unit_registry_path)
@@ -86,11 +94,16 @@ func _on_squad_command(_squad: Node, order: Dictionary) -> void:
 		return
 
 	runtime_leader.call("process_current_ftl_task")
+	var unit = unit_registry.call("get_unit", unit_id)
+	if unit == null:
+		push_warning("MissionCommandFlowDriver could not resolve the target unit for FTL assignment.")
+		return
+
+	runtime_leader.call("assign", unit)
 	if not bool(runtime_leader.call("assign_current_ftl_task_to_unit")):
 		return
 
-	var unit = unit_registry.call("get_unit", unit_id)
-	if unit == null or not unit.has_method("get_current_unit_command"):
+	if not unit.has_method("get_current_unit_command"):
 		push_warning("MissionCommandFlowDriver could not resolve the target unit for command enqueue.")
 		return
 

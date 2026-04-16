@@ -58,6 +58,18 @@ func get_fire_status() -> String:
 	return String(_runtime_status.fire_status)
 
 
+func get_source_command_type() -> String:
+	return String(_runtime_status.source_command_type)
+
+
+func get_cover_score() -> float:
+	return float(_runtime_status.cover_score)
+
+
+func get_attack_bonus() -> float:
+	return float(_runtime_status.attack_bonus)
+
+
 func get_last_damage_context() -> Dictionary:
 	return _last_damage_context.duplicate(true)
 
@@ -95,6 +107,9 @@ func set_target_position(target_position: Variant) -> bool:
 		String(_runtime_status.active_command_type),
 		int(_runtime_status.priority),
 		String(_runtime_status.fire_status),
+		String(_runtime_status.source_command_type),
+		float(_runtime_status.cover_score),
+		float(_runtime_status.attack_bonus),
 		int(_runtime_status.phase),
 		target_position
 	)
@@ -113,6 +128,9 @@ func assign_unit_command(command) -> bool:
 		String(command.get("command_type")),
 		int(command.get("priority")),
 		String(command.get("fire_status")),
+		String(command.get("source_command_type")),
+		float(command.get("cover_score")),
+		float(command.get("attack_bonus")),
 		int(command.get("phase")),
 		command.get("target_position")
 	):
@@ -127,10 +145,23 @@ func set_runtime_status(
 	active_command_type: String = "",
 	priority: int = 0,
 	fire_status: String = "fire_at_will",
+	source_command_type: String = "",
+	cover_score: float = 0.0,
+	attack_bonus: float = 0.0,
 	phase: int = -1,
 	target_position: Variant = null
 ) -> bool:
-	var runtime_status = _build_runtime_status(status_name, active_command_type, priority, fire_status, phase, target_position)
+	var runtime_status = _build_runtime_status(
+		status_name,
+		active_command_type,
+		priority,
+		fire_status,
+		source_command_type,
+		cover_score,
+		attack_bonus,
+		phase,
+		target_position
+	)
 	if not bool(runtime_status.call("is_valid")):
 		push_warning("TestUnit.set_runtime_status expects a valid UnitRuntimeStatus-compatible value.")
 		return false
@@ -145,6 +176,9 @@ func _build_runtime_status(
 	active_command_type: String = "",
 	priority: int = 0,
 	fire_status: String = "fire_at_will",
+	source_command_type: String = "",
+	cover_score: float = 0.0,
+	attack_bonus: float = 0.0,
 	phase: int = -1,
 	target_position: Variant = null
 ):
@@ -155,6 +189,9 @@ func _build_runtime_status(
 	runtime_status.unit_id = unit_id
 	runtime_status.team_id = team_id
 	runtime_status.fire_status = fire_status
+	runtime_status.source_command_type = source_command_type
+	runtime_status.cover_score = cover_score
+	runtime_status.attack_bonus = attack_bonus
 	runtime_status.target_position = target_position
 	runtime_status.phase = phase
 	return runtime_status

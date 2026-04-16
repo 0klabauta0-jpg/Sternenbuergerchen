@@ -3,6 +3,7 @@ extends Node
 
 const FTL_RUNTIME_STATUS_SCRIPT: GDScript = preload("res://scripts/ftl/ftl_runtime_status.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
+const FLANK_OFFSET_DISTANCE: float = 72.0
 
 signal promoted(new_leader)
 signal demoted(old_leader)
@@ -218,7 +219,9 @@ func _map_task_type_to_runtime_status(task_type: String) -> String:
 
 
 func _build_unit_command_from_ftl_task(task, unit: Node):
-	var command_type: String = _map_task_type_to_unit_command_type(String(task.get("task_type")))
+	var task_type: String = String(task.get("task_type"))
+	var source_command_type: String = String(task.get("source_command_type"))
+	var command_type: String = _map_task_type_to_unit_command_type(task_type)
 	if command_type.is_empty():
 		return null
 
@@ -229,10 +232,13 @@ func _build_unit_command_from_ftl_task(task, unit: Node):
 	if unit_command.unit_id.is_empty():
 		unit_command.unit_id = String(unit.call("get_unit_id"))
 	unit_command.team_id = String(task.get("team_id"))
-	unit_command.fire_status = _map_task_type_to_fire_status(String(task.get("task_type")))
-	unit_command.target_position = task.get("target_position")
+	unit_command.fire_status = _map_task_type_to_fire_status(task_type, source_command_type)
+	unit_command.source_command_type = source_command_type
+	unit_command.cover_score = _derive_cover_score(task_type, source_command_type)
+	unit_command.attack_bonus = _derive_attack_bonus(task_type, source_command_type)
+	unit_command.target_position = _derive_target_position(task, unit, command_type, source_command_type)
 	unit_command.target_area_id = String(task.get("target_area_id"))
-	unit_command.source_task_type = String(task.get("task_type"))
+	unit_command.source_task_type = task_type
 	unit_command.phase = int(task.get("phase"))
 	return unit_command
 
@@ -253,9 +259,73 @@ func _map_task_type_to_unit_command_type(task_type: String) -> String:
 			return ""
 
 
-func _map_task_type_to_fire_status(task_type: String) -> String:
+func _map_task_type_to_fire_status(task_type: String, source_command_type: String) -> String:
+	if source_command_type == "move":
+		return "hold_fire"
+
+	if source_command_type == "flank":
+		return "fire_at_will"
+
 	match task_type:
-		"engage_in_area", "hold_position":
+		"engage_in_area", "hold_position", "seek_cover":
 			return "fire_at_will"
 		_:
 			return "hold_fire"
+
+
+func _derive_cover_score(task_type: String, source_command_type: String) -> float:
+	if source_command_type == "defend":
+		return 0.7
+
+	if source_command_type == "flank":
+		return 0.15
+
+	match task_type:
+		"hold_position":
+			return 0.55
+		"seek_cover":
+			return 0.8
+		"engage_in_area":
+			return 0.2
+		_:
+			return 0.0
+
+
+func _derive_attack_bonus(task_type: String, source_command_type: String) -> float:
+	if source_command_type == "flank":
+		return 0.35
+
+	match task_type:
+		"engage_in_area":
+			return 0.2
+		"hold_position":
+			return 0.05
+		_:
+			return 0.0
+
+
+func _derive_target_position(task, unit: Node, command_type: String, source_command_type: String):
+	var raw_target_position: Variant = task.get("target_position")
+	if command_type == "hold_position" and unit is Node2D:
+		return (unit as Node2D).position
+
+	if typeof(raw_target_position) != TYPE_VECTOR2:
+		return raw_target_position
+
+	if source_command_type != "flank":
+		return raw_target_position
+
+	if not (unit is Node2D):
+		return raw_target_position
+
+	var unit_position: Vector2 = (unit as Node2D).position
+	var direction: Vector2 = raw_target_position - unit_position
+	if direction.is_zero_approx():
+		return raw_target_position
+
+	var flank_sign: float = 1.0
+	if unit_position.y <= raw_target_position.y:
+		flank_sign = -1.0
+
+	var flank_offset: Vector2 = direction.normalized().orthogonal() * FLANK_OFFSET_DISTANCE * flank_sign
+	return raw_target_position + flank_offset
