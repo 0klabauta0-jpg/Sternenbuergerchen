@@ -213,3 +213,10 @@
 - Offene Punkte: keine komplexe Deckungsarchitektur, keine echte Taktik-KI, keine Formation, keine Navigation und keine ausgebaute Zielpriorisierung ueber den kleinen Testpfad hinaus.
 - Risiken: die Unterschiede bleiben bewusst daten- und testszenenbasiert; spaetere echte Taktiksysteme sollten diese Minimalableitungen explizit ersetzen statt sie still weiter aufzublasen.
 - Naechster Schritt: spaeter nur bei eigenem Task feinere Deckungs-, Zielwahl- oder Rollenregeln ergaenzen und dabei die autoritative Rolle von `SimulationRoot` beibehalten.
+
+### Minimal Tactical Sandbox Controls
+- Status: implementiert
+- Stand: die bestehende Missions-Testszene bleibt jetzt offen und startet nicht mehr automatisch in den bisherigen Command-Flow; ein kleiner `MissionTacticalSandboxController` erlaubt stattdessen manuelle Sandbox-Befehle fuer das Friendly-Team via `1 = move`, `2 = defend`, `3 = flank` sowie das Umschalten eines sichtbaren Zielmarkers via `Q/E`. Die bestehende `MissionCommandFlowDriver`-Kette wird weiterverwendet und kann jetzt wiederholt manuell angestossen werden.
+- Offene Punkte: keine komplexe Auswahl, keine Maussteuerung, keine echte Commander-UI und keine ausgebaute Sandbox-Logik ueber den kleinen Debug-Spielmodus hinaus.
+- Risiken: die Steuerung bleibt bewusst test- und tastaturbasiert; spaetere echte Eingabe- oder Taktikbedienung sollte diesen Glue-Code explizit ersetzen statt ihn still zu einer grossen UI-Schicht auszubauen.
+- Naechster Schritt: spaeter nur bei eigenem Task weitere kleine Sandbox-Hilfen wie Reset oder einfache Engage-Tests ergaenzen, ohne eine neue grosse Steuerarchitektur einzufuehren.

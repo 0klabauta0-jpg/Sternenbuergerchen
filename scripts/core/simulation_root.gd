@@ -202,6 +202,9 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 		push_warning("SimulationRoot move command expects a Node2D-compatible unit.")
 		return
 
+	if not _is_current_move_command(unit, cmd):
+		return
+
 	if unit.has_method("set_target_position"):
 		unit.call("set_target_position", target_position)
 
@@ -319,6 +322,25 @@ func _resolve_attacker_unit(attacker_unit_id: String):
 		return null
 
 	return _resolve_unit(attacker_unit_id)
+
+
+func _is_current_move_command(unit, cmd: Dictionary) -> bool:
+	if unit == null or not unit.has_method("get_current_unit_command"):
+		return true
+
+	var current_command = unit.call("get_current_unit_command")
+	if current_command == null or not current_command.has_method("get"):
+		return true
+
+	if String(current_command.get("command_type")) != "move_to_position":
+		return false
+
+	var current_target_position: Variant = current_command.get("target_position")
+	var queued_target_position: Variant = cmd.get("target_position", null)
+	if typeof(current_target_position) == TYPE_VECTOR2 and typeof(queued_target_position) == TYPE_VECTOR2:
+		return current_target_position.distance_to(queued_target_position) <= 0.01
+
+	return true
 
 
 func _extract_unit_cover_score(unit) -> float:
