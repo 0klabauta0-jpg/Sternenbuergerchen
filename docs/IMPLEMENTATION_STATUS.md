@@ -311,3 +311,10 @@
 - Offene Punkte: keine echte FTL-Taktikplanung, keine komplexe Bereichssicherung, keine Formation und keine feinere Zielwahl fuer `take`.
 - Risiken: die Ableitung bleibt bewusst klein und rollenbasiert; spaetere echte Team- oder FTL-Entscheidungslogik sollte diese Proto-Regeln explizit ersetzen statt weitere Sonderfaelle daran anzuschrauben.
 - Naechster Schritt: spaeter nur bei eigenem Task weitere indirekte Order-Unterschiede wie `defend`-/`flank`-Interpretation oder mehrere FTL-Instanzen pruefen, wenn das fuer V1 wirklich gebraucht wird.
+
+### Minimal Objective State Clarity
+- Status: implementiert
+- Stand: der bestehende Objective-Punkt im taktischen Slice hat jetzt einen klaren kleinen Zustandskern `neutral / contested / secured`. `MissionCombatLoopDriver` fuehrt diesen Zustand explizit, zeigt ihn im Statusblock und ueber ein kleines `ObjectiveStateLabel` direkt am Marker an. Der bisherige Capture-Fortschritt bleibt klein und wird nur als neutraler Fortschritt angezeigt. Zusaetzlich koennen Units mit einem `take`-Command in `HOLD`-Phase jetzt auch dann zum Objective-Halten beitragen, wenn sie den Zielpunkt ueber die bewegende `move_to_position`-Ableitung erreichen.
+- Offene Punkte: keine feindliche Objective-Einnahme, keine Mehrziel-Architektur, keine grosse Objective-UI und keine tieferen Missionsphasen ueber diesen kleinen Markerzustand hinaus.
+- Risiken: der Schritt bleibt bewusst nur ein kleiner Vertical-Slice-Haken fuer den bestehenden Einsatzkern; spaetere echte Objective-Systeme sollten diesen Proto-Pfad explizit ersetzen statt weitere Sonderlogik auf denselben Combat-Driver zu stapeln.
+- Naechster Schritt: spaeter nur bei eigenem Task den kleinen Objective-Zustand an klare Victory/Fail- und Debrief-Pfade anbinden, wenn das fuer den Mission-Loop gebraucht wird.

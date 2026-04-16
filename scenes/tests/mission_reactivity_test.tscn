@@ -80,6 +80,10 @@ polygon = PackedVector2Array(-10, 0, 0, -10, 10, 0, 0, 10)
 position = Vector2(16, -18)
 text = "ORDER TARGET"
 
+[node name="ObjectiveStateLabel" type="Label" parent="TargetMarker"]
+position = Vector2(16, 4)
+text = "OBJECTIVE\nNEUTRAL"
+
 [node name="UnitAlpha" type="Node2D" parent="."]
 script = ExtResource("7_unit")
 position = Vector2(72, 120)
@@ -202,6 +206,7 @@ event_router_path = NodePath("../EventRouter")
 simulation_root_path = NodePath("../SimulationRoot")
 status_label_path = NodePath("../StatusLabel")
 target_marker_path = NodePath("../TargetMarker")
+objective_state_label_path = NodePath("../TargetMarker/ObjectiveStateLabel")
 objective_capture_radius = 40.0
 objective_hold_ticks_required = 10
 friendly_unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie")])

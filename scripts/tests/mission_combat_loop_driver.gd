@@ -7,6 +7,10 @@ const WINNER_LABEL_NAME: String = "CombatWinnerLabel"
 const PHASE_APPROACH: int = 0
 const PHASE_ASSAULT: int = 1
 const PHASE_HOLD: int = 2
+const OBJECTIVE_STATE_INACTIVE: String = "inactive"
+const OBJECTIVE_STATE_NEUTRAL: String = "neutral"
+const OBJECTIVE_STATE_CONTESTED: String = "contested"
+const OBJECTIVE_STATE_SECURED: String = "secured"
 
 signal contact_established(attacker, target)
 signal combat_resolved(winning_team_id, neutralized_enemy_count)
@@ -22,6 +26,7 @@ signal combat_resolved(winning_team_id, neutralized_enemy_count)
 @export var simulation_root_path: NodePath
 @export var status_label_path: NodePath
 @export var target_marker_path: NodePath
+@export var objective_state_label_path: NodePath
 @export var objective_capture_radius: float = 42.0
 @export var objective_hold_ticks_required: int = 10
 @export var friendly_unit_paths: Array[NodePath] = []
@@ -38,7 +43,8 @@ var _current_tick: int = 0
 var _next_attack_tick: int = 1
 var _last_event_text: String = "Combat waiting"
 var _objective_progress_ticks: int = 0
-var _objective_state_text: String = "UNSECURED"
+var _objective_state: String = OBJECTIVE_STATE_NEUTRAL
+var _objective_owner_team_id: String = ""
 var _contact_line: Line2D = null
 var _event_label: Label = null
 var _winner_label: Label = null
@@ -69,6 +75,18 @@ func get_winning_team_id() -> String:
 
 func get_resolution_reason() -> String:
 	return _resolution_reason
+
+
+func get_objective_state() -> String:
+	return _objective_state
+
+
+func get_objective_progress_ticks() -> int:
+	return _objective_progress_ticks
+
+
+func get_objective_owner_team_id() -> String:
+	return _objective_owner_team_id
 
 
 func get_last_contact() -> Dictionary:
@@ -193,30 +211,35 @@ func _update_combat_resolution() -> void:
 func _update_objective_control() -> void:
 	if mission_goal != "secure_target":
 		_objective_progress_ticks = 0
-		_objective_state_text = "INACTIVE"
+		_objective_owner_team_id = ""
+		_set_objective_state(OBJECTIVE_STATE_INACTIVE)
 		return
 
 	var target_marker = get_node_or_null(target_marker_path)
 	if not (target_marker is Node2D):
 		_objective_progress_ticks = 0
-		_objective_state_text = "INACTIVE"
+		_objective_owner_team_id = ""
+		_set_objective_state(OBJECTIVE_STATE_INACTIVE)
 		return
 
 	var objective_position: Vector2 = target_marker.position
 	if _is_objective_contested(objective_position):
 		_objective_progress_ticks = 0
-		_objective_state_text = "CONTESTED"
+		_objective_owner_team_id = ""
+		_set_objective_state(OBJECTIVE_STATE_CONTESTED)
 		return
 
 	var objective_holders: Array = _get_objective_holders(objective_position)
 	if objective_holders.is_empty():
 		_objective_progress_ticks = 0
-		_objective_state_text = "UNSECURED"
+		_objective_owner_team_id = ""
+		_set_objective_state(OBJECTIVE_STATE_NEUTRAL)
 		return
 
 	var required_ticks: int = maxi(objective_hold_ticks_required, 1)
 	_objective_progress_ticks = mini(_objective_progress_ticks + 1, required_ticks)
-	_objective_state_text = "SECURE %d/%d" % [_objective_progress_ticks, required_ticks]
+	_objective_owner_team_id = ""
+	_set_objective_state(OBJECTIVE_STATE_NEUTRAL)
 	if _objective_progress_ticks < required_ticks:
 		return
 
@@ -227,7 +250,8 @@ func _resolve_objective_victory() -> void:
 	_combat_finished = true
 	_winning_team_id = friendly_team_id
 	_resolution_reason = "objective_secured"
-	_objective_state_text = "SECURED"
+	_objective_owner_team_id = friendly_team_id
+	_set_objective_state(OBJECTIVE_STATE_SECURED)
 	_set_event_text("OBJECTIVE SECURED")
 	_clear_contact_visuals()
 	_update_status_label("resolved")
@@ -253,7 +277,7 @@ func _can_hold_objective(unit, objective_position: Vector2) -> bool:
 	if _get_unit_phase(unit) != PHASE_HOLD:
 		return false
 
-	if not _is_hold_phase_ready(unit):
+	if not _is_objective_ready(unit):
 		return false
 
 	if not (unit is Node2D):
@@ -399,6 +423,26 @@ func _is_hold_phase_ready(unit) -> bool:
 	return false
 
 
+func _is_objective_ready(unit) -> bool:
+	if _is_hold_phase_ready(unit):
+		return true
+
+	if unit == null:
+		return false
+
+	if unit.has_method("get_current_unit_command"):
+		var command = unit.call("get_current_unit_command")
+		if command != null and command.has_method("get"):
+			return String(command.get("command_type")) == "move_to_position" and String(command.get("source_command_type")) == "take"
+
+	if unit.has_method("get_runtime_status"):
+		var runtime_status = unit.call("get_runtime_status")
+		if runtime_status != null and runtime_status.has_method("get"):
+			return String(runtime_status.get("status")) == "pending_move" and String(runtime_status.get("source_command_type")) == "take"
+
+	return false
+
+
 func _get_unit_phase(unit) -> int:
 	if unit == null:
 		return -1
@@ -437,7 +481,9 @@ func _build_status_text(state_name: String) -> String:
 
 	lines.append("Enemies fit: %d" % _count_fit_units(enemy_unit_paths))
 	lines.append("Friendlies fit: %d" % _count_fit_units(friendly_unit_paths))
-	lines.append("Objective: %s" % _objective_state_text)
+	lines.append("Objective: %s" % _build_objective_state_text())
+	if mission_goal == "secure_target" and _objective_state == OBJECTIVE_STATE_NEUTRAL and not _combat_finished:
+		lines.append("Objective progress: %d/%d" % [_objective_progress_ticks, maxi(objective_hold_ticks_required, 1)])
 	lines.append("Next shot: %s" % _build_attack_readiness_text())
 	lines.append("Last event: %s" % _last_event_text)
 
@@ -671,6 +717,63 @@ func _update_winner_label() -> void:
 	_winner_label.text = ""
 
 
+func _set_objective_state(state_name: String) -> void:
+	if _objective_state == state_name:
+		_update_objective_state_label()
+		return
+
+	_objective_state = state_name
+	_update_objective_state_label()
+
+
+func _update_objective_state_label() -> void:
+	var objective_state_label = get_node_or_null(objective_state_label_path) as Label
+	if objective_state_label == null:
+		return
+
+	objective_state_label.text = _build_objective_marker_text()
+	objective_state_label.modulate = _build_objective_state_color()
+
+
+func _build_objective_marker_text() -> String:
+	match _objective_state:
+		OBJECTIVE_STATE_INACTIVE:
+			return "OBJECTIVE\nINACTIVE"
+		OBJECTIVE_STATE_CONTESTED:
+			return "OBJECTIVE\nCONTESTED"
+		OBJECTIVE_STATE_SECURED:
+			return "OBJECTIVE\nSECURED"
+		_:
+			if mission_goal == "secure_target" and _objective_progress_ticks > 0:
+				return "OBJECTIVE\nNEUTRAL %d/%d" % [_objective_progress_ticks, maxi(objective_hold_ticks_required, 1)]
+
+			return "OBJECTIVE\nNEUTRAL"
+
+
+func _build_objective_state_color() -> Color:
+	match _objective_state:
+		OBJECTIVE_STATE_INACTIVE:
+			return Color(0.75, 0.75, 0.75, 1.0)
+		OBJECTIVE_STATE_CONTESTED:
+			return Color(1.0, 0.55, 0.35, 1.0)
+		OBJECTIVE_STATE_SECURED:
+			return Color(0.45, 1.0, 0.55, 1.0)
+		_:
+			return Color(1.0, 0.95, 0.5, 1.0)
+
+
+func _build_objective_state_text() -> String:
+	match _objective_state:
+		OBJECTIVE_STATE_INACTIVE:
+			return "INACTIVE"
+		OBJECTIVE_STATE_CONTESTED:
+			return "CONTESTED"
+		OBJECTIVE_STATE_SECURED:
+			return "SECURED"
+		_:
+			return "NEUTRAL"
+
+
 func _count_fit_units(paths: Array[NodePath]) -> int:
 	var fit_count: int = 0
 	for unit in _get_units(paths):
@@ -703,4 +806,5 @@ func _finish_readability_setup() -> void:
 	_ensure_readability_nodes()
 	_update_event_label()
 	_update_winner_label()
+	_update_objective_state_label()
 	_update_status_label("waiting")
