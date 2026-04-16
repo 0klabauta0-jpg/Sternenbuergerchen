@@ -17,6 +17,8 @@ signal combat_resolved(winning_team_id, neutralized_enemy_count)
 @export var base_hit_chance: float = 0.45
 @export var base_damage_multiplier: float = 1.0
 @export var ticks_between_attacks: int = 10
+@export var mission_goal: String = "secure_target"
+@export var event_router_path: NodePath
 @export var simulation_root_path: NodePath
 @export var status_label_path: NodePath
 @export var target_marker_path: NodePath
@@ -27,6 +29,7 @@ signal combat_resolved(winning_team_id, neutralized_enemy_count)
 
 var _los_system = LOS_SYSTEM_SCRIPT.new()
 var _queued_bleedout_by_unit_id: Dictionary = {}
+var _queued_respawn_request_by_unit_id: Dictionary = {}
 var _combat_finished: bool = false
 var _winning_team_id: String = ""
 var _resolution_reason: String = ""
@@ -188,6 +191,11 @@ func _update_combat_resolution() -> void:
 
 
 func _update_objective_control() -> void:
+	if mission_goal != "secure_target":
+		_objective_progress_ticks = 0
+		_objective_state_text = "INACTIVE"
+		return
+
 	var target_marker = get_node_or_null(target_marker_path)
 	if not (target_marker is Node2D):
 		_objective_progress_ticks = 0
@@ -601,10 +609,36 @@ func _on_unit_vital_status_changed(vital_status, unit) -> void:
 			if unit.has_method("show_event_text"):
 				unit.call("show_event_text", "DOWN", Color(1.0, 0.55, 0.55, 1.0), 1.5)
 		"bleedout":
+			_queue_respawn_request(unit, unit_id)
 			_set_event_text("%s BLEEDOUT" % unit_id)
 			if unit.has_method("show_event_text"):
 				unit.call("show_event_text", "BLEEDOUT", Color(0.92, 0.6, 0.6, 1.0), 1.6)
+		"fit":
+			_queued_respawn_request_by_unit_id.erase(unit_id)
 	_update_status_label("active")
+
+
+func _queue_respawn_request(unit, unit_id: String) -> void:
+	if unit == null or unit_id.is_empty():
+		return
+
+	if not unit.has_method("get_team_id"):
+		return
+
+	if String(unit.call("get_team_id")) != friendly_team_id:
+		return
+
+	if _queued_respawn_request_by_unit_id.get(unit_id, false):
+		return
+
+	var event_router = get_node_or_null(event_router_path)
+	if event_router == null or not event_router.has_method("request_respawn"):
+		return
+
+	event_router.call("request_respawn", unit, "fob")
+	_queued_respawn_request_by_unit_id[unit_id] = true
+	if unit.has_method("show_event_text"):
+		unit.call("show_event_text", "RESPAWN FOB", Color(0.72, 0.95, 1.0, 1.0), 1.4)
 
 
 func _set_event_text(event_text: String) -> void:

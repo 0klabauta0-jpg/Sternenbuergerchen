@@ -45,11 +45,13 @@ var _current_event_color: Color = Color(1.0, 0.95, 0.5, 1.0)
 var _event_time_remaining: float = 0.0
 var _contact_active: bool = false
 var _contact_target_id: String = ""
+var _spawn_position: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
 	_sanitize_fireteam_id()
 	_sanitize_combat_role()
+	_spawn_position = position
 	_ensure_readability_labels()
 	_runtime_status = _build_runtime_status("idle")
 	_vital_status = _build_vital_status("fit", max_health_points, 0)
@@ -147,6 +149,10 @@ func get_target_position():
 	return _runtime_status.target_position
 
 
+func get_spawn_position() -> Vector2:
+	return _spawn_position
+
+
 func apply_damage(amount: int, hit_context: Dictionary = {}) -> bool:
 	if amount <= 0:
 		return false
@@ -169,6 +175,20 @@ func advance_bleedout() -> bool:
 
 	_set_vital_status("bleedout", get_health(), int(_vital_status.bleedout_ticks) + 1)
 	show_event_text("BLEEDOUT", Color(0.95, 0.55, 0.55, 1.0))
+	return true
+
+
+func respawn_from_checkpoint(respawn_target: String = "fob") -> bool:
+	position = _spawn_position
+	_current_unit_command = null
+	_last_damage_context.clear()
+	_contact_active = false
+	_contact_target_id = ""
+	_set_vital_status("fit", max_health_points, 0)
+	if not set_runtime_status("idle"):
+		return false
+
+	show_event_text("RESPAWN %s" % respawn_target.to_upper(), Color(0.72, 0.95, 1.0, 1.0), 1.6)
 	return true
 
 

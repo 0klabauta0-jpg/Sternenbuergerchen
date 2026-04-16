@@ -99,6 +99,8 @@ func _apply_effect(effect: Dictionary, delta: float) -> void:
 			_apply_damage_effect(effect)
 		"bleedout":
 			_apply_bleedout_effect(effect)
+		"respawn":
+			_apply_respawn_effect(effect)
 		_:
 			# TODO: Deterministic effect commits belong here once systems exist.
 			pass
@@ -313,6 +315,25 @@ func _apply_bleedout_effect(effect: Dictionary) -> void:
 		return
 
 	unit.call("advance_bleedout")
+
+
+func _apply_respawn_effect(effect: Dictionary) -> void:
+	var unit_id: String = String(effect.get("unit_id", ""))
+	if unit_id.is_empty():
+		push_warning("SimulationRoot respawn effect expects a non-empty unit_id.")
+		return
+
+	var unit = _resolve_unit(unit_id)
+	if unit == null:
+		push_warning("SimulationRoot could not resolve the target unit for a respawn effect.")
+		return
+
+	if not unit.has_method("respawn_from_checkpoint"):
+		push_warning("SimulationRoot respawn effect expects a unit with respawn_from_checkpoint().")
+		return
+
+	var respawn_target: String = String(effect.get("respawn_target", "fob"))
+	unit.call("respawn_from_checkpoint", respawn_target)
 
 
 func _get_unit_registry():

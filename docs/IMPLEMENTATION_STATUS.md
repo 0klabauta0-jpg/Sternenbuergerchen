@@ -269,3 +269,17 @@
 - Offene Punkte: keine grosse Objective-Architektur, keine Missionsgenerator- oder Mehrziel-Logik, keine separate Objective-UI und keine automatische Verkettung mehrerer Missionsphasen.
 - Risiken: der Objective-Pfad ist bewusst nur ein sehr kleiner Vertical-Slice-Haken am bestehenden Combat-Driver; spaetere echte Siegbedingungen sollten diesen Glue-Code explizit ersetzen statt ihn still zu einem kompletten Missionssystem auszubauen.
 - Naechster Schritt: spaeter nur bei eigenem Task Objective-Secure mit weiteren V1-Siegbedingungen oder einem kleinen Missionsstart-/Einsatzkontext verbinden, falls das wirklich benoetigt wird.
+
+### Minimal Mission Start Context
+- Status: implementiert
+- Stand: der bestehende Einsatz startet jetzt mit einem kleinen, konkreten Missionskontext statt nur in eine nackte Testszene zu springen. `MissionTestSetup` fuellt einen kleinen Missionsbrief in der Szene mit `MISSION`, `DEPLOY`, `OBJECTIVE` und dem aktuell eingesetzten Team. `MetaLayerFlow` gibt dafuer beim Start aus der FOB minimal `Operation Sandglass`, `FOB` und `secure_target` an die Missionsszene weiter. `MissionCombatLoopDriver` nutzt diesen Kontext auch leicht mechanisch: der Objective-Siegpfad ist nur aktiv, wenn das Missionsziel `secure_target` ist.
+- Offene Punkte: keine grosse Missionsstart-Architektur, keine generischen Missionsgeneratoren, keine Objective-Kette und keine ausgebaute Einsatzplanung.
+- Risiken: der Schritt bleibt bewusst ein kleiner Kontext-Haken fuer den bestehenden Slice; spaetere echte Missionsstarts sollten diesen Proto-Pfad explizit ersetzen statt ihn still zu einem grossen Missionsframework auszubauen.
+- Naechster Schritt: spaeter nur bei eigenem Task weitere kleine V1-Einsatzparameter wie Spawnart oder alternative Mission Goals anbinden, wenn das fuer den Slice wirklich gebraucht wird.
+
+### Minimal FOB Respawn Hook
+- Status: implementiert
+- Stand: der taktische Slice hat jetzt einen kleinen autoritativen Friendly-Respawn-Haken. Wenn eine Friendly-Unit `bleedout` erreicht, fordert `MissionCombatLoopDriver` ueber den bestehenden `EventRouter` einen `fob`-Respawn an. Ein kleiner `MissionRespawnDriver` verwaltet dafuer nur eine kurze Tick-Verzoegerung und enqueued anschliessend einen `respawn`-Effect in `SimulationRoot`. `TestUnit` kann daraufhin ueber `respawn_from_checkpoint()` mit voller Health am urspruenglichen Spawnpunkt in den Slice zurueckkehren.
+- Offene Punkte: keine Rover-/Homebase-Respawnpfade, keine echten V1-Zeiten aus dem Brief, keine Transportlogik, keine Respawn-UI und kein Meta-Layer-Rueckfluss dieses Hooks.
+- Risiken: der Hook ist bewusst nur ein kleiner Friendly-Testpfad fuer den bestehenden Slice; spaetere echte Respawn-Systeme muessen diesen Glue-Code explizit ersetzen statt ihn still zur Voll-Loesung werden zu lassen.
+- Naechster Schritt: spaeter nur bei eigenem Task den Respawn-Zieltyp, die Wartezeit oder den Meta-Rueckfluss weiter differenzieren, wenn das fuer V1 wirklich noetig wird.

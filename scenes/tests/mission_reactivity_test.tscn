@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scripts/core/simulation_root.gd" id="1_simulation"]
 [ext_resource type="Script" path="res://scripts/core/event_router.gd" id="2_router"]
@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://scripts/tests/mission_command_flow_driver.gd" id="9_flow"]
 [ext_resource type="Script" path="res://scripts/tests/mission_combat_loop_driver.gd" id="10_combat"]
 [ext_resource type="Script" path="res://scripts/tests/mission_tactical_sandbox_controller.gd" id="11_sandbox"]
+[ext_resource type="Script" path="res://scripts/tests/mission_respawn_driver.gd" id="12_respawn"]
 
 [node name="MissionReactivityTest" type="Node2D"]
 
@@ -41,6 +42,13 @@ offset_top = 16.0
 offset_right = 860.0
 offset_bottom = 132.0
 text = "ALPHA TEAM ORDER\nACTIVE FT: ALL\nORDER PHASE: APPROACH\nAWAITING INPUT\nQ/E FT   R/F PHASE\n1 MOVE   2 DEFEND   3 FLANK   4 TAKE"
+
+[node name="MissionBriefLabel" type="Label" parent="."]
+offset_left = 544.0
+offset_top = 224.0
+offset_right = 860.0
+offset_bottom = 320.0
+text = "MISSION: Operation Sandglass\nDEPLOY: FOB\nOBJECTIVE: SECURE TARGET\nTEAM: unit_alpha, unit_bravo, unit_charlie"
 
 [node name="SimulationRoot" type="Node" parent="."]
 script = ExtResource("1_simulation")
@@ -148,6 +156,8 @@ script = ExtResource("8_setup")
 runtime_leader_path = NodePath("../RuntimeLeader")
 unit_registry_path = NodePath("../UnitRegistry")
 ftl_registry_path = NodePath("../FTLRegistry")
+mission_brief_label_path = NodePath("../MissionBriefLabel")
+combat_driver_path = NodePath("../CombatLoopDriver")
 unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie"), NodePath("../EnemyDelta"), NodePath("../EnemyEcho")])
 
 [node name="DefendFlowDriver" type="Node" parent="."]
@@ -198,6 +208,8 @@ flow_driver_paths = Array[NodePath]([NodePath("../DefendFlowDriver"), NodePath("
 [node name="CombatLoopDriver" type="Node" parent="."]
 script = ExtResource("10_combat")
 contact_range = 220.0
+mission_goal = "secure_target"
+event_router_path = NodePath("../EventRouter")
 simulation_root_path = NodePath("../SimulationRoot")
 status_label_path = NodePath("../StatusLabel")
 target_marker_path = NodePath("../TargetMarker")
@@ -205,3 +217,9 @@ objective_capture_radius = 40.0
 objective_hold_ticks_required = 10
 friendly_unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie")])
 enemy_unit_paths = Array[NodePath]([NodePath("../EnemyDelta"), NodePath("../EnemyEcho")])
+
+[node name="RespawnDriver" type="Node" parent="."]
+script = ExtResource("12_respawn")
+event_router_path = NodePath("../EventRouter")
+simulation_root_path = NodePath("../SimulationRoot")
+friendly_unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie")])

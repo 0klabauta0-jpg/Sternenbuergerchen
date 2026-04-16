@@ -1,6 +1,9 @@
 extends Node
 
 const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
+const DEFAULT_MISSION_NAME: String = "Operation Sandglass"
+const DEFAULT_DEPLOYMENT_SOURCE: String = "FOB"
+const DEFAULT_MISSION_GOAL: String = "secure_target"
 const AVAILABLE_TEAM_UNITS: Array = [
 	{
 		"unit_id": "unit_alpha",
@@ -114,6 +117,9 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 	var mission_setup = mission_instance.get_node_or_null("MissionSetup")
 	if mission_setup != null:
 		mission_setup.set("selected_team_unit_ids", selected_unit_ids)
+		mission_setup.set("mission_name", DEFAULT_MISSION_NAME)
+		mission_setup.set("deployment_source", DEFAULT_DEPLOYMENT_SOURCE)
+		mission_setup.set("mission_goal", DEFAULT_MISSION_GOAL)
 
 	var command_flow_driver = mission_instance.get_node_or_null("CommandFlowDriver")
 	if command_flow_driver != null:
