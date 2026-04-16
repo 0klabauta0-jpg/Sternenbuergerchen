@@ -1,0 +1,156 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Texture2D" path="res://Assets/kenney_space/terrain/isometric/platform_long_NE.png" id="1_platform_long_ne"]
+[ext_resource type="Texture2D" path="res://Assets/kenney_space/terrain/isometric/platform_long_NW.png" id="2_platform_long_nw"]
+[ext_resource type="Texture2D" path="res://Assets/kenney_space/terrain/isometric/platform_small_NE.png" id="3_platform_small_ne"]
+[ext_resource type="Texture2D" path="res://Assets/kenney_space/terrain/isometric/corridor_NE.png" id="4_corridor_ne"]
+[ext_resource type="Texture2D" path="res://Assets/kenney_space/terrain/isometric/corridor_NW.png" id="5_corridor_nw"]
+[ext_resource type="Texture2D" path="res://Assets/kenney_space/terrain/isometric/corridor_wall_NE.png" id="6_corridor_wall_ne"]
+[ext_resource type="Texture2D" path="res://Assets/kenney_space/terrain/isometric/corridor_wall_NW.png" id="7_corridor_wall_nw"]
+[ext_resource type="Texture2D" path="res://Assets/kenney_space/terrain/isometric/structure_NE.png" id="8_structure_ne"]
+[ext_resource type="Texture2D" path="res://Assets/kenney_space/terrain/isometric/structure_NW.png" id="9_structure_nw"]
+[ext_resource type="Texture2D" path="res://Assets/kenney_space/terrain/isometric/supports_low_NE.png" id="10_supports_low_ne"]
+
+[node name="FirstMapV1" type="Node2D"]
+
+[node name="Ground" type="Polygon2D" parent="."]
+z_index = -30
+color = Color(0.08, 0.1, 0.13, 1)
+polygon = PackedVector2Array(0, 0, 760, 0, 760, 460, 0, 460)
+
+[node name="OpenRiskZone" type="Polygon2D" parent="."]
+z_index = -29
+color = Color(0.11, 0.14, 0.18, 1)
+polygon = PackedVector2Array(210, 138, 538, 122, 620, 230, 474, 338, 246, 330, 154, 246)
+
+[node name="AlphaSpawnZone" type="Polygon2D" parent="."]
+z_index = -28
+color = Color(0.12, 0.24, 0.34, 1)
+polygon = PackedVector2Array(36, 278, 180, 250, 234, 348, 92, 396)
+
+[node name="BravoSpawnZone" type="Polygon2D" parent="."]
+z_index = -28
+color = Color(0.34, 0.15, 0.16, 1)
+polygon = PackedVector2Array(520, 42, 694, 52, 726, 152, 560, 190)
+
+[node name="ObjectiveZone" type="Polygon2D" parent="."]
+z_index = -27
+color = Color(0.28, 0.22, 0.08, 1)
+polygon = PackedVector2Array(332, 162, 466, 158, 522, 218, 466, 276, 336, 270, 290, 214)
+
+[node name="spawn_alpha" type="Marker2D" parent="."]
+position = Vector2(118, 332)
+
+[node name="spawn_bravo" type="Marker2D" parent="."]
+position = Vector2(624, 110)
+
+[node name="objective_point" type="Marker2D" parent="."]
+position = Vector2(408, 210)
+
+[node name="flank_anchor_left" type="Marker2D" parent="."]
+position = Vector2(296, 354)
+
+[node name="flank_anchor_right" type="Marker2D" parent="."]
+position = Vector2(490, 296)
+
+[node name="MainPathAlphaA" type="Sprite2D" parent="."]
+z_index = -18
+position = Vector2(188, 300)
+scale = Vector2(0.72, 0.72)
+texture = ExtResource("1_platform_long_ne")
+
+[node name="MainPathAlphaB" type="Sprite2D" parent="."]
+z_index = -18
+position = Vector2(272, 258)
+scale = Vector2(0.72, 0.72)
+texture = ExtResource("1_platform_long_ne")
+
+[node name="MainPathAlphaC" type="Sprite2D" parent="."]
+z_index = -18
+position = Vector2(382, 222)
+scale = Vector2(0.72, 0.72)
+texture = ExtResource("1_platform_long_ne")
+
+[node name="MainPathBravoA" type="Sprite2D" parent="."]
+z_index = -18
+position = Vector2(540, 146)
+scale = Vector2(0.72, 0.72)
+texture = ExtResource("2_platform_long_nw")
+
+[node name="MainPathBravoB" type="Sprite2D" parent="."]
+z_index = -18
+position = Vector2(492, 182)
+scale = Vector2(0.72, 0.72)
+texture = ExtResource("2_platform_long_nw")
+
+[node name="ObjectivePad" type="Sprite2D" parent="."]
+z_index = -17
+position = Vector2(408, 210)
+scale = Vector2(0.78, 0.78)
+texture = ExtResource("3_platform_small_ne")
+
+[node name="FlankLaneA" type="Sprite2D" parent="."]
+z_index = -18
+position = Vector2(224, 378)
+scale = Vector2(0.72, 0.72)
+texture = ExtResource("4_corridor_ne")
+
+[node name="FlankLaneB" type="Sprite2D" parent="."]
+z_index = -18
+position = Vector2(308, 358)
+scale = Vector2(0.72, 0.72)
+texture = ExtResource("4_corridor_ne")
+
+[node name="FlankLaneC" type="Sprite2D" parent="."]
+z_index = -18
+position = Vector2(404, 330)
+scale = Vector2(0.72, 0.72)
+texture = ExtResource("5_corridor_nw")
+
+[node name="FlankLaneD" type="Sprite2D" parent="."]
+z_index = -18
+position = Vector2(516, 290)
+scale = Vector2(0.72, 0.72)
+texture = ExtResource("5_corridor_nw")
+
+[node name="SpawnAlphaBlocker" type="Sprite2D" parent="."]
+z_index = -16
+position = Vector2(198, 274)
+scale = Vector2(0.68, 0.68)
+texture = ExtResource("9_structure_nw")
+
+[node name="SpawnBravoBlocker" type="Sprite2D" parent="."]
+z_index = -16
+position = Vector2(552, 148)
+scale = Vector2(0.68, 0.68)
+texture = ExtResource("8_structure_ne")
+
+[node name="MidWallNorth" type="Sprite2D" parent="."]
+z_index = -15
+position = Vector2(388, 144)
+scale = Vector2(0.74, 0.74)
+texture = ExtResource("6_corridor_wall_ne")
+
+[node name="MidWallSouth" type="Sprite2D" parent="."]
+z_index = -15
+position = Vector2(432, 266)
+scale = Vector2(0.74, 0.74)
+texture = ExtResource("7_corridor_wall_nw")
+
+[node name="ObjectiveCoverLeft" type="Sprite2D" parent="."]
+z_index = -14
+position = Vector2(354, 242)
+scale = Vector2(0.78, 0.78)
+texture = ExtResource("10_supports_low_ne")
+
+[node name="ObjectiveCoverRight" type="Sprite2D" parent="."]
+z_index = -14
+position = Vector2(460, 190)
+scale = Vector2(0.78, 0.78)
+texture = ExtResource("10_supports_low_ne")
+
+[node name="CenterBlocker" type="Sprite2D" parent="."]
+z_index = -16
+position = Vector2(324, 176)
+scale = Vector2(0.66, 0.66)
+texture = ExtResource("8_structure_ne")

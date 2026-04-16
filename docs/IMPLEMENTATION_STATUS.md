@@ -220,3 +220,10 @@
 - Offene Punkte: keine groessere HUD-/Debug-Architektur, keine Politur, keine Animationen und keine komplexe Zeitsteuerung.
 - Risiken: die Lesbarkeitshilfen bleiben bewusst testszenenbezogen; spaetere echte UI- oder Debug-Systeme sollten diesen kleinen Pfad explizit ersetzen statt ihn still zu einer grossen Overlay-Schicht auszubauen.
 - Naechster Schritt: spaeter nur bei eigenem Task weitere gezielte Beobachtbarkeit wie einfache Threat-/Objective-Hinweise ergaenzen, ohne die Szene in eine Debug-Framework-Struktur zu ziehen.
+
+### First Tactical Map V1
+- Status: implementiert
+- Stand: `res://scenes/maps/first_map_v1.tscn` liefert jetzt eine kleine flache Testkarte mit klaren Marker-Nodes `spawn_alpha`, `spawn_bravo`, `objective_point` sowie zwei optionalen Flank-Ankern. Die Karte kombiniert wenige Kenney-Terrain-Sprites fuer Hauptweg, unteren Flankweg, Objective-Pad und wenige Sicht-/Deckungsblocker. `MissionTestSetup` liest diese Marker direkt aus der Map-Szene und setzt Friendly-Spawns, Enemy-Spawns und TargetMarker ohne neue Map- oder Loader-Architektur.
+- Offene Punkte: auf diesem Branch noch keine `MapDefinition`-/`MapLoader`-Schicht, keine Hindernislogik fuer LOS, kein Pathfinding und keine Nutzung der optionalen Flank-Anker im Laufzeitpfad.
+- Risiken: die Karte bleibt bewusst eine lesbare Slice-Testmap und keine Gameplay-Wahrheit; spaetere echte Karten- oder Loader-Systeme sollten die Marker-Integration explizit uebernehmen statt sie still in Missions-Glue weiterwachsen zu lassen.
+- Naechster Schritt: spaeter nur bei eigenem Task entweder ein kleines Karten-Datenmodell nachziehen oder weitere Map-Varianten auf demselben Marker-Schnitt ergaenzen.

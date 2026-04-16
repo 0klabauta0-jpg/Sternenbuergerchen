@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/core/simulation_root.gd" id="1_simulation"]
 [ext_resource type="Script" path="res://scripts/core/event_router.gd" id="2_router"]
@@ -10,8 +10,11 @@
 [ext_resource type="Script" path="res://scripts/tests/mission_test_setup.gd" id="8_setup"]
 [ext_resource type="Script" path="res://scripts/tests/mission_command_flow_driver.gd" id="9_flow"]
 [ext_resource type="Script" path="res://scripts/tests/mission_combat_loop_driver.gd" id="10_combat"]
+[ext_resource type="PackedScene" path="res://scenes/maps/first_map_v1.tscn" id="11_map"]
 
 [node name="MissionReactivityTest" type="Node2D"]
+
+[node name="MapRoot" parent="." instance=ExtResource("11_map")]
 
 [node name="StatusLabel" type="Label" parent="."]
 offset_left = 16.0
@@ -40,7 +43,7 @@ script = ExtResource("5_updates")
 script = ExtResource("6_leader")
 
 [node name="TargetMarker" type="Marker2D" parent="."]
-position = Vector2(320, 180)
+position = Vector2(408, 210)
 
 [node name="TargetVisual" type="Polygon2D" parent="TargetMarker"]
 color = Color(0.95, 0.85, 0.2, 1)
@@ -48,7 +51,7 @@ polygon = PackedVector2Array(-10, 0, 0, -10, 10, 0, 0, 10)
 
 [node name="UnitAlpha" type="Node2D" parent="."]
 script = ExtResource("7_unit")
-position = Vector2(72, 120)
+position = Vector2(118, 332)
 unit_id = "unit_alpha"
 display_name = "Unit Alpha"
 team_id = "team_alpha"
@@ -59,7 +62,7 @@ polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 
 [node name="UnitBravo" type="Node2D" parent="."]
 script = ExtResource("7_unit")
-position = Vector2(72, 180)
+position = Vector2(148, 366)
 unit_id = "unit_bravo"
 display_name = "Unit Bravo"
 team_id = "team_alpha"
@@ -70,7 +73,7 @@ polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 
 [node name="UnitCharlie" type="Node2D" parent="."]
 script = ExtResource("7_unit")
-position = Vector2(72, 240)
+position = Vector2(90, 400)
 unit_id = "unit_charlie"
 display_name = "Unit Charlie"
 team_id = "team_alpha"
@@ -81,7 +84,7 @@ polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 
 [node name="EnemyDelta" type="Node2D" parent="."]
 script = ExtResource("7_unit")
-position = Vector2(220, 130)
+position = Vector2(624, 110)
 unit_id = "enemy_delta"
 display_name = "Enemy Delta"
 team_id = "team_bravo"
@@ -92,7 +95,7 @@ polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 
 [node name="EnemyEcho" type="Node2D" parent="."]
 script = ExtResource("7_unit")
-position = Vector2(228, 212)
+position = Vector2(590, 148)
 unit_id = "enemy_echo"
 display_name = "Enemy Echo"
 team_id = "team_bravo"
@@ -106,6 +109,8 @@ script = ExtResource("8_setup")
 runtime_leader_path = NodePath("../RuntimeLeader")
 unit_registry_path = NodePath("../UnitRegistry")
 ftl_registry_path = NodePath("../FTLRegistry")
+map_root_path = NodePath("../MapRoot")
+target_marker_path = NodePath("../TargetMarker")
 unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie"), NodePath("../EnemyDelta"), NodePath("../EnemyEcho")])
 
 [node name="DefendFlowDriver" type="Node" parent="."]
