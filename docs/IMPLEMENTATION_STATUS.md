@@ -227,3 +227,10 @@
 - Offene Punkte: keine grosse Commander-UI, keine Mausselektion, keine komplexe Marker- oder Overlay-Logik und keine ueber den Testbedarf hinausgehende Eingabearchitektur.
 - Risiken: der Feedback-Pfad bleibt bewusst testszenenbezogen; spaetere echte Commander- oder Taktik-UI sollte diese kleine Debug-Steuerung explizit ersetzen statt sie still auszubauen.
 - Naechster Schritt: spaeter nur bei eigenem Task weitere kleine Bedienhilfen wie Zielwechsel oder Reset ergaenzen, falls der Taktik-Slice das wirklich braucht.
+
+### Team Identity / Roles
+- Status: implementiert
+- Stand: die taktische Missions-Testszene traegt jetzt einen kleinen, klar lesbaren Team-Identity-Schritt: `TestUnit` kann eine kurze Teamanzeige und Rollenbezeichnung tragen, Friendly- und Enemy-Units zeigen diese Identitaet direkt im kleinen Unit-Label, und die Szene selbst haelt zusaetzliche Mini-Uebersichten fuer `TEAM ALPHA` und `HOSTILE TEAM BRAVO`. Der bestehende Befehlsblock zeigt ausserdem jetzt `ALPHA TEAM ORDER`, damit der manuelle Sandbox-Pfad klar einer Teamseite zugeordnet bleibt.
+- Offene Punkte: keine Gameplay-Wirkung aus Rollen, keine tiefere Fireteam-Struktur, keine neue Commander- oder Squad-Architektur und keine Persistenz dieser Identitaet ausserhalb der Testszene.
+- Risiken: der Schritt ist bewusst rein lesbar und testszenenbezogen; spaetere echte Team-/Rollenlogik sollte diese Anzeige explizit erweitern statt aus reiner Beschriftung still Gameplay-Wahrheit abzuleiten.
+- Naechster Schritt: spaeter nur bei eigenem Task Rollen minimal funktional machen, falls das fuer Fireteams oder Commander-Befehle wirklich noetig wird.

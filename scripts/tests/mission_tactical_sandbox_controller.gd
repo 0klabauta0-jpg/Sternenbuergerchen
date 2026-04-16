@@ -5,6 +5,7 @@ const MOVE_COLOR: Color = Color(0.95, 0.85, 0.2, 1.0)
 const DEFEND_COLOR: Color = Color(0.4, 0.9, 1.0, 1.0)
 const FLANK_COLOR: Color = Color(1.0, 0.65, 0.3, 1.0)
 
+@export var order_team_label: String = "ALPHA TEAM"
 @export var runtime_leader_path: NodePath
 @export var command_feedback_label_path: NodePath
 @export var target_marker_path: NodePath
@@ -95,7 +96,7 @@ func _refresh_command_feedback_label() -> void:
 		return
 
 	var lines: PackedStringArray = []
-	lines.append("ACTIVE ORDER")
+	lines.append("%s ORDER" % order_team_label)
 	if _last_command_type.is_empty():
 		lines.append("AWAITING INPUT")
 	else:

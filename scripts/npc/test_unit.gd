@@ -17,6 +17,8 @@ signal vital_status_changed(vital_status)
 @export var unit_id: String = "unit_test_001"
 @export var display_name: String = "Test Unit"
 @export var team_id: String = "team_test"
+@export var team_display_name: String = ""
+@export var role_name: String = ""
 @export var max_health_points: int = 100
 
 var _runtime_status: RefCounted = UNIT_RUNTIME_STATUS_SCRIPT.new()
@@ -67,6 +69,21 @@ func get_health() -> int:
 
 func get_team_id() -> String:
 	return team_id
+
+
+func get_team_display_name() -> String:
+	if not team_display_name.is_empty():
+		return team_display_name
+
+	var compact_team_id: String = team_id
+	if compact_team_id.begins_with("team_"):
+		compact_team_id = compact_team_id.substr(5)
+
+	return compact_team_id.to_upper()
+
+
+func get_role_name() -> String:
+	return role_name
 
 
 func get_vital_status():
@@ -326,9 +343,16 @@ func _refresh_status_label() -> void:
 		return
 
 	var lines: PackedStringArray = []
+	var identity_label: String = _build_identity_label()
+	if not identity_label.is_empty():
+		lines.append(identity_label)
+
 	lines.append(_build_unit_name_label())
 	lines.append(_build_primary_status_label())
-	lines.append(_build_secondary_status_label())
+	var secondary_label: String = _build_secondary_status_label()
+	if not secondary_label.is_empty():
+		lines.append(secondary_label)
+
 	_status_label.text = "\n".join(lines)
 	_status_label.modulate = _build_status_label_color()
 
@@ -347,6 +371,20 @@ func _build_unit_name_label() -> String:
 		return display_name
 
 	return unit_id
+
+
+func _build_identity_label() -> String:
+	var team_label: String = get_team_display_name()
+	if team_label.is_empty() and role_name.is_empty():
+		return ""
+
+	if role_name.is_empty():
+		return team_label
+
+	if team_label.is_empty():
+		return role_name
+
+	return "%s / %s" % [team_label, role_name]
 
 
 func _build_primary_status_label() -> String:
