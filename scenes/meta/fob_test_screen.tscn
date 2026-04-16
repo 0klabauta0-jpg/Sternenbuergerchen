@@ -54,6 +54,20 @@ layout_mode = 2
 text = "Last mission: none"
 autowrap_mode = 3
 
+[node name="LoadoutSection" type="VBoxContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LoadoutTitle" type="Label" parent="Panel/Margin/VBox/LoadoutSection"]
+layout_mode = 2
+text = "Loadout & Roles"
+
+[node name="LoadoutGrid" type="GridContainer" parent="Panel/Margin/VBox/LoadoutSection"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 4
+
 [node name="ButtonRow" type="HBoxContainer" parent="Panel/Margin/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 12
