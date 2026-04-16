@@ -90,3 +90,32 @@
 - Offene Punkte: keine Registry-Nutzung, keine differenzierte Verteilung pro Unit und keine Ausfuehrungslogik.
 - Risiken: Die Mehrfachverteilung ist bewusst identisch fuer alle gehaltenen Units; spaetere feinere Aufteilung oder Priorisierung muss explizit und separat eingefuehrt werden.
 - Naechster Schritt: den Batch abschliessen und erst im naechsten Batch sichtbare Reaktion oder Missionsszenen ergaenzen.
+
+
+### UnitCommand Stub
+- Status: implementiert
+- Stand: ein minimaler `UnitCommand`-Stub wurde als leichtgewichtiges Datenmodell eingefuehrt; dient als kleine formale Grundlage fuer spaetere Unit-bezogene Runtime-Kommandos ohne echte Ausfuehrungslogik.
+- Offene Punkte: keine echte Unit-Ausfuehrung, keine Bewegung, keine Kampf- oder Missionslogik.
+- Risiken: Das Modell ist bewusst klein; spaetere Erweiterungen muessen kompatibel zur bestehenden Daten- und Runtime-Struktur bleiben.
+- Naechster Schritt: spaeter an Runtime-Status und minimale Simulationspfade anbinden.
+
+### TestUnit Runtime Status
+- Status: implementiert
+- Stand: fuer `TestUnit` existiert ein minimales Runtime-Statusmodell mit einfachen Zustandswerten wie `idle`, `assigned`, `pending_move` und `holding`.
+- Offene Punkte: keine echte Bewegungslogik, keine KI, keine Kampfzustandslogik.
+- Risiken: Der Status ist rein vorbereitend; spaetere Runtime-Uebergaenge muessen weiter ueber SimulationRoot und klar definierte Datenpfade laufen.
+- Naechster Schritt: an einfache sichtbare Reaktionen und minimale Move-Tests anbinden.
+
+### FTLTask to Unit Assignment
+- Status: implementiert
+- Stand: ein minimaler Datenfluss wurde ergaenzt, ueber den ein `FTLTask` einer `TestUnit` zugeordnet werden kann; dient nur als Referenz- und Integrationsnachweis.
+- Offene Punkte: keine echte Task-Ausfuehrung, keine Taktiklogik, keine Bewegungs- oder Aktionsverarbeitung.
+- Risiken: Die Zuordnung ist aktuell bewusst leichtgewichtig; spaetere Erweiterungen muessen die Trennung zwischen Datenfluss, RuntimeLeader und SimulationRoot erhalten.
+- Naechster Schritt: in eine minimale sichtbare Missionsreaktion ueberfuehren.
+
+### Multiple Units per FTL
+- Status: implementiert
+- Stand: der grundlegende Datenfluss fuer mehrere `TestUnit`-Instanzen unter einem FTL / Team wurde hergestellt; mehrere Units koennen demselben FTL-Kontext zugeordnet werden.
+- Offene Punkte: keine Formation, keine echte Untereinheitensteuerung, keine taktische Verteilung.
+- Risiken: Bisher nur Integrations- und Strukturbeweis; spaetere Gruppenlogik darf nicht still in Registries oder RuntimeLeader versteckt werden.
+- Naechster Schritt: mehrere Units in einer minimalen Missions-Testszene sichtbar reagieren lassen.
