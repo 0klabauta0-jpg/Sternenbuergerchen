@@ -262,3 +262,10 @@
 - Offene Punkte: keine grosse Missions- oder Objective-Logik, keine automatische Phasenumschaltung, keine neue State-Machine und keine Phase-UI ueber den kleinen Sandbox-Hinweis hinaus.
 - Risiken: der Schritt bleibt bewusst ein kleiner Gate-Mechanismus fuer den bestehenden Slice; spaetere echte Missionsphasen sollten diesen Debug-/Proto-Pfad explizit ersetzen statt ihn still zu einer grossen Systemschicht auszubauen.
 - Naechster Schritt: spaeter nur bei eigenem Task eine minimale Siegbedingung oder Objective-Logik an diesen Phase-Haken koppeln, wenn das fuer den Vertical Slice wirklich noetig wird.
+
+### Minimal Objective Victory
+- Status: implementiert
+- Stand: der bestehende Zielmarker fungiert jetzt auch als kleiner Objective-Punkt fuer den taktischen Sandbox-Slice. `MissionCombatLoopDriver` kann Friendly-Sieg jetzt nicht nur ueber gegnerische Neutralisierung, sondern alternativ auch ueber `OBJECTIVE SECURED` aufloesen: dafuer muss mindestens eine fitte Friendly-Unit im `HOLD`-Phasenmodus den Zielmarker innerhalb eines kleinen Radius ueber einige Ticks halten, waehrend dort kein fitter Gegner contestet. Der Combat-Status und der Siegerhinweis zeigen diesen alternativen Endzustand direkt in der Szene an.
+- Offene Punkte: keine grosse Objective-Architektur, keine Missionsgenerator- oder Mehrziel-Logik, keine separate Objective-UI und keine automatische Verkettung mehrerer Missionsphasen.
+- Risiken: der Objective-Pfad ist bewusst nur ein sehr kleiner Vertical-Slice-Haken am bestehenden Combat-Driver; spaetere echte Siegbedingungen sollten diesen Glue-Code explizit ersetzen statt ihn still zu einem kompletten Missionssystem auszubauen.
+- Naechster Schritt: spaeter nur bei eigenem Task Objective-Secure mit weiteren V1-Siegbedingungen oder einem kleinen Missionsstart-/Einsatzkontext verbinden, falls das wirklich benoetigt wird.

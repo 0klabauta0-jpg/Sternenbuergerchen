@@ -19,6 +19,9 @@ signal combat_resolved(winning_team_id, neutralized_enemy_count)
 @export var ticks_between_attacks: int = 10
 @export var simulation_root_path: NodePath
 @export var status_label_path: NodePath
+@export var target_marker_path: NodePath
+@export var objective_capture_radius: float = 42.0
+@export var objective_hold_ticks_required: int = 10
 @export var friendly_unit_paths: Array[NodePath] = []
 @export var enemy_unit_paths: Array[NodePath] = []
 
@@ -26,10 +29,13 @@ var _los_system = LOS_SYSTEM_SCRIPT.new()
 var _queued_bleedout_by_unit_id: Dictionary = {}
 var _combat_finished: bool = false
 var _winning_team_id: String = ""
+var _resolution_reason: String = ""
 var _last_contact: Dictionary = {}
 var _current_tick: int = 0
 var _next_attack_tick: int = 1
 var _last_event_text: String = "Combat waiting"
+var _objective_progress_ticks: int = 0
+var _objective_state_text: String = "UNSECURED"
 var _contact_line: Line2D = null
 var _event_label: Label = null
 var _winner_label: Label = null
@@ -58,6 +64,10 @@ func get_winning_team_id() -> String:
 	return _winning_team_id
 
 
+func get_resolution_reason() -> String:
+	return _resolution_reason
+
+
 func get_last_contact() -> Dictionary:
 	return _last_contact.duplicate(true)
 
@@ -74,6 +84,10 @@ func _on_tick_processed(tick: int) -> void:
 
 	_queue_bleedout_for_downed_enemy(simulation_root)
 	_try_enqueue_attacks(simulation_root)
+	_update_objective_control()
+	if _combat_finished:
+		_update_status_label("resolved")
+		return
 	_update_combat_resolution()
 	if not _combat_finished:
 		_update_status_label("active")
@@ -165,11 +179,93 @@ func _update_combat_resolution() -> void:
 
 	_combat_finished = true
 	_winning_team_id = friendly_team_id
-	_set_event_text("COMBAT FINISHED")
+	_resolution_reason = "enemy_neutralized"
+	_set_event_text("ENEMY FORCE NEUTRALIZED")
 	_clear_contact_visuals()
 	_update_status_label("resolved")
 	_update_winner_label()
-	combat_resolved.emit(_winning_team_id, enemy_units.size())
+	combat_resolved.emit(_winning_team_id, _count_neutralized_units(enemy_unit_paths))
+
+
+func _update_objective_control() -> void:
+	var target_marker = get_node_or_null(target_marker_path)
+	if not (target_marker is Node2D):
+		_objective_progress_ticks = 0
+		_objective_state_text = "INACTIVE"
+		return
+
+	var objective_position: Vector2 = target_marker.position
+	if _is_objective_contested(objective_position):
+		_objective_progress_ticks = 0
+		_objective_state_text = "CONTESTED"
+		return
+
+	var objective_holders: Array = _get_objective_holders(objective_position)
+	if objective_holders.is_empty():
+		_objective_progress_ticks = 0
+		_objective_state_text = "UNSECURED"
+		return
+
+	var required_ticks: int = maxi(objective_hold_ticks_required, 1)
+	_objective_progress_ticks = mini(_objective_progress_ticks + 1, required_ticks)
+	_objective_state_text = "SECURE %d/%d" % [_objective_progress_ticks, required_ticks]
+	if _objective_progress_ticks < required_ticks:
+		return
+
+	_resolve_objective_victory()
+
+
+func _resolve_objective_victory() -> void:
+	_combat_finished = true
+	_winning_team_id = friendly_team_id
+	_resolution_reason = "objective_secured"
+	_objective_state_text = "SECURED"
+	_set_event_text("OBJECTIVE SECURED")
+	_clear_contact_visuals()
+	_update_status_label("resolved")
+	_update_winner_label()
+	combat_resolved.emit(_winning_team_id, _count_neutralized_units(enemy_unit_paths))
+
+
+func _get_objective_holders(objective_position: Vector2) -> Array:
+	var holders: Array = []
+	for unit in _get_units(friendly_unit_paths):
+		if not _can_hold_objective(unit, objective_position):
+			continue
+
+		holders.append(unit)
+
+	return holders
+
+
+func _can_hold_objective(unit, objective_position: Vector2) -> bool:
+	if unit == null or not _can_target_receive_attack(unit):
+		return false
+
+	if _get_unit_phase(unit) != PHASE_HOLD:
+		return false
+
+	if not _is_hold_phase_ready(unit):
+		return false
+
+	if not (unit is Node2D):
+		return false
+
+	return (unit as Node2D).position.distance_to(objective_position) <= objective_capture_radius
+
+
+func _is_objective_contested(objective_position: Vector2) -> bool:
+	for enemy in _get_units(enemy_unit_paths):
+		if enemy == null or not _can_target_receive_attack(enemy):
+			continue
+
+		if not (enemy is Node2D):
+			continue
+
+		if (enemy as Node2D).position.distance_to(objective_position) <= objective_capture_radius:
+			return true
+
+	return false
 
 
 func _get_units(paths: Array[NodePath]) -> Array:
@@ -329,6 +425,7 @@ func _build_status_text(state_name: String) -> String:
 
 	lines.append("Enemies fit: %d" % _count_fit_units(enemy_unit_paths))
 	lines.append("Friendlies fit: %d" % _count_fit_units(friendly_unit_paths))
+	lines.append("Objective: %s" % _objective_state_text)
 	lines.append("Next shot: %s" % _build_attack_readiness_text())
 	lines.append("Last event: %s" % _last_event_text)
 
@@ -527,7 +624,10 @@ func _update_winner_label() -> void:
 		return
 
 	if _combat_finished and not _winning_team_id.is_empty():
-		_winner_label.text = "COMBAT FINISHED\nWinner: %s" % _winning_team_id
+		if _resolution_reason == "objective_secured":
+			_winner_label.text = "OBJECTIVE SECURED\nWinner: %s" % _winning_team_id
+		else:
+			_winner_label.text = "COMBAT FINISHED\nWinner: %s" % _winning_team_id
 		return
 
 	_winner_label.text = ""
@@ -540,6 +640,18 @@ func _count_fit_units(paths: Array[NodePath]) -> int:
 			fit_count += 1
 
 	return fit_count
+
+
+func _count_neutralized_units(paths: Array[NodePath]) -> int:
+	var neutralized_count: int = 0
+	for unit in _get_units(paths):
+		if unit == null or not unit.has_method("get_vital_state"):
+			continue
+
+		if String(unit.call("get_vital_state")) != "fit":
+			neutralized_count += 1
+
+	return neutralized_count
 
 
 func _build_attack_readiness_text() -> String:
