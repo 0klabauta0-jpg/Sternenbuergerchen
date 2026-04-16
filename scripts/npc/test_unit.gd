@@ -5,17 +5,22 @@ const UNIT_RUNTIME_STATUS_SCRIPT: GDScript = preload("res://scripts/npc/unit_run
 
 signal runtime_status_changed(runtime_status)
 signal unit_command_assigned(command)
+signal damage_applied(amount, health_points, hit_context)
 
 @export var unit_id: String = "unit_test_001"
 @export var display_name: String = "Test Unit"
 @export var team_id: String = "team_test"
+@export var max_health_points: int = 100
 
 var _runtime_status: RefCounted = UNIT_RUNTIME_STATUS_SCRIPT.new()
 var _current_unit_command: RefCounted = null
+var _health_points: int = max_health_points
+var _last_damage_context: Dictionary = {}
 
 
 func _ready() -> void:
 	_runtime_status = _build_runtime_status("idle")
+	_health_points = max_health_points
 
 
 func get_unit_id() -> String:
@@ -30,8 +35,26 @@ func get_current_unit_command():
 	return _current_unit_command
 
 
+func get_health() -> int:
+	return _health_points
+
+
+func get_last_damage_context() -> Dictionary:
+	return _last_damage_context.duplicate(true)
+
+
 func get_target_position():
 	return _runtime_status.target_position
+
+
+func apply_damage(amount: int, hit_context: Dictionary = {}) -> bool:
+	if amount <= 0:
+		return false
+
+	_health_points = maxi(_health_points - amount, 0)
+	_last_damage_context = hit_context.duplicate(true)
+	damage_applied.emit(amount, _health_points, _last_damage_context)
+	return true
 
 
 func set_target_position(target_position: Variant) -> bool:

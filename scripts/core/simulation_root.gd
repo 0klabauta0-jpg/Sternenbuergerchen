@@ -4,6 +4,7 @@ extends Node
 signal tick_processed(tick: int)
 
 const MOVE_SPEED_PER_SECOND: float = 120.0
+const DAMAGE_MODEL_SCRIPT: GDScript = preload("res://scripts/core/damage_model.gd")
 
 @export var unit_registry_path: NodePath
 
@@ -93,7 +94,12 @@ func _apply_effect(effect: Dictionary, delta: float) -> void:
 		push_warning("SimulationRoot received a negative physics delta while applying an effect.")
 		return
 
-	# TODO: Deterministic effect commits belong here once systems exist.
+	match _extract_effect_type(effect):
+		"damage":
+			_apply_damage_effect(effect)
+		_:
+			# TODO: Deterministic effect commits belong here once systems exist.
+			pass
 
 
 func _drain_queue(queue: Array) -> Array:
@@ -162,6 +168,13 @@ func _extract_command_type(cmd: Dictionary) -> String:
 	return ""
 
 
+func _extract_effect_type(effect: Dictionary) -> String:
+	if effect.has("effect_type"):
+		return String(effect["effect_type"])
+
+	return ""
+
+
 func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 	var unit_id: String = String(cmd.get("unit_id", ""))
 	if unit_id.is_empty():
@@ -204,8 +217,69 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 	node_2d.position = current_position + direction.normalized() * step_distance
 
 
+func _apply_damage_effect(effect: Dictionary) -> void:
+	var unit_id: String = String(effect.get("unit_id", ""))
+	if unit_id.is_empty():
+		push_warning("SimulationRoot damage effect expects a non-empty unit_id.")
+		return
+
+	var unit = _resolve_unit(unit_id)
+	if unit == null:
+		push_warning("SimulationRoot could not resolve the target unit for a damage effect.")
+		return
+
+	if not unit.has_method("apply_damage"):
+		push_warning("SimulationRoot damage effect expects a unit with apply_damage().")
+		return
+
+	var base_damage: int = _extract_int(effect.get("damage", 0))
+	if base_damage <= 0:
+		push_warning("SimulationRoot damage effect expects a positive damage value.")
+		return
+
+	var hit_chance: float = _extract_float(effect.get("hit_chance", 1.0), 1.0)
+	var roll_override: float = _extract_float(effect.get("roll_override", -1.0), -1.0)
+	var damage_multiplier: float = _extract_float(effect.get("damage_multiplier", 1.0), 1.0)
+	var damage_model = DAMAGE_MODEL_SCRIPT.new()
+	if not bool(damage_model.call("resolve_hit", hit_chance, roll_override)):
+		return
+
+	var resolved_damage: int = int(damage_model.call("resolve_damage", base_damage, damage_multiplier))
+	if resolved_damage <= 0:
+		return
+
+	var hit_context: Dictionary = {
+		"effect_type": "damage",
+		"unit_id": unit_id,
+	}
+	unit.call("apply_damage", resolved_damage, hit_context)
+
+
 func _get_unit_registry():
 	if unit_registry_path.is_empty():
 		return null
 
 	return get_node_or_null(unit_registry_path)
+
+
+func _resolve_unit(unit_id: String):
+	var unit_registry = _get_unit_registry()
+	if unit_registry == null or not unit_registry.has_method("get_unit"):
+		push_warning("SimulationRoot requires a direct UnitRegistry reference for unit lookups.")
+		return null
+
+	return unit_registry.call("get_unit", unit_id)
+
+
+func _extract_int(value: Variant) -> int:
+	if typeof(value) == TYPE_INT or typeof(value) == TYPE_FLOAT:
+		return int(value)
+
+	return 0
+
+
+func _extract_float(value: Variant, fallback: float) -> float:
+	if typeof(value) == TYPE_INT or typeof(value) == TYPE_FLOAT:
+		return float(value)
+
+	return fallback
