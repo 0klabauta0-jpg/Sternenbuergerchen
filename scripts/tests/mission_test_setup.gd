@@ -4,6 +4,10 @@ extends Node
 @export var runtime_leader_path: NodePath
 @export var unit_registry_path: NodePath
 @export var ftl_registry_path: NodePath
+@export var target_marker_path: NodePath
+@export var spawn_alpha_path: NodePath
+@export var spawn_bravo_path: NodePath
+@export var objective_point_path: NodePath
 @export var unit_paths: Array[NodePath] = []
 @export var selected_team_unit_ids: PackedStringArray = []
 
@@ -21,7 +25,16 @@ func _ready() -> void:
 		push_warning("MissionTestSetup requires direct references to RuntimeLeader, UnitRegistry and FTLRegistry.")
 		return
 
+	var spawn_alpha_marker := _resolve_marker(spawn_alpha_path)
+	var spawn_bravo_marker := _resolve_marker(spawn_bravo_path)
+	var objective_marker := _resolve_marker(objective_point_path)
+	var target_marker := _resolve_marker(target_marker_path)
+	if target_marker != null and objective_marker != null:
+		target_marker.global_position = objective_marker.global_position
+
 	var first_unit: Node = null
+	var friendly_spawn_index: int = 0
+	var enemy_spawn_index: int = 0
 	for unit_path in unit_paths:
 		var unit = get_node_or_null(unit_path)
 		if unit == null or not unit.has_method("get_unit_id"):
@@ -36,6 +49,15 @@ func _ready() -> void:
 			if unit is CanvasItem:
 				unit.visible = false
 			continue
+
+		if unit is Node2D:
+			var unit_node: Node2D = unit
+			if unit_team_id == team_id and spawn_alpha_marker != null:
+				unit_node.global_position = spawn_alpha_marker.global_position + _get_friendly_spawn_offset(friendly_spawn_index)
+				friendly_spawn_index += 1
+			elif unit_team_id != team_id and spawn_bravo_marker != null:
+				unit_node.global_position = spawn_bravo_marker.global_position + _get_enemy_spawn_offset(enemy_spawn_index)
+				enemy_spawn_index += 1
 
 		if unit is CanvasItem:
 			unit.visible = true
@@ -60,3 +82,33 @@ func _is_selected_friendly_unit(unit_id: String) -> bool:
 		return true
 
 	return selected_team_unit_ids.has(unit_id)
+
+
+func _resolve_marker(node_path: NodePath) -> Marker2D:
+	if node_path.is_empty():
+		return null
+
+	return get_node_or_null(node_path) as Marker2D
+
+
+func _get_friendly_spawn_offset(index: int) -> Vector2:
+	var offsets: Array[Vector2] = [
+		Vector2(-24.0, 12.0),
+		Vector2(0.0, 0.0),
+		Vector2(24.0, -12.0),
+	]
+	if index >= 0 and index < offsets.size():
+		return offsets[index]
+
+	return Vector2(24.0 * float(index), 0.0)
+
+
+func _get_enemy_spawn_offset(index: int) -> Vector2:
+	var offsets: Array[Vector2] = [
+		Vector2(-18.0, -10.0),
+		Vector2(18.0, 10.0),
+	]
+	if index >= 0 and index < offsets.size():
+		return offsets[index]
+
+	return Vector2(18.0 * float(index), 0.0)
