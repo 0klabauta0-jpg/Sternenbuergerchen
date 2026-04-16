@@ -23,6 +23,7 @@ var _last_damage_context: Dictionary = {}
 func _ready() -> void:
 	_runtime_status = _build_runtime_status("idle")
 	_vital_status = _build_vital_status("fit", max_health_points, 0)
+	_apply_vital_visual()
 
 
 func get_unit_id() -> String:
@@ -47,6 +48,10 @@ func get_team_id() -> String:
 
 func get_vital_status():
 	return _vital_status
+
+
+func get_vital_state() -> String:
+	return String(_vital_status.state)
 
 
 func get_last_damage_context() -> Dictionary:
@@ -160,6 +165,7 @@ func _set_vital_status(state: String, health_points: int, bleedout_ticks: int) -
 		return
 
 	_vital_status = vital_status
+	_apply_vital_visual()
 	vital_status_changed.emit(_vital_status)
 
 
@@ -171,3 +177,16 @@ func _map_unit_command_to_status(command_type: String) -> String:
 			return "holding"
 		_:
 			return "assigned"
+
+
+func _apply_vital_visual() -> void:
+	match String(_vital_status.state):
+		"down":
+			modulate = Color(1.0, 0.55, 0.55, 0.85)
+			rotation_degrees = 28.0
+		"bleedout":
+			modulate = Color(0.45, 0.45, 0.45, 0.7)
+			rotation_degrees = 45.0
+		_:
+			modulate = Color(1.0, 1.0, 1.0, 1.0)
+			rotation_degrees = 0.0

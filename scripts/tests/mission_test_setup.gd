@@ -28,8 +28,14 @@ func _ready() -> void:
 
 		var unit_id: String = String(unit.call("get_unit_id"))
 		unit_registry.call("register_unit", unit_id, unit)
-		runtime_leader.call("add_unit_member", unit)
-		if first_unit == null:
+		var unit_team_id: String = ""
+		if unit.has_method("get_team_id"):
+			unit_team_id = String(unit.call("get_team_id"))
+
+		if unit_team_id == team_id:
+			runtime_leader.call("add_unit_member", unit)
+
+		if first_unit == null and unit_team_id == team_id:
 			first_unit = unit
 
 	if first_unit != null:
