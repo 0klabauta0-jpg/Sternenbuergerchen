@@ -8,6 +8,12 @@ const EVENT_LABEL_NAME: String = "DebugEventLabel"
 const STATUS_LABEL_OFFSET: Vector2 = Vector2(-54.0, -48.0)
 const EVENT_LABEL_OFFSET: Vector2 = Vector2(-42.0, -70.0)
 const EVENT_DURATION_SECONDS: float = 1.2
+const DEFAULT_COMBAT_ROLE: String = "anchor"
+const ALLOWED_COMBAT_ROLES: PackedStringArray = [
+	"anchor",
+	"recon",
+	"assault",
+]
 
 signal runtime_status_changed(runtime_status)
 signal unit_command_assigned(command)
@@ -19,6 +25,7 @@ signal vital_status_changed(vital_status)
 @export var team_id: String = "team_test"
 @export var team_display_name: String = ""
 @export var role_name: String = ""
+@export var combat_role: String = DEFAULT_COMBAT_ROLE
 @export var max_health_points: int = 100
 
 var _runtime_status: RefCounted = UNIT_RUNTIME_STATUS_SCRIPT.new()
@@ -35,6 +42,7 @@ var _contact_target_id: String = ""
 
 
 func _ready() -> void:
+	_sanitize_combat_role()
 	_ensure_readability_labels()
 	_runtime_status = _build_runtime_status("idle")
 	_vital_status = _build_vital_status("fit", max_health_points, 0)
@@ -84,6 +92,13 @@ func get_team_display_name() -> String:
 
 func get_role_name() -> String:
 	return role_name
+
+
+func get_combat_role() -> String:
+	if ALLOWED_COMBAT_ROLES.has(combat_role):
+		return combat_role
+
+	return DEFAULT_COMBAT_ROLE
 
 
 func get_vital_status():
@@ -226,6 +241,14 @@ func show_event_text(event_text: String, event_color: Color = Color(1.0, 0.95, 0
 	_current_event_color = event_color
 	_event_time_remaining = duration_seconds
 	_refresh_event_label()
+
+
+func _sanitize_combat_role() -> void:
+	if ALLOWED_COMBAT_ROLES.has(combat_role):
+		return
+
+	push_warning("TestUnit.combat_role expects one of: anchor, recon, assault.")
+	combat_role = DEFAULT_COMBAT_ROLE
 
 
 func _build_runtime_status(

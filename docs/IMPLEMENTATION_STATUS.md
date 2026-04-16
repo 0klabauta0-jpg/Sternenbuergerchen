@@ -234,3 +234,10 @@
 - Offene Punkte: keine Gameplay-Wirkung aus Rollen, keine tiefere Fireteam-Struktur, keine neue Commander- oder Squad-Architektur und keine Persistenz dieser Identitaet ausserhalb der Testszene.
 - Risiken: der Schritt ist bewusst rein lesbar und testszenenbezogen; spaetere echte Team-/Rollenlogik sollte diese Anzeige explizit erweitern statt aus reiner Beschriftung still Gameplay-Wahrheit abzuleiten.
 - Naechster Schritt: spaeter nur bei eigenem Task Rollen minimal funktional machen, falls das fuer Fireteams oder Commander-Befehle wirklich noetig wird.
+
+### Team Identity / Roles Mechanical Step
+- Status: implementiert
+- Stand: `TestUnit` traegt jetzt genau ein kleines exportiertes Feld `combat_role` mit den erlaubten Werten `anchor`, `recon` und `assault`. Dieses Feld wird ausschliesslich in der bestehenden Ableitung im `RuntimeLeader` verwendet, um `target_position`, `cover_score` und `attack_bonus` fuer bestehende Orders minimal unterschiedlich abzuleiten. In der Missions-Testszene ist `Unit Alpha = anchor`, `Unit Bravo = recon` und `Unit Charlie = assault`; dadurch fuehrt dieselbe Order jetzt zu unterschiedlich konservativen, seitlichen oder offensiven Ergebnissen, ohne eine neue Rollen- oder Skill-Architektur einzufuehren.
+- Offene Punkte: keine neue Rollenarchitektur, keine Persoenlichkeiten, keine Fireteam-Logik, keine neue Commander-UI und keine tieferen Datenpipelines fuer Rollen ausserhalb der Test-Units.
+- Risiken: der Schritt ist bewusst klein gehalten und haengt nur an bereits bestehenden Order-Ableitungen; spaetere echte Rollen- oder Squad-Systeme muessen diesen Minimalpfad explizit erweitern statt versteckte Regeln ueber viele Systeme zu verteilen.
+- Naechster Schritt: spaeter nur bei eigenem Task weitere kleine funktionale Unterschiede ergaenzen, falls sie fuer Fireteams oder Commander-Befehle wirklich gebraucht werden.

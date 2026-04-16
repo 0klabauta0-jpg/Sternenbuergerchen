@@ -80,6 +80,7 @@ display_name = "Unit Alpha"
 team_id = "team_alpha"
 team_display_name = "ALPHA"
 role_name = "FTL"
+combat_role = "anchor"
 
 [node name="Visual" type="Polygon2D" parent="UnitAlpha"]
 color = Color(0.2, 0.8, 1, 1)
@@ -93,6 +94,7 @@ display_name = "Unit Bravo"
 team_id = "team_alpha"
 team_display_name = "ALPHA"
 role_name = "RIFLE"
+combat_role = "recon"
 
 [node name="Visual" type="Polygon2D" parent="UnitBravo"]
 color = Color(0.2, 0.65, 1, 1)
@@ -106,6 +108,7 @@ display_name = "Unit Charlie"
 team_id = "team_alpha"
 team_display_name = "ALPHA"
 role_name = "FLANK"
+combat_role = "assault"
 
 [node name="Visual" type="Polygon2D" parent="UnitCharlie"]
 color = Color(0.2, 0.5, 1, 1)

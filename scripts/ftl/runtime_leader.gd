@@ -4,6 +4,13 @@ extends Node
 const FTL_RUNTIME_STATUS_SCRIPT: GDScript = preload("res://scripts/ftl/ftl_runtime_status.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const FLANK_OFFSET_DISTANCE: float = 72.0
+const ROLE_ANCHOR: String = "anchor"
+const ROLE_RECON: String = "recon"
+const ROLE_ASSAULT: String = "assault"
+const MOVE_RECON_LATERAL_OFFSET: float = 28.0
+const MOVE_ASSAULT_FORWARD_OFFSET: float = 24.0
+const FLANK_RECON_LATERAL_SCALE: float = 1.45
+const FLANK_ASSAULT_FORWARD_OFFSET: float = 28.0
 
 signal promoted(new_leader)
 signal demoted(old_leader)
@@ -234,8 +241,8 @@ func _build_unit_command_from_ftl_task(task, unit: Node):
 	unit_command.team_id = String(task.get("team_id"))
 	unit_command.fire_status = _map_task_type_to_fire_status(task_type, source_command_type)
 	unit_command.source_command_type = source_command_type
-	unit_command.cover_score = _derive_cover_score(task_type, source_command_type)
-	unit_command.attack_bonus = _derive_attack_bonus(task_type, source_command_type)
+	unit_command.cover_score = _derive_cover_score(task_type, source_command_type, unit)
+	unit_command.attack_bonus = _derive_attack_bonus(task_type, source_command_type, unit)
 	unit_command.target_position = _derive_target_position(task, unit, command_type, source_command_type)
 	unit_command.target_area_id = String(task.get("target_area_id"))
 	unit_command.source_task_type = task_type
@@ -273,35 +280,56 @@ func _map_task_type_to_fire_status(task_type: String, source_command_type: Strin
 			return "hold_fire"
 
 
-func _derive_cover_score(task_type: String, source_command_type: String) -> float:
+func _derive_cover_score(task_type: String, source_command_type: String, unit: Node) -> float:
+	var cover_score: float = 0.0
 	if source_command_type == "defend":
-		return 0.7
+		cover_score = 0.7
+	elif source_command_type == "flank":
+		cover_score = 0.15
+	else:
+		match task_type:
+			"hold_position":
+				cover_score = 0.55
+			"seek_cover":
+				cover_score = 0.8
+			"engage_in_area":
+				cover_score = 0.2
+			_:
+				cover_score = 0.0
 
+	match _get_unit_combat_role(unit):
+		ROLE_ANCHOR:
+			cover_score += 0.2
+		ROLE_RECON:
+			cover_score += 0.05
+		ROLE_ASSAULT:
+			cover_score -= 0.1
+
+	return clampf(cover_score, 0.0, 1.0)
+
+
+func _derive_attack_bonus(task_type: String, source_command_type: String, unit: Node) -> float:
+	var attack_bonus: float = 0.0
 	if source_command_type == "flank":
-		return 0.15
+		attack_bonus = 0.35
+	else:
+		match task_type:
+			"engage_in_area":
+				attack_bonus = 0.2
+			"hold_position":
+				attack_bonus = 0.05
+			_:
+				attack_bonus = 0.0
 
-	match task_type:
-		"hold_position":
-			return 0.55
-		"seek_cover":
-			return 0.8
-		"engage_in_area":
-			return 0.2
-		_:
-			return 0.0
+	match _get_unit_combat_role(unit):
+		ROLE_ANCHOR:
+			attack_bonus -= 0.08
+		ROLE_RECON:
+			attack_bonus += 0.08
+		ROLE_ASSAULT:
+			attack_bonus += 0.18
 
-
-func _derive_attack_bonus(task_type: String, source_command_type: String) -> float:
-	if source_command_type == "flank":
-		return 0.35
-
-	match task_type:
-		"engage_in_area":
-			return 0.2
-		"hold_position":
-			return 0.05
-		_:
-			return 0.0
+	return clampf(attack_bonus, 0.0, 0.75)
 
 
 func _derive_target_position(task, unit: Node, command_type: String, source_command_type: String):
@@ -311,6 +339,25 @@ func _derive_target_position(task, unit: Node, command_type: String, source_comm
 
 	if typeof(raw_target_position) != TYPE_VECTOR2:
 		return raw_target_position
+
+	if source_command_type == "move" and unit is Node2D:
+		var unit_position: Vector2 = (unit as Node2D).position
+		var move_direction: Vector2 = raw_target_position - unit_position
+		if move_direction.is_zero_approx():
+			return raw_target_position
+
+		var move_forward_direction: Vector2 = move_direction.normalized()
+		var move_lateral_sign: float = -1.0 if unit_position.y <= raw_target_position.y else 1.0
+		var move_lateral_direction: Vector2 = move_forward_direction.orthogonal() * move_lateral_sign
+		match _get_unit_combat_role(unit):
+			ROLE_ANCHOR:
+				return unit_position.lerp(raw_target_position, 0.72)
+			ROLE_RECON:
+				return unit_position.lerp(raw_target_position, 0.88) + move_lateral_direction * MOVE_RECON_LATERAL_OFFSET
+			ROLE_ASSAULT:
+				return raw_target_position + move_forward_direction * MOVE_ASSAULT_FORWARD_OFFSET
+			_:
+				return raw_target_position
 
 	if source_command_type != "flank":
 		return raw_target_position
@@ -323,9 +370,32 @@ func _derive_target_position(task, unit: Node, command_type: String, source_comm
 	if direction.is_zero_approx():
 		return raw_target_position
 
+	var combat_role: String = _get_unit_combat_role(unit)
+	var forward_direction: Vector2 = direction.normalized()
 	var flank_sign: float = 1.0
 	if unit_position.y <= raw_target_position.y:
 		flank_sign = -1.0
 
-	var flank_offset: Vector2 = direction.normalized().orthogonal() * FLANK_OFFSET_DISTANCE * flank_sign
-	return raw_target_position + flank_offset
+	var lateral_direction: Vector2 = forward_direction.orthogonal() * flank_sign
+	var flank_offset: Vector2 = lateral_direction * FLANK_OFFSET_DISTANCE
+	match combat_role:
+		ROLE_ANCHOR:
+			return raw_target_position + flank_offset * 0.7
+		ROLE_RECON:
+			return raw_target_position + flank_offset * FLANK_RECON_LATERAL_SCALE
+		ROLE_ASSAULT:
+			return raw_target_position + flank_offset + forward_direction * FLANK_ASSAULT_FORWARD_OFFSET
+		_:
+			return raw_target_position + flank_offset
+
+
+func _get_unit_combat_role(unit: Node) -> String:
+	if unit == null or not unit.has_method("get_combat_role"):
+		return ROLE_ANCHOR
+
+	var combat_role: String = String(unit.call("get_combat_role"))
+	match combat_role:
+		ROLE_ANCHOR, ROLE_RECON, ROLE_ASSAULT:
+			return combat_role
+		_:
+			return ROLE_ANCHOR
