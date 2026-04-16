@@ -304,3 +304,10 @@
 - Offene Punkte: keine Unsicherheits-/Persoenlichkeitslogik, keine komplexe Befehlsverweigerung, keine neue Timing-Architektur und keine tieferen FTL-Entscheidungen.
 - Risiken: der Schritt ist bewusst klein und deterministisch; spaetere echte Verhaltenssimulation sollte diesen Proto-Versatz explizit ersetzen statt viele weitere Sonderregeln auf denselben Tick-Haken zu stapeln.
 - Naechster Schritt: spaeter nur bei eigenem Task weitere kleine Unterschiede wie alternative Commander-Freigaben oder echte Fireteam-FTLs pruefen, wenn das fuer V1 wirklich gebraucht wird.
+
+### Minimal Take Role Split
+- Status: implementiert
+- Stand: derselbe Commander-Befehl `take` fuehrt jetzt im bestehenden Slice nicht mehr fuer alle Friendly-Units zur exakt gleichen Unit-Ableitung. `RuntimeLeader` leitet `take` jetzt rollenabhaengig aus: `anchor` bleibt als haltender Sicherungspunkt auf `hold_position`, waehrend `recon` und `assault` den Zielraum ueber `move_to_position` mit unterschiedlichen Zielversetzen anlaufen. `MissionCombatLoopDriver` erlaubt dabei nun auch bewegende `take`-Commands als mobilen Engage-Pfad, sodass `take` sich weniger nach direkter Einheitssteuerung und mehr nach indirekter Team-Interpretation anfuehlt.
+- Offene Punkte: keine echte FTL-Taktikplanung, keine komplexe Bereichssicherung, keine Formation und keine feinere Zielwahl fuer `take`.
+- Risiken: die Ableitung bleibt bewusst klein und rollenbasiert; spaetere echte Team- oder FTL-Entscheidungslogik sollte diese Proto-Regeln explizit ersetzen statt weitere Sonderfaelle daran anzuschrauben.
+- Naechster Schritt: spaeter nur bei eigenem Task weitere indirekte Order-Unterschiede wie `defend`-/`flank`-Interpretation oder mehrere FTL-Instanzen pruefen, wenn das fuer V1 wirklich gebraucht wird.

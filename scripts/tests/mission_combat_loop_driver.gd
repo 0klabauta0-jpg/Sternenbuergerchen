@@ -346,7 +346,7 @@ func _is_engage_ready(unit) -> bool:
 			if command_type == "engage_area" or command_type == "hold_position":
 				return true
 
-			return command_type == "move_to_position" and String(command.get("source_command_type")) == "flank"
+			return command_type == "move_to_position" and _is_mobile_engage_source(String(command.get("source_command_type")))
 
 	if unit.has_method("get_runtime_status"):
 		var runtime_status = unit.call("get_runtime_status")
@@ -355,9 +355,13 @@ func _is_engage_ready(unit) -> bool:
 			if status_name == "engaging" or status_name == "holding":
 				return true
 
-			return status_name == "pending_move" and String(runtime_status.get("source_command_type")) == "flank"
+			return status_name == "pending_move" and _is_mobile_engage_source(String(runtime_status.get("source_command_type")))
 
 	return false
+
+
+func _is_mobile_engage_source(source_command_type: String) -> bool:
+	return source_command_type == "flank" or source_command_type == "take"
 
 
 func _is_phase_attack_allowed(unit) -> bool:

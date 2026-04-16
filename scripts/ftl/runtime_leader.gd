@@ -11,6 +11,8 @@ const MOVE_RECON_LATERAL_OFFSET: float = 28.0
 const MOVE_ASSAULT_FORWARD_OFFSET: float = 24.0
 const FLANK_RECON_LATERAL_SCALE: float = 1.45
 const FLANK_ASSAULT_FORWARD_OFFSET: float = 28.0
+const TAKE_RECON_LATERAL_OFFSET: float = 36.0
+const TAKE_ASSAULT_FORWARD_OFFSET: float = 18.0
 const DELAY_ANCHOR_MOVE: int = 3
 const DELAY_ANCHOR_FLANK: int = 4
 const DELAY_ANCHOR_TAKE: int = 2
@@ -235,7 +237,7 @@ func _map_task_type_to_runtime_status(task_type: String) -> String:
 func _build_unit_command_from_ftl_task(task, unit: Node):
 	var task_type: String = String(task.get("task_type"))
 	var source_command_type: String = String(task.get("source_command_type"))
-	var command_type: String = _map_task_type_to_unit_command_type(task_type)
+	var command_type: String = _derive_unit_command_type(task_type, source_command_type, unit)
 	if command_type.is_empty():
 		return null
 
@@ -272,6 +274,19 @@ func _map_task_type_to_unit_command_type(task_type: String) -> String:
 			return "retreat"
 		_:
 			return ""
+
+
+func _derive_unit_command_type(task_type: String, source_command_type: String, unit: Node) -> String:
+	if source_command_type == "take":
+		match _get_unit_combat_role(unit):
+			ROLE_ANCHOR:
+				return "hold_position"
+			ROLE_RECON, ROLE_ASSAULT:
+				return "move_to_position"
+			_:
+				return "engage_area"
+
+	return _map_task_type_to_unit_command_type(task_type)
 
 
 func _map_task_type_to_fire_status(task_type: String, source_command_type: String) -> String:
@@ -364,6 +379,25 @@ func _derive_target_position(task, unit: Node, command_type: String, source_comm
 				return unit_position.lerp(raw_target_position, 0.88) + move_lateral_direction * MOVE_RECON_LATERAL_OFFSET
 			ROLE_ASSAULT:
 				return raw_target_position + move_forward_direction * MOVE_ASSAULT_FORWARD_OFFSET
+			_:
+				return raw_target_position
+
+	if source_command_type == "take" and unit is Node2D:
+		var unit_position: Vector2 = (unit as Node2D).position
+		var take_direction: Vector2 = raw_target_position - unit_position
+		if take_direction.is_zero_approx():
+			return raw_target_position
+
+		var take_forward_direction: Vector2 = take_direction.normalized()
+		var take_lateral_sign: float = -1.0 if unit_position.y <= raw_target_position.y else 1.0
+		var take_lateral_direction: Vector2 = take_forward_direction.orthogonal() * take_lateral_sign
+		match _get_unit_combat_role(unit):
+			ROLE_ANCHOR:
+				return unit_position
+			ROLE_RECON:
+				return unit_position.lerp(raw_target_position, 0.84) + take_lateral_direction * TAKE_RECON_LATERAL_OFFSET
+			ROLE_ASSAULT:
+				return raw_target_position + take_forward_direction * TAKE_ASSAULT_FORWARD_OFFSET
 			_:
 				return raw_target_position
 
