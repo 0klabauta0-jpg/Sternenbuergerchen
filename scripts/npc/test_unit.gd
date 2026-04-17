@@ -4,8 +4,10 @@ extends Node2D
 const UNIT_RUNTIME_STATUS_SCRIPT: GDScript = preload("res://scripts/npc/unit_runtime_status.gd")
 const UNIT_VITAL_STATUS_SCRIPT: GDScript = preload("res://scripts/npc/unit_vital_status.gd")
 const STATUS_LABEL_NAME: String = "DebugStatusLabel"
+const FIRETEAM_LABEL_NAME: String = "DebugFireteamLabel"
 const EVENT_LABEL_NAME: String = "DebugEventLabel"
 const STATUS_LABEL_OFFSET: Vector2 = Vector2(-54.0, -48.0)
+const FIRETEAM_LABEL_SPACING: float = 8.0
 const EVENT_LABEL_OFFSET: Vector2 = Vector2(-42.0, -70.0)
 const EVENT_DURATION_SECONDS: float = 1.2
 
@@ -17,6 +19,7 @@ signal vital_status_changed(vital_status)
 @export var unit_id: String = "unit_test_001"
 @export var display_name: String = "Test Unit"
 @export var team_id: String = "team_test"
+@export var fireteam_id: String = ""
 @export var max_health_points: int = 100
 
 var _runtime_status: RefCounted = UNIT_RUNTIME_STATUS_SCRIPT.new()
@@ -24,6 +27,7 @@ var _current_unit_command: RefCounted = null
 var _vital_status: RefCounted = UNIT_VITAL_STATUS_SCRIPT.new()
 var _last_damage_context: Dictionary = {}
 var _status_label: Label = null
+var _fireteam_label: Label = null
 var _event_label: Label = null
 var _current_event_text: String = ""
 var _current_event_color: Color = Color(1.0, 0.95, 0.5, 1.0)
@@ -33,6 +37,7 @@ var _contact_target_id: String = ""
 
 
 func _ready() -> void:
+	fireteam_id = _normalize_fireteam_id(fireteam_id)
 	_ensure_readability_labels()
 	_runtime_status = _build_runtime_status("idle")
 	_vital_status = _build_vital_status("fit", max_health_points, 0)
@@ -69,6 +74,10 @@ func get_team_id() -> String:
 	return team_id
 
 
+func get_fireteam_id() -> String:
+	return fireteam_id
+
+
 func get_vital_status():
 	return _vital_status
 
@@ -99,6 +108,33 @@ func get_last_damage_context() -> Dictionary:
 
 func get_target_position():
 	return _runtime_status.target_position
+
+
+func set_fireteam_id(next_fireteam_id: String) -> bool:
+	fireteam_id = _normalize_fireteam_id(next_fireteam_id)
+
+	if _runtime_status == null:
+		_refresh_readability()
+		return true
+
+	var runtime_status = _build_runtime_status(
+		String(_runtime_status.status),
+		String(_runtime_status.active_command_type),
+		int(_runtime_status.priority),
+		String(_runtime_status.fire_status),
+		String(_runtime_status.source_command_type),
+		float(_runtime_status.cover_score),
+		float(_runtime_status.attack_bonus),
+		int(_runtime_status.phase),
+		_runtime_status.target_position
+	)
+	if not bool(runtime_status.call("is_valid")):
+		return false
+
+	_runtime_status = runtime_status
+	runtime_status_changed.emit(_runtime_status)
+	_refresh_readability()
+	return true
 
 
 func apply_damage(amount: int, hit_context: Dictionary = {}) -> bool:
@@ -244,6 +280,7 @@ func _build_runtime_status(
 	runtime_status.priority = priority
 	runtime_status.unit_id = unit_id
 	runtime_status.team_id = team_id
+	runtime_status.fireteam_id = fireteam_id
 	runtime_status.fire_status = fire_status
 	runtime_status.source_command_type = source_command_type
 	runtime_status.cover_score = cover_score
@@ -308,6 +345,13 @@ func _ensure_readability_labels() -> void:
 		_status_label.top_level = true
 		add_child(_status_label)
 
+	_fireteam_label = get_node_or_null(FIRETEAM_LABEL_NAME) as Label
+	if _fireteam_label == null:
+		_fireteam_label = Label.new()
+		_fireteam_label.name = FIRETEAM_LABEL_NAME
+		_fireteam_label.top_level = true
+		add_child(_fireteam_label)
+
 	_event_label = get_node_or_null(EVENT_LABEL_NAME) as Label
 	if _event_label == null:
 		_event_label = Label.new()
@@ -316,10 +360,13 @@ func _ensure_readability_labels() -> void:
 		add_child(_event_label)
 
 	_status_label.add_theme_font_size_override("font_size", 11)
+	_fireteam_label.add_theme_font_size_override("font_size", 10)
 	_event_label.add_theme_font_size_override("font_size", 12)
 	_status_label.add_theme_constant_override("outline_size", 2)
+	_fireteam_label.add_theme_constant_override("outline_size", 2)
 	_event_label.add_theme_constant_override("outline_size", 2)
 	_status_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
+	_fireteam_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
 	_event_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
 	_sync_readability_positions()
 
@@ -328,6 +375,13 @@ func _sync_readability_positions() -> void:
 	if _status_label != null:
 		_status_label.visible = is_visible_in_tree()
 		_status_label.global_position = global_position + STATUS_LABEL_OFFSET
+		if _fireteam_label != null:
+			_fireteam_label.visible = is_visible_in_tree() and not fireteam_id.is_empty()
+			_fireteam_label.global_position = _status_label.global_position + Vector2(_status_label.get_combined_minimum_size().x + FIRETEAM_LABEL_SPACING, 0.0)
+
+	elif _fireteam_label != null:
+		_fireteam_label.visible = is_visible_in_tree() and not fireteam_id.is_empty()
+		_fireteam_label.global_position = global_position + STATUS_LABEL_OFFSET
 
 	if _event_label != null:
 		_event_label.visible = is_visible_in_tree() and not _current_event_text.is_empty()
@@ -336,6 +390,7 @@ func _sync_readability_positions() -> void:
 
 func _refresh_readability() -> void:
 	_refresh_status_label()
+	_refresh_fireteam_label()
 	_refresh_event_label()
 	_sync_readability_positions()
 
@@ -350,6 +405,20 @@ func _refresh_status_label() -> void:
 	lines.append(_build_secondary_status_label())
 	_status_label.text = "\n".join(lines)
 	_status_label.modulate = _build_status_label_color()
+
+
+func _refresh_fireteam_label() -> void:
+	if _fireteam_label == null:
+		return
+
+	if fireteam_id.is_empty():
+		_fireteam_label.text = ""
+		_fireteam_label.visible = false
+		return
+
+	_fireteam_label.text = fireteam_id.to_upper()
+	_fireteam_label.modulate = _build_fireteam_label_color()
+	_fireteam_label.visible = is_visible_in_tree()
 
 
 func _refresh_event_label() -> void:
@@ -433,3 +502,17 @@ func _build_status_label_color() -> Color:
 		return Color(0.85, 0.95, 1.0, 1.0)
 
 	return Color(1.0, 0.88, 0.88, 1.0)
+
+
+func _build_fireteam_label_color() -> Color:
+	match fireteam_id:
+		"blue":
+			return Color(0.45, 0.72, 1.0, 1.0)
+		"gold":
+			return Color(1.0, 0.88, 0.35, 1.0)
+		_:
+			return Color(0.9, 0.9, 0.9, 1.0)
+
+
+func _normalize_fireteam_id(value: String) -> String:
+	return value.strip_edges().to_lower()

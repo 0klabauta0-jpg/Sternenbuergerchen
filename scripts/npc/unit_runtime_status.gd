@@ -25,6 +25,7 @@ var active_command_type: String = ""
 var priority: int = 0
 var unit_id: String = ""
 var team_id: String = ""
+var fireteam_id: String = ""
 var fire_status: String = FIRE_STATUS_FIRE_AT_WILL
 var source_command_type: String = ""
 var cover_score: float = 0.0
@@ -76,6 +77,9 @@ func to_dict() -> Dictionary:
 	if phase >= 0:
 		data["phase"] = phase
 
+	if not fireteam_id.is_empty():
+		data["fireteam_id"] = fireteam_id
+
 	return data
 
 
@@ -96,6 +100,9 @@ func _apply_dict(data: Dictionary) -> void:
 
 	if data.has("team_id"):
 		team_id = String(data["team_id"])
+
+	if data.has("fireteam_id"):
+		fireteam_id = String(data["fireteam_id"])
 
 	if data.has("fire_status"):
 		fire_status = String(data["fire_status"])

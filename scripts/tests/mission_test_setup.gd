@@ -46,6 +46,9 @@ func _ready() -> void:
 		if unit.has_method("get_team_id"):
 			unit_team_id = String(unit.call("get_team_id"))
 
+		if unit.has_method("set_fireteam_id"):
+			unit.call("set_fireteam_id", _get_fireteam_id_for_unit(unit_id, unit_team_id))
+
 		if unit_team_id == team_id and not _is_selected_friendly_unit(unit_id):
 			if unit is CanvasItem:
 				unit.visible = false
@@ -127,3 +130,16 @@ func _setup_respawn_manager(spawn_alpha: Marker2D, spawn_bravo: Marker2D) -> voi
 
 	if spawn_bravo != null:
 		respawn_manager.call("set_spawn_position", "team_bravo", spawn_bravo.global_position)
+
+
+func _get_fireteam_id_for_unit(unit_id: String, unit_team_id: String) -> String:
+	if unit_team_id != team_id:
+		return ""
+
+	match unit_id:
+		"unit_alpha", "unit_bravo":
+			return "blue"
+		"unit_charlie":
+			return "gold"
+		_:
+			return ""
