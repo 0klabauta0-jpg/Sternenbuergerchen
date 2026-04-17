@@ -126,6 +126,22 @@ func advance_bleedout() -> bool:
 	return true
 
 
+func respawn(spawn_position: Vector2) -> bool:
+	var vital_state: String = String(_vital_status.state)
+	if vital_state != "down" and vital_state != "bleedout":
+		return false
+
+	position = spawn_position
+	_set_vital_status("fit", max_health_points, 0)
+	_runtime_status = _build_runtime_status("idle")
+	_current_unit_command = null
+	_last_damage_context = {}
+	_contact_active = false
+	_contact_target_id = ""
+	show_event_text("RESPAWN", Color(0.5, 1.0, 0.7, 1.0), 2.0)
+	return true
+
+
 func set_target_position(target_position: Variant) -> bool:
 	return set_runtime_status(
 		String(_runtime_status.status),
@@ -276,6 +292,9 @@ func _apply_vital_visual() -> void:
 		"bleedout":
 			modulate = Color(0.45, 0.45, 0.45, 0.7)
 			rotation_degrees = 45.0
+		"respawning":
+			modulate = Color(0.7, 0.9, 1.0, 0.5)
+			rotation_degrees = 0.0
 		_:
 			modulate = Color(1.0, 1.0, 1.0, 1.0)
 			rotation_degrees = 0.0
@@ -356,6 +375,8 @@ func _build_primary_status_label() -> String:
 			return "DOWN"
 		"bleedout":
 			return "BLEEDOUT"
+		"respawning":
+			return "RESPAWNING"
 
 	var source_command_type: String = String(_runtime_status.source_command_type)
 	match source_command_type:
@@ -404,6 +425,9 @@ func _build_status_label_color() -> Color:
 
 	if String(_vital_status.state) == "bleedout":
 		return Color(0.82, 0.82, 0.82, 1.0)
+
+	if String(_vital_status.state) == "respawning":
+		return Color(0.7, 0.9, 1.0, 0.8)
 
 	if team_id == "team_alpha":
 		return Color(0.85, 0.95, 1.0, 1.0)

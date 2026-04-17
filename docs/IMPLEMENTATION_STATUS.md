@@ -234,3 +234,24 @@
 - Offene Punkte: die Map ist weiterhin nur Struktur und Marker, keine Gameplay-Wahrheit; es gibt noch keine Terrain-Metadaten fuer `walkable`, `blocks_los`, `cover` oder `orientation`, keine Hindernis- oder Hoehenlogik und keine spaetere Fireteam-Flanknutzung der optionalen Flank-Anker.
 - Risiken: die Karte verbessert Iso-Lesbarkeit, Spacing und Beobachtungszeit, aber LOS und Combat bleiben auf dem bestehenden Slice weiter rein systemseitig und nicht terrainbasiert. Spaetere Terrain-Daten oder feineres Encounter-Tuning sollten explizit als eigene Daten- bzw. Balancing-Tasks folgen, statt still in die Szene hineinzuwachsen.
 - Naechster Schritt: nur bei eigenem Task gezielt weitere Terrain-Daten oder eine spaetere feine Layout-Iteration ergaenzen, ohne ein grosses Tile-/Registry-System vorzuziehen.
+
+### TASK_036 – Respawn-Logik
+- Status: implementiert
+- Stand: `UnitVitalStatus` kennt jetzt den Zustand `respawning`; `TestUnit` hat eine `respawn(spawn_position)`-Methode, die eine Unit von `down`/`bleedout` zurueck auf `fit` setzt, Health auf Maximum zuruecksetzt und die Unit an die uebergebene Spawn-Position verschiebt. `SimulationRoot` verarbeitet jetzt einen `respawn`-Effect autoritativ. Ein neuer `RespawnManager` unter `res://scripts/core/respawn_manager.gd` verwaltet timerbasierte Respawns pro Unit mit konfigurierbarem Spawn-Typ (Rover: 30s, FOB: 150s, Homebase: 270s). `MissionCombatLoopDriver` fordert automatisch Respawns fuer eliminierte Units an und setzt den Bleedout-Tracker bei erfolgreichem Respawn zurueck. Friendlies und Enemies koennen jetzt beide bleedouten und respawnen.
+- Offene Punkte: keine Respawn-Limitierung, keine Respawn-Warteschlange, keine sichtbare Timer-Anzeige und keine differenzierte Spawn-Punkt-Auswahl.
+- Risiken: der Respawn-Pfad ist bewusst klein und timerbasiert; spaetere echte Respawn-Mechaniken (begrenzte Leben, Sanitaeter, Evakuierung) muessen diesen Minimalpfad explizit erweitern.
+- Naechster Schritt: bei Bedarf spaeter Respawn-Timer-Anzeige oder differenzierte Spawn-Punkte in eigenen Tasks ergaenzen.
+
+### TASK_037 – Rover/Frachter Respawn-Punkte
+- Status: implementiert
+- Stand: `RespawnManager` unterstuetzt jetzt drei Spawn-Typen mit den V1-Zeitwerten: `rover` (30s), `fob` (150s) und `homebase` (270s). Spawn-Positionen werden pro `team_id` gesetzt und von `MissionTestSetup` aus den bestehenden Map-Markern (`spawn_alpha`, `spawn_bravo`) automatisch uebernommen. Die Missions-Testszene nutzt standardmaessig `rover`-Respawn fuer schnelle Testzyklen.
+- Offene Punkte: keine sichtbaren Spawn-Punkt-Marker in der Szene, keine Fahrzeug-Darstellung, keine Spawn-Punkt-Auswahl durch den Spieler und keine unterschiedlichen Spawn-Punkte pro Typ.
+- Risiken: die Spawn-Punkte sind bewusst nur Positionsdaten ohne eigene Nodes oder Darstellung; spaetere Rover-/Frachter-Mechaniken muessen als eigene sichtbare Szenenelemente folgen.
+- Naechster Schritt: spaeter bei eigenem Task sichtbare Spawn-Punkt-Marker oder Fahrzeug-Stubs in der Missionsszene ergaenzen.
+
+### Symmetrischer Gegner-Kampfpfad
+- Status: implementiert
+- Stand: `MissionCombatLoopDriver` erlaubt jetzt bidirektionalen Kampf; Enemies koennen Friendlies angreifen, wenn sie `fit` sind und LOS-Kontakt haben. Friendlies koennen ebenfalls downed und bleedout werden, mit anschliessendem Respawn ueber den `RespawnManager`.
+- Offene Punkte: keine echte Gegner-KI, keine Positionierung, keine Deckungssuche und keine Gegner-Befehlskette.
+- Risiken: der Gegnerpfad ist bewusst nur ein symmetrischer Angriffspfad ohne eigene taktische Logik; spaetere Gegner-KI muss explizit und separat folgen.
+- Naechster Schritt: bei Bedarf in eigenen Tasks Gegner-Verhalten oder einfache Positionierungslogik ergaenzen.

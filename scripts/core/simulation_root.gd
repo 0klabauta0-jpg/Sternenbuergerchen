@@ -99,6 +99,8 @@ func _apply_effect(effect: Dictionary, delta: float) -> void:
 			_apply_damage_effect(effect)
 		"bleedout":
 			_apply_bleedout_effect(effect)
+		"respawn":
+			_apply_respawn_effect(effect)
 		_:
 			# TODO: Deterministic effect commits belong here once systems exist.
 			pass
@@ -347,3 +349,26 @@ func _extract_float(value: Variant, fallback: float) -> float:
 		return float(value)
 
 	return fallback
+
+
+func _apply_respawn_effect(effect: Dictionary) -> void:
+	var unit_id: String = String(effect.get("unit_id", ""))
+	if unit_id.is_empty():
+		push_warning("SimulationRoot respawn effect expects a non-empty unit_id.")
+		return
+
+	var unit = _resolve_unit(unit_id)
+	if unit == null:
+		push_warning("SimulationRoot could not resolve the target unit for a respawn effect.")
+		return
+
+	if not unit.has_method("respawn"):
+		push_warning("SimulationRoot respawn effect expects a unit with respawn().")
+		return
+
+	var spawn_position: Variant = effect.get("spawn_position", null)
+	if typeof(spawn_position) != TYPE_VECTOR2:
+		push_warning("SimulationRoot respawn effect expects a Vector2 spawn_position.")
+		return
+
+	unit.call("respawn", spawn_position)

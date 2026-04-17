@@ -4,10 +4,12 @@ extends RefCounted
 const STATE_FIT: String = "fit"
 const STATE_DOWN: String = "down"
 const STATE_BLEEDOUT: String = "bleedout"
+const STATE_RESPAWNING: String = "respawning"
 const ALLOWED_STATES: PackedStringArray = [
 	STATE_FIT,
 	STATE_DOWN,
 	STATE_BLEEDOUT,
+	STATE_RESPAWNING,
 ]
 
 var state: String = STATE_FIT

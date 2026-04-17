@@ -10,6 +10,7 @@ extends Node
 @export var objective_point_path: NodePath
 @export var unit_paths: Array[NodePath] = []
 @export var selected_team_unit_ids: PackedStringArray = []
+@export var respawn_manager_path: NodePath
 
 var _is_initialized: bool = false
 
@@ -74,6 +75,8 @@ func _ready() -> void:
 		runtime_leader.call("assign", first_unit)
 
 	ftl_registry.call("register_ftl", team_id, runtime_leader)
+
+	_setup_respawn_manager(spawn_alpha_marker, spawn_bravo_marker)
 	_is_initialized = true
 
 
@@ -112,3 +115,15 @@ func _get_enemy_spawn_offset(index: int) -> Vector2:
 		return offsets[index]
 
 	return Vector2(18.0 * float(index), 0.0)
+
+
+func _setup_respawn_manager(spawn_alpha: Marker2D, spawn_bravo: Marker2D) -> void:
+	var respawn_manager = get_node_or_null(respawn_manager_path)
+	if respawn_manager == null or not respawn_manager.has_method("set_spawn_position"):
+		return
+
+	if spawn_alpha != null:
+		respawn_manager.call("set_spawn_position", team_id, spawn_alpha.global_position)
+
+	if spawn_bravo != null:
+		respawn_manager.call("set_spawn_position", "team_bravo", spawn_bravo.global_position)

@@ -18,6 +18,7 @@ signal combat_resolved(winning_team_id, neutralized_enemy_count)
 @export var status_label_path: NodePath
 @export var friendly_unit_paths: Array[NodePath] = []
 @export var enemy_unit_paths: Array[NodePath] = []
+@export var respawn_manager_path: NodePath
 
 var _los_system = LOS_SYSTEM_SCRIPT.new()
 var _queued_bleedout_by_unit_id: Dictionary = {}
@@ -39,6 +40,7 @@ func _ready() -> void:
 		return
 
 	_connect_unit_signals()
+	_connect_respawn_signals()
 	call_deferred("_finish_readability_setup")
 
 	if not simulation_root.tick_processed.is_connected(_on_tick_processed):
@@ -70,6 +72,7 @@ func _on_tick_processed(tick: int) -> void:
 		return
 
 	_queue_bleedout_for_downed_enemy(simulation_root)
+	_queue_bleedout_for_downed_friendly(simulation_root)
 	_try_enqueue_attacks(simulation_root)
 	_update_combat_resolution()
 	if not _combat_finished:
@@ -98,7 +101,51 @@ func _queue_bleedout_for_downed_enemy(simulation_root: Node) -> void:
 		)
 		_queued_bleedout_by_unit_id[unit_id] = true
 		_set_event_text("%s BLEEDOUT" % unit_id)
+
+		_request_respawn_for_unit(enemy, unit_id)
 		return
+
+
+func _queue_bleedout_for_downed_friendly(simulation_root: Node) -> void:
+	for friendly in _get_units(friendly_unit_paths):
+		if friendly == null or not friendly.has_method("get_vital_state") or not friendly.has_method("get_unit_id"):
+			continue
+
+		var unit_id: String = String(friendly.call("get_unit_id"))
+		if unit_id.is_empty() or _queued_bleedout_by_unit_id.get(unit_id, false):
+			continue
+
+		if String(friendly.call("get_vital_state")) != "down":
+			continue
+
+		simulation_root.call(
+			"enqueue_effect",
+			{
+				"effect_type": "bleedout",
+				"priority": 20,
+				"unit_id": unit_id,
+			}
+		)
+		_queued_bleedout_by_unit_id[unit_id] = true
+		_set_event_text("%s BLEEDOUT" % unit_id)
+
+		_request_respawn_for_unit(friendly, unit_id)
+		return
+
+
+func _request_respawn_for_unit(unit, unit_id: String) -> void:
+	var respawn_manager = get_node_or_null(respawn_manager_path)
+	if respawn_manager == null or not respawn_manager.has_method("request_respawn"):
+		return
+
+	var unit_team_id: String = ""
+	if unit.has_method("get_team_id"):
+		unit_team_id = String(unit.call("get_team_id"))
+
+	if unit_team_id.is_empty():
+		return
+
+	respawn_manager.call("request_respawn", unit_id, unit_team_id)
 
 
 func _try_enqueue_attacks(simulation_root: Node) -> void:
@@ -107,8 +154,8 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 		_clear_contact_visuals()
 		return
 
-	var friendly = contact_pair["attacker"]
-	var enemy = contact_pair["target"]
+	var attacker = contact_pair["attacker"]
+	var target = contact_pair["target"]
 	var attacker_id: String = String(contact_pair["attacker_id"])
 	var target_id: String = String(contact_pair["target_id"])
 	if attacker_id.is_empty() or target_id.is_empty():
@@ -119,12 +166,12 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 		"attacker_id": attacker_id,
 		"target_id": target_id,
 	}
-	_set_contact_visuals(friendly, enemy)
+	_set_contact_visuals(attacker, target)
 	_update_status_label("contact")
 	if _current_tick < _next_attack_tick:
 		return
 
-	contact_established.emit(friendly, enemy)
+	contact_established.emit(attacker, target)
 	_set_event_text("%s ENGAGE %s" % [attacker_id, target_id])
 	simulation_root.call(
 		"enqueue_effect",
@@ -133,7 +180,7 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 			"priority": 30,
 			"unit_id": target_id,
 			"attacker_unit_id": attacker_id,
-			"attacker_team_id": String(friendly.call("get_team_id")),
+			"attacker_team_id": String(attacker.call("get_team_id")),
 			"allow_friendly_fire": false,
 			"damage": damage_per_hit,
 			"hit_chance": base_hit_chance,
@@ -179,14 +226,27 @@ func _get_units(paths: Array[NodePath]) -> Array:
 	return units
 
 
-func _pick_target_for_attacker(attacker):
-	for enemy in _get_units(enemy_unit_paths):
-		if not _is_target_attackable(attacker, enemy):
+func _pick_target_for_attacker(attacker, target_paths: Array[NodePath]):
+	for target in _get_units(target_paths):
+		if not _is_target_attackable(attacker, target):
 			continue
 
-		return enemy
+		return target
 
 	return null
+
+
+func _can_enemy_attack(unit) -> bool:
+	if unit == null:
+		return false
+
+	if not unit.has_method("get_vital_state"):
+		return false
+
+	if String(unit.call("get_vital_state")) != "fit":
+		return false
+
+	return true
 
 
 func _can_unit_attack(unit) -> bool:
@@ -324,7 +384,7 @@ func _find_first_contact_pair() -> Dictionary:
 		if not _can_unit_attack(friendly):
 			continue
 
-		var enemy = _pick_target_for_attacker(friendly)
+		var enemy = _pick_target_for_attacker(friendly, enemy_unit_paths)
 		if enemy == null:
 			continue
 
@@ -333,6 +393,21 @@ func _find_first_contact_pair() -> Dictionary:
 			"target": enemy,
 			"attacker_id": String(friendly.call("get_unit_id")),
 			"target_id": String(enemy.call("get_unit_id")),
+		}
+
+	for enemy in _get_units(enemy_unit_paths):
+		if not _can_enemy_attack(enemy):
+			continue
+
+		var friendly = _pick_target_for_attacker(enemy, friendly_unit_paths)
+		if friendly == null:
+			continue
+
+		return {
+			"attacker": enemy,
+			"target": friendly,
+			"attacker_id": String(enemy.call("get_unit_id")),
+			"target_id": String(friendly.call("get_unit_id")),
 		}
 
 	return {}
@@ -389,6 +464,21 @@ func _connect_unit_signals() -> void:
 			var vital_callable := Callable(self, "_on_unit_vital_status_changed").bind(unit)
 			if not unit.is_connected("vital_status_changed", vital_callable):
 				unit.connect("vital_status_changed", vital_callable)
+
+
+func _connect_respawn_signals() -> void:
+	var respawn_manager = get_node_or_null(respawn_manager_path)
+	if respawn_manager == null:
+		return
+
+	if respawn_manager.has_signal("unit_respawn_completed"):
+		if not respawn_manager.is_connected("unit_respawn_completed", Callable(self, "_on_unit_respawn_completed")):
+			respawn_manager.connect("unit_respawn_completed", Callable(self, "_on_unit_respawn_completed"))
+
+
+func _on_unit_respawn_completed(unit_id: String) -> void:
+	_queued_bleedout_by_unit_id.erase(unit_id)
+	_set_event_text("%s RESPAWNED" % unit_id)
 
 
 func _set_contact_visuals(attacker, target) -> void:

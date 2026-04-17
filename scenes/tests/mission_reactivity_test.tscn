@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scripts/core/simulation_root.gd" id="1_simulation"]
 [ext_resource type="Script" path="res://scripts/core/event_router.gd" id="2_router"]
@@ -14,6 +14,7 @@
 [ext_resource type="Texture2D" path="res://Assets/kenney_space-kit/Isometric/astronautA_SW.png" id="12_astronaut_a"]
 [ext_resource type="Texture2D" path="res://Assets/kenney_space-kit/Isometric/astronautB_SW.png" id="13_astronaut_b"]
 [ext_resource type="PackedScene" path="res://scenes/maps/iso_map_v2_layout.tscn" id="14_map"]
+[ext_resource type="Script" path="res://scripts/core/respawn_manager.gd" id="15_respawn"]
 
 [node name="MissionReactivityTest" type="Node2D"]
 
@@ -41,6 +42,12 @@ script = ExtResource("4_ftls")
 
 [node name="UpdateManager" type="Node" parent="."]
 script = ExtResource("5_updates")
+
+[node name="RespawnManager" type="Node" parent="."]
+script = ExtResource("15_respawn")
+simulation_root_path = NodePath("../SimulationRoot")
+unit_registry_path = NodePath("../UnitRegistry")
+respawn_type = "rover"
 
 [node name="RuntimeLeader" type="Node" parent="."]
 script = ExtResource("6_leader")
@@ -122,6 +129,7 @@ spawn_alpha_path = NodePath("../MapRoot/spawn_alpha")
 spawn_bravo_path = NodePath("../MapRoot/spawn_bravo")
 objective_point_path = NodePath("../MapRoot/objective_point")
 unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie"), NodePath("../EnemyDelta"), NodePath("../EnemyEcho")])
+respawn_manager_path = NodePath("../RespawnManager")
 
 [node name="AlphaFlowDriver" type="Node" parent="."]
 script = ExtResource("9_flow")
@@ -163,6 +171,7 @@ simulation_root_path = NodePath("../SimulationRoot")
 status_label_path = NodePath("../StatusLabel")
 friendly_unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie")])
 enemy_unit_paths = Array[NodePath]([NodePath("../EnemyDelta"), NodePath("../EnemyEcho")])
+respawn_manager_path = NodePath("../RespawnManager")
 
 [node name="TacticalUI" type="CanvasLayer" parent="."]
 layer = 10
