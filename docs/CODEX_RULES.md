@@ -14,6 +14,7 @@ Du arbeitest als vorsichtiger Senior-Entwickler im bestehenden Godot-4.6.1-Proje
    - `docs/PROJECT_BRIEF.md`
    - `docs/ARCHITECTURE.md`
    - `docs/CODEX_RULES.md`
+   - `docs/IMPLEMENTATION_STATUS.md`
    - die konkrete Task-Datei unter `docs/tasks/`
 2. Prüfe den aktuellen Branch und den Git-Status.
 3. Arbeite nur im Projekt unter `C:\dev\SternenBuergerchen`.

@@ -11,6 +11,15 @@ const TERRAIN_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/terra
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const CAPTURE_PROGRESS_PER_TICK: float = 0.01
 
+const HIT_CHANCE_MIN: float = 0.05
+const HIT_CHANCE_MAX: float = 0.95
+const ATTACKER_COVER_HIT_BONUS_FACTOR: float = 0.05
+const TARGET_COVER_HIT_PENALTY_FACTOR: float = 0.35
+const TARGET_COVER_DAMAGE_PENALTY_FACTOR: float = 0.2
+const DAMAGE_MULTIPLIER_MIN: float = 0.1
+const HEIGHT_ADVANTAGE_ACCURACY_BONUS: float = 0.1
+const HEIGHT_DISADVANTAGE_ACCURACY_PENALTY: float = 0.05
+
 @export var is_server_authoritative: bool = false
 @export var unit_registry_path: NodePath
 @export var terrain_registry_path: NodePath
@@ -732,13 +741,13 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 	var hit_chance: float = _extract_float(effect.get("hit_chance", 1.0), 1.0)
 	hit_chance *= _extract_unit_accuracy_multiplier(attacker_unit)
 	hit_chance = clampf(
-		hit_chance + attacker_attack_bonus + _extract_height_accuracy_modifier(attacker_unit, unit) + (attacker_cover_score * 0.05) - (target_cover_score * 0.35),
-		0.05,
-		0.95
+		hit_chance + attacker_attack_bonus + _extract_height_accuracy_modifier(attacker_unit, unit) + (attacker_cover_score * ATTACKER_COVER_HIT_BONUS_FACTOR) - (target_cover_score * TARGET_COVER_HIT_PENALTY_FACTOR),
+		HIT_CHANCE_MIN,
+		HIT_CHANCE_MAX
 	)
 	var roll_override: float = _extract_float(effect.get("roll_override", -1.0), -1.0)
 	var damage_multiplier: float = _extract_float(effect.get("damage_multiplier", 1.0), 1.0)
-	damage_multiplier = maxf(damage_multiplier + attacker_attack_bonus - (target_cover_score * 0.2), 0.1)
+	damage_multiplier = maxf(damage_multiplier + attacker_attack_bonus - (target_cover_score * TARGET_COVER_DAMAGE_PENALTY_FACTOR), DAMAGE_MULTIPLIER_MIN)
 	damage_multiplier *= _extract_unit_damage_taken_multiplier(unit)
 	var damage_model = DAMAGE_MODEL_SCRIPT.new()
 	if not bool(damage_model.call("resolve_hit", hit_chance, roll_override)):
@@ -849,10 +858,10 @@ func _extract_height_accuracy_modifier(attacker_unit, target_unit) -> float:
 	var target_height: int = int(terrain_registry.call("get_height_at_world", (target_unit as Node2D).global_position))
 	var height_difference: int = attacker_height - target_height
 	if height_difference > 0:
-		return 0.1 * float(height_difference)
+		return HEIGHT_ADVANTAGE_ACCURACY_BONUS * float(height_difference)
 
 	if height_difference < 0:
-		return -0.05 * float(abs(height_difference))
+		return -HEIGHT_DISADVANTAGE_ACCURACY_PENALTY * float(abs(height_difference))
 
 	return 0.0
 

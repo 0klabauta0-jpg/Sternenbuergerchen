@@ -1,12 +1,4 @@
-Gut, das ist genau der richtige Punkt, um das sauber festzuziehen.
-Ich mache dir jetzt eine Doc-Version, die:
-
-deine ursprüngliche Idee vollständig enthält
-deine späteren Ergänzungen integriert
-Referenzen wie Star Citizen, Kenny Tiles und deine Pulse-Hinweise mit einordnet
-direkt als Grundlage für dein Projekt dienen kann
-📄 GAME DESIGN DOCUMENT (KERNVERSION)
-# STERNENBÜRGER – CORE GAME DESIGN
+# STERNENBUERGER – CORE GAME DESIGN
 
 ---
 

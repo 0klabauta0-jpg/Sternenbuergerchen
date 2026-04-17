@@ -152,7 +152,28 @@ TASK_039 – Phasen-Wirkung
 TASK_040 – Take-Befehl und Objective
 TASK_041 – Siegbedingung
 TASK_042 – Respawn-Timer-Anzeige
-Phase 9 – Erweiterung (spaeter)
+Phase 9 – Gegner-Verhalten
+TASK_043 – Einfache Gegner-Positionierung
+TASK_044 – Gegner-Reaktion auf Kontakt
+TASK_045 – Gegner-Wellen
+Phase 10 – Unit-Identitaet
+TASK_046 – Unit-Skill-Werte
+TASK_047 – Skill-Wirkung im Combat
+TASK_048 – Persoenlichkeitsmerkmale
+TASK_049 – Heimatbasis: Unit-Uebersicht mit Skills
+Phase 11 – Multiplayer-Prototyp V1
+TASK_050 – Server-autoritativer SimulationRoot
+TASK_051 – Host/Join mit Testteams
+TASK_052 – Befehlsuebertragung ueber Netzwerk
+TASK_053 – Synchronisierte Spielzustandsanzeige
+Phase 12 – Terrain-System und Gameplay-Wirkung
+TASK_054 – Terrain-Tile-Datenmodell und Registry
+TASK_055 – Walkability und einfaches A*-Pathfinding
+TASK_056 – LOS ueber Terrain-Tiles
+TASK_057 – Cover aus Terrain-Tiles
+TASK_058 – Hoehenstufen
+TASK_059 – Strassen und Oberflaechen
+Phase 13 – Erweiterung (spaeter)
 Skillsystem
 soziale Dynamik
 persistente Teams

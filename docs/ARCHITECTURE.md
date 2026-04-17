@@ -11,7 +11,7 @@ Simulation, Darstellung und UI strikt trennen.
 - Registries statt `get_tree().get_nodes_in_group()` im Laufzeitkern
 - Dirty-Flags statt per-frame Komplett-Refresh
 - Out-of-View-Simulation vereinfacht, aber konsistent
-- Navigation klein und stabil halten
+- Navigation ueber A*-Pfadsuche auf dem Iso-Grid (walkable, Hoehenunterschied, Surface-Kosten); Geradlinien-Fallback ohne TerrainRegistry
 - Datenbasiertes Combat statt Physik-Ballistik
 
 ## Kernbausteine

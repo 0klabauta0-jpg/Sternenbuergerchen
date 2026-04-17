@@ -1,12 +1,26 @@
 # GLOSSARY
 
+- **Bleedout**: Endzustand nach Down; Unit ist handlungsunfaehig und wartet auf Respawn
 - **Commander**: Spieler auf oberster Befehlsebene
+- **Cover / Deckung**: Zahlenwert, der Trefferchance und Schadenshoehe reduziert; setzt sich aus Command-, Phase- und Terrain-Cover zusammen
+- **Down**: Zustand nach toedlichem Schaden; Unit ist gefallen, aber noch nicht endgueltig ausgeschieden
+- **Engage**: Feuerfreigabe und aktiver Kampfkontakt mit Feinden im Sichtbereich
+- **EventRouter**: zentrale Signal-/Event-Entkopplung
+- **Fireteam**: Untereinheit innerhalb eines FTL-Teams (z.B. BLUE, GOLD); dient zur Aufteilung von Befehlen
+- **Flankieren**: Zielraum aus vorgegebener Richtung seitlich anlaufen
+- **FOB**: Forward Operating Base; Staging-Screen vor dem Einsatz
+- **FOW (Fog of War)**: Sichtbarkeitssystem; bestimmt welche Einheiten fuer ein Team sichtbar sind
 - **FTL**: Fire Team Leader; direkte Unterebene unter dem Commander
 - **Heimatbasis**: Management-Screen zur Teamzusammenstellung
-- **FOB**: Forward Operating Base; Staging-Screen vor dem Einsatz
-- **Nehmen**: Gebiet einnehmen und anschließend halten
-- **Verteidigen**: Position halten unter Feinddruck
-- **Flankieren**: Zielraum aus vorgegebener Richtung seitlich anlaufen
-- **SimulationRoot**: zentrale autoritative Stelle für State-Mutationen
-- **EventRouter**: zentrale Signal-/Event-Entkopplung
+- **LOS (Line of Sight)**: Sichtlinie zwischen zwei Einheiten; kann durch Terrain blockiert werden
+- **Nehmen (Take)**: Gebiet einnehmen; beim vollen Capture-Fortschritt wechselt der Besitzer
+- **Objective**: Einnehmbarer Zielpunkt auf der Karte mit Capture-Fortschritt und Besitzer
+- **Phase**: Taktische Einsatzphase (APPROACH, ASSAULT, HOLD); beeinflusst Feuerverhalten, Geschwindigkeit und Deckung
 - **Registry**: zentrale strukturierte Laufzeitliste statt SceneTree-Abfragen
+- **Respawn**: Wiederbelebung einer Unit nach Bleedout mit konfigurierbarem Timer (Rover/FOB/Homebase)
+- **Rover/Frachter**: Schnellster Spawn-Typ (30s); liefert die Spawn-Position auf der Karte
+- **SimulationRoot**: einzige autoritative Stelle fuer Gameplay-State-Aenderungen
+- **Skill**: Individuelle Unit-Faehigkeit (accuracy, speed, leadership, toughness); beeinflusst Combat und Bewegung
+- **Trait**: Persoenlichkeitsmerkmal einer Unit (z.B. aggressive, cautious); modifiziert Skill-Werte
+- **Verteidigen**: Position halten unter Feinddruck
+- **WaveController**: Steuert das gestaffelte Spawnen von Gegnerwellen waehrend einer Mission

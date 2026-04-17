@@ -108,4 +108,4 @@ func _has_valid_target_position() -> bool:
 		return true
 
 	var value_type: int = typeof(target_position)
-	return value_type == TYPE_VECTOR2 or value_type == TYPE_VECTOR3
+	return value_type == TYPE_VECTOR2 or value_type == TYPE_VECTOR2I or value_type == TYPE_VECTOR3

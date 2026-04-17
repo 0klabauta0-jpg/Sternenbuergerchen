@@ -17,3 +17,17 @@
 - Friendly Fire ist an
 - Damage ist datenbasiert
 - Respawn ist unbegrenzt mit Zeitverzögerung
+
+## Architektur-Entscheidungen
+- SimulationRoot ist die einzige autoritative Stelle fuer State-Mutationen; keine Gameplay-Wahrheit in UI oder Szenen-Glue
+- Server-autoritativer SimulationRoot im Multiplayer: nur der Server verarbeitet Commands/Effects, Clients erhalten Snapshots
+- Isometrisches 2D-Grid als Koordinatensystem; Tile-Positionen werden ueber konfigurierbare Iso-Konvertierung abgebildet
+- A*-Pathfinding auf dem Iso-Grid mit drei Kostenvariablen: walkable, Hoehenunterschied, Surface-Kosten
+- Datenbasiertes Combat statt Physik-Ballistik: Trefferchance und Schaden ueber Formeln mit Skill-, Cover- und Terrain-Modifikatoren
+- Unit-Skills (accuracy, speed, leadership, toughness) als statische Werte pro Unit; beeinflussen Combat und Bewegung direkt
+- Persoenlichkeitsmerkmale (Traits) als Skill-Modifikatoren ohne eigene Gameplay-Subsysteme
+- Phasensystem (APPROACH, ASSAULT, HOLD) beeinflusst Feuerverhalten, Geschwindigkeit und Deckungswerte
+- Fireteams (BLUE, GOLD) als Untereinheiten fuer selektive Befehlsvergabe
+- Terrain-Daten (walkable, blocks_los, cover_value, height_level, surface_type) als leichtgewichtige RefCounted-Objekte in TerrainRegistry
+- Respawn-Timer-Staffelung: Rover 30s, FOB 150s, Homebase 270s
+- Host/Join ueber ENetMultiplayerPeer auf Port 7777 fuer V1; kein Matchmaking
