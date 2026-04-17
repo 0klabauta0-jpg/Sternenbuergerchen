@@ -112,6 +112,17 @@ func get_tiles() -> Array:
 	return _tiles.duplicate()
 
 
+func get_tile_at_grid(grid_position: Vector2i):
+	for tile_data in _tiles:
+		if tile_data == null:
+			continue
+
+		if tile_data.grid_position == grid_position:
+			return tile_data
+
+	return null
+
+
 func get_map_name() -> String:
 	return _map_name
 

@@ -1,0 +1,63 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/editor/map_editor.gd" id="1_script"]
+
+[node name="MapEditor" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+enabled = true
+zoom = Vector2(1.2, 1.2)
+
+[node name="TileContainer" type="Node2D" parent="."]
+
+[node name="SelectionOutline" type="Line2D" parent="."]
+default_color = Color(1, 1, 1, 0.95)
+width = 3.0
+closed = false
+z_index = 40
+
+[node name="UI" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="PropertyPanel" type="PanelContainer" parent="UI"]
+offset_left = 930.0
+offset_top = 24.0
+offset_right = 1260.0
+offset_bottom = 320.0
+
+[node name="Margin" type="MarginContainer" parent="UI/PropertyPanel"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 322.0
+offset_bottom = 288.0
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="UI/PropertyPanel/Margin"]
+offset_right = 290.0
+offset_bottom = 256.0
+theme_override_constants/separation = 8
+
+[node name="TitleLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox"]
+text = "Tile Properties"
+
+[node name="TileLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox"]
+text = "Tile: -"
+
+[node name="WalkableLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox"]
+text = "walkable: -"
+
+[node name="BlocksLosLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox"]
+text = "blocks_los: -"
+
+[node name="CoverValueLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox"]
+text = "cover_value: -"
+
+[node name="HeightLevelLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox"]
+text = "height_level: -"
+
+[node name="SurfaceTypeLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox"]
+text = "surface_type: -"
