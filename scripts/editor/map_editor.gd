@@ -964,11 +964,12 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 
 	# Step 2: detect corners - pairs of adjacent wall edges
 	# Corner pieces REPLACE the two straight panels they connect
+	# Corner textures diagonally swapped to match Kenney sprite orientation
 	var corner_map: Array = [
-		[Vector2i(1, 0), Vector2i(0, 1), WALL_CORNER_SW],
-		[Vector2i(1, 0), Vector2i(0, -1), WALL_CORNER_SE],
-		[Vector2i(-1, 0), Vector2i(0, 1), WALL_CORNER_NW],
-		[Vector2i(-1, 0), Vector2i(0, -1), WALL_CORNER_NE],
+		[Vector2i(1, 0), Vector2i(0, 1), WALL_CORNER_NE],
+		[Vector2i(1, 0), Vector2i(0, -1), WALL_CORNER_NW],
+		[Vector2i(-1, 0), Vector2i(0, 1), WALL_CORNER_SE],
+		[Vector2i(-1, 0), Vector2i(0, -1), WALL_CORNER_SW],
 	]
 
 	var edges_consumed_by_corners: Array[Vector2i] = []
