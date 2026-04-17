@@ -215,6 +215,7 @@ func _rebuild_tile_sprites() -> void:
 
 	_rebuild_all_cliff_overlays()
 	_rebuild_all_wall_overlays()
+	_rebuild_grid_overlay()
 
 
 func _refresh_tile_visual(tile_data) -> void:
@@ -1003,6 +1004,41 @@ func _clear_wall_overlays() -> void:
 			child.queue_free()
 
 	_wall_sprites_by_grid.clear()
+
+
+func _rebuild_grid_overlay() -> void:
+	var grid_overlay := get_node_or_null("GridOverlay") as Node2D
+	if grid_overlay == null:
+		return
+
+	for child in grid_overlay.get_children():
+		child.queue_free()
+
+	if _terrain_map_data == null:
+		return
+
+	var tile_size: Dictionary = _terrain_map_data.call("get_tile_size")
+	var half_w: float = float(tile_size.get("half_width", DEFAULT_HALF_TILE_WIDTH))
+	var half_h: float = float(tile_size.get("half_height", DEFAULT_HALF_TILE_HEIGHT))
+	var grid_color: Color = Color(1.0, 1.0, 1.0, 0.12)
+	var grid_width: float = 1.0
+
+	for tile_data in _terrain_map_data.call("get_tiles"):
+		var center: Vector2 = tile_data.world_position
+		var top: Vector2 = center + Vector2(0.0, -half_h)
+		var right: Vector2 = center + Vector2(half_w, 0.0)
+		var bottom: Vector2 = center + Vector2(0.0, half_h)
+		var left: Vector2 = center + Vector2(-half_w, 0.0)
+
+		var line := Line2D.new()
+		line.width = grid_width
+		line.default_color = grid_color
+		line.add_point(top)
+		line.add_point(right)
+		line.add_point(bottom)
+		line.add_point(left)
+		line.add_point(top)
+		grid_overlay.add_child(line)
 
 
 # --- Hover Preview ---
