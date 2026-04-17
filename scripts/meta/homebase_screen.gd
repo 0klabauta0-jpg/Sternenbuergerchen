@@ -1,11 +1,15 @@
 class_name HomebaseTestScreen
 extends Control
 
+const TEST_UNIT_SCRIPT: GDScript = preload("res://scripts/npc/test_unit.gd")
+const PREVIEW_ROOT_NAME: String = "PreviewUnits"
+
 signal selection_changed(selected_unit_ids)
 signal team_confirmed(selected_unit_ids)
 
 var _available_units: Array = []
 var _selected_unit_ids: PackedStringArray = []
+var _preview_units_by_id: Dictionary = {}
 
 
 func _ready() -> void:
@@ -13,6 +17,8 @@ func _ready() -> void:
 	if not confirm_button.pressed.is_connected(_on_confirm_button_pressed):
 		confirm_button.pressed.connect(_on_confirm_button_pressed)
 
+	_ensure_preview_root()
+	_rebuild_preview_units()
 	_render_roster()
 
 
@@ -20,6 +26,7 @@ func setup_roster(available_units: Array, selected_unit_ids: PackedStringArray =
 	_available_units = available_units.duplicate(true)
 	_selected_unit_ids = selected_unit_ids.duplicate()
 	if is_inside_tree():
+		_rebuild_preview_units()
 		_render_roster()
 
 
@@ -55,10 +62,10 @@ func _render_roster() -> void:
 
 		var check_box := CheckBox.new()
 		var display_name: String = String(unit_data.get("display_name", unit_id))
-		var team_id: String = String(unit_data.get("team_id", ""))
-		check_box.text = "%s (%s / %s)" % [display_name, unit_id, team_id]
+		check_box.text = "%s | %s" % [display_name, _build_unit_detail_text(unit_id)]
 		check_box.button_pressed = _selected_unit_ids.has(unit_id)
 		check_box.toggled.connect(_on_unit_toggled.bind(unit_id))
+		check_box.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		roster_list.add_child(check_box)
 
 	_update_selection_status()
@@ -103,3 +110,56 @@ func _on_unit_toggled(_pressed: bool, _unit_id: String) -> void:
 
 func _on_confirm_button_pressed() -> void:
 	confirm_selection()
+
+
+func _build_unit_detail_text(unit_id: String) -> String:
+	var preview_unit = _preview_units_by_id.get(unit_id, null)
+	if preview_unit == null:
+		return unit_id
+
+	var skill_text: String = unit_id
+	if preview_unit.has_method("get_skill_summary_text"):
+		skill_text = String(preview_unit.call("get_skill_summary_text"))
+
+	var trait_text: String = ""
+	if preview_unit.has_method("get_trait_summary_text"):
+		trait_text = String(preview_unit.call("get_trait_summary_text"))
+
+	if trait_text.is_empty():
+		return "%s | -" % skill_text
+
+	return "%s | %s" % [skill_text, trait_text]
+
+
+func _ensure_preview_root() -> Node:
+	var preview_root = get_node_or_null(PREVIEW_ROOT_NAME)
+	if preview_root == null:
+		preview_root = Node.new()
+		preview_root.name = PREVIEW_ROOT_NAME
+		add_child(preview_root)
+
+	return preview_root
+
+
+func _rebuild_preview_units() -> void:
+	var preview_root: Node = _ensure_preview_root()
+	for child in preview_root.get_children():
+		preview_root.remove_child(child)
+		child.queue_free()
+
+	_preview_units_by_id.clear()
+	for unit_data in _available_units:
+		var unit_id: String = String(unit_data.get("unit_id", ""))
+		if unit_id.is_empty():
+			continue
+
+		var preview_unit = TEST_UNIT_SCRIPT.new()
+		preview_unit.visible = false
+		preview_unit.unit_id = unit_id
+		preview_unit.team_id = String(unit_data.get("team_id", "team_alpha"))
+		preview_unit.display_name = String(unit_data.get("display_name", unit_id))
+		if preview_unit.has_method("apply_identity_config"):
+			preview_unit.call("apply_identity_config", unit_data)
+		preview_root.add_child(preview_unit)
+		preview_unit.set_process(false)
+		_preview_units_by_id[unit_id] = preview_unit

@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://scripts/core/simulation_root.gd" id="1_simulation"]
 [ext_resource type="Script" path="res://scripts/core/event_router.gd" id="2_router"]
@@ -17,6 +17,7 @@
 [ext_resource type="Script" path="res://scripts/core/respawn_manager.gd" id="15_respawn"]
 [ext_resource type="Script" path="res://scripts/tests/mission_objective_status_view.gd" id="16_objective_view"]
 [ext_resource type="Script" path="res://scripts/tests/mission_respawn_overlay.gd" id="17_respawn_overlay"]
+[ext_resource type="Script" path="res://scripts/tests/enemy_wave_controller.gd" id="18_enemy_waves"]
 
 [node name="MissionReactivityTest" type="Node2D"]
 
@@ -132,6 +133,7 @@ spawn_bravo_path = NodePath("../MapRoot/spawn_bravo")
 objective_point_path = NodePath("../MapRoot/objective_point")
 unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie"), NodePath("../EnemyDelta"), NodePath("../EnemyEcho")])
 respawn_manager_path = NodePath("../RespawnManager")
+enemy_wave_controller_path = NodePath("../EnemyWaveController")
 
 [node name="AlphaFlowDriver" type="Node" parent="."]
 script = ExtResource("9_flow")
@@ -166,6 +168,14 @@ simulation_root_path = NodePath("../SimulationRoot")
 unit_registry_path = NodePath("../UnitRegistry")
 target_marker_path = NodePath("../TargetMarker")
 
+[node name="EnemyWaveController" type="Node" parent="."]
+script = ExtResource("18_enemy_waves")
+wave_count = 2
+units_per_wave = 1
+wave_delay_seconds = 18.0
+first_wave_delay_seconds = 0.0
+unit_registry_path = NodePath("../UnitRegistry")
+
 [node name="CombatLoopDriver" type="Node" parent="."]
 script = ExtResource("10_combat")
 contact_range = 220.0
@@ -175,6 +185,7 @@ status_label_path = NodePath("../StatusLabel")
 friendly_unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie")])
 enemy_unit_paths = Array[NodePath]([NodePath("../EnemyDelta"), NodePath("../EnemyEcho")])
 respawn_manager_path = NodePath("../RespawnManager")
+enemy_wave_controller_path = NodePath("../EnemyWaveController")
 
 [node name="ObjectiveStatusView" type="Node" parent="."]
 script = ExtResource("16_objective_view")

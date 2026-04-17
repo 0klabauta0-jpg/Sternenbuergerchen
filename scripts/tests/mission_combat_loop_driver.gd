@@ -17,6 +17,14 @@ signal combat_resolved(mission_result: Dictionary)
 @export var base_hit_chance: float = 0.45
 @export var base_damage_multiplier: float = 1.0
 @export var ticks_between_attacks: int = 10
+@export var enemy_advance_enabled: bool = true
+@export var enemy_advance_speed_factor: float = 0.3
+@export var enemy_engage_distance: float = 200.0
+@export var enemy_reposition_enabled: bool = true
+@export var enemy_reposition_cooldown_seconds: float = 4.0
+@export var enemy_reposition_min_distance: float = 30.0
+@export var enemy_reposition_max_distance: float = 60.0
+@export var enemy_reposition_move_speed_factor: float = 0.45
 @export var win_condition: String = WIN_CONDITION_ELIMINATION
 @export var objective_defense_hold_seconds: float = 8.0
 @export var simulation_root_path: NodePath
@@ -24,9 +32,11 @@ signal combat_resolved(mission_result: Dictionary)
 @export var friendly_unit_paths: Array[NodePath] = []
 @export var enemy_unit_paths: Array[NodePath] = []
 @export var respawn_manager_path: NodePath
+@export var enemy_wave_controller_path: NodePath
 
 var _los_system = LOS_SYSTEM_SCRIPT.new()
 var _queued_bleedout_by_unit_id: Dictionary = {}
+var _enemy_reposition_ready_at_msec: Dictionary = {}
 var _combat_finished: bool = false
 var _winning_team_id: String = ""
 var _last_contact: Dictionary = {}
@@ -49,6 +59,7 @@ func _ready() -> void:
 
 	_connect_unit_signals()
 	_connect_respawn_signals()
+	_connect_wave_controller_signals()
 	call_deferred("_finish_readability_setup")
 	_mission_started_at_msec = Time.get_ticks_msec()
 
@@ -86,6 +97,7 @@ func _on_tick_processed(tick: int) -> void:
 
 	_queue_bleedout_for_downed_enemy(simulation_root)
 	_queue_bleedout_for_downed_friendly(simulation_root)
+	_advance_enemy_units(simulation_root)
 	_try_enqueue_attacks(simulation_root)
 	_update_combat_resolution()
 	if not _combat_finished:
@@ -324,10 +336,11 @@ func _build_status_text(state_name: String) -> String:
 	if _combat_finished and not _winning_team_id.is_empty():
 		lines.append("Winner: %s" % _winning_team_id)
 
-	lines.append("Enemies fit: %d" % _count_fit_units(enemy_unit_paths))
+	lines.append("Enemies fit: %d" % _count_fit_enemy_units())
 	lines.append("Friendlies fit: %d" % _count_fit_units(friendly_unit_paths))
 	lines.append("Duration: %.1fs" % _get_duration_seconds())
 	lines.append(_build_objective_status_text())
+	lines.append(_build_wave_status_text())
 
 	if win_condition == WIN_CONDITION_OBJECTIVE_DEFENSE and _objective_owned_since_msec >= 0 and not _combat_finished:
 		lines.append("Hold timer: %.1fs / %.1fs" % [_get_objective_defense_elapsed_seconds(), objective_defense_hold_seconds])
@@ -389,7 +402,7 @@ func _find_first_contact_pair() -> Dictionary:
 		if not _can_unit_attack(friendly):
 			continue
 
-		var enemy = _pick_target_for_attacker(friendly, enemy_unit_paths)
+		var enemy = _pick_target_from_units(friendly, _get_active_enemy_units())
 		if enemy == null:
 			continue
 
@@ -400,11 +413,11 @@ func _find_first_contact_pair() -> Dictionary:
 			"target_id": String(enemy.call("get_unit_id")),
 		}
 
-	for enemy in _get_units(enemy_unit_paths):
+	for enemy in _get_active_enemy_units():
 		if not _can_enemy_attack(enemy):
 			continue
 
-		var friendly = _pick_target_for_attacker(enemy, friendly_unit_paths)
+		var friendly = _pick_target_from_units(enemy, _get_units(friendly_unit_paths))
 		if friendly == null:
 			continue
 
@@ -481,6 +494,16 @@ func _connect_respawn_signals() -> void:
 			respawn_manager.connect("unit_respawn_completed", Callable(self, "_on_unit_respawn_completed"))
 
 
+func _connect_wave_controller_signals() -> void:
+	var enemy_wave_controller = _get_enemy_wave_controller()
+	if enemy_wave_controller == null:
+		return
+
+	if enemy_wave_controller.has_signal("wave_started"):
+		if not enemy_wave_controller.is_connected("wave_started", Callable(self, "_on_enemy_wave_started")):
+			enemy_wave_controller.connect("wave_started", Callable(self, "_on_enemy_wave_started"))
+
+
 func _on_unit_respawn_completed(unit_id: String) -> void:
 	_queued_bleedout_by_unit_id.erase(unit_id)
 	_set_event_text("%s RESPAWN READY" % unit_id)
@@ -522,6 +545,7 @@ func _on_unit_damage_applied(amount: int, _health_points: int, _hit_context: Dic
 	_set_event_text("%s HIT -%d" % [unit_id, amount])
 	if unit.has_method("show_event_text"):
 		unit.call("show_event_text", "HIT -%d" % amount, Color(1.0, 0.78, 0.35, 1.0))
+	_try_reposition_enemy_on_damage(unit, _hit_context)
 	_update_status_label("contact")
 
 
@@ -582,6 +606,15 @@ func _count_fit_units(paths: Array[NodePath]) -> int:
 	return fit_count
 
 
+func _count_fit_enemy_units() -> int:
+	var fit_count: int = 0
+	for enemy in _get_active_enemy_units():
+		if enemy != null and enemy.has_method("get_vital_state") and String(enemy.call("get_vital_state")) == "fit":
+			fit_count += 1
+
+	return fit_count
+
+
 func _build_attack_readiness_text() -> String:
 	if _current_tick >= _next_attack_tick:
 		return "ready"
@@ -609,11 +642,20 @@ func _is_victory_condition_met() -> bool:
 
 
 func _is_enemy_team_eliminated() -> bool:
-	var enemy_units: Array = _get_units(enemy_unit_paths)
-	if enemy_units.is_empty():
+	var active_enemy_units: Array = _get_active_enemy_units()
+	if active_enemy_units.is_empty():
+		if _has_pending_enemy_waves():
+			return false
+
 		return false
 
-	return _count_fit_units(enemy_unit_paths) == 0
+	if _has_pending_enemy_waves():
+		return false
+
+	if _has_pending_enemy_respawns():
+		return false
+
+	return _count_fit_enemy_units() == 0
 
 
 func _resolve_combat(result: String, winning_team_id: String) -> void:
@@ -709,3 +751,215 @@ func _build_objective_status_text() -> String:
 		status_text += " contested"
 
 	return status_text
+
+
+func _advance_enemy_units(simulation_root: Node) -> void:
+	if not enemy_advance_enabled:
+		return
+
+	var objective_position: Vector2 = _get_objective_position()
+	for enemy in _get_active_enemy_units():
+		if enemy == null or not enemy.has_method("get_vital_state"):
+			continue
+
+		if String(enemy.call("get_vital_state")) != "fit":
+			continue
+
+		if _enemy_should_hold_position(enemy):
+			continue
+
+		simulation_root.call(
+			"enqueue_command",
+			{
+				"command_type": "move_to_position",
+				"priority": 8,
+				"unit_id": String(enemy.call("get_unit_id")),
+				"target_position": objective_position,
+				"move_speed_factor": enemy_advance_speed_factor,
+				"requeue_until_target": false,
+			}
+		)
+
+
+func _enemy_should_hold_position(enemy) -> bool:
+	if enemy == null or not (enemy is Node2D):
+		return true
+
+	for friendly in _get_units(friendly_unit_paths):
+		if friendly == null or not _can_target_receive_attack(friendly):
+			continue
+
+		if not _los_system.has_line_of_sight_between_nodes(enemy, friendly, contact_range):
+			continue
+
+		if (enemy as Node2D).global_position.distance_to((friendly as Node2D).global_position) <= enemy_engage_distance:
+			return true
+
+	return false
+
+
+func _pick_target_from_units(attacker, targets: Array):
+	for target in targets:
+		if not _is_target_attackable(attacker, target):
+			continue
+
+		return target
+
+	return null
+
+
+func _get_active_enemy_units() -> Array:
+	var active_units: Array = []
+	var unit_registry = _get_unit_registry()
+	for enemy in _get_units(enemy_unit_paths):
+		if enemy == null or not enemy.has_method("get_unit_id"):
+			continue
+
+		if unit_registry != null and unit_registry.has_method("has_unit"):
+			if not bool(unit_registry.call("has_unit", String(enemy.call("get_unit_id")))):
+				continue
+
+		if enemy is CanvasItem and not (enemy as CanvasItem).visible:
+			continue
+
+		active_units.append(enemy)
+
+	return active_units
+
+
+func _get_unit_registry():
+	var simulation_root = get_node_or_null(simulation_root_path)
+	if simulation_root == null or not simulation_root.has_method("_get_unit_registry"):
+		return null
+
+	return simulation_root.call("_get_unit_registry")
+
+
+func _get_objective_position() -> Vector2:
+	var objective_status = _get_objective_status()
+	if objective_status != null:
+		return objective_status.position
+
+	return Vector2.ZERO
+
+
+func _try_reposition_enemy_on_damage(unit, hit_context: Dictionary) -> void:
+	if not enemy_reposition_enabled:
+		return
+
+	if unit == null or not unit.has_method("get_unit_id") or not unit.has_method("get_team_id"):
+		return
+
+	if String(unit.call("get_team_id")) == friendly_team_id:
+		return
+
+	if not _get_active_enemy_units().has(unit):
+		return
+
+	if String(unit.call("get_vital_state")) != "fit":
+		return
+
+	var unit_id: String = String(unit.call("get_unit_id"))
+	var now_msec: int = Time.get_ticks_msec()
+	if int(_enemy_reposition_ready_at_msec.get(unit_id, 0)) > now_msec:
+		return
+
+	var simulation_root = get_node_or_null(simulation_root_path)
+	if simulation_root == null:
+		return
+
+	var reposition_target: Vector2 = _build_enemy_reposition_target(unit, hit_context)
+	simulation_root.call(
+		"enqueue_command",
+		{
+			"command_type": "move_to_position",
+			"priority": 12,
+			"unit_id": unit_id,
+			"target_position": reposition_target,
+			"move_speed_factor": enemy_reposition_move_speed_factor,
+			"requeue_until_target": true,
+		}
+	)
+	_enemy_reposition_ready_at_msec[unit_id] = now_msec + int(round(enemy_reposition_cooldown_seconds * 1000.0))
+
+
+func _build_enemy_reposition_target(unit, hit_context: Dictionary) -> Vector2:
+	var unit_node: Node2D = unit
+	var attacker_direction: Vector2 = Vector2.ZERO
+	var attacker_unit_id: String = String(hit_context.get("attacker_unit_id", ""))
+	var attacker = _resolve_unit_by_id(attacker_unit_id)
+	if attacker != null and attacker is Node2D:
+		attacker_direction = unit_node.global_position - (attacker as Node2D).global_position
+
+	if attacker_direction.is_zero_approx():
+		attacker_direction = Vector2.RIGHT.rotated(randf() * TAU)
+
+	var reposition_distance: float = randf_range(enemy_reposition_min_distance, enemy_reposition_max_distance)
+	return unit_node.global_position + attacker_direction.normalized() * reposition_distance
+
+
+func _resolve_unit_by_id(unit_id: String):
+	if unit_id.is_empty():
+		return null
+
+	var unit_registry = _get_unit_registry()
+	if unit_registry == null or not unit_registry.has_method("get_unit"):
+		return null
+
+	return unit_registry.call("get_unit", unit_id)
+
+
+func _get_enemy_wave_controller():
+	if enemy_wave_controller_path.is_empty():
+		return null
+
+	return get_node_or_null(enemy_wave_controller_path)
+
+
+func _has_pending_enemy_waves() -> bool:
+	var enemy_wave_controller = _get_enemy_wave_controller()
+	if enemy_wave_controller == null or not enemy_wave_controller.has_method("are_all_waves_started"):
+		return false
+
+	return not bool(enemy_wave_controller.call("are_all_waves_started"))
+
+
+func _has_pending_enemy_respawns() -> bool:
+	var respawn_manager = get_node_or_null(respawn_manager_path)
+	if respawn_manager == null or not respawn_manager.has_method("has_pending_respawn"):
+		return false
+
+	for enemy in _get_units(enemy_unit_paths):
+		if enemy == null or not enemy.has_method("get_unit_id"):
+			continue
+
+		var unit_id: String = String(enemy.call("get_unit_id"))
+		if unit_id.is_empty():
+			continue
+
+		if bool(respawn_manager.call("has_pending_respawn", unit_id)):
+			return true
+
+	return false
+
+
+func _build_wave_status_text() -> String:
+	var enemy_wave_controller = _get_enemy_wave_controller()
+	if enemy_wave_controller == null:
+		return "Wave: none"
+
+	if not enemy_wave_controller.has_method("get_current_wave_number") or not enemy_wave_controller.has_method("get_total_wave_count"):
+		return "Wave: unavailable"
+
+	return "Wave: %d/%d" % [
+		int(enemy_wave_controller.call("get_current_wave_number")),
+		int(enemy_wave_controller.call("get_total_wave_count")),
+	]
+
+
+func _on_enemy_wave_started(wave_number: int) -> void:
+	if wave_number <= 1:
+		_set_event_text("ENEMY WAVE %d" % wave_number)
+		return
+
+	_set_event_text("ENEMY REINFORCEMENTS")

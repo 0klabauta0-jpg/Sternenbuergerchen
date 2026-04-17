@@ -246,7 +246,8 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 		return
 
 	node_2d.position = current_position + direction.normalized() * step_distance
-	enqueue_command(cmd.duplicate(true))
+	if bool(cmd.get("requeue_until_target", true)):
+		enqueue_command(cmd.duplicate(true))
 
 
 func _apply_damage_effect(effect: Dictionary) -> void:
@@ -285,10 +286,12 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 	var attacker_attack_bonus: float = _extract_unit_attack_bonus(attacker_unit)
 	var attacker_cover_score: float = _extract_unit_cover_score(attacker_unit)
 	var hit_chance: float = _extract_float(effect.get("hit_chance", 1.0), 1.0)
-	hit_chance = clampf(hit_chance + attacker_attack_bonus + (attacker_cover_score * 0.05) - (target_cover_score * 0.35), 0.05, 1.0)
+	hit_chance *= _extract_unit_accuracy_multiplier(attacker_unit)
+	hit_chance = clampf(hit_chance + attacker_attack_bonus + (attacker_cover_score * 0.05) - (target_cover_score * 0.35), 0.05, 0.95)
 	var roll_override: float = _extract_float(effect.get("roll_override", -1.0), -1.0)
 	var damage_multiplier: float = _extract_float(effect.get("damage_multiplier", 1.0), 1.0)
 	damage_multiplier = maxf(damage_multiplier + attacker_attack_bonus - (target_cover_score * 0.2), 0.1)
+	damage_multiplier *= _extract_unit_damage_taken_multiplier(unit)
 	var damage_model = DAMAGE_MODEL_SCRIPT.new()
 	if not bool(damage_model.call("resolve_hit", hit_chance, roll_override)):
 		return
@@ -365,14 +368,14 @@ func _extract_unit_attack_bonus(unit) -> float:
 
 
 func _extract_move_speed_factor(cmd: Dictionary, unit) -> float:
+	var move_speed_factor: float = 1.0
 	var raw_factor: Variant = cmd.get("move_speed_factor", null)
 	if typeof(raw_factor) == TYPE_INT or typeof(raw_factor) == TYPE_FLOAT:
-		return maxf(float(raw_factor), 0.0)
+		move_speed_factor = maxf(float(raw_factor), 0.0)
+	elif unit != null and unit.has_method("get_move_speed_factor"):
+		move_speed_factor = maxf(float(unit.call("get_move_speed_factor")), 0.0)
 
-	if unit != null and unit.has_method("get_move_speed_factor"):
-		return maxf(float(unit.call("get_move_speed_factor")), 0.0)
-
-	return 1.0
+	return move_speed_factor * _extract_unit_speed_multiplier(unit)
 
 
 func _update_objective_capture() -> void:
@@ -450,6 +453,28 @@ func _extract_float(value: Variant, fallback: float) -> float:
 		return float(value)
 
 	return fallback
+
+
+func _extract_unit_accuracy_multiplier(unit) -> float:
+	if unit == null or not unit.has_method("get_accuracy_skill"):
+		return 1.0
+
+	return 0.5 + clampf(float(unit.call("get_accuracy_skill")), 0.0, 1.0)
+
+
+func _extract_unit_speed_multiplier(unit) -> float:
+	if unit == null or not unit.has_method("get_speed_skill"):
+		return 1.0
+
+	return 0.5 + clampf(float(unit.call("get_speed_skill")), 0.0, 1.0)
+
+
+func _extract_unit_damage_taken_multiplier(unit) -> float:
+	if unit == null or not unit.has_method("get_toughness_skill"):
+		return 1.0
+
+	var toughness: float = clampf(float(unit.call("get_toughness_skill")), 0.0, 1.0)
+	return 1.0 - (toughness * 0.4)
 
 
 func _apply_respawn_effect(effect: Dictionary) -> void:

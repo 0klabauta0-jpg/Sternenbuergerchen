@@ -290,3 +290,52 @@
 - Offene Punkte: keine Queue-Ansicht, keine Fortschrittsbalken, keine Spawn-Punkt-Auswahl und keine groessere HUD-Struktur.
 - Risiken: die Anzeige bleibt bewusst ein kleiner Polling-Overlay-Pfad fuer die Testszene; spaetere echte HUD-Systeme sollten diese Minimalanzeige explizit ersetzen statt sie still auszubauen.
 - Naechster Schritt: den Vertical Slice gegen die naechsten Gegner-Tasks absichern und erst dann weitere Gegnerlogik aufsetzen.
+
+### TASK_043 - Einfache Gegner-Positionierung
+- Status: implementiert
+- Stand: `MissionCombatLoopDriver` hat jetzt einen kleinen Enemy-Vormarschpfad mit `enemy_advance_enabled`, `enemy_advance_speed_factor` und `enemy_engage_distance`. `fit`e, aktive Enemy-Units enqueueen pro Tick ueber `SimulationRoot` einen `move_to_position`-Command Richtung Objective, stoppen aber bei LOS-Kontakt in Kampfdistanz und bleiben damit im bestehenden Combat-Loop feuersauber eingebettet. Nach Respawn oder Wellenaktivierung greifen dieselben Regeln automatisch erneut.
+- Offene Punkte: keine Pfadplanung, keine Deckungssuche, keine Gegner-Befehlskette und keine feinere Zielwahl ueber den bestehenden Contact-Check hinaus.
+- Risiken: die Bewegung bleibt bewusst ein sehr einfacher Objective-Marsch; spaetere KI- oder Terrain-Systeme muessen diesen Slice explizit ersetzen oder erweitern, statt Logik schleichend im Combat-Driver anzusammeln.
+- Naechster Schritt: auf eingehenden Schaden eine kleine Repositionierung fuer Enemies aufsetzen.
+
+### TASK_044 - Gegner-Reaktion auf Kontakt
+- Status: implementiert
+- Stand: `MissionCombatLoopDriver` reagiert jetzt auf eingehenden Schaden von Enemy-Units mit einer kleinen Repositionierung ueber den bestehenden `SimulationRoot.enqueue_command()`-Pfad. Die Zielposition wird bevorzugt weg vom bekannten Angreifer aufgebaut, faellt sonst auf einen zufaelligen Offset zurueck und ist ueber `enemy_reposition_*`-Exports fuer Distanz, Cooldown und Bewegungsgeschwindigkeit klein konfigurierbar.
+- Offene Punkte: keine echte Deckungssuche, keine Retreat-Logik, keine Gruppenreaktion und keine taktische Bewertung des neuen Standorts.
+- Risiken: der Reaktionspfad ist bewusst ein lokaler, eventgetriebener Minimal-Offset; spaetere Gegnerlogik sollte darauf explizit aufbauen statt viele Sonderfaelle in den Hit-Callback zu schieben.
+- Naechster Schritt: Enemy-Spawns in einfache Wellen staffeln, damit die Mission zeitlich getragen wird.
+
+### TASK_045 - Gegner-Wellen
+- Status: implementiert
+- Stand: ein neuer `EnemyWaveController` unter `res://scripts/tests/enemy_wave_controller.gd` staffelt Enemy-Units jetzt in konfigurierbare Wellen mit `wave_count`, `units_per_wave`, `wave_delay_seconds` und `first_wave_delay_seconds`. Noch nicht gestartete Units bleiben unsichtbar und aus dem `UnitRegistry` abgemeldet; beim Wellenstart werden sie an ihre Spawn-Position gesetzt, sichtbar, wieder registriert und vom bestehenden Enemy-Vormarsch uebernommen. Ein kleines Szenenlabel zeigt `WAVE x/y`, und der `MissionCombatLoopDriver` laesst Elimination-Sieg erst nach letzter Welle und ohne ausstehende Enemy-Respawns zu.
+- Offene Punkte: keine dynamische Wellenzusammenstellung, keine verschiedenen Gegnertypen, keine Spawn-Richtungswahl und kein eigener Reinforcement-UI-Flow ausser der kleinen Szenenlesbarkeit.
+- Risiken: der Wave-Controller bleibt bewusst ein leichter Testszenen-Node; spaetere Missions- oder Encounter-Systeme sollten ihn explizit ablösen oder erweitern statt Wellenlogik verteilt ueber Setup, Combat-Driver und Szene zu verstecken.
+- Naechster Schritt: individuelle Skill-Werte an Units haengen, bevor diese das Gameplay beeinflussen.
+
+### TASK_046 - Unit-Skill-Werte
+- Status: implementiert
+- Stand: `UnitSkills` unter `res://scripts/npc/unit_skills.gd` formalisiert jetzt `accuracy`, `speed`, `leadership` und `toughness` mit kleinem Dictionary-Roundtrip. `TestUnit` traegt dazu exportierte Skillwerte, baut daraus beim Initialisieren ein `UnitSkills`-Objekt und zeigt einen kompakten Skill-Hinweis direkt im bestehenden Debug-Label an. `MissionTestSetup` weist Friendlies und Enemies ueber `UnitRosterPresets` feste, leicht unterschiedliche Presets zu.
+- Offene Punkte: noch keine Laufzeitentwicklung der Werte, keine Balancing-Arbeit und noch keine direkte Leadership-Wirkung.
+- Risiken: die Skills sind bewusst kleine statische Unit-Daten; spaetere Progression oder Balancing-Systeme muessen diese Datenbasis explizit erweitern statt sie still in Szene-Properties zu zerstreuen.
+- Naechster Schritt: die neuen Skillwerte in Trefferchance, Bewegung und Schadensreduktion einspeisen.
+
+### TASK_047 - Skill-Wirkung im Combat
+- Status: implementiert
+- Stand: `SimulationRoot` leitet Trefferchance, Bewegungstempo und Schadensreduktion jetzt direkt aus den individuellen Unit-Skills ab. `accuracy` skaliert die `hit_chance` der angreifenden Unit mit Clamp auf 0.95, `speed` multipliziert den bestehenden `move_speed_factor`, und `toughness` reduziert den finalen Schaden nach einer einfachen, nachvollziehbaren Formel. `leadership` wird weiter mitgefuehrt, hat in diesem Slice aber noch keine eigene Wirkung.
+- Offene Punkte: kein tieferes Balancing, keine situationsabhaengigen Modifikatoren und keine Fuehrungsqualitaets-Logik.
+- Risiken: die Formeln sind bewusst einfach und testszenenfreundlich; spaetere Kampf- oder AI-Systeme sollten klare Erweiterungsschritte waehlen statt diese Minimalformeln still zu ueberladen.
+- Naechster Schritt: einfache Persoenlichkeitsmerkmale auf die Skillbasis aufsetzen.
+
+### TASK_048 - Einfache Persoenlichkeitsmerkmale
+- Status: implementiert
+- Stand: `UnitTrait` unter `res://scripts/npc/unit_trait.gd` liefert jetzt eine kleine Trait-Factory fuer `aggressive`, `cautious`, `steady`, `reckless` und `calm` samt Skill-Modifikatoren und Kurz-Tags. `TestUnit` kann ueber `trait_ids` bis zu zwei Traits laden, die effektiven Skills beim Initialisieren anpassen und ihre Tags im Debug-Label anzeigen. `UnitRosterPresets` vergibt dazu unterschiedliche Trait-Kombinationen an die Friendly-Units; Enemies bleiben im V1-Pfad traitlos.
+- Offene Punkte: keine sozialen Beziehungen, keine Synergie-Effekte, keine Laufzeitveraenderung und kein Trait-Balancing.
+- Risiken: Traits bleiben bewusst ein leichter Skill-Modifikator ohne eigene Gameplay-Subsysteme; spaetere Charakter- oder Squad-Systeme muessen diese kleine Datenbasis explizit weiterdenken statt versteckte Nebenlogik in `TestUnit` zu sammeln.
+- Naechster Schritt: die neuen Unit-Details in der Homebase sichtbar machen.
+
+### TASK_049 - Heimatbasis: Unit-Uebersicht mit Skills und Traits
+- Status: implementiert
+- Stand: `HomebaseTestScreen` zeigt in der Checkbox-Liste jetzt pro verfuegbarer Unit eine kompakte Detailzeile mit Skill-Kurzform und Trait-Tags. Die Daten werden bewusst aus `TestUnit`-Instanzen im Szenenbaum gelesen: dafuer baut der Screen einen kleinen unsichtbaren Preview-Root mit `TestUnit`-Kindern aus den `UnitRosterPresets` auf und liest daraus die gleichen Summary-Methoden wie in der Missionsszene. `MetaLayerFlow` bezieht die verfuegbaren Homebase-Units jetzt direkt aus denselben Presets.
+- Offene Punkte: keine Sortierung, keine Vergleichsansicht, keine tiefe Detailseite und keine optionale Farbcodierung.
+- Risiken: der Homebase-Pfad bleibt bewusst eine kleine Listenlesbarkeit ohne neue Registry oder Persistenzschicht; spaetere Meta-UI sollte diesen Preview-Ansatz explizit ersetzen, wenn ein echtes Daten-/Roster-System eingefuehrt wird.
+- Naechster Schritt: den Slice lokal gegen Mission und Meta-Layer pruefen und dann fuer die naechsten Netzwerk-/Terrain-Aufgaben stabilisieren.

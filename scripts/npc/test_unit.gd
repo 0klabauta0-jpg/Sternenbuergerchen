@@ -2,6 +2,8 @@ class_name TestUnit
 extends Node2D
 
 const COMMANDER_COMMAND_SCRIPT: GDScript = preload("res://scripts/command/commander_command.gd")
+const UNIT_SKILLS_SCRIPT: GDScript = preload("res://scripts/npc/unit_skills.gd")
+const UNIT_TRAIT_SCRIPT: GDScript = preload("res://scripts/npc/unit_trait.gd")
 const UNIT_RUNTIME_STATUS_SCRIPT: GDScript = preload("res://scripts/npc/unit_runtime_status.gd")
 const UNIT_VITAL_STATUS_SCRIPT: GDScript = preload("res://scripts/npc/unit_vital_status.gd")
 const STATUS_LABEL_NAME: String = "DebugStatusLabel"
@@ -23,10 +25,17 @@ signal vital_status_changed(vital_status)
 @export var team_id: String = "team_test"
 @export var fireteam_id: String = ""
 @export var max_health_points: int = 100
+@export_range(0.0, 1.0, 0.01) var skill_accuracy: float = 0.5
+@export_range(0.0, 1.0, 0.01) var skill_speed: float = 0.5
+@export_range(0.0, 1.0, 0.01) var skill_leadership: float = 0.3
+@export_range(0.0, 1.0, 0.01) var skill_toughness: float = 0.5
+@export var trait_ids: PackedStringArray = []
 
 var _runtime_status: RefCounted = UNIT_RUNTIME_STATUS_SCRIPT.new()
 var _current_unit_command: RefCounted = null
 var _vital_status: RefCounted = UNIT_VITAL_STATUS_SCRIPT.new()
+var _skills: RefCounted = UNIT_SKILLS_SCRIPT.new()
+var _traits: Array = []
 var _last_damage_context: Dictionary = {}
 var _status_label: Label = null
 var _fireteam_label: Label = null
@@ -42,6 +51,7 @@ var _respawn_manager = null
 
 func _ready() -> void:
 	fireteam_id = _normalize_fireteam_id(fireteam_id)
+	_rebuild_identity_data()
 	_ensure_readability_labels()
 	_runtime_status = _build_runtime_status("idle")
 	_vital_status = _build_vital_status("fit", max_health_points, 0)
@@ -76,6 +86,10 @@ func get_health() -> int:
 
 func get_team_id() -> String:
 	return team_id
+
+
+func get_display_name() -> String:
+	return display_name
 
 
 func get_fireteam_id() -> String:
@@ -118,8 +132,83 @@ func get_last_damage_context() -> Dictionary:
 	return _last_damage_context.duplicate(true)
 
 
+func get_skills():
+	return _skills
+
+
+func get_accuracy_skill() -> float:
+	return float(_skills.accuracy)
+
+
+func get_speed_skill() -> float:
+	return float(_skills.speed)
+
+
+func get_leadership_skill() -> float:
+	return float(_skills.leadership)
+
+
+func get_toughness_skill() -> float:
+	return float(_skills.toughness)
+
+
+func get_traits() -> Array:
+	return _traits.duplicate()
+
+
+func get_trait_ids() -> PackedStringArray:
+	return trait_ids.duplicate()
+
+
+func get_trait_tags() -> PackedStringArray:
+	var tags: PackedStringArray = []
+	for unit_trait in _traits:
+		if unit_trait == null:
+			continue
+
+		tags.append("[%s]" % String(unit_trait.short_tag))
+
+	return tags
+
+
+func get_skill_summary_text() -> String:
+	return "A:%.1f S:%.1f L:%.1f T:%.1f" % [
+		get_accuracy_skill(),
+		get_speed_skill(),
+		get_leadership_skill(),
+		get_toughness_skill(),
+	]
+
+
+func get_trait_summary_text() -> String:
+	return " ".join(get_trait_tags())
+
+
 func get_target_position():
 	return _runtime_status.target_position
+
+
+func apply_identity_config(identity_config: Dictionary) -> void:
+	if identity_config.has("display_name"):
+		display_name = String(identity_config["display_name"])
+
+	if identity_config.has("skill_accuracy"):
+		skill_accuracy = clampf(float(identity_config["skill_accuracy"]), 0.0, 1.0)
+
+	if identity_config.has("skill_speed"):
+		skill_speed = clampf(float(identity_config["skill_speed"]), 0.0, 1.0)
+
+	if identity_config.has("skill_leadership"):
+		skill_leadership = clampf(float(identity_config["skill_leadership"]), 0.0, 1.0)
+
+	if identity_config.has("skill_toughness"):
+		skill_toughness = clampf(float(identity_config["skill_toughness"]), 0.0, 1.0)
+
+	if identity_config.has("trait_ids"):
+		trait_ids = _coerce_trait_ids(identity_config["trait_ids"])
+
+	_rebuild_identity_data()
+	_refresh_readability()
 
 
 func set_fireteam_id(next_fireteam_id: String) -> bool:
@@ -194,6 +283,37 @@ func begin_respawn() -> bool:
 	_refresh_readability()
 	show_event_text("RESPAWNING", Color(0.7, 0.9, 1.0, 1.0), 1.8)
 	return true
+
+
+func activate_for_wave(spawn_position: Vector2) -> void:
+	position = spawn_position
+	_current_unit_command = null
+	_last_damage_context = {}
+	_contact_active = false
+	_contact_target_id = ""
+	_current_event_text = ""
+	_event_time_remaining = 0.0
+	_runtime_status = _build_runtime_status("idle")
+	runtime_status_changed.emit(_runtime_status)
+	_set_vital_status("fit", max_health_points, 0)
+	visible = true
+	_refresh_event_label()
+	_refresh_readability()
+
+
+func deactivate_for_wave() -> void:
+	_current_unit_command = null
+	_last_damage_context = {}
+	_contact_active = false
+	_contact_target_id = ""
+	_current_event_text = ""
+	_event_time_remaining = 0.0
+	_runtime_status = _build_runtime_status("idle")
+	runtime_status_changed.emit(_runtime_status)
+	_set_vital_status("fit", max_health_points, 0)
+	visible = false
+	_refresh_event_label()
+	_refresh_readability()
 
 
 func respawn(spawn_position: Vector2) -> bool:
@@ -463,8 +583,19 @@ func _refresh_status_label() -> void:
 
 	var lines: PackedStringArray = []
 	lines.append(_build_unit_name_label())
-	lines.append(_build_primary_status_label())
-	lines.append(_build_secondary_status_label())
+	var primary_status_label: String = _build_primary_status_label()
+	if not primary_status_label.is_empty():
+		lines.append(primary_status_label)
+
+	var secondary_status_label: String = _build_secondary_status_label()
+	if not secondary_status_label.is_empty():
+		lines.append(secondary_status_label)
+
+	lines.append(get_skill_summary_text())
+	var trait_summary_text: String = get_trait_summary_text()
+	if not trait_summary_text.is_empty():
+		lines.append(trait_summary_text)
+
 	_status_label.text = "\n".join(lines)
 	_status_label.modulate = _build_status_label_color()
 
@@ -605,3 +736,38 @@ func _get_respawn_remaining_seconds() -> int:
 		return 0
 
 	return maxi(int(ceili(float(_respawn_manager.call("get_remaining_time", unit_id)))), 0)
+
+
+func _rebuild_identity_data() -> void:
+	_skills = UNIT_SKILLS_SCRIPT.new(
+		{
+			"accuracy": skill_accuracy,
+			"speed": skill_speed,
+			"leadership": skill_leadership,
+			"toughness": skill_toughness,
+		}
+	)
+	_traits.clear()
+	for trait_id in trait_ids:
+		var unit_trait = UNIT_TRAIT_SCRIPT.from_id(String(trait_id))
+		if unit_trait == null:
+			continue
+
+		unit_trait.apply_to_skills(_skills)
+		_traits.append(unit_trait)
+
+
+func _coerce_trait_ids(value: Variant) -> PackedStringArray:
+	if value is PackedStringArray:
+		return (value as PackedStringArray).duplicate()
+
+	var result: PackedStringArray = []
+	if value is Array:
+		for entry in value:
+			var trait_id: String = String(entry).strip_edges().to_lower()
+			if trait_id.is_empty():
+				continue
+
+			result.append(trait_id)
+
+	return result

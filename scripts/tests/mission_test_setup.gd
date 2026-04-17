@@ -1,6 +1,7 @@
 extends Node
 
 const OBJECTIVE_STATUS_SCRIPT: GDScript = preload("res://scripts/core/objective_status.gd")
+const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
 
 @export var team_id: String = "team_alpha"
 @export var runtime_leader_path: NodePath
@@ -13,6 +14,7 @@ const OBJECTIVE_STATUS_SCRIPT: GDScript = preload("res://scripts/core/objective_
 @export var unit_paths: Array[NodePath] = []
 @export var selected_team_unit_ids: PackedStringArray = []
 @export var respawn_manager_path: NodePath
+@export var enemy_wave_controller_path: NodePath
 
 var _is_initialized: bool = false
 
@@ -39,6 +41,7 @@ func _ready() -> void:
 	var first_unit: Node = null
 	var friendly_spawn_index: int = 0
 	var enemy_spawn_index: int = 0
+	var enemy_units: Array = []
 	for unit_path in unit_paths:
 		var unit = get_node_or_null(unit_path)
 		if unit == null or not unit.has_method("get_unit_id"):
@@ -48,6 +51,8 @@ func _ready() -> void:
 		var unit_team_id: String = ""
 		if unit.has_method("get_team_id"):
 			unit_team_id = String(unit.call("get_team_id"))
+
+		_apply_unit_identity_preset(unit, unit_id, unit_team_id)
 
 		if unit.has_method("set_fireteam_id"):
 			unit.call("set_fireteam_id", _get_fireteam_id_for_unit(unit_id, unit_team_id))
@@ -70,13 +75,15 @@ func _ready() -> void:
 				unit_node.global_position = spawn_bravo_marker.global_position + _get_enemy_spawn_offset(enemy_spawn_index)
 				enemy_spawn_index += 1
 
-		if unit is CanvasItem:
-			unit.visible = true
+			if unit is CanvasItem:
+				unit.visible = true
 
 		unit_registry.call("register_unit", unit_id, unit)
 
 		if unit_team_id == team_id:
 			runtime_leader.call("add_unit_member", unit)
+		else:
+			enemy_units.append(unit)
 
 		if first_unit == null and unit_team_id == team_id:
 			first_unit = unit
@@ -88,6 +95,7 @@ func _ready() -> void:
 	_setup_objective_status(simulation_root, objective_marker)
 
 	_setup_respawn_manager(spawn_alpha_marker, spawn_bravo_marker)
+	_setup_enemy_waves(enemy_units)
 	_is_initialized = true
 
 
@@ -149,6 +157,25 @@ func _setup_objective_status(simulation_root: Node, objective_marker: Marker2D) 
 	objective_status.position = objective_marker.global_position
 	objective_status.capture_radius = 80.0
 	simulation_root.call("set_objective_status", objective_status)
+
+
+func _setup_enemy_waves(enemy_units: Array) -> void:
+	var enemy_wave_controller = get_node_or_null(enemy_wave_controller_path)
+	if enemy_wave_controller == null or not enemy_wave_controller.has_method("initialize_enemy_units"):
+		return
+
+	enemy_wave_controller.call("initialize_enemy_units", enemy_units)
+
+
+func _apply_unit_identity_preset(unit, unit_id: String, unit_team_id: String) -> void:
+	if unit == null or not unit.has_method("apply_identity_config"):
+		return
+
+	var preset: Dictionary = UNIT_ROSTER_PRESETS_SCRIPT.get_preset(unit_id, unit_team_id)
+	if preset.is_empty():
+		return
+
+	unit.call("apply_identity_config", preset)
 
 
 func _get_fireteam_id_for_unit(unit_id: String, unit_team_id: String) -> String:

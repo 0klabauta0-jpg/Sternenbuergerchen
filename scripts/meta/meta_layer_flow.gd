@@ -1,29 +1,14 @@
 extends Node
 
 const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
-const AVAILABLE_TEAM_UNITS: Array = [
-	{
-		"unit_id": "unit_alpha",
-		"display_name": "Unit Alpha",
-		"team_id": "team_alpha",
-	},
-	{
-		"unit_id": "unit_bravo",
-		"display_name": "Unit Bravo",
-		"team_id": "team_alpha",
-	},
-	{
-		"unit_id": "unit_charlie",
-		"display_name": "Unit Charlie",
-		"team_id": "team_alpha",
-	},
-]
+const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
 const FRIENDLY_NODE_NAMES_BY_ID: Dictionary = {
 	"unit_alpha": "UnitAlpha",
 	"unit_bravo": "UnitBravo",
 	"unit_charlie": "UnitCharlie",
 }
 
+var _available_team_units: Array = UNIT_ROSTER_PRESETS_SCRIPT.get_homebase_roster()
 var _selected_unit_ids: PackedStringArray = ["unit_alpha", "unit_bravo"]
 var _active_mission = null
 var _last_mission_result: Dictionary = {}
@@ -52,7 +37,7 @@ func _ready() -> void:
 	if not debrief_screen.return_to_homebase_requested.is_connected(_on_debrief_return_to_homebase_requested):
 		debrief_screen.return_to_homebase_requested.connect(_on_debrief_return_to_homebase_requested)
 
-	homebase_screen.setup_roster(AVAILABLE_TEAM_UNITS, _selected_unit_ids)
+	homebase_screen.setup_roster(_available_team_units, _selected_unit_ids)
 	fob_screen.set_team(_selected_unit_ids)
 	fob_screen.set_last_mission_result(_last_mission_result)
 	_show_homebase()
