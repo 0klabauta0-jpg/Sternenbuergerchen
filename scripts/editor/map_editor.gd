@@ -790,7 +790,7 @@ func _rebuild_all_cliff_overlays() -> void:
 		return
 
 	for tile_data in _terrain_map_data.call("get_tiles"):
-		if int(tile_data.height_level) > 0:
+		if int(tile_data.height_level) > 0 and not _is_wall_type(tile_data):
 			_create_cliff_overlays_for_tile(tile_data)
 
 
@@ -804,7 +804,7 @@ func _update_cliff_overlays_around(grid_position: Vector2i) -> void:
 		if _terrain_map_data == null:
 			continue
 		var tile_data = _terrain_map_data.call("get_tile_at_grid", pos)
-		if tile_data != null and int(tile_data.height_level) > 0:
+		if tile_data != null and int(tile_data.height_level) > 0 and not _is_wall_type(tile_data):
 			_create_cliff_overlays_for_tile(tile_data)
 
 
@@ -836,7 +836,7 @@ func _create_cliff_overlays_for_tile(tile_data) -> void:
 		var cliff_texture: Texture2D = entry[1]
 		var neighbor = _terrain_map_data.call("get_tile_at_grid", grid_pos + offset)
 		var neighbor_height: int = int(neighbor.height_level) if neighbor != null else 0
-		if neighbor_height < my_height:
+		if neighbor_height < my_height and not _is_wall_type(neighbor):
 			cliff_edge_dirs.append(offset)
 			var cliff_sprite := Sprite2D.new()
 			cliff_sprite.texture = cliff_texture
