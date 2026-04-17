@@ -413,3 +413,11 @@
 - Offene Punkte: keine Audio-/Sichtbarkeitsfolgen, keine fahrzeugspezifischen Terrain-Regeln und keine dynamischen Oberflaechenveraenderungen.
 - Risiken: die Oberflaechenwirkung bleibt bewusst ein einfacher Bewegungs- und Kostenmodifikator; spaetere Systeme fuer Wetter, Fahrzeuge oder Spezialeinheiten sollten diese Daten explizit erweitern statt neue, parallele Terrain-Kategorien einzufuehren.
 - Naechster Schritt: den Terrain-Slice lokal stabil halten und erst danach den spaeteren Multiplayer-Block gemaess Roadmap angehen.
+
+
+### TASK_065 - Tile-Typ-Katalog und Palette
+- Status: implementiert
+- Stand: `TerrainTileCatalog` unter `res://scripts/terrain/terrain_tile_catalog.gd` laedt Tile-Typ-Definitionen aus `res://data/terrain_tile_catalog.json`. Jeder Typ definiert einmalig `type_id`, `display_name`, `surface_type`, `walkable`, `blocks_los`, `cover_value` und `height_level`. Der Map-Editor zeigt links eine Palette (`ItemList`) mit allen verfuegbaren Tile-Typen. Bei Auswahl eines Typs wird automatisch der Brush-Modus aktiviert; Klick auf ein Tile uebertraegt alle Eigenschaften des Typs. Das Property-Panel zeigt bei selektiertem Tile den erkannten Typ-Namen oder `(custom)` an.
+- Offene Punkte: keine Typ-Referenz in der Map-JSON (Tiles speichern weiterhin alle Eigenschaften inline), keine benutzerdefinierten Typen zur Laufzeit, kein Tile-Preview in der Palette.
+- Risiken: der Katalog ist bewusst ein reiner Editor-Workflow; Runtime-Code hat keinen Katalog-Bezug und bleibt von Inline-Daten abhaengig.
+- Naechster Schritt: bei Bedarf Map-JSON auf Typ-Referenzen umstellen und Katalog in Runtime-Loading einbinden.

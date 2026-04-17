@@ -1,0 +1,130 @@
+{
+	"tile_types": [
+		{
+			"type_id": "ground_flat",
+			"display_name": "Boden (flach)",
+			"surface_type": "ground",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 0
+		},
+		{
+			"type_id": "ground_elevated",
+			"display_name": "Boden (erhoeht)",
+			"surface_type": "ground",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 1
+		},
+		{
+			"type_id": "ground_high",
+			"display_name": "Boden (hoch)",
+			"surface_type": "ground",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 2
+		},
+		{
+			"type_id": "road_flat",
+			"display_name": "Strasse (flach)",
+			"surface_type": "road",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 0
+		},
+		{
+			"type_id": "road_elevated",
+			"display_name": "Strasse (erhoeht)",
+			"surface_type": "road",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 1
+		},
+		{
+			"type_id": "sand_flat",
+			"display_name": "Sand (flach)",
+			"surface_type": "sand",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 0
+		},
+		{
+			"type_id": "rock_flat",
+			"display_name": "Fels (flach)",
+			"surface_type": "rock",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 0
+		},
+		{
+			"type_id": "rock_elevated",
+			"display_name": "Fels (erhoeht)",
+			"surface_type": "rock",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 20,
+			"height_level": 1
+		},
+		{
+			"type_id": "rock_high",
+			"display_name": "Fels (hoch)",
+			"surface_type": "rock",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 35,
+			"height_level": 2
+		},
+		{
+			"type_id": "cover_low",
+			"display_name": "Leichte Deckung",
+			"surface_type": "ground",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 20,
+			"height_level": 0
+		},
+		{
+			"type_id": "cover_high",
+			"display_name": "Schwere Deckung",
+			"surface_type": "ground",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 35,
+			"height_level": 1
+		},
+		{
+			"type_id": "wall",
+			"display_name": "Mauer",
+			"surface_type": "rock",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 0,
+			"height_level": 2
+		},
+		{
+			"type_id": "wall_low",
+			"display_name": "Niedrige Mauer",
+			"surface_type": "rock",
+			"walkable": false,
+			"blocks_los": false,
+			"cover_value": 50,
+			"height_level": 1
+		},
+		{
+			"type_id": "blocked",
+			"display_name": "Unpassierbar",
+			"surface_type": "ground",
+			"walkable": false,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 0
+		}
+	]
+}

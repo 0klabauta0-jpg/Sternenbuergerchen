@@ -3,6 +3,7 @@ extends Node2D
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const TERRAIN_REGISTRY_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_registry.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
+const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_catalog.gd")
 const TILE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_SW.png")
 const DEFAULT_MAP_PATH: String = "res://maps/test_mission.json"
 const DEFAULT_NEW_MAP_PATH: String = "res://maps/new_map.json"
@@ -19,8 +20,10 @@ const CAMERA_ZOOM_STEP: float = 0.1
 
 var _terrain_map_data = null
 var _terrain_registry = null
+var _tile_catalog = null
 var _tile_sprites_by_grid: Dictionary = {}
 var _selected_grid_position: Vector2i = Vector2i(-1, -1)
+var _selected_type_id: String = ""
 var _is_panning: bool = false
 var _dirty: bool = false
 var _is_refreshing_property_controls: bool = false
@@ -32,7 +35,9 @@ var _pending_dialog_action: String = ""
 func _ready() -> void:
 	set_process_unhandled_input(true)
 	_ensure_terrain_registry()
+	_load_tile_catalog()
 	_populate_surface_type_options()
+	_populate_tile_palette()
 	_connect_ui_signals()
 	_load_map(map_file_path if not map_file_path.is_empty() else DEFAULT_MAP_PATH)
 
@@ -223,10 +228,16 @@ func _apply_brush_at_world_position(world_position: Vector2) -> void:
 	if tile_data == null:
 		return
 
-	var patch: Dictionary = {
-		"walkable": _get_walkable_checkbox().button_pressed,
-		"surface_type": _get_selected_surface_type(),
-	}
+	var patch: Dictionary = {}
+	if not _selected_type_id.is_empty() and _tile_catalog != null and _tile_catalog.has_type(_selected_type_id):
+		patch = _tile_catalog.get_type(_selected_type_id).duplicate()
+		patch.erase("type_id")
+		patch.erase("display_name")
+	else:
+		patch = {
+			"walkable": _get_walkable_checkbox().button_pressed,
+			"surface_type": _get_selected_surface_type(),
+		}
 	if _apply_tile_patch(tile_data, patch):
 		_mark_dirty(true)
 
@@ -268,6 +279,7 @@ func _refresh_selection_visual() -> void:
 func _refresh_property_panel() -> void:
 	var tile_data = _get_selected_tile()
 	var tile_label := get_node_or_null("UI/PropertyPanel/Margin/VBox/TileLabel") as Label
+	var type_label := get_node_or_null("UI/PropertyPanel/Margin/VBox/TypeLabel") as Label
 	var walkable_checkbox := _get_walkable_checkbox()
 	var blocks_los_checkbox := _get_blocks_los_checkbox()
 	var cover_spinbox := _get_cover_spinbox()
@@ -279,6 +291,8 @@ func _refresh_property_panel() -> void:
 	_is_refreshing_property_controls = true
 	if tile_data == null:
 		tile_label.text = "Tile: -"
+		if type_label != null:
+			type_label.text = "Typ: -"
 		walkable_checkbox.button_pressed = false
 		blocks_los_checkbox.button_pressed = false
 		cover_spinbox.value = 0
@@ -289,6 +303,12 @@ func _refresh_property_panel() -> void:
 		return
 
 	tile_label.text = "Tile: (%d, %d)" % [tile_data.grid_position.x, tile_data.grid_position.y]
+	if type_label != null:
+		var matched_type_id: String = _find_matching_type_id(tile_data)
+		if matched_type_id.is_empty():
+			type_label.text = "Typ: (custom)"
+		else:
+			type_label.text = "Typ: %s" % _tile_catalog.get_display_name(matched_type_id)
 	walkable_checkbox.button_pressed = bool(tile_data.walkable)
 	blocks_los_checkbox.button_pressed = bool(tile_data.blocks_los)
 	cover_spinbox.value = int(tile_data.cover_value)
@@ -462,6 +482,7 @@ func _connect_ui_signals() -> void:
 	var surface_option_button := _get_surface_option_button()
 	var file_dialog := get_node_or_null("UI/LoadDialog") as FileDialog
 	var confirm_dialog := get_node_or_null("UI/DirtyConfirmDialog") as ConfirmationDialog
+	var tile_type_list := _get_tile_type_list()
 	if save_button != null and not save_button.pressed.is_connected(_on_save_pressed):
 		save_button.pressed.connect(_on_save_pressed)
 	if load_button != null and not load_button.pressed.is_connected(_on_load_pressed):
@@ -480,6 +501,8 @@ func _connect_ui_signals() -> void:
 		height_spinbox.value_changed.connect(_on_property_controls_value_changed)
 	if surface_option_button != null and not surface_option_button.item_selected.is_connected(_on_surface_selected):
 		surface_option_button.item_selected.connect(_on_surface_selected)
+	if tile_type_list != null and not tile_type_list.item_selected.is_connected(_on_tile_type_selected):
+		tile_type_list.item_selected.connect(_on_tile_type_selected)
 	if file_dialog != null:
 		file_dialog.access = FileDialog.ACCESS_RESOURCES
 		file_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
@@ -525,6 +548,22 @@ func _on_property_controls_value_changed(_value: float) -> void:
 
 func _on_surface_selected(_index: int) -> void:
 	_apply_property_controls_to_selected_tile()
+
+
+func _on_tile_type_selected(index: int) -> void:
+	var tile_type_list := _get_tile_type_list()
+	if tile_type_list == null or _tile_catalog == null:
+		return
+
+	var type_ids: Array[String] = _tile_catalog.get_type_ids()
+	if index < 0 or index >= type_ids.size():
+		_selected_type_id = ""
+		return
+
+	_selected_type_id = type_ids[index]
+	var brush_button := get_node_or_null("UI/TopBar/Margin/HBox/BrushButton") as Button
+	if brush_button != null and not brush_button.button_pressed:
+		brush_button.button_pressed = true
 
 
 func _on_load_file_selected(path: String) -> void:
@@ -622,6 +661,42 @@ func _find_surface_option_index(surface_type: String) -> int:
 
 func _is_pointer_over_control() -> bool:
 	return get_viewport().gui_get_hovered_control() != null
+
+
+func _load_tile_catalog() -> void:
+	_tile_catalog = TERRAIN_TILE_CATALOG_SCRIPT.call("load_from_file")
+
+
+func _populate_tile_palette() -> void:
+	var tile_type_list := _get_tile_type_list()
+	if tile_type_list == null or _tile_catalog == null:
+		return
+
+	tile_type_list.clear()
+	for tile_type in _tile_catalog.get_all_types():
+		tile_type_list.add_item(String(tile_type.get("display_name", tile_type.get("type_id", "?"))))
+
+
+func _get_tile_type_list() -> ItemList:
+	return get_node_or_null("UI/PalettePanel/Margin/VBox/TileTypeList") as ItemList
+
+
+func _find_matching_type_id(tile_data) -> String:
+	if tile_data == null or _tile_catalog == null:
+		return ""
+
+	for type_id in _tile_catalog.get_type_ids():
+		var entry: Dictionary = _tile_catalog.get_type(type_id)
+		if (
+			bool(entry.get("walkable", true)) == bool(tile_data.walkable)
+			and bool(entry.get("blocks_los", false)) == bool(tile_data.blocks_los)
+			and int(entry.get("cover_value", 0)) == int(tile_data.cover_value)
+			and int(entry.get("height_level", 0)) == int(tile_data.height_level)
+			and String(entry.get("surface_type", "ground")) == String(tile_data.surface_type)
+		):
+			return type_id
+
+	return ""
 
 
 func _ensure_terrain_registry() -> void:
