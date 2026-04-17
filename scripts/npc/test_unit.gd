@@ -15,6 +15,7 @@ const STATUS_LABEL_OFFSET: Vector2 = Vector2(-54.0, -48.0)
 const FIRETEAM_LABEL_SPACING: float = 8.0
 const EVENT_LABEL_OFFSET: Vector2 = Vector2(-42.0, -70.0)
 const EVENT_DURATION_SECONDS: float = 1.2
+const REMOTE_POSITION_LERP_WEIGHT: float = 0.75
 
 signal runtime_status_changed(runtime_status)
 signal unit_command_assigned(command)
@@ -276,6 +277,34 @@ func set_terrain_registry(terrain_registry) -> void:
 	_refresh_readability()
 
 
+func apply_remote_snapshot(snapshot: Dictionary, interpolation_alpha: float = REMOTE_POSITION_LERP_WEIGHT) -> void:
+	if typeof(snapshot) != TYPE_DICTIONARY:
+		return
+
+	if self is CanvasItem and snapshot.has("visible"):
+		visible = bool(snapshot["visible"])
+
+	if snapshot.has("position"):
+		var remote_position: Vector2 = snapshot["position"] if snapshot["position"] is Vector2 else global_position
+		global_position = global_position.lerp(remote_position, clampf(interpolation_alpha, 0.0, 1.0))
+
+	if snapshot.has("fireteam_id"):
+		fireteam_id = _normalize_fireteam_id(String(snapshot["fireteam_id"]))
+
+	_apply_remote_runtime_status(_build_remote_runtime_dict(snapshot))
+	_apply_remote_vital_status(_build_remote_vital_dict(snapshot))
+
+	_refresh_readability()
+
+
+func apply_remote_vital_update(vital_update: Dictionary) -> void:
+	if typeof(vital_update) != TYPE_DICTIONARY:
+		return
+
+	_apply_remote_vital_status(_build_remote_vital_dict(vital_update))
+	_refresh_readability()
+
+
 func refresh_terrain_readability() -> void:
 	_refresh_readability()
 
@@ -505,6 +534,76 @@ func _set_vital_status(state: String, health_points: int, bleedout_ticks: int) -
 	_apply_vital_visual()
 	vital_status_changed.emit(_vital_status)
 	_refresh_readability()
+
+
+func _apply_remote_runtime_status(runtime_dict: Dictionary) -> void:
+	if runtime_dict.is_empty():
+		return
+
+	var merged_runtime_dict: Dictionary = runtime_dict.duplicate(true)
+	if not merged_runtime_dict.has("unit_id"):
+		merged_runtime_dict["unit_id"] = unit_id
+	if not merged_runtime_dict.has("team_id"):
+		merged_runtime_dict["team_id"] = team_id
+	if not merged_runtime_dict.has("fireteam_id") and not fireteam_id.is_empty():
+		merged_runtime_dict["fireteam_id"] = fireteam_id
+
+	var runtime_status = UNIT_RUNTIME_STATUS_SCRIPT.call("from_dict", merged_runtime_dict)
+	if runtime_status == null or not runtime_status.has_method("is_valid") or not bool(runtime_status.call("is_valid")):
+		return
+
+	_runtime_status = runtime_status
+	runtime_status_changed.emit(_runtime_status)
+
+
+func _apply_remote_vital_status(vital_dict: Dictionary) -> void:
+	if vital_dict.is_empty():
+		return
+
+	var previous_state: String = String(_vital_status.state)
+	var vital_status = UNIT_VITAL_STATUS_SCRIPT.call("from_dict", vital_dict)
+	if vital_status == null or not vital_status.has_method("is_valid") or not bool(vital_status.call("is_valid")):
+		return
+
+	_vital_status = vital_status
+	_apply_vital_visual()
+	vital_status_changed.emit(_vital_status)
+	if previous_state == "respawning" and String(_vital_status.state) == "fit":
+		show_event_text("RESPAWN", Color(0.5, 1.0, 0.7, 1.0), 2.0)
+
+
+func _build_remote_runtime_dict(snapshot: Dictionary) -> Dictionary:
+	var runtime_variant: Variant = snapshot.get("runtime_status", {})
+	if typeof(runtime_variant) == TYPE_DICTIONARY:
+		return (runtime_variant as Dictionary).duplicate(true)
+
+	var runtime_dict: Dictionary = {
+		"status": String(snapshot.get("runtime_state", _runtime_status.status)),
+		"active_command_type": String(snapshot.get("active_command_type", _runtime_status.active_command_type)),
+		"priority": int(snapshot.get("priority", _runtime_status.priority)),
+		"unit_id": String(snapshot.get("unit_id", unit_id)),
+		"team_id": String(snapshot.get("team_id", team_id)),
+		"fireteam_id": String(snapshot.get("fireteam_id", fireteam_id)),
+		"fire_status": String(snapshot.get("fire_mode", _runtime_status.fire_status)),
+		"source_command_type": String(snapshot.get("source_command_type", _runtime_status.source_command_type)),
+		"move_speed_factor": float(snapshot.get("move_speed_factor", _runtime_status.move_speed_factor)),
+		"cover_score": float(snapshot.get("cover_score", _runtime_status.cover_score)),
+		"attack_bonus": float(snapshot.get("attack_bonus", _runtime_status.attack_bonus)),
+		"phase": int(snapshot.get("phase", _runtime_status.phase)),
+	}
+	return runtime_dict
+
+
+func _build_remote_vital_dict(snapshot: Dictionary) -> Dictionary:
+	var vital_variant: Variant = snapshot.get("vital_status", {})
+	if typeof(vital_variant) == TYPE_DICTIONARY:
+		return (vital_variant as Dictionary).duplicate(true)
+
+	return {
+		"state": String(snapshot.get("vital_state", _vital_status.state)),
+		"health_points": int(snapshot.get("health", _vital_status.health_points)),
+		"bleedout_ticks": int(snapshot.get("bleedout_ticks", _vital_status.bleedout_ticks)),
+	}
 
 
 func _map_unit_command_to_status(command_type: String) -> String:

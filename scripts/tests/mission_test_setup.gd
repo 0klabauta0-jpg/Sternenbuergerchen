@@ -66,6 +66,9 @@ func _ready() -> void:
 		if terrain_registry != null and unit.has_method("set_terrain_registry"):
 			unit.call("set_terrain_registry", terrain_registry)
 
+		if simulation_root.has_method("register_known_unit"):
+			simulation_root.call("register_known_unit", unit_id, unit)
+
 		if unit_team_id == team_id and not _is_selected_friendly_unit(unit_id):
 			if unit is CanvasItem:
 				unit.visible = false

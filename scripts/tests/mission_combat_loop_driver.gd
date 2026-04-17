@@ -7,6 +7,12 @@ const WINNER_LABEL_NAME: String = "CombatWinnerLabel"
 const WIN_CONDITION_ELIMINATION: String = "elimination"
 const WIN_CONDITION_OBJECTIVE_CAPTURE: String = "objective_capture"
 const WIN_CONDITION_OBJECTIVE_DEFENSE: String = "objective_defense"
+const DEFAULT_EVENT_COLOR: Color = Color(1.0, 0.95, 0.5, 1.0)
+const HIT_EVENT_COLOR: Color = Color(1.0, 0.78, 0.35, 1.0)
+const DOWN_EVENT_COLOR: Color = Color(1.0, 0.55, 0.55, 1.0)
+const BLEEDOUT_EVENT_COLOR: Color = Color(0.92, 0.6, 0.6, 1.0)
+const RESPAWN_EVENT_COLOR: Color = Color(0.72, 0.9, 1.0, 1.0)
+const EVENT_DEFAULT_DURATION: float = 1.2
 
 signal contact_established(attacker, target)
 signal combat_resolved(mission_result: Dictionary)
@@ -50,6 +56,7 @@ var _winner_label: Label = null
 var _mission_started_at_msec: int = 0
 var _objective_owned_since_msec: int = -1
 var _mission_result: Dictionary = {}
+var _runs_local_authority: bool = true
 
 
 func _ready() -> void:
@@ -58,16 +65,18 @@ func _ready() -> void:
 		push_warning("MissionCombatLoopDriver requires a direct SimulationRoot reference.")
 		return
 
-	_connect_unit_signals()
-	_connect_respawn_signals()
-	_connect_wave_controller_signals()
+	_runs_local_authority = _should_run_local_combat(simulation_root)
+	if _runs_local_authority:
+		_connect_unit_signals()
+		_connect_respawn_signals()
+		_connect_wave_controller_signals()
 	call_deferred("_finish_readability_setup")
 	_mission_started_at_msec = Time.get_ticks_msec()
 
-	if not simulation_root.tick_processed.is_connected(_on_tick_processed):
+	if _runs_local_authority and not simulation_root.tick_processed.is_connected(_on_tick_processed):
 		simulation_root.tick_processed.connect(_on_tick_processed)
 
-	_update_status_label("waiting")
+	_update_status_label("waiting" if _runs_local_authority else "observing")
 
 
 func is_combat_finished() -> bool:
@@ -84,6 +93,44 @@ func get_last_contact() -> Dictionary:
 
 func get_mission_result() -> Dictionary:
 	return _mission_result.duplicate(true)
+
+
+@rpc("authority", "reliable")
+func _receive_mission_result(mission_result: Dictionary) -> void:
+	if _runs_local_authority:
+		return
+
+	_combat_finished = true
+	_mission_result = mission_result.duplicate(true)
+	_winning_team_id = String(_mission_result.get("winning_team_id", ""))
+	_set_event_text("MISSION %s" % String(_mission_result.get("result", "ended")).to_upper())
+	_clear_contact_visuals()
+	_update_status_label("resolved")
+	_update_winner_label()
+	combat_resolved.emit(get_mission_result())
+
+
+@rpc("authority", "reliable")
+func _receive_remote_event(
+	event_text: String,
+	unit_id: String = "",
+	event_color: Color = DEFAULT_EVENT_COLOR,
+	duration_seconds: float = EVENT_DEFAULT_DURATION,
+	unit_event_text: String = ""
+) -> void:
+	if _runs_local_authority:
+		return
+
+	_set_event_text(event_text)
+	if unit_id.is_empty():
+		return
+
+	var unit = _resolve_unit_by_id(unit_id)
+	if unit == null or not unit.has_method("show_event_text"):
+		return
+
+	var resolved_unit_event_text: String = unit_event_text if not unit_event_text.is_empty() else event_text
+	unit.call("show_event_text", resolved_unit_event_text, event_color, duration_seconds)
 
 
 func _on_tick_processed(tick: int) -> void:
@@ -355,6 +402,33 @@ func _build_status_text(state_name: String) -> String:
 	return "\n".join(lines)
 
 
+func _build_team_states(paths: Array[NodePath]) -> Array:
+	var team_states: Array = []
+	for unit in _get_units(paths):
+		if unit == null or not unit.has_method("get_unit_id"):
+			continue
+
+		var health_points: int = 0
+		if unit.has_method("get_health"):
+			health_points = int(unit.call("get_health"))
+
+		var vital_state: String = ""
+		if unit.has_method("get_vital_state"):
+			vital_state = String(unit.call("get_vital_state"))
+
+		var display_name: String = String(unit.call("get_display_name")) if unit.has_method("get_display_name") else String(unit.call("get_unit_id"))
+		team_states.append(
+			{
+				"unit_id": String(unit.call("get_unit_id")),
+				"display_name": display_name,
+				"vital_state": vital_state,
+				"health_points": health_points,
+			}
+		)
+
+	return team_states
+
+
 func _describe_friendly_unit(unit) -> String:
 	if unit == null:
 		return "- missing"
@@ -508,6 +582,7 @@ func _connect_wave_controller_signals() -> void:
 func _on_unit_respawn_completed(unit_id: String) -> void:
 	_queued_bleedout_by_unit_id.erase(unit_id)
 	_set_event_text("%s RESPAWN READY" % unit_id)
+	_broadcast_remote_event("%s RESPAWN READY" % unit_id, unit_id, RESPAWN_EVENT_COLOR, 1.6, "RESPAWN READY")
 
 
 func _set_contact_visuals(attacker, target) -> void:
@@ -545,7 +620,8 @@ func _on_unit_damage_applied(amount: int, _health_points: int, _hit_context: Dic
 	var unit_id: String = String(unit.call("get_unit_id"))
 	_set_event_text("%s HIT -%d" % [unit_id, amount])
 	if unit.has_method("show_event_text"):
-		unit.call("show_event_text", "HIT -%d" % amount, Color(1.0, 0.78, 0.35, 1.0))
+		unit.call("show_event_text", "HIT -%d" % amount, HIT_EVENT_COLOR)
+	_broadcast_remote_event("%s HIT -%d" % [unit_id, amount], unit_id, HIT_EVENT_COLOR, EVENT_DEFAULT_DURATION, "HIT -%d" % amount)
 	_try_reposition_enemy_on_damage(unit, _hit_context)
 	_update_status_label("contact")
 
@@ -560,16 +636,19 @@ func _on_unit_vital_status_changed(vital_status, unit) -> void:
 		"down":
 			_set_event_text("%s DOWN" % unit_id)
 			if unit.has_method("show_event_text"):
-				unit.call("show_event_text", "DOWN", Color(1.0, 0.55, 0.55, 1.0), 1.5)
+				unit.call("show_event_text", "DOWN", DOWN_EVENT_COLOR, 1.5)
+			_broadcast_remote_event("%s DOWN" % unit_id, unit_id, DOWN_EVENT_COLOR, 1.5, "DOWN")
 		"bleedout":
 			_set_event_text("%s BLEEDOUT" % unit_id)
 			if unit.has_method("show_event_text"):
-				unit.call("show_event_text", "BLEEDOUT", Color(0.92, 0.6, 0.6, 1.0), 1.6)
+				unit.call("show_event_text", "BLEEDOUT", BLEEDOUT_EVENT_COLOR, 1.6)
+			_broadcast_remote_event("%s BLEEDOUT" % unit_id, unit_id, BLEEDOUT_EVENT_COLOR, 1.6, "BLEEDOUT")
 			_request_respawn_for_unit(unit, unit_id)
 		"respawning":
 			_set_event_text("%s RESPAWNING" % unit_id)
 			if unit.has_method("show_event_text"):
-				unit.call("show_event_text", "RESPAWNING", Color(0.72, 0.9, 1.0, 1.0), 1.6)
+				unit.call("show_event_text", "RESPAWNING", RESPAWN_EVENT_COLOR, 1.6)
+			_broadcast_remote_event("%s RESPAWNING" % unit_id, unit_id, RESPAWN_EVENT_COLOR, 1.6, "RESPAWNING")
 	_update_status_label("active")
 
 
@@ -578,11 +657,49 @@ func _set_event_text(event_text: String) -> void:
 	_update_event_label()
 
 
+func _broadcast_remote_event(
+	event_text: String,
+	unit_id: String = "",
+	event_color: Color = DEFAULT_EVENT_COLOR,
+	duration_seconds: float = EVENT_DEFAULT_DURATION,
+	unit_event_text: String = ""
+) -> void:
+	if not _can_broadcast_to_clients():
+		return
+
+	_receive_remote_event.rpc(event_text, unit_id, event_color, duration_seconds, unit_event_text)
+
+
 func _update_event_label() -> void:
 	if _event_label == null:
 		return
 
 	_event_label.text = "Event: %s" % _last_event_text
+
+
+func _should_run_local_combat(simulation_root: Node) -> bool:
+	if simulation_root == null:
+		return true
+
+	if not bool(simulation_root.get("is_server_authoritative")):
+		return true
+
+	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
+	if peer == null or peer.get_connection_status() == MultiplayerPeer.CONNECTION_DISCONNECTED:
+		return true
+
+	return multiplayer.is_server()
+
+
+func _can_broadcast_to_clients() -> bool:
+	if not _runs_local_authority:
+		return false
+
+	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
+	if peer == null or peer.get_connection_status() == MultiplayerPeer.CONNECTION_DISCONNECTED:
+		return false
+
+	return multiplayer.is_server()
 
 
 func _update_winner_label() -> void:
@@ -670,6 +787,8 @@ func _resolve_combat(result: String, winning_team_id: String) -> void:
 	_clear_contact_visuals()
 	_update_status_label("resolved")
 	_update_winner_label()
+	if _can_broadcast_to_clients():
+		_receive_mission_result.rpc(_mission_result)
 	combat_resolved.emit(get_mission_result())
 
 
@@ -682,6 +801,7 @@ func _build_mission_result(result: String, winning_team_id: String) -> Dictionar
 		"win_condition_type": win_condition,
 		"objective_captured": _is_objective_captured_by_friendly(),
 		"duration_seconds": _get_duration_seconds(),
+		"team_states": _build_team_states(friendly_unit_paths),
 	}
 
 
@@ -972,6 +1092,8 @@ func _build_wave_status_text() -> String:
 func _on_enemy_wave_started(wave_number: int) -> void:
 	if wave_number <= 1:
 		_set_event_text("ENEMY WAVE %d" % wave_number)
+		_broadcast_remote_event("ENEMY WAVE %d" % wave_number)
 		return
 
 	_set_event_text("ENEMY REINFORCEMENTS")
+	_broadcast_remote_event("ENEMY REINFORCEMENTS")

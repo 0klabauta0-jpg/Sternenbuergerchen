@@ -89,6 +89,9 @@ func request_respawn(unit_id: String, team_id: String) -> bool:
 
 
 func _physics_process(delta: float) -> void:
+	if not _should_process_locally():
+		return
+
 	if _pending_respawns.is_empty():
 		return
 
@@ -131,3 +134,18 @@ func _resolve_unit(unit_id: String):
 		return null
 
 	return unit_registry.call("get_unit", unit_id)
+
+
+func _should_process_locally() -> bool:
+	var simulation_root = get_node_or_null(simulation_root_path)
+	if simulation_root == null:
+		return true
+
+	if not bool(simulation_root.get("is_server_authoritative")):
+		return true
+
+	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
+	if peer == null or peer.get_connection_status() == MultiplayerPeer.CONNECTION_DISCONNECTED:
+		return true
+
+	return multiplayer.is_server()

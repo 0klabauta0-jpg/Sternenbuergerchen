@@ -118,4 +118,24 @@ func _on_squad_command(_squad: Node, order: Dictionary) -> void:
 
 	last_translated_task = translated_task
 	last_enqueued_command = unit_command.call("to_dict")
-	simulation_root.call("enqueue_command", last_enqueued_command)
+	_enqueue_unit_command(simulation_root, last_enqueued_command)
+
+
+func _enqueue_unit_command(simulation_root: Node, command_dict: Dictionary) -> void:
+	if simulation_root == null:
+		return
+
+	var is_server_authoritative_mode: bool = bool(simulation_root.get("is_server_authoritative"))
+	if not is_server_authoritative_mode:
+		simulation_root.call("enqueue_command", command_dict)
+		return
+
+	if multiplayer.multiplayer_peer == null or multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_DISCONNECTED:
+		simulation_root.call("request_command", command_dict)
+		return
+
+	if multiplayer.is_server():
+		simulation_root.call("request_command", command_dict)
+		return
+
+	simulation_root.rpc_id(1, "request_command", command_dict)

@@ -6,10 +6,12 @@ signal tick_processed(tick: int)
 const MOVE_SPEED_PER_SECOND: float = 120.0
 const DAMAGE_MODEL_SCRIPT: GDScript = preload("res://scripts/core/damage_model.gd")
 const OBJECTIVE_STATUS_SCRIPT: GDScript = preload("res://scripts/core/objective_status.gd")
+const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const TERRAIN_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_pathfinder.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const CAPTURE_PROGRESS_PER_TICK: float = 0.01
 
+@export var is_server_authoritative: bool = false
 @export var unit_registry_path: NodePath
 @export var terrain_registry_path: NodePath
 
@@ -19,6 +21,10 @@ var tick_counter: int = 0
 var is_processing_tick: bool = false
 var _objective_status: RefCounted = null
 var _terrain_pathfinder = TERRAIN_PATHFINDER_SCRIPT.new()
+var _known_units_by_id: Dictionary = {}
+var _peer_team_assignments: Dictionary = {1: "team_alpha"}
+var _last_broadcast_vital_state_by_unit_id: Dictionary = {}
+var _last_server_state: Dictionary = {}
 
 
 func enqueue_command(cmd: Dictionary) -> void:
@@ -46,6 +52,51 @@ func get_tick() -> int:
 	return tick_counter
 
 
+func register_known_unit(unit_id: String, unit: Node) -> bool:
+	if unit_id.is_empty() or unit == null:
+		return false
+
+	_known_units_by_id[unit_id] = unit
+	return true
+
+
+func set_peer_team(peer_id: int, team_id: String) -> void:
+	if peer_id <= 0:
+		return
+
+	var normalized_team_id: String = team_id.strip_edges()
+	if normalized_team_id.is_empty():
+		_peer_team_assignments.erase(peer_id)
+		return
+
+	_peer_team_assignments[peer_id] = normalized_team_id
+
+
+func set_peer_team_assignments(assignments: Dictionary) -> void:
+	_peer_team_assignments.clear()
+	for raw_peer_id in assignments.keys():
+		var peer_id: int = int(raw_peer_id)
+		var team_id: String = String(assignments[raw_peer_id]).strip_edges()
+		if peer_id <= 0 or team_id.is_empty():
+			continue
+
+		_peer_team_assignments[peer_id] = team_id
+
+	if not _peer_team_assignments.has(1):
+		_peer_team_assignments[1] = "team_alpha"
+
+
+func get_peer_team(peer_id: int) -> String:
+	if peer_id <= 0:
+		return ""
+
+	return String(_peer_team_assignments.get(peer_id, ""))
+
+
+func get_last_server_state() -> Dictionary:
+	return _last_server_state.duplicate(true)
+
+
 func set_objective_status(objective_status) -> bool:
 	if objective_status == null:
 		_objective_status = null
@@ -63,8 +114,56 @@ func get_objective_status():
 	return _objective_status
 
 
+@rpc("any_peer", "reliable")
+func request_command(command_dict: Dictionary) -> void:
+	if not is_server_authoritative:
+		enqueue_command(command_dict)
+		return
+
+	if _has_active_multiplayer_peer() and not multiplayer.is_server():
+		push_warning("SimulationRoot.request_command can only be executed on the authority while server-authoritative mode is active.")
+		return
+
+	if not _is_valid_network_command(command_dict):
+		push_warning("SimulationRoot rejected an invalid network command.")
+		return
+
+	var sending_peer_id: int = multiplayer.get_remote_sender_id()
+	if sending_peer_id <= 0:
+		sending_peer_id = 1
+
+	var requested_team_id: String = String(command_dict.get("team_id", ""))
+	if not _is_peer_allowed_for_team(sending_peer_id, requested_team_id):
+		push_warning("SimulationRoot rejected a network command for an unauthorized team.")
+		return
+
+	enqueue_command(command_dict)
+
+
+@rpc("authority", "unreliable")
+func _receive_tick_state(state_dict: Dictionary) -> void:
+	_last_server_state = state_dict.duplicate(true)
+	_apply_remote_state(state_dict)
+
+
+@rpc("authority", "reliable")
+func _receive_vital_state_updates(vital_updates: Array) -> void:
+	for vital_update in vital_updates:
+		if typeof(vital_update) != TYPE_DICTIONARY:
+			continue
+
+		var unit = _resolve_known_unit(String(vital_update.get("unit_id", "")))
+		if unit == null or not unit.has_method("apply_remote_vital_update"):
+			continue
+
+		unit.call("apply_remote_vital_update", vital_update)
+
+
 # Commands are committed before effects on every authoritative physics tick.
 func _physics_process(delta: float) -> void:
+	if _should_skip_local_tick_processing():
+		return
+
 	tick_counter += 1
 	is_processing_tick = true
 
@@ -76,7 +175,254 @@ func _physics_process(delta: float) -> void:
 	_update_objective_capture()
 
 	is_processing_tick = false
+	_broadcast_tick_state()
 	tick_processed.emit(tick_counter)
+
+
+func _should_skip_local_tick_processing() -> bool:
+	if not is_server_authoritative:
+		return false
+
+	if not _has_active_multiplayer_peer():
+		return false
+
+	return not multiplayer.is_server()
+
+
+func _has_active_multiplayer_peer() -> bool:
+	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
+	if peer == null:
+		return false
+
+	return peer.get_connection_status() != MultiplayerPeer.CONNECTION_DISCONNECTED
+
+
+func _is_valid_network_command(command_dict: Dictionary) -> bool:
+	var command = UNIT_COMMAND_SCRIPT.call("from_dict", command_dict)
+	if command == null or not command.has_method("is_valid") or not bool(command.call("is_valid")):
+		return false
+
+	var unit_id: String = String(command_dict.get("unit_id", ""))
+	var team_id: String = String(command_dict.get("team_id", ""))
+	if unit_id.is_empty() or team_id.is_empty():
+		return false
+
+	var unit = _resolve_known_unit(unit_id)
+	if unit != null and unit.has_method("get_team_id"):
+		return String(unit.call("get_team_id")) == team_id
+
+	return true
+
+
+func _is_peer_allowed_for_team(peer_id: int, team_id: String) -> bool:
+	if team_id.is_empty():
+		return false
+
+	if not _has_active_multiplayer_peer():
+		return peer_id == 1 and team_id == "team_alpha"
+
+	return get_peer_team(peer_id) == team_id
+
+
+func _broadcast_tick_state() -> void:
+	if not is_server_authoritative or not _has_active_multiplayer_peer() or not multiplayer.is_server():
+		return
+
+	var state_dict: Dictionary = _build_tick_state()
+	_receive_tick_state.rpc(state_dict)
+
+	var vital_updates: Array = _build_vital_state_updates()
+	if not vital_updates.is_empty():
+		_receive_vital_state_updates.rpc(vital_updates)
+
+
+func _build_tick_state() -> Dictionary:
+	var state_dict: Dictionary = {
+		"tick": tick_counter,
+		"units": [],
+	}
+	for unit in _get_snapshot_units():
+		var unit_snapshot: Dictionary = _build_unit_snapshot(unit)
+		if unit_snapshot.is_empty():
+			continue
+
+		state_dict["units"].append(unit_snapshot)
+
+	if _is_valid_objective_status(_objective_status):
+		state_dict["objective"] = {
+			"owning_team_id": _objective_status.owning_team_id,
+			"capture_progress": _objective_status.capture_progress,
+			"capturing_team_id": _objective_status.capturing_team_id,
+			"contested": _objective_status.is_contested(),
+		}
+
+	return state_dict
+
+
+func _build_vital_state_updates() -> Array:
+	var updates: Array = []
+	for unit in _get_snapshot_units():
+		var vital_update: Dictionary = _build_unit_vital_update(unit)
+		if vital_update.is_empty():
+			continue
+
+		var unit_id: String = String(vital_update.get("unit_id", ""))
+		if unit_id.is_empty():
+			continue
+
+		var previous_update: Dictionary = _last_broadcast_vital_state_by_unit_id.get(unit_id, {})
+		if previous_update == vital_update:
+			continue
+
+		_last_broadcast_vital_state_by_unit_id[unit_id] = vital_update.duplicate(true)
+		updates.append(vital_update)
+
+	return updates
+
+
+func _get_snapshot_units() -> Array:
+	var snapshot_units: Array = []
+	var unit_registry = _get_unit_registry()
+	if unit_registry != null and unit_registry.has_method("get_all_units"):
+		for unit in unit_registry.call("get_all_units"):
+			if unit == null or not unit.has_method("get_unit_id"):
+				continue
+
+			snapshot_units.append(unit)
+		return snapshot_units
+
+	for unit in _known_units_by_id.values():
+		if unit == null or not unit.has_method("get_unit_id"):
+			continue
+
+		if unit is CanvasItem and not (unit as CanvasItem).visible:
+			continue
+
+		snapshot_units.append(unit)
+
+	return snapshot_units
+
+
+func _build_unit_snapshot(unit) -> Dictionary:
+	if unit == null or not unit.has_method("get_unit_id"):
+		return {}
+
+	var unit_id: String = String(unit.call("get_unit_id"))
+	if unit_id.is_empty():
+		return {}
+
+	var snapshot: Dictionary = {
+		"unit_id": unit_id,
+		"visible": true,
+	}
+	if unit is Node2D:
+		snapshot["position"] = (unit as Node2D).global_position
+
+	if unit is CanvasItem:
+		snapshot["visible"] = bool((unit as CanvasItem).visible)
+
+	if unit.has_method("get_runtime_status"):
+		var runtime_status = unit.call("get_runtime_status")
+		if runtime_status != null and runtime_status.has_method("to_dict"):
+			var runtime_dict: Dictionary = runtime_status.call("to_dict")
+			snapshot["runtime_state"] = String(runtime_dict.get("status", ""))
+			snapshot["fire_mode"] = String(runtime_dict.get("fire_status", ""))
+
+	if unit.has_method("get_vital_status"):
+		var vital_status = unit.call("get_vital_status")
+		if vital_status != null and vital_status.has_method("to_dict"):
+			var vital_dict: Dictionary = vital_status.call("to_dict")
+			snapshot["vital_state"] = String(vital_dict.get("state", ""))
+			snapshot["health"] = int(vital_dict.get("health_points", 0))
+			snapshot["bleedout_ticks"] = int(vital_dict.get("bleedout_ticks", 0))
+
+	return snapshot
+
+
+func _build_unit_vital_update(unit) -> Dictionary:
+	if unit == null or not unit.has_method("get_unit_id") or not unit.has_method("get_vital_status"):
+		return {}
+
+	var unit_id: String = String(unit.call("get_unit_id"))
+	if unit_id.is_empty():
+		return {}
+
+	var vital_status = unit.call("get_vital_status")
+	if vital_status == null or not vital_status.has_method("to_dict"):
+		return {}
+
+	return {
+		"unit_id": unit_id,
+		"vital_state": String(vital_status.state),
+		"health": int(vital_status.health_points),
+		"bleedout_ticks": int(vital_status.bleedout_ticks),
+	}
+
+
+func _apply_remote_state(state_dict: Dictionary) -> void:
+	if typeof(state_dict) != TYPE_DICTIONARY:
+		return
+
+	var objective_dict: Variant = state_dict.get("objective", {})
+	if typeof(objective_dict) == TYPE_DICTIONARY:
+		_apply_remote_objective_state(objective_dict)
+
+	var unit_snapshots: Variant = state_dict.get("units", [])
+	if not (unit_snapshots is Array):
+		return
+
+	for unit_snapshot in unit_snapshots:
+		if typeof(unit_snapshot) != TYPE_DICTIONARY:
+			continue
+
+		var unit = _resolve_known_unit(String(unit_snapshot.get("unit_id", "")))
+		if unit == null:
+			continue
+
+		if unit.has_method("apply_remote_snapshot"):
+			unit.call("apply_remote_snapshot", unit_snapshot)
+			continue
+
+		_apply_remote_snapshot_fallback(unit, unit_snapshot)
+
+
+func _apply_remote_objective_state(objective_dict: Dictionary) -> void:
+	if objective_dict.is_empty():
+		return
+
+	if not _is_valid_objective_status(_objective_status):
+		_objective_status = OBJECTIVE_STATUS_SCRIPT.new()
+
+	_objective_status.objective_id = String(objective_dict.get("objective_id", _objective_status.objective_id))
+	_objective_status.position = _coerce_vector2(objective_dict.get("position", _objective_status.position), _objective_status.position)
+	_objective_status.capture_radius = _extract_float(objective_dict.get("capture_radius", _objective_status.capture_radius), _objective_status.capture_radius)
+	_objective_status.owning_team_id = String(objective_dict.get("owning_team_id", _objective_status.owning_team_id))
+	_objective_status.capture_progress = clampf(_extract_float(objective_dict.get("capture_progress", _objective_status.capture_progress), _objective_status.capture_progress), 0.0, 1.0)
+	_objective_status.capturing_team_id = String(objective_dict.get("capturing_team_id", _objective_status.capturing_team_id))
+	_objective_status.set_contested(bool(objective_dict.get("contested", _objective_status.is_contested())))
+
+
+func _apply_remote_snapshot_fallback(unit, unit_snapshot: Dictionary) -> void:
+	if unit == null:
+		return
+
+	if unit is CanvasItem:
+		(unit as CanvasItem).visible = bool(unit_snapshot.get("visible", true))
+
+	if unit is Node2D:
+		var target_position: Vector2 = _coerce_vector2(unit_snapshot.get("position", (unit as Node2D).global_position), (unit as Node2D).global_position)
+		(unit as Node2D).global_position = (unit as Node2D).global_position.lerp(target_position, 0.75)
+
+
+func _resolve_known_unit(unit_id: String):
+	if unit_id.is_empty():
+		return null
+
+	var unit = _known_units_by_id.get(unit_id, null)
+	if unit != null:
+		return unit
+
+	return _resolve_unit(unit_id)
 
 
 func _process_commands(commands: Array, delta: float) -> void:
@@ -460,7 +806,7 @@ func _resolve_attacker_unit(attacker_unit_id: String):
 	if attacker_unit_id.is_empty():
 		return null
 
-	return _resolve_unit(attacker_unit_id)
+	return _resolve_known_unit(attacker_unit_id)
 
 
 func _extract_unit_cover_score(unit) -> float:

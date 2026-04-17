@@ -29,10 +29,14 @@ func _ready() -> void:
 	_connect_button(defend_button_path, Callable(self, "issue_defend"))
 	_connect_button(flank_button_path, Callable(self, "issue_flank"))
 	_connect_button(take_button_path, Callable(self, "issue_take"))
+	_refresh_button_state()
 	_update_ui()
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if not _can_issue_local_commands():
+		return
+
 	if event is InputEventMouseButton:
 		var mouse_button_event := event as InputEventMouseButton
 		if mouse_button_event.pressed and mouse_button_event.button_index == MOUSE_BUTTON_LEFT:
@@ -108,6 +112,11 @@ func try_place_target_from_screen_position(screen_position: Vector2) -> bool:
 
 
 func _issue_command(command_type: String, display_text: String) -> bool:
+	if not _can_issue_local_commands():
+		_last_command_text = "OBSERVER MODE"
+		_update_ui()
+		return false
+
 	var issued_count: int = 0
 	for driver in _get_active_flow_drivers():
 		if driver == null or not driver.has_method("issue_command"):
@@ -170,7 +179,7 @@ func _update_ui() -> void:
 
 	var hotkey_legend_label := get_node_or_null(hotkey_legend_label_path) as Label
 	if hotkey_legend_label != null:
-		hotkey_legend_label.text = HOTKEY_LEGEND
+		hotkey_legend_label.text = HOTKEY_LEGEND if _can_issue_local_commands() else "OBSERVER MODE | Host controls commands in multiplayer V1"
 
 
 func _connect_button(button_path: NodePath, callback: Callable) -> void:
@@ -233,3 +242,33 @@ func _snap_target_to_objective() -> void:
 	target_marker.global_position = objective_marker.global_position
 	_last_target_position = objective_marker.global_position
 	_update_ui()
+
+
+func _refresh_button_state() -> void:
+	var buttons: Array[NodePath] = [
+		move_button_path,
+		defend_button_path,
+		flank_button_path,
+		take_button_path,
+	]
+	for button_path in buttons:
+		var button := get_node_or_null(button_path) as BaseButton
+		if button == null:
+			continue
+
+		button.disabled = not _can_issue_local_commands()
+
+
+func _can_issue_local_commands() -> bool:
+	var simulation_root = get_node_or_null("../SimulationRoot")
+	if simulation_root == null:
+		return true
+
+	if not bool(simulation_root.get("is_server_authoritative")):
+		return true
+
+	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
+	if peer == null or peer.get_connection_status() == MultiplayerPeer.CONNECTION_DISCONNECTED:
+		return true
+
+	return multiplayer.is_server()

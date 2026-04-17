@@ -11,6 +11,7 @@ const STATUS_LABEL_POSITION: Vector2 = Vector2(542.0, 176.0)
 @export var wave_delay_seconds: float = 45.0
 @export var first_wave_delay_seconds: float = 5.0
 @export var unit_registry_path: NodePath
+@export var simulation_root_path: NodePath
 
 var _enemy_units: Array = []
 var _spawn_positions_by_unit_id: Dictionary = {}
@@ -44,7 +45,7 @@ func initialize_enemy_units(enemy_units: Array) -> void:
 		_refresh_status_label()
 		return
 
-	if _time_until_next_wave <= 0.0:
+	if _time_until_next_wave <= 0.0 and _should_process_locally():
 		_start_next_wave()
 		if not are_all_waves_started():
 			_time_until_next_wave = maxf(wave_delay_seconds, 0.0)
@@ -74,6 +75,10 @@ func are_all_waves_started() -> bool:
 
 
 func _process(delta: float) -> void:
+	if not _should_process_locally():
+		_refresh_status_label()
+		return
+
 	if _enemy_units.is_empty() or are_all_waves_started():
 		_refresh_status_label()
 		return
@@ -193,3 +198,23 @@ func _refresh_status_label() -> void:
 func _finish_ready() -> void:
 	_ensure_status_label()
 	_refresh_status_label()
+
+
+func _should_process_locally() -> bool:
+	var simulation_root = null
+	if not simulation_root_path.is_empty():
+		simulation_root = get_node_or_null(simulation_root_path)
+	elif get_parent() != null:
+		simulation_root = get_parent().get_node_or_null("SimulationRoot")
+
+	if simulation_root == null:
+		return true
+
+	if not bool(simulation_root.get("is_server_authoritative")):
+		return true
+
+	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
+	if peer == null or peer.get_connection_status() == MultiplayerPeer.CONNECTION_DISCONNECTED:
+		return true
+
+	return multiplayer.is_server()

@@ -340,6 +340,34 @@
 - Risiken: der Homebase-Pfad bleibt bewusst eine kleine Listenlesbarkeit ohne neue Registry oder Persistenzschicht; spaetere Meta-UI sollte diesen Preview-Ansatz explizit ersetzen, wenn ein echtes Daten-/Roster-System eingefuehrt wird.
 - Naechster Schritt: den Slice lokal gegen Mission und Meta-Layer pruefen und dann fuer die naechsten Netzwerk-/Terrain-Aufgaben stabilisieren.
 
+### TASK_050 - Server-autoritativer SimulationRoot
+- Status: implementiert
+- Stand: `SimulationRoot` besitzt jetzt `is_server_authoritative`, eine RPC-faehige `request_command()`-Einspeisung, Peer-zu-Team-Mapping und einen vorbereiteten Tick-Broadcast. Im Multiplayer-Modus verarbeitet nur noch der Server Commands und Effects lokal; Clients speichern den letzten Server-Snapshot und erhalten zusaetzlich zuverlaessige Vital-Updates. Ohne aktiven Peer oder bei deaktivierter Authority bleibt der bisherige Singleplayer-Pfad unveraendert.
+- Offene Punkte: keine Latenz-Kompensation, keine Ownership-Uebertragung und keine generische Netzwerk-Abstraktionsschicht ausserhalb dieses Testslices.
+- Risiken: der Authority-Pfad bleibt bewusst klein und direkt an der Missions-Testszene orientiert; spaetere groessere Multiplayer-Systeme sollten den Datenvertrag explizit erweitern, statt versteckte Sonderlogik neben `SimulationRoot` wachsen zu lassen.
+- Naechster Schritt: eine minimale Host/Join-Lobby auf die neue Autoritaetsbasis setzen.
+
+### TASK_051 - Host/Join mit Testteams
+- Status: implementiert
+- Stand: unter `res://scenes/tests/lobby_test.tscn` gibt es jetzt einen kleinen `LobbyTestScreen` mit `Host`, `Join` und host-only `Start Mission`. Host und Joiner verbinden sich lokal ueber `ENetMultiplayerPeer` auf Port `7777`, sehen denselben Status und starten dieselbe Missionsszene; `SimulationRoot` wird dabei server-autoritativ initialisiert. Bei Disconnect oder Verbindungsfehler wird sauber in die Lobby zurueckgekehrt.
+- Offene Punkte: nur localhost/LAN-V1, keine Teamauswahl, kein Matchmaking, kein Session-Browser und kein reconnect.
+- Risiken: die Lobby ist bewusst ein sehr kleiner Testszenen-Flow ohne Meta-Layer-Integration; spaetere echte Multiplayer-Menues sollten diesen Pfad explizit ersetzen statt ihn still auszubauen.
+- Naechster Schritt: die bestehende Befehlskette ueber RPC an den Server umleiten.
+
+### TASK_052 - Befehlsuebertragung ueber Netzwerk
+- Status: implementiert
+- Stand: `MissionCommandFlowDriver` schickt `UnitCommand`-Dictionaries im server-autoritativen Modus jetzt nicht mehr direkt an `enqueue_command()`, sondern an `SimulationRoot.request_command()` bzw. per `rpc_id(1, ...)` an den Host. `SimulationRoot` validiert Command-Typ, `unit_id` und Team-Zugehoerigkeit gegen das Peer-Mapping. `MissionCombatLoopDriver`, `RespawnManager` und `EnemyWaveController` fuehren ihre autoritativen Simulationsteile im Multiplayer nur noch auf dem Server aus; der Joiner bleibt in V1 Beobachter und bekommt keine lokale Command-Eingabe mehr.
+- Offene Punkte: noch kein zweiter aktiver Commander, keine komplexere Autorisierung und keine Client-Prediction.
+- Risiken: die Servervalidierung bleibt bewusst schlank und testszenenbezogen; spaetere PvP- oder Koop-Ausbaustufen sollten diese Checks explizit verstaerken statt sie ad hoc in UI oder Drivern zu verteilen.
+- Naechster Schritt: den autoritativen Zustand sichtbar auf den Joiner spiegeln.
+
+### TASK_053 - Synchronisierte Spielzustandsanzeige
+- Status: implementiert
+- Stand: `SimulationRoot` broadcastet jetzt pro Tick einen kompakten Snapshot fuer aktive Units (`unit_id`, Position, Runtime-/Vital-Kernstatus) plus Objective-Fortschritt an Clients; `TestUnit` kann diese Remote-Snapshots direkt anwenden und zeigt dadurch Bewegungen, Vital-Status und Respawn-Momente auch als Joiner korrekt an. `MissionCombatLoopDriver` synchronisiert Missionsresultat und Event-Feedback (`HIT`, `DOWN`, `BLEEDOUT`, `RESPAWNING`, Wellenhinweise) per RPC, sodass beide Peers denselben Debrief sehen.
+- Offene Punkte: keine Snapshot-Pufferung, keine Lag-Kompensation, keine FoW-Differenzierung und keine feingranulare Kontakt-/Linien-Synchronisation.
+- Risiken: der Sync bleibt bewusst ein einfacher V1-Snapshot-Pfad; spaetere groessere Multiplayer-Loops sollten diesen Datenstrom explizit weiterentwickeln statt mit immer mehr Einzelfeldern zu ueberladen.
+- Naechster Schritt: nach dem Multiplayer-Prototyp den Terrain-Block gemaess Roadmap wieder lokal und datenorientiert ausbauen.
+
 ### TASK_054 - Terrain-Tile-Datenmodell und Registry
 - Status: implementiert
 - Stand: `TerrainTileData` unter `res://scripts/terrain/terrain_tile_data.gd` und `TerrainRegistry` unter `res://scripts/terrain/terrain_registry.gd` bilden jetzt ein kleines datenbasiertes Terrain-System mit `walkable`, `blocks_los`, `cover_value`, `height_level` und `surface_type`. Die Missions-Testszene besitzt einen eigenen `TerrainRegistry`-Node, und `MissionTestSetup` liest die bestehenden 64 Iso-Tiles aus `MapRoot/Terrain`, konfiguriert die Iso-Grid-Konvertierung passend zur bestehenden Karte und registriert alle Tiles mit Default- bzw. Szenenwerten.
