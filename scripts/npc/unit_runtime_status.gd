@@ -28,6 +28,7 @@ var team_id: String = ""
 var fireteam_id: String = ""
 var fire_status: String = FIRE_STATUS_FIRE_AT_WILL
 var source_command_type: String = ""
+var move_speed_factor: float = 1.0
 var cover_score: float = 0.0
 var attack_bonus: float = 0.0
 var target_position: Variant = null
@@ -55,6 +56,9 @@ func is_valid() -> bool:
 	if not ALLOWED_FIRE_STATUSES.has(fire_status):
 		return false
 
+	if move_speed_factor < 0.0:
+		return false
+
 	return _has_valid_target_position()
 
 
@@ -67,6 +71,7 @@ func to_dict() -> Dictionary:
 		"team_id": team_id,
 		"fire_status": fire_status,
 		"source_command_type": source_command_type,
+		"move_speed_factor": move_speed_factor,
 		"cover_score": cover_score,
 		"attack_bonus": attack_bonus,
 	}
@@ -109,6 +114,11 @@ func _apply_dict(data: Dictionary) -> void:
 
 	if data.has("source_command_type"):
 		source_command_type = String(data["source_command_type"])
+
+	if data.has("move_speed_factor"):
+		var raw_move_speed_factor: Variant = data["move_speed_factor"]
+		if typeof(raw_move_speed_factor) == TYPE_INT or typeof(raw_move_speed_factor) == TYPE_FLOAT:
+			move_speed_factor = float(raw_move_speed_factor)
 
 	if data.has("cover_score"):
 		var raw_cover_score: Variant = data["cover_score"]

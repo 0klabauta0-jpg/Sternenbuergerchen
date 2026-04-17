@@ -1,9 +1,12 @@
 class_name RuntimeLeader
 extends Node
 
+const COMMANDER_COMMAND_SCRIPT: GDScript = preload("res://scripts/command/commander_command.gd")
 const FTL_RUNTIME_STATUS_SCRIPT: GDScript = preload("res://scripts/ftl/ftl_runtime_status.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const FLANK_OFFSET_DISTANCE: float = 72.0
+const PHASE_APPROACH_COVER_BONUS: float = 0.2
+const PHASE_HOLD_COVER_BONUS: float = 0.3
 
 signal promoted(new_leader)
 signal demoted(old_leader)
@@ -232,14 +235,15 @@ func _build_unit_command_from_ftl_task(task, unit: Node):
 	if unit_command.unit_id.is_empty():
 		unit_command.unit_id = String(unit.call("get_unit_id"))
 	unit_command.team_id = String(task.get("team_id"))
-	unit_command.fire_status = _map_task_type_to_fire_status(task_type, source_command_type)
+	unit_command.phase = int(task.get("phase"))
+	unit_command.fire_status = _map_task_type_to_fire_status(task_type, source_command_type, unit_command.phase)
 	unit_command.source_command_type = source_command_type
-	unit_command.cover_score = _derive_cover_score(task_type, source_command_type)
+	unit_command.move_speed_factor = _derive_move_speed_factor(unit_command.phase)
+	unit_command.cover_score = _derive_cover_score(task_type, source_command_type, unit_command.phase)
 	unit_command.attack_bonus = _derive_attack_bonus(task_type, source_command_type)
 	unit_command.target_position = _derive_target_position(task, unit, command_type, source_command_type)
 	unit_command.target_area_id = String(task.get("target_area_id"))
 	unit_command.source_task_type = task_type
-	unit_command.phase = int(task.get("phase"))
 	return unit_command
 
 
@@ -259,7 +263,13 @@ func _map_task_type_to_unit_command_type(task_type: String) -> String:
 			return ""
 
 
-func _map_task_type_to_fire_status(task_type: String, source_command_type: String) -> String:
+func _map_task_type_to_fire_status(task_type: String, source_command_type: String, phase: int) -> String:
+	match phase:
+		COMMANDER_COMMAND_SCRIPT.PHASE_APPROACH:
+			return "hold_fire"
+		COMMANDER_COMMAND_SCRIPT.PHASE_ASSAULT, COMMANDER_COMMAND_SCRIPT.PHASE_HOLD:
+			return "fire_at_will"
+
 	if source_command_type == "move":
 		return "hold_fire"
 
@@ -273,22 +283,22 @@ func _map_task_type_to_fire_status(task_type: String, source_command_type: Strin
 			return "hold_fire"
 
 
-func _derive_cover_score(task_type: String, source_command_type: String) -> float:
+func _derive_cover_score(task_type: String, source_command_type: String, phase: int) -> float:
+	var base_cover_score: float = 0.0
 	if source_command_type == "defend":
-		return 0.7
+		base_cover_score = 0.7
+	elif source_command_type == "flank":
+		base_cover_score = 0.15
+	else:
+		match task_type:
+			"hold_position":
+				base_cover_score = 0.55
+			"seek_cover":
+				base_cover_score = 0.8
+			"engage_in_area":
+				base_cover_score = 0.2
 
-	if source_command_type == "flank":
-		return 0.15
-
-	match task_type:
-		"hold_position":
-			return 0.55
-		"seek_cover":
-			return 0.8
-		"engage_in_area":
-			return 0.2
-		_:
-			return 0.0
+	return base_cover_score + _derive_phase_cover_bonus(phase)
 
 
 func _derive_attack_bonus(task_type: String, source_command_type: String) -> float:
@@ -300,6 +310,28 @@ func _derive_attack_bonus(task_type: String, source_command_type: String) -> flo
 			return 0.2
 		"hold_position":
 			return 0.05
+		_:
+			return 0.0
+
+
+func _derive_move_speed_factor(phase: int) -> float:
+	match phase:
+		COMMANDER_COMMAND_SCRIPT.PHASE_APPROACH:
+			return 0.5
+		COMMANDER_COMMAND_SCRIPT.PHASE_ASSAULT:
+			return 1.5
+		COMMANDER_COMMAND_SCRIPT.PHASE_HOLD:
+			return 0.0
+		_:
+			return 1.0
+
+
+func _derive_phase_cover_bonus(phase: int) -> float:
+	match phase:
+		COMMANDER_COMMAND_SCRIPT.PHASE_APPROACH:
+			return PHASE_APPROACH_COVER_BONUS
+		COMMANDER_COMMAND_SCRIPT.PHASE_HOLD:
+			return PHASE_HOLD_COVER_BONUS
 		_:
 			return 0.0
 

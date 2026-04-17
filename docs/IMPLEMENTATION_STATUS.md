@@ -262,3 +262,31 @@
 - Offene Punkte: keine dynamische Fireteam-Zuweisung zur Laufzeit, keine weitergehende Fireteam-UI und noch keine Nutzung der neuen Fireteam-Daten ausserhalb der bestehenden Testszene und des Runtime-Status.
 - Risiken: die Fireteam-Wirkung bleibt fuer diesen Slice bewusst auf die bestehende Auswahl-/Driver-Filterung plus sichtbare Unit-Zuordnung begrenzt; spaetere Fireteam-Mechaniken muessen die neue Datenbasis explizit nutzen, statt Logik still in UI oder Szene-Glue zu verstecken.
 - Naechster Schritt: mit TASK_039 die bestehende Phasenwahl in eine kleine echte Laufzeitwirkung ueberfuehren, ohne die Commander-/Driver-Architektur zu verbiegen.
+
+### TASK_039 - Phasen-Wirkung
+- Status: implementiert
+- Stand: `CommanderCommand`, `UnitCommand` und `UnitRuntimeStatus` tragen jetzt eine kleine echte Phasenwirkung. `RuntimeLeader` leitet `APPROACH`, `ASSAULT` und `HOLD` in minimale Unterschiede fuer `fire_status`, `move_speed_factor` und `cover_score` ueber, `SimulationRoot` respektiert den neuen Geschwindigkeitsfaktor autoritativ bei Bewegung, und `TestUnit` zeigt die aktive Phase als kleines zusaetzliches Label direkt an der Unit an.
+- Offene Punkte: keine tiefere Combat-Loop-Interpretation jenseits der kleinen Ableitungen, keine erweiterten Rules of Engagement und keine Phase-KI fuer Gegner.
+- Risiken: die Wirkung bleibt bewusst klein und datenorientiert; spaetere komplexere Phasenlogik sollte explizit auf den neuen Feldern aufbauen statt versteckte Sonderfaelle in UI oder Drivern zu sammeln.
+- Naechster Schritt: den `take`-Befehl an ein echtes Objective mit Capture-Zustand anbinden.
+
+### TASK_040 - Take-Befehl und Objective
+- Status: implementiert
+- Stand: ein neues `ObjectiveStatus`-Datenmodell haengt jetzt am `SimulationRoot`; pro Tick wird autoritativ geprueft, welche `fit`-Units im Capture-Radius stehen, contested-Zustaende blockieren Fortschritt und bei vollem Fortschritt wechselt der Besitzer. `MissionTestSetup` erstellt den Objective-Zustand aus dem bestehenden `objective_point`-Marker, `take` snappt den Zielmarker auf diesen Punkt, `engage_area` bewegt Units nun auch zum Objective, und ein kleines `MissionObjectiveStatusView` zeigt Besitzer und Capture-Fortschritt direkt an der Szene an.
+- Offene Punkte: weiterhin nur ein Objective gleichzeitig, keine komplexere Zonen-Geometrie, keine Gegner-Capture-Orders und keine Besitzer-Boni.
+- Risiken: der Objective-Pfad ist bewusst ein einzelner, leichter Vertical-Slice ohne grosse Objective-Architektur; spaetere Missionssysteme sollten den Datenvertrag explizit erweitern statt ihn still im Szenen-Glue wachsen zu lassen.
+- Naechster Schritt: aus dem neuen Objective-Zustand eine echte Sieg-/Niederlagenlogik fuer den bestehenden Debrief-Flow ableiten.
+
+### TASK_041 - Siegbedingung
+- Status: implementiert
+- Stand: `MissionCombatLoopDriver` unterstuetzt jetzt die Siegbedingungstypen `elimination`, `objective_capture` und `objective_defense`, prueft zusaetzlich eine Niederlage bei gleichzeitig komplett nicht mehr `fit`en Friendlies und liefert ein erweitertes `mission_result` mit `result`, `win_condition_type`, `objective_captured` und `duration_seconds`. Die Missions-Testszene nutzt standardmaessig `objective_capture`, und `MetaLayerFlow` plus `DebriefTestScreen` reichen das reichere Ergebnis bis in den bestehenden Debrief-/FOB-Rueckfluss weiter.
+- Offene Punkte: keine mehrstufigen Missionsziele, keine Zeitlimit-Niederlage und keine gegnerische Objective-Logik.
+- Risiken: die Missionsauswertung bleibt bewusst klein und testszenenbezogen; spaetere Kampagnen- oder Multi-Objective-Systeme muessen darauf explizit aufbauen statt den Combat-Driver schleichend zu ueberladen.
+- Naechster Schritt: die bestehende Respawn-Logik fuer den Spieler sichtbar machen.
+
+### TASK_042 - Respawn-Timer-Anzeige
+- Status: implementiert
+- Stand: `RespawnManager` stellt jetzt `get_pending_respawns()` und `get_remaining_time(unit_id)` bereit. Ein neues `MissionRespawnOverlay` zeigt in der Missions-Testszene aktuell laufende Respawns unter dem Command-Feedback an, waehrend `TestUnit` bei `respawning` den verbleibenden Countdown direkt im Unit-Statuslabel anzeigt. `MissionTestSetup` verdrahtet dazu den `RespawnManager` explizit an die Units.
+- Offene Punkte: keine Queue-Ansicht, keine Fortschrittsbalken, keine Spawn-Punkt-Auswahl und keine groessere HUD-Struktur.
+- Risiken: die Anzeige bleibt bewusst ein kleiner Polling-Overlay-Pfad fuer die Testszene; spaetere echte HUD-Systeme sollten diese Minimalanzeige explizit ersetzen statt sie still auszubauen.
+- Naechster Schritt: den Vertical Slice gegen die naechsten Gegner-Tasks absichern und erst dann weitere Gegnerlogik aufsetzen.

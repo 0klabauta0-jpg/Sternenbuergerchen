@@ -8,6 +8,7 @@ const HOTKEY_LEGEND: String = "LMB Set Target | 1 Move | 2 Defend | 3 Flank | 4 
 @export var bravo_flow_driver_path: NodePath
 @export var charlie_flow_driver_path: NodePath
 @export var target_marker_path: NodePath
+@export var objective_point_path: NodePath
 @export var command_feedback_label_path: NodePath
 @export var hotkey_legend_label_path: NodePath
 @export var move_button_path: NodePath
@@ -89,6 +90,7 @@ func issue_flank() -> bool:
 
 
 func issue_take() -> bool:
+	_snap_target_to_objective()
 	return _issue_command("take", "TAKE / ENGAGE")
 
 
@@ -220,3 +222,14 @@ func _clamp_world_position_to_viewport(world_position: Vector2) -> Vector2:
 		clampf(world_position.x, min_x, max_x),
 		clampf(world_position.y, min_y, max_y)
 	)
+
+
+func _snap_target_to_objective() -> void:
+	var target_marker := get_node_or_null(target_marker_path) as Node2D
+	var objective_marker := get_node_or_null(objective_point_path) as Node2D
+	if target_marker == null or objective_marker == null:
+		return
+
+	target_marker.global_position = objective_marker.global_position
+	_last_target_position = objective_marker.global_position
+	_update_ui()

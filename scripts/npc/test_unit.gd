@@ -1,10 +1,12 @@
 class_name TestUnit
 extends Node2D
 
+const COMMANDER_COMMAND_SCRIPT: GDScript = preload("res://scripts/command/commander_command.gd")
 const UNIT_RUNTIME_STATUS_SCRIPT: GDScript = preload("res://scripts/npc/unit_runtime_status.gd")
 const UNIT_VITAL_STATUS_SCRIPT: GDScript = preload("res://scripts/npc/unit_vital_status.gd")
 const STATUS_LABEL_NAME: String = "DebugStatusLabel"
 const FIRETEAM_LABEL_NAME: String = "DebugFireteamLabel"
+const PHASE_LABEL_NAME: String = "DebugPhaseLabel"
 const EVENT_LABEL_NAME: String = "DebugEventLabel"
 const STATUS_LABEL_OFFSET: Vector2 = Vector2(-54.0, -48.0)
 const FIRETEAM_LABEL_SPACING: float = 8.0
@@ -28,12 +30,14 @@ var _vital_status: RefCounted = UNIT_VITAL_STATUS_SCRIPT.new()
 var _last_damage_context: Dictionary = {}
 var _status_label: Label = null
 var _fireteam_label: Label = null
+var _phase_label: Label = null
 var _event_label: Label = null
 var _current_event_text: String = ""
 var _current_event_color: Color = Color(1.0, 0.95, 0.5, 1.0)
 var _event_time_remaining: float = 0.0
 var _contact_active: bool = false
 var _contact_target_id: String = ""
+var _respawn_manager = null
 
 
 func _ready() -> void:
@@ -90,8 +94,16 @@ func get_fire_status() -> String:
 	return String(_runtime_status.fire_status)
 
 
+func get_phase() -> int:
+	return int(_runtime_status.phase)
+
+
 func get_source_command_type() -> String:
 	return String(_runtime_status.source_command_type)
+
+
+func get_move_speed_factor() -> float:
+	return float(_runtime_status.move_speed_factor)
 
 
 func get_cover_score() -> float:
@@ -123,6 +135,7 @@ func set_fireteam_id(next_fireteam_id: String) -> bool:
 		int(_runtime_status.priority),
 		String(_runtime_status.fire_status),
 		String(_runtime_status.source_command_type),
+		float(_runtime_status.move_speed_factor),
 		float(_runtime_status.cover_score),
 		float(_runtime_status.attack_bonus),
 		int(_runtime_status.phase),
@@ -135,6 +148,11 @@ func set_fireteam_id(next_fireteam_id: String) -> bool:
 	runtime_status_changed.emit(_runtime_status)
 	_refresh_readability()
 	return true
+
+
+func set_respawn_manager(respawn_manager) -> void:
+	_respawn_manager = respawn_manager
+	_refresh_readability()
 
 
 func apply_damage(amount: int, hit_context: Dictionary = {}) -> bool:
@@ -162,18 +180,36 @@ func advance_bleedout() -> bool:
 	return true
 
 
-func respawn(spawn_position: Vector2) -> bool:
+func begin_respawn() -> bool:
 	var vital_state: String = String(_vital_status.state)
 	if vital_state != "down" and vital_state != "bleedout":
+		return false
+
+	_runtime_status = _build_runtime_status("idle")
+	runtime_status_changed.emit(_runtime_status)
+	_set_vital_status("respawning", get_health(), int(_vital_status.bleedout_ticks))
+	_current_unit_command = null
+	_contact_active = false
+	_contact_target_id = ""
+	_refresh_readability()
+	show_event_text("RESPAWNING", Color(0.7, 0.9, 1.0, 1.0), 1.8)
+	return true
+
+
+func respawn(spawn_position: Vector2) -> bool:
+	var vital_state: String = String(_vital_status.state)
+	if vital_state != "down" and vital_state != "bleedout" and vital_state != "respawning":
 		return false
 
 	position = spawn_position
 	_set_vital_status("fit", max_health_points, 0)
 	_runtime_status = _build_runtime_status("idle")
+	runtime_status_changed.emit(_runtime_status)
 	_current_unit_command = null
 	_last_damage_context = {}
 	_contact_active = false
 	_contact_target_id = ""
+	_refresh_readability()
 	show_event_text("RESPAWN", Color(0.5, 1.0, 0.7, 1.0), 2.0)
 	return true
 
@@ -185,6 +221,7 @@ func set_target_position(target_position: Variant) -> bool:
 		int(_runtime_status.priority),
 		String(_runtime_status.fire_status),
 		String(_runtime_status.source_command_type),
+		float(_runtime_status.move_speed_factor),
 		float(_runtime_status.cover_score),
 		float(_runtime_status.attack_bonus),
 		int(_runtime_status.phase),
@@ -206,6 +243,7 @@ func assign_unit_command(command) -> bool:
 		int(command.get("priority")),
 		String(command.get("fire_status")),
 		String(command.get("source_command_type")),
+		float(command.get("move_speed_factor")),
 		float(command.get("cover_score")),
 		float(command.get("attack_bonus")),
 		int(command.get("phase")),
@@ -224,6 +262,7 @@ func set_runtime_status(
 	priority: int = 0,
 	fire_status: String = "fire_at_will",
 	source_command_type: String = "",
+	move_speed_factor: float = 1.0,
 	cover_score: float = 0.0,
 	attack_bonus: float = 0.0,
 	phase: int = -1,
@@ -235,6 +274,7 @@ func set_runtime_status(
 		priority,
 		fire_status,
 		source_command_type,
+		move_speed_factor,
 		cover_score,
 		attack_bonus,
 		phase,
@@ -269,6 +309,7 @@ func _build_runtime_status(
 	priority: int = 0,
 	fire_status: String = "fire_at_will",
 	source_command_type: String = "",
+	move_speed_factor: float = 1.0,
 	cover_score: float = 0.0,
 	attack_bonus: float = 0.0,
 	phase: int = -1,
@@ -283,6 +324,7 @@ func _build_runtime_status(
 	runtime_status.fireteam_id = fireteam_id
 	runtime_status.fire_status = fire_status
 	runtime_status.source_command_type = source_command_type
+	runtime_status.move_speed_factor = move_speed_factor
 	runtime_status.cover_score = cover_score
 	runtime_status.attack_bonus = attack_bonus
 	runtime_status.target_position = target_position
@@ -352,6 +394,13 @@ func _ensure_readability_labels() -> void:
 		_fireteam_label.top_level = true
 		add_child(_fireteam_label)
 
+	_phase_label = get_node_or_null(PHASE_LABEL_NAME) as Label
+	if _phase_label == null:
+		_phase_label = Label.new()
+		_phase_label.name = PHASE_LABEL_NAME
+		_phase_label.top_level = true
+		add_child(_phase_label)
+
 	_event_label = get_node_or_null(EVENT_LABEL_NAME) as Label
 	if _event_label == null:
 		_event_label = Label.new()
@@ -361,12 +410,15 @@ func _ensure_readability_labels() -> void:
 
 	_status_label.add_theme_font_size_override("font_size", 11)
 	_fireteam_label.add_theme_font_size_override("font_size", 10)
+	_phase_label.add_theme_font_size_override("font_size", 10)
 	_event_label.add_theme_font_size_override("font_size", 12)
 	_status_label.add_theme_constant_override("outline_size", 2)
 	_fireteam_label.add_theme_constant_override("outline_size", 2)
+	_phase_label.add_theme_constant_override("outline_size", 2)
 	_event_label.add_theme_constant_override("outline_size", 2)
 	_status_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
 	_fireteam_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
+	_phase_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
 	_event_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
 	_sync_readability_positions()
 
@@ -378,10 +430,19 @@ func _sync_readability_positions() -> void:
 		if _fireteam_label != null:
 			_fireteam_label.visible = is_visible_in_tree() and not fireteam_id.is_empty()
 			_fireteam_label.global_position = _status_label.global_position + Vector2(_status_label.get_combined_minimum_size().x + FIRETEAM_LABEL_SPACING, 0.0)
+		if _phase_label != null:
+			var phase_offset_x: float = _status_label.get_combined_minimum_size().x + FIRETEAM_LABEL_SPACING
+			if _fireteam_label != null and _fireteam_label.visible:
+				phase_offset_x += _fireteam_label.get_combined_minimum_size().x + FIRETEAM_LABEL_SPACING
+			_phase_label.visible = is_visible_in_tree() and not _build_phase_label_text().is_empty()
+			_phase_label.global_position = _status_label.global_position + Vector2(phase_offset_x, 0.0)
 
 	elif _fireteam_label != null:
 		_fireteam_label.visible = is_visible_in_tree() and not fireteam_id.is_empty()
 		_fireteam_label.global_position = global_position + STATUS_LABEL_OFFSET
+		if _phase_label != null:
+			_phase_label.visible = is_visible_in_tree() and not _build_phase_label_text().is_empty()
+			_phase_label.global_position = global_position + STATUS_LABEL_OFFSET + Vector2(FIRETEAM_LABEL_SPACING, 0.0)
 
 	if _event_label != null:
 		_event_label.visible = is_visible_in_tree() and not _current_event_text.is_empty()
@@ -391,6 +452,7 @@ func _sync_readability_positions() -> void:
 func _refresh_readability() -> void:
 	_refresh_status_label()
 	_refresh_fireteam_label()
+	_refresh_phase_label()
 	_refresh_event_label()
 	_sync_readability_positions()
 
@@ -421,6 +483,16 @@ func _refresh_fireteam_label() -> void:
 	_fireteam_label.visible = is_visible_in_tree()
 
 
+func _refresh_phase_label() -> void:
+	if _phase_label == null:
+		return
+
+	var phase_text: String = _build_phase_label_text()
+	_phase_label.text = phase_text
+	_phase_label.modulate = Color(0.88, 0.98, 0.88, 1.0)
+	_phase_label.visible = is_visible_in_tree() and not phase_text.is_empty()
+
+
 func _refresh_event_label() -> void:
 	if _event_label == null:
 		return
@@ -445,6 +517,9 @@ func _build_primary_status_label() -> String:
 		"bleedout":
 			return "BLEEDOUT"
 		"respawning":
+			var respawn_seconds: int = _get_respawn_remaining_seconds()
+			if respawn_seconds > 0:
+				return "RESPAWN %ds" % respawn_seconds
 			return "RESPAWNING"
 
 	var source_command_type: String = String(_runtime_status.source_command_type)
@@ -472,6 +547,9 @@ func _build_primary_status_label() -> String:
 
 
 func _build_secondary_status_label() -> String:
+	if String(_vital_status.state) != "fit":
+		return ""
+
 	var parts: PackedStringArray = []
 	var fire_status: String = String(_runtime_status.fire_status)
 	if fire_status == "hold_fire":
@@ -514,5 +592,16 @@ func _build_fireteam_label_color() -> Color:
 			return Color(0.9, 0.9, 0.9, 1.0)
 
 
+func _build_phase_label_text() -> String:
+	return COMMANDER_COMMAND_SCRIPT.get_phase_short_name(int(_runtime_status.phase))
+
+
 func _normalize_fireteam_id(value: String) -> String:
 	return value.strip_edges().to_lower()
+
+
+func _get_respawn_remaining_seconds() -> int:
+	if _respawn_manager == null or not _respawn_manager.has_method("get_remaining_time"):
+		return 0
+
+	return maxi(int(ceili(float(_respawn_manager.call("get_remaining_time", unit_id)))), 0)

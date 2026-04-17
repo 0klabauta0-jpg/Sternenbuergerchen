@@ -48,12 +48,36 @@ func get_pending_count() -> int:
 	return _pending_respawns.size()
 
 
+func get_pending_respawns() -> Dictionary:
+	var pending_copy: Dictionary = {}
+	for unit_id in _pending_respawns:
+		var entry: Dictionary = _pending_respawns[unit_id]
+		pending_copy[unit_id] = float(entry.get("time_remaining", 0.0))
+
+	return pending_copy
+
+
+func get_remaining_time(unit_id: String) -> float:
+	if unit_id.is_empty() or not _pending_respawns.has(unit_id):
+		return 0.0
+
+	var entry: Dictionary = _pending_respawns[unit_id]
+	return maxf(float(entry.get("time_remaining", 0.0)), 0.0)
+
+
 func request_respawn(unit_id: String, team_id: String) -> bool:
 	if unit_id.is_empty() or team_id.is_empty():
 		return false
 
 	if _pending_respawns.has(unit_id):
 		return false
+
+	var unit = _resolve_unit(unit_id)
+	if unit == null:
+		return false
+
+	if unit.has_method("begin_respawn"):
+		unit.call("begin_respawn")
 
 	var respawn_time: float = get_respawn_time()
 	_pending_respawns[unit_id] = {
@@ -92,7 +116,18 @@ func _physics_process(delta: float) -> void:
 			}
 		)
 		completed_ids.append(unit_id)
-		unit_respawn_completed.emit(unit_id)
 
 	for completed_id in completed_ids:
 		_pending_respawns.erase(completed_id)
+		unit_respawn_completed.emit(completed_id)
+
+
+func _resolve_unit(unit_id: String):
+	if unit_id.is_empty() or unit_registry_path.is_empty():
+		return null
+
+	var unit_registry = get_node_or_null(unit_registry_path)
+	if unit_registry == null or not unit_registry.has_method("get_unit"):
+		return null
+
+	return unit_registry.call("get_unit", unit_id)

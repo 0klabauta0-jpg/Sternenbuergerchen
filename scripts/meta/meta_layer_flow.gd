@@ -136,11 +136,11 @@ func _connect_mission_end(mission_instance: Node) -> void:
 		combat_driver.combat_resolved.connect(_on_mission_combat_resolved)
 
 
-func _on_mission_combat_resolved(winning_team_id: String, _neutralized_enemy_count: int) -> void:
+func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 	if _active_mission == null:
 		return
 
-	_last_mission_result = _build_mission_result(_active_mission, winning_team_id)
+	_last_mission_result = _build_mission_result(_active_mission, mission_result)
 	var fob_screen = _get_fob_screen()
 	if fob_screen != null:
 		fob_screen.set_last_mission_result(_last_mission_result)
@@ -153,7 +153,7 @@ func _on_mission_combat_resolved(winning_team_id: String, _neutralized_enemy_cou
 	_show_debrief()
 
 
-func _build_mission_result(mission_instance: Node, winning_team_id: String) -> Dictionary:
+func _build_mission_result(mission_instance: Node, mission_result: Dictionary) -> Dictionary:
 	var team_states: Array = []
 	for unit_id in _selected_unit_ids:
 		var node_name: String = String(FRIENDLY_NODE_NAMES_BY_ID.get(unit_id, ""))
@@ -181,19 +181,20 @@ func _build_mission_result(mission_instance: Node, winning_team_id: String) -> D
 			}
 		)
 
-	return {
-		"winning_team_id": winning_team_id,
-		"mission_outcome": _get_mission_outcome(winning_team_id),
-		"selected_unit_ids": _selected_unit_ids.duplicate(),
-		"team_states": team_states,
-	}
+	var merged_result: Dictionary = mission_result.duplicate(true)
+	if merged_result.is_empty():
+		merged_result = {
+			"winning_team_id": "",
+			"mission_outcome": "ended",
+			"result": "ended",
+			"win_condition_type": "",
+			"objective_captured": false,
+			"duration_seconds": 0.0,
+		}
 
-
-func _get_mission_outcome(winning_team_id: String) -> String:
-	if winning_team_id == "team_alpha":
-		return "won"
-
-	return "lost"
+	merged_result["selected_unit_ids"] = _selected_unit_ids.duplicate()
+	merged_result["team_states"] = team_states
+	return merged_result
 
 
 func _release_active_mission() -> void:

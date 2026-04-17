@@ -4,9 +4,12 @@ const LOS_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/los_system.gd")
 const CONTACT_LINE_NAME: String = "CombatContactLine"
 const EVENT_LABEL_NAME: String = "CombatEventLabel"
 const WINNER_LABEL_NAME: String = "CombatWinnerLabel"
+const WIN_CONDITION_ELIMINATION: String = "elimination"
+const WIN_CONDITION_OBJECTIVE_CAPTURE: String = "objective_capture"
+const WIN_CONDITION_OBJECTIVE_DEFENSE: String = "objective_defense"
 
 signal contact_established(attacker, target)
-signal combat_resolved(winning_team_id, neutralized_enemy_count)
+signal combat_resolved(mission_result: Dictionary)
 
 @export var friendly_team_id: String = "team_alpha"
 @export var contact_range: float = 180.0
@@ -14,6 +17,8 @@ signal combat_resolved(winning_team_id, neutralized_enemy_count)
 @export var base_hit_chance: float = 0.45
 @export var base_damage_multiplier: float = 1.0
 @export var ticks_between_attacks: int = 10
+@export var win_condition: String = WIN_CONDITION_ELIMINATION
+@export var objective_defense_hold_seconds: float = 8.0
 @export var simulation_root_path: NodePath
 @export var status_label_path: NodePath
 @export var friendly_unit_paths: Array[NodePath] = []
@@ -31,6 +36,9 @@ var _last_event_text: String = "Combat waiting"
 var _contact_line: Line2D = null
 var _event_label: Label = null
 var _winner_label: Label = null
+var _mission_started_at_msec: int = 0
+var _objective_owned_since_msec: int = -1
+var _mission_result: Dictionary = {}
 
 
 func _ready() -> void:
@@ -42,6 +50,7 @@ func _ready() -> void:
 	_connect_unit_signals()
 	_connect_respawn_signals()
 	call_deferred("_finish_readability_setup")
+	_mission_started_at_msec = Time.get_ticks_msec()
 
 	if not simulation_root.tick_processed.is_connected(_on_tick_processed):
 		simulation_root.tick_processed.connect(_on_tick_processed)
@@ -59,6 +68,10 @@ func get_winning_team_id() -> String:
 
 func get_last_contact() -> Dictionary:
 	return _last_contact.duplicate(true)
+
+
+func get_mission_result() -> Dictionary:
+	return _mission_result.duplicate(true)
 
 
 func _on_tick_processed(tick: int) -> void:
@@ -101,8 +114,6 @@ func _queue_bleedout_for_downed_enemy(simulation_root: Node) -> void:
 		)
 		_queued_bleedout_by_unit_id[unit_id] = true
 		_set_event_text("%s BLEEDOUT" % unit_id)
-
-		_request_respawn_for_unit(enemy, unit_id)
 		return
 
 
@@ -128,8 +139,6 @@ func _queue_bleedout_for_downed_friendly(simulation_root: Node) -> void:
 		)
 		_queued_bleedout_by_unit_id[unit_id] = true
 		_set_event_text("%s BLEEDOUT" % unit_id)
-
-		_request_respawn_for_unit(friendly, unit_id)
 		return
 
 
@@ -192,28 +201,17 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 
 
 func _update_combat_resolution() -> void:
-	var enemy_units: Array = _get_units(enemy_unit_paths)
-	if enemy_units.is_empty():
+	if _combat_finished:
 		return
 
-	var enemy_fit_count: int = 0
-	for enemy in enemy_units:
-		if enemy == null or not enemy.has_method("get_vital_state"):
-			continue
-
-		if String(enemy.call("get_vital_state")) == "fit":
-			enemy_fit_count += 1
-
-	if enemy_fit_count > 0:
+	if _is_victory_condition_met():
+		_resolve_combat("victory", friendly_team_id)
 		return
 
-	_combat_finished = true
-	_winning_team_id = friendly_team_id
-	_set_event_text("COMBAT FINISHED")
-	_clear_contact_visuals()
-	_update_status_label("resolved")
-	_update_winner_label()
-	combat_resolved.emit(_winning_team_id, enemy_units.size())
+	if _count_fit_units(friendly_unit_paths) > 0:
+		return
+
+	_resolve_combat("defeat", _get_enemy_team_id())
 
 
 func _get_units(paths: Array[NodePath]) -> Array:
@@ -321,12 +319,19 @@ func _update_status_label(state_name: String) -> void:
 func _build_status_text(state_name: String) -> String:
 	var lines: PackedStringArray = []
 	lines.append("Combat: %s" % state_name)
+	lines.append("Win condition: %s" % win_condition)
 
 	if _combat_finished and not _winning_team_id.is_empty():
 		lines.append("Winner: %s" % _winning_team_id)
 
 	lines.append("Enemies fit: %d" % _count_fit_units(enemy_unit_paths))
 	lines.append("Friendlies fit: %d" % _count_fit_units(friendly_unit_paths))
+	lines.append("Duration: %.1fs" % _get_duration_seconds())
+	lines.append(_build_objective_status_text())
+
+	if win_condition == WIN_CONDITION_OBJECTIVE_DEFENSE and _objective_owned_since_msec >= 0 and not _combat_finished:
+		lines.append("Hold timer: %.1fs / %.1fs" % [_get_objective_defense_elapsed_seconds(), objective_defense_hold_seconds])
+
 	lines.append("Next shot: %s" % _build_attack_readiness_text())
 	lines.append("Last event: %s" % _last_event_text)
 
@@ -478,7 +483,7 @@ func _connect_respawn_signals() -> void:
 
 func _on_unit_respawn_completed(unit_id: String) -> void:
 	_queued_bleedout_by_unit_id.erase(unit_id)
-	_set_event_text("%s RESPAWNED" % unit_id)
+	_set_event_text("%s RESPAWN READY" % unit_id)
 
 
 func _set_contact_visuals(attacker, target) -> void:
@@ -535,6 +540,11 @@ func _on_unit_vital_status_changed(vital_status, unit) -> void:
 			_set_event_text("%s BLEEDOUT" % unit_id)
 			if unit.has_method("show_event_text"):
 				unit.call("show_event_text", "BLEEDOUT", Color(0.92, 0.6, 0.6, 1.0), 1.6)
+			_request_respawn_for_unit(unit, unit_id)
+		"respawning":
+			_set_event_text("%s RESPAWNING" % unit_id)
+			if unit.has_method("show_event_text"):
+				unit.call("show_event_text", "RESPAWNING", Color(0.72, 0.9, 1.0, 1.0), 1.6)
 	_update_status_label("active")
 
 
@@ -555,7 +565,9 @@ func _update_winner_label() -> void:
 		return
 
 	if _combat_finished and not _winning_team_id.is_empty():
-		_winner_label.text = "COMBAT FINISHED\nWinner: %s" % _winning_team_id
+		var result_text: String = String(_mission_result.get("result", "")).to_upper()
+		var condition_text: String = String(_mission_result.get("win_condition_type", ""))
+		_winner_label.text = "%s\nWinner: %s\nCondition: %s" % [result_text, _winning_team_id, condition_text]
 		return
 
 	_winner_label.text = ""
@@ -582,3 +594,118 @@ func _finish_readability_setup() -> void:
 	_update_event_label()
 	_update_winner_label()
 	_update_status_label("waiting")
+
+
+func _is_victory_condition_met() -> bool:
+	match win_condition:
+		WIN_CONDITION_OBJECTIVE_CAPTURE:
+			_update_objective_hold_tracking()
+			return _is_objective_captured_by_friendly()
+		WIN_CONDITION_OBJECTIVE_DEFENSE:
+			_update_objective_hold_tracking()
+			return _is_objective_captured_by_friendly() and _get_objective_defense_elapsed_seconds() >= objective_defense_hold_seconds
+		_:
+			return _is_enemy_team_eliminated()
+
+
+func _is_enemy_team_eliminated() -> bool:
+	var enemy_units: Array = _get_units(enemy_unit_paths)
+	if enemy_units.is_empty():
+		return false
+
+	return _count_fit_units(enemy_unit_paths) == 0
+
+
+func _resolve_combat(result: String, winning_team_id: String) -> void:
+	if _combat_finished:
+		return
+
+	_combat_finished = true
+	_winning_team_id = winning_team_id
+	_mission_result = _build_mission_result(result, winning_team_id)
+	_set_event_text("MISSION %s" % result.to_upper())
+	_clear_contact_visuals()
+	_update_status_label("resolved")
+	_update_winner_label()
+	combat_resolved.emit(get_mission_result())
+
+
+func _build_mission_result(result: String, winning_team_id: String) -> Dictionary:
+	return {
+		"winning_team_id": winning_team_id,
+		"friendly_team_id": friendly_team_id,
+		"mission_outcome": "won" if result == "victory" else "lost",
+		"result": result,
+		"win_condition_type": win_condition,
+		"objective_captured": _is_objective_captured_by_friendly(),
+		"duration_seconds": _get_duration_seconds(),
+	}
+
+
+func _get_enemy_team_id() -> String:
+	for enemy in _get_units(enemy_unit_paths):
+		if enemy != null and enemy.has_method("get_team_id"):
+			var team_id: String = String(enemy.call("get_team_id"))
+			if not team_id.is_empty():
+				return team_id
+
+	return ""
+
+
+func _get_duration_seconds() -> float:
+	if _mission_started_at_msec <= 0:
+		return 0.0
+
+	return maxf(float(Time.get_ticks_msec() - _mission_started_at_msec) / 1000.0, 0.0)
+
+
+func _get_objective_status():
+	var simulation_root = get_node_or_null(simulation_root_path)
+	if simulation_root == null or not simulation_root.has_method("get_objective_status"):
+		return null
+
+	return simulation_root.call("get_objective_status")
+
+
+func _is_objective_captured_by_friendly() -> bool:
+	var objective_status = _get_objective_status()
+	if objective_status == null:
+		return false
+
+	return String(objective_status.owning_team_id) == friendly_team_id and float(objective_status.capture_progress) >= 1.0
+
+
+func _update_objective_hold_tracking() -> void:
+	if win_condition != WIN_CONDITION_OBJECTIVE_DEFENSE:
+		return
+
+	if _is_objective_captured_by_friendly():
+		if _objective_owned_since_msec < 0:
+			_objective_owned_since_msec = Time.get_ticks_msec()
+		return
+
+	_objective_owned_since_msec = -1
+
+
+func _get_objective_defense_elapsed_seconds() -> float:
+	if _objective_owned_since_msec < 0:
+		return 0.0
+
+	return maxf(float(Time.get_ticks_msec() - _objective_owned_since_msec) / 1000.0, 0.0)
+
+
+func _build_objective_status_text() -> String:
+	var objective_status = _get_objective_status()
+	if objective_status == null:
+		return "Objective: unavailable"
+
+	var owner_text: String = String(objective_status.owning_team_id)
+	if owner_text.is_empty():
+		owner_text = "neutral"
+
+	var progress_percent: int = int(round(clampf(float(objective_status.capture_progress), 0.0, 1.0) * 100.0))
+	var status_text: String = "Objective: %s %d%%" % [owner_text, progress_percent]
+	if bool(objective_status.call("is_contested")):
+		status_text += " contested"
+
+	return status_text

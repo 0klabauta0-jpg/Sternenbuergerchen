@@ -38,8 +38,24 @@ func _render_result() -> void:
 		return
 
 	var winner_team_id: String = String(_mission_result.get("winning_team_id", ""))
+	var result: String = String(_mission_result.get("result", "ended"))
 	var mission_outcome: String = String(_mission_result.get("mission_outcome", "ended"))
-	result_label.text = "Mission %s\nWinner: %s" % [mission_outcome, winner_team_id]
+	var win_condition_type: String = String(_mission_result.get("win_condition_type", ""))
+	var duration_seconds: float = float(_mission_result.get("duration_seconds", 0.0))
+	var objective_captured: bool = bool(_mission_result.get("objective_captured", false))
+
+	var winner_text: String = winner_team_id
+	if winner_text.is_empty():
+		winner_text = "unknown"
+
+	result_label.text = "Mission %s\nResult: %s\nWinner: %s\nCondition: %s\nDuration: %.1fs\nObjective captured: %s" % [
+		mission_outcome,
+		result.to_upper(),
+		winner_text,
+		win_condition_type,
+		duration_seconds,
+		"yes" if objective_captured else "no",
+	]
 
 	var team_state_lines: PackedStringArray = []
 	for member_state in _mission_result.get("team_states", []):

@@ -5,6 +5,8 @@ signal tick_processed(tick: int)
 
 const MOVE_SPEED_PER_SECOND: float = 120.0
 const DAMAGE_MODEL_SCRIPT: GDScript = preload("res://scripts/core/damage_model.gd")
+const OBJECTIVE_STATUS_SCRIPT: GDScript = preload("res://scripts/core/objective_status.gd")
+const CAPTURE_PROGRESS_PER_TICK: float = 0.01
 
 @export var unit_registry_path: NodePath
 
@@ -12,6 +14,7 @@ var command_queue: Array = []
 var effects_queue: Array = []
 var tick_counter: int = 0
 var is_processing_tick: bool = false
+var _objective_status: RefCounted = null
 
 
 func enqueue_command(cmd: Dictionary) -> void:
@@ -39,6 +42,23 @@ func get_tick() -> int:
 	return tick_counter
 
 
+func set_objective_status(objective_status) -> bool:
+	if objective_status == null:
+		_objective_status = null
+		return true
+
+	if not _is_valid_objective_status(objective_status):
+		push_warning("SimulationRoot.set_objective_status expects a valid ObjectiveStatus-like object.")
+		return false
+
+	_objective_status = objective_status
+	return true
+
+
+func get_objective_status():
+	return _objective_status
+
+
 # Commands are committed before effects on every authoritative physics tick.
 func _physics_process(delta: float) -> void:
 	tick_counter += 1
@@ -49,6 +69,7 @@ func _physics_process(delta: float) -> void:
 
 	var effects: Array = _drain_queue(effects_queue)
 	_process_effects(effects, delta)
+	_update_objective_capture()
 
 	is_processing_tick = false
 	tick_processed.emit(tick_counter)
@@ -79,6 +100,8 @@ func _apply_command(cmd: Dictionary, delta: float) -> void:
 
 	match _extract_command_type(cmd):
 		"move_to_position":
+			_apply_move_command(cmd, delta)
+		"engage_area":
 			_apply_move_command(cmd, delta)
 		_:
 			# TODO: Authoritative gameplay state commits belong here once systems exist.
@@ -210,7 +233,11 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 	var node_2d: Node2D = unit
 	var current_position: Vector2 = node_2d.position
 	var direction: Vector2 = target_position - current_position
-	var step_distance: float = MOVE_SPEED_PER_SECOND * delta
+	var move_speed_factor: float = _extract_move_speed_factor(cmd, unit)
+	if move_speed_factor <= 0.0:
+		return
+
+	var step_distance: float = MOVE_SPEED_PER_SECOND * move_speed_factor * delta
 	if direction.length() <= step_distance:
 		node_2d.position = target_position
 		return
@@ -335,6 +362,80 @@ func _extract_unit_attack_bonus(unit) -> float:
 		return 0.0
 
 	return float(unit.call("get_attack_bonus"))
+
+
+func _extract_move_speed_factor(cmd: Dictionary, unit) -> float:
+	var raw_factor: Variant = cmd.get("move_speed_factor", null)
+	if typeof(raw_factor) == TYPE_INT or typeof(raw_factor) == TYPE_FLOAT:
+		return maxf(float(raw_factor), 0.0)
+
+	if unit != null and unit.has_method("get_move_speed_factor"):
+		return maxf(float(unit.call("get_move_speed_factor")), 0.0)
+
+	return 1.0
+
+
+func _update_objective_capture() -> void:
+	if not _is_valid_objective_status(_objective_status):
+		return
+
+	var capturing_team_ids: PackedStringArray = _get_objective_team_ids_in_radius(_objective_status)
+	_objective_status.call("set_contested", capturing_team_ids.size() > 1)
+	if capturing_team_ids.size() != 1:
+		return
+
+	var capturing_team_id: String = String(capturing_team_ids[0])
+	if capturing_team_id.is_empty():
+		return
+
+	if String(_objective_status.owning_team_id) == capturing_team_id:
+		_objective_status.capture_progress = 1.0
+		_objective_status.capturing_team_id = capturing_team_id
+		return
+
+	if String(_objective_status.capturing_team_id) != capturing_team_id:
+		_objective_status.capturing_team_id = capturing_team_id
+		_objective_status.capture_progress = 0.0
+
+	_objective_status.capture_progress = minf(float(_objective_status.capture_progress) + CAPTURE_PROGRESS_PER_TICK, 1.0)
+	if float(_objective_status.capture_progress) < 1.0:
+		return
+
+	_objective_status.capture_progress = 1.0
+	_objective_status.owning_team_id = capturing_team_id
+
+
+func _get_objective_team_ids_in_radius(objective_status) -> PackedStringArray:
+	var unit_registry = _get_unit_registry()
+	if unit_registry == null or not unit_registry.has_method("get_all_units"):
+		return []
+
+	var team_ids: PackedStringArray = []
+	var objective_position: Vector2 = objective_status.position
+	var capture_radius: float = maxf(float(objective_status.capture_radius), 0.0)
+	for unit in unit_registry.call("get_all_units"):
+		if unit == null or not (unit is Node2D):
+			continue
+
+		if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
+			continue
+
+		if not unit.has_method("get_team_id"):
+			continue
+
+		var team_id: String = String(unit.call("get_team_id"))
+		if team_id.is_empty() or team_ids.has(team_id):
+			continue
+
+		var unit_position: Vector2 = (unit as Node2D).global_position
+		if unit_position.distance_to(objective_position) <= capture_radius:
+			team_ids.append(team_id)
+
+	return team_ids
+
+
+func _is_valid_objective_status(objective_status) -> bool:
+	return objective_status != null and objective_status is OBJECTIVE_STATUS_SCRIPT
 
 
 func _extract_int(value: Variant) -> int:

@@ -5,11 +5,19 @@ const TYPE_MOVE: String = "move"
 const TYPE_TAKE: String = "take"
 const TYPE_DEFEND: String = "defend"
 const TYPE_FLANK: String = "flank"
+const PHASE_APPROACH: int = 0
+const PHASE_ASSAULT: int = 1
+const PHASE_HOLD: int = 2
 const ALLOWED_COMMAND_TYPES: PackedStringArray = [
 	TYPE_MOVE,
 	TYPE_TAKE,
 	TYPE_DEFEND,
 	TYPE_FLANK,
+]
+const ALLOWED_PHASES: PackedInt32Array = [
+	PHASE_APPROACH,
+	PHASE_ASSAULT,
+	PHASE_HOLD,
 ]
 
 var command_type: String = ""
@@ -34,9 +42,40 @@ static func is_allowed_command_type(value: String) -> bool:
 	return ALLOWED_COMMAND_TYPES.has(value)
 
 
+static func is_allowed_phase(value: int) -> bool:
+	return ALLOWED_PHASES.has(value)
+
+
+static func get_phase_name(value: int) -> String:
+	match value:
+		PHASE_APPROACH:
+			return "APPROACH"
+		PHASE_ASSAULT:
+			return "ASSAULT"
+		PHASE_HOLD:
+			return "HOLD"
+		_:
+			return ""
+
+
+static func get_phase_short_name(value: int) -> String:
+	match value:
+		PHASE_APPROACH:
+			return "APR"
+		PHASE_ASSAULT:
+			return "ASS"
+		PHASE_HOLD:
+			return "HLD"
+		_:
+			return ""
+
+
 # This validates only the lightweight data contract, not gameplay semantics.
 func is_valid() -> bool:
 	if not is_allowed_command_type(command_type):
+		return false
+
+	if phase >= 0 and not is_allowed_phase(phase):
 		return false
 
 	if not _has_valid_target_position():
