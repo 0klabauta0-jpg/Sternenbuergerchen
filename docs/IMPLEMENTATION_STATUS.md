@@ -421,3 +421,35 @@
 - Offene Punkte: keine Typ-Referenz in der Map-JSON (Tiles speichern weiterhin alle Eigenschaften inline), keine benutzerdefinierten Typen zur Laufzeit, kein Tile-Preview in der Palette.
 - Risiken: der Katalog ist bewusst ein reiner Editor-Workflow; Runtime-Code hat keinen Katalog-Bezug und bleibt von Inline-Daten abhaengig.
 - Naechster Schritt: bei Bedarf Map-JSON auf Typ-Referenzen umstellen und Katalog in Runtime-Loading einbinden.
+
+### TASK_066 - Corridor-Wall Typen, Typ-Texturen und Auto-Cliff
+- Status: implementiert
+- Stand: Der Tile-Katalog (`terrain_tile_catalog.json`) enthaelt jetzt 14 Tile-Typen mit optionalem `texture_path` (ground, road haben eigene Texturen). Tile-Sprites zeigen die Typ-Textur wenn vorhanden, sonst Fallback mit Modulate-Farbe. Cliff-Overlays (`terrain_sideCliff_SE/SW/NE/NW.png`) werden automatisch an Kanten mit Hoehendifferenz gezeichnet; Cliff-Corner-Pieces an Ecken wo zwei Cliff-Kanten aufeinandertreffen. Wall-Overlays (`corridor_wall_SE/SW/NE/NW.png`) analog fuer Tiles mit `blocks_los=true` an Kanten zu Nicht-Wall-Nachbarn.
+- Offene Punkte: Wall- und Cliff-Sprites sind Kenney-Assets die als vertikale Panels designed sind, nicht als ISO-Bodenplatten - die visuelle Passung ist naeherungsweise.
+- Risiken: die Overlay-Logik ist eng an 4-Nachbar-Adjazenz gebunden; diagonale oder mehrlagige Overlays braeuchten eine erweiterte Kantenlogik.
+
+### TASK_067 - Fix Map-Editor 64x64 Flat Ground
+- Status: implementiert
+- Stand: Map-Editor erzeugt jetzt standardmaessig 64x64 Grids mit Zoom 0.3 statt 8x8. `create_empty()` setzt `type_id="ground_flat"` als Default fuer neue Tiles, damit die Palette-Erkennung korrekt funktioniert.
+- Offene Punkte: keine.
+
+### TASK_068 - Zoom-Inversion und Auto-Wall-Overlays
+- Status: implementiert
+- Stand: Zoom-Richtung korrigiert (WHEEL_UP = hineinzoomen, WHEEL_DOWN = herauszoomen). Wall-Overlays werden jetzt korrekt bei `_rebuild_tile_sprites()` und `_refresh_tile_visual()` aktualisiert.
+- Offene Punkte: keine.
+
+### TASK_068b - Drag-Painting und Hover-Preview
+- Status: implementiert
+- Stand: Linksklick-Halten und Ziehen malt durchgehend Tiles im Brush-Modus (`_is_painting` Flag, Motion-Handler). Halbtransparentes Hover-Preview-Sprite zeigt den ausgewaehlten Tile-Typ an der Mausposition, solange Brush aktiv ist.
+- Offene Punkte: keine.
+
+### TASK_068c - Gitternetz-Overlay und Himmelsrichtungen
+- Status: implementiert
+- Stand: `GridOverlay` Node2D zeichnet feine weisse Diamant-Umrisse (12% Opacity, 1px) ueber jedem Tile (z_index 10). Kompass-Labels N/O/S/W an den vier Ecken der ISO-Diamant-Karte, 80px, halbtransparent. Richtungsmapping: Grid +x=SE, +y=SW (aus Cliff-Overlay-Logik abgeleitet).
+- Offene Punkte: keine.
+
+### Fix - Cliff/Wall Overlay Separation und Corner-Replacement
+- Status: implementiert
+- Stand: Wall-Tiles (blocks_los) bekommen nur noch Wall-Overlays, keine Cliff-Overlays. Cliff-Kanten werden nicht zu Wall-Nachbarn gezeichnet. Corner-Pieces ersetzen die beiden geraden Panels (Wall und Cliff) statt sich darüberzustapeln. Drag-Painting funktioniert jetzt ohne vorherige Tile-Selektion (Guard von `_has_selected_tile()` auf `_has_selected_type()` geaendert).
+- Offene Punkte: Wall-/Cliff-Corner-Zuordnung (welches Corner-Piece an welcher Ecke) muss visuell geprueft und ggf. korrigiert werden.
+- Naechster Schritt: Wall-Richtungsmapping anhand der tatsaechlichen Sprite-Orientierung verifizieren und ggf. korrigieren.

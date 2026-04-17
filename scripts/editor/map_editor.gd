@@ -89,7 +89,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				return
 			if _is_pointer_over_control():
 				return
-			if _is_brush_enabled() and _has_selected_tile():
+			if _is_brush_enabled() and _has_selected_type():
 				_is_painting = true
 				_last_painted_grid = Vector2i(-1, -1)
 				_apply_brush_at_world_position(get_global_mouse_position())
@@ -104,7 +104,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			if camera != null:
 				camera.position -= mouse_motion.relative * camera.zoom
 			return
-		if _is_painting and _is_brush_enabled() and _has_selected_tile():
+		if _is_painting and _is_brush_enabled() and _has_selected_type():
 			_apply_brush_at_world_position(get_global_mouse_position())
 			return
 		if _is_brush_enabled() and not _is_pointer_over_control():
@@ -675,6 +675,10 @@ func _has_selected_tile() -> bool:
 	return _get_selected_tile() != null
 
 
+func _has_selected_type() -> bool:
+	return not _selected_type_id.is_empty()
+
+
 func _is_brush_enabled() -> bool:
 	var brush_button := get_node_or_null("UI/TopBar/Margin/HBox/BrushButton") as Button
 	return brush_button != null and brush_button.button_pressed
@@ -822,39 +826,23 @@ func _create_cliff_overlays_for_tile(tile_data) -> void:
 
 	# Grid neighbor direction → cliff texture mapping:
 	# (+1, 0) = SE,  (-1, 0) = NW,  (0, +1) = SW,  (0, -1) = NE
-	var neighbor_cliff_map: Array = [
-		[Vector2i(1, 0), CLIFF_TEXTURE_SE],
-		[Vector2i(-1, 0), CLIFF_TEXTURE_NW],
-		[Vector2i(0, 1), CLIFF_TEXTURE_SW],
-		[Vector2i(0, -1), CLIFF_TEXTURE_NE],
-	]
-
 	var cliff_edge_dirs: Array[Vector2i] = []
-
-	for entry in neighbor_cliff_map:
-		var offset: Vector2i = entry[0]
-		var cliff_texture: Texture2D = entry[1]
+	for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 		var neighbor = _terrain_map_data.call("get_tile_at_grid", grid_pos + offset)
 		var neighbor_height: int = int(neighbor.height_level) if neighbor != null else 0
 		if neighbor_height < my_height and not _is_wall_type(neighbor):
 			cliff_edge_dirs.append(offset)
-			var cliff_sprite := Sprite2D.new()
-			cliff_sprite.texture = cliff_texture
-			cliff_sprite.centered = false
-			cliff_sprite.z_index = -15
-			cliff_sprite.position = tile_data.world_position - (cliff_texture.get_size() * 0.5)
-			cliff_container.add_child(cliff_sprite)
-			overlays.append(cliff_sprite)
 
-	# Corner detection: if two adjacent edges have cliffs, add corner overlay
-	# SE+SW → corner facing S (use corner SW), SE+NE → corner E (use corner SE)
-	# NW+SW → corner W (use corner NW), NW+NE → corner N (use corner NE)
+	# Step 1: detect corners - pairs of adjacent exposed edges
+	# Corner pieces REPLACE the two straight cliff panels they connect
 	var corner_map: Array = [
 		[Vector2i(1, 0), Vector2i(0, 1), CLIFF_CORNER_SW],
 		[Vector2i(1, 0), Vector2i(0, -1), CLIFF_CORNER_SE],
 		[Vector2i(-1, 0), Vector2i(0, 1), CLIFF_CORNER_NW],
 		[Vector2i(-1, 0), Vector2i(0, -1), CLIFF_CORNER_NE],
 	]
+
+	var edges_consumed_by_corners: Array[Vector2i] = []
 
 	for corner_entry in corner_map:
 		var dir_a: Vector2i = corner_entry[0]
@@ -868,6 +856,30 @@ func _create_cliff_overlays_for_tile(tile_data) -> void:
 			corner_sprite.position = tile_data.world_position - (corner_texture.get_size() * 0.5)
 			cliff_container.add_child(corner_sprite)
 			overlays.append(corner_sprite)
+			if not edges_consumed_by_corners.has(dir_a):
+				edges_consumed_by_corners.append(dir_a)
+			if not edges_consumed_by_corners.has(dir_b):
+				edges_consumed_by_corners.append(dir_b)
+
+	# Step 2: render straight cliff panels only for edges NOT consumed by corners
+	var edge_texture_map: Dictionary = {
+		Vector2i(1, 0): CLIFF_TEXTURE_SE,
+		Vector2i(-1, 0): CLIFF_TEXTURE_NW,
+		Vector2i(0, 1): CLIFF_TEXTURE_SW,
+		Vector2i(0, -1): CLIFF_TEXTURE_NE,
+	}
+
+	for edge_dir in cliff_edge_dirs:
+		if edges_consumed_by_corners.has(edge_dir):
+			continue
+		var cliff_texture: Texture2D = edge_texture_map[edge_dir]
+		var cliff_sprite := Sprite2D.new()
+		cliff_sprite.texture = cliff_texture
+		cliff_sprite.centered = false
+		cliff_sprite.z_index = -15
+		cliff_sprite.position = tile_data.world_position - (cliff_texture.get_size() * 0.5)
+		cliff_container.add_child(cliff_sprite)
+		overlays.append(cliff_sprite)
 
 	if not overlays.is_empty():
 		_cliff_sprites_by_grid[grid_pos] = overlays
