@@ -5,6 +5,14 @@ const TERRAIN_REGISTRY_SCRIPT: GDScript = preload("res://scripts/terrain/terrain
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_catalog.gd")
 const TILE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_SW.png")
+const CLIFF_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_SE.png")
+const CLIFF_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_SW.png")
+const CLIFF_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_NE.png")
+const CLIFF_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_NW.png")
+const CLIFF_CORNER_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_SE.png")
+const CLIFF_CORNER_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_SW.png")
+const CLIFF_CORNER_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_NE.png")
+const CLIFF_CORNER_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_NW.png")
 const DEFAULT_MAP_PATH: String = "res://maps/test_mission.json"
 const DEFAULT_NEW_MAP_PATH: String = "res://maps/new_map.json"
 const DEFAULT_NEW_MAP_NAME: String = "new_map"
@@ -22,6 +30,7 @@ var _terrain_map_data = null
 var _terrain_registry = null
 var _tile_catalog = null
 var _tile_sprites_by_grid: Dictionary = {}
+var _cliff_sprites_by_grid: Dictionary = {}
 var _selected_grid_position: Vector2i = Vector2i(-1, -1)
 var _selected_type_id: String = ""
 var _is_panning: bool = false
@@ -90,6 +99,7 @@ func _load_map(path: String) -> void:
 		)
 
 	_tile_sprites_by_grid.clear()
+	_cliff_sprites_by_grid.clear()
 	_selected_grid_position = Vector2i(-1, -1)
 	_last_undo_state.clear()
 	_mark_dirty(false)
@@ -112,6 +122,7 @@ func _create_new_map() -> void:
 		DEFAULT_HALF_TILE_HEIGHT
 	)
 	_tile_sprites_by_grid.clear()
+	_cliff_sprites_by_grid.clear()
 	_selected_grid_position = Vector2i(-1, -1)
 	_last_undo_state.clear()
 	_mark_dirty(false)
@@ -164,14 +175,17 @@ func _rebuild_tile_sprites() -> void:
 		child.queue_free()
 
 	for tile_data in _terrain_map_data.call("get_tiles"):
+		var tile_texture: Texture2D = _resolve_tile_texture(tile_data)
 		var tile_sprite := Sprite2D.new()
-		tile_sprite.texture = TILE_TEXTURE
+		tile_sprite.texture = tile_texture
 		tile_sprite.centered = false
 		tile_sprite.z_index = -20
-		tile_sprite.position = tile_data.world_position - (TILE_TEXTURE.get_size() * 0.5)
+		tile_sprite.position = tile_data.world_position - (tile_texture.get_size() * 0.5)
 		tile_sprite.modulate = _build_tile_modulate(tile_data)
 		tile_container.add_child(tile_sprite)
 		_tile_sprites_by_grid[tile_data.grid_position] = tile_sprite
+
+	_rebuild_all_cliff_overlays()
 
 
 func _refresh_tile_visual(tile_data) -> void:
@@ -182,11 +196,19 @@ func _refresh_tile_visual(tile_data) -> void:
 	if tile_sprite == null:
 		return
 
+	var tile_texture: Texture2D = _resolve_tile_texture(tile_data)
+	tile_sprite.texture = tile_texture
+	tile_sprite.position = tile_data.world_position - (tile_texture.get_size() * 0.5)
 	tile_sprite.modulate = _build_tile_modulate(tile_data)
+	_update_cliff_overlays_around(tile_data.grid_position)
 
 
 func _build_tile_modulate(tile_data) -> Color:
 	if tile_data == null:
+		return Color(1.0, 1.0, 1.0, 1.0)
+
+	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
+	if not type_id.is_empty() and _tile_catalog != null and _tile_catalog.get_texture(type_id) != null:
 		return Color(1.0, 1.0, 1.0, 1.0)
 
 	var tile_color: Color = Color(1.0, 1.0, 1.0, 1.0)
@@ -228,18 +250,17 @@ func _apply_brush_at_world_position(world_position: Vector2) -> void:
 	if tile_data == null:
 		return
 
-	var patch: Dictionary = {}
 	if not _selected_type_id.is_empty() and _tile_catalog != null and _tile_catalog.has_type(_selected_type_id):
-		patch = _tile_catalog.get_type(_selected_type_id).duplicate()
-		patch.erase("type_id")
-		patch.erase("display_name")
+		_store_undo_state(tile_data)
+		if _tile_catalog.apply_type_to_tile(tile_data, _selected_type_id):
+			_mark_dirty(true)
 	else:
-		patch = {
+		var patch: Dictionary = {
 			"walkable": _get_walkable_checkbox().button_pressed,
 			"surface_type": _get_selected_surface_type(),
 		}
-	if _apply_tile_patch(tile_data, patch):
-		_mark_dirty(true)
+		if _apply_tile_patch(tile_data, patch):
+			_mark_dirty(true)
 
 	_selected_grid_position = tile_data.grid_position
 	_refresh_tile_visual(tile_data)
@@ -304,11 +325,15 @@ func _refresh_property_panel() -> void:
 
 	tile_label.text = "Tile: (%d, %d)" % [tile_data.grid_position.x, tile_data.grid_position.y]
 	if type_label != null:
-		var matched_type_id: String = _find_matching_type_id(tile_data)
-		if matched_type_id.is_empty():
-			type_label.text = "Typ: (custom)"
+		var tile_type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
+		if not tile_type_id.is_empty() and _tile_catalog != null and _tile_catalog.has_type(tile_type_id):
+			type_label.text = "Typ: %s" % _tile_catalog.get_display_name(tile_type_id)
 		else:
-			type_label.text = "Typ: %s" % _tile_catalog.get_display_name(matched_type_id)
+			var matched_type_id: String = _find_matching_type_id(tile_data)
+			if matched_type_id.is_empty():
+				type_label.text = "Typ: (custom)"
+			else:
+				type_label.text = "Typ: %s" % _tile_catalog.get_display_name(matched_type_id)
 	walkable_checkbox.button_pressed = bool(tile_data.walkable)
 	blocks_los_checkbox.button_pressed = bool(tile_data.blocks_los)
 	cover_spinbox.value = int(tile_data.cover_value)
@@ -401,6 +426,7 @@ func _undo_last_change() -> void:
 
 	var restored_tile = TERRAIN_TILE_DATA_SCRIPT.call("from_dict", tile_dict)
 	tile_data.tile_id = restored_tile.tile_id
+	tile_data.type_id = restored_tile.type_id
 	tile_data.grid_position = restored_tile.grid_position
 	tile_data.world_position = restored_tile.world_position
 	tile_data.walkable = restored_tile.walkable
@@ -706,3 +732,128 @@ func _ensure_terrain_registry() -> void:
 	_terrain_registry = TERRAIN_REGISTRY_SCRIPT.new()
 	_terrain_registry.name = "RuntimeTerrainRegistry"
 	add_child(_terrain_registry)
+
+
+func _resolve_tile_texture(tile_data) -> Texture2D:
+	if tile_data == null or _tile_catalog == null:
+		return TILE_TEXTURE
+
+	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
+	if type_id.is_empty():
+		return TILE_TEXTURE
+
+	var type_texture: Texture2D = _tile_catalog.get_texture(type_id)
+	if type_texture != null:
+		return type_texture
+
+	return TILE_TEXTURE
+
+
+func _rebuild_all_cliff_overlays() -> void:
+	_clear_cliff_overlays()
+	if _terrain_map_data == null:
+		return
+
+	for tile_data in _terrain_map_data.call("get_tiles"):
+		if int(tile_data.height_level) > 0:
+			_create_cliff_overlays_for_tile(tile_data)
+
+
+func _update_cliff_overlays_around(grid_position: Vector2i) -> void:
+	var positions_to_update: Array[Vector2i] = [grid_position]
+	for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		positions_to_update.append(grid_position + offset)
+
+	for pos in positions_to_update:
+		_remove_cliff_overlays_at(pos)
+		if _terrain_map_data == null:
+			continue
+		var tile_data = _terrain_map_data.call("get_tile_at_grid", pos)
+		if tile_data != null and int(tile_data.height_level) > 0:
+			_create_cliff_overlays_for_tile(tile_data)
+
+
+func _create_cliff_overlays_for_tile(tile_data) -> void:
+	if tile_data == null or _terrain_map_data == null:
+		return
+
+	var cliff_container := get_node_or_null("CliffContainer") as Node2D
+	if cliff_container == null:
+		return
+
+	var my_height: int = int(tile_data.height_level)
+	var grid_pos: Vector2i = tile_data.grid_position
+	var overlays: Array[Sprite2D] = []
+
+	# Grid neighbor direction → cliff texture mapping:
+	# (+1, 0) = SE,  (-1, 0) = NW,  (0, +1) = SW,  (0, -1) = NE
+	var neighbor_cliff_map: Array = [
+		[Vector2i(1, 0), CLIFF_TEXTURE_SE],
+		[Vector2i(-1, 0), CLIFF_TEXTURE_NW],
+		[Vector2i(0, 1), CLIFF_TEXTURE_SW],
+		[Vector2i(0, -1), CLIFF_TEXTURE_NE],
+	]
+
+	var cliff_edge_dirs: Array[Vector2i] = []
+
+	for entry in neighbor_cliff_map:
+		var offset: Vector2i = entry[0]
+		var cliff_texture: Texture2D = entry[1]
+		var neighbor = _terrain_map_data.call("get_tile_at_grid", grid_pos + offset)
+		var neighbor_height: int = int(neighbor.height_level) if neighbor != null else 0
+		if neighbor_height < my_height:
+			cliff_edge_dirs.append(offset)
+			var cliff_sprite := Sprite2D.new()
+			cliff_sprite.texture = cliff_texture
+			cliff_sprite.centered = false
+			cliff_sprite.z_index = -15
+			cliff_sprite.position = tile_data.world_position - (cliff_texture.get_size() * 0.5)
+			cliff_container.add_child(cliff_sprite)
+			overlays.append(cliff_sprite)
+
+	# Corner detection: if two adjacent edges have cliffs, add corner overlay
+	# SE+SW → corner facing S (use corner SW), SE+NE → corner E (use corner SE)
+	# NW+SW → corner W (use corner NW), NW+NE → corner N (use corner NE)
+	var corner_map: Array = [
+		[Vector2i(1, 0), Vector2i(0, 1), CLIFF_CORNER_SW],
+		[Vector2i(1, 0), Vector2i(0, -1), CLIFF_CORNER_SE],
+		[Vector2i(-1, 0), Vector2i(0, 1), CLIFF_CORNER_NW],
+		[Vector2i(-1, 0), Vector2i(0, -1), CLIFF_CORNER_NE],
+	]
+
+	for corner_entry in corner_map:
+		var dir_a: Vector2i = corner_entry[0]
+		var dir_b: Vector2i = corner_entry[1]
+		var corner_texture: Texture2D = corner_entry[2]
+		if cliff_edge_dirs.has(dir_a) and cliff_edge_dirs.has(dir_b):
+			var corner_sprite := Sprite2D.new()
+			corner_sprite.texture = corner_texture
+			corner_sprite.centered = false
+			corner_sprite.z_index = -14
+			corner_sprite.position = tile_data.world_position - (corner_texture.get_size() * 0.5)
+			cliff_container.add_child(corner_sprite)
+			overlays.append(corner_sprite)
+
+	if not overlays.is_empty():
+		_cliff_sprites_by_grid[grid_pos] = overlays
+
+
+func _remove_cliff_overlays_at(grid_position: Vector2i) -> void:
+	if not _cliff_sprites_by_grid.has(grid_position):
+		return
+
+	var overlays: Array = _cliff_sprites_by_grid[grid_position]
+	for sprite in overlays:
+		if sprite != null and is_instance_valid(sprite):
+			sprite.queue_free()
+
+	_cliff_sprites_by_grid.erase(grid_position)
+
+
+func _clear_cliff_overlays() -> void:
+	var cliff_container := get_node_or_null("CliffContainer") as Node2D
+	if cliff_container != null:
+		for child in cliff_container.get_children():
+			child.queue_free()
+
+	_cliff_sprites_by_grid.clear()

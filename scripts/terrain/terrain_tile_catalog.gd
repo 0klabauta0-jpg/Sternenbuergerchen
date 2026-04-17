@@ -5,6 +5,7 @@ const DEFAULT_CATALOG_PATH: String = "res://data/terrain_tile_catalog.json"
 
 var _tile_types: Dictionary = {}
 var _type_order: Array[String] = []
+var _type_textures: Dictionary = {}
 
 
 static func load_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCatalog:
@@ -39,6 +40,7 @@ static func load_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCa
 		catalog._tile_types[type_id] = {
 			"type_id": type_id,
 			"display_name": String(entry.get("display_name", type_id)),
+			"texture_path": String(entry.get("texture_path", "")),
 			"surface_type": String(entry.get("surface_type", "ground")),
 			"walkable": bool(entry.get("walkable", true)),
 			"blocks_los": bool(entry.get("blocks_los", false)),
@@ -46,6 +48,10 @@ static func load_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCa
 			"height_level": clampi(int(entry.get("height_level", 0)), 0, 3),
 		}
 		catalog._type_order.append(type_id)
+
+		var texture_path: String = String(entry.get("texture_path", ""))
+		if not texture_path.is_empty() and ResourceLoader.exists(texture_path):
+			catalog._type_textures[type_id] = load(texture_path) as Texture2D
 
 	return catalog
 
@@ -75,11 +81,16 @@ func has_type(type_id: String) -> bool:
 	return _tile_types.has(type_id)
 
 
+func get_texture(type_id: String) -> Texture2D:
+	return _type_textures.get(type_id, null) as Texture2D
+
+
 func apply_type_to_tile(tile_data, type_id: String) -> bool:
 	if tile_data == null or not has_type(type_id):
 		return false
 
 	var entry: Dictionary = _tile_types[type_id]
+	tile_data.type_id = type_id
 	tile_data.walkable = bool(entry.get("walkable", true))
 	tile_data.blocks_los = bool(entry.get("blocks_los", false))
 	tile_data.cover_value = int(entry.get("cover_value", 0))

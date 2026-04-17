@@ -131,6 +131,7 @@ func save_to_file(path: String) -> Error:
 					"x": grid_position.x,
 					"y": grid_position.y,
 				},
+				"type_id": String(tile_dict.get("type_id", "")),
 				"walkable": bool(tile_dict.get("walkable", true)),
 				"blocks_los": bool(tile_dict.get("blocks_los", false)),
 				"cover_value": int(tile_dict.get("cover_value", 0)),
