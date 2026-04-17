@@ -964,11 +964,12 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 
 	# Step 2: detect corners - pairs of adjacent wall edges
 	# Corner pieces REPLACE the two straight panels they connect
+	# Corner textures rotated 90° CW to match Kenney sprite orientation
 	var corner_map: Array = [
-		[Vector2i(1, 0), Vector2i(0, 1), WALL_CORNER_SW],
-		[Vector2i(1, 0), Vector2i(0, -1), WALL_CORNER_SE],
-		[Vector2i(-1, 0), Vector2i(0, 1), WALL_CORNER_NW],
-		[Vector2i(-1, 0), Vector2i(0, -1), WALL_CORNER_NE],
+		[Vector2i(1, 0), Vector2i(0, 1), WALL_CORNER_NW],
+		[Vector2i(1, 0), Vector2i(0, -1), WALL_CORNER_SW],
+		[Vector2i(-1, 0), Vector2i(0, 1), WALL_CORNER_NE],
+		[Vector2i(-1, 0), Vector2i(0, -1), WALL_CORNER_SE],
 	]
 
 	var edges_consumed_by_corners: Array[Vector2i] = []
@@ -991,11 +992,12 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 				edges_consumed_by_corners.append(dir_b)
 
 	# Step 3: render straight wall panels only for edges NOT consumed by corners
+	# Textures rotated 90° CW to match Kenney sprite orientation
 	var edge_texture_map: Dictionary = {
-		Vector2i(1, 0): WALL_TEXTURE_SE,
-		Vector2i(-1, 0): WALL_TEXTURE_NW,
-		Vector2i(0, 1): WALL_TEXTURE_SW,
-		Vector2i(0, -1): WALL_TEXTURE_NE,
+		Vector2i(1, 0): WALL_TEXTURE_SW,
+		Vector2i(-1, 0): WALL_TEXTURE_NE,
+		Vector2i(0, 1): WALL_TEXTURE_NW,
+		Vector2i(0, -1): WALL_TEXTURE_SE,
 	}
 
 	for edge_dir in wall_edge_dirs:
