@@ -43,6 +43,10 @@ var _wall_sprites_by_grid: Dictionary = {}
 var _selected_grid_position: Vector2i = Vector2i(-1, -1)
 var _selected_type_id: String = ""
 var _is_panning: bool = false
+var _is_painting: bool = false
+var _last_painted_grid: Vector2i = Vector2i(-1, -1)
+var _hover_preview: Sprite2D = null
+var _hover_grid_position: Vector2i = Vector2i(-1, -1)
 var _dirty: bool = false
 var _is_refreshing_property_controls: bool = false
 var _last_undo_state: Dictionary = {}
@@ -78,20 +82,35 @@ func _unhandled_input(event: InputEvent) -> void:
 		if mouse_button_event.button_index == MOUSE_BUTTON_MIDDLE or mouse_button_event.button_index == MOUSE_BUTTON_RIGHT:
 			_is_panning = mouse_button_event.pressed
 			return
-		if mouse_button_event.button_index == MOUSE_BUTTON_LEFT and mouse_button_event.pressed and not _is_pointer_over_control():
+		if mouse_button_event.button_index == MOUSE_BUTTON_LEFT:
+			if not mouse_button_event.pressed:
+				_is_painting = false
+				_last_painted_grid = Vector2i(-1, -1)
+				return
+			if _is_pointer_over_control():
+				return
 			if _is_brush_enabled() and _has_selected_tile():
+				_is_painting = true
+				_last_painted_grid = Vector2i(-1, -1)
 				_apply_brush_at_world_position(get_global_mouse_position())
 				return
-
 			_select_tile_at_world_position(get_global_mouse_position())
 			return
 
-	if event is InputEventMouseMotion and _is_panning:
+	if event is InputEventMouseMotion:
 		var mouse_motion := event as InputEventMouseMotion
-		var camera := _get_camera()
-		if camera != null:
-			camera.position -= mouse_motion.relative * camera.zoom
-		return
+		if _is_panning:
+			var camera := _get_camera()
+			if camera != null:
+				camera.position -= mouse_motion.relative * camera.zoom
+			return
+		if _is_painting and _is_brush_enabled() and _has_selected_tile():
+			_apply_brush_at_world_position(get_global_mouse_position())
+			return
+		if _is_brush_enabled() and not _is_pointer_over_control():
+			_update_hover_preview(get_global_mouse_position())
+			return
+		_hide_hover_preview()
 
 
 func _load_map(path: String) -> void:
@@ -260,6 +279,10 @@ func _apply_brush_at_world_position(world_position: Vector2) -> void:
 	var tile_data = _resolve_tile_at_world_position(world_position)
 	if tile_data == null:
 		return
+
+	if tile_data.grid_position == _last_painted_grid:
+		return
+	_last_painted_grid = tile_data.grid_position
 
 	if not _selected_type_id.is_empty() and _tile_catalog != null and _tile_catalog.has_type(_selected_type_id):
 		_store_undo_state(tile_data)
@@ -980,3 +1003,44 @@ func _clear_wall_overlays() -> void:
 			child.queue_free()
 
 	_wall_sprites_by_grid.clear()
+
+
+# --- Hover Preview ---
+
+func _update_hover_preview(world_position: Vector2) -> void:
+	if _terrain_map_data == null or _terrain_registry == null:
+		_hide_hover_preview()
+		return
+
+	var grid_pos: Vector2i = _terrain_registry.world_to_grid(world_position)
+	if grid_pos == _hover_grid_position:
+		return
+
+	_hover_grid_position = grid_pos
+	var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_pos)
+	if tile_data == null:
+		_hide_hover_preview()
+		return
+
+	var preview_texture: Texture2D = TILE_TEXTURE
+	if not _selected_type_id.is_empty() and _tile_catalog != null:
+		var type_texture: Texture2D = _tile_catalog.get_texture(_selected_type_id)
+		if type_texture != null:
+			preview_texture = type_texture
+
+	if _hover_preview == null:
+		_hover_preview = Sprite2D.new()
+		_hover_preview.centered = false
+		_hover_preview.z_index = 30
+		add_child(_hover_preview)
+
+	_hover_preview.texture = preview_texture
+	_hover_preview.position = tile_data.world_position - (preview_texture.get_size() * 0.5)
+	_hover_preview.modulate = Color(1.0, 1.0, 1.0, 0.4)
+	_hover_preview.visible = true
+
+
+func _hide_hover_preview() -> void:
+	_hover_grid_position = Vector2i(-1, -1)
+	if _hover_preview != null:
+		_hover_preview.visible = false
