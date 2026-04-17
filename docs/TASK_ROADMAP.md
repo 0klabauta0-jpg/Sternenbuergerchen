@@ -147,11 +147,11 @@ TASK_035 – Teamtransfer
 TASK_036 – Respawn-Logik
 TASK_037 – Rover/Frachter minimal
 Phase 8 – Vertical Slice
-TASK_038 – Missionstart
-TASK_039 – Fireteams
-TASK_040 – Commander-Befehle
-TASK_041 – Phasen-System
-TASK_042 – Siegbedingung
+TASK_038 – Fireteam-Aufteilung
+TASK_039 – Phasen-Wirkung
+TASK_040 – Take-Befehl und Objective
+TASK_041 – Siegbedingung
+TASK_042 – Respawn-Timer-Anzeige
 Phase 9 – Erweiterung (spaeter)
 Skillsystem
 soziale Dynamik
