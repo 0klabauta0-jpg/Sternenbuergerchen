@@ -13,6 +13,8 @@ zoom = Vector2(0.3, 0.3)
 
 [node name="CliffContainer" type="Node2D" parent="."]
 
+[node name="WallContainer" type="Node2D" parent="."]
+
 [node name="SelectionOutline" type="Line2D" parent="."]
 default_color = Color(1, 1, 1, 0.95)
 width = 3.0

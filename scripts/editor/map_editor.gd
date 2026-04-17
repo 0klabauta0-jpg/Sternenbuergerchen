@@ -13,6 +13,14 @@ const CLIFF_CORNER_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isomet
 const CLIFF_CORNER_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_SW.png")
 const CLIFF_CORNER_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_NE.png")
 const CLIFF_CORNER_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_NW.png")
+const WALL_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wall_SE.png")
+const WALL_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wall_SW.png")
+const WALL_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wall_NE.png")
+const WALL_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wall_NW.png")
+const WALL_CORNER_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_SE.png")
+const WALL_CORNER_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_SW.png")
+const WALL_CORNER_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_NE.png")
+const WALL_CORNER_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_NW.png")
 const DEFAULT_MAP_PATH: String = "res://maps/test_mission.json"
 const DEFAULT_NEW_MAP_PATH: String = "res://maps/new_map.json"
 const DEFAULT_NEW_MAP_NAME: String = "new_map"
@@ -31,6 +39,7 @@ var _terrain_registry = null
 var _tile_catalog = null
 var _tile_sprites_by_grid: Dictionary = {}
 var _cliff_sprites_by_grid: Dictionary = {}
+var _wall_sprites_by_grid: Dictionary = {}
 var _selected_grid_position: Vector2i = Vector2i(-1, -1)
 var _selected_type_id: String = ""
 var _is_panning: bool = false
@@ -61,10 +70,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mouse_button_event := event as InputEventMouseButton
 		if mouse_button_event.button_index == MOUSE_BUTTON_WHEEL_UP and mouse_button_event.pressed and not _is_pointer_over_control():
-			_adjust_camera_zoom(-CAMERA_ZOOM_STEP)
+			_adjust_camera_zoom(CAMERA_ZOOM_STEP)
 			return
 		if mouse_button_event.button_index == MOUSE_BUTTON_WHEEL_DOWN and mouse_button_event.pressed and not _is_pointer_over_control():
-			_adjust_camera_zoom(CAMERA_ZOOM_STEP)
+			_adjust_camera_zoom(-CAMERA_ZOOM_STEP)
 			return
 		if mouse_button_event.button_index == MOUSE_BUTTON_MIDDLE or mouse_button_event.button_index == MOUSE_BUTTON_RIGHT:
 			_is_panning = mouse_button_event.pressed
@@ -186,6 +195,7 @@ func _rebuild_tile_sprites() -> void:
 		_tile_sprites_by_grid[tile_data.grid_position] = tile_sprite
 
 	_rebuild_all_cliff_overlays()
+	_rebuild_all_wall_overlays()
 
 
 func _refresh_tile_visual(tile_data) -> void:
@@ -201,6 +211,7 @@ func _refresh_tile_visual(tile_data) -> void:
 	tile_sprite.position = tile_data.world_position - (tile_texture.get_size() * 0.5)
 	tile_sprite.modulate = _build_tile_modulate(tile_data)
 	_update_cliff_overlays_around(tile_data.grid_position)
+	_update_wall_overlays_around(tile_data.grid_position)
 
 
 func _build_tile_modulate(tile_data) -> Color:
@@ -857,3 +868,115 @@ func _clear_cliff_overlays() -> void:
 			child.queue_free()
 
 	_cliff_sprites_by_grid.clear()
+
+
+# --- Wall Overlay System ---
+
+func _is_wall_type(tile_data) -> bool:
+	if tile_data == null:
+		return false
+	return bool(tile_data.blocks_los)
+
+
+func _rebuild_all_wall_overlays() -> void:
+	_clear_wall_overlays()
+	if _terrain_map_data == null:
+		return
+
+	for tile_data in _terrain_map_data.call("get_tiles"):
+		if _is_wall_type(tile_data):
+			_create_wall_overlays_for_tile(tile_data)
+
+
+func _update_wall_overlays_around(grid_position: Vector2i) -> void:
+	var positions_to_update: Array[Vector2i] = [grid_position]
+	for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		positions_to_update.append(grid_position + offset)
+
+	for pos in positions_to_update:
+		_remove_wall_overlays_at(pos)
+		if _terrain_map_data == null:
+			continue
+		var tile_data = _terrain_map_data.call("get_tile_at_grid", pos)
+		if tile_data != null and _is_wall_type(tile_data):
+			_create_wall_overlays_for_tile(tile_data)
+
+
+func _create_wall_overlays_for_tile(tile_data) -> void:
+	if tile_data == null or _terrain_map_data == null:
+		return
+
+	var wall_container := get_node_or_null("WallContainer") as Node2D
+	if wall_container == null:
+		return
+
+	var grid_pos: Vector2i = tile_data.grid_position
+	var overlays: Array[Sprite2D] = []
+
+	var neighbor_wall_map: Array = [
+		[Vector2i(1, 0), WALL_TEXTURE_SE],
+		[Vector2i(-1, 0), WALL_TEXTURE_NW],
+		[Vector2i(0, 1), WALL_TEXTURE_SW],
+		[Vector2i(0, -1), WALL_TEXTURE_NE],
+	]
+
+	var wall_edge_dirs: Array[Vector2i] = []
+
+	for entry in neighbor_wall_map:
+		var offset: Vector2i = entry[0]
+		var wall_texture: Texture2D = entry[1]
+		var neighbor = _terrain_map_data.call("get_tile_at_grid", grid_pos + offset)
+		var neighbor_is_wall: bool = _is_wall_type(neighbor) if neighbor != null else false
+		if not neighbor_is_wall:
+			wall_edge_dirs.append(offset)
+			var wall_sprite := Sprite2D.new()
+			wall_sprite.texture = wall_texture
+			wall_sprite.centered = false
+			wall_sprite.z_index = -13
+			wall_sprite.position = tile_data.world_position - (wall_texture.get_size() * 0.5)
+			wall_container.add_child(wall_sprite)
+			overlays.append(wall_sprite)
+
+	var corner_map: Array = [
+		[Vector2i(1, 0), Vector2i(0, 1), WALL_CORNER_SW],
+		[Vector2i(1, 0), Vector2i(0, -1), WALL_CORNER_SE],
+		[Vector2i(-1, 0), Vector2i(0, 1), WALL_CORNER_NW],
+		[Vector2i(-1, 0), Vector2i(0, -1), WALL_CORNER_NE],
+	]
+
+	for corner_entry in corner_map:
+		var dir_a: Vector2i = corner_entry[0]
+		var dir_b: Vector2i = corner_entry[1]
+		var corner_texture: Texture2D = corner_entry[2]
+		if wall_edge_dirs.has(dir_a) and wall_edge_dirs.has(dir_b):
+			var corner_sprite := Sprite2D.new()
+			corner_sprite.texture = corner_texture
+			corner_sprite.centered = false
+			corner_sprite.z_index = -12
+			corner_sprite.position = tile_data.world_position - (corner_texture.get_size() * 0.5)
+			wall_container.add_child(corner_sprite)
+			overlays.append(corner_sprite)
+
+	if not overlays.is_empty():
+		_wall_sprites_by_grid[grid_pos] = overlays
+
+
+func _remove_wall_overlays_at(grid_position: Vector2i) -> void:
+	if not _wall_sprites_by_grid.has(grid_position):
+		return
+
+	var overlays: Array = _wall_sprites_by_grid[grid_position]
+	for sprite in overlays:
+		if sprite != null and is_instance_valid(sprite):
+			sprite.queue_free()
+
+	_wall_sprites_by_grid.erase(grid_position)
+
+
+func _clear_wall_overlays() -> void:
+	var wall_container := get_node_or_null("WallContainer") as Node2D
+	if wall_container != null:
+		for child in wall_container.get_children():
+			child.queue_free()
+
+	_wall_sprites_by_grid.clear()
