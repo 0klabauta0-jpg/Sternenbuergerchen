@@ -173,7 +173,13 @@ TASK_056 – LOS ueber Terrain-Tiles
 TASK_057 – Cover aus Terrain-Tiles
 TASK_058 – Hoehenstufen
 TASK_059 – Strassen und Oberflaechen
-Phase 13 – Erweiterung (spaeter)
+Phase 13 – Map Editor
+TASK_060 – Terrain-Daten als JSON-Datei
+TASK_061 – Map-Editor-Szene: Tile-Auswahl und Anzeige
+TASK_062 – Map-Editor: Tile-Properties bearbeiten
+TASK_063 – Map-Editor: Speichern und Laden
+TASK_064 – MissionTestSetup: Terrain aus JSON laden
+Phase 14 – Erweiterung (spaeter)
 Skillsystem
 soziale Dynamik
 persistente Teams

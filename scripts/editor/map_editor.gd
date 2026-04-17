@@ -4,40 +4,62 @@ const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain
 const TERRAIN_REGISTRY_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_registry.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const TILE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_SW.png")
+const DEFAULT_MAP_PATH: String = "res://maps/test_mission.json"
+const DEFAULT_NEW_MAP_PATH: String = "res://maps/new_map.json"
+const DEFAULT_NEW_MAP_NAME: String = "new_map"
+const DEFAULT_GRID_SIZE: Vector2i = Vector2i(8, 8)
+const DEFAULT_GRID_ORIGIN: Vector2 = Vector2(448.0, 157.0)
+const DEFAULT_HALF_TILE_WIDTH: float = 64.0
+const DEFAULT_HALF_TILE_HEIGHT: float = 32.0
 const MIN_CAMERA_ZOOM: float = 0.5
 const MAX_CAMERA_ZOOM: float = 3.0
 const CAMERA_ZOOM_STEP: float = 0.1
 
-@export var map_file_path: String = "res://maps/test_mission.json"
+@export var map_file_path: String = DEFAULT_MAP_PATH
 
 var _terrain_map_data = null
 var _terrain_registry = null
 var _tile_sprites_by_grid: Dictionary = {}
 var _selected_grid_position: Vector2i = Vector2i(-1, -1)
 var _is_panning: bool = false
+var _dirty: bool = false
+var _is_refreshing_property_controls: bool = false
+var _last_undo_state: Dictionary = {}
+var _current_map_path: String = DEFAULT_MAP_PATH
+var _pending_dialog_action: String = ""
 
 
 func _ready() -> void:
 	set_process_unhandled_input(true)
 	_ensure_terrain_registry()
-	_load_map(map_file_path)
-	_refresh_selection_visual()
-	_refresh_property_panel()
+	_populate_surface_type_options()
+	_connect_ui_signals()
+	_load_map(map_file_path if not map_file_path.is_empty() else DEFAULT_MAP_PATH)
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey:
+		var key_event := event as InputEventKey
+		if key_event.pressed and not key_event.echo and key_event.ctrl_pressed and key_event.physical_keycode == KEY_Z:
+			_undo_last_change()
+			return
+
 	if event is InputEventMouseButton:
 		var mouse_button_event := event as InputEventMouseButton
-		if mouse_button_event.button_index == MOUSE_BUTTON_WHEEL_UP and mouse_button_event.pressed:
+		if mouse_button_event.button_index == MOUSE_BUTTON_WHEEL_UP and mouse_button_event.pressed and not _is_pointer_over_control():
 			_adjust_camera_zoom(-CAMERA_ZOOM_STEP)
 			return
-		if mouse_button_event.button_index == MOUSE_BUTTON_WHEEL_DOWN and mouse_button_event.pressed:
+		if mouse_button_event.button_index == MOUSE_BUTTON_WHEEL_DOWN and mouse_button_event.pressed and not _is_pointer_over_control():
 			_adjust_camera_zoom(CAMERA_ZOOM_STEP)
 			return
 		if mouse_button_event.button_index == MOUSE_BUTTON_MIDDLE or mouse_button_event.button_index == MOUSE_BUTTON_RIGHT:
 			_is_panning = mouse_button_event.pressed
 			return
 		if mouse_button_event.button_index == MOUSE_BUTTON_LEFT and mouse_button_event.pressed and not _is_pointer_over_control():
+			if _is_brush_enabled() and _has_selected_tile():
+				_apply_brush_at_world_position(get_global_mouse_position())
+				return
+
 			_select_tile_at_world_position(get_global_mouse_position())
 			return
 
@@ -50,12 +72,67 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _load_map(path: String) -> void:
+	_current_map_path = path
 	_terrain_map_data = TERRAIN_MAP_DATA_SCRIPT.call("load_from_file", path)
+	if _terrain_map_data == null or _terrain_map_data.call("get_tiles").is_empty():
+		_terrain_map_data = TERRAIN_MAP_DATA_SCRIPT.call(
+			"create_empty",
+			path.get_file().get_basename() if not path.is_empty() else DEFAULT_NEW_MAP_NAME,
+			DEFAULT_GRID_SIZE,
+			DEFAULT_GRID_ORIGIN,
+			DEFAULT_HALF_TILE_WIDTH,
+			DEFAULT_HALF_TILE_HEIGHT
+		)
+
 	_tile_sprites_by_grid.clear()
 	_selected_grid_position = Vector2i(-1, -1)
+	_last_undo_state.clear()
+	_mark_dirty(false)
 	_rebuild_registry_from_map_data()
 	_rebuild_tile_sprites()
 	_center_camera_on_map()
+	_refresh_selection_visual()
+	_refresh_property_panel()
+	_refresh_top_bar()
+
+
+func _create_new_map() -> void:
+	_current_map_path = DEFAULT_NEW_MAP_PATH
+	_terrain_map_data = TERRAIN_MAP_DATA_SCRIPT.call(
+		"create_empty",
+		DEFAULT_NEW_MAP_NAME,
+		DEFAULT_GRID_SIZE,
+		DEFAULT_GRID_ORIGIN,
+		DEFAULT_HALF_TILE_WIDTH,
+		DEFAULT_HALF_TILE_HEIGHT
+	)
+	_tile_sprites_by_grid.clear()
+	_selected_grid_position = Vector2i(-1, -1)
+	_last_undo_state.clear()
+	_mark_dirty(false)
+	_rebuild_registry_from_map_data()
+	_rebuild_tile_sprites()
+	_center_camera_on_map()
+	_refresh_selection_visual()
+	_refresh_property_panel()
+	_refresh_top_bar()
+
+
+func _save_current_map() -> void:
+	if _terrain_map_data == null or _current_map_path.is_empty():
+		return
+
+	var map_name: String = _current_map_path.get_file().get_basename()
+	if not map_name.is_empty() and _terrain_map_data.has_method("set_map_name"):
+		_terrain_map_data.call("set_map_name", map_name)
+
+	var save_error: Error = _terrain_map_data.call("save_to_file", _current_map_path)
+	if save_error != OK:
+		push_warning("MapEditor could not save map to %s" % _current_map_path)
+		return
+
+	_mark_dirty(false)
+	_refresh_top_bar()
 
 
 func _rebuild_registry_from_map_data() -> void:
@@ -66,8 +143,8 @@ func _rebuild_registry_from_map_data() -> void:
 	var tile_size: Dictionary = _terrain_map_data.call("get_tile_size")
 	_terrain_registry.configure_iso_grid(
 		_terrain_map_data.call("get_grid_origin"),
-		float(tile_size.get("half_width", 64.0)),
-		float(tile_size.get("half_height", 32.0))
+		float(tile_size.get("half_width", DEFAULT_HALF_TILE_WIDTH)),
+		float(tile_size.get("half_height", DEFAULT_HALF_TILE_HEIGHT))
 	)
 	for tile_data in _terrain_map_data.call("get_tiles"):
 		_terrain_registry.register_tile(tile_data)
@@ -90,6 +167,17 @@ func _rebuild_tile_sprites() -> void:
 		tile_sprite.modulate = _build_tile_modulate(tile_data)
 		tile_container.add_child(tile_sprite)
 		_tile_sprites_by_grid[tile_data.grid_position] = tile_sprite
+
+
+func _refresh_tile_visual(tile_data) -> void:
+	if tile_data == null or not _tile_sprites_by_grid.has(tile_data.grid_position):
+		return
+
+	var tile_sprite := _tile_sprites_by_grid[tile_data.grid_position] as Sprite2D
+	if tile_sprite == null:
+		return
+
+	tile_sprite.modulate = _build_tile_modulate(tile_data)
 
 
 func _build_tile_modulate(tile_data) -> Color:
@@ -121,14 +209,39 @@ func _build_tile_modulate(tile_data) -> Color:
 
 
 func _select_tile_at_world_position(world_position: Vector2) -> void:
-	var grid_position: Vector2i = _terrain_registry.world_to_grid(world_position)
-	var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
+	var tile_data = _resolve_tile_at_world_position(world_position)
 	if tile_data == null:
 		return
 
-	_selected_grid_position = grid_position
+	_selected_grid_position = tile_data.grid_position
 	_refresh_selection_visual()
 	_refresh_property_panel()
+
+
+func _apply_brush_at_world_position(world_position: Vector2) -> void:
+	var tile_data = _resolve_tile_at_world_position(world_position)
+	if tile_data == null:
+		return
+
+	var patch: Dictionary = {
+		"walkable": _get_walkable_checkbox().button_pressed,
+		"surface_type": _get_selected_surface_type(),
+	}
+	if _apply_tile_patch(tile_data, patch):
+		_mark_dirty(true)
+
+	_selected_grid_position = tile_data.grid_position
+	_refresh_tile_visual(tile_data)
+	_refresh_selection_visual()
+	_refresh_property_panel()
+
+
+func _resolve_tile_at_world_position(world_position: Vector2):
+	if _terrain_map_data == null:
+		return null
+
+	var grid_position: Vector2i = _terrain_registry.world_to_grid(world_position)
+	return _terrain_map_data.call("get_tile_at_grid", grid_position)
 
 
 func _refresh_selection_visual() -> void:
@@ -137,13 +250,13 @@ func _refresh_selection_visual() -> void:
 		return
 
 	outline.clear_points()
-	var tile_data = _terrain_map_data.call("get_tile_at_grid", _selected_grid_position) if _terrain_map_data != null else null
+	var tile_data = _get_selected_tile()
 	if tile_data == null:
 		return
 
 	var tile_size: Dictionary = _terrain_map_data.call("get_tile_size")
-	var half_width: float = float(tile_size.get("half_width", 64.0))
-	var half_height: float = float(tile_size.get("half_height", 32.0))
+	var half_width: float = float(tile_size.get("half_width", DEFAULT_HALF_TILE_WIDTH))
+	var half_height: float = float(tile_size.get("half_height", DEFAULT_HALF_TILE_HEIGHT))
 	var center: Vector2 = tile_data.world_position
 	outline.add_point(center + Vector2(0.0, -half_height))
 	outline.add_point(center + Vector2(half_width, 0.0))
@@ -153,31 +266,156 @@ func _refresh_selection_visual() -> void:
 
 
 func _refresh_property_panel() -> void:
-	var tile_data = _terrain_map_data.call("get_tile_at_grid", _selected_grid_position) if _terrain_map_data != null else null
+	var tile_data = _get_selected_tile()
 	var tile_label := get_node_or_null("UI/PropertyPanel/Margin/VBox/TileLabel") as Label
-	var walkable_label := get_node_or_null("UI/PropertyPanel/Margin/VBox/WalkableLabel") as Label
-	var blocks_los_label := get_node_or_null("UI/PropertyPanel/Margin/VBox/BlocksLosLabel") as Label
-	var cover_label := get_node_or_null("UI/PropertyPanel/Margin/VBox/CoverValueLabel") as Label
-	var height_label := get_node_or_null("UI/PropertyPanel/Margin/VBox/HeightLevelLabel") as Label
-	var surface_label := get_node_or_null("UI/PropertyPanel/Margin/VBox/SurfaceTypeLabel") as Label
-	if tile_label == null or walkable_label == null or blocks_los_label == null or cover_label == null or height_label == null or surface_label == null:
+	var walkable_checkbox := _get_walkable_checkbox()
+	var blocks_los_checkbox := _get_blocks_los_checkbox()
+	var cover_spinbox := _get_cover_spinbox()
+	var height_spinbox := _get_height_spinbox()
+	var surface_option_button := _get_surface_option_button()
+	if tile_label == null or walkable_checkbox == null or blocks_los_checkbox == null or cover_spinbox == null or height_spinbox == null or surface_option_button == null:
 		return
 
+	_is_refreshing_property_controls = true
 	if tile_data == null:
 		tile_label.text = "Tile: -"
-		walkable_label.text = "walkable: -"
-		blocks_los_label.text = "blocks_los: -"
-		cover_label.text = "cover_value: -"
-		height_label.text = "height_level: -"
-		surface_label.text = "surface_type: -"
+		walkable_checkbox.button_pressed = false
+		blocks_los_checkbox.button_pressed = false
+		cover_spinbox.value = 0
+		height_spinbox.value = 0
+		surface_option_button.select(_find_surface_option_index(TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFACE_TYPE))
+		_set_property_controls_enabled(false)
+		_is_refreshing_property_controls = false
 		return
 
-	tile_label.text = "Tile: (%d, %d)" % [_selected_grid_position.x, _selected_grid_position.y]
-	walkable_label.text = "walkable: %s" % ("true" if bool(tile_data.walkable) else "false")
-	blocks_los_label.text = "blocks_los: %s" % ("true" if bool(tile_data.blocks_los) else "false")
-	cover_label.text = "cover_value: %d" % int(tile_data.cover_value)
-	height_label.text = "height_level: %d" % int(tile_data.height_level)
-	surface_label.text = "surface_type: %s" % String(tile_data.surface_type)
+	tile_label.text = "Tile: (%d, %d)" % [tile_data.grid_position.x, tile_data.grid_position.y]
+	walkable_checkbox.button_pressed = bool(tile_data.walkable)
+	blocks_los_checkbox.button_pressed = bool(tile_data.blocks_los)
+	cover_spinbox.value = int(tile_data.cover_value)
+	height_spinbox.value = int(tile_data.height_level)
+	surface_option_button.select(_find_surface_option_index(String(tile_data.surface_type)))
+	_set_property_controls_enabled(true)
+	_is_refreshing_property_controls = false
+
+
+func _set_property_controls_enabled(is_enabled: bool) -> void:
+	_get_walkable_checkbox().disabled = not is_enabled
+	_get_blocks_los_checkbox().disabled = not is_enabled
+	_get_cover_spinbox().editable = is_enabled
+	_get_height_spinbox().editable = is_enabled
+	_get_surface_option_button().disabled = not is_enabled
+
+
+func _apply_property_controls_to_selected_tile() -> void:
+	if _is_refreshing_property_controls:
+		return
+
+	var tile_data = _get_selected_tile()
+	if tile_data == null:
+		return
+
+	var patch: Dictionary = {
+		"walkable": _get_walkable_checkbox().button_pressed,
+		"blocks_los": _get_blocks_los_checkbox().button_pressed,
+		"cover_value": int(_get_cover_spinbox().value),
+		"height_level": int(_get_height_spinbox().value),
+		"surface_type": _get_selected_surface_type(),
+	}
+	if not _apply_tile_patch(tile_data, patch):
+		return
+
+	_refresh_tile_visual(tile_data)
+	_mark_dirty(true)
+	_refresh_property_panel()
+
+
+func _apply_tile_patch(tile_data, patch: Dictionary) -> bool:
+	if tile_data == null or patch.is_empty():
+		return false
+
+	var next_walkable: bool = bool(patch.get("walkable", tile_data.walkable))
+	var next_blocks_los: bool = bool(patch.get("blocks_los", tile_data.blocks_los))
+	var next_cover_value: int = clampi(int(patch.get("cover_value", tile_data.cover_value)), 0, 100)
+	var next_height_level: int = clampi(int(patch.get("height_level", tile_data.height_level)), 0, 2)
+	var next_surface_type: String = String(patch.get("surface_type", tile_data.surface_type))
+
+	var changed: bool = (
+		tile_data.walkable != next_walkable
+		or tile_data.blocks_los != next_blocks_los
+		or int(tile_data.cover_value) != next_cover_value
+		or int(tile_data.height_level) != next_height_level
+		or String(tile_data.surface_type) != next_surface_type
+	)
+	if not changed:
+		return false
+
+	_store_undo_state(tile_data)
+	tile_data.walkable = next_walkable
+	tile_data.blocks_los = next_blocks_los
+	tile_data.cover_value = next_cover_value
+	tile_data.height_level = next_height_level
+	tile_data.surface_type = next_surface_type
+	return true
+
+
+func _store_undo_state(tile_data) -> void:
+	if tile_data == null or not tile_data.has_method("to_dict"):
+		return
+
+	_last_undo_state = {
+		"grid_position": tile_data.grid_position,
+		"tile_dict": tile_data.call("to_dict"),
+	}
+	_refresh_top_bar()
+
+
+func _undo_last_change() -> void:
+	if _last_undo_state.is_empty() or _terrain_map_data == null:
+		return
+
+	var grid_position: Vector2i = _last_undo_state.get("grid_position", Vector2i(-1, -1))
+	var tile_dict: Dictionary = _last_undo_state.get("tile_dict", {})
+	var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
+	if tile_data == null or tile_dict.is_empty():
+		return
+
+	var restored_tile = TERRAIN_TILE_DATA_SCRIPT.call("from_dict", tile_dict)
+	tile_data.tile_id = restored_tile.tile_id
+	tile_data.grid_position = restored_tile.grid_position
+	tile_data.world_position = restored_tile.world_position
+	tile_data.walkable = restored_tile.walkable
+	tile_data.blocks_los = restored_tile.blocks_los
+	tile_data.cover_value = restored_tile.cover_value
+	tile_data.height_level = restored_tile.height_level
+	tile_data.surface_type = restored_tile.surface_type
+
+	_selected_grid_position = grid_position
+	_last_undo_state.clear()
+	_refresh_tile_visual(tile_data)
+	_mark_dirty(true)
+	_refresh_selection_visual()
+	_refresh_property_panel()
+	_refresh_top_bar()
+
+
+func _refresh_top_bar() -> void:
+	var title_label := get_node_or_null("UI/TopBar/Margin/HBox/TitleLabel") as Label
+	var path_label := get_node_or_null("UI/TopBar/Margin/HBox/PathLabel") as Label
+	var save_button := get_node_or_null("UI/TopBar/Margin/HBox/SaveButton") as Button
+	var undo_button := get_node_or_null("UI/TopBar/Margin/HBox/UndoButton") as Button
+	if title_label != null:
+		title_label.text = "Map Editor%s" % (" *" if _dirty else "")
+	if path_label != null:
+		path_label.text = _current_map_path if not _current_map_path.is_empty() else "(unsaved)"
+	if save_button != null:
+		save_button.disabled = _terrain_map_data == null or _current_map_path.is_empty()
+	if undo_button != null:
+		undo_button.disabled = _last_undo_state.is_empty()
+
+
+func _mark_dirty(is_dirty: bool) -> void:
+	_dirty = is_dirty
+	_refresh_top_bar()
 
 
 func _adjust_camera_zoom(delta: float) -> void:
@@ -195,12 +433,191 @@ func _center_camera_on_map() -> void:
 		return
 
 	var grid_size: Vector2i = _terrain_map_data.call("get_grid_size")
-	var center_grid := Vector2i(maxi(grid_size.x - 1, 0) / 2, maxi(grid_size.y - 1, 0) / 2)
-	camera.position = _terrain_registry.grid_to_world(center_grid)
+	var center_world: Vector2 = _terrain_registry.grid_to_world(Vector2i(grid_size.x / 2, grid_size.y / 2))
+	camera.position = center_world
+
+
+func _populate_surface_type_options() -> void:
+	var option_button := _get_surface_option_button()
+	if option_button == null:
+		return
+
+	option_button.clear()
+	option_button.add_item(TERRAIN_TILE_DATA_SCRIPT.SURFACE_GROUND)
+	option_button.add_item(TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROAD)
+	option_button.add_item(TERRAIN_TILE_DATA_SCRIPT.SURFACE_SAND)
+	option_button.add_item(TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROCK)
+	option_button.select(0)
+
+
+func _connect_ui_signals() -> void:
+	var save_button := get_node_or_null("UI/TopBar/Margin/HBox/SaveButton") as Button
+	var load_button := get_node_or_null("UI/TopBar/Margin/HBox/LoadButton") as Button
+	var new_map_button := get_node_or_null("UI/TopBar/Margin/HBox/NewMapButton") as Button
+	var undo_button := get_node_or_null("UI/TopBar/Margin/HBox/UndoButton") as Button
+	var walkable_checkbox := _get_walkable_checkbox()
+	var blocks_los_checkbox := _get_blocks_los_checkbox()
+	var cover_spinbox := _get_cover_spinbox()
+	var height_spinbox := _get_height_spinbox()
+	var surface_option_button := _get_surface_option_button()
+	var file_dialog := get_node_or_null("UI/LoadDialog") as FileDialog
+	var confirm_dialog := get_node_or_null("UI/DirtyConfirmDialog") as ConfirmationDialog
+	if save_button != null and not save_button.pressed.is_connected(_on_save_pressed):
+		save_button.pressed.connect(_on_save_pressed)
+	if load_button != null and not load_button.pressed.is_connected(_on_load_pressed):
+		load_button.pressed.connect(_on_load_pressed)
+	if new_map_button != null and not new_map_button.pressed.is_connected(_on_new_map_pressed):
+		new_map_button.pressed.connect(_on_new_map_pressed)
+	if undo_button != null and not undo_button.pressed.is_connected(_on_undo_pressed):
+		undo_button.pressed.connect(_on_undo_pressed)
+	if walkable_checkbox != null and not walkable_checkbox.toggled.is_connected(_on_property_controls_changed):
+		walkable_checkbox.toggled.connect(_on_property_controls_changed)
+	if blocks_los_checkbox != null and not blocks_los_checkbox.toggled.is_connected(_on_property_controls_changed):
+		blocks_los_checkbox.toggled.connect(_on_property_controls_changed)
+	if cover_spinbox != null and not cover_spinbox.value_changed.is_connected(_on_property_controls_value_changed):
+		cover_spinbox.value_changed.connect(_on_property_controls_value_changed)
+	if height_spinbox != null and not height_spinbox.value_changed.is_connected(_on_property_controls_value_changed):
+		height_spinbox.value_changed.connect(_on_property_controls_value_changed)
+	if surface_option_button != null and not surface_option_button.item_selected.is_connected(_on_surface_selected):
+		surface_option_button.item_selected.connect(_on_surface_selected)
+	if file_dialog != null:
+		file_dialog.access = FileDialog.ACCESS_RESOURCES
+		file_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
+		file_dialog.current_dir = "res://maps"
+		file_dialog.filters = PackedStringArray(["*.json ; JSON terrain map"])
+		if not file_dialog.file_selected.is_connected(_on_load_file_selected):
+			file_dialog.file_selected.connect(_on_load_file_selected)
+	if confirm_dialog != null and not confirm_dialog.confirmed.is_connected(_on_dirty_confirmed):
+		confirm_dialog.confirmed.connect(_on_dirty_confirmed)
+
+
+func _on_save_pressed() -> void:
+	_save_current_map()
+
+
+func _on_load_pressed() -> void:
+	if _dirty:
+		_open_dirty_confirmation("load")
+		return
+
+	_open_load_dialog()
+
+
+func _on_new_map_pressed() -> void:
+	if _dirty:
+		_open_dirty_confirmation("new")
+		return
+
+	_create_new_map()
+
+
+func _on_undo_pressed() -> void:
+	_undo_last_change()
+
+
+func _on_property_controls_changed(_value: bool) -> void:
+	_apply_property_controls_to_selected_tile()
+
+
+func _on_property_controls_value_changed(_value: float) -> void:
+	_apply_property_controls_to_selected_tile()
+
+
+func _on_surface_selected(_index: int) -> void:
+	_apply_property_controls_to_selected_tile()
+
+
+func _on_load_file_selected(path: String) -> void:
+	_load_map(path)
+
+
+func _on_dirty_confirmed() -> void:
+	match _pending_dialog_action:
+		"load":
+			_open_load_dialog()
+		"new":
+			_create_new_map()
+
+	_pending_dialog_action = ""
+
+
+func _open_load_dialog() -> void:
+	var file_dialog := get_node_or_null("UI/LoadDialog") as FileDialog
+	if file_dialog == null:
+		return
+
+	file_dialog.current_dir = "res://maps"
+	file_dialog.popup_centered_ratio(0.65)
+
+
+func _open_dirty_confirmation(action_name: String) -> void:
+	var confirm_dialog := get_node_or_null("UI/DirtyConfirmDialog") as ConfirmationDialog
+	if confirm_dialog == null:
+		return
+
+	_pending_dialog_action = action_name
+	confirm_dialog.dialog_text = "Ungespeicherte Aenderungen gehen verloren. Fortfahren?"
+	confirm_dialog.popup_centered()
 
 
 func _get_camera() -> Camera2D:
 	return get_node_or_null("Camera2D") as Camera2D
+
+
+func _get_selected_tile():
+	if _terrain_map_data == null:
+		return null
+
+	return _terrain_map_data.call("get_tile_at_grid", _selected_grid_position)
+
+
+func _has_selected_tile() -> bool:
+	return _get_selected_tile() != null
+
+
+func _is_brush_enabled() -> bool:
+	var brush_button := get_node_or_null("UI/TopBar/Margin/HBox/BrushButton") as Button
+	return brush_button != null and brush_button.button_pressed
+
+
+func _get_walkable_checkbox() -> CheckBox:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/WalkableCheckBox") as CheckBox
+
+
+func _get_blocks_los_checkbox() -> CheckBox:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/BlocksLosCheckBox") as CheckBox
+
+
+func _get_cover_spinbox() -> SpinBox:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/CoverRow/CoverSpinBox") as SpinBox
+
+
+func _get_height_spinbox() -> SpinBox:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/HeightRow/HeightSpinBox") as SpinBox
+
+
+func _get_surface_option_button() -> OptionButton:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/SurfaceRow/SurfaceOptionButton") as OptionButton
+
+
+func _get_selected_surface_type() -> String:
+	var option_button := _get_surface_option_button()
+	if option_button == null or option_button.selected < 0:
+		return TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFACE_TYPE
+
+	return option_button.get_item_text(option_button.selected)
+
+
+func _find_surface_option_index(surface_type: String) -> int:
+	var option_button := _get_surface_option_button()
+	if option_button == null:
+		return 0
+
+	for index in range(option_button.item_count):
+		if option_button.get_item_text(index) == surface_type:
+			return index
+
+	return 0
 
 
 func _is_pointer_over_control() -> bool:

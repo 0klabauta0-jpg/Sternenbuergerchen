@@ -31,3 +31,5 @@
 - Terrain-Daten (walkable, blocks_los, cover_value, height_level, surface_type) als leichtgewichtige RefCounted-Objekte in TerrainRegistry
 - Respawn-Timer-Staffelung: Rover 30s, FOB 150s, Homebase 270s
 - Host/Join ueber ENetMultiplayerPeer auf Port 7777 fuer V1; kein Matchmaking
+- Terrain-Konfiguration als JSON-Datei unter `res://maps/`; kein Godot-Resource-Format, damit auch externe Tools die Daten lesen koennen
+- Map Editor als Runtime-Szene im Spiel, kein Godot-EditorPlugin; interner Workflow-Editor, nicht spielerseitig in V1

@@ -21,6 +21,7 @@
 - **Rover/Frachter**: Schnellster Spawn-Typ (30s); liefert die Spawn-Position auf der Karte
 - **SimulationRoot**: einzige autoritative Stelle fuer Gameplay-State-Aenderungen
 - **Skill**: Individuelle Unit-Faehigkeit (accuracy, speed, leadership, toughness); beeinflusst Combat und Bewegung
+- **TerrainMapData**: Serialisierbare Terrain-Konfiguration als JSON; enthaelt Tile-Eigenschaften und Karten-Metadaten
 - **Trait**: Persoenlichkeitsmerkmal einer Unit (z.B. aggressive, cautious); modifiziert Skill-Werte
 - **Verteidigen**: Position halten unter Feinddruck
 - **WaveController**: Steuert das gestaffelte Spawnen von Gegnerwellen waehrend einer Mission

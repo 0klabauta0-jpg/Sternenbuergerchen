@@ -56,6 +56,41 @@ static func load_from_file(path: String) -> TerrainMapData:
 	return terrain_map_data
 
 
+static func create_empty(
+	map_name: String,
+	grid_size: Vector2i,
+	grid_origin: Vector2,
+	half_tile_width: float = 64.0,
+	half_tile_height: float = 32.0
+) -> TerrainMapData:
+	var terrain_map_data := TerrainMapData.new()
+	terrain_map_data._map_name = map_name
+	terrain_map_data._grid_size = grid_size
+	terrain_map_data._grid_origin = grid_origin
+	terrain_map_data._tile_half_width = maxf(half_tile_width, 0.001)
+	terrain_map_data._tile_half_height = maxf(half_tile_height, 0.001)
+
+	for x in range(maxi(grid_size.x, 0)):
+		for y in range(maxi(grid_size.y, 0)):
+			var grid_position := Vector2i(x, y)
+			var tile_data = TERRAIN_TILE_DATA_SCRIPT.call(
+				"from_dict",
+				{
+					"tile_id": "tile_%d_%d" % [x, y],
+					"grid_position": grid_position,
+					"world_position": terrain_map_data._grid_to_world(grid_position),
+					"walkable": TERRAIN_TILE_DATA_SCRIPT.DEFAULT_WALKABLE,
+					"blocks_los": TERRAIN_TILE_DATA_SCRIPT.DEFAULT_BLOCKS_LOS,
+					"cover_value": TERRAIN_TILE_DATA_SCRIPT.DEFAULT_COVER_VALUE,
+					"height_level": TERRAIN_TILE_DATA_SCRIPT.DEFAULT_HEIGHT_LEVEL,
+					"surface_type": TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFACE_TYPE,
+				}
+			)
+			terrain_map_data._tiles.append(tile_data)
+
+	return terrain_map_data
+
+
 func save_to_file(path: String) -> Error:
 	if path.is_empty():
 		return ERR_INVALID_PARAMETER
@@ -125,6 +160,10 @@ func get_tile_at_grid(grid_position: Vector2i):
 
 func get_map_name() -> String:
 	return _map_name
+
+
+func set_map_name(map_name: String) -> void:
+	_map_name = map_name.strip_edges()
 
 
 func get_grid_size() -> Vector2i:
