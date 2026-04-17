@@ -2,11 +2,12 @@ extends Node
 
 const FIRETEAM_NAMES: PackedStringArray = ["ALL", "BLUE", "GOLD"]
 const PHASE_NAMES: PackedStringArray = ["APPROACH", "ASSAULT", "HOLD"]
-const HOTKEY_LEGEND: String = "1 Move | 2 Defend | 3 Flank | 4 Take | Q/E Team | R/F Phase"
+const HOTKEY_LEGEND: String = "LMB Set Target | 1 Move | 2 Defend | 3 Flank | 4 Take | Q/E Team | R/F Phase"
 
 @export var alpha_flow_driver_path: NodePath
 @export var bravo_flow_driver_path: NodePath
 @export var charlie_flow_driver_path: NodePath
+@export var target_marker_path: NodePath
 @export var command_feedback_label_path: NodePath
 @export var hotkey_legend_label_path: NodePath
 @export var move_button_path: NodePath
@@ -17,10 +18,12 @@ const HOTKEY_LEGEND: String = "1 Move | 2 Defend | 3 Flank | 4 Take | Q/E Team |
 var _current_fireteam_index: int = 0
 var _current_phase_index: int = 0
 var _last_command_text: String = "AWAITING INPUT"
+var _last_target_position: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
 	set_process_unhandled_input(true)
+	_last_target_position = _get_target_position()
 	_connect_button(move_button_path, Callable(self, "issue_move"))
 	_connect_button(defend_button_path, Callable(self, "issue_defend"))
 	_connect_button(flank_button_path, Callable(self, "issue_flank"))
@@ -29,6 +32,16 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var mouse_button_event := event as InputEventMouseButton
+		if mouse_button_event.pressed and mouse_button_event.button_index == MOUSE_BUTTON_LEFT:
+			if _is_pointer_over_control():
+				return
+
+			if try_place_target_from_screen_position(mouse_button_event.position):
+				get_viewport().set_input_as_handled()
+			return
+
 	if not (event is InputEventKey):
 		return
 
@@ -77,6 +90,19 @@ func issue_flank() -> bool:
 
 func issue_take() -> bool:
 	return _issue_command("take", "TAKE / ENGAGE")
+
+
+func try_place_target_from_screen_position(screen_position: Vector2) -> bool:
+	var target_marker := get_node_or_null(target_marker_path) as Node2D
+	if target_marker == null:
+		return false
+
+	var world_position: Vector2 = _screen_to_world_position(screen_position)
+	var clamped_position: Vector2 = _clamp_world_position_to_viewport(world_position)
+	target_marker.global_position = clamped_position
+	_last_target_position = clamped_position
+	_update_ui()
+	return true
 
 
 func _issue_command(command_type: String, display_text: String) -> bool:
@@ -133,9 +159,10 @@ func _get_phase_name() -> String:
 func _update_ui() -> void:
 	var command_feedback_label := get_node_or_null(command_feedback_label_path) as Label
 	if command_feedback_label != null:
-		command_feedback_label.text = "ACTIVE TEAM: %s\nACTIVE PHASE: %s\nLAST ORDER: %s" % [
+		command_feedback_label.text = "ACTIVE TEAM: %s\nACTIVE PHASE: %s\nTARGET: %s\nLAST ORDER: %s" % [
 			_get_fireteam_name(),
 			_get_phase_name(),
+			_build_target_text(),
 			_last_command_text,
 		]
 
@@ -151,3 +178,45 @@ func _connect_button(button_path: NodePath, callback: Callable) -> void:
 
 	if not button.pressed.is_connected(callback):
 		button.pressed.connect(callback)
+
+
+func _is_pointer_over_control() -> bool:
+	return get_viewport().gui_get_hovered_control() != null
+
+
+func _get_target_position() -> Vector2:
+	var target_marker := get_node_or_null(target_marker_path) as Node2D
+	if target_marker == null:
+		return Vector2.ZERO
+
+	return target_marker.global_position
+
+
+func _build_target_text() -> String:
+	var target_position: Vector2 = _get_target_position()
+	_last_target_position = target_position
+	return "%d, %d" % [
+		int(round(target_position.x)),
+		int(round(target_position.y)),
+	]
+
+
+func _screen_to_world_position(screen_position: Vector2) -> Vector2:
+	var canvas_transform: Transform2D = get_viewport().get_canvas_transform()
+	return canvas_transform.affine_inverse() * screen_position
+
+
+func _clamp_world_position_to_viewport(world_position: Vector2) -> Vector2:
+	var visible_rect: Rect2 = get_viewport().get_visible_rect()
+	var canvas_transform: Transform2D = get_viewport().get_canvas_transform()
+	var inverse_transform: Transform2D = canvas_transform.affine_inverse()
+	var world_a: Vector2 = inverse_transform * visible_rect.position
+	var world_b: Vector2 = inverse_transform * visible_rect.end
+	var min_x: float = minf(world_a.x, world_b.x)
+	var max_x: float = maxf(world_a.x, world_b.x)
+	var min_y: float = minf(world_a.y, world_b.y)
+	var max_y: float = maxf(world_a.y, world_b.y)
+	return Vector2(
+		clampf(world_position.x, min_x, max_x),
+		clampf(world_position.y, min_y, max_y)
+	)
