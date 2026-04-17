@@ -920,7 +920,7 @@ func _rebuild_all_wall_overlays() -> void:
 		return
 
 	for tile_data in _terrain_map_data.call("get_tiles"):
-		if _is_wall_type(tile_data):
+		if not _is_wall_type(tile_data):
 			_create_wall_overlays_for_tile(tile_data)
 
 
@@ -934,11 +934,14 @@ func _update_wall_overlays_around(grid_position: Vector2i) -> void:
 		if _terrain_map_data == null:
 			continue
 		var tile_data = _terrain_map_data.call("get_tile_at_grid", pos)
-		if tile_data != null and _is_wall_type(tile_data):
+		if tile_data != null and not _is_wall_type(tile_data):
 			_create_wall_overlays_for_tile(tile_data)
 
 
 func _create_wall_overlays_for_tile(tile_data) -> void:
+	# Wall overlays are placed on NON-WALL tiles that have WALL neighbors.
+	# Kenney's corridor_wall sprites are designed as overlays on corridor (floor) tiles,
+	# showing a wall panel on the edge facing the wall neighbor.
 	if tile_data == null or _terrain_map_data == null:
 		return
 
@@ -949,15 +952,17 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 	var grid_pos: Vector2i = tile_data.grid_position
 	var overlays: Array[Sprite2D] = []
 
-	# Step 1: determine which edges face non-wall neighbors
+	# Step 1: determine which edges have wall neighbors
 	var wall_edge_dirs: Array[Vector2i] = []
 	for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 		var neighbor = _terrain_map_data.call("get_tile_at_grid", grid_pos + offset)
-		var neighbor_is_wall: bool = _is_wall_type(neighbor) if neighbor != null else false
-		if not neighbor_is_wall:
+		if _is_wall_type(neighbor):
 			wall_edge_dirs.append(offset)
 
-	# Step 2: detect corners - pairs of adjacent exposed edges
+	if wall_edge_dirs.is_empty():
+		return
+
+	# Step 2: detect corners - pairs of adjacent wall edges
 	# Corner pieces REPLACE the two straight panels they connect
 	var corner_map: Array = [
 		[Vector2i(1, 0), Vector2i(0, 1), WALL_CORNER_SW],
