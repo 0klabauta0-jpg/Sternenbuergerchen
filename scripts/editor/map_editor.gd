@@ -1040,6 +1040,48 @@ func _rebuild_grid_overlay() -> void:
 		line.add_point(top)
 		grid_overlay.add_child(line)
 
+	# --- Compass labels at the four diamond corners ---
+	var grid_size: Vector2i = _terrain_map_data.call("get_grid_size")
+	var origin: Vector2 = _terrain_map_data.call("get_grid_origin")
+	var max_x: int = grid_size.x - 1
+	var max_y: int = grid_size.y - 1
+
+	# Corner world positions (from _grid_to_world formula)
+	var north_pos: Vector2 = Vector2(
+		origin.x + float(0 - 0) * half_w,
+		origin.y + float(0 + 0) * half_h
+	)
+	var east_pos: Vector2 = Vector2(
+		origin.x + float(max_x - 0) * half_w,
+		origin.y + float(max_x + 0) * half_h
+	)
+	var south_pos: Vector2 = Vector2(
+		origin.x + float(max_x - max_y) * half_w,
+		origin.y + float(max_x + max_y) * half_h
+	)
+	var west_pos: Vector2 = Vector2(
+		origin.x + float(0 - max_y) * half_w,
+		origin.y + float(0 + max_y) * half_h
+	)
+
+	var compass_data: Array = [
+		["N", north_pos + Vector2(0, -half_h * 3)],
+		["O", east_pos + Vector2(half_w * 3, 0)],
+		["S", south_pos + Vector2(0, half_h * 3)],
+		["W", west_pos + Vector2(-half_w * 3, 0)],
+	]
+
+	for entry in compass_data:
+		var lbl := Label.new()
+		lbl.text = entry[0]
+		lbl.add_theme_font_size_override("font_size", 80)
+		lbl.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 0.5))
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		lbl.size = Vector2(160, 120)
+		lbl.position = entry[1] - lbl.size * 0.5
+		grid_overlay.add_child(lbl)
+
 
 # --- Hover Preview ---
 
