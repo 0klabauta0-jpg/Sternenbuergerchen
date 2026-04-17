@@ -937,36 +937,24 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 	var grid_pos: Vector2i = tile_data.grid_position
 	var overlays: Array[Sprite2D] = []
 
-	var neighbor_wall_map: Array = [
-		[Vector2i(1, 0), WALL_TEXTURE_SE],
-		[Vector2i(-1, 0), WALL_TEXTURE_NW],
-		[Vector2i(0, 1), WALL_TEXTURE_SW],
-		[Vector2i(0, -1), WALL_TEXTURE_NE],
-	]
-
+	# Step 1: determine which edges face non-wall neighbors
 	var wall_edge_dirs: Array[Vector2i] = []
-
-	for entry in neighbor_wall_map:
-		var offset: Vector2i = entry[0]
-		var wall_texture: Texture2D = entry[1]
+	for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 		var neighbor = _terrain_map_data.call("get_tile_at_grid", grid_pos + offset)
 		var neighbor_is_wall: bool = _is_wall_type(neighbor) if neighbor != null else false
 		if not neighbor_is_wall:
 			wall_edge_dirs.append(offset)
-			var wall_sprite := Sprite2D.new()
-			wall_sprite.texture = wall_texture
-			wall_sprite.centered = false
-			wall_sprite.z_index = -13
-			wall_sprite.position = tile_data.world_position - (wall_texture.get_size() * 0.5)
-			wall_container.add_child(wall_sprite)
-			overlays.append(wall_sprite)
 
+	# Step 2: detect corners - pairs of adjacent exposed edges
+	# Corner pieces REPLACE the two straight panels they connect
 	var corner_map: Array = [
 		[Vector2i(1, 0), Vector2i(0, 1), WALL_CORNER_SW],
 		[Vector2i(1, 0), Vector2i(0, -1), WALL_CORNER_SE],
 		[Vector2i(-1, 0), Vector2i(0, 1), WALL_CORNER_NW],
 		[Vector2i(-1, 0), Vector2i(0, -1), WALL_CORNER_NE],
 	]
+
+	var edges_consumed_by_corners: Array[Vector2i] = []
 
 	for corner_entry in corner_map:
 		var dir_a: Vector2i = corner_entry[0]
@@ -980,6 +968,30 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 			corner_sprite.position = tile_data.world_position - (corner_texture.get_size() * 0.5)
 			wall_container.add_child(corner_sprite)
 			overlays.append(corner_sprite)
+			if not edges_consumed_by_corners.has(dir_a):
+				edges_consumed_by_corners.append(dir_a)
+			if not edges_consumed_by_corners.has(dir_b):
+				edges_consumed_by_corners.append(dir_b)
+
+	# Step 3: render straight wall panels only for edges NOT consumed by corners
+	var edge_texture_map: Dictionary = {
+		Vector2i(1, 0): WALL_TEXTURE_SE,
+		Vector2i(-1, 0): WALL_TEXTURE_NW,
+		Vector2i(0, 1): WALL_TEXTURE_SW,
+		Vector2i(0, -1): WALL_TEXTURE_NE,
+	}
+
+	for edge_dir in wall_edge_dirs:
+		if edges_consumed_by_corners.has(edge_dir):
+			continue
+		var wall_texture: Texture2D = edge_texture_map[edge_dir]
+		var wall_sprite := Sprite2D.new()
+		wall_sprite.texture = wall_texture
+		wall_sprite.centered = false
+		wall_sprite.z_index = -13
+		wall_sprite.position = tile_data.world_position - (wall_texture.get_size() * 0.5)
+		wall_container.add_child(wall_sprite)
+		overlays.append(wall_sprite)
 
 	if not overlays.is_empty():
 		_wall_sprites_by_grid[grid_pos] = overlays
