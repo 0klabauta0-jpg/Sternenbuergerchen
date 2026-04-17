@@ -3,6 +3,7 @@
 		{
 			"type_id": "ground_flat",
 			"display_name": "Boden (flach)",
+			"texture_path": "res://Assets/kenney_space-kit/Isometric/terrain_SW.png",
 			"surface_type": "ground",
 			"walkable": true,
 			"blocks_los": false,
@@ -12,6 +13,7 @@
 		{
 			"type_id": "ground_elevated",
 			"display_name": "Boden (erhoeht)",
+			"texture_path": "res://Assets/kenney_space-kit/Isometric/terrain_SW.png",
 			"surface_type": "ground",
 			"walkable": true,
 			"blocks_los": false,
@@ -21,6 +23,7 @@
 		{
 			"type_id": "ground_high",
 			"display_name": "Boden (hoch)",
+			"texture_path": "res://Assets/kenney_space-kit/Isometric/terrain_SW.png",
 			"surface_type": "ground",
 			"walkable": true,
 			"blocks_los": false,
@@ -30,6 +33,7 @@
 		{
 			"type_id": "road_flat",
 			"display_name": "Strasse (flach)",
+			"texture_path": "res://Assets/kenney_space-kit/Isometric/terrain_roadStraight_SW.png",
 			"surface_type": "road",
 			"walkable": true,
 			"blocks_los": false,
@@ -39,6 +43,7 @@
 		{
 			"type_id": "road_elevated",
 			"display_name": "Strasse (erhoeht)",
+			"texture_path": "res://Assets/kenney_space-kit/Isometric/terrain_roadStraight_SW.png",
 			"surface_type": "road",
 			"walkable": true,
 			"blocks_los": false,
@@ -125,86 +130,6 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"height_level": 0
-		},
-		{
-			"type_id": "corridor_wall_sw",
-			"display_name": "Korridor-Wand SW",
-			"texture_path": "res://Assets/kenney_space-kit/Isometric/corridor_wall_SW.png",
-			"surface_type": "rock",
-			"walkable": false,
-			"blocks_los": true,
-			"cover_value": 50,
-			"height_level": 1
-		},
-		{
-			"type_id": "corridor_wall_ne",
-			"display_name": "Korridor-Wand NE",
-			"texture_path": "res://Assets/kenney_space-kit/Isometric/corridor_wall_NE.png",
-			"surface_type": "rock",
-			"walkable": false,
-			"blocks_los": true,
-			"cover_value": 50,
-			"height_level": 1
-		},
-		{
-			"type_id": "corridor_wall_se",
-			"display_name": "Korridor-Wand SE",
-			"texture_path": "res://Assets/kenney_space-kit/Isometric/corridor_wall_SE.png",
-			"surface_type": "rock",
-			"walkable": false,
-			"blocks_los": true,
-			"cover_value": 50,
-			"height_level": 1
-		},
-		{
-			"type_id": "corridor_wall_nw",
-			"display_name": "Korridor-Wand NW",
-			"texture_path": "res://Assets/kenney_space-kit/Isometric/corridor_wall_NW.png",
-			"surface_type": "rock",
-			"walkable": false,
-			"blocks_los": true,
-			"cover_value": 50,
-			"height_level": 1
-		},
-		{
-			"type_id": "corridor_wall_corner_sw",
-			"display_name": "Korridor-Ecke SW",
-			"texture_path": "res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_SW.png",
-			"surface_type": "rock",
-			"walkable": false,
-			"blocks_los": true,
-			"cover_value": 50,
-			"height_level": 1
-		},
-		{
-			"type_id": "corridor_wall_corner_ne",
-			"display_name": "Korridor-Ecke NE",
-			"texture_path": "res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_NE.png",
-			"surface_type": "rock",
-			"walkable": false,
-			"blocks_los": true,
-			"cover_value": 50,
-			"height_level": 1
-		},
-		{
-			"type_id": "corridor_wall_corner_se",
-			"display_name": "Korridor-Ecke SE",
-			"texture_path": "res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_SE.png",
-			"surface_type": "rock",
-			"walkable": false,
-			"blocks_los": true,
-			"cover_value": 50,
-			"height_level": 1
-		},
-		{
-			"type_id": "corridor_wall_corner_nw",
-			"display_name": "Korridor-Ecke NW",
-			"texture_path": "res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_NW.png",
-			"surface_type": "rock",
-			"walkable": false,
-			"blocks_los": true,
-			"cover_value": 50,
-			"height_level": 1
 		}
 	]
 }

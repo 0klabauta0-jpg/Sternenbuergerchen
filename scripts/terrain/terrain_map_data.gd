@@ -77,6 +77,7 @@ static func create_empty(
 				"from_dict",
 				{
 					"tile_id": "tile_%d_%d" % [x, y],
+					"type_id": "ground_flat",
 					"grid_position": grid_position,
 					"world_position": terrain_map_data._grid_to_world(grid_position),
 					"walkable": TERRAIN_TILE_DATA_SCRIPT.DEFAULT_WALKABLE,

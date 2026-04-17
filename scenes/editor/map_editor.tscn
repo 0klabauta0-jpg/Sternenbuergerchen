@@ -7,7 +7,7 @@ script = ExtResource("1_script")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 enabled = true
-zoom = Vector2(1.2, 1.2)
+zoom = Vector2(0.3, 0.3)
 
 [node name="TileContainer" type="Node2D" parent="."]
 

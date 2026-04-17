@@ -16,15 +16,15 @@ const CLIFF_CORNER_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isomet
 const DEFAULT_MAP_PATH: String = "res://maps/test_mission.json"
 const DEFAULT_NEW_MAP_PATH: String = "res://maps/new_map.json"
 const DEFAULT_NEW_MAP_NAME: String = "new_map"
-const DEFAULT_GRID_SIZE: Vector2i = Vector2i(8, 8)
-const DEFAULT_GRID_ORIGIN: Vector2 = Vector2(448.0, 157.0)
+const DEFAULT_GRID_SIZE: Vector2i = Vector2i(64, 64)
+const DEFAULT_GRID_ORIGIN: Vector2 = Vector2(0.0, 0.0)
 const DEFAULT_HALF_TILE_WIDTH: float = 64.0
 const DEFAULT_HALF_TILE_HEIGHT: float = 32.0
-const MIN_CAMERA_ZOOM: float = 0.5
+const MIN_CAMERA_ZOOM: float = 0.1
 const MAX_CAMERA_ZOOM: float = 3.0
-const CAMERA_ZOOM_STEP: float = 0.1
+const CAMERA_ZOOM_STEP: float = 0.05
 
-@export var map_file_path: String = DEFAULT_MAP_PATH
+@export var map_file_path: String = ""
 
 var _terrain_map_data = null
 var _terrain_registry = null
