@@ -2,6 +2,7 @@ extends Node
 
 const OBJECTIVE_STATUS_SCRIPT: GDScript = preload("res://scripts/core/objective_status.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
+const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
 
 @export var team_id: String = "team_alpha"
@@ -17,6 +18,7 @@ const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_ros
 @export var respawn_manager_path: NodePath
 @export var enemy_wave_controller_path: NodePath
 @export var terrain_registry_path: NodePath
+@export var map_file_path: String = "res://maps/test_mission.json"
 
 var _is_initialized: bool = false
 
@@ -189,9 +191,60 @@ func _setup_terrain_registry():
 	if not terrain_registry.has_method("clear_tiles") or not terrain_registry.has_method("configure_iso_grid") or not terrain_registry.has_method("register_tile"):
 		return terrain_registry
 
+	if _try_load_terrain_from_json(terrain_registry):
+		return terrain_registry
+
+	_setup_terrain_from_hardcode(terrain_registry)
+	return terrain_registry
+
+
+func _try_load_terrain_from_json(terrain_registry) -> bool:
+	if map_file_path.is_empty() or not FileAccess.file_exists(map_file_path):
+		return false
+
+	var terrain_map_data = TERRAIN_MAP_DATA_SCRIPT.call("load_from_file", map_file_path)
+	if terrain_map_data == null or terrain_map_data.call("get_tiles").is_empty():
+		return false
+
+	var tile_size: Dictionary = terrain_map_data.call("get_tile_size")
+	terrain_registry.call("clear_tiles")
+	terrain_registry.call(
+		"configure_iso_grid",
+		terrain_map_data.call("get_grid_origin"),
+		float(tile_size.get("half_width", 64.0)),
+		float(tile_size.get("half_height", 32.0))
+	)
+
+	var terrain_root: Node = get_node_or_null("../MapRoot/Terrain")
+	for tile_data in terrain_map_data.call("get_tiles"):
+		terrain_registry.call("register_tile", tile_data)
+		if terrain_root != null:
+			var tile_sprite := _find_tile_sprite_at(terrain_root, tile_data.world_position)
+			_apply_terrain_tile_visual(tile_sprite, tile_data)
+
+	return true
+
+
+func _find_tile_sprite_at(terrain_root: Node, world_position: Vector2) -> Sprite2D:
+	var best_sprite: Sprite2D = null
+	var best_distance: float = INF
+	for child in terrain_root.get_children():
+		if not child is Sprite2D:
+			continue
+
+		var tile_center: Vector2 = _get_tile_world_center(child)
+		var distance: float = tile_center.distance_squared_to(world_position)
+		if distance < best_distance:
+			best_distance = distance
+			best_sprite = child
+
+	return best_sprite
+
+
+func _setup_terrain_from_hardcode(terrain_registry) -> void:
 	var terrain_root: Node = get_node_or_null("../MapRoot/Terrain")
 	if terrain_root == null:
-		return terrain_registry
+		return
 
 	var terrain_tiles: Array = []
 	for child in terrain_root.get_children():
@@ -199,7 +252,7 @@ func _setup_terrain_registry():
 			terrain_tiles.append(child)
 
 	if terrain_tiles.is_empty():
-		return terrain_registry
+		return
 
 	var first_tile: Sprite2D = terrain_tiles[0]
 	var second_tile: Sprite2D = terrain_tiles[1] if terrain_tiles.size() > 1 else null
@@ -230,7 +283,6 @@ func _setup_terrain_registry():
 		terrain_registry.call("register_tile", tile_data)
 		_apply_terrain_tile_visual(terrain_tile, tile_data)
 
-	return terrain_registry
 
 
 func _apply_unit_identity_preset(unit, unit_id: String, unit_team_id: String) -> void:

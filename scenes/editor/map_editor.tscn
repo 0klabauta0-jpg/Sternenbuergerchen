@@ -20,44 +20,140 @@ z_index = 40
 [node name="UI" type="CanvasLayer" parent="."]
 layer = 10
 
+[node name="TopBar" type="PanelContainer" parent="UI"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 40.0
+grow_horizontal = 2
+
+[node name="Margin" type="MarginContainer" parent="UI/TopBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 4
+
+[node name="HBox" type="HBoxContainer" parent="UI/TopBar/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TitleLabel" type="Label" parent="UI/TopBar/Margin/HBox"]
+layout_mode = 2
+text = "Map Editor"
+
+[node name="PathLabel" type="Label" parent="UI/TopBar/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "(unsaved)"
+
+[node name="BrushButton" type="Button" parent="UI/TopBar/Margin/HBox"]
+layout_mode = 2
+toggle_mode = true
+text = "Brush"
+
+[node name="UndoButton" type="Button" parent="UI/TopBar/Margin/HBox"]
+layout_mode = 2
+text = "Undo"
+
+[node name="NewMapButton" type="Button" parent="UI/TopBar/Margin/HBox"]
+layout_mode = 2
+text = "New"
+
+[node name="LoadButton" type="Button" parent="UI/TopBar/Margin/HBox"]
+layout_mode = 2
+text = "Load"
+
+[node name="SaveButton" type="Button" parent="UI/TopBar/Margin/HBox"]
+layout_mode = 2
+text = "Save"
+
 [node name="PropertyPanel" type="PanelContainer" parent="UI"]
-offset_left = 930.0
-offset_top = 24.0
-offset_right = 1260.0
-offset_bottom = 320.0
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = 44.0
+grow_horizontal = 0
 
 [node name="Margin" type="MarginContainer" parent="UI/PropertyPanel"]
-offset_left = 8.0
-offset_top = 8.0
-offset_right = 322.0
-offset_bottom = 288.0
+layout_mode = 2
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 12
 
 [node name="VBox" type="VBoxContainer" parent="UI/PropertyPanel/Margin"]
-offset_right = 290.0
-offset_bottom = 256.0
+layout_mode = 2
 theme_override_constants/separation = 8
 
 [node name="TitleLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
 text = "Tile Properties"
 
 [node name="TileLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
 text = "Tile: -"
 
-[node name="WalkableLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox"]
-text = "walkable: -"
+[node name="WalkableCheckBox" type="CheckBox" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
+text = "Walkable"
+disabled = true
 
-[node name="BlocksLosLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox"]
-text = "blocks_los: -"
+[node name="BlocksLosCheckBox" type="CheckBox" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
+text = "Blocks LOS"
+disabled = true
 
-[node name="CoverValueLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox"]
-text = "cover_value: -"
+[node name="CoverRow" type="HBoxContainer" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
 
-[node name="HeightLevelLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox"]
-text = "height_level: -"
+[node name="CoverLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox/CoverRow"]
+layout_mode = 2
+text = "Cover:"
 
-[node name="SurfaceTypeLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox"]
-text = "surface_type: -"
+[node name="CoverSpinBox" type="SpinBox" parent="UI/PropertyPanel/Margin/VBox/CoverRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 100.0
+step = 1.0
+editable = false
+
+[node name="HeightRow" type="HBoxContainer" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="HeightLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox/HeightRow"]
+layout_mode = 2
+text = "Height:"
+
+[node name="HeightSpinBox" type="SpinBox" parent="UI/PropertyPanel/Margin/VBox/HeightRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 3.0
+step = 1.0
+editable = false
+
+[node name="SurfaceRow" type="HBoxContainer" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="SurfaceLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox/SurfaceRow"]
+layout_mode = 2
+text = "Surface:"
+
+[node name="SurfaceOptionButton" type="OptionButton" parent="UI/PropertyPanel/Margin/VBox/SurfaceRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+disabled = true
+
+[node name="LoadDialog" type="FileDialog" parent="UI"]
+title = "Load Map"
+size = Vector2i(600, 400)
+exclusive = true
+
+[node name="DirtyConfirmDialog" type="ConfirmationDialog" parent="UI"]
+title = "Unsaved Changes"
+size = Vector2i(400, 150)
+dialog_text = "Ungespeicherte Aenderungen gehen verloren. Fortfahren?"
