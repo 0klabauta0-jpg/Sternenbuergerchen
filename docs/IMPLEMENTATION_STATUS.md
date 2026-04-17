@@ -339,3 +339,45 @@
 - Offene Punkte: keine Sortierung, keine Vergleichsansicht, keine tiefe Detailseite und keine optionale Farbcodierung.
 - Risiken: der Homebase-Pfad bleibt bewusst eine kleine Listenlesbarkeit ohne neue Registry oder Persistenzschicht; spaetere Meta-UI sollte diesen Preview-Ansatz explizit ersetzen, wenn ein echtes Daten-/Roster-System eingefuehrt wird.
 - Naechster Schritt: den Slice lokal gegen Mission und Meta-Layer pruefen und dann fuer die naechsten Netzwerk-/Terrain-Aufgaben stabilisieren.
+
+### TASK_054 - Terrain-Tile-Datenmodell und Registry
+- Status: implementiert
+- Stand: `TerrainTileData` unter `res://scripts/terrain/terrain_tile_data.gd` und `TerrainRegistry` unter `res://scripts/terrain/terrain_registry.gd` bilden jetzt ein kleines datenbasiertes Terrain-System mit `walkable`, `blocks_los`, `cover_value`, `height_level` und `surface_type`. Die Missions-Testszene besitzt einen eigenen `TerrainRegistry`-Node, und `MissionTestSetup` liest die bestehenden 64 Iso-Tiles aus `MapRoot/Terrain`, konfiguriert die Iso-Grid-Konvertierung passend zur bestehenden Karte und registriert alle Tiles mit Default- bzw. Szenenwerten.
+- Offene Punkte: noch kein Editor fuer Terrain-Daten, keine separate Tile-Registry ueber mehrere Karten und keine Gameplay-Wirkung ausser den folgenden Terrain-Tasks.
+- Risiken: die Grid-Konvertierung ist bewusst auf die bestehende 8x8-Iso-Testkarte zugeschnitten; spaetere Kartenvarianten sollten diese kleine Konfiguration explizit erweitern statt still neue Koordinatenannahmen in Mission-Glue zu streuen.
+- Naechster Schritt: die neuen Tile-Daten fuer Bewegung ueber A*-Pfadsuche auswerten.
+
+### TASK_055 - Walkability und einfaches A*-Pathfinding
+- Status: implementiert
+- Stand: `TerrainPathfinder` unter `res://scripts/terrain/terrain_pathfinder.gd` fuehrt jetzt eine kleine A*-Suche auf dem Iso-Grid aus und beruecksichtigt `walkable`, Hoehenunterschiede sowie vorbereitete Surface-Kosten. `SimulationRoot` nutzt die `TerrainRegistry` jetzt optional fuer `move_to_position`: wenn Terrain-Daten vorhanden sind, wird ein Wegpunktpfad aufgebaut und tile-basiert abgegangen; ohne Registry bleibt der bisherige Geradlinien-Fallback erhalten. `MissionTestSetup` markiert einige Tiles als nicht begehbar, damit der Pfad sichtbar um die Blocker fuehrt.
+- Offene Punkte: keine lokale Kollisionsvermeidung zwischen Units, keine Pfad-Neuberechnung bei dynamischen Aenderungen und keine feinere Optimierung ueber den kleinen 64-Tile-Testfall hinaus.
+- Risiken: der Pfad wird bewusst klein und command-lokal gespeichert; spaetere groeßere Karten oder dynamische Hindernisse sollten einen expliziten Recompute-Pfad bekommen statt diese V1-Logik still zu ueberladen.
+- Naechster Schritt: Sichtlinien an die Terrain-Tiles binden.
+
+### TASK_056 - LOS ueber Terrain-Tiles
+- Status: implementiert
+- Stand: `LineOfSightSystem` unterstuetzt jetzt optionale Terrain-Registries und prueft per einfachem Tile-Stepping, ob `blocks_los`-Tiles zwischen Quelle und Ziel liegen. Dabei wird die vorbereitete Hoehenregel direkt beruecksichtigt: hoehere Einheiten koennen ueber niedrigere Hindernisse hinwegsehen. `MissionCombatLoopDriver` gibt die `TerrainRegistry` an alle LOS-Aufrufe weiter, sodass Contact und Enemy-Hold-Checks auf der Testkarte jetzt von Terrain-Blockern beeinflusst werden.
+- Offene Punkte: keine Raycasts, keine partielle Deckung, keine feingranulare Sichtkanal- oder FOW-Regel pro Spieler.
+- Risiken: der LOS-Pfad bleibt bewusst grob tile-basiert; spaetere komplexere Hindernisse oder echte FoW-Systeme muessen diesen einfachen Sichtpfad explizit erweitern statt ihn nebenbei auszutauschen.
+- Naechster Schritt: Terrain-Cover mit der bestehenden Command-/Phase-Coverlogik kombinieren.
+
+### TASK_057 - Cover aus Terrain-Tiles
+- Status: implementiert
+- Stand: `SimulationRoot` addiert jetzt Terrain-Cover vom Tile der Ziel-Unit auf den bestehenden `cover_score` aus Command und Phase und klemmt den effektiven Cover-Wert auf maximal 80. `MissionTestSetup` versieht mehrere Tiles mit leichter oder mittlerer Deckung, und `TestUnit` zeigt den aktuellen effektiven Deckungswert direkt im Debug-Label als `COV:x` an.
+- Offene Punkte: keine richtungsabhaengige Deckung, keine zerstoerbaren Cover-Objekte und keine Deckungssuche-KI.
+- Risiken: Terrain-Cover bleibt bewusst symmetrisch und tile-zentriert; spaetere echte Deckungssysteme sollten diesen V1-Wert explizit differenzieren statt Command- und Terrain-Cover still zu vermischen.
+- Naechster Schritt: Hoehenstufen auch fuer Bewegung und Trefferqualitaet auswerten.
+
+### TASK_058 - Hoehenstufen
+- Status: implementiert
+- Stand: die Testkarte besitzt jetzt mehrere Tiles mit `height_level` 1 und 2; `MissionTestSetup` moduliert diese Tiles leicht heller, damit Hoehenzonen sichtbar bleiben. `TerrainPathfinder` blockiert Bewegungen ueber Cliffs mit Hoehenunterschied > 1, `LineOfSightSystem` nutzt Hoehen fuer Blockadeentscheidungen, und `SimulationRoot` gibt Angreifern auf hoeherem Terrain einen Accuracy-Bonus bzw. bei Hoehennachteil eine kleine Penalty. `TestUnit` zeigt die aktuelle Hoehenstufe als `H:x` direkt im Debug-Label.
+- Offene Punkte: keine Rampen-/Treppenlogik, keine echte Iso-Stack-Darstellung und keine weiteren Hoehenfolgen wie Fallschaden.
+- Risiken: die Hoehenzonen bleiben bewusst eine leichte 2D-Modulation ueber dem bestehenden Kartensprite; spaetere Karten sollten diese Datenbasis behalten, statt Hoehen still in separate Spezialpfade aufzuteilen.
+- Naechster Schritt: verschiedene Oberflaechentypen auf Bewegung und Pfadkosten anwenden.
+
+### TASK_059 - Strassen und Oberflaechen
+- Status: implementiert
+- Stand: `TerrainTileData` kennt jetzt die Oberflaechentypen `ground`, `road`, `sand` und `rock` samt Speed- und Pfadkostenfaktoren. `SimulationRoot` multipliziert das Bewegungstempo mit dem aktuellen Surface-Speed-Faktor des Tiles unter der Unit, `TerrainPathfinder` bevorzugt dadurch Strassen und meidet Sand oder Fels, und `MissionTestSetup` markiert mehrere Strassen-, Sand- und Felszonen mit passender Farbmodulation direkt auf der Testkarte. `TestUnit` zeigt den aktuellen Surface-Code samt Speed-Faktor, z.B. `RD:1.4`, im Debug-Label.
+- Offene Punkte: keine Audio-/Sichtbarkeitsfolgen, keine fahrzeugspezifischen Terrain-Regeln und keine dynamischen Oberflaechenveraenderungen.
+- Risiken: die Oberflaechenwirkung bleibt bewusst ein einfacher Bewegungs- und Kostenmodifikator; spaetere Systeme fuer Wetter, Fahrzeuge oder Spezialeinheiten sollten diese Daten explizit erweitern statt neue, parallele Terrain-Kategorien einzufuehren.
+- Naechster Schritt: den Terrain-Slice lokal stabil halten und erst danach den spaeteren Multiplayer-Block gemaess Roadmap angehen.

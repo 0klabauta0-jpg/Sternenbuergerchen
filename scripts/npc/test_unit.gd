@@ -2,6 +2,7 @@ class_name TestUnit
 extends Node2D
 
 const COMMANDER_COMMAND_SCRIPT: GDScript = preload("res://scripts/command/commander_command.gd")
+const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const UNIT_SKILLS_SCRIPT: GDScript = preload("res://scripts/npc/unit_skills.gd")
 const UNIT_TRAIT_SCRIPT: GDScript = preload("res://scripts/npc/unit_trait.gd")
 const UNIT_RUNTIME_STATUS_SCRIPT: GDScript = preload("res://scripts/npc/unit_runtime_status.gd")
@@ -47,6 +48,7 @@ var _event_time_remaining: float = 0.0
 var _contact_active: bool = false
 var _contact_target_id: String = ""
 var _respawn_manager = null
+var _terrain_registry = null
 
 
 func _ready() -> void:
@@ -152,6 +154,31 @@ func get_toughness_skill() -> float:
 	return float(_skills.toughness)
 
 
+func get_effective_cover_score() -> int:
+	return int(roundi(clampf(get_cover_score() + _get_terrain_cover_bonus(), 0.0, 80.0)))
+
+
+func get_height_level() -> int:
+	if _terrain_registry == null or not _terrain_registry.has_method("get_height_at_world"):
+		return 0
+
+	return int(_terrain_registry.call("get_height_at_world", global_position))
+
+
+func get_surface_type() -> String:
+	if _terrain_registry == null or not _terrain_registry.has_method("get_surface_type_at_world"):
+		return TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFACE_TYPE
+
+	return String(_terrain_registry.call("get_surface_type_at_world", global_position))
+
+
+func get_surface_speed_factor() -> float:
+	if _terrain_registry == null or not _terrain_registry.has_method("get_surface_speed_factor_at_world"):
+		return 1.0
+
+	return float(_terrain_registry.call("get_surface_speed_factor_at_world", global_position))
+
+
 func get_traits() -> Array:
 	return _traits.duplicate()
 
@@ -241,6 +268,15 @@ func set_fireteam_id(next_fireteam_id: String) -> bool:
 
 func set_respawn_manager(respawn_manager) -> void:
 	_respawn_manager = respawn_manager
+	_refresh_readability()
+
+
+func set_terrain_registry(terrain_registry) -> void:
+	_terrain_registry = terrain_registry
+	_refresh_readability()
+
+
+func refresh_terrain_readability() -> void:
 	_refresh_readability()
 
 
@@ -591,6 +627,10 @@ func _refresh_status_label() -> void:
 	if not secondary_status_label.is_empty():
 		lines.append(secondary_status_label)
 
+	var terrain_status_label: String = _build_terrain_status_label()
+	if not terrain_status_label.is_empty():
+		lines.append(terrain_status_label)
+
 	lines.append(get_skill_summary_text())
 	var trait_summary_text: String = get_trait_summary_text()
 	if not trait_summary_text.is_empty():
@@ -697,6 +737,22 @@ func _build_secondary_status_label() -> String:
 	return " ".join(parts)
 
 
+func _build_terrain_status_label() -> String:
+	var effective_cover: int = get_effective_cover_score()
+	var height_level: int = get_height_level()
+	var surface_type: String = get_surface_type()
+	var surface_speed_factor: float = get_surface_speed_factor()
+	if _terrain_registry == null and effective_cover <= 0 and height_level <= 0 and surface_type == TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFACE_TYPE:
+		return ""
+
+	return "COV:%d H:%d %s:%.1f" % [
+		effective_cover,
+		height_level,
+		TERRAIN_TILE_DATA_SCRIPT.get_surface_short_code(surface_type),
+		surface_speed_factor,
+	]
+
+
 func _build_status_label_color() -> Color:
 	if String(_vital_status.state) == "down":
 		return Color(1.0, 0.78, 0.78, 1.0)
@@ -736,6 +792,13 @@ func _get_respawn_remaining_seconds() -> int:
 		return 0
 
 	return maxi(int(ceili(float(_respawn_manager.call("get_remaining_time", unit_id)))), 0)
+
+
+func _get_terrain_cover_bonus() -> float:
+	if _terrain_registry == null or not _terrain_registry.has_method("get_cover_at_world"):
+		return 0.0
+
+	return float(_terrain_registry.call("get_cover_at_world", global_position))
 
 
 func _rebuild_identity_data() -> void:

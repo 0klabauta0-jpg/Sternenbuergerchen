@@ -33,6 +33,7 @@ signal combat_resolved(mission_result: Dictionary)
 @export var enemy_unit_paths: Array[NodePath] = []
 @export var respawn_manager_path: NodePath
 @export var enemy_wave_controller_path: NodePath
+@export var terrain_registry_path: NodePath
 
 var _los_system = LOS_SYSTEM_SCRIPT.new()
 var _queued_bleedout_by_unit_id: Dictionary = {}
@@ -285,7 +286,7 @@ func _is_target_attackable(attacker, target) -> bool:
 	if String(attacker.call("get_team_id")) == String(target.call("get_team_id")):
 		return false
 
-	return _los_system.has_line_of_sight_between_nodes(attacker, target, contact_range)
+	return _los_system.has_line_of_sight_between_nodes(attacker, target, contact_range, _get_terrain_registry())
 
 
 func _can_target_receive_attack(unit) -> bool:
@@ -789,7 +790,7 @@ func _enemy_should_hold_position(enemy) -> bool:
 		if friendly == null or not _can_target_receive_attack(friendly):
 			continue
 
-		if not _los_system.has_line_of_sight_between_nodes(enemy, friendly, contact_range):
+		if not _los_system.has_line_of_sight_between_nodes(enemy, friendly, contact_range, _get_terrain_registry()):
 			continue
 
 		if (enemy as Node2D).global_position.distance_to((friendly as Node2D).global_position) <= enemy_engage_distance:
@@ -914,6 +915,17 @@ func _get_enemy_wave_controller():
 		return null
 
 	return get_node_or_null(enemy_wave_controller_path)
+
+
+func _get_terrain_registry():
+	if not terrain_registry_path.is_empty():
+		return get_node_or_null(terrain_registry_path)
+
+	var simulation_root = get_node_or_null(simulation_root_path)
+	if simulation_root == null or not simulation_root.has_method("_get_terrain_registry"):
+		return null
+
+	return simulation_root.call("_get_terrain_registry")
 
 
 func _has_pending_enemy_waves() -> bool:

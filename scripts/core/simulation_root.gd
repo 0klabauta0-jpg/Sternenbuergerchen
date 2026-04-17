@@ -6,15 +6,19 @@ signal tick_processed(tick: int)
 const MOVE_SPEED_PER_SECOND: float = 120.0
 const DAMAGE_MODEL_SCRIPT: GDScript = preload("res://scripts/core/damage_model.gd")
 const OBJECTIVE_STATUS_SCRIPT: GDScript = preload("res://scripts/core/objective_status.gd")
+const TERRAIN_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_pathfinder.gd")
+const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const CAPTURE_PROGRESS_PER_TICK: float = 0.01
 
 @export var unit_registry_path: NodePath
+@export var terrain_registry_path: NodePath
 
 var command_queue: Array = []
 var effects_queue: Array = []
 var tick_counter: int = 0
 var is_processing_tick: bool = false
 var _objective_status: RefCounted = null
+var _terrain_pathfinder = TERRAIN_PATHFINDER_SCRIPT.new()
 
 
 func enqueue_command(cmd: Dictionary) -> void:
@@ -231,23 +235,117 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 		unit.call("set_target_position", target_position)
 
 	var node_2d: Node2D = unit
-	var current_position: Vector2 = node_2d.position
-	var direction: Vector2 = target_position - current_position
 	var move_speed_factor: float = _extract_move_speed_factor(cmd, unit)
 	if move_speed_factor <= 0.0:
 		return
 
+	var terrain_registry = _get_terrain_registry()
+	if terrain_registry != null:
+		_apply_move_command_with_terrain(cmd, node_2d, target_position, move_speed_factor, delta, terrain_registry)
+		return
+
+	var current_position: Vector2 = node_2d.position
+	var direction: Vector2 = target_position - current_position
 	var step_distance: float = MOVE_SPEED_PER_SECOND * move_speed_factor * delta
 	if direction.length() <= step_distance:
 		node_2d.position = target_position
+		if unit.has_method("refresh_terrain_readability"):
+			unit.call("refresh_terrain_readability")
 		return
 
 	if direction.is_zero_approx():
 		return
 
 	node_2d.position = current_position + direction.normalized() * step_distance
+	if unit.has_method("refresh_terrain_readability"):
+		unit.call("refresh_terrain_readability")
 	if bool(cmd.get("requeue_until_target", true)):
 		enqueue_command(cmd.duplicate(true))
+
+
+func _apply_move_command_with_terrain(
+	cmd: Dictionary,
+	unit_node: Node2D,
+	target_position: Vector2,
+	move_speed_factor: float,
+	delta: float,
+	terrain_registry
+) -> void:
+	var path_world_points: Array = _extract_or_build_path_world_points(cmd, unit_node.global_position, target_position, terrain_registry)
+	if path_world_points.is_empty():
+		return
+
+	var current_position: Vector2 = unit_node.global_position
+	var step_distance: float = MOVE_SPEED_PER_SECOND * move_speed_factor * _extract_surface_speed_factor(unit_node) * delta
+	while step_distance > 0.0 and not path_world_points.is_empty():
+		var next_waypoint: Vector2 = _coerce_vector2(path_world_points[0], target_position)
+		var direction_to_waypoint: Vector2 = next_waypoint - current_position
+		if direction_to_waypoint.is_zero_approx():
+			path_world_points.pop_front()
+			continue
+
+		var distance_to_waypoint: float = direction_to_waypoint.length()
+		if distance_to_waypoint <= step_distance:
+			current_position = next_waypoint
+			step_distance -= distance_to_waypoint
+			path_world_points.pop_front()
+			continue
+
+		current_position += direction_to_waypoint.normalized() * step_distance
+		step_distance = 0.0
+
+	unit_node.global_position = current_position
+	cmd["path"] = path_world_points.duplicate(true)
+	if unit_node.has_method("refresh_terrain_readability"):
+		unit_node.call("refresh_terrain_readability")
+
+	if bool(cmd.get("requeue_until_target", true)) and (not path_world_points.is_empty() or current_position.distance_to(target_position) > 0.5):
+		enqueue_command(cmd.duplicate(true))
+
+
+func _extract_or_build_path_world_points(
+	cmd: Dictionary,
+	current_position: Vector2,
+	target_position: Vector2,
+	terrain_registry
+) -> Array:
+	var existing_path: Array = []
+	var raw_path: Variant = cmd.get("path", [])
+	if raw_path is Array:
+		existing_path = (raw_path as Array).duplicate(true)
+
+	if not existing_path.is_empty():
+		return existing_path
+
+	var path_world_points: Array = _build_path_world_points(current_position, target_position, terrain_registry)
+	cmd["path"] = path_world_points.duplicate(true)
+	return path_world_points
+
+
+func _build_path_world_points(current_position: Vector2, target_position: Vector2, terrain_registry) -> Array:
+	var path_world_points: Array = []
+	if terrain_registry == null or _terrain_pathfinder == null:
+		path_world_points.append(target_position)
+		return path_world_points
+
+	var from_grid: Vector2i = terrain_registry.call("world_to_grid", current_position)
+	var to_grid: Vector2i = terrain_registry.call("world_to_grid", target_position)
+	var path_grid_points: Array = _terrain_pathfinder.find_path(from_grid, to_grid, terrain_registry)
+	if path_grid_points.is_empty():
+		if from_grid == to_grid:
+			path_world_points.append(target_position)
+			return path_world_points
+
+		push_warning("SimulationRoot could not build a terrain path for move command.")
+		return path_world_points
+
+	for index in range(1, path_grid_points.size()):
+		path_world_points.append(terrain_registry.call("grid_to_world", path_grid_points[index]))
+
+	if path_world_points.is_empty() or _coerce_vector2(path_world_points[-1], target_position).distance_to(target_position) > 0.5:
+		path_world_points.append(target_position)
+
+	return path_world_points
 
 
 func _apply_damage_effect(effect: Dictionary) -> void:
@@ -282,12 +380,16 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		return
 
 	var attacker_unit = _resolve_attacker_unit(attacker_unit_id)
-	var target_cover_score: float = _extract_unit_cover_score(unit)
+	var target_cover_score: float = _extract_effective_cover_score(unit)
 	var attacker_attack_bonus: float = _extract_unit_attack_bonus(attacker_unit)
 	var attacker_cover_score: float = _extract_unit_cover_score(attacker_unit)
 	var hit_chance: float = _extract_float(effect.get("hit_chance", 1.0), 1.0)
 	hit_chance *= _extract_unit_accuracy_multiplier(attacker_unit)
-	hit_chance = clampf(hit_chance + attacker_attack_bonus + (attacker_cover_score * 0.05) - (target_cover_score * 0.35), 0.05, 0.95)
+	hit_chance = clampf(
+		hit_chance + attacker_attack_bonus + _extract_height_accuracy_modifier(attacker_unit, unit) + (attacker_cover_score * 0.05) - (target_cover_score * 0.35),
+		0.05,
+		0.95
+	)
 	var roll_override: float = _extract_float(effect.get("roll_override", -1.0), -1.0)
 	var damage_multiplier: float = _extract_float(effect.get("damage_multiplier", 1.0), 1.0)
 	damage_multiplier = maxf(damage_multiplier + attacker_attack_bonus - (target_cover_score * 0.2), 0.1)
@@ -306,6 +408,7 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		"attacker_unit_id": attacker_unit_id,
 		"attacker_team_id": attacker_team_id,
 		"attacker_attack_bonus": attacker_attack_bonus,
+		"height_accuracy_modifier": _extract_height_accuracy_modifier(attacker_unit, unit),
 		"target_cover_score": target_cover_score,
 		"friendly_fire": is_friendly_fire,
 	}
@@ -337,6 +440,13 @@ func _get_unit_registry():
 	return get_node_or_null(unit_registry_path)
 
 
+func _get_terrain_registry():
+	if terrain_registry_path.is_empty():
+		return null
+
+	return get_node_or_null(terrain_registry_path)
+
+
 func _resolve_unit(unit_id: String):
 	var unit_registry = _get_unit_registry()
 	if unit_registry == null or not unit_registry.has_method("get_unit"):
@@ -360,11 +470,53 @@ func _extract_unit_cover_score(unit) -> float:
 	return float(unit.call("get_cover_score"))
 
 
+func _extract_effective_cover_score(unit) -> float:
+	var command_cover_score: float = _extract_unit_cover_score(unit)
+	var terrain_cover_score: float = _extract_terrain_cover_score(unit)
+	return clampf(command_cover_score + terrain_cover_score, 0.0, 80.0)
+
+
+func _extract_terrain_cover_score(unit) -> float:
+	var terrain_registry = _get_terrain_registry()
+	if terrain_registry == null or unit == null or not (unit is Node2D):
+		return 0.0
+
+	return float(terrain_registry.call("get_cover_at_world", (unit as Node2D).global_position))
+
+
 func _extract_unit_attack_bonus(unit) -> float:
 	if unit == null or not unit.has_method("get_attack_bonus"):
 		return 0.0
 
 	return float(unit.call("get_attack_bonus"))
+
+
+func _extract_height_accuracy_modifier(attacker_unit, target_unit) -> float:
+	var terrain_registry = _get_terrain_registry()
+	if terrain_registry == null or attacker_unit == null or target_unit == null:
+		return 0.0
+
+	if not (attacker_unit is Node2D) or not (target_unit is Node2D):
+		return 0.0
+
+	var attacker_height: int = int(terrain_registry.call("get_height_at_world", (attacker_unit as Node2D).global_position))
+	var target_height: int = int(terrain_registry.call("get_height_at_world", (target_unit as Node2D).global_position))
+	var height_difference: int = attacker_height - target_height
+	if height_difference > 0:
+		return 0.1 * float(height_difference)
+
+	if height_difference < 0:
+		return -0.05 * float(abs(height_difference))
+
+	return 0.0
+
+
+func _extract_surface_speed_factor(unit) -> float:
+	var terrain_registry = _get_terrain_registry()
+	if terrain_registry == null or unit == null or not (unit is Node2D):
+		return 1.0
+
+	return float(terrain_registry.call("get_surface_speed_factor_at_world", (unit as Node2D).global_position))
 
 
 func _extract_move_speed_factor(cmd: Dictionary, unit) -> float:
@@ -498,3 +650,13 @@ func _apply_respawn_effect(effect: Dictionary) -> void:
 		return
 
 	unit.call("respawn", spawn_position)
+
+
+func _coerce_vector2(value: Variant, fallback: Vector2) -> Vector2:
+	if value is Vector2:
+		return value
+
+	if value is Vector2i:
+		return Vector2(value.x, value.y)
+
+	return fallback
