@@ -965,11 +965,16 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 	# Step 2: detect corners - pairs of adjacent wall edges
 	# Corner pieces REPLACE the two straight panels they connect
 	# Corner textures diagonally swapped to match Kenney sprite orientation
+	# Corners offset to diamond vertex where the two walls meet
+	var tile_size: Dictionary = _terrain_map_data.call("get_tile_size")
+	var half_w: float = float(tile_size.get("half_width", DEFAULT_HALF_TILE_WIDTH))
+	var half_h: float = float(tile_size.get("half_height", DEFAULT_HALF_TILE_HEIGHT))
+
 	var corner_map: Array = [
-		[Vector2i(1, 0), Vector2i(0, 1), WALL_CORNER_NE],
-		[Vector2i(1, 0), Vector2i(0, -1), WALL_CORNER_NW],
-		[Vector2i(-1, 0), Vector2i(0, 1), WALL_CORNER_SE],
-		[Vector2i(-1, 0), Vector2i(0, -1), WALL_CORNER_SW],
+		[Vector2i(1, 0), Vector2i(0, 1), WALL_CORNER_NE, Vector2(0, half_h)],
+		[Vector2i(1, 0), Vector2i(0, -1), WALL_CORNER_NW, Vector2(half_w, 0)],
+		[Vector2i(-1, 0), Vector2i(0, 1), WALL_CORNER_SE, Vector2(-half_w, 0)],
+		[Vector2i(-1, 0), Vector2i(0, -1), WALL_CORNER_SW, Vector2(0, -half_h)],
 	]
 
 	var edges_consumed_by_corners: Array[Vector2i] = []
@@ -978,12 +983,13 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 		var dir_a: Vector2i = corner_entry[0]
 		var dir_b: Vector2i = corner_entry[1]
 		var corner_texture: Texture2D = corner_entry[2]
+		var corner_offset: Vector2 = corner_entry[3]
 		if wall_edge_dirs.has(dir_a) and wall_edge_dirs.has(dir_b):
 			var corner_sprite := Sprite2D.new()
 			corner_sprite.texture = corner_texture
 			corner_sprite.centered = false
 			corner_sprite.z_index = -12
-			corner_sprite.position = tile_data.world_position - (corner_texture.get_size() * 0.5)
+			corner_sprite.position = tile_data.world_position + corner_offset - (corner_texture.get_size() * 0.5)
 			wall_container.add_child(corner_sprite)
 			overlays.append(corner_sprite)
 			if not edges_consumed_by_corners.has(dir_a):
