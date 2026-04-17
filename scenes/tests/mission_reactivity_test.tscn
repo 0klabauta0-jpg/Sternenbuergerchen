@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scripts/core/simulation_root.gd" id="1_simulation"]
 [ext_resource type="Script" path="res://scripts/core/event_router.gd" id="2_router"]
@@ -13,6 +13,7 @@
 [ext_resource type="Script" path="res://scripts/tests/mission_tactical_sandbox_controller.gd" id="11_input"]
 [ext_resource type="Texture2D" path="res://Assets/kenney_space-kit/Isometric/astronautA_SW.png" id="12_astronaut_a"]
 [ext_resource type="Texture2D" path="res://Assets/kenney_space-kit/Isometric/astronautB_SW.png" id="13_astronaut_b"]
+[ext_resource type="PackedScene" path="res://scenes/maps/iso_map_v2_layout.tscn" id="14_map"]
 
 [node name="MissionReactivityTest" type="Node2D"]
 
@@ -22,6 +23,8 @@ offset_top = 16.0
 offset_right = 520.0
 offset_bottom = 212.0
 text = "Combat: waiting"
+
+[node name="MapRoot" parent="." instance=ExtResource("14_map")]
 
 [node name="SimulationRoot" type="Node" parent="."]
 script = ExtResource("1_simulation")
@@ -114,6 +117,10 @@ script = ExtResource("8_setup")
 runtime_leader_path = NodePath("../RuntimeLeader")
 unit_registry_path = NodePath("../UnitRegistry")
 ftl_registry_path = NodePath("../FTLRegistry")
+target_marker_path = NodePath("../TargetMarker")
+spawn_alpha_path = NodePath("../MapRoot/spawn_alpha")
+spawn_bravo_path = NodePath("../MapRoot/spawn_bravo")
+objective_point_path = NodePath("../MapRoot/objective_point")
 unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie"), NodePath("../EnemyDelta"), NodePath("../EnemyEcho")])
 
 [node name="AlphaFlowDriver" type="Node" parent="."]

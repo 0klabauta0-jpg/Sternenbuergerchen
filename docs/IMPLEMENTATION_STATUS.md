@@ -234,3 +234,10 @@
 - Offene Punkte: noch keine automatische Terrain-Erkennung auf Karten, keine Map-/Loader-Integration, keine Runtime-Nutzung in Movement, LOS, Cover oder Combat und keine Hoehen-/Cliff-Logik.
 - Risiken: die Registry ist bewusst eine kleine Datenbasis; spaetere Systeme muessen Terrain-Metadaten explizit konsumieren statt still Logik oder Karten-Scanning in die Registry zu ziehen.
 - Naechster Schritt: nur bei eigenem Task kleine Lesepfade an spaetere Map-/Terrain-Nutzung anbinden, ohne daraus ein grosses Tile-/Editor-System zu machen.
+
+### Iso Map V2 Layout
+- Status: implementiert
+- Stand: die Missions-Testszene nutzt jetzt wieder eine eigene flache Karten-Szene unter `res://scenes/maps/iso_map_v2_layout.tscn`, die ausschliesslich aus wiederholten `terrain_SW.png`-Kacheln aufgebaut ist. Die Karte bleibt bewusst ohne Gebaeude, ohne Cliff-Stufen und ohne zweite Hoehe. Die Richtungs-Konvention ist fuer diesen Pfad festgehalten: obere Kante = `N`, untere Kante = `S`, linke Kante = `W`, rechte Kante = `E`, obere linke Ecke = `NW`, obere rechte Ecke = `NE`, untere linke Ecke = `SW`, untere rechte Ecke = `SE`. `terrain_SW.png` bleibt unveraendert die Referenzkachel fuer `SW` = unten links / southwest; es wurde nichts frei gedreht. `MissionTestSetup` liest Spawn- und Objective-Marker direkt aus der Map-Szene und setzt Friendlys, Enemies sowie den Zielmarker daran ausgerichtet.
+- Offene Punkte: die Map ist weiterhin nur Struktur und Marker, keine Gameplay-Wahrheit; es gibt noch keine Terrain-Metadaten-Nutzung in Movement, LOS oder Cover und keine Hindernis- oder Hoehenlogik.
+- Risiken: die Karte verbessert Lesbarkeit und Spacing, aber LOS und Combat bleiben auf dem bestehenden Slice weiter systemseitig und nicht terrainbasiert. Spaetere Terrain-Daten sollten explizit als eigener Datenpfad folgen, statt still in die Szene hineinzuwachsen.
+- Naechster Schritt: nur bei eigenem Task gezielt weitere Terrain-Daten oder eine spaetere feine Layout-Iteration ergaenzen, ohne ein grosses Tile-/Registry-System vorzuziehen.
