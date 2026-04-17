@@ -241,3 +241,17 @@
 - Offene Punkte: die Map ist weiterhin nur Struktur und Marker, keine Gameplay-Wahrheit; es gibt noch keine Terrain-Metadaten-Nutzung in Movement, LOS oder Cover und keine Hindernis- oder Hoehenlogik.
 - Risiken: die Karte verbessert Lesbarkeit und Spacing, aber LOS und Combat bleiben auf dem bestehenden Slice weiter systemseitig und nicht terrainbasiert. Spaetere Terrain-Daten sollten explizit als eigener Datenpfad folgen, statt still in die Szene hineinzuwachsen.
 - Naechster Schritt: nur bei eigenem Task gezielt weitere Terrain-Daten oder eine spaetere feine Layout-Iteration ergaenzen, ohne ein grosses Tile-/Registry-System vorzuziehen.
+
+### Minimal Mouse Target Placement
+- Status: implementiert
+- Stand: der bestehende gelbe `TargetMarker` der Missions-Testszene kann jetzt direkt per Linksklick neu gesetzt werden. Der kleine `MissionTacticalSandboxController` uebersetzt dafuer die Screen-Mausposition sauber ueber den aktuellen Canvas-/Viewport-Transform in eine Weltposition und setzt nur den vorhandenen Marker neu; die bestehenden `move`-, `defend`-, `flank`- und `take`-Commands greifen danach unveraendert auf diese Marker-Position zu. Die Minimalregel ist bewusst klein: Klicks ueber Control-UI werden ignoriert, andere Klicks werden auf den aktuell sichtbaren Viewport-Weltbereich geklemmt.
+- Offene Punkte: keine Kontextmenues, kein Picking-Framework, keine Drag-Selection und keine tiefere Zielvalidierung gegen Terrain, Deckung oder LOS.
+- Risiken: der Klickpfad bleibt bewusst testszenenbezogen; spaetere echte Commander-Eingabe sollte diesen kleinen Marker-Setter explizit ersetzen statt ihn still zu einer grossen Auswahlarchitektur auszubauen.
+- Naechster Schritt: nur bei eigenem Task spaeter mit echten Karten- oder Terrain-Grenzen koppeln, ohne daraus ein neues Input-System zu machen.
+
+### Tactical Slice Tempo and Distance
+- Status: implementiert
+- Stand: der bestehende Taktik-Slice wurde nur ueber vorhandene Szenenwerte und die bereits wiederhergestellte Iso-Map entschleunigt: der Combat-Loop nutzt jetzt geringere `contact_range`, hoeheres `ticks_between_attacks` und niedrigeres `damage_per_hit`, waehrend Friendly- und Enemy-Spawns weiter ueber die Map-Marker auseinanderliegen. Dadurch kommt Erstkontakt spaeter und der laufende Kampf bleibt laenger beobachtbar, ohne neue Combat- oder KI-Logik einzufuehren.
+- Offene Punkte: der Slice bleibt weiterhin eine kleine Testszenen-Combat-Annäherung ohne echte Gegner-KI, ohne terrainbasiertes LOS und ohne feinere Missions-/Objective-Distanzen.
+- Risiken: die Tempo-Wirkung haengt weiterhin an wenigen Tuning-Werten in Szene und Map-Marker-Layout; spaetere echte Karten- oder Combat-Systeme sollten diese Testwerte explizit ersetzen statt sie still weiter auszubauen.
+- Naechster Schritt: nur bei eigenem Task weiter nachschaerfen, falls echte Godot-Playtests noch zeigen, dass Kontakt oder Kampfabschluss trotz Iso-Map und groesserer Distanz zu hektisch bleiben.
