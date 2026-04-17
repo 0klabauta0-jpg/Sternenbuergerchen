@@ -227,3 +227,10 @@
 - Offene Punkte: die Fireteam- und Phase-Umschaltung bleibt bewusst szenenlokal; es gibt keine grosse Commander-UI, keine Auswahlarchitektur und noch keine tiefere Phase-Wirkung im Combat-Loop.
 - Risiken: der UI-Pfad darf keine Gameplay-Wahrheit uebernehmen; er bleibt ein leichter Command-Ausloeser fuer den bestehenden Commander -> FTL -> Unit -> SimulationRoot-Flow. Spaetere echte Commander- oder HUD-Systeme sollten diesen kleinen Szenen-Controller explizit ersetzen statt ihn still auszubauen.
 - Naechster Schritt: nur bei eigenem Task gezielt weiter verfeinern, etwa Marker-/Objective-Lesbarkeit oder spaetere echte Fireteam-/Phasenwirkung, ohne neue UI- oder Input-Architektur aufzubauen.
+
+### Minimal Terrain Registry Foundation
+- Status: implementiert
+- Stand: `TerrainDefinition` unter `res://scripts/terrain/terrain_definition.gd` formalisiert jetzt eine kleine Terrain-V0 mit `terrain_id`, `source_asset_path`, `orientation`, `walkable`, `blocks_los`, `cover_value` und `speed_multiplier`. `TerrainRegistry` unter `res://scripts/terrain/terrain_registry.gd` haelt diese Definitionen zentral, erlaubt Lookup per `terrain_id` und `source_asset_path` und bringt eine kleine V0-Befuellung fuer die klaren flachen Basis-Kacheln `terrain_SW`, `terrain_SE`, `terrain_NE` und `terrain_NW` mit. Die Richtungs-Konvention ist jetzt explizit: obere Kante `N`, untere Kante `S`, linke Kante `W`, rechte Kante `E`, obere linke Ecke `NW`, obere rechte Ecke `NE`, untere linke Ecke `SW`, untere rechte Ecke `SE`; `terrain_SW.png` dient dabei als Referenzbeispiel fuer `SW = unten links / southwest`.
+- Offene Punkte: noch keine automatische Terrain-Erkennung auf Karten, keine Map-/Loader-Integration, keine Runtime-Nutzung in Movement, LOS, Cover oder Combat und keine Hoehen-/Cliff-Logik.
+- Risiken: die Registry ist bewusst eine kleine Datenbasis; spaetere Systeme muessen Terrain-Metadaten explizit konsumieren statt still Logik oder Karten-Scanning in die Registry zu ziehen.
+- Naechster Schritt: nur bei eigenem Task kleine Lesepfade an spaetere Map-/Terrain-Nutzung anbinden, ohne daraus ein grosses Tile-/Editor-System zu machen.
