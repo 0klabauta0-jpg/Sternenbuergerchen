@@ -966,8 +966,8 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 	# Corner pieces REPLACE the two straight panels they connect
 	var corner_map: Array = [
 		[Vector2i(1, 0), Vector2i(0, 1), WALL_CORNER_SW],
-		[Vector2i(1, 0), Vector2i(0, -1), WALL_CORNER_NW],
-		[Vector2i(-1, 0), Vector2i(0, 1), WALL_CORNER_SE],
+		[Vector2i(1, 0), Vector2i(0, -1), WALL_CORNER_SE],
+		[Vector2i(-1, 0), Vector2i(0, 1), WALL_CORNER_NW],
 		[Vector2i(-1, 0), Vector2i(0, -1), WALL_CORNER_NE],
 	]
 
@@ -992,8 +992,8 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 
 	# Step 3: render straight wall panels only for edges NOT consumed by corners
 	var edge_texture_map: Dictionary = {
-		Vector2i(1, 0): WALL_TEXTURE_NW,
-		Vector2i(-1, 0): WALL_TEXTURE_SE,
+		Vector2i(1, 0): WALL_TEXTURE_SE,
+		Vector2i(-1, 0): WALL_TEXTURE_NW,
 		Vector2i(0, 1): WALL_TEXTURE_SW,
 		Vector2i(0, -1): WALL_TEXTURE_NE,
 	}
