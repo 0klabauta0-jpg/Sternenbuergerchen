@@ -1,3 +1,9 @@
+### TASK_069 – Map-Editor: Selection Tool, Gruppierte Palette, Save As, New Map
+- Status: implementiert
+- Stand: Map-Editor bietet jetzt ein Auswahlwerkzeug (Select-Button neben Brush), das Multi-Selection per Ctrl+LMB und visuelle Umrahmung mehrerer Tiles erlaubt. Die Palette ist gruppiert (Wände, Cliffs, Rampen) und per Button ein-/ausklappbar. Save As-Dialog (Ctrl+Save) und New Map-Button sind integriert. Neue Map-Vorlage (32x32) als Test_mission_32x32.json angelegt.
+- Offene Punkte: Auswahlwerkzeug ist rein UI, keine Massenoperationen auf Selektion, keine Drag-Selection. Palette-Gruppen sind statisch, keine dynamische Filterung. Save As überschreibt nicht die Map-Referenz in laufender Session. Kein visuelles Brush-Preview für Multi-Tile-Brush.
+- Risiken: UI-Änderungen betreffen nur Editor, keine Auswirkungen auf Simulation oder Runtime. Bedienung bleibt konsistent, keine Breaking Changes. Erweiterungen (z.B. Massenoperationen) müssen explizit als neue Tasks erfolgen.
+- Naechster Schritt: Dokumentation und Changelog weiter pflegen, ggf. Massenoperationen und Drag-Selection als eigene Tasks aufnehmen.
 # IMPLEMENTATION_STATUS
 
 ## Template

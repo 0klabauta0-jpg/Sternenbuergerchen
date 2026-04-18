@@ -15,6 +15,7 @@ const DEFAULT_SURFACE_TYPE: String = SURFACE_GROUND
 
 const EDGE_CLIFF: String = "cliff"
 const EDGE_SLOPE: String = "slope"
+const EDGE_NONE: String = "none"
 
 var tile_id: String = ""
 var type_id: String = ""
@@ -98,7 +99,7 @@ static func get_surface_short_code(next_surface_type: String) -> String:
 static func _normalize_edge_type(value: String) -> String:
 	var normalized: String = value.strip_edges().to_lower()
 	match normalized:
-		EDGE_CLIFF, EDGE_SLOPE:
+		EDGE_CLIFF, EDGE_SLOPE, EDGE_NONE:
 			return normalized
 		_:
 			return EDGE_CLIFF

@@ -137,7 +137,9 @@ func save_to_file(path: String) -> Error:
 				"blocks_los": bool(tile_dict.get("blocks_los", false)),
 				"cover_value": int(tile_dict.get("cover_value", 0)),
 				"height_level": int(tile_dict.get("height_level", 0)),
+				"object_height": int(tile_dict.get("object_height", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_OBJECT_HEIGHT)),
 				"surface_type": String(tile_dict.get("surface_type", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFACE_TYPE)),
+				"edge_type": String(tile_dict.get("edge_type", TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF)),
 			}
 		)
 

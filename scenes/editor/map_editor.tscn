@@ -1,3 +1,10 @@
+[node name="SaveAsDialog" type="FileDialog" parent="UI"]
+title = "Save Map As"
+size = Vector2i(600, 400)
+exclusive = true
+file_mode = 2 # FILE_MODE_SAVE
+access = 1 # ACCESS_RESOURCES
+filters = [ "*.json ; JSON terrain map" ]
 [gd_scene load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://scripts/editor/map_editor.gd" id="1_script"]
@@ -98,6 +105,35 @@ theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
 [node name="VBox" type="VBoxContainer" parent="UI/PalettePanel/Margin"]
+ [node name="WallGroup" type="VBoxContainer" parent="UI/PalettePanel/Margin/VBox"]
+ layout_mode = 2
+ [node name="WallHeader" type="Button" parent="UI/PalettePanel/Margin/VBox/WallGroup"]
+ text = "Wände"
+ toggle_mode = true
+ pressed = true
+ [node name="WallList" type="ItemList" parent="UI/PalettePanel/Margin/VBox/WallGroup"]
+ size_flags_vertical = 1
+ allow_reselect = true
+
+ [node name="CliffGroup" type="VBoxContainer" parent="UI/PalettePanel/Margin/VBox"]
+ layout_mode = 2
+ [node name="CliffHeader" type="Button" parent="UI/PalettePanel/Margin/VBox/CliffGroup"]
+ text = "Cliffs"
+ toggle_mode = true
+ pressed = true
+ [node name="CliffList" type="ItemList" parent="UI/PalettePanel/Margin/VBox/CliffGroup"]
+ size_flags_vertical = 1
+ allow_reselect = true
+
+ [node name="RampGroup" type="VBoxContainer" parent="UI/PalettePanel/Margin/VBox"]
+ layout_mode = 2
+ [node name="RampHeader" type="Button" parent="UI/PalettePanel/Margin/VBox/RampGroup"]
+ text = "Rampen"
+ toggle_mode = true
+ pressed = true
+ [node name="RampList" type="ItemList" parent="UI/PalettePanel/Margin/VBox/RampGroup"]
+ size_flags_vertical = 1
+ allow_reselect = true
 layout_mode = 2
 theme_override_constants/separation = 6
 

@@ -68,6 +68,10 @@ var _tile_sprites_by_grid: Dictionary = {}
 var _cliff_sprites_by_grid: Dictionary = {}
 var _wall_sprites_by_grid: Dictionary = {}
 var _selected_grid_position: Vector2i = Vector2i(-1, -1)
+var _last_selected_surface_type: String = TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFACE_TYPE
+var _last_selected_edge_type: String = TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF
+var _selected_grids: Array = []
+var _selection_tool_enabled: bool = false
 var _selected_type_id: String = ""
 var _is_panning: bool = false
 var _is_painting: bool = false
@@ -91,7 +95,27 @@ func _ready() -> void:
 	_populate_brush_size_options()
 	_populate_tile_palette()
 	_connect_ui_signals()
+	_add_selection_tool_button()
 	_load_map(map_file_path if not map_file_path.is_empty() else DEFAULT_MAP_PATH)
+
+	# Connect expand/collapse for palette groups
+	var wall_header = get_node_or_null("UI/PalettePanel/Margin/VBox/WallGroup/WallHeader") as Button
+	var wall_list = get_node_or_null("UI/PalettePanel/Margin/VBox/WallGroup/WallList") as ItemList
+	if wall_header and wall_list:
+		wall_header.toggled.connect(func(pressed): wall_list.visible = pressed)
+		wall_list.visible = wall_header.pressed
+
+	var cliff_header = get_node_or_null("UI/PalettePanel/Margin/VBox/CliffGroup/CliffHeader") as Button
+	var cliff_list = get_node_or_null("UI/PalettePanel/Margin/VBox/CliffGroup/CliffList") as ItemList
+	if cliff_header and cliff_list:
+		cliff_header.toggled.connect(func(pressed): cliff_list.visible = pressed)
+		cliff_list.visible = cliff_header.pressed
+
+	var ramp_header = get_node_or_null("UI/PalettePanel/Margin/VBox/RampGroup/RampHeader") as Button
+	var ramp_list = get_node_or_null("UI/PalettePanel/Margin/VBox/RampGroup/RampList") as ItemList
+	if ramp_header and ramp_list:
+		ramp_header.toggled.connect(func(pressed): ramp_list.visible = pressed)
+		ramp_list.visible = ramp_header.pressed
 
 
 func _process(delta: float) -> void:
@@ -139,6 +163,18 @@ func _unhandled_input(event: InputEvent) -> void:
 				return
 			if _is_pointer_over_control():
 				return
+			var grid_pos = _terrain_registry.world_to_grid(get_global_mouse_position())
+			if _selection_tool_enabled:
+				if mouse_button_event.ctrl_pressed:
+					if _selected_grids.has(grid_pos):
+						_selected_grids.erase(grid_pos)
+					else:
+						_selected_grids.append(grid_pos)
+				else:
+					_selected_grids = [grid_pos]
+				_refresh_selection_visual()
+				_refresh_property_panel()
+				return
 			if _is_brush_enabled() and _has_selected_type():
 				_is_painting = true
 				_last_painted_grid = Vector2i(-1, -1)
@@ -155,7 +191,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				camera.position -= mouse_motion.relative * camera.zoom
 			return
 		if _is_painting and _is_brush_enabled() and _has_selected_type():
-			#_apply_brush_at_world_position(get_global_mouse_position())
+			_apply_brush_at_world_position(get_global_mouse_position())
 			return
 		if _is_brush_enabled() and not _is_pointer_over_control():
 			_update_hover_preview(get_global_mouse_position())
@@ -355,9 +391,24 @@ func _apply_brush_at_world_position(world_position: Vector2) -> void:
 			if not _selected_type_id.is_empty() and _tile_catalog != null and _tile_catalog.has_type(_selected_type_id):
 				if dx == 0 and dy == 0:
 					_store_undo_state(target_tile)
-				if _tile_catalog.apply_type_to_tile(target_tile, _selected_type_id):
-					any_changed = true
-					_refresh_tile_visual(target_tile)
+				var is_directional: bool = _selected_type_id.begins_with("cliff_") or _selected_type_id.begins_with("slope_")
+				if is_directional and (dx != 0 or dy != 0):
+					# Surrounding tiles get height + edge properties only, not directional type_id
+					var entry: Dictionary = _tile_catalog.get_type(_selected_type_id)
+					var patch: Dictionary = {
+						"height_level": int(entry.get("height_level", 0)),
+						"edge_type": String(entry.get("edge_type", "cliff")),
+						"walkable": bool(entry.get("walkable", true)),
+						"blocks_los": bool(entry.get("blocks_los", false)),
+						"surface_type": String(entry.get("surface_type", "ground")),
+					}
+					if _apply_tile_patch(target_tile, patch):
+						any_changed = true
+						_refresh_tile_visual(target_tile)
+				else:
+					if _tile_catalog.apply_type_to_tile(target_tile, _selected_type_id):
+						any_changed = true
+						_refresh_tile_visual(target_tile)
 			else:
 				var patch: Dictionary = {
 					"walkable": _get_walkable_checkbox().button_pressed,
@@ -390,19 +441,41 @@ func _refresh_selection_visual() -> void:
 		return
 
 	outline.clear_points()
-	var tile_data = _get_selected_tile()
-	if tile_data == null:
-		return
-
 	var tile_size: Dictionary = _terrain_map_data.call("get_tile_size")
 	var half_width: float = float(tile_size.get("half_width", DEFAULT_HALF_TILE_WIDTH))
 	var half_height: float = float(tile_size.get("half_height", DEFAULT_HALF_TILE_HEIGHT))
-	var center: Vector2 = tile_data.world_position
-	outline.add_point(center + Vector2(0.0, -half_height))
-	outline.add_point(center + Vector2(half_width, 0.0))
-	outline.add_point(center + Vector2(0.0, half_height))
-	outline.add_point(center + Vector2(-half_width, 0.0))
-	outline.add_point(center + Vector2(0.0, -half_height))
+
+	# Draw outlines for all selected grids
+	var grids = _selected_grids.duplicate()
+	if grids.is_empty() and _selected_grid_position != Vector2i(-1, -1):
+		grids = [_selected_grid_position]
+	for grid in grids:
+		var tile_data = _terrain_map_data.call("get_tile_at_grid", grid)
+		if tile_data == null:
+			continue
+		var center: Vector2 = tile_data.world_position
+		outline.add_point(center + Vector2(0.0, -half_height))
+		outline.add_point(center + Vector2(half_width, 0.0))
+		outline.add_point(center + Vector2(0.0, half_height))
+		outline.add_point(center + Vector2(-half_width, 0.0))
+		outline.add_point(center + Vector2(0.0, -half_height))
+		outline.add_point(Vector2(-9999, -9999)) # break between tiles
+func _add_selection_tool_button() -> void:
+	var top_bar := get_node_or_null("TopBar")
+	if top_bar == null:
+		return
+	var select_btn := Button.new()
+	select_btn.text = "Select"
+	select_btn.toggle_mode = true
+	select_btn.pressed = _selection_tool_enabled
+	select_btn.connect("toggled", Callable(self, "_on_selection_tool_toggled"))
+	top_bar.add_child(select_btn)
+
+func _on_selection_tool_toggled(pressed: bool) -> void:
+	_selection_tool_enabled = pressed
+	if pressed:
+		_is_painting = false
+		_last_painted_grid = Vector2i(-1, -1)
 
 
 func _refresh_property_panel() -> void:
@@ -427,9 +500,15 @@ func _refresh_property_panel() -> void:
 		blocks_los_checkbox.button_pressed = false
 		cover_spinbox.value = 0
 		height_spinbox.value = 0
-		surface_option_button.select(_find_surface_option_index(TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFACE_TYPE))
+		surface_option_button.select(_find_surface_option_index(_last_selected_surface_type))
 		if edge_type_option_button != null:
-			edge_type_option_button.select(0)
+			var edge_idx := 0
+			match _last_selected_edge_type:
+				TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE:
+					edge_idx = 1
+				TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE:
+					edge_idx = 2
+			edge_type_option_button.select(edge_idx)
 		_set_property_controls_enabled(false)
 		_is_refreshing_property_controls = false
 		return
@@ -451,7 +530,13 @@ func _refresh_property_panel() -> void:
 	height_spinbox.value = int(tile_data.height_level)
 	surface_option_button.select(_find_surface_option_index(String(tile_data.surface_type)))
 	if edge_type_option_button != null:
-		edge_type_option_button.select(0 if String(tile_data.edge_type) == TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF else 1)
+		var edge_idx: int = 0
+		match String(tile_data.edge_type):
+			TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE:
+				edge_idx = 1
+			TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE:
+				edge_idx = 2
+		edge_type_option_button.select(edge_idx)
 	_set_property_controls_enabled(true)
 	_is_refreshing_property_controls = false
 
@@ -535,6 +620,7 @@ func _apply_tile_patch(tile_data, patch: Dictionary) -> bool:
 	tile_data.height_level = next_height_level
 	tile_data.surface_type = next_surface_type
 	tile_data.edge_type = next_edge_type
+	tile_data.type_id = ""
 	return true
 
 
@@ -570,6 +656,7 @@ func _undo_last_change() -> void:
 	tile_data.height_level = restored_tile.height_level
 	tile_data.surface_type = restored_tile.surface_type
 	tile_data.edge_type = restored_tile.edge_type
+	tile_data.object_height = restored_tile.object_height
 
 	_selected_grid_position = grid_position
 	_last_undo_state.clear()
@@ -639,7 +726,8 @@ func _populate_edge_type_options() -> void:
 
 	option_button.clear()
 	option_button.add_item("Cliff")
-	option_button.add_item("Slope")
+	option_button.add_item("Hang")
+	option_button.add_item("Keine")
 	option_button.select(0)
 
 
@@ -657,6 +745,7 @@ func _populate_brush_size_options() -> void:
 
 func _connect_ui_signals() -> void:
 	var save_button := get_node_or_null("UI/TopBar/Margin/HBox/SaveButton") as Button
+	var save_as_dialog := get_node_or_null("UI/SaveAsDialog") as FileDialog
 	var load_button := get_node_or_null("UI/TopBar/Margin/HBox/LoadButton") as Button
 	var new_map_button := get_node_or_null("UI/TopBar/Margin/HBox/NewMapButton") as Button
 	var undo_button := get_node_or_null("UI/TopBar/Margin/HBox/UndoButton") as Button
@@ -671,6 +760,8 @@ func _connect_ui_signals() -> void:
 	var tile_type_list := _get_tile_type_list()
 	if save_button != null and not save_button.pressed.is_connected(_on_save_pressed):
 		save_button.pressed.connect(_on_save_pressed)
+	if save_as_dialog != null and not save_as_dialog.file_selected.is_connected(_on_save_as_file_selected):
+		save_as_dialog.file_selected.connect(_on_save_as_file_selected)
 	if load_button != null and not load_button.pressed.is_connected(_on_load_pressed):
 		load_button.pressed.connect(_on_load_pressed)
 	if new_map_button != null and not new_map_button.pressed.is_connected(_on_new_map_pressed):
@@ -703,6 +794,20 @@ func _connect_ui_signals() -> void:
 
 
 func _on_save_pressed() -> void:
+	# Check if Ctrl is pressed for Save As
+	if Input.is_key_pressed(KEY_CTRL):
+		var save_as_dialog := get_node_or_null("UI/SaveAsDialog") as FileDialog
+		if save_as_dialog != null:
+			save_as_dialog.current_dir = "res://maps"
+			save_as_dialog.current_file = _current_map_path.get_file() if not _current_map_path.is_empty() else "new_map.json"
+			save_as_dialog.popup_centered_ratio(0.65)
+		return
+	_save_current_map()
+
+func _on_save_as_file_selected(path: String) -> void:
+	if path.is_empty():
+		return
+	_current_map_path = path
 	_save_current_map()
 
 
@@ -735,10 +840,23 @@ func _on_property_controls_value_changed(_value: float) -> void:
 
 
 func _on_surface_selected(_index: int) -> void:
+	var option_button := _get_surface_option_button()
+	if option_button != null and option_button.selected >= 0:
+		_last_selected_surface_type = option_button.get_item_text(option_button.selected)
 	_apply_property_controls_to_selected_tile()
 
 
 func _on_edge_type_selected(_index: int) -> void:
+	var option_button := _get_edge_type_option_button()
+	if option_button != null and option_button.selected >= 0:
+		# Index 0 = "Cliff", 1 = "Hang", 2 = "Keine"
+		match option_button.selected:
+			0:
+				_last_selected_edge_type = TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF
+			1:
+				_last_selected_edge_type = TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE
+			2:
+				_last_selected_edge_type = TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE
 	_apply_property_controls_to_selected_tile()
 
 
@@ -867,20 +985,22 @@ func _get_surface_option_button() -> OptionButton:
 func _get_selected_surface_type() -> String:
 	var option_button := _get_surface_option_button()
 	if option_button == null or option_button.selected < 0:
-		return TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFACE_TYPE
-
+		return _last_selected_surface_type
 	return option_button.get_item_text(option_button.selected)
 
 
 func _get_selected_edge_type() -> String:
 	var option_button := _get_edge_type_option_button()
 	if option_button == null or option_button.selected < 0:
-		return TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF
-
-	# Index 0 = "Cliff", Index 1 = "Slope"
-	if option_button.selected == 1:
-		return TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE
-	return TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF
+		return _last_selected_edge_type
+	match option_button.selected:
+		0:
+			return TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF
+		1:
+			return TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE
+		2:
+			return TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE
+	return _last_selected_edge_type
 
 
 func _find_surface_option_index(surface_type: String) -> int:
@@ -904,13 +1024,25 @@ func _load_tile_catalog() -> void:
 
 
 func _populate_tile_palette() -> void:
-	var tile_type_list := _get_tile_type_list()
-	if tile_type_list == null or _tile_catalog == null:
+	var wall_list = get_node_or_null("UI/PalettePanel/Margin/VBox/WallGroup/WallList") as ItemList
+	var cliff_list = get_node_or_null("UI/PalettePanel/Margin/VBox/CliffGroup/CliffList") as ItemList
+	var ramp_list = get_node_or_null("UI/PalettePanel/Margin/VBox/RampGroup/RampList") as ItemList
+	if wall_list == null or cliff_list == null or ramp_list == null or _tile_catalog == null:
 		return
 
-	tile_type_list.clear()
+	wall_list.clear()
+	cliff_list.clear()
+	ramp_list.clear()
+
 	for tile_type in _tile_catalog.get_all_types():
-		tile_type_list.add_item(String(tile_type.get("display_name", tile_type.get("type_id", "?"))))
+		var type_id = String(tile_type.get("type_id", ""))
+		var display_name = String(tile_type.get("display_name", type_id))
+		if type_id.begins_with("wall_"):
+			wall_list.add_item(display_name)
+		elif type_id.begins_with("cliff_"):
+			cliff_list.add_item(display_name)
+		elif type_id.begins_with("slope_"):
+			ramp_list.add_item(display_name)
 
 
 func _get_tile_type_list() -> ItemList:
@@ -994,7 +1126,10 @@ func _create_cliff_overlays_for_tile(tile_data) -> void:
 
 	var my_height: int = int(tile_data.height_level)
 	var grid_pos: Vector2i = tile_data.grid_position
-	var is_slope: bool = String(tile_data.edge_type) == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE
+	var current_edge_type: String = String(tile_data.edge_type)
+	if current_edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE:
+		return
+	var is_slope: bool = current_edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE
 	var overlays: Array[Sprite2D] = []
 
 	# Grid neighbor direction → cliff texture mapping:
@@ -1097,7 +1232,7 @@ func _is_object_type(tile_data) -> bool:
 	if tile_data == null:
 		return false
 	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
-	return type_id.begins_with("wall_") or type_id.begins_with("cliff_") or type_id.begins_with("rock_") or type_id.begins_with("slope_")
+	return type_id.begins_with("wall_") or type_id.begins_with("cliff_") or type_id.begins_with("slope_") or type_id.begins_with("rock_")
 
 
 func _rebuild_all_wall_overlays() -> void:
