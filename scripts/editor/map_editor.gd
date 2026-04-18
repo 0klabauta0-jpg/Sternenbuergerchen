@@ -1151,7 +1151,7 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 			pos_offset = Vector2(1, -25)
 		"cliff_corner_ne":
 			texture = CLIFF_CORNER_NW
-			pos_offset = Vector2(0, 65)
+			pos_offset = Vector2(0, 1)
 		"cliff_corner_nw":
 			texture = CLIFF_CORNER_SW
 			pos_offset = Vector2(65, 8)
