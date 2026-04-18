@@ -43,6 +43,7 @@ const DEFAULT_GRID_SIZE: Vector2i = Vector2i(64, 64)
 const DEFAULT_GRID_ORIGIN: Vector2 = Vector2(0.0, 0.0)
 const DEFAULT_HALF_TILE_WIDTH: float = 64.0
 const DEFAULT_HALF_TILE_HEIGHT: float = 32.0
+const KENNEY_DIAMOND_CENTER := Vector2(256.0, 315.0)
 const MIN_CAMERA_ZOOM: float = 0.1
 const MAX_CAMERA_ZOOM: float = 3.0
 const CAMERA_ZOOM_STEP: float = 0.05
@@ -223,7 +224,7 @@ func _rebuild_tile_sprites() -> void:
 		tile_sprite.texture = tile_texture
 		tile_sprite.centered = false
 		tile_sprite.z_index = -20
-		tile_sprite.position = tile_data.world_position - (tile_texture.get_size() * 0.5)
+		tile_sprite.position = tile_data.world_position - KENNEY_DIAMOND_CENTER
 		tile_sprite.modulate = _build_tile_modulate(tile_data)
 		tile_container.add_child(tile_sprite)
 		_tile_sprites_by_grid[tile_data.grid_position] = tile_sprite
@@ -243,7 +244,7 @@ func _refresh_tile_visual(tile_data) -> void:
 
 	var tile_texture: Texture2D = _resolve_tile_texture(tile_data)
 	tile_sprite.texture = tile_texture
-	tile_sprite.position = tile_data.world_position - (tile_texture.get_size() * 0.5)
+	tile_sprite.position = tile_data.world_position - KENNEY_DIAMOND_CENTER
 	tile_sprite.modulate = _build_tile_modulate(tile_data)
 	_update_cliff_overlays_around(tile_data.grid_position)
 	_update_wall_overlays_around(tile_data.grid_position)
@@ -868,7 +869,7 @@ func _create_cliff_overlays_for_tile(tile_data) -> void:
 			corner_sprite.texture = corner_texture
 			corner_sprite.centered = false
 			corner_sprite.z_index = -14
-			corner_sprite.position = tile_data.world_position - (corner_texture.get_size() * 0.5)
+			corner_sprite.position = tile_data.world_position - KENNEY_DIAMOND_CENTER
 			cliff_container.add_child(corner_sprite)
 			overlays.append(corner_sprite)
 			if not edges_consumed_by_corners.has(dir_a):
@@ -892,7 +893,7 @@ func _create_cliff_overlays_for_tile(tile_data) -> void:
 		cliff_sprite.texture = cliff_texture
 		cliff_sprite.centered = false
 		cliff_sprite.z_index = -15
-		cliff_sprite.position = tile_data.world_position - (cliff_texture.get_size() * 0.5)
+		cliff_sprite.position = tile_data.world_position - KENNEY_DIAMOND_CENTER
 		cliff_container.add_child(cliff_sprite)
 		overlays.append(cliff_sprite)
 
@@ -1058,7 +1059,7 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 	sprite.texture = texture
 	sprite.centered = false
 	sprite.z_index = -13
-	sprite.position = tile_data.world_position - (texture.get_size() * 0.5) + pos_offset
+	sprite.position = tile_data.world_position - KENNEY_DIAMOND_CENTER + pos_offset
 	wall_container.add_child(sprite)
 	_wall_sprites_by_grid[grid_pos] = [sprite]
 
@@ -1191,7 +1192,7 @@ func _update_hover_preview(world_position: Vector2) -> void:
 		add_child(_hover_preview)
 
 	_hover_preview.texture = preview_texture
-	_hover_preview.position = tile_data.world_position - (preview_texture.get_size() * 0.5)
+	_hover_preview.position = tile_data.world_position - KENNEY_DIAMOND_CENTER
 	_hover_preview.modulate = Color(1.0, 1.0, 1.0, 0.4)
 	_hover_preview.visible = true
 
