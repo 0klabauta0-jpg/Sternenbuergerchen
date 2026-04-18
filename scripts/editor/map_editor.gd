@@ -317,6 +317,7 @@ func _apply_brush_at_world_position(world_position: Vector2) -> void:
 	_refresh_tile_visual(tile_data)
 	_refresh_selection_visual()
 	_refresh_property_panel()
+	_hide_hover_preview()
 
 
 func _resolve_tile_at_world_position(world_position: Vector2):
@@ -979,13 +980,13 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 		"wall_straight_nw":
 			texture = WALL_TEXTURE_NW
 		"wall_corner_se":
-			texture = WALL_CORNER_SE
-		"wall_corner_sw":
-			texture = WALL_CORNER_SW
-		"wall_corner_ne":
-			texture = WALL_CORNER_NE
-		"wall_corner_nw":
 			texture = WALL_CORNER_NW
+		"wall_corner_sw":
+			texture = WALL_CORNER_NE
+		"wall_corner_ne":
+			texture = WALL_CORNER_SW
+		"wall_corner_nw":
+			texture = WALL_CORNER_SE
 		_:
 			# Legacy fallback for old "wall" type_id — auto-detect from neighbors
 			if not _is_wall_type(tile_data):

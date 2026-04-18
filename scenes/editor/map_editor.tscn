@@ -14,7 +14,7 @@ zoom = Vector2(0.3, 0.3)
 [node name="CliffContainer" type="Node2D" parent="."]
 
 [node name="WallContainer" type="Node2D" parent="."]
-
+Fast
 [node name="GridOverlay" type="Node2D" parent="."]
 z_index = 10
 
