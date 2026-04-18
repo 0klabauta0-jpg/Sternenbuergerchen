@@ -48,7 +48,7 @@
 		},
 		{
 			"type_id": "wall_corner_se",
-			"display_name": "Ecke SE",
+			"display_name": "Ecke Ost",
 			"surface_type": "rock",
 			"walkable": false,
 			"blocks_los": true,
@@ -57,7 +57,7 @@
 		},
 		{
 			"type_id": "wall_corner_sw",
-			"display_name": "Ecke SW",
+			"display_name": "Ecke Sued",
 			"surface_type": "rock",
 			"walkable": false,
 			"blocks_los": true,
@@ -66,7 +66,7 @@
 		},
 		{
 			"type_id": "wall_corner_ne",
-			"display_name": "Ecke NE",
+			"display_name": "Ecke Nord",
 			"surface_type": "rock",
 			"walkable": false,
 			"blocks_los": true,
@@ -75,7 +75,7 @@
 		},
 		{
 			"type_id": "wall_corner_nw",
-			"display_name": "Ecke NW",
+			"display_name": "Ecke West",
 			"surface_type": "rock",
 			"walkable": false,
 			"blocks_los": true,

@@ -999,7 +999,7 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 	var sprite := Sprite2D.new()
 	sprite.texture = texture
 	sprite.centered = false
-	sprite.z_index = -13
+	sprite.z_index = 0
 	sprite.position = tile_data.world_position - KENNEY_DIAMOND_CENTER + pos_offset
 	wall_container.add_child(sprite)
 	_wall_sprites_by_grid[grid_pos] = [sprite]
