@@ -180,6 +180,50 @@
 			"edge_type": "cliff"
 		},
 		{
+			"type_id": "slope_se",
+			"display_name": "Rampe SE",
+			"surface_type": "ground",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 1,
+			"object_height": 0,
+			"edge_type": "slope"
+		},
+		{
+			"type_id": "slope_sw",
+			"display_name": "Rampe SW",
+			"surface_type": "ground",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 1,
+			"object_height": 0,
+			"edge_type": "slope"
+		},
+		{
+			"type_id": "slope_ne",
+			"display_name": "Rampe NE",
+			"surface_type": "ground",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 1,
+			"object_height": 0,
+			"edge_type": "slope"
+		},
+		{
+			"type_id": "slope_nw",
+			"display_name": "Rampe NW",
+			"surface_type": "ground",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 1,
+			"object_height": 0,
+			"edge_type": "slope"
+		},
+		{
 			"type_id": "rock_small",
 			"display_name": "Fels klein",
 			"surface_type": "rock",

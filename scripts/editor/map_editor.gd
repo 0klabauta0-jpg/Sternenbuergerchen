@@ -113,6 +113,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		if key_event.pressed and not key_event.echo and key_event.ctrl_pressed and key_event.physical_keycode == KEY_Z:
 			_undo_last_change()
 			return
+		if key_event.pressed and not key_event.echo and key_event.physical_keycode == KEY_ESCAPE:
+			_on_tile_type_deselected()
+			return
 
 	if event is InputEventMouseButton:
 		var mouse_button_event := event as InputEventMouseButton
@@ -746,9 +749,21 @@ func _on_tile_type_selected(index: int) -> void:
 		return
 
 	_selected_type_id = type_ids[index]
+
+	# Auto-enable brush when a type is selected
 	var brush_button := get_node_or_null("UI/TopBar/Margin/HBox/BrushButton") as Button
 	if brush_button != null and not brush_button.button_pressed:
 		brush_button.button_pressed = true
+
+
+# Deselect palette item to enter select mode
+func _on_tile_type_deselected() -> void:
+	var tile_type_list := _get_tile_type_list()
+	if tile_type_list != null:
+		for i in tile_type_list.item_count:
+			tile_type_list.deselect(i)
+	_selected_type_id = ""
+	_hide_hover_preview()
 
 
 func _on_load_file_selected(path: String) -> void:
@@ -1078,7 +1093,7 @@ func _is_object_type(tile_data) -> bool:
 	if tile_data == null:
 		return false
 	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
-	return type_id.begins_with("wall_") or type_id.begins_with("cliff_") or type_id.begins_with("rock_")
+	return type_id.begins_with("wall_") or type_id.begins_with("cliff_") or type_id.begins_with("rock_") or type_id.begins_with("slope_")
 
 
 func _rebuild_all_wall_overlays() -> void:
@@ -1161,6 +1176,18 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 		"cliff_corner_nw":
 			texture = CLIFF_CORNER_SW
 			pos_offset = Vector2(65, 40)
+		"slope_se":
+			texture = SLOPE_TEXTURE_SE
+			pos_offset = Vector2(0, 32)
+		"slope_sw":
+			texture = SLOPE_TEXTURE_SW
+			pos_offset = Vector2(0, 32)
+		"slope_ne":
+			texture = SLOPE_TEXTURE_NE
+			pos_offset = Vector2(0, 32)
+		"slope_nw":
+			texture = SLOPE_TEXTURE_NW
+			pos_offset = Vector2(0, 32)
 		"rock_small":
 			texture = ROCK_SMALL_TEXTURE
 		"rock_large":
