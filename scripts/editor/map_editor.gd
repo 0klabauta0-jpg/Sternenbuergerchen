@@ -1140,13 +1140,13 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 		"cliff_straight_nw":
 			texture = CLIFF_TEXTURE_NW
 		"cliff_corner_se":
-			texture = CLIFF_CORNER_SE
-		"cliff_corner_sw":
-			texture = CLIFF_CORNER_SW
-		"cliff_corner_ne":
 			texture = CLIFF_CORNER_NE
-		"cliff_corner_nw":
+		"cliff_corner_sw":
+			texture = CLIFF_CORNER_SE
+		"cliff_corner_ne":
 			texture = CLIFF_CORNER_NW
+		"cliff_corner_nw":
+			texture = CLIFF_CORNER_SW
 		"rock_small":
 			texture = ROCK_SMALL_TEXTURE
 		"rock_large":
