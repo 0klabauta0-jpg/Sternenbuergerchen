@@ -92,6 +92,94 @@
 			"object_height": 2
 		},
 		{
+			"type_id": "cliff_straight_se",
+			"display_name": "Cliff SE",
+			"surface_type": "rock",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 0,
+			"height_level": 1,
+			"object_height": 0,
+			"edge_type": "cliff"
+		},
+		{
+			"type_id": "cliff_straight_sw",
+			"display_name": "Cliff SW",
+			"surface_type": "rock",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 0,
+			"height_level": 1,
+			"object_height": 0,
+			"edge_type": "cliff"
+		},
+		{
+			"type_id": "cliff_straight_ne",
+			"display_name": "Cliff NE",
+			"surface_type": "rock",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 0,
+			"height_level": 1,
+			"object_height": 0,
+			"edge_type": "cliff"
+		},
+		{
+			"type_id": "cliff_straight_nw",
+			"display_name": "Cliff NW",
+			"surface_type": "rock",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 0,
+			"height_level": 1,
+			"object_height": 0,
+			"edge_type": "cliff"
+		},
+		{
+			"type_id": "cliff_corner_se",
+			"display_name": "Cliff Ecke Ost",
+			"surface_type": "rock",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 0,
+			"height_level": 1,
+			"object_height": 0,
+			"edge_type": "cliff"
+		},
+		{
+			"type_id": "cliff_corner_sw",
+			"display_name": "Cliff Ecke Sued",
+			"surface_type": "rock",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 0,
+			"height_level": 1,
+			"object_height": 0,
+			"edge_type": "cliff"
+		},
+		{
+			"type_id": "cliff_corner_ne",
+			"display_name": "Cliff Ecke Nord",
+			"surface_type": "rock",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 0,
+			"height_level": 1,
+			"object_height": 0,
+			"edge_type": "cliff"
+		},
+		{
+			"type_id": "cliff_corner_nw",
+			"display_name": "Cliff Ecke West",
+			"surface_type": "rock",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 0,
+			"height_level": 1,
+			"object_height": 0,
+			"edge_type": "cliff"
+		},
+		{
 			"type_id": "rock_small",
 			"display_name": "Fels klein",
 			"surface_type": "rock",

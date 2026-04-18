@@ -1053,7 +1053,7 @@ func _is_object_type(tile_data) -> bool:
 	if tile_data == null:
 		return false
 	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
-	return type_id.begins_with("wall_") or type_id.begins_with("rock_")
+	return type_id.begins_with("wall_") or type_id.begins_with("cliff_") or type_id.begins_with("rock_")
 
 
 func _rebuild_all_wall_overlays() -> void:
@@ -1112,6 +1112,22 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 			texture = WALL_CORNER_SW
 		"wall_corner_nw":
 			texture = WALL_CORNER_SE
+		"cliff_straight_se":
+			texture = CLIFF_TEXTURE_SE
+		"cliff_straight_sw":
+			texture = CLIFF_TEXTURE_SW
+		"cliff_straight_ne":
+			texture = CLIFF_TEXTURE_NE
+		"cliff_straight_nw":
+			texture = CLIFF_TEXTURE_NW
+		"cliff_corner_se":
+			texture = CLIFF_CORNER_NW
+		"cliff_corner_sw":
+			texture = CLIFF_CORNER_NE
+		"cliff_corner_ne":
+			texture = CLIFF_CORNER_SW
+		"cliff_corner_nw":
+			texture = CLIFF_CORNER_SE
 		"rock_small":
 			texture = ROCK_SMALL_TEXTURE
 		"rock_large":
