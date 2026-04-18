@@ -53,6 +53,7 @@ const KENNEY_DIAMOND_CENTER := Vector2(256.0, 315.0)
 const MIN_CAMERA_ZOOM: float = 0.1
 const MAX_CAMERA_ZOOM: float = 3.0
 const CAMERA_ZOOM_STEP: float = 0.05
+const CAMERA_PAN_SPEED: float = 800.0
 
 @export var map_file_path: String = ""
 
@@ -77,6 +78,7 @@ var _pending_dialog_action: String = ""
 
 
 func _ready() -> void:
+	set_process(true)
 	set_process_unhandled_input(true)
 	_ensure_terrain_registry()
 	_load_tile_catalog()
@@ -86,6 +88,23 @@ func _ready() -> void:
 	_populate_tile_palette()
 	_connect_ui_signals()
 	_load_map(map_file_path if not map_file_path.is_empty() else DEFAULT_MAP_PATH)
+
+
+func _process(delta: float) -> void:
+	var camera := _get_camera()
+	if camera == null:
+		return
+	var direction := Vector2.ZERO
+	if Input.is_key_pressed(KEY_W):
+		direction.y -= 1.0
+	if Input.is_key_pressed(KEY_S):
+		direction.y += 1.0
+	if Input.is_key_pressed(KEY_A):
+		direction.x -= 1.0
+	if Input.is_key_pressed(KEY_D):
+		direction.x += 1.0
+	if direction != Vector2.ZERO:
+		camera.position += direction.normalized() * CAMERA_PAN_SPEED * delta / camera.zoom.x
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -1121,13 +1140,13 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 		"cliff_straight_nw":
 			texture = CLIFF_TEXTURE_NW
 		"cliff_corner_se":
-			texture = CLIFF_CORNER_NW
-		"cliff_corner_sw":
-			texture = CLIFF_CORNER_NE
-		"cliff_corner_ne":
-			texture = CLIFF_CORNER_SW
-		"cliff_corner_nw":
 			texture = CLIFF_CORNER_SE
+		"cliff_corner_sw":
+			texture = CLIFF_CORNER_SW
+		"cliff_corner_ne":
+			texture = CLIFF_CORNER_NE
+		"cliff_corner_nw":
+			texture = CLIFF_CORNER_NW
 		"rock_small":
 			texture = ROCK_SMALL_TEXTURE
 		"rock_large":
@@ -1185,8 +1204,8 @@ func _rebuild_grid_overlay() -> void:
 	var tile_size: Dictionary = _terrain_map_data.call("get_tile_size")
 	var half_w: float = float(tile_size.get("half_width", DEFAULT_HALF_TILE_WIDTH))
 	var half_h: float = float(tile_size.get("half_height", DEFAULT_HALF_TILE_HEIGHT))
-	var grid_color: Color = Color(0.0, 0.0, 0.0, 0.7)
-	var grid_width: float = 1.5
+	var grid_color: Color = Color(0.0, 0.0, 0.0, 0.8)
+	var grid_width: float = 4.0
 
 	for tile_data in _terrain_map_data.call("get_tiles"):
 		var center: Vector2 = tile_data.world_position
