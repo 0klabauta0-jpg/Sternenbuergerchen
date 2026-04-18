@@ -281,35 +281,36 @@ func _build_tile_modulate(tile_data) -> Color:
 	if tile_data == null:
 		return Color(1.0, 1.0, 1.0, 1.0)
 
-	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
-	if not type_id.is_empty() and _tile_catalog != null and _tile_catalog.get_texture(type_id) != null:
-		return Color(1.0, 1.0, 1.0, 1.0)
-
 	var tile_color: Color = Color(1.0, 1.0, 1.0, 1.0)
-	match String(tile_data.surface_type):
-		TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROAD:
-			tile_color = Color(0.82, 0.82, 0.84, 1.0)
-		TERRAIN_TILE_DATA_SCRIPT.SURFACE_SAND:
-			tile_color = Color(1.0, 0.95, 0.72, 1.0)
-		TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROCK:
-			tile_color = Color(0.88, 0.78, 0.66, 1.0)
 
-	var height_level: int = int(tile_data.height_level)
-	if height_level == 1:
-		tile_color = tile_color.lightened(0.08)
-	elif height_level >= 2:
-		tile_color = tile_color.lightened(0.16)
+	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
+	var has_catalog_texture: bool = not type_id.is_empty() and _tile_catalog != null and _tile_catalog.get_texture(type_id) != null
 
-	if bool(tile_data.blocks_los):
-		tile_color = tile_color.darkened(0.1)
+	if not has_catalog_texture:
+		match String(tile_data.surface_type):
+			TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROAD:
+				tile_color = Color(0.82, 0.82, 0.84, 1.0)
+			TERRAIN_TILE_DATA_SCRIPT.SURFACE_SAND:
+				tile_color = Color(1.0, 0.95, 0.72, 1.0)
+			TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROCK:
+				tile_color = Color(0.88, 0.78, 0.66, 1.0)
 
-	if not bool(tile_data.walkable):
-		tile_color = tile_color.darkened(0.14)
+		var height_level: int = int(tile_data.height_level)
+		if height_level == 1:
+			tile_color = tile_color.lightened(0.08)
+		elif height_level >= 2:
+			tile_color = tile_color.lightened(0.16)
+
+		if bool(tile_data.blocks_los):
+			tile_color = tile_color.darkened(0.1)
+
+		if not bool(tile_data.walkable):
+			tile_color = tile_color.darkened(0.14)
 
 	# Checkerboard pattern for grid visibility
 	var gp: Vector2i = tile_data.grid_position
 	if (gp.x + gp.y) % 2 == 0:
-		tile_color = tile_color.darkened(0.06)
+		tile_color = tile_color.darkened(0.08)
 
 	return tile_color
 
@@ -1138,28 +1139,28 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 			texture = WALL_CORNER_SE
 		"cliff_straight_se":
 			texture = CLIFF_TEXTURE_SE
-			pos_offset = Vector2(33, -8)
+			pos_offset = Vector2(33, 24)
 		"cliff_straight_sw":
 			texture = CLIFF_TEXTURE_SW
-			pos_offset = Vector2(33, 24)
+			pos_offset = Vector2(33, 56)
 		"cliff_straight_ne":
 			texture = CLIFF_TEXTURE_NE
-			pos_offset = Vector2(-31, -9)
+			pos_offset = Vector2(-31, 23)
 		"cliff_straight_nw":
 			texture = CLIFF_TEXTURE_NW
-			pos_offset = Vector2(-32, 24)
+			pos_offset = Vector2(-32, 56)
 		"cliff_corner_se":
 			texture = CLIFF_CORNER_NE
-			pos_offset = Vector2(-64, 8)
+			pos_offset = Vector2(-64, 40)
 		"cliff_corner_sw":
 			texture = CLIFF_CORNER_SE
-			pos_offset = Vector2(1, -25)
+			pos_offset = Vector2(1, 7)
 		"cliff_corner_ne":
 			texture = CLIFF_CORNER_NW
-			pos_offset = Vector2(0, 25)
+			pos_offset = Vector2(0, 73)
 		"cliff_corner_nw":
 			texture = CLIFF_CORNER_SW
-			pos_offset = Vector2(65, 8)
+			pos_offset = Vector2(65, 40)
 		"rock_small":
 			texture = ROCK_SMALL_TEXTURE
 		"rock_large":
