@@ -24974,11 +24974,1607 @@
 			"walkable": true
 		},
 		{
-			"blocks_los": true,
+			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
 				"x": 32,
 				"y": 32
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 33
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 34
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 35
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 36
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 37
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 38
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 39
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 40
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 41
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 42
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 43
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 44
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 45
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 46
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 47
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 48
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 49
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 50
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 51
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 52
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 53
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 54
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 55
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 56
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 57
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 58
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 59
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 60
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 61
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 62
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 32,
+				"y": 63
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 0
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 1
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 2
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 3
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 4
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 5
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 6
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 7
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 8
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 9
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 10
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 11
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 12
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 13
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 14
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 15
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 16
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 17
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 18
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 19
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 20
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 21
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 22
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 23
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 24
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 25
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 26
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 27
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 28
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 29
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 30
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 31
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 32
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 33
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 34
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 35
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 36
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 37
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 38
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 39
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 40
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 41
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 42
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 43
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 44
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 45
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 46
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 47
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 48
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 49
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 50
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 51
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 52
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 53
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 54
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 55
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 56
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 57
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 58
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 59
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 60
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 61
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 62
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 33,
+				"y": 63
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 0
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 1
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 2
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 3
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 4
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 5
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 6
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 7
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 8
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 9
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 10
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 11
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 12
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 13
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 14
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 15
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 16
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 17
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 18
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 19
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 20
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 21
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 22
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 23
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 24
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 25
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 26
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 27
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 28
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 29
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 30
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 31
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 32
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 33
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 34
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 35
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 36
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": true,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 34,
+				"y": 37
 			},
 			"height_level": 1,
 			"surface_type": "rock",
@@ -24989,8 +26585,8 @@
 			"blocks_los": true,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
-				"y": 33
+				"x": 34,
+				"y": 38
 			},
 			"height_level": 1,
 			"surface_type": "rock",
@@ -25001,8 +26597,8 @@
 			"blocks_los": true,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
-				"y": 34
+				"x": 34,
+				"y": 39
 			},
 			"height_level": 1,
 			"surface_type": "rock",
@@ -25013,67 +26609,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
-				"y": 35
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 32,
-				"y": 36
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 32,
-				"y": 37
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 32,
-				"y": 38
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 32,
-				"y": 39
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 40
 			},
 			"height_level": 0,
@@ -25085,7 +26621,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 41
 			},
 			"height_level": 0,
@@ -25097,7 +26633,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 42
 			},
 			"height_level": 0,
@@ -25109,7 +26645,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 43
 			},
 			"height_level": 0,
@@ -25121,7 +26657,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 44
 			},
 			"height_level": 0,
@@ -25133,7 +26669,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 45
 			},
 			"height_level": 0,
@@ -25145,7 +26681,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 46
 			},
 			"height_level": 0,
@@ -25157,7 +26693,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 47
 			},
 			"height_level": 0,
@@ -25169,7 +26705,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 48
 			},
 			"height_level": 0,
@@ -25181,7 +26717,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 49
 			},
 			"height_level": 0,
@@ -25193,7 +26729,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 50
 			},
 			"height_level": 0,
@@ -25205,7 +26741,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 51
 			},
 			"height_level": 0,
@@ -25217,7 +26753,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 52
 			},
 			"height_level": 0,
@@ -25229,7 +26765,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 53
 			},
 			"height_level": 0,
@@ -25241,7 +26777,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 54
 			},
 			"height_level": 0,
@@ -25253,7 +26789,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 55
 			},
 			"height_level": 0,
@@ -25265,7 +26801,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 56
 			},
 			"height_level": 0,
@@ -25277,7 +26813,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 57
 			},
 			"height_level": 0,
@@ -25289,7 +26825,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 58
 			},
 			"height_level": 0,
@@ -25301,7 +26837,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 59
 			},
 			"height_level": 0,
@@ -25313,7 +26849,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 60
 			},
 			"height_level": 0,
@@ -25325,7 +26861,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 61
 			},
 			"height_level": 0,
@@ -25337,7 +26873,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 62
 			},
 			"height_level": 0,
@@ -25349,7 +26885,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 32,
+				"x": 34,
 				"y": 63
 			},
 			"height_level": 0,
@@ -25361,7 +26897,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 0
 			},
 			"height_level": 0,
@@ -25373,7 +26909,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 1
 			},
 			"height_level": 0,
@@ -25385,7 +26921,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 2
 			},
 			"height_level": 0,
@@ -25397,7 +26933,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 3
 			},
 			"height_level": 0,
@@ -25409,7 +26945,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 4
 			},
 			"height_level": 0,
@@ -25421,7 +26957,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 5
 			},
 			"height_level": 0,
@@ -25433,7 +26969,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 6
 			},
 			"height_level": 0,
@@ -25445,7 +26981,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 7
 			},
 			"height_level": 0,
@@ -25457,7 +26993,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 8
 			},
 			"height_level": 0,
@@ -25469,7 +27005,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 9
 			},
 			"height_level": 0,
@@ -25481,7 +27017,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 10
 			},
 			"height_level": 0,
@@ -25493,7 +27029,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 11
 			},
 			"height_level": 0,
@@ -25505,7 +27041,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 12
 			},
 			"height_level": 0,
@@ -25517,7 +27053,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 13
 			},
 			"height_level": 0,
@@ -25529,7 +27065,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 14
 			},
 			"height_level": 0,
@@ -25541,7 +27077,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 15
 			},
 			"height_level": 0,
@@ -25553,7 +27089,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 16
 			},
 			"height_level": 0,
@@ -25565,7 +27101,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 17
 			},
 			"height_level": 0,
@@ -25577,7 +27113,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 18
 			},
 			"height_level": 0,
@@ -25589,7 +27125,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 19
 			},
 			"height_level": 0,
@@ -25601,7 +27137,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 20
 			},
 			"height_level": 0,
@@ -25613,7 +27149,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 21
 			},
 			"height_level": 0,
@@ -25625,7 +27161,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 22
 			},
 			"height_level": 0,
@@ -25637,7 +27173,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 23
 			},
 			"height_level": 0,
@@ -25649,7 +27185,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 24
 			},
 			"height_level": 0,
@@ -25661,7 +27197,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 25
 			},
 			"height_level": 0,
@@ -25673,7 +27209,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 26
 			},
 			"height_level": 0,
@@ -25685,7 +27221,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 27
 			},
 			"height_level": 0,
@@ -25697,7 +27233,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 28
 			},
 			"height_level": 0,
@@ -25709,7 +27245,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 29
 			},
 			"height_level": 0,
@@ -25721,7 +27257,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 30
 			},
 			"height_level": 0,
@@ -25733,8 +27269,68 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 31
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 35,
+				"y": 32
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 35,
+				"y": 33
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 35,
+				"y": 34
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 35,
+				"y": 35
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 35,
+				"y": 36
 			},
 			"height_level": 0,
 			"surface_type": "ground",
@@ -25745,8 +27341,8 @@
 			"blocks_los": true,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
-				"y": 32
+				"x": 35,
+				"y": 37
 			},
 			"height_level": 1,
 			"surface_type": "rock",
@@ -25757,8 +27353,8 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
-				"y": 33
+				"x": 35,
+				"y": 38
 			},
 			"height_level": 0,
 			"surface_type": "ground",
@@ -25769,8 +27365,8 @@
 			"blocks_los": true,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
-				"y": 34
+				"x": 35,
+				"y": 39
 			},
 			"height_level": 1,
 			"surface_type": "rock",
@@ -25781,67 +27377,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
-				"y": 35
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 33,
-				"y": 36
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 33,
-				"y": 37
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 33,
-				"y": 38
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 33,
-				"y": 39
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 40
 			},
 			"height_level": 0,
@@ -25853,7 +27389,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 41
 			},
 			"height_level": 0,
@@ -25865,7 +27401,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 42
 			},
 			"height_level": 0,
@@ -25877,7 +27413,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 43
 			},
 			"height_level": 0,
@@ -25889,7 +27425,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 44
 			},
 			"height_level": 0,
@@ -25901,7 +27437,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 45
 			},
 			"height_level": 0,
@@ -25913,7 +27449,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 46
 			},
 			"height_level": 0,
@@ -25925,7 +27461,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 47
 			},
 			"height_level": 0,
@@ -25937,7 +27473,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 48
 			},
 			"height_level": 0,
@@ -25949,7 +27485,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 49
 			},
 			"height_level": 0,
@@ -25961,7 +27497,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 50
 			},
 			"height_level": 0,
@@ -25973,7 +27509,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 51
 			},
 			"height_level": 0,
@@ -25985,7 +27521,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 52
 			},
 			"height_level": 0,
@@ -25997,7 +27533,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 53
 			},
 			"height_level": 0,
@@ -26009,7 +27545,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 54
 			},
 			"height_level": 0,
@@ -26021,7 +27557,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 55
 			},
 			"height_level": 0,
@@ -26033,7 +27569,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 56
 			},
 			"height_level": 0,
@@ -26045,7 +27581,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 57
 			},
 			"height_level": 0,
@@ -26057,7 +27593,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 58
 			},
 			"height_level": 0,
@@ -26069,7 +27605,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 59
 			},
 			"height_level": 0,
@@ -26081,7 +27617,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 60
 			},
 			"height_level": 0,
@@ -26093,7 +27629,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 61
 			},
 			"height_level": 0,
@@ -26105,7 +27641,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 62
 			},
 			"height_level": 0,
@@ -26117,7 +27653,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 33,
+				"x": 35,
 				"y": 63
 			},
 			"height_level": 0,
@@ -26129,7 +27665,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 0
 			},
 			"height_level": 0,
@@ -26141,7 +27677,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 1
 			},
 			"height_level": 0,
@@ -26153,7 +27689,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 2
 			},
 			"height_level": 0,
@@ -26165,7 +27701,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 3
 			},
 			"height_level": 0,
@@ -26177,7 +27713,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 4
 			},
 			"height_level": 0,
@@ -26189,7 +27725,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 5
 			},
 			"height_level": 0,
@@ -26201,7 +27737,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 6
 			},
 			"height_level": 0,
@@ -26213,7 +27749,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 7
 			},
 			"height_level": 0,
@@ -26225,7 +27761,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 8
 			},
 			"height_level": 0,
@@ -26237,7 +27773,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 9
 			},
 			"height_level": 0,
@@ -26249,7 +27785,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 10
 			},
 			"height_level": 0,
@@ -26261,7 +27797,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 11
 			},
 			"height_level": 0,
@@ -26273,7 +27809,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 12
 			},
 			"height_level": 0,
@@ -26285,7 +27821,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 13
 			},
 			"height_level": 0,
@@ -26297,7 +27833,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 14
 			},
 			"height_level": 0,
@@ -26309,7 +27845,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 15
 			},
 			"height_level": 0,
@@ -26321,7 +27857,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 16
 			},
 			"height_level": 0,
@@ -26333,7 +27869,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 17
 			},
 			"height_level": 0,
@@ -26345,7 +27881,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 18
 			},
 			"height_level": 0,
@@ -26357,7 +27893,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 19
 			},
 			"height_level": 0,
@@ -26369,7 +27905,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 20
 			},
 			"height_level": 0,
@@ -26381,7 +27917,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 21
 			},
 			"height_level": 0,
@@ -26393,7 +27929,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 22
 			},
 			"height_level": 0,
@@ -26405,7 +27941,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 23
 			},
 			"height_level": 0,
@@ -26417,7 +27953,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 24
 			},
 			"height_level": 0,
@@ -26429,7 +27965,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 25
 			},
 			"height_level": 0,
@@ -26441,7 +27977,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 26
 			},
 			"height_level": 0,
@@ -26453,7 +27989,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 27
 			},
 			"height_level": 0,
@@ -26465,7 +28001,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 28
 			},
 			"height_level": 0,
@@ -26477,7 +28013,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 29
 			},
 			"height_level": 0,
@@ -26489,7 +28025,7 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 30
 			},
 			"height_level": 0,
@@ -26501,8 +28037,68 @@
 			"blocks_los": false,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
+				"x": 36,
 				"y": 31
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 36,
+				"y": 32
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 36,
+				"y": 33
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 36,
+				"y": 34
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 36,
+				"y": 35
+			},
+			"height_level": 0,
+			"surface_type": "ground",
+			"type_id": "ground_flat",
+			"walkable": true
+		},
+		{
+			"blocks_los": false,
+			"cover_value": 0,
+			"grid_position": {
+				"x": 36,
+				"y": 36
 			},
 			"height_level": 0,
 			"surface_type": "ground",
@@ -26513,8 +28109,8 @@
 			"blocks_los": true,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
-				"y": 32
+				"x": 36,
+				"y": 37
 			},
 			"height_level": 1,
 			"surface_type": "rock",
@@ -26525,8 +28121,8 @@
 			"blocks_los": true,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
-				"y": 33
+				"x": 36,
+				"y": 38
 			},
 			"height_level": 1,
 			"surface_type": "rock",
@@ -26537,1609 +28133,13 @@
 			"blocks_los": true,
 			"cover_value": 0,
 			"grid_position": {
-				"x": 34,
-				"y": 34
+				"x": 36,
+				"y": 39
 			},
 			"height_level": 1,
 			"surface_type": "rock",
 			"type_id": "cliff_corner_sw",
 			"walkable": false
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 35
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 36
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 37
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 38
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 39
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 40
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 41
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 42
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 43
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 44
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 45
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 46
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 47
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 48
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 49
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 50
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 51
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 52
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 53
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 54
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 55
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 56
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 57
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 58
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 59
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 60
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 61
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 62
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 34,
-				"y": 63
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 0
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 1
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 2
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 3
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 4
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 5
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 6
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 7
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 8
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 9
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 10
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 11
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 12
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 13
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 14
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 15
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 16
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 17
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 18
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 19
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 20
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 21
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 22
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 23
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 24
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 25
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 26
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 27
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 28
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 29
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 30
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 31
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 32
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 33
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 34
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 35
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 36
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 37
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 38
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 39
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 40
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 41
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 42
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 43
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 44
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 45
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 46
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 47
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 48
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 49
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 50
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 51
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 52
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 53
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 54
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 55
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 56
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 57
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 58
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 59
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 60
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 61
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 62
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 35,
-				"y": 63
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 0
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 1
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 2
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 3
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 4
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 5
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 6
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 7
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 8
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 9
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 10
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 11
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 12
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 13
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 14
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 15
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 16
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 17
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 18
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 19
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 20
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 21
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 22
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 23
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 24
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 25
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 26
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 27
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 28
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 29
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 30
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 31
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 32
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 33
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 34
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 35
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 36
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 37
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 38
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
-		},
-		{
-			"blocks_los": false,
-			"cover_value": 0,
-			"grid_position": {
-				"x": 36,
-				"y": 39
-			},
-			"height_level": 0,
-			"surface_type": "ground",
-			"type_id": "ground_flat",
-			"walkable": true
 		},
 		{
 			"blocks_los": false,

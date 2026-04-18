@@ -1151,7 +1151,7 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 			pos_offset = Vector2(1, -25)
 		"cliff_corner_ne":
 			texture = CLIFF_CORNER_NW
-			pos_offset = Vector2(0, 17)
+			pos_offset = Vector2(0, 25)
 		"cliff_corner_nw":
 			texture = CLIFF_CORNER_SW
 			pos_offset = Vector2(65, 8)
@@ -1199,12 +1199,9 @@ func _clear_wall_overlays() -> void:
 
 
 func _rebuild_grid_overlay() -> void:
-	var grid_overlay := get_node_or_null("GridOverlay") as Node2D
+	var grid_overlay := get_node_or_null("GridOverlay")
 	if grid_overlay == null:
 		return
-
-	for child in grid_overlay.get_children():
-		child.queue_free()
 
 	if _terrain_map_data == null:
 		return
@@ -1212,25 +1209,12 @@ func _rebuild_grid_overlay() -> void:
 	var tile_size: Dictionary = _terrain_map_data.call("get_tile_size")
 	var half_w: float = float(tile_size.get("half_width", DEFAULT_HALF_TILE_WIDTH))
 	var half_h: float = float(tile_size.get("half_height", DEFAULT_HALF_TILE_HEIGHT))
-	var grid_color: Color = Color(0.0, 1.0, 0.0, 0.7)
-	var grid_width: float = 15.0
 
+	var centers := PackedVector2Array()
 	for tile_data in _terrain_map_data.call("get_tiles"):
-		var center: Vector2 = tile_data.world_position
-		var top: Vector2 = center + Vector2(0.0, -half_h)
-		var right: Vector2 = center + Vector2(half_w, 0.0)
-		var bottom: Vector2 = center + Vector2(0.0, half_h)
-		var left: Vector2 = center + Vector2(-half_w, 0.0)
+		centers.append(tile_data.world_position)
 
-		var line := Line2D.new()
-		line.width = grid_width
-		line.default_color = grid_color
-		line.add_point(top)
-		line.add_point(right)
-		line.add_point(bottom)
-		line.add_point(left)
-		line.add_point(top)
-		grid_overlay.add_child(line)
+	grid_overlay.set_grid_data(centers, half_w, half_h)
 
 	# --- Compass labels at the four diamond corners ---
 	var grid_size: Vector2i = _terrain_map_data.call("get_grid_size")
@@ -1238,7 +1222,6 @@ func _rebuild_grid_overlay() -> void:
 	var max_x: int = grid_size.x - 1
 	var max_y: int = grid_size.y - 1
 
-	# Corner world positions (from _grid_to_world formula)
 	var north_pos: Vector2 = Vector2(
 		origin.x + float(0 - 0) * half_w,
 		origin.y + float(0 + 0) * half_h
@@ -1256,23 +1239,12 @@ func _rebuild_grid_overlay() -> void:
 		origin.y + float(0 + max_y) * half_h
 	)
 
-	var compass_data: Array = [
+	grid_overlay.set_compass_data([
 		["N", north_pos + Vector2(0, -half_h * 3)],
 		["O", east_pos + Vector2(half_w * 3, 0)],
 		["S", south_pos + Vector2(0, half_h * 3)],
 		["W", west_pos + Vector2(-half_w * 3, 0)],
-	]
-
-	for entry in compass_data:
-		var lbl := Label.new()
-		lbl.text = entry[0]
-		lbl.add_theme_font_size_override("font_size", 80)
-		lbl.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 0.5))
-		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		lbl.size = Vector2(160, 120)
-		lbl.position = entry[1] - lbl.size * 0.5
-		grid_overlay.add_child(lbl)
+	])
 
 
 # --- Hover Preview ---
