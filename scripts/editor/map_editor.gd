@@ -972,12 +972,10 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 	match type_id:
 		"wall_straight_se":
 			texture = WALL_TEXTURE_SE
-			pos_offset = Vector2(DEFAULT_HALF_TILE_WIDTH * 0.9, DEFAULT_HALF_TILE_HEIGHT * 0.9)
 		"wall_straight_sw":
 			texture = WALL_TEXTURE_SW
 		"wall_straight_ne":
 			texture = WALL_TEXTURE_NE
-			pos_offset = Vector2(DEFAULT_HALF_TILE_WIDTH * 0.9, -DEFAULT_HALF_TILE_HEIGHT * 0.9)
 		"wall_straight_nw":
 			texture = WALL_TEXTURE_NW
 		"wall_corner_se":
