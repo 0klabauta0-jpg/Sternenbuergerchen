@@ -180,6 +180,18 @@ max_value = 3.0
 step = 1.0
 editable = false
 
+[node name="EdgeTypeRow" type="HBoxContainer" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="EdgeTypeLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox/EdgeTypeRow"]
+layout_mode = 2
+text = "Kante:"
+
+[node name="EdgeTypeOptionButton" type="OptionButton" parent="UI/PropertyPanel/Margin/VBox/EdgeTypeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+disabled = true
+
 [node name="SurfaceRow" type="HBoxContainer" parent="UI/PropertyPanel/Margin/VBox"]
 layout_mode = 2
 

@@ -13,6 +13,9 @@ const DEFAULT_HEIGHT_LEVEL: int = 0
 const DEFAULT_OBJECT_HEIGHT: int = 0
 const DEFAULT_SURFACE_TYPE: String = SURFACE_GROUND
 
+const EDGE_CLIFF: String = "cliff"
+const EDGE_SLOPE: String = "slope"
+
 var tile_id: String = ""
 var type_id: String = ""
 var grid_position: Vector2i = Vector2i.ZERO
@@ -23,6 +26,7 @@ var cover_value: int = DEFAULT_COVER_VALUE
 var height_level: int = DEFAULT_HEIGHT_LEVEL
 var object_height: int = DEFAULT_OBJECT_HEIGHT
 var surface_type: String = DEFAULT_SURFACE_TYPE
+var edge_type: String = EDGE_CLIFF
 
 
 func _init(data: Dictionary = {}) -> void:
@@ -51,6 +55,7 @@ func to_dict() -> Dictionary:
 		"height_level": height_level,
 		"object_height": object_height,
 		"surface_type": surface_type,
+		"edge_type": edge_type,
 	}
 
 
@@ -90,6 +95,15 @@ static func get_surface_short_code(next_surface_type: String) -> String:
 			return "GND"
 
 
+static func _normalize_edge_type(value: String) -> String:
+	var normalized: String = value.strip_edges().to_lower()
+	match normalized:
+		EDGE_CLIFF, EDGE_SLOPE:
+			return normalized
+		_:
+			return EDGE_CLIFF
+
+
 static func _normalize_surface_type(next_surface_type: String) -> String:
 	var normalized_surface_type: String = next_surface_type.strip_edges().to_lower()
 	if normalized_surface_type.is_empty():
@@ -117,6 +131,7 @@ func _apply_dict(data: Dictionary) -> void:
 	height_level = clampi(int(data.get("height_level", DEFAULT_HEIGHT_LEVEL)), 0, 2)
 	object_height = clampi(int(data.get("object_height", DEFAULT_OBJECT_HEIGHT)), 0, 3)
 	surface_type = _normalize_surface_type(String(data.get("surface_type", DEFAULT_SURFACE_TYPE)))
+	edge_type = _normalize_edge_type(String(data.get("edge_type", EDGE_CLIFF)))
 
 
 func _coerce_grid_position(value: Variant) -> Vector2i:

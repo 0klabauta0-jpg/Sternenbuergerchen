@@ -91,7 +91,17 @@ func _is_neighbor_walkable(current_grid: Vector2i, neighbor_grid: Vector2i, regi
 		return false
 
 	var height_difference: int = abs(int(neighbor_tile.height_level) - int(current_tile.height_level))
-	return height_difference <= 1
+	if height_difference == 0:
+		return true
+
+	# Determine edge_type of the higher tile — it controls traversability
+	var higher_tile = neighbor_tile if int(neighbor_tile.height_level) > int(current_tile.height_level) else current_tile
+	var edge_type: String = String(higher_tile.edge_type)
+
+	if edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE:
+		return true  # slopes are always traversable
+	else:
+		return height_difference <= 1  # cliffs only allow 1 level difference
 
 
 func _get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry) -> float:
@@ -102,4 +112,12 @@ func _get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry) -
 
 	var height_difference: int = abs(int(neighbor_tile.height_level) - int(current_tile.height_level))
 	var surface_cost: float = TERRAIN_TILE_DATA_SCRIPT.get_surface_path_cost(String(neighbor_tile.surface_type))
+
+	# Slopes cost more per height level than flat terrain
+	if height_difference > 0:
+		var higher_tile = neighbor_tile if int(neighbor_tile.height_level) > int(current_tile.height_level) else current_tile
+		var edge_type: String = String(higher_tile.edge_type)
+		if edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE:
+			return surface_cost + (float(height_difference) * 1.0)
+
 	return surface_cost + (float(height_difference) * 0.5)

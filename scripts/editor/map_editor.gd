@@ -13,6 +13,10 @@ const CLIFF_CORNER_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isomet
 const CLIFF_CORNER_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_SW.png")
 const CLIFF_CORNER_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_NE.png")
 const CLIFF_CORNER_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_NW.png")
+const SLOPE_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_side_SE.png")
+const SLOPE_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_side_SW.png")
+const SLOPE_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_side_NE.png")
+const SLOPE_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_side_NW.png")
 const WALL_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wall_SE.png")
 const WALL_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wall_SW.png")
 const WALL_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wall_NE.png")
@@ -77,6 +81,7 @@ func _ready() -> void:
 	_ensure_terrain_registry()
 	_load_tile_catalog()
 	_populate_surface_type_options()
+	_populate_edge_type_options()
 	_populate_tile_palette()
 	_connect_ui_signals()
 	_load_map(map_file_path if not map_file_path.is_empty() else DEFAULT_MAP_PATH)
@@ -360,6 +365,7 @@ func _refresh_property_panel() -> void:
 	var cover_spinbox := _get_cover_spinbox()
 	var height_spinbox := _get_height_spinbox()
 	var surface_option_button := _get_surface_option_button()
+	var edge_type_option_button := _get_edge_type_option_button()
 	if tile_label == null or walkable_checkbox == null or blocks_los_checkbox == null or cover_spinbox == null or height_spinbox == null or surface_option_button == null:
 		return
 
@@ -373,6 +379,8 @@ func _refresh_property_panel() -> void:
 		cover_spinbox.value = 0
 		height_spinbox.value = 0
 		surface_option_button.select(_find_surface_option_index(TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFACE_TYPE))
+		if edge_type_option_button != null:
+			edge_type_option_button.select(0)
 		_set_property_controls_enabled(false)
 		_is_refreshing_property_controls = false
 		return
@@ -393,6 +401,8 @@ func _refresh_property_panel() -> void:
 	cover_spinbox.value = int(tile_data.cover_value)
 	height_spinbox.value = int(tile_data.height_level)
 	surface_option_button.select(_find_surface_option_index(String(tile_data.surface_type)))
+	if edge_type_option_button != null:
+		edge_type_option_button.select(0 if String(tile_data.edge_type) == TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF else 1)
 	_set_property_controls_enabled(true)
 	_is_refreshing_property_controls = false
 
@@ -403,6 +413,9 @@ func _set_property_controls_enabled(is_enabled: bool) -> void:
 	_get_cover_spinbox().editable = is_enabled
 	_get_height_spinbox().editable = is_enabled
 	_get_surface_option_button().disabled = not is_enabled
+	var edge_type_btn := _get_edge_type_option_button()
+	if edge_type_btn != null:
+		edge_type_btn.disabled = not is_enabled
 
 
 func _apply_property_controls_to_selected_tile() -> void:
@@ -419,6 +432,7 @@ func _apply_property_controls_to_selected_tile() -> void:
 		"cover_value": int(_get_cover_spinbox().value),
 		"height_level": int(_get_height_spinbox().value),
 		"surface_type": _get_selected_surface_type(),
+		"edge_type": _get_selected_edge_type(),
 	}
 	if not _apply_tile_patch(tile_data, patch):
 		return
@@ -437,6 +451,7 @@ func _apply_tile_patch(tile_data, patch: Dictionary) -> bool:
 	var next_cover_value: int = clampi(int(patch.get("cover_value", tile_data.cover_value)), 0, 100)
 	var next_height_level: int = clampi(int(patch.get("height_level", tile_data.height_level)), 0, 2)
 	var next_surface_type: String = String(patch.get("surface_type", tile_data.surface_type))
+	var next_edge_type: String = String(patch.get("edge_type", tile_data.edge_type))
 
 	var changed: bool = (
 		tile_data.walkable != next_walkable
@@ -444,6 +459,7 @@ func _apply_tile_patch(tile_data, patch: Dictionary) -> bool:
 		or int(tile_data.cover_value) != next_cover_value
 		or int(tile_data.height_level) != next_height_level
 		or String(tile_data.surface_type) != next_surface_type
+		or String(tile_data.edge_type) != next_edge_type
 	)
 	if not changed:
 		return false
@@ -454,6 +470,7 @@ func _apply_tile_patch(tile_data, patch: Dictionary) -> bool:
 	tile_data.cover_value = next_cover_value
 	tile_data.height_level = next_height_level
 	tile_data.surface_type = next_surface_type
+	tile_data.edge_type = next_edge_type
 	return true
 
 
@@ -488,6 +505,7 @@ func _undo_last_change() -> void:
 	tile_data.cover_value = restored_tile.cover_value
 	tile_data.height_level = restored_tile.height_level
 	tile_data.surface_type = restored_tile.surface_type
+	tile_data.edge_type = restored_tile.edge_type
 
 	_selected_grid_position = grid_position
 	_last_undo_state.clear()
@@ -550,6 +568,17 @@ func _populate_surface_type_options() -> void:
 	option_button.select(0)
 
 
+func _populate_edge_type_options() -> void:
+	var option_button := _get_edge_type_option_button()
+	if option_button == null:
+		return
+
+	option_button.clear()
+	option_button.add_item("Cliff")
+	option_button.add_item("Slope")
+	option_button.select(0)
+
+
 func _connect_ui_signals() -> void:
 	var save_button := get_node_or_null("UI/TopBar/Margin/HBox/SaveButton") as Button
 	var load_button := get_node_or_null("UI/TopBar/Margin/HBox/LoadButton") as Button
@@ -560,6 +589,7 @@ func _connect_ui_signals() -> void:
 	var cover_spinbox := _get_cover_spinbox()
 	var height_spinbox := _get_height_spinbox()
 	var surface_option_button := _get_surface_option_button()
+	var edge_type_option_button := _get_edge_type_option_button()
 	var file_dialog := get_node_or_null("UI/LoadDialog") as FileDialog
 	var confirm_dialog := get_node_or_null("UI/DirtyConfirmDialog") as ConfirmationDialog
 	var tile_type_list := _get_tile_type_list()
@@ -581,6 +611,8 @@ func _connect_ui_signals() -> void:
 		height_spinbox.value_changed.connect(_on_property_controls_value_changed)
 	if surface_option_button != null and not surface_option_button.item_selected.is_connected(_on_surface_selected):
 		surface_option_button.item_selected.connect(_on_surface_selected)
+	if edge_type_option_button != null and not edge_type_option_button.item_selected.is_connected(_on_edge_type_selected):
+		edge_type_option_button.item_selected.connect(_on_edge_type_selected)
 	if tile_type_list != null and not tile_type_list.item_selected.is_connected(_on_tile_type_selected):
 		tile_type_list.item_selected.connect(_on_tile_type_selected)
 	if file_dialog != null:
@@ -627,6 +659,10 @@ func _on_property_controls_value_changed(_value: float) -> void:
 
 
 func _on_surface_selected(_index: int) -> void:
+	_apply_property_controls_to_selected_tile()
+
+
+func _on_edge_type_selected(_index: int) -> void:
 	_apply_property_controls_to_selected_tile()
 
 
@@ -719,6 +755,10 @@ func _get_height_spinbox() -> SpinBox:
 	return get_node_or_null("UI/PropertyPanel/Margin/VBox/HeightRow/HeightSpinBox") as SpinBox
 
 
+func _get_edge_type_option_button() -> OptionButton:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/EdgeTypeRow/EdgeTypeOptionButton") as OptionButton
+
+
 func _get_surface_option_button() -> OptionButton:
 	return get_node_or_null("UI/PropertyPanel/Margin/VBox/SurfaceRow/SurfaceOptionButton") as OptionButton
 
@@ -729,6 +769,17 @@ func _get_selected_surface_type() -> String:
 		return TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFACE_TYPE
 
 	return option_button.get_item_text(option_button.selected)
+
+
+func _get_selected_edge_type() -> String:
+	var option_button := _get_edge_type_option_button()
+	if option_button == null or option_button.selected < 0:
+		return TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF
+
+	# Index 0 = "Cliff", Index 1 = "Slope"
+	if option_button.selected == 1:
+		return TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE
+	return TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF
 
 
 func _find_surface_option_index(surface_type: String) -> int:
@@ -842,6 +893,7 @@ func _create_cliff_overlays_for_tile(tile_data) -> void:
 
 	var my_height: int = int(tile_data.height_level)
 	var grid_pos: Vector2i = tile_data.grid_position
+	var is_slope: bool = String(tile_data.edge_type) == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE
 	var overlays: Array[Sprite2D] = []
 
 	# Grid neighbor direction → cliff texture mapping:
@@ -855,6 +907,7 @@ func _create_cliff_overlays_for_tile(tile_data) -> void:
 
 	# Step 1: detect corners - pairs of adjacent exposed edges
 	# Corner pieces REPLACE the two straight cliff panels they connect
+	# Note: corner textures are the same for cliff and slope (sideCorner)
 	var corner_map: Array = [
 		[Vector2i(1, 0), Vector2i(0, 1), CLIFF_CORNER_SW],
 		[Vector2i(1, 0), Vector2i(0, -1), CLIFF_CORNER_SE],
@@ -881,25 +934,35 @@ func _create_cliff_overlays_for_tile(tile_data) -> void:
 			if not edges_consumed_by_corners.has(dir_b):
 				edges_consumed_by_corners.append(dir_b)
 
-	# Step 2: render straight cliff panels only for edges NOT consumed by corners
-	var edge_texture_map: Dictionary = {
-		Vector2i(1, 0): CLIFF_TEXTURE_SE,
-		Vector2i(-1, 0): CLIFF_TEXTURE_NW,
-		Vector2i(0, 1): CLIFF_TEXTURE_SW,
-		Vector2i(0, -1): CLIFF_TEXTURE_NE,
-	}
+	# Step 2: render straight panels only for edges NOT consumed by corners
+	# Use terrain_side_* for slopes, terrain_sideCliff_* for cliffs
+	var edge_texture_map: Dictionary
+	if is_slope:
+		edge_texture_map = {
+			Vector2i(1, 0): SLOPE_TEXTURE_SE,
+			Vector2i(-1, 0): SLOPE_TEXTURE_NW,
+			Vector2i(0, 1): SLOPE_TEXTURE_SW,
+			Vector2i(0, -1): SLOPE_TEXTURE_NE,
+		}
+	else:
+		edge_texture_map = {
+			Vector2i(1, 0): CLIFF_TEXTURE_SE,
+			Vector2i(-1, 0): CLIFF_TEXTURE_NW,
+			Vector2i(0, 1): CLIFF_TEXTURE_SW,
+			Vector2i(0, -1): CLIFF_TEXTURE_NE,
+		}
 
 	for edge_dir in cliff_edge_dirs:
 		if edges_consumed_by_corners.has(edge_dir):
 			continue
-		var cliff_texture: Texture2D = edge_texture_map[edge_dir]
-		var cliff_sprite := Sprite2D.new()
-		cliff_sprite.texture = cliff_texture
-		cliff_sprite.centered = false
-		cliff_sprite.z_index = -15
-		cliff_sprite.position = tile_data.world_position - KENNEY_DIAMOND_CENTER
-		cliff_container.add_child(cliff_sprite)
-		overlays.append(cliff_sprite)
+		var edge_texture: Texture2D = edge_texture_map[edge_dir]
+		var edge_sprite := Sprite2D.new()
+		edge_sprite.texture = edge_texture
+		edge_sprite.centered = false
+		edge_sprite.z_index = -15
+		edge_sprite.position = tile_data.world_position - KENNEY_DIAMOND_CENTER
+		cliff_container.add_child(edge_sprite)
+		overlays.append(edge_sprite)
 
 	if not overlays.is_empty():
 		_cliff_sprites_by_grid[grid_pos] = overlays
