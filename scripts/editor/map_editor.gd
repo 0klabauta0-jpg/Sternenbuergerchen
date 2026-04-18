@@ -971,10 +971,10 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 	var half_h: float = float(tile_size.get("half_height", DEFAULT_HALF_TILE_HEIGHT))
 
 	var corner_map: Array = [
-		[Vector2i(1, 0), Vector2i(0, 1), WALL_CORNER_NE, Vector2(0, half_h)],
-		[Vector2i(1, 0), Vector2i(0, -1), WALL_CORNER_NW, Vector2(half_w, 0)],
-		[Vector2i(-1, 0), Vector2i(0, 1), WALL_CORNER_SE, Vector2(-half_w, 0)],
-		[Vector2i(-1, 0), Vector2i(0, -1), WALL_CORNER_SW, Vector2(0, -half_h)],
+		[Vector2i(1, 0), Vector2i(0, 1), WALL_CORNER_NE, Vector2(0, 3.0 * half_h)],
+		[Vector2i(1, 0), Vector2i(0, -1), WALL_CORNER_NW, Vector2(3.0 * half_w, 0)],
+		[Vector2i(-1, 0), Vector2i(0, 1), WALL_CORNER_SE, Vector2(-3.0 * half_w, 0)],
+		[Vector2i(-1, 0), Vector2i(0, -1), WALL_CORNER_SW, Vector2(0, -3.0 * half_h)],
 	]
 
 	var edges_consumed_by_corners: Array[Vector2i] = []
