@@ -389,6 +389,49 @@
 ### TASK_056 - LOS ueber Terrain-Tiles
 - Status: implementiert
 - Stand: `LineOfSightSystem` unterstuetzt jetzt optionale Terrain-Registries und prueft per einfachem Tile-Stepping, ob `blocks_los`-Tiles zwischen Quelle und Ziel liegen. Dabei wird die vorbereitete Hoehenregel direkt beruecksichtigt: hoehere Einheiten koennen ueber niedrigere Hindernisse hinwegsehen. `MissionCombatLoopDriver` gibt die `TerrainRegistry` an alle LOS-Aufrufe weiter, sodass Contact und Enemy-Hold-Checks auf der Testkarte jetzt von Terrain-Blockern beeinflusst werden.
+
+### Wall-Overlay-System im Map-Editor
+- Status: implementiert
+- Stand: Der Map-Editor unterstuetzt jetzt individuelle Wand- und Eckenstuecke als Overlay-Sprites ueber dem Terrain.
+
+#### Tile-Katalog (`data/terrain_tile_catalog.json`)
+9 Eintraege: `ground_flat`, 4 gerade Mauern (`wall_straight_se/sw/ne/nw`), 4 Ecken (`wall_corner_se/sw/ne/nw`).
+Wand-Tiles haben kein eigenes `texture_path` — der Boden zeigt `terrain_SW.png`, die Mauer wird als Overlay daruebergelegt.
+
+#### Namenskonvention
+- **Gerade Mauern**: `wall_straight_XX` — XX ist die Laufrichtung der Mauer (SE = Mauer laeuft von NW nach SE).
+- **Ecken**: `wall_corner_XX` — XX ist die Grid-Richtung, `display_name` zeigt die visuelle Position:
+  - `wall_corner_se` = "Ecke Ost" (rechts)
+  - `wall_corner_sw` = "Ecke Sued" (unten)
+  - `wall_corner_ne` = "Ecke Nord" (oben)
+  - `wall_corner_nw` = "Ecke West" (links)
+
+#### Kenney-Sprite-Zuordnung
+Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurve. Im Code werden sie daher gegenlaefig gemappt:
+- `wall_corner_se` -> `WALL_CORNER_NW` (corridor_wallCorner_NW.png)
+- `wall_corner_sw` -> `WALL_CORNER_NE` (corridor_wallCorner_NE.png)
+- `wall_corner_ne` -> `WALL_CORNER_SW` (corridor_wallCorner_SW.png)
+- `wall_corner_nw` -> `WALL_CORNER_SE` (corridor_wallCorner_SE.png)
+
+#### Sprite-Platzierung
+- Alle Sprites: `centered = false`, Position = `world_position - KENNEY_DIAMOND_CENTER`
+- `KENNEY_DIAMOND_CENTER = Vector2(256, 315)` — Diamant-Mitte aller Kenney 512x512-Sprites
+- `WallContainer` hat `y_sort_enabled = true` und `z_index = -13` — suedlichere Mauern ueberdecken noerdlichere korrekt
+
+#### Tile-Datenfelder — aktuelle Semantik und Grenzen
+
+| Feld | Typ | Aktuell | Gameplay-Wirkung |
+|------|-----|---------|-----------------|
+| `surface_type` | String | Pro Tile, nicht pro Objekt | Beeinflusst Bewegungsgeschwindigkeit und Pfadkosten (`road`=1.4x, `sand`=0.6x, `rock`=0.8x) |
+| `walkable` | bool | Ganzes Tile blockiert | Pathfinder lehnt Tile komplett ab — keine Richtungsinformation |
+| `blocks_los` | bool | Ganzes Tile blockiert | LOS-System prueft pro Tile — keine Richtungsinformation |
+| `cover_value` | int 0-100 | Pro Tile | Combat: -0.35 Hit-Chance fuer Ziel, +0.05 fuer Angreifer, -0.2 Schaden (max 80) |
+| `height_level` | int 0-2 | Hoehe des Tiles/Objekts | Pathfinding: max 1 Level Differenz, +0.5 Kosten pro Level. Combat: +0.1 Accuracy-Bonus pro Level ueber Ziel |
+
+**Bekannte Design-Luecken:**
+- `walkable` und `blocks_los` sind nicht richtungsabhaengig. Eine Mauer SW blockiert aktuell das ganze Tile statt nur die NW-SE-Kante. Fuer feingranulare Wandmechanik muesste ein edge-basiertes System (`blocked_edges: ["nw-se"]`) eingefuehrt werden.
+- `surface_type` beschreibt aktuell den Boden unter der Mauer (z.B. "rock"), nicht das Mauerobjekt selbst.
+- `height_level` ist gleichzeitig Objekthoehe und Terrainhoehe — bei Mauern (level 2) wirkt es wie Objekthoehe, bei erhoehtem Terrain wie Gelaendehoehe.
 - Offene Punkte: keine Raycasts, keine partielle Deckung, keine feingranulare Sichtkanal- oder FOW-Regel pro Spieler.
 - Risiken: der LOS-Pfad bleibt bewusst grob tile-basiert; spaetere komplexere Hindernisse oder echte FoW-Systeme muessen diesen einfachen Sichtpfad explizit erweitern statt ihn nebenbei auszutauschen.
 - Naechster Schritt: Terrain-Cover mit der bestehenden Command-/Phase-Coverlogik kombinieren.

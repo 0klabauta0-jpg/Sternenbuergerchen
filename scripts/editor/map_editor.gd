@@ -1040,7 +1040,7 @@ func _rebuild_grid_overlay() -> void:
 	var tile_size: Dictionary = _terrain_map_data.call("get_tile_size")
 	var half_w: float = float(tile_size.get("half_width", DEFAULT_HALF_TILE_WIDTH))
 	var half_h: float = float(tile_size.get("half_height", DEFAULT_HALF_TILE_HEIGHT))
-	var grid_color: Color = Color(1.0, 1.0, 1.0, 0.12)
+	var grid_color: Color = Color(1.0, 1.0, 1.0, 0.3)
 	var grid_width: float = 1.0
 
 	for tile_data in _terrain_map_data.call("get_tiles"):
