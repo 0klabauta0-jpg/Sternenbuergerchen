@@ -982,13 +982,33 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 		var sum: Vector2i = wall_dirs[0] + wall_dirs[1]
 		if sum == Vector2i.ZERO:
 			# Opposite directions → straight wall panel
+			# Scan perpendicular to find interior side (opposite wall)
 			if wall_dirs.has(Vector2i(1, 0)):
-				# SE+NW axis — wall visual at SE edge, shift NW to center
+				# SE+NW axis, perpendicular is NE(0,-1) / SW(0,+1)
 				texture = WALL_TEXTURE_SE
-				pos_offset = Vector2(-DEFAULT_HALF_TILE_WIDTH, -DEFAULT_HALF_TILE_HEIGHT)
+				var interior_is_sw := false
+				for i in range(1, 20):
+					var check = _terrain_map_data.call("get_tile_at_grid", grid_pos + Vector2i(0, 1) * i)
+					if _is_wall_type(check):
+						interior_is_sw = true
+						break
+				if interior_is_sw:
+					# NE side wall → offset 1 tile NE
+					pos_offset = Vector2(DEFAULT_HALF_TILE_WIDTH, -DEFAULT_HALF_TILE_HEIGHT)
+				# else: SW side wall → no offset
 			else:
-				# NE+SW axis — correctly centered, no offset needed
+				# NE+SW axis, perpendicular is SE(+1,0) / NW(-1,0)
 				texture = WALL_TEXTURE_SW
+				var interior_is_se := false
+				for i in range(1, 20):
+					var check = _terrain_map_data.call("get_tile_at_grid", grid_pos + Vector2i(1, 0) * i)
+					if _is_wall_type(check):
+						interior_is_se = true
+						break
+				if not interior_is_se:
+					# SE side wall → offset 1 tile SE
+					pos_offset = Vector2(DEFAULT_HALF_TILE_WIDTH, DEFAULT_HALF_TILE_HEIGHT)
+				# else: NW side wall → no offset
 		else:
 			# Adjacent directions → corner wall piece
 			if wall_dirs.has(Vector2i(1, 0)) and wall_dirs.has(Vector2i(0, 1)):
