@@ -121,7 +121,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				camera.position -= mouse_motion.relative * camera.zoom
 			return
 		if _is_painting and _is_brush_enabled() and _has_selected_type():
-			_apply_brush_at_world_position(get_global_mouse_position())
+			#_apply_brush_at_world_position(get_global_mouse_position())
 			return
 		if _is_brush_enabled() and not _is_pointer_over_control():
 			_update_hover_preview(get_global_mouse_position())

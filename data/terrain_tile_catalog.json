@@ -2,7 +2,7 @@
 	"tile_types": [
 		{
 			"type_id": "ground_flat",
-			"display_name": "Boden (flach)",
+			"display_name": "Boden",
 			"texture_path": "res://Assets/kenney_space-kit/Isometric/terrain_SW.png",
 			"surface_type": "ground",
 			"walkable": true,
@@ -11,102 +11,8 @@
 			"height_level": 0
 		},
 		{
-			"type_id": "ground_elevated",
-			"display_name": "Boden (erhoeht)",
-			"texture_path": "res://Assets/kenney_space-kit/Isometric/terrain_SW.png",
-			"surface_type": "ground",
-			"walkable": true,
-			"blocks_los": false,
-			"cover_value": 0,
-			"height_level": 1
-		},
-		{
-			"type_id": "ground_high",
-			"display_name": "Boden (hoch)",
-			"texture_path": "res://Assets/kenney_space-kit/Isometric/terrain_SW.png",
-			"surface_type": "ground",
-			"walkable": true,
-			"blocks_los": false,
-			"cover_value": 0,
-			"height_level": 2
-		},
-		{
-			"type_id": "road_flat",
-			"display_name": "Strasse (flach)",
-			"texture_path": "res://Assets/kenney_space-kit/Isometric/terrain_roadStraight_SW.png",
-			"surface_type": "road",
-			"walkable": true,
-			"blocks_los": false,
-			"cover_value": 0,
-			"height_level": 0
-		},
-		{
-			"type_id": "road_elevated",
-			"display_name": "Strasse (erhoeht)",
-			"texture_path": "res://Assets/kenney_space-kit/Isometric/terrain_roadStraight_SW.png",
-			"surface_type": "road",
-			"walkable": true,
-			"blocks_los": false,
-			"cover_value": 0,
-			"height_level": 1
-		},
-		{
-			"type_id": "sand_flat",
-			"display_name": "Sand (flach)",
-			"surface_type": "sand",
-			"walkable": true,
-			"blocks_los": false,
-			"cover_value": 0,
-			"height_level": 0
-		},
-		{
-			"type_id": "rock_flat",
-			"display_name": "Fels (flach)",
-			"surface_type": "rock",
-			"walkable": true,
-			"blocks_los": false,
-			"cover_value": 0,
-			"height_level": 0
-		},
-		{
-			"type_id": "rock_elevated",
-			"display_name": "Fels (erhoeht)",
-			"surface_type": "rock",
-			"walkable": true,
-			"blocks_los": false,
-			"cover_value": 20,
-			"height_level": 1
-		},
-		{
-			"type_id": "rock_high",
-			"display_name": "Fels (hoch)",
-			"surface_type": "rock",
-			"walkable": true,
-			"blocks_los": false,
-			"cover_value": 35,
-			"height_level": 2
-		},
-		{
-			"type_id": "cover_low",
-			"display_name": "Leichte Deckung",
-			"surface_type": "ground",
-			"walkable": true,
-			"blocks_los": false,
-			"cover_value": 20,
-			"height_level": 0
-		},
-		{
-			"type_id": "cover_high",
-			"display_name": "Schwere Deckung",
-			"surface_type": "ground",
-			"walkable": true,
-			"blocks_los": false,
-			"cover_value": 35,
-			"height_level": 1
-		},
-		{
-			"type_id": "wall",
-			"display_name": "Mauer",
+			"type_id": "wall_straight_se",
+			"display_name": "Mauer SE",
 			"surface_type": "rock",
 			"walkable": false,
 			"blocks_los": true,
@@ -114,22 +20,67 @@
 			"height_level": 2
 		},
 		{
-			"type_id": "wall_low",
-			"display_name": "Niedrige Mauer",
+			"type_id": "wall_straight_sw",
+			"display_name": "Mauer SW",
 			"surface_type": "rock",
 			"walkable": false,
-			"blocks_los": false,
-			"cover_value": 50,
-			"height_level": 1
+			"blocks_los": true,
+			"cover_value": 0,
+			"height_level": 2
 		},
 		{
-			"type_id": "blocked",
-			"display_name": "Unpassierbar",
-			"surface_type": "ground",
+			"type_id": "wall_straight_ne",
+			"display_name": "Mauer NE",
+			"surface_type": "rock",
 			"walkable": false,
-			"blocks_los": false,
+			"blocks_los": true,
 			"cover_value": 0,
-			"height_level": 0
+			"height_level": 2
+		},
+		{
+			"type_id": "wall_straight_nw",
+			"display_name": "Mauer NW",
+			"surface_type": "rock",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 0,
+			"height_level": 2
+		},
+		{
+			"type_id": "wall_corner_se",
+			"display_name": "Ecke SE",
+			"surface_type": "rock",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 0,
+			"height_level": 2
+		},
+		{
+			"type_id": "wall_corner_sw",
+			"display_name": "Ecke SW",
+			"surface_type": "rock",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 0,
+			"height_level": 2
+		},
+		{
+			"type_id": "wall_corner_ne",
+			"display_name": "Ecke NE",
+			"surface_type": "rock",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 0,
+			"height_level": 2
+		},
+		{
+			"type_id": "wall_corner_nw",
+			"display_name": "Ecke NW",
+			"surface_type": "rock",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 0,
+			"height_level": 2
 		}
 	]
 }
