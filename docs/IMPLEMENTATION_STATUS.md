@@ -426,12 +426,21 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 | `walkable` | bool | Ganzes Tile blockiert | Pathfinder lehnt Tile komplett ab — keine Richtungsinformation |
 | `blocks_los` | bool | Ganzes Tile blockiert | LOS-System prueft pro Tile — keine Richtungsinformation |
 | `cover_value` | int 0-100 | Pro Tile | Combat: -0.35 Hit-Chance fuer Ziel, +0.05 fuer Angreifer, -0.2 Schaden (max 80) |
-| `height_level` | int 0-2 | Hoehe des Tiles/Objekts | Pathfinding: max 1 Level Differenz, +0.5 Kosten pro Level. Combat: +0.1 Accuracy-Bonus pro Level ueber Ziel |
+| `height_level` | int 0-2 | Terrainhoehe (Gelaende) | Pathfinding: max 1 Level Differenz, +0.5 Kosten pro Level. Combat: +0.1 Accuracy-Bonus pro Level ueber Ziel |
+| `object_height` | int 0-3 | Objekthoehe (Mauer, Fels) | LOS: Blocker-Hoehe = `height_level + object_height`. Pathfinding: nicht verwendet |
+
+#### Objekt-Typen im Katalog
+
+| type_id | display_name | object_height | cover | blocks_los | Beschreibung |
+|---------|-------------|--------------|-------|------------|-------------|
+| `rock_small` | Fels klein | 1 | 30 | nein | Kleiner Fels, bietet Deckung aber blockiert nicht LOS |
+| `rock_large` | Fels gross | 2 | 50 | ja | Grosser Fels, blockiert LOS und bietet starke Deckung |
+| `wall_straight_*` | Mauer XX | 2 | 0 | ja | Gerade Mauerstuecke |
+| `wall_corner_*` | Ecke XX | 2 | 0 | ja | Eckverbindungen |
 
 **Bekannte Design-Luecken:**
 - `walkable` und `blocks_los` sind nicht richtungsabhaengig. Eine Mauer SW blockiert aktuell das ganze Tile statt nur die NW-SE-Kante. Fuer feingranulare Wandmechanik muesste ein edge-basiertes System (`blocked_edges: ["nw-se"]`) eingefuehrt werden.
 - `surface_type` beschreibt aktuell den Boden unter der Mauer (z.B. "rock"), nicht das Mauerobjekt selbst.
-- `height_level` ist gleichzeitig Objekthoehe und Terrainhoehe — bei Mauern (level 2) wirkt es wie Objekthoehe, bei erhoehtem Terrain wie Gelaendehoehe.
 - Offene Punkte: keine Raycasts, keine partielle Deckung, keine feingranulare Sichtkanal- oder FOW-Regel pro Spieler.
 - Risiken: der LOS-Pfad bleibt bewusst grob tile-basiert; spaetere komplexere Hindernisse oder echte FoW-Systeme muessen diesen einfachen Sichtpfad explizit erweitern statt ihn nebenbei auszutauschen.
 - Naechster Schritt: Terrain-Cover mit der bestehenden Command-/Phase-Coverlogik kombinieren.

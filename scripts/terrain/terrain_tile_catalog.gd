@@ -46,6 +46,7 @@ static func load_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCa
 			"blocks_los": bool(entry.get("blocks_los", false)),
 			"cover_value": clampi(int(entry.get("cover_value", 0)), 0, 100),
 			"height_level": clampi(int(entry.get("height_level", 0)), 0, 3),
+			"object_height": clampi(int(entry.get("object_height", 0)), 0, 3),
 		}
 		catalog._type_order.append(type_id)
 
@@ -95,5 +96,6 @@ func apply_type_to_tile(tile_data, type_id: String) -> bool:
 	tile_data.blocks_los = bool(entry.get("blocks_los", false))
 	tile_data.cover_value = int(entry.get("cover_value", 0))
 	tile_data.height_level = int(entry.get("height_level", 0))
+	tile_data.object_height = int(entry.get("object_height", 0))
 	tile_data.surface_type = String(entry.get("surface_type", "ground"))
 	return true

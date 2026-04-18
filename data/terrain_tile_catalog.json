@@ -8,7 +8,8 @@
 			"walkable": true,
 			"blocks_los": false,
 			"cover_value": 0,
-			"height_level": 0
+			"height_level": 0,
+			"object_height": 0
 		},
 		{
 			"type_id": "wall_straight_se",
@@ -17,7 +18,8 @@
 			"walkable": false,
 			"blocks_los": true,
 			"cover_value": 0,
-			"height_level": 2
+			"height_level": 0,
+			"object_height": 2
 		},
 		{
 			"type_id": "wall_straight_sw",
@@ -26,7 +28,8 @@
 			"walkable": false,
 			"blocks_los": true,
 			"cover_value": 0,
-			"height_level": 2
+			"height_level": 0,
+			"object_height": 2
 		},
 		{
 			"type_id": "wall_straight_ne",
@@ -35,7 +38,8 @@
 			"walkable": false,
 			"blocks_los": true,
 			"cover_value": 0,
-			"height_level": 2
+			"height_level": 0,
+			"object_height": 2
 		},
 		{
 			"type_id": "wall_straight_nw",
@@ -44,7 +48,8 @@
 			"walkable": false,
 			"blocks_los": true,
 			"cover_value": 0,
-			"height_level": 2
+			"height_level": 0,
+			"object_height": 2
 		},
 		{
 			"type_id": "wall_corner_se",
@@ -53,7 +58,8 @@
 			"walkable": false,
 			"blocks_los": true,
 			"cover_value": 0,
-			"height_level": 2
+			"height_level": 0,
+			"object_height": 2
 		},
 		{
 			"type_id": "wall_corner_sw",
@@ -62,7 +68,8 @@
 			"walkable": false,
 			"blocks_los": true,
 			"cover_value": 0,
-			"height_level": 2
+			"height_level": 0,
+			"object_height": 2
 		},
 		{
 			"type_id": "wall_corner_ne",
@@ -71,7 +78,8 @@
 			"walkable": false,
 			"blocks_los": true,
 			"cover_value": 0,
-			"height_level": 2
+			"height_level": 0,
+			"object_height": 2
 		},
 		{
 			"type_id": "wall_corner_nw",
@@ -80,7 +88,28 @@
 			"walkable": false,
 			"blocks_los": true,
 			"cover_value": 0,
-			"height_level": 2
+			"height_level": 0,
+			"object_height": 2
+		},
+		{
+			"type_id": "rock_small",
+			"display_name": "Fels klein",
+			"surface_type": "rock",
+			"walkable": false,
+			"blocks_los": false,
+			"cover_value": 30,
+			"height_level": 0,
+			"object_height": 1
+		},
+		{
+			"type_id": "rock_large",
+			"display_name": "Fels gross",
+			"surface_type": "rock",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 50,
+			"height_level": 0,
+			"object_height": 2
 		}
 	]
 }

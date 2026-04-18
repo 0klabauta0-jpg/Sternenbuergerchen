@@ -21,6 +21,8 @@ const WALL_CORNER_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometr
 const WALL_CORNER_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_SW.png")
 const WALL_CORNER_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_NE.png")
 const WALL_CORNER_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_NW.png")
+const ROCK_SMALL_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/rock_SW.png")
+const ROCK_LARGE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/rock_largeB_SW.png")
 const CORRIDOR_STRAIGHT_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_SW.png")
 const CORRIDOR_STRAIGHT_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_SE.png")
 const CORRIDOR_CORNER_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_corner_SW.png")
@@ -774,6 +776,7 @@ func _find_matching_type_id(tile_data) -> String:
 			and bool(entry.get("blocks_los", false)) == bool(tile_data.blocks_los)
 			and int(entry.get("cover_value", 0)) == int(tile_data.cover_value)
 			and int(entry.get("height_level", 0)) == int(tile_data.height_level)
+			and int(entry.get("object_height", 0)) == int(tile_data.object_height)
 			and String(entry.get("surface_type", "ground")) == String(tile_data.surface_type)
 		):
 			return type_id
@@ -811,7 +814,7 @@ func _rebuild_all_cliff_overlays() -> void:
 		return
 
 	for tile_data in _terrain_map_data.call("get_tiles"):
-		if int(tile_data.height_level) > 0 and not _is_wall_type(tile_data):
+		if int(tile_data.height_level) > 0 and not _is_object_type(tile_data):
 			_create_cliff_overlays_for_tile(tile_data)
 
 
@@ -825,7 +828,7 @@ func _update_cliff_overlays_around(grid_position: Vector2i) -> void:
 		if _terrain_map_data == null:
 			continue
 		var tile_data = _terrain_map_data.call("get_tile_at_grid", pos)
-		if tile_data != null and int(tile_data.height_level) > 0 and not _is_wall_type(tile_data):
+		if tile_data != null and int(tile_data.height_level) > 0 and not _is_object_type(tile_data):
 			_create_cliff_overlays_for_tile(tile_data)
 
 
@@ -847,7 +850,7 @@ func _create_cliff_overlays_for_tile(tile_data) -> void:
 	for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 		var neighbor = _terrain_map_data.call("get_tile_at_grid", grid_pos + offset)
 		var neighbor_height: int = int(neighbor.height_level) if neighbor != null else 0
-		if neighbor_height < my_height and not _is_wall_type(neighbor):
+		if neighbor_height < my_height and not _is_object_type(neighbor):
 			cliff_edge_dirs.append(offset)
 
 	# Step 1: detect corners - pairs of adjacent exposed edges
@@ -925,10 +928,11 @@ func _clear_cliff_overlays() -> void:
 
 # --- Wall Overlay System ---
 
-func _is_wall_type(tile_data) -> bool:
+func _is_object_type(tile_data) -> bool:
 	if tile_data == null:
 		return false
-	return bool(tile_data.blocks_los)
+	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
+	return type_id.begins_with("wall_") or type_id.begins_with("rock_")
 
 
 func _rebuild_all_wall_overlays() -> void:
@@ -937,7 +941,7 @@ func _rebuild_all_wall_overlays() -> void:
 		return
 
 	for tile_data in _terrain_map_data.call("get_tiles"):
-		if _is_wall_type(tile_data):
+		if _is_object_type(tile_data):
 			_create_wall_overlays_for_tile(tile_data)
 
 
@@ -951,7 +955,7 @@ func _update_wall_overlays_around(grid_position: Vector2i) -> void:
 		if _terrain_map_data == null:
 			continue
 		var tile_data = _terrain_map_data.call("get_tile_at_grid", pos)
-		if tile_data != null and _is_wall_type(tile_data):
+		if tile_data != null and _is_object_type(tile_data):
 			_create_wall_overlays_for_tile(tile_data)
 
 
@@ -987,9 +991,13 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 			texture = WALL_CORNER_SW
 		"wall_corner_nw":
 			texture = WALL_CORNER_SE
+		"rock_small":
+			texture = ROCK_SMALL_TEXTURE
+		"rock_large":
+			texture = ROCK_LARGE_TEXTURE
 		_:
 			# Legacy fallback for old "wall" type_id — auto-detect from neighbors
-			if not _is_wall_type(tile_data):
+			if not _is_object_type(tile_data):
 				return
 			texture = WALL_TEXTURE_SW
 

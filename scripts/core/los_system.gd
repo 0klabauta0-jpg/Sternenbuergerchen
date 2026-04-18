@@ -67,7 +67,7 @@ func has_line_of_sight_with_terrain(
 		if tile_data == null or not bool(tile_data.blocks_los):
 			continue
 
-		var blocker_height: int = int(tile_data.height_level)
+		var blocker_height: int = int(tile_data.height_level) + int(tile_data.object_height)
 		if blocker_height >= source_height and blocker_height >= target_height:
 			return false
 
