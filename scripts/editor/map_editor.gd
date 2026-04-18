@@ -964,12 +964,13 @@ func _create_cliff_overlays_for_tile(tile_data) -> void:
 
 	# Step 1: detect corners - pairs of adjacent exposed edges
 	# Corner pieces REPLACE the two straight cliff panels they connect
-	# Note: corner textures are the same for cliff and slope (sideCorner)
+	# Note: Kenney names corners by inner curve direction, so we swap:
+	# SE↔NW and SW↔NE (same fix as wall corners)
 	var corner_map: Array = [
-		[Vector2i(1, 0), Vector2i(0, 1), CLIFF_CORNER_SW],
-		[Vector2i(1, 0), Vector2i(0, -1), CLIFF_CORNER_SE],
-		[Vector2i(-1, 0), Vector2i(0, 1), CLIFF_CORNER_NW],
-		[Vector2i(-1, 0), Vector2i(0, -1), CLIFF_CORNER_NE],
+		[Vector2i(1, 0), Vector2i(0, 1), CLIFF_CORNER_NE],
+		[Vector2i(1, 0), Vector2i(0, -1), CLIFF_CORNER_NW],
+		[Vector2i(-1, 0), Vector2i(0, 1), CLIFF_CORNER_SE],
+		[Vector2i(-1, 0), Vector2i(0, -1), CLIFF_CORNER_SW],
 	]
 
 	var edges_consumed_by_corners: Array[Vector2i] = []
@@ -1168,7 +1169,7 @@ func _rebuild_grid_overlay() -> void:
 	var tile_size: Dictionary = _terrain_map_data.call("get_tile_size")
 	var half_w: float = float(tile_size.get("half_width", DEFAULT_HALF_TILE_WIDTH))
 	var half_h: float = float(tile_size.get("half_height", DEFAULT_HALF_TILE_HEIGHT))
-	var grid_color: Color = Color(1.0, 1.0, 1.0, 0.3)
+	var grid_color: Color = Color(0.0, 0.0, 0.0, 0.35)
 	var grid_width: float = 1.0
 
 	for tile_data in _terrain_map_data.call("get_tiles"):
