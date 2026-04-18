@@ -955,13 +955,10 @@ func _update_wall_overlays_around(grid_position: Vector2i) -> void:
 
 func _create_wall_overlays_for_tile(tile_data) -> void:
 	# Wall overlays are placed on WALL tiles themselves.
-	# Each wall tile gets ONE corridor overlay based on its structural role:
-	# - Straight: 2 opposite wall neighbors → corridor piece (walls on both sides)
-	# - Corner: 2 adjacent wall neighbors → corridor_corner piece (L-turn)
-	# - End: 1 wall neighbor → corridor_end piece
-	# - T-junction: 3 wall neighbors → corridor_split piece
-	# - Cross: 4 wall neighbors → corridor_cross piece
-	# - Isolated: 0 wall neighbors → corridor_end piece (default)
+	# Each wall tile gets ONE wall overlay based on its structural role:
+	# - Straight: 2 opposite wall neighbors → corridor_wall_XX (single wall panel)
+	# - Corner: 2 adjacent wall neighbors → corridor_wallCorner_XX (corner piece)
+	# - End/T/Cross/Isolated: fallback to wall panel
 	if tile_data == null or _terrain_map_data == null:
 		return
 
@@ -983,40 +980,35 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 	if wall_dirs.size() == 2:
 		var sum: Vector2i = wall_dirs[0] + wall_dirs[1]
 		if sum == Vector2i.ZERO:
-			# Opposite directions → straight corridor
+			# Opposite directions → straight wall panel
 			if wall_dirs.has(Vector2i(1, 0)):
 				# SE+NW axis
-				texture = CORRIDOR_STRAIGHT_SE
+				texture = WALL_TEXTURE_SE
 			else:
 				# NE+SW axis
-				texture = CORRIDOR_STRAIGHT_SW
+				texture = WALL_TEXTURE_SW
 		else:
-			# Adjacent directions → corner
+			# Adjacent directions → corner wall piece
 			if wall_dirs.has(Vector2i(1, 0)) and wall_dirs.has(Vector2i(0, 1)):
-				# Walls toward SE and SW
-				texture = CORRIDOR_CORNER_SW
+				texture = WALL_CORNER_SW
 			elif wall_dirs.has(Vector2i(1, 0)) and wall_dirs.has(Vector2i(0, -1)):
-				# Walls toward SE and NE
-				texture = CORRIDOR_CORNER_SE
+				texture = WALL_CORNER_SE
 			elif wall_dirs.has(Vector2i(-1, 0)) and wall_dirs.has(Vector2i(0, 1)):
-				# Walls toward NW and SW
-				texture = CORRIDOR_CORNER_NW
+				texture = WALL_CORNER_NW
 			elif wall_dirs.has(Vector2i(-1, 0)) and wall_dirs.has(Vector2i(0, -1)):
-				# Walls toward NW and NE
-				texture = CORRIDOR_CORNER_NE
+				texture = WALL_CORNER_NE
 	elif wall_dirs.size() == 1:
-		# End piece — one wall neighbor, open on other 3 sides
 		var wall_dir: Vector2i = wall_dirs[0]
 		if wall_dir == Vector2i(1, 0):
-			texture = CORRIDOR_END_SE
+			texture = WALL_TEXTURE_SE
 		elif wall_dir == Vector2i(-1, 0):
-			texture = CORRIDOR_END_NW
+			texture = WALL_TEXTURE_NW
 		elif wall_dir == Vector2i(0, 1):
-			texture = CORRIDOR_END_SW
+			texture = WALL_TEXTURE_SW
 		elif wall_dir == Vector2i(0, -1):
-			texture = CORRIDOR_END_NE
+			texture = WALL_TEXTURE_NE
 	elif wall_dirs.size() == 3:
-		# T-junction — find the missing direction
+		# T-junction — use wall panel facing the open side
 		var all_dirs: Array[Vector2i] = [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
 		var open_dir: Vector2i = Vector2i.ZERO
 		for d in all_dirs:
@@ -1024,19 +1016,17 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 				open_dir = d
 				break
 		if open_dir == Vector2i(1, 0):
-			texture = CORRIDOR_SPLIT_SE
+			texture = WALL_TEXTURE_SE
 		elif open_dir == Vector2i(-1, 0):
-			texture = CORRIDOR_SPLIT_NW
+			texture = WALL_TEXTURE_NW
 		elif open_dir == Vector2i(0, 1):
-			texture = CORRIDOR_SPLIT_SW
+			texture = WALL_TEXTURE_SW
 		elif open_dir == Vector2i(0, -1):
-			texture = CORRIDOR_SPLIT_NE
+			texture = WALL_TEXTURE_NE
 	elif wall_dirs.size() == 4:
-		# Cross — walls on all 4 sides
-		texture = CORRIDOR_CROSS
+		texture = WALL_TEXTURE_SW
 	elif wall_dirs.size() == 0:
-		# Isolated wall tile — use end piece as default
-		texture = CORRIDOR_END_SW
+		texture = WALL_TEXTURE_SW
 
 	if texture == null:
 		return
