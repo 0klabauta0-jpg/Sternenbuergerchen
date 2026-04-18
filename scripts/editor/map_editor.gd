@@ -955,11 +955,6 @@ func _update_wall_overlays_around(grid_position: Vector2i) -> void:
 
 
 func _create_wall_overlays_for_tile(tile_data) -> void:
-	# Wall overlays are placed on WALL tiles themselves.
-	# Each wall tile gets ONE wall overlay based on its structural role:
-	# - Straight: 2 opposite wall neighbors → corridor_wall_XX (single wall panel)
-	# - Corner: 2 adjacent wall neighbors → corridor_wallCorner_XX (corner piece)
-	# - End/T/Cross/Isolated: fallback to wall panel
 	if tile_data == null or _terrain_map_data == null:
 		return
 
@@ -968,89 +963,36 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 		return
 
 	var grid_pos: Vector2i = tile_data.grid_position
-
-	# Classify neighbors
-	var wall_dirs: Array[Vector2i] = []
-	for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-		var neighbor = _terrain_map_data.call("get_tile_at_grid", grid_pos + offset)
-		if _is_wall_type(neighbor):
-			wall_dirs.append(offset)
+	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
 
 	var texture: Texture2D = null
 	var pos_offset := Vector2.ZERO
 
-	if wall_dirs.size() == 2:
-		var sum: Vector2i = wall_dirs[0] + wall_dirs[1]
-		if sum == Vector2i.ZERO:
-			# Opposite directions → straight wall panel
-			# Scan perpendicular to find interior side (opposite wall)
-			if wall_dirs.has(Vector2i(1, 0)):
-				# SE+NW axis → NE or SW side of rectangle
-				# Perpendicular is NE(0,-1) / SW(0,+1)
-				texture = WALL_TEXTURE_SE
-				var interior_is_sw := false
-				for i in range(1, 20):
-					var check = _terrain_map_data.call("get_tile_at_grid", grid_pos + Vector2i(0, 1) * i)
-					if _is_wall_type(check):
-						interior_is_sw = true
-						break
-				if interior_is_sw:
-					# NE side → offset 0.9 tile NE
-					pos_offset = Vector2(DEFAULT_HALF_TILE_WIDTH * 0.9, -DEFAULT_HALF_TILE_HEIGHT * 0.9)
-				# else: SW side → no offset
-			else:
-				# NE+SW axis, perpendicular is SE(+1,0) / NW(-1,0)
-				texture = WALL_TEXTURE_SW
-				var interior_is_se := false
-				for i in range(1, 20):
-					var check = _terrain_map_data.call("get_tile_at_grid", grid_pos + Vector2i(1, 0) * i)
-					if _is_wall_type(check):
-						interior_is_se = true
-						break
-				if not interior_is_se:
-					# SE side of rectangle → offset 0.9 tile SE
-					pos_offset = Vector2(DEFAULT_HALF_TILE_WIDTH * 0.9, DEFAULT_HALF_TILE_HEIGHT * 0.9)
-				# else: SW side → no offset
-		else:
-			# Adjacent directions → corner wall piece
-			if wall_dirs.has(Vector2i(1, 0)) and wall_dirs.has(Vector2i(0, 1)):
-				texture = WALL_CORNER_SW
-			elif wall_dirs.has(Vector2i(1, 0)) and wall_dirs.has(Vector2i(0, -1)):
-				texture = WALL_CORNER_SE
-			elif wall_dirs.has(Vector2i(-1, 0)) and wall_dirs.has(Vector2i(0, 1)):
-				texture = WALL_CORNER_NW
-			elif wall_dirs.has(Vector2i(-1, 0)) and wall_dirs.has(Vector2i(0, -1)):
-				texture = WALL_CORNER_NE
-	elif wall_dirs.size() == 1:
-		var wall_dir: Vector2i = wall_dirs[0]
-		if wall_dir == Vector2i(1, 0):
+	# Use type_id to determine texture and offset directly
+	match type_id:
+		"wall_straight_se":
 			texture = WALL_TEXTURE_SE
-		elif wall_dir == Vector2i(-1, 0):
-			texture = WALL_TEXTURE_NW
-		elif wall_dir == Vector2i(0, 1):
+			pos_offset = Vector2(DEFAULT_HALF_TILE_WIDTH * 0.9, DEFAULT_HALF_TILE_HEIGHT * 0.9)
+		"wall_straight_sw":
 			texture = WALL_TEXTURE_SW
-		elif wall_dir == Vector2i(0, -1):
+		"wall_straight_ne":
 			texture = WALL_TEXTURE_NE
-	elif wall_dirs.size() == 3:
-		# T-junction — use wall panel facing the open side
-		var all_dirs: Array[Vector2i] = [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
-		var open_dir: Vector2i = Vector2i.ZERO
-		for d in all_dirs:
-			if not wall_dirs.has(d):
-				open_dir = d
-				break
-		if open_dir == Vector2i(1, 0):
-			texture = WALL_TEXTURE_SE
-		elif open_dir == Vector2i(-1, 0):
+			pos_offset = Vector2(DEFAULT_HALF_TILE_WIDTH * 0.9, -DEFAULT_HALF_TILE_HEIGHT * 0.9)
+		"wall_straight_nw":
 			texture = WALL_TEXTURE_NW
-		elif open_dir == Vector2i(0, 1):
+		"wall_corner_se":
+			texture = WALL_CORNER_SE
+		"wall_corner_sw":
+			texture = WALL_CORNER_SW
+		"wall_corner_ne":
+			texture = WALL_CORNER_NE
+		"wall_corner_nw":
+			texture = WALL_CORNER_NW
+		_:
+			# Legacy fallback for old "wall" type_id — auto-detect from neighbors
+			if not _is_wall_type(tile_data):
+				return
 			texture = WALL_TEXTURE_SW
-		elif open_dir == Vector2i(0, -1):
-			texture = WALL_TEXTURE_NE
-	elif wall_dirs.size() == 4:
-		texture = WALL_TEXTURE_SW
-	elif wall_dirs.size() == 0:
-		texture = WALL_TEXTURE_SW
 
 	if texture == null:
 		return
