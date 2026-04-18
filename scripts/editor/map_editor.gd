@@ -82,6 +82,7 @@ func _ready() -> void:
 	_load_tile_catalog()
 	_populate_surface_type_options()
 	_populate_edge_type_options()
+	_populate_brush_size_options()
 	_populate_tile_palette()
 	_connect_ui_signals()
 	_load_map(map_file_path if not map_file_path.is_empty() else DEFAULT_MAP_PATH)
@@ -308,20 +309,36 @@ func _apply_brush_at_world_position(world_position: Vector2) -> void:
 		return
 	_last_painted_grid = tile_data.grid_position
 
-	if not _selected_type_id.is_empty() and _tile_catalog != null and _tile_catalog.has_type(_selected_type_id):
-		_store_undo_state(tile_data)
-		if _tile_catalog.apply_type_to_tile(tile_data, _selected_type_id):
-			_mark_dirty(true)
-	else:
-		var patch: Dictionary = {
-			"walkable": _get_walkable_checkbox().button_pressed,
-			"surface_type": _get_selected_surface_type(),
-		}
-		if _apply_tile_patch(tile_data, patch):
-			_mark_dirty(true)
+	var center_grid: Vector2i = tile_data.grid_position
+	var radius: int = _get_brush_radius()
+	var any_changed: bool = false
 
-	_selected_grid_position = tile_data.grid_position
-	_refresh_tile_visual(tile_data)
+	for dx in range(-radius, radius + 1):
+		for dy in range(-radius, radius + 1):
+			var target_grid: Vector2i = center_grid + Vector2i(dx, dy)
+			var target_tile = _terrain_map_data.call("get_tile_at_grid", target_grid) if _terrain_map_data != null else null
+			if target_tile == null:
+				continue
+
+			if not _selected_type_id.is_empty() and _tile_catalog != null and _tile_catalog.has_type(_selected_type_id):
+				if dx == 0 and dy == 0:
+					_store_undo_state(target_tile)
+				if _tile_catalog.apply_type_to_tile(target_tile, _selected_type_id):
+					any_changed = true
+					_refresh_tile_visual(target_tile)
+			else:
+				var patch: Dictionary = {
+					"walkable": _get_walkable_checkbox().button_pressed,
+					"surface_type": _get_selected_surface_type(),
+				}
+				if _apply_tile_patch(target_tile, patch):
+					any_changed = true
+					_refresh_tile_visual(target_tile)
+
+	if any_changed:
+		_mark_dirty(true)
+
+	_selected_grid_position = center_grid
 	_refresh_selection_visual()
 	_refresh_property_panel()
 	_hide_hover_preview()
@@ -434,10 +451,25 @@ func _apply_property_controls_to_selected_tile() -> void:
 		"surface_type": _get_selected_surface_type(),
 		"edge_type": _get_selected_edge_type(),
 	}
-	if not _apply_tile_patch(tile_data, patch):
+
+	var center_grid: Vector2i = tile_data.grid_position
+	var radius: int = _get_brush_radius()
+	var any_changed: bool = false
+
+	for dx in range(-radius, radius + 1):
+		for dy in range(-radius, radius + 1):
+			var target_grid: Vector2i = center_grid + Vector2i(dx, dy)
+			var target_tile = _terrain_map_data.call("get_tile_at_grid", target_grid) if _terrain_map_data != null else null
+			if target_tile == null:
+				continue
+
+			if _apply_tile_patch(target_tile, patch):
+				any_changed = true
+				_refresh_tile_visual(target_tile)
+
+	if not any_changed:
 		return
 
-	_refresh_tile_visual(tile_data)
 	_mark_dirty(true)
 	_refresh_property_panel()
 
@@ -576,6 +608,18 @@ func _populate_edge_type_options() -> void:
 	option_button.clear()
 	option_button.add_item("Cliff")
 	option_button.add_item("Slope")
+	option_button.select(0)
+
+
+func _populate_brush_size_options() -> void:
+	var option_button := _get_brush_size_option_button()
+	if option_button == null:
+		return
+
+	option_button.clear()
+	option_button.add_item("1x1")
+	option_button.add_item("3x3")
+	option_button.add_item("5x5")
 	option_button.select(0)
 
 
@@ -757,6 +801,19 @@ func _get_height_spinbox() -> SpinBox:
 
 func _get_edge_type_option_button() -> OptionButton:
 	return get_node_or_null("UI/PropertyPanel/Margin/VBox/EdgeTypeRow/EdgeTypeOptionButton") as OptionButton
+
+
+func _get_brush_size_option_button() -> OptionButton:
+	return get_node_or_null("UI/TopBar/Margin/HBox/BrushSizeOptionButton") as OptionButton
+
+
+func _get_brush_radius() -> int:
+	var option_button := _get_brush_size_option_button()
+	if option_button == null or option_button.selected < 0:
+		return 0
+
+	# Index 0 = 1x1 (radius 0), Index 1 = 3x3 (radius 1), Index 2 = 5x5 (radius 2)
+	return option_button.selected
 
 
 func _get_surface_option_button() -> OptionButton:

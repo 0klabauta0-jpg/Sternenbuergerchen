@@ -426,8 +426,9 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 | `walkable` | bool | Ganzes Tile blockiert | Pathfinder lehnt Tile komplett ab — keine Richtungsinformation |
 | `blocks_los` | bool | Ganzes Tile blockiert | LOS-System prueft pro Tile — keine Richtungsinformation |
 | `cover_value` | int 0-100 | Pro Tile | Combat: -0.35 Hit-Chance fuer Ziel, +0.05 fuer Angreifer, -0.2 Schaden (max 80) |
-| `height_level` | int 0-2 | Terrainhoehe (Gelaende) | Pathfinding: max 1 Level Differenz, +0.5 Kosten pro Level. Combat: +0.1 Accuracy-Bonus pro Level ueber Ziel |
+| `height_level` | int 0-2 | Terrainhoehe (Gelaende) | Pathfinding: max 1 Level Differenz bei Cliff, +0.5 Kosten pro Level. Combat: +0.1 Accuracy-Bonus pro Level ueber Ziel |
 | `object_height` | int 0-3 | Objekthoehe (Mauer, Fels) | LOS: Blocker-Hoehe = `height_level + object_height`. Pathfinding: nicht verwendet |
+| `edge_type` | String | "cliff" oder "slope" | Cliff: blockiert Bewegung bei height_diff > 1, Overlay mit `terrain_sideCliff_*.png`. Slope: immer begehbar, +1.0 Kosten pro Level, Overlay mit `terrain_side_*.png` |
 
 #### Objekt-Typen im Katalog
 
@@ -505,3 +506,15 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Stand: Wall-Tiles (blocks_los) bekommen nur noch Wall-Overlays, keine Cliff-Overlays. Cliff-Kanten werden nicht zu Wall-Nachbarn gezeichnet. Corner-Pieces ersetzen die beiden geraden Panels (Wall und Cliff) statt sich darüberzustapeln. Drag-Painting funktioniert jetzt ohne vorherige Tile-Selektion (Guard von `_has_selected_tile()` auf `_has_selected_type()` geaendert).
 - Offene Punkte: Wall-/Cliff-Corner-Zuordnung (welches Corner-Piece an welcher Ecke) muss visuell geprueft und ggf. korrigiert werden.
 - Naechster Schritt: Wall-Richtungsmapping anhand der tatsaechlichen Sprite-Orientierung verifizieren und ggf. korrigieren.
+
+### Edge-Type System (Cliff vs Slope)
+- Status: implementiert
+- Stand: Jedes Tile hat ein `edge_type` Feld ("cliff" oder "slope", Default: cliff). Im Map-Editor wahlbar ueber "Kante:" Dropdown. Cliffs blockieren Bewegung bei height_diff > 1 und rendern `terrain_sideCliff_*.png`. Slopes sind immer begehbar (kosten aber 1.0 pro Level statt 0.5) und rendern `terrain_side_*.png`. Das hoehere Tile bestimmt den edge_type fuer die Kante.
+- Offene Punkte: Inner-Corner-Pieces (`terrain_sideCornerInner_*.png`) noch nicht implementiert, Side-End-Pieces (`terrain_sideEnd_*.png`) noch nicht implementiert.
+- Naechster Schritt: Inner Corners fuer komplexe Huegelformationen implementieren.
+
+### Brush-Size System
+- Status: implementiert
+- Stand: Im TopBar neben dem Brush-Button ein BrushSize-Dropdown mit 1x1, 3x3 und 5x5. Gilt fuer beide Modi: Brush-Paint (Typ auf Karte malen) und Property-Panel-Aenderungen (Height, Edge-Type, Surface etc. auf selektiertes Tile + Radius anwenden). Radius 0/1/2 entspricht der jeweiligen Brush-Groesse.
+- Offene Punkte: Kein visuelles Brush-Preview auf der Karte (nur Hover-Preview fuer 1x1). Undo speichert nur das Center-Tile.
+- Naechster Schritt: Optional visuelles Brush-Preview, Multi-Tile-Undo.
