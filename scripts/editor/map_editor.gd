@@ -13,6 +13,10 @@ const CLIFF_CORNER_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isomet
 const CLIFF_CORNER_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_SW.png")
 const CLIFF_CORNER_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_NE.png")
 const CLIFF_CORNER_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_NW.png")
+const RAMP_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_rampLarge_SE.png")
+const RAMP_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_rampLarge_SW.png")
+const RAMP_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_rampLarge_NE.png")
+const RAMP_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_rampLarge_NW.png")
 const SLOPE_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_side_SE.png")
 const SLOPE_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_side_SW.png")
 const SLOPE_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_side_NE.png")
@@ -1177,16 +1181,16 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 			texture = CLIFF_CORNER_SW
 			pos_offset = Vector2(65, 40)
 		"slope_se":
-			texture = SLOPE_TEXTURE_SE
+			texture = RAMP_TEXTURE_SE
 			pos_offset = Vector2(0, 32)
 		"slope_sw":
-			texture = SLOPE_TEXTURE_SW
+			texture = RAMP_TEXTURE_SW
 			pos_offset = Vector2(0, 32)
 		"slope_ne":
-			texture = SLOPE_TEXTURE_NE
+			texture = RAMP_TEXTURE_NE
 			pos_offset = Vector2(0, 32)
 		"slope_nw":
-			texture = SLOPE_TEXTURE_NW
+			texture = RAMP_TEXTURE_NW
 			pos_offset = Vector2(0, 32)
 		"rock_small":
 			texture = ROCK_SMALL_TEXTURE
