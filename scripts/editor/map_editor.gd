@@ -21,6 +21,21 @@ const WALL_CORNER_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometr
 const WALL_CORNER_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_SW.png")
 const WALL_CORNER_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_NE.png")
 const WALL_CORNER_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_NW.png")
+const CORRIDOR_STRAIGHT_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_SW.png")
+const CORRIDOR_STRAIGHT_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_SE.png")
+const CORRIDOR_CORNER_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_corner_SW.png")
+const CORRIDOR_CORNER_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_corner_SE.png")
+const CORRIDOR_CORNER_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_corner_NW.png")
+const CORRIDOR_CORNER_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_corner_NE.png")
+const CORRIDOR_END_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_end_SW.png")
+const CORRIDOR_END_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_end_SE.png")
+const CORRIDOR_END_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_end_NW.png")
+const CORRIDOR_END_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_end_NE.png")
+const CORRIDOR_SPLIT_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_split_SW.png")
+const CORRIDOR_SPLIT_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_split_SE.png")
+const CORRIDOR_SPLIT_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_split_NW.png")
+const CORRIDOR_SPLIT_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_split_NE.png")
+const CORRIDOR_CROSS: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_cross_SW.png")
 const DEFAULT_MAP_PATH: String = "res://maps/test_mission.json"
 const DEFAULT_NEW_MAP_PATH: String = "res://maps/new_map.json"
 const DEFAULT_NEW_MAP_NAME: String = "new_map"
@@ -920,7 +935,7 @@ func _rebuild_all_wall_overlays() -> void:
 		return
 
 	for tile_data in _terrain_map_data.call("get_tiles"):
-		if not _is_wall_type(tile_data):
+		if _is_wall_type(tile_data):
 			_create_wall_overlays_for_tile(tile_data)
 
 
@@ -934,14 +949,19 @@ func _update_wall_overlays_around(grid_position: Vector2i) -> void:
 		if _terrain_map_data == null:
 			continue
 		var tile_data = _terrain_map_data.call("get_tile_at_grid", pos)
-		if tile_data != null and not _is_wall_type(tile_data):
+		if tile_data != null and _is_wall_type(tile_data):
 			_create_wall_overlays_for_tile(tile_data)
 
 
 func _create_wall_overlays_for_tile(tile_data) -> void:
-	# Wall overlays are placed on NON-WALL tiles that have WALL neighbors.
-	# Kenney's corridor_wall sprites are designed as overlays on corridor (floor) tiles,
-	# showing a wall panel on the edge facing the wall neighbor.
+	# Wall overlays are placed on WALL tiles themselves.
+	# Each wall tile gets ONE corridor overlay based on its structural role:
+	# - Straight: 2 opposite wall neighbors → corridor piece (walls on both sides)
+	# - Corner: 2 adjacent wall neighbors → corridor_corner piece (L-turn)
+	# - End: 1 wall neighbor → corridor_end piece
+	# - T-junction: 3 wall neighbors → corridor_split piece
+	# - Cross: 4 wall neighbors → corridor_cross piece
+	# - Isolated: 0 wall neighbors → corridor_end piece (default)
 	if tile_data == null or _terrain_map_data == null:
 		return
 
@@ -950,76 +970,84 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 		return
 
 	var grid_pos: Vector2i = tile_data.grid_position
-	var overlays: Array[Sprite2D] = []
 
-	# Step 1: determine which edges have wall neighbors
-	var wall_edge_dirs: Array[Vector2i] = []
+	# Classify neighbors
+	var wall_dirs: Array[Vector2i] = []
 	for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 		var neighbor = _terrain_map_data.call("get_tile_at_grid", grid_pos + offset)
 		if _is_wall_type(neighbor):
-			wall_edge_dirs.append(offset)
+			wall_dirs.append(offset)
 
-	if wall_edge_dirs.is_empty():
+	var texture: Texture2D = null
+
+	if wall_dirs.size() == 2:
+		var sum: Vector2i = wall_dirs[0] + wall_dirs[1]
+		if sum == Vector2i.ZERO:
+			# Opposite directions → straight corridor
+			if wall_dirs.has(Vector2i(1, 0)):
+				# SE+NW axis
+				texture = CORRIDOR_STRAIGHT_SE
+			else:
+				# NE+SW axis
+				texture = CORRIDOR_STRAIGHT_SW
+		else:
+			# Adjacent directions → corner
+			if wall_dirs.has(Vector2i(1, 0)) and wall_dirs.has(Vector2i(0, 1)):
+				# Walls toward SE and SW
+				texture = CORRIDOR_CORNER_SW
+			elif wall_dirs.has(Vector2i(1, 0)) and wall_dirs.has(Vector2i(0, -1)):
+				# Walls toward SE and NE
+				texture = CORRIDOR_CORNER_SE
+			elif wall_dirs.has(Vector2i(-1, 0)) and wall_dirs.has(Vector2i(0, 1)):
+				# Walls toward NW and SW
+				texture = CORRIDOR_CORNER_NW
+			elif wall_dirs.has(Vector2i(-1, 0)) and wall_dirs.has(Vector2i(0, -1)):
+				# Walls toward NW and NE
+				texture = CORRIDOR_CORNER_NE
+	elif wall_dirs.size() == 1:
+		# End piece — one wall neighbor, open on other 3 sides
+		var wall_dir: Vector2i = wall_dirs[0]
+		if wall_dir == Vector2i(1, 0):
+			texture = CORRIDOR_END_SE
+		elif wall_dir == Vector2i(-1, 0):
+			texture = CORRIDOR_END_NW
+		elif wall_dir == Vector2i(0, 1):
+			texture = CORRIDOR_END_SW
+		elif wall_dir == Vector2i(0, -1):
+			texture = CORRIDOR_END_NE
+	elif wall_dirs.size() == 3:
+		# T-junction — find the missing direction
+		var all_dirs: Array[Vector2i] = [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
+		var open_dir: Vector2i = Vector2i.ZERO
+		for d in all_dirs:
+			if not wall_dirs.has(d):
+				open_dir = d
+				break
+		if open_dir == Vector2i(1, 0):
+			texture = CORRIDOR_SPLIT_SE
+		elif open_dir == Vector2i(-1, 0):
+			texture = CORRIDOR_SPLIT_NW
+		elif open_dir == Vector2i(0, 1):
+			texture = CORRIDOR_SPLIT_SW
+		elif open_dir == Vector2i(0, -1):
+			texture = CORRIDOR_SPLIT_NE
+	elif wall_dirs.size() == 4:
+		# Cross — walls on all 4 sides
+		texture = CORRIDOR_CROSS
+	elif wall_dirs.size() == 0:
+		# Isolated wall tile — use end piece as default
+		texture = CORRIDOR_END_SW
+
+	if texture == null:
 		return
 
-	# Step 2: detect corners - pairs of adjacent wall edges
-	# Corner pieces REPLACE the two straight panels they connect
-	# Corner textures diagonally swapped to match Kenney sprite orientation
-	# Corners offset to diamond vertex where the two walls meet
-	var tile_size: Dictionary = _terrain_map_data.call("get_tile_size")
-	var half_w: float = float(tile_size.get("half_width", DEFAULT_HALF_TILE_WIDTH))
-	var half_h: float = float(tile_size.get("half_height", DEFAULT_HALF_TILE_HEIGHT))
-
-	var corner_map: Array = [
-		[Vector2i(1, 0), Vector2i(0, 1), WALL_CORNER_NE, Vector2(0, 3.0 * half_h)],
-		[Vector2i(1, 0), Vector2i(0, -1), WALL_CORNER_NW, Vector2(3.0 * half_w, 0)],
-		[Vector2i(-1, 0), Vector2i(0, 1), WALL_CORNER_SE, Vector2(-3.0 * half_w, 0)],
-		[Vector2i(-1, 0), Vector2i(0, -1), WALL_CORNER_SW, Vector2(0, -3.0 * half_h)],
-	]
-
-	var edges_consumed_by_corners: Array[Vector2i] = []
-
-	for corner_entry in corner_map:
-		var dir_a: Vector2i = corner_entry[0]
-		var dir_b: Vector2i = corner_entry[1]
-		var corner_texture: Texture2D = corner_entry[2]
-		var corner_offset: Vector2 = corner_entry[3]
-		if wall_edge_dirs.has(dir_a) and wall_edge_dirs.has(dir_b):
-			var corner_sprite := Sprite2D.new()
-			corner_sprite.texture = corner_texture
-			corner_sprite.centered = false
-			corner_sprite.z_index = -12
-			corner_sprite.position = tile_data.world_position + corner_offset - (corner_texture.get_size() * 0.5)
-			wall_container.add_child(corner_sprite)
-			overlays.append(corner_sprite)
-			if not edges_consumed_by_corners.has(dir_a):
-				edges_consumed_by_corners.append(dir_a)
-			if not edges_consumed_by_corners.has(dir_b):
-				edges_consumed_by_corners.append(dir_b)
-
-	# Step 3: render straight wall panels only for edges NOT consumed by corners
-	# Textures rotated 90° CW to match Kenney sprite orientation
-	var edge_texture_map: Dictionary = {
-		Vector2i(1, 0): WALL_TEXTURE_SW,
-		Vector2i(-1, 0): WALL_TEXTURE_NE,
-		Vector2i(0, 1): WALL_TEXTURE_NW,
-		Vector2i(0, -1): WALL_TEXTURE_SE,
-	}
-
-	for edge_dir in wall_edge_dirs:
-		if edges_consumed_by_corners.has(edge_dir):
-			continue
-		var wall_texture: Texture2D = edge_texture_map[edge_dir]
-		var wall_sprite := Sprite2D.new()
-		wall_sprite.texture = wall_texture
-		wall_sprite.centered = false
-		wall_sprite.z_index = -13
-		wall_sprite.position = tile_data.world_position - (wall_texture.get_size() * 0.5)
-		wall_container.add_child(wall_sprite)
-		overlays.append(wall_sprite)
-
-	if not overlays.is_empty():
-		_wall_sprites_by_grid[grid_pos] = overlays
+	var sprite := Sprite2D.new()
+	sprite.texture = texture
+	sprite.centered = false
+	sprite.z_index = -13
+	sprite.position = tile_data.world_position - (texture.get_size() * 0.5)
+	wall_container.add_child(sprite)
+	_wall_sprites_by_grid[grid_pos] = [sprite]
 
 
 func _remove_wall_overlays_at(grid_position: Vector2i) -> void:
