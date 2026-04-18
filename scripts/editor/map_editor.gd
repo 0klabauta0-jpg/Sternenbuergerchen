@@ -984,7 +984,8 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 			# Opposite directions → straight wall panel
 			# Scan perpendicular to find interior side (opposite wall)
 			if wall_dirs.has(Vector2i(1, 0)):
-				# SE+NW axis, perpendicular is NE(0,-1) / SW(0,+1)
+				# SE+NW axis → NE or SW side of rectangle
+				# Perpendicular is NE(0,-1) / SW(0,+1)
 				var interior_is_sw := false
 				for i in range(1, 20):
 					var check = _terrain_map_data.call("get_tile_at_grid", grid_pos + Vector2i(0, 1) * i)
@@ -992,13 +993,12 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 						interior_is_sw = true
 						break
 				if interior_is_sw:
-					# NW side of rectangle → WALL_SE + offset 1 tile NE
-					texture = WALL_TEXTURE_SE
-					pos_offset = Vector2(DEFAULT_HALF_TILE_WIDTH, -DEFAULT_HALF_TILE_HEIGHT)
-				else:
-					# SE side of rectangle → WALL_NW + offset 1 tile SW
-					texture = WALL_TEXTURE_NW
+					# NE side → WALL_NE + offset 1 tile SW (sit at NE edge)
+					texture = WALL_TEXTURE_NE
 					pos_offset = Vector2(-DEFAULT_HALF_TILE_WIDTH, DEFAULT_HALF_TILE_HEIGHT)
+				else:
+					# SW side → WALL_SW, no offset
+					texture = WALL_TEXTURE_SW
 			else:
 				# NE+SW axis, perpendicular is SE(+1,0) / NW(-1,0)
 				var interior_is_se := false
