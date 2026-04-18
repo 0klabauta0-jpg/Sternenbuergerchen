@@ -45,6 +45,7 @@ func _ready() -> void:
 
 	var first_unit: Node = null
 	var friendly_spawn_index: int = 0
+	var friendly_slot_index: int = 0
 	var enemy_spawn_index: int = 0
 	var enemy_units: Array = []
 	for unit_path in unit_paths:
@@ -57,7 +58,21 @@ func _ready() -> void:
 		if unit.has_method("get_team_id"):
 			unit_team_id = String(unit.call("get_team_id"))
 
+		if unit_team_id == team_id:
+			if not _is_friendly_slot_enabled(friendly_slot_index):
+				if unit is CanvasItem:
+					unit.visible = false
+				friendly_slot_index += 1
+				continue
+
+			unit_id = _get_selected_unit_id_for_friendly_slot(friendly_slot_index, unit_id)
+			friendly_slot_index += 1
+
 		_apply_unit_identity_preset(unit, unit_id, unit_team_id)
+		if unit.has_method("get_unit_id"):
+			unit_id = String(unit.call("get_unit_id"))
+		if unit.has_method("get_team_id"):
+			unit_team_id = String(unit.call("get_team_id"))
 
 		if unit.has_method("set_fireteam_id"):
 			unit.call("set_fireteam_id", _get_fireteam_id_for_unit(unit_id, unit_team_id))
@@ -70,11 +85,6 @@ func _ready() -> void:
 
 		if simulation_root.has_method("register_known_unit"):
 			simulation_root.call("register_known_unit", unit_id, unit)
-
-		if unit_team_id == team_id and not _is_selected_friendly_unit(unit_id):
-			if unit is CanvasItem:
-				unit.visible = false
-			continue
 
 		if unit is Node2D:
 			var unit_node: Node2D = unit
@@ -112,11 +122,22 @@ func _ready() -> void:
 	_is_initialized = true
 
 
-func _is_selected_friendly_unit(unit_id: String) -> bool:
+func _is_friendly_slot_enabled(slot_index: int) -> bool:
 	if selected_team_unit_ids.is_empty():
 		return true
 
-	return selected_team_unit_ids.has(unit_id)
+	return slot_index >= 0 and slot_index < selected_team_unit_ids.size()
+
+
+func _get_selected_unit_id_for_friendly_slot(slot_index: int, fallback_unit_id: String) -> String:
+	if not _is_friendly_slot_enabled(slot_index):
+		return fallback_unit_id
+
+	var selected_unit_id: String = String(selected_team_unit_ids[slot_index]).strip_edges()
+	if selected_unit_id.is_empty():
+		return fallback_unit_id
+
+	return selected_unit_id
 
 
 func _resolve_marker(node_path: NodePath) -> Marker2D:
@@ -300,13 +321,8 @@ func _get_fireteam_id_for_unit(unit_id: String, unit_team_id: String) -> String:
 	if unit_team_id != team_id:
 		return ""
 
-	match unit_id:
-		"unit_alpha", "unit_bravo":
-			return "blue"
-		"unit_charlie":
-			return "gold"
-		_:
-			return ""
+	var preset: Dictionary = UNIT_ROSTER_PRESETS_SCRIPT.get_preset(unit_id, unit_team_id)
+	return String(preset.get("fireteam_id", "")).strip_edges().to_lower()
 
 
 func _get_tile_world_center(tile_sprite: Sprite2D) -> Vector2:

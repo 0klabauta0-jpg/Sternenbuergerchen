@@ -1,8 +1,9 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://drb7o2mk2gxxa"]
 
-[ext_resource type="Script" path="res://scripts/meta/homebase_screen.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://dye1ybjacy442" path="res://scripts/meta/homebase_screen.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://va7te1c15i3j" path="res://scripts/meta/homebase_team_drop_panel.gd" id="2_v7pq4"]
 
-[node name="HomebaseScreen" type="Control"]
+[node name="HomebaseScreen" type="Control" unique_id=931750808]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,7 +12,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="Panel" type="PanelContainer" parent="."]
+[node name="Panel" type="PanelContainer" parent="." unique_id=2113189432]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -23,35 +24,178 @@ offset_bottom = -24.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Margin" type="MarginContainer" parent="Panel"]
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=1481081441]
 layout_mode = 2
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=151363819]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="TitleLabel" type="Label" parent="Panel/Margin/VBox"]
+[node name="TitleLabel" type="Label" parent="Panel/Margin/VBox" unique_id=1835794553]
 layout_mode = 2
-text = "Homebase Test Screen"
+text = "[\"Homebase Roster\"]"
 
-[node name="SubtitleLabel" type="Label" parent="Panel/Margin/VBox"]
+[node name="SubtitleLabel" type="Label" parent="Panel/Margin/VBox" unique_id=1187507993]
 layout_mode = 2
-text = "Select a minimal team from the available test roster."
+text = "[\"Inspect operators on the left, stage a three-person transfer team in the center, and drag candidates in from the roster on the right.\"]"
 autowrap_mode = 3
 
-[node name="RosterList" type="VBoxContainer" parent="Panel/Margin/VBox"]
+[node name="ContentRow" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=586892159]
 layout_mode = 2
-theme_override_constants/separation = 8
+size_flags_vertical = 0
+theme_override_constants/separation = 0
 
-[node name="SelectionStatusLabel" type="Label" parent="Panel/Margin/VBox"]
+[node name="InfoPanel" type="PanelContainer" parent="Panel/Margin/VBox/ContentRow" unique_id=1732154521]
 layout_mode = 2
-text = "Selected team: none"
-autowrap_mode = 3
+size_flags_horizontal = 0
 
-[node name="ConfirmButton" type="Button" parent="Panel/Margin/VBox"]
+[node name="InfoMargin" type="MarginContainer" parent="Panel/Margin/VBox/ContentRow/InfoPanel" unique_id=79205656]
 layout_mode = 2
-text = "Transfer Team to FOB"
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+
+[node name="InfoVBox" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin" unique_id=1548642022]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="InfoHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoVBox" unique_id=383525356]
+layout_mode = 2
+text = "[\"Character Sheet\"]"
+
+[node name="InfoHelpLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoVBox" unique_id=1775030294]
+layout_mode = 2
+text = "[\"Click a compact card to inspect the full read-only profile before staging the operator.\"]"
+
+[node name="PortraitRect" type="TextureRect" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoVBox" unique_id=2029876862]
+layout_mode = 2
+
+[node name="SheetNameLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoVBox" unique_id=108048481]
+layout_mode = 2
+text = "[\"No operator selected\"]"
+
+[node name="SheetIdentityLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoVBox" unique_id=1112285583]
+layout_mode = 2
+text = "[\"Click a portrait card on the right to inspect a full character sheet.\"]"
+
+[node name="SheetRoleLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoVBox" unique_id=1849222890]
+layout_mode = 2
+text = "[\"Role: unavailable\"]"
+
+[node name="SheetStatusLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoVBox" unique_id=427182804]
+layout_mode = 2
+text = "[\"Status: waiting for selection\"]"
+
+[node name="SheetSkillLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoVBox" unique_id=1375835574]
+layout_mode = 2
+text = "[\"Skills: unavailable\"]"
+
+[node name="SheetTraitLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoVBox" unique_id=841677537]
+layout_mode = 2
+text = "[\"Traits: unavailable\"]"
+
+[node name="SheetLoadoutLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoVBox" unique_id=1846668100]
+layout_mode = 2
+text = "[\"Loadout: unavailable\"]"
+
+[node name="SheetBioLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoVBox" unique_id=179343847]
+layout_mode = 2
+text = "[\"Bio: unavailable\"]"
+
+[node name="TeamPanel" type="PanelContainer" parent="Panel/Margin/VBox/ContentRow" unique_id=986191683]
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="TeamMargin" type="MarginContainer" parent="Panel/Margin/VBox/ContentRow/TeamPanel" unique_id=1962225873]
+layout_mode = 2
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+
+[node name="TeamVBox" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin" unique_id=1294434304]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="TeamHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox" unique_id=188375870]
+layout_mode = 2
+text = "[\"Transfer Team\"]"
+
+[node name="TeamHintLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox" unique_id=1394947270]
+layout_mode = 2
+text = "[\"Drag operators from the roster into the staging zone.\"]"
+
+[node name="TeamStatusLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox" unique_id=2005759181]
+layout_mode = 2
+text = "[\"Staged team: 0 / 3\"]"
+
+[node name="SelectedNamesLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox" unique_id=449483764]
+layout_mode = 2
+text = "[\"No staged operators yet.\"]"
+
+[node name="TeamDropPanel" type="PanelContainer" parent="Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox" unique_id=818159992]
+layout_mode = 2
+script = ExtResource("2_v7pq4")
+
+[node name="DropMargin" type="MarginContainer" parent="Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamDropPanel" unique_id=2140368994]
+layout_mode = 2
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+
+[node name="DropVBox" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamDropPanel/DropMargin" unique_id=1226648397]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="DropInfoLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamDropPanel/DropMargin/DropVBox" unique_id=1670815626]
+layout_mode = 2
+text = "[\"Drop operators here to stage them for FOB transfer.\"]"
+
+[node name="SelectedTeamScroll" type="ScrollContainer" parent="Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamDropPanel/DropMargin/DropVBox" unique_id=378370664]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="SelectedTeamList" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamDropPanel/DropMargin/DropVBox/SelectedTeamScroll" unique_id=829047516]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="ConfirmButton" type="Button" parent="Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox" unique_id=184307964]
+layout_mode = 2
+text = "[\"Transfer Team to FOB\"]"
+
+[node name="RosterPanel" type="PanelContainer" parent="Panel/Margin/VBox/ContentRow" unique_id=1399078403]
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="RosterMargin" type="MarginContainer" parent="Panel/Margin/VBox/ContentRow/RosterPanel" unique_id=1913993892]
+layout_mode = 2
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+
+[node name="RosterVBox" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin" unique_id=798555755]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="RosterHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox" unique_id=2120369881]
+layout_mode = 2
+text = "[\"Available Operators\"]"
+
+[node name="RosterHelpLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox" unique_id=1453484048]
+layout_mode = 2
+text = "[\"Each portrait card shows the operator name plus two quick identifiers. Drag from here into the transfer team.\"]"
+
+[node name="RosterScroll" type="ScrollContainer" parent="Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox" unique_id=504321704]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="RosterList" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox/RosterScroll" unique_id=1372838093]
+layout_mode = 2
+theme_override_constants/separation = 0

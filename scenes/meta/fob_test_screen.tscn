@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://dnryj6pq8agl4"]
 
-[ext_resource type="Script" path="res://scripts/meta/fob_screen.gd" id="1_script"]
+[ext_resource type="Script" uid="uid://pfakp0eilk5x" path="res://scripts/meta/fob_screen.gd" id="1_script"]
 
-[node name="FOBScreen" type="Control"]
+[node name="FOBScreen" type="Control" unique_id=762821283]
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -12,7 +12,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_script")
 
-[node name="Panel" type="PanelContainer" parent="."]
+[node name="Panel" type="PanelContainer" parent="." unique_id=1940295517]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -24,44 +24,103 @@ offset_bottom = -24.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Margin" type="MarginContainer" parent="Panel"]
+[node name="Margin" type="MarginContainer" parent="Panel" unique_id=342636387]
 layout_mode = 2
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin" unique_id=679781087]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="TitleLabel" type="Label" parent="Panel/Margin/VBox"]
+[node name="TitleLabel" type="Label" parent="Panel/Margin/VBox" unique_id=334264302]
 layout_mode = 2
 text = "FOB Test Screen"
 
-[node name="SubtitleLabel" type="Label" parent="Panel/Margin/VBox"]
+[node name="SubtitleLabel" type="Label" parent="Panel/Margin/VBox" unique_id=1371707373]
 layout_mode = 2
 text = "Review the transferred team and start the existing mission test scene."
 autowrap_mode = 3
 
-[node name="TeamStatusLabel" type="Label" parent="Panel/Margin/VBox"]
+[node name="TeamStatusLabel" type="Label" parent="Panel/Margin/VBox" unique_id=197485532]
 layout_mode = 2
-text = "FOB team: none"
+text = "[\"FOB team: none\"]"
 autowrap_mode = 3
 
-[node name="MissionResultLabel" type="Label" parent="Panel/Margin/VBox"]
+[node name="MissionResultLabel" type="Label" parent="Panel/Margin/VBox" unique_id=1227475551]
 layout_mode = 2
-text = "Last mission: none"
+text = "[\"Last mission: waiting for transfer\"]"
 autowrap_mode = 3
 
-[node name="ButtonRow" type="HBoxContainer" parent="Panel/Margin/VBox"]
+[node name="ReadinessLabel" type="Label" parent="Panel/Margin/VBox" unique_id=169523130]
+layout_mode = 2
+text = "[\"Ready units: 0 / 0\"]"
+
+[node name="ContentRow" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=1335408369]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_constants/separation = 0
+
+[node name="TeamColumn" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow" unique_id=1569966440]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_constants/separation = 0
+
+[node name="TeamHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/TeamColumn" unique_id=1635472947]
+layout_mode = 2
+text = "[\"Transferred Operators\"]"
+
+[node name="TeamScroll" type="ScrollContainer" parent="Panel/Margin/VBox/ContentRow/TeamColumn" unique_id=1096951694]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="TeamCardList" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/TeamColumn/TeamScroll" unique_id=1552116022]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="FocusPanel" type="PanelContainer" parent="Panel/Margin/VBox/ContentRow" unique_id=1072603458]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="FocusMargin" type="MarginContainer" parent="Panel/Margin/VBox/ContentRow/FocusPanel" unique_id=1986670532]
+layout_mode = 2
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
+
+[node name="FocusVBox" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/FocusPanel/FocusMargin" unique_id=1311180148]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="FocusHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/FocusPanel/FocusMargin/FocusVBox" unique_id=1763253224]
+layout_mode = 2
+text = "[\"Operator Focus\"]"
+
+[node name="FocusCardHost" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/FocusPanel/FocusMargin/FocusVBox" unique_id=1212155309]
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="FocusMetaLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/FocusPanel/FocusMargin/FocusVBox" unique_id=2076526878]
+layout_mode = 2
+text = "[\"No operator focused.\"]"
+
+[node name="FocusHelpLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/FocusPanel/FocusMargin/FocusVBox" unique_id=469200289]
+layout_mode = 2
+text = "[\"Transferred operators appear here after Homebase confirmation.\"]"
+
+[node name="ButtonRow" type="HBoxContainer" parent="Panel/Margin/VBox" unique_id=1281597569]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="BackButton" type="Button" parent="Panel/Margin/VBox/ButtonRow"]
+[node name="BackButton" type="Button" parent="Panel/Margin/VBox/ButtonRow" unique_id=85407496]
 layout_mode = 2
 text = "Back to Homebase"
 
-[node name="StartMissionButton" type="Button" parent="Panel/Margin/VBox/ButtonRow"]
+[node name="StartMissionButton" type="Button" parent="Panel/Margin/VBox/ButtonRow" unique_id=2026734083]
 layout_mode = 2
 text = "Start Mission"

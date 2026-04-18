@@ -179,7 +179,20 @@ TASK_061 – Map-Editor-Szene: Tile-Auswahl und Anzeige
 TASK_062 – Map-Editor: Tile-Properties bearbeiten
 TASK_063 – Map-Editor: Speichern und Laden
 TASK_064 – MissionTestSetup: Terrain aus JSON laden
-Phase 14 – Erweiterung (spaeter)
+Phase 14 – Map-Editor-Workflow und Politur
+TASK_065 – Tile-Typ-Katalog und Palette
+TASK_066 – Corridor-Wall Typen, Typ-Texturen und Auto-Cliff
+TASK_067 – Fix Map-Editor 64x64 Flat Ground
+TASK_068 – Zoom-Inversion und Auto-Wall-Overlays
+TASK_068b – Drag-Painting und Hover-Preview
+TASK_068c – Gitternetz-Overlay und Himmelsrichtungen
+TASK_069 – Map-Editor: Auswahl, Save As und Workflow-Polish
+Phase 15 – Meta-Layer-Roster-Lesbarkeit
+TASK_070 – NPC-Karten-Komponente
+TASK_071 – Heimatbasis: NPC-Karten und Auswahlfokus
+TASK_072 – FOB: Teamkarten und Einsatzstatus
+TASK_073 – Homebase: Charakterbogen und Drag-and-Drop-Teamstaging
+Phase 16 – Erweiterung (spaeter)
 Skillsystem
 soziale Dynamik
 persistente Teams

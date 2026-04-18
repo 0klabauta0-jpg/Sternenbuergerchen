@@ -1,9 +1,3 @@
-### TASK_069 – Map-Editor: Selection Tool, Gruppierte Palette, Save As, New Map
-- Status: implementiert
-- Stand: Map-Editor bietet jetzt ein Auswahlwerkzeug (Select-Button neben Brush), das Multi-Selection per Ctrl+LMB und visuelle Umrahmung mehrerer Tiles erlaubt. Die Palette ist gruppiert (Wände, Cliffs, Rampen) und per Button ein-/ausklappbar. Save As-Dialog (Ctrl+Save) und New Map-Button sind integriert. Neue Map-Vorlage (32x32) als Test_mission_32x32.json angelegt.
-- Offene Punkte: Auswahlwerkzeug ist rein UI, keine Massenoperationen auf Selektion, keine Drag-Selection. Palette-Gruppen sind statisch, keine dynamische Filterung. Save As überschreibt nicht die Map-Referenz in laufender Session. Kein visuelles Brush-Preview für Multi-Tile-Brush.
-- Risiken: UI-Änderungen betreffen nur Editor, keine Auswirkungen auf Simulation oder Runtime. Bedienung bleibt konsistent, keine Breaking Changes. Erweiterungen (z.B. Massenoperationen) müssen explizit als neue Tasks erfolgen.
-- Naechster Schritt: Dokumentation und Changelog weiter pflegen, ggf. Massenoperationen und Drag-Selection als eigene Tasks aufnehmen.
 # IMPLEMENTATION_STATUS
 
 ## Template
@@ -476,8 +470,8 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 
 ### TASK_065 - Tile-Typ-Katalog und Palette
 - Status: implementiert
-- Stand: `TerrainTileCatalog` unter `res://scripts/terrain/terrain_tile_catalog.gd` laedt Tile-Typ-Definitionen aus `res://data/terrain_tile_catalog.json`. Jeder Typ definiert einmalig `type_id`, `display_name`, `surface_type`, `walkable`, `blocks_los`, `cover_value` und `height_level`. Der Map-Editor zeigt links eine Palette (`ItemList`) mit allen verfuegbaren Tile-Typen. Bei Auswahl eines Typs wird automatisch der Brush-Modus aktiviert; Klick auf ein Tile uebertraegt alle Eigenschaften des Typs. Das Property-Panel zeigt bei selektiertem Tile den erkannten Typ-Namen oder `(custom)` an.
-- Offene Punkte: keine Typ-Referenz in der Map-JSON (Tiles speichern weiterhin alle Eigenschaften inline), keine benutzerdefinierten Typen zur Laufzeit, kein Tile-Preview in der Palette.
+- Stand: `TerrainTileCatalog` unter `res://scripts/terrain/terrain_tile_catalog.gd` laedt Tile-Typ-Definitionen aus `res://data/terrain_tile_catalog.json`. Jeder Typ definiert einmalig `type_id`, `display_name`, `surface_type`, `walkable`, `blocks_los`, `cover_value` und `height_level`. Der Map-Editor zeigt links wieder eine einfache einzelne Liste mit allen verfuegbaren Tile-Typen. Bei Auswahl eines Typs wird automatisch der Brush-Modus aktiviert; Klick auf ein Tile uebertraegt alle Eigenschaften des Typs. Das Property-Panel zeigt bei selektiertem Tile den erkannten Typ-Namen oder `(custom)` an.
+- Offene Punkte: keine Typ-Referenz in der Map-JSON (Tiles speichern weiterhin alle Eigenschaften inline), keine benutzerdefinierten Typen zur Laufzeit und kein Tile-Preview in der Palette.
 - Risiken: der Katalog ist bewusst ein reiner Editor-Workflow; Runtime-Code hat keinen Katalog-Bezug und bleibt von Inline-Daten abhaengig.
 - Naechster Schritt: bei Bedarf Map-JSON auf Typ-Referenzen umstellen und Katalog in Runtime-Loading einbinden.
 
@@ -489,7 +483,7 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 
 ### TASK_067 - Fix Map-Editor 64x64 Flat Ground
 - Status: implementiert
-- Stand: Map-Editor erzeugt jetzt standardmaessig 64x64 Grids mit Zoom 0.3 statt 8x8. `create_empty()` setzt `type_id="ground_flat"` als Default fuer neue Tiles, damit die Palette-Erkennung korrekt funktioniert.
+- Stand: Der Map-Editor ist nicht mehr auf 8x8 begrenzt. Fehlende Karten fallen beim Laden weiterhin auf ein 64x64-Grid mit Zoom 0.3 zurueck. Neue Karten werden dagegen ueber einen Dialog mit frei waehlbarer Breite/Hoehe angelegt; der Dialog startet standardmaessig mit 32x32. `create_empty()` setzt `type_id="ground_flat"` als Default fuer neue Tiles, damit die Palette-Erkennung korrekt funktioniert.
 - Offene Punkte: keine.
 
 ### TASK_068 - Zoom-Inversion und Auto-Wall-Overlays
@@ -504,8 +498,10 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 
 ### TASK_068c - Gitternetz-Overlay und Himmelsrichtungen
 - Status: implementiert
-- Stand: `GridOverlay` Node2D zeichnet feine weisse Diamant-Umrisse (12% Opacity, 1px) ueber jedem Tile (z_index 10). Kompass-Labels N/O/S/W an den vier Ecken der ISO-Diamant-Karte, 80px, halbtransparent. Richtungsmapping: Grid +x=SE, +y=SW (aus Cliff-Overlay-Logik abgeleitet).
-- Offene Punkte: keine.
+- Stand: Die frueheren per-Tile-Gitterlinien wurden zugunsten einer leichten Checkerboard-Modulation direkt auf den Bodentiles ersetzt. `GridOverlay` dient jetzt nur noch fuer die Kompass-Labels `N/O/S/W` an den vier Kartenextremen; damit bleibt die Iso-Ausrichtung lesbar, ohne viele zusaetzliche Linien- oder `Line2D`-Nodes zu erzeugen. Richtungsmapping: Grid +x=SE, +y=SW (aus der Cliff-Overlay-Logik abgeleitet).
+- Offene Punkte: kein separat zuschaltbares Debug-Gitter, keine groessere Grid-HUD-Konfiguration.
+- Risiken: die Gitterlesbarkeit haengt jetzt an Tile-Modulation und Kontrast der Bodentexturen; spaetere Theme- oder Texture-Wechsel muessen das explizit mitpruefen.
+- Naechster Schritt: nur bei Bedarf ein optional zuschaltbares Debug-Gitter ergaenzen.
 
 ### Fix - Cliff/Wall Overlay Separation und Corner-Replacement
 - Status: implementiert
@@ -515,7 +511,7 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 
 ### Edge-Type System (Cliff vs Slope)
 - Status: implementiert
-- Stand: Jedes Tile hat ein `edge_type` Feld ("cliff" oder "slope", Default: cliff). Im Map-Editor wahlbar ueber "Kante:" Dropdown. Cliffs blockieren Bewegung bei height_diff > 1 und rendern `terrain_sideCliff_*.png`. Slopes sind immer begehbar (kosten aber 1.0 pro Level statt 0.5) und rendern `terrain_side_*.png`. Das hoehere Tile bestimmt den edge_type fuer die Kante.
+- Stand: Jedes Tile hat ein `edge_type` Feld (`cliff`, `slope`, `none`, Default: `cliff`). Im Map-Editor ist das ueber das `Kante:`-Dropdown als `Cliff`, `Hang` oder `Keine` waehlbar. Cliffs blockieren Bewegung bei `height_diff > 1` und rendern `terrain_sideCliff_*.png`. Slopes bleiben begehbar, kosten mehr und nutzen die grossen `terrain_rampLarge_*.png`-Sprites. `none` unterdrueckt die Kanten-Visualisierung komplett. Die Palette enthaelt zusaetzlich gerichtete Cliff- und Rampen-Typen fuer `SE`/`SW`/`NE`/`NW`.
 - Offene Punkte: Inner-Corner-Pieces (`terrain_sideCornerInner_*.png`) noch nicht implementiert, Side-End-Pieces (`terrain_sideEnd_*.png`) noch nicht implementiert.
 - Naechster Schritt: Inner Corners fuer komplexe Huegelformationen implementieren.
 
@@ -524,3 +520,45 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Stand: Im TopBar neben dem Brush-Button ein BrushSize-Dropdown mit 1x1, 3x3 und 5x5. Gilt fuer beide Modi: Brush-Paint (Typ auf Karte malen) und Property-Panel-Aenderungen (Height, Edge-Type, Surface etc. auf selektiertes Tile + Radius anwenden). Radius 0/1/2 entspricht der jeweiligen Brush-Groesse.
 - Offene Punkte: Kein visuelles Brush-Preview auf der Karte (nur Hover-Preview fuer 1x1). Undo speichert nur das Center-Tile.
 - Naechster Schritt: Optional visuelles Brush-Preview, Multi-Tile-Undo.
+
+### Fix - Map-Roundtrip, Property-Patching und Undo
+- Status: implementiert
+- Stand: Map-JSON-Roundtrips behalten jetzt auch `edge_type` und `object_height`, damit Speichern/Laden keine Tile-Daten mehr verliert. Echte Property-Aenderungen loesen die starre Typbindung eines Tiles (`type_id = ""`), damit geaenderte Felder korrekt als Custom-Zustand behandelt werden. Undo stellt die zuletzt gesicherte Tile-Version wieder vollstaendig her, inklusive `object_height`.
+- Offene Punkte: Undo bleibt weiterhin auf das gespeicherte Center-Tile begrenzt; kein kompletter Mehrfeld- oder Mehrtile-Verlauf.
+- Risiken: der Patch bleibt bewusst editorlokal; spaetere Format-Erweiterungen muessen beim Roundtrip explizit mitgezogen werden.
+- Naechster Schritt: nur bei Bedarf ein explizites Multi-Tile-Undo und feinere Undo-Historie als eigene Aufgabe schneiden.
+
+### Fix - Wall/Cliff/Ramp Sprite-Zuordnung und Offsets
+- Status: implementiert
+- Stand: Overlay- und Objekt-Sprites werden jetzt konsistent ueber `KENNEY_DIAMOND_CENTER` positioniert; mehrere Wall-/Corner-Richtungen und Offsets wurden visuell nachkorrigiert. Der Wall-Pfad ist tile-zentriert stabilisiert, Cliff-/Corner-Offsets wurden nachgezogen, und Rampen nutzen fuer ihre vier Richtungen jetzt die grossen `terrain_rampLarge_*`-Sprites statt der generischen Side-Sprites.
+- Offene Punkte: Feintuning einzelner Offsets kann bei neuen Tile-Kombinationen weiter noetig sein.
+- Risiken: die Zuordnung bleibt an die Kenney-Sprite-Semantik und die aktuelle Iso-Richtungsdefinition gebunden; spaetere Asset-Wechsel muessen diese Mapping-Schicht explizit neu pruefen.
+- Naechster Schritt: nur bei Bedarf weitere Corner-/Offset-Korrekturen auf Basis konkreter visueller Problemfaelle ergaenzen.
+
+### TASK_069 – Map-Editor: Auswahl, Save As und Workflow-Polish
+- Status: implementiert
+- Stand: Der Editor merkt sich die zuletzt gewaehlten Surface- und Kanten-Typen auch ohne aktive Tile-Selektion. `Escape` hebt die aktuelle Palette-Auswahl auf. Ein neuer `Select`-Button neben `Brush` schaltet in einen Auswahlmodus mit Ctrl+LMB-Multiselection und gemeinsamer Outline. `Ctrl+Save` oeffnet `Save As`, `New` oeffnet jetzt einen Groessen-Dialog fuer neue Karten (Default 32x32), und `maps/Test_mission_32x32.json` dient als neue 32x32-Vorlage. Die vier Wand-Ecktypen sind in der Palette jetzt eindeutig als `Mauer Ecke ...` benannt.
+- Offene Punkte: keine Drag-Selection, keine Massenoperationen auf bestehende Mehrfachauswahl und kein Multi-Tile-Undo ueber den gesamten Brush-Radius.
+- Risiken: die Erweiterungen bleiben bewusst editorlokal; Runtime- und Kartenformat bleiben kompatibel, solange neue UI-Komfortfunktionen keine versteckte Semantik in die gespeicherten Tile-Daten einfuehren.
+- Naechster Schritt: nur bei Bedarf Bulk-Edit auf Mehrfachauswahl, Drag-Selection und erweitertes Undo in eigene Tasks schneiden.
+
+### TASK_070 - NPC-Karten-Komponente
+- Status: implementiert
+- Stand: `MetaUnitProfile` und `MetaUnitProfileBuilder` unter `res://scripts/meta/` bilden jetzt einen kleinen expliziten read-only Datenpfad fuer Meta-UI aus vorhandenen Unit-Identitaetsdaten, inklusive effektiver Skill-Zusammenfassung und Trait-Tags nach derselben Modifikatorlogik wie in `TestUnit`. Eine neue `NPCMetaCard`-Komponente unter `res://scripts/meta/npc_meta_card.gd` plus `res://scenes/meta/components/npc_meta_card.tscn` stellt Name, Skill-Kurzform, Trait-Tags und optional eine Statuszeile dar und unterstuetzt die leichten visuellen Zustaende `neutral`, `selectable`, `selected` und `disabled`. `HomebaseTestScreen` nutzt fuer seine bestehende Textlistenanzeige jetzt bereits den neuen Profilpfad statt unsichtbarer `TestUnit`-Preview-Nodes.
+- Offene Punkte: die Karte ist noch nicht in Heimatbasis oder FOB als eigentliche Listen-/Grid-Darstellung eingebaut; es gibt noch keinen Auswahlfokus und keine FOB-spezifische Statusabbildung.
+- Risiken: der Profilpfad ist bewusst klein und read-only gehalten; spaetere Heimatbasis-/FOB-Integration sollte denselben Datenvertrag weiterverwenden statt wieder screen-spezifische Sonderpfade aufzubauen.
+- Naechster Schritt: in TASK_071 die Heimatbasis von der Checkbox-Textliste auf echte NPC-Karten plus Auswahlfokus umstellen.
+
+### TASK_071 - Heimatbasis: NPC-Karten und Auswahlfokus
+- Status: implementiert
+- Stand: `HomebaseTestScreen` rendert die verfuegbaren Units jetzt als echte `NPCMetaCard`-Instanzen statt als Checkbox-Textzeilen, verwaltet einen expliziten Fokuszustand und zeigt rechts einen kleinen Detailbereich mit fokussierter Karte, Team-/Fireteam-Metadaten und Transferhinweis. Die Homebase-Szene unter `res://scenes/meta/homebase_test_screen.tscn` wurde dafuer in eine zweispaltige Struktur mit scrollbarer Kartenliste, Fokuspanel und separater Teamzusammenfassung umgebaut. Die Auswahl bleibt weiter rein UI-lokal und liefert an den `MetaLayerFlow` unveraendert nur die selektierten `unit_id`s in stabiler Roster-Reihenfolge.
+- Offene Punkte: noch keine feinere visuelle Politur fuer Hover/Keyboard-Fokus, keine Detailsektion fuer weitergehende Biografie-/Loadout-Daten und noch keine FOB-spezifische Kartenwiederverwendung.
+- Risiken: der Fokus- und Auswahlzustand liegt weiterhin bewusst nur im Screen; spaetere Meta-Features duerfen daraus keine zweite Gameplay-Wahrheit oder einen versteckten globalen UI-State aufbauen.
+- Naechster Schritt: in TASK_072 dieselbe Kartenbasis kontrolliert in die FOB-Ansicht uebernehmen und dort missions-/transferbezogene Statusinformationen ergaenzen.
+
+### TASK_072 - FOB: Teamkarten und Einsatzstatus
+- Status: implementiert
+- Stand: `FOBTestScreen` nutzt jetzt dieselbe `NPCMetaCard`-Komponente und denselben `MetaUnitProfileBuilder`-Pfad wie die Heimatbasis, um das uebertragene Team als Kartenliste statt als rohe Textzeilen darzustellen. Der bestehende Missionsrueckfluss aus `mission_result.team_states` wird pro Unit in kompakte Kartenstatus wie `READY FOR MISSION`, `FIT`, `DOWN`, `BLEEDOUT`, `RESPAWNING` oder `UNKNOWN` uebersetzt; ergaenzend zeigt die FOB eine kleine Zusammenfassung mit Teamgroesse, letzter Mission und Zahl einsatzbereiter Units sowie einen Fokusbereich fuer die aktuell betrachtete Unit. `MetaLayerFlow` liefert dafuer explizit den verfuegbaren Roster-Kontext an die FOB, ohne den bestehenden Homebase->FOB->Mission->Debrief-Flow semantisch zu aendern.
+- Offene Punkte: noch keine tiefergehende After-Action-Aufbereitung, keine Rollen-/Loadout-Ansicht und keine Politur fuer alternative Statusbadges jenseits der bestehenden Kartenstatuszeile.
+- Risiken: die FOB bleibt bewusst ein read-only Staging-Screen; spaetere Komfortfunktionen duerfen daraus keine zweite Teamverwaltungslogik oder verdeckte Persistenzschicht machen.
+- Naechster Schritt: nur bei eigenem Folgetask weitere FOB-spezifische Komfortelemente wie Rollenhinweise oder Transfer-CTA-Politur aufbauen, ohne die bestehende Kartenbasis zu forkieren.

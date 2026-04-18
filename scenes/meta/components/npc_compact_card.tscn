@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://dnnlq8omgp74x"]
+
+[ext_resource type="Script" path="res://scripts/meta/npc_compact_card.gd" id="1_36wi0"]
+
+[node name="NPCCompactCard" type="PanelContainer" unique_id=2014851795]
+script = ExtResource("1_36wi0")

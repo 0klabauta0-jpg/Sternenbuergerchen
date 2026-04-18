@@ -1,0 +1,200 @@
+class_name NPCMetaCard
+extends PanelContainer
+
+const META_UNIT_PROFILE_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile.gd")
+
+signal card_pressed(unit_id, profile)
+
+var _profile = null
+var _is_selectable: bool = false
+var _is_selected: bool = false
+var _is_disabled: bool = false
+var _show_status_line: bool = true
+
+
+func _ready() -> void:
+	size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	custom_minimum_size = Vector2(220.0, 0.0)
+	focus_mode = Control.FOCUS_NONE
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	_ensure_ui()
+	_refresh_card()
+
+
+func setup_from_profile(profile, options: Dictionary = {}) -> void:
+	if profile != null and profile.has_method("duplicate_profile"):
+		_profile = profile.duplicate_profile()
+	elif typeof(profile) == TYPE_DICTIONARY:
+		_profile = META_UNIT_PROFILE_SCRIPT.new(profile)
+	else:
+		_profile = META_UNIT_PROFILE_SCRIPT.new()
+
+	_is_selectable = bool(options.get("selectable", _is_selectable))
+	_is_selected = bool(options.get("selected", _is_selected))
+	_is_disabled = bool(options.get("disabled", _is_disabled))
+	_show_status_line = bool(options.get("show_status_line", _show_status_line))
+
+	if is_inside_tree():
+		_refresh_card()
+
+
+func set_interaction_state(selectable: bool, selected: bool, disabled: bool = false) -> void:
+	_is_selectable = selectable
+	_is_selected = selected
+	_is_disabled = disabled
+	if is_inside_tree():
+		_refresh_card()
+
+
+func set_show_status_line(show_status_line: bool) -> void:
+	_show_status_line = show_status_line
+	if is_inside_tree():
+		_refresh_card()
+
+
+func get_unit_id() -> String:
+	if _profile == null:
+		return ""
+
+	return String(_profile.unit_id)
+
+
+func get_profile():
+	if _profile == null or not _profile.has_method("duplicate_profile"):
+		return null
+
+	return _profile.duplicate_profile()
+
+
+func _gui_input(event: InputEvent) -> void:
+	if not _can_emit_press():
+		return
+
+	if event is InputEventMouseButton:
+		var mouse_event: InputEventMouseButton = event
+		if mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed:
+			card_pressed.emit(get_unit_id(), get_profile())
+			accept_event()
+
+
+func _ensure_ui() -> void:
+	if get_node_or_null("Margin") != null:
+		return
+
+	var margin := MarginContainer.new()
+	margin.name = "Margin"
+	margin.add_theme_constant_override("margin_left", 12)
+	margin.add_theme_constant_override("margin_top", 12)
+	margin.add_theme_constant_override("margin_right", 12)
+	margin.add_theme_constant_override("margin_bottom", 12)
+	add_child(margin)
+
+	var vbox := VBoxContainer.new()
+	vbox.name = "VBox"
+	vbox.add_theme_constant_override("separation", 6)
+	margin.add_child(vbox)
+
+	var name_label := Label.new()
+	name_label.name = "NameLabel"
+	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(name_label)
+
+	var skills_label := Label.new()
+	skills_label.name = "SkillsLabel"
+	skills_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(skills_label)
+
+	var traits_label := Label.new()
+	traits_label.name = "TraitsLabel"
+	traits_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(traits_label)
+
+	var status_label := Label.new()
+	status_label.name = "StatusLabel"
+	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(status_label)
+
+
+func _refresh_card() -> void:
+	_ensure_ui()
+	var name_label: Label = get_node("Margin/VBox/NameLabel")
+	var skills_label: Label = get_node("Margin/VBox/SkillsLabel")
+	var traits_label: Label = get_node("Margin/VBox/TraitsLabel")
+	var status_label: Label = get_node("Margin/VBox/StatusLabel")
+
+	var display_name: String = "Unknown Unit"
+	var skill_summary_text: String = "A:0.0 S:0.0 L:0.0 T:0.0"
+	var trait_summary_text: String = "-"
+	var status_line: String = ""
+	if _profile != null:
+		display_name = String(_profile.display_name if not String(_profile.display_name).is_empty() else _profile.unit_id)
+		skill_summary_text = String(_profile.skill_summary_text if not String(_profile.skill_summary_text).is_empty() else skill_summary_text)
+		trait_summary_text = String(_profile.trait_summary_text if not String(_profile.trait_summary_text).is_empty() else trait_summary_text)
+		status_line = _build_status_line()
+
+	name_label.text = display_name
+	skills_label.text = skill_summary_text
+	traits_label.text = trait_summary_text
+	status_label.text = status_line
+	status_label.visible = _show_status_line and not status_line.is_empty()
+
+	_apply_state_visuals(name_label, skills_label, traits_label, status_label)
+
+
+func _apply_state_visuals(name_label: Label, skills_label: Label, traits_label: Label, status_label: Label) -> void:
+	var stylebox := StyleBoxFlat.new()
+	stylebox.border_width_left = 2
+	stylebox.border_width_top = 2
+	stylebox.border_width_right = 2
+	stylebox.border_width_bottom = 2
+	stylebox.corner_radius_top_left = 8
+	stylebox.corner_radius_top_right = 8
+	stylebox.corner_radius_bottom_right = 8
+	stylebox.corner_radius_bottom_left = 8
+
+	var name_color := Color(0.94, 0.96, 0.98, 1.0)
+	var detail_color := Color(0.78, 0.82, 0.86, 1.0)
+	var status_color := Color(0.72, 0.82, 0.98, 1.0)
+
+	if _is_disabled:
+		stylebox.bg_color = Color(0.11, 0.11, 0.12, 1.0)
+		stylebox.border_color = Color(0.28, 0.28, 0.30, 1.0)
+		name_color = Color(0.58, 0.60, 0.62, 1.0)
+		detail_color = Color(0.46, 0.48, 0.50, 1.0)
+		status_color = Color(0.46, 0.48, 0.50, 1.0)
+	elif _is_selected:
+		stylebox.bg_color = Color(0.16, 0.23, 0.18, 1.0)
+		stylebox.border_color = Color(0.68, 0.84, 0.58, 1.0)
+		status_color = Color(0.84, 0.93, 0.68, 1.0)
+	elif _is_selectable:
+		stylebox.bg_color = Color(0.13, 0.15, 0.18, 1.0)
+		stylebox.border_color = Color(0.43, 0.55, 0.65, 1.0)
+	else:
+		stylebox.bg_color = Color(0.12, 0.12, 0.14, 1.0)
+		stylebox.border_color = Color(0.30, 0.33, 0.37, 1.0)
+
+	add_theme_stylebox_override("panel", stylebox)
+	name_label.add_theme_color_override("font_color", name_color)
+	skills_label.add_theme_color_override("font_color", detail_color)
+	traits_label.add_theme_color_override("font_color", detail_color)
+	status_label.add_theme_color_override("font_color", status_color)
+	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND if _can_emit_press() else Control.CURSOR_ARROW
+
+
+func _build_status_line() -> String:
+	if _profile == null:
+		return ""
+
+	var lines: PackedStringArray = []
+	var status_text: String = String(_profile.status_text).strip_edges()
+	var secondary_text: String = String(_profile.secondary_text).strip_edges()
+	if not status_text.is_empty():
+		lines.append(status_text)
+	if not secondary_text.is_empty() and secondary_text != status_text:
+		lines.append(secondary_text)
+
+	return " | ".join(lines)
+
+
+func _can_emit_press() -> bool:
+	return _is_selectable and not _is_disabled and _profile != null and _profile.is_valid()

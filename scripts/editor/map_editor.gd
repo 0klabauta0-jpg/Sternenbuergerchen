@@ -49,10 +49,13 @@ const CORRIDOR_CROSS: Texture2D = preload("res://Assets/kenney_space-kit/Isometr
 const DEFAULT_MAP_PATH: String = "res://maps/test_mission.json"
 const DEFAULT_NEW_MAP_PATH: String = "res://maps/new_map.json"
 const DEFAULT_NEW_MAP_NAME: String = "new_map"
-const DEFAULT_GRID_SIZE: Vector2i = Vector2i(64, 64)
+const DEFAULT_FALLBACK_GRID_SIZE: Vector2i = Vector2i(64, 64)
+const DEFAULT_NEW_MAP_GRID_SIZE: Vector2i = Vector2i(32, 32)
 const DEFAULT_GRID_ORIGIN: Vector2 = Vector2(0.0, 0.0)
 const DEFAULT_HALF_TILE_WIDTH: float = 64.0
 const DEFAULT_HALF_TILE_HEIGHT: float = 32.0
+const MIN_NEW_MAP_GRID_DIMENSION: int = 1
+const MAX_NEW_MAP_GRID_DIMENSION: int = 512
 const KENNEY_DIAMOND_CENTER := Vector2(256.0, 315.0)
 const MIN_CAMERA_ZOOM: float = 0.1
 const MAX_CAMERA_ZOOM: float = 3.0
@@ -97,25 +100,6 @@ func _ready() -> void:
 	_connect_ui_signals()
 	_add_selection_tool_button()
 	_load_map(map_file_path if not map_file_path.is_empty() else DEFAULT_MAP_PATH)
-
-	# Connect expand/collapse for palette groups
-	var wall_header = get_node_or_null("UI/PalettePanel/Margin/VBox/WallGroup/WallHeader") as Button
-	var wall_list = get_node_or_null("UI/PalettePanel/Margin/VBox/WallGroup/WallList") as ItemList
-	if wall_header and wall_list:
-		wall_header.toggled.connect(func(pressed): wall_list.visible = pressed)
-		wall_list.visible = wall_header.pressed
-
-	var cliff_header = get_node_or_null("UI/PalettePanel/Margin/VBox/CliffGroup/CliffHeader") as Button
-	var cliff_list = get_node_or_null("UI/PalettePanel/Margin/VBox/CliffGroup/CliffList") as ItemList
-	if cliff_header and cliff_list:
-		cliff_header.toggled.connect(func(pressed): cliff_list.visible = pressed)
-		cliff_list.visible = cliff_header.pressed
-
-	var ramp_header = get_node_or_null("UI/PalettePanel/Margin/VBox/RampGroup/RampHeader") as Button
-	var ramp_list = get_node_or_null("UI/PalettePanel/Margin/VBox/RampGroup/RampList") as ItemList
-	if ramp_header and ramp_list:
-		ramp_header.toggled.connect(func(pressed): ramp_list.visible = pressed)
-		ramp_list.visible = ramp_header.pressed
 
 
 func _process(delta: float) -> void:
@@ -206,7 +190,7 @@ func _load_map(path: String) -> void:
 		_terrain_map_data = TERRAIN_MAP_DATA_SCRIPT.call(
 			"create_empty",
 			path.get_file().get_basename() if not path.is_empty() else DEFAULT_NEW_MAP_NAME,
-			DEFAULT_GRID_SIZE,
+			DEFAULT_FALLBACK_GRID_SIZE,
 			DEFAULT_GRID_ORIGIN,
 			DEFAULT_HALF_TILE_WIDTH,
 			DEFAULT_HALF_TILE_HEIGHT
@@ -225,12 +209,16 @@ func _load_map(path: String) -> void:
 	_refresh_top_bar()
 
 
-func _create_new_map() -> void:
+func _create_new_map(grid_size: Vector2i = DEFAULT_NEW_MAP_GRID_SIZE) -> void:
+	var normalized_grid_size := Vector2i(
+		clampi(grid_size.x, MIN_NEW_MAP_GRID_DIMENSION, MAX_NEW_MAP_GRID_DIMENSION),
+		clampi(grid_size.y, MIN_NEW_MAP_GRID_DIMENSION, MAX_NEW_MAP_GRID_DIMENSION)
+	)
 	_current_map_path = DEFAULT_NEW_MAP_PATH
 	_terrain_map_data = TERRAIN_MAP_DATA_SCRIPT.call(
 		"create_empty",
 		DEFAULT_NEW_MAP_NAME,
-		DEFAULT_GRID_SIZE,
+		normalized_grid_size,
 		DEFAULT_GRID_ORIGIN,
 		DEFAULT_HALF_TILE_WIDTH,
 		DEFAULT_HALF_TILE_HEIGHT
@@ -238,6 +226,7 @@ func _create_new_map() -> void:
 	_tile_sprites_by_grid.clear()
 	_cliff_sprites_by_grid.clear()
 	_selected_grid_position = Vector2i(-1, -1)
+	_selected_grids.clear()
 	_last_undo_state.clear()
 	_mark_dirty(false)
 	_rebuild_registry_from_map_data()
@@ -436,40 +425,56 @@ func _resolve_tile_at_world_position(world_position: Vector2):
 
 
 func _refresh_selection_visual() -> void:
-	var outline := get_node_or_null("SelectionOutline") as Line2D
-	if outline == null:
+	var outline_root := get_node_or_null("SelectionOutline") as Node2D
+	if outline_root == null or _terrain_map_data == null:
 		return
 
-	outline.clear_points()
+	for child in outline_root.get_children():
+		child.queue_free()
+
 	var tile_size: Dictionary = _terrain_map_data.call("get_tile_size")
 	var half_width: float = float(tile_size.get("half_width", DEFAULT_HALF_TILE_WIDTH))
 	var half_height: float = float(tile_size.get("half_height", DEFAULT_HALF_TILE_HEIGHT))
 
-	# Draw outlines for all selected grids
 	var grids = _selected_grids.duplicate()
 	if grids.is_empty() and _selected_grid_position != Vector2i(-1, -1):
 		grids = [_selected_grid_position]
+
 	for grid in grids:
 		var tile_data = _terrain_map_data.call("get_tile_at_grid", grid)
 		if tile_data == null:
 			continue
+
 		var center: Vector2 = tile_data.world_position
+		var outline := Line2D.new()
+		outline.default_color = Color(1, 1, 1, 0.95)
+		outline.width = 3.0
+		outline.closed = true
 		outline.add_point(center + Vector2(0.0, -half_height))
 		outline.add_point(center + Vector2(half_width, 0.0))
 		outline.add_point(center + Vector2(0.0, half_height))
 		outline.add_point(center + Vector2(-half_width, 0.0))
-		outline.add_point(center + Vector2(0.0, -half_height))
-		outline.add_point(Vector2(-9999, -9999)) # break between tiles
+		outline_root.add_child(outline)
+
+
 func _add_selection_tool_button() -> void:
-	var top_bar := get_node_or_null("TopBar")
-	if top_bar == null:
+	var button_row := get_node_or_null("UI/TopBar/Margin/HBox") as HBoxContainer
+	if button_row == null:
 		return
+
+	var existing_button := button_row.get_node_or_null("SelectButton") as Button
+	if existing_button != null:
+		existing_button.button_pressed = _selection_tool_enabled
+		return
+
 	var select_btn := Button.new()
+	select_btn.name = "SelectButton"
 	select_btn.text = "Select"
 	select_btn.toggle_mode = true
-	select_btn.pressed = _selection_tool_enabled
-	select_btn.connect("toggled", Callable(self, "_on_selection_tool_toggled"))
-	top_bar.add_child(select_btn)
+	select_btn.button_pressed = _selection_tool_enabled
+	select_btn.toggled.connect(_on_selection_tool_toggled)
+	button_row.add_child(select_btn)
+
 
 func _on_selection_tool_toggled(pressed: bool) -> void:
 	_selection_tool_enabled = pressed
@@ -702,7 +707,8 @@ func _center_camera_on_map() -> void:
 		return
 
 	var grid_size: Vector2i = _terrain_map_data.call("get_grid_size")
-	var center_world: Vector2 = _terrain_registry.grid_to_world(Vector2i(grid_size.x / 2, grid_size.y / 2))
+	var center_grid := Vector2i(floori(grid_size.x * 0.5), floori(grid_size.y * 0.5))
+	var center_world: Vector2 = _terrain_registry.grid_to_world(center_grid)
 	camera.position = center_world
 
 
@@ -757,6 +763,7 @@ func _connect_ui_signals() -> void:
 	var edge_type_option_button := _get_edge_type_option_button()
 	var file_dialog := get_node_or_null("UI/LoadDialog") as FileDialog
 	var confirm_dialog := get_node_or_null("UI/DirtyConfirmDialog") as ConfirmationDialog
+	var new_map_dialog := _get_new_map_dialog()
 	var tile_type_list := _get_tile_type_list()
 	if save_button != null and not save_button.pressed.is_connected(_on_save_pressed):
 		save_button.pressed.connect(_on_save_pressed)
@@ -791,6 +798,8 @@ func _connect_ui_signals() -> void:
 			file_dialog.file_selected.connect(_on_load_file_selected)
 	if confirm_dialog != null and not confirm_dialog.confirmed.is_connected(_on_dirty_confirmed):
 		confirm_dialog.confirmed.connect(_on_dirty_confirmed)
+	if new_map_dialog != null and not new_map_dialog.confirmed.is_connected(_on_new_map_dialog_confirmed):
+		new_map_dialog.confirmed.connect(_on_new_map_dialog_confirmed)
 
 
 func _on_save_pressed() -> void:
@@ -824,7 +833,7 @@ func _on_new_map_pressed() -> void:
 		_open_dirty_confirmation("new")
 		return
 
-	_create_new_map()
+	_open_new_map_dialog()
 
 
 func _on_undo_pressed() -> void:
@@ -865,12 +874,16 @@ func _on_tile_type_selected(index: int) -> void:
 	if tile_type_list == null or _tile_catalog == null:
 		return
 
-	var type_ids: Array[String] = _tile_catalog.get_type_ids()
-	if index < 0 or index >= type_ids.size():
+	if index < 0 or index >= tile_type_list.item_count:
 		_selected_type_id = ""
 		return
 
-	_selected_type_id = type_ids[index]
+	_selected_type_id = String(tile_type_list.get_item_metadata(index))
+	if _selected_type_id.is_empty():
+		var type_ids: Array[String] = _tile_catalog.get_type_ids()
+		if index < 0 or index >= type_ids.size():
+			return
+		_selected_type_id = type_ids[index]
 
 	# Auto-enable brush when a type is selected
 	var brush_button := get_node_or_null("UI/TopBar/Margin/HBox/BrushButton") as Button
@@ -882,7 +895,7 @@ func _on_tile_type_selected(index: int) -> void:
 func _on_tile_type_deselected() -> void:
 	var tile_type_list := _get_tile_type_list()
 	if tile_type_list != null:
-		for i in tile_type_list.item_count:
+		for i in range(tile_type_list.item_count):
 			tile_type_list.deselect(i)
 	_selected_type_id = ""
 	_hide_hover_preview()
@@ -897,7 +910,7 @@ func _on_dirty_confirmed() -> void:
 		"load":
 			_open_load_dialog()
 		"new":
-			_create_new_map()
+			_open_new_map_dialog()
 
 	_pending_dialog_action = ""
 
@@ -909,6 +922,32 @@ func _open_load_dialog() -> void:
 
 	file_dialog.current_dir = "res://maps"
 	file_dialog.popup_centered_ratio(0.65)
+
+
+func _open_new_map_dialog() -> void:
+	var new_map_dialog := _get_new_map_dialog()
+	var width_spinbox := _get_new_map_width_spinbox()
+	var height_spinbox := _get_new_map_height_spinbox()
+	if new_map_dialog == null or width_spinbox == null or height_spinbox == null:
+		_create_new_map(DEFAULT_NEW_MAP_GRID_SIZE)
+		return
+
+	width_spinbox.value = DEFAULT_NEW_MAP_GRID_SIZE.x
+	height_spinbox.value = DEFAULT_NEW_MAP_GRID_SIZE.y
+	new_map_dialog.popup_centered()
+
+
+func _on_new_map_dialog_confirmed() -> void:
+	var width_spinbox := _get_new_map_width_spinbox()
+	var height_spinbox := _get_new_map_height_spinbox()
+	var grid_width := DEFAULT_NEW_MAP_GRID_SIZE.x
+	var grid_height := DEFAULT_NEW_MAP_GRID_SIZE.y
+	if width_spinbox != null:
+		grid_width = clampi(int(width_spinbox.value), MIN_NEW_MAP_GRID_DIMENSION, MAX_NEW_MAP_GRID_DIMENSION)
+	if height_spinbox != null:
+		grid_height = clampi(int(height_spinbox.value), MIN_NEW_MAP_GRID_DIMENSION, MAX_NEW_MAP_GRID_DIMENSION)
+
+	_create_new_map(Vector2i(grid_width, grid_height))
 
 
 func _open_dirty_confirmation(action_name: String) -> void:
@@ -969,6 +1008,18 @@ func _get_brush_size_option_button() -> OptionButton:
 	return get_node_or_null("UI/TopBar/Margin/HBox/BrushSizeOptionButton") as OptionButton
 
 
+func _get_new_map_dialog() -> ConfirmationDialog:
+	return get_node_or_null("UI/NewMapDialog") as ConfirmationDialog
+
+
+func _get_new_map_width_spinbox() -> SpinBox:
+	return get_node_or_null("UI/NewMapDialog/Margin/VBox/WidthRow/WidthSpinBox") as SpinBox
+
+
+func _get_new_map_height_spinbox() -> SpinBox:
+	return get_node_or_null("UI/NewMapDialog/Margin/VBox/HeightRow/HeightSpinBox") as SpinBox
+
+
 func _get_brush_radius() -> int:
 	var option_button := _get_brush_size_option_button()
 	if option_button == null or option_button.selected < 0:
@@ -1024,29 +1075,31 @@ func _load_tile_catalog() -> void:
 
 
 func _populate_tile_palette() -> void:
-	var wall_list = get_node_or_null("UI/PalettePanel/Margin/VBox/WallGroup/WallList") as ItemList
-	var cliff_list = get_node_or_null("UI/PalettePanel/Margin/VBox/CliffGroup/CliffList") as ItemList
-	var ramp_list = get_node_or_null("UI/PalettePanel/Margin/VBox/RampGroup/RampList") as ItemList
-	if wall_list == null or cliff_list == null or ramp_list == null or _tile_catalog == null:
+	var tile_type_list := _get_tile_type_list()
+	var palette_groups_root := _get_palette_groups_root()
+	if tile_type_list == null or _tile_catalog == null:
 		return
 
-	wall_list.clear()
-	cliff_list.clear()
-	ramp_list.clear()
+	tile_type_list.clear()
+	tile_type_list.visible = true
+	if palette_groups_root != null:
+		palette_groups_root.visible = false
+		for child in palette_groups_root.get_children():
+			child.queue_free()
 
 	for tile_type in _tile_catalog.get_all_types():
-		var type_id = String(tile_type.get("type_id", ""))
-		var display_name = String(tile_type.get("display_name", type_id))
-		if type_id.begins_with("wall_"):
-			wall_list.add_item(display_name)
-		elif type_id.begins_with("cliff_"):
-			cliff_list.add_item(display_name)
-		elif type_id.begins_with("slope_"):
-			ramp_list.add_item(display_name)
+		var type_id := String(tile_type.get("type_id", ""))
+		var display_name := String(tile_type.get("display_name", type_id))
+		tile_type_list.add_item(display_name)
+		tile_type_list.set_item_metadata(tile_type_list.item_count - 1, type_id)
 
 
 func _get_tile_type_list() -> ItemList:
 	return get_node_or_null("UI/PalettePanel/Margin/VBox/TileTypeList") as ItemList
+
+
+func _get_palette_groups_root() -> VBoxContainer:
+	return get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteGroups") as VBoxContainer
 
 
 func _find_matching_type_id(tile_data) -> String:

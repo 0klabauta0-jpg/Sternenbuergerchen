@@ -6,6 +6,7 @@ const DEFAULT_CATALOG_PATH: String = "res://data/terrain_tile_catalog.json"
 var _tile_types: Dictionary = {}
 var _type_order: Array[String] = []
 var _type_textures: Dictionary = {}
+var _palette_groups: Array[Dictionary] = []
 
 
 static func load_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCatalog:
@@ -25,6 +26,20 @@ static func load_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCa
 		return catalog
 
 	var root_dict: Dictionary = parsed
+	var palette_groups_array: Variant = root_dict.get("palette_groups", [])
+	if palette_groups_array is Array:
+		for group_entry in palette_groups_array:
+			if typeof(group_entry) != TYPE_DICTIONARY:
+				continue
+			var group_id: String = _normalize_palette_group_id(String(group_entry.get("group_id", "")))
+			if group_id.is_empty():
+				continue
+			catalog._append_palette_group_if_missing(
+				group_id,
+				String(group_entry.get("display_name", _build_default_palette_group_label(group_id))),
+				bool(group_entry.get("collapsed", false))
+			)
+
 	var tile_types_array: Variant = root_dict.get("tile_types", [])
 	if not tile_types_array is Array:
 		return catalog
@@ -37,9 +52,15 @@ static func load_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCa
 		if type_id.is_empty():
 			continue
 
+		var palette_group: String = _normalize_palette_group_id(String(entry.get("palette_group", "default")))
+		if palette_group.is_empty():
+			palette_group = "default"
+		catalog._append_palette_group_if_missing(palette_group)
+
 		catalog._tile_types[type_id] = {
 			"type_id": type_id,
 			"display_name": String(entry.get("display_name", type_id)),
+			"palette_group": palette_group,
 			"texture_path": String(entry.get("texture_path", "")),
 			"surface_type": String(entry.get("surface_type", "ground")),
 			"walkable": bool(entry.get("walkable", true)),
@@ -56,6 +77,27 @@ static func load_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCa
 			catalog._type_textures[type_id] = load(texture_path) as Texture2D
 
 	return catalog
+
+
+static func _normalize_palette_group_id(value: String) -> String:
+	return value.strip_edges().to_lower()
+
+
+static func _build_default_palette_group_label(group_id: String) -> String:
+	if group_id.is_empty():
+		return "Weitere"
+	return group_id.capitalize()
+
+
+func _append_palette_group_if_missing(group_id: String, display_name: String = "", collapsed: bool = false) -> void:
+	for existing_group in _palette_groups:
+		if String(existing_group.get("group_id", "")) == group_id:
+			return
+	_palette_groups.append({
+		"group_id": group_id,
+		"display_name": display_name if not display_name.is_empty() else _build_default_palette_group_label(group_id),
+		"collapsed": collapsed,
+	})
 
 
 func get_type_ids() -> Array[String]:
@@ -77,6 +119,10 @@ func get_all_types() -> Array[Dictionary]:
 		result.append(_tile_types[type_id])
 
 	return result
+
+
+func get_palette_groups() -> Array[Dictionary]:
+	return _palette_groups.duplicate(true)
 
 
 func has_type(type_id: String) -> bool:

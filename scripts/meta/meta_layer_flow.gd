@@ -2,14 +2,10 @@ extends Node
 
 const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
 const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
-const FRIENDLY_NODE_NAMES_BY_ID: Dictionary = {
-	"unit_alpha": "UnitAlpha",
-	"unit_bravo": "UnitBravo",
-	"unit_charlie": "UnitCharlie",
-}
+const FRIENDLY_NODE_NAMES: PackedStringArray = ["UnitAlpha", "UnitBravo", "UnitCharlie"]
 
 var _available_team_units: Array = UNIT_ROSTER_PRESETS_SCRIPT.get_homebase_roster()
-var _selected_unit_ids: PackedStringArray = ["unit_alpha", "unit_bravo"]
+var _selected_unit_ids: PackedStringArray = UNIT_ROSTER_PRESETS_SCRIPT.get_default_homebase_selection()
 var _active_mission = null
 var _last_mission_result: Dictionary = {}
 
@@ -38,6 +34,7 @@ func _ready() -> void:
 		debrief_screen.return_to_homebase_requested.connect(_on_debrief_return_to_homebase_requested)
 
 	homebase_screen.setup_roster(_available_team_units, _selected_unit_ids)
+	fob_screen.set_available_units(_available_team_units)
 	fob_screen.set_team(_selected_unit_ids)
 	fob_screen.set_last_mission_result(_last_mission_result)
 	_show_homebase()
@@ -53,6 +50,7 @@ func get_active_mission():
 
 func _on_homebase_team_confirmed(selected_unit_ids: PackedStringArray) -> void:
 	_selected_unit_ids = selected_unit_ids.duplicate()
+	_get_fob_screen().set_available_units(_available_team_units)
 	_get_fob_screen().set_team(_selected_unit_ids)
 	_show_fob()
 
@@ -140,14 +138,18 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 
 func _build_mission_result(mission_instance: Node, mission_result: Dictionary) -> Dictionary:
 	var team_states: Array = []
-	for unit_id in _selected_unit_ids:
-		var node_name: String = String(FRIENDLY_NODE_NAMES_BY_ID.get(unit_id, ""))
-		if node_name.is_empty():
-			continue
+	var friendly_slot_count: int = mini(_selected_unit_ids.size(), FRIENDLY_NODE_NAMES.size())
+	for slot_index in range(friendly_slot_count):
+		var node_name: String = String(FRIENDLY_NODE_NAMES[slot_index])
+		var requested_unit_id: String = String(_selected_unit_ids[slot_index])
 
 		var unit = mission_instance.get_node_or_null(node_name)
 		if unit == null:
 			continue
+
+		var resolved_unit_id: String = requested_unit_id
+		if unit.has_method("get_unit_id"):
+			resolved_unit_id = String(unit.call("get_unit_id"))
 
 		var health_points: int = -1
 		if unit.has_method("get_health"):
@@ -159,7 +161,7 @@ func _build_mission_result(mission_instance: Node, mission_result: Dictionary) -
 
 		team_states.append(
 			{
-				"unit_id": unit_id,
+				"unit_id": resolved_unit_id,
 				"display_name": String(unit.get("display_name")),
 				"vital_state": vital_state,
 				"health_points": health_points,
@@ -192,11 +194,9 @@ func _release_active_mission() -> void:
 
 func _build_selected_friendly_paths(selected_unit_ids: PackedStringArray) -> Array[NodePath]:
 	var selected_paths: Array[NodePath] = []
-	for unit_id in selected_unit_ids:
-		var node_name: String = String(FRIENDLY_NODE_NAMES_BY_ID.get(unit_id, ""))
-		if node_name.is_empty():
-			continue
-
+	var friendly_slot_count: int = mini(selected_unit_ids.size(), FRIENDLY_NODE_NAMES.size())
+	for slot_index in range(friendly_slot_count):
+		var node_name: String = String(FRIENDLY_NODE_NAMES[slot_index])
 		selected_paths.append(NodePath("../%s" % node_name))
 
 	return selected_paths
@@ -223,6 +223,7 @@ func _show_fob() -> void:
 		homebase_screen.visible = false
 	if fob_screen != null:
 		fob_screen.visible = true
+		fob_screen.set_available_units(_available_team_units)
 		fob_screen.set_team(_selected_unit_ids)
 		fob_screen.set_last_mission_result(_last_mission_result)
 	if debrief_screen != null:

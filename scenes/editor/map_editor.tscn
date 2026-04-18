@@ -1,10 +1,3 @@
-[node name="SaveAsDialog" type="FileDialog" parent="UI"]
-title = "Save Map As"
-size = Vector2i(600, 400)
-exclusive = true
-file_mode = 2 # FILE_MODE_SAVE
-access = 1 # ACCESS_RESOURCES
-filters = [ "*.json ; JSON terrain map" ]
 [gd_scene load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://scripts/editor/map_editor.gd" id="1_script"]
@@ -23,14 +16,11 @@ zoom = Vector2(0.3, 0.3)
 [node name="WallContainer" type="Node2D" parent="."]
 y_sort_enabled = true
 z_index = -13
-Fast
+
 [node name="GridOverlay" type="Node2D" parent="."]
 z_index = 10
 
-[node name="SelectionOutline" type="Line2D" parent="."]
-default_color = Color(1, 1, 1, 0.95)
-width = 3.0
-closed = false
+[node name="SelectionOutline" type="Node2D" parent="."]
 z_index = 40
 
 [node name="UI" type="CanvasLayer" parent="."]
@@ -105,35 +95,6 @@ theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
 [node name="VBox" type="VBoxContainer" parent="UI/PalettePanel/Margin"]
- [node name="WallGroup" type="VBoxContainer" parent="UI/PalettePanel/Margin/VBox"]
- layout_mode = 2
- [node name="WallHeader" type="Button" parent="UI/PalettePanel/Margin/VBox/WallGroup"]
- text = "Wände"
- toggle_mode = true
- pressed = true
- [node name="WallList" type="ItemList" parent="UI/PalettePanel/Margin/VBox/WallGroup"]
- size_flags_vertical = 1
- allow_reselect = true
-
- [node name="CliffGroup" type="VBoxContainer" parent="UI/PalettePanel/Margin/VBox"]
- layout_mode = 2
- [node name="CliffHeader" type="Button" parent="UI/PalettePanel/Margin/VBox/CliffGroup"]
- text = "Cliffs"
- toggle_mode = true
- pressed = true
- [node name="CliffList" type="ItemList" parent="UI/PalettePanel/Margin/VBox/CliffGroup"]
- size_flags_vertical = 1
- allow_reselect = true
-
- [node name="RampGroup" type="VBoxContainer" parent="UI/PalettePanel/Margin/VBox"]
- layout_mode = 2
- [node name="RampHeader" type="Button" parent="UI/PalettePanel/Margin/VBox/RampGroup"]
- text = "Rampen"
- toggle_mode = true
- pressed = true
- [node name="RampList" type="ItemList" parent="UI/PalettePanel/Margin/VBox/RampGroup"]
- size_flags_vertical = 1
- allow_reselect = true
 layout_mode = 2
 theme_override_constants/separation = 6
 
@@ -141,10 +102,16 @@ theme_override_constants/separation = 6
 layout_mode = 2
 text = "Tile-Palette"
 
+[node name="PaletteGroups" type="VBoxContainer" parent="UI/PalettePanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+visible = false
+
 [node name="TileTypeList" type="ItemList" parent="UI/PalettePanel/Margin/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
 allow_reselect = true
+visible = true
 
 [node name="PropertyPanel" type="PanelContainer" parent="UI"]
 anchors_preset = 3
@@ -248,7 +215,65 @@ title = "Load Map"
 size = Vector2i(600, 400)
 exclusive = true
 
+[node name="SaveAsDialog" type="FileDialog" parent="UI"]
+title = "Save Map As"
+size = Vector2i(600, 400)
+exclusive = true
+file_mode = 2
+access = 1
+filters = ["*.json ; JSON terrain map"]
+
 [node name="DirtyConfirmDialog" type="ConfirmationDialog" parent="UI"]
 title = "Unsaved Changes"
 size = Vector2i(400, 150)
 dialog_text = "Ungespeicherte Aenderungen gehen verloren. Fortfahren?"
+
+[node name="NewMapDialog" type="ConfirmationDialog" parent="UI"]
+title = "Neue Karte"
+size = Vector2i(360, 210)
+exclusive = true
+
+[node name="Margin" type="MarginContainer" parent="UI/NewMapDialog"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="UI/NewMapDialog/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="InfoLabel" type="Label" parent="UI/NewMapDialog/Margin/VBox"]
+layout_mode = 2
+text = "Groesse der neuen Karte"
+
+[node name="WidthRow" type="HBoxContainer" parent="UI/NewMapDialog/Margin/VBox"]
+layout_mode = 2
+
+[node name="WidthLabel" type="Label" parent="UI/NewMapDialog/Margin/VBox/WidthRow"]
+layout_mode = 2
+text = "Breite:"
+
+[node name="WidthSpinBox" type="SpinBox" parent="UI/NewMapDialog/Margin/VBox/WidthRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 512.0
+step = 1.0
+value = 32.0
+
+[node name="HeightRow" type="HBoxContainer" parent="UI/NewMapDialog/Margin/VBox"]
+layout_mode = 2
+
+[node name="HeightLabel" type="Label" parent="UI/NewMapDialog/Margin/VBox/HeightRow"]
+layout_mode = 2
+text = "Hoehe:"
+
+[node name="HeightSpinBox" type="SpinBox" parent="UI/NewMapDialog/Margin/VBox/HeightRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 512.0
+step = 1.0
+value = 32.0

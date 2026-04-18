@@ -217,8 +217,17 @@ func get_target_position():
 
 
 func apply_identity_config(identity_config: Dictionary) -> void:
+	if identity_config.has("unit_id"):
+		unit_id = String(identity_config["unit_id"]).strip_edges()
+
 	if identity_config.has("display_name"):
 		display_name = String(identity_config["display_name"])
+
+	if identity_config.has("team_id"):
+		team_id = String(identity_config["team_id"]).strip_edges()
+
+	if identity_config.has("fireteam_id"):
+		fireteam_id = _normalize_fireteam_id(String(identity_config["fireteam_id"]))
 
 	if identity_config.has("skill_accuracy"):
 		skill_accuracy = clampf(float(identity_config["skill_accuracy"]), 0.0, 1.0)

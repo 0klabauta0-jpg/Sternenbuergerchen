@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://clss1ct137c1c"]
+
+[ext_resource type="Script" uid="uid://cow4252wnp1k1" path="res://scripts/meta/npc_meta_card.gd" id="1_2eedr"]
+
+[node name="NPCMetaCard" type="PanelContainer" unique_id=1713590410]
+script = ExtResource("1_2eedr")

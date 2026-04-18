@@ -1,8 +1,36 @@
 {
+	"palette_groups": [
+		{
+			"group_id": "terrain",
+			"display_name": "Terrain",
+			"collapsed": false
+		},
+		{
+			"group_id": "waende",
+			"display_name": "Waende",
+			"collapsed": false
+		},
+		{
+			"group_id": "cliffs",
+			"display_name": "Cliffs",
+			"collapsed": false
+		},
+		{
+			"group_id": "rampen",
+			"display_name": "Rampen",
+			"collapsed": false
+		},
+		{
+			"group_id": "felsen",
+			"display_name": "Felsen",
+			"collapsed": false
+		}
+	],
 	"tile_types": [
 		{
 			"type_id": "ground_flat",
 			"display_name": "Boden",
+			"palette_group": "terrain",
 			"texture_path": "res://Assets/kenney_space-kit/Isometric/terrain_SW.png",
 			"surface_type": "ground",
 			"walkable": true,
@@ -14,6 +42,7 @@
 		{
 			"type_id": "wall_straight_se",
 			"display_name": "Mauer SE",
+			"palette_group": "waende",
 			"surface_type": "rock",
 			"walkable": false,
 			"blocks_los": true,
@@ -24,6 +53,7 @@
 		{
 			"type_id": "wall_straight_sw",
 			"display_name": "Mauer SW",
+			"palette_group": "waende",
 			"surface_type": "rock",
 			"walkable": false,
 			"blocks_los": true,
@@ -34,6 +64,7 @@
 		{
 			"type_id": "wall_straight_ne",
 			"display_name": "Mauer NE",
+			"palette_group": "waende",
 			"surface_type": "rock",
 			"walkable": false,
 			"blocks_los": true,
@@ -44,6 +75,7 @@
 		{
 			"type_id": "wall_straight_nw",
 			"display_name": "Mauer NW",
+			"palette_group": "waende",
 			"surface_type": "rock",
 			"walkable": false,
 			"blocks_los": true,
@@ -53,7 +85,8 @@
 		},
 		{
 			"type_id": "wall_corner_se",
-			"display_name": "Ecke Ost",
+			"display_name": "Mauer Ecke Ost",
+			"palette_group": "waende",
 			"surface_type": "rock",
 			"walkable": false,
 			"blocks_los": true,
@@ -63,7 +96,8 @@
 		},
 		{
 			"type_id": "wall_corner_sw",
-			"display_name": "Ecke Sued",
+			"display_name": "Mauer Ecke Sued",
+			"palette_group": "waende",
 			"surface_type": "rock",
 			"walkable": false,
 			"blocks_los": true,
@@ -73,7 +107,8 @@
 		},
 		{
 			"type_id": "wall_corner_ne",
-			"display_name": "Ecke Nord",
+			"display_name": "Mauer Ecke Nord",
+			"palette_group": "waende",
 			"surface_type": "rock",
 			"walkable": false,
 			"blocks_los": true,
@@ -83,7 +118,8 @@
 		},
 		{
 			"type_id": "wall_corner_nw",
-			"display_name": "Ecke West",
+			"display_name": "Mauer Ecke West",
+			"palette_group": "waende",
 			"surface_type": "rock",
 			"walkable": false,
 			"blocks_los": true,
@@ -94,6 +130,7 @@
 		{
 			"type_id": "cliff_straight_se",
 			"display_name": "Cliff SE",
+			"palette_group": "cliffs",
 			"surface_type": "rock",
 			"walkable": false,
 			"blocks_los": true,
@@ -105,6 +142,7 @@
 		{
 			"type_id": "cliff_straight_sw",
 			"display_name": "Cliff SW",
+			"palette_group": "cliffs",
 			"surface_type": "rock",
 			"walkable": false,
 			"blocks_los": true,
@@ -116,6 +154,7 @@
 		{
 			"type_id": "cliff_straight_ne",
 			"display_name": "Cliff NE",
+			"palette_group": "cliffs",
 			"surface_type": "rock",
 			"walkable": false,
 			"blocks_los": true,
@@ -127,6 +166,7 @@
 		{
 			"type_id": "cliff_straight_nw",
 			"display_name": "Cliff NW",
+			"palette_group": "cliffs",
 			"surface_type": "rock",
 			"walkable": false,
 			"blocks_los": true,
@@ -138,6 +178,7 @@
 		{
 			"type_id": "cliff_corner_se",
 			"display_name": "Cliff Ecke Ost",
+			"palette_group": "cliffs",
 			"surface_type": "rock",
 			"walkable": false,
 			"blocks_los": true,
@@ -149,6 +190,7 @@
 		{
 			"type_id": "cliff_corner_sw",
 			"display_name": "Cliff Ecke Sued",
+			"palette_group": "cliffs",
 			"surface_type": "rock",
 			"walkable": false,
 			"blocks_los": true,
@@ -160,6 +202,7 @@
 		{
 			"type_id": "cliff_corner_ne",
 			"display_name": "Cliff Ecke Nord",
+			"palette_group": "cliffs",
 			"surface_type": "rock",
 			"walkable": false,
 			"blocks_los": true,
@@ -171,6 +214,7 @@
 		{
 			"type_id": "cliff_corner_nw",
 			"display_name": "Cliff Ecke West",
+			"palette_group": "cliffs",
 			"surface_type": "rock",
 			"walkable": false,
 			"blocks_los": true,
@@ -182,6 +226,7 @@
 		{
 			"type_id": "slope_se",
 			"display_name": "Rampe SE",
+			"palette_group": "rampen",
 			"surface_type": "ground",
 			"walkable": true,
 			"blocks_los": false,
@@ -193,6 +238,7 @@
 		{
 			"type_id": "slope_sw",
 			"display_name": "Rampe SW",
+			"palette_group": "rampen",
 			"surface_type": "ground",
 			"walkable": true,
 			"blocks_los": false,
@@ -204,6 +250,7 @@
 		{
 			"type_id": "slope_ne",
 			"display_name": "Rampe NE",
+			"palette_group": "rampen",
 			"surface_type": "ground",
 			"walkable": true,
 			"blocks_los": false,
@@ -215,6 +262,7 @@
 		{
 			"type_id": "slope_nw",
 			"display_name": "Rampe NW",
+			"palette_group": "rampen",
 			"surface_type": "ground",
 			"walkable": true,
 			"blocks_los": false,
@@ -226,6 +274,7 @@
 		{
 			"type_id": "rock_small",
 			"display_name": "Fels klein",
+			"palette_group": "felsen",
 			"surface_type": "rock",
 			"walkable": false,
 			"blocks_los": false,
@@ -236,6 +285,7 @@
 		{
 			"type_id": "rock_large",
 			"display_name": "Fels gross",
+			"palette_group": "felsen",
 			"surface_type": "rock",
 			"walkable": false,
 			"blocks_los": true,
