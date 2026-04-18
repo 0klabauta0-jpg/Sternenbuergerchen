@@ -306,6 +306,11 @@ func _build_tile_modulate(tile_data) -> Color:
 	if not bool(tile_data.walkable):
 		tile_color = tile_color.darkened(0.14)
 
+	# Checkerboard pattern for grid visibility
+	var gp: Vector2i = tile_data.grid_position
+	if (gp.x + gp.y) % 2 == 0:
+		tile_color = tile_color.darkened(0.06)
+
 	return tile_color
 
 
@@ -1203,18 +1208,15 @@ func _rebuild_grid_overlay() -> void:
 	if grid_overlay == null:
 		return
 
+	for child in grid_overlay.get_children():
+		child.queue_free()
+
 	if _terrain_map_data == null:
 		return
 
 	var tile_size: Dictionary = _terrain_map_data.call("get_tile_size")
 	var half_w: float = float(tile_size.get("half_width", DEFAULT_HALF_TILE_WIDTH))
 	var half_h: float = float(tile_size.get("half_height", DEFAULT_HALF_TILE_HEIGHT))
-
-	var centers := PackedVector2Array()
-	for tile_data in _terrain_map_data.call("get_tiles"):
-		centers.append(tile_data.world_position)
-
-	grid_overlay.set_grid_data(centers, half_w, half_h)
 
 	# --- Compass labels at the four diamond corners ---
 	var grid_size: Vector2i = _terrain_map_data.call("get_grid_size")
@@ -1239,12 +1241,23 @@ func _rebuild_grid_overlay() -> void:
 		origin.y + float(0 + max_y) * half_h
 	)
 
-	grid_overlay.set_compass_data([
+	var compass_data: Array = [
 		["N", north_pos + Vector2(0, -half_h * 3)],
 		["O", east_pos + Vector2(half_w * 3, 0)],
 		["S", south_pos + Vector2(0, half_h * 3)],
 		["W", west_pos + Vector2(-half_w * 3, 0)],
-	])
+	]
+
+	for entry in compass_data:
+		var lbl := Label.new()
+		lbl.text = entry[0]
+		lbl.add_theme_font_size_override("font_size", 80)
+		lbl.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0, 0.5))
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		lbl.size = Vector2(160, 120)
+		lbl.position = entry[1] - lbl.size * 0.5
+		grid_overlay.add_child(lbl)
 
 
 # --- Hover Preview ---
