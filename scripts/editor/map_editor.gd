@@ -994,8 +994,8 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 						interior_is_sw = true
 						break
 				if interior_is_sw:
-					# NE side → offset 1 tile NE (sit at NE edge)
-					pos_offset = Vector2(DEFAULT_HALF_TILE_WIDTH, -DEFAULT_HALF_TILE_HEIGHT)
+					# NE side → offset 1 tile NE minus half tile SW
+					pos_offset = Vector2(DEFAULT_HALF_TILE_WIDTH * 0.5, -DEFAULT_HALF_TILE_HEIGHT * 0.5)
 				# else: SW side → no offset
 			else:
 				# NE+SW axis, perpendicular is SE(+1,0) / NW(-1,0)
@@ -1007,8 +1007,8 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 						interior_is_se = true
 						break
 				if not interior_is_se:
-					# SE side of rectangle → offset 1 tile SE
-					pos_offset = Vector2(DEFAULT_HALF_TILE_WIDTH, DEFAULT_HALF_TILE_HEIGHT)
+					# SE side of rectangle → offset 1 tile SE minus half tile NW
+					pos_offset = Vector2(DEFAULT_HALF_TILE_WIDTH * 0.5, DEFAULT_HALF_TILE_HEIGHT * 0.5)
 				# else: SW side → no offset
 		else:
 			# Adjacent directions → corner wall piece
