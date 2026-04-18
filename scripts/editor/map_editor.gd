@@ -976,17 +976,20 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 			wall_dirs.append(offset)
 
 	var texture: Texture2D = null
+	var pos_offset := Vector2.ZERO
 
 	if wall_dirs.size() == 2:
 		var sum: Vector2i = wall_dirs[0] + wall_dirs[1]
 		if sum == Vector2i.ZERO:
 			# Opposite directions → straight wall panel
 			if wall_dirs.has(Vector2i(1, 0)):
-				# SE+NW axis
+				# SE+NW axis — shift 1 tile SE
 				texture = WALL_TEXTURE_SE
+				pos_offset = Vector2(DEFAULT_HALF_TILE_WIDTH, DEFAULT_HALF_TILE_HEIGHT)
 			else:
-				# NE+SW axis
+				# NE+SW axis — shift 1 tile NE
 				texture = WALL_TEXTURE_SW
+				pos_offset = Vector2(DEFAULT_HALF_TILE_WIDTH, -DEFAULT_HALF_TILE_HEIGHT)
 		else:
 			# Adjacent directions → corner wall piece
 			if wall_dirs.has(Vector2i(1, 0)) and wall_dirs.has(Vector2i(0, 1)):
@@ -1035,7 +1038,7 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 	sprite.texture = texture
 	sprite.centered = false
 	sprite.z_index = -13
-	sprite.position = tile_data.world_position - (texture.get_size() * 0.5)
+	sprite.position = tile_data.world_position - (texture.get_size() * 0.5) + pos_offset
 	wall_container.add_child(sprite)
 	_wall_sprites_by_grid[grid_pos] = [sprite]
 
