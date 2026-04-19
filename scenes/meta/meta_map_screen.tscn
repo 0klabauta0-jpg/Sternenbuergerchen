@@ -1,0 +1,204 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/meta/meta_map_screen.gd" id="1_script"]
+
+[node name="MapScreen" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+size_flags_vertical = 3
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MissionPanel" type="PanelContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 80)
+size_flags_horizontal = 3
+clip_contents = true
+
+[node name="MissionMargin" type="MarginContainer" parent="Panel/Margin/VBox/MissionPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 3
+
+[node name="MissionVBox" type="VBoxContainer" parent="Panel/Margin/VBox/MissionPanel/MissionMargin"]
+layout_mode = 2
+theme_override_constants/separation = 2
+size_flags_horizontal = 3
+
+[node name="HeaderRow" type="HBoxContainer" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox"]
+layout_mode = 2
+theme_override_constants/separation = 3
+size_flags_horizontal = 3
+
+[node name="NavButtonRow" type="HBoxContainer" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="HomebaseNavButton" type="Button" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 18)
+text = "Homebase"
+theme_override_font_sizes/font_size = 8
+
+[node name="FOBNavButton" type="Button" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 18)
+text = "FOB"
+theme_override_font_sizes/font_size = 8
+
+[node name="MissionNavButton" type="Button" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 18)
+text = "Mission"
+theme_override_font_sizes/font_size = 8
+
+[node name="MissionHeaderLabel" type="Label" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox"]
+layout_mode = 2
+text = "Map Overview"
+theme_override_font_sizes/font_size = 11
+
+[node name="MissionInfoRow" type="HBoxContainer" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+size_flags_horizontal = 3
+
+[node name="MapNameLabel" type="Label" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Map: test_mission"
+theme_override_font_sizes/font_size = 9
+
+[node name="OperatorCountLabel" type="Label" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Operators: 0"
+theme_override_font_sizes/font_size = 9
+
+[node name="FireteamCountLabel" type="Label" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Fireteams: 1"
+theme_override_font_sizes/font_size = 9
+
+[node name="MissionSummaryLabel" type="Label" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox"]
+layout_mode = 2
+text = "Read-only map overview of the current meta preparation."
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 9
+
+[node name="ContentRow" type="HBoxContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="MapPanel" type="PanelContainer" parent="Panel/Margin/VBox/ContentRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 1.1
+
+[node name="MapMargin" type="MarginContainer" parent="Panel/Margin/VBox/ContentRow/MapPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+size_flags_vertical = 3
+
+[node name="MapVBox" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/MapPanel/MapMargin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MapHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox"]
+layout_mode = 2
+text = "Mission Map"
+theme_override_font_sizes/font_size = 13
+
+[node name="MapDataLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox"]
+layout_mode = 2
+text = "File: res://maps/test_mission.json\nGrid: 0 x 0\nTiles: 0"
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 11
+
+[node name="MapHelpLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox"]
+layout_mode = 2
+text = "Die Map-Ansicht bleibt bewusst read-only."
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 11
+
+[node name="SummaryPanel" type="PanelContainer" parent="Panel/Margin/VBox/ContentRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.95
+
+[node name="SummaryMargin" type="MarginContainer" parent="Panel/Margin/VBox/ContentRow/SummaryPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+size_flags_vertical = 3
+
+[node name="SummaryVBox" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/SummaryPanel/SummaryMargin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="SummaryHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/SummaryPanel/SummaryMargin/SummaryVBox"]
+layout_mode = 2
+text = "FOB Staging Snapshot"
+theme_override_font_sizes/font_size = 13
+
+[node name="FireteamOverviewLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/SummaryPanel/SummaryMargin/SummaryVBox"]
+layout_mode = 2
+text = "Fireteams"
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 11
+
+[node name="DropshipOverviewLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/SummaryPanel/SummaryMargin/SummaryVBox"]
+layout_mode = 2
+text = "Dropship"
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 11
+
+[node name="RespawnOverviewLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/SummaryPanel/SummaryMargin/SummaryVBox"]
+layout_mode = 2
+text = "Respawn + Loadout"
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 11

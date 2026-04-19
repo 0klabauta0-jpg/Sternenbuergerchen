@@ -4,6 +4,7 @@ extends RefCounted
 const META_UNIT_PROFILE_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile.gd")
 const UNIT_SKILLS_SCRIPT: GDScript = preload("res://scripts/npc/unit_skills.gd")
 const UNIT_TRAIT_SCRIPT: GDScript = preload("res://scripts/npc/unit_trait.gd")
+const UNIT_PROFILE_MATH_SCRIPT: GDScript = preload("res://scripts/npc/unit_profile_math.gd")
 
 
 static func build_from_identity_config(identity_config: Dictionary, options: Dictionary = {}):
@@ -13,6 +14,7 @@ static func build_from_identity_config(identity_config: Dictionary, options: Dic
 	var skills = _build_effective_skills(identity_config)
 	var trait_ids: PackedStringArray = _coerce_trait_ids(identity_config.get("trait_ids", []))
 	var trait_tags: PackedStringArray = _build_trait_tags(trait_ids)
+	var bundle: Dictionary = _build_character_bundle(identity_config, skills)
 
 	return META_UNIT_PROFILE_SCRIPT.new(
 		{
@@ -20,16 +22,28 @@ static func build_from_identity_config(identity_config: Dictionary, options: Dic
 			"display_name": display_name,
 			"portrait_path": String(identity_config.get("portrait_path", "")).strip_edges(),
 			"callsign": String(identity_config.get("callsign", "")).strip_edges(),
+			"role_id": String(bundle.get("role_id", String(identity_config.get("role_id", "")).strip_edges().to_lower())).strip_edges(),
 			"role_name": String(identity_config.get("role_name", "")).strip_edges(),
-			"specialty_text": String(identity_config.get("specialty_text", "")).strip_edges(),
+			"specialty_text": String(bundle.get("primary_specialty", String(identity_config.get("specialty_text", "")).strip_edges())).strip_edges(),
+			"primary_specialty": String(bundle.get("primary_specialty", "")).strip_edges(),
+			"secondary_specialty": String(bundle.get("secondary_specialty", "")).strip_edges(),
+			"short_description": _build_short_description(identity_config),
 			"homeworld": String(identity_config.get("homeworld", "")).strip_edges(),
 			"age_years": int(identity_config.get("age_years", 0)),
 			"biography_text": String(identity_config.get("biography_text", "")).strip_edges(),
 			"loadout_summary": String(identity_config.get("loadout_summary", "")).strip_edges(),
 			"team_id": String(identity_config.get("team_id", "")).strip_edges(),
 			"fireteam_id": fireteam_id,
-			"skill_values": skills.to_dict(),
+			"skill_values": Dictionary(bundle.get("core_values", skills.to_dict())).duplicate(true),
 			"skill_summary_text": _build_skill_summary_text(skills),
+			"communication_values": Dictionary(bundle.get("communication_values", {})).duplicate(true),
+			"platform_values": Dictionary(bundle.get("platform_values", {})).duplicate(true),
+			"behavior_axes": Dictionary(bundle.get("behavior_axes", {})).duplicate(true),
+			"method_scores": Dictionary(bundle.get("method_scores", {})).duplicate(true),
+			"function_scores": Dictionary(bundle.get("function_scores", {})).duplicate(true),
+			"method_summary_text": String(bundle.get("method_summary", "")).strip_edges(),
+			"function_summary_text": String(bundle.get("function_summary", "")).strip_edges(),
+			"combat_effect_summary_text": String(bundle.get("combat_effect_summary", "")).strip_edges(),
 			"trait_ids": trait_ids,
 			"trait_tags": trait_tags,
 			"trait_summary_text": " ".join(trait_tags),
@@ -55,6 +69,9 @@ static func build_from_test_unit(test_unit, options: Dictionary = {}):
 	var skill_summary_text: String = ""
 	if test_unit.has_method("get_skill_summary_text"):
 		skill_summary_text = String(test_unit.call("get_skill_summary_text"))
+	var character_bundle: Dictionary = {}
+	if test_unit.has_method("get_character_profile_bundle"):
+		character_bundle = Dictionary(test_unit.call("get_character_profile_bundle")).duplicate(true)
 
 	var trait_ids: PackedStringArray = []
 	if test_unit.has_method("get_trait_ids"):
@@ -74,16 +91,28 @@ static func build_from_test_unit(test_unit, options: Dictionary = {}):
 			"display_name": display_name,
 			"portrait_path": _read_string_value(test_unit, "get_portrait_path", "portrait_path"),
 			"callsign": _read_string_value(test_unit, "get_callsign", "callsign"),
+			"role_id": _read_string_value(test_unit, "get_role_id", "role_id"),
 			"role_name": _read_string_value(test_unit, "get_role_name", "role_name"),
-			"specialty_text": _read_string_value(test_unit, "get_specialty_text", "specialty_text"),
+			"specialty_text": String(character_bundle.get("primary_specialty", _read_string_value(test_unit, "get_specialty_text", "specialty_text"))).strip_edges(),
+			"primary_specialty": String(character_bundle.get("primary_specialty", "")).strip_edges(),
+			"secondary_specialty": String(character_bundle.get("secondary_specialty", "")).strip_edges(),
+			"short_description": _read_string_value(test_unit, "get_short_description", "short_description"),
 			"homeworld": _read_string_value(test_unit, "get_homeworld", "homeworld"),
 			"age_years": int(test_unit.get("age_years")) if test_unit.get("age_years") != null else 0,
 			"biography_text": _read_string_value(test_unit, "get_biography_text", "biography_text"),
 			"loadout_summary": _read_string_value(test_unit, "get_loadout_summary", "loadout_summary"),
 			"team_id": _read_string_value(test_unit, "get_team_id", "team_id"),
 			"fireteam_id": fireteam_id,
-			"skill_values": skill_values,
+			"skill_values": Dictionary(character_bundle.get("core_values", skill_values)).duplicate(true),
 			"skill_summary_text": skill_summary_text,
+			"communication_values": Dictionary(character_bundle.get("communication_values", {})).duplicate(true),
+			"platform_values": Dictionary(character_bundle.get("platform_values", {})).duplicate(true),
+			"behavior_axes": Dictionary(character_bundle.get("behavior_axes", {})).duplicate(true),
+			"method_scores": Dictionary(character_bundle.get("method_scores", {})).duplicate(true),
+			"function_scores": Dictionary(character_bundle.get("function_scores", {})).duplicate(true),
+			"method_summary_text": String(character_bundle.get("method_summary", "")).strip_edges(),
+			"function_summary_text": String(character_bundle.get("function_summary", "")).strip_edges(),
+			"combat_effect_summary_text": String(character_bundle.get("combat_effect_summary", "")).strip_edges(),
 			"trait_ids": trait_ids,
 			"trait_tags": trait_tags,
 			"trait_summary_text": trait_summary_text,
@@ -181,6 +210,28 @@ static func _coerce_trait_ids(value: Variant) -> PackedStringArray:
 			result.append(trait_id)
 
 	return result
+
+
+static func _build_character_bundle(identity_config: Dictionary, skills) -> Dictionary:
+	var metric_input: Dictionary = identity_config.duplicate(true)
+	metric_input["accuracy"] = float(skills.accuracy)
+	metric_input["speed"] = float(skills.speed)
+	metric_input["toughness"] = float(skills.toughness)
+	metric_input["leadership"] = float(skills.leadership)
+	return UNIT_PROFILE_MATH_SCRIPT.build_character_bundle(metric_input)
+
+
+static func _build_short_description(identity_config: Dictionary) -> String:
+	var explicit_text: String = String(identity_config.get("short_description", "")).strip_edges()
+	if not explicit_text.is_empty():
+		return explicit_text
+	var biography_text: String = String(identity_config.get("biography_text", "")).strip_edges()
+	if biography_text.is_empty():
+		return ""
+	var sentence_parts: PackedStringArray = biography_text.split(".", false)
+	if sentence_parts.is_empty():
+		return biography_text
+	return "%s." % String(sentence_parts[0]).strip_edges()
 
 
 static func _resolve_display_name(identity_config: Dictionary, unit_id: String) -> String:

@@ -5,8 +5,12 @@ var unit_id: String = ""
 var display_name: String = ""
 var portrait_path: String = ""
 var callsign: String = ""
+var role_id: String = ""
 var role_name: String = ""
 var specialty_text: String = ""
+var primary_specialty: String = ""
+var secondary_specialty: String = ""
+var short_description: String = ""
 var homeworld: String = ""
 var age_years: int = 0
 var biography_text: String = ""
@@ -15,6 +19,14 @@ var team_id: String = ""
 var fireteam_id: String = ""
 var skill_values: Dictionary = {}
 var skill_summary_text: String = ""
+var communication_values: Dictionary = {}
+var platform_values: Dictionary = {}
+var behavior_axes: Dictionary = {}
+var method_scores: Dictionary = {}
+var function_scores: Dictionary = {}
+var method_summary_text: String = ""
+var function_summary_text: String = ""
+var combat_effect_summary_text: String = ""
 var trait_ids: PackedStringArray = []
 var trait_tags: PackedStringArray = []
 var trait_summary_text: String = ""
@@ -42,8 +54,12 @@ func to_dict() -> Dictionary:
 		"display_name": display_name,
 		"portrait_path": portrait_path,
 		"callsign": callsign,
+		"role_id": role_id,
 		"role_name": role_name,
 		"specialty_text": specialty_text,
+		"primary_specialty": primary_specialty,
+		"secondary_specialty": secondary_specialty,
+		"short_description": short_description,
 		"homeworld": homeworld,
 		"age_years": age_years,
 		"biography_text": biography_text,
@@ -52,6 +68,14 @@ func to_dict() -> Dictionary:
 		"fireteam_id": fireteam_id,
 		"skill_values": skill_values.duplicate(true),
 		"skill_summary_text": skill_summary_text,
+		"communication_values": communication_values.duplicate(true),
+		"platform_values": platform_values.duplicate(true),
+		"behavior_axes": behavior_axes.duplicate(true),
+		"method_scores": method_scores.duplicate(true),
+		"function_scores": function_scores.duplicate(true),
+		"method_summary_text": method_summary_text,
+		"function_summary_text": function_summary_text,
+		"combat_effect_summary_text": combat_effect_summary_text,
 		"trait_ids": trait_ids.duplicate(),
 		"trait_tags": trait_tags.duplicate(),
 		"trait_summary_text": trait_summary_text,
@@ -70,8 +94,12 @@ func _apply_dict(data: Dictionary) -> void:
 	display_name = String(data.get("display_name", unit_id)).strip_edges()
 	portrait_path = String(data.get("portrait_path", "")).strip_edges()
 	callsign = String(data.get("callsign", "")).strip_edges()
+	role_id = String(data.get("role_id", "")).strip_edges().to_lower()
 	role_name = String(data.get("role_name", "")).strip_edges()
 	specialty_text = String(data.get("specialty_text", "")).strip_edges()
+	primary_specialty = String(data.get("primary_specialty", specialty_text)).strip_edges()
+	secondary_specialty = String(data.get("secondary_specialty", "")).strip_edges()
+	short_description = String(data.get("short_description", "")).strip_edges()
 	homeworld = String(data.get("homeworld", "")).strip_edges()
 	age_years = int(data.get("age_years", 0))
 	biography_text = String(data.get("biography_text", "")).strip_edges()
@@ -80,6 +108,14 @@ func _apply_dict(data: Dictionary) -> void:
 	fireteam_id = String(data.get("fireteam_id", "")).strip_edges().to_lower()
 	skill_values = Dictionary(data.get("skill_values", {})).duplicate(true)
 	skill_summary_text = String(data.get("skill_summary_text", "")).strip_edges()
+	communication_values = Dictionary(data.get("communication_values", {})).duplicate(true)
+	platform_values = Dictionary(data.get("platform_values", {})).duplicate(true)
+	behavior_axes = Dictionary(data.get("behavior_axes", {})).duplicate(true)
+	method_scores = Dictionary(data.get("method_scores", {})).duplicate(true)
+	function_scores = Dictionary(data.get("function_scores", {})).duplicate(true)
+	method_summary_text = String(data.get("method_summary_text", "")).strip_edges()
+	function_summary_text = String(data.get("function_summary_text", "")).strip_edges()
+	combat_effect_summary_text = String(data.get("combat_effect_summary_text", "")).strip_edges()
 	trait_ids = _coerce_string_array(data.get("trait_ids", []))
 	trait_tags = _coerce_string_array(data.get("trait_tags", []))
 	trait_summary_text = String(data.get("trait_summary_text", "")).strip_edges()
@@ -91,6 +127,9 @@ func _apply_dict(data: Dictionary) -> void:
 
 	if trait_summary_text.is_empty() and not trait_tags.is_empty():
 		trait_summary_text = " ".join(trait_tags)
+
+	if specialty_text.is_empty():
+		specialty_text = primary_specialty
 
 
 func _coerce_string_array(value: Variant) -> PackedStringArray:

@@ -741,7 +741,7 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 	var hit_chance: float = _extract_float(effect.get("hit_chance", 1.0), 1.0)
 	hit_chance *= _extract_unit_accuracy_multiplier(attacker_unit)
 	hit_chance = clampf(
-		hit_chance + attacker_attack_bonus + _extract_height_accuracy_modifier(attacker_unit, unit) + (attacker_cover_score * ATTACKER_COVER_HIT_BONUS_FACTOR) - (target_cover_score * TARGET_COVER_HIT_PENALTY_FACTOR),
+		hit_chance + attacker_attack_bonus + _extract_unit_hit_modifier(attacker_unit) + _extract_height_accuracy_modifier(attacker_unit, unit) + (attacker_cover_score * ATTACKER_COVER_HIT_BONUS_FACTOR) - _extract_unit_evasion_modifier(unit) - (target_cover_score * TARGET_COVER_HIT_PENALTY_FACTOR),
 		HIT_CHANCE_MIN,
 		HIT_CHANCE_MAX
 	)
@@ -763,6 +763,8 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		"attacker_unit_id": attacker_unit_id,
 		"attacker_team_id": attacker_team_id,
 		"attacker_attack_bonus": attacker_attack_bonus,
+		"attacker_profile_hit_modifier": _extract_unit_hit_modifier(attacker_unit),
+		"target_profile_evasion_modifier": _extract_unit_evasion_modifier(unit),
 		"height_accuracy_modifier": _extract_height_accuracy_modifier(attacker_unit, unit),
 		"target_cover_score": target_cover_score,
 		"friendly_fire": is_friendly_fire,
@@ -962,6 +964,25 @@ func _extract_float(value: Variant, fallback: float) -> float:
 	return fallback
 
 
+func _extract_unit_hit_modifier(unit) -> float:
+	if unit == null:
+		return 0.0
+
+	var modifier: float = 0.0
+	if unit.has_method("get_order_fidelity_hit_modifier"):
+		modifier += float(unit.call("get_order_fidelity_hit_modifier"))
+	if unit.has_method("get_autonomy_hit_modifier"):
+		modifier += float(unit.call("get_autonomy_hit_modifier"))
+	return modifier
+
+
+func _extract_unit_evasion_modifier(unit) -> float:
+	if unit == null or not unit.has_method("get_signature_control_evasion_modifier"):
+		return 0.0
+
+	return float(unit.call("get_signature_control_evasion_modifier"))
+
+
 func _extract_unit_accuracy_multiplier(unit) -> float:
 	if unit == null or not unit.has_method("get_accuracy_skill"):
 		return 1.0
@@ -973,7 +994,10 @@ func _extract_unit_speed_multiplier(unit) -> float:
 	if unit == null or not unit.has_method("get_speed_skill"):
 		return 1.0
 
-	return 0.5 + clampf(float(unit.call("get_speed_skill")), 0.0, 1.0)
+	var base_multiplier: float = 0.5 + clampf(float(unit.call("get_speed_skill")), 0.0, 1.0)
+	if unit.has_method("get_initiative_speed_multiplier"):
+		base_multiplier *= float(unit.call("get_initiative_speed_multiplier"))
+	return base_multiplier
 
 
 func _extract_unit_damage_taken_multiplier(unit) -> float:
@@ -981,7 +1005,10 @@ func _extract_unit_damage_taken_multiplier(unit) -> float:
 		return 1.0
 
 	var toughness: float = clampf(float(unit.call("get_toughness_skill")), 0.0, 1.0)
-	return 1.0 - (toughness * 0.4)
+	var damage_taken_multiplier: float = 1.0 - (toughness * 0.4)
+	if unit.has_method("get_contact_stability_damage_taken_multiplier"):
+		damage_taken_multiplier *= float(unit.call("get_contact_stability_damage_taken_multiplier"))
+	return damage_taken_multiplier
 
 
 func _apply_respawn_effect(effect: Dictionary) -> void:

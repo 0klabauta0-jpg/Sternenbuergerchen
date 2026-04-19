@@ -15,10 +15,11 @@ const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_ros
 @export var objective_point_path: NodePath
 @export var unit_paths: Array[NodePath] = []
 @export var selected_team_unit_ids: PackedStringArray = []
+@export var selected_team_fireteam_ids: PackedStringArray = []
 @export var respawn_manager_path: NodePath
 @export var enemy_wave_controller_path: NodePath
 @export var terrain_registry_path: NodePath
-@export var map_file_path: String = "res://maps/test_mission.json"
+@export var map_file_path: String = "res://maps/test_mission_32x32_slots8.json"
 
 var _is_initialized: bool = false
 
@@ -55,10 +56,12 @@ func _ready() -> void:
 
 		var unit_id: String = String(unit.call("get_unit_id"))
 		var unit_team_id: String = ""
+		var friendly_assignment_slot_index: int = -1
 		if unit.has_method("get_team_id"):
 			unit_team_id = String(unit.call("get_team_id"))
 
 		if unit_team_id == team_id:
+			friendly_assignment_slot_index = friendly_slot_index
 			if not _is_friendly_slot_enabled(friendly_slot_index):
 				if unit is CanvasItem:
 					unit.visible = false
@@ -75,7 +78,7 @@ func _ready() -> void:
 			unit_team_id = String(unit.call("get_team_id"))
 
 		if unit.has_method("set_fireteam_id"):
-			unit.call("set_fireteam_id", _get_fireteam_id_for_unit(unit_id, unit_team_id))
+			unit.call("set_fireteam_id", _get_fireteam_id_for_friendly_slot(friendly_assignment_slot_index, unit_id, unit_team_id))
 
 		var respawn_manager = get_node_or_null(respawn_manager_path)
 		if respawn_manager != null and unit.has_method("set_respawn_manager"):
@@ -152,6 +155,11 @@ func _get_friendly_spawn_offset(index: int) -> Vector2:
 		Vector2(-24.0, 12.0),
 		Vector2(0.0, 0.0),
 		Vector2(24.0, -12.0),
+		Vector2(-48.0, 24.0),
+		Vector2(48.0, -24.0),
+		Vector2(-72.0, 36.0),
+		Vector2(72.0, -36.0),
+		Vector2(0.0, 28.0),
 	]
 	if index >= 0 and index < offsets.size():
 		return offsets[index]
@@ -317,9 +325,14 @@ func _apply_unit_identity_preset(unit, unit_id: String, unit_team_id: String) ->
 	unit.call("apply_identity_config", preset)
 
 
-func _get_fireteam_id_for_unit(unit_id: String, unit_team_id: String) -> String:
+func _get_fireteam_id_for_friendly_slot(slot_index: int, unit_id: String, unit_team_id: String) -> String:
 	if unit_team_id != team_id:
 		return ""
+
+	if slot_index >= 0 and slot_index < selected_team_fireteam_ids.size():
+		var selected_fireteam_id: String = String(selected_team_fireteam_ids[slot_index]).strip_edges().to_lower()
+		if selected_fireteam_id == "blue" or selected_fireteam_id == "gold":
+			return selected_fireteam_id
 
 	var preset: Dictionary = UNIT_ROSTER_PRESETS_SCRIPT.get_preset(unit_id, unit_team_id)
 	return String(preset.get("fireteam_id", "")).strip_edges().to_lower()

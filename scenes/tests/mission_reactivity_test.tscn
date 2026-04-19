@@ -103,6 +103,66 @@ position = Vector2(0, -26)
 scale = Vector2(0.4, 0.4)
 texture = ExtResource("12_astronaut_a")
 
+[node name="UnitDelta" type="Node2D" parent="."]
+script = ExtResource("7_unit")
+position = Vector2(48, 286)
+unit_id = "unit_delta"
+display_name = "Unit Delta"
+team_id = "team_alpha"
+
+[node name="Visual" type="Sprite2D" parent="UnitDelta"]
+position = Vector2(0, -26)
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("12_astronaut_a")
+
+[node name="UnitEcho" type="Node2D" parent="."]
+script = ExtResource("7_unit")
+position = Vector2(96, 306)
+unit_id = "unit_echo"
+display_name = "Unit Echo"
+team_id = "team_alpha"
+
+[node name="Visual" type="Sprite2D" parent="UnitEcho"]
+position = Vector2(0, -26)
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("12_astronaut_a")
+
+[node name="UnitFoxtrot" type="Node2D" parent="."]
+script = ExtResource("7_unit")
+position = Vector2(24, 334)
+unit_id = "unit_foxtrot"
+display_name = "Unit Foxtrot"
+team_id = "team_alpha"
+
+[node name="Visual" type="Sprite2D" parent="UnitFoxtrot"]
+position = Vector2(0, -26)
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("12_astronaut_a")
+
+[node name="UnitGolf" type="Node2D" parent="."]
+script = ExtResource("7_unit")
+position = Vector2(120, 348)
+unit_id = "unit_golf"
+display_name = "Unit Golf"
+team_id = "team_alpha"
+
+[node name="Visual" type="Sprite2D" parent="UnitGolf"]
+position = Vector2(0, -26)
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("12_astronaut_a")
+
+[node name="UnitHotel" type="Node2D" parent="."]
+script = ExtResource("7_unit")
+position = Vector2(72, 374)
+unit_id = "unit_hotel"
+display_name = "Unit Hotel"
+team_id = "team_alpha"
+
+[node name="Visual" type="Sprite2D" parent="UnitHotel"]
+position = Vector2(0, -26)
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("12_astronaut_a")
+
 [node name="EnemyDelta" type="Node2D" parent="."]
 script = ExtResource("7_unit")
 position = Vector2(220, 130)
@@ -136,7 +196,7 @@ target_marker_path = NodePath("../TargetMarker")
 spawn_alpha_path = NodePath("../MapRoot/spawn_alpha")
 spawn_bravo_path = NodePath("../MapRoot/spawn_bravo")
 objective_point_path = NodePath("../MapRoot/objective_point")
-unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie"), NodePath("../EnemyDelta"), NodePath("../EnemyEcho")])
+unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie"), NodePath("../UnitDelta"), NodePath("../UnitEcho"), NodePath("../UnitFoxtrot"), NodePath("../UnitGolf"), NodePath("../UnitHotel"), NodePath("../EnemyDelta"), NodePath("../EnemyEcho")])
 respawn_manager_path = NodePath("../RespawnManager")
 enemy_wave_controller_path = NodePath("../EnemyWaveController")
 terrain_registry_path = NodePath("../TerrainRegistry")
@@ -188,7 +248,7 @@ contact_range = 220.0
 win_condition = "objective_capture"
 simulation_root_path = NodePath("../SimulationRoot")
 status_label_path = NodePath("../StatusLabel")
-friendly_unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie")])
+friendly_unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie"), NodePath("../UnitDelta"), NodePath("../UnitEcho"), NodePath("../UnitFoxtrot"), NodePath("../UnitGolf"), NodePath("../UnitHotel")])
 enemy_unit_paths = Array[NodePath]([NodePath("../EnemyDelta"), NodePath("../EnemyEcho")])
 respawn_manager_path = NodePath("../RespawnManager")
 enemy_wave_controller_path = NodePath("../EnemyWaveController")

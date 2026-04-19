@@ -192,6 +192,14 @@ TASK_070 – NPC-Karten-Komponente
 TASK_071 – Heimatbasis: NPC-Karten und Auswahlfokus
 TASK_072 – FOB: Teamkarten und Einsatzstatus
 TASK_073 – Homebase: Charakterbogen und Drag-and-Drop-Teamstaging
+TASK_074 – Homebase: Layout-Neuordnung und Missionsinfoleiste
+TASK_075 – Homebase: Kartenverdichtung, Tooltip-Polish und Charakterbogen-Fokus
+TASK_076 – Meta-Layer: Graue Kenney-UI-Rahmen
+TASK_077 – FOB: Fireteam-Auswahl und Startvorbereitung
+TASK_078 – Meta-Layer: Navigation und Map-Ansicht
+TASK_079 – FOB: Fireteam-Management, Respawn-/Loadout-Staging und Dropship-Wartezone
+TASK_080 – Meta-Layer: Transfer-Sichtbarkeit, Pool-DnD und Charakterbogen-Toggle
+TASK_081 – Meta-Layer: UI-Harmonisierung fuer FOB, Homebase und Loadout
 Phase 16 – Erweiterung (spaeter)
 Skillsystem
 soziale Dynamik
@@ -210,6 +218,15 @@ Batch 2
 TASK_020–023
 Batch 3
 TASK_024–027
+
+Batch 4
+TASK_074–077
+
+Batch 5
+TASK_078–079
+
+Batch 6
+TASK_080–081
 
 Nach jedem Batch:
 

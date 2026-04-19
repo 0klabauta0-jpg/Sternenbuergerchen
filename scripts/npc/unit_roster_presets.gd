@@ -2,6 +2,7 @@ class_name UnitRosterPresets
 extends RefCounted
 
 const HOMEBASE_TEAM_CAPACITY: int = 3
+const UNIT_PROFILE_MATH_SCRIPT: GDScript = preload("res://scripts/npc/unit_profile_math.gd")
 
 const FRIENDLY_ROSTER: Array = [
 	{
@@ -232,25 +233,6 @@ const FRIENDLY_ROSTER: Array = [
 		"skill_toughness": 0.5,
 		"trait_ids": ["reckless", "steady"],
 	},
-	{
-		"unit_id": "unit_mike",
-		"display_name": "Sora Bell",
-		"portrait_path": "res://Assets/Char/Use AI Image Apr 5, 2026, 23_15_16.png",
-		"callsign": "MIRROR",
-		"role_name": "Counterintel Operative",
-		"specialty_text": "Civil blending and false-profile reads",
-		"homeworld": "Lowglass",
-		"age_years": 28,
-		"biography_text": "Not the loudest operator, but the one most likely to notice when a room starts performing innocence.",
-		"loadout_summary": "Concealed pistol, disguise kit, passive scanner",
-		"team_id": "team_alpha",
-		"fireteam_id": "gold",
-		"skill_accuracy": 0.5,
-		"skill_speed": 0.5,
-		"skill_leadership": 0.4,
-		"skill_toughness": 0.4,
-		"trait_ids": ["cautious", "steady"],
-	},
 ]
 
 const ENEMY_DEFAULT_PRESET: Dictionary = {
@@ -264,7 +246,10 @@ const ENEMY_DEFAULT_PRESET: Dictionary = {
 
 
 static func get_homebase_roster() -> Array:
-	return FRIENDLY_ROSTER.duplicate(true)
+	var roster: Array = []
+	for unit_data in FRIENDLY_ROSTER:
+		roster.append(_with_extended_identity(unit_data))
+	return roster
 
 
 static func get_homebase_team_capacity() -> int:
@@ -278,15 +263,16 @@ static func get_default_homebase_selection() -> PackedStringArray:
 static func get_preset(unit_id: String, team_id: String = "") -> Dictionary:
 	for unit_data in FRIENDLY_ROSTER:
 		if String(unit_data.get("unit_id", "")) == unit_id:
-			return unit_data.duplicate(true)
+			return _with_extended_identity(unit_data)
 
 	if team_id == "team_bravo":
 		var enemy_preset: Dictionary = ENEMY_DEFAULT_PRESET.duplicate(true)
 		enemy_preset["unit_id"] = unit_id
 		enemy_preset["display_name"] = _build_display_name(unit_id)
-		return enemy_preset
+		return _with_extended_identity(enemy_preset)
 
-	return {
+	return _with_extended_identity(
+		{
 		"unit_id": unit_id,
 		"display_name": _build_display_name(unit_id),
 		"portrait_path": "",
@@ -304,7 +290,25 @@ static func get_preset(unit_id: String, team_id: String = "") -> Dictionary:
 		"skill_leadership": 0.3,
 		"skill_toughness": 0.5,
 		"trait_ids": [],
-	}
+		}
+	)
+
+
+static func _with_extended_identity(unit_data: Dictionary) -> Dictionary:
+	var enriched: Dictionary = unit_data.duplicate(true)
+	if not enriched.has("role_id"):
+		enriched["role_id"] = UNIT_PROFILE_MATH_SCRIPT.normalize_role_id(String(enriched.get("role_name", "security_guard")))
+	if not enriched.has("short_description"):
+		var biography_text: String = String(enriched.get("biography_text", "")).strip_edges()
+		if not biography_text.is_empty():
+			var parts: PackedStringArray = biography_text.split(".", false)
+			if not parts.is_empty():
+				enriched["short_description"] = "%s." % String(parts[0]).strip_edges()
+	if not enriched.has("callsign"):
+		enriched["callsign"] = ""
+	if not enriched.has("portrait_path"):
+		enriched["portrait_path"] = ""
+	return enriched
 
 
 static func _build_display_name(unit_id: String) -> String:

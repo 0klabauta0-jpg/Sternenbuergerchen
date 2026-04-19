@@ -1,42 +1,133 @@
 extends Node
 
 const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
+const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
 const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
-const FRIENDLY_NODE_NAMES: PackedStringArray = ["UnitAlpha", "UnitBravo", "UnitCharlie"]
+const FRIENDLY_NODE_NAMES: PackedStringArray = ["UnitAlpha", "UnitBravo", "UnitCharlie", "UnitDelta", "UnitEcho", "UnitFoxtrot", "UnitGolf", "UnitHotel"]
+const DEFAULT_META_MAP_PATH: String = "res://maps/test_mission_32x32_slots8.json"
+const HOMEBASE_MISSION_CATALOG: Array = [
+	{
+		"mission_id": "fob_transfer",
+		"mission_name": "Operation: FOB Transfer",
+		"map_file_path": "res://maps/test_mission_32x32_slots8.json",
+		"slot_count": 8,
+	},
+	{
+		"mission_id": "grid_sweep",
+		"mission_name": "Operation: Grid Sweep",
+		"map_file_path": "res://maps/test_mission_32x32_slots8.json",
+		"slot_count": 3,
+	},
+	{
+		"mission_id": "frontier_probe",
+		"mission_name": "Operation: Frontier Probe",
+		"map_file_path": "res://maps/new_map.json",
+		"slot_count": 3,
+	},
+	{
+		"mission_id": "wall_breach",
+		"mission_name": "Operation: Wall Breach",
+		"map_file_path": "res://maps/wall_test_4x4.json",
+		"slot_count": 3,
+	},
+]
+const HOMEBASE_AIRCRAFT_BASE_DEFINITIONS: Dictionary = {
+	"dropship": {
+		"craft_type": "dropship",
+		"display_name": "Dropship",
+		"summary": "Single-pilot shuttle for the FOB corridor.",
+		"texture_path": "res://Assets/kenney_space-kit/Side/craft_speederB.png",
+		"supports_cargo": false,
+		"cargo_options": [],
+	},
+	"craft_cargoB": {
+		"craft_type": "craft_cargoB",
+		"display_name": "Frachter",
+		"summary": "Cargo freighter for Rover-sized payloads.",
+		"texture_path": "res://Assets/kenney_space-kit/Side/craft_cargoB.png",
+		"supports_cargo": true,
+		"cargo_options": [
+			{"cargo_id": "", "display_name": "No Cargo"},
+			{"cargo_id": "rover", "display_name": "Rover"},
+		],
+	}
+}
+const HOMEBASE_TEAM_TRANSFER_DURATION_SECONDS: float = 14.0
+const HOMEBASE_PILOT_TRANSFER_DURATION_SECONDS: float = 10.0
+const HOMEBASE_CARGO_LOAD_DURATION_SECONDS: float = 9.0
 
 var _available_team_units: Array = UNIT_ROSTER_PRESETS_SCRIPT.get_homebase_roster()
-var _selected_unit_ids: PackedStringArray = UNIT_ROSTER_PRESETS_SCRIPT.get_default_homebase_selection()
+var _all_team_units: Array = UNIT_ROSTER_PRESETS_SCRIPT.get_homebase_roster()
+var _selected_unit_ids: PackedStringArray = []
+var _homebase_staged_unit_ids: PackedStringArray = UNIT_ROSTER_PRESETS_SCRIPT.get_default_homebase_selection()
+var _selected_fireteam_ids: PackedStringArray = []
 var _active_mission = null
 var _last_mission_result: Dictionary = {}
+var _current_meta_view: String = "homebase"
+var _mission_catalog: Array = HOMEBASE_MISSION_CATALOG.duplicate(true)
+var _selected_mission_id: String = "fob_transfer"
+var _selected_mission_map_path: String = DEFAULT_META_MAP_PATH
+var _homebase_aircraft_definitions: Array = []
+var _assigned_aircraft_pilot_by_craft: Dictionary = {}
+var _aircraft_location_by_craft: Dictionary = {}
+var _selected_aircraft_cargo_by_craft: Dictionary = {}
+var _loaded_aircraft_cargo_by_craft: Dictionary = {}
+var _pending_homebase_team_transfers: Array = []
+var _pending_homebase_pilot_transfers: Array = []
+var _pending_homebase_cargo_loads: Array = []
+var _transfer_sequence: int = 0
 
 
 func _ready() -> void:
 	var homebase_screen = _get_homebase_screen()
 	var fob_screen = _get_fob_screen()
+	var map_screen = _get_map_screen()
 	var debrief_screen = _get_debrief_screen()
-	if homebase_screen == null or fob_screen == null or debrief_screen == null:
-		push_warning("MetaLayerFlow requires HomebaseScreen, FOBScreen and DebriefScreen children.")
+	if homebase_screen == null or fob_screen == null or map_screen == null or debrief_screen == null:
+		push_warning("MetaLayerFlow requires HomebaseScreen, FOBScreen, MapScreen and DebriefScreen children.")
 		return
 
+	META_UI_SKIN_SCRIPT.apply_meta_navigation(self)
+	_connect_navigation_buttons()
+	_ensure_homebase_aircraft_locations()
+
+	if not homebase_screen.selection_changed.is_connected(_on_homebase_selection_changed):
+		homebase_screen.selection_changed.connect(_on_homebase_selection_changed)
 	if not homebase_screen.team_confirmed.is_connected(_on_homebase_team_confirmed):
 		homebase_screen.team_confirmed.connect(_on_homebase_team_confirmed)
-
-	if not fob_screen.back_requested.is_connected(_on_fob_back_requested):
-		fob_screen.back_requested.connect(_on_fob_back_requested)
-
+	if not homebase_screen.mission_selection_changed.is_connected(_on_homebase_mission_selection_changed):
+		homebase_screen.mission_selection_changed.connect(_on_homebase_mission_selection_changed)
+	if not homebase_screen.aircraft_add_requested.is_connected(_on_homebase_aircraft_add_requested):
+		homebase_screen.aircraft_add_requested.connect(_on_homebase_aircraft_add_requested)
+	if not homebase_screen.aircraft_remove_requested.is_connected(_on_homebase_aircraft_remove_requested):
+		homebase_screen.aircraft_remove_requested.connect(_on_homebase_aircraft_remove_requested)
+	if not homebase_screen.aircraft_pilot_assigned.is_connected(_on_homebase_aircraft_pilot_assigned):
+		homebase_screen.aircraft_pilot_assigned.connect(_on_homebase_aircraft_pilot_assigned)
+	if not homebase_screen.aircraft_pilot_cleared.is_connected(_on_homebase_aircraft_pilot_cleared):
+		homebase_screen.aircraft_pilot_cleared.connect(_on_homebase_aircraft_pilot_cleared)
+	if not homebase_screen.aircraft_pilot_transfer_requested.is_connected(_on_homebase_aircraft_pilot_transfer_requested):
+		homebase_screen.aircraft_pilot_transfer_requested.connect(_on_homebase_aircraft_pilot_transfer_requested)
+	if not homebase_screen.aircraft_cargo_selected.is_connected(_on_homebase_aircraft_cargo_selected):
+		homebase_screen.aircraft_cargo_selected.connect(_on_homebase_aircraft_cargo_selected)
+	if not homebase_screen.aircraft_cargo_load_requested.is_connected(_on_homebase_aircraft_cargo_load_requested):
+		homebase_screen.aircraft_cargo_load_requested.connect(_on_homebase_aircraft_cargo_load_requested)
 	if not fob_screen.mission_start_requested.is_connected(_on_fob_mission_start_requested):
 		fob_screen.mission_start_requested.connect(_on_fob_mission_start_requested)
-
 	if not debrief_screen.return_to_fob_requested.is_connected(_on_debrief_return_to_fob_requested):
 		debrief_screen.return_to_fob_requested.connect(_on_debrief_return_to_fob_requested)
-
 	if not debrief_screen.return_to_homebase_requested.is_connected(_on_debrief_return_to_homebase_requested):
 		debrief_screen.return_to_homebase_requested.connect(_on_debrief_return_to_homebase_requested)
 
-	homebase_screen.setup_roster(_available_team_units, _selected_unit_ids)
-	fob_screen.set_available_units(_available_team_units)
-	fob_screen.set_team(_selected_unit_ids)
+	var transport_timer := _get_transport_timer()
+	if transport_timer != null and not transport_timer.timeout.is_connected(_on_homebase_transport_timer_timeout):
+		transport_timer.timeout.connect(_on_homebase_transport_timer_timeout)
+
+	_selected_fireteam_ids = _build_unassigned_fireteam_selection(_selected_unit_ids)
+	_refresh_homebase_screen()
+	_refresh_fob_screen()
 	fob_screen.set_last_mission_result(_last_mission_result)
+	_refresh_map_screen()
+	_ensure_transport_timer_state()
 	_show_homebase()
 
 
@@ -48,19 +139,208 @@ func get_active_mission():
 	return _active_mission
 
 
-func _on_homebase_team_confirmed(selected_unit_ids: PackedStringArray) -> void:
-	_selected_unit_ids = selected_unit_ids.duplicate()
-	_get_fob_screen().set_available_units(_available_team_units)
-	_get_fob_screen().set_team(_selected_unit_ids)
-	_show_fob()
+func _connect_navigation_buttons() -> void:
+	for path in [
+		"HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/HomebaseNavButton",
+		"FOBScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/HomebaseNavButton",
+		"MapScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/HomebaseNavButton",
+	]:
+		var homebase_button := get_node_or_null(path) as Button
+		if homebase_button != null and not homebase_button.pressed.is_connected(_on_homebase_nav_pressed):
+			homebase_button.pressed.connect(_on_homebase_nav_pressed)
+
+	for path in [
+		"HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/FOBNavButton",
+		"FOBScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/FOBNavButton",
+		"MapScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/FOBNavButton",
+	]:
+		var fob_button := get_node_or_null(path) as Button
+		if fob_button != null and not fob_button.pressed.is_connected(_on_fob_nav_pressed):
+			fob_button.pressed.connect(_on_fob_nav_pressed)
+
+	for path in [
+		"HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/MissionNavButton",
+		"FOBScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/MissionNavButton",
+		"MapScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/MissionNavButton",
+	]:
+		var mission_button := get_node_or_null(path) as Button
+		if mission_button != null and not mission_button.pressed.is_connected(_on_map_nav_pressed):
+			mission_button.pressed.connect(_on_map_nav_pressed)
 
 
-func _on_fob_back_requested() -> void:
+func _on_homebase_nav_pressed() -> void:
 	_show_homebase()
 
 
-func _on_fob_mission_start_requested(selected_unit_ids: PackedStringArray) -> void:
+func _on_fob_nav_pressed() -> void:
+	_show_fob()
+
+
+func _on_map_nav_pressed() -> void:
+	_show_map()
+
+
+func _on_homebase_selection_changed(selected_unit_ids: PackedStringArray) -> void:
+	_homebase_staged_unit_ids = _sanitize_homebase_selection(selected_unit_ids)
+
+
+func _on_homebase_mission_selection_changed(mission_id: String) -> void:
+	var normalized_mission_id: String = mission_id.strip_edges()
+	if normalized_mission_id.is_empty() or not _is_known_mission_id(normalized_mission_id):
+		return
+	if normalized_mission_id == _selected_mission_id:
+		return
+	_selected_mission_id = normalized_mission_id
+	var mission_definition: Dictionary = _get_selected_mission_definition()
+	_selected_mission_map_path = String(mission_definition.get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges()
+	_refresh_homebase_screen()
+	_refresh_fob_screen()
+	_refresh_map_screen()
+
+
+func _on_homebase_team_confirmed(selected_unit_ids: PackedStringArray) -> void:
+	var transferred_unit_ids: PackedStringArray = _filter_available_homebase_unit_ids(selected_unit_ids)
+	if transferred_unit_ids.is_empty():
+		return
+
+	_pending_homebase_team_transfers.append(_build_homebase_team_transfer_entry(transferred_unit_ids))
+	_available_team_units = _remove_units_by_id(_available_team_units, transferred_unit_ids)
+	_homebase_staged_unit_ids = PackedStringArray()
+	_refresh_homebase_screen()
+	_refresh_map_screen()
+	_ensure_transport_timer_state()
+
+
+func _on_homebase_aircraft_add_requested(base_craft_type: String) -> void:
+	var normalized_craft_type: String = base_craft_type.strip_edges()
+	if normalized_craft_type.is_empty():
+		normalized_craft_type = "dropship"
+	var aircraft_definition := _build_homebase_aircraft_definition(normalized_craft_type, _get_next_homebase_aircraft_index(normalized_craft_type))
+	_homebase_aircraft_definitions.append(aircraft_definition)
+	_aircraft_location_by_craft[String(aircraft_definition.get("craft_id", "")).strip_edges()] = "homebase"
+	_refresh_homebase_screen()
+
+
+func _on_homebase_aircraft_remove_requested(craft_id: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return
+	if _assigned_aircraft_pilot_by_craft.has(normalized_craft_id):
+		return
+	if _has_active_homebase_pilot_transfer(normalized_craft_id):
+		return
+	if _has_active_homebase_cargo_load(normalized_craft_id):
+		return
+	if _loaded_aircraft_cargo_by_craft.has(normalized_craft_id):
+		return
+
+	var remaining_aircraft: Array = []
+	for craft_variant in _homebase_aircraft_definitions:
+		var craft_def: Dictionary = Dictionary(craft_variant)
+		if String(craft_def.get("craft_id", "")).strip_edges() == normalized_craft_id:
+			continue
+		remaining_aircraft.append(craft_def)
+	_homebase_aircraft_definitions = remaining_aircraft
+	_aircraft_location_by_craft.erase(normalized_craft_id)
+	_selected_aircraft_cargo_by_craft.erase(normalized_craft_id)
+	_loaded_aircraft_cargo_by_craft.erase(normalized_craft_id)
+	_refresh_homebase_screen()
+
+
+func _on_homebase_aircraft_pilot_assigned(craft_id: String, pilot_unit_id: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	var normalized_pilot_id: String = pilot_unit_id.strip_edges()
+	if normalized_craft_id.is_empty() or normalized_pilot_id.is_empty():
+		return
+	if not _is_unit_available_in_homebase(normalized_pilot_id):
+		return
+
+	for assigned_craft_id_variant in _assigned_aircraft_pilot_by_craft.keys():
+		var assigned_craft_id: String = String(assigned_craft_id_variant).strip_edges()
+		if String(_assigned_aircraft_pilot_by_craft.get(assigned_craft_id, "")).strip_edges() != normalized_pilot_id:
+			continue
+		_assigned_aircraft_pilot_by_craft.erase(assigned_craft_id)
+
+	_assigned_aircraft_pilot_by_craft[normalized_craft_id] = normalized_pilot_id
+	_homebase_staged_unit_ids = _remove_unit_ids_from_list(_homebase_staged_unit_ids, PackedStringArray([normalized_pilot_id]))
+	_refresh_homebase_screen()
+
+
+func _on_homebase_aircraft_pilot_cleared(craft_id: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return
+	_assigned_aircraft_pilot_by_craft.erase(normalized_craft_id)
+	_refresh_homebase_screen()
+
+
+func _on_homebase_aircraft_cargo_selected(craft_id: String, cargo_id: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	var normalized_cargo_id: String = cargo_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return
+	var craft_def: Dictionary = _find_homebase_aircraft_definition(normalized_craft_id)
+	if craft_def.is_empty() or not bool(craft_def.get("supports_cargo", false)):
+		return
+	if _has_active_homebase_cargo_load(normalized_craft_id) or _loaded_aircraft_cargo_by_craft.has(normalized_craft_id):
+		return
+	if normalized_cargo_id.is_empty():
+		_selected_aircraft_cargo_by_craft.erase(normalized_craft_id)
+	else:
+		_selected_aircraft_cargo_by_craft[normalized_craft_id] = normalized_cargo_id
+	_refresh_homebase_screen()
+
+
+func _on_homebase_aircraft_cargo_load_requested(craft_id: String, cargo_id: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	var normalized_cargo_id: String = cargo_id.strip_edges()
+	if normalized_craft_id.is_empty() or normalized_cargo_id.is_empty():
+		return
+	var craft_def: Dictionary = _find_homebase_aircraft_definition(normalized_craft_id)
+	if craft_def.is_empty() or not bool(craft_def.get("supports_cargo", false)):
+		return
+	if not _craft_supports_cargo_id(craft_def, normalized_cargo_id):
+		return
+	if _has_active_homebase_cargo_load(normalized_craft_id) or _has_active_homebase_pilot_transfer(normalized_craft_id):
+		return
+	if _loaded_aircraft_cargo_by_craft.has(normalized_craft_id):
+		return
+	_selected_aircraft_cargo_by_craft[normalized_craft_id] = normalized_cargo_id
+	_pending_homebase_cargo_loads.append(_build_homebase_cargo_load_entry(normalized_craft_id, normalized_cargo_id))
+	_refresh_homebase_screen()
+	_ensure_transport_timer_state()
+
+
+func _on_homebase_aircraft_pilot_transfer_requested(craft_id: String, pilot_unit_id: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	var normalized_pilot_id: String = pilot_unit_id.strip_edges()
+	if normalized_craft_id.is_empty() or normalized_pilot_id.is_empty():
+		return
+	if String(_assigned_aircraft_pilot_by_craft.get(normalized_craft_id, "")).strip_edges() != normalized_pilot_id:
+		return
+	if not _is_unit_available_in_homebase(normalized_pilot_id):
+		return
+	if _has_active_homebase_pilot_transfer(normalized_craft_id):
+		return
+	if _has_active_homebase_cargo_load(normalized_craft_id):
+		return
+	var selected_cargo_id: String = String(_selected_aircraft_cargo_by_craft.get(normalized_craft_id, "")).strip_edges()
+	var loaded_cargo_id: String = String(_loaded_aircraft_cargo_by_craft.get(normalized_craft_id, "")).strip_edges()
+	if not selected_cargo_id.is_empty() and loaded_cargo_id.is_empty():
+		return
+
+	_aircraft_location_by_craft[normalized_craft_id] = "transit"
+	_available_team_units = _remove_units_by_id(_available_team_units, PackedStringArray([normalized_pilot_id]))
+	_pending_homebase_pilot_transfers.append(_build_homebase_pilot_transfer_entry(normalized_craft_id, normalized_pilot_id, loaded_cargo_id))
+	_refresh_homebase_screen()
+	_refresh_fob_screen()
+	_refresh_map_screen()
+	_ensure_transport_timer_state()
+
+
+func _on_fob_mission_start_requested(selected_unit_ids: PackedStringArray, selected_fireteam_ids: PackedStringArray) -> void:
 	_selected_unit_ids = selected_unit_ids.duplicate()
+	_selected_fireteam_ids = selected_fireteam_ids.duplicate()
 	_start_mission()
 
 
@@ -83,20 +363,22 @@ func _start_mission() -> void:
 		_active_mission = null
 
 	var mission_instance = MISSION_TEST_SCENE.instantiate()
-	_configure_mission_instance(mission_instance, _selected_unit_ids)
+	_configure_mission_instance(mission_instance, _selected_unit_ids, _selected_fireteam_ids)
 	mission_host.add_child(mission_instance)
 	_active_mission = mission_instance
 	_connect_mission_end(_active_mission)
 	_show_mission()
 
 
-func _configure_mission_instance(mission_instance: Node, selected_unit_ids: PackedStringArray) -> void:
+func _configure_mission_instance(mission_instance: Node, selected_unit_ids: PackedStringArray, selected_fireteam_ids: PackedStringArray) -> void:
 	if selected_unit_ids.is_empty():
 		return
 
 	var mission_setup = mission_instance.get_node_or_null("MissionSetup")
 	if mission_setup != null:
 		mission_setup.set("selected_team_unit_ids", selected_unit_ids)
+		mission_setup.set("selected_team_fireteam_ids", selected_fireteam_ids)
+		mission_setup.set("map_file_path", String(_get_selected_mission_definition().get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges())
 
 	var command_flow_driver = mission_instance.get_node_or_null("CommandFlowDriver")
 	if command_flow_driver != null:
@@ -133,6 +415,7 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 		debrief_screen.set_mission_result(_last_mission_result)
 
 	_release_active_mission()
+	_refresh_map_screen()
 	_show_debrief()
 
 
@@ -163,6 +446,7 @@ func _build_mission_result(mission_instance: Node, mission_result: Dictionary) -
 			{
 				"unit_id": resolved_unit_id,
 				"display_name": String(unit.get("display_name")),
+				"fireteam_id": String(unit.get("fireteam_id")),
 				"vital_state": vital_state,
 				"health_points": health_points,
 			}
@@ -180,6 +464,7 @@ func _build_mission_result(mission_instance: Node, mission_result: Dictionary) -
 		}
 
 	merged_result["selected_unit_ids"] = _selected_unit_ids.duplicate()
+	merged_result["selected_fireteam_ids"] = _selected_fireteam_ids.duplicate()
 	merged_result["team_states"] = team_states
 	return merged_result
 
@@ -192,6 +477,394 @@ func _release_active_mission() -> void:
 	_active_mission = null
 
 
+func _on_homebase_transport_timer_timeout() -> void:
+	var completed_team_transfers: Array = []
+	var active_team_transfers: Array = []
+	for entry_variant in _pending_homebase_team_transfers:
+		var entry: Dictionary = Dictionary(entry_variant).duplicate(true)
+		entry["elapsed_seconds"] = min(float(entry.get("elapsed_seconds", 0.0)) + 1.0, float(entry.get("duration_seconds", HOMEBASE_TEAM_TRANSFER_DURATION_SECONDS)))
+		if float(entry.get("elapsed_seconds", 0.0)) >= float(entry.get("duration_seconds", HOMEBASE_TEAM_TRANSFER_DURATION_SECONDS)):
+			completed_team_transfers.append(entry)
+		else:
+			active_team_transfers.append(entry)
+	_pending_homebase_team_transfers = active_team_transfers
+
+	var completed_pilot_transfers: Array = []
+	var active_pilot_transfers: Array = []
+	for entry_variant in _pending_homebase_pilot_transfers:
+		var entry: Dictionary = Dictionary(entry_variant).duplicate(true)
+		entry["elapsed_seconds"] = min(float(entry.get("elapsed_seconds", 0.0)) + 1.0, float(entry.get("duration_seconds", HOMEBASE_PILOT_TRANSFER_DURATION_SECONDS)))
+		if float(entry.get("elapsed_seconds", 0.0)) >= float(entry.get("duration_seconds", HOMEBASE_PILOT_TRANSFER_DURATION_SECONDS)):
+			completed_pilot_transfers.append(entry)
+		else:
+			active_pilot_transfers.append(entry)
+	_pending_homebase_pilot_transfers = active_pilot_transfers
+
+	var completed_cargo_loads: Array = []
+	var active_cargo_loads: Array = []
+	for entry_variant in _pending_homebase_cargo_loads:
+		var entry: Dictionary = Dictionary(entry_variant).duplicate(true)
+		entry["elapsed_seconds"] = min(float(entry.get("elapsed_seconds", 0.0)) + 1.0, float(entry.get("duration_seconds", HOMEBASE_CARGO_LOAD_DURATION_SECONDS)))
+		if float(entry.get("elapsed_seconds", 0.0)) >= float(entry.get("duration_seconds", HOMEBASE_CARGO_LOAD_DURATION_SECONDS)):
+			completed_cargo_loads.append(entry)
+		else:
+			active_cargo_loads.append(entry)
+	_pending_homebase_cargo_loads = active_cargo_loads
+
+	var fob_changed: bool = false
+	for entry_variant in completed_team_transfers:
+		_complete_homebase_team_transfer(Dictionary(entry_variant))
+		fob_changed = true
+	for entry_variant in completed_cargo_loads:
+		_complete_homebase_cargo_load(Dictionary(entry_variant))
+	for entry_variant in completed_pilot_transfers:
+		_complete_homebase_pilot_transfer(Dictionary(entry_variant))
+		fob_changed = true
+
+	_refresh_homebase_screen()
+	if fob_changed:
+		_refresh_fob_screen()
+		_refresh_map_screen()
+	_ensure_transport_timer_state()
+
+
+func _complete_homebase_team_transfer(entry: Dictionary) -> void:
+	for unit_id_variant in entry.get("unit_ids", []):
+		_append_unit_to_fob(String(unit_id_variant).strip_edges())
+
+
+func _complete_homebase_pilot_transfer(entry: Dictionary) -> void:
+	var craft_id: String = String(entry.get("craft_id", "")).strip_edges()
+	var pilot_unit_id: String = String(entry.get("pilot_unit_id", "")).strip_edges()
+	if not craft_id.is_empty():
+		_aircraft_location_by_craft[craft_id] = "fob"
+	_selected_unit_ids = _remove_unit_ids_from_list(_selected_unit_ids, PackedStringArray([pilot_unit_id]))
+	_selected_fireteam_ids = _build_unassigned_fireteam_selection(_selected_unit_ids)
+
+
+func _complete_homebase_cargo_load(entry: Dictionary) -> void:
+	var craft_id: String = String(entry.get("craft_id", "")).strip_edges()
+	var cargo_id: String = String(entry.get("cargo_id", "")).strip_edges()
+	if craft_id.is_empty() or cargo_id.is_empty():
+		return
+	_loaded_aircraft_cargo_by_craft[craft_id] = cargo_id
+	_selected_aircraft_cargo_by_craft[craft_id] = cargo_id
+
+
+func _append_unit_to_fob(unit_id: String) -> void:
+	if unit_id.is_empty() or _selected_unit_ids.has(unit_id):
+		return
+	_selected_unit_ids.append(unit_id)
+	_selected_fireteam_ids.append("")
+
+
+func _refresh_homebase_screen() -> void:
+	var homebase_screen = _get_homebase_screen()
+	if homebase_screen == null:
+		return
+	homebase_screen.setup_roster(_available_team_units, _homebase_staged_unit_ids)
+	var selected_mission: Dictionary = _get_selected_mission_definition()
+	homebase_screen.set_mission_context(
+		_mission_catalog,
+		String(selected_mission.get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges(),
+		String(selected_mission.get("mission_name", "Operation: FOB Transfer")).strip_edges(),
+		int(selected_mission.get("slot_count", FRIENDLY_NODE_NAMES.size())),
+		String(selected_mission.get("mission_id", _selected_mission_id)).strip_edges()
+	)
+	homebase_screen.set_transport_state(
+		_homebase_aircraft_definitions,
+		_assigned_aircraft_pilot_by_craft,
+		_pending_homebase_team_transfers,
+		_pending_homebase_pilot_transfers,
+		_aircraft_location_by_craft,
+		_selected_aircraft_cargo_by_craft,
+		_loaded_aircraft_cargo_by_craft,
+		_pending_homebase_cargo_loads
+	)
+
+
+func _refresh_fob_screen() -> void:
+	var fob_screen = _get_fob_screen()
+	if fob_screen == null:
+		return
+	var selected_mission: Dictionary = _get_selected_mission_definition()
+	var fireteam_definitions: Array = fob_screen.get_fireteam_definitions()
+	var transport_craft_states: Array = _build_transport_craft_states()
+	fob_screen.set_available_units(_build_fob_profile_unit_subset(transport_craft_states))
+	fob_screen.set_transport_craft_state(transport_craft_states)
+	fob_screen.set_mission_context(
+		String(selected_mission.get("mission_name", "Operation: FOB Transfer")).strip_edges(),
+		String(selected_mission.get("map_file_path", DEFAULT_META_MAP_PATH)).get_file().get_basename(),
+		int(selected_mission.get("slot_count", FRIENDLY_NODE_NAMES.size()))
+	)
+	fob_screen.configure_transfer(_selected_unit_ids, _selected_fireteam_ids, fireteam_definitions)
+
+
+func _ensure_transport_timer_state() -> void:
+	var transport_timer := _get_transport_timer()
+	if transport_timer == null:
+		return
+	var has_pending_transfers: bool = not _pending_homebase_team_transfers.is_empty() or not _pending_homebase_pilot_transfers.is_empty() or not _pending_homebase_cargo_loads.is_empty()
+	transport_timer.wait_time = 1.0
+	transport_timer.one_shot = false
+	if has_pending_transfers:
+		if transport_timer.is_stopped():
+			transport_timer.start()
+	else:
+		transport_timer.stop()
+
+
+func _build_homebase_team_transfer_entry(unit_ids: PackedStringArray) -> Dictionary:
+	_transfer_sequence += 1
+	return {
+		"transfer_id": "team_%d" % _transfer_sequence,
+		"unit_ids": unit_ids.duplicate(),
+		"elapsed_seconds": 0.0,
+		"duration_seconds": HOMEBASE_TEAM_TRANSFER_DURATION_SECONDS,
+	}
+
+
+func _build_homebase_pilot_transfer_entry(craft_id: String, pilot_unit_id: String, cargo_id: String = "") -> Dictionary:
+	_transfer_sequence += 1
+	return {
+		"transfer_id": "pilot_%d" % _transfer_sequence,
+		"craft_id": craft_id,
+		"pilot_unit_id": pilot_unit_id,
+		"cargo_id": cargo_id,
+		"elapsed_seconds": 0.0,
+		"duration_seconds": HOMEBASE_PILOT_TRANSFER_DURATION_SECONDS,
+	}
+
+
+func _build_homebase_cargo_load_entry(craft_id: String, cargo_id: String) -> Dictionary:
+	_transfer_sequence += 1
+	return {
+		"transfer_id": "cargo_%d" % _transfer_sequence,
+		"entry_type": "cargo_load",
+		"craft_id": craft_id,
+		"cargo_id": cargo_id,
+		"elapsed_seconds": 0.0,
+		"duration_seconds": HOMEBASE_CARGO_LOAD_DURATION_SECONDS,
+	}
+
+
+func _build_homebase_aircraft_definition(craft_type: String, craft_index: int) -> Dictionary:
+	var base_definition: Dictionary = _get_homebase_aircraft_base_definition(craft_type)
+	return {
+		"craft_id": "%s_%d" % [craft_type, craft_index],
+		"craft_type": craft_type,
+		"display_name": "%s %d" % [String(base_definition.get("display_name", craft_type)), craft_index],
+		"summary": String(base_definition.get("summary", "")),
+		"texture_path": String(base_definition.get("texture_path", "")),
+		"supports_cargo": bool(base_definition.get("supports_cargo", false)),
+		"cargo_options": Array(base_definition.get("cargo_options", [])).duplicate(true),
+	}
+
+
+func _ensure_homebase_aircraft_locations() -> void:
+	var visible_craft_ids: Dictionary = {}
+	for craft_variant in _homebase_aircraft_definitions:
+		var craft_def: Dictionary = Dictionary(craft_variant)
+		var craft_id: String = String(craft_def.get("craft_id", "")).strip_edges()
+		if craft_id.is_empty():
+			continue
+		visible_craft_ids[craft_id] = true
+		if String(_aircraft_location_by_craft.get(craft_id, "")).strip_edges().is_empty():
+			_aircraft_location_by_craft[craft_id] = "homebase"
+
+	for craft_id_variant in _aircraft_location_by_craft.keys():
+		var craft_id: String = String(craft_id_variant).strip_edges()
+		if visible_craft_ids.has(craft_id):
+			continue
+		_aircraft_location_by_craft.erase(craft_id)
+
+
+func _get_homebase_aircraft_base_definition(craft_type: String) -> Dictionary:
+	if HOMEBASE_AIRCRAFT_BASE_DEFINITIONS.has(craft_type):
+		return Dictionary(HOMEBASE_AIRCRAFT_BASE_DEFINITIONS.get(craft_type, {})).duplicate(true)
+	return Dictionary(HOMEBASE_AIRCRAFT_BASE_DEFINITIONS.get("dropship", {})).duplicate(true)
+
+
+func _get_next_homebase_aircraft_index(craft_type: String) -> int:
+	var next_index: int = 1
+	for craft_variant in _homebase_aircraft_definitions:
+		var craft_def: Dictionary = Dictionary(craft_variant)
+		if String(craft_def.get("craft_type", "")).strip_edges() != craft_type:
+			continue
+		next_index = maxi(next_index, int(String(craft_def.get("craft_id", "0")).split("_")[-1]) + 1)
+	return next_index
+
+
+func _find_homebase_aircraft_definition(craft_id: String) -> Dictionary:
+	for craft_variant in _homebase_aircraft_definitions:
+		var craft_def: Dictionary = Dictionary(craft_variant)
+		if String(craft_def.get("craft_id", "")).strip_edges() == craft_id:
+			return craft_def
+	return {}
+
+
+func _build_transport_craft_states() -> Array:
+	_ensure_homebase_aircraft_locations()
+	var craft_states: Array = []
+	for craft_variant in _homebase_aircraft_definitions:
+		var craft_def: Dictionary = Dictionary(craft_variant)
+		var craft_id: String = String(craft_def.get("craft_id", "")).strip_edges()
+		if craft_id.is_empty():
+			continue
+
+		var pilot_unit_id: String = String(_assigned_aircraft_pilot_by_craft.get(craft_id, "")).strip_edges()
+		var cargo_id: String = String(_loaded_aircraft_cargo_by_craft.get(craft_id, _selected_aircraft_cargo_by_craft.get(craft_id, ""))).strip_edges()
+		var pilot_transfer_entry: Dictionary = _find_pending_homebase_pilot_transfer(craft_id)
+		var craft_location: String = String(_aircraft_location_by_craft.get(craft_id, "homebase")).strip_edges().to_lower()
+		var is_in_transit: bool = not pilot_transfer_entry.is_empty() or craft_location == "transit"
+		if is_in_transit:
+			craft_location = "transit"
+		elif craft_location != "fob":
+			craft_location = "homebase"
+
+		var progress_value: float = 0.0
+		var eta_seconds: int = 0
+		if not pilot_transfer_entry.is_empty():
+			var duration_seconds: float = max(float(pilot_transfer_entry.get("duration_seconds", HOMEBASE_PILOT_TRANSFER_DURATION_SECONDS)), 1.0)
+			var elapsed_seconds: float = clamp(float(pilot_transfer_entry.get("elapsed_seconds", 0.0)), 0.0, duration_seconds)
+			progress_value = (elapsed_seconds / duration_seconds) * 100.0
+			eta_seconds = maxi(int(ceil(duration_seconds - elapsed_seconds)), 0)
+		elif craft_location == "fob":
+			progress_value = 100.0
+
+		craft_states.append(
+			{
+				"craft_id": craft_id,
+				"craft_type": String(craft_def.get("craft_type", "dropship")).strip_edges(),
+				"display_name": String(craft_def.get("display_name", craft_id)).strip_edges(),
+				"summary": String(craft_def.get("summary", "")).strip_edges(),
+				"texture_path": String(craft_def.get("texture_path", "")).strip_edges(),
+				"location": craft_location,
+				"visible_in_homebase": craft_location != "fob",
+				"visible_in_fob": craft_location != "homebase",
+				"is_in_transit": is_in_transit,
+				"pilot_unit_id": pilot_unit_id,
+				"pilot_display_name": _resolve_unit_display_name(pilot_unit_id),
+				"cargo_id": cargo_id,
+				"cargo_display_name": _build_homebase_cargo_display_name(craft_def, cargo_id),
+				"transfer_progress": progress_value,
+				"transfer_eta_seconds": eta_seconds,
+				"is_boardable": String(craft_def.get("craft_type", "dropship")).strip_edges() == "dropship" and craft_location == "fob",
+			}
+		)
+	return craft_states
+
+
+func _find_pending_homebase_pilot_transfer(craft_id: String) -> Dictionary:
+	for entry_variant in _pending_homebase_pilot_transfers:
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("craft_id", "")).strip_edges() == craft_id:
+			return entry.duplicate(true)
+	return {}
+
+
+func _resolve_unit_display_name(unit_id: String) -> String:
+	if unit_id.is_empty():
+		return "none"
+	for unit_variant in _all_team_units:
+		if typeof(unit_variant) != TYPE_DICTIONARY:
+			continue
+		var unit_data: Dictionary = unit_variant
+		if String(unit_data.get("unit_id", "")).strip_edges() != unit_id:
+			continue
+		return String(unit_data.get("display_name", unit_id)).strip_edges()
+	return unit_id
+
+
+func _build_homebase_cargo_display_name(craft_def: Dictionary, cargo_id: String) -> String:
+	var normalized_cargo_id: String = cargo_id.strip_edges()
+	if normalized_cargo_id.is_empty():
+		return ""
+	for cargo_variant in Array(craft_def.get("cargo_options", [])):
+		var cargo_option: Dictionary = Dictionary(cargo_variant)
+		if String(cargo_option.get("cargo_id", "")).strip_edges() != normalized_cargo_id:
+			continue
+		return String(cargo_option.get("display_name", normalized_cargo_id)).strip_edges()
+	return normalized_cargo_id.capitalize()
+
+
+func _has_active_homebase_cargo_load(craft_id: String) -> bool:
+	for entry_variant in _pending_homebase_cargo_loads:
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("craft_id", "")).strip_edges() == craft_id:
+			return true
+	return false
+
+
+func _craft_supports_cargo_id(craft_def: Dictionary, cargo_id: String) -> bool:
+	var normalized_cargo_id: String = cargo_id.strip_edges()
+	if normalized_cargo_id.is_empty():
+		return false
+	for cargo_variant in Array(craft_def.get("cargo_options", [])):
+		var cargo_option: Dictionary = Dictionary(cargo_variant)
+		if String(cargo_option.get("cargo_id", "")).strip_edges() == normalized_cargo_id:
+			return true
+	return false
+
+
+func _filter_available_homebase_unit_ids(unit_ids: PackedStringArray) -> PackedStringArray:
+	var available_lookup: Dictionary = {}
+	for unit_data in _available_team_units:
+		var unit_id: String = String(unit_data.get("unit_id", "")).strip_edges()
+		if unit_id.is_empty():
+			continue
+		available_lookup[unit_id] = true
+
+	var filtered_unit_ids: PackedStringArray = []
+	for unit_id_variant in unit_ids:
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty() or not available_lookup.has(unit_id) or filtered_unit_ids.has(unit_id):
+			continue
+		if _is_unit_assigned_to_aircraft(unit_id):
+			continue
+		filtered_unit_ids.append(unit_id)
+	return filtered_unit_ids
+
+
+func _sanitize_homebase_selection(unit_ids: PackedStringArray) -> PackedStringArray:
+	return _filter_available_homebase_unit_ids(unit_ids)
+
+
+func _remove_unit_ids_from_list(source_ids: PackedStringArray, removed_ids: PackedStringArray) -> PackedStringArray:
+	var filtered_ids: PackedStringArray = []
+	for unit_id_variant in source_ids:
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty() or removed_ids.has(unit_id):
+			continue
+		filtered_ids.append(unit_id)
+	return filtered_ids
+
+
+func _is_unit_available_in_homebase(unit_id: String) -> bool:
+	for unit_data in _available_team_units:
+		if String(unit_data.get("unit_id", "")).strip_edges() == unit_id:
+			return true
+	return false
+
+
+func _is_unit_assigned_to_aircraft(unit_id: String) -> bool:
+	for pilot_id_variant in _assigned_aircraft_pilot_by_craft.values():
+		if String(pilot_id_variant).strip_edges() == unit_id:
+			return true
+	return false
+
+
+func _has_active_homebase_pilot_transfer(craft_id: String) -> bool:
+	for entry_variant in _pending_homebase_pilot_transfers:
+		if String(Dictionary(entry_variant).get("craft_id", "")).strip_edges() == craft_id:
+			return true
+	return false
+
+
+func _get_transport_timer() -> Timer:
+	return get_node_or_null("TransportTimer") as Timer
+
+
 func _build_selected_friendly_paths(selected_unit_ids: PackedStringArray) -> Array[NodePath]:
 	var selected_paths: Array[NodePath] = []
 	var friendly_slot_count: int = mini(selected_unit_ids.size(), FRIENDLY_NODE_NAMES.size())
@@ -202,56 +875,161 @@ func _build_selected_friendly_paths(selected_unit_ids: PackedStringArray) -> Arr
 	return selected_paths
 
 
+func _build_fob_profile_unit_subset(transport_craft_states: Array) -> Array:
+	var profile_unit_ids: PackedStringArray = _selected_unit_ids.duplicate()
+	for craft_state_variant in transport_craft_states:
+		if typeof(craft_state_variant) != TYPE_DICTIONARY:
+			continue
+		var craft_state: Dictionary = craft_state_variant
+		if not bool(craft_state.get("visible_in_fob", false)):
+			continue
+		var pilot_unit_id: String = String(craft_state.get("pilot_unit_id", "")).strip_edges()
+		if pilot_unit_id.is_empty() or profile_unit_ids.has(pilot_unit_id):
+			continue
+		profile_unit_ids.append(pilot_unit_id)
+	return _build_unit_subset_by_ids(profile_unit_ids)
+
+
 func _show_homebase() -> void:
+	_current_meta_view = "homebase"
 	var homebase_screen = _get_homebase_screen()
 	var fob_screen = _get_fob_screen()
+	var map_screen = _get_map_screen()
 	var debrief_screen = _get_debrief_screen()
 	if homebase_screen != null:
 		homebase_screen.visible = true
-		homebase_screen.set_selected_unit_ids(_selected_unit_ids)
+		_refresh_homebase_screen()
 	if fob_screen != null:
 		fob_screen.visible = false
+	if map_screen != null:
+		map_screen.visible = false
 	if debrief_screen != null:
 		debrief_screen.visible = false
+	_set_navigation_visible(true)
+	_refresh_navigation_state()
 
 
 func _show_fob() -> void:
+	_current_meta_view = "fob"
 	var homebase_screen = _get_homebase_screen()
 	var fob_screen = _get_fob_screen()
+	var map_screen = _get_map_screen()
 	var debrief_screen = _get_debrief_screen()
 	if homebase_screen != null:
 		homebase_screen.visible = false
 	if fob_screen != null:
 		fob_screen.visible = true
-		fob_screen.set_available_units(_available_team_units)
-		fob_screen.set_team(_selected_unit_ids)
+		_refresh_fob_screen()
 		fob_screen.set_last_mission_result(_last_mission_result)
+	if map_screen != null:
+		map_screen.visible = false
 	if debrief_screen != null:
 		debrief_screen.visible = false
+	_set_navigation_visible(true)
+	_refresh_map_screen()
+	_refresh_navigation_state()
+
+
+func _show_map() -> void:
+	_current_meta_view = "map"
+	var homebase_screen = _get_homebase_screen()
+	var fob_screen = _get_fob_screen()
+	var map_screen = _get_map_screen()
+	var debrief_screen = _get_debrief_screen()
+	if homebase_screen != null:
+		homebase_screen.visible = false
+	if fob_screen != null:
+		fob_screen.visible = false
+	if map_screen != null:
+		map_screen.visible = true
+	if debrief_screen != null:
+		debrief_screen.visible = false
+	_set_navigation_visible(true)
+	_refresh_map_screen()
+	_refresh_navigation_state()
 
 
 func _show_mission() -> void:
 	var homebase_screen = _get_homebase_screen()
 	var fob_screen = _get_fob_screen()
+	var map_screen = _get_map_screen()
 	var debrief_screen = _get_debrief_screen()
 	if homebase_screen != null:
 		homebase_screen.visible = false
 	if fob_screen != null:
 		fob_screen.visible = false
+	if map_screen != null:
+		map_screen.visible = false
 	if debrief_screen != null:
 		debrief_screen.visible = false
+	_set_navigation_visible(false)
 
 
 func _show_debrief() -> void:
 	var homebase_screen = _get_homebase_screen()
 	var fob_screen = _get_fob_screen()
+	var map_screen = _get_map_screen()
 	var debrief_screen = _get_debrief_screen()
 	if homebase_screen != null:
 		homebase_screen.visible = false
 	if fob_screen != null:
 		fob_screen.visible = false
+	if map_screen != null:
+		map_screen.visible = false
 	if debrief_screen != null:
 		debrief_screen.visible = true
+	_set_navigation_visible(false)
+
+
+func _set_navigation_visible(is_visible: bool) -> void:
+	var homebase_nav_paths: PackedStringArray = [
+		"HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow",
+		"FOBScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow",
+		"MapScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow",
+	]
+	for path in homebase_nav_paths:
+		var nav_row := get_node_or_null(path) as Control
+		if nav_row != null:
+			nav_row.visible = is_visible
+
+
+func _refresh_navigation_state() -> void:
+	for pair in [
+		{"path": "HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/HomebaseNavButton", "view": "homebase"},
+		{"path": "HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/FOBNavButton", "view": "fob"},
+		{"path": "HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/MissionNavButton", "view": "map"},
+		{"path": "FOBScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/HomebaseNavButton", "view": "homebase"},
+		{"path": "FOBScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/FOBNavButton", "view": "fob"},
+		{"path": "FOBScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/MissionNavButton", "view": "map"},
+		{"path": "MapScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/HomebaseNavButton", "view": "homebase"},
+		{"path": "MapScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/FOBNavButton", "view": "fob"},
+		{"path": "MapScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/MissionNavButton", "view": "map"},
+	]:
+		var button := get_node_or_null(String(pair["path"])) as Button
+		if button == null:
+			continue
+		var view_name: String = String(pair["view"])
+		button.disabled = _current_meta_view == view_name
+		if button.disabled:
+			META_UI_SKIN_SCRIPT.style_primary_button(button)
+		else:
+			META_UI_SKIN_SCRIPT.style_secondary_button(button)
+
+
+func _refresh_map_screen() -> void:
+	var map_screen = _get_map_screen()
+	var fob_screen = _get_fob_screen()
+	if map_screen == null or fob_screen == null:
+		return
+
+	var selected_mission: Dictionary = _get_selected_mission_definition()
+	map_screen.set_map_context(
+		String(selected_mission.get("mission_name", "Operation: FOB Transfer")).strip_edges(),
+		String(selected_mission.get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges(),
+		_selected_unit_ids,
+		fob_screen.build_meta_overview(),
+		int(selected_mission.get("slot_count", FRIENDLY_NODE_NAMES.size()))
+	)
 
 
 func _get_homebase_screen():
@@ -262,9 +1040,95 @@ func _get_fob_screen():
 	return get_node_or_null("FOBScreen")
 
 
+func _get_map_screen():
+	return get_node_or_null("MapScreen")
+
+
 func _get_debrief_screen():
 	return get_node_or_null("DebriefScreen")
 
 
 func _get_mission_host():
 	return get_node_or_null("MissionHost")
+
+
+func _build_unassigned_fireteam_selection(selected_unit_ids: PackedStringArray) -> PackedStringArray:
+	var fireteam_ids: PackedStringArray = []
+	for _unit_id in selected_unit_ids:
+		fireteam_ids.append("")
+	return fireteam_ids
+
+
+func _build_unit_subset_by_ids(unit_ids: PackedStringArray) -> Array:
+	var wanted_ids: Dictionary = {}
+	for unit_id_variant in unit_ids:
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty():
+			continue
+		wanted_ids[unit_id] = true
+
+	var result: Array = []
+	for unit_variant in _all_team_units:
+		if typeof(unit_variant) != TYPE_DICTIONARY:
+			continue
+		var unit_data: Dictionary = unit_variant
+		var unit_id: String = String(unit_data.get("unit_id", "")).strip_edges()
+		if unit_id.is_empty() or not wanted_ids.has(unit_id):
+			continue
+		result.append(unit_data.duplicate(true))
+	return result
+
+
+func _remove_units_by_id(source_units: Array, removed_ids: PackedStringArray) -> Array:
+	var removed_lookup: Dictionary = {}
+	for unit_id_variant in removed_ids:
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty():
+			continue
+		removed_lookup[unit_id] = true
+
+	var result: Array = []
+	for unit_variant in source_units:
+		if typeof(unit_variant) != TYPE_DICTIONARY:
+			continue
+		var unit_data: Dictionary = unit_variant
+		var unit_id: String = String(unit_data.get("unit_id", "")).strip_edges()
+		if unit_id.is_empty() or removed_lookup.has(unit_id):
+			continue
+		result.append(unit_data.duplicate(true))
+	return result
+
+
+func _is_known_mission_map_path(map_file_path: String) -> bool:
+	for mission_variant in _mission_catalog:
+		var mission_definition: Dictionary = Dictionary(mission_variant)
+		if String(mission_definition.get("map_file_path", "")).strip_edges() == map_file_path:
+			return true
+	return false
+
+
+func _is_known_mission_id(mission_id: String) -> bool:
+	for mission_variant in _mission_catalog:
+		var mission_definition: Dictionary = Dictionary(mission_variant)
+		if String(mission_definition.get("mission_id", "")).strip_edges() == mission_id:
+			return true
+	return false
+
+
+func _get_selected_mission_definition() -> Dictionary:
+	for mission_variant in _mission_catalog:
+		var mission_definition: Dictionary = Dictionary(mission_variant)
+		if String(mission_definition.get("mission_id", "")).strip_edges() == _selected_mission_id:
+			return mission_definition.duplicate(true)
+	for mission_variant in _mission_catalog:
+		var mission_definition: Dictionary = Dictionary(mission_variant)
+		if String(mission_definition.get("map_file_path", "")).strip_edges() == _selected_mission_map_path:
+			return mission_definition.duplicate(true)
+	if _mission_catalog.is_empty():
+		return {
+			"mission_id": _selected_mission_id,
+			"mission_name": "Operation: FOB Transfer",
+			"map_file_path": DEFAULT_META_MAP_PATH,
+			"slot_count": FRIENDLY_NODE_NAMES.size(),
+		}
+	return Dictionary(_mission_catalog[0]).duplicate(true)

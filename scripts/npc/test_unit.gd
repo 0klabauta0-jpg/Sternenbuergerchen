@@ -5,6 +5,7 @@ const COMMANDER_COMMAND_SCRIPT: GDScript = preload("res://scripts/command/comman
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const UNIT_SKILLS_SCRIPT: GDScript = preload("res://scripts/npc/unit_skills.gd")
 const UNIT_TRAIT_SCRIPT: GDScript = preload("res://scripts/npc/unit_trait.gd")
+const UNIT_PROFILE_MATH_SCRIPT: GDScript = preload("res://scripts/npc/unit_profile_math.gd")
 const UNIT_RUNTIME_STATUS_SCRIPT: GDScript = preload("res://scripts/npc/unit_runtime_status.gd")
 const UNIT_VITAL_STATUS_SCRIPT: GDScript = preload("res://scripts/npc/unit_vital_status.gd")
 const STATUS_LABEL_NAME: String = "DebugStatusLabel"
@@ -24,6 +25,15 @@ signal vital_status_changed(vital_status)
 
 @export var unit_id: String = "unit_test_001"
 @export var display_name: String = "Test Unit"
+@export var portrait_path: String = ""
+@export var callsign: String = ""
+@export var role_id: String = "security_guard"
+@export var role_name: String = "Operator"
+@export var homeworld: String = ""
+@export var age_years: int = 0
+@export_multiline var short_description: String = ""
+@export_multiline var biography_text: String = ""
+@export_multiline var loadout_summary: String = ""
 @export var team_id: String = "team_test"
 @export var fireteam_id: String = ""
 @export var max_health_points: int = 100
@@ -31,6 +41,16 @@ signal vital_status_changed(vital_status)
 @export_range(0.0, 1.0, 0.01) var skill_speed: float = 0.5
 @export_range(0.0, 1.0, 0.01) var skill_leadership: float = 0.3
 @export_range(0.0, 1.0, 0.01) var skill_toughness: float = 0.5
+@export_range(0.0, 1.0, 0.01) var awareness: float = 0.5
+@export_range(0.0, 1.0, 0.01) var recognition: float = 0.5
+@export_range(0.0, 1.0, 0.01) var stealth: float = 0.5
+@export_range(0.0, 1.0, 0.01) var discipline: float = 0.5
+@export_range(0.0, 1.0, 0.01) var speech_quality: float = 0.5
+@export_range(0.0, 1.0, 0.01) var speech_quantity: float = 0.4
+@export_range(-1.0, 1.0, 0.01) var ground_vehicle_handling: float = -1.0
+@export_range(-1.0, 1.0, 0.01) var dropship_piloting: float = -1.0
+@export_range(-1.0, 1.0, 0.01) var freighter_piloting: float = -1.0
+@export_range(-1.0, 1.0, 0.01) var fighter_piloting: float = -1.0
 @export var trait_ids: PackedStringArray = []
 
 var _runtime_status: RefCounted = UNIT_RUNTIME_STATUS_SCRIPT.new()
@@ -38,6 +58,7 @@ var _current_unit_command: RefCounted = null
 var _vital_status: RefCounted = UNIT_VITAL_STATUS_SCRIPT.new()
 var _skills: RefCounted = UNIT_SKILLS_SCRIPT.new()
 var _traits: Array = []
+var _character_profile_bundle: Dictionary = {}
 var _last_damage_context: Dictionary = {}
 var _status_label: Label = null
 var _fireteam_label: Label = null
@@ -93,6 +114,42 @@ func get_team_id() -> String:
 
 func get_display_name() -> String:
 	return display_name
+
+
+func get_portrait_path() -> String:
+	return portrait_path
+
+
+func get_callsign() -> String:
+	return callsign
+
+
+func get_role_id() -> String:
+	return role_id
+
+
+func get_role_name() -> String:
+	return role_name
+
+
+func get_specialty_text() -> String:
+	return String(_character_profile_bundle.get("primary_specialty", "")).strip_edges()
+
+
+func get_homeworld() -> String:
+	return homeworld
+
+
+func get_short_description() -> String:
+	return short_description
+
+
+func get_biography_text() -> String:
+	return biography_text
+
+
+func get_loadout_summary() -> String:
+	return loadout_summary
 
 
 func get_fireteam_id() -> String:
@@ -212,6 +269,30 @@ func get_trait_summary_text() -> String:
 	return " ".join(get_trait_tags())
 
 
+func get_character_profile_bundle() -> Dictionary:
+	return _character_profile_bundle.duplicate(true)
+
+
+func get_initiative_speed_multiplier() -> float:
+	return float(Dictionary(_character_profile_bundle.get("combat_effects", {})).get("speed_multiplier", 1.0))
+
+
+func get_order_fidelity_hit_modifier() -> float:
+	return UNIT_PROFILE_MATH_SCRIPT.order_fidelity_to_hit_modifier(_get_behavior_axis("order_fidelity"))
+
+
+func get_autonomy_hit_modifier() -> float:
+	return UNIT_PROFILE_MATH_SCRIPT.autonomy_to_hit_modifier(_get_behavior_axis("autonomy"))
+
+
+func get_signature_control_evasion_modifier() -> float:
+	return UNIT_PROFILE_MATH_SCRIPT.signature_control_to_evasion_modifier(_get_behavior_axis("signature_control"))
+
+
+func get_contact_stability_damage_taken_multiplier() -> float:
+	return UNIT_PROFILE_MATH_SCRIPT.contact_stability_to_damage_taken_multiplier(_get_behavior_axis("contact_stability"))
+
+
 func get_target_position():
 	return _runtime_status.target_position
 
@@ -222,6 +303,35 @@ func apply_identity_config(identity_config: Dictionary) -> void:
 
 	if identity_config.has("display_name"):
 		display_name = String(identity_config["display_name"])
+
+	if identity_config.has("portrait_path"):
+		portrait_path = String(identity_config["portrait_path"]).strip_edges()
+
+	if identity_config.has("callsign"):
+		callsign = String(identity_config["callsign"]).strip_edges()
+
+	if identity_config.has("role_id"):
+		role_id = UNIT_PROFILE_MATH_SCRIPT.normalize_role_id(String(identity_config["role_id"]))
+	elif identity_config.has("role_name"):
+		role_id = UNIT_PROFILE_MATH_SCRIPT.normalize_role_id(String(identity_config["role_name"]))
+
+	if identity_config.has("role_name"):
+		role_name = String(identity_config["role_name"]).strip_edges()
+
+	if identity_config.has("homeworld"):
+		homeworld = String(identity_config["homeworld"]).strip_edges()
+
+	if identity_config.has("age_years"):
+		age_years = int(identity_config["age_years"])
+
+	if identity_config.has("short_description"):
+		short_description = String(identity_config["short_description"]).strip_edges()
+
+	if identity_config.has("biography_text"):
+		biography_text = String(identity_config["biography_text"]).strip_edges()
+
+	if identity_config.has("loadout_summary"):
+		loadout_summary = String(identity_config["loadout_summary"]).strip_edges()
 
 	if identity_config.has("team_id"):
 		team_id = String(identity_config["team_id"]).strip_edges()
@@ -240,6 +350,36 @@ func apply_identity_config(identity_config: Dictionary) -> void:
 
 	if identity_config.has("skill_toughness"):
 		skill_toughness = clampf(float(identity_config["skill_toughness"]), 0.0, 1.0)
+
+	if identity_config.has("awareness"):
+		awareness = clampf(float(identity_config["awareness"]), 0.0, 1.0)
+
+	if identity_config.has("recognition"):
+		recognition = clampf(float(identity_config["recognition"]), 0.0, 1.0)
+
+	if identity_config.has("stealth"):
+		stealth = clampf(float(identity_config["stealth"]), 0.0, 1.0)
+
+	if identity_config.has("discipline"):
+		discipline = clampf(float(identity_config["discipline"]), 0.0, 1.0)
+
+	if identity_config.has("speech_quality"):
+		speech_quality = clampf(float(identity_config["speech_quality"]), 0.0, 1.0)
+
+	if identity_config.has("speech_quantity"):
+		speech_quantity = clampf(float(identity_config["speech_quantity"]), 0.0, 1.0)
+
+	if identity_config.has("ground_vehicle_handling"):
+		ground_vehicle_handling = clampf(float(identity_config["ground_vehicle_handling"]), -1.0, 1.0)
+
+	if identity_config.has("dropship_piloting"):
+		dropship_piloting = clampf(float(identity_config["dropship_piloting"]), -1.0, 1.0)
+
+	if identity_config.has("freighter_piloting"):
+		freighter_piloting = clampf(float(identity_config["freighter_piloting"]), -1.0, 1.0)
+
+	if identity_config.has("fighter_piloting"):
+		fighter_piloting = clampf(float(identity_config["fighter_piloting"]), -1.0, 1.0)
 
 	if identity_config.has("trait_ids"):
 		trait_ids = _coerce_trait_ids(identity_config["trait_ids"])
@@ -927,6 +1067,44 @@ func _rebuild_identity_data() -> void:
 		unit_trait.apply_to_skills(_skills)
 		_traits.append(unit_trait)
 
+	var metric_input: Dictionary = {
+		"role_id": role_id,
+		"trait_ids": trait_ids.duplicate(),
+		"accuracy": float(_skills.accuracy),
+		"speed": float(_skills.speed),
+		"leadership": float(_skills.leadership),
+		"toughness": float(_skills.toughness),
+		"awareness": awareness,
+		"recognition": recognition,
+		"stealth": stealth,
+		"discipline": discipline,
+		"speech_quality": speech_quality,
+		"speech_quantity": speech_quantity,
+		"ground_vehicle_handling": ground_vehicle_handling,
+		"dropship_piloting": dropship_piloting,
+		"freighter_piloting": freighter_piloting,
+		"fighter_piloting": fighter_piloting,
+	}
+	_character_profile_bundle = UNIT_PROFILE_MATH_SCRIPT.build_character_bundle(metric_input)
+
+	var core_values: Dictionary = Dictionary(_character_profile_bundle.get("core_values", {}))
+	awareness = float(core_values.get("awareness", awareness))
+	recognition = float(core_values.get("recognition", recognition))
+	stealth = float(core_values.get("stealth", stealth))
+	discipline = float(core_values.get("discipline", discipline))
+	var communication_values: Dictionary = Dictionary(_character_profile_bundle.get("communication_values", {}))
+	speech_quality = float(communication_values.get("speech_quality", speech_quality))
+	speech_quantity = float(communication_values.get("speech_quantity", speech_quantity))
+	var platform_values: Dictionary = Dictionary(_character_profile_bundle.get("platform_values", {}))
+	ground_vehicle_handling = float(platform_values.get("ground_vehicle_handling", ground_vehicle_handling))
+	dropship_piloting = float(platform_values.get("dropship_piloting", dropship_piloting))
+	freighter_piloting = float(platform_values.get("freighter_piloting", freighter_piloting))
+	fighter_piloting = float(platform_values.get("fighter_piloting", fighter_piloting))
+	if short_description.is_empty() and not biography_text.is_empty():
+		var biography_parts: PackedStringArray = biography_text.split(".", false)
+		if not biography_parts.is_empty():
+			short_description = "%s." % String(biography_parts[0]).strip_edges()
+
 
 func _coerce_trait_ids(value: Variant) -> PackedStringArray:
 	if value is PackedStringArray:
@@ -942,3 +1120,7 @@ func _coerce_trait_ids(value: Variant) -> PackedStringArray:
 			result.append(trait_id)
 
 	return result
+
+
+func _get_behavior_axis(axis_name: String) -> float:
+	return clampf(float(Dictionary(_character_profile_bundle.get("behavior_axes", {})).get(axis_name, 0.0)), 0.0, 1.0)
