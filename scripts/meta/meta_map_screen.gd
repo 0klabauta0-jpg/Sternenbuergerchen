@@ -41,6 +41,7 @@ func _render() -> void:
 	var map_name: String = _map_file_path.get_file().get_basename()
 	var grid_size := Vector2i.ZERO
 	var tile_count: int = 0
+	var marker_summary_text: String = "Markers: none"
 	if terrain_map_data != null:
 		if terrain_map_data.has_method("get_map_name"):
 			map_name = String(terrain_map_data.call("get_map_name"))
@@ -48,13 +49,14 @@ func _render() -> void:
 			grid_size = terrain_map_data.call("get_grid_size")
 		if terrain_map_data.has_method("get_tiles"):
 			tile_count = int((terrain_map_data.call("get_tiles") as Array).size())
+		marker_summary_text = _build_marker_summary_text(terrain_map_data)
 
 	var fireteams: Array = _fob_overview.get("fireteams", [])
 	map_name_label.text = "Map: %s" % map_name
 	operator_count_label.text = "Operators: %d" % _selected_unit_ids.size()
 	fireteam_count_label.text = "Slots: %d | Fireteams: %d" % [_mission_slot_count, fireteams.size()]
 	mission_summary_label.text = "%s on %s. Read-only map overview of the current meta preparation; no editor or gameplay commit happens here." % [_mission_name, map_name]
-	map_data_label.text = "File: %s\nGrid: %d x %d\nTiles: %d" % [_map_file_path, grid_size.x, grid_size.y, tile_count]
+	map_data_label.text = "File: %s\nGrid: %d x %d\nTiles: %d\n%s" % [_map_file_path, grid_size.x, grid_size.y, tile_count, marker_summary_text]
 	map_help_label.text = "Die Map-Ansicht bleibt bewusst read-only. Sie spiegelt nur den aktuellen Missions- und FOB-Vorbereitungsstand auf derselben Meta-Ebene."
 	fireteam_overview_label.text = _build_fireteam_overview_text(fireteams)
 	dropship_overview_label.text = "Dropship\n\n%s\n%s" % [
@@ -80,6 +82,27 @@ func _build_fireteam_overview_text(fireteams: Array) -> String:
 			String(fireteam.get("loadout", "medium")).to_upper(),
 		])
 	return "\n".join(lines)
+
+
+func _build_marker_summary_text(terrain_map_data) -> String:
+	if terrain_map_data == null or not terrain_map_data.has_method("get_markers"):
+		return "Markers: none"
+
+	var markers: Dictionary = terrain_map_data.call("get_markers")
+	if markers.is_empty():
+		return "Markers: none"
+
+	var ordered_marker_ids: PackedStringArray = []
+	for marker_id_variant in markers.keys():
+		ordered_marker_ids.append(String(marker_id_variant))
+	ordered_marker_ids.sort()
+
+	var marker_parts: PackedStringArray = []
+	for marker_id in ordered_marker_ids:
+		var marker_position: Vector2 = terrain_map_data.call("get_marker_position", marker_id, Vector2.ZERO)
+		marker_parts.append("%s %d,%d" % [marker_id, int(round(marker_position.x)), int(round(marker_position.y))])
+
+	return "Markers: %s" % " | ".join(marker_parts)
 
 
 func _build_respawn_overview_text(fireteams: Array) -> String:

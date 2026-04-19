@@ -3,6 +3,7 @@ extends Node
 const OBJECTIVE_STATUS_SCRIPT: GDScript = preload("res://scripts/core/objective_status.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
+const TERRAIN_MAP_RENDERER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_renderer.gd")
 const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
 
 @export var team_id: String = "team_alpha"
@@ -22,9 +23,12 @@ const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_ros
 @export var map_file_path: String = "res://maps/test_mission_32x32_slots8.json"
 
 var _is_initialized: bool = false
+var _terrain_renderer = null
 
 
 func _ready() -> void:
+	if _terrain_renderer == null:
+		_terrain_renderer = TERRAIN_MAP_RENDERER_SCRIPT.new()
 	if _is_initialized:
 		return
 
@@ -36,11 +40,11 @@ func _ready() -> void:
 		push_warning("MissionTestSetup requires direct references to RuntimeLeader, UnitRegistry, FTLRegistry and SimulationRoot.")
 		return
 
+	var terrain_registry = _setup_terrain_registry()
 	var spawn_alpha_marker := _resolve_marker(spawn_alpha_path)
 	var spawn_bravo_marker := _resolve_marker(spawn_bravo_path)
 	var objective_marker := _resolve_marker(objective_point_path)
 	var target_marker := _resolve_marker(target_marker_path)
-	var terrain_registry = _setup_terrain_registry()
 	if target_marker != null and objective_marker != null:
 		target_marker.global_position = objective_marker.global_position
 
@@ -244,12 +248,13 @@ func _try_load_terrain_from_json(terrain_registry) -> bool:
 		float(tile_size.get("half_height", 32.0))
 	)
 
-	var terrain_root: Node = get_node_or_null("../MapRoot/Terrain")
 	for tile_data in terrain_map_data.call("get_tiles"):
 		terrain_registry.call("register_tile", tile_data)
-		if terrain_root != null:
-			var tile_sprite := _find_tile_sprite_at(terrain_root, tile_data.world_position)
-			_apply_terrain_tile_visual(tile_sprite, tile_data)
+
+	var map_root: Node = get_node_or_null("../MapRoot")
+	if map_root != null and _terrain_renderer != null:
+		_terrain_renderer.render_map(terrain_map_data, map_root)
+	_apply_map_marker_positions(terrain_map_data)
 
 	return true
 
@@ -311,6 +316,25 @@ func _setup_terrain_from_hardcode(terrain_registry) -> void:
 		)
 		terrain_registry.call("register_tile", tile_data)
 		_apply_terrain_tile_visual(terrain_tile, tile_data)
+
+
+func _apply_map_marker_positions(terrain_map_data) -> void:
+	if terrain_map_data == null:
+		return
+
+	_apply_marker_position("spawn_alpha", _resolve_marker(spawn_alpha_path), terrain_map_data)
+	_apply_marker_position("spawn_bravo", _resolve_marker(spawn_bravo_path), terrain_map_data)
+	_apply_marker_position("objective_point", _resolve_marker(objective_point_path), terrain_map_data)
+	_apply_marker_position("flank_anchor_left", get_node_or_null("../MapRoot/flank_anchor_left") as Marker2D, terrain_map_data)
+	_apply_marker_position("flank_anchor_right", get_node_or_null("../MapRoot/flank_anchor_right") as Marker2D, terrain_map_data)
+
+
+func _apply_marker_position(marker_id: String, marker_node: Marker2D, terrain_map_data) -> void:
+	if marker_node == null or terrain_map_data == null:
+		return
+	if not terrain_map_data.has_method("has_marker") or not bool(terrain_map_data.call("has_marker", marker_id)):
+		return
+	marker_node.global_position = terrain_map_data.call("get_marker_position", marker_id, marker_node.global_position)
 
 
 

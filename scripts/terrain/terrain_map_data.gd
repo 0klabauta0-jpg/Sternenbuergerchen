@@ -8,6 +8,7 @@ var _grid_size: Vector2i = Vector2i.ZERO
 var _tile_half_width: float = 64.0
 var _tile_half_height: float = 32.0
 var _grid_origin: Vector2 = Vector2.ZERO
+var _markers: Dictionary = {}
 var _tiles: Array = []
 
 
@@ -34,6 +35,7 @@ static func load_from_file(path: String) -> TerrainMapData:
 	terrain_map_data._tile_half_width = maxf(float(tile_size_dict.get("half_width", 64.0)), 0.001)
 	terrain_map_data._tile_half_height = maxf(float(tile_size_dict.get("half_height", 32.0)), 0.001)
 	terrain_map_data._grid_origin = _coerce_vector2(root_dict.get("grid_origin", Vector2.ZERO))
+	terrain_map_data._markers = _coerce_marker_dictionary(root_dict.get("markers", {}))
 
 	var tiles_variant: Variant = root_dict.get("tiles", [])
 	if tiles_variant is Array:
@@ -120,6 +122,7 @@ func save_to_file(path: String) -> Error:
 			"x": int(round(_grid_origin.x)),
 			"y": int(round(_grid_origin.y)),
 		},
+		"markers": _serialize_markers(),
 		"tiles": [],
 	}
 
@@ -183,6 +186,29 @@ func get_tile_size() -> Dictionary:
 
 func get_grid_origin() -> Vector2:
 	return _grid_origin
+
+
+func get_markers() -> Dictionary:
+	return _markers.duplicate(true)
+
+
+func get_marker_position(marker_id: String, fallback: Vector2 = Vector2.ZERO) -> Vector2:
+	var normalized_marker_id: String = marker_id.strip_edges()
+	if normalized_marker_id.is_empty() or not _markers.has(normalized_marker_id):
+		return fallback
+	return _coerce_vector2(_markers.get(normalized_marker_id, fallback))
+
+
+func has_marker(marker_id: String) -> bool:
+	var normalized_marker_id: String = marker_id.strip_edges()
+	return not normalized_marker_id.is_empty() and _markers.has(normalized_marker_id)
+
+
+func set_marker_position(marker_id: String, world_position: Vector2) -> void:
+	var normalized_marker_id: String = marker_id.strip_edges()
+	if normalized_marker_id.is_empty():
+		return
+	_markers[normalized_marker_id] = world_position
 
 
 func _grid_to_world(grid_position: Vector2i) -> Vector2:
@@ -249,3 +275,33 @@ static func _coerce_vector2(value: Variant) -> Vector2:
 		return Vector2(float(value_dict.get("x", 0.0)), float(value_dict.get("y", 0.0)))
 
 	return Vector2.ZERO
+
+
+static func _coerce_marker_dictionary(value: Variant) -> Dictionary:
+	var result: Dictionary = {}
+	if typeof(value) != TYPE_DICTIONARY:
+		return result
+
+	var marker_dict: Dictionary = value
+	for marker_id_variant in marker_dict.keys():
+		var marker_id: String = String(marker_id_variant).strip_edges()
+		if marker_id.is_empty():
+			continue
+		result[marker_id] = _coerce_vector2(marker_dict.get(marker_id_variant, Vector2.ZERO))
+
+	return result
+
+
+func _serialize_markers() -> Dictionary:
+	var serialized_markers: Dictionary = {}
+	for marker_id_variant in _markers.keys():
+		var marker_id: String = String(marker_id_variant).strip_edges()
+		if marker_id.is_empty():
+			continue
+		var marker_position: Vector2 = _coerce_vector2(_markers.get(marker_id_variant, Vector2.ZERO))
+		serialized_markers[marker_id] = {
+			"x": int(round(marker_position.x)),
+			"y": int(round(marker_position.y)),
+		}
+
+	return serialized_markers

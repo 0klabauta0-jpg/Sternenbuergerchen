@@ -4,6 +4,7 @@ const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain
 const TERRAIN_REGISTRY_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_registry.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_catalog.gd")
+const TERRAIN_MAP_RENDERER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_renderer.gd")
 const TILE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_SW.png")
 const CLIFF_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_SE.png")
 const CLIFF_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_SW.png")
@@ -67,6 +68,7 @@ const CAMERA_PAN_SPEED: float = 800.0
 var _terrain_map_data = null
 var _terrain_registry = null
 var _tile_catalog = null
+var _terrain_renderer = null
 var _tile_sprites_by_grid: Dictionary = {}
 var _cliff_sprites_by_grid: Dictionary = {}
 var _wall_sprites_by_grid: Dictionary = {}
@@ -93,6 +95,7 @@ func _ready() -> void:
 	set_process_unhandled_input(true)
 	_ensure_terrain_registry()
 	_load_tile_catalog()
+	_terrain_renderer = TERRAIN_MAP_RENDERER_SCRIPT.new(_tile_catalog)
 	_populate_surface_type_options()
 	_populate_edge_type_options()
 	_populate_brush_size_options()
@@ -270,26 +273,13 @@ func _rebuild_registry_from_map_data() -> void:
 
 
 func _rebuild_tile_sprites() -> void:
-	var tile_container := get_node_or_null("TileContainer") as Node2D
-	if tile_container == null:
+	if _terrain_renderer == null:
 		return
-
-	for child in tile_container.get_children():
-		child.queue_free()
-
-	for tile_data in _terrain_map_data.call("get_tiles"):
-		var tile_texture: Texture2D = _resolve_tile_texture(tile_data)
-		var tile_sprite := Sprite2D.new()
-		tile_sprite.texture = tile_texture
-		tile_sprite.centered = false
-		tile_sprite.z_index = -20
-		tile_sprite.position = tile_data.world_position - KENNEY_DIAMOND_CENTER
-		tile_sprite.modulate = _build_tile_modulate(tile_data)
-		tile_container.add_child(tile_sprite)
-		_tile_sprites_by_grid[tile_data.grid_position] = tile_sprite
-
-	_rebuild_all_cliff_overlays()
-	_rebuild_all_wall_overlays()
+	_terrain_renderer.set_tile_catalog(_tile_catalog)
+	var render_state: Dictionary = _terrain_renderer.render_map(_terrain_map_data, self)
+	_tile_sprites_by_grid = render_state.get("tiles", {})
+	_cliff_sprites_by_grid = render_state.get("cliffs", {})
+	_wall_sprites_by_grid = render_state.get("walls", {})
 	_rebuild_grid_overlay()
 
 
@@ -310,41 +300,10 @@ func _refresh_tile_visual(tile_data) -> void:
 
 
 func _build_tile_modulate(tile_data) -> Color:
-	if tile_data == null:
+	if _terrain_renderer == null:
 		return Color(1.0, 1.0, 1.0, 1.0)
-
-	var tile_color: Color = Color(1.0, 1.0, 1.0, 1.0)
-
-	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
-	var has_catalog_texture: bool = not type_id.is_empty() and _tile_catalog != null and _tile_catalog.get_texture(type_id) != null
-
-	if not has_catalog_texture:
-		match String(tile_data.surface_type):
-			TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROAD:
-				tile_color = Color(0.82, 0.82, 0.84, 1.0)
-			TERRAIN_TILE_DATA_SCRIPT.SURFACE_SAND:
-				tile_color = Color(1.0, 0.95, 0.72, 1.0)
-			TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROCK:
-				tile_color = Color(0.88, 0.78, 0.66, 1.0)
-
-		var height_level: int = int(tile_data.height_level)
-		if height_level == 1:
-			tile_color = tile_color.lightened(0.08)
-		elif height_level >= 2:
-			tile_color = tile_color.lightened(0.16)
-
-		if bool(tile_data.blocks_los):
-			tile_color = tile_color.darkened(0.1)
-
-		if not bool(tile_data.walkable):
-			tile_color = tile_color.darkened(0.14)
-
-	# Checkerboard pattern for grid visibility
-	var gp: Vector2i = tile_data.grid_position
-	if (gp.x + gp.y) % 2 == 0:
-		tile_color = tile_color.darkened(0.08)
-
-	return tile_color
+	_terrain_renderer.set_tile_catalog(_tile_catalog)
+	return _terrain_renderer.build_tile_modulate(tile_data)
 
 
 func _select_tile_at_world_position(world_position: Vector2) -> void:
@@ -1131,18 +1090,10 @@ func _ensure_terrain_registry() -> void:
 
 
 func _resolve_tile_texture(tile_data) -> Texture2D:
-	if tile_data == null or _tile_catalog == null:
+	if _terrain_renderer == null:
 		return TILE_TEXTURE
-
-	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
-	if type_id.is_empty():
-		return TILE_TEXTURE
-
-	var type_texture: Texture2D = _tile_catalog.get_texture(type_id)
-	if type_texture != null:
-		return type_texture
-
-	return TILE_TEXTURE
+	_terrain_renderer.set_tile_catalog(_tile_catalog)
+	return _terrain_renderer.resolve_tile_texture(tile_data)
 
 
 func _rebuild_all_cliff_overlays() -> void:
@@ -1282,10 +1233,9 @@ func _clear_cliff_overlays() -> void:
 # --- Wall Overlay System ---
 
 func _is_object_type(tile_data) -> bool:
-	if tile_data == null:
+	if _terrain_renderer == null:
 		return false
-	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
-	return type_id.begins_with("wall_") or type_id.begins_with("cliff_") or type_id.begins_with("slope_") or type_id.begins_with("rock_")
+	return _terrain_renderer.is_object_type(tile_data)
 
 
 func _rebuild_all_wall_overlays() -> void:
