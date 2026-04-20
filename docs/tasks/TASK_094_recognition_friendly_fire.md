@@ -4,7 +4,7 @@
 Units mit niedrigem `recognition`-Wert koennen in bestimmten Situationen eigene Truppen
 als Feinde misidentifizieren und auf sie schiessen.
 
-## Status: OFFEN
+## Status: ERLEDIGT
 
 ## Kontext
 - `test_unit.gd` hat `recognition` als Export (0.0–1.0, Default 0.5)

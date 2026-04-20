@@ -711,5 +711,7 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Naechster Schritt: TASK_094 Recognition/Friendly-Fire.
 
 ### TASK_094 – Recognition: Friendly-Fire-Verwechslung
-- Status: offen
-- Ziel: Units mit niedrigem `recognition`-Wert koennen in bestimmten Situationen eigene Truppen als Feinde misidentifizieren und auf sie schiessen. Aktuell blockiert `allow_friendly_fire: false` jeden Friendly-Fire komplett.
+- Status: implementiert
+- Stand: `_check_misidentification(attacker, attacker_id)` in `mission_combat_loop_driver.gd` wuerfelt pro Tick ob ein Friendly sein Ziel verwechselt. Formel: `MISIDENTIFICATION_BASE_CHANCE (0.03) * (1.0 - recognition)`. recognition=1.0 → 0% Verwechslung, recognition=0.0 → 3% pro Tick. Naechste eigene Unit wird als Ziel gewaehlt, Effect mit `allow_friendly_fire: true` gesendet. Cooldown (`MISIDENTIFICATION_COOLDOWN_TICKS=15`) verhindert Dauerfeuer auf Eigene. Nur Friendlies koennen verwechseln, Enemies nie. `get_recognition()` in `test_unit.gd` ergaenzt.
+- Offene Punkte: keine
+- Risiken: keine

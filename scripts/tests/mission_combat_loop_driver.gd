@@ -22,6 +22,9 @@ const STEALTH_RANGE_REDUCTION_FACTOR: float = 0.5
 const DISCIPLINE_BREAK_BASE_CHANCE: float = 0.08
 const DISCIPLINE_BREAK_COOLDOWN_TICKS: int = 10
 const DISCIPLINE_BREAK_EVENT_COLOR: Color = Color(1.0, 0.65, 0.3, 1.0)
+const MISIDENTIFICATION_BASE_CHANCE: float = 0.03
+const MISIDENTIFICATION_COOLDOWN_TICKS: int = 15
+const MISIDENTIFICATION_EVENT_COLOR: Color = Color(1.0, 0.4, 0.4, 1.0)
 
 signal contact_established(attacker, target)
 signal combat_resolved(mission_result: Dictionary)
@@ -71,6 +74,7 @@ var _fireteam_acting_leads: Dictionary = {}
 var _fireteam_members: Dictionary = {}
 var _detection_progress: Dictionary = {}
 var _discipline_break_cooldown: Dictionary = {}
+var _misidentification_cooldown: Dictionary = {}
 
 
 func _ready() -> void:
@@ -163,6 +167,7 @@ func _on_tick_processed(tick: int) -> void:
 	_update_fireteam_leadership()
 	_advance_detection_timers()
 	_advance_discipline_cooldowns()
+	_advance_misidentification_cooldowns()
 	_advance_enemy_units(simulation_root)
 	_try_enqueue_attacks(simulation_root)
 	_update_combat_resolution()
@@ -258,8 +263,20 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 	if _current_tick < _next_attack_tick:
 		return
 
-	contact_established.emit(attacker, target)
-	_set_event_text("%s ENGAGE %s" % [attacker_id, target_id])
+	var misid_result: Dictionary = _check_misidentification(attacker, attacker_id)
+	var actual_target = target
+	var actual_target_id: String = target_id
+	var is_friendly_fire: bool = false
+	if not misid_result.is_empty():
+		actual_target = misid_result["target"]
+		actual_target_id = misid_result["target_id"]
+		is_friendly_fire = true
+
+	contact_established.emit(attacker, actual_target)
+	if is_friendly_fire:
+		_set_event_text("%s verwechselt Ziel! -> %s" % [attacker_id, actual_target_id])
+	else:
+		_set_event_text("%s ENGAGE %s" % [attacker_id, actual_target_id])
 	var active_weapon_id: String = _get_unit_active_weapon_id(attacker)
 	var weapon_damage: int = WEAPON_DATA_SCRIPT.get_damage_per_hit(active_weapon_id)
 	var weapon_hit_chance: float = WEAPON_DATA_SCRIPT.get_base_hit_chance(active_weapon_id)
@@ -269,16 +286,19 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 		{
 			"effect_type": "damage",
 			"priority": 30,
-			"unit_id": target_id,
+			"unit_id": actual_target_id,
 			"attacker_unit_id": attacker_id,
 			"attacker_team_id": String(attacker.call("get_team_id")),
-			"allow_friendly_fire": false,
+			"allow_friendly_fire": is_friendly_fire,
 			"damage": weapon_damage,
 			"hit_chance": weapon_hit_chance,
 			"damage_multiplier": base_damage_multiplier,
 			"roll_override": 0.4,
 		}
 	)
+	if is_friendly_fire and attacker.has_method("show_event_text"):
+		attacker.call("show_event_text", "FRIENDLY FIRE!", MISIDENTIFICATION_EVENT_COLOR, 1.6)
+		_broadcast_remote_event("%s verwechselt Ziel! -> %s" % [attacker_id, actual_target_id], attacker_id, MISIDENTIFICATION_EVENT_COLOR, 1.6, "FRIENDLY FIRE!")
 	_next_attack_tick = _current_tick + max(weapon_ticks, 1)
 
 
@@ -585,6 +605,74 @@ func _advance_discipline_cooldowns() -> void:
 
 func get_discipline_break_cooldown() -> Dictionary:
 	return _discipline_break_cooldown
+
+
+func _advance_misidentification_cooldowns() -> void:
+	var keys_to_remove: Array = []
+	for key in _misidentification_cooldown.keys():
+		var remaining: int = int(_misidentification_cooldown[key])
+		if remaining > 1:
+			_misidentification_cooldown[key] = remaining - 1
+		else:
+			keys_to_remove.append(key)
+	for key in keys_to_remove:
+		_misidentification_cooldown.erase(key)
+
+
+func get_misidentification_cooldown() -> Dictionary:
+	return _misidentification_cooldown
+
+
+func _check_misidentification(attacker, attacker_id: String) -> Dictionary:
+	if attacker == null or attacker_id.is_empty():
+		return {}
+
+	var cooldown_remaining: int = _misidentification_cooldown.get(attacker_id, 0) as int
+	if cooldown_remaining > 0:
+		return {}
+
+	# Only friendlies can misidentify (not enemies)
+	var attacker_team: String = ""
+	if attacker.has_method("get_team_id"):
+		attacker_team = String(attacker.call("get_team_id"))
+	if attacker_team != friendly_team_id:
+		return {}
+
+	var unit_recognition: float = 0.5
+	if attacker.has_method("get_recognition"):
+		unit_recognition = clampf(float(attacker.call("get_recognition")), 0.0, 1.0)
+
+	var misid_chance: float = MISIDENTIFICATION_BASE_CHANCE * (1.0 - unit_recognition)
+	if misid_chance <= 0.0:
+		return {}
+
+	if randf() >= misid_chance:
+		return {}
+
+	# Find nearest friendly unit (not self) as misidentified target
+	var nearest_friendly = null
+	var nearest_dist: float = INF
+	for friendly in _get_units(friendly_unit_paths):
+		if friendly == attacker:
+			continue
+		if not friendly.has_method("get_vital_state"):
+			continue
+		if String(friendly.call("get_vital_state")) != "fit":
+			continue
+		var dist: float = attacker.global_position.distance_to(friendly.global_position)
+		if dist < nearest_dist:
+			nearest_dist = dist
+			nearest_friendly = friendly
+
+	if nearest_friendly == null:
+		return {}
+
+	_misidentification_cooldown[attacker_id] = MISIDENTIFICATION_COOLDOWN_TICKS
+	var friendly_id: String = String(nearest_friendly.call("get_unit_id"))
+	return {
+		"target": nearest_friendly,
+		"target_id": friendly_id,
+	}
 
 
 func _has_valid_los(attacker, target) -> bool:

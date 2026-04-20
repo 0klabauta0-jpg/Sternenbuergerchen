@@ -236,6 +236,10 @@ func get_discipline() -> float:
 	return discipline
 
 
+func get_recognition() -> float:
+	return recognition
+
+
 func get_toughness_skill() -> float:
 	return float(_skills.toughness)
 
