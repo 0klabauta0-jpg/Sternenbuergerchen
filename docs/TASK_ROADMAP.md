@@ -200,7 +200,32 @@ TASK_078 – Meta-Layer: Navigation und Map-Ansicht
 TASK_079 – FOB: Fireteam-Management, Respawn-/Loadout-Staging und Dropship-Wartezone
 TASK_080 – Meta-Layer: Transfer-Sichtbarkeit, Pool-DnD und Charakterbogen-Toggle
 TASK_081 – Meta-Layer: UI-Harmonisierung fuer FOB, Homebase und Loadout
-Phase 16 – Erweiterung (spaeter)
+
+Phase 16 – Charakterbogen-Kampfwirkung
+TASK_082 – Gemeinsamer Terrain-Renderer fuer Editor und Mission
+TASK_085 – Charakterbogen Combat-Integration (get_combat_effects)
+TASK_086 – Waffenmodell (WeaponData)
+TASK_087 – Loadout-Pipeline und Waffen-Sprites
+
+Phase 17A – Waffen und Loadout (abhaengig von 086/087)
+(bereits in Phase 16 enthalten)
+
+Phase 17B – Teamdynamik
+TASK_088 – Leadership-Bonus auf Fireteam-Mitglieder
+
+Phase 17C – Gegner
+TASK_089 – Enemy Cover-Seeking
+TASK_090 – Differenzierte Enemy-Typen
+
+Phase 17D – Wahrnehmung
+TASK_091 – Awareness: Detection-Delay
+TASK_092 – Stealth: Reduzierte Sichtreichweite
+
+Phase 17E – Verhaltensqualitaet
+TASK_093 – Discipline: Hold-Fire-Disziplinbrueche
+TASK_094 – Recognition: Friendly-Fire-Verwechslung
+
+Phase 18 – Erweiterung (spaeter)
 Skillsystem
 soziale Dynamik
 persistente Teams

@@ -667,3 +667,31 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 ### TASK_087 – Loadout-Pipeline und Waffen-Sprites
 - Status: offen
 - Ziel: Die beiden offenen Punkte aus TASK_086 schliessen: (A) FOB-Loadout-Daten (`weapon_1`/`weapon_2`/`armor`) ueber `MetaLayerFlow` → `MissionTestSetup` → `TestUnit.apply_identity_config()` durchreichen; (B) Waffen-Sprite als Child-Node an der Unit rendern, mit Asset-Pfad und Scale aus `WeaponData` (Schienenkanone 2x).
+
+### TASK_088 – Leadership-Bonus auf Fireteam-Mitglieder
+- Status: offen
+- Ziel: Der Fireteam-Lead verteilt einen kleinen Leadership-Bonus (hit_modifier, speed_multiplier) auf alle Mitglieder seines Fireteams. Wenn der Lead ausfaellt (down/bleedout), wird der Bonus sofort entfernt.
+
+### TASK_089 – Enemy Cover-Seeking
+- Status: offen
+- Ziel: Gegner-Units suchen aktiv Cover-Tiles in ihrer Naehe, statt sich nur nach Treffer zufaellig zu repositionieren. Die bestehende Reposition-Logik in `MissionCombatLoopDriver` wird um eine Cover-Tile-Praeferenz aus `TerrainRegistry` erweitert.
+
+### TASK_090 – Differenzierte Enemy-Typen
+- Status: offen
+- Ziel: Statt eines einzigen `ENEMY_DEFAULT_PRESET` mit identischen Stats werden 6 verschiedene Enemy-Archetypen eingefuehrt (z.B. Scout, Heavy, Sniper, Medic, Officer, Standard), jeweils mit unterschiedlichen Skill-Werten, Waffen und Traits.
+
+### TASK_091 – Awareness: Detection-Delay
+- Status: offen
+- Ziel: Der `awareness`-Wert einer Unit bestimmt, wie schnell sie feindliche Kontakte erkennt. Hohe Awareness → sofortige Erkennung; niedrige Awareness → verzoegertes Engagement. Aktuell ist Kontakt sofort da, sobald LOS und Reichweite stimmen.
+
+### TASK_092 – Stealth: Reduzierte Sichtreichweite
+- Status: offen
+- Ziel: Der `stealth`-Wert einer Unit reduziert die effektive Sichtreichweite, mit der Gegner sie erkennen koennen. Hoher Stealth → Gegner muessen naeher kommen, bevor sie die Unit sehen.
+
+### TASK_093 – Discipline: Hold-Fire-Disziplinbrueche
+- Status: offen
+- Ziel: Units mit niedrigem `discipline`-Wert brechen gelegentlich Hold-Fire-Befehle und feuern trotzdem, obwohl sie in Phase APPROACH oder HOLD stehen. Hohe Disziplin → zuverlaessiges Hold-Fire.
+
+### TASK_094 – Recognition: Friendly-Fire-Verwechslung
+- Status: offen
+- Ziel: Units mit niedrigem `recognition`-Wert koennen in bestimmten Situationen eigene Truppen als Feinde misidentifizieren und auf sie schiessen. Aktuell blockiert `allow_friendly_fire: false` jeden Friendly-Fire komplett.
