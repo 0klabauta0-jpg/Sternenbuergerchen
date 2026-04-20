@@ -5,7 +5,7 @@ Die beiden offenen Punkte aus TASK_086 (Waffenmodell) schliessen:
 1. FOB-Loadout-Daten (`weapon_1`, `weapon_2`, `armor`) an Missions-Units durchreichen
 2. Visuelle Waffen-Sprites an den Units in der Missionsszene rendern
 
-## Status: OFFEN
+## Status: TEIL A ERLEDIGT (Pipeline) / TEIL B OFFEN (Sprites)
 
 ## Kontext
 - Die FOB-UI (`fob_screen.gd`) speichert pro Fireteam-Mitglied bereits `weapon_1`/`weapon_2`/`armor` in `member_loadouts`
@@ -35,8 +35,9 @@ Die beiden offenen Punkte aus TASK_086 (Waffenmodell) schliessen:
 - `scripts/core/weapon_data.gd` (nur Lesezugriff)
 
 ## Akzeptanzkriterien
-- [ ] Units in der Mission tragen die in der FOB gewaehlte Waffe
+- [x] Units in der Mission tragen die in der FOB gewaehlte Waffe
 - [ ] Waffen-Sprite ist an der Unit sichtbar (korrekte Richtung, korrekte Skalierung)
 - [ ] Schienenkanone erscheint doppelt so gross wie Sturmgewehr
-- [ ] Ohne FOB-Daten (direkter Szenenstart) bleiben Default-Waffen aktiv
-- [ ] Headless-Verifier bestaetigt korrekte weapon_id auf Unit nach Setup
+- [x] Ohne FOB-Daten (direkter Szenenstart) bleiben Default-Waffen aktiv
+- [x] Headless-Verifier bestaetigt korrekte weapon_id auf Unit nach Setup
+- [x] is_fireteam_lead wird aus lead_unit_id der FOB-Daten gesetzt

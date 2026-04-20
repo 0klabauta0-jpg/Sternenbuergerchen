@@ -660,20 +660,23 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 ### TASK_086 – Waffenmodell (WeaponData)
 - Status: implementiert
 - Stand: Neues `scripts/core/weapon_data.gd` als statische Waffen-Registry mit drei Typen: Maschinenpistole (smg, weapon_gun_*, schnell, niedrig), Sturmgewehr (rifle, weapon_rifle_*, balanciert), Schienenkanone (rail_gun, weapon_rifle_* in 2x, langsam, hoch). `TestUnit` traegt `weapon_1_id`/`weapon_2_id` als Exports und liefert `get_active_weapon_id()`. `MissionCombatLoopDriver` nutzt aktive Waffe des Angreifers fuer damage/hit_chance/ticks statt globaler Konstanten. In `fob_screen.gd` wurde "Sonderwaffe" zu "Schienenkanone" umbenannt und weapon-ID `special` zu `rail_gun` migriert (abwaertskompatibel).
-- Offene Punkte: Loadout-Daten aus FOB-Screen werden noch nicht automatisch an Missions-Units durchgereicht; per-Unit-Loadout-Pipeline ist separater Task.
+- Offene Punkte: keine (Loadout-Pipeline durch TASK_087 geschlossen).
 - Risiken: Globale combat-Exports (`damage_per_hit`, `base_hit_chance`, `ticks_between_attacks`) auf `MissionCombatLoopDriver` bleiben als Fallback-Defaults erhalten, werden aber im normalen Pfad nicht mehr genutzt.
-- Naechster Schritt: TASK_087 – FOB-Loadout-Pipeline zu Missions-Units durchreichen und visuelle Waffen-Sprites an Units rendern.
+- Naechster Schritt: Waffen-Sprites visuell rendern (separater Task).
 
 ### TASK_087 – Loadout-Pipeline und Waffen-Sprites
-- Status: offen
-- Ziel: Die beiden offenen Punkte aus TASK_086 schliessen: (A) FOB-Loadout-Daten (`weapon_1`/`weapon_2`/`armor`) ueber `MetaLayerFlow` → `MissionTestSetup` → `TestUnit.apply_identity_config()` durchreichen; (B) Waffen-Sprite als Child-Node an der Unit rendern, mit Asset-Pfad und Scale aus `WeaponData` (Schienenkanone 2x).
+- Status: implementiert (Teil A: Pipeline)
+- Stand: `meta_layer_flow.gd` liest per `_build_fob_member_loadouts()` die `member_loadouts` und `lead_unit_id` aus allen Fireteam-Definitionen der FOB-UI, baut ein flaches `{unit_id: {weapon_1, weapon_2, armor, is_fireteam_lead}}` Dictionary und uebergibt es via `mission_setup.set("member_loadouts", ...)` an `MissionTestSetup`. `mission_test_setup.gd` hat neue Property `member_loadouts: Dictionary` und ruft nach dem Roster-Preset `_apply_fob_loadout_override()` auf, das `weapon_1_id`, `weapon_2_id`, `armor` und `is_fireteam_lead` via `apply_identity_config()` auf die Unit setzt. Nur Friendlies erhalten Overrides; Enemies bleiben unberuehrt. Ohne FOB-Daten greifen die Roster-Defaults.
+- Offene Punkte: Teil B (Waffen-Sprites visuell rendern) ist noch nicht umgesetzt.
+- Risiken: keine.
+- Naechster Schritt: Waffen-Sprites als separaten Task umsetzen.
 
 ### TASK_088 – Leadership-Bonus auf Fireteam-Mitglieder
 - Status: implementiert
 - Stand: Leadership-Bonus-System mit automatischer Lead-Nachfolge implementiert. `test_unit.gd` hat `is_fireteam_lead`-Export, `_leadership_bonus`-Feld, `apply_leadership_bonus()`, `clear_leadership_bonus()`, `get_leadership_hit_modifier()`. Der Bonus fliesst ueber `get_combat_effects()` und `_extract_unit_hit_modifier()` in SimulationRoot in die Trefferberechnung ein. `mission_combat_loop_driver.gd` verwaltet pro Tick Fireteam-Leads: wenn Original-Lead down → Unit mit hoechstem Leadership uebernimmt automatisch; wenn Original-Lead respawnt → uebernimmt sofort zurueck. Bonus = `leadership * 0.15` auf alle Fireteam-Mitglieder (nicht Lead selbst).
-- Offene Punkte: `is_fireteam_lead` muss im Mission-Setup aus FOB-Daten gesetzt werden (Loadout-Fluss TASK_087).
+- Offene Punkte: keine (durch TASK_087 wird `is_fireteam_lead` jetzt aus `lead_unit_id` der FOB-Daten gesetzt).
 - Risiken: keine
-- Naechster Schritt: Integration mit FOB-Loadout-Fluss (TASK_087).
+- Naechster Schritt: keiner.
 
 ### TASK_089 – Enemy Cover-Seeking
 - Status: implementiert

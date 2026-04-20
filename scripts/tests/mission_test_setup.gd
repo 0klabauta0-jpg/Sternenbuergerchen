@@ -22,6 +22,7 @@ const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_ros
 @export var terrain_registry_path: NodePath
 @export var map_file_path: String = "res://maps/test_mission_32x32_slots8.json"
 
+var member_loadouts: Dictionary = {}
 var _is_initialized: bool = false
 var _terrain_renderer = null
 
@@ -76,6 +77,7 @@ func _ready() -> void:
 			friendly_slot_index += 1
 
 		_apply_unit_identity_preset(unit, unit_id, unit_team_id)
+		_apply_fob_loadout_override(unit, unit_id, unit_team_id)
 		if unit.has_method("get_unit_id"):
 			unit_id = String(unit.call("get_unit_id"))
 		if unit.has_method("get_team_id"):
@@ -347,6 +349,34 @@ func _apply_unit_identity_preset(unit, unit_id: String, unit_team_id: String) ->
 		return
 
 	unit.call("apply_identity_config", preset)
+
+
+func _apply_fob_loadout_override(unit, unit_id: String, unit_team_id: String) -> void:
+	if unit_team_id != team_id:
+		return
+	if member_loadouts.is_empty():
+		return
+	if unit == null or not unit.has_method("apply_identity_config"):
+		return
+	if not member_loadouts.has(unit_id):
+		return
+
+	var loadout: Dictionary = member_loadouts[unit_id]
+	if typeof(loadout) != TYPE_DICTIONARY or loadout.is_empty():
+		return
+
+	var config: Dictionary = {}
+	if loadout.has("weapon_1"):
+		config["weapon_1_id"] = String(loadout["weapon_1"])
+	if loadout.has("weapon_2"):
+		config["weapon_2_id"] = String(loadout["weapon_2"])
+	if loadout.has("armor"):
+		config["armor"] = String(loadout["armor"])
+	if loadout.has("is_fireteam_lead"):
+		config["is_fireteam_lead"] = bool(loadout["is_fireteam_lead"])
+
+	if not config.is_empty():
+		unit.call("apply_identity_config", config)
 
 
 func _get_fireteam_id_for_friendly_slot(slot_index: int, unit_id: String, unit_team_id: String) -> String:

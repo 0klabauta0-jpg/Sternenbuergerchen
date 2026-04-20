@@ -380,6 +380,10 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 		mission_setup.set("selected_team_fireteam_ids", selected_fireteam_ids)
 		mission_setup.set("map_file_path", String(_get_selected_mission_definition().get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges())
 
+		var fob_loadouts: Dictionary = _build_fob_member_loadouts()
+		if not fob_loadouts.is_empty():
+			mission_setup.set("member_loadouts", fob_loadouts)
+
 	var command_flow_driver = mission_instance.get_node_or_null("CommandFlowDriver")
 	if command_flow_driver != null:
 		command_flow_driver.set("unit_id", String(selected_unit_ids[0]))
@@ -1030,6 +1034,35 @@ func _refresh_map_screen() -> void:
 		fob_screen.build_meta_overview(),
 		int(selected_mission.get("slot_count", FRIENDLY_NODE_NAMES.size()))
 	)
+
+
+func _build_fob_member_loadouts() -> Dictionary:
+	var fob_screen = _get_fob_screen()
+	if fob_screen == null:
+		return {}
+
+	var result: Dictionary = {}
+	var definitions: Array = fob_screen.get_fireteam_definitions()
+	for definition_variant in definitions:
+		if typeof(definition_variant) != TYPE_DICTIONARY:
+			continue
+		var definition: Dictionary = definition_variant
+		var lead_unit_id: String = String(definition.get("lead_unit_id", "")).strip_edges()
+		var member_loadouts = definition.get("member_loadouts", {})
+		if typeof(member_loadouts) != TYPE_DICTIONARY:
+			continue
+		for unit_id_variant in member_loadouts.keys():
+			var unit_id: String = String(unit_id_variant).strip_edges()
+			if unit_id.is_empty():
+				continue
+			var loadout = member_loadouts[unit_id_variant]
+			if typeof(loadout) != TYPE_DICTIONARY:
+				continue
+			var entry: Dictionary = (loadout as Dictionary).duplicate()
+			if not lead_unit_id.is_empty() and unit_id == lead_unit_id:
+				entry["is_fireteam_lead"] = true
+			result[unit_id] = entry
+	return result
 
 
 func _get_homebase_screen():
