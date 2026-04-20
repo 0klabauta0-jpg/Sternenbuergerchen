@@ -220,7 +220,7 @@ size_flags_vertical = 3
 
 [node name="AvailableHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/AvailablePanel/AvailableMargin/AvailableVBox"]
 layout_mode = 2
-text = "Available Operators"
+text = "1 Available Operators"
 theme_override_font_sizes/font_size = 13
 
 [node name="AvailableHelpLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/AvailablePanel/AvailableMargin/AvailableVBox"]
@@ -265,7 +265,7 @@ size_flags_vertical = 3
 
 [node name="FireteamHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox"]
 layout_mode = 2
-text = "Fireteams"
+text = "2 Fireteams"
 theme_override_font_sizes/font_size = 13
 
 [node name="FireteamToolbar" type="HBoxContainer" parent="Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox"]
@@ -336,7 +336,7 @@ size_flags_vertical = 3
 
 [node name="StagingHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox"]
 layout_mode = 2
-text = "Loadout Staging"
+text = "3 Loadout Staging"
 theme_override_font_sizes/font_size = 13
 
 [node name="RespawnPanel" type="PanelContainer" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox"]
@@ -360,7 +360,7 @@ size_flags_horizontal = 3
 
 [node name="RespawnHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/RespawnPanel/RespawnMargin/RespawnVBox"]
 layout_mode = 2
-text = "FOB Respawn"
+text = "3.1 FOB Respawn"
 theme_override_font_sizes/font_size = 10
 
 [node name="RespawnStatusLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/RespawnPanel/RespawnMargin/RespawnVBox"]
@@ -421,7 +421,7 @@ theme_override_constants/separation = 6
 [node name="LoadoutHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutHeaderRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Loadout"
+text = "3.2 Loadout"
 theme_override_font_sizes/font_size = 12
 
 [node name="ClearLoadoutButton" type="Button" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutHeaderRow"]
@@ -487,7 +487,7 @@ theme_override_constants/separation = 6
 [node name="DropshipHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipHeaderRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Dropship Wait Zone"
+text = "4 Dropship Wait Zone"
 theme_override_font_sizes/font_size = 13
 
 [node name="StartBoardingButton" type="Button" parent="Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipHeaderRow"]

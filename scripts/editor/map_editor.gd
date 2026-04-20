@@ -57,6 +57,15 @@ const DEFAULT_HALF_TILE_WIDTH: float = 64.0
 const DEFAULT_HALF_TILE_HEIGHT: float = 32.0
 const MIN_NEW_MAP_GRID_DIMENSION: int = 1
 const MAX_NEW_MAP_GRID_DIMENSION: int = 512
+const MIN_MISSION_SLOT_COUNT: int = 1
+const MAX_MISSION_SLOT_COUNT: int = 8
+const EDITABLE_MARKER_IDS: PackedStringArray = [
+	"spawn_alpha",
+	"spawn_bravo",
+	"objective_point",
+	"flank_anchor_left",
+	"flank_anchor_right",
+]
 const KENNEY_DIAMOND_CENTER := Vector2(256.0, 315.0)
 const MIN_CAMERA_ZOOM: float = 0.1
 const MAX_CAMERA_ZOOM: float = 3.0
@@ -85,6 +94,7 @@ var _hover_preview: Sprite2D = null
 var _hover_grid_position: Vector2i = Vector2i(-1, -1)
 var _dirty: bool = false
 var _is_refreshing_property_controls: bool = false
+var _is_refreshing_map_settings_controls: bool = false
 var _last_undo_state: Dictionary = {}
 var _current_map_path: String = DEFAULT_MAP_PATH
 var _pending_dialog_action: String = ""
@@ -454,6 +464,7 @@ func _refresh_property_panel() -> void:
 	var edge_type_option_button := _get_edge_type_option_button()
 	if tile_label == null or walkable_checkbox == null or blocks_los_checkbox == null or cover_spinbox == null or height_spinbox == null or surface_option_button == null:
 		return
+	_refresh_map_settings_panel()
 
 	_is_refreshing_property_controls = true
 	if tile_data == null:
@@ -503,6 +514,48 @@ func _refresh_property_panel() -> void:
 		edge_type_option_button.select(edge_idx)
 	_set_property_controls_enabled(true)
 	_is_refreshing_property_controls = false
+
+
+func _refresh_map_settings_panel() -> void:
+	var grid_size_label := get_node_or_null("UI/PropertyPanel/Margin/VBox/GridSizeLabel") as Label
+	var mission_slot_spinbox := _get_mission_slot_spinbox()
+	if grid_size_label == null or mission_slot_spinbox == null:
+		return
+
+	_is_refreshing_map_settings_controls = true
+	if _terrain_map_data == null:
+		grid_size_label.text = "Grid: -"
+		mission_slot_spinbox.value = MIN_MISSION_SLOT_COUNT
+		mission_slot_spinbox.editable = false
+		for marker_id in EDITABLE_MARKER_IDS:
+			_update_marker_controls(marker_id, Vector2.ZERO, false, false)
+		_is_refreshing_map_settings_controls = false
+		return
+
+	var grid_size: Vector2i = _terrain_map_data.call("get_grid_size")
+	grid_size_label.text = "Grid: %d x %d" % [grid_size.x, grid_size.y]
+	mission_slot_spinbox.value = clampi(int(_terrain_map_data.call("get_mission_slot_count")), MIN_MISSION_SLOT_COUNT, MAX_MISSION_SLOT_COUNT)
+	mission_slot_spinbox.editable = true
+
+	var has_selected_tile: bool = _get_selected_tile() != null
+	for marker_id in EDITABLE_MARKER_IDS:
+		var has_marker: bool = bool(_terrain_map_data.call("has_marker", marker_id))
+		var marker_position: Vector2 = _terrain_map_data.call("get_marker_position", marker_id, Vector2.ZERO)
+		_update_marker_controls(marker_id, marker_position, has_marker, has_selected_tile)
+
+	_is_refreshing_map_settings_controls = false
+
+
+func _update_marker_controls(marker_id: String, marker_position: Vector2, has_marker: bool, can_assign: bool) -> void:
+	var marker_label := _get_marker_label(marker_id)
+	var marker_button := _get_marker_button(marker_id)
+	if marker_label != null:
+		if has_marker:
+			marker_label.text = "%s: %d, %d" % [marker_id, int(round(marker_position.x)), int(round(marker_position.y))]
+		else:
+			marker_label.text = "%s: -" % marker_id
+	if marker_button != null:
+		marker_button.disabled = not can_assign
 
 
 func _set_property_controls_enabled(is_enabled: bool) -> void:
@@ -720,6 +773,7 @@ func _connect_ui_signals() -> void:
 	var height_spinbox := _get_height_spinbox()
 	var surface_option_button := _get_surface_option_button()
 	var edge_type_option_button := _get_edge_type_option_button()
+	var mission_slot_spinbox := _get_mission_slot_spinbox()
 	var file_dialog := get_node_or_null("UI/LoadDialog") as FileDialog
 	var confirm_dialog := get_node_or_null("UI/DirtyConfirmDialog") as ConfirmationDialog
 	var new_map_dialog := _get_new_map_dialog()
@@ -746,8 +800,14 @@ func _connect_ui_signals() -> void:
 		surface_option_button.item_selected.connect(_on_surface_selected)
 	if edge_type_option_button != null and not edge_type_option_button.item_selected.is_connected(_on_edge_type_selected):
 		edge_type_option_button.item_selected.connect(_on_edge_type_selected)
+	if mission_slot_spinbox != null and not mission_slot_spinbox.value_changed.is_connected(_on_mission_slot_spinbox_value_changed):
+		mission_slot_spinbox.value_changed.connect(_on_mission_slot_spinbox_value_changed)
 	if tile_type_list != null and not tile_type_list.item_selected.is_connected(_on_tile_type_selected):
 		tile_type_list.item_selected.connect(_on_tile_type_selected)
+	for marker_id in EDITABLE_MARKER_IDS:
+		var marker_button := _get_marker_button(marker_id)
+		if marker_button != null and not marker_button.pressed.is_connected(_on_marker_assign_button_pressed.bind(marker_id)):
+			marker_button.pressed.connect(_on_marker_assign_button_pressed.bind(marker_id))
 	if file_dialog != null:
 		file_dialog.access = FileDialog.ACCESS_RESOURCES
 		file_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
@@ -805,6 +865,28 @@ func _on_property_controls_changed(_value: bool) -> void:
 
 func _on_property_controls_value_changed(_value: float) -> void:
 	_apply_property_controls_to_selected_tile()
+
+
+func _on_mission_slot_spinbox_value_changed(value: float) -> void:
+	if _is_refreshing_map_settings_controls or _terrain_map_data == null:
+		return
+	var next_slot_count: int = clampi(int(round(value)), MIN_MISSION_SLOT_COUNT, MAX_MISSION_SLOT_COUNT)
+	if int(_terrain_map_data.call("get_mission_slot_count")) == next_slot_count:
+		return
+	_terrain_map_data.call("set_mission_slot_count", next_slot_count)
+	_mark_dirty(true)
+	_refresh_map_settings_panel()
+
+
+func _on_marker_assign_button_pressed(marker_id: String) -> void:
+	if _terrain_map_data == null:
+		return
+	var tile_data = _get_selected_tile()
+	if tile_data == null:
+		return
+	_terrain_map_data.call("set_marker_position", marker_id, tile_data.world_position)
+	_mark_dirty(true)
+	_refresh_map_settings_panel()
 
 
 func _on_surface_selected(_index: int) -> void:
@@ -959,6 +1041,10 @@ func _get_height_spinbox() -> SpinBox:
 	return get_node_or_null("UI/PropertyPanel/Margin/VBox/HeightRow/HeightSpinBox") as SpinBox
 
 
+func _get_mission_slot_spinbox() -> SpinBox:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MissionSlotRow/MissionSlotSpinBox") as SpinBox
+
+
 func _get_edge_type_option_button() -> OptionButton:
 	return get_node_or_null("UI/PropertyPanel/Margin/VBox/EdgeTypeRow/EdgeTypeOptionButton") as OptionButton
 
@@ -990,6 +1076,36 @@ func _get_brush_radius() -> int:
 
 func _get_surface_option_button() -> OptionButton:
 	return get_node_or_null("UI/PropertyPanel/Margin/VBox/SurfaceRow/SurfaceOptionButton") as OptionButton
+
+
+func _get_marker_label(marker_id: String) -> Label:
+	match marker_id:
+		"spawn_alpha":
+			return get_node_or_null("UI/PropertyPanel/Margin/VBox/SpawnAlphaRow/SpawnAlphaLabel") as Label
+		"spawn_bravo":
+			return get_node_or_null("UI/PropertyPanel/Margin/VBox/SpawnBravoRow/SpawnBravoLabel") as Label
+		"objective_point":
+			return get_node_or_null("UI/PropertyPanel/Margin/VBox/ObjectivePointRow/ObjectivePointLabel") as Label
+		"flank_anchor_left":
+			return get_node_or_null("UI/PropertyPanel/Margin/VBox/FlankLeftRow/FlankLeftLabel") as Label
+		"flank_anchor_right":
+			return get_node_or_null("UI/PropertyPanel/Margin/VBox/FlankRightRow/FlankRightLabel") as Label
+	return null
+
+
+func _get_marker_button(marker_id: String) -> Button:
+	match marker_id:
+		"spawn_alpha":
+			return get_node_or_null("UI/PropertyPanel/Margin/VBox/SpawnAlphaRow/SpawnAlphaButton") as Button
+		"spawn_bravo":
+			return get_node_or_null("UI/PropertyPanel/Margin/VBox/SpawnBravoRow/SpawnBravoButton") as Button
+		"objective_point":
+			return get_node_or_null("UI/PropertyPanel/Margin/VBox/ObjectivePointRow/ObjectivePointButton") as Button
+		"flank_anchor_left":
+			return get_node_or_null("UI/PropertyPanel/Margin/VBox/FlankLeftRow/FlankLeftButton") as Button
+		"flank_anchor_right":
+			return get_node_or_null("UI/PropertyPanel/Margin/VBox/FlankRightRow/FlankRightButton") as Button
+	return null
 
 
 func _get_selected_surface_type() -> String:

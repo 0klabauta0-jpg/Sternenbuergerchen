@@ -210,6 +210,106 @@ layout_mode = 2
 size_flags_horizontal = 3
 disabled = true
 
+[node name="MapSettingsSeparator" type="HSeparator" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="MapSettingsTitle" type="Label" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
+text = "Map Settings"
+
+[node name="GridSizeLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
+text = "Grid: -"
+
+[node name="MissionSlotRow" type="HBoxContainer" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="MissionSlotLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox/MissionSlotRow"]
+layout_mode = 2
+text = "Mission Slots:"
+
+[node name="MissionSlotSpinBox" type="SpinBox" parent="UI/PropertyPanel/Margin/VBox/MissionSlotRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 8.0
+step = 1.0
+value = 3.0
+
+[node name="MarkersTitle" type="Label" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
+text = "Mission Markers"
+
+[node name="MarkerHelpLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
+text = "Setzt den Marker auf die Mitte des aktuell selektierten Tiles."
+autowrap_mode = 3
+
+[node name="SpawnAlphaRow" type="HBoxContainer" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="SpawnAlphaLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox/SpawnAlphaRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "spawn_alpha: -"
+
+[node name="SpawnAlphaButton" type="Button" parent="UI/PropertyPanel/Margin/VBox/SpawnAlphaRow"]
+layout_mode = 2
+text = "Use Tile"
+
+[node name="SpawnBravoRow" type="HBoxContainer" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="SpawnBravoLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox/SpawnBravoRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "spawn_bravo: -"
+
+[node name="SpawnBravoButton" type="Button" parent="UI/PropertyPanel/Margin/VBox/SpawnBravoRow"]
+layout_mode = 2
+text = "Use Tile"
+
+[node name="ObjectivePointRow" type="HBoxContainer" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ObjectivePointLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox/ObjectivePointRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "objective_point: -"
+
+[node name="ObjectivePointButton" type="Button" parent="UI/PropertyPanel/Margin/VBox/ObjectivePointRow"]
+layout_mode = 2
+text = "Use Tile"
+
+[node name="FlankLeftRow" type="HBoxContainer" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="FlankLeftLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox/FlankLeftRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "flank_anchor_left: -"
+
+[node name="FlankLeftButton" type="Button" parent="UI/PropertyPanel/Margin/VBox/FlankLeftRow"]
+layout_mode = 2
+text = "Use Tile"
+
+[node name="FlankRightRow" type="HBoxContainer" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="FlankRightLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox/FlankRightRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "flank_anchor_right: -"
+
+[node name="FlankRightButton" type="Button" parent="UI/PropertyPanel/Margin/VBox/FlankRightRow"]
+layout_mode = 2
+text = "Use Tile"
+
 [node name="LoadDialog" type="FileDialog" parent="UI"]
 title = "Load Map"
 size = Vector2i(600, 400)

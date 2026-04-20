@@ -2060,13 +2060,14 @@ func _build_transport_craft_pilot_card(craft_state: Dictionary) -> Control:
 	var profile = _profiles_by_id.get(pilot_unit_id, null)
 	if profile == null:
 		return null
+	var is_in_transit: bool = bool(craft_state.get("is_in_transit", false))
 	var card = NPC_COMPACT_CARD_SCENE.instantiate()
 	card.setup_from_profile(
 		profile,
 		{
 			"source_context": "transport_craft_pilot",
 			"selected": pilot_unit_id == _focused_unit_id,
-			"disabled": false,
+			"disabled": is_in_transit,
 			"drag_enabled": false,
 			"compact_mode": true,
 		}
@@ -2076,6 +2077,8 @@ func _build_transport_craft_pilot_card(craft_state: Dictionary) -> Control:
 	if not card.card_open_requested.is_connected(_on_operator_card_open_requested):
 		card.card_open_requested.connect(_on_operator_card_open_requested)
 	card.mouse_filter = Control.MOUSE_FILTER_PASS
+	if is_in_transit:
+		card.modulate = Color(1.0, 1.0, 1.0, 0.56)
 	return card
 
 

@@ -159,7 +159,7 @@ size_flags_vertical = 3
 
 [node name="RosterHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox" unique_id=2120369881]
 layout_mode = 2
-text = "Available Operators"
+text = "1 Available Operators"
 theme_override_font_sizes/font_size = 13
 
 [node name="RosterHelpLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox" unique_id=1453484048]
@@ -205,7 +205,7 @@ theme_override_constants/separation = 6
 [node name="TeamHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamHeaderRow" unique_id=188375870]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Transfer Team"
+text = "2 Transfer Team"
 theme_override_font_sizes/font_size = 13
 
 [node name="ConfirmButton" type="Button" parent="Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamHeaderRow" unique_id=184307964]
@@ -268,7 +268,7 @@ theme_override_constants/separation = 4
 
 [node name="ActiveTransfersHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox"]
 layout_mode = 2
-text = "Inbound To FOB"
+text = "2.1 Inbound To FOB"
 theme_override_font_sizes/font_size = 11
 
 [node name="ActiveTransfersScroll" type="ScrollContainer" parent="Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox"]
@@ -306,7 +306,7 @@ size_flags_vertical = 3
 
 [node name="AircraftHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox"]
 layout_mode = 2
-text = "Flight Deck"
+text = "3 Flight Deck"
 theme_override_font_sizes/font_size = 13
 
 [node name="AircraftSelectorRow" type="HBoxContainer" parent="Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox"]
@@ -359,7 +359,7 @@ theme_override_constants/separation = 6
 
 [node name="AircraftTransfersHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox"]
 layout_mode = 2
-text = "Deck Activity"
+text = "3.1 Deck Activity"
 theme_override_font_sizes/font_size = 11
 
 [node name="AircraftTransfersScroll" type="ScrollContainer" parent="Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox"]
@@ -407,7 +407,7 @@ layout_mode = 2
 [node name="InfoHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/InfoHeaderRow" unique_id=383525356]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Character Sheet"
+text = "4 Character Sheet"
 theme_override_font_sizes/font_size = 13
 
 [node name="CloseSheetButton" type="Button" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/InfoHeaderRow"]

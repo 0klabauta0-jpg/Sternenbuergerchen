@@ -8,6 +8,7 @@
                       "y":  32
                   },
     "map_name":  "test_mission_32x32_slots8",
+    "mission_slot_count":  8,
     "markers":  {
                     "flank_anchor_left":  {
                                               "x":  128,

@@ -1,5 +1,6 @@
 {
 	"map_name": "wall_test_4x4",
+	"mission_slot_count": 3,
 	"grid_size": {
 		"x": 8,
 		"y": 8

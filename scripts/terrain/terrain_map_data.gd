@@ -4,6 +4,7 @@ extends RefCounted
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 
 var _map_name: String = ""
+var _mission_slot_count: int = 3
 var _grid_size: Vector2i = Vector2i.ZERO
 var _tile_half_width: float = 64.0
 var _tile_half_height: float = 32.0
@@ -29,6 +30,7 @@ static func load_from_file(path: String) -> TerrainMapData:
 
 	var root_dict: Dictionary = parsed_json
 	terrain_map_data._map_name = String(root_dict.get("map_name", path.get_file().get_basename()))
+	terrain_map_data._mission_slot_count = maxi(int(root_dict.get("mission_slot_count", 3)), 1)
 	terrain_map_data._grid_size = _coerce_vector2i(root_dict.get("grid_size", Vector2i.ZERO))
 
 	var tile_size_dict: Dictionary = root_dict.get("tile_size", {})
@@ -63,10 +65,12 @@ static func create_empty(
 	grid_size: Vector2i,
 	grid_origin: Vector2,
 	half_tile_width: float = 64.0,
-	half_tile_height: float = 32.0
+	half_tile_height: float = 32.0,
+	mission_slot_count: int = 3
 ) -> TerrainMapData:
 	var terrain_map_data := TerrainMapData.new()
 	terrain_map_data._map_name = map_name
+	terrain_map_data._mission_slot_count = maxi(mission_slot_count, 1)
 	terrain_map_data._grid_size = grid_size
 	terrain_map_data._grid_origin = grid_origin
 	terrain_map_data._tile_half_width = maxf(half_tile_width, 0.001)
@@ -110,6 +114,7 @@ func save_to_file(path: String) -> Error:
 
 	var json_root: Dictionary = {
 		"map_name": _map_name,
+		"mission_slot_count": _mission_slot_count,
 		"grid_size": {
 			"x": _grid_size.x,
 			"y": _grid_size.y,
@@ -171,6 +176,14 @@ func get_map_name() -> String:
 
 func set_map_name(map_name: String) -> void:
 	_map_name = map_name.strip_edges()
+
+
+func get_mission_slot_count() -> int:
+	return maxi(_mission_slot_count, 1)
+
+
+func set_mission_slot_count(mission_slot_count: int) -> void:
+	_mission_slot_count = maxi(mission_slot_count, 1)
 
 
 func get_grid_size() -> Vector2i:

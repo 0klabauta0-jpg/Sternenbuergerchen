@@ -3,6 +3,7 @@ extends Node
 const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
 const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
+const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const FRIENDLY_NODE_NAMES: PackedStringArray = ["UnitAlpha", "UnitBravo", "UnitCharlie", "UnitDelta", "UnitEcho", "UnitFoxtrot", "UnitGolf", "UnitHotel"]
 const DEFAULT_META_MAP_PATH: String = "res://maps/test_mission_32x32_slots8.json"
 const HOMEBASE_MISSION_CATALOG: Array = [
@@ -526,9 +527,8 @@ func _on_homebase_transport_timer_timeout() -> void:
 		fob_changed = true
 
 	_refresh_homebase_screen()
-	if fob_changed:
-		_refresh_fob_screen()
-		_refresh_map_screen()
+	_refresh_fob_screen()
+	_refresh_map_screen()
 	_ensure_transport_timer_state()
 
 
@@ -1148,20 +1148,39 @@ func _is_known_mission_id(mission_id: String) -> bool:
 	return false
 
 
+func _resolve_mission_slot_count(mission_definition: Dictionary) -> int:
+	var explicit_slot_count: int = int(mission_definition.get("slot_count", 0))
+	if explicit_slot_count > 0:
+		return explicit_slot_count
+	var map_file_path: String = String(mission_definition.get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges()
+	if map_file_path.is_empty():
+		map_file_path = DEFAULT_META_MAP_PATH
+	var terrain_map_data = TERRAIN_MAP_DATA_SCRIPT.call("load_from_file", map_file_path)
+	if terrain_map_data != null and terrain_map_data.has_method("get_mission_slot_count"):
+		return maxi(int(terrain_map_data.call("get_mission_slot_count")), 1)
+	return FRIENDLY_NODE_NAMES.size()
+
+
+func _build_resolved_mission_definition(mission_definition: Dictionary) -> Dictionary:
+	var resolved_definition: Dictionary = mission_definition.duplicate(true)
+	resolved_definition["slot_count"] = _resolve_mission_slot_count(mission_definition)
+	return resolved_definition
+
+
 func _get_selected_mission_definition() -> Dictionary:
 	for mission_variant in _mission_catalog:
 		var mission_definition: Dictionary = Dictionary(mission_variant)
 		if String(mission_definition.get("mission_id", "")).strip_edges() == _selected_mission_id:
-			return mission_definition.duplicate(true)
+			return _build_resolved_mission_definition(mission_definition)
 	for mission_variant in _mission_catalog:
 		var mission_definition: Dictionary = Dictionary(mission_variant)
 		if String(mission_definition.get("map_file_path", "")).strip_edges() == _selected_mission_map_path:
-			return mission_definition.duplicate(true)
+			return _build_resolved_mission_definition(mission_definition)
 	if _mission_catalog.is_empty():
 		return {
 			"mission_id": _selected_mission_id,
 			"mission_name": "Operation: FOB Transfer",
 			"map_file_path": DEFAULT_META_MAP_PATH,
-			"slot_count": FRIENDLY_NODE_NAMES.size(),
+			"slot_count": _resolve_mission_slot_count({"map_file_path": DEFAULT_META_MAP_PATH}),
 		}
-	return Dictionary(_mission_catalog[0]).duplicate(true)
+	return _build_resolved_mission_definition(Dictionary(_mission_catalog[0]))

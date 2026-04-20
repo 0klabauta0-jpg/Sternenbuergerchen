@@ -1206,7 +1206,7 @@ func _build_assigned_pilot_row(unit_id: String, craft_name: String, craft_busy: 
 		{
 			"source_context": "aircraft_shipcard",
 			"selected": unit_id == _focused_unit_id,
-			"disabled": false,
+			"disabled": craft_in_transit,
 			"drag_enabled": not craft_busy,
 			"compact_mode": true,
 		}
