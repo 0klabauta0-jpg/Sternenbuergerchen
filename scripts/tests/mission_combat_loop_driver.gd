@@ -1169,6 +1169,23 @@ func _build_enemy_reposition_target(unit, hit_context: Dictionary) -> Vector2:
 	if attacker_direction.is_zero_approx():
 		attacker_direction = Vector2.RIGHT.rotated(randf() * TAU)
 
+	# Try cover-seeking: find walkable cover tiles in reposition radius
+	var terrain_registry = _get_terrain_registry()
+	if terrain_registry != null and terrain_registry.has_method("get_walkable_cover_tiles_in_radius"):
+		var cover_tiles: Array = terrain_registry.call("get_walkable_cover_tiles_in_radius", unit_node.global_position, enemy_reposition_max_distance)
+		if cover_tiles.size() > 0:
+			# Filter tiles that are at least min_distance away
+			var min_dist_sq: float = enemy_reposition_min_distance * enemy_reposition_min_distance
+			var candidates: Array = []
+			for tile in cover_tiles:
+				if unit_node.global_position.distance_squared_to(tile.world_position) >= min_dist_sq:
+					candidates.append(tile)
+			if candidates.size() > 0:
+				# Sort by cover_value descending, pick best
+				candidates.sort_custom(func(a, b): return int(a.cover_value) > int(b.cover_value))
+				return Vector2(candidates[0].world_position)
+
+	# Fallback: random reposition away from attacker
 	var reposition_distance: float = randf_range(enemy_reposition_min_distance, enemy_reposition_max_distance)
 	return unit_node.global_position + attacker_direction.normalized() * reposition_distance
 

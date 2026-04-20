@@ -108,6 +108,20 @@ func get_surface_speed_factor_at_world(world_pos: Vector2) -> float:
 	return TERRAIN_TILE_DATA_SCRIPT.get_surface_speed_factor(get_surface_type_at_world(world_pos))
 
 
+func get_walkable_cover_tiles_in_radius(world_center: Vector2, radius: float) -> Array:
+	var radius_sq: float = radius * radius
+	var result: Array = []
+	for tile_data in _tiles.values():
+		if not bool(tile_data.walkable):
+			continue
+		if int(tile_data.cover_value) <= 0:
+			continue
+		if world_center.distance_squared_to(tile_data.world_position) > radius_sq:
+			continue
+		result.append(tile_data)
+	return result
+
+
 func world_to_grid(world_pos: Vector2) -> Vector2i:
 	var delta: Vector2 = world_pos - _grid_origin_world
 	var grid_x: float = ((delta.y / _half_tile_height) + (delta.x / _half_tile_width)) * 0.5

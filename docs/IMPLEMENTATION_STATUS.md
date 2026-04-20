@@ -676,8 +676,11 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Naechster Schritt: Integration mit FOB-Loadout-Fluss (TASK_087).
 
 ### TASK_089 – Enemy Cover-Seeking
-- Status: offen
-- Ziel: Gegner-Units suchen aktiv Cover-Tiles in ihrer Naehe, statt sich nur nach Treffer zufaellig zu repositionieren. Die bestehende Reposition-Logik in `MissionCombatLoopDriver` wird um eine Cover-Tile-Praeferenz aus `TerrainRegistry` erweitert.
+- Status: implementiert
+- Stand: `TerrainRegistry` um `get_walkable_cover_tiles_in_radius(world_center, radius)` erweitert. `_build_enemy_reposition_target()` in `mission_combat_loop_driver.gd` sucht jetzt Cover-Tiles im Reposition-Radius, filtert nach Mindestabstand, sortiert nach Cover-Score absteigend und waehlt das beste Tile. Fallback auf bisherige Zufalls-Reposition wenn keine Cover-Tiles vorhanden. Cooldown bleibt erhalten.
+- Offene Punkte: keine
+- Risiken: keine
+- Naechster Schritt: TASK_090 differenzierte Enemy-Typen.
 
 ### TASK_090 – Differenzierte Enemy-Typen
 - Status: offen

@@ -3,7 +3,7 @@
 ## Ziel
 Gegner-Units suchen aktiv Cover-Tiles in ihrer Naehe, statt sich nur nach Treffer zufaellig zu repositionieren.
 
-## Status: OFFEN
+## Status: ERLEDIGT
 
 ## Kontext
 - `_try_reposition_enemy_on_damage()` in `mission_combat_loop_driver.gd` (Zeile ~980) repositioniert Gegner nach Treffer
