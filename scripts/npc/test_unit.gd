@@ -224,6 +224,10 @@ func get_leadership_skill() -> float:
 	return float(_skills.leadership)
 
 
+func get_awareness() -> float:
+	return awareness
+
+
 func get_toughness_skill() -> float:
 	return float(_skills.toughness)
 

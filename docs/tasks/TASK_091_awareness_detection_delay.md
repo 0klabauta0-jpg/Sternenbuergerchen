@@ -4,7 +4,7 @@
 Der `awareness`-Wert einer Unit bestimmt, wie schnell sie feindliche Kontakte erkennt.
 Hohe Awareness → sofortige Erkennung; niedrige Awareness → verzoegertes Engagement.
 
-## Status: OFFEN
+## Status: ERLEDIGT
 
 ## Kontext
 - `test_unit.gd` hat `awareness` als Export (0.0–1.0, Default 0.5)

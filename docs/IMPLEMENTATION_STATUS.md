@@ -690,8 +690,11 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Naechster Schritt: TASK_091 Awareness/Detection Delay.
 
 ### TASK_091 – Awareness: Detection-Delay
-- Status: offen
-- Ziel: Der `awareness`-Wert einer Unit bestimmt, wie schnell sie feindliche Kontakte erkennt. Hohe Awareness → sofortige Erkennung; niedrige Awareness → verzoegertes Engagement. Aktuell ist Kontakt sofort da, sobald LOS und Reichweite stimmen.
+- Status: implementiert
+- Stand: Detection-Delay basierend auf dem `awareness`-Wert einer Unit implementiert. `_detection_progress`-Dictionary in `mission_combat_loop_driver.gd` trackt pro Attacker-Target-Paar verbleibende Detection-Ticks. Formel: `(1.0 - awareness) * MAX_DETECTION_DELAY_TICKS` (15 Ticks). awareness=1.0 erkennt sofort, awareness=0.0 braucht 15 Ticks. Timer wird pro Tick dekrementiert und bei LOS-Verlust zurueckgesetzt. `get_awareness()` in `test_unit.gd` ergaenzt.
+- Offene Punkte: keine
+- Risiken: keine
+- Naechster Schritt: TASK_092 Stealth/Sichtreichweite.
 
 ### TASK_092 – Stealth: Reduzierte Sichtreichweite
 - Status: offen

@@ -16,6 +16,8 @@ const RESPAWN_EVENT_COLOR: Color = Color(0.72, 0.9, 1.0, 1.0)
 const EVENT_DEFAULT_DURATION: float = 1.2
 const LEADERSHIP_BONUS_FACTOR: float = 0.15
 const LEADERSHIP_EVENT_COLOR: Color = Color(0.6, 0.85, 1.0, 1.0)
+const MAX_DETECTION_DELAY_TICKS: int = 15
+const DETECTION_EVENT_COLOR: Color = Color(0.85, 0.85, 0.55, 1.0)
 
 signal contact_established(attacker, target)
 signal combat_resolved(mission_result: Dictionary)
@@ -63,6 +65,7 @@ var _runs_local_authority: bool = true
 var _fireteam_original_leads: Dictionary = {}
 var _fireteam_acting_leads: Dictionary = {}
 var _fireteam_members: Dictionary = {}
+var _detection_progress: Dictionary = {}
 
 
 func _ready() -> void:
@@ -153,6 +156,7 @@ func _on_tick_processed(tick: int) -> void:
 	_queue_bleedout_for_downed_enemy(simulation_root)
 	_queue_bleedout_for_downed_friendly(simulation_root)
 	_update_fireteam_leadership()
+	_advance_detection_timers()
 	_advance_enemy_units(simulation_root)
 	_try_enqueue_attacks(simulation_root)
 	_update_combat_resolution()
@@ -469,6 +473,81 @@ func _can_unit_attack(unit) -> bool:
 	return _is_engage_ready(unit)
 
 
+func _get_detection_delay_ticks(unit) -> int:
+	var unit_awareness: float = 0.5
+	if unit != null and unit.has_method("get_awareness"):
+		unit_awareness = clampf(float(unit.call("get_awareness")), 0.0, 1.0)
+
+	return int(round((1.0 - unit_awareness) * float(MAX_DETECTION_DELAY_TICKS)))
+
+
+func _make_detection_key(attacker_id: String, target_id: String) -> String:
+	return "%s:%s" % [attacker_id, target_id]
+
+
+func _is_detection_complete(attacker_id: String, target_id: String) -> bool:
+	var key: String = _make_detection_key(attacker_id, target_id)
+	return _detection_progress.has(key) and int(_detection_progress[key]) <= 0
+
+
+func _start_or_continue_detection(attacker, attacker_id: String, target_id: String) -> void:
+	var key: String = _make_detection_key(attacker_id, target_id)
+	if _detection_progress.has(key):
+		return
+
+	var delay: int = _get_detection_delay_ticks(attacker)
+	_detection_progress[key] = delay
+	if delay > 0 and attacker != null and attacker.has_method("show_event_text"):
+		attacker.call("show_event_text", "DETECTING...", DETECTION_EVENT_COLOR, 0.8)
+
+
+func _advance_detection_timers() -> void:
+	var keys_to_remove: Array = []
+	for key in _detection_progress.keys():
+		var remaining: int = int(_detection_progress[key])
+		if remaining > 0:
+			_detection_progress[key] = remaining - 1
+		else:
+			# Already detected, keep entry
+			pass
+
+	# Prune pairs that lost LOS
+	for key in _detection_progress.keys():
+		var parts: PackedStringArray = String(key).split(":")
+		if parts.size() != 2:
+			keys_to_remove.append(key)
+			continue
+
+		var attacker = _resolve_unit_by_id(parts[0])
+		var target = _resolve_unit_by_id(parts[1])
+		if attacker == null or target == null:
+			keys_to_remove.append(key)
+			continue
+
+		if not _has_valid_los(attacker, target):
+			keys_to_remove.append(key)
+
+	for key in keys_to_remove:
+		_detection_progress.erase(key)
+
+
+func _has_valid_los(attacker, target) -> bool:
+	if attacker == null or target == null:
+		return false
+
+	if not attacker.has_method("get_vital_state") or String(attacker.call("get_vital_state")) != "fit":
+		return false
+
+	if not target.has_method("get_vital_state") or String(target.call("get_vital_state")) != "fit":
+		return false
+
+	return _los_system.has_line_of_sight_between_nodes(attacker, target, contact_range, _get_terrain_registry())
+
+
+func get_detection_progress() -> Dictionary:
+	return _detection_progress.duplicate(true)
+
+
 func _is_target_attackable(attacker, target) -> bool:
 	if target == null or not _can_target_receive_attack(target):
 		return false
@@ -635,11 +714,17 @@ func _find_first_contact_pair() -> Dictionary:
 		if enemy == null:
 			continue
 
+		var f_id: String = String(friendly.call("get_unit_id"))
+		var e_id: String = String(enemy.call("get_unit_id"))
+		_start_or_continue_detection(friendly, f_id, e_id)
+		if not _is_detection_complete(f_id, e_id):
+			continue
+
 		return {
 			"attacker": friendly,
 			"target": enemy,
-			"attacker_id": String(friendly.call("get_unit_id")),
-			"target_id": String(enemy.call("get_unit_id")),
+			"attacker_id": f_id,
+			"target_id": e_id,
 		}
 
 	for enemy in _get_active_enemy_units():
@@ -650,11 +735,17 @@ func _find_first_contact_pair() -> Dictionary:
 		if friendly == null:
 			continue
 
+		var en_id: String = String(enemy.call("get_unit_id"))
+		var fr_id: String = String(friendly.call("get_unit_id"))
+		_start_or_continue_detection(enemy, en_id, fr_id)
+		if not _is_detection_complete(en_id, fr_id):
+			continue
+
 		return {
 			"attacker": enemy,
 			"target": friendly,
-			"attacker_id": String(enemy.call("get_unit_id")),
-			"target_id": String(friendly.call("get_unit_id")),
+			"attacker_id": en_id,
+			"target_id": fr_id,
 		}
 
 	return {}
