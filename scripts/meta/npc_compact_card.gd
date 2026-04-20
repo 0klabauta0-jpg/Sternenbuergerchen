@@ -227,6 +227,7 @@ func _ensure_ui() -> void:
 	star_button.name = "StarButton"
 	star_button.text = "\u2605"
 	star_button.flat = true
+	star_button.toggle_mode = true
 	star_button.custom_minimum_size = Vector2(COMPACT_STAR_WIDTH, COMPACT_STAR_WIDTH)
 	star_button.visible = false
 	star_button.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -279,7 +280,10 @@ func _refresh_card() -> void:
 	var star_button = get_node_or_null("Margin/HBox/StarButton")
 	if star_button != null:
 		star_button.visible = _show_lead_indicator
+		star_button.button_pressed = _is_lead
 		star_button.custom_minimum_size = Vector2(COMPACT_STAR_WIDTH, COMPACT_STAR_WIDTH) if _compact_mode else Vector2(20.0, 20.0)
+		star_button.tooltip_text = "Lead aktiv" if _is_lead else "Als Lead setzen"
+		star_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		if _is_lead:
 			star_button.add_theme_color_override("font_color", Color(1.0, 0.84, 0.0, 1.0))
 			star_button.add_theme_font_size_override("font_size", 16 if not _compact_mode else 14)

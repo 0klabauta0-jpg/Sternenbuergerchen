@@ -12,6 +12,7 @@ const STATUS_LABEL_POSITION: Vector2 = Vector2(542.0, 176.0)
 @export var first_wave_delay_seconds: float = 5.0
 @export var unit_registry_path: NodePath
 @export var simulation_root_path: NodePath
+@export var preview_mode: bool = false
 
 var _enemy_units: Array = []
 var _spawn_positions_by_unit_id: Dictionary = {}
@@ -19,6 +20,7 @@ var _current_wave_number: int = 0
 var _time_until_next_wave: float = 0.0
 var _status_label: Label = null
 var _all_waves_complete_emitted: bool = false
+var _overlay_visible: bool = true
 
 
 func _ready() -> void:
@@ -75,6 +77,8 @@ func are_all_waves_started() -> bool:
 
 
 func _process(delta: float) -> void:
+	if preview_mode:
+		return
 	if not _should_process_locally():
 		_refresh_status_label()
 		return
@@ -179,7 +183,7 @@ func _ensure_status_label() -> void:
 
 
 func _refresh_status_label() -> void:
-	if _status_label == null:
+	if _status_label == null or preview_mode:
 		return
 
 	var total_wave_count: int = get_total_wave_count()
@@ -196,8 +200,40 @@ func _refresh_status_label() -> void:
 
 
 func _finish_ready() -> void:
+	if preview_mode:
+		_remove_status_label()
+		return
 	_ensure_status_label()
+	_apply_overlay_visibility()
 	_refresh_status_label()
+
+
+func set_preview_mode(is_preview: bool) -> void:
+	preview_mode = is_preview
+	if preview_mode:
+		_remove_status_label()
+		return
+	if is_inside_tree():
+		_ensure_status_label()
+		_apply_overlay_visibility()
+		_refresh_status_label()
+
+
+func set_overlay_visible(is_visible: bool) -> void:
+	_overlay_visible = is_visible
+	_apply_overlay_visibility()
+
+
+func _apply_overlay_visibility() -> void:
+	if _status_label == null:
+		return
+	_status_label.visible = _overlay_visible and not preview_mode
+
+
+func _remove_status_label() -> void:
+	if _status_label != null:
+		_status_label.queue_free()
+		_status_label = null
 
 
 func _should_process_locally() -> bool:

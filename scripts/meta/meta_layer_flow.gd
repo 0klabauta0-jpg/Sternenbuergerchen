@@ -56,11 +56,19 @@ const HOMEBASE_AIRCRAFT_BASE_DEFINITIONS: Dictionary = {
 const HOMEBASE_TEAM_TRANSFER_DURATION_SECONDS: float = 14.0
 const HOMEBASE_PILOT_TRANSFER_DURATION_SECONDS: float = 10.0
 const HOMEBASE_CARGO_LOAD_DURATION_SECONDS: float = 9.0
+const DEFAULT_MISSION_PLANNING_STATE: Dictionary = {
+	"has_lz_position": false,
+	"lz_position": Vector2.ZERO,
+	"approach_angle": "NW",
+	"drop_ship_requested": false,
+	"selected_fireteam": "ALL",
+	"selected_phase": "APPROACH",
+}
 
 var _available_team_units: Array = UNIT_ROSTER_PRESETS_SCRIPT.get_homebase_roster()
 var _all_team_units: Array = UNIT_ROSTER_PRESETS_SCRIPT.get_homebase_roster()
 var _selected_unit_ids: PackedStringArray = []
-var _homebase_staged_unit_ids: PackedStringArray = UNIT_ROSTER_PRESETS_SCRIPT.get_default_homebase_selection()
+var _homebase_staged_unit_ids: PackedStringArray = []
 var _selected_fireteam_ids: PackedStringArray = []
 var _active_mission = null
 var _last_mission_result: Dictionary = {}
@@ -77,6 +85,9 @@ var _pending_homebase_team_transfers: Array = []
 var _pending_homebase_pilot_transfers: Array = []
 var _pending_homebase_cargo_loads: Array = []
 var _transfer_sequence: int = 0
+var _preview_mission = null
+var _preview_mission_signature: Dictionary = {}
+var _mission_planning_state: Dictionary = DEFAULT_MISSION_PLANNING_STATE.duplicate(true)
 
 
 func _ready() -> void:
@@ -130,6 +141,7 @@ func _ready() -> void:
 	_refresh_map_screen()
 	_ensure_transport_timer_state()
 	_show_homebase()
+	call_deferred("_sync_mission_host_visibility")
 
 
 func get_selected_unit_ids() -> PackedStringArray:
@@ -358,22 +370,27 @@ func _start_mission() -> void:
 	if mission_host == null:
 		push_warning("MetaLayerFlow requires a MissionHost child.")
 		return
+	_release_preview_mission()
 
 	if _active_mission != null:
 		_active_mission.queue_free()
 		_active_mission = null
 
 	var mission_instance = MISSION_TEST_SCENE.instantiate()
-	_configure_mission_instance(mission_instance, _selected_unit_ids, _selected_fireteam_ids)
+	_configure_mission_instance(mission_instance, _selected_unit_ids, _selected_fireteam_ids, false)
 	mission_host.add_child(mission_instance)
 	_active_mission = mission_instance
+	_connect_planning_state_bridge(_active_mission)
 	_connect_mission_end(_active_mission)
 	_show_mission()
 
 
-func _configure_mission_instance(mission_instance: Node, selected_unit_ids: PackedStringArray, selected_fireteam_ids: PackedStringArray) -> void:
+func _configure_mission_instance(mission_instance: Node, selected_unit_ids: PackedStringArray, selected_fireteam_ids: PackedStringArray, preview_mode: bool) -> void:
 	if selected_unit_ids.is_empty():
-		return
+		selected_unit_ids = _selected_unit_ids.duplicate()
+	if selected_fireteam_ids.is_empty():
+		selected_fireteam_ids = _selected_fireteam_ids.duplicate()
+	_configure_mission_overlay_nodes(mission_instance, preview_mode)
 
 	var mission_setup = mission_instance.get_node_or_null("MissionSetup")
 	if mission_setup != null:
@@ -385,6 +402,12 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 		if not fob_loadouts.is_empty():
 			mission_setup.set("member_loadouts", fob_loadouts)
 
+	var tactical_controller = mission_instance.get_node_or_null("TacticalController")
+	if tactical_controller != null:
+		tactical_controller.set("preview_mode", preview_mode)
+		if tactical_controller.has_method("set_planning_state"):
+			tactical_controller.call("set_planning_state", _mission_planning_state)
+
 	var command_flow_driver = mission_instance.get_node_or_null("CommandFlowDriver")
 	if command_flow_driver != null:
 		command_flow_driver.set("unit_id", String(selected_unit_ids[0]))
@@ -392,6 +415,15 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 	var combat_driver = mission_instance.get_node_or_null("CombatLoopDriver")
 	if combat_driver != null:
 		combat_driver.set("friendly_unit_paths", _build_selected_friendly_paths(selected_unit_ids))
+
+	if preview_mode:
+		_disable_node_processing(mission_instance.get_node_or_null("SimulationRoot"))
+		_disable_node_processing(mission_instance.get_node_or_null("CombatLoopDriver"))
+		_disable_node_processing(mission_instance.get_node_or_null("RespawnManager"))
+		_disable_node_processing(mission_instance.get_node_or_null("EnemyWaveController"))
+		_disable_node_processing(mission_instance.get_node_or_null("AlphaFlowDriver"))
+		_disable_node_processing(mission_instance.get_node_or_null("BravoFlowDriver"))
+		_disable_node_processing(mission_instance.get_node_or_null("CharlieFlowDriver"))
 
 
 func _connect_mission_end(mission_instance: Node) -> void:
@@ -482,6 +514,15 @@ func _release_active_mission() -> void:
 	_active_mission = null
 
 
+func _release_preview_mission() -> void:
+	if _preview_mission == null:
+		return
+
+	_preview_mission.queue_free()
+	_preview_mission = null
+	_preview_mission_signature = {}
+
+
 func _on_homebase_transport_timer_timeout() -> void:
 	var completed_team_transfers: Array = []
 	var active_team_transfers: Array = []
@@ -567,6 +608,7 @@ func _refresh_homebase_screen() -> void:
 	if homebase_screen == null:
 		return
 	homebase_screen.setup_roster(_available_team_units, _homebase_staged_unit_ids)
+	homebase_screen.set_fireteam_context(_build_unassigned_fireteam_selection(_homebase_staged_unit_ids))
 	var selected_mission: Dictionary = _get_selected_mission_definition()
 	homebase_screen.set_mission_context(
 		_mission_catalog,
@@ -900,6 +942,7 @@ func _show_homebase() -> void:
 	var fob_screen = _get_fob_screen()
 	var map_screen = _get_map_screen()
 	var debrief_screen = _get_debrief_screen()
+	var mission_host = _get_mission_host()
 	if homebase_screen != null:
 		homebase_screen.visible = true
 		_refresh_homebase_screen()
@@ -909,6 +952,7 @@ func _show_homebase() -> void:
 		map_screen.visible = false
 	if debrief_screen != null:
 		debrief_screen.visible = false
+	_sync_mission_host_visibility()
 	_set_navigation_visible(true)
 	_refresh_navigation_state()
 
@@ -919,6 +963,7 @@ func _show_fob() -> void:
 	var fob_screen = _get_fob_screen()
 	var map_screen = _get_map_screen()
 	var debrief_screen = _get_debrief_screen()
+	var mission_host = _get_mission_host()
 	if homebase_screen != null:
 		homebase_screen.visible = false
 	if fob_screen != null:
@@ -929,6 +974,7 @@ func _show_fob() -> void:
 		map_screen.visible = false
 	if debrief_screen != null:
 		debrief_screen.visible = false
+	_sync_mission_host_visibility()
 	_set_navigation_visible(true)
 	_refresh_map_screen()
 	_refresh_navigation_state()
@@ -940,24 +986,7 @@ func _show_map() -> void:
 	var fob_screen = _get_fob_screen()
 	var map_screen = _get_map_screen()
 	var debrief_screen = _get_debrief_screen()
-	if homebase_screen != null:
-		homebase_screen.visible = false
-	if fob_screen != null:
-		fob_screen.visible = false
-	if map_screen != null:
-		map_screen.visible = true
-	if debrief_screen != null:
-		debrief_screen.visible = false
-	_set_navigation_visible(true)
-	_refresh_map_screen()
-	_refresh_navigation_state()
-
-
-func _show_mission() -> void:
-	var homebase_screen = _get_homebase_screen()
-	var fob_screen = _get_fob_screen()
-	var map_screen = _get_map_screen()
-	var debrief_screen = _get_debrief_screen()
+	var mission_host = _get_mission_host()
 	if homebase_screen != null:
 		homebase_screen.visible = false
 	if fob_screen != null:
@@ -966,14 +995,37 @@ func _show_mission() -> void:
 		map_screen.visible = false
 	if debrief_screen != null:
 		debrief_screen.visible = false
-	_set_navigation_visible(false)
+	_sync_mission_host_visibility()
+	_refresh_map_screen()
+	_refresh_navigation_state()
 
 
-func _show_debrief() -> void:
+func _show_mission() -> void:
+	_current_meta_view = "mission"
 	var homebase_screen = _get_homebase_screen()
 	var fob_screen = _get_fob_screen()
 	var map_screen = _get_map_screen()
 	var debrief_screen = _get_debrief_screen()
+	var mission_host = _get_mission_host()
+	if homebase_screen != null:
+		homebase_screen.visible = false
+	if fob_screen != null:
+		fob_screen.visible = false
+	if map_screen != null:
+		map_screen.visible = false
+	if debrief_screen != null:
+		debrief_screen.visible = false
+	_sync_mission_host_visibility()
+	_set_navigation_visible(false)
+
+
+func _show_debrief() -> void:
+	_current_meta_view = "debrief"
+	var homebase_screen = _get_homebase_screen()
+	var fob_screen = _get_fob_screen()
+	var map_screen = _get_map_screen()
+	var debrief_screen = _get_debrief_screen()
+	var mission_host = _get_mission_host()
 	if homebase_screen != null:
 		homebase_screen.visible = false
 	if fob_screen != null:
@@ -982,6 +1034,7 @@ func _show_debrief() -> void:
 		map_screen.visible = false
 	if debrief_screen != null:
 		debrief_screen.visible = true
+	_sync_mission_host_visibility()
 	_set_navigation_visible(false)
 
 
@@ -1024,16 +1077,21 @@ func _refresh_map_screen() -> void:
 	var map_screen = _get_map_screen()
 	var fob_screen = _get_fob_screen()
 	if map_screen == null or fob_screen == null:
-		return
+		pass
 
 	var selected_mission: Dictionary = _get_selected_mission_definition()
-	map_screen.set_map_context(
-		String(selected_mission.get("mission_name", "Operation: FOB Transfer")).strip_edges(),
-		String(selected_mission.get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges(),
-		_selected_unit_ids,
-		fob_screen.build_meta_overview(),
-		int(selected_mission.get("slot_count", FRIENDLY_NODE_NAMES.size()))
-	)
+	if map_screen != null and fob_screen != null:
+		map_screen.set_map_context(
+			String(selected_mission.get("mission_name", "Operation: FOB Transfer")).strip_edges(),
+			String(selected_mission.get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges(),
+			_selected_unit_ids,
+			fob_screen.build_meta_overview(),
+			int(selected_mission.get("slot_count", FRIENDLY_NODE_NAMES.size()))
+		)
+	if _active_mission == null:
+		_ensure_preview_mission()
+	if _preview_mission != null:
+		_apply_planning_state_to_mission(_preview_mission)
 
 
 func _build_fob_member_loadouts() -> Dictionary:
@@ -1083,6 +1141,134 @@ func _get_debrief_screen():
 
 func _get_mission_host():
 	return get_node_or_null("MissionHost")
+
+
+func _ensure_preview_mission() -> void:
+	var mission_host = _get_mission_host()
+	if mission_host == null:
+		return
+	var desired_signature: Dictionary = _build_preview_mission_signature()
+	if _preview_mission != null and _preview_mission_signature == desired_signature:
+		return
+	_release_preview_mission()
+	var preview_instance = MISSION_TEST_SCENE.instantiate()
+	_configure_mission_instance(preview_instance, _selected_unit_ids, _selected_fireteam_ids, true)
+	mission_host.add_child(preview_instance)
+	_preview_mission = preview_instance
+	_preview_mission_signature = desired_signature
+	_connect_planning_state_bridge(_preview_mission)
+	_sync_mission_host_visibility()
+
+
+func _build_preview_mission_signature() -> Dictionary:
+	var selected_mission: Dictionary = _get_selected_mission_definition()
+	return {
+		"mission_id": String(selected_mission.get("mission_id", _selected_mission_id)).strip_edges(),
+		"map_file_path": String(selected_mission.get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges(),
+		"selected_unit_ids": Array(_selected_unit_ids),
+		"selected_fireteam_ids": Array(_selected_fireteam_ids),
+	}
+
+
+func _connect_planning_state_bridge(mission_instance: Node) -> void:
+	if mission_instance == null:
+		return
+	var tactical_controller = mission_instance.get_node_or_null("TacticalController")
+	if tactical_controller == null:
+		return
+	if tactical_controller.has_method("set_planning_state"):
+		tactical_controller.call("set_planning_state", _mission_planning_state)
+	if not tactical_controller.planning_state_changed.is_connected(_on_mission_planning_state_changed):
+		tactical_controller.planning_state_changed.connect(_on_mission_planning_state_changed)
+
+
+func _apply_planning_state_to_mission(mission_instance: Node) -> void:
+	if mission_instance == null:
+		return
+	var tactical_controller = mission_instance.get_node_or_null("TacticalController")
+	if tactical_controller != null and tactical_controller.has_method("set_planning_state"):
+		tactical_controller.call("set_planning_state", _mission_planning_state)
+
+
+func _on_mission_planning_state_changed(planning_state: Dictionary) -> void:
+	if planning_state.is_empty():
+		return
+	_mission_planning_state = DEFAULT_MISSION_PLANNING_STATE.duplicate(true)
+	for key_variant in planning_state.keys():
+		var key: String = String(key_variant)
+		_mission_planning_state[key] = planning_state[key_variant]
+	if _preview_mission != null:
+		_apply_planning_state_to_mission(_preview_mission)
+	if _active_mission != null:
+		_apply_planning_state_to_mission(_active_mission)
+
+
+func _disable_node_processing(node: Node) -> void:
+	if node == null:
+		return
+	node.process_mode = Node.PROCESS_MODE_DISABLED
+
+
+func _is_mission_host_visible_for_current_view() -> bool:
+	return _current_meta_view == "map" or _current_meta_view == "mission"
+
+
+func _sync_mission_host_visibility() -> void:
+	_set_mission_host_visible(_is_mission_host_visible_for_current_view())
+
+
+func _set_mission_host_visible(is_visible: bool) -> void:
+	var mission_host = _get_mission_host()
+	if mission_host == null:
+		return
+	for child in mission_host.get_children():
+		if child is CanvasItem:
+			(child as CanvasItem).visible = is_visible
+		_set_mission_instance_ui_visibility(child, is_visible)
+		_set_mission_overlay_visibility(child, is_visible)
+		var tactical_controller := child.get_node_or_null("TacticalController")
+		if tactical_controller != null and tactical_controller.has_method("set_tactical_ui_visible"):
+			tactical_controller.call("set_tactical_ui_visible", is_visible)
+		child.process_mode = Node.PROCESS_MODE_INHERIT if is_visible else Node.PROCESS_MODE_DISABLED
+
+
+func _set_mission_instance_ui_visibility(mission_instance: Node, is_visible: bool) -> void:
+	if mission_instance == null:
+		return
+	for path in [
+		"TacticalUI/MissionTint",
+		"TacticalUI/MissionIdentityPanel",
+		"TacticalUI/TopNavPanel",
+		"TacticalUI/BottomDock",
+	]:
+		var canvas_item := mission_instance.get_node_or_null(path) as CanvasItem
+		if canvas_item != null:
+			canvas_item.visible = is_visible
+	var overlay := mission_instance.get_node_or_null("TacticalUI/CharacterOverlay") as Control
+	if overlay != null and not is_visible:
+		overlay.visible = false
+
+
+func _configure_mission_overlay_nodes(mission_instance: Node, preview_mode: bool) -> void:
+	if mission_instance == null:
+		return
+	for node_path in ["CombatLoopDriver", "EnemyWaveController", "ObjectiveStatusView"]:
+		var node := mission_instance.get_node_or_null(node_path)
+		if node == null:
+			continue
+		node.set("preview_mode", preview_mode)
+		if node.has_method("set_preview_mode"):
+			node.call("set_preview_mode", preview_mode)
+
+
+func _set_mission_overlay_visibility(mission_instance: Node, is_visible: bool) -> void:
+	if mission_instance == null:
+		return
+	for node_path in ["CombatLoopDriver", "EnemyWaveController", "ObjectiveStatusView"]:
+		var node := mission_instance.get_node_or_null(node_path)
+		if node == null or not node.has_method("set_overlay_visible"):
+			continue
+		node.call("set_overlay_visible", is_visible)
 
 
 func _build_unassigned_fireteam_selection(selected_unit_ids: PackedStringArray) -> PackedStringArray:

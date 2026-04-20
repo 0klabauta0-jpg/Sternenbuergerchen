@@ -5,17 +5,41 @@ const LABEL_OFFSET: Vector2 = Vector2(-44.0, -54.0)
 
 @export var simulation_root_path: NodePath
 @export var objective_marker_path: NodePath
+@export var preview_mode: bool = false
 
 var _status_label: Label = null
+var _overlay_visible: bool = true
 
 
 func _ready() -> void:
+	if preview_mode:
+		_remove_label()
+		return
 	_ensure_label()
+	_apply_overlay_visibility()
 	_refresh()
 
 
 func _process(_delta: float) -> void:
+	if preview_mode or not _overlay_visible:
+		return
 	_refresh()
+
+
+func set_preview_mode(is_preview: bool) -> void:
+	preview_mode = is_preview
+	if preview_mode:
+		_remove_label()
+		return
+	if is_inside_tree():
+		_ensure_label()
+		_apply_overlay_visibility()
+		_refresh()
+
+
+func set_overlay_visible(is_visible: bool) -> void:
+	_overlay_visible = is_visible
+	_apply_overlay_visibility()
 
 
 func _refresh() -> void:
@@ -57,6 +81,18 @@ func _ensure_label() -> void:
 		_status_label.add_theme_constant_override("outline_size", 2)
 		_status_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
 		add_child(_status_label)
+
+
+func _apply_overlay_visibility() -> void:
+	if _status_label == null:
+		return
+	_status_label.visible = _overlay_visible and not preview_mode
+
+
+func _remove_label() -> void:
+	if _status_label != null:
+		_status_label.queue_free()
+		_status_label = null
 
 
 func _get_objective_status():

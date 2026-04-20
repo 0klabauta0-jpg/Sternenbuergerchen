@@ -3,11 +3,23 @@ extends Control
 
 const META_UNIT_PROFILE_BUILDER_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile_builder.gd")
 const CHARACTER_SHEET_FORMATTER_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_formatter.gd")
+const CHARACTER_SHEET_VIEW_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_view.gd")
 const NPC_COMPACT_CARD_SCENE: PackedScene = preload("res://scenes/meta/components/npc_compact_card.tscn")
 const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
 const HOMEBASE_TEAM_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/homebase_team_drop_panel.gd")
 const DROPSHIP_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Side/craft_speederB.png")
+const LEGACY_CHARACTER_SHEET_NODE_NAMES: PackedStringArray = [
+	"PortraitRect",
+	"SheetNameLabel",
+	"SheetIdentityLabel",
+	"SheetRoleLabel",
+	"SheetStatusLabel",
+	"SheetSkillLabel",
+	"SheetTraitLabel",
+	"SheetLoadoutLabel",
+	"SheetBioLabel",
+]
 
 signal selection_changed(selected_unit_ids)
 signal team_confirmed(selected_unit_ids)
@@ -22,6 +34,7 @@ signal aircraft_remove_requested(craft_id)
 
 var _available_units: Array = []
 var _selected_unit_ids: PackedStringArray = []
+var _selected_fireteam_ids: PackedStringArray = []
 var _profiles_by_id: Dictionary = {}
 var _focused_unit_id: String = ""
 var _roster_cards_by_unit_id: Dictionary = {}
@@ -91,10 +104,17 @@ func _ready() -> void:
 func setup_roster(available_units: Array, selected_unit_ids: PackedStringArray = []) -> void:
 	_available_units = available_units.duplicate(true)
 	_selected_unit_ids = _normalize_selected_unit_ids(selected_unit_ids)
+	_selected_fireteam_ids = _normalize_selected_fireteam_ids(_selected_fireteam_ids)
 	_team_feedback_text = ""
 	if is_inside_tree():
 		_rebuild_profiles()
 		_rebuild_ui()
+
+
+func set_fireteam_context(selected_fireteam_ids: PackedStringArray = []) -> void:
+	_selected_fireteam_ids = _normalize_selected_fireteam_ids(selected_fireteam_ids)
+	if is_inside_tree() and _character_sheet_open:
+		_update_character_sheet()
 
 
 func set_mission_context(mission_catalog: Array, selected_map_path: String, mission_name: String, mission_slot_count: int, selected_mission_id: String = "") -> void:
@@ -126,12 +146,14 @@ func set_transport_state(
 	_pilot_transfer_entries = pilot_transfer_entries.duplicate(true)
 	_cargo_load_entries = cargo_load_entries.duplicate(true)
 	_selected_unit_ids = _normalize_selected_unit_ids(_selected_unit_ids)
+	_selected_fireteam_ids = _normalize_selected_fireteam_ids(_selected_fireteam_ids)
 	if is_inside_tree():
 		_rebuild_ui()
 
 
 func set_selected_unit_ids(selected_unit_ids: PackedStringArray) -> void:
 	_selected_unit_ids = _normalize_selected_unit_ids(selected_unit_ids)
+	_selected_fireteam_ids = _normalize_selected_fireteam_ids(_selected_fireteam_ids)
 	_team_feedback_text = ""
 	if is_inside_tree():
 		_rebuild_ui()
@@ -284,10 +306,12 @@ func _update_mission_info() -> void:
 	_populate_mission_selector(mission_selector)
 	var team_capacity: int = _get_team_capacity()
 	var staged_count: int = _selected_unit_ids.size()
+	var pilot_count: int = _count_assigned_pilots()
+	var mission_slot_usage: int = staged_count + pilot_count
 	mission_name_label.text = _selected_mission_name
-	mission_team_limit_label.text = "Team limit: %d operators" % team_capacity
-	mission_transfer_label.text = "Map: %s | Transfer: %s" % [_build_selected_mission_map_label(), _build_transfer_status_text(staged_count, team_capacity)]
-	mission_summary_label.text = _build_mission_summary_text(staged_count, team_capacity)
+	mission_team_limit_label.text = "Mission slots: %d / %d" % [mini(mission_slot_usage, _selected_mission_slot_count), _selected_mission_slot_count]
+	mission_transfer_label.text = "Map: %s | Transfer: %s | Pilots: %d" % [_build_selected_mission_map_label(), _build_transfer_status_text(staged_count, team_capacity), pilot_count]
+	mission_summary_label.text = _build_mission_summary_text(staged_count, team_capacity, pilot_count)
 
 
 func _update_team_transfer_list() -> void:
@@ -364,46 +388,31 @@ func _update_aircraft_panel() -> void:
 
 
 func _update_character_sheet() -> void:
-	var portrait_rect: TextureRect = get_node("Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/PortraitRect")
-	var sheet_name_label: Label = get_node("Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/SheetNameLabel")
-	var sheet_identity_label: Label = get_node("Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/SheetIdentityLabel")
-	var sheet_role_label: Label = get_node("Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/SheetRoleLabel")
-	var sheet_status_label: Label = get_node("Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/SheetStatusLabel")
-	var sheet_skill_label: Label = get_node("Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/SheetSkillLabel")
-	var sheet_trait_label: Label = get_node("Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/SheetTraitLabel")
-	var sheet_loadout_label: Label = get_node("Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/SheetLoadoutLabel")
-	var sheet_bio_label: Label = get_node("Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/SheetBioLabel")
-
 	var profile = _profiles_by_id.get(_focused_unit_id, null)
-	if profile == null:
-		portrait_rect.texture = null
-		var empty_blocks: Dictionary = CHARACTER_SHEET_FORMATTER_SCRIPT.build_sheet_blocks(null)
-		sheet_name_label.text = String(empty_blocks.get("name", "No operator selected"))
-		sheet_identity_label.text = String(empty_blocks.get("identity", "No profile loaded"))
-		sheet_role_label.text = String(empty_blocks.get("role", "Role: unavailable"))
-		sheet_status_label.text = String(empty_blocks.get("status", "Status: waiting for selection"))
-		sheet_skill_label.text = String(empty_blocks.get("skills", "Core: unavailable"))
-		sheet_trait_label.text = String(empty_blocks.get("traits", "Behavior: unavailable"))
-		sheet_loadout_label.text = String(empty_blocks.get("loadout", "Loadout: unavailable"))
-		sheet_bio_label.text = String(empty_blocks.get("bio", "Bio: unavailable"))
-		return
-
-	portrait_rect.texture = _load_portrait_texture(String(profile.portrait_path))
-	portrait_rect.modulate = Color(1.0, 1.0, 1.0, 1.0) if portrait_rect.texture != null else Color(0.35, 0.37, 0.42, 1.0)
-	var blocks: Dictionary = CHARACTER_SHEET_FORMATTER_SCRIPT.build_sheet_blocks(
+	CHARACTER_SHEET_VIEW_SCRIPT.render(
+		_get_character_sheet_content_host(),
 		profile,
 		{
 			"status_text": _build_sheet_status_text(_focused_unit_id),
+			"fireteam_text": _build_homebase_fireteam_text(_focused_unit_id),
 		}
 	)
-	sheet_name_label.text = String(blocks.get("name", String(profile.display_name)))
-	sheet_identity_label.text = String(blocks.get("identity", ""))
-	sheet_role_label.text = String(blocks.get("role", ""))
-	sheet_status_label.text = String(blocks.get("status", ""))
-	sheet_skill_label.text = String(blocks.get("skills", ""))
-	sheet_trait_label.text = String(blocks.get("traits", ""))
-	sheet_loadout_label.text = String(blocks.get("loadout", ""))
-	sheet_bio_label.text = String(blocks.get("bio", ""))
+
+
+func _get_character_sheet_content_host() -> VBoxContainer:
+	var info_vbox := get_node("Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox") as VBoxContainer
+	for node_name in LEGACY_CHARACTER_SHEET_NODE_NAMES:
+		var legacy_node := info_vbox.get_node_or_null(String(node_name)) as CanvasItem
+		if legacy_node != null:
+			legacy_node.visible = false
+	var host := info_vbox.get_node_or_null("GeneratedSheetContent") as VBoxContainer
+	if host == null:
+		host = VBoxContainer.new()
+		host.name = "GeneratedSheetContent"
+		host.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		host.add_theme_constant_override("separation", 8)
+		info_vbox.add_child(host)
+	return host
 
 
 func _on_compact_card_pressed(unit_id: String, _profile, _source_context: String) -> void:
@@ -713,6 +722,16 @@ func _normalize_selected_unit_ids(selected_unit_ids: PackedStringArray) -> Packe
 	return normalized_selection
 
 
+func _normalize_selected_fireteam_ids(selected_fireteam_ids: PackedStringArray) -> PackedStringArray:
+	var normalized_fireteam_ids: PackedStringArray = []
+	for unit_index in range(_selected_unit_ids.size()):
+		var fireteam_id: String = ""
+		if unit_index < selected_fireteam_ids.size():
+			fireteam_id = String(selected_fireteam_ids[unit_index]).strip_edges().to_lower()
+		normalized_fireteam_ids.append(fireteam_id)
+	return normalized_fireteam_ids
+
+
 func _build_selected_names_text() -> String:
 	if _selected_unit_ids.is_empty():
 		return "No staged operators yet."
@@ -781,17 +800,28 @@ func _build_transfer_status_text(staged_count: int, team_capacity: int) -> Strin
 	return "%d of %d operators staged" % [staged_count, team_capacity]
 
 
-func _build_mission_summary_text(staged_count: int, team_capacity: int) -> String:
+func _build_mission_summary_text(staged_count: int, team_capacity: int, pilot_count: int) -> String:
+	var mission_slot_usage: int = staged_count + pilot_count
 	if not _team_transfer_entries.is_empty() or not _pilot_transfer_entries.is_empty() or not _cargo_load_entries.is_empty():
-		return "%s on %s is active. Confirmed transfers stay visible in Homebase until arrival, and each Team-, Pilot- or Cargo-Path reports its own progress before the FOB state updates." % [_selected_mission_name, _build_selected_mission_map_label()]
+		return "%s on %s is active. Mission occupancy is currently %d / %d including pilots, and confirmed transfers stay visible in Homebase until arrival." % [_selected_mission_name, _build_selected_mission_map_label(), mini(mission_slot_usage, _selected_mission_slot_count), _selected_mission_slot_count]
 
 	if staged_count <= 0:
-		return "%s uses %s as current map. Prepare up to %d operators for the next FOB transfer; the center window defines the exact package that will be handed over." % [_selected_mission_name, _build_selected_mission_map_label(), team_capacity]
+		return "%s uses %s as current map. Mission occupancy is %d / %d including pilots; the center window starts empty and defines the next transfer package." % [_selected_mission_name, _build_selected_mission_map_label(), mini(mission_slot_usage, _selected_mission_slot_count), _selected_mission_slot_count]
 
 	if staged_count >= team_capacity:
-		return "The transfer package for %s is full. Review the staged operators in the center window and send the team to FOB when ready." % _selected_mission_name
+		return "The transfer package for %s is full. Mission occupancy is %d / %d including pilots; review the staged operators and send the team to FOB when ready." % [_selected_mission_name, mini(mission_slot_usage, _selected_mission_slot_count), _selected_mission_slot_count]
 
 	return "The transfer package is still open. You can stage %d more operator(s) before the current Homebase mission limit is reached." % [team_capacity - staged_count]
+
+
+func _count_assigned_pilots() -> int:
+	var unique_pilot_ids: Dictionary = {}
+	for pilot_id_variant in _assigned_pilot_by_craft.values():
+		var pilot_id: String = String(pilot_id_variant).strip_edges()
+		if pilot_id.is_empty():
+			continue
+		unique_pilot_ids[pilot_id] = true
+	return unique_pilot_ids.size()
 
 
 func _build_selected_mission_map_label() -> String:
@@ -844,6 +874,17 @@ func _build_sheet_status_text(unit_id: String) -> String:
 		return "Loc: Homebase / Transfer Window | Status: staged for FOB transfer"
 
 	return "Loc: Homebase / Roster | Status: available"
+
+
+func _build_homebase_fireteam_text(unit_id: String) -> String:
+	return CHARACTER_SHEET_FORMATTER_SCRIPT.format_fireteam_label(_get_selected_fireteam_id_for_unit(unit_id))
+
+
+func _get_selected_fireteam_id_for_unit(unit_id: String) -> String:
+	var unit_index: int = _selected_unit_ids.find(unit_id)
+	if unit_index < 0 or unit_index >= _selected_fireteam_ids.size():
+		return ""
+	return String(_selected_fireteam_ids[unit_index]).strip_edges().to_lower()
 
 
 func _build_homebase_location_text(unit_id: String) -> String:

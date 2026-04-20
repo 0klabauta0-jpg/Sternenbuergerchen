@@ -25,6 +25,11 @@ const DISCIPLINE_BREAK_EVENT_COLOR: Color = Color(1.0, 0.65, 0.3, 1.0)
 const MISIDENTIFICATION_BASE_CHANCE: float = 0.03
 const MISIDENTIFICATION_COOLDOWN_TICKS: int = 15
 const MISIDENTIFICATION_EVENT_COLOR: Color = Color(1.0, 0.4, 0.4, 1.0)
+const MEDIC_SUPPORT_RANGE: float = 84.0
+const MEDIC_SUPPORT_HEAL_AMOUNT: int = 35
+const MEDIC_SUPPORT_COOLDOWN_TICKS: int = 12
+const MEDIC_SUPPORT_PRIORITY: int = 25
+const MEDIC_EVENT_COLOR: Color = Color(0.55, 1.0, 0.72, 1.0)
 
 signal contact_established(attacker, target)
 signal combat_resolved(mission_result: Dictionary)
@@ -52,6 +57,7 @@ signal combat_resolved(mission_result: Dictionary)
 @export var respawn_manager_path: NodePath
 @export var enemy_wave_controller_path: NodePath
 @export var terrain_registry_path: NodePath
+@export var preview_mode: bool = false
 
 var _los_system = LOS_SYSTEM_SCRIPT.new()
 var _queued_bleedout_by_unit_id: Dictionary = {}
@@ -75,6 +81,8 @@ var _fireteam_members: Dictionary = {}
 var _detection_progress: Dictionary = {}
 var _discipline_break_cooldown: Dictionary = {}
 var _misidentification_cooldown: Dictionary = {}
+var _medic_support_cooldown: Dictionary = {}
+var _overlays_visible: bool = true
 
 
 func _ready() -> void:
@@ -89,7 +97,10 @@ func _ready() -> void:
 		_connect_respawn_signals()
 		_connect_wave_controller_signals()
 		_init_fireteam_leadership()
-	call_deferred("_finish_readability_setup")
+	if preview_mode:
+		_apply_overlay_visibility()
+	else:
+		call_deferred("_finish_readability_setup")
 	_mission_started_at_msec = Time.get_ticks_msec()
 
 	if _runs_local_authority and not simulation_root.tick_processed.is_connected(_on_tick_processed):
@@ -168,6 +179,8 @@ func _on_tick_processed(tick: int) -> void:
 	_advance_detection_timers()
 	_advance_discipline_cooldowns()
 	_advance_misidentification_cooldowns()
+	_advance_medic_support_cooldowns()
+	_try_enqueue_medic_support(simulation_root)
 	_advance_enemy_units(simulation_root)
 	_try_enqueue_attacks(simulation_root)
 	_update_combat_resolution()
@@ -413,6 +426,136 @@ func _find_best_successor(ft_id: String, exclude_id: String) -> String:
 	return best_id
 
 
+func _try_enqueue_medic_support(simulation_root: Node) -> void:
+	var reserved_target_ids: Dictionary = {}
+	_try_enqueue_medic_support_for_units(simulation_root, _get_units(friendly_unit_paths), _get_units(friendly_unit_paths), reserved_target_ids)
+	_try_enqueue_medic_support_for_units(simulation_root, _get_active_enemy_units(), _get_active_enemy_units(), reserved_target_ids)
+
+
+func _try_enqueue_medic_support_for_units(simulation_root: Node, medics: Array, allies: Array, reserved_target_ids: Dictionary) -> void:
+	for medic in medics:
+		if not _can_medic_support(medic):
+			continue
+
+		var medic_id: String = String(medic.call("get_unit_id"))
+		var target = _pick_medic_target(medic, allies, reserved_target_ids)
+		if target == null or not target.has_method("get_unit_id"):
+			continue
+
+		var target_id: String = String(target.call("get_unit_id"))
+		if target_id.is_empty():
+			continue
+
+		reserved_target_ids[target_id] = true
+		simulation_root.call(
+			"enqueue_effect",
+			{
+				"effect_type": "heal",
+				"priority": MEDIC_SUPPORT_PRIORITY,
+				"unit_id": target_id,
+				"healer_unit_id": medic_id,
+				"healer_team_id": String(medic.call("get_team_id")),
+				"amount": MEDIC_SUPPORT_HEAL_AMOUNT,
+			}
+		)
+		_medic_support_cooldown[medic_id] = MEDIC_SUPPORT_COOLDOWN_TICKS
+		_set_event_text("%s PATCH %s" % [medic_id, target_id])
+		if medic.has_method("show_event_text"):
+			medic.call("show_event_text", "PATCH", MEDIC_EVENT_COLOR, 1.2)
+
+
+func _can_medic_support(unit) -> bool:
+	if unit == null or not unit.has_method("get_unit_id") or not unit.has_method("get_vital_state"):
+		return false
+
+	if String(unit.call("get_vital_state")) != "fit":
+		return false
+
+	if not _is_medic_unit(unit):
+		return false
+
+	return int(_medic_support_cooldown.get(String(unit.call("get_unit_id")), 0)) <= 0
+
+
+func _is_medic_unit(unit) -> bool:
+	if unit == null:
+		return false
+
+	var role_id: String = String(unit.call("get_role_id")).to_lower() if unit.has_method("get_role_id") else ""
+	if role_id == "combat_medic":
+		return true
+
+	var role_name: String = String(unit.call("get_role_name")).to_lower() if unit.has_method("get_role_name") else ""
+	return role_name.contains("medic") or role_name.contains("sanitaeter")
+
+
+func _pick_medic_target(medic, allies: Array, reserved_target_ids: Dictionary):
+	if medic == null or not (medic is Node2D):
+		return null
+
+	var downed_target = _pick_medic_target_by_state(medic, allies, reserved_target_ids, "down")
+	if downed_target != null:
+		return downed_target
+
+	return _pick_medic_wounded_target(medic, allies, reserved_target_ids)
+
+
+func _pick_medic_target_by_state(medic, allies: Array, reserved_target_ids: Dictionary, expected_state: String):
+	var best_target = null
+	var best_distance: float = INF
+	for ally in allies:
+		if not _is_valid_medic_target(medic, ally, reserved_target_ids):
+			continue
+		if String(ally.call("get_vital_state")) != expected_state:
+			continue
+
+		var distance: float = (medic as Node2D).global_position.distance_to((ally as Node2D).global_position)
+		if distance < best_distance:
+			best_distance = distance
+			best_target = ally
+
+	return best_target
+
+
+func _pick_medic_wounded_target(medic, allies: Array, reserved_target_ids: Dictionary):
+	var best_target = null
+	var best_health_ratio: float = 1.1
+	for ally in allies:
+		if not _is_valid_medic_target(medic, ally, reserved_target_ids):
+			continue
+		if String(ally.call("get_vital_state")) != "fit":
+			continue
+		if not ally.has_method("get_health") or not ally.has_method("get_max_health_points"):
+			continue
+
+		var max_health: int = int(ally.call("get_max_health_points"))
+		if max_health <= 0:
+			continue
+
+		var health_ratio: float = float(ally.call("get_health")) / float(max_health)
+		if health_ratio >= 0.65:
+			continue
+
+		if health_ratio < best_health_ratio:
+			best_health_ratio = health_ratio
+			best_target = ally
+
+	return best_target
+
+
+func _is_valid_medic_target(medic, ally, reserved_target_ids: Dictionary) -> bool:
+	if ally == null or ally == medic or not (ally is Node2D):
+		return false
+	if not ally.has_method("get_unit_id") or not ally.has_method("get_vital_state"):
+		return false
+
+	var target_id: String = String(ally.call("get_unit_id"))
+	if target_id.is_empty() or reserved_target_ids.has(target_id):
+		return false
+
+	return (medic as Node2D).global_position.distance_to((ally as Node2D).global_position) <= MEDIC_SUPPORT_RANGE
+
+
 func _apply_all_leadership_bonuses() -> void:
 	for unit in _get_units(friendly_unit_paths):
 		if unit == null or not unit.has_method("clear_leadership_bonus"):
@@ -623,6 +766,22 @@ func get_misidentification_cooldown() -> Dictionary:
 	return _misidentification_cooldown
 
 
+func get_medic_support_cooldown() -> Dictionary:
+	return _medic_support_cooldown.duplicate(true)
+
+
+func _advance_medic_support_cooldowns() -> void:
+	var keys_to_remove: Array = []
+	for key in _medic_support_cooldown.keys():
+		var remaining: int = int(_medic_support_cooldown[key])
+		if remaining > 1:
+			_medic_support_cooldown[key] = remaining - 1
+		else:
+			keys_to_remove.append(key)
+	for key in keys_to_remove:
+		_medic_support_cooldown.erase(key)
+
+
 func _check_misidentification(attacker, attacker_id: String) -> Dictionary:
 	if attacker == null or attacker_id.is_empty():
 		return {}
@@ -749,7 +908,11 @@ func _update_status_label(state_name: String) -> void:
 	var status_label = get_node_or_null(status_label_path)
 	if status_label == null:
 		return
+	if preview_mode:
+		status_label.set("visible", false)
+		return
 
+	status_label.set("visible", _overlays_visible)
 	status_label.set("text", _build_status_text(state_name))
 
 
@@ -904,6 +1067,8 @@ func _find_first_contact_pair() -> Dictionary:
 
 
 func _ensure_readability_nodes() -> void:
+	if preview_mode:
+		return
 	var scene_root = get_parent()
 	if scene_root == null:
 		return
@@ -949,6 +1114,11 @@ func _connect_unit_signals() -> void:
 			var damage_callable := Callable(self, "_on_unit_damage_applied").bind(unit)
 			if not unit.is_connected("damage_applied", damage_callable):
 				unit.connect("damage_applied", damage_callable)
+
+		if unit.has_signal("healed_applied"):
+			var healed_callable := Callable(self, "_on_unit_healed_applied").bind(unit)
+			if not unit.is_connected("healed_applied", healed_callable):
+				unit.connect("healed_applied", healed_callable)
 
 		if unit.has_signal("vital_status_changed"):
 			var vital_callable := Callable(self, "_on_unit_vital_status_changed").bind(unit)
@@ -1023,12 +1193,32 @@ func _on_unit_damage_applied(amount: int, _health_points: int, _hit_context: Dic
 	_update_status_label("contact")
 
 
+func _on_unit_healed_applied(amount: int, _health_points: int, heal_context: Dictionary, unit) -> void:
+	if unit == null or not unit.has_method("get_unit_id"):
+		return
+
+	var unit_id: String = String(unit.call("get_unit_id"))
+	var healer_unit_id: String = String(heal_context.get("healer_unit_id", ""))
+	var event_text: String = "%s PATCH %s +%d" % [healer_unit_id if not healer_unit_id.is_empty() else "MEDIC", unit_id, amount]
+	_set_event_text(event_text)
+	if unit.has_method("show_event_text"):
+		unit.call("show_event_text", "PATCH +%d" % amount, MEDIC_EVENT_COLOR, 1.4)
+	if not healer_unit_id.is_empty():
+		var healer = _resolve_unit_by_id(healer_unit_id)
+		if healer != null and healer.has_method("show_event_text"):
+			healer.call("show_event_text", "PATCH", MEDIC_EVENT_COLOR, 1.2)
+	_broadcast_remote_event(event_text, unit_id, MEDIC_EVENT_COLOR, 1.4, "PATCH +%d" % amount)
+	_update_status_label("active")
+
+
 func _on_unit_vital_status_changed(vital_status, unit) -> void:
 	if vital_status == null or not vital_status.has_method("get"):
 		return
 
 	var unit_id: String = String(unit.call("get_unit_id"))
 	var vital_state: String = String(vital_status.get("state"))
+	if vital_state == "fit":
+		_queued_bleedout_by_unit_id.erase(unit_id)
 	match vital_state:
 		"down":
 			_set_event_text("%s DOWN" % unit_id)
@@ -1138,10 +1328,54 @@ func _build_attack_readiness_text() -> String:
 
 
 func _finish_readability_setup() -> void:
+	if preview_mode:
+		_remove_readability_nodes()
+		_apply_overlay_visibility()
+		return
 	_ensure_readability_nodes()
+	_apply_overlay_visibility()
 	_update_event_label()
 	_update_winner_label()
 	_update_status_label("waiting")
+
+
+func set_preview_mode(is_preview: bool) -> void:
+	preview_mode = is_preview
+	if preview_mode:
+		_remove_readability_nodes()
+		_apply_overlay_visibility()
+		return
+	if is_inside_tree():
+		_finish_readability_setup()
+
+
+func set_overlay_visible(is_visible: bool) -> void:
+	_overlays_visible = is_visible
+	_apply_overlay_visibility()
+
+
+func _apply_overlay_visibility() -> void:
+	var status_label = get_node_or_null(status_label_path)
+	if status_label != null:
+		status_label.set("visible", _overlays_visible and not preview_mode)
+	if _contact_line != null:
+		_contact_line.visible = _overlays_visible and not preview_mode
+	if _event_label != null:
+		_event_label.visible = _overlays_visible and not preview_mode
+	if _winner_label != null:
+		_winner_label.visible = _overlays_visible and not preview_mode
+
+
+func _remove_readability_nodes() -> void:
+	if _contact_line != null:
+		_contact_line.queue_free()
+		_contact_line = null
+	if _event_label != null:
+		_event_label.queue_free()
+		_event_label = null
+	if _winner_label != null:
+		_winner_label.queue_free()
+		_winner_label = null
 
 
 func _is_victory_condition_met() -> bool:
