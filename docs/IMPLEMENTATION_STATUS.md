@@ -662,4 +662,8 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Stand: Neues `scripts/core/weapon_data.gd` als statische Waffen-Registry mit drei Typen: Maschinenpistole (smg, weapon_gun_*, schnell, niedrig), Sturmgewehr (rifle, weapon_rifle_*, balanciert), Schienenkanone (rail_gun, weapon_rifle_* in 2x, langsam, hoch). `TestUnit` traegt `weapon_1_id`/`weapon_2_id` als Exports und liefert `get_active_weapon_id()`. `MissionCombatLoopDriver` nutzt aktive Waffe des Angreifers fuer damage/hit_chance/ticks statt globaler Konstanten. In `fob_screen.gd` wurde "Sonderwaffe" zu "Schienenkanone" umbenannt und weapon-ID `special` zu `rail_gun` migriert (abwaertskompatibel).
 - Offene Punkte: Loadout-Daten aus FOB-Screen werden noch nicht automatisch an Missions-Units durchgereicht; per-Unit-Loadout-Pipeline ist separater Task.
 - Risiken: Globale combat-Exports (`damage_per_hit`, `base_hit_chance`, `ticks_between_attacks`) auf `MissionCombatLoopDriver` bleiben als Fallback-Defaults erhalten, werden aber im normalen Pfad nicht mehr genutzt.
-- Naechster Schritt: FOB-Loadout-Pipeline zu Missions-Units durchreichen; visuelle Waffen-Sprites an Units rendern.
+- Naechster Schritt: TASK_087 – FOB-Loadout-Pipeline zu Missions-Units durchreichen und visuelle Waffen-Sprites an Units rendern.
+
+### TASK_087 – Loadout-Pipeline und Waffen-Sprites
+- Status: offen
+- Ziel: Die beiden offenen Punkte aus TASK_086 schliessen: (A) FOB-Loadout-Daten (`weapon_1`/`weapon_2`/`armor`) ueber `MetaLayerFlow` → `MissionTestSetup` → `TestUnit.apply_identity_config()` durchreichen; (B) Waffen-Sprite als Child-Node an der Unit rendern, mit Asset-Pfad und Scale aus `WeaponData` (Schienenkanone 2x).
