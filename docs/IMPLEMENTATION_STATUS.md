@@ -697,8 +697,11 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Naechster Schritt: TASK_092 Stealth/Sichtreichweite.
 
 ### TASK_092 – Stealth: Reduzierte Sichtreichweite
-- Status: offen
-- Ziel: Der `stealth`-Wert einer Unit reduziert die effektive Sichtreichweite, mit der Gegner sie erkennen koennen. Hoher Stealth → Gegner muessen naeher kommen, bevor sie die Unit sehen.
+- Status: implementiert
+- Stand: `_get_effective_range(target)` in `mission_combat_loop_driver.gd` berechnet effektive Sichtreichweite basierend auf dem `stealth`-Wert des Ziels. Formel: `contact_range * (1.0 - stealth * 0.5)`. stealth=0.0 ergibt volle Reichweite, stealth=1.0 halbiert sie. Alle drei LOS-Checks verwenden jetzt die effektive Reichweite. `get_stealth()` in `test_unit.gd` ergaenzt.
+- Offene Punkte: keine
+- Risiken: keine
+- Naechster Schritt: TASK_093 Discipline/Hold-Fire.
 
 ### TASK_093 – Discipline: Hold-Fire-Disziplinbrueche
 - Status: offen

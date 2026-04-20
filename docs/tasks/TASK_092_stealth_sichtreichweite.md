@@ -4,7 +4,7 @@
 Der `stealth`-Wert einer Unit reduziert die effektive Sichtreichweite, mit der Gegner sie erkennen koennen.
 Hoher Stealth → Gegner muessen naeher kommen, bevor sie die Unit sehen.
 
-## Status: OFFEN
+## Status: ERLEDIGT
 
 ## Kontext
 - `test_unit.gd` hat `stealth` als Export (0.0–1.0, Default 0.5)

@@ -18,6 +18,7 @@ const LEADERSHIP_BONUS_FACTOR: float = 0.15
 const LEADERSHIP_EVENT_COLOR: Color = Color(0.6, 0.85, 1.0, 1.0)
 const MAX_DETECTION_DELAY_TICKS: int = 15
 const DETECTION_EVENT_COLOR: Color = Color(0.85, 0.85, 0.55, 1.0)
+const STEALTH_RANGE_REDUCTION_FACTOR: float = 0.5
 
 signal contact_established(attacker, target)
 signal combat_resolved(mission_result: Dictionary)
@@ -541,11 +542,19 @@ func _has_valid_los(attacker, target) -> bool:
 	if not target.has_method("get_vital_state") or String(target.call("get_vital_state")) != "fit":
 		return false
 
-	return _los_system.has_line_of_sight_between_nodes(attacker, target, contact_range, _get_terrain_registry())
+	return _los_system.has_line_of_sight_between_nodes(attacker, target, _get_effective_range(target), _get_terrain_registry())
 
 
 func get_detection_progress() -> Dictionary:
 	return _detection_progress.duplicate(true)
+
+
+func _get_effective_range(target) -> float:
+	var target_stealth: float = 0.0
+	if target != null and target.has_method("get_stealth"):
+		target_stealth = clampf(float(target.call("get_stealth")), 0.0, 1.0)
+
+	return contact_range * (1.0 - target_stealth * STEALTH_RANGE_REDUCTION_FACTOR)
 
 
 func _is_target_attackable(attacker, target) -> bool:
@@ -558,7 +567,7 @@ func _is_target_attackable(attacker, target) -> bool:
 	if String(attacker.call("get_team_id")) == String(target.call("get_team_id")):
 		return false
 
-	return _los_system.has_line_of_sight_between_nodes(attacker, target, contact_range, _get_terrain_registry())
+	return _los_system.has_line_of_sight_between_nodes(attacker, target, _get_effective_range(target), _get_terrain_registry())
 
 
 func _can_target_receive_attack(unit) -> bool:
@@ -1155,7 +1164,7 @@ func _enemy_should_hold_position(enemy) -> bool:
 		if friendly == null or not _can_target_receive_attack(friendly):
 			continue
 
-		if not _los_system.has_line_of_sight_between_nodes(enemy, friendly, contact_range, _get_terrain_registry()):
+		if not _los_system.has_line_of_sight_between_nodes(enemy, friendly, _get_effective_range(friendly), _get_terrain_registry()):
 			continue
 
 		if (enemy as Node2D).global_position.distance_to((friendly as Node2D).global_position) <= enemy_engage_distance:
