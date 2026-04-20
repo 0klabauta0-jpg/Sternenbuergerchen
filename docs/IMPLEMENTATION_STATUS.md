@@ -662,14 +662,14 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Stand: Neues `scripts/core/weapon_data.gd` als statische Waffen-Registry mit drei Typen: Maschinenpistole (smg, weapon_gun_*, schnell, niedrig), Sturmgewehr (rifle, weapon_rifle_*, balanciert), Schienenkanone (rail_gun, weapon_rifle_* in 2x, langsam, hoch). `TestUnit` traegt `weapon_1_id`/`weapon_2_id` als Exports und liefert `get_active_weapon_id()`. `MissionCombatLoopDriver` nutzt aktive Waffe des Angreifers fuer damage/hit_chance/ticks statt globaler Konstanten. In `fob_screen.gd` wurde "Sonderwaffe" zu "Schienenkanone" umbenannt und weapon-ID `special` zu `rail_gun` migriert (abwaertskompatibel).
 - Offene Punkte: keine (Loadout-Pipeline durch TASK_087 geschlossen).
 - Risiken: Globale combat-Exports (`damage_per_hit`, `base_hit_chance`, `ticks_between_attacks`) auf `MissionCombatLoopDriver` bleiben als Fallback-Defaults erhalten, werden aber im normalen Pfad nicht mehr genutzt.
-- Naechster Schritt: Waffen-Sprites visuell rendern (separater Task).
+- Naechster Schritt: keiner.
 
 ### TASK_087 – Loadout-Pipeline und Waffen-Sprites
-- Status: implementiert (Teil A: Pipeline)
-- Stand: `meta_layer_flow.gd` liest per `_build_fob_member_loadouts()` die `member_loadouts` und `lead_unit_id` aus allen Fireteam-Definitionen der FOB-UI, baut ein flaches `{unit_id: {weapon_1, weapon_2, armor, is_fireteam_lead}}` Dictionary und uebergibt es via `mission_setup.set("member_loadouts", ...)` an `MissionTestSetup`. `mission_test_setup.gd` hat neue Property `member_loadouts: Dictionary` und ruft nach dem Roster-Preset `_apply_fob_loadout_override()` auf, das `weapon_1_id`, `weapon_2_id`, `armor` und `is_fireteam_lead` via `apply_identity_config()` auf die Unit setzt. Nur Friendlies erhalten Overrides; Enemies bleiben unberuehrt. Ohne FOB-Daten greifen die Roster-Defaults.
-- Offene Punkte: Teil B (Waffen-Sprites visuell rendern) ist noch nicht umgesetzt.
+- Status: implementiert
+- Stand: `meta_layer_flow.gd` liest per `_build_fob_member_loadouts()` die `member_loadouts` und `lead_unit_id` aus allen Fireteam-Definitionen der FOB-UI, baut ein flaches `{unit_id: {weapon_1, weapon_2, armor, is_fireteam_lead}}` Dictionary und uebergibt es via `mission_setup.set("member_loadouts", ...)` an `MissionTestSetup`. `mission_test_setup.gd` hat neue Property `member_loadouts: Dictionary` und ruft nach dem Roster-Preset `_apply_fob_loadout_override()` auf, das `weapon_1_id`, `weapon_2_id`, `armor` und `is_fireteam_lead` via `apply_identity_config()` auf die Unit setzt. Nur Friendlies erhalten Overrides; Enemies bleiben unberuehrt. Ohne FOB-Daten greifen die Roster-Defaults. `test_unit.gd` rendert jetzt zusaetzlich ein `WeaponVisual`-`Sprite2D` als Child der bestehenden `Visual`-Sprite, leitet die Richtung aus der aktuellen Unit-Textur ab (Fallback `SE`), nutzt `WeaponData.get_asset_path()` und `WeaponData.get_sprite_scale()` fuer Textur und Skalierung und setzt kleine Kenney-kompatible Offsets pro Iso-Richtung. Dadurch ist die Schienenkanone visuell doppelt so gross wie das Sturmgewehr.
+- Offene Punkte: keine.
 - Risiken: keine.
-- Naechster Schritt: Waffen-Sprites als separaten Task umsetzen.
+- Naechster Schritt: keiner.
 
 ### TASK_088 – Leadership-Bonus auf Fireteam-Mitglieder
 - Status: implementiert

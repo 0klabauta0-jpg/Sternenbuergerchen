@@ -5,14 +5,14 @@ Die beiden offenen Punkte aus TASK_086 (Waffenmodell) schliessen:
 1. FOB-Loadout-Daten (`weapon_1`, `weapon_2`, `armor`) an Missions-Units durchreichen
 2. Visuelle Waffen-Sprites an den Units in der Missionsszene rendern
 
-## Status: TEIL A ERLEDIGT (Pipeline) / TEIL B OFFEN (Sprites)
+## Status: ERLEDIGT
 
 ## Kontext
 - Die FOB-UI (`fob_screen.gd`) speichert pro Fireteam-Mitglied bereits `weapon_1`/`weapon_2`/`armor` in `member_loadouts`
 - `meta_layer_flow.gd` → `_configure_mission_instance()` uebergibt bisher nur `selected_team_unit_ids`, `selected_team_fireteam_ids` und `map_file_path` an `MissionSetup`
 - `mission_test_setup.gd` wendet Unit-Presets via `unit_roster_presets.gd` an, aber keine per-Unit-Loadout-Daten aus der FOB
 - `test_unit.gd` hat seit TASK_086 `weapon_1_id`/`weapon_2_id` Exports und `apply_identity_config()` liest sie – aber niemand setzt sie zur Laufzeit
-- `weapon_data.gd` liefert Asset-Pfade (`get_asset_path()`) und Sprite-Scale (`get_sprite_scale()`) – wird aber visuell noch nicht genutzt
+- `weapon_data.gd` liefert Asset-Pfade (`get_asset_path()`) und Sprite-Scale (`get_sprite_scale()`) und wird jetzt fuer die Missions-Visualisierung genutzt
 
 ## Teilaufgaben
 
@@ -36,8 +36,8 @@ Die beiden offenen Punkte aus TASK_086 (Waffenmodell) schliessen:
 
 ## Akzeptanzkriterien
 - [x] Units in der Mission tragen die in der FOB gewaehlte Waffe
-- [ ] Waffen-Sprite ist an der Unit sichtbar (korrekte Richtung, korrekte Skalierung)
-- [ ] Schienenkanone erscheint doppelt so gross wie Sturmgewehr
+- [x] Waffen-Sprite ist an der Unit sichtbar (korrekte Richtung, korrekte Skalierung)
+- [x] Schienenkanone erscheint doppelt so gross wie Sturmgewehr
 - [x] Ohne FOB-Daten (direkter Szenenstart) bleiben Default-Waffen aktiv
 - [x] Headless-Verifier bestaetigt korrekte weapon_id auf Unit nach Setup
 - [x] is_fireteam_lead wird aus lead_unit_id der FOB-Daten gesetzt

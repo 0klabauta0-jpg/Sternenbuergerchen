@@ -2,12 +2,22 @@ class_name TestUnit
 extends Node2D
 
 const COMMANDER_COMMAND_SCRIPT: GDScript = preload("res://scripts/command/commander_command.gd")
+const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const UNIT_SKILLS_SCRIPT: GDScript = preload("res://scripts/npc/unit_skills.gd")
 const UNIT_TRAIT_SCRIPT: GDScript = preload("res://scripts/npc/unit_trait.gd")
 const UNIT_PROFILE_MATH_SCRIPT: GDScript = preload("res://scripts/npc/unit_profile_math.gd")
 const UNIT_RUNTIME_STATUS_SCRIPT: GDScript = preload("res://scripts/npc/unit_runtime_status.gd")
 const UNIT_VITAL_STATUS_SCRIPT: GDScript = preload("res://scripts/npc/unit_vital_status.gd")
+const VISUAL_SPRITE_NAME: String = "Visual"
+const WEAPON_VISUAL_NAME: String = "WeaponVisual"
+const DEFAULT_WEAPON_VISUAL_DIRECTION: String = "SE"
+const WEAPON_VISUAL_OFFSETS: Dictionary = {
+	"SE": Vector2(10.0, -4.0),
+	"SW": Vector2(-10.0, -4.0),
+	"NE": Vector2(8.0, -14.0),
+	"NW": Vector2(-8.0, -14.0),
+}
 const STATUS_LABEL_NAME: String = "DebugStatusLabel"
 const FIRETEAM_LABEL_NAME: String = "DebugFireteamLabel"
 const PHASE_LABEL_NAME: String = "DebugPhaseLabel"
@@ -73,17 +83,22 @@ var _current_event_color: Color = Color(1.0, 0.95, 0.5, 1.0)
 var _event_time_remaining: float = 0.0
 var _contact_active: bool = false
 var _contact_target_id: String = ""
+var _weapon_visual: Sprite2D = null
+var _weapon_visual_direction: String = DEFAULT_WEAPON_VISUAL_DIRECTION
 var _respawn_manager = null
 var _terrain_registry = null
 
 
 func _ready() -> void:
 	fireteam_id = _normalize_fireteam_id(fireteam_id)
+	if not child_entered_tree.is_connected(_on_child_entered_tree):
+		child_entered_tree.connect(_on_child_entered_tree)
 	_rebuild_identity_data()
 	_ensure_readability_labels()
 	_runtime_status = _build_runtime_status("idle")
 	_vital_status = _build_vital_status("fit", max_health_points, 0)
 	_apply_vital_visual()
+	_refresh_weapon_visual()
 	_refresh_readability()
 
 
@@ -166,6 +181,21 @@ func get_weapon_2_id() -> String:
 
 func get_active_weapon_id() -> String:
 	return weapon_1_id if not weapon_1_id.is_empty() else "rifle"
+
+
+func get_weapon_visual() -> Sprite2D:
+	return _weapon_visual
+
+
+func get_weapon_visual_direction() -> String:
+	return _weapon_visual_direction
+
+
+func get_weapon_visual_texture_path() -> String:
+	if _weapon_visual == null or _weapon_visual.texture == null:
+		return ""
+
+	return String(_weapon_visual.texture.resource_path).strip_edges()
 
 
 func get_fireteam_id() -> String:
@@ -451,6 +481,7 @@ func apply_identity_config(identity_config: Dictionary) -> void:
 		trait_ids = _coerce_trait_ids(identity_config["trait_ids"])
 
 	_rebuild_identity_data()
+	_refresh_weapon_visual()
 	_refresh_readability()
 
 
@@ -490,6 +521,11 @@ func set_respawn_manager(respawn_manager) -> void:
 func set_terrain_registry(terrain_registry) -> void:
 	_terrain_registry = terrain_registry
 	_refresh_readability()
+
+
+func _on_child_entered_tree(node: Node) -> void:
+	if node != null and String(node.name) == VISUAL_SPRITE_NAME:
+		_refresh_weapon_visual()
 
 
 func apply_remote_snapshot(snapshot: Dictionary, interpolation_alpha: float = REMOTE_POSITION_LERP_WEIGHT) -> void:
@@ -847,6 +883,73 @@ func _apply_vital_visual() -> void:
 		_:
 			modulate = Color(1.0, 1.0, 1.0, 1.0)
 			rotation_degrees = 0.0
+
+
+func _refresh_weapon_visual() -> void:
+	var visual_root := get_node_or_null(VISUAL_SPRITE_NAME) as Sprite2D
+	if visual_root == null:
+		_weapon_visual = null
+		_weapon_visual_direction = DEFAULT_WEAPON_VISUAL_DIRECTION
+		return
+
+	var weapon_visual := _ensure_weapon_visual(visual_root)
+	if weapon_visual == null:
+		return
+
+	_weapon_visual_direction = _resolve_weapon_visual_direction(visual_root)
+	var weapon_id: String = get_active_weapon_id()
+	var asset_path: String = WEAPON_DATA_SCRIPT.get_asset_path(weapon_id, _weapon_visual_direction)
+	var weapon_texture := load(asset_path) as Texture2D
+	if weapon_texture == null:
+		weapon_visual.texture = null
+		weapon_visual.visible = false
+		return
+
+	weapon_visual.texture = weapon_texture
+	weapon_visual.position = _get_weapon_visual_offset(_weapon_visual_direction)
+	weapon_visual.scale = WEAPON_DATA_SCRIPT.get_sprite_scale(weapon_id)
+	weapon_visual.visible = true
+
+
+func _ensure_weapon_visual(visual_root: Sprite2D) -> Sprite2D:
+	_weapon_visual = visual_root.get_node_or_null(WEAPON_VISUAL_NAME) as Sprite2D
+	if _weapon_visual == null:
+		_weapon_visual = Sprite2D.new()
+		_weapon_visual.name = WEAPON_VISUAL_NAME
+		_weapon_visual.z_index = 1
+		visual_root.add_child(_weapon_visual)
+
+	_weapon_visual.centered = true
+	return _weapon_visual
+
+
+func _resolve_weapon_visual_direction(visual_root: Sprite2D) -> String:
+	if visual_root == null or visual_root.texture == null:
+		return DEFAULT_WEAPON_VISUAL_DIRECTION
+
+	var texture_path: String = String(visual_root.texture.resource_path).strip_edges()
+	for direction_variant in ["NE", "NW", "SE", "SW"]:
+		var direction: String = String(direction_variant)
+		if texture_path.ends_with("_%s.png" % direction):
+			return direction
+
+	if texture_path.ends_with("_N.png"):
+		return "NE"
+	if texture_path.ends_with("_S.png"):
+		return "SW"
+	if texture_path.ends_with("_E.png"):
+		return "SE"
+	if texture_path.ends_with("_W.png"):
+		return "NW"
+
+	return DEFAULT_WEAPON_VISUAL_DIRECTION
+
+
+func _get_weapon_visual_offset(direction: String) -> Vector2:
+	if WEAPON_VISUAL_OFFSETS.has(direction):
+		return Vector2(WEAPON_VISUAL_OFFSETS[direction])
+
+	return Vector2(WEAPON_VISUAL_OFFSETS[DEFAULT_WEAPON_VISUAL_DIRECTION])
 
 
 func _ensure_readability_labels() -> void:

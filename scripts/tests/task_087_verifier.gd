@@ -27,6 +27,9 @@ func _run_tests() -> void:
 	_test_mission_setup_member_loadouts_property()
 	_test_weapon_id_survives_apply_identity_config()
 	_test_is_fireteam_lead_survives_apply_identity_config()
+	await _test_weapon_visual_uses_visual_direction()
+	await _test_weapon_visual_falls_back_to_se()
+	await _test_weapon_visual_rail_gun_scale()
 
 	print("")
 	print("=== Results: %d passed, %d failed, %d total ===" % [_pass_count, _fail_count, _test_count])
@@ -171,6 +174,39 @@ func _test_is_fireteam_lead_survives_apply_identity_config() -> void:
 	unit.queue_free()
 
 
+func _test_weapon_visual_uses_visual_direction() -> void:
+	var unit = _make_test_unit("unit_alpha", "team_alpha")
+	_attach_visual(unit, "res://Assets/kenney_space-kit/Isometric/astronautA_SW.png")
+	await process_frame
+	_assert(unit.get_weapon_visual() != null, "weapon visual created when Visual sprite exists")
+	_assert(unit.get_weapon_visual_direction() == "SW", "weapon visual direction inferred from Visual texture")
+	_assert(unit.get_weapon_visual_texture_path().ends_with("weapon_rifle_SW.png"), "weapon visual uses rifle SW texture by default")
+	unit.apply_identity_config({"weapon_1_id": "smg"})
+	_assert(unit.get_weapon_visual_texture_path().ends_with("weapon_gun_SW.png"), "weapon visual refreshes after weapon override")
+	unit.queue_free()
+
+
+func _test_weapon_visual_falls_back_to_se() -> void:
+	var unit = _make_test_unit("unit_alpha", "team_alpha")
+	_attach_visual(unit, "")
+	await process_frame
+	_assert(unit.get_weapon_visual_direction() == "SE", "weapon visual falls back to SE without facing texture")
+	_assert(unit.get_weapon_visual_texture_path().ends_with("weapon_rifle_SE.png"), "weapon visual fallback uses rifle SE texture")
+	unit.queue_free()
+
+
+func _test_weapon_visual_rail_gun_scale() -> void:
+	var unit = _make_test_unit("unit_alpha", "team_alpha")
+	_attach_visual(unit, "res://Assets/kenney_space-kit/Isometric/astronautA_SE.png")
+	unit.apply_identity_config({"weapon_1_id": "rail_gun"})
+	await process_frame
+	var weapon_visual = unit.get_weapon_visual()
+	_assert(weapon_visual != null, "weapon visual exists for rail gun")
+	_assert(weapon_visual.scale == Vector2(2.0, 2.0), "rail gun weapon visual uses 2x scale")
+	_assert(unit.get_weapon_visual_texture_path().ends_with("weapon_rifle_SE.png"), "rail gun uses rifle SE sprite asset")
+	unit.queue_free()
+
+
 # --- Helpers ---
 
 func _make_test_unit(unit_id: String, team_id: String) -> Node:
@@ -181,6 +217,16 @@ func _make_test_unit(unit_id: String, team_id: String) -> Node:
 	unit.team_id = team_id
 	root.add_child(unit)
 	return unit
+
+
+func _attach_visual(unit: Node, texture_path: String) -> void:
+	var visual := Sprite2D.new()
+	visual.name = "Visual"
+	visual.position = Vector2(0.0, -26.0)
+	visual.scale = Vector2(0.4, 0.4)
+	if not texture_path.is_empty():
+		visual.texture = load(texture_path) as Texture2D
+	unit.add_child(visual)
 
 
 func _make_mission_test_setup() -> Node:

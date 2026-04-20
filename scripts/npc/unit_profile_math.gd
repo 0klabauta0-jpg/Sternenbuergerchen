@@ -23,12 +23,12 @@ const ROLE_ALIASES := {
 }
 
 const ROLE_ALLOWED_FUNCTIONS := {
-	"atv_recon_scout": PackedStringArray(["pathfinder", "scout", "overwatch", "infiltrator"]),
-	"security_guard": PackedStringArray(["sentinel", "overwatch", "scout"]),
-	"section_lead": PackedStringArray(["coordinator", "sentinel", "overwatch", "pathfinder"]),
-	"dropship_pilot": PackedStringArray(["insertion_pilot", "transport_pilot", "escort_pilot"]),
-	"freighter_pilot": PackedStringArray(["cargo_runner", "route_master"]),
-	"fighter_pilot": PackedStringArray(["interceptor", "strike_pilot", "escort_pilot"]),
+	"atv_recon_scout": ["pathfinder", "scout", "overwatch", "infiltrator"],
+	"security_guard": ["sentinel", "overwatch", "scout"],
+	"section_lead": ["coordinator", "sentinel", "overwatch", "pathfinder"],
+	"dropship_pilot": ["insertion_pilot", "transport_pilot", "escort_pilot"],
+	"freighter_pilot": ["cargo_runner", "route_master"],
+	"fighter_pilot": ["interceptor", "strike_pilot", "escort_pilot"],
 }
 
 const SPECIALTY_NAME_MAP := {
