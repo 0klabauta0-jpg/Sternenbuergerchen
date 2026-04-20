@@ -19,6 +19,9 @@ const LEADERSHIP_EVENT_COLOR: Color = Color(0.6, 0.85, 1.0, 1.0)
 const MAX_DETECTION_DELAY_TICKS: int = 15
 const DETECTION_EVENT_COLOR: Color = Color(0.85, 0.85, 0.55, 1.0)
 const STEALTH_RANGE_REDUCTION_FACTOR: float = 0.5
+const DISCIPLINE_BREAK_BASE_CHANCE: float = 0.08
+const DISCIPLINE_BREAK_COOLDOWN_TICKS: int = 10
+const DISCIPLINE_BREAK_EVENT_COLOR: Color = Color(1.0, 0.65, 0.3, 1.0)
 
 signal contact_established(attacker, target)
 signal combat_resolved(mission_result: Dictionary)
@@ -67,6 +70,7 @@ var _fireteam_original_leads: Dictionary = {}
 var _fireteam_acting_leads: Dictionary = {}
 var _fireteam_members: Dictionary = {}
 var _detection_progress: Dictionary = {}
+var _discipline_break_cooldown: Dictionary = {}
 
 
 func _ready() -> void:
@@ -158,6 +162,7 @@ func _on_tick_processed(tick: int) -> void:
 	_queue_bleedout_for_downed_friendly(simulation_root)
 	_update_fireteam_leadership()
 	_advance_detection_timers()
+	_advance_discipline_cooldowns()
 	_advance_enemy_units(simulation_root)
 	_try_enqueue_attacks(simulation_root)
 	_update_combat_resolution()
@@ -469,9 +474,43 @@ func _can_unit_attack(unit) -> bool:
 		return false
 
 	if unit.has_method("get_fire_status") and String(unit.call("get_fire_status")) != "fire_at_will":
-		return false
+		if not _check_discipline_break(unit):
+			return false
 
 	return _is_engage_ready(unit)
+
+
+func _check_discipline_break(unit) -> bool:
+	if unit == null:
+		return false
+	var unit_id: String = ""
+	if unit.has_method("get_unit_id"):
+		unit_id = String(unit.call("get_unit_id"))
+	if unit_id.is_empty():
+		return false
+
+	var cooldown_remaining: int = _discipline_break_cooldown.get(unit_id, 0) as int
+	if cooldown_remaining > 0:
+		return false
+
+	var unit_discipline: float = 0.5
+	if unit.has_method("get_discipline"):
+		unit_discipline = clampf(float(unit.call("get_discipline")), 0.0, 1.0)
+
+	var break_chance: float = DISCIPLINE_BREAK_BASE_CHANCE * (1.0 - unit_discipline)
+	if break_chance <= 0.0:
+		return false
+
+	if randf() >= break_chance:
+		return false
+
+	_discipline_break_cooldown[unit_id] = DISCIPLINE_BREAK_COOLDOWN_TICKS
+	var event_msg: String = "%s bricht Hold-Fire!" % unit_id
+	_set_event_text(event_msg)
+	if unit.has_method("show_event_text"):
+		unit.call("show_event_text", "HOLD-FIRE BREAK!", DISCIPLINE_BREAK_EVENT_COLOR, 1.4)
+	_broadcast_remote_event(event_msg, unit_id, DISCIPLINE_BREAK_EVENT_COLOR, 1.4, "HOLD-FIRE BREAK!")
+	return true
 
 
 func _get_detection_delay_ticks(unit) -> int:
@@ -530,6 +569,22 @@ func _advance_detection_timers() -> void:
 
 	for key in keys_to_remove:
 		_detection_progress.erase(key)
+
+
+func _advance_discipline_cooldowns() -> void:
+	var keys_to_remove: Array = []
+	for key in _discipline_break_cooldown.keys():
+		var remaining: int = int(_discipline_break_cooldown[key])
+		if remaining > 1:
+			_discipline_break_cooldown[key] = remaining - 1
+		else:
+			keys_to_remove.append(key)
+	for key in keys_to_remove:
+		_discipline_break_cooldown.erase(key)
+
+
+func get_discipline_break_cooldown() -> Dictionary:
+	return _discipline_break_cooldown
 
 
 func _has_valid_los(attacker, target) -> bool:

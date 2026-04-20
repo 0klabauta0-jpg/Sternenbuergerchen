@@ -4,7 +4,7 @@
 Units mit niedrigem `discipline`-Wert brechen gelegentlich Hold-Fire-Befehle und feuern trotzdem,
 obwohl sie in einer Phase stehen, die kein Feuern erlaubt (z.B. APPROACH, HOLD).
 
-## Status: OFFEN
+## Status: ERLEDIGT
 
 ## Kontext
 - `test_unit.gd` hat `discipline` als Export (0.0–1.0, Default 0.5)

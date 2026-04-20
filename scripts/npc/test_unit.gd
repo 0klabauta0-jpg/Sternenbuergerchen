@@ -232,6 +232,10 @@ func get_stealth() -> float:
 	return stealth
 
 
+func get_discipline() -> float:
+	return discipline
+
+
 func get_toughness_skill() -> float:
 	return float(_skills.toughness)
 

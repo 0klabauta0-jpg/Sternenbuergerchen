@@ -704,8 +704,11 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Naechster Schritt: TASK_093 Discipline/Hold-Fire.
 
 ### TASK_093 – Discipline: Hold-Fire-Disziplinbrueche
-- Status: offen
-- Ziel: Units mit niedrigem `discipline`-Wert brechen gelegentlich Hold-Fire-Befehle und feuern trotzdem, obwohl sie in Phase APPROACH oder HOLD stehen. Hohe Disziplin → zuverlaessiges Hold-Fire.
+- Status: implementiert
+- Stand: `_check_discipline_break(unit)` in `mission_combat_loop_driver.gd` wuerfelt pro Tick bei Hold-Fire ob Unit den Befehl bricht. Formel: `DISCIPLINE_BREAK_BASE_CHANCE (0.08) * (1.0 - discipline)`. discipline=1.0 → 0% Bruch, discipline=0.0 → 8% pro Tick. Cooldown (`DISCIPLINE_BREAK_COOLDOWN_TICKS=10`) verhindert Dauerfeuer. Bruch wird als Event sichtbar. `get_discipline()` in `test_unit.gd` ergaenzt.
+- Offene Punkte: keine
+- Risiken: keine
+- Naechster Schritt: TASK_094 Recognition/Friendly-Fire.
 
 ### TASK_094 – Recognition: Friendly-Fire-Verwechslung
 - Status: offen
