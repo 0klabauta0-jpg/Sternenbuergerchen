@@ -1,6 +1,7 @@
 extends Node
 
 const LOS_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/los_system.gd")
+const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
 const CONTACT_LINE_NAME: String = "CombatContactLine"
 const EVENT_LABEL_NAME: String = "CombatEventLabel"
 const WINNER_LABEL_NAME: String = "CombatWinnerLabel"
@@ -242,6 +243,10 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 
 	contact_established.emit(attacker, target)
 	_set_event_text("%s ENGAGE %s" % [attacker_id, target_id])
+	var active_weapon_id: String = _get_unit_active_weapon_id(attacker)
+	var weapon_damage: int = WEAPON_DATA_SCRIPT.get_damage_per_hit(active_weapon_id)
+	var weapon_hit_chance: float = WEAPON_DATA_SCRIPT.get_base_hit_chance(active_weapon_id)
+	var weapon_ticks: int = WEAPON_DATA_SCRIPT.get_ticks_between_attacks(active_weapon_id)
 	simulation_root.call(
 		"enqueue_effect",
 		{
@@ -251,13 +256,13 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 			"attacker_unit_id": attacker_id,
 			"attacker_team_id": String(attacker.call("get_team_id")),
 			"allow_friendly_fire": false,
-			"damage": damage_per_hit,
-			"hit_chance": base_hit_chance,
+			"damage": weapon_damage,
+			"hit_chance": weapon_hit_chance,
 			"damage_multiplier": base_damage_multiplier,
 			"roll_override": 0.4,
 		}
 	)
-	_next_attack_tick = _current_tick + max(ticks_between_attacks, 1)
+	_next_attack_tick = _current_tick + max(weapon_ticks, 1)
 
 
 func _update_combat_resolution() -> void:
@@ -470,6 +475,14 @@ func _describe_enemy_unit(unit) -> String:
 		String(unit.call("get_vital_state")),
 		health,
 	]
+
+
+func _get_unit_active_weapon_id(unit) -> String:
+	if unit != null and unit.has_method("get_active_weapon_id"):
+		var weapon_id: String = String(unit.call("get_active_weapon_id")).strip_edges()
+		if WEAPON_DATA_SCRIPT.is_valid_weapon_id(weapon_id):
+			return weapon_id
+	return WEAPON_DATA_SCRIPT.DEFAULT_WEAPON_ID
 
 
 func _find_first_contact_pair() -> Dictionary:

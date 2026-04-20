@@ -649,3 +649,17 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Offene Punkte: Der Editor kann Markerpositionen im V1-Pfad noch nicht direkt bearbeiten; die JSON speichert sie bereits, aber es gibt noch keinen expliziten Marker-Editing-Workflow. Laufende Editor-Einzelupdates fuer geaenderte Tiles nutzen weiterhin ihre bestehenden lokalen Update-Helfer; der gemeinsame Pfad ist aktuell der gemeinsame Full-Rebuild und der Runtime-Aufbau.
 - Risiken: Die Missionsmarker werden jetzt aus der Map-Datei in Szenen-Marker gespiegelt, solange andere Testpfade noch NodePaths auf diese Marker erwarten. Falls spaeter auch Marker-Editing im Editor kommt, sollte dieser Pfad denselben kleinen Datenvertrag weiterverwenden statt einen zweiten Marker-State aufzubauen.
 - Naechster Schritt: Bei Bedarf Marker auch im Map-Editor bearbeitbar machen und erst danach weitere Terrain-Funktionen wie mehrere Missionskarten oder grafische Meta-Map-Vorschauen darauf aufbauen.
+
+### TASK_085 – Charakterbogen Combat-Integration (get_combat_effects)
+- Status: implementiert
+- Stand: `TestUnit` bietet jetzt `get_combat_effects() -> Dictionary`, das die combat_effects-Werte (`speed_multiplier`, `hit_modifier`, `evasion_modifier`, `damage_taken_multiplier`) direkt aus dem Charakterbogen-Bundle zurueckgibt, mit sicheren Defaults bei leerem Bundle.
+- Offene Punkte: keine.
+- Risiken: Rein additiv; bestehende Einzelgetter bleiben weiter verfuegbar.
+- Naechster Schritt: Consumers koennen `get_combat_effects()` statt der Einzelmethoden nutzen.
+
+### TASK_086 – Waffenmodell (WeaponData)
+- Status: implementiert
+- Stand: Neues `scripts/core/weapon_data.gd` als statische Waffen-Registry mit drei Typen: Maschinenpistole (smg, weapon_gun_*, schnell, niedrig), Sturmgewehr (rifle, weapon_rifle_*, balanciert), Schienenkanone (rail_gun, weapon_rifle_* in 2x, langsam, hoch). `TestUnit` traegt `weapon_1_id`/`weapon_2_id` als Exports und liefert `get_active_weapon_id()`. `MissionCombatLoopDriver` nutzt aktive Waffe des Angreifers fuer damage/hit_chance/ticks statt globaler Konstanten. In `fob_screen.gd` wurde "Sonderwaffe" zu "Schienenkanone" umbenannt und weapon-ID `special` zu `rail_gun` migriert (abwaertskompatibel).
+- Offene Punkte: Loadout-Daten aus FOB-Screen werden noch nicht automatisch an Missions-Units durchgereicht; per-Unit-Loadout-Pipeline ist separater Task.
+- Risiken: Globale combat-Exports (`damage_per_hit`, `base_hit_chance`, `ticks_between_attacks`) auf `MissionCombatLoopDriver` bleiben als Fallback-Defaults erhalten, werden aber im normalen Pfad nicht mehr genutzt.
+- Naechster Schritt: FOB-Loadout-Pipeline zu Missions-Units durchreichen; visuelle Waffen-Sprites an Units rendern.

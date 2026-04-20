@@ -34,6 +34,8 @@ signal vital_status_changed(vital_status)
 @export_multiline var short_description: String = ""
 @export_multiline var biography_text: String = ""
 @export_multiline var loadout_summary: String = ""
+@export var weapon_1_id: String = "rifle"
+@export var weapon_2_id: String = "rifle"
 @export var team_id: String = "team_test"
 @export var fireteam_id: String = ""
 @export var max_health_points: int = 100
@@ -150,6 +152,18 @@ func get_biography_text() -> String:
 
 func get_loadout_summary() -> String:
 	return loadout_summary
+
+
+func get_weapon_1_id() -> String:
+	return weapon_1_id
+
+
+func get_weapon_2_id() -> String:
+	return weapon_2_id
+
+
+func get_active_weapon_id() -> String:
+	return weapon_1_id if not weapon_1_id.is_empty() else "rifle"
 
 
 func get_fireteam_id() -> String:
@@ -273,6 +287,13 @@ func get_character_profile_bundle() -> Dictionary:
 	return _character_profile_bundle.duplicate(true)
 
 
+func get_combat_effects() -> Dictionary:
+	var effects: Dictionary = Dictionary(_character_profile_bundle.get("combat_effects", {}))
+	if effects.is_empty():
+		return {"speed_multiplier": 1.0, "hit_modifier": 0.0, "evasion_modifier": 0.0, "damage_taken_multiplier": 1.0}
+	return effects.duplicate(true)
+
+
 func get_initiative_speed_multiplier() -> float:
 	return float(Dictionary(_character_profile_bundle.get("combat_effects", {})).get("speed_multiplier", 1.0))
 
@@ -332,6 +353,12 @@ func apply_identity_config(identity_config: Dictionary) -> void:
 
 	if identity_config.has("loadout_summary"):
 		loadout_summary = String(identity_config["loadout_summary"]).strip_edges()
+
+	if identity_config.has("weapon_1") or identity_config.has("weapon_1_id"):
+		weapon_1_id = String(identity_config.get("weapon_1_id", identity_config.get("weapon_1", "rifle"))).strip_edges()
+
+	if identity_config.has("weapon_2") or identity_config.has("weapon_2_id"):
+		weapon_2_id = String(identity_config.get("weapon_2_id", identity_config.get("weapon_2", "rifle"))).strip_edges()
 
 	if identity_config.has("team_id"):
 		team_id = String(identity_config["team_id"]).strip_edges()
