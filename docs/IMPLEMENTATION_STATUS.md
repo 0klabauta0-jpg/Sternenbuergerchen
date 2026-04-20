@@ -683,8 +683,11 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Naechster Schritt: TASK_090 differenzierte Enemy-Typen.
 
 ### TASK_090 – Differenzierte Enemy-Typen
-- Status: offen
-- Ziel: Statt eines einzigen `ENEMY_DEFAULT_PRESET` mit identischen Stats werden 6 verschiedene Enemy-Archetypen eingefuehrt (z.B. Scout, Heavy, Sniper, Medic, Officer, Standard), jeweils mit unterschiedlichen Skill-Werten, Waffen und Traits.
+- Status: implementiert
+- Stand: 6 Enemy-Archetypen (Standard, Scout, Heavy, Sniper, Medic, Officer) als `ENEMY_ARCHETYPES`-Array in `unit_roster_presets.gd` definiert. Jeder Archetyp hat eigene Skills, Waffe und Traits. `get_preset()` fuer `team_bravo` waehlt Archetyp per Unit-ID-Hash automatisch. Lookup-Funktionen `get_enemy_archetype_for_unit()` und `get_enemy_archetype_by_id()` ergaenzt. Friendly-Roster bleibt unberuehrt.
+- Offene Punkte: keine
+- Risiken: keine
+- Naechster Schritt: TASK_091 Awareness/Detection Delay.
 
 ### TASK_091 – Awareness: Detection-Delay
 - Status: offen

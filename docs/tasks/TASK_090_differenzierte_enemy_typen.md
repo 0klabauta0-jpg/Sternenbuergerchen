@@ -4,7 +4,7 @@
 Statt eines einzigen `ENEMY_DEFAULT_PRESET` werden 6 verschiedene Enemy-Archetypen eingefuehrt,
 jeweils mit unterschiedlichen Skill-Werten, Waffen und Traits.
 
-## Status: OFFEN
+## Status: ERLEDIGT
 
 ## Kontext
 - `unit_roster_presets.gd` hat aktuell nur `ENEMY_DEFAULT_PRESET` (accuracy=0.4, speed=0.3, leadership=0.2, toughness=0.5)

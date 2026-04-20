@@ -244,6 +244,75 @@ const ENEMY_DEFAULT_PRESET: Dictionary = {
 	"trait_ids": [],
 }
 
+const ENEMY_ARCHETYPES: Array = [
+	{
+		"archetype_id": "standard",
+		"team_id": "team_bravo",
+		"role_name": "Infanterist",
+		"weapon_id": "rifle",
+		"skill_accuracy": 0.40,
+		"skill_speed": 0.35,
+		"skill_toughness": 0.50,
+		"skill_leadership": 0.10,
+		"trait_ids": [],
+	},
+	{
+		"archetype_id": "scout",
+		"team_id": "team_bravo",
+		"role_name": "Spaehsoldat",
+		"weapon_id": "smg",
+		"skill_accuracy": 0.30,
+		"skill_speed": 0.60,
+		"skill_toughness": 0.30,
+		"skill_leadership": 0.05,
+		"trait_ids": ["reckless"],
+	},
+	{
+		"archetype_id": "heavy",
+		"team_id": "team_bravo",
+		"role_name": "Schwerer Schuetze",
+		"weapon_id": "rail_gun",
+		"skill_accuracy": 0.35,
+		"skill_speed": 0.20,
+		"skill_toughness": 0.80,
+		"skill_leadership": 0.10,
+		"trait_ids": ["steady"],
+	},
+	{
+		"archetype_id": "sniper",
+		"team_id": "team_bravo",
+		"role_name": "Scharfschuetze",
+		"weapon_id": "rifle",
+		"skill_accuracy": 0.70,
+		"skill_speed": 0.15,
+		"skill_toughness": 0.30,
+		"skill_leadership": 0.05,
+		"trait_ids": ["calm"],
+	},
+	{
+		"archetype_id": "medic",
+		"team_id": "team_bravo",
+		"role_name": "Sanitaeter",
+		"weapon_id": "smg",
+		"skill_accuracy": 0.25,
+		"skill_speed": 0.40,
+		"skill_toughness": 0.40,
+		"skill_leadership": 0.15,
+		"trait_ids": ["cautious"],
+	},
+	{
+		"archetype_id": "officer",
+		"team_id": "team_bravo",
+		"role_name": "Offizier",
+		"weapon_id": "rifle",
+		"skill_accuracy": 0.45,
+		"skill_speed": 0.30,
+		"skill_toughness": 0.50,
+		"skill_leadership": 0.60,
+		"trait_ids": ["calm", "steady"],
+	},
+]
+
 
 static func get_homebase_roster() -> Array:
 	var roster: Array = []
@@ -260,13 +329,31 @@ static func get_default_homebase_selection() -> PackedStringArray:
 	return PackedStringArray(["unit_alpha", "unit_bravo"])
 
 
+static func get_enemy_archetype_for_unit(unit_id: String) -> Dictionary:
+	if ENEMY_ARCHETYPES.is_empty():
+		return ENEMY_DEFAULT_PRESET
+	var hash_value: int = unit_id.hash()
+	if hash_value < 0:
+		hash_value = -hash_value
+	var index: int = hash_value % ENEMY_ARCHETYPES.size()
+	return Dictionary(ENEMY_ARCHETYPES[index])
+
+
+static func get_enemy_archetype_by_id(archetype_id: String) -> Dictionary:
+	for archetype in ENEMY_ARCHETYPES:
+		if String(archetype.get("archetype_id", "")) == archetype_id:
+			return Dictionary(archetype)
+	return ENEMY_DEFAULT_PRESET
+
+
 static func get_preset(unit_id: String, team_id: String = "") -> Dictionary:
 	for unit_data in FRIENDLY_ROSTER:
 		if String(unit_data.get("unit_id", "")) == unit_id:
 			return _with_extended_identity(unit_data)
 
 	if team_id == "team_bravo":
-		var enemy_preset: Dictionary = ENEMY_DEFAULT_PRESET.duplicate(true)
+		var archetype: Dictionary = get_enemy_archetype_for_unit(unit_id)
+		var enemy_preset: Dictionary = archetype.duplicate(true)
 		enemy_preset["unit_id"] = unit_id
 		enemy_preset["display_name"] = _build_display_name(unit_id)
 		return _with_extended_identity(enemy_preset)
