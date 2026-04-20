@@ -247,7 +247,8 @@ static func _build_function_scores(role_id: String, core_values: Dictionary, com
 		"escort_pilot": clampf((maxf(_resolve_air_role_value(platform_values, role_id), 0.0) * 0.30) + (float(core_values.get("awareness", 0.0)) * 0.20) + (float(core_values.get("discipline", 0.0)) * 0.20) + (float(core_values.get("leadership", 0.0)) * 0.15) + (float(communication_values.get("speech_quality", 0.0)) * 0.15), 0.0, 1.0),
 	}
 	var filtered: Dictionary = {}
-	for function_id in PackedStringArray(ROLE_ALLOWED_FUNCTIONS.get(role_id, PackedStringArray(["sentinel", "overwatch", "scout"]))):
+	for function_id_variant in ROLE_ALLOWED_FUNCTIONS.get(role_id, ["sentinel", "overwatch", "scout"]):
+		var function_id: String = String(function_id_variant)
 		filtered[function_id] = float(all_scores.get(function_id, 0.0))
 	return filtered
 
