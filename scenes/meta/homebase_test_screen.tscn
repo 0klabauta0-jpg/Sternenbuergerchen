@@ -286,7 +286,7 @@ theme_override_constants/separation = 4
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-size_flags_stretch_ratio = 1.0
+size_flags_stretch_ratio = 1.18
 custom_minimum_size = Vector2(250, 0)
 tooltip_text = "Flugdeck fuer Pilotenzuweisung und Einzeltransfers zur FOB."
 
@@ -348,9 +348,9 @@ theme_override_font_sizes/font_size = 11
 
 [node name="ShipCardsScroll" type="ScrollContainer" parent="Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 236)
+custom_minimum_size = Vector2(0, 276)
 size_flags_horizontal = 3
-size_flags_vertical = 1
+size_flags_vertical = 3
 
 [node name="ShipCardsList" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/ShipCardsScroll"]
 layout_mode = 2
@@ -364,7 +364,7 @@ theme_override_font_sizes/font_size = 11
 
 [node name="AircraftTransfersScroll" type="ScrollContainer" parent="Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 68)
+custom_minimum_size = Vector2(0, 44)
 size_flags_horizontal = 3
 size_flags_vertical = 1
 
@@ -378,7 +378,7 @@ visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-size_flags_stretch_ratio = 1.1
+size_flags_stretch_ratio = 0.88
 custom_minimum_size = Vector2(280, 0)
 tooltip_text = "Lesender Charakterbogen der aktuell fokussierten Person. Zeigt Rolle, Status, ausgeschriebene Skills, Traits, Loadout und Kurzbiografie."
 

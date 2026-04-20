@@ -157,6 +157,7 @@ static func apply_map(screen: Control) -> void:
 	_apply_panel_style(screen, "Panel", "frame")
 	_apply_panel_style(screen, "Panel/Margin/VBox/MissionPanel", "mission_header")
 	_apply_panel_style(screen, "Panel/Margin/VBox/ContentRow/MapPanel", "frame")
+	_apply_panel_style(screen, "Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox/MapPreviewFrame", "panel")
 	_apply_panel_style(screen, "Panel/Margin/VBox/ContentRow/SummaryPanel", "frame")
 
 	for path in [
@@ -168,7 +169,7 @@ static func apply_map(screen: Control) -> void:
 
 	for path in [
 		"Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionHeaderLabel",
-		"Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox/MapHeaderLabel",
+		"Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox/MapHeaderRow/MapHeaderLabel",
 		"Panel/Margin/VBox/ContentRow/SummaryPanel/SummaryMargin/SummaryVBox/SummaryHeaderLabel",
 	]:
 		style_header_label(screen.get_node_or_null(path), 12)
@@ -178,10 +179,12 @@ static func apply_map(screen: Control) -> void:
 		"Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/OperatorCountLabel",
 		"Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/FireteamCountLabel",
 		"Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionSummaryLabel",
+		"Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox/MapHeaderRow/MapCapacityLabel",
 	]:
 		style_body_label(screen.get_node_or_null(path), 10)
 
 	for path in [
+		"Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox/MarkerListLabel",
 		"Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox/MapDataLabel",
 		"Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox/MapHelpLabel",
 		"Panel/Margin/VBox/ContentRow/SummaryPanel/SummaryMargin/SummaryVBox/FireteamOverviewLabel",

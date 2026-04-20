@@ -61,6 +61,10 @@ layout_mode = 2
 theme_override_constants/separation = 3
 size_flags_horizontal = 3
 
+[node name="HeaderSpacer" type="Control" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
 [node name="NavButtonRow" type="HBoxContainer" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow"]
 layout_mode = 2
 theme_override_constants/separation = 3
@@ -127,7 +131,7 @@ theme_override_constants/separation = 8
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-size_flags_stretch_ratio = 1.1
+size_flags_stretch_ratio = 1.28
 
 [node name="MapMargin" type="MarginContainer" parent="Panel/Margin/VBox/ContentRow/MapPanel"]
 layout_mode = 2
@@ -143,28 +147,66 @@ theme_override_constants/separation = 4
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="MapHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox"]
+[node name="MapHeaderRow" type="HBoxContainer" parent="Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox"]
 layout_mode = 2
+
+[node name="MapHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox/MapHeaderRow"]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "Mission Map"
 theme_override_font_sizes/font_size = 13
+
+[node name="MapCapacityLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox/MapHeaderRow"]
+layout_mode = 2
+horizontal_alignment = 2
+text = "Mission slots 0 | Dropship 6 NPC + pilot"
+theme_override_font_sizes/font_size = 9
+
+[node name="MapPreviewFrame" type="PanelContainer" parent="Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MapPreviewMargin" type="MarginContainer" parent="Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox/MapPreviewFrame"]
+layout_mode = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 6
+size_flags_vertical = 3
+
+[node name="MapPreviewClip" type="Control" parent="Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox/MapPreviewFrame/MapPreviewMargin"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 308)
+clip_contents = true
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MapPreviewRoot" type="Node2D" parent="Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox/MapPreviewFrame/MapPreviewMargin/MapPreviewClip"]
+
+[node name="MarkerListLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox"]
+layout_mode = 2
+text = "Markers"
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 10
 
 [node name="MapDataLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox"]
 layout_mode = 2
 text = "File: res://maps/test_mission.json\nGrid: 0 x 0\nTiles: 0"
 autowrap_mode = 3
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 10
 
 [node name="MapHelpLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox"]
 layout_mode = 2
 text = "Die Map-Ansicht bleibt bewusst read-only."
 autowrap_mode = 3
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 10
 
 [node name="SummaryPanel" type="PanelContainer" parent="Panel/Margin/VBox/ContentRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-size_flags_stretch_ratio = 0.95
+size_flags_stretch_ratio = 0.82
 
 [node name="SummaryMargin" type="MarginContainer" parent="Panel/Margin/VBox/ContentRow/SummaryPanel"]
 layout_mode = 2

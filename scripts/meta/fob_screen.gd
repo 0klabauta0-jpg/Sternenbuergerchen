@@ -2033,11 +2033,11 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 		var drop_label := Label.new()
 		if is_selected and not _dropship_staged_fireteam_ids.is_empty():
 			if _get_transport_craft_remaining_capacity(craft_state) <= 0:
-				drop_label.text = "Full %d/%d NPC assigned" % [_get_transport_craft_staged_member_count(craft_id), DROPSHIP_NPC_CAPACITY]
+				drop_label.text = "Full %d/%d NPC assigned + pilot" % [_get_transport_craft_staged_member_count(craft_id), DROPSHIP_NPC_CAPACITY]
 			else:
-				drop_label.text = "Assigned fireteams | %d/%d NPC" % [_get_transport_craft_staged_member_count(craft_id), DROPSHIP_NPC_CAPACITY]
+				drop_label.text = "Assigned fireteams | %d/%d NPC + pilot" % [_get_transport_craft_staged_member_count(craft_id), DROPSHIP_NPC_CAPACITY]
 		else:
-			drop_label.text = "Drop FT here to board this ship"
+			drop_label.text = "Drop FT here to board this ship (max 6 NPC + pilot)"
 		drop_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		drop_label.add_theme_font_size_override("font_size", 9)
 		vbox.add_child(drop_label)
@@ -2126,7 +2126,7 @@ func _build_transport_craft_cargo_text(craft_state: Dictionary) -> String:
 
 func _build_transport_craft_status_line(craft_state: Dictionary) -> String:
 	if bool(craft_state.get("is_in_transit", false)):
-		return "Status: inbound to FOB | ETA %ds" % int(craft_state.get("transfer_eta_seconds", 0))
+		return "Status: inbound to FOB | ETA %ds | 6 NPC + pilot" % int(craft_state.get("transfer_eta_seconds", 0))
 	if bool(craft_state.get("is_boardable", false)):
 		return "Status: docked in FOB | %s" % _build_transport_craft_capacity_text(craft_state)
 	return "Status: visible in FOB as delivered cargo state"
@@ -2137,8 +2137,8 @@ func _build_transport_craft_capacity_text(craft_state: Dictionary) -> String:
 		return ""
 	var staged_member_count: int = _get_transport_craft_staged_member_count(String(craft_state.get("craft_id", "")).strip_edges())
 	if staged_member_count >= DROPSHIP_NPC_CAPACITY:
-		return "Full %d/%d NPC" % [staged_member_count, DROPSHIP_NPC_CAPACITY]
-	return "Capacity %d/%d NPC" % [staged_member_count, DROPSHIP_NPC_CAPACITY]
+		return "Full %d/%d NPC + pilot" % [staged_member_count, DROPSHIP_NPC_CAPACITY]
+	return "Capacity %d/%d NPC + pilot" % [staged_member_count, DROPSHIP_NPC_CAPACITY]
 
 
 func _build_transport_craft_progress_value(craft_state: Dictionary) -> float:
