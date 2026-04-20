@@ -14,6 +14,8 @@ const DOWN_EVENT_COLOR: Color = Color(1.0, 0.55, 0.55, 1.0)
 const BLEEDOUT_EVENT_COLOR: Color = Color(0.92, 0.6, 0.6, 1.0)
 const RESPAWN_EVENT_COLOR: Color = Color(0.72, 0.9, 1.0, 1.0)
 const EVENT_DEFAULT_DURATION: float = 1.2
+const LEADERSHIP_BONUS_FACTOR: float = 0.15
+const LEADERSHIP_EVENT_COLOR: Color = Color(0.6, 0.85, 1.0, 1.0)
 
 signal contact_established(attacker, target)
 signal combat_resolved(mission_result: Dictionary)
@@ -58,6 +60,9 @@ var _mission_started_at_msec: int = 0
 var _objective_owned_since_msec: int = -1
 var _mission_result: Dictionary = {}
 var _runs_local_authority: bool = true
+var _fireteam_original_leads: Dictionary = {}
+var _fireteam_acting_leads: Dictionary = {}
+var _fireteam_members: Dictionary = {}
 
 
 func _ready() -> void:
@@ -71,6 +76,7 @@ func _ready() -> void:
 		_connect_unit_signals()
 		_connect_respawn_signals()
 		_connect_wave_controller_signals()
+		_init_fireteam_leadership()
 	call_deferred("_finish_readability_setup")
 	_mission_started_at_msec = Time.get_ticks_msec()
 
@@ -146,6 +152,7 @@ func _on_tick_processed(tick: int) -> void:
 
 	_queue_bleedout_for_downed_enemy(simulation_root)
 	_queue_bleedout_for_downed_friendly(simulation_root)
+	_update_fireteam_leadership()
 	_advance_enemy_units(simulation_root)
 	_try_enqueue_attacks(simulation_root)
 	_update_combat_resolution()
@@ -287,6 +294,140 @@ func _get_units(paths: Array[NodePath]) -> Array:
 			units.append(unit)
 
 	return units
+
+
+func _init_fireteam_leadership() -> void:
+	_fireteam_original_leads.clear()
+	_fireteam_acting_leads.clear()
+	_fireteam_members.clear()
+	for unit in _get_units(friendly_unit_paths):
+		if unit == null or not unit.has_method("get_fireteam_id") or not unit.has_method("get_unit_id"):
+			continue
+
+		var ft_id: String = String(unit.call("get_fireteam_id"))
+		if ft_id.is_empty():
+			continue
+
+		var uid: String = String(unit.call("get_unit_id"))
+		if not _fireteam_members.has(ft_id):
+			_fireteam_members[ft_id] = []
+
+		_fireteam_members[ft_id].append(uid)
+		if unit.has_method("get") and unit.get("is_fireteam_lead"):
+			_fireteam_original_leads[ft_id] = uid
+			_fireteam_acting_leads[ft_id] = uid
+
+	_apply_all_leadership_bonuses()
+
+
+func _update_fireteam_leadership() -> void:
+	var changed: bool = false
+	for ft_id in _fireteam_original_leads.keys():
+		var original_lead_id: String = String(_fireteam_original_leads[ft_id])
+		var current_acting_id: String = String(_fireteam_acting_leads.get(ft_id, ""))
+		var original_lead = _resolve_unit_by_id(original_lead_id)
+		var original_is_fit: bool = original_lead != null and original_lead.has_method("get_vital_state") and String(original_lead.call("get_vital_state")) == "fit"
+
+		if original_is_fit:
+			if current_acting_id != original_lead_id:
+				_fireteam_acting_leads[ft_id] = original_lead_id
+				changed = true
+				_show_leadership_event(original_lead_id, "LEAD BACK")
+		else:
+			if current_acting_id == original_lead_id or not _is_acting_lead_fit(current_acting_id):
+				var successor_id: String = _find_best_successor(ft_id, original_lead_id)
+				if successor_id != current_acting_id:
+					_fireteam_acting_leads[ft_id] = successor_id
+					changed = true
+					if not successor_id.is_empty():
+						_show_leadership_event(successor_id, "ACTING LEAD")
+
+	if changed:
+		_apply_all_leadership_bonuses()
+
+
+func _is_acting_lead_fit(uid: String) -> bool:
+	if uid.is_empty():
+		return false
+
+	var unit = _resolve_unit_by_id(uid)
+	if unit == null or not unit.has_method("get_vital_state"):
+		return false
+
+	return String(unit.call("get_vital_state")) == "fit"
+
+
+func _find_best_successor(ft_id: String, exclude_id: String) -> String:
+	var best_id: String = ""
+	var best_leadership: float = -1.0
+	var members: Array = _fireteam_members.get(ft_id, [])
+	for uid in members:
+		if String(uid) == exclude_id:
+			continue
+
+		var unit = _resolve_unit_by_id(String(uid))
+		if unit == null or not unit.has_method("get_vital_state"):
+			continue
+
+		if String(unit.call("get_vital_state")) != "fit":
+			continue
+
+		var leadership: float = 0.0
+		if unit.has_method("get_leadership_skill"):
+			leadership = float(unit.call("get_leadership_skill"))
+
+		if leadership > best_leadership:
+			best_leadership = leadership
+			best_id = String(uid)
+
+	return best_id
+
+
+func _apply_all_leadership_bonuses() -> void:
+	for unit in _get_units(friendly_unit_paths):
+		if unit == null or not unit.has_method("clear_leadership_bonus"):
+			continue
+
+		unit.call("clear_leadership_bonus")
+
+	for ft_id in _fireteam_acting_leads.keys():
+		var acting_lead_id: String = String(_fireteam_acting_leads[ft_id])
+		if acting_lead_id.is_empty():
+			continue
+
+		var lead_unit = _resolve_unit_by_id(acting_lead_id)
+		if lead_unit == null or not lead_unit.has_method("get_vital_state"):
+			continue
+
+		if String(lead_unit.call("get_vital_state")) != "fit":
+			continue
+
+		var leadership_value: float = 0.0
+		if lead_unit.has_method("get_leadership_skill"):
+			leadership_value = float(lead_unit.call("get_leadership_skill"))
+
+		var bonus: float = leadership_value * LEADERSHIP_BONUS_FACTOR
+		if bonus <= 0.0:
+			continue
+
+		var members: Array = _fireteam_members.get(ft_id, [])
+		for uid in members:
+			if String(uid) == acting_lead_id:
+				continue
+
+			var member = _resolve_unit_by_id(String(uid))
+			if member == null or not member.has_method("apply_leadership_bonus"):
+				continue
+
+			member.call("apply_leadership_bonus", bonus)
+
+
+func _show_leadership_event(uid: String, text: String) -> void:
+	var unit = _resolve_unit_by_id(uid)
+	if unit != null and unit.has_method("show_event_text"):
+		unit.call("show_event_text", text, LEADERSHIP_EVENT_COLOR, EVENT_DEFAULT_DURATION)
+
+	_set_event_text("%s %s" % [uid, text])
 
 
 func _pick_target_for_attacker(attacker, target_paths: Array[NodePath]):

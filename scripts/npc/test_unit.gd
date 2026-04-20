@@ -54,10 +54,12 @@ signal vital_status_changed(vital_status)
 @export_range(-1.0, 1.0, 0.01) var freighter_piloting: float = -1.0
 @export_range(-1.0, 1.0, 0.01) var fighter_piloting: float = -1.0
 @export var trait_ids: PackedStringArray = []
+@export var is_fireteam_lead: bool = false
 
 var _runtime_status: RefCounted = UNIT_RUNTIME_STATUS_SCRIPT.new()
 var _current_unit_command: RefCounted = null
 var _vital_status: RefCounted = UNIT_VITAL_STATUS_SCRIPT.new()
+var _leadership_bonus: float = 0.0
 var _skills: RefCounted = UNIT_SKILLS_SCRIPT.new()
 var _traits: Array = []
 var _character_profile_bundle: Dictionary = {}
@@ -290,8 +292,26 @@ func get_character_profile_bundle() -> Dictionary:
 func get_combat_effects() -> Dictionary:
 	var effects: Dictionary = Dictionary(_character_profile_bundle.get("combat_effects", {}))
 	if effects.is_empty():
-		return {"speed_multiplier": 1.0, "hit_modifier": 0.0, "evasion_modifier": 0.0, "damage_taken_multiplier": 1.0}
-	return effects.duplicate(true)
+		return {"speed_multiplier": 1.0, "hit_modifier": 0.0 + _leadership_bonus, "evasion_modifier": 0.0, "damage_taken_multiplier": 1.0}
+	var result: Dictionary = effects.duplicate(true)
+	result["hit_modifier"] = float(result.get("hit_modifier", 0.0)) + _leadership_bonus
+	return result
+
+
+func apply_leadership_bonus(bonus: float) -> void:
+	_leadership_bonus = maxf(bonus, 0.0)
+
+
+func clear_leadership_bonus() -> void:
+	_leadership_bonus = 0.0
+
+
+func get_leadership_bonus() -> float:
+	return _leadership_bonus
+
+
+func get_leadership_hit_modifier() -> float:
+	return _leadership_bonus
 
 
 func get_initiative_speed_multiplier() -> float:
@@ -365,6 +385,9 @@ func apply_identity_config(identity_config: Dictionary) -> void:
 
 	if identity_config.has("fireteam_id"):
 		fireteam_id = _normalize_fireteam_id(String(identity_config["fireteam_id"]))
+
+	if identity_config.has("is_fireteam_lead"):
+		is_fireteam_lead = bool(identity_config["is_fireteam_lead"])
 
 	if identity_config.has("skill_accuracy"):
 		skill_accuracy = clampf(float(identity_config["skill_accuracy"]), 0.0, 1.0)

@@ -973,6 +973,8 @@ func _extract_unit_hit_modifier(unit) -> float:
 		modifier += float(unit.call("get_order_fidelity_hit_modifier"))
 	if unit.has_method("get_autonomy_hit_modifier"):
 		modifier += float(unit.call("get_autonomy_hit_modifier"))
+	if unit.has_method("get_leadership_hit_modifier"):
+		modifier += float(unit.call("get_leadership_hit_modifier"))
 	return modifier
 
 

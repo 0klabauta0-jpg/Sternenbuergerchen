@@ -4,7 +4,7 @@
 Der Fireteam-Lead verteilt einen kleinen Leadership-Bonus auf alle Mitglieder seines Fireteams.
 Wenn der Lead ausfaellt (down/bleedout), wird der Bonus sofort entfernt.
 
-## Status: OFFEN
+## Status: ERLEDIGT
 
 ## Kontext
 - `test_unit.gd` hat `skill_leadership` (0.0–1.0) und `fireteam_id`

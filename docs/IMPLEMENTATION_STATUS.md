@@ -669,8 +669,11 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Ziel: Die beiden offenen Punkte aus TASK_086 schliessen: (A) FOB-Loadout-Daten (`weapon_1`/`weapon_2`/`armor`) ueber `MetaLayerFlow` → `MissionTestSetup` → `TestUnit.apply_identity_config()` durchreichen; (B) Waffen-Sprite als Child-Node an der Unit rendern, mit Asset-Pfad und Scale aus `WeaponData` (Schienenkanone 2x).
 
 ### TASK_088 – Leadership-Bonus auf Fireteam-Mitglieder
-- Status: offen
-- Ziel: Der Fireteam-Lead verteilt einen kleinen Leadership-Bonus (hit_modifier, speed_multiplier) auf alle Mitglieder seines Fireteams. Wenn der Lead ausfaellt (down/bleedout), wird der Bonus sofort entfernt.
+- Status: implementiert
+- Stand: Leadership-Bonus-System mit automatischer Lead-Nachfolge implementiert. `test_unit.gd` hat `is_fireteam_lead`-Export, `_leadership_bonus`-Feld, `apply_leadership_bonus()`, `clear_leadership_bonus()`, `get_leadership_hit_modifier()`. Der Bonus fliesst ueber `get_combat_effects()` und `_extract_unit_hit_modifier()` in SimulationRoot in die Trefferberechnung ein. `mission_combat_loop_driver.gd` verwaltet pro Tick Fireteam-Leads: wenn Original-Lead down → Unit mit hoechstem Leadership uebernimmt automatisch; wenn Original-Lead respawnt → uebernimmt sofort zurueck. Bonus = `leadership * 0.15` auf alle Fireteam-Mitglieder (nicht Lead selbst).
+- Offene Punkte: `is_fireteam_lead` muss im Mission-Setup aus FOB-Daten gesetzt werden (Loadout-Fluss TASK_087).
+- Risiken: keine
+- Naechster Schritt: Integration mit FOB-Loadout-Fluss (TASK_087).
 
 ### TASK_089 – Enemy Cover-Seeking
 - Status: offen
