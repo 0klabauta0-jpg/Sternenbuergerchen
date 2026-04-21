@@ -56,6 +56,7 @@ var _boarding_order: PackedStringArray = []
 var _boarding_index: int = 0
 var _boarding_member_index: int = 0
 var _current_boarding_unit_id: String = ""
+var _current_boarding_fireteam_id: String = ""
 var _boarded_unit_ids: PackedStringArray = []
 var _boarded_fireteam_ids: PackedStringArray = []
 var _mission_name: String = DEFAULT_MISSION_NAME
