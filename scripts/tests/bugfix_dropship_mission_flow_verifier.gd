@@ -17,6 +17,7 @@ func _run_tests() -> void:
 	print("=== Dropship Mission Bugfix Verifier ===")
 	await _test_fob_refresh_preserves_boarded_units()
 	await _test_shipcard_start_dispatches_boarded_craft_without_full_team_boarded()
+	await _test_fob_header_start_is_hidden()
 	await _test_mission_start_requires_boarded_team()
 	await _test_mission_timer_uses_explicit_start_timestamp()
 	await _test_dropship_returns_to_fob_after_drop()
@@ -179,6 +180,16 @@ func _test_shipcard_start_dispatches_boarded_craft_without_full_team_boarded() -
 	await process_frame
 
 
+func _test_fob_header_start_is_hidden() -> void:
+	var screen: Control = FOB_TEST_SCENE.instantiate()
+	root.add_child(screen)
+	await process_frame
+	var start_button := screen.get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/StartMissionButton") as Button
+	_assert(start_button != null and not start_button.visible, "FOB header start button stays hidden because mission launch belongs to Homebase")
+	screen.queue_free()
+	await process_frame
+
+
 func _test_mission_start_requires_boarded_team() -> void:
 	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
 	root.add_child(scene)
@@ -242,6 +253,7 @@ func _test_mission_start_requires_boarded_team() -> void:
 	for _frame in range(4):
 		await process_frame
 	_assert(scene.call("get_active_mission") != null, "Homebase mission start launches once a boarded dropship is launch-ready")
+	_assert(int(scene.get("_active_mission_started_at_msec")) > 0, "Homebase start seeds the mission countdown timestamp at launch")
 	scene.queue_free()
 	await process_frame
 

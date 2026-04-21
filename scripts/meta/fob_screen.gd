@@ -128,6 +128,9 @@ func _ready() -> void:
 		close_overlay_button.pressed.connect(_on_close_overlay_button_pressed)
 	if mission_info_row != null:
 		mission_info_row.move_child(start_button, mission_info_row.get_child_count() - 1)
+	if start_button != null:
+		start_button.visible = false
+		start_button.disabled = true
 
 	_fireteam_definitions = _normalize_fireteam_definitions(_fireteam_definitions, _selected_fireteam_ids)
 	_selected_fireteam_ids = _normalize_selected_fireteam_ids(_selected_fireteam_ids)
@@ -435,6 +438,7 @@ func _update_brief_panel() -> void:
 	mission_summary_label.text = "Operators: %d | Pilots: %d | Fireteams: %d active | %s" % [_selected_unit_ids.size(), pilot_count, _count_fireteams_with_members(), _build_dropship_status_text()]
 	start_button.text = "Start @ Home"
 	start_button.disabled = true
+	start_button.visible = false
 
 
 func _render_available_operators() -> void:
@@ -2144,7 +2148,7 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 	elif is_transit_to_fob:
 		select_button.text = "Return"
 	else:
-		select_button.text = "Start"
+		select_button.text = "Send"
 	select_button.custom_minimum_size = Vector2(58.0, 0.0)
 	select_button.add_theme_font_size_override("font_size", 8)
 	select_button.disabled = is_waiting_on_mission or is_transit_to_mission or is_transit_to_fob or not _can_mark_transport_craft_launch_ready(craft_state)
