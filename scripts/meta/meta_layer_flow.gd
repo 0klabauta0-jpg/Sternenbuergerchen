@@ -1399,6 +1399,8 @@ func _refresh_meta_mission_timer_labels() -> void:
 
 
 func _build_meta_mission_timer_text() -> String:
+	if _active_mission_started_at_msec <= 0 or _active_mission_time_limit_seconds <= 0.0:
+		return "--:--"
 	var total_seconds: int = int(round(float(_get_selected_mission_definition().get("time_limit_seconds", 1200.0))))
 	if _active_mission_started_at_msec > 0 and _active_mission_time_limit_seconds > 0.0:
 		var elapsed_seconds: int = maxi(int(float(Time.get_ticks_msec() - _active_mission_started_at_msec) / 1000.0), 0)

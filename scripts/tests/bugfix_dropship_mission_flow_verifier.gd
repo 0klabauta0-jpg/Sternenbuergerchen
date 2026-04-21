@@ -18,7 +18,9 @@ func _run_tests() -> void:
 	await _test_fob_refresh_preserves_boarded_units()
 	await _test_shipcard_start_dispatches_boarded_craft_without_full_team_boarded()
 	await _test_fob_header_start_is_hidden()
+	await _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting()
 	await _test_mission_start_requires_boarded_team()
+	await _test_homebase_timer_label_switches_from_idle_to_countdown()
 	await _test_mission_timer_uses_explicit_start_timestamp()
 	await _test_dropship_returns_to_fob_after_drop()
 	await _test_meta_mission_uses_deferred_drop_state()
@@ -190,6 +192,70 @@ func _test_fob_header_start_is_hidden() -> void:
 	await process_frame
 
 
+func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	for _frame in range(4):
+		await process_frame
+
+	var fob_screen: Control = scene.get_node("FOBScreen")
+	var map_screen: Control = scene.get_node("MapScreen")
+	var selected_unit_ids := PackedStringArray(["unit_alpha", "unit_bravo", "unit_delta"])
+	var selected_fireteam_ids := PackedStringArray(["blue", "blue", "blue"])
+	var fireteam_definitions := [
+		{
+			"id": "blue",
+			"label": "BLUE",
+			"lead_unit_id": "unit_alpha",
+			"respawn_enabled": false,
+			"loadout": "medium",
+		}
+	]
+	scene.set(
+		"_homebase_aircraft_definitions",
+		[
+			{
+				"craft_id": "dropship_test",
+				"display_name": "Dropship Test",
+				"craft_type": "dropship",
+				"texture_path": "res://Assets/kenney_space-kit/Side/craft_speederB.png",
+			}
+		]
+	)
+	scene.set("_assigned_aircraft_pilot_by_craft", {"dropship_test": "unit_hotel"})
+	scene.set("_aircraft_location_by_craft", {"dropship_test": "fob"})
+	scene.set("_selected_unit_ids", selected_unit_ids)
+	scene.set("_selected_fireteam_ids", selected_fireteam_ids)
+	scene.call("_refresh_fob_screen")
+	fob_screen.call("configure_transfer", selected_unit_ids, selected_fireteam_ids, fireteam_definitions)
+	fob_screen.set("_dropship_transport_craft_id", "dropship_test")
+	fob_screen.set("_dropship_phase", "boarded")
+	fob_screen.set("_boarded_unit_ids", selected_unit_ids)
+	fob_screen.set("_boarded_fireteam_ids", PackedStringArray(["blue"]))
+	fob_screen.call("_on_transport_craft_mission_stage_requested", "dropship_test")
+	scene.call("_refresh_map_screen")
+	for _frame in range(2):
+		await process_frame
+
+	var mission_craft_card := map_screen.get_node("Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox/MissionCraftCard") as PanelContainer
+	var status_label := mission_craft_card.get_node("CardMargin/CardRow/TextVBox/StatusLabel") as Label
+	_assert(mission_craft_card != null and mission_craft_card.visible, "Map screen shows the mini shipcard while the dropship is en route")
+	_assert(mission_craft_card.get_index() == 2, "Mini shipcard is inserted directly under the map preview panel")
+	_assert(mission_craft_card.modulate.a < 1.0, "Mini shipcard is greyed out while the dropship is still in transit")
+	_assert(status_label != null and status_label.text.contains("En route to mission map"), "Mini shipcard reports the live transfer status during mission transit")
+
+	for _step in range(18):
+		scene.call("_on_homebase_transport_timer_timeout")
+	scene.call("_refresh_map_screen")
+	for _frame in range(2):
+		await process_frame
+
+	_assert(mission_craft_card.visible and mission_craft_card.modulate.a < 1.0, "Mini shipcard stays visible and greyed out once the dropship is waiting on the mission map")
+	_assert(status_label != null and status_label.text.contains("Holding on mission map"), "Mini shipcard switches to waiting status after the transfer completes")
+	scene.queue_free()
+	await process_frame
+
+
 func _test_mission_start_requires_boarded_team() -> void:
 	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
 	root.add_child(scene)
@@ -254,6 +320,63 @@ func _test_mission_start_requires_boarded_team() -> void:
 		await process_frame
 	_assert(scene.call("get_active_mission") != null, "Homebase mission start launches once a boarded dropship is launch-ready")
 	_assert(int(scene.get("_active_mission_started_at_msec")) > 0, "Homebase start seeds the mission countdown timestamp at launch")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_homebase_timer_label_switches_from_idle_to_countdown() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	for _frame in range(4):
+		await process_frame
+
+	var homebase_screen: Control = scene.get_node("HomebaseScreen")
+	var fob_screen: Control = scene.get_node("FOBScreen")
+	var timer_label := scene.get_node("HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/MissionTimerLabel") as Label
+	var selected_unit_ids := PackedStringArray(["unit_alpha", "unit_bravo", "unit_delta"])
+	var selected_fireteam_ids := PackedStringArray(["blue", "blue", "blue"])
+	var fireteam_definitions := [
+		{
+			"id": "blue",
+			"label": "BLUE",
+			"lead_unit_id": "unit_alpha",
+			"respawn_enabled": false,
+			"loadout": "medium",
+		}
+	]
+	scene.set(
+		"_homebase_aircraft_definitions",
+		[
+			{
+				"craft_id": "dropship_test",
+				"display_name": "Dropship Test",
+				"craft_type": "dropship",
+				"texture_path": "res://Assets/kenney_space-kit/Side/craft_speederB.png",
+			}
+		]
+	)
+	scene.set("_assigned_aircraft_pilot_by_craft", {"dropship_test": "unit_hotel"})
+	scene.set("_aircraft_location_by_craft", {"dropship_test": "fob"})
+	scene.set("_selected_unit_ids", selected_unit_ids)
+	scene.set("_selected_fireteam_ids", selected_fireteam_ids)
+	scene.call("_refresh_fob_screen")
+	fob_screen.call("configure_transfer", selected_unit_ids, selected_fireteam_ids, fireteam_definitions)
+	fob_screen.set("_dropship_transport_craft_id", "dropship_test")
+	fob_screen.set("_dropship_phase", "boarded")
+	fob_screen.set("_boarded_unit_ids", selected_unit_ids)
+	fob_screen.set("_boarded_fireteam_ids", PackedStringArray(["blue"]))
+	fob_screen.call("_on_transport_craft_mission_stage_requested", "dropship_test")
+	for _step in range(18):
+		scene.call("_on_homebase_transport_timer_timeout")
+	scene.call("_refresh_homebase_screen")
+	for _frame in range(2):
+		await process_frame
+
+	_assert(timer_label != null and timer_label.text == "--:--", "Homebase timer stays idle until the mission start button is pressed")
+	homebase_screen.call("request_mission_start")
+	for _frame in range(4):
+		await process_frame
+	_assert(timer_label != null and timer_label.text != "--:--", "Homebase timer switches to a live countdown after mission start")
 	scene.queue_free()
 	await process_frame
 

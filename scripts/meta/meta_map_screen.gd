@@ -21,6 +21,7 @@ func _ready() -> void:
 	var preview_clip := get_node("Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox/MapPreviewFrame/MapPreviewMargin/MapPreviewClip") as Control
 	if preview_clip != null and not preview_clip.resized.is_connected(_on_map_preview_clip_resized):
 		preview_clip.resized.connect(_on_map_preview_clip_resized)
+	_ensure_mission_craft_card()
 	call_deferred("_render")
 
 
@@ -80,7 +81,138 @@ func _render() -> void:
 		String(_fob_overview.get("dropship_queue", "Boarding queue: no active fireteams")),
 	]
 	respawn_overview_label.text = _build_respawn_overview_text(fireteams)
+	_refresh_mission_craft_card(Dictionary(_fob_overview.get("mission_craft", {})))
 	_render_map_preview(terrain_map_data)
+
+
+func _ensure_mission_craft_card() -> PanelContainer:
+	var map_vbox := get_node_or_null("Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox") as VBoxContainer
+	if map_vbox == null:
+		return null
+	var card := map_vbox.get_node_or_null("MissionCraftCard") as PanelContainer
+	if card != null:
+		return card
+	card = PanelContainer.new()
+	card.name = "MissionCraftCard"
+	card.visible = false
+	card.custom_minimum_size = Vector2(0.0, 72.0)
+	map_vbox.add_child(card)
+	var map_preview_frame := map_vbox.get_node_or_null("MapPreviewFrame")
+	if map_preview_frame != null:
+		map_vbox.move_child(card, map_preview_frame.get_index() + 1)
+
+	var margin := MarginContainer.new()
+	margin.name = "CardMargin"
+	margin.add_theme_constant_override("margin_left", 6)
+	margin.add_theme_constant_override("margin_top", 6)
+	margin.add_theme_constant_override("margin_right", 6)
+	margin.add_theme_constant_override("margin_bottom", 6)
+	card.add_child(margin)
+
+	var row := HBoxContainer.new()
+	row.name = "CardRow"
+	row.add_theme_constant_override("separation", 8)
+	margin.add_child(row)
+
+	var ship_texture := TextureRect.new()
+	ship_texture.name = "ShipTexture"
+	ship_texture.custom_minimum_size = Vector2(84.0, 44.0)
+	ship_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	ship_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	row.add_child(ship_texture)
+
+	var text_vbox := VBoxContainer.new()
+	text_vbox.name = "TextVBox"
+	text_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text_vbox.add_theme_constant_override("separation", 2)
+	row.add_child(text_vbox)
+
+	var title_label := Label.new()
+	title_label.name = "TitleLabel"
+	title_label.add_theme_font_size_override("font_size", 10)
+	text_vbox.add_child(title_label)
+
+	var status_label := Label.new()
+	status_label.name = "StatusLabel"
+	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	status_label.add_theme_font_size_override("font_size", 9)
+	text_vbox.add_child(status_label)
+
+	var progress_bar := ProgressBar.new()
+	progress_bar.name = "ProgressBar"
+	progress_bar.min_value = 0.0
+	progress_bar.max_value = 100.0
+	progress_bar.custom_minimum_size = Vector2(0.0, 8.0)
+	text_vbox.add_child(progress_bar)
+
+	var pilot_vbox := VBoxContainer.new()
+	pilot_vbox.name = "PilotVBox"
+	pilot_vbox.custom_minimum_size = Vector2(56.0, 0.0)
+	pilot_vbox.add_theme_constant_override("separation", 2)
+	row.add_child(pilot_vbox)
+
+	var pilot_texture := TextureRect.new()
+	pilot_texture.name = "PilotTexture"
+	pilot_texture.custom_minimum_size = Vector2(42.0, 42.0)
+	pilot_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	pilot_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	pilot_vbox.add_child(pilot_texture)
+
+	var passenger_label := Label.new()
+	passenger_label.name = "PassengerLabel"
+	passenger_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	passenger_label.add_theme_font_size_override("font_size", 8)
+	pilot_vbox.add_child(passenger_label)
+	return card
+
+
+func _refresh_mission_craft_card(mission_craft: Dictionary) -> void:
+	var card := _ensure_mission_craft_card()
+	if card == null:
+		return
+	var show_card: bool = not mission_craft.is_empty()
+	card.visible = show_card
+	if not show_card:
+		return
+	var ship_texture := card.get_node_or_null("CardMargin/CardRow/ShipTexture") as TextureRect
+	var title_label := card.get_node_or_null("CardMargin/CardRow/TextVBox/TitleLabel") as Label
+	var status_label := card.get_node_or_null("CardMargin/CardRow/TextVBox/StatusLabel") as Label
+	var progress_bar := card.get_node_or_null("CardMargin/CardRow/TextVBox/ProgressBar") as ProgressBar
+	var pilot_texture := card.get_node_or_null("CardMargin/CardRow/PilotVBox/PilotTexture") as TextureRect
+	var passenger_label := card.get_node_or_null("CardMargin/CardRow/PilotVBox/PassengerLabel") as Label
+	var is_transit: bool = bool(mission_craft.get("mission_transit_to_map", false)) or bool(mission_craft.get("mission_transit_to_fob", false))
+	var card_alpha: float = 0.56 if is_transit else 0.74
+	card.modulate = Color(1.0, 1.0, 1.0, card_alpha)
+	if ship_texture != null:
+		ship_texture.texture = _load_texture(String(mission_craft.get("texture_path", "")).strip_edges())
+	if title_label != null:
+		title_label.text = String(mission_craft.get("display_name", "Dropship")).strip_edges()
+	if status_label != null:
+		status_label.text = _build_mission_craft_status_text(mission_craft)
+	if progress_bar != null:
+		progress_bar.visible = is_transit
+		progress_bar.value = clampf(float(mission_craft.get("transfer_progress", 0.0)), 0.0, 100.0)
+	if pilot_texture != null:
+		pilot_texture.texture = _load_texture(String(mission_craft.get("pilot_portrait_path", "")).strip_edges())
+	if passenger_label != null:
+		passenger_label.text = "%d pax" % maxi(int(mission_craft.get("passenger_count", 0)), 0)
+
+
+func _build_mission_craft_status_text(mission_craft: Dictionary) -> String:
+	var pilot_name: String = String(mission_craft.get("pilot_display_name", "")).strip_edges()
+	var pilot_text: String = pilot_name if not pilot_name.is_empty() else "unassigned"
+	if bool(mission_craft.get("mission_transit_to_map", false)):
+		return "Pilot %s | En route to mission map | ETA %ds" % [pilot_text, maxi(int(mission_craft.get("transfer_eta_seconds", 0)), 0)]
+	if bool(mission_craft.get("mission_transit_to_fob", false)):
+		return "Pilot %s | Returning to FOB | ETA %ds" % [pilot_text, maxi(int(mission_craft.get("transfer_eta_seconds", 0)), 0)]
+	return "Pilot %s | Holding on mission map" % pilot_text
+
+
+func _load_texture(resource_path: String) -> Texture2D:
+	if resource_path.is_empty():
+		return null
+	var resource: Resource = load(resource_path)
+	return resource as Texture2D
 
 
 func _build_fireteam_overview_text(fireteams: Array) -> String:

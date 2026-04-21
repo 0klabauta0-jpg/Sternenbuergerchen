@@ -301,6 +301,7 @@ func build_mission_drop_state() -> Dictionary:
 func build_meta_overview() -> Dictionary:
 	var fireteams: Array = []
 	var pilot_count: int = _count_transport_pilot_slots()
+	var mission_craft_state: Dictionary = _get_meta_mission_craft_state()
 	for definition_variant in _fireteam_definitions:
 		if typeof(definition_variant) != TYPE_DICTIONARY:
 			continue
@@ -325,8 +326,32 @@ func build_meta_overview() -> Dictionary:
 		"slot_usage_count": _selected_unit_ids.size() + pilot_count,
 		"dropship_status": _build_dropship_status_text(),
 		"dropship_queue": _build_boarding_queue_text(),
+		"mission_craft": mission_craft_state,
 		"fireteams": fireteams,
 	}
+
+
+func _get_meta_mission_craft_state() -> Dictionary:
+	for craft_state_variant in _transport_craft_states:
+		if typeof(craft_state_variant) != TYPE_DICTIONARY:
+			continue
+		var craft_state: Dictionary = Dictionary(craft_state_variant)
+		if not bool(craft_state.get("mission_waiting", false)) and not bool(craft_state.get("mission_transit_to_map", false)) and not bool(craft_state.get("mission_transit_to_fob", false)):
+			continue
+		return {
+			"craft_id": String(craft_state.get("craft_id", "")).strip_edges(),
+			"display_name": String(craft_state.get("display_name", "Dropship")).strip_edges(),
+			"texture_path": String(craft_state.get("texture_path", "")).strip_edges(),
+			"pilot_display_name": String(craft_state.get("pilot_display_name", "")).strip_edges(),
+			"pilot_portrait_path": String(craft_state.get("pilot_portrait_path", "")).strip_edges(),
+			"passenger_count": _boarded_unit_ids.size(),
+			"transfer_progress": float(craft_state.get("transfer_progress", 0.0)),
+			"transfer_eta_seconds": int(craft_state.get("transfer_eta_seconds", 0)),
+			"mission_waiting": bool(craft_state.get("mission_waiting", false)),
+			"mission_transit_to_map": bool(craft_state.get("mission_transit_to_map", false)),
+			"mission_transit_to_fob": bool(craft_state.get("mission_transit_to_fob", false)),
+		}
+	return {}
 
 
 func _rebuild_profiles() -> void:
