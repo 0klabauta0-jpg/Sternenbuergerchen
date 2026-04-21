@@ -111,20 +111,31 @@ static func apply_card_state(card: PanelContainer, state: Dictionary) -> void:
 
 	var title_label := card.get_node("MarginContainer/VBox/HeaderRow/TitleLabel") as Label
 	title_label.text = String(state.get("title_text", "")).strip_edges()
+	var title_font_size: int = int(state.get("title_font_size", 11))
+	title_label.add_theme_font_size_override("font_size", title_font_size)
+	META_UI_SKIN_SCRIPT.style_body_label(title_label, title_font_size)
 
 	_apply_action_button(card.get_node("MarginContainer/VBox/HeaderRow/PrimaryActionButton") as Button, Dictionary(state.get("primary_action", {})))
 	_apply_action_button(card.get_node("MarginContainer/VBox/HeaderRow/SecondaryActionButton") as Button, Dictionary(state.get("secondary_action", {})))
 
+	var content_row := card.get_node("MarginContainer/VBox/ContentRow") as HBoxContainer
+	content_row.custom_minimum_size = Vector2(0.0, float(state.get("content_minimum_height", 58.0)))
+
 	var ship_texture := card.get_node("MarginContainer/VBox/ContentRow/ShipTexture") as TextureRect
 	ship_texture.texture = state.get("ship_texture", null) as Texture2D
+	ship_texture.custom_minimum_size = Vector2(
+		float(state.get("ship_texture_width", 88.0)),
+		float(state.get("ship_texture_height", 52.0))
+	)
 	ship_texture.modulate = Color(1.0, 1.0, 1.0, 0.52) if is_in_transit else Color(1.0, 1.0, 1.0, 1.0)
 
 	_refresh_pilot_content(card, state)
-	_refresh_info_lines(card, Array(state.get("info_lines", [])))
+	_refresh_info_lines(card, Array(state.get("info_lines", [])), int(state.get("info_line_font_size", 9)))
 
 	var progress_bar := card.get_node("MarginContainer/VBox/ProgressBar") as ProgressBar
 	progress_bar.value = clampf(float(state.get("progress_value", 0.0)), 0.0, 100.0)
 	progress_bar.visible = bool(state.get("progress_visible", false))
+	progress_bar.custom_minimum_size = Vector2(0.0, float(state.get("progress_bar_height", 8.0)))
 
 	if bool(state.get("clear_extra_content", true)):
 		clear_extra_content(card)
@@ -167,9 +178,13 @@ static func _apply_action_button(button: Button, config: Dictionary) -> void:
 static func _refresh_pilot_content(card: PanelContainer, state: Dictionary) -> void:
 	var pilot_card_host := card.get_node("MarginContainer/VBox/ContentRow/InfoVBox/PilotCardHost") as VBoxContainer
 	var fallback_label := card.get_node("MarginContainer/VBox/ContentRow/InfoVBox/PilotLabelFallback") as Label
+	pilot_card_host.custom_minimum_size = Vector2(0.0, float(state.get("pilot_card_minimum_height", 58.0)))
 	var pilot_profile = state.get("pilot_profile", null)
 	var pilot_card = pilot_card_host.get_node_or_null("PilotCard")
 	var pilot_text: String = String(state.get("pilot_text", "")).strip_edges()
+	var pilot_text_font_size: int = int(state.get("pilot_text_font_size", 9))
+	fallback_label.add_theme_font_size_override("font_size", pilot_text_font_size)
+	META_UI_SKIN_SCRIPT.style_body_label(fallback_label, pilot_text_font_size)
 	if pilot_profile != null:
 		if pilot_card == null:
 			pilot_card = NPC_COMPACT_CARD_SCENE.instantiate()
@@ -208,7 +223,7 @@ static func _refresh_pilot_content(card: PanelContainer, state: Dictionary) -> v
 	fallback_label.text = pilot_text
 
 
-static func _refresh_info_lines(card: PanelContainer, info_lines: Array) -> void:
+static func _refresh_info_lines(card: PanelContainer, info_lines: Array, font_size: int = 9) -> void:
 	var info_lines_host := card.get_node("MarginContainer/VBox/ContentRow/InfoVBox/InfoLinesHost") as VBoxContainer
 	for child in info_lines_host.get_children():
 		info_lines_host.remove_child(child)
@@ -219,8 +234,8 @@ static func _refresh_info_lines(card: PanelContainer, info_lines: Array) -> void
 			continue
 		var info_label := Label.new()
 		info_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		info_label.add_theme_font_size_override("font_size", 9)
-		META_UI_SKIN_SCRIPT.style_body_label(info_label, 9)
+		info_label.add_theme_font_size_override("font_size", font_size)
+		META_UI_SKIN_SCRIPT.style_body_label(info_label, font_size)
 		info_label.text = line_text
 		info_lines_host.add_child(info_label)
 

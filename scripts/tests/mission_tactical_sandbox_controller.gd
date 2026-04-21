@@ -63,6 +63,16 @@ const DROP_SEQUENCE_LANDED: String = "landed"
 const DROP_SEQUENCE_UNLOADING: String = "unloading"
 const DROP_SEQUENCE_COMPLETE: String = "complete"
 const DROP_SEQUENCE_OUTBOUND: String = "outbound"
+const MISSION_DROPSHIP_PANEL_SIZE: Vector2 = Vector2(312.0, 104.0)
+const MISSION_DROPSHIP_PANEL_MARGIN_RIGHT: float = 16.0
+const MISSION_DROPSHIP_PANEL_MARGIN_TOP: float = 100.0
+const MISSION_DROPSHIP_PANEL_GAP_BELOW_IDENTITY: float = 10.0
+const MISSION_DROPSHIP_TITLE_FONT_SIZE: int = 10
+const MISSION_DROPSHIP_SHIP_TEXTURE_SIZE: Vector2 = Vector2(72.0, 42.0)
+const MISSION_DROPSHIP_PILOT_CARD_SIZE: Vector2 = Vector2(136.0, 50.0)
+const MISSION_DROPSHIP_CONTENT_HEIGHT: float = 50.0
+const MISSION_DROPSHIP_INFO_FONT_SIZE: int = 8
+const MISSION_DROPSHIP_PROGRESS_HEIGHT: float = 6.0
 const APPROACH_OFFSETS: Dictionary = {
 	"NW": Vector2(-180.0, -112.0),
 	"NE": Vector2(180.0, -112.0),
@@ -2001,20 +2011,27 @@ func _refresh_mission_dropship_panel() -> void:
 			"in_transit": is_transit,
 			"can_stage": false,
 			"title_text": _build_mission_dropship_title_text(),
+			"title_font_size": MISSION_DROPSHIP_TITLE_FONT_SIZE,
 			"ship_texture": ship_texture,
+			"ship_texture_width": MISSION_DROPSHIP_SHIP_TEXTURE_SIZE.x,
+			"ship_texture_height": MISSION_DROPSHIP_SHIP_TEXTURE_SIZE.y,
+			"content_minimum_height": MISSION_DROPSHIP_CONTENT_HEIGHT,
 			"pilot_profile": _build_mission_dropship_pilot_profile(),
 			"pilot_text": _build_mission_dropship_pilot_text(),
+			"pilot_text_font_size": MISSION_DROPSHIP_INFO_FONT_SIZE,
 			"pilot_source_context": "mission_drop_pilot",
 			"pilot_disabled": is_transit,
 			"pilot_mouse_filter": Control.MOUSE_FILTER_IGNORE,
-			"pilot_card_minimum_width": 156.0,
-			"pilot_card_minimum_height": 58.0,
+			"pilot_card_minimum_width": MISSION_DROPSHIP_PILOT_CARD_SIZE.x,
+			"pilot_card_minimum_height": MISSION_DROPSHIP_PILOT_CARD_SIZE.y,
 			"info_lines": [
 				_build_mission_dropship_passenger_text(),
 				_build_mission_dropship_status_text(),
 			],
+			"info_line_font_size": MISSION_DROPSHIP_INFO_FONT_SIZE,
 			"progress_visible": is_transit,
 			"progress_value": _build_mission_dropship_progress_value(),
+			"progress_bar_height": MISSION_DROPSHIP_PROGRESS_HEIGHT,
 			"primary_action": {
 				"visible": false,
 			},
@@ -2025,23 +2042,50 @@ func _refresh_mission_dropship_panel() -> void:
 		}
 	)
 	_set_control_tree_mouse_filter(panel, Control.MOUSE_FILTER_IGNORE)
+	_enforce_mission_dropship_panel_geometry(panel)
 	panel.visible = true
+	call_deferred("_deferred_enforce_mission_dropship_panel_geometry")
 
 
 func _enforce_mission_dropship_panel_geometry(panel: PanelContainer) -> void:
 	if panel == null:
 		return
-	panel.anchor_left = 1.0
+	var viewport := get_viewport()
+	var viewport_size: Vector2 = viewport.get_visible_rect().size if viewport != null else Vector2(1920.0, 1080.0)
+	var panel_position := Vector2(
+		maxf(viewport_size.x - MISSION_DROPSHIP_PANEL_SIZE.x - MISSION_DROPSHIP_PANEL_MARGIN_RIGHT, 0.0),
+		_get_mission_dropship_panel_top_offset()
+	)
+	panel.top_level = true
+	panel.anchor_left = 0.0
 	panel.anchor_top = 0.0
-	panel.anchor_right = 1.0
+	panel.anchor_right = 0.0
 	panel.anchor_bottom = 0.0
-	panel.offset_left = -364.0
-	panel.offset_top = 100.0
-	panel.offset_right = -16.0
-	panel.offset_bottom = 230.0
-	panel.custom_minimum_size = Vector2(348.0, 130.0)
-	panel.size = panel.custom_minimum_size
+	panel.position = panel_position
+	panel.size = MISSION_DROPSHIP_PANEL_SIZE
+	panel.custom_minimum_size = MISSION_DROPSHIP_PANEL_SIZE
+	panel.offset_left = panel_position.x
+	panel.offset_top = panel_position.y
+	panel.offset_right = panel_position.x + MISSION_DROPSHIP_PANEL_SIZE.x
+	panel.offset_bottom = panel_position.y + MISSION_DROPSHIP_PANEL_SIZE.y
 	panel.clip_contents = true
+	panel.set_deferred("position", panel_position)
+	panel.set_deferred("size", MISSION_DROPSHIP_PANEL_SIZE)
+
+
+func _deferred_enforce_mission_dropship_panel_geometry() -> void:
+	var panel := get_node_or_null("../TacticalUI/MissionDropshipPanel") as PanelContainer
+	if panel == null:
+		return
+	_enforce_mission_dropship_panel_geometry(panel)
+
+
+func _get_mission_dropship_panel_top_offset() -> float:
+	var top_offset := MISSION_DROPSHIP_PANEL_MARGIN_TOP
+	var mission_identity_panel := get_node_or_null("../TacticalUI/MissionIdentityPanel") as Control
+	if mission_identity_panel != null:
+		top_offset = maxf(top_offset, mission_identity_panel.offset_bottom + MISSION_DROPSHIP_PANEL_GAP_BELOW_IDENTITY)
+	return top_offset
 
 
 func _set_control_tree_mouse_filter(root: Node, mouse_filter: Control.MouseFilter) -> void:

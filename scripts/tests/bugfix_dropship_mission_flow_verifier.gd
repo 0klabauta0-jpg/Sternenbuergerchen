@@ -298,7 +298,8 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 	preview_planning_state["lz_position"] = Vector2(320.0, 180.0)
 	if tactical_controller != null:
 		tactical_controller.call("set_planning_state", preview_planning_state)
-	await process_frame
+	for _frame in range(6):
+		await process_frame
 	var mission_identity_panel := preview_mission.get_node("TacticalUI/MissionIdentityPanel") as PanelContainer if preview_mission != null else null
 	var mission_craft_card := preview_mission.get_node("TacticalUI/MissionDropshipPanel") as PanelContainer if preview_mission != null else null
 	var title_label := mission_craft_card.get_node("MarginContainer/VBox/HeaderRow/TitleLabel") as Label if mission_craft_card != null else null
@@ -327,7 +328,8 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 	_assert(mission_craft_card != null and mission_craft_card.visible, "Preview mission shows the mini shipcard while the dropship is en route")
 	_assert(mission_craft_card != null and mission_craft_card.modulate.a < 1.0, "Mini shipcard stays greyed out during mission transit")
 	_assert(mission_craft_card != null and mission_craft_card.clip_contents, "Mission mini shipcard clips its content so the panel cannot spill over other HUD windows")
-	_assert(mission_craft_card != null and is_equal_approx(mission_craft_card.size.x, 348.0) and is_equal_approx(mission_craft_card.size.y, 130.0), "Mission mini shipcard keeps its fixed tactical HUD size")
+	_assert(mission_craft_card != null and is_equal_approx(mission_craft_card.size.x, 312.0) and is_equal_approx(mission_craft_card.size.y, 104.0), "Mission mini shipcard keeps its smaller fixed tactical HUD size")
+	_assert(mission_craft_card != null and mission_craft_card.top_level, "Mission mini shipcard stays on an absolute HUD layer instead of stretching with the tactical layout")
 	_assert(title_label != null and title_label.text == String(expected_drop_state.get("mission_drop_title_text", "")), "Mission mini shipcard reuses the FOB ship title text")
 	_assert(title_label != null and title_label.text.begins_with(UI_BLOCK_LABELS_SCRIPT.SHARED_TRANSPORT_CARD_PREFIX), "Shared shipcard numbering reuses the same # id in FOB and mission views")
 	for node_path_variant in shared_card_paths:
@@ -343,7 +345,7 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 	_assert(not (mission_craft_card.get_node("MarginContainer/VBox/HeaderRow/SecondaryActionButton") as Button).visible, "Mission mini shipcard hides the shared secondary action button")
 	_assert(dropship_marker != null and dropship_marker.visible, "Preview mission renders the dropship marker once the craft is actually on the mission-map route")
 	_assert(mission_identity_panel != null and mission_craft_card.offset_top >= mission_identity_panel.offset_bottom, "Mini shipcard sits below the LIVE TACTICAL GRID header panel")
-	_assert(is_equal_approx(mission_craft_card.anchor_right, 1.0) and is_equal_approx(mission_craft_card.offset_right, -16.0), "Mini shipcard stays docked to the right edge of the tactical preview")
+	_assert(is_equal_approx(mission_craft_card.anchor_left, 0.0) and is_equal_approx(mission_craft_card.anchor_right, 0.0), "Mini shipcard uses absolute HUD anchors and no longer stretches with the right edge layout")
 	_assert(Array(fob_screen.call("_get_visible_transport_craft_states")).is_empty(), "FOB stops rendering the sent dropship while it is on the mission-map transfer")
 	_assert(Array(homebase_screen.call("_get_visible_homebase_aircraft_definitions")).is_empty(), "Homebase does not resurrect the sent dropship while it transfers to the mission map")
 	if shared_fob_card != null:
