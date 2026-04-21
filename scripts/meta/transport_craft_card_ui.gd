@@ -8,6 +8,7 @@ const NPC_COMPACT_CARD_SCENE: PackedScene = preload("res://scenes/meta/component
 static func ensure_card_structure(card: PanelContainer) -> void:
 	if card == null or card.get_node_or_null("MarginContainer") != null:
 		return
+	card.clip_contents = true
 
 	var margin := MarginContainer.new()
 	margin.name = "MarginContainer"
@@ -46,6 +47,7 @@ static func ensure_card_structure(card: PanelContainer) -> void:
 
 	var content_row := HBoxContainer.new()
 	content_row.name = "ContentRow"
+	content_row.custom_minimum_size = Vector2(0.0, 58.0)
 	content_row.add_theme_constant_override("separation", 8)
 	vbox.add_child(content_row)
 
@@ -65,6 +67,7 @@ static func ensure_card_structure(card: PanelContainer) -> void:
 
 	var pilot_card_host := VBoxContainer.new()
 	pilot_card_host.name = "PilotCardHost"
+	pilot_card_host.custom_minimum_size = Vector2(0.0, 58.0)
 	pilot_card_host.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	info_vbox.add_child(pilot_card_host)
 
@@ -173,6 +176,10 @@ static func _refresh_pilot_content(card: PanelContainer, state: Dictionary) -> v
 			pilot_card.name = "PilotCard"
 			pilot_card_host.add_child(pilot_card)
 		pilot_card.visible = true
+		pilot_card.custom_minimum_size = Vector2(
+			float(state.get("pilot_card_minimum_width", 156.0)),
+			float(state.get("pilot_card_minimum_height", 58.0))
+		)
 		pilot_card.call(
 			"setup_from_profile",
 			pilot_profile,
@@ -184,7 +191,7 @@ static func _refresh_pilot_content(card: PanelContainer, state: Dictionary) -> v
 				"compact_mode": true,
 			}
 		)
-		pilot_card.mouse_filter = Control.MOUSE_FILTER_PASS
+		pilot_card.mouse_filter = int(state.get("pilot_mouse_filter", Control.MOUSE_FILTER_PASS))
 		pilot_card.modulate = Color(1.0, 1.0, 1.0, 0.56) if bool(state.get("pilot_disabled", false)) else Color(1.0, 1.0, 1.0, 1.0)
 		var card_pressed: Callable = state.get("pilot_card_pressed", Callable())
 		if card_pressed.is_valid() and pilot_card.has_signal("card_pressed") and not pilot_card.card_pressed.is_connected(card_pressed):

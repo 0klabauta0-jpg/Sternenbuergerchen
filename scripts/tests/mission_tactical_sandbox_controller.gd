@@ -1971,23 +1971,18 @@ func _ensure_mission_dropship_panel() -> void:
 	panel.name = "MissionDropshipPanel"
 	panel.visible = false
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	panel.anchor_left = 1.0
-	panel.anchor_top = 0.0
-	panel.anchor_right = 1.0
-	panel.anchor_bottom = 0.0
-	panel.offset_left = -364.0
-	panel.offset_top = 100.0
-	panel.offset_right = -16.0
-	panel.offset_bottom = 230.0
-	panel.custom_minimum_size = Vector2(348.0, 130.0)
+	panel.clip_contents = true
+	_enforce_mission_dropship_panel_geometry(panel)
 	tactical_ui.add_child(panel)
 	TRANSPORT_CRAFT_CARD_UI_SCRIPT.ensure_card_structure(panel)
+	_set_control_tree_mouse_filter(panel, Control.MOUSE_FILTER_IGNORE)
 
 
 func _refresh_mission_dropship_panel() -> void:
 	var panel := get_node_or_null("../TacticalUI/MissionDropshipPanel") as PanelContainer
 	if panel == null:
 		return
+	_enforce_mission_dropship_panel_geometry(panel)
 	var show_panel: bool = _tactical_ui_visible and (not _mission_drop_craft_id.is_empty() or _is_drop_sequence_active())
 	panel.visible = show_panel
 	if not show_panel:
@@ -2008,6 +2003,9 @@ func _refresh_mission_dropship_panel() -> void:
 			"pilot_text": _build_mission_dropship_pilot_text(),
 			"pilot_source_context": "mission_drop_pilot",
 			"pilot_disabled": is_transit,
+			"pilot_mouse_filter": Control.MOUSE_FILTER_IGNORE,
+			"pilot_card_minimum_width": 156.0,
+			"pilot_card_minimum_height": 58.0,
 			"info_lines": [
 				_build_mission_dropship_passenger_text(),
 				_build_mission_dropship_status_text(),
@@ -2023,6 +2021,30 @@ func _refresh_mission_dropship_panel() -> void:
 			"clear_extra_content": true,
 		}
 	)
+	_set_control_tree_mouse_filter(panel, Control.MOUSE_FILTER_IGNORE)
+
+
+func _enforce_mission_dropship_panel_geometry(panel: PanelContainer) -> void:
+	if panel == null:
+		return
+	panel.anchor_left = 1.0
+	panel.anchor_top = 0.0
+	panel.anchor_right = 1.0
+	panel.anchor_bottom = 0.0
+	panel.offset_left = -364.0
+	panel.offset_top = 100.0
+	panel.offset_right = -16.0
+	panel.offset_bottom = 230.0
+	panel.custom_minimum_size = Vector2(348.0, 130.0)
+	panel.size = panel.custom_minimum_size
+	panel.clip_contents = true
+
+
+func _set_control_tree_mouse_filter(root: Node, mouse_filter: Control.MouseFilter) -> void:
+	if root is Control:
+		(root as Control).mouse_filter = mouse_filter
+	for child in root.get_children():
+		_set_control_tree_mouse_filter(child, mouse_filter)
 
 
 func _build_mission_dropship_title_text() -> String:
