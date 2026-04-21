@@ -4429,26 +4429,30 @@ func _try_start_drop_sequence() -> bool:
 		return false
 	if _is_drop_sequence_active():
 		return false
-	if preview_mode:
-		if _mission_drop_state != "waiting":
-			return false
-		_drop_sequence_units = []
-		_drop_sequence_fireteam_name = _get_drop_fireteam_name()
-		_drop_sequence_unit_index = 0
-		_drop_sequence_timer = 0.0
-		_drop_sequence_phase = DROP_SEQUENCE_INBOUND
-		_drop_ship_staged = true
-		_drop_sequence_visual_only = true
-		_drop_sequence_position = _get_drop_staging_position()
-		_refresh_world_overlays()
-		_update_ui()
-		return true
 	var pending_units: Array = []
 	for unit in _get_units_for_drop_operation():
 		var unit_id: String = String(unit.call("get_unit_id"))
 		if _deployed_unit_ids.has(unit_id):
 			continue
 		pending_units.append(unit)
+	if preview_mode:
+		if _mission_drop_state != "waiting":
+			return false
+		if pending_units.is_empty():
+			return false
+		_embark_units_for_drop(pending_units)
+		_drop_sequence_units = pending_units
+		_drop_sequence_fireteam_name = _get_drop_fireteam_name()
+		_drop_sequence_unit_index = 0
+		_drop_sequence_timer = 0.0
+		_drop_sequence_phase = DROP_SEQUENCE_INBOUND
+		_drop_ship_staged = true
+		_drop_sequence_visual_only = false
+		_drop_sequence_position = _get_drop_staging_position()
+		_emit_planning_state_changed()
+		_refresh_world_overlays()
+		_update_ui()
+		return true
 	if pending_units.is_empty():
 		return false
 	_embark_units_for_drop(pending_units)
@@ -4515,7 +4519,7 @@ func _update_drop_sequence(delta: float) -> void:
 				_drop_ship_staged = false
 				_mission_drop_state = "to_fob"
 				_mission_drop_progress = 0.0
-				_mission_drop_return_requested = true
+				_mission_drop_return_requested = false
 				_drop_sequence_position = Vector2.ZERO
 				_drop_sequence_phase = ""
 				_drop_sequence_units = []
@@ -4541,6 +4545,7 @@ func _complete_drop_sequence_deployment() -> void:
 		_deploy_next_embarked_unit()
 	_mission_drop_passenger_count = _embarked_unit_ids.size()
 	_drop_sequence_position = _lz_position
+	_emit_planning_state_changed()
 
 
 func _begin_drop_sequence_outbound() -> void:
@@ -4548,9 +4553,11 @@ func _begin_drop_sequence_outbound() -> void:
 		return
 	_mission_drop_state = "to_fob"
 	_mission_drop_passenger_count = _embarked_unit_ids.size()
+	_mission_drop_return_requested = true
 	_drop_sequence_phase = DROP_SEQUENCE_OUTBOUND
 	_drop_sequence_timer = 0.0
 	_last_command_text = "DROPSHIP RTB"
+	_emit_planning_state_changed()
 	_update_ui()
 	_refresh_world_overlays()
 
@@ -4566,7 +4573,8 @@ func _deploy_next_embarked_unit() -> void:
 	var unit_id: String = String(unit.call("get_unit_id"))
 	_embarked_unit_ids.erase(unit_id)
 	_deployed_unit_ids[unit_id] = true
-	_register_unit_for_runtime(unit)
+	if not preview_mode:
+		_register_unit_for_runtime(unit)
 	if unit is Node2D:
 		(unit as Node2D).global_position = _lz_position + _get_unload_offset(unload_index)
 	if unit is CanvasItem:

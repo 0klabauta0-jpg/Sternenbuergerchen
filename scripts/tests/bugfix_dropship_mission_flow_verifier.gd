@@ -445,16 +445,22 @@ func _test_preview_drop_button_stays_drop_without_live_sequence() -> void:
 	tactical_controller.call("set_planning_state", planning_state)
 	tactical_controller.call("_on_call_dropship_pressed")
 	var start_position: Vector2 = Vector2(tactical_controller.get("_drop_sequence_position")) if tactical_controller != null else Vector2.ZERO
-	tactical_controller.call("_update_drop_sequence", 0.5)
+	for _step in range(120):
+		tactical_controller.call("_update_drop_sequence", 0.2)
+		if String(tactical_controller.get("_drop_sequence_phase")) != "inbound":
+			break
 	await process_frame
+	var preview_drop_state: Dictionary = Dictionary(tactical_controller.call("get_planning_state")) if tactical_controller != null else {}
 
 	_assert(tactical_controller != null and bool(tactical_controller.get("preview_mode")), "Mission nav still uses the preview mission controller before the actual mission start")
-	_assert(bool(tactical_controller.get("_drop_sequence_visual_only")), "Preview drop uses a visual-only dropship sequence instead of live runtime insertion")
-	_assert(String(tactical_controller.get("_drop_sequence_phase")) == "inbound", "Preview drop starts a visible inbound dropship pass on the mission map")
+	_assert(not bool(tactical_controller.get("_drop_sequence_visual_only")), "Preview drop now commits the real boarded fireteam instead of staying visual-only")
+	_assert(String(tactical_controller.get("_drop_sequence_phase")) == "outbound", "Preview drop transitions into the return leg after the fireteam is dropped at the LZ")
 	_assert(start_position.distance_to(Vector2(tactical_controller.get("_drop_sequence_position"))) > 0.1, "Preview dropship visibly advances toward the LZ after pressing Drop")
-	_assert(call_button != null and call_button.text == "Inbound", "Preview drop button reflects the visible inbound drop sequence")
-	_assert(dropship_marker != null and dropship_marker.visible, "Preview mission shows the dropship marker while the visual drop run is active")
-	_assert(Array(Dictionary(tactical_controller.call("get_planning_state")).get("deployed_unit_ids", [])).is_empty(), "Preview drop stays visual-only and does not deploy friendlies before mission start")
+	_assert(call_button != null and call_button.text == "Outbound", "Preview drop button reflects the return leg once the drop has been completed")
+	_assert(dropship_marker != null and dropship_marker.visible, "Preview mission keeps the dropship marker visible while the return flight is active")
+	_assert(Array(preview_drop_state.get("embarked_unit_ids", [])) == [], "Preview drop clears the embarked payload once the boarded fireteam has landed")
+	_assert(Array(preview_drop_state.get("deployed_unit_ids", [])) == Array(selected_unit_ids), "Preview drop visibly deploys the boarded FOB fireteam onto the mission map before mission start")
+	_assert(not bool(tactical_controller.call("_is_fireteam_runtime_active", "blue")), "Preview drop keeps the pre-start mission map non-authoritative even after the visual insertion")
 	scene.queue_free()
 	await process_frame
 
@@ -957,6 +963,12 @@ func _test_dropship_returns_to_fob_after_drop() -> void:
 	_assert(Array(mid_drop_state.get("embarked_unit_ids", [])) == [], "All boarded passengers are removed from the embarked set as soon as the dropship lands")
 	_assert(Array(mid_drop_state.get("deployed_unit_ids", [])) == Array(selected_unit_ids), "The boarded FOB fireteam deploys immediately at the LZ when the dropship arrives")
 	_assert(int(mid_drop_state.get("mission_drop_passenger_count", -1)) == 0, "Mission dropship passenger count falls to zero immediately after the live drop")
+	for _frame in range(4):
+		await process_frame
+	var bridged_drop_state: Dictionary = Dictionary(tactical_controller.call("get_planning_state"))
+	_assert(Array(bridged_drop_state.get("embarked_unit_ids", [])) == [], "Meta return-bridge no longer re-embarks the just-dropped fireteam during the return handoff")
+	_assert(Array(bridged_drop_state.get("deployed_unit_ids", [])) == Array(selected_unit_ids), "Meta return-bridge preserves the deployed fireteam after the live drop")
+	_assert(int(bridged_drop_state.get("mission_drop_passenger_count", -1)) == 0, "Meta return-bridge keeps the dropship passenger count at zero after the fireteam has disembarked")
 	for _step in range(600):
 		tactical_controller.call("_update_drop_sequence", 0.2)
 		if String(tactical_controller.get("_drop_sequence_phase")).is_empty():
@@ -966,6 +978,7 @@ func _test_dropship_returns_to_fob_after_drop() -> void:
 
 	var returning_craft_state: Dictionary = Dictionary(fob_screen.call("_get_transport_craft_state", "dropship_test"))
 	_assert(bool(returning_craft_state.get("mission_transit_to_fob", false)), "FOB shows the dropship greyed-out and returning after the mission drop")
+	_assert(int(returning_craft_state.get("passenger_count", -1)) == 0, "FOB return card no longer keeps the dropped fireteam attached to the returning dropship")
 	for _step in range(18):
 		scene.call("_on_homebase_transport_timer_timeout")
 	var returned_craft_state: Dictionary = Dictionary(fob_screen.call("_get_transport_craft_state", "dropship_test"))

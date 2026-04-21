@@ -1475,6 +1475,9 @@ func _on_mission_planning_state_changed(planning_state: Dictionary) -> void:
 		var key: String = String(key_variant)
 		_mission_planning_state[key] = planning_state[key_variant]
 	if bool(_mission_planning_state.get("mission_drop_return_requested", false)):
+		var fob_screen = _get_fob_screen()
+		if fob_screen != null and fob_screen.has_method("clear_mission_boarded_payload"):
+			fob_screen.call("clear_mission_boarded_payload")
 		var mission_craft_id: String = String(_mission_planning_state.get("mission_drop_craft_id", "")).strip_edges()
 		if not mission_craft_id.is_empty():
 			_begin_mission_craft_transfer(mission_craft_id, "to_fob", MISSION_DROPSHIP_TO_FOB_SECONDS)

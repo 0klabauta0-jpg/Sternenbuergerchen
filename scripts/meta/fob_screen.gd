@@ -261,6 +261,17 @@ func mark_transport_craft_launch_ready(craft_id: String) -> void:
 		_refresh_ui_state()
 
 
+func clear_mission_boarded_payload() -> void:
+	_boarded_unit_ids = PackedStringArray()
+	_boarded_fireteam_ids = PackedStringArray()
+	_dropship_staged_fireteam_ids = PackedStringArray()
+	_current_boarding_unit_id = ""
+	_current_boarding_fireteam_id = ""
+	_dropship_phase = "idle"
+	if is_inside_tree():
+		_refresh_ui_state()
+
+
 func _is_mission_ready_for_launch() -> bool:
 	if _selected_unit_ids.is_empty():
 		return false
