@@ -21,6 +21,7 @@
 [ext_resource type="Script" path="res://scripts/terrain/terrain_registry.gd" id="19_terrain_registry"]
 [ext_resource type="Texture2D" path="res://Assets/kenney_space-kit/Side/craft_speederB.png" id="20_dropship"]
 [ext_resource type="Script" path="res://scripts/tests/phase_controller.gd" id="21_phase_controller"]
+[ext_resource type="Script" path="res://scripts/tests/mission_map_camera_controller.gd" id="22_camera"]
 
 [node name="MissionReactivityTest" type="Node2D"]
 
@@ -64,6 +65,10 @@ script = ExtResource("6_leader")
 
 [node name="TargetMarker" type="Marker2D" parent="."]
 position = Vector2(320, 180)
+
+[node name="MissionCamera" type="Camera2D" parent="."]
+script = ExtResource("22_camera")
+focus_marker_path = NodePath("../MapRoot/objective_point")
 
 [node name="TargetVisual" type="Polygon2D" parent="TargetMarker"]
 color = Color(0.95, 0.85, 0.2, 1)
