@@ -14,6 +14,7 @@ func _run_tests() -> void:
 	print("=== Mission Map Camera Verifier ===")
 	await _test_scene_has_active_mission_camera()
 	await _test_camera_supports_zoom_and_pan()
+	await _test_camera_releases_viewport_when_scene_is_hidden()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	if _failed > 0:
 		print("FAIL")
@@ -70,6 +71,30 @@ func _test_camera_supports_zoom_and_pan() -> void:
 	_assert(camera.zoom.x < zoom_before.x, "Mission camera zooms with mouse wheel input")
 	_assert(camera.position != position_before, "Mission camera pans with middle-mouse drag input")
 	scene.queue_free()
+	await process_frame
+
+
+func _test_camera_releases_viewport_when_scene_is_hidden() -> void:
+	var mission := MISSION_TEST_SCENE.instantiate() as Node2D
+	root.add_child(mission)
+	for _frame in range(4):
+		await process_frame
+	var camera := mission.get_node_or_null("MissionCamera") as Camera2D
+	if camera == null:
+		_assert(false, "Mission camera exists for visibility hand-off checks")
+		mission.queue_free()
+		await process_frame
+		return
+	_assert(camera.is_current(), "Mission camera is current while mission scene is visible")
+	mission.visible = false
+	for _frame in range(2):
+		await process_frame
+	_assert(not camera.is_current(), "Mission camera releases the viewport when the mission scene is hidden")
+	mission.visible = true
+	for _frame in range(2):
+		await process_frame
+	_assert(camera.is_current(), "Mission camera becomes current again when the mission scene is shown")
+	mission.queue_free()
 	await process_frame
 
 
