@@ -129,6 +129,7 @@ var _drop_sequence_unit_index: int = 0
 var _drop_sequence_timer: float = 0.0
 var _drop_sequence_position: Vector2 = Vector2.ZERO
 var _drop_sequence_fireteam_name: String = "ALL"
+var _drop_sequence_visual_only: bool = false
 var _embarked_unit_ids: Dictionary = {}
 var _deployed_unit_ids: Dictionary = {}
 var _live_drop_bootstrap_consumed: bool = false
@@ -949,7 +950,10 @@ func _on_call_dropship_pressed() -> void:
 	_mission_drop_return_requested = false
 	if preview_mode:
 		_drop_ship_requested = true
-		_last_command_text = "DROP %s" % _get_approach_angle_name()
+		if _try_start_drop_sequence():
+			_last_command_text = "DROP INBOUND %s" % _get_approach_angle_name()
+		else:
+			_last_command_text = "DROP %s" % _get_approach_angle_name()
 	elif _is_drop_sequence_active():
 		_last_command_text = "DROP ALREADY ACTIVE"
 	elif _try_start_drop_sequence():
@@ -1973,51 +1977,67 @@ func _ensure_mission_dropship_panel() -> void:
 	panel.offset_left = -364.0
 	panel.offset_top = 100.0
 	panel.offset_right = -16.0
-	panel.offset_bottom = 204.0
-	panel.custom_minimum_size = Vector2(348.0, 104.0)
+	panel.offset_bottom = 230.0
+	panel.custom_minimum_size = Vector2(348.0, 130.0)
 	tactical_ui.add_child(panel)
-	META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "frame")
+	panel.add_theme_stylebox_override("panel", _build_mission_dropship_stylebox(false))
 
 	var margin := MarginContainer.new()
 	margin.name = "MarginContainer"
-	margin.add_theme_constant_override("margin_left", 8)
-	margin.add_theme_constant_override("margin_top", 8)
-	margin.add_theme_constant_override("margin_right", 8)
-	margin.add_theme_constant_override("margin_bottom", 8)
+	margin.add_theme_constant_override("margin_left", 6)
+	margin.add_theme_constant_override("margin_top", 6)
+	margin.add_theme_constant_override("margin_right", 6)
+	margin.add_theme_constant_override("margin_bottom", 6)
 	panel.add_child(margin)
 
-	var row := HBoxContainer.new()
-	row.name = "Row"
-	row.add_theme_constant_override("separation", 6)
-	margin.add_child(row)
+	var vbox := VBoxContainer.new()
+	vbox.name = "VBox"
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.add_theme_constant_override("separation", 4)
+	margin.add_child(vbox)
+
+	var header_row := HBoxContainer.new()
+	header_row.name = "HeaderRow"
+	header_row.add_theme_constant_override("separation", 6)
+	vbox.add_child(header_row)
+
+	var title_label := Label.new()
+	title_label.name = "TitleLabel"
+	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	title_label.add_theme_font_size_override("font_size", 11)
+	META_UI_SKIN_SCRIPT.style_body_label(title_label, 11)
+	header_row.add_child(title_label)
+
+	var content_row := HBoxContainer.new()
+	content_row.name = "ContentRow"
+	content_row.add_theme_constant_override("separation", 8)
+	vbox.add_child(content_row)
 
 	var ship_texture := TextureRect.new()
 	ship_texture.name = "ShipTexture"
 	ship_texture.custom_minimum_size = Vector2(88.0, 52.0)
 	ship_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	ship_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	row.add_child(ship_texture)
-
-	var pilot_texture := TextureRect.new()
-	pilot_texture.name = "PilotTexture"
-	pilot_texture.custom_minimum_size = Vector2(36.0, 36.0)
-	pilot_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	pilot_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	row.add_child(pilot_texture)
+	content_row.add_child(ship_texture)
 
 	var info_vbox := VBoxContainer.new()
 	info_vbox.name = "InfoVBox"
 	info_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	info_vbox.add_theme_constant_override("separation", 2)
-	row.add_child(info_vbox)
+	content_row.add_child(info_vbox)
 
-	for label_name in ["TitleLabel", "PilotLabel", "PassengerLabel", "StatusLabel"]:
+	var pilot_card_host := VBoxContainer.new()
+	pilot_card_host.name = "PilotCardHost"
+	pilot_card_host.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info_vbox.add_child(pilot_card_host)
+
+	for label_name in ["PassengerLabel", "StatusLabel"]:
 		var info_label := Label.new()
 		info_label.name = label_name
 		info_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		var font_size: int = 11 if label_name == "TitleLabel" else 9
-		info_label.add_theme_font_size_override("font_size", font_size)
-		META_UI_SKIN_SCRIPT.style_body_label(info_label, font_size)
+		info_label.add_theme_font_size_override("font_size", 9)
+		META_UI_SKIN_SCRIPT.style_body_label(info_label, 9)
 		info_vbox.add_child(info_label)
 
 	var progress_bar := ProgressBar.new()
@@ -2026,7 +2046,7 @@ func _ensure_mission_dropship_panel() -> void:
 	progress_bar.max_value = 100.0
 	progress_bar.show_percentage = false
 	progress_bar.custom_minimum_size = Vector2(0.0, 8.0)
-	info_vbox.add_child(progress_bar)
+	vbox.add_child(progress_bar)
 
 
 func _refresh_mission_dropship_panel() -> void:
@@ -2037,33 +2057,29 @@ func _refresh_mission_dropship_panel() -> void:
 	panel.visible = show_panel
 	if not show_panel:
 		return
-	var is_transit: bool = _mission_drop_state == "to_mission" or _mission_drop_state == "to_fob"
-	panel.modulate = Color(1.0, 1.0, 1.0, 0.6 if is_transit else 0.78)
-	var ship_texture := panel.get_node_or_null("MarginContainer/Row/ShipTexture") as TextureRect
-	var pilot_texture := panel.get_node_or_null("MarginContainer/Row/PilotTexture") as TextureRect
-	var title_label := panel.get_node_or_null("MarginContainer/Row/InfoVBox/TitleLabel") as Label
-	var pilot_label := panel.get_node_or_null("MarginContainer/Row/InfoVBox/PilotLabel") as Label
-	var passenger_label := panel.get_node_or_null("MarginContainer/Row/InfoVBox/PassengerLabel") as Label
-	var status_label := panel.get_node_or_null("MarginContainer/Row/InfoVBox/StatusLabel") as Label
-	var progress_bar := panel.get_node_or_null("MarginContainer/Row/InfoVBox/ProgressBar") as ProgressBar
+	var is_transit: bool = _mission_drop_state == "to_mission" or _mission_drop_state == "to_fob" or _drop_sequence_phase == DROP_SEQUENCE_INBOUND or _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND
+	panel.modulate = Color(1.0, 1.0, 1.0, 0.58) if is_transit else Color(1.0, 1.0, 1.0, 1.0)
+	panel.add_theme_stylebox_override("panel", _build_mission_dropship_stylebox(is_transit))
+	var ship_texture := panel.get_node_or_null("MarginContainer/VBox/ContentRow/ShipTexture") as TextureRect
+	var title_label := panel.get_node_or_null("MarginContainer/VBox/HeaderRow/TitleLabel") as Label
+	var pilot_card_host := panel.get_node_or_null("MarginContainer/VBox/ContentRow/InfoVBox/PilotCardHost") as VBoxContainer
+	var passenger_label := panel.get_node_or_null("MarginContainer/VBox/ContentRow/InfoVBox/PassengerLabel") as Label
+	var status_label := panel.get_node_or_null("MarginContainer/VBox/ContentRow/InfoVBox/StatusLabel") as Label
+	var progress_bar := panel.get_node_or_null("MarginContainer/VBox/ProgressBar") as ProgressBar
 	if ship_texture != null:
 		ship_texture.texture = _load_optional_texture(_mission_drop_texture_path)
 		if ship_texture.texture == null:
 			ship_texture.texture = _get_dropship_marker_texture()
-	if pilot_texture != null:
-		pilot_texture.texture = _load_portrait_texture(_mission_drop_pilot_portrait_path)
-		pilot_texture.visible = pilot_texture.texture != null
+		ship_texture.modulate = Color(1.0, 1.0, 1.0, 0.52) if is_transit else Color(1.0, 1.0, 1.0, 1.0)
 	if title_label != null:
 		title_label.text = _build_mission_dropship_title_text()
-	if pilot_label != null:
-		pilot_label.text = _build_mission_dropship_pilot_text()
+	_refresh_mission_dropship_pilot_card(pilot_card_host, is_transit)
 	if passenger_label != null:
-		var passenger_count: int = _mission_drop_passenger_count if _mission_drop_passenger_count > 0 else _embarked_unit_ids.size()
-		passenger_label.text = "Passengers: %d" % passenger_count
+		passenger_label.text = _build_mission_dropship_passenger_text()
 	if status_label != null:
 		status_label.text = _build_mission_dropship_status_text()
 	if progress_bar != null:
-		progress_bar.value = _mission_drop_progress
+		progress_bar.value = _build_mission_dropship_progress_value()
 		progress_bar.visible = is_transit
 
 
@@ -2086,6 +2102,107 @@ func _build_mission_dropship_pilot_text() -> String:
 	if not _mission_drop_pilot_text.is_empty():
 		return _mission_drop_pilot_text
 	return "Pilot: %s" % (_mission_drop_pilot_display_name if not _mission_drop_pilot_display_name.is_empty() else "unassigned")
+
+
+func _build_mission_dropship_passenger_text() -> String:
+	var passenger_count: int = _mission_drop_passenger_count if _mission_drop_passenger_count > 0 else _embarked_unit_ids.size()
+	return "Passengers: %d" % passenger_count
+
+
+func _build_mission_dropship_progress_value() -> float:
+	if _drop_sequence_phase == DROP_SEQUENCE_INBOUND:
+		var staging_position: Vector2 = _get_drop_staging_position()
+		var total_distance: float = staging_position.distance_to(_lz_position)
+		if total_distance > 0.001:
+			var covered_distance: float = total_distance - _drop_sequence_position.distance_to(_lz_position)
+			return clampf((covered_distance / total_distance) * 100.0, 0.0, 100.0)
+		return 0.0
+	if _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND:
+		var exit_position: Vector2 = _get_drop_exit_position()
+		var total_return_distance: float = _lz_position.distance_to(exit_position)
+		if total_return_distance > 0.001:
+			var covered_return_distance: float = total_return_distance - _drop_sequence_position.distance_to(exit_position)
+			return clampf((covered_return_distance / total_return_distance) * 100.0, 0.0, 100.0)
+		return 0.0
+	return _mission_drop_progress
+
+
+func _build_mission_dropship_stylebox(is_in_transit: bool) -> StyleBoxFlat:
+	var stylebox := StyleBoxFlat.new()
+	stylebox.bg_color = Color(0.11, 0.14, 0.17, 0.72) if is_in_transit else Color(0.11, 0.14, 0.17, 1.0)
+	stylebox.border_color = Color(0.56, 0.59, 0.63, 0.82) if is_in_transit else Color(0.31, 0.36, 0.42, 1.0)
+	stylebox.border_width_left = 1
+	stylebox.border_width_top = 1
+	stylebox.border_width_right = 1
+	stylebox.border_width_bottom = 1
+	stylebox.corner_radius_top_left = 8
+	stylebox.corner_radius_top_right = 8
+	stylebox.corner_radius_bottom_left = 8
+	stylebox.corner_radius_bottom_right = 8
+	return stylebox
+
+
+func _build_mission_dropship_pilot_profile():
+	if _mission_drop_pilot_display_name.is_empty() and _mission_drop_pilot_portrait_path.is_empty():
+		return null
+	var pilot_unit = _find_friendly_unit_by_id(_mission_drop_pilot_unit_id)
+	if pilot_unit != null:
+		return _build_profile_from_unit(pilot_unit)
+	return META_UNIT_PROFILE_BUILDER_SCRIPT.build_from_identity_config(
+		{
+			"unit_id": _mission_drop_pilot_unit_id if not _mission_drop_pilot_unit_id.is_empty() else "mission_drop_pilot",
+			"display_name": _mission_drop_pilot_display_name if not _mission_drop_pilot_display_name.is_empty() else "Unassigned Pilot",
+			"portrait_path": _mission_drop_pilot_portrait_path,
+			"role_name": "Dropship Pilot",
+			"team_id": FRIENDLY_TEAM_ID,
+		},
+		{
+			"secondary_text": _build_mission_dropship_pilot_text(),
+		}
+	)
+
+
+func _refresh_mission_dropship_pilot_card(host: VBoxContainer, is_in_transit: bool) -> void:
+	if host == null:
+		return
+	var pilot_profile = _build_mission_dropship_pilot_profile()
+	var pilot_card = host.get_node_or_null("PilotCard")
+	var fallback_label := host.get_node_or_null("PilotLabelFallback") as Label
+	if pilot_profile != null:
+		if fallback_label != null:
+			fallback_label.visible = false
+		if pilot_card == null:
+			pilot_card = NPC_COMPACT_CARD_SCENE.instantiate()
+			pilot_card.name = "PilotCard"
+			pilot_card.custom_minimum_size = Vector2(156.0, 58.0)
+			host.add_child(pilot_card)
+		pilot_card.visible = true
+		pilot_card.call(
+			"setup_from_profile",
+			pilot_profile,
+			{
+				"source_context": "mission_drop_pilot",
+				"compact_mode": true,
+				"drag_enabled": false,
+				"disabled": is_in_transit,
+			}
+		)
+		if is_in_transit:
+			pilot_card.modulate = Color(1.0, 1.0, 1.0, 0.56)
+		else:
+			pilot_card.modulate = Color(1.0, 1.0, 1.0, 1.0)
+		return
+	if pilot_card != null:
+		pilot_card.visible = false
+	if fallback_label == null:
+		fallback_label = Label.new()
+		fallback_label.name = "PilotLabelFallback"
+		fallback_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		fallback_label.add_theme_font_size_override("font_size", 9)
+		META_UI_SKIN_SCRIPT.style_body_label(fallback_label, 9)
+		host.add_child(fallback_label)
+	fallback_label.visible = true
+	fallback_label.text = _build_mission_dropship_pilot_text()
 
 
 func _build_mission_dropship_status_text() -> String:
@@ -4336,14 +4453,28 @@ func _maybe_bootstrap_live_drop() -> void:
 
 
 func _try_start_drop_sequence() -> bool:
-	if preview_mode or not _has_lz_position:
+	if not _has_lz_position:
 		return false
-	if _drop_ship_cooldown_remaining > 0.0:
+	if not preview_mode and _drop_ship_cooldown_remaining > 0.0:
 		return false
-	if _live_drop_bootstrap_consumed and _drop_sequence_phase == DROP_SEQUENCE_COMPLETE:
+	if not preview_mode and _live_drop_bootstrap_consumed and _drop_sequence_phase == DROP_SEQUENCE_COMPLETE:
 		return false
 	if _is_drop_sequence_active():
 		return false
+	if preview_mode:
+		if _mission_drop_state != "waiting":
+			return false
+		_drop_sequence_units = []
+		_drop_sequence_fireteam_name = _get_drop_fireteam_name()
+		_drop_sequence_unit_index = 0
+		_drop_sequence_timer = 0.0
+		_drop_sequence_phase = DROP_SEQUENCE_INBOUND
+		_drop_ship_staged = true
+		_drop_sequence_visual_only = true
+		_drop_sequence_position = _get_drop_staging_position()
+		_refresh_world_overlays()
+		_update_ui()
+		return true
 	var pending_units: Array = []
 	for unit in _get_units_for_drop_operation():
 		var unit_id: String = String(unit.call("get_unit_id"))
@@ -4359,6 +4490,7 @@ func _try_start_drop_sequence() -> bool:
 	_drop_sequence_timer = 0.0
 	_drop_sequence_phase = DROP_SEQUENCE_INBOUND
 	_drop_ship_staged = true
+	_drop_sequence_visual_only = false
 	_drop_sequence_position = _get_drop_staging_position()
 	_live_drop_bootstrap_consumed = true
 	_refresh_world_overlays()
@@ -4381,19 +4513,20 @@ func _embark_units_for_drop(units: Array) -> void:
 
 
 func _update_drop_sequence(delta: float) -> void:
-	if preview_mode:
-		return
 	match _drop_sequence_phase:
 		DROP_SEQUENCE_INBOUND:
 			_drop_sequence_position = _drop_sequence_position.move_toward(_lz_position, DROP_SHIP_SPEED * delta)
 			if _drop_sequence_position.distance_to(_lz_position) <= 2.0:
 				_drop_sequence_position = _lz_position
 				_drop_sequence_phase = DROP_SEQUENCE_LANDED
-				_drop_sequence_timer = DROP_LANDING_HOLD_SECONDS
+				_drop_sequence_timer = DROP_LANDING_HOLD_SECONDS if not _drop_sequence_visual_only else 0.0
 				_last_command_text = "DROPSHIP LANDED"
 				_update_ui()
 			_refresh_world_overlays()
 		DROP_SEQUENCE_LANDED:
+			if _drop_sequence_visual_only:
+				_refresh_world_overlays()
+				return
 			_drop_sequence_timer -= delta
 			if _drop_sequence_timer > 0.0:
 				return
@@ -4438,6 +4571,7 @@ func _update_drop_sequence(delta: float) -> void:
 				_drop_sequence_unit_index = 0
 				_drop_sequence_timer = 0.0
 				_drop_sequence_fireteam_name = "ALL"
+				_drop_sequence_visual_only = false
 				_live_drop_bootstrap_consumed = false
 				_last_command_text = "DROPSHIP CLEARED"
 				_emit_planning_state_changed()

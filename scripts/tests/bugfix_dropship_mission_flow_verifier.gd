@@ -297,10 +297,11 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 	await process_frame
 	var mission_identity_panel := preview_mission.get_node("TacticalUI/MissionIdentityPanel") as PanelContainer if preview_mission != null else null
 	var mission_craft_card := preview_mission.get_node("TacticalUI/MissionDropshipPanel") as PanelContainer if preview_mission != null else null
-	var title_label := mission_craft_card.get_node("MarginContainer/Row/InfoVBox/TitleLabel") as Label if mission_craft_card != null else null
-	var pilot_label := mission_craft_card.get_node("MarginContainer/Row/InfoVBox/PilotLabel") as Label if mission_craft_card != null else null
-	var status_label := mission_craft_card.get_node("MarginContainer/Row/InfoVBox/StatusLabel") as Label if mission_craft_card != null else null
-	var ship_texture := mission_craft_card.get_node("MarginContainer/Row/ShipTexture") as TextureRect if mission_craft_card != null else null
+	var title_label := mission_craft_card.get_node("MarginContainer/VBox/HeaderRow/TitleLabel") as Label if mission_craft_card != null else null
+	var pilot_card := mission_craft_card.get_node("MarginContainer/VBox/ContentRow/InfoVBox/PilotCardHost/PilotCard") if mission_craft_card != null and mission_craft_card.has_node("MarginContainer/VBox/ContentRow/InfoVBox/PilotCardHost/PilotCard") else null
+	var pilot_secondary_label := pilot_card.get_node("Margin/HBox/TextVBox/DataBLabel") as Label if pilot_card != null else null
+	var status_label := mission_craft_card.get_node("MarginContainer/VBox/ContentRow/InfoVBox/StatusLabel") as Label if mission_craft_card != null else null
+	var ship_texture := mission_craft_card.get_node("MarginContainer/VBox/ContentRow/ShipTexture") as TextureRect if mission_craft_card != null else null
 	var dropship_marker := preview_mission.get_node("DropshipPlanMarker") as Node2D if preview_mission != null else null
 	var expected_drop_state: Dictionary = Dictionary(fob_screen.call("build_mission_drop_state"))
 	_assert(not map_screen.visible, "Mission nav no longer renders the old Mission Link overlay screen")
@@ -308,7 +309,8 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 	_assert(mission_craft_card != null and mission_craft_card.visible, "Preview mission shows the mini shipcard while the dropship is en route")
 	_assert(mission_craft_card != null and mission_craft_card.modulate.a < 1.0, "Mini shipcard stays greyed out during mission transit")
 	_assert(title_label != null and title_label.text == String(expected_drop_state.get("mission_drop_title_text", "")), "Mission mini shipcard reuses the FOB ship title text")
-	_assert(pilot_label != null and pilot_label.text == String(expected_drop_state.get("mission_drop_pilot_text", "")), "Mission mini shipcard reuses the FOB pilot text")
+	_assert(pilot_card != null, "Mission mini shipcard reuses the FOB-style compact pilot card layout")
+	_assert(pilot_secondary_label != null and pilot_secondary_label.text == String(expected_drop_state.get("mission_drop_pilot_text", "")), "Mission mini shipcard reuses the FOB pilot text")
 	_assert(status_label != null and status_label.text.contains("ETA mission map"), "Mini shipcard reports the live transfer status during mission transit")
 	_assert(ship_texture != null and ship_texture.texture != null and ship_texture.texture.resource_path == "res://Assets/kenney_space-kit/Side/craft_speederB.png", "Mission mini shipcard reuses the same dropship texture as the FOB shipcard")
 	_assert(dropship_marker != null and dropship_marker.visible, "Preview mission renders the dropship marker once the craft is actually on the mission-map route")
@@ -325,8 +327,8 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 
 	preview_mission = mission_host.get_child(0) if mission_host.get_child_count() > 0 else null
 	mission_craft_card = preview_mission.get_node("TacticalUI/MissionDropshipPanel") as PanelContainer if preview_mission != null else null
-	title_label = mission_craft_card.get_node("MarginContainer/Row/InfoVBox/TitleLabel") as Label if mission_craft_card != null else null
-	status_label = mission_craft_card.get_node("MarginContainer/Row/InfoVBox/StatusLabel") as Label if mission_craft_card != null else null
+	title_label = mission_craft_card.get_node("MarginContainer/VBox/HeaderRow/TitleLabel") as Label if mission_craft_card != null else null
+	status_label = mission_craft_card.get_node("MarginContainer/VBox/ContentRow/InfoVBox/StatusLabel") as Label if mission_craft_card != null else null
 	dropship_marker = preview_mission.get_node("DropshipPlanMarker") as Node2D if preview_mission != null else null
 	expected_drop_state = Dictionary(fob_screen.call("build_mission_drop_state"))
 	_assert(mission_craft_card != null and mission_craft_card.visible and mission_craft_card.modulate.a < 1.0, "Mini shipcard stays visible once the dropship is waiting on the mission map")
@@ -409,12 +411,17 @@ func _test_preview_drop_button_stays_drop_without_live_sequence() -> void:
 	planning_state["lz_position"] = Vector2(320.0, 180.0)
 	tactical_controller.call("set_planning_state", planning_state)
 	tactical_controller.call("_on_call_dropship_pressed")
+	var start_position: Vector2 = Vector2(tactical_controller.get("_drop_sequence_position")) if tactical_controller != null else Vector2.ZERO
+	tactical_controller.call("_update_drop_sequence", 0.5)
 	await process_frame
 
 	_assert(tactical_controller != null and bool(tactical_controller.get("preview_mode")), "Mission nav still uses the preview mission controller before the actual mission start")
-	_assert(String(tactical_controller.get("_drop_sequence_phase")).is_empty(), "Preview mission does not start the live dropship sequence before Homebase Start")
-	_assert(call_button != null and call_button.text == "Drop", "Preview drop button keeps the Drop label instead of switching to Drop Planned")
-	_assert(dropship_marker != null and not dropship_marker.visible, "Preview mission does not pin a static dropship marker outside the map before the live mission starts")
+	_assert(bool(tactical_controller.get("_drop_sequence_visual_only")), "Preview drop uses a visual-only dropship sequence instead of live runtime insertion")
+	_assert(String(tactical_controller.get("_drop_sequence_phase")) == "inbound", "Preview drop starts a visible inbound dropship pass on the mission map")
+	_assert(start_position.distance_to(Vector2(tactical_controller.get("_drop_sequence_position"))) > 0.1, "Preview dropship visibly advances toward the LZ after pressing Drop")
+	_assert(call_button != null and call_button.text == "Inbound", "Preview drop button reflects the visible inbound drop sequence")
+	_assert(dropship_marker != null and dropship_marker.visible, "Preview mission shows the dropship marker while the visual drop run is active")
+	_assert(Array(Dictionary(tactical_controller.call("get_planning_state")).get("deployed_unit_ids", [])).is_empty(), "Preview drop stays visual-only and does not deploy friendlies before mission start")
 	scene.queue_free()
 	await process_frame
 
@@ -814,6 +821,7 @@ func _test_dropship_returns_to_fob_after_drop() -> void:
 	mission_state["lz_position"] = Vector2(320.0, 180.0)
 	tactical_controller.call("set_planning_state", mission_state)
 	tactical_controller.call("_on_call_dropship_pressed")
+	_assert(String(tactical_controller.get("_drop_sequence_phase")) == "inbound", "Live mission drop button immediately starts the inbound dropship sequence")
 	for _step in range(600):
 		tactical_controller.call("_update_drop_sequence", 0.2)
 		if String(tactical_controller.get("_drop_sequence_phase")).is_empty():
