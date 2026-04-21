@@ -13,6 +13,7 @@ signal fireteam_coordination_requested(coordination_data)
 signal fireteam_ready_to_advance(fireteam_id, coordination_id)
 signal fireteam_bound_complete(fireteam_id, bound_data)
 signal leader_initiated_flank(fireteam_id, leader, flank_data)
+signal flank_vulnerability_triggered(fireteam_id, flank_data)
 
 
 # The router only validates lightweight contracts and forwards signals.
@@ -127,3 +128,14 @@ func notify_leader_initiated_flank(fireteam_id: String, leader: Node, flank_data
 		push_warning("EventRouter.notify_leader_initiated_flank expects a leader Node.")
 		return
 	leader_initiated_flank.emit(normalized_fireteam_id, leader, flank_data.duplicate(true))
+
+
+func notify_flank_vulnerability_triggered(fireteam_id: String, flank_data: Dictionary) -> void:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		push_warning("EventRouter.notify_flank_vulnerability_triggered expects a non-empty fireteam_id.")
+		return
+	if flank_data.is_empty():
+		push_warning("EventRouter.notify_flank_vulnerability_triggered expects a non-empty payload.")
+		return
+	flank_vulnerability_triggered.emit(normalized_fireteam_id, flank_data.duplicate(true))

@@ -802,6 +802,8 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 
 	var attacker_unit = _resolve_attacker_unit(attacker_unit_id)
 	var target_cover_score: float = _extract_effective_cover_score(unit)
+	if effect.has("target_cover_override"):
+		target_cover_score = clampf(_extract_float(effect.get("target_cover_override", target_cover_score), target_cover_score), 0.0, 80.0)
 	var attacker_attack_bonus: float = _extract_unit_attack_bonus(attacker_unit)
 	var attacker_cover_score: float = _extract_unit_cover_score(attacker_unit)
 	var hit_chance: float = _extract_float(effect.get("hit_chance", 1.0), 1.0)
@@ -835,6 +837,10 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		"target_cover_score": target_cover_score,
 		"friendly_fire": is_friendly_fire,
 	}
+	if bool(effect.get("is_flank", false)):
+		hit_context["is_flank"] = true
+		hit_context["flank_fireteam_id"] = String(effect.get("flank_fireteam_id", ""))
+		hit_context["flank_source_angle"] = _extract_float(effect.get("flank_source_angle", 0.0), 0.0)
 	unit.call("apply_damage", resolved_damage, hit_context)
 
 

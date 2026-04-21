@@ -4,6 +4,7 @@ const LOS_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/los_system.gd")
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
 const OVERWATCH_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/overwatch_controller.gd")
 const CONTACT_TRACKER_SCRIPT: GDScript = preload("res://scripts/tests/contact_tracker.gd")
+const FLANK_VULNERABILITY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tests/flank_vulnerability_resolver.gd")
 const CONTACT_LINE_NAME: String = "CombatContactLine"
 const EVENT_LABEL_NAME: String = "CombatEventLabel"
 const WINNER_LABEL_NAME: String = "CombatWinnerLabel"
@@ -98,6 +99,7 @@ var _enemy_patrol_waypoint_index_by_unit_id: Dictionary = {}
 var _enemy_patrol_contact_locked: Dictionary = {}
 var _overwatch_controller = OVERWATCH_CONTROLLER_SCRIPT.new()
 var _contact_tracker = CONTACT_TRACKER_SCRIPT.new()
+var _flank_vulnerability_resolver = FLANK_VULNERABILITY_RESOLVER_SCRIPT.new()
 
 
 func _ready() -> void:
@@ -153,6 +155,18 @@ func get_fireteam_contact_snapshot(fireteam_id: String) -> Array:
 	return Array(_contact_tracker.call("get_fireteam_contacts", fireteam_id)).duplicate(true)
 
 
+func get_flank_vulnerability_snapshot() -> Array:
+	if _flank_vulnerability_resolver == null:
+		return []
+	return Array(_flank_vulnerability_resolver.call("get_state_snapshot", _current_tick)).duplicate(true)
+
+
+func get_fireteam_flank_vulnerability_state(fireteam_id: String) -> Dictionary:
+	if _flank_vulnerability_resolver == null:
+		return {}
+	return Dictionary(_flank_vulnerability_resolver.call("get_fireteam_state", fireteam_id, _current_tick)).duplicate(true)
+
+
 @rpc("authority", "reliable")
 func _receive_mission_result(mission_result: Dictionary) -> void:
 	if _runs_local_authority:
@@ -206,6 +220,7 @@ func _on_tick_processed(tick: int) -> void:
 	_update_fireteam_leadership()
 	_advance_detection_timers()
 	_update_contact_tracking()
+	_advance_flank_vulnerability_state()
 	_advance_discipline_cooldowns()
 	_advance_misidentification_cooldowns()
 	_advance_medic_support_cooldowns()
@@ -329,6 +344,9 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 	if String(attacker.call("get_team_id")) == friendly_team_id and contact_state == "spotted":
 		weapon_hit_chance = clampf(weapon_hit_chance + SPOTTED_CONTACT_HIT_CHANCE_MALUS, 0.02, 0.98)
 	var weapon_ticks: int = WEAPON_DATA_SCRIPT.get_ticks_between_attacks(active_weapon_id)
+	var flank_modifiers: Dictionary = resolve_flank_attack(attacker, actual_target)
+	if bool(flank_modifiers.get("is_flank", false)):
+		weapon_hit_chance = clampf(weapon_hit_chance + float(flank_modifiers.get("hit_chance_bonus", 0.0)), 0.02, 0.98)
 	simulation_root.call(
 		"enqueue_effect",
 		{
@@ -340,10 +358,15 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 			"allow_friendly_fire": is_friendly_fire,
 			"damage": weapon_damage,
 			"hit_chance": weapon_hit_chance,
-			"damage_multiplier": base_damage_multiplier,
+			"damage_multiplier": base_damage_multiplier * float(flank_modifiers.get("damage_multiplier", 1.0)),
 			"roll_override": 0.4,
+			"target_cover_override": flank_modifiers.get("target_cover_override", null),
+			"is_flank": bool(flank_modifiers.get("is_flank", false)),
+			"flank_fireteam_id": String(flank_modifiers.get("fireteam_id", "")),
+			"flank_source_angle": float(flank_modifiers.get("source_angle", 0.0)),
 		}
 	)
+	_maybe_publish_flank_event(flank_modifiers, attacker, actual_target)
 	if is_friendly_fire and attacker.has_method("show_event_text"):
 		attacker.call("show_event_text", "FRIENDLY FIRE!", MISIDENTIFICATION_EVENT_COLOR, 1.6)
 		_broadcast_remote_event("%s verwechselt Ziel! -> %s" % [attacker_id, actual_target_id], attacker_id, MISIDENTIFICATION_EVENT_COLOR, 1.6, "FRIENDLY FIRE!")
@@ -940,6 +963,17 @@ func _update_contact_tracking() -> void:
 		tactical_controller.call("refresh_contact_overlay")
 
 
+func _advance_flank_vulnerability_state() -> void:
+	if _flank_vulnerability_resolver == null:
+		return
+	var did_change: bool = bool(_flank_vulnerability_resolver.call("advance", _current_tick))
+	if not did_change:
+		return
+	var tactical_controller = _get_tactical_controller()
+	if tactical_controller != null and tactical_controller.has_method("refresh_flank_vulnerability_state"):
+		tactical_controller.call("refresh_flank_vulnerability_state")
+
+
 func get_detection_progress() -> Dictionary:
 	return _detection_progress.duplicate(true)
 
@@ -1163,6 +1197,47 @@ func _find_first_contact_pair() -> Dictionary:
 		}
 
 	return {}
+
+
+func resolve_flank_attack(attacker, target) -> Dictionary:
+	if attacker == null or target == null or not target.has_method("get_fireteam_id"):
+		return {}
+	var tactical_controller = _get_tactical_controller()
+	if tactical_controller == null or not tactical_controller.has_method("get_fireteam_security_state"):
+		return {}
+	var defending_fireteam_id: String = String(target.call("get_fireteam_id")).strip_edges().to_lower()
+	if defending_fireteam_id.is_empty():
+		return {}
+	var security_state: Dictionary = Dictionary(tactical_controller.call("get_fireteam_security_state", defending_fireteam_id)).duplicate(true)
+	return resolve_flank_attack_with_state(defending_fireteam_id, attacker, target, security_state)
+
+
+func resolve_flank_attack_with_state(fireteam_id: String, attacker, target, security_state: Dictionary) -> Dictionary:
+	if _flank_vulnerability_resolver == null or fireteam_id.strip_edges().is_empty():
+		return {}
+	var result: Dictionary = Dictionary(_flank_vulnerability_resolver.call("resolve_attack", fireteam_id, attacker, target, security_state, _current_tick)).duplicate(true)
+	if result.is_empty():
+		return {}
+	var tactical_controller = _get_tactical_controller()
+	if tactical_controller != null and tactical_controller.has_method("refresh_flank_vulnerability_state"):
+		tactical_controller.call("refresh_flank_vulnerability_state")
+	return result
+
+
+func _maybe_publish_flank_event(flank_modifiers: Dictionary, attacker, target) -> void:
+	if flank_modifiers.is_empty() or not bool(flank_modifiers.get("triggered_now", false)):
+		return
+	var fireteam_id: String = String(flank_modifiers.get("fireteam_id", "")).strip_edges().to_lower()
+	if fireteam_id.is_empty():
+		return
+	_set_event_text("FLANK %s" % fireteam_id.to_upper())
+	if target != null and target.has_method("show_event_text"):
+		target.call("show_event_text", "FLANKED", DOWN_EVENT_COLOR, 1.2)
+	if attacker != null and attacker.has_method("show_event_text"):
+		attacker.call("show_event_text", "FLANK", DEFAULT_EVENT_COLOR, 1.0)
+	var event_router = get_node_or_null("../EventRouter")
+	if event_router != null and event_router.has_method("notify_flank_vulnerability_triggered"):
+		event_router.call("notify_flank_vulnerability_triggered", fireteam_id, flank_modifiers)
 
 
 func _get_fireteam_contact_state(fireteam_id: String, enemy_unit_id: String) -> Dictionary:

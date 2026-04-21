@@ -557,6 +557,20 @@ func get_fireteam_contact_snapshot(fireteam_id: String) -> Array:
 	return Array(combat_driver.call("get_fireteam_contact_snapshot", fireteam_id)).duplicate(true)
 
 
+func get_flank_vulnerability_snapshot() -> Array:
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver == null or not combat_driver.has_method("get_flank_vulnerability_snapshot"):
+		return []
+	return Array(combat_driver.call("get_flank_vulnerability_snapshot")).duplicate(true)
+
+
+func get_fireteam_flank_vulnerability_state(fireteam_id: String) -> Dictionary:
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver == null or not combat_driver.has_method("get_fireteam_flank_vulnerability_state"):
+		return {}
+	return Dictionary(combat_driver.call("get_fireteam_flank_vulnerability_state", fireteam_id)).duplicate(true)
+
+
 func get_tactical_stances_snapshot() -> Dictionary:
 	_ensure_tactical_stance_controller()
 	if _tactical_stance_controller == null:
@@ -1266,9 +1280,10 @@ func _refresh_fireteam_status_panel() -> void:
 	var stance_text: String = _build_selected_tactical_stance_text()
 	var movement_text: String = _format_movement_state_text(get_fireteam_movement_state(selected_fireteam_id))
 	var security_text: String = _format_security_state_text(get_fireteam_security_state(selected_fireteam_id))
+	var flank_text: String = _format_flank_vulnerability_text(get_fireteam_flank_vulnerability_state(selected_fireteam_id))
 	if suppression_label != null:
 		var ad_hoc_text: String = " | AD-HOC %s" % ad_hoc_type.to_upper() if not ad_hoc_type.is_empty() else ""
-		suppression_label.text = "%s | STANCE %s | MOVE %s | SEC %s | SUPP %.2f/%.2f%s" % [lead_name, stance_text, movement_text, security_text, suppression_value, suppression_threshold, ad_hoc_text]
+		suppression_label.text = "%s | STANCE %s | MOVE %s | SEC %s | FLK %s | SUPP %.2f/%.2f%s" % [lead_name, stance_text, movement_text, security_text, flank_text, suppression_value, suppression_threshold, ad_hoc_text]
 	if return_button != null:
 		return_button.disabled = selected_fireteam_id.is_empty() or not (_has_pending_plan_for_fireteam(selected_fireteam_id) or (_ad_hoc_order_controller != null and bool(_ad_hoc_order_controller.call("has_active_order", selected_fireteam_id))))
 
@@ -1649,7 +1664,7 @@ func _build_fireteam_status_text() -> String:
 		drop_state_text = "%d embarked | %d deployed | Lead %s" % [embarked_count, deployed_count, lead_name]
 	elif deployed_count > 0:
 		drop_state_text = "%d deployed | Lead %s" % [deployed_count, lead_name]
-	return "%s | %d Karten | %d Wegpunkte | STANCE %s | MOVE %s | SEC %s | %s" % [_get_fireteam_name(), units.size(), planned_waypoint_count, _build_selected_tactical_stance_text(), _build_selected_movement_text(), _build_selected_security_text(), drop_state_text]
+	return "%s | %d Karten | %d Wegpunkte | STANCE %s | MOVE %s | SEC %s | FLK %s | %s" % [_get_fireteam_name(), units.size(), planned_waypoint_count, _build_selected_tactical_stance_text(), _build_selected_movement_text(), _build_selected_security_text(), _build_selected_flank_vulnerability_text(), drop_state_text]
 
 
 func _build_strategic_status_text() -> String:
@@ -2277,6 +2292,9 @@ func _resolve_suppression_threshold(fireteam_id: String) -> float:
 	var base_threshold: float = 2.0
 	if not profile_dict.is_empty():
 		base_threshold = maxf(float(profile_dict.get("suppression_threshold", 2.0)), 1.0)
+	var flank_state: Dictionary = get_fireteam_flank_vulnerability_state(fireteam_id)
+	if bool(flank_state.get("is_active", false)):
+		base_threshold = maxf(base_threshold * float(flank_state.get("suppression_threshold_multiplier", 1.0)), 1.0)
 	return base_threshold
 
 
@@ -2699,6 +2717,11 @@ func refresh_contact_overlay() -> void:
 	overlay.call("set_contact_entries", get_contact_snapshot())
 
 
+func refresh_flank_vulnerability_state() -> void:
+	_refresh_fireteam_status_panel()
+	_update_ui()
+
+
 func _try_open_waypoint_menu_at_position(screen_position: Vector2) -> bool:
 	var existing_target: Dictionary = _find_waypoint_target_at_screen_position(screen_position)
 	if not existing_target.is_empty():
@@ -2915,6 +2938,20 @@ func _build_selected_security_text() -> String:
 	return shared_text
 
 
+func _build_selected_flank_vulnerability_text() -> String:
+	if _selected_fireteam_ids.is_empty():
+		return "-"
+	var shared_text: String = ""
+	for fireteam_id in _selected_fireteam_ids:
+		var flank_text: String = _format_flank_vulnerability_text(get_fireteam_flank_vulnerability_state(String(fireteam_id)))
+		if shared_text.is_empty():
+			shared_text = flank_text
+			continue
+		if flank_text != shared_text:
+			return "MIXED"
+	return shared_text
+
+
 func _format_movement_state_text(state: Dictionary) -> String:
 	if state.is_empty():
 		return "-"
@@ -2935,6 +2972,15 @@ func _format_security_state_text(state: Dictionary) -> String:
 	if bool(state.get("overwatch_ready", false)):
 		return "%s+OVW" % mode_label
 	return mode_label
+
+
+func _format_flank_vulnerability_text(state: Dictionary) -> String:
+	if state.is_empty() or not bool(state.get("is_active", false)):
+		return "-"
+	var remaining_seconds: float = float(state.get("remaining_seconds", 0.0))
+	if remaining_seconds <= 0.05:
+		return "ON"
+	return "%.1fs" % remaining_seconds
 
 
 func _get_movement_style_short_label(style_id: String) -> String:
