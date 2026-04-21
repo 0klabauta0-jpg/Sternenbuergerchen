@@ -5,6 +5,7 @@ const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrai
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const TERRAIN_MAP_RENDERER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_renderer.gd")
 const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
+const LOADOUT_MODIFIER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/command/loadout_modifier_resolver.gd")
 
 @export var team_id: String = "team_alpha"
 @export var runtime_leader_path: NodePath
@@ -21,10 +22,13 @@ const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_ros
 @export var enemy_wave_controller_path: NodePath
 @export var terrain_registry_path: NodePath
 @export var map_file_path: String = "res://maps/test_mission_32x32_slots8.json"
+@export var defer_friendly_runtime_activation: bool = true
 
 var member_loadouts: Dictionary = {}
+var unit_loadout_modifiers_by_unit_id: Dictionary = {}
 var _is_initialized: bool = false
 var _terrain_renderer = null
+var _loaded_terrain_map_data = null
 
 
 func _ready() -> void:
@@ -42,6 +46,7 @@ func _ready() -> void:
 		return
 
 	var terrain_registry = _setup_terrain_registry()
+	_build_unit_loadout_modifiers()
 	var spawn_alpha_marker := _resolve_marker(spawn_alpha_path)
 	var spawn_bravo_marker := _resolve_marker(spawn_bravo_path)
 	var objective_marker := _resolve_marker(objective_point_path)
@@ -110,25 +115,72 @@ func _ready() -> void:
 			if terrain_registry != null and unit.has_method("refresh_terrain_readability"):
 				unit.call("refresh_terrain_readability")
 
-		unit_registry.call("register_unit", unit_id, unit)
-
 		if unit_team_id == team_id:
-			runtime_leader.call("add_unit_member", unit)
+			if defer_friendly_runtime_activation:
+				if unit is CanvasItem:
+					unit.visible = false
+			else:
+				unit_registry.call("register_unit", unit_id, unit)
+				runtime_leader.call("add_unit_member", unit)
+				_enqueue_initial_loadout_effect(simulation_root, unit_id)
 		else:
+			unit_registry.call("register_unit", unit_id, unit)
 			enemy_units.append(unit)
 
 		if first_unit == null and unit_team_id == team_id:
 			first_unit = unit
 
-	if first_unit != null:
+	if first_unit != null and not defer_friendly_runtime_activation:
 		runtime_leader.call("assign", first_unit)
 
-	ftl_registry.call("register_ftl", team_id, runtime_leader)
+	if not defer_friendly_runtime_activation:
+		ftl_registry.call("register_ftl", team_id, runtime_leader)
 	_setup_objective_status(simulation_root, objective_marker)
 
 	_setup_respawn_manager(spawn_alpha_marker, spawn_bravo_marker)
 	_setup_enemy_waves(enemy_units)
 	_is_initialized = true
+
+
+func get_unit_loadout_modifiers_dict(unit_id: String) -> Dictionary:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return {}
+	return Dictionary(unit_loadout_modifiers_by_unit_id.get(normalized_unit_id, {})).duplicate(true)
+
+
+func _build_unit_loadout_modifiers() -> void:
+	unit_loadout_modifiers_by_unit_id.clear()
+	if member_loadouts.is_empty():
+		return
+	var resolver = LOADOUT_MODIFIER_RESOLVER_SCRIPT.new()
+	if resolver == null or not resolver.has_method("resolve_for_member_loadouts"):
+		return
+	var resolved: Dictionary = Dictionary(resolver.call("resolve_for_member_loadouts", member_loadouts))
+	for unit_id_variant in resolved.keys():
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty():
+			continue
+		var modifiers_dict: Dictionary = Dictionary(resolved.get(unit_id_variant, {})).duplicate(true)
+		if modifiers_dict.is_empty():
+			continue
+		unit_loadout_modifiers_by_unit_id[unit_id] = modifiers_dict
+
+
+func _enqueue_initial_loadout_effect(simulation_root: Node, unit_id: String) -> void:
+	if simulation_root == null or not simulation_root.has_method("enqueue_effect"):
+		return
+	var modifiers_dict: Dictionary = get_unit_loadout_modifiers_dict(unit_id)
+	if modifiers_dict.is_empty():
+		return
+	simulation_root.call(
+		"enqueue_effect",
+		{
+			"effect_type": "apply_loadout_modifiers",
+			"unit_id": unit_id,
+			"modifiers": modifiers_dict,
+		}
+	)
 
 
 func _is_friendly_slot_enabled(slot_index: int) -> bool:
@@ -214,8 +266,23 @@ func _setup_enemy_waves(enemy_units: Array) -> void:
 	var enemy_wave_controller = get_node_or_null(enemy_wave_controller_path)
 	if enemy_wave_controller == null or not enemy_wave_controller.has_method("initialize_enemy_units"):
 		return
+	if enemy_wave_controller.has_method("set_patrol_paths"):
+		enemy_wave_controller.call("set_patrol_paths", _build_enemy_patrol_paths())
 
 	enemy_wave_controller.call("initialize_enemy_units", enemy_units)
+
+
+func _build_enemy_patrol_paths() -> Dictionary:
+	var result: Dictionary = {}
+	if _loaded_terrain_map_data == null or not _loaded_terrain_map_data.has_method("get_patrol_paths"):
+		return result
+	var patrol_paths: Dictionary = Dictionary(_loaded_terrain_map_data.call("get_patrol_paths"))
+	for spawn_id_variant in patrol_paths.keys():
+		var spawn_id: String = String(spawn_id_variant).strip_edges()
+		if spawn_id.is_empty():
+			continue
+		result[spawn_id] = Array(patrol_paths.get(spawn_id_variant, [])).duplicate(true)
+	return result
 
 
 func _setup_terrain_registry():
@@ -243,6 +310,7 @@ func _try_load_terrain_from_json(terrain_registry) -> bool:
 	var terrain_map_data = TERRAIN_MAP_DATA_SCRIPT.call("load_from_file", map_file_path)
 	if terrain_map_data == null or terrain_map_data.call("get_tiles").is_empty():
 		return false
+	_loaded_terrain_map_data = terrain_map_data
 
 	var tile_size: Dictionary = terrain_map_data.call("get_tile_size")
 	terrain_registry.call("clear_tiles")
@@ -281,6 +349,7 @@ func _find_tile_sprite_at(terrain_root: Node, world_position: Vector2) -> Sprite
 
 
 func _setup_terrain_from_hardcode(terrain_registry) -> void:
+	_loaded_terrain_map_data = null
 	var terrain_root: Node = get_node_or_null("../MapRoot/Terrain")
 	if terrain_root == null:
 		return

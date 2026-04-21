@@ -73,6 +73,7 @@ var _runtime_status: RefCounted = UNIT_RUNTIME_STATUS_SCRIPT.new()
 var _current_unit_command: RefCounted = null
 var _vital_status: RefCounted = UNIT_VITAL_STATUS_SCRIPT.new()
 var _leadership_bonus: float = 0.0
+var _loadout_modifiers: Dictionary = {}
 var _skills: RefCounted = UNIT_SKILLS_SCRIPT.new()
 var _traits: Array = []
 var _character_profile_bundle: Dictionary = {}
@@ -288,7 +289,8 @@ func get_toughness_skill() -> float:
 
 
 func get_effective_cover_score() -> int:
-	return int(roundi(clampf(get_cover_score() + _get_terrain_cover_bonus(), 0.0, 80.0)))
+	var loadout_cover_bonus: float = float(_loadout_modifiers.get("cover_mod", 0.0)) * 100.0
+	return int(roundi(clampf(get_cover_score() + _get_terrain_cover_bonus() + loadout_cover_bonus, 0.0, 80.0)))
 
 
 func get_height_level() -> int:
@@ -351,10 +353,11 @@ func get_character_profile_bundle() -> Dictionary:
 func get_combat_effects() -> Dictionary:
 	var effects: Dictionary = Dictionary(_character_profile_bundle.get("combat_effects", {}))
 	if effects.is_empty():
-		return {"hit_chance_multiplier": 1.0, "speed_multiplier": 1.0, "hit_modifier": 0.0 + _leadership_bonus, "evasion_modifier": 0.0, "damage_taken_multiplier": 1.0}
+		var base_effects := {"hit_chance_multiplier": 1.0, "speed_multiplier": 1.0, "hit_modifier": 0.0 + _leadership_bonus, "evasion_modifier": 0.0, "damage_taken_multiplier": 1.0}
+		return _apply_loadout_modifiers_to_effects(base_effects)
 	var result: Dictionary = effects.duplicate(true)
 	result["hit_modifier"] = float(result.get("hit_modifier", 0.0)) + _leadership_bonus
-	return result
+	return _apply_loadout_modifiers_to_effects(result)
 
 
 func apply_leadership_bonus(bonus: float) -> void:
@@ -371,6 +374,18 @@ func get_leadership_bonus() -> float:
 
 func get_leadership_hit_modifier() -> float:
 	return _leadership_bonus
+
+
+func apply_loadout_modifiers(modifiers: Dictionary) -> void:
+	_loadout_modifiers = Dictionary(modifiers).duplicate(true)
+
+
+func clear_loadout_modifiers() -> void:
+	_loadout_modifiers.clear()
+
+
+func get_loadout_modifiers_snapshot() -> Dictionary:
+	return _loadout_modifiers.duplicate(true)
 
 
 func get_combat_hit_chance_multiplier() -> float:
@@ -411,6 +426,20 @@ func get_signature_control_evasion_modifier() -> float:
 
 func get_contact_stability_damage_taken_multiplier() -> float:
 	return UNIT_PROFILE_MATH_SCRIPT.contact_stability_to_damage_taken_multiplier(_get_behavior_axis("contact_stability"))
+
+
+func _apply_loadout_modifiers_to_effects(effects: Dictionary) -> Dictionary:
+	var next_effects: Dictionary = effects.duplicate(true)
+	if _loadout_modifiers.is_empty():
+		return next_effects
+	var speed_mod: float = float(_loadout_modifiers.get("speed_mod", 0.0))
+	var accuracy_mod: float = float(_loadout_modifiers.get("accuracy_mod", 0.0))
+	var toughness_mod: float = float(_loadout_modifiers.get("toughness_mod", 0.0))
+	next_effects["hit_modifier"] = float(next_effects.get("hit_modifier", 0.0)) + accuracy_mod
+	next_effects["speed_multiplier"] = maxf(float(next_effects.get("speed_multiplier", 1.0)) + speed_mod, 0.1)
+	var base_damage_taken_multiplier: float = float(next_effects.get("damage_taken_multiplier", 1.0))
+	next_effects["damage_taken_multiplier"] = maxf(base_damage_taken_multiplier * (1.0 - toughness_mod), 0.2)
+	return next_effects
 
 
 func get_target_position():
