@@ -1521,7 +1521,12 @@ func _get_aircraft_location(craft_id: String) -> String:
 
 
 func _is_craft_visible_in_homebase(craft_id: String) -> bool:
-	return _get_aircraft_location(craft_id) != "fob"
+	var craft_location: String = _get_aircraft_location(craft_id)
+	if craft_location == "homebase":
+		return true
+	if craft_location == "transit" and _has_active_pilot_transfer_for_craft(craft_id):
+		return true
+	return false
 
 
 func _is_craft_in_transit(craft_id: String) -> bool:

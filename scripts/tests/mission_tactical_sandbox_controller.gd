@@ -108,7 +108,9 @@ var _drop_ship_requested: bool = false
 var _drop_ship_staged: bool = false
 var _mission_drop_craft_id: String = ""
 var _mission_drop_display_name: String = ""
+var _mission_drop_texture_path: String = ""
 var _mission_drop_state: String = ""
+var _mission_drop_status_line: String = ""
 var _mission_drop_progress: float = 0.0
 var _mission_drop_eta_seconds: int = 0
 var _mission_drop_pilot_unit_id: String = ""
@@ -432,8 +434,12 @@ func set_planning_state(planning_state: Dictionary) -> void:
 		_mission_drop_craft_id = String(planning_state.get("mission_drop_craft_id", "")).strip_edges()
 	if planning_state.has("mission_drop_display_name"):
 		_mission_drop_display_name = String(planning_state.get("mission_drop_display_name", "")).strip_edges()
+	if planning_state.has("mission_drop_texture_path"):
+		_mission_drop_texture_path = String(planning_state.get("mission_drop_texture_path", "")).strip_edges()
 	if planning_state.has("mission_drop_state"):
 		_mission_drop_state = String(planning_state.get("mission_drop_state", "")).strip_edges().to_lower()
+	if planning_state.has("mission_drop_status_line"):
+		_mission_drop_status_line = String(planning_state.get("mission_drop_status_line", "")).strip_edges()
 	if planning_state.has("mission_drop_progress"):
 		_mission_drop_progress = clampf(float(planning_state.get("mission_drop_progress", 0.0)), 0.0, 100.0)
 	if planning_state.has("mission_drop_eta_seconds"):
@@ -492,7 +498,9 @@ func get_planning_state() -> Dictionary:
 		"drop_ship_staged": _drop_ship_staged,
 		"mission_drop_craft_id": _mission_drop_craft_id,
 		"mission_drop_display_name": _mission_drop_display_name,
+		"mission_drop_texture_path": _mission_drop_texture_path,
 		"mission_drop_state": _mission_drop_state,
+		"mission_drop_status_line": _mission_drop_status_line,
 		"mission_drop_progress": _mission_drop_progress,
 		"mission_drop_eta_seconds": _mission_drop_eta_seconds,
 		"mission_drop_pilot_unit_id": _mission_drop_pilot_unit_id,
@@ -1145,7 +1153,7 @@ func _update_ui() -> void:
 				DROP_SEQUENCE_COMPLETE:
 					call_dropship_button.text = "Drop Complete"
 				_:
-					call_dropship_button.text = "Drop Planned" if _drop_ship_requested else "Drop"
+					call_dropship_button.text = "Drop"
 
 	_apply_compact_mission_control_layout()
 	_refresh_dynamic_button_styles()
@@ -1900,6 +1908,13 @@ func _load_portrait_texture(portrait_path: String) -> Texture2D:
 	return resource as Texture2D
 
 
+func _load_optional_texture(texture_path: String) -> Texture2D:
+	if texture_path.strip_edges().is_empty():
+		return null
+	var resource: Resource = load(texture_path)
+	return resource as Texture2D
+
+
 func _ensure_mission_nav_timer_label() -> void:
 	var nav_row := get_node_or_null("../TacticalUI/TopNavPanel/NavMargin/NavRow") as HBoxContainer
 	if nav_row == null:
@@ -2019,7 +2034,9 @@ func _refresh_mission_dropship_panel() -> void:
 	var status_label := panel.get_node_or_null("MarginContainer/Row/InfoVBox/StatusLabel") as Label
 	var progress_bar := panel.get_node_or_null("MarginContainer/Row/InfoVBox/ProgressBar") as ProgressBar
 	if ship_texture != null:
-		ship_texture.texture = _get_dropship_marker_texture()
+		ship_texture.texture = _load_optional_texture(_mission_drop_texture_path)
+		if ship_texture.texture == null:
+			ship_texture.texture = _get_dropship_marker_texture()
 	if pilot_texture != null:
 		pilot_texture.texture = _load_portrait_texture(_mission_drop_pilot_portrait_path)
 		pilot_texture.visible = pilot_texture.texture != null
@@ -2050,6 +2067,8 @@ func _build_mission_dropship_status_text() -> String:
 				return "Leaving mission map"
 			DROP_SEQUENCE_COMPLETE:
 				return "Drop complete"
+	if not _mission_drop_status_line.is_empty():
+		return _mission_drop_status_line
 	match _mission_drop_state:
 		"waiting":
 			return "Holding on mission map"
@@ -2183,7 +2202,7 @@ func _refresh_world_overlays() -> void:
 	if dropship_marker == null:
 		return
 
-	if not _has_lz_position or (not _drop_ship_staged and not _drop_ship_requested and _drop_sequence_phase.is_empty()):
+	if preview_mode or not _has_lz_position or _drop_sequence_phase.is_empty():
 		dropship_marker.visible = false
 		return
 

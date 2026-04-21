@@ -20,7 +20,9 @@ func _run_tests() -> void:
 	await _test_fob_header_start_is_hidden()
 	await _test_homebase_start_button_lives_in_header()
 	await _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting()
+	await _test_preview_drop_button_stays_drop_without_live_sequence()
 	await _test_fob_assignments_and_boarding_survive_send_and_nav_refresh()
+	await _test_mission_slot_labels_stay_aligned_with_pilots()
 	await _test_mission_start_requires_boarded_team()
 	await _test_homebase_timer_label_switches_from_idle_to_countdown()
 	await _test_mission_timer_uses_explicit_start_timestamp()
@@ -214,6 +216,7 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 		await process_frame
 
 	var fob_screen: Control = scene.get_node("FOBScreen")
+	var homebase_screen: Control = scene.get_node("HomebaseScreen")
 	var map_screen: Control = scene.get_node("MapScreen")
 	var mission_host: Node = scene.get_node("MissionHost")
 	var selected_unit_ids := PackedStringArray(["unit_alpha", "unit_bravo", "unit_delta"])
@@ -249,6 +252,8 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 	fob_screen.set("_boarded_unit_ids", selected_unit_ids)
 	fob_screen.set("_boarded_fireteam_ids", PackedStringArray(["blue"]))
 	fob_screen.call("_on_transport_craft_mission_stage_requested", "dropship_test")
+	scene.call("_refresh_homebase_screen")
+	scene.call("_refresh_fob_screen")
 	scene.call("_show_map")
 	for _frame in range(2):
 		await process_frame
@@ -257,13 +262,17 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 	var mission_identity_panel := preview_mission.get_node("TacticalUI/MissionIdentityPanel") as PanelContainer if preview_mission != null else null
 	var mission_craft_card := preview_mission.get_node("TacticalUI/MissionDropshipPanel") as PanelContainer if preview_mission != null else null
 	var status_label := mission_craft_card.get_node("MarginContainer/Row/InfoVBox/StatusLabel") as Label if mission_craft_card != null else null
+	var ship_texture := mission_craft_card.get_node("MarginContainer/Row/ShipTexture") as TextureRect if mission_craft_card != null else null
 	_assert(not map_screen.visible, "Mission nav no longer renders the old Mission Link overlay screen")
 	_assert(preview_mission != null, "Mission nav keeps the preview mission host active as the visible map surface")
 	_assert(mission_craft_card != null and mission_craft_card.visible, "Preview mission shows the mini shipcard while the dropship is en route")
 	_assert(mission_craft_card != null and mission_craft_card.modulate.a < 1.0, "Mini shipcard stays greyed out during mission transit")
 	_assert(status_label != null and status_label.text.contains("ETA mission map"), "Mini shipcard reports the live transfer status during mission transit")
+	_assert(ship_texture != null and ship_texture.texture != null and ship_texture.texture.resource_path == "res://Assets/kenney_space-kit/Side/craft_speederB.png", "Mission mini shipcard reuses the same dropship texture as the FOB shipcard")
 	_assert(mission_identity_panel != null and mission_craft_card.offset_top >= mission_identity_panel.offset_bottom, "Mini shipcard sits below the LIVE TACTICAL GRID header panel")
 	_assert(is_equal_approx(mission_craft_card.anchor_right, 1.0) and is_equal_approx(mission_craft_card.offset_right, -16.0), "Mini shipcard stays docked to the right edge of the tactical preview")
+	_assert(Array(fob_screen.call("_get_visible_transport_craft_states")).is_empty(), "FOB stops rendering the sent dropship while it is on the mission-map transfer")
+	_assert(Array(homebase_screen.call("_get_visible_homebase_aircraft_definitions")).is_empty(), "Homebase does not resurrect the sent dropship while it transfers to the mission map")
 
 	for _step in range(18):
 		scene.call("_on_homebase_transport_timer_timeout")
@@ -276,6 +285,74 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 	status_label = mission_craft_card.get_node("MarginContainer/Row/InfoVBox/StatusLabel") as Label if mission_craft_card != null else null
 	_assert(mission_craft_card != null and mission_craft_card.visible and mission_craft_card.modulate.a < 1.0, "Mini shipcard stays visible once the dropship is waiting on the mission map")
 	_assert(status_label != null and status_label.text.contains("Holding on mission map"), "Mini shipcard switches to waiting status after the transfer completes")
+	_assert(Array(fob_screen.call("_get_visible_transport_craft_states")).is_empty(), "FOB keeps the sent dropship hidden while it waits on the mission map")
+	_assert(Array(homebase_screen.call("_get_visible_homebase_aircraft_definitions")).is_empty(), "Homebase keeps mission-side dropships out of the flight deck while they wait on the mission map")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_preview_drop_button_stays_drop_without_live_sequence() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	for _frame in range(4):
+		await process_frame
+
+	var fob_screen: Control = scene.get_node("FOBScreen")
+	var mission_host: Node = scene.get_node("MissionHost")
+	var selected_unit_ids := PackedStringArray(["unit_alpha", "unit_bravo", "unit_delta"])
+	var selected_fireteam_ids := PackedStringArray(["blue", "blue", "blue"])
+	var fireteam_definitions := [
+		{
+			"id": "blue",
+			"label": "BLUE",
+			"lead_unit_id": "unit_alpha",
+			"respawn_enabled": false,
+			"loadout": "medium",
+		}
+	]
+	scene.set(
+		"_homebase_aircraft_definitions",
+		[
+			{
+				"craft_id": "dropship_test",
+				"display_name": "Dropship Test",
+				"craft_type": "dropship",
+				"texture_path": "res://Assets/kenney_space-kit/Side/craft_speederB.png",
+			}
+		]
+	)
+	scene.set("_assigned_aircraft_pilot_by_craft", {"dropship_test": "unit_hotel"})
+	scene.set("_aircraft_location_by_craft", {"dropship_test": "fob"})
+	scene.set("_selected_unit_ids", selected_unit_ids)
+	scene.set("_selected_fireteam_ids", selected_fireteam_ids)
+	scene.call("_refresh_fob_screen")
+	fob_screen.call("configure_transfer", selected_unit_ids, selected_fireteam_ids, fireteam_definitions)
+	fob_screen.set("_dropship_transport_craft_id", "dropship_test")
+	fob_screen.set("_dropship_phase", "boarded")
+	fob_screen.set("_boarded_unit_ids", selected_unit_ids)
+	fob_screen.set("_boarded_fireteam_ids", PackedStringArray(["blue"]))
+	fob_screen.call("_on_transport_craft_mission_stage_requested", "dropship_test")
+	for _step in range(18):
+		scene.call("_on_homebase_transport_timer_timeout")
+	scene.call("_show_map")
+	for _frame in range(2):
+		await process_frame
+
+	var preview_mission := mission_host.get_child(0) if mission_host.get_child_count() > 0 else null
+	var tactical_controller: Node = preview_mission.get_node("TacticalController") if preview_mission != null else null
+	var call_button := preview_mission.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton") as Button if preview_mission != null else null
+	var dropship_marker := preview_mission.get_node("DropshipPlanMarker") as Node2D if preview_mission != null else null
+	var planning_state: Dictionary = Dictionary(tactical_controller.call("get_planning_state")) if tactical_controller != null else {}
+	planning_state["has_lz_position"] = true
+	planning_state["lz_position"] = Vector2(320.0, 180.0)
+	tactical_controller.call("set_planning_state", planning_state)
+	tactical_controller.call("_on_call_dropship_pressed")
+	await process_frame
+
+	_assert(tactical_controller != null and bool(tactical_controller.get("preview_mode")), "Mission nav still uses the preview mission controller before the actual mission start")
+	_assert(String(tactical_controller.get("_drop_sequence_phase")).is_empty(), "Preview mission does not start the live dropship sequence before Homebase Start")
+	_assert(call_button != null and call_button.text == "Drop", "Preview drop button keeps the Drop label instead of switching to Drop Planned")
+	_assert(dropship_marker != null and not dropship_marker.visible, "Preview mission does not pin a static dropship marker outside the map before the live mission starts")
 	scene.queue_free()
 	await process_frame
 
@@ -336,6 +413,66 @@ func _test_fob_assignments_and_boarding_survive_send_and_nav_refresh() -> void:
 	for _frame in range(2):
 		await process_frame
 	_assert(PackedStringArray(fob_screen.call("get_selected_fireteam_ids")) == PackedStringArray(["ft1", "ft1", "ft1"]), "Returning from Mission Map keeps FOB fireteam assignments intact")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_mission_slot_labels_stay_aligned_with_pilots() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	for _frame in range(4):
+		await process_frame
+
+	var homebase_screen: Control = scene.get_node("HomebaseScreen")
+	var fob_screen: Control = scene.get_node("FOBScreen")
+	var homebase_label := scene.get_node("HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/MissionTeamLimitLabel") as Label
+	var fob_label := scene.get_node("FOBScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/TeamStatusLabel") as Label
+	var selected_unit_ids := PackedStringArray(["unit_alpha", "unit_bravo", "unit_delta"])
+	var selected_fireteam_ids := PackedStringArray(["blue", "blue", "blue"])
+	var fireteam_definitions := [
+		{
+			"id": "blue",
+			"label": "BLUE",
+			"lead_unit_id": "unit_alpha",
+			"respawn_enabled": false,
+			"loadout": "medium",
+		}
+	]
+	scene.set(
+		"_homebase_aircraft_definitions",
+		[
+			{
+				"craft_id": "dropship_test",
+				"display_name": "Dropship Test",
+				"craft_type": "dropship",
+				"texture_path": "res://Assets/kenney_space-kit/Side/craft_speederB.png",
+			}
+		]
+	)
+	scene.set("_assigned_aircraft_pilot_by_craft", {"dropship_test": "unit_hotel"})
+	scene.set("_aircraft_location_by_craft", {"dropship_test": "fob"})
+	scene.set("_selected_unit_ids", selected_unit_ids)
+	scene.set("_selected_fireteam_ids", selected_fireteam_ids)
+	scene.call("_refresh_fob_screen")
+	scene.call("_refresh_homebase_screen")
+
+	_assert(homebase_label != null and homebase_label.text == "Mission slots: 4 / 8", "Homebase mission slots count operators plus the assigned pilot")
+	_assert(fob_label != null and fob_label.text == homebase_label.text, "FOB mission slots match Homebase before the craft is sent")
+
+	fob_screen.call("configure_transfer", selected_unit_ids, selected_fireteam_ids, fireteam_definitions)
+	fob_screen.set("_dropship_transport_craft_id", "dropship_test")
+	fob_screen.set("_dropship_phase", "boarded")
+	fob_screen.set("_boarded_unit_ids", selected_unit_ids)
+	fob_screen.set("_boarded_fireteam_ids", PackedStringArray(["blue"]))
+	fob_screen.call("_on_transport_craft_mission_stage_requested", "dropship_test")
+	for _step in range(18):
+		scene.call("_on_homebase_transport_timer_timeout")
+	scene.call("_refresh_fob_screen")
+	scene.call("_refresh_homebase_screen")
+
+	_assert(homebase_label != null and homebase_label.text == "Mission slots: 4 / 8", "Homebase keeps counting the pilot after the dropship reaches the mission map")
+	_assert(fob_label != null and fob_label.text == homebase_label.text, "FOB mission slots stay aligned with Homebase even while the dropship is off-map")
+	_assert(int(Dictionary(fob_screen.call("build_meta_overview")).get("slot_usage_count", 0)) == 4, "Meta overview exports the same mission slot usage including the pilot")
 	scene.queue_free()
 	await process_frame
 

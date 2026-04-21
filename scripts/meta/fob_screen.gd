@@ -277,6 +277,8 @@ func _has_boarded_mission_payload() -> bool:
 
 func build_mission_drop_state() -> Dictionary:
 	var mission_craft_state: Dictionary = _get_transport_craft_state(_mission_launch_ready_craft_id)
+	if mission_craft_state.is_empty():
+		mission_craft_state = _get_meta_mission_craft_state()
 	var mission_drop_state: String = "waiting" if bool(mission_craft_state.get("mission_waiting", false)) else ("to_mission" if bool(mission_craft_state.get("mission_transit_to_map", false)) else ("to_fob" if bool(mission_craft_state.get("mission_transit_to_fob", false)) else ""))
 	return {
 		"transport_craft_id": _dropship_transport_craft_id,
@@ -288,7 +290,9 @@ func build_mission_drop_state() -> Dictionary:
 		"drop_ship_staged": can_request_mission_start(),
 		"mission_drop_craft_id": String(mission_craft_state.get("craft_id", _mission_launch_ready_craft_id)).strip_edges(),
 		"mission_drop_display_name": String(mission_craft_state.get("display_name", "Dropship")).strip_edges(),
+		"mission_drop_texture_path": String(mission_craft_state.get("texture_path", "")).strip_edges(),
 		"mission_drop_state": mission_drop_state,
+		"mission_drop_status_line": _build_transport_craft_status_line(mission_craft_state) if not mission_craft_state.is_empty() else "",
 		"mission_drop_progress": float(mission_craft_state.get("transfer_progress", 0.0)),
 		"mission_drop_eta_seconds": int(mission_craft_state.get("transfer_eta_seconds", 0)),
 		"mission_drop_pilot_unit_id": String(mission_craft_state.get("pilot_unit_id", "")).strip_edges(),
@@ -323,7 +327,7 @@ func build_meta_overview() -> Dictionary:
 		"team_count": _selected_unit_ids.size(),
 		"assigned_operator_count": _count_assigned_operators(),
 		"pilot_count": pilot_count,
-		"slot_usage_count": _selected_unit_ids.size() + pilot_count,
+		"slot_usage_count": _build_mission_slot_usage_count(),
 		"dropship_status": _build_dropship_status_text(),
 		"dropship_queue": _build_boarding_queue_text(),
 		"mission_craft": mission_craft_state,
@@ -454,7 +458,7 @@ func _update_brief_panel() -> void:
 	var mission_summary_label := get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionSummaryLabel") as Label
 	var start_button := get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/StartMissionButton") as Button
 	var pilot_count: int = _count_transport_pilot_slots()
-	var mission_slot_usage: int = _selected_unit_ids.size() + pilot_count
+	var mission_slot_usage: int = _build_mission_slot_usage_count()
 
 	mission_header_label.text = "FOB MISSION BRIEF"
 	team_status_label.text = "Mission slots: %d / %d" % [mini(mission_slot_usage, _mission_slot_count), _mission_slot_count]
@@ -1210,18 +1214,11 @@ func _count_assigned_operators() -> int:
 
 
 func _count_transport_pilot_slots() -> int:
-	var unique_pilot_ids: Dictionary = {}
-	for craft_state_variant in _transport_craft_states:
-		if typeof(craft_state_variant) != TYPE_DICTIONARY:
-			continue
-		var craft_state: Dictionary = craft_state_variant
-		if not bool(craft_state.get("visible_in_fob", false)):
-			continue
-		var pilot_unit_id: String = String(craft_state.get("pilot_unit_id", "")).strip_edges()
-		if pilot_unit_id.is_empty():
-			continue
-		unique_pilot_ids[pilot_unit_id] = true
-	return unique_pilot_ids.size()
+	return _get_transport_craft_pilot_unit_ids().size()
+
+
+func _build_mission_slot_usage_count() -> int:
+	return _selected_unit_ids.size() + _count_transport_pilot_slots()
 
 
 func _count_fireteams_with_members() -> int:
@@ -2615,8 +2612,6 @@ func _get_transport_craft_pilot_unit_ids() -> PackedStringArray:
 		if typeof(craft_state_variant) != TYPE_DICTIONARY:
 			continue
 		var craft_state: Dictionary = craft_state_variant
-		if not bool(craft_state.get("visible_in_fob", false)):
-			continue
 		var pilot_unit_id: String = String(craft_state.get("pilot_unit_id", "")).strip_edges()
 		if pilot_unit_id.is_empty() or pilot_unit_ids.has(pilot_unit_id):
 			continue

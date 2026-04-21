@@ -933,7 +933,7 @@ func _build_transport_craft_states() -> Array:
 				"texture_path": String(craft_def.get("texture_path", "")).strip_edges(),
 				"location": craft_location,
 				"visible_in_homebase": craft_location == "homebase",
-				"visible_in_fob": craft_location != "homebase" and (craft_location != "mission" or mission_phase == "to_mission"),
+				"visible_in_fob": craft_location == "fob",
 				"is_in_transit": is_in_transit,
 				"pilot_unit_id": pilot_unit_id,
 				"pilot_display_name": _resolve_unit_display_name(pilot_unit_id),
@@ -1341,7 +1341,9 @@ func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: boo
 	_mission_planning_state["launch_ready_craft_id"] = String(drop_state.get("launch_ready_craft_id", "")).strip_edges()
 	_mission_planning_state["mission_drop_craft_id"] = String(drop_state.get("mission_drop_craft_id", "")).strip_edges()
 	_mission_planning_state["mission_drop_display_name"] = String(drop_state.get("mission_drop_display_name", "")).strip_edges()
+	_mission_planning_state["mission_drop_texture_path"] = String(drop_state.get("mission_drop_texture_path", "")).strip_edges()
 	_mission_planning_state["mission_drop_state"] = String(drop_state.get("mission_drop_state", "")).strip_edges()
+	_mission_planning_state["mission_drop_status_line"] = String(drop_state.get("mission_drop_status_line", "")).strip_edges()
 	_mission_planning_state["mission_drop_progress"] = float(drop_state.get("mission_drop_progress", 0.0))
 	_mission_planning_state["mission_drop_eta_seconds"] = int(drop_state.get("mission_drop_eta_seconds", 0))
 	_mission_planning_state["mission_drop_pilot_unit_id"] = String(drop_state.get("mission_drop_pilot_unit_id", "")).strip_edges()
