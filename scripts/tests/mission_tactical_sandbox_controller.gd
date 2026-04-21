@@ -4486,43 +4486,26 @@ func _update_drop_sequence(delta: float) -> void:
 			_drop_sequence_position = _drop_sequence_position.move_toward(_lz_position, DROP_SHIP_SPEED * delta)
 			if _drop_sequence_position.distance_to(_lz_position) <= 2.0:
 				_drop_sequence_position = _lz_position
-				_drop_sequence_phase = DROP_SEQUENCE_LANDED
-				_drop_sequence_timer = DROP_LANDING_HOLD_SECONDS if not _drop_sequence_visual_only else 0.0
-				_last_command_text = "DROPSHIP LANDED"
-				_update_ui()
+				if _drop_sequence_visual_only:
+					_drop_sequence_phase = DROP_SEQUENCE_LANDED
+					_drop_sequence_timer = 0.0
+					_last_command_text = "DROPSHIP LANDED"
+					_update_ui()
+				else:
+					_complete_drop_sequence_deployment()
+					_begin_drop_sequence_outbound()
 			_refresh_world_overlays()
 		DROP_SEQUENCE_LANDED:
 			if _drop_sequence_visual_only:
 				_refresh_world_overlays()
 				return
-			_drop_sequence_timer -= delta
-			if _drop_sequence_timer > 0.0:
-				return
-			_drop_sequence_phase = DROP_SEQUENCE_UNLOADING
-			_drop_sequence_timer = 0.0
-			_last_command_text = "DEBOARDING %s" % _drop_sequence_fireteam_name
-			_update_ui()
+			_complete_drop_sequence_deployment()
+			_begin_drop_sequence_outbound()
 		DROP_SEQUENCE_UNLOADING:
-			_drop_sequence_timer -= delta
-			if _drop_sequence_timer > 0.0:
-				return
-			if _drop_sequence_unit_index >= _drop_sequence_units.size():
-				_drop_sequence_phase = DROP_SEQUENCE_COMPLETE
-				_drop_sequence_position = _lz_position
-				_last_command_text = "%s DEPLOYED" % _drop_sequence_fireteam_name
-				_drop_sequence_timer = 0.2
-				_update_ui()
-				_refresh_world_overlays()
-				return
-			_deploy_next_embarked_unit()
-			_drop_sequence_timer = DROP_UNLOAD_INTERVAL_SECONDS
+			_complete_drop_sequence_deployment()
+			_begin_drop_sequence_outbound()
 		DROP_SEQUENCE_COMPLETE:
-			_drop_sequence_timer -= delta
-			if _drop_sequence_timer > 0.0:
-				return
-			_drop_sequence_phase = DROP_SEQUENCE_OUTBOUND
-			_last_command_text = "DROPSHIP EXITING"
-			_update_ui()
+			_begin_drop_sequence_outbound()
 		DROP_SEQUENCE_OUTBOUND:
 			var exit_position: Vector2 = _get_drop_exit_position()
 			_drop_sequence_position = _drop_sequence_position.move_toward(exit_position, DROP_SHIP_SPEED * delta)
@@ -4546,6 +4529,30 @@ func _update_drop_sequence(delta: float) -> void:
 				_update_ui()
 				_refresh_world_overlays()
 			_refresh_world_overlays()
+
+
+func _complete_drop_sequence_deployment() -> void:
+	if _drop_sequence_visual_only:
+		return
+	if _drop_sequence_phase != DROP_SEQUENCE_UNLOADING:
+		_drop_sequence_phase = DROP_SEQUENCE_UNLOADING
+		_last_command_text = "DEBOARDING %s" % _drop_sequence_fireteam_name
+	while _drop_sequence_unit_index < _drop_sequence_units.size():
+		_deploy_next_embarked_unit()
+	_mission_drop_passenger_count = _embarked_unit_ids.size()
+	_drop_sequence_position = _lz_position
+
+
+func _begin_drop_sequence_outbound() -> void:
+	if _drop_sequence_visual_only:
+		return
+	_mission_drop_state = "to_fob"
+	_mission_drop_passenger_count = _embarked_unit_ids.size()
+	_drop_sequence_phase = DROP_SEQUENCE_OUTBOUND
+	_drop_sequence_timer = 0.0
+	_last_command_text = "DROPSHIP RTB"
+	_update_ui()
+	_refresh_world_overlays()
 
 
 func _deploy_next_embarked_unit() -> void:

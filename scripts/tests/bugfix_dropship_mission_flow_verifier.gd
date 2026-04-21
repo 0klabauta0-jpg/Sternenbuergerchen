@@ -948,6 +948,15 @@ func _test_dropship_returns_to_fob_after_drop() -> void:
 	tactical_controller.call("set_planning_state", mission_state)
 	tactical_controller.call("_on_call_dropship_pressed")
 	_assert(String(tactical_controller.get("_drop_sequence_phase")) == "inbound", "Live mission drop button immediately starts the inbound dropship sequence")
+	for _step in range(120):
+		tactical_controller.call("_update_drop_sequence", 0.2)
+		if String(tactical_controller.get("_drop_sequence_phase")) != "inbound":
+			break
+	var mid_drop_state: Dictionary = Dictionary(tactical_controller.call("get_planning_state"))
+	_assert(String(tactical_controller.get("_drop_sequence_phase")) == "outbound", "Live dropship goes straight into the outbound return once it reaches the LZ")
+	_assert(Array(mid_drop_state.get("embarked_unit_ids", [])) == [], "All boarded passengers are removed from the embarked set as soon as the dropship lands")
+	_assert(Array(mid_drop_state.get("deployed_unit_ids", [])) == Array(selected_unit_ids), "The boarded FOB fireteam deploys immediately at the LZ when the dropship arrives")
+	_assert(int(mid_drop_state.get("mission_drop_passenger_count", -1)) == 0, "Mission dropship passenger count falls to zero immediately after the live drop")
 	for _step in range(600):
 		tactical_controller.call("_update_drop_sequence", 0.2)
 		if String(tactical_controller.get("_drop_sequence_phase")).is_empty():
