@@ -17,6 +17,8 @@ func _run_tests() -> void:
 	print("=== Dropship Mission Bugfix Verifier ===")
 	await _test_fob_refresh_preserves_boarded_units()
 	await _test_mission_start_requires_boarded_team()
+	await _test_mission_timer_uses_explicit_start_timestamp()
+	await _test_dropship_returns_to_fob_after_drop()
 	await _test_meta_mission_uses_deferred_drop_state()
 	await _test_combat_loop_waits_for_pending_insertions()
 	await _test_drop_ship_starts_far_outside_the_map()
@@ -140,18 +142,22 @@ func _test_mission_start_requires_boarded_team() -> void:
 			"loadout": "medium",
 		}
 	]
-	fob_screen.call("set_available_units", UNIT_ROSTER_PRESETS_SCRIPT.call("get_homebase_roster"))
-	fob_screen.call(
-		"set_transport_craft_state",
+	scene.set(
+		"_homebase_aircraft_definitions",
 		[
 			{
 				"craft_id": "dropship_test",
 				"display_name": "Dropship Test",
-				"visible_in_fob": true,
-				"is_boardable": true,
+				"craft_type": "dropship",
+				"texture_path": "res://Assets/kenney_space-kit/Side/craft_speederB.png",
 			}
 		]
 	)
+	scene.set("_assigned_aircraft_pilot_by_craft", {"dropship_test": "unit_hotel"})
+	scene.set("_aircraft_location_by_craft", {"dropship_test": "fob"})
+	scene.set("_selected_unit_ids", selected_unit_ids)
+	scene.set("_selected_fireteam_ids", selected_fireteam_ids)
+	scene.call("_refresh_fob_screen")
 	fob_screen.call("configure_transfer", selected_unit_ids, selected_fireteam_ids, fireteam_definitions)
 	fob_screen.call("_queue_fireteam_for_dropship", "blue", "dropship_test")
 	fob_screen.call("_refresh_ui_state")
@@ -166,14 +172,104 @@ func _test_mission_start_requires_boarded_team() -> void:
 	fob_screen.set("_dropship_phase", "boarded")
 	fob_screen.set("_boarded_unit_ids", selected_unit_ids)
 	fob_screen.set("_boarded_fireteam_ids", PackedStringArray(["blue"]))
-	fob_screen.call("_on_transport_craft_mission_launch_requested", "dropship_test")
+	fob_screen.call("_on_transport_craft_mission_stage_requested", "dropship_test")
 	fob_screen.call("_refresh_ui_state")
 	scene.call("_refresh_homebase_screen")
-	_assert(start_button != null and not start_button.disabled, "Homebase start button unlocks once the boarded dropship is staged for mission launch")
+	_assert(start_button != null and start_button.disabled, "Homebase start waits until the boarded dropship has reached the mission map")
+	for _step in range(18):
+		scene.call("_on_homebase_transport_timer_timeout")
+	scene.call("_refresh_homebase_screen")
+	scene.call("_refresh_fob_screen")
+	_assert(start_button != null and not start_button.disabled, "Homebase start button unlocks once the boarded dropship is waiting on the mission map")
 	homebase_screen.call("request_mission_start")
 	for _frame in range(4):
 		await process_frame
 	_assert(scene.call("get_active_mission") != null, "Homebase mission start launches once a boarded dropship is launch-ready")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_mission_timer_uses_explicit_start_timestamp() -> void:
+	var scene: Node = MISSION_TEST_SCENE.instantiate()
+	var combat_driver: Node = scene.get_node("CombatLoopDriver")
+	combat_driver.set("mission_time_limit_seconds", 1200.0)
+	combat_driver.set("mission_timer_started_at_msec", Time.get_ticks_msec() - 65000)
+	root.add_child(scene)
+	for _frame in range(4):
+		await process_frame
+	var remaining_seconds: float = float(combat_driver.call("get_remaining_time_limit_seconds"))
+	_assert(remaining_seconds <= 1136.0 and remaining_seconds >= 1133.0, "Mission timer counts down from the explicit Homebase start timestamp")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_dropship_returns_to_fob_after_drop() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	for _frame in range(4):
+		await process_frame
+
+	var homebase_screen: Control = scene.get_node("HomebaseScreen")
+	var fob_screen: Control = scene.get_node("FOBScreen")
+	var selected_unit_ids := PackedStringArray(["unit_alpha", "unit_bravo", "unit_delta"])
+	var selected_fireteam_ids := PackedStringArray(["blue", "blue", "blue"])
+	var fireteam_definitions := [
+		{
+			"id": "blue",
+			"label": "BLUE",
+			"lead_unit_id": "unit_alpha",
+			"respawn_enabled": false,
+			"loadout": "medium",
+		}
+	]
+	scene.set(
+		"_homebase_aircraft_definitions",
+		[
+			{
+				"craft_id": "dropship_test",
+				"display_name": "Dropship Test",
+				"craft_type": "dropship",
+				"texture_path": "res://Assets/kenney_space-kit/Side/craft_speederB.png",
+			}
+		]
+	)
+	scene.set("_assigned_aircraft_pilot_by_craft", {"dropship_test": "unit_hotel"})
+	scene.set("_aircraft_location_by_craft", {"dropship_test": "fob"})
+	scene.set("_selected_unit_ids", selected_unit_ids)
+	scene.set("_selected_fireteam_ids", selected_fireteam_ids)
+	scene.call("_refresh_fob_screen")
+	fob_screen.call("configure_transfer", selected_unit_ids, selected_fireteam_ids, fireteam_definitions)
+	fob_screen.set("_dropship_transport_craft_id", "dropship_test")
+	fob_screen.set("_dropship_phase", "boarded")
+	fob_screen.set("_boarded_unit_ids", selected_unit_ids)
+	fob_screen.set("_boarded_fireteam_ids", PackedStringArray(["blue"]))
+	fob_screen.call("_on_transport_craft_mission_stage_requested", "dropship_test")
+	for _step in range(18):
+		scene.call("_on_homebase_transport_timer_timeout")
+	homebase_screen.call("request_mission_start")
+	for _frame in range(8):
+		await process_frame
+
+	var active_mission: Node = scene.call("get_active_mission")
+	var tactical_controller: Node = active_mission.get_node("TacticalController")
+	var mission_state: Dictionary = Dictionary(tactical_controller.call("get_planning_state"))
+	mission_state["has_lz_position"] = true
+	mission_state["lz_position"] = Vector2(320.0, 180.0)
+	tactical_controller.call("set_planning_state", mission_state)
+	tactical_controller.call("_on_call_dropship_pressed")
+	for _step in range(600):
+		tactical_controller.call("_update_drop_sequence", 0.2)
+		if String(tactical_controller.get("_drop_sequence_phase")).is_empty():
+			break
+	for _frame in range(4):
+		await process_frame
+
+	var returning_craft_state: Dictionary = Dictionary(fob_screen.call("_get_transport_craft_state", "dropship_test"))
+	_assert(bool(returning_craft_state.get("mission_transit_to_fob", false)), "FOB shows the dropship greyed-out and returning after the mission drop")
+	for _step in range(18):
+		scene.call("_on_homebase_transport_timer_timeout")
+	var returned_craft_state: Dictionary = Dictionary(fob_screen.call("_get_transport_craft_state", "dropship_test"))
+	_assert(bool(returned_craft_state.get("visible_in_fob", false)) and bool(returned_craft_state.get("is_boardable", false)), "Dropship becomes boardable in FOB again after the return flight")
 	scene.queue_free()
 	await process_frame
 

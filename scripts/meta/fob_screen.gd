@@ -23,6 +23,7 @@ const LEGACY_CHARACTER_OVERLAY_NODE_NAMES: PackedStringArray = [
 ]
 
 signal mission_start_requested(selected_unit_ids, selected_fireteam_ids)
+signal transport_craft_mission_stage_requested(craft_id)
 
 const DEFAULT_DROPSHIP_ETA_SECONDS := 18.0
 const DEFAULT_BOARDING_SECONDS := 6.0
@@ -228,16 +229,31 @@ func request_mission_start() -> void:
 
 
 func can_request_mission_start() -> bool:
-	return _can_mark_transport_craft_launch_ready(_get_transport_craft_state(_mission_launch_ready_craft_id))
+	return _can_request_homebase_mission_start(_get_transport_craft_state(_mission_launch_ready_craft_id))
 
 
 func get_mission_launch_summary() -> String:
-	if not can_request_mission_start():
-		return "Board complete in FOB, then press Start on the dropship card."
+	var craft_state: Dictionary = _get_transport_craft_state(_mission_launch_ready_craft_id)
+	if can_request_mission_start():
+		var ready_craft_name: String = String(craft_state.get("display_name", "Dropship")).strip_edges()
+		if ready_craft_name.is_empty():
+			ready_craft_name = "Dropship"
+		return "%s waiting on the mission map. Start from Homebase when ready." % ready_craft_name
+	if not craft_state.is_empty() and bool(craft_state.get("mission_transit_to_map", false)):
+		return "%s en route to mission map." % _build_optional_text(String(craft_state.get("display_name", "")).strip_edges(), "Dropship")
 	var craft_name: String = String(_get_transport_craft_state(_mission_launch_ready_craft_id).get("display_name", "Dropship")).strip_edges()
 	if craft_name.is_empty():
 		craft_name = "Dropship"
-	return "%s staged off-map and ready for Homebase launch." % craft_name
+	return "Board complete in FOB, then send %s to the mission map." % craft_name
+
+
+func mark_transport_craft_launch_ready(craft_id: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return
+	_mission_launch_ready_craft_id = normalized_craft_id
+	if is_inside_tree():
+		_refresh_ui_state()
 
 
 func _is_mission_ready_for_launch() -> bool:
@@ -253,6 +269,8 @@ func _is_mission_ready_for_launch() -> bool:
 
 
 func build_mission_drop_state() -> Dictionary:
+	var mission_craft_state: Dictionary = _get_transport_craft_state(_mission_launch_ready_craft_id)
+	var mission_drop_state: String = "waiting" if bool(mission_craft_state.get("mission_waiting", false)) else ("to_mission" if bool(mission_craft_state.get("mission_transit_to_map", false)) else ("to_fob" if bool(mission_craft_state.get("mission_transit_to_fob", false)) else ""))
 	return {
 		"transport_craft_id": _dropship_transport_craft_id,
 		"dropship_phase": _dropship_phase,
@@ -261,6 +279,15 @@ func build_mission_drop_state() -> Dictionary:
 		"embarked_unit_ids": Array(_boarded_unit_ids),
 		"launch_ready_craft_id": _mission_launch_ready_craft_id,
 		"drop_ship_staged": can_request_mission_start(),
+		"mission_drop_craft_id": String(mission_craft_state.get("craft_id", _mission_launch_ready_craft_id)).strip_edges(),
+		"mission_drop_display_name": String(mission_craft_state.get("display_name", "Dropship")).strip_edges(),
+		"mission_drop_state": mission_drop_state,
+		"mission_drop_progress": float(mission_craft_state.get("transfer_progress", 0.0)),
+		"mission_drop_eta_seconds": int(mission_craft_state.get("transfer_eta_seconds", 0)),
+		"mission_drop_pilot_unit_id": String(mission_craft_state.get("pilot_unit_id", "")).strip_edges(),
+		"mission_drop_pilot_display_name": String(mission_craft_state.get("pilot_display_name", "")).strip_edges(),
+		"mission_drop_pilot_portrait_path": String(mission_craft_state.get("pilot_portrait_path", "")).strip_edges(),
+		"mission_drop_passenger_count": _boarded_unit_ids.size(),
 	}
 
 
@@ -616,8 +643,8 @@ func _update_dropship_panel() -> void:
 	dropship_arrival_progress.value = _build_dropship_arrival_progress_value(selected_craft_state)
 	dropship_arrival_progress.visible = not selected_craft_state.is_empty() and bool(selected_craft_state.get("is_in_transit", false))
 	dropship_arrival_label.text = _build_dropship_arrival_visual_text(selected_craft_state)
-	start_boarding_button.disabled = _dropship_phase != "ready" or _boarding_order.is_empty() or _dropship_transport_craft_id.is_empty()
-	start_boarding_button.text = "Boarding..." if _dropship_phase == "boarding" else "Start Boarding"
+	start_boarding_button.visible = false
+	start_boarding_button.disabled = true
 	remove_dropship_fireteam_button.disabled = not _dropship_staged_fireteam_ids.has(_focused_fireteam_id)
 	_render_dropship_fireteam_cards(queue_list)
 
@@ -702,6 +729,12 @@ func _build_fireteam_panel_summary_text() -> String:
 func _build_dropship_status_text(selected_craft_state: Dictionary = {}) -> String:
 	if not selected_craft_state.is_empty():
 		var craft_name: String = String(selected_craft_state.get("display_name", "craft")).strip_edges()
+		if bool(selected_craft_state.get("mission_waiting", false)):
+			return "%s: waiting on mission map" % craft_name
+		if bool(selected_craft_state.get("mission_transit_to_map", false)):
+			return "%s: outbound to mission map" % craft_name
+		if bool(selected_craft_state.get("mission_transit_to_fob", false)):
+			return "%s: returning from mission map" % craft_name
 		if bool(selected_craft_state.get("is_in_transit", false)):
 			return "%s: inbound from Homebase" % craft_name
 		if not bool(selected_craft_state.get("is_boardable", false)):
@@ -730,6 +763,10 @@ func _build_dropship_status_text(selected_craft_state: Dictionary = {}) -> Strin
 
 func _build_dropship_eta_text(selected_craft_state: Dictionary = {}) -> String:
 	if not selected_craft_state.is_empty():
+		if bool(selected_craft_state.get("mission_waiting", false)):
+			return "Mission ETA: on-station | awaiting Drop"
+		if bool(selected_craft_state.get("mission_transit_to_map", false)) or bool(selected_craft_state.get("mission_transit_to_fob", false)):
+			return "Mission ETA: %ds" % int(selected_craft_state.get("transfer_eta_seconds", 0))
 		if bool(selected_craft_state.get("is_in_transit", false)):
 			return "Arrival ETA: %ds" % int(selected_craft_state.get("transfer_eta_seconds", 0))
 		if _dropship_transport_craft_id == String(selected_craft_state.get("craft_id", "")).strip_edges() and not _boarding_order.is_empty():
@@ -2080,17 +2117,38 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 	title_label.add_theme_font_size_override("font_size", 11)
 	header_row.add_child(title_label)
 
+	var board_button := Button.new()
+	board_button.text = "Board"
+	board_button.custom_minimum_size = Vector2(52.0, 0.0)
+	board_button.add_theme_font_size_override("font_size", 8)
+	board_button.disabled = not _can_start_boarding_for_craft(craft_state)
+	if board_button.disabled:
+		META_UI_SKIN_SCRIPT.style_secondary_button(board_button)
+	else:
+		META_UI_SKIN_SCRIPT.style_transfer_button(board_button, true)
+	board_button.pressed.connect(_on_transport_craft_boarding_requested.bind(craft_id))
+	header_row.add_child(board_button)
+
 	var select_button := Button.new()
-	var is_launch_ready: bool = _mission_launch_ready_craft_id == craft_id and can_request_mission_start()
-	select_button.text = "Started" if is_launch_ready else "Start"
+	var is_waiting_on_mission: bool = bool(craft_state.get("mission_waiting", false))
+	var is_transit_to_mission: bool = bool(craft_state.get("mission_transit_to_map", false))
+	var is_transit_to_fob: bool = bool(craft_state.get("mission_transit_to_fob", false))
+	if is_waiting_on_mission:
+		select_button.text = "Waiting"
+	elif is_transit_to_mission:
+		select_button.text = "En Route"
+	elif is_transit_to_fob:
+		select_button.text = "Return"
+	else:
+		select_button.text = "Start"
 	select_button.custom_minimum_size = Vector2(58.0, 0.0)
 	select_button.add_theme_font_size_override("font_size", 8)
-	select_button.disabled = not is_launch_ready and not _can_mark_transport_craft_launch_ready(craft_state)
-	if is_launch_ready:
+	select_button.disabled = is_waiting_on_mission or is_transit_to_mission or is_transit_to_fob or not _can_mark_transport_craft_launch_ready(craft_state)
+	if not select_button.disabled:
 		META_UI_SKIN_SCRIPT.style_transfer_button(select_button, true)
 	else:
 		META_UI_SKIN_SCRIPT.style_secondary_button(select_button)
-	select_button.pressed.connect(_on_transport_craft_mission_launch_requested.bind(craft_id))
+	select_button.pressed.connect(_on_transport_craft_mission_stage_requested.bind(craft_id))
 	header_row.add_child(select_button)
 
 	var content_row := HBoxContainer.new()
@@ -2216,6 +2274,12 @@ func _build_transport_craft_stylebox(is_selected: bool, is_in_transit: bool, can
 
 func _build_transport_craft_title(craft_state: Dictionary) -> String:
 	var craft_name: String = String(craft_state.get("display_name", "craft")).strip_edges()
+	if bool(craft_state.get("mission_waiting", false)):
+		return "%s · MAP" % craft_name
+	if bool(craft_state.get("mission_transit_to_map", false)):
+		return "%s · HANDOVER" % craft_name
+	if bool(craft_state.get("mission_transit_to_fob", false)):
+		return "%s · RETURN" % craft_name
 	if bool(craft_state.get("is_in_transit", false)):
 		return "%s · TRANSIT" % craft_name
 	if bool(craft_state.get("is_boardable", false)):
@@ -2235,6 +2299,12 @@ func _build_transport_craft_cargo_text(craft_state: Dictionary) -> String:
 
 
 func _build_transport_craft_status_line(craft_state: Dictionary) -> String:
+	if bool(craft_state.get("mission_waiting", false)):
+		return "Status: holding on mission map | waiting for Drop"
+	if bool(craft_state.get("mission_transit_to_map", false)):
+		return "Status: outbound to mission map | ETA %ds" % int(craft_state.get("transfer_eta_seconds", 0))
+	if bool(craft_state.get("mission_transit_to_fob", false)):
+		return "Status: returning to FOB | ETA %ds" % int(craft_state.get("transfer_eta_seconds", 0))
 	if bool(craft_state.get("is_in_transit", false)):
 		return "Status: inbound to FOB | ETA %ds | 6 NPC + pilot" % int(craft_state.get("transfer_eta_seconds", 0))
 	if bool(craft_state.get("is_boardable", false)):
@@ -2339,7 +2409,27 @@ func _can_mark_transport_craft_launch_ready(craft_state: Dictionary) -> bool:
 		return false
 	if not _is_mission_ready_for_launch():
 		return false
-	return String(craft_state.get("craft_id", "")).strip_edges() == _dropship_transport_craft_id
+	if String(craft_state.get("craft_id", "")).strip_edges() != _dropship_transport_craft_id:
+		return false
+	return not bool(craft_state.get("mission_waiting", false)) and not bool(craft_state.get("mission_transit_to_map", false)) and not bool(craft_state.get("mission_transit_to_fob", false))
+
+
+func _can_request_homebase_mission_start(craft_state: Dictionary) -> bool:
+	if craft_state.is_empty():
+		return false
+	if not _is_mission_ready_for_launch():
+		return false
+	return bool(craft_state.get("mission_waiting", false))
+
+
+func _can_start_boarding_for_craft(craft_state: Dictionary) -> bool:
+	if craft_state.is_empty():
+		return false
+	if String(craft_state.get("craft_id", "")).strip_edges() != _dropship_transport_craft_id:
+		return false
+	if _dropship_phase == "boarding":
+		return false
+	return _dropship_phase == "ready" and not _boarding_order.is_empty()
 
 
 func _on_transport_craft_selected(craft_id: String) -> void:
@@ -2350,14 +2440,26 @@ func _on_transport_craft_selected(craft_id: String) -> void:
 	_refresh_ui_state()
 
 
-func _on_transport_craft_mission_launch_requested(craft_id: String) -> void:
+func _on_transport_craft_boarding_requested(craft_id: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return
+	_dropship_transport_craft_id = normalized_craft_id
+	_on_start_boarding_button_pressed()
+	_refresh_ui_state()
+
+
+func _on_transport_craft_mission_stage_requested(craft_id: String) -> void:
 	var normalized_craft_id: String = craft_id.strip_edges()
 	if normalized_craft_id.is_empty():
 		return
 	_dropship_transport_craft_id = normalized_craft_id
 	var craft_state: Dictionary = _get_transport_craft_state(normalized_craft_id)
-	if _can_mark_transport_craft_launch_ready(craft_state):
-		_mission_launch_ready_craft_id = normalized_craft_id
+	if not _can_mark_transport_craft_launch_ready(craft_state):
+		_refresh_ui_state()
+		return
+	_mission_launch_ready_craft_id = normalized_craft_id
+	transport_craft_mission_stage_requested.emit(normalized_craft_id)
 	_refresh_ui_state()
 
 
@@ -2404,11 +2506,14 @@ func _trim_dropship_queue_to_capacity() -> void:
 func _sanitize_transport_craft_state() -> void:
 	var selected_craft_id: String = _dropship_transport_craft_id.strip_edges()
 	if selected_craft_id.is_empty():
-		_mission_launch_ready_craft_id = ""
+		var pending_launch_state: Dictionary = _get_transport_craft_state(_mission_launch_ready_craft_id)
+		if not _can_request_homebase_mission_start(pending_launch_state) and not bool(pending_launch_state.get("mission_transit_to_map", false)) and not bool(pending_launch_state.get("mission_transit_to_fob", false)):
+			_mission_launch_ready_craft_id = ""
 		return
 	var craft_state: Dictionary = _get_transport_craft_state(selected_craft_id)
-	if not craft_state.is_empty() and (bool(craft_state.get("visible_in_fob", false)) or bool(craft_state.get("is_in_transit", false))):
-		if not _can_mark_transport_craft_launch_ready(_get_transport_craft_state(_mission_launch_ready_craft_id)):
+	if not craft_state.is_empty() and (bool(craft_state.get("visible_in_fob", false)) or bool(craft_state.get("is_in_transit", false)) or bool(craft_state.get("mission_waiting", false))):
+		var launch_ready_state: Dictionary = _get_transport_craft_state(_mission_launch_ready_craft_id)
+		if not _can_request_homebase_mission_start(launch_ready_state) and not bool(launch_ready_state.get("mission_transit_to_map", false)) and not bool(launch_ready_state.get("mission_transit_to_fob", false)):
 			_mission_launch_ready_craft_id = ""
 		return
 	_dropship_transport_craft_id = ""
@@ -2604,6 +2709,12 @@ func _build_dropship_arrival_progress_value(selected_craft_state: Dictionary = {
 
 func _build_dropship_arrival_visual_text(selected_craft_state: Dictionary = {}) -> String:
 	if not selected_craft_state.is_empty():
+		if bool(selected_craft_state.get("mission_waiting", false)):
+			return "%s holding on mission map" % String(selected_craft_state.get("display_name", "craft")).strip_edges()
+		if bool(selected_craft_state.get("mission_transit_to_map", false)):
+			return "%s outbound to mission" % String(selected_craft_state.get("display_name", "craft")).strip_edges()
+		if bool(selected_craft_state.get("mission_transit_to_fob", false)):
+			return "%s returning to FOB" % String(selected_craft_state.get("display_name", "craft")).strip_edges()
 		if bool(selected_craft_state.get("is_in_transit", false)):
 			return "%s inbound" % String(selected_craft_state.get("display_name", "craft")).strip_edges()
 		if bool(selected_craft_state.get("is_boardable", false)):

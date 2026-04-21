@@ -106,6 +106,16 @@ var _is_lz_placement_armed: bool = false
 var _is_target_placement_armed: bool = false
 var _drop_ship_requested: bool = false
 var _drop_ship_staged: bool = false
+var _mission_drop_craft_id: String = ""
+var _mission_drop_display_name: String = ""
+var _mission_drop_state: String = ""
+var _mission_drop_progress: float = 0.0
+var _mission_drop_eta_seconds: int = 0
+var _mission_drop_pilot_unit_id: String = ""
+var _mission_drop_pilot_display_name: String = ""
+var _mission_drop_pilot_portrait_path: String = ""
+var _mission_drop_passenger_count: int = 0
+var _mission_drop_return_requested: bool = false
 var _drop_ship_cooldown_remaining: float = 0.0
 var _card_refresh_time_remaining: float = 0.0
 var _drop_sequence_phase: String = ""
@@ -191,6 +201,8 @@ func _ready() -> void:
 	_ensure_fireteam_security_controller()
 	_ensure_order_visualizer()
 	_ensure_contact_map_overlay()
+	_ensure_mission_nav_timer_label()
+	_ensure_mission_dropship_panel()
 	_hide_legacy_phase_buttons()
 	_sync_phase_selection_from_controller()
 	_initialize_fireteam_suppression_state()
@@ -416,6 +428,26 @@ func set_planning_state(planning_state: Dictionary) -> void:
 		_drop_ship_requested = bool(planning_state.get("drop_ship_requested", false))
 	if planning_state.has("drop_ship_staged"):
 		_drop_ship_staged = bool(planning_state.get("drop_ship_staged", false))
+	if planning_state.has("mission_drop_craft_id"):
+		_mission_drop_craft_id = String(planning_state.get("mission_drop_craft_id", "")).strip_edges()
+	if planning_state.has("mission_drop_display_name"):
+		_mission_drop_display_name = String(planning_state.get("mission_drop_display_name", "")).strip_edges()
+	if planning_state.has("mission_drop_state"):
+		_mission_drop_state = String(planning_state.get("mission_drop_state", "")).strip_edges().to_lower()
+	if planning_state.has("mission_drop_progress"):
+		_mission_drop_progress = clampf(float(planning_state.get("mission_drop_progress", 0.0)), 0.0, 100.0)
+	if planning_state.has("mission_drop_eta_seconds"):
+		_mission_drop_eta_seconds = maxi(int(planning_state.get("mission_drop_eta_seconds", 0)), 0)
+	if planning_state.has("mission_drop_pilot_unit_id"):
+		_mission_drop_pilot_unit_id = String(planning_state.get("mission_drop_pilot_unit_id", "")).strip_edges()
+	if planning_state.has("mission_drop_pilot_display_name"):
+		_mission_drop_pilot_display_name = String(planning_state.get("mission_drop_pilot_display_name", "")).strip_edges()
+	if planning_state.has("mission_drop_pilot_portrait_path"):
+		_mission_drop_pilot_portrait_path = String(planning_state.get("mission_drop_pilot_portrait_path", "")).strip_edges()
+	if planning_state.has("mission_drop_passenger_count"):
+		_mission_drop_passenger_count = maxi(int(planning_state.get("mission_drop_passenger_count", 0)), 0)
+	if planning_state.has("mission_drop_return_requested"):
+		_mission_drop_return_requested = bool(planning_state.get("mission_drop_return_requested", false))
 	if planning_state.has("embarked_unit_ids"):
 		_embarked_unit_ids = _build_drop_unit_state_dict(Array(planning_state.get("embarked_unit_ids", [])))
 	if planning_state.has("deployed_unit_ids"):
@@ -458,6 +490,16 @@ func get_planning_state() -> Dictionary:
 		"approach_angle": _get_approach_angle_name(),
 		"drop_ship_requested": _drop_ship_requested,
 		"drop_ship_staged": _drop_ship_staged,
+		"mission_drop_craft_id": _mission_drop_craft_id,
+		"mission_drop_display_name": _mission_drop_display_name,
+		"mission_drop_state": _mission_drop_state,
+		"mission_drop_progress": _mission_drop_progress,
+		"mission_drop_eta_seconds": _mission_drop_eta_seconds,
+		"mission_drop_pilot_unit_id": _mission_drop_pilot_unit_id,
+		"mission_drop_pilot_display_name": _mission_drop_pilot_display_name,
+		"mission_drop_pilot_portrait_path": _mission_drop_pilot_portrait_path,
+		"mission_drop_passenger_count": _mission_drop_passenger_count,
+		"mission_drop_return_requested": _mission_drop_return_requested,
 		"embarked_unit_ids": _build_sorted_drop_unit_id_array(_embarked_unit_ids),
 		"deployed_unit_ids": _build_sorted_drop_unit_id_array(_deployed_unit_ids),
 		"selected_fireteam": _get_fireteam_name(),
@@ -874,6 +916,10 @@ func _on_call_dropship_pressed() -> void:
 		_last_command_text = "OBSERVER MODE"
 		_update_ui()
 		return
+	if not _is_mission_drop_available():
+		_last_command_text = "DROP SHIP NOT ON MISSION MAP"
+		_update_ui()
+		return
 	if not preview_mode and _drop_ship_cooldown_remaining > 0.0:
 		_last_command_text = "DROP COOLDOWN %.1FS" % _drop_ship_cooldown_remaining
 		_update_ui()
@@ -883,14 +929,15 @@ func _on_call_dropship_pressed() -> void:
 		_update_ui()
 		return
 	_drop_ship_staged = true
+	_mission_drop_return_requested = false
 	if preview_mode:
 		_drop_ship_requested = true
-		_last_command_text = "DROP SHIP CALLED %s" % _get_approach_angle_name()
+		_last_command_text = "DROP %s" % _get_approach_angle_name()
 	elif _is_drop_sequence_active():
 		_last_command_text = "DROP ALREADY ACTIVE"
 	elif _try_start_drop_sequence():
 		_drop_ship_requested = true
-		_last_command_text = "DROP SHIP INBOUND %s" % _get_approach_angle_name()
+		_last_command_text = "DROP INBOUND %s" % _get_approach_angle_name()
 	else:
 		_drop_ship_requested = false
 		_last_command_text = "NO DROP TEAM AVAILABLE"
@@ -1057,6 +1104,8 @@ func _update_ui() -> void:
 		fireteam_status_label.text = _build_fireteam_status_text()
 	_refresh_fireteam_status_panel()
 	_refresh_fireteam_phase_panel()
+	_refresh_mission_nav_timer_label()
+	_refresh_mission_dropship_panel()
 
 	var strategic_status_label := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicStatusLabel") as Label
 	if strategic_status_label != null:
@@ -1095,7 +1144,7 @@ func _update_ui() -> void:
 				DROP_SEQUENCE_COMPLETE:
 					call_dropship_button.text = "Drop Complete"
 				_:
-					call_dropship_button.text = "Drop Planned" if _drop_ship_requested else "Call Drop"
+					call_dropship_button.text = "Drop Planned" if _drop_ship_requested else "Drop"
 
 	_apply_compact_mission_control_layout()
 	_refresh_dynamic_button_styles()
@@ -1787,7 +1836,13 @@ func _build_fireteam_status_text() -> String:
 func _build_strategic_status_text() -> String:
 	var lz_text: String = "LZ offen" if not _has_lz_position else "LZ %s" % _format_world_position(_lz_position)
 	var ship_text: String = "Drop wartend"
-	if _drop_ship_staged and not _drop_ship_requested and _drop_sequence_phase.is_empty():
+	if _mission_drop_state == "to_mission":
+		ship_text = "Dropship unterwegs zur Mission (%ds)" % _mission_drop_eta_seconds
+	elif _mission_drop_state == "waiting":
+		ship_text = "Dropship wartet auf Mission-Map"
+	elif _mission_drop_state == "to_fob":
+		ship_text = "Dropship Rueckflug zur FOB (%ds)" % _mission_drop_eta_seconds
+	if _mission_drop_state.is_empty() and _drop_ship_staged and not _drop_ship_requested and _drop_sequence_phase.is_empty():
 		ship_text = "Dropship staged off-map"
 	if _drop_ship_requested:
 		ship_text = "Drop aus %s angefordert" % _get_approach_angle_name()
@@ -1827,6 +1882,168 @@ func _build_mission_time_limit_text() -> String:
 	var minutes: int = int(floor(remaining_seconds / 60.0))
 	var seconds: int = int(remaining_seconds) % 60
 	return "Time %02d:%02d" % [minutes, seconds]
+
+
+func _is_mission_drop_available() -> bool:
+	if _mission_drop_state == "waiting":
+		return true
+	if _drop_ship_staged and _mission_drop_craft_id.is_empty():
+		return true
+	return _mission_drop_craft_id.is_empty() and not _embarked_unit_ids.is_empty() and _deployed_unit_ids.is_empty()
+
+
+func _load_portrait_texture(portrait_path: String) -> Texture2D:
+	if portrait_path.strip_edges().is_empty():
+		return null
+	var resource: Resource = load(portrait_path)
+	return resource as Texture2D
+
+
+func _ensure_mission_nav_timer_label() -> void:
+	var nav_row := get_node_or_null("../TacticalUI/TopNavPanel/NavMargin/NavRow") as HBoxContainer
+	if nav_row == null:
+		return
+	var timer_label := nav_row.get_node_or_null("MissionTimerLabel") as Label
+	if timer_label == null:
+		timer_label = Label.new()
+		timer_label.name = "MissionTimerLabel"
+		timer_label.custom_minimum_size = Vector2(44.0, 0.0)
+		timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		timer_label.add_theme_font_size_override("font_size", 8)
+		nav_row.add_child(timer_label)
+
+
+func _refresh_mission_nav_timer_label() -> void:
+	var timer_label := get_node_or_null("../TacticalUI/TopNavPanel/NavMargin/NavRow/MissionTimerLabel") as Label
+	if timer_label == null:
+		return
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver != null and combat_driver.has_method("get_remaining_time_limit_seconds"):
+		var remaining_seconds: float = float(combat_driver.call("get_remaining_time_limit_seconds"))
+		if remaining_seconds >= 0.0:
+			var total_seconds: int = maxi(int(round(remaining_seconds)), 0)
+			timer_label.text = "%02d:%02d" % [total_seconds / 60, total_seconds % 60]
+			return
+	timer_label.text = "--:--"
+
+
+func _ensure_mission_dropship_panel() -> void:
+	var strategic_vbox := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox") as VBoxContainer
+	if strategic_vbox == null:
+		return
+	var panel := strategic_vbox.get_node_or_null("MissionDropshipPanel") as PanelContainer
+	if panel != null:
+		return
+	panel = PanelContainer.new()
+	panel.name = "MissionDropshipPanel"
+	panel.visible = false
+	strategic_vbox.add_child(panel)
+	strategic_vbox.move_child(panel, 1)
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 8)
+	margin.add_theme_constant_override("margin_top", 8)
+	margin.add_theme_constant_override("margin_right", 8)
+	margin.add_theme_constant_override("margin_bottom", 8)
+	panel.add_child(margin)
+
+	var row := HBoxContainer.new()
+	row.name = "Row"
+	row.add_theme_constant_override("separation", 6)
+	margin.add_child(row)
+
+	var ship_texture := TextureRect.new()
+	ship_texture.name = "ShipTexture"
+	ship_texture.custom_minimum_size = Vector2(56.0, 36.0)
+	ship_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	ship_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	row.add_child(ship_texture)
+
+	var pilot_texture := TextureRect.new()
+	pilot_texture.name = "PilotTexture"
+	pilot_texture.custom_minimum_size = Vector2(28.0, 28.0)
+	pilot_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	pilot_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	row.add_child(pilot_texture)
+
+	var info_vbox := VBoxContainer.new()
+	info_vbox.name = "InfoVBox"
+	info_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info_vbox.add_theme_constant_override("separation", 2)
+	row.add_child(info_vbox)
+
+	for label_name in ["TitleLabel", "PilotLabel", "PassengerLabel", "StatusLabel"]:
+		var info_label := Label.new()
+		info_label.name = label_name
+		info_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		info_label.add_theme_font_size_override("font_size", 8 if label_name == "StatusLabel" else 9)
+		info_vbox.add_child(info_label)
+
+	var progress_bar := ProgressBar.new()
+	progress_bar.name = "ProgressBar"
+	progress_bar.min_value = 0.0
+	progress_bar.max_value = 100.0
+	progress_bar.show_percentage = false
+	progress_bar.custom_minimum_size = Vector2(0.0, 8.0)
+	info_vbox.add_child(progress_bar)
+
+
+func _refresh_mission_dropship_panel() -> void:
+	var panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/MissionDropshipPanel") as PanelContainer
+	if panel == null:
+		return
+	var show_panel: bool = not _mission_drop_craft_id.is_empty() or _is_drop_sequence_active()
+	panel.visible = show_panel
+	if not show_panel:
+		return
+	var ship_texture := panel.get_node_or_null("MarginContainer/Row/ShipTexture") as TextureRect
+	var pilot_texture := panel.get_node_or_null("MarginContainer/Row/PilotTexture") as TextureRect
+	var title_label := panel.get_node_or_null("MarginContainer/Row/InfoVBox/TitleLabel") as Label
+	var pilot_label := panel.get_node_or_null("MarginContainer/Row/InfoVBox/PilotLabel") as Label
+	var passenger_label := panel.get_node_or_null("MarginContainer/Row/InfoVBox/PassengerLabel") as Label
+	var status_label := panel.get_node_or_null("MarginContainer/Row/InfoVBox/StatusLabel") as Label
+	var progress_bar := panel.get_node_or_null("MarginContainer/Row/InfoVBox/ProgressBar") as ProgressBar
+	if ship_texture != null:
+		ship_texture.texture = _get_dropship_marker_texture()
+	if pilot_texture != null:
+		pilot_texture.texture = _load_portrait_texture(_mission_drop_pilot_portrait_path)
+		pilot_texture.visible = pilot_texture.texture != null
+	if title_label != null:
+		title_label.text = _mission_drop_display_name if not _mission_drop_display_name.is_empty() else "Dropship"
+	if pilot_label != null:
+		pilot_label.text = "Pilot: %s" % ( _mission_drop_pilot_display_name if not _mission_drop_pilot_display_name.is_empty() else "unassigned")
+	if passenger_label != null:
+		var passenger_count: int = _mission_drop_passenger_count if _mission_drop_passenger_count > 0 else _embarked_unit_ids.size()
+		passenger_label.text = "Passengers: %d" % passenger_count
+	if status_label != null:
+		status_label.text = _build_mission_dropship_status_text()
+	if progress_bar != null:
+		progress_bar.value = _mission_drop_progress
+		progress_bar.visible = _mission_drop_state == "to_mission" or _mission_drop_state == "to_fob"
+
+
+func _build_mission_dropship_status_text() -> String:
+	if _is_drop_sequence_active():
+		match _drop_sequence_phase:
+			DROP_SEQUENCE_INBOUND:
+				return "Inbound to LZ"
+			DROP_SEQUENCE_LANDED:
+				return "Landed at LZ"
+			DROP_SEQUENCE_UNLOADING:
+				return "Dropping %d/%d" % [_drop_sequence_unit_index, _drop_sequence_units.size()]
+			DROP_SEQUENCE_OUTBOUND:
+				return "Leaving mission map"
+			DROP_SEQUENCE_COMPLETE:
+				return "Drop complete"
+	match _mission_drop_state:
+		"waiting":
+			return "Holding on mission map"
+		"to_mission":
+			return "ETA mission map %ds" % _mission_drop_eta_seconds
+		"to_fob":
+			return "Returning to FOB %ds" % _mission_drop_eta_seconds
+		_:
+			return "Mission transport offline"
 
 
 func _build_phase_list_text() -> String:
@@ -1932,7 +2149,7 @@ func _refresh_button_state() -> void:
 
 	var call_dropship_button := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton") as BaseButton
 	if call_dropship_button != null:
-		call_dropship_button.disabled = not _can_edit_planning() or (not preview_mode and _drop_ship_cooldown_remaining > 0.0)
+		call_dropship_button.disabled = not _can_edit_planning() or not _is_mission_drop_available() or (not preview_mode and _drop_ship_cooldown_remaining > 0.0)
 
 	var next_phase_button := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/NextPhaseButton") as BaseButton
 	if next_phase_button != null:
@@ -1973,6 +2190,22 @@ func _refresh_world_overlays() -> void:
 
 
 func _apply_compact_mission_control_layout() -> void:
+	var top_nav_panel := get_node_or_null("../TacticalUI/TopNavPanel") as Control
+	if top_nav_panel != null:
+		top_nav_panel.offset_right = 332.0
+	for path in [
+		"../TacticalUI/TopNavPanel/NavMargin/NavRow/HomebaseNavButton",
+		"../TacticalUI/TopNavPanel/NavMargin/NavRow/FOBNavButton",
+		"../TacticalUI/TopNavPanel/NavMargin/NavRow/MissionNavButton",
+	]:
+		var nav_button := get_node_or_null(path) as Button
+		if nav_button == null:
+			continue
+		nav_button.custom_minimum_size = Vector2(60.0, 22.0)
+		nav_button.add_theme_font_size_override("font_size", 8)
+	var nav_timer_label := get_node_or_null("../TacticalUI/TopNavPanel/NavMargin/NavRow/MissionTimerLabel") as Label
+	if nav_timer_label != null:
+		nav_timer_label.custom_minimum_size = Vector2(40.0, 0.0)
 	var bottom_dock := get_node_or_null("../TacticalUI/BottomDock") as Control
 	if bottom_dock != null:
 		bottom_dock.offset_top = -254.0
@@ -4118,6 +4351,9 @@ func _update_drop_sequence(delta: float) -> void:
 				_drop_ship_cooldown_remaining = DROP_SHIP_RECALL_COOLDOWN_SECONDS
 				_drop_ship_requested = false
 				_drop_ship_staged = false
+				_mission_drop_state = "to_fob"
+				_mission_drop_progress = 0.0
+				_mission_drop_return_requested = true
 				_drop_sequence_position = Vector2.ZERO
 				_drop_sequence_phase = ""
 				_drop_sequence_units = []

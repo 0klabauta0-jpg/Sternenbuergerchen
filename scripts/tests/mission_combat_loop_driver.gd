@@ -60,6 +60,7 @@ signal combat_resolved(mission_result: Dictionary)
 @export var win_condition: String = WIN_CONDITION_ELIMINATION
 @export var objective_defense_hold_seconds: float = 8.0
 @export var mission_time_limit_seconds: float = 0.0
+@export var mission_timer_started_at_msec: int = 0
 @export var simulation_root_path: NodePath
 @export var status_label_path: NodePath
 @export var friendly_unit_paths: Array[NodePath] = []
@@ -121,7 +122,7 @@ func _ready() -> void:
 		_apply_overlay_visibility()
 	else:
 		call_deferred("_finish_readability_setup")
-	_mission_started_at_msec = Time.get_ticks_msec()
+	_mission_started_at_msec = mission_timer_started_at_msec if mission_timer_started_at_msec != 0 else Time.get_ticks_msec()
 
 	if _runs_local_authority and not simulation_root.tick_processed.is_connected(_on_tick_processed):
 		simulation_root.tick_processed.connect(_on_tick_processed)
@@ -1677,7 +1678,7 @@ func _get_enemy_team_id() -> String:
 
 
 func _get_duration_seconds() -> float:
-	if _mission_started_at_msec <= 0:
+	if _mission_started_at_msec == 0:
 		return 0.0
 
 	return maxf(float(Time.get_ticks_msec() - _mission_started_at_msec) / 1000.0, 0.0)
