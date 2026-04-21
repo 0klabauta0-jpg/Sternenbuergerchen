@@ -18,6 +18,7 @@ func _run_tests() -> void:
 	await _test_fob_refresh_preserves_boarded_units()
 	await _test_shipcard_start_dispatches_boarded_craft_without_full_team_boarded()
 	await _test_fob_header_start_is_hidden()
+	await _test_homebase_start_button_lives_in_header()
 	await _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting()
 	await _test_mission_start_requires_boarded_team()
 	await _test_homebase_timer_label_switches_from_idle_to_countdown()
@@ -192,6 +193,19 @@ func _test_fob_header_start_is_hidden() -> void:
 	await process_frame
 
 
+func _test_homebase_start_button_lives_in_header() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	for _frame in range(2):
+		await process_frame
+	var start_button := scene.get_node("HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/StartMissionButton") as Button
+	var old_start_button := scene.get_node_or_null("HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/StartMissionButton") as Button
+	_assert(start_button != null, "Homebase start button sits in the header row")
+	_assert(old_start_button == null, "Homebase mission info row no longer owns a duplicate start button")
+	scene.queue_free()
+	await process_frame
+
+
 func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> void:
 	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
 	root.add_child(scene)
@@ -264,7 +278,7 @@ func _test_mission_start_requires_boarded_team() -> void:
 
 	var homebase_screen: Control = scene.get_node("HomebaseScreen")
 	var fob_screen: Control = scene.get_node("FOBScreen")
-	var start_button := scene.get_node("HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/StartMissionButton") as Button
+	var start_button := scene.get_node("HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/StartMissionButton") as Button
 	var selected_unit_ids := PackedStringArray(["unit_alpha", "unit_bravo", "unit_delta"])
 	var selected_fireteam_ids := PackedStringArray(["blue", "blue", "blue"])
 	var fireteam_definitions := [

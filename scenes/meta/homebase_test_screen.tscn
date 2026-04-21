@@ -67,6 +67,12 @@ size_flags_horizontal = 3
 layout_mode = 2
 theme_override_constants/separation = 3
 
+[node name="StartMissionButton" type="Button" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 18)
+text = "Start"
+theme_override_font_sizes/font_size = 8
+
 [node name="HeaderSpacer" type="Control" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -103,12 +109,6 @@ theme_override_font_sizes/font_size = 11
 layout_mode = 2
 theme_override_constants/separation = 6
 size_flags_horizontal = 3
-
-[node name="StartMissionButton" type="Button" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow"]
-layout_mode = 2
-custom_minimum_size = Vector2(56, 24)
-text = "Start"
-theme_override_font_sizes/font_size = 8
 
 [node name="MissionNameLabel" type="Label" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow"]
 layout_mode = 2
