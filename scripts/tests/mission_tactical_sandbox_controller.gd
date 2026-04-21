@@ -464,6 +464,10 @@ func get_planning_state() -> Dictionary:
 	return planning_state
 
 
+func has_pending_friendly_insertions() -> bool:
+	return not _embarked_unit_ids.is_empty()
+
+
 func add_global_phase() -> int:
 	var phase_controller = _get_phase_controller()
 	if phase_controller == null or not phase_controller.has_method("add_phase"):

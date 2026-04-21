@@ -16,6 +16,7 @@ func _run_tests() -> void:
 	print("=== Dropship Mission Bugfix Verifier ===")
 	await _test_fob_refresh_preserves_boarded_units()
 	await _test_meta_mission_uses_deferred_drop_state()
+	await _test_combat_loop_waits_for_pending_insertions()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	if _failed > 0:
 		print("FAIL")
@@ -111,6 +112,33 @@ func _test_meta_mission_uses_deferred_drop_state() -> void:
 	_assert(all_gold_hidden, "Non-dropped friendly units stay hidden on the mission map")
 	_assert(blue_drop_units.size() == 3, "Drop operation prefers the already embarked fireteam members")
 	_assert(String(tactical_controller.get("_drop_sequence_phase")) == "inbound", "Calling the dropship starts the live inbound sequence for embarked units")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_combat_loop_waits_for_pending_insertions() -> void:
+	var scene: Node = MISSION_TEST_SCENE.instantiate()
+	var mission_setup: Node = scene.get_node("MissionSetup")
+	mission_setup.set("defer_friendly_runtime_activation", true)
+	var tactical_controller: Node = scene.get_node("TacticalController")
+	var combat_driver: Node = scene.get_node("CombatLoopDriver")
+	tactical_controller.call(
+		"set_planning_state",
+		{
+			"has_lz_position": true,
+			"lz_position": Vector2(320.0, 180.0),
+			"selected_fireteam": "BLUE",
+			"selected_fireteams": ["blue"],
+			"embarked_unit_ids": ["unit_alpha", "unit_bravo", "unit_delta"],
+			"deployed_unit_ids": [],
+		}
+	)
+	root.add_child(scene)
+	for _frame in range(24):
+		await process_frame
+
+	var mission_result: Dictionary = Dictionary(combat_driver.call("get_mission_result"))
+	_assert(mission_result.is_empty(), "Combat loop does not resolve defeat while friendly insertions are still pending")
 	scene.queue_free()
 	await process_frame
 

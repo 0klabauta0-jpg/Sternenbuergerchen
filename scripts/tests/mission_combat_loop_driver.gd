@@ -384,6 +384,9 @@ func _update_combat_resolution() -> void:
 	if _count_fit_units(friendly_unit_paths) > 0:
 		return
 
+	if _has_pending_friendly_insertions():
+		return
+
 	_resolve_combat("defeat", _get_enemy_team_id())
 
 
@@ -1858,6 +1861,13 @@ func _get_active_enemy_units() -> Array:
 		active_units.append(enemy)
 
 	return active_units
+
+
+func _has_pending_friendly_insertions() -> bool:
+	var tactical_controller = _get_tactical_controller()
+	if tactical_controller != null and tactical_controller.has_method("has_pending_friendly_insertions"):
+		return bool(tactical_controller.call("has_pending_friendly_insertions"))
+	return false
 
 
 func _get_unit_registry():
