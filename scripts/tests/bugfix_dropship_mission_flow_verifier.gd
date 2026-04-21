@@ -16,6 +16,7 @@ func _init() -> void:
 func _run_tests() -> void:
 	print("=== Dropship Mission Bugfix Verifier ===")
 	await _test_fob_refresh_preserves_boarded_units()
+	await _test_shipcard_start_dispatches_boarded_craft_without_full_team_boarded()
 	await _test_mission_start_requires_boarded_team()
 	await _test_mission_timer_uses_explicit_start_timestamp()
 	await _test_dropship_returns_to_fob_after_drop()
@@ -118,6 +119,62 @@ func _test_meta_mission_uses_deferred_drop_state() -> void:
 	_assert(all_gold_hidden, "Non-dropped friendly units stay hidden on the mission map")
 	_assert(blue_drop_units.size() == 3, "Drop operation prefers the already embarked fireteam members")
 	_assert(String(tactical_controller.get("_drop_sequence_phase")) == "inbound", "Calling the dropship starts the live inbound sequence for embarked units")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_shipcard_start_dispatches_boarded_craft_without_full_team_boarded() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	for _frame in range(4):
+		await process_frame
+
+	var fob_screen: Control = scene.get_node("FOBScreen")
+	var selected_unit_ids := PackedStringArray(["unit_alpha", "unit_bravo", "unit_delta", "unit_echo"])
+	var selected_fireteam_ids := PackedStringArray(["blue", "blue", "blue", "gold"])
+	var fireteam_definitions := [
+		{
+			"id": "blue",
+			"label": "BLUE",
+			"lead_unit_id": "unit_alpha",
+			"respawn_enabled": false,
+			"loadout": "medium",
+		},
+		{
+			"id": "gold",
+			"label": "GOLD",
+			"lead_unit_id": "unit_echo",
+			"respawn_enabled": false,
+			"loadout": "medium",
+		}
+	]
+	scene.set(
+		"_homebase_aircraft_definitions",
+		[
+			{
+				"craft_id": "dropship_test",
+				"display_name": "Dropship Test",
+				"craft_type": "dropship",
+				"texture_path": "res://Assets/kenney_space-kit/Side/craft_speederB.png",
+			}
+		]
+	)
+	scene.set("_assigned_aircraft_pilot_by_craft", {"dropship_test": "unit_hotel"})
+	scene.set("_aircraft_location_by_craft", {"dropship_test": "fob"})
+	scene.set("_selected_unit_ids", selected_unit_ids)
+	scene.set("_selected_fireteam_ids", selected_fireteam_ids)
+	scene.call("_refresh_fob_screen")
+	fob_screen.call("configure_transfer", selected_unit_ids, selected_fireteam_ids, fireteam_definitions)
+	fob_screen.set("_dropship_transport_craft_id", "dropship_test")
+	fob_screen.set("_dropship_phase", "boarded")
+	fob_screen.set("_boarded_unit_ids", PackedStringArray(["unit_alpha", "unit_bravo", "unit_delta"]))
+	fob_screen.set("_boarded_fireteam_ids", PackedStringArray(["blue"]))
+
+	var craft_state: Dictionary = Dictionary(fob_screen.call("_get_transport_craft_state", "dropship_test"))
+	_assert(bool(fob_screen.call("_can_mark_transport_craft_launch_ready", craft_state)), "Shipcard start becomes available once this craft has boarded passengers")
+	fob_screen.call("_on_transport_craft_mission_stage_requested", "dropship_test")
+	var pending_transfers: Array = Array(scene.get("_pending_mission_craft_transfers"))
+	_assert(pending_transfers.size() == 1, "Shipcard start dispatches the boarded craft even when other selected operators stay behind")
 	scene.queue_free()
 	await process_frame
 

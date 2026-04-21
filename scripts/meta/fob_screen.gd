@@ -222,7 +222,7 @@ func clear_last_mission_result() -> void:
 
 
 func request_mission_start() -> void:
-	if not _is_mission_ready_for_launch():
+	if not can_request_mission_start():
 		return
 
 	mission_start_requested.emit(get_team(), get_selected_fireteam_ids())
@@ -266,6 +266,10 @@ func _is_mission_ready_for_launch() -> bool:
 		if not _boarded_unit_ids.has(unit_id):
 			return false
 	return true
+
+
+func _has_boarded_mission_payload() -> bool:
+	return not _boarded_unit_ids.is_empty()
 
 
 func build_mission_drop_state() -> Dictionary:
@@ -2407,9 +2411,11 @@ func _can_stage_fireteam_into_craft(craft_state: Dictionary, fireteam_id: String
 func _can_mark_transport_craft_launch_ready(craft_state: Dictionary) -> bool:
 	if craft_state.is_empty():
 		return false
-	if not _is_mission_ready_for_launch():
+	if not _has_boarded_mission_payload():
 		return false
 	if String(craft_state.get("craft_id", "")).strip_edges() != _dropship_transport_craft_id:
+		return false
+	if not bool(craft_state.get("is_boardable", false)):
 		return false
 	return not bool(craft_state.get("mission_waiting", false)) and not bool(craft_state.get("mission_transit_to_map", false)) and not bool(craft_state.get("mission_transit_to_fob", false))
 
@@ -2417,7 +2423,7 @@ func _can_mark_transport_craft_launch_ready(craft_state: Dictionary) -> bool:
 func _can_request_homebase_mission_start(craft_state: Dictionary) -> bool:
 	if craft_state.is_empty():
 		return false
-	if not _is_mission_ready_for_launch():
+	if not _has_boarded_mission_payload():
 		return false
 	return bool(craft_state.get("mission_waiting", false))
 
