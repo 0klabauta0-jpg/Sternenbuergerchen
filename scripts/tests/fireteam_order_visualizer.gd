@@ -11,6 +11,7 @@ var _phase_index: int = 0
 var _selected_fireteam_ids: PackedStringArray = []
 var _plan_dicts: Array = []
 var _visible_waypoints: Array = []
+var _ad_hoc_order_dicts: Array = []
 
 
 func set_phase_index(phase_index: int) -> void:
@@ -29,6 +30,15 @@ func set_plan_dicts(plan_dicts: Array) -> void:
 		if typeof(plan_variant) == TYPE_DICTIONARY:
 			_plan_dicts.append(Dictionary(plan_variant).duplicate(true))
 	_rebuild_cache()
+
+
+func set_ad_hoc_order_dicts(ad_hoc_order_dicts: Array) -> void:
+	_ad_hoc_order_dicts = []
+	for order_variant in ad_hoc_order_dicts:
+		if typeof(order_variant) != TYPE_DICTIONARY:
+			continue
+		_ad_hoc_order_dicts.append(Dictionary(order_variant).duplicate(true))
+	queue_redraw()
 
 
 func get_visible_waypoints() -> Array:
@@ -52,6 +62,7 @@ func _draw() -> void:
 		if plan == null or not plan.is_valid() or int(plan.phase) != _phase_index:
 			continue
 		_draw_plan(plan)
+	_draw_ad_hoc_orders()
 
 
 func _draw_plan(plan) -> void:
@@ -104,6 +115,41 @@ func _draw_waypoint_symbol(position: Vector2, command_type: String, marker_color
 	draw_circle(position, 4.0, index_color)
 	if index > 0:
 		draw_circle(position + Vector2(8.0, -8.0), 3.0, index_color)
+
+
+func _draw_ad_hoc_orders() -> void:
+	for order_dict in _ad_hoc_order_dicts:
+		var fireteam_id: String = String(order_dict.get("fireteam_id", "")).strip_edges().to_lower()
+		var anchor_position: Vector2 = Vector2(order_dict.get("anchor_position", Vector2.ZERO))
+		var target_position: Vector2 = Vector2(order_dict.get("target_position", anchor_position))
+		var base_color: Color = _get_fireteam_color(fireteam_id)
+		var edge_color: Color = base_color
+		var ad_hoc_color := Color(0.96, 0.96, 0.96, 0.95)
+		_draw_dashed_line(anchor_position, target_position, ad_hoc_color, 3.0)
+		draw_circle(target_position, 10.0, ad_hoc_color)
+		draw_arc(target_position, 11.5, 0.0, TAU, 24, edge_color, 2.0)
+		draw_circle(anchor_position, 6.0, ad_hoc_color)
+		draw_arc(anchor_position, 7.5, 0.0, TAU, 24, edge_color, 2.0)
+		var label_text: String = String(order_dict.get("label", "AD-HOC")).strip_edges()
+		var fallback_font: Font = ThemeDB.fallback_font
+		if fallback_font != null and not label_text.is_empty():
+			draw_string(fallback_font, target_position + Vector2(14.0, -8.0), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 12, Color(0.95, 0.95, 0.95, 0.92))
+
+
+func _draw_dashed_line(from_point: Vector2, to_point: Vector2, line_color: Color, width: float) -> void:
+	var delta: Vector2 = to_point - from_point
+	var length: float = delta.length()
+	if length <= 1.0:
+		return
+	var direction: Vector2 = delta / length
+	var step: float = 16.0
+	var dash: float = 9.0
+	var cursor: float = 0.0
+	while cursor < length:
+		var start_point: Vector2 = from_point + direction * cursor
+		var end_point: Vector2 = from_point + direction * minf(cursor + dash, length)
+		draw_line(start_point, end_point, line_color, width, true)
+		cursor += step
 
 
 func _rebuild_cache() -> void:
