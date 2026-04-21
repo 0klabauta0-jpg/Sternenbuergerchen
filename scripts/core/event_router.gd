@@ -11,6 +11,7 @@ signal suppression_changed(fireteam_id, suppression_data)
 signal return_to_plan_requested(fireteam_id, reason)
 signal fireteam_coordination_requested(coordination_data)
 signal fireteam_ready_to_advance(fireteam_id, coordination_id)
+signal fireteam_bound_complete(fireteam_id, bound_data)
 signal leader_initiated_flank(fireteam_id, leader, flank_data)
 
 
@@ -104,6 +105,17 @@ func notify_fireteam_ready_to_advance(fireteam_id: String, coordination_id: Stri
 		push_warning("EventRouter.notify_fireteam_ready_to_advance expects a non-empty fireteam_id.")
 		return
 	fireteam_ready_to_advance.emit(normalized_fireteam_id, coordination_id.strip_edges())
+
+
+func notify_fireteam_bound_complete(fireteam_id: String, bound_data: Dictionary) -> void:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		push_warning("EventRouter.notify_fireteam_bound_complete expects a non-empty fireteam_id.")
+		return
+	if bound_data.is_empty():
+		push_warning("EventRouter.notify_fireteam_bound_complete expects a non-empty payload.")
+		return
+	fireteam_bound_complete.emit(normalized_fireteam_id, bound_data.duplicate(true))
 
 
 func notify_leader_initiated_flank(fireteam_id: String, leader: Node, flank_data: Dictionary) -> void:
