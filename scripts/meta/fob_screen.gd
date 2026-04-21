@@ -61,6 +61,7 @@ var _mission_slot_count: int = DEFAULT_MISSION_SLOT_COUNT
 var _character_overlay_open: bool = false
 var _transport_craft_states: Array = []
 var _dropship_transport_craft_id: String = ""
+var _mission_launch_ready_craft_id: String = ""
 
 
 func _ready() -> void:
@@ -226,6 +227,19 @@ func request_mission_start() -> void:
 	mission_start_requested.emit(get_team(), get_selected_fireteam_ids())
 
 
+func can_request_mission_start() -> bool:
+	return _can_mark_transport_craft_launch_ready(_get_transport_craft_state(_mission_launch_ready_craft_id))
+
+
+func get_mission_launch_summary() -> String:
+	if not can_request_mission_start():
+		return "Board complete in FOB, then press Start on the dropship card."
+	var craft_name: String = String(_get_transport_craft_state(_mission_launch_ready_craft_id).get("display_name", "Dropship")).strip_edges()
+	if craft_name.is_empty():
+		craft_name = "Dropship"
+	return "%s staged off-map and ready for Homebase launch." % craft_name
+
+
 func _is_mission_ready_for_launch() -> bool:
 	if _selected_unit_ids.is_empty():
 		return false
@@ -245,6 +259,8 @@ func build_mission_drop_state() -> Dictionary:
 		"queued_fireteam_ids": Array(_dropship_staged_fireteam_ids),
 		"boarded_fireteam_ids": Array(_boarded_fireteam_ids),
 		"embarked_unit_ids": Array(_boarded_unit_ids),
+		"launch_ready_craft_id": _mission_launch_ready_craft_id,
+		"drop_ship_staged": can_request_mission_start(),
 	}
 
 
@@ -386,7 +402,8 @@ func _update_brief_panel() -> void:
 	fireteam_status_label.text = "Mission: %s" % _mission_name
 	dropship_status_label.text = "Map: %s" % _mission_map_name
 	mission_summary_label.text = "Operators: %d | Pilots: %d | Fireteams: %d active | %s" % [_selected_unit_ids.size(), pilot_count, _count_fireteams_with_members(), _build_dropship_status_text()]
-	start_button.disabled = not _is_mission_ready_for_launch()
+	start_button.text = "Start @ Home"
+	start_button.disabled = true
 
 
 func _render_available_operators() -> void:
@@ -1087,6 +1104,7 @@ func _restart_dropship_cycle() -> void:
 	_boarding_member_index = 0
 	_current_boarding_unit_id = ""
 	_boarding_seconds = 0.0
+	_mission_launch_ready_craft_id = ""
 
 	if _selected_unit_ids.is_empty() or _boarding_order.is_empty():
 		_dropship_phase = "idle"
@@ -2063,11 +2081,16 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 	header_row.add_child(title_label)
 
 	var select_button := Button.new()
-	select_button.text = "Focus" if not is_selected else "Focused"
+	var is_launch_ready: bool = _mission_launch_ready_craft_id == craft_id and can_request_mission_start()
+	select_button.text = "Started" if is_launch_ready else "Start"
 	select_button.custom_minimum_size = Vector2(58.0, 0.0)
 	select_button.add_theme_font_size_override("font_size", 8)
-	META_UI_SKIN_SCRIPT.style_secondary_button(select_button)
-	select_button.pressed.connect(_on_transport_craft_selected.bind(craft_id))
+	select_button.disabled = not is_launch_ready and not _can_mark_transport_craft_launch_ready(craft_state)
+	if is_launch_ready:
+		META_UI_SKIN_SCRIPT.style_transfer_button(select_button, true)
+	else:
+		META_UI_SKIN_SCRIPT.style_secondary_button(select_button)
+	select_button.pressed.connect(_on_transport_craft_mission_launch_requested.bind(craft_id))
 	header_row.add_child(select_button)
 
 	var content_row := HBoxContainer.new()
@@ -2311,11 +2334,30 @@ func _can_stage_fireteam_into_craft(craft_state: Dictionary, fireteam_id: String
 	return _has_transport_craft_capacity_for_fireteam(craft_state, fireteam_id)
 
 
+func _can_mark_transport_craft_launch_ready(craft_state: Dictionary) -> bool:
+	if craft_state.is_empty():
+		return false
+	if not _is_mission_ready_for_launch():
+		return false
+	return String(craft_state.get("craft_id", "")).strip_edges() == _dropship_transport_craft_id
+
+
 func _on_transport_craft_selected(craft_id: String) -> void:
 	var normalized_craft_id: String = craft_id.strip_edges()
 	if normalized_craft_id.is_empty():
 		return
 	_dropship_transport_craft_id = normalized_craft_id
+	_refresh_ui_state()
+
+
+func _on_transport_craft_mission_launch_requested(craft_id: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return
+	_dropship_transport_craft_id = normalized_craft_id
+	var craft_state: Dictionary = _get_transport_craft_state(normalized_craft_id)
+	if _can_mark_transport_craft_launch_ready(craft_state):
+		_mission_launch_ready_craft_id = normalized_craft_id
 	_refresh_ui_state()
 
 
@@ -2362,14 +2404,18 @@ func _trim_dropship_queue_to_capacity() -> void:
 func _sanitize_transport_craft_state() -> void:
 	var selected_craft_id: String = _dropship_transport_craft_id.strip_edges()
 	if selected_craft_id.is_empty():
+		_mission_launch_ready_craft_id = ""
 		return
 	var craft_state: Dictionary = _get_transport_craft_state(selected_craft_id)
 	if not craft_state.is_empty() and (bool(craft_state.get("visible_in_fob", false)) or bool(craft_state.get("is_in_transit", false))):
+		if not _can_mark_transport_craft_launch_ready(_get_transport_craft_state(_mission_launch_ready_craft_id)):
+			_mission_launch_ready_craft_id = ""
 		return
 	_dropship_transport_craft_id = ""
 	_dropship_staged_fireteam_ids = PackedStringArray()
 	_boarding_order = PackedStringArray()
 	_dropship_phase = "idle"
+	_mission_launch_ready_craft_id = ""
 
 
 func _build_fireteam_display_text(fireteam_id: String) -> String:

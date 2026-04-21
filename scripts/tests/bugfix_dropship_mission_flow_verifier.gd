@@ -19,6 +19,8 @@ func _run_tests() -> void:
 	await _test_mission_start_requires_boarded_team()
 	await _test_meta_mission_uses_deferred_drop_state()
 	await _test_combat_loop_waits_for_pending_insertions()
+	await _test_drop_ship_starts_far_outside_the_map()
+	await _test_mission_time_limit_resolves_defeat()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	if _failed > 0:
 		print("FAIL")
@@ -124,8 +126,9 @@ func _test_mission_start_requires_boarded_team() -> void:
 	for _frame in range(4):
 		await process_frame
 
+	var homebase_screen: Control = scene.get_node("HomebaseScreen")
 	var fob_screen: Control = scene.get_node("FOBScreen")
-	var start_button := scene.get_node("FOBScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/StartMissionButton") as Button
+	var start_button := scene.get_node("HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/StartMissionButton") as Button
 	var selected_unit_ids := PackedStringArray(["unit_alpha", "unit_bravo", "unit_delta"])
 	var selected_fireteam_ids := PackedStringArray(["blue", "blue", "blue"])
 	var fireteam_definitions := [
@@ -152,22 +155,25 @@ func _test_mission_start_requires_boarded_team() -> void:
 	fob_screen.call("configure_transfer", selected_unit_ids, selected_fireteam_ids, fireteam_definitions)
 	fob_screen.call("_queue_fireteam_for_dropship", "blue", "dropship_test")
 	fob_screen.call("_refresh_ui_state")
+	scene.call("_refresh_homebase_screen")
 
-	_assert(start_button != null and start_button.disabled, "FOB start button stays locked until the selected operators are boarded")
-	fob_screen.call("request_mission_start")
+	_assert(start_button != null and start_button.disabled, "Homebase start button stays locked until the dropship is launch-ready")
+	homebase_screen.call("request_mission_start")
 	for _frame in range(2):
 		await process_frame
-	_assert(scene.call("get_active_mission") == null, "FOB mission start does not launch a mission before boarding is complete")
+	_assert(scene.call("get_active_mission") == null, "Homebase mission start does not launch a mission before boarding is complete")
 
 	fob_screen.set("_dropship_phase", "boarded")
 	fob_screen.set("_boarded_unit_ids", selected_unit_ids)
 	fob_screen.set("_boarded_fireteam_ids", PackedStringArray(["blue"]))
+	fob_screen.call("_on_transport_craft_mission_launch_requested", "dropship_test")
 	fob_screen.call("_refresh_ui_state")
-	_assert(start_button != null and not start_button.disabled, "FOB start button unlocks once the selected operators are fully boarded")
-	fob_screen.call("request_mission_start")
+	scene.call("_refresh_homebase_screen")
+	_assert(start_button != null and not start_button.disabled, "Homebase start button unlocks once the boarded dropship is staged for mission launch")
+	homebase_screen.call("request_mission_start")
 	for _frame in range(4):
 		await process_frame
-	_assert(scene.call("get_active_mission") != null, "FOB mission start launches once a boarded team is available")
+	_assert(scene.call("get_active_mission") != null, "Homebase mission start launches once a boarded dropship is launch-ready")
 	scene.queue_free()
 	await process_frame
 
@@ -195,6 +201,54 @@ func _test_combat_loop_waits_for_pending_insertions() -> void:
 
 	var mission_result: Dictionary = Dictionary(combat_driver.call("get_mission_result"))
 	_assert(mission_result.is_empty(), "Combat loop does not resolve defeat while friendly insertions are still pending")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_drop_ship_starts_far_outside_the_map() -> void:
+	var scene: Node = MISSION_TEST_SCENE.instantiate()
+	var mission_setup: Node = scene.get_node("MissionSetup")
+	mission_setup.set("defer_friendly_runtime_activation", true)
+	var tactical_controller: Node = scene.get_node("TacticalController")
+	tactical_controller.call(
+		"set_planning_state",
+		{
+			"has_lz_position": true,
+			"lz_position": Vector2(448.0, 413.0),
+			"selected_fireteam": "BLUE",
+			"selected_fireteams": ["blue"],
+			"drop_ship_staged": true,
+			"embarked_unit_ids": ["unit_alpha", "unit_bravo", "unit_delta"],
+			"deployed_unit_ids": [],
+		}
+	)
+	root.add_child(scene)
+	for _frame in range(8):
+		await process_frame
+
+	var start_position: Vector2 = Vector2(tactical_controller.call("_get_drop_staging_position"))
+	var lz_position: Vector2 = Vector2(tactical_controller.get("_lz_position"))
+	var map_bounds: Rect2 = Rect2(tactical_controller.call("_get_map_world_bounds"))
+	var required_distance: float = maxf(maxf(map_bounds.size.x, map_bounds.size.y) * 2.0, 720.0)
+	_assert(start_position.distance_to(lz_position) >= required_distance - 1.0, "Dropship staging starts at least two map-widths away from the LZ")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_mission_time_limit_resolves_defeat() -> void:
+	var scene: Node = MISSION_TEST_SCENE.instantiate()
+	var mission_setup: Node = scene.get_node("MissionSetup")
+	mission_setup.set("defer_friendly_runtime_activation", false)
+	var combat_driver: Node = scene.get_node("CombatLoopDriver")
+	combat_driver.set("mission_time_limit_seconds", 1.0)
+	root.add_child(scene)
+	for _frame in range(8):
+		await process_frame
+	combat_driver.set("_mission_started_at_msec", Time.get_ticks_msec() - 2500)
+	combat_driver.call("_update_combat_resolution")
+	var mission_result: Dictionary = Dictionary(combat_driver.call("get_mission_result"))
+	_assert(String(mission_result.get("result", "")) == "defeat", "Mission time limit resolves the mission as a defeat once the timer expires")
+	_assert(String(mission_result.get("win_condition_type", "")) == "time_limit", "Mission result records the time limit as the resolution condition")
 	scene.queue_free()
 	await process_frame
 

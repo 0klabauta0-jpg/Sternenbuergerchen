@@ -12,24 +12,28 @@ const HOMEBASE_MISSION_CATALOG: Array = [
 		"mission_name": "Operation: FOB Transfer",
 		"map_file_path": "res://maps/test_mission_32x32_slots8.json",
 		"slot_count": 8,
+		"time_limit_seconds": 1200.0,
 	},
 	{
 		"mission_id": "grid_sweep",
 		"mission_name": "Operation: Grid Sweep",
 		"map_file_path": "res://maps/test_mission_32x32_slots8.json",
 		"slot_count": 3,
+		"time_limit_seconds": 1200.0,
 	},
 	{
 		"mission_id": "frontier_probe",
 		"mission_name": "Operation: Frontier Probe",
 		"map_file_path": "res://maps/new_map.json",
 		"slot_count": 3,
+		"time_limit_seconds": 1200.0,
 	},
 	{
 		"mission_id": "wall_breach",
 		"mission_name": "Operation: Wall Breach",
 		"map_file_path": "res://maps/wall_test_4x4.json",
 		"slot_count": 3,
+		"time_limit_seconds": 1200.0,
 	},
 ]
 const HOMEBASE_AIRCRAFT_BASE_DEFINITIONS: Dictionary = {
@@ -110,6 +114,8 @@ func _ready() -> void:
 		homebase_screen.selection_changed.connect(_on_homebase_selection_changed)
 	if not homebase_screen.team_confirmed.is_connected(_on_homebase_team_confirmed):
 		homebase_screen.team_confirmed.connect(_on_homebase_team_confirmed)
+	if not homebase_screen.mission_start_requested.is_connected(_on_homebase_mission_start_requested):
+		homebase_screen.mission_start_requested.connect(_on_homebase_mission_start_requested)
 	if not homebase_screen.mission_selection_changed.is_connected(_on_homebase_mission_selection_changed):
 		homebase_screen.mission_selection_changed.connect(_on_homebase_mission_selection_changed)
 	if not homebase_screen.aircraft_add_requested.is_connected(_on_homebase_aircraft_add_requested):
@@ -225,6 +231,15 @@ func _on_homebase_team_confirmed(selected_unit_ids: PackedStringArray) -> void:
 	_refresh_homebase_screen()
 	_refresh_map_screen()
 	_ensure_transport_timer_state()
+
+
+func _on_homebase_mission_start_requested() -> void:
+	_sync_fob_dropship_state_into_mission_planning(true)
+	if not bool(_mission_planning_state.get("drop_ship_staged", false)):
+		return
+	if Array(_mission_planning_state.get("embarked_unit_ids", [])).is_empty():
+		return
+	_start_mission()
 
 
 func _on_homebase_aircraft_add_requested(base_craft_type: String) -> void:
@@ -358,6 +373,8 @@ func _on_fob_mission_start_requested(selected_unit_ids: PackedStringArray, selec
 	_selected_unit_ids = selected_unit_ids.duplicate()
 	_selected_fireteam_ids = selected_fireteam_ids.duplicate()
 	_sync_fob_dropship_state_into_mission_planning(true)
+	if not bool(_mission_planning_state.get("drop_ship_staged", false)):
+		return
 	if Array(_mission_planning_state.get("embarked_unit_ids", [])).is_empty():
 		return
 	_start_mission()
@@ -422,6 +439,7 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 	var combat_driver = mission_instance.get_node_or_null("CombatLoopDriver")
 	if combat_driver != null:
 		combat_driver.set("friendly_unit_paths", _build_selected_friendly_paths(selected_unit_ids))
+		combat_driver.set("mission_time_limit_seconds", float(_get_selected_mission_definition().get("time_limit_seconds", 1200.0)))
 
 	if preview_mode:
 		_disable_node_processing(mission_instance.get_node_or_null("SimulationRoot"))
@@ -634,6 +652,14 @@ func _refresh_homebase_screen() -> void:
 		_loaded_aircraft_cargo_by_craft,
 		_pending_homebase_cargo_loads
 	)
+	var fob_screen = _get_fob_screen()
+	if fob_screen != null and fob_screen.has_method("can_request_mission_start"):
+		homebase_screen.set_mission_launch_state(
+			bool(fob_screen.call("can_request_mission_start")),
+			String(fob_screen.call("get_mission_launch_summary"))
+		)
+	else:
+		homebase_screen.set_mission_launch_state(false, "")
 
 
 func _refresh_fob_screen() -> void:
@@ -1177,6 +1203,8 @@ func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: boo
 	var drop_state: Dictionary = Dictionary(fob_screen.call("build_mission_drop_state")).duplicate(true)
 	_mission_planning_state["embarked_unit_ids"] = Array(PackedStringArray(Array(drop_state.get("embarked_unit_ids", []))))
 	_mission_planning_state["drop_queued_fireteam_ids"] = Array(PackedStringArray(Array(drop_state.get("queued_fireteam_ids", []))))
+	_mission_planning_state["drop_ship_staged"] = bool(drop_state.get("drop_ship_staged", false))
+	_mission_planning_state["launch_ready_craft_id"] = String(drop_state.get("launch_ready_craft_id", "")).strip_edges()
 	if clear_deployed_unit_ids or not _mission_planning_state.has("deployed_unit_ids"):
 		_mission_planning_state["deployed_unit_ids"] = []
 

@@ -59,6 +59,7 @@ signal combat_resolved(mission_result: Dictionary)
 @export var enemy_reposition_move_speed_factor: float = 0.45
 @export var win_condition: String = WIN_CONDITION_ELIMINATION
 @export var objective_defense_hold_seconds: float = 8.0
+@export var mission_time_limit_seconds: float = 0.0
 @export var simulation_root_path: NodePath
 @export var status_label_path: NodePath
 @export var friendly_unit_paths: Array[NodePath] = []
@@ -84,6 +85,7 @@ var _winner_label: Label = null
 var _mission_started_at_msec: int = 0
 var _objective_owned_since_msec: int = -1
 var _mission_result: Dictionary = {}
+var _mission_result_condition_override: String = ""
 var _runs_local_authority: bool = true
 var _fireteam_original_leads: Dictionary = {}
 var _fireteam_acting_leads: Dictionary = {}
@@ -375,6 +377,10 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 
 func _update_combat_resolution() -> void:
 	if _combat_finished:
+		return
+
+	if mission_time_limit_seconds > 0.0 and _get_duration_seconds() >= mission_time_limit_seconds:
+		_resolve_combat("defeat", _get_enemy_team_id(), "time_limit")
 		return
 
 	if _is_victory_condition_met():
@@ -1629,12 +1635,13 @@ func _is_enemy_team_eliminated() -> bool:
 	return _count_fit_enemy_units() == 0
 
 
-func _resolve_combat(result: String, winning_team_id: String) -> void:
+func _resolve_combat(result: String, winning_team_id: String, result_condition_override: String = "") -> void:
 	if _combat_finished:
 		return
 
 	_combat_finished = true
 	_winning_team_id = winning_team_id
+	_mission_result_condition_override = result_condition_override.strip_edges()
 	_mission_result = _build_mission_result(result, winning_team_id)
 	_set_event_text("MISSION %s" % result.to_upper())
 	_clear_contact_visuals()
@@ -1646,12 +1653,13 @@ func _resolve_combat(result: String, winning_team_id: String) -> void:
 
 
 func _build_mission_result(result: String, winning_team_id: String) -> Dictionary:
+	var result_condition: String = _mission_result_condition_override if not _mission_result_condition_override.is_empty() else win_condition
 	return {
 		"winning_team_id": winning_team_id,
 		"friendly_team_id": friendly_team_id,
 		"mission_outcome": "won" if result == "victory" else "lost",
 		"result": result,
-		"win_condition_type": win_condition,
+		"win_condition_type": result_condition,
 		"objective_captured": _is_objective_captured_by_friendly(),
 		"duration_seconds": _get_duration_seconds(),
 		"team_states": _build_team_states(friendly_unit_paths),
@@ -1673,6 +1681,12 @@ func _get_duration_seconds() -> float:
 		return 0.0
 
 	return maxf(float(Time.get_ticks_msec() - _mission_started_at_msec) / 1000.0, 0.0)
+
+
+func get_remaining_time_limit_seconds() -> float:
+	if mission_time_limit_seconds <= 0.0:
+		return -1.0
+	return maxf(mission_time_limit_seconds - _get_duration_seconds(), 0.0)
 
 
 func _get_objective_status():

@@ -17,6 +17,10 @@ const TACTICAL_STANCE_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests
 const FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/fireteam_movement_controller.gd")
 const FIRETEAM_SECURITY_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/fireteam_security_controller.gd")
 const CONTACT_MAP_OVERLAY_SCRIPT: GDScript = preload("res://scripts/tests/contact_map_overlay.gd")
+const DROPSHIP_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NE.png")
+const DROPSHIP_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NW.png")
+const DROPSHIP_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
+const DROPSHIP_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SW.png")
 
 const FIRETEAM_NAMES: PackedStringArray = ["ALL", "BLUE", "GOLD"]
 const REAL_FIRETEAM_IDS: PackedStringArray = ["blue", "gold"]
@@ -46,7 +50,8 @@ const WAYPOINT_MENU_ENGAGE_ID: int = 102
 const WAYPOINT_MENU_FLANK_ID: int = 103
 const WAYPOINT_MENU_TAKE_ID: int = 104
 const WAYPOINT_MENU_DELETE_ID: int = 199
-const DROP_STAGING_DISTANCE: float = 560.0
+const DROP_OFFMAP_DISTANCE_MULTIPLIER: float = 2.0
+const DROP_OFFMAP_MIN_DISTANCE: float = 720.0
 const DROP_SHIP_SPEED: float = 340.0
 const DROP_LANDING_HOLD_SECONDS: float = 0.75
 const DROP_UNLOAD_INTERVAL_SECONDS: float = 0.45
@@ -100,6 +105,7 @@ var _has_lz_position: bool = false
 var _is_lz_placement_armed: bool = false
 var _is_target_placement_armed: bool = false
 var _drop_ship_requested: bool = false
+var _drop_ship_staged: bool = false
 var _drop_ship_cooldown_remaining: float = 0.0
 var _card_refresh_time_remaining: float = 0.0
 var _drop_sequence_phase: String = ""
@@ -408,6 +414,8 @@ func set_planning_state(planning_state: Dictionary) -> void:
 			_lz_position = next_position
 	if planning_state.has("drop_ship_requested"):
 		_drop_ship_requested = bool(planning_state.get("drop_ship_requested", false))
+	if planning_state.has("drop_ship_staged"):
+		_drop_ship_staged = bool(planning_state.get("drop_ship_staged", false))
 	if planning_state.has("embarked_unit_ids"):
 		_embarked_unit_ids = _build_drop_unit_state_dict(Array(planning_state.get("embarked_unit_ids", [])))
 	if planning_state.has("deployed_unit_ids"):
@@ -449,6 +457,7 @@ func get_planning_state() -> Dictionary:
 		"lz_position": _lz_position,
 		"approach_angle": _get_approach_angle_name(),
 		"drop_ship_requested": _drop_ship_requested,
+		"drop_ship_staged": _drop_ship_staged,
 		"embarked_unit_ids": _build_sorted_drop_unit_id_array(_embarked_unit_ids),
 		"deployed_unit_ids": _build_sorted_drop_unit_id_array(_deployed_unit_ids),
 		"selected_fireteam": _get_fireteam_name(),
@@ -873,6 +882,7 @@ func _on_call_dropship_pressed() -> void:
 		_last_command_text = "SET LZ BEFORE DROP CALL"
 		_update_ui()
 		return
+	_drop_ship_staged = true
 	if preview_mode:
 		_drop_ship_requested = true
 		_last_command_text = "DROP SHIP CALLED %s" % _get_approach_angle_name()
@@ -1046,6 +1056,7 @@ func _update_ui() -> void:
 	if fireteam_status_label != null:
 		fireteam_status_label.text = _build_fireteam_status_text()
 	_refresh_fireteam_status_panel()
+	_refresh_fireteam_phase_panel()
 
 	var strategic_status_label := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicStatusLabel") as Label
 	if strategic_status_label != null:
@@ -1086,6 +1097,7 @@ func _update_ui() -> void:
 				_:
 					call_dropship_button.text = "Drop Planned" if _drop_ship_requested else "Call Drop"
 
+	_apply_compact_mission_control_layout()
 	_refresh_dynamic_button_styles()
 	_refresh_world_overlays()
 	_refresh_ad_hoc_panel_visibility()
@@ -1155,16 +1167,17 @@ func _ensure_ad_hoc_panel() -> Control:
 
 
 func _ensure_fireteam_status_panel() -> Control:
-	var existing_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamStatusPanel") as PanelContainer
+	var existing_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox/FireteamStatusPanel") as PanelContainer
 	if existing_panel != null:
 		return existing_panel
-	var fireteam_vbox := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox") as VBoxContainer
-	if fireteam_vbox == null:
+	var fireteam_info_vbox := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox") as VBoxContainer
+	if fireteam_info_vbox == null:
 		return null
 	var panel := PanelContainer.new()
 	panel.name = "FireteamStatusPanel"
 	META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "frame")
-	fireteam_vbox.add_child(panel)
+	fireteam_info_vbox.add_child(panel)
+	fireteam_info_vbox.move_child(panel, 1)
 
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 8)
@@ -1186,6 +1199,8 @@ func _ensure_fireteam_status_panel() -> Control:
 	var return_button := Button.new()
 	return_button.name = "ReturnToPlanButton"
 	return_button.text = "Return to Plan"
+	return_button.custom_minimum_size = Vector2(94.0, 22.0)
+	return_button.add_theme_font_size_override("font_size", 8)
 	META_UI_SKIN_SCRIPT.style_tactical_button(return_button, false)
 	if not return_button.pressed.is_connected(_on_return_to_plan_button_pressed):
 		return_button.pressed.connect(_on_return_to_plan_button_pressed)
@@ -1194,17 +1209,17 @@ func _ensure_fireteam_status_panel() -> Control:
 
 
 func _ensure_tactical_stance_panel() -> Control:
-	var existing_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/TacticalStancePanel") as PanelContainer
+	var existing_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox/TacticalStancePanel") as PanelContainer
 	if existing_panel != null:
 		return existing_panel
-	var fireteam_vbox := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox") as VBoxContainer
-	if fireteam_vbox == null:
+	var fireteam_info_vbox := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox") as VBoxContainer
+	if fireteam_info_vbox == null:
 		return null
 	var panel := PanelContainer.new()
 	panel.name = "TacticalStancePanel"
 	META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "frame")
-	fireteam_vbox.add_child(panel)
-	fireteam_vbox.move_child(panel, 1)
+	fireteam_info_vbox.add_child(panel)
+	fireteam_info_vbox.move_child(panel, 0)
 
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 8)
@@ -1229,10 +1244,73 @@ func _ensure_tactical_stance_panel() -> Control:
 		var button := Button.new()
 		button.name = "%sButton" % String(stance_id).capitalize()
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.custom_minimum_size = Vector2(0.0, 22.0)
+		button.add_theme_font_size_override("font_size", 8)
 		button.text = _get_tactical_stance_button_text(stance_id)
 		button.set_meta("tactical_stance_id", stance_id)
 		if not button.pressed.is_connected(_on_tactical_stance_button_pressed.bind(button)):
 			button.pressed.connect(_on_tactical_stance_button_pressed.bind(button))
+		META_UI_SKIN_SCRIPT.style_tactical_button(button, false)
+		row.add_child(button)
+	return panel
+
+
+func _ensure_fireteam_phase_panel() -> Control:
+	var existing_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox/FireteamPhasePanel") as PanelContainer
+	if existing_panel != null:
+		return existing_panel
+	var fireteam_info_vbox := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox") as VBoxContainer
+	if fireteam_info_vbox == null:
+		return null
+	var panel := PanelContainer.new()
+	panel.name = "FireteamPhasePanel"
+	META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "frame")
+	fireteam_info_vbox.add_child(panel)
+	fireteam_info_vbox.move_child(panel, 2)
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 8)
+	margin.add_theme_constant_override("margin_top", 6)
+	margin.add_theme_constant_override("margin_right", 8)
+	margin.add_theme_constant_override("margin_bottom", 6)
+	panel.add_child(margin)
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 4)
+	margin.add_child(vbox)
+
+	var status_label := Label.new()
+	status_label.name = "PhaseStatusLabel"
+	META_UI_SKIN_SCRIPT.style_body_label(status_label, 10)
+	vbox.add_child(status_label)
+
+	var list_label := Label.new()
+	list_label.name = "PhaseListLabel"
+	list_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	META_UI_SKIN_SCRIPT.style_body_label(list_label, 9)
+	vbox.add_child(list_label)
+
+	var row := HBoxContainer.new()
+	row.name = "PhaseActionRow"
+	row.add_theme_constant_override("separation", 4)
+	vbox.add_child(row)
+
+	var button_specs: Array = [
+		{"name": "PrevEditPhaseButton", "text": "< Edit", "callback": Callable(self, "_on_previous_edit_phase_pressed")},
+		{"name": "AddPhaseButton", "text": "+P", "callback": Callable(self, "_on_add_phase_pressed")},
+		{"name": "NextEditPhaseButton", "text": "Edit >", "callback": Callable(self, "_on_next_edit_phase_pressed")},
+		{"name": "NextPhaseButton", "text": "Next", "callback": Callable(self, "_on_next_phase_pressed")},
+	]
+	for spec_variant in button_specs:
+		var spec: Dictionary = Dictionary(spec_variant)
+		var button := Button.new()
+		var callback: Callable = spec.get("callback", Callable())
+		button.name = String(spec.get("name", "")).strip_edges()
+		button.text = String(spec.get("text", "")).strip_edges()
+		button.custom_minimum_size = Vector2(52.0, 22.0)
+		button.add_theme_font_size_override("font_size", 8)
+		if not button.pressed.is_connected(callback):
+			button.pressed.connect(callback)
 		META_UI_SKIN_SCRIPT.style_tactical_button(button, false)
 		row.add_child(button)
 	return panel
@@ -1267,6 +1345,33 @@ func _refresh_tactical_stance_panel() -> void:
 		var stance_id: String = String(button.get_meta("tactical_stance_id", "")).strip_edges().to_lower()
 		META_UI_SKIN_SCRIPT.style_tactical_button(button, not shared_stance.is_empty() and stance_id == shared_stance)
 		button.disabled = not _can_edit_planning() or _selected_fireteam_ids.is_empty()
+
+
+func _refresh_fireteam_phase_panel() -> void:
+	var legacy_phase_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel") as Control
+	if legacy_phase_panel != null:
+		legacy_phase_panel.visible = false
+	var panel := _ensure_fireteam_phase_panel()
+	if panel == null:
+		return
+	var status_label := panel.get_node_or_null("MarginContainer/VBoxContainer/PhaseStatusLabel") as Label
+	if status_label != null:
+		status_label.text = _build_phase_status_text()
+	var list_label := panel.get_node_or_null("MarginContainer/VBoxContainer/PhaseListLabel") as Label
+	if list_label != null:
+		list_label.text = _build_phase_list_text()
+	var prev_button := panel.get_node_or_null("MarginContainer/VBoxContainer/PhaseActionRow/PrevEditPhaseButton") as Button
+	var add_button := panel.get_node_or_null("MarginContainer/VBoxContainer/PhaseActionRow/AddPhaseButton") as Button
+	var next_edit_button := panel.get_node_or_null("MarginContainer/VBoxContainer/PhaseActionRow/NextEditPhaseButton") as Button
+	var next_phase_button := panel.get_node_or_null("MarginContainer/VBoxContainer/PhaseActionRow/NextPhaseButton") as Button
+	for button in [prev_button, add_button, next_edit_button]:
+		if button == null:
+			continue
+		button.disabled = not _can_edit_planning()
+		META_UI_SKIN_SCRIPT.style_tactical_button(button, false)
+	if next_phase_button != null:
+		next_phase_button.disabled = preview_mode or not _can_issue_local_commands()
+		META_UI_SKIN_SCRIPT.style_tactical_button(next_phase_button, not next_phase_button.disabled and not _phase_execution_by_fireteam.is_empty())
 
 
 func _refresh_fireteam_status_panel() -> void:
@@ -1682,6 +1787,8 @@ func _build_fireteam_status_text() -> String:
 func _build_strategic_status_text() -> String:
 	var lz_text: String = "LZ offen" if not _has_lz_position else "LZ %s" % _format_world_position(_lz_position)
 	var ship_text: String = "Drop wartend"
+	if _drop_ship_staged and not _drop_ship_requested and _drop_sequence_phase.is_empty():
+		ship_text = "Dropship staged off-map"
 	if _drop_ship_requested:
 		ship_text = "Drop aus %s angefordert" % _get_approach_angle_name()
 	if not preview_mode and _drop_ship_cooldown_remaining > 0.0 and _drop_sequence_phase.is_empty():
@@ -1696,7 +1803,8 @@ func _build_strategic_status_text() -> String:
 		ship_text = "Dropship outbound"
 	elif _drop_sequence_phase == DROP_SEQUENCE_COMPLETE:
 		ship_text = "Fireteam entladen"
-	return "%s\nApproach %s\n%s" % [lz_text, _get_approach_angle_name(), ship_text]
+	var time_text: String = _build_mission_time_limit_text()
+	return "%s\nApproach %s\n%s\n%s" % [lz_text, _get_approach_angle_name(), ship_text, time_text]
 
 
 func _build_phase_status_text() -> String:
@@ -1707,6 +1815,18 @@ func _build_phase_status_text() -> String:
 		String(phase_controller.call("get_active_phase_name")),
 		String(phase_controller.call("get_selected_phase_name")),
 	]
+
+
+func _build_mission_time_limit_text() -> String:
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver == null or not combat_driver.has_method("get_remaining_time_limit_seconds"):
+		return "Time offen"
+	var remaining_seconds: float = float(combat_driver.call("get_remaining_time_limit_seconds"))
+	if remaining_seconds < 0.0:
+		return "Time offen"
+	var minutes: int = int(floor(remaining_seconds / 60.0))
+	var seconds: int = int(remaining_seconds) % 60
+	return "Time %02d:%02d" % [minutes, seconds]
 
 
 func _build_phase_list_text() -> String:
@@ -1831,16 +1951,18 @@ func _refresh_world_overlays() -> void:
 	if dropship_marker == null:
 		return
 
-	if not _has_lz_position or (not _drop_ship_requested and _drop_sequence_phase.is_empty()):
+	if not _has_lz_position or (not _drop_ship_staged and not _drop_ship_requested and _drop_sequence_phase.is_empty()):
 		dropship_marker.visible = false
 		return
 
-	var offset: Vector2 = _get_drop_approach_offset()
+	var sprite := dropship_marker.get_node_or_null("Sprite") as Sprite2D
 	dropship_marker.visible = true
 	if _drop_sequence_phase == DROP_SEQUENCE_INBOUND or _drop_sequence_phase == DROP_SEQUENCE_LANDED or _drop_sequence_phase == DROP_SEQUENCE_UNLOADING or _drop_sequence_phase == DROP_SEQUENCE_COMPLETE or _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND:
 		dropship_marker.global_position = _drop_sequence_position
 	else:
-		dropship_marker.global_position = _lz_position + offset
+		dropship_marker.global_position = _get_drop_staging_position()
+	if sprite != null:
+		sprite.texture = _get_dropship_marker_texture()
 	var approach_line := dropship_marker.get_node_or_null("ApproachLine") as Line2D
 	if approach_line != null:
 		approach_line.clear_points()
@@ -1848,6 +1970,39 @@ func _refresh_world_overlays() -> void:
 		if line_delta.length_squared() > 4.0:
 			approach_line.add_point(Vector2.ZERO)
 			approach_line.add_point(line_delta)
+
+
+func _apply_compact_mission_control_layout() -> void:
+	var bottom_dock := get_node_or_null("../TacticalUI/BottomDock") as Control
+	if bottom_dock != null:
+		bottom_dock.offset_top = -254.0
+		bottom_dock.offset_bottom = -6.0
+	var strategic_action_row := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow") as HBoxContainer
+	if strategic_action_row != null:
+		strategic_action_row.alignment = BoxContainer.ALIGNMENT_END
+		strategic_action_row.add_theme_constant_override("separation", 4)
+	for path in [
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/NWButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/NEButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/SWButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/SEButton",
+	]:
+		var button := get_node_or_null(path) as Button
+		if button == null:
+			continue
+		button.custom_minimum_size = Vector2(62.0, 22.0)
+		button.add_theme_font_size_override("font_size", 8)
+	var strategic_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel") as Control
+	if strategic_panel != null:
+		strategic_panel.custom_minimum_size = Vector2(276.0, 170.0)
+	var command_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel") as Control
+	if command_panel != null:
+		command_panel.custom_minimum_size = Vector2(296.0, 170.0)
+	var fireteam_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel") as Control
+	if fireteam_panel != null:
+		fireteam_panel.custom_minimum_size = Vector2(432.0, 170.0)
 
 
 func _refresh_dynamic_button_styles() -> void:
@@ -3892,6 +4047,7 @@ func _try_start_drop_sequence() -> bool:
 	_drop_sequence_unit_index = 0
 	_drop_sequence_timer = 0.0
 	_drop_sequence_phase = DROP_SEQUENCE_INBOUND
+	_drop_ship_staged = true
 	_drop_sequence_position = _get_drop_staging_position()
 	_live_drop_bootstrap_consumed = true
 	_refresh_world_overlays()
@@ -3961,6 +4117,7 @@ func _update_drop_sequence(delta: float) -> void:
 			if _drop_sequence_position.distance_to(exit_position) <= 2.0:
 				_drop_ship_cooldown_remaining = DROP_SHIP_RECALL_COOLDOWN_SECONDS
 				_drop_ship_requested = false
+				_drop_ship_staged = false
 				_drop_sequence_position = Vector2.ZERO
 				_drop_sequence_phase = ""
 				_drop_sequence_units = []
@@ -4016,11 +4173,87 @@ func _get_drop_staging_position() -> Vector2:
 	var offset: Vector2 = _get_drop_approach_offset()
 	if offset.length_squared() <= 0.001:
 		offset = Vector2(180.0, -112.0)
-	return _lz_position + offset.normalized() * DROP_STAGING_DISTANCE
+	var map_bounds: Rect2 = _get_map_world_bounds()
+	var map_span: float = maxf(maxf(map_bounds.size.x, map_bounds.size.y) * DROP_OFFMAP_DISTANCE_MULTIPLIER, DROP_OFFMAP_MIN_DISTANCE)
+	return _lz_position + offset.normalized() * map_span
 
 
 func _get_drop_exit_position() -> Vector2:
 	return _get_drop_staging_position()
+
+
+func _get_map_world_bounds() -> Rect2:
+	var terrain_registry = get_node_or_null("../TerrainRegistry")
+	var has_point: bool = false
+	var min_pos: Vector2 = Vector2.ZERO
+	var max_pos: Vector2 = Vector2.ZERO
+	if terrain_registry != null and terrain_registry.has_method("get_all_tiles"):
+		for tile_data in Array(terrain_registry.call("get_all_tiles")):
+			if tile_data == null:
+				continue
+			var world_position: Vector2 = Vector2(tile_data.get("world_position"))
+			if not has_point:
+				min_pos = world_position
+				max_pos = world_position
+				has_point = true
+				continue
+			min_pos.x = minf(min_pos.x, world_position.x)
+			min_pos.y = minf(min_pos.y, world_position.y)
+			max_pos.x = maxf(max_pos.x, world_position.x)
+			max_pos.y = maxf(max_pos.y, world_position.y)
+	if has_point:
+		return Rect2(min_pos, (max_pos - min_pos).abs())
+	var map_root := get_node_or_null("../MapRoot") as Node2D
+	if map_root != null:
+		for child in map_root.get_children():
+			var child_node := child as Node2D
+			if child_node == null:
+				continue
+			var world_position: Vector2 = child_node.global_position
+			if not has_point:
+				min_pos = world_position
+				max_pos = world_position
+				has_point = true
+				continue
+			min_pos.x = minf(min_pos.x, world_position.x)
+			min_pos.y = minf(min_pos.y, world_position.y)
+			max_pos.x = maxf(max_pos.x, world_position.x)
+			max_pos.y = maxf(max_pos.y, world_position.y)
+	if has_point:
+		return Rect2(min_pos, (max_pos - min_pos).abs())
+	return Rect2(_lz_position - Vector2(256.0, 192.0), Vector2(512.0, 384.0))
+
+
+func _get_dropship_marker_texture() -> Texture2D:
+	match _drop_sequence_phase:
+		DROP_SEQUENCE_OUTBOUND:
+			return _get_dropship_texture_for_angle(_get_approach_angle_name())
+		_:
+			return _get_dropship_texture_for_angle(_get_opposite_approach_angle_name())
+
+
+func _get_dropship_texture_for_angle(angle_name: String) -> Texture2D:
+	match angle_name.strip_edges().to_upper():
+		"NE":
+			return DROPSHIP_TEXTURE_NE
+		"SW":
+			return DROPSHIP_TEXTURE_SW
+		"SE":
+			return DROPSHIP_TEXTURE_SE
+		_:
+			return DROPSHIP_TEXTURE_NW
+
+
+func _get_opposite_approach_angle_name() -> String:
+	match _get_approach_angle_name():
+		"NE":
+			return "SW"
+		"SW":
+			return "NE"
+		"SE":
+			return "NW"
+		_:
+			return "SE"
 
 
 func _get_units_for_drop_operation() -> Array:

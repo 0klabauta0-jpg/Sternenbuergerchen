@@ -24,6 +24,7 @@ const LEGACY_CHARACTER_SHEET_NODE_NAMES: PackedStringArray = [
 signal selection_changed(selected_unit_ids)
 signal team_confirmed(selected_unit_ids)
 signal mission_selection_changed(mission_id)
+signal mission_start_requested()
 signal aircraft_pilot_assigned(craft_id, pilot_unit_id)
 signal aircraft_pilot_cleared(craft_id)
 signal aircraft_pilot_transfer_requested(craft_id, pilot_unit_id)
@@ -47,6 +48,8 @@ var _selected_mission_id: String = "fob_transfer"
 var _selected_mission_map_path: String = "res://maps/test_mission.json"
 var _selected_mission_name: String = "Operation: FOB Transfer"
 var _selected_mission_slot_count: int = 3
+var _mission_launch_ready: bool = false
+var _mission_launch_summary: String = ""
 var _aircraft_definitions: Array = []
 var _assigned_pilot_by_craft: Dictionary = {}
 var _aircraft_location_by_craft: Dictionary = {}
@@ -61,6 +64,7 @@ var _selected_aircraft_id: String = ""
 func _ready() -> void:
 	META_UI_SKIN_SCRIPT.apply_homebase(self)
 	var mission_selector: OptionButton = get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/MissionSelector")
+	var start_mission_button: Button = get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/StartMissionButton")
 	var confirm_button: Button = get_node("Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamHeaderRow/ConfirmButton")
 	var close_sheet_button: Button = get_node("Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/InfoHeaderRow/CloseSheetButton")
 	var aircraft_selector: OptionButton = get_node("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftSelectorRow/AircraftSelector")
@@ -73,6 +77,8 @@ func _ready() -> void:
 		confirm_button.pressed.connect(_on_confirm_button_pressed)
 	if not mission_selector.item_selected.is_connected(_on_mission_selector_item_selected):
 		mission_selector.item_selected.connect(_on_mission_selector_item_selected)
+	if not start_mission_button.pressed.is_connected(_on_start_mission_button_pressed):
+		start_mission_button.pressed.connect(_on_start_mission_button_pressed)
 	if not close_sheet_button.pressed.is_connected(_on_close_sheet_button_pressed):
 		close_sheet_button.pressed.connect(_on_close_sheet_button_pressed)
 	if not aircraft_selector.item_selected.is_connected(_on_aircraft_selector_item_selected):
@@ -87,6 +93,7 @@ func _ready() -> void:
 		load_cargo_button.pressed.connect(_on_load_cargo_button_pressed)
 	META_UI_SKIN_SCRIPT.style_secondary_button(close_sheet_button)
 	META_UI_SKIN_SCRIPT.style_secondary_button(load_cargo_button)
+	META_UI_SKIN_SCRIPT.style_transfer_button(start_mission_button, false)
 	remove_aircraft_button.visible = false
 	aircraft_cargo_row.visible = false
 
@@ -161,6 +168,19 @@ func set_selected_unit_ids(selected_unit_ids: PackedStringArray) -> void:
 
 func get_selected_unit_ids() -> PackedStringArray:
 	return _selected_unit_ids.duplicate()
+
+
+func set_mission_launch_state(is_ready: bool, summary_text: String = "") -> void:
+	_mission_launch_ready = is_ready
+	_mission_launch_summary = summary_text.strip_edges()
+	if is_inside_tree():
+		_update_mission_info()
+
+
+func request_mission_start() -> void:
+	if not _mission_launch_ready:
+		return
+	mission_start_requested.emit()
 
 
 func confirm_selection() -> void:
@@ -298,6 +318,7 @@ func _update_team_summary() -> void:
 
 func _update_mission_info() -> void:
 	var mission_selector: OptionButton = get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/MissionSelector")
+	var start_mission_button: Button = get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/StartMissionButton")
 	var mission_name_label: Label = get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/MissionNameLabel")
 	var mission_team_limit_label: Label = get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/MissionTeamLimitLabel")
 	var mission_transfer_label: Label = get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/MissionTransferLabel")
@@ -308,10 +329,16 @@ func _update_mission_info() -> void:
 	var staged_count: int = _selected_unit_ids.size()
 	var pilot_count: int = _count_assigned_pilots()
 	var mission_slot_usage: int = staged_count + pilot_count
+	start_mission_button.disabled = not _mission_launch_ready
+	start_mission_button.text = "Start"
+	META_UI_SKIN_SCRIPT.style_transfer_button(start_mission_button, _mission_launch_ready)
 	mission_name_label.text = _selected_mission_name
 	mission_team_limit_label.text = "Mission slots: %d / %d" % [mini(mission_slot_usage, _selected_mission_slot_count), _selected_mission_slot_count]
-	mission_transfer_label.text = "Map: %s | Transfer: %s | Pilots: %d" % [_build_selected_mission_map_label(), _build_transfer_status_text(staged_count, team_capacity), pilot_count]
+	var launch_text: String = _mission_launch_summary if not _mission_launch_summary.is_empty() else ("Dropship ready for launch" if _mission_launch_ready else "Dropship not launch-ready")
+	mission_transfer_label.text = "Map: %s | Transfer: %s | Pilots: %d | %s" % [_build_selected_mission_map_label(), _build_transfer_status_text(staged_count, team_capacity), pilot_count, launch_text]
 	mission_summary_label.text = _build_mission_summary_text(staged_count, team_capacity, pilot_count)
+	if not _mission_launch_summary.is_empty():
+		mission_summary_label.text = "%s\n%s" % [mission_summary_label.text, _mission_launch_summary]
 
 
 func _update_team_transfer_list() -> void:
@@ -495,6 +522,10 @@ func _on_mission_selector_item_selected(index: int) -> void:
 	if mission_id.is_empty() or mission_id == _selected_mission_id:
 		return
 	mission_selection_changed.emit(mission_id)
+
+
+func _on_start_mission_button_pressed() -> void:
+	request_mission_start()
 
 
 func _on_aircraft_selector_item_selected(index: int) -> void:
