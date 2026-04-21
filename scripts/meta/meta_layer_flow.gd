@@ -1192,7 +1192,7 @@ func _show_map() -> void:
 	if fob_screen != null:
 		fob_screen.visible = false
 	if map_screen != null:
-		map_screen.visible = true
+		map_screen.visible = false
 	if debrief_screen != null:
 		debrief_screen.visible = false
 	_sync_mission_host_visibility()

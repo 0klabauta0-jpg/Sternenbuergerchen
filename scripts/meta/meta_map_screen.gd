@@ -69,7 +69,7 @@ func _render() -> void:
 	var fireteams: Array = _fob_overview.get("fireteams", [])
 	var pilot_count: int = int(_fob_overview.get("pilot_count", 0))
 	var slot_usage_count: int = int(_fob_overview.get("slot_usage_count", _selected_unit_ids.size() + pilot_count))
-	mission_header_label.text = "MISSION LINK"
+	mission_header_label.text = ""
 	map_name_label.text = "Map: %s" % map_name
 	operator_count_label.text = "Operators: %d | Pilots: %d" % [_selected_unit_ids.size(), pilot_count]
 	fireteam_count_label.text = "Slots: %d / %d | Fireteams: %d" % [mini(slot_usage_count, _mission_slot_count), _mission_slot_count, fireteams.size()]
@@ -94,12 +94,7 @@ func _configure_compact_layout() -> void:
 	var mission_panel := get_node_or_null("Panel/Margin/VBox/MissionPanel") as Control
 	var mission_summary_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionSummaryLabel") as Control
 	if panel != null:
-		panel.anchor_right = 0.0
-		panel.anchor_bottom = 0.0
-		panel.offset_left = 24.0
-		panel.offset_top = 24.0
-		panel.offset_right = 540.0
-		panel.offset_bottom = 168.0
+		panel.visible = false
 	if content_row != null:
 		content_row.visible = false
 	if mission_panel != null:
@@ -109,20 +104,22 @@ func _configure_compact_layout() -> void:
 
 
 func _ensure_mission_craft_card() -> PanelContainer:
-	var mission_vbox := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox") as VBoxContainer
-	if mission_vbox == null:
-		return null
-	var card := mission_vbox.get_node_or_null("MissionCraftCard") as PanelContainer
+	var card := get_node_or_null("MissionCraftCard") as PanelContainer
 	if card != null:
 		return card
 	card = PanelContainer.new()
 	card.name = "MissionCraftCard"
 	card.visible = false
-	card.custom_minimum_size = Vector2(0.0, 72.0)
-	mission_vbox.add_child(card)
-	var mission_info_row := mission_vbox.get_node_or_null("MissionInfoRow")
-	if mission_info_row != null:
-		mission_vbox.move_child(card, mission_info_row.get_index() + 1)
+	card.custom_minimum_size = Vector2(320.0, 84.0)
+	card.anchor_left = 1.0
+	card.anchor_top = 0.0
+	card.anchor_right = 1.0
+	card.anchor_bottom = 0.0
+	card.offset_left = -344.0
+	card.offset_top = 144.0
+	card.offset_right = -24.0
+	card.offset_bottom = 228.0
+	add_child(card)
 
 	var margin := MarginContainer.new()
 	margin.name = "CardMargin"

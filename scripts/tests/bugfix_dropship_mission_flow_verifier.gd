@@ -215,6 +215,7 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 
 	var fob_screen: Control = scene.get_node("FOBScreen")
 	var map_screen: Control = scene.get_node("MapScreen")
+	var mission_host: Node = scene.get_node("MissionHost")
 	var selected_unit_ids := PackedStringArray(["unit_alpha", "unit_bravo", "unit_delta"])
 	var selected_fireteam_ids := PackedStringArray(["blue", "blue", "blue"])
 	var fireteam_definitions := [
@@ -252,16 +253,17 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 	for _frame in range(2):
 		await process_frame
 
-	var mission_craft_card := map_screen.get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionCraftCard") as PanelContainer
-	var content_row := map_screen.get_node("Panel/Margin/VBox/ContentRow") as Control
-	var panel := map_screen.get_node("Panel") as Control
-	var status_label := mission_craft_card.get_node("CardMargin/CardRow/TextVBox/StatusLabel") as Label
-	_assert(map_screen.visible, "Mission nav shows the real meta map screen instead of bypassing it")
-	_assert(content_row != null and not content_row.visible, "Mission nav keeps the bulky mission context content hidden")
-	_assert(panel != null and panel.size.x <= 560.0 and panel.size.y <= 190.0, "Mission nav uses only a compact overlay instead of a screen-filling context window")
-	_assert(mission_craft_card != null and mission_craft_card.visible, "Map screen shows the mini shipcard while the dropship is en route")
-	_assert(mission_craft_card.modulate.a < 1.0, "Mini shipcard is greyed out while the dropship is still in transit")
-	_assert(status_label != null and status_label.text.contains("En route to mission map"), "Mini shipcard reports the live transfer status during mission transit")
+	var preview_mission := mission_host.get_child(0) if mission_host.get_child_count() > 0 else null
+	var mission_identity_panel := preview_mission.get_node("TacticalUI/MissionIdentityPanel") as PanelContainer if preview_mission != null else null
+	var mission_craft_card := preview_mission.get_node("TacticalUI/MissionDropshipPanel") as PanelContainer if preview_mission != null else null
+	var status_label := mission_craft_card.get_node("MarginContainer/Row/InfoVBox/StatusLabel") as Label if mission_craft_card != null else null
+	_assert(not map_screen.visible, "Mission nav no longer renders the old Mission Link overlay screen")
+	_assert(preview_mission != null, "Mission nav keeps the preview mission host active as the visible map surface")
+	_assert(mission_craft_card != null and mission_craft_card.visible, "Preview mission shows the mini shipcard while the dropship is en route")
+	_assert(mission_craft_card != null and mission_craft_card.modulate.a < 1.0, "Mini shipcard stays greyed out during mission transit")
+	_assert(status_label != null and status_label.text.contains("ETA mission map"), "Mini shipcard reports the live transfer status during mission transit")
+	_assert(mission_identity_panel != null and mission_craft_card.offset_top >= mission_identity_panel.offset_bottom, "Mini shipcard sits below the LIVE TACTICAL GRID header panel")
+	_assert(is_equal_approx(mission_craft_card.anchor_right, 1.0) and is_equal_approx(mission_craft_card.offset_right, -16.0), "Mini shipcard stays docked to the right edge of the tactical preview")
 
 	for _step in range(18):
 		scene.call("_on_homebase_transport_timer_timeout")
@@ -269,7 +271,10 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 	for _frame in range(2):
 		await process_frame
 
-	_assert(mission_craft_card.visible and mission_craft_card.modulate.a < 1.0, "Mini shipcard stays visible and greyed out once the dropship is waiting on the mission map")
+	preview_mission = mission_host.get_child(0) if mission_host.get_child_count() > 0 else null
+	mission_craft_card = preview_mission.get_node("TacticalUI/MissionDropshipPanel") as PanelContainer if preview_mission != null else null
+	status_label = mission_craft_card.get_node("MarginContainer/Row/InfoVBox/StatusLabel") as Label if mission_craft_card != null else null
+	_assert(mission_craft_card != null and mission_craft_card.visible and mission_craft_card.modulate.a < 1.0, "Mini shipcard stays visible once the dropship is waiting on the mission map")
 	_assert(status_label != null and status_label.text.contains("Holding on mission map"), "Mini shipcard switches to waiting status after the transfer completes")
 	scene.queue_free()
 	await process_frame

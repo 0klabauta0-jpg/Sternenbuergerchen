@@ -1071,6 +1071,7 @@ func set_tactical_ui_visible(is_visible: bool) -> void:
 	for path in [
 		"../TacticalUI/MissionTint",
 		"../TacticalUI/MissionIdentityPanel",
+		"../TacticalUI/MissionDropshipPanel",
 		"../TacticalUI/TopNavPanel",
 		"../TacticalUI/BottomDock",
 	]:
@@ -1928,19 +1929,30 @@ func _refresh_mission_nav_timer_label() -> void:
 
 
 func _ensure_mission_dropship_panel() -> void:
-	var strategic_vbox := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox") as VBoxContainer
-	if strategic_vbox == null:
+	var tactical_ui := get_node_or_null("../TacticalUI") as CanvasLayer
+	if tactical_ui == null:
 		return
-	var panel := strategic_vbox.get_node_or_null("MissionDropshipPanel") as PanelContainer
+	var panel := tactical_ui.get_node_or_null("MissionDropshipPanel") as PanelContainer
 	if panel != null:
 		return
 	panel = PanelContainer.new()
 	panel.name = "MissionDropshipPanel"
 	panel.visible = false
-	strategic_vbox.add_child(panel)
-	strategic_vbox.move_child(panel, 1)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.anchor_left = 1.0
+	panel.anchor_top = 0.0
+	panel.anchor_right = 1.0
+	panel.anchor_bottom = 0.0
+	panel.offset_left = -364.0
+	panel.offset_top = 100.0
+	panel.offset_right = -16.0
+	panel.offset_bottom = 186.0
+	panel.custom_minimum_size = Vector2(348.0, 86.0)
+	tactical_ui.add_child(panel)
+	META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "frame")
 
 	var margin := MarginContainer.new()
+	margin.name = "MarginContainer"
 	margin.add_theme_constant_override("margin_left", 8)
 	margin.add_theme_constant_override("margin_top", 8)
 	margin.add_theme_constant_override("margin_right", 8)
@@ -1977,6 +1989,7 @@ func _ensure_mission_dropship_panel() -> void:
 		info_label.name = label_name
 		info_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		info_label.add_theme_font_size_override("font_size", 8 if label_name == "StatusLabel" else 9)
+		META_UI_SKIN_SCRIPT.style_body_label(info_label, 8 if label_name == "StatusLabel" else 9)
 		info_vbox.add_child(info_label)
 
 	var progress_bar := ProgressBar.new()
@@ -1989,13 +2002,15 @@ func _ensure_mission_dropship_panel() -> void:
 
 
 func _refresh_mission_dropship_panel() -> void:
-	var panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/MissionDropshipPanel") as PanelContainer
+	var panel := get_node_or_null("../TacticalUI/MissionDropshipPanel") as PanelContainer
 	if panel == null:
 		return
 	var show_panel: bool = not _mission_drop_craft_id.is_empty() or _is_drop_sequence_active()
 	panel.visible = show_panel
 	if not show_panel:
 		return
+	var is_transit: bool = _mission_drop_state == "to_mission" or _mission_drop_state == "to_fob"
+	panel.modulate = Color(1.0, 1.0, 1.0, 0.6 if is_transit else 0.78)
 	var ship_texture := panel.get_node_or_null("MarginContainer/Row/ShipTexture") as TextureRect
 	var pilot_texture := panel.get_node_or_null("MarginContainer/Row/PilotTexture") as TextureRect
 	var title_label := panel.get_node_or_null("MarginContainer/Row/InfoVBox/TitleLabel") as Label
@@ -2019,7 +2034,7 @@ func _refresh_mission_dropship_panel() -> void:
 		status_label.text = _build_mission_dropship_status_text()
 	if progress_bar != null:
 		progress_bar.value = _mission_drop_progress
-		progress_bar.visible = _mission_drop_state == "to_mission" or _mission_drop_state == "to_fob"
+		progress_bar.visible = is_transit
 
 
 func _build_mission_dropship_status_text() -> String:
