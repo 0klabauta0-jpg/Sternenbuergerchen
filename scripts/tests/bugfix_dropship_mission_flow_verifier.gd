@@ -252,11 +252,14 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 	for _frame in range(2):
 		await process_frame
 
-	var mission_craft_card := map_screen.get_node("Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox/MissionCraftCard") as PanelContainer
+	var mission_craft_card := map_screen.get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionCraftCard") as PanelContainer
+	var content_row := map_screen.get_node("Panel/Margin/VBox/ContentRow") as Control
+	var panel := map_screen.get_node("Panel") as Control
 	var status_label := mission_craft_card.get_node("CardMargin/CardRow/TextVBox/StatusLabel") as Label
 	_assert(map_screen.visible, "Mission nav shows the real meta map screen instead of bypassing it")
+	_assert(content_row != null and not content_row.visible, "Mission nav keeps the bulky mission context content hidden")
+	_assert(panel != null and panel.size.x <= 560.0 and panel.size.y <= 190.0, "Mission nav uses only a compact overlay instead of a screen-filling context window")
 	_assert(mission_craft_card != null and mission_craft_card.visible, "Map screen shows the mini shipcard while the dropship is en route")
-	_assert(mission_craft_card.get_index() == 2, "Mini shipcard is inserted directly under the map preview panel")
 	_assert(mission_craft_card.modulate.a < 1.0, "Mini shipcard is greyed out while the dropship is still in transit")
 	_assert(status_label != null and status_label.text.contains("En route to mission map"), "Mini shipcard reports the live transfer status during mission transit")
 

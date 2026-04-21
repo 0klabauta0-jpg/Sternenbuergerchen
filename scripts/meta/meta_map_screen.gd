@@ -16,6 +16,7 @@ var _terrain_renderer = null
 
 func _ready() -> void:
 	META_UI_SKIN_SCRIPT.apply_map(self)
+	_configure_compact_layout()
 	if _terrain_renderer == null:
 		_terrain_renderer = TERRAIN_MAP_RENDERER_SCRIPT.new()
 	var preview_clip := get_node("Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox/MapPreviewFrame/MapPreviewMargin/MapPreviewClip") as Control
@@ -36,6 +37,7 @@ func set_map_context(mission_name: String, map_file_path: String, selected_unit_
 
 
 func _render() -> void:
+	var mission_header_label := get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionHeaderLabel") as Label
 	var map_name_label := get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/MapNameLabel") as Label
 	var operator_count_label := get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/OperatorCountLabel") as Label
 	var fireteam_count_label := get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/FireteamCountLabel") as Label
@@ -67,10 +69,11 @@ func _render() -> void:
 	var fireteams: Array = _fob_overview.get("fireteams", [])
 	var pilot_count: int = int(_fob_overview.get("pilot_count", 0))
 	var slot_usage_count: int = int(_fob_overview.get("slot_usage_count", _selected_unit_ids.size() + pilot_count))
+	mission_header_label.text = "MISSION LINK"
 	map_name_label.text = "Map: %s" % map_name
 	operator_count_label.text = "Operators: %d | Pilots: %d" % [_selected_unit_ids.size(), pilot_count]
 	fireteam_count_label.text = "Slots: %d / %d | Fireteams: %d" % [mini(slot_usage_count, _mission_slot_count), _mission_slot_count, fireteams.size()]
-	mission_summary_label.text = "%s on %s. Mission context, slots and FOB staging stay compact here while the actual mission map remains the authoritative planning surface." % [_mission_name, map_name]
+	mission_summary_label.text = "%s | %s" % [_mission_name, String(_fob_overview.get("dropship_status", "Dropship awaiting transfer"))]
 	map_capacity_label.text = "Mission slots %d | Dropship %d NPC + pilot" % [_mission_slot_count, DROPSHIP_NPC_CAPACITY]
 	marker_list_label.text = marker_detail_text
 	map_data_label.text = "File: %s\nGrid: %d x %d\nTiles: %d\n%s" % [_map_file_path, grid_size.x, grid_size.y, tile_count, marker_summary_text]
@@ -85,21 +88,41 @@ func _render() -> void:
 	_render_map_preview(terrain_map_data)
 
 
+func _configure_compact_layout() -> void:
+	var panel := get_node_or_null("Panel") as Control
+	var content_row := get_node_or_null("Panel/Margin/VBox/ContentRow") as Control
+	var mission_panel := get_node_or_null("Panel/Margin/VBox/MissionPanel") as Control
+	var mission_summary_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionSummaryLabel") as Control
+	if panel != null:
+		panel.anchor_right = 0.0
+		panel.anchor_bottom = 0.0
+		panel.offset_left = 24.0
+		panel.offset_top = 24.0
+		panel.offset_right = 540.0
+		panel.offset_bottom = 168.0
+	if content_row != null:
+		content_row.visible = false
+	if mission_panel != null:
+		mission_panel.custom_minimum_size = Vector2(0.0, 120.0)
+	if mission_summary_label != null:
+		mission_summary_label.visible = false
+
+
 func _ensure_mission_craft_card() -> PanelContainer:
-	var map_vbox := get_node_or_null("Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox") as VBoxContainer
-	if map_vbox == null:
+	var mission_vbox := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox") as VBoxContainer
+	if mission_vbox == null:
 		return null
-	var card := map_vbox.get_node_or_null("MissionCraftCard") as PanelContainer
+	var card := mission_vbox.get_node_or_null("MissionCraftCard") as PanelContainer
 	if card != null:
 		return card
 	card = PanelContainer.new()
 	card.name = "MissionCraftCard"
 	card.visible = false
 	card.custom_minimum_size = Vector2(0.0, 72.0)
-	map_vbox.add_child(card)
-	var map_preview_frame := map_vbox.get_node_or_null("MapPreviewFrame")
-	if map_preview_frame != null:
-		map_vbox.move_child(card, map_preview_frame.get_index() + 1)
+	mission_vbox.add_child(card)
+	var mission_info_row := mission_vbox.get_node_or_null("MissionInfoRow")
+	if mission_info_row != null:
+		mission_vbox.move_child(card, mission_info_row.get_index() + 1)
 
 	var margin := MarginContainer.new()
 	margin.name = "CardMargin"
