@@ -190,6 +190,7 @@ func _ready() -> void:
 	_initialize_fireteam_suppression_state()
 	_ensure_default_fireteam_selection()
 	_sync_initial_runtime_active_units()
+	_apply_drop_presence_state_to_units()
 	_refresh_selection_visuals()
 	_refresh_order_visuals()
 	_refresh_button_state()
@@ -407,6 +408,10 @@ func set_planning_state(planning_state: Dictionary) -> void:
 			_lz_position = next_position
 	if planning_state.has("drop_ship_requested"):
 		_drop_ship_requested = bool(planning_state.get("drop_ship_requested", false))
+	if planning_state.has("embarked_unit_ids"):
+		_embarked_unit_ids = _build_drop_unit_state_dict(Array(planning_state.get("embarked_unit_ids", [])))
+	if planning_state.has("deployed_unit_ids"):
+		_deployed_unit_ids = _build_drop_unit_state_dict(Array(planning_state.get("deployed_unit_ids", [])))
 	if planning_state.has("selected_fireteam"):
 		var fireteam_name: String = String(planning_state.get("selected_fireteam", _get_fireteam_name())).strip_edges().to_upper()
 		var fireteam_index: int = FIRETEAM_NAMES.find(fireteam_name)
@@ -432,6 +437,7 @@ func set_planning_state(planning_state: Dictionary) -> void:
 	_refresh_selection_visuals()
 	_refresh_order_visuals()
 	_refresh_world_overlays()
+	_apply_drop_presence_state_to_units()
 	_update_ui()
 	_maybe_bootstrap_live_drop()
 
@@ -443,6 +449,8 @@ func get_planning_state() -> Dictionary:
 		"lz_position": _lz_position,
 		"approach_angle": _get_approach_angle_name(),
 		"drop_ship_requested": _drop_ship_requested,
+		"embarked_unit_ids": _build_sorted_drop_unit_id_array(_embarked_unit_ids),
+		"deployed_unit_ids": _build_sorted_drop_unit_id_array(_deployed_unit_ids),
 		"selected_fireteam": _get_fireteam_name(),
 		"selected_fireteams": Array(_selected_fireteam_ids),
 		"selected_phase": _get_phase_name(),
@@ -4014,14 +4022,17 @@ func _get_drop_exit_position() -> Vector2:
 func _get_units_for_drop_operation() -> Array:
 	var requested_fireteam_id: String = _get_drop_fireteam_id()
 	var result: Array = []
+	var fallback_units: Array = []
 	for unit in _get_selected_friendly_units(true):
-		if requested_fireteam_id.is_empty():
-			result.append(unit)
-			continue
 		var unit_fireteam_id: String = String(unit.call("get_fireteam_id")).strip_edges().to_lower()
-		if unit_fireteam_id == requested_fireteam_id:
+		if not requested_fireteam_id.is_empty() and unit_fireteam_id != requested_fireteam_id:
+			continue
+		fallback_units.append(unit)
+		if _embarked_unit_ids.has(String(unit.call("get_unit_id")).strip_edges()):
 			result.append(unit)
-	return result
+	if not result.is_empty():
+		return result
+	return fallback_units
 
 
 func _get_drop_fireteam_id() -> String:
@@ -4051,6 +4062,44 @@ func _get_drop_fireteam_name() -> String:
 			return "GOLD"
 		_:
 			return "ALL"
+
+
+func _build_drop_unit_state_dict(unit_ids: Array) -> Dictionary:
+	var result: Dictionary = {}
+	for unit_id_variant in unit_ids:
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty():
+			continue
+		result[unit_id] = true
+	return result
+
+
+func _build_sorted_drop_unit_id_array(unit_state: Dictionary) -> Array:
+	var unit_ids: Array = []
+	for unit_id_variant in unit_state.keys():
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty():
+			continue
+		unit_ids.append(unit_id)
+	unit_ids.sort()
+	return unit_ids
+
+
+func _apply_drop_presence_state_to_units() -> void:
+	var mission_setup = get_node_or_null("../MissionSetup")
+	var uses_deferred_activation: bool = mission_setup != null and bool(mission_setup.get("defer_friendly_runtime_activation"))
+	if not uses_deferred_activation and _embarked_unit_ids.is_empty() and _deployed_unit_ids.is_empty():
+		return
+	for unit in _get_all_friendly_units(true):
+		if unit == null or not unit.has_method("get_unit_id") or not (unit is CanvasItem):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+		if _embarked_unit_ids.has(unit_id):
+			(unit as CanvasItem).visible = false
+		elif _deployed_unit_ids.has(unit_id):
+			(unit as CanvasItem).visible = true
+		elif uses_deferred_activation:
+			(unit as CanvasItem).visible = false
 
 
 func _get_unload_offset(index: int) -> Vector2:

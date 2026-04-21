@@ -357,6 +357,7 @@ func _on_homebase_aircraft_pilot_transfer_requested(craft_id: String, pilot_unit
 func _on_fob_mission_start_requested(selected_unit_ids: PackedStringArray, selected_fireteam_ids: PackedStringArray) -> void:
 	_selected_unit_ids = selected_unit_ids.duplicate()
 	_selected_fireteam_ids = selected_fireteam_ids.duplicate()
+	_sync_fob_dropship_state_into_mission_planning(true)
 	_start_mission()
 
 
@@ -400,6 +401,7 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 		mission_setup.set("selected_team_unit_ids", selected_unit_ids)
 		mission_setup.set("selected_team_fireteam_ids", selected_fireteam_ids)
 		mission_setup.set("map_file_path", String(_get_selected_mission_definition().get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges())
+		mission_setup.set("defer_friendly_runtime_activation", true)
 
 		var fob_loadouts: Dictionary = _build_fob_member_loadouts()
 		if not fob_loadouts.is_empty():
@@ -1126,6 +1128,8 @@ func _refresh_map_screen() -> void:
 			int(selected_mission.get("slot_count", FRIENDLY_NODE_NAMES.size()))
 		)
 	if _active_mission == null:
+		_sync_fob_dropship_state_into_mission_planning()
+	if _active_mission == null:
 		_ensure_preview_mission()
 	if _preview_mission != null:
 		_apply_planning_state_to_mission(_preview_mission)
@@ -1158,6 +1162,21 @@ func _build_fob_member_loadouts() -> Dictionary:
 				entry["is_fireteam_lead"] = true
 			result[unit_id] = entry
 	return result
+
+
+func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: bool = false) -> void:
+	var fob_screen = _get_fob_screen()
+	if fob_screen == null or not fob_screen.has_method("build_mission_drop_state"):
+		_mission_planning_state["embarked_unit_ids"] = []
+		if clear_deployed_unit_ids:
+			_mission_planning_state["deployed_unit_ids"] = []
+		return
+
+	var drop_state: Dictionary = Dictionary(fob_screen.call("build_mission_drop_state")).duplicate(true)
+	_mission_planning_state["embarked_unit_ids"] = Array(PackedStringArray(Array(drop_state.get("embarked_unit_ids", []))))
+	_mission_planning_state["drop_queued_fireteam_ids"] = Array(PackedStringArray(Array(drop_state.get("queued_fireteam_ids", []))))
+	if clear_deployed_unit_ids or not _mission_planning_state.has("deployed_unit_ids"):
+		_mission_planning_state["deployed_unit_ids"] = []
 
 
 func _get_homebase_screen():

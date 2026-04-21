@@ -143,6 +143,7 @@ func set_available_units(available_units: Array) -> void:
 
 
 func set_transport_craft_state(transport_craft_states: Array) -> void:
+	var previous_selected_craft_state: Dictionary = _get_transport_craft_state(_dropship_transport_craft_id)
 	_transport_craft_states = []
 	for craft_state_variant in transport_craft_states:
 		if typeof(craft_state_variant) != TYPE_DICTIONARY:
@@ -150,10 +151,15 @@ func set_transport_craft_state(transport_craft_states: Array) -> void:
 		_transport_craft_states.append((craft_state_variant as Dictionary).duplicate(true))
 	_sanitize_transport_craft_state()
 	if is_inside_tree():
+		var current_selected_craft_state: Dictionary = _get_transport_craft_state(_dropship_transport_craft_id)
+		var selected_craft_became_boardable: bool = not bool(previous_selected_craft_state.get("is_boardable", false)) and bool(current_selected_craft_state.get("is_boardable", false))
+		if selected_craft_became_boardable and not _dropship_staged_fireteam_ids.is_empty() and (_dropship_phase == "idle" or _dropship_phase == "incoming"):
+			_restart_dropship_cycle()
 		_refresh_ui_state()
 
 
 func configure_transfer(selected_unit_ids: PackedStringArray, selected_fireteam_ids: PackedStringArray = [], fireteam_definitions: Array = []) -> void:
+	var previous_transfer_signature: String = _build_transfer_signature(_selected_unit_ids, _selected_fireteam_ids, _fireteam_definitions)
 	_selected_unit_ids = selected_unit_ids.duplicate()
 	_fireteam_definitions = _normalize_fireteam_definitions(fireteam_definitions, selected_fireteam_ids)
 	_selected_fireteam_ids = _normalize_selected_fireteam_ids(selected_fireteam_ids)
@@ -162,7 +168,9 @@ func configure_transfer(selected_unit_ids: PackedStringArray, selected_fireteam_
 	_sanitize_transport_craft_state()
 	_ensure_focused_unit_id()
 	_ensure_focused_fireteam_id()
-	_restart_dropship_cycle()
+	var next_transfer_signature: String = _build_transfer_signature(_selected_unit_ids, _selected_fireteam_ids, _fireteam_definitions)
+	if previous_transfer_signature != next_transfer_signature:
+		_restart_dropship_cycle()
 	if is_inside_tree():
 		_rebuild_profiles()
 		_refresh_ui_state()
@@ -216,6 +224,16 @@ func request_mission_start() -> void:
 		return
 
 	mission_start_requested.emit(get_team(), get_selected_fireteam_ids())
+
+
+func build_mission_drop_state() -> Dictionary:
+	return {
+		"transport_craft_id": _dropship_transport_craft_id,
+		"dropship_phase": _dropship_phase,
+		"queued_fireteam_ids": Array(_dropship_staged_fireteam_ids),
+		"boarded_fireteam_ids": Array(_boarded_fireteam_ids),
+		"embarked_unit_ids": Array(_boarded_unit_ids),
+	}
 
 
 func build_meta_overview() -> Dictionary:
@@ -1536,6 +1554,24 @@ func _normalize_fireteam_definitions(source_definitions: Array, selected_firetea
 		seen_ids[fireteam_id] = true
 
 	return normalized_definitions
+
+
+func _build_transfer_signature(selected_unit_ids: PackedStringArray, selected_fireteam_ids: PackedStringArray, fireteam_definitions: Array) -> String:
+	var serialized_definitions: Array = []
+	for definition_variant in fireteam_definitions:
+		if typeof(definition_variant) != TYPE_DICTIONARY:
+			continue
+		serialized_definitions.append(Dictionary(definition_variant).duplicate(true))
+	return JSON.stringify(
+		{
+			"selected_unit_ids": Array(selected_unit_ids),
+			"selected_fireteam_ids": Array(selected_fireteam_ids),
+			"fireteam_definitions": serialized_definitions,
+		},
+		"",
+		false,
+		true
+	)
 
 
 func _coerce_fireteam_definition(definition_variant) -> Dictionary:
