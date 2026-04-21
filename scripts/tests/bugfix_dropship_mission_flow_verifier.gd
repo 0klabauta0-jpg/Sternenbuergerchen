@@ -22,6 +22,7 @@ func _run_tests() -> void:
 	await _test_preview_mission_only_exists_in_map_view()
 	await _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting()
 	await _test_preview_drop_button_stays_drop_without_live_sequence()
+	await _test_preview_drop_request_bootstraps_live_mission_inbound()
 	await _test_fob_assignments_and_boarding_survive_send_and_nav_refresh()
 	await _test_mission_slot_labels_stay_aligned_with_pilots()
 	await _test_mission_start_requires_boarded_team()
@@ -395,6 +396,88 @@ func _test_preview_drop_button_stays_drop_without_live_sequence() -> void:
 	_assert(String(tactical_controller.get("_drop_sequence_phase")).is_empty(), "Preview mission does not start the live dropship sequence before Homebase Start")
 	_assert(call_button != null and call_button.text == "Drop", "Preview drop button keeps the Drop label instead of switching to Drop Planned")
 	_assert(dropship_marker != null and not dropship_marker.visible, "Preview mission does not pin a static dropship marker outside the map before the live mission starts")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_preview_drop_request_bootstraps_live_mission_inbound() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	for _frame in range(4):
+		await process_frame
+
+	var homebase_screen: Control = scene.get_node("HomebaseScreen")
+	var fob_screen: Control = scene.get_node("FOBScreen")
+	var mission_host: Node = scene.get_node("MissionHost")
+	var selected_unit_ids := PackedStringArray(["unit_alpha", "unit_bravo", "unit_delta"])
+	var selected_fireteam_ids := PackedStringArray(["blue", "blue", "blue"])
+	var fireteam_definitions := [
+		{
+			"id": "blue",
+			"label": "BLUE",
+			"lead_unit_id": "unit_alpha",
+			"respawn_enabled": false,
+			"loadout": "medium",
+		}
+	]
+	scene.set(
+		"_homebase_aircraft_definitions",
+		[
+			{
+				"craft_id": "dropship_test",
+				"display_name": "Dropship Test",
+				"craft_type": "dropship",
+				"texture_path": "res://Assets/kenney_space-kit/Side/craft_speederB.png",
+			}
+		]
+	)
+	scene.set("_assigned_aircraft_pilot_by_craft", {"dropship_test": "unit_hotel"})
+	scene.set("_aircraft_location_by_craft", {"dropship_test": "fob"})
+	scene.set("_selected_unit_ids", selected_unit_ids)
+	scene.set("_selected_fireteam_ids", selected_fireteam_ids)
+	scene.call("_refresh_fob_screen")
+	fob_screen.call("configure_transfer", selected_unit_ids, selected_fireteam_ids, fireteam_definitions)
+	fob_screen.set("_dropship_transport_craft_id", "dropship_test")
+	fob_screen.set("_dropship_phase", "boarded")
+	fob_screen.set("_boarded_unit_ids", selected_unit_ids)
+	fob_screen.set("_boarded_fireteam_ids", PackedStringArray(["blue"]))
+	fob_screen.call("_on_transport_craft_mission_stage_requested", "dropship_test")
+	for _step in range(18):
+		scene.call("_on_homebase_transport_timer_timeout")
+
+	scene.call("_show_map")
+	for _frame in range(2):
+		await process_frame
+	var preview_mission := mission_host.get_child(0) if mission_host.get_child_count() > 0 else null
+	var preview_tactical_controller: Node = preview_mission.get_node("TacticalController") if preview_mission != null else null
+	var preview_state: Dictionary = Dictionary(preview_tactical_controller.call("get_planning_state")) if preview_tactical_controller != null else {}
+	preview_state["has_lz_position"] = true
+	preview_state["lz_position"] = Vector2(320.0, 180.0)
+	preview_tactical_controller.call("set_planning_state", preview_state)
+	preview_tactical_controller.call("_on_call_dropship_pressed")
+	for _frame in range(2):
+		await process_frame
+
+	var meta_planning_state: Dictionary = Dictionary(scene.get("_mission_planning_state"))
+	_assert(bool(meta_planning_state.get("drop_ship_requested", false)), "Preview drop request is stored in the shared mission planning state before mission start")
+
+	scene.call("_show_homebase")
+	for _frame in range(2):
+		await process_frame
+	homebase_screen.call("request_mission_start")
+	for _frame in range(8):
+		await process_frame
+
+	var active_mission: Node = scene.call("get_active_mission")
+	var active_tactical_controller: Node = active_mission.get_node("TacticalController") if active_mission != null else null
+	_assert(active_mission != null, "Homebase start still launches the active mission after a preview drop request")
+	_assert(active_tactical_controller != null and not bool(active_tactical_controller.get("preview_mode")), "The live mission controller replaces the preview controller after mission start")
+	_assert(String(active_tactical_controller.get("_drop_sequence_phase")) == "inbound", "A preview drop request bootstraps the live mission directly into inbound dropship movement")
+	var initial_drop_position: Vector2 = active_tactical_controller.get("_drop_sequence_position")
+	for _frame in range(6):
+		await process_frame
+	var updated_drop_position: Vector2 = active_tactical_controller.get("_drop_sequence_position")
+	_assert(initial_drop_position.distance_to(updated_drop_position) > 0.1, "Bootstrapped live dropship sequence advances visibly after mission start")
 	scene.queue_free()
 	await process_frame
 

@@ -219,7 +219,7 @@ func _ready() -> void:
 	_update_ui()
 	_refresh_ad_hoc_panel_visibility()
 	_emit_planning_state_changed()
-	_maybe_bootstrap_live_drop()
+	call_deferred("_maybe_bootstrap_live_drop")
 
 
 func _process(delta: float) -> void:
@@ -4304,6 +4304,9 @@ func _maybe_bootstrap_live_drop() -> void:
 	if not _drop_ship_requested or not _has_lz_position:
 		return
 	if not is_inside_tree():
+		return
+	if not is_node_ready():
+		call_deferred("_maybe_bootstrap_live_drop")
 		return
 	if _try_start_drop_sequence():
 		_live_drop_bootstrap_consumed = true
