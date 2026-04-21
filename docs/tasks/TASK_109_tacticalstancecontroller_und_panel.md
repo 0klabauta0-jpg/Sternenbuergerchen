@@ -14,6 +14,11 @@ Der Spieler kann pro ausgewaehltem Fireteam eine taktische Haltung anfordern. Di
 - Lies [docs/tasks/TASK_101_fireteambehaviorresolver_und_standardverhalten.md](docs/tasks/TASK_101_fireteambehaviorresolver_und_standardverhalten.md)
 - Pruefe den Git-Status
 
+## Kontext
+- `TacticalStanceController` besitzt nur den fluechtigen Anforderungszustand pro Fireteam.
+- `FireteamBehaviorResolver` bleibt die einzige Stelle, die daraus ein konkretes `FireteamBehaviorProfile` ableitet.
+- Der Task erweitert weder `FireteamOrderPlan` noch `PhaseState` um neuen Gameplay-Persistenzzustand.
+
 ## Aufgabe
 
 ### 1. `TacticalStanceController`
@@ -23,6 +28,7 @@ Der Spieler kann pro ausgewaehltem Fireteam eine taktische Haltung anfordern. Di
   - `aggressive`
 - Die Haltung wird nicht im `FireteamOrderPlan` gespeichert.
 - Die Haltung gilt bis zur naechsten Aenderung oder bis zu einem globalen Phasenuebergang.
+- Der Controller arbeitet missionslokal und liest den Auswahlzustand aus dem bestehenden `TacticalInputController`, statt eigene Auswahlwahrheiten aufzubauen.
 
 ### 2. Integration in die Verhaltensableitung
 - `FireteamBehaviorResolver` beruecksichtigt die Haltung bei:
@@ -32,6 +38,7 @@ Der Spieler kann pro ausgewaehltem Fireteam eine taktische Haltung anfordern. Di
 - Trait-Sonderfaelle bleiben erhalten:
   - `reckless` ignoriert `cautious` weitgehend
   - `cautious` setzt `aggressive` nur teilweise um
+- Die Haltung modifiziert nur die Ableitung; die eigentliche Ausfuehrung bleibt in bestehenden Runtime-/Simulationspfaden.
 
 ### 3. UI `TacticalStancePanel`
 - Zeige fuer aktuell ausgewaehlte Fireteams die Buttons:
@@ -45,11 +52,14 @@ Der Spieler kann pro ausgewaehltem Fireteam eine taktische Haltung anfordern. Di
 - Die aktuelle Haltung wird an der Unit oder im Statusbereich als Badge `C`, `N` oder `A` sichtbar.
 - Bei Phasenwechsel wird die Haltung automatisch auf `normal` zurueckgesetzt.
 - Haltung und Ad-hoc-Befehle bleiben parallel sichtbar und kompatibel.
+- Die vorhandene Plan-/Ad-hoc-Visualisierung aus frueheren Tasks wird nicht neu definiert, sondern nur um die Stance-Lesbarkeit ergaenzt.
 
 ## Nicht-Ziele
 - keine neuen Phasenregeln
 - keine Ad-hoc-Befehlslogik
 - keine Persistenz im Meta-Layer
+- keine neue Fireteam-Auswahllogik
+- keine direkte Mutation von `TestUnit` ausserhalb des autoritativen Laufzeitpfads
 
 ## Akzeptanzkriterien
 - Pro Fireteam kann zwischen `cautious`, `normal` und `aggressive` umgeschaltet werden.

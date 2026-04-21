@@ -12,8 +12,13 @@ Ein `FireteamMovementController` steuert die Relativbewegung der Members innerha
 - Lies [docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md)
 - Lies [docs/tasks/TASK_100_globaler_phasecontroller_und_plan_ausfuehrung.md](docs/tasks/TASK_100_globaler_phasecontroller_und_plan_ausfuehrung.md)
 - Lies [docs/tasks/TASK_101_fireteambehaviorresolver_und_standardverhalten.md](docs/tasks/TASK_101_fireteambehaviorresolver_und_standardverhalten.md)
+- Lies [docs/tasks/TASK_109_tacticalstancecontroller_und_panel.md](docs/tasks/TASK_109_tacticalstancecontroller_und_panel.md)
 - Lies [docs/tasks/TASK_088_leadership_bonus.md](docs/tasks/TASK_088_leadership_bonus.md)
 - Pruefe den Git-Status
+
+## Kontext
+- Dieser Task setzt das bereits abgeleitete Bewegungsprofil aus `FireteamBehaviorResolver` um; er wird nicht zur zweiten Wahrheitsquelle fuer Verhaltensformeln.
+- `Inter-Fireteam-Koordination` bleibt bei TASK_104, auch wenn mehrere Fireteams zeitgleich in dieselbe Richtung marschieren.
 
 ## Aufgabe
 
@@ -21,6 +26,7 @@ Ein `FireteamMovementController` steuert die Relativbewegung der Members innerha
 - Fuehre Fireteam-Bewegung als eigenstaendige Schicht ein.
 - Der Controller schreibt nicht direkt auf `TestUnit`, sondern erzeugt weiter Commands oder Effects fuer den autoritativen Pfad.
 - Bewegungsmuster werden pro aktivem Wegpunkt aus dem Laufzeitprofil abgeleitet, nicht persistent gespeichert.
+- Eingaben sind mindestens: aktiver Waypoint, aktuelles `advance_style`, `cohesion_threshold`, Leader-/Member-Skills und der aktuelle Missionszustand der Fireteam-Members.
 
 ### 2. Bewegungsmuster `rush`
 - Alle fit Members bewegen sich gleichzeitig.
@@ -41,11 +47,13 @@ Ein `FireteamMovementController` steuert die Relativbewegung der Members innerha
 - Hohes `speed` bevorzugt die erste Bewegungsgruppe.
 - Hohes `accuracy` bevorzugt die Deckungsgruppe.
 - Der Lead bleibt bis zum letzten Bound in der Deckungsgruppe, ausser bei Trait `reckless`.
+- Sind mehr als 50% der Members `down` oder `bleedout`, darf der Controller koordinierte Muster kontrolliert auf einen vereinfachten gleichzeitigen Vormarsch herunterbrechen, statt eine neue Sonderarchitektur einzufuehren.
 
 ### 6. Integrationsgrenzen
 - Keine strukturelle Aenderung an `RuntimeLeader`, `SimulationRoot` oder `CommandToFTLTaskTranslator`.
 - Wegpunkt-Abschluss und Phasenlogik bleiben bei den bestehenden Plan-/Phase-Systemen.
 - Der Controller ergaenzt nur das intra-Fireteam-Verhalten waehrend aktiver Bewegung.
+- Sicherungssektoren, Overwatch und Kontaktgedaechtnis werden nicht in diesen Controller hineingezogen.
 
 ## Nicht-Ziele
 - keine Inter-Fireteam-Koordination

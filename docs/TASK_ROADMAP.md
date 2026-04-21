@@ -247,6 +247,13 @@ TASK_107 – LoadoutModifierResolver und initiale Missions-Effects
 Phase 17I – Gegner-Patrouillen und Editor
 TASK_108 – PatrolEditorTool und Pre-Contact-Patrol
 
+Phase 17J – Taktische Erweiterungen
+TASK_109 – TacticalStanceController und TacticalStancePanel
+TASK_110 – FireteamMovementController und Bewegungsmuster
+TASK_111 – FireteamSecurityController und Overwatch
+TASK_112 – ContactTracker und ContactMapOverlay
+TASK_113 – FlankVulnerabilityResolver und Sektorstrafen
+
 Phase 18 – Erweiterung (spaeter)
 Skillsystem
 soziale Dynamik

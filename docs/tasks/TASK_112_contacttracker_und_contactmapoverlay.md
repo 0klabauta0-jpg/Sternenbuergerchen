@@ -15,6 +15,11 @@ Ein `ContactTracker` fuehrt gestufte Feinderkennungszustaende pro Fireteam ein u
 - Lies [docs/tasks/TASK_092_stealth_sichtreichweite.md](docs/tasks/TASK_092_stealth_sichtreichweite.md)
 - Pruefe den Git-Status
 
+## Kontext
+- `ContactTracker` verwaltet missionslokale Kontaktinformationen als eigene Datenlage pro Fireteam.
+- Der Tracker loest nicht selbst Bewegung, Feuer oder Sektorwechsel aus, sondern beliefert die dafuer zustaendigen Systeme mit Kontaktzustand, letzter Position und Zeitstempeln.
+- Die Darstellung im `ContactMapOverlay` bleibt rein lesend.
+
 ## Aufgabe
 
 ### 1. `ContactTracker`
@@ -38,10 +43,10 @@ Ein `ContactTracker` fuehrt gestufte Feinderkennungszustaende pro Fireteam ein u
 - Empfangende Fireteams erhalten mindestens `suspected`.
 
 ### 4. Wirkung auf das Verhalten
-- `suspected` richtet Fireteams auf den Sektor aus und bereitet Overwatch vor.
-- `spotted` erlaubt Feuer in Reichweite mit Accuracy-Malus.
-- `confirmed` nutzt den normalen Kampfpfad.
-- `lost` haelt die letzte bekannte Position weiter als Bezug fuer Sicherung oder moegliches spaeteres Flankieren.
+- `suspected` liefert genug Information, damit Sicherungs- oder Overwatch-Systeme sich auf den Sektor ausrichten koennen.
+- `spotted` und `confirmed` liefern den noetigen Kontaktzustand fuer bestehende Kampf- und Feuerfreigabelogik.
+- `lost` haelt die letzte bekannte Position weiter als Bezug fuer Sicherung oder spaetere Flanken-Entscheidungen.
+- Die konkrete Reaktion bleibt in den konsumierenden Systemen und wird nicht in den Tracker gezogen.
 
 ### 5. `ContactMapOverlay`
 - Visualisiere:
@@ -55,6 +60,8 @@ Ein `ContactTracker` fuehrt gestufte Feinderkennungszustaende pro Fireteam ein u
 - keine komplette Wahrnehmungs-KI-Neuarchitektur
 - keine eigene Minimap
 - keine globale Commander-Intel-Persistenz ausserhalb der Mission
+- keine eigene Overwatch- oder Security-Ausfuehrung
+- keine direkte Gameplay-Mutation an Units
 
 ## Akzeptanzkriterien
 - Fireteams fuehren Feindkontakte mit den fuenf Erkennungszustaenden.
