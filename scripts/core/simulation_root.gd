@@ -7,6 +7,7 @@ const MOVE_SPEED_PER_SECOND: float = 120.0
 const DAMAGE_MODEL_SCRIPT: GDScript = preload("res://scripts/core/damage_model.gd")
 const OBJECTIVE_STATUS_SCRIPT: GDScript = preload("res://scripts/core/objective_status.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
+const CONTACT_PATH_RECOMPUTE_INTERVAL_MSEC: int = 600
 const TERRAIN_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_pathfinder.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const CAPTURE_PROGRESS_PER_TICK: float = 0.01
@@ -28,6 +29,7 @@ var command_queue: Array = []
 var effects_queue: Array = []
 var tick_counter: int = 0
 var is_processing_tick: bool = false
+var _contact_path_recompute_ready_at_msec: Dictionary = {}
 var _objective_status: RefCounted = null
 var _terrain_pathfinder = TERRAIN_PATHFINDER_SCRIPT.new()
 var _known_units_by_id: Dictionary = {}
@@ -479,6 +481,8 @@ func _apply_effect(effect: Dictionary, delta: float) -> void:
 	match _extract_effect_type(effect):
 		"damage":
 			_apply_damage_effect(effect)
+		"heal":
+			_apply_heal_effect(effect)
 		"bleedout":
 			_apply_bleedout_effect(effect)
 		"respawn":
@@ -626,7 +630,7 @@ func _apply_move_command_with_terrain(
 	delta: float,
 	terrain_registry
 ) -> void:
-	var path_world_points: Array = _extract_or_build_path_world_points(cmd, unit_node.global_position, target_position, terrain_registry)
+	var path_world_points: Array = _extract_or_build_path_world_points(cmd, unit_node, unit_node.global_position, target_position, terrain_registry)
 	if path_world_points.is_empty():
 		return
 
@@ -660,6 +664,7 @@ func _apply_move_command_with_terrain(
 
 func _extract_or_build_path_world_points(
 	cmd: Dictionary,
+	unit,
 	current_position: Vector2,
 	target_position: Vector2,
 	terrain_registry
@@ -669,12 +674,69 @@ func _extract_or_build_path_world_points(
 	if raw_path is Array:
 		existing_path = (raw_path as Array).duplicate(true)
 
+	if _should_recompute_move_path(cmd, unit, existing_path, current_position, target_position, terrain_registry):
+		existing_path.clear()
+		cmd["path"] = []
+
 	if not existing_path.is_empty():
 		return existing_path
 
 	var path_world_points: Array = _build_path_world_points(current_position, target_position, terrain_registry)
 	cmd["path"] = path_world_points.duplicate(true)
 	return path_world_points
+
+
+func _should_recompute_move_path(
+	cmd: Dictionary,
+	unit,
+	existing_path: Array,
+	current_position: Vector2,
+	target_position: Vector2,
+	terrain_registry
+) -> bool:
+	if terrain_registry == null or unit == null:
+		return false
+
+	var unit_id: String = _extract_unit_id_for_path_recompute(unit)
+	if unit_id.is_empty():
+		return false
+
+	if not bool(cmd.get("requeue_until_target", true)) or not _is_unit_in_contact(unit):
+		_contact_path_recompute_ready_at_msec.erase(unit_id)
+		return false
+
+	if existing_path.is_empty():
+		return false
+
+	var target_grid: Vector2i = terrain_registry.call("world_to_grid", target_position)
+	var current_final_waypoint: Vector2 = _coerce_vector2(existing_path[-1], target_position)
+	var current_final_grid: Vector2i = terrain_registry.call("world_to_grid", current_final_waypoint)
+	if current_final_grid != target_grid:
+		_contact_path_recompute_ready_at_msec[unit_id] = Time.get_ticks_msec() + CONTACT_PATH_RECOMPUTE_INTERVAL_MSEC
+		return true
+
+	var current_grid: Vector2i = terrain_registry.call("world_to_grid", current_position)
+	if current_grid == target_grid:
+		_contact_path_recompute_ready_at_msec.erase(unit_id)
+		return false
+
+	var now_msec: int = Time.get_ticks_msec()
+	if int(_contact_path_recompute_ready_at_msec.get(unit_id, 0)) > now_msec:
+		return false
+
+	_contact_path_recompute_ready_at_msec[unit_id] = now_msec + CONTACT_PATH_RECOMPUTE_INTERVAL_MSEC
+	return true
+
+
+func _extract_unit_id_for_path_recompute(unit) -> String:
+	if unit == null or not unit.has_method("get_unit_id"):
+		return ""
+
+	return String(unit.call("get_unit_id"))
+
+
+func _is_unit_in_contact(unit) -> bool:
+	return unit != null and unit.has_method("is_in_contact") and bool(unit.call("is_in_contact"))
 
 
 func _build_path_world_points(current_position: Vector2, target_position: Vector2, terrain_registry) -> Array:
@@ -770,6 +832,40 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		"friendly_fire": is_friendly_fire,
 	}
 	unit.call("apply_damage", resolved_damage, hit_context)
+
+
+func _apply_heal_effect(effect: Dictionary) -> void:
+	var unit_id: String = String(effect.get("unit_id", ""))
+	if unit_id.is_empty():
+		push_warning("SimulationRoot heal effect expects a non-empty unit_id.")
+		return
+
+	var unit = _resolve_unit(unit_id)
+	if unit == null:
+		push_warning("SimulationRoot could not resolve the target unit for a heal effect.")
+		return
+
+	if not unit.has_method("apply_heal"):
+		push_warning("SimulationRoot heal effect expects a unit with apply_heal().")
+		return
+
+	var heal_amount: int = _extract_int(effect.get("amount", 0))
+	if heal_amount <= 0:
+		push_warning("SimulationRoot heal effect expects a positive amount value.")
+		return
+
+	var healer_team_id: String = String(effect.get("healer_team_id", ""))
+	if not healer_team_id.is_empty() and unit.has_method("get_team_id"):
+		if healer_team_id != String(unit.call("get_team_id")):
+			return
+
+	var heal_context: Dictionary = {
+		"effect_type": "heal",
+		"unit_id": unit_id,
+		"healer_unit_id": String(effect.get("healer_unit_id", "")),
+		"healer_team_id": healer_team_id,
+	}
+	unit.call("apply_heal", heal_amount, heal_context)
 
 
 func _apply_bleedout_effect(effect: Dictionary) -> void:
@@ -967,6 +1063,8 @@ func _extract_float(value: Variant, fallback: float) -> float:
 func _extract_unit_hit_modifier(unit) -> float:
 	if unit == null:
 		return 0.0
+	if unit.has_method("get_combat_hit_modifier"):
+		return float(unit.call("get_combat_hit_modifier"))
 
 	var modifier: float = 0.0
 	if unit.has_method("get_order_fidelity_hit_modifier"):
@@ -979,21 +1077,33 @@ func _extract_unit_hit_modifier(unit) -> float:
 
 
 func _extract_unit_evasion_modifier(unit) -> float:
-	if unit == null or not unit.has_method("get_signature_control_evasion_modifier"):
+	if unit == null:
+		return 0.0
+	if unit.has_method("get_combat_evasion_modifier"):
+		return float(unit.call("get_combat_evasion_modifier"))
+	if not unit.has_method("get_signature_control_evasion_modifier"):
 		return 0.0
 
 	return float(unit.call("get_signature_control_evasion_modifier"))
 
 
 func _extract_unit_accuracy_multiplier(unit) -> float:
-	if unit == null or not unit.has_method("get_accuracy_skill"):
+	if unit == null:
+		return 1.0
+	if unit.has_method("get_combat_hit_chance_multiplier"):
+		return maxf(float(unit.call("get_combat_hit_chance_multiplier")), 0.0)
+	if not unit.has_method("get_accuracy_skill"):
 		return 1.0
 
 	return 0.5 + clampf(float(unit.call("get_accuracy_skill")), 0.0, 1.0)
 
 
 func _extract_unit_speed_multiplier(unit) -> float:
-	if unit == null or not unit.has_method("get_speed_skill"):
+	if unit == null:
+		return 1.0
+	if unit.has_method("get_combat_speed_multiplier"):
+		return maxf(float(unit.call("get_combat_speed_multiplier")), 0.0)
+	if not unit.has_method("get_speed_skill"):
 		return 1.0
 
 	var base_multiplier: float = 0.5 + clampf(float(unit.call("get_speed_skill")), 0.0, 1.0)
@@ -1003,7 +1113,11 @@ func _extract_unit_speed_multiplier(unit) -> float:
 
 
 func _extract_unit_damage_taken_multiplier(unit) -> float:
-	if unit == null or not unit.has_method("get_toughness_skill"):
+	if unit == null:
+		return 1.0
+	if unit.has_method("get_combat_damage_taken_multiplier"):
+		return maxf(float(unit.call("get_combat_damage_taken_multiplier")), 0.0)
+	if not unit.has_method("get_toughness_skill"):
 		return 1.0
 
 	var toughness: float = clampf(float(unit.call("get_toughness_skill")), 0.0, 1.0)

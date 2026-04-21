@@ -24,6 +24,8 @@ var _drag_enabled: bool = true
 var _compact_mode: bool = false
 var _is_lead: bool = false
 var _show_lead_indicator: bool = false
+var _show_progress: bool = false
+var _progress_value: float = 0.0
 var _is_drag_preview: bool = false
 var _drag_preview_size: Vector2 = Vector2.ZERO
 var _drag_preview_text_width: float = 0.0
@@ -55,6 +57,8 @@ func setup_from_profile(profile, options: Dictionary = {}) -> void:
 	_compact_mode = bool(options.get("compact_mode", _compact_mode))
 	_is_lead = bool(options.get("is_lead", _is_lead))
 	_show_lead_indicator = bool(options.get("show_lead_indicator", _show_lead_indicator))
+	_show_progress = bool(options.get("show_progress", _show_progress))
+	_progress_value = clampf(float(options.get("progress_value", _progress_value)), 0.0, 100.0)
 	_is_drag_preview = bool(options.get("drag_preview", _is_drag_preview))
 	_drag_preview_size = options.get("drag_preview_size", _drag_preview_size) if typeof(options.get("drag_preview_size", _drag_preview_size)) == TYPE_VECTOR2 else _drag_preview_size
 	_drag_preview_text_width = float(options.get("drag_preview_text_width", _drag_preview_text_width))
@@ -223,6 +227,15 @@ func _ensure_ui() -> void:
 	data_b_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text_vbox.add_child(data_b_label)
 
+	var progress_bar := ProgressBar.new()
+	progress_bar.name = "ProgressBar"
+	progress_bar.min_value = 0.0
+	progress_bar.max_value = 100.0
+	progress_bar.show_percentage = false
+	progress_bar.custom_minimum_size = Vector2(0.0, 8.0)
+	progress_bar.visible = false
+	text_vbox.add_child(progress_bar)
+
 	var star_button := Button.new()
 	star_button.name = "StarButton"
 	star_button.text = "\u2605"
@@ -245,6 +258,7 @@ func _refresh_card() -> void:
 	var margin: MarginContainer = get_node("Margin")
 	var hbox: HBoxContainer = get_node("Margin/HBox")
 	var text_vbox: VBoxContainer = get_node("Margin/HBox/TextVBox")
+	var progress_bar: ProgressBar = get_node("Margin/HBox/TextVBox/ProgressBar")
 
 	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -253,9 +267,11 @@ func _refresh_card() -> void:
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	data_a_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	data_b_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	progress_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	data_a_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	data_b_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	progress_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	if _compact_mode:
 		name_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 		data_a_label.autowrap_mode = TextServer.AUTOWRAP_OFF
@@ -306,7 +322,10 @@ func _refresh_card() -> void:
 	data_b_label.text = data_b_text
 	portrait_rect.texture = portrait_texture
 	portrait_rect.modulate = Color(1.0, 1.0, 1.0, 1.0) if portrait_texture != null else Color(0.35, 0.37, 0.42, 1.0)
-	_apply_density(margin, hbox, text_vbox, portrait_rect, name_label, data_a_label, data_b_label)
+	progress_bar.visible = _show_progress
+	progress_bar.value = _progress_value
+	progress_bar.modulate = Color(0.48, 0.82, 0.58, 1.0) if not _is_disabled else Color(0.42, 0.46, 0.44, 0.92)
+	_apply_density(margin, hbox, text_vbox, portrait_rect, name_label, data_a_label, data_b_label, progress_bar)
 
 	_apply_state_visuals(name_label, data_a_label, data_b_label)
 
@@ -342,7 +361,8 @@ func _apply_density(
 	portrait_rect: TextureRect,
 	name_label: Label,
 	data_a_label: Label,
-	data_b_label: Label
+	data_b_label: Label,
+	progress_bar: ProgressBar
 ) -> void:
 	if _compact_mode:
 		var compact_width := _get_compact_required_width()
@@ -353,6 +373,8 @@ func _apply_density(
 		var compact_height := COMPACT_CARD_MIN_SIZE.y
 		if _is_drag_preview and _drag_preview_size.y > compact_height:
 			compact_height = _drag_preview_size.y
+		if _show_progress:
+			compact_height = maxf(compact_height, 68.0)
 		custom_minimum_size = Vector2(compact_width, compact_height)
 		margin.add_theme_constant_override("margin_left", 4)
 		margin.add_theme_constant_override("margin_top", 4)
@@ -371,6 +393,7 @@ func _apply_density(
 		name_label.add_theme_font_size_override("font_size", 12)
 		data_a_label.add_theme_font_size_override("font_size", 10)
 		data_b_label.add_theme_font_size_override("font_size", 10)
+		progress_bar.custom_minimum_size = Vector2(0.0, 8.0)
 		return
 
 	custom_minimum_size = Vector2(custom_minimum_size.x, FULL_CARD_MIN_HEIGHT)
@@ -388,6 +411,7 @@ func _apply_density(
 	name_label.add_theme_font_size_override("font_size", 14)
 	data_a_label.add_theme_font_size_override("font_size", 12)
 	data_b_label.add_theme_font_size_override("font_size", 12)
+	progress_bar.custom_minimum_size = Vector2(0.0, 10.0)
 
 
 func _get_compact_required_width() -> float:

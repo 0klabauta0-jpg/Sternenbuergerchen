@@ -7,6 +7,10 @@ const BUTTON_TEXTURE: Texture2D = preload("res://Assets/kenney_ui-pack/PNG/Grey/
 const BUTTON_DISABLED_TEXTURE: Texture2D = preload("res://Assets/kenney_ui-pack/PNG/Grey/Default/button_rectangle_flat.png")
 const HEADER_TEXTURE: Texture2D = preload("res://Assets/kenney_ui-pack-space-expansion/PNG/Grey/Default/button_square_header_large_rectangle.png")
 const MISSION_HEADER_TEXTURE: Texture2D = preload("res://Assets/kenney_ui-pack-space-expansion/PNG/Grey/Default/button_square_header_blade_rectangle_screws.png")
+const TACTICAL_FRAME_TEXTURE: Texture2D = preload("res://Assets/kenney_ui-pack-space-expansion/PNG/Grey/Default/bar_square_large.png")
+const TACTICAL_PANEL_TEXTURE: Texture2D = preload("res://Assets/kenney_ui-pack-space-expansion/PNG/Grey/Default/bar_square_gloss_large.png")
+const TACTICAL_BUTTON_TEXTURE: Texture2D = preload("res://Assets/kenney_ui-pack-space-expansion/PNG/Grey/Default/button_square_header_small_rectangle_screws.png")
+const TACTICAL_BUTTON_ACTIVE_TEXTURE: Texture2D = preload("res://Assets/kenney_ui-pack-space-expansion/PNG/Grey/Default/button_square_header_notch_rectangle_screws.png")
 const TRANSFER_READY_TEXTURE: Texture2D = preload("res://Assets/kenney_ui-pack-space-expansion/PNG/Green/Default/button_square_header_blade_rectangle_screws.png")
 const TRANSFER_PRESSED_TEXTURE: Texture2D = preload("res://Assets/kenney_ui-pack-space-expansion/PNG/Yellow/Default/button_square_header_blade_rectangle_screws.png")
 
@@ -204,6 +208,35 @@ static func style_secondary_button(button: Button) -> void:
 
 static func style_primary_button(button: Button) -> void:
 	_apply_button_style(button, true)
+
+
+static func style_tactical_panel(panel: PanelContainer, variant: String = "frame") -> void:
+	if panel == null:
+		return
+
+	match variant:
+		"header":
+			panel.add_theme_stylebox_override("panel", _build_stylebox(MISSION_HEADER_TEXTURE, 14, 14, 12, 12))
+		"panel":
+			panel.add_theme_stylebox_override("panel", _build_stylebox(TACTICAL_PANEL_TEXTURE, 16, 16, 14, 14))
+		_:
+			panel.add_theme_stylebox_override("panel", _build_stylebox(TACTICAL_FRAME_TEXTURE, 16, 16, 14, 14))
+
+
+static func style_tactical_button(button: Button, is_active: bool = false) -> void:
+	if button == null:
+		return
+
+	button.add_theme_stylebox_override("normal", _build_stylebox(TACTICAL_BUTTON_ACTIVE_TEXTURE if is_active else TACTICAL_BUTTON_TEXTURE, 12, 12, 10, 10))
+	button.add_theme_stylebox_override("hover", _build_stylebox(TACTICAL_BUTTON_ACTIVE_TEXTURE, 12, 12, 10, 10))
+	button.add_theme_stylebox_override("pressed", _build_stylebox(TACTICAL_FRAME_TEXTURE, 14, 14, 12, 12))
+	button.add_theme_stylebox_override("disabled", _build_stylebox(BUTTON_DISABLED_TEXTURE, 10, 10, 10, 10))
+	button.add_theme_color_override("font_color", TEXT_HEADER)
+	button.add_theme_color_override("font_hover_color", TEXT_HEADER)
+	button.add_theme_color_override("font_pressed_color", TEXT_HEADER)
+	button.add_theme_color_override("font_focus_color", TEXT_HEADER)
+	button.add_theme_color_override("font_disabled_color", TEXT_DISABLED)
+	button.add_theme_font_size_override("font_size", 9)
 
 
 static func style_header_button(button: Button, primary: bool = false) -> void:

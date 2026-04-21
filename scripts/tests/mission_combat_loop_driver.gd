@@ -30,6 +30,10 @@ const MEDIC_SUPPORT_HEAL_AMOUNT: int = 35
 const MEDIC_SUPPORT_COOLDOWN_TICKS: int = 12
 const MEDIC_SUPPORT_PRIORITY: int = 25
 const MEDIC_EVENT_COLOR: Color = Color(0.55, 1.0, 0.72, 1.0)
+const FRIENDLY_STANDARD_COVER_RADIUS: float = 48.0
+const FRIENDLY_STANDARD_COVER_MIN_DISTANCE: float = 10.0
+const FRIENDLY_STANDARD_COVER_COOLDOWN_MSEC: int = 1600
+const FRIENDLY_LOW_COVER_THRESHOLD: int = 16
 
 signal contact_established(attacker, target)
 signal combat_resolved(mission_result: Dictionary)
@@ -57,6 +61,7 @@ signal combat_resolved(mission_result: Dictionary)
 @export var respawn_manager_path: NodePath
 @export var enemy_wave_controller_path: NodePath
 @export var terrain_registry_path: NodePath
+@export var tactical_controller_path: NodePath
 @export var preview_mode: bool = false
 
 var _los_system = LOS_SYSTEM_SCRIPT.new()
@@ -82,6 +87,7 @@ var _detection_progress: Dictionary = {}
 var _discipline_break_cooldown: Dictionary = {}
 var _misidentification_cooldown: Dictionary = {}
 var _medic_support_cooldown: Dictionary = {}
+var _friendly_cover_ready_at_msec: Dictionary = {}
 var _overlays_visible: bool = true
 
 
@@ -182,6 +188,7 @@ func _on_tick_processed(tick: int) -> void:
 	_advance_medic_support_cooldowns()
 	_try_enqueue_medic_support(simulation_root)
 	_advance_enemy_units(simulation_root)
+	_apply_friendly_standard_behavior(simulation_root)
 	_try_enqueue_attacks(simulation_root)
 	_update_combat_resolution()
 	if not _combat_finished:
@@ -1694,6 +1701,114 @@ func _get_terrain_registry():
 		return null
 
 	return simulation_root.call("_get_terrain_registry")
+
+
+func _get_tactical_controller():
+	if not tactical_controller_path.is_empty():
+		return get_node_or_null(tactical_controller_path)
+	return get_node_or_null("../TacticalController")
+
+
+func _apply_friendly_standard_behavior(simulation_root: Node) -> void:
+	if simulation_root == null:
+		return
+	var tactical_controller = _get_tactical_controller()
+	if tactical_controller == null or not tactical_controller.has_method("get_active_behavior_profile"):
+		return
+	for friendly in _get_units(friendly_unit_paths):
+		if friendly == null or not (friendly is Node2D) or not friendly.has_method("get_vital_state"):
+			continue
+		if String(friendly.call("get_vital_state")) != "fit":
+			continue
+		if not (friendly.has_method("is_in_contact") and bool(friendly.call("is_in_contact"))):
+			continue
+		if not friendly.has_method("get_fireteam_id") or not friendly.has_method("get_unit_id"):
+			continue
+		var fireteam_id: String = String(friendly.call("get_fireteam_id")).strip_edges().to_lower()
+		var profile_dict: Dictionary = Dictionary(tactical_controller.call("get_active_behavior_profile", fireteam_id))
+		if profile_dict.is_empty():
+			continue
+		var metadata: Dictionary = Dictionary(profile_dict.get("metadata", {}))
+		if String(metadata.get("origin", "")) != "standard_behavior":
+			continue
+		if not bool(metadata.get("prefer_cover_seek", false)):
+			continue
+		if _extract_current_command_type(friendly) != "hold_position":
+			continue
+		if friendly.has_method("get_effective_cover_score") and int(friendly.call("get_effective_cover_score")) >= FRIENDLY_LOW_COVER_THRESHOLD:
+			continue
+		var unit_id: String = String(friendly.call("get_unit_id"))
+		var now_msec: int = Time.get_ticks_msec()
+		if int(_friendly_cover_ready_at_msec.get(unit_id, 0)) > now_msec:
+			continue
+		var cover_target: Vector2 = _build_friendly_cover_target(friendly, profile_dict)
+		if cover_target == Vector2.INF:
+			continue
+		simulation_root.call(
+			"enqueue_command",
+			{
+				"command_type": "move_to_position",
+				"priority": 11,
+				"unit_id": unit_id,
+				"target_position": cover_target,
+				"move_speed_factor": 0.35,
+				"requeue_until_target": true,
+			}
+		)
+		_friendly_cover_ready_at_msec[unit_id] = now_msec + FRIENDLY_STANDARD_COVER_COOLDOWN_MSEC
+		if friendly.has_method("show_event_text"):
+			friendly.call("show_event_text", "SEEK COVER", DEFAULT_EVENT_COLOR, 0.9)
+
+
+func _extract_current_command_type(unit) -> String:
+	if unit == null:
+		return ""
+	if unit.has_method("get_current_unit_command"):
+		var command = unit.call("get_current_unit_command")
+		if command != null and command.has_method("get"):
+			return String(command.get("command_type"))
+	if unit.has_method("get_runtime_status"):
+		var runtime_status = unit.call("get_runtime_status")
+		if runtime_status != null and runtime_status.has_method("get"):
+			return String(runtime_status.get("active_command_type"))
+	return ""
+
+
+func _build_friendly_cover_target(unit, profile_dict: Dictionary) -> Vector2:
+	var terrain_registry = _get_terrain_registry()
+	if terrain_registry == null or not terrain_registry.has_method("get_walkable_cover_tiles_in_radius"):
+		return Vector2.INF
+	if unit == null or not (unit is Node2D):
+		return Vector2.INF
+	var unit_node: Node2D = unit
+	var min_dist_sq: float = FRIENDLY_STANDARD_COVER_MIN_DISTANCE * FRIENDLY_STANDARD_COVER_MIN_DISTANCE
+	var best_position: Vector2 = Vector2.INF
+	var best_score: float = -INF
+	var cover_priority: float = clampf(float(profile_dict.get("cover_priority", 0.5)), 0.0, 1.0)
+	for tile in terrain_registry.call("get_walkable_cover_tiles_in_radius", unit_node.global_position, FRIENDLY_STANDARD_COVER_RADIUS):
+		if tile == null:
+			continue
+		var tile_position: Vector2 = Vector2(tile.world_position)
+		var distance_sq: float = unit_node.global_position.distance_squared_to(tile_position)
+		if distance_sq < min_dist_sq:
+			continue
+		var cover_score: float = clampf(float(tile.cover_value) / 100.0, 0.0, 1.0)
+		var score: float = (cover_score * (0.6 + cover_priority)) - (sqrt(distance_sq) * 0.02)
+		if score <= best_score:
+			continue
+		best_score = score
+		best_position = tile_position
+	return best_position
+
+
+func get_current_fireteam_lead_unit(fireteam_id: String):
+	var normalized_fireteam_id: String = fireteam_id.strip_edges()
+	if normalized_fireteam_id.is_empty():
+		return null
+	var acting_lead_id: String = String(_fireteam_acting_leads.get(normalized_fireteam_id, ""))
+	if not acting_lead_id.is_empty():
+		return _resolve_unit_by_id(acting_lead_id)
+	return null
 
 
 func _has_pending_enemy_waves() -> bool:

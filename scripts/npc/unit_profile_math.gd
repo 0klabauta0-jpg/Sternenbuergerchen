@@ -105,11 +105,15 @@ static func build_character_bundle(data: Dictionary) -> Dictionary:
 	}
 	var function_scores: Dictionary = _build_function_scores(role_id, core_values, communication_values, platform_values, mobility)
 	var specialty_info: Dictionary = _build_specialties(role_id, method_scores, function_scores)
+	var accuracy_multiplier: float = accuracy_to_hit_chance_multiplier(float(core_values.get("accuracy", 0.0)))
+	var speed_multiplier: float = base_speed_to_speed_multiplier(float(core_values.get("speed", 0.0))) * initiative_to_speed_multiplier(float(behavior_axes.get("initiative", 0.0)))
+	var damage_taken_multiplier: float = toughness_to_damage_taken_multiplier(float(core_values.get("toughness", 0.0))) * contact_stability_to_damage_taken_multiplier(float(behavior_axes.get("contact_stability", 0.0)))
 	var combat_effects: Dictionary = {
-		"speed_multiplier": initiative_to_speed_multiplier(float(behavior_axes.get("initiative", 0.0))),
+		"hit_chance_multiplier": accuracy_multiplier,
+		"speed_multiplier": speed_multiplier,
 		"hit_modifier": order_fidelity_to_hit_modifier(float(behavior_axes.get("order_fidelity", 0.0))) + autonomy_to_hit_modifier(float(behavior_axes.get("autonomy", 0.0))),
 		"evasion_modifier": signature_control_to_evasion_modifier(float(behavior_axes.get("signature_control", 0.0))),
-		"damage_taken_multiplier": contact_stability_to_damage_taken_multiplier(float(behavior_axes.get("contact_stability", 0.0))),
+		"damage_taken_multiplier": damage_taken_multiplier,
 	}
 	return {
 		"role_id": role_id,
@@ -146,6 +150,14 @@ static func initiative_to_speed_multiplier(score: float) -> float:
 	return clampf(0.85 + (clampf(score, 0.0, 1.0) * 0.30), 0.85, 1.15)
 
 
+static func accuracy_to_hit_chance_multiplier(score: float) -> float:
+	return 0.5 + clampf(score, 0.0, 1.0)
+
+
+static func base_speed_to_speed_multiplier(score: float) -> float:
+	return 0.5 + clampf(score, 0.0, 1.0)
+
+
 static func order_fidelity_to_hit_modifier(score: float) -> float:
 	return (clampf(score, 0.0, 1.0) - 0.50) * 0.18
 
@@ -160,6 +172,10 @@ static func signature_control_to_evasion_modifier(score: float) -> float:
 
 static func contact_stability_to_damage_taken_multiplier(score: float) -> float:
 	return clampf(1.0 - ((clampf(score, 0.0, 1.0) - 0.50) * 0.30), 0.85, 1.15)
+
+
+static func toughness_to_damage_taken_multiplier(score: float) -> float:
+	return 1.0 - (clampf(score, 0.0, 1.0) * 0.4)
 
 
 static func describe_value(score: float) -> String:
@@ -406,7 +422,8 @@ static func _resolve_air_role_value(platform_values: Dictionary, role_id: String
 
 static func _build_combat_effect_summary(combat_effects: Dictionary) -> String:
 	var speed_delta: int = int(round((float(combat_effects.get("speed_multiplier", 1.0)) - 1.0) * 100.0))
-	var hit_delta: int = int(round(float(combat_effects.get("hit_modifier", 0.0)) * 100.0))
+	var hit_multiplier_delta: int = int(round((float(combat_effects.get("hit_chance_multiplier", 1.0)) - 1.0) * 100.0))
+	var hit_delta: int = hit_multiplier_delta + int(round(float(combat_effects.get("hit_modifier", 0.0)) * 100.0))
 	var evasion_delta: int = int(round(float(combat_effects.get("evasion_modifier", 0.0)) * 100.0))
 	var stability_delta: int = int(round((1.0 - float(combat_effects.get("damage_taken_multiplier", 1.0))) * 100.0))
 	return "Move %+d%% | Aim %+d%% | Conceal %+d%% | Stability %+d%%" % [speed_delta, hit_delta, evasion_delta, stability_delta]

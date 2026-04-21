@@ -41,6 +41,14 @@ func run_flow() -> bool:
 
 
 func issue_command(command_type_override: String = "", phase_override: int = -1) -> bool:
+	return _issue_command_internal(command_type_override, phase_override, null)
+
+
+func issue_command_at_position(target_world_position: Vector2, command_type_override: String = "", phase_override: int = -1) -> bool:
+	return _issue_command_internal(command_type_override, phase_override, target_world_position)
+
+
+func _issue_command_internal(command_type_override: String, phase_override: int, target_position_override) -> bool:
 	var runtime_leader = get_node_or_null(runtime_leader_path)
 	var target_marker = get_node_or_null(target_marker_path)
 	if runtime_leader == null or not (target_marker is Node2D):
@@ -52,7 +60,10 @@ func issue_command(command_type_override: String = "", phase_override: int = -1)
 	command.priority = 10
 	command.unit_id = unit_id
 	command.team_id = team_id
-	command.target_position = target_marker.position
+	if typeof(target_position_override) == TYPE_VECTOR2:
+		command.target_position = target_position_override
+	else:
+		command.target_position = target_marker.global_position
 	command.phase = phase if phase_override < 0 else phase_override
 	if not bool(command.call("is_valid")):
 		push_warning("MissionCommandFlowDriver could not build a valid CommanderCommand.")

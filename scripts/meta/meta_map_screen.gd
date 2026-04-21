@@ -64,14 +64,16 @@ func _render() -> void:
 		marker_detail_text = _build_marker_detail_text(terrain_map_data)
 
 	var fireteams: Array = _fob_overview.get("fireteams", [])
+	var pilot_count: int = int(_fob_overview.get("pilot_count", 0))
+	var slot_usage_count: int = int(_fob_overview.get("slot_usage_count", _selected_unit_ids.size() + pilot_count))
 	map_name_label.text = "Map: %s" % map_name
-	operator_count_label.text = "Operators: %d" % _selected_unit_ids.size()
-	fireteam_count_label.text = "Slots: %d | Fireteams: %d" % [_mission_slot_count, fireteams.size()]
-	mission_summary_label.text = "%s on %s. This screen stays read-only and mirrors the current Homebase-to-FOB preparation without committing gameplay state." % [_mission_name, map_name]
+	operator_count_label.text = "Operators: %d | Pilots: %d" % [_selected_unit_ids.size(), pilot_count]
+	fireteam_count_label.text = "Slots: %d / %d | Fireteams: %d" % [mini(slot_usage_count, _mission_slot_count), _mission_slot_count, fireteams.size()]
+	mission_summary_label.text = "%s on %s. Mission context, slots and FOB staging stay compact here while the actual mission map remains the authoritative planning surface." % [_mission_name, map_name]
 	map_capacity_label.text = "Mission slots %d | Dropship %d NPC + pilot" % [_mission_slot_count, DROPSHIP_NPC_CAPACITY]
 	marker_list_label.text = marker_detail_text
 	map_data_label.text = "File: %s\nGrid: %d x %d\nTiles: %d\n%s" % [_map_file_path, grid_size.x, grid_size.y, tile_count, marker_summary_text]
-	map_help_label.text = "Die Einsatzmap nutzt denselben Terrain-Renderpfad wie Mission und Editor, bleibt hier aber bewusst read-only. Sie zeigt Marker, Kartenstruktur und den aktuellen Meta-Vorbereitungsstand auf einen Blick."
+	map_help_label.text = "Diese Ansicht verwendet dieselbe Kartenbasis wie Mission und Editor. Sie zeigt Marker, Kartenstruktur und den aktuellen FOB-Vorbereitungsstand ohne einen zweiten MissionMap-Begriff einzufuehren."
 	fireteam_overview_label.text = _build_fireteam_overview_text(fireteams)
 	dropship_overview_label.text = "Dropship\n\n%s\n%s" % [
 		String(_fob_overview.get("dropship_status", "Dropship: waiting for active fireteams")),

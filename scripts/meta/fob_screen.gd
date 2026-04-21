@@ -3,12 +3,24 @@ extends Control
 
 const META_UNIT_PROFILE_BUILDER_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile_builder.gd")
 const CHARACTER_SHEET_FORMATTER_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_formatter.gd")
+const CHARACTER_SHEET_VIEW_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_view.gd")
 const NPC_COMPACT_CARD_SCENE: PackedScene = preload("res://scenes/meta/components/npc_compact_card.tscn")
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
 const FOB_FIRETEAM_CARD_SCRIPT: GDScript = preload("res://scripts/meta/fob_fireteam_card.gd")
 const FOB_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/fob_drop_panel.gd")
 const DROPSHIP_SIDE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Side/craft_speederB.png")
 const DROPSHIP_FOB_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
+const LEGACY_CHARACTER_OVERLAY_NODE_NAMES: PackedStringArray = [
+	"OverlayPortraitRect",
+	"OverlayNameLabel",
+	"OverlayIdentityLabel",
+	"OverlayRoleLabel",
+	"OverlayStatusLabel",
+	"OverlaySkillLabel",
+	"OverlayTraitLabel",
+	"OverlayLoadoutLabel",
+	"OverlayBioLabel",
+]
 
 signal mission_start_requested(selected_unit_ids, selected_fireteam_ids)
 
@@ -208,6 +220,7 @@ func request_mission_start() -> void:
 
 func build_meta_overview() -> Dictionary:
 	var fireteams: Array = []
+	var pilot_count: int = _count_transport_pilot_slots()
 	for definition_variant in _fireteam_definitions:
 		if typeof(definition_variant) != TYPE_DICTIONARY:
 			continue
@@ -228,6 +241,8 @@ func build_meta_overview() -> Dictionary:
 	return {
 		"team_count": _selected_unit_ids.size(),
 		"assigned_operator_count": _count_assigned_operators(),
+		"pilot_count": pilot_count,
+		"slot_usage_count": _selected_unit_ids.size() + pilot_count,
 		"dropship_status": _build_dropship_status_text(),
 		"dropship_queue": _build_boarding_queue_text(),
 		"fireteams": fireteams,
@@ -246,6 +261,8 @@ func _build_selected_unit_configs() -> Array:
 	var selected_lookup: Dictionary = {}
 	for unit_id_variant in _selected_unit_ids:
 		selected_lookup[String(unit_id_variant)] = true
+	for transit_unit_id in _get_transit_to_fob_unit_ids():
+		selected_lookup[transit_unit_id] = true
 	for pilot_unit_id in _get_transport_craft_pilot_unit_ids():
 		selected_lookup[pilot_unit_id] = true
 
@@ -299,6 +316,11 @@ func _build_profile_options_by_unit_id() -> Dictionary:
 			"status_text": "PILOT",
 			"secondary_text": _build_unit_location_text(pilot_unit_id),
 		}
+	for transit_unit_id in _get_transit_to_fob_unit_ids():
+		options_by_unit_id[transit_unit_id] = {
+			"status_text": "IN TRANSIT",
+			"secondary_text": _build_transit_to_fob_secondary_text(transit_unit_id),
+		}
 
 	return options_by_unit_id
 
@@ -326,12 +348,14 @@ func _update_brief_panel() -> void:
 	var mission_header_label := get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionHeaderLabel") as Label
 	var mission_summary_label := get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionSummaryLabel") as Label
 	var start_button := get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/StartMissionButton") as Button
+	var pilot_count: int = _count_transport_pilot_slots()
+	var mission_slot_usage: int = _selected_unit_ids.size() + pilot_count
 
 	mission_header_label.text = "FOB MISSION BRIEF"
-	team_status_label.text = "Mission slots: %d / %d" % [mini(_selected_unit_ids.size(), _mission_slot_count), _mission_slot_count]
+	team_status_label.text = "Mission slots: %d / %d" % [mini(mission_slot_usage, _mission_slot_count), _mission_slot_count]
 	fireteam_status_label.text = "Mission: %s" % _mission_name
 	dropship_status_label.text = "Map: %s" % _mission_map_name
-	mission_summary_label.text = "Operators: %d | Fireteams: %d active | %s" % [_selected_unit_ids.size(), _count_fireteams_with_members(), _build_dropship_status_text()]
+	mission_summary_label.text = "Operators: %d | Pilots: %d | Fireteams: %d active | %s" % [_selected_unit_ids.size(), pilot_count, _count_fireteams_with_members(), _build_dropship_status_text()]
 	start_button.disabled = _selected_unit_ids.is_empty()
 
 
@@ -340,11 +364,17 @@ func _render_available_operators() -> void:
 	_clear_container(operator_list)
 	_operator_cards_by_unit_id.clear()
 
-	for unit_id_variant in _selected_unit_ids:
-		var unit_id: String = String(unit_id_variant)
+	for unit_data_variant in _available_units:
+		if typeof(unit_data_variant) != TYPE_DICTIONARY:
+			continue
+		var unit_data: Dictionary = Dictionary(unit_data_variant)
+		var unit_id: String = String(unit_data.get("unit_id", "")).strip_edges()
+		if unit_id.is_empty():
+			continue
 		if _is_transport_craft_pilot(unit_id):
 			continue
-		if not _get_selected_fireteam_id_for_unit(unit_id).is_empty():
+		var is_in_transit: bool = bool(unit_data.get("is_transit_to_fob", false))
+		if not is_in_transit and not _get_selected_fireteam_id_for_unit(unit_id).is_empty():
 			continue
 		var profile = _profiles_by_id.get(unit_id, null)
 		if profile == null:
@@ -356,9 +386,11 @@ func _render_available_operators() -> void:
 			{
 				"source_context": "fob_available",
 				"selected": unit_id == _focused_unit_id,
-				"disabled": false,
-				"drag_enabled": true,
+				"disabled": is_in_transit,
+				"drag_enabled": not is_in_transit,
 				"compact_mode": true,
+				"show_progress": is_in_transit,
+				"progress_value": float(unit_data.get("transfer_progress", 0.0)),
 			}
 		)
 		if not card.card_pressed.is_connected(_on_operator_card_pressed):
@@ -453,7 +485,7 @@ func _refresh_card_highlights() -> void:
 	for unit_id in _operator_cards_by_unit_id.keys():
 		var card = _operator_cards_by_unit_id.get(unit_id, null)
 		if card != null and is_instance_valid(card):
-			card.set_visual_state(String(unit_id) == _focused_unit_id, false)
+			card.set_visual_state(String(unit_id) == _focused_unit_id, _is_unit_in_transit_to_fob(String(unit_id)))
 
 	for unit_id in _member_cards_by_unit_id.keys():
 		var card = _member_cards_by_unit_id.get(unit_id, null)
@@ -552,47 +584,34 @@ func _open_character_overlay(unit_id: String) -> void:
 
 
 func _update_character_overlay() -> void:
-	var portrait_rect := get_node("CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox/OverlayPortraitRect") as TextureRect
-	var name_label := get_node("CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox/OverlayNameLabel") as Label
-	var identity_label := get_node("CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox/OverlayIdentityLabel") as Label
-	var role_label := get_node("CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox/OverlayRoleLabel") as Label
-	var status_label := get_node("CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox/OverlayStatusLabel") as Label
-	var skill_label := get_node("CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox/OverlaySkillLabel") as Label
-	var trait_label := get_node("CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox/OverlayTraitLabel") as Label
-	var loadout_label := get_node("CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox/OverlayLoadoutLabel") as Label
-	var bio_label := get_node("CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox/OverlayBioLabel") as Label
-
 	var profile = _profiles_by_id.get(_focused_unit_id, null)
-	if profile == null:
-		portrait_rect.texture = null
-		var empty_blocks: Dictionary = CHARACTER_SHEET_FORMATTER_SCRIPT.build_sheet_blocks(null)
-		name_label.text = String(empty_blocks.get("name", "No operator selected"))
-		identity_label.text = String(empty_blocks.get("identity", "No profile loaded"))
-		role_label.text = String(empty_blocks.get("role", "Role: unavailable"))
-		status_label.text = String(empty_blocks.get("status", "Status: waiting for selection"))
-		skill_label.text = String(empty_blocks.get("skills", "Core: unavailable"))
-		trait_label.text = String(empty_blocks.get("traits", "Behavior: unavailable"))
-		loadout_label.text = String(empty_blocks.get("loadout", "Loadout: unavailable"))
-		bio_label.text = String(empty_blocks.get("bio", "Bio: unavailable"))
-		return
-
-	portrait_rect.texture = _load_portrait_texture(String(profile.portrait_path))
-	portrait_rect.modulate = Color(1.0, 1.0, 1.0, 1.0) if portrait_rect.texture != null else Color(0.35, 0.37, 0.42, 1.0)
-	var blocks: Dictionary = CHARACTER_SHEET_FORMATTER_SCRIPT.build_sheet_blocks(
+	var overlay_options: Dictionary = {
+		"status_text": _build_overlay_status_text(_focused_unit_id),
+		"fireteam_text": CHARACTER_SHEET_FORMATTER_SCRIPT.format_fireteam_label(_build_fireteam_display_text(_get_selected_fireteam_id_for_unit(_focused_unit_id))),
+	}
+	if profile != null:
+		overlay_options["loadout_text"] = _build_overlay_loadout_text(_focused_unit_id, profile)
+	CHARACTER_SHEET_VIEW_SCRIPT.render(
+		_get_character_overlay_content_host(),
 		profile,
-		{
-			"status_text": _build_overlay_status_text(_focused_unit_id),
-			"loadout_text": _build_overlay_loadout_text(_focused_unit_id, profile),
-		}
+		overlay_options
 	)
-	name_label.text = String(blocks.get("name", String(profile.display_name)))
-	identity_label.text = String(blocks.get("identity", ""))
-	role_label.text = String(blocks.get("role", ""))
-	status_label.text = String(blocks.get("status", ""))
-	skill_label.text = String(blocks.get("skills", ""))
-	trait_label.text = String(blocks.get("traits", ""))
-	loadout_label.text = String(blocks.get("loadout", ""))
-	bio_label.text = String(blocks.get("bio", ""))
+
+
+func _get_character_overlay_content_host() -> VBoxContainer:
+	var content_vbox := get_node("CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox") as VBoxContainer
+	for node_name in LEGACY_CHARACTER_OVERLAY_NODE_NAMES:
+		var legacy_node := content_vbox.get_node_or_null(String(node_name)) as CanvasItem
+		if legacy_node != null:
+			legacy_node.visible = false
+	var host := content_vbox.get_node_or_null("GeneratedOverlayContent") as VBoxContainer
+	if host == null:
+		host = VBoxContainer.new()
+		host.name = "GeneratedOverlayContent"
+		host.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		host.add_theme_constant_override("separation", 8)
+		content_vbox.add_child(host)
+	return host
 
 
 func _update_character_overlay_visibility() -> void:
@@ -617,7 +636,10 @@ func _build_last_mission_summary_text() -> String:
 
 
 func _build_available_help_text() -> String:
+	var inbound_count: int = _get_transit_to_fob_unit_ids().size()
 	if _focused_unit_id.is_empty():
+		if inbound_count > 0:
+			return "Links stehen unzugewiesene FOB-Operators. Grau markierte Karten sind noch im Anflug und zeigen ihren Transferfortschritt."
 		return "Links stehen nur unzugewiesene FOB-Operators. Ziehe Mitglieder auf Fireteams oder zurueck hierher, um sie zu loesen."
 
 	return "Focused operator: %s | Current fireteam: %s" % [_build_display_name(_focused_unit_id), _build_fireteam_display_text(_get_selected_fireteam_id_for_unit(_focused_unit_id))]
@@ -1067,6 +1089,21 @@ func _count_assigned_operators() -> int:
 		if not String(fireteam_id).strip_edges().is_empty():
 			assigned_count += 1
 	return assigned_count
+
+
+func _count_transport_pilot_slots() -> int:
+	var unique_pilot_ids: Dictionary = {}
+	for craft_state_variant in _transport_craft_states:
+		if typeof(craft_state_variant) != TYPE_DICTIONARY:
+			continue
+		var craft_state: Dictionary = craft_state_variant
+		if not bool(craft_state.get("visible_in_fob", false)):
+			continue
+		var pilot_unit_id: String = String(craft_state.get("pilot_unit_id", "")).strip_edges()
+		if pilot_unit_id.is_empty():
+			continue
+		unique_pilot_ids[pilot_unit_id] = true
+	return unique_pilot_ids.size()
 
 
 func _count_fireteams_with_members() -> int:
@@ -1842,6 +1879,8 @@ func _build_unit_secondary_text(team_state: Dictionary, unit_id: String) -> Stri
 
 
 func _build_unit_location_text(unit_id: String) -> String:
+	if _is_unit_in_transit_to_fob(unit_id):
+		return "Loc: Transit To FOB / ETA %ds" % _get_unit_transit_eta_seconds(unit_id)
 	var craft_state: Dictionary = _find_transport_craft_state_by_pilot(unit_id)
 	if not craft_state.is_empty():
 		var craft_name: String = String(craft_state.get("display_name", "craft")).strip_edges()
@@ -1976,7 +2015,7 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 	header_row.add_child(title_label)
 
 	var select_button := Button.new()
-	select_button.text = "Track" if not is_selected else "Tracked"
+	select_button.text = "Focus" if not is_selected else "Focused"
 	select_button.custom_minimum_size = Vector2(58.0, 0.0)
 	select_button.add_theme_font_size_override("font_size", 8)
 	META_UI_SKIN_SCRIPT.style_secondary_button(select_button)
@@ -2325,6 +2364,8 @@ func _build_overlay_status_text(unit_id: String) -> String:
 	var assigned_fireteam_id := _get_selected_fireteam_id_for_unit(unit_id)
 	var team_state := _get_team_state_for_unit(unit_id)
 	var location_text := "%s | %s" % [_build_unit_location_text(unit_id), _build_unit_respawn_text(unit_id)]
+	if _is_unit_in_transit_to_fob(unit_id):
+		return "Inbound to FOB | %s | Progress %.0f%%" % [location_text, _get_unit_transit_progress(unit_id)]
 	if not craft_state.is_empty():
 		return "Assigned to %s | %s" % [String(craft_state.get("display_name", "craft")).strip_edges(), location_text]
 	if not team_state.is_empty():
@@ -2347,6 +2388,51 @@ func _get_transport_craft_pilot_unit_ids() -> PackedStringArray:
 			continue
 		pilot_unit_ids.append(pilot_unit_id)
 	return pilot_unit_ids
+
+
+func _get_transit_to_fob_unit_ids() -> PackedStringArray:
+	var transit_unit_ids: PackedStringArray = []
+	for unit_data_variant in _available_units:
+		if typeof(unit_data_variant) != TYPE_DICTIONARY:
+			continue
+		var unit_data: Dictionary = Dictionary(unit_data_variant)
+		if not bool(unit_data.get("is_transit_to_fob", false)):
+			continue
+		var unit_id: String = String(unit_data.get("unit_id", "")).strip_edges()
+		if unit_id.is_empty() or transit_unit_ids.has(unit_id):
+			continue
+		transit_unit_ids.append(unit_id)
+	return transit_unit_ids
+
+
+func _get_available_unit_config(unit_id: String) -> Dictionary:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return {}
+	for unit_data_variant in _available_units:
+		if typeof(unit_data_variant) != TYPE_DICTIONARY:
+			continue
+		var unit_data: Dictionary = Dictionary(unit_data_variant)
+		if String(unit_data.get("unit_id", "")).strip_edges() != normalized_unit_id:
+			continue
+		return unit_data.duplicate(true)
+	return {}
+
+
+func _is_unit_in_transit_to_fob(unit_id: String) -> bool:
+	return bool(_get_available_unit_config(unit_id).get("is_transit_to_fob", false))
+
+
+func _get_unit_transit_progress(unit_id: String) -> float:
+	return clampf(float(_get_available_unit_config(unit_id).get("transfer_progress", 0.0)), 0.0, 100.0)
+
+
+func _get_unit_transit_eta_seconds(unit_id: String) -> int:
+	return maxi(int(_get_available_unit_config(unit_id).get("transfer_eta_seconds", 0)), 0)
+
+
+func _build_transit_to_fob_secondary_text(unit_id: String) -> String:
+	return "Loc: Transit To FOB | ETA %ds | Progress %.0f%%" % [_get_unit_transit_eta_seconds(unit_id), _get_unit_transit_progress(unit_id)]
 
 
 func _find_transport_craft_state_by_pilot(unit_id: String) -> Dictionary:
@@ -2469,15 +2555,13 @@ func _build_member_boarding_status_text(fireteam_id: String, unit_id: String) ->
 
 
 func _build_overlay_loadout_text(unit_id: String, profile) -> String:
+	if profile == null:
+		return "standard kit"
 	var assigned_fireteam_id := _get_selected_fireteam_id_for_unit(unit_id)
 	if not assigned_fireteam_id.is_empty():
 		var member_loadout := _get_member_loadout(assigned_fireteam_id, unit_id)
-		return "%s armor | %s | %s" % [
-			String(member_loadout.get("armor", "medium")).capitalize(),
-			_build_weapon_label(String(member_loadout.get("weapon_1", DEFAULT_MEMBER_WEAPON))),
-			_build_weapon_label(String(member_loadout.get("weapon_2", DEFAULT_MEMBER_WEAPON))),
-		]
-	return _build_optional_text(String(profile.loadout_summary), "standard kit")
+		return CHARACTER_SHEET_FORMATTER_SCRIPT.build_loadout_text_from_member_loadout(member_loadout, "standard kit")
+	return CHARACTER_SHEET_FORMATTER_SCRIPT.build_loadout_text_from_ids(String(profile.armor_id), String(profile.weapon_1_id), String(profile.weapon_2_id), "standard kit")
 
 
 func _load_portrait_texture(portrait_path: String) -> Texture2D:

@@ -37,6 +37,8 @@ func _map_command_type(command_type: String) -> String:
 	match command_type:
 		"move":
 			return "move_to_area"
+		"engage":
+			return "engage_in_area"
 		# V1 rule: "take" maps straight to an area-engagement task without deeper decomposition yet.
 		"take":
 			return "engage_in_area"

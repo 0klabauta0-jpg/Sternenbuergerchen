@@ -1,0 +1,122 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Godot: Run Main Scene",
+			"type": "shell",
+			"command": "C:\\Users\\bjoer\\AppData\\Local\\Programs\\Godot\\Godot_v4.6.2-stable_win64_console.exe",
+			"args": [
+				"--path",
+				".",
+				"res://scenes/meta/meta_layer_test.tscn",
+				"--quit-after",
+				"5000"
+			],
+			"isBackground": false,
+			"group": "test",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared",
+				"clear": true
+			}
+		},
+		{
+			"label": "Godot: Run Mission Reactivity Test Scene",
+			"type": "shell",
+			"command": "C:\\Users\\bjoer\\AppData\\Local\\Programs\\Godot\\Godot_v4.6.2-stable_win64_console.exe",
+			"args": [
+				"--path",
+				".",
+				"--headless",
+				"res://scenes/tests/mission_reactivity_test.tscn",
+				"--quit-after",
+				"5000"
+			],
+			"isBackground": false,
+			"group": "test",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared",
+				"clear": true
+			}
+		},
+		{
+			"label": "Godot: Run Meta Map Screen Scene",
+			"type": "shell",
+			"command": "C:\\Users\\bjoer\\AppData\\Local\\Programs\\Godot\\Godot_v4.6.2-stable_win64_console.exe",
+			"args": [
+				"--path",
+				".",
+				"--headless",
+				"res://scenes/meta/meta_map_screen.tscn",
+				"--quit-after",
+				"5000"
+			],
+			"isBackground": false,
+			"group": "test",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared",
+				"clear": true
+			}
+		},
+		{
+			"label": "Godot: Validate Editor Startup",
+			"type": "shell",
+			"command": "C:\\Users\\bjoer\\AppData\\Local\\Programs\\Godot\\Godot_v4.6.2-stable_win64_console.exe",
+			"args": [
+				"--headless",
+				"--path",
+				".",
+				"--editor",
+				"--quit-after",
+				"3000"
+			],
+			"isBackground": false,
+			"group": "test",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared",
+				"clear": true
+			}
+		},
+		{
+			"label": "Godot: Run Formation Offsets Verifier",
+			"type": "shell",
+			"command": "C:\\Users\\bjoer\\AppData\\Local\\Programs\\Godot\\Godot_v4.6.2-stable_win64_console.exe",
+			"args": [
+				"--path",
+				".",
+				"--headless",
+				"-s",
+				"res://scripts/tests/formation_offsets_verifier.gd"
+			],
+			"isBackground": false,
+			"group": "test",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared",
+				"clear": true
+			}
+		},
+		{
+			"label": "Godot: Run TASK_085 Verifier",
+			"type": "shell",
+			"command": "C:\\Users\\bjoer\\AppData\\Local\\Programs\\Godot\\Godot_v4.6.2-stable_win64_console.exe",
+			"args": [
+				"--path",
+				".",
+				"--headless",
+				"-s",
+				"res://scripts/tests/task_085_verifier.gd"
+			],
+			"isBackground": false,
+			"group": "test",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared",
+				"clear": true
+			}
+		}
+	]
+}

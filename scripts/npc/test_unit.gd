@@ -22,6 +22,7 @@ const STATUS_LABEL_NAME: String = "DebugStatusLabel"
 const FIRETEAM_LABEL_NAME: String = "DebugFireteamLabel"
 const PHASE_LABEL_NAME: String = "DebugPhaseLabel"
 const EVENT_LABEL_NAME: String = "DebugEventLabel"
+const SELECTION_RING_NAME: String = "SelectionRing"
 const STATUS_LABEL_OFFSET: Vector2 = Vector2(-54.0, -48.0)
 const FIRETEAM_LABEL_SPACING: float = 8.0
 const EVENT_LABEL_OFFSET: Vector2 = Vector2(-42.0, -70.0)
@@ -31,6 +32,7 @@ const REMOTE_POSITION_LERP_WEIGHT: float = 0.75
 signal runtime_status_changed(runtime_status)
 signal unit_command_assigned(command)
 signal damage_applied(amount, health_points, hit_context)
+signal healed_applied(amount, health_points, heal_context)
 signal vital_status_changed(vital_status)
 
 @export var unit_id: String = "unit_test_001"
@@ -44,6 +46,7 @@ signal vital_status_changed(vital_status)
 @export_multiline var short_description: String = ""
 @export_multiline var biography_text: String = ""
 @export_multiline var loadout_summary: String = ""
+@export var armor_id: String = "medium"
 @export var weapon_1_id: String = "rifle"
 @export var weapon_2_id: String = "rifle"
 @export var team_id: String = "team_test"
@@ -83,6 +86,8 @@ var _current_event_color: Color = Color(1.0, 0.95, 0.5, 1.0)
 var _event_time_remaining: float = 0.0
 var _contact_active: bool = false
 var _contact_target_id: String = ""
+var _is_tactical_selected: bool = false
+var _selection_ring: Line2D = null
 var _weapon_visual: Sprite2D = null
 var _weapon_visual_direction: String = DEFAULT_WEAPON_VISUAL_DIRECTION
 var _respawn_manager = null
@@ -127,6 +132,10 @@ func get_health() -> int:
 	return int(_vital_status.health_points)
 
 
+func get_max_health_points() -> int:
+	return max_health_points
+
+
 func get_team_id() -> String:
 	return team_id
 
@@ -169,6 +178,10 @@ func get_biography_text() -> String:
 
 func get_loadout_summary() -> String:
 	return loadout_summary
+
+
+func get_armor_id() -> String:
+	return armor_id
 
 
 func get_weapon_1_id() -> String:
@@ -338,7 +351,7 @@ func get_character_profile_bundle() -> Dictionary:
 func get_combat_effects() -> Dictionary:
 	var effects: Dictionary = Dictionary(_character_profile_bundle.get("combat_effects", {}))
 	if effects.is_empty():
-		return {"speed_multiplier": 1.0, "hit_modifier": 0.0 + _leadership_bonus, "evasion_modifier": 0.0, "damage_taken_multiplier": 1.0}
+		return {"hit_chance_multiplier": 1.0, "speed_multiplier": 1.0, "hit_modifier": 0.0 + _leadership_bonus, "evasion_modifier": 0.0, "damage_taken_multiplier": 1.0}
 	var result: Dictionary = effects.duplicate(true)
 	result["hit_modifier"] = float(result.get("hit_modifier", 0.0)) + _leadership_bonus
 	return result
@@ -360,8 +373,28 @@ func get_leadership_hit_modifier() -> float:
 	return _leadership_bonus
 
 
+func get_combat_hit_chance_multiplier() -> float:
+	return float(get_combat_effects().get("hit_chance_multiplier", 1.0))
+
+
+func get_combat_speed_multiplier() -> float:
+	return float(get_combat_effects().get("speed_multiplier", 1.0))
+
+
+func get_combat_hit_modifier() -> float:
+	return float(get_combat_effects().get("hit_modifier", 0.0))
+
+
+func get_combat_evasion_modifier() -> float:
+	return float(get_combat_effects().get("evasion_modifier", 0.0))
+
+
+func get_combat_damage_taken_multiplier() -> float:
+	return float(get_combat_effects().get("damage_taken_multiplier", 1.0))
+
+
 func get_initiative_speed_multiplier() -> float:
-	return float(Dictionary(_character_profile_bundle.get("combat_effects", {})).get("speed_multiplier", 1.0))
+	return get_combat_speed_multiplier()
 
 
 func get_order_fidelity_hit_modifier() -> float:
@@ -419,6 +452,9 @@ func apply_identity_config(identity_config: Dictionary) -> void:
 
 	if identity_config.has("loadout_summary"):
 		loadout_summary = String(identity_config["loadout_summary"]).strip_edges()
+
+	if identity_config.has("armor") or identity_config.has("armor_id"):
+		armor_id = String(identity_config.get("armor_id", identity_config.get("armor", "medium"))).strip_edges().to_lower()
 
 	if identity_config.has("weapon_1") or identity_config.has("weapon_1_id"):
 		weapon_1_id = String(identity_config.get("weapon_1_id", identity_config.get("weapon_1", "rifle"))).strip_edges()
@@ -576,6 +612,44 @@ func apply_damage(amount: int, hit_context: Dictionary = {}) -> bool:
 	return true
 
 
+func apply_heal(amount: int, heal_context: Dictionary = {}) -> bool:
+	if amount <= 0:
+		return false
+
+	var vital_state: String = String(_vital_status.state)
+	if vital_state != "fit" and vital_state != "down":
+		return false
+
+	var current_health: int = get_health()
+	if vital_state == "fit" and current_health >= max_health_points:
+		return false
+
+	var next_health: int = mini(current_health + amount, max_health_points)
+	if next_health <= current_health:
+		return false
+
+	var next_state: String = vital_state
+	var recovered_from_down: bool = vital_state == "down" and next_health > 0
+	if recovered_from_down:
+		next_state = "fit"
+		_runtime_status = _build_runtime_status("idle")
+		runtime_status_changed.emit(_runtime_status)
+		_current_unit_command = null
+		_last_damage_context = {}
+		_contact_active = false
+		_contact_target_id = ""
+
+	_set_vital_status(next_state, next_health, 0 if recovered_from_down else int(_vital_status.bleedout_ticks))
+	var restored_amount: int = maxi(next_health - current_health, 0)
+	if restored_amount <= 0:
+		return false
+
+	var resolved_context: Dictionary = heal_context.duplicate(true)
+	show_event_text("PATCH +%d" % restored_amount, Color(0.55, 1.0, 0.72, 1.0))
+	healed_applied.emit(restored_amount, next_health, resolved_context)
+	return true
+
+
 func advance_bleedout() -> bool:
 	if String(_vital_status.state) != "down":
 		return false
@@ -730,6 +804,23 @@ func set_contact_state(is_active: bool, target_unit_id: String = "") -> void:
 	_contact_active = is_active
 	_contact_target_id = target_unit_id
 	_refresh_status_label()
+
+
+func is_in_contact() -> bool:
+	return _contact_active
+
+
+func get_contact_target_id() -> String:
+	return _contact_target_id
+
+
+func is_tactical_selected() -> bool:
+	return _is_tactical_selected
+
+
+func set_tactical_selected(is_selected: bool) -> void:
+	_is_tactical_selected = is_selected
+	_refresh_selection_ring()
 
 
 func show_event_text(event_text: String, event_color: Color = Color(1.0, 0.95, 0.5, 1.0), duration_seconds: float = EVENT_DURATION_SECONDS) -> void:
@@ -993,6 +1084,7 @@ func _ensure_readability_labels() -> void:
 	_fireteam_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
 	_phase_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
 	_event_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
+	_ensure_selection_ring()
 	_sync_readability_positions()
 
 
@@ -1027,6 +1119,7 @@ func _refresh_readability() -> void:
 	_refresh_fireteam_label()
 	_refresh_phase_label()
 	_refresh_event_label()
+	_refresh_selection_ring()
 	_sync_readability_positions()
 
 
@@ -1194,6 +1287,31 @@ func _build_fireteam_label_color() -> Color:
 			return Color(1.0, 0.88, 0.35, 1.0)
 		_:
 			return Color(0.9, 0.9, 0.9, 1.0)
+
+
+func _ensure_selection_ring() -> void:
+	_selection_ring = get_node_or_null(SELECTION_RING_NAME) as Line2D
+	if _selection_ring == null:
+		_selection_ring = Line2D.new()
+		_selection_ring.name = SELECTION_RING_NAME
+		_selection_ring.width = 3.0
+		_selection_ring.closed = true
+		_selection_ring.z_index = 6
+		_selection_ring.points = PackedVector2Array([
+			Vector2(-18.0, 4.0),
+			Vector2(0.0, -12.0),
+			Vector2(18.0, 4.0),
+			Vector2(0.0, 20.0),
+		])
+		add_child(_selection_ring)
+	_refresh_selection_ring()
+
+
+func _refresh_selection_ring() -> void:
+	if _selection_ring == null:
+		return
+	_selection_ring.default_color = _build_fireteam_label_color().lightened(0.18)
+	_selection_ring.visible = _is_tactical_selected and is_visible_in_tree()
 
 
 func _build_phase_label_text() -> String:

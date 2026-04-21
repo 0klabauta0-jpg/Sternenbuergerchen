@@ -62,7 +62,10 @@ const DEFAULT_MISSION_PLANNING_STATE: Dictionary = {
 	"approach_angle": "NW",
 	"drop_ship_requested": false,
 	"selected_fireteam": "ALL",
-	"selected_phase": "APPROACH",
+	"selected_phase": "P1",
+	"selected_phase_index": 1,
+	"active_phase_index": 0,
+	"phase_count": 2,
 }
 
 var _available_team_units: Array = UNIT_ROSTER_PRESETS_SCRIPT.get_homebase_roster()
@@ -923,6 +926,26 @@ func _build_selected_friendly_paths(selected_unit_ids: PackedStringArray) -> Arr
 
 func _build_fob_profile_unit_subset(transport_craft_states: Array) -> Array:
 	var profile_unit_ids: PackedStringArray = _selected_unit_ids.duplicate()
+	var transit_state_by_unit_id: Dictionary = {}
+	for entry_variant in _pending_homebase_team_transfers:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var duration_seconds: float = maxf(float(entry.get("duration_seconds", HOMEBASE_TEAM_TRANSFER_DURATION_SECONDS)), 1.0)
+		var elapsed_seconds: float = clampf(float(entry.get("elapsed_seconds", 0.0)), 0.0, duration_seconds)
+		var transfer_progress: float = (elapsed_seconds / duration_seconds) * 100.0
+		var transfer_eta_seconds: int = maxi(int(ceil(duration_seconds - elapsed_seconds)), 0)
+		for unit_id_variant in entry.get("unit_ids", []):
+			var unit_id: String = String(unit_id_variant).strip_edges()
+			if unit_id.is_empty():
+				continue
+			if not profile_unit_ids.has(unit_id):
+				profile_unit_ids.append(unit_id)
+			transit_state_by_unit_id[unit_id] = {
+				"is_transit_to_fob": true,
+				"transfer_progress": transfer_progress,
+				"transfer_eta_seconds": transfer_eta_seconds,
+			}
 	for craft_state_variant in transport_craft_states:
 		if typeof(craft_state_variant) != TYPE_DICTIONARY:
 			continue
@@ -933,7 +956,21 @@ func _build_fob_profile_unit_subset(transport_craft_states: Array) -> Array:
 		if pilot_unit_id.is_empty() or profile_unit_ids.has(pilot_unit_id):
 			continue
 		profile_unit_ids.append(pilot_unit_id)
-	return _build_unit_subset_by_ids(profile_unit_ids)
+
+	var result: Array = []
+	for unit_variant in _all_team_units:
+		if typeof(unit_variant) != TYPE_DICTIONARY:
+			continue
+		var unit_data: Dictionary = Dictionary(unit_variant)
+		var unit_id: String = String(unit_data.get("unit_id", "")).strip_edges()
+		if unit_id.is_empty() or not profile_unit_ids.has(unit_id):
+			continue
+		var fob_unit_data: Dictionary = unit_data.duplicate(true)
+		if transit_state_by_unit_id.has(unit_id):
+			for key_variant in Dictionary(transit_state_by_unit_id[unit_id]).keys():
+				fob_unit_data[String(key_variant)] = Dictionary(transit_state_by_unit_id[unit_id])[key_variant]
+		result.append(fob_unit_data)
+	return result
 
 
 func _show_homebase() -> void:

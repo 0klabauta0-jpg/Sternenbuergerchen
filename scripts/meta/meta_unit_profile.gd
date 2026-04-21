@@ -15,6 +15,9 @@ var homeworld: String = ""
 var age_years: int = 0
 var biography_text: String = ""
 var loadout_summary: String = ""
+var armor_id: String = "medium"
+var weapon_1_id: String = "rifle"
+var weapon_2_id: String = "rifle"
 var team_id: String = ""
 var fireteam_id: String = ""
 var skill_values: Dictionary = {}
@@ -64,6 +67,9 @@ func to_dict() -> Dictionary:
 		"age_years": age_years,
 		"biography_text": biography_text,
 		"loadout_summary": loadout_summary,
+		"armor_id": armor_id,
+		"weapon_1_id": weapon_1_id,
+		"weapon_2_id": weapon_2_id,
 		"team_id": team_id,
 		"fireteam_id": fireteam_id,
 		"skill_values": skill_values.duplicate(true),
@@ -104,6 +110,9 @@ func _apply_dict(data: Dictionary) -> void:
 	age_years = int(data.get("age_years", 0))
 	biography_text = String(data.get("biography_text", "")).strip_edges()
 	loadout_summary = String(data.get("loadout_summary", "")).strip_edges()
+	armor_id = String(data.get("armor_id", "medium")).strip_edges().to_lower()
+	weapon_1_id = String(data.get("weapon_1_id", "rifle")).strip_edges().to_lower()
+	weapon_2_id = String(data.get("weapon_2_id", "rifle")).strip_edges().to_lower()
 	team_id = String(data.get("team_id", "")).strip_edges()
 	fireteam_id = String(data.get("fireteam_id", "")).strip_edges().to_lower()
 	skill_values = Dictionary(data.get("skill_values", {})).duplicate(true)

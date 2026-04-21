@@ -65,7 +65,7 @@ const FRIENDLY_ROSTER: Array = [
 	{
 		"unit_id": "unit_delta",
 		"display_name": "Darius Holt",
-		"portrait_path": "res://Assets/Char/Use AI Image Apr 5, 2026, 22_33_24.png",
+		"portrait_path": "res://Assets/Char/Use AI Image Apr 6, 2026, 00_19_16.png",
 		"callsign": "RAM",
 		"role_name": "Breacher",
 		"specialty_text": "Close-entry shock actions",

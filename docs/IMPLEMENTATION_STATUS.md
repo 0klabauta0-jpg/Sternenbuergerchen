@@ -718,3 +718,31 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Stand: `_check_misidentification(attacker, attacker_id)` in `mission_combat_loop_driver.gd` wuerfelt pro Tick ob ein Friendly sein Ziel verwechselt. Formel: `MISIDENTIFICATION_BASE_CHANCE (0.03) * (1.0 - recognition)`. recognition=1.0 → 0% Verwechslung, recognition=0.0 → 3% pro Tick. Naechste eigene Unit wird als Ziel gewaehlt, Effect mit `allow_friendly_fire: true` gesendet. Cooldown (`MISIDENTIFICATION_COOLDOWN_TICKS=15`) verhindert Dauerfeuer auf Eigene. Nur Friendlies koennen verwechseln, Enemies nie.
 - Offene Punkte: keine
 - Risiken: keine
+
+### TASK_095 – Combat Medic Support
+- Status: implementiert
+- Stand: `SimulationRoot` verarbeitet jetzt zusaetzlich `heal`-Effects autoritativ ueber `_apply_heal_effect()`. `TestUnit` unterstuetzt dafuer `apply_heal(amount, heal_context)` und kann dadurch einen `down`-Zustand wieder nach `fit` anheben, solange der Heal vor einem `bleedout` greift. `mission_combat_loop_driver.gd` erkennt Combat-Medics ueber `role_id`/`role_name`, waehlt in Reichweite bevorzugt `down`-Allies und danach stark verwundete `fit`-Allies, enqueued den Heal als Effect und begrenzt die Frequenz ueber einen eigenen Medic-Cooldown. Heal-/Patch-Events werden lokal sichtbar gemacht und ueber den bestehenden Event-Pfad in der Testszene gespiegelt. Mit `scripts/tests/medic_support_verifier.gd` existiert ein headless Verifier fuer Revive-vor-Bleedout, Heal-Queueing und Cooldown-Block.
+- Offene Punkte: keine groessere Support-Architektur, keine echte Revive-Animation, keine Sanitaeter-Bewegungs-/Priorisierungslogik ausser Reichweite und Zustand, keine Verbrauchsressourcen.
+- Risiken: Die Zielwahl ist bewusst klein und rein reichweitenbasiert; spaetere komplexere Support-Rollen sollten diesen kleinen Pfad explizit erweitern statt ihn still in einen allgemeinen Utility-/Ability-Stack zu verwandeln.
+- Naechster Schritt: Falls gewuenscht, spaeter Suppression, Officer-Buffs oder aktive Sanitaeter-Bewegung als eigene klar begrenzte Tasks aufbauen.
+
+### TASK_099 – Wegpunktplanung und Order-Visualisierung
+- Status: implementiert
+- Stand: Der `TacticalInputController` haelt jetzt pro Fireteam und Phase echte `FireteamOrderPlan`-Daten auf Basis der Task-97-Modelle. Rechtsklick setzt Wegpunkte fuer alle aktuell ausgewaehlten Fireteams, ein kontextsensitives Kurzmenue erlaubt direkt `move`, `defend`, `engage`, `flank` und `take`, und Wegpunkte koennen nachtraeglich per Drag verschoben oder per Delete entfernt werden. Ein schlanker `FireteamOrderVisualizer` rendert die Plaene rein lesend als Linien und Symbolmarker in der Missionsszene; beim Planen werden keine Commands an SimulationRoot oder Flow-Driver gesendet.
+- Offene Punkte: keine Phasen-Ausfuehrung, keine Ad-hoc-Orders, keine Pathfinding-Auswertung entlang der Wegpunkte und keine ausgebaute Kontextmenue-/Polish-Schicht ueber den kurzen Missions-Testpfad hinaus.
+- Risiken: Die Planungsdaten liegen bewusst lokal im bestehenden Mission-Planning-State-Bridge-Pfad; spaetere globale Plan-Ausfuehrung muss diese Daten explizit konsumieren, statt wieder direkte Sofort-Commands aus dem Input-Controller abzuleiten. Die Visualisierung ist absichtlich rein lesend und darf spaeter nicht zum versteckten Gameplay-Treiber werden.
+- Naechster Schritt: Task 100 kann auf diesem Slice aufsetzen, um einen globalen Phase-Controller und die tatsaechliche Plan-Ausfuehrung einzufuehren.
+
+### TASK_100 – PhaseController und globale Plan-Ausfuehrung
+- Status: implementiert
+- Stand: Eine eigene `PhaseController`-Instanz verwaltet jetzt globale Missionsphasen getrennt vom UI-Bearbeitungskontext. Phase 0 bleibt Pre-Mission, Phase 1 existiert immer, `+ Phase` erweitert den globalen Phasenraum, und `Next Phase` ist der einzige globale Startpfad. Beim Weiterschalten startet der `TacticalInputController` alle Fireteam-Plaene der neuen Phase gleichzeitig, aktiviert Wegpunkte pro Fireteam nacheinander und erzeugt jeden Laufzeitbefehl weiter ueber `MissionCommandFlowDriver` -> Commander/FTL -> Unit -> `SimulationRoot.enqueue_command()`.
+- Offene Punkte: keine Ad-hoc-Befehle, keine Suppression, keine Gegner-Phasen und keine ausgebaute Resume-/Interrupt-Logik fuer spaetere Task-101+-Verhaltensresolver.
+- Risiken: Die Wegpunkt-Fertigmeldung haengt aktuell an einem schlanken Zielradius plus optionaler Haltezeit auf Fireteam-Ankerbasis. Falls spaeter echte Formations-/Suppression-/Kontaktlogik hinzukommt, muss diese Fertigbedingung bewusst erweitert werden statt still implizit zu kippen.
+- Naechster Schritt: Task 101 kann jetzt auf dem globalen Phase- und Ausfuehrungsrahmen aufsetzen, um Standardverhalten und Resolver pro Fireteam sauber einzuschieben.
+
+### TASK_101 – FireteamBehaviorResolver und Standardverhalten
+- Status: implementiert
+- Stand: `FireteamBehaviorResolver` leitet nun aus dem aktuellen Fireteam-Leader ein `FireteamBehaviorProfile` ab und mappt Traits, Leadership und Toughness auf Advance-Style, Cover-Prioritaet, Fire-Discipline, Cohesion und Suppression. Der `TacticalInputController` berechnet diese Profile zur Laufzeit fuer geplante Orders und Standard-Fallbacks, nutzt sie fuer leadergesteuertes `flank` mit konkreter Zielverfeinerung und sendet beim Start eines Flankierens `flank_initiated` ueber den `EventRouter`. Fireteams ohne aktive Orders fallen bei Phasenstart und nach Planende auf `hold_position` zurueck; `cautious` sucht bei Kontakt lokal Deckung.
+- Offene Punkte: keine Suppression-Logik, keine Resume-/Interrupt-State-Machine und noch keine inter-fireteam Koordination ueber den Router jenseits des Flank-Startsignals.
+- Risiken: Das Standardverhalten bleibt bewusst klein. `cautious` nutzt nur lokale Cover-Spruenge; spaetere Tasks muessen diesen Fallback explizit ausbauen statt daraus still eine vollstaendige KI zu machen.
+- Naechster Schritt: Task 102 kann jetzt auf den aktiven Behavior-Profilen aufsetzen, um Ad-hoc-Orders und Rueckkehr in den Planfluss sauber zu implementieren.

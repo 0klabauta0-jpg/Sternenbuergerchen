@@ -89,7 +89,7 @@ theme_override_font_sizes/font_size = 8
 
 [node name="MissionHeaderLabel" type="Label" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox"]
 layout_mode = 2
-text = "Map Overview"
+text = "0 Mission Context"
 theme_override_font_sizes/font_size = 11
 
 [node name="MissionInfoRow" type="HBoxContainer" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox"]
@@ -117,7 +117,7 @@ theme_override_font_sizes/font_size = 9
 
 [node name="MissionSummaryLabel" type="Label" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox"]
 layout_mode = 2
-text = "Read-only map overview of the current meta preparation."
+text = "Mission context stays compact here while the actual planning map remains the authoritative surface."
 autowrap_mode = 3
 theme_override_font_sizes/font_size = 9
 
@@ -153,7 +153,7 @@ layout_mode = 2
 [node name="MapHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox/MapHeaderRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Mission Map"
+text = "1 Terrain + Markers"
 theme_override_font_sizes/font_size = 13
 
 [node name="MapCapacityLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox/MapHeaderRow"]
@@ -198,7 +198,7 @@ theme_override_font_sizes/font_size = 10
 
 [node name="MapHelpLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox"]
 layout_mode = 2
-text = "Die Map-Ansicht bleibt bewusst read-only."
+text = "Dieselbe Kartenbasis wie Mission und Editor, ohne separaten MissionMap-Begriff."
 autowrap_mode = 3
 theme_override_font_sizes/font_size = 10
 
@@ -224,7 +224,7 @@ size_flags_vertical = 3
 
 [node name="SummaryHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/SummaryPanel/SummaryMargin/SummaryVBox"]
 layout_mode = 2
-text = "FOB Staging Snapshot"
+text = "2 FOB Staging Snapshot"
 theme_override_font_sizes/font_size = 13
 
 [node name="FireteamOverviewLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/SummaryPanel/SummaryMargin/SummaryVBox"]

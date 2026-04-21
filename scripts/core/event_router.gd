@@ -5,6 +5,7 @@ signal squad_command(squad, order)
 signal unit_down(unit)
 signal threat_detected(source, threat_data)
 signal leader_changed(squad, leader)
+signal flank_initiated(fireteam_id, leader, flank_data)
 signal respawn_requested(unit, respawn_target)
 
 
@@ -43,6 +44,18 @@ func notify_leader_changed(squad: Node, leader: Node) -> void:
 		return
 
 	leader_changed.emit(squad, leader)
+
+
+func notify_flank_initiated(fireteam_id: String, leader: Node, flank_data: Dictionary) -> void:
+	if fireteam_id.strip_edges().is_empty():
+		push_warning("EventRouter.notify_flank_initiated expects a non-empty fireteam_id.")
+		return
+
+	if leader == null:
+		push_warning("EventRouter.notify_flank_initiated expects a leader Node.")
+		return
+
+	flank_initiated.emit(fireteam_id.strip_edges().to_lower(), leader, flank_data.duplicate(true))
 
 
 func request_respawn(unit: Node, respawn_target: String) -> void:

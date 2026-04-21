@@ -139,6 +139,9 @@ func _is_friendly_slot_enabled(slot_index: int) -> bool:
 
 
 func _get_selected_unit_id_for_friendly_slot(slot_index: int, fallback_unit_id: String) -> String:
+	if selected_team_unit_ids.is_empty():
+		return fallback_unit_id
+
 	if not _is_friendly_slot_enabled(slot_index):
 		return fallback_unit_id
 

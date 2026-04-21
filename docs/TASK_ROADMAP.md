@@ -225,6 +225,28 @@ Phase 17E – Verhaltensqualitaet
 TASK_093 – Discipline: Hold-Fire-Disziplinbrueche
 TASK_094 – Recognition: Friendly-Fire-Verwechslung
 
+Phase 17F – Support-Rollen
+TASK_095 – Combat Medic Support
+
+Phase 17G – Meta-Layer Recovery
+TASK_096 – Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
+
+Phase 17H – Taktisches Kampfsystem
+TASK_097 – Datenmodelle, engage und Ad-hoc-Vertraege
+TASK_098 – TacticalInputController und Fireteam-Auswahl
+TASK_099 – Wegpunktplanung, Kontextmenue und Order-Visualisierung
+TASK_100 – PhaseController und globale Plan-Ausfuehrung
+TASK_101 – FireteamBehaviorResolver, geplantes Flankieren und Standardverhalten
+TASK_102 – AdHocOrderController und Gefechts-Sofortbefehle
+TASK_103 – Suppression, Interruption und Return-to-Plan
+TASK_104 – Inter-Fireteam-Koordination und Leader-initiiertes Flankieren
+TASK_105 – Leader-Nachfolge, Lead-Rueckgabe und UI-Synchronisierung
+TASK_106 – Dropship-LZ, Insertion und verzoegerte Aktivierung
+TASK_107 – LoadoutModifierResolver und initiale Missions-Effects
+
+Phase 17I – Gegner-Patrouillen und Editor
+TASK_108 – PatrolEditorTool und Pre-Contact-Patrol
+
 Phase 18 – Erweiterung (spaeter)
 Skillsystem
 soziale Dynamik

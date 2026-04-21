@@ -2,6 +2,7 @@ class_name CommanderCommand
 extends RefCounted
 
 const TYPE_MOVE: String = "move"
+const TYPE_ENGAGE: String = "engage"
 const TYPE_TAKE: String = "take"
 const TYPE_DEFEND: String = "defend"
 const TYPE_FLANK: String = "flank"
@@ -10,6 +11,7 @@ const PHASE_ASSAULT: int = 1
 const PHASE_HOLD: int = 2
 const ALLOWED_COMMAND_TYPES: PackedStringArray = [
 	TYPE_MOVE,
+	TYPE_ENGAGE,
 	TYPE_TAKE,
 	TYPE_DEFEND,
 	TYPE_FLANK,
@@ -43,7 +45,7 @@ static func is_allowed_command_type(value: String) -> bool:
 
 
 static func is_allowed_phase(value: int) -> bool:
-	return ALLOWED_PHASES.has(value)
+	return value >= 0
 
 
 static func get_phase_name(value: int) -> String:
@@ -55,7 +57,7 @@ static func get_phase_name(value: int) -> String:
 		PHASE_HOLD:
 			return "HOLD"
 		_:
-			return ""
+			return "PHASE %d" % value
 
 
 static func get_phase_short_name(value: int) -> String:
@@ -67,7 +69,7 @@ static func get_phase_short_name(value: int) -> String:
 		PHASE_HOLD:
 			return "HLD"
 		_:
-			return ""
+			return "P%d" % value
 
 
 # This validates only the lightweight data contract, not gameplay semantics.

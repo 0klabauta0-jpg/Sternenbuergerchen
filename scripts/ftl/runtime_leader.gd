@@ -5,6 +5,15 @@ const COMMANDER_COMMAND_SCRIPT: GDScript = preload("res://scripts/command/comman
 const FTL_RUNTIME_STATUS_SCRIPT: GDScript = preload("res://scripts/ftl/ftl_runtime_status.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const FLANK_OFFSET_DISTANCE: float = 72.0
+const FORMATION_SLOT_SPACING: float = 42.0
+const FORMATION_SLOT_LAYOUT: Array[Vector2] = [
+	Vector2(0.0, 0.0),
+	Vector2(-1.0, -1.0),
+	Vector2(1.0, -1.0),
+	Vector2(-2.0, -2.0),
+	Vector2(2.0, -2.0),
+	Vector2(0.0, -2.0),
+]
 const PHASE_APPROACH_COVER_BONUS: float = 0.2
 const PHASE_HOLD_COVER_BONUS: float = 0.3
 
@@ -344,20 +353,68 @@ func _derive_target_position(task, unit: Node, command_type: String, source_comm
 	if typeof(raw_target_position) != TYPE_VECTOR2:
 		return raw_target_position
 
+	var target_position: Vector2 = raw_target_position
+
 	if source_command_type != "flank":
-		return raw_target_position
+		return _apply_formation_offset(unit, target_position, command_type)
 
 	if not (unit is Node2D):
-		return raw_target_position
+		return target_position
 
 	var unit_position: Vector2 = (unit as Node2D).position
-	var direction: Vector2 = raw_target_position - unit_position
+	var direction: Vector2 = target_position - unit_position
 	if direction.is_zero_approx():
-		return raw_target_position
+		return _apply_formation_offset(unit, target_position, command_type)
 
 	var flank_sign: float = 1.0
-	if unit_position.y <= raw_target_position.y:
+	if unit_position.y <= target_position.y:
 		flank_sign = -1.0
 
 	var flank_offset: Vector2 = direction.normalized().orthogonal() * FLANK_OFFSET_DISTANCE * flank_sign
-	return raw_target_position + flank_offset
+	target_position += flank_offset
+	return _apply_formation_offset(unit, target_position, command_type)
+
+
+func _apply_formation_offset(unit: Node, target_position: Vector2, command_type: String) -> Vector2:
+	if command_type != "move_to_position" and command_type != "engage_area" and command_type != "retreat":
+		return target_position
+
+	if not (unit is Node2D):
+		return target_position
+
+	var slot_index: int = _get_formation_slot_index(unit)
+	if slot_index <= 0:
+		return target_position
+
+	var slot_offset: Vector2 = _get_formation_slot_offset(slot_index, (unit as Node2D).position, target_position)
+	return target_position + slot_offset
+
+
+func _get_formation_slot_index(unit: Node) -> int:
+	var ordered_units: Array = []
+	var lead_unit: Node = null
+	for assigned_unit in _assigned_units:
+		if assigned_unit == null:
+			continue
+		if assigned_unit.has_method("get") and bool(assigned_unit.get("is_fireteam_lead")) and lead_unit == null:
+			lead_unit = assigned_unit
+			continue
+		ordered_units.append(assigned_unit)
+
+	if lead_unit != null:
+		ordered_units.push_front(lead_unit)
+
+	var slot_index: int = ordered_units.find(unit)
+	return maxi(slot_index, 0)
+
+
+func _get_formation_slot_offset(slot_index: int, unit_position: Vector2, target_position: Vector2) -> Vector2:
+	var layout_index: int = mini(slot_index, FORMATION_SLOT_LAYOUT.size() - 1)
+	var slot: Vector2 = FORMATION_SLOT_LAYOUT[layout_index]
+	var direction: Vector2 = target_position - unit_position
+	if direction.is_zero_approx():
+		direction = Vector2.DOWN
+
+	var forward: Vector2 = direction.normalized()
+	var lateral: Vector2 = forward.orthogonal()
+	return ((lateral * slot.x) + (forward * slot.y)) * FORMATION_SLOT_SPACING
