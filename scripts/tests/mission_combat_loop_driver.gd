@@ -3,6 +3,7 @@ extends Node
 const LOS_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/los_system.gd")
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
 const OVERWATCH_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/overwatch_controller.gd")
+const CONTACT_TRACKER_SCRIPT: GDScript = preload("res://scripts/tests/contact_tracker.gd")
 const CONTACT_LINE_NAME: String = "CombatContactLine"
 const EVENT_LABEL_NAME: String = "CombatEventLabel"
 const WINNER_LABEL_NAME: String = "CombatWinnerLabel"
@@ -20,6 +21,7 @@ const LEADERSHIP_EVENT_COLOR: Color = Color(0.6, 0.85, 1.0, 1.0)
 const MAX_DETECTION_DELAY_TICKS: int = 15
 const DETECTION_EVENT_COLOR: Color = Color(0.85, 0.85, 0.55, 1.0)
 const STEALTH_RANGE_REDUCTION_FACTOR: float = 0.5
+const SPOTTED_CONTACT_HIT_CHANCE_MALUS: float = -0.15
 const DISCIPLINE_BREAK_BASE_CHANCE: float = 0.08
 const DISCIPLINE_BREAK_COOLDOWN_TICKS: int = 10
 const DISCIPLINE_BREAK_EVENT_COLOR: Color = Color(1.0, 0.65, 0.3, 1.0)
@@ -95,6 +97,7 @@ var _enemy_patrol_paths_by_unit_id: Dictionary = {}
 var _enemy_patrol_waypoint_index_by_unit_id: Dictionary = {}
 var _enemy_patrol_contact_locked: Dictionary = {}
 var _overwatch_controller = OVERWATCH_CONTROLLER_SCRIPT.new()
+var _contact_tracker = CONTACT_TRACKER_SCRIPT.new()
 
 
 func _ready() -> void:
@@ -136,6 +139,18 @@ func get_last_contact() -> Dictionary:
 
 func get_mission_result() -> Dictionary:
 	return _mission_result.duplicate(true)
+
+
+func get_contact_snapshot() -> Array:
+	if _contact_tracker == null:
+		return []
+	return Array(_contact_tracker.call("get_contact_snapshot")).duplicate(true)
+
+
+func get_fireteam_contact_snapshot(fireteam_id: String) -> Array:
+	if _contact_tracker == null:
+		return []
+	return Array(_contact_tracker.call("get_fireteam_contacts", fireteam_id)).duplicate(true)
 
 
 @rpc("authority", "reliable")
@@ -190,6 +205,7 @@ func _on_tick_processed(tick: int) -> void:
 	_queue_bleedout_for_downed_friendly(simulation_root)
 	_update_fireteam_leadership()
 	_advance_detection_timers()
+	_update_contact_tracking()
 	_advance_discipline_cooldowns()
 	_advance_misidentification_cooldowns()
 	_advance_medic_support_cooldowns()
@@ -279,6 +295,7 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 	var target = contact_pair["target"]
 	var attacker_id: String = String(contact_pair["attacker_id"])
 	var target_id: String = String(contact_pair["target_id"])
+	var contact_state: String = String(contact_pair.get("contact_state", "")).strip_edges().to_lower()
 	if attacker_id.is_empty() or target_id.is_empty():
 		_clear_contact_visuals()
 		return
@@ -309,6 +326,8 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 	var active_weapon_id: String = _get_unit_active_weapon_id(attacker)
 	var weapon_damage: int = WEAPON_DATA_SCRIPT.get_damage_per_hit(active_weapon_id)
 	var weapon_hit_chance: float = WEAPON_DATA_SCRIPT.get_base_hit_chance(active_weapon_id)
+	if String(attacker.call("get_team_id")) == friendly_team_id and contact_state == "spotted":
+		weapon_hit_chance = clampf(weapon_hit_chance + SPOTTED_CONTACT_HIT_CHANCE_MALUS, 0.02, 0.98)
 	var weapon_ticks: int = WEAPON_DATA_SCRIPT.get_ticks_between_attacks(active_weapon_id)
 	simulation_root.call(
 		"enqueue_effect",
@@ -877,6 +896,50 @@ func _has_valid_los(attacker, target) -> bool:
 	return _los_system.has_line_of_sight_between_nodes(attacker, target, _get_effective_range(target), _get_terrain_registry())
 
 
+func _update_contact_tracking() -> void:
+	if _contact_tracker == null:
+		return
+	var contact_observations: Array = []
+	var active_enemies: Array = _get_active_enemy_units()
+	for friendly in _get_units(friendly_unit_paths):
+		if not _can_target_receive_attack(friendly):
+			continue
+		if friendly == null or not friendly.has_method("get_fireteam_id") or not friendly.has_method("get_unit_id"):
+			continue
+		var fireteam_id: String = String(friendly.call("get_fireteam_id")).strip_edges().to_lower()
+		var attacker_id: String = String(friendly.call("get_unit_id")).strip_edges()
+		if fireteam_id.is_empty() or attacker_id.is_empty():
+			continue
+		for enemy in active_enemies:
+			if not _has_valid_los(friendly, enemy):
+				continue
+			var enemy_unit_id: String = String(enemy.call("get_unit_id")).strip_edges()
+			if enemy_unit_id.is_empty():
+				continue
+			_start_or_continue_detection(friendly, attacker_id, enemy_unit_id)
+			contact_observations.append({
+				"fireteam_id": fireteam_id,
+				"unit_id": enemy_unit_id,
+				"team_id": String(enemy.call("get_team_id")) if enemy.has_method("get_team_id") else "",
+				"last_known_position": (enemy as Node2D).global_position if enemy is Node2D else Vector2.ZERO,
+				"detection_complete": _is_detection_complete(attacker_id, enemy_unit_id),
+			})
+	var did_change: bool = bool(
+		_contact_tracker.call(
+			"update",
+			_current_tick,
+			contact_observations,
+			_get_known_friendly_fireteam_ids(),
+			_get_fireteam_leadership_snapshot()
+		)
+	)
+	if not did_change:
+		return
+	var tactical_controller = _get_tactical_controller()
+	if tactical_controller != null and tactical_controller.has_method("refresh_contact_overlay"):
+		tactical_controller.call("refresh_contact_overlay")
+
+
 func get_detection_progress() -> Dictionary:
 	return _detection_progress.duplicate(true)
 
@@ -1064,12 +1127,18 @@ func _find_first_contact_pair() -> Dictionary:
 		_start_or_continue_detection(friendly, f_id, e_id)
 		if not _is_detection_complete(f_id, e_id):
 			continue
+		var fireteam_id: String = String(friendly.call("get_fireteam_id")).strip_edges().to_lower() if friendly.has_method("get_fireteam_id") else ""
+		var contact_entry: Dictionary = _get_fireteam_contact_state(fireteam_id, e_id)
+		var detection_state: String = String(contact_entry.get("detection_state", "confirmed")).strip_edges().to_lower()
+		if detection_state != "spotted" and detection_state != "confirmed":
+			continue
 
 		return {
 			"attacker": friendly,
 			"target": enemy,
 			"attacker_id": f_id,
 			"target_id": e_id,
+			"contact_state": detection_state,
 		}
 
 	for enemy in _get_active_enemy_units():
@@ -1094,6 +1163,38 @@ func _find_first_contact_pair() -> Dictionary:
 		}
 
 	return {}
+
+
+func _get_fireteam_contact_state(fireteam_id: String, enemy_unit_id: String) -> Dictionary:
+	if _contact_tracker == null or fireteam_id.strip_edges().is_empty() or enemy_unit_id.strip_edges().is_empty():
+		return {}
+	return Dictionary(_contact_tracker.call("get_contact_state", fireteam_id, enemy_unit_id)).duplicate(true)
+
+
+func _get_known_friendly_fireteam_ids() -> Array:
+	var known_fireteam_ids: Dictionary = {}
+	for friendly in _get_units(friendly_unit_paths):
+		if friendly == null or not friendly.has_method("get_fireteam_id"):
+			continue
+		var fireteam_id: String = String(friendly.call("get_fireteam_id")).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		known_fireteam_ids[fireteam_id] = true
+	var result: Array = known_fireteam_ids.keys()
+	result.sort()
+	return result
+
+
+func _get_fireteam_leadership_snapshot() -> Dictionary:
+	var result: Dictionary = {}
+	for fireteam_id_variant in _get_known_friendly_fireteam_ids():
+		var fireteam_id: String = String(fireteam_id_variant)
+		var leadership: float = 0.0
+		var acting_lead = get_current_fireteam_lead_unit(fireteam_id)
+		if acting_lead != null and acting_lead.has_method("get_leadership_skill"):
+			leadership = float(acting_lead.call("get_leadership_skill"))
+		result[fireteam_id] = leadership
+	return result
 
 
 func _ensure_readability_nodes() -> void:

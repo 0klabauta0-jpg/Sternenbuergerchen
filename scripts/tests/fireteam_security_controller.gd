@@ -48,7 +48,7 @@ func update_fireteam_state(
 	movement_state: Dictionary,
 	suppression_state: Dictionary,
 	ad_hoc_order: Dictionary,
-	visible_enemy_units: Array
+	threat_inputs: Array
 ) -> Dictionary:
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty():
@@ -59,7 +59,7 @@ func update_fireteam_state(
 		return {}
 	var anchor_position: Vector2 = _resolve_anchor_position(fit_members, leader)
 	var previous_state: Dictionary = Dictionary(_state_by_fireteam.get(normalized_fireteam_id, {})).duplicate(true)
-	var threat_info: Dictionary = _resolve_main_threat(anchor_position, visible_enemy_units)
+	var threat_info: Dictionary = _resolve_main_threat(anchor_position, threat_inputs)
 	var threat_position: Variant = threat_info.get("position", null)
 	var threat_distance: float = float(threat_info.get("distance", INF))
 	var leadership: float = _read_skill_value(leader, "get_leadership_skill", 0.0)
@@ -158,28 +158,66 @@ func _resolve_anchor_position(fit_members: Array, leader) -> Vector2:
 	return sum / float(count)
 
 
-func _resolve_main_threat(anchor_position: Vector2, visible_enemy_units: Array) -> Dictionary:
-	var best_enemy = null
+func _resolve_main_threat(anchor_position: Vector2, threat_inputs: Array) -> Dictionary:
+	var best_threat: Dictionary = {}
+	var best_rank: int = -1
 	var best_distance: float = INF
-	for enemy in visible_enemy_units:
-		if enemy == null or not (enemy is Node2D) or not enemy.has_method("get_vital_state"):
+	for threat_input in threat_inputs:
+		var threat_info: Dictionary = _coerce_threat_info(threat_input, anchor_position)
+		if threat_info.is_empty():
 			continue
-		if String(enemy.call("get_vital_state")) != "fit":
+		var threat_rank: int = _contact_state_rank(String(threat_info.get("detection_state", "confirmed")))
+		var threat_distance: float = float(threat_info.get("distance", INF))
+		if threat_rank < best_rank:
 			continue
-		if enemy is CanvasItem and not (enemy as CanvasItem).visible:
+		if threat_rank == best_rank and threat_distance >= best_distance:
 			continue
-		var distance: float = anchor_position.distance_to((enemy as Node2D).global_position)
-		if distance >= best_distance:
-			continue
-		best_distance = distance
-		best_enemy = enemy
-	if best_enemy == null:
+		best_rank = threat_rank
+		best_distance = threat_distance
+		best_threat = threat_info
+	return best_threat
+
+
+func _coerce_threat_info(threat_input, anchor_position: Vector2) -> Dictionary:
+	if typeof(threat_input) == TYPE_DICTIONARY:
+		var threat_dict: Dictionary = Dictionary(threat_input)
+		var threat_state: String = String(threat_dict.get("detection_state", "")).strip_edges().to_lower()
+		if threat_state == "unknown":
+			return {}
+		var threat_position: Vector2 = _coerce_vector2(threat_dict.get("last_known_position", threat_dict.get("position", Vector2.ZERO)), Vector2.ZERO)
+		return {
+			"unit_id": String(threat_dict.get("unit_id", "")),
+			"position": threat_position,
+			"distance": anchor_position.distance_to(threat_position),
+			"detection_state": threat_state if not threat_state.is_empty() else "confirmed",
+		}
+	if threat_input == null or not (threat_input is Node2D) or not threat_input.has_method("get_vital_state"):
 		return {}
+	if String(threat_input.call("get_vital_state")) != "fit":
+		return {}
+	if threat_input is CanvasItem and not (threat_input as CanvasItem).visible:
+		return {}
+	var threat_node: Node2D = threat_input
 	return {
-		"unit_id": String(best_enemy.call("get_unit_id")) if best_enemy.has_method("get_unit_id") else "",
-		"position": (best_enemy as Node2D).global_position,
-		"distance": best_distance,
+		"unit_id": String(threat_input.call("get_unit_id")) if threat_input.has_method("get_unit_id") else "",
+		"position": threat_node.global_position,
+		"distance": anchor_position.distance_to(threat_node.global_position),
+		"detection_state": "confirmed",
 	}
+
+
+func _contact_state_rank(detection_state: String) -> int:
+	match detection_state.strip_edges().to_lower():
+		"confirmed":
+			return 4
+		"spotted":
+			return 3
+		"lost":
+			return 2
+		"suspected":
+			return 1
+		_:
+			return 0
 
 
 func _resolve_security_mode(leadership: float, trait_ids: PackedStringArray, threat_position) -> String:
@@ -257,6 +295,17 @@ func _read_skill_value(unit, method_name: String, fallback: float) -> float:
 	if unit == null or not unit.has_method(method_name):
 		return fallback
 	return clampf(float(unit.call(method_name)), 0.0, 1.0)
+
+
+func _coerce_vector2(value: Variant, fallback: Vector2) -> Vector2:
+	if value is Vector2:
+		return value
+	if value is Vector2i:
+		return Vector2(value.x, value.y)
+	if typeof(value) == TYPE_DICTIONARY:
+		var value_dict: Dictionary = value
+		return Vector2(float(value_dict.get("x", fallback.x)), float(value_dict.get("y", fallback.y)))
+	return fallback
 
 
 func _build_public_state(state: Dictionary) -> Dictionary:

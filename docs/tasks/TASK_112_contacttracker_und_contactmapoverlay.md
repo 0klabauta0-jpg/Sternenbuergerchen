@@ -3,7 +3,7 @@
 ## Ziel
 Ein `ContactTracker` fuehrt gestufte Feinderkennungszustaende pro Fireteam ein und verteilt bestaetigte Kontakte mit Verzogerung an andere Friendlies. Ein `ContactMapOverlay` visualisiert diese Kontaktlage in der Missionsansicht.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT
 
 ## Pflicht vor Beginn
 - Lies [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md)
@@ -68,3 +68,11 @@ Ein `ContactTracker` fuehrt gestufte Feinderkennungszustaende pro Fireteam ein u
 - Bestaetigte Kontakte werden verzoegert an andere Fireteams weitergegeben.
 - Die Kontaktzustaende wirken auf Ausrichtung, Feuerfreigabe und Overwatch.
 - Die Missionsansicht visualisiert `suspected`, `spotted`, `confirmed` und `lost` unterscheidbar.
+
+## Umsetzung
+- `scripts/tests/contact_tracker.gd` fuehrt die missionslokale Kontaktlage pro Friendly-Fireteam mit `suspected`, `spotted`, `confirmed` und `lost`, inklusive letzter Position, Tick-Zeitstempel und leadership-skaliert verzogerter Relay-Weitergabe bestaetigter Kontakte.
+- `MissionCombatLoopDriver` speist den Tracker aus bestehendem LOS- und Detection-Delay, exponiert Snapshots nach aussen und nutzt `spotted`/`confirmed` als zusaetzliche Feuerfreigabe-Intel fuer Friendly-Angriffe; `spotted` erhaelt dabei den vorgesehenen Accuracy-Malus.
+- `MissionTacticalSandboxController` reicht die Kontakt-Snapshots an Security und UI weiter, ohne selbst neue Gameplay-Wahrheit aufzubauen.
+- `FireteamSecurityController` akzeptiert nun neben sichtbaren Enemy-Nodes auch Contact-Entries, sodass `suspected` und `lost` bereits fuer Sicherungsrichtung und Hauptbedrohung genuegen.
+- `scripts/tests/contact_map_overlay.gd` visualisiert die Kontaktlage getrennt von Plan- und Security-Layern als rein lesendes Karten-Overlay.
+- `scripts/tests/task_112_verifier.gd` deckt Zustandsuebergaenge, Relay-Delay, Security-Konsum von Kontakt-Hinweisen, Overlay-Aggregation und Missionsintegration headless ab.

@@ -16,6 +16,7 @@ const FIRETEAM_COORDINATION_MANAGER_SCRIPT: GDScript = preload("res://scripts/te
 const TACTICAL_STANCE_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/tactical_stance_controller.gd")
 const FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/fireteam_movement_controller.gd")
 const FIRETEAM_SECURITY_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/fireteam_security_controller.gd")
+const CONTACT_MAP_OVERLAY_SCRIPT: GDScript = preload("res://scripts/tests/contact_map_overlay.gd")
 
 const FIRETEAM_NAMES: PackedStringArray = ["ALL", "BLUE", "GOLD"]
 const REAL_FIRETEAM_IDS: PackedStringArray = ["blue", "gold"]
@@ -142,6 +143,7 @@ var _fireteam_movement_controller = null
 var _fireteam_security_controller = null
 var _active_coordination_by_id: Dictionary = {}
 var _leader_initiated_flank_ready_at_msec_by_fireteam: Dictionary = {}
+var _contact_overlay_pending: bool = false
 
 
 func _ready() -> void:
@@ -182,6 +184,7 @@ func _ready() -> void:
 	_ensure_fireteam_movement_controller()
 	_ensure_fireteam_security_controller()
 	_ensure_order_visualizer()
+	_ensure_contact_map_overlay()
 	_hide_legacy_phase_buttons()
 	_sync_phase_selection_from_controller()
 	_initialize_fireteam_suppression_state()
@@ -540,6 +543,20 @@ func get_fireteam_security_state(fireteam_id: String) -> Dictionary:
 	return Dictionary(_fireteam_security_controller.call("get_fireteam_state", fireteam_id)).duplicate(true)
 
 
+func get_contact_snapshot() -> Array:
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver == null or not combat_driver.has_method("get_contact_snapshot"):
+		return []
+	return Array(combat_driver.call("get_contact_snapshot")).duplicate(true)
+
+
+func get_fireteam_contact_snapshot(fireteam_id: String) -> Array:
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver == null or not combat_driver.has_method("get_fireteam_contact_snapshot"):
+		return []
+	return Array(combat_driver.call("get_fireteam_contact_snapshot", fireteam_id)).duplicate(true)
+
+
 func get_tactical_stances_snapshot() -> Dictionary:
 	_ensure_tactical_stance_controller()
 	if _tactical_stance_controller == null:
@@ -610,7 +627,7 @@ func refresh_fireteam_security_state() -> bool:
 			get_fireteam_movement_state(fireteam_id),
 			Dictionary(_suppression_state_by_fireteam.get(fireteam_id, {})).duplicate(true),
 			Dictionary(_ad_hoc_order_controller.call("get_active_order", fireteam_id)) if _ad_hoc_order_controller != null else {},
-			_get_all_enemy_units(false)
+			get_fireteam_contact_snapshot(fireteam_id)
 		)
 	var next_snapshot_text: String = JSON.stringify(get_fireteam_security_snapshot())
 	if previous_snapshot_text == next_snapshot_text:
@@ -2644,15 +2661,42 @@ func _finalize_order_visualizer_attach() -> void:
 	_refresh_order_visuals()
 
 
+func _ensure_contact_map_overlay() -> void:
+	var mission_root := get_parent()
+	if mission_root == null or mission_root.get_node_or_null("ContactMapOverlay") != null or _contact_overlay_pending:
+		return
+	var overlay = CONTACT_MAP_OVERLAY_SCRIPT.new()
+	overlay.name = "ContactMapOverlay"
+	overlay.z_index = 6
+	_contact_overlay_pending = true
+	mission_root.call_deferred("add_child", overlay)
+	call_deferred("_finalize_contact_map_overlay_attach")
+
+
+func _finalize_contact_map_overlay_attach() -> void:
+	_contact_overlay_pending = false
+	refresh_contact_overlay()
+
+
 func _refresh_order_visuals() -> void:
 	var visualizer := get_node_or_null("../FireteamOrderVisualizer")
 	if visualizer == null:
+		refresh_contact_overlay()
 		return
 	visualizer.call("set_phase_index", _current_phase_index)
 	visualizer.call("set_selected_fireteam_ids", _selected_fireteam_ids)
 	visualizer.call("set_plan_dicts", _serialize_order_plans())
 	visualizer.call("set_ad_hoc_order_dicts", _build_ad_hoc_visualization_entries())
 	visualizer.call("set_security_dicts", get_fireteam_security_snapshot())
+	refresh_contact_overlay()
+
+
+func refresh_contact_overlay() -> void:
+	var overlay := get_node_or_null("../ContactMapOverlay")
+	if overlay == null:
+		return
+	overlay.call("set_selected_fireteam_ids", _selected_fireteam_ids)
+	overlay.call("set_contact_entries", get_contact_snapshot())
 
 
 func _try_open_waypoint_menu_at_position(screen_position: Vector2) -> bool:
@@ -2783,6 +2827,13 @@ func _get_max_order_plan_phase() -> int:
 
 func _get_phase_controller():
 	return get_node_or_null("../PhaseController")
+
+
+func _get_combat_loop_driver():
+	var combat_driver = get_node_or_null("../CombatLoopDriver")
+	if combat_driver != null:
+		return combat_driver
+	return get_node_or_null("../MissionCombatLoopDriver")
 
 
 func _sync_phase_selection_from_controller() -> void:
