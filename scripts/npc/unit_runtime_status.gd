@@ -8,6 +8,7 @@ const STATUS_ENGAGING: String = "engaging"
 const STATUS_HOLDING: String = "holding"
 const FIRE_STATUS_FIRE_AT_WILL: String = "fire_at_will"
 const FIRE_STATUS_HOLD_FIRE: String = "hold_fire"
+const FIRE_STATUS_SEMI_DISCIPLINED: String = "semi_disciplined"
 const ALLOWED_STATUSES: PackedStringArray = [
 	STATUS_IDLE,
 	STATUS_ASSIGNED,
@@ -18,6 +19,7 @@ const ALLOWED_STATUSES: PackedStringArray = [
 const ALLOWED_FIRE_STATUSES: PackedStringArray = [
 	FIRE_STATUS_FIRE_AT_WILL,
 	FIRE_STATUS_HOLD_FIRE,
+	FIRE_STATUS_SEMI_DISCIPLINED,
 ]
 
 var status: String = STATUS_IDLE

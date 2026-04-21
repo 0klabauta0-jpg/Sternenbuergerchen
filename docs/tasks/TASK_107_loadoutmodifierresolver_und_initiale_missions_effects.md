@@ -3,7 +3,7 @@
 ## Ziel
 FOB-Staging erzeugt beim Missionsstart `UnitLoadoutModifiers`, die als initiale Effects ueber den autoritativen Missionspfad auf die Units wirken.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT
 
 ## Pflicht vor Beginn
 - Lies [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md)
@@ -11,7 +11,7 @@ FOB-Staging erzeugt beim Missionsstart `UnitLoadoutModifiers`, die als initiale 
 - Lies [docs/CODEX_RULES.md](docs/CODEX_RULES.md)
 - Lies [docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md)
 - Lies [docs/tasks/TASK_087_loadout_pipeline_waffen_sprites.md](docs/tasks/TASK_087_loadout_pipeline_waffen_sprites.md)
-- Lies [TASK_106 – Dropship-LZ, Insertion und verzoegerte Aktivierung](docs/tasks/TASK_106_gegner_patrouillenpfade_und_pre_contact_patrol.md)
+- Lies [TASK_106 – Dropship-LZ, Insertion und verzoegerte Aktivierung](docs/tasks/TASK_106_dropship_lz_insertion_und_verzoegerte_aktivierung.md)
 - Pruefe den Git-Status
 
 ## Aufgabe

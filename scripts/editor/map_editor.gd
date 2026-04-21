@@ -959,11 +959,11 @@ func _refresh_patrol_overlay() -> void:
 			marker.add_point(waypoint_position + Vector2(0.0, -5.0))
 			marker.add_point(waypoint_position + Vector2(0.0, 5.0))
 			overlay.add_child(marker)
-			var label := Label2D.new()
+			var label := Label.new()
 			label.position = waypoint_position + Vector2(6.0, -12.0)
 			label.text = "%s:%d" % [spawn_id, waypoint_index + 1]
 			label.modulate = base_color
-			label.font_size = 10
+			label.add_theme_font_size_override("font_size", 10)
 			overlay.add_child(label)
 
 

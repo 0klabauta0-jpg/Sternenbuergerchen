@@ -141,7 +141,8 @@ func _should_process_locally() -> bool:
 	if simulation_root == null:
 		return true
 
-	if not bool(simulation_root.get("is_server_authoritative")):
+	var is_server_authoritative: Variant = simulation_root.get("is_server_authoritative")
+	if not _variant_to_bool(is_server_authoritative):
 		return true
 
 	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
@@ -149,3 +150,16 @@ func _should_process_locally() -> bool:
 		return true
 
 	return multiplayer.is_server()
+
+
+func _variant_to_bool(value: Variant) -> bool:
+	match typeof(value):
+		TYPE_BOOL:
+			return value
+		TYPE_INT, TYPE_FLOAT:
+			return value != 0
+		TYPE_STRING:
+			var normalized := String(value).strip_edges().to_lower()
+			return normalized == "true" or normalized == "1"
+		_:
+			return value != null

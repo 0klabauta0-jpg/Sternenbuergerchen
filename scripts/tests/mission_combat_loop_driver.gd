@@ -1294,7 +1294,7 @@ func _should_run_local_combat(simulation_root: Node) -> bool:
 	if simulation_root == null:
 		return true
 
-	if not bool(simulation_root.get("is_server_authoritative")):
+	if not _variant_to_bool(simulation_root.get("is_server_authoritative")):
 		return true
 
 	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
@@ -1302,6 +1302,19 @@ func _should_run_local_combat(simulation_root: Node) -> bool:
 		return true
 
 	return multiplayer.is_server()
+
+
+func _variant_to_bool(value: Variant) -> bool:
+	match typeof(value):
+		TYPE_BOOL:
+			return value
+		TYPE_INT, TYPE_FLOAT:
+			return value != 0
+		TYPE_STRING:
+			var normalized := String(value).strip_edges().to_lower()
+			return normalized == "true" or normalized == "1"
+		_:
+			return value != null
 
 
 func _can_broadcast_to_clients() -> bool:

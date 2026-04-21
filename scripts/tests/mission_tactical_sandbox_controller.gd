@@ -26,9 +26,10 @@ const SELECTION_DRAG_THRESHOLD: float = 10.0
 const WAYPOINT_DRAG_THRESHOLD: float = 4.0
 const PHASE_WAYPOINT_COMPLETE_RADIUS: float = 26.0
 const AD_HOC_ORDER_COMPLETE_RADIUS: float = 28.0
-const SUPPRESSION_HIT_GAIN: float = 1.0
+const SUPPRESSION_HIT_GAIN: float = 1.5
 const SUPPRESSION_NEAR_MISS_GAIN: float = 0.35
-const SUPPRESSION_BASE_DECAY_PER_SECOND: float = 0.75
+const SUPPRESSION_BASE_DECAY_PER_SECOND: float = 0.2
+const SUPPRESSION_MIN_HOLD_MSEC: int = 500
 const SUPPRESSION_NEAR_MISS_INTERVAL_MSEC: int = 950
 const SUPPRESSION_HIT_CHANCE_MALUS: float = -0.3
 const SUPPRESSION_MOVE_FACTOR: float = 0.3
@@ -176,6 +177,7 @@ func _ready() -> void:
 	_sync_phase_selection_from_controller()
 	_initialize_fireteam_suppression_state()
 	_ensure_default_fireteam_selection()
+	_sync_initial_runtime_active_units()
 	_refresh_selection_visuals()
 	_refresh_order_visuals()
 	_refresh_button_state()
@@ -809,7 +811,31 @@ func _get_flow_drivers_for_fireteams(fireteam_ids: PackedStringArray) -> Array:
 		drivers.append(bravo_driver)
 	if fireteam_ids.has("gold"):
 		drivers.append(charlie_driver)
-	return drivers
+	var active_drivers: Array = []
+	for driver in drivers:
+		if driver == null:
+			continue
+		if _is_flow_driver_runtime_active(driver):
+			active_drivers.append(driver)
+	return active_drivers
+
+
+func _is_flow_driver_runtime_active(driver: Node) -> bool:
+	if driver == null or not driver.has_method("get"):
+		return false
+	var unit_id: String = String(driver.get("unit_id")).strip_edges()
+	if unit_id.is_empty():
+		return true
+	if _deployed_unit_ids.has(unit_id):
+		return true
+	var unit_registry = get_node_or_null("../UnitRegistry")
+	if unit_registry == null:
+		return false
+	if unit_registry.has_method("has_unit"):
+		return bool(unit_registry.call("has_unit", unit_id))
+	if unit_registry.has_method("get_unit"):
+		return unit_registry.call("get_unit", unit_id) != null
+	return false
 
 
 func _get_fireteam_name() -> String:
@@ -1858,6 +1884,25 @@ func _get_all_friendly_units(include_hidden: bool = true) -> Array:
 	return result
 
 
+func _sync_initial_runtime_active_units() -> void:
+	var unit_registry = get_node_or_null("../UnitRegistry")
+	if unit_registry == null:
+		return
+	for unit in _get_all_friendly_units(true):
+		if unit == null or not unit.has_method("get_unit_id"):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+		if unit_id.is_empty() or _embarked_unit_ids.has(unit_id):
+			continue
+		var is_registered: bool = false
+		if unit_registry.has_method("has_unit"):
+			is_registered = bool(unit_registry.call("has_unit", unit_id))
+		elif unit_registry.has_method("get_unit"):
+			is_registered = unit_registry.call("get_unit", unit_id) != null
+		if is_registered:
+			_deployed_unit_ids[unit_id] = true
+
+
 func _get_fireteam_units(fireteam_id: String, include_hidden: bool = true) -> Array:
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty():
@@ -1879,9 +1924,18 @@ func _resolve_fireteam_leader_for_behavior(fireteam_id: String):
 		var active_lead = mission_combat_driver.call("get_current_fireteam_lead_unit", normalized_fireteam_id)
 		if active_lead != null:
 			return active_lead
+	var mission_root: Node = get_parent()
+	if mission_root == null:
+		return _get_selection_anchor_for_fireteam(normalized_fireteam_id)
 	var best_unit = null
 	var best_leadership: float = -1.0
-	for unit in _get_fireteam_units(normalized_fireteam_id, true):
+	for unit in mission_root.get_children():
+		if unit == null or not unit.has_method("get_team_id") or not unit.has_method("get_fireteam_id"):
+			continue
+		if String(unit.call("get_team_id")).strip_edges() != FRIENDLY_TEAM_ID:
+			continue
+		if String(unit.call("get_fireteam_id")).strip_edges().to_lower() != normalized_fireteam_id:
+			continue
 		var is_fit: bool = not unit.has_method("get_vital_state") or String(unit.call("get_vital_state")) == "fit"
 		if not is_fit:
 			continue
@@ -1925,13 +1979,17 @@ func _initialize_fireteam_suppression_state() -> void:
 			"is_suppressed": false,
 			"is_heavily_suppressed": false,
 			"applied_level": 0,
+			"hold_until_msec": 0,
 		}
 		_suppression_interrupt_pending_by_fireteam[normalized_fireteam_id] = false
 		_suppression_near_miss_ready_at_msec_by_fireteam[normalized_fireteam_id] = 0
 		for unit in _get_fireteam_units(normalized_fireteam_id, true):
-			if unit == null or not unit.has_method("get_unit_id") or not unit.has_method("get_health_points"):
+			if unit == null or not unit.has_method("get_unit_id"):
 				continue
-			_tracked_health_by_unit_id[String(unit.call("get_unit_id"))] = int(unit.call("get_health_points"))
+			var health_points: int = _get_unit_health_points(unit)
+			if health_points < 0:
+				continue
+			_tracked_health_by_unit_id[String(unit.call("get_unit_id"))] = health_points
 
 
 func _update_fireteam_suppression(delta: float) -> void:
@@ -1964,10 +2022,15 @@ func _update_fireteam_suppression(delta: float) -> void:
 		state["value"] = next_value
 		var was_suppressed: bool = bool(state.get("is_suppressed", false))
 		var was_heavy: bool = bool(state.get("is_heavily_suppressed", false))
-		var is_suppressed: bool = next_value >= threshold
+		var hold_until_msec: int = int(state.get("hold_until_msec", 0))
+		var threshold_triggered: bool = next_value >= threshold
+		if threshold_triggered and not was_suppressed:
+			hold_until_msec = now_msec + SUPPRESSION_MIN_HOLD_MSEC
+		var is_suppressed: bool = threshold_triggered or now_msec < hold_until_msec
 		var is_heavy: bool = next_value >= threshold * 1.8
 		state["is_suppressed"] = is_suppressed
 		state["is_heavily_suppressed"] = is_heavy
+		state["hold_until_msec"] = hold_until_msec if is_suppressed else 0
 		_suppression_state_by_fireteam[normalized_fireteam_id] = state
 		if is_suppressed and not _should_ignore_suppression(normalized_fireteam_id):
 			_interrupt_plan_for_suppression(normalized_fireteam_id)
@@ -1989,16 +2052,28 @@ func _resolve_suppression_threshold(fireteam_id: String) -> float:
 func _compute_suppression_gain_from_damage(units: Array) -> float:
 	var gain: float = 0.0
 	for unit in units:
-		if unit == null or not unit.has_method("get_unit_id") or not unit.has_method("get_health_points"):
+		if unit == null or not unit.has_method("get_unit_id"):
 			continue
 		var unit_id: String = String(unit.call("get_unit_id"))
-		var current_health: int = int(unit.call("get_health_points"))
+		var current_health: int = _get_unit_health_points(unit)
+		if current_health < 0:
+			continue
 		var previous_health: int = int(_tracked_health_by_unit_id.get(unit_id, current_health))
 		_tracked_health_by_unit_id[unit_id] = current_health
 		if current_health >= previous_health:
 			continue
 		gain += SUPPRESSION_HIT_GAIN + (float(previous_health - current_health) / 100.0)
 	return gain
+
+
+func _get_unit_health_points(unit: Node) -> int:
+	if unit == null:
+		return -1
+	if unit.has_method("get_health_points"):
+		return int(unit.call("get_health_points"))
+	if unit.has_method("get_health"):
+		return int(unit.call("get_health"))
+	return -1
 
 
 func _should_ignore_suppression(fireteam_id: String) -> bool:
@@ -2301,6 +2376,7 @@ func _ensure_waypoint_command_menu() -> void:
 	menu.hide_on_item_selection = true
 	if not menu.id_pressed.is_connected(_on_waypoint_menu_id_pressed):
 		menu.id_pressed.connect(_on_waypoint_menu_id_pressed)
+	tactical_ui.add_child(menu)
 
 
 func _ensure_ad_hoc_order_controller() -> void:
@@ -2313,7 +2389,6 @@ func _ensure_coordination_manager() -> void:
 	if _coordination_manager != null:
 		return
 	_coordination_manager = FIRETEAM_COORDINATION_MANAGER_SCRIPT.new()
-	tactical_ui.add_child(menu)
 
 
 func _ensure_order_visualizer() -> void:
@@ -3466,7 +3541,7 @@ func _register_unit_for_runtime(unit: Node) -> void:
 		if team_id.is_empty():
 			var mission_setup = get_node_or_null("../MissionSetup")
 			if mission_setup != null:
-				team_id = String(mission_setup.get("team_id", "")).strip_edges()
+				team_id = String(mission_setup.get("team_id")).strip_edges()
 		if not team_id.is_empty() and (not ftl_registry.has_method("has_ftl") or not bool(ftl_registry.call("has_ftl", team_id))):
 			ftl_registry.call("register_ftl", team_id, runtime_leader)
 	_enqueue_initial_loadout_effect_for_unit(unit_id)

@@ -3,7 +3,7 @@
 ## Ziel
 Ein `AdHocOrderController` fuehrt kurzfristige Commander-Eingriffe in laufende Gefechte ein. Diese Befehle werden nicht in Phasenplaenen gespeichert, laufen sofort an und kehren nach Abschluss automatisch zum unterbrochenen Plan zurueck.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT
 
 ## Pflicht vor Beginn
 - Lies [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md)

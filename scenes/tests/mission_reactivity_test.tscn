@@ -202,6 +202,7 @@ unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo")
 respawn_manager_path = NodePath("../RespawnManager")
 enemy_wave_controller_path = NodePath("../EnemyWaveController")
 terrain_registry_path = NodePath("../TerrainRegistry")
+defer_friendly_runtime_activation = false
 
 [node name="AlphaFlowDriver" type="Node" parent="."]
 script = ExtResource("9_flow")

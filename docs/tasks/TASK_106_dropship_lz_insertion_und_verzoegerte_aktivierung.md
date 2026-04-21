@@ -3,7 +3,7 @@
 ## Ziel
 Die Dropship-Landezone ist die echte Startposition eines Fireteams. Nicht eingeflogene Teams existieren noch nicht in den Laufzeit-Registries und werden erst mit der Insertion steuerbar.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT
 
 ## Pflicht vor Beginn
 - Lies [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md)
@@ -11,7 +11,7 @@ Die Dropship-Landezone ist die echte Startposition eines Fireteams. Nicht eingef
 - Lies [docs/CODEX_RULES.md](docs/CODEX_RULES.md)
 - Lies [docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md)
 - Lies [docs/tasks/TASK_096_meta_missionmap_dropship_und_charactersheet_recovery.md](docs/tasks/TASK_096_meta_missionmap_dropship_und_charactersheet_recovery.md)
-- Lies [TASK_105 – Leader-Nachfolge, Lead-Rueckgabe und UI-Synchronisierung](docs/tasks/TASK_105_loadoutmodifierresolver_zum_missionsstart.md)
+- Lies [TASK_105 – Leader-Nachfolge, Lead-Rueckgabe und UI-Synchronisierung](docs/tasks/TASK_105_leader_nachfolge_und_ui_synchronisierung.md)
 - Pruefe den Git-Status
 
 ## Aufgabe

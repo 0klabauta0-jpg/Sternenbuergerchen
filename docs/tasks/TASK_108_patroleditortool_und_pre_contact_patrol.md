@@ -3,7 +3,7 @@
 ## Ziel
 Der Map-Editor erhaelt ein `PatrolEditorTool` fuer gegnerische Patrouillenpfade. In der Mission folgen Gegner diesen Pfaden bis zum ersten Feindkontakt und wechseln danach auf das bestehende reaktive Kampfverhalten.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT
 
 ## Pflicht vor Beginn
 - Lies [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md)

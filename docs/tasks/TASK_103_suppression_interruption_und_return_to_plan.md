@@ -3,7 +3,7 @@
 ## Ziel
 Fireteams reagieren auf Treffer und Nahmiss-Situationen mit einem echten Suppression-Zustand, koennen aktive Wegpunkte unterbrechen und spaeter automatisch oder manuell in den Phasenplan zurueckkehren.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT
 
 ## Pflicht vor Beginn
 - Lies [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md)
@@ -11,7 +11,7 @@ Fireteams reagieren auf Treffer und Nahmiss-Situationen mit einem echten Suppres
 - Lies [docs/CODEX_RULES.md](docs/CODEX_RULES.md)
 - Lies [docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md)
 - Lies [docs/tasks/TASK_101_fireteambehaviorresolver_und_standardverhalten.md](docs/tasks/TASK_101_fireteambehaviorresolver_und_standardverhalten.md)
-- Lies [docs/tasks/TASK_102_suppression_und_return_to_plan.md](docs/tasks/TASK_102_suppression_und_return_to_plan.md)
+- Lies [docs/tasks/TASK_102_adhocordercontroller_und_gefechts_sofortbefehle.md](docs/tasks/TASK_102_adhocordercontroller_und_gefechts_sofortbefehle.md)
 - Pruefe den Git-Status
 
 ## Aufgabe

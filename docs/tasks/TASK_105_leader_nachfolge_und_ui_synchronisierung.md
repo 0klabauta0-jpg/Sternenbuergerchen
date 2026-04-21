@@ -3,7 +3,7 @@
 ## Ziel
 Faellt ein Fireteam-Lead im Einsatz aus, wird automatisch ein Nachfolger bestimmt. Kommt der urspruengliche Lead per Respawn oder Einflug zurueck, uebernimmt er sofort wieder die Fuehrung. Alle Lead-Anzeigen in Mission, FOB und Meta werden synchron gehalten.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT
 
 ## Pflicht vor Beginn
 - Lies [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md)
@@ -11,7 +11,7 @@ Faellt ein Fireteam-Lead im Einsatz aus, wird automatisch ein Nachfolger bestimm
 - Lies [docs/CODEX_RULES.md](docs/CODEX_RULES.md)
 - Lies [docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md)
 - Lies [docs/tasks/TASK_088_leadership_bonus.md](docs/tasks/TASK_088_leadership_bonus.md)
-- Lies [TASK_104 – Inter-Fireteam-Koordination und Leader-initiiertes Flankieren](docs/tasks/TASK_104_missionsinsertion_ab_lz_und_verzoegerte_aktivierung.md)
+- Lies [TASK_104 – Inter-Fireteam-Koordination und Leader-initiiertes Flankieren](docs/tasks/TASK_104_inter_fireteam_koordination_und_leader_flankieren.md)
 - Pruefe den Git-Status
 
 ## Aufgabe

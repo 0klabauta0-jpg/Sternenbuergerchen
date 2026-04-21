@@ -435,7 +435,7 @@ func _apply_loadout_modifiers_to_effects(effects: Dictionary) -> Dictionary:
 	var speed_mod: float = float(_loadout_modifiers.get("speed_mod", 0.0))
 	var accuracy_mod: float = float(_loadout_modifiers.get("accuracy_mod", 0.0))
 	var toughness_mod: float = float(_loadout_modifiers.get("toughness_mod", 0.0))
-	next_effects["hit_modifier"] = float(next_effects.get("hit_modifier", 0.0)) + accuracy_mod
+	next_effects["hit_modifier"] = maxf(float(next_effects.get("hit_modifier", 0.0)), 0.0) + accuracy_mod
 	next_effects["speed_multiplier"] = maxf(float(next_effects.get("speed_multiplier", 1.0)) + speed_mod, 0.1)
 	var base_damage_taken_multiplier: float = float(next_effects.get("damage_taken_multiplier", 1.0))
 	next_effects["damage_taken_multiplier"] = maxf(base_damage_taken_multiplier * (1.0 - toughness_mod), 0.2)
@@ -447,6 +447,46 @@ func get_target_position():
 
 
 func apply_identity_config(identity_config: Dictionary) -> void:
+	var should_rebuild_identity_data: bool = _character_profile_bundle.is_empty()
+	var should_refresh_visuals: bool = false
+	var profile_keys := {
+		"role_id": true,
+		"role_name": true,
+		"skill_accuracy": true,
+		"skill_speed": true,
+		"skill_leadership": true,
+		"skill_toughness": true,
+		"awareness": true,
+		"recognition": true,
+		"stealth": true,
+		"discipline": true,
+		"speech_quality": true,
+		"speech_quantity": true,
+		"ground_vehicle_handling": true,
+		"dropship_piloting": true,
+		"freighter_piloting": true,
+		"fighter_piloting": true,
+		"trait_ids": true,
+	}
+	var visual_keys := {
+		"display_name": true,
+		"callsign": true,
+		"fireteam_id": true,
+		"is_fireteam_lead": true,
+		"armor": true,
+		"armor_id": true,
+		"weapon_1": true,
+		"weapon_1_id": true,
+		"weapon_2": true,
+		"weapon_2_id": true,
+	}
+	for identity_key_variant in identity_config.keys():
+		var identity_key: String = String(identity_key_variant)
+		if profile_keys.has(identity_key):
+			should_rebuild_identity_data = true
+		if visual_keys.has(identity_key):
+			should_refresh_visuals = true
+
 	if identity_config.has("unit_id"):
 		unit_id = String(identity_config["unit_id"]).strip_edges()
 
@@ -545,8 +585,10 @@ func apply_identity_config(identity_config: Dictionary) -> void:
 	if identity_config.has("trait_ids"):
 		trait_ids = _coerce_trait_ids(identity_config["trait_ids"])
 
-	_rebuild_identity_data()
-	_refresh_weapon_visual()
+	if should_rebuild_identity_data:
+		_rebuild_identity_data()
+	if should_refresh_visuals:
+		_refresh_weapon_visual()
 	_refresh_readability()
 
 

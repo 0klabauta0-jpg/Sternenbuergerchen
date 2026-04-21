@@ -3,15 +3,15 @@
 ## Ziel
 Mehrere Fireteams koordinieren ihre Bewegung bei engen Zielraeumen ueber einen `FireteamCoordinationManager`, und aggressive Leader koennen in guenstigen Gefechtssituationen eigenstaendig einen Ad-hoc-`flank` anstossen.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT
 
 ## Pflicht vor Beginn
 - Lies [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md)
 - Lies [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - Lies [docs/CODEX_RULES.md](docs/CODEX_RULES.md)
 - Lies [docs/IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md)
-- Lies [docs/tasks/TASK_102_suppression_und_return_to_plan.md](docs/tasks/TASK_102_suppression_und_return_to_plan.md)
-- Lies [docs/tasks/TASK_103_inter_fireteam_koordination_ueber_eventrouter.md](docs/tasks/TASK_103_inter_fireteam_koordination_ueber_eventrouter.md)
+- Lies [docs/tasks/TASK_102_adhocordercontroller_und_gefechts_sofortbefehle.md](docs/tasks/TASK_102_adhocordercontroller_und_gefechts_sofortbefehle.md)
+- Lies [docs/tasks/TASK_103_suppression_interruption_und_return_to_plan.md](docs/tasks/TASK_103_suppression_interruption_und_return_to_plan.md)
 - Pruefe den Git-Status
 
 ## Aufgabe

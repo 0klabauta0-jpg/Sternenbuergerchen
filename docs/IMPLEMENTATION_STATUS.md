@@ -301,6 +301,13 @@
 - Risiken: Die aktuelle Koordination bleibt bewusst leichtgewichtig und testszenenlokal; spaetere komplexere Team-Taktik sollte den Signalvertrag explizit weiterfuehren statt den Controller still zu ueberladen.
 - Naechster Schritt: Falls notwendig, in Folge-Tasks dedizierte EventRouter-Consumer fuer Entlastungs-/Unterstuetzungsreaktionen zwischen Fireteams ausbauen.
 
+### TASK_105 – Leader-Nachfolge, Lead-Rueckgabe und UI-Synchronisierung
+- Status: implementiert
+- Stand: `MissionCombatLoopDriver` verwaltet jetzt pro Fireteam Original-Lead, Acting-Lead und Mitgliederliste. Faellt der urspruengliche Lead aus, uebernimmt automatisch das fitte Mitglied mit dem hoechsten `leadership`, bei Gleichstand entscheidet `toughness`. Sobald der Original-Lead durch Respawn oder spaetere Insertion wieder `fit` ist, geht die Fuehrung in derselben Mission automatisch an ihn zurueck. `TacticalInputController` bindet Lead-Anzeigen und Verhaltensableitungen an den jeweils aktuellen Acting-Lead; dadurch wechseln Lead-Stern, Ad-hoc-/Koordinationsentscheidungen und Fireteam-Karten synchron mit.
+- Offene Punkte: keine dauerhafte Meta-Persistenz der Missions-Nachfolge ausserhalb der laufenden Mission und keine separate manuelle Lead-Uebersteuerung.
+- Risiken: die Lead-Synchronisierung bleibt bewusst missionslokal und haengt an den bestehenden Friendly-/Respawn-Pfaden; spaetere Netzwerk- oder Meta-Synchronisierung sollte diesen Vertrag explizit uebernehmen statt parallele Lead-Wahrheiten aufzubauen.
+- Naechster Schritt: TASK_106 auf dem jetzt stabilen Lead-/Respawn-Pfad fuer verzoegerte Runtime-Aktivierung und LZ-Insertion aufsetzen.
+
 ### TASK_038 - Fireteam-Aufteilung
 - Status: implementiert
 - Stand: `TestUnit` traegt jetzt eine eigene `fireteam_id`, spiegelt diese in `UnitRuntimeStatus` und zeigt sie in der Missions-Testszene als kleinen farbigen `BLUE`-/`GOLD`-Text direkt neben dem bestehenden Statuslabel an. `MissionTestSetup` weist Alpha und Bravo fest `blue` sowie Charlie fest `gold` zu, ohne die bestehende Driver- oder Hotkey-Logik im `MissionTacticalSandboxController` umzubauen.
