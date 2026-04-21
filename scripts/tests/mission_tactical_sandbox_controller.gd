@@ -13,6 +13,7 @@ const FIRETEAM_ORDER_VISUALIZER_SCRIPT: GDScript = preload("res://scripts/tests/
 const AD_HOC_ORDER_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/ad_hoc_order_controller.gd")
 const AD_HOC_ORDER_SCRIPT: GDScript = preload("res://scripts/command/ad_hoc_order.gd")
 const FIRETEAM_COORDINATION_MANAGER_SCRIPT: GDScript = preload("res://scripts/tests/fireteam_coordination_manager.gd")
+const TACTICAL_STANCE_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/tactical_stance_controller.gd")
 
 const FIRETEAM_NAMES: PackedStringArray = ["ALL", "BLUE", "GOLD"]
 const REAL_FIRETEAM_IDS: PackedStringArray = ["blue", "gold"]
@@ -127,6 +128,7 @@ var _order_visualizer_pending: bool = false
 var _phase_execution_by_fireteam: Dictionary = {}
 var _active_behavior_profiles_by_fireteam: Dictionary = {}
 var _ad_hoc_order_controller = null
+var _tactical_stance_controller = null
 var _ad_hoc_execution_by_fireteam: Dictionary = {}
 var _ad_hoc_resume_state_by_fireteam: Dictionary = {}
 var _suppression_state_by_fireteam: Dictionary = {}
@@ -171,6 +173,7 @@ func _ready() -> void:
 	_ensure_selection_overlay()
 	_ensure_waypoint_command_menu()
 	_ensure_ad_hoc_order_controller()
+	_ensure_tactical_stance_controller()
 	_ensure_coordination_manager()
 	_ensure_order_visualizer()
 	_hide_legacy_phase_buttons()
@@ -380,6 +383,7 @@ func return_selected_fireteams_to_plan() -> bool:
 
 func set_planning_state(planning_state: Dictionary) -> void:
 	var uses_global_phase_state: bool = planning_state.has("selected_phase_index") or planning_state.has("active_phase_index") or planning_state.has("phase_states") or planning_state.has("phase_count")
+	_ensure_tactical_stance_controller()
 	if planning_state.has("approach_angle"):
 		var approach_angle: String = String(planning_state.get("approach_angle", "NW")).strip_edges().to_upper()
 		var angle_index: int = APPROACH_ANGLES.find(approach_angle)
@@ -401,6 +405,8 @@ func set_planning_state(planning_state: Dictionary) -> void:
 			_selected_fireteam_ids = _selection_ids_for_index(fireteam_index)
 	if planning_state.has("selected_fireteams"):
 		_set_selected_fireteams(_sanitize_fireteam_ids(PackedStringArray(Array(planning_state.get("selected_fireteams", [])))), false)
+	if planning_state.has("tactical_stances") and _tactical_stance_controller != null:
+		_tactical_stance_controller.call("load_stance_snapshot", Dictionary(planning_state.get("tactical_stances", {})), _get_available_fireteam_ids())
 	if planning_state.has("order_plans"):
 		_load_order_plans_from_state(Array(planning_state.get("order_plans", [])), 1 if not uses_global_phase_state else 0)
 	var phase_controller = _get_phase_controller()
@@ -421,6 +427,7 @@ func set_planning_state(planning_state: Dictionary) -> void:
 
 
 func get_planning_state() -> Dictionary:
+	_ensure_tactical_stance_controller()
 	var planning_state: Dictionary = {
 		"has_lz_position": _has_lz_position,
 		"lz_position": _lz_position,
@@ -431,6 +438,8 @@ func get_planning_state() -> Dictionary:
 		"selected_phase": _get_phase_name(),
 		"order_plans": _serialize_order_plans(),
 	}
+	if _tactical_stance_controller != null:
+		planning_state["tactical_stances"] = Dictionary(_tactical_stance_controller.call("get_stance_snapshot"))
 	var phase_controller = _get_phase_controller()
 	if phase_controller != null and phase_controller.has_method("build_planning_state_fragment"):
 		planning_state.merge(Dictionary(phase_controller.call("build_planning_state_fragment")), true)
@@ -468,6 +477,7 @@ func advance_to_next_phase() -> bool:
 		_last_command_text = "NO NEXT PHASE"
 		_update_ui()
 		return false
+	_reset_tactical_stances_for_new_phase()
 	_start_active_phase_execution(next_phase_index)
 	_refresh_button_state()
 	_refresh_order_visuals()
@@ -500,6 +510,37 @@ func get_active_behavior_profile(fireteam_id: String) -> Dictionary:
 	if typeof(profile) == TYPE_DICTIONARY:
 		return Dictionary(profile).duplicate(true)
 	return {}
+
+
+func get_requested_tactical_stance(fireteam_id: String) -> String:
+	_ensure_tactical_stance_controller()
+	if _tactical_stance_controller == null:
+		return "normal"
+	return String(_tactical_stance_controller.call("get_requested_stance", fireteam_id))
+
+
+func get_tactical_stances_snapshot() -> Dictionary:
+	_ensure_tactical_stance_controller()
+	if _tactical_stance_controller == null:
+		return {}
+	return Dictionary(_tactical_stance_controller.call("get_stance_snapshot")).duplicate(true)
+
+
+func set_selected_fireteams_tactical_stance(next_stance: String) -> bool:
+	_ensure_tactical_stance_controller()
+	if _tactical_stance_controller == null or _selected_fireteam_ids.is_empty():
+		return false
+	var applied_count: int = int(_tactical_stance_controller.call("apply_to_fireteams", _selected_fireteam_ids, next_stance))
+	if applied_count <= 0:
+		return false
+	for fireteam_id_variant in _selected_fireteam_ids:
+		_refresh_active_behavior_profile_for_fireteam(String(fireteam_id_variant))
+	var first_stance: String = String(_tactical_stance_controller.call("get_requested_stance", String(_selected_fireteam_ids[0])))
+	_last_command_text = "STANCE %s (%d)" % [_get_tactical_stance_short_label(first_stance), applied_count]
+	_refresh_button_state()
+	_update_ui()
+	_emit_planning_state_changed()
+	return true
 
 
 func get_active_behavior_profiles_snapshot() -> Array:
@@ -1044,10 +1085,87 @@ func _ensure_fireteam_status_panel() -> Control:
 	return panel
 
 
+func _ensure_tactical_stance_panel() -> Control:
+	var existing_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/TacticalStancePanel") as PanelContainer
+	if existing_panel != null:
+		return existing_panel
+	var fireteam_vbox := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox") as VBoxContainer
+	if fireteam_vbox == null:
+		return null
+	var panel := PanelContainer.new()
+	panel.name = "TacticalStancePanel"
+	META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "frame")
+	fireteam_vbox.add_child(panel)
+	fireteam_vbox.move_child(panel, 1)
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 8)
+	margin.add_theme_constant_override("margin_top", 6)
+	margin.add_theme_constant_override("margin_right", 8)
+	margin.add_theme_constant_override("margin_bottom", 6)
+	panel.add_child(margin)
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 4)
+	margin.add_child(vbox)
+
+	var summary_label := Label.new()
+	summary_label.name = "SummaryLabel"
+	META_UI_SKIN_SCRIPT.style_body_label(summary_label, 10)
+	vbox.add_child(summary_label)
+
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	vbox.add_child(row)
+	for stance_id in ["cautious", "normal", "aggressive"]:
+		var button := Button.new()
+		button.name = "%sButton" % String(stance_id).capitalize()
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.text = _get_tactical_stance_button_text(stance_id)
+		button.set_meta("tactical_stance_id", stance_id)
+		if not button.pressed.is_connected(_on_tactical_stance_button_pressed.bind(button)):
+			button.pressed.connect(_on_tactical_stance_button_pressed.bind(button))
+		META_UI_SKIN_SCRIPT.style_tactical_button(button, false)
+		row.add_child(button)
+	return panel
+
+
+func _refresh_tactical_stance_panel() -> void:
+	var panel := _ensure_tactical_stance_panel()
+	if panel == null:
+		return
+	var summary_label := panel.get_node_or_null("MarginContainer/VBoxContainer/SummaryLabel") as Label
+	var shared_stance: String = _get_shared_selected_tactical_stance()
+	var summary_text: String = "STANCE N | no fireteams selected"
+	if not _selected_fireteam_ids.is_empty():
+		var selection_text: String = "%s selected" % _get_fireteam_name()
+		if _selected_fireteam_ids.size() > 1 and not _is_all_fireteams_selected():
+			selection_text = "%d fireteams selected" % _selected_fireteam_ids.size()
+		elif _is_all_fireteams_selected():
+			selection_text = "all fireteams selected"
+		var stance_text: String = "STANCE MIXED"
+		if not shared_stance.is_empty():
+			stance_text = "STANCE %s" % _get_tactical_stance_short_label(shared_stance)
+		summary_text = "%s | %s" % [stance_text, selection_text]
+	if summary_label != null:
+		summary_label.text = summary_text
+	var button_row := panel.get_node_or_null("MarginContainer/VBoxContainer/HBoxContainer") as HBoxContainer
+	if button_row == null:
+		return
+	for child in button_row.get_children():
+		var button := child as Button
+		if button == null:
+			continue
+		var stance_id: String = String(button.get_meta("tactical_stance_id", "")).strip_edges().to_lower()
+		META_UI_SKIN_SCRIPT.style_tactical_button(button, not shared_stance.is_empty() and stance_id == shared_stance)
+		button.disabled = not _can_edit_planning() or _selected_fireteam_ids.is_empty()
+
+
 func _refresh_fireteam_status_panel() -> void:
 	var panel := _ensure_fireteam_status_panel()
 	if panel == null:
 		return
+	_refresh_tactical_stance_panel()
 	var suppression_label := panel.get_node_or_null("MarginContainer/HBoxContainer/SuppressionLabel") as Label
 	var return_button := panel.get_node_or_null("MarginContainer/HBoxContainer/ReturnToPlanButton") as Button
 	var selected_fireteam_id: String = _get_selected_fireteam_id()
@@ -1063,9 +1181,10 @@ func _refresh_fireteam_status_panel() -> void:
 	var ad_hoc_type: String = ""
 	if _ad_hoc_order_controller != null:
 		ad_hoc_type = String(Dictionary(_ad_hoc_order_controller.call("get_active_order", selected_fireteam_id)).get("order_type", "")).strip_edges()
+	var stance_text: String = _build_selected_tactical_stance_text()
 	if suppression_label != null:
 		var ad_hoc_text: String = " | AD-HOC %s" % ad_hoc_type.to_upper() if not ad_hoc_type.is_empty() else ""
-		suppression_label.text = "%s | SUPP %.2f/%.2f%s" % [lead_name, suppression_value, suppression_threshold, ad_hoc_text]
+		suppression_label.text = "%s | STANCE %s | SUPP %.2f/%.2f%s" % [lead_name, stance_text, suppression_value, suppression_threshold, ad_hoc_text]
 	if return_button != null:
 		return_button.disabled = selected_fireteam_id.is_empty() or not (_has_pending_plan_for_fireteam(selected_fireteam_id) or (_ad_hoc_order_controller != null and bool(_ad_hoc_order_controller.call("has_active_order", selected_fireteam_id))))
 
@@ -1103,6 +1222,15 @@ func _on_ad_hoc_button_pressed(button: Button) -> void:
 	if order_type.is_empty():
 		return
 	issue_ad_hoc_order(order_type, _get_target_position())
+
+
+func _on_tactical_stance_button_pressed(button: Button) -> void:
+	if button == null:
+		return
+	var stance_id: String = String(button.get_meta("tactical_stance_id", "")).strip_edges().to_lower()
+	if stance_id.is_empty():
+		return
+	set_selected_fireteams_tactical_stance(stance_id)
 
 
 func _on_return_to_plan_button_pressed() -> void:
@@ -1437,7 +1565,7 @@ func _build_fireteam_status_text() -> String:
 		drop_state_text = "%d embarked | %d deployed | Lead %s" % [embarked_count, deployed_count, lead_name]
 	elif deployed_count > 0:
 		drop_state_text = "%d deployed | Lead %s" % [deployed_count, lead_name]
-	return "%s | %d Karten | %d Wegpunkte | %s" % [_get_fireteam_name(), units.size(), planned_waypoint_count, drop_state_text]
+	return "%s | %d Karten | %d Wegpunkte | STANCE %s | %s" % [_get_fireteam_name(), units.size(), planned_waypoint_count, _build_selected_tactical_stance_text(), drop_state_text]
 
 
 func _build_strategic_status_text() -> String:
@@ -1578,6 +1706,7 @@ func _refresh_button_state() -> void:
 	var next_phase_button := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/NextPhaseButton") as BaseButton
 	if next_phase_button != null:
 		next_phase_button.disabled = preview_mode or not _can_issue_local_commands() or not _has_pending_global_phase()
+	_refresh_tactical_stance_panel()
 
 
 func _refresh_world_overlays() -> void:
@@ -1688,6 +1817,7 @@ func _apply_hud_skin() -> void:
 		META_UI_SKIN_SCRIPT.style_body_label(get_node_or_null(path), 10)
 
 	_refresh_dynamic_button_styles()
+	_refresh_tactical_stance_panel()
 	_refresh_button_state()
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayHeaderRow/CloseOverlayButton") as Button, false)
 
@@ -1852,6 +1982,7 @@ func _set_selected_fireteams(next_selected_fireteam_ids: PackedStringArray, emit
 	_refresh_selection_visuals()
 	_refresh_order_visuals()
 	_refresh_button_state()
+	_refresh_tactical_stance_panel()
 	_update_ui()
 	if emit_signal:
 		_emit_planning_state_changed()
@@ -2385,6 +2516,12 @@ func _ensure_ad_hoc_order_controller() -> void:
 	_ad_hoc_order_controller = AD_HOC_ORDER_CONTROLLER_SCRIPT.new()
 
 
+func _ensure_tactical_stance_controller() -> void:
+	if _tactical_stance_controller != null:
+		return
+	_tactical_stance_controller = TACTICAL_STANCE_CONTROLLER_SCRIPT.new()
+
+
 func _ensure_coordination_manager() -> void:
 	if _coordination_manager != null:
 		return
@@ -2578,6 +2715,47 @@ func _has_pending_global_phase() -> bool:
 	return int(phase_controller.call("get_active_phase_index")) < int(phase_controller.call("get_phase_count")) - 1
 
 
+func _get_shared_selected_tactical_stance() -> String:
+	if _selected_fireteam_ids.is_empty():
+		return ""
+	var shared_stance: String = ""
+	for fireteam_id_variant in _selected_fireteam_ids:
+		var stance: String = get_requested_tactical_stance(String(fireteam_id_variant))
+		if shared_stance.is_empty():
+			shared_stance = stance
+			continue
+		if stance != shared_stance:
+			return ""
+	return shared_stance
+
+
+func _build_selected_tactical_stance_text() -> String:
+	var shared_stance: String = _get_shared_selected_tactical_stance()
+	if shared_stance.is_empty():
+		return "MIXED" if not _selected_fireteam_ids.is_empty() else "N"
+	return _get_tactical_stance_short_label(shared_stance)
+
+
+func _get_tactical_stance_short_label(stance_id: String) -> String:
+	match stance_id.strip_edges().to_lower():
+		"cautious":
+			return "C"
+		"aggressive":
+			return "A"
+		_:
+			return "N"
+
+
+func _get_tactical_stance_button_text(stance_id: String) -> String:
+	match stance_id.strip_edges().to_lower():
+		"cautious":
+			return "Vorsichtiger"
+		"aggressive":
+			return "Aggressiver"
+		_:
+			return "Normal"
+
+
 func _get_terrain_registry():
 	var terrain_registry = get_node_or_null("../TerrainRegistry")
 	if terrain_registry != null:
@@ -2592,6 +2770,7 @@ func _resolve_fireteam_behavior_profile(fireteam_id: String, command_type: Strin
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty():
 		return null
+	var tactical_stance: String = get_requested_tactical_stance(normalized_fireteam_id)
 	return FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT.call(
 		"resolve_profile",
 		normalized_fireteam_id,
@@ -2599,7 +2778,8 @@ func _resolve_fireteam_behavior_profile(fireteam_id: String, command_type: Strin
 		_resolve_fireteam_leader_for_behavior(normalized_fireteam_id),
 		command_type,
 		rough_target_position,
-		_get_terrain_registry()
+		_get_terrain_registry(),
+		tactical_stance
 	)
 
 
@@ -2611,6 +2791,33 @@ func _set_active_behavior_profile(fireteam_id: String, behavior_profile) -> void
 		_active_behavior_profiles_by_fireteam.erase(normalized_fireteam_id)
 		return
 	_active_behavior_profiles_by_fireteam[normalized_fireteam_id] = behavior_profile
+
+
+func _refresh_active_behavior_profile_for_fireteam(fireteam_id: String) -> void:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty() or not _active_behavior_profiles_by_fireteam.has(normalized_fireteam_id):
+		return
+	var existing_profile_dict: Dictionary = get_active_behavior_profile(normalized_fireteam_id)
+	if existing_profile_dict.is_empty():
+		return
+	var metadata: Dictionary = Dictionary(existing_profile_dict.get("metadata", {})).duplicate(true)
+	var command_type: String = String(metadata.get("origin_command_type", "hold_position")).strip_edges().to_lower()
+	var rough_target_position: Variant = metadata.get("rough_target_position", null)
+	if typeof(rough_target_position) != TYPE_VECTOR2:
+		var anchor = _get_selection_anchor_for_fireteam(normalized_fireteam_id)
+		rough_target_position = anchor.global_position if anchor != null else null
+	var refreshed_profile = _resolve_fireteam_behavior_profile(normalized_fireteam_id, command_type, rough_target_position)
+	if refreshed_profile == null:
+		return
+	refreshed_profile.metadata = metadata
+	_set_active_behavior_profile(normalized_fireteam_id, refreshed_profile)
+
+
+func _reset_tactical_stances_for_new_phase() -> void:
+	_ensure_tactical_stance_controller()
+	if _tactical_stance_controller == null:
+		return
+	_tactical_stance_controller.call("reset_fireteams")
 
 
 func _notify_flank_initiated(fireteam_id: String, rough_target_position: Vector2, resolved_target_position: Vector2, behavior_profile) -> void:

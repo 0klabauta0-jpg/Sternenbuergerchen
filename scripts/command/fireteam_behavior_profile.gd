@@ -7,6 +7,9 @@ const ADVANCE_STYLE_CREEP: String = "creep"
 const FIRE_DISCIPLINE_HOLD_FIRE: String = "hold_fire"
 const FIRE_DISCIPLINE_SEMI_DISCIPLINED: String = "semi_disciplined"
 const FIRE_DISCIPLINE_FIRE_AT_WILL: String = "fire_at_will"
+const TACTICAL_STANCE_CAUTIOUS: String = "cautious"
+const TACTICAL_STANCE_NORMAL: String = "normal"
+const TACTICAL_STANCE_AGGRESSIVE: String = "aggressive"
 const ALLOWED_ADVANCE_STYLES: PackedStringArray = [
 	ADVANCE_STYLE_RUSH,
 	ADVANCE_STYLE_BOUNDING,
@@ -17,6 +20,11 @@ const ALLOWED_FIRE_DISCIPLINE: PackedStringArray = [
 	FIRE_DISCIPLINE_SEMI_DISCIPLINED,
 	FIRE_DISCIPLINE_FIRE_AT_WILL,
 ]
+const ALLOWED_TACTICAL_STANCES: PackedStringArray = [
+	TACTICAL_STANCE_CAUTIOUS,
+	TACTICAL_STANCE_NORMAL,
+	TACTICAL_STANCE_AGGRESSIVE,
+]
 
 var fireteam_id: String = ""
 var leader_unit_id: String = ""
@@ -25,6 +33,7 @@ var cover_priority: float = 0.5
 var fire_discipline: String = FIRE_DISCIPLINE_SEMI_DISCIPLINED
 var cohesion_threshold: float = 100.0
 var suppression_threshold: int = 1
+var tactical_stance: String = TACTICAL_STANCE_NORMAL
 var metadata: Dictionary = {}
 
 
@@ -46,6 +55,10 @@ static func is_allowed_fire_discipline(value: String) -> bool:
 	return ALLOWED_FIRE_DISCIPLINE.has(value)
 
 
+static func is_allowed_tactical_stance(value: String) -> bool:
+	return ALLOWED_TACTICAL_STANCES.has(value)
+
+
 func is_valid() -> bool:
 	if fireteam_id.is_empty():
 		return false
@@ -54,6 +67,9 @@ func is_valid() -> bool:
 		return false
 
 	if not is_allowed_fire_discipline(fire_discipline):
+		return false
+
+	if not is_allowed_tactical_stance(tactical_stance):
 		return false
 
 	if cover_priority < 0.0 or cover_priority > 1.0:
@@ -74,6 +90,7 @@ func to_dict() -> Dictionary:
 		"fire_discipline": fire_discipline,
 		"cohesion_threshold": cohesion_threshold,
 		"suppression_threshold": suppression_threshold,
+		"tactical_stance": tactical_stance,
 		"metadata": metadata.duplicate(true),
 	}
 
@@ -86,4 +103,7 @@ func _apply_dict(data: Dictionary) -> void:
 	cover_priority = clampf(float(data.get("cover_priority", 0.5)), 0.0, 1.0)
 	cohesion_threshold = maxf(float(data.get("cohesion_threshold", 100.0)), 0.0)
 	suppression_threshold = maxi(int(data.get("suppression_threshold", 1)), 0)
+	tactical_stance = String(data.get("tactical_stance", TACTICAL_STANCE_NORMAL)).strip_edges().to_lower()
+	if not is_allowed_tactical_stance(tactical_stance):
+		tactical_stance = TACTICAL_STANCE_NORMAL
 	metadata = Dictionary(data.get("metadata", {})).duplicate(true)

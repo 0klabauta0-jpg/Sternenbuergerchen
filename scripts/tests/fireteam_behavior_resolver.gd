@@ -15,7 +15,8 @@ static func resolve_profile(
 	preferred_leader = null,
 	command_type: String = "",
 	rough_target_position = null,
-	terrain_registry = null
+	terrain_registry = null,
+	tactical_stance: String = FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL
 ):
 	var profile = FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.new()
 	profile.fireteam_id = fireteam_id.strip_edges().to_lower()
@@ -24,6 +25,7 @@ static func resolve_profile(
 		profile.metadata = {
 			"trait_mode": TRAIT_MODE_NEUTRAL,
 			"origin_command_type": command_type.strip_edges().to_lower(),
+			"tactical_stance": FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL,
 		}
 		return profile
 
@@ -31,6 +33,7 @@ static func resolve_profile(
 	var toughness: float = _read_skill_value(leader, "get_toughness_skill", 0.5)
 	var trait_mode: String = _resolve_trait_mode(leader)
 	var normalized_command_type: String = command_type.strip_edges().to_lower()
+	var normalized_tactical_stance: String = _normalize_tactical_stance(tactical_stance)
 	var directness: float = _derive_directness(leadership, trait_mode)
 
 	profile.leader_unit_id = _read_string(leader, "get_unit_id")
@@ -39,6 +42,10 @@ static func resolve_profile(
 	profile.fire_discipline = _derive_fire_discipline(normalized_command_type, leadership)
 	profile.cohesion_threshold = clampf(200.0 - (leadership * 150.0), 50.0, 180.0)
 	profile.suppression_threshold = _derive_suppression_threshold(toughness, trait_mode)
+	profile.tactical_stance = normalized_tactical_stance
+	profile.advance_style = _apply_tactical_stance_to_advance_style(profile.advance_style, normalized_tactical_stance, trait_mode)
+	profile.cover_priority = _apply_tactical_stance_to_cover_priority(profile.cover_priority, normalized_tactical_stance, trait_mode)
+	profile.suppression_threshold = _apply_tactical_stance_to_suppression_threshold(profile.suppression_threshold, normalized_tactical_stance, trait_mode)
 
 	var resolved_target_position = null
 	if typeof(rough_target_position) == TYPE_VECTOR2:
@@ -54,6 +61,7 @@ static func resolve_profile(
 		"prefer_cover_seek": trait_mode == TRAIT_MODE_CAUTIOUS,
 		"prefer_exposed_position": trait_mode == TRAIT_MODE_AGGRESSIVE or trait_mode == TRAIT_MODE_RECKLESS,
 		"directness": directness,
+		"tactical_stance": normalized_tactical_stance,
 		"rough_target_position": rough_target_position,
 		"resolved_target_position": resolved_target_position,
 		"terrain_cover_used": typeof(resolved_target_position) == TYPE_VECTOR2 and typeof(rough_target_position) == TYPE_VECTOR2 and resolved_target_position != rough_target_position,
@@ -152,6 +160,76 @@ static func _derive_suppression_threshold(toughness: float, trait_mode: String) 
 			return maxi(1, floori(float(suppression_value) * 0.5))
 		_:
 			return suppression_value
+
+
+static func _normalize_tactical_stance(value: String) -> String:
+	var normalized_value: String = value.strip_edges().to_lower()
+	if FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.is_allowed_tactical_stance(normalized_value):
+		return normalized_value
+	return FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL
+
+
+static func _apply_tactical_stance_to_advance_style(base_style: String, tactical_stance: String, trait_mode: String) -> String:
+	match tactical_stance:
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
+			if trait_mode == TRAIT_MODE_RECKLESS:
+				return base_style
+			return _shift_style_more_cautious(base_style)
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
+			if trait_mode == TRAIT_MODE_CAUTIOUS:
+				return base_style
+			return _shift_style_more_aggressive(base_style)
+		_:
+			return base_style
+
+
+static func _apply_tactical_stance_to_cover_priority(base_cover_priority: float, tactical_stance: String, trait_mode: String) -> float:
+	match tactical_stance:
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
+			if trait_mode == TRAIT_MODE_RECKLESS:
+				return clampf(base_cover_priority + 0.05, 0.1, 0.9)
+			return clampf(base_cover_priority + 0.2, 0.1, 0.9)
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
+			if trait_mode == TRAIT_MODE_CAUTIOUS:
+				return clampf(base_cover_priority - 0.1, 0.1, 0.9)
+			return clampf(base_cover_priority - 0.2, 0.1, 0.9)
+		_:
+			return clampf(base_cover_priority, 0.1, 0.9)
+
+
+static func _apply_tactical_stance_to_suppression_threshold(base_threshold: int, tactical_stance: String, trait_mode: String) -> int:
+	var base_value: float = maxf(float(base_threshold), 1.0)
+	match tactical_stance:
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
+			if trait_mode == TRAIT_MODE_RECKLESS:
+				return maxi(1, int(roundi(base_value)))
+			return maxi(1, int(roundi(base_value * 0.7)))
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
+			if trait_mode == TRAIT_MODE_CAUTIOUS:
+				return maxi(1, int(roundi(base_value * 1.2)))
+			return maxi(1, int(roundi(base_value * 1.4)))
+		_:
+			return maxi(1, int(roundi(base_value)))
+
+
+static func _shift_style_more_aggressive(base_style: String) -> String:
+	match base_style:
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.ADVANCE_STYLE_CREEP:
+			return FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.ADVANCE_STYLE_BOUNDING
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.ADVANCE_STYLE_BOUNDING:
+			return FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.ADVANCE_STYLE_RUSH
+		_:
+			return FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.ADVANCE_STYLE_RUSH
+
+
+static func _shift_style_more_cautious(base_style: String) -> String:
+	match base_style:
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.ADVANCE_STYLE_RUSH:
+			return FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.ADVANCE_STYLE_BOUNDING
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.ADVANCE_STYLE_BOUNDING:
+			return FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.ADVANCE_STYLE_CREEP
+		_:
+			return FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.ADVANCE_STYLE_CREEP
 
 
 static func _derive_directness(leadership: float, trait_mode: String) -> float:

@@ -3,7 +3,7 @@
 ## Ziel
 Der Spieler kann pro ausgewaehltem Fireteam eine taktische Haltung anfordern. Diese Haltung ist keine direkte Mikrobefehlssteuerung, sondern eine fluechtige Vorgabe, die der aktuelle Fireteam-Lead innerhalb seiner Trait- und Skill-Grenzen in das abgeleitete Verhalten uebersetzt.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT
 
 ## Pflicht vor Beginn
 - Lies [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md)
