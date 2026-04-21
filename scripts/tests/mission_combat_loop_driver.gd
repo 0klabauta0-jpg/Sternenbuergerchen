@@ -122,7 +122,12 @@ func _ready() -> void:
 		_apply_overlay_visibility()
 	else:
 		call_deferred("_finish_readability_setup")
-	_mission_started_at_msec = mission_timer_started_at_msec if mission_timer_started_at_msec != 0 else Time.get_ticks_msec()
+	if mission_timer_started_at_msec != 0:
+		_mission_started_at_msec = mission_timer_started_at_msec
+	elif preview_mode:
+		_mission_started_at_msec = 0
+	else:
+		_mission_started_at_msec = Time.get_ticks_msec()
 
 	if _runs_local_authority and not simulation_root.tick_processed.is_connected(_on_tick_processed):
 		simulation_root.tick_processed.connect(_on_tick_processed)
@@ -1685,7 +1690,7 @@ func _get_duration_seconds() -> float:
 
 
 func get_remaining_time_limit_seconds() -> float:
-	if mission_time_limit_seconds <= 0.0:
+	if mission_time_limit_seconds <= 0.0 or _mission_started_at_msec <= 0:
 		return -1.0
 	return maxf(mission_time_limit_seconds - _get_duration_seconds(), 0.0)
 

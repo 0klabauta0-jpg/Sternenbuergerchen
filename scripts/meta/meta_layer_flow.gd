@@ -933,7 +933,7 @@ func _build_transport_craft_states() -> Array:
 				"texture_path": String(craft_def.get("texture_path", "")).strip_edges(),
 				"location": craft_location,
 				"visible_in_homebase": craft_location == "homebase",
-				"visible_in_fob": craft_location == "fob",
+				"visible_in_fob": craft_location == "fob" or (craft_location == "transit" and not pilot_transfer_entry.is_empty()),
 				"is_in_transit": is_in_transit,
 				"pilot_unit_id": pilot_unit_id,
 				"pilot_display_name": _resolve_unit_display_name(pilot_unit_id),

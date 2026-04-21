@@ -6,6 +6,7 @@ const CHARACTER_SHEET_FORMATTER_SCRIPT: GDScript = preload("res://scripts/meta/c
 const CHARACTER_SHEET_VIEW_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_view.gd")
 const NPC_COMPACT_CARD_SCENE: PackedScene = preload("res://scenes/meta/components/npc_compact_card.tscn")
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
+const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_labels.gd")
 const TRANSPORT_CRAFT_CARD_UI_SCRIPT: GDScript = preload("res://scripts/meta/transport_craft_card_ui.gd")
 const FOB_FIRETEAM_CARD_SCRIPT: GDScript = preload("res://scripts/meta/fob_fireteam_card.gd")
 const FOB_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/fob_drop_panel.gd")
@@ -291,7 +292,7 @@ func build_mission_drop_state() -> Dictionary:
 		"drop_ship_staged": can_request_mission_start(),
 		"mission_drop_craft_id": String(mission_craft_state.get("craft_id", _mission_launch_ready_craft_id)).strip_edges(),
 		"mission_drop_display_name": String(mission_craft_state.get("display_name", "Dropship")).strip_edges(),
-		"mission_drop_title_text": _build_transport_craft_title(mission_craft_state) if not mission_craft_state.is_empty() else "Dropship",
+		"mission_drop_title_text": UI_BLOCK_LABELS_SCRIPT.prefixed_transport_title(_build_transport_craft_title(mission_craft_state)) if not mission_craft_state.is_empty() else UI_BLOCK_LABELS_SCRIPT.prefixed_transport_title("Dropship"),
 		"mission_drop_texture_path": String(mission_craft_state.get("texture_path", "")).strip_edges(),
 		"mission_drop_state": mission_drop_state,
 		"mission_drop_pilot_text": _build_transport_craft_pilot_text(mission_craft_state) if not mission_craft_state.is_empty() else "Pilot: none",
@@ -438,6 +439,7 @@ func _build_profile_options_by_unit_id() -> Dictionary:
 
 
 func _refresh_ui_state() -> void:
+	_apply_block_labels()
 	_update_brief_panel()
 	_render_available_operators()
 	_render_fireteam_rows()
@@ -453,6 +455,23 @@ func _refresh_dropship_status_ui() -> void:
 	_update_dropship_panel()
 
 
+func _apply_block_labels() -> void:
+	var label_text_by_path: Dictionary = {
+		"Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionHeaderLabel": UI_BLOCK_LABELS_SCRIPT.FOB_MISSION_BRIEF,
+		"Panel/Margin/VBox/ContentRow/AvailablePanel/AvailableMargin/AvailableVBox/AvailableHeaderLabel": UI_BLOCK_LABELS_SCRIPT.FOB_AVAILABLE_OPERATORS,
+		"Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderLabel": UI_BLOCK_LABELS_SCRIPT.FOB_FIRETEAMS,
+		"Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/StagingHeaderLabel": UI_BLOCK_LABELS_SCRIPT.FOB_LOADOUT_STAGING,
+		"Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/RespawnPanel/RespawnMargin/RespawnVBox/RespawnHeaderLabel": UI_BLOCK_LABELS_SCRIPT.FOB_RESPAWN,
+		"Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutHeaderRow/LoadoutHeaderLabel": UI_BLOCK_LABELS_SCRIPT.FOB_LOADOUT,
+		"Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipHeaderRow/DropshipHeaderLabel": UI_BLOCK_LABELS_SCRIPT.FOB_DROPSHIP_WAIT_ZONE,
+		"CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayHeaderRow/OverlayHeaderLabel": UI_BLOCK_LABELS_SCRIPT.CHARACTER_OVERLAY,
+	}
+	for path_variant in label_text_by_path.keys():
+		var label := get_node_or_null(String(path_variant)) as Label
+		if label != null:
+			label.text = String(label_text_by_path[path_variant])
+
+
 func _update_brief_panel() -> void:
 	var team_status_label := get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/TeamStatusLabel") as Label
 	var fireteam_status_label := get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/FireteamStatusLabel") as Label
@@ -463,7 +482,7 @@ func _update_brief_panel() -> void:
 	var pilot_count: int = _count_transport_pilot_slots()
 	var mission_slot_usage: int = _build_mission_slot_usage_count()
 
-	mission_header_label.text = "FOB MISSION BRIEF"
+	mission_header_label.text = UI_BLOCK_LABELS_SCRIPT.FOB_MISSION_BRIEF
 	team_status_label.text = "Mission slots: %d / %d" % [mini(mission_slot_usage, _mission_slot_count), _mission_slot_count]
 	fireteam_status_label.text = "Mission: %s" % _mission_name
 	dropship_status_label.text = "Map: %s" % _mission_map_name
@@ -2134,7 +2153,7 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 			"selected": is_selected,
 			"in_transit": is_in_transit,
 			"can_stage": can_stage_fireteams,
-			"title_text": _build_transport_craft_title(craft_state),
+			"title_text": UI_BLOCK_LABELS_SCRIPT.prefixed_transport_title(_build_transport_craft_title(craft_state)),
 			"ship_texture": _get_transport_craft_texture(craft_state),
 			"pilot_profile": _profiles_by_id.get(pilot_unit_id, null),
 			"pilot_text": _build_transport_craft_pilot_text(craft_state),

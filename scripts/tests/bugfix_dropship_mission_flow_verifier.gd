@@ -4,6 +4,7 @@ const FOB_TEST_SCENE: PackedScene = preload("res://scenes/meta/fob_test_screen.t
 const META_LAYER_TEST_SCENE: PackedScene = preload("res://scenes/meta/meta_layer_test.tscn")
 const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
 const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
+const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_labels.gd")
 
 var _passed: int = 0
 var _failed: int = 0
@@ -27,7 +28,10 @@ func _run_tests() -> void:
 	await _test_mission_slot_labels_stay_aligned_with_pilots()
 	await _test_mission_start_requires_boarded_team()
 	await _test_homebase_timer_label_switches_from_idle_to_countdown()
+	await _test_preview_mission_timer_stays_idle_before_homebase_start()
 	await _test_mission_timer_uses_explicit_start_timestamp()
+	await _test_homebase_inbound_craft_is_visible_in_fob()
+	await _test_block_labels_use_unique_prefixed_ids()
 	await _test_dropship_returns_to_fob_after_drop()
 	await _test_meta_mission_uses_deferred_drop_state()
 	await _test_combat_loop_waits_for_pending_insertions()
@@ -325,6 +329,7 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 	_assert(mission_craft_card != null and mission_craft_card.clip_contents, "Mission mini shipcard clips its content so the panel cannot spill over other HUD windows")
 	_assert(mission_craft_card != null and is_equal_approx(mission_craft_card.size.x, 348.0) and is_equal_approx(mission_craft_card.size.y, 130.0), "Mission mini shipcard keeps its fixed tactical HUD size")
 	_assert(title_label != null and title_label.text == String(expected_drop_state.get("mission_drop_title_text", "")), "Mission mini shipcard reuses the FOB ship title text")
+	_assert(title_label != null and title_label.text.begins_with(UI_BLOCK_LABELS_SCRIPT.SHARED_TRANSPORT_CARD_PREFIX), "Shared shipcard numbering reuses the same # id in FOB and mission views")
 	for node_path_variant in shared_card_paths:
 		var node_path: String = String(node_path_variant)
 		_assert(shared_fob_card != null and shared_fob_card.has_node(node_path), "Shared FOB card keeps the shared transport-card node %s" % node_path)
@@ -779,6 +784,27 @@ func _test_homebase_timer_label_switches_from_idle_to_countdown() -> void:
 	await process_frame
 
 
+func _test_preview_mission_timer_stays_idle_before_homebase_start() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	for _frame in range(4):
+		await process_frame
+
+	scene.call("_show_map")
+	for _frame in range(4):
+		await process_frame
+
+	var preview_mission: Node = scene.get_node("MissionHost").get_child(0) if scene.get_node("MissionHost").get_child_count() > 0 else null
+	var timer_label := preview_mission.get_node("TacticalUI/TopNavPanel/NavMargin/NavRow/MissionTimerLabel") as Label if preview_mission != null else null
+	var tactical_controller: Node = preview_mission.get_node("TacticalController") if preview_mission != null else null
+	var strategic_status_label := preview_mission.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicStatusLabel") as Label if preview_mission != null else null
+	_assert(timer_label != null and timer_label.text == "--:--", "Preview mission timer stays idle until Homebase starts the live mission")
+	_assert(strategic_status_label != null and strategic_status_label.text.contains("Time --:--"), "Preview mission HUD keeps the time limit idle before Homebase start")
+	_assert(tactical_controller != null and tactical_controller.get("_drop_sequence_phase") == "", "Preview mission does not auto-start the drop sequence just by opening the mission map")
+	scene.queue_free()
+	await process_frame
+
+
 func _test_mission_timer_uses_explicit_start_timestamp() -> void:
 	var scene: Node = MISSION_TEST_SCENE.instantiate()
 	var combat_driver: Node = scene.get_node("CombatLoopDriver")
@@ -789,6 +815,78 @@ func _test_mission_timer_uses_explicit_start_timestamp() -> void:
 		await process_frame
 	var remaining_seconds: float = float(combat_driver.call("get_remaining_time_limit_seconds"))
 	_assert(remaining_seconds <= 1136.0 and remaining_seconds >= 1133.0, "Mission timer counts down from the explicit Homebase start timestamp")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_homebase_inbound_craft_is_visible_in_fob() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	for _frame in range(4):
+		await process_frame
+
+	scene.set(
+		"_homebase_aircraft_definitions",
+		[
+			{
+				"craft_id": "dropship_test",
+				"display_name": "Dropship Test",
+				"craft_type": "dropship",
+				"texture_path": "res://Assets/kenney_space-kit/Side/craft_speederB.png",
+			}
+		]
+	)
+	scene.set("_assigned_aircraft_pilot_by_craft", {"dropship_test": "unit_hotel"})
+	scene.set("_aircraft_location_by_craft", {"dropship_test": "transit"})
+	scene.set(
+		"_pending_homebase_pilot_transfers",
+		[
+			{
+				"craft_id": "dropship_test",
+				"pilot_unit_id": "unit_hotel",
+				"cargo_id": "",
+				"duration_seconds": 10.0,
+				"elapsed_seconds": 3.0,
+			}
+		]
+	)
+	scene.call("_refresh_fob_screen")
+	for _frame in range(2):
+		await process_frame
+
+	var fob_screen: Control = scene.get_node("FOBScreen")
+	var visible_states: Array = Array(fob_screen.call("_get_visible_transport_craft_states"))
+	var inbound_state: Dictionary = visible_states[0] if not visible_states.is_empty() else {}
+	_assert(visible_states.size() == 1, "FOB renders the inbound homebase dropship instead of letting it pop in at arrival")
+	_assert(bool(inbound_state.get("is_in_transit", false)), "Inbound homebase dropship stays greyed-out in FOB while it is still in transit")
+	_assert(not bool(inbound_state.get("is_boardable", false)), "Inbound homebase dropship is not boardable before it actually reaches the FOB")
+	_assert(int(inbound_state.get("transfer_eta_seconds", 0)) > 0, "Inbound homebase dropship exposes a live ETA in the FOB transit card")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_block_labels_use_unique_prefixed_ids() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	for _frame in range(4):
+		await process_frame
+
+	scene.call("_show_map")
+	for _frame in range(4):
+		await process_frame
+
+	var preview_mission: Node = scene.get_node("MissionHost").get_child(0) if scene.get_node("MissionHost").get_child_count() > 0 else null
+	var homebase_available_label := scene.get_node("HomebaseScreen/Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox/RosterHeaderLabel") as Label
+	var fob_available_label := scene.get_node("FOBScreen/Panel/Margin/VBox/ContentRow/AvailablePanel/AvailableMargin/AvailableVBox/AvailableHeaderLabel") as Label
+	var mission_command_label := preview_mission.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandHeaderLabel") as Label if preview_mission != null else null
+	var mission_control_label := preview_mission.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicHeaderLabel") as Label if preview_mission != null else null
+
+	_assert(homebase_available_label != null and homebase_available_label.text == UI_BLOCK_LABELS_SCRIPT.HOMEBASE_AVAILABLE_OPERATORS, "Homebase block labels use the shared unique # ids")
+	_assert(fob_available_label != null and fob_available_label.text == UI_BLOCK_LABELS_SCRIPT.FOB_AVAILABLE_OPERATORS, "FOB block labels use the shared unique # ids")
+	_assert(mission_command_label != null and mission_command_label.text == UI_BLOCK_LABELS_SCRIPT.MISSION_COMMAND_MATRIX, "Mission command panel uses its unique shared # id")
+	_assert(mission_control_label != null and mission_control_label.text == UI_BLOCK_LABELS_SCRIPT.MISSION_CONTROL, "Mission control panel uses its unique shared # id")
+	_assert(homebase_available_label != null and fob_available_label != null and homebase_available_label.text != fob_available_label.text, "Different windows no longer repeat the same block number")
+
 	scene.queue_free()
 	await process_frame
 

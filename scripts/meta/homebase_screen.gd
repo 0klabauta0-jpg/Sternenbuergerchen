@@ -7,6 +7,7 @@ const CHARACTER_SHEET_VIEW_SCRIPT: GDScript = preload("res://scripts/meta/charac
 const NPC_COMPACT_CARD_SCENE: PackedScene = preload("res://scenes/meta/components/npc_compact_card.tscn")
 const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
+const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_labels.gd")
 const HOMEBASE_TEAM_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/homebase_team_drop_panel.gd")
 const DROPSHIP_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Side/craft_speederB.png")
 const LEGACY_CHARACTER_SHEET_NODE_NAMES: PackedStringArray = [
@@ -197,6 +198,7 @@ func _rebuild_profiles() -> void:
 func _rebuild_ui() -> void:
 	_ensure_focused_unit_id()
 	_ensure_selected_aircraft_id()
+	_apply_block_labels()
 	_render_roster()
 	_render_staged_team()
 	_update_mission_info()
@@ -205,6 +207,22 @@ func _rebuild_ui() -> void:
 	_update_aircraft_panel()
 	_update_character_sheet()
 	_update_character_sheet_visibility()
+
+
+func _apply_block_labels() -> void:
+	var label_text_by_path: Dictionary = {
+		"Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_MISSION_BRIEF,
+		"Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox/RosterHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_AVAILABLE_OPERATORS,
+		"Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamHeaderRow/TeamHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_TRANSFER_TEAM,
+		"Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/ActiveTransfersHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_INBOUND_TO_FOB,
+		"Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_FLIGHT_DECK,
+		"Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftTransfersHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_DECK_ACTIVITY,
+		"Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/InfoHeaderRow/InfoHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_CHARACTER_SHEET,
+	}
+	for path_variant in label_text_by_path.keys():
+		var label := get_node_or_null(String(path_variant)) as Label
+		if label != null:
+			label.text = String(label_text_by_path[path_variant])
 
 
 func _render_roster() -> void:

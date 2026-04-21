@@ -2,6 +2,7 @@ class_name TacticalInputController
 extends Node
 
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
+const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_labels.gd")
 const NPC_COMPACT_CARD_SCENE: PackedScene = preload("res://scenes/meta/components/npc_compact_card.tscn")
 const TRANSPORT_CRAFT_CARD_UI_SCRIPT: GDScript = preload("res://scripts/meta/transport_craft_card_ui.gd")
 const META_UNIT_PROFILE_BUILDER_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile_builder.gd")
@@ -1107,6 +1108,7 @@ func set_tactical_ui_visible(is_visible: bool) -> void:
 
 
 func _update_ui() -> void:
+	_apply_block_labels()
 	var command_feedback_label := get_node_or_null(command_feedback_label_path) as Label
 	if command_feedback_label != null:
 		command_feedback_label.text = "TEAM %s | PHASE %s\nTARGET %s\nLAST %s" % [
@@ -1901,10 +1903,10 @@ func _build_phase_status_text() -> String:
 func _build_mission_time_limit_text() -> String:
 	var combat_driver = _get_combat_loop_driver()
 	if combat_driver == null or not combat_driver.has_method("get_remaining_time_limit_seconds"):
-		return "Time offen"
+		return "Time --:--"
 	var remaining_seconds: float = float(combat_driver.call("get_remaining_time_limit_seconds"))
 	if remaining_seconds < 0.0:
-		return "Time offen"
+		return "Time --:--"
 	var minutes: int = int(floor(remaining_seconds / 60.0))
 	var seconds: int = int(remaining_seconds) % 60
 	return "Time %02d:%02d" % [minutes, seconds]
@@ -1984,9 +1986,10 @@ func _refresh_mission_dropship_panel() -> void:
 		return
 	_enforce_mission_dropship_panel_geometry(panel)
 	var show_panel: bool = _tactical_ui_visible and (not _mission_drop_craft_id.is_empty() or _is_drop_sequence_active())
-	panel.visible = show_panel
 	if not show_panel:
+		panel.visible = false
 		return
+	panel.visible = false
 	var is_transit: bool = _mission_drop_state == "to_mission" or _mission_drop_state == "to_fob" or _drop_sequence_phase == DROP_SEQUENCE_INBOUND or _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND
 	var ship_texture := _load_optional_texture(_mission_drop_texture_path)
 	if ship_texture == null:
@@ -2022,6 +2025,7 @@ func _refresh_mission_dropship_panel() -> void:
 		}
 	)
 	_set_control_tree_mouse_filter(panel, Control.MOUSE_FILTER_IGNORE)
+	panel.visible = true
 
 
 func _enforce_mission_dropship_panel_geometry(panel: PanelContainer) -> void:
@@ -2374,6 +2378,20 @@ func _refresh_dynamic_button_styles() -> void:
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton") as Button, _drop_ship_requested)
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/NextPhaseButton") as Button, not preview_mode and _can_issue_local_commands() and not _phase_execution_by_fireteam.is_empty())
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/%sButton" % _get_approach_angle_name()) as Button, true)
+
+
+func _apply_block_labels() -> void:
+	var label_text_by_path: Dictionary = {
+		"../TacticalUI/MissionIdentityPanel/MissionIdentityMargin/MissionIdentityVBox/MissionIdentityHeaderLabel": UI_BLOCK_LABELS_SCRIPT.MISSION_LIVE_TACTICAL_GRID,
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandHeaderLabel": UI_BLOCK_LABELS_SCRIPT.MISSION_COMMAND_MATRIX,
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamHeaderLabel": UI_BLOCK_LABELS_SCRIPT.MISSION_SELECTED_FIRETEAM,
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicHeaderLabel": UI_BLOCK_LABELS_SCRIPT.MISSION_CONTROL,
+		"../TacticalUI/CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayHeaderRow/OverlayHeaderLabel": UI_BLOCK_LABELS_SCRIPT.CHARACTER_OVERLAY,
+	}
+	for path_variant in label_text_by_path.keys():
+		var label := get_node_or_null(String(path_variant)) as Label
+		if label != null:
+			label.text = String(label_text_by_path[path_variant])
 
 
 func _apply_hud_skin() -> void:
