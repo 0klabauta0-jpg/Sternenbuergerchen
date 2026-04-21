@@ -109,8 +109,10 @@ var _drop_ship_requested: bool = false
 var _drop_ship_staged: bool = false
 var _mission_drop_craft_id: String = ""
 var _mission_drop_display_name: String = ""
+var _mission_drop_title_text: String = ""
 var _mission_drop_texture_path: String = ""
 var _mission_drop_state: String = ""
+var _mission_drop_pilot_text: String = ""
 var _mission_drop_status_line: String = ""
 var _mission_drop_progress: float = 0.0
 var _mission_drop_eta_seconds: int = 0
@@ -435,10 +437,14 @@ func set_planning_state(planning_state: Dictionary) -> void:
 		_mission_drop_craft_id = String(planning_state.get("mission_drop_craft_id", "")).strip_edges()
 	if planning_state.has("mission_drop_display_name"):
 		_mission_drop_display_name = String(planning_state.get("mission_drop_display_name", "")).strip_edges()
+	if planning_state.has("mission_drop_title_text"):
+		_mission_drop_title_text = String(planning_state.get("mission_drop_title_text", "")).strip_edges()
 	if planning_state.has("mission_drop_texture_path"):
 		_mission_drop_texture_path = String(planning_state.get("mission_drop_texture_path", "")).strip_edges()
 	if planning_state.has("mission_drop_state"):
 		_mission_drop_state = String(planning_state.get("mission_drop_state", "")).strip_edges().to_lower()
+	if planning_state.has("mission_drop_pilot_text"):
+		_mission_drop_pilot_text = String(planning_state.get("mission_drop_pilot_text", "")).strip_edges()
 	if planning_state.has("mission_drop_status_line"):
 		_mission_drop_status_line = String(planning_state.get("mission_drop_status_line", "")).strip_edges()
 	if planning_state.has("mission_drop_progress"):
@@ -499,8 +505,10 @@ func get_planning_state() -> Dictionary:
 		"drop_ship_staged": _drop_ship_staged,
 		"mission_drop_craft_id": _mission_drop_craft_id,
 		"mission_drop_display_name": _mission_drop_display_name,
+		"mission_drop_title_text": _mission_drop_title_text,
 		"mission_drop_texture_path": _mission_drop_texture_path,
 		"mission_drop_state": _mission_drop_state,
+		"mission_drop_pilot_text": _mission_drop_pilot_text,
 		"mission_drop_status_line": _mission_drop_status_line,
 		"mission_drop_progress": _mission_drop_progress,
 		"mission_drop_eta_seconds": _mission_drop_eta_seconds,
@@ -2048,7 +2056,7 @@ func _refresh_mission_dropship_panel() -> void:
 	if title_label != null:
 		title_label.text = _build_mission_dropship_title_text()
 	if pilot_label != null:
-		pilot_label.text = "Pilot: %s" % ( _mission_drop_pilot_display_name if not _mission_drop_pilot_display_name.is_empty() else "unassigned")
+		pilot_label.text = _build_mission_dropship_pilot_text()
 	if passenger_label != null:
 		var passenger_count: int = _mission_drop_passenger_count if _mission_drop_passenger_count > 0 else _embarked_unit_ids.size()
 		passenger_label.text = "Passengers: %d" % passenger_count
@@ -2060,6 +2068,8 @@ func _refresh_mission_dropship_panel() -> void:
 
 
 func _build_mission_dropship_title_text() -> String:
+	if not _mission_drop_title_text.is_empty():
+		return _mission_drop_title_text
 	var craft_name: String = _mission_drop_display_name if not _mission_drop_display_name.is_empty() else "Dropship"
 	match _mission_drop_state:
 		"waiting":
@@ -2070,6 +2080,12 @@ func _build_mission_dropship_title_text() -> String:
 			return "%s · RETURN" % craft_name
 		_:
 			return craft_name
+
+
+func _build_mission_dropship_pilot_text() -> String:
+	if not _mission_drop_pilot_text.is_empty():
+		return _mission_drop_pilot_text
+	return "Pilot: %s" % (_mission_drop_pilot_display_name if not _mission_drop_pilot_display_name.is_empty() else "unassigned")
 
 
 func _build_mission_dropship_status_text() -> String:
@@ -2220,18 +2236,25 @@ func _refresh_world_overlays() -> void:
 	if dropship_marker == null:
 		return
 
-	if preview_mode or not _has_lz_position or _drop_sequence_phase.is_empty():
+	if not _has_lz_position:
+		dropship_marker.visible = false
+		return
+
+	var has_live_drop_state: bool = not _mission_drop_state.is_empty()
+	var has_live_drop_sequence: bool = not _drop_sequence_phase.is_empty()
+	if not has_live_drop_state and not has_live_drop_sequence:
 		dropship_marker.visible = false
 		return
 
 	var sprite := dropship_marker.get_node_or_null("Sprite") as Sprite2D
 	dropship_marker.visible = true
-	if _drop_sequence_phase == DROP_SEQUENCE_INBOUND or _drop_sequence_phase == DROP_SEQUENCE_LANDED or _drop_sequence_phase == DROP_SEQUENCE_UNLOADING or _drop_sequence_phase == DROP_SEQUENCE_COMPLETE or _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND:
+	if has_live_drop_sequence and (_drop_sequence_phase == DROP_SEQUENCE_INBOUND or _drop_sequence_phase == DROP_SEQUENCE_LANDED or _drop_sequence_phase == DROP_SEQUENCE_UNLOADING or _drop_sequence_phase == DROP_SEQUENCE_COMPLETE or _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND):
 		dropship_marker.global_position = _drop_sequence_position
 	else:
 		dropship_marker.global_position = _get_drop_staging_position()
 	if sprite != null:
-		sprite.texture = _get_dropship_marker_texture()
+		var mission_drop_texture := _load_optional_texture(_mission_drop_texture_path)
+		sprite.texture = mission_drop_texture if mission_drop_texture != null else _get_dropship_marker_texture()
 	var approach_line := dropship_marker.get_node_or_null("ApproachLine") as Line2D
 	if approach_line != null:
 		approach_line.clear_points()
