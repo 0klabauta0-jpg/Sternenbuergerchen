@@ -12,6 +12,9 @@ var _mission_slot_count: int = 3
 var _selected_unit_ids: PackedStringArray = []
 var _fob_overview: Dictionary = {}
 var _terrain_renderer = null
+var _render_queued: bool = false
+var _render_in_progress: bool = false
+var _render_requested_during_render: bool = false
 
 
 func _ready() -> void:
@@ -21,7 +24,7 @@ func _ready() -> void:
 	var preview_clip := get_node("Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox/MapPreviewFrame/MapPreviewMargin/MapPreviewClip") as Control
 	if preview_clip != null and not preview_clip.resized.is_connected(_on_map_preview_clip_resized):
 		preview_clip.resized.connect(_on_map_preview_clip_resized)
-	call_deferred("_render")
+	_request_render()
 
 
 func set_map_context(mission_name: String, map_file_path: String, selected_unit_ids: PackedStringArray, fob_overview: Dictionary, mission_slot_count: int = 3) -> void:
@@ -31,7 +34,31 @@ func set_map_context(mission_name: String, map_file_path: String, selected_unit_
 	_selected_unit_ids = selected_unit_ids.duplicate()
 	_fob_overview = fob_overview.duplicate(true)
 	if is_inside_tree():
-		_render()
+		_request_render()
+
+
+func _request_render() -> void:
+	if not is_inside_tree():
+		return
+	if _render_in_progress:
+		_render_requested_during_render = true
+		return
+	if _render_queued:
+		return
+	_render_queued = true
+	call_deferred("_run_queued_render")
+
+
+func _run_queued_render() -> void:
+	_render_queued = false
+	if not is_inside_tree():
+		return
+	_render_in_progress = true
+	_render()
+	_render_in_progress = false
+	if _render_requested_during_render:
+		_render_requested_during_render = false
+		_request_render()
 
 
 func _render() -> void:
@@ -244,4 +271,4 @@ func _clear_map_preview(preview_root: Node) -> void:
 func _on_map_preview_clip_resized() -> void:
 	if not is_inside_tree():
 		return
-	call_deferred("_render")
+	_request_render()
