@@ -1151,6 +1151,7 @@ func _show_homebase() -> void:
 		map_screen.visible = false
 	if debrief_screen != null:
 		debrief_screen.visible = false
+	_refresh_preview_mission_lifecycle()
 	_sync_mission_host_visibility()
 	_set_navigation_visible(true)
 	_refresh_navigation_state()
@@ -1173,6 +1174,7 @@ func _show_fob() -> void:
 		map_screen.visible = false
 	if debrief_screen != null:
 		debrief_screen.visible = false
+	_refresh_preview_mission_lifecycle()
 	_sync_mission_host_visibility()
 	_set_navigation_visible(true)
 	_refresh_map_screen()
@@ -1195,6 +1197,7 @@ func _show_map() -> void:
 		map_screen.visible = false
 	if debrief_screen != null:
 		debrief_screen.visible = false
+	_refresh_preview_mission_lifecycle()
 	_sync_mission_host_visibility()
 	_set_navigation_visible(true)
 	_refresh_map_screen()
@@ -1216,6 +1219,7 @@ func _show_mission() -> void:
 		map_screen.visible = false
 	if debrief_screen != null:
 		debrief_screen.visible = false
+	_refresh_preview_mission_lifecycle()
 	_sync_mission_host_visibility()
 	_set_navigation_visible(false)
 
@@ -1235,6 +1239,7 @@ func _show_debrief() -> void:
 		map_screen.visible = false
 	if debrief_screen != null:
 		debrief_screen.visible = true
+	_refresh_preview_mission_lifecycle()
 	_sync_mission_host_visibility()
 	_set_navigation_visible(false)
 
@@ -1291,10 +1296,7 @@ func _refresh_map_screen() -> void:
 		)
 	if _active_mission == null:
 		_sync_fob_dropship_state_into_mission_planning()
-	if _active_mission == null:
-		_ensure_preview_mission()
-	if _preview_mission != null:
-		_apply_planning_state_to_mission(_preview_mission)
+	_refresh_preview_mission_lifecycle()
 
 
 func _build_fob_member_loadouts() -> Dictionary:
@@ -1540,7 +1542,20 @@ func _disable_node_processing(node: Node) -> void:
 
 
 func _is_mission_host_visible_for_current_view() -> bool:
-	return _current_meta_view == "map" or _current_meta_view == "mission"
+	if _current_meta_view == "map":
+		return _preview_mission != null
+	if _current_meta_view == "mission":
+		return _active_mission != null
+	return false
+
+
+func _refresh_preview_mission_lifecycle() -> void:
+	if _active_mission == null and _current_meta_view == "map":
+		_ensure_preview_mission()
+		if _preview_mission != null:
+			_apply_planning_state_to_mission(_preview_mission)
+		return
+	_release_preview_mission()
 
 
 func _sync_mission_host_visibility() -> void:

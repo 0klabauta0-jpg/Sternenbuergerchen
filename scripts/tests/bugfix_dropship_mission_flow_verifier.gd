@@ -19,6 +19,7 @@ func _run_tests() -> void:
 	await _test_shipcard_start_dispatches_boarded_craft_without_full_team_boarded()
 	await _test_fob_header_start_is_hidden()
 	await _test_homebase_start_button_lives_in_header()
+	await _test_preview_mission_only_exists_in_map_view()
 	await _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting()
 	await _test_preview_drop_button_stays_drop_without_live_sequence()
 	await _test_fob_assignments_and_boarding_survive_send_and_nav_refresh()
@@ -205,6 +206,33 @@ func _test_homebase_start_button_lives_in_header() -> void:
 	var old_start_button := scene.get_node_or_null("HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/StartMissionButton") as Button
 	_assert(start_button != null, "Homebase start button sits in the header row")
 	_assert(old_start_button == null, "Homebase mission info row no longer owns a duplicate start button")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_preview_mission_only_exists_in_map_view() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	for _frame in range(4):
+		await process_frame
+
+	var mission_host: Node = scene.get_node("MissionHost")
+	_assert(mission_host.get_child_count() == 0, "Meta layer keeps no preview mission alive while Homebase is active")
+
+	scene.call("_show_map")
+	for _frame in range(2):
+		await process_frame
+	_assert(mission_host.get_child_count() == 1, "Map view instantiates exactly one preview mission")
+
+	scene.call("_show_fob")
+	for _frame in range(2):
+		await process_frame
+	_assert(mission_host.get_child_count() == 0, "Leaving the map releases the preview mission instead of carrying it through FOB")
+
+	scene.call("_show_homebase")
+	for _frame in range(2):
+		await process_frame
+	_assert(mission_host.get_child_count() == 0, "Homebase does not resurrect a hidden preview mission after the cleanup")
 	scene.queue_free()
 	await process_frame
 
