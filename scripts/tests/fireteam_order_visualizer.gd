@@ -12,6 +12,7 @@ var _selected_fireteam_ids: PackedStringArray = []
 var _plan_dicts: Array = []
 var _visible_waypoints: Array = []
 var _ad_hoc_order_dicts: Array = []
+var _security_dicts: Array = []
 
 
 func set_phase_index(phase_index: int) -> void:
@@ -41,6 +42,15 @@ func set_ad_hoc_order_dicts(ad_hoc_order_dicts: Array) -> void:
 	queue_redraw()
 
 
+func set_security_dicts(security_dicts: Array) -> void:
+	_security_dicts = []
+	for security_variant in security_dicts:
+		if typeof(security_variant) != TYPE_DICTIONARY:
+			continue
+		_security_dicts.append(Dictionary(security_variant).duplicate(true))
+	queue_redraw()
+
+
 func get_visible_waypoints() -> Array:
 	var result: Array = []
 	for waypoint_data in _visible_waypoints:
@@ -63,6 +73,7 @@ func _draw() -> void:
 			continue
 		_draw_plan(plan)
 	_draw_ad_hoc_orders()
+	_draw_security_states()
 
 
 func _draw_plan(plan) -> void:
@@ -134,6 +145,43 @@ func _draw_ad_hoc_orders() -> void:
 		var fallback_font: Font = ThemeDB.fallback_font
 		if fallback_font != null and not label_text.is_empty():
 			draw_string(fallback_font, target_position + Vector2(14.0, -8.0), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 12, Color(0.95, 0.95, 0.95, 0.92))
+
+
+func _draw_security_states() -> void:
+	for security_dict in _security_dicts:
+		var fireteam_id: String = String(security_dict.get("fireteam_id", "")).strip_edges().to_lower()
+		if not _selected_fireteam_ids.is_empty() and not _selected_fireteam_ids.has(fireteam_id):
+			continue
+		if not bool(security_dict.get("is_active", false)):
+			continue
+		var anchor_position: Vector2 = Vector2(security_dict.get("anchor_position", Vector2.ZERO))
+		var base_color: Color = _get_fireteam_color(fireteam_id)
+		var overlay_color: Color = base_color.lightened(0.15)
+		overlay_color.a = 0.32
+		for assignment_variant in Array(security_dict.get("member_assignments", [])):
+			if typeof(assignment_variant) != TYPE_DICTIONARY:
+				continue
+			var assignment: Dictionary = Dictionary(assignment_variant)
+			var center_angle: float = float(assignment.get("center_angle", 0.0))
+			var arc_width: float = float(assignment.get("arc_width", 0.0))
+			_draw_sector(anchor_position, center_angle, arc_width, 74.0, overlay_color)
+		if bool(security_dict.get("overwatch_ready", false)):
+			draw_circle(anchor_position, 7.0, Color(0.95, 0.98, 1.0, 0.9))
+			var fallback_font: Font = ThemeDB.fallback_font
+			if fallback_font != null:
+				draw_string(fallback_font, anchor_position + Vector2(12.0, -10.0), "OVW", HORIZONTAL_ALIGNMENT_LEFT, -1.0, 11, Color(0.95, 0.98, 1.0, 0.95))
+
+
+func _draw_sector(origin: Vector2, center_angle: float, arc_width: float, radius: float, fill_color: Color) -> void:
+	var points: PackedVector2Array = [origin]
+	var start_angle: float = center_angle - (arc_width * 0.5)
+	var steps: int = maxi(int(ceil(arc_width / (PI / 12.0))), 2)
+	for step in range(steps + 1):
+		var t: float = float(step) / float(steps)
+		var angle: float = lerpf(start_angle, start_angle + arc_width, t)
+		points.append(origin + Vector2.RIGHT.rotated(angle) * radius)
+	draw_colored_polygon(points, fill_color)
+	draw_arc(origin, radius, start_angle, start_angle + arc_width, maxi(steps * 2, 12), fill_color.lightened(0.18), 2.0)
 
 
 func _draw_dashed_line(from_point: Vector2, to_point: Vector2, line_color: Color, width: float) -> void:

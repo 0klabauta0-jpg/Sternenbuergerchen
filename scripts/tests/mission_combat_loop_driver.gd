@@ -2,6 +2,7 @@ extends Node
 
 const LOS_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/los_system.gd")
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
+const OVERWATCH_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/overwatch_controller.gd")
 const CONTACT_LINE_NAME: String = "CombatContactLine"
 const EVENT_LABEL_NAME: String = "CombatEventLabel"
 const WINNER_LABEL_NAME: String = "CombatWinnerLabel"
@@ -93,6 +94,7 @@ var _overlays_visible: bool = true
 var _enemy_patrol_paths_by_unit_id: Dictionary = {}
 var _enemy_patrol_waypoint_index_by_unit_id: Dictionary = {}
 var _enemy_patrol_contact_locked: Dictionary = {}
+var _overwatch_controller = OVERWATCH_CONTROLLER_SCRIPT.new()
 
 
 func _ready() -> void:
@@ -194,7 +196,9 @@ func _on_tick_processed(tick: int) -> void:
 	_try_enqueue_medic_support(simulation_root)
 	_advance_enemy_units(simulation_root)
 	_apply_friendly_standard_behavior(simulation_root)
-	_try_enqueue_attacks(simulation_root)
+	var overwatch_shots: Array = _try_enqueue_overwatch(simulation_root)
+	if overwatch_shots.is_empty():
+		_try_enqueue_attacks(simulation_root)
 	_update_combat_resolution()
 	if not _combat_finished:
 		_update_status_label("active")
@@ -1852,6 +1856,54 @@ func _apply_friendly_standard_behavior(simulation_root: Node) -> void:
 		_friendly_cover_ready_at_msec[unit_id] = now_msec + FRIENDLY_STANDARD_COVER_COOLDOWN_MSEC
 		if friendly.has_method("show_event_text"):
 			friendly.call("show_event_text", "SEEK COVER", DEFAULT_EVENT_COLOR, 0.9)
+
+
+func _try_enqueue_overwatch(simulation_root: Node) -> Array:
+	if simulation_root == null or _overwatch_controller == null:
+		return []
+	var tactical_controller = _get_tactical_controller()
+	if tactical_controller == null or not tactical_controller.has_method("refresh_fireteam_security_state") or not tactical_controller.has_method("get_fireteam_security_snapshot"):
+		_overwatch_controller.call("reset_all")
+		return []
+	tactical_controller.call("refresh_fireteam_security_state")
+	var friendly_units_by_fireteam: Dictionary = {}
+	for friendly in _get_units(friendly_unit_paths):
+		if friendly == null or not friendly.has_method("get_fireteam_id"):
+			continue
+		var fireteam_id: String = String(friendly.call("get_fireteam_id")).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		if not friendly_units_by_fireteam.has(fireteam_id):
+			friendly_units_by_fireteam[fireteam_id] = []
+		var fireteam_units: Array = Array(friendly_units_by_fireteam.get(fireteam_id, []))
+		fireteam_units.append(friendly)
+		friendly_units_by_fireteam[fireteam_id] = fireteam_units
+	var shots: Array = Array(
+		_overwatch_controller.call(
+			"update",
+			simulation_root,
+			Array(tactical_controller.call("get_fireteam_security_snapshot")),
+			friendly_units_by_fireteam,
+			_get_active_enemy_units(),
+			_get_terrain_registry(),
+			contact_range,
+			_current_tick
+		)
+	)
+	for shot_variant in shots:
+		if typeof(shot_variant) != TYPE_DICTIONARY:
+			continue
+		var shot: Dictionary = Dictionary(shot_variant)
+		var attacker = _resolve_unit_by_id(String(shot.get("attacker_unit_id", "")))
+		var target = _resolve_unit_by_id(String(shot.get("target_unit_id", "")))
+		if attacker != null and target != null:
+			_set_contact_visuals(attacker, target)
+		var event_text: String = "OVERWATCH %s -> %s" % [String(shot.get("attacker_unit_id", "")), String(shot.get("target_unit_id", ""))]
+		_set_event_text(event_text)
+		if attacker != null and attacker.has_method("show_event_text"):
+			attacker.call("show_event_text", "OVERWATCH", DEFAULT_EVENT_COLOR, 1.1)
+		_broadcast_remote_event(event_text, String(shot.get("attacker_unit_id", "")), DEFAULT_EVENT_COLOR, 1.1, "OVERWATCH")
+	return shots
 
 
 func _extract_current_command_type(unit) -> String:

@@ -15,6 +15,7 @@ const AD_HOC_ORDER_SCRIPT: GDScript = preload("res://scripts/command/ad_hoc_orde
 const FIRETEAM_COORDINATION_MANAGER_SCRIPT: GDScript = preload("res://scripts/tests/fireteam_coordination_manager.gd")
 const TACTICAL_STANCE_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/tactical_stance_controller.gd")
 const FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/fireteam_movement_controller.gd")
+const FIRETEAM_SECURITY_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/fireteam_security_controller.gd")
 
 const FIRETEAM_NAMES: PackedStringArray = ["ALL", "BLUE", "GOLD"]
 const REAL_FIRETEAM_IDS: PackedStringArray = ["blue", "gold"]
@@ -138,6 +139,7 @@ var _suppression_near_miss_ready_at_msec_by_fireteam: Dictionary = {}
 var _tracked_health_by_unit_id: Dictionary = {}
 var _coordination_manager = null
 var _fireteam_movement_controller = null
+var _fireteam_security_controller = null
 var _active_coordination_by_id: Dictionary = {}
 var _leader_initiated_flank_ready_at_msec_by_fireteam: Dictionary = {}
 
@@ -178,6 +180,7 @@ func _ready() -> void:
 	_ensure_tactical_stance_controller()
 	_ensure_coordination_manager()
 	_ensure_fireteam_movement_controller()
+	_ensure_fireteam_security_controller()
 	_ensure_order_visualizer()
 	_hide_legacy_phase_buttons()
 	_sync_phase_selection_from_controller()
@@ -202,6 +205,7 @@ func _process(delta: float) -> void:
 	_update_leader_initiated_flanks()
 	_update_ad_hoc_execution(delta)
 	_update_active_phase_execution(delta)
+	refresh_fireteam_security_state()
 	_card_refresh_time_remaining -= delta
 	if _card_refresh_time_remaining > 0.0:
 		return
@@ -529,6 +533,13 @@ func get_fireteam_movement_state(fireteam_id: String) -> Dictionary:
 	return Dictionary(_fireteam_movement_controller.call("get_fireteam_state", fireteam_id)).duplicate(true)
 
 
+func get_fireteam_security_state(fireteam_id: String) -> Dictionary:
+	_ensure_fireteam_security_controller()
+	if _fireteam_security_controller == null:
+		return {}
+	return Dictionary(_fireteam_security_controller.call("get_fireteam_state", fireteam_id)).duplicate(true)
+
+
 func get_tactical_stances_snapshot() -> Dictionary:
 	_ensure_tactical_stance_controller()
 	if _tactical_stance_controller == null:
@@ -570,6 +581,43 @@ func get_fireteam_movement_snapshot() -> Array:
 	if _fireteam_movement_controller == null:
 		return []
 	return Array(_fireteam_movement_controller.call("get_state_snapshot")).duplicate(true)
+
+
+func get_fireteam_security_snapshot() -> Array:
+	_ensure_fireteam_security_controller()
+	if _fireteam_security_controller == null:
+		return []
+	return Array(_fireteam_security_controller.call("get_state_snapshot")).duplicate(true)
+
+
+func refresh_fireteam_security_state() -> bool:
+	_ensure_fireteam_security_controller()
+	if _fireteam_security_controller == null:
+		return false
+	var previous_snapshot_text: String = JSON.stringify(get_fireteam_security_snapshot())
+	for fireteam_id_variant in _get_available_fireteam_ids():
+		var fireteam_id: String = String(fireteam_id_variant)
+		var behavior_profile_dict: Dictionary = get_active_behavior_profile(fireteam_id)
+		if not _is_fireteam_runtime_active(fireteam_id) or behavior_profile_dict.is_empty():
+			_fireteam_security_controller.call("reset_fireteam", fireteam_id)
+			continue
+		_fireteam_security_controller.call(
+			"update_fireteam_state",
+			fireteam_id,
+			_get_fireteam_units(fireteam_id, true),
+			_resolve_fireteam_leader_for_behavior(fireteam_id),
+			behavior_profile_dict,
+			get_fireteam_movement_state(fireteam_id),
+			Dictionary(_suppression_state_by_fireteam.get(fireteam_id, {})).duplicate(true),
+			Dictionary(_ad_hoc_order_controller.call("get_active_order", fireteam_id)) if _ad_hoc_order_controller != null else {},
+			_get_all_enemy_units(false)
+		)
+	var next_snapshot_text: String = JSON.stringify(get_fireteam_security_snapshot())
+	if previous_snapshot_text == next_snapshot_text:
+		return false
+	_refresh_order_visuals()
+	_refresh_fireteam_status_panel()
+	return true
 
 
 func get_current_fireteam_lead_unit(fireteam_id: String):
@@ -1200,9 +1248,10 @@ func _refresh_fireteam_status_panel() -> void:
 		ad_hoc_type = String(Dictionary(_ad_hoc_order_controller.call("get_active_order", selected_fireteam_id)).get("order_type", "")).strip_edges()
 	var stance_text: String = _build_selected_tactical_stance_text()
 	var movement_text: String = _format_movement_state_text(get_fireteam_movement_state(selected_fireteam_id))
+	var security_text: String = _format_security_state_text(get_fireteam_security_state(selected_fireteam_id))
 	if suppression_label != null:
 		var ad_hoc_text: String = " | AD-HOC %s" % ad_hoc_type.to_upper() if not ad_hoc_type.is_empty() else ""
-		suppression_label.text = "%s | STANCE %s | MOVE %s | SUPP %.2f/%.2f%s" % [lead_name, stance_text, movement_text, suppression_value, suppression_threshold, ad_hoc_text]
+		suppression_label.text = "%s | STANCE %s | MOVE %s | SEC %s | SUPP %.2f/%.2f%s" % [lead_name, stance_text, movement_text, security_text, suppression_value, suppression_threshold, ad_hoc_text]
 	if return_button != null:
 		return_button.disabled = selected_fireteam_id.is_empty() or not (_has_pending_plan_for_fireteam(selected_fireteam_id) or (_ad_hoc_order_controller != null and bool(_ad_hoc_order_controller.call("has_active_order", selected_fireteam_id))))
 
@@ -1583,7 +1632,7 @@ func _build_fireteam_status_text() -> String:
 		drop_state_text = "%d embarked | %d deployed | Lead %s" % [embarked_count, deployed_count, lead_name]
 	elif deployed_count > 0:
 		drop_state_text = "%d deployed | Lead %s" % [deployed_count, lead_name]
-	return "%s | %d Karten | %d Wegpunkte | STANCE %s | MOVE %s | %s" % [_get_fireteam_name(), units.size(), planned_waypoint_count, _build_selected_tactical_stance_text(), _build_selected_movement_text(), drop_state_text]
+	return "%s | %d Karten | %d Wegpunkte | STANCE %s | MOVE %s | SEC %s | %s" % [_get_fireteam_name(), units.size(), planned_waypoint_count, _build_selected_tactical_stance_text(), _build_selected_movement_text(), _build_selected_security_text(), drop_state_text]
 
 
 func _build_strategic_status_text() -> String:
@@ -2030,6 +2079,22 @@ func _get_all_friendly_units(include_hidden: bool = true) -> Array:
 		result.append(child)
 
 	result.sort_custom(Callable(self, "_sort_unit_nodes_for_cards"))
+	return result
+
+
+func _get_all_enemy_units(include_hidden: bool = true) -> Array:
+	var mission_root: Node = get_parent()
+	if mission_root == null:
+		return []
+	var result: Array = []
+	for child in mission_root.get_children():
+		if not child.has_method("get_team_id") or not child.has_method("get_unit_id"):
+			continue
+		if String(child.call("get_team_id")).strip_edges() == FRIENDLY_TEAM_ID:
+			continue
+		if not include_hidden and child is CanvasItem and not (child as CanvasItem).visible:
+			continue
+		result.append(child)
 	return result
 
 
@@ -2555,6 +2620,12 @@ func _ensure_fireteam_movement_controller() -> void:
 	_fireteam_movement_controller = FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT.new()
 
 
+func _ensure_fireteam_security_controller() -> void:
+	if _fireteam_security_controller != null:
+		return
+	_fireteam_security_controller = FIRETEAM_SECURITY_CONTROLLER_SCRIPT.new()
+
+
 func _ensure_order_visualizer() -> void:
 	var mission_root := get_parent()
 	if mission_root == null or mission_root.get_node_or_null("FireteamOrderVisualizer") != null or _order_visualizer_pending:
@@ -2581,6 +2652,7 @@ func _refresh_order_visuals() -> void:
 	visualizer.call("set_selected_fireteam_ids", _selected_fireteam_ids)
 	visualizer.call("set_plan_dicts", _serialize_order_plans())
 	visualizer.call("set_ad_hoc_order_dicts", _build_ad_hoc_visualization_entries())
+	visualizer.call("set_security_dicts", get_fireteam_security_snapshot())
 
 
 func _try_open_waypoint_menu_at_position(screen_position: Vector2) -> bool:
@@ -2778,6 +2850,20 @@ func _build_selected_movement_text() -> String:
 	return shared_text
 
 
+func _build_selected_security_text() -> String:
+	if _selected_fireteam_ids.is_empty():
+		return "-"
+	var shared_text: String = ""
+	for fireteam_id in _selected_fireteam_ids:
+		var security_text: String = _format_security_state_text(get_fireteam_security_state(String(fireteam_id)))
+		if shared_text.is_empty():
+			shared_text = security_text
+			continue
+		if security_text != shared_text:
+			return "MIXED"
+	return shared_text
+
+
 func _format_movement_state_text(state: Dictionary) -> String:
 	if state.is_empty():
 		return "-"
@@ -2786,6 +2872,18 @@ func _format_movement_state_text(state: Dictionary) -> String:
 	if bool(state.get("simplified_due_to_losses", false)):
 		return "%s S%d LOSS" % [style_label, stage_index]
 	return "%s S%d" % [style_label, stage_index]
+
+
+func _format_security_state_text(state: Dictionary) -> String:
+	if state.is_empty() or not bool(state.get("is_active", false)):
+		return "-"
+	var mode: String = String(state.get("security_mode", "directional")).strip_edges().to_lower()
+	var mode_label: String = "DIR"
+	if mode == "360":
+		mode_label = "360"
+	if bool(state.get("overwatch_ready", false)):
+		return "%s+OVW" % mode_label
+	return mode_label
 
 
 func _get_movement_style_short_label(style_id: String) -> String:
