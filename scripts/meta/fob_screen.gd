@@ -220,10 +220,22 @@ func clear_last_mission_result() -> void:
 
 
 func request_mission_start() -> void:
-	if _selected_unit_ids.is_empty():
+	if not _is_mission_ready_for_launch():
 		return
 
 	mission_start_requested.emit(get_team(), get_selected_fireteam_ids())
+
+
+func _is_mission_ready_for_launch() -> bool:
+	if _selected_unit_ids.is_empty():
+		return false
+	for unit_id_variant in _selected_unit_ids:
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty():
+			continue
+		if not _boarded_unit_ids.has(unit_id):
+			return false
+	return true
 
 
 func build_mission_drop_state() -> Dictionary:
@@ -374,7 +386,7 @@ func _update_brief_panel() -> void:
 	fireteam_status_label.text = "Mission: %s" % _mission_name
 	dropship_status_label.text = "Map: %s" % _mission_map_name
 	mission_summary_label.text = "Operators: %d | Pilots: %d | Fireteams: %d active | %s" % [_selected_unit_ids.size(), pilot_count, _count_fireteams_with_members(), _build_dropship_status_text()]
-	start_button.disabled = _selected_unit_ids.is_empty()
+	start_button.disabled = not _is_mission_ready_for_launch()
 
 
 func _render_available_operators() -> void:

@@ -1,6 +1,7 @@
 extends SceneTree
 
 const FOB_TEST_SCENE: PackedScene = preload("res://scenes/meta/fob_test_screen.tscn")
+const META_LAYER_TEST_SCENE: PackedScene = preload("res://scenes/meta/meta_layer_test.tscn")
 const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
 const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
 
@@ -15,6 +16,7 @@ func _init() -> void:
 func _run_tests() -> void:
 	print("=== Dropship Mission Bugfix Verifier ===")
 	await _test_fob_refresh_preserves_boarded_units()
+	await _test_mission_start_requires_boarded_team()
 	await _test_meta_mission_uses_deferred_drop_state()
 	await _test_combat_loop_waits_for_pending_insertions()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
@@ -112,6 +114,60 @@ func _test_meta_mission_uses_deferred_drop_state() -> void:
 	_assert(all_gold_hidden, "Non-dropped friendly units stay hidden on the mission map")
 	_assert(blue_drop_units.size() == 3, "Drop operation prefers the already embarked fireteam members")
 	_assert(String(tactical_controller.get("_drop_sequence_phase")) == "inbound", "Calling the dropship starts the live inbound sequence for embarked units")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_mission_start_requires_boarded_team() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	for _frame in range(4):
+		await process_frame
+
+	var fob_screen: Control = scene.get_node("FOBScreen")
+	var start_button := scene.get_node("FOBScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/StartMissionButton") as Button
+	var selected_unit_ids := PackedStringArray(["unit_alpha", "unit_bravo", "unit_delta"])
+	var selected_fireteam_ids := PackedStringArray(["blue", "blue", "blue"])
+	var fireteam_definitions := [
+		{
+			"id": "blue",
+			"label": "BLUE",
+			"lead_unit_id": "unit_alpha",
+			"respawn_enabled": false,
+			"loadout": "medium",
+		}
+	]
+	fob_screen.call("set_available_units", UNIT_ROSTER_PRESETS_SCRIPT.call("get_homebase_roster"))
+	fob_screen.call(
+		"set_transport_craft_state",
+		[
+			{
+				"craft_id": "dropship_test",
+				"display_name": "Dropship Test",
+				"visible_in_fob": true,
+				"is_boardable": true,
+			}
+		]
+	)
+	fob_screen.call("configure_transfer", selected_unit_ids, selected_fireteam_ids, fireteam_definitions)
+	fob_screen.call("_queue_fireteam_for_dropship", "blue", "dropship_test")
+	fob_screen.call("_refresh_ui_state")
+
+	_assert(start_button != null and start_button.disabled, "FOB start button stays locked until the selected operators are boarded")
+	fob_screen.call("request_mission_start")
+	for _frame in range(2):
+		await process_frame
+	_assert(scene.call("get_active_mission") == null, "FOB mission start does not launch a mission before boarding is complete")
+
+	fob_screen.set("_dropship_phase", "boarded")
+	fob_screen.set("_boarded_unit_ids", selected_unit_ids)
+	fob_screen.set("_boarded_fireteam_ids", PackedStringArray(["blue"]))
+	fob_screen.call("_refresh_ui_state")
+	_assert(start_button != null and not start_button.disabled, "FOB start button unlocks once the selected operators are fully boarded")
+	fob_screen.call("request_mission_start")
+	for _frame in range(4):
+		await process_frame
+	_assert(scene.call("get_active_mission") != null, "FOB mission start launches once a boarded team is available")
 	scene.queue_free()
 	await process_frame
 

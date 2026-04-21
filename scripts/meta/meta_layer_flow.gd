@@ -358,6 +358,8 @@ func _on_fob_mission_start_requested(selected_unit_ids: PackedStringArray, selec
 	_selected_unit_ids = selected_unit_ids.duplicate()
 	_selected_fireteam_ids = selected_fireteam_ids.duplicate()
 	_sync_fob_dropship_state_into_mission_planning(true)
+	if Array(_mission_planning_state.get("embarked_unit_ids", [])).is_empty():
+		return
 	_start_mission()
 
 
