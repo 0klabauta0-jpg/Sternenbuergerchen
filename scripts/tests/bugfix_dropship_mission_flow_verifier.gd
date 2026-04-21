@@ -20,6 +20,7 @@ func _run_tests() -> void:
 	await _test_fob_header_start_is_hidden()
 	await _test_homebase_start_button_lives_in_header()
 	await _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting()
+	await _test_fob_assignments_and_boarding_survive_send_and_nav_refresh()
 	await _test_mission_start_requires_boarded_team()
 	await _test_homebase_timer_label_switches_from_idle_to_countdown()
 	await _test_mission_timer_uses_explicit_start_timestamp()
@@ -247,12 +248,13 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 	fob_screen.set("_boarded_unit_ids", selected_unit_ids)
 	fob_screen.set("_boarded_fireteam_ids", PackedStringArray(["blue"]))
 	fob_screen.call("_on_transport_craft_mission_stage_requested", "dropship_test")
-	scene.call("_refresh_map_screen")
+	scene.call("_show_map")
 	for _frame in range(2):
 		await process_frame
 
 	var mission_craft_card := map_screen.get_node("Panel/Margin/VBox/ContentRow/MapPanel/MapMargin/MapVBox/MissionCraftCard") as PanelContainer
 	var status_label := mission_craft_card.get_node("CardMargin/CardRow/TextVBox/StatusLabel") as Label
+	_assert(map_screen.visible, "Mission nav shows the real meta map screen instead of bypassing it")
 	_assert(mission_craft_card != null and mission_craft_card.visible, "Map screen shows the mini shipcard while the dropship is en route")
 	_assert(mission_craft_card.get_index() == 2, "Mini shipcard is inserted directly under the map preview panel")
 	_assert(mission_craft_card.modulate.a < 1.0, "Mini shipcard is greyed out while the dropship is still in transit")
@@ -260,12 +262,72 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 
 	for _step in range(18):
 		scene.call("_on_homebase_transport_timer_timeout")
-	scene.call("_refresh_map_screen")
+	scene.call("_show_map")
 	for _frame in range(2):
 		await process_frame
 
 	_assert(mission_craft_card.visible and mission_craft_card.modulate.a < 1.0, "Mini shipcard stays visible and greyed out once the dropship is waiting on the mission map")
 	_assert(status_label != null and status_label.text.contains("Holding on mission map"), "Mini shipcard switches to waiting status after the transfer completes")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_fob_assignments_and_boarding_survive_send_and_nav_refresh() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	for _frame in range(4):
+		await process_frame
+
+	var fob_screen: Control = scene.get_node("FOBScreen")
+	var selected_unit_ids := PackedStringArray(["unit_alpha", "unit_bravo", "unit_delta"])
+	scene.set(
+		"_homebase_aircraft_definitions",
+		[
+			{
+				"craft_id": "dropship_test",
+				"display_name": "Dropship Test",
+				"craft_type": "dropship",
+				"texture_path": "res://Assets/kenney_space-kit/Side/craft_speederB.png",
+			}
+		]
+	)
+	scene.set("_assigned_aircraft_pilot_by_craft", {"dropship_test": "unit_hotel"})
+	scene.set("_aircraft_location_by_craft", {"dropship_test": "fob"})
+	scene.set("_selected_unit_ids", selected_unit_ids)
+	scene.set("_selected_fireteam_ids", PackedStringArray(["", "", ""]))
+	scene.call("_refresh_fob_screen")
+
+	fob_screen.call("_set_selected_fireteam_for_unit", "unit_alpha", "ft1")
+	fob_screen.call("_set_selected_fireteam_for_unit", "unit_bravo", "ft1")
+	fob_screen.call("_set_selected_fireteam_for_unit", "unit_delta", "ft1")
+	fob_screen.call("_queue_fireteam_for_dropship", "ft1", "dropship_test")
+	fob_screen.set("_dropship_transport_craft_id", "dropship_test")
+	fob_screen.set("_dropship_phase", "boarded")
+	fob_screen.set("_boarded_unit_ids", selected_unit_ids)
+	fob_screen.set("_boarded_fireteam_ids", PackedStringArray(["ft1"]))
+
+	fob_screen.call("_on_transport_craft_mission_stage_requested", "dropship_test")
+	for _frame in range(2):
+		await process_frame
+
+	_assert(PackedStringArray(fob_screen.call("get_selected_fireteam_ids")) == PackedStringArray(["ft1", "ft1", "ft1"]), "FOB send keeps the locally assigned fireteam membership instead of resetting operators to available")
+	_assert(PackedStringArray(fob_screen.get("_boarded_unit_ids")) == selected_unit_ids, "FOB send no longer wipes boarded operators on the immediate refresh")
+
+	scene.call("_show_homebase")
+	for _frame in range(2):
+		await process_frame
+	scene.call("_show_fob")
+	for _frame in range(2):
+		await process_frame
+	_assert(PackedStringArray(fob_screen.call("get_selected_fireteam_ids")) == PackedStringArray(["ft1", "ft1", "ft1"]), "Returning from Homebase keeps FOB fireteam assignments intact")
+
+	scene.call("_show_map")
+	for _frame in range(2):
+		await process_frame
+	scene.call("_show_fob")
+	for _frame in range(2):
+		await process_frame
+	_assert(PackedStringArray(fob_screen.call("get_selected_fireteam_ids")) == PackedStringArray(["ft1", "ft1", "ft1"]), "Returning from Mission Map keeps FOB fireteam assignments intact")
 	scene.queue_free()
 	await process_frame
 

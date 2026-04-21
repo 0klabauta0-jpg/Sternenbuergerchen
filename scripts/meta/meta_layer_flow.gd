@@ -754,6 +754,7 @@ func _refresh_fob_screen() -> void:
 	var fob_screen = _get_fob_screen()
 	if fob_screen == null:
 		return
+	_sync_fob_transfer_selection_from_screen()
 	var selected_mission: Dictionary = _get_selected_mission_definition()
 	var fireteam_definitions: Array = fob_screen.get_fireteam_definitions()
 	var transport_craft_states: Array = _build_transport_craft_states()
@@ -1140,6 +1141,7 @@ func _show_homebase() -> void:
 	var map_screen = _get_map_screen()
 	var debrief_screen = _get_debrief_screen()
 	var mission_host = _get_mission_host()
+	_sync_fob_transfer_selection_from_screen()
 	if homebase_screen != null:
 		homebase_screen.visible = true
 		_refresh_homebase_screen()
@@ -1184,15 +1186,17 @@ func _show_map() -> void:
 	var map_screen = _get_map_screen()
 	var debrief_screen = _get_debrief_screen()
 	var mission_host = _get_mission_host()
+	_sync_fob_transfer_selection_from_screen()
 	if homebase_screen != null:
 		homebase_screen.visible = false
 	if fob_screen != null:
 		fob_screen.visible = false
 	if map_screen != null:
-		map_screen.visible = false
+		map_screen.visible = true
 	if debrief_screen != null:
 		debrief_screen.visible = false
 	_sync_mission_host_visibility()
+	_set_navigation_visible(true)
 	_refresh_map_screen()
 	_refresh_navigation_state()
 
@@ -1348,6 +1352,28 @@ func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: boo
 		_mission_planning_state["deployed_unit_ids"] = []
 	if not _mission_planning_state.has("mission_drop_return_requested"):
 		_mission_planning_state["mission_drop_return_requested"] = false
+
+
+func _sync_fob_transfer_selection_from_screen() -> void:
+	var fob_screen = _get_fob_screen()
+	if fob_screen == null or not fob_screen.has_method("get_team") or not fob_screen.has_method("get_selected_fireteam_ids"):
+		return
+	if _selected_unit_ids.is_empty():
+		return
+
+	var screen_unit_ids := PackedStringArray(fob_screen.call("get_team"))
+	var screen_fireteam_ids := PackedStringArray(fob_screen.call("get_selected_fireteam_ids"))
+	var next_selected_fireteam_ids: PackedStringArray = _build_unassigned_fireteam_selection(_selected_unit_ids)
+	for unit_index in range(_selected_unit_ids.size()):
+		var unit_id: String = String(_selected_unit_ids[unit_index]).strip_edges()
+		if unit_id.is_empty():
+			continue
+		var screen_index: int = screen_unit_ids.find(unit_id)
+		if screen_index >= 0 and screen_index < screen_fireteam_ids.size():
+			next_selected_fireteam_ids[unit_index] = String(screen_fireteam_ids[screen_index]).strip_edges()
+		elif unit_index < _selected_fireteam_ids.size():
+			next_selected_fireteam_ids[unit_index] = String(_selected_fireteam_ids[unit_index]).strip_edges()
+	_selected_fireteam_ids = next_selected_fireteam_ids
 
 
 func _begin_active_mission_timer() -> void:
