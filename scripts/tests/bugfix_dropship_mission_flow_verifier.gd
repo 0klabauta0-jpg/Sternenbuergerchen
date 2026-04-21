@@ -250,7 +250,7 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 
 	var fob_screen: Control = scene.get_node("FOBScreen")
 	var homebase_screen: Control = scene.get_node("HomebaseScreen")
-	var map_screen: Control = scene.get_node("MapScreen")
+	var map_screen: Control = scene.get_node_or_null("MapScreen") as Control
 	var mission_host: Node = scene.get_node("MissionHost")
 	var selected_unit_ids := PackedStringArray(["unit_alpha", "unit_bravo", "unit_delta"])
 	var selected_fireteam_ids := PackedStringArray(["blue", "blue", "blue"])
@@ -322,7 +322,7 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 		"MarginContainer/VBox/ProgressBar",
 		"MarginContainer/VBox/ExtraContentHost",
 	]
-	_assert(not map_screen.visible, "Mission nav no longer renders the old Mission Link overlay screen")
+	_assert(map_screen == null, "Mission nav no longer keeps the old legacy MapScreen in the meta scene")
 	_assert(preview_mission != null, "Mission nav keeps the preview mission host active as the visible map surface")
 	_assert(mission_craft_card != null and mission_craft_card.visible, "Preview mission shows the mini shipcard while the dropship is en route")
 	_assert(mission_craft_card != null and mission_craft_card.modulate.a < 1.0, "Mini shipcard stays greyed out during mission transit")

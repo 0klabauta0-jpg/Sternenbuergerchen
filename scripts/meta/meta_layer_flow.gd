@@ -107,10 +107,9 @@ func _ready() -> void:
 	set_process(true)
 	var homebase_screen = _get_homebase_screen()
 	var fob_screen = _get_fob_screen()
-	var map_screen = _get_map_screen()
 	var debrief_screen = _get_debrief_screen()
-	if homebase_screen == null or fob_screen == null or map_screen == null or debrief_screen == null:
-		push_warning("MetaLayerFlow requires HomebaseScreen, FOBScreen, MapScreen and DebriefScreen children.")
+	if homebase_screen == null or fob_screen == null or debrief_screen == null:
+		push_warning("MetaLayerFlow requires HomebaseScreen, FOBScreen and DebriefScreen children.")
 		return
 
 	META_UI_SKIN_SCRIPT.apply_meta_navigation(self)
@@ -179,7 +178,6 @@ func _connect_navigation_buttons() -> void:
 	for path in [
 		"HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/HomebaseNavButton",
 		"FOBScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/HomebaseNavButton",
-		"MapScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/HomebaseNavButton",
 	]:
 		var homebase_button := get_node_or_null(path) as Button
 		if homebase_button != null and not homebase_button.pressed.is_connected(_on_homebase_nav_pressed):
@@ -188,7 +186,6 @@ func _connect_navigation_buttons() -> void:
 	for path in [
 		"HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/FOBNavButton",
 		"FOBScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/FOBNavButton",
-		"MapScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/FOBNavButton",
 	]:
 		var fob_button := get_node_or_null(path) as Button
 		if fob_button != null and not fob_button.pressed.is_connected(_on_fob_nav_pressed):
@@ -197,7 +194,6 @@ func _connect_navigation_buttons() -> void:
 	for path in [
 		"HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/MissionNavButton",
 		"FOBScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/MissionNavButton",
-		"MapScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/MissionNavButton",
 	]:
 		var mission_button := get_node_or_null(path) as Button
 		if mission_button != null and not mission_button.pressed.is_connected(_on_map_nav_pressed):
@@ -1138,17 +1134,13 @@ func _show_homebase() -> void:
 	_current_meta_view = "homebase"
 	var homebase_screen = _get_homebase_screen()
 	var fob_screen = _get_fob_screen()
-	var map_screen = _get_map_screen()
 	var debrief_screen = _get_debrief_screen()
-	var mission_host = _get_mission_host()
 	_sync_fob_transfer_selection_from_screen()
 	if homebase_screen != null:
 		homebase_screen.visible = true
 		_refresh_homebase_screen()
 	if fob_screen != null:
 		fob_screen.visible = false
-	if map_screen != null:
-		map_screen.visible = false
 	if debrief_screen != null:
 		debrief_screen.visible = false
 	_refresh_preview_mission_lifecycle()
@@ -1161,17 +1153,13 @@ func _show_fob() -> void:
 	_current_meta_view = "fob"
 	var homebase_screen = _get_homebase_screen()
 	var fob_screen = _get_fob_screen()
-	var map_screen = _get_map_screen()
 	var debrief_screen = _get_debrief_screen()
-	var mission_host = _get_mission_host()
 	if homebase_screen != null:
 		homebase_screen.visible = false
 	if fob_screen != null:
 		fob_screen.visible = true
 		_refresh_fob_screen()
 		fob_screen.set_last_mission_result(_last_mission_result)
-	if map_screen != null:
-		map_screen.visible = false
 	if debrief_screen != null:
 		debrief_screen.visible = false
 	_refresh_preview_mission_lifecycle()
@@ -1185,16 +1173,12 @@ func _show_map() -> void:
 	_current_meta_view = "map"
 	var homebase_screen = _get_homebase_screen()
 	var fob_screen = _get_fob_screen()
-	var map_screen = _get_map_screen()
 	var debrief_screen = _get_debrief_screen()
-	var mission_host = _get_mission_host()
 	_sync_fob_transfer_selection_from_screen()
 	if homebase_screen != null:
 		homebase_screen.visible = false
 	if fob_screen != null:
 		fob_screen.visible = false
-	if map_screen != null:
-		map_screen.visible = false
 	if debrief_screen != null:
 		debrief_screen.visible = false
 	_refresh_preview_mission_lifecycle()
@@ -1208,15 +1192,11 @@ func _show_mission() -> void:
 	_current_meta_view = "mission"
 	var homebase_screen = _get_homebase_screen()
 	var fob_screen = _get_fob_screen()
-	var map_screen = _get_map_screen()
 	var debrief_screen = _get_debrief_screen()
-	var mission_host = _get_mission_host()
 	if homebase_screen != null:
 		homebase_screen.visible = false
 	if fob_screen != null:
 		fob_screen.visible = false
-	if map_screen != null:
-		map_screen.visible = false
 	if debrief_screen != null:
 		debrief_screen.visible = false
 	_refresh_preview_mission_lifecycle()
@@ -1228,15 +1208,11 @@ func _show_debrief() -> void:
 	_current_meta_view = "debrief"
 	var homebase_screen = _get_homebase_screen()
 	var fob_screen = _get_fob_screen()
-	var map_screen = _get_map_screen()
 	var debrief_screen = _get_debrief_screen()
-	var mission_host = _get_mission_host()
 	if homebase_screen != null:
 		homebase_screen.visible = false
 	if fob_screen != null:
 		fob_screen.visible = false
-	if map_screen != null:
-		map_screen.visible = false
 	if debrief_screen != null:
 		debrief_screen.visible = true
 	_refresh_preview_mission_lifecycle()
@@ -1248,7 +1224,6 @@ func _set_navigation_visible(is_visible: bool) -> void:
 	var homebase_nav_paths: PackedStringArray = [
 		"HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow",
 		"FOBScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow",
-		"MapScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow",
 	]
 	for path in homebase_nav_paths:
 		var nav_row := get_node_or_null(path) as Control
@@ -1264,9 +1239,6 @@ func _refresh_navigation_state() -> void:
 		{"path": "FOBScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/HomebaseNavButton", "view": "homebase"},
 		{"path": "FOBScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/FOBNavButton", "view": "fob"},
 		{"path": "FOBScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/MissionNavButton", "view": "map"},
-		{"path": "MapScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/HomebaseNavButton", "view": "homebase"},
-		{"path": "MapScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/FOBNavButton", "view": "fob"},
-		{"path": "MapScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/MissionNavButton", "view": "map"},
 	]:
 		var button := get_node_or_null(String(pair["path"])) as Button
 		if button == null:
@@ -1280,20 +1252,7 @@ func _refresh_navigation_state() -> void:
 
 
 func _refresh_map_screen() -> void:
-	var map_screen = _get_map_screen()
 	var fob_screen = _get_fob_screen()
-	if map_screen == null or fob_screen == null:
-		pass
-
-	var selected_mission: Dictionary = _get_selected_mission_definition()
-	if map_screen != null and fob_screen != null:
-		map_screen.set_map_context(
-			String(selected_mission.get("mission_name", "Operation: FOB Transfer")).strip_edges(),
-			String(selected_mission.get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges(),
-			_selected_unit_ids,
-			fob_screen.build_meta_overview(),
-			int(selected_mission.get("slot_count", FRIENDLY_NODE_NAMES.size()))
-		)
 	if _active_mission == null:
 		_sync_fob_dropship_state_into_mission_planning()
 	_refresh_preview_mission_lifecycle()
@@ -1400,7 +1359,6 @@ func _ensure_meta_nav_timer_labels() -> void:
 	for path in [
 		"HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow",
 		"FOBScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow",
-		"MapScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow",
 	]:
 		var nav_row := get_node_or_null(path) as HBoxContainer
 		if nav_row == null:
@@ -1423,7 +1381,6 @@ func _refresh_meta_mission_timer_labels() -> void:
 	for path in [
 		"HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/MissionTimerLabel",
 		"FOBScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/MissionTimerLabel",
-		"MapScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow/MissionTimerLabel",
 	]:
 		var timer_label := get_node_or_null(path) as Label
 		if timer_label != null:
@@ -1453,10 +1410,6 @@ func _get_homebase_screen():
 
 func _get_fob_screen():
 	return get_node_or_null("FOBScreen")
-
-
-func _get_map_screen():
-	return get_node_or_null("MapScreen")
 
 
 func _get_debrief_screen():

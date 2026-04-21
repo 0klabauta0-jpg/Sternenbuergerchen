@@ -4,16 +4,12 @@
 [ext_resource type="PackedScene" path="res://scenes/meta/homebase_test_screen.tscn" id="2_homebase"]
 [ext_resource type="PackedScene" path="res://scenes/meta/fob_test_screen.tscn" id="3_fob"]
 [ext_resource type="PackedScene" path="res://scenes/meta/debrief_test_screen.tscn" id="4_debrief"]
-[ext_resource type="PackedScene" path="res://scenes/meta/meta_map_screen.tscn" id="5_map"]
-
 [node name="MetaLayerTest" type="Node"]
 script = ExtResource("1_flow")
 
 [node name="HomebaseScreen" parent="." instance=ExtResource("2_homebase")]
 
 [node name="FOBScreen" parent="." instance=ExtResource("3_fob")]
-
-[node name="MapScreen" parent="." instance=ExtResource("5_map")]
 
 [node name="DebriefScreen" parent="." instance=ExtResource("4_debrief")]
 
