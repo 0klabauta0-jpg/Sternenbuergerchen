@@ -3,6 +3,7 @@ extends Node
 
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
 const NPC_COMPACT_CARD_SCENE: PackedScene = preload("res://scenes/meta/components/npc_compact_card.tscn")
+const TRANSPORT_CRAFT_CARD_UI_SCRIPT: GDScript = preload("res://scripts/meta/transport_craft_card_ui.gd")
 const META_UNIT_PROFILE_BUILDER_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile_builder.gd")
 const CHARACTER_SHEET_FORMATTER_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_formatter.gd")
 const CHARACTER_SHEET_VIEW_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_view.gd")
@@ -1980,73 +1981,7 @@ func _ensure_mission_dropship_panel() -> void:
 	panel.offset_bottom = 230.0
 	panel.custom_minimum_size = Vector2(348.0, 130.0)
 	tactical_ui.add_child(panel)
-	panel.add_theme_stylebox_override("panel", _build_mission_dropship_stylebox(false))
-
-	var margin := MarginContainer.new()
-	margin.name = "MarginContainer"
-	margin.add_theme_constant_override("margin_left", 6)
-	margin.add_theme_constant_override("margin_top", 6)
-	margin.add_theme_constant_override("margin_right", 6)
-	margin.add_theme_constant_override("margin_bottom", 6)
-	panel.add_child(margin)
-
-	var vbox := VBoxContainer.new()
-	vbox.name = "VBox"
-	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	vbox.add_theme_constant_override("separation", 4)
-	margin.add_child(vbox)
-
-	var header_row := HBoxContainer.new()
-	header_row.name = "HeaderRow"
-	header_row.add_theme_constant_override("separation", 6)
-	vbox.add_child(header_row)
-
-	var title_label := Label.new()
-	title_label.name = "TitleLabel"
-	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	title_label.add_theme_font_size_override("font_size", 11)
-	META_UI_SKIN_SCRIPT.style_body_label(title_label, 11)
-	header_row.add_child(title_label)
-
-	var content_row := HBoxContainer.new()
-	content_row.name = "ContentRow"
-	content_row.add_theme_constant_override("separation", 8)
-	vbox.add_child(content_row)
-
-	var ship_texture := TextureRect.new()
-	ship_texture.name = "ShipTexture"
-	ship_texture.custom_minimum_size = Vector2(88.0, 52.0)
-	ship_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	ship_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	content_row.add_child(ship_texture)
-
-	var info_vbox := VBoxContainer.new()
-	info_vbox.name = "InfoVBox"
-	info_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info_vbox.add_theme_constant_override("separation", 2)
-	content_row.add_child(info_vbox)
-
-	var pilot_card_host := VBoxContainer.new()
-	pilot_card_host.name = "PilotCardHost"
-	pilot_card_host.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info_vbox.add_child(pilot_card_host)
-
-	for label_name in ["PassengerLabel", "StatusLabel"]:
-		var info_label := Label.new()
-		info_label.name = label_name
-		info_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		info_label.add_theme_font_size_override("font_size", 9)
-		META_UI_SKIN_SCRIPT.style_body_label(info_label, 9)
-		info_vbox.add_child(info_label)
-
-	var progress_bar := ProgressBar.new()
-	progress_bar.name = "ProgressBar"
-	progress_bar.min_value = 0.0
-	progress_bar.max_value = 100.0
-	progress_bar.show_percentage = false
-	progress_bar.custom_minimum_size = Vector2(0.0, 8.0)
-	vbox.add_child(progress_bar)
+	TRANSPORT_CRAFT_CARD_UI_SCRIPT.ensure_card_structure(panel)
 
 
 func _refresh_mission_dropship_panel() -> void:
@@ -2058,29 +1993,36 @@ func _refresh_mission_dropship_panel() -> void:
 	if not show_panel:
 		return
 	var is_transit: bool = _mission_drop_state == "to_mission" or _mission_drop_state == "to_fob" or _drop_sequence_phase == DROP_SEQUENCE_INBOUND or _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND
-	panel.modulate = Color(1.0, 1.0, 1.0, 0.58) if is_transit else Color(1.0, 1.0, 1.0, 1.0)
-	panel.add_theme_stylebox_override("panel", _build_mission_dropship_stylebox(is_transit))
-	var ship_texture := panel.get_node_or_null("MarginContainer/VBox/ContentRow/ShipTexture") as TextureRect
-	var title_label := panel.get_node_or_null("MarginContainer/VBox/HeaderRow/TitleLabel") as Label
-	var pilot_card_host := panel.get_node_or_null("MarginContainer/VBox/ContentRow/InfoVBox/PilotCardHost") as VBoxContainer
-	var passenger_label := panel.get_node_or_null("MarginContainer/VBox/ContentRow/InfoVBox/PassengerLabel") as Label
-	var status_label := panel.get_node_or_null("MarginContainer/VBox/ContentRow/InfoVBox/StatusLabel") as Label
-	var progress_bar := panel.get_node_or_null("MarginContainer/VBox/ProgressBar") as ProgressBar
-	if ship_texture != null:
-		ship_texture.texture = _load_optional_texture(_mission_drop_texture_path)
-		if ship_texture.texture == null:
-			ship_texture.texture = _get_dropship_marker_texture()
-		ship_texture.modulate = Color(1.0, 1.0, 1.0, 0.52) if is_transit else Color(1.0, 1.0, 1.0, 1.0)
-	if title_label != null:
-		title_label.text = _build_mission_dropship_title_text()
-	_refresh_mission_dropship_pilot_card(pilot_card_host, is_transit)
-	if passenger_label != null:
-		passenger_label.text = _build_mission_dropship_passenger_text()
-	if status_label != null:
-		status_label.text = _build_mission_dropship_status_text()
-	if progress_bar != null:
-		progress_bar.value = _build_mission_dropship_progress_value()
-		progress_bar.visible = is_transit
+	var ship_texture := _load_optional_texture(_mission_drop_texture_path)
+	if ship_texture == null:
+		ship_texture = _get_dropship_marker_texture()
+	TRANSPORT_CRAFT_CARD_UI_SCRIPT.apply_card_state(
+		panel,
+		{
+			"selected": false,
+			"in_transit": is_transit,
+			"can_stage": false,
+			"title_text": _build_mission_dropship_title_text(),
+			"ship_texture": ship_texture,
+			"pilot_profile": _build_mission_dropship_pilot_profile(),
+			"pilot_text": _build_mission_dropship_pilot_text(),
+			"pilot_source_context": "mission_drop_pilot",
+			"pilot_disabled": is_transit,
+			"info_lines": [
+				_build_mission_dropship_passenger_text(),
+				_build_mission_dropship_status_text(),
+			],
+			"progress_visible": is_transit,
+			"progress_value": _build_mission_dropship_progress_value(),
+			"primary_action": {
+				"visible": false,
+			},
+			"secondary_action": {
+				"visible": false,
+			},
+			"clear_extra_content": true,
+		}
+	)
 
 
 func _build_mission_dropship_title_text() -> String:
@@ -2127,21 +2069,6 @@ func _build_mission_dropship_progress_value() -> float:
 	return _mission_drop_progress
 
 
-func _build_mission_dropship_stylebox(is_in_transit: bool) -> StyleBoxFlat:
-	var stylebox := StyleBoxFlat.new()
-	stylebox.bg_color = Color(0.11, 0.14, 0.17, 0.72) if is_in_transit else Color(0.11, 0.14, 0.17, 1.0)
-	stylebox.border_color = Color(0.56, 0.59, 0.63, 0.82) if is_in_transit else Color(0.31, 0.36, 0.42, 1.0)
-	stylebox.border_width_left = 1
-	stylebox.border_width_top = 1
-	stylebox.border_width_right = 1
-	stylebox.border_width_bottom = 1
-	stylebox.corner_radius_top_left = 8
-	stylebox.corner_radius_top_right = 8
-	stylebox.corner_radius_bottom_left = 8
-	stylebox.corner_radius_bottom_right = 8
-	return stylebox
-
-
 func _build_mission_dropship_pilot_profile():
 	if _mission_drop_pilot_display_name.is_empty() and _mission_drop_pilot_portrait_path.is_empty():
 		return null
@@ -2160,49 +2087,6 @@ func _build_mission_dropship_pilot_profile():
 			"secondary_text": _build_mission_dropship_pilot_text(),
 		}
 	)
-
-
-func _refresh_mission_dropship_pilot_card(host: VBoxContainer, is_in_transit: bool) -> void:
-	if host == null:
-		return
-	var pilot_profile = _build_mission_dropship_pilot_profile()
-	var pilot_card = host.get_node_or_null("PilotCard")
-	var fallback_label := host.get_node_or_null("PilotLabelFallback") as Label
-	if pilot_profile != null:
-		if fallback_label != null:
-			fallback_label.visible = false
-		if pilot_card == null:
-			pilot_card = NPC_COMPACT_CARD_SCENE.instantiate()
-			pilot_card.name = "PilotCard"
-			pilot_card.custom_minimum_size = Vector2(156.0, 58.0)
-			host.add_child(pilot_card)
-		pilot_card.visible = true
-		pilot_card.call(
-			"setup_from_profile",
-			pilot_profile,
-			{
-				"source_context": "mission_drop_pilot",
-				"compact_mode": true,
-				"drag_enabled": false,
-				"disabled": is_in_transit,
-			}
-		)
-		if is_in_transit:
-			pilot_card.modulate = Color(1.0, 1.0, 1.0, 0.56)
-		else:
-			pilot_card.modulate = Color(1.0, 1.0, 1.0, 1.0)
-		return
-	if pilot_card != null:
-		pilot_card.visible = false
-	if fallback_label == null:
-		fallback_label = Label.new()
-		fallback_label.name = "PilotLabelFallback"
-		fallback_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		fallback_label.add_theme_font_size_override("font_size", 9)
-		META_UI_SKIN_SCRIPT.style_body_label(fallback_label, 9)
-		host.add_child(fallback_label)
-	fallback_label.visible = true
-	fallback_label.text = _build_mission_dropship_pilot_text()
 
 
 func _build_mission_dropship_status_text() -> String:

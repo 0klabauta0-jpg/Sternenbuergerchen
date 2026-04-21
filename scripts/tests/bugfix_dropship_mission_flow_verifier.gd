@@ -300,24 +300,46 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 	var title_label := mission_craft_card.get_node("MarginContainer/VBox/HeaderRow/TitleLabel") as Label if mission_craft_card != null else null
 	var pilot_card := mission_craft_card.get_node("MarginContainer/VBox/ContentRow/InfoVBox/PilotCardHost/PilotCard") if mission_craft_card != null and mission_craft_card.has_node("MarginContainer/VBox/ContentRow/InfoVBox/PilotCardHost/PilotCard") else null
 	var pilot_secondary_label := pilot_card.get_node("Margin/HBox/TextVBox/DataBLabel") as Label if pilot_card != null else null
-	var status_label := mission_craft_card.get_node("MarginContainer/VBox/ContentRow/InfoVBox/StatusLabel") as Label if mission_craft_card != null else null
+	var info_lines_host := mission_craft_card.get_node("MarginContainer/VBox/ContentRow/InfoVBox/InfoLinesHost") as VBoxContainer if mission_craft_card != null else null
+	var status_label := info_lines_host.get_child(1) as Label if info_lines_host != null and info_lines_host.get_child_count() > 1 else null
 	var ship_texture := mission_craft_card.get_node("MarginContainer/VBox/ContentRow/ShipTexture") as TextureRect if mission_craft_card != null else null
 	var dropship_marker := preview_mission.get_node("DropshipPlanMarker") as Node2D if preview_mission != null else null
 	var expected_drop_state: Dictionary = Dictionary(fob_screen.call("build_mission_drop_state"))
+	var shared_fob_state: Dictionary = Dictionary(fob_screen.call("_get_transport_craft_state", String(expected_drop_state.get("mission_drop_craft_id", ""))))
+	var shared_fob_card: PanelContainer = fob_screen.call("_build_transport_craft_card", shared_fob_state)
+	var shared_card_paths := [
+		"MarginContainer/VBox/HeaderRow/TitleLabel",
+		"MarginContainer/VBox/HeaderRow/PrimaryActionButton",
+		"MarginContainer/VBox/HeaderRow/SecondaryActionButton",
+		"MarginContainer/VBox/ContentRow/ShipTexture",
+		"MarginContainer/VBox/ContentRow/InfoVBox/PilotCardHost",
+		"MarginContainer/VBox/ContentRow/InfoVBox/PilotLabelFallback",
+		"MarginContainer/VBox/ContentRow/InfoVBox/InfoLinesHost",
+		"MarginContainer/VBox/ProgressBar",
+		"MarginContainer/VBox/ExtraContentHost",
+	]
 	_assert(not map_screen.visible, "Mission nav no longer renders the old Mission Link overlay screen")
 	_assert(preview_mission != null, "Mission nav keeps the preview mission host active as the visible map surface")
 	_assert(mission_craft_card != null and mission_craft_card.visible, "Preview mission shows the mini shipcard while the dropship is en route")
 	_assert(mission_craft_card != null and mission_craft_card.modulate.a < 1.0, "Mini shipcard stays greyed out during mission transit")
 	_assert(title_label != null and title_label.text == String(expected_drop_state.get("mission_drop_title_text", "")), "Mission mini shipcard reuses the FOB ship title text")
-	_assert(pilot_card != null, "Mission mini shipcard reuses the FOB-style compact pilot card layout")
+	for node_path_variant in shared_card_paths:
+		var node_path: String = String(node_path_variant)
+		_assert(shared_fob_card != null and shared_fob_card.has_node(node_path), "Shared FOB card keeps the shared transport-card node %s" % node_path)
+		_assert(mission_craft_card != null and mission_craft_card.has_node(node_path), "Mission mini shipcard reuses the shared transport-card node %s" % node_path)
+	_assert(pilot_card != null, "Mission mini shipcard reuses the shared compact pilot card layout")
 	_assert(pilot_secondary_label != null and pilot_secondary_label.text == String(expected_drop_state.get("mission_drop_pilot_text", "")), "Mission mini shipcard reuses the FOB pilot text")
 	_assert(status_label != null and status_label.text.contains("ETA mission map"), "Mini shipcard reports the live transfer status during mission transit")
 	_assert(ship_texture != null and ship_texture.texture != null and ship_texture.texture.resource_path == "res://Assets/kenney_space-kit/Side/craft_speederB.png", "Mission mini shipcard reuses the same dropship texture as the FOB shipcard")
+	_assert(not (mission_craft_card.get_node("MarginContainer/VBox/HeaderRow/PrimaryActionButton") as Button).visible, "Mission mini shipcard hides the shared primary action button")
+	_assert(not (mission_craft_card.get_node("MarginContainer/VBox/HeaderRow/SecondaryActionButton") as Button).visible, "Mission mini shipcard hides the shared secondary action button")
 	_assert(dropship_marker != null and dropship_marker.visible, "Preview mission renders the dropship marker once the craft is actually on the mission-map route")
 	_assert(mission_identity_panel != null and mission_craft_card.offset_top >= mission_identity_panel.offset_bottom, "Mini shipcard sits below the LIVE TACTICAL GRID header panel")
 	_assert(is_equal_approx(mission_craft_card.anchor_right, 1.0) and is_equal_approx(mission_craft_card.offset_right, -16.0), "Mini shipcard stays docked to the right edge of the tactical preview")
 	_assert(Array(fob_screen.call("_get_visible_transport_craft_states")).is_empty(), "FOB stops rendering the sent dropship while it is on the mission-map transfer")
 	_assert(Array(homebase_screen.call("_get_visible_homebase_aircraft_definitions")).is_empty(), "Homebase does not resurrect the sent dropship while it transfers to the mission map")
+	if shared_fob_card != null:
+		shared_fob_card.queue_free()
 
 	for _step in range(18):
 		scene.call("_on_homebase_transport_timer_timeout")
@@ -328,7 +350,8 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 	preview_mission = mission_host.get_child(0) if mission_host.get_child_count() > 0 else null
 	mission_craft_card = preview_mission.get_node("TacticalUI/MissionDropshipPanel") as PanelContainer if preview_mission != null else null
 	title_label = mission_craft_card.get_node("MarginContainer/VBox/HeaderRow/TitleLabel") as Label if mission_craft_card != null else null
-	status_label = mission_craft_card.get_node("MarginContainer/VBox/ContentRow/InfoVBox/StatusLabel") as Label if mission_craft_card != null else null
+	info_lines_host = mission_craft_card.get_node("MarginContainer/VBox/ContentRow/InfoVBox/InfoLinesHost") as VBoxContainer if mission_craft_card != null else null
+	status_label = info_lines_host.get_child(1) as Label if info_lines_host != null and info_lines_host.get_child_count() > 1 else null
 	dropship_marker = preview_mission.get_node("DropshipPlanMarker") as Node2D if preview_mission != null else null
 	expected_drop_state = Dictionary(fob_screen.call("build_mission_drop_state"))
 	_assert(mission_craft_card != null and mission_craft_card.visible and mission_craft_card.modulate.a < 1.0, "Mini shipcard stays visible once the dropship is waiting on the mission map")

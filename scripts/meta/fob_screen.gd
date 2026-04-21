@@ -6,6 +6,7 @@ const CHARACTER_SHEET_FORMATTER_SCRIPT: GDScript = preload("res://scripts/meta/c
 const CHARACTER_SHEET_VIEW_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_view.gd")
 const NPC_COMPACT_CARD_SCENE: PackedScene = preload("res://scenes/meta/components/npc_compact_card.tscn")
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
+const TRANSPORT_CRAFT_CARD_UI_SCRIPT: GDScript = preload("res://scripts/meta/transport_craft_card_ui.gd")
 const FOB_FIRETEAM_CARD_SCRIPT: GDScript = preload("res://scripts/meta/fob_fireteam_card.gd")
 const FOB_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/fob_drop_panel.gd")
 const DROPSHIP_SIDE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Side/craft_speederB.png")
@@ -2119,115 +2120,55 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 	var can_stage_fireteams: bool = _can_stage_fireteam_into_craft(craft_state)
 	var craft_card: PanelContainer = PanelContainer.new()
 	craft_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	craft_card.add_theme_stylebox_override("panel", _build_transport_craft_stylebox(is_selected, is_in_transit, can_stage_fireteams))
-	craft_card.modulate = Color(1.0, 1.0, 1.0, 0.58) if is_in_transit else Color(1.0, 1.0, 1.0, 1.0)
 	if can_stage_fireteams:
 		craft_card.set_script(FOB_DROP_PANEL_SCRIPT)
 		craft_card.drop_kind = "dropship|%s" % craft_id
 		craft_card.fireteam_dropped.connect(_on_staging_fireteam_dropped)
-
-	var margin := MarginContainer.new()
-	margin.add_theme_constant_override("margin_left", 6)
-	margin.add_theme_constant_override("margin_top", 6)
-	margin.add_theme_constant_override("margin_right", 6)
-	margin.add_theme_constant_override("margin_bottom", 6)
-	craft_card.add_child(margin)
-
-	var vbox := VBoxContainer.new()
-	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	vbox.add_theme_constant_override("separation", 4)
-	margin.add_child(vbox)
-
-	var header_row := HBoxContainer.new()
-	header_row.add_theme_constant_override("separation", 6)
-	vbox.add_child(header_row)
-
-	var title_label := Label.new()
-	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	title_label.text = _build_transport_craft_title(craft_state)
-	title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	title_label.add_theme_font_size_override("font_size", 11)
-	header_row.add_child(title_label)
-
-	var board_button := Button.new()
-	board_button.text = "Board"
-	board_button.custom_minimum_size = Vector2(52.0, 0.0)
-	board_button.add_theme_font_size_override("font_size", 8)
-	board_button.disabled = not _can_start_boarding_for_craft(craft_state)
-	if board_button.disabled:
-		META_UI_SKIN_SCRIPT.style_secondary_button(board_button)
-	else:
-		META_UI_SKIN_SCRIPT.style_transfer_button(board_button, true)
-	board_button.pressed.connect(_on_transport_craft_boarding_requested.bind(craft_id))
-	header_row.add_child(board_button)
-
-	var select_button := Button.new()
 	var is_waiting_on_mission: bool = bool(craft_state.get("mission_waiting", false))
 	var is_transit_to_mission: bool = bool(craft_state.get("mission_transit_to_map", false))
 	var is_transit_to_fob: bool = bool(craft_state.get("mission_transit_to_fob", false))
-	if is_waiting_on_mission:
-		select_button.text = "Waiting"
-	elif is_transit_to_mission:
-		select_button.text = "En Route"
-	elif is_transit_to_fob:
-		select_button.text = "Return"
-	else:
-		select_button.text = "Send"
-	select_button.custom_minimum_size = Vector2(58.0, 0.0)
-	select_button.add_theme_font_size_override("font_size", 8)
-	select_button.disabled = is_waiting_on_mission or is_transit_to_mission or is_transit_to_fob or not _can_mark_transport_craft_launch_ready(craft_state)
-	if not select_button.disabled:
-		META_UI_SKIN_SCRIPT.style_transfer_button(select_button, true)
-	else:
-		META_UI_SKIN_SCRIPT.style_secondary_button(select_button)
-	select_button.pressed.connect(_on_transport_craft_mission_stage_requested.bind(craft_id))
-	header_row.add_child(select_button)
+	var pilot_unit_id: String = String(craft_state.get("pilot_unit_id", "")).strip_edges()
+	TRANSPORT_CRAFT_CARD_UI_SCRIPT.apply_card_state(
+		craft_card,
+		{
+			"selected": is_selected,
+			"in_transit": is_in_transit,
+			"can_stage": can_stage_fireteams,
+			"title_text": _build_transport_craft_title(craft_state),
+			"ship_texture": _get_transport_craft_texture(craft_state),
+			"pilot_profile": _profiles_by_id.get(pilot_unit_id, null),
+			"pilot_text": _build_transport_craft_pilot_text(craft_state),
+			"pilot_source_context": "transport_craft_pilot",
+			"pilot_selected": pilot_unit_id == _focused_unit_id,
+			"pilot_disabled": is_in_transit,
+			"pilot_card_pressed": Callable(self, "_on_operator_card_pressed"),
+			"pilot_card_open_requested": Callable(self, "_on_operator_card_open_requested"),
+			"info_lines": [
+				_build_transport_craft_cargo_text(craft_state),
+				_build_transport_craft_status_line(craft_state),
+			],
+			"progress_visible": is_in_transit,
+			"progress_value": _build_transport_craft_progress_value(craft_state),
+			"primary_action": {
+				"visible": true,
+				"text": "Board",
+				"disabled": not _can_start_boarding_for_craft(craft_state),
+				"minimum_width": 52.0,
+				"ready_style": true,
+				"callback": Callable(self, "_on_transport_craft_boarding_requested").bind(craft_id),
+			},
+			"secondary_action": {
+				"visible": true,
+				"text": "Waiting" if is_waiting_on_mission else "En Route" if is_transit_to_mission else "Return" if is_transit_to_fob else "Send",
+				"disabled": is_waiting_on_mission or is_transit_to_mission or is_transit_to_fob or not _can_mark_transport_craft_launch_ready(craft_state),
+				"minimum_width": 58.0,
+				"ready_style": true,
+				"callback": Callable(self, "_on_transport_craft_mission_stage_requested").bind(craft_id),
+			},
+		}
+	)
 
-	var content_row := HBoxContainer.new()
-	content_row.add_theme_constant_override("separation", 8)
-	vbox.add_child(content_row)
-
-	var ship_texture := TextureRect.new()
-	ship_texture.custom_minimum_size = Vector2(88.0, 52.0)
-	ship_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	ship_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	ship_texture.texture = _get_transport_craft_texture(craft_state)
-	ship_texture.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	if ship_texture.texture != null and is_in_transit:
-		ship_texture.modulate = Color(1.0, 1.0, 1.0, 0.52)
-	content_row.add_child(ship_texture)
-
-	var info_vbox := VBoxContainer.new()
-	info_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	info_vbox.add_theme_constant_override("separation", 2)
-	content_row.add_child(info_vbox)
-	var pilot_card := _build_transport_craft_pilot_card(craft_state)
-	var pilot_line: String = ""
-	if pilot_card != null:
-		info_vbox.add_child(pilot_card)
-	else:
-		pilot_line = _build_transport_craft_pilot_text(craft_state)
-
-	for line in [
-		pilot_line,
-		_build_transport_craft_cargo_text(craft_state),
-		_build_transport_craft_status_line(craft_state),
-	]:
-		if line.strip_edges().is_empty():
-			continue
-		var info_label := Label.new()
-		info_label.text = line
-		info_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		info_label.add_theme_font_size_override("font_size", 9)
-		info_vbox.add_child(info_label)
-
-	var progress_bar := ProgressBar.new()
-	progress_bar.min_value = 0.0
-	progress_bar.max_value = 100.0
-	progress_bar.value = _build_transport_craft_progress_value(craft_state)
-	progress_bar.show_percentage = false
-	progress_bar.visible = is_in_transit
-	vbox.add_child(progress_bar)
+	var extra_content_host: VBoxContainer = TRANSPORT_CRAFT_CARD_UI_SCRIPT.get_extra_content_host(craft_card)
 
 	if is_boardable:
 		var drop_label := Label.new()
@@ -2240,7 +2181,7 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 			drop_label.text = "Drop FT here to board this ship (max 6 NPC + pilot)"
 		drop_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		drop_label.add_theme_font_size_override("font_size", 9)
-		vbox.add_child(drop_label)
+		extra_content_host.add_child(drop_label)
 		if is_selected and not _boarding_order.is_empty():
 			for fireteam_id_variant in _boarding_order:
 				var fireteam_id: String = String(fireteam_id_variant)
@@ -2248,60 +2189,9 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 				if fireteam_card == null:
 					continue
 				_render_dropship_member_rows(fireteam_card.get_member_host(), fireteam_id, _get_member_unit_ids_for_fireteam(fireteam_id))
-				vbox.add_child(fireteam_card)
+				extra_content_host.add_child(fireteam_card)
 
 	return craft_card
-
-
-func _build_transport_craft_pilot_card(craft_state: Dictionary) -> Control:
-	var pilot_unit_id: String = String(craft_state.get("pilot_unit_id", "")).strip_edges()
-	if pilot_unit_id.is_empty():
-		return null
-	var profile = _profiles_by_id.get(pilot_unit_id, null)
-	if profile == null:
-		return null
-	var is_in_transit: bool = bool(craft_state.get("is_in_transit", false))
-	var card = NPC_COMPACT_CARD_SCENE.instantiate()
-	card.setup_from_profile(
-		profile,
-		{
-			"source_context": "transport_craft_pilot",
-			"selected": pilot_unit_id == _focused_unit_id,
-			"disabled": is_in_transit,
-			"drag_enabled": false,
-			"compact_mode": true,
-		}
-	)
-	if not card.card_pressed.is_connected(_on_operator_card_pressed):
-		card.card_pressed.connect(_on_operator_card_pressed)
-	if not card.card_open_requested.is_connected(_on_operator_card_open_requested):
-		card.card_open_requested.connect(_on_operator_card_open_requested)
-	card.mouse_filter = Control.MOUSE_FILTER_PASS
-	if is_in_transit:
-		card.modulate = Color(1.0, 1.0, 1.0, 0.56)
-	return card
-
-
-func _build_transport_craft_stylebox(is_selected: bool, is_in_transit: bool, can_stage_fireteams: bool) -> StyleBoxFlat:
-	var stylebox := StyleBoxFlat.new()
-	stylebox.bg_color = Color(0.11, 0.14, 0.17, 0.72) if is_in_transit else Color(0.11, 0.14, 0.17, 1.0)
-	if is_selected:
-		stylebox.border_color = Color(0.66, 0.73, 0.80, 0.96)
-	elif is_in_transit:
-		stylebox.border_color = Color(0.56, 0.59, 0.63, 0.82)
-	elif can_stage_fireteams:
-		stylebox.border_color = Color(0.48, 0.63, 0.49, 1.0)
-	else:
-		stylebox.border_color = Color(0.31, 0.36, 0.42, 1.0)
-	stylebox.border_width_left = 1
-	stylebox.border_width_top = 1
-	stylebox.border_width_right = 1
-	stylebox.border_width_bottom = 1
-	stylebox.corner_radius_top_left = 8
-	stylebox.corner_radius_top_right = 8
-	stylebox.corner_radius_bottom_left = 8
-	stylebox.corner_radius_bottom_right = 8
-	return stylebox
 
 
 func _build_transport_craft_title(craft_state: Dictionary) -> String:
