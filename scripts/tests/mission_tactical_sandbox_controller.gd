@@ -93,6 +93,7 @@ signal planning_state_changed(planning_state)
 @export var take_button_path: NodePath
 
 var preview_mode: bool = false
+var _tactical_ui_visible: bool = true
 
 var _current_fireteam_index: int = 0
 var _current_phase_index: int = 1
@@ -1076,6 +1077,7 @@ func _get_approach_angle_name() -> String:
 
 
 func set_tactical_ui_visible(is_visible: bool) -> void:
+	_tactical_ui_visible = is_visible
 	for path in [
 		"../TacticalUI/MissionTint",
 		"../TacticalUI/MissionIdentityPanel",
@@ -1162,6 +1164,8 @@ func _update_ui() -> void:
 	_refresh_fireteam_cards()
 	if _character_overlay_open:
 		_update_character_overlay()
+	if not _tactical_ui_visible:
+		set_tactical_ui_visible(false)
 
 
 func _ensure_ad_hoc_panel() -> Control:
@@ -1961,8 +1965,8 @@ func _ensure_mission_dropship_panel() -> void:
 	panel.offset_left = -364.0
 	panel.offset_top = 100.0
 	panel.offset_right = -16.0
-	panel.offset_bottom = 186.0
-	panel.custom_minimum_size = Vector2(348.0, 86.0)
+	panel.offset_bottom = 204.0
+	panel.custom_minimum_size = Vector2(348.0, 104.0)
 	tactical_ui.add_child(panel)
 	META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "frame")
 
@@ -1981,14 +1985,14 @@ func _ensure_mission_dropship_panel() -> void:
 
 	var ship_texture := TextureRect.new()
 	ship_texture.name = "ShipTexture"
-	ship_texture.custom_minimum_size = Vector2(56.0, 36.0)
+	ship_texture.custom_minimum_size = Vector2(88.0, 52.0)
 	ship_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	ship_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	row.add_child(ship_texture)
 
 	var pilot_texture := TextureRect.new()
 	pilot_texture.name = "PilotTexture"
-	pilot_texture.custom_minimum_size = Vector2(28.0, 28.0)
+	pilot_texture.custom_minimum_size = Vector2(36.0, 36.0)
 	pilot_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	pilot_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	row.add_child(pilot_texture)
@@ -2003,8 +2007,9 @@ func _ensure_mission_dropship_panel() -> void:
 		var info_label := Label.new()
 		info_label.name = label_name
 		info_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		info_label.add_theme_font_size_override("font_size", 8 if label_name == "StatusLabel" else 9)
-		META_UI_SKIN_SCRIPT.style_body_label(info_label, 8 if label_name == "StatusLabel" else 9)
+		var font_size: int = 11 if label_name == "TitleLabel" else 9
+		info_label.add_theme_font_size_override("font_size", font_size)
+		META_UI_SKIN_SCRIPT.style_body_label(info_label, font_size)
 		info_vbox.add_child(info_label)
 
 	var progress_bar := ProgressBar.new()
@@ -2020,7 +2025,7 @@ func _refresh_mission_dropship_panel() -> void:
 	var panel := get_node_or_null("../TacticalUI/MissionDropshipPanel") as PanelContainer
 	if panel == null:
 		return
-	var show_panel: bool = not _mission_drop_craft_id.is_empty() or _is_drop_sequence_active()
+	var show_panel: bool = _tactical_ui_visible and (not _mission_drop_craft_id.is_empty() or _is_drop_sequence_active())
 	panel.visible = show_panel
 	if not show_panel:
 		return
@@ -2041,7 +2046,7 @@ func _refresh_mission_dropship_panel() -> void:
 		pilot_texture.texture = _load_portrait_texture(_mission_drop_pilot_portrait_path)
 		pilot_texture.visible = pilot_texture.texture != null
 	if title_label != null:
-		title_label.text = _mission_drop_display_name if not _mission_drop_display_name.is_empty() else "Dropship"
+		title_label.text = _build_mission_dropship_title_text()
 	if pilot_label != null:
 		pilot_label.text = "Pilot: %s" % ( _mission_drop_pilot_display_name if not _mission_drop_pilot_display_name.is_empty() else "unassigned")
 	if passenger_label != null:
@@ -2052,6 +2057,19 @@ func _refresh_mission_dropship_panel() -> void:
 	if progress_bar != null:
 		progress_bar.value = _mission_drop_progress
 		progress_bar.visible = is_transit
+
+
+func _build_mission_dropship_title_text() -> String:
+	var craft_name: String = _mission_drop_display_name if not _mission_drop_display_name.is_empty() else "Dropship"
+	match _mission_drop_state:
+		"waiting":
+			return "%s · MAP" % craft_name
+		"to_mission":
+			return "%s · HANDOVER" % craft_name
+		"to_fob":
+			return "%s · RETURN" % craft_name
+		_:
+			return craft_name
 
 
 func _build_mission_dropship_status_text() -> String:

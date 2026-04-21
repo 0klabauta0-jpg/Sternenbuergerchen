@@ -287,6 +287,20 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 	_assert(status_label != null and status_label.text.contains("Holding on mission map"), "Mini shipcard switches to waiting status after the transfer completes")
 	_assert(Array(fob_screen.call("_get_visible_transport_craft_states")).is_empty(), "FOB keeps the sent dropship hidden while it waits on the mission map")
 	_assert(Array(homebase_screen.call("_get_visible_homebase_aircraft_definitions")).is_empty(), "Homebase keeps mission-side dropships out of the flight deck while they wait on the mission map")
+
+	scene.call("_show_fob")
+	for _frame in range(2):
+		await process_frame
+	preview_mission = mission_host.get_child(0) if mission_host.get_child_count() > 0 else null
+	mission_craft_card = preview_mission.get_node("TacticalUI/MissionDropshipPanel") as PanelContainer if preview_mission != null else null
+	_assert(mission_craft_card != null and not mission_craft_card.visible, "Preview mission shipcard stays hidden while the FOB screen is active")
+
+	scene.call("_show_homebase")
+	for _frame in range(2):
+		await process_frame
+	preview_mission = mission_host.get_child(0) if mission_host.get_child_count() > 0 else null
+	mission_craft_card = preview_mission.get_node("TacticalUI/MissionDropshipPanel") as PanelContainer if preview_mission != null else null
+	_assert(mission_craft_card != null and not mission_craft_card.visible, "Preview mission shipcard stays hidden while the Homebase screen is active")
 	scene.queue_free()
 	await process_frame
 
