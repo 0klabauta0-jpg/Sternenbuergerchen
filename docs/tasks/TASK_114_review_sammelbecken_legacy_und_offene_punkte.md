@@ -53,6 +53,10 @@ Dieser Task sammelt die im tiefen Review vom 2026-04-21 verifizierten Altlasten,
   - Umfang: der asynchrone Leadership-Delay-Test in `task_111_verifier.gd` wird jetzt korrekt awaited statt einen `SceneTreeTimer`-/Coroutine-Leak bis zum Prozessende offen zu lassen; in `task_113_verifier.gd` wird der nur fuer den Signalvertrag erzeugte `EventRouter` wieder freigegeben.
   - Verifikation: `scripts/tests/task_111_verifier.gd`, `scripts/tests/task_112_verifier.gd`, `scripts/tests/task_113_verifier.gd`
 
+- [x] Verwaiste Legacy-Reste fuer den alten `meta_map_screen`-Pfad und reine Worktree-Formatdiffs sind bereinigt.
+  - Dateien: `docs/IMPLEMENTATION_STATUS.md`, `docs/tasks/TASK_096_meta_missionmap_dropship_und_charactersheet_recovery.md`, `scenes/meta/meta_map_screen.tscn`
+  - Umfang: die ungenutzte lokale Alt-Szene `meta_map_screen.tscn` ist entfernt; die Status- und Task-Doku verweist stattdessen wieder auf die echte eingebettete Missionsvorschau in `MissionHost`. Zusaetzlich wurden zwei versehentliche reine Newline-Diffs in `maps/wall_test_4x4.json` und `scripts/meta/npc_meta_card.gd` aus dem Worktree zurueckgesetzt.
+
 ## Offene Punkte
 
 ### 1. Legacy-Kompatibilitaet im Code

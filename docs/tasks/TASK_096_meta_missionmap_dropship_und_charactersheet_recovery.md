@@ -1,7 +1,7 @@
 # TASK_096 – Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 
 ## Ziel
-Die alte read-only `Mission`-/`MissionMap`-Overview soll durch die echte Missionskarte im Meta-Layer ersetzt werden. Gleichzeitig sollen mutmasslich verlorene oder unvollstaendige Meta-UI-Punkte aus Homebase, FOB, Dropship-Flow und Character Sheet gebuendelt wiederhergestellt bzw. sauber zu Ende gebaut werden.
+Die fruehere read-only `Mission`-/`MissionMap`-Overview ist inzwischen durch die echte Missionskarte im Meta-Layer ersetzt. Die verbleibenden Recovery-Punkte aus Homebase, FOB, Dropship-Flow und Character Sheet sollen hier gebuendelt sauber zu Ende gebaut werden.
 
 ## Status: OFFEN
 
@@ -21,7 +21,7 @@ Die alte read-only `Mission`-/`MissionMap`-Overview soll durch die echte Mission
 - UI bleibt Anzeige- und Staging-Schicht; Gameplay-Wahrheit bleibt ausserhalb der Meta-UI.
 
 ## Kontext
-- TASK_078 hat explizit eine read-only Map-Overview eingefuehrt; genau diese Ansicht wird inzwischen nicht mehr gewuenscht.
+- TASK_078 hatte zwischenzeitlich eine read-only Map-Overview eingefuehrt; der alte separate `meta_map_screen`-Pfad ist inzwischen wieder entfernt, und `Mission` zeigt jetzt die eingebettete echte Missionskartenvorschau.
 - `IMPLEMENTATION_STATUS.md` beschreibt mehrere spaetere Meta-Recoveries bereits als vorhanden, unter anderem leeres Flight Deck, nummerierte Fenster und ausgegraute Pilot-/Transportkarten waehrend Transfer. Der aktuelle Nutzerstand deutet darauf hin, dass mindestens Teile davon fehlen, regressiert sind oder nicht vollstaendig durchverdrahtet wurden.
 - Die eigentliche Missionskarte mit NPCs soll vor Missionsstart bereits als `Mission`-Ansicht sichtbar sein; ein separates Mission-Briefing als eigener Screen wird nicht mehr benoetigt.
 
@@ -111,8 +111,8 @@ Die alte read-only `Mission`-/`MissionMap`-Overview soll durch die echte Mission
 
 ## Betroffene Bereiche
 - `scripts/meta/meta_layer_flow.gd`
-- `scripts/meta/meta_map_screen.gd`
-- `scenes/meta/meta_map_screen.tscn`
+- `scenes/tests/mission_reactivity_test.tscn`
+- `scripts/tests/mission_tactical_sandbox_controller.gd`
 - `scripts/meta/homebase_screen.gd`
 - `scripts/meta/fob_screen.gd`
 - `scripts/meta/character_sheet_formatter.gd`
