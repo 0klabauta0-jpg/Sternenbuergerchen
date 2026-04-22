@@ -448,18 +448,6 @@ text = "Gold"
 focus_mode = 0
 text = "Target"
 
-[node name="ApproachPhaseButton" type="Button" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid"]
-focus_mode = 0
-text = "Approach"
-
-[node name="AssaultPhaseButton" type="Button" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid"]
-focus_mode = 0
-text = "Assault"
-
-[node name="HoldPhaseButton" type="Button" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid"]
-focus_mode = 0
-text = "Phase Hold"
-
 [node name="ClearTargetButton" type="Button" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid"]
 focus_mode = 0
 text = "Clear"

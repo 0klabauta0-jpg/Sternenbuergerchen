@@ -1,7 +1,7 @@
 # TASK_069 – Map-Editor: Auswahl, Save As und Workflow-Polish
 
 - Phase: 14 – Map-Editor-Workflow und Politur
-- Status: offen
+- Status: implementiert
 - Abhaengigkeiten: TASK_068c (Gitternetz-Overlay und Himmelsrichtungen)
 
 ## Ziel

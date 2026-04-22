@@ -195,6 +195,7 @@ func _test_scene_proxies_active_flank_state_to_tactical_controller() -> void:
 func _test_event_router_exposes_flank_signal_contract() -> void:
 	var event_router = EVENT_ROUTER_SCRIPT.new()
 	_assert(event_router.has_signal("flank_vulnerability_triggered"), "EventRouter exposes a flank_vulnerability_triggered signal contract")
+	event_router.free()
 
 
 func _build_behavior_profile(command_type: String) -> Dictionary:

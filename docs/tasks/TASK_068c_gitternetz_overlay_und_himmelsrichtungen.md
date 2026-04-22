@@ -1,7 +1,7 @@
 # TASK_068c – Gitternetz-Overlay und Himmelsrichtungen
 
 - Phase: 14 – Map-Editor-Workflow und Politur
-- Status: offen
+- Status: implementiert
 - Abhaengigkeiten: TASK_068b (Drag-Painting und Hover-Preview)
 
 ## Ziel

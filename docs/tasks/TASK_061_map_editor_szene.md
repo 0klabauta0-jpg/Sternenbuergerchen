@@ -1,7 +1,7 @@
 # TASK_061 – Map-Editor-Szene: Tile-Auswahl und Anzeige
 
 - Phase: 13 – Map Editor
-- Status: offen
+- Status: implementiert
 - Abhaengigkeiten: TASK_060 (Terrain-JSON)
 
 ## Ziel

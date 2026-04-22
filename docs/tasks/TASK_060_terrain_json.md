@@ -1,7 +1,7 @@
 # TASK_060 – Terrain-Daten als JSON-Datei
 
 - Phase: 13 – Map Editor
-- Status: offen
+- Status: implementiert
 - Abhaengigkeiten: TASK_054 (TerrainTileData), TASK_055 (TerrainRegistry)
 
 ## Ziel

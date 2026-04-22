@@ -1,7 +1,7 @@
 # TASK_067 – Fix Map-Editor 64x64 Flat Ground
 
 - Phase: 14 – Map-Editor-Workflow und Politur
-- Status: offen
+- Status: implementiert
 - Abhaengigkeiten: TASK_066 (Corridor-Wall Typen, Typ-Texturen und Auto-Cliff)
 
 ## Ziel

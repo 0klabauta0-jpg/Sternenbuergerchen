@@ -26,7 +26,6 @@ const DROPSHIP_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Is
 
 const FIRETEAM_NAMES: PackedStringArray = ["ALL", "BLUE", "GOLD"]
 const REAL_FIRETEAM_IDS: PackedStringArray = ["blue", "gold"]
-const LEGACY_PHASE_NAMES: PackedStringArray = ["APPROACH", "ASSAULT", "HOLD"]
 const APPROACH_ANGLES: PackedStringArray = ["NW", "NE", "SW", "SE"]
 const HOTKEY_LEGEND: String = "LMB Select | RMB Waypoint | CTRL+LMB Add | Drag Lasso | DEL Waypoint | 1 Move | 2 Hold | 3 Flank | 4 Take | Q/E Team | R/F Edit Phase | G Next Phase"
 const FRIENDLY_TEAM_ID: String = "team_alpha"
@@ -221,7 +220,6 @@ func _ready() -> void:
 	_ensure_contact_map_overlay()
 	_ensure_mission_nav_timer_label()
 	_ensure_mission_dropship_panel()
-	_hide_legacy_phase_buttons()
 	_sync_phase_selection_from_controller()
 	_initialize_fireteam_suppression_state()
 	_ensure_default_fireteam_selection()
@@ -843,27 +841,6 @@ func _select_fireteam_by_name(fireteam_name: String) -> void:
 	if next_index == -1:
 		return
 	_set_selected_fireteams(_selection_ids_for_index(next_index))
-
-
-func _select_phase_by_name(phase_name: String) -> void:
-	var normalized_name: String = phase_name.strip_edges().to_upper()
-	var next_index: int = -1
-	if normalized_name.begins_with("P"):
-		next_index = maxi(int(normalized_name.substr(1)), 1)
-	else:
-		var legacy_index: int = LEGACY_PHASE_NAMES.find(normalized_name)
-		if legacy_index != -1:
-			next_index = legacy_index + 1
-	if next_index == -1:
-		return
-	var phase_controller = _get_phase_controller()
-	if phase_controller != null and phase_controller.has_method("set_selected_phase_index"):
-		_current_phase_index = int(phase_controller.call("set_selected_phase_index", next_index))
-	else:
-		_current_phase_index = next_index
-	_refresh_order_visuals()
-	_update_ui()
-	_emit_planning_state_changed()
 
 
 func _select_approach_angle(angle_name: String) -> void:
@@ -2000,7 +1977,7 @@ func _refresh_mission_dropship_panel() -> void:
 		panel.visible = false
 		return
 	panel.visible = false
-	var is_transit: bool = _mission_drop_state == "to_mission" or _mission_drop_state == "to_fob" or _drop_sequence_phase == DROP_SEQUENCE_INBOUND or _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND
+	var is_transit: bool = _mission_drop_state == "to_mission" or _mission_drop_state == "to_fob" or _mission_drop_state == "waiting" or _drop_sequence_phase == DROP_SEQUENCE_INBOUND or _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND
 	var ship_texture := _load_optional_texture(_mission_drop_texture_path)
 	if ship_texture == null:
 		ship_texture = _get_dropship_marker_texture()
@@ -2011,27 +1988,37 @@ func _refresh_mission_dropship_panel() -> void:
 			"in_transit": is_transit,
 			"can_stage": false,
 			"title_text": _build_mission_dropship_title_text(),
-			"title_font_size": MISSION_DROPSHIP_TITLE_FONT_SIZE,
+			"title_font_size": 9,
+			"margin_left": 4,
+			"margin_top": 1,
+			"margin_right": 4,
+			"margin_bottom": 1,
+			"vbox_separation": 0,
+			"header_separation": 4,
+			"content_separation": 4,
 			"ship_texture": ship_texture,
-			"ship_texture_width": MISSION_DROPSHIP_SHIP_TEXTURE_SIZE.x,
-			"ship_texture_height": MISSION_DROPSHIP_SHIP_TEXTURE_SIZE.y,
-			"content_minimum_height": MISSION_DROPSHIP_CONTENT_HEIGHT,
+			"ship_texture_width": 64.0,
+			"ship_texture_height": 36.0,
+			"content_minimum_height": 42.0,
 			"pilot_profile": _build_mission_dropship_pilot_profile(),
 			"pilot_text": _build_mission_dropship_pilot_text(),
 			"pilot_text_font_size": MISSION_DROPSHIP_INFO_FONT_SIZE,
 			"pilot_source_context": "mission_drop_pilot",
 			"pilot_disabled": is_transit,
 			"pilot_mouse_filter": Control.MOUSE_FILTER_IGNORE,
-			"pilot_card_minimum_width": MISSION_DROPSHIP_PILOT_CARD_SIZE.x,
-			"pilot_card_minimum_height": MISSION_DROPSHIP_PILOT_CARD_SIZE.y,
+			"pilot_card_minimum_width": 128.0,
+			"pilot_card_minimum_height": 42.0,
+			"pilot_host_separation": 0,
+			"info_vbox_separation": 0,
+			"info_lines_separation": 0,
 			"info_lines": [
 				_build_mission_dropship_passenger_text(),
 				_build_mission_dropship_status_text(),
 			],
 			"info_line_font_size": MISSION_DROPSHIP_INFO_FONT_SIZE,
+			"progress_bar_height": 4.0,
 			"progress_visible": is_transit,
 			"progress_value": _build_mission_dropship_progress_value(),
-			"progress_bar_height": MISSION_DROPSHIP_PROGRESS_HEIGHT,
 			"primary_action": {
 				"visible": false,
 			},
@@ -2144,7 +2131,12 @@ func _build_mission_dropship_pilot_profile():
 		return null
 	var pilot_unit = _find_friendly_unit_by_id(_mission_drop_pilot_unit_id)
 	if pilot_unit != null:
-		return _build_profile_from_unit(pilot_unit)
+		var pilot_profile = _build_profile_from_unit(pilot_unit)
+		if pilot_profile != null and pilot_profile.has_method("duplicate_profile"):
+			var duplicated_profile = pilot_profile.duplicate_profile()
+			duplicated_profile.secondary_text = _build_mission_dropship_pilot_text()
+			return duplicated_profile
+		return pilot_profile
 	return META_UNIT_PROFILE_BUILDER_SCRIPT.build_from_identity_config(
 		{
 			"unit_id": _mission_drop_pilot_unit_id if not _mission_drop_pilot_unit_id.is_empty() else "mission_drop_pilot",
@@ -2307,10 +2299,6 @@ func _refresh_world_overlays() -> void:
 	if dropship_marker == null:
 		return
 
-	if not _has_lz_position:
-		dropship_marker.visible = false
-		return
-
 	var has_live_drop_state: bool = not _mission_drop_state.is_empty()
 	var has_live_drop_sequence: bool = not _drop_sequence_phase.is_empty()
 	if not has_live_drop_state and not has_live_drop_sequence:
@@ -2321,6 +2309,8 @@ func _refresh_world_overlays() -> void:
 	dropship_marker.visible = true
 	if has_live_drop_sequence and (_drop_sequence_phase == DROP_SEQUENCE_INBOUND or _drop_sequence_phase == DROP_SEQUENCE_LANDED or _drop_sequence_phase == DROP_SEQUENCE_UNLOADING or _drop_sequence_phase == DROP_SEQUENCE_COMPLETE or _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND):
 		dropship_marker.global_position = _drop_sequence_position
+	elif not _has_lz_position:
+		dropship_marker.global_position = _get_drop_staging_position()
 	else:
 		dropship_marker.global_position = _get_drop_staging_position()
 	if sprite != null:
@@ -2329,8 +2319,8 @@ func _refresh_world_overlays() -> void:
 	var approach_line := dropship_marker.get_node_or_null("ApproachLine") as Line2D
 	if approach_line != null:
 		approach_line.clear_points()
-		var line_delta: Vector2 = _lz_position - dropship_marker.global_position
-		if line_delta.length_squared() > 4.0:
+		var line_delta: Vector2 = _lz_position - dropship_marker.global_position if _has_lz_position else Vector2.ZERO
+		if _has_lz_position and line_delta.length_squared() > 4.0:
 			approach_line.add_point(Vector2.ZERO)
 			approach_line.add_point(line_delta)
 
@@ -3427,20 +3417,6 @@ func _sync_phase_selection_from_controller() -> void:
 	_current_phase_index = int(phase_controller.call("get_selected_phase_index"))
 
 
-func _hide_legacy_phase_buttons() -> void:
-	for path in [
-		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ApproachPhaseButton",
-		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/AssaultPhaseButton",
-		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/HoldPhaseButton",
-	]:
-		var control := get_node_or_null(path) as Control
-		if control != null:
-			control.visible = false
-		var button := get_node_or_null(path) as BaseButton
-		if button != null:
-			button.disabled = true
-
-
 func _has_pending_global_phase() -> bool:
 	var phase_controller = _get_phase_controller()
 	if phase_controller == null:
@@ -3945,6 +3921,7 @@ func _issue_waypoint_for_fireteam(fireteam_id: String, waypoint, phase_index: in
 			)
 		)
 		if bool(movement_result.get("started", false)):
+			_mirror_flow_driver_order_for_fireteam(fireteam_id, target_position, command_type, phase_index)
 			if command_type == FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_FLANK:
 				_notify_flank_initiated(fireteam_id, waypoint.target_position, target_position, behavior_profile)
 			return true
@@ -3968,6 +3945,13 @@ func _issue_waypoint_for_fireteam(fireteam_id: String, waypoint, phase_index: in
 	if issued_count > 0 and command_type == FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_FLANK:
 		_notify_flank_initiated(fireteam_id, waypoint.target_position, target_position, behavior_profile)
 	return issued_count > 0
+
+
+func _mirror_flow_driver_order_for_fireteam(fireteam_id: String, target_position: Vector2, command_type: String, phase_index: int) -> void:
+	# Keep existing flow-driver observability in sync while movement execution owns the live unit commands.
+	for driver in _get_flow_drivers_for_fireteam(fireteam_id):
+		if driver != null and driver.has_method("mirror_command_at_position"):
+			driver.call("mirror_command_at_position", target_position, command_type, phase_index)
 
 
 func _issue_ad_hoc_order_for_fireteam(fireteam_id: String, order_dict: Dictionary) -> bool:
@@ -4834,6 +4818,8 @@ func _enqueue_initial_loadout_effect_for_unit(unit_id: String) -> void:
 
 
 func _is_fireteam_runtime_active(fireteam_id: String) -> bool:
+	if preview_mode:
+		return false
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty():
 		return false

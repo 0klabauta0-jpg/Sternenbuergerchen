@@ -1,7 +1,7 @@
 # TASK_066 – Corridor-Wall Typen, Typ-Texturen und Auto-Cliff
 
 - Phase: 14 – Map-Editor-Workflow und Politur
-- Status: offen
+- Status: implementiert
 - Abhaengigkeiten: TASK_065 (Tile-Typ-Katalog und Palette)
 
 ## Ziel

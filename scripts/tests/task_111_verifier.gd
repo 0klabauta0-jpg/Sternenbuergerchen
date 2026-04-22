@@ -24,7 +24,7 @@ func _run_tests() -> void:
 	print("=== TASK_111 Fireteam Security + Overwatch Verifier ===")
 	_test_security_controller_assigns_360_sectors_for_high_leadership()
 	_test_security_controller_prefers_directional_with_low_leadership_and_aggressive_focus()
-	_test_directional_sector_shift_reacts_with_leadership_delay()
+	await _test_directional_sector_shift_reacts_with_leadership_delay()
 	_test_overwatch_triggers_on_enemy_movement_inside_watched_sector()
 	_test_overwatch_stays_disabled_under_suppression_or_movement()
 	await _test_scene_exposes_security_snapshot_for_holding_fireteams()
@@ -75,11 +75,6 @@ func _test_directional_sector_shift_reacts_with_leadership_delay() -> void:
 	var state_b: Dictionary = controller.update_fireteam_state("blue", [leader, wing], leader, _build_behavior_profile("hold_position"), {}, {}, {}, [enemy_left])
 	var angle_b: float = float(state_b.get("direction_angle", 0.0))
 	_assert(absf(angle_a - angle_b) < 0.001, "Mid-leadership fireteams keep their sector until the delayed shift matures")
-	var internal_state: Dictionary = controller.get_fireteam_state("blue")
-	# Force the pending timer to expire by patching the internal controller state through a second update delay window.
-	var pending_wait_msec: int = 0
-	if controller.has_method("get"):
-		pending_wait_msec = 0
 	await create_timer(1.3).timeout
 	var state_c: Dictionary = controller.update_fireteam_state("blue", [leader, wing], leader, _build_behavior_profile("hold_position"), {}, {}, {}, [enemy_left])
 	var angle_c: float = float(state_c.get("direction_angle", 0.0))

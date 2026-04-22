@@ -12,17 +12,6 @@ const FOB_FIRETEAM_CARD_SCRIPT: GDScript = preload("res://scripts/meta/fob_firet
 const FOB_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/fob_drop_panel.gd")
 const DROPSHIP_SIDE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Side/craft_speederB.png")
 const DROPSHIP_FOB_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
-const LEGACY_CHARACTER_OVERLAY_NODE_NAMES: PackedStringArray = [
-	"OverlayPortraitRect",
-	"OverlayNameLabel",
-	"OverlayIdentityLabel",
-	"OverlayRoleLabel",
-	"OverlayStatusLabel",
-	"OverlaySkillLabel",
-	"OverlayTraitLabel",
-	"OverlayLoadoutLabel",
-	"OverlayBioLabel",
-]
 
 signal mission_start_requested(selected_unit_ids, selected_fireteam_ids)
 signal transport_craft_mission_stage_requested(craft_id)
@@ -744,19 +733,7 @@ func _update_character_overlay() -> void:
 
 
 func _get_character_overlay_content_host() -> VBoxContainer:
-	var content_vbox := get_node("CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox") as VBoxContainer
-	for node_name in LEGACY_CHARACTER_OVERLAY_NODE_NAMES:
-		var legacy_node := content_vbox.get_node_or_null(String(node_name)) as CanvasItem
-		if legacy_node != null:
-			legacy_node.visible = false
-	var host := content_vbox.get_node_or_null("GeneratedOverlayContent") as VBoxContainer
-	if host == null:
-		host = VBoxContainer.new()
-		host.name = "GeneratedOverlayContent"
-		host.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		host.add_theme_constant_override("separation", 8)
-		content_vbox.add_child(host)
-	return host
+	return get_node("CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox/GeneratedOverlayContent") as VBoxContainer
 
 
 func _update_character_overlay_visibility() -> void:
@@ -2253,9 +2230,9 @@ func _build_transport_craft_cargo_text(craft_state: Dictionary) -> String:
 
 func _build_transport_craft_status_line(craft_state: Dictionary) -> String:
 	if bool(craft_state.get("mission_waiting", false)):
-		return "Status: holding on mission map | waiting for Drop"
+		return "Status: Holding on mission map | waiting for Drop"
 	if bool(craft_state.get("mission_transit_to_map", false)):
-		return "Status: outbound to mission map | ETA %ds" % int(craft_state.get("transfer_eta_seconds", 0))
+		return "Status: ETA mission map %ds" % int(craft_state.get("transfer_eta_seconds", 0))
 	if bool(craft_state.get("mission_transit_to_fob", false)):
 		return "Status: returning to FOB | ETA %ds" % int(craft_state.get("transfer_eta_seconds", 0))
 	if bool(craft_state.get("is_in_transit", false)):

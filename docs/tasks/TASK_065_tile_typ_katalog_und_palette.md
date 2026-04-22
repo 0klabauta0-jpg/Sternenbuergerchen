@@ -1,7 +1,7 @@
 # TASK_065 – Tile-Typ-Katalog und Palette
 
 - Phase: 14 – Map-Editor-Workflow und Politur
-- Status: offen
+- Status: implementiert
 - Abhaengigkeiten: TASK_064 (MissionTestSetup: Terrain aus JSON laden)
 
 ## Ziel

@@ -48,6 +48,20 @@ func issue_command_at_position(target_world_position: Vector2, command_type_over
 	return _issue_command_internal(command_type_override, phase_override, target_world_position)
 
 
+func mirror_command_at_position(target_world_position: Vector2, command_type_override: String = "", phase_override: int = -1) -> bool:
+	var command = COMMANDER_COMMAND_SCRIPT.new()
+	command.command_type = commander_command_type if command_type_override.is_empty() else command_type_override
+	command.priority = 10
+	command.unit_id = unit_id
+	command.team_id = team_id
+	command.target_position = target_world_position
+	command.phase = phase if phase_override < 0 else phase_override
+	if not bool(command.call("is_valid")):
+		return false
+	last_issued_order = command.call("to_dict")
+	return true
+
+
 func _issue_command_internal(command_type_override: String, phase_override: int, target_position_override) -> bool:
 	var runtime_leader = get_node_or_null(runtime_leader_path)
 	var target_marker = get_node_or_null(target_marker_path)

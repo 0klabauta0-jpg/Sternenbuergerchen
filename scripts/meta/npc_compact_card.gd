@@ -365,34 +365,35 @@ func _apply_density(
 	progress_bar: ProgressBar
 ) -> void:
 	if _compact_mode:
+		var is_mission_drop_pilot: bool = _source_context == "mission_drop_pilot"
 		var compact_width := _get_compact_required_width()
 		if custom_minimum_size.x > compact_width:
 			compact_width = custom_minimum_size.x
 		if _is_drag_preview and _drag_preview_size.x > 0.0:
 			compact_width = _drag_preview_size.x
-		var compact_height := COMPACT_CARD_MIN_SIZE.y
+		var compact_height := 46.0 if is_mission_drop_pilot else COMPACT_CARD_MIN_SIZE.y
 		if _is_drag_preview and _drag_preview_size.y > compact_height:
 			compact_height = _drag_preview_size.y
 		if _show_progress:
 			compact_height = maxf(compact_height, 68.0)
 		custom_minimum_size = Vector2(compact_width, compact_height)
-		margin.add_theme_constant_override("margin_left", 4)
-		margin.add_theme_constant_override("margin_top", 4)
-		margin.add_theme_constant_override("margin_right", 4)
-		margin.add_theme_constant_override("margin_bottom", 4)
-		hbox.add_theme_constant_override("separation", 6)
-		text_vbox.add_theme_constant_override("separation", 1)
-		portrait_rect.custom_minimum_size = Vector2(COMPACT_PORTRAIT_SIZE, COMPACT_PORTRAIT_SIZE)
-		var compact_text_width := COMPACT_TEXT_MIN_WIDTH
+		margin.add_theme_constant_override("margin_left", 2 if is_mission_drop_pilot else 4)
+		margin.add_theme_constant_override("margin_top", 2 if is_mission_drop_pilot else 4)
+		margin.add_theme_constant_override("margin_right", 2 if is_mission_drop_pilot else 4)
+		margin.add_theme_constant_override("margin_bottom", 2 if is_mission_drop_pilot else 4)
+		hbox.add_theme_constant_override("separation", 4 if is_mission_drop_pilot else 6)
+		text_vbox.add_theme_constant_override("separation", 0 if is_mission_drop_pilot else 1)
+		portrait_rect.custom_minimum_size = Vector2(30.0, 30.0) if is_mission_drop_pilot else Vector2(COMPACT_PORTRAIT_SIZE, COMPACT_PORTRAIT_SIZE)
+		var compact_text_width := 76.0 if is_mission_drop_pilot else COMPACT_TEXT_MIN_WIDTH
 		if _drag_preview_text_width > compact_text_width:
 			compact_text_width = _drag_preview_text_width
 		text_vbox.custom_minimum_size = Vector2(compact_text_width, 0.0)
-		name_label.custom_minimum_size = Vector2(0.0, 14.0)
-		data_a_label.custom_minimum_size = Vector2(0.0, 12.0)
-		data_b_label.custom_minimum_size = Vector2(0.0, 12.0)
-		name_label.add_theme_font_size_override("font_size", 12)
-		data_a_label.add_theme_font_size_override("font_size", 10)
-		data_b_label.add_theme_font_size_override("font_size", 10)
+		name_label.custom_minimum_size = Vector2(0.0, 12.0 if is_mission_drop_pilot else 14.0)
+		data_a_label.custom_minimum_size = Vector2(0.0, 10.0 if is_mission_drop_pilot else 12.0)
+		data_b_label.custom_minimum_size = Vector2(0.0, 10.0 if is_mission_drop_pilot else 12.0)
+		name_label.add_theme_font_size_override("font_size", 10 if is_mission_drop_pilot else 12)
+		data_a_label.add_theme_font_size_override("font_size", 8 if is_mission_drop_pilot else 10)
+		data_b_label.add_theme_font_size_override("font_size", 8 if is_mission_drop_pilot else 10)
 		progress_bar.custom_minimum_size = Vector2(0.0, 8.0)
 		return
 

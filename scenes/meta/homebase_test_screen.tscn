@@ -424,57 +424,7 @@ text = "Close"
 layout_mode = 2
 visible = false
 
-[node name="PortraitRect" type="TextureRect" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox" unique_id=2029876862]
+[node name="GeneratedSheetContent" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 176)
 size_flags_horizontal = 3
-stretch_mode = 5
-expand_mode = 1
-
-[node name="SheetNameLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox" unique_id=108048481]
-layout_mode = 2
-text = "No operator selected"
-autowrap_mode = 3
-theme_override_font_sizes/font_size = 14
-
-[node name="SheetIdentityLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox" unique_id=1112285583]
-layout_mode = 2
-text = "Select an operator from the left roster to inspect the full character sheet."
-autowrap_mode = 3
-theme_override_font_sizes/font_size = 11
-
-[node name="SheetRoleLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox" unique_id=1849222890]
-layout_mode = 2
-text = "Role: unavailable"
-autowrap_mode = 3
-theme_override_font_sizes/font_size = 11
-
-[node name="SheetStatusLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox" unique_id=427182804]
-layout_mode = 2
-text = "Status: waiting for selection"
-autowrap_mode = 3
-theme_override_font_sizes/font_size = 11
-
-[node name="SheetSkillLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox" unique_id=1375835574]
-layout_mode = 2
-text = "Skills: unavailable"
-autowrap_mode = 3
-theme_override_font_sizes/font_size = 11
-
-[node name="SheetTraitLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox" unique_id=841677537]
-layout_mode = 2
-text = "Traits: unavailable"
-autowrap_mode = 3
-theme_override_font_sizes/font_size = 11
-
-[node name="SheetLoadoutLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox" unique_id=1846668100]
-layout_mode = 2
-text = "Loadout: unavailable"
-autowrap_mode = 3
-theme_override_font_sizes/font_size = 11
-
-[node name="SheetBioLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox" unique_id=179343847]
-layout_mode = 2
-text = "Bio: unavailable"
-autowrap_mode = 3
-theme_override_font_sizes/font_size = 11
+theme_override_constants/separation = 8

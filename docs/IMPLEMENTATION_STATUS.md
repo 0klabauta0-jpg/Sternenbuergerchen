@@ -92,37 +92,6 @@
 - Naechster Schritt: den Batch abschliessen und erst im naechsten Batch sichtbare Reaktion oder Missionsszenen ergaenzen.
 
 
-### TASK_020 – UnitCommand Stub (fruehe Version)
-> Hinweis: Duplikat der TASK_020-Sektion oberhalb; enthaelt die urspruengliche Zusammenfassung.
-- Status: implementiert
-- Stand: ein minimaler `UnitCommand`-Stub wurde als leichtgewichtiges Datenmodell eingefuehrt; dient als kleine formale Grundlage fuer spaetere Unit-bezogene Runtime-Kommandos ohne echte Ausfuehrungslogik.
-- Offene Punkte: keine echte Unit-Ausfuehrung, keine Bewegung, keine Kampf- oder Missionslogik.
-- Risiken: Das Modell ist bewusst klein; spaetere Erweiterungen muessen kompatibel zur bestehenden Daten- und Runtime-Struktur bleiben.
-- Naechster Schritt: spaeter an Runtime-Status und minimale Simulationspfade anbinden.
-
-### TASK_021 – TestUnit Runtime Status (fruehe Version)
-> Hinweis: Duplikat der TASK_021-Sektion oberhalb; enthaelt die urspruengliche Zusammenfassung.
-- Status: implementiert
-- Stand: fuer `TestUnit` existiert ein minimales Runtime-Statusmodell mit einfachen Zustandswerten wie `idle`, `assigned`, `pending_move` und `holding`.
-- Offene Punkte: keine echte Bewegungslogik, keine KI, keine Kampfzustandslogik.
-- Risiken: Der Status ist rein vorbereitend; spaetere Runtime-Uebergaenge muessen weiter ueber SimulationRoot und klar definierte Datenpfade laufen.
-- Naechster Schritt: an einfache sichtbare Reaktionen und minimale Move-Tests anbinden.
-
-### TASK_022 – FTLTask to Unit Assignment (fruehe Version)
-> Hinweis: Duplikat der TASK_022-Sektion oberhalb; enthaelt die urspruengliche Zusammenfassung.
-- Status: implementiert
-- Stand: ein minimaler Datenfluss wurde ergaenzt, ueber den ein `FTLTask` einer `TestUnit` zugeordnet werden kann; dient nur als Referenz- und Integrationsnachweis.
-- Offene Punkte: keine echte Task-Ausfuehrung, keine Taktiklogik, keine Bewegungs- oder Aktionsverarbeitung.
-- Risiken: Die Zuordnung ist aktuell bewusst leichtgewichtig; spaetere Erweiterungen muessen die Trennung zwischen Datenfluss, RuntimeLeader und SimulationRoot erhalten.
-- Naechster Schritt: in eine minimale sichtbare Missionsreaktion ueberfuehren.
-
-### TASK_023 – Multiple Units per FTL (fruehe Version)
-> Hinweis: Duplikat der TASK_023-Sektion oberhalb; enthaelt die urspruengliche Zusammenfassung.
-- Status: implementiert
-- Stand: der grundlegende Datenfluss fuer mehrere `TestUnit`-Instanzen unter einem FTL / Team wurde hergestellt; mehrere Units koennen demselben FTL-Kontext zugeordnet werden.
-- Offene Punkte: keine Formation, keine echte Untereinheitensteuerung, keine taktische Verteilung.
-- Risiken: Bisher nur Integrations- und Strukturbeweis; spaetere Gruppenlogik darf nicht still in Registries oder RuntimeLeader versteckt werden.
-- Naechster Schritt: mehrere Units in einer minimalen Missions-Testszene sichtbar reagieren lassen.
 
 ### TASK_024 – minimale Missions-Testszene
 - Status: implementiert
@@ -515,6 +484,41 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: die Oberflaechenwirkung bleibt bewusst ein einfacher Bewegungs- und Kostenmodifikator; spaetere Systeme fuer Wetter, Fahrzeuge oder Spezialeinheiten sollten diese Daten explizit erweitern statt neue, parallele Terrain-Kategorien einzufuehren.
 - Naechster Schritt: den Terrain-Slice lokal stabil halten und erst danach den spaeteren Multiplayer-Block gemaess Roadmap angehen.
 
+
+### TASK_060 - Terrain-Daten als JSON-Datei
+- Status: implementiert
+- Stand: `TerrainMapData` unter `res://scripts/terrain/terrain_map_data.gd` laedt und speichert Terrainkarten unter `res://maps/` als JSON-Root mit `map_name`, `grid_size`, `tile_size`, `grid_origin` und serialisierten Tile-Eintraegen. Beim Laden werden die JSON-Daten in `TerrainTileData`-Instanzen ueberfuehrt; mit `create_empty(...)` existiert zusaetzlich ein kontrollierter Default-Pfad fuer neue Karten.
+- Offene Punkte: keine separate Schema-Versionierung oder Migrationslogik fuer aeltere Kartenformate.
+- Risiken: `TerrainMapData` ist inzwischen gemeinsamer Datenvertrag fuer Editor, Mission und Meta-Map; spaetere JSON-Erweiterungen duerfen deshalb keine stillen Breaking Changes fuer bestehende Karten einfuehren.
+- Naechster Schritt: den JSON-Vertrag kontrolliert im Editor und in `MissionTestSetup` konsumieren.
+
+### TASK_061 - Map-Editor-Szene: Tile-Auswahl und Anzeige
+- Status: implementiert
+- Stand: `res://scenes/editor/map_editor.tscn` plus `res://scripts/editor/map_editor.gd` bilden eine eigenstaendige Editor-Szene mit Kartenaufbau aus `TerrainMapData`, `Camera2D`-basierter Pan-/Zoom-Steuerung, Tile-Auswahl per Klick, visueller Outline sowie seitlichem Property- und Palette-Panel.
+- Offene Punkte: keine separate read-only-Ansicht; spaetere Workflow- und Palette-Erweiterungen laufen in den Folgetasks.
+- Risiken: die Szene bleibt bewusst editorlokal; Auswahl- und Anzeigezustand duerfen nicht in Runtime- oder Missionspfade auslaufen.
+- Naechster Schritt: editierbare Tile-Properties auf denselben lokalen Map-Zustand legen.
+
+### TASK_062 - Map-Editor: Tile-Properties bearbeiten
+- Status: implementiert
+- Stand: Das Property-Panel kann die Terrain-Eigenschaften des selektierten Tiles lokal auf `TerrainMapData` anwenden und die Visualisierung sofort aktualisieren; dazu gehoeren `walkable`, `blocks_los`, `cover_value`, `height_level`, `surface_type` und spaeter erweitert auch `edge_type`. Ein kleiner Undo-Pfad fuer den zuletzt gesicherten Tile-Zustand ist vorhanden.
+- Offene Punkte: kein ausgebauter Mehrschritt-Undo-Stack und keine grossen Massenoperationen jenseits spaeterer Brush-/Selection-Erweiterungen.
+- Risiken: Property-Patches bleiben bewusst editorlokal; spaetere Runtime-Regeln muessen weiterhin aus den serialisierten Tile-Daten statt aus UI-Zustand abgeleitet werden.
+- Naechster Schritt: Speichern/Laden und New-Workflow auf denselben lokalen Zustand aufsetzen.
+
+### TASK_063 - Map-Editor: Speichern und Laden
+- Status: implementiert
+- Stand: Der Editor kann Karten ueber `TerrainMapData.save_to_file()` speichern, ueber FileDialogs laden, neue Karten erzeugen und einen Dirty-Status im Titel fuehren; `Save`, `Load` und `New` sind an die bestehende Editor-UI angebunden, inklusive Warn-Dialog bei ungesicherten Aenderungen. Spaetere Workflow-Politur hat diesen Pfad um `Save As` und frei waehlbare Kartengroessen erweitert.
+- Offene Punkte: keine Versionsverwaltung oder komplexe Dateibrowser-Logik ueber den lokalen Ressourcenpfad hinaus.
+- Risiken: der Dateipfad bleibt bewusst editorgetrieben; spaetere Tooling- oder Import-Pipelines sollten denselben `TerrainMapData`-Vertrag nutzen statt parallele Speicherrouten einzufuehren.
+- Naechster Schritt: `MissionTestSetup` kontrolliert auf denselben JSON-Load-Pfad umstellen.
+
+### TASK_064 - MissionTestSetup: Terrain aus JSON laden
+- Status: implementiert
+- Stand: `MissionTestSetup` nutzt `map_file_path`, laedt Terrain ueber `TerrainMapData.load_from_file(...)`, konfiguriert die `TerrainRegistry` aus JSON-Metadaten und registriert alle Tiles aus der Karte. Wenn keine gueltige Datei vorliegt, bleibt der Hardcode-Pfad als Fallback aktiv; sichtbares Kartenrendering und Marker-Spiegelung greifen auf denselben geladenen Map-Zustand zu.
+- Offene Punkte: der Hardcode-Fallback bleibt nur fuer Alt- oder Fehlerszenarien erhalten und sollte nicht wieder zum primaeren Kartenpfad werden.
+- Risiken: solange Fallback und JSON-Pfad parallel existieren, muessen Terrain-Aenderungen bewusst im JSON-Vertrag landen, damit Editor und Mission nicht erneut auseinanderdriften.
+- Naechster Schritt: darauf die Editor-Workflow-Slices und den spaeteren gemeinsamen Terrain-Renderer aufbauen.
 
 ### TASK_065 - Tile-Typ-Katalog und Palette
 - Status: implementiert

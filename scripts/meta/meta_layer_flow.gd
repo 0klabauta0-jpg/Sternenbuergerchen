@@ -736,6 +736,7 @@ func _refresh_homebase_screen() -> void:
 		_loaded_aircraft_cargo_by_craft,
 		_pending_homebase_cargo_loads
 	)
+	homebase_screen.set_mission_occupancy(_selected_unit_ids.size() + _count_assigned_aircraft_pilots(), _count_assigned_aircraft_pilots())
 	var fob_screen = _get_fob_screen()
 	if fob_screen != null and fob_screen.has_method("can_request_mission_start"):
 		homebase_screen.set_mission_launch_state(
@@ -902,8 +903,14 @@ func _build_transport_craft_states() -> Array:
 			craft_location = "mission" if mission_phase == "to_mission" else "fob"
 		elif craft_location == "mission":
 			mission_phase = "waiting"
-		elif craft_location != "fob":
+		elif craft_location != "fob" and craft_location != "transit":
 			craft_location = "homebase"
+
+		var passenger_count: int = 0
+		if mission_phase == "to_mission" or mission_phase == "waiting":
+			passenger_count = Array(_mission_planning_state.get("embarked_unit_ids", [])).size()
+		elif mission_phase == "to_fob":
+			passenger_count = int(_mission_planning_state.get("mission_drop_passenger_count", 0))
 
 		var progress_value: float = 0.0
 		var eta_seconds: int = 0
@@ -936,6 +943,7 @@ func _build_transport_craft_states() -> Array:
 				"pilot_portrait_path": _resolve_unit_portrait_path(pilot_unit_id),
 				"cargo_id": cargo_id,
 				"cargo_display_name": _build_homebase_cargo_display_name(craft_def, cargo_id),
+				"passenger_count": passenger_count,
 				"transfer_progress": progress_value,
 				"transfer_eta_seconds": eta_seconds,
 				"is_boardable": String(craft_def.get("craft_type", "dropship")).strip_edges() == "dropship" and craft_location == "fob" and mission_phase.is_empty(),
@@ -967,6 +975,16 @@ func _resolve_unit_display_name(unit_id: String) -> String:
 			continue
 		return String(unit_data.get("display_name", unit_id)).strip_edges()
 	return unit_id
+
+
+func _count_assigned_aircraft_pilots() -> int:
+	var unique_pilot_ids: Dictionary = {}
+	for pilot_id_variant in _assigned_aircraft_pilot_by_craft.values():
+		var pilot_id: String = String(pilot_id_variant).strip_edges()
+		if pilot_id.is_empty():
+			continue
+		unique_pilot_ids[pilot_id] = true
+	return unique_pilot_ids.size()
 
 
 func _resolve_unit_portrait_path(unit_id: String) -> String:
@@ -1508,12 +1526,20 @@ func _is_mission_host_visible_for_current_view() -> bool:
 
 
 func _refresh_preview_mission_lifecycle() -> void:
-	if _active_mission == null and _current_meta_view == "map":
+	if _active_mission == null and (_current_meta_view == "map" or _should_keep_preview_mission_loaded()):
 		_ensure_preview_mission()
 		if _preview_mission != null:
 			_apply_planning_state_to_mission(_preview_mission)
 		return
 	_release_preview_mission()
+
+
+func _should_keep_preview_mission_loaded() -> bool:
+	if _active_mission != null:
+		return false
+	if _current_meta_view == "map":
+		return true
+	return not String(_mission_planning_state.get("mission_drop_craft_id", "")).strip_edges().is_empty()
 
 
 func _sync_mission_host_visibility() -> void:

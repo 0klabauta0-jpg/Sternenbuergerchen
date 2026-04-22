@@ -1,7 +1,7 @@
 # TASK_064 – MissionTestSetup: Terrain aus JSON laden
 
 - Phase: 13 – Map Editor
-- Status: offen
+- Status: implementiert
 - Abhaengigkeiten: TASK_060 (Terrain-JSON), TASK_063 (Speichern)
 
 ## Ziel

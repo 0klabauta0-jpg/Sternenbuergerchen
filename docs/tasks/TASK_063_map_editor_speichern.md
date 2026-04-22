@@ -1,7 +1,7 @@
 # TASK_063 – Map-Editor: Speichern und Laden
 
 - Phase: 13 – Map Editor
-- Status: offen
+- Status: implementiert
 - Abhaengigkeiten: TASK_062 (Property-Editing)
 
 ## Ziel

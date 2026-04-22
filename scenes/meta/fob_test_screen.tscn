@@ -636,57 +636,7 @@ theme_override_constants/separation = 6
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="OverlayPortraitRect" type="TextureRect" parent="CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox"]
+[node name="GeneratedOverlayContent" type="VBoxContainer" parent="CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 196)
 size_flags_horizontal = 3
-stretch_mode = 5
-expand_mode = 1
-
-[node name="OverlayNameLabel" type="Label" parent="CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox"]
-layout_mode = 2
-text = "No operator selected"
-autowrap_mode = 3
-theme_override_font_sizes/font_size = 15
-
-[node name="OverlayIdentityLabel" type="Label" parent="CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox"]
-layout_mode = 2
-text = "No profile loaded"
-autowrap_mode = 3
-theme_override_font_sizes/font_size = 11
-
-[node name="OverlayRoleLabel" type="Label" parent="CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox"]
-layout_mode = 2
-text = "Role: unavailable"
-autowrap_mode = 3
-theme_override_font_sizes/font_size = 11
-
-[node name="OverlayStatusLabel" type="Label" parent="CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox"]
-layout_mode = 2
-text = "Status: waiting for selection"
-autowrap_mode = 3
-theme_override_font_sizes/font_size = 11
-
-[node name="OverlaySkillLabel" type="Label" parent="CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox"]
-layout_mode = 2
-text = "Skills: unavailable"
-autowrap_mode = 3
-theme_override_font_sizes/font_size = 11
-
-[node name="OverlayTraitLabel" type="Label" parent="CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox"]
-layout_mode = 2
-text = "Traits: unavailable"
-autowrap_mode = 3
-theme_override_font_sizes/font_size = 11
-
-[node name="OverlayLoadoutLabel" type="Label" parent="CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox"]
-layout_mode = 2
-text = "Loadout: unavailable"
-autowrap_mode = 3
-theme_override_font_sizes/font_size = 11
-
-[node name="OverlayBioLabel" type="Label" parent="CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox"]
-layout_mode = 2
-text = "Bio: unavailable"
-autowrap_mode = 3
-theme_override_font_sizes/font_size = 11
+theme_override_constants/separation = 8

@@ -10,17 +10,6 @@ const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.g
 const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_labels.gd")
 const HOMEBASE_TEAM_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/homebase_team_drop_panel.gd")
 const DROPSHIP_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Side/craft_speederB.png")
-const LEGACY_CHARACTER_SHEET_NODE_NAMES: PackedStringArray = [
-	"PortraitRect",
-	"SheetNameLabel",
-	"SheetIdentityLabel",
-	"SheetRoleLabel",
-	"SheetStatusLabel",
-	"SheetSkillLabel",
-	"SheetTraitLabel",
-	"SheetLoadoutLabel",
-	"SheetBioLabel",
-]
 
 signal selection_changed(selected_unit_ids)
 signal team_confirmed(selected_unit_ids)
@@ -51,6 +40,8 @@ var _selected_mission_name: String = "Operation: FOB Transfer"
 var _selected_mission_slot_count: int = 3
 var _mission_launch_ready: bool = false
 var _mission_launch_summary: String = ""
+var _mission_slot_usage_override: int = -1
+var _mission_pilot_count_override: int = -1
 var _aircraft_definitions: Array = []
 var _assigned_pilot_by_craft: Dictionary = {}
 var _aircraft_location_by_craft: Dictionary = {}
@@ -131,6 +122,13 @@ func set_mission_context(mission_catalog: Array, selected_map_path: String, miss
 	_selected_mission_map_path = selected_map_path.strip_edges() if not selected_map_path.strip_edges().is_empty() else _selected_mission_map_path
 	_selected_mission_name = mission_name.strip_edges() if not mission_name.strip_edges().is_empty() else _selected_mission_name
 	_selected_mission_slot_count = maxi(mission_slot_count, 1)
+	if is_inside_tree():
+		_update_mission_info()
+
+
+func set_mission_occupancy(slot_usage_count: int, pilot_count: int = -1) -> void:
+	_mission_slot_usage_override = maxi(slot_usage_count, 0)
+	_mission_pilot_count_override = pilot_count
 	if is_inside_tree():
 		_update_mission_info()
 
@@ -345,8 +343,8 @@ func _update_mission_info() -> void:
 	_populate_mission_selector(mission_selector)
 	var team_capacity: int = _get_team_capacity()
 	var staged_count: int = _selected_unit_ids.size()
-	var pilot_count: int = _count_assigned_pilots()
-	var mission_slot_usage: int = staged_count + pilot_count
+	var pilot_count: int = _mission_pilot_count_override if _mission_pilot_count_override >= 0 else _count_assigned_pilots()
+	var mission_slot_usage: int = _mission_slot_usage_override if _mission_slot_usage_override >= 0 else staged_count + pilot_count
 	start_mission_button.disabled = not _mission_launch_ready
 	start_mission_button.text = "Start"
 	META_UI_SKIN_SCRIPT.style_transfer_button(start_mission_button, _mission_launch_ready)
@@ -354,7 +352,7 @@ func _update_mission_info() -> void:
 	mission_team_limit_label.text = "Mission slots: %d / %d" % [mini(mission_slot_usage, _selected_mission_slot_count), _selected_mission_slot_count]
 	var launch_text: String = _mission_launch_summary if not _mission_launch_summary.is_empty() else ("Dropship ready for launch" if _mission_launch_ready else "Dropship not launch-ready")
 	mission_transfer_label.text = "Map: %s | Transfer: %s | Pilots: %d | %s" % [_build_selected_mission_map_label(), _build_transfer_status_text(staged_count, team_capacity), pilot_count, launch_text]
-	mission_summary_label.text = _build_mission_summary_text(staged_count, team_capacity, pilot_count)
+	mission_summary_label.text = _build_mission_summary_text(staged_count, team_capacity, pilot_count, mission_slot_usage)
 	if not _mission_launch_summary.is_empty():
 		mission_summary_label.text = "%s\n%s" % [mission_summary_label.text, _mission_launch_summary]
 
@@ -445,19 +443,7 @@ func _update_character_sheet() -> void:
 
 
 func _get_character_sheet_content_host() -> VBoxContainer:
-	var info_vbox := get_node("Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox") as VBoxContainer
-	for node_name in LEGACY_CHARACTER_SHEET_NODE_NAMES:
-		var legacy_node := info_vbox.get_node_or_null(String(node_name)) as CanvasItem
-		if legacy_node != null:
-			legacy_node.visible = false
-	var host := info_vbox.get_node_or_null("GeneratedSheetContent") as VBoxContainer
-	if host == null:
-		host = VBoxContainer.new()
-		host.name = "GeneratedSheetContent"
-		host.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		host.add_theme_constant_override("separation", 8)
-		info_vbox.add_child(host)
-	return host
+	return get_node("Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/GeneratedSheetContent") as VBoxContainer
 
 
 func _on_compact_card_pressed(unit_id: String, _profile, _source_context: String) -> void:
@@ -849,8 +835,9 @@ func _build_transfer_status_text(staged_count: int, team_capacity: int) -> Strin
 	return "%d of %d operators staged" % [staged_count, team_capacity]
 
 
-func _build_mission_summary_text(staged_count: int, team_capacity: int, pilot_count: int) -> String:
-	var mission_slot_usage: int = staged_count + pilot_count
+func _build_mission_summary_text(staged_count: int, team_capacity: int, pilot_count: int, mission_slot_usage: int = -1) -> String:
+	if mission_slot_usage < 0:
+		mission_slot_usage = staged_count + pilot_count
 	if not _team_transfer_entries.is_empty() or not _pilot_transfer_entries.is_empty() or not _cargo_load_entries.is_empty():
 		return "%s on %s is active. Mission occupancy is currently %d / %d including pilots, and confirmed transfers stay visible in Homebase until arrival." % [_selected_mission_name, _build_selected_mission_map_label(), mini(mission_slot_usage, _selected_mission_slot_count), _selected_mission_slot_count]
 

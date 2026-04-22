@@ -72,14 +72,6 @@ static func apply_homebase(screen: Control) -> void:
 		"Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftAssignmentFrame/AircraftAssignmentMargin/AircraftAssignmentRow/AircraftPilotVBox/AircraftPilotHeaderLabel",
 		"Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftAssignmentFrame/AircraftAssignmentMargin/AircraftAssignmentRow/AircraftPilotVBox/AircraftPilotDropPanel/AircraftPilotDropMargin/AircraftPilotDropVBox/AircraftPilotHelpLabel",
 		"Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftTransfersHeaderLabel",
-		"Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/SheetNameLabel",
-		"Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/SheetIdentityLabel",
-		"Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/SheetRoleLabel",
-		"Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/SheetStatusLabel",
-		"Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/SheetSkillLabel",
-		"Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/SheetTraitLabel",
-		"Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/SheetLoadoutLabel",
-		"Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/SheetBioLabel",
 	]:
 		_apply_label_style(screen.get_node_or_null(path), "body")
 
@@ -146,14 +138,6 @@ static func apply_fob(screen: Control) -> void:
 		"Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipTopRow/DropshipInfoVBox/BoardingQueueLabel",
 		"Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipTopRow/DropshipVisualVBox/DropshipArrivalLabel",
 		"Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipHelpLabel",
-		"CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox/OverlayNameLabel",
-		"CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox/OverlayIdentityLabel",
-		"CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox/OverlayRoleLabel",
-		"CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox/OverlayStatusLabel",
-		"CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox/OverlaySkillLabel",
-		"CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox/OverlayTraitLabel",
-		"CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox/OverlayLoadoutLabel",
-		"CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox/OverlayBioLabel",
 	]:
 		_apply_label_style(screen.get_node_or_null(path), "body")
 

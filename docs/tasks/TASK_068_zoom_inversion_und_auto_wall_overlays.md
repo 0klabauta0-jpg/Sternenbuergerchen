@@ -1,7 +1,7 @@
 # TASK_068 – Zoom-Inversion und Auto-Wall-Overlays
 
 - Phase: 14 – Map-Editor-Workflow und Politur
-- Status: offen
+- Status: implementiert
 - Abhaengigkeiten: TASK_067 (Fix Map-Editor 64x64 Flat Ground)
 
 ## Ziel

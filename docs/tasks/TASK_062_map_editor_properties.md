@@ -1,7 +1,7 @@
 # TASK_062 – Map-Editor: Tile-Properties bearbeiten
 
 - Phase: 13 – Map Editor
-- Status: offen
+- Status: implementiert
 - Abhaengigkeiten: TASK_061 (Editor-Szene)
 
 ## Ziel

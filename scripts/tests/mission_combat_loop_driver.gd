@@ -1690,7 +1690,7 @@ func _get_duration_seconds() -> float:
 
 
 func get_remaining_time_limit_seconds() -> float:
-	if mission_time_limit_seconds <= 0.0 or _mission_started_at_msec <= 0:
+	if mission_time_limit_seconds <= 0.0 or _mission_started_at_msec == 0:
 		return -1.0
 	return maxf(mission_time_limit_seconds - _get_duration_seconds(), 0.0)
 

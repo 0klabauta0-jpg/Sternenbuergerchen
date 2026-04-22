@@ -1,7 +1,7 @@
 # TASK_082 – Gemeinsamer Terrain-Renderer fuer Editor und Mission
 
 - Phase: 16 – Charakterbogen-Kampfwirkung
-- Status: offen
+- Status: implementiert
 - Abhaengigkeiten: TASK_064 (MissionTestSetup: Terrain aus JSON laden), TASK_069 (Map-Editor: Auswahl, Save As und Workflow-Polish), TASK_078 (Meta-Layer: Navigation und Map-Ansicht)
 
 ## Ziel

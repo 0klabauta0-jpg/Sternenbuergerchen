@@ -115,11 +115,30 @@ static func apply_card_state(card: PanelContainer, state: Dictionary) -> void:
 	title_label.add_theme_font_size_override("font_size", title_font_size)
 	META_UI_SKIN_SCRIPT.style_body_label(title_label, title_font_size)
 
+	var margin := card.get_node("MarginContainer") as MarginContainer
+	margin.add_theme_constant_override("margin_left", int(state.get("margin_left", 6)))
+	margin.add_theme_constant_override("margin_top", int(state.get("margin_top", 6)))
+	margin.add_theme_constant_override("margin_right", int(state.get("margin_right", 6)))
+	margin.add_theme_constant_override("margin_bottom", int(state.get("margin_bottom", 6)))
+
+	var vbox := card.get_node("MarginContainer/VBox") as VBoxContainer
+	vbox.add_theme_constant_override("separation", int(state.get("vbox_separation", 4)))
+
+	var header_row := card.get_node("MarginContainer/VBox/HeaderRow") as HBoxContainer
+	header_row.add_theme_constant_override("separation", int(state.get("header_separation", 6)))
+
 	_apply_action_button(card.get_node("MarginContainer/VBox/HeaderRow/PrimaryActionButton") as Button, Dictionary(state.get("primary_action", {})))
 	_apply_action_button(card.get_node("MarginContainer/VBox/HeaderRow/SecondaryActionButton") as Button, Dictionary(state.get("secondary_action", {})))
 
 	var content_row := card.get_node("MarginContainer/VBox/ContentRow") as HBoxContainer
 	content_row.custom_minimum_size = Vector2(0.0, float(state.get("content_minimum_height", 58.0)))
+	content_row.add_theme_constant_override("separation", int(state.get("content_separation", 8)))
+
+	var info_vbox := card.get_node("MarginContainer/VBox/ContentRow/InfoVBox") as VBoxContainer
+	info_vbox.add_theme_constant_override("separation", int(state.get("info_vbox_separation", 2)))
+
+	var info_lines_host := card.get_node("MarginContainer/VBox/ContentRow/InfoVBox/InfoLinesHost") as VBoxContainer
+	info_lines_host.add_theme_constant_override("separation", int(state.get("info_lines_separation", 2)))
 
 	var ship_texture := card.get_node("MarginContainer/VBox/ContentRow/ShipTexture") as TextureRect
 	ship_texture.texture = state.get("ship_texture", null) as Texture2D
@@ -179,6 +198,7 @@ static func _refresh_pilot_content(card: PanelContainer, state: Dictionary) -> v
 	var pilot_card_host := card.get_node("MarginContainer/VBox/ContentRow/InfoVBox/PilotCardHost") as VBoxContainer
 	var fallback_label := card.get_node("MarginContainer/VBox/ContentRow/InfoVBox/PilotLabelFallback") as Label
 	pilot_card_host.custom_minimum_size = Vector2(0.0, float(state.get("pilot_card_minimum_height", 58.0)))
+	pilot_card_host.add_theme_constant_override("separation", int(state.get("pilot_host_separation", 0)))
 	var pilot_profile = state.get("pilot_profile", null)
 	var pilot_card = pilot_card_host.get_node_or_null("PilotCard")
 	var pilot_text: String = String(state.get("pilot_text", "")).strip_edges()
