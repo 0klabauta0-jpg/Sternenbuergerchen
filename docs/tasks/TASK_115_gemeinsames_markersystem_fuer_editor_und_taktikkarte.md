@@ -3,7 +3,7 @@
 ## Ziel
 Map-Marker sollen nicht mehr nur aus ein paar festen IDs bestehen. Stattdessen gibt es einen kleinen gemeinsamen Marker-Typkatalog, ueber den der Editor authorbare Map-/Systemmarker pflegt und die Taktikkarte einen freigegebenen Teil als spielerseitige Befehlsmarker direkt auf der Karte setzen kann.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT
 
 ## Pflicht vor Beginn
 - Lies [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md)
@@ -86,3 +86,12 @@ Map-Marker sollen nicht mehr nur aus ein paar festen IDs bestehen. Stattdessen g
 - Der Marker-Typ kommt immer aus einer festen Liste und traegt mindestens Name, Farbe und kleines Symbol.
 - In der Mission koennen Spieler nur freigegebene Befehlsmarker direkt auf der Karte setzen; Gegner- und Systemmarker bleiben dort read-only.
 - Map-Datei und missionslokaler Tactical-State teilen Renderer und Typkatalog, bleiben aber getrennte Datenwahrheiten.
+
+## Umsetzung
+- `scripts/terrain/terrain_marker_catalog.gd` fuehrt jetzt einen kleinen gemeinsamen Typkatalog fuer Editor- und Mission-Marker, inklusive Standardname, Farbe, Symbol, Kontext und Single-/Multi-Instance-Regel.
+- `scripts/terrain/terrain_map_data.gd` speichert Kartenmarker nicht mehr nur als nackte Positionen, sondern als normale Marker-Eintraege mit Typ, Name, Farbe, Symbol und Position. Alte JSON-Dateien mit reinem `x`/`y`-Markerformat bleiben dabei weiter lesbar.
+- `scripts/editor/map_editor.gd` ersetzt die alten festen Marker-Zeilen durch eine echte Marker-Liste mit Add/Remove, Typwechsel, Namensbearbeitung, Farbwahl und sichtbarem Overlay direkt auf der Karte. Platzierung und Drag rasten auf Tile-Mitten ein; doppelte Belegung eines Felds wird blockiert.
+- Die bisherigen festen Marker `spawn_alpha`, `spawn_bravo`, `objective_point`, `flank_anchor_left` und `flank_anchor_right` laufen im Editor jetzt ueber dieselbe Marker-Basis wie neue Typen wie `rally_point`, `danger_zone`, `loot_cache` und `recon_note`.
+- `scripts/tests/mission_tactical_sandbox_controller.gd` erzeugt Taktikmarker nur noch aus dem gemeinsamen `mission_player`-Typkatalog, baut das Kontextmenue daraus auf und rastet neue oder verschobene Wegpunkte auf Tile-Mitten ein.
+- `scripts/tests/fireteam_order_visualizer.gd` nutzt fuer Spieler-Befehlsmarker jetzt dieselbe Symbolfamilie aus dem Marker-Katalog statt einer separaten reinen Sondertabelle.
+- `scripts/tests/task_115_verifier.gd` deckt den neuen Marker-Roundtrip, den Editor-Workflow und die taktische Tile-Snap-/Katalog-Integration headless ab.

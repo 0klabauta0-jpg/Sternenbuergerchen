@@ -3,6 +3,7 @@ extends Node2D
 
 const FIRETEAM_ORDER_PLAN_SCRIPT: GDScript = preload("res://scripts/command/fireteam_order_plan.gd")
 const FIRETEAM_WAYPOINT_SCRIPT: GDScript = preload("res://scripts/command/fireteam_waypoint.gd")
+const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
 const MARKER_RADIUS: float = 12.0
 const HIT_RADIUS: float = 16.0
 const WAYPOINT_OFFSET_STEP: float = 7.0
@@ -99,27 +100,34 @@ func _draw_plan(plan) -> void:
 		var waypoint = _coerce_waypoint(plan.waypoints[index])
 		if waypoint == null:
 			continue
-		_draw_waypoint_symbol(points[index], String(waypoint.command_type), draw_color, index)
+		var command_type: String = String(waypoint.command_type)
+		var command_color: Color = Color(TERRAIN_MARKER_CATALOG_SCRIPT.call("get_color", command_type))
+		_draw_waypoint_symbol(points[index], command_type, draw_color.lerp(command_color, 0.35), index)
 
 
 func _draw_waypoint_symbol(position: Vector2, command_type: String, marker_color: Color, index: int) -> void:
-	match command_type:
-		"defend":
+	var marker_symbol: String = String(TERRAIN_MARKER_CATALOG_SCRIPT.call("get_symbol", command_type)).strip_edges().to_lower()
+	match marker_symbol:
+		TERRAIN_MARKER_CATALOG_SCRIPT.SYMBOL_SQUARE:
 			draw_rect(Rect2(position - Vector2(10.0, 10.0), Vector2(20.0, 20.0)), marker_color, true)
-		"engage":
+		TERRAIN_MARKER_CATALOG_SCRIPT.SYMBOL_CROSS:
 			draw_circle(position, MARKER_RADIUS, marker_color)
 			draw_line(position + Vector2(-8.0, 0.0), position + Vector2(8.0, 0.0), Color(0.05, 0.07, 0.08, 0.9), 2.0)
 			draw_line(position + Vector2(0.0, -8.0), position + Vector2(0.0, 8.0), Color(0.05, 0.07, 0.08, 0.9), 2.0)
-		"flank":
+		TERRAIN_MARKER_CATALOG_SCRIPT.SYMBOL_DIAMOND:
 			draw_colored_polygon(PackedVector2Array([
 				position + Vector2(0.0, -12.0),
 				position + Vector2(11.0, 0.0),
 				position + Vector2(0.0, 12.0),
 				position + Vector2(-11.0, 0.0),
 			]), marker_color)
-		"take":
-			draw_line(position + Vector2(-10.0, 10.0), position + Vector2(10.0, -10.0), marker_color, 4.0)
-			draw_line(position + Vector2(-10.0, -10.0), position + Vector2(10.0, 10.0), marker_color, 4.0)
+		TERRAIN_MARKER_CATALOG_SCRIPT.SYMBOL_FLAG:
+			draw_line(position + Vector2(-6.0, 10.0), position + Vector2(-6.0, -10.0), marker_color, 3.0)
+			draw_colored_polygon(PackedVector2Array([
+				position + Vector2(-6.0, -10.0),
+				position + Vector2(8.0, -6.0),
+				position + Vector2(-6.0, -1.0),
+			]), marker_color)
 		_:
 			draw_circle(position, MARKER_RADIUS, marker_color)
 	var index_color := Color(0.03, 0.05, 0.06, 0.92)

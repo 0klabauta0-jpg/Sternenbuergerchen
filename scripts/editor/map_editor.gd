@@ -5,6 +5,7 @@ const TERRAIN_REGISTRY_SCRIPT: GDScript = preload("res://scripts/terrain/terrain
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_catalog.gd")
 const TERRAIN_MAP_RENDERER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_renderer.gd")
+const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
 const TILE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_SW.png")
 const CLIFF_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_SE.png")
 const CLIFF_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_SW.png")
@@ -74,6 +75,9 @@ const CAMERA_PAN_SPEED: float = 800.0
 const PATROL_OVERLAY_NAME: String = "PatrolOverlay"
 const PATROL_SPAWN_IDS: PackedStringArray = ["enemy_delta", "enemy_echo", "enemy_alpha", "enemy_bravo"]
 const PATROL_PICK_RADIUS: float = 28.0
+const MARKER_OVERLAY_NAME: String = "MarkerOverlay"
+const MARKER_PICK_RADIUS: float = 26.0
+const MARKER_DRAG_THRESHOLD: float = 4.0
 
 @export var map_file_path: String = ""
 
@@ -104,6 +108,14 @@ var _pending_dialog_action: String = ""
 var _patrol_tool_enabled: bool = false
 var _patrol_spawn_id: String = "enemy_delta"
 var _dragged_patrol_waypoint_index: int = -1
+var _marker_tool_enabled: bool = false
+var _selected_marker_id: String = ""
+var _dragged_marker_id: String = ""
+var _dragged_marker_press_screen_position: Vector2 = Vector2.ZERO
+var _is_dragging_marker: bool = false
+var _has_dragged_marker: bool = false
+var _is_refreshing_marker_controls: bool = false
+var _marker_feedback_text: String = ""
 
 
 func _ready() -> void:
@@ -119,7 +131,9 @@ func _ready() -> void:
 	_connect_ui_signals()
 	_add_selection_tool_button()
 	_add_patrol_tool_controls()
+	_ensure_marker_editor_controls()
 	_ensure_patrol_overlay()
+	_ensure_marker_overlay()
 	_load_map(map_file_path if not map_file_path.is_empty() else DEFAULT_MAP_PATH)
 
 
@@ -146,7 +160,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		if key_event.pressed and not key_event.echo and key_event.ctrl_pressed and key_event.physical_keycode == KEY_Z:
 			_undo_last_change()
 			return
+		if key_event.pressed and not key_event.echo and key_event.physical_keycode == KEY_DELETE:
+			if _delete_selected_marker():
+				return
 		if key_event.pressed and not key_event.echo and key_event.physical_keycode == KEY_ESCAPE:
+			_clear_marker_selection()
 			_on_tile_type_deselected()
 			return
 
@@ -162,6 +180,12 @@ func _unhandled_input(event: InputEvent) -> void:
 			_is_panning = mouse_button_event.pressed
 			return
 		if mouse_button_event.button_index == MOUSE_BUTTON_LEFT:
+			if _marker_tool_enabled and not _is_pointer_over_control():
+				if mouse_button_event.pressed:
+					if _handle_marker_left_press(mouse_button_event):
+						return
+				elif _finish_marker_drag():
+					return
 			if _patrol_tool_enabled and not _is_pointer_over_control():
 				if mouse_button_event.pressed:
 					_handle_patrol_left_click(get_global_mouse_position(), mouse_button_event.ctrl_pressed)
@@ -196,6 +220,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if event is InputEventMouseMotion:
 		var mouse_motion := event as InputEventMouseMotion
+		if _update_marker_drag(get_global_mouse_position(), mouse_motion.relative):
+			return
 		if _patrol_tool_enabled and _dragged_patrol_waypoint_index >= 0 and not _is_pointer_over_control():
 			_move_patrol_waypoint(_dragged_patrol_waypoint_index, get_global_mouse_position())
 			return
@@ -251,6 +277,8 @@ func _load_map(path: String) -> void:
 	_refresh_property_panel()
 	_refresh_top_bar()
 	_refresh_patrol_overlay()
+	_refresh_marker_overlay()
+	_refresh_marker_editor_controls()
 
 
 func _create_new_map(grid_size: Vector2i = DEFAULT_NEW_MAP_GRID_SIZE) -> void:
@@ -280,6 +308,8 @@ func _create_new_map(grid_size: Vector2i = DEFAULT_NEW_MAP_GRID_SIZE) -> void:
 	_refresh_property_panel()
 	_refresh_top_bar()
 	_refresh_patrol_overlay()
+	_refresh_marker_overlay()
+	_refresh_marker_editor_controls()
 
 
 func _save_current_map() -> void:
@@ -511,6 +541,10 @@ func _add_patrol_tool_controls() -> void:
 func _on_selection_tool_toggled(pressed: bool) -> void:
 	_selection_tool_enabled = pressed
 	if pressed:
+		_marker_tool_enabled = false
+		var marker_tool_button := _get_marker_tool_button()
+		if marker_tool_button != null and marker_tool_button.button_pressed:
+			marker_tool_button.button_pressed = false
 		_is_painting = false
 		_last_painted_grid = Vector2i(-1, -1)
 
@@ -518,6 +552,10 @@ func _on_selection_tool_toggled(pressed: bool) -> void:
 func _on_patrol_tool_toggled(pressed: bool) -> void:
 	_patrol_tool_enabled = pressed
 	if pressed:
+		_marker_tool_enabled = false
+		var marker_tool_button := _get_marker_tool_button()
+		if marker_tool_button != null and marker_tool_button.button_pressed:
+			marker_tool_button.button_pressed = false
 		_selection_tool_enabled = false
 		var select_button := get_node_or_null("UI/TopBar/Margin/HBox/SelectButton") as Button
 		if select_button != null and select_button.button_pressed:
@@ -617,8 +655,7 @@ func _refresh_map_settings_panel() -> void:
 		grid_size_label.text = "Grid: -"
 		mission_slot_spinbox.value = MIN_MISSION_SLOT_COUNT
 		mission_slot_spinbox.editable = false
-		for marker_id in EDITABLE_MARKER_IDS:
-			_update_marker_controls(marker_id, Vector2.ZERO, false, false)
+		_refresh_marker_editor_controls()
 		_is_refreshing_map_settings_controls = false
 		return
 
@@ -626,13 +663,7 @@ func _refresh_map_settings_panel() -> void:
 	grid_size_label.text = "Grid: %d x %d" % [grid_size.x, grid_size.y]
 	mission_slot_spinbox.value = clampi(int(_terrain_map_data.call("get_mission_slot_count")), MIN_MISSION_SLOT_COUNT, MAX_MISSION_SLOT_COUNT)
 	mission_slot_spinbox.editable = true
-
-	var has_selected_tile: bool = _get_selected_tile() != null
-	for marker_id in EDITABLE_MARKER_IDS:
-		var has_marker: bool = bool(_terrain_map_data.call("has_marker", marker_id))
-		var marker_position: Vector2 = _terrain_map_data.call("get_marker_position", marker_id, Vector2.ZERO)
-		_update_marker_controls(marker_id, marker_position, has_marker, has_selected_tile)
-
+	_refresh_marker_editor_controls()
 	_is_refreshing_map_settings_controls = false
 
 
@@ -646,6 +677,690 @@ func _update_marker_controls(marker_id: String, marker_position: Vector2, has_ma
 			marker_label.text = "%s: -" % marker_id
 	if marker_button != null:
 		marker_button.disabled = not can_assign
+
+
+func _ensure_marker_editor_controls() -> void:
+	var marker_title := get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkersTitle") as Label
+	if marker_title != null:
+		marker_title.text = "Markers"
+	var marker_help_label := get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerHelpLabel") as Label
+	if marker_help_label != null:
+		marker_help_label.text = "Markers come from a fixed list. Add one, place or drag it on the map, double-click to rename, and use DEL to remove it. Markers snap to tiles and do not overlap."
+	_hide_legacy_marker_rows()
+
+	var marker_panel_parent := get_node_or_null("UI/PropertyPanel/Margin/VBox") as VBoxContainer
+	if marker_panel_parent == null:
+		return
+	var marker_panel := marker_panel_parent.get_node_or_null("MarkerEditorPanel") as VBoxContainer
+	if marker_panel == null:
+		marker_panel = VBoxContainer.new()
+		marker_panel.name = "MarkerEditorPanel"
+		marker_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		marker_panel.theme_override_constants.separation = 6
+		marker_panel_parent.add_child(marker_panel)
+
+		var toolbar := HBoxContainer.new()
+		toolbar.name = "MarkerToolbarRow"
+		toolbar.theme_override_constants.separation = 6
+		marker_panel.add_child(toolbar)
+
+		var add_type_option := OptionButton.new()
+		add_type_option.name = "AddMarkerTypeOption"
+		add_type_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		toolbar.add_child(add_type_option)
+
+		var add_marker_button := Button.new()
+		add_marker_button.name = "AddMarkerButton"
+		add_marker_button.text = "Add"
+		toolbar.add_child(add_marker_button)
+
+		var marker_tool_button := Button.new()
+		marker_tool_button.name = "MarkerToolButton"
+		marker_tool_button.text = "Marker Tool"
+		marker_tool_button.toggle_mode = true
+		toolbar.add_child(marker_tool_button)
+
+		var remove_marker_button := Button.new()
+		remove_marker_button.name = "RemoveMarkerButton"
+		remove_marker_button.text = "Remove"
+		toolbar.add_child(remove_marker_button)
+
+		var marker_list := ItemList.new()
+		marker_list.name = "MarkerList"
+		marker_list.select_mode = ItemList.SELECT_SINGLE
+		marker_list.allow_reselect = true
+		marker_list.custom_minimum_size = Vector2(0.0, 170.0)
+		marker_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		marker_panel.add_child(marker_list)
+
+		var type_row := HBoxContainer.new()
+		type_row.name = "SelectedMarkerTypeRow"
+		type_row.theme_override_constants.separation = 6
+		marker_panel.add_child(type_row)
+
+		var type_label := Label.new()
+		type_label.text = "Type:"
+		type_row.add_child(type_label)
+
+		var selected_type_option := OptionButton.new()
+		selected_type_option.name = "SelectedMarkerTypeOption"
+		selected_type_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		type_row.add_child(selected_type_option)
+
+		var name_row := HBoxContainer.new()
+		name_row.name = "SelectedMarkerNameRow"
+		name_row.theme_override_constants.separation = 6
+		marker_panel.add_child(name_row)
+
+		var name_label := Label.new()
+		name_label.text = "Name:"
+		name_row.add_child(name_label)
+
+		var name_line_edit := LineEdit.new()
+		name_line_edit.name = "MarkerNameLineEdit"
+		name_line_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		name_row.add_child(name_line_edit)
+
+		var color_row := HBoxContainer.new()
+		color_row.name = "SelectedMarkerColorRow"
+		color_row.theme_override_constants.separation = 6
+		marker_panel.add_child(color_row)
+
+		var color_label := Label.new()
+		color_label.text = "Color:"
+		color_row.add_child(color_label)
+
+		var color_picker_button := ColorPickerButton.new()
+		color_picker_button.name = "MarkerColorButton"
+		color_picker_button.custom_minimum_size = Vector2(88.0, 0.0)
+		color_picker_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		color_row.add_child(color_picker_button)
+
+		var marker_info_label := Label.new()
+		marker_info_label.name = "MarkerInfoLabel"
+		marker_info_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		marker_info_label.text = "Select a marker to edit it."
+		marker_panel.add_child(marker_info_label)
+
+	_populate_marker_type_options()
+	_connect_marker_editor_signals()
+	_refresh_marker_editor_controls()
+
+
+func _hide_legacy_marker_rows() -> void:
+	for node_path in [
+		"UI/PropertyPanel/Margin/VBox/SpawnAlphaRow",
+		"UI/PropertyPanel/Margin/VBox/SpawnBravoRow",
+		"UI/PropertyPanel/Margin/VBox/ObjectivePointRow",
+		"UI/PropertyPanel/Margin/VBox/FlankLeftRow",
+		"UI/PropertyPanel/Margin/VBox/FlankRightRow",
+	]:
+		var row := get_node_or_null(node_path) as Control
+		if row != null:
+			row.visible = false
+
+
+func _populate_marker_type_options() -> void:
+	var editor_marker_type_ids: PackedStringArray = TERRAIN_MARKER_CATALOG_SCRIPT.call("get_type_ids_for_context", TERRAIN_MARKER_CATALOG_SCRIPT.CONTEXT_EDITOR_ONLY)
+	for option_button in [_get_add_marker_type_option_button(), _get_selected_marker_type_option_button()]:
+		if option_button == null:
+			continue
+		var previous_type_id: String = ""
+		if option_button.selected >= 0 and option_button.selected < option_button.item_count:
+			previous_type_id = String(option_button.get_item_metadata(option_button.selected)).strip_edges()
+		option_button.clear()
+		for marker_type_id in editor_marker_type_ids:
+			option_button.add_item(String(TERRAIN_MARKER_CATALOG_SCRIPT.call("get_display_name", marker_type_id)))
+			option_button.set_item_metadata(option_button.item_count - 1, marker_type_id)
+		var selected_index: int = 0
+		for index in range(option_button.item_count):
+			if String(option_button.get_item_metadata(index)) == previous_type_id:
+				selected_index = index
+				break
+		if option_button.item_count > 0:
+			option_button.select(selected_index)
+
+
+func _connect_marker_editor_signals() -> void:
+	var add_marker_button := _get_add_marker_button()
+	if add_marker_button != null and not add_marker_button.pressed.is_connected(_on_add_marker_button_pressed):
+		add_marker_button.pressed.connect(_on_add_marker_button_pressed)
+	var remove_marker_button := _get_remove_marker_button()
+	if remove_marker_button != null and not remove_marker_button.pressed.is_connected(_on_remove_marker_button_pressed):
+		remove_marker_button.pressed.connect(_on_remove_marker_button_pressed)
+	var marker_tool_button := _get_marker_tool_button()
+	if marker_tool_button != null and not marker_tool_button.toggled.is_connected(_on_marker_tool_toggled):
+		marker_tool_button.toggled.connect(_on_marker_tool_toggled)
+	var marker_list := _get_marker_list()
+	if marker_list != null:
+		if not marker_list.item_selected.is_connected(_on_marker_list_item_selected):
+			marker_list.item_selected.connect(_on_marker_list_item_selected)
+		if not marker_list.item_activated.is_connected(_on_marker_list_item_activated):
+			marker_list.item_activated.connect(_on_marker_list_item_activated)
+	var selected_marker_type_option := _get_selected_marker_type_option_button()
+	if selected_marker_type_option != null and not selected_marker_type_option.item_selected.is_connected(_on_selected_marker_type_item_selected):
+		selected_marker_type_option.item_selected.connect(_on_selected_marker_type_item_selected)
+	var marker_name_line_edit := _get_marker_name_line_edit()
+	if marker_name_line_edit != null:
+		if not marker_name_line_edit.text_changed.is_connected(_on_marker_name_text_changed):
+			marker_name_line_edit.text_changed.connect(_on_marker_name_text_changed)
+		if not marker_name_line_edit.text_submitted.is_connected(_on_marker_name_text_submitted):
+			marker_name_line_edit.text_submitted.connect(_on_marker_name_text_submitted)
+	var marker_color_button := _get_marker_color_button()
+	if marker_color_button != null and not marker_color_button.color_changed.is_connected(_on_marker_color_changed):
+		marker_color_button.color_changed.connect(_on_marker_color_changed)
+
+
+func _refresh_marker_editor_controls() -> void:
+	var add_type_option := _get_add_marker_type_option_button()
+	var add_marker_button := _get_add_marker_button()
+	var marker_tool_button := _get_marker_tool_button()
+	var remove_marker_button := _get_remove_marker_button()
+	var marker_list := _get_marker_list()
+	var selected_type_option := _get_selected_marker_type_option_button()
+	var marker_name_line_edit := _get_marker_name_line_edit()
+	var marker_color_button := _get_marker_color_button()
+	var marker_info_label := _get_marker_info_label()
+	if add_type_option == null or add_marker_button == null or marker_tool_button == null or remove_marker_button == null or marker_list == null or selected_type_option == null or marker_name_line_edit == null or marker_color_button == null or marker_info_label == null:
+		return
+
+	_is_refreshing_marker_controls = true
+	_populate_marker_type_options()
+	_refresh_marker_list()
+
+	var has_map_data: bool = _terrain_map_data != null
+	var selected_record: Dictionary = {}
+	if has_map_data and not _selected_marker_id.is_empty() and bool(_terrain_map_data.call("has_marker", _selected_marker_id)):
+		selected_record = Dictionary(_terrain_map_data.call("get_marker_record", _selected_marker_id))
+	else:
+		_selected_marker_id = ""
+
+	add_type_option.disabled = not has_map_data
+	add_marker_button.disabled = not has_map_data
+	marker_tool_button.disabled = not has_map_data
+	marker_tool_button.button_pressed = _marker_tool_enabled
+	remove_marker_button.disabled = selected_record.is_empty()
+	selected_type_option.disabled = selected_record.is_empty()
+	marker_name_line_edit.editable = not selected_record.is_empty()
+	marker_color_button.disabled = selected_record.is_empty()
+
+	if selected_record.is_empty():
+		marker_name_line_edit.text = ""
+		marker_color_button.color = Color(0.9, 0.9, 0.9, 1.0)
+		marker_info_label.text = _marker_feedback_text if not _marker_feedback_text.is_empty() else "Create a marker from the list above and place it directly on the map."
+		_is_refreshing_marker_controls = false
+		return
+
+	var marker_type_id: String = String(selected_record.get("marker_type_id", "")).strip_edges()
+	for index in range(selected_type_option.item_count):
+		if String(selected_type_option.get_item_metadata(index)) == marker_type_id:
+			selected_type_option.select(index)
+			break
+	marker_name_line_edit.text = String(selected_record.get("name", _selected_marker_id))
+	marker_color_button.color = Color(selected_record.get("color", Color(0.9, 0.9, 0.9, 1.0)))
+	marker_info_label.text = _build_marker_info_text(selected_record)
+	_is_refreshing_marker_controls = false
+
+
+func _refresh_marker_list() -> void:
+	var marker_list := _get_marker_list()
+	if marker_list == null:
+		return
+	marker_list.clear()
+	if _terrain_map_data == null:
+		return
+	var marker_ids: PackedStringArray = _terrain_map_data.call("get_marker_ids")
+	var selected_index: int = -1
+	for marker_id in marker_ids:
+		var marker_record: Dictionary = Dictionary(_terrain_map_data.call("get_marker_record", marker_id))
+		marker_list.add_item(_build_marker_list_label(String(marker_id), marker_record))
+		marker_list.set_item_metadata(marker_list.item_count - 1, marker_id)
+		marker_list.set_item_custom_fg_color(marker_list.item_count - 1, Color(marker_record.get("color", Color(0.9, 0.9, 0.9, 1.0))))
+		if String(marker_id) == _selected_marker_id:
+			selected_index = marker_list.item_count - 1
+	if selected_index >= 0:
+		marker_list.select(selected_index)
+
+
+func _build_marker_list_label(marker_id: String, marker_record: Dictionary) -> String:
+	var marker_type_id: String = String(marker_record.get("marker_type_id", marker_id)).strip_edges()
+	var marker_name: String = String(marker_record.get("name", marker_id)).strip_edges()
+	var type_name: String = String(TERRAIN_MARKER_CATALOG_SCRIPT.call("get_display_name", marker_type_id)).strip_edges()
+	if marker_name.is_empty() or marker_name == type_name:
+		return type_name
+	return "%s | %s" % [type_name, marker_name]
+
+
+func _build_marker_info_text(marker_record: Dictionary) -> String:
+	var marker_type_id: String = String(marker_record.get("marker_type_id", "")).strip_edges()
+	var marker_name: String = String(marker_record.get("name", _selected_marker_id)).strip_edges()
+	var marker_position: Vector2 = Vector2(marker_record.get("position", Vector2.ZERO))
+	var marker_context: String = String(marker_record.get("placement_context", "")).strip_edges().to_lower()
+	var context_text: String = "Editor only" if marker_context == TERRAIN_MARKER_CATALOG_SCRIPT.CONTEXT_EDITOR_ONLY else "Mission player"
+	var base_text: String = "%s | %s | %d, %d | %s" % [String(TERRAIN_MARKER_CATALOG_SCRIPT.call("get_display_name", marker_type_id)), marker_name, int(round(marker_position.x)), int(round(marker_position.y)), context_text]
+	if _marker_feedback_text.is_empty():
+		return base_text
+	return "%s\n%s" % [_marker_feedback_text, base_text]
+
+
+func _set_marker_feedback(feedback_text: String) -> void:
+	_marker_feedback_text = feedback_text.strip_edges()
+	var marker_info_label := _get_marker_info_label()
+	if marker_info_label == null:
+		return
+	if _marker_feedback_text.is_empty():
+		marker_info_label.text = "Select a marker to edit it."
+		return
+	marker_info_label.text = _marker_feedback_text
+
+
+func _on_add_marker_button_pressed() -> void:
+	_add_marker_of_selected_type()
+
+
+func _on_remove_marker_button_pressed() -> void:
+	_delete_selected_marker()
+
+
+func _on_marker_tool_toggled(pressed: bool) -> void:
+	_marker_tool_enabled = pressed
+	if not pressed:
+		_is_dragging_marker = false
+		_has_dragged_marker = false
+		_dragged_marker_id = ""
+		_refresh_marker_editor_controls()
+		return
+	_selection_tool_enabled = false
+	_patrol_tool_enabled = false
+	var select_button := get_node_or_null("UI/TopBar/Margin/HBox/SelectButton") as Button
+	if select_button != null:
+		select_button.button_pressed = false
+	var patrol_button := get_node_or_null("UI/TopBar/Margin/HBox/PatrolButton") as Button
+	if patrol_button != null:
+		patrol_button.button_pressed = false
+	var brush_button := get_node_or_null("UI/TopBar/Margin/HBox/BrushButton") as Button
+	if brush_button != null and brush_button.button_pressed:
+		brush_button.button_pressed = false
+	_hide_hover_preview()
+	_refresh_marker_editor_controls()
+
+
+func _on_marker_list_item_selected(index: int) -> void:
+	var marker_list := _get_marker_list()
+	if marker_list == null or index < 0 or index >= marker_list.item_count:
+		return
+	_select_marker(String(marker_list.get_item_metadata(index)))
+
+
+func _on_marker_list_item_activated(index: int) -> void:
+	_on_marker_list_item_selected(index)
+	_focus_marker_name_editor()
+
+
+func _on_selected_marker_type_item_selected(index: int) -> void:
+	if _is_refreshing_marker_controls or _terrain_map_data == null or _selected_marker_id.is_empty():
+		return
+	var option_button := _get_selected_marker_type_option_button()
+	if option_button == null or index < 0 or index >= option_button.item_count:
+		return
+	var marker_type_id: String = String(option_button.get_item_metadata(index)).strip_edges()
+	if marker_type_id.is_empty():
+		return
+	if bool(TERRAIN_MARKER_CATALOG_SCRIPT.call("is_single_instance", marker_type_id)):
+		for other_marker_id in PackedStringArray(_terrain_map_data.call("get_marker_ids")):
+			if String(other_marker_id) == _selected_marker_id:
+				continue
+			if String(_terrain_map_data.call("get_marker_type_id", other_marker_id)) == marker_type_id:
+				_set_marker_feedback("Only one %s marker is allowed." % String(TERRAIN_MARKER_CATALOG_SCRIPT.call("get_display_name", marker_type_id)))
+				_refresh_marker_editor_controls()
+				return
+	_terrain_map_data.call("set_marker_type", _selected_marker_id, marker_type_id)
+	_mark_dirty(true)
+	_set_marker_feedback("Marker type updated.")
+	_refresh_marker_overlay()
+	_refresh_marker_editor_controls()
+
+
+func _on_marker_name_text_changed(new_text: String) -> void:
+	if _is_refreshing_marker_controls or _terrain_map_data == null or _selected_marker_id.is_empty():
+		return
+	_terrain_map_data.call("set_marker_display_name", _selected_marker_id, new_text)
+	_mark_dirty(true)
+	_refresh_marker_overlay()
+	_refresh_marker_editor_controls()
+
+
+func _on_marker_name_text_submitted(_new_text: String) -> void:
+	_focus_marker_name_editor(false)
+
+
+func _on_marker_color_changed(marker_color: Color) -> void:
+	if _is_refreshing_marker_controls or _terrain_map_data == null or _selected_marker_id.is_empty():
+		return
+	_terrain_map_data.call("set_marker_color", _selected_marker_id, marker_color)
+	_mark_dirty(true)
+	_set_marker_feedback("Marker color updated.")
+	_refresh_marker_overlay()
+	_refresh_marker_editor_controls()
+
+
+func _add_marker_of_selected_type() -> bool:
+	if _terrain_map_data == null:
+		return false
+	var add_type_option := _get_add_marker_type_option_button()
+	if add_type_option == null or add_type_option.selected < 0 or add_type_option.selected >= add_type_option.item_count:
+		return false
+	var marker_type_id: String = String(add_type_option.get_item_metadata(add_type_option.selected)).strip_edges()
+	if marker_type_id.is_empty():
+		return false
+	var existing_marker_ids: PackedStringArray = _terrain_map_data.call("get_marker_ids")
+	var marker_id: String = String(TERRAIN_MARKER_CATALOG_SCRIPT.call("build_marker_id", marker_type_id, existing_marker_ids))
+	if bool(TERRAIN_MARKER_CATALOG_SCRIPT.call("is_single_instance", marker_type_id)) and bool(_terrain_map_data.call("has_marker", marker_id)):
+		_select_marker(marker_id)
+		_set_marker_feedback("There is already a %s marker." % String(TERRAIN_MARKER_CATALOG_SCRIPT.call("get_display_name", marker_type_id)))
+		return false
+	var spawn_position = _find_first_available_marker_world_position(_get_default_marker_spawn_position())
+	if spawn_position == null:
+		_set_marker_feedback("No free tile is available for another marker.")
+		return false
+	_terrain_map_data.call("set_marker", marker_id, marker_type_id, spawn_position)
+	_mark_dirty(true)
+	_select_marker(marker_id)
+	_set_marker_feedback("Marker added. Place or drag it on the map.")
+	_refresh_marker_overlay()
+	_refresh_marker_editor_controls()
+	return true
+
+
+func _delete_selected_marker() -> bool:
+	if _terrain_map_data == null or _selected_marker_id.is_empty() or not bool(_terrain_map_data.call("has_marker", _selected_marker_id)):
+		return false
+	_terrain_map_data.call("remove_marker", _selected_marker_id)
+	_mark_dirty(true)
+	_set_marker_feedback("Marker removed.")
+	_selected_marker_id = ""
+	_refresh_marker_overlay()
+	_refresh_marker_editor_controls()
+	return true
+
+
+func _clear_marker_selection() -> void:
+	if _selected_marker_id.is_empty():
+		return
+	_selected_marker_id = ""
+	_refresh_marker_overlay()
+	_refresh_marker_editor_controls()
+
+
+func _select_marker(marker_id: String) -> void:
+	var normalized_marker_id: String = marker_id.strip_edges()
+	if _terrain_map_data == null or normalized_marker_id.is_empty() or not bool(_terrain_map_data.call("has_marker", normalized_marker_id)):
+		_selected_marker_id = ""
+	else:
+		_selected_marker_id = normalized_marker_id
+		var marker_position: Vector2 = _terrain_map_data.call("get_marker_position", normalized_marker_id, Vector2.ZERO)
+		_selected_grid_position = _terrain_registry.world_to_grid(marker_position) if _terrain_registry != null else _selected_grid_position
+	_refresh_selection_visual()
+	_refresh_marker_overlay()
+	_refresh_marker_editor_controls()
+
+
+func _handle_marker_left_press(mouse_button_event: InputEventMouseButton) -> bool:
+	var world_position: Vector2 = get_global_mouse_position()
+	var hit_marker_id: String = _find_marker_id_at_world_position(world_position)
+	if not hit_marker_id.is_empty():
+		_select_marker(hit_marker_id)
+		if mouse_button_event.double_click:
+			_focus_marker_name_editor()
+			return true
+		_dragged_marker_id = hit_marker_id
+		_dragged_marker_press_screen_position = mouse_button_event.position
+		_is_dragging_marker = true
+		_has_dragged_marker = false
+		return true
+	if _selected_marker_id.is_empty():
+		return false
+	return _move_marker_to_world_position(_selected_marker_id, world_position)
+
+
+func _update_marker_drag(world_position: Vector2, _relative: Vector2) -> bool:
+	if not _is_dragging_marker or _dragged_marker_id.is_empty():
+		return false
+	if _is_pointer_over_control():
+		return true
+	var current_screen_position: Vector2 = get_viewport().get_mouse_position()
+	if not _has_dragged_marker and _dragged_marker_press_screen_position.distance_to(current_screen_position) < MARKER_DRAG_THRESHOLD:
+		return true
+	_has_dragged_marker = true
+	_move_marker_to_world_position(_dragged_marker_id, world_position, true)
+	return true
+
+
+func _finish_marker_drag() -> bool:
+	if not _is_dragging_marker:
+		return false
+	if _has_dragged_marker:
+		_set_marker_feedback("Marker moved.")
+		_refresh_marker_editor_controls()
+	_is_dragging_marker = false
+	_has_dragged_marker = false
+	_dragged_marker_id = ""
+	return true
+
+
+func _move_marker_to_world_position(marker_id: String, world_position: Vector2, is_drag: bool = false) -> bool:
+	if _terrain_map_data == null or marker_id.is_empty():
+		return false
+	var snapped_position = _snap_world_position_to_tile_center(world_position)
+	if snapped_position == null:
+		if not is_drag:
+			_set_marker_feedback("Markers can only be placed on existing tiles.")
+		return false
+	if not _can_place_marker_at_world_position(marker_id, snapped_position):
+		if not is_drag:
+			_set_marker_feedback("That tile already has another marker.")
+		return false
+	_terrain_map_data.call("set_marker_position", marker_id, snapped_position)
+	_mark_dirty(true)
+	_select_marker(marker_id)
+	if not is_drag:
+		_set_marker_feedback("Marker placed on tile center.")
+	return true
+
+
+func _snap_world_position_to_tile_center(world_position: Vector2):
+	var tile_data = _resolve_tile_at_world_position(world_position)
+	if tile_data == null:
+		return null
+	return Vector2(tile_data.world_position)
+
+
+func _find_marker_id_at_world_position(world_position: Vector2) -> String:
+	if _terrain_map_data == null:
+		return ""
+	var best_marker_id: String = ""
+	var best_distance_sq: float = MARKER_PICK_RADIUS * MARKER_PICK_RADIUS
+	for marker_id in PackedStringArray(_terrain_map_data.call("get_marker_ids")):
+		var marker_position: Vector2 = _terrain_map_data.call("get_marker_position", marker_id, Vector2.ZERO)
+		var distance_sq: float = marker_position.distance_squared_to(world_position)
+		if distance_sq > best_distance_sq:
+			continue
+		best_distance_sq = distance_sq
+		best_marker_id = String(marker_id)
+	return best_marker_id
+
+
+func _can_place_marker_at_world_position(marker_id: String, world_position: Vector2) -> bool:
+	if _terrain_map_data == null:
+		return false
+	for other_marker_id in PackedStringArray(_terrain_map_data.call("get_marker_ids")):
+		if String(other_marker_id) == marker_id:
+			continue
+		if _marker_positions_equal(world_position, Vector2(_terrain_map_data.call("get_marker_position", other_marker_id, Vector2.ZERO))):
+			return false
+	return true
+
+
+func _find_first_available_marker_world_position(preferred_world_position: Vector2, ignore_marker_id: String = ""):
+	var preferred_tile_position = _snap_world_position_to_tile_center(preferred_world_position)
+	if preferred_tile_position != null and _can_place_marker_at_world_position(ignore_marker_id, preferred_tile_position):
+		return preferred_tile_position
+	if _terrain_map_data == null:
+		return null
+	for tile_data in _terrain_map_data.call("get_tiles"):
+		if tile_data == null:
+			continue
+		if _can_place_marker_at_world_position(ignore_marker_id, Vector2(tile_data.world_position)):
+			return Vector2(tile_data.world_position)
+	return null
+
+
+func _marker_positions_equal(a: Vector2, b: Vector2) -> bool:
+	return a.distance_squared_to(b) <= 1.0
+
+
+func _get_default_marker_spawn_position() -> Vector2:
+	var selected_tile = _get_selected_tile()
+	if selected_tile != null:
+		return Vector2(selected_tile.world_position)
+	if _terrain_map_data == null:
+		return Vector2.ZERO
+	var grid_size: Vector2i = _terrain_map_data.call("get_grid_size")
+	var center_grid := Vector2i(maxi(grid_size.x / 2, 0), maxi(grid_size.y / 2, 0))
+	var center_tile = _terrain_map_data.call("get_tile_at_grid", center_grid)
+	if center_tile != null:
+		return Vector2(center_tile.world_position)
+	var tiles: Array = _terrain_map_data.call("get_tiles")
+	if tiles.is_empty():
+		return Vector2.ZERO
+	return Vector2(tiles[0].world_position)
+
+
+func _ensure_marker_overlay() -> void:
+	var existing_overlay := get_node_or_null(MARKER_OVERLAY_NAME) as Node2D
+	if existing_overlay != null:
+		return
+	var overlay := Node2D.new()
+	overlay.name = MARKER_OVERLAY_NAME
+	overlay.z_index = 36
+	add_child(overlay)
+
+
+func _refresh_marker_overlay() -> void:
+	var overlay := get_node_or_null(MARKER_OVERLAY_NAME) as Node2D
+	if overlay == null:
+		return
+	for child in overlay.get_children():
+		child.queue_free()
+	if _terrain_map_data == null:
+		return
+	for marker_id in PackedStringArray(_terrain_map_data.call("get_marker_ids")):
+		var marker_record: Dictionary = Dictionary(_terrain_map_data.call("get_marker_record", marker_id))
+		var marker_position: Vector2 = Vector2(marker_record.get("position", Vector2.ZERO))
+		var marker_host := Node2D.new()
+		marker_host.name = "Marker_%s" % marker_id
+		marker_host.position = marker_position
+		overlay.add_child(marker_host)
+		var marker_color: Color = Color(marker_record.get("color", Color(0.9, 0.9, 0.9, 1.0)))
+		var marker_symbol: String = String(marker_record.get("symbol", TERRAIN_MARKER_CATALOG_SCRIPT.call("get_symbol", marker_id))).strip_edges().to_lower()
+		_add_marker_symbol_to_host(marker_host, marker_symbol, marker_color, String(marker_id) == _selected_marker_id)
+		var marker_label := Label.new()
+		marker_label.text = String(marker_record.get("name", marker_id)).strip_edges()
+		marker_label.position = Vector2(14.0, -22.0)
+		marker_label.modulate = marker_color.lightened(0.18)
+		marker_label.add_theme_font_size_override("font_size", 11)
+		marker_host.add_child(marker_label)
+
+
+func _add_marker_symbol_to_host(host: Node2D, marker_symbol: String, marker_color: Color, is_selected: bool) -> void:
+	var polygon_points: PackedVector2Array = PackedVector2Array()
+	match marker_symbol:
+		TERRAIN_MARKER_CATALOG_SCRIPT.SYMBOL_SQUARE:
+			polygon_points = PackedVector2Array([
+				Vector2(-8.0, -8.0),
+				Vector2(8.0, -8.0),
+				Vector2(8.0, 8.0),
+				Vector2(-8.0, 8.0),
+			])
+		TERRAIN_MARKER_CATALOG_SCRIPT.SYMBOL_DIAMOND:
+			polygon_points = PackedVector2Array([
+				Vector2(0.0, -10.0),
+				Vector2(10.0, 0.0),
+				Vector2(0.0, 10.0),
+				Vector2(-10.0, 0.0),
+			])
+		TERRAIN_MARKER_CATALOG_SCRIPT.SYMBOL_TRIANGLE:
+			polygon_points = PackedVector2Array([
+				Vector2(0.0, -10.0),
+				Vector2(10.0, 9.0),
+				Vector2(-10.0, 9.0),
+			])
+		TERRAIN_MARKER_CATALOG_SCRIPT.SYMBOL_FLAG:
+			var pole := Line2D.new()
+			pole.width = 2.0
+			pole.default_color = marker_color
+			pole.add_point(Vector2(-6.0, 10.0))
+			pole.add_point(Vector2(-6.0, -10.0))
+			host.add_child(pole)
+			polygon_points = PackedVector2Array([
+				Vector2(-6.0, -10.0),
+				Vector2(8.0, -6.0),
+				Vector2(-6.0, -1.0),
+			])
+		_:
+			polygon_points = PackedVector2Array()
+	if not polygon_points.is_empty():
+		var polygon := Polygon2D.new()
+		polygon.polygon = polygon_points
+		polygon.color = marker_color
+		host.add_child(polygon)
+	if marker_symbol == TERRAIN_MARKER_CATALOG_SCRIPT.SYMBOL_CROSS or marker_symbol == TERRAIN_MARKER_CATALOG_SCRIPT.SYMBOL_CHEVRON:
+		var line := Line2D.new()
+		line.width = 3.0
+		line.default_color = marker_color
+		if marker_symbol == TERRAIN_MARKER_CATALOG_SCRIPT.SYMBOL_CROSS:
+			line.add_point(Vector2(-8.0, -8.0))
+			line.add_point(Vector2(8.0, 8.0))
+			line.add_point(Vector2(0.0, 0.0))
+			line.add_point(Vector2(-8.0, 8.0))
+			line.add_point(Vector2(8.0, -8.0))
+		else:
+			line.add_point(Vector2(-9.0, -7.0))
+			line.add_point(Vector2(0.0, 0.0))
+			line.add_point(Vector2(-9.0, 7.0))
+			line.add_point(Vector2(0.0, 0.0))
+			line.add_point(Vector2(9.0, 0.0))
+		host.add_child(line)
+	if marker_symbol == TERRAIN_MARKER_CATALOG_SCRIPT.SYMBOL_CIRCLE or (polygon_points.is_empty() and marker_symbol != TERRAIN_MARKER_CATALOG_SCRIPT.SYMBOL_CROSS and marker_symbol != TERRAIN_MARKER_CATALOG_SCRIPT.SYMBOL_CHEVRON):
+		var circle := Polygon2D.new()
+		var circle_points := PackedVector2Array()
+		for point_index in range(14):
+			var angle: float = TAU * float(point_index) / 14.0
+			circle_points.append(Vector2(cos(angle), sin(angle)) * 8.5)
+		circle.polygon = circle_points
+		circle.color = marker_color
+		host.add_child(circle)
+	if is_selected:
+		var selection_outline := Line2D.new()
+		selection_outline.width = 2.0
+		selection_outline.default_color = Color(1.0, 1.0, 1.0, 0.96)
+		selection_outline.closed = true
+		selection_outline.add_point(Vector2(0.0, -14.0))
+		selection_outline.add_point(Vector2(14.0, 0.0))
+		selection_outline.add_point(Vector2(0.0, 14.0))
+		selection_outline.add_point(Vector2(-14.0, 0.0))
+		host.add_child(selection_outline)
+
+
+func _focus_marker_name_editor(grab_focus: bool = true) -> void:
+	var marker_name_line_edit := _get_marker_name_line_edit()
+	if marker_name_line_edit == null:
+		return
+	if grab_focus:
+		marker_name_line_edit.grab_focus()
+		marker_name_line_edit.select_all()
+	else:
+		marker_name_line_edit.release_focus()
 
 
 func _set_property_controls_enabled(is_enabled: bool) -> void:
@@ -899,6 +1614,7 @@ func _connect_ui_signals() -> void:
 		var marker_button := _get_marker_button(marker_id)
 		if marker_button != null and not marker_button.pressed.is_connected(_on_marker_assign_button_pressed.bind(marker_id)):
 			marker_button.pressed.connect(_on_marker_assign_button_pressed.bind(marker_id))
+	_connect_marker_editor_signals()
 	if file_dialog != null:
 		file_dialog.access = FileDialog.ACCESS_RESOURCES
 		file_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
@@ -1155,6 +1871,10 @@ func _on_tile_type_selected(index: int) -> void:
 	var brush_button := get_node_or_null("UI/TopBar/Margin/HBox/BrushButton") as Button
 	if brush_button != null and not brush_button.button_pressed:
 		brush_button.button_pressed = true
+	if _marker_tool_enabled:
+		var marker_tool_button := _get_marker_tool_button()
+		if marker_tool_button != null and marker_tool_button.button_pressed:
+			marker_tool_button.button_pressed = false
 
 
 # Deselect palette item to enter select mode
@@ -1277,6 +1997,42 @@ func _get_height_spinbox() -> SpinBox:
 
 func _get_mission_slot_spinbox() -> SpinBox:
 	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MissionSlotRow/MissionSlotSpinBox") as SpinBox
+
+
+func _get_add_marker_type_option_button() -> OptionButton:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/MarkerToolbarRow/AddMarkerTypeOption") as OptionButton
+
+
+func _get_add_marker_button() -> Button:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/MarkerToolbarRow/AddMarkerButton") as Button
+
+
+func _get_marker_tool_button() -> Button:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/MarkerToolbarRow/MarkerToolButton") as Button
+
+
+func _get_remove_marker_button() -> Button:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/MarkerToolbarRow/RemoveMarkerButton") as Button
+
+
+func _get_marker_list() -> ItemList:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/MarkerList") as ItemList
+
+
+func _get_selected_marker_type_option_button() -> OptionButton:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/SelectedMarkerTypeRow/SelectedMarkerTypeOption") as OptionButton
+
+
+func _get_marker_name_line_edit() -> LineEdit:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/SelectedMarkerNameRow/MarkerNameLineEdit") as LineEdit
+
+
+func _get_marker_color_button() -> ColorPickerButton:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/SelectedMarkerColorRow/MarkerColorButton") as ColorPickerButton
+
+
+func _get_marker_info_label() -> Label:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/MarkerInfoLabel") as Label
 
 
 func _get_edge_type_option_button() -> OptionButton:

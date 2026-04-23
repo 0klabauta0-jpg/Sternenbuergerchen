@@ -65,6 +65,7 @@ func _test_waypoint_command_and_drag_update() -> void:
 			if String(Dictionary(waypoint_dict).get("command_type", "")) == "engage":
 				engage_count += 1
 	_assert(engage_count == 2, "Waypoint command type can be changed to engage for all selected fireteams")
+	var snapped_target: Vector2 = controller.call("_snap_planning_position_to_tile_center", Vector2(330.0, 260.0))
 	controller.call("_update_waypoint_targets", [refs[0]], Vector2(330.0, 260.0))
 	plans = controller.call("get_order_plans_snapshot")
 	var moved: bool = false
@@ -72,8 +73,8 @@ func _test_waypoint_command_and_drag_update() -> void:
 		if String(Dictionary(plan_dict).get("fireteam_id", "")) != String(Dictionary(refs[0]).get("fireteam_id", "")):
 			continue
 		var first_waypoint: Dictionary = Dictionary(Array(Dictionary(plan_dict).get("waypoints", []))[0])
-		moved = Vector2(first_waypoint.get("target_position", Vector2.ZERO)) == Vector2(330.0, 260.0)
-	_assert(moved, "Waypoint positions can be dragged to a new location")
+		moved = Vector2(first_waypoint.get("target_position", Vector2.ZERO)) == snapped_target
+	_assert(moved, "Waypoint positions can be dragged and snap to tile centers")
 	scene.queue_free()
 	await process_frame
 

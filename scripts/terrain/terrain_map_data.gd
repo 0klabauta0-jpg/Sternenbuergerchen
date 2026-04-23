@@ -2,6 +2,7 @@ class_name TerrainMapData
 extends RefCounted
 
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
+const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
 
 var _map_name: String = ""
 var _mission_slot_count: int = 3
@@ -236,6 +237,55 @@ func get_markers() -> Dictionary:
 	return _markers.duplicate(true)
 
 
+func get_marker_ids() -> PackedStringArray:
+	var marker_ids: PackedStringArray = []
+	var sorted_ids: Array = _markers.keys()
+	sorted_ids.sort()
+	for marker_id_variant in sorted_ids:
+		marker_ids.append(String(marker_id_variant))
+	return marker_ids
+
+
+func get_marker_record(marker_id: String) -> Dictionary:
+	var normalized_marker_id: String = marker_id.strip_edges()
+	if normalized_marker_id.is_empty() or not _markers.has(normalized_marker_id):
+		return {}
+	return Dictionary(_markers.get(normalized_marker_id, {})).duplicate(true)
+
+
+func get_marker_type_id(marker_id: String) -> String:
+	var marker_record: Dictionary = get_marker_record(marker_id)
+	return String(marker_record.get("marker_type_id", "")).strip_edges().to_lower()
+
+
+func get_marker_display_name(marker_id: String) -> String:
+	var marker_record: Dictionary = get_marker_record(marker_id)
+	if marker_record.is_empty():
+		return marker_id.strip_edges()
+	return String(marker_record.get("name", marker_id)).strip_edges()
+
+
+func get_marker_context(marker_id: String) -> String:
+	var marker_record: Dictionary = get_marker_record(marker_id)
+	if marker_record.is_empty():
+		return String(TERRAIN_MARKER_CATALOG_SCRIPT.call("get_context", marker_id)).strip_edges().to_lower()
+	return String(marker_record.get("placement_context", TERRAIN_MARKER_CATALOG_SCRIPT.call("get_context", marker_id))).strip_edges().to_lower()
+
+
+func get_marker_symbol(marker_id: String) -> String:
+	var marker_record: Dictionary = get_marker_record(marker_id)
+	if marker_record.is_empty():
+		return String(TERRAIN_MARKER_CATALOG_SCRIPT.call("get_symbol", marker_id)).strip_edges().to_lower()
+	return String(marker_record.get("symbol", TERRAIN_MARKER_CATALOG_SCRIPT.call("get_symbol", marker_id))).strip_edges().to_lower()
+
+
+func get_marker_color(marker_id: String, fallback: Color = Color(0.9, 0.9, 0.9, 1.0)) -> Color:
+	var marker_record: Dictionary = get_marker_record(marker_id)
+	if marker_record.is_empty():
+		return TERRAIN_MARKER_CATALOG_SCRIPT.call("normalize_color", TERRAIN_MARKER_CATALOG_SCRIPT.call("get_color", marker_id), fallback)
+	return TERRAIN_MARKER_CATALOG_SCRIPT.call("normalize_color", marker_record.get("color", TERRAIN_MARKER_CATALOG_SCRIPT.call("get_color", marker_id)), fallback)
+
+
 func get_patrol_paths() -> Dictionary:
 	return _patrol_paths.duplicate(true)
 
@@ -262,7 +312,8 @@ func get_marker_position(marker_id: String, fallback: Vector2 = Vector2.ZERO) ->
 	var normalized_marker_id: String = marker_id.strip_edges()
 	if normalized_marker_id.is_empty() or not _markers.has(normalized_marker_id):
 		return fallback
-	return _coerce_vector2(_markers.get(normalized_marker_id, fallback))
+	var marker_record: Dictionary = Dictionary(_markers.get(normalized_marker_id, {}))
+	return TERRAIN_MARKER_CATALOG_SCRIPT.call("normalize_position", marker_record.get("position", fallback))
 
 
 func has_marker(marker_id: String) -> bool:
@@ -274,7 +325,68 @@ func set_marker_position(marker_id: String, world_position: Vector2) -> void:
 	var normalized_marker_id: String = marker_id.strip_edges()
 	if normalized_marker_id.is_empty():
 		return
-	_markers[normalized_marker_id] = world_position
+	var marker_record: Dictionary = get_marker_record(normalized_marker_id)
+	if marker_record.is_empty():
+		var inferred_type_id: String = normalized_marker_id.to_lower() if bool(TERRAIN_MARKER_CATALOG_SCRIPT.call("has_type", normalized_marker_id)) else String(TERRAIN_MARKER_CATALOG_SCRIPT.TYPE_CUSTOM)
+		marker_record = TERRAIN_MARKER_CATALOG_SCRIPT.call("build_marker_record", normalized_marker_id, inferred_type_id, world_position)
+	else:
+		marker_record["position"] = world_position
+	_markers[normalized_marker_id] = marker_record
+
+
+func set_marker(marker_id: String, marker_type_id: String, world_position: Vector2, overrides: Dictionary = {}) -> void:
+	var normalized_marker_id: String = marker_id.strip_edges()
+	if normalized_marker_id.is_empty():
+		return
+	_markers[normalized_marker_id] = TERRAIN_MARKER_CATALOG_SCRIPT.call("build_marker_record", normalized_marker_id, marker_type_id, world_position, overrides)
+
+
+func remove_marker(marker_id: String) -> void:
+	var normalized_marker_id: String = marker_id.strip_edges()
+	if normalized_marker_id.is_empty():
+		return
+	_markers.erase(normalized_marker_id)
+
+
+func set_marker_display_name(marker_id: String, marker_name: String) -> void:
+	var normalized_marker_id: String = marker_id.strip_edges()
+	if normalized_marker_id.is_empty():
+		return
+	var marker_record: Dictionary = get_marker_record(normalized_marker_id)
+	if marker_record.is_empty():
+		marker_record = TERRAIN_MARKER_CATALOG_SCRIPT.call("build_marker_record", normalized_marker_id, normalized_marker_id, Vector2.ZERO)
+	var sanitized_name: String = marker_name.strip_edges()
+	if sanitized_name.is_empty():
+		sanitized_name = String(TERRAIN_MARKER_CATALOG_SCRIPT.call("get_default_name", String(marker_record.get("marker_type_id", normalized_marker_id)), normalized_marker_id))
+	marker_record["name"] = sanitized_name
+	_markers[normalized_marker_id] = marker_record
+
+
+func set_marker_type(marker_id: String, marker_type_id: String) -> void:
+	var normalized_marker_id: String = marker_id.strip_edges()
+	if normalized_marker_id.is_empty():
+		return
+	var existing_record: Dictionary = get_marker_record(normalized_marker_id)
+	var preserved_name: String = String(existing_record.get("name", "")).strip_edges()
+	var preserved_color: Variant = existing_record.get("color", TERRAIN_MARKER_CATALOG_SCRIPT.call("get_color", marker_type_id))
+	var position: Vector2 = get_marker_position(normalized_marker_id, Vector2.ZERO)
+	var overrides: Dictionary = {
+		"color": preserved_color,
+	}
+	if not preserved_name.is_empty():
+		overrides["name"] = preserved_name
+	_markers[normalized_marker_id] = TERRAIN_MARKER_CATALOG_SCRIPT.call("build_marker_record", normalized_marker_id, marker_type_id, position, overrides)
+
+
+func set_marker_color(marker_id: String, marker_color: Color) -> void:
+	var normalized_marker_id: String = marker_id.strip_edges()
+	if normalized_marker_id.is_empty():
+		return
+	var marker_record: Dictionary = get_marker_record(normalized_marker_id)
+	if marker_record.is_empty():
+		marker_record = TERRAIN_MARKER_CATALOG_SCRIPT.call("build_marker_record", normalized_marker_id, normalized_marker_id, Vector2.ZERO)
+	marker_record["color"] = TERRAIN_MARKER_CATALOG_SCRIPT.call("normalize_color", marker_color, marker_color)
+	_markers[normalized_marker_id] = marker_record
 
 
 func _grid_to_world(grid_position: Vector2i) -> Vector2:
@@ -353,7 +465,7 @@ static func _coerce_marker_dictionary(value: Variant) -> Dictionary:
 		var marker_id: String = String(marker_id_variant).strip_edges()
 		if marker_id.is_empty():
 			continue
-		result[marker_id] = _coerce_vector2(marker_dict.get(marker_id_variant, Vector2.ZERO))
+		result[marker_id] = _coerce_marker_record(marker_id, marker_dict.get(marker_id_variant, Vector2.ZERO))
 
 	return result
 
@@ -364,13 +476,46 @@ func _serialize_markers() -> Dictionary:
 		var marker_id: String = String(marker_id_variant).strip_edges()
 		if marker_id.is_empty():
 			continue
-		var marker_position: Vector2 = _coerce_vector2(_markers.get(marker_id_variant, Vector2.ZERO))
+		var marker_record: Dictionary = _coerce_marker_record(marker_id, _markers.get(marker_id_variant, {}))
+		var marker_position: Vector2 = TERRAIN_MARKER_CATALOG_SCRIPT.call("normalize_position", marker_record.get("position", Vector2.ZERO))
 		serialized_markers[marker_id] = {
+			"marker_type_id": String(marker_record.get("marker_type_id", marker_id)).strip_edges().to_lower(),
+			"name": String(marker_record.get("name", marker_id)).strip_edges(),
+			"placement_context": String(marker_record.get("placement_context", TERRAIN_MARKER_CATALOG_SCRIPT.call("get_context", marker_id))).strip_edges().to_lower(),
+			"symbol": String(marker_record.get("symbol", TERRAIN_MARKER_CATALOG_SCRIPT.call("get_symbol", marker_id))).strip_edges().to_lower(),
+			"color": TERRAIN_MARKER_CATALOG_SCRIPT.call("serialize_color", TERRAIN_MARKER_CATALOG_SCRIPT.call("normalize_color", marker_record.get("color", TERRAIN_MARKER_CATALOG_SCRIPT.call("get_color", marker_id)), TERRAIN_MARKER_CATALOG_SCRIPT.call("get_color", marker_id))),
 			"x": int(round(marker_position.x)),
 			"y": int(round(marker_position.y)),
 		}
 
 	return serialized_markers
+
+
+static func _coerce_marker_record(marker_id: String, value: Variant) -> Dictionary:
+	var normalized_marker_id: String = marker_id.strip_edges()
+	var fallback_type_id: String = normalized_marker_id.to_lower() if bool(TERRAIN_MARKER_CATALOG_SCRIPT.call("has_type", normalized_marker_id)) else String(TERRAIN_MARKER_CATALOG_SCRIPT.TYPE_CUSTOM)
+	var fallback_color: Color = TERRAIN_MARKER_CATALOG_SCRIPT.call("get_color", fallback_type_id)
+	var overrides: Dictionary = {}
+	if typeof(value) == TYPE_DICTIONARY:
+		var value_dict: Dictionary = value
+		var type_id: String = String(value_dict.get("marker_type_id", fallback_type_id)).strip_edges().to_lower()
+		if type_id.is_empty():
+			type_id = fallback_type_id
+		var marker_name: String = String(value_dict.get("name", value_dict.get("label", ""))).strip_edges()
+		if not marker_name.is_empty():
+			overrides["name"] = marker_name
+		var placement_context: String = String(value_dict.get("placement_context", value_dict.get("context", ""))).strip_edges().to_lower()
+		if not placement_context.is_empty():
+			overrides["placement_context"] = placement_context
+		var symbol: String = String(value_dict.get("symbol", "")).strip_edges().to_lower()
+		if not symbol.is_empty():
+			overrides["symbol"] = symbol
+		if value_dict.has("color"):
+			overrides["color"] = TERRAIN_MARKER_CATALOG_SCRIPT.call("normalize_color", value_dict.get("color"), fallback_color)
+		overrides["position"] = TERRAIN_MARKER_CATALOG_SCRIPT.call("normalize_position", value_dict)
+		return TERRAIN_MARKER_CATALOG_SCRIPT.call("build_marker_record", normalized_marker_id, type_id, TERRAIN_MARKER_CATALOG_SCRIPT.call("normalize_position", value_dict), overrides)
+	var position: Vector2 = TERRAIN_MARKER_CATALOG_SCRIPT.call("normalize_position", value)
+	return TERRAIN_MARKER_CATALOG_SCRIPT.call("build_marker_record", normalized_marker_id, fallback_type_id, position)
 
 
 static func _coerce_patrol_dictionary(value: Variant) -> Dictionary:

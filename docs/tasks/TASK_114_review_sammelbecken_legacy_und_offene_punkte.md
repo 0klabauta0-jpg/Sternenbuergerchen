@@ -91,16 +91,17 @@ Dieser Task sammelt die im tiefen Review vom 2026-04-21 verifizierten Altlasten,
   - Dateien: `docs/tasks/TASK_082_gemeinsamer_terrain_renderer_editor_und_mission.md`, `docs/tasks/TASK_114_review_sammelbecken_legacy_und_offene_punkte.md`, `docs/tasks/TASK_115_gemeinsames_markersystem_fuer_editor_und_taktikkarte.md`
   - Umfang: Die offenen Marker-Themen werden nicht mehr nur als vager Rest in `TASK_082` weitergetragen, sondern als eigener Folge-Task `TASK_115` festgehalten. Der neue Task trennt klar zwischen authorbaren Editor-/Systemmarkern und spielerseitigen Befehlsmarkern in der Mission, fordert eine Typ-Liste statt freier Marker-Namen und haelt direkte Karteninteraktion, Tile-Snap und Ueberlappungsblock fest.
 
+- [x] Der ausgelagerte Marker-Folge-Task `TASK_115` ist umgesetzt.
+  - Dateien: `scripts/terrain/terrain_marker_catalog.gd`, `scripts/terrain/terrain_map_data.gd`, `scripts/editor/map_editor.gd`, `scripts/tests/fireteam_order_visualizer.gd`, `scripts/tests/mission_tactical_sandbox_controller.gd`, `scripts/tests/task_115_verifier.gd`, `docs/tasks/TASK_082_gemeinsamer_terrain_renderer_editor_und_mission.md`, `docs/tasks/TASK_115_gemeinsames_markersystem_fuer_editor_und_taktikkarte.md`, `docs/IMPLEMENTATION_STATUS.md`
+  - Umfang: Marker laufen jetzt ueber einen gemeinsamen Typkatalog mit Name, Farbe, Symbol und Kontext. Der Map-Editor besitzt eine echte Marker-Liste mit direkter Kartenplatzierung, Drag, Delete, Doppelklick-Umbenennen, Tile-Snap und Ueberlappungsblock. Die Taktikkarte konsumiert fuer Spielermarker denselben `mission_player`-Katalog und rastet Wegpunkte auf Tile-Mitten ein.
+  - Verifikation: `scripts/tests/task_115_verifier.gd`, `scripts/tests/task_099_verifier.gd`, `scripts/tests/task_109_verifier.gd`, `scripts/tests/task_113_verifier.gd`, `scripts/tests/task_096_recovery_verifier.gd`, `scripts/tests/task_114_meta_recovery_verifier.gd`, `scripts/tests/bugfix_dropship_mission_flow_verifier.gd`
+
 ## Folge-Tasks aus dem Review
 
-### 1. Explizit ausgelagerter Restpunkt
-- `TASK_115` / Gemeinsames Markersystem fuer Editor und Taktikkarte
-  - Fuehrt die bisher festen Map-Marker in einen gemeinsamen Typkatalog ueber.
-  - Ergaenzt Marker-Liste, direkte Kartenplatzierung, Drag, Delete, Doppelklick-Umbenennen, Tile-Snap und Ueberlappungsblock.
-  - Oeffnet nur einen freigegebenen Teil der Marker fuer spielerseitige Missions-Befehlsmarker; Gegner- und Systemmarker bleiben editor-only.
+- Keine verbleibenden explizit ausgelagerten Review-Restpunkte.
 
 ## Empfehlung fuer die naechste Abarbeitung
-1. `TASK_115` als eigenen Editor-/Tactical-Follow-up bearbeiten statt neue Marker-Logik still in `TASK_082`, `map_editor.gd` oder `mission_tactical_sandbox_controller.gd` hineinzuziehen.
+1. Keine weiteren offenen Review-Folge-Tasks aus `TASK_114`; neue Marker- oder Terrain-Erweiterungen nur noch als neu benannte Folge-Tasks schneiden.
 
 ## Nicht-Ziele
 - kein stiller Grossrefactor des Meta-Layers

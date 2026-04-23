@@ -14,6 +14,7 @@ const FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tests
 const FIRETEAM_ORDER_VISUALIZER_SCRIPT: GDScript = preload("res://scripts/tests/fireteam_order_visualizer.gd")
 const AD_HOC_ORDER_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/ad_hoc_order_controller.gd")
 const AD_HOC_ORDER_SCRIPT: GDScript = preload("res://scripts/command/ad_hoc_order.gd")
+const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
 const FIRETEAM_COORDINATION_MANAGER_SCRIPT: GDScript = preload("res://scripts/tests/fireteam_coordination_manager.gd")
 const TACTICAL_STANCE_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/tactical_stance_controller.gd")
 const FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/fireteam_movement_controller.gd")
@@ -3688,8 +3689,9 @@ func _try_open_waypoint_menu_at_position(screen_position: Vector2) -> bool:
 
 func _create_waypoints_for_selected_fireteams(world_position: Vector2) -> Array:
 	var waypoint_targets: Array = []
+	var snapped_world_position: Vector2 = _snap_planning_position_to_tile_center(world_position)
 	for fireteam_id in _selected_fireteam_ids:
-		var waypoint_target: Dictionary = _append_waypoint_to_plan(String(fireteam_id), _current_phase_index, world_position)
+		var waypoint_target: Dictionary = _append_waypoint_to_plan(String(fireteam_id), _current_phase_index, snapped_world_position)
 		if waypoint_target.is_empty():
 			continue
 		waypoint_targets.append(waypoint_target)
@@ -4703,11 +4705,8 @@ func _open_waypoint_command_menu(screen_position: Vector2, waypoint_targets: Arr
 	for waypoint_target in waypoint_targets:
 		_waypoint_menu_targets.append(Dictionary(waypoint_target).duplicate(true))
 	menu.clear()
-	menu.add_item("Move", WAYPOINT_MENU_MOVE_ID)
-	menu.add_item("Defend", WAYPOINT_MENU_DEFEND_ID)
-	menu.add_item("Engage", WAYPOINT_MENU_ENGAGE_ID)
-	menu.add_item("Flank", WAYPOINT_MENU_FLANK_ID)
-	menu.add_item("Take", WAYPOINT_MENU_TAKE_ID)
+	for marker_type_id in PackedStringArray(TERRAIN_MARKER_CATALOG_SCRIPT.call("get_type_ids_for_context", TERRAIN_MARKER_CATALOG_SCRIPT.CONTEXT_MISSION_PLAYER)):
+		menu.add_item(String(TERRAIN_MARKER_CATALOG_SCRIPT.call("get_display_name", marker_type_id)), _waypoint_menu_id_for_command(String(marker_type_id)))
 	if include_delete_action:
 		menu.add_separator()
 		menu.add_item("Delete", WAYPOINT_MENU_DELETE_ID)
@@ -4758,18 +4757,47 @@ func _set_waypoint_command_for_targets(waypoint_targets: Array, command_type: St
 
 
 func _update_waypoint_targets(waypoint_targets: Array, world_position: Vector2) -> bool:
+	var snapped_world_position: Vector2 = _snap_planning_position_to_tile_center(world_position)
 	var did_change: bool = false
 	for waypoint_target in waypoint_targets:
 		var waypoint = _get_waypoint_from_ref(Dictionary(waypoint_target))
 		if waypoint == null:
 			continue
-		waypoint.target_position = world_position
+		waypoint.target_position = snapped_world_position
 		did_change = true
 	if not did_change:
 		return false
 	_refresh_order_visuals()
 	_update_ui()
 	return true
+
+
+func _waypoint_menu_id_for_command(command_type: String) -> int:
+	match command_type.strip_edges().to_lower():
+		FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_MOVE:
+			return WAYPOINT_MENU_MOVE_ID
+		FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_DEFEND:
+			return WAYPOINT_MENU_DEFEND_ID
+		FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_ENGAGE:
+			return WAYPOINT_MENU_ENGAGE_ID
+		FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_FLANK:
+			return WAYPOINT_MENU_FLANK_ID
+		FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_TAKE:
+			return WAYPOINT_MENU_TAKE_ID
+	return WAYPOINT_MENU_MOVE_ID
+
+
+func _snap_planning_position_to_tile_center(world_position: Vector2) -> Vector2:
+	var clamped_world_position: Vector2 = _clamp_world_position_to_viewport(world_position)
+	var terrain_registry = _get_terrain_registry()
+	if terrain_registry == null or not terrain_registry.has_method("get_tile_at_world"):
+		return clamped_world_position
+	var tile_data = terrain_registry.call("get_tile_at_world", clamped_world_position)
+	if tile_data == null:
+		return clamped_world_position
+	if typeof(tile_data.world_position) == TYPE_VECTOR2:
+		return Vector2(tile_data.world_position)
+	return clamped_world_position
 
 
 func _delete_waypoint_targets(waypoint_targets: Array) -> bool:
