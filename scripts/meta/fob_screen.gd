@@ -1738,10 +1738,12 @@ func _normalize_loadout_id(value: String) -> String:
 func _normalize_weapon_id(value: String) -> String:
 	var normalized_value: String = value.strip_edges().to_lower()
 	match normalized_value:
-		"smg", "rifle", "rail_gun":
+		"smg", "rifle", "rail_gun", "medictool":
 			return normalized_value
 		"special", "sonderwaffe", "schienenkanone":
 			return "rail_gun"
+		"medic_tool", "medic-tool", "medic tool":
+			return "medictool"
 		_:
 			return DEFAULT_MEMBER_WEAPON
 
@@ -1842,6 +1844,7 @@ func _populate_weapon_option_button(option_button: OptionButton, selected_weapon
 		{"id": "smg", "label": "Maschinenpistole"},
 		{"id": "rifle", "label": "Sturmgewehr"},
 		{"id": "rail_gun", "label": "Schienenkanone"},
+		{"id": "medictool", "label": "Medictool"},
 	]:
 		option_button.add_item(String(option["label"]))
 		if String(option["id"]) == _normalize_weapon_id(selected_weapon_id):
@@ -1854,6 +1857,8 @@ func _build_weapon_label(weapon_id: String) -> String:
 			return "Maschinenpistole"
 		"rail_gun", "special":
 			return "Schienenkanone"
+		"medictool":
+			return "Medictool"
 		_:
 			return "Sturmgewehr"
 
@@ -1878,6 +1883,8 @@ func _weapon_id_from_index(index: int) -> String:
 			return "rifle"
 		2:
 			return "rail_gun"
+		3:
+			return "medictool"
 		_:
 			return DEFAULT_MEMBER_WEAPON
 

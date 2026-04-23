@@ -21,6 +21,7 @@ const WEAPON_VISUAL_OFFSETS: Dictionary = {
 const STATUS_LABEL_NAME: String = "DebugStatusLabel"
 const FIRETEAM_LABEL_NAME: String = "DebugFireteamLabel"
 const PHASE_LABEL_NAME: String = "DebugPhaseLabel"
+const TACTICAL_STANCE_LABEL_NAME: String = "DebugTacticalStanceLabel"
 const EVENT_LABEL_NAME: String = "DebugEventLabel"
 const SELECTION_RING_NAME: String = "SelectionRing"
 const STATUS_LABEL_OFFSET: Vector2 = Vector2(-54.0, -48.0)
@@ -81,6 +82,7 @@ var _last_damage_context: Dictionary = {}
 var _status_label: Label = null
 var _fireteam_label: Label = null
 var _phase_label: Label = null
+var _tactical_stance_label: Label = null
 var _event_label: Label = null
 var _current_event_text: String = ""
 var _current_event_color: Color = Color(1.0, 0.95, 0.5, 1.0)
@@ -93,6 +95,8 @@ var _weapon_visual: Sprite2D = null
 var _weapon_visual_direction: String = DEFAULT_WEAPON_VISUAL_DIRECTION
 var _respawn_manager = null
 var _terrain_registry = null
+var _tactical_stance_id: String = "normal"
+var _tactical_stance_revision: int = 0
 
 
 func _ready() -> void:
@@ -194,7 +198,22 @@ func get_weapon_2_id() -> String:
 
 
 func get_active_weapon_id() -> String:
-	return weapon_1_id if not weapon_1_id.is_empty() else "rifle"
+	return _resolve_active_combat_weapon_id()
+
+
+func has_loadout_item(item_id: String) -> bool:
+	var normalized_item_id: String = WEAPON_DATA_SCRIPT.normalize_weapon_id(item_id)
+	if normalized_item_id.is_empty():
+		return false
+	return WEAPON_DATA_SCRIPT.normalize_weapon_id(weapon_1_id) == normalized_item_id or WEAPON_DATA_SCRIPT.normalize_weapon_id(weapon_2_id) == normalized_item_id
+
+
+func has_medic_tool() -> bool:
+	return has_loadout_item("medictool")
+
+
+func has_attack_weapon() -> bool:
+	return not _resolve_active_combat_weapon_id().is_empty()
 
 
 func get_weapon_visual() -> Sprite2D:
@@ -203,6 +222,25 @@ func get_weapon_visual() -> Sprite2D:
 
 func get_weapon_visual_direction() -> String:
 	return _weapon_visual_direction
+
+
+func get_tactical_stance_indicator_id() -> String:
+	return _tactical_stance_id
+
+
+func get_tactical_stance_indicator_revision() -> int:
+	return _tactical_stance_revision
+
+
+func get_tactical_stance_badge_text() -> String:
+	return _build_tactical_stance_label_text()
+
+
+func get_tactical_stance_badge_snapshot() -> Dictionary:
+	return {
+		"tactical_stance": _tactical_stance_id,
+		"tactical_stance_revision": _tactical_stance_revision,
+	}
 
 
 func get_weapon_visual_texture_path() -> String:
@@ -526,10 +564,10 @@ func apply_identity_config(identity_config: Dictionary) -> void:
 		armor_id = String(identity_config.get("armor_id", identity_config.get("armor", "medium"))).strip_edges().to_lower()
 
 	if identity_config.has("weapon_1") or identity_config.has("weapon_1_id"):
-		weapon_1_id = String(identity_config.get("weapon_1_id", identity_config.get("weapon_1", "rifle"))).strip_edges()
+		weapon_1_id = WEAPON_DATA_SCRIPT.sanitize_weapon_id(String(identity_config.get("weapon_1_id", identity_config.get("weapon_1", WEAPON_DATA_SCRIPT.DEFAULT_WEAPON_ID))))
 
 	if identity_config.has("weapon_2") or identity_config.has("weapon_2_id"):
-		weapon_2_id = String(identity_config.get("weapon_2_id", identity_config.get("weapon_2", "rifle"))).strip_edges()
+		weapon_2_id = WEAPON_DATA_SCRIPT.sanitize_weapon_id(String(identity_config.get("weapon_2_id", identity_config.get("weapon_2", WEAPON_DATA_SCRIPT.DEFAULT_WEAPON_ID))))
 
 	if identity_config.has("team_id"):
 		team_id = String(identity_config["team_id"]).strip_edges()
@@ -630,6 +668,22 @@ func set_terrain_registry(terrain_registry) -> void:
 	_refresh_readability()
 
 
+func set_tactical_stance_indicator(next_stance_id: String, revision: int = -1) -> void:
+	var normalized_stance_id: String = _normalize_tactical_stance_id(next_stance_id)
+	var next_revision: int = _tactical_stance_revision
+	if revision >= 0:
+		if revision < _tactical_stance_revision:
+			return
+		next_revision = revision
+	elif normalized_stance_id != _tactical_stance_id:
+		next_revision += 1
+	if normalized_stance_id == _tactical_stance_id and next_revision == _tactical_stance_revision:
+		return
+	_tactical_stance_id = normalized_stance_id
+	_tactical_stance_revision = next_revision
+	_refresh_readability()
+
+
 func _on_child_entered_tree(node: Node) -> void:
 	if node != null and String(node.name) == VISUAL_SPRITE_NAME:
 		_refresh_weapon_visual()
@@ -651,6 +705,11 @@ func apply_remote_snapshot(snapshot: Dictionary, interpolation_alpha: float = RE
 
 	_apply_remote_runtime_status(_build_remote_runtime_dict(snapshot))
 	_apply_remote_vital_status(_build_remote_vital_dict(snapshot))
+	if snapshot.has("tactical_stance") or snapshot.has("tactical_stance_revision"):
+		var stance_revision: int = -1
+		if snapshot.has("tactical_stance_revision"):
+			stance_revision = maxi(int(snapshot.get("tactical_stance_revision", _tactical_stance_revision)), 0)
+		set_tactical_stance_indicator(String(snapshot.get("tactical_stance", _tactical_stance_id)), stance_revision)
 
 	_refresh_readability()
 
@@ -1059,8 +1118,16 @@ func _refresh_weapon_visual() -> void:
 		return
 
 	_weapon_visual_direction = _resolve_weapon_visual_direction(visual_root)
-	var weapon_id: String = get_active_weapon_id()
+	var weapon_id: String = _resolve_visual_weapon_id()
+	if weapon_id.is_empty():
+		weapon_visual.texture = null
+		weapon_visual.visible = false
+		return
 	var asset_path: String = WEAPON_DATA_SCRIPT.get_asset_path(weapon_id, _weapon_visual_direction)
+	if asset_path.is_empty():
+		weapon_visual.texture = null
+		weapon_visual.visible = false
+		return
 	var weapon_texture := load(asset_path) as Texture2D
 	if weapon_texture == null:
 		weapon_visual.texture = null
@@ -1070,7 +1137,25 @@ func _refresh_weapon_visual() -> void:
 	weapon_visual.texture = weapon_texture
 	weapon_visual.position = _get_weapon_visual_offset(_weapon_visual_direction)
 	weapon_visual.scale = WEAPON_DATA_SCRIPT.get_sprite_scale(weapon_id)
+	weapon_visual.modulate = WEAPON_DATA_SCRIPT.get_sprite_modulate(weapon_id)
 	weapon_visual.visible = true
+
+
+func _resolve_active_combat_weapon_id() -> String:
+	var primary_weapon_id: String = WEAPON_DATA_SCRIPT.sanitize_weapon_id(weapon_1_id)
+	if WEAPON_DATA_SCRIPT.is_attack_weapon_id(primary_weapon_id):
+		return primary_weapon_id
+	var secondary_weapon_id: String = WEAPON_DATA_SCRIPT.sanitize_weapon_id(weapon_2_id)
+	if WEAPON_DATA_SCRIPT.is_attack_weapon_id(secondary_weapon_id):
+		return secondary_weapon_id
+	return ""
+
+
+func _resolve_visual_weapon_id() -> String:
+	var primary_weapon_id: String = WEAPON_DATA_SCRIPT.sanitize_weapon_id(weapon_1_id)
+	if WEAPON_DATA_SCRIPT.is_valid_weapon_id(primary_weapon_id):
+		return primary_weapon_id
+	return _resolve_active_combat_weapon_id()
 
 
 func _ensure_weapon_visual(visual_root: Sprite2D) -> Sprite2D:
@@ -1136,6 +1221,13 @@ func _ensure_readability_labels() -> void:
 		_phase_label.top_level = true
 		add_child(_phase_label)
 
+	_tactical_stance_label = get_node_or_null(TACTICAL_STANCE_LABEL_NAME) as Label
+	if _tactical_stance_label == null:
+		_tactical_stance_label = Label.new()
+		_tactical_stance_label.name = TACTICAL_STANCE_LABEL_NAME
+		_tactical_stance_label.top_level = true
+		add_child(_tactical_stance_label)
+
 	_event_label = get_node_or_null(EVENT_LABEL_NAME) as Label
 	if _event_label == null:
 		_event_label = Label.new()
@@ -1146,39 +1238,56 @@ func _ensure_readability_labels() -> void:
 	_status_label.add_theme_font_size_override("font_size", 11)
 	_fireteam_label.add_theme_font_size_override("font_size", 10)
 	_phase_label.add_theme_font_size_override("font_size", 10)
+	_tactical_stance_label.add_theme_font_size_override("font_size", 10)
 	_event_label.add_theme_font_size_override("font_size", 12)
 	_status_label.add_theme_constant_override("outline_size", 2)
 	_fireteam_label.add_theme_constant_override("outline_size", 2)
 	_phase_label.add_theme_constant_override("outline_size", 2)
+	_tactical_stance_label.add_theme_constant_override("outline_size", 2)
 	_event_label.add_theme_constant_override("outline_size", 2)
 	_status_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
 	_fireteam_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
 	_phase_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
+	_tactical_stance_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
 	_event_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
 	_ensure_selection_ring()
 	_sync_readability_positions()
 
 
 func _sync_readability_positions() -> void:
+	var base_position: Vector2 = global_position + STATUS_LABEL_OFFSET
 	if _status_label != null:
 		_status_label.visible = is_visible_in_tree()
-		_status_label.global_position = global_position + STATUS_LABEL_OFFSET
+		_status_label.global_position = base_position
+		var inline_offset_x: float = _status_label.get_combined_minimum_size().x + FIRETEAM_LABEL_SPACING
 		if _fireteam_label != null:
 			_fireteam_label.visible = is_visible_in_tree() and not fireteam_id.is_empty()
-			_fireteam_label.global_position = _status_label.global_position + Vector2(_status_label.get_combined_minimum_size().x + FIRETEAM_LABEL_SPACING, 0.0)
+			_fireteam_label.global_position = _status_label.global_position + Vector2(inline_offset_x, 0.0)
+			if _fireteam_label.visible:
+				inline_offset_x += _fireteam_label.get_combined_minimum_size().x + FIRETEAM_LABEL_SPACING
 		if _phase_label != null:
-			var phase_offset_x: float = _status_label.get_combined_minimum_size().x + FIRETEAM_LABEL_SPACING
-			if _fireteam_label != null and _fireteam_label.visible:
-				phase_offset_x += _fireteam_label.get_combined_minimum_size().x + FIRETEAM_LABEL_SPACING
 			_phase_label.visible = is_visible_in_tree() and not _build_phase_label_text().is_empty()
-			_phase_label.global_position = _status_label.global_position + Vector2(phase_offset_x, 0.0)
+			_phase_label.global_position = _status_label.global_position + Vector2(inline_offset_x, 0.0)
+			if _phase_label.visible:
+				inline_offset_x += _phase_label.get_combined_minimum_size().x + FIRETEAM_LABEL_SPACING
+		if _tactical_stance_label != null:
+			_tactical_stance_label.visible = is_visible_in_tree() and not _build_tactical_stance_label_text().is_empty()
+			_tactical_stance_label.global_position = _status_label.global_position + Vector2(inline_offset_x, 0.0)
 
 	elif _fireteam_label != null:
 		_fireteam_label.visible = is_visible_in_tree() and not fireteam_id.is_empty()
-		_fireteam_label.global_position = global_position + STATUS_LABEL_OFFSET
+		_fireteam_label.global_position = base_position
+		var fallback_offset_x: float = 0.0
+		if _fireteam_label.visible:
+			fallback_offset_x += _fireteam_label.get_combined_minimum_size().x + FIRETEAM_LABEL_SPACING
 		if _phase_label != null:
 			_phase_label.visible = is_visible_in_tree() and not _build_phase_label_text().is_empty()
-			_phase_label.global_position = global_position + STATUS_LABEL_OFFSET + Vector2(FIRETEAM_LABEL_SPACING, 0.0)
+			_phase_label.global_position = base_position + Vector2(fallback_offset_x, 0.0)
+			if _phase_label.visible:
+				fallback_offset_x += _phase_label.get_combined_minimum_size().x + FIRETEAM_LABEL_SPACING
+		if _tactical_stance_label != null:
+			_tactical_stance_label.visible = is_visible_in_tree() and not _build_tactical_stance_label_text().is_empty()
+			_tactical_stance_label.global_position = base_position + Vector2(fallback_offset_x, 0.0)
 
 	if _event_label != null:
 		_event_label.visible = is_visible_in_tree() and not _current_event_text.is_empty()
@@ -1189,6 +1298,7 @@ func _refresh_readability() -> void:
 	_refresh_status_label()
 	_refresh_fireteam_label()
 	_refresh_phase_label()
+	_refresh_tactical_stance_label()
 	_refresh_event_label()
 	_refresh_selection_ring()
 	_sync_readability_positions()
@@ -1243,6 +1353,16 @@ func _refresh_phase_label() -> void:
 	_phase_label.text = phase_text
 	_phase_label.modulate = Color(0.88, 0.98, 0.88, 1.0)
 	_phase_label.visible = is_visible_in_tree() and not phase_text.is_empty()
+
+
+func _refresh_tactical_stance_label() -> void:
+	if _tactical_stance_label == null:
+		return
+
+	var stance_text: String = _build_tactical_stance_label_text()
+	_tactical_stance_label.text = stance_text
+	_tactical_stance_label.modulate = _build_tactical_stance_label_color()
+	_tactical_stance_label.visible = is_visible_in_tree() and not stance_text.is_empty()
 
 
 func _refresh_event_label() -> void:
@@ -1389,8 +1509,37 @@ func _build_phase_label_text() -> String:
 	return COMMANDER_COMMAND_SCRIPT.get_phase_short_name(int(_runtime_status.phase))
 
 
+func _build_tactical_stance_label_text() -> String:
+	match _tactical_stance_id:
+		"cautious":
+			return "C"
+		"aggressive":
+			return "A"
+		_:
+			return "N"
+
+
+func _build_tactical_stance_label_color() -> Color:
+	match _tactical_stance_id:
+		"cautious":
+			return Color(0.62, 0.82, 1.0, 1.0)
+		"aggressive":
+			return Color(1.0, 0.52, 0.44, 1.0)
+		_:
+			return Color(0.94, 0.94, 0.9, 1.0)
+
+
 func _normalize_fireteam_id(value: String) -> String:
 	return value.strip_edges().to_lower()
+
+
+func _normalize_tactical_stance_id(value: String) -> String:
+	var normalized_value: String = value.strip_edges().to_lower()
+	match normalized_value:
+		"cautious", "aggressive":
+			return normalized_value
+		_:
+			return "normal"
 
 
 func _get_respawn_remaining_seconds() -> int:

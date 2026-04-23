@@ -3,7 +3,7 @@
 ## Ziel
 Die fruehere read-only `Mission`-/`MissionMap`-Overview ist inzwischen durch die echte Missionskarte im Meta-Layer ersetzt. Die verbleibenden Recovery-Punkte aus Homebase, FOB, Dropship-Flow und Character Sheet sollen hier gebuendelt sauber zu Ende gebaut werden.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT
 
 ## Pflicht vor Beginn
 - Lies `docs/PROJECT_BRIEF.md`
@@ -120,23 +120,27 @@ Die fruehere read-only `Mission`-/`MissionMap`-Overview ist inzwischen durch die
 - Roster-/Portrait-Zuordnung fuer Darius Holt
 
 ## Akzeptanzkriterien
-- [ ] `Mission` fuehrt im Meta-Layer immer zur echten Missionskarte und nicht mehr zu einer read-only Text-Overview.
-- [ ] Die Missionskartenansicht besitzt dieselben drei Navigationsbuttons wie Homebase und FOB.
-- [ ] Das alte separate Mission-Briefing ist entfernt oder in Homebase-/FOB-Header kompakt aufgegangen, ohne deren Groesse zu vergroessern.
-- [ ] Fensterbereiche tragen kleine sichtbare Nummern oben links.
-- [ ] In der Homebase startet das Transferfenster leer.
-- [ ] In der FOB werden transitierende NPC-Karten in Fenster 1 ausgegraut und mit Fortschrittsbalken angezeigt.
-- [ ] Piloten werden in die Missionsslot-Kapazitaet eingerechnet.
-- [ ] Auf der Karte koennen LZ und Anflugrichtung (`NW`, `NE`, `SW`, `SE`) definiert und in transparentem Gruen dargestellt werden.
-- [ ] Das Dropship ist auf der Karte sichtbar, Passagiere steigen nach Landung aus, und abgesetzte Fireteams verschwinden aus der Dropship-Karte.
-- [ ] Das Character Sheet folgt dem neuen Layout mit deutschem Label-Block und Fortschrittsbalken fuer Kernwerte.
-- [ ] Darius Holt nutzt ein anderes, korrektes Portrait.
-- [ ] Der `tracked`-Button ist entweder fachlich klar erklaert und sinnvoll benannt oder aus der Dropship-Shipcard entfernt.
+- [x] `Mission` fuehrt im Meta-Layer immer zur echten Missionskarte und nicht mehr zu einer read-only Text-Overview.
+- [x] Die Missionskartenansicht besitzt dieselben drei Navigationsbuttons wie Homebase und FOB.
+- [x] Das alte separate Mission-Briefing ist entfernt oder in Homebase-/FOB-Header kompakt aufgegangen, ohne deren Groesse zu vergroessern.
+- [x] Fensterbereiche tragen kleine sichtbare Nummern oben links.
+- [x] In der Homebase startet das Transferfenster leer.
+- [x] In der FOB werden transitierende NPC-Karten in Fenster 1 ausgegraut und mit Fortschrittsbalken angezeigt.
+- [x] Piloten werden in die Missionsslot-Kapazitaet eingerechnet.
+- [x] Auf der Karte koennen LZ und Anflugrichtung (`NW`, `NE`, `SW`, `SE`) definiert und in transparentem Gruen dargestellt werden.
+- [x] Das Dropship ist auf der Karte sichtbar, Passagiere steigen nach Landung aus, und abgesetzte Fireteams verschwinden aus der Dropship-Karte.
+- [x] Das Character Sheet folgt dem neuen Layout mit deutschem Label-Block und Fortschrittsbalken fuer Kernwerte.
+- [x] Darius Holt nutzt ein anderes, korrektes Portrait.
+- [x] Der `tracked`-Button ist entweder fachlich klar erklaert und sinnvoll benannt oder aus der Dropship-Shipcard entfernt.
 
-## Offene Restpunkte nach dem aktuellen Recovery-Slice
-- Sichtbare Nummern direkt in der echten Missions-Tactical-UI nachziehen, nicht nur in der alten Auxiliary-Map-Ansicht.
-- Einen kleinen Verifier fuer FOB-Transitkarten und Character-Sheet-Layout nachziehen, damit die Recovery nicht wieder still regressiert.
-- Eine letzte Pruefung machen, ob im Dropship-Kontext irgendwo doch noch ein fachlich falscher `tracked`-Button steckt.
+## Abschluss dieses Recovery-Slice
+- Die echten Tactical-HUD-Labels in `mission_reactivity_test.tscn` tragen jetzt direkt die gemeinsamen `#15` bis `#18`-Nummern statt alter Platzhaltertexte.
+- `scripts/tests/task_096_recovery_verifier.gd` deckt die drei spaeten Recovery-Risiken jetzt gezielt ab: nummerierte Tactical-HUD-Labels, ausgegraute FOB-Transitkarten mit Fortschrittsbalken sowie den Character-Sheet-Aufbau mit deutschem Label-Block und Kernwert-Balken.
+- Der Dropship-Kontext wurde abschliessend auf einen alten `tracked`-Button geprueft. Verbleibende Shipcard-Aktionen heissen fachlich klar `Board` und `Send`.
+
+## Lokale Pruefung
+- `godot_console.exe --headless --path . --script scripts/tests/task_096_recovery_verifier.gd`
+- `godot_console.exe --headless --path . --script scripts/tests/bugfix_dropship_mission_flow_verifier.gd`
 
 ## Git-Schritte nach lokaler Pruefung
 - `git status`

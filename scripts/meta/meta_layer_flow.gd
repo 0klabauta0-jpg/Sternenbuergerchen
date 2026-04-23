@@ -67,6 +67,7 @@ const DEFAULT_MISSION_PLANNING_STATE: Dictionary = {
 	"lz_position": Vector2.ZERO,
 	"approach_angle": "NW",
 	"drop_ship_requested": false,
+	"meta_transfer_routes": [],
 	"selected_fireteam": "ALL",
 	"selected_phase": "P1",
 	"selected_phase_index": 1,
@@ -1305,10 +1306,51 @@ func _build_fob_member_loadouts() -> Dictionary:
 	return result
 
 
+func _build_homebase_transfer_route_entries() -> Array:
+	var route_entries: Array = []
+	for entry_variant in _pending_homebase_team_transfers:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var duration_seconds: float = maxf(float(entry.get("duration_seconds", HOMEBASE_TEAM_TRANSFER_DURATION_SECONDS)), 1.0)
+		var elapsed_seconds: float = clampf(float(entry.get("elapsed_seconds", 0.0)), 0.0, duration_seconds)
+		var unit_ids: PackedStringArray = PackedStringArray(Array(entry.get("unit_ids", [])))
+		route_entries.append(
+			{
+				"transfer_id": String(entry.get("transfer_id", "")).strip_edges(),
+				"entry_type": "team",
+				"progress_value": (elapsed_seconds / duration_seconds) * 100.0,
+				"eta_seconds": maxi(int(ceil(duration_seconds - elapsed_seconds)), 0),
+				"member_count": unit_ids.size(),
+				"display_name": "%d Operators" % unit_ids.size(),
+			}
+		)
+	for entry_variant in _pending_homebase_pilot_transfers:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var duration_seconds: float = maxf(float(entry.get("duration_seconds", HOMEBASE_PILOT_TRANSFER_DURATION_SECONDS)), 1.0)
+		var elapsed_seconds: float = clampf(float(entry.get("elapsed_seconds", 0.0)), 0.0, duration_seconds)
+		var craft_id: String = String(entry.get("craft_id", "")).strip_edges()
+		var craft_definition: Dictionary = _find_homebase_aircraft_definition(craft_id)
+		route_entries.append(
+			{
+				"transfer_id": String(entry.get("transfer_id", "")).strip_edges(),
+				"entry_type": "pilot",
+				"progress_value": (elapsed_seconds / duration_seconds) * 100.0,
+				"eta_seconds": maxi(int(ceil(duration_seconds - elapsed_seconds)), 0),
+				"member_count": 0,
+				"display_name": String(craft_definition.get("display_name", craft_id)).strip_edges(),
+			}
+		)
+	return route_entries
+
+
 func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: bool = false) -> void:
 	var fob_screen = _get_fob_screen()
 	if fob_screen == null or not fob_screen.has_method("build_mission_drop_state"):
 		_mission_planning_state["embarked_unit_ids"] = []
+		_mission_planning_state["meta_transfer_routes"] = _build_homebase_transfer_route_entries()
 		if clear_deployed_unit_ids:
 			_mission_planning_state["deployed_unit_ids"] = []
 		return
@@ -1331,6 +1373,7 @@ func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: boo
 	_mission_planning_state["mission_drop_pilot_display_name"] = String(drop_state.get("mission_drop_pilot_display_name", "")).strip_edges()
 	_mission_planning_state["mission_drop_pilot_portrait_path"] = String(drop_state.get("mission_drop_pilot_portrait_path", "")).strip_edges()
 	_mission_planning_state["mission_drop_passenger_count"] = int(drop_state.get("mission_drop_passenger_count", 0))
+	_mission_planning_state["meta_transfer_routes"] = _build_homebase_transfer_route_entries()
 	if clear_deployed_unit_ids or not _mission_planning_state.has("deployed_unit_ids"):
 		_mission_planning_state["deployed_unit_ids"] = []
 	if not _mission_planning_state.has("mission_drop_return_requested"):

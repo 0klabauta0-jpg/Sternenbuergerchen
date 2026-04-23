@@ -72,6 +72,15 @@ const MISSION_DROPSHIP_PILOT_CARD_SIZE: Vector2 = Vector2(136.0, 50.0)
 const MISSION_DROPSHIP_CONTENT_HEIGHT: float = 50.0
 const MISSION_DROPSHIP_INFO_FONT_SIZE: int = 8
 const MISSION_DROPSHIP_PROGRESS_HEIGHT: float = 6.0
+const META_TRANSFER_ROUTE_COLOR: Color = Color(0.92, 0.74, 0.22, 0.72)
+const META_TRANSFER_ROUTE_TEAM_COLOR: Color = Color(0.45, 0.92, 0.64, 0.96)
+const META_TRANSFER_ROUTE_PILOT_COLOR: Color = Color(0.96, 0.84, 0.38, 0.98)
+const META_TRANSFER_ROUTE_HOMEBASE_COLOR: Color = Color(0.95, 0.78, 0.34, 0.84)
+const META_TRANSFER_ROUTE_FOB_COLOR: Color = Color(0.48, 0.9, 1.0, 0.88)
+const META_TRANSFER_ROUTE_WIDTH: float = 4.0
+const META_TRANSFER_ROUTE_HOMEBASE_OFFSET: Vector2 = Vector2(-252.0, -214.0)
+const META_TRANSFER_ROUTE_BEND_OFFSET: Vector2 = Vector2(-158.0, -106.0)
+const META_TRANSFER_ROUTE_MARKER_OFFSET: float = 12.0
 const APPROACH_OFFSETS: Dictionary = {
 	"NW": Vector2(-180.0, -112.0),
 	"NE": Vector2(180.0, -112.0),
@@ -132,6 +141,7 @@ var _mission_drop_pilot_display_name: String = ""
 var _mission_drop_pilot_portrait_path: String = ""
 var _mission_drop_passenger_count: int = 0
 var _mission_drop_return_requested: bool = false
+var _meta_transfer_routes: Array = []
 var _drop_ship_cooldown_remaining: float = 0.0
 var _card_refresh_time_remaining: float = 0.0
 var _drop_sequence_phase: String = ""
@@ -478,6 +488,8 @@ func set_planning_state(planning_state: Dictionary) -> void:
 		_mission_drop_passenger_count = maxi(int(planning_state.get("mission_drop_passenger_count", 0)), 0)
 	if planning_state.has("mission_drop_return_requested"):
 		_mission_drop_return_requested = bool(planning_state.get("mission_drop_return_requested", false))
+	if planning_state.has("meta_transfer_routes"):
+		_meta_transfer_routes = _sanitize_meta_transfer_routes(Array(planning_state.get("meta_transfer_routes", [])))
 	if planning_state.has("embarked_unit_ids"):
 		_embarked_unit_ids = _build_drop_unit_state_dict(Array(planning_state.get("embarked_unit_ids", [])))
 	if planning_state.has("deployed_unit_ids"):
@@ -490,7 +502,9 @@ func set_planning_state(planning_state: Dictionary) -> void:
 			_selected_fireteam_ids = _selection_ids_for_index(fireteam_index)
 	if planning_state.has("selected_fireteams"):
 		_set_selected_fireteams(_sanitize_fireteam_ids(PackedStringArray(Array(planning_state.get("selected_fireteams", [])))), false)
-	if planning_state.has("tactical_stances") and _tactical_stance_controller != null:
+	if planning_state.has("tactical_stance_sync") and _tactical_stance_controller != null:
+		_tactical_stance_controller.call("load_sync_state", Dictionary(planning_state.get("tactical_stance_sync", {})), _get_available_fireteam_ids())
+	elif planning_state.has("tactical_stances") and _tactical_stance_controller != null:
 		_tactical_stance_controller.call("load_stance_snapshot", Dictionary(planning_state.get("tactical_stances", {})), _get_available_fireteam_ids())
 	if planning_state.has("order_plans"):
 		_load_order_plans_from_state(Array(planning_state.get("order_plans", [])))
@@ -534,6 +548,7 @@ func get_planning_state() -> Dictionary:
 		"mission_drop_pilot_portrait_path": _mission_drop_pilot_portrait_path,
 		"mission_drop_passenger_count": _mission_drop_passenger_count,
 		"mission_drop_return_requested": _mission_drop_return_requested,
+		"meta_transfer_routes": _serialize_meta_transfer_routes(),
 		"embarked_unit_ids": _build_sorted_drop_unit_id_array(_embarked_unit_ids),
 		"deployed_unit_ids": _build_sorted_drop_unit_id_array(_deployed_unit_ids),
 		"selected_fireteam": _get_fireteam_name(),
@@ -543,6 +558,7 @@ func get_planning_state() -> Dictionary:
 	}
 	if _tactical_stance_controller != null:
 		planning_state["tactical_stances"] = Dictionary(_tactical_stance_controller.call("get_stance_snapshot"))
+		planning_state["tactical_stance_sync"] = Dictionary(_tactical_stance_controller.call("get_sync_state"))
 	var phase_controller = _get_phase_controller()
 	if phase_controller != null and phase_controller.has_method("build_planning_state_fragment"):
 		planning_state.merge(Dictionary(phase_controller.call("build_planning_state_fragment")), true)
@@ -677,6 +693,24 @@ func get_tactical_stances_snapshot() -> Dictionary:
 	if _tactical_stance_controller == null:
 		return {}
 	return Dictionary(_tactical_stance_controller.call("get_stance_snapshot")).duplicate(true)
+
+
+func get_tactical_stance_sync_state() -> Dictionary:
+	_ensure_tactical_stance_controller()
+	if _tactical_stance_controller == null:
+		return {}
+	return Dictionary(_tactical_stance_controller.call("get_sync_state")).duplicate(true)
+
+
+func apply_tactical_stance_sync_state(sync_state: Dictionary, emit_signal: bool = false) -> void:
+	_ensure_tactical_stance_controller()
+	if _tactical_stance_controller == null:
+		return
+	_tactical_stance_controller.call("load_sync_state", sync_state, _get_available_fireteam_ids())
+	_refresh_tactical_stance_panel()
+	_update_ui()
+	if emit_signal:
+		_emit_planning_state_changed()
 
 
 func set_selected_fireteams_tactical_stance(next_stance: String) -> bool:
@@ -1106,6 +1140,7 @@ func set_tactical_ui_visible(is_visible: bool) -> void:
 
 func _update_ui() -> void:
 	_apply_block_labels()
+	_sync_unit_tactical_stance_badges()
 	var command_feedback_label := get_node_or_null(command_feedback_label_path) as Label
 	if command_feedback_label != null:
 		if not _last_planning_state_issue.is_empty():
@@ -1551,11 +1586,11 @@ func _refresh_fireteam_cards() -> void:
 
 	for unit in units:
 		var card = NPC_COMPACT_CARD_SCENE.instantiate()
-		card.custom_minimum_size = Vector2(156.0, 58.0)
+		card.custom_minimum_size = Vector2(180.0 if preview_mode else 156.0, 58.0)
 		card.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		card.call(
 			"setup_from_profile",
-			_build_profile_from_unit(unit),
+			_build_fireteam_card_profile(unit),
 			{
 				"source_context": "mission_tactical",
 				"compact_mode": true,
@@ -1568,6 +1603,19 @@ func _refresh_fireteam_cards() -> void:
 		if not card.card_open_requested.is_connected(_on_fireteam_card_open_requested):
 			card.card_open_requested.connect(_on_fireteam_card_open_requested)
 		card_row.add_child(card)
+
+
+func _build_fireteam_card_profile(unit: Node):
+	var profile = _build_profile_from_unit(unit)
+	if not preview_mode or profile == null or not profile.has_method("duplicate_profile"):
+		return profile
+
+	var card_profile = profile.duplicate_profile()
+	var loadout_summary: String = _build_preview_fireteam_card_loadout_summary(unit)
+	if not loadout_summary.is_empty():
+		card_profile.role_name = loadout_summary
+	card_profile.secondary_text = _build_unit_secondary_text(unit)
+	return card_profile
 
 
 func _build_profile_from_unit(unit: Node) -> RefCounted:
@@ -1759,18 +1807,73 @@ func _build_tactical_loadout_text(unit: Node) -> String:
 	if unit == null or not unit.has_method("get_unit_id"):
 		return "standard kit"
 
+	var effective_loadout: Dictionary = _get_effective_member_loadout(unit)
+	return CHARACTER_SHEET_FORMATTER_SCRIPT.build_loadout_text_from_ids(
+		String(effective_loadout.get("armor", "medium")),
+		String(effective_loadout.get("weapon_1", "rifle")),
+		String(effective_loadout.get("weapon_2", "rifle")),
+		"standard kit"
+	)
+
+
+func _build_preview_fireteam_card_loadout_summary(unit: Node) -> String:
+	if unit == null:
+		return ""
+	var effective_loadout: Dictionary = _get_effective_member_loadout(unit)
+	return "%s | %s | %s" % [
+		_build_compact_armor_label(String(effective_loadout.get("armor", "medium"))),
+		_build_compact_weapon_label(String(effective_loadout.get("weapon_1", "rifle"))),
+		_build_compact_weapon_label(String(effective_loadout.get("weapon_2", "rifle"))),
+	]
+
+
+func _get_effective_member_loadout(unit: Node) -> Dictionary:
+	if unit == null or not unit.has_method("get_unit_id"):
+		return {
+			"armor": "medium",
+			"weapon_1": "rifle",
+			"weapon_2": "rifle",
+		}
+
 	var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
 	var mission_setup: Node = get_node_or_null("../MissionSetup")
 	if mission_setup != null:
 		var member_loadouts: Dictionary = mission_setup.get("member_loadouts") if typeof(mission_setup.get("member_loadouts")) == TYPE_DICTIONARY else {}
 		if member_loadouts.has(unit_id) and typeof(member_loadouts.get(unit_id)) == TYPE_DICTIONARY:
-			var loadout: Dictionary = member_loadouts[unit_id]
-			return CHARACTER_SHEET_FORMATTER_SCRIPT.build_loadout_text_from_member_loadout(loadout, "standard kit")
+			var loadout: Dictionary = Dictionary(member_loadouts.get(unit_id, {}))
+			return {
+				"armor": String(loadout.get("armor", "medium")).strip_edges(),
+				"weapon_1": String(loadout.get("weapon_1", loadout.get("weapon", "rifle"))).strip_edges(),
+				"weapon_2": String(loadout.get("weapon_2", "rifle")).strip_edges(),
+			}
 
-	var armor_id: String = String(unit.call("get_armor_id")).strip_edges() if unit.has_method("get_armor_id") else "medium"
-	var weapon_1_id: String = String(unit.call("get_weapon_1_id")).strip_edges() if unit.has_method("get_weapon_1_id") else "rifle"
-	var weapon_2_id: String = String(unit.call("get_weapon_2_id")).strip_edges() if unit.has_method("get_weapon_2_id") else "rifle"
-	return CHARACTER_SHEET_FORMATTER_SCRIPT.build_loadout_text_from_ids(armor_id, weapon_1_id, weapon_2_id, "standard kit")
+	return {
+		"armor": String(unit.call("get_armor_id")).strip_edges() if unit.has_method("get_armor_id") else "medium",
+		"weapon_1": String(unit.call("get_weapon_1_id")).strip_edges() if unit.has_method("get_weapon_1_id") else "rifle",
+		"weapon_2": String(unit.call("get_weapon_2_id")).strip_edges() if unit.has_method("get_weapon_2_id") else "rifle",
+	}
+
+
+func _build_compact_armor_label(armor_id: String) -> String:
+	match armor_id.strip_edges().to_lower():
+		"light":
+			return "Light"
+		"heavy":
+			return "Heavy"
+		_:
+			return "Medium"
+
+
+func _build_compact_weapon_label(weapon_id: String) -> String:
+	match weapon_id.strip_edges().to_lower():
+		"smg":
+			return "SMG"
+		"rail_gun", "special":
+			return "Rail"
+		"medictool", "medic_tool", "medic-tool":
+			return "Med"
+		_:
+			return "Rifle"
 
 
 func _build_tactical_fireteam_text(unit: Node) -> String:
@@ -1889,7 +1992,39 @@ func _build_strategic_status_text() -> String:
 	elif _drop_sequence_phase == DROP_SEQUENCE_COMPLETE:
 		ship_text = "Fireteam entladen"
 	var time_text: String = _build_mission_time_limit_text()
-	return "%s\nApproach %s\n%s\n%s" % [lz_text, _get_approach_angle_name(), ship_text, time_text]
+	var transfer_text: String = _build_meta_transfer_status_text()
+	if transfer_text.is_empty():
+		return "%s\nApproach %s\n%s\n%s" % [lz_text, _get_approach_angle_name(), ship_text, time_text]
+	return "%s\nApproach %s\n%s\n%s\n%s" % [lz_text, _get_approach_angle_name(), ship_text, transfer_text, time_text]
+
+
+func _build_meta_transfer_status_text() -> String:
+	if not preview_mode or _meta_transfer_routes.is_empty():
+		return ""
+	var operator_count: int = 0
+	var craft_count: int = 0
+	var next_eta_seconds: int = 0
+	for route_variant in _meta_transfer_routes:
+		if typeof(route_variant) != TYPE_DICTIONARY:
+			continue
+		var route: Dictionary = Dictionary(route_variant)
+		if String(route.get("entry_type", "team")).strip_edges().to_lower() == "pilot":
+			craft_count += 1
+		else:
+			operator_count += maxi(int(route.get("member_count", 0)), 1)
+		var eta_seconds: int = maxi(int(route.get("eta_seconds", 0)), 0)
+		if eta_seconds > 0 and (next_eta_seconds <= 0 or eta_seconds < next_eta_seconds):
+			next_eta_seconds = eta_seconds
+	var summary_bits: PackedStringArray = []
+	if operator_count > 0:
+		summary_bits.append("%d NPC" % operator_count)
+	if craft_count > 0:
+		summary_bits.append("%d Craft" % craft_count)
+	if summary_bits.is_empty():
+		summary_bits.append("%d aktiv" % _meta_transfer_routes.size())
+	if next_eta_seconds > 0:
+		return "HB->FOB %s | ETA %ds" % [" + ".join(summary_bits), next_eta_seconds]
+	return "HB->FOB %s" % " + ".join(summary_bits)
 
 
 func _build_phase_status_text() -> String:
@@ -2311,33 +2446,264 @@ func _refresh_world_overlays() -> void:
 			lz_marker.global_position = _lz_position
 
 	var dropship_marker := get_node_or_null("../DropshipPlanMarker") as Node2D
-	if dropship_marker == null:
+	if dropship_marker != null:
+		var has_live_drop_state: bool = not _mission_drop_state.is_empty()
+		var has_live_drop_sequence: bool = not _drop_sequence_phase.is_empty()
+		if not has_live_drop_state and not has_live_drop_sequence:
+			dropship_marker.visible = false
+		else:
+			var sprite := dropship_marker.get_node_or_null("Sprite") as Sprite2D
+			dropship_marker.visible = true
+			if has_live_drop_sequence and (_drop_sequence_phase == DROP_SEQUENCE_INBOUND or _drop_sequence_phase == DROP_SEQUENCE_LANDED or _drop_sequence_phase == DROP_SEQUENCE_UNLOADING or _drop_sequence_phase == DROP_SEQUENCE_COMPLETE or _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND):
+				dropship_marker.global_position = _drop_sequence_position
+			elif not _has_lz_position:
+				dropship_marker.global_position = _get_drop_staging_position()
+			else:
+				dropship_marker.global_position = _get_drop_staging_position()
+			if sprite != null:
+				var mission_drop_texture := _load_optional_texture(_mission_drop_texture_path)
+				sprite.texture = mission_drop_texture if mission_drop_texture != null else _get_dropship_marker_texture()
+			var approach_line := dropship_marker.get_node_or_null("ApproachLine") as Line2D
+			if approach_line != null:
+				approach_line.clear_points()
+				var line_delta: Vector2 = _lz_position - dropship_marker.global_position if _has_lz_position else Vector2.ZERO
+				if _has_lz_position and line_delta.length_squared() > 4.0:
+					approach_line.add_point(Vector2.ZERO)
+					approach_line.add_point(line_delta)
+	_refresh_meta_transfer_route_overlay()
+
+
+func _ensure_meta_transfer_route_overlay() -> Node2D:
+	var mission_root: Node = get_parent()
+	if mission_root == null:
+		return null
+	var overlay := mission_root.get_node_or_null("MetaTransferRouteOverlay") as Node2D
+	if overlay != null:
+		return overlay
+	if not mission_root.is_node_ready():
+		call_deferred("_refresh_meta_transfer_route_overlay")
+		return null
+
+	overlay = Node2D.new()
+	overlay.name = "MetaTransferRouteOverlay"
+	overlay.visible = false
+	overlay.z_index = 1
+	mission_root.add_child(overlay)
+
+	var route_line := Line2D.new()
+	route_line.name = "RouteLine"
+	route_line.default_color = META_TRANSFER_ROUTE_COLOR
+	route_line.width = META_TRANSFER_ROUTE_WIDTH
+	overlay.add_child(route_line)
+
+	var homebase_anchor := Polygon2D.new()
+	homebase_anchor.name = "HomebaseAnchor"
+	homebase_anchor.color = META_TRANSFER_ROUTE_HOMEBASE_COLOR
+	homebase_anchor.polygon = PackedVector2Array([
+		Vector2(-16.0, 0.0),
+		Vector2(0.0, -10.0),
+		Vector2(16.0, 0.0),
+		Vector2(0.0, 10.0),
+	])
+	overlay.add_child(homebase_anchor)
+
+	var fob_anchor := Polygon2D.new()
+	fob_anchor.name = "FobAnchor"
+	fob_anchor.color = META_TRANSFER_ROUTE_FOB_COLOR
+	fob_anchor.polygon = PackedVector2Array([
+		Vector2(0.0, -12.0),
+		Vector2(12.0, 0.0),
+		Vector2(0.0, 12.0),
+		Vector2(-12.0, 0.0),
+	])
+	overlay.add_child(fob_anchor)
+
+	var marker_host := Node2D.new()
+	marker_host.name = "RouteMarkerHost"
+	overlay.add_child(marker_host)
+	return overlay
+
+
+func _refresh_meta_transfer_route_overlay() -> void:
+	var overlay := _ensure_meta_transfer_route_overlay()
+	if overlay == null:
+		return
+	var show_overlay: bool = preview_mode and not _meta_transfer_routes.is_empty()
+	overlay.visible = show_overlay
+	if not show_overlay:
 		return
 
-	var has_live_drop_state: bool = not _mission_drop_state.is_empty()
-	var has_live_drop_sequence: bool = not _drop_sequence_phase.is_empty()
-	if not has_live_drop_state and not has_live_drop_sequence:
-		dropship_marker.visible = false
-		return
+	var route_points: PackedVector2Array = _build_meta_transfer_route_points()
+	var route_line := overlay.get_node_or_null("RouteLine") as Line2D
+	if route_line != null:
+		route_line.clear_points()
+		for route_point in route_points:
+			route_line.add_point(route_point)
 
-	var sprite := dropship_marker.get_node_or_null("Sprite") as Sprite2D
-	dropship_marker.visible = true
-	if has_live_drop_sequence and (_drop_sequence_phase == DROP_SEQUENCE_INBOUND or _drop_sequence_phase == DROP_SEQUENCE_LANDED or _drop_sequence_phase == DROP_SEQUENCE_UNLOADING or _drop_sequence_phase == DROP_SEQUENCE_COMPLETE or _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND):
-		dropship_marker.global_position = _drop_sequence_position
-	elif not _has_lz_position:
-		dropship_marker.global_position = _get_drop_staging_position()
-	else:
-		dropship_marker.global_position = _get_drop_staging_position()
-	if sprite != null:
-		var mission_drop_texture := _load_optional_texture(_mission_drop_texture_path)
-		sprite.texture = mission_drop_texture if mission_drop_texture != null else _get_dropship_marker_texture()
-	var approach_line := dropship_marker.get_node_or_null("ApproachLine") as Line2D
-	if approach_line != null:
-		approach_line.clear_points()
-		var line_delta: Vector2 = _lz_position - dropship_marker.global_position if _has_lz_position else Vector2.ZERO
-		if _has_lz_position and line_delta.length_squared() > 4.0:
-			approach_line.add_point(Vector2.ZERO)
-			approach_line.add_point(line_delta)
+	var homebase_anchor := overlay.get_node_or_null("HomebaseAnchor") as Polygon2D
+	if homebase_anchor != null and route_points.size() > 0:
+		homebase_anchor.position = route_points[0]
+
+	var fob_anchor := overlay.get_node_or_null("FobAnchor") as Polygon2D
+	if fob_anchor != null and route_points.size() > 0:
+		fob_anchor.position = route_points[route_points.size() - 1]
+
+	var marker_host := overlay.get_node_or_null("RouteMarkerHost") as Node2D
+	if marker_host == null:
+		return
+	for child in marker_host.get_children():
+		marker_host.remove_child(child)
+		child.queue_free()
+
+	for route_index in range(_meta_transfer_routes.size()):
+		var route_marker := _build_meta_transfer_route_marker(Dictionary(_meta_transfer_routes[route_index]), route_points, route_index)
+		if route_marker != null:
+			marker_host.add_child(route_marker)
+
+
+func _build_meta_transfer_route_points() -> PackedVector2Array:
+	var fob_anchor: Vector2 = _get_meta_transfer_fob_anchor_position()
+	return PackedVector2Array(
+		[
+			fob_anchor + META_TRANSFER_ROUTE_HOMEBASE_OFFSET,
+			fob_anchor + META_TRANSFER_ROUTE_BEND_OFFSET,
+			fob_anchor,
+		]
+	)
+
+
+func _get_meta_transfer_fob_anchor_position() -> Vector2:
+	var spawn_anchor := get_node_or_null("../MapRoot/spawn_alpha") as Node2D
+	if spawn_anchor != null:
+		return spawn_anchor.global_position
+	var objective_marker := get_node_or_null(objective_point_path) as Node2D
+	if objective_marker != null:
+		return objective_marker.global_position
+	return _get_target_position()
+
+
+func _build_meta_transfer_route_marker(route: Dictionary, route_points: PackedVector2Array, route_index: int) -> Node2D:
+	if route.is_empty():
+		return null
+	var marker := Node2D.new()
+	var transfer_id: String = String(route.get("transfer_id", "transfer_%d" % route_index)).strip_edges()
+	marker.name = "TransferMarker_%s" % transfer_id
+	marker.set_meta("transfer_id", transfer_id)
+	marker.set_meta("entry_type", String(route.get("entry_type", "team")).strip_edges().to_lower())
+	marker.set_meta("member_count", maxi(int(route.get("member_count", 0)), 0))
+	marker.set_meta("eta_seconds", maxi(int(route.get("eta_seconds", 0)), 0))
+	marker.set_meta("progress_value", clampf(float(route.get("progress_value", 0.0)), 0.0, 100.0))
+
+	var progress_ratio: float = clampf(float(route.get("progress_value", 0.0)) / 100.0, 0.0, 1.0)
+	var route_normal: Vector2 = _sample_meta_transfer_route_normal(route_points, progress_ratio)
+	var stagger_index: float = float(route_index % 3) - 1.0
+	marker.position = _sample_meta_transfer_route_point(route_points, progress_ratio) + (route_normal * stagger_index * META_TRANSFER_ROUTE_MARKER_OFFSET)
+
+	var icon := Polygon2D.new()
+	icon.name = "Icon"
+	icon.color = _build_meta_transfer_route_marker_color(String(route.get("entry_type", "team")))
+	icon.polygon = _build_meta_transfer_route_marker_polygon(String(route.get("entry_type", "team")))
+	marker.add_child(icon)
+	return marker
+
+
+func _build_meta_transfer_route_marker_color(entry_type: String) -> Color:
+	return META_TRANSFER_ROUTE_PILOT_COLOR if entry_type.strip_edges().to_lower() == "pilot" else META_TRANSFER_ROUTE_TEAM_COLOR
+
+
+func _build_meta_transfer_route_marker_polygon(entry_type: String) -> PackedVector2Array:
+	if entry_type.strip_edges().to_lower() == "pilot":
+		return PackedVector2Array([
+			Vector2(0.0, -12.0),
+			Vector2(11.0, 6.0),
+			Vector2(-11.0, 6.0),
+		])
+	return PackedVector2Array([
+		Vector2(0.0, -11.0),
+		Vector2(11.0, 0.0),
+		Vector2(0.0, 11.0),
+		Vector2(-11.0, 0.0),
+	])
+
+
+func _sample_meta_transfer_route_point(route_points: PackedVector2Array, progress_ratio: float) -> Vector2:
+	if route_points.is_empty():
+		return Vector2.ZERO
+	if route_points.size() == 1:
+		return route_points[0]
+	var target_ratio: float = clampf(progress_ratio, 0.0, 1.0)
+	var segment_lengths: Array = []
+	var total_length: float = 0.0
+	for segment_index in range(route_points.size() - 1):
+		var segment_length: float = route_points[segment_index].distance_to(route_points[segment_index + 1])
+		segment_lengths.append(segment_length)
+		total_length += segment_length
+	if total_length <= 0.001:
+		return route_points[route_points.size() - 1]
+	var target_distance: float = target_ratio * total_length
+	var traversed_distance: float = 0.0
+	for segment_index in range(segment_lengths.size()):
+		var segment_length: float = float(segment_lengths[segment_index])
+		if traversed_distance + segment_length >= target_distance:
+			var local_ratio: float = 0.0 if segment_length <= 0.001 else (target_distance - traversed_distance) / segment_length
+			return route_points[segment_index].lerp(route_points[segment_index + 1], local_ratio)
+		traversed_distance += segment_length
+	return route_points[route_points.size() - 1]
+
+
+func _sample_meta_transfer_route_normal(route_points: PackedVector2Array, progress_ratio: float) -> Vector2:
+	if route_points.size() < 2:
+		return Vector2.UP
+	var target_ratio: float = clampf(progress_ratio, 0.0, 1.0)
+	var segment_lengths: Array = []
+	var total_length: float = 0.0
+	for segment_index in range(route_points.size() - 1):
+		var segment_length: float = route_points[segment_index].distance_to(route_points[segment_index + 1])
+		segment_lengths.append(segment_length)
+		total_length += segment_length
+	if total_length <= 0.001:
+		return Vector2.UP
+	var target_distance: float = target_ratio * total_length
+	var traversed_distance: float = 0.0
+	for segment_index in range(segment_lengths.size()):
+		var segment_length: float = float(segment_lengths[segment_index])
+		if traversed_distance + segment_length >= target_distance:
+			var direction: Vector2 = (route_points[segment_index + 1] - route_points[segment_index]).normalized()
+			var normal: Vector2 = direction.orthogonal().normalized()
+			return normal if normal.length_squared() > 0.001 else Vector2.UP
+		traversed_distance += segment_length
+	return Vector2.UP
+
+
+func _sanitize_meta_transfer_routes(route_entries: Array) -> Array:
+	var sanitized_routes: Array = []
+	for route_variant in route_entries:
+		if typeof(route_variant) != TYPE_DICTIONARY:
+			continue
+		var route: Dictionary = Dictionary(route_variant)
+		var transfer_id: String = String(route.get("transfer_id", "")).strip_edges()
+		if transfer_id.is_empty():
+			continue
+		sanitized_routes.append(
+			{
+				"transfer_id": transfer_id,
+				"entry_type": String(route.get("entry_type", "team")).strip_edges().to_lower(),
+				"progress_value": clampf(float(route.get("progress_value", 0.0)), 0.0, 100.0),
+				"eta_seconds": maxi(int(route.get("eta_seconds", 0)), 0),
+				"member_count": maxi(int(route.get("member_count", 0)), 0),
+				"display_name": String(route.get("display_name", "")).strip_edges(),
+			}
+		)
+	return sanitized_routes
+
+
+func _serialize_meta_transfer_routes() -> Array:
+	var serialized_routes: Array = []
+	for route_variant in _meta_transfer_routes:
+		if typeof(route_variant) != TYPE_DICTIONARY:
+			continue
+		serialized_routes.append(Dictionary(route_variant).duplicate(true))
+	return serialized_routes
 
 
 func _apply_compact_mission_control_layout() -> void:
@@ -2660,6 +3026,16 @@ func _refresh_selection_visuals() -> void:
 		unit.call("set_tactical_selected", _selected_fireteam_ids.has(fireteam_id))
 
 
+func _sync_unit_tactical_stance_badges() -> void:
+	var sync_state: Dictionary = get_tactical_stance_sync_state()
+	var stance_revision: int = maxi(int(sync_state.get("revision", 0)), 0)
+	for unit in _get_all_friendly_units(true):
+		if unit == null or not unit.has_method("set_tactical_stance_indicator") or not unit.has_method("get_fireteam_id"):
+			continue
+		var fireteam_id: String = String(unit.call("get_fireteam_id")).strip_edges().to_lower()
+		unit.call("set_tactical_stance_indicator", get_requested_tactical_stance(fireteam_id), stance_revision)
+
+
 func _get_all_friendly_units(include_hidden: bool = true) -> Array:
 	var mission_root: Node = get_parent()
 	if mission_root == null:
@@ -2858,8 +3234,8 @@ func _resolve_suppression_threshold(fireteam_id: String) -> float:
 	if not profile_dict.is_empty():
 		base_threshold = maxf(float(profile_dict.get("suppression_threshold", 2.0)), 1.0)
 	var flank_state: Dictionary = get_fireteam_flank_vulnerability_state(fireteam_id)
-	if bool(flank_state.get("is_active", false)):
-		base_threshold = maxf(base_threshold * float(flank_state.get("suppression_threshold_multiplier", 1.0)), 1.0)
+	if bool(flank_state.get("is_active", false)) or bool(flank_state.get("is_morale_active", false)):
+		base_threshold = maxf(base_threshold * float(flank_state.get("effective_suppression_threshold_multiplier", flank_state.get("suppression_threshold_multiplier", 1.0))), 1.0)
 	return base_threshold
 
 
@@ -3530,12 +3906,45 @@ func _format_security_state_text(state: Dictionary) -> String:
 
 
 func _format_flank_vulnerability_text(state: Dictionary) -> String:
-	if state.is_empty() or not bool(state.get("is_active", false)):
+	if state.is_empty() or (not bool(state.get("is_active", false)) and not bool(state.get("is_morale_active", false))):
 		return "-"
-	var remaining_seconds: float = float(state.get("remaining_seconds", 0.0))
-	if remaining_seconds <= 0.05:
-		return "ON"
-	return "%.1fs" % remaining_seconds
+	var parts: PackedStringArray = []
+	var direction_label: String = _get_flank_direction_short_label(String(state.get("direction_label", "")))
+	if not direction_label.is_empty():
+		parts.append(direction_label)
+	if bool(state.get("is_active", false)):
+		var remaining_seconds: float = float(state.get("remaining_seconds", 0.0))
+		parts.append("ON" if remaining_seconds <= 0.05 else "%.1fs" % remaining_seconds)
+	if bool(state.get("is_morale_active", false)):
+		var morale_label: String = _get_flank_morale_short_label(String(state.get("morale_state", "")))
+		if not morale_label.is_empty():
+			parts.append(morale_label)
+			var morale_seconds: float = float(state.get("morale_remaining_seconds", 0.0))
+			if morale_seconds > 0.05:
+				parts.append("%.1fs" % morale_seconds)
+	return " ".join(parts)
+
+
+func _get_flank_direction_short_label(direction_label: String) -> String:
+	match direction_label.strip_edges().to_lower():
+		"rear":
+			return "REAR"
+		"left":
+			return "LEFT"
+		"right":
+			return "RIGHT"
+		_:
+			return ""
+
+
+func _get_flank_morale_short_label(morale_state: String) -> String:
+	match morale_state.strip_edges().to_lower():
+		"shaken":
+			return "SHK"
+		"alerted":
+			return "ALRT"
+		_:
+			return ""
 
 
 func _get_movement_style_short_label(style_id: String) -> String:

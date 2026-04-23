@@ -347,6 +347,11 @@ func _build_unit_snapshot(unit) -> Dictionary:
 			snapshot["health"] = int(vital_dict.get("health_points", 0))
 			snapshot["bleedout_ticks"] = int(vital_dict.get("bleedout_ticks", 0))
 
+	if unit.has_method("get_tactical_stance_badge_snapshot"):
+		var stance_snapshot_variant: Variant = unit.call("get_tactical_stance_badge_snapshot")
+		if typeof(stance_snapshot_variant) == TYPE_DICTIONARY:
+			snapshot.merge(Dictionary(stance_snapshot_variant), true)
+
 	return snapshot
 
 
@@ -841,6 +846,8 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		hit_context["is_flank"] = true
 		hit_context["flank_fireteam_id"] = String(effect.get("flank_fireteam_id", ""))
 		hit_context["flank_source_angle"] = _extract_float(effect.get("flank_source_angle", 0.0), 0.0)
+		hit_context["flank_direction_label"] = String(effect.get("flank_direction_label", "")).strip_edges().to_lower()
+		hit_context["flank_morale_state"] = String(effect.get("flank_morale_state", "")).strip_edges().to_lower()
 	unit.call("apply_damage", resolved_damage, hit_context)
 
 

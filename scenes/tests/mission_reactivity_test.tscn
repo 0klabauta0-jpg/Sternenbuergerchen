@@ -323,7 +323,7 @@ offset_bottom = -8.0
 theme_override_constants/separation = 2
 
 [node name="MissionIdentityHeaderLabel" type="Label" parent="TacticalUI/MissionIdentityPanel/MissionIdentityMargin/MissionIdentityVBox"]
-text = "LIVE TACTICAL GRID"
+text = "#15 LIVE TACTICAL GRID"
 
 [node name="MissionIdentityBodyLabel" type="Label" parent="TacticalUI/MissionIdentityPanel/MissionIdentityMargin/MissionIdentityVBox"]
 text = "Realtime insertion feed | live fireteam deployment"
@@ -409,7 +409,7 @@ size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
 [node name="CommandHeaderLabel" type="Label" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox"]
-text = "1 COMMAND MATRIX"
+text = "#16 COMMAND MATRIX"
 
 [node name="CommandGrid" type="GridContainer" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox"]
 columns = 4
@@ -472,7 +472,7 @@ theme_override_constants/separation = 4
 theme_override_constants/separation = 8
 
 [node name="FireteamHeaderLabel" type="Label" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow"]
-text = "2 SELECTED FIRETEAM"
+text = "#17 SELECTED FIRETEAM"
 
 [node name="FireteamStatusLabel" type="Label" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow"]
 size_flags_horizontal = 3
@@ -541,7 +541,7 @@ vertical_scroll_mode = 1
 theme_override_constants/separation = 4
 
 [node name="StrategicHeaderLabel" type="Label" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox"]
-text = "3 MISSION CONTROL"
+text = "#18 MISSION CONTROL"
 
 [node name="PhaseControlPanel" type="PanelContainer" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox"]
 

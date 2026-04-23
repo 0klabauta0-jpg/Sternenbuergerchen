@@ -7,7 +7,7 @@ func _init() -> void:
 	var failed: int = 0
 
 	# Test 1: All weapon IDs are valid
-	for weapon_id in ["smg", "rifle", "rail_gun"]:
+	for weapon_id in ["smg", "rifle", "rail_gun", "medictool"]:
 		var weapon: Dictionary = WEAPON_DATA_SCRIPT.get_weapon(weapon_id)
 		if weapon.get("id", "") == weapon_id:
 			passed += 1
@@ -84,6 +84,13 @@ func _init() -> void:
 		failed += 1
 		print("FAIL: rail_gun display_name is '%s'" % WEAPON_DATA_SCRIPT.get_display_name("rail_gun"))
 
+	if WEAPON_DATA_SCRIPT.get_display_name("medictool") == "Medictool":
+		passed += 1
+		print("PASS: medictool display_name is Medictool")
+	else:
+		failed += 1
+		print("FAIL: medictool display_name is '%s'" % WEAPON_DATA_SCRIPT.get_display_name("medictool"))
+
 	# Test 7: Asset paths
 	var rifle_se_path: String = WEAPON_DATA_SCRIPT.get_asset_path("rifle", "SE")
 	if rifle_se_path == "res://Assets/kenney_space-kit/Isometric/weapon_rifle_SE.png":
@@ -101,6 +108,29 @@ func _init() -> void:
 		failed += 1
 		print("FAIL: smg SW asset path is '%s'" % smg_sw_path)
 
+	var medictool_path: String = WEAPON_DATA_SCRIPT.get_asset_path("medictool", "SE")
+	if medictool_path == "res://Assets/kenney_space-kit/Isometric/weapon_gun_SE.png":
+		passed += 1
+		print("PASS: medictool uses the pistol sprite asset path")
+	else:
+		failed += 1
+		print("FAIL: medictool asset path is '%s'" % medictool_path)
+
+	if WEAPON_DATA_SCRIPT.is_support_weapon_id("medictool") and not WEAPON_DATA_SCRIPT.is_attack_weapon_id("medictool"):
+		passed += 1
+		print("PASS: medictool is recognized as support-only slot equipment")
+	else:
+		failed += 1
+		print("FAIL: medictool support/attack flags are incorrect")
+
+	var medictool_modulate: Color = WEAPON_DATA_SCRIPT.get_sprite_modulate("medictool")
+	if medictool_modulate == Color(1.0, 0.2, 0.2, 1.0):
+		passed += 1
+		print("PASS: medictool sprite tint is red")
+	else:
+		failed += 1
+		print("FAIL: medictool sprite tint is %s" % str(medictool_modulate))
+
 	# Test 8: Invalid weapon ID falls back to default
 	var invalid_weapon: Dictionary = WEAPON_DATA_SCRIPT.get_weapon("nonexistent")
 	if invalid_weapon.get("id", "") == "rifle":
@@ -112,12 +142,12 @@ func _init() -> void:
 
 	# Test 9: get_all_weapon_ids
 	var all_ids: PackedStringArray = WEAPON_DATA_SCRIPT.get_all_weapon_ids()
-	if all_ids.size() == 3:
+	if all_ids.size() == 4 and all_ids.has("medictool"):
 		passed += 1
-		print("PASS: get_all_weapon_ids returns 3 weapons")
+		print("PASS: get_all_weapon_ids returns 4 weapons including medictool")
 	else:
 		failed += 1
-		print("FAIL: get_all_weapon_ids returned %d weapons" % all_ids.size())
+		print("FAIL: get_all_weapon_ids returned %d weapons (%s)" % [all_ids.size(), str(all_ids)])
 
 	print("\n=== WEAPON DATA TESTS: %d passed, %d failed ===" % [passed, failed])
 	if failed > 0:

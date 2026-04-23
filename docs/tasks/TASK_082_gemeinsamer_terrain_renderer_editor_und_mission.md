@@ -30,3 +30,6 @@ Editor, Missions-Testszene und Meta-Map sollen auf denselben kleinen JSON-/Rende
 - graphische Handle-basierte Marker-Platzierung direkt auf der Karte
 - komplexe Missionsplanung oder Kampagnenpersistenz
 - mehrere voneinander unabhaengige Runtime-Renderer fuer dieselbe Kartenlogik
+
+## Folgepfad
+- Der verbliebene Marker-Restpunkt ist jetzt explizit als [TASK_115 - Gemeinsames Markersystem fuer Editor und Taktikkarte](docs/tasks/TASK_115_gemeinsames_markersystem_fuer_editor_und_taktikkarte.md) geschnitten.

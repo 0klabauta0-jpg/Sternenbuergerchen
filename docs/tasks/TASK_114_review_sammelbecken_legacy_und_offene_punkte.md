@@ -3,7 +3,7 @@
 ## Ziel
 Dieser Task sammelt die im tiefen Review vom 2026-04-21 verifizierten Altlasten, Legacy-Kompatibilitaetsstellen, Behelfspfade, Doku-Drift und bewusst offen gelassenen Restpunkte in einem zentralen Abarbeitungsdokument.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT
 
 ## Herkunft
 - Review-Durchlauf ueber Pflicht-Dokus, `IMPLEMENTATION_STATUS.md`, Task-Dateien, Legacy-Marker im Code und headless Verifier.
@@ -62,33 +62,45 @@ Dieser Task sammelt die im tiefen Review vom 2026-04-21 verifizierten Altlasten,
   - Umfang: Karten mit altem Tile-Typ `wall` werden beim Laden jetzt klar als alte Datei markiert und nicht mehr mit einer geratenen Standardwand dargestellt; der Editor faellt stattdessen auf eine saubere neue Leerkartengrundlage zurueck. Alte Planungsdaten mit `selected_phase` ohne nummerierten Phasenstand werden nicht mehr auf das neue System gemappt oder um einen Schritt verschoben, sondern explizit als nicht mehr unterstuetzt abgewiesen. Fuer beide Faelle liegen kleine Alt-Beispieldateien plus headless Verifier vor.
   - Verifikation: `scripts/tests/task_114_legacy_guard_verifier.gd`
 
-## Offene Punkte
+- [x] Die spaeten Recovery-Restpunkte aus `TASK_096` sind abgeschlossen.
+  - Dateien: `scenes/tests/mission_reactivity_test.tscn`, `scenes/meta/fob_test_screen.tscn`, `scripts/tests/task_096_recovery_verifier.gd`, `docs/tasks/TASK_096_meta_missionmap_dropship_und_charactersheet_recovery.md`
+  - Umfang: die sichtbaren Block-Nummern stehen jetzt auch direkt in der echten Tactical-UI, ein eigener Verifier prueft ausgegraute FOB-Transitkarten samt Fortschrittsbalken und den Character-Sheet-Aufbau, und der Dropship-Kontext ist abschliessend auf einen fachlich falschen `tracked`-Button geprueft.
+  - Verifikation: `scripts/tests/task_096_recovery_verifier.gd`, `scripts/tests/bugfix_dropship_mission_flow_verifier.gd`
 
-### 1. Noch offene Fachpunkte aus bestehenden Tasks
-- `TASK_096`
-  - Sichtbare Nummern direkt in der echten Tactical-UI nachziehen.
-  - Kleinen Verifier fuer FOB-Transitkarten und Character-Sheet-Layout nachziehen.
-  - Final pruefen, ob irgendwo noch ein fachlich falscher `tracked`-Button uebrig ist.
+- [x] Der Meta-Recovery-Restpunkt fuer per-Mitglied-Loadouts und sichtbare Homebase-Transfer-Routen auf der Meta-Map ist abgeschlossen.
+  - Dateien: `scripts/meta/meta_layer_flow.gd`, `scripts/tests/mission_tactical_sandbox_controller.gd`, `scripts/tests/task_114_meta_recovery_verifier.gd`
+  - Umfang: die eingebettete Missionsvorschau auf der Meta-Map zeigt auf den Fireteam-Karten jetzt den individuellen Kit-Stand jedes Teammitglieds statt nur den groben teamweiten Default. Laufende Homebase->FOB-Transfers werden zusaetzlich als eigene Kartenroute mit separaten Markern fuer Team- und Pilot/Craft-Transfers dargestellt und im Mission-Control-Statustext gespiegelt.
+  - Verifikation: `scripts/tests/task_114_meta_recovery_verifier.gd`, `scripts/tests/bugfix_dropship_mission_flow_verifier.gd`
 
-- `IMPLEMENTATION_STATUS.md` / Meta-Recovery
-  - Die Meta-Map spiegelt per-Mitglied-Loadouts noch nicht vollstaendig und zeigt laufende Homebase-Transfers noch nicht als eigene Kartenroute oder grafische Flugspur.
+- [x] Der `TASK_095`-Restpunkt fuer slotgebundenes Medic-Equipment, aktive Sanitaeter-Bewegung und tiefere Zielpriorisierung ist abgeschlossen.
+  - Dateien: `scripts/core/weapon_data.gd`, `scripts/meta/fob_screen.gd`, `scripts/command/loadout_modifier_resolver.gd`, `scripts/npc/unit_roster_presets.gd`, `scripts/npc/test_unit.gd`, `scripts/tests/mission_combat_loop_driver.gd`, `scripts/tests/medic_support_verifier.gd`
+  - Umfang: `medictool` ist jetzt als Loadout-Gegenstand im FOB-Dropdown auswaehlbar und belegt einen Waffenslot. Combat-Medics duerfen nur noch mit diesem Tool heilen, behalten aber bei einer zusaetzlichen Schusswaffe ihren aktiven Kampfslot sauber auf der echten Waffe. Ausserhalb der Heal-Reichweite laufen Medics auf downed oder stark verwundete Ziele zu; bei mehreren Kandidaten gewinnt nicht mehr nur Reichweite, sondern der dringlichere Verwundungsgrad.
+  - Verifikation: `scripts/tests/medic_support_verifier.gd`, `scripts/tests/task_087_verifier.gd`, `scripts/tests/task_107_verifier.gd`, `scripts/tests/test_weapon_data.gd`
 
-- `TASK_095` / Medic Support
-  - Noch keine Sanitaeter-Bewegung, Ressourcen oder tiefere Priorisierung ausser Reichweite/Zustand.
+- [x] Die `TASK_109`-Restpunkte fuer In-World-Stance-Badges und feinere Sync-Vorbereitung sind abgeschlossen.
+  - Dateien: `scripts/tests/tactical_stance_controller.gd`, `scripts/tests/mission_tactical_sandbox_controller.gd`, `scripts/npc/test_unit.gd`, `scripts/core/simulation_root.gd`, `scripts/tests/task_109_verifier.gd`
+  - Umfang: Units zeigen die angeforderte Haltung jetzt direkt als kleines `C`-/`N`-/`A`-Badge neben Fireteam und Phase. Der Stance-Controller liefert zusaetzlich einen versionierten `tactical_stance_sync`-Stand fuer Preview-/Runtime-Bruecken und spaetere Multiplayer-Pfade; der bestehende Observer-Snapshot transportiert diese Badge-Daten direkt mit.
+  - Verifikation: `scripts/tests/task_109_verifier.gd`
 
-- `TASK_109`
-  - Noch keine In-World-Unit-Badges fuer Stances.
-  - Noch keine feinere Netzwerk-Synchronisierung fuer spaetere Multiplayer-Stance-Aenderungen.
+- [x] Der `TASK_113`-Restpunkt fuer tieferes Richtungs-/Morale-Follow-up ist abgeschlossen.
+  - Dateien: `scripts/tests/flank_vulnerability_resolver.gd`, `scripts/tests/mission_combat_loop_driver.gd`, `scripts/tests/mission_tactical_sandbox_controller.gd`, `scripts/core/simulation_root.gd`, `scripts/tests/task_113_verifier.gd`
+  - Umfang: Flanken behalten jetzt ihre relative Richtung (`left`, `right`, `rear`) als kurzes Richtungsgedaechtnis und koennen Fireteams in ein kleines Morale-Folgefenster (`alerted`, `shaken`) schieben. Ein Heckentreffer wirkt sofort `shaken`, wiederholte Seitenflanken koennen denselben Zustand nachziehen. Das Folgefenster senkt den effektiven Suppression-Schwellenwert weiter, wird im Statusbereich sichtbar und laeuft ueber den bestehenden Flank-/Damage-Pfad statt ueber eine zweite Sonderlogik.
+  - Verifikation: `scripts/tests/task_113_verifier.gd`
 
-- `TASK_113`
-  - Noch keine tieferen Richtungs-/Morale-Folgesysteme jenseits der aktuellen Flank- und Suppression-Modifier.
+- [x] Der verbliebene Terrain-Marker-Restpunkt aus `TASK_082` ist jetzt als expliziter Folge-Task geschnitten.
+  - Dateien: `docs/tasks/TASK_082_gemeinsamer_terrain_renderer_editor_und_mission.md`, `docs/tasks/TASK_114_review_sammelbecken_legacy_und_offene_punkte.md`, `docs/tasks/TASK_115_gemeinsames_markersystem_fuer_editor_und_taktikkarte.md`
+  - Umfang: Die offenen Marker-Themen werden nicht mehr nur als vager Rest in `TASK_082` weitergetragen, sondern als eigener Folge-Task `TASK_115` festgehalten. Der neue Task trennt klar zwischen authorbaren Editor-/Systemmarkern und spielerseitigen Befehlsmarkern in der Mission, fordert eine Typ-Liste statt freier Marker-Namen und haelt direkte Karteninteraktion, Tile-Snap und Ueberlappungsblock fest.
 
-- `TASK_082` / Terrain-Metadaten
-  - Markerbearbeitung bleibt auf feste IDs begrenzt.
-  - Keine freien Marker-Typen oder Handle-basierte Platzierung direkt auf der Karte.
+## Folge-Tasks aus dem Review
+
+### 1. Explizit ausgelagerter Restpunkt
+- `TASK_115` / Gemeinsames Markersystem fuer Editor und Taktikkarte
+  - Fuehrt die bisher festen Map-Marker in einen gemeinsamen Typkatalog ueber.
+  - Ergaenzt Marker-Liste, direkte Kartenplatzierung, Drag, Delete, Doppelklick-Umbenennen, Tile-Snap und Ueberlappungsblock.
+  - Oeffnet nur einen freigegebenen Teil der Marker fuer spielerseitige Missions-Befehlsmarker; Gegner- und Systemmarker bleiben editor-only.
 
 ## Empfehlung fuer die naechste Abarbeitung
-1. Fachliche Restpunkte aus TASK_096, TASK_109 und TASK_113 in kleine Folge-Tasks schneiden statt still weiter in bestehende Monsterdateien zu wachsen.
+1. `TASK_115` als eigenen Editor-/Tactical-Follow-up bearbeiten statt neue Marker-Logik still in `TASK_082`, `map_editor.gd` oder `mission_tactical_sandbox_controller.gd` hineinzuziehen.
 
 ## Nicht-Ziele
 - kein stiller Grossrefactor des Meta-Layers

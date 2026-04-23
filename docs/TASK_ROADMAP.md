@@ -254,6 +254,9 @@ TASK_111 – FireteamSecurityController und Overwatch
 TASK_112 – ContactTracker und ContactMapOverlay
 TASK_113 – FlankVulnerabilityResolver und Sektorstrafen
 
+Phase 17K – Marker-Follow-up
+TASK_115 – Gemeinsames Markersystem fuer Editor und Taktikkarte
+
 Phase 18 – Erweiterung (spaeter)
 Skillsystem
 soziale Dynamik

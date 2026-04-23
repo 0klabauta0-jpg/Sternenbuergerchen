@@ -66,3 +66,8 @@ Der Spieler kann pro ausgewaehltem Fireteam eine taktische Haltung anfordern. Di
 - Die Haltung wirkt auf die abgeleiteten Verhaltenswerte, ohne selbst als Planzustand gespeichert zu werden.
 - Das Panel funktioniert fuer Einzel- und Mehrfachauswahl.
 - Nach einem Phasenwechsel stehen alle Fireteams wieder auf `normal`.
+
+## Abschlussstand
+- `TestUnit` zeigt die aktuelle Haltung jetzt direkt an der Unit als kleines Badge `C`, `N` oder `A` neben den bestehenden Fireteam-/Phasenlabels.
+- `TacticalStanceController` stellt zusaetzlich einen versionierten `sync_state` bereit, damit Preview, aktive Missionsinstanz und spaetere Multiplayer-Pfade denselben kleinen Stance-Vertrag benutzen koennen.
+- `SimulationRoot` spiegelt das Badge ueber den bestehenden Remote-Unit-Snapshot mit, damit Observer-/Joiner-Clients dieselbe Lesbarkeit ohne zweiten Sonderpfad erhalten.

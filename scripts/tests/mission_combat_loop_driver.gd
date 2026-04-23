@@ -29,10 +29,19 @@ const DISCIPLINE_BREAK_EVENT_COLOR: Color = Color(1.0, 0.65, 0.3, 1.0)
 const MISIDENTIFICATION_BASE_CHANCE: float = 0.03
 const MISIDENTIFICATION_COOLDOWN_TICKS: int = 15
 const MISIDENTIFICATION_EVENT_COLOR: Color = Color(1.0, 0.4, 0.4, 1.0)
-const MEDIC_SUPPORT_RANGE: float = 84.0
+const MEDIC_SUPPORT_TILE_RANGE: int = 2
+const MEDIC_SUPPORT_MOVE_MAX_TILE_DISTANCE: int = 3
+const MEDIC_SUPPORT_RANGE_FALLBACK_WORLD: float = 144.0
+const MEDIC_SUPPORT_MOVE_MAX_DISTANCE_FALLBACK_WORLD: float = 216.0
+const MEDIC_SUPPORT_MOVE_SPEED_FACTOR: float = 0.55
+const MEDIC_SUPPORT_MOVE_REISSUE_TICKS: int = 4
+const MEDIC_SUPPORT_APPROACH_STANDOFF: float = 28.0
+const MEDIC_SUPPORT_WOUNDED_THRESHOLD: float = 0.65
+const MEDIC_SUPPORT_REMOTE_WOUNDED_THRESHOLD: float = 0.45
 const MEDIC_SUPPORT_HEAL_AMOUNT: int = 35
 const MEDIC_SUPPORT_COOLDOWN_TICKS: int = 12
 const MEDIC_SUPPORT_PRIORITY: int = 25
+const MEDIC_SUPPORT_MOVE_PRIORITY: int = 14
 const MEDIC_EVENT_COLOR: Color = Color(0.55, 1.0, 0.72, 1.0)
 const FRIENDLY_STANDARD_COVER_RADIUS: float = 48.0
 const FRIENDLY_STANDARD_COVER_MIN_DISTANCE: float = 10.0
@@ -95,6 +104,7 @@ var _detection_progress: Dictionary = {}
 var _discipline_break_cooldown: Dictionary = {}
 var _misidentification_cooldown: Dictionary = {}
 var _medic_support_cooldown: Dictionary = {}
+var _medic_support_move_ready_tick: Dictionary = {}
 var _friendly_cover_ready_at_msec: Dictionary = {}
 var _overlays_visible: bool = true
 var _enemy_patrol_paths_by_unit_id: Dictionary = {}
@@ -372,6 +382,8 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 			"is_flank": bool(flank_modifiers.get("is_flank", false)),
 			"flank_fireteam_id": String(flank_modifiers.get("fireteam_id", "")),
 			"flank_source_angle": float(flank_modifiers.get("source_angle", 0.0)),
+			"flank_direction_label": String(flank_modifiers.get("direction_label", "")),
+			"flank_morale_state": String(flank_modifiers.get("morale_state", "")),
 		}
 	)
 	_maybe_publish_flank_event(flank_modifiers, attacker, actual_target)
@@ -526,29 +538,34 @@ func _try_enqueue_medic_support_for_units(simulation_root: Node, medics: Array, 
 
 		var medic_id: String = String(medic.call("get_unit_id"))
 		var target = _pick_medic_target(medic, allies, reserved_target_ids)
-		if target == null or not target.has_method("get_unit_id"):
+		if target != null and target.has_method("get_unit_id"):
+			var target_id: String = String(target.call("get_unit_id"))
+			if target_id.is_empty():
+				continue
+
+			reserved_target_ids[target_id] = true
+			simulation_root.call(
+				"enqueue_effect",
+				{
+					"effect_type": "heal",
+					"priority": MEDIC_SUPPORT_PRIORITY,
+					"unit_id": target_id,
+					"healer_unit_id": medic_id,
+					"healer_team_id": String(medic.call("get_team_id")),
+					"amount": MEDIC_SUPPORT_HEAL_AMOUNT,
+					"support_resource": "medictool",
+				}
+			)
+			_medic_support_cooldown[medic_id] = MEDIC_SUPPORT_COOLDOWN_TICKS
+			_set_event_text("%s PATCH %s" % [medic_id, target_id])
+			if medic.has_method("show_event_text"):
+				medic.call("show_event_text", "PATCH", MEDIC_EVENT_COLOR, 1.2)
 			continue
 
-		var target_id: String = String(target.call("get_unit_id"))
-		if target_id.is_empty():
+		var move_target = _pick_medic_move_target(medic, allies, reserved_target_ids)
+		if move_target == null:
 			continue
-
-		reserved_target_ids[target_id] = true
-		simulation_root.call(
-			"enqueue_effect",
-			{
-				"effect_type": "heal",
-				"priority": MEDIC_SUPPORT_PRIORITY,
-				"unit_id": target_id,
-				"healer_unit_id": medic_id,
-				"healer_team_id": String(medic.call("get_team_id")),
-				"amount": MEDIC_SUPPORT_HEAL_AMOUNT,
-			}
-		)
-		_medic_support_cooldown[medic_id] = MEDIC_SUPPORT_COOLDOWN_TICKS
-		_set_event_text("%s PATCH %s" % [medic_id, target_id])
-		if medic.has_method("show_event_text"):
-			medic.call("show_event_text", "PATCH", MEDIC_EVENT_COLOR, 1.2)
+		_try_enqueue_medic_move(simulation_root, medic, move_target)
 
 
 func _can_medic_support(unit) -> bool:
@@ -559,6 +576,9 @@ func _can_medic_support(unit) -> bool:
 		return false
 
 	if not _is_medic_unit(unit):
+		return false
+
+	if not _has_required_medic_tool(unit):
 		return false
 
 	return int(_medic_support_cooldown.get(String(unit.call("get_unit_id")), 0)) <= 0
@@ -579,58 +599,48 @@ func _is_medic_unit(unit) -> bool:
 func _pick_medic_target(medic, allies: Array, reserved_target_ids: Dictionary):
 	if medic == null or not (medic is Node2D):
 		return null
+	return _pick_best_medic_target(medic, allies, reserved_target_ids, true)
 
-	var downed_target = _pick_medic_target_by_state(medic, allies, reserved_target_ids, "down")
-	if downed_target != null:
-		return downed_target
+func _pick_medic_move_target(medic, allies: Array, reserved_target_ids: Dictionary):
+	if medic == null or not (medic is Node2D):
+		return null
+	return _pick_best_medic_target(medic, allies, reserved_target_ids, false)
 
-	return _pick_medic_wounded_target(medic, allies, reserved_target_ids)
 
-
-func _pick_medic_target_by_state(medic, allies: Array, reserved_target_ids: Dictionary, expected_state: String):
+func _pick_best_medic_target(medic, allies: Array, reserved_target_ids: Dictionary, require_in_range: bool):
 	var best_target = null
-	var best_distance: float = INF
+	var best_score: float = -INF
 	for ally in allies:
-		if not _is_valid_medic_target(medic, ally, reserved_target_ids):
-			continue
-		if String(ally.call("get_vital_state")) != expected_state:
-			continue
-
-		var distance: float = (medic as Node2D).global_position.distance_to((ally as Node2D).global_position)
-		if distance < best_distance:
-			best_distance = distance
+		var candidate_score: float = _score_medic_target(medic, ally, reserved_target_ids, require_in_range)
+		if candidate_score > best_score:
+			best_score = candidate_score
 			best_target = ally
 
 	return best_target
 
 
-func _pick_medic_wounded_target(medic, allies: Array, reserved_target_ids: Dictionary):
-	var best_target = null
-	var best_health_ratio: float = 1.1
-	for ally in allies:
-		if not _is_valid_medic_target(medic, ally, reserved_target_ids):
-			continue
-		if String(ally.call("get_vital_state")) != "fit":
-			continue
-		if not ally.has_method("get_health") or not ally.has_method("get_max_health_points"):
-			continue
-
-		var max_health: int = int(ally.call("get_max_health_points"))
-		if max_health <= 0:
-			continue
-
-		var health_ratio: float = float(ally.call("get_health")) / float(max_health)
-		if health_ratio >= 0.65:
-			continue
-
-		if health_ratio < best_health_ratio:
-			best_health_ratio = health_ratio
-			best_target = ally
-
-	return best_target
+func _score_medic_target(medic, ally, reserved_target_ids: Dictionary, require_in_range: bool) -> float:
+	if not _is_valid_medic_target(medic, ally, reserved_target_ids, require_in_range):
+		return -INF
+	var distance: float = (medic as Node2D).global_position.distance_to((ally as Node2D).global_position)
+	var vital_state: String = String(ally.call("get_vital_state")).strip_edges().to_lower()
+	if vital_state == "down":
+		return 500.0 - (distance * 0.75)
+	if vital_state != "fit":
+		return -INF
+	if not ally.has_method("get_health") or not ally.has_method("get_max_health_points"):
+		return -INF
+	var max_health: int = int(ally.call("get_max_health_points"))
+	if max_health <= 0:
+		return -INF
+	var health_ratio: float = float(ally.call("get_health")) / float(max_health)
+	var wounded_threshold: float = MEDIC_SUPPORT_WOUNDED_THRESHOLD if require_in_range else MEDIC_SUPPORT_REMOTE_WOUNDED_THRESHOLD
+	if health_ratio >= wounded_threshold:
+		return -INF
+	return 160.0 + ((1.0 - health_ratio) * 220.0) - (distance * 0.45)
 
 
-func _is_valid_medic_target(medic, ally, reserved_target_ids: Dictionary) -> bool:
+func _is_valid_medic_target(medic, ally, reserved_target_ids: Dictionary, require_in_range: bool = true) -> bool:
 	if ally == null or ally == medic or not (ally is Node2D):
 		return false
 	if not ally.has_method("get_unit_id") or not ally.has_method("get_vital_state"):
@@ -640,7 +650,95 @@ func _is_valid_medic_target(medic, ally, reserved_target_ids: Dictionary) -> boo
 	if target_id.is_empty() or reserved_target_ids.has(target_id):
 		return false
 
-	return (medic as Node2D).global_position.distance_to((ally as Node2D).global_position) <= MEDIC_SUPPORT_RANGE
+	var distance: float = (medic as Node2D).global_position.distance_to((ally as Node2D).global_position)
+	if require_in_range:
+		return _is_within_medic_support_range(medic, ally, distance)
+	return _is_within_medic_move_range(medic, ally, distance)
+
+
+func _has_required_medic_tool(unit) -> bool:
+	if unit == null:
+		return false
+	if unit.has_method("has_medic_tool"):
+		return bool(unit.call("has_medic_tool"))
+	var weapon_1_id: String = String(unit.call("get_weapon_1_id")).strip_edges() if unit.has_method("get_weapon_1_id") else ""
+	var weapon_2_id: String = String(unit.call("get_weapon_2_id")).strip_edges() if unit.has_method("get_weapon_2_id") else ""
+	return WEAPON_DATA_SCRIPT.is_medic_tool_id(weapon_1_id) or WEAPON_DATA_SCRIPT.is_medic_tool_id(weapon_2_id)
+
+
+func _try_enqueue_medic_move(simulation_root: Node, medic, target) -> bool:
+	if simulation_root == null or medic == null or target == null:
+		return false
+	if not (medic is Node2D) or not (target is Node2D):
+		return false
+	if not medic.has_method("get_unit_id") or not target.has_method("get_unit_id"):
+		return false
+	var medic_id: String = String(medic.call("get_unit_id")).strip_edges()
+	var target_id: String = String(target.call("get_unit_id")).strip_edges()
+	if medic_id.is_empty() or target_id.is_empty():
+		return false
+	var distance: float = (medic as Node2D).global_position.distance_to((target as Node2D).global_position)
+	if _is_within_medic_support_range(medic, target, distance):
+		return false
+	if int(_medic_support_move_ready_tick.get(medic_id, -1)) > _current_tick:
+		return false
+	simulation_root.call(
+		"enqueue_command",
+		{
+			"command_type": "move_to_position",
+			"priority": MEDIC_SUPPORT_MOVE_PRIORITY,
+			"unit_id": medic_id,
+			"target_position": _build_medic_approach_position(medic, target),
+			"move_speed_factor": MEDIC_SUPPORT_MOVE_SPEED_FACTOR,
+			"requeue_until_target": false,
+		}
+	)
+	_medic_support_move_ready_tick[medic_id] = _current_tick + MEDIC_SUPPORT_MOVE_REISSUE_TICKS
+	if medic.has_method("show_event_text"):
+		medic.call("show_event_text", "MEDIC MOVE", MEDIC_EVENT_COLOR, 1.0)
+	return true
+
+
+func _build_medic_approach_position(medic, target) -> Vector2:
+	if medic == null or target == null or not (medic is Node2D) or not (target is Node2D):
+		return Vector2.ZERO
+	var target_position: Vector2 = (target as Node2D).global_position
+	var direction: Vector2 = target_position - (medic as Node2D).global_position
+	if direction.length_squared() <= 0.001:
+		return target_position
+	return target_position - (direction.normalized() * MEDIC_SUPPORT_APPROACH_STANDOFF)
+
+
+func _is_within_medic_support_range(medic, target, fallback_distance: float = -1.0) -> bool:
+	var tile_distance: int = _get_medic_tile_distance(medic, target)
+	if tile_distance >= 0:
+		return tile_distance <= MEDIC_SUPPORT_TILE_RANGE
+	var resolved_distance: float = fallback_distance
+	if resolved_distance < 0.0 and medic is Node2D and target is Node2D:
+		resolved_distance = (medic as Node2D).global_position.distance_to((target as Node2D).global_position)
+	return resolved_distance <= MEDIC_SUPPORT_RANGE_FALLBACK_WORLD
+
+
+func _is_within_medic_move_range(medic, target, fallback_distance: float = -1.0) -> bool:
+	var tile_distance: int = _get_medic_tile_distance(medic, target)
+	if tile_distance >= 0:
+		return tile_distance <= MEDIC_SUPPORT_MOVE_MAX_TILE_DISTANCE
+	var resolved_distance: float = fallback_distance
+	if resolved_distance < 0.0 and medic is Node2D and target is Node2D:
+		resolved_distance = (medic as Node2D).global_position.distance_to((target as Node2D).global_position)
+	return resolved_distance <= MEDIC_SUPPORT_MOVE_MAX_DISTANCE_FALLBACK_WORLD
+
+
+func _get_medic_tile_distance(medic, target) -> int:
+	if medic == null or target == null or not (medic is Node2D) or not (target is Node2D):
+		return -1
+	var terrain_registry = _get_terrain_registry()
+	if terrain_registry == null or not terrain_registry.has_method("world_to_grid"):
+		return -1
+	var medic_grid: Vector2i = Vector2i(terrain_registry.call("world_to_grid", (medic as Node2D).global_position))
+	var target_grid: Vector2i = Vector2i(terrain_registry.call("world_to_grid", (target as Node2D).global_position))
+	var delta: Vector2i = target_grid - medic_grid
+	return absi(delta.x) + absi(delta.y)
 
 
 func _apply_all_leadership_bonuses() -> void:
@@ -710,7 +808,7 @@ func _can_enemy_attack(unit) -> bool:
 	if String(unit.call("get_vital_state")) != "fit":
 		return false
 
-	return true
+	return not _get_unit_active_weapon_id(unit).is_empty()
 
 
 func _can_unit_attack(unit) -> bool:
@@ -721,6 +819,9 @@ func _can_unit_attack(unit) -> bool:
 		return false
 
 	if String(unit.call("get_vital_state")) != "fit":
+		return false
+
+	if _get_unit_active_weapon_id(unit).is_empty():
 		return false
 
 	if unit.has_method("get_fire_status") and String(unit.call("get_fire_status")) != "fire_at_will":
@@ -1157,9 +1258,9 @@ func _describe_enemy_unit(unit) -> String:
 func _get_unit_active_weapon_id(unit) -> String:
 	if unit != null and unit.has_method("get_active_weapon_id"):
 		var weapon_id: String = String(unit.call("get_active_weapon_id")).strip_edges()
-		if WEAPON_DATA_SCRIPT.is_valid_weapon_id(weapon_id):
+		if WEAPON_DATA_SCRIPT.is_attack_weapon_id(weapon_id):
 			return weapon_id
-	return WEAPON_DATA_SCRIPT.DEFAULT_WEAPON_ID
+	return ""
 
 
 func _find_first_contact_pair() -> Dictionary:
@@ -1240,16 +1341,31 @@ func resolve_flank_attack_with_state(fireteam_id: String, attacker, target, secu
 
 
 func _maybe_publish_flank_event(flank_modifiers: Dictionary, attacker, target) -> void:
-	if flank_modifiers.is_empty() or not bool(flank_modifiers.get("triggered_now", false)):
+	if flank_modifiers.is_empty() or not (bool(flank_modifiers.get("triggered_now", false)) or bool(flank_modifiers.get("morale_triggered_now", false))):
 		return
 	var fireteam_id: String = String(flank_modifiers.get("fireteam_id", "")).strip_edges().to_lower()
 	if fireteam_id.is_empty():
 		return
-	_set_event_text("FLANK %s" % fireteam_id.to_upper())
+	var direction_label: String = String(flank_modifiers.get("direction_label", "")).strip_edges().to_upper()
+	var morale_state: String = String(flank_modifiers.get("morale_state", "")).strip_edges().to_lower()
+	var event_text: String = "FLANK %s" % fireteam_id.to_upper()
+	if not direction_label.is_empty():
+		event_text = "%s %s" % [event_text, direction_label]
+	if morale_state == "shaken":
+		event_text = "%s SHK" % event_text
+	_set_event_text(event_text)
 	if target != null and target.has_method("show_event_text"):
-		target.call("show_event_text", "FLANKED", DOWN_EVENT_COLOR, 1.2)
+		var target_event_text: String = "FLANKED"
+		if morale_state == "shaken":
+			target_event_text = "SHAKEN"
+		elif not direction_label.is_empty():
+			target_event_text = "%s FLANK" % direction_label
+		target.call("show_event_text", target_event_text, DOWN_EVENT_COLOR, 1.2)
 	if attacker != null and attacker.has_method("show_event_text"):
-		attacker.call("show_event_text", "FLANK", DEFAULT_EVENT_COLOR, 1.0)
+		var attacker_event_text: String = "FLANK"
+		if not direction_label.is_empty():
+			attacker_event_text = "%s %s" % [attacker_event_text, direction_label]
+		attacker.call("show_event_text", attacker_event_text, DEFAULT_EVENT_COLOR, 1.0)
 	var event_router = get_node_or_null("../EventRouter")
 	if event_router != null and event_router.has_method("notify_flank_vulnerability_triggered"):
 		event_router.call("notify_flank_vulnerability_triggered", fireteam_id, flank_modifiers)

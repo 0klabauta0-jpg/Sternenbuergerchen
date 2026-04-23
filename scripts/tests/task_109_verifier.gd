@@ -3,6 +3,7 @@ extends SceneTree
 const FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tests/fireteam_behavior_resolver.gd")
 const TACTICAL_STANCE_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/tactical_stance_controller.gd")
 const TEST_UNIT_SCRIPT: GDScript = preload("res://scripts/npc/test_unit.gd")
+const SIMULATION_ROOT_SCRIPT: GDScript = preload("res://scripts/core/simulation_root.gd")
 
 var _passed: int = 0
 var _failed: int = 0
@@ -15,9 +16,11 @@ func _init() -> void:
 func _run_tests() -> void:
 	print("=== TASK_109 Tactical Stance Verifier ===")
 	_test_stance_controller_snapshot_roundtrip()
+	_test_unit_badge_and_remote_snapshot_sync()
 	_test_aggressive_stance_shifts_behavior_profile()
 	_test_reckless_leader_mostly_ignores_cautious_request()
 	await _test_scene_panel_and_multiselect_application()
+	await _test_scene_stance_sync_bridge()
 	await _test_phase_transition_resets_stances_to_normal()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	if _failed > 0:
@@ -32,12 +35,38 @@ func _test_stance_controller_snapshot_roundtrip() -> void:
 	controller.call("set_requested_stance", "blue", "aggressive")
 	controller.call("set_requested_stance", "gold", "cautious")
 	var snapshot: Dictionary = Dictionary(controller.call("get_stance_snapshot"))
+	var sync_state: Dictionary = Dictionary(controller.call("get_sync_state"))
 	var restored = TACTICAL_STANCE_CONTROLLER_SCRIPT.new()
-	restored.call("load_stance_snapshot", snapshot, PackedStringArray(["blue", "gold"]))
+	restored.call("load_sync_state", sync_state, PackedStringArray(["blue", "gold"]))
 	_assert(String(restored.call("get_requested_stance", "blue")) == "aggressive", "Stance controller roundtrips aggressive stance per fireteam")
 	_assert(String(restored.call("get_requested_stance", "gold")) == "cautious", "Stance controller roundtrips cautious stance per fireteam")
+	_assert(int(sync_state.get("revision", 0)) == 2, "Stance controller sync state increments revision for each real stance change")
+	_assert(int(restored.call("get_sync_revision")) == 2, "Restored stance controller preserves sync revision from sync state")
+	var legacy_restored = TACTICAL_STANCE_CONTROLLER_SCRIPT.new()
+	legacy_restored.call("load_stance_snapshot", snapshot, PackedStringArray(["blue", "gold"]))
+	_assert(String(legacy_restored.call("get_requested_stance", "blue")) == "aggressive", "Legacy stance snapshot loading still accepts aggressive fireteam state")
 	restored.call("reset_fireteams")
 	_assert(String(restored.call("get_requested_stance", "blue")) == "normal", "Reset returns fireteam stance to normal")
+	_assert(int(restored.call("get_sync_revision")) == 3, "Reset advances sync revision once for the cleared stance state")
+
+
+func _test_unit_badge_and_remote_snapshot_sync() -> void:
+	var unit = _make_unit("badge_unit", "blue", false, 0.55, 0.55, [])
+	unit.call("set_tactical_stance_indicator", "aggressive", 4)
+	_assert(String(unit.call("get_tactical_stance_badge_text")) == "A", "TestUnit renders aggressive stance as in-world badge A")
+	var badge_snapshot: Dictionary = Dictionary(unit.call("get_tactical_stance_badge_snapshot"))
+	_assert(String(badge_snapshot.get("tactical_stance", "")) == "aggressive", "TestUnit exposes tactical stance in its snapshot fragment")
+	_assert(int(badge_snapshot.get("tactical_stance_revision", -1)) == 4, "TestUnit carries the stance sync revision in its snapshot fragment")
+	var simulation_root = SIMULATION_ROOT_SCRIPT.new()
+	var unit_snapshot: Dictionary = Dictionary(simulation_root.call("_build_unit_snapshot", unit))
+	_assert(String(unit_snapshot.get("tactical_stance", "")) == "aggressive", "SimulationRoot includes tactical stance badge data in unit snapshots")
+	_assert(int(unit_snapshot.get("tactical_stance_revision", -1)) == 4, "SimulationRoot includes stance revision in unit snapshots")
+	unit.call("apply_remote_snapshot", {"tactical_stance": "cautious", "tactical_stance_revision": 3})
+	_assert(String(unit.call("get_tactical_stance_badge_text")) == "A", "Older remote stance revisions do not overwrite newer local badge state")
+	unit.call("apply_remote_snapshot", {"tactical_stance": "cautious", "tactical_stance_revision": 5})
+	_assert(String(unit.call("get_tactical_stance_badge_text")) == "C", "Newer remote stance revisions update the in-world badge")
+	simulation_root.free()
+	unit.free()
 
 
 func _test_aggressive_stance_shifts_behavior_profile() -> void:
@@ -46,15 +75,17 @@ func _test_aggressive_stance_shifts_behavior_profile() -> void:
 	_assert(String(profile.tactical_stance) == "aggressive", "Behavior profile stores the requested aggressive stance")
 	_assert(String(profile.advance_style) == "rush", "Aggressive stance shifts neutral bounding profile to rush")
 	_assert(absf(float(profile.cover_priority) - 0.1) < 0.001, "Aggressive stance lowers cover priority with clamp")
-	_assert(int(profile.suppression_threshold) == 5, "Aggressive stance raises suppression threshold")
+	_assert(int(profile.suppression_threshold) == 4, "Aggressive stance raises suppression threshold against the current toughness formula")
+	leader.free()
 
 
 func _test_reckless_leader_mostly_ignores_cautious_request() -> void:
 	var leader = _make_unit("leader_reckless", "gold", true, 0.25, 0.4, ["reckless"])
 	var profile = FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT.call("resolve_profile", "gold", [leader], leader, "move", Vector2.ZERO, null, "cautious")
 	_assert(String(profile.advance_style) == "rush", "Reckless leader keeps rush style despite cautious request")
-	_assert(absf(float(profile.cover_priority) - 0.65) < 0.001, "Reckless leader only gets a minimal cover priority increase from cautious stance")
-	_assert(int(profile.suppression_threshold) == 6, "Reckless leader keeps the original suppression threshold under cautious request")
+	_assert(absf(float(profile.cover_priority) - 0.8) < 0.001, "Reckless leader only gets a minimal cover priority increase from cautious stance")
+	_assert(int(profile.suppression_threshold) == 3, "Reckless leader keeps the original suppression threshold under cautious request")
+	leader.free()
 
 
 func _test_scene_panel_and_multiselect_application() -> void:
@@ -68,7 +99,31 @@ func _test_scene_panel_and_multiselect_application() -> void:
 	_assert(applied, "Selected fireteams accept a shared stance request")
 	_assert(String(snapshot.get("blue", "")) == "aggressive", "Blue fireteam stores aggressive stance from multiselect")
 	_assert(String(snapshot.get("gold", "")) == "aggressive", "Gold fireteam stores aggressive stance from multiselect")
+	var blue_unit = _find_friendly_unit(scene, "blue")
+	_assert(blue_unit != null and String(blue_unit.call("get_tactical_stance_badge_text")) == "A", "Blue operators show the shared aggressive stance directly on the unit badge")
 	scene.queue_free()
+	await process_frame
+
+
+func _test_scene_stance_sync_bridge() -> void:
+	var scene = await _load_scene()
+	var tactical_controller = scene.get_node("TacticalController")
+	tactical_controller.call("_set_selected_fireteams", PackedStringArray(["blue"]), false)
+	tactical_controller.call("set_selected_fireteams_tactical_stance", "cautious")
+	var sync_state: Dictionary = Dictionary(tactical_controller.call("get_tactical_stance_sync_state"))
+	var planning_state: Dictionary = Dictionary(tactical_controller.call("get_planning_state"))
+	var mirrored_scene = await _load_scene()
+	var mirrored_controller = mirrored_scene.get_node("TacticalController")
+	mirrored_controller.call("set_planning_state", planning_state)
+	var mirrored_sync_state: Dictionary = Dictionary(mirrored_controller.call("get_tactical_stance_sync_state"))
+	var mirrored_blue_unit = _find_friendly_unit(mirrored_scene, "blue")
+	_assert(int(sync_state.get("revision", 0)) > 0, "Mission controller exposes a revisioned stance sync state for future multiplayer transport")
+	_assert(String(Dictionary(sync_state.get("stances", {})).get("blue", "")) == "cautious", "Mission stance sync state carries the normalized fireteam stance dictionary")
+	_assert(planning_state.has("tactical_stance_sync"), "Planning state includes the dedicated tactical stance sync fragment")
+	_assert(int(mirrored_sync_state.get("revision", -1)) == int(sync_state.get("revision", -2)), "Planning state bridge preserves stance sync revisions between mission instances")
+	_assert(mirrored_blue_unit != null and String(mirrored_blue_unit.call("get_tactical_stance_badge_text")) == "C", "Mirrored mission instances rebuild the same in-world unit badge from the sync fragment")
+	scene.queue_free()
+	mirrored_scene.queue_free()
 	await process_frame
 
 
@@ -93,6 +148,19 @@ func _test_phase_transition_resets_stances_to_normal() -> void:
 	_assert(String(blue_profile.get("tactical_stance", "")) == "normal", "Freshly activated behavior profiles use normal stance after a phase change")
 	scene.queue_free()
 	await process_frame
+
+
+func _find_friendly_unit(scene: Node, fireteam_id: String) -> Node:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	for child in scene.get_children():
+		if child == null or not child.has_method("get_team_id") or not child.has_method("get_fireteam_id"):
+			continue
+		if String(child.call("get_team_id")).strip_edges() != "team_alpha":
+			continue
+		if String(child.call("get_fireteam_id")).strip_edges().to_lower() != normalized_fireteam_id:
+			continue
+		return child
+	return null
 
 
 func _load_scene() -> Node:

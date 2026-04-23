@@ -15,6 +15,7 @@ func _run() -> void:
 	print("=== TASK_107 Loadout Modifier Verifier ===")
 	_test_resolver_builds_modifier_dict()
 	_test_resolver_supports_special_aliases()
+	_test_resolver_supports_medictool_slot_item()
 	_test_testunit_applies_modifiers_to_combat_effects()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	if _failed > 0:
@@ -44,6 +45,15 @@ func _test_resolver_supports_special_aliases() -> void:
 	if mods != null:
 		_assert(String(mods.weapon_1_id) == "special", "weapon_1 normalized to special")
 		_assert(float(mods.toughness_mod) > 0.0, "heavy+special stack produces positive toughness modifier")
+
+
+func _test_resolver_supports_medictool_slot_item() -> void:
+	var resolver = LOADOUT_MODIFIER_RESOLVER_SCRIPT.new()
+	var mods = resolver.resolve_for_unit("unit_medic", {"weapon_1": "medictool", "weapon_2": "rifle", "armor": "medium"})
+	_assert(mods != null and mods.is_valid(), "resolver accepts medictool as valid weapon-slot loadout item")
+	if mods != null:
+		_assert(String(mods.weapon_1_id) == "medictool", "weapon_1 keeps medictool id through resolver")
+		_assert(String(mods.range_class) == "medium", "medictool keeps resolver output in an allowed range class")
 
 
 func _test_testunit_applies_modifiers_to_combat_effects() -> void:

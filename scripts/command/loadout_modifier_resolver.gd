@@ -27,6 +27,13 @@ const WEAPON_FORMULAS: Dictionary = {
 		"cover_mod": 0.06,
 		"range_class": "any",
 	},
+	"medictool": {
+		"accuracy_mod": -0.03,
+		"speed_mod": -0.02,
+		"toughness_mod": 0.0,
+		"cover_mod": 0.0,
+		"range_class": "medium",
+	},
 }
 
 const ARMOR_FORMULAS: Dictionary = {
@@ -109,6 +116,8 @@ func _normalize_weapon_id(weapon_id: String) -> String:
 			return "smg"
 		"rifle":
 			return "rifle"
+		"medictool", "medic_tool", "medic-tool":
+			return "medictool"
 		"special", "rail_gun", "sonderwaffe":
 			return "special"
 		_:

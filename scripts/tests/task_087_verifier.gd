@@ -30,6 +30,7 @@ func _run_tests() -> void:
 	await _test_weapon_visual_uses_visual_direction()
 	await _test_weapon_visual_falls_back_to_se()
 	await _test_weapon_visual_rail_gun_scale()
+	await _test_medictool_visual_uses_red_pistol()
 
 	print("")
 	print("=== Results: %d passed, %d failed, %d total ===" % [_pass_count, _fail_count, _test_count])
@@ -204,6 +205,18 @@ func _test_weapon_visual_rail_gun_scale() -> void:
 	_assert(weapon_visual != null, "weapon visual exists for rail gun")
 	_assert(weapon_visual.scale == Vector2(2.0, 2.0), "rail gun weapon visual uses 2x scale")
 	_assert(unit.get_weapon_visual_texture_path().ends_with("weapon_rifle_SE.png"), "rail gun uses rifle SE sprite asset")
+	unit.queue_free()
+
+
+func _test_medictool_visual_uses_red_pistol() -> void:
+	var unit = _make_test_unit("unit_medic", "team_alpha")
+	_attach_visual(unit, "res://Assets/kenney_space-kit/Isometric/astronautA_SE.png")
+	unit.apply_identity_config({"weapon_1_id": "medictool", "weapon_2_id": "rifle"})
+	await process_frame
+	var weapon_visual = unit.get_weapon_visual()
+	_assert(weapon_visual != null, "weapon visual exists for medictool")
+	_assert(unit.get_weapon_visual_texture_path().ends_with("weapon_gun_SE.png"), "medictool uses the pistol sprite asset")
+	_assert(weapon_visual.modulate == Color(1.0, 0.2, 0.2, 1.0), "medictool weapon visual is tinted red")
 	unit.queue_free()
 
 

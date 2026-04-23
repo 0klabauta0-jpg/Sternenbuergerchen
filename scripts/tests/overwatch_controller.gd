@@ -128,7 +128,7 @@ func _can_member_overwatch(unit) -> bool:
 		return false
 	if String(unit.call("get_vital_state")) != "fit":
 		return false
-	return unit is Node2D
+	return unit is Node2D and not _get_active_weapon_id(unit).is_empty()
 
 
 func _get_effective_range(target, base_contact_range: float) -> float:
@@ -141,9 +141,9 @@ func _get_effective_range(target, base_contact_range: float) -> float:
 func _get_active_weapon_id(unit) -> String:
 	if unit != null and unit.has_method("get_active_weapon_id"):
 		var weapon_id: String = String(unit.call("get_active_weapon_id")).strip_edges()
-		if WEAPON_DATA_SCRIPT.is_valid_weapon_id(weapon_id):
+		if WEAPON_DATA_SCRIPT.is_attack_weapon_id(weapon_id):
 			return weapon_id
-	return WEAPON_DATA_SCRIPT.DEFAULT_WEAPON_ID
+	return ""
 
 
 func _prime_enemy_positions(enemy_units: Array) -> void:

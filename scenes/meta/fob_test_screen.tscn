@@ -617,7 +617,7 @@ layout_mode = 2
 [node name="OverlayHeaderLabel" type="Label" parent="CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayHeaderRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Character Sheet"
+text = "#20 CHARACTER OVERLAY"
 theme_override_font_sizes/font_size = 16
 
 [node name="CloseOverlayButton" type="Button" parent="CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayHeaderRow"]

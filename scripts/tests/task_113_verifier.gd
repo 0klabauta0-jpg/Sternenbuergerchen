@@ -33,6 +33,7 @@ func _run_tests() -> void:
 	print("=== TASK_113 Flank Vulnerability Verifier ===")
 	_test_resolver_detects_directional_flank_and_bonuses()
 	_test_resolver_ignores_360_security()
+	_test_resolver_tracks_direction_and_escalates_morale()
 	await _test_active_flank_state_expires_after_duration()
 	await _test_simulation_root_respects_cover_override_in_flank_damage()
 	await _test_scene_proxies_active_flank_state_to_tactical_controller()
@@ -66,6 +67,8 @@ func _test_resolver_detects_directional_flank_and_bonuses() -> void:
 	_assert(is_equal_approx(float(result.get("hit_chance_bonus", 0.0)), 0.2), "Flank hits grant the configured hit chance bonus")
 	_assert(is_equal_approx(float(result.get("damage_multiplier", 0.0)), 1.3), "Flank hits grant the configured damage multiplier")
 	_assert(is_equal_approx(float(result.get("target_cover_override", -1.0)), 0.0), "Flank hits override target cover down to zero")
+	_assert(String(result.get("direction_label", "")) == "rear", "Rear-angle flank hits expose the relative attack direction for follow-up systems")
+	_assert(String(result.get("morale_state", "")) == "shaken", "Rear-angle flank hits immediately escalate the defending fireteam into a shaken morale state")
 	_cleanup_units([leader, wing, attacker])
 
 
@@ -91,10 +94,30 @@ func _test_active_flank_state_expires_after_duration() -> void:
 	resolver.resolve_attack("blue", attacker, leader, security_state, 12)
 	var active_state: Dictionary = resolver.get_fireteam_state("blue", 12)
 	var expiry_tick: int = int(active_state.get("expires_at_tick", 12))
+	var morale_expiry_tick: int = int(active_state.get("morale_expires_at_tick", expiry_tick))
 	var changed: bool = bool(resolver.advance(expiry_tick + 1))
-	var expired_state: Dictionary = resolver.get_fireteam_state("blue", expiry_tick + 1)
+	var post_flank_state: Dictionary = resolver.get_fireteam_state("blue", expiry_tick + 1)
+	var cleared: bool = bool(resolver.advance(morale_expiry_tick + 1))
+	var expired_state: Dictionary = resolver.get_fireteam_state("blue", morale_expiry_tick + 1)
 	_assert(bool(active_state.get("is_active", false)), "Resolver stores an active vulnerability window after a flank hit")
-	_assert(changed and expired_state.is_empty(), "Flank vulnerability expires cleanly after its duration")
+	_assert(changed and not bool(post_flank_state.get("is_active", false)) and bool(post_flank_state.get("is_morale_active", false)), "Flank vulnerability can expire while the follow-up morale pressure remains briefly active")
+	_assert(cleared and expired_state.is_empty(), "Directional morale pressure also expires cleanly after its longer follow-up window")
+	_cleanup_units([leader, wing, attacker])
+
+
+func _test_resolver_tracks_direction_and_escalates_morale() -> void:
+	var resolver = FLANK_VULNERABILITY_RESOLVER_SCRIPT.new()
+	var security_controller = FIRETEAM_SECURITY_CONTROLLER_SCRIPT.new()
+	var leader = _make_unit("side_lead", "blue", true, Vector2(0.0, 0.0), 0.45, 0.65, 0.35, ["aggressive"], "team_alpha")
+	var wing = _make_unit("side_wing", "blue", false, Vector2(10.0, 10.0), 0.52, 0.55, 0.3, [], "team_alpha")
+	var security_state: Dictionary = security_controller.update_fireteam_state("blue", [leader, wing], leader, _build_behavior_profile("hold_position"), {}, {}, {}, [_build_confirmed_contact("blue", Vector2(120.0, 0.0))])
+	var attacker = _make_unit("enemy_left_flank", "enemy", false, Vector2(-60.0, -120.0), 0.5, 0.5, 0.2, [], "team_bravo")
+	var first_result: Dictionary = resolver.resolve_attack("blue", attacker, leader, security_state, 20)
+	var second_result: Dictionary = resolver.resolve_attack("blue", attacker, leader, security_state, 21)
+	_assert(String(first_result.get("direction_label", "")) == "left", "Off-axis flank hits keep their relative left/right direction instead of collapsing everything into rear")
+	_assert(String(first_result.get("morale_state", "")) == "alerted", "A single side flank first creates a lighter alerted morale memory")
+	_assert(String(second_result.get("morale_state", "")) == "shaken", "Repeated flank pressure escalates the morale state to shaken")
+	_assert(bool(second_result.get("morale_triggered_now", false)), "Crossing into the shaken state is exposed as an explicit transition for UI/debug follow-up")
 	_cleanup_units([leader, wing, attacker])
 
 
@@ -130,11 +153,15 @@ func _test_simulation_root_respects_cover_override_in_flank_damage() -> void:
 			"is_flank": true,
 			"flank_fireteam_id": "blue",
 			"flank_source_angle": PI,
+			"flank_direction_label": "rear",
+			"flank_morale_state": "shaken",
 		}
 	)
 	var hit_context: Dictionary = target.call("get_last_damage_context")
 	_assert(is_equal_approx(float(hit_context.get("target_cover_score", -1.0)), 0.0), "SimulationRoot applies flank cover override through the authoritative damage path")
 	_assert(bool(hit_context.get("is_flank", false)), "Flank hits are annotated in the damage hit context for downstream systems")
+	_assert(String(hit_context.get("flank_direction_label", "")) == "rear", "SimulationRoot preserves flank direction labels in the authoritative hit context")
+	_assert(String(hit_context.get("flank_morale_state", "")) == "shaken", "SimulationRoot preserves flank morale state in the authoritative hit context")
 	simulation_root.queue_free()
 	_cleanup_units([attacker, target])
 	await process_frame
@@ -183,11 +210,14 @@ func _test_scene_proxies_active_flank_state_to_tactical_controller() -> void:
 		result = Dictionary(combat_driver.call("resolve_flank_attack_with_state", selected_fireteam_id, enemies[0], friendlies[0], forced_directional_state))
 	var tactical_snapshot: Array = Array(tactical_controller.call("get_flank_vulnerability_snapshot"))
 	var combat_snapshot: Array = Array(combat_driver.call("get_flank_vulnerability_snapshot"))
+	var proxied_state: Dictionary = Dictionary(tactical_controller.call("get_fireteam_flank_vulnerability_state", selected_fireteam_id))
 	_assert(started, "Mission scene starts successfully for flank integration")
 	_assert(not selected_state.is_empty(), "Mission scene exposes active security state for flank integration")
 	_assert(bool(result.get("is_flank", false)), "Combat loop can trigger flank vulnerability from a rear directional attack in scene context")
 	_assert(not tactical_snapshot.is_empty(), "Tactical controller proxies active flank vulnerability snapshots")
 	_assert(JSON.stringify(tactical_snapshot) == JSON.stringify(combat_snapshot), "Tactical controller flank snapshot matches the combat-loop source")
+	_assert(String(proxied_state.get("direction_label", "")) == "rear", "Tactical controller proxies the relative flank direction into the mission status layer")
+	_assert(String(proxied_state.get("morale_state", "")) == "shaken", "Tactical controller proxies the follow-up morale state into the mission status layer")
 	scene.queue_free()
 	await process_frame
 
