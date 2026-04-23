@@ -1,0 +1,34 @@
+{
+	"map_name": "legacy_wall_type_unsupported",
+	"mission_slot_count": 1,
+	"grid_size": {
+		"x": 1,
+		"y": 1
+	},
+	"tile_size": {
+		"half_width": 64,
+		"half_height": 32
+	},
+	"grid_origin": {
+		"x": 0,
+		"y": 0
+	},
+	"markers": {},
+	"patrol_paths": {},
+	"tiles": [
+		{
+			"grid_position": {
+				"x": 0,
+				"y": 0
+			},
+			"type_id": "wall",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 40,
+			"height_level": 0,
+			"object_height": 2,
+			"surface_type": "ground",
+			"edge_type": "none"
+		}
+	]
+}

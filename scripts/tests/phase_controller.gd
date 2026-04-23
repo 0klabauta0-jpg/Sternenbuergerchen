@@ -10,6 +10,7 @@ var _phase_states: Array = []
 var _active_phase_index: int = PREMISSION_PHASE_INDEX
 var _selected_phase_index: int = FIRST_INTERACTIVE_PHASE_INDEX
 var _tick_counter: int = 0
+var _last_load_issue_message: String = ""
 
 
 func _ready() -> void:
@@ -21,6 +22,7 @@ func reset_to_defaults() -> void:
 	_active_phase_index = PREMISSION_PHASE_INDEX
 	_selected_phase_index = FIRST_INTERACTIVE_PHASE_INDEX
 	_tick_counter = 0
+	_last_load_issue_message = ""
 	ensure_phase_count(MINIMUM_PHASE_COUNT)
 	_sync_phase_states()
 
@@ -50,7 +52,8 @@ func load_from_planning_state(planning_state: Dictionary, max_plan_phase: int = 
 	if planning_state.has("selected_phase_index"):
 		_selected_phase_index = maxi(int(planning_state.get("selected_phase_index", FIRST_INTERACTIVE_PHASE_INDEX)), FIRST_INTERACTIVE_PHASE_INDEX)
 	elif legacy_mode and planning_state.has("selected_phase"):
-		_selected_phase_index = _parse_legacy_selected_phase(String(planning_state.get("selected_phase", "")))
+		_last_load_issue_message = "Old planning data detected: 'selected_phase' without the numbered phase state is no longer supported. Please recreate this plan with the current phase system."
+		push_warning("PhaseController: %s" % _last_load_issue_message)
 
 	_active_phase_index = mini(_active_phase_index, max(FIRST_INTERACTIVE_PHASE_INDEX, _phase_states.size() - 1))
 	_selected_phase_index = clampi(_selected_phase_index, FIRST_INTERACTIVE_PHASE_INDEX, max(FIRST_INTERACTIVE_PHASE_INDEX, _phase_states.size() - 1))
@@ -102,6 +105,10 @@ func get_selected_phase_index() -> int:
 
 func get_phase_count() -> int:
 	return _phase_states.size()
+
+
+func get_last_load_issue_message() -> String:
+	return _last_load_issue_message
 
 
 func get_selected_phase_name() -> String:
@@ -182,18 +189,3 @@ func _get_phase_display_name(phase_index: int) -> String:
 	if phase_index == PREMISSION_PHASE_INDEX:
 		return "P0 PRE"
 	return "P%d" % phase_index
-
-
-func _parse_legacy_selected_phase(phase_name: String) -> int:
-	var normalized_name: String = phase_name.strip_edges().to_upper()
-	match normalized_name:
-		"APPROACH":
-			return 1
-		"ASSAULT":
-			return 2
-		"HOLD":
-			return 3
-		_:
-			if normalized_name.begins_with("P"):
-				return maxi(int(normalized_name.substr(1)), FIRST_INTERACTIVE_PHASE_INDEX)
-	return FIRST_INTERACTIVE_PHASE_INDEX

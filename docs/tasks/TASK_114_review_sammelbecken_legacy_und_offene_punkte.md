@@ -57,16 +57,14 @@ Dieser Task sammelt die im tiefen Review vom 2026-04-21 verifizierten Altlasten,
   - Dateien: `docs/IMPLEMENTATION_STATUS.md`, `docs/tasks/TASK_096_meta_missionmap_dropship_und_charactersheet_recovery.md`, `scenes/meta/meta_map_screen.tscn`
   - Umfang: die ungenutzte lokale Alt-Szene `meta_map_screen.tscn` ist entfernt; die Status- und Task-Doku verweist stattdessen wieder auf die echte eingebettete Missionsvorschau in `MissionHost`. Zusaetzlich wurden zwei versehentliche reine Newline-Diffs in `maps/wall_test_4x4.json` und `scripts/meta/npc_meta_card.gd` aus dem Worktree zurueckgesetzt.
 
+- [x] Legacy-Wandkarten und alte `selected_phase`-Planungsdaten folgen jetzt einer expliziten Ausstiegsstrategie statt stiller Migration.
+  - Dateien: `scripts/terrain/terrain_map_data.gd`, `scripts/editor/map_editor.gd`, `scripts/tests/phase_controller.gd`, `scripts/tests/mission_tactical_sandbox_controller.gd`, `maps/legacy_wall_type_unsupported.json`, `tests/fixtures/legacy_selected_phase_planning_state.json`, `scripts/tests/task_114_legacy_guard_verifier.gd`
+  - Umfang: Karten mit altem Tile-Typ `wall` werden beim Laden jetzt klar als alte Datei markiert und nicht mehr mit einer geratenen Standardwand dargestellt; der Editor faellt stattdessen auf eine saubere neue Leerkartengrundlage zurueck. Alte Planungsdaten mit `selected_phase` ohne nummerierten Phasenstand werden nicht mehr auf das neue System gemappt oder um einen Schritt verschoben, sondern explizit als nicht mehr unterstuetzt abgewiesen. Fuer beide Faelle liegen kleine Alt-Beispieldateien plus headless Verifier vor.
+  - Verifikation: `scripts/tests/task_114_legacy_guard_verifier.gd`
+
 ## Offene Punkte
 
-### 1. Legacy-Kompatibilitaet im Code
-- `scripts/editor/map_editor.gd` haelt einen Legacy-Fallback fuer den alten Tile-Typ `wall`.
-  - Das ist sinnvoll fuer Altdateien, sollte aber irgendwann durch eine kontrollierte Map-Migration oder ein sauberes Upgrade-Skript ersetzt werden.
-
-- `scripts/tests/phase_controller.gd` und `scripts/tests/mission_tactical_sandbox_controller.gd` behalten weiter die Migration fuer alte `selected_phase`-Planungsdaten.
-  - Der Pfad ist bewusst erhalten, weil er noch alte Planungsstaende lesen kann; entfernt wurden nur die toten Szenen-/UI-Hooks.
-
-### 2. Noch offene Fachpunkte aus bestehenden Tasks
+### 1. Noch offene Fachpunkte aus bestehenden Tasks
 - `TASK_096`
   - Sichtbare Nummern direkt in der echten Tactical-UI nachziehen.
   - Kleinen Verifier fuer FOB-Transitkarten und Character-Sheet-Layout nachziehen.
@@ -90,8 +88,7 @@ Dieser Task sammelt die im tiefen Review vom 2026-04-21 verifizierten Altlasten,
   - Keine freien Marker-Typen oder Handle-basierte Platzierung direkt auf der Karte.
 
 ## Empfehlung fuer die naechste Abarbeitung
-1. Verbleibende Legacy-Migrationen (`map_editor.gd` fuer alten Tile-Typ `wall`, `phase_controller.gd` fuer `selected_phase`) nur mit expliziter Upgrade-Strategie oder Alt-Daten-Testfaellen anfassen.
-2. Fachliche Restpunkte aus TASK_096, TASK_109 und TASK_113 in kleine Folge-Tasks schneiden statt still weiter in bestehende Monsterdateien zu wachsen.
+1. Fachliche Restpunkte aus TASK_096, TASK_109 und TASK_113 in kleine Folge-Tasks schneiden statt still weiter in bestehende Monsterdateien zu wachsen.
 
 ## Nicht-Ziele
 - kein stiller Grossrefactor des Meta-Layers
@@ -104,4 +101,4 @@ Dieser Task sammelt die im tiefen Review vom 2026-04-21 verifizierten Altlasten,
 - `godot_console.exe --headless --path . --script scripts/tests/task_111_verifier.gd`
 - `godot_console.exe --headless --path . --script scripts/tests/task_112_verifier.gd`
 - `godot_console.exe --headless --path . --script scripts/tests/task_113_verifier.gd`
-
+- `godot_console.exe --headless --path . --script scripts/tests/task_114_legacy_guard_verifier.gd`

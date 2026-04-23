@@ -177,6 +177,7 @@ var _fireteam_security_controller = null
 var _active_coordination_by_id: Dictionary = {}
 var _leader_initiated_flank_ready_at_msec_by_fireteam: Dictionary = {}
 var _contact_overlay_pending: bool = false
+var _last_planning_state_issue: String = ""
 
 
 func _ready() -> void:
@@ -427,7 +428,12 @@ func return_selected_fireteams_to_plan() -> bool:
 
 
 func set_planning_state(planning_state: Dictionary) -> void:
-	var uses_global_phase_state: bool = planning_state.has("selected_phase_index") or planning_state.has("active_phase_index") or planning_state.has("phase_states") or planning_state.has("phase_count")
+	_last_planning_state_issue = _get_unsupported_planning_state_issue(planning_state)
+	if not _last_planning_state_issue.is_empty():
+		_last_command_text = "ALTE PLANUNGSDATEN"
+		push_warning("TacticalInputController: %s" % _last_planning_state_issue)
+		_update_ui()
+		return
 	_ensure_tactical_stance_controller()
 	if planning_state.has("approach_angle"):
 		var approach_angle: String = String(planning_state.get("approach_angle", "NW")).strip_edges().to_upper()
@@ -487,10 +493,10 @@ func set_planning_state(planning_state: Dictionary) -> void:
 	if planning_state.has("tactical_stances") and _tactical_stance_controller != null:
 		_tactical_stance_controller.call("load_stance_snapshot", Dictionary(planning_state.get("tactical_stances", {})), _get_available_fireteam_ids())
 	if planning_state.has("order_plans"):
-		_load_order_plans_from_state(Array(planning_state.get("order_plans", [])), 1 if not uses_global_phase_state else 0)
+		_load_order_plans_from_state(Array(planning_state.get("order_plans", [])))
 	var phase_controller = _get_phase_controller()
 	if phase_controller != null and phase_controller.has_method("load_from_planning_state"):
-		phase_controller.call("load_from_planning_state", planning_state, _get_max_order_plan_phase(), not uses_global_phase_state)
+		phase_controller.call("load_from_planning_state", planning_state, _get_max_order_plan_phase(), false)
 	_sync_phase_selection_from_controller()
 	_phase_execution_by_fireteam.clear()
 	_ad_hoc_execution_by_fireteam.clear()
@@ -597,6 +603,10 @@ func get_phase_state_snapshot() -> Dictionary:
 		"phase_count": int(phase_controller.call("get_phase_count")),
 		"phase_states": Array(phase_controller.call("get_phase_states_snapshot")),
 	}
+
+
+func get_last_planning_state_issue() -> String:
+	return _last_planning_state_issue
 
 
 func get_active_behavior_profile(fireteam_id: String) -> Dictionary:
@@ -1098,12 +1108,15 @@ func _update_ui() -> void:
 	_apply_block_labels()
 	var command_feedback_label := get_node_or_null(command_feedback_label_path) as Label
 	if command_feedback_label != null:
-		command_feedback_label.text = "TEAM %s | PHASE %s\nTARGET %s\nLAST %s" % [
-			_get_fireteam_name(),
-			_get_phase_name(),
-			_build_target_text(),
-			_last_command_text,
-		]
+		if not _last_planning_state_issue.is_empty():
+			command_feedback_label.text = "PLANUNG NICHT GELADEN\nAlte Planungsdaten erkannt.\nBitte Plan im aktuellen Phasensystem neu anlegen."
+		else:
+			command_feedback_label.text = "TEAM %s | PHASE %s\nTARGET %s\nLAST %s" % [
+				_get_fireteam_name(),
+				_get_phase_name(),
+				_build_target_text(),
+				_last_command_text,
+			]
 
 	var hotkey_legend_label := get_node_or_null(hotkey_legend_label_path) as Label
 	if hotkey_legend_label != null:
@@ -1849,6 +1862,8 @@ func _build_fireteam_status_text() -> String:
 
 
 func _build_strategic_status_text() -> String:
+	if not _last_planning_state_issue.is_empty():
+		return "Alte Planungsdaten erkannt\nBitte Plan im aktuellen\nPhasensystem neu anlegen."
 	var lz_text: String = "LZ offen" if not _has_lz_position else "LZ %s" % _format_world_position(_lz_position)
 	var ship_text: String = "Drop wartend"
 	if _mission_drop_state == "to_mission":
@@ -3361,21 +3376,13 @@ func _serialize_order_plans() -> Array:
 	return result
 
 
-func _load_order_plans_from_state(plan_dicts: Array, phase_offset: int = 0) -> void:
+func _load_order_plans_from_state(plan_dicts: Array) -> void:
 	_order_plans_by_key.clear()
 	for plan_variant in plan_dicts:
 		if typeof(plan_variant) != TYPE_DICTIONARY:
 			continue
 		var adjusted_plan_dict: Dictionary = Dictionary(plan_variant).duplicate(true)
-		adjusted_plan_dict["phase"] = maxi(int(adjusted_plan_dict.get("phase", 0)) + phase_offset, 0)
-		for waypoint_variant in Array(adjusted_plan_dict.get("waypoints", [])):
-			if typeof(waypoint_variant) != TYPE_DICTIONARY:
-				continue
-			var waypoint_dict: Dictionary = Dictionary(waypoint_variant)
-			if phase_offset != 0:
-				var metadata: Dictionary = Dictionary(waypoint_dict.get("metadata", {})).duplicate(true)
-				metadata["legacy_phase_migrated"] = true
-				waypoint_dict["metadata"] = metadata
+		adjusted_plan_dict["phase"] = maxi(int(adjusted_plan_dict.get("phase", 0)), 0)
 		var plan = FIRETEAM_ORDER_PLAN_SCRIPT.call("from_dict", adjusted_plan_dict)
 		if plan == null or not plan.is_valid():
 			continue
@@ -3396,6 +3403,18 @@ func _get_max_order_plan_phase() -> int:
 			continue
 		max_phase = maxi(max_phase, int(plan.phase))
 	return max_phase
+
+
+func _get_unsupported_planning_state_issue(planning_state: Dictionary) -> String:
+	var uses_global_phase_state: bool = planning_state.has("selected_phase_index") or planning_state.has("active_phase_index") or planning_state.has("phase_states") or planning_state.has("phase_count")
+	if uses_global_phase_state:
+		return ""
+	if planning_state.has("selected_phase"):
+		var selected_phase: String = String(planning_state.get("selected_phase", "")).strip_edges()
+		return "Old planning data detected: '%s' uses the removed selected_phase format without the numbered phase state. Please recreate this plan with the current phase system." % selected_phase
+	if planning_state.has("order_plans") and not Array(planning_state.get("order_plans", [])).is_empty():
+		return "Old planning data detected: order plans without the numbered phase state are no longer supported. Please recreate this plan with the current phase system."
+	return ""
 
 
 func _get_phase_controller():

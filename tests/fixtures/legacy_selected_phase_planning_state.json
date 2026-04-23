@@ -1,0 +1,24 @@
+{
+	"selected_fireteam": "ALL",
+	"selected_phase": "ASSAULT",
+	"order_plans": [
+		{
+			"plan_id": "plan_blue_p0",
+			"fireteam_id": "blue",
+			"phase": 0,
+			"status": "draft",
+			"active_waypoint_index": -1,
+			"metadata": {},
+			"waypoints": [
+				{
+					"waypoint_id": "wp_0001",
+					"command_type": "move",
+					"status": "pending",
+					"target_area_id": "legacy_objective",
+					"hold_duration_seconds": 0.0,
+					"metadata": {}
+				}
+			]
+		}
+	]
+}

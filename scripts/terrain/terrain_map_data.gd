@@ -12,6 +12,7 @@ var _grid_origin: Vector2 = Vector2.ZERO
 var _markers: Dictionary = {}
 var _patrol_paths: Dictionary = {}
 var _tiles: Array = []
+var _load_issue_message: String = ""
 
 
 static func load_from_file(path: String) -> TerrainMapData:
@@ -43,6 +44,25 @@ static func load_from_file(path: String) -> TerrainMapData:
 
 	var tiles_variant: Variant = root_dict.get("tiles", [])
 	if tiles_variant is Array:
+		var legacy_wall_positions: Array[Vector2i] = []
+		for tile_entry in tiles_variant:
+			if typeof(tile_entry) != TYPE_DICTIONARY:
+				continue
+			var tile_dict: Dictionary = tile_entry
+			var type_id: String = String(tile_dict.get("type_id", "")).strip_edges().to_lower()
+			if type_id != "wall":
+				continue
+			legacy_wall_positions.append(_coerce_vector2i(tile_dict.get("grid_position", Vector2i.ZERO)))
+		if not legacy_wall_positions.is_empty():
+			var first_legacy_position: Vector2i = legacy_wall_positions[0]
+			terrain_map_data._load_issue_message = "Old map file detected in %s: tile type 'wall' is no longer supported (first at %d,%d; %d total). Please rebuild this map with the current wall types." % [
+				path,
+				first_legacy_position.x,
+				first_legacy_position.y,
+				legacy_wall_positions.size(),
+			]
+			push_warning(terrain_map_data._load_issue_message)
+			return terrain_map_data
 		for tile_entry in tiles_variant:
 			if typeof(tile_entry) != TYPE_DICTIONARY:
 				continue
@@ -160,6 +180,14 @@ func save_to_file(path: String) -> Error:
 
 func get_tiles() -> Array:
 	return _tiles.duplicate()
+
+
+func has_load_issue() -> bool:
+	return not _load_issue_message.is_empty()
+
+
+func get_load_issue_message() -> String:
+	return _load_issue_message
 
 
 func get_tile_at_grid(grid_position: Vector2i):

@@ -216,7 +216,20 @@ func _unhandled_input(event: InputEvent) -> void:
 func _load_map(path: String) -> void:
 	_current_map_path = path
 	_terrain_map_data = TERRAIN_MAP_DATA_SCRIPT.call("load_from_file", path)
-	if _terrain_map_data == null or _terrain_map_data.call("get_tiles").is_empty():
+	var has_load_issue: bool = _terrain_map_data != null and _terrain_map_data.has_method("has_load_issue") and bool(_terrain_map_data.call("has_load_issue"))
+	if has_load_issue:
+		var load_issue_message: String = String(_terrain_map_data.call("get_load_issue_message"))
+		_current_map_path = DEFAULT_NEW_MAP_PATH
+		_terrain_map_data = TERRAIN_MAP_DATA_SCRIPT.call(
+			"create_empty",
+			DEFAULT_NEW_MAP_NAME,
+			DEFAULT_FALLBACK_GRID_SIZE,
+			DEFAULT_GRID_ORIGIN,
+			DEFAULT_HALF_TILE_WIDTH,
+			DEFAULT_HALF_TILE_HEIGHT
+		)
+		call_deferred("_show_load_issue_dialog", load_issue_message, path)
+	elif _terrain_map_data == null or _terrain_map_data.call("get_tiles").is_empty():
 		_terrain_map_data = TERRAIN_MAP_DATA_SCRIPT.call(
 			"create_empty",
 			path.get_file().get_basename() if not path.is_empty() else DEFAULT_NEW_MAP_NAME,
@@ -1213,6 +1226,15 @@ func _open_dirty_confirmation(action_name: String) -> void:
 	confirm_dialog.popup_centered()
 
 
+func _show_load_issue_dialog(issue_message: String, source_path: String) -> void:
+	var dialog := get_node_or_null("UI/LoadIssueDialog") as AcceptDialog
+	if dialog == null:
+		return
+	var shown_path: String = source_path if not source_path.is_empty() else "(unbekannt)"
+	dialog.dialog_text = "Das ist eine alte Datei und wird nicht mehr unterstuetzt.\n\nDatei: %s\n\nBitte die Karte im aktuellen Format neu bauen. Der Editor hat stattdessen eine neue leere Karte geoeffnet.\n\nTechnischer Hinweis: %s" % [shown_path, issue_message]
+	dialog.popup_centered()
+
+
 func _get_camera() -> Camera2D:
 	return get_node_or_null("Camera2D") as Camera2D
 
@@ -1663,10 +1685,7 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 		"rock_large":
 			texture = ROCK_LARGE_TEXTURE
 		_:
-			# Legacy fallback for old "wall" type_id — auto-detect from neighbors
-			if not _is_object_type(tile_data):
-				return
-			texture = WALL_TEXTURE_SW
+			return
 
 	if texture == null:
 		return
