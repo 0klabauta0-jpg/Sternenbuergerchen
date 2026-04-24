@@ -25,11 +25,16 @@ const DROPSHIP_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Is
 const DROPSHIP_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
 const DROPSHIP_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SW.png")
 
-const FIRETEAM_NAMES: PackedStringArray = ["ALL", "BLUE", "GOLD"]
-const REAL_FIRETEAM_IDS: PackedStringArray = ["blue", "gold"]
+const ALL_FIRETEAM_LABEL: String = "ALL"
 const APPROACH_ANGLES: PackedStringArray = ["NW", "NE", "SW", "SE"]
 const HOTKEY_LEGEND: String = "LMB Select | RMB Waypoint | CTRL+LMB Add | Drag Lasso | DEL Waypoint | 1 Move | 2 Hold | 3 Flank | 4 Take | Q/E Team | R/F Edit Phase | G Next Phase"
 const FRIENDLY_TEAM_ID: String = "team_alpha"
+const FIRETEAM_PANEL_PATH: String = "../TacticalUI/FireteamPanel"
+const FIRETEAM_HEADER_LABEL_PATH: String = "../TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamHeaderLabel"
+const FIRETEAM_STATUS_LABEL_PATH: String = "../TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamStatusLabel"
+const FIRETEAM_ALL_BUTTON_PATH: String = "../TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/AllFireteamsButton"
+const FIRETEAM_INFO_VBOX_PATH: String = "../TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox/FireteamInfoScroll/FireteamInfoVBox"
+const FIRETEAM_CARDS_VBOX_PATH: String = "../TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox/FireteamCardsScroll/FireteamCardsVBox"
 const CARD_REFRESH_INTERVAL_SECONDS: float = 0.35
 const UNIT_SELECTION_PICK_RADIUS: float = 34.0
 const SELECTION_DRAG_THRESHOLD: float = 10.0
@@ -205,9 +210,7 @@ func _ready() -> void:
 	_connect_named_button("../TacticalUI/TopNavPanel/NavMargin/NavRow/HomebaseNavButton", Callable(self, "_on_homebase_nav_pressed"))
 	_connect_named_button("../TacticalUI/TopNavPanel/NavMargin/NavRow/FOBNavButton", Callable(self, "_on_fob_nav_pressed"))
 	_connect_named_button("../TacticalUI/TopNavPanel/NavMargin/NavRow/MissionNavButton", Callable(self, "_on_mission_nav_pressed"))
-	_connect_named_button("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/AllButton", Callable(self, "_on_all_fireteam_pressed"))
-	_connect_named_button("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/BlueButton", Callable(self, "_on_blue_fireteam_pressed"))
-	_connect_named_button("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoldButton", Callable(self, "_on_gold_fireteam_pressed"))
+	_connect_named_button(FIRETEAM_ALL_BUTTON_PATH, Callable(self, "_on_all_fireteam_pressed"))
 	_connect_named_button("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton", Callable(self, "_on_target_button_pressed"))
 	_connect_named_button("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton", Callable(self, "_on_clear_target_pressed"))
 	_connect_named_button("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton", Callable(self, "_on_set_lz_pressed"))
@@ -496,11 +499,7 @@ func set_planning_state(planning_state: Dictionary) -> void:
 	if planning_state.has("deployed_unit_ids"):
 		_deployed_unit_ids = _build_drop_unit_state_dict(Array(planning_state.get("deployed_unit_ids", [])))
 	if planning_state.has("selected_fireteam"):
-		var fireteam_name: String = String(planning_state.get("selected_fireteam", _get_fireteam_name())).strip_edges().to_upper()
-		var fireteam_index: int = FIRETEAM_NAMES.find(fireteam_name)
-		if fireteam_index != -1:
-			_current_fireteam_index = fireteam_index
-			_selected_fireteam_ids = _selection_ids_for_index(fireteam_index)
+		_select_fireteam_by_name(String(planning_state.get("selected_fireteam", _get_fireteam_name())), false)
 	if planning_state.has("selected_fireteams"):
 		_set_selected_fireteams(_sanitize_fireteam_ids(PackedStringArray(Array(planning_state.get("selected_fireteams", [])))), false)
 	if planning_state.has("tactical_stance_sync") and _tactical_stance_controller != null:
@@ -865,7 +864,10 @@ func _issue_command(command_type: String, display_text: String) -> bool:
 
 
 func _change_fireteam(delta: int) -> void:
-	var next_index: int = wrapi(_current_fireteam_index + delta, 0, FIRETEAM_NAMES.size())
+	var selection_options: Array = _get_fireteam_selection_options()
+	if selection_options.is_empty():
+		return
+	var next_index: int = wrapi(_current_fireteam_index + delta, 0, selection_options.size())
 	_set_selected_fireteams(_selection_ids_for_index(next_index))
 
 
@@ -880,12 +882,11 @@ func _change_phase(delta: int) -> void:
 	_emit_planning_state_changed()
 
 
-func _select_fireteam_by_name(fireteam_name: String) -> void:
-	var normalized_name: String = fireteam_name.strip_edges().to_upper()
-	var next_index: int = FIRETEAM_NAMES.find(normalized_name)
+func _select_fireteam_by_name(fireteam_name: String, emit_signal: bool = true) -> void:
+	var next_index: int = _find_fireteam_selection_index_by_name(fireteam_name)
 	if next_index == -1:
 		return
-	_set_selected_fireteams(_selection_ids_for_index(next_index))
+	_set_selected_fireteams(_selection_ids_for_index(next_index), emit_signal)
 
 
 func _select_approach_angle(angle_name: String) -> void:
@@ -913,15 +914,14 @@ func _on_mission_nav_pressed() -> void:
 
 
 func _on_all_fireteam_pressed() -> void:
-	_select_fireteam_by_name("ALL")
+	_select_fireteam_by_name(ALL_FIRETEAM_LABEL)
 
 
-func _on_blue_fireteam_pressed() -> void:
-	_select_fireteam_by_name("BLUE")
-
-
-func _on_gold_fireteam_pressed() -> void:
-	_select_fireteam_by_name("GOLD")
+func _on_fireteam_group_pressed(fireteam_id: String) -> void:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return
+	_set_selected_fireteams(PackedStringArray([normalized_fireteam_id]))
 
 
 func _on_target_button_pressed() -> void:
@@ -1067,11 +1067,13 @@ func _get_flow_drivers_for_fireteams(fireteam_ids: PackedStringArray) -> Array:
 	var bravo_driver = get_node_or_null(bravo_flow_driver_path)
 	var charlie_driver = get_node_or_null(charlie_flow_driver_path)
 	var drivers: Array = []
-	if fireteam_ids.has("blue"):
-		drivers.append(alpha_driver)
-		drivers.append(bravo_driver)
-	if fireteam_ids.has("gold"):
-		drivers.append(charlie_driver)
+	for driver in [alpha_driver, bravo_driver, charlie_driver]:
+		if driver == null:
+			continue
+		var driver_fireteam_id: String = _get_fireteam_id_for_flow_driver(driver)
+		if driver_fireteam_id.is_empty() or not fireteam_ids.has(driver_fireteam_id):
+			continue
+		drivers.append(driver)
 	var active_drivers: Array = []
 	for driver in drivers:
 		if driver == null:
@@ -1079,6 +1081,18 @@ func _get_flow_drivers_for_fireteams(fireteam_ids: PackedStringArray) -> Array:
 		if _is_flow_driver_runtime_active(driver):
 			active_drivers.append(driver)
 	return active_drivers
+
+
+func _get_fireteam_id_for_flow_driver(driver: Node) -> String:
+	if driver == null or not driver.has_method("get"):
+		return ""
+	var unit_id: String = String(driver.get("unit_id")).strip_edges()
+	if unit_id.is_empty():
+		return ""
+	var unit = _find_friendly_unit_by_id(unit_id)
+	if unit == null or not unit.has_method("get_fireteam_id"):
+		return ""
+	return String(unit.call("get_fireteam_id")).strip_edges().to_lower()
 
 
 func _is_flow_driver_runtime_active(driver: Node) -> bool:
@@ -1103,12 +1117,45 @@ func _get_fireteam_name() -> String:
 	if _selected_fireteam_ids.is_empty():
 		return "NONE"
 	if _is_all_fireteams_selected():
-		return "ALL"
-	if _selected_fireteam_ids.has("blue"):
-		return "BLUE"
-	if _selected_fireteam_ids.has("gold"):
-		return "GOLD"
-	return FIRETEAM_NAMES[_current_fireteam_index]
+		return ALL_FIRETEAM_LABEL
+	if _selected_fireteam_ids.size() == 1:
+		return _get_fireteam_display_label(String(_selected_fireteam_ids[0]))
+	var labels: PackedStringArray = []
+	for fireteam_id in _selected_fireteam_ids:
+		labels.append(_get_fireteam_display_label(String(fireteam_id)))
+	return " + ".join(labels)
+
+
+func _get_fireteam_display_label(fireteam_id: String) -> String:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return "UNASSIGNED"
+	var definition: Dictionary = _get_mission_fireteam_definition(normalized_fireteam_id)
+	var label_text: String = String(definition.get("label", "")).strip_edges()
+	if label_text.is_empty():
+		label_text = String(definition.get("display_name", "")).strip_edges()
+	if not label_text.is_empty():
+		return label_text.to_upper()
+	return CHARACTER_SHEET_FORMATTER_SCRIPT.format_fireteam_label(normalized_fireteam_id)
+
+
+func _get_mission_fireteam_definition(fireteam_id: String) -> Dictionary:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return {}
+	var mission_setup: Node = get_node_or_null("../MissionSetup")
+	if mission_setup == null:
+		return {}
+	var definitions_variant = mission_setup.get("selected_fireteam_definitions")
+	if typeof(definitions_variant) != TYPE_ARRAY:
+		return {}
+	for definition_variant in Array(definitions_variant):
+		if typeof(definition_variant) != TYPE_DICTIONARY:
+			continue
+		var definition: Dictionary = Dictionary(definition_variant)
+		if String(definition.get("id", "")).strip_edges().to_lower() == normalized_fireteam_id:
+			return definition.duplicate(true)
+	return {}
 
 
 func _get_phase_name() -> String:
@@ -1161,7 +1208,7 @@ func _update_ui() -> void:
 		else:
 			hotkey_legend_label.text = HOTKEY_LEGEND if _can_issue_local_commands() else "OBSERVER MODE | Host controls mission orders in multiplayer V1"
 
-	var fireteam_status_label := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamStatusLabel") as Label
+	var fireteam_status_label := get_node_or_null(FIRETEAM_STATUS_LABEL_PATH) as Label
 	if fireteam_status_label != null:
 		fireteam_status_label.text = _build_fireteam_status_text()
 	_refresh_fireteam_status_panel()
@@ -1280,10 +1327,10 @@ func _ensure_ad_hoc_panel() -> Control:
 
 
 func _ensure_fireteam_status_panel() -> Control:
-	var existing_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox/FireteamStatusPanel") as PanelContainer
+	var existing_panel := get_node_or_null("%s/FireteamStatusPanel" % FIRETEAM_INFO_VBOX_PATH) as PanelContainer
 	if existing_panel != null:
 		return existing_panel
-	var fireteam_info_vbox := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox") as VBoxContainer
+	var fireteam_info_vbox := get_node_or_null(FIRETEAM_INFO_VBOX_PATH) as VBoxContainer
 	if fireteam_info_vbox == null:
 		return null
 	var panel := PanelContainer.new()
@@ -1322,10 +1369,10 @@ func _ensure_fireteam_status_panel() -> Control:
 
 
 func _ensure_tactical_stance_panel() -> Control:
-	var existing_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox/TacticalStancePanel") as PanelContainer
+	var existing_panel := get_node_or_null("%s/TacticalStancePanel" % FIRETEAM_INFO_VBOX_PATH) as PanelContainer
 	if existing_panel != null:
 		return existing_panel
-	var fireteam_info_vbox := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox") as VBoxContainer
+	var fireteam_info_vbox := get_node_or_null(FIRETEAM_INFO_VBOX_PATH) as VBoxContainer
 	if fireteam_info_vbox == null:
 		return null
 	var panel := PanelContainer.new()
@@ -1369,10 +1416,10 @@ func _ensure_tactical_stance_panel() -> Control:
 
 
 func _ensure_fireteam_phase_panel() -> Control:
-	var existing_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox/FireteamPhasePanel") as PanelContainer
+	var existing_panel := get_node_or_null("%s/FireteamPhasePanel" % FIRETEAM_INFO_VBOX_PATH) as PanelContainer
 	if existing_panel != null:
 		return existing_panel
-	var fireteam_info_vbox := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox") as VBoxContainer
+	var fireteam_info_vbox := get_node_or_null(FIRETEAM_INFO_VBOX_PATH) as VBoxContainer
 	if fireteam_info_vbox == null:
 		return null
 	var panel := PanelContainer.new()
@@ -1567,43 +1614,97 @@ func _on_return_to_plan_button_pressed() -> void:
 
 
 func _refresh_fireteam_cards() -> void:
-	var card_row := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll/FireteamCardsBody/FireteamCardsRow") as HBoxContainer
-	if card_row == null:
+	var card_host := get_node_or_null(FIRETEAM_CARDS_VBOX_PATH) as VBoxContainer
+	if card_host == null:
 		return
 
-	for child in card_row.get_children():
+	for child in card_host.get_children():
 		child.queue_free()
 
-	var units: Array = _get_selected_friendly_units(true)
-	if units.is_empty():
+	var available_fireteam_ids: PackedStringArray = _get_available_fireteam_ids()
+	if available_fireteam_ids.is_empty():
 		var empty_label := Label.new()
 		empty_label.text = "Kein aktives Fireteam im Sichtbereich."
-		empty_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		empty_label.size_flags_horizontal = Control.SIZE_SHRINK_END
-		empty_label.custom_minimum_size = Vector2(280.0, 58.0)
+		empty_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		empty_label.custom_minimum_size = Vector2(280.0, 44.0)
 		META_UI_SKIN_SCRIPT.style_body_label(empty_label, 11)
-		card_row.add_child(empty_label)
+		card_host.add_child(empty_label)
 		return
 
-	for unit in units:
-		var card = NPC_COMPACT_CARD_SCENE.instantiate()
-		card.custom_minimum_size = Vector2(180.0 if preview_mode else 156.0, 58.0)
-		card.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-		card.call(
-			"setup_from_profile",
-			_build_fireteam_card_profile(unit),
-			{
-				"source_context": "mission_tactical",
-				"compact_mode": true,
-				"drag_enabled": false,
-				"show_lead_indicator": true,
-				"is_lead": _is_unit_current_fireteam_lead(unit),
-				"selected": _is_unit_selected(unit),
-			}
-		)
-		if not card.card_open_requested.is_connected(_on_fireteam_card_open_requested):
-			card.card_open_requested.connect(_on_fireteam_card_open_requested)
-		card_row.add_child(card)
+	for fireteam_id in available_fireteam_ids:
+		var units: Array = _get_fireteam_units(String(fireteam_id), true)
+		var group_panel := PanelContainer.new()
+		group_panel.name = "FireteamGroup_%s" % String(fireteam_id).capitalize()
+		group_panel.set_meta("fireteam_id", String(fireteam_id))
+		META_UI_SKIN_SCRIPT.style_tactical_panel(group_panel, "frame")
+		card_host.add_child(group_panel)
+
+		var margin := MarginContainer.new()
+		margin.name = "Margin"
+		margin.add_theme_constant_override("margin_left", 8)
+		margin.add_theme_constant_override("margin_top", 6)
+		margin.add_theme_constant_override("margin_right", 8)
+		margin.add_theme_constant_override("margin_bottom", 6)
+		group_panel.add_child(margin)
+
+		var group_vbox := VBoxContainer.new()
+		group_vbox.name = "VBox"
+		group_vbox.add_theme_constant_override("separation", 4)
+		margin.add_child(group_vbox)
+
+		var header_row := HBoxContainer.new()
+		header_row.name = "HeaderRow"
+		header_row.add_theme_constant_override("separation", 6)
+		group_vbox.add_child(header_row)
+
+		var select_button := Button.new()
+		select_button.name = "SelectButton"
+		select_button.text = _get_fireteam_display_label(String(fireteam_id))
+		select_button.focus_mode = Control.FOCUS_NONE
+		select_button.custom_minimum_size = Vector2(56.0, 22.0)
+		if not select_button.pressed.is_connected(_on_fireteam_group_pressed.bind(String(fireteam_id))):
+			select_button.pressed.connect(_on_fireteam_group_pressed.bind(String(fireteam_id)))
+		META_UI_SKIN_SCRIPT.style_tactical_button(select_button, _selected_fireteam_ids.has(String(fireteam_id)))
+		header_row.add_child(select_button)
+
+		var summary_label := Label.new()
+		summary_label.name = "SummaryLabel"
+		summary_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		summary_label.text = _build_fireteam_group_status_text(String(fireteam_id), units)
+		META_UI_SKIN_SCRIPT.style_body_label(summary_label, 9)
+		header_row.add_child(summary_label)
+
+		var cards_row := HBoxContainer.new()
+		cards_row.name = "CardsRow"
+		cards_row.add_theme_constant_override("separation", 6)
+		group_vbox.add_child(cards_row)
+
+		if units.is_empty():
+			var missing_label := Label.new()
+			missing_label.text = "Keine Einheiten sichtbar."
+			META_UI_SKIN_SCRIPT.style_body_label(missing_label, 9)
+			cards_row.add_child(missing_label)
+			continue
+
+		for unit in units:
+			var card = NPC_COMPACT_CARD_SCENE.instantiate()
+			card.custom_minimum_size = Vector2(180.0 if preview_mode else 152.0, 58.0)
+			card.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+			card.call(
+				"setup_from_profile",
+				_build_fireteam_card_profile(unit),
+				{
+					"source_context": "mission_tactical",
+					"compact_mode": true,
+					"drag_enabled": false,
+					"show_lead_indicator": true,
+					"is_lead": _is_unit_current_fireteam_lead(unit),
+					"selected": _is_unit_selected(unit),
+				}
+			)
+			if not card.card_open_requested.is_connected(_on_fireteam_card_open_requested):
+				card.card_open_requested.connect(_on_fireteam_card_open_requested)
+			cards_row.add_child(card)
 
 
 func _build_fireteam_card_profile(unit: Node):
@@ -1632,7 +1733,7 @@ func _build_profile_from_unit(unit: Node) -> RefCounted:
 func _build_tactical_character_status_text(unit: Node) -> String:
 	if unit == null:
 		return "Taktische Daten nicht verfuegbar"
-	var fireteam_label: String = String(unit.call("get_fireteam_id")).strip_edges().to_upper()
+	var fireteam_label: String = _get_fireteam_display_label(String(unit.call("get_fireteam_id")))
 	if fireteam_label.is_empty():
 		fireteam_label = "UNASSIGNED"
 	var state_bits: PackedStringArray = ["Fireteam %s" % fireteam_label]
@@ -1645,6 +1746,21 @@ func _build_tactical_character_status_text(unit: Node) -> String:
 		state_bits.append(String(unit.call("get_vital_state")).capitalize())
 	state_bits.append("Phase %s" % _get_phase_name())
 	return " | ".join(state_bits)
+
+
+func _build_fireteam_group_status_text(fireteam_id: String, units: Array) -> String:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return "Keine Daten"
+	var lead_name: String = "-"
+	for unit in units:
+		if unit != null and _is_unit_current_fireteam_lead(unit):
+			lead_name = String(unit.call("get_display_name"))
+			break
+	if lead_name == "-" and not units.is_empty() and (units[0] as Node).has_method("get_display_name"):
+		lead_name = String((units[0] as Node).call("get_display_name"))
+	var planned_waypoint_count: int = _count_selected_phase_waypoints_for_fireteams(PackedStringArray([normalized_fireteam_id]))
+	return "%d Karten | %d Wegpunkte | Lead %s" % [units.size(), planned_waypoint_count, lead_name]
 
 
 func _on_fireteam_card_open_requested(unit_id: String, _profile, _source_context: String) -> void:
@@ -1887,9 +2003,9 @@ func _build_tactical_fireteam_text(unit: Node) -> String:
 		var selected_fireteam_ids: PackedStringArray = PackedStringArray(mission_setup.get("selected_team_fireteam_ids"))
 		var unit_index: int = selected_unit_ids.find(unit_id)
 		if unit_index >= 0 and unit_index < selected_fireteam_ids.size():
-			return CHARACTER_SHEET_FORMATTER_SCRIPT.format_fireteam_label(String(selected_fireteam_ids[unit_index]))
+			return _get_fireteam_display_label(String(selected_fireteam_ids[unit_index]))
 	var fireteam_id: String = String(unit.call("get_fireteam_id")).strip_edges().to_lower()
-	return CHARACTER_SHEET_FORMATTER_SCRIPT.format_fireteam_label(fireteam_id)
+	return _get_fireteam_display_label(fireteam_id)
 
 
 func _get_selected_friendly_units(include_hidden: bool = true) -> Array:
@@ -2751,9 +2867,10 @@ func _apply_compact_mission_control_layout() -> void:
 	var command_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel") as Control
 	if command_panel != null:
 		command_panel.custom_minimum_size = Vector2(296.0, 170.0)
-	var fireteam_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel") as Control
+	var fireteam_panel := get_node_or_null(FIRETEAM_PANEL_PATH) as Control
 	if fireteam_panel != null:
-		fireteam_panel.custom_minimum_size = Vector2(432.0, 170.0)
+		fireteam_panel.offset_right = 332.0
+		fireteam_panel.offset_bottom = -262.0
 
 
 func _refresh_dynamic_button_styles() -> void:
@@ -2761,13 +2878,11 @@ func _refresh_dynamic_button_styles() -> void:
 		"../TacticalUI/TopNavPanel/NavMargin/NavRow/HomebaseNavButton",
 		"../TacticalUI/TopNavPanel/NavMargin/NavRow/FOBNavButton",
 		"../TacticalUI/TopNavPanel/NavMargin/NavRow/MissionNavButton",
+		FIRETEAM_ALL_BUTTON_PATH,
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/MoveButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/HoldButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/FlankButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton",
-		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/AllButton",
-		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/BlueButton",
-		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoldButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton",
@@ -2786,9 +2901,7 @@ func _refresh_dynamic_button_styles() -> void:
 			META_UI_SKIN_SCRIPT.style_tactical_button(button, false)
 
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/TopNavPanel/NavMargin/NavRow/MissionNavButton") as Button, true)
-	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/AllButton") as Button, _is_all_fireteams_selected())
-	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/BlueButton") as Button, _selected_fireteam_ids.has("blue"))
-	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoldButton") as Button, _selected_fireteam_ids.has("gold"))
+	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null(FIRETEAM_ALL_BUTTON_PATH) as Button, _is_all_fireteams_selected())
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton") as Button, _is_target_placement_armed)
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton") as Button, _is_lz_placement_armed)
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton") as Button, _drop_ship_requested)
@@ -2800,7 +2913,7 @@ func _apply_block_labels() -> void:
 	var label_text_by_path: Dictionary = {
 		"../TacticalUI/MissionIdentityPanel/MissionIdentityMargin/MissionIdentityVBox/MissionIdentityHeaderLabel": UI_BLOCK_LABELS_SCRIPT.MISSION_LIVE_TACTICAL_GRID,
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandHeaderLabel": UI_BLOCK_LABELS_SCRIPT.MISSION_COMMAND_MATRIX,
-		"../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamHeaderLabel": UI_BLOCK_LABELS_SCRIPT.MISSION_SELECTED_FIRETEAM,
+		FIRETEAM_HEADER_LABEL_PATH: UI_BLOCK_LABELS_SCRIPT.MISSION_SELECTED_FIRETEAM,
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicHeaderLabel": UI_BLOCK_LABELS_SCRIPT.MISSION_CONTROL,
 		"../TacticalUI/CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayHeaderRow/OverlayHeaderLabel": UI_BLOCK_LABELS_SCRIPT.CHARACTER_OVERLAY,
 	}
@@ -2816,7 +2929,7 @@ func _apply_hud_skin() -> void:
 		"../TacticalUI/TopNavPanel",
 		"../TacticalUI/BottomDock",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel",
-		"../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel",
+		FIRETEAM_PANEL_PATH,
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel",
 		"../TacticalUI/CharacterOverlay/OverlayPanel",
 	]:
@@ -2832,7 +2945,7 @@ func _apply_hud_skin() -> void:
 	for path in [
 		"../TacticalUI/MissionIdentityPanel/MissionIdentityMargin/MissionIdentityVBox/MissionIdentityHeaderLabel",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandHeaderLabel",
-		"../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamHeaderLabel",
+		FIRETEAM_HEADER_LABEL_PATH,
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicHeaderLabel",
 		"../TacticalUI/CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayHeaderRow/OverlayHeaderLabel",
 	]:
@@ -2842,7 +2955,7 @@ func _apply_hud_skin() -> void:
 		"../TacticalUI/MissionIdentityPanel/MissionIdentityMargin/MissionIdentityVBox/MissionIdentityBodyLabel",
 		command_feedback_label_path,
 		hotkey_legend_label_path,
-		"../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamStatusLabel",
+		FIRETEAM_STATUS_LABEL_PATH,
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicStatusLabel",
 	]:
 		META_UI_SKIN_SCRIPT.style_body_label(get_node_or_null(path), 10)
@@ -3004,12 +3117,13 @@ func _clear_selection() -> void:
 
 func _set_selected_fireteams(next_selected_fireteam_ids: PackedStringArray, emit_signal: bool = true) -> void:
 	_selected_fireteam_ids = _sanitize_fireteam_ids(next_selected_fireteam_ids)
-	if _selected_fireteam_ids.is_empty() or _is_all_fireteams_selected():
-		_current_fireteam_index = 0
-	elif _selected_fireteam_ids.has("blue"):
-		_current_fireteam_index = 1
-	elif _selected_fireteam_ids.has("gold"):
-		_current_fireteam_index = 2
+	_current_fireteam_index = 0
+	var selection_options: Array = _get_fireteam_selection_options()
+	for option_index in range(selection_options.size()):
+		var option_ids := PackedStringArray(Array((selection_options[option_index] as Dictionary).get("ids", [])))
+		if _selection_ids_match(option_ids, _selected_fireteam_ids):
+			_current_fireteam_index = option_index
+			break
 	_refresh_selection_visuals()
 	_refresh_order_visuals()
 	_refresh_button_state()
@@ -3491,30 +3605,91 @@ func _is_all_fireteams_selected() -> bool:
 
 func _get_available_fireteam_ids() -> PackedStringArray:
 	var available_fireteam_ids: PackedStringArray = []
+	var mission_setup: Node = get_node_or_null("../MissionSetup")
+	if mission_setup != null:
+		for fireteam_id_variant in PackedStringArray(mission_setup.get("selected_team_fireteam_ids")):
+			var configured_fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+			if configured_fireteam_id.is_empty() or available_fireteam_ids.has(configured_fireteam_id):
+				continue
+			available_fireteam_ids.append(configured_fireteam_id)
 	for unit in _get_all_friendly_units(true):
 		var fireteam_id: String = String(unit.call("get_fireteam_id")).strip_edges().to_lower()
 		if fireteam_id.is_empty() or available_fireteam_ids.has(fireteam_id):
 			continue
 		available_fireteam_ids.append(fireteam_id)
-	return _sanitize_fireteam_ids(available_fireteam_ids)
+	return available_fireteam_ids
 
 
 func _sanitize_fireteam_ids(raw_fireteam_ids: PackedStringArray) -> PackedStringArray:
+	var normalized_input: PackedStringArray = []
+	for fireteam_id_variant in raw_fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty() or normalized_input.has(fireteam_id):
+			continue
+		normalized_input.append(fireteam_id)
+	var available_fireteam_ids: PackedStringArray = _get_available_fireteam_ids()
+	if available_fireteam_ids.is_empty():
+		return normalized_input
 	var result: PackedStringArray = []
-	for fireteam_id in REAL_FIRETEAM_IDS:
-		if raw_fireteam_ids.has(fireteam_id):
+	for fireteam_id in available_fireteam_ids:
+		if normalized_input.has(fireteam_id):
 			result.append(fireteam_id)
 	return result
 
 
 func _selection_ids_for_index(index: int) -> PackedStringArray:
-	match index:
-		1:
-			return PackedStringArray(["blue"])
-		2:
-			return PackedStringArray(["gold"])
-		_:
-			return _get_available_fireteam_ids()
+	var selection_options: Array = _get_fireteam_selection_options()
+	if selection_options.is_empty():
+		return PackedStringArray()
+	var wrapped_index: int = wrapi(index, 0, selection_options.size())
+	return PackedStringArray(Array(selection_options[wrapped_index].get("ids", [])))
+
+
+func _get_fireteam_selection_options() -> Array:
+	var available_fireteam_ids: PackedStringArray = _get_available_fireteam_ids()
+	if available_fireteam_ids.is_empty():
+		return []
+	var options: Array = [
+		{
+			"name": ALL_FIRETEAM_LABEL,
+			"ids": Array(available_fireteam_ids),
+		}
+	]
+	for fireteam_id in available_fireteam_ids:
+		options.append(
+			{
+				"name": _get_fireteam_display_label(String(fireteam_id)),
+				"ids": [String(fireteam_id)],
+				"fireteam_id": String(fireteam_id),
+			}
+		)
+	return options
+
+
+func _find_fireteam_selection_index_by_name(fireteam_name: String) -> int:
+	var normalized_name: String = fireteam_name.strip_edges().to_upper()
+	var selection_options: Array = _get_fireteam_selection_options()
+	for option_index in range(selection_options.size()):
+		var option: Dictionary = selection_options[option_index]
+		if String(option.get("name", "")).strip_edges().to_upper() == normalized_name:
+			return option_index
+		var option_ids := PackedStringArray(Array(option.get("ids", [])))
+		if option_ids.size() == 1 and String(option_ids[0]).strip_edges().to_upper() == normalized_name:
+			return option_index
+	if normalized_name == "BLUE" and selection_options.size() > 1:
+		return 1
+	if normalized_name == "GOLD" and selection_options.size() > 2:
+		return 2
+	return -1
+
+
+func _selection_ids_match(left_ids: PackedStringArray, right_ids: PackedStringArray) -> bool:
+	if left_ids.size() != right_ids.size():
+		return false
+	for fireteam_id in left_ids:
+		if not right_ids.has(fireteam_id):
+			return false
+	return true
 
 
 func _is_unit_selected(unit: Node) -> bool:
@@ -4625,8 +4800,12 @@ func _return_fireteam_to_plan(fireteam_id: String, manual_return: bool) -> bool:
 
 
 func _count_selected_phase_waypoints() -> int:
+	return _count_selected_phase_waypoints_for_fireteams(_selected_fireteam_ids)
+
+
+func _count_selected_phase_waypoints_for_fireteams(fireteam_ids: PackedStringArray) -> int:
 	var total: int = 0
-	for fireteam_id in _selected_fireteam_ids:
+	for fireteam_id in fireteam_ids:
 		var plan = _order_plans_by_key.get(_build_order_plan_key(String(fireteam_id), _current_phase_index), null)
 		if plan == null:
 			continue
@@ -5154,7 +5333,7 @@ func _get_drop_fireteam_id() -> String:
 	var unique_fireteam_ids: Dictionary = {}
 	for fireteam_id_variant in meta_fireteam_ids:
 		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
-		if fireteam_id == "blue" or fireteam_id == "gold":
+		if not fireteam_id.is_empty():
 			unique_fireteam_ids[fireteam_id] = true
 	if unique_fireteam_ids.size() == 1:
 		return String(unique_fireteam_ids.keys()[0])
@@ -5163,13 +5342,9 @@ func _get_drop_fireteam_id() -> String:
 
 func _get_drop_fireteam_name() -> String:
 	var fireteam_id: String = _get_drop_fireteam_id()
-	match fireteam_id:
-		"blue":
-			return "BLUE"
-		"gold":
-			return "GOLD"
-		_:
-			return "ALL"
+	if fireteam_id.is_empty():
+		return ALL_FIRETEAM_LABEL
+	return _get_fireteam_display_label(fireteam_id)
 
 
 func _build_drop_unit_state_dict(unit_ids: Array) -> Dictionary:

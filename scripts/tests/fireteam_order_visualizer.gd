@@ -244,9 +244,9 @@ func _coerce_waypoint(waypoint_variant):
 
 func _get_fireteam_color(fireteam_id: String) -> Color:
 	match fireteam_id:
-		"blue":
+		"blue", "ft1":
 			return Color(0.42, 0.76, 1.0, 0.95)
-		"gold":
+		"gold", "ft2":
 			return Color(1.0, 0.86, 0.3, 0.95)
 		_:
 			return Color(0.88, 0.88, 0.88, 0.85)
@@ -254,9 +254,9 @@ func _get_fireteam_color(fireteam_id: String) -> Color:
 
 func _get_marker_offset(fireteam_id: String) -> Vector2:
 	match fireteam_id:
-		"blue":
+		"blue", "ft1":
 			return Vector2(-WAYPOINT_OFFSET_STEP, -WAYPOINT_OFFSET_STEP)
-		"gold":
+		"gold", "ft2":
 			return Vector2(WAYPOINT_OFFSET_STEP, WAYPOINT_OFFSET_STEP)
 		_:
 			return Vector2.ZERO

@@ -44,11 +44,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mouse_button_event := event as InputEventMouseButton
 		if mouse_button_event.button_index == MOUSE_BUTTON_WHEEL_UP and mouse_button_event.pressed and not _is_pointer_over_control():
-			_adjust_camera_zoom(-CAMERA_ZOOM_STEP)
+			_adjust_camera_zoom(CAMERA_ZOOM_STEP)
 			get_viewport().set_input_as_handled()
 			return
 		if mouse_button_event.button_index == MOUSE_BUTTON_WHEEL_DOWN and mouse_button_event.pressed and not _is_pointer_over_control():
-			_adjust_camera_zoom(CAMERA_ZOOM_STEP)
+			_adjust_camera_zoom(-CAMERA_ZOOM_STEP)
 			get_viewport().set_input_as_handled()
 			return
 		if mouse_button_event.button_index == MOUSE_BUTTON_MIDDLE:

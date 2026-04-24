@@ -35,13 +35,16 @@ func _test_live_mission_block_labels_use_shared_ids() -> void:
 
 	var mission_identity_label := scene.get_node("TacticalUI/MissionIdentityPanel/MissionIdentityMargin/MissionIdentityVBox/MissionIdentityHeaderLabel") as Label
 	var command_label := scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandHeaderLabel") as Label
-	var fireteam_label := scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamHeaderLabel") as Label
+	var fireteam_label := scene.get_node("TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamHeaderLabel") as Label
 	var strategic_label := scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicHeaderLabel") as Label
+	var command_grid := scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid") as GridContainer
+	var legacy_team_button_missing: bool = scene.get_node_or_null("TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/BlueButton") == null and scene.get_node_or_null("TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoldButton") == null and scene.get_node_or_null("TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/AllButton") == null
 
 	_assert(mission_identity_label != null and mission_identity_label.text == UI_BLOCK_LABELS_SCRIPT.MISSION_LIVE_TACTICAL_GRID, "Mission HUD shows the shared #15 live tactical label")
 	_assert(command_label != null and command_label.text == UI_BLOCK_LABELS_SCRIPT.MISSION_COMMAND_MATRIX, "Mission HUD shows the shared #16 command label")
 	_assert(fireteam_label != null and fireteam_label.text == UI_BLOCK_LABELS_SCRIPT.MISSION_SELECTED_FIRETEAM, "Mission HUD shows the shared #17 selected-fireteam label")
 	_assert(strategic_label != null and strategic_label.text == UI_BLOCK_LABELS_SCRIPT.MISSION_CONTROL, "Mission HUD shows the shared #18 mission-control label")
+	_assert(command_grid != null and command_grid.columns == 3 and legacy_team_button_missing, "Mission command panel keeps #16 command-only and no longer shows old team-selection buttons")
 
 	scene.queue_free()
 	await process_frame

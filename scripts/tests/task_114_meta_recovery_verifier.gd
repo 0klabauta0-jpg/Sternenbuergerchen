@@ -57,14 +57,16 @@ func _test_preview_map_fireteam_cards_show_member_loadouts() -> void:
 	var preview_mission: Node = mission_host.get_child(0) if mission_host.get_child_count() > 0 else null
 	var mission_setup := preview_mission.get_node("MissionSetup") as Node if preview_mission != null else null
 	var member_loadouts: Dictionary = mission_setup.get("member_loadouts") if mission_setup != null and typeof(mission_setup.get("member_loadouts")) == TYPE_DICTIONARY else {}
-	var cards_row := preview_mission.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll/FireteamCardsBody/FireteamCardsRow") as HBoxContainer if preview_mission != null else null
-	var alpha_card: Control = _find_card_for_unit(cards_row, "unit_alpha")
-	var bravo_card: Control = _find_card_for_unit(cards_row, "unit_bravo")
+	var cards_host := preview_mission.get_node("TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox/FireteamCardsScroll/FireteamCardsVBox") as Control if preview_mission != null else null
+	var fireteam_button: Button = _find_button_with_text(cards_host, "FT1")
+	var alpha_card: Control = _find_card_for_unit(cards_host, "unit_alpha")
+	var bravo_card: Control = _find_card_for_unit(cards_host, "unit_bravo")
 	var alpha_loadout := alpha_card.get_node("Margin/HBox/TextVBox/DataALabel") as Label if alpha_card != null else null
 	var bravo_loadout := bravo_card.get_node("Margin/HBox/TextVBox/DataALabel") as Label if bravo_card != null else null
 
 	_assert(preview_mission != null, "Meta map keeps a preview mission instance alive for the route/loadout checks")
 	_assert(member_loadouts.has("unit_alpha"), "Preview mission receives the per-member loadout dictionary from the FOB bridge")
+	_assert(fireteam_button != null and fireteam_button.text == "FT1", "Preview mission keeps the FOB fireteam label on the tactical mini-card group")
 	_assert(alpha_card != null and bravo_card != null, "Preview mission renders compact cards for the configured fireteam members")
 	_assert(alpha_loadout != null and alpha_loadout.text == "Heavy | Rail | SMG", "Preview mission card mirrors the per-member heavy rail loadout for the lead operator")
 	_assert(bravo_loadout != null and bravo_loadout.text == "Light | SMG | SMG", "Preview mission card mirrors the per-member light SMG loadout for a second operator")
@@ -160,14 +162,35 @@ func _test_preview_map_renders_homebase_transfer_route_overlay() -> void:
 	await process_frame
 
 
-func _find_card_for_unit(cards_row: HBoxContainer, unit_id: String) -> Control:
-	if cards_row == null:
+func _find_card_for_unit(cards_host: Control, unit_id: String) -> Control:
+	if cards_host == null:
 		return null
-	for child in cards_row.get_children():
+	for child in cards_host.get_children():
 		if child == null or not child.has_method("get_unit_id"):
+			var nested_control := child as Control
+			if nested_control != null:
+				var nested_match: Control = _find_card_for_unit(nested_control, unit_id)
+				if nested_match != null:
+					return nested_match
 			continue
 		if String(child.call("get_unit_id")).strip_edges() == unit_id:
 			return child as Control
+	return null
+
+
+func _find_button_with_text(root_control: Control, expected_text: String) -> Button:
+	if root_control == null:
+		return null
+	for child in root_control.get_children():
+		var button := child as Button
+		if button != null and button.text == expected_text:
+			return button
+		var nested_control := child as Control
+		if nested_control == null:
+			continue
+		var nested_button: Button = _find_button_with_text(nested_control, expected_text)
+		if nested_button != null:
+			return nested_button
 	return null
 
 

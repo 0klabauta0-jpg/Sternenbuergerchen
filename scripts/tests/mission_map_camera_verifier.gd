@@ -68,7 +68,7 @@ func _test_camera_supports_zoom_and_pan() -> void:
 	middle_up.pressed = false
 	camera._unhandled_input(middle_up)
 
-	_assert(camera.zoom.x < zoom_before.x, "Mission camera zooms with mouse wheel input")
+	_assert(camera.zoom.x > zoom_before.x, "Mission camera uses the inverted mouse wheel zoom direction")
 	_assert(camera.position != position_before, "Mission camera pans with middle-mouse drag input")
 	scene.queue_free()
 	await process_frame

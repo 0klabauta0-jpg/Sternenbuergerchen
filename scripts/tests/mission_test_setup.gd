@@ -18,6 +18,7 @@ const LOADOUT_MODIFIER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/comman
 @export var unit_paths: Array[NodePath] = []
 @export var selected_team_unit_ids: PackedStringArray = []
 @export var selected_team_fireteam_ids: PackedStringArray = []
+@export var selected_fireteam_definitions: Array = []
 @export var respawn_manager_path: NodePath
 @export var enemy_wave_controller_path: NodePath
 @export var terrain_registry_path: NodePath
@@ -457,7 +458,7 @@ func _get_fireteam_id_for_friendly_slot(slot_index: int, unit_id: String, unit_t
 
 	if slot_index >= 0 and slot_index < selected_team_fireteam_ids.size():
 		var selected_fireteam_id: String = String(selected_team_fireteam_ids[slot_index]).strip_edges().to_lower()
-		if selected_fireteam_id == "blue" or selected_fireteam_id == "gold":
+		if not selected_fireteam_id.is_empty():
 			return selected_fireteam_id
 
 	var preset: Dictionary = UNIT_ROSTER_PRESETS_SCRIPT.get_preset(unit_id, unit_team_id)

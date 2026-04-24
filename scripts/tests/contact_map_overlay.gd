@@ -129,9 +129,9 @@ func _get_contact_color(detection_state: String) -> Color:
 
 func _get_fireteam_color(fireteam_id: String) -> Color:
 	match fireteam_id.strip_edges().to_lower():
-		"blue":
+		"blue", "ft1":
 			return Color(0.42, 0.76, 1.0, 0.95)
-		"gold":
+		"gold", "ft2":
 			return Color(1.0, 0.86, 0.3, 0.95)
 		_:
 			return Color(0.95, 0.95, 0.95, 0.9)

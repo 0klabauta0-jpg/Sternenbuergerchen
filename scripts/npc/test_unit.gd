@@ -1472,9 +1472,9 @@ func _build_status_label_color() -> Color:
 
 func _build_fireteam_label_color() -> Color:
 	match fireteam_id:
-		"blue":
+		"blue", "ft1":
 			return Color(0.45, 0.72, 1.0, 1.0)
-		"gold":
+		"gold", "ft2":
 			return Color(1.0, 0.88, 0.35, 1.0)
 		_:
 			return Color(0.9, 0.9, 0.9, 1.0)
