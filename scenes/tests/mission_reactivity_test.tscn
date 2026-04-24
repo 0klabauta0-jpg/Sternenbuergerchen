@@ -360,14 +360,13 @@ focus_mode = 0
 custom_minimum_size = Vector2(74, 0)
 text = "Mission"
 
-[node name="FireteamPanel" type="PanelContainer" parent="TacticalUI"]
-anchor_bottom = 1.0
+[node name="FireteamMiniPanel" type="PanelContainer" parent="TacticalUI"]
 offset_left = 16.0
 offset_top = 84.0
-offset_right = 332.0
-offset_bottom = -262.0
+offset_right = 264.0
+offset_bottom = 236.0
 
-[node name="FireteamMargin" type="MarginContainer" parent="TacticalUI/FireteamPanel"]
+[node name="MiniMargin" type="MarginContainer" parent="TacticalUI/FireteamMiniPanel"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -376,52 +375,22 @@ offset_top = 10.0
 offset_right = -10.0
 offset_bottom = -10.0
 
-[node name="FireteamVBox" type="VBoxContainer" parent="TacticalUI/FireteamPanel/FireteamMargin"]
+[node name="MiniVBox" type="VBoxContainer" parent="TacticalUI/FireteamMiniPanel/MiniMargin"]
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 6
 
-[node name="FireteamHeaderRow" type="HBoxContainer" parent="TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox"]
-theme_override_constants/separation = 8
+[node name="MiniHeaderLabel" type="Label" parent="TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox"]
+visible = false
+text = "FIRETEAM OVERVIEW"
 
-[node name="FireteamHeaderLabel" type="Label" parent="TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow"]
-text = "#17 SELECTED FIRETEAM"
-
-[node name="FireteamStatusLabel" type="Label" parent="TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow"]
-size_flags_horizontal = 3
-horizontal_alignment = 0
-text = "ALL | 0 Karten | Lead -"
-
-[node name="AllFireteamsButton" type="Button" parent="TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow"]
-focus_mode = 0
-custom_minimum_size = Vector2(52, 0)
-text = "All"
-
-[node name="FireteamInfoScroll" type="ScrollContainer" parent="TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox"]
-custom_minimum_size = Vector2(0, 150)
-size_flags_horizontal = 3
-horizontal_scroll_mode = 0
-vertical_scroll_mode = 1
-
-[node name="FireteamInfoVBox" type="VBoxContainer" parent="TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox/FireteamInfoScroll"]
-size_flags_horizontal = 3
-theme_override_constants/separation = 4
-
-[node name="CommandFeedbackLabel" type="Label" parent="TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox/FireteamInfoScroll/FireteamInfoVBox"]
-text = "TEAM ALL | PHASE APPROACH\nTARGET 320, 180\nLAST AWAITING INPUT"
-autowrap_mode = 3
-
-[node name="HotkeyLegendLabel" type="Label" parent="TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox/FireteamInfoScroll/FireteamInfoVBox"]
-text = "LMB Select | RMB Waypoint | CTRL+LMB Add | Drag Lasso | DEL Waypoint | 1 Move | 2 Hold | 3 Flank | 4 Take | Q/E Team | R/F Phase | SET LZ arms map placement"
-autowrap_mode = 3
-
-[node name="FireteamCardsScroll" type="ScrollContainer" parent="TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox"]
+[node name="MiniCardsScroll" type="ScrollContainer" parent="TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox"]
 size_flags_horizontal = 3
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 vertical_scroll_mode = 1
 
-[node name="FireteamCardsVBox" type="VBoxContainer" parent="TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox/FireteamCardsScroll"]
+[node name="MiniCardsVBox" type="VBoxContainer" parent="TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll"]
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
@@ -505,8 +474,76 @@ text = "Target"
 focus_mode = 0
 text = "Clear"
 
-[node name="BottomSpacer" type="Control" parent="TacticalUI/BottomDock/BottomMargin/BottomRow"]
+[node name="FireteamPanel" type="PanelContainer" parent="TacticalUI/BottomDock/BottomMargin/BottomRow"]
+custom_minimum_size = Vector2(432, 146)
 size_flags_horizontal = 3
+
+[node name="FireteamMargin" type="MarginContainer" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+
+[node name="FireteamVBox" type="VBoxContainer" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin"]
+theme_override_constants/separation = 4
+
+[node name="FireteamHeaderRow" type="HBoxContainer" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox"]
+theme_override_constants/separation = 8
+
+[node name="FireteamHeaderLabel" type="Label" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow"]
+text = "#17 SELECTED FIRETEAM"
+
+[node name="FireteamStatusLabel" type="Label" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow"]
+size_flags_horizontal = 3
+horizontal_alignment = 0
+text = "ALL | 0 Karten | Lead -"
+
+[node name="AllFireteamsButton" type="Button" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow"]
+focus_mode = 0
+custom_minimum_size = Vector2(52, 0)
+text = "All"
+
+[node name="FireteamBodyRow" type="HBoxContainer" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="FireteamInfoScroll" type="ScrollContainer" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow"]
+custom_minimum_size = Vector2(180, 0)
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 1
+
+[node name="FireteamInfoVBox" type="VBoxContainer" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll"]
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="CommandFeedbackLabel" type="Label" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox"]
+text = "TEAM ALL | PHASE APPROACH\nTARGET 320, 180\nLAST AWAITING INPUT"
+autowrap_mode = 3
+
+[node name="HotkeyLegendLabel" type="Label" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox"]
+text = "LMB Select | RMB Waypoint | CTRL+LMB Add | Drag Lasso | DEL Waypoint | 1 Move | 2 Hold | 3 Flank | 4 Take | Q/E Team | R/F Edit Phase | G Next Phase"
+autowrap_mode = 3
+
+[node name="FireteamCardsScroll" type="ScrollContainer" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 2
+vertical_scroll_mode = 0
+
+[node name="FireteamCardsBody" type="HBoxContainer" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll"]
+size_flags_horizontal = 3
+
+[node name="FireteamCardsSpacer" type="Control" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll/FireteamCardsBody"]
+size_flags_horizontal = 3
+
+[node name="FireteamCardsRow" type="HBoxContainer" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll/FireteamCardsBody"]
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
 
 [node name="StrategicPanel" type="PanelContainer" parent="TacticalUI/BottomDock/BottomMargin/BottomRow"]
 custom_minimum_size = Vector2(304, 146)
@@ -616,8 +653,8 @@ bravo_flow_driver_path = NodePath("../BravoFlowDriver")
 charlie_flow_driver_path = NodePath("../CharlieFlowDriver")
 target_marker_path = NodePath("../TargetMarker")
 objective_point_path = NodePath("../MapRoot/objective_point")
-command_feedback_label_path = NodePath("../TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox/FireteamInfoScroll/FireteamInfoVBox/CommandFeedbackLabel")
-hotkey_legend_label_path = NodePath("../TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox/FireteamInfoScroll/FireteamInfoVBox/HotkeyLegendLabel")
+command_feedback_label_path = NodePath("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox/CommandFeedbackLabel")
+hotkey_legend_label_path = NodePath("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox/HotkeyLegendLabel")
 move_button_path = NodePath("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/MoveButton")
 defend_button_path = NodePath("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/HoldButton")
 flank_button_path = NodePath("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/FlankButton")

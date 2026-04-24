@@ -1,7 +1,7 @@
 extends SceneTree
 
-const FIRETEAM_SECURITY_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/fireteam_security_controller.gd")
-const OVERWATCH_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/overwatch_controller.gd")
+const FIRETEAM_SECURITY_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_security_controller.gd")
+const OVERWATCH_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/overwatch_controller.gd")
 const TEST_UNIT_SCRIPT: GDScript = preload("res://scripts/npc/test_unit.gd")
 
 var _passed: int = 0

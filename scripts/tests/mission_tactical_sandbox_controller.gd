@@ -10,16 +10,16 @@ const CHARACTER_SHEET_FORMATTER_SCRIPT: GDScript = preload("res://scripts/meta/c
 const CHARACTER_SHEET_VIEW_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_view.gd")
 const FIRETEAM_ORDER_PLAN_SCRIPT: GDScript = preload("res://scripts/command/fireteam_order_plan.gd")
 const FIRETEAM_WAYPOINT_SCRIPT: GDScript = preload("res://scripts/command/fireteam_waypoint.gd")
-const FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tests/fireteam_behavior_resolver.gd")
-const FIRETEAM_ORDER_VISUALIZER_SCRIPT: GDScript = preload("res://scripts/tests/fireteam_order_visualizer.gd")
-const AD_HOC_ORDER_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/ad_hoc_order_controller.gd")
+const FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_behavior_resolver.gd")
+const FIRETEAM_ORDER_VISUALIZER_SCRIPT: GDScript = preload("res://scripts/tactical/visuals/fireteam_order_visualizer.gd")
+const AD_HOC_ORDER_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/ad_hoc_order_controller.gd")
 const AD_HOC_ORDER_SCRIPT: GDScript = preload("res://scripts/command/ad_hoc_order.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
-const FIRETEAM_COORDINATION_MANAGER_SCRIPT: GDScript = preload("res://scripts/tests/fireteam_coordination_manager.gd")
-const TACTICAL_STANCE_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/tactical_stance_controller.gd")
-const FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/fireteam_movement_controller.gd")
-const FIRETEAM_SECURITY_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/fireteam_security_controller.gd")
-const CONTACT_MAP_OVERLAY_SCRIPT: GDScript = preload("res://scripts/tests/contact_map_overlay.gd")
+const FIRETEAM_COORDINATION_MANAGER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_coordination_manager.gd")
+const TACTICAL_STANCE_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_stance_controller.gd")
+const FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_movement_controller.gd")
+const FIRETEAM_SECURITY_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_security_controller.gd")
+const CONTACT_MAP_OVERLAY_SCRIPT: GDScript = preload("res://scripts/tactical/visuals/contact_map_overlay.gd")
 const DROPSHIP_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NE.png")
 const DROPSHIP_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NW.png")
 const DROPSHIP_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
@@ -29,12 +29,15 @@ const ALL_FIRETEAM_LABEL: String = "ALL"
 const APPROACH_ANGLES: PackedStringArray = ["NW", "NE", "SW", "SE"]
 const HOTKEY_LEGEND: String = "LMB Select | RMB Waypoint | CTRL+LMB Add | Drag Lasso | DEL Waypoint | 1 Move | 2 Hold | 3 Flank | 4 Take | Q/E Team | R/F Edit Phase | G Next Phase"
 const FRIENDLY_TEAM_ID: String = "team_alpha"
-const FIRETEAM_PANEL_PATH: String = "../TacticalUI/FireteamPanel"
-const FIRETEAM_HEADER_LABEL_PATH: String = "../TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamHeaderLabel"
-const FIRETEAM_STATUS_LABEL_PATH: String = "../TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamStatusLabel"
-const FIRETEAM_ALL_BUTTON_PATH: String = "../TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/AllFireteamsButton"
-const FIRETEAM_INFO_VBOX_PATH: String = "../TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox/FireteamInfoScroll/FireteamInfoVBox"
-const FIRETEAM_CARDS_VBOX_PATH: String = "../TacticalUI/FireteamPanel/FireteamMargin/FireteamVBox/FireteamCardsScroll/FireteamCardsVBox"
+const FIRETEAM_PANEL_PATH: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel"
+const FIRETEAM_HEADER_LABEL_PATH: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamHeaderLabel"
+const FIRETEAM_STATUS_LABEL_PATH: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamStatusLabel"
+const FIRETEAM_ALL_BUTTON_PATH: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/AllFireteamsButton"
+const FIRETEAM_INFO_VBOX_PATH: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox"
+const FIRETEAM_SELECTED_CARDS_ROW_PATH: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll/FireteamCardsBody/FireteamCardsRow"
+const FIRETEAM_MINI_PANEL_PATH: String = "../TacticalUI/FireteamMiniPanel"
+const FIRETEAM_MINI_HEADER_LABEL_PATH: String = "../TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniHeaderLabel"
+const FIRETEAM_MINI_CARDS_VBOX_PATH: String = "../TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox"
 const CARD_REFRESH_INTERVAL_SECONDS: float = 0.35
 const UNIT_SELECTION_PICK_RADIUS: float = 34.0
 const SELECTION_DRAG_THRESHOLD: float = 10.0
@@ -159,6 +162,8 @@ var _drop_sequence_fireteam_name: String = "ALL"
 var _drop_sequence_visual_only: bool = false
 var _embarked_unit_ids: Dictionary = {}
 var _deployed_unit_ids: Dictionary = {}
+var _runtime_activation_pending_fireteam_ids: Dictionary = {}
+var _fireteam_runtime_ui_refresh_frames_remaining: int = 0
 var _live_drop_bootstrap_consumed: bool = false
 var _character_overlay_open: bool = false
 var _character_overlay_unit_id: String = ""
@@ -258,6 +263,8 @@ func _process(delta: float) -> void:
 	_update_leader_initiated_flanks()
 	_update_ad_hoc_execution(delta)
 	_update_active_phase_execution(delta)
+	_flush_pending_drop_runtime_phase_starts()
+	_refresh_fireteam_runtime_ui_if_pending()
 	refresh_fireteam_security_state()
 	_card_refresh_time_remaining -= delta
 	if _card_refresh_time_remaining > 0.0:
@@ -1176,6 +1183,7 @@ func set_tactical_ui_visible(is_visible: bool) -> void:
 		"../TacticalUI/MissionIdentityPanel",
 		"../TacticalUI/MissionDropshipPanel",
 		"../TacticalUI/TopNavPanel",
+		FIRETEAM_MINI_PANEL_PATH,
 		"../TacticalUI/BottomDock",
 	]:
 		var canvas_item := get_node_or_null(path) as CanvasItem
@@ -1259,7 +1267,8 @@ func _update_ui() -> void:
 	_refresh_dynamic_button_styles()
 	_refresh_world_overlays()
 	_refresh_ad_hoc_panel_visibility()
-	_refresh_fireteam_cards()
+	_refresh_selected_fireteam_cards()
+	_refresh_fireteam_mini_cards()
 	if _character_overlay_open:
 		_update_character_overlay()
 	if not _tactical_ui_visible:
@@ -1555,12 +1564,13 @@ func _refresh_fireteam_status_panel() -> void:
 	if _ad_hoc_order_controller != null:
 		ad_hoc_type = String(Dictionary(_ad_hoc_order_controller.call("get_active_order", selected_fireteam_id)).get("order_type", "")).strip_edges()
 	var stance_text: String = _build_selected_tactical_stance_text()
+	var execution_text: String = _build_selected_execution_quality_text()
 	var movement_text: String = _format_movement_state_text(get_fireteam_movement_state(selected_fireteam_id))
 	var security_text: String = _format_security_state_text(get_fireteam_security_state(selected_fireteam_id))
 	var flank_text: String = _format_flank_vulnerability_text(get_fireteam_flank_vulnerability_state(selected_fireteam_id))
 	if suppression_label != null:
 		var ad_hoc_text: String = " | AD-HOC %s" % ad_hoc_type.to_upper() if not ad_hoc_type.is_empty() else ""
-		suppression_label.text = "%s | STANCE %s | MOVE %s | SEC %s | FLK %s | SUPP %.2f/%.2f%s" % [lead_name, stance_text, movement_text, security_text, flank_text, suppression_value, suppression_threshold, ad_hoc_text]
+		suppression_label.text = "%s | STANCE %s | EXEC %s | MOVE %s | SEC %s | FLK %s | SUPP %.2f/%.2f%s" % [lead_name, stance_text, execution_text, movement_text, security_text, flank_text, suppression_value, suppression_threshold, ad_hoc_text]
 	if return_button != null:
 		return_button.disabled = selected_fireteam_id.is_empty() or not (_has_pending_plan_for_fireteam(selected_fireteam_id) or (_ad_hoc_order_controller != null and bool(_ad_hoc_order_controller.call("has_active_order", selected_fireteam_id))))
 
@@ -1613,98 +1623,127 @@ func _on_return_to_plan_button_pressed() -> void:
 	return_selected_fireteams_to_plan()
 
 
-func _refresh_fireteam_cards() -> void:
-	var card_host := get_node_or_null(FIRETEAM_CARDS_VBOX_PATH) as VBoxContainer
-	if card_host == null:
+func _refresh_selected_fireteam_cards() -> void:
+	var card_row := get_node_or_null(FIRETEAM_SELECTED_CARDS_ROW_PATH) as HBoxContainer
+	if card_row == null:
 		return
 
-	for child in card_host.get_children():
+	for child in card_row.get_children():
 		child.queue_free()
 
-	var available_fireteam_ids: PackedStringArray = _get_available_fireteam_ids()
-	if available_fireteam_ids.is_empty():
+	var units: Array = _get_selected_friendly_units(not _use_visible_units_for_fireteam_ui())
+	if units.is_empty():
 		var empty_label := Label.new()
 		empty_label.text = "Kein aktives Fireteam im Sichtbereich."
+		empty_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		empty_label.size_flags_horizontal = Control.SIZE_SHRINK_END
 		empty_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		empty_label.custom_minimum_size = Vector2(280.0, 44.0)
 		META_UI_SKIN_SCRIPT.style_body_label(empty_label, 11)
-		card_host.add_child(empty_label)
+		card_row.add_child(empty_label)
+		return
+
+	for unit in units:
+		var card = NPC_COMPACT_CARD_SCENE.instantiate()
+		card.custom_minimum_size = Vector2(180.0 if preview_mode else 156.0, 58.0)
+		card.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		card.call(
+			"setup_from_profile",
+			_build_fireteam_card_profile(unit),
+			{
+				"source_context": "mission_tactical",
+				"compact_mode": true,
+				"drag_enabled": false,
+				"show_lead_indicator": true,
+				"is_lead": _is_unit_current_fireteam_lead(unit),
+				"selected": _is_unit_selected(unit),
+			}
+		)
+		if not card.card_open_requested.is_connected(_on_fireteam_card_open_requested):
+			card.card_open_requested.connect(_on_fireteam_card_open_requested)
+		card_row.add_child(card)
+
+
+func _refresh_fireteam_mini_cards() -> void:
+	var card_host := get_node_or_null(FIRETEAM_MINI_CARDS_VBOX_PATH) as VBoxContainer
+	if card_host == null:
+		return
+
+	var fireteam_panel := get_node_or_null(FIRETEAM_MINI_PANEL_PATH) as Control
+	for child in card_host.get_children():
+		child.queue_free()
+
+	var available_fireteam_ids: PackedStringArray = _get_displayable_fireteam_ids()
+	if fireteam_panel != null:
+		fireteam_panel.visible = not available_fireteam_ids.is_empty()
+	if available_fireteam_ids.is_empty():
 		return
 
 	for fireteam_id in available_fireteam_ids:
-		var units: Array = _get_fireteam_units(String(fireteam_id), true)
-		var group_panel := PanelContainer.new()
-		group_panel.name = "FireteamGroup_%s" % String(fireteam_id).capitalize()
-		group_panel.set_meta("fireteam_id", String(fireteam_id))
-		META_UI_SKIN_SCRIPT.style_tactical_panel(group_panel, "frame")
-		card_host.add_child(group_panel)
+		var normalized_fireteam_id: String = String(fireteam_id).strip_edges().to_lower()
+		var units: Array = _get_fireteam_units(normalized_fireteam_id, not _use_visible_units_for_fireteam_ui())
+		var card := PanelContainer.new()
+		card.name = "FireteamMiniCard_%s" % normalized_fireteam_id.capitalize()
+		card.custom_minimum_size = Vector2(0.0, 0.0)
+		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		card.set_meta("fireteam_id", normalized_fireteam_id)
+		card_host.add_child(card)
 
-		var margin := MarginContainer.new()
-		margin.name = "Margin"
-		margin.add_theme_constant_override("margin_left", 8)
-		margin.add_theme_constant_override("margin_top", 6)
-		margin.add_theme_constant_override("margin_right", 8)
-		margin.add_theme_constant_override("margin_bottom", 6)
-		group_panel.add_child(margin)
-
-		var group_vbox := VBoxContainer.new()
-		group_vbox.name = "VBox"
-		group_vbox.add_theme_constant_override("separation", 4)
-		margin.add_child(group_vbox)
-
-		var header_row := HBoxContainer.new()
-		header_row.name = "HeaderRow"
-		header_row.add_theme_constant_override("separation", 6)
-		group_vbox.add_child(header_row)
-
-		var select_button := Button.new()
-		select_button.name = "SelectButton"
-		select_button.text = _get_fireteam_display_label(String(fireteam_id))
-		select_button.focus_mode = Control.FOCUS_NONE
-		select_button.custom_minimum_size = Vector2(56.0, 22.0)
-		if not select_button.pressed.is_connected(_on_fireteam_group_pressed.bind(String(fireteam_id))):
-			select_button.pressed.connect(_on_fireteam_group_pressed.bind(String(fireteam_id)))
-		META_UI_SKIN_SCRIPT.style_tactical_button(select_button, _selected_fireteam_ids.has(String(fireteam_id)))
-		header_row.add_child(select_button)
-
-		var summary_label := Label.new()
-		summary_label.name = "SummaryLabel"
-		summary_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		summary_label.text = _build_fireteam_group_status_text(String(fireteam_id), units)
-		META_UI_SKIN_SCRIPT.style_body_label(summary_label, 9)
-		header_row.add_child(summary_label)
-
-		var cards_row := HBoxContainer.new()
-		cards_row.name = "CardsRow"
-		cards_row.add_theme_constant_override("separation", 6)
-		group_vbox.add_child(cards_row)
-
-		if units.is_empty():
-			var missing_label := Label.new()
-			missing_label.text = "Keine Einheiten sichtbar."
-			META_UI_SKIN_SCRIPT.style_body_label(missing_label, 9)
-			cards_row.add_child(missing_label)
-			continue
-
-		for unit in units:
-			var card = NPC_COMPACT_CARD_SCENE.instantiate()
-			card.custom_minimum_size = Vector2(180.0 if preview_mode else 152.0, 58.0)
-			card.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-			card.call(
-				"setup_from_profile",
-				_build_fireteam_card_profile(unit),
-				{
-					"source_context": "mission_tactical",
-					"compact_mode": true,
-					"drag_enabled": false,
-					"show_lead_indicator": true,
-					"is_lead": _is_unit_current_fireteam_lead(unit),
-					"selected": _is_unit_selected(unit),
-				}
-			)
-			if not card.card_open_requested.is_connected(_on_fireteam_card_open_requested):
-				card.card_open_requested.connect(_on_fireteam_card_open_requested)
-			cards_row.add_child(card)
+		var lead = _resolve_fireteam_leader_for_behavior(normalized_fireteam_id)
+		var selected_fireteam: bool = _selected_fireteam_ids.has(normalized_fireteam_id)
+		var selection_locked: bool = selected_fireteam and not _is_all_fireteams_selected()
+		var runtime_inactive: bool = not preview_mode and not _is_fireteam_runtime_active(normalized_fireteam_id)
+		var lead_name: String = String(lead.call("get_display_name")) if lead != null and lead.has_method("get_display_name") else "Kein Lead"
+		var lead_portrait_path: String = String(lead.call("get_portrait_path")) if lead != null and lead.has_method("get_portrait_path") else ""
+		var fireteam_texture: Texture2D = _load_portrait_texture(lead_portrait_path)
+		if fireteam_texture == null and lead != null and lead.has_method("get_weapon_visual_texture_path"):
+			fireteam_texture = _load_optional_texture(String(lead.call("get_weapon_visual_texture_path")))
+		TRANSPORT_CRAFT_CARD_UI_SCRIPT.apply_card_state(
+			card,
+			{
+				"selected": selected_fireteam,
+				"in_transit": runtime_inactive,
+				"can_stage": false,
+				"title_text": _get_fireteam_display_label(normalized_fireteam_id),
+				"title_font_size": 10,
+				"margin_left": 6,
+				"margin_top": 6,
+				"margin_right": 6,
+				"margin_bottom": 6,
+				"vbox_separation": 2,
+				"header_separation": 4,
+				"content_separation": 4,
+				"ship_texture": fireteam_texture,
+				"ship_texture_width": 40.0,
+				"ship_texture_height": 40.0,
+				"content_minimum_height": 42.0,
+				"pilot_profile": null,
+				"pilot_text": "Lead %s" % lead_name,
+				"pilot_text_font_size": 8,
+				"pilot_source_context": "mission_fireteam_lead",
+				"pilot_disabled": runtime_inactive,
+				"pilot_mouse_filter": Control.MOUSE_FILTER_IGNORE,
+				"pilot_card_minimum_width": 124.0,
+				"pilot_card_minimum_height": 32.0,
+				"pilot_host_separation": 0,
+				"info_vbox_separation": 0,
+				"info_lines_separation": 0,
+				"info_lines": _build_fireteam_mini_info_lines(normalized_fireteam_id, units),
+				"info_line_font_size": 8,
+				"progress_visible": false,
+				"primary_action": {
+					"visible": true,
+					"text": "Active" if selection_locked else "Select",
+					"disabled": selection_locked,
+					"minimum_width": 54.0,
+					"callback": Callable(self, "_on_fireteam_group_pressed").bind(normalized_fireteam_id),
+				},
+				"secondary_action": {
+					"visible": false,
+				},
+				"clear_extra_content": true,
+			}
+		)
 
 
 func _build_fireteam_card_profile(unit: Node):
@@ -1760,7 +1799,16 @@ func _build_fireteam_group_status_text(fireteam_id: String, units: Array) -> Str
 	if lead_name == "-" and not units.is_empty() and (units[0] as Node).has_method("get_display_name"):
 		lead_name = String((units[0] as Node).call("get_display_name"))
 	var planned_waypoint_count: int = _count_selected_phase_waypoints_for_fireteams(PackedStringArray([normalized_fireteam_id]))
-	return "%d Karten | %d Wegpunkte | Lead %s" % [units.size(), planned_waypoint_count, lead_name]
+	return "%d Operatoren | %d Wegpunkte | Lead %s" % [units.size(), planned_waypoint_count, lead_name]
+
+
+func _build_fireteam_mini_info_lines(fireteam_id: String, units: Array) -> Array:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	var member_count_text := "%d Mitglieder" % units.size()
+	if units.size() == 1:
+		member_count_text = "1 Mitglied"
+	var planned_waypoint_count: int = _count_selected_phase_waypoints_for_fireteams(PackedStringArray([normalized_fireteam_id]))
+	return ["%s | %d Wegpunkte" % [member_count_text, planned_waypoint_count]]
 
 
 func _on_fireteam_card_open_requested(unit_id: String, _profile, _source_context: String) -> void:
@@ -2055,7 +2103,7 @@ func _build_fireteam_status_text() -> String:
 	if _selected_fireteam_ids.is_empty():
 		return "NO SELECTION | 0 Karten | Click unit or drag leaders"
 
-	var units: Array = _get_selected_friendly_units(true)
+	var units: Array = _get_selected_friendly_units(not _use_visible_units_for_fireteam_ui())
 	var planned_waypoint_count: int = _count_selected_phase_waypoints()
 	if units.is_empty():
 		return "%s | %d Wegpunkte | keine Einheiten aktiv" % [_get_fireteam_name(), planned_waypoint_count]
@@ -2078,7 +2126,7 @@ func _build_fireteam_status_text() -> String:
 		drop_state_text = "%d embarked | %d deployed | Lead %s" % [embarked_count, deployed_count, lead_name]
 	elif deployed_count > 0:
 		drop_state_text = "%d deployed | Lead %s" % [deployed_count, lead_name]
-	return "%s | %d Karten | %d Wegpunkte | STANCE %s | MOVE %s | SEC %s | FLK %s | %s" % [_get_fireteam_name(), units.size(), planned_waypoint_count, _build_selected_tactical_stance_text(), _build_selected_movement_text(), _build_selected_security_text(), _build_selected_flank_vulnerability_text(), drop_state_text]
+	return "%s | %d Karten | %d Wegpunkte | STANCE %s | EXEC %s | MOVE %s | SEC %s | FLK %s | %s" % [_get_fireteam_name(), units.size(), planned_waypoint_count, _build_selected_tactical_stance_text(), _build_selected_execution_quality_text(), _build_selected_movement_text(), _build_selected_security_text(), _build_selected_flank_vulnerability_text(), drop_state_text]
 
 
 func _build_strategic_status_text() -> String:
@@ -2869,8 +2917,14 @@ func _apply_compact_mission_control_layout() -> void:
 		command_panel.custom_minimum_size = Vector2(296.0, 170.0)
 	var fireteam_panel := get_node_or_null(FIRETEAM_PANEL_PATH) as Control
 	if fireteam_panel != null:
-		fireteam_panel.offset_right = 332.0
-		fireteam_panel.offset_bottom = -262.0
+		fireteam_panel.custom_minimum_size = Vector2(428.0, 170.0)
+	var fireteam_mini_panel := get_node_or_null(FIRETEAM_MINI_PANEL_PATH) as Control
+	if fireteam_mini_panel != null:
+		fireteam_mini_panel.anchor_bottom = 0.0
+		fireteam_mini_panel.offset_left = 16.0
+		fireteam_mini_panel.offset_top = 84.0
+		fireteam_mini_panel.offset_right = 264.0
+		fireteam_mini_panel.offset_bottom = 236.0
 
 
 func _refresh_dynamic_button_styles() -> void:
@@ -2927,6 +2981,7 @@ func _apply_hud_skin() -> void:
 	for path in [
 		"../TacticalUI/MissionIdentityPanel",
 		"../TacticalUI/TopNavPanel",
+		FIRETEAM_MINI_PANEL_PATH,
 		"../TacticalUI/BottomDock",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel",
 		FIRETEAM_PANEL_PATH,
@@ -2944,6 +2999,7 @@ func _apply_hud_skin() -> void:
 
 	for path in [
 		"../TacticalUI/MissionIdentityPanel/MissionIdentityMargin/MissionIdentityVBox/MissionIdentityHeaderLabel",
+		FIRETEAM_MINI_HEADER_LABEL_PATH,
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandHeaderLabel",
 		FIRETEAM_HEADER_LABEL_PATH,
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicHeaderLabel",
@@ -3620,6 +3676,25 @@ func _get_available_fireteam_ids() -> PackedStringArray:
 	return available_fireteam_ids
 
 
+func _get_displayable_fireteam_ids() -> PackedStringArray:
+	if not _use_visible_units_for_fireteam_ui():
+		return _get_available_fireteam_ids()
+	var displayable_fireteam_ids: PackedStringArray = []
+	for unit in _get_all_friendly_units(false):
+		var fireteam_id: String = String(unit.call("get_fireteam_id")).strip_edges().to_lower()
+		if fireteam_id.is_empty() or displayable_fireteam_ids.has(fireteam_id):
+			continue
+		displayable_fireteam_ids.append(fireteam_id)
+	return displayable_fireteam_ids
+
+
+func _use_visible_units_for_fireteam_ui() -> bool:
+	var mission_setup: Node = get_node_or_null("../MissionSetup")
+	if mission_setup == null:
+		return false
+	return bool(mission_setup.get("defer_friendly_runtime_activation"))
+
+
 func _sanitize_fireteam_ids(raw_fireteam_ids: PackedStringArray) -> PackedStringArray:
 	var normalized_input: PackedStringArray = []
 	for fireteam_id_variant in raw_fireteam_ids:
@@ -4032,6 +4107,21 @@ func _build_selected_movement_text() -> String:
 	return shared_text
 
 
+func _build_selected_execution_quality_text() -> String:
+	if _selected_fireteam_ids.is_empty():
+		return "-"
+	var shared_text: String = ""
+	for fireteam_id in _selected_fireteam_ids:
+		var profile_dict: Dictionary = get_active_behavior_profile(String(fireteam_id))
+		var execution_text: String = _format_execution_quality_text(profile_dict)
+		if shared_text.is_empty():
+			shared_text = execution_text
+			continue
+		if execution_text != shared_text:
+			return "MIXED"
+	return shared_text
+
+
 func _build_selected_security_text() -> String:
 	if _selected_fireteam_ids.is_empty():
 		return "-"
@@ -4068,6 +4158,16 @@ func _format_movement_state_text(state: Dictionary) -> String:
 	if bool(state.get("simplified_due_to_losses", false)):
 		return "%s S%d LOSS" % [style_label, stage_index]
 	return "%s S%d" % [style_label, stage_index]
+
+
+func _format_execution_quality_text(profile_dict: Dictionary) -> String:
+	if profile_dict.is_empty():
+		return "-"
+	var label: String = String(profile_dict.get("execution_label", "STEADY")).strip_edges().to_upper()
+	if label.is_empty():
+		label = "STEADY"
+	var order_fidelity_percent: int = int(roundi(clampf(float(profile_dict.get("order_fidelity", 0.0)), 0.0, 1.0) * 100.0))
+	return "%s %d" % [label, order_fidelity_percent]
 
 
 func _format_security_state_text(state: Dictionary) -> String:
@@ -5097,10 +5197,14 @@ func _embark_units_for_drop(units: Array) -> void:
 			continue
 		var unit_id: String = String(unit.call("get_unit_id"))
 		_embarked_unit_ids[unit_id] = true
-		if unit is Node2D:
-			(unit as Node2D).global_position = staging_position + Vector2(-18.0 * index, 10.0 * index)
-		if unit is CanvasItem:
-			(unit as CanvasItem).visible = false
+		var embark_position: Vector2 = staging_position + Vector2(-18.0 * index, 10.0 * index)
+		if preview_mode:
+			if unit is Node2D:
+				(unit as Node2D).global_position = embark_position
+			if unit is CanvasItem:
+				(unit as CanvasItem).visible = false
+		else:
+			_enqueue_dropship_embark_effect(unit, unit_id, embark_position)
 
 
 func _update_drop_sequence(delta: float) -> void:
@@ -5192,21 +5296,27 @@ func _deploy_next_embarked_unit() -> void:
 	var unit_id: String = String(unit.call("get_unit_id"))
 	_embarked_unit_ids.erase(unit_id)
 	_deployed_unit_ids[unit_id] = true
-	if not preview_mode:
-		_register_unit_for_runtime(unit)
-	if unit is Node2D:
-		(unit as Node2D).global_position = _lz_position + _get_unload_offset(unload_index)
-	if unit is CanvasItem:
-		(unit as CanvasItem).visible = true
-	if unit.has_method("set_runtime_status"):
-		unit.call("set_runtime_status", "idle")
-	if unit.has_method("refresh_terrain_readability"):
-		unit.call("refresh_terrain_readability")
+	var deploy_position: Vector2 = _lz_position + _get_unload_offset(unload_index)
+	if preview_mode:
+		if unit is Node2D:
+			(unit as Node2D).global_position = deploy_position
+		if unit is CanvasItem:
+			(unit as CanvasItem).visible = true
+		if unit.has_method("set_runtime_status"):
+			unit.call("set_runtime_status", "idle")
+		if unit.has_method("refresh_terrain_readability"):
+			unit.call("refresh_terrain_readability")
+	else:
+		_enqueue_dropship_deploy_effect(unit, unit_id, deploy_position)
+		_fireteam_runtime_ui_refresh_frames_remaining = 6
 	if unit.has_method("show_event_text"):
 		unit.call("show_event_text", "DISEMBARK", Color(0.55, 1.0, 0.72, 1.0), 1.5)
 	var fireteam_id: String = String(unit.call("get_fireteam_id")).strip_edges().to_lower() if unit.has_method("get_fireteam_id") else ""
 	if not fireteam_id.is_empty():
-		_maybe_start_active_phase_for_fireteam(fireteam_id)
+		if preview_mode:
+			_maybe_start_active_phase_for_fireteam(fireteam_id)
+		else:
+			_runtime_activation_pending_fireteam_ids[fireteam_id] = true
 	_last_command_text = "DEBOARD %d/%d" % [_drop_sequence_unit_index, _drop_sequence_units.size()]
 	_update_ui()
 
@@ -5377,12 +5487,22 @@ func _apply_drop_presence_state_to_units() -> void:
 		if unit == null or not unit.has_method("get_unit_id") or not (unit is CanvasItem):
 			continue
 		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+		var desired_visible: bool = true
+		var should_apply_presence: bool = true
 		if _embarked_unit_ids.has(unit_id):
-			(unit as CanvasItem).visible = false
+			desired_visible = false
 		elif _deployed_unit_ids.has(unit_id):
-			(unit as CanvasItem).visible = true
+			desired_visible = true
 		elif uses_deferred_activation:
-			(unit as CanvasItem).visible = false
+			desired_visible = false
+		else:
+			should_apply_presence = false
+		if not should_apply_presence:
+			continue
+		if preview_mode:
+			(unit as CanvasItem).visible = desired_visible
+		else:
+			_enqueue_dropship_presence_effect(unit, unit_id, desired_visible)
 
 
 func _get_unload_offset(index: int) -> Vector2:
@@ -5398,31 +5518,92 @@ func _get_unload_offset(index: int) -> Vector2:
 			return base_offset
 
 
-func _register_unit_for_runtime(unit: Node) -> void:
-	if unit == null or not unit.has_method("get_unit_id"):
-		return
-	var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
-	if unit_id.is_empty():
-		return
-	var unit_registry = get_node_or_null("../UnitRegistry")
-	if unit_registry != null and unit_registry.has_method("register_unit"):
-		if not unit_id.is_empty() and (not unit_registry.has_method("has_unit") or not bool(unit_registry.call("has_unit", unit_id))):
-			unit_registry.call("register_unit", unit_id, unit)
-	var runtime_leader = get_node_or_null("../RuntimeLeader")
-	if runtime_leader != null and runtime_leader.has_method("add_unit_member"):
-		runtime_leader.call("add_unit_member", unit)
-	var ftl_registry = get_node_or_null("../FTLRegistry")
-	if ftl_registry != null and ftl_registry.has_method("register_ftl"):
-		var team_id: String = ""
-		if unit.has_method("get_team_id"):
-			team_id = String(unit.call("get_team_id")).strip_edges()
-		if team_id.is_empty():
-			var mission_setup = get_node_or_null("../MissionSetup")
-			if mission_setup != null:
-				team_id = String(mission_setup.get("team_id")).strip_edges()
-		if not team_id.is_empty() and (not ftl_registry.has_method("has_ftl") or not bool(ftl_registry.call("has_ftl", team_id))):
-			ftl_registry.call("register_ftl", team_id, runtime_leader)
+func _enqueue_dropship_embark_effect(unit: Node, unit_id: String, position: Vector2) -> void:
+	_remember_drop_unit_for_simulation(unit, unit_id)
+	_enqueue_dropship_effect(
+		{
+			"effect_type": "dropship_embark_unit",
+			"unit_id": unit_id,
+			"position": position,
+			"visible": false,
+			"priority": 30,
+		}
+	)
+
+
+func _enqueue_dropship_presence_effect(unit: Node, unit_id: String, visible: bool) -> void:
+	_remember_drop_unit_for_simulation(unit, unit_id)
+	_enqueue_dropship_effect(
+		{
+			"effect_type": "dropship_deploy_unit" if visible else "dropship_embark_unit",
+			"unit_id": unit_id,
+			"visible": visible,
+			"priority": 30,
+		}
+	)
+
+
+func _enqueue_dropship_deploy_effect(unit: Node, unit_id: String, position: Vector2) -> void:
+	_remember_drop_unit_for_simulation(unit, unit_id)
+	var effect: Dictionary = {
+		"effect_type": "dropship_deploy_unit",
+		"unit_id": unit_id,
+		"position": position,
+		"visible": true,
+		"runtime_status": "idle",
+		"runtime_active": true,
+		"runtime_leader_path": NodePath("../RuntimeLeader"),
+		"ftl_registry_path": NodePath("../FTLRegistry"),
+		"priority": 30,
+	}
+	var team_id: String = ""
+	if unit != null and unit.has_method("get_team_id"):
+		team_id = String(unit.call("get_team_id")).strip_edges()
+	if team_id.is_empty():
+		var mission_setup = get_node_or_null("../MissionSetup")
+		if mission_setup != null:
+			team_id = String(mission_setup.get("team_id")).strip_edges()
+	if not team_id.is_empty():
+		effect["team_id"] = team_id
+	_enqueue_dropship_effect(effect)
 	_enqueue_initial_loadout_effect_for_unit(unit_id)
+
+
+func _remember_drop_unit_for_simulation(unit: Node, unit_id: String) -> void:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty() or unit == null:
+		return
+	var simulation_root = get_node_or_null("../SimulationRoot")
+	if simulation_root != null and simulation_root.has_method("register_known_unit"):
+		simulation_root.call("register_known_unit", normalized_unit_id, unit)
+
+
+func _enqueue_dropship_effect(effect: Dictionary) -> void:
+	var simulation_root = get_node_or_null("../SimulationRoot")
+	if simulation_root == null or not simulation_root.has_method("enqueue_effect"):
+		return
+	simulation_root.call("enqueue_effect", effect)
+
+
+func _flush_pending_drop_runtime_phase_starts() -> void:
+	if preview_mode or _runtime_activation_pending_fireteam_ids.is_empty():
+		return
+	for fireteam_id_variant in _runtime_activation_pending_fireteam_ids.keys():
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty() or not _is_fireteam_runtime_active(fireteam_id):
+			continue
+		_maybe_start_active_phase_for_fireteam(fireteam_id)
+		_runtime_activation_pending_fireteam_ids.erase(fireteam_id_variant)
+	_refresh_selected_fireteam_cards()
+	_refresh_fireteam_mini_cards()
+
+
+func _refresh_fireteam_runtime_ui_if_pending() -> void:
+	if preview_mode or _fireteam_runtime_ui_refresh_frames_remaining <= 0:
+		return
+	_fireteam_runtime_ui_refresh_frames_remaining -= 1
+	_refresh_selected_fireteam_cards()
+	_refresh_fireteam_mini_cards()
 
 
 func _enqueue_initial_loadout_effect_for_unit(unit_id: String) -> void:

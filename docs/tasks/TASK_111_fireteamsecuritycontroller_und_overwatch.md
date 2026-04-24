@@ -67,8 +67,8 @@ Ein `FireteamSecurityController` verteilt Sicherungssektoren fuer haltende Firet
 - Die taktische Ansicht macht Sicherungsmodus und Overwatch-Zustand sichtbar.
 
 ## Umsetzung
-- `scripts/tests/fireteam_security_controller.gd` verwaltet pro Fireteam den fluechtigen Sicherungszustand mit `360`/`directional`, sektorbezogenen Member-Zuweisungen, leadership-abhaengigem Richtungswechsel und `overwatch_ready`.
-- `scripts/tests/overwatch_controller.gd` konsumiert diese Security-Snapshots im Combat-Loop und enqueued autoritative `damage`-Effects fuer bewegte Feinde in beobachteten Sektoren mit kleinem Accuracy-Bonus.
+- `scripts/tactical/fireteam_security_controller.gd` verwaltet pro Fireteam den fluechtigen Sicherungszustand mit `360`/`directional`, sektorbezogenen Member-Zuweisungen, leadership-abhaengigem Richtungswechsel und `overwatch_ready`.
+- `scripts/tactical/overwatch_controller.gd` konsumiert diese Security-Snapshots im Combat-Loop und enqueued autoritative `damage`-Effects fuer bewegte Feinde in beobachteten Sektoren mit kleinem Accuracy-Bonus.
 - `MissionTacticalSandboxController` stellt Security-Snapshots bereit, aktualisiert sie entlang von Bewegung, Suppression und Ad-hoc-Status und reicht sie an die taktische Visualisierung weiter.
 - `FireteamOrderVisualizer` zeichnet die Sicherungssektoren und markiert Overwatch-Bereitschaft lesbar in der Missionsansicht.
 - `scripts/tests/task_111_verifier.gd` deckt Moduswahl, Sektorwechsel, Overwatch-Trigger, Deaktivierung unter Suppression/Bewegung und die Missionsintegration headless ab.

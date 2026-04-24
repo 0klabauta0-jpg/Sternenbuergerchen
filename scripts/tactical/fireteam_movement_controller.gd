@@ -91,8 +91,15 @@ func start_execution(
 	var effective_style: String = _resolve_effective_style(raw_style, units, member_records)
 	var cover_priority: float = _extract_cover_priority(behavior_profile)
 	var cohesion_threshold: float = _extract_cohesion_threshold(behavior_profile)
+	var execution_profile: Dictionary = _extract_execution_profile(behavior_profile)
 	var leader_unit_id: String = _extract_leader_unit_id(leader, member_records)
 	var origin_anchor: Vector2 = _resolve_origin_anchor(member_records, leader)
+	var resolved_target_position: Vector2 = _apply_execution_target_offset(
+		normalized_fireteam_id,
+		origin_anchor,
+		target_position,
+		float(execution_profile.get("order_fidelity", 0.65))
+	)
 	var state: Dictionary = {
 		"fireteam_id": normalized_fireteam_id,
 		"phase": phase_index,
@@ -100,13 +107,24 @@ func start_execution(
 		"raw_style": raw_style,
 		"effective_style": effective_style,
 		"leader_unit_id": leader_unit_id,
-		"final_target_position": target_position,
+		"requested_target_position": target_position,
+		"final_target_position": resolved_target_position,
 		"progress_anchor_position": origin_anchor,
 		"cover_priority": cover_priority,
-		"cohesion_threshold": cohesion_threshold,
+		"cohesion_threshold": maxf(cohesion_threshold * lerpf(1.25, 0.88, float(execution_profile.get("execution_cohesion", 0.65))), 1.0),
+		"order_fidelity": float(execution_profile.get("order_fidelity", 0.65)),
+		"reaction_delay_seconds": float(execution_profile.get("reaction_delay_seconds", 0.25)),
+		"execution_cohesion": float(execution_profile.get("execution_cohesion", 0.65)),
+		"execution_fire_discipline": float(execution_profile.get("execution_fire_discipline", 0.65)),
+		"contact_stability": float(execution_profile.get("contact_stability", 0.65)),
+		"initiative": float(execution_profile.get("initiative", 0.5)),
+		"execution_label": String(execution_profile.get("execution_label", "STEADY")),
+		"formation_scatter_factor": lerpf(1.36, 0.88, float(execution_profile.get("execution_cohesion", 0.65))),
+		"move_speed_multiplier": lerpf(0.84, 1.08, float(execution_profile.get("initiative", 0.5))),
+		"order_target_offset": resolved_target_position - target_position,
 		"stage_index": 0,
 		"completed_stage_count": 0,
-		"current_anchor_target_position": target_position,
+		"current_anchor_target_position": resolved_target_position,
 		"current_target_positions": {},
 		"current_moving_unit_ids": PackedStringArray(),
 		"current_covering_unit_ids": PackedStringArray(),
@@ -207,7 +225,7 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root) -> 
 		_:
 			moving_unit_ids = _packed_unit_ids(member_records)
 	var next_anchor_target: Vector2 = _compute_next_anchor_target(state, member_records)
-	var formation_targets: Dictionary = _build_formation_targets(next_anchor_target, member_records, String(state.get("leader_unit_id", "")))
+	var formation_targets: Dictionary = _build_formation_targets(next_anchor_target, member_records, String(state.get("leader_unit_id", "")), float(state.get("formation_scatter_factor", 1.0)))
 	var current_positions: Dictionary = _build_current_positions(member_records)
 	var issued_count: int = 0
 	for record in member_records:
@@ -233,7 +251,7 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root) -> 
 		if not moving_unit_ids.has(unit_id):
 			continue
 		var move_target: Vector2 = Vector2(formation_targets.get(unit_id, next_anchor_target))
-		var move_speed_factor: float = _build_move_speed_factor(style, member_records, moving_unit_ids, current_positions, float(state.get("cohesion_threshold", 100.0)), float(record.get("speed", 0.5)))
+		var move_speed_factor: float = _build_move_speed_factor(style, member_records, moving_unit_ids, current_positions, float(state.get("cohesion_threshold", 100.0)), float(record.get("speed", 0.5)), float(state.get("move_speed_multiplier", 1.0)))
 		var unit_command_type: String = _map_waypoint_command_to_unit_command(String(state.get("command_type", "")))
 		if _enqueue_unit_command(
 			simulation_root,
@@ -284,7 +302,7 @@ func _is_execution_complete(state: Dictionary, member_records: Array) -> bool:
 	var current_anchor_target_position: Vector2 = Vector2(state.get("current_anchor_target_position", final_target_position))
 	if current_anchor_target_position.distance_to(final_target_position) > ANCHOR_REACHED_RADIUS:
 		return false
-	var final_targets: Dictionary = _build_formation_targets(final_target_position, member_records, String(state.get("leader_unit_id", "")))
+	var final_targets: Dictionary = _build_formation_targets(final_target_position, member_records, String(state.get("leader_unit_id", "")), float(state.get("formation_scatter_factor", 1.0)))
 	for record in member_records:
 		var unit = record.get("unit", null)
 		if not (unit is Node2D):
@@ -396,7 +414,7 @@ func _compute_next_anchor_target(state: Dictionary, member_records: Array) -> Ve
 	return current_anchor_position + direction.normalized() * step_distance
 
 
-func _build_formation_targets(anchor_position: Vector2, member_records: Array, leader_unit_id: String) -> Dictionary:
+func _build_formation_targets(anchor_position: Vector2, member_records: Array, leader_unit_id: String, scatter_factor: float = 1.0) -> Dictionary:
 	var targets: Dictionary = {}
 	var ordered_records: Array = member_records.duplicate()
 	ordered_records.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
@@ -418,7 +436,7 @@ func _build_formation_targets(anchor_position: Vector2, member_records: Array, l
 		var record: Dictionary = ordered_records[index]
 		var slot_index: int = mini(index, FORMATION_SLOT_LAYOUT.size() - 1)
 		var slot: Vector2 = FORMATION_SLOT_LAYOUT[slot_index]
-		targets[String(record.get("unit_id", ""))] = anchor_position + ((lateral * slot.x) + (forward * slot.y)) * FORMATION_SLOT_SPACING
+		targets[String(record.get("unit_id", ""))] = anchor_position + ((lateral * slot.x) + (forward * slot.y)) * FORMATION_SLOT_SPACING * maxf(scatter_factor, 0.5)
 	return targets
 
 
@@ -437,25 +455,27 @@ func _build_move_speed_factor(
 	moving_unit_ids: PackedStringArray,
 	current_positions: Dictionary,
 	cohesion_threshold: float,
-	speed_skill: float
+	speed_skill: float,
+	move_speed_multiplier: float = 1.0
 ) -> float:
+	var normalized_multiplier: float = maxf(move_speed_multiplier, 0.1)
 	match style:
 		ADVANCE_STYLE_BOUNDING:
-			return lerpf(BOUNDING_MIN_SPEED_FACTOR, BOUNDING_MAX_SPEED_FACTOR, clampf(speed_skill, 0.0, 1.0))
+			return lerpf(BOUNDING_MIN_SPEED_FACTOR, BOUNDING_MAX_SPEED_FACTOR, clampf(speed_skill, 0.0, 1.0)) * normalized_multiplier
 		ADVANCE_STYLE_CATERPILLAR:
-			return lerpf(CATERPILLAR_MIN_SPEED_FACTOR, CATERPILLAR_MAX_SPEED_FACTOR, clampf(speed_skill, 0.0, 1.0))
+			return lerpf(CATERPILLAR_MIN_SPEED_FACTOR, CATERPILLAR_MAX_SPEED_FACTOR, clampf(speed_skill, 0.0, 1.0)) * normalized_multiplier
 		_:
 			var base_factor: float = lerpf(RUSH_MIN_SPEED_FACTOR, RUSH_MAX_SPEED_FACTOR, clampf(speed_skill, 0.0, 1.0))
 			var spread: float = _compute_group_spread(moving_unit_ids, current_positions)
 			if spread <= cohesion_threshold:
-				return base_factor
+				return base_factor * normalized_multiplier
 			var slowest_speed: float = speed_skill
 			for record in member_records:
 				var unit_id: String = String(record.get("unit_id", ""))
 				if not moving_unit_ids.has(unit_id):
 					continue
 				slowest_speed = minf(slowest_speed, float(record.get("speed", speed_skill)))
-			return minf(base_factor, lerpf(RUSH_MIN_SPEED_FACTOR, RUSH_MAX_SPEED_FACTOR, clampf(slowest_speed, 0.0, 1.0)))
+			return minf(base_factor, lerpf(RUSH_MIN_SPEED_FACTOR, RUSH_MAX_SPEED_FACTOR, clampf(slowest_speed, 0.0, 1.0))) * normalized_multiplier
 
 
 func _compute_group_spread(unit_ids: PackedStringArray, current_positions: Dictionary) -> float:
@@ -583,6 +603,50 @@ func _extract_cohesion_threshold(behavior_profile) -> float:
 	return maxf(float(behavior_profile.cohesion_threshold), 0.0)
 
 
+func _extract_execution_profile(behavior_profile) -> Dictionary:
+	if behavior_profile == null:
+		return {
+			"order_fidelity": 0.65,
+			"reaction_delay_seconds": 0.25,
+			"execution_cohesion": 0.65,
+			"execution_fire_discipline": 0.65,
+			"contact_stability": 0.65,
+			"initiative": 0.5,
+			"execution_label": "STEADY",
+		}
+	var source: Dictionary = {}
+	if typeof(behavior_profile) == TYPE_DICTIONARY:
+		source = Dictionary(behavior_profile)
+	else:
+		source = behavior_profile.to_dict() if behavior_profile.has_method("to_dict") else {}
+	return {
+		"order_fidelity": clampf(float(source.get("order_fidelity", 0.65)), 0.0, 1.0),
+		"reaction_delay_seconds": maxf(float(source.get("reaction_delay_seconds", 0.25)), 0.0),
+		"execution_cohesion": clampf(float(source.get("execution_cohesion", 0.65)), 0.0, 1.0),
+		"execution_fire_discipline": clampf(float(source.get("execution_fire_discipline", 0.65)), 0.0, 1.0),
+		"contact_stability": clampf(float(source.get("contact_stability", 0.65)), 0.0, 1.0),
+		"initiative": clampf(float(source.get("initiative", 0.5)), 0.0, 1.0),
+		"execution_label": String(source.get("execution_label", "STEADY")).strip_edges().to_upper(),
+	}
+
+
+func _apply_execution_target_offset(fireteam_id: String, origin_anchor: Vector2, target_position: Vector2, order_fidelity: float) -> Vector2:
+	var instability: float = clampf(1.0 - order_fidelity, 0.0, 1.0)
+	if instability <= 0.12:
+		return target_position
+	var direction: Vector2 = target_position - origin_anchor
+	if direction.length_squared() <= 0.001:
+		direction = Vector2.RIGHT
+	else:
+		direction = direction.normalized()
+	var lateral: Vector2 = direction.orthogonal()
+	var hash_value: int = abs(fireteam_id.hash())
+	var lateral_sign: float = -1.0 if hash_value % 2 == 0 else 1.0
+	var lateral_offset: float = lerpf(0.0, 42.0, instability)
+	var short_offset: float = lerpf(0.0, 24.0, instability)
+	return target_position + (lateral * lateral_sign * lateral_offset) - (direction * short_offset)
+
+
 func _extract_leader_unit_id(leader, member_records: Array) -> String:
 	if leader != null and leader.has_method("get_unit_id"):
 		return String(leader.call("get_unit_id")).strip_edges()
@@ -672,10 +736,21 @@ func _build_public_state(state: Dictionary) -> Dictionary:
 		"leader_unit_id": String(state.get("leader_unit_id", "")),
 		"stage_index": int(state.get("stage_index", 0)),
 		"completed_stage_count": int(state.get("completed_stage_count", 0)),
+		"requested_target_position": Vector2(state.get("requested_target_position", state.get("final_target_position", Vector2.ZERO))),
 		"current_anchor_target_position": Vector2(state.get("current_anchor_target_position", Vector2.ZERO)),
 		"final_target_position": Vector2(state.get("final_target_position", Vector2.ZERO)),
+		"order_target_offset": Vector2(state.get("order_target_offset", Vector2.ZERO)),
 		"current_target_positions": Dictionary(state.get("current_target_positions", {})).duplicate(true),
 		"current_moving_unit_ids": PackedStringArray(state.get("current_moving_unit_ids", PackedStringArray())),
 		"current_covering_unit_ids": PackedStringArray(state.get("current_covering_unit_ids", PackedStringArray())),
 		"simplified_due_to_losses": bool(state.get("simplified_due_to_losses", false)),
+		"order_fidelity": float(state.get("order_fidelity", 0.65)),
+		"reaction_delay_seconds": float(state.get("reaction_delay_seconds", 0.25)),
+		"execution_cohesion": float(state.get("execution_cohesion", 0.65)),
+		"execution_fire_discipline": float(state.get("execution_fire_discipline", 0.65)),
+		"contact_stability": float(state.get("contact_stability", 0.65)),
+		"initiative": float(state.get("initiative", 0.5)),
+		"execution_label": String(state.get("execution_label", "STEADY")),
+		"formation_scatter_factor": float(state.get("formation_scatter_factor", 1.0)),
+		"move_speed_multiplier": float(state.get("move_speed_multiplier", 1.0)),
 	}

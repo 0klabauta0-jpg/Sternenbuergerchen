@@ -72,7 +72,6 @@ func update(
 						"damage": int(shot_dict.get("damage", 0)),
 						"hit_chance": float(shot_dict.get("hit_chance", 0.0)),
 						"damage_multiplier": 1.0,
-						"roll_override": 0.35,
 					}
 				)
 				triggered_shots.append(shot_dict)

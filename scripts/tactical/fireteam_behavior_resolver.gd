@@ -46,6 +46,14 @@ static func resolve_profile(
 	profile.advance_style = _apply_tactical_stance_to_advance_style(profile.advance_style, normalized_tactical_stance, trait_mode)
 	profile.cover_priority = _apply_tactical_stance_to_cover_priority(profile.cover_priority, normalized_tactical_stance, trait_mode)
 	profile.suppression_threshold = _apply_tactical_stance_to_suppression_threshold(profile.suppression_threshold, normalized_tactical_stance, trait_mode)
+	var execution_profile: Dictionary = _derive_execution_profile(units, leader, leadership, trait_mode)
+	profile.order_fidelity = float(execution_profile.get("order_fidelity", profile.order_fidelity))
+	profile.reaction_delay_seconds = float(execution_profile.get("reaction_delay_seconds", profile.reaction_delay_seconds))
+	profile.execution_cohesion = float(execution_profile.get("execution_cohesion", profile.execution_cohesion))
+	profile.execution_fire_discipline = float(execution_profile.get("execution_fire_discipline", profile.execution_fire_discipline))
+	profile.contact_stability = float(execution_profile.get("contact_stability", profile.contact_stability))
+	profile.initiative = float(execution_profile.get("initiative", profile.initiative))
+	profile.execution_label = String(execution_profile.get("execution_label", profile.execution_label))
 
 	var resolved_target_position = null
 	if typeof(rough_target_position) == TYPE_VECTOR2:
@@ -65,6 +73,7 @@ static func resolve_profile(
 		"rough_target_position": rough_target_position,
 		"resolved_target_position": resolved_target_position,
 		"terrain_cover_used": typeof(resolved_target_position) == TYPE_VECTOR2 and typeof(rough_target_position) == TYPE_VECTOR2 and resolved_target_position != rough_target_position,
+		"execution_profile": execution_profile.duplicate(true),
 	}
 	return profile
 
@@ -121,6 +130,121 @@ static func _resolve_trait_mode(leader) -> String:
 	if trait_ids.has("aggressive"):
 		return TRAIT_MODE_AGGRESSIVE
 	return TRAIT_MODE_NEUTRAL
+
+
+static func _derive_execution_profile(units: Array, leader, leader_leadership: float, leader_trait_mode: String) -> Dictionary:
+	var fit_units: Array = _filter_fit_units(units)
+	if fit_units.is_empty() and leader != null:
+		fit_units.append(leader)
+	var average_accuracy: float = _average_skill_value(fit_units, "get_accuracy_skill", 0.5)
+	var average_speed: float = _average_skill_value(fit_units, "get_speed_skill", 0.5)
+	var average_toughness: float = _average_skill_value(fit_units, "get_toughness_skill", 0.5)
+	var average_discipline: float = _average_skill_value(fit_units, "get_discipline", 0.5)
+	var average_recognition: float = _average_skill_value(fit_units, "get_recognition", 0.5)
+	var trait_adjustments: Dictionary = _derive_team_trait_adjustments(fit_units, leader_trait_mode)
+	var trait_fidelity: float = float(trait_adjustments.get("fidelity", 0.0))
+	var trait_cohesion: float = float(trait_adjustments.get("cohesion", 0.0))
+	var trait_discipline: float = float(trait_adjustments.get("discipline", 0.0))
+	var trait_contact: float = float(trait_adjustments.get("contact", 0.0))
+	var trait_initiative: float = float(trait_adjustments.get("initiative", 0.0))
+	var order_fidelity: float = clampf((leader_leadership * 0.36) + (average_discipline * 0.22) + (average_recognition * 0.18) + (average_toughness * 0.14) + (average_accuracy * 0.10) + trait_fidelity, 0.0, 1.0)
+	var execution_cohesion: float = clampf((leader_leadership * 0.40) + (average_discipline * 0.22) + (average_toughness * 0.20) + (average_speed * 0.18) + trait_cohesion, 0.0, 1.0)
+	var execution_fire_discipline: float = clampf((average_discipline * 0.55) + (leader_leadership * 0.25) + (average_recognition * 0.20) + trait_discipline, 0.0, 1.0)
+	var contact_stability: float = clampf((average_recognition * 0.42) + (leader_leadership * 0.26) + (average_accuracy * 0.18) + (average_discipline * 0.14) + trait_contact, 0.0, 1.0)
+	var initiative: float = clampf((leader_leadership * 0.36) + (average_speed * 0.30) + (average_accuracy * 0.18) + (average_discipline * 0.10) + (average_toughness * 0.06) + trait_initiative, 0.0, 1.0)
+	var reaction_quality: float = clampf((leader_leadership * 0.58) + (initiative * 0.42), 0.0, 1.0)
+	var reaction_delay_seconds: float = lerpf(0.85, 0.05, reaction_quality)
+	return {
+		"order_fidelity": order_fidelity,
+		"reaction_delay_seconds": reaction_delay_seconds,
+		"execution_cohesion": execution_cohesion,
+		"execution_fire_discipline": execution_fire_discipline,
+		"contact_stability": contact_stability,
+		"initiative": initiative,
+		"execution_label": _derive_execution_label(order_fidelity, reaction_delay_seconds, execution_cohesion, execution_fire_discipline),
+	}
+
+
+static func _filter_fit_units(units: Array) -> Array:
+	var result: Array = []
+	for unit in units:
+		if unit == null:
+			continue
+		if unit.has_method("get_vital_state") and _read_string(unit, "get_vital_state") != "fit":
+			continue
+		result.append(unit)
+	return result
+
+
+static func _average_skill_value(units: Array, method_name: String, fallback: float) -> float:
+	if units.is_empty():
+		return fallback
+	var total: float = 0.0
+	var count: int = 0
+	for unit in units:
+		total += _read_skill_value(unit, method_name, fallback)
+		count += 1
+	return total / float(maxi(count, 1))
+
+
+static func _derive_team_trait_adjustments(units: Array, leader_trait_mode: String) -> Dictionary:
+	var adjustments: Dictionary = {
+		"fidelity": 0.0,
+		"cohesion": 0.0,
+		"discipline": 0.0,
+		"contact": 0.0,
+		"initiative": 0.0,
+	}
+	if units.is_empty():
+		return adjustments
+	for unit in units:
+		if unit == null or not unit.has_method("get_trait_ids"):
+			continue
+		for trait_id in PackedStringArray(unit.call("get_trait_ids")):
+			match String(trait_id).strip_edges().to_lower():
+				"calm":
+					adjustments["fidelity"] = float(adjustments["fidelity"]) + 0.035
+					adjustments["discipline"] = float(adjustments["discipline"]) + 0.045
+					adjustments["contact"] = float(adjustments["contact"]) + 0.035
+				"steady":
+					adjustments["fidelity"] = float(adjustments["fidelity"]) + 0.025
+					adjustments["cohesion"] = float(adjustments["cohesion"]) + 0.025
+					adjustments["contact"] = float(adjustments["contact"]) + 0.025
+				"cautious":
+					adjustments["discipline"] = float(adjustments["discipline"]) + 0.035
+					adjustments["contact"] = float(adjustments["contact"]) + 0.025
+					adjustments["initiative"] = float(adjustments["initiative"]) - 0.035
+				"aggressive":
+					adjustments["initiative"] = float(adjustments["initiative"]) + 0.04
+					adjustments["discipline"] = float(adjustments["discipline"]) - 0.035
+				"reckless":
+					adjustments["initiative"] = float(adjustments["initiative"]) + 0.06
+					adjustments["fidelity"] = float(adjustments["fidelity"]) - 0.06
+					adjustments["cohesion"] = float(adjustments["cohesion"]) - 0.05
+					adjustments["discipline"] = float(adjustments["discipline"]) - 0.06
+	if leader_trait_mode == TRAIT_MODE_CAUTIOUS:
+		adjustments["fidelity"] = float(adjustments["fidelity"]) + 0.025
+		adjustments["initiative"] = float(adjustments["initiative"]) - 0.025
+	elif leader_trait_mode == TRAIT_MODE_AGGRESSIVE:
+		adjustments["initiative"] = float(adjustments["initiative"]) + 0.025
+	elif leader_trait_mode == TRAIT_MODE_RECKLESS:
+		adjustments["fidelity"] = float(adjustments["fidelity"]) - 0.035
+		adjustments["cohesion"] = float(adjustments["cohesion"]) - 0.035
+	for key in adjustments.keys():
+		adjustments[key] = clampf(float(adjustments[key]) / float(maxi(units.size(), 1)), -0.12, 0.12)
+	return adjustments
+
+
+static func _derive_execution_label(order_fidelity: float, reaction_delay_seconds: float, execution_cohesion: float, execution_fire_discipline: float) -> String:
+	if order_fidelity >= 0.74 and execution_cohesion >= 0.68 and reaction_delay_seconds <= 0.28:
+		return "CLEAN EXEC"
+	if execution_fire_discipline < 0.42:
+		return "LOW DISC"
+	if execution_cohesion < 0.46:
+		return "SCATTER"
+	if reaction_delay_seconds >= 0.52:
+		return "DELAY"
+	return "STEADY"
 
 
 static func _derive_advance_style(toughness: float, trait_mode: String) -> String:

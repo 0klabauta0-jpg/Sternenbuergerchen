@@ -1,4 +1,4 @@
-﻿# TASK_114 - Review-Sammelbecken: Legacy, offene Punkte und Nacharbeiten
+# TASK_114 - Review-Sammelbecken: Legacy, offene Punkte und Nacharbeiten
 
 ## Ziel
 Dieser Task sammelt die im tiefen Review vom 2026-04-21 verifizierten Altlasten, Legacy-Kompatibilitaetsstellen, Behelfspfade, Doku-Drift und bewusst offen gelassenen Restpunkte in einem zentralen Abarbeitungsdokument.
@@ -78,12 +78,12 @@ Dieser Task sammelt die im tiefen Review vom 2026-04-21 verifizierten Altlasten,
   - Verifikation: `scripts/tests/medic_support_verifier.gd`, `scripts/tests/task_087_verifier.gd`, `scripts/tests/task_107_verifier.gd`, `scripts/tests/test_weapon_data.gd`
 
 - [x] Die `TASK_109`-Restpunkte fuer In-World-Stance-Badges und feinere Sync-Vorbereitung sind abgeschlossen.
-  - Dateien: `scripts/tests/tactical_stance_controller.gd`, `scripts/tests/mission_tactical_sandbox_controller.gd`, `scripts/npc/test_unit.gd`, `scripts/core/simulation_root.gd`, `scripts/tests/task_109_verifier.gd`
+  - Dateien: `scripts/tactical/tactical_stance_controller.gd`, `scripts/tests/mission_tactical_sandbox_controller.gd`, `scripts/npc/test_unit.gd`, `scripts/core/simulation_root.gd`, `scripts/tests/task_109_verifier.gd`
   - Umfang: Units zeigen die angeforderte Haltung jetzt direkt als kleines `C`-/`N`-/`A`-Badge neben Fireteam und Phase. Der Stance-Controller liefert zusaetzlich einen versionierten `tactical_stance_sync`-Stand fuer Preview-/Runtime-Bruecken und spaetere Multiplayer-Pfade; der bestehende Observer-Snapshot transportiert diese Badge-Daten direkt mit.
   - Verifikation: `scripts/tests/task_109_verifier.gd`
 
 - [x] Der `TASK_113`-Restpunkt fuer tieferes Richtungs-/Morale-Follow-up ist abgeschlossen.
-  - Dateien: `scripts/tests/flank_vulnerability_resolver.gd`, `scripts/tests/mission_combat_loop_driver.gd`, `scripts/tests/mission_tactical_sandbox_controller.gd`, `scripts/core/simulation_root.gd`, `scripts/tests/task_113_verifier.gd`
+  - Dateien: `scripts/tactical/flank_vulnerability_resolver.gd`, `scripts/tests/mission_combat_loop_driver.gd`, `scripts/tests/mission_tactical_sandbox_controller.gd`, `scripts/core/simulation_root.gd`, `scripts/tests/task_113_verifier.gd`
   - Umfang: Flanken behalten jetzt ihre relative Richtung (`left`, `right`, `rear`) als kurzes Richtungsgedaechtnis und koennen Fireteams in ein kleines Morale-Folgefenster (`alerted`, `shaken`) schieben. Ein Heckentreffer wirkt sofort `shaken`, wiederholte Seitenflanken koennen denselben Zustand nachziehen. Das Folgefenster senkt den effektiven Suppression-Schwellenwert weiter, wird im Statusbereich sichtbar und laeuft ueber den bestehenden Flank-/Damage-Pfad statt ueber eine zweite Sonderlogik.
   - Verifikation: `scripts/tests/task_113_verifier.gd`
 
@@ -92,16 +92,25 @@ Dieser Task sammelt die im tiefen Review vom 2026-04-21 verifizierten Altlasten,
   - Umfang: Die offenen Marker-Themen werden nicht mehr nur als vager Rest in `TASK_082` weitergetragen, sondern als eigener Folge-Task `TASK_115` festgehalten. Der neue Task trennt klar zwischen authorbaren Editor-/Systemmarkern und spielerseitigen Befehlsmarkern in der Mission, fordert eine Typ-Liste statt freier Marker-Namen und haelt direkte Karteninteraktion, Tile-Snap und Ueberlappungsblock fest.
 
 - [x] Der ausgelagerte Marker-Folge-Task `TASK_115` ist umgesetzt.
-  - Dateien: `scripts/terrain/terrain_marker_catalog.gd`, `scripts/terrain/terrain_map_data.gd`, `scripts/editor/map_editor.gd`, `scripts/tests/fireteam_order_visualizer.gd`, `scripts/tests/mission_tactical_sandbox_controller.gd`, `scripts/tests/task_115_verifier.gd`, `docs/tasks/TASK_082_gemeinsamer_terrain_renderer_editor_und_mission.md`, `docs/tasks/TASK_115_gemeinsames_markersystem_fuer_editor_und_taktikkarte.md`, `docs/IMPLEMENTATION_STATUS.md`
+  - Dateien: `scripts/terrain/terrain_marker_catalog.gd`, `scripts/terrain/terrain_map_data.gd`, `scripts/editor/map_editor.gd`, `scripts/tactical/visuals/fireteam_order_visualizer.gd`, `scripts/tests/mission_tactical_sandbox_controller.gd`, `scripts/tests/task_115_verifier.gd`, `docs/tasks/TASK_082_gemeinsamer_terrain_renderer_editor_und_mission.md`, `docs/tasks/TASK_115_gemeinsames_markersystem_fuer_editor_und_taktikkarte.md`, `docs/IMPLEMENTATION_STATUS.md`
   - Umfang: Marker laufen jetzt ueber einen gemeinsamen Typkatalog mit Name, Farbe, Symbol und Kontext. Der Map-Editor besitzt eine echte Marker-Liste mit direkter Kartenplatzierung, Drag, Delete, Doppelklick-Umbenennen, Tile-Snap und Ueberlappungsblock. Die Taktikkarte konsumiert fuer Spielermarker denselben `mission_player`-Katalog und rastet Wegpunkte auf Tile-Mitten ein.
   - Verifikation: `scripts/tests/task_115_verifier.gd`, `scripts/tests/task_099_verifier.gd`, `scripts/tests/task_109_verifier.gd`, `scripts/tests/task_113_verifier.gd`, `scripts/tests/task_096_recovery_verifier.gd`, `scripts/tests/task_114_meta_recovery_verifier.gd`, `scripts/tests/bugfix_dropship_mission_flow_verifier.gd`
 
 ## Folge-Tasks aus dem Review
 
-- Keine verbleibenden explizit ausgelagerten Review-Restpunkte.
+- Aus dem urspruenglichen TASK_114-Durchlauf blieben keine offenen Review-Restpunkte.
+- Aus dem anschliessenden Code-/Design-/Architektur-Review vom 2026-04-24 wurden neue Folge-Tasks geschnitten:
+  - `TASK_116` - Runtime-Systeme aus `scripts/tests` herausloesen
+  - `TASK_117` - Dropship-Deploy als `SimulationRoot`-Effects
+  - `TASK_118` - Combat-Entscheidungen aus `MissionCombatLoopDriver` herausloesen
+  - `TASK_119` - Seeded Combat RNG und `roll_override` begrenzen
+  - `TASK_120` - Teamqualitaet als FTL-Ausfuehrungsfaktor
 
 ## Empfehlung fuer die naechste Abarbeitung
-1. Keine weiteren offenen Review-Folge-Tasks aus `TASK_114`; neue Marker- oder Terrain-Erweiterungen nur noch als neu benannte Folge-Tasks schneiden.
+1. Zuerst `TASK_116` bearbeiten, damit produktive Tactical-/Runtime-Systeme klare Pfade haben.
+2. Danach `TASK_117` bis `TASK_119` als Architektur-Stabilisierung vor weiteren Gameplay-Erweiterungen bearbeiten.
+3. `TASK_120` anschliessend als Design-/Spielgefuehl-Slice auf der bereinigten Runtime-Basis umsetzen.
+4. Neue Marker- oder Terrain-Erweiterungen nur noch als neu benannte Folge-Tasks schneiden.
 
 ## Nicht-Ziele
 - kein stiller Grossrefactor des Meta-Layers

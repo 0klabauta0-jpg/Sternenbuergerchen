@@ -452,6 +452,7 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 			mission_setup.set("selected_fireteam_definitions", Array(fob_screen.call("get_fireteam_definitions")).duplicate(true))
 		mission_setup.set("map_file_path", String(_get_selected_mission_definition().get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges())
 		mission_setup.set("defer_friendly_runtime_activation", true)
+		mission_setup.set("allow_full_roster_when_selection_empty", false)
 
 		var fob_loadouts: Dictionary = _build_fob_member_loadouts()
 		if not fob_loadouts.is_empty():
@@ -464,7 +465,7 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 			tactical_controller.call("set_planning_state", _mission_planning_state)
 
 	var command_flow_driver = mission_instance.get_node_or_null("CommandFlowDriver")
-	if command_flow_driver != null:
+	if command_flow_driver != null and not selected_unit_ids.is_empty():
 		command_flow_driver.set("unit_id", String(selected_unit_ids[0]))
 
 	var combat_driver = mission_instance.get_node_or_null("CombatLoopDriver")

@@ -24,6 +24,7 @@ const LOADOUT_MODIFIER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/comman
 @export var terrain_registry_path: NodePath
 @export var map_file_path: String = "res://maps/test_mission_32x32_slots8.json"
 @export var defer_friendly_runtime_activation: bool = true
+@export var allow_full_roster_when_selection_empty: bool = true
 
 var member_loadouts: Dictionary = {}
 var unit_loadout_modifiers_by_unit_id: Dictionary = {}
@@ -74,6 +75,7 @@ func _ready() -> void:
 		if unit_team_id == team_id:
 			friendly_assignment_slot_index = friendly_slot_index
 			if not _is_friendly_slot_enabled(friendly_slot_index):
+				_deactivate_unused_friendly_slot(unit, friendly_slot_index)
 				if unit is CanvasItem:
 					unit.visible = false
 				friendly_slot_index += 1
@@ -186,7 +188,7 @@ func _enqueue_initial_loadout_effect(simulation_root: Node, unit_id: String) -> 
 
 func _is_friendly_slot_enabled(slot_index: int) -> bool:
 	if selected_team_unit_ids.is_empty():
-		return true
+		return allow_full_roster_when_selection_empty
 
 	return slot_index >= 0 and slot_index < selected_team_unit_ids.size()
 
@@ -203,6 +205,21 @@ func _get_selected_unit_id_for_friendly_slot(slot_index: int, fallback_unit_id: 
 		return fallback_unit_id
 
 	return selected_unit_id
+
+
+func _deactivate_unused_friendly_slot(unit, slot_index: int) -> void:
+	if unit == null or not unit.has_method("apply_identity_config"):
+		return
+	unit.call(
+		"apply_identity_config",
+		{
+			"unit_id": "__unused_friendly_slot_%d" % maxi(slot_index, 0),
+			"display_name": "Unused Friendly Slot",
+			"team_id": "team_unused",
+			"fireteam_id": "",
+			"is_fireteam_lead": false,
+		}
+	)
 
 
 func _resolve_marker(node_path: NodePath) -> Marker2D:

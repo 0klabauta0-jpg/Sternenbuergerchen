@@ -1,6 +1,6 @@
 extends SceneTree
 
-const COORDINATION_MANAGER_SCRIPT: GDScript = preload("res://scripts/tests/fireteam_coordination_manager.gd")
+const COORDINATION_MANAGER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_coordination_manager.gd")
 
 var _passed: int = 0
 var _failed: int = 0

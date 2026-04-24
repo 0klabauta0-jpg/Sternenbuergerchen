@@ -1,10 +1,11 @@
 extends Node
 
 const LOS_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/los_system.gd")
-const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
-const OVERWATCH_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/overwatch_controller.gd")
-const CONTACT_TRACKER_SCRIPT: GDScript = preload("res://scripts/tests/contact_tracker.gd")
-const FLANK_VULNERABILITY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tests/flank_vulnerability_resolver.gd")
+const OVERWATCH_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/overwatch_controller.gd")
+const CONTACT_TRACKER_SCRIPT: GDScript = preload("res://scripts/tactical/contact_tracker.gd")
+const FLANK_VULNERABILITY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/flank_vulnerability_resolver.gd")
+const MEDIC_SUPPORT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/medic_support_resolver.gd")
+const COMBAT_FIRE_DECISION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/combat_fire_decision_resolver.gd")
 const CONTACT_LINE_NAME: String = "CombatContactLine"
 const EVENT_LABEL_NAME: String = "CombatEventLabel"
 const WINNER_LABEL_NAME: String = "CombatWinnerLabel"
@@ -342,55 +343,25 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 	if _current_tick < _next_attack_tick:
 		return
 
-	var misid_result: Dictionary = _check_misidentification(attacker, attacker_id)
-	var actual_target = target
-	var actual_target_id: String = target_id
-	var is_friendly_fire: bool = false
-	if not misid_result.is_empty():
-		actual_target = misid_result["target"]
-		actual_target_id = misid_result["target_id"]
-		is_friendly_fire = true
+	var decision: Dictionary = COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("build_damage_effect", contact_pair, _build_fire_decision_context())
+	if decision.is_empty():
+		return
+	var actual_target = decision.get("target", target)
+	var actual_target_id: String = String(decision.get("target_id", target_id))
+	var is_friendly_fire: bool = bool(decision.get("is_friendly_fire", false))
 
 	contact_established.emit(attacker, actual_target)
 	if is_friendly_fire:
 		_set_event_text("%s verwechselt Ziel! -> %s" % [attacker_id, actual_target_id])
 	else:
 		_set_event_text("%s ENGAGE %s" % [attacker_id, actual_target_id])
-	var active_weapon_id: String = _get_unit_active_weapon_id(attacker)
-	var weapon_damage: int = WEAPON_DATA_SCRIPT.get_damage_per_hit(active_weapon_id)
-	var weapon_hit_chance: float = WEAPON_DATA_SCRIPT.get_base_hit_chance(active_weapon_id)
-	if String(attacker.call("get_team_id")) == friendly_team_id and contact_state == "spotted":
-		weapon_hit_chance = clampf(weapon_hit_chance + SPOTTED_CONTACT_HIT_CHANCE_MALUS, 0.02, 0.98)
-	var weapon_ticks: int = WEAPON_DATA_SCRIPT.get_ticks_between_attacks(active_weapon_id)
-	var flank_modifiers: Dictionary = resolve_flank_attack(attacker, actual_target)
-	if bool(flank_modifiers.get("is_flank", false)):
-		weapon_hit_chance = clampf(weapon_hit_chance + float(flank_modifiers.get("hit_chance_bonus", 0.0)), 0.02, 0.98)
-	simulation_root.call(
-		"enqueue_effect",
-		{
-			"effect_type": "damage",
-			"priority": 30,
-			"unit_id": actual_target_id,
-			"attacker_unit_id": attacker_id,
-			"attacker_team_id": String(attacker.call("get_team_id")),
-			"allow_friendly_fire": is_friendly_fire,
-			"damage": weapon_damage,
-			"hit_chance": weapon_hit_chance,
-			"damage_multiplier": base_damage_multiplier * float(flank_modifiers.get("damage_multiplier", 1.0)),
-			"roll_override": 0.4,
-			"target_cover_override": flank_modifiers.get("target_cover_override", null),
-			"is_flank": bool(flank_modifiers.get("is_flank", false)),
-			"flank_fireteam_id": String(flank_modifiers.get("fireteam_id", "")),
-			"flank_source_angle": float(flank_modifiers.get("source_angle", 0.0)),
-			"flank_direction_label": String(flank_modifiers.get("direction_label", "")),
-			"flank_morale_state": String(flank_modifiers.get("morale_state", "")),
-		}
-	)
+	simulation_root.call("enqueue_effect", Dictionary(decision.get("effect", {})))
+	var flank_modifiers: Dictionary = Dictionary(decision.get("flank_modifiers", {}))
 	_maybe_publish_flank_event(flank_modifiers, attacker, actual_target)
 	if is_friendly_fire and attacker.has_method("show_event_text"):
 		attacker.call("show_event_text", "FRIENDLY FIRE!", MISIDENTIFICATION_EVENT_COLOR, 1.6)
 		_broadcast_remote_event("%s verwechselt Ziel! -> %s" % [attacker_id, actual_target_id], attacker_id, MISIDENTIFICATION_EVENT_COLOR, 1.6, "FRIENDLY FIRE!")
-	_next_attack_tick = _current_tick + max(weapon_ticks, 1)
+	_next_attack_tick = _current_tick + max(int(decision.get("weapon_ticks", 1)), 1)
 
 
 func _update_combat_resolution() -> void:
@@ -532,18 +503,28 @@ func _try_enqueue_medic_support(simulation_root: Node) -> void:
 
 
 func _try_enqueue_medic_support_for_units(simulation_root: Node, medics: Array, allies: Array, reserved_target_ids: Dictionary) -> void:
-	for medic in medics:
-		if not _can_medic_support(medic):
+	var actions: Array = Array(
+		MEDIC_SUPPORT_RESOLVER_SCRIPT.call(
+			"build_support_actions",
+			medics,
+			allies,
+			reserved_target_ids,
+			_medic_support_cooldown,
+			_medic_support_move_ready_tick,
+			_get_terrain_registry(),
+			_current_tick,
+			_build_medic_support_config()
+		)
+	)
+	for action_variant in actions:
+		if typeof(action_variant) != TYPE_DICTIONARY:
 			continue
-
-		var medic_id: String = String(medic.call("get_unit_id"))
-		var target = _pick_medic_target(medic, allies, reserved_target_ids)
-		if target != null and target.has_method("get_unit_id"):
-			var target_id: String = String(target.call("get_unit_id"))
-			if target_id.is_empty():
-				continue
-
-			reserved_target_ids[target_id] = true
+		var action: Dictionary = Dictionary(action_variant)
+		var medic = action.get("medic", null)
+		var target = action.get("target", null)
+		var medic_id: String = String(action.get("medic_id", "")).strip_edges()
+		var target_id: String = String(action.get("target_id", "")).strip_edges()
+		if String(action.get("action_type", "")) == "heal":
 			simulation_root.call(
 				"enqueue_effect",
 				{
@@ -551,119 +532,62 @@ func _try_enqueue_medic_support_for_units(simulation_root: Node, medics: Array, 
 					"priority": MEDIC_SUPPORT_PRIORITY,
 					"unit_id": target_id,
 					"healer_unit_id": medic_id,
-					"healer_team_id": String(medic.call("get_team_id")),
+					"healer_team_id": String(medic.call("get_team_id")) if medic != null and medic.has_method("get_team_id") else "",
 					"amount": MEDIC_SUPPORT_HEAL_AMOUNT,
 					"support_resource": "medictool",
 				}
 			)
 			_medic_support_cooldown[medic_id] = MEDIC_SUPPORT_COOLDOWN_TICKS
 			_set_event_text("%s PATCH %s" % [medic_id, target_id])
-			if medic.has_method("show_event_text"):
+			if medic != null and medic.has_method("show_event_text"):
 				medic.call("show_event_text", "PATCH", MEDIC_EVENT_COLOR, 1.2)
 			continue
-
-		var move_target = _pick_medic_move_target(medic, allies, reserved_target_ids)
-		if move_target == null:
+		if String(action.get("action_type", "")) != "move":
 			continue
-		_try_enqueue_medic_move(simulation_root, medic, move_target)
+		_enqueue_medic_move_action(simulation_root, action)
+
+
+func _build_medic_support_config() -> Dictionary:
+	return {
+		"tile_range": MEDIC_SUPPORT_TILE_RANGE,
+		"move_max_tile_distance": MEDIC_SUPPORT_MOVE_MAX_TILE_DISTANCE,
+		"range_fallback_world": MEDIC_SUPPORT_RANGE_FALLBACK_WORLD,
+		"move_max_distance_fallback_world": MEDIC_SUPPORT_MOVE_MAX_DISTANCE_FALLBACK_WORLD,
+		"approach_standoff": MEDIC_SUPPORT_APPROACH_STANDOFF,
+		"wounded_threshold": MEDIC_SUPPORT_WOUNDED_THRESHOLD,
+		"remote_wounded_threshold": MEDIC_SUPPORT_REMOTE_WOUNDED_THRESHOLD,
+	}
 
 
 func _can_medic_support(unit) -> bool:
-	if unit == null or not unit.has_method("get_unit_id") or not unit.has_method("get_vital_state"):
-		return false
-
-	if String(unit.call("get_vital_state")) != "fit":
-		return false
-
-	if not _is_medic_unit(unit):
-		return false
-
-	if not _has_required_medic_tool(unit):
-		return false
-
-	return int(_medic_support_cooldown.get(String(unit.call("get_unit_id")), 0)) <= 0
+	return bool(MEDIC_SUPPORT_RESOLVER_SCRIPT.call("can_medic_support", unit, _medic_support_cooldown))
 
 
 func _is_medic_unit(unit) -> bool:
-	if unit == null:
-		return false
-
-	var role_id: String = String(unit.call("get_role_id")).to_lower() if unit.has_method("get_role_id") else ""
-	if role_id == "combat_medic":
-		return true
-
-	var role_name: String = String(unit.call("get_role_name")).to_lower() if unit.has_method("get_role_name") else ""
-	return role_name.contains("medic") or role_name.contains("sanitaeter")
+	return bool(MEDIC_SUPPORT_RESOLVER_SCRIPT.call("is_medic_unit", unit))
 
 
 func _pick_medic_target(medic, allies: Array, reserved_target_ids: Dictionary):
-	if medic == null or not (medic is Node2D):
-		return null
-	return _pick_best_medic_target(medic, allies, reserved_target_ids, true)
+	return MEDIC_SUPPORT_RESOLVER_SCRIPT.call("pick_medic_target", medic, allies, reserved_target_ids, _get_terrain_registry(), _build_medic_support_config())
 
 func _pick_medic_move_target(medic, allies: Array, reserved_target_ids: Dictionary):
-	if medic == null or not (medic is Node2D):
-		return null
-	return _pick_best_medic_target(medic, allies, reserved_target_ids, false)
+	return MEDIC_SUPPORT_RESOLVER_SCRIPT.call("pick_medic_move_target", medic, allies, reserved_target_ids, _get_terrain_registry(), _build_medic_support_config())
 
 
 func _pick_best_medic_target(medic, allies: Array, reserved_target_ids: Dictionary, require_in_range: bool):
-	var best_target = null
-	var best_score: float = -INF
-	for ally in allies:
-		var candidate_score: float = _score_medic_target(medic, ally, reserved_target_ids, require_in_range)
-		if candidate_score > best_score:
-			best_score = candidate_score
-			best_target = ally
-
-	return best_target
+	return MEDIC_SUPPORT_RESOLVER_SCRIPT.call("pick_best_medic_target", medic, allies, reserved_target_ids, require_in_range, _get_terrain_registry(), _build_medic_support_config())
 
 
 func _score_medic_target(medic, ally, reserved_target_ids: Dictionary, require_in_range: bool) -> float:
-	if not _is_valid_medic_target(medic, ally, reserved_target_ids, require_in_range):
-		return -INF
-	var distance: float = (medic as Node2D).global_position.distance_to((ally as Node2D).global_position)
-	var vital_state: String = String(ally.call("get_vital_state")).strip_edges().to_lower()
-	if vital_state == "down":
-		return 500.0 - (distance * 0.75)
-	if vital_state != "fit":
-		return -INF
-	if not ally.has_method("get_health") or not ally.has_method("get_max_health_points"):
-		return -INF
-	var max_health: int = int(ally.call("get_max_health_points"))
-	if max_health <= 0:
-		return -INF
-	var health_ratio: float = float(ally.call("get_health")) / float(max_health)
-	var wounded_threshold: float = MEDIC_SUPPORT_WOUNDED_THRESHOLD if require_in_range else MEDIC_SUPPORT_REMOTE_WOUNDED_THRESHOLD
-	if health_ratio >= wounded_threshold:
-		return -INF
-	return 160.0 + ((1.0 - health_ratio) * 220.0) - (distance * 0.45)
+	return float(MEDIC_SUPPORT_RESOLVER_SCRIPT.call("score_medic_target", medic, ally, reserved_target_ids, require_in_range, _get_terrain_registry(), _build_medic_support_config()))
 
 
 func _is_valid_medic_target(medic, ally, reserved_target_ids: Dictionary, require_in_range: bool = true) -> bool:
-	if ally == null or ally == medic or not (ally is Node2D):
-		return false
-	if not ally.has_method("get_unit_id") or not ally.has_method("get_vital_state"):
-		return false
-
-	var target_id: String = String(ally.call("get_unit_id"))
-	if target_id.is_empty() or reserved_target_ids.has(target_id):
-		return false
-
-	var distance: float = (medic as Node2D).global_position.distance_to((ally as Node2D).global_position)
-	if require_in_range:
-		return _is_within_medic_support_range(medic, ally, distance)
-	return _is_within_medic_move_range(medic, ally, distance)
+	return bool(MEDIC_SUPPORT_RESOLVER_SCRIPT.call("is_valid_medic_target", medic, ally, reserved_target_ids, require_in_range, _get_terrain_registry(), _build_medic_support_config()))
 
 
 func _has_required_medic_tool(unit) -> bool:
-	if unit == null:
-		return false
-	if unit.has_method("has_medic_tool"):
-		return bool(unit.call("has_medic_tool"))
-	var weapon_1_id: String = String(unit.call("get_weapon_1_id")).strip_edges() if unit.has_method("get_weapon_1_id") else ""
-	var weapon_2_id: String = String(unit.call("get_weapon_2_id")).strip_edges() if unit.has_method("get_weapon_2_id") else ""
-	return WEAPON_DATA_SCRIPT.is_medic_tool_id(weapon_1_id) or WEAPON_DATA_SCRIPT.is_medic_tool_id(weapon_2_id)
+	return bool(MEDIC_SUPPORT_RESOLVER_SCRIPT.call("has_required_medic_tool", unit))
 
 
 func _try_enqueue_medic_move(simulation_root: Node, medic, target) -> bool:
@@ -699,46 +623,43 @@ func _try_enqueue_medic_move(simulation_root: Node, medic, target) -> bool:
 	return true
 
 
+func _enqueue_medic_move_action(simulation_root: Node, action: Dictionary) -> bool:
+	var medic = action.get("medic", null)
+	var medic_id: String = String(action.get("medic_id", "")).strip_edges()
+	var target_id: String = String(action.get("target_id", "")).strip_edges()
+	if simulation_root == null or medic == null or medic_id.is_empty() or target_id.is_empty():
+		return false
+	simulation_root.call(
+		"enqueue_command",
+		{
+			"command_type": "move_to_position",
+			"priority": MEDIC_SUPPORT_MOVE_PRIORITY,
+			"unit_id": medic_id,
+			"target_position": Vector2(action.get("target_position", Vector2.ZERO)),
+			"move_speed_factor": MEDIC_SUPPORT_MOVE_SPEED_FACTOR,
+			"requeue_until_target": false,
+		}
+	)
+	_medic_support_move_ready_tick[medic_id] = _current_tick + MEDIC_SUPPORT_MOVE_REISSUE_TICKS
+	if medic.has_method("show_event_text"):
+		medic.call("show_event_text", "MEDIC MOVE", MEDIC_EVENT_COLOR, 1.0)
+	return true
+
+
 func _build_medic_approach_position(medic, target) -> Vector2:
-	if medic == null or target == null or not (medic is Node2D) or not (target is Node2D):
-		return Vector2.ZERO
-	var target_position: Vector2 = (target as Node2D).global_position
-	var direction: Vector2 = target_position - (medic as Node2D).global_position
-	if direction.length_squared() <= 0.001:
-		return target_position
-	return target_position - (direction.normalized() * MEDIC_SUPPORT_APPROACH_STANDOFF)
+	return Vector2(MEDIC_SUPPORT_RESOLVER_SCRIPT.call("build_medic_approach_position", medic, target, MEDIC_SUPPORT_APPROACH_STANDOFF))
 
 
 func _is_within_medic_support_range(medic, target, fallback_distance: float = -1.0) -> bool:
-	var tile_distance: int = _get_medic_tile_distance(medic, target)
-	if tile_distance >= 0:
-		return tile_distance <= MEDIC_SUPPORT_TILE_RANGE
-	var resolved_distance: float = fallback_distance
-	if resolved_distance < 0.0 and medic is Node2D and target is Node2D:
-		resolved_distance = (medic as Node2D).global_position.distance_to((target as Node2D).global_position)
-	return resolved_distance <= MEDIC_SUPPORT_RANGE_FALLBACK_WORLD
+	return bool(MEDIC_SUPPORT_RESOLVER_SCRIPT.call("is_within_medic_support_range", medic, target, _get_terrain_registry(), fallback_distance, _build_medic_support_config()))
 
 
 func _is_within_medic_move_range(medic, target, fallback_distance: float = -1.0) -> bool:
-	var tile_distance: int = _get_medic_tile_distance(medic, target)
-	if tile_distance >= 0:
-		return tile_distance <= MEDIC_SUPPORT_MOVE_MAX_TILE_DISTANCE
-	var resolved_distance: float = fallback_distance
-	if resolved_distance < 0.0 and medic is Node2D and target is Node2D:
-		resolved_distance = (medic as Node2D).global_position.distance_to((target as Node2D).global_position)
-	return resolved_distance <= MEDIC_SUPPORT_MOVE_MAX_DISTANCE_FALLBACK_WORLD
+	return bool(MEDIC_SUPPORT_RESOLVER_SCRIPT.call("is_within_medic_move_range", medic, target, _get_terrain_registry(), fallback_distance, _build_medic_support_config()))
 
 
 func _get_medic_tile_distance(medic, target) -> int:
-	if medic == null or target == null or not (medic is Node2D) or not (target is Node2D):
-		return -1
-	var terrain_registry = _get_terrain_registry()
-	if terrain_registry == null or not terrain_registry.has_method("world_to_grid"):
-		return -1
-	var medic_grid: Vector2i = Vector2i(terrain_registry.call("world_to_grid", (medic as Node2D).global_position))
-	var target_grid: Vector2i = Vector2i(terrain_registry.call("world_to_grid", (target as Node2D).global_position))
-	var delta: Vector2i = target_grid - medic_grid
-	return absi(delta.x) + absi(delta.y)
+	return int(MEDIC_SUPPORT_RESOLVER_SCRIPT.call("get_medic_tile_distance", medic, target, _get_terrain_registry()))
 
 
 func _apply_all_leadership_bonuses() -> void:
@@ -789,46 +710,15 @@ func _show_leadership_event(uid: String, text: String) -> void:
 
 
 func _pick_target_for_attacker(attacker, target_paths: Array[NodePath]):
-	for target in _get_units(target_paths):
-		if not _is_target_attackable(attacker, target):
-			continue
-
-		return target
-
-	return null
+	return COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("pick_target_from_units", attacker, _get_units(target_paths), _build_fire_decision_context())
 
 
 func _can_enemy_attack(unit) -> bool:
-	if unit == null:
-		return false
-
-	if not unit.has_method("get_vital_state"):
-		return false
-
-	if String(unit.call("get_vital_state")) != "fit":
-		return false
-
-	return not _get_unit_active_weapon_id(unit).is_empty()
+	return bool(COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("can_enemy_attack", unit))
 
 
 func _can_unit_attack(unit) -> bool:
-	if unit == null:
-		return false
-
-	if not unit.has_method("get_vital_state"):
-		return false
-
-	if String(unit.call("get_vital_state")) != "fit":
-		return false
-
-	if _get_unit_active_weapon_id(unit).is_empty():
-		return false
-
-	if unit.has_method("get_fire_status") and String(unit.call("get_fire_status")) != "fire_at_will":
-		if not _check_discipline_break(unit):
-			return false
-
-	return _is_engage_ready(unit)
+	return bool(COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("can_unit_attack", unit, _build_fire_decision_context()))
 
 
 func _check_discipline_break(unit) -> bool:
@@ -1103,48 +993,15 @@ func _get_effective_range(target) -> float:
 
 
 func _is_target_attackable(attacker, target) -> bool:
-	if target == null or not _can_target_receive_attack(target):
-		return false
-
-	if attacker == null:
-		return false
-
-	if String(attacker.call("get_team_id")) == String(target.call("get_team_id")):
-		return false
-
-	return _los_system.has_line_of_sight_between_nodes(attacker, target, _get_effective_range(target), _get_terrain_registry())
+	return bool(COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("is_target_attackable", attacker, target, _build_fire_decision_context()))
 
 
 func _can_target_receive_attack(unit) -> bool:
-	if unit == null or not unit.has_method("get_vital_state"):
-		return false
-
-	return String(unit.call("get_vital_state")) == "fit"
+	return bool(COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("can_target_receive_attack", unit))
 
 
 func _is_engage_ready(unit) -> bool:
-	if unit == null:
-		return false
-
-	if unit.has_method("get_current_unit_command"):
-		var command = unit.call("get_current_unit_command")
-		if command != null and command.has_method("get"):
-			var command_type: String = String(command.get("command_type"))
-			if command_type == "engage_area" or command_type == "hold_position":
-				return true
-
-			return command_type == "move_to_position" and String(command.get("source_command_type")) == "flank"
-
-	if unit.has_method("get_runtime_status"):
-		var runtime_status = unit.call("get_runtime_status")
-		if runtime_status != null and runtime_status.has_method("get"):
-			var status_name: String = String(runtime_status.get("status"))
-			if status_name == "engaging" or status_name == "holding":
-				return true
-
-			return status_name == "pending_move" and String(runtime_status.get("source_command_type")) == "flank"
-
-	return false
+	return bool(COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("is_engage_ready", unit))
 
 
 func _update_status_label(state_name: String) -> void:
@@ -1256,63 +1113,21 @@ func _describe_enemy_unit(unit) -> String:
 
 
 func _get_unit_active_weapon_id(unit) -> String:
-	if unit != null and unit.has_method("get_active_weapon_id"):
-		var weapon_id: String = String(unit.call("get_active_weapon_id")).strip_edges()
-		if WEAPON_DATA_SCRIPT.is_attack_weapon_id(weapon_id):
-			return weapon_id
-	return ""
+	return String(COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("get_unit_active_weapon_id", unit))
 
 
 func _find_first_contact_pair() -> Dictionary:
-	for friendly in _get_units(friendly_unit_paths):
-		if not _can_unit_attack(friendly):
-			continue
-
-		var enemy = _pick_target_from_units(friendly, _get_active_enemy_units())
-		if enemy == null:
-			continue
-
-		var f_id: String = String(friendly.call("get_unit_id"))
-		var e_id: String = String(enemy.call("get_unit_id"))
-		_start_or_continue_detection(friendly, f_id, e_id)
-		if not _is_detection_complete(f_id, e_id):
-			continue
-		var fireteam_id: String = String(friendly.call("get_fireteam_id")).strip_edges().to_lower() if friendly.has_method("get_fireteam_id") else ""
-		var contact_entry: Dictionary = _get_fireteam_contact_state(fireteam_id, e_id)
-		var detection_state: String = String(contact_entry.get("detection_state", "confirmed")).strip_edges().to_lower()
-		if detection_state != "spotted" and detection_state != "confirmed":
-			continue
-
-		return {
-			"attacker": friendly,
-			"target": enemy,
-			"attacker_id": f_id,
-			"target_id": e_id,
-			"contact_state": detection_state,
-		}
-
-	for enemy in _get_active_enemy_units():
-		if not _can_enemy_attack(enemy):
-			continue
-
-		var friendly = _pick_target_from_units(enemy, _get_units(friendly_unit_paths))
-		if friendly == null:
-			continue
-
-		var en_id: String = String(enemy.call("get_unit_id"))
-		var fr_id: String = String(friendly.call("get_unit_id"))
-		_start_or_continue_detection(enemy, en_id, fr_id)
-		if not _is_detection_complete(en_id, fr_id):
-			continue
-
-		return {
-			"attacker": enemy,
-			"target": friendly,
-			"attacker_id": en_id,
-			"target_id": fr_id,
-		}
-
-	return {}
+	return Dictionary(
+		COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call(
+			"find_first_contact_pair",
+			_build_fire_decision_context(
+				{
+					"friendly_units": _get_units(friendly_unit_paths),
+					"enemy_units": _get_active_enemy_units(),
+				}
+			)
+		)
+	).duplicate(true)
 
 
 func resolve_flank_attack(attacker, target) -> Dictionary:
@@ -1375,6 +1190,27 @@ func _get_fireteam_contact_state(fireteam_id: String, enemy_unit_id: String) -> 
 	if _contact_tracker == null or fireteam_id.strip_edges().is_empty() or enemy_unit_id.strip_edges().is_empty():
 		return {}
 	return Dictionary(_contact_tracker.call("get_contact_state", fireteam_id, enemy_unit_id)).duplicate(true)
+
+
+func _build_fire_decision_context(extra: Dictionary = {}) -> Dictionary:
+	var context: Dictionary = {
+		"friendly_team_id": friendly_team_id,
+		"contact_range": contact_range,
+		"base_damage_multiplier": base_damage_multiplier,
+		"spotted_contact_hit_chance_malus": SPOTTED_CONTACT_HIT_CHANCE_MALUS,
+		"los_system": _los_system,
+		"terrain_registry": _get_terrain_registry(),
+		"check_discipline_break": Callable(self, "_check_discipline_break"),
+		"start_detection": Callable(self, "_start_or_continue_detection"),
+		"is_detection_complete": Callable(self, "_is_detection_complete"),
+		"get_contact_state": Callable(self, "_get_fireteam_contact_state"),
+		"check_misidentification": Callable(self, "_check_misidentification"),
+		"resolve_flank_attack": Callable(self, "resolve_flank_attack"),
+		"get_effective_range": Callable(self, "_get_effective_range"),
+	}
+	for key in extra.keys():
+		context[key] = extra[key]
+	return context
 
 
 func _get_known_friendly_fireteam_ids() -> Array:
@@ -1971,13 +1807,7 @@ func _enemy_should_hold_position(enemy) -> bool:
 
 
 func _pick_target_from_units(attacker, targets: Array):
-	for target in targets:
-		if not _is_target_attackable(attacker, target):
-			continue
-
-		return target
-
-	return null
+	return COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("pick_target_from_units", attacker, targets, _build_fire_decision_context())
 
 
 func _get_active_enemy_units() -> Array:

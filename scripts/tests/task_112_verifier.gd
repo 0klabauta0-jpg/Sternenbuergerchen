@@ -1,8 +1,8 @@
 extends SceneTree
 
-const CONTACT_TRACKER_SCRIPT: GDScript = preload("res://scripts/tests/contact_tracker.gd")
-const CONTACT_MAP_OVERLAY_SCRIPT: GDScript = preload("res://scripts/tests/contact_map_overlay.gd")
-const FIRETEAM_SECURITY_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/fireteam_security_controller.gd")
+const CONTACT_TRACKER_SCRIPT: GDScript = preload("res://scripts/tactical/contact_tracker.gd")
+const CONTACT_MAP_OVERLAY_SCRIPT: GDScript = preload("res://scripts/tactical/visuals/contact_map_overlay.gd")
+const FIRETEAM_SECURITY_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_security_controller.gd")
 const TEST_UNIT_SCRIPT: GDScript = preload("res://scripts/npc/test_unit.gd")
 
 var _passed: int = 0

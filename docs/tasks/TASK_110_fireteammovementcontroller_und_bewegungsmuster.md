@@ -67,7 +67,7 @@ Ein `FireteamMovementController` steuert die Relativbewegung der Members innerha
 - Alle Bewegungswirkungen laufen weiterhin ueber den bestehenden autoritativen Command-/Effect-Pfad.
 
 ## Umsetzung
-- `scripts/tests/fireteam_movement_controller.gd` fuehrt `rush`, `bounding` und `caterpillar` als eigene Laufzeit-Orchestrierung pro aktivem Waypoint ein.
+- `scripts/tactical/fireteam_movement_controller.gd` fuehrt `rush`, `bounding` und `caterpillar` als eigene Laufzeit-Orchestrierung pro aktivem Waypoint ein.
 - `MissionTacticalSandboxController` nutzt den Controller fuer geplante und ad-hoc-Bewegungen, setzt ihn bei Standard-Hold-/Interrupt-Pfaden zurueck und zeigt den aktuellen Bewegungsmodus als `MOVE RSH/BND/CAT` im Statuspanel.
 - `EventRouter` erweitert den Signalvertrag um `fireteam_bound_complete`, damit Gruppenwechsel explizit gemeldet werden koennen.
 - `scripts/tests/task_110_verifier.gd` deckt Rush-Kohaesion, Bounding-Rotation, Caterpillar-Sequenz, Verlust-Downshift und die Mission-Integration headless ab.

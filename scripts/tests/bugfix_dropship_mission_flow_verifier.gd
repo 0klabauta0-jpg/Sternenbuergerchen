@@ -958,10 +958,17 @@ func _test_dropship_returns_to_fob_after_drop() -> void:
 		tactical_controller.call("_update_drop_sequence", 0.2)
 		if String(tactical_controller.get("_drop_sequence_phase")) != "inbound":
 			break
+	for _frame in range(2):
+		await process_frame
 	var mid_drop_state: Dictionary = Dictionary(tactical_controller.call("get_planning_state"))
+	var visible_friendly_unit_ids: Array = _collect_visible_friendly_unit_ids(active_mission)
+	var fireteam_cards_host := active_mission.get_node("TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox") as VBoxContainer
+	var fireteam_panel := active_mission.get_node("TacticalUI/FireteamMiniPanel") as Control
 	_assert(String(tactical_controller.get("_drop_sequence_phase")) == "outbound", "Live dropship goes straight into the outbound return once it reaches the LZ")
 	_assert(Array(mid_drop_state.get("embarked_unit_ids", [])) == [], "All boarded passengers are removed from the embarked set as soon as the dropship lands")
 	_assert(Array(mid_drop_state.get("deployed_unit_ids", [])) == Array(selected_unit_ids), "The boarded FOB fireteam deploys immediately at the LZ when the dropship arrives")
+	_assert(visible_friendly_unit_ids == _to_sorted_string_array(selected_unit_ids), "Live drop keeps only the selected operators visible and does not resurrect hidden spare slots")
+	_assert(fireteam_panel != null and fireteam_panel.visible and fireteam_cards_host != null and fireteam_cards_host.get_child_count() == 1, "Mission map starts showing the staged fireteam mini-card once the dropped team is actually on the map")
 	_assert(int(mid_drop_state.get("mission_drop_passenger_count", -1)) == 0, "Mission dropship passenger count falls to zero immediately after the live drop")
 	for _frame in range(4):
 		await process_frame
@@ -1042,6 +1049,30 @@ func _test_drop_ship_starts_far_outside_the_map() -> void:
 	_assert(start_position.distance_to(lz_position) >= required_distance - 1.0, "Dropship staging starts at least two map-widths away from the LZ")
 	scene.queue_free()
 	await process_frame
+
+
+func _collect_visible_friendly_unit_ids(mission_root: Node) -> Array:
+	var result: Array = []
+	if mission_root == null:
+		return result
+	for child in mission_root.get_children():
+		if not child.has_method("get_team_id") or not child.has_method("get_unit_id"):
+			continue
+		if String(child.call("get_team_id")).strip_edges() != "team_alpha":
+			continue
+		if child is CanvasItem and not (child as CanvasItem).visible:
+			continue
+		result.append(String(child.call("get_unit_id")).strip_edges())
+	result.sort()
+	return result
+
+
+func _to_sorted_string_array(values: PackedStringArray) -> Array:
+	var result: Array = []
+	for value in values:
+		result.append(String(value).strip_edges())
+	result.sort()
+	return result
 
 
 func _test_mission_time_limit_resolves_defeat() -> void:

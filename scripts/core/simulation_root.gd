@@ -24,6 +24,7 @@ const HEIGHT_DISADVANTAGE_ACCURACY_PENALTY: float = 0.05
 @export var is_server_authoritative: bool = false
 @export var unit_registry_path: NodePath
 @export var terrain_registry_path: NodePath
+@export var combat_rng_seed: int = 1
 
 var command_queue: Array = []
 var effects_queue: Array = []
@@ -36,6 +37,15 @@ var _known_units_by_id: Dictionary = {}
 var _peer_team_assignments: Dictionary = {1: "team_alpha"}
 var _last_broadcast_vital_state_by_unit_id: Dictionary = {}
 var _last_server_state: Dictionary = {}
+var _combat_rng := RandomNumberGenerator.new()
+
+
+func _init() -> void:
+	_combat_rng.seed = int(combat_rng_seed)
+
+
+func _ready() -> void:
+	set_combat_rng_seed(combat_rng_seed)
 
 
 func enqueue_command(cmd: Dictionary) -> void:
@@ -61,6 +71,15 @@ func clear_queues() -> void:
 
 func get_tick() -> int:
 	return tick_counter
+
+
+func set_combat_rng_seed(seed_value: int) -> void:
+	combat_rng_seed = seed_value
+	_combat_rng.seed = int(seed_value)
+
+
+func get_next_combat_roll() -> float:
+	return _combat_rng.randf()
 
 
 func register_known_unit(unit_id: String, unit: Node) -> bool:
@@ -492,6 +511,10 @@ func _apply_effect(effect: Dictionary, delta: float) -> void:
 			_apply_bleedout_effect(effect)
 		"respawn":
 			_apply_respawn_effect(effect)
+		"dropship_embark_unit":
+			_apply_dropship_embark_unit_effect(effect)
+		"dropship_deploy_unit":
+			_apply_dropship_deploy_unit_effect(effect)
 		"apply_loadout_modifiers":
 			_apply_loadout_modifiers_effect(effect)
 		_:
@@ -818,12 +841,12 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		HIT_CHANCE_MIN,
 		HIT_CHANCE_MAX
 	)
-	var roll_override: float = _extract_float(effect.get("roll_override", -1.0), -1.0)
+	var roll: float = _extract_damage_roll(effect)
 	var damage_multiplier: float = _extract_float(effect.get("damage_multiplier", 1.0), 1.0)
 	damage_multiplier = maxf(damage_multiplier + attacker_attack_bonus - (target_cover_score * TARGET_COVER_DAMAGE_PENALTY_FACTOR), DAMAGE_MULTIPLIER_MIN)
 	damage_multiplier *= _extract_unit_damage_taken_multiplier(unit)
 	var damage_model = DAMAGE_MODEL_SCRIPT.new()
-	if not bool(damage_model.call("resolve_hit", hit_chance, roll_override)):
+	if not bool(damage_model.call("resolve_hit", hit_chance, roll)):
 		return
 
 	var resolved_damage: int = int(damage_model.call("resolve_damage", base_damage, damage_multiplier))
@@ -849,6 +872,12 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		hit_context["flank_direction_label"] = String(effect.get("flank_direction_label", "")).strip_edges().to_lower()
 		hit_context["flank_morale_state"] = String(effect.get("flank_morale_state", "")).strip_edges().to_lower()
 	unit.call("apply_damage", resolved_damage, hit_context)
+
+
+func _extract_damage_roll(effect: Dictionary) -> float:
+	if effect.has("roll_override"):
+		return _extract_float(effect.get("roll_override", -1.0), -1.0)
+	return get_next_combat_roll()
 
 
 func _apply_heal_effect(effect: Dictionary) -> void:
@@ -1165,6 +1194,73 @@ func _apply_respawn_effect(effect: Dictionary) -> void:
 		return
 
 	unit.call("respawn", spawn_position)
+
+
+func _apply_dropship_embark_unit_effect(effect: Dictionary) -> void:
+	var unit_id: String = String(effect.get("unit_id", "")).strip_edges()
+	if unit_id.is_empty():
+		push_warning("SimulationRoot dropship embark effect expects a non-empty unit_id.")
+		return
+	var unit = _resolve_known_unit(unit_id)
+	if unit == null:
+		push_warning("SimulationRoot could not resolve the target unit for a dropship embark effect.")
+		return
+	_apply_dropship_position_and_visibility(unit, effect, false)
+
+
+func _apply_dropship_deploy_unit_effect(effect: Dictionary) -> void:
+	var unit_id: String = String(effect.get("unit_id", "")).strip_edges()
+	if unit_id.is_empty():
+		push_warning("SimulationRoot dropship deploy effect expects a non-empty unit_id.")
+		return
+	var unit = _resolve_known_unit(unit_id)
+	if unit == null:
+		push_warning("SimulationRoot could not resolve the target unit for a dropship deploy effect.")
+		return
+	_apply_dropship_runtime_activation(unit_id, unit, effect)
+	_apply_dropship_position_and_visibility(unit, effect, true)
+	var runtime_status: String = String(effect.get("runtime_status", "")).strip_edges()
+	if not runtime_status.is_empty() and unit.has_method("set_runtime_status"):
+		unit.call("set_runtime_status", runtime_status)
+	if unit.has_method("refresh_terrain_readability"):
+		unit.call("refresh_terrain_readability")
+
+
+func _apply_dropship_position_and_visibility(unit, effect: Dictionary, default_visible: bool) -> void:
+	if unit == null:
+		return
+	if effect.has("position") and unit is Node2D:
+		var unit_node := unit as Node2D
+		unit_node.global_position = _coerce_vector2(effect.get("position", unit_node.global_position), unit_node.global_position)
+	if unit is CanvasItem:
+		(unit as CanvasItem).visible = bool(effect.get("visible", default_visible))
+
+
+func _apply_dropship_runtime_activation(unit_id: String, unit: Node, effect: Dictionary) -> void:
+	if not bool(effect.get("runtime_active", false)):
+		return
+	var unit_registry = _get_unit_registry()
+	if unit_registry != null and unit_registry.has_method("register_unit"):
+		if not unit_registry.has_method("has_unit") or not bool(unit_registry.call("has_unit", unit_id)):
+			unit_registry.call("register_unit", unit_id, unit)
+	var runtime_leader = _resolve_optional_node_path(effect.get("runtime_leader_path", NodePath("")))
+	if runtime_leader != null and runtime_leader.has_method("add_unit_member"):
+		runtime_leader.call("add_unit_member", unit)
+	var ftl_registry = _resolve_optional_node_path(effect.get("ftl_registry_path", NodePath("")))
+	if ftl_registry == null or not ftl_registry.has_method("register_ftl"):
+		return
+	var team_id: String = String(effect.get("team_id", "")).strip_edges()
+	if team_id.is_empty() and unit.has_method("get_team_id"):
+		team_id = String(unit.call("get_team_id")).strip_edges()
+	if not team_id.is_empty() and (not ftl_registry.has_method("has_ftl") or not bool(ftl_registry.call("has_ftl", team_id))):
+		ftl_registry.call("register_ftl", team_id, runtime_leader)
+
+
+func _resolve_optional_node_path(raw_path: Variant) -> Node:
+	var node_path: NodePath = raw_path if raw_path is NodePath else NodePath(String(raw_path))
+	if node_path.is_empty():
+		return null
+	return get_node_or_null(node_path)
 
 
 func _apply_loadout_modifiers_effect(effect: Dictionary) -> void:

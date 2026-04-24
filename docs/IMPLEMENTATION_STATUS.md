@@ -822,7 +822,7 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 
 ### TASK_112 - ContactTracker und ContactMapOverlay
 - Status: implementiert
-- Stand: `scripts/tests/contact_tracker.gd` fuehrt jetzt eine eigene missionslokale Kontaktlage pro Friendly-Fireteam mit `suspected`, `spotted`, `confirmed` und `lost`, inklusive letzter Position, Tick-Zeitstempel und leadership-skaliert verzogerter Weitergabe bestaetigter Kontakte. `MissionCombatLoopDriver` speist den Tracker aus bestehendem LOS und Detection-Delay, exponiert Kontakt-Snapshots und verwendet `spotted`/`confirmed` als Kontakt-Gate fuer Friendly-Feuerfreigabe; `spotted` erhaelt dabei den vorgesehenen Accuracy-Malus.
+- Stand: `scripts/tactical/contact_tracker.gd` fuehrt jetzt eine eigene missionslokale Kontaktlage pro Friendly-Fireteam mit `suspected`, `spotted`, `confirmed` und `lost`, inklusive letzter Position, Tick-Zeitstempel und leadership-skaliert verzogerter Weitergabe bestaetigter Kontakte. `MissionCombatLoopDriver` speist den Tracker aus bestehendem LOS und Detection-Delay, exponiert Kontakt-Snapshots und verwendet `spotted`/`confirmed` als Kontakt-Gate fuer Friendly-Feuerfreigabe; `spotted` erhaelt dabei den vorgesehenen Accuracy-Malus.
 - Stand: `MissionTacticalSandboxController` reicht die Kontakt-Snapshots an `FireteamSecurityController` und ein neues `ContactMapOverlay` weiter. Das Overlay zeichnet `suspected`, `spotted`, `confirmed` und `lost` getrennt von Plan- und Security-Layern, bleibt rein lesend und aggregiert auf den aktuell ausgewaehlten Fireteam-Scope.
 - Offene Punkte: Gegnerseitiges Contact-Tracking bleibt weiterhin ausserhalb dieses Scopes; der Tracker modelliert hier bewusst Friendly-Intel statt eine vollstaendige Wahrnehmungs-KI fuer beide Seiten.
 - Risiken: Contact-Tracking, Security und Combat bleiben getrennte Schichten. Wenn spaetere Tasks tiefere Bedrohungslogik brauchen, sollte sie im Tracker oder Resolvern zentral erweitert werden statt erneut direkt in UI oder Overwatch auszuufern.
@@ -830,7 +830,7 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 
 ### TASK_113 - FlankVulnerabilityResolver und Sektorstrafen
 - Status: implementiert
-- Stand: `scripts/tests/flank_vulnerability_resolver.gd` fuehrt jetzt eine schmale Laufzeit-Auswertung ueber bestehende Security-Snapshots aus und erkennt Flanken ausschliesslich auf Basis von `security_mode`, `direction_angle` und `member_assignments`. Erfolgreiche Flankentreffer erzeugen einen klaren Modifier-Satz fuer Trefferchance, Schadensmultiplikator, Cover-Override und eine zeitlich begrenzte Absenkung des effektiven `suppression_threshold`, ohne selbst Security-, Contact- oder Damage-Wahrheit zu werden.
+- Stand: `scripts/tactical/flank_vulnerability_resolver.gd` fuehrt jetzt eine schmale Laufzeit-Auswertung ueber bestehende Security-Snapshots aus und erkennt Flanken ausschliesslich auf Basis von `security_mode`, `direction_angle` und `member_assignments`. Erfolgreiche Flankentreffer erzeugen einen klaren Modifier-Satz fuer Trefferchance, Schadensmultiplikator, Cover-Override und eine zeitlich begrenzte Absenkung des effektiven `suppression_threshold`, ohne selbst Security-, Contact- oder Damage-Wahrheit zu werden.
 - Stand: Darauf sitzt jetzt ein kleiner Richtungs-/Morale-Folgepfad im selben Resolver: Flanken behalten die relative Angriffsrichtung (`left`, `right`, `rear`) als kurzes Richtungsgedaechtnis, und Fireteams koennen fuer wenige Sekunden `alerted` oder `shaken` bleiben. Ein Heckentreffer schaltet sofort auf `shaken`, wiederholte Seitenflanken koennen denselben Zustand nachziehen; der effektive Suppression-Schwellenwert sinkt in diesem Folgefenster weiter. `MissionCombatLoopDriver` gibt Richtung und Morale im bestehenden Flank-Payload sowie im Damage-Hit-Context weiter, `SimulationRoot` spiegelt diese Felder autoritativ durch den bestehenden Damage-Pfad, und `MissionTacticalSandboxController` zeigt Richtung, Restdauer und Morale-Kuerzel im Statusbereich.
 - Offene Punkte: Gegnerseitige autonome Flankenreaktionen bleiben weiter ausserhalb dieses Scopes.
 - Risiken: Flankenverwundbarkeit bleibt bewusst ein schmaler Resolver ueber vorhandene Security- und Combat-Daten. Wenn spaetere Tasks komplexere Richtungsdeckung oder groessere Morale-Ketten einfuehren, sollten sie diesen zentralen Modifier-Pfad erweitern statt zweite flank-spezifische Sonderlogik in UI, Overwatch oder DamageModel zu verteilen.
@@ -844,6 +844,46 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Offene Punkte: Keine innerhalb des TASK-115-Slices; weitergehende Markerfamilien, echte Missionsmarker-Listen im Tactical-UI oder persistente Kampagnenmarker bleiben bewusst eigene Folgepfade.
 - Risiken: Kartenmarker in `TerrainMapData` und spielerseitige Missionsmarker im Planning-State teilen jetzt Typkatalog und Symbolik, bleiben aber absichtlich getrennte Datenwahrheiten. Weitere Ausbaupfade sollten diesen Vertrag erweitern statt wieder separate Marker-Sonderlogik in Editor, Tactical-UI oder Meta-Map aufzubauen.
 - Naechster Schritt: Nur bei Bedarf neue Folge-Tasks fuer zusaetzliche Marker-Typfamilien, tiefere Mission-Listenbearbeitung oder persistente Marker ueber Missionsgrenzen hinaus schneiden.
+
+### TASK_116 - Runtime-Systeme aus scripts/tests herausloesen
+- Status: implementiert
+- Stand: Produktiv genutzte Tactical-/Runtime-Systeme liegen jetzt unter `scripts/tactical/` statt unter `scripts/tests`: `ad_hoc_order_controller.gd`, `contact_tracker.gd`, `fireteam_behavior_resolver.gd`, `fireteam_coordination_manager.gd`, `fireteam_movement_controller.gd`, `fireteam_security_controller.gd`, `flank_vulnerability_resolver.gd`, `overwatch_controller.gd` und `tactical_stance_controller.gd`.
+- Stand: Rein lesende Visuals liegen unter `scripts/tactical/visuals/`: `contact_map_overlay.gd` und `fireteam_order_visualizer.gd`. `MissionTacticalSandboxController`, `MissionCombatLoopDriver` und die Verifier bleiben in `scripts/tests`, laden aber die produktiven Systeme aus den neuen Pfaden.
+- Offene Punkte: Keine innerhalb dieses Pfad-Slices; die eigentliche Entflechtung von UI-/Driver-Gameplay-Wahrheit bleibt bewusst TASK_117 und TASK_118.
+- Risiken: Der Task ist bewusst nur Move-/Import-Hygiene. Spaetere Runtime-Arbeiten sollten die neuen Produktivpfade verwenden und keine neuen produktiven Systeme unter `scripts/tests` anlegen.
+- Naechster Schritt: TASK_117 kann Dropship-Deploys aus dem Tactical-Controller in autoritative `SimulationRoot`-Effects ueberfuehren.
+
+### TASK_117 - Dropship-Deploy als SimulationRoot-Effects
+- Status: implementiert
+- Stand: `SimulationRoot` kennt jetzt die expliziten Effects `dropship_embark_unit` und `dropship_deploy_unit`. Bekannte, aber noch nicht in der `UnitRegistry` aktivierte Dropship-Passagiere koennen dadurch ueber `register_known_unit` positioniert, verborgen, sichtbar gemacht und beim Deboarding autoritativ in `UnitRegistry`, `RuntimeLeader` und `FTLRegistry` aktiviert werden.
+- Stand: `MissionTacticalSandboxController` behaelt Dropship-Sequenz, UI-Texte, Marker und Preview-Visualisierung, enqueued in der Live-Mission aber nur noch Embark-/Deploy-/Presence-Effects. Direkte `global_position`-/`visible`-/Runtime-Status-Commits bleiben auf den non-authoritative Preview-Pfad begrenzt. Loadout-Modifier laufen nach dem Deploy weiter ueber den bestehenden Effect-Pfad.
+- Offene Punkte: Die Dropship-Sequenz selbst ist weiterhin im Sandbox-Controller statt in einem eigenen produktiven Runtime-Modul gekapselt; ein tieferer Fahrzeug- oder Mission-Event-Controller bleibt bewusst ausserhalb dieses Tasks.
+- Risiken: Der neue Effect-Vertrag ist V1-schmal und nimmt RuntimeLeader-/FTLRegistry-Pfade im Effect-Payload mit. Wenn spaeter echte Fahrzeug- oder Multiplayer-Flows entstehen, sollte dieser Vertrag zentral erweitert werden, statt wieder UI-nahe Sonderpfade fuer Deploy-Zustand einzufuehren.
+- Naechster Schritt: TASK_118 kann Combat-Entscheidungen aus dem Mission-Driver herausloesen und damit den naechsten UI-/Testtreiber-Anteil aus der Gameplay-Wahrheit entfernen.
+
+### TASK_118 - Combat-Entscheidungen aus MissionCombatLoopDriver herausloesen
+- Status: implementiert
+- Stand: `scripts/tactical/combat_fire_decision_resolver.gd` uebernimmt jetzt Zielwahl, Feuerfreigabe, Friendly-Contact-Gate und Damage-Effect-Payload-Aufbau. Der Resolver konsumiert vorhandene Callbacks fuer Detection, ContactTracker, Misidentification und FlankVulnerability, ohne selbst State zu committen.
+- Stand: `scripts/tactical/medic_support_resolver.gd` uebernimmt Medic-Rollen-/Tool-Pruefung, Target-Priorisierung, Reichweitenentscheidung und Heal-/Move-Action-Auswahl. Der `MissionCombatLoopDriver` enqueued daraus weiter die autoritativen `heal`-Effects und Medic-Move-Commands.
+- Offene Punkte: Enemy-Advance, Reposition-on-Damage, Bleedout-Queueing und Leadership-Nachfolge liegen weiterhin im Driver. Sie sind bewusst nicht in diesem ersten Struktur-Slice mitgezogen, damit Combat-Verhalten stabil bleibt.
+- Risiken: Die Resolver arbeiten weiterhin mit Node-Referenzen und Driver-Callbacks, weil die bestehende Testmission noch keine vollstaendige produktive Combat-Context-Schicht besitzt. Spaetere Tasks sollten diese Context-Schnittstelle konsolidieren, statt neue Inline-Entscheidungen im Driver anzulegen.
+- Naechster Schritt: TASK_119 kann auf dem ausgelagerten Fire-Decision-Payload aufsetzen und `roll_override`/RNG sauber deterministisch begrenzen.
+
+### TASK_119 - Seeded Combat RNG und roll_override begrenzen
+- Status: implementiert
+- Stand: `SimulationRoot` besitzt jetzt einen kleinen seedbaren Combat-RNG (`combat_rng_seed`, `set_combat_rng_seed()`, `get_next_combat_roll()`) und zieht im autoritativen Damage-Pfad daraus den Trefferwurf, sobald ein Damage-Effect keinen expliziten `roll_override` mitbringt.
+- Stand: Normale Fire-Decision-Payloads aus `CombatFireDecisionResolver` und Overwatch-Damage-Effects setzen keinen festen `roll_override` mehr. Der Override bleibt im Effect-Vertrag nur fuer gezielte Test-/Debug-Payloads erhalten, damit Verifier einzelne Treffer- oder Fehlschlagfaelle weiter exakt pruefen koennen.
+- Offene Punkte: Kein Replay-/Rollback-Framework und keine Multiplayer-RNG-Synchronisierung jenseits des seedbaren autoritativen Pfads. Das bleibt bewusst ein spaeterer Netcode-/Server-Tick-Scope.
+- Risiken: Der RNG sitzt jetzt an der richtigen autoritativen Stelle, aber die bestehende Testmission benutzt weiterhin Node-basierte Driver-/Resolver-Kontexte. Spaetere Multiplayer-Arbeit sollte den Seed-/Tick-Vertrag zentral erweitern, statt Zufallsquellen in Resolver oder UI zurueckzubringen.
+- Naechster Schritt: TASK_120 kann Teamqualitaet/FTL-Ausfuehrungsfaktoren auf dem jetzt wieder probabilistischen Combat-Pfad modellieren, ohne feste Live-Rolls zu kaschieren.
+
+### TASK_120 - Teamqualitaet als FTL-Ausfuehrungsfaktor
+- Status: implementiert
+- Stand: `FireteamBehaviorProfile` enthaelt jetzt einen kompakten Ausfuehrungsprofil-Satz (`order_fidelity`, `reaction_delay_seconds`, `execution_cohesion`, `execution_fire_discipline`, `contact_stability`, `initiative`, `execution_label`). `FireteamBehaviorResolver` leitet diese Werte aus vorhandenen Team-/Leaderdaten, Discipline, Recognition und Traits ab, ohne neue Persistenz oder Sozialdynamik einzufuehren.
+- Stand: `FireteamMovementController` konsumiert das Ausfuehrungsprofil beim Start von Movement-/Order-Ausfuehrung. Niedrige Order Fidelity erzeugt einen kleinen deterministischen Ziel-Offset, niedrige Cohesion vergroessert Formationstreuung, und Initiative beeinflusst den Bewegungstempo-Multiplikator. Die Tactical UI zeigt diese Werte nur lesend als `EXEC`-Status mit Feedback wie `CLEAN EXEC`, `DELAY`, `SCATTER`, `LOW DISC` oder `STEADY`.
+- Offene Punkte: Keine tiefere Teamchemie, keine Kampagnen-Persistenz und kein umfassendes Morale-/Social-System. Reaction Delay ist als Profilwert vorhanden, wird aber in diesem V1-Slice noch nicht als echte Startwartezeit getaktet.
+- Risiken: Die Werte sind bewusst kleine Ausfuehrungsmodifikatoren. Spaetere Teamchemie sollte den vorhandenen Profilvertrag erweitern, statt UI- oder Driver-seitig neue Berechnungen einzufuehren.
+- Naechster Schritt: Weitere Teamqualitaetswirkung nur als klarer Folge-Task, z.B. echte Tick-basierte Reaktionsverzoegerung oder breitere Contact-/Morale-Kopplung.
 
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert

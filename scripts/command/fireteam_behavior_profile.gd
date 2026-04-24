@@ -34,6 +34,13 @@ var fire_discipline: String = FIRE_DISCIPLINE_SEMI_DISCIPLINED
 var cohesion_threshold: float = 100.0
 var suppression_threshold: int = 1
 var tactical_stance: String = TACTICAL_STANCE_NORMAL
+var order_fidelity: float = 0.65
+var reaction_delay_seconds: float = 0.25
+var execution_cohesion: float = 0.65
+var execution_fire_discipline: float = 0.65
+var contact_stability: float = 0.65
+var initiative: float = 0.5
+var execution_label: String = "STEADY"
 var metadata: Dictionary = {}
 
 
@@ -78,6 +85,24 @@ func is_valid() -> bool:
 	if cohesion_threshold < 0.0:
 		return false
 
+	if order_fidelity < 0.0 or order_fidelity > 1.0:
+		return false
+
+	if reaction_delay_seconds < 0.0:
+		return false
+
+	if execution_cohesion < 0.0 or execution_cohesion > 1.0:
+		return false
+
+	if execution_fire_discipline < 0.0 or execution_fire_discipline > 1.0:
+		return false
+
+	if contact_stability < 0.0 or contact_stability > 1.0:
+		return false
+
+	if initiative < 0.0 or initiative > 1.0:
+		return false
+
 	return suppression_threshold >= 0
 
 
@@ -91,6 +116,13 @@ func to_dict() -> Dictionary:
 		"cohesion_threshold": cohesion_threshold,
 		"suppression_threshold": suppression_threshold,
 		"tactical_stance": tactical_stance,
+		"order_fidelity": order_fidelity,
+		"reaction_delay_seconds": reaction_delay_seconds,
+		"execution_cohesion": execution_cohesion,
+		"execution_fire_discipline": execution_fire_discipline,
+		"contact_stability": contact_stability,
+		"initiative": initiative,
+		"execution_label": execution_label,
 		"metadata": metadata.duplicate(true),
 	}
 
@@ -106,4 +138,13 @@ func _apply_dict(data: Dictionary) -> void:
 	tactical_stance = String(data.get("tactical_stance", TACTICAL_STANCE_NORMAL)).strip_edges().to_lower()
 	if not is_allowed_tactical_stance(tactical_stance):
 		tactical_stance = TACTICAL_STANCE_NORMAL
+	order_fidelity = clampf(float(data.get("order_fidelity", 0.65)), 0.0, 1.0)
+	reaction_delay_seconds = maxf(float(data.get("reaction_delay_seconds", 0.25)), 0.0)
+	execution_cohesion = clampf(float(data.get("execution_cohesion", 0.65)), 0.0, 1.0)
+	execution_fire_discipline = clampf(float(data.get("execution_fire_discipline", 0.65)), 0.0, 1.0)
+	contact_stability = clampf(float(data.get("contact_stability", 0.65)), 0.0, 1.0)
+	initiative = clampf(float(data.get("initiative", 0.5)), 0.0, 1.0)
+	execution_label = String(data.get("execution_label", "STEADY")).strip_edges().to_upper()
+	if execution_label.is_empty():
+		execution_label = "STEADY"
 	metadata = Dictionary(data.get("metadata", {})).duplicate(true)

@@ -257,6 +257,13 @@ TASK_113 – FlankVulnerabilityResolver und Sektorstrafen
 Phase 17K – Marker-Follow-up
 TASK_115 – Gemeinsames Markersystem fuer Editor und Taktikkarte
 
+Phase 17L – Architektur- und Spielgefuehl-Nacharbeit
+TASK_116 – Runtime-Systeme aus scripts/tests herausloesen
+TASK_117 – Dropship-Deploy als SimulationRoot-Effects
+TASK_118 – Combat-Entscheidungen aus MissionCombatLoopDriver herausloesen
+TASK_119 – Seeded Combat RNG und roll_override begrenzen
+TASK_120 – Teamqualitaet als FTL-Ausfuehrungsfaktor
+
 Phase 18 – Erweiterung (spaeter)
 Skillsystem
 soziale Dynamik
