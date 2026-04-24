@@ -696,12 +696,12 @@ func _ensure_marker_editor_controls() -> void:
 		marker_panel = VBoxContainer.new()
 		marker_panel.name = "MarkerEditorPanel"
 		marker_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		marker_panel.theme_override_constants.separation = 6
+		marker_panel.add_theme_constant_override("separation", 6)
 		marker_panel_parent.add_child(marker_panel)
 
 		var toolbar := HBoxContainer.new()
 		toolbar.name = "MarkerToolbarRow"
-		toolbar.theme_override_constants.separation = 6
+		toolbar.add_theme_constant_override("separation", 6)
 		marker_panel.add_child(toolbar)
 
 		var add_type_option := OptionButton.new()
@@ -735,7 +735,7 @@ func _ensure_marker_editor_controls() -> void:
 
 		var type_row := HBoxContainer.new()
 		type_row.name = "SelectedMarkerTypeRow"
-		type_row.theme_override_constants.separation = 6
+		type_row.add_theme_constant_override("separation", 6)
 		marker_panel.add_child(type_row)
 
 		var type_label := Label.new()
@@ -749,7 +749,7 @@ func _ensure_marker_editor_controls() -> void:
 
 		var name_row := HBoxContainer.new()
 		name_row.name = "SelectedMarkerNameRow"
-		name_row.theme_override_constants.separation = 6
+		name_row.add_theme_constant_override("separation", 6)
 		marker_panel.add_child(name_row)
 
 		var name_label := Label.new()
@@ -763,7 +763,7 @@ func _ensure_marker_editor_controls() -> void:
 
 		var color_row := HBoxContainer.new()
 		color_row.name = "SelectedMarkerColorRow"
-		color_row.theme_override_constants.separation = 6
+		color_row.add_theme_constant_override("separation", 6)
 		marker_panel.add_child(color_row)
 
 		var color_label := Label.new()

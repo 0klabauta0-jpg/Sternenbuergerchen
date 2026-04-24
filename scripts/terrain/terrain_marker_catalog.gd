@@ -236,6 +236,7 @@ static func build_marker_id(marker_type_id: String, existing_marker_ids: PackedS
 		if not existing_lookup.has(candidate):
 			return candidate
 		suffix += 1
+	return normalized_type_id
 
 
 static func build_marker_record(marker_id: String, marker_type_id: String, world_position: Vector2, overrides: Dictionary = {}) -> Dictionary:
