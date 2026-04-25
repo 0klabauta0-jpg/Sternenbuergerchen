@@ -455,6 +455,7 @@ func set_planning_state(planning_state: Dictionary) -> void:
 		push_warning("TacticalInputController: %s" % _last_planning_state_issue)
 		_update_ui()
 		return
+	var preserve_live_execution: bool = _should_preserve_live_execution_during_planning_sync(planning_state)
 	_ensure_tactical_stance_controller()
 	if planning_state.has("approach_angle"):
 		var approach_angle: String = String(planning_state.get("approach_angle", "NW")).strip_edges().to_upper()
@@ -519,11 +520,12 @@ func set_planning_state(planning_state: Dictionary) -> void:
 	if phase_controller != null and phase_controller.has_method("load_from_planning_state"):
 		phase_controller.call("load_from_planning_state", planning_state, _get_max_order_plan_phase(), false)
 	_sync_phase_selection_from_controller()
-	_phase_execution_by_fireteam.clear()
-	_ad_hoc_execution_by_fireteam.clear()
-	_ad_hoc_resume_state_by_fireteam.clear()
-	_active_coordination_by_id.clear()
-	_initialize_fireteam_suppression_state()
+	if not preserve_live_execution:
+		_phase_execution_by_fireteam.clear()
+		_ad_hoc_execution_by_fireteam.clear()
+		_ad_hoc_resume_state_by_fireteam.clear()
+		_active_coordination_by_id.clear()
+		_initialize_fireteam_suppression_state()
 	_refresh_button_state()
 	_refresh_selection_visuals()
 	_refresh_order_visuals()
@@ -531,6 +533,24 @@ func set_planning_state(planning_state: Dictionary) -> void:
 	_apply_drop_presence_state_to_units()
 	_update_ui()
 	_maybe_bootstrap_live_drop()
+
+
+func _should_preserve_live_execution_during_planning_sync(planning_state: Dictionary) -> bool:
+	if preview_mode:
+		return false
+	if _phase_execution_by_fireteam.is_empty() and _ad_hoc_execution_by_fireteam.is_empty():
+		return false
+	if not planning_state.has("order_plans"):
+		return false
+	var current_order_plans_text: String = JSON.stringify(_serialize_order_plans())
+	var incoming_order_plans_text: String = JSON.stringify(Array(planning_state.get("order_plans", [])))
+	if current_order_plans_text != incoming_order_plans_text:
+		return false
+	var phase_controller = _get_phase_controller()
+	if phase_controller != null and planning_state.has("active_phase_index") and phase_controller.has_method("get_active_phase_index"):
+		if int(planning_state.get("active_phase_index", -999)) != int(phase_controller.call("get_active_phase_index")):
+			return false
+	return true
 
 
 func get_planning_state() -> Dictionary:
