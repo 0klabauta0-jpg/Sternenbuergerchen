@@ -100,12 +100,14 @@ func _draw_plan(plan) -> void:
 		draw_color.a = 0.55
 
 	var points: PackedVector2Array = []
+	var drawable_waypoints: Array = []
 	for waypoint_variant in plan.waypoints:
 		var waypoint = _coerce_waypoint(waypoint_variant)
-		if waypoint == null or waypoint.target_position == null:
+		if not _is_waypoint_visible(waypoint):
 			continue
 		var point := Vector2(waypoint.target_position) + marker_offset
 		points.append(point)
+		drawable_waypoints.append(waypoint)
 
 	if points.size() >= 2:
 		draw_polyline(points, draw_color, 3.0, true)
@@ -116,7 +118,7 @@ func _draw_plan(plan) -> void:
 		draw_circle(visual_anchor_position, 5.0, draw_color)
 
 	for index in range(points.size()):
-		var waypoint = _coerce_waypoint(plan.waypoints[index])
+		var waypoint = _coerce_waypoint(drawable_waypoints[index])
 		if waypoint == null:
 			continue
 		var command_type: String = String(waypoint.command_type)
@@ -237,7 +239,7 @@ func _rebuild_cache() -> void:
 		var marker_offset: Vector2 = _get_marker_offset(fireteam_id)
 		for waypoint_index in range(plan.waypoints.size()):
 			var waypoint = _coerce_waypoint(plan.waypoints[waypoint_index])
-			if waypoint == null or waypoint.target_position == null:
+			if not _is_waypoint_visible(waypoint):
 				continue
 			_visible_waypoints.append({
 				"fireteam_id": fireteam_id,
@@ -249,6 +251,12 @@ func _rebuild_cache() -> void:
 				"index": waypoint_index,
 			})
 	queue_redraw()
+
+
+func _is_waypoint_visible(waypoint) -> bool:
+	if waypoint == null or waypoint.target_position == null:
+		return false
+	return String(waypoint.status) != FIRETEAM_WAYPOINT_SCRIPT.STATUS_COMPLETED
 
 
 func _coerce_waypoint(waypoint_variant):

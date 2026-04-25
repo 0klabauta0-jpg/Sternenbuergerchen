@@ -14,6 +14,7 @@ func _run_tests() -> void:
 	await _test_waypoint_menu_contains_engage()
 	await _test_waypoint_command_and_drag_update()
 	await _test_waypoint_delete_and_state_roundtrip()
+	await _test_completed_waypoints_are_hidden_from_visualizer()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	if _failed > 0:
 		print("FAIL")
@@ -99,6 +100,37 @@ func _test_waypoint_delete_and_state_roundtrip() -> void:
 	_assert(copied_visualized.size() == 2, "Serialized planning state restores visualized waypoints in a fresh mission controller")
 	scene.queue_free()
 	scene_copy.queue_free()
+	await process_frame
+
+
+func _test_completed_waypoints_are_hidden_from_visualizer() -> void:
+	var scene = await _load_scene()
+	var controller = scene.get_node("TacticalController")
+	controller.call("_set_selected_fireteams", PackedStringArray(["blue"]), false)
+	controller.call("_create_waypoints_for_selected_fireteams", Vector2(240.0, 190.0))
+	controller.call("_create_waypoints_for_selected_fireteams", Vector2(300.0, 220.0))
+	var planning_state: Dictionary = Dictionary(controller.call("get_planning_state"))
+	var order_plans: Array = Array(planning_state.get("order_plans", []))
+	for plan_index in range(order_plans.size()):
+		var plan_dict: Dictionary = Dictionary(order_plans[plan_index]).duplicate(true)
+		if String(plan_dict.get("fireteam_id", "")) != "blue":
+			continue
+		var waypoints: Array = Array(plan_dict.get("waypoints", []))
+		if waypoints.size() >= 2:
+			var completed_waypoint: Dictionary = Dictionary(waypoints[0]).duplicate(true)
+			completed_waypoint["status"] = "completed"
+			waypoints[0] = completed_waypoint
+			plan_dict["waypoints"] = waypoints
+			order_plans[plan_index] = plan_dict
+			break
+	planning_state["order_plans"] = order_plans
+	controller.call("set_planning_state", planning_state)
+	var visualized: Array = controller.call("get_visualized_waypoints_snapshot")
+	_assert(visualized.size() == 1, "Completed waypoints are hidden while pending waypoints remain visible")
+	if not visualized.is_empty():
+		_assert(int(Dictionary(visualized[0]).get("index", -1)) == 1, "Visible waypoint keeps its original plan index after completed waypoints are hidden")
+	_assert(int(controller.call("_count_selected_phase_waypoints")) == 1, "Fireteam waypoint count ignores completed waypoints")
+	scene.queue_free()
 	await process_frame
 
 

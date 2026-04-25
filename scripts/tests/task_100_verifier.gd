@@ -58,17 +58,22 @@ func _test_waypoints_execute_sequentially_per_fireteam() -> void:
 	var blue_anchor = controller.call("_get_selection_anchor_for_fireteam", "blue") as Node2D
 	controller.call("_set_selected_fireteams", PackedStringArray(["blue"]), false)
 	var first_target: Vector2 = blue_anchor.global_position + Vector2(18.0, 0.0)
-	var second_target: Vector2 = blue_anchor.global_position + Vector2(42.0, 16.0)
+	var second_target: Vector2 = blue_anchor.global_position + Vector2(160.0, 72.0)
 	controller.call("_create_waypoints_for_selected_fireteams", first_target)
 	controller.call("_create_waypoints_for_selected_fireteams", second_target)
 	var started: bool = controller.call("advance_to_next_phase")
 	_assert(started, "Single-fireteam plan starts on Next Phase")
-	blue_anchor.global_position = first_target
-	for _index in range(4):
+	var first_movement_state: Dictionary = Dictionary(controller.call("get_fireteam_movement_state", "blue"))
+	blue_anchor.global_position = Vector2(first_movement_state.get("final_target_position", first_target))
+	for _index in range(8):
 		await process_frame
-	blue_anchor.global_position = second_target
-	for _index in range(4):
+		await physics_frame
+	var second_movement_state: Dictionary = Dictionary(controller.call("get_fireteam_movement_state", "blue"))
+	blue_anchor.global_position = Vector2(second_movement_state.get("final_target_position", second_target))
+	for _index in range(8):
 		await process_frame
+		await physics_frame
+	var visualized_after_second: Array = controller.call("get_visualized_waypoints_snapshot")
 	var plans: Array = controller.call("get_order_plans_snapshot")
 	var blue_plan: Dictionary = {}
 	for plan_dict in plans:
@@ -80,6 +85,7 @@ func _test_waypoints_execute_sequentially_per_fireteam() -> void:
 	_assert(int(blue_plan.get("active_waypoint_index", -1)) == 1, "Plan active waypoint index ends on the last waypoint")
 	_assert(String(Dictionary(waypoints[0]).get("status", "")) == "completed", "First waypoint is completed before phase end")
 	_assert(String(Dictionary(waypoints[1]).get("status", "")) == "completed", "Second waypoint is completed after sequential execution")
+	_assert(visualized_after_second.is_empty(), "Completed phase leaves no tactical waypoint overlay markers")
 	scene.queue_free()
 	await process_frame
 

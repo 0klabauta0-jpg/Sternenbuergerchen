@@ -5030,7 +5030,9 @@ func _count_selected_phase_waypoints_for_fireteams(fireteam_ids: PackedStringArr
 		var plan = _order_plans_by_key.get(_build_order_plan_key(String(fireteam_id), _current_phase_index), null)
 		if plan == null:
 			continue
-		total += plan.waypoints.size()
+		for waypoint in plan.waypoints:
+			if waypoint != null and String(waypoint.status) != FIRETEAM_WAYPOINT_SCRIPT.STATUS_COMPLETED:
+				total += 1
 	return total
 
 
