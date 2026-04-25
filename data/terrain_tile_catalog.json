@@ -24,6 +24,16 @@
 			"group_id": "felsen",
 			"display_name": "Felsen",
 			"collapsed": false
+		},
+		{
+			"group_id": "stadt",
+			"display_name": "Stadt",
+			"collapsed": false
+		},
+		{
+			"group_id": "landschaft",
+			"display_name": "Landschaft",
+			"collapsed": false
 		}
 	],
 	"tile_types": [
@@ -292,6 +302,102 @@
 			"cover_value": 50,
 			"height_level": 0,
 			"object_height": 2
+		},
+		{
+			"type_id": "city_pavement_light",
+			"display_name": "Stadt Pflaster hell",
+			"palette_group": "stadt",
+			"texture_path": "res://Assets/kenney_isometric-city/PNG/cityTiles_000.png",
+			"surface_type": "road",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 0,
+			"object_height": 0
+		},
+		{
+			"type_id": "city_pavement_dark",
+			"display_name": "Stadt Pflaster dunkel",
+			"palette_group": "stadt",
+			"texture_path": "res://Assets/kenney_isometric-city/PNG/cityTiles_070.png",
+			"surface_type": "road",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 0,
+			"object_height": 0
+		},
+		{
+			"type_id": "city_road_crossing",
+			"display_name": "Stadt Kreuzung",
+			"palette_group": "stadt",
+			"texture_path": "res://Assets/kenney_isometric-city/PNG/cityTiles_013.png",
+			"surface_type": "road",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 0,
+			"object_height": 0
+		},
+		{
+			"type_id": "city_low_cover",
+			"display_name": "Stadt Deckung niedrig",
+			"palette_group": "stadt",
+			"texture_path": "res://Assets/kenney_isometric-city/PNG/cityTiles_024.png",
+			"surface_type": "rock",
+			"walkable": false,
+			"blocks_los": false,
+			"cover_value": 35,
+			"height_level": 0,
+			"object_height": 1
+		},
+		{
+			"type_id": "landscape_grass",
+			"display_name": "Wiese",
+			"palette_group": "landschaft",
+			"texture_path": "res://Assets/kenney_isometric-landscape/PNG/landscapeTiles_000.png",
+			"surface_type": "ground",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 0,
+			"object_height": 0
+		},
+		{
+			"type_id": "landscape_sand",
+			"display_name": "Sand",
+			"palette_group": "landschaft",
+			"texture_path": "res://Assets/kenney_isometric-landscape/PNG/landscapeTiles_019.png",
+			"surface_type": "sand",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 0,
+			"object_height": 0
+		},
+		{
+			"type_id": "landscape_water_edge",
+			"display_name": "Wasserkante",
+			"palette_group": "landschaft",
+			"texture_path": "res://Assets/kenney_isometric-landscape/PNG/landscapeTiles_008.png",
+			"surface_type": "sand",
+			"walkable": false,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 0,
+			"object_height": 0
+		},
+		{
+			"type_id": "landscape_low_cover",
+			"display_name": "Gelaende Deckung",
+			"palette_group": "landschaft",
+			"texture_path": "res://Assets/kenney_isometric-landscape/PNG/landscapeTiles_098.png",
+			"surface_type": "rock",
+			"walkable": false,
+			"blocks_los": false,
+			"cover_value": 30,
+			"height_level": 0,
+			"object_height": 1
 		}
 	]
 }

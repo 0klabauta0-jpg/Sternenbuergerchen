@@ -793,8 +793,13 @@ func _build_path_world_points(current_position: Vector2, target_position: Vector
 			path_world_points.append(terrain_registry.call("grid_to_world", to_grid) if not target_grid_was_walkable else target_position)
 			return path_world_points
 
+		var has_known_start_tile: bool = terrain_registry.has_method("get_tile_at_grid") and terrain_registry.call("get_tile_at_grid", from_grid) != null
+		var has_known_target_tile: bool = terrain_registry.has_method("get_tile_at_grid") and terrain_registry.call("get_tile_at_grid", to_grid) != null
+		if has_known_start_tile and has_known_target_tile:
+			return path_world_points
+
 		# Some test-scene move targets do not map to a traversable terrain path.
-		# Fall back to a direct waypoint so movement remains deterministic without warning noise.
+		# Fall back only outside known terrain so blocker tiles are not crossed by a direct line.
 		if target_grid_was_walkable:
 			path_world_points.append(target_position)
 		else:
@@ -803,6 +808,9 @@ func _build_path_world_points(current_position: Vector2, target_position: Vector
 
 	for index in range(1, path_grid_points.size()):
 		path_world_points.append(terrain_registry.call("grid_to_world", path_grid_points[index]))
+
+	if not target_grid_was_walkable and (path_world_points.is_empty() or _coerce_vector2(path_world_points[-1], target_position).distance_to(terrain_registry.call("grid_to_world", to_grid)) > 0.5):
+		path_world_points.append(terrain_registry.call("grid_to_world", to_grid))
 
 	if target_grid_was_walkable and (path_world_points.is_empty() or _coerce_vector2(path_world_points[-1], target_position).distance_to(target_position) > 0.5):
 		path_world_points.append(target_position)

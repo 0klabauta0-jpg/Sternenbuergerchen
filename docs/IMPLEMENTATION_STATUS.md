@@ -885,6 +885,48 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Die Werte sind bewusst kleine Ausfuehrungsmodifikatoren. Spaetere Teamchemie sollte den vorhandenen Profilvertrag erweitern, statt UI- oder Driver-seitig neue Berechnungen einzufuehren.
 - Naechster Schritt: Weitere Teamqualitaetswirkung nur als klarer Folge-Task, z.B. echte Tick-basierte Reaktionsverzoegerung oder breitere Contact-/Morale-Kopplung.
 
+### TASK_121 - Area Order Marker
+- Status: implementiert
+- Stand: `AreaOrder` und `AreaOrderResolver` fuehren einen missionslokalen Datenvertrag fuer Gebietsmarker ein. Die Tactical Sandbox kann per `SHIFT+RMB` Defend-Areas und per `ALT+RMB` Attack-/Engage-Areas aus Iso-Tiles erzeugen, im Planning-State serialisieren und ueber den bestehenden `FireteamOrderVisualizer` als separate Flaechen anzeigen.
+- Offene Punkte: V1 nutzt rechteckige Tile-Areas; Lasso-/Polygon-Auswahl und Editor-Komfort bleiben spaetere UI-Tasks.
+- Risiken: Area Orders bleiben bewusst Planning-/Command-Daten. Gameplay-Wahrheit darf weiterhin nicht in den UI-Controller wandern.
+- Naechster Schritt: Defend-/Attack-Semantik auf dem neuen Datenvertrag weiter verfeinern.
+
+### TASK_122 - Defend Area Semantik
+- Status: implementiert
+- Stand: Defend-Areas verteilen Fireteam-Mitglieder auf walkable Slots im Gebiet, bevorzugen Deckungsnaehe, setzen Security-/Hold-Verhalten nach Erreichen und vermeiden das Kleben aller Units auf einem Einzelpunkt.
+- Offene Punkte: Noch keine frei drehbaren Feuersektor-Kegel und keine abgestufte Reserve-/Wechselpositionslogik.
+- Risiken: Die aktuelle Slotwahl ist deterministisch und klein; spaetere Deckungsqualitaet sollte aus Terrain-/LOS-Daten wachsen, nicht aus UI-Sonderfaellen.
+- Naechster Schritt: Sektor- und Overwatch-Feedback fuer Area Defense gezielt ausbauen.
+
+### TASK_123 - Attack Area Semantik
+- Status: implementiert
+- Stand: Attack-/Engage-Areas werden nicht als blinder Mittelpunkt-Marsch ausgefuehrt. Der Resolver bestimmt einen Approach-Punkt am Rand/ausserhalb der Area, beschreibt die Annaherungsrichtung und gibt dem Combat-Resolver eine einfache Area-Prioritaet fuer Ziele im markierten Gebiet.
+- Offene Punkte: Keine Suppression-Taktung, kein echtes Bounding-Overwatch und keine Entry-/Breach-Rollen.
+- Risiken: Der Angriff bleibt ein V1-Approach. Anspruchsvolleres Assault-Verhalten sollte als eigener Bewegungs-/Combat-Task aufsetzen.
+- Naechster Schritt: Attack-Area in Annaherung, Kontaktaufnahme, Unterdrueckung und Raumklaerung aufteilen.
+
+### TASK_124 - Area Feedback in Selected Fireteam
+- Status: implementiert
+- Stand: `#17 SELECTED FIRETEAM` zeigt aktive und wartende Area Orders mit deutschem Befehl, Gebietsgroesse, Status, Approach-/Sicherungsrichtung, Kontaktlage und GO-Hinweis an. Routinedaten bleiben im Panel statt ueber den NPCs, damit die Figuren sichtbar bleiben.
+- Offene Punkte: Keine interaktive Reorder-Liste und keine Detailansicht pro Area-Slot.
+- Risiken: Das Panel darf nur lesen und ausloesen, nicht heimlich Simulationszustand verwalten.
+- Naechster Schritt: Eine kompakte Order-Queue in `#17` ergaenzen, wenn mehrere Areas/Wegpunkte gleichzeitig geplant werden.
+
+### TASK_125 - Terrain Blocker Debug und Walkability Tests
+- Status: implementiert
+- Stand: `TerrainRegistry` liefert deterministische walkable Ersatztiles und einen Debug-Report fuer Originalziel, Blockergrund und Ersatz-Ziel. `SimulationRoot` faellt bei bekannten Terrain-Blockern nicht mehr auf eine Gerade durch den Blocker zurueck. Ein gemeinsamer Headless-Verifier prueft Area Orders, Walkability und die neue 64x64-Testkarte.
+- Offene Punkte: Kein vollstaendiger Navigation-Overlay und keine Physics-Kollisionen; Path-Follow bleibt der vorhandene autoritative Move-Pfad.
+- Risiken: Blocker-Debug hilft beim Reproduzieren, ersetzt aber noch keinen vollstaendigen Pathfinding-Debugger im Editor.
+- Naechster Schritt: Im Editor eine sichtbare Walkability-/A*-Pfadvorschau fuer markierte Ziele ergaenzen.
+
+### Isometric Asset Catalog und 64x64-Testkarte
+- Status: implementiert
+- Stand: Der Terrain-Katalog kennt jetzt zusaetzliche Kenney-Isometric-City- und Landscape-Tiles fuer Pflaster, Strassenkreuzung, Low-Cover, Grass/Sand und Wasser-/Cover-Blocker. `maps/area_orders_64x64_isometric.json` stellt eine 64x64-Testkarte mit Stadtbereich, Wegen, Wasser-/Cover-Blockern, Spawns, Objective- und Patrol-Daten bereit.
+- Offene Punkte: Die Assets sind katalogisiert und datengetrieben nutzbar; eine vollstaendige Editor-Palette mit allen Varianten aus den Asset-Ordnern bleibt ein eigener Content-/Editor-Task.
+- Risiken: Die Testkarte ist bewusst ein Dev-/Balance-Feld und noch kein finaler Missionsinhalt.
+- Naechster Schritt: Editor-Palette und Map-Validator fuer Asset-Abdeckung, Walkability und Spawn-to-Objective-Routen ausbauen.
+
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert
 - Stand: Der Meta-Layer fuehrt jetzt durchgaengig auf die echte eingebettete Missionskarte statt auf eine separate read-only Overview. Homebase, FOB und Mission teilen dieselbe kompakte Navigation, die Missions-Tactical-UI traegt direkt die gemeinsamen Block-Labels `#15` bis `#18`, und der Missionspfad bleibt auf dieselbe Kartenbasis, dieselben LZ-/Approach-Marker sowie denselben Dropship-Handoff verdrahtet wie die spaetere Live-Mission.

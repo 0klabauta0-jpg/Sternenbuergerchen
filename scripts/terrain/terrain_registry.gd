@@ -65,19 +65,62 @@ func is_walkable(grid_pos: Vector2i) -> bool:
 
 
 func get_nearest_walkable_grid(world_pos: Vector2) -> Variant:
-	var nearest_grid: Variant = null
-	var nearest_distance: float = INF
+	var candidates: Array = []
 	for tile_data in _tiles.values():
 		if not bool(tile_data.walkable):
 			continue
 		var distance_to_tile: float = world_pos.distance_squared_to(tile_data.world_position)
-		if distance_to_tile >= nearest_distance:
-			continue
+		candidates.append({
+			"grid_position": tile_data.grid_position,
+			"distance": distance_to_tile,
+		})
+	candidates.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var distance_a: float = float(a.get("distance", INF))
+		var distance_b: float = float(b.get("distance", INF))
+		if absf(distance_a - distance_b) > 0.001:
+			return distance_a < distance_b
+		var grid_a: Vector2i = a.get("grid_position", Vector2i.ZERO)
+		var grid_b: Vector2i = b.get("grid_position", Vector2i.ZERO)
+		if grid_a.x == grid_b.x:
+			return grid_a.y < grid_b.y
+		return grid_a.x < grid_b.x
+	)
+	if candidates.is_empty():
+		return null
 
-		nearest_distance = distance_to_tile
-		nearest_grid = tile_data.grid_position
+	return candidates[0].get("grid_position", null)
 
-	return nearest_grid
+
+func resolve_walkable_world_position(world_pos: Vector2) -> Vector2:
+	var grid_pos: Vector2i = world_to_grid(world_pos)
+	if is_walkable(grid_pos):
+		return grid_to_world(grid_pos)
+	var nearest_grid: Variant = get_nearest_walkable_grid(world_pos)
+	if typeof(nearest_grid) == TYPE_VECTOR2I:
+		return grid_to_world(nearest_grid)
+	return world_pos
+
+
+func build_walkability_debug_report(world_pos: Vector2) -> Dictionary:
+	var original_grid: Vector2i = world_to_grid(world_pos)
+	var original_tile = get_tile_at_grid(original_grid)
+	var original_walkable: bool = original_tile != null and bool(original_tile.walkable)
+	var replacement_grid: Variant = original_grid if original_walkable else get_nearest_walkable_grid(world_pos)
+	var replacement_position: Variant = grid_to_world(replacement_grid) if typeof(replacement_grid) == TYPE_VECTOR2I else null
+	var reason: String = "walkable"
+	if original_tile == null:
+		reason = "missing_tile"
+	elif not bool(original_tile.walkable):
+		reason = "blocked_by_%s" % String(original_tile.type_id)
+	return {
+		"world_position": world_pos,
+		"original_grid": original_grid,
+		"original_walkable": original_walkable,
+		"original_type_id": String(original_tile.type_id) if original_tile != null else "",
+		"reason": reason,
+		"replacement_grid": replacement_grid,
+		"replacement_world_position": replacement_position,
+	}
 
 
 func get_cover_at(grid_pos: Vector2i) -> int:

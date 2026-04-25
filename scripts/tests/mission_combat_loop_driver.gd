@@ -1207,10 +1207,18 @@ func _build_fire_decision_context(extra: Dictionary = {}) -> Dictionary:
 		"check_misidentification": Callable(self, "_check_misidentification"),
 		"resolve_flank_attack": Callable(self, "resolve_flank_attack"),
 		"get_effective_range": Callable(self, "_get_effective_range"),
+		"score_attack_target": Callable(self, "_score_attack_area_target"),
 	}
 	for key in extra.keys():
 		context[key] = extra[key]
 	return context
+
+
+func _score_attack_area_target(attacker, target) -> float:
+	var tactical_controller = _get_tactical_controller()
+	if tactical_controller == null or not tactical_controller.has_method("score_attack_area_target"):
+		return 0.0
+	return float(tactical_controller.call("score_attack_area_target", attacker, target))
 
 
 func _get_known_friendly_fireteam_ids() -> Array:

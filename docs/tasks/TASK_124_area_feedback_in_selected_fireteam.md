@@ -3,7 +3,7 @@
 ## Ziel
 Das Panel `#17 SELECTED FIRETEAM` soll Area Orders lesbar machen, ohne die NPCs auf der Karte wieder mit Text zu ueberladen. Der Spieler soll verstehen, welchen Bereich das Fireteam gerade bearbeitet, welchen Modus es nutzt und ob es wartet, verteidigt, angreift oder Kontakt hat.
 
-## Status: OFFEN
+## Status: ERLEDIGT
 
 ## Voraussetzung
 - `TASK_121 - Area Order Marker`
@@ -40,11 +40,15 @@ Das Panel `#17 SELECTED FIRETEAM` soll Area Orders lesbar machen, ohne die NPCs 
 - Keine per-frame Komplett-Rebuilds; bestehende Refresh-/Dirty-Pfade nutzen.
 
 ## Akzeptanzkriterien
-- [ ] Area Order wird in #17 mit Typ, Groesse und Status angezeigt.
-- [ ] Defend/Attack/Take sind sprachlich klar unterscheidbar.
-- [ ] NPCs auf der Map bleiben lesbar und werden nicht wieder mit langen Texten verdeckt.
-- [ ] Mehrfachauswahl bleibt kompakt.
-- [ ] Headless-Verifier prueft die erzeugten Statusstrings.
+- [x] Area Order wird in #17 mit Typ, Groesse und Status angezeigt.
+- [x] Defend/Attack/Take sind sprachlich klar unterscheidbar.
+- [x] NPCs auf der Map bleiben lesbar und werden nicht wieder mit langen Texten verdeckt.
+- [x] Mehrfachauswahl bleibt kompakt.
+- [x] Headless-Verifier prueft die erzeugten Statusstrings.
+
+## Umsetzung
+- #17 zeigt Area-Typ, Tile-Anzahl, Approach-/Security-Status und Kontaktlage.
+- Welt-Text bleibt auf kurze kritische Badges begrenzt; Area-Details liegen im Panel.
 
 ## Dateien (voraussichtlich)
 - `scripts/tests/mission_tactical_sandbox_controller.gd`
@@ -53,4 +57,3 @@ Das Panel `#17 SELECTED FIRETEAM` soll Area Orders lesbar machen, ohne die NPCs 
 
 ## Risiken
 - Zu viele Statusdetails machen #17 unruhig. Lieber wenige gute Worte als Debug-Wand.
-
