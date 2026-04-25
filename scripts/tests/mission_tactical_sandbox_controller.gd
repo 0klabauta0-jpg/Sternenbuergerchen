@@ -8,6 +8,7 @@ const TRANSPORT_CRAFT_CARD_UI_SCRIPT: GDScript = preload("res://scripts/meta/tra
 const META_UNIT_PROFILE_BUILDER_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile_builder.gd")
 const CHARACTER_SHEET_FORMATTER_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_formatter.gd")
 const CHARACTER_SHEET_VIEW_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_view.gd")
+const COMMANDER_COMMAND_SCRIPT: GDScript = preload("res://scripts/command/commander_command.gd")
 const FIRETEAM_ORDER_PLAN_SCRIPT: GDScript = preload("res://scripts/command/fireteam_order_plan.gd")
 const FIRETEAM_WAYPOINT_SCRIPT: GDScript = preload("res://scripts/command/fireteam_waypoint.gd")
 const FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_behavior_resolver.gd")
@@ -786,14 +787,14 @@ func get_tactical_stance_sync_state() -> Dictionary:
 	return Dictionary(_tactical_stance_controller.call("get_sync_state")).duplicate(true)
 
 
-func apply_tactical_stance_sync_state(sync_state: Dictionary, emit_signal: bool = false) -> void:
+func apply_tactical_stance_sync_state(sync_state: Dictionary, should_emit_signal: bool = false) -> void:
 	_ensure_tactical_stance_controller()
 	if _tactical_stance_controller == null:
 		return
 	_tactical_stance_controller.call("load_sync_state", sync_state, _get_available_fireteam_ids())
 	_refresh_tactical_stance_panel()
 	_update_ui()
-	if emit_signal:
+	if should_emit_signal:
 		_emit_planning_state_changed()
 
 
@@ -966,11 +967,11 @@ func _change_phase(delta: int) -> void:
 	_emit_planning_state_changed()
 
 
-func _select_fireteam_by_name(fireteam_name: String, emit_signal: bool = true) -> void:
+func _select_fireteam_by_name(fireteam_name: String, should_emit_signal: bool = true) -> void:
 	var next_index: int = _find_fireteam_selection_index_by_name(fireteam_name)
 	if next_index == -1:
 		return
-	_set_selected_fireteams(_selection_ids_for_index(next_index), emit_signal)
+	_set_selected_fireteams(_selection_ids_for_index(next_index), should_emit_signal)
 
 
 func _select_approach_angle(angle_name: String) -> void:
@@ -1835,14 +1836,18 @@ func _refresh_fireteam_mini_cards() -> void:
 
 func _build_fireteam_card_profile(unit: Node):
 	var profile = _build_profile_from_unit(unit)
-	if not preview_mode or profile == null or not profile.has_method("duplicate_profile"):
+	if profile == null or not profile.has_method("duplicate_profile"):
 		return profile
 
 	var card_profile = profile.duplicate_profile()
-	var loadout_summary: String = _build_preview_fireteam_card_loadout_summary(unit)
-	if not loadout_summary.is_empty():
-		card_profile.role_name = loadout_summary
-	card_profile.secondary_text = _build_unit_secondary_text(unit)
+	if preview_mode:
+		var loadout_summary: String = _build_preview_fireteam_card_loadout_summary(unit)
+		if not loadout_summary.is_empty():
+			card_profile.role_name = loadout_summary
+		card_profile.secondary_text = _build_unit_secondary_text(unit)
+	else:
+		card_profile.role_name = _build_live_fireteam_card_runtime_line(unit)
+		card_profile.secondary_text = _build_live_fireteam_card_detail_line(unit)
 	return card_profile
 
 
@@ -1872,6 +1877,61 @@ func _build_tactical_character_status_text(unit: Node) -> String:
 		state_bits.append(String(unit.call("get_vital_state")).capitalize())
 	state_bits.append("Phase %s" % _get_phase_name())
 	return " | ".join(state_bits)
+
+
+func _build_live_fireteam_card_runtime_line(unit: Node) -> String:
+	if unit == null:
+		return "Runtime unavailable"
+	var parts: PackedStringArray = []
+	var vital_state: String = String(unit.call("get_vital_state")) if unit.has_method("get_vital_state") else "fit"
+	if vital_state != "fit":
+		parts.append(vital_state.to_upper())
+	else:
+		var runtime_status = unit.call("get_runtime_status") if unit.has_method("get_runtime_status") else null
+		var source_command_type: String = ""
+		var status_name: String = ""
+		var phase_index: int = -1
+		if runtime_status != null and runtime_status.has_method("get"):
+			source_command_type = String(runtime_status.get("source_command_type"))
+			status_name = String(runtime_status.get("status"))
+			phase_index = int(runtime_status.get("phase"))
+		var command_label: String = source_command_type.to_upper()
+		if command_label.is_empty():
+			command_label = status_name.to_upper()
+		if command_label.is_empty():
+			command_label = "IDLE"
+		parts.append(command_label)
+		if unit.has_method("get_fire_status"):
+			parts.append(_format_unit_fire_status_short(String(unit.call("get_fire_status"))))
+		if phase_index >= 0:
+			parts.append(COMMANDER_COMMAND_SCRIPT.get_phase_short_name(phase_index))
+	if unit.has_method("get_effective_cover_score"):
+		parts.append("COV %d" % int(unit.call("get_effective_cover_score")))
+	return " | ".join(parts)
+
+
+func _build_live_fireteam_card_detail_line(unit: Node) -> String:
+	if unit == null:
+		return "No unit data"
+	var detail_parts: PackedStringArray = []
+	if unit.has_method("get_skill_summary_text"):
+		detail_parts.append(String(unit.call("get_skill_summary_text")))
+	var trait_text: String = String(unit.call("get_trait_summary_text")).strip_edges() if unit.has_method("get_trait_summary_text") else ""
+	if not trait_text.is_empty():
+		detail_parts.append(trait_text)
+	return " | ".join(detail_parts)
+
+
+func _format_unit_fire_status_short(fire_status: String) -> String:
+	match fire_status.strip_edges().to_lower():
+		"hold_fire":
+			return "HF"
+		"fire_at_will":
+			return "FAW"
+		"semi_disciplined":
+			return "SEC"
+		_:
+			return fire_status.strip_edges().to_upper()
 
 
 func _build_fireteam_group_status_text(fireteam_id: String, units: Array) -> String:
@@ -2349,7 +2409,7 @@ func _refresh_mission_nav_timer_label() -> void:
 		var remaining_seconds: float = float(combat_driver.call("get_remaining_time_limit_seconds"))
 		if remaining_seconds >= 0.0:
 			var total_seconds: int = maxi(int(round(remaining_seconds)), 0)
-			timer_label.text = "%02d:%02d" % [total_seconds / 60, total_seconds % 60]
+			timer_label.text = "%02d:%02d" % [floori(float(total_seconds) / 60.0), total_seconds % 60]
 			return
 	timer_label.text = "--:--"
 
@@ -3258,7 +3318,7 @@ func _clear_selection() -> void:
 	_set_selected_fireteams(PackedStringArray())
 
 
-func _set_selected_fireteams(next_selected_fireteam_ids: PackedStringArray, emit_signal: bool = true) -> void:
+func _set_selected_fireteams(next_selected_fireteam_ids: PackedStringArray, should_emit_signal: bool = true) -> void:
 	_selected_fireteam_ids = _sanitize_fireteam_ids(next_selected_fireteam_ids)
 	_current_fireteam_index = 0
 	var selection_options: Array = _get_fireteam_selection_options()
@@ -3272,7 +3332,7 @@ func _set_selected_fireteams(next_selected_fireteam_ids: PackedStringArray, emit
 	_refresh_button_state()
 	_refresh_tactical_stance_panel()
 	_update_ui()
-	if emit_signal:
+	if should_emit_signal:
 		_emit_planning_state_changed()
 
 
@@ -3671,7 +3731,7 @@ func _update_leader_initiated_flanks() -> void:
 		_update_ui()
 
 
-func _resolve_autonomous_flank_target(fireteam_id: String, leader) -> Vector2:
+func _resolve_autonomous_flank_target(_fireteam_id: String, leader) -> Vector2:
 	if leader == null or not (leader is Node2D):
 		return Vector2.INF
 	var contact_target_id: String = String(leader.call("get_contact_target_id")) if leader.has_method("get_contact_target_id") else ""

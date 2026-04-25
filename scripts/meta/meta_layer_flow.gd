@@ -1523,7 +1523,7 @@ func _build_meta_mission_timer_text() -> String:
 
 func _format_timer_seconds(total_seconds: int) -> String:
 	var clamped_total_seconds: int = maxi(total_seconds, 0)
-	var minutes: int = clamped_total_seconds / 60
+	var minutes: int = floori(float(clamped_total_seconds) / 60.0)
 	var seconds: int = clamped_total_seconds % 60
 	return "%02d:%02d" % [minutes, seconds]
 

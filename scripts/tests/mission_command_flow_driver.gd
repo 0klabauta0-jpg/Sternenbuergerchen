@@ -125,7 +125,7 @@ func _on_squad_command(_squad: Node, order: Dictionary) -> void:
 	runtime_leader.call("process_current_ftl_task")
 	var unit = unit_registry.call("get_unit", unit_id)
 	if unit == null:
-		push_warning("MissionCommandFlowDriver could not resolve the target unit for FTL assignment.")
+		last_translated_task = translated_task
 		return
 
 	runtime_leader.call("assign", unit)

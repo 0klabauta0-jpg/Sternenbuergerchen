@@ -748,9 +748,7 @@ func _check_discipline_break(unit) -> bool:
 	_discipline_break_cooldown[unit_id] = DISCIPLINE_BREAK_COOLDOWN_TICKS
 	var event_msg: String = "%s bricht Hold-Fire!" % unit_id
 	_set_event_text(event_msg)
-	if unit.has_method("show_event_text"):
-		unit.call("show_event_text", "HOLD-FIRE BREAK!", DISCIPLINE_BREAK_EVENT_COLOR, 1.4)
-	_broadcast_remote_event(event_msg, unit_id, DISCIPLINE_BREAK_EVENT_COLOR, 1.4, "HOLD-FIRE BREAK!")
+	_broadcast_remote_event(event_msg)
 	return true
 
 

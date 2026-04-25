@@ -69,6 +69,8 @@ signal vital_status_changed(vital_status)
 @export_range(-1.0, 1.0, 0.01) var fighter_piloting: float = -1.0
 @export var trait_ids: PackedStringArray = []
 @export var is_fireteam_lead: bool = false
+@export var show_world_debug_labels: bool = false
+@export var show_world_event_labels: bool = true
 
 var _runtime_status: RefCounted = UNIT_RUNTIME_STATUS_SCRIPT.new()
 var _current_unit_command: RefCounted = null
@@ -960,6 +962,11 @@ func show_event_text(event_text: String, event_color: Color = Color(1.0, 0.95, 0
 	_refresh_event_label()
 
 
+func set_world_debug_labels_visible(visible: bool) -> void:
+	show_world_debug_labels = visible
+	_sync_readability_positions()
+
+
 func _build_runtime_status(
 	status_name: String,
 	active_command_type: String = "",
@@ -1257,40 +1264,40 @@ func _ensure_readability_labels() -> void:
 func _sync_readability_positions() -> void:
 	var base_position: Vector2 = global_position + STATUS_LABEL_OFFSET
 	if _status_label != null:
-		_status_label.visible = is_visible_in_tree()
+		_status_label.visible = show_world_debug_labels and is_visible_in_tree()
 		_status_label.global_position = base_position
 		var inline_offset_x: float = _status_label.get_combined_minimum_size().x + FIRETEAM_LABEL_SPACING
 		if _fireteam_label != null:
-			_fireteam_label.visible = is_visible_in_tree() and not fireteam_id.is_empty()
+			_fireteam_label.visible = show_world_debug_labels and is_visible_in_tree() and not fireteam_id.is_empty()
 			_fireteam_label.global_position = _status_label.global_position + Vector2(inline_offset_x, 0.0)
 			if _fireteam_label.visible:
 				inline_offset_x += _fireteam_label.get_combined_minimum_size().x + FIRETEAM_LABEL_SPACING
 		if _phase_label != null:
-			_phase_label.visible = is_visible_in_tree() and not _build_phase_label_text().is_empty()
+			_phase_label.visible = show_world_debug_labels and is_visible_in_tree() and not _build_phase_label_text().is_empty()
 			_phase_label.global_position = _status_label.global_position + Vector2(inline_offset_x, 0.0)
 			if _phase_label.visible:
 				inline_offset_x += _phase_label.get_combined_minimum_size().x + FIRETEAM_LABEL_SPACING
 		if _tactical_stance_label != null:
-			_tactical_stance_label.visible = is_visible_in_tree() and not _build_tactical_stance_label_text().is_empty()
+			_tactical_stance_label.visible = show_world_debug_labels and is_visible_in_tree() and not _build_tactical_stance_label_text().is_empty()
 			_tactical_stance_label.global_position = _status_label.global_position + Vector2(inline_offset_x, 0.0)
 
 	elif _fireteam_label != null:
-		_fireteam_label.visible = is_visible_in_tree() and not fireteam_id.is_empty()
+		_fireteam_label.visible = show_world_debug_labels and is_visible_in_tree() and not fireteam_id.is_empty()
 		_fireteam_label.global_position = base_position
 		var fallback_offset_x: float = 0.0
 		if _fireteam_label.visible:
 			fallback_offset_x += _fireteam_label.get_combined_minimum_size().x + FIRETEAM_LABEL_SPACING
 		if _phase_label != null:
-			_phase_label.visible = is_visible_in_tree() and not _build_phase_label_text().is_empty()
+			_phase_label.visible = show_world_debug_labels and is_visible_in_tree() and not _build_phase_label_text().is_empty()
 			_phase_label.global_position = base_position + Vector2(fallback_offset_x, 0.0)
 			if _phase_label.visible:
 				fallback_offset_x += _phase_label.get_combined_minimum_size().x + FIRETEAM_LABEL_SPACING
 		if _tactical_stance_label != null:
-			_tactical_stance_label.visible = is_visible_in_tree() and not _build_tactical_stance_label_text().is_empty()
+			_tactical_stance_label.visible = show_world_debug_labels and is_visible_in_tree() and not _build_tactical_stance_label_text().is_empty()
 			_tactical_stance_label.global_position = base_position + Vector2(fallback_offset_x, 0.0)
 
 	if _event_label != null:
-		_event_label.visible = is_visible_in_tree() and not _current_event_text.is_empty()
+		_event_label.visible = show_world_event_labels and is_visible_in_tree() and not _current_event_text.is_empty()
 		_event_label.global_position = global_position + EVENT_LABEL_OFFSET
 
 
@@ -1342,7 +1349,7 @@ func _refresh_fireteam_label() -> void:
 
 	_fireteam_label.text = fireteam_id.to_upper()
 	_fireteam_label.modulate = _build_fireteam_label_color()
-	_fireteam_label.visible = is_visible_in_tree()
+	_fireteam_label.visible = show_world_debug_labels and is_visible_in_tree()
 
 
 func _refresh_phase_label() -> void:
@@ -1352,7 +1359,7 @@ func _refresh_phase_label() -> void:
 	var phase_text: String = _build_phase_label_text()
 	_phase_label.text = phase_text
 	_phase_label.modulate = Color(0.88, 0.98, 0.88, 1.0)
-	_phase_label.visible = is_visible_in_tree() and not phase_text.is_empty()
+	_phase_label.visible = show_world_debug_labels and is_visible_in_tree() and not phase_text.is_empty()
 
 
 func _refresh_tactical_stance_label() -> void:
@@ -1362,7 +1369,7 @@ func _refresh_tactical_stance_label() -> void:
 	var stance_text: String = _build_tactical_stance_label_text()
 	_tactical_stance_label.text = stance_text
 	_tactical_stance_label.modulate = _build_tactical_stance_label_color()
-	_tactical_stance_label.visible = is_visible_in_tree() and not stance_text.is_empty()
+	_tactical_stance_label.visible = show_world_debug_labels and is_visible_in_tree() and not stance_text.is_empty()
 
 
 func _refresh_event_label() -> void:
@@ -1371,7 +1378,7 @@ func _refresh_event_label() -> void:
 
 	_event_label.text = _current_event_text
 	_event_label.modulate = _current_event_color
-	_event_label.visible = not _current_event_text.is_empty()
+	_event_label.visible = show_world_event_labels and not _current_event_text.is_empty()
 
 
 func _build_unit_name_label() -> String:
