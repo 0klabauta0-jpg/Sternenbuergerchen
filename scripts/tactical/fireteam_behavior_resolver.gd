@@ -44,6 +44,7 @@ static func resolve_profile(
 	profile.suppression_threshold = _derive_suppression_threshold(toughness, trait_mode)
 	profile.tactical_stance = normalized_tactical_stance
 	profile.advance_style = _apply_tactical_stance_to_advance_style(profile.advance_style, normalized_tactical_stance, trait_mode)
+	profile.advance_style = _apply_command_to_advance_style(profile.advance_style, normalized_command_type, normalized_tactical_stance)
 	profile.cover_priority = _apply_tactical_stance_to_cover_priority(profile.cover_priority, normalized_tactical_stance, trait_mode)
 	profile.suppression_threshold = _apply_tactical_stance_to_suppression_threshold(profile.suppression_threshold, normalized_tactical_stance, trait_mode)
 	var execution_profile: Dictionary = _derive_execution_profile(units, leader, leadership, trait_mode)
@@ -305,6 +306,14 @@ static func _apply_tactical_stance_to_advance_style(base_style: String, tactical
 			return _shift_style_more_aggressive(base_style)
 		_:
 			return base_style
+
+
+static func _apply_command_to_advance_style(base_style: String, command_type: String, tactical_stance: String) -> String:
+	if command_type != "move":
+		return base_style
+	if tactical_stance == FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
+		return base_style
+	return FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.ADVANCE_STYLE_RUSH
 
 
 static func _apply_tactical_stance_to_cover_priority(base_cover_priority: float, tactical_stance: String, trait_mode: String) -> float:

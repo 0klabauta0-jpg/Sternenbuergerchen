@@ -312,6 +312,10 @@ func _test_live_fireteam_go_moves_lead_and_members_without_snapback() -> void:
 	var go_button := scene.find_child("GoPhaseButton", true, false) as Button
 	if go_button != null:
 		go_button.emit_signal("pressed")
+	await process_frame
+	await physics_frame
+	var initial_movement_state: Dictionary = Dictionary(controller.call("get_fireteam_movement_state", "ft1"))
+	_assert(String(initial_movement_state.get("effective_style", "")) == "rush", "Live GO treats a normal Move order as group travel")
 	for _frame in range(260):
 		await process_frame
 		await physics_frame
@@ -322,6 +326,10 @@ func _test_live_fireteam_go_moves_lead_and_members_without_snapback() -> void:
 			var moved_distance: float = (unit as Node2D).global_position.distance_to(Vector2(positions_before.get(unit_id, (unit as Node2D).global_position)))
 			max_member_progress[unit_id] = maxf(float(max_member_progress.get(unit_id, 0.0)), moved_distance)
 	var lead_moved_distance: float = lead.global_position.distance_to(lead_start) if lead != null else 0.0
+	var moved_member_count: int = 0
+	for unit_id_variant in max_member_progress.keys():
+		if float(max_member_progress.get(unit_id_variant, 0.0)) > 8.0:
+			moved_member_count += 1
 	var all_members_kept_most_progress: bool = true
 	for unit in ft1_units:
 		if not (unit is Node2D) or not unit.has_method("get_unit_id"):
@@ -333,6 +341,7 @@ func _test_live_fireteam_go_moves_lead_and_members_without_snapback() -> void:
 			all_members_kept_most_progress = false
 			break
 	_assert(lead != null and lead_moved_distance > 8.0, "Live GO eventually moves the fireteam lead instead of leaving the FTL behind")
+	_assert(moved_member_count == ft1_units.size(), "Live GO moves every active fireteam member, not just one scout")
 	_assert(all_members_kept_most_progress, "Live GO members keep their movement progress instead of snapping back to the FTL")
 	scene.queue_free()
 	await process_frame

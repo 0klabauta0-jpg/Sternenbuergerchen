@@ -27,6 +27,7 @@ func _run_tests() -> void:
 	print("=== TASK_101 Fireteam Behavior Resolver Verifier ===")
 	_test_cautious_profile_mapping()
 	_test_reckless_profile_mapping()
+	_test_move_profile_defaults_to_group_travel()
 	_test_flank_target_uses_cover_tiles()
 	await _test_default_behavior_without_orders()
 	await _test_flank_event_is_emitted()
@@ -57,6 +58,13 @@ func _test_reckless_profile_mapping() -> void:
 	_assert(String(profile.advance_style) == "rush", "Reckless leaders resolve to rush advance style")
 	_assert(String(profile.fire_discipline) == "hold_fire", "Move orders always resolve to hold_fire discipline")
 	_assert(int(profile.suppression_threshold) == expected_suppression, "Reckless suppression threshold triples the toughness-based baseline")
+
+
+func _test_move_profile_defaults_to_group_travel() -> void:
+	var leader = _make_unit("leader_cautious_move", "blue", true, 0.7, 0.8, ["cautious", "steady"])
+	var profile = FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT.call("resolve_profile", "blue", [leader], leader, "move", Vector2(240.0, 180.0), null)
+	_assert(String(profile.advance_style) == "rush", "Normal move orders use group travel instead of single-member creep")
+	_assert(String(profile.fire_discipline) == "hold_fire", "Move group travel still keeps hold-fire discipline")
 
 
 func _test_flank_target_uses_cover_tiles() -> void:
