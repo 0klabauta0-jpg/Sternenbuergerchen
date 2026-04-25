@@ -264,6 +264,13 @@ TASK_118 – Combat-Entscheidungen aus MissionCombatLoopDriver herausloesen
 TASK_119 – Seeded Combat RNG und roll_override begrenzen
 TASK_120 – Teamqualitaet als FTL-Ausfuehrungsfaktor
 
+Phase 17M – Area Orders und Bewegungsrobustheit
+TASK_121 – Area Order Marker
+TASK_122 – Defend Area Semantik
+TASK_123 – Attack Area Semantik
+TASK_124 – Area Feedback in #17 Selected Fireteam
+TASK_125 – Terrain Blocker Debug und Walkability Tests
+
 Phase 18 – Erweiterung (spaeter)
 Skillsystem
 soziale Dynamik
