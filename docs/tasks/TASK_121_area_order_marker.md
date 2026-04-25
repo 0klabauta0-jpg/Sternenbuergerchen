@@ -3,7 +3,7 @@
 ## Ziel
 Die Missionstaktikkarte soll nicht nur einzelne Wegpunkte, sondern auch Gebiete als spielerseitige Befehlsmarker unterstuetzen. Ein Gebiet besteht in V1 aus mehreren Iso-Grid-Feldern und kann fuer Befehle wie `defend`, `engage`, `take` oder spaeter `recon` verwendet werden.
 
-## Status: ERLEDIGT
+## Status: OFFEN
 
 ## Kontext
 - `TASK_115` fuehrte den gemeinsamen Marker-Katalog fuer Editor und Taktikkarte ein.
@@ -38,18 +38,12 @@ Die Missionstaktikkarte soll nicht nur einzelne Wegpunkte, sondern auch Gebiete 
 - Tile-Auswahl nutzt vorhandene Terrain-/Grid-Hilfen, wenn verfuegbar.
 
 ## Akzeptanzkriterien
-- [x] Spieler kann ein Gebiet aus mehreren Tiles als Area Order markieren.
-- [x] Gebiete koennen als `defend`, `engage` oder `take` klassifiziert werden.
-- [x] Area Orders werden sichtbar auf der Mission Map gezeichnet.
-- [x] Bestehende Einzel-Wegpunkte funktionieren weiter.
-- [x] Planning-State-Roundtrip erhaelt Area Orders.
-- [x] Headless-Verifier prueft Erzeugen, Serialisieren und Visualizer-Snapshot.
-
-## Umsetzung
-- `AreaOrder` fuehrt den missionslokalen Datenvertrag ein.
-- `AreaOrderResolver` erzeugt rechteckige Tile-Gebiete aus TerrainRegistry-Daten.
-- `SHIFT+RMB` legt ein Defend-Gebiet an, `ALT+RMB` ein Attack-/Engage-Gebiet.
-- `FireteamOrderVisualizer` zeichnet Area Orders separat von Wegpunktlinien.
+- [ ] Spieler kann ein Gebiet aus mehreren Tiles als Area Order markieren.
+- [ ] Gebiete koennen als `defend`, `engage` oder `take` klassifiziert werden.
+- [ ] Area Orders werden sichtbar auf der Mission Map gezeichnet.
+- [ ] Bestehende Einzel-Wegpunkte funktionieren weiter.
+- [ ] Planning-State-Roundtrip erhaelt Area Orders.
+- [ ] Headless-Verifier prueft Erzeugen, Serialisieren und Visualizer-Snapshot.
 
 ## Dateien (voraussichtlich)
 - `scripts/tests/mission_tactical_sandbox_controller.gd`
@@ -60,3 +54,4 @@ Die Missionstaktikkarte soll nicht nur einzelne Wegpunkte, sondern auch Gebiete 
 ## Risiken
 - Wenn Gebietsauswahl direkt im UI zu viel Logik bekommt, entsteht Architektur-Drift.
 - Rechteck- und Polygon-Auswahl sollten klein gehalten werden; V1 darf bewusst simpel bleiben.
+

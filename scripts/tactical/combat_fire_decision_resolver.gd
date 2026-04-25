@@ -143,16 +143,11 @@ static func can_unit_attack(unit, context: Dictionary = {}) -> bool:
 
 
 static func pick_target_from_units(attacker, targets: Array, context: Dictionary):
-	var best_target = null
-	var best_score: float = -INF
 	for target in targets:
 		if not is_target_attackable(attacker, target, context):
 			continue
-		var score: float = _score_target_priority(attacker, target, context)
-		if best_target == null or score > best_score:
-			best_target = target
-			best_score = score
-	return best_target
+		return target
+	return null
 
 
 static func is_target_attackable(attacker, target, context: Dictionary) -> bool:
@@ -227,10 +222,3 @@ static func _call_flank_resolver(context: Dictionary, attacker, target) -> Dicti
 	if not resolve_flank_attack.is_valid():
 		return {}
 	return Dictionary(resolve_flank_attack.call(attacker, target)).duplicate(true)
-
-
-static func _score_target_priority(attacker, target, context: Dictionary) -> float:
-	var score_attack_target: Callable = context.get("score_attack_target", Callable())
-	if score_attack_target.is_valid():
-		return float(score_attack_target.call(attacker, target))
-	return 0.0

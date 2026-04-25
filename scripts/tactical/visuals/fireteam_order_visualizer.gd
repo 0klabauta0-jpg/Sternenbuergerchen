@@ -3,7 +3,6 @@ extends Node2D
 
 const FIRETEAM_ORDER_PLAN_SCRIPT: GDScript = preload("res://scripts/command/fireteam_order_plan.gd")
 const FIRETEAM_WAYPOINT_SCRIPT: GDScript = preload("res://scripts/command/fireteam_waypoint.gd")
-const AREA_ORDER_SCRIPT: GDScript = preload("res://scripts/command/area_order.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
 const MARKER_RADIUS: float = 12.0
 const HIT_RADIUS: float = 16.0
@@ -16,8 +15,6 @@ var _phase_index: int = 0
 var _selected_fireteam_ids: PackedStringArray = []
 var _plan_dicts: Array = []
 var _visible_waypoints: Array = []
-var _area_order_dicts: Array = []
-var _visible_area_orders: Array = []
 var _ad_hoc_order_dicts: Array = []
 var _security_dicts: Array = []
 var _fireteam_anchor_positions: Dictionary = {}
@@ -38,14 +35,6 @@ func set_plan_dicts(plan_dicts: Array) -> void:
 	for plan_variant in plan_dicts:
 		if typeof(plan_variant) == TYPE_DICTIONARY:
 			_plan_dicts.append(Dictionary(plan_variant).duplicate(true))
-	_rebuild_cache()
-
-
-func set_area_order_dicts(area_order_dicts: Array) -> void:
-	_area_order_dicts = []
-	for area_order_variant in area_order_dicts:
-		if typeof(area_order_variant) == TYPE_DICTIONARY:
-			_area_order_dicts.append(Dictionary(area_order_variant).duplicate(true))
 	_rebuild_cache()
 
 
@@ -87,13 +76,6 @@ func get_visible_waypoints() -> Array:
 	return result
 
 
-func get_visible_area_orders() -> Array:
-	var result: Array = []
-	for area_order_data in _visible_area_orders:
-		result.append(Dictionary(area_order_data).duplicate(true))
-	return result
-
-
 func get_waypoint_hit(screen_position: Vector2, canvas_transform: Transform2D) -> Dictionary:
 	for waypoint_data in _visible_waypoints:
 		var marker_screen_position: Vector2 = canvas_transform * Vector2(waypoint_data.get("position", Vector2.ZERO))
@@ -102,16 +84,7 @@ func get_waypoint_hit(screen_position: Vector2, canvas_transform: Transform2D) -
 	return {}
 
 
-func get_area_order_hit(screen_position: Vector2, canvas_transform: Transform2D) -> Dictionary:
-	for area_order_data in _visible_area_orders:
-		var center_screen_position: Vector2 = canvas_transform * Vector2(area_order_data.get("center_position", Vector2.ZERO))
-		if center_screen_position.distance_to(screen_position) <= HIT_RADIUS * 2.0:
-			return Dictionary(area_order_data).duplicate(true)
-	return {}
-
-
 func _draw() -> void:
-	_draw_area_orders()
 	for plan_dict in _plan_dicts:
 		var plan = FIRETEAM_ORDER_PLAN_SCRIPT.call("from_dict", plan_dict)
 		if plan == null or not plan.is_valid() or int(plan.phase) != _phase_index:
@@ -119,31 +92,6 @@ func _draw() -> void:
 		_draw_plan(plan)
 	_draw_ad_hoc_orders()
 	_draw_security_states()
-
-
-func _draw_area_orders() -> void:
-	for area_order_dict in _area_order_dicts:
-		var area_order = AREA_ORDER_SCRIPT.call("from_dict", area_order_dict)
-		if area_order == null or not area_order.is_valid():
-			continue
-		if String(area_order.status) == AREA_ORDER_SCRIPT.STATUS_COMPLETED:
-			continue
-		var fireteam_id: String = String(area_order.fireteam_id).strip_edges().to_lower()
-		var selection_alpha: float = 1.0
-		if not _selected_fireteam_ids.is_empty() and not _selected_fireteam_ids.has(fireteam_id):
-			selection_alpha = 0.38
-		var line_color: Color = _apply_selection_alpha(_get_command_line_color(String(area_order.command_type)), selection_alpha)
-		var fill_color: Color = line_color
-		fill_color.a = 0.18 * selection_alpha
-		var polygon: PackedVector2Array = area_order.world_polygon
-		if polygon.size() >= 3:
-			draw_colored_polygon(polygon, fill_color)
-			for index in range(polygon.size()):
-				draw_line(polygon[index], polygon[(index + 1) % polygon.size()], line_color, 3.0, true)
-		else:
-			draw_circle(area_order.center_position, 28.0, fill_color)
-			draw_arc(area_order.center_position, 30.0, 0.0, TAU, 24, line_color, 3.0)
-		draw_circle(area_order.center_position, 6.0, line_color)
 
 
 func _draw_plan(plan) -> void:
@@ -307,22 +255,6 @@ func _draw_dashed_line(from_point: Vector2, to_point: Vector2, line_color: Color
 
 func _rebuild_cache() -> void:
 	_visible_waypoints.clear()
-	_visible_area_orders.clear()
-	for area_order_dict in _area_order_dicts:
-		var area_order = AREA_ORDER_SCRIPT.call("from_dict", area_order_dict)
-		if area_order == null or not area_order.is_valid():
-			continue
-		if String(area_order.status) == AREA_ORDER_SCRIPT.STATUS_COMPLETED:
-			continue
-		_visible_area_orders.append({
-			"fireteam_id": String(area_order.fireteam_id).strip_edges().to_lower(),
-			"area_order_id": String(area_order.area_order_id),
-			"center_position": area_order.center_position,
-			"command_type": String(area_order.command_type),
-			"status": String(area_order.status),
-			"tile_count": area_order.tile_positions.size(),
-			"world_polygon": area_order.world_polygon,
-		})
 	for plan_dict in _plan_dicts:
 		var plan = FIRETEAM_ORDER_PLAN_SCRIPT.call("from_dict", plan_dict)
 		if plan == null or not plan.is_valid() or int(plan.phase) != _phase_index:

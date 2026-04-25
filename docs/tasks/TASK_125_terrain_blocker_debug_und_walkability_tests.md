@@ -3,7 +3,7 @@
 ## Ziel
 Das beobachtete Haengenbleiben an Rocks soll reproduzierbar und testbar werden. Units duerfen nicht dauerhaft an nicht-walkable Terrain feststecken und sollen keine zufaelligen Spaet-Durchlaeufe durch Blocker zeigen.
 
-## Status: ERLEDIGT
+## Status: OFFEN
 
 ## Kontext
 - Die Architektur sieht A*-Navigation ueber Iso-Grid, Walkability, Hoehenunterschiede und Surface-Kosten vor.
@@ -35,16 +35,11 @@ Das beobachtete Haengenbleiben an Rocks soll reproduzierbar und testbar werden. 
 - Debug-Overlay ist rein lesend und abschaltbar.
 
 ## Akzeptanzkriterien
-- [x] Verifier reproduziert ein blockiertes Rock-Ziel.
-- [x] Nicht-walkable Ziel wird stabil auf ein walkable Ersatz-Ziel gemappt.
-- [x] Fireteam-Move in Richtung Blocker bleibt nicht dauerhaft stecken.
-- [x] Units laufen nicht sichtbar durch Rock-Blocker.
-- [x] Debug-Ausgabe benennt Originalziel, Ersatz-Ziel und Blockergrund.
-
-## Umsetzung
-- `TerrainRegistry.get_nearest_walkable_grid()` ist jetzt deterministisch.
-- `build_walkability_debug_report()` benennt Originalgrid, Blockergrund und Ersatzgrid.
-- `SimulationRoot` nutzt bei bekannten Terrain-Blockern keinen Geradeaus-Fallback mehr durch den Blocker.
+- [ ] Verifier reproduziert ein blockiertes Rock-Ziel.
+- [ ] Nicht-walkable Ziel wird stabil auf ein walkable Ersatz-Ziel gemappt.
+- [ ] Fireteam-Move in Richtung Blocker bleibt nicht dauerhaft stecken.
+- [ ] Units laufen nicht sichtbar durch Rock-Blocker.
+- [ ] Debug-Ausgabe benennt Originalziel, Ersatz-Ziel und Blockergrund.
 
 ## Dateien (voraussichtlich)
 - `scripts/terrain/terrain_registry.gd`
@@ -55,3 +50,4 @@ Das beobachtete Haengenbleiben an Rocks soll reproduzierbar und testbar werden. 
 
 ## Risiken
 - Wenn der aktuelle Move-Pfad nur Geradlinienbewegung nutzt, muss dieser Task klar zwischen kurzfristigem Ersatz-Ziel und spaeterem echtem Path-Follow trennen.
+
