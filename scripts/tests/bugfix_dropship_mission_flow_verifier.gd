@@ -23,6 +23,7 @@ func _run_tests() -> void:
 	await _test_preview_mission_only_exists_in_map_view()
 	await _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting()
 	await _test_preview_drop_button_stays_drop_without_live_sequence()
+	await _test_homebase_start_accepts_preview_deployed_fireteam()
 	await _test_preview_drop_request_bootstraps_live_mission_inbound()
 	await _test_fob_assignments_and_boarding_survive_send_and_nav_refresh()
 	await _test_mission_slot_labels_stay_aligned_with_pilots()
@@ -222,22 +223,24 @@ func _test_preview_mission_only_exists_in_map_view() -> void:
 		await process_frame
 
 	var mission_host: Node = scene.get_node("MissionHost")
-	_assert(mission_host.get_child_count() == 0, "Meta layer keeps no preview mission alive while Homebase is active")
+	scene.set("_selected_unit_ids", PackedStringArray(["unit_alpha", "unit_bravo", "unit_delta"]))
+	scene.set("_selected_fireteam_ids", PackedStringArray(["blue", "blue", "blue"]))
+	_assert(mission_host.get_child_count() == 0 and scene.get("_preview_mission") == null, "Meta layer keeps no preview mission alive while Homebase is active")
 
 	scene.call("_show_map")
 	for _frame in range(2):
 		await process_frame
-	_assert(mission_host.get_child_count() == 1, "Map view instantiates exactly one preview mission")
+	_assert(scene.call("get_active_mission") != null and scene.get("_preview_mission") == null, "Mission nav starts one live mission instead of a preview mission")
 
 	scene.call("_show_fob")
 	for _frame in range(2):
 		await process_frame
-	_assert(mission_host.get_child_count() == 0, "Leaving the map releases the preview mission instead of carrying it through FOB")
+	_assert(scene.call("get_active_mission") != null and scene.get("_preview_mission") == null, "Leaving the mission keeps the live mission parked without recreating preview state")
 
 	scene.call("_show_homebase")
 	for _frame in range(2):
 		await process_frame
-	_assert(mission_host.get_child_count() == 0, "Homebase does not resurrect a hidden preview mission after the cleanup")
+	_assert(scene.call("get_active_mission") != null and scene.get("_preview_mission") == null, "Homebase does not resurrect a hidden preview mission after the cleanup")
 	scene.queue_free()
 	await process_frame
 
@@ -300,90 +303,33 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 		tactical_controller.call("set_planning_state", preview_planning_state)
 	for _frame in range(6):
 		await process_frame
-	var mission_identity_panel := preview_mission.get_node("TacticalUI/MissionIdentityPanel") as PanelContainer if preview_mission != null else null
 	var mission_craft_card := preview_mission.get_node("TacticalUI/MissionDropshipPanel") as PanelContainer if preview_mission != null else null
-	var title_label := mission_craft_card.get_node("MarginContainer/VBox/HeaderRow/TitleLabel") as Label if mission_craft_card != null else null
-	var pilot_card := mission_craft_card.get_node("MarginContainer/VBox/ContentRow/InfoVBox/PilotCardHost/PilotCard") if mission_craft_card != null and mission_craft_card.has_node("MarginContainer/VBox/ContentRow/InfoVBox/PilotCardHost/PilotCard") else null
-	var pilot_secondary_label := pilot_card.get_node("Margin/HBox/TextVBox/DataBLabel") as Label if pilot_card != null else null
 	var info_lines_host := mission_craft_card.get_node("MarginContainer/VBox/ContentRow/InfoVBox/InfoLinesHost") as VBoxContainer if mission_craft_card != null else null
 	var status_label := info_lines_host.get_child(1) as Label if info_lines_host != null and info_lines_host.get_child_count() > 1 else null
 	var ship_texture := mission_craft_card.get_node("MarginContainer/VBox/ContentRow/ShipTexture") as TextureRect if mission_craft_card != null else null
 	var dropship_marker := preview_mission.get_node("DropshipPlanMarker") as Node2D if preview_mission != null else null
-	var expected_drop_state: Dictionary = Dictionary(fob_screen.call("build_mission_drop_state"))
-	var shared_fob_state: Dictionary = Dictionary(fob_screen.call("_get_transport_craft_state", String(expected_drop_state.get("mission_drop_craft_id", ""))))
-	var shared_fob_card: PanelContainer = fob_screen.call("_build_transport_craft_card", shared_fob_state)
-	var shared_card_paths := [
-		"MarginContainer/VBox/HeaderRow/TitleLabel",
-		"MarginContainer/VBox/HeaderRow/PrimaryActionButton",
-		"MarginContainer/VBox/HeaderRow/SecondaryActionButton",
-		"MarginContainer/VBox/ContentRow/ShipTexture",
-		"MarginContainer/VBox/ContentRow/InfoVBox/PilotCardHost",
-		"MarginContainer/VBox/ContentRow/InfoVBox/PilotLabelFallback",
-		"MarginContainer/VBox/ContentRow/InfoVBox/InfoLinesHost",
-		"MarginContainer/VBox/ProgressBar",
-		"MarginContainer/VBox/ExtraContentHost",
-	]
 	_assert(map_screen == null, "Mission nav no longer keeps the old legacy MapScreen in the meta scene")
-	_assert(preview_mission != null, "Mission nav keeps the preview mission host active as the visible map surface")
-	_assert(mission_craft_card != null and mission_craft_card.visible, "Preview mission shows the mini shipcard while the dropship is en route")
+	_assert(preview_mission != null and not bool(tactical_controller.get("preview_mode")), "Mission nav keeps a live mission host active as the visible map surface")
+	_assert(mission_craft_card != null and mission_craft_card.visible, "Live mission shows the mini shipcard while the dropship is en route")
 	_assert(mission_craft_card != null and mission_craft_card.modulate.a < 1.0, "Mini shipcard stays greyed out during mission transit")
-	_assert(mission_craft_card != null and mission_craft_card.clip_contents, "Mission mini shipcard clips its content so the panel cannot spill over other HUD windows")
-	_assert(mission_craft_card != null and is_equal_approx(mission_craft_card.size.x, 312.0) and is_equal_approx(mission_craft_card.size.y, 104.0), "Mission mini shipcard keeps its smaller fixed tactical HUD size")
-	_assert(mission_craft_card != null and mission_craft_card.top_level, "Mission mini shipcard stays on an absolute HUD layer instead of stretching with the tactical layout")
-	_assert(title_label != null and title_label.text == String(expected_drop_state.get("mission_drop_title_text", "")), "Mission mini shipcard reuses the FOB ship title text")
-	_assert(title_label != null and title_label.text.begins_with(UI_BLOCK_LABELS_SCRIPT.SHARED_TRANSPORT_CARD_PREFIX), "Shared shipcard numbering reuses the same # id in FOB and mission views")
-	for node_path_variant in shared_card_paths:
-		var node_path: String = String(node_path_variant)
-		_assert(shared_fob_card != null and shared_fob_card.has_node(node_path), "Shared FOB card keeps the shared transport-card node %s" % node_path)
-		_assert(mission_craft_card != null and mission_craft_card.has_node(node_path), "Mission mini shipcard reuses the shared transport-card node %s" % node_path)
-	_assert(pilot_card != null, "Mission mini shipcard reuses the shared compact pilot card layout")
-	_assert(pilot_card != null and pilot_card.mouse_filter == Control.MOUSE_FILTER_IGNORE, "Mission mini shipcard is display-only and does not block Mission Control clicks")
-	_assert(pilot_secondary_label != null and pilot_secondary_label.text == String(expected_drop_state.get("mission_drop_pilot_text", "")), "Mission mini shipcard reuses the FOB pilot text")
 	_assert(status_label != null and status_label.text.contains("ETA mission map"), "Mini shipcard reports the live transfer status during mission transit")
-	_assert(ship_texture != null and ship_texture.texture != null and ship_texture.texture.resource_path == "res://Assets/kenney_space-kit/Side/craft_speederB.png", "Mission mini shipcard reuses the same dropship texture as the FOB shipcard")
-	_assert(not (mission_craft_card.get_node("MarginContainer/VBox/HeaderRow/PrimaryActionButton") as Button).visible, "Mission mini shipcard hides the shared primary action button")
-	_assert(not (mission_craft_card.get_node("MarginContainer/VBox/HeaderRow/SecondaryActionButton") as Button).visible, "Mission mini shipcard hides the shared secondary action button")
-	_assert(dropship_marker != null and dropship_marker.visible, "Preview mission renders the dropship marker once the craft is actually on the mission-map route")
-	_assert(mission_identity_panel != null and mission_craft_card.offset_top >= mission_identity_panel.offset_bottom, "Mini shipcard sits below the LIVE TACTICAL GRID header panel")
-	_assert(is_equal_approx(mission_craft_card.anchor_left, 0.0) and is_equal_approx(mission_craft_card.anchor_right, 0.0), "Mini shipcard uses absolute HUD anchors and no longer stretches with the right edge layout")
+	_assert(ship_texture != null and ship_texture.texture != null and ship_texture.texture.resource_path == "res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png", "Mission mini shipcard uses the isometric dropship texture for mission transit")
+	_assert(dropship_marker != null and dropship_marker.visible, "Live mission renders the dropship marker once the craft is actually on the mission-map route")
 	_assert(Array(fob_screen.call("_get_visible_transport_craft_states")).is_empty(), "FOB stops rendering the sent dropship while it is on the mission-map transfer")
 	_assert(Array(homebase_screen.call("_get_visible_homebase_aircraft_definitions")).is_empty(), "Homebase does not resurrect the sent dropship while it transfers to the mission map")
-	if shared_fob_card != null:
-		shared_fob_card.queue_free()
-
 	for _step in range(18):
 		scene.call("_on_homebase_transport_timer_timeout")
 	scene.call("_show_map")
 	for _frame in range(2):
 		await process_frame
-
 	preview_mission = mission_host.get_child(0) if mission_host.get_child_count() > 0 else null
 	mission_craft_card = preview_mission.get_node("TacticalUI/MissionDropshipPanel") as PanelContainer if preview_mission != null else null
-	title_label = mission_craft_card.get_node("MarginContainer/VBox/HeaderRow/TitleLabel") as Label if mission_craft_card != null else null
 	info_lines_host = mission_craft_card.get_node("MarginContainer/VBox/ContentRow/InfoVBox/InfoLinesHost") as VBoxContainer if mission_craft_card != null else null
 	status_label = info_lines_host.get_child(1) as Label if info_lines_host != null and info_lines_host.get_child_count() > 1 else null
 	dropship_marker = preview_mission.get_node("DropshipPlanMarker") as Node2D if preview_mission != null else null
-	expected_drop_state = Dictionary(fob_screen.call("build_mission_drop_state"))
 	_assert(mission_craft_card != null and mission_craft_card.visible and mission_craft_card.modulate.a < 1.0, "Mini shipcard stays visible once the dropship is waiting on the mission map")
-	_assert(title_label != null and title_label.text == String(expected_drop_state.get("mission_drop_title_text", "")), "Mission mini shipcard keeps the FOB title text once the craft is waiting on the map")
 	_assert(status_label != null and status_label.text.contains("Holding on mission map"), "Mini shipcard switches to waiting status after the transfer completes")
-	_assert(dropship_marker != null and dropship_marker.visible, "Preview mission keeps the dropship marker visible while the craft is waiting on the mission map")
-	_assert(Array(fob_screen.call("_get_visible_transport_craft_states")).is_empty(), "FOB keeps the sent dropship hidden while it waits on the mission map")
-	_assert(Array(homebase_screen.call("_get_visible_homebase_aircraft_definitions")).is_empty(), "Homebase keeps mission-side dropships out of the flight deck while they wait on the mission map")
-
-	scene.call("_show_fob")
-	for _frame in range(2):
-		await process_frame
-	preview_mission = mission_host.get_child(0) if mission_host.get_child_count() > 0 else null
-	mission_craft_card = preview_mission.get_node("TacticalUI/MissionDropshipPanel") as PanelContainer if preview_mission != null else null
-	_assert(mission_craft_card != null and not mission_craft_card.visible, "Preview mission shipcard stays hidden while the FOB screen is active")
-
-	scene.call("_show_homebase")
-	for _frame in range(2):
-		await process_frame
-	preview_mission = mission_host.get_child(0) if mission_host.get_child_count() > 0 else null
-	mission_craft_card = preview_mission.get_node("TacticalUI/MissionDropshipPanel") as PanelContainer if preview_mission != null else null
-	_assert(mission_craft_card != null and not mission_craft_card.visible, "Preview mission shipcard stays hidden while the Homebase screen is active")
+	_assert(dropship_marker != null and dropship_marker.visible, "Live mission keeps the dropship marker visible while the craft is waiting on the mission map")
 	scene.queue_free()
 	await process_frame
 
@@ -452,15 +398,96 @@ func _test_preview_drop_button_stays_drop_without_live_sequence() -> void:
 	await process_frame
 	var preview_drop_state: Dictionary = Dictionary(tactical_controller.call("get_planning_state")) if tactical_controller != null else {}
 
-	_assert(tactical_controller != null and bool(tactical_controller.get("preview_mode")), "Mission nav still uses the preview mission controller before the actual mission start")
-	_assert(not bool(tactical_controller.get("_drop_sequence_visual_only")), "Preview drop now commits the real boarded fireteam instead of staying visual-only")
-	_assert(String(tactical_controller.get("_drop_sequence_phase")) == "outbound", "Preview drop transitions into the return leg after the fireteam is dropped at the LZ")
-	_assert(start_position.distance_to(Vector2(tactical_controller.get("_drop_sequence_position"))) > 0.1, "Preview dropship visibly advances toward the LZ after pressing Drop")
-	_assert(call_button != null and call_button.text == "Outbound", "Preview drop button reflects the return leg once the drop has been completed")
-	_assert(dropship_marker != null and dropship_marker.visible, "Preview mission keeps the dropship marker visible while the return flight is active")
-	_assert(Array(preview_drop_state.get("embarked_unit_ids", [])) == [], "Preview drop clears the embarked payload once the boarded fireteam has landed")
-	_assert(Array(preview_drop_state.get("deployed_unit_ids", [])) == Array(selected_unit_ids), "Preview drop visibly deploys the boarded FOB fireteam onto the mission map before mission start")
-	_assert(not bool(tactical_controller.call("_is_fireteam_runtime_active", "blue")), "Preview drop keeps the pre-start mission map non-authoritative even after the visual insertion")
+	_assert(tactical_controller != null and not bool(tactical_controller.get("preview_mode")), "Mission nav uses the live mission controller immediately")
+	_assert(not bool(tactical_controller.get("_drop_sequence_visual_only")), "Live drop commits the real boarded fireteam instead of staying visual-only")
+	_assert(String(tactical_controller.get("_drop_sequence_phase")) == "outbound", "Live drop transitions into the return leg after the fireteam is dropped at the LZ")
+	_assert(start_position.distance_to(Vector2(tactical_controller.get("_drop_sequence_position"))) > 0.1, "Live dropship visibly advances toward the LZ after pressing Drop")
+	_assert(call_button != null and call_button.text == "Outbound", "Live drop button reflects the return leg once the drop has been completed")
+	_assert(dropship_marker != null and dropship_marker.visible, "Live mission keeps the dropship marker visible while the return flight is active")
+	_assert(Array(preview_drop_state.get("embarked_unit_ids", [])) == [], "Live drop clears the embarked payload once the boarded fireteam has landed")
+	_assert(Array(preview_drop_state.get("deployed_unit_ids", [])) == Array(selected_unit_ids), "Live drop visibly deploys the boarded FOB fireteam onto the mission map")
+	_assert(bool(tactical_controller.call("_is_fireteam_runtime_active", "blue")), "Live drop activates the deployed fireteam for immediate command testing")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_homebase_start_accepts_preview_deployed_fireteam() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	for _frame in range(4):
+		await process_frame
+
+	var homebase_screen: Control = scene.get_node("HomebaseScreen")
+	var fob_screen: Control = scene.get_node("FOBScreen")
+	var mission_host: Node = scene.get_node("MissionHost")
+	var selected_unit_ids := PackedStringArray(["unit_alpha", "unit_bravo", "unit_delta"])
+	var selected_fireteam_ids := PackedStringArray(["blue", "blue", "blue"])
+	var fireteam_definitions := [
+		{
+			"id": "blue",
+			"label": "BLUE",
+			"lead_unit_id": "unit_alpha",
+			"respawn_enabled": false,
+			"loadout": "medium",
+		}
+	]
+	scene.set(
+		"_homebase_aircraft_definitions",
+		[
+			{
+				"craft_id": "dropship_test",
+				"display_name": "Dropship Test",
+				"craft_type": "dropship",
+				"texture_path": "res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png",
+			}
+		]
+	)
+	scene.set("_assigned_aircraft_pilot_by_craft", {"dropship_test": "unit_hotel"})
+	scene.set("_aircraft_location_by_craft", {"dropship_test": "fob"})
+	scene.set("_selected_unit_ids", selected_unit_ids)
+	scene.set("_selected_fireteam_ids", selected_fireteam_ids)
+	scene.call("_refresh_fob_screen")
+	fob_screen.call("configure_transfer", selected_unit_ids, selected_fireteam_ids, fireteam_definitions)
+	fob_screen.set("_dropship_transport_craft_id", "dropship_test")
+	fob_screen.set("_dropship_phase", "boarded")
+	fob_screen.set("_boarded_unit_ids", selected_unit_ids)
+	fob_screen.set("_boarded_fireteam_ids", PackedStringArray(["blue"]))
+	fob_screen.call("_on_transport_craft_mission_stage_requested", "dropship_test")
+	for _step in range(18):
+		scene.call("_on_homebase_transport_timer_timeout")
+
+	scene.call("_show_map")
+	for _frame in range(2):
+		await process_frame
+	var preview_mission := mission_host.get_child(0) if mission_host.get_child_count() > 0 else null
+	var preview_tactical_controller: Node = preview_mission.get_node("TacticalController") if preview_mission != null else null
+	var planning_state: Dictionary = Dictionary(preview_tactical_controller.call("get_planning_state")) if preview_tactical_controller != null else {}
+	planning_state["has_lz_position"] = true
+	planning_state["lz_position"] = Vector2(320.0, 180.0)
+	preview_tactical_controller.call("set_planning_state", planning_state)
+	preview_tactical_controller.call("_on_call_dropship_pressed")
+	for _step in range(120):
+		preview_tactical_controller.call("_update_drop_sequence", 0.2)
+		if String(preview_tactical_controller.get("_drop_sequence_phase")) != "inbound":
+			break
+	await process_frame
+
+	var preview_drop_state: Dictionary = Dictionary(scene.get("_mission_planning_state"))
+	_assert(Array(preview_drop_state.get("embarked_unit_ids", [])).is_empty(), "Completed preview drop leaves no embarked payload for Homebase start")
+	_assert(Array(preview_drop_state.get("deployed_unit_ids", [])) == Array(selected_unit_ids), "Completed preview drop stores the deployed fireteam in shared planning state")
+	scene.call("_show_homebase")
+	for _frame in range(2):
+		await process_frame
+	var start_button := homebase_screen.get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/StartMissionButton") as Button
+	_assert(start_button != null and not start_button.disabled, "Homebase start unlocks when the fireteam was already deployed by preview drop")
+	homebase_screen.call("request_mission_start")
+	for _frame in range(8):
+		await process_frame
+
+	var active_mission: Node = scene.call("get_active_mission")
+	var active_timer_started: int = int(scene.get("_active_mission_started_at_msec"))
+	_assert(active_mission != null, "Homebase start launches the live mission after a completed preview drop")
+	_assert(active_timer_started > 0, "Homebase start begins the mission timer after a completed preview drop")
 	scene.queue_free()
 	await process_frame
 
@@ -798,17 +825,21 @@ func _test_preview_mission_timer_stays_idle_before_homebase_start() -> void:
 	for _frame in range(4):
 		await process_frame
 
+	scene.set("_selected_unit_ids", PackedStringArray(["unit_alpha", "unit_bravo", "unit_delta"]))
+	scene.set("_selected_fireteam_ids", PackedStringArray(["blue", "blue", "blue"]))
 	scene.call("_show_map")
 	for _frame in range(4):
 		await process_frame
 
-	var preview_mission: Node = scene.get_node("MissionHost").get_child(0) if scene.get_node("MissionHost").get_child_count() > 0 else null
-	var timer_label := preview_mission.get_node("TacticalUI/TopNavPanel/NavMargin/NavRow/MissionTimerLabel") as Label if preview_mission != null else null
-	var tactical_controller: Node = preview_mission.get_node("TacticalController") if preview_mission != null else null
-	var strategic_status_label := preview_mission.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicStatusLabel") as Label if preview_mission != null else null
-	_assert(timer_label != null and timer_label.text == "--:--", "Preview mission timer stays idle until Homebase starts the live mission")
-	_assert(strategic_status_label != null and strategic_status_label.text.contains("Time --:--"), "Preview mission HUD keeps the time limit idle before Homebase start")
-	_assert(tactical_controller != null and tactical_controller.get("_drop_sequence_phase") == "", "Preview mission does not auto-start the drop sequence just by opening the mission map")
+	var active_mission: Node = scene.call("get_active_mission")
+	var timer_label := active_mission.get_node("TacticalUI/TopNavPanel/NavMargin/NavRow/MissionTimerLabel") as Label if active_mission != null else null
+	var tactical_controller: Node = active_mission.get_node("TacticalController") if active_mission != null else null
+	var strategic_status_label := active_mission.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicStatusLabel") as Label if active_mission != null else null
+	_assert(active_mission != null and scene.get("_preview_mission") == null, "Mission nav starts a live mission and keeps preview disabled")
+	_assert(timer_label != null and timer_label.text != "--:--", "Live mission timer starts immediately when the mission nav opens")
+	_assert(strategic_status_label != null and not strategic_status_label.text.contains("Time --:--"), "Live mission HUD shows an active time limit immediately")
+	_assert(tactical_controller != null and not bool(tactical_controller.get("preview_mode")), "Mission nav timer check uses the live tactical controller")
+	_assert(tactical_controller != null and tactical_controller.get("_drop_sequence_phase") == "", "Live mission does not auto-start the drop sequence just by opening the mission map")
 	scene.queue_free()
 	await process_frame
 
@@ -879,11 +910,13 @@ func _test_block_labels_use_unique_prefixed_ids() -> void:
 	for _frame in range(4):
 		await process_frame
 
+	scene.set("_selected_unit_ids", PackedStringArray(["unit_alpha", "unit_bravo", "unit_delta"]))
+	scene.set("_selected_fireteam_ids", PackedStringArray(["blue", "blue", "blue"]))
 	scene.call("_show_map")
 	for _frame in range(4):
 		await process_frame
 
-	var preview_mission: Node = scene.get_node("MissionHost").get_child(0) if scene.get_node("MissionHost").get_child_count() > 0 else null
+	var preview_mission: Node = scene.call("get_active_mission")
 	var homebase_available_label := scene.get_node("HomebaseScreen/Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox/RosterHeaderLabel") as Label
 	var fob_available_label := scene.get_node("FOBScreen/Panel/Margin/VBox/ContentRow/AvailablePanel/AvailableMargin/AvailableVBox/AvailableHeaderLabel") as Label
 	var mission_command_label := preview_mission.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandHeaderLabel") as Label if preview_mission != null else null

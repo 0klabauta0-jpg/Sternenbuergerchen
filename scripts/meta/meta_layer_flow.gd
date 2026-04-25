@@ -41,7 +41,7 @@ const HOMEBASE_AIRCRAFT_BASE_DEFINITIONS: Dictionary = {
 		"craft_type": "dropship",
 		"display_name": "Dropship",
 		"summary": "Single-pilot shuttle for the FOB corridor.",
-		"texture_path": "res://Assets/kenney_space-kit/Side/craft_speederB.png",
+		"texture_path": "res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png",
 		"supports_cargo": false,
 		"cargo_options": [],
 	},
@@ -62,6 +62,7 @@ const HOMEBASE_PILOT_TRANSFER_DURATION_SECONDS: float = 10.0
 const HOMEBASE_CARGO_LOAD_DURATION_SECONDS: float = 9.0
 const MISSION_DROPSHIP_TO_MAP_SECONDS: float = 18.0
 const MISSION_DROPSHIP_TO_FOB_SECONDS: float = 18.0
+const MISSION_PREVIEW_ENABLED: bool = false
 const DEFAULT_MISSION_PLANNING_STATE: Dictionary = {
 	"has_lz_position": false,
 	"lz_position": Vector2.ZERO,
@@ -245,10 +246,9 @@ func _on_homebase_team_confirmed(selected_unit_ids: PackedStringArray) -> void:
 
 
 func _on_homebase_mission_start_requested() -> void:
-	_sync_fob_dropship_state_into_mission_planning(true)
-	if not bool(_mission_planning_state.get("drop_ship_staged", false)):
-		return
-	if Array(_mission_planning_state.get("embarked_unit_ids", [])).is_empty():
+	var had_preview_deployed_payload: bool = _has_preview_deployed_mission_payload()
+	_sync_fob_dropship_state_into_mission_planning(not had_preview_deployed_payload)
+	if not _has_mission_start_payload():
 		return
 	_begin_active_mission_timer()
 	_start_mission()
@@ -384,10 +384,9 @@ func _on_homebase_aircraft_pilot_transfer_requested(craft_id: String, pilot_unit
 func _on_fob_mission_start_requested(selected_unit_ids: PackedStringArray, selected_fireteam_ids: PackedStringArray) -> void:
 	_selected_unit_ids = selected_unit_ids.duplicate()
 	_selected_fireteam_ids = selected_fireteam_ids.duplicate()
-	_sync_fob_dropship_state_into_mission_planning(true)
-	if not bool(_mission_planning_state.get("drop_ship_staged", false)):
-		return
-	if Array(_mission_planning_state.get("embarked_unit_ids", [])).is_empty():
+	var had_preview_deployed_payload: bool = _has_preview_deployed_mission_payload()
+	_sync_fob_dropship_state_into_mission_planning(not had_preview_deployed_payload)
+	if not _has_mission_start_payload():
 		return
 	_begin_active_mission_timer()
 	_start_mission()
@@ -451,7 +450,7 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 		if fob_screen != null and fob_screen.has_method("get_fireteam_definitions"):
 			mission_setup.set("selected_fireteam_definitions", Array(fob_screen.call("get_fireteam_definitions")).duplicate(true))
 		mission_setup.set("map_file_path", String(_get_selected_mission_definition().get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges())
-		mission_setup.set("defer_friendly_runtime_activation", true)
+		mission_setup.set("defer_friendly_runtime_activation", _should_defer_friendly_runtime_activation())
 		mission_setup.set("allow_full_roster_when_selection_empty", false)
 
 		var fob_loadouts: Dictionary = _build_fob_member_loadouts()
@@ -744,12 +743,13 @@ func _refresh_homebase_screen() -> void:
 	homebase_screen.set_mission_occupancy(_selected_unit_ids.size() + _count_assigned_aircraft_pilots(), _count_assigned_aircraft_pilots())
 	var fob_screen = _get_fob_screen()
 	if fob_screen != null and fob_screen.has_method("can_request_mission_start"):
+		var has_preview_deployed_payload: bool = _has_preview_deployed_mission_payload()
 		homebase_screen.set_mission_launch_state(
-			bool(fob_screen.call("can_request_mission_start")),
-			String(fob_screen.call("get_mission_launch_summary"))
+			bool(fob_screen.call("can_request_mission_start")) or has_preview_deployed_payload,
+			"Fireteam already deployed on the mission map. Start live mission when ready." if has_preview_deployed_payload else String(fob_screen.call("get_mission_launch_summary"))
 		)
 	else:
-		homebase_screen.set_mission_launch_state(false, "")
+		homebase_screen.set_mission_launch_state(_has_preview_deployed_mission_payload(), "Fireteam already deployed on the mission map. Start live mission when ready.")
 
 
 func _refresh_fob_screen() -> void:
@@ -1194,10 +1194,13 @@ func _show_fob() -> void:
 
 func _show_map() -> void:
 	_current_meta_view = "map"
+	_sync_fob_transfer_selection_from_screen()
+	if not MISSION_PREVIEW_ENABLED:
+		_start_or_show_live_mission_from_nav()
+		return
 	var homebase_screen = _get_homebase_screen()
 	var fob_screen = _get_fob_screen()
 	var debrief_screen = _get_debrief_screen()
-	_sync_fob_transfer_selection_from_screen()
 	if homebase_screen != null:
 		homebase_screen.visible = false
 	if fob_screen != null:
@@ -1225,6 +1228,17 @@ func _show_mission() -> void:
 	_refresh_preview_mission_lifecycle()
 	_sync_mission_host_visibility()
 	_set_navigation_visible(false)
+
+
+func _start_or_show_live_mission_from_nav() -> void:
+	_sync_fob_dropship_state_into_mission_planning(false)
+	if _active_mission == null:
+		if _active_mission_started_at_msec <= 0:
+			_begin_active_mission_timer()
+		_start_mission()
+		return
+	_apply_planning_state_to_mission(_active_mission)
+	_show_mission()
 
 
 func _show_debrief() -> void:
@@ -1275,7 +1289,9 @@ func _refresh_navigation_state() -> void:
 
 
 func _refresh_map_screen() -> void:
-	var fob_screen = _get_fob_screen()
+	if not MISSION_PREVIEW_ENABLED:
+		_release_preview_mission()
+		return
 	if _active_mission == null:
 		_sync_fob_dropship_state_into_mission_planning()
 	_refresh_preview_mission_lifecycle()
@@ -1384,6 +1400,22 @@ func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: boo
 		_mission_planning_state["mission_drop_return_requested"] = false
 
 
+func _has_preview_deployed_mission_payload() -> bool:
+	return not Array(_mission_planning_state.get("deployed_unit_ids", [])).is_empty()
+
+
+func _has_mission_start_payload() -> bool:
+	if not bool(_mission_planning_state.get("drop_ship_staged", false)) and not _has_preview_deployed_mission_payload():
+		return false
+	if not Array(_mission_planning_state.get("embarked_unit_ids", [])).is_empty():
+		return true
+	return _has_preview_deployed_mission_payload()
+
+
+func _should_defer_friendly_runtime_activation() -> bool:
+	return not Array(_mission_planning_state.get("embarked_unit_ids", [])).is_empty()
+
+
 func _sync_fob_transfer_selection_from_screen() -> void:
 	var fob_screen = _get_fob_screen()
 	if fob_screen == null or not fob_screen.has_method("get_team") or not fob_screen.has_method("get_selected_fireteam_ids"):
@@ -1486,6 +1518,8 @@ func _get_mission_host():
 
 
 func _ensure_preview_mission() -> void:
+	if not MISSION_PREVIEW_ENABLED:
+		return
 	var mission_host = _get_mission_host()
 	if mission_host == null:
 		return
@@ -1566,13 +1600,16 @@ func _disable_node_processing(node: Node) -> void:
 
 func _is_mission_host_visible_for_current_view() -> bool:
 	if _current_meta_view == "map":
-		return _preview_mission != null
+		return _preview_mission != null if MISSION_PREVIEW_ENABLED else _active_mission != null
 	if _current_meta_view == "mission":
 		return _active_mission != null
 	return false
 
 
 func _refresh_preview_mission_lifecycle() -> void:
+	if not MISSION_PREVIEW_ENABLED:
+		_release_preview_mission()
+		return
 	if _active_mission == null and (_current_meta_view == "map" or _should_keep_preview_mission_loaded()):
 		_ensure_preview_mission()
 		if _preview_mission != null:

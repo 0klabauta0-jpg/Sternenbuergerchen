@@ -14,6 +14,7 @@ var _plan_dicts: Array = []
 var _visible_waypoints: Array = []
 var _ad_hoc_order_dicts: Array = []
 var _security_dicts: Array = []
+var _fireteam_anchor_positions: Dictionary = {}
 
 
 func set_phase_index(phase_index: int) -> void:
@@ -32,6 +33,19 @@ func set_plan_dicts(plan_dicts: Array) -> void:
 		if typeof(plan_variant) == TYPE_DICTIONARY:
 			_plan_dicts.append(Dictionary(plan_variant).duplicate(true))
 	_rebuild_cache()
+
+
+func set_fireteam_anchor_dicts(anchor_dicts: Array) -> void:
+	_fireteam_anchor_positions.clear()
+	for anchor_variant in anchor_dicts:
+		if typeof(anchor_variant) != TYPE_DICTIONARY:
+			continue
+		var anchor_dict: Dictionary = Dictionary(anchor_variant)
+		var fireteam_id: String = String(anchor_dict.get("fireteam_id", "")).strip_edges().to_lower()
+		if fireteam_id.is_empty() or typeof(anchor_dict.get("position", null)) != TYPE_VECTOR2:
+			continue
+		_fireteam_anchor_positions[fireteam_id] = Vector2(anchor_dict.get("position", Vector2.ZERO))
+	queue_redraw()
 
 
 func set_ad_hoc_order_dicts(ad_hoc_order_dicts: Array) -> void:
@@ -95,6 +109,11 @@ func _draw_plan(plan) -> void:
 
 	if points.size() >= 2:
 		draw_polyline(points, draw_color, 3.0, true)
+	var anchor_position: Vector2 = _get_fireteam_anchor_position(fireteam_id)
+	if points.size() >= 1 and anchor_position.is_finite():
+		var visual_anchor_position: Vector2 = anchor_position + marker_offset
+		draw_line(visual_anchor_position, points[0], draw_color, 3.0, true)
+		draw_circle(visual_anchor_position, 5.0, draw_color)
 
 	for index in range(points.size()):
 		var waypoint = _coerce_waypoint(plan.waypoints[index])
@@ -260,3 +279,9 @@ func _get_marker_offset(fireteam_id: String) -> Vector2:
 			return Vector2(WAYPOINT_OFFSET_STEP, WAYPOINT_OFFSET_STEP)
 		_:
 			return Vector2.ZERO
+
+
+func _get_fireteam_anchor_position(fireteam_id: String) -> Vector2:
+	if not _fireteam_anchor_positions.has(fireteam_id):
+		return Vector2.INF
+	return Vector2(_fireteam_anchor_positions.get(fireteam_id, Vector2.ZERO))

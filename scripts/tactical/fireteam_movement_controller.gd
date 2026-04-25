@@ -128,6 +128,8 @@ func start_execution(
 		"current_target_positions": {},
 		"current_moving_unit_ids": PackedStringArray(),
 		"current_covering_unit_ids": PackedStringArray(),
+		"groups_issued_for_anchor": 0,
+		"group_count_for_anchor": 1,
 		"movement_sequence": PackedStringArray(),
 		"group_cycle": [],
 		"next_group_index": 0,
@@ -197,11 +199,13 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root) -> 
 	var style: String = String(state.get("effective_style", ADVANCE_STYLE_RUSH))
 	var moving_unit_ids: PackedStringArray = PackedStringArray()
 	var covering_unit_ids: PackedStringArray = PackedStringArray()
+	var group_count: int = 1
 	match style:
 		ADVANCE_STYLE_BOUNDING:
 			var groups: Array = Array(state.get("group_cycle", []))
 			if groups.is_empty():
 				return {"started": false}
+			group_count = maxi(groups.size(), 1)
 			var group_index: int = int(state.get("next_group_index", 0)) % groups.size()
 			moving_unit_ids = PackedStringArray(groups[group_index])
 			for index in range(groups.size()):
@@ -215,6 +219,7 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root) -> 
 			var sequence: PackedStringArray = PackedStringArray(state.get("movement_sequence", PackedStringArray()))
 			if sequence.is_empty():
 				return {"started": false}
+			group_count = maxi(sequence.size(), 1)
 			var sequence_index: int = int(state.get("next_group_index", 0)) % sequence.size()
 			var moving_unit_id: String = String(sequence[sequence_index])
 			moving_unit_ids = PackedStringArray([moving_unit_id])
@@ -224,7 +229,7 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root) -> 
 			state["next_group_index"] = (sequence_index + 1) % sequence.size()
 		_:
 			moving_unit_ids = _packed_unit_ids(member_records)
-	var next_anchor_target: Vector2 = _compute_next_anchor_target(state, member_records)
+	var next_anchor_target: Vector2 = _resolve_stage_anchor_target(state, member_records, group_count)
 	var formation_targets: Dictionary = _build_formation_targets(next_anchor_target, member_records, String(state.get("leader_unit_id", "")), float(state.get("formation_scatter_factor", 1.0)))
 	var current_positions: Dictionary = _build_current_positions(member_records)
 	var issued_count: int = 0
@@ -270,13 +275,28 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root) -> 
 	state["current_target_positions"] = formation_targets
 	state["current_moving_unit_ids"] = moving_unit_ids
 	state["current_covering_unit_ids"] = covering_unit_ids
-	state["progress_anchor_position"] = next_anchor_target
+	state["group_count_for_anchor"] = group_count
+	state["groups_issued_for_anchor"] = int(state.get("groups_issued_for_anchor", 0)) + 1
+	if style == ADVANCE_STYLE_RUSH or int(state.get("groups_issued_for_anchor", 0)) >= group_count:
+		state["progress_anchor_position"] = next_anchor_target
 	return {
 		"started": issued_count > 0,
 		"issued_count": issued_count,
 		"resolved_target_position": Vector2(state.get("final_target_position", next_anchor_target)),
 		"effective_advance_style": String(state.get("effective_style", style)),
 	}
+
+
+func _resolve_stage_anchor_target(state: Dictionary, member_records: Array, group_count: int) -> Vector2:
+	var style: String = String(state.get("effective_style", ADVANCE_STYLE_RUSH))
+	if style == ADVANCE_STYLE_RUSH:
+		state["groups_issued_for_anchor"] = 0
+		return _compute_next_anchor_target(state, member_records)
+	var groups_issued_for_anchor: int = int(state.get("groups_issued_for_anchor", 0))
+	if groups_issued_for_anchor <= 0 or groups_issued_for_anchor >= maxi(group_count, 1):
+		state["groups_issued_for_anchor"] = 0
+		return _compute_next_anchor_target(state, member_records)
+	return Vector2(state.get("current_anchor_target_position", _compute_next_anchor_target(state, member_records)))
 
 
 func _are_current_targets_reached(state: Dictionary, member_records: Array) -> bool:

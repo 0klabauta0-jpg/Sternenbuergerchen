@@ -10,8 +10,11 @@ const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_la
 const TRANSPORT_CRAFT_CARD_UI_SCRIPT: GDScript = preload("res://scripts/meta/transport_craft_card_ui.gd")
 const FOB_FIRETEAM_CARD_SCRIPT: GDScript = preload("res://scripts/meta/fob_fireteam_card.gd")
 const FOB_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/fob_drop_panel.gd")
-const DROPSHIP_SIDE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Side/craft_speederB.png")
-const DROPSHIP_FOB_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
+const DROPSHIP_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NE.png")
+const DROPSHIP_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NW.png")
+const DROPSHIP_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
+const DROPSHIP_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SW.png")
+const DROPSHIP_FOB_TEXTURE: Texture2D = DROPSHIP_TEXTURE_SE
 
 signal mission_start_requested(selected_unit_ids, selected_fireteam_ids)
 signal transport_craft_mission_stage_requested(craft_id)
@@ -233,6 +236,8 @@ func get_mission_launch_summary() -> String:
 		var ready_craft_name: String = String(craft_state.get("display_name", "Dropship")).strip_edges()
 		if ready_craft_name.is_empty():
 			ready_craft_name = "Dropship"
+		if bool(craft_state.get("mission_transit_to_map", false)):
+			return "%s en route to mission map. Start live mission when ready." % ready_craft_name
 		return "%s waiting on the mission map. Start from Homebase when ready." % ready_craft_name
 	if not craft_state.is_empty() and bool(craft_state.get("mission_transit_to_map", false)):
 		return "%s en route to mission map." % _build_optional_text(String(craft_state.get("display_name", "")).strip_edges(), "Dropship")
@@ -777,6 +782,7 @@ func _build_fireteam_panel_summary_text() -> String:
 func _build_dropship_status_text(selected_craft_state: Dictionary = {}) -> String:
 	if not selected_craft_state.is_empty():
 		var craft_name: String = String(selected_craft_state.get("display_name", "craft")).strip_edges()
+		var craft_id: String = String(selected_craft_state.get("craft_id", "")).strip_edges()
 		if bool(selected_craft_state.get("mission_waiting", false)):
 			return "%s: waiting on mission map" % craft_name
 		if bool(selected_craft_state.get("mission_transit_to_map", false)):
@@ -785,6 +791,8 @@ func _build_dropship_status_text(selected_craft_state: Dictionary = {}) -> Strin
 			return "%s: returning from mission map" % craft_name
 		if bool(selected_craft_state.get("is_in_transit", false)):
 			return "%s: inbound from Homebase" % craft_name
+		if craft_id == _mission_launch_ready_craft_id and _has_boarded_mission_payload():
+			return "%s: staged for mission start" % craft_name
 		if not bool(selected_craft_state.get("is_boardable", false)):
 			return "%s: cargo visible in FOB" % craft_name
 		if _dropship_transport_craft_id == String(selected_craft_state.get("craft_id", "")).strip_edges() and not _boarding_order.is_empty():
@@ -2142,6 +2150,7 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 	var is_waiting_on_mission: bool = bool(craft_state.get("mission_waiting", false))
 	var is_transit_to_mission: bool = bool(craft_state.get("mission_transit_to_map", false))
 	var is_transit_to_fob: bool = bool(craft_state.get("mission_transit_to_fob", false))
+	var is_launch_ready_in_fob: bool = craft_id == _mission_launch_ready_craft_id and _has_boarded_mission_payload() and not is_waiting_on_mission and not is_transit_to_mission and not is_transit_to_fob
 	var pilot_unit_id: String = String(craft_state.get("pilot_unit_id", "")).strip_edges()
 	TRANSPORT_CRAFT_CARD_UI_SCRIPT.apply_card_state(
 		craft_card,
@@ -2174,8 +2183,8 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 			},
 			"secondary_action": {
 				"visible": true,
-				"text": "Waiting" if is_waiting_on_mission else "En Route" if is_transit_to_mission else "Return" if is_transit_to_fob else "Send",
-				"disabled": is_waiting_on_mission or is_transit_to_mission or is_transit_to_fob or not _can_mark_transport_craft_launch_ready(craft_state),
+				"text": "Waiting" if is_waiting_on_mission else "En Route" if is_transit_to_mission else "Return" if is_transit_to_fob else "Ready" if is_launch_ready_in_fob else "Send",
+				"disabled": is_launch_ready_in_fob or is_waiting_on_mission or is_transit_to_mission or is_transit_to_fob or not _can_mark_transport_craft_launch_ready(craft_state),
 				"minimum_width": 58.0,
 				"ready_style": true,
 				"callback": Callable(self, "_on_transport_craft_mission_stage_requested").bind(craft_id),
@@ -2244,6 +2253,8 @@ func _build_transport_craft_status_line(craft_state: Dictionary) -> String:
 		return "Status: returning to FOB | ETA %ds" % int(craft_state.get("transfer_eta_seconds", 0))
 	if bool(craft_state.get("is_in_transit", false)):
 		return "Status: inbound to FOB | ETA %ds | 6 NPC + pilot" % int(craft_state.get("transfer_eta_seconds", 0))
+	if String(craft_state.get("craft_id", "")).strip_edges() == _mission_launch_ready_craft_id and _has_boarded_mission_payload():
+		return "Status: staged in FOB | start mission to launch"
 	if bool(craft_state.get("is_boardable", false)):
 		return "Status: docked in FOB | %s" % _build_transport_craft_capacity_text(craft_state)
 	return "Status: visible in FOB as delivered cargo state"
@@ -2265,9 +2276,18 @@ func _build_transport_craft_progress_value(craft_state: Dictionary) -> float:
 
 
 func _get_transport_craft_texture(craft_state: Dictionary) -> Texture2D:
+	if String(craft_state.get("craft_type", "dropship")).strip_edges().to_lower() == "dropship":
+		if bool(craft_state.get("mission_transit_to_map", false)):
+			return DROPSHIP_TEXTURE_SE
+		if bool(craft_state.get("mission_transit_to_fob", false)):
+			return DROPSHIP_TEXTURE_NW
+		if bool(craft_state.get("is_in_transit", false)):
+			return DROPSHIP_TEXTURE_NW
+		if bool(craft_state.get("mission_waiting", false)):
+			return DROPSHIP_TEXTURE_SE
 	var texture_path: String = String(craft_state.get("texture_path", "")).strip_edges()
 	if texture_path.is_empty():
-		return DROPSHIP_FOB_TEXTURE if bool(craft_state.get("is_boardable", false)) else DROPSHIP_SIDE_TEXTURE
+		return DROPSHIP_FOB_TEXTURE if bool(craft_state.get("is_boardable", false)) else DROPSHIP_TEXTURE_NW
 	var resource: Resource = load(texture_path)
 	return resource as Texture2D
 
@@ -2627,7 +2647,7 @@ func _build_dropship_visual_texture(selected_craft_state: Dictionary = {}) -> Te
 		return _get_transport_craft_texture(selected_craft_state)
 	match _dropship_phase:
 		"incoming":
-			return DROPSHIP_SIDE_TEXTURE
+			return DROPSHIP_TEXTURE_NW
 		"ready", "boarding", "boarded":
 			return DROPSHIP_FOB_TEXTURE
 		_:

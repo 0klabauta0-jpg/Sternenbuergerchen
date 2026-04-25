@@ -27,7 +27,7 @@ const DROPSHIP_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Is
 
 const ALL_FIRETEAM_LABEL: String = "ALL"
 const APPROACH_ANGLES: PackedStringArray = ["NW", "NE", "SW", "SE"]
-const HOTKEY_LEGEND: String = "LMB Select | RMB Waypoint | CTRL+LMB Add | Drag Lasso | DEL Waypoint | 1 Move | 2 Hold | 3 Flank | 4 Take | Q/E Team | R/F Edit Phase | G Next Phase"
+const HOTKEY_LEGEND: String = "LMB Select | RMB Waypoint | CTRL+LMB Add | Drag Lasso | DEL Waypoint | 1 Move | 2 Hold | 3 Flank | 4 Take | Q/E Team | R/F Edit Phase | G GO"
 const FRIENDLY_TEAM_ID: String = "team_alpha"
 const FIRETEAM_PANEL_PATH: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel"
 const FIRETEAM_HEADER_LABEL_PATH: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamHeaderLabel"
@@ -362,7 +362,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			_change_phase(1)
 			get_viewport().set_input_as_handled()
 		KEY_G:
-			if advance_to_next_phase():
+			if execute_selected_fireteam_orders():
 				get_viewport().set_input_as_handled()
 
 
@@ -609,6 +609,63 @@ func advance_to_next_phase() -> bool:
 		return false
 	_reset_tactical_stances_for_new_phase()
 	_start_active_phase_execution(next_phase_index)
+	_refresh_button_state()
+	_refresh_order_visuals()
+	_update_ui()
+	_emit_planning_state_changed()
+	return true
+
+
+func execute_selected_fireteam_orders() -> bool:
+	if preview_mode:
+		_last_command_text = "PREVIEW MODE"
+		_update_ui()
+		return false
+	if not _can_issue_local_commands():
+		_last_command_text = "OBSERVER MODE"
+		_update_ui()
+		return false
+	if _selected_fireteam_ids.is_empty():
+		_last_command_text = "NO FIRETEAM SELECTED"
+		_update_ui()
+		return false
+	var inactive_fireteams: PackedStringArray = []
+	for fireteam_id_variant in _selected_fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if not _is_fireteam_runtime_active(fireteam_id):
+			inactive_fireteams.append(fireteam_id.to_upper())
+	if not inactive_fireteams.is_empty():
+		_last_command_text = "WAIT FOR INSERTION: %s" % ", ".join(inactive_fireteams)
+		_update_ui()
+		return false
+	var phase_controller = _get_phase_controller()
+	if phase_controller == null or not phase_controller.has_method("get_active_phase_index") or not phase_controller.has_method("advance_to_next_phase"):
+		return false
+	var target_phase_index: int = maxi(_current_phase_index, 1)
+	while int(phase_controller.call("get_active_phase_index")) < target_phase_index:
+		if int(phase_controller.call("advance_to_next_phase")) < 0:
+			break
+	var issued_fireteams: PackedStringArray = []
+	for fireteam_id_variant in _selected_fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		var plan = _order_plans_by_key.get(_build_order_plan_key(fireteam_id, target_phase_index), null)
+		if plan == null or plan.waypoints.is_empty():
+			if _apply_default_fireteam_behavior(fireteam_id, target_phase_index):
+				issued_fireteams.append(fireteam_id.to_upper())
+			continue
+		for waypoint in plan.waypoints:
+			if waypoint != null and String(waypoint.status) != FIRETEAM_WAYPOINT_SCRIPT.STATUS_COMPLETED:
+				waypoint.status = FIRETEAM_WAYPOINT_SCRIPT.STATUS_PENDING
+		plan.status = FIRETEAM_ORDER_PLAN_SCRIPT.STATUS_PENDING
+		plan.active_waypoint_index = -1
+		if _activate_next_waypoint_for_plan(plan, fireteam_id, 0):
+			issued_fireteams.append(fireteam_id.to_upper())
+	if issued_fireteams.is_empty():
+		_last_command_text = "NO ORDERS TO EXECUTE"
+		_update_ui()
+		return false
+	_apply_fireteam_coordination_for_phase(target_phase_index)
+	_last_command_text = "GO %s (P%d)" % [", ".join(issued_fireteams), target_phase_index]
 	_refresh_button_state()
 	_refresh_order_visuals()
 	_update_ui()
@@ -954,6 +1011,10 @@ func _on_next_phase_pressed() -> void:
 	advance_to_next_phase()
 
 
+func _on_go_phase_pressed() -> void:
+	execute_selected_fireteam_orders()
+
+
 func _on_clear_target_pressed() -> void:
 	_snap_target_to_objective()
 	_last_command_text = "TARGET RESET TO OBJECTIVE"
@@ -1212,7 +1273,7 @@ func _update_ui() -> void:
 	var hotkey_legend_label := get_node_or_null(hotkey_legend_label_path) as Label
 	if hotkey_legend_label != null:
 		if preview_mode:
-			hotkey_legend_label.text = "PLANNING VIEW | RMB adds waypoint menu | LMB drags waypoint | DEL removes focused waypoint"
+			hotkey_legend_label.text = "MISSION PREVIEW | Homebase Start unlocks GO/orders | RMB waypoints | DEL removes"
 		else:
 			hotkey_legend_label.text = HOTKEY_LEGEND if _can_issue_local_commands() else "OBSERVER MODE | Host controls mission orders in multiplayer V1"
 
@@ -1469,6 +1530,7 @@ func _ensure_fireteam_phase_panel() -> Control:
 		{"name": "AddPhaseButton", "text": "+P", "callback": Callable(self, "_on_add_phase_pressed")},
 		{"name": "NextEditPhaseButton", "text": "Edit >", "callback": Callable(self, "_on_next_edit_phase_pressed")},
 		{"name": "NextPhaseButton", "text": "Next", "callback": Callable(self, "_on_next_phase_pressed")},
+		{"name": "GoPhaseButton", "text": "GO", "callback": Callable(self, "_on_go_phase_pressed"), "min_width": 64.0},
 	]
 	for spec_variant in button_specs:
 		var spec: Dictionary = Dictionary(spec_variant)
@@ -1476,7 +1538,7 @@ func _ensure_fireteam_phase_panel() -> Control:
 		var callback: Callable = spec.get("callback", Callable())
 		button.name = String(spec.get("name", "")).strip_edges()
 		button.text = String(spec.get("text", "")).strip_edges()
-		button.custom_minimum_size = Vector2(52.0, 22.0)
+		button.custom_minimum_size = Vector2(float(spec.get("min_width", 52.0)), 22.0)
 		button.add_theme_font_size_override("font_size", 8)
 		if not button.pressed.is_connected(callback):
 			button.pressed.connect(callback)
@@ -1533,6 +1595,7 @@ func _refresh_fireteam_phase_panel() -> void:
 	var add_button := panel.get_node_or_null("MarginContainer/VBoxContainer/PhaseActionRow/AddPhaseButton") as Button
 	var next_edit_button := panel.get_node_or_null("MarginContainer/VBoxContainer/PhaseActionRow/NextEditPhaseButton") as Button
 	var next_phase_button := panel.get_node_or_null("MarginContainer/VBoxContainer/PhaseActionRow/NextPhaseButton") as Button
+	var go_phase_button := panel.get_node_or_null("MarginContainer/VBoxContainer/PhaseActionRow/GoPhaseButton") as Button
 	for button in [prev_button, add_button, next_edit_button]:
 		if button == null:
 			continue
@@ -1541,6 +1604,10 @@ func _refresh_fireteam_phase_panel() -> void:
 	if next_phase_button != null:
 		next_phase_button.disabled = preview_mode or not _can_issue_local_commands()
 		META_UI_SKIN_SCRIPT.style_tactical_button(next_phase_button, not next_phase_button.disabled and not _phase_execution_by_fireteam.is_empty())
+	if go_phase_button != null:
+		go_phase_button.disabled = preview_mode or not _can_issue_local_commands() or not _has_selected_fireteam_orders_to_execute()
+		go_phase_button.tooltip_text = "Start the live mission from Homebase before GO can execute orders." if preview_mode else "Execute selected fireteam orders for the selected phase."
+		META_UI_SKIN_SCRIPT.style_tactical_button(go_phase_button, not go_phase_button.disabled)
 
 
 func _refresh_fireteam_status_panel() -> void:
@@ -2126,7 +2193,8 @@ func _build_fireteam_status_text() -> String:
 		drop_state_text = "%d embarked | %d deployed | Lead %s" % [embarked_count, deployed_count, lead_name]
 	elif deployed_count > 0:
 		drop_state_text = "%d deployed | Lead %s" % [deployed_count, lead_name]
-	return "%s | %d Karten | %d Wegpunkte | STANCE %s | EXEC %s | MOVE %s | SEC %s | FLK %s | %s" % [_get_fireteam_name(), units.size(), planned_waypoint_count, _build_selected_tactical_stance_text(), _build_selected_execution_quality_text(), _build_selected_movement_text(), _build_selected_security_text(), _build_selected_flank_vulnerability_text(), drop_state_text]
+	var mode_text: String = "PREVIEW - START MISSION FOR GO | " if preview_mode else ""
+	return "%s%s | %d Karten | %d Wegpunkte | STANCE %s | EXEC %s | MOVE %s | SEC %s | FLK %s | %s" % [mode_text, _get_fireteam_name(), units.size(), planned_waypoint_count, _build_selected_tactical_stance_text(), _build_selected_execution_quality_text(), _build_selected_movement_text(), _build_selected_security_text(), _build_selected_flank_vulnerability_text(), drop_state_text]
 
 
 func _build_strategic_status_text() -> String:
@@ -2144,6 +2212,8 @@ func _build_strategic_status_text() -> String:
 		ship_text = "Dropship staged off-map"
 	if _drop_ship_requested:
 		ship_text = "Drop aus %s angefordert" % _get_approach_angle_name()
+	if preview_mode:
+		ship_text = "%s (Preview)" % ship_text
 	if not preview_mode and _drop_ship_cooldown_remaining > 0.0 and _drop_sequence_phase.is_empty():
 		ship_text = "Drop bereit in %.1fs" % _drop_ship_cooldown_remaining
 	if _drop_sequence_phase == DROP_SEQUENCE_INBOUND:
@@ -2293,9 +2363,7 @@ func _refresh_mission_dropship_panel() -> void:
 		return
 	panel.visible = false
 	var is_transit: bool = _mission_drop_state == "to_mission" or _mission_drop_state == "to_fob" or _mission_drop_state == "waiting" or _drop_sequence_phase == DROP_SEQUENCE_INBOUND or _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND
-	var ship_texture := _load_optional_texture(_mission_drop_texture_path)
-	if ship_texture == null:
-		ship_texture = _get_dropship_marker_texture()
+	var ship_texture := _get_mission_dropship_texture()
 	TRANSPORT_CRAFT_CARD_UI_SCRIPT.apply_card_state(
 		panel,
 		{
@@ -2626,8 +2694,7 @@ func _refresh_world_overlays() -> void:
 			else:
 				dropship_marker.global_position = _get_drop_staging_position()
 			if sprite != null:
-				var mission_drop_texture := _load_optional_texture(_mission_drop_texture_path)
-				sprite.texture = mission_drop_texture if mission_drop_texture != null else _get_dropship_marker_texture()
+				sprite.texture = _get_mission_dropship_texture()
 			var approach_line := dropship_marker.get_node_or_null("ApproachLine") as Line2D
 			if approach_line != null:
 				approach_line.clear_points()
@@ -3895,6 +3962,8 @@ func _refresh_order_visuals() -> void:
 		return
 	visualizer.call("set_phase_index", _current_phase_index)
 	visualizer.call("set_selected_fireteam_ids", _selected_fireteam_ids)
+	if visualizer.has_method("set_fireteam_anchor_dicts"):
+		visualizer.call("set_fireteam_anchor_dicts", _build_fireteam_anchor_visualization_entries())
 	visualizer.call("set_plan_dicts", _serialize_order_plans())
 	visualizer.call("set_ad_hoc_order_dicts", _build_ad_hoc_visualization_entries())
 	visualizer.call("set_security_dicts", get_fireteam_security_snapshot())
@@ -3947,6 +4016,22 @@ func _create_waypoints_for_selected_fireteams(world_position: Vector2) -> Array:
 		waypoint_targets.append(waypoint_target)
 	_refresh_order_visuals()
 	return waypoint_targets
+
+
+func _build_fireteam_anchor_visualization_entries() -> Array:
+	var entries: Array = []
+	for fireteam_id_variant in _get_available_fireteam_ids():
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		var anchor := _get_selection_anchor_for_fireteam(fireteam_id)
+		if anchor == null:
+			continue
+		entries.append({
+			"fireteam_id": fireteam_id,
+			"position": anchor.global_position,
+		})
+	return entries
 
 
 func _append_waypoint_to_plan(fireteam_id: String, phase_index: int, world_position: Vector2) -> Dictionary:
@@ -4069,6 +4154,22 @@ func _has_pending_global_phase() -> bool:
 	if phase_controller == null:
 		return false
 	return int(phase_controller.call("get_active_phase_index")) < int(phase_controller.call("get_phase_count")) - 1
+
+
+func _has_selected_fireteam_orders_to_execute() -> bool:
+	if _selected_fireteam_ids.is_empty():
+		return false
+	for fireteam_id_variant in _selected_fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty() or not _is_fireteam_runtime_active(fireteam_id):
+			continue
+		var plan = _order_plans_by_key.get(_build_order_plan_key(fireteam_id, _current_phase_index), null)
+		if plan == null:
+			continue
+		for waypoint in plan.waypoints:
+			if waypoint != null and String(waypoint.status) != FIRETEAM_WAYPOINT_SCRIPT.STATUS_COMPLETED:
+				return true
+	return false
 
 
 func _get_shared_selected_tactical_stance() -> String:
@@ -5392,6 +5493,21 @@ func _get_dropship_marker_texture() -> Texture2D:
 			return _get_dropship_texture_for_angle(_get_opposite_approach_angle_name())
 
 
+func _get_mission_dropship_texture() -> Texture2D:
+	if _is_drop_sequence_active():
+		return _get_dropship_marker_texture()
+	match _mission_drop_state:
+		"to_mission":
+			return _get_dropship_texture_for_angle(_get_opposite_approach_angle_name())
+		"to_fob":
+			return _get_dropship_texture_for_angle(_get_approach_angle_name())
+		"waiting":
+			return _get_dropship_texture_for_angle("SE")
+		_:
+			var mission_drop_texture := _load_optional_texture(_mission_drop_texture_path)
+			return mission_drop_texture if mission_drop_texture != null else _get_dropship_texture_for_angle("SE")
+
+
 func _get_dropship_texture_for_angle(angle_name: String) -> Texture2D:
 	match angle_name.strip_edges().to_upper():
 		"NE":
@@ -5483,6 +5599,7 @@ func _apply_drop_presence_state_to_units() -> void:
 	var uses_deferred_activation: bool = mission_setup != null and bool(mission_setup.get("defer_friendly_runtime_activation"))
 	if not uses_deferred_activation and _embarked_unit_ids.is_empty() and _deployed_unit_ids.is_empty():
 		return
+	var deployed_index: int = 0
 	for unit in _get_all_friendly_units(true):
 		if unit == null or not unit.has_method("get_unit_id") or not (unit is CanvasItem):
 			continue
@@ -5502,7 +5619,12 @@ func _apply_drop_presence_state_to_units() -> void:
 		if preview_mode:
 			(unit as CanvasItem).visible = desired_visible
 		else:
-			_enqueue_dropship_presence_effect(unit, unit_id, desired_visible)
+			if _deployed_unit_ids.has(unit_id):
+				_enqueue_dropship_deploy_effect(unit, unit_id, _lz_position + _get_unload_offset(deployed_index))
+				_runtime_activation_pending_fireteam_ids[String(unit.call("get_fireteam_id")).strip_edges().to_lower()] = true
+				deployed_index += 1
+			else:
+				_enqueue_dropship_presence_effect(unit, unit_id, desired_visible)
 
 
 func _get_unload_offset(index: int) -> Vector2:
@@ -5634,6 +5756,11 @@ func _is_fireteam_runtime_active(fireteam_id: String) -> bool:
 		return false
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty():
+		return false
+	if not _use_visible_units_for_fireteam_ui():
+		for active_unit in _get_fireteam_units(normalized_fireteam_id, false):
+			if active_unit != null and active_unit.has_method("get_unit_id"):
+				return true
 		return false
 	for unit in _get_fireteam_units(normalized_fireteam_id, true):
 		if unit == null or not unit.has_method("get_unit_id"):

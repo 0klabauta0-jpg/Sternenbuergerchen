@@ -12,9 +12,9 @@ func _init() -> void:
 
 func _run_tests() -> void:
 	print("=== TASK_114 Meta-Recovery Verifier ===")
-	await _test_preview_map_hides_fireteam_cards_until_deployed()
-	await _test_preview_map_without_fob_team_exposes_no_legacy_fireteams()
-	await _test_preview_map_renders_homebase_transfer_route_overlay()
+	await _test_mission_nav_starts_live_mission_with_fireteam_cards()
+	await _test_mission_nav_without_fob_team_keeps_no_legacy_preview_fireteams()
+	await _test_live_mission_nav_disables_preview_transfer_route_overlay()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	if _failed > 0:
 		print("FAIL")
@@ -23,7 +23,7 @@ func _run_tests() -> void:
 	quit()
 
 
-func _test_preview_map_hides_fireteam_cards_until_deployed() -> void:
+func _test_mission_nav_starts_live_mission_with_fireteam_cards() -> void:
 	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
 	root.add_child(scene)
 	await _wait_frames(4)
@@ -55,27 +55,29 @@ func _test_preview_map_hides_fireteam_cards_until_deployed() -> void:
 	scene.call("_show_map")
 	await _wait_frames(6)
 
-	var preview_mission: Node = mission_host.get_child(0) if mission_host.get_child_count() > 0 else null
-	var mission_setup := preview_mission.get_node("MissionSetup") as Node if preview_mission != null else null
-	var tactical_controller := preview_mission.get_node("TacticalController") as Node if preview_mission != null else null
+	var active_mission: Node = scene.call("get_active_mission")
+	var mission_host_child: Node = mission_host.get_child(0) if mission_host.get_child_count() > 0 else null
+	var mission_setup := active_mission.get_node("MissionSetup") as Node if active_mission != null else null
+	var tactical_controller := active_mission.get_node("TacticalController") as Node if active_mission != null else null
 	var member_loadouts: Dictionary = mission_setup.get("member_loadouts") if mission_setup != null and typeof(mission_setup.get("member_loadouts")) == TYPE_DICTIONARY else {}
-	var cards_host := preview_mission.get_node("TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox") as Control if preview_mission != null else null
-	var fireteam_panel := preview_mission.get_node("TacticalUI/FireteamMiniPanel") as Control if preview_mission != null else null
+	var cards_host := active_mission.get_node("TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox") as Control if active_mission != null else null
+	var fireteam_panel := active_mission.get_node("TacticalUI/FireteamMiniPanel") as Control if active_mission != null else null
 	var available_fireteams: PackedStringArray = PackedStringArray(tactical_controller.call("_get_available_fireteam_ids")) if tactical_controller != null else PackedStringArray()
 	var displayable_fireteams: PackedStringArray = PackedStringArray(tactical_controller.call("_get_displayable_fireteam_ids")) if tactical_controller != null else PackedStringArray()
 
-	_assert(preview_mission != null, "Meta map keeps a preview mission instance alive for the route/loadout checks")
-	_assert(member_loadouts.has("unit_alpha"), "Preview mission receives the per-member loadout dictionary from the FOB bridge")
-	_assert(available_fireteams == PackedStringArray(["ft1"]), "Preview mission still knows which FOB fireteam is configured for later deployment")
-	_assert(displayable_fireteams.is_empty(), "Preview mission does not expose a fireteam on the map before it has actually landed there")
-	_assert(cards_host != null and cards_host.get_child_count() == 0, "Preview mission keeps the mini-card host empty before the fireteam is on the mission map")
-	_assert(fireteam_panel != null and not fireteam_panel.visible, "Preview mission hides the fireteam mini-card panel until a deployed fireteam is actually present on the map")
+	_assert(active_mission != null and mission_host_child == active_mission, "Mission nav now starts a live mission instance instead of a preview")
+	_assert(tactical_controller != null and not bool(tactical_controller.get("preview_mode")), "Mission nav live instance is not in preview mode")
+	_assert(member_loadouts.has("unit_alpha"), "Live mission receives the per-member loadout dictionary from the FOB bridge")
+	_assert(available_fireteams == PackedStringArray(["ft1"]), "Live mission knows the configured FOB fireteam")
+	_assert(displayable_fireteams == PackedStringArray(["ft1"]), "Live mission exposes the configured fireteam immediately for movement testing")
+	_assert(cards_host != null and cards_host.get_child_count() == 1, "Live mission shows the configured fireteam mini-card immediately")
+	_assert(fireteam_panel != null and fireteam_panel.visible, "Live mission keeps the fireteam mini-card panel visible for command testing")
 
 	scene.queue_free()
 	await process_frame
 
 
-func _test_preview_map_without_fob_team_exposes_no_legacy_fireteams() -> void:
+func _test_mission_nav_without_fob_team_keeps_no_legacy_preview_fireteams() -> void:
 	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
 	root.add_child(scene)
 	await _wait_frames(4)
@@ -88,22 +90,22 @@ func _test_preview_map_without_fob_team_exposes_no_legacy_fireteams() -> void:
 	await _wait_frames(6)
 
 	var mission_host: Node = scene.get_node("MissionHost")
-	var preview_mission: Node = mission_host.get_child(0) if mission_host.get_child_count() > 0 else null
-	var tactical_controller := preview_mission.get_node("TacticalController") as Node if preview_mission != null else null
-	var cards_host := preview_mission.get_node("TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox") as Control if preview_mission != null else null
-	var fireteam_panel := preview_mission.get_node("TacticalUI/FireteamMiniPanel") as Control if preview_mission != null else null
+	var active_mission: Node = scene.call("get_active_mission")
+	var tactical_controller := active_mission.get_node("TacticalController") as Node if active_mission != null else null
+	var cards_host := active_mission.get_node("TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox") as Control if active_mission != null else null
+	var fireteam_panel := active_mission.get_node("TacticalUI/FireteamMiniPanel") as Control if active_mission != null else null
 	var available_fireteams: PackedStringArray = PackedStringArray(tactical_controller.call("_get_available_fireteam_ids")) if tactical_controller != null else PackedStringArray()
 
-	_assert(preview_mission != null, "Meta map still builds its preview mission surface even without a staged FOB team")
-	_assert(available_fireteams.is_empty(), "Preview mission no longer invents legacy BLUE/GOLD fireteams when no FOB team was assembled")
-	_assert(cards_host != null and cards_host.get_child_count() == 0, "Preview mission shows no fireteam mini-cards when nothing was staged in the FOB")
-	_assert(fireteam_panel != null and not fireteam_panel.visible, "Preview mission keeps the mini fireteam panel hidden when there is no staged team")
+	_assert(scene.get("_preview_mission") == null, "Mission nav does not keep a preview mission around without a staged FOB team")
+	_assert(active_mission == null or available_fireteams.is_empty(), "Live mission no longer invents legacy BLUE/GOLD fireteams when no FOB team was assembled")
+	_assert(active_mission == null or (cards_host != null and cards_host.get_child_count() == 0), "Live mission shows no fireteam mini-cards when nothing was staged in the FOB")
+	_assert(active_mission == null or (fireteam_panel != null and not fireteam_panel.visible), "Live mission keeps the mini fireteam panel hidden when there is no staged team")
 
 	scene.queue_free()
 	await process_frame
 
 
-func _test_preview_map_renders_homebase_transfer_route_overlay() -> void:
+func _test_live_mission_nav_disables_preview_transfer_route_overlay() -> void:
 	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
 	root.add_child(scene)
 	await _wait_frames(4)
@@ -168,22 +170,26 @@ func _test_preview_map_renders_homebase_transfer_route_overlay() -> void:
 	scene.call("_show_map")
 	await _wait_frames(6)
 
-	var preview_mission: Node = mission_host.get_child(0) if mission_host.get_child_count() > 0 else null
-	var overlay := preview_mission.get_node("MetaTransferRouteOverlay") as Node2D if preview_mission != null else null
+	var active_mission: Node = scene.call("get_active_mission")
+	var mission_host_child: Node = mission_host.get_child(0) if mission_host.get_child_count() > 0 else null
+	var tactical_controller := active_mission.get_node("TacticalController") as Node if active_mission != null else null
+	var overlay := active_mission.get_node("MetaTransferRouteOverlay") as Node2D if active_mission != null else null
 	var route_line := overlay.get_node("RouteLine") as Line2D if overlay != null else null
 	var marker_host := overlay.get_node("RouteMarkerHost") as Node2D if overlay != null else null
-	var strategic_status := preview_mission.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicStatusLabel") as Label if preview_mission != null else null
+	var strategic_status := active_mission.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicStatusLabel") as Label if active_mission != null else null
 	var marker_types: Array = []
 	if marker_host != null:
 		for child in marker_host.get_children():
 			marker_types.append(String((child as Node).get_meta("entry_type", "")))
 
-	_assert(preview_mission != null, "Meta map preview mission exists while transfer routes are active")
-	_assert(overlay != null and overlay.visible, "Preview mission renders the dedicated Homebase-to-FOB transfer overlay")
-	_assert(route_line != null and route_line.points.size() == 3, "Transfer overlay exposes a distinct three-point route path on the preview map")
-	_assert(marker_host != null and marker_host.get_child_count() == 2, "Transfer overlay renders one moving marker per active Homebase transfer entry")
-	_assert(marker_types.has("team") and marker_types.has("pilot"), "Transfer overlay keeps separate markers for team and pilot/craft transfers")
-	_assert(strategic_status != null and strategic_status.text.contains("HB->FOB"), "Mission control text calls out the active Homebase transfer route while the preview map is open")
+	_assert(active_mission != null and mission_host_child == active_mission, "Mission nav starts a live mission while Homebase transfers are active")
+	_assert(tactical_controller != null and not bool(tactical_controller.get("preview_mode")), "Homebase transfer route check uses a live mission instance")
+	_assert(scene.get("_preview_mission") == null, "Preview mission stays disabled while Homebase transfers are active")
+	_assert(overlay == null or not overlay.visible, "Preview-only Homebase transfer route overlay stays hidden in live mission mode")
+	_assert(route_line == null or route_line.points.is_empty(), "Live mission mode does not draw the preview transfer route line")
+	_assert(marker_host == null or marker_host.get_child_count() == 0, "Live mission mode does not draw preview transfer route markers")
+	_assert(marker_types.is_empty(), "Live mission mode keeps preview transfer marker types empty")
+	_assert(strategic_status == null or not strategic_status.text.contains("HB->FOB"), "Mission control no longer advertises the preview transfer route in live mission mode")
 
 	scene.queue_free()
 	await process_frame

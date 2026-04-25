@@ -26,10 +26,14 @@ func _run_tests() -> void:
 	print("=== TASK_110 Fireteam Movement Controller Verifier ===")
 	_test_rush_moves_all_fit_members_with_cohesion_clamp()
 	_test_bounding_rotates_cover_and_movement_groups()
+	_test_bounding_keeps_bound_anchor_until_lead_moves()
 	_test_caterpillar_moves_one_member_at_a_time()
 	_test_losses_simplify_coordinated_patterns_to_rush()
 	_test_bound_complete_event_router_contract()
 	await _test_scene_exposes_runtime_movement_snapshot()
+	await _test_go_button_starts_planned_fireteam_execution()
+	await _test_go_button_moves_meta_fireteam_id()
+	await _test_go_button_moves_all_selected_meta_fireteam_ids()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	if _failed > 0:
 		print("FAIL")
@@ -77,6 +81,35 @@ func _test_bounding_rotates_cover_and_movement_groups() -> void:
 	var next_state: Dictionary = Dictionary(update_result.get("movement_state", {}))
 	var next_moving_ids: PackedStringArray = PackedStringArray(next_state.get("current_moving_unit_ids", PackedStringArray()))
 	_assert(next_moving_ids.has("bound_lead"), "Bounding rotates to the next group after a completed bound")
+	_cleanup_units([leader, scout, marksman, rifleman])
+
+
+func _test_bounding_keeps_bound_anchor_until_lead_moves() -> void:
+	var controller = FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT.new()
+	var simulation = SimulationStub.new()
+	var leader = _make_unit("anchor_lead", "blue", true, Vector2(0.0, 0.0), 0.5, 0.45, 0.82, 0.55, ["steady"])
+	var scout = _make_unit("anchor_scout", "blue", false, Vector2(-24.0, 10.0), 0.94, 0.3, 0.35, 0.42, [])
+	var marksman = _make_unit("anchor_marksman", "blue", false, Vector2(20.0, 12.0), 0.42, 0.96, 0.3, 0.44, [])
+	var rifleman = _make_unit("anchor_rifleman", "blue", false, Vector2(8.0, 30.0), 0.58, 0.46, 0.28, 0.48, [])
+	var profile = _make_profile("blue", "bounding", 96.0)
+	var result: Dictionary = controller.start_execution("blue", "move", 1, Vector2(460.0, 120.0), profile, [leader, scout, marksman, rifleman], leader, simulation)
+	var movement_state: Dictionary = Dictionary(result.get("movement_state", {}))
+	var first_anchor: Vector2 = Vector2(movement_state.get("current_anchor_target_position", Vector2.ZERO))
+	var first_moving_ids: PackedStringArray = PackedStringArray(movement_state.get("current_moving_unit_ids", PackedStringArray()))
+	_move_units_to_targets([leader, scout, marksman, rifleman], Dictionary(movement_state.get("current_target_positions", {})), first_moving_ids)
+	var update_result: Dictionary = controller.update_execution("blue", [leader, scout, marksman, rifleman], leader, simulation)
+	var next_state: Dictionary = Dictionary(update_result.get("movement_state", {}))
+	var next_moving_ids: PackedStringArray = PackedStringArray(next_state.get("current_moving_unit_ids", PackedStringArray()))
+	var next_anchor: Vector2 = Vector2(next_state.get("current_anchor_target_position", Vector2.ZERO))
+	var next_targets: Dictionary = Dictionary(next_state.get("current_target_positions", {}))
+	_assert(next_moving_ids.has("anchor_lead"), "Bounding moves the FTL on the second group of the same bound")
+	_assert(next_anchor.distance_to(first_anchor) <= 0.1, "Bounding keeps the same bound anchor until the FTL group catches up")
+	_assert(Vector2(next_targets.get("anchor_lead", Vector2.ZERO)).distance_to(first_anchor) <= 0.1, "FTL target is the current bound anchor, not a later virtual anchor")
+	_move_units_to_targets([leader, scout, marksman, rifleman], next_targets, next_moving_ids)
+	var next_update_result: Dictionary = controller.update_execution("blue", [leader, scout, marksman, rifleman], leader, simulation)
+	var third_state: Dictionary = Dictionary(next_update_result.get("movement_state", {}))
+	var third_anchor: Vector2 = Vector2(third_state.get("current_anchor_target_position", first_anchor))
+	_assert(third_anchor.distance_to(first_anchor) > 1.0, "Bounding advances to the next anchor only after both groups completed the bound")
 	_cleanup_units([leader, scout, marksman, rifleman])
 
 
@@ -152,6 +185,113 @@ func _test_scene_exposes_runtime_movement_snapshot() -> void:
 	await process_frame
 
 
+func _test_go_button_starts_planned_fireteam_execution() -> void:
+	var scene = await _load_scene()
+	var controller = scene.get_node("TacticalController")
+	controller.call("_set_selected_fireteams", PackedStringArray(["blue"]), false)
+	controller.call("_create_waypoints_for_selected_fireteams", Vector2(280.0, 180.0))
+	controller.call("_refresh_fireteam_phase_panel")
+	var blue_units: Array = Array(controller.call("_get_fireteam_units", "blue", true))
+	var positions_before: Dictionary = {}
+	for unit in blue_units:
+		if unit is Node2D and unit.has_method("get_unit_id"):
+			positions_before[String(unit.call("get_unit_id"))] = (unit as Node2D).global_position
+	var go_button := scene.find_child("GoPhaseButton", true, false) as Button
+	_assert(go_button != null, "Mission tactical controller exposes a GO button in the fireteam phase panel")
+	if go_button != null:
+		_assert(not go_button.disabled, "GO button is enabled when a planned phase can start")
+		go_button.emit_signal("pressed")
+	await process_frame
+	for _index in range(6):
+		await physics_frame
+	var snapshot: Array = Array(controller.call("get_fireteam_movement_snapshot"))
+	var has_blue_execution := false
+	for entry_variant in snapshot:
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("fireteam_id", "")) == "blue":
+			has_blue_execution = true
+			break
+	_assert(has_blue_execution, "GO button starts the planned fireteam execution")
+	var did_move := false
+	for unit in blue_units:
+		if not (unit is Node2D) or not unit.has_method("get_unit_id"):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id"))
+		if positions_before.has(unit_id) and (unit as Node2D).global_position.distance_to(Vector2(positions_before[unit_id])) > 0.5:
+			did_move = true
+			break
+	_assert(did_move, "GO button moves the selected fireteam through SimulationRoot")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_go_button_moves_meta_fireteam_id() -> void:
+	var scene = await _load_scene(PackedStringArray(["ft1", "ft1", "ft1"]))
+	var controller = scene.get_node("TacticalController")
+	controller.call("_set_selected_fireteams", PackedStringArray(["ft1"]), false)
+	controller.call("_create_waypoints_for_selected_fireteams", Vector2(300.0, 190.0))
+	controller.call("_refresh_fireteam_phase_panel")
+	var ft1_units: Array = Array(controller.call("_get_fireteam_units", "ft1", true))
+	var positions_before: Dictionary = {}
+	for unit in ft1_units:
+		if unit is Node2D and unit.has_method("get_unit_id"):
+			positions_before[String(unit.call("get_unit_id"))] = (unit as Node2D).global_position
+	var go_button := scene.find_child("GoPhaseButton", true, false) as Button
+	_assert(go_button != null, "Mission tactical controller exposes GO for meta fireteam ids")
+	if go_button != null:
+		_assert(not go_button.disabled, "GO button is enabled for FT1 planned orders")
+		go_button.emit_signal("pressed")
+	await process_frame
+	for _index in range(6):
+		await physics_frame
+	var did_move := false
+	for unit in ft1_units:
+		if not (unit is Node2D) or not unit.has_method("get_unit_id"):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id"))
+		if positions_before.has(unit_id) and (unit as Node2D).global_position.distance_to(Vector2(positions_before[unit_id])) > 0.5:
+			did_move = true
+			break
+	_assert(did_move, "GO button moves FT1 fireteams configured through the meta layer")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_go_button_moves_all_selected_meta_fireteam_ids() -> void:
+	var scene = await _load_scene(PackedStringArray(["ft1", "ft1", "ft1"]))
+	var controller = scene.get_node("TacticalController")
+	controller.call("_set_selected_fireteams", PackedStringArray(["ft1"]), false)
+	controller.call("_create_waypoints_for_selected_fireteams", Vector2(300.0, 190.0))
+	controller.call("_create_waypoints_for_selected_fireteams", Vector2(360.0, 160.0))
+	controller.call("_create_waypoints_for_selected_fireteams", Vector2(420.0, 130.0))
+	controller.call("_set_selected_fireteams", PackedStringArray(["ft1"]), false)
+	controller.call("_refresh_fireteam_phase_panel")
+	var ft1_units: Array = Array(controller.call("_get_fireteam_units", "ft1", true))
+	var positions_before: Dictionary = {}
+	for unit in ft1_units:
+		if unit is Node2D and unit.has_method("get_unit_id"):
+			positions_before[String(unit.call("get_unit_id"))] = (unit as Node2D).global_position
+	var go_button := scene.find_child("GoPhaseButton", true, false) as Button
+	_assert(go_button != null, "Mission tactical controller exposes GO for the ALL-style fireteam selection")
+	if go_button != null:
+		_assert(not go_button.disabled, "GO button is enabled for ALL-style selected FT1 orders")
+		go_button.emit_signal("pressed")
+	await process_frame
+	for _index in range(6):
+		await physics_frame
+	var did_move := false
+	for unit in ft1_units:
+		if not (unit is Node2D) or not unit.has_method("get_unit_id"):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id"))
+		if positions_before.has(unit_id) and (unit as Node2D).global_position.distance_to(Vector2(positions_before[unit_id])) > 0.5:
+			did_move = true
+			break
+	_assert(did_move, "GO button moves a multi-waypoint FT1 plan from the ALL-style selection")
+	scene.queue_free()
+	await process_frame
+
+
 func _make_profile(fireteam_id: String, advance_style: String, cohesion_threshold: float):
 	var profile = FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.new()
 	profile.fireteam_id = fireteam_id
@@ -208,8 +348,12 @@ func _cleanup_units(units: Array) -> void:
 			unit.queue_free()
 
 
-func _load_scene() -> Node:
+func _load_scene(selected_fireteam_ids: PackedStringArray = PackedStringArray()) -> Node:
 	var scene = load("res://scenes/tests/mission_reactivity_test.tscn").instantiate()
+	if not selected_fireteam_ids.is_empty():
+		var mission_setup: Node = scene.get_node_or_null("MissionSetup")
+		if mission_setup != null:
+			mission_setup.set("selected_team_fireteam_ids", selected_fireteam_ids)
 	root.add_child(scene)
 	for _index in range(10):
 		await process_frame
