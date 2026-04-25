@@ -359,8 +359,8 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 	var flank_modifiers: Dictionary = Dictionary(decision.get("flank_modifiers", {}))
 	_maybe_publish_flank_event(flank_modifiers, attacker, actual_target)
 	if is_friendly_fire and attacker.has_method("show_event_text"):
-		attacker.call("show_event_text", "FRIENDLY FIRE!", MISIDENTIFICATION_EVENT_COLOR, 1.6)
-		_broadcast_remote_event("%s verwechselt Ziel! -> %s" % [attacker_id, actual_target_id], attacker_id, MISIDENTIFICATION_EVENT_COLOR, 1.6, "FRIENDLY FIRE!")
+		attacker.call("show_event_text", "EIGENBESCHUSS!", MISIDENTIFICATION_EVENT_COLOR, 1.6)
+		_broadcast_remote_event("%s verwechselt Ziel! -> %s" % [attacker_id, actual_target_id], attacker_id, MISIDENTIFICATION_EVENT_COLOR, 1.6, "EIGENBESCHUSS!")
 	_next_attack_tick = _current_tick + max(int(decision.get("weapon_ticks", 1)), 1)
 
 
@@ -746,9 +746,11 @@ func _check_discipline_break(unit) -> bool:
 		return false
 
 	_discipline_break_cooldown[unit_id] = DISCIPLINE_BREAK_COOLDOWN_TICKS
-	var event_msg: String = "%s bricht Hold-Fire!" % unit_id
+	var event_msg: String = "%s bricht Feuerstopp!" % unit_id
 	_set_event_text(event_msg)
-	_broadcast_remote_event(event_msg)
+	if unit.has_method("show_event_text"):
+		unit.call("show_event_text", "FEUERSTOPP GEBROCHEN!", DISCIPLINE_BREAK_EVENT_COLOR, 1.6)
+	_broadcast_remote_event(event_msg, unit_id, DISCIPLINE_BREAK_EVENT_COLOR, 1.6, "FEUERSTOPP GEBROCHEN!")
 	return true
 
 

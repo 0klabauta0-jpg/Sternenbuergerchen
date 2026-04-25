@@ -29,6 +29,12 @@ const FIRETEAM_LABEL_SPACING: float = 8.0
 const EVENT_LABEL_OFFSET: Vector2 = Vector2(-42.0, -70.0)
 const EVENT_DURATION_SECONDS: float = 1.2
 const REMOTE_POSITION_LERP_WEIGHT: float = 0.75
+const WORLD_EVENT_LABEL_ALLOWLIST: PackedStringArray = [
+	"FEUERSTOPP GEBROCHEN!",
+	"EIGENBESCHUSS!",
+	"DOWN",
+	"BLEEDOUT",
+]
 
 signal runtime_status_changed(runtime_status)
 signal unit_command_assigned(command)
@@ -956,6 +962,9 @@ func set_tactical_selected(is_selected: bool) -> void:
 
 
 func show_event_text(event_text: String, event_color: Color = Color(1.0, 0.95, 0.5, 1.0), duration_seconds: float = EVENT_DURATION_SECONDS) -> void:
+	var normalized_event_text: String = event_text.strip_edges()
+	if not _should_show_world_event_text(normalized_event_text):
+		return
 	_current_event_text = event_text
 	_current_event_color = event_color
 	_event_time_remaining = duration_seconds
@@ -965,6 +974,12 @@ func show_event_text(event_text: String, event_color: Color = Color(1.0, 0.95, 0
 func set_world_debug_labels_visible(visible: bool) -> void:
 	show_world_debug_labels = visible
 	_sync_readability_positions()
+
+
+func _should_show_world_event_text(event_text: String) -> bool:
+	if event_text.is_empty():
+		return false
+	return WORLD_EVENT_LABEL_ALLOWLIST.has(event_text.to_upper())
 
 
 func _build_runtime_status(

@@ -45,6 +45,16 @@ const SELECTION_DRAG_THRESHOLD: float = 10.0
 const WAYPOINT_DRAG_THRESHOLD: float = 4.0
 const PHASE_WAYPOINT_COMPLETE_RADIUS: float = 26.0
 const AD_HOC_ORDER_COMPLETE_RADIUS: float = 28.0
+const DEV_CHARACTER_STAT_ROWS: Array = [
+	{"key": "skill_accuracy", "label": "Treffsicherheit"},
+	{"key": "skill_speed", "label": "Tempo"},
+	{"key": "skill_leadership", "label": "Fuehrung"},
+	{"key": "skill_toughness", "label": "Zaehigkeit"},
+	{"key": "awareness", "label": "Aufmerksamkeit"},
+	{"key": "recognition", "label": "Erkennung"},
+	{"key": "discipline", "label": "Disziplin"},
+	{"key": "stealth", "label": "Tarnung"},
+]
 const SUPPRESSION_HIT_GAIN: float = 1.5
 const SUPPRESSION_NEAR_MISS_GAIN: float = 0.35
 const SUPPRESSION_BASE_DECAY_PER_SECOND: float = 0.2
@@ -1990,6 +2000,8 @@ func _update_character_overlay() -> void:
 		render_options["loadout_text"] = _build_tactical_loadout_text(unit)
 		render_options["fireteam_text"] = _build_tactical_fireteam_text(unit)
 	CHARACTER_SHEET_VIEW_SCRIPT.render(host, profile, render_options)
+	if unit != null:
+		_append_character_overlay_dev_editor(host, unit)
 
 
 func _find_friendly_unit_by_id(unit_id: String) -> Node:
@@ -2014,6 +2026,121 @@ func _get_character_overlay_host() -> VBoxContainer:
 	if overlay == null:
 		return null
 	return overlay.get_node_or_null("OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox") as VBoxContainer
+
+
+func _append_character_overlay_dev_editor(host: VBoxContainer, unit: Node) -> void:
+	if host == null or unit == null or not unit.has_method("apply_identity_config"):
+		return
+
+	var panel := PanelContainer.new()
+	panel.name = "DevStatsPanel"
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "subtle")
+	host.add_child(panel)
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 8)
+	margin.add_theme_constant_override("margin_top", 8)
+	margin.add_theme_constant_override("margin_right", 8)
+	margin.add_theme_constant_override("margin_bottom", 8)
+	panel.add_child(margin)
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 6)
+	margin.add_child(vbox)
+
+	var header := Label.new()
+	header.text = "DEV-WERTE"
+	META_UI_SKIN_SCRIPT.style_header_label(header, 11)
+	vbox.add_child(header)
+
+	var hint := Label.new()
+	hint.text = "Nur zum Balancing waehrend der Entwicklung. Werte werden auf die laufende Unit angewendet."
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	META_UI_SKIN_SCRIPT.style_body_label(hint, 9)
+	vbox.add_child(hint)
+
+	var unit_id: String = String(unit.call("get_unit_id")) if unit.has_method("get_unit_id") else ""
+	for row_variant in DEV_CHARACTER_STAT_ROWS:
+		var row_data: Dictionary = row_variant
+		var stat_key: String = String(row_data.get("key", "")).strip_edges()
+		if stat_key.is_empty():
+			continue
+		_append_character_overlay_dev_slider(vbox, unit, unit_id, stat_key, String(row_data.get("label", stat_key)))
+
+
+func _append_character_overlay_dev_slider(host: VBoxContainer, unit: Node, unit_id: String, stat_key: String, label_text: String) -> void:
+	var row := HBoxContainer.new()
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_theme_constant_override("separation", 8)
+	host.add_child(row)
+
+	var label := Label.new()
+	label.text = "%s:" % label_text
+	label.custom_minimum_size = Vector2(96.0, 0.0)
+	META_UI_SKIN_SCRIPT.style_body_label(label, 9)
+	row.add_child(label)
+
+	var slider := HSlider.new()
+	slider.name = "Dev_%s" % stat_key
+	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	slider.min_value = 0.0
+	slider.max_value = 1.0
+	slider.step = 0.01
+	slider.value = _get_unit_dev_stat_value(unit, stat_key)
+	row.add_child(slider)
+
+	var value_label := Label.new()
+	value_label.text = "%.2f" % slider.value
+	value_label.custom_minimum_size = Vector2(42.0, 0.0)
+	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	META_UI_SKIN_SCRIPT.style_body_label(value_label, 9)
+	row.add_child(value_label)
+
+	if not slider.value_changed.is_connected(_on_dev_unit_slider_preview_changed):
+		slider.value_changed.connect(_on_dev_unit_slider_preview_changed.bind(value_label))
+	if not slider.drag_ended.is_connected(_on_dev_unit_slider_drag_ended):
+		slider.drag_ended.connect(_on_dev_unit_slider_drag_ended.bind(slider, unit_id, stat_key))
+
+
+func _get_unit_dev_stat_value(unit: Node, stat_key: String) -> float:
+	if unit == null:
+		return 0.0
+	match stat_key:
+		"skill_accuracy":
+			return float(unit.call("get_accuracy_skill")) if unit.has_method("get_accuracy_skill") else 0.0
+		"skill_speed":
+			return float(unit.call("get_speed_skill")) if unit.has_method("get_speed_skill") else 0.0
+		"skill_leadership":
+			return float(unit.call("get_leadership_skill")) if unit.has_method("get_leadership_skill") else 0.0
+		"skill_toughness":
+			return float(unit.call("get_toughness_skill")) if unit.has_method("get_toughness_skill") else 0.0
+		"awareness":
+			return float(unit.call("get_awareness")) if unit.has_method("get_awareness") else 0.0
+		"recognition":
+			return float(unit.call("get_recognition")) if unit.has_method("get_recognition") else 0.0
+		"discipline":
+			return float(unit.call("get_discipline")) if unit.has_method("get_discipline") else 0.0
+		"stealth":
+			return float(unit.call("get_stealth")) if unit.has_method("get_stealth") else 0.0
+		_:
+			return 0.0
+
+
+func _on_dev_unit_slider_preview_changed(value: float, value_label: Label) -> void:
+	if value_label != null:
+		value_label.text = "%.2f" % clampf(value, 0.0, 1.0)
+
+
+func _on_dev_unit_slider_drag_ended(value_changed: bool, slider: HSlider, unit_id: String, stat_key: String) -> void:
+	if not value_changed or slider == null:
+		return
+	var unit := _find_friendly_unit_by_id(unit_id)
+	if unit == null or not unit.has_method("apply_identity_config"):
+		return
+	unit.call("apply_identity_config", {stat_key: clampf(float(slider.value), 0.0, 1.0)})
+	_update_ui()
+	call_deferred("_update_character_overlay")
 
 
 func _ensure_character_overlay() -> void:

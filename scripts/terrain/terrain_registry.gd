@@ -64,6 +64,22 @@ func is_walkable(grid_pos: Vector2i) -> bool:
 	return bool(tile_data.walkable)
 
 
+func get_nearest_walkable_grid(world_pos: Vector2) -> Variant:
+	var nearest_grid: Variant = null
+	var nearest_distance: float = INF
+	for tile_data in _tiles.values():
+		if not bool(tile_data.walkable):
+			continue
+		var distance_to_tile: float = world_pos.distance_squared_to(tile_data.world_position)
+		if distance_to_tile >= nearest_distance:
+			continue
+
+		nearest_distance = distance_to_tile
+		nearest_grid = tile_data.grid_position
+
+	return nearest_grid
+
+
 func get_cover_at(grid_pos: Vector2i) -> int:
 	var tile_data = get_tile_at_grid(grid_pos)
 	if tile_data == null:

@@ -777,21 +777,34 @@ func _build_path_world_points(current_position: Vector2, target_position: Vector
 
 	var from_grid: Vector2i = terrain_registry.call("world_to_grid", current_position)
 	var to_grid: Vector2i = terrain_registry.call("world_to_grid", target_position)
+	var target_grid_was_walkable: bool = bool(terrain_registry.call("is_walkable", to_grid)) if terrain_registry.has_method("is_walkable") else true
+	if terrain_registry.has_method("is_walkable") and not bool(terrain_registry.call("is_walkable", from_grid)):
+		var nearest_start_grid: Variant = terrain_registry.call("get_nearest_walkable_grid", current_position) if terrain_registry.has_method("get_nearest_walkable_grid") else null
+		if typeof(nearest_start_grid) == TYPE_VECTOR2I:
+			from_grid = nearest_start_grid
+	if not target_grid_was_walkable:
+		var nearest_target_grid: Variant = terrain_registry.call("get_nearest_walkable_grid", target_position) if terrain_registry.has_method("get_nearest_walkable_grid") else null
+		if typeof(nearest_target_grid) == TYPE_VECTOR2I:
+			to_grid = nearest_target_grid
+
 	var path_grid_points: Array = _terrain_pathfinder.find_path(from_grid, to_grid, terrain_registry)
 	if path_grid_points.is_empty():
 		if from_grid == to_grid:
-			path_world_points.append(target_position)
+			path_world_points.append(terrain_registry.call("grid_to_world", to_grid) if not target_grid_was_walkable else target_position)
 			return path_world_points
 
 		# Some test-scene move targets do not map to a traversable terrain path.
 		# Fall back to a direct waypoint so movement remains deterministic without warning noise.
-		path_world_points.append(target_position)
+		if target_grid_was_walkable:
+			path_world_points.append(target_position)
+		else:
+			path_world_points.append(terrain_registry.call("grid_to_world", to_grid))
 		return path_world_points
 
 	for index in range(1, path_grid_points.size()):
 		path_world_points.append(terrain_registry.call("grid_to_world", path_grid_points[index]))
 
-	if path_world_points.is_empty() or _coerce_vector2(path_world_points[-1], target_position).distance_to(target_position) > 0.5:
+	if target_grid_was_walkable and (path_world_points.is_empty() or _coerce_vector2(path_world_points[-1], target_position).distance_to(target_position) > 0.5):
 		path_world_points.append(target_position)
 
 	return path_world_points

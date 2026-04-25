@@ -19,7 +19,7 @@ obwohl sie in einer Phase stehen, die kein Feuern erlaubt (z.B. APPROACH, HOLD).
   - discipline=1.0 → 0% Bruchwahrscheinlichkeit
   - discipline=0.0 → DISCIPLINE_BREAK_BASE_CHANCE (z.B. 8% pro Tick)
 - Bei Bruch: Unit feuert einmal, danach Cooldown bevor naechster Bruch moeglich
-- Bruch wird als Event sichtbar gemacht (z.B. "UNIT bricht Hold-Fire!")
+- Bruch wird als Event sichtbar gemacht (z.B. "UNIT bricht Feuerstopp!" / "FEUERSTOPP GEBROCHEN!")
 
 ## Implementierung
 1. `mission_combat_loop_driver.gd`:
