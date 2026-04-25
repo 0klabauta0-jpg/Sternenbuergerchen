@@ -7,6 +7,9 @@ const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/t
 const MARKER_RADIUS: float = 12.0
 const HIT_RADIUS: float = 16.0
 const WAYPOINT_OFFSET_STEP: float = 7.0
+const NEUTRAL_ORDER_LINE_COLOR: Color = Color(0.24, 0.72, 1.0, 0.95)
+const DEFENSIVE_ORDER_LINE_COLOR: Color = Color(0.28, 0.9, 0.48, 0.95)
+const OFFENSIVE_ORDER_LINE_COLOR: Color = Color(1.0, 0.28, 0.22, 0.95)
 
 var _phase_index: int = 0
 var _selected_fireteam_ids: PackedStringArray = []
@@ -110,11 +113,16 @@ func _draw_plan(plan) -> void:
 		drawable_waypoints.append(waypoint)
 
 	if points.size() >= 2:
-		draw_polyline(points, draw_color, 3.0, true)
+		for index in range(1, points.size()):
+			var segment_waypoint = _coerce_waypoint(drawable_waypoints[index])
+			var segment_color: Color = _get_command_line_color(String(segment_waypoint.command_type) if segment_waypoint != null else "")
+			draw_line(points[index - 1], points[index], _apply_selection_alpha(segment_color, draw_color.a), 3.0, true)
 	var anchor_position: Vector2 = _get_fireteam_anchor_position(fireteam_id)
 	if points.size() >= 1 and anchor_position.is_finite():
 		var visual_anchor_position: Vector2 = anchor_position + marker_offset
-		draw_line(visual_anchor_position, points[0], draw_color, 3.0, true)
+		var first_waypoint = _coerce_waypoint(drawable_waypoints[0])
+		var anchor_line_color: Color = _get_command_line_color(String(first_waypoint.command_type) if first_waypoint != null else "")
+		draw_line(visual_anchor_position, points[0], _apply_selection_alpha(anchor_line_color, draw_color.a), 3.0, true)
 		draw_circle(visual_anchor_position, 5.0, draw_color)
 
 	for index in range(points.size()):
@@ -155,6 +163,22 @@ func _draw_waypoint_symbol(position: Vector2, command_type: String, marker_color
 	draw_circle(position, 4.0, index_color)
 	if index > 0:
 		draw_circle(position + Vector2(8.0, -8.0), 3.0, index_color)
+
+
+func _get_command_line_color(command_type: String) -> Color:
+	match command_type.strip_edges().to_lower():
+		FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_DEFEND:
+			return DEFENSIVE_ORDER_LINE_COLOR
+		FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_ENGAGE, FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_FLANK, FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_TAKE:
+			return OFFENSIVE_ORDER_LINE_COLOR
+		_:
+			return NEUTRAL_ORDER_LINE_COLOR
+
+
+func _apply_selection_alpha(line_color: Color, alpha: float) -> Color:
+	var result := line_color
+	result.a *= clampf(alpha, 0.0, 1.0)
+	return result
 
 
 func _draw_ad_hoc_orders() -> void:

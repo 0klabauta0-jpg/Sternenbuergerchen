@@ -2,6 +2,8 @@ extends SceneTree
 
 const FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_movement_controller.gd")
 const FIRETEAM_BEHAVIOR_PROFILE_SCRIPT: GDScript = preload("res://scripts/command/fireteam_behavior_profile.gd")
+const FIRETEAM_WAYPOINT_SCRIPT: GDScript = preload("res://scripts/command/fireteam_waypoint.gd")
+const FIRETEAM_ORDER_VISUALIZER_SCRIPT: GDScript = preload("res://scripts/tactical/visuals/fireteam_order_visualizer.gd")
 const EVENT_ROUTER_SCRIPT: GDScript = preload("res://scripts/core/event_router.gd")
 const TEST_UNIT_SCRIPT: GDScript = preload("res://scripts/npc/test_unit.gd")
 
@@ -30,8 +32,11 @@ func _run_tests() -> void:
 	_test_caterpillar_moves_one_member_at_a_time()
 	_test_losses_simplify_coordinated_patterns_to_rush()
 	_test_bound_complete_event_router_contract()
+	_test_order_visualizer_uses_command_line_colors()
 	await _test_scene_exposes_runtime_movement_snapshot()
 	await _test_go_button_starts_planned_fireteam_execution()
+	await _test_go_button_does_not_restart_active_defend_execution()
+	await _test_selected_fireteam_panel_shows_current_waypoint_details()
 	await _test_go_button_moves_meta_fireteam_id()
 	await _test_go_button_moves_all_selected_meta_fireteam_ids()
 	await _test_live_fireteam_go_moves_lead_and_members_without_snapback()
@@ -167,6 +172,17 @@ func _test_bound_complete_event_router_contract() -> void:
 	event_router.queue_free()
 
 
+func _test_order_visualizer_uses_command_line_colors() -> void:
+	var visualizer = FIRETEAM_ORDER_VISUALIZER_SCRIPT.new()
+	var move_color: Color = Color(visualizer.call("_get_command_line_color", FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_MOVE))
+	var defend_color: Color = Color(visualizer.call("_get_command_line_color", FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_DEFEND))
+	var flank_color: Color = Color(visualizer.call("_get_command_line_color", FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_FLANK))
+	_assert(move_color.b > move_color.r and move_color.b >= move_color.g, "Neutral move waypoints draw blue route lines")
+	_assert(defend_color.g > defend_color.r and defend_color.g > defend_color.b, "Defensive waypoints draw green route lines")
+	_assert(flank_color.r > flank_color.g and flank_color.r > flank_color.b, "Offensive waypoints draw red route lines")
+	visualizer.queue_free()
+
+
 func _test_scene_exposes_runtime_movement_snapshot() -> void:
 	var scene = await _load_scene()
 	var controller = scene.get_node("TacticalController")
@@ -224,6 +240,51 @@ func _test_go_button_starts_planned_fireteam_execution() -> void:
 			did_move = true
 			break
 	_assert(did_move, "GO button moves the selected fireteam through SimulationRoot")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_go_button_does_not_restart_active_defend_execution() -> void:
+	var scene = await _load_scene()
+	var controller = scene.get_node("TacticalController")
+	controller.call("_set_selected_fireteams", PackedStringArray(["blue"]), false)
+	var waypoint_targets: Array = Array(controller.call("_create_waypoints_for_selected_fireteams", Vector2(300.0, 190.0)))
+	controller.call("_set_waypoint_command_for_targets", waypoint_targets, FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_DEFEND)
+	controller.call("_refresh_fireteam_phase_panel")
+	var go_button := scene.find_child("GoPhaseButton", true, false) as Button
+	_assert(go_button != null, "Mission tactical controller exposes GO for a defend order")
+	if go_button != null:
+		go_button.emit_signal("pressed")
+	await process_frame
+	await physics_frame
+	var execution_before: Dictionary = Dictionary(Dictionary(controller.get("_phase_execution_by_fireteam")).get("blue", {}))
+	if go_button != null:
+		go_button.emit_signal("pressed")
+	await process_frame
+	await physics_frame
+	var execution_after: Dictionary = Dictionary(Dictionary(controller.get("_phase_execution_by_fireteam")).get("blue", {}))
+	_assert(not execution_before.is_empty(), "First GO starts the defend waypoint execution")
+	_assert(int(execution_after.get("waypoint_index", -1)) == int(execution_before.get("waypoint_index", -2)), "Second GO keeps active defend execution on the current waypoint")
+	_assert(String(controller.get("_last_command_text")).contains("ACTIVE"), "Second GO reports an already active fireteam instead of reissuing from the start")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_selected_fireteam_panel_shows_current_waypoint_details() -> void:
+	var scene = await _load_scene()
+	var controller = scene.get_node("TacticalController")
+	controller.call("_set_selected_fireteams", PackedStringArray(["blue"]), false)
+	controller.call("_create_waypoints_for_selected_fireteams", Vector2(280.0, 180.0))
+	controller.call("_refresh_fireteam_phase_panel")
+	var planned_text: String = String(controller.call("_build_selected_waypoint_info_text"))
+	_assert(planned_text.contains("WP 1/1") and planned_text.contains("MOVE"), "Selected fireteam panel summarizes the next planned waypoint")
+	var go_button := scene.find_child("GoPhaseButton", true, false) as Button
+	if go_button != null:
+		go_button.emit_signal("pressed")
+	await process_frame
+	await physics_frame
+	var active_text: String = String(controller.call("_build_selected_waypoint_info_text"))
+	_assert(active_text.contains("ACTIVE") and active_text.contains("Bewegung:"), "Selected fireteam panel shows current waypoint status and movement style")
 	scene.queue_free()
 	await process_frame
 

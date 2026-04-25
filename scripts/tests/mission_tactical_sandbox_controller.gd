@@ -677,26 +677,36 @@ func execute_selected_fireteam_orders() -> bool:
 		if int(phase_controller.call("advance_to_next_phase")) < 0:
 			break
 	var issued_fireteams: PackedStringArray = []
+	var already_active_fireteams: PackedStringArray = []
 	for fireteam_id_variant in _selected_fireteam_ids:
 		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if _phase_execution_by_fireteam.has(fireteam_id):
+			already_active_fireteams.append(fireteam_id.to_upper())
+			continue
 		var plan = _order_plans_by_key.get(_build_order_plan_key(fireteam_id, target_phase_index), null)
 		if plan == null or plan.waypoints.is_empty():
 			if _apply_default_fireteam_behavior(fireteam_id, target_phase_index):
 				issued_fireteams.append(fireteam_id.to_upper())
 			continue
-		for waypoint in plan.waypoints:
-			if waypoint != null and String(waypoint.status) != FIRETEAM_WAYPOINT_SCRIPT.STATUS_COMPLETED:
-				waypoint.status = FIRETEAM_WAYPOINT_SCRIPT.STATUS_PENDING
+		var next_waypoint_index: int = _find_next_executable_waypoint_index(plan)
+		if next_waypoint_index < 0:
+			continue
+		_reset_non_completed_waypoints_for_resume(plan)
 		plan.status = FIRETEAM_ORDER_PLAN_SCRIPT.STATUS_PENDING
-		plan.active_waypoint_index = -1
-		if _activate_next_waypoint_for_plan(plan, fireteam_id, 0):
+		if _activate_next_waypoint_for_plan(plan, fireteam_id, next_waypoint_index):
 			issued_fireteams.append(fireteam_id.to_upper())
-	if issued_fireteams.is_empty():
+	if issued_fireteams.is_empty() and already_active_fireteams.is_empty():
 		_last_command_text = "NO ORDERS TO EXECUTE"
 		_update_ui()
 		return false
-	_apply_fireteam_coordination_for_phase(target_phase_index)
-	_last_command_text = "GO %s (P%d)" % [", ".join(issued_fireteams), target_phase_index]
+	if not issued_fireteams.is_empty():
+		_apply_fireteam_coordination_for_phase(target_phase_index)
+	var go_bits: PackedStringArray = []
+	if not issued_fireteams.is_empty():
+		go_bits.append("GO %s" % ", ".join(issued_fireteams))
+	if not already_active_fireteams.is_empty():
+		go_bits.append("ACTIVE %s" % ", ".join(already_active_fireteams))
+	_last_command_text = "%s (P%d)" % [" | ".join(go_bits), target_phase_index]
 	_refresh_button_state()
 	_refresh_order_visuals()
 	_update_ui()
@@ -1294,10 +1304,11 @@ func _update_ui() -> void:
 		if not _last_planning_state_issue.is_empty():
 			command_feedback_label.text = "PLANUNG NICHT GELADEN\nAlte Planungsdaten erkannt.\nBitte Plan im aktuellen Phasensystem neu anlegen."
 		else:
-			command_feedback_label.text = "TEAM %s | PHASE %s\nTARGET %s\nLAST %s" % [
+			command_feedback_label.text = "TEAM %s | PHASE %s\nTARGET %s\n%s\nLAST %s" % [
 				_get_fireteam_name(),
 				_get_phase_name(),
 				_build_target_text(),
+				_build_selected_waypoint_info_text(),
 				_last_command_text,
 			]
 
@@ -2402,6 +2413,83 @@ func _build_fireteam_status_text() -> String:
 		drop_state_text = "%d deployed | Lead %s" % [deployed_count, lead_name]
 	var mode_text: String = "PREVIEW - START MISSION FOR GO | " if preview_mode else ""
 	return "%s%s | %d Karten | %d Wegpunkte | STANCE %s | EXEC %s | MOVE %s | SEC %s | FLK %s | %s" % [mode_text, _get_fireteam_name(), units.size(), planned_waypoint_count, _build_selected_tactical_stance_text(), _build_selected_execution_quality_text(), _build_selected_movement_text(), _build_selected_security_text(), _build_selected_flank_vulnerability_text(), drop_state_text]
+
+
+func _build_selected_waypoint_info_text() -> String:
+	if _selected_fireteam_ids.is_empty():
+		return "WP -"
+	var info_lines: PackedStringArray = []
+	for fireteam_id_variant in _selected_fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		var info_text: String = _build_fireteam_waypoint_info_text(fireteam_id)
+		if info_text.is_empty():
+			continue
+		if _selected_fireteam_ids.size() > 1:
+			info_lines.append("%s %s" % [fireteam_id.to_upper(), info_text])
+		else:
+			info_lines.append(info_text)
+	if info_lines.is_empty():
+		return "WP -"
+	return "\n".join(info_lines)
+
+
+func _build_fireteam_waypoint_info_text(fireteam_id: String) -> String:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return ""
+	var phase_index: int = maxi(_current_phase_index, 1)
+	var execution_state: Dictionary = Dictionary(_phase_execution_by_fireteam.get(normalized_fireteam_id, {}))
+	if not execution_state.is_empty():
+		phase_index = int(execution_state.get("phase", phase_index))
+	var plan = _order_plans_by_key.get(_build_order_plan_key(normalized_fireteam_id, phase_index), null)
+	if plan == null or plan.waypoints.is_empty():
+		return "WP keine geplanten Befehle"
+	var waypoint_index: int = int(execution_state.get("waypoint_index", -1))
+	if waypoint_index < 0:
+		waypoint_index = _find_next_executable_waypoint_index(plan)
+	if waypoint_index < 0 or waypoint_index >= plan.waypoints.size():
+		return "WP abgeschlossen"
+	var waypoint = plan.waypoints[waypoint_index]
+	if waypoint == null:
+		return "WP -"
+	var command_text: String = _get_waypoint_command_display_name(String(waypoint.command_type))
+	var status_text: String = String(waypoint.status).strip_edges().to_upper()
+	var movement_text: String = _build_waypoint_movement_description(get_fireteam_movement_state(normalized_fireteam_id))
+	var target_text: String = _format_world_position(Vector2(waypoint.target_position)) if typeof(waypoint.target_position) == TYPE_VECTOR2 else "--"
+	var text: String = "WP %d/%d %s | %s | Ziel %s" % [waypoint_index + 1, plan.waypoints.size(), command_text, status_text, target_text]
+	if not movement_text.is_empty():
+		text = "%s | %s" % [text, movement_text]
+	return text
+
+
+func _get_waypoint_command_display_name(command_type: String) -> String:
+	match command_type.strip_edges().to_lower():
+		FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_DEFEND:
+			return "DEFEND"
+		FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_ENGAGE:
+			return "ENGAGE"
+		FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_FLANK:
+			return "FLANK"
+		FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_TAKE:
+			return "TAKE"
+		_:
+			return "MOVE"
+
+
+func _build_waypoint_movement_description(movement_state: Dictionary) -> String:
+	if movement_state.is_empty():
+		return ""
+	match String(movement_state.get("effective_style", "")).strip_edges().to_lower():
+		"rush":
+			return "Bewegung: stuermt"
+		"bounding":
+			return "Bewegung: gebunden"
+		"caterpillar", "creep":
+			return "Bewegung: raupenartig"
+		_:
+			return ""
 
 
 func _build_strategic_status_text() -> String:
@@ -4377,6 +4465,33 @@ func _has_selected_fireteam_orders_to_execute() -> bool:
 			if waypoint != null and String(waypoint.status) != FIRETEAM_WAYPOINT_SCRIPT.STATUS_COMPLETED:
 				return true
 	return false
+
+
+func _find_next_executable_waypoint_index(plan) -> int:
+	if plan == null or plan.waypoints.is_empty():
+		return -1
+	var active_waypoint_index: int = int(plan.active_waypoint_index)
+	if active_waypoint_index >= 0 and active_waypoint_index < plan.waypoints.size():
+		var active_status: String = String(plan.waypoints[active_waypoint_index].status)
+		if active_status == FIRETEAM_WAYPOINT_SCRIPT.STATUS_ACTIVE:
+			return active_waypoint_index
+	for waypoint_index in range(plan.waypoints.size()):
+		var waypoint = plan.waypoints[waypoint_index]
+		if waypoint == null:
+			continue
+		var waypoint_status: String = String(waypoint.status)
+		if waypoint_status == FIRETEAM_WAYPOINT_SCRIPT.STATUS_PENDING or waypoint_status == FIRETEAM_WAYPOINT_SCRIPT.STATUS_INTERRUPTED or waypoint_status == FIRETEAM_WAYPOINT_SCRIPT.STATUS_ACTIVE:
+			return waypoint_index
+	return -1
+
+
+func _reset_non_completed_waypoints_for_resume(plan) -> void:
+	if plan == null:
+		return
+	for waypoint in plan.waypoints:
+		if waypoint != null and String(waypoint.status) != FIRETEAM_WAYPOINT_SCRIPT.STATUS_COMPLETED:
+			waypoint.status = FIRETEAM_WAYPOINT_SCRIPT.STATUS_PENDING
+	plan.active_waypoint_index = -1
 
 
 func _get_shared_selected_tactical_stance() -> String:
