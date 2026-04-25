@@ -36,6 +36,8 @@ func _run_tests() -> void:
 	await _test_scene_exposes_runtime_movement_snapshot()
 	await _test_go_button_starts_planned_fireteam_execution()
 	await _test_go_button_does_not_restart_active_defend_execution()
+	await _test_go_button_continues_from_defend_to_next_waypoint()
+	await _test_fireteam_panel_runs_in_direct_order_mode()
 	await _test_selected_fireteam_panel_shows_current_waypoint_details()
 	await _test_go_button_moves_meta_fireteam_id()
 	await _test_go_button_moves_all_selected_meta_fireteam_ids()
@@ -266,6 +268,55 @@ func _test_go_button_does_not_restart_active_defend_execution() -> void:
 	_assert(not execution_before.is_empty(), "First GO starts the defend waypoint execution")
 	_assert(int(execution_after.get("waypoint_index", -1)) == int(execution_before.get("waypoint_index", -2)), "Second GO keeps active defend execution on the current waypoint")
 	_assert(String(controller.get("_last_command_text")).contains("ACTIVE"), "Second GO reports an already active fireteam instead of reissuing from the start")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_go_button_continues_from_defend_to_next_waypoint() -> void:
+	var scene = await _load_scene()
+	var controller = scene.get_node("TacticalController")
+	controller.call("_set_selected_fireteams", PackedStringArray(["blue"]), false)
+	var defend_targets: Array = Array(controller.call("_create_waypoints_for_selected_fireteams", Vector2(300.0, 190.0)))
+	controller.call("_set_waypoint_command_for_targets", defend_targets, FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_DEFEND)
+	controller.call("_create_waypoints_for_selected_fireteams", Vector2(380.0, 220.0))
+	controller.call("_refresh_fireteam_phase_panel")
+	var go_button := scene.find_child("GoPhaseButton", true, false) as Button
+	if go_button != null:
+		go_button.emit_signal("pressed")
+	await process_frame
+	await physics_frame
+	_move_scene_fireteam_to_current_targets(controller, "blue")
+	for _index in range(3):
+		controller.call("_update_active_phase_execution", 0.2)
+		await process_frame
+	var waiting_text: String = String(controller.call("_build_selected_waypoint_info_text"))
+	_assert(waiting_text.contains("WARTET AUF GO"), "Reached defend waypoint waits for explicit GO before continuing")
+	if go_button != null:
+		go_button.emit_signal("pressed")
+	await process_frame
+	await physics_frame
+	var execution_after: Dictionary = Dictionary(Dictionary(controller.get("_phase_execution_by_fireteam")).get("blue", {}))
+	_assert(int(execution_after.get("waypoint_index", -1)) == 1, "GO from a waiting defend waypoint advances to the next target")
+	_assert(String(controller.get("_last_command_text")).contains("NEXT"), "GO reports continuation to the next waypoint")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_fireteam_panel_runs_in_direct_order_mode() -> void:
+	var scene = await _load_scene()
+	var controller = scene.get_node("TacticalController")
+	controller.call("_refresh_fireteam_phase_panel")
+	var panel := controller.get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox/FireteamPhasePanel")
+	var status_label: Label = null
+	var phase_next_button: Button = null
+	var edit_button: Button = null
+	if panel != null:
+		status_label = panel.find_child("PhaseStatusLabel", true, false) as Label
+		phase_next_button = panel.find_child("NextPhaseButton", true, false) as Button
+		edit_button = panel.find_child("PrevEditPhaseButton", true, false) as Button
+	_assert(String(controller.call("_build_phase_status_text")).contains("Direktmodus"), "Fireteam panel shows direct order mode while phases are parked")
+	_assert(phase_next_button == null or not phase_next_button.visible, "Global phase advance button is hidden in direct order mode")
+	_assert(edit_button == null or not edit_button.visible, "Phase edit buttons are hidden in direct order mode")
 	scene.queue_free()
 	await process_frame
 
@@ -524,6 +575,18 @@ func _move_units_to_targets(units: Array, current_target_positions: Dictionary, 
 		if not current_target_positions.has(unit_id):
 			continue
 		unit.global_position = Vector2(current_target_positions.get(unit_id))
+
+
+func _move_scene_fireteam_to_current_targets(controller: Node, fireteam_id: String) -> void:
+	var movement_state: Dictionary = Dictionary(controller.call("get_fireteam_movement_state", fireteam_id))
+	var target_positions: Dictionary = Dictionary(movement_state.get("current_target_positions", {}))
+	var units: Array = Array(controller.call("_get_fireteam_units", fireteam_id, true))
+	for unit in units:
+		if not (unit is Node2D) or not unit.has_method("get_unit_id"):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id"))
+		if target_positions.has(unit_id):
+			(unit as Node2D).global_position = Vector2(target_positions.get(unit_id))
 
 
 func _cleanup_units(units: Array) -> void:

@@ -29,6 +29,8 @@ const DROPSHIP_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Is
 const ALL_FIRETEAM_LABEL: String = "ALL"
 const APPROACH_ANGLES: PackedStringArray = ["NW", "NE", "SW", "SE"]
 const HOTKEY_LEGEND: String = "LMB Select | RMB Waypoint | CTRL+LMB Add | Drag Lasso | DEL Waypoint | 1 Move | 2 Hold | 3 Flank | 4 Take | Q/E Team | R/F Edit Phase | G GO"
+const LIVE_ORDER_PHASE_INDEX: int = 1
+const PHASE_PLANNING_ENABLED: bool = false
 const FRIENDLY_TEAM_ID: String = "team_alpha"
 const FIRETEAM_PANEL_PATH: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel"
 const FIRETEAM_HEADER_LABEL_PATH: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamHeaderLabel"
@@ -558,7 +560,7 @@ func _should_preserve_live_execution_during_planning_sync(planning_state: Dictio
 	if current_order_plans_text != incoming_order_plans_text:
 		return false
 	var phase_controller = _get_phase_controller()
-	if phase_controller != null and planning_state.has("active_phase_index") and phase_controller.has_method("get_active_phase_index"):
+	if PHASE_PLANNING_ENABLED and phase_controller != null and planning_state.has("active_phase_index") and phase_controller.has_method("get_active_phase_index"):
 		if int(planning_state.get("active_phase_index", -999)) != int(phase_controller.call("get_active_phase_index")):
 			return false
 	return true
@@ -608,6 +610,11 @@ func has_pending_friendly_insertions() -> bool:
 
 
 func add_global_phase() -> int:
+	if not PHASE_PLANNING_ENABLED:
+		_current_phase_index = _get_live_order_phase_index()
+		_last_command_text = "DIREKTMODUS: PHASEN AUS"
+		_update_ui()
+		return _current_phase_index
 	var phase_controller = _get_phase_controller()
 	if phase_controller == null or not phase_controller.has_method("add_phase"):
 		return -1
@@ -669,18 +676,16 @@ func execute_selected_fireteam_orders() -> bool:
 		_last_command_text = "WAIT FOR INSERTION: %s" % ", ".join(inactive_fireteams)
 		_update_ui()
 		return false
-	var phase_controller = _get_phase_controller()
-	if phase_controller == null or not phase_controller.has_method("get_active_phase_index") or not phase_controller.has_method("advance_to_next_phase"):
-		return false
-	var target_phase_index: int = maxi(_current_phase_index, 1)
-	while int(phase_controller.call("get_active_phase_index")) < target_phase_index:
-		if int(phase_controller.call("advance_to_next_phase")) < 0:
-			break
+	var target_phase_index: int = _get_live_order_phase_index()
 	var issued_fireteams: PackedStringArray = []
 	var already_active_fireteams: PackedStringArray = []
+	var continued_fireteams: PackedStringArray = []
 	for fireteam_id_variant in _selected_fireteam_ids:
 		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
 		if _phase_execution_by_fireteam.has(fireteam_id):
+			if _try_continue_active_fireteam_order(fireteam_id):
+				continued_fireteams.append(fireteam_id.to_upper())
+				continue
 			already_active_fireteams.append(fireteam_id.to_upper())
 			continue
 		var plan = _order_plans_by_key.get(_build_order_plan_key(fireteam_id, target_phase_index), null)
@@ -695,7 +700,7 @@ func execute_selected_fireteam_orders() -> bool:
 		plan.status = FIRETEAM_ORDER_PLAN_SCRIPT.STATUS_PENDING
 		if _activate_next_waypoint_for_plan(plan, fireteam_id, next_waypoint_index):
 			issued_fireteams.append(fireteam_id.to_upper())
-	if issued_fireteams.is_empty() and already_active_fireteams.is_empty():
+	if issued_fireteams.is_empty() and already_active_fireteams.is_empty() and continued_fireteams.is_empty():
 		_last_command_text = "NO ORDERS TO EXECUTE"
 		_update_ui()
 		return false
@@ -704,9 +709,11 @@ func execute_selected_fireteam_orders() -> bool:
 	var go_bits: PackedStringArray = []
 	if not issued_fireteams.is_empty():
 		go_bits.append("GO %s" % ", ".join(issued_fireteams))
+	if not continued_fireteams.is_empty():
+		go_bits.append("NEXT %s" % ", ".join(continued_fireteams))
 	if not already_active_fireteams.is_empty():
 		go_bits.append("ACTIVE %s" % ", ".join(already_active_fireteams))
-	_last_command_text = "%s (P%d)" % [" | ".join(go_bits), target_phase_index]
+	_last_command_text = " | ".join(go_bits)
 	_refresh_button_state()
 	_refresh_order_visuals()
 	_update_ui()
@@ -955,7 +962,7 @@ func _issue_command(command_type: String, display_text: String) -> bool:
 		if driver == null or not driver.has_method("issue_command"):
 			continue
 
-		if bool(driver.call("issue_command", command_type, _current_phase_index)):
+		if bool(driver.call("issue_command", command_type, _get_live_order_phase_index())):
 			issued_count += 1
 
 	if issued_count == 0:
@@ -977,6 +984,11 @@ func _change_fireteam(delta: int) -> void:
 
 
 func _change_phase(delta: int) -> void:
+	if not PHASE_PLANNING_ENABLED:
+		_current_phase_index = _get_live_order_phase_index()
+		_last_command_text = "DIREKTMODUS: PHASEN AUS"
+		_update_ui()
+		return
 	var phase_controller = _get_phase_controller()
 	if phase_controller == null or not phase_controller.has_method("cycle_selected_phase"):
 		_current_phase_index = maxi(_current_phase_index + delta, 1)
@@ -1037,18 +1049,33 @@ func _on_target_button_pressed() -> void:
 
 
 func _on_previous_edit_phase_pressed() -> void:
+	if not PHASE_PLANNING_ENABLED:
+		_last_command_text = "DIREKTMODUS: PHASEN AUS"
+		_update_ui()
+		return
 	_change_phase(-1)
 
 
 func _on_add_phase_pressed() -> void:
+	if not PHASE_PLANNING_ENABLED:
+		_last_command_text = "DIREKTMODUS: PHASEN AUS"
+		_update_ui()
+		return
 	add_global_phase()
 
 
 func _on_next_edit_phase_pressed() -> void:
+	if not PHASE_PLANNING_ENABLED:
+		_last_command_text = "DIREKTMODUS: PHASEN AUS"
+		_update_ui()
+		return
 	_change_phase(1)
 
 
 func _on_next_phase_pressed() -> void:
+	if not PHASE_PLANNING_ENABLED:
+		execute_selected_fireteam_orders()
+		return
 	advance_to_next_phase()
 
 
@@ -1268,6 +1295,8 @@ func _get_mission_fireteam_definition(fireteam_id: String) -> Dictionary:
 
 
 func _get_phase_name() -> String:
+	if not PHASE_PLANNING_ENABLED:
+		return "LIVE"
 	var phase_controller = _get_phase_controller()
 	if phase_controller != null and phase_controller.has_method("get_selected_phase_name"):
 		return String(phase_controller.call("get_selected_phase_name"))
@@ -1574,6 +1603,10 @@ func _ensure_fireteam_phase_panel() -> Control:
 		{"name": "NextPhaseButton", "text": "Next", "callback": Callable(self, "_on_next_phase_pressed")},
 		{"name": "GoPhaseButton", "text": "GO", "callback": Callable(self, "_on_go_phase_pressed"), "min_width": 64.0},
 	]
+	if not PHASE_PLANNING_ENABLED:
+		button_specs = [
+			{"name": "GoPhaseButton", "text": "GO", "callback": Callable(self, "_on_go_phase_pressed"), "min_width": 64.0},
+		]
 	for spec_variant in button_specs:
 		var spec: Dictionary = Dictionary(spec_variant)
 		var button := Button.new()
@@ -1638,17 +1671,15 @@ func _refresh_fireteam_phase_panel() -> void:
 	var next_edit_button := panel.get_node_or_null("MarginContainer/VBoxContainer/PhaseActionRow/NextEditPhaseButton") as Button
 	var next_phase_button := panel.get_node_or_null("MarginContainer/VBoxContainer/PhaseActionRow/NextPhaseButton") as Button
 	var go_phase_button := panel.get_node_or_null("MarginContainer/VBoxContainer/PhaseActionRow/GoPhaseButton") as Button
-	for button in [prev_button, add_button, next_edit_button]:
+	for button in [prev_button, add_button, next_edit_button, next_phase_button]:
 		if button == null:
 			continue
-		button.disabled = not _can_edit_planning()
+		button.visible = PHASE_PLANNING_ENABLED
+		button.disabled = true if not PHASE_PLANNING_ENABLED else not _can_edit_planning()
 		META_UI_SKIN_SCRIPT.style_tactical_button(button, false)
-	if next_phase_button != null:
-		next_phase_button.disabled = preview_mode or not _can_issue_local_commands()
-		META_UI_SKIN_SCRIPT.style_tactical_button(next_phase_button, not next_phase_button.disabled and not _phase_execution_by_fireteam.is_empty())
 	if go_phase_button != null:
 		go_phase_button.disabled = preview_mode or not _can_issue_local_commands() or not _has_selected_fireteam_orders_to_execute()
-		go_phase_button.tooltip_text = "Start the live mission from Homebase before GO can execute orders." if preview_mode else "Execute selected fireteam orders for the selected phase."
+		go_phase_button.tooltip_text = "Start the live mission from Homebase before GO can execute orders." if preview_mode else "Fuehrt das ausgewaehlte Fireteam zum naechsten offenen Zielpunkt."
 		META_UI_SKIN_SCRIPT.style_tactical_button(go_phase_button, not go_phase_button.disabled)
 
 
@@ -1685,10 +1716,7 @@ func _refresh_fireteam_status_panel() -> void:
 
 
 func _has_pending_plan_for_fireteam(fireteam_id: String) -> bool:
-	var phase_controller = _get_phase_controller()
-	var active_phase_index: int = _current_phase_index
-	if phase_controller != null and phase_controller.has_method("get_active_phase_index"):
-		active_phase_index = int(phase_controller.call("get_active_phase_index"))
+	var active_phase_index: int = _get_live_order_phase_index()
 	var plan = _order_plans_by_key.get(_build_order_plan_key(fireteam_id, active_phase_index), null)
 	if plan == null:
 		return false
@@ -2439,7 +2467,7 @@ func _build_fireteam_waypoint_info_text(fireteam_id: String) -> String:
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty():
 		return ""
-	var phase_index: int = maxi(_current_phase_index, 1)
+	var phase_index: int = _get_live_order_phase_index()
 	var execution_state: Dictionary = Dictionary(_phase_execution_by_fireteam.get(normalized_fireteam_id, {}))
 	if not execution_state.is_empty():
 		phase_index = int(execution_state.get("phase", phase_index))
@@ -2456,12 +2484,28 @@ func _build_fireteam_waypoint_info_text(fireteam_id: String) -> String:
 		return "WP -"
 	var command_text: String = _get_waypoint_command_display_name(String(waypoint.command_type))
 	var status_text: String = String(waypoint.status).strip_edges().to_upper()
+	if bool(execution_state.get("waiting_for_go", false)) or _should_display_waypoint_waiting_for_go(normalized_fireteam_id, waypoint, execution_state):
+		status_text = "WARTET AUF GO"
 	var movement_text: String = _build_waypoint_movement_description(get_fireteam_movement_state(normalized_fireteam_id))
 	var target_text: String = _format_world_position(Vector2(waypoint.target_position)) if typeof(waypoint.target_position) == TYPE_VECTOR2 else "--"
 	var text: String = "WP %d/%d %s | %s | Ziel %s" % [waypoint_index + 1, plan.waypoints.size(), command_text, status_text, target_text]
 	if not movement_text.is_empty():
 		text = "%s | %s" % [text, movement_text]
 	return text
+
+
+func _should_display_waypoint_waiting_for_go(fireteam_id: String, waypoint, execution_state: Dictionary) -> bool:
+	if waypoint == null or String(waypoint.command_type).strip_edges().to_lower() != FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_DEFEND:
+		return false
+	if String(waypoint.status) == FIRETEAM_WAYPOINT_SCRIPT.STATUS_ACTIVE:
+		return true
+	var anchor := _get_selection_anchor_for_fireteam(fireteam_id)
+	if anchor == null:
+		return false
+	var resolved_target_position: Variant = execution_state.get("resolved_target_position", waypoint.target_position)
+	if typeof(resolved_target_position) != TYPE_VECTOR2:
+		return false
+	return anchor.global_position.distance_to(Vector2(resolved_target_position)) <= PHASE_WAYPOINT_COMPLETE_RADIUS
 
 
 func _get_waypoint_command_display_name(command_type: String) -> String:
@@ -2558,6 +2602,8 @@ func _build_meta_transfer_status_text() -> String:
 
 
 func _build_phase_status_text() -> String:
+	if not PHASE_PLANNING_ENABLED:
+		return "Direktmodus | GO fuehrt zum naechsten Zielpunkt"
 	var phase_controller = _get_phase_controller()
 	if phase_controller == null:
 		return "Active P0 PRE | Edit %s" % _get_phase_name()
@@ -2856,6 +2902,8 @@ func _build_mission_dropship_status_text() -> String:
 
 
 func _build_phase_list_text() -> String:
+	if not PHASE_PLANNING_ENABLED:
+		return "Phasen geparkt | Befehle laufen als Live-Wegpunktkette"
 	var phase_controller = _get_phase_controller()
 	if phase_controller == null or not phase_controller.has_method("get_phase_list_text"):
 		return "Phases P0 PRE | %s" % _get_phase_name()
@@ -2962,7 +3010,8 @@ func _refresh_button_state() -> void:
 
 	var next_phase_button := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/NextPhaseButton") as BaseButton
 	if next_phase_button != null:
-		next_phase_button.disabled = preview_mode or not _can_issue_local_commands() or not _has_pending_global_phase()
+		next_phase_button.visible = PHASE_PLANNING_ENABLED
+		next_phase_button.disabled = true if not PHASE_PLANNING_ENABLED else preview_mode or not _can_issue_local_commands() or not _has_pending_global_phase()
 	_refresh_tactical_stance_panel()
 
 
@@ -3321,7 +3370,7 @@ func _refresh_dynamic_button_styles() -> void:
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton") as Button, _is_target_placement_armed)
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton") as Button, _is_lz_placement_armed)
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton") as Button, _drop_ship_requested)
-	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/NextPhaseButton") as Button, not preview_mode and _can_issue_local_commands() and not _phase_execution_by_fireteam.is_empty())
+	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/NextPhaseButton") as Button, PHASE_PLANNING_ENABLED and not preview_mode and _can_issue_local_commands() and not _phase_execution_by_fireteam.is_empty())
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/%sButton" % _get_approach_angle_name()) as Button, true)
 
 
@@ -4255,7 +4304,7 @@ func _refresh_order_visuals() -> void:
 	if visualizer == null:
 		refresh_contact_overlay()
 		return
-	visualizer.call("set_phase_index", _current_phase_index)
+	visualizer.call("set_phase_index", _get_live_order_phase_index())
 	visualizer.call("set_selected_fireteam_ids", _selected_fireteam_ids)
 	if visualizer.has_method("set_fireteam_anchor_dicts"):
 		visualizer.call("set_fireteam_anchor_dicts", _build_fireteam_anchor_visualization_entries())
@@ -4305,7 +4354,7 @@ func _create_waypoints_for_selected_fireteams(world_position: Vector2) -> Array:
 	var waypoint_targets: Array = []
 	var snapped_world_position: Vector2 = _snap_planning_position_to_tile_center(world_position)
 	for fireteam_id in _selected_fireteam_ids:
-		var waypoint_target: Dictionary = _append_waypoint_to_plan(String(fireteam_id), _current_phase_index, snapped_world_position)
+		var waypoint_target: Dictionary = _append_waypoint_to_plan(String(fireteam_id), _get_live_order_phase_index(), snapped_world_position)
 		if waypoint_target.is_empty():
 			continue
 		waypoint_targets.append(waypoint_target)
@@ -4437,6 +4486,9 @@ func _get_combat_loop_driver():
 
 
 func _sync_phase_selection_from_controller() -> void:
+	if not PHASE_PLANNING_ENABLED:
+		_current_phase_index = _get_live_order_phase_index()
+		return
 	var phase_controller = _get_phase_controller()
 	if phase_controller == null or not phase_controller.has_method("get_selected_phase_index"):
 		_current_phase_index = maxi(_current_phase_index, 1)
@@ -4445,10 +4497,16 @@ func _sync_phase_selection_from_controller() -> void:
 
 
 func _has_pending_global_phase() -> bool:
+	if not PHASE_PLANNING_ENABLED:
+		return false
 	var phase_controller = _get_phase_controller()
 	if phase_controller == null:
 		return false
 	return int(phase_controller.call("get_active_phase_index")) < int(phase_controller.call("get_phase_count")) - 1
+
+
+func _get_live_order_phase_index() -> int:
+	return LIVE_ORDER_PHASE_INDEX
 
 
 func _has_selected_fireteam_orders_to_execute() -> bool:
@@ -4458,7 +4516,9 @@ func _has_selected_fireteam_orders_to_execute() -> bool:
 		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
 		if fireteam_id.is_empty() or not _is_fireteam_runtime_active(fireteam_id):
 			continue
-		var plan = _order_plans_by_key.get(_build_order_plan_key(fireteam_id, _current_phase_index), null)
+		if _phase_execution_by_fireteam.has(fireteam_id):
+			return true
+		var plan = _order_plans_by_key.get(_build_order_plan_key(fireteam_id, _get_live_order_phase_index()), null)
 		if plan == null:
 			continue
 		for waypoint in plan.waypoints:
@@ -4485,6 +4545,19 @@ func _find_next_executable_waypoint_index(plan) -> int:
 	return -1
 
 
+func _find_next_executable_waypoint_index_after(plan, current_waypoint_index: int) -> int:
+	if plan == null or plan.waypoints.is_empty():
+		return -1
+	for waypoint_index in range(maxi(current_waypoint_index + 1, 0), plan.waypoints.size()):
+		var waypoint = plan.waypoints[waypoint_index]
+		if waypoint == null:
+			continue
+		var waypoint_status: String = String(waypoint.status)
+		if waypoint_status == FIRETEAM_WAYPOINT_SCRIPT.STATUS_PENDING or waypoint_status == FIRETEAM_WAYPOINT_SCRIPT.STATUS_INTERRUPTED or waypoint_status == FIRETEAM_WAYPOINT_SCRIPT.STATUS_ACTIVE:
+			return waypoint_index
+	return -1
+
+
 func _reset_non_completed_waypoints_for_resume(plan) -> void:
 	if plan == null:
 		return
@@ -4492,6 +4565,45 @@ func _reset_non_completed_waypoints_for_resume(plan) -> void:
 		if waypoint != null and String(waypoint.status) != FIRETEAM_WAYPOINT_SCRIPT.STATUS_COMPLETED:
 			waypoint.status = FIRETEAM_WAYPOINT_SCRIPT.STATUS_PENDING
 	plan.active_waypoint_index = -1
+
+
+func _try_continue_active_fireteam_order(fireteam_id: String) -> bool:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	var execution_state: Dictionary = Dictionary(_phase_execution_by_fireteam.get(normalized_fireteam_id, {})).duplicate(true)
+	if execution_state.is_empty():
+		return false
+	var phase_index: int = int(execution_state.get("phase", _get_live_order_phase_index()))
+	var plan = _order_plans_by_key.get(_build_order_plan_key(normalized_fireteam_id, phase_index), null)
+	if plan == null:
+		return false
+	var waypoint_index: int = int(execution_state.get("waypoint_index", -1))
+	if waypoint_index < 0 or waypoint_index >= plan.waypoints.size():
+		return false
+	var next_waypoint_index: int = _find_next_executable_waypoint_index_after(plan, waypoint_index)
+	if next_waypoint_index < 0:
+		return false
+	var waypoint = plan.waypoints[waypoint_index]
+	if waypoint == null:
+		return false
+	var command_type: String = String(waypoint.command_type).strip_edges().to_lower()
+	var waiting_for_go: bool = bool(execution_state.get("waiting_for_go", false))
+	if not waiting_for_go and command_type == FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_DEFEND:
+		waiting_for_go = true
+	if not waiting_for_go:
+		return false
+	return _complete_waypoint_and_activate_next(normalized_fireteam_id, plan, waypoint_index, next_waypoint_index)
+
+
+func _complete_waypoint_and_activate_next(fireteam_id: String, plan, waypoint_index: int, next_waypoint_index: int) -> bool:
+	if plan == null or waypoint_index < 0 or waypoint_index >= plan.waypoints.size():
+		return false
+	plan.waypoints[waypoint_index].status = FIRETEAM_WAYPOINT_SCRIPT.STATUS_COMPLETED
+	plan.active_waypoint_index = waypoint_index
+	_phase_execution_by_fireteam.erase(fireteam_id)
+	_ensure_fireteam_movement_controller()
+	if _fireteam_movement_controller != null:
+		_fireteam_movement_controller.call("reset_fireteam", fireteam_id)
+	return _activate_next_waypoint_for_plan(plan, fireteam_id, next_waypoint_index)
 
 
 func _get_shared_selected_tactical_stance() -> String:
@@ -4935,10 +5047,7 @@ func _notify_fireteam_ready_for_coordination(fireteam_id: String) -> void:
 
 
 func _interrupt_active_plan_for_ad_hoc(fireteam_id: String) -> bool:
-	var phase_controller = _get_phase_controller()
-	var active_phase_index: int = _current_phase_index
-	if phase_controller != null and phase_controller.has_method("get_active_phase_index"):
-		active_phase_index = int(phase_controller.call("get_active_phase_index"))
+	var active_phase_index: int = _get_live_order_phase_index()
 	var plan = _order_plans_by_key.get(_build_order_plan_key(fireteam_id, active_phase_index), null)
 	var execution_state: Dictionary = Dictionary(_phase_execution_by_fireteam.get(fireteam_id, {})).duplicate(true)
 	var resume_state: Dictionary = {
@@ -4967,10 +5076,7 @@ func _start_ad_hoc_order_for_fireteam(fireteam_id: String, order_type: String, t
 	_ensure_ad_hoc_order_controller()
 	if _ad_hoc_order_controller == null:
 		return false
-	var phase_controller = _get_phase_controller()
-	var active_phase_index: int = _current_phase_index
-	if phase_controller != null and phase_controller.has_method("get_active_phase_index"):
-		active_phase_index = int(phase_controller.call("get_active_phase_index"))
+	var active_phase_index: int = _get_live_order_phase_index()
 	var execution_target: Vector2 = _get_target_position()
 	if typeof(target_position) == TYPE_VECTOR2:
 		execution_target = Vector2(target_position)
@@ -5176,7 +5282,15 @@ func _update_active_phase_execution(delta: float) -> void:
 			did_change = true
 		if anchor == null or typeof(resolved_target_position) != TYPE_VECTOR2:
 			continue
-		if anchor.global_position.distance_to(resolved_target_position) > PHASE_WAYPOINT_COMPLETE_RADIUS:
+		var movement_finished: bool = bool(movement_result.get("finished", false))
+		var anchor_reached_target: bool = anchor.global_position.distance_to(resolved_target_position) <= PHASE_WAYPOINT_COMPLETE_RADIUS
+		if not movement_finished and not anchor_reached_target:
+			continue
+		if String(waypoint.command_type).strip_edges().to_lower() == FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_DEFEND:
+			if not bool(execution_state.get("waiting_for_go", false)):
+				execution_state["waiting_for_go"] = true
+				_phase_execution_by_fireteam[fireteam_id] = execution_state
+				did_change = true
 			continue
 		execution_state["hold_elapsed"] = float(execution_state.get("hold_elapsed", 0.0)) + delta
 		var required_hold: float = maxf(float(waypoint.hold_duration_seconds), 0.0)
@@ -5300,10 +5414,7 @@ func _return_fireteam_to_plan(fireteam_id: String, manual_return: bool) -> bool:
 	if _fireteam_movement_controller != null:
 		_fireteam_movement_controller.call("reset_fireteam", fireteam_id)
 	_suppression_interrupt_pending_by_fireteam[fireteam_id] = false
-	var phase_controller = _get_phase_controller()
-	var active_phase_index: int = _current_phase_index
-	if phase_controller != null and phase_controller.has_method("get_active_phase_index"):
-		active_phase_index = int(phase_controller.call("get_active_phase_index"))
+	var active_phase_index: int = _get_live_order_phase_index()
 	var plan = _order_plans_by_key.get(_build_order_plan_key(fireteam_id, active_phase_index), null)
 	if plan == null or plan.waypoints.is_empty():
 		return _apply_default_fireteam_behavior(fireteam_id, active_phase_index) or had_active_ad_hoc
@@ -5329,7 +5440,7 @@ func _count_selected_phase_waypoints() -> int:
 func _count_selected_phase_waypoints_for_fireteams(fireteam_ids: PackedStringArray) -> int:
 	var total: int = 0
 	for fireteam_id in fireteam_ids:
-		var plan = _order_plans_by_key.get(_build_order_plan_key(String(fireteam_id), _current_phase_index), null)
+		var plan = _order_plans_by_key.get(_build_order_plan_key(String(fireteam_id), _get_live_order_phase_index()), null)
 		if plan == null:
 			continue
 		for waypoint in plan.waypoints:
@@ -6114,6 +6225,8 @@ func _is_fireteam_runtime_active(fireteam_id: String) -> bool:
 
 func _maybe_start_active_phase_for_fireteam(fireteam_id: String) -> void:
 	if preview_mode or fireteam_id.strip_edges().is_empty():
+		return
+	if not PHASE_PLANNING_ENABLED:
 		return
 	if _phase_execution_by_fireteam.has(fireteam_id):
 		return
