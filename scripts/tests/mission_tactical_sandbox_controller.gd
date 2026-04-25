@@ -5620,11 +5620,28 @@ func _apply_drop_presence_state_to_units() -> void:
 			(unit as CanvasItem).visible = desired_visible
 		else:
 			if _deployed_unit_ids.has(unit_id):
-				_enqueue_dropship_deploy_effect(unit, unit_id, _lz_position + _get_unload_offset(deployed_index))
-				_runtime_activation_pending_fireteam_ids[String(unit.call("get_fireteam_id")).strip_edges().to_lower()] = true
+				if not _is_unit_runtime_registered(unit_id):
+					_enqueue_dropship_deploy_effect(unit, unit_id, _lz_position + _get_unload_offset(deployed_index))
+					_runtime_activation_pending_fireteam_ids[String(unit.call("get_fireteam_id")).strip_edges().to_lower()] = true
+				elif unit is CanvasItem and not (unit as CanvasItem).visible:
+					_enqueue_dropship_presence_effect(unit, unit_id, true)
 				deployed_index += 1
 			else:
 				_enqueue_dropship_presence_effect(unit, unit_id, desired_visible)
+
+
+func _is_unit_runtime_registered(unit_id: String) -> bool:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return false
+	var unit_registry = get_node_or_null("../UnitRegistry")
+	if unit_registry == null:
+		return false
+	if unit_registry.has_method("has_unit"):
+		return bool(unit_registry.call("has_unit", normalized_unit_id))
+	if unit_registry.has_method("get_unit"):
+		return unit_registry.call("get_unit", normalized_unit_id) != null
+	return false
 
 
 func _get_unload_offset(index: int) -> Vector2:
