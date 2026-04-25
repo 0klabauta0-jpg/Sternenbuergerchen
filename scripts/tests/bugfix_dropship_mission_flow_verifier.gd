@@ -22,6 +22,7 @@ func _run_tests() -> void:
 	await _test_homebase_start_button_lives_in_header()
 	await _test_preview_mission_only_exists_in_map_view()
 	await _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting()
+	await _test_live_mission_updates_dropship_transfer_progress_without_nav_refresh()
 	await _test_preview_drop_button_stays_drop_without_live_sequence()
 	await _test_homebase_start_accepts_preview_deployed_fireteam()
 	await _test_preview_drop_request_bootstraps_live_mission_inbound()
@@ -330,6 +331,74 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 	_assert(mission_craft_card != null and mission_craft_card.visible and mission_craft_card.modulate.a < 1.0, "Mini shipcard stays visible once the dropship is waiting on the mission map")
 	_assert(status_label != null and status_label.text.contains("Holding on mission map"), "Mini shipcard switches to waiting status after the transfer completes")
 	_assert(dropship_marker != null and dropship_marker.visible, "Live mission keeps the dropship marker visible while the craft is waiting on the mission map")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_live_mission_updates_dropship_transfer_progress_without_nav_refresh() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	for _frame in range(4):
+		await process_frame
+
+	var fob_screen: Control = scene.get_node("FOBScreen")
+	var selected_unit_ids := PackedStringArray(["unit_alpha", "unit_bravo", "unit_delta"])
+	var selected_fireteam_ids := PackedStringArray(["blue", "blue", "blue"])
+	var fireteam_definitions := [
+		{
+			"id": "blue",
+			"label": "BLUE",
+			"lead_unit_id": "unit_alpha",
+			"respawn_enabled": false,
+			"loadout": "medium",
+		}
+	]
+	scene.set(
+		"_homebase_aircraft_definitions",
+		[
+			{
+				"craft_id": "dropship_test",
+				"display_name": "Dropship Test",
+				"craft_type": "dropship",
+				"texture_path": "res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png",
+			}
+		]
+	)
+	scene.set("_assigned_aircraft_pilot_by_craft", {"dropship_test": "unit_hotel"})
+	scene.set("_aircraft_location_by_craft", {"dropship_test": "fob"})
+	scene.set("_selected_unit_ids", selected_unit_ids)
+	scene.set("_selected_fireteam_ids", selected_fireteam_ids)
+	scene.call("_refresh_fob_screen")
+	fob_screen.call("configure_transfer", selected_unit_ids, selected_fireteam_ids, fireteam_definitions)
+	fob_screen.set("_dropship_transport_craft_id", "dropship_test")
+	fob_screen.set("_dropship_phase", "boarded")
+	fob_screen.set("_boarded_unit_ids", selected_unit_ids)
+	fob_screen.set("_boarded_fireteam_ids", PackedStringArray(["blue"]))
+	fob_screen.call("_on_transport_craft_mission_stage_requested", "dropship_test")
+
+	scene.call("_show_map")
+	for _frame in range(2):
+		await process_frame
+	var active_mission: Node = scene.call("get_active_mission")
+	var tactical_controller: Node = active_mission.get_node("TacticalController") if active_mission != null else null
+	var initial_state: Dictionary = Dictionary(tactical_controller.call("get_planning_state")) if tactical_controller != null else {}
+	_assert(active_mission != null, "Mission nav starts the live mission while the dropship is en route")
+	_assert(String(initial_state.get("mission_drop_state", "")) == "to_mission", "Live mission receives the initial dropship transfer state")
+
+	for _step in range(5):
+		scene.call("_on_homebase_transport_timer_timeout")
+	for _frame in range(2):
+		await process_frame
+	var progress_state: Dictionary = Dictionary(tactical_controller.call("get_planning_state")) if tactical_controller != null else {}
+	_assert(float(progress_state.get("mission_drop_progress", 0.0)) > float(initial_state.get("mission_drop_progress", 0.0)), "Live mission dropship progress updates without clicking Mission again")
+	_assert(int(progress_state.get("mission_drop_eta_seconds", 0)) < int(initial_state.get("mission_drop_eta_seconds", 999)), "Live mission dropship ETA counts down while the mission stays visible")
+
+	for _step in range(20):
+		scene.call("_on_homebase_transport_timer_timeout")
+	for _frame in range(2):
+		await process_frame
+	var waiting_state: Dictionary = Dictionary(tactical_controller.call("get_planning_state")) if tactical_controller != null else {}
+	_assert(String(waiting_state.get("mission_drop_state", "")) == "waiting", "Live mission switches to waiting once the dropship reaches the mission map")
 	scene.queue_free()
 	await process_frame
 

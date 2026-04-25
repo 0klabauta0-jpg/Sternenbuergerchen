@@ -642,6 +642,7 @@ func _on_homebase_transport_timer_timeout() -> void:
 		fob_changed = true
 
 	_refresh_fob_screen()
+	_sync_mission_drop_transport_fields_from_fob()
 	_refresh_homebase_screen()
 	_refresh_map_screen()
 	_ensure_transport_timer_state()
@@ -1291,6 +1292,8 @@ func _refresh_navigation_state() -> void:
 func _refresh_map_screen() -> void:
 	if not MISSION_PREVIEW_ENABLED:
 		_release_preview_mission()
+		if _active_mission != null:
+			_apply_planning_state_to_mission(_active_mission)
 		return
 	if _active_mission == null:
 		_sync_fob_dropship_state_into_mission_planning()
@@ -1398,6 +1401,30 @@ func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: boo
 		_mission_planning_state["deployed_unit_ids"] = []
 	if not _mission_planning_state.has("mission_drop_return_requested"):
 		_mission_planning_state["mission_drop_return_requested"] = false
+
+
+func _sync_mission_drop_transport_fields_from_fob() -> void:
+	var fob_screen = _get_fob_screen()
+	if fob_screen == null or not fob_screen.has_method("build_mission_drop_state"):
+		return
+
+	var drop_state: Dictionary = Dictionary(fob_screen.call("build_mission_drop_state")).duplicate(true)
+	_mission_planning_state["drop_ship_staged"] = bool(drop_state.get("drop_ship_staged", false))
+	_mission_planning_state["launch_ready_craft_id"] = String(drop_state.get("launch_ready_craft_id", "")).strip_edges()
+	_mission_planning_state["mission_drop_craft_id"] = String(drop_state.get("mission_drop_craft_id", "")).strip_edges()
+	_mission_planning_state["mission_drop_display_name"] = String(drop_state.get("mission_drop_display_name", "")).strip_edges()
+	_mission_planning_state["mission_drop_title_text"] = String(drop_state.get("mission_drop_title_text", "")).strip_edges()
+	_mission_planning_state["mission_drop_texture_path"] = String(drop_state.get("mission_drop_texture_path", "")).strip_edges()
+	_mission_planning_state["mission_drop_state"] = String(drop_state.get("mission_drop_state", "")).strip_edges()
+	_mission_planning_state["mission_drop_pilot_text"] = String(drop_state.get("mission_drop_pilot_text", "")).strip_edges()
+	_mission_planning_state["mission_drop_status_line"] = String(drop_state.get("mission_drop_status_line", "")).strip_edges()
+	_mission_planning_state["mission_drop_progress"] = float(drop_state.get("mission_drop_progress", 0.0))
+	_mission_planning_state["mission_drop_eta_seconds"] = int(drop_state.get("mission_drop_eta_seconds", 0))
+	_mission_planning_state["mission_drop_pilot_unit_id"] = String(drop_state.get("mission_drop_pilot_unit_id", "")).strip_edges()
+	_mission_planning_state["mission_drop_pilot_display_name"] = String(drop_state.get("mission_drop_pilot_display_name", "")).strip_edges()
+	_mission_planning_state["mission_drop_pilot_portrait_path"] = String(drop_state.get("mission_drop_pilot_portrait_path", "")).strip_edges()
+	_mission_planning_state["mission_drop_passenger_count"] = int(drop_state.get("mission_drop_passenger_count", 0))
+	_mission_planning_state["meta_transfer_routes"] = _build_homebase_transfer_route_entries()
 
 
 func _has_preview_deployed_mission_payload() -> bool:

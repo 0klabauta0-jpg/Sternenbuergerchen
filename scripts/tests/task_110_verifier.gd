@@ -34,6 +34,7 @@ func _run_tests() -> void:
 	await _test_go_button_starts_planned_fireteam_execution()
 	await _test_go_button_moves_meta_fireteam_id()
 	await _test_go_button_moves_all_selected_meta_fireteam_ids()
+	await _test_live_fireteam_go_moves_lead_and_members_without_snapback()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	if _failed > 0:
 		print("FAIL")
@@ -288,6 +289,51 @@ func _test_go_button_moves_all_selected_meta_fireteam_ids() -> void:
 			did_move = true
 			break
 	_assert(did_move, "GO button moves a multi-waypoint FT1 plan from the ALL-style selection")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_live_fireteam_go_moves_lead_and_members_without_snapback() -> void:
+	var scene = await _load_scene(PackedStringArray(["ft1", "ft1", "ft1"]))
+	var controller = scene.get_node("TacticalController")
+	controller.call("_set_selected_fireteams", PackedStringArray(["ft1"]), false)
+	controller.call("_create_waypoints_for_selected_fireteams", Vector2(460.0, 150.0))
+	controller.call("_refresh_fireteam_phase_panel")
+	var ft1_units: Array = Array(controller.call("_get_fireteam_units", "ft1", true))
+	var positions_before: Dictionary = {}
+	for unit in ft1_units:
+		if not (unit is Node2D) or not unit.has_method("get_unit_id"):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id"))
+		positions_before[unit_id] = (unit as Node2D).global_position
+	var lead: Node2D = controller.call("_resolve_fireteam_leader_for_behavior", "ft1") as Node2D
+	var lead_start: Vector2 = lead.global_position if lead != null else Vector2.ZERO
+	var max_member_progress: Dictionary = {}
+	var go_button := scene.find_child("GoPhaseButton", true, false) as Button
+	if go_button != null:
+		go_button.emit_signal("pressed")
+	for _frame in range(260):
+		await process_frame
+		await physics_frame
+		for unit in ft1_units:
+			if not (unit is Node2D) or not unit.has_method("get_unit_id"):
+				continue
+			var unit_id: String = String(unit.call("get_unit_id"))
+			var moved_distance: float = (unit as Node2D).global_position.distance_to(Vector2(positions_before.get(unit_id, (unit as Node2D).global_position)))
+			max_member_progress[unit_id] = maxf(float(max_member_progress.get(unit_id, 0.0)), moved_distance)
+	var lead_moved_distance: float = lead.global_position.distance_to(lead_start) if lead != null else 0.0
+	var all_members_kept_most_progress: bool = true
+	for unit in ft1_units:
+		if not (unit is Node2D) or not unit.has_method("get_unit_id"):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id"))
+		var max_progress: float = float(max_member_progress.get(unit_id, 0.0))
+		var final_progress: float = (unit as Node2D).global_position.distance_to(Vector2(positions_before.get(unit_id, (unit as Node2D).global_position)))
+		if max_progress > 8.0 and final_progress + 12.0 < max_progress:
+			all_members_kept_most_progress = false
+			break
+	_assert(lead != null and lead_moved_distance > 8.0, "Live GO eventually moves the fireteam lead instead of leaving the FTL behind")
+	_assert(all_members_kept_most_progress, "Live GO members keep their movement progress instead of snapping back to the FTL")
 	scene.queue_free()
 	await process_frame
 

@@ -191,6 +191,7 @@ func update_execution(fireteam_id: String, units: Array, leader, simulation_root
 		issue_result["bound_complete"] = bound_event
 		issue_result["movement_state"] = _build_public_state(state)
 		return issue_result
+	_reissue_current_stage(state, member_records, simulation_root)
 	_execution_by_fireteam[normalized_fireteam_id] = state
 	return {"movement_state": _build_public_state(state)}
 
@@ -315,6 +316,50 @@ func _are_current_targets_reached(state: Dictionary, member_records: Array) -> b
 		if (unit as Node2D).global_position.distance_to(target_position) > POSITION_REACHED_RADIUS:
 			return false
 	return true
+
+
+func _reissue_current_stage(state: Dictionary, member_records: Array, simulation_root) -> void:
+	if simulation_root == null:
+		return
+	var moving_unit_ids: PackedStringArray = PackedStringArray(state.get("current_moving_unit_ids", PackedStringArray()))
+	if moving_unit_ids.is_empty():
+		return
+	var covering_unit_ids: PackedStringArray = PackedStringArray(state.get("current_covering_unit_ids", PackedStringArray()))
+	var current_target_positions: Dictionary = Dictionary(state.get("current_target_positions", {}))
+	var current_positions: Dictionary = _build_current_positions(member_records)
+	var style: String = String(state.get("effective_style", ADVANCE_STYLE_RUSH))
+	for record in member_records:
+		var unit_id: String = String(record.get("unit_id", ""))
+		if unit_id.is_empty():
+			continue
+		if covering_unit_ids.has(unit_id):
+			_enqueue_unit_command(
+				simulation_root,
+				String(record.get("team_id", "")),
+				unit_id,
+				UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION,
+				Vector2(current_positions.get(unit_id, state.get("current_anchor_target_position", Vector2.ZERO))),
+				0.0,
+				float(state.get("cover_priority", 0.0)),
+				0.08,
+				String(state.get("command_type", "")),
+				int(state.get("phase", -1))
+			)
+			continue
+		if not moving_unit_ids.has(unit_id) or not current_target_positions.has(unit_id):
+			continue
+		_enqueue_unit_command(
+			simulation_root,
+			String(record.get("team_id", "")),
+			unit_id,
+			_map_waypoint_command_to_unit_command(String(state.get("command_type", ""))),
+			Vector2(current_target_positions.get(unit_id)),
+			_build_move_speed_factor(style, member_records, moving_unit_ids, current_positions, float(state.get("cohesion_threshold", 100.0)), float(record.get("speed", 0.5)), float(state.get("move_speed_multiplier", 1.0))),
+			float(state.get("cover_priority", 0.0)),
+			_attack_bonus_for_style(style),
+			String(state.get("command_type", "")),
+			int(state.get("phase", -1))
+		)
 
 
 func _is_execution_complete(state: Dictionary, member_records: Array) -> bool:
@@ -582,7 +627,9 @@ func _enqueue_unit_command(
 		command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL
 	if not bool(command.call("is_valid")):
 		return false
-	simulation_root.call("enqueue_command", command.to_dict())
+	var command_dict: Dictionary = command.to_dict()
+	command_dict["requeue_until_target"] = false
+	simulation_root.call("enqueue_command", command_dict)
 	return true
 
 
