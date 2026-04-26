@@ -946,7 +946,16 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Stand: `HPANavigationGraph` exposed dafuer eine lesende `get_component_tiles()`-API. `scripts/tests/task_127_verifier.gd` deckt Same-Cluster-Pfade, Multi-Cluster-Portalpfade, disconnected early-fail, SimulationRoot-Ausfuehrung und unreachable-Fallback ab.
 - Offene Punkte: Keine dynamischen Kartenupdates und keine Flow-Fields. Lokale Teilpfade nutzen weiterhin den bestehenden `TerrainPathfinder`, damit Walkability-, Hoehen- und Diagonalregeln identisch bleiben.
 - Risiken: Der Graph-Cache invalidiert aktuell ueber Registry-Referenz und Tile-Anzahl, nicht ueber jede moegliche Walkability-Aenderung. Portalpfade koennen in V1 noch kantiger wirken als spaetere geglaettete Routen.
-- Naechster Schritt: TASK_128 sollte Performance-/Profiling-Messpunkte fuer grosse Karten und HPA-Cacheverhalten einfuehren, bevor Cluster-Groesse oder Portalstrategie weiter justiert werden.
+- Naechster Schritt: TASK_129 kann auf den Budget-/Debug-Messpunkten aufsetzen und deckungsbewusste Pfadkosten einfuehren.
+
+### TASK_128 - Navigation Budgeting und Debug
+- Status: implementiert
+- Stand: `SimulationRoot` besitzt jetzt ein konfigurierbares Navigation-Budget fuer neue Pfadrequests pro Physics-Tick (`navigation_budget_enabled`, `navigation_max_new_path_queries_per_tick`). Wenn das Budget erschoepft ist, werden Move-Commands mit Delay-Grund deterministisch ueber die bestehende Prioritaets- und Queue-Reihenfolge in einen spaeteren Tick requeued.
+- Stand: `get_navigation_debug_snapshot()` liefert lesende Metriken fuer neue Path-Requests, konkrete Pathfinder-Queries, Fallbacks, unreachable Queries, Delays, Pending Count, letzte Query-Records und die teuerste Query. Query-Records unterscheiden HPA, direkten A*, Fallback und Delay und enthalten grobe Kandidaten-/Expanded-Schaetzwerte.
+- Stand: Contact-Recompute laeuft durch denselben Budgetpfad, sodass mehrere Units im Kontakt nicht mehr im selben Frame eine Pfadquery-Spitze erzeugen. `scripts/tests/task_128_verifier.gd` deckt Snapshot-Zaehler, Budget-Limit, deterministische Delay-Reihenfolge, Contact-Staffelung und unreachable-Debug ab.
+- Offene Punkte: Keine Worker-Threads, keine UI-Pflichtanzeige und keine Multiplayer-Synchronisierung der Navigation-Metriken. Fallback-Kandidaten bleiben bewusst grob geschaetzt, bis TASK_129/130 echte Messdaten fuer neue Path-Schichten liefern.
+- Risiken: Ein niedriges Budget kann sichtbare Startverzoegerungen bei grossen Sammelbefehlen erzeugen; der Snapshot macht diese Pending- und Delay-Gruende deshalb explizit sichtbar.
+- Naechster Schritt: TASK_129 kann deckungsbewusste Pfadkosten aufsetzen, ohne CPU-Spitzen ungezaehlt zu lassen.
 
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert

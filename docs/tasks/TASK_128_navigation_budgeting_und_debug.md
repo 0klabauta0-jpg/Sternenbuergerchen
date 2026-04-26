@@ -3,7 +3,7 @@
 ## Ziel
 Navigation soll messbar und budgetiert werden, damit mehrere Units nicht gleichzeitig teure Pfadqueries ausloesen und CPU-Spitzen verursachen.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Voraussetzung
 - `TASK_126 - HPA Navigation Foundation`
@@ -49,12 +49,12 @@ Navigation soll messbar und budgetiert werden, damit mehrere Units nicht gleichz
 - Kein per-frame Vollscan aller Units.
 
 ## Akzeptanzkriterien
-- [ ] Pfadqueries werden gezaehlt und als Snapshot lesbar.
-- [ ] Pro Tick wird ein konfigurierbares Query-Limit eingehalten.
-- [ ] Mehrere gleichzeitige Commands werden deterministisch ueber mehrere Ticks abgearbeitet.
-- [ ] Kontakt-Recompute erzeugt keine Query-Spitze fuer alle Units im selben Frame.
-- [ ] Unerreichbare Ziele werden im Debug klar markiert.
-- [ ] Bestehende Movement- und Area-Tests bleiben gruen.
+- [x] Pfadqueries werden gezaehlt und als Snapshot lesbar.
+- [x] Pro Tick wird ein konfigurierbares Query-Limit eingehalten.
+- [x] Mehrere gleichzeitige Commands werden deterministisch ueber mehrere Ticks abgearbeitet.
+- [x] Kontakt-Recompute erzeugt keine Query-Spitze fuer alle Units im selben Frame.
+- [x] Unerreichbare Ziele werden im Debug klar markiert.
+- [x] Bestehende Movement- und Area-Tests bleiben gruen.
 
 ## Erwartetes Ergebnis
 - Navigation-CPU-Last wird sichtbar und kontrollierbar.
@@ -62,17 +62,22 @@ Navigation soll messbar und budgetiert werden, damit mehrere Units nicht gleichz
 - Spaetere Optimierungen koennen datenbasiert statt nach Bauchgefuehl entschieden werden.
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_128_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_127_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_125_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_110_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/fireteam_dev_testing_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_128_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_127_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_125_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_110_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/fireteam_dev_testing_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/path_recompute_under_fire_verifier.gd`
 
-## Dateien (voraussichtlich)
+## Dateien
 - `scripts/core/simulation_root.gd`
-- `scripts/terrain/hpa_pathfinder.gd`
-- `scripts/tests/mission_tactical_sandbox_controller.gd`
 - `scripts/tests/task_128_verifier.gd`
+
+## Ergebnis
+- `SimulationRoot` besitzt jetzt ein konfigurierbares Budget fuer neue Pfadrequests pro Physics-Tick.
+- Budget-Delays werden deterministisch ueber die bestehende Command-Reihenfolge nach Prioritaet und Eingangsindex requeued.
+- `get_navigation_debug_snapshot()` liefert Zaehler, Pending Count, Delay-/Fallback-Grund, letzte Queries, teuerste Query und unreachable-Markierungen.
+- Contact-Recompute nutzt denselben Budgetpfad und kann dadurch nicht mehr alle Units im selben Tick neu planen.
 
 ## Risiken
 - Query-Budgeting kann sichtbare Startverzoegerung erzeugen, wenn zu viele Units gleichzeitig neue Befehle erhalten.

@@ -29,6 +29,10 @@ const HEIGHT_DISADVANTAGE_ACCURACY_PENALTY: float = 0.05
 @export var terrain_registry_path: NodePath
 @export var combat_rng_seed: int = 1
 @export var terrain_move_debug_enabled: bool = false
+@export var navigation_budget_enabled: bool = true
+@export_range(0, 64, 1) var navigation_max_new_path_queries_per_tick: int = 4
+@export var navigation_debug_enabled: bool = false
+@export_range(1, 128, 1) var navigation_debug_query_history_limit: int = 24
 
 var command_queue: Array = []
 var effects_queue: Array = []
@@ -47,6 +51,14 @@ var _hpa_navigation_graph = null
 var _hpa_pathfinder = HPA_PATHFINDER_SCRIPT.new()
 var _hpa_navigation_registry = null
 var _hpa_navigation_tile_count: int = -1
+var _navigation_new_path_queries_this_tick: int = 0
+var _navigation_path_queries_this_tick: int = 0
+var _navigation_delayed_this_tick: int = 0
+var _navigation_fallback_queries_this_tick: int = 0
+var _navigation_unreachable_queries_this_tick: int = 0
+var _navigation_last_delay_reason: String = ""
+var _navigation_last_tick_queries: Array = []
+var _navigation_most_expensive_query: Dictionary = {}
 
 
 func _init() -> void:
@@ -97,6 +109,39 @@ func get_terrain_move_debug_snapshot(unit_id: String = "") -> Variant:
 			result.append(Dictionary(_last_terrain_move_debug_by_unit_id.get(unit_id_variant, {})).duplicate(true))
 		return result
 	return Dictionary(_last_terrain_move_debug_by_unit_id.get(unit_id.strip_edges(), {})).duplicate(true)
+
+
+func set_navigation_budget_enabled(enabled: bool) -> void:
+	navigation_budget_enabled = enabled
+
+
+func set_navigation_max_new_path_queries_per_tick(limit: int) -> void:
+	navigation_max_new_path_queries_per_tick = maxi(0, limit)
+
+
+func set_navigation_debug_enabled(enabled: bool) -> void:
+	navigation_debug_enabled = enabled
+	if not navigation_debug_enabled:
+		_navigation_last_tick_queries.clear()
+		_navigation_most_expensive_query.clear()
+
+
+func get_navigation_debug_snapshot() -> Dictionary:
+	return {
+		"enabled": navigation_debug_enabled,
+		"budget_enabled": navigation_budget_enabled,
+		"tick": tick_counter,
+		"max_new_path_queries_per_tick": navigation_max_new_path_queries_per_tick,
+		"new_path_queries_this_tick": _navigation_new_path_queries_this_tick,
+		"path_queries_this_tick": _navigation_path_queries_this_tick,
+		"fallback_queries_this_tick": _navigation_fallback_queries_this_tick,
+		"unreachable_queries_this_tick": _navigation_unreachable_queries_this_tick,
+		"delayed_this_tick": _navigation_delayed_this_tick,
+		"pending_query_count": _count_pending_navigation_queries(),
+		"last_delay_reason": _navigation_last_delay_reason,
+		"last_queries": _duplicate_dictionary_array(_navigation_last_tick_queries),
+		"most_expensive_query": _navigation_most_expensive_query.duplicate(true),
+	}
 
 
 func clear_queues() -> void:
@@ -231,6 +276,7 @@ func _physics_process(delta: float) -> void:
 
 	tick_counter += 1
 	is_processing_tick = true
+	_begin_navigation_budget_tick()
 
 	var commands: Array = _drain_queue(command_queue)
 	_process_commands(commands, delta)
@@ -239,6 +285,7 @@ func _physics_process(delta: float) -> void:
 	_process_effects(effects, delta)
 	_update_objective_capture()
 
+	_finish_navigation_budget_tick()
 	is_processing_tick = false
 	_broadcast_tick_state()
 	tick_processed.emit(tick_counter)
@@ -766,7 +813,10 @@ func _extract_or_build_path_world_points(
 	if not existing_path.is_empty():
 		return existing_path
 
-	var path_world_points: Array = _build_path_world_points(current_position, target_position, terrain_registry)
+	if not _try_begin_navigation_path_request(cmd, unit, current_position, target_position):
+		return []
+
+	var path_world_points: Array = _build_path_world_points(current_position, target_position, terrain_registry, cmd, unit)
 	cmd["path"] = path_world_points.duplicate(true)
 	if terrain_move_debug_enabled:
 		_record_terrain_move_debug(cmd, unit, current_position, target_position, terrain_registry, path_world_points)
@@ -815,6 +865,147 @@ func _should_recompute_move_path(
 	return true
 
 
+func _begin_navigation_budget_tick() -> void:
+	_navigation_new_path_queries_this_tick = 0
+	_navigation_path_queries_this_tick = 0
+	_navigation_delayed_this_tick = 0
+	_navigation_fallback_queries_this_tick = 0
+	_navigation_unreachable_queries_this_tick = 0
+	_navigation_last_delay_reason = ""
+	_navigation_last_tick_queries.clear()
+
+
+func _finish_navigation_budget_tick() -> void:
+	if _navigation_last_tick_queries.size() > navigation_debug_query_history_limit:
+		_navigation_last_tick_queries = _navigation_last_tick_queries.slice(_navigation_last_tick_queries.size() - navigation_debug_query_history_limit)
+
+
+func _try_begin_navigation_path_request(cmd: Dictionary, unit, current_position: Vector2, target_position: Vector2) -> bool:
+	var max_queries: int = maxi(0, navigation_max_new_path_queries_per_tick)
+	if navigation_budget_enabled and is_processing_tick and _navigation_new_path_queries_this_tick >= max_queries:
+		_delay_navigation_path_request(cmd, unit, current_position, target_position, "budget_exhausted")
+		return false
+
+	_navigation_new_path_queries_this_tick += 1
+	cmd.erase("navigation_pending_reason")
+	cmd.erase("navigation_pending_since_tick")
+	return true
+
+
+func _delay_navigation_path_request(cmd: Dictionary, unit, current_position: Vector2, target_position: Vector2, reason: String) -> void:
+	_navigation_delayed_this_tick += 1
+	_navigation_last_delay_reason = reason
+	var delayed_cmd: Dictionary = cmd.duplicate(true)
+	delayed_cmd["path"] = []
+	delayed_cmd["navigation_pending_reason"] = reason
+	delayed_cmd["navigation_pending_since_tick"] = tick_counter
+	delayed_cmd["navigation_delay_count"] = int(cmd.get("navigation_delay_count", 0)) + 1
+	enqueue_command(delayed_cmd)
+
+	var record: Dictionary = _make_navigation_record(cmd, unit, Vector2i.ZERO, Vector2i.ZERO, {}, 0, "delayed", reason, 0)
+	record["current_position"] = current_position
+	record["target_position"] = target_position
+	record["delayed"] = true
+	_append_navigation_debug_record(record)
+
+
+func _record_navigation_path_query(
+	cmd: Dictionary,
+	unit,
+	from_grid: Vector2i,
+	to_grid: Vector2i,
+	query_result: Dictionary,
+	duration_usec: int,
+	query_kind: String,
+	reason: String,
+	candidate_count: int
+) -> void:
+	_navigation_path_queries_this_tick += 1
+	if query_kind == "fallback":
+		_navigation_fallback_queries_this_tick += 1
+	var record: Dictionary = _make_navigation_record(cmd, unit, from_grid, to_grid, query_result, duration_usec, query_kind, reason, candidate_count)
+	if bool(record.get("unreachable", false)):
+		_navigation_unreachable_queries_this_tick += 1
+	_append_navigation_debug_record(record)
+
+
+func _make_navigation_record(
+	cmd: Dictionary,
+	unit,
+	from_grid: Vector2i,
+	to_grid: Vector2i,
+	query_result: Dictionary,
+	duration_usec: int,
+	query_kind: String,
+	reason: String,
+	candidate_count: int
+) -> Dictionary:
+	var path: Array = Array(query_result.get("path", []))
+	var status: String = String(query_result.get("status", ""))
+	var unit_id: String = _extract_unit_id_for_path_recompute(unit)
+	if unit_id.is_empty():
+		unit_id = String(cmd.get("unit_id", ""))
+	var route_type: String = "none"
+	if status == "direct_a_star":
+		route_type = "direct_a_star"
+	elif status == HPA_PATHFINDER_SCRIPT.STATUS_HPA or status == HPA_PATHFINDER_SCRIPT.STATUS_SAME_COMPONENT:
+		route_type = "hpa"
+	elif query_kind == "delayed":
+		route_type = "delayed"
+	var unreachable: bool = path.is_empty() and (
+		status == HPA_PATHFINDER_SCRIPT.STATUS_NO_ABSTRACT_ROUTE
+		or status == HPA_PATHFINDER_SCRIPT.STATUS_NO_COMPONENT
+		or status == HPA_PATHFINDER_SCRIPT.STATUS_LOCAL_PATH_FAILED
+		or status == HPA_PATHFINDER_SCRIPT.STATUS_INVALID
+	)
+	return {
+		"tick": tick_counter,
+		"unit_id": unit_id,
+		"command_type": String(cmd.get("command_type", cmd.get("type", ""))),
+		"priority": _extract_priority(cmd),
+		"query_kind": query_kind,
+		"route_type": route_type,
+		"status": status,
+		"from_grid": from_grid,
+		"to_grid": to_grid,
+		"duration_usec": duration_usec,
+		"path_grid_count": path.size(),
+		"candidate_count_estimate": candidate_count,
+		"expanded_node_estimate": maxi(candidate_count, path.size()),
+		"fallback_or_delay_reason": reason,
+		"unreachable": unreachable,
+	}
+
+
+func _append_navigation_debug_record(record: Dictionary) -> void:
+	if not navigation_debug_enabled:
+		return
+	_navigation_last_tick_queries.append(record)
+	if _navigation_last_tick_queries.size() > navigation_debug_query_history_limit:
+		_navigation_last_tick_queries.pop_front()
+	var duration_usec: int = int(record.get("duration_usec", 0))
+	if _navigation_most_expensive_query.is_empty() or duration_usec > int(_navigation_most_expensive_query.get("duration_usec", -1)):
+		_navigation_most_expensive_query = record.duplicate(true)
+
+
+func _count_pending_navigation_queries() -> int:
+	var pending_count: int = 0
+	for queued_command in command_queue:
+		if typeof(queued_command) != TYPE_DICTIONARY:
+			continue
+		if not String(Dictionary(queued_command).get("navigation_pending_reason", "")).strip_edges().is_empty():
+			pending_count += 1
+	return pending_count
+
+
+func _duplicate_dictionary_array(values: Array) -> Array:
+	var result: Array = []
+	for value in values:
+		if typeof(value) == TYPE_DICTIONARY:
+			result.append(Dictionary(value).duplicate(true))
+	return result
+
+
 func _extract_unit_id_for_path_recompute(unit) -> String:
 	if unit == null or not unit.has_method("get_unit_id"):
 		return ""
@@ -826,7 +1017,7 @@ func _is_unit_in_contact(unit) -> bool:
 	return unit != null and unit.has_method("is_in_contact") and bool(unit.call("is_in_contact"))
 
 
-func _build_path_world_points(current_position: Vector2, target_position: Vector2, terrain_registry) -> Array:
+func _build_path_world_points(current_position: Vector2, target_position: Vector2, terrain_registry, cmd: Dictionary = {}, unit = null) -> Array:
 	var path_world_points: Array = []
 	if terrain_registry == null or _terrain_pathfinder == null:
 		path_world_points.append(target_position)
@@ -843,9 +1034,12 @@ func _build_path_world_points(current_position: Vector2, target_position: Vector
 		if typeof(nearest_start_grid) == TYPE_VECTOR2I:
 			from_grid = nearest_start_grid
 
+	var navigation_started_usec: int = Time.get_ticks_usec()
 	var navigation_query: Dictionary = _find_navigation_grid_path(from_grid, to_grid, terrain_registry)
+	var navigation_duration_usec: int = Time.get_ticks_usec() - navigation_started_usec
 	var path_grid_points: Array = Array(navigation_query.get("path", []))
 	var navigation_status: String = String(navigation_query.get("status", ""))
+	_record_navigation_path_query(cmd, unit, from_grid, to_grid, navigation_query, navigation_duration_usec, "primary", "", path_grid_points.size())
 	path_grid_points = _simplify_grid_path_turns(path_grid_points)
 	if path_grid_points.is_empty():
 		if from_grid == to_grid:
@@ -855,8 +1049,11 @@ func _build_path_world_points(current_position: Vector2, target_position: Vector
 		var reachable_grid: Variant = _find_hpa_reachable_walkable_grid(from_grid, to_grid, terrain_registry) if navigation_status == HPA_PATHFINDER_SCRIPT.STATUS_NO_ABSTRACT_ROUTE else _find_nearest_reachable_walkable_grid(from_grid, to_grid, terrain_registry)
 		if typeof(reachable_grid) != TYPE_VECTOR2I:
 			return path_world_points
+		var fallback_started_usec: int = Time.get_ticks_usec()
 		var fallback_query: Dictionary = _find_navigation_grid_path(from_grid, reachable_grid, terrain_registry)
+		var fallback_duration_usec: int = Time.get_ticks_usec() - fallback_started_usec
 		var fallback_path_grid_points: Array = Array(fallback_query.get("path", []))
+		_record_navigation_path_query(cmd, unit, from_grid, reachable_grid, fallback_query, fallback_duration_usec, "fallback", navigation_status, fallback_path_grid_points.size())
 		fallback_path_grid_points = _simplify_grid_path_turns(fallback_path_grid_points)
 		if fallback_path_grid_points.is_empty() and reachable_grid != from_grid:
 			return path_world_points
