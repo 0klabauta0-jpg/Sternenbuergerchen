@@ -839,7 +839,7 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 ### TASK_115 - Gemeinsames Markersystem fuer Editor und Taktikkarte
 - Status: implementiert
 - Stand: `scripts/terrain/terrain_marker_catalog.gd` fuehrt jetzt einen kleinen gemeinsamen Marker-Typkatalog fuer Editor- und Mission-Marker mit Standardname, Farbe, Symbol, Kontext und Single-/Multi-Instance-Regel. `TerrainMapData` speichert Kartenmarker nicht mehr nur als nackte Positionen, sondern als Marker-Eintraege mit Typ, Name, Farbe, Symbol und Position; alte JSON-Dateien mit einfachem `x`/`y`-Markerformat bleiben rueckwaertskompatibel lesbar.
-- Stand: Der Map-Editor besitzt jetzt eine echte Marker-Liste statt der alten festen Marker-Zeilen. Marker werden aus einer festen Typ-Liste angelegt, direkt auf der Karte platziert oder gezogen, per `DEL` geloescht, per Doppelklick umbenannt, auf Tile-Mitten eingerastet und auf demselben Feld nicht mehr gestapelt. Die bisherigen festen Marker `spawn_alpha`, `spawn_bravo`, `objective_point`, `flank_anchor_left` und `flank_anchor_right` laufen ueber dieselbe Marker-Basis wie neue Editor-Typen wie `rally_point`, `danger_zone`, `loot_cache` und `recon_note`.
+- Stand: Der Map-Editor besitzt jetzt eine echte Marker-Liste statt der alten festen Marker-Zeilen. Marker werden aus einer festen Typ-Liste angelegt, direkt auf der Karte platziert oder gezogen, per `DEL` geloescht, per Doppelklick umbenannt, auf Tile-Mitten eingerastet und auf demselben Feld nicht mehr gestapelt. Die festen Marker `spawn_alpha`, `spawn_bravo` und `objective_point` laufen ueber dieselbe Marker-Basis wie neue Editor-Typen wie `rally_point`, `danger_zone`, `loot_cache` und `recon_note`; die frueheren Flank-Anchors wurden spaeter entfernt.
 - Stand: Die Taktikkarte konsumiert fuer Spielermarker denselben `mission_player`-Katalog. Das Wegpunkt-Kontextmenue wird daraus aufgebaut, neue oder verschobene Wegpunkte rasten auf Tile-Mitten ein, und `FireteamOrderVisualizer` nutzt dieselbe Symbolfamilie statt einer separaten Sondertabelle.
 - Offene Punkte: Keine innerhalb des TASK-115-Slices; weitergehende Markerfamilien, echte Missionsmarker-Listen im Tactical-UI oder persistente Kampagnenmarker bleiben bewusst eigene Folgepfade.
 - Risiken: Kartenmarker in `TerrainMapData` und spielerseitige Missionsmarker im Planning-State teilen jetzt Typkatalog und Symbolik, bleiben aber absichtlich getrennte Datenwahrheiten. Weitere Ausbaupfade sollten diesen Vertrag erweitern statt wieder separate Marker-Sonderlogik in Editor, Tactical-UI oder Meta-Map aufzubauen.
@@ -982,6 +982,27 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Offene Punkte: Keine produktive JPS-, D* Lite-, CBS- oder Reservierungslogik. Der Harness misst vorhandene Systeme und bleibt unter `scripts/tests`.
 - Risiken: Benchmark-Szenarien sind kleine Laborkarten und ersetzen keine grossen Playtests in `mission_fireteam_dev_test.tscn`; sie schaffen aber eine stabile Basis fuer Folgeentscheidungen.
 - Naechster Schritt: TASK_151 kann Engpass-Reservierung/MAPF-Light auf Basis der gemessenen Bottleneck- und Avoidance-Werte schneiden.
+
+### Editor Cleanup - Flank Anchor Marker
+- Status: implementiert
+- Stand: Die veralteten festen Mapmarker `flank_anchor_left` und `flank_anchor_right` sind aus Marker-Katalog, Editor-Festmarkerzeilen, Standardmap und Missions-Setup-Fallback entfernt. Der eigentliche `flank`-Befehl, Flank-Areas und die Flank-Vulnerability-Logik bleiben unveraendert.
+- Offene Punkte: Alte externe Karten, die diese Marker noch enthalten, laden sie nach dem Entfernen aus dem Katalog als Custom-Marker, falls sie nicht vorher bereinigt werden.
+- Risiken: Keine Runtime-Abhaengigkeit wurde gefunden; die Anchors waren nur noch Editor-/Map-Altlasten.
+- Naechster Schritt: Bei Bedarf alte Karten einmal im Editor neu speichern, damit die Custom-Altmarker aus den JSON-Dateien verschwinden.
+
+### Editor Slot Limit
+- Status: implementiert
+- Stand: Der Map-Editor erlaubt fuer `mission_slot_count` jetzt bis zu 50 Slots pro Seite statt der bisherigen 8er-Obergrenze. Die gespeicherten Map-Daten bleiben unveraendert ein einfacher `mission_slot_count`-Wert.
+- Offene Punkte: Die Meta-/FOB-UI zeigt die hoehere Kapazitaet an, erzeugt dadurch aber noch keine 50 sichtbaren Missions-Unit-Nodes.
+- Risiken: Das ist zunaechst eine Editor-/Kapazitaetsfreigabe; groessere Live-Teams brauchen weiterhin passende Spawn-/Roster-/Performance-Folgearbeit.
+- Naechster Schritt: Bei Bedarf separate Tasks fuer 50er-Spawnverteilung und Meta-Roster-Skalierung schneiden.
+
+### TASK_132 - Kenney Isometric Asset Palette Expansion
+- Status: implementiert
+- Stand: Der Tile-Katalog enthaelt jetzt 44 kuratierte Kenney-Isometric-Asset-Tile-Typen in acht neuen Palette-Gruppen: `deko`, `technik`, `gebaeude`, `plattformen`, `pipes`, `rails`, `crater` und `fahrzeuge`. Die Auswahl nutzt vollstaendige Richtungssaetze fuer Faesser, Generatoren, Satellitenschuesseln, Gebaeude, Plattformen, Rohre, Schienen, Krater und Speeder. Diese neuen Gruppen laufen als Objekt-Layer ueber `object_type_id`: der Bodentile bleibt in `type_id` erhalten, der Renderer zeichnet danach das Objekt-Overlay in einem eigenen `ObjectContainer`, und alte bereits gemalte Objekt-`type_id`s rendern weiterhin mit Boden darunter. Die Defaults bleiben konservativ: kleine Deko blockt keine LOS, grosse Technik-/Gebaeude-/Fahrzeugobjekte sind nicht begehbar und koennen LOS/Cover liefern, flache Plattform-/Rail-/Crater-Tiles bleiben begehbar. Die Editor-Palette zeigt Kataloggruppen nun als nicht auswaehlbare Header, damit die neue Asset-Menge scanbar bleibt.
+- Offene Punkte: Kein automatischer Vollimport; weitere Kenney-Familien sollten weiterhin kuratiert und mit sichtbarer Editor-Pruefung ergaenzt werden.
+- Risiken: Grosse Sprites koennen visuell noch spezifische Anchor-/Offset-Nacharbeit brauchen; Gameplay-Werte sind bewusst defensive V1-Defaults und werden aktuell noch als aggregierte Tile-Felder gespeichert, nicht als getrennte Objekt-/Boden-Gameplaywerte.
+- Naechster Schritt: Bei Bedarf eine zweite Palette-Erweiterung fuer Gates, Turrets, Monorail oder Desks schneiden, nachdem die aktuelle Auswahl im Editor visuell geprueft wurde.
 
 ### TASK_151-153 - Geplante Folge-Labs
 - Status: geplant

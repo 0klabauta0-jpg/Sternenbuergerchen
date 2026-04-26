@@ -48,6 +48,7 @@ func render_map(terrain_map_data, map_root: Node) -> Dictionary:
 		"tiles": {},
 		"cliffs": {},
 		"walls": {},
+		"objects": {},
 	}
 	if terrain_map_data == null or map_root == null:
 		return empty_result
@@ -55,12 +56,16 @@ func render_map(terrain_map_data, map_root: Node) -> Dictionary:
 	var tile_container := _ensure_container(map_root, "Terrain")
 	var cliff_container := _ensure_container(map_root, "CliffContainer")
 	var wall_container := _ensure_container(map_root, "WallContainer")
+	var object_container := _ensure_container(map_root, "ObjectContainer")
 	wall_container.y_sort_enabled = true
 	wall_container.z_index = -13
+	object_container.y_sort_enabled = true
+	object_container.z_index = -12
 
 	_clear_children(tile_container)
 	_clear_children(cliff_container)
 	_clear_children(wall_container)
+	_clear_children(object_container)
 
 	var tile_sprites_by_grid: Dictionary = {}
 	for tile_data in terrain_map_data.call("get_tiles"):
@@ -75,10 +80,12 @@ func render_map(terrain_map_data, map_root: Node) -> Dictionary:
 
 	var cliff_sprites_by_grid: Dictionary = _build_cliff_overlays(terrain_map_data, cliff_container)
 	var wall_sprites_by_grid: Dictionary = _build_wall_overlays(terrain_map_data, wall_container)
+	var object_sprites_by_grid: Dictionary = _build_object_overlays(terrain_map_data, object_container)
 	return {
 		"tiles": tile_sprites_by_grid,
 		"cliffs": cliff_sprites_by_grid,
 		"walls": wall_sprites_by_grid,
+		"objects": object_sprites_by_grid,
 	}
 
 
@@ -92,6 +99,9 @@ func resolve_tile_texture(tile_data) -> Texture2D:
 
 	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
 	if type_id.is_empty():
+		return TILE_TEXTURE
+
+	if tile_catalog.has_method("is_object_layer_type") and bool(tile_catalog.call("is_object_layer_type", type_id)):
 		return TILE_TEXTURE
 
 	var type_texture: Texture2D = tile_catalog.get_texture(type_id)
@@ -143,6 +153,33 @@ func is_object_type(tile_data) -> bool:
 		return false
 	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
 	return type_id.begins_with("wall_") or type_id.begins_with("cliff_") or type_id.begins_with("slope_") or type_id.begins_with("rock_")
+
+
+func get_tile_object_type_id(tile_data) -> String:
+	if tile_data == null:
+		return ""
+
+	var object_type_id: String = String(tile_data.object_type_id) if tile_data.object_type_id is String else ""
+	if not object_type_id.is_empty():
+		return object_type_id
+
+	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
+	var tile_catalog = _get_or_load_tile_catalog()
+	if type_id.is_empty() or tile_catalog == null or not tile_catalog.has_method("is_object_layer_type"):
+		return ""
+	if bool(tile_catalog.call("is_object_layer_type", type_id)):
+		return type_id
+	return ""
+
+
+func resolve_object_texture(tile_data) -> Texture2D:
+	var object_type_id: String = get_tile_object_type_id(tile_data)
+	if object_type_id.is_empty():
+		return null
+	var tile_catalog = _get_or_load_tile_catalog()
+	if tile_catalog == null:
+		return null
+	return tile_catalog.get_texture(object_type_id)
 
 
 func _get_or_load_tile_catalog():
@@ -261,13 +298,13 @@ func _build_wall_overlays(terrain_map_data, wall_container: Node2D) -> Dictionar
 
 		match type_id:
 			"wall_straight_se":
-				texture = WALL_TEXTURE_SE
-			"wall_straight_sw":
-				texture = WALL_TEXTURE_SW
-			"wall_straight_ne":
 				texture = WALL_TEXTURE_NE
-			"wall_straight_nw":
+			"wall_straight_sw":
+				texture = WALL_TEXTURE_SE
+			"wall_straight_ne":
 				texture = WALL_TEXTURE_NW
+			"wall_straight_nw":
+				texture = WALL_TEXTURE_SW
 			"wall_corner_se":
 				texture = WALL_CORNER_NW
 			"wall_corner_sw":
@@ -331,3 +368,21 @@ func _build_wall_overlays(terrain_map_data, wall_container: Node2D) -> Dictionar
 		wall_sprites_by_grid[tile_data.grid_position] = [sprite]
 
 	return wall_sprites_by_grid
+
+
+func _build_object_overlays(terrain_map_data, object_container: Node2D) -> Dictionary:
+	var object_sprites_by_grid: Dictionary = {}
+	for tile_data in terrain_map_data.call("get_tiles"):
+		var texture: Texture2D = resolve_object_texture(tile_data)
+		if texture == null:
+			continue
+
+		var sprite := Sprite2D.new()
+		sprite.texture = texture
+		sprite.centered = false
+		sprite.z_index = 0
+		sprite.position = tile_data.world_position - KENNEY_DIAMOND_CENTER
+		object_container.add_child(sprite)
+		object_sprites_by_grid[tile_data.grid_position] = [sprite]
+
+	return object_sprites_by_grid

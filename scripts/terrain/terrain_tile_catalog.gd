@@ -2,6 +2,16 @@ class_name TerrainTileCatalog
 extends RefCounted
 
 const DEFAULT_CATALOG_PATH: String = "res://data/terrain_tile_catalog.json"
+const OBJECT_LAYER_GROUPS: PackedStringArray = [
+	"deko",
+	"technik",
+	"gebaeude",
+	"plattformen",
+	"pipes",
+	"rails",
+	"crater",
+	"fahrzeuge",
+]
 
 var _tile_types: Dictionary = {}
 var _type_order: Array[String] = []
@@ -61,6 +71,7 @@ static func load_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCa
 			"type_id": type_id,
 			"display_name": String(entry.get("display_name", type_id)),
 			"palette_group": palette_group,
+			"placement_layer": String(entry.get("placement_layer", "object" if OBJECT_LAYER_GROUPS.has(palette_group) else "terrain")),
 			"texture_path": String(entry.get("texture_path", "")),
 			"surface_type": String(entry.get("surface_type", "ground")),
 			"walkable": bool(entry.get("walkable", true)),
@@ -133,12 +144,26 @@ func get_texture(type_id: String) -> Texture2D:
 	return _type_textures.get(type_id, null) as Texture2D
 
 
+func is_object_layer_type(type_id: String) -> bool:
+	var entry: Dictionary = _tile_types.get(type_id, {})
+	return String(entry.get("placement_layer", "terrain")).strip_edges().to_lower() == "object"
+
+
 func apply_type_to_tile(tile_data, type_id: String) -> bool:
 	if tile_data == null or not has_type(type_id):
 		return false
 
 	var entry: Dictionary = _tile_types[type_id]
+	if is_object_layer_type(type_id):
+		tile_data.object_type_id = type_id
+		tile_data.walkable = bool(entry.get("walkable", true))
+		tile_data.blocks_los = bool(entry.get("blocks_los", false))
+		tile_data.cover_value = int(entry.get("cover_value", 0))
+		tile_data.object_height = int(entry.get("object_height", 0))
+		return true
+
 	tile_data.type_id = type_id
+	tile_data.object_type_id = ""
 	tile_data.walkable = bool(entry.get("walkable", true))
 	tile_data.blocks_los = bool(entry.get("blocks_los", false))
 	tile_data.cover_value = int(entry.get("cover_value", 0))

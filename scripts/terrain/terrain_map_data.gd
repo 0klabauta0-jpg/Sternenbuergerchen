@@ -3,6 +3,7 @@ extends RefCounted
 
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
+const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_catalog.gd")
 
 var _map_name: String = ""
 var _mission_slot_count: int = 3
@@ -73,6 +74,7 @@ static func load_from_file(path: String) -> TerrainMapData:
 			normalized_tile_entry["grid_position"] = grid_position
 			normalized_tile_entry["tile_id"] = "tile_%d_%d" % [grid_position.x, grid_position.y]
 			normalized_tile_entry["world_position"] = terrain_map_data._grid_to_world(grid_position)
+			_normalize_legacy_object_layer_tile(normalized_tile_entry)
 
 			var tile_data = TERRAIN_TILE_DATA_SCRIPT.call("from_dict", normalized_tile_entry)
 			if tile_data == null or not tile_data.has_method("is_valid") or not bool(tile_data.call("is_valid")):
@@ -81,6 +83,25 @@ static func load_from_file(path: String) -> TerrainMapData:
 			terrain_map_data._tiles.append(tile_data)
 
 	return terrain_map_data
+
+
+static func _normalize_legacy_object_layer_tile(tile_entry: Dictionary) -> void:
+	if tile_entry.is_empty():
+		return
+
+	var type_id: String = String(tile_entry.get("type_id", "")).strip_edges()
+	var object_type_id: String = String(tile_entry.get("object_type_id", "")).strip_edges()
+	if type_id.is_empty() or not object_type_id.is_empty():
+		return
+
+	var catalog = TERRAIN_TILE_CATALOG_SCRIPT.call("load_from_file")
+	if catalog == null or not catalog.has_method("is_object_layer_type"):
+		return
+	if not bool(catalog.call("is_object_layer_type", type_id)):
+		return
+
+	tile_entry["object_type_id"] = type_id
+	tile_entry["type_id"] = "ground_flat"
 
 
 static func create_empty(
@@ -158,22 +179,24 @@ func save_to_file(path: String) -> Error:
 	for tile_data in _get_sorted_tiles():
 		var tile_dict: Dictionary = tile_data.call("to_dict")
 		var grid_position: Vector2i = tile_dict.get("grid_position", Vector2i.ZERO)
-		json_root["tiles"].append(
-			{
-				"grid_position": {
-					"x": grid_position.x,
-					"y": grid_position.y,
-				},
-				"type_id": String(tile_dict.get("type_id", "")),
-				"walkable": bool(tile_dict.get("walkable", true)),
-				"blocks_los": bool(tile_dict.get("blocks_los", false)),
-				"cover_value": int(tile_dict.get("cover_value", 0)),
-				"height_level": int(tile_dict.get("height_level", 0)),
-				"object_height": int(tile_dict.get("object_height", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_OBJECT_HEIGHT)),
-				"surface_type": String(tile_dict.get("surface_type", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFACE_TYPE)),
-				"edge_type": String(tile_dict.get("edge_type", TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF)),
-			}
-		)
+		var serialized_tile: Dictionary = {
+			"grid_position": {
+				"x": grid_position.x,
+				"y": grid_position.y,
+			},
+			"type_id": String(tile_dict.get("type_id", "")),
+			"walkable": bool(tile_dict.get("walkable", true)),
+			"blocks_los": bool(tile_dict.get("blocks_los", false)),
+			"cover_value": int(tile_dict.get("cover_value", 0)),
+			"height_level": int(tile_dict.get("height_level", 0)),
+			"object_height": int(tile_dict.get("object_height", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_OBJECT_HEIGHT)),
+			"surface_type": String(tile_dict.get("surface_type", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFACE_TYPE)),
+			"edge_type": String(tile_dict.get("edge_type", TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF)),
+		}
+		var object_type_id: String = String(tile_dict.get("object_type_id", "")).strip_edges()
+		if not object_type_id.is_empty():
+			serialized_tile["object_type_id"] = object_type_id
+		json_root["tiles"].append(serialized_tile)
 
 	file.store_string(JSON.stringify(json_root, "\t") + "\n")
 	return OK

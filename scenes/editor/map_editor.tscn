@@ -232,7 +232,7 @@ text = "Mission Slots:"
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 1.0
-max_value = 8.0
+max_value = 50.0
 step = 1.0
 value = 3.0
 
@@ -281,32 +281,6 @@ size_flags_horizontal = 3
 text = "objective_point: -"
 
 [node name="ObjectivePointButton" type="Button" parent="UI/PropertyPanel/Margin/VBox/ObjectivePointRow"]
-layout_mode = 2
-text = "Use Tile"
-
-[node name="FlankLeftRow" type="HBoxContainer" parent="UI/PropertyPanel/Margin/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="FlankLeftLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox/FlankLeftRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "flank_anchor_left: -"
-
-[node name="FlankLeftButton" type="Button" parent="UI/PropertyPanel/Margin/VBox/FlankLeftRow"]
-layout_mode = 2
-text = "Use Tile"
-
-[node name="FlankRightRow" type="HBoxContainer" parent="UI/PropertyPanel/Margin/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="FlankRightLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox/FlankRightRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "flank_anchor_right: -"
-
-[node name="FlankRightButton" type="Button" parent="UI/PropertyPanel/Margin/VBox/FlankRightRow"]
 layout_mode = 2
 text = "Use Tile"
 

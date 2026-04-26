@@ -10,7 +10,7 @@ Editor, Missions-Testszene und Meta-Map sollen auf denselben kleinen JSON-/Rende
 ## Anforderungen
 1. Fuehre einen gemeinsamen Renderer fuer `TerrainMapData` ein, den Editor und Mission teilen koennen.
 2. Die Missions-Testszene soll dieselbe JSON-Karte ueber diesen Pfad sichtbar aufbauen statt ueber einen separaten Hardcode-/Sprite-Mix.
-3. `TerrainMapData` soll einen kleinen Marker-Datenvertrag fuer feste Missionsmarker tragen, mindestens `spawn_alpha`, `spawn_bravo`, `objective_point`, `flank_anchor_left` und `flank_anchor_right`.
+3. `TerrainMapData` soll einen kleinen Marker-Datenvertrag fuer feste Missionsmarker tragen, mindestens `spawn_alpha`, `spawn_bravo` und `objective_point`. Die frueheren `flank_anchor_left`-/`flank_anchor_right`-Marker sind inzwischen veraltet und entfernt.
 4. Die zentrale Testmap soll diese Marker direkt in derselben JSON-Datei speichern.
 5. `MissionTestSetup` soll Marker aus der JSON in die vorhandenen Szenen-Marker spiegeln, damit bestehende NodePath-Pfade weiter funktionieren.
 6. Die read-only Meta-Map soll dieselben Markerkoordinaten aus derselben Map-Datei lesen.
