@@ -292,6 +292,9 @@ TASK_151 - Engpass-Reservierung und MAPF-Light
 TASK_152 - Seeded Cover Placement Lab
 TASK_153 - 3D Transparency Material Presets
 
+Phase 18B - Editor-Asset-Ausbau
+TASK_154 - Kenney Isometric Asset Palette Expansion
+
 Batch-Empfehlung
 
 Codex soll Tasks in kleinen Gruppen bearbeiten:
