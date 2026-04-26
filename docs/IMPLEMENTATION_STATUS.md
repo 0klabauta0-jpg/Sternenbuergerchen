@@ -998,11 +998,11 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Naechster Schritt: Bei Bedarf separate Tasks fuer 50er-Spawnverteilung und Meta-Roster-Skalierung schneiden.
 
 ### TASK_132 - Kenney Isometric Asset Palette Expansion
-- Status: geplant
-- Stand: Fuer den Ausbau des Map-Editors wurde ein eigener Task geschnitten, der mehr Assets aus `res://Assets/kenney_space-kit/Isometric/` kuratiert in den Tile-Katalog und die Editor-Palette bringen soll.
-- Offene Punkte: Auswahl und Defaults pro Asset-Gruppe muessen bewusst getroffen werden; kein Blindimport des gesamten Ordners.
-- Risiken: Grosse Deko-/Gebaeude-Sprites koennen andere Anchor-/Offset-Regeln brauchen und duerfen keine unbeabsichtigte Gameplay-Semantik in Navigation oder LOS einschleusen.
-- Naechster Schritt: TASK_132 starten und zuerst einen Katalog-/Renderer-Verifier fuer existierende Texturpfade, Familien-/Richtungserkennung und Gruppensichtbarkeit bauen.
+- Status: implementiert
+- Stand: Der Tile-Katalog enthaelt jetzt 44 kuratierte Kenney-Isometric-Asset-Tile-Typen in acht neuen Palette-Gruppen: `deko`, `technik`, `gebaeude`, `plattformen`, `pipes`, `rails`, `crater` und `fahrzeuge`. Die Auswahl nutzt vollstaendige Richtungssaetze fuer Faesser, Generatoren, Satellitenschuesseln, Gebaeude, Plattformen, Rohre, Schienen, Krater und Speeder. Die Defaults bleiben konservativ: kleine Deko blockt keine LOS, grosse Technik-/Gebaeude-/Fahrzeugobjekte sind nicht begehbar und koennen LOS/Cover liefern, flache Plattform-/Rail-/Crater-Tiles bleiben begehbar. Die Editor-Palette zeigt Kataloggruppen nun als nicht auswaehlbare Header, damit die neue Asset-Menge scanbar bleibt.
+- Offene Punkte: Kein automatischer Vollimport; weitere Kenney-Familien sollten weiterhin kuratiert und mit sichtbarer Editor-Pruefung ergaenzt werden.
+- Risiken: Grosse Sprites koennen visuell noch spezifische Anchor-/Offset-Nacharbeit brauchen; Gameplay-Werte sind bewusst defensive V1-Defaults und sollten spaeter anhand echter Maps feinjustiert werden.
+- Naechster Schritt: Bei Bedarf eine zweite Palette-Erweiterung fuer Gates, Turrets, Monorail oder Desks schneiden, nachdem die aktuelle Auswahl im Editor visuell geprueft wurde.
 
 ### TASK_151-153 - Geplante Folge-Labs
 - Status: geplant

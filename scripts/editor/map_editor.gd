@@ -1857,6 +1857,9 @@ func _on_tile_type_selected(index: int) -> void:
 		return
 
 	_selected_type_id = String(tile_type_list.get_item_metadata(index))
+	if _selected_type_id.begins_with("__group:"):
+		_on_tile_type_deselected()
+		return
 	if _selected_type_id.is_empty():
 		var type_ids: Array[String] = _tile_catalog.get_type_ids()
 		if index < 0 or index >= type_ids.size():
@@ -2140,11 +2143,28 @@ func _populate_tile_palette() -> void:
 		for child in palette_groups_root.get_children():
 			child.queue_free()
 
+	var types_by_group: Dictionary = {}
 	for tile_type in _tile_catalog.get_all_types():
-		var type_id := String(tile_type.get("type_id", ""))
-		var display_name := String(tile_type.get("display_name", type_id))
-		tile_type_list.add_item(display_name)
-		tile_type_list.set_item_metadata(tile_type_list.item_count - 1, type_id)
+		var palette_group: String = String(tile_type.get("palette_group", "default")).strip_edges().to_lower()
+		if palette_group.is_empty():
+			palette_group = "default"
+		var group_types: Array = Array(types_by_group.get(palette_group, []))
+		group_types.append(tile_type)
+		types_by_group[palette_group] = group_types
+
+	for group in _tile_catalog.get_palette_groups():
+		var group_id: String = String(Dictionary(group).get("group_id", "")).strip_edges().to_lower()
+		if group_id.is_empty() or not types_by_group.has(group_id):
+			continue
+		var header_index: int = tile_type_list.item_count
+		tile_type_list.add_item("-- %s --" % String(Dictionary(group).get("display_name", group_id.capitalize())))
+		tile_type_list.set_item_metadata(header_index, "__group:%s" % group_id)
+		tile_type_list.set_item_selectable(header_index, false)
+		for tile_type in Array(types_by_group.get(group_id, [])):
+			var type_id := String(Dictionary(tile_type).get("type_id", ""))
+			var display_name := String(Dictionary(tile_type).get("display_name", type_id))
+			tile_type_list.add_item(display_name)
+			tile_type_list.set_item_metadata(tile_type_list.item_count - 1, type_id)
 
 
 func _get_tile_type_list() -> ItemList:

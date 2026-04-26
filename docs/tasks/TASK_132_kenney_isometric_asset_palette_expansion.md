@@ -3,7 +3,7 @@
 ## Ziel
 Der Map-Editor soll mehr Assets aus `res://Assets/kenney_space-kit/Isometric/` nutzbar machen, ohne die Palette unuebersichtlich zu fluten oder Gameplay-Semantik in reine Deko-Assets zu mischen.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Voraussetzung
 - `TASK_082 - Gemeinsamer Terrain-Renderer fuer Editor und Mission`
@@ -58,27 +58,26 @@ Der Map-Editor soll mehr Assets aus `res://Assets/kenney_space-kit/Isometric/` n
 - Keine SceneTree-Vollscans im Runtime-Pfad.
 
 ## Akzeptanzkriterien
-- [ ] Mindestens 30 neue nutzbare Asset-Tile-Typen aus dem Kenney-Isometric-Ordner sind im Editor verfuegbar.
-- [ ] Mindestens 5 neue Palette-Gruppen sind sichtbar und sinnvoll benannt.
-- [ ] Der Verifier gruppiert vorhandene Kenney-Assets nach Familie/Richtung und markiert die kuratierte Auswahl.
-- [ ] Alle neuen `texture_path`-Eintraege zeigen auf existierende Dateien.
-- [ ] Pro neuer Gruppe rendert mindestens ein Beispiel-Asset im gemeinsamen TerrainRenderer.
-- [ ] Bestehende Wall-/Marker-/Editor-Verifier bleiben gruen.
-- [ ] Keine bestehende Map-Datei wird nur durch Formatierung oder Re-Save veraendert.
+- [x] Mindestens 30 neue nutzbare Asset-Tile-Typen aus dem Kenney-Isometric-Ordner sind im Editor verfuegbar.
+- [x] Mindestens 5 neue Palette-Gruppen sind sichtbar und sinnvoll benannt.
+- [x] Der Verifier gruppiert vorhandene Kenney-Assets nach Familie/Richtung und markiert die kuratierte Auswahl.
+- [x] Alle neuen `texture_path`-Eintraege zeigen auf existierende Dateien.
+- [x] Pro neuer Gruppe rendert mindestens ein Beispiel-Asset im gemeinsamen TerrainRenderer.
+- [x] Bestehende Wall-/Marker-/Editor-Verifier bleiben gruen.
+- [x] Keine bestehende Map-Datei wird nur durch Formatierung oder Re-Save veraendert.
 
 ## Erwartetes Ergebnis
 Der Editor wird deutlich brauchbarer fuer Map-Blockout und visuelles Dressing: mehr Objekte, Technik, Plattformen und Umgebungsteile koennen direkt platziert werden, waehrend die Runtime weiterhin nur die bekannten Tile-Datenfelder auswertet.
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_132_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_115_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/wall_direction_mapping_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_132_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_115_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/wall_direction_mapping_verifier.gd`
 
-## Dateien (voraussichtlich)
+## Dateien
 - `data/terrain_tile_catalog.json`
+- `scripts/editor/map_editor.gd`
 - `scripts/tests/task_132_verifier.gd`
-- optional: `scripts/terrain/terrain_tile_catalog.gd`
-- optional: `scripts/terrain/terrain_map_renderer.gd`
 
 ## Risiken
 - Der Asset-Ordner ist gross; ein kompletter Blindimport wuerde die Palette schlechter statt besser machen.
