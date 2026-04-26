@@ -11,6 +11,7 @@ const CHARACTER_SHEET_VIEW_SCRIPT: GDScript = preload("res://scripts/meta/charac
 const COMMANDER_COMMAND_SCRIPT: GDScript = preload("res://scripts/command/commander_command.gd")
 const FIRETEAM_ORDER_PLAN_SCRIPT: GDScript = preload("res://scripts/command/fireteam_order_plan.gd")
 const FIRETEAM_WAYPOINT_SCRIPT: GDScript = preload("res://scripts/command/fireteam_waypoint.gd")
+const AREA_ORDER_SCRIPT: GDScript = preload("res://scripts/command/area_order.gd")
 const FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_behavior_resolver.gd")
 const FIRETEAM_ORDER_VISUALIZER_SCRIPT: GDScript = preload("res://scripts/tactical/visuals/fireteam_order_visualizer.gd")
 const AD_HOC_ORDER_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/ad_hoc_order_controller.gd")
@@ -28,7 +29,7 @@ const DROPSHIP_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Is
 
 const ALL_FIRETEAM_LABEL: String = "ALL"
 const APPROACH_ANGLES: PackedStringArray = ["NW", "NE", "SW", "SE"]
-const HOTKEY_LEGEND: String = "LMB Select | RMB Waypoint | CTRL+LMB Add | Drag Lasso | DEL Waypoint | 1 Move | 2 Hold | 3 Flank | 4 Take | Q/E Team | R/F Edit Phase | G GO"
+const HOTKEY_LEGEND: String = "LMB Select | RMB Waypoint | SHIFT+Drag Area | CTRL+LMB Add | Drag Lasso | DEL Marker | 1 Move | 2 Hold | 3 Flank | 4 Take | Q/E Team | R/F Edit Phase | G GO"
 const LIVE_ORDER_PHASE_INDEX: int = 1
 const PHASE_PLANNING_ENABLED: bool = false
 const FRIENDLY_TEAM_ID: String = "team_alpha"
@@ -45,6 +46,7 @@ const CARD_REFRESH_INTERVAL_SECONDS: float = 0.35
 const UNIT_SELECTION_PICK_RADIUS: float = 34.0
 const SELECTION_DRAG_THRESHOLD: float = 10.0
 const WAYPOINT_DRAG_THRESHOLD: float = 4.0
+const AREA_ORDER_DRAG_THRESHOLD: float = 14.0
 const PHASE_WAYPOINT_COMPLETE_RADIUS: float = 26.0
 const AD_HOC_ORDER_COMPLETE_RADIUS: float = 28.0
 const DEV_CHARACTER_STAT_ROWS: Array = [
@@ -73,6 +75,10 @@ const WAYPOINT_MENU_ENGAGE_ID: int = 102
 const WAYPOINT_MENU_FLANK_ID: int = 103
 const WAYPOINT_MENU_TAKE_ID: int = 104
 const WAYPOINT_MENU_DELETE_ID: int = 199
+const AREA_ORDER_MENU_DEFEND_ID: int = 201
+const AREA_ORDER_MENU_ENGAGE_ID: int = 202
+const AREA_ORDER_MENU_TAKE_ID: int = 203
+const AREA_ORDER_MENU_DELETE_ID: int = 299
 const DROP_OFFMAP_DISTANCE_MULTIPLIER: float = 2.0
 const DROP_OFFMAP_MIN_DISTANCE: float = 720.0
 const DROP_SHIP_SPEED: float = 340.0
@@ -187,13 +193,21 @@ var _selection_drag_screen_position: Vector2 = Vector2.ZERO
 var _selection_press_unit_id: String = ""
 var _selection_press_ctrl: bool = false
 var _order_plans_by_key: Dictionary = {}
+var _area_orders_by_id: Dictionary = {}
 var _waypoint_sequence: int = 0
+var _area_order_sequence: int = 0
 var _waypoint_menu_targets: Array = []
+var _area_order_menu_targets: Array = []
 var _focused_waypoint_ref: Dictionary = {}
+var _focused_area_order_ref: Dictionary = {}
 var _dragged_waypoint_ref: Dictionary = {}
 var _dragged_waypoint_press_screen_position: Vector2 = Vector2.ZERO
 var _is_dragging_waypoint: bool = false
 var _has_dragged_waypoint: bool = false
+var _area_order_press_active: bool = false
+var _area_order_drag_active: bool = false
+var _area_order_press_screen_position: Vector2 = Vector2.ZERO
+var _area_order_drag_screen_position: Vector2 = Vector2.ZERO
 var _order_visualizer_pending: bool = false
 var _phase_execution_by_fireteam: Dictionary = {}
 var _active_behavior_profiles_by_fireteam: Dictionary = {}
@@ -243,7 +257,9 @@ func _ready() -> void:
 	_connect_named_button("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/SEButton", Callable(self, "_on_approach_se_pressed"))
 	_ensure_character_overlay()
 	_ensure_selection_overlay()
+	_ensure_area_order_overlay()
 	_ensure_waypoint_command_menu()
+	_ensure_area_order_command_menu()
 	_ensure_ad_hoc_order_controller()
 	_ensure_tactical_stance_controller()
 	_ensure_coordination_manager()
@@ -303,6 +319,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			if _is_pointer_over_control():
 				return
 
+			if mouse_button_event.shift_pressed:
+				if _begin_area_order_interaction(mouse_button_event.position):
+					get_viewport().set_input_as_handled()
+				return
+
 			if _try_begin_waypoint_drag(mouse_button_event.position):
 				get_viewport().set_input_as_handled()
 				return
@@ -324,6 +345,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 
 		if mouse_button_event.button_index == MOUSE_BUTTON_LEFT and not mouse_button_event.pressed:
+			if _finish_area_order_interaction(mouse_button_event.position):
+				get_viewport().set_input_as_handled()
+				return
 			if _finish_waypoint_drag(mouse_button_event.position):
 				get_viewport().set_input_as_handled()
 				return
@@ -332,6 +356,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 
 	if event is InputEventMouseMotion:
+		if _update_area_order_drag((event as InputEventMouseMotion).position):
+			get_viewport().set_input_as_handled()
+			return
 		if _update_waypoint_drag((event as InputEventMouseMotion).position):
 			get_viewport().set_input_as_handled()
 			return
@@ -348,7 +375,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	match key_event.physical_keycode:
 		KEY_DELETE:
-			if _delete_focused_waypoint():
+			if _delete_focused_area_order() or _delete_focused_waypoint():
 				get_viewport().set_input_as_handled()
 		KEY_1:
 			issue_move()
@@ -529,6 +556,8 @@ func set_planning_state(planning_state: Dictionary) -> void:
 		_tactical_stance_controller.call("load_stance_snapshot", Dictionary(planning_state.get("tactical_stances", {})), _get_available_fireteam_ids())
 	if planning_state.has("order_plans"):
 		_load_order_plans_from_state(Array(planning_state.get("order_plans", [])))
+	if planning_state.has("area_orders"):
+		_load_area_orders_from_state(Array(planning_state.get("area_orders", [])))
 	var phase_controller = _get_phase_controller()
 	if phase_controller != null and phase_controller.has_method("load_from_planning_state"):
 		phase_controller.call("load_from_planning_state", planning_state, _get_max_order_plan_phase(), false)
@@ -595,6 +624,7 @@ func get_planning_state() -> Dictionary:
 		"selected_fireteams": Array(_selected_fireteam_ids),
 		"selected_phase": _get_phase_name(),
 		"order_plans": _serialize_order_plans(),
+		"area_orders": _serialize_area_orders(),
 	}
 	if _tactical_stance_controller != null:
 		planning_state["tactical_stances"] = Dictionary(_tactical_stance_controller.call("get_stance_snapshot"))
@@ -3482,6 +3512,20 @@ func _ensure_selection_overlay() -> void:
 	tactical_ui.add_child(selection_overlay)
 
 
+func _ensure_area_order_overlay() -> void:
+	var tactical_ui := get_node_or_null("../TacticalUI") as CanvasLayer
+	if tactical_ui == null or tactical_ui.get_node_or_null("AreaOrderDragOverlay") != null:
+		return
+
+	var area_overlay := ColorRect.new()
+	area_overlay.name = "AreaOrderDragOverlay"
+	area_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	area_overlay.visible = false
+	area_overlay.color = Color(0.48, 0.92, 0.54, 0.2)
+	area_overlay.z_index = 21
+	tactical_ui.add_child(area_overlay)
+
+
 func _begin_selection_interaction(screen_position: Vector2, ctrl_pressed: bool) -> void:
 	_selection_press_active = true
 	_selection_drag_active = false
@@ -4202,8 +4246,24 @@ func _update_selection_overlay(selection_rect: Rect2) -> void:
 	overlay.visible = true
 
 
+func _update_area_order_overlay(selection_rect: Rect2) -> void:
+	var overlay := get_node_or_null("../TacticalUI/AreaOrderDragOverlay") as ColorRect
+	if overlay == null:
+		return
+	if selection_rect.size.x <= 0.0 or selection_rect.size.y <= 0.0:
+		overlay.visible = false
+		return
+	overlay.position = selection_rect.position
+	overlay.size = selection_rect.size
+	overlay.visible = true
+
+
 func get_order_plans_snapshot() -> Array:
 	return _serialize_order_plans()
+
+
+func get_area_orders_snapshot() -> Array:
+	return _serialize_area_orders()
 
 
 func get_visualized_waypoints_snapshot() -> Array:
@@ -4211,6 +4271,13 @@ func get_visualized_waypoints_snapshot() -> Array:
 	if visualizer == null or not visualizer.has_method("get_visible_waypoints"):
 		return []
 	return Array(visualizer.call("get_visible_waypoints"))
+
+
+func get_visualized_area_orders_snapshot() -> Array:
+	var visualizer := get_node_or_null("../FireteamOrderVisualizer")
+	if visualizer == null or not visualizer.has_method("get_visible_area_orders"):
+		return []
+	return Array(visualizer.call("get_visible_area_orders"))
 
 
 func get_active_ad_hoc_orders_snapshot() -> Array:
@@ -4231,6 +4298,20 @@ func _ensure_waypoint_command_menu() -> void:
 	menu.hide_on_item_selection = true
 	if not menu.id_pressed.is_connected(_on_waypoint_menu_id_pressed):
 		menu.id_pressed.connect(_on_waypoint_menu_id_pressed)
+	tactical_ui.add_child(menu)
+
+
+func _ensure_area_order_command_menu() -> void:
+	var tactical_ui := get_node_or_null("../TacticalUI") as CanvasLayer
+	if tactical_ui == null or tactical_ui.get_node_or_null("AreaOrderCommandMenu") != null:
+		return
+
+	var menu := PopupMenu.new()
+	menu.name = "AreaOrderCommandMenu"
+	menu.hide_on_checkable_item_selection = true
+	menu.hide_on_item_selection = true
+	if not menu.id_pressed.is_connected(_on_area_order_menu_id_pressed):
+		menu.id_pressed.connect(_on_area_order_menu_id_pressed)
 	tactical_ui.add_child(menu)
 
 
@@ -4309,6 +4390,8 @@ func _refresh_order_visuals() -> void:
 	if visualizer.has_method("set_fireteam_anchor_dicts"):
 		visualizer.call("set_fireteam_anchor_dicts", _build_fireteam_anchor_visualization_entries())
 	visualizer.call("set_plan_dicts", _serialize_order_plans())
+	if visualizer.has_method("set_area_order_dicts"):
+		visualizer.call("set_area_order_dicts", _serialize_area_orders())
 	visualizer.call("set_ad_hoc_order_dicts", _build_ad_hoc_visualization_entries())
 	visualizer.call("set_security_dicts", get_fireteam_security_snapshot())
 	refresh_contact_overlay()
@@ -4332,6 +4415,11 @@ func _try_open_waypoint_menu_at_position(screen_position: Vector2) -> bool:
 	if not existing_target.is_empty():
 		_focused_waypoint_ref = existing_target.duplicate(true)
 		_open_waypoint_command_menu(screen_position, [existing_target], true)
+		return true
+	var existing_area_order_target: Dictionary = _find_area_order_target_at_screen_position(screen_position)
+	if not existing_area_order_target.is_empty():
+		_focused_area_order_ref = existing_area_order_target.duplicate(true)
+		_open_area_order_command_menu(screen_position, [existing_area_order_target], true)
 		return true
 
 	if _selected_fireteam_ids.is_empty():
@@ -4360,6 +4448,65 @@ func _create_waypoints_for_selected_fireteams(world_position: Vector2) -> Array:
 		waypoint_targets.append(waypoint_target)
 	_refresh_order_visuals()
 	return waypoint_targets
+
+
+func create_area_order_for_selected_fireteams_from_world_rect(start_world_position: Vector2, end_world_position: Vector2, command_type: String = AREA_ORDER_SCRIPT.COMMAND_TYPE_DEFEND) -> Array:
+	return create_area_order_for_fireteams_from_world_rect(_selected_fireteam_ids, start_world_position, end_world_position, command_type)
+
+
+func create_area_order_for_fireteams_from_world_rect(fireteam_ids: PackedStringArray, start_world_position: Vector2, end_world_position: Vector2, command_type: String = AREA_ORDER_SCRIPT.COMMAND_TYPE_DEFEND) -> Array:
+	var payload: Dictionary = _build_area_order_payload_from_world_rect(start_world_position, end_world_position)
+	return _create_area_orders_from_payload(fireteam_ids, payload, command_type, true)
+
+
+func _create_area_orders_for_selected_fireteams_from_screen_rect(screen_rect: Rect2, command_type: String = AREA_ORDER_SCRIPT.COMMAND_TYPE_DEFEND) -> Array:
+	var payload: Dictionary = _build_area_order_payload_from_screen_rect(screen_rect)
+	return _create_area_orders_from_payload(_selected_fireteam_ids, payload, command_type, true)
+
+
+func _create_area_orders_from_payload(fireteam_ids: PackedStringArray, payload: Dictionary, command_type: String, should_emit_signal: bool) -> Array:
+	var normalized_command_type: String = _normalize_area_order_command_type(command_type)
+	var sanitized_fireteam_ids: PackedStringArray = _sanitize_fireteam_ids(fireteam_ids)
+	if sanitized_fireteam_ids.is_empty():
+		return []
+	if Array(payload.get("tile_positions", [])).is_empty() and PackedVector2Array(payload.get("world_polygon", PackedVector2Array())).is_empty():
+		return []
+
+	var targets: Array = []
+	for fireteam_id_variant in sanitized_fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		var area_order = AREA_ORDER_SCRIPT.new({
+			"area_order_id": _next_area_order_id(),
+			"fireteam_id": fireteam_id,
+			"command_type": normalized_command_type,
+			"tile_positions": Array(payload.get("tile_positions", [])).duplicate(true),
+			"tile_world_positions": Array(payload.get("tile_world_positions", [])).duplicate(true),
+			"world_polygon": PackedVector2Array(payload.get("world_polygon", PackedVector2Array())),
+			"center_position": Vector2(payload.get("center_position", Vector2.ZERO)),
+			"created_at_order_index": _get_next_area_order_index_for_fireteam(fireteam_id),
+			"status": AREA_ORDER_SCRIPT.STATUS_PENDING,
+			"metadata": {
+				"created_phase": _get_live_order_phase_index(),
+			},
+		})
+		if area_order == null or not area_order.is_valid():
+			continue
+		_area_orders_by_id[area_order.area_order_id] = area_order
+		targets.append({
+			"area_order_id": String(area_order.area_order_id),
+			"fireteam_id": fireteam_id,
+		})
+	if targets.is_empty():
+		return []
+	_focused_area_order_ref = Dictionary(targets[0]).duplicate(true)
+	_refresh_order_visuals()
+	_last_command_text = "AREA %s (%d)" % [normalized_command_type.to_upper(), targets.size()]
+	_update_ui()
+	if should_emit_signal:
+		_emit_planning_state_changed()
+	return targets
 
 
 func _build_fireteam_anchor_visualization_entries() -> Array:
@@ -4421,6 +4568,11 @@ func _next_waypoint_id() -> String:
 	return "wp_%04d" % _waypoint_sequence
 
 
+func _next_area_order_id() -> String:
+	_area_order_sequence += 1
+	return "area_%04d" % _area_order_sequence
+
+
 func _serialize_order_plans() -> Array:
 	var result: Array = []
 	var keys: Array = _order_plans_by_key.keys()
@@ -4430,6 +4582,18 @@ func _serialize_order_plans() -> Array:
 		if plan == null or not plan.is_valid() or plan.waypoints.is_empty():
 			continue
 		result.append(plan.to_dict())
+	return result
+
+
+func _serialize_area_orders() -> Array:
+	var result: Array = []
+	var keys: Array = _area_orders_by_id.keys()
+	keys.sort()
+	for key in keys:
+		var area_order = _area_orders_by_id[key]
+		if area_order == null or not area_order.is_valid():
+			continue
+		result.append(area_order.to_dict())
 	return result
 
 
@@ -4449,6 +4613,21 @@ func _load_order_plans_from_state(plan_dicts: Array) -> void:
 			var waypoint_sequence: int = _extract_waypoint_sequence(waypoint_id)
 			if waypoint_sequence > _waypoint_sequence:
 				_waypoint_sequence = waypoint_sequence
+	_refresh_order_visuals()
+
+
+func _load_area_orders_from_state(area_order_dicts: Array) -> void:
+	_area_orders_by_id.clear()
+	for area_order_variant in area_order_dicts:
+		if typeof(area_order_variant) != TYPE_DICTIONARY:
+			continue
+		var area_order = AREA_ORDER_SCRIPT.call("from_dict", Dictionary(area_order_variant))
+		if area_order == null or not area_order.is_valid():
+			continue
+		_area_orders_by_id[String(area_order.area_order_id)] = area_order
+		var sequence: int = _extract_area_order_sequence(String(area_order.area_order_id))
+		if sequence > _area_order_sequence:
+			_area_order_sequence = sequence
 	_refresh_order_visuals()
 
 
@@ -5370,6 +5549,13 @@ func _extract_waypoint_sequence(waypoint_id: String) -> int:
 	return int(parts[parts.size() - 1])
 
 
+func _extract_area_order_sequence(area_order_id: String) -> int:
+	var parts: PackedStringArray = area_order_id.strip_edges().split("_")
+	if parts.size() < 2:
+		return 0
+	return int(parts[parts.size() - 1])
+
+
 func _is_fireteam_eligible_for_ad_hoc(fireteam_id: String) -> bool:
 	if fireteam_id.is_empty():
 		return false
@@ -5463,6 +5649,66 @@ func _find_waypoint_target_at_screen_position(screen_position: Vector2) -> Dicti
 	}
 
 
+func _find_area_order_target_at_screen_position(screen_position: Vector2) -> Dictionary:
+	var visualizer := get_node_or_null("../FireteamOrderVisualizer")
+	if visualizer == null or not visualizer.has_method("get_area_order_hit"):
+		return {}
+	var area_order_data: Dictionary = visualizer.call("get_area_order_hit", screen_position, get_viewport().get_canvas_transform())
+	if area_order_data.is_empty():
+		return {}
+	return {
+		"area_order_id": String(area_order_data.get("area_order_id", "")).strip_edges(),
+		"fireteam_id": String(area_order_data.get("fireteam_id", "")).strip_edges().to_lower(),
+	}
+
+
+func _begin_area_order_interaction(screen_position: Vector2) -> bool:
+	if _is_lz_placement_armed or _is_target_placement_armed:
+		return false
+	if _selected_fireteam_ids.is_empty():
+		_last_command_text = "SELECT FIRETEAM FIRST"
+		_update_ui()
+		return false
+	_area_order_press_active = true
+	_area_order_drag_active = false
+	_area_order_press_screen_position = screen_position
+	_area_order_drag_screen_position = screen_position
+	_hide_waypoint_command_menu()
+	_hide_area_order_command_menu()
+	_update_area_order_overlay(Rect2())
+	return true
+
+
+func _update_area_order_drag(screen_position: Vector2) -> bool:
+	if not _area_order_press_active:
+		return false
+	_area_order_drag_screen_position = screen_position
+	if not _area_order_drag_active and _area_order_press_screen_position.distance_to(screen_position) < AREA_ORDER_DRAG_THRESHOLD:
+		return true
+	_area_order_drag_active = true
+	_update_area_order_overlay(_build_selection_rect(_area_order_press_screen_position, screen_position))
+	return true
+
+
+func _finish_area_order_interaction(screen_position: Vector2) -> bool:
+	if not _area_order_press_active:
+		return false
+	var was_dragging: bool = _area_order_drag_active
+	var start_position: Vector2 = _area_order_press_screen_position
+	_area_order_press_active = false
+	_area_order_drag_active = false
+	_update_area_order_overlay(Rect2())
+	if not was_dragging:
+		return true
+	var area_order_targets: Array = _create_area_orders_for_selected_fireteams_from_screen_rect(_build_selection_rect(start_position, screen_position))
+	if area_order_targets.is_empty():
+		_last_command_text = "AREA EMPTY"
+		_update_ui()
+		return true
+	_open_area_order_command_menu(screen_position, area_order_targets, false)
+	return true
+
+
 func _try_begin_waypoint_drag(screen_position: Vector2) -> bool:
 	if _is_lz_placement_armed or _is_target_placement_armed:
 		return false
@@ -5512,6 +5758,16 @@ func _delete_focused_waypoint() -> bool:
 	return did_delete
 
 
+func _delete_focused_area_order() -> bool:
+	if _focused_area_order_ref.is_empty():
+		return false
+	var did_delete: bool = _delete_area_order_targets([_focused_area_order_ref])
+	if did_delete:
+		_focused_area_order_ref = {}
+		_hide_area_order_command_menu()
+	return did_delete
+
+
 func _open_waypoint_command_menu(screen_position: Vector2, waypoint_targets: Array, include_delete_action: bool) -> void:
 	var menu := get_node_or_null("../TacticalUI/WaypointCommandMenu") as PopupMenu
 	if menu == null:
@@ -5530,11 +5786,37 @@ func _open_waypoint_command_menu(screen_position: Vector2, waypoint_targets: Arr
 	menu.popup()
 
 
+func _open_area_order_command_menu(screen_position: Vector2, area_order_targets: Array, include_delete_action: bool) -> void:
+	var menu := get_node_or_null("../TacticalUI/AreaOrderCommandMenu") as PopupMenu
+	if menu == null:
+		return
+	_area_order_menu_targets = []
+	for area_order_target in area_order_targets:
+		_area_order_menu_targets.append(Dictionary(area_order_target).duplicate(true))
+	menu.clear()
+	menu.add_item("Defend Area", AREA_ORDER_MENU_DEFEND_ID)
+	menu.add_item("Engage Area", AREA_ORDER_MENU_ENGAGE_ID)
+	menu.add_item("Take Area", AREA_ORDER_MENU_TAKE_ID)
+	if include_delete_action:
+		menu.add_separator()
+		menu.add_item("Delete", AREA_ORDER_MENU_DELETE_ID)
+	menu.reset_size()
+	menu.position = screen_position + Vector2(10.0, 10.0)
+	menu.popup()
+
+
 func _hide_waypoint_command_menu() -> void:
 	var menu := get_node_or_null("../TacticalUI/WaypointCommandMenu") as PopupMenu
 	if menu != null:
 		menu.hide()
 	_waypoint_menu_targets.clear()
+
+
+func _hide_area_order_command_menu() -> void:
+	var menu := get_node_or_null("../TacticalUI/AreaOrderCommandMenu") as PopupMenu
+	if menu != null:
+		menu.hide()
+	_area_order_menu_targets.clear()
 
 
 func _on_waypoint_menu_id_pressed(item_id: int) -> void:
@@ -5554,6 +5836,19 @@ func _on_waypoint_menu_id_pressed(item_id: int) -> void:
 	_hide_waypoint_command_menu()
 
 
+func _on_area_order_menu_id_pressed(item_id: int) -> void:
+	match item_id:
+		AREA_ORDER_MENU_DEFEND_ID:
+			_set_area_order_command_for_targets(_area_order_menu_targets, AREA_ORDER_SCRIPT.COMMAND_TYPE_DEFEND)
+		AREA_ORDER_MENU_ENGAGE_ID:
+			_set_area_order_command_for_targets(_area_order_menu_targets, AREA_ORDER_SCRIPT.COMMAND_TYPE_ENGAGE)
+		AREA_ORDER_MENU_TAKE_ID:
+			_set_area_order_command_for_targets(_area_order_menu_targets, AREA_ORDER_SCRIPT.COMMAND_TYPE_TAKE)
+		AREA_ORDER_MENU_DELETE_ID:
+			_delete_area_order_targets(_area_order_menu_targets)
+	_hide_area_order_command_menu()
+
+
 func _set_waypoint_command_for_targets(waypoint_targets: Array, command_type: String) -> bool:
 	var did_change: bool = false
 	for waypoint_target in waypoint_targets:
@@ -5566,6 +5861,24 @@ func _set_waypoint_command_for_targets(waypoint_targets: Array, command_type: St
 		return false
 	_refresh_order_visuals()
 	_last_command_text = "WAYPOINT %s" % command_type.to_upper()
+	_update_ui()
+	_emit_planning_state_changed()
+	return true
+
+
+func _set_area_order_command_for_targets(area_order_targets: Array, command_type: String) -> bool:
+	var normalized_command_type: String = _normalize_area_order_command_type(command_type)
+	var did_change: bool = false
+	for area_order_target in area_order_targets:
+		var area_order = _get_area_order_from_ref(Dictionary(area_order_target))
+		if area_order == null:
+			continue
+		area_order.command_type = normalized_command_type
+		did_change = true
+	if not did_change:
+		return false
+	_refresh_order_visuals()
+	_last_command_text = "AREA %s" % normalized_command_type.to_upper()
 	_update_ui()
 	_emit_planning_state_changed()
 	return true
@@ -5587,6 +5900,30 @@ func _update_waypoint_targets(waypoint_targets: Array, world_position: Vector2) 
 	return true
 
 
+func _delete_area_order_targets(area_order_targets: Array) -> bool:
+	var did_delete: bool = false
+	for area_order_target in area_order_targets:
+		var area_order_id: String = String(Dictionary(area_order_target).get("area_order_id", "")).strip_edges()
+		if area_order_id.is_empty() or not _area_orders_by_id.has(area_order_id):
+			continue
+		_area_orders_by_id.erase(area_order_id)
+		did_delete = true
+	if not did_delete:
+		return false
+	_refresh_order_visuals()
+	_last_command_text = "AREA DELETED"
+	_update_ui()
+	_emit_planning_state_changed()
+	return true
+
+
+func _get_area_order_from_ref(area_order_target: Dictionary):
+	var area_order_id: String = String(area_order_target.get("area_order_id", "")).strip_edges()
+	if area_order_id.is_empty() or not _area_orders_by_id.has(area_order_id):
+		return null
+	return _area_orders_by_id[area_order_id]
+
+
 func _waypoint_menu_id_for_command(command_type: String) -> int:
 	match command_type.strip_edges().to_lower():
 		FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_MOVE:
@@ -5600,6 +5937,156 @@ func _waypoint_menu_id_for_command(command_type: String) -> int:
 		FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_TAKE:
 			return WAYPOINT_MENU_TAKE_ID
 	return WAYPOINT_MENU_MOVE_ID
+
+
+func _normalize_area_order_command_type(command_type: String) -> String:
+	var normalized_command_type: String = command_type.strip_edges().to_lower()
+	if AREA_ORDER_SCRIPT.call("is_allowed_command_type", normalized_command_type):
+		return normalized_command_type
+	return AREA_ORDER_SCRIPT.COMMAND_TYPE_DEFEND
+
+
+func _build_area_order_payload_from_screen_rect(screen_rect: Rect2) -> Dictionary:
+	var terrain_registry = _get_terrain_registry()
+	if terrain_registry != null and terrain_registry.has_method("get_all_tiles"):
+		var canvas_transform: Transform2D = get_viewport().get_canvas_transform()
+		var tile_entries: Array = []
+		for tile_data in Array(terrain_registry.call("get_all_tiles")):
+			if tile_data == null or typeof(tile_data.world_position) != TYPE_VECTOR2:
+				continue
+			var tile_screen_position: Vector2 = canvas_transform * Vector2(tile_data.world_position)
+			if screen_rect.has_point(tile_screen_position):
+				tile_entries.append(tile_data)
+		var tile_payload: Dictionary = _build_area_order_payload_from_tiles(tile_entries)
+		if not tile_payload.is_empty():
+			return tile_payload
+
+	var world_polygon: PackedVector2Array = PackedVector2Array([
+		_screen_to_world_position(screen_rect.position),
+		_screen_to_world_position(Vector2(screen_rect.end.x, screen_rect.position.y)),
+		_screen_to_world_position(screen_rect.end),
+		_screen_to_world_position(Vector2(screen_rect.position.x, screen_rect.end.y)),
+	])
+	return {
+		"tile_positions": [],
+		"tile_world_positions": [],
+		"world_polygon": world_polygon,
+		"center_position": _average_polygon_points(world_polygon),
+	}
+
+
+func _build_area_order_payload_from_world_rect(start_world_position: Vector2, end_world_position: Vector2) -> Dictionary:
+	var world_rect := Rect2(
+		Vector2(minf(start_world_position.x, end_world_position.x), minf(start_world_position.y, end_world_position.y)),
+		Vector2(absf(end_world_position.x - start_world_position.x), absf(end_world_position.y - start_world_position.y))
+	)
+	var terrain_registry = _get_terrain_registry()
+	if terrain_registry != null and terrain_registry.has_method("get_all_tiles"):
+		var tile_entries: Array = []
+		for tile_data in Array(terrain_registry.call("get_all_tiles")):
+			if tile_data == null or typeof(tile_data.world_position) != TYPE_VECTOR2:
+				continue
+			if world_rect.has_point(Vector2(tile_data.world_position)):
+				tile_entries.append(tile_data)
+		var tile_payload: Dictionary = _build_area_order_payload_from_tiles(tile_entries)
+		if not tile_payload.is_empty():
+			return tile_payload
+	var world_polygon: PackedVector2Array = PackedVector2Array([
+		world_rect.position,
+		Vector2(world_rect.end.x, world_rect.position.y),
+		world_rect.end,
+		Vector2(world_rect.position.x, world_rect.end.y),
+	])
+	return {
+		"tile_positions": [],
+		"tile_world_positions": [],
+		"world_polygon": world_polygon,
+		"center_position": _average_polygon_points(world_polygon),
+	}
+
+
+func _build_area_order_payload_from_tiles(tile_entries: Array) -> Dictionary:
+	if tile_entries.is_empty():
+		return {}
+	var sorted_entries: Array = []
+	for tile_data in tile_entries:
+		if tile_data == null or typeof(tile_data.grid_position) != TYPE_VECTOR2I or typeof(tile_data.world_position) != TYPE_VECTOR2:
+			continue
+		sorted_entries.append({
+			"grid_position": Vector2i(tile_data.grid_position),
+			"world_position": Vector2(tile_data.world_position),
+		})
+	if sorted_entries.is_empty():
+		return {}
+	sorted_entries.sort_custom(_sort_area_tile_entries)
+
+	var tile_positions: Array = []
+	var tile_world_positions: Array = []
+	var center_position := Vector2.ZERO
+	for entry_variant in sorted_entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		tile_positions.append(Vector2i(entry.get("grid_position", Vector2i.ZERO)))
+		var world_position: Vector2 = Vector2(entry.get("world_position", Vector2.ZERO))
+		tile_world_positions.append(world_position)
+		center_position += world_position
+	center_position /= float(tile_world_positions.size())
+	return {
+		"tile_positions": tile_positions,
+		"tile_world_positions": tile_world_positions,
+		"world_polygon": _build_world_polygon_for_area_tile_positions(tile_world_positions),
+		"center_position": center_position,
+	}
+
+
+func _sort_area_tile_entries(a: Dictionary, b: Dictionary) -> bool:
+	var a_grid: Vector2i = Vector2i(a.get("grid_position", Vector2i.ZERO))
+	var b_grid: Vector2i = Vector2i(b.get("grid_position", Vector2i.ZERO))
+	if a_grid.x == b_grid.x:
+		return a_grid.y < b_grid.y
+	return a_grid.x < b_grid.x
+
+
+func _build_world_polygon_for_area_tile_positions(tile_world_positions: Array) -> PackedVector2Array:
+	if tile_world_positions.is_empty():
+		return PackedVector2Array()
+	var min_x: float = INF
+	var max_x: float = -INF
+	var min_y: float = INF
+	var max_y: float = -INF
+	for world_position_variant in tile_world_positions:
+		var world_position: Vector2 = Vector2(world_position_variant)
+		min_x = minf(min_x, world_position.x)
+		max_x = maxf(max_x, world_position.x)
+		min_y = minf(min_y, world_position.y)
+		max_y = maxf(max_y, world_position.y)
+	var padding := Vector2(32.0, 18.0)
+	return PackedVector2Array([
+		Vector2(min_x - padding.x, min_y - padding.y),
+		Vector2(max_x + padding.x, min_y - padding.y),
+		Vector2(max_x + padding.x, max_y + padding.y),
+		Vector2(min_x - padding.x, max_y + padding.y),
+	])
+
+
+func _average_polygon_points(polygon: PackedVector2Array) -> Vector2:
+	if polygon.is_empty():
+		return Vector2.ZERO
+	var center := Vector2.ZERO
+	for point in polygon:
+		center += point
+	return center / float(polygon.size())
+
+
+func _get_next_area_order_index_for_fireteam(fireteam_id: String) -> int:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	var order_count: int = 0
+	var plan = _order_plans_by_key.get(_build_order_plan_key(normalized_fireteam_id, _get_live_order_phase_index()), null)
+	if plan != null:
+		order_count += plan.waypoints.size()
+	for area_order in _area_orders_by_id.values():
+		if area_order != null and String(area_order.fireteam_id).strip_edges().to_lower() == normalized_fireteam_id:
+			order_count += 1
+	return order_count
 
 
 func _snap_planning_position_to_tile_center(world_position: Vector2) -> Vector2:

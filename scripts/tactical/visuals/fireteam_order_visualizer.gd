@@ -3,9 +3,11 @@ extends Node2D
 
 const FIRETEAM_ORDER_PLAN_SCRIPT: GDScript = preload("res://scripts/command/fireteam_order_plan.gd")
 const FIRETEAM_WAYPOINT_SCRIPT: GDScript = preload("res://scripts/command/fireteam_waypoint.gd")
+const AREA_ORDER_SCRIPT: GDScript = preload("res://scripts/command/area_order.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
 const MARKER_RADIUS: float = 12.0
 const HIT_RADIUS: float = 16.0
+const AREA_HIT_RADIUS: float = 28.0
 const WAYPOINT_OFFSET_STEP: float = 7.0
 const NEUTRAL_ORDER_LINE_COLOR: Color = Color(0.24, 0.72, 1.0, 0.95)
 const DEFENSIVE_ORDER_LINE_COLOR: Color = Color(0.28, 0.9, 0.48, 0.95)
@@ -14,7 +16,9 @@ const OFFENSIVE_ORDER_LINE_COLOR: Color = Color(1.0, 0.28, 0.22, 0.95)
 var _phase_index: int = 0
 var _selected_fireteam_ids: PackedStringArray = []
 var _plan_dicts: Array = []
+var _area_order_dicts: Array = []
 var _visible_waypoints: Array = []
+var _visible_area_orders: Array = []
 var _ad_hoc_order_dicts: Array = []
 var _security_dicts: Array = []
 var _fireteam_anchor_positions: Dictionary = {}
@@ -35,6 +39,14 @@ func set_plan_dicts(plan_dicts: Array) -> void:
 	for plan_variant in plan_dicts:
 		if typeof(plan_variant) == TYPE_DICTIONARY:
 			_plan_dicts.append(Dictionary(plan_variant).duplicate(true))
+	_rebuild_cache()
+
+
+func set_area_order_dicts(area_order_dicts: Array) -> void:
+	_area_order_dicts = []
+	for area_order_variant in area_order_dicts:
+		if typeof(area_order_variant) == TYPE_DICTIONARY:
+			_area_order_dicts.append(Dictionary(area_order_variant).duplicate(true))
 	_rebuild_cache()
 
 
@@ -76,6 +88,13 @@ func get_visible_waypoints() -> Array:
 	return result
 
 
+func get_visible_area_orders() -> Array:
+	var result: Array = []
+	for area_order_data in _visible_area_orders:
+		result.append(Dictionary(area_order_data).duplicate(true))
+	return result
+
+
 func get_waypoint_hit(screen_position: Vector2, canvas_transform: Transform2D) -> Dictionary:
 	for waypoint_data in _visible_waypoints:
 		var marker_screen_position: Vector2 = canvas_transform * Vector2(waypoint_data.get("position", Vector2.ZERO))
@@ -84,7 +103,19 @@ func get_waypoint_hit(screen_position: Vector2, canvas_transform: Transform2D) -
 	return {}
 
 
+func get_area_order_hit(screen_position: Vector2, canvas_transform: Transform2D) -> Dictionary:
+	for area_order_data in _visible_area_orders:
+		var center_screen_position: Vector2 = canvas_transform * Vector2(area_order_data.get("center_position", Vector2.ZERO))
+		if center_screen_position.distance_to(screen_position) <= AREA_HIT_RADIUS:
+			return Dictionary(area_order_data).duplicate(true)
+		var polygon: PackedVector2Array = PackedVector2Array(area_order_data.get("world_polygon", PackedVector2Array()))
+		if _screen_polygon_contains_point(polygon, screen_position, canvas_transform):
+			return Dictionary(area_order_data).duplicate(true)
+	return {}
+
+
 func _draw() -> void:
+	_draw_area_orders()
 	for plan_dict in _plan_dicts:
 		var plan = FIRETEAM_ORDER_PLAN_SCRIPT.call("from_dict", plan_dict)
 		if plan == null or not plan.is_valid() or int(plan.phase) != _phase_index:
@@ -132,6 +163,39 @@ func _draw_plan(plan) -> void:
 		var command_type: String = String(waypoint.command_type)
 		var command_color: Color = Color(TERRAIN_MARKER_CATALOG_SCRIPT.call("get_color", command_type))
 		_draw_waypoint_symbol(points[index], command_type, draw_color.lerp(command_color, 0.35), index)
+
+
+func _draw_area_orders() -> void:
+	for area_order_data in _visible_area_orders:
+		var fireteam_id: String = String(area_order_data.get("fireteam_id", "")).strip_edges().to_lower()
+		var command_type: String = String(area_order_data.get("command_type", "")).strip_edges().to_lower()
+		var base_color: Color = _get_fireteam_color(fireteam_id)
+		var command_color: Color = _get_command_line_color(command_type)
+		var draw_alpha: float = 1.0
+		if not _selected_fireteam_ids.is_empty() and not _selected_fireteam_ids.has(fireteam_id):
+			draw_alpha = 0.45
+		var fill_color: Color = base_color.lerp(command_color, 0.38)
+		fill_color.a = 0.18 * draw_alpha
+		var edge_color: Color = command_color
+		edge_color.a = 0.86 * draw_alpha
+		var polygon: PackedVector2Array = PackedVector2Array(area_order_data.get("world_polygon", PackedVector2Array()))
+		if polygon.size() >= 3:
+			draw_colored_polygon(polygon, fill_color)
+			for index in range(polygon.size()):
+				draw_line(polygon[index], polygon[(index + 1) % polygon.size()], edge_color, 2.0, true)
+		var center_position: Vector2 = Vector2(area_order_data.get("center_position", Vector2.ZERO))
+		draw_arc(center_position, 14.0, 0.0, TAU, 24, edge_color, 2.0)
+		_draw_area_order_label(center_position, command_type, edge_color)
+
+
+func _draw_area_order_label(center_position: Vector2, command_type: String, label_color: Color) -> void:
+	var fallback_font: Font = ThemeDB.fallback_font
+	if fallback_font == null:
+		return
+	var label_text: String = command_type.substr(0, mini(command_type.length(), 3)).to_upper()
+	if label_text.is_empty():
+		label_text = "AO"
+	draw_string(fallback_font, center_position + Vector2(16.0, 4.0), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 11, label_color)
 
 
 func _draw_waypoint_symbol(position: Vector2, command_type: String, marker_color: Color, index: int) -> void:
@@ -255,6 +319,22 @@ func _draw_dashed_line(from_point: Vector2, to_point: Vector2, line_color: Color
 
 func _rebuild_cache() -> void:
 	_visible_waypoints.clear()
+	_visible_area_orders.clear()
+	for area_order_dict in _area_order_dicts:
+		var area_order = AREA_ORDER_SCRIPT.call("from_dict", area_order_dict)
+		if area_order == null or not area_order.is_valid() or not _is_area_order_visible(area_order):
+			continue
+		var fireteam_id: String = String(area_order.fireteam_id).strip_edges().to_lower()
+		_visible_area_orders.append({
+			"area_order_id": String(area_order.area_order_id),
+			"fireteam_id": fireteam_id,
+			"command_type": String(area_order.command_type),
+			"center_position": Vector2(area_order.center_position),
+			"tile_positions": Array(area_order.tile_positions).duplicate(true),
+			"world_polygon": PackedVector2Array(area_order.world_polygon),
+			"created_at_order_index": int(area_order.created_at_order_index),
+			"status": String(area_order.status),
+		})
 	for plan_dict in _plan_dicts:
 		var plan = FIRETEAM_ORDER_PLAN_SCRIPT.call("from_dict", plan_dict)
 		if plan == null or not plan.is_valid() or int(plan.phase) != _phase_index:
@@ -281,6 +361,34 @@ func _is_waypoint_visible(waypoint) -> bool:
 	if waypoint == null or waypoint.target_position == null:
 		return false
 	return String(waypoint.status) != FIRETEAM_WAYPOINT_SCRIPT.STATUS_COMPLETED
+
+
+func _is_area_order_visible(area_order) -> bool:
+	if area_order == null:
+		return false
+	var status: String = String(area_order.status)
+	return status != AREA_ORDER_SCRIPT.STATUS_COMPLETED and status != AREA_ORDER_SCRIPT.STATUS_CANCELLED
+
+
+func _screen_polygon_contains_point(polygon: PackedVector2Array, screen_position: Vector2, canvas_transform: Transform2D) -> bool:
+	if polygon.size() < 3:
+		return false
+	var inside: bool = false
+	var previous_index: int = polygon.size() - 1
+	for index in range(polygon.size()):
+		var current_point: Vector2 = canvas_transform * polygon[index]
+		var previous_point: Vector2 = canvas_transform * polygon[previous_index]
+		var crosses_y: bool = (current_point.y > screen_position.y) != (previous_point.y > screen_position.y)
+		if crosses_y:
+			var denominator: float = previous_point.y - current_point.y
+			if absf(denominator) < 0.001:
+				previous_index = index
+				continue
+			var slope_x: float = (previous_point.x - current_point.x) * (screen_position.y - current_point.y) / denominator + current_point.x
+			if screen_position.x < slope_x:
+				inside = not inside
+		previous_index = index
+	return inside
 
 
 func _coerce_waypoint(waypoint_variant):

@@ -885,6 +885,15 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Die Werte sind bewusst kleine Ausfuehrungsmodifikatoren. Spaetere Teamchemie sollte den vorhandenen Profilvertrag erweitern, statt UI- oder Driver-seitig neue Berechnungen einzufuehren.
 - Naechster Schritt: Weitere Teamqualitaetswirkung nur als klarer Folge-Task, z.B. echte Tick-basierte Reaktionsverzoegerung oder breitere Contact-/Morale-Kopplung.
 
+### TASK_121 - Area Order Marker
+- Status: implementiert
+- Stand: `AreaOrder` unter `scripts/command/area_order.gd` formalisiert den missionslokalen Datenvertrag fuer Gebietsmarker mit `area_order_id`, `fireteam_id`, `command_type`, Tile-/Polygon-Daten, `center_position`, `created_at_order_index` und `status`.
+- Stand: `MissionTacticalSandboxController` haelt Area Orders getrennt von der Waypoint-Ausfuehrung im Planning-State-Feld `area_orders`. Spieler koennen per `SHIFT+Drag` einfache Rechteckgebiete aus Terrain-Tiles markieren; ohne TerrainRegistry wird ein Polygon-Fallback gespeichert. Das Kontextmenue klassifiziert Gebiete als `defend`, `engage` oder `take`.
+- Stand: `FireteamOrderVisualizer` zeichnet Area Orders als eigenen Layer getrennt von normalen Wegpunktlinien und stellt `get_visible_area_orders()` sowie Hit-Tests fuer das Area-Menue bereit. Bestehende Einzel-Wegpunkte bleiben unveraendert nutzbar.
+- Offene Punkte: Keine echte Defend-/Attack-Semantik, keine Gegner-KI-Reaktion und keine Kampagnenpersistenz; diese Punkte bleiben bewusst Folge-Tasks 122+.
+- Risiken: Die Area-Auswahl ist bewusst V1-schmal und rechteckbasiert. Spaetere Polygon-Editor-Funktionen sollten auf dem vorhandenen Datenvertrag aufsetzen, ohne Gameplay-Wahrheit in UI-Code zu verlagern.
+- Naechster Schritt: TASK_122 kann Defend-Semantik auf Basis der gespeicherten Area Orders ergaenzen, ohne den Marker-/Planning-Roundtrip erneut zu bauen.
+
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert
 - Stand: Der Meta-Layer fuehrt jetzt durchgaengig auf die echte eingebettete Missionskarte statt auf eine separate read-only Overview. Homebase, FOB und Mission teilen dieselbe kompakte Navigation, die Missions-Tactical-UI traegt direkt die gemeinsamen Block-Labels `#15` bis `#18`, und der Missionspfad bleibt auf dieselbe Kartenbasis, dieselben LZ-/Approach-Marker sowie denselben Dropship-Handoff verdrahtet wie die spaetere Live-Mission.
