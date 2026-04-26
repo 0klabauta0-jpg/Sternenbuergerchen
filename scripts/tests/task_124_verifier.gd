@@ -81,6 +81,19 @@ func _test_attack_and_take_area_feedback_is_distinct() -> void:
 	controller.call("_update_area_attack_execution", 0.25)
 	controller.call("refresh_fireteam_security_state")
 	await process_frame
+	var occupying_snapshot: Array = controller.call("get_active_area_attack_snapshot")
+	var occupying_state: Dictionary = Dictionary(occupying_snapshot[0]) if not occupying_snapshot.is_empty() else {}
+	var occupying_text: String = String(controller.call("_build_fireteam_waypoint_info_text", "blue"))
+	_assert(occupying_text.contains("AREA TAKE"), "Occupying take feedback keeps the command label")
+	_assert(occupying_text.contains("0/") and occupying_text.contains("nimmt Gebiet"), "Occupying take feedback keeps progress pending while the fireteam moves into the area")
+	for assignment_variant in Array(occupying_state.get("assignments", [])):
+		var assignment: Dictionary = Dictionary(assignment_variant)
+		var unit = _find_unit(controller.call("_get_fireteam_units", "blue", true), String(assignment.get("unit_id", "")))
+		if unit is Node2D:
+			(unit as Node2D).global_position = Vector2(assignment.get("target_position", (unit as Node2D).global_position))
+	controller.call("_update_area_attack_execution", 0.25)
+	controller.call("refresh_fireteam_security_state")
+	await process_frame
 	var secured_text: String = String(controller.call("_build_fireteam_waypoint_info_text", "blue"))
 	_assert(secured_text.contains("AREA TAKE"), "Secured take feedback keeps the command label")
 	_assert(secured_text.contains("Felder gesichert") and not secured_text.contains("0/"), "Secured take feedback advances field progress")

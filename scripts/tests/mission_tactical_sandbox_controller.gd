@@ -49,6 +49,8 @@ const UNIT_SELECTION_PICK_RADIUS: float = 34.0
 const SELECTION_DRAG_THRESHOLD: float = 10.0
 const WAYPOINT_DRAG_THRESHOLD: float = 4.0
 const AREA_ORDER_DRAG_THRESHOLD: float = 14.0
+const AREA_ORDER_ISO_TILE_HALF_WIDTH: float = 64.0
+const AREA_ORDER_ISO_TILE_HALF_HEIGHT: float = 32.0
 const PHASE_WAYPOINT_COMPLETE_RADIUS: float = 26.0
 const AREA_DEFENSE_POSITION_REACHED_RADIUS: float = 24.0
 const AREA_ATTACK_APPROACH_REACHED_RADIUS: float = 30.0
@@ -1944,6 +1946,7 @@ func _refresh_fireteam_mini_cards() -> void:
 
 	var fireteam_panel := get_node_or_null(FIRETEAM_MINI_PANEL_PATH) as Control
 	for child in card_host.get_children():
+		card_host.remove_child(child)
 		child.queue_free()
 
 	var available_fireteam_ids: PackedStringArray = _get_displayable_fireteam_ids()
@@ -1959,12 +1962,15 @@ func _refresh_fireteam_mini_cards() -> void:
 		card.name = "FireteamMiniCard_%s" % normalized_fireteam_id.capitalize()
 		card.custom_minimum_size = Vector2(0.0, 0.0)
 		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		card.mouse_filter = Control.MOUSE_FILTER_STOP
 		card.set_meta("fireteam_id", normalized_fireteam_id)
+		var card_click_callback: Callable = Callable(self, "_on_fireteam_mini_card_gui_input").bind(normalized_fireteam_id)
+		if not card.gui_input.is_connected(card_click_callback):
+			card.gui_input.connect(card_click_callback)
 		card_host.add_child(card)
 
 		var lead = _resolve_fireteam_leader_for_behavior(normalized_fireteam_id)
 		var selected_fireteam: bool = _selected_fireteam_ids.has(normalized_fireteam_id)
-		var selection_locked: bool = selected_fireteam and not _is_all_fireteams_selected()
 		var runtime_inactive: bool = not preview_mode and not _is_fireteam_runtime_active(normalized_fireteam_id)
 		var lead_name: String = String(lead.call("get_display_name")) if lead != null and lead.has_method("get_display_name") else "Kein Lead"
 		var lead_portrait_path: String = String(lead.call("get_portrait_path")) if lead != null and lead.has_method("get_portrait_path") else ""
@@ -2005,11 +2011,7 @@ func _refresh_fireteam_mini_cards() -> void:
 				"info_line_font_size": 8,
 				"progress_visible": false,
 				"primary_action": {
-					"visible": true,
-					"text": "Active" if selection_locked else "Select",
-					"disabled": selection_locked,
-					"minimum_width": 54.0,
-					"callback": Callable(self, "_on_fireteam_group_pressed").bind(normalized_fireteam_id),
+					"visible": false,
 				},
 				"secondary_action": {
 					"visible": false,
@@ -2017,6 +2019,17 @@ func _refresh_fireteam_mini_cards() -> void:
 				"clear_extra_content": true,
 			}
 		)
+
+
+func _on_fireteam_mini_card_gui_input(event: InputEvent, fireteam_id: String) -> void:
+	if event is InputEventMouseButton:
+		var mouse_button_event := event as InputEventMouseButton
+		if mouse_button_event.button_index != MOUSE_BUTTON_LEFT:
+			return
+		_cancel_selection_interaction()
+		get_viewport().set_input_as_handled()
+		if mouse_button_event.pressed:
+			_on_fireteam_group_pressed(fireteam_id)
 
 
 func _build_fireteam_card_profile(unit: Node):
@@ -2763,6 +2776,8 @@ func _build_area_feedback_mode_text(command_type: String, state: Dictionary) -> 
 func _build_area_feedback_approach_text(state: Dictionary, prefix: String) -> String:
 	if String(state.get("status", "")).strip_edges().to_lower() == "engaging":
 		return "Kontakt suchen"
+	if String(state.get("status", "")).strip_edges().to_lower() == "occupying":
+		return "rueckt ins Gebiet"
 	if String(state.get("status", "")).strip_edges().to_lower() == "secured":
 		return "haltet Gebiet"
 	var center_position: Vector2 = Vector2(state.get("center_position", Vector2.ZERO))
@@ -3866,6 +3881,16 @@ func _update_selection_drag(screen_position: Vector2) -> bool:
 	return true
 
 
+func _cancel_selection_interaction() -> void:
+	if not _selection_press_active and not _selection_drag_active:
+		return
+	_selection_press_active = false
+	_selection_drag_active = false
+	_selection_press_unit_id = ""
+	_selection_press_ctrl = false
+	_update_selection_overlay(Rect2())
+
+
 func _finish_selection_interaction(screen_position: Vector2) -> bool:
 	if not _selection_press_active:
 		return false
@@ -4564,6 +4589,18 @@ func _update_selection_overlay(selection_rect: Rect2) -> void:
 
 func _update_area_order_overlay(selection_rect: Rect2) -> void:
 	var overlay := get_node_or_null("../TacticalUI/AreaOrderDragOverlay") as ColorRect
+	var visualizer := get_node_or_null("../FireteamOrderVisualizer")
+	if visualizer != null and visualizer.has_method("set_area_order_preview_payload"):
+		if selection_rect.size.x <= 0.0 or selection_rect.size.y <= 0.0:
+			visualizer.call("set_area_order_preview_payload", {})
+		else:
+			var preview_payload: Dictionary = _build_area_order_payload_from_screen_rect(selection_rect)
+			if not preview_payload.is_empty():
+				visualizer.call("set_area_order_preview_payload", preview_payload)
+				if overlay != null:
+					overlay.visible = false
+				return
+			visualizer.call("set_area_order_preview_payload", {})
 	if overlay == null:
 		return
 	if selection_rect.size.x <= 0.0 or selection_rect.size.y <= 0.0:
@@ -6096,40 +6133,79 @@ func _update_area_attack_execution(_delta: float) -> void:
 	if preview_mode or _area_attack_execution_by_fireteam.is_empty():
 		return
 	var did_change: bool = false
+	var did_start_occupation: bool = false
+	var did_secure_area: bool = false
 	for fireteam_id in _area_attack_execution_by_fireteam.keys().duplicate():
 		var state: Dictionary = Dictionary(_area_attack_execution_by_fireteam.get(fireteam_id, {})).duplicate(true)
 		if state.is_empty() or bool(state.get("waiting_for_go", false)):
+			continue
+		var status: String = String(state.get("status", "approaching")).strip_edges().to_lower()
+		if status == "occupying":
+			if not _are_area_attack_assignments_reached(state):
+				continue
+			for assignment_variant in Array(state.get("assignments", [])):
+				_issue_area_attack_unit_command(
+					String(fireteam_id),
+					Dictionary(assignment_variant),
+					int(state.get("phase", _get_live_order_phase_index())),
+					true,
+					String(state.get("area_order_id", "")),
+					String(state.get("command_type", "take"))
+				)
+			state["status"] = "secured"
+			state["waiting_for_go"] = true
+			_area_attack_execution_by_fireteam[fireteam_id] = state
+			did_change = true
+			did_secure_area = true
 			continue
 		if not _are_area_attack_assignments_reached(state):
 			continue
 		var target_area: Dictionary = Dictionary(state.get("target_area", {})).duplicate(true)
 		var area_cleared: bool = _is_attack_area_cleared(target_area)
-		var next_status: String = "secured" if area_cleared else "engaging"
+		var next_status: String = "occupying" if area_cleared else "engaging"
 		if String(state.get("status", "")) != next_status:
 			state["status"] = next_status
 			did_change = true
 		if not area_cleared:
 			_area_attack_execution_by_fireteam[fireteam_id] = state
 			continue
-		for assignment_variant in Array(state.get("assignments", [])):
+		var occupation_assignments: Array = _build_attack_area_occupation_assignments(String(fireteam_id), state)
+		if occupation_assignments.is_empty():
+			occupation_assignments = Array(state.get("assignments", [])).duplicate(true)
+		state["approach_assignments"] = Array(state.get("assignments", [])).duplicate(true)
+		state["assignments"] = occupation_assignments.duplicate(true)
+		for assignment_variant in occupation_assignments:
 			_issue_area_attack_unit_command(
 				String(fireteam_id),
 				Dictionary(assignment_variant),
 				int(state.get("phase", _get_live_order_phase_index())),
-				true,
+				false,
 				String(state.get("area_order_id", "")),
 				String(state.get("command_type", "take"))
 			)
-		state["waiting_for_go"] = true
 		_area_attack_execution_by_fireteam[fireteam_id] = state
 		did_change = true
+		did_start_occupation = true
 	if not did_change:
 		return
-	_last_command_text = "AREA GESICHERT"
+	_last_command_text = "AREA GESICHERT" if did_secure_area else "AREA BESETZEN" if did_start_occupation else "AREA KONTAKT"
 	_refresh_order_visuals()
 	refresh_fireteam_security_state()
 	_update_ui()
 	_emit_planning_state_changed()
+
+
+func _build_attack_area_occupation_assignments(fireteam_id: String, state: Dictionary) -> Array:
+	_ensure_area_order_resolver()
+	if _area_order_resolver == null:
+		return []
+	var area_order = _area_orders_by_id.get(String(state.get("area_order_id", "")), null)
+	if area_order == null:
+		return []
+	var units: Array = _get_fireteam_units(fireteam_id, true)
+	var leader = _resolve_fireteam_leader_for_behavior(fireteam_id)
+	var resolution: Dictionary = Dictionary(_area_order_resolver.call("resolve_occupy_area", area_order, units, leader, _get_terrain_registry()))
+	return Array(resolution.get("assignments", [])).duplicate(true)
 
 
 func _are_area_attack_assignments_reached(state: Dictionary) -> bool:
@@ -6842,23 +6918,16 @@ func _sort_area_tile_entries(a: Dictionary, b: Dictionary) -> bool:
 func _build_world_polygon_for_area_tile_positions(tile_world_positions: Array) -> PackedVector2Array:
 	if tile_world_positions.is_empty():
 		return PackedVector2Array()
-	var min_x: float = INF
-	var max_x: float = -INF
-	var min_y: float = INF
-	var max_y: float = -INF
+	var hull_points: PackedVector2Array = PackedVector2Array()
 	for world_position_variant in tile_world_positions:
 		var world_position: Vector2 = Vector2(world_position_variant)
-		min_x = minf(min_x, world_position.x)
-		max_x = maxf(max_x, world_position.x)
-		min_y = minf(min_y, world_position.y)
-		max_y = maxf(max_y, world_position.y)
-	var padding := Vector2(32.0, 18.0)
-	return PackedVector2Array([
-		Vector2(min_x - padding.x, min_y - padding.y),
-		Vector2(max_x + padding.x, min_y - padding.y),
-		Vector2(max_x + padding.x, max_y + padding.y),
-		Vector2(min_x - padding.x, max_y + padding.y),
-	])
+		hull_points.append(world_position + Vector2(0.0, -AREA_ORDER_ISO_TILE_HALF_HEIGHT))
+		hull_points.append(world_position + Vector2(AREA_ORDER_ISO_TILE_HALF_WIDTH, 0.0))
+		hull_points.append(world_position + Vector2(0.0, AREA_ORDER_ISO_TILE_HALF_HEIGHT))
+		hull_points.append(world_position + Vector2(-AREA_ORDER_ISO_TILE_HALF_WIDTH, 0.0))
+	if hull_points.size() <= 3:
+		return hull_points
+	return Geometry2D.convex_hull(hull_points)
 
 
 func _average_polygon_points(polygon: PackedVector2Array) -> Vector2:

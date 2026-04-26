@@ -14,6 +14,17 @@ static func resolve_defend_area(area_order_data, units: Array, leader = null, te
 		return {}
 	if String(area_order.command_type) != AREA_ORDER_SCRIPT.COMMAND_TYPE_DEFEND:
 		return {}
+	return _resolve_area_hold_positions(area_order, units, leader, terrain_registry, String(area_order.command_type))
+
+
+static func resolve_occupy_area(area_order_data, units: Array, leader = null, terrain_registry = null) -> Dictionary:
+	var area_order = _coerce_area_order(area_order_data)
+	if area_order == null or not area_order.is_valid():
+		return {}
+	return _resolve_area_hold_positions(area_order, units, leader, terrain_registry, String(area_order.command_type))
+
+
+static func _resolve_area_hold_positions(area_order, units: Array, leader, terrain_registry, command_type: String) -> Dictionary:
 	var members: Array = _build_fit_members(units, leader)
 	if members.is_empty():
 		return {}
@@ -27,7 +38,7 @@ static func resolve_defend_area(area_order_data, units: Array, leader = null, te
 	return {
 		"area_order_id": String(area_order.area_order_id),
 		"fireteam_id": String(area_order.fireteam_id),
-		"command_type": String(area_order.command_type),
+		"command_type": command_type,
 		"center_position": center_position,
 		"leader_unit_id": String(members[0].get("unit_id", "")),
 		"assignments": assignments,

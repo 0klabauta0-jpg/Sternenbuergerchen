@@ -47,11 +47,15 @@ func _test_resolver_builds_edge_approach() -> void:
 	var approach_position: Vector2 = Vector2(resolution.get("approach_position", Vector2.ZERO))
 	var center_position: Vector2 = Vector2(resolution.get("center_position", Vector2.ZERO))
 	var assignments: Array = Array(resolution.get("assignments", []))
+	var occupy_resolution: Dictionary = AREA_ORDER_RESOLVER_SCRIPT.call("resolve_occupy_area", area_order, units, units[0], null)
+	var occupy_assignments: Array = Array(occupy_resolution.get("assignments", []))
+	var target_area: Dictionary = Dictionary(resolution.get("target_area", {}))
 	_assert(not resolution.is_empty(), "Attack Area resolver accepts offensive Area Orders")
 	_assert(not flank_resolution.is_empty(), "Attack Area resolver accepts offensive Flank Area Orders")
 	_assert(approach_position.distance_to(center_position) > 48.0, "Attack Area approach is outside the target center")
 	_assert(approach_position.distance_to((units[0] as Node2D).global_position) < center_position.distance_to((units[0] as Node2D).global_position), "Attack Area approach is formed on the friendly side of the area")
 	_assert(assignments.size() == 3 and _count_unique_targets(assignments) == 3, "Attack Area spreads the fireteam on the approach line")
+	_assert(occupy_assignments.size() == 3 and _all_assignments_inside_area(occupy_assignments, target_area), "Attack Area can derive occupation positions inside the target area")
 	_cleanup_units(units)
 
 
@@ -83,6 +87,20 @@ func _test_mission_attack_area_execution_and_secured_state() -> void:
 	var attack_context: Dictionary = Dictionary(controller.call("get_fireteam_attack_area_context", "blue"))
 	_assert(String(attack_context.get("area_order_id", "")) == String(state.get("area_order_id", "")), "Combat context is tied to the active attack Area Order")
 	for assignment_variant in Array(state.get("assignments", [])):
+		var assignment: Dictionary = Dictionary(assignment_variant)
+		var unit = _find_unit(controller.call("_get_fireteam_units", "blue", true), String(assignment.get("unit_id", "")))
+		if unit is Node2D:
+			(unit as Node2D).global_position = Vector2(assignment.get("target_position", (unit as Node2D).global_position))
+	controller.call("_update_area_attack_execution", 0.25)
+	controller.call("refresh_fireteam_security_state")
+	await process_frame
+	var occupying_snapshot: Array = controller.call("get_active_area_attack_snapshot")
+	var occupying_state: Dictionary = Dictionary(occupying_snapshot[0]) if not occupying_snapshot.is_empty() else {}
+	_assert(String(occupying_state.get("status", "")) == "occupying", "Cleared Attack Area sends the fireteam into the marked area")
+	var occupying_assignments: Array = Array(occupying_state.get("assignments", []))
+	var occupying_target_area: Dictionary = Dictionary(occupying_state.get("target_area", {}))
+	_assert(not occupying_assignments.is_empty() and _all_assignments_inside_area(occupying_assignments, occupying_target_area), "Attack Area occupation targets are inside the marked area")
+	for assignment_variant in occupying_assignments:
 		var assignment: Dictionary = Dictionary(assignment_variant)
 		var unit = _find_unit(controller.call("_get_fireteam_units", "blue", true), String(assignment.get("unit_id", "")))
 		if unit is Node2D:
@@ -185,6 +203,17 @@ func _count_unique_targets(assignments: Array) -> int:
 		var target_position: Vector2 = Vector2(assignment.get("target_position", Vector2.ZERO))
 		seen["%d,%d" % [roundi(target_position.x), roundi(target_position.y)]] = true
 	return seen.size()
+
+
+func _all_assignments_inside_area(assignments: Array, area_context: Dictionary) -> bool:
+	if assignments.is_empty() or area_context.is_empty():
+		return false
+	for assignment_variant in assignments:
+		var assignment: Dictionary = Dictionary(assignment_variant)
+		var target_position: Vector2 = Vector2(assignment.get("target_position", Vector2.ZERO))
+		if not bool(AREA_ORDER_RESOLVER_SCRIPT.call("is_position_in_area_context", area_context, target_position)):
+			return false
+	return true
 
 
 func _cleanup_units(units: Array) -> void:

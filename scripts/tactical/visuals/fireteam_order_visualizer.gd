@@ -5,10 +5,13 @@ const FIRETEAM_ORDER_PLAN_SCRIPT: GDScript = preload("res://scripts/command/fire
 const FIRETEAM_WAYPOINT_SCRIPT: GDScript = preload("res://scripts/command/fireteam_waypoint.gd")
 const AREA_ORDER_SCRIPT: GDScript = preload("res://scripts/command/area_order.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
-const MARKER_RADIUS: float = 12.0
 const HIT_RADIUS: float = 16.0
 const AREA_HIT_RADIUS: float = 28.0
 const WAYPOINT_OFFSET_STEP: float = 7.0
+const ISO_TILE_HALF_WIDTH: float = 64.0
+const ISO_TILE_HALF_HEIGHT: float = 32.0
+const ISO_MARKER_HALF_WIDTH: float = 18.0
+const ISO_MARKER_HALF_HEIGHT: float = 10.0
 const NEUTRAL_ORDER_LINE_COLOR: Color = Color(0.24, 0.72, 1.0, 0.95)
 const DEFENSIVE_ORDER_LINE_COLOR: Color = Color(0.28, 0.9, 0.48, 0.95)
 const OFFENSIVE_ORDER_LINE_COLOR: Color = Color(1.0, 0.28, 0.22, 0.95)
@@ -22,6 +25,7 @@ var _visible_area_orders: Array = []
 var _ad_hoc_order_dicts: Array = []
 var _security_dicts: Array = []
 var _fireteam_anchor_positions: Dictionary = {}
+var _area_order_preview_payload: Dictionary = {}
 
 
 func set_phase_index(phase_index: int) -> void:
@@ -48,6 +52,11 @@ func set_area_order_dicts(area_order_dicts: Array) -> void:
 		if typeof(area_order_variant) == TYPE_DICTIONARY:
 			_area_order_dicts.append(Dictionary(area_order_variant).duplicate(true))
 	_rebuild_cache()
+
+
+func set_area_order_preview_payload(preview_payload: Dictionary) -> void:
+	_area_order_preview_payload = preview_payload.duplicate(true)
+	queue_redraw()
 
 
 func set_fireteam_anchor_dicts(anchor_dicts: Array) -> void:
@@ -108,6 +117,10 @@ func get_area_order_hit(screen_position: Vector2, canvas_transform: Transform2D)
 		var center_screen_position: Vector2 = canvas_transform * Vector2(area_order_data.get("center_position", Vector2.ZERO))
 		if center_screen_position.distance_to(screen_position) <= AREA_HIT_RADIUS:
 			return Dictionary(area_order_data).duplicate(true)
+		for tile_world_position_variant in Array(area_order_data.get("tile_world_positions", [])):
+			var tile_polygon: PackedVector2Array = _build_iso_tile_polygon(Vector2(tile_world_position_variant))
+			if _screen_polygon_contains_point(tile_polygon, screen_position, canvas_transform):
+				return Dictionary(area_order_data).duplicate(true)
 		var polygon: PackedVector2Array = PackedVector2Array(area_order_data.get("world_polygon", PackedVector2Array()))
 		if _screen_polygon_contains_point(polygon, screen_position, canvas_transform):
 			return Dictionary(area_order_data).duplicate(true)
@@ -116,6 +129,7 @@ func get_area_order_hit(screen_position: Vector2, canvas_transform: Transform2D)
 
 func _draw() -> void:
 	_draw_area_orders()
+	_draw_area_order_preview()
 	for plan_dict in _plan_dicts:
 		var plan = FIRETEAM_ORDER_PLAN_SCRIPT.call("from_dict", plan_dict)
 		if plan == null or not plan.is_valid() or int(plan.phase) != _phase_index:
@@ -154,7 +168,7 @@ func _draw_plan(plan) -> void:
 		var first_waypoint = _coerce_waypoint(drawable_waypoints[0])
 		var anchor_line_color: Color = _get_command_line_color(String(first_waypoint.command_type) if first_waypoint != null else "")
 		draw_line(visual_anchor_position, points[0], _apply_selection_alpha(anchor_line_color, draw_color.a), 3.0, true)
-		draw_circle(visual_anchor_position, 5.0, draw_color)
+		_draw_iso_marker_base(visual_anchor_position, draw_color, draw_color.darkened(0.35), 0.55)
 
 	for index in range(points.size()):
 		var waypoint = _coerce_waypoint(drawable_waypoints[index])
@@ -178,14 +192,32 @@ func _draw_area_orders() -> void:
 		fill_color.a = 0.18 * draw_alpha
 		var edge_color: Color = command_color
 		edge_color.a = 0.86 * draw_alpha
-		var polygon: PackedVector2Array = PackedVector2Array(area_order_data.get("world_polygon", PackedVector2Array()))
-		if polygon.size() >= 3:
+		var tile_world_positions: Array = Array(area_order_data.get("tile_world_positions", []))
+		if not tile_world_positions.is_empty():
+			for tile_world_position_variant in tile_world_positions:
+				_draw_iso_tile(Vector2(tile_world_position_variant), fill_color, edge_color)
+		else:
+			var polygon: PackedVector2Array = PackedVector2Array(area_order_data.get("world_polygon", PackedVector2Array()))
+			if polygon.size() < 3:
+				continue
 			draw_colored_polygon(polygon, fill_color)
 			for index in range(polygon.size()):
 				draw_line(polygon[index], polygon[(index + 1) % polygon.size()], edge_color, 2.0, true)
 		var center_position: Vector2 = Vector2(area_order_data.get("center_position", Vector2.ZERO))
-		draw_arc(center_position, 14.0, 0.0, TAU, 24, edge_color, 2.0)
+		_draw_iso_marker_base(center_position, Color(edge_color.r, edge_color.g, edge_color.b, 0.18 * draw_alpha), edge_color, 0.8)
 		_draw_area_order_label(center_position, command_type, edge_color)
+
+
+func _draw_area_order_preview() -> void:
+	if _area_order_preview_payload.is_empty():
+		return
+	var tile_world_positions: Array = Array(_area_order_preview_payload.get("tile_world_positions", []))
+	if tile_world_positions.is_empty():
+		return
+	var preview_fill := Color(0.84, 0.94, 1.0, 0.16)
+	var preview_edge := Color(0.84, 0.94, 1.0, 0.72)
+	for tile_world_position_variant in tile_world_positions:
+		_draw_iso_tile(Vector2(tile_world_position_variant), preview_fill, preview_edge)
 
 
 func _draw_area_order_label(center_position: Vector2, command_type: String, label_color: Color) -> void:
@@ -200,20 +232,18 @@ func _draw_area_order_label(center_position: Vector2, command_type: String, labe
 
 func _draw_waypoint_symbol(position: Vector2, command_type: String, marker_color: Color, index: int) -> void:
 	var marker_symbol: String = String(TERRAIN_MARKER_CATALOG_SCRIPT.call("get_symbol", command_type)).strip_edges().to_lower()
+	_draw_iso_marker_base(position, marker_color, marker_color.darkened(0.35), 1.0)
 	match marker_symbol:
 		TERRAIN_MARKER_CATALOG_SCRIPT.SYMBOL_SQUARE:
-			draw_rect(Rect2(position - Vector2(10.0, 10.0), Vector2(20.0, 20.0)), marker_color, true)
+			_draw_iso_marker_base(position, marker_color.lightened(0.12), marker_color.darkened(0.35), 0.82)
 		TERRAIN_MARKER_CATALOG_SCRIPT.SYMBOL_CROSS:
-			draw_circle(position, MARKER_RADIUS, marker_color)
-			draw_line(position + Vector2(-8.0, 0.0), position + Vector2(8.0, 0.0), Color(0.05, 0.07, 0.08, 0.9), 2.0)
-			draw_line(position + Vector2(0.0, -8.0), position + Vector2(0.0, 8.0), Color(0.05, 0.07, 0.08, 0.9), 2.0)
+			draw_line(position + Vector2(-9.0, -5.0), position + Vector2(9.0, 5.0), Color(0.05, 0.07, 0.08, 0.9), 2.0)
+			draw_line(position + Vector2(-9.0, 5.0), position + Vector2(9.0, -5.0), Color(0.05, 0.07, 0.08, 0.9), 2.0)
 		TERRAIN_MARKER_CATALOG_SCRIPT.SYMBOL_DIAMOND:
-			draw_colored_polygon(PackedVector2Array([
-				position + Vector2(0.0, -12.0),
-				position + Vector2(11.0, 0.0),
-				position + Vector2(0.0, 12.0),
-				position + Vector2(-11.0, 0.0),
-			]), marker_color)
+			draw_line(position + Vector2(0.0, -ISO_MARKER_HALF_HEIGHT), position + Vector2(ISO_MARKER_HALF_WIDTH, 0.0), marker_color.lightened(0.18), 2.0, true)
+			draw_line(position + Vector2(ISO_MARKER_HALF_WIDTH, 0.0), position + Vector2(0.0, ISO_MARKER_HALF_HEIGHT), marker_color.lightened(0.18), 2.0, true)
+			draw_line(position + Vector2(0.0, ISO_MARKER_HALF_HEIGHT), position + Vector2(-ISO_MARKER_HALF_WIDTH, 0.0), marker_color.lightened(0.18), 2.0, true)
+			draw_line(position + Vector2(-ISO_MARKER_HALF_WIDTH, 0.0), position + Vector2(0.0, -ISO_MARKER_HALF_HEIGHT), marker_color.lightened(0.18), 2.0, true)
 		TERRAIN_MARKER_CATALOG_SCRIPT.SYMBOL_FLAG:
 			draw_line(position + Vector2(-6.0, 10.0), position + Vector2(-6.0, -10.0), marker_color, 3.0)
 			draw_colored_polygon(PackedVector2Array([
@@ -222,7 +252,7 @@ func _draw_waypoint_symbol(position: Vector2, command_type: String, marker_color
 				position + Vector2(-6.0, -1.0),
 			]), marker_color)
 		_:
-			draw_circle(position, MARKER_RADIUS, marker_color)
+			draw_line(position + Vector2(-8.0, 0.0), position + Vector2(8.0, 0.0), marker_color.lightened(0.2), 2.0, true)
 	var index_color := Color(0.03, 0.05, 0.06, 0.92)
 	draw_circle(position, 4.0, index_color)
 	if index > 0:
@@ -254,10 +284,8 @@ func _draw_ad_hoc_orders() -> void:
 		var edge_color: Color = base_color
 		var ad_hoc_color := Color(0.96, 0.96, 0.96, 0.95)
 		_draw_dashed_line(anchor_position, target_position, ad_hoc_color, 3.0)
-		draw_circle(target_position, 10.0, ad_hoc_color)
-		draw_arc(target_position, 11.5, 0.0, TAU, 24, edge_color, 2.0)
-		draw_circle(anchor_position, 6.0, ad_hoc_color)
-		draw_arc(anchor_position, 7.5, 0.0, TAU, 24, edge_color, 2.0)
+		_draw_iso_marker_base(target_position, ad_hoc_color, edge_color, 0.86)
+		_draw_iso_marker_base(anchor_position, ad_hoc_color, edge_color, 0.52)
 		var label_text: String = String(order_dict.get("label", "AD-HOC")).strip_edges()
 		var fallback_font: Font = ThemeDB.fallback_font
 		if fallback_font != null and not label_text.is_empty():
@@ -283,7 +311,7 @@ func _draw_security_states() -> void:
 			var arc_width: float = float(assignment.get("arc_width", 0.0))
 			_draw_sector(anchor_position, center_angle, arc_width, 74.0, overlay_color)
 		if bool(security_dict.get("overwatch_ready", false)):
-			draw_circle(anchor_position, 7.0, Color(0.95, 0.98, 1.0, 0.9))
+			_draw_iso_marker_base(anchor_position, Color(0.95, 0.98, 1.0, 0.45), Color(0.95, 0.98, 1.0, 0.9), 0.55)
 			var fallback_font: Font = ThemeDB.fallback_font
 			if fallback_font != null:
 				draw_string(fallback_font, anchor_position + Vector2(12.0, -10.0), "OVW", HORIZONTAL_ALIGNMENT_LEFT, -1.0, 11, Color(0.95, 0.98, 1.0, 0.95))
@@ -317,6 +345,36 @@ func _draw_dashed_line(from_point: Vector2, to_point: Vector2, line_color: Color
 		cursor += step
 
 
+func _draw_iso_tile(center_position: Vector2, fill_color: Color, edge_color: Color) -> void:
+	var polygon: PackedVector2Array = _build_iso_tile_polygon(center_position)
+	draw_colored_polygon(polygon, fill_color)
+	for index in range(polygon.size()):
+		draw_line(polygon[index], polygon[(index + 1) % polygon.size()], edge_color, 2.0, true)
+
+
+func _draw_iso_marker_base(center_position: Vector2, fill_color: Color, edge_color: Color, scale: float = 1.0) -> void:
+	var half_width: float = ISO_MARKER_HALF_WIDTH * scale
+	var half_height: float = ISO_MARKER_HALF_HEIGHT * scale
+	var polygon: PackedVector2Array = PackedVector2Array([
+		center_position + Vector2(0.0, -half_height),
+		center_position + Vector2(half_width, 0.0),
+		center_position + Vector2(0.0, half_height),
+		center_position + Vector2(-half_width, 0.0),
+	])
+	draw_colored_polygon(polygon, fill_color)
+	for index in range(polygon.size()):
+		draw_line(polygon[index], polygon[(index + 1) % polygon.size()], edge_color, 2.0, true)
+
+
+func _build_iso_tile_polygon(center_position: Vector2) -> PackedVector2Array:
+	return PackedVector2Array([
+		center_position + Vector2(0.0, -ISO_TILE_HALF_HEIGHT),
+		center_position + Vector2(ISO_TILE_HALF_WIDTH, 0.0),
+		center_position + Vector2(0.0, ISO_TILE_HALF_HEIGHT),
+		center_position + Vector2(-ISO_TILE_HALF_WIDTH, 0.0),
+	])
+
+
 func _rebuild_cache() -> void:
 	_visible_waypoints.clear()
 	_visible_area_orders.clear()
@@ -331,6 +389,7 @@ func _rebuild_cache() -> void:
 			"command_type": String(area_order.command_type),
 			"center_position": Vector2(area_order.center_position),
 			"tile_positions": Array(area_order.tile_positions).duplicate(true),
+			"tile_world_positions": Array(area_order.tile_world_positions).duplicate(true),
 			"world_polygon": PackedVector2Array(area_order.world_polygon),
 			"created_at_order_index": int(area_order.created_at_order_index),
 			"status": String(area_order.status),
