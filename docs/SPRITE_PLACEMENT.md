@@ -22,8 +22,20 @@ Jedes Wall-Tile bekommt **genau 1 Overlay** basierend auf seiner strukturellen R
 
 ### Gerade Waende (2 gegenueberliegende Wall-Nachbarn)
 
-Die Wandachse bestimmt die Textur. Per Perpendicular-Scan wird erkannt,
-ob die Wand auf der Innen- oder Aussenseite liegt.
+Gerichtete `wall_straight_*`-Tiles nutzen die visuelle Kenney-Blickrichtung
+der Mauer-Sprites. Die strukturelle Tile-Richtung und die Sprite-Blickrichtung
+sind dabei bewusst gegeneinander gemappt:
+
+| Tile-Typ           | Kenney-Textur       | Visuelle Blickrichtung |
+|--------------------|---------------------|-------------------------|
+| `wall_straight_se` | `corridor_wall_SW`  | SW                      |
+| `wall_straight_sw` | `corridor_wall_NW`  | NW                      |
+| `wall_straight_ne` | `corridor_wall_SE`  | SE                      |
+| `wall_straight_nw` | `corridor_wall_NE`  | NE                      |
+
+Die aelteren automatisch aus Nachbarschaften abgeleiteten Waende nutzten
+Achsen/Perpendicular-Scans. Diese Logik bleibt als historische Referenz
+hier sichtbar, ist aber nicht die aktuelle direkte `wall_straight_*`-Zuordnung.
 
 | Wandachse  | Textur            | Seite (Kartenrichtung) | Offset                                      |
 |------------|-------------------|------------------------|----------------------------------------------|
