@@ -39,6 +39,7 @@ const FORMATION_SLOT_LAYOUT := [
 const FORMATION_SLOT_SPACING: float = 28.0
 
 var _execution_by_fireteam: Dictionary = {}
+var _execution_sequence: int = 0
 
 
 func reset_fireteam(fireteam_id: String) -> void:
@@ -110,6 +111,7 @@ func start_execution(
 		formation_scatter_factor = minf(formation_scatter_factor, MOVE_MAX_FORMATION_SCATTER_FACTOR)
 	var state: Dictionary = {
 		"fireteam_id": normalized_fireteam_id,
+		"execution_id": _next_execution_id(normalized_fireteam_id),
 		"phase": phase_index,
 		"command_type": normalized_command_type,
 		"raw_style": raw_style,
@@ -240,7 +242,13 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root) -> 
 			moving_unit_ids = _packed_unit_ids(member_records)
 	var next_anchor_target: Vector2 = _resolve_stage_anchor_target(state, member_records, group_count)
 	var stage_scatter_factor: float = _resolve_stage_formation_scatter_factor(state, next_anchor_target)
-	var formation_targets: Dictionary = _build_formation_targets(next_anchor_target, member_records, String(state.get("leader_unit_id", "")), stage_scatter_factor)
+	var formation_targets: Dictionary = _build_formation_targets(
+		next_anchor_target,
+		member_records,
+		String(state.get("leader_unit_id", "")),
+		stage_scatter_factor,
+		String(state.get("command_type", "")) != "move"
+	)
 	var current_positions: Dictionary = _build_current_positions(member_records)
 	var issued_count: int = 0
 	for record in member_records:
@@ -260,7 +268,8 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root) -> 
 				0.08,
 				String(state.get("command_type", "")),
 				int(state.get("phase", -1)),
-				record.get("unit", null)
+				record.get("unit", null),
+				_build_stage_command_token(state, unit_id)
 			):
 				issued_count += 1
 			continue
@@ -282,7 +291,8 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root) -> 
 			_attack_bonus_for_style(style),
 			String(state.get("command_type", "")),
 			int(state.get("phase", -1)),
-			record.get("unit", null)
+			record.get("unit", null),
+			_build_stage_command_token(state, unit_id)
 		):
 			issued_count += 1
 	state["current_anchor_target_position"] = next_anchor_target
@@ -341,6 +351,29 @@ func _are_current_targets_reached(state: Dictionary, member_records: Array) -> b
 	return true
 
 
+func _is_execution_complete(state: Dictionary, member_records: Array) -> bool:
+	var final_target_position: Vector2 = Vector2(state.get("final_target_position", Vector2.ZERO))
+	var current_anchor_target_position: Vector2 = Vector2(state.get("current_anchor_target_position", final_target_position))
+	if current_anchor_target_position.distance_to(final_target_position) > ANCHOR_REACHED_RADIUS:
+		return false
+	var final_targets: Dictionary = _build_formation_targets(
+		final_target_position,
+		member_records,
+		String(state.get("leader_unit_id", "")),
+		float(state.get("formation_scatter_factor", 1.0)),
+		String(state.get("command_type", "")) != "move"
+	)
+	for record in member_records:
+		var unit = record.get("unit", null)
+		if not (unit is Node2D):
+			return false
+		var unit_id: String = String(record.get("unit_id", ""))
+		var target_position: Vector2 = Vector2(final_targets.get(unit_id, final_target_position))
+		if (unit as Node2D).global_position.distance_to(target_position) > POSITION_REACHED_RADIUS:
+			return false
+	return true
+
+
 func _reissue_current_stage(state: Dictionary, member_records: Array, simulation_root) -> void:
 	if simulation_root == null:
 		return
@@ -367,7 +400,8 @@ func _reissue_current_stage(state: Dictionary, member_records: Array, simulation
 				0.08,
 				String(state.get("command_type", "")),
 				int(state.get("phase", -1)),
-				record.get("unit", null)
+				record.get("unit", null),
+				_build_stage_command_token(state, unit_id)
 			)
 			continue
 		if not moving_unit_ids.has(unit_id) or not current_target_positions.has(unit_id):
@@ -385,26 +419,10 @@ func _reissue_current_stage(state: Dictionary, member_records: Array, simulation
 			_attack_bonus_for_style(style),
 			String(state.get("command_type", "")),
 			int(state.get("phase", -1)),
-			record.get("unit", null)
+			record.get("unit", null),
+			_build_stage_command_token(state, unit_id)
 		)
 	state["current_target_positions"] = current_target_positions
-
-
-func _is_execution_complete(state: Dictionary, member_records: Array) -> bool:
-	var final_target_position: Vector2 = Vector2(state.get("final_target_position", Vector2.ZERO))
-	var current_anchor_target_position: Vector2 = Vector2(state.get("current_anchor_target_position", final_target_position))
-	if current_anchor_target_position.distance_to(final_target_position) > ANCHOR_REACHED_RADIUS:
-		return false
-	var final_targets: Dictionary = _build_formation_targets(final_target_position, member_records, String(state.get("leader_unit_id", "")), float(state.get("formation_scatter_factor", 1.0)))
-	for record in member_records:
-		var unit = record.get("unit", null)
-		if not (unit is Node2D):
-			return false
-		var unit_id: String = String(record.get("unit_id", ""))
-		var target_position: Vector2 = Vector2(final_targets.get(unit_id, final_target_position))
-		if (unit as Node2D).global_position.distance_to(target_position) > POSITION_REACHED_RADIUS:
-			return false
-	return true
 
 
 func _build_member_records(units: Array, leader) -> Array:
@@ -507,7 +525,7 @@ func _compute_next_anchor_target(state: Dictionary, _member_records: Array) -> V
 	return current_anchor_position + direction.normalized() * step_distance
 
 
-func _build_formation_targets(anchor_position: Vector2, member_records: Array, leader_unit_id: String, scatter_factor: float = 1.0) -> Dictionary:
+func _build_formation_targets(anchor_position: Vector2, member_records: Array, leader_unit_id: String, scatter_factor: float = 1.0, allow_trailing_slots: bool = true) -> Dictionary:
 	var targets: Dictionary = {}
 	var ordered_records: Array = member_records.duplicate()
 	ordered_records.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
@@ -529,6 +547,8 @@ func _build_formation_targets(anchor_position: Vector2, member_records: Array, l
 		var record: Dictionary = ordered_records[index]
 		var slot_index: int = mini(index, FORMATION_SLOT_LAYOUT.size() - 1)
 		var slot: Vector2 = FORMATION_SLOT_LAYOUT[slot_index]
+		if not allow_trailing_slots:
+			slot.y = minf(slot.y, 0.0)
 		targets[String(record.get("unit_id", ""))] = anchor_position + ((lateral * slot.x) + (forward * slot.y)) * FORMATION_SLOT_SPACING * maxf(scatter_factor, 0.5)
 	return targets
 
@@ -655,7 +675,8 @@ func _enqueue_unit_command(
 	attack_bonus: float,
 	source_command_type: String,
 	phase_index: int,
-	unit = null
+	unit = null,
+	command_token: String = ""
 ) -> bool:
 	if simulation_root == null:
 		return false
@@ -670,6 +691,7 @@ func _enqueue_unit_command(
 	command.attack_bonus = attack_bonus
 	command.source_command_type = source_command_type
 	command.phase = phase_index
+	command.command_token = command_token
 	if command_type == UNIT_COMMAND_SCRIPT.TYPE_MOVE_TO_POSITION:
 		command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_HOLD_FIRE
 	else:
@@ -679,9 +701,24 @@ func _enqueue_unit_command(
 	if unit != null and unit.has_method("assign_unit_command"):
 		unit.call("assign_unit_command", command)
 	var command_dict: Dictionary = command.to_dict()
-	command_dict["requeue_until_target"] = false
+	command_dict["requeue_until_target"] = command_type != UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION
 	simulation_root.call("enqueue_command", command_dict)
 	return true
+
+
+func _next_execution_id(fireteam_id: String) -> String:
+	_execution_sequence += 1
+	return "%s_%d" % [fireteam_id, _execution_sequence]
+
+
+func _build_stage_command_token(state: Dictionary, unit_id: String) -> String:
+	return "%s:%d:%s:%d:%s" % [
+		String(state.get("execution_id", "")),
+		int(state.get("phase", -1)),
+		String(state.get("command_type", "")),
+		int(state.get("stage_index", 0)),
+		unit_id,
+	]
 
 
 func _resolve_origin_anchor(member_records: Array, leader) -> Vector2:

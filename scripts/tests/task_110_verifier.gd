@@ -17,6 +17,12 @@ class SimulationStub:
 	var commands: Array = []
 
 	func enqueue_command(command_dict: Dictionary) -> void:
+		var command_token: String = String(command_dict.get("command_token", "")).strip_edges()
+		if not command_token.is_empty():
+			for index in range(commands.size()):
+				if String(Dictionary(commands[index]).get("command_token", "")).strip_edges() == command_token:
+					commands[index] = command_dict.duplicate(true)
+					return
 		commands.append(command_dict.duplicate(true))
 
 
@@ -27,6 +33,7 @@ func _init() -> void:
 func _run_tests() -> void:
 	print("=== TASK_110 Fireteam Movement Controller Verifier ===")
 	_test_rush_moves_all_fit_members_with_cohesion_clamp()
+	_test_unreached_stage_relies_on_simulation_requeue()
 	_test_move_travel_uses_compact_intermediate_formation()
 	_test_bounding_rotates_cover_and_movement_groups()
 	_test_bounding_keeps_bound_anchor_until_lead_moves()
@@ -69,8 +76,26 @@ func _test_rush_moves_all_fit_members_with_cohesion_clamp() -> void:
 	_assert(PackedStringArray(movement_state.get("current_moving_unit_ids", PackedStringArray())).size() == 3, "Rush moves all fit members at the same time")
 	var move_speed_factors: Array = []
 	for command_dict in simulation.commands:
-		move_speed_factors.append(float(Dictionary(command_dict).get("move_speed_factor", -1.0)))
+		var command: Dictionary = Dictionary(command_dict)
+		move_speed_factors.append(float(command.get("move_speed_factor", -1.0)))
+		_assert(bool(command.get("requeue_until_target", false)), "Rush move command is requeued by SimulationRoot until target")
+		_assert(not String(command.get("command_token", "")).is_empty(), "Rush move command carries a FireteamMovement token")
 	_assert(_all_close(move_speed_factors), "Rush clamps movers to a shared speed when cohesion is already broken")
+	_cleanup_units([leader, wing_a, wing_b])
+
+
+func _test_unreached_stage_relies_on_simulation_requeue() -> void:
+	var controller = FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT.new()
+	var simulation = SimulationStub.new()
+	var leader = _make_unit("requeue_lead", "blue", true, Vector2(0.0, 0.0), 0.72, 0.55, 0.6, 0.6, ["steady"])
+	var wing_a = _make_unit("requeue_a", "blue", false, Vector2(-20.0, 10.0), 0.68, 0.55, 0.35, 0.5, [])
+	var wing_b = _make_unit("requeue_b", "blue", false, Vector2(20.0, 10.0), 0.68, 0.55, 0.35, 0.5, [])
+	var profile = _make_profile("blue", "rush", 96.0)
+	controller.start_execution("blue", "move", 1, Vector2(420.0, 0.0), profile, [leader, wing_a, wing_b], leader, simulation)
+	var initial_command_count: int = simulation.commands.size()
+	controller.update_execution("blue", [leader, wing_a, wing_b], leader, simulation)
+	_assert(initial_command_count > 0, "Fireteam movement issues commands when a stage starts")
+	_assert(simulation.commands.size() == initial_command_count, "Unreached Fireteam stage does not pulse duplicate commands every update")
 	_cleanup_units([leader, wing_a, wing_b])
 
 

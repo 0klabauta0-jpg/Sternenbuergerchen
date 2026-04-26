@@ -62,6 +62,15 @@ func enqueue_command(cmd: Dictionary) -> void:
 		push_warning("SimulationRoot.enqueue_command expects a Dictionary command.")
 		return
 
+	var command_token: String = String(cmd.get("command_token", "")).strip_edges()
+	if not command_token.is_empty():
+		for index in range(command_queue.size()):
+			var queued_command: Dictionary = Dictionary(command_queue[index])
+			if String(queued_command.get("command_token", "")).strip_edges() != command_token:
+				continue
+			command_queue[index] = cmd.duplicate(true)
+			return
+
 	command_queue.append(cmd)
 
 
@@ -646,6 +655,9 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 		push_warning("SimulationRoot move command expects a Node2D-compatible unit.")
 		return
 
+	if _is_stale_tokenized_move_command(cmd, unit):
+		return
+
 	if unit.has_method("set_target_position"):
 		unit.call("set_target_position", target_position)
 
@@ -716,6 +728,23 @@ func _apply_move_command_with_terrain(
 
 	if bool(cmd.get("requeue_until_target", true)) and (not path_world_points.is_empty() or current_position.distance_to(target_position) > 0.5):
 		enqueue_command(cmd.duplicate(true))
+
+
+func _is_stale_tokenized_move_command(cmd: Dictionary, unit) -> bool:
+	var command_token: String = String(cmd.get("command_token", "")).strip_edges()
+	if command_token.is_empty():
+		return false
+	if unit == null or not unit.has_method("get_current_unit_command"):
+		return false
+	var current_command = unit.call("get_current_unit_command")
+	if current_command == null:
+		return true
+	var current_token: String = ""
+	if typeof(current_command) == TYPE_DICTIONARY:
+		current_token = String(Dictionary(current_command).get("command_token", "")).strip_edges()
+	elif current_command is Object:
+		current_token = String(current_command.get("command_token")).strip_edges()
+	return current_token != command_token
 
 
 func _extract_or_build_path_world_points(
