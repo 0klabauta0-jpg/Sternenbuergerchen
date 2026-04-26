@@ -41,11 +41,14 @@ func _test_resolver_builds_edge_approach() -> void:
 		_make_unit("blue_b", "team_alpha", "blue", false, Vector2(-260.0, 80.0)),
 	]
 	var area_order = _make_area_order("area_attack_test", "blue", "take", Vector2(96.0, 96.0))
+	var flank_area_order = _make_area_order("area_flank_test", "blue", "flank", Vector2(96.0, 96.0))
 	var resolution: Dictionary = AREA_ORDER_RESOLVER_SCRIPT.call("resolve_attack_area", area_order, units, units[0], null)
+	var flank_resolution: Dictionary = AREA_ORDER_RESOLVER_SCRIPT.call("resolve_attack_area", flank_area_order, units, units[0], null)
 	var approach_position: Vector2 = Vector2(resolution.get("approach_position", Vector2.ZERO))
 	var center_position: Vector2 = Vector2(resolution.get("center_position", Vector2.ZERO))
 	var assignments: Array = Array(resolution.get("assignments", []))
 	_assert(not resolution.is_empty(), "Attack Area resolver accepts offensive Area Orders")
+	_assert(not flank_resolution.is_empty(), "Attack Area resolver accepts offensive Flank Area Orders")
 	_assert(approach_position.distance_to(center_position) > 48.0, "Attack Area approach is outside the target center")
 	_assert(approach_position.distance_to((units[0] as Node2D).global_position) < center_position.distance_to((units[0] as Node2D).global_position), "Attack Area approach is formed on the friendly side of the area")
 	_assert(assignments.size() == 3 and _count_unique_targets(assignments) == 3, "Attack Area spreads the fireteam on the approach line")

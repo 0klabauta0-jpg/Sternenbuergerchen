@@ -4,6 +4,7 @@ extends RefCounted
 const COMMAND_TYPE_DEFEND: String = "defend"
 const COMMAND_TYPE_ENGAGE: String = "engage"
 const COMMAND_TYPE_TAKE: String = "take"
+const COMMAND_TYPE_FLANK: String = "flank"
 const STATUS_PENDING: String = "pending"
 const STATUS_ACTIVE: String = "active"
 const STATUS_COMPLETED: String = "completed"
@@ -12,6 +13,7 @@ const ALLOWED_COMMAND_TYPES: PackedStringArray = [
 	COMMAND_TYPE_DEFEND,
 	COMMAND_TYPE_ENGAGE,
 	COMMAND_TYPE_TAKE,
+	COMMAND_TYPE_FLANK,
 ]
 const ALLOWED_STATUSES: PackedStringArray = [
 	STATUS_PENDING,

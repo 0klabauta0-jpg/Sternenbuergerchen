@@ -82,6 +82,7 @@ const WAYPOINT_MENU_DELETE_ID: int = 199
 const AREA_ORDER_MENU_DEFEND_ID: int = 201
 const AREA_ORDER_MENU_ENGAGE_ID: int = 202
 const AREA_ORDER_MENU_TAKE_ID: int = 203
+const AREA_ORDER_MENU_FLANK_ID: int = 204
 const AREA_ORDER_MENU_DELETE_ID: int = 299
 const DROP_OFFMAP_DISTANCE_MULTIPLIER: float = 2.0
 const DROP_OFFMAP_MIN_DISTANCE: float = 720.0
@@ -4976,7 +4977,7 @@ func _find_next_attack_area_order(fireteam_id: String):
 		if String(area_order.fireteam_id).strip_edges().to_lower() != normalized_fireteam_id:
 			continue
 		var command_type: String = String(area_order.command_type).strip_edges().to_lower()
-		if command_type != AREA_ORDER_SCRIPT.COMMAND_TYPE_ENGAGE and command_type != AREA_ORDER_SCRIPT.COMMAND_TYPE_TAKE and command_type != "flank":
+		if command_type != AREA_ORDER_SCRIPT.COMMAND_TYPE_ENGAGE and command_type != AREA_ORDER_SCRIPT.COMMAND_TYPE_TAKE and command_type != AREA_ORDER_SCRIPT.COMMAND_TYPE_FLANK:
 			continue
 		var status: String = String(area_order.status)
 		if status != AREA_ORDER_SCRIPT.STATUS_PENDING and status != AREA_ORDER_SCRIPT.STATUS_ACTIVE:
@@ -6392,6 +6393,7 @@ func _open_area_order_command_menu(screen_position: Vector2, area_order_targets:
 	menu.add_item("Defend Area", AREA_ORDER_MENU_DEFEND_ID)
 	menu.add_item("Engage Area", AREA_ORDER_MENU_ENGAGE_ID)
 	menu.add_item("Take Area", AREA_ORDER_MENU_TAKE_ID)
+	menu.add_item("Flank Area", AREA_ORDER_MENU_FLANK_ID)
 	if include_delete_action:
 		menu.add_separator()
 		menu.add_item("Delete", AREA_ORDER_MENU_DELETE_ID)
@@ -6439,6 +6441,8 @@ func _on_area_order_menu_id_pressed(item_id: int) -> void:
 			_set_area_order_command_for_targets(_area_order_menu_targets, AREA_ORDER_SCRIPT.COMMAND_TYPE_ENGAGE)
 		AREA_ORDER_MENU_TAKE_ID:
 			_set_area_order_command_for_targets(_area_order_menu_targets, AREA_ORDER_SCRIPT.COMMAND_TYPE_TAKE)
+		AREA_ORDER_MENU_FLANK_ID:
+			_set_area_order_command_for_targets(_area_order_menu_targets, AREA_ORDER_SCRIPT.COMMAND_TYPE_FLANK)
 		AREA_ORDER_MENU_DELETE_ID:
 			_delete_area_order_targets(_area_order_menu_targets)
 	_hide_area_order_command_menu()

@@ -93,7 +93,7 @@ static func _coerce_area_order(area_order_data):
 
 static func _is_attack_area_command_type(command_type: String) -> bool:
 	match command_type.strip_edges().to_lower():
-		AREA_ORDER_SCRIPT.COMMAND_TYPE_ENGAGE, AREA_ORDER_SCRIPT.COMMAND_TYPE_TAKE, "flank":
+		AREA_ORDER_SCRIPT.COMMAND_TYPE_ENGAGE, AREA_ORDER_SCRIPT.COMMAND_TYPE_TAKE, AREA_ORDER_SCRIPT.COMMAND_TYPE_FLANK:
 			return true
 		_:
 			return false

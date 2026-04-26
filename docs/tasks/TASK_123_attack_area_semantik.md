@@ -50,6 +50,7 @@ Ein offensives Gebiet soll nicht wie ein stumpfer Move-Befehl funktionieren. Fir
 - `MissionTacticalSandboxController` startet Attack-Area-Ausfuehrung per GO, enqueued `engage_area`-Befehle ueber `SimulationRoot` und fuehrt nach Gebietssicherung in einen `GESICHERT | HALTET GEBIET`-Security-Zustand.
 - `MissionCombatLoopDriver` reicht den aktiven Attack-Area-Kontext an den Combat-Resolver weiter und kann Zielgebiete auf gegnerfreie Sicherung pruefen.
 - `CombatFireDecisionResolver` priorisiert fuer befreundete Fireteams Ziele innerhalb des aktiven Attack-Area-Zielgebiets, ohne die bestehende Damage-Formel zu aendern.
+- `AreaOrder` und das Area-Kontextmenue erlauben `flank` als offensiven Area-Typ.
 
 ## Lokale Pruefung
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_123_verifier.gd`
@@ -62,6 +63,7 @@ Ein offensives Gebiet soll nicht wie ein stumpfer Move-Befehl funktionieren. Fir
 
 ## Dateien (voraussichtlich)
 - `scripts/tactical/combat_fire_decision_resolver.gd`
+- `scripts/command/area_order.gd`
 - `scripts/tactical/contact_tracker.gd`
 - ggf. `scripts/tactical/area_order_resolver.gd`
 - `scripts/tests/mission_combat_loop_driver.gd`
