@@ -3,6 +3,8 @@ extends SceneTree
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const AREA_ORDER_SCRIPT: GDScript = preload("res://scripts/command/area_order.gd")
 const COMBAT_FIRE_DECISION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/combat_fire_decision_resolver.gd")
+const TERRAIN_REGISTRY_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_registry.gd")
+const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const TEST_UNIT_SCRIPT: GDScript = preload("res://scripts/npc/test_unit.gd")
 
 var _passed: int = 0
@@ -23,6 +25,7 @@ func _init() -> void:
 func _run_tests() -> void:
 	print("=== TASK_123 Attack Area Semantik Verifier ===")
 	_test_resolver_builds_edge_approach()
+	_test_resolver_skips_unreachable_occupation_tiles()
 	_test_fire_resolver_prioritizes_target_area_contacts()
 	await _test_mission_engage_area_enters_uncleared_area()
 	await _test_mission_attack_area_execution_and_secured_state()
@@ -58,6 +61,30 @@ func _test_resolver_builds_edge_approach() -> void:
 	_assert(assignments.size() == 3 and _count_unique_targets(assignments) == 3, "Attack Area spreads the fireteam on the approach line")
 	_assert(occupy_assignments.size() == 3 and _all_assignments_inside_area(occupy_assignments, target_area), "Attack Area can derive occupation positions inside the target area")
 	_cleanup_units(units)
+
+
+func _test_resolver_skips_unreachable_occupation_tiles() -> void:
+	var registry = _make_registry([Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0), Vector2i(0, 1)], {Vector2i(1, 0): false})
+	var unit := _make_unit("blue_lead", "team_alpha", "blue", true, registry.grid_to_world(Vector2i(0, 0)))
+	var unreachable_position: Vector2 = registry.grid_to_world(Vector2i(2, 0))
+	var reachable_position: Vector2 = registry.grid_to_world(Vector2i(0, 1))
+	var area_order = AREA_ORDER_SCRIPT.new({
+		"area_order_id": "area_reachable_test",
+		"fireteam_id": "blue",
+		"command_type": "take",
+		"tile_positions": [Vector2i(2, 0), Vector2i(0, 1)],
+		"tile_world_positions": [unreachable_position, reachable_position],
+		"world_polygon": PackedVector2Array([unreachable_position + Vector2(-32.0, -16.0), unreachable_position + Vector2(32.0, -16.0), reachable_position + Vector2(32.0, 16.0), reachable_position + Vector2(-32.0, 16.0)]),
+		"center_position": unreachable_position,
+		"created_at_order_index": 0,
+		"status": "pending",
+	})
+	var resolution: Dictionary = AREA_ORDER_RESOLVER_SCRIPT.call("resolve_occupy_area", area_order, [unit], unit, registry)
+	var assignments: Array = Array(resolution.get("assignments", []))
+	var target_position: Vector2 = Vector2(Dictionary(assignments[0]).get("target_position", Vector2.ZERO)) if not assignments.is_empty() else Vector2.ZERO
+	_assert(not assignments.is_empty() and target_position.distance_to(reachable_position) <= 0.5, "Area occupation skips unreachable marked tiles")
+	unit.free()
+	registry.free()
 
 
 func _test_fire_resolver_prioritizes_target_area_contacts() -> void:
@@ -217,6 +244,23 @@ func _make_unit(unit_id: String, team_id: String, fireteam_id: String, is_lead: 
 	unit.global_position = position_value
 	unit._ready()
 	return unit
+
+
+func _make_registry(grid_positions: Array, blocked_by_grid: Dictionary):
+	var registry = TERRAIN_REGISTRY_SCRIPT.new()
+	registry.configure_iso_grid(Vector2.ZERO, 64.0, 32.0)
+	for grid_variant in grid_positions:
+		var grid_position: Vector2i = Vector2i(grid_variant)
+		var walkable: bool = bool(blocked_by_grid.get(grid_position, true))
+		registry.register_tile(TERRAIN_TILE_DATA_SCRIPT.new({
+			"tile_id": "%d_%d" % [grid_position.x, grid_position.y],
+			"type_id": "ground_flat" if walkable else "rock_large",
+			"grid_position": grid_position,
+			"world_position": registry.grid_to_world(grid_position),
+			"walkable": walkable,
+			"surface_type": "ground" if walkable else "rock",
+		}))
+	return registry
 
 
 func _load_scene() -> Node:

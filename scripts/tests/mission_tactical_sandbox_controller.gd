@@ -4878,14 +4878,32 @@ func _build_fireteam_anchor_visualization_entries() -> Array:
 		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
 		if fireteam_id.is_empty():
 			continue
-		var anchor := _get_selection_anchor_for_fireteam(fireteam_id)
-		if anchor == null:
+		var anchor_position: Variant = _resolve_fireteam_visual_anchor_position(fireteam_id)
+		if typeof(anchor_position) != TYPE_VECTOR2:
 			continue
 		entries.append({
 			"fireteam_id": fireteam_id,
-			"position": anchor.global_position,
+			"position": Vector2(anchor_position),
 		})
 	return entries
+
+
+func _resolve_fireteam_visual_anchor_position(fireteam_id: String) -> Variant:
+	var sum: Vector2 = Vector2.ZERO
+	var count: int = 0
+	for unit in _get_fireteam_units(fireteam_id, true):
+		if not (unit is Node2D):
+			continue
+		if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
+			continue
+		sum += (unit as Node2D).global_position
+		count += 1
+	if count > 0:
+		return sum / float(count)
+	var anchor := _get_selection_anchor_for_fireteam(fireteam_id)
+	if anchor != null:
+		return anchor.global_position
+	return null
 
 
 func _append_waypoint_to_plan(fireteam_id: String, phase_index: int, world_position: Vector2) -> Dictionary:

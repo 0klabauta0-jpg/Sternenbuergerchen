@@ -817,6 +817,7 @@ func _build_path_world_points(current_position: Vector2, target_position: Vector
 	var navigation_query: Dictionary = _find_navigation_grid_path(from_grid, to_grid, terrain_registry)
 	var path_grid_points: Array = Array(navigation_query.get("path", []))
 	var navigation_status: String = String(navigation_query.get("status", ""))
+	path_grid_points = _simplify_grid_path_turns(path_grid_points)
 	if path_grid_points.is_empty():
 		if from_grid == to_grid:
 			path_world_points.append(resolved_target_position)
@@ -827,6 +828,7 @@ func _build_path_world_points(current_position: Vector2, target_position: Vector
 			return path_world_points
 		var fallback_query: Dictionary = _find_navigation_grid_path(from_grid, reachable_grid, terrain_registry)
 		var fallback_path_grid_points: Array = Array(fallback_query.get("path", []))
+		fallback_path_grid_points = _simplify_grid_path_turns(fallback_path_grid_points)
 		if fallback_path_grid_points.is_empty() and reachable_grid != from_grid:
 			return path_world_points
 		for fallback_index in range(1, fallback_path_grid_points.size()):
@@ -842,6 +844,35 @@ func _build_path_world_points(current_position: Vector2, target_position: Vector
 		path_world_points.append(target_position)
 
 	return path_world_points
+
+
+func _simplify_grid_path_turns(path_grid_points: Array) -> Array:
+	if path_grid_points.size() <= 2:
+		return path_grid_points.duplicate()
+	var simplified: Array = [Vector2i(path_grid_points[0]), Vector2i(path_grid_points[1])]
+	var previous_direction: Vector2i = _grid_step_direction(Vector2i(path_grid_points[0]), Vector2i(path_grid_points[1]))
+	for index in range(2, path_grid_points.size()):
+		var current_direction: Vector2i = _grid_step_direction(Vector2i(path_grid_points[index - 1]), Vector2i(path_grid_points[index]))
+		if current_direction != previous_direction:
+			simplified.append(Vector2i(path_grid_points[index - 1]))
+		previous_direction = current_direction
+	simplified.append(Vector2i(path_grid_points[-1]))
+	return simplified
+
+
+func _grid_step_direction(from_grid: Vector2i, to_grid: Vector2i) -> Vector2i:
+	var delta: Vector2i = to_grid - from_grid
+	var direction_x: int = 0
+	var direction_y: int = 0
+	if delta.x > 0:
+		direction_x = 1
+	elif delta.x < 0:
+		direction_x = -1
+	if delta.y > 0:
+		direction_y = 1
+	elif delta.y < 0:
+		direction_y = -1
+	return Vector2i(direction_x, direction_y)
 
 
 func _find_navigation_grid_path(from_grid: Vector2i, to_grid: Vector2i, terrain_registry) -> Dictionary:

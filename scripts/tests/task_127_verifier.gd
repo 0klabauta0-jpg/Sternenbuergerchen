@@ -24,6 +24,7 @@ func _run_tests() -> void:
 	_test_multi_cluster_path_uses_portals()
 	_test_disconnected_components_fail_early()
 	_test_simulation_root_executes_hpa_path()
+	_test_simulation_root_simplifies_collinear_hpa_path()
 	_test_simulation_root_unreachable_target_uses_local_fallback()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	if _failed > 0:
@@ -84,6 +85,18 @@ func _test_simulation_root_executes_hpa_path() -> void:
 		if unit.global_position.distance_to(target_position) <= 1.0:
 			break
 	_assert(unit.global_position.distance_to(target_position) <= 1.0, "SimulationRoot executes the HPA path to the target")
+	_cleanup_context(context)
+
+
+func _test_simulation_root_simplifies_collinear_hpa_path() -> void:
+	var context: Dictionary = _make_simulation_context(_make_rect_positions(Vector2i(0, 0), Vector2i(9, 0)), {}, Vector2i(0, 0))
+	var simulation_root = context["simulation_root"]
+	var registry = context["terrain_registry"]
+	var unit = context["unit"]
+	var target_position: Vector2 = registry.grid_to_world(Vector2i(9, 0))
+	var cmd: Dictionary = _build_move_command(unit.get_unit_id(), target_position)
+	var path: Array = simulation_root.call("_extract_or_build_path_world_points", cmd, unit, unit.global_position, target_position, registry)
+	_assert(path.size() <= 2 and not path.is_empty() and registry.call("world_to_grid", Vector2(path[-1])) == Vector2i(9, 0), "SimulationRoot simplifies straight HPA path segments")
 	_cleanup_context(context)
 
 

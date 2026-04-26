@@ -2,6 +2,7 @@ class_name AreaOrderResolver
 extends RefCounted
 
 const AREA_ORDER_SCRIPT: GDScript = preload("res://scripts/command/area_order.gd")
+const TERRAIN_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_pathfinder.gd")
 
 const FALLBACK_SPACING: float = 42.0
 const ATTACK_APPROACH_STANDOFF: float = 64.0
@@ -32,7 +33,7 @@ static func _resolve_area_hold_positions(area_order, units: Array, leader, terra
 	var candidates: Array = _build_candidates(area_order, center_position, terrain_registry, members.size())
 	if candidates.is_empty():
 		return {}
-	var assignments: Array = _assign_members_to_candidates(members, candidates, center_position)
+	var assignments: Array = _assign_members_to_candidates(members, candidates, center_position, terrain_registry)
 	if assignments.is_empty():
 		return {}
 	return {
@@ -281,12 +282,12 @@ static func _build_fallback_candidates(center_position: Vector2, required_count:
 	return result
 
 
-static func _assign_members_to_candidates(members: Array, candidates: Array, center_position: Vector2) -> Array:
+static func _assign_members_to_candidates(members: Array, candidates: Array, center_position: Vector2, terrain_registry = null) -> Array:
 	var assignments: Array = []
 	var used_indices: Dictionary = {}
 	for member_index in range(members.size()):
 		var member: Dictionary = Dictionary(members[member_index])
-		var candidate_index: int = _pick_candidate_index(member_index, candidates, used_indices, center_position)
+		var candidate_index: int = _pick_candidate_index(member_index, candidates, used_indices, center_position, member, terrain_registry)
 		if candidate_index < 0:
 			continue
 		used_indices[candidate_index] = true
@@ -301,7 +302,7 @@ static func _assign_members_to_candidates(members: Array, candidates: Array, cen
 	return assignments
 
 
-static func _pick_candidate_index(member_index: int, candidates: Array, used_indices: Dictionary, center_position: Vector2) -> int:
+static func _pick_candidate_index(member_index: int, candidates: Array, used_indices: Dictionary, center_position: Vector2, member: Dictionary = {}, terrain_registry = null) -> int:
 	if candidates.is_empty():
 		return -1
 	if member_index == 0:
@@ -309,16 +310,50 @@ static func _pick_candidate_index(member_index: int, candidates: Array, used_ind
 		var best_leader_score: float = -INF
 		for index in range(candidates.size()):
 			var candidate: Dictionary = Dictionary(candidates[index])
+			if not _is_candidate_reachable_for_member(member, candidate, terrain_registry):
+				continue
 			var score: float = (float(candidate.get("cover_score", 0.0)) * 40.0) - Vector2(candidate.get("target_position", center_position)).distance_to(center_position)
 			if score <= best_leader_score:
 				continue
 			best_leader_score = score
 			best_leader_index = index
-		return best_leader_index
+		if best_leader_index >= 0:
+			return best_leader_index
+	for index in range(candidates.size()):
+		if not used_indices.has(index) and _is_candidate_reachable_for_member(member, Dictionary(candidates[index]), terrain_registry):
+			return index
 	for index in range(candidates.size()):
 		if not used_indices.has(index):
 			return index
 	return member_index % candidates.size()
+
+
+static func _is_candidate_reachable_for_member(member: Dictionary, candidate: Dictionary, terrain_registry) -> bool:
+	if terrain_registry == null or not terrain_registry.has_method("world_to_grid") or not terrain_registry.has_method("get_tile_at_grid"):
+		return true
+	var unit = member.get("unit", null)
+	if not (unit is Node2D):
+		return true
+	var from_grid: Vector2i = Vector2i(terrain_registry.call("world_to_grid", (unit as Node2D).global_position))
+	if terrain_registry.has_method("is_walkable") and not bool(terrain_registry.call("is_walkable", from_grid)):
+		var nearest_start_grid: Variant = terrain_registry.call("get_nearest_walkable_grid", (unit as Node2D).global_position) if terrain_registry.has_method("get_nearest_walkable_grid") else null
+		if typeof(nearest_start_grid) != TYPE_VECTOR2I:
+			return false
+		from_grid = Vector2i(nearest_start_grid)
+	var target_position: Vector2 = Vector2(candidate.get("target_position", Vector2.ZERO))
+	var to_grid: Vector2i = Vector2i(candidate.get("grid_position", terrain_registry.call("world_to_grid", target_position)))
+	var target_tile = terrain_registry.call("get_tile_at_grid", to_grid)
+	if target_tile == null:
+		to_grid = Vector2i(terrain_registry.call("world_to_grid", target_position))
+		target_tile = terrain_registry.call("get_tile_at_grid", to_grid)
+	if target_tile == null:
+		return false
+	if target_tile.has_method("get") and not bool(target_tile.get("walkable")):
+		return false
+	if from_grid == to_grid:
+		return true
+	var pathfinder = TERRAIN_PATHFINDER_SCRIPT.new()
+	return not Array(pathfinder.call("find_path", from_grid, to_grid, terrain_registry)).is_empty()
 
 
 static func _read_skill_value(unit, method_name: String, fallback: float) -> float:
