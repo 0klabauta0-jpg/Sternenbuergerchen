@@ -2385,13 +2385,13 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 	# Use type_id to determine texture and offset directly
 	match type_id:
 		"wall_straight_se":
-			texture = WALL_TEXTURE_SW
-		"wall_straight_sw":
-			texture = WALL_TEXTURE_NW
-		"wall_straight_ne":
-			texture = WALL_TEXTURE_SE
-		"wall_straight_nw":
 			texture = WALL_TEXTURE_NE
+		"wall_straight_sw":
+			texture = WALL_TEXTURE_SE
+		"wall_straight_ne":
+			texture = WALL_TEXTURE_NW
+		"wall_straight_nw":
+			texture = WALL_TEXTURE_SW
 		"wall_corner_se":
 			texture = WALL_CORNER_NW
 		"wall_corner_sw":

@@ -28,10 +28,10 @@ sind dabei bewusst gegeneinander gemappt:
 
 | Tile-Typ           | Kenney-Textur       | Visuelle Blickrichtung |
 |--------------------|---------------------|-------------------------|
-| `wall_straight_se` | `corridor_wall_SW`  | SW                      |
-| `wall_straight_sw` | `corridor_wall_NW`  | NW                      |
-| `wall_straight_ne` | `corridor_wall_SE`  | SE                      |
-| `wall_straight_nw` | `corridor_wall_NE`  | NE                      |
+| `wall_straight_se` | `corridor_wall_NE`  | SE                      |
+| `wall_straight_sw` | `corridor_wall_SE`  | SW                      |
+| `wall_straight_ne` | `corridor_wall_NW`  | NE                      |
+| `wall_straight_nw` | `corridor_wall_SW`  | NW                      |
 
 Die aelteren automatisch aus Nachbarschaften abgeleiteten Waende nutzten
 Achsen/Perpendicular-Scans. Diese Logik bleibt als historische Referenz

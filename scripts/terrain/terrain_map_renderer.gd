@@ -261,13 +261,13 @@ func _build_wall_overlays(terrain_map_data, wall_container: Node2D) -> Dictionar
 
 		match type_id:
 			"wall_straight_se":
-				texture = WALL_TEXTURE_SW
-			"wall_straight_sw":
-				texture = WALL_TEXTURE_NW
-			"wall_straight_ne":
-				texture = WALL_TEXTURE_SE
-			"wall_straight_nw":
 				texture = WALL_TEXTURE_NE
+			"wall_straight_sw":
+				texture = WALL_TEXTURE_SE
+			"wall_straight_ne":
+				texture = WALL_TEXTURE_NW
+			"wall_straight_nw":
+				texture = WALL_TEXTURE_SW
 			"wall_corner_se":
 				texture = WALL_CORNER_NW
 			"wall_corner_sw":

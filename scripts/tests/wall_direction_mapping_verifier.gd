@@ -12,10 +12,10 @@ const WALL_TYPE_IDS: PackedStringArray = [
 ]
 const KENNEY_DIAMOND_CENTER := Vector2(256.0, 315.0)
 const EXPECTED_WALL_TEXTURES: Dictionary = {
-	"wall_straight_se": "res://Assets/kenney_space-kit/Isometric/corridor_wall_SW.png",
-	"wall_straight_sw": "res://Assets/kenney_space-kit/Isometric/corridor_wall_NW.png",
-	"wall_straight_ne": "res://Assets/kenney_space-kit/Isometric/corridor_wall_SE.png",
-	"wall_straight_nw": "res://Assets/kenney_space-kit/Isometric/corridor_wall_NE.png",
+	"wall_straight_se": "res://Assets/kenney_space-kit/Isometric/corridor_wall_NE.png",
+	"wall_straight_sw": "res://Assets/kenney_space-kit/Isometric/corridor_wall_SE.png",
+	"wall_straight_ne": "res://Assets/kenney_space-kit/Isometric/corridor_wall_NW.png",
+	"wall_straight_nw": "res://Assets/kenney_space-kit/Isometric/corridor_wall_SW.png",
 }
 
 var _passed: int = 0
