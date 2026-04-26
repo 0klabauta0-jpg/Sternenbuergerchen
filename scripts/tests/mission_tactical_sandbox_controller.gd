@@ -729,16 +729,20 @@ func execute_selected_fireteam_orders() -> bool:
 		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
 		if _area_defense_execution_by_fireteam.has(fireteam_id):
 			if _try_continue_active_area_defense(fireteam_id):
-				continued_fireteams.append(fireteam_id.to_upper())
+				if not _has_pending_waypoint_order(fireteam_id, target_phase_index):
+					continued_fireteams.append(fireteam_id.to_upper())
+					continue
+			else:
+				already_active_fireteams.append(fireteam_id.to_upper())
 				continue
-			already_active_fireteams.append(fireteam_id.to_upper())
-			continue
 		if _area_attack_execution_by_fireteam.has(fireteam_id):
 			if _try_continue_active_area_attack(fireteam_id):
-				continued_fireteams.append(fireteam_id.to_upper())
+				if not _has_pending_waypoint_order(fireteam_id, target_phase_index):
+					continued_fireteams.append(fireteam_id.to_upper())
+					continue
+			else:
+				already_active_fireteams.append(fireteam_id.to_upper())
 				continue
-			already_active_fireteams.append(fireteam_id.to_upper())
-			continue
 		if _phase_execution_by_fireteam.has(fireteam_id):
 			if _try_continue_active_fireteam_order(fireteam_id):
 				continued_fireteams.append(fireteam_id.to_upper())
@@ -5171,6 +5175,11 @@ func _try_continue_active_area_attack(fireteam_id: String) -> bool:
 	return true
 
 
+func _has_pending_waypoint_order(fireteam_id: String, phase_index: int) -> bool:
+	var plan = _order_plans_by_key.get(_build_order_plan_key(fireteam_id.strip_edges().to_lower(), phase_index), null)
+	return plan != null and _find_next_executable_waypoint_index(plan) >= 0
+
+
 func _find_next_defend_area_order(fireteam_id: String):
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty():
@@ -6140,8 +6149,10 @@ func _update_area_attack_execution(_delta: float) -> void:
 		if state.is_empty() or bool(state.get("waiting_for_go", false)):
 			continue
 		var status: String = String(state.get("status", "approaching")).strip_edges().to_lower()
-		if status == "occupying":
+		if status == "engaging" or status == "occupying":
 			if not _are_area_attack_assignments_reached(state):
+				continue
+			if status == "engaging" and not _is_attack_area_cleared(Dictionary(state.get("target_area", {})).duplicate(true)):
 				continue
 			for assignment_variant in Array(state.get("assignments", [])):
 				_issue_area_attack_unit_command(
@@ -6162,18 +6173,12 @@ func _update_area_attack_execution(_delta: float) -> void:
 			continue
 		var target_area: Dictionary = Dictionary(state.get("target_area", {})).duplicate(true)
 		var area_cleared: bool = _is_attack_area_cleared(target_area)
-		var next_status: String = "occupying" if area_cleared else "engaging"
-		if String(state.get("status", "")) != next_status:
-			state["status"] = next_status
-			did_change = true
-		if not area_cleared:
-			_area_attack_execution_by_fireteam[fireteam_id] = state
-			continue
 		var occupation_assignments: Array = _build_attack_area_occupation_assignments(String(fireteam_id), state)
 		if occupation_assignments.is_empty():
 			occupation_assignments = Array(state.get("assignments", [])).duplicate(true)
 		state["approach_assignments"] = Array(state.get("assignments", [])).duplicate(true)
 		state["assignments"] = occupation_assignments.duplicate(true)
+		state["status"] = "occupying" if area_cleared else "engaging"
 		for assignment_variant in occupation_assignments:
 			_issue_area_attack_unit_command(
 				String(fireteam_id),

@@ -24,6 +24,7 @@ func _run_tests() -> void:
 	print("=== TASK_123 Attack Area Semantik Verifier ===")
 	_test_resolver_builds_edge_approach()
 	_test_fire_resolver_prioritizes_target_area_contacts()
+	await _test_mission_engage_area_enters_uncleared_area()
 	await _test_mission_attack_area_execution_and_secured_state()
 	await _test_single_waypoint_orders_still_work()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
@@ -76,6 +77,9 @@ func _test_mission_attack_area_execution_and_secured_state() -> void:
 	controller.call("_set_selected_fireteams", PackedStringArray(["blue"]), false)
 	var area_refs: Array = controller.call("create_area_order_for_selected_fireteams_from_world_rect", Vector2(900.0, 900.0), Vector2(1080.0, 1040.0), "take")
 	_assert(area_refs.size() == 1, "Mission creates a Take Area Order")
+	var visualized_area_orders: Array = controller.call("get_visualized_area_orders_snapshot")
+	var area_visual: Dictionary = Dictionary(visualized_area_orders[0]) if not visualized_area_orders.is_empty() else {}
+	_assert(typeof(area_visual.get("anchor_position", null)) == TYPE_VECTOR2, "Area Orders expose a route anchor for the visual path line")
 	var started: bool = bool(controller.call("execute_selected_fireteam_orders"))
 	_assert(started, "GO starts attack-area execution")
 	var active_snapshot: Array = controller.call("get_active_area_attack_snapshot")
@@ -116,6 +120,40 @@ func _test_mission_attack_area_execution_and_secured_state() -> void:
 	_assert(waypoint_text.contains("AREA TAKE") and waypoint_text.contains("GESICHERT"), "#17 exposes Attack-Area state and target area")
 	var security_state: Dictionary = Dictionary(controller.call("get_fireteam_security_state", "blue"))
 	_assert(bool(security_state.get("is_active", false)) and String(security_state.get("area_order_id", "")) == String(state.get("area_order_id", "")), "Secured Attack Area switches into area security")
+	var waypoint_refs: Array = controller.call("_create_waypoints_for_selected_fireteams", Vector2(360.0, 300.0))
+	var moved_after_area: bool = bool(controller.call("execute_selected_fireteam_orders"))
+	_assert(waypoint_refs.size() == 1 and moved_after_area, "GO after a secured Attack Area releases it and starts the next Move order")
+	_assert(Array(controller.call("get_active_area_attack_snapshot")).is_empty() and _has_active_waypoint(controller.call("get_order_plans_snapshot"), "blue"), "Move order is active after Attack Area release")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_mission_engage_area_enters_uncleared_area() -> void:
+	var scene = await _load_scene()
+	var controller = scene.get_node("TacticalController")
+	var enemy := scene.get_node_or_null("EnemyDelta") as Node2D
+	if enemy != null:
+		enemy.global_position = Vector2(980.0, 960.0)
+	controller.call("_set_selected_fireteams", PackedStringArray(["blue"]), false)
+	var area_refs: Array = controller.call("create_area_order_for_selected_fireteams_from_world_rect", Vector2(900.0, 900.0), Vector2(1080.0, 1040.0), "engage")
+	_assert(area_refs.size() == 1, "Mission creates an Engage Area Order")
+	var started: bool = bool(controller.call("execute_selected_fireteam_orders"))
+	_assert(started, "GO starts engage-area execution")
+	var active_snapshot: Array = controller.call("get_active_area_attack_snapshot")
+	var state: Dictionary = Dictionary(active_snapshot[0]) if not active_snapshot.is_empty() else {}
+	for assignment_variant in Array(state.get("assignments", [])):
+		var assignment: Dictionary = Dictionary(assignment_variant)
+		var unit = _find_unit(controller.call("_get_fireteam_units", "blue", true), String(assignment.get("unit_id", "")))
+		if unit is Node2D:
+			(unit as Node2D).global_position = Vector2(assignment.get("target_position", (unit as Node2D).global_position))
+	controller.call("_update_area_attack_execution", 0.25)
+	await process_frame
+	var engaging_snapshot: Array = controller.call("get_active_area_attack_snapshot")
+	var engaging_state: Dictionary = Dictionary(engaging_snapshot[0]) if not engaging_snapshot.is_empty() else {}
+	var target_area: Dictionary = Dictionary(engaging_state.get("target_area", {}))
+	var assignments: Array = Array(engaging_state.get("assignments", []))
+	_assert(String(engaging_state.get("status", "")) == "engaging", "Uncleared Engage Area switches from approach into engaging")
+	_assert(not assignments.is_empty() and _all_assignments_inside_area(assignments, target_area), "Uncleared Engage Area sends all members into the marked area")
 	scene.queue_free()
 	await process_frame
 
@@ -214,6 +252,18 @@ func _all_assignments_inside_area(assignments: Array, area_context: Dictionary) 
 		if not bool(AREA_ORDER_RESOLVER_SCRIPT.call("is_position_in_area_context", area_context, target_position)):
 			return false
 	return true
+
+
+func _has_active_waypoint(plan_dicts: Array, fireteam_id: String) -> bool:
+	for plan_variant in plan_dicts:
+		var plan: Dictionary = Dictionary(plan_variant)
+		if String(plan.get("fireteam_id", "")).strip_edges().to_lower() != fireteam_id:
+			continue
+		for waypoint_variant in Array(plan.get("waypoints", [])):
+			var waypoint: Dictionary = Dictionary(waypoint_variant)
+			if String(waypoint.get("status", "")) == "active":
+				return true
+	return false
 
 
 func _cleanup_units(units: Array) -> void:
