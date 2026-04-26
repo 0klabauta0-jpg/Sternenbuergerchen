@@ -8,6 +8,7 @@ const DEFAULT_CLUSTER_SIZE: int = 8
 var cluster_size: int = DEFAULT_CLUSTER_SIZE
 var _clusters_by_id: Dictionary = {}
 var _component_key_by_grid: Dictionary = {}
+var _component_tiles_by_key: Dictionary = {}
 var _portals: Array = []
 var _portal_ids_seen: Dictionary = {}
 var _portals_by_cluster: Dictionary = {}
@@ -18,6 +19,7 @@ var _pathfinder = TERRAIN_PATHFINDER_SCRIPT.new()
 func clear() -> void:
 	_clusters_by_id.clear()
 	_component_key_by_grid.clear()
+	_component_tiles_by_key.clear()
 	_portals.clear()
 	_portal_ids_seen.clear()
 	_portals_by_cluster.clear()
@@ -93,6 +95,10 @@ func get_component_key_for_grid(grid_position: Vector2i) -> String:
 	return String(_component_key_by_grid.get(grid_position, ""))
 
 
+func get_component_tiles(component_key: String) -> Array:
+	return Array(_component_tiles_by_key.get(component_key, [])).duplicate()
+
+
 func are_grids_in_same_component(a_grid: Vector2i, b_grid: Vector2i) -> bool:
 	var a_key: String = get_component_key_for_grid(a_grid)
 	if a_key.is_empty():
@@ -166,6 +172,7 @@ func _build_cluster_components(cluster_id: Vector2i, registry) -> void:
 			var component_grid: Vector2i = Vector2i(component_grid_variant)
 			component_by_grid[component_grid] = component_key
 			_component_key_by_grid[component_grid] = component_key
+		_component_tiles_by_key[component_key] = component_tiles.duplicate()
 		components.append({
 			"component_id": component_index,
 			"component_key": component_key,

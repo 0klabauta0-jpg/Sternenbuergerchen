@@ -9,8 +9,11 @@ const OBJECTIVE_STATUS_SCRIPT: GDScript = preload("res://scripts/core/objective_
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const CONTACT_PATH_RECOMPUTE_INTERVAL_MSEC: int = 600
 const TERRAIN_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_pathfinder.gd")
+const HPA_NAVIGATION_GRAPH_SCRIPT: GDScript = preload("res://scripts/terrain/hpa_navigation_graph.gd")
+const HPA_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/hpa_pathfinder.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const CAPTURE_PROGRESS_PER_TICK: float = 0.01
+const HPA_NAVIGATION_CLUSTER_SIZE: int = 8
 
 const HIT_CHANCE_MIN: float = 0.05
 const HIT_CHANCE_MAX: float = 0.95
@@ -40,6 +43,10 @@ var _peer_team_assignments: Dictionary = {1: "team_alpha"}
 var _last_broadcast_vital_state_by_unit_id: Dictionary = {}
 var _last_server_state: Dictionary = {}
 var _combat_rng := RandomNumberGenerator.new()
+var _hpa_navigation_graph = null
+var _hpa_pathfinder = HPA_PATHFINDER_SCRIPT.new()
+var _hpa_navigation_registry = null
+var _hpa_navigation_tile_count: int = -1
 
 
 func _init() -> void:
@@ -807,16 +814,19 @@ func _build_path_world_points(current_position: Vector2, target_position: Vector
 		if typeof(nearest_start_grid) == TYPE_VECTOR2I:
 			from_grid = nearest_start_grid
 
-	var path_grid_points: Array = _terrain_pathfinder.find_path(from_grid, to_grid, terrain_registry)
+	var navigation_query: Dictionary = _find_navigation_grid_path(from_grid, to_grid, terrain_registry)
+	var path_grid_points: Array = Array(navigation_query.get("path", []))
+	var navigation_status: String = String(navigation_query.get("status", ""))
 	if path_grid_points.is_empty():
 		if from_grid == to_grid:
 			path_world_points.append(resolved_target_position)
 			return path_world_points
 
-		var reachable_grid: Variant = _find_nearest_reachable_walkable_grid(from_grid, to_grid, terrain_registry)
+		var reachable_grid: Variant = _find_hpa_reachable_walkable_grid(from_grid, to_grid, terrain_registry) if navigation_status == HPA_PATHFINDER_SCRIPT.STATUS_NO_ABSTRACT_ROUTE else _find_nearest_reachable_walkable_grid(from_grid, to_grid, terrain_registry)
 		if typeof(reachable_grid) != TYPE_VECTOR2I:
 			return path_world_points
-		var fallback_path_grid_points: Array = _terrain_pathfinder.find_path(from_grid, reachable_grid, terrain_registry)
+		var fallback_query: Dictionary = _find_navigation_grid_path(from_grid, reachable_grid, terrain_registry)
+		var fallback_path_grid_points: Array = Array(fallback_query.get("path", []))
 		if fallback_path_grid_points.is_empty() and reachable_grid != from_grid:
 			return path_world_points
 		for fallback_index in range(1, fallback_path_grid_points.size()):
@@ -832,6 +842,39 @@ func _build_path_world_points(current_position: Vector2, target_position: Vector
 		path_world_points.append(target_position)
 
 	return path_world_points
+
+
+func _find_navigation_grid_path(from_grid: Vector2i, to_grid: Vector2i, terrain_registry) -> Dictionary:
+	var graph = _ensure_hpa_navigation_graph(terrain_registry)
+	if graph != null and _hpa_pathfinder != null:
+		var hpa_query: Dictionary = Dictionary(_hpa_pathfinder.call("find_path_with_status", from_grid, to_grid, terrain_registry, graph))
+		var hpa_status: String = String(hpa_query.get("status", ""))
+		if not Array(hpa_query.get("path", [])).is_empty():
+			return hpa_query
+		if hpa_status == HPA_PATHFINDER_SCRIPT.STATUS_NO_ABSTRACT_ROUTE or hpa_status == HPA_PATHFINDER_SCRIPT.STATUS_NO_COMPONENT:
+			return hpa_query
+
+	return {
+		"path": _terrain_pathfinder.find_path(from_grid, to_grid, terrain_registry),
+		"status": "direct_a_star",
+	}
+
+
+func _ensure_hpa_navigation_graph(terrain_registry):
+	if terrain_registry == null or not terrain_registry.has_method("get_all_tiles"):
+		return null
+	var tile_count: int = Array(terrain_registry.call("get_all_tiles")).size()
+	if _hpa_navigation_graph != null and _hpa_navigation_registry == terrain_registry and _hpa_navigation_tile_count == tile_count:
+		return _hpa_navigation_graph
+	_hpa_navigation_graph = HPA_NAVIGATION_GRAPH_SCRIPT.new()
+	if not bool(_hpa_navigation_graph.call("build_from_registry", terrain_registry, HPA_NAVIGATION_CLUSTER_SIZE)):
+		_hpa_navigation_graph = null
+		_hpa_navigation_registry = null
+		_hpa_navigation_tile_count = -1
+		return null
+	_hpa_navigation_registry = terrain_registry
+	_hpa_navigation_tile_count = tile_count
+	return _hpa_navigation_graph
 
 
 func _resolve_walkable_move_target(target_position: Vector2, terrain_registry) -> Dictionary:
@@ -861,6 +904,32 @@ func _resolve_walkable_move_target(target_position: Vector2, terrain_registry) -
 		"blocked_position": target_position,
 		"blocker_reason": "target_not_walkable",
 	}
+
+
+func _find_hpa_reachable_walkable_grid(from_grid: Vector2i, desired_grid: Vector2i, terrain_registry) -> Variant:
+	var graph = _ensure_hpa_navigation_graph(terrain_registry)
+	if graph == null:
+		return null
+	var component_key: String = String(graph.call("get_component_key_for_grid", from_grid))
+	if component_key.is_empty():
+		return null
+	var candidates: Array = Array(graph.call("get_component_tiles", component_key))
+	candidates.sort_custom(func(a, b) -> bool:
+		var grid_a: Vector2i = Vector2i(a)
+		var grid_b: Vector2i = Vector2i(b)
+		var distance_a: float = _grid_distance_score(grid_a, desired_grid)
+		var distance_b: float = _grid_distance_score(grid_b, desired_grid)
+		if absf(distance_a - distance_b) > 0.001:
+			return distance_a < distance_b
+		var source_distance_a: float = _grid_distance_score(grid_a, from_grid)
+		var source_distance_b: float = _grid_distance_score(grid_b, from_grid)
+		if absf(source_distance_a - source_distance_b) > 0.001:
+			return source_distance_a < source_distance_b
+		if grid_a.x == grid_b.x:
+			return grid_a.y < grid_b.y
+		return grid_a.x < grid_b.x
+	)
+	return null if candidates.is_empty() else Vector2i(candidates[0])
 
 
 func _find_nearest_reachable_walkable_grid(from_grid: Vector2i, desired_grid: Vector2i, terrain_registry) -> Variant:

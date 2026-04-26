@@ -939,6 +939,15 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Cluster-Groesse und Portal-Dichte sind V1-Parameter. Spaetere Performance-Arbeit sollte diese Werte ueber Messungen aus TASK_128 justieren.
 - Naechster Schritt: TASK_127 kann den HPA-Graphen in einen hierarchischen Pathfinder ueberfuehren und optional im autoritativen Move-Pfad verwenden.
 
+### TASK_127 - HPA Pathfinder Integration
+- Status: implementiert
+- Stand: `scripts/terrain/hpa_pathfinder.gd` setzt die HPA-Grundlage aus TASK_126 in konkrete Pfadqueries um. Same-Cluster-Wege laufen weiter direkt ueber `TerrainPathfinder`, Multi-Cluster-Wege werden ueber abstrakte Portalrouten gesucht und anschliessend aus lokalen Tile-Pfadsegmenten zusammengesetzt.
+- Stand: `SimulationRoot` baut und cached den HPA-Graphen pro `TerrainRegistry` und nutzt den HPA-Pfadfinder im autoritativen Move-Pfad. Wenn Start und Ziel in unverbundenen HPA-Komponenten liegen, wird kein globaler Full-Map-Fallback gegen das unerreichbare Ziel gestartet; stattdessen wird ein stabiler walkable Fallback innerhalb der Start-Komponente gewaehlt.
+- Stand: `HPANavigationGraph` exposed dafuer eine lesende `get_component_tiles()`-API. `scripts/tests/task_127_verifier.gd` deckt Same-Cluster-Pfade, Multi-Cluster-Portalpfade, disconnected early-fail, SimulationRoot-Ausfuehrung und unreachable-Fallback ab.
+- Offene Punkte: Keine dynamischen Kartenupdates und keine Flow-Fields. Lokale Teilpfade nutzen weiterhin den bestehenden `TerrainPathfinder`, damit Walkability-, Hoehen- und Diagonalregeln identisch bleiben.
+- Risiken: Der Graph-Cache invalidiert aktuell ueber Registry-Referenz und Tile-Anzahl, nicht ueber jede moegliche Walkability-Aenderung. Portalpfade koennen in V1 noch kantiger wirken als spaetere geglaettete Routen.
+- Naechster Schritt: TASK_128 sollte Performance-/Profiling-Messpunkte fuer grosse Karten und HPA-Cacheverhalten einfuehren, bevor Cluster-Groesse oder Portalstrategie weiter justiert werden.
+
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert
 - Stand: Der Meta-Layer fuehrt jetzt durchgaengig auf die echte eingebettete Missionskarte statt auf eine separate read-only Overview. Homebase, FOB und Mission teilen dieselbe kompakte Navigation, die Missions-Tactical-UI traegt direkt die gemeinsamen Block-Labels `#15` bis `#18`, und der Missionspfad bleibt auf dieselbe Kartenbasis, dieselben LZ-/Approach-Marker sowie denselben Dropship-Handoff verdrahtet wie die spaetere Live-Mission.
