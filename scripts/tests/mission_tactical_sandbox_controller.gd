@@ -406,6 +406,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			_change_fireteam(-1)
 			get_viewport().set_input_as_handled()
 		KEY_E:
+			if execute_selected_fireteam_orders():
+				get_viewport().set_input_as_handled()
+		KEY_TAB:
 			_change_fireteam(1)
 			get_viewport().set_input_as_handled()
 		KEY_R:
@@ -5716,12 +5719,49 @@ func _apply_default_fireteam_behavior(fireteam_id: String, phase_index: int) -> 
 	metadata["phase"] = phase_index
 	behavior_profile.metadata = metadata
 	_set_active_behavior_profile(fireteam_id, behavior_profile)
+	if _issue_fireteam_hold_current_positions(fireteam_id, phase_index):
+		_mirror_flow_driver_order_for_fireteam(fireteam_id, anchor_position, "defend", phase_index)
+		return true
 	var issued_count: int = 0
 	for driver in _get_flow_drivers_for_fireteam(fireteam_id):
 		if driver == null or not driver.has_method("issue_command_at_position"):
 			continue
 		if bool(driver.call("issue_command_at_position", anchor_position, "defend", phase_index)):
 			issued_count += 1
+	return issued_count > 0
+
+
+func _issue_fireteam_hold_current_positions(fireteam_id: String, phase_index: int) -> bool:
+	var simulation_root = get_node_or_null("../SimulationRoot")
+	if simulation_root == null:
+		return false
+	var issued_count: int = 0
+	for unit in _get_fireteam_units(fireteam_id, true):
+		if not (unit is Node2D):
+			continue
+		if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
+			continue
+		if not unit.has_method("get_unit_id"):
+			continue
+		var command = UNIT_COMMAND_SCRIPT.new()
+		command.command_type = UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION
+		command.priority = 11
+		command.unit_id = String(unit.call("get_unit_id"))
+		command.team_id = String(unit.call("get_team_id")) if unit.has_method("get_team_id") else FRIENDLY_TEAM_ID
+		command.target_position = (unit as Node2D).global_position
+		command.move_speed_factor = 0.0
+		command.cover_score = float(unit.call("get_cover_score")) if unit.has_method("get_cover_score") else 0.0
+		command.attack_bonus = 0.0
+		command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL
+		command.source_command_type = "hold_position"
+		command.source_task_type = "default_hold"
+		command.phase = phase_index
+		if not bool(command.call("is_valid")):
+			continue
+		if unit.has_method("assign_unit_command"):
+			unit.call("assign_unit_command", command)
+		simulation_root.call("enqueue_command", command.to_dict())
+		issued_count += 1
 	return issued_count > 0
 
 
@@ -6313,6 +6353,8 @@ func _update_active_phase_execution(delta: float) -> void:
 		var waypoint = plan.waypoints[waypoint_index]
 		var anchor := _get_selection_anchor_for_fireteam(String(fireteam_id))
 		var resolved_target_position: Vector2 = Vector2(execution_state.get("resolved_target_position", waypoint.target_position))
+		_ensure_fireteam_movement_controller()
+		var had_movement_execution: bool = _fireteam_movement_controller != null and bool(_fireteam_movement_controller.call("has_active_execution", String(fireteam_id)))
 		var movement_result: Dictionary = _update_fireteam_movement_execution(String(fireteam_id))
 		if not Dictionary(movement_result.get("bound_complete", {})).is_empty():
 			did_change = true
@@ -6320,7 +6362,9 @@ func _update_active_phase_execution(delta: float) -> void:
 			continue
 		var movement_finished: bool = bool(movement_result.get("finished", false))
 		var anchor_reached_target: bool = anchor.global_position.distance_to(resolved_target_position) <= PHASE_WAYPOINT_COMPLETE_RADIUS
-		if not movement_finished and not anchor_reached_target:
+		if had_movement_execution and not movement_finished:
+			continue
+		if not had_movement_execution and not anchor_reached_target:
 			continue
 		if String(waypoint.command_type).strip_edges().to_lower() == FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_DEFEND:
 			if not bool(execution_state.get("waiting_for_go", false)):

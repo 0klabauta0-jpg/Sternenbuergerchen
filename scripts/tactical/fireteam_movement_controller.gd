@@ -14,10 +14,14 @@ const POSITION_REACHED_RADIUS: float = 18.0
 const ANCHOR_REACHED_RADIUS: float = 22.0
 const RUSH_MIN_SPEED_FACTOR: float = 0.6
 const RUSH_MAX_SPEED_FACTOR: float = 1.15
+const MOVE_RUSH_MIN_SPEED_FACTOR: float = 0.92
+const MOVE_RUSH_MAX_SPEED_FACTOR: float = 1.22
 const BOUNDING_MIN_SPEED_FACTOR: float = 0.52
 const BOUNDING_MAX_SPEED_FACTOR: float = 0.92
 const CATERPILLAR_MIN_SPEED_FACTOR: float = 0.38
 const CATERPILLAR_MAX_SPEED_FACTOR: float = 0.68
+const MOVE_TRAVEL_FORMATION_SCATTER_FACTOR: float = 0.45
+const MOVE_MAX_FORMATION_SCATTER_FACTOR: float = 0.72
 const BOUNDING_MIN_STEP_DISTANCE: float = 84.0
 const BOUNDING_MAX_STEP_DISTANCE: float = 176.0
 const CATERPILLAR_MIN_STEP_DISTANCE: float = 56.0
@@ -94,16 +98,20 @@ func start_execution(
 	var execution_profile: Dictionary = _extract_execution_profile(behavior_profile)
 	var leader_unit_id: String = _extract_leader_unit_id(leader, member_records)
 	var origin_anchor: Vector2 = _resolve_origin_anchor(member_records, leader)
+	var normalized_command_type: String = command_type.strip_edges().to_lower()
 	var resolved_target_position: Vector2 = _apply_execution_target_offset(
 		normalized_fireteam_id,
 		origin_anchor,
 		target_position,
 		float(execution_profile.get("order_fidelity", 0.65))
 	)
+	var formation_scatter_factor: float = lerpf(1.36, 0.88, float(execution_profile.get("execution_cohesion", 0.65)))
+	if normalized_command_type == "move":
+		formation_scatter_factor = minf(formation_scatter_factor, MOVE_MAX_FORMATION_SCATTER_FACTOR)
 	var state: Dictionary = {
 		"fireteam_id": normalized_fireteam_id,
 		"phase": phase_index,
-		"command_type": command_type.strip_edges().to_lower(),
+		"command_type": normalized_command_type,
 		"raw_style": raw_style,
 		"effective_style": effective_style,
 		"leader_unit_id": leader_unit_id,
@@ -119,7 +127,7 @@ func start_execution(
 		"contact_stability": float(execution_profile.get("contact_stability", 0.65)),
 		"initiative": float(execution_profile.get("initiative", 0.5)),
 		"execution_label": String(execution_profile.get("execution_label", "STEADY")),
-		"formation_scatter_factor": lerpf(1.36, 0.88, float(execution_profile.get("execution_cohesion", 0.65))),
+		"formation_scatter_factor": formation_scatter_factor,
 		"move_speed_multiplier": lerpf(0.84, 1.08, float(execution_profile.get("initiative", 0.5))),
 		"order_target_offset": resolved_target_position - target_position,
 		"stage_index": 0,
@@ -231,7 +239,8 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root) -> 
 		_:
 			moving_unit_ids = _packed_unit_ids(member_records)
 	var next_anchor_target: Vector2 = _resolve_stage_anchor_target(state, member_records, group_count)
-	var formation_targets: Dictionary = _build_formation_targets(next_anchor_target, member_records, String(state.get("leader_unit_id", "")), float(state.get("formation_scatter_factor", 1.0)))
+	var stage_scatter_factor: float = _resolve_stage_formation_scatter_factor(state, next_anchor_target)
+	var formation_targets: Dictionary = _build_formation_targets(next_anchor_target, member_records, String(state.get("leader_unit_id", "")), stage_scatter_factor)
 	var current_positions: Dictionary = _build_current_positions(member_records)
 	var issued_count: int = 0
 	for record in member_records:
@@ -250,14 +259,17 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root) -> 
 				float(state.get("cover_priority", 0.0)),
 				0.08,
 				String(state.get("command_type", "")),
-				int(state.get("phase", -1))
+				int(state.get("phase", -1)),
+				record.get("unit", null)
 			):
 				issued_count += 1
 			continue
 		if not moving_unit_ids.has(unit_id):
 			continue
 		var move_target: Vector2 = Vector2(formation_targets.get(unit_id, next_anchor_target))
-		var move_speed_factor: float = _build_move_speed_factor(style, member_records, moving_unit_ids, current_positions, float(state.get("cohesion_threshold", 100.0)), float(record.get("speed", 0.5)), float(state.get("move_speed_multiplier", 1.0)))
+		move_target = _avoid_backward_move_target(state, Vector2(current_positions.get(unit_id, move_target)), move_target)
+		formation_targets[unit_id] = move_target
+		var move_speed_factor: float = _build_move_speed_factor(style, String(state.get("command_type", "")), member_records, moving_unit_ids, current_positions, float(state.get("cohesion_threshold", 100.0)), float(record.get("speed", 0.5)), float(state.get("move_speed_multiplier", 1.0)))
 		var unit_command_type: String = _map_waypoint_command_to_unit_command(String(state.get("command_type", "")))
 		if _enqueue_unit_command(
 			simulation_root,
@@ -269,7 +281,8 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root) -> 
 			float(state.get("cover_priority", 0.0)),
 			_attack_bonus_for_style(style),
 			String(state.get("command_type", "")),
-			int(state.get("phase", -1))
+			int(state.get("phase", -1)),
+			record.get("unit", null)
 		):
 			issued_count += 1
 	state["current_anchor_target_position"] = next_anchor_target
@@ -298,6 +311,16 @@ func _resolve_stage_anchor_target(state: Dictionary, member_records: Array, grou
 		state["groups_issued_for_anchor"] = 0
 		return _compute_next_anchor_target(state, member_records)
 	return Vector2(state.get("current_anchor_target_position", _compute_next_anchor_target(state, member_records)))
+
+
+func _resolve_stage_formation_scatter_factor(state: Dictionary, next_anchor_target: Vector2) -> float:
+	var scatter_factor: float = float(state.get("formation_scatter_factor", 1.0))
+	if String(state.get("command_type", "")) != "move":
+		return scatter_factor
+	var final_target_position: Vector2 = Vector2(state.get("final_target_position", next_anchor_target))
+	if next_anchor_target.distance_to(final_target_position) > ANCHOR_REACHED_RADIUS:
+		return minf(scatter_factor, MOVE_TRAVEL_FORMATION_SCATTER_FACTOR)
+	return scatter_factor
 
 
 func _are_current_targets_reached(state: Dictionary, member_records: Array) -> bool:
@@ -343,23 +366,28 @@ func _reissue_current_stage(state: Dictionary, member_records: Array, simulation
 				float(state.get("cover_priority", 0.0)),
 				0.08,
 				String(state.get("command_type", "")),
-				int(state.get("phase", -1))
+				int(state.get("phase", -1)),
+				record.get("unit", null)
 			)
 			continue
 		if not moving_unit_ids.has(unit_id) or not current_target_positions.has(unit_id):
 			continue
+		var move_target: Vector2 = _avoid_backward_move_target(state, Vector2(current_positions.get(unit_id, current_target_positions.get(unit_id))), Vector2(current_target_positions.get(unit_id)))
+		current_target_positions[unit_id] = move_target
 		_enqueue_unit_command(
 			simulation_root,
 			String(record.get("team_id", "")),
 			unit_id,
 			_map_waypoint_command_to_unit_command(String(state.get("command_type", ""))),
-			Vector2(current_target_positions.get(unit_id)),
-			_build_move_speed_factor(style, member_records, moving_unit_ids, current_positions, float(state.get("cohesion_threshold", 100.0)), float(record.get("speed", 0.5)), float(state.get("move_speed_multiplier", 1.0))),
+			move_target,
+			_build_move_speed_factor(style, String(state.get("command_type", "")), member_records, moving_unit_ids, current_positions, float(state.get("cohesion_threshold", 100.0)), float(record.get("speed", 0.5)), float(state.get("move_speed_multiplier", 1.0))),
 			float(state.get("cover_priority", 0.0)),
 			_attack_bonus_for_style(style),
 			String(state.get("command_type", "")),
-			int(state.get("phase", -1))
+			int(state.get("phase", -1)),
+			record.get("unit", null)
 		)
+	state["current_target_positions"] = current_target_positions
 
 
 func _is_execution_complete(state: Dictionary, member_records: Array) -> bool:
@@ -514,8 +542,20 @@ func _build_current_positions(member_records: Array) -> Dictionary:
 	return positions
 
 
+func _avoid_backward_move_target(state: Dictionary, current_position: Vector2, target_position: Vector2) -> Vector2:
+	if String(state.get("command_type", "")) != "move":
+		return target_position
+	var final_target_position: Vector2 = Vector2(state.get("final_target_position", target_position))
+	var current_distance: float = current_position.distance_to(final_target_position)
+	var target_distance: float = target_position.distance_to(final_target_position)
+	if target_distance > current_distance + 4.0:
+		return current_position
+	return target_position
+
+
 func _build_move_speed_factor(
 	style: String,
+	command_type: String,
 	member_records: Array,
 	moving_unit_ids: PackedStringArray,
 	current_positions: Dictionary,
@@ -530,7 +570,9 @@ func _build_move_speed_factor(
 		ADVANCE_STYLE_CATERPILLAR:
 			return lerpf(CATERPILLAR_MIN_SPEED_FACTOR, CATERPILLAR_MAX_SPEED_FACTOR, clampf(speed_skill, 0.0, 1.0)) * normalized_multiplier
 		_:
-			var base_factor: float = lerpf(RUSH_MIN_SPEED_FACTOR, RUSH_MAX_SPEED_FACTOR, clampf(speed_skill, 0.0, 1.0))
+			var min_speed_factor: float = MOVE_RUSH_MIN_SPEED_FACTOR if command_type == "move" else RUSH_MIN_SPEED_FACTOR
+			var max_speed_factor: float = MOVE_RUSH_MAX_SPEED_FACTOR if command_type == "move" else RUSH_MAX_SPEED_FACTOR
+			var base_factor: float = lerpf(min_speed_factor, max_speed_factor, clampf(speed_skill, 0.0, 1.0))
 			var spread: float = _compute_group_spread(moving_unit_ids, current_positions)
 			if spread <= cohesion_threshold:
 				return base_factor * normalized_multiplier
@@ -540,7 +582,7 @@ func _build_move_speed_factor(
 				if not moving_unit_ids.has(unit_id):
 					continue
 				slowest_speed = minf(slowest_speed, float(record.get("speed", speed_skill)))
-			return minf(base_factor, lerpf(RUSH_MIN_SPEED_FACTOR, RUSH_MAX_SPEED_FACTOR, clampf(slowest_speed, 0.0, 1.0))) * normalized_multiplier
+			return minf(base_factor, lerpf(min_speed_factor, max_speed_factor, clampf(slowest_speed, 0.0, 1.0))) * normalized_multiplier
 
 
 func _compute_group_spread(unit_ids: PackedStringArray, current_positions: Dictionary) -> float:
@@ -606,7 +648,8 @@ func _enqueue_unit_command(
 	cover_score: float,
 	attack_bonus: float,
 	source_command_type: String,
-	phase_index: int
+	phase_index: int,
+	unit = null
 ) -> bool:
 	if simulation_root == null:
 		return false
@@ -627,6 +670,8 @@ func _enqueue_unit_command(
 		command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL
 	if not bool(command.call("is_valid")):
 		return false
+	if unit != null and unit.has_method("assign_unit_command"):
+		unit.call("assign_unit_command", command)
 	var command_dict: Dictionary = command.to_dict()
 	command_dict["requeue_until_target"] = false
 	simulation_root.call("enqueue_command", command_dict)

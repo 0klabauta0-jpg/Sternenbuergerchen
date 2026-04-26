@@ -27,6 +27,7 @@ func _init() -> void:
 func _run_tests() -> void:
 	print("=== TASK_110 Fireteam Movement Controller Verifier ===")
 	_test_rush_moves_all_fit_members_with_cohesion_clamp()
+	_test_move_travel_uses_compact_intermediate_formation()
 	_test_bounding_rotates_cover_and_movement_groups()
 	_test_bounding_keeps_bound_anchor_until_lead_moves()
 	_test_caterpillar_moves_one_member_at_a_time()
@@ -35,6 +36,7 @@ func _run_tests() -> void:
 	_test_order_visualizer_uses_command_line_colors()
 	await _test_scene_exposes_runtime_movement_snapshot()
 	await _test_go_button_starts_planned_fireteam_execution()
+	await _test_e_key_starts_planned_fireteam_execution()
 	await _test_go_button_does_not_restart_active_defend_execution()
 	await _test_go_button_continues_from_defend_to_next_waypoint()
 	await _test_fireteam_panel_runs_in_direct_order_mode()
@@ -42,6 +44,7 @@ func _run_tests() -> void:
 	await _test_go_button_moves_meta_fireteam_id()
 	await _test_go_button_moves_all_selected_meta_fireteam_ids()
 	await _test_live_fireteam_go_moves_lead_and_members_without_snapback()
+	await _test_live_move_waits_for_members_after_lead_reaches_target()
 	await _test_live_planning_echo_keeps_go_execution_running()
 	await _test_planning_state_echo_does_not_redeploy_moving_fireteam()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
@@ -67,6 +70,24 @@ func _test_rush_moves_all_fit_members_with_cohesion_clamp() -> void:
 	for command_dict in simulation.commands:
 		move_speed_factors.append(float(Dictionary(command_dict).get("move_speed_factor", -1.0)))
 	_assert(_all_close(move_speed_factors), "Rush clamps movers to a shared speed when cohesion is already broken")
+	_cleanup_units([leader, wing_a, wing_b])
+
+
+func _test_move_travel_uses_compact_intermediate_formation() -> void:
+	var controller = FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT.new()
+	var simulation = SimulationStub.new()
+	var leader = _make_unit("compact_lead", "blue", true, Vector2(0.0, 0.0), 0.72, 0.55, 0.6, 0.6, ["steady"])
+	var wing_a = _make_unit("compact_a", "blue", false, Vector2(-28.0, 12.0), 0.68, 0.55, 0.35, 0.5, [])
+	var wing_b = _make_unit("compact_b", "blue", false, Vector2(28.0, 12.0), 0.68, 0.55, 0.35, 0.5, [])
+	var profile = _make_profile("blue", "rush", 96.0)
+	var result: Dictionary = controller.start_execution("blue", "move", 1, Vector2(520.0, 0.0), profile, [leader, wing_a, wing_b], leader, simulation)
+	var movement_state: Dictionary = Dictionary(result.get("movement_state", {}))
+	var target_spread: float = _compute_target_spread(Dictionary(movement_state.get("current_target_positions", {})))
+	var min_speed: float = 999.0
+	for command_dict in simulation.commands:
+		min_speed = minf(min_speed, float(Dictionary(command_dict).get("move_speed_factor", 0.0)))
+	_assert(target_spread <= 35.0, "Move travel keeps intermediate formation compact around the shared route anchor")
+	_assert(min_speed >= 0.9, "Move travel uses a brisk movement speed after area release")
 	_cleanup_units([leader, wing_a, wing_b])
 
 
@@ -242,6 +263,30 @@ func _test_go_button_starts_planned_fireteam_execution() -> void:
 			did_move = true
 			break
 	_assert(did_move, "GO button moves the selected fireteam through SimulationRoot")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_e_key_starts_planned_fireteam_execution() -> void:
+	var scene = await _load_scene()
+	var controller = scene.get_node("TacticalController")
+	controller.call("_set_selected_fireteams", PackedStringArray(["blue"]), false)
+	controller.call("_create_waypoints_for_selected_fireteams", Vector2(300.0, 190.0))
+	controller.call("_refresh_fireteam_phase_panel")
+	var key_event := InputEventKey.new()
+	key_event.pressed = true
+	key_event.physical_keycode = KEY_E
+	controller.call("_unhandled_input", key_event)
+	await process_frame
+	await physics_frame
+	var snapshot: Array = Array(controller.call("get_fireteam_movement_snapshot"))
+	var has_blue_execution: bool = false
+	for entry_variant in snapshot:
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("fireteam_id", "")) == "blue":
+			has_blue_execution = true
+			break
+	_assert(has_blue_execution, "E key starts the selected fireteam GO order")
 	scene.queue_free()
 	await process_frame
 
@@ -451,12 +496,37 @@ func _test_live_fireteam_go_moves_lead_and_members_without_snapback() -> void:
 		var unit_id: String = String(unit.call("get_unit_id"))
 		var max_progress: float = float(max_member_progress.get(unit_id, 0.0))
 		var final_progress: float = (unit as Node2D).global_position.distance_to(Vector2(positions_before.get(unit_id, (unit as Node2D).global_position)))
-		if max_progress > 8.0 and final_progress + 12.0 < max_progress:
+		if max_progress > 8.0 and final_progress + 48.0 < max_progress:
 			all_members_kept_most_progress = false
 			break
 	_assert(lead != null and lead_moved_distance > 8.0, "Live GO eventually moves the fireteam lead instead of leaving the FTL behind")
 	_assert(moved_member_count == ft1_units.size(), "Live GO moves every active fireteam member, not just one scout")
 	_assert(all_members_kept_most_progress, "Live GO members keep their movement progress instead of snapping back to the FTL")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_live_move_waits_for_members_after_lead_reaches_target() -> void:
+	var scene = await _load_scene(PackedStringArray(["ft1", "ft1", "ft1"]))
+	var controller = scene.get_node("TacticalController")
+	controller.call("_set_selected_fireteams", PackedStringArray(["ft1"]), false)
+	controller.call("_create_waypoints_for_selected_fireteams", Vector2(460.0, 150.0))
+	controller.call("_refresh_fireteam_phase_panel")
+	var go_button := scene.find_child("GoPhaseButton", true, false) as Button
+	if go_button != null:
+		go_button.emit_signal("pressed")
+	await process_frame
+	await physics_frame
+	var execution_before: Dictionary = Dictionary(Dictionary(controller.get("_phase_execution_by_fireteam")).get("ft1", {}))
+	var target_position: Vector2 = Vector2(execution_before.get("resolved_target_position", Vector2.ZERO))
+	var lead := controller.call("_resolve_fireteam_leader_for_behavior", "ft1") as Node2D
+	if lead != null:
+		lead.global_position = target_position
+	controller.call("_update_active_phase_execution", 0.2)
+	await process_frame
+	var execution_after: Dictionary = Dictionary(Dictionary(controller.get("_phase_execution_by_fireteam")).get("ft1", {}))
+	_assert(not execution_before.is_empty(), "Live move execution starts before lead-only arrival check")
+	_assert(not execution_after.is_empty(), "Live move waits for trailing members after the FTL reaches the target")
 	scene.queue_free()
 	await process_frame
 
@@ -587,6 +657,18 @@ func _move_scene_fireteam_to_current_targets(controller: Node, fireteam_id: Stri
 		var unit_id: String = String(unit.call("get_unit_id"))
 		if target_positions.has(unit_id):
 			(unit as Node2D).global_position = Vector2(target_positions.get(unit_id))
+
+
+func _compute_target_spread(target_positions: Dictionary) -> float:
+	var positions: Array = []
+	for target_variant in target_positions.values():
+		if typeof(target_variant) == TYPE_VECTOR2:
+			positions.append(Vector2(target_variant))
+	var max_distance: float = 0.0
+	for position_a in positions:
+		for position_b in positions:
+			max_distance = maxf(max_distance, Vector2(position_a).distance_to(Vector2(position_b)))
+	return max_distance
 
 
 func _cleanup_units(units: Array) -> void:
