@@ -10,7 +10,7 @@ static func find_first_contact_pair(context: Dictionary) -> Dictionary:
 	var enemy_units: Array = Array(context.get("enemy_units", []))
 	var friendly_team_id: String = String(context.get("friendly_team_id", ""))
 	for friendly in friendly_units:
-		if not can_unit_attack(friendly, context):
+		if not _can_unit_seek_target(friendly):
 			continue
 		var enemy = pick_target_from_units(friendly, enemy_units, context)
 		if enemy == null:
@@ -27,6 +27,8 @@ static func find_first_contact_pair(context: Dictionary) -> Dictionary:
 		var contact_entry: Dictionary = _call_contact_state(context, fireteam_id, e_id)
 		var detection_state: String = String(contact_entry.get("detection_state", "confirmed")).strip_edges().to_lower()
 		if detection_state != "spotted" and detection_state != "confirmed":
+			continue
+		if not can_unit_attack(friendly, context):
 			continue
 		return {
 			"attacker": friendly,
@@ -128,6 +130,16 @@ static func can_enemy_attack(unit) -> bool:
 
 
 static func can_unit_attack(unit, context: Dictionary = {}) -> bool:
+	if not _can_unit_seek_target(unit):
+		return false
+	if unit.has_method("get_fire_status") and String(unit.call("get_fire_status")) != "fire_at_will":
+		var discipline_break: Callable = context.get("check_discipline_break", Callable())
+		if not discipline_break.is_valid() or not bool(discipline_break.call(unit)):
+			return false
+	return true
+
+
+static func _can_unit_seek_target(unit) -> bool:
 	if unit == null:
 		return false
 	if not unit.has_method("get_vital_state"):
@@ -136,10 +148,6 @@ static func can_unit_attack(unit, context: Dictionary = {}) -> bool:
 		return false
 	if get_unit_active_weapon_id(unit).is_empty():
 		return false
-	if unit.has_method("get_fire_status") and String(unit.call("get_fire_status")) != "fire_at_will":
-		var discipline_break: Callable = context.get("check_discipline_break", Callable())
-		if not discipline_break.is_valid() or not bool(discipline_break.call(unit)):
-			return false
 	return is_engage_ready(unit)
 
 
