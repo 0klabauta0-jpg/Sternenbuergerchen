@@ -44,6 +44,7 @@ func _run_tests() -> void:
 	await _test_go_button_moves_meta_fireteam_id()
 	await _test_go_button_moves_all_selected_meta_fireteam_ids()
 	await _test_live_fireteam_go_moves_lead_and_members_without_snapback()
+	await _test_live_move_continues_after_initial_go_without_repress()
 	await _test_live_move_waits_for_members_after_lead_reaches_target()
 	await _test_live_planning_echo_keeps_go_execution_running()
 	await _test_planning_state_echo_does_not_redeploy_moving_fireteam()
@@ -527,6 +528,44 @@ func _test_live_move_waits_for_members_after_lead_reaches_target() -> void:
 	var execution_after: Dictionary = Dictionary(Dictionary(controller.get("_phase_execution_by_fireteam")).get("ft1", {}))
 	_assert(not execution_before.is_empty(), "Live move execution starts before lead-only arrival check")
 	_assert(not execution_after.is_empty(), "Live move waits for trailing members after the FTL reaches the target")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_live_move_continues_after_initial_go_without_repress() -> void:
+	var scene = await _load_scene(PackedStringArray(["ft1", "ft1", "ft1"]))
+	var controller = scene.get_node("TacticalController")
+	controller.call("_set_selected_fireteams", PackedStringArray(["ft1"]), false)
+	controller.call("_create_waypoints_for_selected_fireteams", Vector2(560.0, 160.0))
+	controller.call("_refresh_fireteam_phase_panel")
+	var ft1_units: Array = Array(controller.call("_get_fireteam_units", "ft1", true))
+	var start_positions: Dictionary = {}
+	for unit in ft1_units:
+		if unit is Node2D and unit.has_method("get_unit_id"):
+			start_positions[String(unit.call("get_unit_id"))] = (unit as Node2D).global_position
+	var go_button := scene.find_child("GoPhaseButton", true, false) as Button
+	if go_button != null:
+		go_button.emit_signal("pressed")
+	await process_frame
+	for _frame in range(8):
+		await physics_frame
+	var early_progress: Dictionary = {}
+	for unit in ft1_units:
+		if unit is Node2D and unit.has_method("get_unit_id"):
+			var unit_id: String = String(unit.call("get_unit_id"))
+			early_progress[unit_id] = (unit as Node2D).global_position.distance_to(Vector2(start_positions.get(unit_id, (unit as Node2D).global_position)))
+	for _frame in range(100):
+		await process_frame
+		await physics_frame
+	var continued_member_count: int = 0
+	for unit in ft1_units:
+		if not (unit is Node2D) or not unit.has_method("get_unit_id"):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id"))
+		var later_progress: float = (unit as Node2D).global_position.distance_to(Vector2(start_positions.get(unit_id, (unit as Node2D).global_position)))
+		if later_progress > float(early_progress.get(unit_id, 0.0)) + 6.0:
+			continued_member_count += 1
+	_assert(continued_member_count == ft1_units.size(), "Live Move keeps progressing after the initial GO pulse without pressing GO again")
 	scene.queue_free()
 	await process_frame
 

@@ -487,7 +487,7 @@ func _build_caterpillar_groups(member_records: Array, leader_unit_id: String, le
 	}
 
 
-func _compute_next_anchor_target(state: Dictionary, member_records: Array) -> Vector2:
+func _compute_next_anchor_target(state: Dictionary, _member_records: Array) -> Vector2:
 	var final_target_position: Vector2 = Vector2(state.get("final_target_position", Vector2.ZERO))
 	var current_anchor_position: Vector2 = Vector2(state.get("progress_anchor_position", final_target_position))
 	var style: String = String(state.get("effective_style", ADVANCE_STYLE_RUSH))
@@ -546,9 +546,12 @@ func _avoid_backward_move_target(state: Dictionary, current_position: Vector2, t
 	if String(state.get("command_type", "")) != "move":
 		return target_position
 	var final_target_position: Vector2 = Vector2(state.get("final_target_position", target_position))
-	var current_distance: float = current_position.distance_to(final_target_position)
-	var target_distance: float = target_position.distance_to(final_target_position)
-	if target_distance > current_distance + 4.0:
+	var to_final: Vector2 = final_target_position - current_position
+	var to_target: Vector2 = target_position - current_position
+	if to_final.length() <= ANCHOR_REACHED_RADIUS or to_target.length() <= 0.001:
+		return target_position
+	var target_alignment: float = to_final.normalized().dot(to_target.normalized())
+	if target_alignment < -0.25 and to_target.length() > FORMATION_SLOT_SPACING * 0.5:
 		return current_position
 	return target_position
 
@@ -570,8 +573,11 @@ func _build_move_speed_factor(
 		ADVANCE_STYLE_CATERPILLAR:
 			return lerpf(CATERPILLAR_MIN_SPEED_FACTOR, CATERPILLAR_MAX_SPEED_FACTOR, clampf(speed_skill, 0.0, 1.0)) * normalized_multiplier
 		_:
-			var min_speed_factor: float = MOVE_RUSH_MIN_SPEED_FACTOR if command_type == "move" else RUSH_MIN_SPEED_FACTOR
-			var max_speed_factor: float = MOVE_RUSH_MAX_SPEED_FACTOR if command_type == "move" else RUSH_MAX_SPEED_FACTOR
+			var min_speed_factor: float = RUSH_MIN_SPEED_FACTOR
+			var max_speed_factor: float = RUSH_MAX_SPEED_FACTOR
+			if command_type == "move":
+				min_speed_factor = MOVE_RUSH_MIN_SPEED_FACTOR
+				max_speed_factor = MOVE_RUSH_MAX_SPEED_FACTOR
 			var base_factor: float = lerpf(min_speed_factor, max_speed_factor, clampf(speed_skill, 0.0, 1.0))
 			var spread: float = _compute_group_spread(moving_unit_ids, current_positions)
 			if spread <= cohesion_threshold:

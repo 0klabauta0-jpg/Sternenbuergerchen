@@ -23,7 +23,9 @@ static func find_first_contact_pair(context: Dictionary) -> Dictionary:
 		var is_detection_complete: Callable = context.get("is_detection_complete", Callable())
 		if is_detection_complete.is_valid() and not bool(is_detection_complete.call(f_id, e_id)):
 			continue
-		var fireteam_id: String = String(friendly.call("get_fireteam_id")).strip_edges().to_lower() if friendly.has_method("get_fireteam_id") else ""
+		var fireteam_id: String = ""
+		if friendly.has_method("get_fireteam_id"):
+			fireteam_id = String(friendly.call("get_fireteam_id")).strip_edges().to_lower()
 		var contact_entry: Dictionary = _call_contact_state(context, fireteam_id, e_id)
 		var detection_state: String = String(contact_entry.get("detection_state", "confirmed")).strip_edges().to_lower()
 		if detection_state != "spotted" and detection_state != "confirmed":
@@ -57,7 +59,7 @@ static func find_first_contact_pair(context: Dictionary) -> Dictionary:
 			"target": friendly,
 			"attacker_id": en_id,
 			"target_id": fr_id,
-			"contact_state": "confirmed" if friendly_team_id.is_empty() else "",
+			"contact_state": _resolve_enemy_contact_state_text(friendly_team_id),
 		}
 
 	return {}
@@ -176,8 +178,10 @@ static func is_target_attackable(attacker, target, context: Dictionary) -> bool:
 	if los_system == null or not los_system.has_method("has_line_of_sight_between_nodes"):
 		return false
 	var effective_range: Callable = context.get("get_effective_range", Callable())
-	var range: float = float(effective_range.call(target)) if effective_range.is_valid() else float(context.get("contact_range", 0.0))
-	return bool(los_system.call("has_line_of_sight_between_nodes", attacker, target, range, context.get("terrain_registry", null)))
+	var effective_attack_range: float = float(context.get("contact_range", 0.0))
+	if effective_range.is_valid():
+		effective_attack_range = float(effective_range.call(target))
+	return bool(los_system.call("has_line_of_sight_between_nodes", attacker, target, effective_attack_range, context.get("terrain_registry", null)))
 
 
 static func can_target_receive_attack(unit) -> bool:
@@ -215,7 +219,15 @@ static func get_unit_active_weapon_id(unit) -> String:
 
 
 static func _get_team_id(unit) -> String:
-	return String(unit.call("get_team_id")) if unit != null and unit.has_method("get_team_id") else ""
+	if unit != null and unit.has_method("get_team_id"):
+		return String(unit.call("get_team_id"))
+	return ""
+
+
+static func _resolve_enemy_contact_state_text(friendly_team_id: String) -> String:
+	if friendly_team_id.is_empty():
+		return "confirmed"
+	return ""
 
 
 static func _call_contact_state(context: Dictionary, fireteam_id: String, enemy_unit_id: String) -> Dictionary:
@@ -244,7 +256,9 @@ static func _resolve_attack_area_context(attacker, context: Dictionary) -> Dicti
 	var friendly_team_id: String = String(context.get("friendly_team_id", "")).strip_edges()
 	if not friendly_team_id.is_empty() and _get_team_id(attacker) != friendly_team_id:
 		return {}
-	var fireteam_id: String = String(attacker.call("get_fireteam_id")).strip_edges().to_lower() if attacker.has_method("get_fireteam_id") else ""
+	var fireteam_id: String = ""
+	if attacker.has_method("get_fireteam_id"):
+		fireteam_id = String(attacker.call("get_fireteam_id")).strip_edges().to_lower()
 	if fireteam_id.is_empty():
 		return {}
 	var get_attack_area_context: Callable = context.get("get_attack_area_context", Callable())

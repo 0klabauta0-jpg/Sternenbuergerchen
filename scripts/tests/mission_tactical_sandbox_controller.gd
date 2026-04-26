@@ -5747,10 +5747,14 @@ func _issue_fireteam_hold_current_positions(fireteam_id: String, phase_index: in
 		command.command_type = UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION
 		command.priority = 11
 		command.unit_id = String(unit.call("get_unit_id"))
-		command.team_id = String(unit.call("get_team_id")) if unit.has_method("get_team_id") else FRIENDLY_TEAM_ID
+		command.team_id = FRIENDLY_TEAM_ID
+		if unit.has_method("get_team_id"):
+			command.team_id = String(unit.call("get_team_id"))
 		command.target_position = (unit as Node2D).global_position
 		command.move_speed_factor = 0.0
-		command.cover_score = float(unit.call("get_cover_score")) if unit.has_method("get_cover_score") else 0.0
+		command.cover_score = 0.0
+		if unit.has_method("get_cover_score"):
+			command.cover_score = float(unit.call("get_cover_score"))
 		command.attack_bonus = 0.0
 		command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL
 		command.source_command_type = "hold_position"
@@ -6162,7 +6166,7 @@ func _are_area_defense_assignments_reached(state: Dictionary) -> bool:
 	return true
 
 
-func _issue_area_defense_unit_command(fireteam_id: String, assignment: Dictionary, phase_index: int, hold_position: bool, area_order_id: String = "") -> bool:
+func _issue_area_defense_unit_command(_fireteam_id: String, assignment: Dictionary, phase_index: int, hold_position: bool, area_order_id: String = "") -> bool:
 	var unit_id: String = String(assignment.get("unit_id", "")).strip_edges()
 	if unit_id.is_empty():
 		return false
@@ -6170,15 +6174,23 @@ func _issue_area_defense_unit_command(fireteam_id: String, assignment: Dictionar
 	if unit == null:
 		return false
 	var command = UNIT_COMMAND_SCRIPT.new()
-	command.command_type = UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION if hold_position else UNIT_COMMAND_SCRIPT.TYPE_MOVE_TO_POSITION
+	command.command_type = UNIT_COMMAND_SCRIPT.TYPE_MOVE_TO_POSITION
+	if hold_position:
+		command.command_type = UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION
 	command.priority = 13
 	command.unit_id = unit_id
-	command.team_id = String(unit.call("get_team_id")) if unit.has_method("get_team_id") else FRIENDLY_TEAM_ID
+	command.team_id = FRIENDLY_TEAM_ID
+	if unit.has_method("get_team_id"):
+		command.team_id = String(unit.call("get_team_id"))
 	command.target_position = Vector2(assignment.get("target_position", Vector2.ZERO))
-	command.move_speed_factor = 0.0 if hold_position else 0.85
+	command.move_speed_factor = 0.85
+	if hold_position:
+		command.move_speed_factor = 0.0
 	command.cover_score = float(assignment.get("cover_score", 0.0))
 	command.attack_bonus = 0.0
-	command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL if hold_position else UNIT_COMMAND_SCRIPT.FIRE_STATUS_HOLD_FIRE
+	command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_HOLD_FIRE
+	if hold_position:
+		command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL
 	command.source_command_type = "defend"
 	command.source_task_type = "defend_area"
 	command.target_area_id = area_order_id
@@ -6236,7 +6248,9 @@ func _update_area_attack_execution(_delta: float) -> void:
 			occupation_assignments = Array(state.get("assignments", [])).duplicate(true)
 		state["approach_assignments"] = Array(state.get("assignments", [])).duplicate(true)
 		state["assignments"] = occupation_assignments.duplicate(true)
-		state["status"] = "occupying" if area_cleared else "engaging"
+		state["status"] = "engaging"
+		if area_cleared:
+			state["status"] = "occupying"
 		for assignment_variant in occupation_assignments:
 			_issue_area_attack_unit_command(
 				String(fireteam_id),
@@ -6251,7 +6265,11 @@ func _update_area_attack_execution(_delta: float) -> void:
 		did_start_occupation = true
 	if not did_change:
 		return
-	_last_command_text = "AREA GESICHERT" if did_secure_area else "AREA BESETZEN" if did_start_occupation else "AREA KONTAKT"
+	_last_command_text = "AREA KONTAKT"
+	if did_start_occupation:
+		_last_command_text = "AREA BESETZEN"
+	if did_secure_area:
+		_last_command_text = "AREA GESICHERT"
 	_refresh_order_visuals()
 	refresh_fireteam_security_state()
 	_update_ui()
@@ -6293,7 +6311,7 @@ func _is_attack_area_cleared(target_area: Dictionary) -> bool:
 	return true
 
 
-func _issue_area_attack_unit_command(fireteam_id: String, assignment: Dictionary, phase_index: int, hold_position: bool, area_order_id: String = "", source_command_type: String = "take") -> bool:
+func _issue_area_attack_unit_command(_fireteam_id: String, assignment: Dictionary, phase_index: int, hold_position: bool, area_order_id: String = "", source_command_type: String = "take") -> bool:
 	var unit_id: String = String(assignment.get("unit_id", "")).strip_edges()
 	if unit_id.is_empty():
 		return false
@@ -6301,12 +6319,18 @@ func _issue_area_attack_unit_command(fireteam_id: String, assignment: Dictionary
 	if unit == null:
 		return false
 	var command = UNIT_COMMAND_SCRIPT.new()
-	command.command_type = UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION if hold_position else UNIT_COMMAND_SCRIPT.TYPE_ENGAGE_AREA
+	command.command_type = UNIT_COMMAND_SCRIPT.TYPE_ENGAGE_AREA
+	if hold_position:
+		command.command_type = UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION
 	command.priority = 14
 	command.unit_id = unit_id
-	command.team_id = String(unit.call("get_team_id")) if unit.has_method("get_team_id") else FRIENDLY_TEAM_ID
+	command.team_id = FRIENDLY_TEAM_ID
+	if unit.has_method("get_team_id"):
+		command.team_id = String(unit.call("get_team_id"))
 	command.target_position = Vector2(assignment.get("target_position", Vector2.ZERO))
-	command.move_speed_factor = 0.0 if hold_position else 0.9
+	command.move_speed_factor = 0.9
+	if hold_position:
+		command.move_speed_factor = 0.0
 	command.cover_score = float(assignment.get("cover_score", 0.0))
 	command.attack_bonus = 0.0
 	command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL
@@ -7508,37 +7532,40 @@ func _get_unload_offset(index: int) -> Vector2:
 			return base_offset
 
 
-func _enqueue_dropship_embark_effect(unit: Node, unit_id: String, position: Vector2) -> void:
+func _enqueue_dropship_embark_effect(unit: Node, unit_id: String, world_position: Vector2) -> void:
 	_remember_drop_unit_for_simulation(unit, unit_id)
 	_enqueue_dropship_effect(
 		{
 			"effect_type": "dropship_embark_unit",
 			"unit_id": unit_id,
-			"position": position,
+			"position": world_position,
 			"visible": false,
 			"priority": 30,
 		}
 	)
 
 
-func _enqueue_dropship_presence_effect(unit: Node, unit_id: String, visible: bool) -> void:
+func _enqueue_dropship_presence_effect(unit: Node, unit_id: String, is_visible: bool) -> void:
 	_remember_drop_unit_for_simulation(unit, unit_id)
+	var effect_type: String = "dropship_embark_unit"
+	if is_visible:
+		effect_type = "dropship_deploy_unit"
 	_enqueue_dropship_effect(
 		{
-			"effect_type": "dropship_deploy_unit" if visible else "dropship_embark_unit",
+			"effect_type": effect_type,
 			"unit_id": unit_id,
-			"visible": visible,
+			"visible": is_visible,
 			"priority": 30,
 		}
 	)
 
 
-func _enqueue_dropship_deploy_effect(unit: Node, unit_id: String, position: Vector2) -> void:
+func _enqueue_dropship_deploy_effect(unit: Node, unit_id: String, world_position: Vector2) -> void:
 	_remember_drop_unit_for_simulation(unit, unit_id)
 	var effect: Dictionary = {
 		"effect_type": "dropship_deploy_unit",
 		"unit_id": unit_id,
-		"position": position,
+		"position": world_position,
 		"visible": true,
 		"runtime_status": "idle",
 		"runtime_active": true,
