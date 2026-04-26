@@ -271,6 +271,11 @@ TASK_123 – Attack Area Semantik
 TASK_124 – Area Feedback in #17 Selected Fireteam
 TASK_125 – Terrain Blocker Debug und Walkability Tests
 
+Phase 17N – HPA Navigation und Performance
+TASK_126 – HPA Navigation Foundation
+TASK_127 – HPA Pathfinder Integration
+TASK_128 – Navigation Budgeting und Debug
+
 Phase 18 – Erweiterung (spaeter)
 Skillsystem
 soziale Dynamik
