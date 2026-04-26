@@ -286,6 +286,12 @@ Multiplayer
 Map Editor
 Fahrzeuge
 komplexe Taktik
+Phase 18A - Navigation-, Cover- und Rendering-Labs
+TASK_150 - Navigation Benchmark Harness
+TASK_151 - Engpass-Reservierung und MAPF-Light
+TASK_152 - Seeded Cover Placement Lab
+TASK_153 - 3D Transparency Material Presets
+
 Batch-Empfehlung
 
 Codex soll Tasks in kleinen Gruppen bearbeiten:
