@@ -158,22 +158,24 @@ func save_to_file(path: String) -> Error:
 	for tile_data in _get_sorted_tiles():
 		var tile_dict: Dictionary = tile_data.call("to_dict")
 		var grid_position: Vector2i = tile_dict.get("grid_position", Vector2i.ZERO)
-		json_root["tiles"].append(
-			{
-				"grid_position": {
-					"x": grid_position.x,
-					"y": grid_position.y,
-				},
-				"type_id": String(tile_dict.get("type_id", "")),
-				"walkable": bool(tile_dict.get("walkable", true)),
-				"blocks_los": bool(tile_dict.get("blocks_los", false)),
-				"cover_value": int(tile_dict.get("cover_value", 0)),
-				"height_level": int(tile_dict.get("height_level", 0)),
-				"object_height": int(tile_dict.get("object_height", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_OBJECT_HEIGHT)),
-				"surface_type": String(tile_dict.get("surface_type", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFACE_TYPE)),
-				"edge_type": String(tile_dict.get("edge_type", TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF)),
-			}
-		)
+		var serialized_tile: Dictionary = {
+			"grid_position": {
+				"x": grid_position.x,
+				"y": grid_position.y,
+			},
+			"type_id": String(tile_dict.get("type_id", "")),
+			"walkable": bool(tile_dict.get("walkable", true)),
+			"blocks_los": bool(tile_dict.get("blocks_los", false)),
+			"cover_value": int(tile_dict.get("cover_value", 0)),
+			"height_level": int(tile_dict.get("height_level", 0)),
+			"object_height": int(tile_dict.get("object_height", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_OBJECT_HEIGHT)),
+			"surface_type": String(tile_dict.get("surface_type", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFACE_TYPE)),
+			"edge_type": String(tile_dict.get("edge_type", TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF)),
+		}
+		var object_type_id: String = String(tile_dict.get("object_type_id", "")).strip_edges()
+		if not object_type_id.is_empty():
+			serialized_tile["object_type_id"] = object_type_id
+		json_root["tiles"].append(serialized_tile)
 
 	file.store_string(JSON.stringify(json_root, "\t") + "\n")
 	return OK

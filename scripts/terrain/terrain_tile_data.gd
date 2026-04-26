@@ -19,6 +19,7 @@ const EDGE_NONE: String = "none"
 
 var tile_id: String = ""
 var type_id: String = ""
+var object_type_id: String = ""
 var grid_position: Vector2i = Vector2i.ZERO
 var world_position: Vector2 = Vector2.ZERO
 var walkable: bool = DEFAULT_WALKABLE
@@ -48,6 +49,7 @@ func to_dict() -> Dictionary:
 	return {
 		"tile_id": tile_id,
 		"type_id": type_id,
+		"object_type_id": object_type_id,
 		"grid_position": grid_position,
 		"world_position": world_position,
 		"walkable": walkable,
@@ -124,6 +126,7 @@ static func _is_surface_type_valid(next_surface_type: String) -> bool:
 func _apply_dict(data: Dictionary) -> void:
 	tile_id = String(data.get("tile_id", ""))
 	type_id = String(data.get("type_id", ""))
+	object_type_id = String(data.get("object_type_id", ""))
 	grid_position = _coerce_grid_position(data.get("grid_position", Vector2i.ZERO))
 	world_position = _coerce_world_position(data.get("world_position", Vector2.ZERO))
 	walkable = bool(data.get("walkable", DEFAULT_WALKABLE))

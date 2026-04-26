@@ -98,19 +98,28 @@ func _test_renderer_samples(catalog) -> void:
 		var type_id: String = String(SAMPLE_TYPE_BY_GROUP.get(group_id, ""))
 		var tile_data = map_data.call("get_tile_at_grid", Vector2i(index, 0))
 		_assert(catalog.call("apply_type_to_tile", tile_data, type_id), "Catalog applies sample type %s" % type_id)
+		_assert(String(tile_data.type_id) == "ground_flat", "Object-layer sample %s keeps the terrain type" % type_id)
+		_assert(String(tile_data.object_type_id) == type_id, "Object-layer sample %s stores object_type_id" % type_id)
 	var map_root := Node2D.new()
 	root.add_child(map_root)
 	var render_result: Dictionary = Dictionary(renderer.call("render_map", map_data, map_root))
 	var tiles: Dictionary = Dictionary(render_result.get("tiles", {}))
+	var objects: Dictionary = Dictionary(render_result.get("objects", {}))
 	for index in range(REQUIRED_GROUPS.size()):
 		var group_id: String = REQUIRED_GROUPS[index]
 		var type_id: String = String(SAMPLE_TYPE_BY_GROUP.get(group_id, ""))
 		var tile_data = map_data.call("get_tile_at_grid", Vector2i(index, 0))
-		var sprite := tiles.get(tile_data.grid_position, null) as Sprite2D
+		var ground_sprite := tiles.get(tile_data.grid_position, null) as Sprite2D
+		var object_sprites: Array = Array(objects.get(tile_data.grid_position, []))
+		var object_sprite := object_sprites[0] as Sprite2D if not object_sprites.is_empty() else null
 		var expected_path: String = String(Dictionary(catalog.call("get_type", type_id)).get("texture_path", ""))
-		var actual_path: String = sprite.texture.resource_path if sprite != null and sprite.texture != null else ""
-		_assert(actual_path == expected_path, "Renderer uses catalog texture for %s sample" % group_id)
+		var ground_path: String = ground_sprite.texture.resource_path if ground_sprite != null and ground_sprite.texture != null else ""
+		var object_path: String = object_sprite.texture.resource_path if object_sprite != null and object_sprite.texture != null else ""
+		_assert(ground_path.ends_with("terrain_SW.png"), "Renderer keeps ground under %s sample" % group_id)
+		_assert(object_path == expected_path, "Renderer draws object overlay texture for %s sample" % group_id)
 	map_root.queue_free()
+	_test_object_layer_save_roundtrip(catalog)
+	_test_legacy_object_type_rendering(catalog)
 
 
 func _test_editor_palette_groups() -> void:
@@ -133,6 +142,43 @@ func _test_editor_palette_groups() -> void:
 		_assert(sample_found, "Map editor palette contains sample asset for group %s" % group_id)
 	scene.queue_free()
 	await process_frame
+
+
+func _test_object_layer_save_roundtrip(catalog) -> void:
+	var temp_path: String = "user://task_132_object_layer_roundtrip.json"
+	var map_data = TERRAIN_MAP_DATA_SCRIPT.call("create_empty", "task_132_object_roundtrip", Vector2i(1, 1), Vector2.ZERO)
+	var tile_data = map_data.call("get_tile_at_grid", Vector2i.ZERO)
+	var type_id: String = "technik_generator_se"
+	_assert(catalog.call("apply_type_to_tile", tile_data, type_id), "Object-layer roundtrip applies sample object")
+	var save_error: Error = map_data.call("save_to_file", temp_path)
+	_assert(save_error == OK, "Object-layer map saves without error")
+	var reloaded = TERRAIN_MAP_DATA_SCRIPT.call("load_from_file", temp_path)
+	var reloaded_tile = reloaded.call("get_tile_at_grid", Vector2i.ZERO) if reloaded != null else null
+	_assert(reloaded_tile != null and String(reloaded_tile.type_id) == "ground_flat", "Object-layer roundtrip keeps terrain type")
+	_assert(reloaded_tile != null and String(reloaded_tile.object_type_id) == type_id, "Object-layer roundtrip restores object_type_id")
+
+
+func _test_legacy_object_type_rendering(catalog) -> void:
+	var type_id: String = "deko_barrel_se"
+	var map_data = TERRAIN_MAP_DATA_SCRIPT.call("create_empty", "task_132_legacy_object", Vector2i(1, 1), Vector2.ZERO)
+	var tile_data = map_data.call("get_tile_at_grid", Vector2i.ZERO)
+	tile_data.type_id = type_id
+	tile_data.object_type_id = ""
+	var renderer = TERRAIN_MAP_RENDERER_SCRIPT.new(catalog)
+	var map_root := Node2D.new()
+	root.add_child(map_root)
+	var render_result: Dictionary = Dictionary(renderer.call("render_map", map_data, map_root))
+	var tiles: Dictionary = Dictionary(render_result.get("tiles", {}))
+	var objects: Dictionary = Dictionary(render_result.get("objects", {}))
+	var ground_sprite := tiles.get(Vector2i.ZERO, null) as Sprite2D
+	var object_sprites: Array = Array(objects.get(Vector2i.ZERO, []))
+	var object_sprite := object_sprites[0] as Sprite2D if not object_sprites.is_empty() else null
+	var expected_path: String = String(Dictionary(catalog.call("get_type", type_id)).get("texture_path", ""))
+	var ground_path: String = ground_sprite.texture.resource_path if ground_sprite != null and ground_sprite.texture != null else ""
+	var object_path: String = object_sprite.texture.resource_path if object_sprite != null and object_sprite.texture != null else ""
+	_assert(ground_path.ends_with("terrain_SW.png"), "Legacy object type_id renders a ground tile underneath")
+	_assert(object_path == expected_path, "Legacy object type_id renders as object overlay")
+	map_root.queue_free()
 
 
 func _build_asset_audit() -> Dictionary:

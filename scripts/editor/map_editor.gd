@@ -86,6 +86,7 @@ var _terrain_renderer = null
 var _tile_sprites_by_grid: Dictionary = {}
 var _cliff_sprites_by_grid: Dictionary = {}
 var _wall_sprites_by_grid: Dictionary = {}
+var _object_sprites_by_grid: Dictionary = {}
 var _selected_grid_position: Vector2i = Vector2i(-1, -1)
 var _last_selected_surface_type: String = TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFACE_TYPE
 var _last_selected_edge_type: String = TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF
@@ -263,8 +264,10 @@ func _load_map(path: String) -> void:
 			DEFAULT_HALF_TILE_HEIGHT
 		)
 
+	_normalize_object_layer_tiles()
 	_tile_sprites_by_grid.clear()
 	_cliff_sprites_by_grid.clear()
+	_object_sprites_by_grid.clear()
 	_selected_grid_position = Vector2i(-1, -1)
 	_last_undo_state.clear()
 	_mark_dirty(false)
@@ -295,6 +298,7 @@ func _create_new_map(grid_size: Vector2i = DEFAULT_NEW_MAP_GRID_SIZE) -> void:
 	)
 	_tile_sprites_by_grid.clear()
 	_cliff_sprites_by_grid.clear()
+	_object_sprites_by_grid.clear()
 	_selected_grid_position = Vector2i(-1, -1)
 	_selected_grids.clear()
 	_last_undo_state.clear()
@@ -308,6 +312,22 @@ func _create_new_map(grid_size: Vector2i = DEFAULT_NEW_MAP_GRID_SIZE) -> void:
 	_refresh_patrol_overlay()
 	_refresh_marker_overlay()
 	_refresh_marker_editor_controls()
+
+
+func _normalize_object_layer_tiles() -> void:
+	if _terrain_map_data == null or _tile_catalog == null or not _tile_catalog.has_method("is_object_layer_type"):
+		return
+
+	for tile_data in _terrain_map_data.call("get_tiles"):
+		if tile_data == null:
+			continue
+		var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
+		var object_type_id: String = String(tile_data.object_type_id) if tile_data.object_type_id is String else ""
+		if type_id.is_empty() or not object_type_id.is_empty():
+			continue
+		if bool(_tile_catalog.call("is_object_layer_type", type_id)):
+			tile_data.object_type_id = type_id
+			tile_data.type_id = "ground_flat"
 
 
 func _save_current_map() -> void:
@@ -350,6 +370,7 @@ func _rebuild_tile_sprites() -> void:
 	_tile_sprites_by_grid = render_state.get("tiles", {})
 	_cliff_sprites_by_grid = render_state.get("cliffs", {})
 	_wall_sprites_by_grid = render_state.get("walls", {})
+	_object_sprites_by_grid = render_state.get("objects", {})
 	_rebuild_grid_overlay()
 
 
@@ -367,6 +388,7 @@ func _refresh_tile_visual(tile_data) -> void:
 	tile_sprite.modulate = _build_tile_modulate(tile_data)
 	_update_cliff_overlays_around(tile_data.grid_position)
 	_update_wall_overlays_around(tile_data.grid_position)
+	_update_object_overlay_at(tile_data.grid_position)
 
 
 func _build_tile_modulate(tile_data) -> Color:
@@ -617,14 +639,18 @@ func _refresh_property_panel() -> void:
 	tile_label.text = "Tile: (%d, %d)" % [tile_data.grid_position.x, tile_data.grid_position.y]
 	if type_label != null:
 		var tile_type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
+		var object_type_id: String = String(tile_data.object_type_id) if tile_data.object_type_id is String else ""
+		var object_label: String = ""
+		if not object_type_id.is_empty() and _tile_catalog != null and _tile_catalog.has_type(object_type_id):
+			object_label = " | Objekt: %s" % _tile_catalog.get_display_name(object_type_id)
 		if not tile_type_id.is_empty() and _tile_catalog != null and _tile_catalog.has_type(tile_type_id):
-			type_label.text = "Typ: %s" % _tile_catalog.get_display_name(tile_type_id)
+			type_label.text = "Typ: %s%s" % [_tile_catalog.get_display_name(tile_type_id), object_label]
 		else:
 			var matched_type_id: String = _find_matching_type_id(tile_data)
 			if matched_type_id.is_empty():
-				type_label.text = "Typ: (custom)"
+				type_label.text = "Typ: (custom)%s" % object_label
 			else:
-				type_label.text = "Typ: %s" % _tile_catalog.get_display_name(matched_type_id)
+				type_label.text = "Typ: %s%s" % [_tile_catalog.get_display_name(matched_type_id), object_label]
 	walkable_checkbox.button_pressed = bool(tile_data.walkable)
 	blocks_los_checkbox.button_pressed = bool(tile_data.blocks_los)
 	cover_spinbox.value = int(tile_data.cover_value)
@@ -1466,6 +1492,7 @@ func _undo_last_change() -> void:
 	var restored_tile = TERRAIN_TILE_DATA_SCRIPT.call("from_dict", tile_dict)
 	tile_data.tile_id = restored_tile.tile_id
 	tile_data.type_id = restored_tile.type_id
+	tile_data.object_type_id = restored_tile.object_type_id
 	tile_data.grid_position = restored_tile.grid_position
 	tile_data.world_position = restored_tile.world_position
 	tile_data.walkable = restored_tile.walkable
@@ -2482,6 +2509,49 @@ func _clear_wall_overlays() -> void:
 			child.queue_free()
 
 	_wall_sprites_by_grid.clear()
+
+
+func _update_object_overlay_at(grid_position: Vector2i) -> void:
+	_remove_object_overlay_at(grid_position)
+	if _terrain_map_data == null or _terrain_renderer == null:
+		return
+
+	var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
+	if tile_data == null:
+		return
+
+	_terrain_renderer.set_tile_catalog(_tile_catalog)
+	var texture: Texture2D = _terrain_renderer.resolve_object_texture(tile_data)
+	if texture == null:
+		return
+
+	var object_container := get_node_or_null("ObjectContainer") as Node2D
+	if object_container == null:
+		object_container = Node2D.new()
+		object_container.name = "ObjectContainer"
+		object_container.y_sort_enabled = true
+		object_container.z_index = -12
+		add_child(object_container)
+
+	var sprite := Sprite2D.new()
+	sprite.texture = texture
+	sprite.centered = false
+	sprite.z_index = 0
+	sprite.position = tile_data.world_position - KENNEY_DIAMOND_CENTER
+	object_container.add_child(sprite)
+	_object_sprites_by_grid[grid_position] = [sprite]
+
+
+func _remove_object_overlay_at(grid_position: Vector2i) -> void:
+	if not _object_sprites_by_grid.has(grid_position):
+		return
+
+	var overlays: Array = _object_sprites_by_grid[grid_position]
+	for sprite in overlays:
+		if sprite != null and is_instance_valid(sprite):
+			sprite.queue_free()
+
+	_object_sprites_by_grid.erase(grid_position)
 
 
 func _rebuild_grid_overlay() -> void:

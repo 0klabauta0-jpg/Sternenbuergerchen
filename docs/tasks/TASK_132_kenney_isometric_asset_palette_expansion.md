@@ -29,7 +29,8 @@ Der Map-Editor soll mehr Assets aus `res://Assets/kenney_space-kit/Isometric/` n
    - neue `tile_types` mit `texture_path`, lesbarem `display_name` und defensiven Defaults.
    - Deko-Assets standardmaessig nicht walkable, aber nicht automatisch LOS-blockend, ausser es ist klar ein grosses Objekt.
 3. Renderer-/Editor-Kompatibilitaet pruefen:
-   - Assets mit `texture_path` sollen ueber den bestehenden `TerrainMapRenderer.resolve_tile_texture()` laufen.
+   - Assets mit `texture_path` werden als `object_type_id` ueber dem bestehenden Boden gerendert.
+   - `TerrainMapRenderer.resolve_tile_texture()` bleibt fuer den Bodentile zustaendig; `resolve_object_texture()` liefert das Objekt-Overlay.
    - Keine neuen Sonder-Match-Zweige fuer jedes Asset, solange die Katalog-Textur reicht.
    - Nur falls grosse Objekte falsch sitzen: kleiner, allgemeiner Offset-/Anchor-Vertrag im Katalog statt harter Einzel-Fixes.
 4. Gameplay-Werte konservativ setzen:
@@ -62,12 +63,13 @@ Der Map-Editor soll mehr Assets aus `res://Assets/kenney_space-kit/Isometric/` n
 - [x] Mindestens 5 neue Palette-Gruppen sind sichtbar und sinnvoll benannt.
 - [x] Der Verifier gruppiert vorhandene Kenney-Assets nach Familie/Richtung und markiert die kuratierte Auswahl.
 - [x] Alle neuen `texture_path`-Eintraege zeigen auf existierende Dateien.
-- [x] Pro neuer Gruppe rendert mindestens ein Beispiel-Asset im gemeinsamen TerrainRenderer.
+- [x] Pro neuer Gruppe rendert mindestens ein Beispiel-Asset im gemeinsamen TerrainRenderer als Objekt ueber sichtbarem Boden.
+- [x] Objekt-Layer-Assets ersetzen nicht mehr die Bodentextur und speichern/laden ueber `object_type_id`.
 - [x] Bestehende Wall-/Marker-/Editor-Verifier bleiben gruen.
 - [x] Keine bestehende Map-Datei wird nur durch Formatierung oder Re-Save veraendert.
 
 ## Erwartetes Ergebnis
-Der Editor wird deutlich brauchbarer fuer Map-Blockout und visuelles Dressing: mehr Objekte, Technik, Plattformen und Umgebungsteile koennen direkt platziert werden, waehrend die Runtime weiterhin nur die bekannten Tile-Datenfelder auswertet.
+Der Editor wird deutlich brauchbarer fuer Map-Blockout und visuelles Dressing: mehr Objekte, Technik, Plattformen und Umgebungsteile koennen direkt platziert werden, ohne den Boden visuell zu ersetzen, waehrend die Runtime weiterhin die bekannten Tile-Datenfelder fuer Walkability, LOS, Cover und Hoehe auswertet.
 
 ## Lokale Pruefung
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_132_verifier.gd`
@@ -77,6 +79,10 @@ Der Editor wird deutlich brauchbarer fuer Map-Blockout und visuelles Dressing: m
 ## Dateien
 - `data/terrain_tile_catalog.json`
 - `scripts/editor/map_editor.gd`
+- `scripts/terrain/terrain_map_data.gd`
+- `scripts/terrain/terrain_map_renderer.gd`
+- `scripts/terrain/terrain_tile_catalog.gd`
+- `scripts/terrain/terrain_tile_data.gd`
 - `scripts/tests/task_132_verifier.gd`
 
 ## Risiken
