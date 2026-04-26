@@ -73,9 +73,30 @@ func _test_direct_dev_mission_starts_with_active_fireteams_and_editor() -> void:
 		await process_frame
 	var dev_panel = scene.get_node_or_null("TacticalUI/CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox/DevStatsPanel")
 	_assert(dev_panel != null, "Mission character sheet exposes DEV-WERTE sliders")
+	if controller != null:
+		var gold_card = _find_fireteam_mini_card(scene, "gold")
+		var had_gold_card: bool = gold_card != null
+		var click_event := InputEventMouseButton.new()
+		click_event.button_index = MOUSE_BUTTON_LEFT
+		click_event.pressed = true
+		if had_gold_card:
+			gold_card.emit_signal("gui_input", click_event)
+			await process_frame
+		var selected_fireteams: PackedStringArray = controller.call("get_selected_fireteam_ids")
+		_assert(had_gold_card and selected_fireteams.size() == 1 and String(selected_fireteams[0]) == "gold", "Gold fireteam mini-card selects Fireteam Gold")
 
 	scene.queue_free()
 	await process_frame
+
+
+func _find_fireteam_mini_card(scene: Node, fireteam_id: String) -> Control:
+	var host = scene.get_node_or_null("TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox")
+	if host == null:
+		return null
+	for child in host.get_children():
+		if child is Control and String(child.get_meta("fireteam_id", "")).strip_edges().to_lower() == fireteam_id:
+			return child as Control
+	return null
 
 
 func _make_tile(registry, grid_position: Vector2i, walkable: bool, type_id: String):

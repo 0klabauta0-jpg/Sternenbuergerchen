@@ -1946,6 +1946,7 @@ func _refresh_fireteam_mini_cards() -> void:
 
 	var fireteam_panel := get_node_or_null(FIRETEAM_MINI_PANEL_PATH) as Control
 	for child in card_host.get_children():
+		card_host.remove_child(child)
 		child.queue_free()
 
 	var available_fireteam_ids: PackedStringArray = _get_displayable_fireteam_ids()
@@ -1961,7 +1962,11 @@ func _refresh_fireteam_mini_cards() -> void:
 		card.name = "FireteamMiniCard_%s" % normalized_fireteam_id.capitalize()
 		card.custom_minimum_size = Vector2(0.0, 0.0)
 		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		card.mouse_filter = Control.MOUSE_FILTER_STOP
 		card.set_meta("fireteam_id", normalized_fireteam_id)
+		var card_click_callback: Callable = Callable(self, "_on_fireteam_mini_card_gui_input").bind(normalized_fireteam_id)
+		if not card.gui_input.is_connected(card_click_callback):
+			card.gui_input.connect(card_click_callback)
 		card_host.add_child(card)
 
 		var lead = _resolve_fireteam_leader_for_behavior(normalized_fireteam_id)
@@ -2019,6 +2024,13 @@ func _refresh_fireteam_mini_cards() -> void:
 				"clear_extra_content": true,
 			}
 		)
+
+
+func _on_fireteam_mini_card_gui_input(event: InputEvent, fireteam_id: String) -> void:
+	if event is InputEventMouseButton:
+		var mouse_button_event := event as InputEventMouseButton
+		if mouse_button_event.button_index == MOUSE_BUTTON_LEFT and mouse_button_event.pressed:
+			_on_fireteam_group_pressed(fireteam_id)
 
 
 func _build_fireteam_card_profile(unit: Node):
