@@ -32,6 +32,7 @@ var attack_bonus: float = 0.0
 var target_position: Variant = null
 var target_area_id: String = ""
 var source_task_type: String = ""
+var command_token: String = ""
 var phase: int = -1
 
 
@@ -87,6 +88,9 @@ func to_dict() -> Dictionary:
 	if not source_task_type.is_empty():
 		data["source_task_type"] = source_task_type
 
+	if not command_token.is_empty():
+		data["command_token"] = command_token
+
 	if phase >= 0:
 		data["phase"] = phase
 
@@ -137,6 +141,9 @@ func _apply_dict(data: Dictionary) -> void:
 
 	if data.has("source_task_type"):
 		source_task_type = String(data["source_task_type"])
+
+	if data.has("command_token"):
+		command_token = String(data["command_token"])
 
 	if data.has("phase"):
 		var raw_phase: Variant = data["phase"]

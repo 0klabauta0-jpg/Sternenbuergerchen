@@ -9,8 +9,12 @@ const OBJECTIVE_STATUS_SCRIPT: GDScript = preload("res://scripts/core/objective_
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const CONTACT_PATH_RECOMPUTE_INTERVAL_MSEC: int = 600
 const TERRAIN_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_pathfinder.gd")
+const HPA_NAVIGATION_GRAPH_SCRIPT: GDScript = preload("res://scripts/terrain/hpa_navigation_graph.gd")
+const HPA_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/hpa_pathfinder.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
+const LOCAL_AVOIDANCE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/local_avoidance_resolver.gd")
 const CAPTURE_PROGRESS_PER_TICK: float = 0.01
+const HPA_NAVIGATION_CLUSTER_SIZE: int = 8
 
 const HIT_CHANCE_MIN: float = 0.05
 const HIT_CHANCE_MAX: float = 0.95
@@ -26,6 +30,22 @@ const HEIGHT_DISADVANTAGE_ACCURACY_PENALTY: float = 0.05
 @export var terrain_registry_path: NodePath
 @export var combat_rng_seed: int = 1
 @export var terrain_move_debug_enabled: bool = false
+@export var navigation_budget_enabled: bool = true
+@export_range(0, 64, 1) var navigation_max_new_path_queries_per_tick: int = 4
+@export var navigation_debug_enabled: bool = false
+@export_range(1, 128, 1) var navigation_debug_query_history_limit: int = 24
+@export var navigation_cover_aware_enabled: bool = false
+@export_range(0.0, 8.0, 0.1) var navigation_default_exposure_weight: float = 0.8
+@export_range(0.0, 8.0, 0.1) var navigation_default_cover_weight: float = 0.25
+@export_range(1.0, 64.0, 1.0) var navigation_exposure_max_grid_distance: float = 8.0
+@export var local_avoidance_enabled: bool = false
+@export var local_avoidance_debug_enabled: bool = false
+@export_range(4.0, 96.0, 1.0) var local_avoidance_agent_radius: float = 18.0
+@export_range(8.0, 192.0, 1.0) var local_avoidance_neighbor_radius: float = 56.0
+@export_range(8.0, 192.0, 1.0) var local_avoidance_spatial_cell_size: float = 64.0
+@export_range(1, 32, 1) var local_avoidance_max_neighbors: int = 8
+@export_range(0.1, 5.0, 0.1) var local_avoidance_stuck_threshold_seconds: float = 1.0
+@export_range(0.0, 60.0, 1.0) var local_avoidance_stuck_speed_threshold: float = 5.0
 
 var command_queue: Array = []
 var effects_queue: Array = []
@@ -40,6 +60,23 @@ var _peer_team_assignments: Dictionary = {1: "team_alpha"}
 var _last_broadcast_vital_state_by_unit_id: Dictionary = {}
 var _last_server_state: Dictionary = {}
 var _combat_rng := RandomNumberGenerator.new()
+var _hpa_navigation_graph = null
+var _hpa_pathfinder = HPA_PATHFINDER_SCRIPT.new()
+var _hpa_navigation_registry = null
+var _hpa_navigation_tile_count: int = -1
+var _navigation_new_path_queries_this_tick: int = 0
+var _navigation_path_queries_this_tick: int = 0
+var _navigation_delayed_this_tick: int = 0
+var _navigation_fallback_queries_this_tick: int = 0
+var _navigation_unreachable_queries_this_tick: int = 0
+var _navigation_last_delay_reason: String = ""
+var _navigation_last_tick_queries: Array = []
+var _navigation_most_expensive_query: Dictionary = {}
+var _navigation_last_path_metrics: Dictionary = {}
+var _local_avoidance_resolver = LOCAL_AVOIDANCE_RESOLVER_SCRIPT.new()
+var _local_avoidance_prepared_tick: int = -1
+var _local_avoidance_debug_by_unit_id: Dictionary = {}
+var _local_avoidance_stuck_seconds_by_unit_id: Dictionary = {}
 
 
 func _init() -> void:
@@ -54,6 +91,15 @@ func enqueue_command(cmd: Dictionary) -> void:
 	if typeof(cmd) != TYPE_DICTIONARY:
 		push_warning("SimulationRoot.enqueue_command expects a Dictionary command.")
 		return
+
+	var command_token: String = String(cmd.get("command_token", "")).strip_edges()
+	if not command_token.is_empty():
+		for index in range(command_queue.size()):
+			var queued_command: Dictionary = Dictionary(command_queue[index])
+			if String(queued_command.get("command_token", "")).strip_edges() != command_token:
+				continue
+			command_queue[index] = cmd.duplicate(true)
+			return
 
 	command_queue.append(cmd)
 
@@ -81,6 +127,65 @@ func get_terrain_move_debug_snapshot(unit_id: String = "") -> Variant:
 			result.append(Dictionary(_last_terrain_move_debug_by_unit_id.get(unit_id_variant, {})).duplicate(true))
 		return result
 	return Dictionary(_last_terrain_move_debug_by_unit_id.get(unit_id.strip_edges(), {})).duplicate(true)
+
+
+func set_navigation_budget_enabled(enabled: bool) -> void:
+	navigation_budget_enabled = enabled
+
+
+func set_navigation_max_new_path_queries_per_tick(limit: int) -> void:
+	navigation_max_new_path_queries_per_tick = maxi(0, limit)
+
+
+func set_navigation_debug_enabled(enabled: bool) -> void:
+	navigation_debug_enabled = enabled
+	if not navigation_debug_enabled:
+		_navigation_last_tick_queries.clear()
+		_navigation_most_expensive_query.clear()
+		_navigation_last_path_metrics.clear()
+
+
+func get_navigation_debug_snapshot() -> Dictionary:
+	return {
+		"enabled": navigation_debug_enabled,
+		"budget_enabled": navigation_budget_enabled,
+		"tick": tick_counter,
+		"max_new_path_queries_per_tick": navigation_max_new_path_queries_per_tick,
+		"new_path_queries_this_tick": _navigation_new_path_queries_this_tick,
+		"path_queries_this_tick": _navigation_path_queries_this_tick,
+		"fallback_queries_this_tick": _navigation_fallback_queries_this_tick,
+		"unreachable_queries_this_tick": _navigation_unreachable_queries_this_tick,
+		"delayed_this_tick": _navigation_delayed_this_tick,
+		"pending_query_count": _count_pending_navigation_queries(),
+		"last_delay_reason": _navigation_last_delay_reason,
+		"last_queries": _duplicate_dictionary_array(_navigation_last_tick_queries),
+		"most_expensive_query": _navigation_most_expensive_query.duplicate(true),
+		"last_path_metrics": _navigation_last_path_metrics.duplicate(true),
+	}
+
+
+func set_local_avoidance_enabled(enabled: bool) -> void:
+	local_avoidance_enabled = enabled
+	_local_avoidance_prepared_tick = -1
+	if not local_avoidance_enabled:
+		_local_avoidance_resolver.clear()
+
+
+func set_local_avoidance_debug_enabled(enabled: bool) -> void:
+	local_avoidance_debug_enabled = enabled
+	if not local_avoidance_debug_enabled:
+		_local_avoidance_debug_by_unit_id.clear()
+
+
+func get_local_avoidance_debug_snapshot(unit_id: String = "") -> Variant:
+	if unit_id.strip_edges().is_empty():
+		var result: Array = []
+		var unit_ids: Array = _local_avoidance_debug_by_unit_id.keys()
+		unit_ids.sort()
+		for unit_id_variant in unit_ids:
+			result.append(Dictionary(_local_avoidance_debug_by_unit_id.get(unit_id_variant, {})).duplicate(true))
+		return result
+	return Dictionary(_local_avoidance_debug_by_unit_id.get(unit_id.strip_edges(), {})).duplicate(true)
 
 
 func clear_queues() -> void:
@@ -215,6 +320,8 @@ func _physics_process(delta: float) -> void:
 
 	tick_counter += 1
 	is_processing_tick = true
+	_begin_navigation_budget_tick()
+	_prepare_local_avoidance_tick()
 
 	var commands: Array = _drain_queue(command_queue)
 	_process_commands(commands, delta)
@@ -223,6 +330,7 @@ func _physics_process(delta: float) -> void:
 	_process_effects(effects, delta)
 	_update_objective_capture()
 
+	_finish_navigation_budget_tick()
 	is_processing_tick = false
 	_broadcast_tick_state()
 	tick_processed.emit(tick_counter)
@@ -639,6 +747,9 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 		push_warning("SimulationRoot move command expects a Node2D-compatible unit.")
 		return
 
+	if _is_stale_tokenized_move_command(cmd, unit):
+		return
+
 	if unit.has_method("set_target_position"):
 		unit.call("set_target_position", target_position)
 
@@ -659,12 +770,19 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 		node_2d.position = target_position
 		if unit.has_method("refresh_terrain_readability"):
 			unit.call("refresh_terrain_readability")
+		_update_local_avoidance_agent_position(unit_id, node_2d.global_position)
 		return
 
 	if direction.is_zero_approx():
 		return
 
-	node_2d.position = current_position + direction.normalized() * step_distance
+	var desired_velocity: Vector2 = direction.normalized() * (step_distance / maxf(delta, 0.0001))
+	var safe_velocity: Vector2 = _resolve_local_avoidance_velocity(cmd, node_2d, current_position, desired_velocity, desired_velocity.length(), delta, null)
+	var displacement: Vector2 = safe_velocity * delta
+	if displacement.length() > step_distance:
+		displacement = displacement.normalized() * step_distance
+	node_2d.position = current_position + displacement
+	_update_local_avoidance_agent_position(unit_id, node_2d.global_position)
 	if unit.has_method("refresh_terrain_readability"):
 		unit.call("refresh_terrain_readability")
 	if bool(cmd.get("requeue_until_target", true)):
@@ -681,6 +799,10 @@ func _apply_move_command_with_terrain(
 ) -> void:
 	var path_world_points: Array = _extract_or_build_path_world_points(cmd, unit_node, unit_node.global_position, target_position, terrain_registry)
 	if path_world_points.is_empty():
+		return
+
+	if _is_local_avoidance_enabled_for_command(cmd):
+		_apply_move_command_with_terrain_avoidance(cmd, unit_node, target_position, move_speed_factor, delta, terrain_registry, path_world_points)
 		return
 
 	var current_position: Vector2 = unit_node.global_position
@@ -703,12 +825,83 @@ func _apply_move_command_with_terrain(
 		step_distance = 0.0
 
 	unit_node.global_position = current_position
+	_update_local_avoidance_agent_position(_extract_unit_id_for_path_recompute(unit_node), unit_node.global_position)
 	cmd["path"] = path_world_points.duplicate(true)
 	if unit_node.has_method("refresh_terrain_readability"):
 		unit_node.call("refresh_terrain_readability")
 
 	if bool(cmd.get("requeue_until_target", true)) and (not path_world_points.is_empty() or current_position.distance_to(target_position) > 0.5):
 		enqueue_command(cmd.duplicate(true))
+
+
+func _apply_move_command_with_terrain_avoidance(
+	cmd: Dictionary,
+	unit_node: Node2D,
+	target_position: Vector2,
+	move_speed_factor: float,
+	delta: float,
+	terrain_registry,
+	path_world_points: Array
+) -> void:
+	var current_position: Vector2 = unit_node.global_position
+	while not path_world_points.is_empty():
+		var first_waypoint: Vector2 = _coerce_vector2(path_world_points[0], target_position)
+		if current_position.distance_to(first_waypoint) > 0.001:
+			break
+		path_world_points.pop_front()
+
+	if path_world_points.is_empty():
+		unit_node.global_position = current_position
+		cmd["path"] = []
+		_update_local_avoidance_agent_position(_extract_unit_id_for_path_recompute(unit_node), unit_node.global_position)
+		if unit_node.has_method("refresh_terrain_readability"):
+			unit_node.call("refresh_terrain_readability")
+		return
+
+	var next_waypoint: Vector2 = _coerce_vector2(path_world_points[0], target_position)
+	var direction_to_waypoint: Vector2 = next_waypoint - current_position
+	if direction_to_waypoint.is_zero_approx():
+		cmd["path"] = path_world_points.duplicate(true)
+		return
+
+	var step_distance: float = MOVE_SPEED_PER_SECOND * move_speed_factor * _extract_surface_speed_factor(unit_node) * delta
+	var distance_to_waypoint: float = direction_to_waypoint.length()
+	var desired_step_distance: float = minf(step_distance, distance_to_waypoint)
+	var desired_velocity: Vector2 = direction_to_waypoint.normalized() * (desired_step_distance / maxf(delta, 0.0001))
+	var safe_velocity: Vector2 = _resolve_local_avoidance_velocity(cmd, unit_node, current_position, desired_velocity, step_distance / maxf(delta, 0.0001), delta, terrain_registry)
+	var displacement: Vector2 = safe_velocity * delta
+	if displacement.length() > desired_step_distance:
+		displacement = displacement.normalized() * desired_step_distance
+	current_position += displacement
+	if current_position.distance_to(next_waypoint) <= 0.5:
+		current_position = next_waypoint
+		path_world_points.pop_front()
+
+	unit_node.global_position = current_position
+	_update_local_avoidance_agent_position(_extract_unit_id_for_path_recompute(unit_node), unit_node.global_position)
+	cmd["path"] = path_world_points.duplicate(true)
+	if unit_node.has_method("refresh_terrain_readability"):
+		unit_node.call("refresh_terrain_readability")
+
+	if bool(cmd.get("requeue_until_target", true)) and (not path_world_points.is_empty() or current_position.distance_to(target_position) > 0.5):
+		enqueue_command(cmd.duplicate(true))
+
+
+func _is_stale_tokenized_move_command(cmd: Dictionary, unit) -> bool:
+	var command_token: String = String(cmd.get("command_token", "")).strip_edges()
+	if command_token.is_empty():
+		return false
+	if unit == null or not unit.has_method("get_current_unit_command"):
+		return false
+	var current_command = unit.call("get_current_unit_command")
+	if current_command == null:
+		return true
+	var current_token: String = ""
+	if typeof(current_command) == TYPE_DICTIONARY:
+		current_token = String(Dictionary(current_command).get("command_token", "")).strip_edges()
+	elif current_command is Object:
+		current_token = String(current_command.get("command_token")).strip_edges()
+	return current_token != command_token
 
 
 func _extract_or_build_path_world_points(
@@ -730,7 +923,10 @@ func _extract_or_build_path_world_points(
 	if not existing_path.is_empty():
 		return existing_path
 
-	var path_world_points: Array = _build_path_world_points(current_position, target_position, terrain_registry)
+	if not _try_begin_navigation_path_request(cmd, unit, current_position, target_position):
+		return []
+
+	var path_world_points: Array = _build_path_world_points(current_position, target_position, terrain_registry, cmd, unit)
 	cmd["path"] = path_world_points.duplicate(true)
 	if terrain_move_debug_enabled:
 		_record_terrain_move_debug(cmd, unit, current_position, target_position, terrain_registry, path_world_points)
@@ -779,6 +975,291 @@ func _should_recompute_move_path(
 	return true
 
 
+func _begin_navigation_budget_tick() -> void:
+	_navigation_new_path_queries_this_tick = 0
+	_navigation_path_queries_this_tick = 0
+	_navigation_delayed_this_tick = 0
+	_navigation_fallback_queries_this_tick = 0
+	_navigation_unreachable_queries_this_tick = 0
+	_navigation_last_delay_reason = ""
+	_navigation_last_tick_queries.clear()
+	_navigation_last_path_metrics.clear()
+
+
+func _finish_navigation_budget_tick() -> void:
+	if _navigation_last_tick_queries.size() > navigation_debug_query_history_limit:
+		_navigation_last_tick_queries = _navigation_last_tick_queries.slice(_navigation_last_tick_queries.size() - navigation_debug_query_history_limit)
+
+
+func _try_begin_navigation_path_request(cmd: Dictionary, unit, current_position: Vector2, target_position: Vector2) -> bool:
+	var max_queries: int = maxi(0, navigation_max_new_path_queries_per_tick)
+	if navigation_budget_enabled and is_processing_tick and _navigation_new_path_queries_this_tick >= max_queries:
+		_delay_navigation_path_request(cmd, unit, current_position, target_position, "budget_exhausted")
+		return false
+
+	_navigation_new_path_queries_this_tick += 1
+	cmd.erase("navigation_pending_reason")
+	cmd.erase("navigation_pending_since_tick")
+	return true
+
+
+func _delay_navigation_path_request(cmd: Dictionary, unit, current_position: Vector2, target_position: Vector2, reason: String) -> void:
+	_navigation_delayed_this_tick += 1
+	_navigation_last_delay_reason = reason
+	var delayed_cmd: Dictionary = cmd.duplicate(true)
+	delayed_cmd["path"] = []
+	delayed_cmd["navigation_pending_reason"] = reason
+	delayed_cmd["navigation_pending_since_tick"] = tick_counter
+	delayed_cmd["navigation_delay_count"] = int(cmd.get("navigation_delay_count", 0)) + 1
+	enqueue_command(delayed_cmd)
+
+	var record: Dictionary = _make_navigation_record(cmd, unit, Vector2i.ZERO, Vector2i.ZERO, {}, 0, "delayed", reason, 0)
+	record["current_position"] = current_position
+	record["target_position"] = target_position
+	record["delayed"] = true
+	_append_navigation_debug_record(record)
+
+
+func _record_navigation_path_query(
+	cmd: Dictionary,
+	unit,
+	from_grid: Vector2i,
+	to_grid: Vector2i,
+	query_result: Dictionary,
+	duration_usec: int,
+	query_kind: String,
+	reason: String,
+	candidate_count: int
+) -> void:
+	_navigation_path_queries_this_tick += 1
+	if query_kind == "fallback":
+		_navigation_fallback_queries_this_tick += 1
+	var record: Dictionary = _make_navigation_record(cmd, unit, from_grid, to_grid, query_result, duration_usec, query_kind, reason, candidate_count)
+	if bool(record.get("unreachable", false)):
+		_navigation_unreachable_queries_this_tick += 1
+	_append_navigation_debug_record(record)
+
+
+func _make_navigation_record(
+	cmd: Dictionary,
+	unit,
+	from_grid: Vector2i,
+	to_grid: Vector2i,
+	query_result: Dictionary,
+	duration_usec: int,
+	query_kind: String,
+	reason: String,
+	candidate_count: int
+) -> Dictionary:
+	var path: Array = Array(query_result.get("path", []))
+	var status: String = String(query_result.get("status", ""))
+	var unit_id: String = _extract_unit_id_for_path_recompute(unit)
+	if unit_id.is_empty():
+		unit_id = String(cmd.get("unit_id", ""))
+	var route_type: String = "none"
+	if status == "direct_a_star":
+		route_type = "direct_a_star"
+	elif status == HPA_PATHFINDER_SCRIPT.STATUS_HPA or status == HPA_PATHFINDER_SCRIPT.STATUS_SAME_COMPONENT:
+		route_type = "hpa"
+	elif query_kind == "delayed":
+		route_type = "delayed"
+	var unreachable: bool = path.is_empty() and (
+		status == HPA_PATHFINDER_SCRIPT.STATUS_NO_ABSTRACT_ROUTE
+		or status == HPA_PATHFINDER_SCRIPT.STATUS_NO_COMPONENT
+		or status == HPA_PATHFINDER_SCRIPT.STATUS_LOCAL_PATH_FAILED
+		or status == HPA_PATHFINDER_SCRIPT.STATUS_INVALID
+	)
+	return {
+		"tick": tick_counter,
+		"unit_id": unit_id,
+		"command_type": String(cmd.get("command_type", cmd.get("type", ""))),
+		"priority": _extract_priority(cmd),
+		"query_kind": query_kind,
+		"route_type": route_type,
+		"status": status,
+		"from_grid": from_grid,
+		"to_grid": to_grid,
+		"duration_usec": duration_usec,
+		"path_grid_count": path.size(),
+		"path_length_grid": int(query_result.get("path_length_grid", path.size())),
+		"exposure_sum": float(query_result.get("exposure_sum", 0.0)),
+		"cover_sum": float(query_result.get("cover_sum", 0.0)),
+		"mean_exposure": float(query_result.get("mean_exposure", 0.0)),
+		"mean_cover": float(query_result.get("mean_cover", 0.0)),
+		"path_cost": float(query_result.get("path_cost", 0.0)),
+		"candidate_count_estimate": candidate_count,
+		"expanded_node_estimate": maxi(candidate_count, path.size()),
+		"fallback_or_delay_reason": reason,
+		"unreachable": unreachable,
+	}
+
+
+func _append_navigation_debug_record(record: Dictionary) -> void:
+	if not navigation_debug_enabled:
+		return
+	_navigation_last_tick_queries.append(record)
+	if _navigation_last_tick_queries.size() > navigation_debug_query_history_limit:
+		_navigation_last_tick_queries.pop_front()
+	var duration_usec: int = int(record.get("duration_usec", 0))
+	if _navigation_most_expensive_query.is_empty() or duration_usec > int(_navigation_most_expensive_query.get("duration_usec", -1)):
+		_navigation_most_expensive_query = record.duplicate(true)
+	if String(record.get("query_kind", "")) != "delayed":
+		_navigation_last_path_metrics = {
+			"unit_id": String(record.get("unit_id", "")),
+			"query_kind": String(record.get("query_kind", "")),
+			"route_type": String(record.get("route_type", "")),
+			"status": String(record.get("status", "")),
+			"path_length_grid": int(record.get("path_length_grid", 0)),
+			"exposure_sum": float(record.get("exposure_sum", 0.0)),
+			"cover_sum": float(record.get("cover_sum", 0.0)),
+			"mean_exposure": float(record.get("mean_exposure", 0.0)),
+			"mean_cover": float(record.get("mean_cover", 0.0)),
+			"path_cost": float(record.get("path_cost", 0.0)),
+		}
+
+
+func _count_pending_navigation_queries() -> int:
+	var pending_count: int = 0
+	for queued_command in command_queue:
+		if typeof(queued_command) != TYPE_DICTIONARY:
+			continue
+		if not String(Dictionary(queued_command).get("navigation_pending_reason", "")).strip_edges().is_empty():
+			pending_count += 1
+	return pending_count
+
+
+func _duplicate_dictionary_array(values: Array) -> Array:
+	var result: Array = []
+	for value in values:
+		if typeof(value) == TYPE_DICTIONARY:
+			result.append(Dictionary(value).duplicate(true))
+	return result
+
+
+func _prepare_local_avoidance_tick() -> void:
+	if not local_avoidance_enabled:
+		_local_avoidance_prepared_tick = -1
+		return
+	if _local_avoidance_prepared_tick == tick_counter:
+		return
+	var unit_registry = _get_unit_registry()
+	if unit_registry == null or not unit_registry.has_method("get_all_units"):
+		_local_avoidance_resolver.clear()
+		_local_avoidance_prepared_tick = tick_counter
+		return
+	_local_avoidance_resolver.call(
+		"build_from_units",
+		Array(unit_registry.call("get_all_units")),
+		local_avoidance_agent_radius,
+		local_avoidance_spatial_cell_size
+	)
+	_local_avoidance_prepared_tick = tick_counter
+
+
+func _is_local_avoidance_enabled_for_command(cmd: Dictionary) -> bool:
+	if cmd.has("local_avoidance_enabled"):
+		return bool(cmd.get("local_avoidance_enabled", false))
+	return local_avoidance_enabled
+
+
+func _resolve_local_avoidance_velocity(
+	cmd: Dictionary,
+	unit_node: Node2D,
+	current_position: Vector2,
+	desired_velocity: Vector2,
+	max_speed: float,
+	delta: float,
+	terrain_registry
+) -> Vector2:
+	if unit_node == null or not _is_local_avoidance_enabled_for_command(cmd) or desired_velocity.is_zero_approx():
+		return desired_velocity
+	_prepare_local_avoidance_tick()
+	var unit_id: String = _extract_unit_id_for_path_recompute(unit_node)
+	var started_usec: int = Time.get_ticks_usec()
+	var result: Dictionary = Dictionary(_local_avoidance_resolver.call(
+		"solve_velocity",
+		unit_id,
+		current_position,
+		desired_velocity,
+		max_speed,
+		local_avoidance_neighbor_radius,
+		local_avoidance_max_neighbors
+	))
+	var safe_velocity: Vector2 = Vector2(result.get("safe_velocity", desired_velocity))
+	var discarded_correction: bool = false
+	var discard_reason: String = ""
+	if terrain_registry != null:
+		var candidate_position: Vector2 = current_position + safe_velocity * delta
+		if not _is_local_avoidance_position_walkable(candidate_position, terrain_registry):
+			var desired_position: Vector2 = current_position + desired_velocity * delta
+			discarded_correction = true
+			discard_reason = "non_walkable_correction"
+			if _is_local_avoidance_position_walkable(desired_position, terrain_registry):
+				safe_velocity = desired_velocity
+			else:
+				safe_velocity = Vector2.ZERO
+				discard_reason = "non_walkable_desired"
+	result["safe_velocity"] = safe_velocity
+	result["correction_velocity"] = safe_velocity - desired_velocity
+	result["discarded_correction"] = discarded_correction
+	result["discard_reason"] = discard_reason
+	result["duration_usec"] = Time.get_ticks_usec() - started_usec
+	_record_local_avoidance_debug(cmd, unit_id, result, delta)
+	return safe_velocity
+
+
+func _is_local_avoidance_position_walkable(position: Vector2, terrain_registry) -> bool:
+	if terrain_registry == null or not terrain_registry.has_method("world_to_grid") or not terrain_registry.has_method("is_walkable"):
+		return true
+	return bool(terrain_registry.call("is_walkable", terrain_registry.call("world_to_grid", position)))
+
+
+func _update_local_avoidance_agent_position(unit_id: String, position: Vector2) -> void:
+	if unit_id.strip_edges().is_empty() or not local_avoidance_enabled:
+		return
+	if _local_avoidance_prepared_tick != tick_counter:
+		return
+	_local_avoidance_resolver.call("update_agent_position", unit_id, position)
+
+
+func _record_local_avoidance_debug(cmd: Dictionary, unit_id: String, result: Dictionary, delta: float) -> void:
+	var desired_velocity: Vector2 = Vector2(result.get("desired_velocity", Vector2.ZERO))
+	var safe_velocity: Vector2 = Vector2(result.get("safe_velocity", desired_velocity))
+	var desired_speed: float = desired_velocity.length()
+	var safe_speed: float = safe_velocity.length()
+	var stuck_seconds: float = float(_local_avoidance_stuck_seconds_by_unit_id.get(unit_id, 0.0))
+	if desired_speed > local_avoidance_stuck_speed_threshold and safe_speed <= local_avoidance_stuck_speed_threshold:
+		stuck_seconds += delta
+	else:
+		stuck_seconds = maxf(stuck_seconds - delta, 0.0)
+	_local_avoidance_stuck_seconds_by_unit_id[unit_id] = stuck_seconds
+	var deadlock_marked: bool = stuck_seconds >= local_avoidance_stuck_threshold_seconds
+	if deadlock_marked:
+		cmd["local_avoidance_deadlock"] = true
+		cmd["local_avoidance_repath_requested"] = true
+	if not local_avoidance_debug_enabled:
+		return
+	var neighbors: Array = Array(result.get("neighbors", []))
+	var neighbor_ids: Array = []
+	for neighbor_variant in neighbors:
+		neighbor_ids.append(String(Dictionary(neighbor_variant).get("unit_id", "")))
+	_local_avoidance_debug_by_unit_id[unit_id] = {
+		"tick": tick_counter,
+		"unit_id": unit_id,
+		"neighbor_count": int(result.get("neighbor_count", 0)),
+		"neighbor_ids": neighbor_ids,
+		"collision_risk_count": int(result.get("collision_risk_count", 0)),
+		"desired_velocity": desired_velocity,
+		"avoidance_velocity": safe_velocity,
+		"correction_velocity": Vector2(result.get("correction_velocity", Vector2.ZERO)),
+		"stuck_time_seconds": stuck_seconds,
+		"deadlock_marked": deadlock_marked,
+		"discarded_correction": bool(result.get("discarded_correction", false)),
+		"discard_reason": String(result.get("discard_reason", "")),
+		"duration_usec": int(result.get("duration_usec", 0)),
+	}
+
+
 func _extract_unit_id_for_path_recompute(unit) -> String:
 	if unit == null or not unit.has_method("get_unit_id"):
 		return ""
@@ -790,7 +1271,7 @@ func _is_unit_in_contact(unit) -> bool:
 	return unit != null and unit.has_method("is_in_contact") and bool(unit.call("is_in_contact"))
 
 
-func _build_path_world_points(current_position: Vector2, target_position: Vector2, terrain_registry) -> Array:
+func _build_path_world_points(current_position: Vector2, target_position: Vector2, terrain_registry, cmd: Dictionary = {}, unit = null) -> Array:
 	var path_world_points: Array = []
 	if terrain_registry == null or _terrain_pathfinder == null:
 		path_world_points.append(target_position)
@@ -807,16 +1288,30 @@ func _build_path_world_points(current_position: Vector2, target_position: Vector
 		if typeof(nearest_start_grid) == TYPE_VECTOR2I:
 			from_grid = nearest_start_grid
 
-	var path_grid_points: Array = _terrain_pathfinder.find_path(from_grid, to_grid, terrain_registry)
+	var navigation_options: Dictionary = _build_navigation_cost_options(cmd, terrain_registry)
+	var navigation_started_usec: int = Time.get_ticks_usec()
+	var navigation_query: Dictionary = _find_navigation_grid_path(from_grid, to_grid, terrain_registry, navigation_options)
+	var navigation_duration_usec: int = Time.get_ticks_usec() - navigation_started_usec
+	var path_grid_points: Array = Array(navigation_query.get("path", []))
+	var navigation_status: String = String(navigation_query.get("status", ""))
+	_annotate_navigation_query_metrics(navigation_query, path_grid_points, terrain_registry, navigation_options)
+	_record_navigation_path_query(cmd, unit, from_grid, to_grid, navigation_query, navigation_duration_usec, "primary", "", path_grid_points.size())
+	path_grid_points = _simplify_grid_path_turns(path_grid_points)
 	if path_grid_points.is_empty():
 		if from_grid == to_grid:
 			path_world_points.append(resolved_target_position)
 			return path_world_points
 
-		var reachable_grid: Variant = _find_nearest_reachable_walkable_grid(from_grid, to_grid, terrain_registry)
+		var reachable_grid: Variant = _find_hpa_reachable_walkable_grid(from_grid, to_grid, terrain_registry) if navigation_status == HPA_PATHFINDER_SCRIPT.STATUS_NO_ABSTRACT_ROUTE else _find_nearest_reachable_walkable_grid(from_grid, to_grid, terrain_registry)
 		if typeof(reachable_grid) != TYPE_VECTOR2I:
 			return path_world_points
-		var fallback_path_grid_points: Array = _terrain_pathfinder.find_path(from_grid, reachable_grid, terrain_registry)
+		var fallback_started_usec: int = Time.get_ticks_usec()
+		var fallback_query: Dictionary = _find_navigation_grid_path(from_grid, reachable_grid, terrain_registry, navigation_options)
+		var fallback_duration_usec: int = Time.get_ticks_usec() - fallback_started_usec
+		var fallback_path_grid_points: Array = Array(fallback_query.get("path", []))
+		_annotate_navigation_query_metrics(fallback_query, fallback_path_grid_points, terrain_registry, navigation_options)
+		_record_navigation_path_query(cmd, unit, from_grid, reachable_grid, fallback_query, fallback_duration_usec, "fallback", navigation_status, fallback_path_grid_points.size())
+		fallback_path_grid_points = _simplify_grid_path_turns(fallback_path_grid_points)
 		if fallback_path_grid_points.is_empty() and reachable_grid != from_grid:
 			return path_world_points
 		for fallback_index in range(1, fallback_path_grid_points.size()):
@@ -832,6 +1327,146 @@ func _build_path_world_points(current_position: Vector2, target_position: Vector
 		path_world_points.append(target_position)
 
 	return path_world_points
+
+
+func _simplify_grid_path_turns(path_grid_points: Array) -> Array:
+	if path_grid_points.size() <= 2:
+		return path_grid_points.duplicate()
+	var simplified: Array = [Vector2i(path_grid_points[0]), Vector2i(path_grid_points[1])]
+	var previous_direction: Vector2i = _grid_step_direction(Vector2i(path_grid_points[0]), Vector2i(path_grid_points[1]))
+	for index in range(2, path_grid_points.size()):
+		var current_direction: Vector2i = _grid_step_direction(Vector2i(path_grid_points[index - 1]), Vector2i(path_grid_points[index]))
+		if current_direction != previous_direction:
+			simplified.append(Vector2i(path_grid_points[index - 1]))
+		previous_direction = current_direction
+	simplified.append(Vector2i(path_grid_points[-1]))
+	return simplified
+
+
+func _grid_step_direction(from_grid: Vector2i, to_grid: Vector2i) -> Vector2i:
+	var delta: Vector2i = to_grid - from_grid
+	var direction_x: int = 0
+	var direction_y: int = 0
+	if delta.x > 0:
+		direction_x = 1
+	elif delta.x < 0:
+		direction_x = -1
+	if delta.y > 0:
+		direction_y = 1
+	elif delta.y < 0:
+		direction_y = -1
+	return Vector2i(direction_x, direction_y)
+
+
+func _build_navigation_cost_options(cmd: Dictionary, terrain_registry) -> Dictionary:
+	var cover_aware_enabled: bool = navigation_cover_aware_enabled
+	if cmd.has("navigation_cover_aware"):
+		cover_aware_enabled = bool(cmd.get("navigation_cover_aware", false))
+	elif cmd.has("cover_aware_navigation"):
+		cover_aware_enabled = bool(cmd.get("cover_aware_navigation", false))
+
+	var weights: Dictionary = _get_navigation_cost_weights_for_command(cmd)
+	if cmd.has("navigation_exposure_weight"):
+		weights["exposure_weight"] = maxf(float(cmd.get("navigation_exposure_weight", 0.0)), 0.0)
+	if cmd.has("navigation_cover_weight"):
+		weights["cover_weight"] = maxf(float(cmd.get("navigation_cover_weight", 0.0)), 0.0)
+
+	return {
+		"cover_aware_enabled": cover_aware_enabled,
+		"exposure_weight": float(weights.get("exposure_weight", navigation_default_exposure_weight)),
+		"cover_weight": float(weights.get("cover_weight", navigation_default_cover_weight)),
+		"exposure_max_grid_distance": float(cmd.get("navigation_exposure_max_grid_distance", navigation_exposure_max_grid_distance)),
+		"hazard_grids": _extract_navigation_hazard_grids(cmd, terrain_registry),
+	}
+
+
+func _get_navigation_cost_weights_for_command(cmd: Dictionary) -> Dictionary:
+	var source_command_type: String = String(cmd.get("source_command_type", cmd.get("origin_command_type", ""))).strip_edges().to_lower()
+	if source_command_type.is_empty():
+		var command_type: String = String(cmd.get("command_type", cmd.get("type", ""))).strip_edges().to_lower()
+		match command_type:
+			"engage_area":
+				source_command_type = "engage"
+			"move_to_position":
+				source_command_type = "move"
+			_:
+				source_command_type = command_type
+	match source_command_type:
+		"defend":
+			return {"exposure_weight": 0.9, "cover_weight": 0.75}
+		"take", "engage":
+			return {"exposure_weight": 1.1, "cover_weight": 0.45}
+		"flank":
+			return {"exposure_weight": 1.2, "cover_weight": 0.3}
+		"rush":
+			return {"exposure_weight": 0.15, "cover_weight": 0.05}
+		_:
+			return {"exposure_weight": navigation_default_exposure_weight, "cover_weight": navigation_default_cover_weight}
+
+
+func _extract_navigation_hazard_grids(cmd: Dictionary, terrain_registry) -> Array:
+	var hazard_grids: Array = []
+	for key in ["navigation_threat_grids", "threat_grids", "danger_grids"]:
+		for grid_variant in Array(cmd.get(key, [])):
+			_append_unique_navigation_hazard_grid(hazard_grids, Vector2i(grid_variant))
+	if terrain_registry != null and terrain_registry.has_method("world_to_grid"):
+		for key in ["navigation_threat_positions", "threat_positions", "danger_positions", "enemy_positions"]:
+			for position_variant in Array(cmd.get(key, [])):
+				if typeof(position_variant) != TYPE_VECTOR2:
+					continue
+				_append_unique_navigation_hazard_grid(hazard_grids, terrain_registry.call("world_to_grid", Vector2(position_variant)))
+	hazard_grids.sort_custom(func(a, b) -> bool:
+		var grid_a: Vector2i = Vector2i(a)
+		var grid_b: Vector2i = Vector2i(b)
+		if grid_a.x == grid_b.x:
+			return grid_a.y < grid_b.y
+		return grid_a.x < grid_b.x
+	)
+	return hazard_grids
+
+
+func _append_unique_navigation_hazard_grid(hazard_grids: Array, grid_position: Vector2i) -> void:
+	if not hazard_grids.has(grid_position):
+		hazard_grids.append(grid_position)
+
+
+func _annotate_navigation_query_metrics(query: Dictionary, path_grid_points: Array, terrain_registry, navigation_options: Dictionary) -> void:
+	var path_metrics: Dictionary = Dictionary(_terrain_pathfinder.call("score_path", path_grid_points, terrain_registry, navigation_options))
+	for key in path_metrics.keys():
+		query[key] = path_metrics[key]
+
+
+func _find_navigation_grid_path(from_grid: Vector2i, to_grid: Vector2i, terrain_registry, navigation_options: Dictionary = {}) -> Dictionary:
+	var graph = _ensure_hpa_navigation_graph(terrain_registry)
+	if graph != null and _hpa_pathfinder != null:
+		var hpa_query: Dictionary = Dictionary(_hpa_pathfinder.call("find_path_with_status", from_grid, to_grid, terrain_registry, graph, navigation_options))
+		var hpa_status: String = String(hpa_query.get("status", ""))
+		if not Array(hpa_query.get("path", [])).is_empty():
+			return hpa_query
+		if hpa_status == HPA_PATHFINDER_SCRIPT.STATUS_NO_ABSTRACT_ROUTE or hpa_status == HPA_PATHFINDER_SCRIPT.STATUS_NO_COMPONENT:
+			return hpa_query
+
+	return {
+		"path": _terrain_pathfinder.call("find_path_with_options", from_grid, to_grid, terrain_registry, navigation_options),
+		"status": "direct_a_star",
+	}
+
+
+func _ensure_hpa_navigation_graph(terrain_registry):
+	if terrain_registry == null or not terrain_registry.has_method("get_all_tiles"):
+		return null
+	var tile_count: int = Array(terrain_registry.call("get_all_tiles")).size()
+	if _hpa_navigation_graph != null and _hpa_navigation_registry == terrain_registry and _hpa_navigation_tile_count == tile_count:
+		return _hpa_navigation_graph
+	_hpa_navigation_graph = HPA_NAVIGATION_GRAPH_SCRIPT.new()
+	if not bool(_hpa_navigation_graph.call("build_from_registry", terrain_registry, HPA_NAVIGATION_CLUSTER_SIZE)):
+		_hpa_navigation_graph = null
+		_hpa_navigation_registry = null
+		_hpa_navigation_tile_count = -1
+		return null
+	_hpa_navigation_registry = terrain_registry
+	_hpa_navigation_tile_count = tile_count
+	return _hpa_navigation_graph
 
 
 func _resolve_walkable_move_target(target_position: Vector2, terrain_registry) -> Dictionary:
@@ -861,6 +1496,32 @@ func _resolve_walkable_move_target(target_position: Vector2, terrain_registry) -
 		"blocked_position": target_position,
 		"blocker_reason": "target_not_walkable",
 	}
+
+
+func _find_hpa_reachable_walkable_grid(from_grid: Vector2i, desired_grid: Vector2i, terrain_registry) -> Variant:
+	var graph = _ensure_hpa_navigation_graph(terrain_registry)
+	if graph == null:
+		return null
+	var component_key: String = String(graph.call("get_component_key_for_grid", from_grid))
+	if component_key.is_empty():
+		return null
+	var candidates: Array = Array(graph.call("get_component_tiles", component_key))
+	candidates.sort_custom(func(a, b) -> bool:
+		var grid_a: Vector2i = Vector2i(a)
+		var grid_b: Vector2i = Vector2i(b)
+		var distance_a: float = _grid_distance_score(grid_a, desired_grid)
+		var distance_b: float = _grid_distance_score(grid_b, desired_grid)
+		if absf(distance_a - distance_b) > 0.001:
+			return distance_a < distance_b
+		var source_distance_a: float = _grid_distance_score(grid_a, from_grid)
+		var source_distance_b: float = _grid_distance_score(grid_b, from_grid)
+		if absf(source_distance_a - source_distance_b) > 0.001:
+			return source_distance_a < source_distance_b
+		if grid_a.x == grid_b.x:
+			return grid_a.y < grid_b.y
+		return grid_a.x < grid_b.x
+	)
+	return null if candidates.is_empty() else Vector2i(candidates[0])
 
 
 func _find_nearest_reachable_walkable_grid(from_grid: Vector2i, desired_grid: Vector2i, terrain_registry) -> Variant:

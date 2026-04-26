@@ -7,6 +7,7 @@ const TEST_UNIT_SCRIPT: GDScript = preload("res://scripts/npc/test_unit.gd")
 var _passed: int = 0
 var _failed: int = 0
 var _contact_state_by_key: Dictionary = {}
+var _discipline_break_checks: int = 0
 
 
 class LosAlways:
@@ -23,6 +24,7 @@ func _init() -> void:
 func _run_tests() -> void:
 	print("=== TASK_118 Combat Resolver Verifier ===")
 	_test_medic_resolver_returns_heal_and_move_actions()
+	_test_discipline_break_waits_for_attackable_target()
 	_test_fire_resolver_requires_contact_gate_for_friendlies()
 	_test_fire_resolver_builds_damage_effect_with_modifiers()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
@@ -73,6 +75,17 @@ func _test_medic_resolver_returns_heal_and_move_actions() -> void:
 	medic.free()
 	patient_near.free()
 	patient_far.free()
+
+
+func _test_discipline_break_waits_for_attackable_target() -> void:
+	var friendly := _make_unit("friendly_holdfire", "team_alpha", "blue", Vector2.ZERO, "Operator")
+	friendly.call("set_runtime_status", "engaging", "", 0, "hold_fire")
+	_discipline_break_checks = 0
+	var context: Dictionary = _build_fire_context([friendly], [])
+	context["check_discipline_break"] = Callable(self, "_count_discipline_break")
+	var contact_pair: Dictionary = Dictionary(COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("find_first_contact_pair", context))
+	_assert(contact_pair.is_empty() and _discipline_break_checks == 0, "Hold-fire discipline break is not checked without an attackable target")
+	friendly.free()
 
 
 func _test_fire_resolver_requires_contact_gate_for_friendlies() -> void:
@@ -179,6 +192,11 @@ func _return_true_ids(_attacker_id: String, _target_id: String) -> bool:
 
 func _return_false(_unit) -> bool:
 	return false
+
+
+func _count_discipline_break(_unit) -> bool:
+	_discipline_break_checks += 1
+	return true
 
 
 func _test_effective_range(_target) -> float:

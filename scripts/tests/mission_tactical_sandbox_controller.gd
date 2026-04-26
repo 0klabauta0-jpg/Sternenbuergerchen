@@ -406,6 +406,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			_change_fireteam(-1)
 			get_viewport().set_input_as_handled()
 		KEY_E:
+			if execute_selected_fireteam_orders():
+				get_viewport().set_input_as_handled()
+		KEY_TAB:
 			_change_fireteam(1)
 			get_viewport().set_input_as_handled()
 		KEY_R:
@@ -729,16 +732,20 @@ func execute_selected_fireteam_orders() -> bool:
 		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
 		if _area_defense_execution_by_fireteam.has(fireteam_id):
 			if _try_continue_active_area_defense(fireteam_id):
-				continued_fireteams.append(fireteam_id.to_upper())
+				if not _has_pending_waypoint_order(fireteam_id, target_phase_index):
+					continued_fireteams.append(fireteam_id.to_upper())
+					continue
+			else:
+				already_active_fireteams.append(fireteam_id.to_upper())
 				continue
-			already_active_fireteams.append(fireteam_id.to_upper())
-			continue
 		if _area_attack_execution_by_fireteam.has(fireteam_id):
 			if _try_continue_active_area_attack(fireteam_id):
-				continued_fireteams.append(fireteam_id.to_upper())
+				if not _has_pending_waypoint_order(fireteam_id, target_phase_index):
+					continued_fireteams.append(fireteam_id.to_upper())
+					continue
+			else:
+				already_active_fireteams.append(fireteam_id.to_upper())
 				continue
-			already_active_fireteams.append(fireteam_id.to_upper())
-			continue
 		if _phase_execution_by_fireteam.has(fireteam_id):
 			if _try_continue_active_fireteam_order(fireteam_id):
 				continued_fireteams.append(fireteam_id.to_upper())
@@ -4874,14 +4881,32 @@ func _build_fireteam_anchor_visualization_entries() -> Array:
 		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
 		if fireteam_id.is_empty():
 			continue
-		var anchor := _get_selection_anchor_for_fireteam(fireteam_id)
-		if anchor == null:
+		var anchor_position: Variant = _resolve_fireteam_visual_anchor_position(fireteam_id)
+		if typeof(anchor_position) != TYPE_VECTOR2:
 			continue
 		entries.append({
 			"fireteam_id": fireteam_id,
-			"position": anchor.global_position,
+			"position": Vector2(anchor_position),
 		})
 	return entries
+
+
+func _resolve_fireteam_visual_anchor_position(fireteam_id: String) -> Variant:
+	var sum: Vector2 = Vector2.ZERO
+	var count: int = 0
+	for unit in _get_fireteam_units(fireteam_id, true):
+		if not (unit is Node2D):
+			continue
+		if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
+			continue
+		sum += (unit as Node2D).global_position
+		count += 1
+	if count > 0:
+		return sum / float(count)
+	var anchor := _get_selection_anchor_for_fireteam(fireteam_id)
+	if anchor != null:
+		return anchor.global_position
+	return null
 
 
 func _append_waypoint_to_plan(fireteam_id: String, phase_index: int, world_position: Vector2) -> Dictionary:
@@ -5169,6 +5194,11 @@ func _try_continue_active_area_attack(fireteam_id: String) -> bool:
 	_refresh_order_visuals()
 	_refresh_fireteam_status_panel()
 	return true
+
+
+func _has_pending_waypoint_order(fireteam_id: String, phase_index: int) -> bool:
+	var plan = _order_plans_by_key.get(_build_order_plan_key(fireteam_id.strip_edges().to_lower(), phase_index), null)
+	return plan != null and _find_next_executable_waypoint_index(plan) >= 0
 
 
 func _find_next_defend_area_order(fireteam_id: String):
@@ -5689,12 +5719,53 @@ func _apply_default_fireteam_behavior(fireteam_id: String, phase_index: int) -> 
 	metadata["phase"] = phase_index
 	behavior_profile.metadata = metadata
 	_set_active_behavior_profile(fireteam_id, behavior_profile)
+	if _issue_fireteam_hold_current_positions(fireteam_id, phase_index):
+		_mirror_flow_driver_order_for_fireteam(fireteam_id, anchor_position, "defend", phase_index)
+		return true
 	var issued_count: int = 0
 	for driver in _get_flow_drivers_for_fireteam(fireteam_id):
 		if driver == null or not driver.has_method("issue_command_at_position"):
 			continue
 		if bool(driver.call("issue_command_at_position", anchor_position, "defend", phase_index)):
 			issued_count += 1
+	return issued_count > 0
+
+
+func _issue_fireteam_hold_current_positions(fireteam_id: String, phase_index: int) -> bool:
+	var simulation_root = get_node_or_null("../SimulationRoot")
+	if simulation_root == null:
+		return false
+	var issued_count: int = 0
+	for unit in _get_fireteam_units(fireteam_id, true):
+		if not (unit is Node2D):
+			continue
+		if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
+			continue
+		if not unit.has_method("get_unit_id"):
+			continue
+		var command = UNIT_COMMAND_SCRIPT.new()
+		command.command_type = UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION
+		command.priority = 11
+		command.unit_id = String(unit.call("get_unit_id"))
+		command.team_id = FRIENDLY_TEAM_ID
+		if unit.has_method("get_team_id"):
+			command.team_id = String(unit.call("get_team_id"))
+		command.target_position = (unit as Node2D).global_position
+		command.move_speed_factor = 0.0
+		command.cover_score = 0.0
+		if unit.has_method("get_cover_score"):
+			command.cover_score = float(unit.call("get_cover_score"))
+		command.attack_bonus = 0.0
+		command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL
+		command.source_command_type = "hold_position"
+		command.source_task_type = "default_hold"
+		command.phase = phase_index
+		if not bool(command.call("is_valid")):
+			continue
+		if unit.has_method("assign_unit_command"):
+			unit.call("assign_unit_command", command)
+		simulation_root.call("enqueue_command", command.to_dict())
+		issued_count += 1
 	return issued_count > 0
 
 
@@ -6095,7 +6166,7 @@ func _are_area_defense_assignments_reached(state: Dictionary) -> bool:
 	return true
 
 
-func _issue_area_defense_unit_command(fireteam_id: String, assignment: Dictionary, phase_index: int, hold_position: bool, area_order_id: String = "") -> bool:
+func _issue_area_defense_unit_command(_fireteam_id: String, assignment: Dictionary, phase_index: int, hold_position: bool, area_order_id: String = "") -> bool:
 	var unit_id: String = String(assignment.get("unit_id", "")).strip_edges()
 	if unit_id.is_empty():
 		return false
@@ -6103,15 +6174,23 @@ func _issue_area_defense_unit_command(fireteam_id: String, assignment: Dictionar
 	if unit == null:
 		return false
 	var command = UNIT_COMMAND_SCRIPT.new()
-	command.command_type = UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION if hold_position else UNIT_COMMAND_SCRIPT.TYPE_MOVE_TO_POSITION
+	command.command_type = UNIT_COMMAND_SCRIPT.TYPE_MOVE_TO_POSITION
+	if hold_position:
+		command.command_type = UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION
 	command.priority = 13
 	command.unit_id = unit_id
-	command.team_id = String(unit.call("get_team_id")) if unit.has_method("get_team_id") else FRIENDLY_TEAM_ID
+	command.team_id = FRIENDLY_TEAM_ID
+	if unit.has_method("get_team_id"):
+		command.team_id = String(unit.call("get_team_id"))
 	command.target_position = Vector2(assignment.get("target_position", Vector2.ZERO))
-	command.move_speed_factor = 0.0 if hold_position else 0.85
+	command.move_speed_factor = 0.85
+	if hold_position:
+		command.move_speed_factor = 0.0
 	command.cover_score = float(assignment.get("cover_score", 0.0))
 	command.attack_bonus = 0.0
-	command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL if hold_position else UNIT_COMMAND_SCRIPT.FIRE_STATUS_HOLD_FIRE
+	command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_HOLD_FIRE
+	if hold_position:
+		command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL
 	command.source_command_type = "defend"
 	command.source_task_type = "defend_area"
 	command.target_area_id = area_order_id
@@ -6140,8 +6219,10 @@ func _update_area_attack_execution(_delta: float) -> void:
 		if state.is_empty() or bool(state.get("waiting_for_go", false)):
 			continue
 		var status: String = String(state.get("status", "approaching")).strip_edges().to_lower()
-		if status == "occupying":
+		if status == "engaging" or status == "occupying":
 			if not _are_area_attack_assignments_reached(state):
+				continue
+			if status == "engaging" and not _is_attack_area_cleared(Dictionary(state.get("target_area", {})).duplicate(true)):
 				continue
 			for assignment_variant in Array(state.get("assignments", [])):
 				_issue_area_attack_unit_command(
@@ -6162,18 +6243,14 @@ func _update_area_attack_execution(_delta: float) -> void:
 			continue
 		var target_area: Dictionary = Dictionary(state.get("target_area", {})).duplicate(true)
 		var area_cleared: bool = _is_attack_area_cleared(target_area)
-		var next_status: String = "occupying" if area_cleared else "engaging"
-		if String(state.get("status", "")) != next_status:
-			state["status"] = next_status
-			did_change = true
-		if not area_cleared:
-			_area_attack_execution_by_fireteam[fireteam_id] = state
-			continue
 		var occupation_assignments: Array = _build_attack_area_occupation_assignments(String(fireteam_id), state)
 		if occupation_assignments.is_empty():
 			occupation_assignments = Array(state.get("assignments", [])).duplicate(true)
 		state["approach_assignments"] = Array(state.get("assignments", [])).duplicate(true)
 		state["assignments"] = occupation_assignments.duplicate(true)
+		state["status"] = "engaging"
+		if area_cleared:
+			state["status"] = "occupying"
 		for assignment_variant in occupation_assignments:
 			_issue_area_attack_unit_command(
 				String(fireteam_id),
@@ -6188,7 +6265,11 @@ func _update_area_attack_execution(_delta: float) -> void:
 		did_start_occupation = true
 	if not did_change:
 		return
-	_last_command_text = "AREA GESICHERT" if did_secure_area else "AREA BESETZEN" if did_start_occupation else "AREA KONTAKT"
+	_last_command_text = "AREA KONTAKT"
+	if did_start_occupation:
+		_last_command_text = "AREA BESETZEN"
+	if did_secure_area:
+		_last_command_text = "AREA GESICHERT"
 	_refresh_order_visuals()
 	refresh_fireteam_security_state()
 	_update_ui()
@@ -6230,7 +6311,7 @@ func _is_attack_area_cleared(target_area: Dictionary) -> bool:
 	return true
 
 
-func _issue_area_attack_unit_command(fireteam_id: String, assignment: Dictionary, phase_index: int, hold_position: bool, area_order_id: String = "", source_command_type: String = "take") -> bool:
+func _issue_area_attack_unit_command(_fireteam_id: String, assignment: Dictionary, phase_index: int, hold_position: bool, area_order_id: String = "", source_command_type: String = "take") -> bool:
 	var unit_id: String = String(assignment.get("unit_id", "")).strip_edges()
 	if unit_id.is_empty():
 		return false
@@ -6238,12 +6319,18 @@ func _issue_area_attack_unit_command(fireteam_id: String, assignment: Dictionary
 	if unit == null:
 		return false
 	var command = UNIT_COMMAND_SCRIPT.new()
-	command.command_type = UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION if hold_position else UNIT_COMMAND_SCRIPT.TYPE_ENGAGE_AREA
+	command.command_type = UNIT_COMMAND_SCRIPT.TYPE_ENGAGE_AREA
+	if hold_position:
+		command.command_type = UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION
 	command.priority = 14
 	command.unit_id = unit_id
-	command.team_id = String(unit.call("get_team_id")) if unit.has_method("get_team_id") else FRIENDLY_TEAM_ID
+	command.team_id = FRIENDLY_TEAM_ID
+	if unit.has_method("get_team_id"):
+		command.team_id = String(unit.call("get_team_id"))
 	command.target_position = Vector2(assignment.get("target_position", Vector2.ZERO))
-	command.move_speed_factor = 0.0 if hold_position else 0.9
+	command.move_speed_factor = 0.9
+	if hold_position:
+		command.move_speed_factor = 0.0
 	command.cover_score = float(assignment.get("cover_score", 0.0))
 	command.attack_bonus = 0.0
 	command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL
@@ -6290,6 +6377,8 @@ func _update_active_phase_execution(delta: float) -> void:
 		var waypoint = plan.waypoints[waypoint_index]
 		var anchor := _get_selection_anchor_for_fireteam(String(fireteam_id))
 		var resolved_target_position: Vector2 = Vector2(execution_state.get("resolved_target_position", waypoint.target_position))
+		_ensure_fireteam_movement_controller()
+		var had_movement_execution: bool = _fireteam_movement_controller != null and bool(_fireteam_movement_controller.call("has_active_execution", String(fireteam_id)))
 		var movement_result: Dictionary = _update_fireteam_movement_execution(String(fireteam_id))
 		if not Dictionary(movement_result.get("bound_complete", {})).is_empty():
 			did_change = true
@@ -6297,7 +6386,9 @@ func _update_active_phase_execution(delta: float) -> void:
 			continue
 		var movement_finished: bool = bool(movement_result.get("finished", false))
 		var anchor_reached_target: bool = anchor.global_position.distance_to(resolved_target_position) <= PHASE_WAYPOINT_COMPLETE_RADIUS
-		if not movement_finished and not anchor_reached_target:
+		if had_movement_execution and not movement_finished:
+			continue
+		if not had_movement_execution and not anchor_reached_target:
 			continue
 		if String(waypoint.command_type).strip_edges().to_lower() == FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_DEFEND:
 			if not bool(execution_state.get("waiting_for_go", false)):
@@ -7441,37 +7532,40 @@ func _get_unload_offset(index: int) -> Vector2:
 			return base_offset
 
 
-func _enqueue_dropship_embark_effect(unit: Node, unit_id: String, position: Vector2) -> void:
+func _enqueue_dropship_embark_effect(unit: Node, unit_id: String, world_position: Vector2) -> void:
 	_remember_drop_unit_for_simulation(unit, unit_id)
 	_enqueue_dropship_effect(
 		{
 			"effect_type": "dropship_embark_unit",
 			"unit_id": unit_id,
-			"position": position,
+			"position": world_position,
 			"visible": false,
 			"priority": 30,
 		}
 	)
 
 
-func _enqueue_dropship_presence_effect(unit: Node, unit_id: String, visible: bool) -> void:
+func _enqueue_dropship_presence_effect(unit: Node, unit_id: String, is_visible: bool) -> void:
 	_remember_drop_unit_for_simulation(unit, unit_id)
+	var effect_type: String = "dropship_embark_unit"
+	if is_visible:
+		effect_type = "dropship_deploy_unit"
 	_enqueue_dropship_effect(
 		{
-			"effect_type": "dropship_deploy_unit" if visible else "dropship_embark_unit",
+			"effect_type": effect_type,
 			"unit_id": unit_id,
-			"visible": visible,
+			"visible": is_visible,
 			"priority": 30,
 		}
 	)
 
 
-func _enqueue_dropship_deploy_effect(unit: Node, unit_id: String, position: Vector2) -> void:
+func _enqueue_dropship_deploy_effect(unit: Node, unit_id: String, world_position: Vector2) -> void:
 	_remember_drop_unit_for_simulation(unit, unit_id)
 	var effect: Dictionary = {
 		"effect_type": "dropship_deploy_unit",
 		"unit_id": unit_id,
-		"position": position,
+		"position": world_position,
 		"visible": true,
 		"runtime_status": "idle",
 		"runtime_active": true,

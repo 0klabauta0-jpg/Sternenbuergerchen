@@ -185,6 +185,7 @@ func _draw_area_orders() -> void:
 		var command_type: String = String(area_order_data.get("command_type", "")).strip_edges().to_lower()
 		var base_color: Color = _get_fireteam_color(fireteam_id)
 		var command_color: Color = _get_command_line_color(command_type)
+		var center_position: Vector2 = Vector2(area_order_data.get("center_position", Vector2.ZERO))
 		var draw_alpha: float = 1.0
 		if not _selected_fireteam_ids.is_empty() and not _selected_fireteam_ids.has(fireteam_id):
 			draw_alpha = 0.45
@@ -192,6 +193,10 @@ func _draw_area_orders() -> void:
 		fill_color.a = 0.18 * draw_alpha
 		var edge_color: Color = command_color
 		edge_color.a = 0.86 * draw_alpha
+		var anchor_position: Vector2 = _get_fireteam_anchor_position(fireteam_id)
+		if anchor_position.is_finite():
+			draw_line(anchor_position, center_position, _apply_selection_alpha(command_color, draw_alpha), 3.0, true)
+			_draw_iso_marker_base(anchor_position, Color(base_color.r, base_color.g, base_color.b, 0.16 * draw_alpha), base_color, 0.55)
 		var tile_world_positions: Array = Array(area_order_data.get("tile_world_positions", []))
 		if not tile_world_positions.is_empty():
 			for tile_world_position_variant in tile_world_positions:
@@ -203,7 +208,6 @@ func _draw_area_orders() -> void:
 			draw_colored_polygon(polygon, fill_color)
 			for index in range(polygon.size()):
 				draw_line(polygon[index], polygon[(index + 1) % polygon.size()], edge_color, 2.0, true)
-		var center_position: Vector2 = Vector2(area_order_data.get("center_position", Vector2.ZERO))
 		_draw_iso_marker_base(center_position, Color(edge_color.r, edge_color.g, edge_color.b, 0.18 * draw_alpha), edge_color, 0.8)
 		_draw_area_order_label(center_position, command_type, edge_color)
 
@@ -383,7 +387,7 @@ func _rebuild_cache() -> void:
 		if area_order == null or not area_order.is_valid() or not _is_area_order_visible(area_order):
 			continue
 		var fireteam_id: String = String(area_order.fireteam_id).strip_edges().to_lower()
-		_visible_area_orders.append({
+		var area_entry: Dictionary = {
 			"area_order_id": String(area_order.area_order_id),
 			"fireteam_id": fireteam_id,
 			"command_type": String(area_order.command_type),
@@ -393,7 +397,11 @@ func _rebuild_cache() -> void:
 			"world_polygon": PackedVector2Array(area_order.world_polygon),
 			"created_at_order_index": int(area_order.created_at_order_index),
 			"status": String(area_order.status),
-		})
+		}
+		var anchor_position: Vector2 = _get_fireteam_anchor_position(fireteam_id)
+		if anchor_position.is_finite():
+			area_entry["anchor_position"] = anchor_position
+		_visible_area_orders.append(area_entry)
 	for plan_dict in _plan_dicts:
 		var plan = FIRETEAM_ORDER_PLAN_SCRIPT.call("from_dict", plan_dict)
 		if plan == null or not plan.is_valid() or int(plan.phase) != _phase_index:

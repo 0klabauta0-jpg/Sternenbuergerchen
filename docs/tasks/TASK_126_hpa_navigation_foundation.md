@@ -5,7 +5,7 @@ Die Terrain-Navigation soll eine hierarchische Grundlage bekommen, damit grosse 
 
 Der Task baut noch keine neue Bewegungssemantik. Er erstellt die Datenbasis fuer HPA* auf dem vorhandenen `TerrainRegistry`-/Tile-Grid.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Voraussetzung
 - `TASK_125 - Terrain Blocker Debug und Walkability Tests`
@@ -55,21 +55,28 @@ Der Task baut noch keine neue Bewegungssemantik. Er erstellt die Datenbasis fuer
 - Keine Vollscans pro Frame; Graph-Aufbau passiert beim Terrain-Load oder explizit nach Terrain-Aenderung.
 
 ## Akzeptanzkriterien
-- [ ] Graph kann aus einer `TerrainRegistry` gebaut werden.
-- [ ] Cluster-Zuordnung ist deterministisch.
-- [ ] Portale entstehen nur an wirklich begehbaren Cluster-Grenzen.
-- [ ] Blockierte Tiles trennen lokale Komponenten korrekt.
-- [ ] Diagonal-Bewegung bleibt moeglich, aber kein Corner-Cutting durch Blocker.
-- [ ] Headless-Verifier deckt offene Flaeche, Blocker-Wand, getrennte Bereiche und mehrere Cluster ab.
+- [x] Graph kann aus einer `TerrainRegistry` gebaut werden.
+- [x] Cluster-Zuordnung ist deterministisch.
+- [x] Portale entstehen nur an wirklich begehbaren Cluster-Grenzen.
+- [x] Blockierte Tiles trennen lokale Komponenten korrekt.
+- [x] Diagonal-Bewegung bleibt moeglich, aber kein Corner-Cutting durch Blocker.
+- [x] Headless-Verifier deckt offene Flaeche, Blocker-Wand, getrennte Bereiche und mehrere Cluster ab.
 
 ## Erwartetes Ergebnis
 - Eine kleine HPA-Datenstruktur existiert als Grundlage fuer spaetere Pfadqueries.
 - Bestehende Bewegung nutzt weiterhin den bisherigen `TerrainPathfinder`.
 - Der Task ist rein vorbereitend und risikoarm fuer Live-Movement.
 
+## Ergebnis
+- `HPANavigationGraph` baut aus der vorhandenen `TerrainRegistry` deterministische Cluster.
+- Pro Cluster werden walkable Tiles, lokale Komponenten und Nachbar-Cluster als abgeleitete Navigationsdaten erfasst.
+- Portale entstehen nur zwischen begehbaren Grenz-Tiles und nutzen dieselben Step-Regeln wie `TerrainPathfinder`.
+- Die Graph-API stellt Cluster-Snapshots, Portale, Komponenten-Keys, Same-Component-Pruefung und abstrakte Nachbarschaften bereit.
+- Live-Movement nutzt weiterhin den bestehenden Pfadfinder; HPA wird erst in TASK_127 in den Move-Pfad integriert.
+
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_126_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_125_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_126_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_125_verifier.gd`
 
 ## Dateien (voraussichtlich)
 - `scripts/terrain/hpa_navigation_graph.gd`

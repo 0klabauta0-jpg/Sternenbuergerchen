@@ -930,6 +930,66 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Der neue Fallback ist konservativ. Wenn ein Ziel nicht erreichbar ist, bleibt die Unit am naechsten stabil erreichbaren walkable Punkt statt optisch in Richtung Blocker weiterzudruecken.
 - Naechster Schritt: Die Area-Order-Reihe 121-125 ist damit fachlich abgeschlossen; weitere Navigationsthemen sollten als eigener Task mit klarer Path-Follow- oder Nav-Stack-Zielsetzung geschnitten werden.
 
+### TASK_126 - HPA Navigation Foundation
+- Status: implementiert
+- Stand: `scripts/terrain/hpa_navigation_graph.gd` baut aus der vorhandenen `TerrainRegistry` eine abgeleitete HPA-Grundlage mit deterministischen Clustern, walkable Tiles, lokalen Komponenten, Portalen und abstrakten Komponenten-Nachbarschaften.
+- Stand: Portale nutzen dieselben Traversal-Regeln wie `TerrainPathfinder`, inklusive Diagonalbewegung ohne Corner-Cutting durch Blocker sowie Hoehen-/Slope-Regeln. `TerrainPathfinder` exposes dafuer eine kleine lesende API fuer Neighbor-Richtungen und Step-Pruefung.
+- Stand: `scripts/tests/task_126_verifier.gd` deckt Graph-Aufbau, Cluster-Zuordnung, Blocker-Komponenten, walkable Portale, abstrakte Nachbarschaften und Diagonal-Corner-Regeln ab.
+- Offene Punkte: HPA wird in diesem Task noch nicht fuer Live-Movement verwendet. Die Integration in `SimulationRoot` und lange Pfadqueries bleibt TASK_127.
+- Risiken: Cluster-Groesse und Portal-Dichte sind V1-Parameter. Spaetere Performance-Arbeit sollte diese Werte ueber Messungen aus TASK_128 justieren.
+- Naechster Schritt: TASK_127 kann den HPA-Graphen in einen hierarchischen Pathfinder ueberfuehren und optional im autoritativen Move-Pfad verwenden.
+
+### TASK_127 - HPA Pathfinder Integration
+- Status: implementiert
+- Stand: `scripts/terrain/hpa_pathfinder.gd` setzt die HPA-Grundlage aus TASK_126 in konkrete Pfadqueries um. Same-Cluster-Wege laufen weiter direkt ueber `TerrainPathfinder`, Multi-Cluster-Wege werden ueber abstrakte Portalrouten gesucht und anschliessend aus lokalen Tile-Pfadsegmenten zusammengesetzt.
+- Stand: `SimulationRoot` baut und cached den HPA-Graphen pro `TerrainRegistry` und nutzt den HPA-Pfadfinder im autoritativen Move-Pfad. Wenn Start und Ziel in unverbundenen HPA-Komponenten liegen, wird kein globaler Full-Map-Fallback gegen das unerreichbare Ziel gestartet; stattdessen wird ein stabiler walkable Fallback innerhalb der Start-Komponente gewaehlt.
+- Stand: `HPANavigationGraph` exposed dafuer eine lesende `get_component_tiles()`-API. `scripts/tests/task_127_verifier.gd` deckt Same-Cluster-Pfade, Multi-Cluster-Portalpfade, disconnected early-fail, SimulationRoot-Ausfuehrung und unreachable-Fallback ab.
+- Offene Punkte: Keine dynamischen Kartenupdates und keine Flow-Fields. Lokale Teilpfade nutzen weiterhin den bestehenden `TerrainPathfinder`, damit Walkability-, Hoehen- und Diagonalregeln identisch bleiben.
+- Risiken: Der Graph-Cache invalidiert aktuell ueber Registry-Referenz und Tile-Anzahl, nicht ueber jede moegliche Walkability-Aenderung. Portalpfade koennen in V1 noch kantiger wirken als spaetere geglaettete Routen.
+- Naechster Schritt: TASK_129 kann auf den Budget-/Debug-Messpunkten aufsetzen und deckungsbewusste Pfadkosten einfuehren.
+
+### TASK_128 - Navigation Budgeting und Debug
+- Status: implementiert
+- Stand: `SimulationRoot` besitzt jetzt ein konfigurierbares Navigation-Budget fuer neue Pfadrequests pro Physics-Tick (`navigation_budget_enabled`, `navigation_max_new_path_queries_per_tick`). Wenn das Budget erschoepft ist, werden Move-Commands mit Delay-Grund deterministisch ueber die bestehende Prioritaets- und Queue-Reihenfolge in einen spaeteren Tick requeued.
+- Stand: `get_navigation_debug_snapshot()` liefert lesende Metriken fuer neue Path-Requests, konkrete Pathfinder-Queries, Fallbacks, unreachable Queries, Delays, Pending Count, letzte Query-Records und die teuerste Query. Query-Records unterscheiden HPA, direkten A*, Fallback und Delay und enthalten grobe Kandidaten-/Expanded-Schaetzwerte.
+- Stand: Contact-Recompute laeuft durch denselben Budgetpfad, sodass mehrere Units im Kontakt nicht mehr im selben Frame eine Pfadquery-Spitze erzeugen. `scripts/tests/task_128_verifier.gd` deckt Snapshot-Zaehler, Budget-Limit, deterministische Delay-Reihenfolge, Contact-Staffelung und unreachable-Debug ab.
+- Offene Punkte: Keine Worker-Threads, keine UI-Pflichtanzeige und keine Multiplayer-Synchronisierung der Navigation-Metriken. Fallback-Kandidaten bleiben bewusst grob geschaetzt, bis TASK_129/130 echte Messdaten fuer neue Path-Schichten liefern.
+- Risiken: Ein niedriges Budget kann sichtbare Startverzoegerungen bei grossen Sammelbefehlen erzeugen; der Snapshot macht diese Pending- und Delay-Gruende deshalb explizit sichtbar.
+- Naechster Schritt: TASK_129 kann deckungsbewusste Pfadkosten aufsetzen, ohne CPU-Spitzen ungezaehlt zu lassen.
+
+### TASK_129 - Deckungsbewusste Pfade mit HPA und Subgoal-Vorbereitung
+- Status: implementiert
+- Stand: `TerrainPathfinder` besitzt jetzt einen optionalen Cover-/Exposure-Kostenvertrag (`find_path_with_options`, `score_path`, `get_exposure_score`). Die Basisregeln fuer Walkability, Hoehen, Diagonalen und Corner-Cutting bleiben identisch; ohne Optionen laeuft der alte Pfad weiter.
+- Stand: `HPAPathfinder` reicht Kostenoptionen in Same-Cluster- und lokale Portal-Segmente weiter. `HPANavigationGraph` annotiert Portale mit `mean_cover` und `min_cover`, damit spaetere Subgoal-/Portalentscheidungen bereits lesbare Cover-Metadaten besitzen.
+- Stand: `SimulationRoot` kann Cover-aware Navigation ueber Export oder Command-Feld aktivieren, Hazard-Grids/-Positionen aus Commands ableiten und Risikogewichte nach `source_command_type` (`move`, `defend`, `take`/`engage`, `flank`, `rush`) setzen. Der Navigation-Debug-Snapshot enthaelt jetzt letzte Pfadmetriken wie `path_length_grid`, `exposure_sum`, `cover_sum`, Mittelwerte und `path_cost`.
+- Offene Punkte: Keine echte Subgoal-Graph-Suche, keine dynamische Threat-Map aus dem Combat-Loop und keine UI-Pflichtanzeige. Threat-/Hazard-Positionen muessen in diesem Slice explizit ueber Command-Daten oder Tests kommen.
+- Risiken: Hohe Exposure-/Cover-Gewichte koennen Umwege stark bevorzugen; deshalb bleiben Cover-aware Kosten standardmaessig deaktiviert und pro Command/Export steuerbar.
+- Naechster Schritt: TASK_130 kann lokale Avoidance/ORCA-Light auf den resultierenden Wunschpfaden aufsetzen, ohne die globale Pfadkostenlogik zu ersetzen.
+
+### TASK_130 - Lokale Unit-Avoidance mit ORCA/RVO-Light
+- Status: implementiert
+- Stand: `scripts/tactical/local_avoidance_resolver.gd` fuehrt eine kleine deterministische ORCA/RVO-Light-Schicht ein: registrierte Units werden pro Tick in einen Spatial-Grid gelegt, Nachbarn sortiert abgefragt und die lokale Wunschvelocity mit Separation-/Sidestep-Korrekturen geclippt.
+- Stand: `SimulationRoot` integriert die Avoidance optional nach globalem Pfadbau und vor dem autoritativen Positions-Commit. Die Route bleibt HPA/A*, Avoidance veraendert nur die lokale Velocity zum naechsten Pathpoint. Nach jedem Move wird der Spatial-Grid aktualisiert, damit spaeter verarbeitete Commands aktuelle Positionen sehen.
+- Stand: Terrain-Sicherheit prueft korrigierte Zielpositionen gegen `TerrainRegistry.is_walkable()`. Nicht-walkable Korrekturen werden verworfen oder bei komplett geblockter Bewegung auf `Vector2.ZERO` reduziert. `get_local_avoidance_debug_snapshot()` liefert Neighbor Count, Avoidance Velocity, Korrektur, Stuck-Zeit, Deadlock-Markierung, verworfene Korrekturen und Dauer.
+- Offene Punkte: Kein vollstaendiger RVO2-/ORCA-LP-Solver, keine Formation-Slot-Swaps und keine tausende-Units-Optimierung. Die Schicht ist bewusst V1 und standardmaessig abschaltbar.
+- Risiken: Zu starke lokale Korrekturen koennen Formationen optisch lockern; deshalb sind Radius, Nachbarschaft, Debug und Aktivierung explizit konfigurierbar.
+- Naechster Schritt: Phase 17N ist damit lokal abgeschlossen; weitere Navigationserweiterungen sollten erst nach Spielgefuehl-/Performance-Review geschnitten werden.
+
+### TASK_131 - Navigation Benchmark Harness
+- Status: implementiert
+- Stand: `scripts/tests/navigation_benchmark_harness.gd` fuehrt reproduzierbare Headless-Benchmarks fuer offene Pfadqueries, Korridor/Engpass-Queries, Cover-/Exposure-Routing, Navigation-Budget-Delays und lokale Avoidance-Ausfuehrung aus.
+- Stand: `scripts/tests/task_131_verifier.gd` prueft, dass HPA/A*, Cover-aware HPA, Budgeting und Avoidance getrennt messbare Dictionary-Metriken liefern. Der Output enthaelt Query-Zeiten, Pfadlaengen, Exposure-/Cover-Summen, Delay-/Pending-Werte sowie Stuck-/Deadlock-Metriken.
+- Offene Punkte: Keine produktive JPS-, D* Lite-, CBS- oder Reservierungslogik. Der Harness misst vorhandene Systeme und bleibt unter `scripts/tests`.
+- Risiken: Benchmark-Szenarien sind kleine Laborkarten und ersetzen keine grossen Playtests in `mission_fireteam_dev_test.tscn`; sie schaffen aber eine stabile Basis fuer Folgeentscheidungen.
+- Naechster Schritt: TASK_151 kann Engpass-Reservierung/MAPF-Light auf Basis der gemessenen Bottleneck- und Avoidance-Werte schneiden.
+
+### TASK_151-153 - Geplante Folge-Labs
+- Status: geplant
+- Stand: Aus den zuletzt bewerteten Vorschlaegen bleiben drei bewusst nachgelagerte Tasks offen: `TASK_151 - Engpass-Reservierung und MAPF-Light`, `TASK_152 - Seeded Cover Placement Lab` und `TASK_153 - 3D Transparency Material Presets`.
+- Offene Punkte: Diese Tasks sind noch nicht implementiert und sollen erst nach Review der Navigation-/Movement-Spielgefuehlbasis gestartet werden.
+- Risiken: CBS/MAPF, JPS/D* Lite, automatische Cover-Verteilung und Transparenz-Presets beruehren unterschiedliche Schichten; deshalb sind sie getrennt geplant und nicht als gemeinsamer Grossumbau gebuendelt.
+- Naechster Schritt: Bei Bedarf `TASK_151` starten, wenn Engpaesse nach den Benchmark-Werten weiterhin der groesste Bewegungsschmerz sind.
+
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert
 - Stand: Der Meta-Layer fuehrt jetzt durchgaengig auf die echte eingebettete Missionskarte statt auf eine separate read-only Overview. Homebase, FOB und Mission teilen dieselbe kompakte Navigation, die Missions-Tactical-UI traegt direkt die gemeinsamen Block-Labels `#15` bis `#18`, und der Missionspfad bleibt auf dieselbe Kartenbasis, dieselben LZ-/Approach-Marker sowie denselben Dropship-Handoff verdrahtet wie die spaetere Live-Mission.

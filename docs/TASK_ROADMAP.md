@@ -275,6 +275,8 @@ Phase 17N – HPA Navigation und Performance
 TASK_126 – HPA Navigation Foundation
 TASK_127 – HPA Pathfinder Integration
 TASK_128 – Navigation Budgeting und Debug
+TASK_129 – Deckungsbewusste Pfade mit HPA und Subgoal-Vorbereitung
+TASK_130 – Lokale Unit-Avoidance mit ORCA/RVO-Light
 
 Phase 18 – Erweiterung (spaeter)
 Skillsystem
@@ -284,6 +286,12 @@ Multiplayer
 Map Editor
 Fahrzeuge
 komplexe Taktik
+Phase 18A - Navigation-, Cover- und Rendering-Labs
+TASK_131 - Navigation Benchmark Harness
+TASK_151 - Engpass-Reservierung und MAPF-Light
+TASK_152 - Seeded Cover Placement Lab
+TASK_153 - 3D Transparency Material Presets
+
 Batch-Empfehlung
 
 Codex soll Tasks in kleinen Gruppen bearbeiten:
