@@ -63,6 +63,14 @@ func find_path(from_grid: Vector2i, to_grid: Vector2i, registry) -> Array:
 	return result
 
 
+func get_neighbor_directions() -> Array:
+	return NEIGHBOR_DIRECTIONS.duplicate()
+
+
+func can_traverse_step(current_grid: Vector2i, neighbor_grid: Vector2i, registry) -> bool:
+	return _is_neighbor_walkable(current_grid, neighbor_grid, registry)
+
+
 func _pop_lowest_f_score(open_set: Array, f_score: Dictionary) -> Vector2i:
 	var best_index: int = 0
 	var best_score: float = float(f_score.get(open_set[0], INF))

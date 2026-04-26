@@ -930,6 +930,15 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Der neue Fallback ist konservativ. Wenn ein Ziel nicht erreichbar ist, bleibt die Unit am naechsten stabil erreichbaren walkable Punkt statt optisch in Richtung Blocker weiterzudruecken.
 - Naechster Schritt: Die Area-Order-Reihe 121-125 ist damit fachlich abgeschlossen; weitere Navigationsthemen sollten als eigener Task mit klarer Path-Follow- oder Nav-Stack-Zielsetzung geschnitten werden.
 
+### TASK_126 - HPA Navigation Foundation
+- Status: implementiert
+- Stand: `scripts/terrain/hpa_navigation_graph.gd` baut aus der vorhandenen `TerrainRegistry` eine abgeleitete HPA-Grundlage mit deterministischen Clustern, walkable Tiles, lokalen Komponenten, Portalen und abstrakten Komponenten-Nachbarschaften.
+- Stand: Portale nutzen dieselben Traversal-Regeln wie `TerrainPathfinder`, inklusive Diagonalbewegung ohne Corner-Cutting durch Blocker sowie Hoehen-/Slope-Regeln. `TerrainPathfinder` exposes dafuer eine kleine lesende API fuer Neighbor-Richtungen und Step-Pruefung.
+- Stand: `scripts/tests/task_126_verifier.gd` deckt Graph-Aufbau, Cluster-Zuordnung, Blocker-Komponenten, walkable Portale, abstrakte Nachbarschaften und Diagonal-Corner-Regeln ab.
+- Offene Punkte: HPA wird in diesem Task noch nicht fuer Live-Movement verwendet. Die Integration in `SimulationRoot` und lange Pfadqueries bleibt TASK_127.
+- Risiken: Cluster-Groesse und Portal-Dichte sind V1-Parameter. Spaetere Performance-Arbeit sollte diese Werte ueber Messungen aus TASK_128 justieren.
+- Naechster Schritt: TASK_127 kann den HPA-Graphen in einen hierarchischen Pathfinder ueberfuehren und optional im autoritativen Move-Pfad verwenden.
+
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert
 - Stand: Der Meta-Layer fuehrt jetzt durchgaengig auf die echte eingebettete Missionskarte statt auf eine separate read-only Overview. Homebase, FOB und Mission teilen dieselbe kompakte Navigation, die Missions-Tactical-UI traegt direkt die gemeinsamen Block-Labels `#15` bis `#18`, und der Missionspfad bleibt auf dieselbe Kartenbasis, dieselben LZ-/Approach-Marker sowie denselben Dropship-Handoff verdrahtet wie die spaetere Live-Mission.
