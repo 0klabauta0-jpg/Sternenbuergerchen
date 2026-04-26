@@ -3,7 +3,7 @@
 ## Ziel
 Nachdem globale Pfade deckungsbewusster und budgetiert sind, soll eine kleine lokale Avoidance-Schicht Units fluessiger aneinander vorbeifuehren. ORCA/RVO wird dabei nicht als neue Wegfindung eingefuehrt, sondern nur als lokale Geschwindigkeitskorrektur auf Basis des bestehenden autoritativen Move-Pfads.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Voraussetzung
 - `TASK_128 - Navigation Budgeting und Debug`
@@ -53,12 +53,12 @@ Nachdem globale Pfade deckungsbewusster und budgetiert sind, soll eine kleine lo
 - Keine UI-Callbacks mit Gameplay-State.
 
 ## Akzeptanzkriterien
-- [ ] Zwei kreuzende Fireteams vermeiden sichtbares Stapeln besser als ohne Avoidance.
-- [ ] Engpass-Test erzeugt keinen dauerhaften Deadlock ohne Debug-Markierung.
-- [ ] Avoidance bewegt keine Unit auf ein nicht-walkable Tile.
-- [ ] HPA-/Path-Follow-Verhalten bleibt erhalten.
-- [ ] Debug-Snapshot nennt Neighbor Count, Avoidance-Velocity, Stuck-Zeit und verworfene Korrekturen.
-- [ ] Bestehende Movement-, HPA-, Cover-aware- und Area-Tests bleiben gruen.
+- [x] Zwei kreuzende Fireteams vermeiden sichtbares Stapeln besser als ohne Avoidance.
+- [x] Engpass-Test erzeugt keinen dauerhaften Deadlock ohne Debug-Markierung.
+- [x] Avoidance bewegt keine Unit auf ein nicht-walkable Tile.
+- [x] HPA-/Path-Follow-Verhalten bleibt erhalten.
+- [x] Debug-Snapshot nennt Neighbor Count, Avoidance-Velocity, Stuck-Zeit und verworfene Korrekturen.
+- [x] Bestehende Movement-, HPA-, Cover-aware- und Area-Tests bleiben gruen.
 
 ## Erwartetes Ergebnis
 - Fireteam-Bewegung wirkt fluessiger, besonders wenn mehrere Units oder Fireteams kreuzen.
@@ -66,18 +66,23 @@ Nachdem globale Pfade deckungsbewusster und budgetiert sind, soll eine kleine lo
 - ORCA/RVO bleibt eine lokale Korrekturschicht statt einer zweiten Navigation.
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_130_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_129_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_128_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_127_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_110_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/fireteam_dev_testing_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_130_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_129_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_128_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_127_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_110_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/fireteam_dev_testing_verifier.gd`
 
-## Dateien (voraussichtlich)
+## Dateien
 - `scripts/core/simulation_root.gd`
 - `scripts/tactical/local_avoidance_resolver.gd`
-- `scripts/registries/unit_registry.gd`
 - `scripts/tests/task_130_verifier.gd`
+
+## Ergebnis
+- `LocalAvoidanceResolver` baut pro Tick einen deterministischen Spatial-Grid aus registrierten Units und liefert eine ORCA/RVO-Light-nahe lokale Separation-Velocity.
+- `SimulationRoot` kann lokale Avoidance optional aktivieren und clippt damit nur die lokale Velocity zum naechsten Pathpoint; globale HPA-/A*-Pfade bleiben Quelle der Route.
+- Terrain-Sicherheit verwirft Korrekturen, die auf nicht-walkable Tiles fuehren wuerden.
+- Debug-Snapshot pro Unit zeigt Neighbor Count, Avoidance Velocity, Korrektur, Stuck-Zeit, Deadlock-Markierung und verworfene Korrekturen.
 
 ## Risiken
 - Lokale Avoidance kann taktische Formationen verwischen, wenn sie zu stark eingreift.

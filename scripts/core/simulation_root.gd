@@ -12,6 +12,7 @@ const TERRAIN_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/terra
 const HPA_NAVIGATION_GRAPH_SCRIPT: GDScript = preload("res://scripts/terrain/hpa_navigation_graph.gd")
 const HPA_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/hpa_pathfinder.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
+const LOCAL_AVOIDANCE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/local_avoidance_resolver.gd")
 const CAPTURE_PROGRESS_PER_TICK: float = 0.01
 const HPA_NAVIGATION_CLUSTER_SIZE: int = 8
 
@@ -37,6 +38,14 @@ const HEIGHT_DISADVANTAGE_ACCURACY_PENALTY: float = 0.05
 @export_range(0.0, 8.0, 0.1) var navigation_default_exposure_weight: float = 0.8
 @export_range(0.0, 8.0, 0.1) var navigation_default_cover_weight: float = 0.25
 @export_range(1.0, 64.0, 1.0) var navigation_exposure_max_grid_distance: float = 8.0
+@export var local_avoidance_enabled: bool = false
+@export var local_avoidance_debug_enabled: bool = false
+@export_range(4.0, 96.0, 1.0) var local_avoidance_agent_radius: float = 18.0
+@export_range(8.0, 192.0, 1.0) var local_avoidance_neighbor_radius: float = 56.0
+@export_range(8.0, 192.0, 1.0) var local_avoidance_spatial_cell_size: float = 64.0
+@export_range(1, 32, 1) var local_avoidance_max_neighbors: int = 8
+@export_range(0.1, 5.0, 0.1) var local_avoidance_stuck_threshold_seconds: float = 1.0
+@export_range(0.0, 60.0, 1.0) var local_avoidance_stuck_speed_threshold: float = 5.0
 
 var command_queue: Array = []
 var effects_queue: Array = []
@@ -64,6 +73,10 @@ var _navigation_last_delay_reason: String = ""
 var _navigation_last_tick_queries: Array = []
 var _navigation_most_expensive_query: Dictionary = {}
 var _navigation_last_path_metrics: Dictionary = {}
+var _local_avoidance_resolver = LOCAL_AVOIDANCE_RESOLVER_SCRIPT.new()
+var _local_avoidance_prepared_tick: int = -1
+var _local_avoidance_debug_by_unit_id: Dictionary = {}
+var _local_avoidance_stuck_seconds_by_unit_id: Dictionary = {}
 
 
 func _init() -> void:
@@ -149,6 +162,30 @@ func get_navigation_debug_snapshot() -> Dictionary:
 		"most_expensive_query": _navigation_most_expensive_query.duplicate(true),
 		"last_path_metrics": _navigation_last_path_metrics.duplicate(true),
 	}
+
+
+func set_local_avoidance_enabled(enabled: bool) -> void:
+	local_avoidance_enabled = enabled
+	_local_avoidance_prepared_tick = -1
+	if not local_avoidance_enabled:
+		_local_avoidance_resolver.clear()
+
+
+func set_local_avoidance_debug_enabled(enabled: bool) -> void:
+	local_avoidance_debug_enabled = enabled
+	if not local_avoidance_debug_enabled:
+		_local_avoidance_debug_by_unit_id.clear()
+
+
+func get_local_avoidance_debug_snapshot(unit_id: String = "") -> Variant:
+	if unit_id.strip_edges().is_empty():
+		var result: Array = []
+		var unit_ids: Array = _local_avoidance_debug_by_unit_id.keys()
+		unit_ids.sort()
+		for unit_id_variant in unit_ids:
+			result.append(Dictionary(_local_avoidance_debug_by_unit_id.get(unit_id_variant, {})).duplicate(true))
+		return result
+	return Dictionary(_local_avoidance_debug_by_unit_id.get(unit_id.strip_edges(), {})).duplicate(true)
 
 
 func clear_queues() -> void:
@@ -284,6 +321,7 @@ func _physics_process(delta: float) -> void:
 	tick_counter += 1
 	is_processing_tick = true
 	_begin_navigation_budget_tick()
+	_prepare_local_avoidance_tick()
 
 	var commands: Array = _drain_queue(command_queue)
 	_process_commands(commands, delta)
@@ -732,12 +770,19 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 		node_2d.position = target_position
 		if unit.has_method("refresh_terrain_readability"):
 			unit.call("refresh_terrain_readability")
+		_update_local_avoidance_agent_position(unit_id, node_2d.global_position)
 		return
 
 	if direction.is_zero_approx():
 		return
 
-	node_2d.position = current_position + direction.normalized() * step_distance
+	var desired_velocity: Vector2 = direction.normalized() * (step_distance / maxf(delta, 0.0001))
+	var safe_velocity: Vector2 = _resolve_local_avoidance_velocity(cmd, node_2d, current_position, desired_velocity, desired_velocity.length(), delta, null)
+	var displacement: Vector2 = safe_velocity * delta
+	if displacement.length() > step_distance:
+		displacement = displacement.normalized() * step_distance
+	node_2d.position = current_position + displacement
+	_update_local_avoidance_agent_position(unit_id, node_2d.global_position)
 	if unit.has_method("refresh_terrain_readability"):
 		unit.call("refresh_terrain_readability")
 	if bool(cmd.get("requeue_until_target", true)):
@@ -754,6 +799,10 @@ func _apply_move_command_with_terrain(
 ) -> void:
 	var path_world_points: Array = _extract_or_build_path_world_points(cmd, unit_node, unit_node.global_position, target_position, terrain_registry)
 	if path_world_points.is_empty():
+		return
+
+	if _is_local_avoidance_enabled_for_command(cmd):
+		_apply_move_command_with_terrain_avoidance(cmd, unit_node, target_position, move_speed_factor, delta, terrain_registry, path_world_points)
 		return
 
 	var current_position: Vector2 = unit_node.global_position
@@ -776,6 +825,60 @@ func _apply_move_command_with_terrain(
 		step_distance = 0.0
 
 	unit_node.global_position = current_position
+	_update_local_avoidance_agent_position(_extract_unit_id_for_path_recompute(unit_node), unit_node.global_position)
+	cmd["path"] = path_world_points.duplicate(true)
+	if unit_node.has_method("refresh_terrain_readability"):
+		unit_node.call("refresh_terrain_readability")
+
+	if bool(cmd.get("requeue_until_target", true)) and (not path_world_points.is_empty() or current_position.distance_to(target_position) > 0.5):
+		enqueue_command(cmd.duplicate(true))
+
+
+func _apply_move_command_with_terrain_avoidance(
+	cmd: Dictionary,
+	unit_node: Node2D,
+	target_position: Vector2,
+	move_speed_factor: float,
+	delta: float,
+	terrain_registry,
+	path_world_points: Array
+) -> void:
+	var current_position: Vector2 = unit_node.global_position
+	while not path_world_points.is_empty():
+		var first_waypoint: Vector2 = _coerce_vector2(path_world_points[0], target_position)
+		if current_position.distance_to(first_waypoint) > 0.001:
+			break
+		path_world_points.pop_front()
+
+	if path_world_points.is_empty():
+		unit_node.global_position = current_position
+		cmd["path"] = []
+		_update_local_avoidance_agent_position(_extract_unit_id_for_path_recompute(unit_node), unit_node.global_position)
+		if unit_node.has_method("refresh_terrain_readability"):
+			unit_node.call("refresh_terrain_readability")
+		return
+
+	var next_waypoint: Vector2 = _coerce_vector2(path_world_points[0], target_position)
+	var direction_to_waypoint: Vector2 = next_waypoint - current_position
+	if direction_to_waypoint.is_zero_approx():
+		cmd["path"] = path_world_points.duplicate(true)
+		return
+
+	var step_distance: float = MOVE_SPEED_PER_SECOND * move_speed_factor * _extract_surface_speed_factor(unit_node) * delta
+	var distance_to_waypoint: float = direction_to_waypoint.length()
+	var desired_step_distance: float = minf(step_distance, distance_to_waypoint)
+	var desired_velocity: Vector2 = direction_to_waypoint.normalized() * (desired_step_distance / maxf(delta, 0.0001))
+	var safe_velocity: Vector2 = _resolve_local_avoidance_velocity(cmd, unit_node, current_position, desired_velocity, step_distance / maxf(delta, 0.0001), delta, terrain_registry)
+	var displacement: Vector2 = safe_velocity * delta
+	if displacement.length() > desired_step_distance:
+		displacement = displacement.normalized() * desired_step_distance
+	current_position += displacement
+	if current_position.distance_to(next_waypoint) <= 0.5:
+		current_position = next_waypoint
+		path_world_points.pop_front()
+
+	unit_node.global_position = current_position
+	_update_local_avoidance_agent_position(_extract_unit_id_for_path_recompute(unit_node), unit_node.global_position)
 	cmd["path"] = path_world_points.duplicate(true)
 	if unit_node.has_method("refresh_terrain_readability"):
 		unit_node.call("refresh_terrain_readability")
@@ -1031,6 +1134,130 @@ func _duplicate_dictionary_array(values: Array) -> Array:
 		if typeof(value) == TYPE_DICTIONARY:
 			result.append(Dictionary(value).duplicate(true))
 	return result
+
+
+func _prepare_local_avoidance_tick() -> void:
+	if not local_avoidance_enabled:
+		_local_avoidance_prepared_tick = -1
+		return
+	if _local_avoidance_prepared_tick == tick_counter:
+		return
+	var unit_registry = _get_unit_registry()
+	if unit_registry == null or not unit_registry.has_method("get_all_units"):
+		_local_avoidance_resolver.clear()
+		_local_avoidance_prepared_tick = tick_counter
+		return
+	_local_avoidance_resolver.call(
+		"build_from_units",
+		Array(unit_registry.call("get_all_units")),
+		local_avoidance_agent_radius,
+		local_avoidance_spatial_cell_size
+	)
+	_local_avoidance_prepared_tick = tick_counter
+
+
+func _is_local_avoidance_enabled_for_command(cmd: Dictionary) -> bool:
+	if cmd.has("local_avoidance_enabled"):
+		return bool(cmd.get("local_avoidance_enabled", false))
+	return local_avoidance_enabled
+
+
+func _resolve_local_avoidance_velocity(
+	cmd: Dictionary,
+	unit_node: Node2D,
+	current_position: Vector2,
+	desired_velocity: Vector2,
+	max_speed: float,
+	delta: float,
+	terrain_registry
+) -> Vector2:
+	if unit_node == null or not _is_local_avoidance_enabled_for_command(cmd) or desired_velocity.is_zero_approx():
+		return desired_velocity
+	_prepare_local_avoidance_tick()
+	var unit_id: String = _extract_unit_id_for_path_recompute(unit_node)
+	var started_usec: int = Time.get_ticks_usec()
+	var result: Dictionary = Dictionary(_local_avoidance_resolver.call(
+		"solve_velocity",
+		unit_id,
+		current_position,
+		desired_velocity,
+		max_speed,
+		local_avoidance_neighbor_radius,
+		local_avoidance_max_neighbors
+	))
+	var safe_velocity: Vector2 = Vector2(result.get("safe_velocity", desired_velocity))
+	var discarded_correction: bool = false
+	var discard_reason: String = ""
+	if terrain_registry != null:
+		var candidate_position: Vector2 = current_position + safe_velocity * delta
+		if not _is_local_avoidance_position_walkable(candidate_position, terrain_registry):
+			var desired_position: Vector2 = current_position + desired_velocity * delta
+			discarded_correction = true
+			discard_reason = "non_walkable_correction"
+			if _is_local_avoidance_position_walkable(desired_position, terrain_registry):
+				safe_velocity = desired_velocity
+			else:
+				safe_velocity = Vector2.ZERO
+				discard_reason = "non_walkable_desired"
+	result["safe_velocity"] = safe_velocity
+	result["correction_velocity"] = safe_velocity - desired_velocity
+	result["discarded_correction"] = discarded_correction
+	result["discard_reason"] = discard_reason
+	result["duration_usec"] = Time.get_ticks_usec() - started_usec
+	_record_local_avoidance_debug(cmd, unit_id, result, delta)
+	return safe_velocity
+
+
+func _is_local_avoidance_position_walkable(position: Vector2, terrain_registry) -> bool:
+	if terrain_registry == null or not terrain_registry.has_method("world_to_grid") or not terrain_registry.has_method("is_walkable"):
+		return true
+	return bool(terrain_registry.call("is_walkable", terrain_registry.call("world_to_grid", position)))
+
+
+func _update_local_avoidance_agent_position(unit_id: String, position: Vector2) -> void:
+	if unit_id.strip_edges().is_empty() or not local_avoidance_enabled:
+		return
+	if _local_avoidance_prepared_tick != tick_counter:
+		return
+	_local_avoidance_resolver.call("update_agent_position", unit_id, position)
+
+
+func _record_local_avoidance_debug(cmd: Dictionary, unit_id: String, result: Dictionary, delta: float) -> void:
+	var desired_velocity: Vector2 = Vector2(result.get("desired_velocity", Vector2.ZERO))
+	var safe_velocity: Vector2 = Vector2(result.get("safe_velocity", desired_velocity))
+	var desired_speed: float = desired_velocity.length()
+	var safe_speed: float = safe_velocity.length()
+	var stuck_seconds: float = float(_local_avoidance_stuck_seconds_by_unit_id.get(unit_id, 0.0))
+	if desired_speed > local_avoidance_stuck_speed_threshold and safe_speed <= local_avoidance_stuck_speed_threshold:
+		stuck_seconds += delta
+	else:
+		stuck_seconds = maxf(stuck_seconds - delta, 0.0)
+	_local_avoidance_stuck_seconds_by_unit_id[unit_id] = stuck_seconds
+	var deadlock_marked: bool = stuck_seconds >= local_avoidance_stuck_threshold_seconds
+	if deadlock_marked:
+		cmd["local_avoidance_deadlock"] = true
+		cmd["local_avoidance_repath_requested"] = true
+	if not local_avoidance_debug_enabled:
+		return
+	var neighbors: Array = Array(result.get("neighbors", []))
+	var neighbor_ids: Array = []
+	for neighbor_variant in neighbors:
+		neighbor_ids.append(String(Dictionary(neighbor_variant).get("unit_id", "")))
+	_local_avoidance_debug_by_unit_id[unit_id] = {
+		"tick": tick_counter,
+		"unit_id": unit_id,
+		"neighbor_count": int(result.get("neighbor_count", 0)),
+		"neighbor_ids": neighbor_ids,
+		"collision_risk_count": int(result.get("collision_risk_count", 0)),
+		"desired_velocity": desired_velocity,
+		"avoidance_velocity": safe_velocity,
+		"correction_velocity": Vector2(result.get("correction_velocity", Vector2.ZERO)),
+		"stuck_time_seconds": stuck_seconds,
+		"deadlock_marked": deadlock_marked,
+		"discarded_correction": bool(result.get("discarded_correction", false)),
+		"discard_reason": String(result.get("discard_reason", "")),
+		"duration_usec": int(result.get("duration_usec", 0)),
+	}
 
 
 func _extract_unit_id_for_path_recompute(unit) -> String:

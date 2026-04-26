@@ -966,6 +966,15 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Hohe Exposure-/Cover-Gewichte koennen Umwege stark bevorzugen; deshalb bleiben Cover-aware Kosten standardmaessig deaktiviert und pro Command/Export steuerbar.
 - Naechster Schritt: TASK_130 kann lokale Avoidance/ORCA-Light auf den resultierenden Wunschpfaden aufsetzen, ohne die globale Pfadkostenlogik zu ersetzen.
 
+### TASK_130 - Lokale Unit-Avoidance mit ORCA/RVO-Light
+- Status: implementiert
+- Stand: `scripts/tactical/local_avoidance_resolver.gd` fuehrt eine kleine deterministische ORCA/RVO-Light-Schicht ein: registrierte Units werden pro Tick in einen Spatial-Grid gelegt, Nachbarn sortiert abgefragt und die lokale Wunschvelocity mit Separation-/Sidestep-Korrekturen geclippt.
+- Stand: `SimulationRoot` integriert die Avoidance optional nach globalem Pfadbau und vor dem autoritativen Positions-Commit. Die Route bleibt HPA/A*, Avoidance veraendert nur die lokale Velocity zum naechsten Pathpoint. Nach jedem Move wird der Spatial-Grid aktualisiert, damit spaeter verarbeitete Commands aktuelle Positionen sehen.
+- Stand: Terrain-Sicherheit prueft korrigierte Zielpositionen gegen `TerrainRegistry.is_walkable()`. Nicht-walkable Korrekturen werden verworfen oder bei komplett geblockter Bewegung auf `Vector2.ZERO` reduziert. `get_local_avoidance_debug_snapshot()` liefert Neighbor Count, Avoidance Velocity, Korrektur, Stuck-Zeit, Deadlock-Markierung, verworfene Korrekturen und Dauer.
+- Offene Punkte: Kein vollstaendiger RVO2-/ORCA-LP-Solver, keine Formation-Slot-Swaps und keine tausende-Units-Optimierung. Die Schicht ist bewusst V1 und standardmaessig abschaltbar.
+- Risiken: Zu starke lokale Korrekturen koennen Formationen optisch lockern; deshalb sind Radius, Nachbarschaft, Debug und Aktivierung explizit konfigurierbar.
+- Naechster Schritt: Phase 17N ist damit lokal abgeschlossen; weitere Navigationserweiterungen sollten erst nach Spielgefuehl-/Performance-Review geschnitten werden.
+
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert
 - Stand: Der Meta-Layer fuehrt jetzt durchgaengig auf die echte eingebettete Missionskarte statt auf eine separate read-only Overview. Homebase, FOB und Mission teilen dieselbe kompakte Navigation, die Missions-Tactical-UI traegt direkt die gemeinsamen Block-Labels `#15` bis `#18`, und der Missionspfad bleibt auf dieselbe Kartenbasis, dieselben LZ-/Approach-Marker sowie denselben Dropship-Handoff verdrahtet wie die spaetere Live-Mission.
