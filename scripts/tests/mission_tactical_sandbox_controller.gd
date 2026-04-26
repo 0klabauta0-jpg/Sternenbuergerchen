@@ -2776,6 +2776,8 @@ func _build_area_feedback_mode_text(command_type: String, state: Dictionary) -> 
 func _build_area_feedback_approach_text(state: Dictionary, prefix: String) -> String:
 	if String(state.get("status", "")).strip_edges().to_lower() == "engaging":
 		return "Kontakt suchen"
+	if String(state.get("status", "")).strip_edges().to_lower() == "occupying":
+		return "rueckt ins Gebiet"
 	if String(state.get("status", "")).strip_edges().to_lower() == "secured":
 		return "haltet Gebiet"
 	var center_position: Vector2 = Vector2(state.get("center_position", Vector2.ZERO))
@@ -6131,40 +6133,79 @@ func _update_area_attack_execution(_delta: float) -> void:
 	if preview_mode or _area_attack_execution_by_fireteam.is_empty():
 		return
 	var did_change: bool = false
+	var did_start_occupation: bool = false
+	var did_secure_area: bool = false
 	for fireteam_id in _area_attack_execution_by_fireteam.keys().duplicate():
 		var state: Dictionary = Dictionary(_area_attack_execution_by_fireteam.get(fireteam_id, {})).duplicate(true)
 		if state.is_empty() or bool(state.get("waiting_for_go", false)):
+			continue
+		var status: String = String(state.get("status", "approaching")).strip_edges().to_lower()
+		if status == "occupying":
+			if not _are_area_attack_assignments_reached(state):
+				continue
+			for assignment_variant in Array(state.get("assignments", [])):
+				_issue_area_attack_unit_command(
+					String(fireteam_id),
+					Dictionary(assignment_variant),
+					int(state.get("phase", _get_live_order_phase_index())),
+					true,
+					String(state.get("area_order_id", "")),
+					String(state.get("command_type", "take"))
+				)
+			state["status"] = "secured"
+			state["waiting_for_go"] = true
+			_area_attack_execution_by_fireteam[fireteam_id] = state
+			did_change = true
+			did_secure_area = true
 			continue
 		if not _are_area_attack_assignments_reached(state):
 			continue
 		var target_area: Dictionary = Dictionary(state.get("target_area", {})).duplicate(true)
 		var area_cleared: bool = _is_attack_area_cleared(target_area)
-		var next_status: String = "secured" if area_cleared else "engaging"
+		var next_status: String = "occupying" if area_cleared else "engaging"
 		if String(state.get("status", "")) != next_status:
 			state["status"] = next_status
 			did_change = true
 		if not area_cleared:
 			_area_attack_execution_by_fireteam[fireteam_id] = state
 			continue
-		for assignment_variant in Array(state.get("assignments", [])):
+		var occupation_assignments: Array = _build_attack_area_occupation_assignments(String(fireteam_id), state)
+		if occupation_assignments.is_empty():
+			occupation_assignments = Array(state.get("assignments", [])).duplicate(true)
+		state["approach_assignments"] = Array(state.get("assignments", [])).duplicate(true)
+		state["assignments"] = occupation_assignments.duplicate(true)
+		for assignment_variant in occupation_assignments:
 			_issue_area_attack_unit_command(
 				String(fireteam_id),
 				Dictionary(assignment_variant),
 				int(state.get("phase", _get_live_order_phase_index())),
-				true,
+				false,
 				String(state.get("area_order_id", "")),
 				String(state.get("command_type", "take"))
 			)
-		state["waiting_for_go"] = true
 		_area_attack_execution_by_fireteam[fireteam_id] = state
 		did_change = true
+		did_start_occupation = true
 	if not did_change:
 		return
-	_last_command_text = "AREA GESICHERT"
+	_last_command_text = "AREA GESICHERT" if did_secure_area else "AREA BESETZEN" if did_start_occupation else "AREA KONTAKT"
 	_refresh_order_visuals()
 	refresh_fireteam_security_state()
 	_update_ui()
 	_emit_planning_state_changed()
+
+
+func _build_attack_area_occupation_assignments(fireteam_id: String, state: Dictionary) -> Array:
+	_ensure_area_order_resolver()
+	if _area_order_resolver == null:
+		return []
+	var area_order = _area_orders_by_id.get(String(state.get("area_order_id", "")), null)
+	if area_order == null:
+		return []
+	var units: Array = _get_fireteam_units(fireteam_id, true)
+	var leader = _resolve_fireteam_leader_for_behavior(fireteam_id)
+	var resolution: Dictionary = Dictionary(_area_order_resolver.call("resolve_occupy_area", area_order, units, leader, _get_terrain_registry()))
+	return Array(resolution.get("assignments", [])).duplicate(true)
 
 
 func _are_area_attack_assignments_reached(state: Dictionary) -> bool:
