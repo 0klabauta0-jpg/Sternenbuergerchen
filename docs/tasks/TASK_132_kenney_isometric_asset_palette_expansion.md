@@ -1,4 +1,4 @@
-# TASK_154 - Kenney Isometric Asset Palette Expansion
+# TASK_132 - Kenney Isometric Asset Palette Expansion
 
 ## Ziel
 Der Map-Editor soll mehr Assets aus `res://Assets/kenney_space-kit/Isometric/` nutzbar machen, ohne die Palette unuebersichtlich zu fluten oder Gameplay-Semantik in reine Deko-Assets zu mischen.
@@ -16,6 +16,10 @@ Der Map-Editor soll mehr Assets aus `res://Assets/kenney_space-kit/Isometric/` n
 - Nicht jedes Sprite sollte sofort Gameplay-Werte bekommen. Viele Assets sind zunaechst reine Editor-/Visual-Objekte.
 
 ## Umfang
+0. Asset-Audit vor der Auswahl:
+   - Dateinamen im Kenney-Isometric-Ordner nach Familien und Richtungssuffixen gruppieren.
+   - Familien mit vollstaendigen Richtungssaetzen bevorzugen (`_NE`, `_NW`, `_SE`, `_SW`).
+   - Ergebnis als kleine Audit-Summary im Verifier ausgeben, damit die Auswahl nachvollziehbar bleibt.
 1. Asset-Auswahl kuratieren:
    - Erste sinnvolle V1-Gruppen: `deko`, `technik`, `gebaeude`, `plattformen`, `pipes`, `rails`, `crater`, `fahrzeuge`.
    - Pro Gruppe eine kleine, verwendbare Auswahl statt kompletter Masseneintrag.
@@ -56,6 +60,7 @@ Der Map-Editor soll mehr Assets aus `res://Assets/kenney_space-kit/Isometric/` n
 ## Akzeptanzkriterien
 - [ ] Mindestens 30 neue nutzbare Asset-Tile-Typen aus dem Kenney-Isometric-Ordner sind im Editor verfuegbar.
 - [ ] Mindestens 5 neue Palette-Gruppen sind sichtbar und sinnvoll benannt.
+- [ ] Der Verifier gruppiert vorhandene Kenney-Assets nach Familie/Richtung und markiert die kuratierte Auswahl.
 - [ ] Alle neuen `texture_path`-Eintraege zeigen auf existierende Dateien.
 - [ ] Pro neuer Gruppe rendert mindestens ein Beispiel-Asset im gemeinsamen TerrainRenderer.
 - [ ] Bestehende Wall-/Marker-/Editor-Verifier bleiben gruen.
@@ -65,13 +70,13 @@ Der Map-Editor soll mehr Assets aus `res://Assets/kenney_space-kit/Isometric/` n
 Der Editor wird deutlich brauchbarer fuer Map-Blockout und visuelles Dressing: mehr Objekte, Technik, Plattformen und Umgebungsteile koennen direkt platziert werden, waehrend die Runtime weiterhin nur die bekannten Tile-Datenfelder auswertet.
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_154_verifier.gd`
+- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_132_verifier.gd`
 - [ ] `godot_console.exe --headless --path . --script scripts/tests/task_115_verifier.gd`
 - [ ] `godot_console.exe --headless --path . --script scripts/tests/wall_direction_mapping_verifier.gd`
 
 ## Dateien (voraussichtlich)
 - `data/terrain_tile_catalog.json`
-- `scripts/tests/task_154_verifier.gd`
+- `scripts/tests/task_132_verifier.gd`
 - optional: `scripts/terrain/terrain_tile_catalog.gd`
 - optional: `scripts/terrain/terrain_map_renderer.gd`
 

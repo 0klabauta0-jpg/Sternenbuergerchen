@@ -997,12 +997,12 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Das ist zunaechst eine Editor-/Kapazitaetsfreigabe; groessere Live-Teams brauchen weiterhin passende Spawn-/Roster-/Performance-Folgearbeit.
 - Naechster Schritt: Bei Bedarf separate Tasks fuer 50er-Spawnverteilung und Meta-Roster-Skalierung schneiden.
 
-### TASK_154 - Kenney Isometric Asset Palette Expansion
+### TASK_132 - Kenney Isometric Asset Palette Expansion
 - Status: geplant
 - Stand: Fuer den Ausbau des Map-Editors wurde ein eigener Task geschnitten, der mehr Assets aus `res://Assets/kenney_space-kit/Isometric/` kuratiert in den Tile-Katalog und die Editor-Palette bringen soll.
 - Offene Punkte: Auswahl und Defaults pro Asset-Gruppe muessen bewusst getroffen werden; kein Blindimport des gesamten Ordners.
 - Risiken: Grosse Deko-/Gebaeude-Sprites koennen andere Anchor-/Offset-Regeln brauchen und duerfen keine unbeabsichtigte Gameplay-Semantik in Navigation oder LOS einschleusen.
-- Naechster Schritt: TASK_154 starten und zuerst einen Katalog-/Renderer-Verifier fuer existierende Texturpfade und Gruppensichtbarkeit bauen.
+- Naechster Schritt: TASK_132 starten und zuerst einen Katalog-/Renderer-Verifier fuer existierende Texturpfade, Familien-/Richtungserkennung und Gruppensichtbarkeit bauen.
 
 ### TASK_151-153 - Geplante Folge-Labs
 - Status: geplant

@@ -293,7 +293,7 @@ TASK_152 - Seeded Cover Placement Lab
 TASK_153 - 3D Transparency Material Presets
 
 Phase 18B - Editor-Asset-Ausbau
-TASK_154 - Kenney Isometric Asset Palette Expansion
+TASK_132 - Kenney Isometric Asset Palette Expansion
 
 Batch-Empfehlung
 
