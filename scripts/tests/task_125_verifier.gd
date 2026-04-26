@@ -3,6 +3,7 @@ extends SceneTree
 const SIMULATION_ROOT_SCRIPT: GDScript = preload("res://scripts/core/simulation_root.gd")
 const TERRAIN_REGISTRY_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_registry.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
+const TERRAIN_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_pathfinder.gd")
 const UNIT_REGISTRY_SCRIPT: GDScript = preload("res://scripts/registries/unit_registry.gd")
 const TEST_UNIT_SCRIPT: GDScript = preload("res://scripts/npc/test_unit.gd")
 
@@ -17,6 +18,8 @@ func _init() -> void:
 func _run_tests() -> void:
 	print("=== TASK_125 Terrain Blocker Debug + Walkability Verifier ===")
 	_test_non_walkable_rock_target_resolves_stably()
+	_test_open_terrain_uses_diagonal_path_steps()
+	_test_diagonal_path_does_not_cut_blocked_corners()
 	_test_path_around_rock_does_not_step_through_blocker()
 	_test_unreachable_walkable_target_does_not_fall_back_to_direct_line()
 	await _test_tactical_controller_exposes_terrain_move_debug_text()
@@ -37,6 +40,38 @@ func _test_non_walkable_rock_target_resolves_stably() -> void:
 	_assert(String(first.get("blocker_reason", "")) == "target_not_walkable", "Rock target debug names the blocker reason")
 	_assert(first.get("replacement_grid", null) == second.get("replacement_grid", null), "Rock replacement target is stable across repeated resolution")
 	_assert(typeof(first.get("replacement_grid", null)) == TYPE_VECTOR2I and bool(registry.call("is_walkable", first.get("replacement_grid"))), "Rock target replacement points to a walkable grid")
+	registry.free()
+
+
+func _test_open_terrain_uses_diagonal_path_steps() -> void:
+	var context: Dictionary = _make_simulation_context(
+		[
+			Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0),
+			Vector2i(0, 1), Vector2i(1, 1), Vector2i(2, 1),
+			Vector2i(0, 2), Vector2i(1, 2), Vector2i(2, 2),
+		],
+		{},
+		Vector2i(0, 0)
+	)
+	var simulation_root = context["simulation_root"]
+	var registry = context["terrain_registry"]
+	var unit = context["unit"]
+	var target_position: Vector2 = registry.grid_to_world(Vector2i(2, 2))
+	var path: Array = simulation_root.call("_extract_or_build_path_world_points", _build_move_command(unit.get_unit_id(), target_position), unit, unit.global_position, target_position, registry)
+	var path_grids: Array = _world_path_to_grids(path, registry)
+	_assert(path_grids.size() <= 2 and path_grids.has(Vector2i(1, 1)) and path_grids.has(Vector2i(2, 2)), "Open terrain path uses diagonal steps instead of axis-first doglegs")
+	_cleanup_context(context)
+
+
+func _test_diagonal_path_does_not_cut_blocked_corners() -> void:
+	var registry = _make_registry(
+		[Vector2i(0, 0), Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1)],
+		{Vector2i(1, 0): false}
+	)
+	var pathfinder = TERRAIN_PATHFINDER_SCRIPT.new()
+	var path: Array = pathfinder.call("find_path", Vector2i(0, 0), Vector2i(1, 1), registry)
+	var cuts_blocked_corner: bool = path.size() == 2 and Vector2i(path[0]) == Vector2i(0, 0) and Vector2i(path[1]) == Vector2i(1, 1)
+	_assert(not cuts_blocked_corner and path.has(Vector2i(0, 1)), "Diagonal pathing routes around blocked tile corners instead of cutting through them")
 	registry.free()
 
 
@@ -171,6 +206,13 @@ func _build_move_command(unit_id: String, target_position: Vector2) -> Dictionar
 		"move_speed_factor": 1.0,
 		"requeue_until_target": true,
 	}
+
+
+func _world_path_to_grids(path: Array, registry) -> Array:
+	var result: Array = []
+	for waypoint_variant in path:
+		result.append(registry.call("world_to_grid", Vector2(waypoint_variant)))
+	return result
 
 
 func _load_scene() -> Node:
