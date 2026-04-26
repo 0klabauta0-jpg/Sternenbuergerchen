@@ -3,7 +3,7 @@
 ## Ziel
 Das Panel `#17 SELECTED FIRETEAM` soll Area Orders lesbar machen, ohne die NPCs auf der Karte wieder mit Text zu ueberladen. Der Spieler soll verstehen, welchen Bereich das Fireteam gerade bearbeitet, welchen Modus es nutzt und ob es wartet, verteidigt, angreift oder Kontakt hat.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT
 
 ## Voraussetzung
 - `TASK_121 - Area Order Marker`
@@ -40,11 +40,25 @@ Das Panel `#17 SELECTED FIRETEAM` soll Area Orders lesbar machen, ohne die NPCs 
 - Keine per-frame Komplett-Rebuilds; bestehende Refresh-/Dirty-Pfade nutzen.
 
 ## Akzeptanzkriterien
-- [ ] Area Order wird in #17 mit Typ, Groesse und Status angezeigt.
-- [ ] Defend/Attack/Take sind sprachlich klar unterscheidbar.
-- [ ] NPCs auf der Map bleiben lesbar und werden nicht wieder mit langen Texten verdeckt.
-- [ ] Mehrfachauswahl bleibt kompakt.
-- [ ] Headless-Verifier prueft die erzeugten Statusstrings.
+- [x] Area Order wird in #17 mit Typ, Groesse und Status angezeigt.
+- [x] Defend/Attack/Take sind sprachlich klar unterscheidbar.
+- [x] NPCs auf der Map bleiben lesbar und werden nicht wieder mit langen Texten verdeckt.
+- [x] Mehrfachauswahl bleibt kompakt.
+- [x] Headless-Verifier prueft die erzeugten Statusstrings.
+
+## Ergebnis
+- #17 baut Area-Statuszeilen jetzt ueber eine gemeinsame Snapshot-Formatierung fuer geplante und aktive Defend-/Attack-/Take-/Flank-Areas.
+- Die Zeilen zeigen Area-Typ, Feldanzahl bzw. Take-Fortschritt, Ausfuehrungsmodus, Security-Kurzstatus, Contact-Status und GO-Wartezustand.
+- Mehrfachauswahl nutzt weiter eine kompakte Zeile pro Fireteam.
+- Das World-Overlay bleibt unveraendert reduziert; es wurden keine neuen langen NPC-Labels eingefuehrt.
+
+## Lokale Pruefung
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_124_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_123_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_122_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_121_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_112_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_111_verifier.gd`
 
 ## Dateien (voraussichtlich)
 - `scripts/tests/mission_tactical_sandbox_controller.gd`
@@ -53,4 +67,3 @@ Das Panel `#17 SELECTED FIRETEAM` soll Area Orders lesbar machen, ohne die NPCs 
 
 ## Risiken
 - Zu viele Statusdetails machen #17 unruhig. Lieber wenige gute Worte als Debug-Wand.
-

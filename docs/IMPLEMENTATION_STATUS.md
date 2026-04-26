@@ -888,7 +888,7 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 ### TASK_121 - Area Order Marker
 - Status: implementiert
 - Stand: `AreaOrder` unter `scripts/command/area_order.gd` formalisiert den missionslokalen Datenvertrag fuer Gebietsmarker mit `area_order_id`, `fireteam_id`, `command_type`, Tile-/Polygon-Daten, `center_position`, `created_at_order_index` und `status`.
-- Stand: `MissionTacticalSandboxController` haelt Area Orders getrennt von der Waypoint-Ausfuehrung im Planning-State-Feld `area_orders`. Spieler koennen per `SHIFT+Drag` einfache Rechteckgebiete aus Terrain-Tiles markieren; ohne TerrainRegistry wird ein Polygon-Fallback gespeichert. Das Kontextmenue klassifiziert Gebiete als `defend`, `engage` oder `take`.
+- Stand: `MissionTacticalSandboxController` haelt Area Orders getrennt von der Waypoint-Ausfuehrung im Planning-State-Feld `area_orders`. Spieler koennen per `SHIFT+Drag` einfache Rechteckgebiete aus Terrain-Tiles markieren; ohne TerrainRegistry wird ein Polygon-Fallback gespeichert. Das Kontextmenue klassifiziert Gebiete als `defend`, `engage`, `take` oder `flank`.
 - Stand: `FireteamOrderVisualizer` zeichnet Area Orders als eigenen Layer getrennt von normalen Wegpunktlinien und stellt `get_visible_area_orders()` sowie Hit-Tests fuer das Area-Menue bereit. Bestehende Einzel-Wegpunkte bleiben unveraendert nutzbar.
 - Offene Punkte: Keine echte Defend-/Attack-Semantik, keine Gegner-KI-Reaktion und keine Kampagnenpersistenz; diese Punkte bleiben bewusst Folge-Tasks 122+.
 - Risiken: Die Area-Auswahl ist bewusst V1-schmal und rechteckbasiert. Spaetere Polygon-Editor-Funktionen sollten auf dem vorhandenen Datenvertrag aufsetzen, ohne Gameplay-Wahrheit in UI-Code zu verlagern.
@@ -902,6 +902,24 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Offene Punkte: Keine komplexe Gebaeuderaum-KI, keine Fortifikation und keine langfristige Munitions-/Morale-Simulation.
 - Risiken: Der Pfad ist bewusst ein V1-Verteiler mit vorhandenen Terrain-/Cover-Daten. Spaetere Attack-/Take-Area-Semantik sollte den Resolver erweitern oder eigene Resolver nutzen, statt Area-Ausfuehrung in UI-Code zu verlagern.
 - Naechster Schritt: TASK_123 kann `engage`/`take`-Area-Semantik auf dem vorhandenen Area-Order- und Resolver-Vertrag aufbauen.
+
+### TASK_123 - Attack Area Semantik
+- Status: implementiert
+- Stand: `AreaOrderResolver` loest offensive `engage`-/`take`-/`flank`-Areas in Zielgebiet, Approach-Punkt und Fireteam-Approach-Formation auf. Der Approach entsteht auf der freundlichen Seite ausserhalb bzw. am Rand des Zielgebiets und kann ueber die vorhandene `TerrainRegistry` auf walkable Tiles geschnappt werden.
+- Stand: `MissionTacticalSandboxController` startet Attack-Area-Ausfuehrung per GO, enqueued `engage_area`-UnitCommands ueber `SimulationRoot`, tracked den missionslokalen Attack-Area-State und schaltet nach Gebietssicherung auf `GESICHERT | WARTET AUF GO | HALTET GEBIET` mit Area-Security-Kontext.
+- Stand: `MissionCombatLoopDriver` reicht den aktiven Attack-Area-Kontext an `CombatFireDecisionResolver` weiter. Der Resolver priorisiert Ziele innerhalb des markierten Zielgebiets, ohne die bestehende Damage-Formel oder den autoritativen Damage-Pfad zu veraendern.
+- Offene Punkte: Keine Multi-Assault-Lanes, keine Smoke-/Breach-/Spezialausruestung und keine neue Gegner-KI in diesem Slice.
+- Risiken: Attack Areas bleiben bewusst eine V1-Semantik ueber vorhandenen Movement-/Combat-/Security-Schichten. Spaetere Assault-Planung sollte den Resolver-Vertrag erweitern, statt ein zweites Combat- oder Bewegungssystem einzufuehren.
+- Naechster Schritt: TASK_124 kann die Area-Zustaende in #17 lesbar zusammenfassen, ohne neue World-Debugtexte einzufuehren.
+
+### TASK_124 - Area Feedback in #17 Selected Fireteam
+- Status: implementiert
+- Stand: #17 baut Area-Statuszeilen jetzt ueber eine gemeinsame Snapshot-Formatierung fuer geplante und aktive Defend-/Attack-/Take-/Flank-Areas. Die Anzeige enthaelt Area-Typ, Feldanzahl bzw. Take-Fortschritt, Ausfuehrungsmodus, Security-Kurzstatus, Contact-Status und GO-Wartezustand.
+- Stand: Mehrfachauswahl bleibt kompakt, indem `_build_selected_waypoint_info_text()` weiter eine Zeile pro Fireteam ausgibt. Die Area-Zeilen ersetzen keine Gameplay-Wahrheit, sondern lesen nur vorhandene Area-, Security- und Contact-Snapshots.
+- Stand: Das World-Overlay bleibt unveraendert reduziert; es wurden keine neuen langen NPC-Labels oder Debugzeilen ueber Figuren eingefuehrt.
+- Offene Punkte: Keine neue Detailansicht, keine permanente Debug-Konsole und keine Charakterblattwerte in #17.
+- Risiken: Statuszeilen koennen schnell zu dicht werden. Folgearbeiten sollten lieber kurze, spielnahe Worte ergaenzen statt rohe Debugfelder in #17 zu kippen.
+- Naechster Schritt: TASK_125 kann Terrain-Blocker- und Walkability-Debugging pruefen, ohne #17 weiter auszubauen.
 
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert

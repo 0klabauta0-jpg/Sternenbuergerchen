@@ -2603,45 +2603,202 @@ func _build_fireteam_waypoint_info_text(fireteam_id: String) -> String:
 func _build_fireteam_area_defense_info_text(fireteam_id: String) -> String:
 	var state: Dictionary = Dictionary(_area_defense_execution_by_fireteam.get(fireteam_id, {})).duplicate(true)
 	if not state.is_empty():
-		var status_text: String = "VERTEILT IM GEBIET"
-		if bool(state.get("waiting_for_go", false)):
-			status_text = "WARTET AUF GO | HALTET GEBIET"
-		var assignments: Array = Array(state.get("assignments", []))
-		return "AREA DEFEND | %s | %d Positionen | Zentrum %s" % [
-			status_text,
-			assignments.size(),
-			_format_world_position(Vector2(state.get("center_position", Vector2.ZERO))),
-		]
+		return _build_area_order_feedback_line(fireteam_id, AREA_ORDER_SCRIPT.COMMAND_TYPE_DEFEND, state, _area_orders_by_id.get(String(state.get("area_order_id", "")), null))
 	var area_order = _find_next_defend_area_order(fireteam_id)
 	if area_order == null:
 		return ""
-	return "AREA DEFEND | GEPLANT | Zentrum %s" % _format_world_position(Vector2(area_order.center_position))
+	return _build_area_order_feedback_line(fireteam_id, AREA_ORDER_SCRIPT.COMMAND_TYPE_DEFEND, {}, area_order)
 
 
 func _build_fireteam_area_attack_info_text(fireteam_id: String) -> String:
 	var state: Dictionary = Dictionary(_area_attack_execution_by_fireteam.get(fireteam_id, {})).duplicate(true)
 	if not state.is_empty():
-		var command_text: String = String(state.get("command_type", "engage")).strip_edges().to_upper()
-		var status_key: String = String(state.get("status", "approaching")).strip_edges().to_lower()
-		var status_text: String = "ANMARSCH"
-		if status_key == "engaging":
-			status_text = "KONTAKT SUCHEN"
-		elif status_key == "secured":
-			status_text = "GESICHERT | HALTET GEBIET"
-		if bool(state.get("waiting_for_go", false)):
-			status_text = "%s | WARTET AUF GO" % status_text
-		return "AREA %s | %s | Zielgebiet %s" % [
-			command_text,
-			status_text,
-			_format_world_position(Vector2(state.get("center_position", Vector2.ZERO))),
-		]
+		var command_type: String = String(state.get("command_type", AREA_ORDER_SCRIPT.COMMAND_TYPE_ENGAGE)).strip_edges().to_lower()
+		return _build_area_order_feedback_line(fireteam_id, command_type, state, _area_orders_by_id.get(String(state.get("area_order_id", "")), null))
 	var area_order = _find_next_attack_area_order(fireteam_id)
 	if area_order == null:
 		return ""
-	return "AREA %s | GEPLANT | Zielgebiet %s" % [
-		String(area_order.command_type).strip_edges().to_upper(),
-		_format_world_position(Vector2(area_order.center_position)),
+	return _build_area_order_feedback_line(fireteam_id, String(area_order.command_type), {}, area_order)
+
+
+func _build_area_order_feedback_line(fireteam_id: String, command_type: String, state: Dictionary = {}, area_order = null) -> String:
+	var normalized_command_type: String = command_type.strip_edges().to_lower()
+	var center_position: Vector2 = _resolve_area_feedback_center_position(state, area_order)
+	var area_context: Dictionary = _resolve_area_feedback_context(state, area_order, center_position)
+	var field_count: int = _resolve_area_feedback_field_count(state, area_order)
+	var mode_text: String = _build_area_feedback_mode_text(normalized_command_type, state)
+	var size_text: String = _build_area_feedback_size_text(normalized_command_type, field_count, state)
+	var security_text: String = _build_area_feedback_security_text(fireteam_id)
+	var contact_text: String = _build_area_feedback_contact_text(fireteam_id, area_context, normalized_command_type)
+	var detail_parts: PackedStringArray = []
+	if not mode_text.is_empty():
+		detail_parts.append(mode_text)
+	if not security_text.is_empty():
+		detail_parts.append(security_text)
+	if not contact_text.is_empty():
+		detail_parts.append(contact_text)
+	detail_parts.append("Ziel %s" % _format_world_position(center_position))
+	return "AREA %s | %s | %s" % [
+		_get_area_feedback_command_label(normalized_command_type),
+		size_text,
+		" | ".join(detail_parts),
 	]
+
+
+func _resolve_area_feedback_center_position(state: Dictionary, area_order) -> Vector2:
+	if typeof(state.get("center_position", null)) == TYPE_VECTOR2:
+		return Vector2(state.get("center_position"))
+	if area_order != null and typeof(area_order.center_position) == TYPE_VECTOR2:
+		return Vector2(area_order.center_position)
+	return Vector2.ZERO
+
+
+func _resolve_area_feedback_context(state: Dictionary, area_order, center_position: Vector2) -> Dictionary:
+	var target_area: Dictionary = Dictionary(state.get("target_area", {})).duplicate(true)
+	if not target_area.is_empty():
+		return target_area
+	if area_order == null:
+		return {
+			"center_position": center_position,
+			"area_radius": 48.0,
+		}
+	var radius: float = 48.0
+	for point_variant in Array(area_order.world_polygon):
+		radius = maxf(radius, Vector2(point_variant).distance_to(center_position))
+	for point_variant in Array(area_order.tile_world_positions):
+		radius = maxf(radius, Vector2(point_variant).distance_to(center_position))
+	return {
+		"area_order_id": String(area_order.area_order_id),
+		"fireteam_id": String(area_order.fireteam_id),
+		"command_type": String(area_order.command_type),
+		"center_position": center_position,
+		"area_radius": radius,
+		"tile_positions": Array(area_order.tile_positions).duplicate(true),
+		"tile_world_positions": Array(area_order.tile_world_positions).duplicate(true),
+		"world_polygon": PackedVector2Array(area_order.world_polygon),
+	}
+
+
+func _resolve_area_feedback_field_count(state: Dictionary, area_order) -> int:
+	var target_area: Dictionary = Dictionary(state.get("target_area", {}))
+	var tile_positions: Array = Array(target_area.get("tile_positions", []))
+	if not tile_positions.is_empty():
+		return tile_positions.size()
+	if area_order != null:
+		tile_positions = Array(area_order.tile_positions)
+		if not tile_positions.is_empty():
+			return tile_positions.size()
+		var tile_world_positions: Array = Array(area_order.tile_world_positions)
+		if not tile_world_positions.is_empty():
+			return tile_world_positions.size()
+	var assignments: Array = Array(state.get("assignments", []))
+	return maxi(assignments.size(), 1)
+
+
+func _build_area_feedback_size_text(command_type: String, field_count: int, state: Dictionary) -> String:
+	var normalized_field_count: int = maxi(field_count, 1)
+	if command_type == AREA_ORDER_SCRIPT.COMMAND_TYPE_TAKE:
+		var secured_count: int = normalized_field_count if String(state.get("status", "")).strip_edges().to_lower() == "secured" else 0
+		return "%d/%d Felder gesichert" % [secured_count, normalized_field_count]
+	return "%d Felder" % normalized_field_count
+
+
+func _build_area_feedback_mode_text(command_type: String, state: Dictionary) -> String:
+	if state.is_empty():
+		return "geplant"
+	var status: String = String(state.get("status", "")).strip_edges().to_lower()
+	var waiting_for_go: bool = bool(state.get("waiting_for_go", false))
+	if waiting_for_go:
+		if status == "secured":
+			return "GESICHERT | WARTET AUF GO | HALTET GEBIET"
+		return "WARTET AUF GO | HALTET GEBIET"
+	match command_type:
+		AREA_ORDER_SCRIPT.COMMAND_TYPE_DEFEND:
+			return "verteidigt" if status == "holding" else "bezieht Stellung"
+		AREA_ORDER_SCRIPT.COMMAND_TYPE_TAKE:
+			return "nimmt Gebiet" if status != "secured" else "GESICHERT | HALTET GEBIET"
+		AREA_ORDER_SCRIPT.COMMAND_TYPE_FLANK:
+			return _build_area_feedback_approach_text(state, "Flank")
+		_:
+			return _build_area_feedback_approach_text(state, "Approach")
+
+
+func _build_area_feedback_approach_text(state: Dictionary, prefix: String) -> String:
+	if String(state.get("status", "")).strip_edges().to_lower() == "engaging":
+		return "Kontakt suchen"
+	if String(state.get("status", "")).strip_edges().to_lower() == "secured":
+		return "haltet Gebiet"
+	var center_position: Vector2 = Vector2(state.get("center_position", Vector2.ZERO))
+	var approach_position: Vector2 = Vector2(state.get("approach_position", center_position))
+	return "%s %s" % [prefix, _format_area_approach_direction(approach_position, center_position)]
+
+
+func _format_area_approach_direction(approach_position: Vector2, center_position: Vector2) -> String:
+	var delta: Vector2 = approach_position - center_position
+	if delta.length() < 0.001:
+		return "-"
+	var horizontal: String = "E" if delta.x > 0.0 else "W"
+	var vertical: String = "S" if delta.y > 0.0 else "N"
+	return "%s%s" % [vertical, horizontal]
+
+
+func _build_area_feedback_security_text(fireteam_id: String) -> String:
+	var security_state: Dictionary = get_fireteam_security_state(fireteam_id)
+	if security_state.is_empty() or not bool(security_state.get("is_active", false)):
+		return "SEC -"
+	var mode: String = String(security_state.get("security_mode", "")).strip_edges().to_lower()
+	if mode == "360":
+		return "SEC 360"
+	if mode == "directional":
+		return "SEC DIR"
+	return "SEC %s" % mode.to_upper()
+
+
+func _build_area_feedback_contact_text(fireteam_id: String, area_context: Dictionary, command_type: String) -> String:
+	var highest_rank: int = 0
+	for contact_variant in get_fireteam_contact_snapshot(fireteam_id):
+		var contact: Dictionary = Dictionary(contact_variant)
+		var contact_position: Vector2 = Vector2(contact.get("last_known_position", Vector2.ZERO))
+		if not area_context.is_empty() and not bool(AREA_ORDER_RESOLVER_SCRIPT.call("is_position_in_area_context", area_context, contact_position)):
+			continue
+		highest_rank = maxi(highest_rank, _rank_area_feedback_contact_state(String(contact.get("detection_state", ""))))
+	if highest_rank >= 4:
+		return "Kontakt bestaetigt"
+	if highest_rank == 3:
+		return "Kontakt gesichtet"
+	if highest_rank == 2:
+		return "Kontakt verloren"
+	if highest_rank == 1:
+		return "Kontakt vermutet"
+	if command_type == AREA_ORDER_SCRIPT.COMMAND_TYPE_DEFEND:
+		return "wartet auf Kontakt"
+	return "kein Kontakt"
+
+
+func _rank_area_feedback_contact_state(detection_state: String) -> int:
+	match detection_state.strip_edges().to_lower():
+		"confirmed":
+			return 4
+		"spotted":
+			return 3
+		"lost":
+			return 2
+		"suspected":
+			return 1
+		_:
+			return 0
+
+
+func _get_area_feedback_command_label(command_type: String) -> String:
+	match command_type.strip_edges().to_lower():
+		AREA_ORDER_SCRIPT.COMMAND_TYPE_DEFEND:
+			return "DEFEND"
+		AREA_ORDER_SCRIPT.COMMAND_TYPE_TAKE:
+			return "TAKE"
+		AREA_ORDER_SCRIPT.COMMAND_TYPE_FLANK:
+			return "FLANK"
+		_:
+			return "ATTACK"
 
 
 func _should_display_waypoint_waiting_for_go(fireteam_id: String, waypoint, execution_state: Dictionary) -> bool:
