@@ -3,7 +3,7 @@
 ## Ziel
 Ein `defend`-Gebiet soll anders funktionieren als ein einzelner Defend-Wegpunkt: Das Fireteam verteilt sich innerhalb des markierten Bereichs, sucht sinnvolle Haltepositionen, richtet Sicherungssektoren aus und bleibt dort bis zu einem neuen GO oder Ad-hoc-Befehl.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT
 
 ## Voraussetzung
 - `TASK_121 - Area Order Marker`
@@ -37,12 +37,24 @@ Ein `defend`-Gebiet soll anders funktionieren als ein einzelner Defend-Wegpunkt:
 - Security/Overwatch bleibt vom Damage-System getrennt.
 
 ## Akzeptanzkriterien
-- [ ] Defend Area verteilt mindestens 2-3 Fireteam-Mitglieder auf unterschiedliche Zielpositionen.
-- [ ] Das Fireteam klebt nicht als Klumpen auf dem Area-Zentrum.
-- [ ] FTL bleibt Teil der Formation und nicht dauerhaft am Startpunkt.
-- [ ] Nach Erreichen zeigt #17 einen klaren Defend-Area-Status.
-- [ ] Security-Snapshot bezieht sich auf die Area.
-- [ ] Headless-Verifier prueft Positionsverteilung, Status und Security-Aktivierung.
+- [x] Defend Area verteilt mindestens 2-3 Fireteam-Mitglieder auf unterschiedliche Zielpositionen.
+- [x] Das Fireteam klebt nicht als Klumpen auf dem Area-Zentrum.
+- [x] FTL bleibt Teil der Formation und nicht dauerhaft am Startpunkt.
+- [x] Nach Erreichen zeigt #17 einen klaren Defend-Area-Status.
+- [x] Security-Snapshot bezieht sich auf die Area.
+- [x] Headless-Verifier prueft Positionsverteilung, Status und Security-Aktivierung.
+
+## Ergebnis
+- `AreaOrderResolver` waehlt fuer `defend`-Gebiete pro fittem Fireteam-Mitglied eine Halteposition.
+- Die Auswahl bevorzugt vorhandene Terrain-Tiles, meidet nicht-walkable Tiles und nutzt Cover-Werte als Score, wenn eine `TerrainRegistry` verfuegbar ist.
+- Der FTL wird als Teil der Formation in Zentrumsnaehe oder auf einer guten Coverposition eingeplant.
+- `MissionTacticalSandboxController` startet Defend-Area-Ausfuehrung per GO, enqueued Bewegungsbefehle ueber `SimulationRoot` und schaltet nach Erreichen auf `WARTET AUF GO | HALTET GEBIET`.
+- `FireteamSecurityController` kann Area-Kontext konsumieren; der Security-Snapshot enthaelt `area_order_id`, `area_center_position` und nutzt das Gebiet als Anchor.
+
+## Lokale Pruefung
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_122_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_121_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_111_verifier.gd`
 
 ## Dateien (voraussichtlich)
 - `scripts/tactical/fireteam_movement_controller.gd`
@@ -54,4 +66,3 @@ Ein `defend`-Gebiet soll anders funktionieren als ein einzelner Defend-Wegpunkt:
 ## Risiken
 - Zu viel Intelligenz in einem ersten Task wuerde das System schwer testbar machen.
 - Cover-Auswertung nur nutzen, wenn die vorhandenen Terrain-Daten stabil genug sind.
-

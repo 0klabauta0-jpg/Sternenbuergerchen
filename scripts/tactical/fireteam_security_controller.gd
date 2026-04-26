@@ -48,7 +48,8 @@ func update_fireteam_state(
 	movement_state: Dictionary,
 	suppression_state: Dictionary,
 	ad_hoc_order: Dictionary,
-	threat_inputs: Array
+	threat_inputs: Array,
+	area_context: Dictionary = {}
 ) -> Dictionary:
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty():
@@ -58,13 +59,15 @@ func update_fireteam_state(
 		_state_by_fireteam.erase(normalized_fireteam_id)
 		return {}
 	var anchor_position: Vector2 = _resolve_anchor_position(fit_members, leader)
+	if typeof(area_context.get("center_position", null)) == TYPE_VECTOR2:
+		anchor_position = Vector2(area_context.get("center_position"))
 	var previous_state: Dictionary = Dictionary(_state_by_fireteam.get(normalized_fireteam_id, {})).duplicate(true)
 	var threat_info: Dictionary = _resolve_main_threat(anchor_position, threat_inputs)
 	var threat_position: Variant = threat_info.get("position", null)
 	var threat_distance: float = float(threat_info.get("distance", INF))
 	var leadership: float = _read_skill_value(leader, "get_leadership_skill", 0.0)
 	var trait_ids: PackedStringArray = PackedStringArray(leader.call("get_trait_ids")) if leader != null and leader.has_method("get_trait_ids") else PackedStringArray()
-	var command_type: String = _extract_command_type(behavior_profile_dict)
+	var command_type: String = _extract_command_type(behavior_profile_dict, area_context)
 	var mode: String = _resolve_security_mode(leadership, trait_ids, threat_position)
 	var direction_angle: float = float(previous_state.get("direction_angle", 0.0))
 	var now_msec: int = Time.get_ticks_msec()
@@ -112,6 +115,9 @@ func update_fireteam_state(
 		"member_assignments": member_assignments,
 		"overwatch_ready": overwatch_ready,
 		"is_active": _is_security_active(command_type, fit_members),
+		"area_order_id": String(area_context.get("area_order_id", "")),
+		"area_center_position": Vector2(area_context.get("center_position", anchor_position)) if typeof(area_context.get("center_position", null)) == TYPE_VECTOR2 else null,
+		"area_status": String(area_context.get("status", "")),
 	}
 	_state_by_fireteam[normalized_fireteam_id] = state
 	return _build_public_state(state)
@@ -255,7 +261,7 @@ func _is_security_active(command_type: String, fit_members: Array) -> bool:
 	if fit_members.is_empty():
 		return false
 	match command_type:
-		"defend", "take", "hold_position":
+		"defend", "defend_area", "take", "hold_position":
 			return true
 		_:
 			return false
@@ -272,7 +278,10 @@ func _is_overwatch_ready(command_type: String, movement_state: Dictionary, suppr
 	return ad_hoc_type != "disengage" and ad_hoc_type != "fall_back"
 
 
-func _extract_command_type(behavior_profile_dict: Dictionary) -> String:
+func _extract_command_type(behavior_profile_dict: Dictionary, area_context: Dictionary = {}) -> String:
+	var area_command_type: String = String(area_context.get("command_type", "")).strip_edges().to_lower()
+	if not area_command_type.is_empty():
+		return area_command_type
 	var metadata: Dictionary = Dictionary(behavior_profile_dict.get("metadata", {}))
 	var command_type: String = String(metadata.get("origin_command_type", "")).strip_edges().to_lower()
 	if command_type.is_empty():
@@ -323,4 +332,7 @@ func _build_public_state(state: Dictionary) -> Dictionary:
 		"member_assignments": Array(state.get("member_assignments", [])).duplicate(true),
 		"overwatch_ready": bool(state.get("overwatch_ready", false)),
 		"is_active": bool(state.get("is_active", false)),
+		"area_order_id": String(state.get("area_order_id", "")),
+		"area_center_position": state.get("area_center_position", null),
+		"area_status": String(state.get("area_status", "")),
 	}

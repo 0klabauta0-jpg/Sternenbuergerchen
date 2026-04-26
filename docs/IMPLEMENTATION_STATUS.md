@@ -894,6 +894,15 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Die Area-Auswahl ist bewusst V1-schmal und rechteckbasiert. Spaetere Polygon-Editor-Funktionen sollten auf dem vorhandenen Datenvertrag aufsetzen, ohne Gameplay-Wahrheit in UI-Code zu verlagern.
 - Naechster Schritt: TASK_122 kann Defend-Semantik auf Basis der gespeicherten Area Orders ergaenzen, ohne den Marker-/Planning-Roundtrip erneut zu bauen.
 
+### TASK_122 - Defend Area Semantik
+- Status: implementiert
+- Stand: `scripts/tactical/area_order_resolver.gd` waehlt fuer `defend`-Area-Orders pro fittem Fireteam-Mitglied eine Halteposition. Der Resolver bevorzugt vorhandene Area-Tiles, meidet nicht-walkable Tiles ueber `TerrainRegistry`, nutzt Cover-Werte als Score und haelt den FTL in Zentrumsnaehe oder auf einer guten Coverposition.
+- Stand: `MissionTacticalSandboxController` startet Defend-Area-Ausfuehrung per GO, enqueued Bewegungsbefehle ueber `SimulationRoot`, tracked den missionslokalen Area-Defense-State und schaltet nach Erreichen auf `WARTET AUF GO | HALTET GEBIET`. Ein weiterer GO kann die aktive Area-Defense wieder freigeben.
+- Stand: `FireteamSecurityController` konsumiert optionalen Area-Kontext; Security-Snapshots enthalten jetzt `area_order_id`, `area_center_position` und `area_status` und nutzen das Gebiet als Anchor fuer Sektoren/Overwatch. #17 zeigt Defend-Area-Status und die Tactical-Statuszeile zaehlt offene Gebiete mit.
+- Offene Punkte: Keine komplexe Gebaeuderaum-KI, keine Fortifikation und keine langfristige Munitions-/Morale-Simulation.
+- Risiken: Der Pfad ist bewusst ein V1-Verteiler mit vorhandenen Terrain-/Cover-Daten. Spaetere Attack-/Take-Area-Semantik sollte den Resolver erweitern oder eigene Resolver nutzen, statt Area-Ausfuehrung in UI-Code zu verlagern.
+- Naechster Schritt: TASK_123 kann `engage`/`take`-Area-Semantik auf dem vorhandenen Area-Order- und Resolver-Vertrag aufbauen.
+
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert
 - Stand: Der Meta-Layer fuehrt jetzt durchgaengig auf die echte eingebettete Missionskarte statt auf eine separate read-only Overview. Homebase, FOB und Mission teilen dieselbe kompakte Navigation, die Missions-Tactical-UI traegt direkt die gemeinsamen Block-Labels `#15` bis `#18`, und der Missionspfad bleibt auf dieselbe Kartenbasis, dieselben LZ-/Approach-Marker sowie denselben Dropship-Handoff verdrahtet wie die spaetere Live-Mission.
