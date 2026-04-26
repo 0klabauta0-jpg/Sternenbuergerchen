@@ -1,9 +1,9 @@
-# TASK_150 - Navigation Benchmark Harness
+# TASK_131 - Navigation Benchmark Harness
 
 ## Ziel
 Die seit TASK_126 bis TASK_130 gewachsene Navigation soll datenbasiert vergleichbar werden. Ein kleiner Benchmark-Harness misst globale Pfade, Cover-Kosten, Budgeting und lokale Avoidance in reproduzierbaren Szenarien, bevor weitere Optimierungen wie JPS oder D* Lite eingebaut werden.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Voraussetzung
 - `TASK_126 - HPA Navigation Foundation`
@@ -51,22 +51,23 @@ Die seit TASK_126 bis TASK_130 gewachsene Navigation soll datenbasiert vergleich
 - Benchmark-Code darf unter `scripts/tests` liegen, produktive Utilities nur bei klarem Wiederverwendungswert.
 
 ## Akzeptanzkriterien
-- [ ] Benchmark laeuft headless.
-- [ ] Mindestens drei Szenarien liefern reproduzierbare Metriken.
-- [ ] HPA, Cover-aware HPA und Avoidance koennen getrennt verglichen werden.
-- [ ] Output nennt Query-Zeit, Pfadlaenge, Delay-/Stuck-Werte und Exposure/Cover, wo relevant.
-- [ ] Bestehende Task-128/129/130-Verifier bleiben gruen.
+- [x] Benchmark laeuft headless.
+- [x] Mindestens drei Szenarien liefern reproduzierbare Metriken.
+- [x] HPA, Cover-aware HPA und Avoidance koennen getrennt verglichen werden.
+- [x] Output nennt Query-Zeit, Pfadlaenge, Delay-/Stuck-Werte und Exposure/Cover, wo relevant.
+- [x] Bestehende Task-128/129/130-Verifier bleiben gruen.
 
 ## Erwartetes Ergebnis
 Wir wissen, welche Navigationsteile in welchen Szenarien teuer oder instabil werden. Folgeentscheidungen wie JPS, D* Lite oder CBS/MAPF werden datenbasiert statt nach Bauchgefuehl getroffen.
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_150_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_130_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_129_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_131_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_130_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_129_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_128_verifier.gd`
 
 ## Dateien (voraussichtlich)
-- `scripts/tests/task_150_verifier.gd`
+- `scripts/tests/task_131_verifier.gd`
 - `scripts/tests/navigation_benchmark_harness.gd`
 
 ## Risiken

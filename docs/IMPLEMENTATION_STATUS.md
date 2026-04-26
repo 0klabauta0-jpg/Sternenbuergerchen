@@ -975,12 +975,20 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Zu starke lokale Korrekturen koennen Formationen optisch lockern; deshalb sind Radius, Nachbarschaft, Debug und Aktivierung explizit konfigurierbar.
 - Naechster Schritt: Phase 17N ist damit lokal abgeschlossen; weitere Navigationserweiterungen sollten erst nach Spielgefuehl-/Performance-Review geschnitten werden.
 
-### TASK_150-153 - Geplante Folge-Labs
+### TASK_131 - Navigation Benchmark Harness
+- Status: implementiert
+- Stand: `scripts/tests/navigation_benchmark_harness.gd` fuehrt reproduzierbare Headless-Benchmarks fuer offene Pfadqueries, Korridor/Engpass-Queries, Cover-/Exposure-Routing, Navigation-Budget-Delays und lokale Avoidance-Ausfuehrung aus.
+- Stand: `scripts/tests/task_131_verifier.gd` prueft, dass HPA/A*, Cover-aware HPA, Budgeting und Avoidance getrennt messbare Dictionary-Metriken liefern. Der Output enthaelt Query-Zeiten, Pfadlaengen, Exposure-/Cover-Summen, Delay-/Pending-Werte sowie Stuck-/Deadlock-Metriken.
+- Offene Punkte: Keine produktive JPS-, D* Lite-, CBS- oder Reservierungslogik. Der Harness misst vorhandene Systeme und bleibt unter `scripts/tests`.
+- Risiken: Benchmark-Szenarien sind kleine Laborkarten und ersetzen keine grossen Playtests in `mission_fireteam_dev_test.tscn`; sie schaffen aber eine stabile Basis fuer Folgeentscheidungen.
+- Naechster Schritt: TASK_151 kann Engpass-Reservierung/MAPF-Light auf Basis der gemessenen Bottleneck- und Avoidance-Werte schneiden.
+
+### TASK_151-153 - Geplante Folge-Labs
 - Status: geplant
-- Stand: Aus den zuletzt bewerteten Vorschlaegen wurden vier bewusst nachgelagerte Tasks geschnitten: `TASK_150 - Navigation Benchmark Harness`, `TASK_151 - Engpass-Reservierung und MAPF-Light`, `TASK_152 - Seeded Cover Placement Lab` und `TASK_153 - 3D Transparency Material Presets`.
+- Stand: Aus den zuletzt bewerteten Vorschlaegen bleiben drei bewusst nachgelagerte Tasks offen: `TASK_151 - Engpass-Reservierung und MAPF-Light`, `TASK_152 - Seeded Cover Placement Lab` und `TASK_153 - 3D Transparency Material Presets`.
 - Offene Punkte: Diese Tasks sind noch nicht implementiert und sollen erst nach Review der Navigation-/Movement-Spielgefuehlbasis gestartet werden.
 - Risiken: CBS/MAPF, JPS/D* Lite, automatische Cover-Verteilung und Transparenz-Presets beruehren unterschiedliche Schichten; deshalb sind sie getrennt geplant und nicht als gemeinsamer Grossumbau gebuendelt.
-- Naechster Schritt: Bei Bedarf mit `TASK_150` beginnen, um weitere Navigationserweiterungen erst zu messen.
+- Naechster Schritt: Bei Bedarf `TASK_151` starten, wenn Engpaesse nach den Benchmark-Werten weiterhin der groesste Bewegungsschmerz sind.
 
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert

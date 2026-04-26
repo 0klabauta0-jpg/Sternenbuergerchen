@@ -8,7 +8,7 @@ Engpaesse sollen deterministisch aufgeloest werden, wenn lokale Avoidance nicht 
 ## Voraussetzung
 - `TASK_128 - Navigation Budgeting und Debug`
 - `TASK_130 - Lokale Unit-Avoidance mit ORCA/RVO-Light`
-- `TASK_150 - Navigation Benchmark Harness`
+- `TASK_131 - Navigation Benchmark Harness`
 
 ## Kontext
 - ORCA/RVO-Light glaettet offene Bewegungen, entscheidet aber keine Reihenfolge in engen Durchgaengen.
@@ -61,7 +61,7 @@ Engpaesse bekommen eine kleine, nachvollziehbare "Ampel", ohne die gesamte Navig
 
 ## Lokale Pruefung
 - [ ] `godot_console.exe --headless --path . --script scripts/tests/task_151_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_150_verifier.gd`
+- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_131_verifier.gd`
 - [ ] `godot_console.exe --headless --path . --script scripts/tests/task_130_verifier.gd`
 
 ## Dateien (voraussichtlich)
