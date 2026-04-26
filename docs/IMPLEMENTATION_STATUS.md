@@ -921,6 +921,15 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Statuszeilen koennen schnell zu dicht werden. Folgearbeiten sollten lieber kurze, spielnahe Worte ergaenzen statt rohe Debugfelder in #17 zu kippen.
 - Naechster Schritt: TASK_125 kann Terrain-Blocker- und Walkability-Debugging pruefen, ohne #17 weiter auszubauen.
 
+### TASK_125 - Terrain Blocker Debug und Walkability Tests
+- Status: implementiert
+- Stand: `TerrainRegistry.resolve_walkable_target()` loest Move-Zielpunkte jetzt mit Originalziel, Walkability, geblocktem Tile, stabilem Ersatz-Ziel und Blockergrund auf. `get_nearest_walkable_grid()` sortiert walkable Kandidaten deterministisch nach Distanz und Grid-Koordinaten, damit Ersatztiles bei Gleichstand nicht springen.
+- Stand: `SimulationRoot` nutzt diese Zielauflosung vor dem Pfadbau. Nicht-walkable Ziele werden auf walkable Ersatzpunkte verschoben; bei nicht erreichbaren walkable Zielen gibt es keinen direkten Geradeaus-Fallback durch Blocker mehr, sondern einen stabilen erreichbaren walkable Fallback oder keinen Move-Pfad.
+- Stand: Terrain-Move-Debugging ist abschaltbar in `SimulationRoot` verfuegbar und wird vom `MissionTacticalSandboxController` lesbar als Zeile mit Originalziel, Ersatz-Ziel, finalem Ziel und Grund exponiert. `task_125_verifier.gd` deckt Rock-Ziel, stabile Ersatzauflosung, Pfad um Blocker, unerreichbares Ziel ohne Tunneling und Debugtext ab.
+- Offene Punkte: Kein neuer Navigation-Stack, keine Physics-Kollisionssimulation und keine Map-Editor-Ueberarbeitung. Diese Grenzen bleiben bewusst ausserhalb von TASK_125.
+- Risiken: Der neue Fallback ist konservativ. Wenn ein Ziel nicht erreichbar ist, bleibt die Unit am naechsten stabil erreichbaren walkable Punkt statt optisch in Richtung Blocker weiterzudruecken.
+- Naechster Schritt: Die Area-Order-Reihe 121-125 ist damit fachlich abgeschlossen; weitere Navigationsthemen sollten als eigener Task mit klarer Path-Follow- oder Nav-Stack-Zielsetzung geschnitten werden.
+
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert
 - Stand: Der Meta-Layer fuehrt jetzt durchgaengig auf die echte eingebettete Missionskarte statt auf eine separate read-only Overview. Homebase, FOB und Mission teilen dieselbe kompakte Navigation, die Missions-Tactical-UI traegt direkt die gemeinsamen Block-Labels `#15` bis `#18`, und der Missionspfad bleibt auf dieselbe Kartenbasis, dieselben LZ-/Approach-Marker sowie denselben Dropship-Handoff verdrahtet wie die spaetere Live-Mission.

@@ -25,6 +25,7 @@ const HEIGHT_DISADVANTAGE_ACCURACY_PENALTY: float = 0.05
 @export var unit_registry_path: NodePath
 @export var terrain_registry_path: NodePath
 @export var combat_rng_seed: int = 1
+@export var terrain_move_debug_enabled: bool = false
 
 var command_queue: Array = []
 var effects_queue: Array = []
@@ -33,6 +34,7 @@ var is_processing_tick: bool = false
 var _contact_path_recompute_ready_at_msec: Dictionary = {}
 var _objective_status: RefCounted = null
 var _terrain_pathfinder = TERRAIN_PATHFINDER_SCRIPT.new()
+var _last_terrain_move_debug_by_unit_id: Dictionary = {}
 var _known_units_by_id: Dictionary = {}
 var _peer_team_assignments: Dictionary = {1: "team_alpha"}
 var _last_broadcast_vital_state_by_unit_id: Dictionary = {}
@@ -62,6 +64,23 @@ func enqueue_effect(effect: Dictionary) -> void:
 		return
 
 	effects_queue.append(effect)
+
+
+func set_terrain_move_debug_enabled(enabled: bool) -> void:
+	terrain_move_debug_enabled = enabled
+	if not terrain_move_debug_enabled:
+		_last_terrain_move_debug_by_unit_id.clear()
+
+
+func get_terrain_move_debug_snapshot(unit_id: String = "") -> Variant:
+	if unit_id.strip_edges().is_empty():
+		var result: Array = []
+		var unit_ids: Array = _last_terrain_move_debug_by_unit_id.keys()
+		unit_ids.sort()
+		for unit_id_variant in unit_ids:
+			result.append(Dictionary(_last_terrain_move_debug_by_unit_id.get(unit_id_variant, {})).duplicate(true))
+		return result
+	return Dictionary(_last_terrain_move_debug_by_unit_id.get(unit_id.strip_edges(), {})).duplicate(true)
 
 
 func clear_queues() -> void:
@@ -713,6 +732,8 @@ func _extract_or_build_path_world_points(
 
 	var path_world_points: Array = _build_path_world_points(current_position, target_position, terrain_registry)
 	cmd["path"] = path_world_points.duplicate(true)
+	if terrain_move_debug_enabled:
+		_record_terrain_move_debug(cmd, unit, current_position, target_position, terrain_registry, path_world_points)
 	return path_world_points
 
 
@@ -776,29 +797,32 @@ func _build_path_world_points(current_position: Vector2, target_position: Vector
 		return path_world_points
 
 	var from_grid: Vector2i = terrain_registry.call("world_to_grid", current_position)
-	var to_grid: Vector2i = terrain_registry.call("world_to_grid", target_position)
-	var target_grid_was_walkable: bool = bool(terrain_registry.call("is_walkable", to_grid)) if terrain_registry.has_method("is_walkable") else true
+	var target_resolution: Dictionary = _resolve_walkable_move_target(target_position, terrain_registry)
+	var raw_replacement_grid: Variant = target_resolution.get("replacement_grid", terrain_registry.call("world_to_grid", target_position))
+	var to_grid: Vector2i = raw_replacement_grid if typeof(raw_replacement_grid) == TYPE_VECTOR2I else terrain_registry.call("world_to_grid", target_position)
+	var target_grid_was_walkable: bool = bool(target_resolution.get("target_walkable", true))
+	var resolved_target_position: Vector2 = Vector2(target_resolution.get("replacement_position", target_position))
 	if terrain_registry.has_method("is_walkable") and not bool(terrain_registry.call("is_walkable", from_grid)):
 		var nearest_start_grid: Variant = terrain_registry.call("get_nearest_walkable_grid", current_position) if terrain_registry.has_method("get_nearest_walkable_grid") else null
 		if typeof(nearest_start_grid) == TYPE_VECTOR2I:
 			from_grid = nearest_start_grid
-	if not target_grid_was_walkable:
-		var nearest_target_grid: Variant = terrain_registry.call("get_nearest_walkable_grid", target_position) if terrain_registry.has_method("get_nearest_walkable_grid") else null
-		if typeof(nearest_target_grid) == TYPE_VECTOR2I:
-			to_grid = nearest_target_grid
 
 	var path_grid_points: Array = _terrain_pathfinder.find_path(from_grid, to_grid, terrain_registry)
 	if path_grid_points.is_empty():
 		if from_grid == to_grid:
-			path_world_points.append(terrain_registry.call("grid_to_world", to_grid) if not target_grid_was_walkable else target_position)
+			path_world_points.append(resolved_target_position)
 			return path_world_points
 
-		# Some test-scene move targets do not map to a traversable terrain path.
-		# Fall back to a direct waypoint so movement remains deterministic without warning noise.
-		if target_grid_was_walkable:
-			path_world_points.append(target_position)
-		else:
-			path_world_points.append(terrain_registry.call("grid_to_world", to_grid))
+		var reachable_grid: Variant = _find_nearest_reachable_walkable_grid(from_grid, to_grid, terrain_registry)
+		if typeof(reachable_grid) != TYPE_VECTOR2I:
+			return path_world_points
+		var fallback_path_grid_points: Array = _terrain_pathfinder.find_path(from_grid, reachable_grid, terrain_registry)
+		if fallback_path_grid_points.is_empty() and reachable_grid != from_grid:
+			return path_world_points
+		for fallback_index in range(1, fallback_path_grid_points.size()):
+			path_world_points.append(terrain_registry.call("grid_to_world", fallback_path_grid_points[fallback_index]))
+		if path_world_points.is_empty():
+			path_world_points.append(terrain_registry.call("grid_to_world", reachable_grid))
 		return path_world_points
 
 	for index in range(1, path_grid_points.size()):
@@ -808,6 +832,102 @@ func _build_path_world_points(current_position: Vector2, target_position: Vector
 		path_world_points.append(target_position)
 
 	return path_world_points
+
+
+func _resolve_walkable_move_target(target_position: Vector2, terrain_registry) -> Dictionary:
+	if terrain_registry != null and terrain_registry.has_method("resolve_walkable_target"):
+		return Dictionary(terrain_registry.call("resolve_walkable_target", target_position)).duplicate(true)
+	var to_grid: Vector2i = terrain_registry.call("world_to_grid", target_position)
+	var target_walkable: bool = bool(terrain_registry.call("is_walkable", to_grid)) if terrain_registry != null and terrain_registry.has_method("is_walkable") else true
+	if target_walkable:
+		return {
+			"original_position": target_position,
+			"original_grid": to_grid,
+			"target_walkable": true,
+			"replacement_grid": to_grid,
+			"replacement_position": target_position,
+			"blocked_grid": null,
+			"blocked_position": null,
+			"blocker_reason": "",
+		}
+	var nearest_target_grid: Variant = terrain_registry.call("get_nearest_walkable_grid", target_position) if terrain_registry != null and terrain_registry.has_method("get_nearest_walkable_grid") else to_grid
+	return {
+		"original_position": target_position,
+		"original_grid": to_grid,
+		"target_walkable": false,
+		"replacement_grid": nearest_target_grid,
+		"replacement_position": terrain_registry.call("grid_to_world", nearest_target_grid) if typeof(nearest_target_grid) == TYPE_VECTOR2I and terrain_registry.has_method("grid_to_world") else target_position,
+		"blocked_grid": to_grid,
+		"blocked_position": target_position,
+		"blocker_reason": "target_not_walkable",
+	}
+
+
+func _find_nearest_reachable_walkable_grid(from_grid: Vector2i, desired_grid: Vector2i, terrain_registry) -> Variant:
+	if terrain_registry == null or not terrain_registry.has_method("get_all_tiles"):
+		return null
+	var candidates: Array = []
+	for tile_data in Array(terrain_registry.call("get_all_tiles")):
+		if tile_data == null or not bool(tile_data.walkable):
+			continue
+		candidates.append(tile_data)
+	candidates.sort_custom(func(a, b) -> bool:
+		var grid_a: Vector2i = Vector2i(a.grid_position)
+		var grid_b: Vector2i = Vector2i(b.grid_position)
+		var distance_a: float = _grid_distance_score(grid_a, desired_grid)
+		var distance_b: float = _grid_distance_score(grid_b, desired_grid)
+		if absf(distance_a - distance_b) > 0.001:
+			return distance_a < distance_b
+		var source_distance_a: float = _grid_distance_score(grid_a, from_grid)
+		var source_distance_b: float = _grid_distance_score(grid_b, from_grid)
+		if absf(source_distance_a - source_distance_b) > 0.001:
+			return source_distance_a < source_distance_b
+		if grid_a.x == grid_b.x:
+			return grid_a.y < grid_b.y
+		return grid_a.x < grid_b.x
+	)
+	for tile_data in candidates:
+		var candidate_grid: Vector2i = Vector2i(tile_data.grid_position)
+		if candidate_grid == from_grid:
+			return candidate_grid
+		if not _terrain_pathfinder.find_path(from_grid, candidate_grid, terrain_registry).is_empty():
+			return candidate_grid
+	return null
+
+
+func _grid_distance_score(a: Vector2i, b: Vector2i) -> float:
+	return absf(float(a.x - b.x)) + absf(float(a.y - b.y))
+
+
+func _record_terrain_move_debug(cmd: Dictionary, unit, current_position: Vector2, target_position: Vector2, terrain_registry, path_world_points: Array) -> void:
+	var unit_id: String = _extract_unit_id_for_path_recompute(unit)
+	if unit_id.is_empty() or terrain_registry == null:
+		return
+	var target_resolution: Dictionary = _resolve_walkable_move_target(target_position, terrain_registry)
+	var replacement_position: Vector2 = Vector2(target_resolution.get("replacement_position", target_position))
+	var final_position: Vector2 = _coerce_vector2(path_world_points[-1], replacement_position) if not path_world_points.is_empty() else current_position
+	var original_grid: Vector2i = Vector2i(target_resolution.get("original_grid", terrain_registry.call("world_to_grid", target_position)))
+	var replacement_grid: Variant = target_resolution.get("replacement_grid", null)
+	var final_grid: Vector2i = terrain_registry.call("world_to_grid", final_position) if terrain_registry.has_method("world_to_grid") else Vector2i.ZERO
+	var path_blocked: bool = not bool(target_resolution.get("target_walkable", true)) or (typeof(replacement_grid) == TYPE_VECTOR2I and final_grid != Vector2i(replacement_grid))
+	var reason: String = String(target_resolution.get("blocker_reason", ""))
+	if reason.is_empty() and path_blocked:
+		reason = "no_reachable_path"
+	_last_terrain_move_debug_by_unit_id[unit_id] = {
+		"unit_id": unit_id,
+		"command_type": String(cmd.get("command_type", "")),
+		"original_target_position": target_position,
+		"original_target_grid": original_grid,
+		"target_walkable": bool(target_resolution.get("target_walkable", true)),
+		"blocked_target_grid": target_resolution.get("blocked_grid", null),
+		"blocked_target_position": target_resolution.get("blocked_position", null),
+		"replacement_target_grid": replacement_grid,
+		"replacement_target_position": replacement_position,
+		"final_waypoint_position": final_position,
+		"final_waypoint_grid": final_grid,
+		"blocker_reason": reason,
+		"path_waypoint_count": path_world_points.size(),
+	}
 
 
 func _apply_damage_effect(effect: Dictionary) -> void:

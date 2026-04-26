@@ -859,6 +859,43 @@ func get_flank_vulnerability_snapshot() -> Array:
 	return Array(combat_driver.call("get_flank_vulnerability_snapshot")).duplicate(true)
 
 
+func get_terrain_move_debug_snapshot(unit_id: String = "") -> Variant:
+	var simulation_root = get_node_or_null("../SimulationRoot")
+	if simulation_root == null or not simulation_root.has_method("get_terrain_move_debug_snapshot"):
+		return [] if unit_id.strip_edges().is_empty() else {}
+	return simulation_root.call("get_terrain_move_debug_snapshot", unit_id)
+
+
+func set_terrain_move_debug_enabled(enabled: bool) -> void:
+	var simulation_root = get_node_or_null("../SimulationRoot")
+	if simulation_root != null and simulation_root.has_method("set_terrain_move_debug_enabled"):
+		simulation_root.call("set_terrain_move_debug_enabled", enabled)
+
+
+func build_terrain_move_debug_text(unit_id: String) -> String:
+	var snapshot: Dictionary = Dictionary(get_terrain_move_debug_snapshot(unit_id))
+	if snapshot.is_empty():
+		return "MOVE DEBUG -"
+	var original_grid: Vector2i = Vector2i(snapshot.get("original_target_grid", Vector2i.ZERO))
+	var replacement_grid: Variant = snapshot.get("replacement_target_grid", null)
+	var final_grid: Vector2i = Vector2i(snapshot.get("final_waypoint_grid", Vector2i.ZERO))
+	var reason: String = String(snapshot.get("blocker_reason", "")).strip_edges()
+	if reason.is_empty():
+		reason = "walkable"
+	var replacement_text: String = "--"
+	if typeof(replacement_grid) == TYPE_VECTOR2I:
+		var replacement_grid_value: Vector2i = replacement_grid
+		replacement_text = "%d,%d" % [replacement_grid_value.x, replacement_grid_value.y]
+	return "MOVE DEBUG | Ziel %d,%d | Ersatz %s | Final %d,%d | Grund %s" % [
+		original_grid.x,
+		original_grid.y,
+		replacement_text,
+		final_grid.x,
+		final_grid.y,
+		reason,
+	]
+
+
 func get_fireteam_flank_vulnerability_state(fireteam_id: String) -> Dictionary:
 	var combat_driver = _get_combat_loop_driver()
 	if combat_driver == null or not combat_driver.has_method("get_fireteam_flank_vulnerability_state"):
