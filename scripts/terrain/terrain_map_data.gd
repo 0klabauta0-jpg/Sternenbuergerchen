@@ -3,6 +3,7 @@ extends RefCounted
 
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
+const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_catalog.gd")
 
 var _map_name: String = ""
 var _mission_slot_count: int = 3
@@ -73,6 +74,7 @@ static func load_from_file(path: String) -> TerrainMapData:
 			normalized_tile_entry["grid_position"] = grid_position
 			normalized_tile_entry["tile_id"] = "tile_%d_%d" % [grid_position.x, grid_position.y]
 			normalized_tile_entry["world_position"] = terrain_map_data._grid_to_world(grid_position)
+			_normalize_legacy_object_layer_tile(normalized_tile_entry)
 
 			var tile_data = TERRAIN_TILE_DATA_SCRIPT.call("from_dict", normalized_tile_entry)
 			if tile_data == null or not tile_data.has_method("is_valid") or not bool(tile_data.call("is_valid")):
@@ -81,6 +83,25 @@ static func load_from_file(path: String) -> TerrainMapData:
 			terrain_map_data._tiles.append(tile_data)
 
 	return terrain_map_data
+
+
+static func _normalize_legacy_object_layer_tile(tile_entry: Dictionary) -> void:
+	if tile_entry.is_empty():
+		return
+
+	var type_id: String = String(tile_entry.get("type_id", "")).strip_edges()
+	var object_type_id: String = String(tile_entry.get("object_type_id", "")).strip_edges()
+	if type_id.is_empty() or not object_type_id.is_empty():
+		return
+
+	var catalog = TERRAIN_TILE_CATALOG_SCRIPT.call("load_from_file")
+	if catalog == null or not catalog.has_method("is_object_layer_type"):
+		return
+	if not bool(catalog.call("is_object_layer_type", type_id)):
+		return
+
+	tile_entry["object_type_id"] = type_id
+	tile_entry["type_id"] = "ground_flat"
 
 
 static func create_empty(

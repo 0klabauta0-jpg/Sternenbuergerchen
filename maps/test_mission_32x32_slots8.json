@@ -8,21 +8,82 @@
                       "y":  32
                   },
     "map_name":  "test_mission_32x32_slots8",
-    "mission_slot_count":  8,
     "markers":  {
+                    "flank_anchor_left":  {
+                                              "color":  {
+                                                            "a":  0.98,
+                                                            "b":  0.6,
+                                                            "g":  0.97,
+                                                            "r":  0.61
+                                                        },
+                                              "marker_type_id":  "custom",
+                                              "name":  "Flank Anchor Left",
+                                              "placement_context":  "editor_only",
+                                              "symbol":  "chevron",
+                                              "x":  128,
+                                              "y":  317
+                                          },
+                    "flank_anchor_right":  {
+                                               "color":  {
+                                                             "a":  0.98,
+                                                             "b":  0.6,
+                                                             "g":  0.97,
+                                                             "r":  0.61
+                                                         },
+                                               "marker_type_id":  "custom",
+                                               "name":  "Flank Anchor Right",
+                                               "placement_context":  "editor_only",
+                                               "symbol":  "chevron",
+                                               "x":  768,
+                                               "y":  317
+                                           },
                     "objective_point":  {
-                                             "x":  448,
-                                             "y":  413
-                                         },
+                                            "color":  {
+                                                          "a":  0.98,
+                                                          "b":  0.24,
+                                                          "g":  0.86,
+                                                          "r":  1.0
+                                                      },
+                                            "marker_type_id":  "objective_point",
+                                            "name":  "Objective",
+                                            "placement_context":  "editor_only",
+                                            "symbol":  "flag",
+                                            "x":  576,
+                                            "y":  925
+                                        },
                     "spawn_alpha":  {
-                                         "x":  192,
-                                         "y":  477
-                                     },
+                                        "color":  {
+                                                      "a":  0.98,
+                                                      "b":  1.0,
+                                                      "g":  0.78,
+                                                      "r":  0.38
+                                                  },
+                                        "marker_type_id":  "spawn_alpha",
+                                        "name":  "Spawn Alpha",
+                                        "placement_context":  "editor_only",
+                                        "symbol":  "diamond",
+                                        "x":  -256,
+                                        "y":  1661
+                                    },
                     "spawn_bravo":  {
-                                         "x":  704,
-                                         "y":  285
-                                     }
+                                        "color":  {
+                                                      "a":  0.98,
+                                                      "b":  0.42,
+                                                      "g":  0.56,
+                                                      "r":  1.0
+                                                  },
+                                        "marker_type_id":  "spawn_bravo",
+                                        "name":  "Spawn Bravo",
+                                        "placement_context":  "editor_only",
+                                        "symbol":  "diamond",
+                                        "x":  704,
+                                        "y":  285
+                                    }
                 },
+    "mission_slot_count":  8,
+    "patrol_paths":  {
+
+                     },
     "tile_size":  {
                       "half_height":  32,
                       "half_width":  64
@@ -4244,17 +4305,18 @@
                   },
                   {
                       "blocks_los":  false,
-                      "cover_value":  0,
+                      "cover_value":  30,
                       "edge_type":  "cliff",
                       "grid_position":  {
                                             "x":  9,
                                             "y":  13
                                         },
                       "height_level":  0,
-                      "object_height":  0,
-                      "surface_type":  "ground",
+                      "object_height":  1,
+                      "surface_type":  "rock",
                       "type_id":  "ground_flat",
-                      "walkable":  true
+                      "walkable":  false,
+                      "object_type_id":  "deko_barrels_nw"
                   },
                   {
                       "blocks_los":  false,
@@ -5545,7 +5607,7 @@
                       "walkable":  true
                   },
                   {
-                      "blocks_los":  false,
+                      "blocks_los":  true,
                       "cover_value":  0,
                       "edge_type":  "cliff",
                       "grid_position":  {
@@ -5553,13 +5615,13 @@
                                             "y":  10
                                         },
                       "height_level":  0,
-                      "object_height":  0,
-                      "surface_type":  "ground",
-                      "type_id":  "ground_flat",
-                      "walkable":  true
+                      "object_height":  2,
+                      "surface_type":  "rock",
+                      "type_id":  "wall_corner_ne",
+                      "walkable":  false
                   },
                   {
-                      "blocks_los":  false,
+                      "blocks_los":  true,
                       "cover_value":  0,
                       "edge_type":  "cliff",
                       "grid_position":  {
@@ -5567,13 +5629,13 @@
                                             "y":  11
                                         },
                       "height_level":  0,
-                      "object_height":  0,
-                      "surface_type":  "ground",
-                      "type_id":  "ground_flat",
-                      "walkable":  true
+                      "object_height":  2,
+                      "surface_type":  "rock",
+                      "type_id":  "wall_straight_nw",
+                      "walkable":  false
                   },
                   {
-                      "blocks_los":  false,
+                      "blocks_los":  true,
                       "cover_value":  0,
                       "edge_type":  "cliff",
                       "grid_position":  {
@@ -5581,10 +5643,10 @@
                                             "y":  12
                                         },
                       "height_level":  0,
-                      "object_height":  0,
-                      "surface_type":  "ground",
-                      "type_id":  "ground_flat",
-                      "walkable":  true
+                      "object_height":  2,
+                      "surface_type":  "rock",
+                      "type_id":  "wall_corner_nw",
+                      "walkable":  false
                   },
                   {
                       "blocks_los":  false,
@@ -5993,7 +6055,7 @@
                       "walkable":  true
                   },
                   {
-                      "blocks_los":  false,
+                      "blocks_los":  true,
                       "cover_value":  0,
                       "edge_type":  "cliff",
                       "grid_position":  {
@@ -6001,10 +6063,10 @@
                                             "y":  10
                                         },
                       "height_level":  0,
-                      "object_height":  0,
-                      "surface_type":  "ground",
-                      "type_id":  "ground_flat",
-                      "walkable":  true
+                      "object_height":  2,
+                      "surface_type":  "rock",
+                      "type_id":  "wall_straight_ne",
+                      "walkable":  false
                   },
                   {
                       "blocks_los":  false,
@@ -6441,7 +6503,7 @@
                       "walkable":  true
                   },
                   {
-                      "blocks_los":  false,
+                      "blocks_los":  true,
                       "cover_value":  0,
                       "edge_type":  "cliff",
                       "grid_position":  {
@@ -6449,10 +6511,10 @@
                                             "y":  10
                                         },
                       "height_level":  0,
-                      "object_height":  0,
-                      "surface_type":  "ground",
-                      "type_id":  "ground_flat",
-                      "walkable":  true
+                      "object_height":  2,
+                      "surface_type":  "rock",
+                      "type_id":  "wall_corner_se",
+                      "walkable":  false
                   },
                   {
                       "blocks_los":  false,
@@ -6469,7 +6531,7 @@
                       "walkable":  true
                   },
                   {
-                      "blocks_los":  false,
+                      "blocks_los":  true,
                       "cover_value":  0,
                       "edge_type":  "cliff",
                       "grid_position":  {
@@ -6477,10 +6539,10 @@
                                             "y":  12
                                         },
                       "height_level":  0,
-                      "object_height":  0,
-                      "surface_type":  "ground",
-                      "type_id":  "ground_flat",
-                      "walkable":  true
+                      "object_height":  2,
+                      "surface_type":  "rock",
+                      "type_id":  "wall_corner_sw",
+                      "walkable":  false
                   },
                   {
                       "blocks_los":  false,
@@ -7785,32 +7847,34 @@
                       "walkable":  true
                   },
                   {
-                      "blocks_los":  false,
-                      "cover_value":  0,
+                      "blocks_los":  true,
+                      "cover_value":  35,
                       "edge_type":  "cliff",
                       "grid_position":  {
                                             "x":  17,
                                             "y":  10
                                         },
                       "height_level":  0,
-                      "object_height":  0,
-                      "surface_type":  "ground",
+                      "object_height":  2,
+                      "surface_type":  "rock",
                       "type_id":  "ground_flat",
-                      "walkable":  true
+                      "walkable":  false,
+                      "object_type_id":  "technik_satellite_large_nw"
                   },
                   {
-                      "blocks_los":  false,
-                      "cover_value":  0,
+                      "blocks_los":  true,
+                      "cover_value":  40,
                       "edge_type":  "cliff",
                       "grid_position":  {
                                             "x":  17,
                                             "y":  11
                                         },
                       "height_level":  0,
-                      "object_height":  0,
-                      "surface_type":  "ground",
+                      "object_height":  2,
+                      "surface_type":  "rock",
                       "type_id":  "ground_flat",
-                      "walkable":  true
+                      "walkable":  false,
+                      "object_type_id":  "technik_generator_nw"
                   },
                   {
                       "blocks_los":  false,
