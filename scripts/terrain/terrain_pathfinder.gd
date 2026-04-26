@@ -21,9 +21,15 @@ const NEIGHBOR_DIRECTIONS: Array = [
 ]
 const DIAGONAL_COST_MULTIPLIER: float = 1.41421356237
 const MIN_SURFACE_PATH_COST: float = 0.7
+const DEFAULT_EXPOSURE_MAX_GRID_DISTANCE: float = 8.0
+const MIN_COVER_AWARE_STEP_COST: float = 0.05
 
 
 func find_path(from_grid: Vector2i, to_grid: Vector2i, registry) -> Array:
+	return find_path_with_options(from_grid, to_grid, registry, {})
+
+
+func find_path_with_options(from_grid: Vector2i, to_grid: Vector2i, registry, options: Dictionary = {}) -> Array:
 	var result: Array = []
 	if registry == null or not registry.has_method("get_tile_at_grid"):
 		return result
@@ -50,7 +56,7 @@ func find_path(from_grid: Vector2i, to_grid: Vector2i, registry) -> Array:
 			if not _is_neighbor_walkable(current, neighbor, registry):
 				continue
 
-			var tentative_g_score: float = float(g_score.get(current, INF)) + _get_step_cost(current, neighbor, registry)
+			var tentative_g_score: float = float(g_score.get(current, INF)) + _get_step_cost(current, neighbor, registry, options)
 			if tentative_g_score >= float(g_score.get(neighbor, INF)):
 				continue
 
@@ -69,6 +75,56 @@ func get_neighbor_directions() -> Array:
 
 func can_traverse_step(current_grid: Vector2i, neighbor_grid: Vector2i, registry) -> bool:
 	return _is_neighbor_walkable(current_grid, neighbor_grid, registry)
+
+
+func get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry, options: Dictionary = {}) -> float:
+	return _get_step_cost(current_grid, neighbor_grid, registry, options)
+
+
+func score_path(path_grid_points: Array, registry, options: Dictionary = {}) -> Dictionary:
+	var exposure_sum: float = 0.0
+	var cover_sum: float = 0.0
+	var path_cost: float = 0.0
+	var previous_grid: Variant = null
+	for grid_variant in path_grid_points:
+		var grid_position: Vector2i = Vector2i(grid_variant)
+		exposure_sum += get_exposure_score(grid_position, registry, options)
+		cover_sum += _get_cover_score(grid_position, registry)
+		if previous_grid != null:
+			path_cost += _get_step_cost(Vector2i(previous_grid), grid_position, registry, options)
+		previous_grid = grid_position
+	var count: int = path_grid_points.size()
+	return {
+		"path_length_grid": count,
+		"exposure_sum": exposure_sum,
+		"cover_sum": cover_sum,
+		"mean_exposure": exposure_sum / float(count) if count > 0 else 0.0,
+		"mean_cover": cover_sum / float(count) if count > 0 else 0.0,
+		"path_cost": path_cost,
+	}
+
+
+func get_exposure_score(grid_position: Vector2i, registry, options: Dictionary = {}) -> float:
+	if not bool(options.get("cover_aware_enabled", false)):
+		return 0.0
+	var exposure_map: Dictionary = Dictionary(options.get("exposure_by_grid", {}))
+	if exposure_map.has(grid_position):
+		return clampf(float(exposure_map.get(grid_position, 0.0)), 0.0, 1.0)
+	var hazard_grids: Array = Array(options.get("hazard_grids", []))
+	if hazard_grids.is_empty():
+		return 0.0
+	var max_distance: float = maxf(float(options.get("exposure_max_grid_distance", DEFAULT_EXPOSURE_MAX_GRID_DISTANCE)), 0.001)
+	var exposure: float = 0.0
+	for hazard_variant in hazard_grids:
+		var hazard_grid: Vector2i = Vector2i(hazard_variant)
+		var grid_distance: float = _grid_distance_score(grid_position, hazard_grid)
+		if grid_distance > max_distance:
+			continue
+		if not _has_grid_line_of_sight(hazard_grid, grid_position, registry):
+			continue
+		var contribution: float = 1.0 - clampf(grid_distance / max_distance, 0.0, 1.0)
+		exposure = maxf(exposure, contribution)
+	return clampf(exposure, 0.0, 1.0)
 
 
 func _pop_lowest_f_score(open_set: Array, f_score: Dictionary) -> Vector2i:
@@ -142,7 +198,7 @@ func _is_grid_step_walkable(current_grid: Vector2i, neighbor_grid: Vector2i, reg
 		return height_difference <= 1  # cliffs only allow 1 level difference
 
 
-func _get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry) -> float:
+func _get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry, options: Dictionary = {}) -> float:
 	var current_tile = registry.call("get_tile_at_grid", current_grid)
 	var neighbor_tile = registry.call("get_tile_at_grid", neighbor_grid)
 	if current_tile == null or neighbor_tile == null:
@@ -159,7 +215,47 @@ func _get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry) -
 		if edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE:
 			base_cost = surface_cost + (float(height_difference) * 1.0)
 
+	if bool(options.get("cover_aware_enabled", false)):
+		var exposure_weight: float = maxf(float(options.get("exposure_weight", 0.0)), 0.0)
+		var cover_weight: float = maxf(float(options.get("cover_weight", 0.0)), 0.0)
+		var exposure_score: float = get_exposure_score(neighbor_grid, registry, options)
+		var cover_score: float = _get_cover_score(neighbor_grid, registry)
+		base_cost = maxf(base_cost + (exposure_weight * exposure_score) - (cover_weight * cover_score), MIN_COVER_AWARE_STEP_COST)
+
 	var delta: Vector2i = neighbor_grid - current_grid
 	if abs(delta.x) == 1 and abs(delta.y) == 1:
 		return base_cost * DIAGONAL_COST_MULTIPLIER
 	return base_cost
+
+
+func _get_cover_score(grid_position: Vector2i, registry) -> float:
+	if registry == null or not registry.has_method("get_tile_at_grid"):
+		return 0.0
+	var tile_data = registry.call("get_tile_at_grid", grid_position)
+	if tile_data == null:
+		return 0.0
+	return clampf(float(tile_data.cover_value) / 100.0, 0.0, 1.0)
+
+
+func _grid_distance_score(a: Vector2i, b: Vector2i) -> float:
+	var delta: Vector2i = a - b
+	return maxf(absf(float(delta.x)), absf(float(delta.y)))
+
+
+func _has_grid_line_of_sight(source_grid: Vector2i, target_grid: Vector2i, registry) -> bool:
+	if registry == null or not registry.has_method("get_tile_at_grid"):
+		return true
+	var delta: Vector2i = target_grid - source_grid
+	var step_count: int = maxi(abs(delta.x), abs(delta.y))
+	if step_count <= 0:
+		return true
+	for step_index in range(1, step_count):
+		var t: float = float(step_index) / float(step_count)
+		var stepped_grid := Vector2i(
+			roundi(lerpf(float(source_grid.x), float(target_grid.x), t)),
+			roundi(lerpf(float(source_grid.y), float(target_grid.y), t))
+		)
+		var tile_data = registry.call("get_tile_at_grid", stepped_grid)
+		if tile_data != null and bool(tile_data.blocks_los):
+			return false
+	return true

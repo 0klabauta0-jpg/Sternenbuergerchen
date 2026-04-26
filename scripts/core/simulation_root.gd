@@ -33,6 +33,10 @@ const HEIGHT_DISADVANTAGE_ACCURACY_PENALTY: float = 0.05
 @export_range(0, 64, 1) var navigation_max_new_path_queries_per_tick: int = 4
 @export var navigation_debug_enabled: bool = false
 @export_range(1, 128, 1) var navigation_debug_query_history_limit: int = 24
+@export var navigation_cover_aware_enabled: bool = false
+@export_range(0.0, 8.0, 0.1) var navigation_default_exposure_weight: float = 0.8
+@export_range(0.0, 8.0, 0.1) var navigation_default_cover_weight: float = 0.25
+@export_range(1.0, 64.0, 1.0) var navigation_exposure_max_grid_distance: float = 8.0
 
 var command_queue: Array = []
 var effects_queue: Array = []
@@ -59,6 +63,7 @@ var _navigation_unreachable_queries_this_tick: int = 0
 var _navigation_last_delay_reason: String = ""
 var _navigation_last_tick_queries: Array = []
 var _navigation_most_expensive_query: Dictionary = {}
+var _navigation_last_path_metrics: Dictionary = {}
 
 
 func _init() -> void:
@@ -124,6 +129,7 @@ func set_navigation_debug_enabled(enabled: bool) -> void:
 	if not navigation_debug_enabled:
 		_navigation_last_tick_queries.clear()
 		_navigation_most_expensive_query.clear()
+		_navigation_last_path_metrics.clear()
 
 
 func get_navigation_debug_snapshot() -> Dictionary:
@@ -141,6 +147,7 @@ func get_navigation_debug_snapshot() -> Dictionary:
 		"last_delay_reason": _navigation_last_delay_reason,
 		"last_queries": _duplicate_dictionary_array(_navigation_last_tick_queries),
 		"most_expensive_query": _navigation_most_expensive_query.duplicate(true),
+		"last_path_metrics": _navigation_last_path_metrics.duplicate(true),
 	}
 
 
@@ -873,6 +880,7 @@ func _begin_navigation_budget_tick() -> void:
 	_navigation_unreachable_queries_this_tick = 0
 	_navigation_last_delay_reason = ""
 	_navigation_last_tick_queries.clear()
+	_navigation_last_path_metrics.clear()
 
 
 func _finish_navigation_budget_tick() -> void:
@@ -970,6 +978,12 @@ func _make_navigation_record(
 		"to_grid": to_grid,
 		"duration_usec": duration_usec,
 		"path_grid_count": path.size(),
+		"path_length_grid": int(query_result.get("path_length_grid", path.size())),
+		"exposure_sum": float(query_result.get("exposure_sum", 0.0)),
+		"cover_sum": float(query_result.get("cover_sum", 0.0)),
+		"mean_exposure": float(query_result.get("mean_exposure", 0.0)),
+		"mean_cover": float(query_result.get("mean_cover", 0.0)),
+		"path_cost": float(query_result.get("path_cost", 0.0)),
 		"candidate_count_estimate": candidate_count,
 		"expanded_node_estimate": maxi(candidate_count, path.size()),
 		"fallback_or_delay_reason": reason,
@@ -986,6 +1000,19 @@ func _append_navigation_debug_record(record: Dictionary) -> void:
 	var duration_usec: int = int(record.get("duration_usec", 0))
 	if _navigation_most_expensive_query.is_empty() or duration_usec > int(_navigation_most_expensive_query.get("duration_usec", -1)):
 		_navigation_most_expensive_query = record.duplicate(true)
+	if String(record.get("query_kind", "")) != "delayed":
+		_navigation_last_path_metrics = {
+			"unit_id": String(record.get("unit_id", "")),
+			"query_kind": String(record.get("query_kind", "")),
+			"route_type": String(record.get("route_type", "")),
+			"status": String(record.get("status", "")),
+			"path_length_grid": int(record.get("path_length_grid", 0)),
+			"exposure_sum": float(record.get("exposure_sum", 0.0)),
+			"cover_sum": float(record.get("cover_sum", 0.0)),
+			"mean_exposure": float(record.get("mean_exposure", 0.0)),
+			"mean_cover": float(record.get("mean_cover", 0.0)),
+			"path_cost": float(record.get("path_cost", 0.0)),
+		}
 
 
 func _count_pending_navigation_queries() -> int:
@@ -1034,11 +1061,13 @@ func _build_path_world_points(current_position: Vector2, target_position: Vector
 		if typeof(nearest_start_grid) == TYPE_VECTOR2I:
 			from_grid = nearest_start_grid
 
+	var navigation_options: Dictionary = _build_navigation_cost_options(cmd, terrain_registry)
 	var navigation_started_usec: int = Time.get_ticks_usec()
-	var navigation_query: Dictionary = _find_navigation_grid_path(from_grid, to_grid, terrain_registry)
+	var navigation_query: Dictionary = _find_navigation_grid_path(from_grid, to_grid, terrain_registry, navigation_options)
 	var navigation_duration_usec: int = Time.get_ticks_usec() - navigation_started_usec
 	var path_grid_points: Array = Array(navigation_query.get("path", []))
 	var navigation_status: String = String(navigation_query.get("status", ""))
+	_annotate_navigation_query_metrics(navigation_query, path_grid_points, terrain_registry, navigation_options)
 	_record_navigation_path_query(cmd, unit, from_grid, to_grid, navigation_query, navigation_duration_usec, "primary", "", path_grid_points.size())
 	path_grid_points = _simplify_grid_path_turns(path_grid_points)
 	if path_grid_points.is_empty():
@@ -1050,9 +1079,10 @@ func _build_path_world_points(current_position: Vector2, target_position: Vector
 		if typeof(reachable_grid) != TYPE_VECTOR2I:
 			return path_world_points
 		var fallback_started_usec: int = Time.get_ticks_usec()
-		var fallback_query: Dictionary = _find_navigation_grid_path(from_grid, reachable_grid, terrain_registry)
+		var fallback_query: Dictionary = _find_navigation_grid_path(from_grid, reachable_grid, terrain_registry, navigation_options)
 		var fallback_duration_usec: int = Time.get_ticks_usec() - fallback_started_usec
 		var fallback_path_grid_points: Array = Array(fallback_query.get("path", []))
+		_annotate_navigation_query_metrics(fallback_query, fallback_path_grid_points, terrain_registry, navigation_options)
 		_record_navigation_path_query(cmd, unit, from_grid, reachable_grid, fallback_query, fallback_duration_usec, "fallback", navigation_status, fallback_path_grid_points.size())
 		fallback_path_grid_points = _simplify_grid_path_turns(fallback_path_grid_points)
 		if fallback_path_grid_points.is_empty() and reachable_grid != from_grid:
@@ -1101,10 +1131,88 @@ func _grid_step_direction(from_grid: Vector2i, to_grid: Vector2i) -> Vector2i:
 	return Vector2i(direction_x, direction_y)
 
 
-func _find_navigation_grid_path(from_grid: Vector2i, to_grid: Vector2i, terrain_registry) -> Dictionary:
+func _build_navigation_cost_options(cmd: Dictionary, terrain_registry) -> Dictionary:
+	var cover_aware_enabled: bool = navigation_cover_aware_enabled
+	if cmd.has("navigation_cover_aware"):
+		cover_aware_enabled = bool(cmd.get("navigation_cover_aware", false))
+	elif cmd.has("cover_aware_navigation"):
+		cover_aware_enabled = bool(cmd.get("cover_aware_navigation", false))
+
+	var weights: Dictionary = _get_navigation_cost_weights_for_command(cmd)
+	if cmd.has("navigation_exposure_weight"):
+		weights["exposure_weight"] = maxf(float(cmd.get("navigation_exposure_weight", 0.0)), 0.0)
+	if cmd.has("navigation_cover_weight"):
+		weights["cover_weight"] = maxf(float(cmd.get("navigation_cover_weight", 0.0)), 0.0)
+
+	return {
+		"cover_aware_enabled": cover_aware_enabled,
+		"exposure_weight": float(weights.get("exposure_weight", navigation_default_exposure_weight)),
+		"cover_weight": float(weights.get("cover_weight", navigation_default_cover_weight)),
+		"exposure_max_grid_distance": float(cmd.get("navigation_exposure_max_grid_distance", navigation_exposure_max_grid_distance)),
+		"hazard_grids": _extract_navigation_hazard_grids(cmd, terrain_registry),
+	}
+
+
+func _get_navigation_cost_weights_for_command(cmd: Dictionary) -> Dictionary:
+	var source_command_type: String = String(cmd.get("source_command_type", cmd.get("origin_command_type", ""))).strip_edges().to_lower()
+	if source_command_type.is_empty():
+		var command_type: String = String(cmd.get("command_type", cmd.get("type", ""))).strip_edges().to_lower()
+		match command_type:
+			"engage_area":
+				source_command_type = "engage"
+			"move_to_position":
+				source_command_type = "move"
+			_:
+				source_command_type = command_type
+	match source_command_type:
+		"defend":
+			return {"exposure_weight": 0.9, "cover_weight": 0.75}
+		"take", "engage":
+			return {"exposure_weight": 1.1, "cover_weight": 0.45}
+		"flank":
+			return {"exposure_weight": 1.2, "cover_weight": 0.3}
+		"rush":
+			return {"exposure_weight": 0.15, "cover_weight": 0.05}
+		_:
+			return {"exposure_weight": navigation_default_exposure_weight, "cover_weight": navigation_default_cover_weight}
+
+
+func _extract_navigation_hazard_grids(cmd: Dictionary, terrain_registry) -> Array:
+	var hazard_grids: Array = []
+	for key in ["navigation_threat_grids", "threat_grids", "danger_grids"]:
+		for grid_variant in Array(cmd.get(key, [])):
+			_append_unique_navigation_hazard_grid(hazard_grids, Vector2i(grid_variant))
+	if terrain_registry != null and terrain_registry.has_method("world_to_grid"):
+		for key in ["navigation_threat_positions", "threat_positions", "danger_positions", "enemy_positions"]:
+			for position_variant in Array(cmd.get(key, [])):
+				if typeof(position_variant) != TYPE_VECTOR2:
+					continue
+				_append_unique_navigation_hazard_grid(hazard_grids, terrain_registry.call("world_to_grid", Vector2(position_variant)))
+	hazard_grids.sort_custom(func(a, b) -> bool:
+		var grid_a: Vector2i = Vector2i(a)
+		var grid_b: Vector2i = Vector2i(b)
+		if grid_a.x == grid_b.x:
+			return grid_a.y < grid_b.y
+		return grid_a.x < grid_b.x
+	)
+	return hazard_grids
+
+
+func _append_unique_navigation_hazard_grid(hazard_grids: Array, grid_position: Vector2i) -> void:
+	if not hazard_grids.has(grid_position):
+		hazard_grids.append(grid_position)
+
+
+func _annotate_navigation_query_metrics(query: Dictionary, path_grid_points: Array, terrain_registry, navigation_options: Dictionary) -> void:
+	var path_metrics: Dictionary = Dictionary(_terrain_pathfinder.call("score_path", path_grid_points, terrain_registry, navigation_options))
+	for key in path_metrics.keys():
+		query[key] = path_metrics[key]
+
+
+func _find_navigation_grid_path(from_grid: Vector2i, to_grid: Vector2i, terrain_registry, navigation_options: Dictionary = {}) -> Dictionary:
 	var graph = _ensure_hpa_navigation_graph(terrain_registry)
 	if graph != null and _hpa_pathfinder != null:
-		var hpa_query: Dictionary = Dictionary(_hpa_pathfinder.call("find_path_with_status", from_grid, to_grid, terrain_registry, graph))
+		var hpa_query: Dictionary = Dictionary(_hpa_pathfinder.call("find_path_with_status", from_grid, to_grid, terrain_registry, graph, navigation_options))
 		var hpa_status: String = String(hpa_query.get("status", ""))
 		if not Array(hpa_query.get("path", [])).is_empty():
 			return hpa_query
@@ -1112,7 +1220,7 @@ func _find_navigation_grid_path(from_grid: Vector2i, to_grid: Vector2i, terrain_
 			return hpa_query
 
 	return {
-		"path": _terrain_pathfinder.find_path(from_grid, to_grid, terrain_registry),
+		"path": _terrain_pathfinder.call("find_path_with_options", from_grid, to_grid, terrain_registry, navigation_options),
 		"status": "direct_a_star",
 	}
 

@@ -3,7 +3,7 @@
 ## Ziel
 Fireteams sollen bei Bewegungsbefehlen nicht nur kurze, sondern taktisch sinnvollere Pfade nutzen: offene, feindnahe und stark exponierte Tiles werden teurer, gedeckte oder weniger sichtbare Tiles werden bevorzugt. Die bestehende HPA-/A*-Pipeline bleibt die Grundlage.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Voraussetzung
 - `TASK_126 - HPA Navigation Foundation`
@@ -54,13 +54,13 @@ Fireteams sollen bei Bewegungsbefehlen nicht nur kurze, sondern taktisch sinnvol
 - Teure Exposure-Berechnung muss cachebar oder budgetierbar sein.
 
 ## Akzeptanzkriterien
-- [ ] Cover-aware Pfadkosten koennen fuer eine Testkarte aktiviert/deaktiviert werden.
-- [ ] Ein Testfall zeigt geringere Exposure-Summe als Plain-HPA bei akzeptabler Mehrlaenge.
-- [ ] Pfade betreten weiterhin keine nicht-walkable Tiles.
-- [ ] HPA-Pfade funktionieren mit und ohne Exposure-Kosten.
-- [ ] Command-Typ oder Behavior-Profil kann die Risikogewichtung beeinflussen.
-- [ ] Debug-Snapshot nennt Pfadlaenge, Exposure-Summe und Cover-Summe.
-- [ ] Bestehende HPA-, Blocker-, Area- und Fireteam-Movement-Tests bleiben gruen.
+- [x] Cover-aware Pfadkosten koennen fuer eine Testkarte aktiviert/deaktiviert werden.
+- [x] Ein Testfall zeigt geringere Exposure-Summe als Plain-HPA bei akzeptabler Mehrlaenge.
+- [x] Pfade betreten weiterhin keine nicht-walkable Tiles.
+- [x] HPA-Pfade funktionieren mit und ohne Exposure-Kosten.
+- [x] Command-Typ oder Behavior-Profil kann die Risikogewichtung beeinflussen.
+- [x] Debug-Snapshot nennt Pfadlaenge, Exposure-Summe und Cover-Summe.
+- [x] Bestehende HPA-, Blocker-, Area- und Fireteam-Movement-Tests bleiben gruen.
 
 ## Erwartetes Ergebnis
 - Fireteams wirken taktischer, weil sie Deckung und offene Feuerlinien in der Routenwahl beruecksichtigen.
@@ -68,19 +68,25 @@ Fireteams sollen bei Bewegungsbefehlen nicht nur kurze, sondern taktisch sinnvol
 - Spaetere Subgoal-/Any-Angle-Optimierung hat Messdaten und klare Anschlussstellen.
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_129_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_128_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_127_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_125_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_110_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_123_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_129_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_128_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_127_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_125_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_110_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_123_verifier.gd`
 
-## Dateien (voraussichtlich)
+## Dateien
 - `scripts/terrain/terrain_pathfinder.gd`
 - `scripts/terrain/hpa_pathfinder.gd`
 - `scripts/terrain/hpa_navigation_graph.gd`
 - `scripts/core/simulation_root.gd`
 - `scripts/tests/task_129_verifier.gd`
+
+## Ergebnis
+- `TerrainPathfinder` akzeptiert optionale Cover-/Exposure-Kosten und kann Pfade mit `path_length_grid`, `exposure_sum`, `cover_sum`, Mittelwerten und Gesamtkosten auswerten.
+- `HPAPathfinder` reicht diese Kostenoptionen an lokale Segmente weiter; Portal-Kanten tragen erste statische Cover-Metadaten als Subgoal-Anschlussstelle.
+- `SimulationRoot` baut Navigation-Kostenoptionen aus Command-Typ, `source_command_type`, Hazard-Grids/-Positionen und optionalen Overrides.
+- Der Navigation-Debug-Snapshot enthaelt jetzt die letzten Pfadmetriken inklusive Pfadlaenge, Exposure-Summe und Cover-Summe.
 
 ## Risiken
 - Zu hohe Exposure-Gewichte koennen Fireteams unnatuerlich lange Umwege laufen lassen.

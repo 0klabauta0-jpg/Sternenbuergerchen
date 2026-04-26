@@ -226,10 +226,10 @@ func _build_portals(registry) -> void:
 					continue
 				if not bool(_pathfinder.call("can_traverse_step", from_grid, to_grid, registry)):
 					continue
-				_add_portal(from_grid, to_grid, cluster_id, to_cluster_id)
+				_add_portal(from_grid, to_grid, cluster_id, to_cluster_id, registry)
 
 
-func _add_portal(from_grid: Vector2i, to_grid: Vector2i, from_cluster_id: Vector2i, to_cluster_id: Vector2i) -> void:
+func _add_portal(from_grid: Vector2i, to_grid: Vector2i, from_cluster_id: Vector2i, to_cluster_id: Vector2i, registry) -> void:
 	var canonical_from: Vector2i = from_grid
 	var canonical_to: Vector2i = to_grid
 	var canonical_from_cluster: Vector2i = from_cluster_id
@@ -247,6 +247,7 @@ func _add_portal(from_grid: Vector2i, to_grid: Vector2i, from_cluster_id: Vector
 
 	var from_component: String = get_component_key_for_grid(canonical_from)
 	var to_component: String = get_component_key_for_grid(canonical_to)
+	var cover_values: PackedFloat32Array = _get_portal_cover_values(canonical_from, canonical_to, registry)
 	var portal: Dictionary = {
 		"portal_id": portal_id,
 		"from_cluster": canonical_from_cluster,
@@ -255,6 +256,8 @@ func _add_portal(from_grid: Vector2i, to_grid: Vector2i, from_cluster_id: Vector
 		"to_grid": canonical_to,
 		"from_component": from_component,
 		"to_component": to_component,
+		"mean_cover": float(cover_values[0]),
+		"min_cover": float(cover_values[1]),
 	}
 	_portals.append(portal)
 	_portals.sort_custom(_sort_portals)
@@ -301,6 +304,21 @@ func _build_component_key(cluster_id: Vector2i, component_index: int) -> String:
 
 func _build_portal_id(from_grid: Vector2i, to_grid: Vector2i) -> String:
 	return "%d,%d>%d,%d" % [from_grid.x, from_grid.y, to_grid.x, to_grid.y]
+
+
+func _get_portal_cover_values(from_grid: Vector2i, to_grid: Vector2i, registry) -> PackedFloat32Array:
+	var from_cover: float = _get_tile_cover_score(from_grid, registry)
+	var to_cover: float = _get_tile_cover_score(to_grid, registry)
+	return PackedFloat32Array([(from_cover + to_cover) * 0.5, minf(from_cover, to_cover)])
+
+
+func _get_tile_cover_score(grid_position: Vector2i, registry) -> float:
+	if registry == null or not registry.has_method("get_tile_at_grid"):
+		return 0.0
+	var tile_data = registry.call("get_tile_at_grid", grid_position)
+	if tile_data == null:
+		return 0.0
+	return clampf(float(tile_data.cover_value) / 100.0, 0.0, 1.0)
 
 
 func _sort_tiles_by_grid(a, b) -> bool:

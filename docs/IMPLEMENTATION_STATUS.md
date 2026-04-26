@@ -957,6 +957,15 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Ein niedriges Budget kann sichtbare Startverzoegerungen bei grossen Sammelbefehlen erzeugen; der Snapshot macht diese Pending- und Delay-Gruende deshalb explizit sichtbar.
 - Naechster Schritt: TASK_129 kann deckungsbewusste Pfadkosten aufsetzen, ohne CPU-Spitzen ungezaehlt zu lassen.
 
+### TASK_129 - Deckungsbewusste Pfade mit HPA und Subgoal-Vorbereitung
+- Status: implementiert
+- Stand: `TerrainPathfinder` besitzt jetzt einen optionalen Cover-/Exposure-Kostenvertrag (`find_path_with_options`, `score_path`, `get_exposure_score`). Die Basisregeln fuer Walkability, Hoehen, Diagonalen und Corner-Cutting bleiben identisch; ohne Optionen laeuft der alte Pfad weiter.
+- Stand: `HPAPathfinder` reicht Kostenoptionen in Same-Cluster- und lokale Portal-Segmente weiter. `HPANavigationGraph` annotiert Portale mit `mean_cover` und `min_cover`, damit spaetere Subgoal-/Portalentscheidungen bereits lesbare Cover-Metadaten besitzen.
+- Stand: `SimulationRoot` kann Cover-aware Navigation ueber Export oder Command-Feld aktivieren, Hazard-Grids/-Positionen aus Commands ableiten und Risikogewichte nach `source_command_type` (`move`, `defend`, `take`/`engage`, `flank`, `rush`) setzen. Der Navigation-Debug-Snapshot enthaelt jetzt letzte Pfadmetriken wie `path_length_grid`, `exposure_sum`, `cover_sum`, Mittelwerte und `path_cost`.
+- Offene Punkte: Keine echte Subgoal-Graph-Suche, keine dynamische Threat-Map aus dem Combat-Loop und keine UI-Pflichtanzeige. Threat-/Hazard-Positionen muessen in diesem Slice explizit ueber Command-Daten oder Tests kommen.
+- Risiken: Hohe Exposure-/Cover-Gewichte koennen Umwege stark bevorzugen; deshalb bleiben Cover-aware Kosten standardmaessig deaktiviert und pro Command/Export steuerbar.
+- Naechster Schritt: TASK_130 kann lokale Avoidance/ORCA-Light auf den resultierenden Wunschpfaden aufsetzen, ohne die globale Pfadkostenlogik zu ersetzen.
+
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert
 - Stand: Der Meta-Layer fuehrt jetzt durchgaengig auf die echte eingebettete Missionskarte statt auf eine separate read-only Overview. Homebase, FOB und Mission teilen dieselbe kompakte Navigation, die Missions-Tactical-UI traegt direkt die gemeinsamen Block-Labels `#15` bis `#18`, und der Missionspfad bleibt auf dieselbe Kartenbasis, dieselben LZ-/Approach-Marker sowie denselben Dropship-Handoff verdrahtet wie die spaetere Live-Mission.

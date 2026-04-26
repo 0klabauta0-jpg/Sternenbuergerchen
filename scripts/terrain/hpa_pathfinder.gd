@@ -17,7 +17,7 @@ func find_path(from_grid: Vector2i, to_grid: Vector2i, registry, graph) -> Array
 	return Array(find_path_with_status(from_grid, to_grid, registry, graph).get("path", []))
 
 
-func find_path_with_status(from_grid: Vector2i, to_grid: Vector2i, registry, graph) -> Dictionary:
+func find_path_with_status(from_grid: Vector2i, to_grid: Vector2i, registry, graph, options: Dictionary = {}) -> Dictionary:
 	if registry == null or graph == null:
 		return {"path": [], "status": STATUS_INVALID}
 
@@ -27,24 +27,24 @@ func find_path_with_status(from_grid: Vector2i, to_grid: Vector2i, registry, gra
 		return {"path": [], "status": STATUS_NO_COMPONENT}
 
 	if from_component == to_component:
-		var same_component_path: Array = _terrain_pathfinder.find_path(from_grid, to_grid, registry)
+		var same_component_path: Array = _terrain_pathfinder.call("find_path_with_options", from_grid, to_grid, registry, options)
 		return {
 			"path": same_component_path,
 			"status": STATUS_SAME_COMPONENT if not same_component_path.is_empty() else STATUS_LOCAL_PATH_FAILED,
 		}
 
-	var portal_route: Array = _find_portal_route(from_component, to_component, to_grid, graph)
+	var portal_route: Array = _find_portal_route(from_component, to_component, to_grid, graph, registry, options)
 	if portal_route.is_empty():
 		return {"path": [], "status": STATUS_NO_ABSTRACT_ROUTE}
 
-	var assembled_path: Array = _assemble_grid_path(from_grid, to_grid, portal_route, registry)
+	var assembled_path: Array = _assemble_grid_path(from_grid, to_grid, portal_route, registry, options)
 	return {
 		"path": assembled_path,
 		"status": STATUS_HPA if not assembled_path.is_empty() else STATUS_LOCAL_PATH_FAILED,
 	}
 
 
-func _find_portal_route(from_component: String, to_component: String, to_grid: Vector2i, graph) -> Array:
+func _find_portal_route(from_component: String, to_component: String, to_grid: Vector2i, graph, registry, options: Dictionary = {}) -> Array:
 	var adjacency: Dictionary = _build_portal_adjacency(graph)
 	var open_set: Array = [from_component]
 	var came_from_edge: Dictionary = {}
@@ -67,7 +67,7 @@ func _find_portal_route(from_component: String, to_component: String, to_grid: V
 			var neighbor_component: String = String(edge.get("to_component", ""))
 			if neighbor_component.is_empty():
 				continue
-			var edge_cost: float = Vector2(Vector2i(edge.get("from_grid", Vector2i.ZERO))).distance_to(Vector2(Vector2i(edge.get("to_grid", Vector2i.ZERO)))) + 1.0
+			var edge_cost: float = _get_portal_edge_cost(edge, registry, options)
 			var tentative_g_score: float = float(g_score.get(current_component, INF)) + edge_cost
 			if tentative_g_score >= float(g_score.get(neighbor_component, INF)):
 				continue
@@ -91,6 +91,8 @@ func _build_portal_adjacency(graph) -> Dictionary:
 			"to_component": String(portal.get("to_component", "")),
 			"from_grid": Vector2i(portal.get("from_grid", Vector2i.ZERO)),
 			"to_grid": Vector2i(portal.get("to_grid", Vector2i.ZERO)),
+			"mean_cover": float(portal.get("mean_cover", 0.0)),
+			"min_cover": float(portal.get("min_cover", 0.0)),
 		}
 		var reverse_edge: Dictionary = {
 			"portal_id": String(portal.get("portal_id", "")),
@@ -98,6 +100,8 @@ func _build_portal_adjacency(graph) -> Dictionary:
 			"to_component": String(portal.get("from_component", "")),
 			"from_grid": Vector2i(portal.get("to_grid", Vector2i.ZERO)),
 			"to_grid": Vector2i(portal.get("from_grid", Vector2i.ZERO)),
+			"mean_cover": float(portal.get("mean_cover", 0.0)),
+			"min_cover": float(portal.get("min_cover", 0.0)),
 		}
 		_append_edge(adjacency, forward_edge)
 		_append_edge(adjacency, reverse_edge)
@@ -143,27 +147,27 @@ func _reconstruct_portal_route(came_from_edge: Dictionary, current_component: St
 	return route
 
 
-func _assemble_grid_path(from_grid: Vector2i, to_grid: Vector2i, portal_route: Array, registry) -> Array:
+func _assemble_grid_path(from_grid: Vector2i, to_grid: Vector2i, portal_route: Array, registry, options: Dictionary = {}) -> Array:
 	var result: Array = [from_grid]
 	var current_grid: Vector2i = from_grid
 	for edge_variant in portal_route:
 		var edge: Dictionary = Dictionary(edge_variant)
 		var portal_from_grid: Vector2i = Vector2i(edge.get("from_grid", current_grid))
 		var portal_to_grid: Vector2i = Vector2i(edge.get("to_grid", portal_from_grid))
-		if not _append_local_path(result, current_grid, portal_from_grid, registry):
+		if not _append_local_path(result, current_grid, portal_from_grid, registry, options):
 			return []
 		_append_unique_grid(result, portal_to_grid)
 		current_grid = portal_to_grid
-	if not _append_local_path(result, current_grid, to_grid, registry):
+	if not _append_local_path(result, current_grid, to_grid, registry, options):
 		return []
 	return result
 
 
-func _append_local_path(result: Array, from_grid: Vector2i, to_grid: Vector2i, registry) -> bool:
+func _append_local_path(result: Array, from_grid: Vector2i, to_grid: Vector2i, registry, options: Dictionary = {}) -> bool:
 	if from_grid == to_grid:
 		_append_unique_grid(result, to_grid)
 		return true
-	var local_path: Array = _terrain_pathfinder.find_path(from_grid, to_grid, registry)
+	var local_path: Array = _terrain_pathfinder.call("find_path_with_options", from_grid, to_grid, registry, options)
 	if local_path.is_empty():
 		return false
 	for grid_variant in local_path:
@@ -182,3 +186,12 @@ func _sort_edges(a: Dictionary, b: Dictionary) -> bool:
 	if portal_a == portal_b:
 		return String(a.get("to_component", "")) < String(b.get("to_component", ""))
 	return portal_a < portal_b
+
+
+func _get_portal_edge_cost(edge: Dictionary, registry, options: Dictionary = {}) -> float:
+	var from_grid: Vector2i = Vector2i(edge.get("from_grid", Vector2i.ZERO))
+	var to_grid: Vector2i = Vector2i(edge.get("to_grid", Vector2i.ZERO))
+	var step_cost: float = float(_terrain_pathfinder.call("get_step_cost", from_grid, to_grid, registry, options))
+	if is_inf(step_cost):
+		step_cost = Vector2(from_grid).distance_to(Vector2(to_grid)) + 1.0
+	return maxf(step_cost, 0.001)
