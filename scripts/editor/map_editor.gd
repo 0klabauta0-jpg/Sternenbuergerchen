@@ -59,7 +59,7 @@ const DEFAULT_HALF_TILE_HEIGHT: float = 32.0
 const MIN_NEW_MAP_GRID_DIMENSION: int = 1
 const MAX_NEW_MAP_GRID_DIMENSION: int = 512
 const MIN_MISSION_SLOT_COUNT: int = 1
-const MAX_MISSION_SLOT_COUNT: int = 8
+const MAX_MISSION_SLOT_COUNT: int = 50
 const EDITABLE_MARKER_IDS: PackedStringArray = [
 	"spawn_alpha",
 	"spawn_bravo",

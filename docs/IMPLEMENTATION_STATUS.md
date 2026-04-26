@@ -990,6 +990,13 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Keine Runtime-Abhaengigkeit wurde gefunden; die Anchors waren nur noch Editor-/Map-Altlasten.
 - Naechster Schritt: Bei Bedarf alte Karten einmal im Editor neu speichern, damit die Custom-Altmarker aus den JSON-Dateien verschwinden.
 
+### Editor Slot Limit
+- Status: implementiert
+- Stand: Der Map-Editor erlaubt fuer `mission_slot_count` jetzt bis zu 50 Slots pro Seite statt der bisherigen 8er-Obergrenze. Die gespeicherten Map-Daten bleiben unveraendert ein einfacher `mission_slot_count`-Wert.
+- Offene Punkte: Die Meta-/FOB-UI zeigt die hoehere Kapazitaet an, erzeugt dadurch aber noch keine 50 sichtbaren Missions-Unit-Nodes.
+- Risiken: Das ist zunaechst eine Editor-/Kapazitaetsfreigabe; groessere Live-Teams brauchen weiterhin passende Spawn-/Roster-/Performance-Folgearbeit.
+- Naechster Schritt: Bei Bedarf separate Tasks fuer 50er-Spawnverteilung und Meta-Roster-Skalierung schneiden.
+
 ### TASK_151-153 - Geplante Folge-Labs
 - Status: geplant
 - Stand: Aus den zuletzt bewerteten Vorschlaegen bleiben drei bewusst nachgelagerte Tasks offen: `TASK_151 - Engpass-Reservierung und MAPF-Light`, `TASK_152 - Seeded Cover Placement Lab` und `TASK_153 - 3D Transparency Material Presets`.
