@@ -6,6 +6,7 @@ const CONTACT_TRACKER_SCRIPT: GDScript = preload("res://scripts/tactical/contact
 const FLANK_VULNERABILITY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/flank_vulnerability_resolver.gd")
 const MEDIC_SUPPORT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/medic_support_resolver.gd")
 const COMBAT_FIRE_DECISION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/combat_fire_decision_resolver.gd")
+const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const CONTACT_LINE_NAME: String = "CombatContactLine"
 const EVENT_LABEL_NAME: String = "CombatEventLabel"
 const WINNER_LABEL_NAME: String = "CombatWinnerLabel"
@@ -1207,10 +1208,29 @@ func _build_fire_decision_context(extra: Dictionary = {}) -> Dictionary:
 		"check_misidentification": Callable(self, "_check_misidentification"),
 		"resolve_flank_attack": Callable(self, "resolve_flank_attack"),
 		"get_effective_range": Callable(self, "_get_effective_range"),
+		"get_attack_area_context": Callable(self, "_get_attack_area_context_for_fireteam"),
 	}
 	for key in extra.keys():
 		context[key] = extra[key]
 	return context
+
+
+func _get_attack_area_context_for_fireteam(fireteam_id: String) -> Dictionary:
+	var tactical_controller = _get_tactical_controller()
+	if tactical_controller == null or not tactical_controller.has_method("get_fireteam_attack_area_context"):
+		return {}
+	return Dictionary(tactical_controller.call("get_fireteam_attack_area_context", fireteam_id)).duplicate(true)
+
+
+func is_area_cleared(area_context: Dictionary) -> bool:
+	if area_context.is_empty():
+		return true
+	for enemy in _get_active_enemy_units():
+		if not (enemy is Node2D):
+			continue
+		if bool(AREA_ORDER_RESOLVER_SCRIPT.call("is_position_in_area_context", area_context, (enemy as Node2D).global_position)):
+			return false
+	return true
 
 
 func _get_known_friendly_fireteam_ids() -> Array:

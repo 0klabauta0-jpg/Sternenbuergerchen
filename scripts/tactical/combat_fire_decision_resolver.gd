@@ -2,6 +2,7 @@ class_name CombatFireDecisionResolver
 extends RefCounted
 
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
+const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 
 
 static func find_first_contact_pair(context: Dictionary) -> Dictionary:
@@ -143,11 +144,17 @@ static func can_unit_attack(unit, context: Dictionary = {}) -> bool:
 
 
 static func pick_target_from_units(attacker, targets: Array, context: Dictionary):
+	var best_target = null
+	var best_score: float = -INF
 	for target in targets:
 		if not is_target_attackable(attacker, target, context):
 			continue
-		return target
-	return null
+		var score: float = _score_attack_target(attacker, target, context)
+		if best_target != null and score <= best_score:
+			continue
+		best_target = target
+		best_score = score
+	return best_target
 
 
 static func is_target_attackable(attacker, target, context: Dictionary) -> bool:
@@ -208,6 +215,35 @@ static func _call_contact_state(context: Dictionary, fireteam_id: String, enemy_
 	if not get_contact_state.is_valid():
 		return {}
 	return Dictionary(get_contact_state.call(fireteam_id, enemy_unit_id)).duplicate(true)
+
+
+static func _score_attack_target(attacker, target, context: Dictionary) -> float:
+	var score: float = 0.0
+	var attack_area_context: Dictionary = _resolve_attack_area_context(attacker, context)
+	if not attack_area_context.is_empty() and target is Node2D:
+		if bool(AREA_ORDER_RESOLVER_SCRIPT.call("is_position_in_area_context", attack_area_context, (target as Node2D).global_position)):
+			score += 10000.0
+	if attacker is Node2D and target is Node2D:
+		score -= (attacker as Node2D).global_position.distance_to((target as Node2D).global_position) * 0.01
+	if target != null and target.has_method("get_unit_id"):
+		score -= float(String(target.call("get_unit_id")).hash() & 0xffff) * 0.000001
+	return score
+
+
+static func _resolve_attack_area_context(attacker, context: Dictionary) -> Dictionary:
+	if attacker == null:
+		return {}
+	var friendly_team_id: String = String(context.get("friendly_team_id", "")).strip_edges()
+	if not friendly_team_id.is_empty() and _get_team_id(attacker) != friendly_team_id:
+		return {}
+	var fireteam_id: String = String(attacker.call("get_fireteam_id")).strip_edges().to_lower() if attacker.has_method("get_fireteam_id") else ""
+	if fireteam_id.is_empty():
+		return {}
+	var get_attack_area_context: Callable = context.get("get_attack_area_context", Callable())
+	if get_attack_area_context.is_valid():
+		return Dictionary(get_attack_area_context.call(fireteam_id)).duplicate(true)
+	var attack_area_by_fireteam: Dictionary = Dictionary(context.get("attack_area_by_fireteam", {}))
+	return Dictionary(attack_area_by_fireteam.get(fireteam_id, {})).duplicate(true)
 
 
 static func _call_misidentification(context: Dictionary, attacker, attacker_id: String) -> Dictionary:

@@ -4,6 +4,8 @@ extends RefCounted
 const AREA_ORDER_SCRIPT: GDScript = preload("res://scripts/command/area_order.gd")
 
 const FALLBACK_SPACING: float = 42.0
+const ATTACK_APPROACH_STANDOFF: float = 64.0
+const ATTACK_APPROACH_MIN_RADIUS: float = 48.0
 
 
 static func resolve_defend_area(area_order_data, units: Array, leader = null, terrain_registry = null) -> Dictionary:
@@ -32,6 +34,53 @@ static func resolve_defend_area(area_order_data, units: Array, leader = null, te
 	}
 
 
+static func resolve_attack_area(area_order_data, units: Array, leader = null, terrain_registry = null) -> Dictionary:
+	var area_order = _coerce_area_order(area_order_data)
+	if area_order == null or not area_order.is_valid():
+		return {}
+	var command_type: String = String(area_order.command_type)
+	if not _is_attack_area_command_type(command_type):
+		return {}
+	var members: Array = _build_fit_members(units, leader)
+	if members.is_empty():
+		return {}
+	var center_position: Vector2 = Vector2(area_order.center_position)
+	var origin_position: Vector2 = _resolve_origin_position(members, leader)
+	var area_radius: float = _estimate_area_radius(area_order, center_position)
+	var approach_position: Vector2 = _resolve_approach_position(center_position, origin_position, area_radius, terrain_registry)
+	var assignments: Array = _build_attack_assignments(members, approach_position, center_position)
+	if assignments.is_empty():
+		return {}
+	return {
+		"area_order_id": String(area_order.area_order_id),
+		"fireteam_id": String(area_order.fireteam_id),
+		"command_type": command_type,
+		"center_position": center_position,
+		"approach_position": approach_position,
+		"area_radius": area_radius,
+		"leader_unit_id": String(members[0].get("unit_id", "")),
+		"assignments": assignments,
+		"target_area": _build_area_context(area_order, center_position, area_radius),
+	}
+
+
+static func is_position_in_area_context(area_context: Dictionary, world_position: Vector2) -> bool:
+	var polygon: PackedVector2Array = PackedVector2Array(area_context.get("world_polygon", PackedVector2Array()))
+	if polygon.size() >= 3:
+		return Geometry2D.is_point_in_polygon(world_position, polygon)
+	var center_position: Vector2 = Vector2(area_context.get("center_position", Vector2.ZERO))
+	var radius: float = maxf(float(area_context.get("area_radius", 0.0)), ATTACK_APPROACH_MIN_RADIUS)
+	return world_position.distance_to(center_position) <= radius
+
+
+static func is_position_in_area_order(area_order_data, world_position: Vector2) -> bool:
+	var area_order = _coerce_area_order(area_order_data)
+	if area_order == null or not area_order.is_valid():
+		return false
+	var center_position: Vector2 = Vector2(area_order.center_position)
+	return is_position_in_area_context(_build_area_context(area_order, center_position, _estimate_area_radius(area_order, center_position)), world_position)
+
+
 static func _coerce_area_order(area_order_data):
 	if area_order_data == null:
 		return null
@@ -40,6 +89,14 @@ static func _coerce_area_order(area_order_data):
 	if typeof(area_order_data) == TYPE_DICTIONARY:
 		return AREA_ORDER_SCRIPT.call("from_dict", Dictionary(area_order_data))
 	return null
+
+
+static func _is_attack_area_command_type(command_type: String) -> bool:
+	match command_type.strip_edges().to_lower():
+		AREA_ORDER_SCRIPT.COMMAND_TYPE_ENGAGE, AREA_ORDER_SCRIPT.COMMAND_TYPE_TAKE, "flank":
+			return true
+		_:
+			return false
 
 
 static func _build_fit_members(units: Array, leader) -> Array:
@@ -74,6 +131,23 @@ static func _build_fit_members(units: Array, leader) -> Array:
 	return members
 
 
+static func _resolve_origin_position(members: Array, leader) -> Vector2:
+	if leader is Node2D:
+		return (leader as Node2D).global_position
+	var sum: Vector2 = Vector2.ZERO
+	var count: int = 0
+	for member_variant in members:
+		var member: Dictionary = Dictionary(member_variant)
+		var unit = member.get("unit", null)
+		if not (unit is Node2D):
+			continue
+		sum += (unit as Node2D).global_position
+		count += 1
+	if count <= 0:
+		return Vector2.ZERO
+	return sum / float(count)
+
+
 static func _build_candidates(area_order, center_position: Vector2, terrain_registry, required_count: int) -> Array:
 	var candidates: Array = []
 	var tile_positions: Array = Array(area_order.tile_positions)
@@ -103,6 +177,76 @@ static func _build_candidates(area_order, center_position: Vector2, terrain_regi
 		return float(a.get("distance_to_center", 0.0)) < float(b.get("distance_to_center", 0.0))
 	)
 	return candidates
+
+
+static func _estimate_area_radius(area_order, center_position: Vector2) -> float:
+	var radius: float = 0.0
+	for point_variant in Array(area_order.world_polygon):
+		radius = maxf(radius, Vector2(point_variant).distance_to(center_position))
+	for point_variant in Array(area_order.tile_world_positions):
+		radius = maxf(radius, Vector2(point_variant).distance_to(center_position))
+	return maxf(radius, ATTACK_APPROACH_MIN_RADIUS)
+
+
+static func _resolve_approach_position(center_position: Vector2, origin_position: Vector2, area_radius: float, terrain_registry) -> Vector2:
+	var direction_to_area: Vector2 = center_position - origin_position
+	if direction_to_area.length() < 0.001:
+		direction_to_area = Vector2.RIGHT
+	else:
+		direction_to_area = direction_to_area.normalized()
+	var raw_position: Vector2 = center_position - (direction_to_area * (area_radius + ATTACK_APPROACH_STANDOFF))
+	return _snap_to_walkable_world(raw_position, terrain_registry)
+
+
+static func _snap_to_walkable_world(world_position: Vector2, terrain_registry) -> Vector2:
+	if terrain_registry == null:
+		return world_position
+	if terrain_registry.has_method("get_nearest_walkable_grid") and terrain_registry.has_method("grid_to_world"):
+		var nearest_grid: Variant = terrain_registry.call("get_nearest_walkable_grid", world_position)
+		if typeof(nearest_grid) == TYPE_VECTOR2I:
+			return Vector2(terrain_registry.call("grid_to_world", nearest_grid))
+	if terrain_registry.has_method("get_tile_at_world"):
+		var tile_data = terrain_registry.call("get_tile_at_world", world_position)
+		if tile_data != null and tile_data.has_method("get") and bool(tile_data.get("walkable")):
+			return Vector2(tile_data.get("world_position"))
+	return world_position
+
+
+static func _build_attack_assignments(members: Array, approach_position: Vector2, center_position: Vector2) -> Array:
+	var assignments: Array = []
+	var attack_direction: Vector2 = center_position - approach_position
+	if attack_direction.length() < 0.001:
+		attack_direction = Vector2.RIGHT
+	else:
+		attack_direction = attack_direction.normalized()
+	var lateral: Vector2 = attack_direction.orthogonal().normalized()
+	for member_index in range(members.size()):
+		var member: Dictionary = Dictionary(members[member_index])
+		var row_offset: float = 0.0 if member_index < 2 else FALLBACK_SPACING
+		var lateral_offset: float = 0.0
+		if members.size() > 1:
+			lateral_offset = (float(member_index) - (float(members.size() - 1) * 0.5)) * FALLBACK_SPACING
+		assignments.append({
+			"unit_id": String(member.get("unit_id", "")),
+			"target_position": approach_position + (lateral * lateral_offset) - (attack_direction * row_offset),
+			"tile_position": Vector2i.ZERO,
+			"cover_score": 0.0,
+			"is_leader": bool(member.get("is_leader", false)),
+		})
+	return assignments
+
+
+static func _build_area_context(area_order, center_position: Vector2, area_radius: float) -> Dictionary:
+	return {
+		"area_order_id": String(area_order.area_order_id),
+		"fireteam_id": String(area_order.fireteam_id),
+		"command_type": String(area_order.command_type),
+		"center_position": center_position,
+		"area_radius": area_radius,
+		"tile_positions": Array(area_order.tile_positions).duplicate(true),
+		"tile_world_positions": Array(area_order.tile_world_positions).duplicate(true),
+		"world_polygon": PackedVector2Array(area_order.world_polygon),
+	}
 
 
 static func _build_candidate(grid_position: Vector2i, world_position: Vector2, cover_value: int, center_position: Vector2) -> Dictionary:
