@@ -52,6 +52,7 @@ func _test_visualizer_area_snapshot() -> void:
 			"fireteam_id": "blue",
 			"command_type": "engage",
 			"tile_positions": [Vector2i(2, 2), Vector2i(2, 3)],
+			"tile_world_positions": [Vector2(128.0, 128.0), Vector2(64.0, 160.0)],
 			"world_polygon": PackedVector2Array([Vector2(10.0, 10.0), Vector2(90.0, 10.0), Vector2(90.0, 70.0), Vector2(10.0, 70.0)]),
 			"center_position": Vector2(50.0, 40.0),
 			"created_at_order_index": 0,
@@ -62,6 +63,7 @@ func _test_visualizer_area_snapshot() -> void:
 	_assert(visible_area_orders.size() == 1, "FireteamOrderVisualizer exposes visible area orders separately from waypoints")
 	var snapshot: Dictionary = Dictionary(visible_area_orders[0])
 	_assert(String(snapshot.get("command_type", "")) == "engage", "Visualizer snapshot keeps the area command classification")
+	_assert(Array(snapshot.get("tile_world_positions", [])).size() == 2, "Visualizer keeps tile centers for isometric area drawing")
 	visualizer.queue_free()
 
 

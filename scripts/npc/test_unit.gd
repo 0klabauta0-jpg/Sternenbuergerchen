@@ -1511,10 +1511,10 @@ func _ensure_selection_ring() -> void:
 		_selection_ring.closed = true
 		_selection_ring.z_index = 6
 		_selection_ring.points = PackedVector2Array([
-			Vector2(-18.0, 4.0),
-			Vector2(0.0, -12.0),
-			Vector2(18.0, 4.0),
-			Vector2(0.0, 20.0),
+			Vector2(0.0, -14.0),
+			Vector2(28.0, 0.0),
+			Vector2(0.0, 14.0),
+			Vector2(-28.0, 0.0),
 		])
 		add_child(_selection_ring)
 	_refresh_selection_ring()

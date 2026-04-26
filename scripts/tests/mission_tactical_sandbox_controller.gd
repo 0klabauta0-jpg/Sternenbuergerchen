@@ -49,6 +49,8 @@ const UNIT_SELECTION_PICK_RADIUS: float = 34.0
 const SELECTION_DRAG_THRESHOLD: float = 10.0
 const WAYPOINT_DRAG_THRESHOLD: float = 4.0
 const AREA_ORDER_DRAG_THRESHOLD: float = 14.0
+const AREA_ORDER_ISO_TILE_HALF_WIDTH: float = 64.0
+const AREA_ORDER_ISO_TILE_HALF_HEIGHT: float = 32.0
 const PHASE_WAYPOINT_COMPLETE_RADIUS: float = 26.0
 const AREA_DEFENSE_POSITION_REACHED_RADIUS: float = 24.0
 const AREA_ATTACK_APPROACH_REACHED_RADIUS: float = 30.0
@@ -4564,6 +4566,18 @@ func _update_selection_overlay(selection_rect: Rect2) -> void:
 
 func _update_area_order_overlay(selection_rect: Rect2) -> void:
 	var overlay := get_node_or_null("../TacticalUI/AreaOrderDragOverlay") as ColorRect
+	var visualizer := get_node_or_null("../FireteamOrderVisualizer")
+	if visualizer != null and visualizer.has_method("set_area_order_preview_payload"):
+		if selection_rect.size.x <= 0.0 or selection_rect.size.y <= 0.0:
+			visualizer.call("set_area_order_preview_payload", {})
+		else:
+			var preview_payload: Dictionary = _build_area_order_payload_from_screen_rect(selection_rect)
+			if not preview_payload.is_empty():
+				visualizer.call("set_area_order_preview_payload", preview_payload)
+				if overlay != null:
+					overlay.visible = false
+				return
+			visualizer.call("set_area_order_preview_payload", {})
 	if overlay == null:
 		return
 	if selection_rect.size.x <= 0.0 or selection_rect.size.y <= 0.0:
@@ -6842,23 +6856,16 @@ func _sort_area_tile_entries(a: Dictionary, b: Dictionary) -> bool:
 func _build_world_polygon_for_area_tile_positions(tile_world_positions: Array) -> PackedVector2Array:
 	if tile_world_positions.is_empty():
 		return PackedVector2Array()
-	var min_x: float = INF
-	var max_x: float = -INF
-	var min_y: float = INF
-	var max_y: float = -INF
+	var hull_points: PackedVector2Array = PackedVector2Array()
 	for world_position_variant in tile_world_positions:
 		var world_position: Vector2 = Vector2(world_position_variant)
-		min_x = minf(min_x, world_position.x)
-		max_x = maxf(max_x, world_position.x)
-		min_y = minf(min_y, world_position.y)
-		max_y = maxf(max_y, world_position.y)
-	var padding := Vector2(32.0, 18.0)
-	return PackedVector2Array([
-		Vector2(min_x - padding.x, min_y - padding.y),
-		Vector2(max_x + padding.x, min_y - padding.y),
-		Vector2(max_x + padding.x, max_y + padding.y),
-		Vector2(min_x - padding.x, max_y + padding.y),
-	])
+		hull_points.append(world_position + Vector2(0.0, -AREA_ORDER_ISO_TILE_HALF_HEIGHT))
+		hull_points.append(world_position + Vector2(AREA_ORDER_ISO_TILE_HALF_WIDTH, 0.0))
+		hull_points.append(world_position + Vector2(0.0, AREA_ORDER_ISO_TILE_HALF_HEIGHT))
+		hull_points.append(world_position + Vector2(-AREA_ORDER_ISO_TILE_HALF_WIDTH, 0.0))
+	if hull_points.size() <= 3:
+		return hull_points
+	return Geometry2D.convex_hull(hull_points)
 
 
 func _average_polygon_points(polygon: PackedVector2Array) -> Vector2:
