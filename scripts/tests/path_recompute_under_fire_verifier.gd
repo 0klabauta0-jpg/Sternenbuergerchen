@@ -45,7 +45,8 @@ func _test_stale_path_recomputed_on_contact() -> void:
 	_assert(result != stale_path, "Stale path is replaced under contact")
 	var last_waypoint: Vector2 = result[-1]
 	_assert(last_waypoint.distance_to(target_position) <= 0.5, "Rebuilt path still ends at target")
-	unit.queue_free()
+	unit.free()
+	simulation_root.free()
 	registry.free()
 
 
@@ -67,7 +68,8 @@ func _test_contact_recompute_is_throttled() -> void:
 	cmd["path"] = first_result.duplicate(true)
 	var second_result: Array = simulation_root.call("_extract_or_build_path_world_points", cmd, unit, current_position, target_position, registry)
 	_assert(first_result == second_result, "Immediate second contact evaluation reuses cached path")
-	unit.queue_free()
+	unit.free()
+	simulation_root.free()
 	registry.free()
 
 
