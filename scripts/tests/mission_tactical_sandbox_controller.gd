@@ -1971,7 +1971,6 @@ func _refresh_fireteam_mini_cards() -> void:
 
 		var lead = _resolve_fireteam_leader_for_behavior(normalized_fireteam_id)
 		var selected_fireteam: bool = _selected_fireteam_ids.has(normalized_fireteam_id)
-		var selection_locked: bool = selected_fireteam and not _is_all_fireteams_selected()
 		var runtime_inactive: bool = not preview_mode and not _is_fireteam_runtime_active(normalized_fireteam_id)
 		var lead_name: String = String(lead.call("get_display_name")) if lead != null and lead.has_method("get_display_name") else "Kein Lead"
 		var lead_portrait_path: String = String(lead.call("get_portrait_path")) if lead != null and lead.has_method("get_portrait_path") else ""
@@ -2012,11 +2011,7 @@ func _refresh_fireteam_mini_cards() -> void:
 				"info_line_font_size": 8,
 				"progress_visible": false,
 				"primary_action": {
-					"visible": true,
-					"text": "Active" if selection_locked else "Select",
-					"disabled": selection_locked,
-					"minimum_width": 54.0,
-					"callback": Callable(self, "_on_fireteam_group_pressed").bind(normalized_fireteam_id),
+					"visible": false,
 				},
 				"secondary_action": {
 					"visible": false,
@@ -2029,7 +2024,11 @@ func _refresh_fireteam_mini_cards() -> void:
 func _on_fireteam_mini_card_gui_input(event: InputEvent, fireteam_id: String) -> void:
 	if event is InputEventMouseButton:
 		var mouse_button_event := event as InputEventMouseButton
-		if mouse_button_event.button_index == MOUSE_BUTTON_LEFT and mouse_button_event.pressed:
+		if mouse_button_event.button_index != MOUSE_BUTTON_LEFT:
+			return
+		_cancel_selection_interaction()
+		get_viewport().set_input_as_handled()
+		if mouse_button_event.pressed:
 			_on_fireteam_group_pressed(fireteam_id)
 
 
@@ -3878,6 +3877,16 @@ func _update_selection_drag(screen_position: Vector2) -> bool:
 	_selection_drag_active = true
 	_update_selection_overlay(_build_selection_rect(_selection_press_screen_position, screen_position))
 	return true
+
+
+func _cancel_selection_interaction() -> void:
+	if not _selection_press_active and not _selection_drag_active:
+		return
+	_selection_press_active = false
+	_selection_drag_active = false
+	_selection_press_unit_id = ""
+	_selection_press_ctrl = false
+	_update_selection_overlay(Rect2())
 
 
 func _finish_selection_interaction(screen_position: Vector2) -> bool:
