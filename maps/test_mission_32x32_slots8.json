@@ -10,14 +10,6 @@
     "map_name":  "test_mission_32x32_slots8",
     "mission_slot_count":  8,
     "markers":  {
-                    "flank_anchor_left":  {
-                                              "x":  128,
-                                              "y":  317
-                                          },
-                    "flank_anchor_right":  {
-                                               "x":  768,
-                                               "y":  317
-                                           },
                     "objective_point":  {
                                              "x":  448,
                                              "y":  413

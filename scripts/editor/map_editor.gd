@@ -64,8 +64,6 @@ const EDITABLE_MARKER_IDS: PackedStringArray = [
 	"spawn_alpha",
 	"spawn_bravo",
 	"objective_point",
-	"flank_anchor_left",
-	"flank_anchor_right",
 ]
 const KENNEY_DIAMOND_CENTER := Vector2(256.0, 315.0)
 const MIN_CAMERA_ZOOM: float = 0.1
@@ -792,8 +790,6 @@ func _hide_legacy_marker_rows() -> void:
 		"UI/PropertyPanel/Margin/VBox/SpawnAlphaRow",
 		"UI/PropertyPanel/Margin/VBox/SpawnBravoRow",
 		"UI/PropertyPanel/Margin/VBox/ObjectivePointRow",
-		"UI/PropertyPanel/Margin/VBox/FlankLeftRow",
-		"UI/PropertyPanel/Margin/VBox/FlankRightRow",
 	]:
 		var row := get_node_or_null(node_path) as Control
 		if row != null:
@@ -2076,10 +2072,6 @@ func _get_marker_label(marker_id: String) -> Label:
 			return get_node_or_null("UI/PropertyPanel/Margin/VBox/SpawnBravoRow/SpawnBravoLabel") as Label
 		"objective_point":
 			return get_node_or_null("UI/PropertyPanel/Margin/VBox/ObjectivePointRow/ObjectivePointLabel") as Label
-		"flank_anchor_left":
-			return get_node_or_null("UI/PropertyPanel/Margin/VBox/FlankLeftRow/FlankLeftLabel") as Label
-		"flank_anchor_right":
-			return get_node_or_null("UI/PropertyPanel/Margin/VBox/FlankRightRow/FlankRightLabel") as Label
 	return null
 
 
@@ -2091,10 +2083,6 @@ func _get_marker_button(marker_id: String) -> Button:
 			return get_node_or_null("UI/PropertyPanel/Margin/VBox/SpawnBravoRow/SpawnBravoButton") as Button
 		"objective_point":
 			return get_node_or_null("UI/PropertyPanel/Margin/VBox/ObjectivePointRow/ObjectivePointButton") as Button
-		"flank_anchor_left":
-			return get_node_or_null("UI/PropertyPanel/Margin/VBox/FlankLeftRow/FlankLeftButton") as Button
-		"flank_anchor_right":
-			return get_node_or_null("UI/PropertyPanel/Margin/VBox/FlankRightRow/FlankRightButton") as Button
 	return null
 
 

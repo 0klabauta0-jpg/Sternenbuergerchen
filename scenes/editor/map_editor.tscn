@@ -284,32 +284,6 @@ text = "objective_point: -"
 layout_mode = 2
 text = "Use Tile"
 
-[node name="FlankLeftRow" type="HBoxContainer" parent="UI/PropertyPanel/Margin/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="FlankLeftLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox/FlankLeftRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "flank_anchor_left: -"
-
-[node name="FlankLeftButton" type="Button" parent="UI/PropertyPanel/Margin/VBox/FlankLeftRow"]
-layout_mode = 2
-text = "Use Tile"
-
-[node name="FlankRightRow" type="HBoxContainer" parent="UI/PropertyPanel/Margin/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="FlankRightLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox/FlankRightRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "flank_anchor_right: -"
-
-[node name="FlankRightButton" type="Button" parent="UI/PropertyPanel/Margin/VBox/FlankRightRow"]
-layout_mode = 2
-text = "Use Tile"
-
 [node name="LoadDialog" type="FileDialog" parent="UI"]
 title = "Load Map"
 size = Vector2i(600, 400)

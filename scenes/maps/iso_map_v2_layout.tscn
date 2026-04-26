@@ -18,9 +18,3 @@ position = Vector2(704, 285)
 
 [node name="objective_point" type="Marker2D" parent="."]
 position = Vector2(448, 413)
-
-[node name="flank_anchor_left" type="Marker2D" parent="."]
-position = Vector2(128, 317)
-
-[node name="flank_anchor_right" type="Marker2D" parent="."]
-position = Vector2(768, 317)

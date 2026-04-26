@@ -417,8 +417,6 @@ func _apply_map_marker_positions(terrain_map_data) -> void:
 	_apply_marker_position("spawn_alpha", _resolve_marker(spawn_alpha_path), terrain_map_data)
 	_apply_marker_position("spawn_bravo", _resolve_marker(spawn_bravo_path), terrain_map_data)
 	_apply_marker_position("objective_point", _resolve_marker(objective_point_path), terrain_map_data)
-	_apply_marker_position("flank_anchor_left", get_node_or_null("../MapRoot/flank_anchor_left") as Marker2D, terrain_map_data)
-	_apply_marker_position("flank_anchor_right", get_node_or_null("../MapRoot/flank_anchor_right") as Marker2D, terrain_map_data)
 
 
 func _apply_marker_position(marker_id: String, marker_node: Marker2D, terrain_map_data) -> void:

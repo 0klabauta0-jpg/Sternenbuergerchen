@@ -43,7 +43,7 @@ Map-Marker sollen nicht mehr nur aus ein paar festen IDs bestehen. Stattdessen g
   - kleines Symbol/Icon
   - erlaubten Platzierungskontext (`editor_only`, `mission_player`)
 - Fuer die Mission sollen mindestens die bestehenden Befehlsfamilien `move`, `defend`, `engage`, `flank` und `take` als Marker-Typen aus derselben Liste abbildbar sein.
-- Fuer den Editor muessen mindestens die bisherigen festen Marker `spawn_alpha`, `spawn_bravo`, `objective_point`, `flank_anchor_left` und `flank_anchor_right` ueber denselben Katalog abbildbar bleiben.
+- Fuer den Editor muessen mindestens die bisherigen festen Marker `spawn_alpha`, `spawn_bravo` und `objective_point` ueber denselben Katalog abbildbar bleiben. Die alten `flank_anchor_left`-/`flank_anchor_right`-Marker wurden spaeter als veraltet entfernt.
 
 ### 2. Markervertrag vereinheitlichen, ohne die Wahrheiten zu vermischen
 - Authorbare Kartenmarker bleiben Teil von `TerrainMapData` und werden weiter mit der Map gespeichert.
@@ -69,7 +69,7 @@ Map-Marker sollen nicht mehr nur aus ein paar festen IDs bestehen. Stattdessen g
 
 ### 5. Bestehende feste Marker in dasselbe System ueberfuehren
 - Die bisherigen festen Map-Marker duerfen nicht als zweiter Sonderfall parallel weiterleben.
-- Der Editor pflegt auch `spawn_alpha`, `spawn_bravo`, `objective_point`, `flank_anchor_left` und `flank_anchor_right` ueber die neue Marker-Liste und dieselbe Karteninteraktion.
+- Der Editor pflegt auch `spawn_alpha`, `spawn_bravo` und `objective_point` ueber die neue Marker-Liste und dieselbe Karteninteraktion; die alten Flank-Anchors sind nicht mehr Teil des aktuellen Editor-Vertrags.
 - Mission und Meta-Map duerfen diese Marker weiter lesen, aber nicht ueber eine separate Altdatenstruktur.
 
 ## Nicht-Ziele
@@ -91,7 +91,7 @@ Map-Marker sollen nicht mehr nur aus ein paar festen IDs bestehen. Stattdessen g
 - `scripts/terrain/terrain_marker_catalog.gd` fuehrt jetzt einen kleinen gemeinsamen Typkatalog fuer Editor- und Mission-Marker, inklusive Standardname, Farbe, Symbol, Kontext und Single-/Multi-Instance-Regel.
 - `scripts/terrain/terrain_map_data.gd` speichert Kartenmarker nicht mehr nur als nackte Positionen, sondern als normale Marker-Eintraege mit Typ, Name, Farbe, Symbol und Position. Alte JSON-Dateien mit reinem `x`/`y`-Markerformat bleiben dabei weiter lesbar.
 - `scripts/editor/map_editor.gd` ersetzt die alten festen Marker-Zeilen durch eine echte Marker-Liste mit Add/Remove, Typwechsel, Namensbearbeitung, Farbwahl und sichtbarem Overlay direkt auf der Karte. Platzierung und Drag rasten auf Tile-Mitten ein; doppelte Belegung eines Felds wird blockiert.
-- Die bisherigen festen Marker `spawn_alpha`, `spawn_bravo`, `objective_point`, `flank_anchor_left` und `flank_anchor_right` laufen im Editor jetzt ueber dieselbe Marker-Basis wie neue Typen wie `rally_point`, `danger_zone`, `loot_cache` und `recon_note`.
+- Die festen Marker `spawn_alpha`, `spawn_bravo` und `objective_point` laufen im Editor jetzt ueber dieselbe Marker-Basis wie neue Typen wie `rally_point`, `danger_zone`, `loot_cache` und `recon_note`.
 - `scripts/tests/mission_tactical_sandbox_controller.gd` erzeugt Taktikmarker nur noch aus dem gemeinsamen `mission_player`-Typkatalog, baut das Kontextmenue daraus auf und rastet neue oder verschobene Wegpunkte auf Tile-Mitten ein.
 - `scripts/tactical/visuals/fireteam_order_visualizer.gd` nutzt fuer Spieler-Befehlsmarker jetzt dieselbe Symbolfamilie aus dem Marker-Katalog statt einer separaten reinen Sondertabelle.
 - `scripts/tests/task_115_verifier.gd` deckt den neuen Marker-Roundtrip, den Editor-Workflow und die taktische Tile-Snap-/Katalog-Integration headless ab.
