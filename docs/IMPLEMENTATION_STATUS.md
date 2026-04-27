@@ -1018,6 +1018,13 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Scale-/Offset-Werte sind optische V1-Schaetzungen und koennen spaeter im Art-Pass ersetzt werden; Kamera-Steuerung ist bewusst nur Spike-Qualitaet.
 - Naechster Schritt: Die Kalibrierungs-Szene visuell pruefen und danach entscheiden, ob der naechste Task 3D-Units, 3D-Auswahl oder Editor-Preview werden soll.
 
+### TASK_135-141 - Geplante 2.5D-Hybrid-Reihe
+- Status: geplant
+- Stand: Die 2.5D-Folgereihe ist als kleine, aufeinander aufbauende Task-Gruppe geschnitten. `TASK_135` definiert den Hoehen-/Cover-/Blocker-Datenvertrag, `TASK_136` nutzt diese Werte fuer LOS und Cover, `TASK_137` erweitert Navigation um erlaubte Hoehenwechsel, `TASK_138` bereitet Multi-Floor-Positionen vor, `TASK_139` schneidet drehbare Kamera und Grid-/Floor-Picking, `TASK_140` macht Hoehendaten im Editor und 3D-Renderer sichtbar, und `TASK_141` fuehrt spaeter einen separaten Air-Layer fuer Flieger ein.
+- Offene Punkte: Alle Tasks sind bewusst noch nicht implementiert. Boden-2.5D sollte vor Air-Layer und Multi-Floor-Komfort stabilisiert werden.
+- Risiken: 2.5D darf nicht still zu Full-3D-Gameplay anwachsen. Die autoritative Wahrheit bleibt zunaechst Grid-/Terrain-basiert; 3D ist Darstellung und Picking-Schicht.
+- Naechster Schritt: Bei Freigabe mit `TASK_135 - 2.5D Height Data Contract` starten.
+
 ### TASK_151-153 - Geplante Folge-Labs
 - Status: geplant
 - Stand: Aus den zuletzt bewerteten Vorschlaegen bleiben drei bewusst nachgelagerte Tasks offen: `TASK_151 - Engpass-Reservierung und MAPF-Light`, `TASK_152 - Seeded Cover Placement Lab` und `TASK_153 - 3D Transparency Material Presets`.

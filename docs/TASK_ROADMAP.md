@@ -299,6 +299,15 @@ Phase 18C - 3D-Darstellungs-Spike
 TASK_133 - 3D Asset Mapping Spike
 TASK_134 - 3D Spike Visual Calibration
 
+Phase 18D - 2.5D-Hybrid fuer Hoehe, Deckung und Kamera
+TASK_135 - 2.5D Height Data Contract
+TASK_136 - 2.5D LOS und Cover Heights
+TASK_137 - 2.5D Height-Aware Navigation
+TASK_138 - 2.5D Multi-Floor Foundation
+TASK_139 - 2.5D Kamera und Picking
+TASK_140 - 2.5D Editor und Visual Sync
+TASK_141 - 2.5D Air Layer V1
+
 Batch-Empfehlung
 
 Codex soll Tasks in kleinen Gruppen bearbeiten:
