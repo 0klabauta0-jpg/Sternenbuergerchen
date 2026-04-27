@@ -25,7 +25,8 @@ func render_map() -> Dictionary:
 		map_root.name = "MapRoot"
 		add_child(map_root)
 	var renderer = TERRAIN_MAP_3D_RENDERER_SCRIPT.new()
-	render_result = renderer.call("render_map", map_data, map_root, {"show_debug_grid": show_debug_grid})
+	var debug_grid_enabled: bool = bool(get("show_debug_grid"))
+	render_result = renderer.call("render_map", map_data, map_root, {"show_debug_grid": debug_grid_enabled})
 	return render_result
 
 
