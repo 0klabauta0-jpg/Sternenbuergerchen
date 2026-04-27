@@ -1011,6 +1011,13 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Pivot, Scale, Rotationsrichtung und Footprint der 3D-Modelle koennen von den 2D-Iso-Sprites abweichen; Full-3D-Simulation bleibt bewusst ausserhalb des Scopes.
 - Naechster Schritt: Im Editor visuell pruefen, ob Scale/Pivots der 13 Modelle brauchbar sind. Falls ja, separaten Task fuer Kamera-/Auswahl-Spike oder 3D-Unit-Darstellung schneiden.
 
+### TASK_134 - 3D Spike Visual Calibration
+- Status: implementiert
+- Stand: Der 3D-Spike besitzt jetzt pro Modellfamilie optionale Kalibrierungswerte (`scale`, `y_offset`, `rotation_degrees_offset`) im Mapping. `TerrainMap3DRenderer` wertet diese Daten aus und kann das Debug-Grid ueber Render-Optionen mit sichtbaren Luecken oder fast geschlossenem Boden rendern. Die bestehende 3D-Spike-Szene hat minimale Kamera-Steuerung: WASD pannt, Q/E rotiert um den Fokus, Mausrad zoomt die Orthokamera. Zusaetzlich gibt es mit `mission_map_3d_calibration.tscn` eine kompakte generierte Kalibrierungs-Szene mit 11 Objektfamilien.
+- Offene Punkte: Keine finale Art-Direction, keine 3D-Unit-Darstellung und keine 3D-Editor-Bedienung.
+- Risiken: Scale-/Offset-Werte sind optische V1-Schaetzungen und koennen spaeter im Art-Pass ersetzt werden; Kamera-Steuerung ist bewusst nur Spike-Qualitaet.
+- Naechster Schritt: Die Kalibrierungs-Szene visuell pruefen und danach entscheiden, ob der naechste Task 3D-Units, 3D-Auswahl oder Editor-Preview werden soll.
+
 ### TASK_151-153 - Geplante Folge-Labs
 - Status: geplant
 - Stand: Aus den zuletzt bewerteten Vorschlaegen bleiben drei bewusst nachgelagerte Tasks offen: `TASK_151 - Engpass-Reservierung und MAPF-Light`, `TASK_152 - Seeded Cover Placement Lab` und `TASK_153 - 3D Transparency Material Presets`.

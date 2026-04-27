@@ -9,6 +9,7 @@ var _model_cache: Dictionary = {}
 var _ground_mesh: BoxMesh = null
 var _ground_material: StandardMaterial3D = null
 var _ground_material_alt: StandardMaterial3D = null
+var _show_debug_grid: bool = true
 
 
 func _init(mapping_path: String = DEFAULT_MAPPING_PATH) -> void:
@@ -26,7 +27,7 @@ static func load_mapping(path: String = DEFAULT_MAPPING_PATH) -> Dictionary:
 	return Dictionary(parsed) if typeof(parsed) == TYPE_DICTIONARY else {}
 
 
-func render_map(terrain_map_data, map_root: Node3D) -> Dictionary:
+func render_map(terrain_map_data, map_root: Node3D, options: Dictionary = {}) -> Dictionary:
 	var result: Dictionary = {
 		"terrain": {},
 		"objects": {},
@@ -39,6 +40,8 @@ func render_map(terrain_map_data, map_root: Node3D) -> Dictionary:
 	}
 	if terrain_map_data == null or map_root == null:
 		return result
+	_show_debug_grid = bool(options.get("show_debug_grid", true))
+	_prepare_ground_resources()
 
 	var terrain_container := _ensure_container(map_root, "Terrain3D")
 	var object_container := _ensure_container(map_root, "Object3D")
@@ -64,9 +67,9 @@ func render_map(terrain_map_data, map_root: Node3D) -> Dictionary:
 			result["stats"]["missing_models"] = missing_models
 			continue
 		object_node.name = "Object_%s_%d_%d" % [object_type_id, tile_data.grid_position.x, tile_data.grid_position.y]
-		var object_position: Vector3 = grid_to_world_3d(tile_data.grid_position, int(tile_data.height_level)) + Vector3(0.0, _get_object_y_offset(), 0.0)
+		var object_position: Vector3 = grid_to_world_3d(tile_data.grid_position, int(tile_data.height_level)) + Vector3(0.0, _get_object_y_offset() + get_model_y_offset_for_type(object_type_id), 0.0)
 		object_node.position = object_position
-		object_node.rotation.y = deg_to_rad(get_rotation_degrees_for_type(object_type_id))
+		object_node.rotation.y = deg_to_rad(get_rotation_degrees_for_type(object_type_id) + get_model_rotation_offset_degrees_for_type(object_type_id))
 		var object_scale: float = get_model_scale_for_type(object_type_id)
 		object_node.scale = Vector3.ONE * object_scale
 		object_container.add_child(object_node)
@@ -136,6 +139,16 @@ func get_model_scale_for_type(type_id: String) -> float:
 	return float(entry.get("scale", _get_grid_number("default_object_scale", 1.0)))
 
 
+func get_model_y_offset_for_type(type_id: String) -> float:
+	var entry: Dictionary = get_model_entry_for_type(type_id)
+	return float(entry.get("y_offset", 0.0))
+
+
+func get_model_rotation_offset_degrees_for_type(type_id: String) -> float:
+	var entry: Dictionary = get_model_entry_for_type(type_id)
+	return float(entry.get("rotation_degrees_offset", 0.0))
+
+
 func get_mapping_summary() -> Dictionary:
 	var models: Dictionary = Dictionary(_mapping.get("models", {}))
 	var existing_model_count: int = 0
@@ -158,7 +171,7 @@ func _create_ground_tile(tile_data) -> MeshInstance3D:
 	var node := MeshInstance3D.new()
 	node.name = "Ground_%d_%d" % [tile_data.grid_position.x, tile_data.grid_position.y]
 	node.mesh = _ground_mesh
-	node.material_override = _ground_material if (tile_data.grid_position.x + tile_data.grid_position.y) % 2 == 0 else _ground_material_alt
+	node.material_override = _ground_material if not _show_debug_grid or (tile_data.grid_position.x + tile_data.grid_position.y) % 2 == 0 else _ground_material_alt
 	node.position = grid_to_world_3d(tile_data.grid_position, int(tile_data.height_level))
 	return node
 
@@ -204,7 +217,8 @@ func _clear_children(container: Node) -> void:
 func _prepare_ground_resources() -> void:
 	_ground_mesh = BoxMesh.new()
 	var cell_size: float = _get_grid_number("cell_size", 2.0)
-	var ground_fill: float = clampf(_get_grid_number("ground_fill", 0.92), 0.1, 1.0)
+	var ground_fill_key: String = "ground_fill" if _show_debug_grid else "ground_fill_no_grid"
+	var ground_fill: float = clampf(_get_grid_number(ground_fill_key, 0.92), 0.1, 1.0)
 	var ground_thickness: float = _get_grid_number("ground_thickness", 0.08)
 	_ground_mesh.size = Vector3(cell_size * ground_fill, ground_thickness, cell_size * ground_fill)
 	_ground_material = StandardMaterial3D.new()

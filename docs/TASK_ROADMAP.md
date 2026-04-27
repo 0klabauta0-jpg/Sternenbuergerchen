@@ -297,6 +297,7 @@ TASK_132 - Kenney Isometric Asset Palette Expansion
 
 Phase 18C - 3D-Darstellungs-Spike
 TASK_133 - 3D Asset Mapping Spike
+TASK_134 - 3D Spike Visual Calibration
 
 Batch-Empfehlung
 
