@@ -3,7 +3,7 @@
 ## Ziel
 Pruefen, ob die vorhandenen Kenney-Space-Kit-3D-Assets als alternative Darstellungsschicht fuer die bestehende 2D-Iso-Simulation taugen, ohne Navigation, Combat, Area-Orders oder `SimulationRoot` auf 3D umzubauen.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Asset-Quelle
 - Lokaler Quellordner: `C:\Users\bjoer\Pictures\Sternenbürger\3d\Space Kit`
@@ -75,27 +75,28 @@ Nur die Darstellung bekommt einen parallelen 3D-Prototyp.
 - Der Spike darf unter `scripts/tests`/`scenes/tests` isoliert bleiben, solange er keine Live-Mission verdrahtet.
 
 ## Akzeptanzkriterien
-- [ ] Der lokale 3D-Asset-Ordner wurde auditiert und die GLB-Verfuegbarkeit dokumentiert.
-- [ ] Mindestens 8 kuratierte 3D-Modelle sind im Projekt unter einem klaren Asset-Pfad verfuegbar.
-- [ ] Mindestens 6 bestehende TASK_132-Asset-Typen haben ein 3D-Mapping.
-- [ ] Eine 3D-Testszene rendert dieselbe Map-Datenbasis ohne Gameplay-Umbau.
-- [ ] Boden und Objekt-Layer sind auch in 3D getrennt: `type_id` fuer Boden, `object_type_id` fuer Objekt.
-- [ ] Der Verifier laedt die 3D-Testszene headless und prueft Modellpfade/Instanzen.
-- [ ] TASK_132-Verifier und Wall-Mapping-Verifier bleiben gruen.
+- [x] Der lokale 3D-Asset-Ordner wurde auditiert und die GLB-Verfuegbarkeit dokumentiert.
+- [x] Mindestens 8 kuratierte 3D-Modelle sind im Projekt unter einem klaren Asset-Pfad verfuegbar.
+- [x] Mindestens 6 bestehende TASK_132-Asset-Typen haben ein 3D-Mapping.
+- [x] Eine 3D-Testszene rendert dieselbe Map-Datenbasis ohne Gameplay-Umbau.
+- [x] Boden und Objekt-Layer sind auch in 3D getrennt: `type_id` fuer Boden, `object_type_id` fuer Objekt.
+- [x] Der Verifier laedt die 3D-Testszene headless und prueft Modellpfade/Instanzen.
+- [x] TASK_132-Verifier und Wall-Mapping-Verifier bleiben gruen.
 
 ## Erwartetes Ergebnis
 Nach TASK_133 wissen wir, ob eine 3D-Darstellung mit den vorhandenen Assets praktikabel ist, welche Scale-/Pivot-/Rotationsprobleme auftreten und ob sich ein groesserer 2.5D-Renderpfad lohnt. Die laufende 2D-Simulation bleibt dabei unangetastet.
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_133_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_132_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/wall_direction_mapping_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_133_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_132_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/wall_direction_mapping_verifier.gd`
 
-## Dateien (voraussichtlich)
+## Dateien
 - `docs/tasks/TASK_133_3d_asset_mapping_spike.md`
-- `data/terrain_tile_catalog.json` oder `data/terrain_3d_asset_mapping.json`
+- `data/terrain_3d_asset_mapping.json`
 - `scripts/terrain/terrain_map_3d_renderer.gd`
 - `scenes/tests/mission_map_3d_render_spike.tscn`
+- `scripts/tests/mission_map_3d_render_spike.gd`
 - `scripts/tests/task_133_verifier.gd`
 - `Assets/kenney_space-kit/3d/...`
 

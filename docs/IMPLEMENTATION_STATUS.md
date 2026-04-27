@@ -1005,11 +1005,11 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Naechster Schritt: Bei Bedarf eine zweite Palette-Erweiterung fuer Gates, Turrets, Monorail oder Desks schneiden, nachdem die aktuelle Auswahl im Editor visuell geprueft wurde.
 
 ### TASK_133 - 3D Asset Mapping Spike
-- Status: geplant
-- Stand: Fuer die vorhandenen Kenney-Space-Kit-3D-Assets unter `C:\Users\bjoer\Pictures\Sternenbürger\3d\Space Kit` wurde ein eigener Spike-Task geschnitten. Der lokale Ordner enthaelt je 153 Modelle in `.glb`, `.fbx`, `.obj`, `.dae` und weiteren Formaten; fuer Godot V1 soll der GLB-Pfad bevorzugt werden. Der Task prueft eine kleine kuratierte 3D-Auswahl als alternative Darstellungsschicht auf derselben `TerrainMapData`-Basis.
-- Offene Punkte: Noch keine Assets ins Projekt kopiert, kein `TerrainMap3DRenderer`, keine 3D-Testszene.
+- Status: implementiert
+- Stand: Der 3D-Spike ist als parallele Darstellungsschicht umgesetzt. Aus `C:\Users\bjoer\Pictures\Sternenbürger\3d\Space Kit\Models\GLTF format` wurden 13 kuratierte GLB-Modelle nach `res://Assets/kenney_space-kit/3d/` uebernommen und per `data/terrain_3d_asset_mapping.json` auf bestehende Terrain-/Objektfamilien gemappt. `TerrainMap3DRenderer` rendert dieselbe `TerrainMapData`: Boden bleibt ein eigener 3D-Ground-Layer aus einfachen Prismen, Objekt-Overlays werden aus `object_type_id` als GLB-Instanzen platziert und ueber `_ne/_nw/_se/_sw` rotiert. `mission_map_3d_render_spike.tscn` laedt die 32x32-Testkarte mit fester 3D-Iso-Kamera und Licht, ohne `SimulationRoot`, Navigation oder Combat zu veraendern.
+- Offene Punkte: Keine Editor-Bedienung fuer 3D, keine Unit-3D-Darstellung, keine finalen Scale-/Pivot-/Materialentscheidungen. Die GLB-Imports brauchen bei frischem Checkout einmal einen Godot-Importlauf.
 - Risiken: Pivot, Scale, Rotationsrichtung und Footprint der 3D-Modelle koennen von den 2D-Iso-Sprites abweichen; Full-3D-Simulation bleibt bewusst ausserhalb des Scopes.
-- Naechster Schritt: TASK_133 starten und zuerst GLB-Auswahl, Mapping-Format und eine isolierte 3D-Render-Testszene aufbauen.
+- Naechster Schritt: Im Editor visuell pruefen, ob Scale/Pivots der 13 Modelle brauchbar sind. Falls ja, separaten Task fuer Kamera-/Auswahl-Spike oder 3D-Unit-Darstellung schneiden.
 
 ### TASK_151-153 - Geplante Folge-Labs
 - Status: geplant

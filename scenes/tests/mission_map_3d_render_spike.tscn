@@ -1,0 +1,18 @@
+[gd_scene load_steps=2 format=3 uid="uid://c6qt8udb86tda"]
+
+[ext_resource type="Script" path="res://scripts/tests/mission_map_3d_render_spike.gd" id="1_3dfyo"]
+
+[node name="MissionMap3DRenderSpike" type="Node3D"]
+script = ExtResource("1_3dfyo")
+
+[node name="MapRoot" type="Node3D" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.821995, -0.363558, 0.438783, 0, 0.770951, 0.636895, -0.569494, -0.523469, 0.633645, 32, 34, 46)
+projection = 1
+current = true
+size = 58.0
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.819152, 0.469846, -0.328989, 0, 0.573576, 0.819152, 0.573576, -0.67101, 0.469846, 0, 0, 0)
+light_energy = 1.6

@@ -1,0 +1,67 @@
+{
+	"source": {
+		"local_path": "C:/Users/bjoer/Pictures/Sternenbürger/3d/Space Kit",
+		"preferred_format": "glb",
+		"audited_glb_count": 153
+	},
+	"grid": {
+		"cell_size": 2.0,
+		"height_step": 0.35,
+		"ground_thickness": 0.08,
+		"object_y_offset": 0.08
+	},
+	"models": {
+		"ground_flat": {
+			"layer": "terrain",
+			"model_path": "res://Assets/kenney_space-kit/3d/terrain.glb"
+		},
+		"wall_straight": {
+			"layer": "terrain_object",
+			"model_path": "res://Assets/kenney_space-kit/3d/corridor_wall.glb"
+		},
+		"deko_barrel": {
+			"layer": "object",
+			"model_path": "res://Assets/kenney_space-kit/3d/barrel.glb"
+		},
+		"deko_barrels": {
+			"layer": "object",
+			"model_path": "res://Assets/kenney_space-kit/3d/barrels.glb"
+		},
+		"technik_generator": {
+			"layer": "object",
+			"model_path": "res://Assets/kenney_space-kit/3d/machine_generator.glb"
+		},
+		"technik_satellite_large": {
+			"layer": "object",
+			"model_path": "res://Assets/kenney_space-kit/3d/satelliteDish_large.glb"
+		},
+		"gebaeude_structure_closed": {
+			"layer": "object",
+			"model_path": "res://Assets/kenney_space-kit/3d/structure_closed.glb"
+		},
+		"gebaeude_hangar_small_b": {
+			"layer": "object",
+			"model_path": "res://Assets/kenney_space-kit/3d/hangar_smallB.glb"
+		},
+		"plattform_center": {
+			"layer": "object",
+			"model_path": "res://Assets/kenney_space-kit/3d/platform_center.glb"
+		},
+		"pipe_straight": {
+			"layer": "object",
+			"model_path": "res://Assets/kenney_space-kit/3d/pipe_straight.glb"
+		},
+		"rail": {
+			"layer": "object",
+			"model_path": "res://Assets/kenney_space-kit/3d/rail.glb"
+		},
+		"crater_small": {
+			"layer": "object",
+			"model_path": "res://Assets/kenney_space-kit/3d/crater.glb"
+		},
+		"fahrzeug_speeder_b": {
+			"layer": "object",
+			"model_path": "res://Assets/kenney_space-kit/3d/craft_speederB.glb"
+		}
+	}
+}
