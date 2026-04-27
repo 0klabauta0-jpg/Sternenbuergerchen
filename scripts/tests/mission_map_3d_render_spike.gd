@@ -11,6 +11,7 @@ var render_result: Dictionary = {}
 func _ready() -> void:
 	_ensure_camera_and_light()
 	render_map()
+	_frame_camera_on_objects()
 
 
 func render_map() -> Dictionary:
@@ -33,9 +34,9 @@ func _ensure_camera_and_light() -> void:
 		add_child(camera)
 	camera.current = true
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
-	camera.size = 58.0
-	camera.position = Vector3(32.0, 34.0, 46.0)
-	camera.look_at(Vector3(31.0, 0.0, 31.0), Vector3.UP)
+	camera.size = 14.0
+	camera.position = Vector3(16.0, 18.0, 23.0)
+	camera.look_at(Vector3(15.5, 0.0, 15.5), Vector3.UP)
 
 	var light := get_node_or_null("DirectionalLight3D") as DirectionalLight3D
 	if light == null:
@@ -44,3 +45,15 @@ func _ensure_camera_and_light() -> void:
 		add_child(light)
 	light.rotation_degrees = Vector3(-55.0, -35.0, 0.0)
 	light.light_energy = 1.6
+
+
+func _frame_camera_on_objects() -> void:
+	var camera := get_node_or_null("Camera3D") as Camera3D
+	if camera == null:
+		return
+	var stats: Dictionary = Dictionary(render_result.get("stats", {}))
+	var focus: Vector3 = Vector3(stats.get("object_focus", Vector3(15.5, 0.0, 15.5)))
+	var camera_offset := Vector3(7.5, 9.0, 10.5)
+	camera.size = 12.0 if int(stats.get("object_count", 0)) > 0 else 26.0
+	camera.position = focus + camera_offset
+	camera.look_at(focus, Vector3.UP)

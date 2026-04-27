@@ -59,6 +59,7 @@ func _test_mapping(mapping: Dictionary, renderer) -> void:
 	_assert(resolved_count >= 6, "At least 6 existing TASK_132 asset types resolve to 3D models")
 	_assert(float(renderer.call("get_rotation_degrees_for_type", "deko_barrel_se")) == 90.0, "3D renderer derives SE rotation from type suffix")
 	_assert(float(renderer.call("get_rotation_degrees_for_type", "deko_barrel_nw")) == 270.0, "3D renderer derives NW rotation from type suffix")
+	_assert(float(renderer.call("get_model_scale_for_type", "deko_barrel_se")) > 1.0, "3D mapping can upscale small prop models")
 
 
 func _test_source_audit(mapping: Dictionary) -> void:
@@ -108,7 +109,9 @@ func _test_spike_scene() -> void:
 	var stats: Dictionary = Dictionary(render_result.get("stats", {}))
 	_assert(int(stats.get("terrain_count", 0)) == 1024, "3D spike scene renders the 32x32 test map terrain")
 	_assert(int(stats.get("object_count", 0)) >= 3, "3D spike scene renders object-layer instances from the test map")
-	_assert(scene.get_node_or_null("Camera3D") is Camera3D, "3D spike scene has a camera")
+	var camera := scene.get_node_or_null("Camera3D") as Camera3D
+	_assert(camera != null, "3D spike scene has a camera")
+	_assert(camera != null and camera.size <= 14.0, "3D spike scene camera focuses the object cluster")
 	_assert(scene.get_node_or_null("DirectionalLight3D") is DirectionalLight3D, "3D spike scene has a light")
 	scene.queue_free()
 	await process_frame

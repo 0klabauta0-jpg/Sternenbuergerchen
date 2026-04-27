@@ -5,10 +5,12 @@
 		"audited_glb_count": 153
 	},
 	"grid": {
-		"cell_size": 2.0,
-		"height_step": 0.35,
-		"ground_thickness": 0.08,
-		"object_y_offset": 0.08
+		"cell_size": 1.0,
+		"height_step": 0.25,
+		"ground_thickness": 0.035,
+		"ground_fill": 0.92,
+		"object_y_offset": 0.04,
+		"default_object_scale": 1.4
 	},
 	"models": {
 		"ground_flat": {
@@ -17,51 +19,63 @@
 		},
 		"wall_straight": {
 			"layer": "terrain_object",
-			"model_path": "res://Assets/kenney_space-kit/3d/corridor_wall.glb"
+			"model_path": "res://Assets/kenney_space-kit/3d/corridor_wall.glb",
+			"scale": 1.2
 		},
 		"deko_barrel": {
 			"layer": "object",
-			"model_path": "res://Assets/kenney_space-kit/3d/barrel.glb"
+			"model_path": "res://Assets/kenney_space-kit/3d/barrel.glb",
+			"scale": 4.0
 		},
 		"deko_barrels": {
 			"layer": "object",
-			"model_path": "res://Assets/kenney_space-kit/3d/barrels.glb"
+			"model_path": "res://Assets/kenney_space-kit/3d/barrels.glb",
+			"scale": 2.2
 		},
 		"technik_generator": {
 			"layer": "object",
-			"model_path": "res://Assets/kenney_space-kit/3d/machine_generator.glb"
+			"model_path": "res://Assets/kenney_space-kit/3d/machine_generator.glb",
+			"scale": 1.3
 		},
 		"technik_satellite_large": {
 			"layer": "object",
-			"model_path": "res://Assets/kenney_space-kit/3d/satelliteDish_large.glb"
+			"model_path": "res://Assets/kenney_space-kit/3d/satelliteDish_large.glb",
+			"scale": 1.6
 		},
 		"gebaeude_structure_closed": {
 			"layer": "object",
-			"model_path": "res://Assets/kenney_space-kit/3d/structure_closed.glb"
+			"model_path": "res://Assets/kenney_space-kit/3d/structure_closed.glb",
+			"scale": 1.3
 		},
 		"gebaeude_hangar_small_b": {
 			"layer": "object",
-			"model_path": "res://Assets/kenney_space-kit/3d/hangar_smallB.glb"
+			"model_path": "res://Assets/kenney_space-kit/3d/hangar_smallB.glb",
+			"scale": 1.2
 		},
 		"plattform_center": {
 			"layer": "object",
-			"model_path": "res://Assets/kenney_space-kit/3d/platform_center.glb"
+			"model_path": "res://Assets/kenney_space-kit/3d/platform_center.glb",
+			"scale": 1.7
 		},
 		"pipe_straight": {
 			"layer": "object",
-			"model_path": "res://Assets/kenney_space-kit/3d/pipe_straight.glb"
+			"model_path": "res://Assets/kenney_space-kit/3d/pipe_straight.glb",
+			"scale": 1.5
 		},
 		"rail": {
 			"layer": "object",
-			"model_path": "res://Assets/kenney_space-kit/3d/rail.glb"
+			"model_path": "res://Assets/kenney_space-kit/3d/rail.glb",
+			"scale": 1.6
 		},
 		"crater_small": {
 			"layer": "object",
-			"model_path": "res://Assets/kenney_space-kit/3d/crater.glb"
+			"model_path": "res://Assets/kenney_space-kit/3d/crater.glb",
+			"scale": 1.8
 		},
 		"fahrzeug_speeder_b": {
 			"layer": "object",
-			"model_path": "res://Assets/kenney_space-kit/3d/craft_speederB.glb"
+			"model_path": "res://Assets/kenney_space-kit/3d/craft_speederB.glb",
+			"scale": 0.9
 		}
 	}
 }
