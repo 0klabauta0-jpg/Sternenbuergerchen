@@ -295,6 +295,9 @@ TASK_153 - 3D Transparency Material Presets
 Phase 18B - Editor-Asset-Ausbau
 TASK_132 - Kenney Isometric Asset Palette Expansion
 
+Phase 18C - 3D-Darstellungs-Spike
+TASK_133 - 3D Asset Mapping Spike
+
 Batch-Empfehlung
 
 Codex soll Tasks in kleinen Gruppen bearbeiten:

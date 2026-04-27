@@ -1004,6 +1004,13 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Grosse Sprites koennen visuell noch spezifische Anchor-/Offset-Nacharbeit brauchen; Gameplay-Werte sind bewusst defensive V1-Defaults und werden aktuell noch als aggregierte Tile-Felder gespeichert, nicht als getrennte Objekt-/Boden-Gameplaywerte.
 - Naechster Schritt: Bei Bedarf eine zweite Palette-Erweiterung fuer Gates, Turrets, Monorail oder Desks schneiden, nachdem die aktuelle Auswahl im Editor visuell geprueft wurde.
 
+### TASK_133 - 3D Asset Mapping Spike
+- Status: geplant
+- Stand: Fuer die vorhandenen Kenney-Space-Kit-3D-Assets unter `C:\Users\bjoer\Pictures\Sternenbürger\3d\Space Kit` wurde ein eigener Spike-Task geschnitten. Der lokale Ordner enthaelt je 153 Modelle in `.glb`, `.fbx`, `.obj`, `.dae` und weiteren Formaten; fuer Godot V1 soll der GLB-Pfad bevorzugt werden. Der Task prueft eine kleine kuratierte 3D-Auswahl als alternative Darstellungsschicht auf derselben `TerrainMapData`-Basis.
+- Offene Punkte: Noch keine Assets ins Projekt kopiert, kein `TerrainMap3DRenderer`, keine 3D-Testszene.
+- Risiken: Pivot, Scale, Rotationsrichtung und Footprint der 3D-Modelle koennen von den 2D-Iso-Sprites abweichen; Full-3D-Simulation bleibt bewusst ausserhalb des Scopes.
+- Naechster Schritt: TASK_133 starten und zuerst GLB-Auswahl, Mapping-Format und eine isolierte 3D-Render-Testszene aufbauen.
+
 ### TASK_151-153 - Geplante Folge-Labs
 - Status: geplant
 - Stand: Aus den zuletzt bewerteten Vorschlaegen bleiben drei bewusst nachgelagerte Tasks offen: `TASK_151 - Engpass-Reservierung und MAPF-Light`, `TASK_152 - Seeded Cover Placement Lab` und `TASK_153 - 3D Transparency Material Presets`.
