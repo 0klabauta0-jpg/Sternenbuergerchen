@@ -87,9 +87,11 @@ var _tile_sprites_by_grid: Dictionary = {}
 var _cliff_sprites_by_grid: Dictionary = {}
 var _wall_sprites_by_grid: Dictionary = {}
 var _object_sprites_by_grid: Dictionary = {}
+var _height_overlays_by_grid: Dictionary = {}
 var _selected_grid_position: Vector2i = Vector2i(-1, -1)
 var _last_selected_surface_type: String = TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFACE_TYPE
 var _last_selected_edge_type: String = TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF
+var _last_selected_height_transition_type: String = TERRAIN_TILE_DATA_SCRIPT.DEFAULT_HEIGHT_TRANSITION_TYPE
 var _selected_grids: Array = []
 var _selection_tool_enabled: bool = false
 var _selected_type_id: String = ""
@@ -125,6 +127,7 @@ func _ready() -> void:
 	_terrain_renderer = TERRAIN_MAP_RENDERER_SCRIPT.new(_tile_catalog)
 	_populate_surface_type_options()
 	_populate_edge_type_options()
+	_populate_height_transition_options()
 	_populate_brush_size_options()
 	_populate_tile_palette()
 	_connect_ui_signals()
@@ -268,6 +271,7 @@ func _load_map(path: String) -> void:
 	_tile_sprites_by_grid.clear()
 	_cliff_sprites_by_grid.clear()
 	_object_sprites_by_grid.clear()
+	_height_overlays_by_grid.clear()
 	_selected_grid_position = Vector2i(-1, -1)
 	_last_undo_state.clear()
 	_mark_dirty(false)
@@ -299,6 +303,7 @@ func _create_new_map(grid_size: Vector2i = DEFAULT_NEW_MAP_GRID_SIZE) -> void:
 	_tile_sprites_by_grid.clear()
 	_cliff_sprites_by_grid.clear()
 	_object_sprites_by_grid.clear()
+	_height_overlays_by_grid.clear()
 	_selected_grid_position = Vector2i(-1, -1)
 	_selected_grids.clear()
 	_last_undo_state.clear()
@@ -366,11 +371,12 @@ func _rebuild_tile_sprites() -> void:
 	if _terrain_renderer == null:
 		return
 	_terrain_renderer.set_tile_catalog(_tile_catalog)
-	var render_state: Dictionary = _terrain_renderer.render_map(_terrain_map_data, self)
+	var render_state: Dictionary = _terrain_renderer.render_map_with_options(_terrain_map_data, self, {"show_height_overlay": true})
 	_tile_sprites_by_grid = render_state.get("tiles", {})
 	_cliff_sprites_by_grid = render_state.get("cliffs", {})
 	_wall_sprites_by_grid = render_state.get("walls", {})
 	_object_sprites_by_grid = render_state.get("objects", {})
+	_height_overlays_by_grid = render_state.get("height_overlays", {})
 	_rebuild_grid_overlay()
 
 
@@ -389,6 +395,7 @@ func _refresh_tile_visual(tile_data) -> void:
 	_update_cliff_overlays_around(tile_data.grid_position)
 	_update_wall_overlays_around(tile_data.grid_position)
 	_update_object_overlay_at(tile_data.grid_position)
+	_update_height_overlay_at(tile_data.grid_position)
 
 
 func _build_tile_modulate(tile_data) -> Color:
@@ -437,6 +444,11 @@ func _apply_brush_at_world_position(world_position: Vector2) -> void:
 					var entry: Dictionary = _tile_catalog.get_type(_selected_type_id)
 					var patch: Dictionary = {
 						"height_level": int(entry.get("height_level", 0)),
+						"floor_height": float(entry.get("floor_height", float(entry.get("height_level", 0)))),
+						"unit_eye_height_bonus": float(entry.get("unit_eye_height_bonus", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_UNIT_EYE_HEIGHT_BONUS)),
+						"cover_height": float(entry.get("cover_height", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_COVER_HEIGHT)),
+						"blocks_los_height": float(entry.get("blocks_los_height", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_BLOCKS_LOS_HEIGHT)),
+						"height_transition_type": String(entry.get("height_transition_type", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_HEIGHT_TRANSITION_TYPE)),
 						"edge_type": String(entry.get("edge_type", "cliff")),
 						"walkable": bool(entry.get("walkable", true)),
 						"blocks_los": bool(entry.get("blocks_los", false)),
@@ -608,9 +620,14 @@ func _refresh_property_panel() -> void:
 	var blocks_los_checkbox := _get_blocks_los_checkbox()
 	var cover_spinbox := _get_cover_spinbox()
 	var height_spinbox := _get_height_spinbox()
+	var floor_height_spinbox := _get_floor_height_spinbox()
+	var eye_height_spinbox := _get_eye_height_spinbox()
+	var cover_height_spinbox := _get_cover_height_spinbox()
+	var los_height_spinbox := _get_los_height_spinbox()
 	var surface_option_button := _get_surface_option_button()
 	var edge_type_option_button := _get_edge_type_option_button()
-	if tile_label == null or walkable_checkbox == null or blocks_los_checkbox == null or cover_spinbox == null or height_spinbox == null or surface_option_button == null:
+	var transition_option_button := _get_height_transition_option_button()
+	if tile_label == null or walkable_checkbox == null or blocks_los_checkbox == null or cover_spinbox == null or height_spinbox == null or floor_height_spinbox == null or eye_height_spinbox == null or cover_height_spinbox == null or los_height_spinbox == null or surface_option_button == null:
 		return
 	_refresh_map_settings_panel()
 
@@ -623,7 +640,13 @@ func _refresh_property_panel() -> void:
 		blocks_los_checkbox.button_pressed = false
 		cover_spinbox.value = 0
 		height_spinbox.value = 0
+		floor_height_spinbox.value = 0.0
+		eye_height_spinbox.value = 0.0
+		cover_height_spinbox.value = 0.0
+		los_height_spinbox.value = 0.0
 		surface_option_button.select(_find_surface_option_index(_last_selected_surface_type))
+		if transition_option_button != null:
+			transition_option_button.select(_find_height_transition_option_index(_last_selected_height_transition_type))
 		if edge_type_option_button != null:
 			var edge_idx := 0
 			match _last_selected_edge_type:
@@ -655,7 +678,13 @@ func _refresh_property_panel() -> void:
 	blocks_los_checkbox.button_pressed = bool(tile_data.blocks_los)
 	cover_spinbox.value = int(tile_data.cover_value)
 	height_spinbox.value = int(tile_data.height_level)
+	floor_height_spinbox.value = float(tile_data.floor_height)
+	eye_height_spinbox.value = float(tile_data.unit_eye_height_bonus)
+	cover_height_spinbox.value = float(tile_data.cover_height)
+	los_height_spinbox.value = float(tile_data.blocks_los_height)
 	surface_option_button.select(_find_surface_option_index(String(tile_data.surface_type)))
+	if transition_option_button != null:
+		transition_option_button.select(_find_height_transition_option_index(String(tile_data.height_transition_type)))
 	if edge_type_option_button != null:
 		var edge_idx: int = 0
 		match String(tile_data.edge_type):
@@ -1390,10 +1419,17 @@ func _set_property_controls_enabled(is_enabled: bool) -> void:
 	_get_blocks_los_checkbox().disabled = not is_enabled
 	_get_cover_spinbox().editable = is_enabled
 	_get_height_spinbox().editable = is_enabled
+	_get_floor_height_spinbox().editable = is_enabled
+	_get_eye_height_spinbox().editable = is_enabled
+	_get_cover_height_spinbox().editable = is_enabled
+	_get_los_height_spinbox().editable = is_enabled
 	_get_surface_option_button().disabled = not is_enabled
 	var edge_type_btn := _get_edge_type_option_button()
 	if edge_type_btn != null:
 		edge_type_btn.disabled = not is_enabled
+	var transition_btn := _get_height_transition_option_button()
+	if transition_btn != null:
+		transition_btn.disabled = not is_enabled
 
 
 func _apply_property_controls_to_selected_tile() -> void:
@@ -1409,8 +1445,13 @@ func _apply_property_controls_to_selected_tile() -> void:
 		"blocks_los": _get_blocks_los_checkbox().button_pressed,
 		"cover_value": int(_get_cover_spinbox().value),
 		"height_level": int(_get_height_spinbox().value),
+		"floor_height": float(_get_floor_height_spinbox().value),
+		"unit_eye_height_bonus": float(_get_eye_height_spinbox().value),
+		"cover_height": float(_get_cover_height_spinbox().value),
+		"blocks_los_height": float(_get_los_height_spinbox().value),
 		"surface_type": _get_selected_surface_type(),
 		"edge_type": _get_selected_edge_type(),
+		"height_transition_type": _get_selected_height_transition_type(),
 	}
 
 	var center_grid: Vector2i = tile_data.grid_position
@@ -1442,17 +1483,27 @@ func _apply_tile_patch(tile_data, patch: Dictionary) -> bool:
 	var next_walkable: bool = bool(patch.get("walkable", tile_data.walkable))
 	var next_blocks_los: bool = bool(patch.get("blocks_los", tile_data.blocks_los))
 	var next_cover_value: int = clampi(int(patch.get("cover_value", tile_data.cover_value)), 0, 100)
-	var next_height_level: int = clampi(int(patch.get("height_level", tile_data.height_level)), 0, 2)
+	var next_height_level: int = clampi(int(patch.get("height_level", tile_data.height_level)), 0, TERRAIN_TILE_DATA_SCRIPT.MAX_HEIGHT_LEVEL)
+	var next_floor_height: float = clampf(float(patch.get("floor_height", tile_data.floor_height)), 0.0, TERRAIN_TILE_DATA_SCRIPT.MAX_WORLD_HEIGHT)
+	var next_eye_height: float = clampf(float(patch.get("unit_eye_height_bonus", tile_data.unit_eye_height_bonus)), 0.0, TERRAIN_TILE_DATA_SCRIPT.MAX_WORLD_HEIGHT)
+	var next_cover_height: float = clampf(float(patch.get("cover_height", tile_data.cover_height)), 0.0, TERRAIN_TILE_DATA_SCRIPT.MAX_WORLD_HEIGHT)
+	var next_los_height: float = clampf(float(patch.get("blocks_los_height", tile_data.blocks_los_height)), 0.0, TERRAIN_TILE_DATA_SCRIPT.MAX_WORLD_HEIGHT)
 	var next_surface_type: String = String(patch.get("surface_type", tile_data.surface_type))
 	var next_edge_type: String = String(patch.get("edge_type", tile_data.edge_type))
+	var next_height_transition_type: String = TERRAIN_TILE_DATA_SCRIPT.normalize_height_transition_type(String(patch.get("height_transition_type", tile_data.height_transition_type)), next_edge_type)
 
 	var changed: bool = (
 		tile_data.walkable != next_walkable
 		or tile_data.blocks_los != next_blocks_los
 		or int(tile_data.cover_value) != next_cover_value
 		or int(tile_data.height_level) != next_height_level
+		or not is_equal_approx(float(tile_data.floor_height), next_floor_height)
+		or not is_equal_approx(float(tile_data.unit_eye_height_bonus), next_eye_height)
+		or not is_equal_approx(float(tile_data.cover_height), next_cover_height)
+		or not is_equal_approx(float(tile_data.blocks_los_height), next_los_height)
 		or String(tile_data.surface_type) != next_surface_type
 		or String(tile_data.edge_type) != next_edge_type
+		or String(tile_data.height_transition_type) != next_height_transition_type
 	)
 	if not changed:
 		return false
@@ -1462,8 +1513,14 @@ func _apply_tile_patch(tile_data, patch: Dictionary) -> bool:
 	tile_data.blocks_los = next_blocks_los
 	tile_data.cover_value = next_cover_value
 	tile_data.height_level = next_height_level
+	tile_data.floor_height = next_floor_height
+	tile_data.unit_eye_height_bonus = next_eye_height
+	tile_data.cover_height = next_cover_height
+	tile_data.blocks_los_height = next_los_height
+	tile_data.is_elevated_surface = next_floor_height > 0.0 or next_height_level > 0
 	tile_data.surface_type = next_surface_type
 	tile_data.edge_type = next_edge_type
+	tile_data.height_transition_type = next_height_transition_type
 	tile_data.type_id = ""
 	return true
 
@@ -1502,6 +1559,12 @@ func _undo_last_change() -> void:
 	tile_data.surface_type = restored_tile.surface_type
 	tile_data.edge_type = restored_tile.edge_type
 	tile_data.object_height = restored_tile.object_height
+	tile_data.floor_height = restored_tile.floor_height
+	tile_data.unit_eye_height_bonus = restored_tile.unit_eye_height_bonus
+	tile_data.cover_height = restored_tile.cover_height
+	tile_data.blocks_los_height = restored_tile.blocks_los_height
+	tile_data.is_elevated_surface = restored_tile.is_elevated_surface
+	tile_data.height_transition_type = restored_tile.height_transition_type
 
 	_selected_grid_position = grid_position
 	_last_undo_state.clear()
@@ -1578,6 +1641,21 @@ func _populate_edge_type_options() -> void:
 	option_button.select(0)
 
 
+func _populate_height_transition_options() -> void:
+	var option_button := _get_height_transition_option_button()
+	if option_button == null:
+		return
+
+	option_button.clear()
+	option_button.add_item("None")
+	option_button.set_item_metadata(0, TERRAIN_TILE_DATA_SCRIPT.HEIGHT_TRANSITION_NONE)
+	option_button.add_item("Ramp")
+	option_button.set_item_metadata(1, TERRAIN_TILE_DATA_SCRIPT.HEIGHT_TRANSITION_RAMP)
+	option_button.add_item("Stairs")
+	option_button.set_item_metadata(2, TERRAIN_TILE_DATA_SCRIPT.HEIGHT_TRANSITION_STAIRS)
+	option_button.select(0)
+
+
 func _populate_brush_size_options() -> void:
 	var option_button := _get_brush_size_option_button()
 	if option_button == null:
@@ -1600,8 +1678,13 @@ func _connect_ui_signals() -> void:
 	var blocks_los_checkbox := _get_blocks_los_checkbox()
 	var cover_spinbox := _get_cover_spinbox()
 	var height_spinbox := _get_height_spinbox()
+	var floor_height_spinbox := _get_floor_height_spinbox()
+	var eye_height_spinbox := _get_eye_height_spinbox()
+	var cover_height_spinbox := _get_cover_height_spinbox()
+	var los_height_spinbox := _get_los_height_spinbox()
 	var surface_option_button := _get_surface_option_button()
 	var edge_type_option_button := _get_edge_type_option_button()
+	var transition_option_button := _get_height_transition_option_button()
 	var mission_slot_spinbox := _get_mission_slot_spinbox()
 	var file_dialog := get_node_or_null("UI/LoadDialog") as FileDialog
 	var confirm_dialog := get_node_or_null("UI/DirtyConfirmDialog") as ConfirmationDialog
@@ -1625,10 +1708,20 @@ func _connect_ui_signals() -> void:
 		cover_spinbox.value_changed.connect(_on_property_controls_value_changed)
 	if height_spinbox != null and not height_spinbox.value_changed.is_connected(_on_property_controls_value_changed):
 		height_spinbox.value_changed.connect(_on_property_controls_value_changed)
+	if floor_height_spinbox != null and not floor_height_spinbox.value_changed.is_connected(_on_property_controls_value_changed):
+		floor_height_spinbox.value_changed.connect(_on_property_controls_value_changed)
+	if eye_height_spinbox != null and not eye_height_spinbox.value_changed.is_connected(_on_property_controls_value_changed):
+		eye_height_spinbox.value_changed.connect(_on_property_controls_value_changed)
+	if cover_height_spinbox != null and not cover_height_spinbox.value_changed.is_connected(_on_property_controls_value_changed):
+		cover_height_spinbox.value_changed.connect(_on_property_controls_value_changed)
+	if los_height_spinbox != null and not los_height_spinbox.value_changed.is_connected(_on_property_controls_value_changed):
+		los_height_spinbox.value_changed.connect(_on_property_controls_value_changed)
 	if surface_option_button != null and not surface_option_button.item_selected.is_connected(_on_surface_selected):
 		surface_option_button.item_selected.connect(_on_surface_selected)
 	if edge_type_option_button != null and not edge_type_option_button.item_selected.is_connected(_on_edge_type_selected):
 		edge_type_option_button.item_selected.connect(_on_edge_type_selected)
+	if transition_option_button != null and not transition_option_button.item_selected.is_connected(_on_height_transition_selected):
+		transition_option_button.item_selected.connect(_on_height_transition_selected)
 	if mission_slot_spinbox != null and not mission_slot_spinbox.value_changed.is_connected(_on_mission_slot_spinbox_value_changed):
 		mission_slot_spinbox.value_changed.connect(_on_mission_slot_spinbox_value_changed)
 	if tile_type_list != null and not tile_type_list.item_selected.is_connected(_on_tile_type_selected):
@@ -1874,6 +1967,13 @@ func _on_edge_type_selected(_index: int) -> void:
 	_apply_property_controls_to_selected_tile()
 
 
+func _on_height_transition_selected(_index: int) -> void:
+	var option_button := _get_height_transition_option_button()
+	if option_button != null and option_button.selected >= 0:
+		_last_selected_height_transition_type = String(option_button.get_item_metadata(option_button.selected))
+	_apply_property_controls_to_selected_tile()
+
+
 func _on_tile_type_selected(index: int) -> void:
 	var tile_type_list := _get_tile_type_list()
 	if tile_type_list == null or _tile_catalog == null:
@@ -2021,6 +2121,22 @@ func _get_height_spinbox() -> SpinBox:
 	return get_node_or_null("UI/PropertyPanel/Margin/VBox/HeightRow/HeightSpinBox") as SpinBox
 
 
+func _get_floor_height_spinbox() -> SpinBox:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/FloorHeightRow/FloorHeightSpinBox") as SpinBox
+
+
+func _get_eye_height_spinbox() -> SpinBox:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/EyeHeightRow/EyeHeightSpinBox") as SpinBox
+
+
+func _get_cover_height_spinbox() -> SpinBox:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/CoverHeightRow/CoverHeightSpinBox") as SpinBox
+
+
+func _get_los_height_spinbox() -> SpinBox:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/LosHeightRow/LosHeightSpinBox") as SpinBox
+
+
 func _get_mission_slot_spinbox() -> SpinBox:
 	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MissionSlotRow/MissionSlotSpinBox") as SpinBox
 
@@ -2063,6 +2179,10 @@ func _get_marker_info_label() -> Label:
 
 func _get_edge_type_option_button() -> OptionButton:
 	return get_node_or_null("UI/PropertyPanel/Margin/VBox/EdgeTypeRow/EdgeTypeOptionButton") as OptionButton
+
+
+func _get_height_transition_option_button() -> OptionButton:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/TransitionRow/TransitionOptionButton") as OptionButton
 
 
 func _get_brush_size_option_button() -> OptionButton:
@@ -2137,6 +2257,13 @@ func _get_selected_edge_type() -> String:
 	return _last_selected_edge_type
 
 
+func _get_selected_height_transition_type() -> String:
+	var option_button := _get_height_transition_option_button()
+	if option_button == null or option_button.selected < 0:
+		return _last_selected_height_transition_type
+	return String(option_button.get_item_metadata(option_button.selected))
+
+
 func _find_surface_option_index(surface_type: String) -> int:
 	var option_button := _get_surface_option_button()
 	if option_button == null:
@@ -2146,6 +2273,17 @@ func _find_surface_option_index(surface_type: String) -> int:
 		if option_button.get_item_text(index) == surface_type:
 			return index
 
+	return 0
+
+
+func _find_height_transition_option_index(height_transition_type: String) -> int:
+	var option_button := _get_height_transition_option_button()
+	if option_button == null:
+		return 0
+	var normalized_type: String = TERRAIN_TILE_DATA_SCRIPT.normalize_height_transition_type(height_transition_type, TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE)
+	for index in range(option_button.item_count):
+		if String(option_button.get_item_metadata(index)) == normalized_type:
+			return index
 	return 0
 
 
@@ -2214,6 +2352,10 @@ func _find_matching_type_id(tile_data) -> String:
 			and int(entry.get("cover_value", 0)) == int(tile_data.cover_value)
 			and int(entry.get("height_level", 0)) == int(tile_data.height_level)
 			and int(entry.get("object_height", 0)) == int(tile_data.object_height)
+			and is_equal_approx(float(entry.get("floor_height", float(entry.get("height_level", 0)))), float(tile_data.floor_height))
+			and is_equal_approx(float(entry.get("cover_height", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_COVER_HEIGHT)), float(tile_data.cover_height))
+			and is_equal_approx(float(entry.get("blocks_los_height", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_BLOCKS_LOS_HEIGHT)), float(tile_data.blocks_los_height))
+			and String(entry.get("height_transition_type", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_HEIGHT_TRANSITION_TYPE)) == String(tile_data.height_transition_type)
 			and String(entry.get("surface_type", "ground")) == String(tile_data.surface_type)
 		):
 			return type_id
@@ -2552,6 +2694,40 @@ func _remove_object_overlay_at(grid_position: Vector2i) -> void:
 			sprite.queue_free()
 
 	_object_sprites_by_grid.erase(grid_position)
+
+
+func _update_height_overlay_at(grid_position: Vector2i) -> void:
+	_remove_height_overlay_at(grid_position)
+	if _terrain_map_data == null or _terrain_renderer == null:
+		return
+
+	var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
+	if tile_data == null or not bool(_terrain_renderer.call("should_show_height_overlay", tile_data)):
+		return
+
+	var height_overlay := get_node_or_null("HeightOverlay") as Node2D
+	if height_overlay == null:
+		height_overlay = Node2D.new()
+		height_overlay.name = "HeightOverlay"
+		height_overlay.z_index = 32
+		add_child(height_overlay)
+
+	var label := _terrain_renderer.call("create_height_overlay_node", tile_data) as Label
+	height_overlay.add_child(label)
+	_height_overlays_by_grid[grid_position] = label
+
+
+func _remove_height_overlay_at(grid_position: Vector2i) -> void:
+	if not _height_overlays_by_grid.has(grid_position):
+		return
+
+	var overlay = _height_overlays_by_grid[grid_position]
+	if overlay != null and is_instance_valid(overlay):
+		var parent: Node = overlay.get_parent()
+		if parent != null:
+			parent.remove_child(overlay)
+		overlay.queue_free()
+	_height_overlays_by_grid.erase(grid_position)
 
 
 func _rebuild_grid_overlay() -> void:

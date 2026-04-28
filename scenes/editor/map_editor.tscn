@@ -182,9 +182,81 @@ text = "Height:"
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 0.0
-max_value = 3.0
+max_value = 8.0
 step = 1.0
 editable = false
+
+[node name="FloorHeightRow" type="HBoxContainer" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="FloorHeightLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox/FloorHeightRow"]
+layout_mode = 2
+text = "Floor:"
+
+[node name="FloorHeightSpinBox" type="SpinBox" parent="UI/PropertyPanel/Margin/VBox/FloorHeightRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 64.0
+step = 0.25
+editable = false
+
+[node name="EyeHeightRow" type="HBoxContainer" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="EyeHeightLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox/EyeHeightRow"]
+layout_mode = 2
+text = "Eye+:"
+
+[node name="EyeHeightSpinBox" type="SpinBox" parent="UI/PropertyPanel/Margin/VBox/EyeHeightRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 64.0
+step = 0.25
+editable = false
+
+[node name="CoverHeightRow" type="HBoxContainer" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="CoverHeightLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox/CoverHeightRow"]
+layout_mode = 2
+text = "Cover H:"
+
+[node name="CoverHeightSpinBox" type="SpinBox" parent="UI/PropertyPanel/Margin/VBox/CoverHeightRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 64.0
+step = 0.25
+editable = false
+
+[node name="LosHeightRow" type="HBoxContainer" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="LosHeightLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox/LosHeightRow"]
+layout_mode = 2
+text = "LOS H:"
+
+[node name="LosHeightSpinBox" type="SpinBox" parent="UI/PropertyPanel/Margin/VBox/LosHeightRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 64.0
+step = 0.25
+editable = false
+
+[node name="TransitionRow" type="HBoxContainer" parent="UI/PropertyPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="TransitionLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox/TransitionRow"]
+layout_mode = 2
+text = "Transition:"
+
+[node name="TransitionOptionButton" type="OptionButton" parent="UI/PropertyPanel/Margin/VBox/TransitionRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+disabled = true
 
 [node name="EdgeTypeRow" type="HBoxContainer" parent="UI/PropertyPanel/Margin/VBox"]
 layout_mode = 2

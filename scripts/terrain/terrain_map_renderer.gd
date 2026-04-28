@@ -44,11 +44,16 @@ func set_tile_catalog(tile_catalog) -> void:
 
 
 func render_map(terrain_map_data, map_root: Node) -> Dictionary:
+	return render_map_with_options(terrain_map_data, map_root, {})
+
+
+func render_map_with_options(terrain_map_data, map_root: Node, options: Dictionary = {}) -> Dictionary:
 	var empty_result: Dictionary = {
 		"tiles": {},
 		"cliffs": {},
 		"walls": {},
 		"objects": {},
+		"height_overlays": {},
 	}
 	if terrain_map_data == null or map_root == null:
 		return empty_result
@@ -57,15 +62,18 @@ func render_map(terrain_map_data, map_root: Node) -> Dictionary:
 	var cliff_container := _ensure_container(map_root, "CliffContainer")
 	var wall_container := _ensure_container(map_root, "WallContainer")
 	var object_container := _ensure_container(map_root, "ObjectContainer")
+	var height_overlay_container := _ensure_container(map_root, "HeightOverlay")
 	wall_container.y_sort_enabled = true
 	wall_container.z_index = -13
 	object_container.y_sort_enabled = true
 	object_container.z_index = -12
+	height_overlay_container.z_index = 32
 
 	_clear_children(tile_container)
 	_clear_children(cliff_container)
 	_clear_children(wall_container)
 	_clear_children(object_container)
+	_clear_children(height_overlay_container)
 
 	var tile_sprites_by_grid: Dictionary = {}
 	for tile_data in terrain_map_data.call("get_tiles"):
@@ -81,11 +89,13 @@ func render_map(terrain_map_data, map_root: Node) -> Dictionary:
 	var cliff_sprites_by_grid: Dictionary = _build_cliff_overlays(terrain_map_data, cliff_container)
 	var wall_sprites_by_grid: Dictionary = _build_wall_overlays(terrain_map_data, wall_container)
 	var object_sprites_by_grid: Dictionary = _build_object_overlays(terrain_map_data, object_container)
+	var height_overlays_by_grid: Dictionary = _build_height_overlays(terrain_map_data, height_overlay_container) if bool(options.get("show_height_overlay", false)) else {}
 	return {
 		"tiles": tile_sprites_by_grid,
 		"cliffs": cliff_sprites_by_grid,
 		"walls": wall_sprites_by_grid,
 		"objects": object_sprites_by_grid,
+		"height_overlays": height_overlays_by_grid,
 	}
 
 
@@ -146,6 +156,42 @@ func build_tile_modulate(tile_data) -> Color:
 		tile_color = tile_color.darkened(0.08)
 
 	return tile_color
+
+
+func should_show_height_overlay(tile_data) -> bool:
+	if tile_data == null:
+		return false
+	return (
+		int(tile_data.height_level) > 0
+		or float(tile_data.floor_height) > 0.0
+		or float(tile_data.cover_height) > 0.0
+		or float(tile_data.blocks_los_height) > 0.0
+		or String(tile_data.height_transition_type) != TERRAIN_TILE_DATA_SCRIPT.HEIGHT_TRANSITION_NONE
+	)
+
+
+func get_height_overlay_text(tile_data) -> String:
+	if tile_data == null:
+		return ""
+	var transition_label: String = String(tile_data.height_transition_type)
+	return "H%d F%.1f\nC%.1f L%.1f\n%s" % [
+		int(tile_data.height_level),
+		float(tile_data.floor_height),
+		float(tile_data.cover_height),
+		float(tile_data.blocks_los_height),
+		transition_label,
+	]
+
+
+func create_height_overlay_node(tile_data) -> Label:
+	var label := Label.new()
+	label.name = "HeightOverlay_%d_%d" % [tile_data.grid_position.x, tile_data.grid_position.y]
+	label.text = get_height_overlay_text(tile_data)
+	label.position = Vector2(tile_data.world_position) + Vector2(-34.0, -46.0)
+	label.scale = Vector2(0.55, 0.55)
+	label.z_index = 32
+	label.modulate = _get_height_overlay_color(tile_data)
+	return label
 
 
 func is_object_type(tile_data) -> bool:
@@ -386,3 +432,31 @@ func _build_object_overlays(terrain_map_data, object_container: Node2D) -> Dicti
 		object_sprites_by_grid[tile_data.grid_position] = [sprite]
 
 	return object_sprites_by_grid
+
+
+func _build_height_overlays(terrain_map_data, height_overlay_container: Node2D) -> Dictionary:
+	var height_overlays_by_grid: Dictionary = {}
+	if terrain_map_data == null or height_overlay_container == null:
+		return height_overlays_by_grid
+	for tile_data in terrain_map_data.call("get_tiles"):
+		if not should_show_height_overlay(tile_data):
+			continue
+		var label := create_height_overlay_node(tile_data)
+		height_overlay_container.add_child(label)
+		height_overlays_by_grid[tile_data.grid_position] = label
+	return height_overlays_by_grid
+
+
+func _get_height_overlay_color(tile_data) -> Color:
+	if tile_data == null:
+		return Color(1.0, 1.0, 1.0, 0.92)
+	var transition_type: String = String(tile_data.height_transition_type)
+	if transition_type == TERRAIN_TILE_DATA_SCRIPT.HEIGHT_TRANSITION_RAMP:
+		return Color(0.35, 0.78, 1.0, 0.95)
+	if transition_type == TERRAIN_TILE_DATA_SCRIPT.HEIGHT_TRANSITION_STAIRS:
+		return Color(0.82, 0.64, 1.0, 0.95)
+	if float(tile_data.blocks_los_height) > 0.0:
+		return Color(1.0, 0.45, 0.35, 0.95)
+	if float(tile_data.cover_height) > 0.0:
+		return Color(0.45, 1.0, 0.55, 0.95)
+	return Color(1.0, 0.88, 0.35, 0.95)

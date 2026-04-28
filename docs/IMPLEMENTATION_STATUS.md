@@ -1057,12 +1057,21 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Picking verwendet die aktuelle rechteckige 3D-Spike-Gridprojektion. Wenn der finale 3D-Renderer spaeter echte Isometrie-Geometrie statt dieses Lab-Grids nutzt, muss die Konvertierung an einer Stelle angepasst werden.
 - Naechster Schritt: `TASK_140` kann Hoehendaten/Floor-Kontext im Editor und 3D-Renderer sichtbar machen.
 
-### TASK_140-141 - Geplante 2.5D-Hybrid-Folge
+### TASK_140 - 2.5D Editor und Visual Sync
+- Status: implementiert
+- Stand: Das Map-Editor-Property-Panel kann jetzt `floor_height`, `unit_eye_height_bonus`, `cover_height`, `blocks_los_height` und `height_transition_type` pro Tile anzeigen und speichern. Die bestehenden Basiseigenschaften bleiben unveraendert, und die neuen Werte laufen weiter ueber `TerrainTileData`/`TerrainMapData`.
+- Stand: `TerrainMapRenderer` besitzt ein optionales Editor-Height-Overlay. Es zeichnet kompakte Labels fuer nicht-flache Tiles und macht Hoehe, Floor-Hoehe, Cover-Hoehe, LOS-Blocker-Hoehe sowie Rampen/Treppen sichtbar. Flache Legacy-Tiles bekommen kein Overlay.
+- Stand: Der Map-Editor rendert und aktualisiert das Height-Overlay bei Property-Aenderungen. `TerrainMap3DRenderer` wird durch den TASK_140-Verifier explizit darauf geprueft, dass Boden und Objekt-Instanzen auf `floor_height` platziert werden.
+- Offene Punkte: Keine komfortable Multi-Floor-Bearbeitung, keine finalen 3D-Materialien und keine automatische Hoehenableitung aus Modellen. Die Overlay-Texte sind V1-Debug-/Editor-Hilfe, keine finale UX.
+- Risiken: Viele nicht-flache Tiles koennen das Editorbild visuell dicht machen; deshalb bleibt das Overlay auf nicht-default Tiles begrenzt.
+- Naechster Schritt: `TASK_141 - 2.5D Air Layer V1` kann spaeter auf dem stabilisierten Boden-2.5D-Kontext aufsetzen.
+
+### TASK_141 - Geplante 2.5D-Hybrid-Folge
 - Status: geplant
-- Stand: Die restliche 2.5D-Folgereihe bleibt getrennt: `TASK_140` macht Hoehendaten im Editor und 3D-Renderer sichtbar, und `TASK_141` fuehrt spaeter einen separaten Air-Layer fuer Flieger ein.
-- Offene Punkte: Boden-2.5D sollte vor Air-Layer und Multi-Floor-Komfort stabilisiert werden.
+- Stand: `TASK_141` fuehrt spaeter einen separaten Air-Layer fuer Flieger ein.
+- Offene Punkte: Boden-2.5D sollte vor Air-Layer-Komfort weiter im Editor/Playtest geprueft werden.
 - Risiken: 2.5D darf nicht still zu Full-3D-Gameplay anwachsen. Die autoritative Wahrheit bleibt zunaechst Grid-/Terrain-basiert; 3D ist Darstellung und Picking-Schicht.
-- Naechster Schritt: Bei Freigabe mit `TASK_140` fortfahren.
+- Naechster Schritt: Bei Freigabe mit `TASK_141` fortfahren.
 
 ### TASK_151-153 - Geplante Folge-Labs
 - Status: geplant
