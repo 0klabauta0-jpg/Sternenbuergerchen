@@ -251,6 +251,7 @@ func _build_unit_command_from_ftl_task(task, unit: Node):
 	unit_command.cover_score = _derive_cover_score(task_type, source_command_type, unit_command.phase)
 	unit_command.attack_bonus = _derive_attack_bonus(task_type, source_command_type)
 	unit_command.target_position = _derive_target_position(task, unit, command_type, source_command_type)
+	unit_command.target_floor_index = int(task.get("target_floor_index"))
 	unit_command.target_area_id = String(task.get("target_area_id"))
 	unit_command.source_task_type = task_type
 	return unit_command

@@ -19,6 +19,7 @@ func translate(command) -> RefCounted:
 	task.unit_id = command.unit_id
 	task.team_id = command.team_id
 	task.target_position = command.target_position
+	task.target_floor_index = int(command.get("target_floor_index"))
 	task.source_command_type = command.command_type
 	task.phase = command.phase
 

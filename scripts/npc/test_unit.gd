@@ -862,7 +862,8 @@ func respawn(spawn_position: Vector2) -> bool:
 	return true
 
 
-func set_target_position(target_position: Variant) -> bool:
+func set_target_position(target_position: Variant, target_floor_index: int = -1) -> bool:
+	var resolved_target_floor_index: int = int(_runtime_status.target_floor_index) if target_floor_index < 0 else target_floor_index
 	return set_runtime_status(
 		String(_runtime_status.status),
 		String(_runtime_status.active_command_type),
@@ -873,7 +874,8 @@ func set_target_position(target_position: Variant) -> bool:
 		float(_runtime_status.cover_score),
 		float(_runtime_status.attack_bonus),
 		int(_runtime_status.phase),
-		target_position
+		target_position,
+		resolved_target_floor_index
 	)
 
 
@@ -895,7 +897,8 @@ func assign_unit_command(command) -> bool:
 		float(command.get("cover_score")),
 		float(command.get("attack_bonus")),
 		int(command.get("phase")),
-		command.get("target_position")
+		command.get("target_position"),
+		int(command.get("target_floor_index"))
 	):
 		return false
 
@@ -914,7 +917,8 @@ func set_runtime_status(
 	cover_score: float = 0.0,
 	attack_bonus: float = 0.0,
 	phase: int = -1,
-	target_position: Variant = null
+	target_position: Variant = null,
+	target_floor_index: int = 0
 ) -> bool:
 	var runtime_status = _build_runtime_status(
 		status_name,
@@ -926,7 +930,8 @@ func set_runtime_status(
 		cover_score,
 		attack_bonus,
 		phase,
-		target_position
+		target_position,
+		target_floor_index
 	)
 	if not bool(runtime_status.call("is_valid")):
 		push_warning("TestUnit.set_runtime_status expects a valid UnitRuntimeStatus-compatible value.")
@@ -992,7 +997,8 @@ func _build_runtime_status(
 	cover_score: float = 0.0,
 	attack_bonus: float = 0.0,
 	phase: int = -1,
-	target_position: Variant = null
+	target_position: Variant = null,
+	target_floor_index: int = 0
 ):
 	var runtime_status = UNIT_RUNTIME_STATUS_SCRIPT.new()
 	runtime_status.status = status_name
@@ -1007,6 +1013,7 @@ func _build_runtime_status(
 	runtime_status.cover_score = cover_score
 	runtime_status.attack_bonus = attack_bonus
 	runtime_status.target_position = target_position
+	runtime_status.target_floor_index = target_floor_index
 	runtime_status.phase = phase
 	return runtime_status
 

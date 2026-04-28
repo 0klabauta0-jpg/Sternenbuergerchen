@@ -90,6 +90,80 @@ func get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry, op
 	return _get_step_cost(current_grid, neighbor_grid, registry, options)
 
 
+func can_traverse_floor_step(current_grid: Vector2i, current_floor_index: int, neighbor_grid: Vector2i, neighbor_floor_index: int, registry) -> bool:
+	return bool(get_floor_step_traversal_snapshot(current_grid, current_floor_index, neighbor_grid, neighbor_floor_index, registry).get("traversable", false))
+
+
+func get_floor_step_traversal_snapshot(current_grid: Vector2i, current_floor_index: int, neighbor_grid: Vector2i, neighbor_floor_index: int, registry) -> Dictionary:
+	var normalized_current_floor: int = _normalize_floor_index(current_floor_index)
+	var normalized_neighbor_floor: int = _normalize_floor_index(neighbor_floor_index)
+	var snapshot: Dictionary = {
+		"from_grid": current_grid,
+		"from_floor_index": normalized_current_floor,
+		"to_grid": neighbor_grid,
+		"to_floor_index": normalized_neighbor_floor,
+		"traversable": false,
+		"reason": "",
+	}
+	if registry == null:
+		snapshot["reason"] = "registry_missing"
+		return snapshot
+	if normalized_current_floor != normalized_neighbor_floor:
+		if registry.has_method("get_floor_transition_snapshot"):
+			return Dictionary(registry.call("get_floor_transition_snapshot", current_grid, normalized_current_floor, neighbor_grid, normalized_neighbor_floor))
+		snapshot["reason"] = "floor_transition_api_missing"
+		return snapshot
+	if normalized_current_floor == TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX:
+		var base_snapshot: Dictionary = get_step_traversal_snapshot(current_grid, neighbor_grid, registry)
+		base_snapshot["from_floor_index"] = normalized_current_floor
+		base_snapshot["to_floor_index"] = normalized_neighbor_floor
+		return base_snapshot
+	if not registry.has_method("get_tile_at_grid_floor"):
+		snapshot["reason"] = "floor_lookup_api_missing"
+		return snapshot
+	var current_tile = registry.call("get_tile_at_grid_floor", current_grid, normalized_current_floor)
+	var neighbor_tile = registry.call("get_tile_at_grid_floor", neighbor_grid, normalized_neighbor_floor)
+	var floor_snapshot: Dictionary = _build_step_traversal_snapshot(current_grid, neighbor_grid, current_tile, neighbor_tile)
+	floor_snapshot["from_floor_index"] = normalized_current_floor
+	floor_snapshot["to_floor_index"] = normalized_neighbor_floor
+	return floor_snapshot
+
+
+func find_floor_path(from_grid: Vector2i, from_floor_index: int, to_grid: Vector2i, to_floor_index: int, registry) -> Array:
+	var result: Array = []
+	if registry == null or not registry.has_method("get_tile_at_grid_floor"):
+		return result
+	var start_floor: int = _normalize_floor_index(from_floor_index)
+	var target_floor: int = _normalize_floor_index(to_floor_index)
+	if registry.call("get_tile_at_grid_floor", from_grid, start_floor) == null or registry.call("get_tile_at_grid_floor", to_grid, target_floor) == null:
+		return result
+
+	var start_key: String = _build_floor_state_key(from_grid, start_floor)
+	var target_key: String = _build_floor_state_key(to_grid, target_floor)
+	var queue: Array = [_make_floor_state(from_grid, start_floor)]
+	var visited: Dictionary = {start_key: true}
+	var came_from: Dictionary = {}
+	while not queue.is_empty():
+		var current: Dictionary = Dictionary(queue.pop_front())
+		var current_grid: Vector2i = Vector2i(current.get("grid_position", Vector2i.ZERO))
+		var current_floor: int = int(current.get("floor_index", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX))
+		var current_key: String = _build_floor_state_key(current_grid, current_floor)
+		if current_key == target_key:
+			return _reconstruct_floor_path(came_from, current_key)
+		for neighbor_state in _get_floor_neighbors(current_grid, current_floor, registry):
+			var neighbor_grid: Vector2i = Vector2i(Dictionary(neighbor_state).get("grid_position", Vector2i.ZERO))
+			var neighbor_floor: int = int(Dictionary(neighbor_state).get("floor_index", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX))
+			var neighbor_key: String = _build_floor_state_key(neighbor_grid, neighbor_floor)
+			if visited.has(neighbor_key):
+				continue
+			if not can_traverse_floor_step(current_grid, current_floor, neighbor_grid, neighbor_floor, registry):
+				continue
+			visited[neighbor_key] = true
+			came_from[neighbor_key] = current_key
+			queue.append(neighbor_state)
+	return result
+
+
 func score_path(path_grid_points: Array, registry, options: Dictionary = {}) -> Dictionary:
 	var exposure_sum: float = 0.0
 	var cover_sum: float = 0.0
@@ -306,6 +380,71 @@ func _get_height_transition_cost_factor(transition_type: String) -> float:
 			return STAIRS_HEIGHT_COST_FACTOR
 		_:
 			return STAIRS_HEIGHT_COST_FACTOR
+
+
+func _get_floor_neighbors(current_grid: Vector2i, current_floor_index: int, registry) -> Array:
+	var result: Array = []
+	for direction in NEIGHBOR_DIRECTIONS:
+		var neighbor_grid: Vector2i = current_grid + Vector2i(direction)
+		if registry.call("get_tile_at_grid_floor", neighbor_grid, current_floor_index) != null:
+			result.append(_make_floor_state(neighbor_grid, current_floor_index))
+	if registry.has_method("get_floor_links_at_grid"):
+		for link_variant in Array(registry.call("get_floor_links_at_grid", current_grid, current_floor_index)):
+			var link: Dictionary = TERRAIN_TILE_DATA_SCRIPT.normalize_floor_link(link_variant)
+			if link.is_empty():
+				continue
+			result.append(_make_floor_state(Vector2i(link.get("target_grid_position", current_grid)), int(link.get("target_floor_index", current_floor_index))))
+	if registry.has_method("get_all_floor_tiles"):
+		for tile_data in Array(registry.call("get_all_floor_tiles")):
+			if tile_data == null:
+				continue
+			var candidate_grid: Vector2i = Vector2i(tile_data.grid_position)
+			var candidate_floor: int = int(tile_data.floor_index)
+			if candidate_grid == current_grid and candidate_floor == current_floor_index:
+				continue
+			for link_variant in Array(tile_data.floor_links):
+				var link: Dictionary = TERRAIN_TILE_DATA_SCRIPT.normalize_floor_link(link_variant)
+				if link.is_empty() or not bool(link.get("bidirectional", true)):
+					continue
+				if Vector2i(link.get("target_grid_position", Vector2i.ZERO)) != current_grid:
+					continue
+				if int(link.get("target_floor_index", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX)) != current_floor_index:
+					continue
+				result.append(_make_floor_state(candidate_grid, candidate_floor))
+	return result
+
+
+func _reconstruct_floor_path(came_from: Dictionary, current_key: String) -> Array:
+	var path: Array = [_parse_floor_state_key(current_key)]
+	while came_from.has(current_key):
+		current_key = String(came_from[current_key])
+		path.push_front(_parse_floor_state_key(current_key))
+	return path
+
+
+func _make_floor_state(grid_position: Vector2i, floor_index: int) -> Dictionary:
+	return {
+		"grid_position": grid_position,
+		"floor_index": _normalize_floor_index(floor_index),
+	}
+
+
+func _build_floor_state_key(grid_position: Vector2i, floor_index: int) -> String:
+	return "%d,%d:%d" % [grid_position.x, grid_position.y, _normalize_floor_index(floor_index)]
+
+
+func _parse_floor_state_key(state_key: String) -> Dictionary:
+	var parts: PackedStringArray = state_key.split(":")
+	if parts.size() != 2:
+		return _make_floor_state(Vector2i.ZERO, TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX)
+	var grid_parts: PackedStringArray = String(parts[0]).split(",")
+	if grid_parts.size() != 2:
+		return _make_floor_state(Vector2i.ZERO, int(parts[1]))
+	return _make_floor_state(Vector2i(int(grid_parts[0]), int(grid_parts[1])), int(parts[1]))
+
+
+func _normalize_floor_index(floor_index: int) -> int:
+	return clampi(int(floor_index), 0, TERRAIN_TILE_DATA_SCRIPT.MAX_FLOOR_INDEX)
 
 
 func _get_cover_score(grid_position: Vector2i, registry) -> float:

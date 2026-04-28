@@ -34,6 +34,7 @@ var move_speed_factor: float = 1.0
 var cover_score: float = 0.0
 var attack_bonus: float = 0.0
 var target_position: Variant = null
+var target_floor_index: int = 0
 var phase: int = -1
 
 
@@ -61,6 +62,9 @@ func is_valid() -> bool:
 	if move_speed_factor < 0.0:
 		return false
 
+	if target_floor_index < 0:
+		return false
+
 	return _has_valid_target_position()
 
 
@@ -80,6 +84,8 @@ func to_dict() -> Dictionary:
 
 	if target_position != null:
 		data["target_position"] = target_position
+		if target_floor_index != 0:
+			data["target_floor_index"] = target_floor_index
 
 	if phase >= 0:
 		data["phase"] = phase
@@ -134,6 +140,11 @@ func _apply_dict(data: Dictionary) -> void:
 
 	if data.has("target_position"):
 		target_position = data["target_position"]
+
+	if data.has("target_floor_index"):
+		var raw_target_floor_index: Variant = data["target_floor_index"]
+		if typeof(raw_target_floor_index) == TYPE_INT or typeof(raw_target_floor_index) == TYPE_FLOAT:
+			target_floor_index = int(raw_target_floor_index)
 
 	if data.has("phase"):
 		var raw_phase: Variant = data["phase"]

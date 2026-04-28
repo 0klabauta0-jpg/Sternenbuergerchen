@@ -754,7 +754,7 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 		return
 
 	if unit.has_method("set_target_position"):
-		unit.call("set_target_position", target_position)
+		unit.call("set_target_position", target_position, int(cmd.get("target_floor_index", 0)))
 
 	var node_2d: Node2D = unit
 	var move_speed_factor: float = _extract_move_speed_factor(cmd, unit)

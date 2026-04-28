@@ -2,8 +2,10 @@ class_name TerrainRegistry
 extends Node
 
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
+const MAP_FLOOR_SLOT_SCRIPT: GDScript = preload("res://scripts/terrain/map_floor_slot.gd")
 
 var _tiles: Dictionary = {}
+var _floor_tiles: Dictionary = {}
 var _grid_origin_world: Vector2 = Vector2.ZERO
 var _half_tile_width: float = 64.0
 var _half_tile_height: float = 32.0
@@ -17,6 +19,7 @@ func configure_iso_grid(grid_origin_world: Vector2, half_tile_width: float, half
 
 func clear_tiles() -> void:
 	_tiles.clear()
+	_floor_tiles.clear()
 
 
 func register_tile(tile_data) -> void:
@@ -24,7 +27,12 @@ func register_tile(tile_data) -> void:
 		push_warning("TerrainRegistry.register_tile expects a valid TerrainTileData.")
 		return
 
-	_tiles[tile_data.grid_position] = tile_data
+	var grid_position: Vector2i = Vector2i(tile_data.grid_position)
+	var floor_index: int = _coerce_floor_index(tile_data.floor_index)
+	tile_data.floor_index = floor_index
+	_floor_tiles[_build_floor_key(grid_position, floor_index)] = tile_data
+	if floor_index == TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX:
+		_tiles[grid_position] = tile_data
 
 
 func get_tile_at_grid(grid_pos: Vector2i):
@@ -32,6 +40,37 @@ func get_tile_at_grid(grid_pos: Vector2i):
 		return null
 
 	return _tiles[grid_pos]
+
+
+func get_tile_at_grid_floor(grid_pos: Vector2i, floor_index: int = TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX):
+	var key: String = _build_floor_key(grid_pos, _coerce_floor_index(floor_index))
+	if not _floor_tiles.has(key):
+		return null
+	return _floor_tiles[key]
+
+
+func has_floor_slot(grid_pos: Vector2i, floor_index: int = TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX) -> bool:
+	return get_tile_at_grid_floor(grid_pos, floor_index) != null
+
+
+func get_floor_slot_at_grid(grid_pos: Vector2i, floor_index: int = TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX):
+	return MAP_FLOOR_SLOT_SCRIPT.call("from_tile_data", get_tile_at_grid_floor(grid_pos, floor_index))
+
+
+func get_floor_slots_at_grid(grid_pos: Vector2i) -> Array:
+	var result: Array = []
+	for tile_data in _floor_tiles.values():
+		if tile_data == null:
+			continue
+		if Vector2i(tile_data.grid_position) != grid_pos:
+			continue
+		var slot = MAP_FLOOR_SLOT_SCRIPT.call("from_tile_data", tile_data)
+		if slot != null:
+			result.append(slot)
+	result.sort_custom(func(a, b) -> bool:
+		return int(a.floor_index) < int(b.floor_index)
+	)
+	return result
 
 
 func get_tile_at_world(world_pos: Vector2):
@@ -56,11 +95,32 @@ func get_all_tiles() -> Array:
 	return _tiles.values()
 
 
+func get_all_floor_tiles() -> Array:
+	var result: Array = _floor_tiles.values()
+	result.sort_custom(func(a, b) -> bool:
+		var grid_a: Vector2i = Vector2i(a.grid_position)
+		var grid_b: Vector2i = Vector2i(b.grid_position)
+		if grid_a.x == grid_b.x:
+			if grid_a.y == grid_b.y:
+				return int(a.floor_index) < int(b.floor_index)
+			return grid_a.y < grid_b.y
+		return grid_a.x < grid_b.x
+	)
+	return result
+
+
 func is_walkable(grid_pos: Vector2i) -> bool:
 	var tile_data = get_tile_at_grid(grid_pos)
 	if tile_data == null:
 		return false
 
+	return bool(tile_data.walkable)
+
+
+func is_walkable_floor(grid_pos: Vector2i, floor_index: int = TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX) -> bool:
+	var tile_data = get_tile_at_grid_floor(grid_pos, floor_index)
+	if tile_data == null:
+		return false
 	return bool(tile_data.walkable)
 
 
@@ -163,7 +223,11 @@ func get_height_at_world(world_pos: Vector2) -> int:
 
 
 func get_floor_height_at(grid_pos: Vector2i) -> float:
-	var tile_data = get_tile_at_grid(grid_pos)
+	return get_floor_height_at_floor(grid_pos, TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX)
+
+
+func get_floor_height_at_floor(grid_pos: Vector2i, floor_index: int = TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX) -> float:
+	var tile_data = get_tile_at_grid_floor(grid_pos, floor_index)
 	if tile_data == null:
 		return TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_HEIGHT
 
@@ -176,6 +240,10 @@ func get_floor_height_at_world(world_pos: Vector2) -> float:
 		return TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_HEIGHT
 
 	return float(tile_data.floor_height)
+
+
+func get_floor_height_at_world_floor(world_pos: Vector2, floor_index: int = TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX) -> float:
+	return get_floor_height_at_floor(world_to_grid(world_pos), floor_index)
 
 
 func get_cover_height_at(grid_pos: Vector2i) -> float:
@@ -218,6 +286,13 @@ func get_unit_eye_height_bonus_at(grid_pos: Vector2i) -> float:
 	return float(tile_data.unit_eye_height_bonus)
 
 
+func get_unit_eye_height_bonus_at_floor(grid_pos: Vector2i, floor_index: int = TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX) -> float:
+	var tile_data = get_tile_at_grid_floor(grid_pos, floor_index)
+	if tile_data == null:
+		return TERRAIN_TILE_DATA_SCRIPT.DEFAULT_UNIT_EYE_HEIGHT_BONUS
+	return float(tile_data.unit_eye_height_bonus)
+
+
 func is_elevated_surface_at(grid_pos: Vector2i) -> bool:
 	var tile_data = get_tile_at_grid(grid_pos)
 	if tile_data == null:
@@ -227,12 +302,17 @@ func is_elevated_surface_at(grid_pos: Vector2i) -> bool:
 
 
 func get_height_profile_at_grid(grid_pos: Vector2i) -> Dictionary:
-	var tile_data = get_tile_at_grid(grid_pos)
+	return get_height_profile_at_grid_floor(grid_pos, TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX)
+
+
+func get_height_profile_at_grid_floor(grid_pos: Vector2i, floor_index: int = TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX) -> Dictionary:
+	var tile_data = get_tile_at_grid_floor(grid_pos, floor_index)
 	if tile_data == null:
 		return {}
 
 	return {
 		"grid_position": grid_pos,
+		"floor_index": int(tile_data.floor_index),
 		"height_level": int(tile_data.height_level),
 		"object_height": int(tile_data.object_height),
 		"floor_height": float(tile_data.floor_height),
@@ -241,6 +321,51 @@ func get_height_profile_at_grid(grid_pos: Vector2i) -> Dictionary:
 		"blocks_los_height": float(tile_data.blocks_los_height),
 		"is_elevated_surface": bool(tile_data.is_elevated_surface),
 		"height_transition_type": String(tile_data.height_transition_type),
+		"floor_links": Array(tile_data.floor_links).duplicate(true),
+	}
+
+
+func get_floor_links_at_grid(grid_pos: Vector2i, floor_index: int = TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX) -> Array:
+	var tile_data = get_tile_at_grid_floor(grid_pos, floor_index)
+	if tile_data == null:
+		return []
+	return Array(tile_data.floor_links).duplicate(true)
+
+
+func can_traverse_floor_transition(from_grid: Vector2i, from_floor_index: int, to_grid: Vector2i, to_floor_index: int) -> bool:
+	if from_floor_index == to_floor_index:
+		return from_grid == to_grid or (is_walkable_floor(from_grid, from_floor_index) and is_walkable_floor(to_grid, to_floor_index))
+	var from_tile = get_tile_at_grid_floor(from_grid, from_floor_index)
+	var to_tile = get_tile_at_grid_floor(to_grid, to_floor_index)
+	if from_tile == null or to_tile == null:
+		return false
+	if not bool(from_tile.walkable) or not bool(to_tile.walkable):
+		return false
+	if _has_floor_link(from_tile, to_grid, to_floor_index, false):
+		return true
+	return _has_floor_link(to_tile, from_grid, from_floor_index, true)
+
+
+func get_floor_transition_snapshot(from_grid: Vector2i, from_floor_index: int, to_grid: Vector2i, to_floor_index: int) -> Dictionary:
+	var from_tile = get_tile_at_grid_floor(from_grid, from_floor_index)
+	var to_tile = get_tile_at_grid_floor(to_grid, to_floor_index)
+	var traversable: bool = can_traverse_floor_transition(from_grid, from_floor_index, to_grid, to_floor_index)
+	var reason: String = "allowed" if traversable else "floor_link_missing"
+	if from_tile == null or to_tile == null:
+		reason = "floor_slot_missing"
+	elif not bool(from_tile.walkable) or not bool(to_tile.walkable):
+		reason = "floor_slot_not_walkable"
+	elif from_floor_index == to_floor_index:
+		reason = "same_floor"
+	return {
+		"from_grid": from_grid,
+		"from_floor_index": _coerce_floor_index(from_floor_index),
+		"to_grid": to_grid,
+		"to_floor_index": _coerce_floor_index(to_floor_index),
+		"traversable": traversable,
+		"reason": reason,
+		"from_height": float(from_tile.floor_height) if from_tile != null else 0.0,
+		"to_height": float(to_tile.floor_height) if to_tile != null else 0.0,
 	}
 
 
@@ -282,3 +407,28 @@ func grid_to_world(grid_pos: Vector2i) -> Vector2:
 		_grid_origin_world.x + (float(grid_pos.x - grid_pos.y) * _half_tile_width),
 		_grid_origin_world.y + (float(grid_pos.x + grid_pos.y) * _half_tile_height)
 	)
+
+
+func _has_floor_link(tile_data, target_grid: Vector2i, target_floor_index: int, require_bidirectional: bool) -> bool:
+	if tile_data == null:
+		return false
+	for link_variant in Array(tile_data.floor_links):
+		var link: Dictionary = TERRAIN_TILE_DATA_SCRIPT.normalize_floor_link(link_variant)
+		if link.is_empty():
+			continue
+		if Vector2i(link.get("target_grid_position", Vector2i.ZERO)) != target_grid:
+			continue
+		if int(link.get("target_floor_index", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX)) != _coerce_floor_index(target_floor_index):
+			continue
+		if require_bidirectional and not bool(link.get("bidirectional", true)):
+			continue
+		return true
+	return false
+
+
+func _build_floor_key(grid_pos: Vector2i, floor_index: int) -> String:
+	return "%d,%d:%d" % [grid_pos.x, grid_pos.y, _coerce_floor_index(floor_index)]
+
+
+func _coerce_floor_index(floor_index: int) -> int:
+	return clampi(int(floor_index), 0, TERRAIN_TILE_DATA_SCRIPT.MAX_FLOOR_INDEX)

@@ -1039,12 +1039,21 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Alte Karten mit Hoehenkanten ohne Transition koennen jetzt korrekt unpassierbar werden. Das ist gewollt, muss aber im Editor sichtbar werden, damit Map-Arbeit nicht raetselhaft wirkt.
 - Naechster Schritt: `TASK_138 - 2.5D Multi-Floor Foundation` kann jetzt auf stabilen Hoehen-Traversal-Regeln aufbauen.
 
-### TASK_138-141 - Geplante 2.5D-Hybrid-Folge
+### TASK_138 - 2.5D Multi-Floor Foundation
+- Status: implementiert
+- Stand: Die Terrain-Daten koennen jetzt mehrere begehbare Slots auf derselben Grid-Koordinate unterscheiden. `TerrainTileData` fuehrt `floor_index` und explizite `floor_links`; `MapFloorSlot` liefert dafuer einen kleinen Snapshot-Vertrag. `TerrainMapData` speichert/laedt floor-indexierte Slots, und `TerrainRegistry` bietet Lookups fuer `grid + floor_index`, floor-spezifische Height-Profile sowie Debug-Snapshots fuer erlaubte/fehlende Floor-Transitions.
+- Stand: `TerrainPathfinder` besitzt mit `find_floor_path(...)` eine kleine Foundation-Suche ueber Floor-Slots. Bewegung auf derselben Ebene nutzt die bestehenden Traversal-Regeln, Etagenwechsel sind nur ueber explizite Links erlaubt. `LineOfSightSystem.get_line_of_sight_floor_snapshot(...)` liest Source-/Target-Hoehen aus floor-spezifischen Slots.
+- Stand: Commander-/FTL-/Unit-Command- und Runtime-Status-Vertraege transportieren optional `target_floor_index`; `RuntimeLeader`, `CommandToFTLTaskTranslator`, `SimulationRoot` und `TestUnit` reichen den Wert ohne neue Gameplay-Semantik durch.
+- Offene Punkte: Keine Etagen-UI, keine Kamera-/Picking-Umschaltung, keine vollstaendige Multi-Floor-HPA-Integration und keine Innenraumlogik. Der bestehende Live-Move-Pfad bleibt fuer normale Karten auf `floor_index = 0`.
+- Risiken: Multi-Floor ist ab jetzt als Daten- und Testpfad vorhanden, aber noch nicht fuer breite Maps optimiert. Editor- und Visual-Sync muessen den Floor-Kontext sichtbar machen, bevor echte Karten damit angenehm gebaut werden koennen.
+- Naechster Schritt: `TASK_139 - 2.5D Kamera und Picking` kann jetzt Floor-Kontext beim Auswaehlen und Anvisieren beruecksichtigen.
+
+### TASK_139-141 - Geplante 2.5D-Hybrid-Folge
 - Status: geplant
-- Stand: Die restliche 2.5D-Folgereihe bleibt getrennt: `TASK_138` bereitet Multi-Floor-Positionen vor, `TASK_139` schneidet drehbare Kamera und Grid-/Floor-Picking, `TASK_140` macht Hoehendaten im Editor und 3D-Renderer sichtbar, und `TASK_141` fuehrt spaeter einen separaten Air-Layer fuer Flieger ein.
+- Stand: Die restliche 2.5D-Folgereihe bleibt getrennt: `TASK_139` schneidet drehbare Kamera und Grid-/Floor-Picking, `TASK_140` macht Hoehendaten im Editor und 3D-Renderer sichtbar, und `TASK_141` fuehrt spaeter einen separaten Air-Layer fuer Flieger ein.
 - Offene Punkte: Boden-2.5D sollte vor Air-Layer und Multi-Floor-Komfort stabilisiert werden.
 - Risiken: 2.5D darf nicht still zu Full-3D-Gameplay anwachsen. Die autoritative Wahrheit bleibt zunaechst Grid-/Terrain-basiert; 3D ist Darstellung und Picking-Schicht.
-- Naechster Schritt: Bei Freigabe mit `TASK_138 - 2.5D Multi-Floor Foundation` fortfahren.
+- Naechster Schritt: Bei Freigabe mit `TASK_139 - 2.5D Kamera und Picking` fortfahren.
 
 ### TASK_151-153 - Geplante Folge-Labs
 - Status: geplant

@@ -19,6 +19,7 @@ var priority: int = 0
 var unit_id: String = ""
 var team_id: String = ""
 var target_position: Variant = null
+var target_floor_index: int = 0
 var target_area_id: String = ""
 var source_command_type: String = ""
 var phase: int = -1
@@ -46,6 +47,9 @@ func is_valid() -> bool:
 	if not _has_valid_target_position():
 		return false
 
+	if target_floor_index < 0:
+		return false
+
 	return true
 
 
@@ -60,6 +64,8 @@ func to_dict() -> Dictionary:
 
 	if target_position != null:
 		data["target_position"] = target_position
+		if target_floor_index != 0:
+			data["target_floor_index"] = target_floor_index
 
 	if not target_area_id.is_empty():
 		data["target_area_id"] = target_area_id
@@ -90,6 +96,11 @@ func _apply_dict(data: Dictionary) -> void:
 
 	if data.has("target_position"):
 		target_position = data["target_position"]
+
+	if data.has("target_floor_index"):
+		var raw_target_floor_index: Variant = data["target_floor_index"]
+		if typeof(raw_target_floor_index) == TYPE_INT or typeof(raw_target_floor_index) == TYPE_FLOAT:
+			target_floor_index = int(raw_target_floor_index)
 
 	if data.has("target_area_id"):
 		target_area_id = String(data["target_area_id"])

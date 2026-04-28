@@ -18,9 +18,11 @@ const DEFAULT_BLOCKS_LOS_HEIGHT: float = 0.0
 const DEFAULT_IS_ELEVATED_SURFACE: bool = false
 const DEFAULT_SURFACE_TYPE: String = SURFACE_GROUND
 const DEFAULT_HEIGHT_TRANSITION_TYPE: String = "none"
+const DEFAULT_FLOOR_INDEX: int = 0
 const MAX_HEIGHT_LEVEL: int = 8
 const MAX_OBJECT_HEIGHT: int = 8
 const MAX_WORLD_HEIGHT: float = 64.0
+const MAX_FLOOR_INDEX: int = 16
 
 const EDGE_CLIFF: String = "cliff"
 const EDGE_SLOPE: String = "slope"
@@ -47,6 +49,8 @@ var is_elevated_surface: bool = DEFAULT_IS_ELEVATED_SURFACE
 var surface_type: String = DEFAULT_SURFACE_TYPE
 var edge_type: String = EDGE_CLIFF
 var height_transition_type: String = DEFAULT_HEIGHT_TRANSITION_TYPE
+var floor_index: int = DEFAULT_FLOOR_INDEX
+var floor_links: Array = []
 
 
 func _init(data: Dictionary = {}) -> void:
@@ -83,6 +87,8 @@ func to_dict() -> Dictionary:
 		"surface_type": surface_type,
 		"edge_type": edge_type,
 		"height_transition_type": height_transition_type,
+		"floor_index": floor_index,
+		"floor_links": floor_links.duplicate(true),
 	}
 
 
@@ -142,6 +148,23 @@ static func normalize_height_transition_type(value: String, fallback_edge_type: 
 			return HEIGHT_TRANSITION_RAMP if _normalize_edge_type(fallback_edge_type) == EDGE_SLOPE else HEIGHT_TRANSITION_NONE
 
 
+static func normalize_floor_link(value: Variant) -> Dictionary:
+	if typeof(value) != TYPE_DICTIONARY:
+		return {}
+	var source: Dictionary = Dictionary(value)
+	var target_grid: Vector2i = _coerce_grid_position(source.get("target_grid_position", source.get("grid_position", Vector2i.ZERO)))
+	var target_floor_index: int = clampi(int(source.get("target_floor_index", source.get("floor_index", DEFAULT_FLOOR_INDEX))), 0, MAX_FLOOR_INDEX)
+	var link_type: String = String(source.get("link_type", HEIGHT_TRANSITION_STAIRS)).strip_edges().to_lower()
+	if link_type.is_empty():
+		link_type = HEIGHT_TRANSITION_STAIRS
+	return {
+		"target_grid_position": target_grid,
+		"target_floor_index": target_floor_index,
+		"link_type": link_type,
+		"bidirectional": bool(source.get("bidirectional", true)),
+	}
+
+
 static func _normalize_surface_type(next_surface_type: String) -> String:
 	var normalized_surface_type: String = next_surface_type.strip_edges().to_lower()
 	if normalized_surface_type.is_empty():
@@ -177,6 +200,8 @@ func _apply_dict(data: Dictionary) -> void:
 	surface_type = _normalize_surface_type(String(data.get("surface_type", DEFAULT_SURFACE_TYPE)))
 	edge_type = _normalize_edge_type(String(data.get("edge_type", EDGE_CLIFF)))
 	height_transition_type = normalize_height_transition_type(String(data.get("height_transition_type", "")), edge_type)
+	floor_index = clampi(int(data.get("floor_index", DEFAULT_FLOOR_INDEX)), 0, MAX_FLOOR_INDEX)
+	floor_links = _coerce_floor_links(data.get("floor_links", []))
 
 
 func _derive_cover_height() -> float:
@@ -197,14 +222,30 @@ func _coerce_height_float(value: Variant) -> float:
 	return clampf(float(value), 0.0, MAX_WORLD_HEIGHT)
 
 
-func _coerce_grid_position(value: Variant) -> Vector2i:
+static func _coerce_grid_position(value: Variant) -> Vector2i:
 	if value is Vector2i:
 		return value
 
 	if value is Vector2:
 		return Vector2i(roundi((value as Vector2).x), roundi((value as Vector2).y))
 
+	if typeof(value) == TYPE_DICTIONARY:
+		var value_dict: Dictionary = Dictionary(value)
+		return Vector2i(int(value_dict.get("x", 0)), int(value_dict.get("y", 0)))
+
 	return Vector2i.ZERO
+
+
+func _coerce_floor_links(value: Variant) -> Array:
+	var result: Array = []
+	if typeof(value) != TYPE_ARRAY:
+		return result
+	for link_variant in Array(value):
+		var normalized_link: Dictionary = normalize_floor_link(link_variant)
+		if normalized_link.is_empty():
+			continue
+		result.append(normalized_link)
+	return result
 
 
 func _coerce_world_position(value: Variant) -> Vector2:

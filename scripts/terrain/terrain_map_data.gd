@@ -71,8 +71,10 @@ static func load_from_file(path: String) -> TerrainMapData:
 
 			var normalized_tile_entry: Dictionary = tile_entry.duplicate(true)
 			var grid_position: Vector2i = _coerce_vector2i(normalized_tile_entry.get("grid_position", Vector2i.ZERO))
+			var floor_index: int = clampi(int(normalized_tile_entry.get("floor_index", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX)), 0, TERRAIN_TILE_DATA_SCRIPT.MAX_FLOOR_INDEX)
 			normalized_tile_entry["grid_position"] = grid_position
-			normalized_tile_entry["tile_id"] = "tile_%d_%d" % [grid_position.x, grid_position.y]
+			normalized_tile_entry["floor_index"] = floor_index
+			normalized_tile_entry["tile_id"] = "tile_%d_%d" % [grid_position.x, grid_position.y] if floor_index == TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX else "tile_%d_%d_f%d" % [grid_position.x, grid_position.y, floor_index]
 			normalized_tile_entry["world_position"] = terrain_map_data._grid_to_world(grid_position)
 			_normalize_legacy_object_layer_tile(normalized_tile_entry)
 
@@ -141,6 +143,8 @@ static func create_empty(
 					"blocks_los_height": TERRAIN_TILE_DATA_SCRIPT.DEFAULT_BLOCKS_LOS_HEIGHT,
 					"is_elevated_surface": TERRAIN_TILE_DATA_SCRIPT.DEFAULT_IS_ELEVATED_SURFACE,
 					"height_transition_type": TERRAIN_TILE_DATA_SCRIPT.DEFAULT_HEIGHT_TRANSITION_TYPE,
+					"floor_index": TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX,
+					"floor_links": [],
 				}
 			)
 			terrain_map_data._tiles.append(tile_data)
@@ -204,6 +208,8 @@ func save_to_file(path: String) -> Error:
 			"surface_type": String(tile_dict.get("surface_type", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFACE_TYPE)),
 			"edge_type": String(tile_dict.get("edge_type", TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF)),
 			"height_transition_type": String(tile_dict.get("height_transition_type", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_HEIGHT_TRANSITION_TYPE)),
+			"floor_index": int(tile_dict.get("floor_index", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX)),
+			"floor_links": _serialize_floor_links(Array(tile_dict.get("floor_links", []))),
 		}
 		var object_type_id: String = String(tile_dict.get("object_type_id", "")).strip_edges()
 		if not object_type_id.is_empty():
@@ -218,6 +224,13 @@ func get_tiles() -> Array:
 	return _tiles.duplicate()
 
 
+func add_tile(tile_data) -> bool:
+	if tile_data == null or not tile_data.has_method("is_valid") or not bool(tile_data.call("is_valid")):
+		return false
+	_tiles.append(tile_data)
+	return true
+
+
 func has_load_issue() -> bool:
 	return not _load_issue_message.is_empty()
 
@@ -227,14 +240,32 @@ func get_load_issue_message() -> String:
 
 
 func get_tile_at_grid(grid_position: Vector2i):
+	return get_tile_at_grid_floor(grid_position, TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX)
+
+
+func get_tile_at_grid_floor(grid_position: Vector2i, floor_index: int = TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX):
+	var normalized_floor_index: int = clampi(floor_index, 0, TERRAIN_TILE_DATA_SCRIPT.MAX_FLOOR_INDEX)
 	for tile_data in _tiles:
 		if tile_data == null:
 			continue
 
-		if tile_data.grid_position == grid_position:
+		if tile_data.grid_position == grid_position and int(tile_data.floor_index) == normalized_floor_index:
 			return tile_data
 
 	return null
+
+
+func get_floor_slots_at_grid(grid_position: Vector2i) -> Array:
+	var result: Array = []
+	for tile_data in _tiles:
+		if tile_data == null:
+			continue
+		if tile_data.grid_position == grid_position:
+			result.append(tile_data)
+	result.sort_custom(func(a, b) -> bool:
+		return int(a.floor_index) < int(b.floor_index)
+	)
+	return result
 
 
 func get_map_name() -> String:
@@ -440,6 +471,7 @@ func _get_sorted_tiles() -> Array:
 		sortable_tiles.append(
 			{
 				"grid_position": tile_data.grid_position,
+				"floor_index": int(tile_data.floor_index),
 				"tile": tile_data,
 			}
 		)
@@ -456,7 +488,11 @@ func _get_sorted_tiles() -> Array:
 func _sort_tile_entries(a: Dictionary, b: Dictionary) -> bool:
 	var a_grid: Vector2i = a.get("grid_position", Vector2i.ZERO)
 	var b_grid: Vector2i = b.get("grid_position", Vector2i.ZERO)
+	var a_floor: int = int(a.get("floor_index", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX))
+	var b_floor: int = int(b.get("floor_index", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX))
 	if a_grid.x == b_grid.x:
+		if a_grid.y == b_grid.y:
+			return a_floor < b_floor
 		return a_grid.y < b_grid.y
 
 	return a_grid.x < b_grid.x
@@ -524,6 +560,25 @@ func _serialize_markers() -> Dictionary:
 		}
 
 	return serialized_markers
+
+
+func _serialize_floor_links(floor_links: Array) -> Array:
+	var result: Array = []
+	for link_variant in floor_links:
+		var link: Dictionary = TERRAIN_TILE_DATA_SCRIPT.normalize_floor_link(link_variant)
+		if link.is_empty():
+			continue
+		var target_grid: Vector2i = Vector2i(link.get("target_grid_position", Vector2i.ZERO))
+		result.append({
+			"target_grid_position": {
+				"x": target_grid.x,
+				"y": target_grid.y,
+			},
+			"target_floor_index": int(link.get("target_floor_index", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_INDEX)),
+			"link_type": String(link.get("link_type", TERRAIN_TILE_DATA_SCRIPT.HEIGHT_TRANSITION_STAIRS)),
+			"bidirectional": bool(link.get("bidirectional", true)),
+		})
+	return result
 
 
 static func _coerce_marker_record(marker_id: String, value: Variant) -> Dictionary:

@@ -139,6 +139,92 @@ func get_line_of_sight_snapshot(
 	}
 
 
+func get_line_of_sight_floor_snapshot(
+	source_grid: Vector2i,
+	source_floor_index: int,
+	target_grid: Vector2i,
+	target_floor_index: int,
+	terrain_registry,
+	max_range: float = DEFAULT_MAX_RANGE
+) -> Dictionary:
+	if terrain_registry == null or not terrain_registry.has_method("grid_to_world"):
+		return {
+			"has_line_of_sight": false,
+			"blocked_by_range": false,
+			"blocking_grid": null,
+			"source_grid": source_grid,
+			"target_grid": target_grid,
+			"source_floor_index": source_floor_index,
+			"target_floor_index": target_floor_index,
+			"reason": "terrain_registry_missing",
+		}
+	var source_position: Vector2 = terrain_registry.call("grid_to_world", source_grid)
+	var target_position: Vector2 = terrain_registry.call("grid_to_world", target_grid)
+	if max_range >= 0.0 and source_position.distance_to(target_position) > max_range:
+		return {
+			"has_line_of_sight": false,
+			"blocked_by_range": true,
+			"blocking_grid": null,
+			"source_grid": source_grid,
+			"target_grid": target_grid,
+			"source_floor_index": source_floor_index,
+			"target_floor_index": target_floor_index,
+			"distance": source_position.distance_to(target_position),
+			"max_range": max_range,
+		}
+
+	var source_eye_height: float = _get_eye_height_at_grid_floor(source_grid, source_floor_index, terrain_registry)
+	var target_focus_height: float = _get_target_focus_height_at_grid_floor(target_grid, target_floor_index, terrain_registry)
+	var stepped_grids: Array[Vector2i] = _build_grid_line(source_grid, target_grid)
+	var sample_records: Array = []
+	var step_count: int = maxi(stepped_grids.size() - 1, 1)
+	for index in range(stepped_grids.size()):
+		var stepped_grid: Vector2i = stepped_grids[index]
+		if stepped_grid == source_grid or stepped_grid == target_grid:
+			continue
+		var tile_data = terrain_registry.call("get_tile_at_grid", stepped_grid)
+		if tile_data == null:
+			continue
+		var t: float = clampf(float(index) / float(step_count), 0.0, 1.0)
+		var sight_height: float = lerpf(source_eye_height, target_focus_height, t)
+		var blocker_height: float = _get_los_blocker_height(tile_data)
+		var sample_record: Dictionary = {
+			"grid_position": stepped_grid,
+			"sight_height": sight_height,
+			"blocks_los_height": blocker_height,
+			"blocks_los": bool(tile_data.blocks_los),
+		}
+		sample_records.append(sample_record)
+		if blocker_height > 0.0 and blocker_height + LOS_HEIGHT_CLEARANCE >= sight_height:
+			sample_record["blocked"] = true
+			return {
+				"has_line_of_sight": false,
+				"blocked_by_range": false,
+				"blocking_grid": stepped_grid,
+				"blocking_height": blocker_height,
+				"sight_height_at_blocker": sight_height,
+				"source_grid": source_grid,
+				"target_grid": target_grid,
+				"source_floor_index": source_floor_index,
+				"target_floor_index": target_floor_index,
+				"source_eye_height": source_eye_height,
+				"target_focus_height": target_focus_height,
+				"samples": sample_records,
+			}
+	return {
+		"has_line_of_sight": true,
+		"blocked_by_range": false,
+		"blocking_grid": null,
+		"source_grid": source_grid,
+		"target_grid": target_grid,
+		"source_floor_index": source_floor_index,
+		"target_floor_index": target_floor_index,
+		"source_eye_height": source_eye_height,
+		"target_focus_height": target_focus_height,
+		"samples": sample_records,
+	}
+
+
 func _get_eye_height_at_world(world_position: Vector2, terrain_registry) -> float:
 	var floor_height: float = 0.0
 	var eye_bonus: float = 0.0
@@ -149,6 +235,16 @@ func _get_eye_height_at_world(world_position: Vector2, terrain_registry) -> floa
 	return floor_height + DEFAULT_SOURCE_EYE_HEIGHT + eye_bonus
 
 
+func _get_eye_height_at_grid_floor(grid_position: Vector2i, floor_index: int, terrain_registry) -> float:
+	var floor_height: float = 0.0
+	var eye_bonus: float = 0.0
+	if terrain_registry != null and terrain_registry.has_method("get_floor_height_at_floor"):
+		floor_height = float(terrain_registry.call("get_floor_height_at_floor", grid_position, floor_index))
+	if terrain_registry != null and terrain_registry.has_method("get_unit_eye_height_bonus_at_floor"):
+		eye_bonus = float(terrain_registry.call("get_unit_eye_height_bonus_at_floor", grid_position, floor_index))
+	return floor_height + DEFAULT_SOURCE_EYE_HEIGHT + eye_bonus
+
+
 func _get_target_focus_height_at_world(world_position: Vector2, terrain_registry) -> float:
 	var floor_height: float = 0.0
 	var eye_bonus: float = 0.0
@@ -156,6 +252,16 @@ func _get_target_focus_height_at_world(world_position: Vector2, terrain_registry
 		floor_height = float(terrain_registry.call("get_floor_height_at_world", world_position))
 	if terrain_registry != null and terrain_registry.has_method("get_unit_eye_height_bonus_at"):
 		eye_bonus = float(terrain_registry.call("get_unit_eye_height_bonus_at", terrain_registry.call("world_to_grid", world_position)))
+	return floor_height + DEFAULT_TARGET_FOCUS_HEIGHT + eye_bonus
+
+
+func _get_target_focus_height_at_grid_floor(grid_position: Vector2i, floor_index: int, terrain_registry) -> float:
+	var floor_height: float = 0.0
+	var eye_bonus: float = 0.0
+	if terrain_registry != null and terrain_registry.has_method("get_floor_height_at_floor"):
+		floor_height = float(terrain_registry.call("get_floor_height_at_floor", grid_position, floor_index))
+	if terrain_registry != null and terrain_registry.has_method("get_unit_eye_height_bonus_at_floor"):
+		eye_bonus = float(terrain_registry.call("get_unit_eye_height_bonus_at_floor", grid_position, floor_index))
 	return floor_height + DEFAULT_TARGET_FOCUS_HEIGHT + eye_bonus
 
 
