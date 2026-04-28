@@ -252,6 +252,8 @@ func _build_unit_command_from_ftl_task(task, unit: Node):
 	unit_command.attack_bonus = _derive_attack_bonus(task_type, source_command_type)
 	unit_command.target_position = _derive_target_position(task, unit, command_type, source_command_type)
 	unit_command.target_floor_index = int(task.get("target_floor_index"))
+	unit_command.movement_layer = String(task.get("movement_layer"))
+	unit_command.altitude_band = int(task.get("altitude_band"))
 	unit_command.target_area_id = String(task.get("target_area_id"))
 	unit_command.source_task_type = task_type
 	return unit_command

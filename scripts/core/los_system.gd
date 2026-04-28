@@ -1,6 +1,7 @@
 class_name LineOfSightSystem
 extends RefCounted
 
+const MOVEMENT_LAYER_SCRIPT: GDScript = preload("res://scripts/core/movement_layer.gd")
 const DEFAULT_MAX_RANGE: float = 320.0
 const DEFAULT_SOURCE_EYE_HEIGHT: float = 1.5
 const DEFAULT_TARGET_FOCUS_HEIGHT: float = 1.2
@@ -53,6 +54,70 @@ func has_line_of_sight_with_terrain(
 	max_range: float = DEFAULT_MAX_RANGE
 ) -> bool:
 	return bool(get_line_of_sight_snapshot(source_position, target_position, terrain_registry, max_range).get("has_line_of_sight", false))
+
+
+func has_layered_line_of_sight(
+	source_position: Vector2,
+	target_position: Vector2,
+	source_movement_layer: String = "ground",
+	target_movement_layer: String = "ground",
+	terrain_registry = null,
+	max_range: float = DEFAULT_MAX_RANGE,
+	source_altitude_band: int = 0,
+	target_altitude_band: int = 0
+) -> bool:
+	return bool(get_layered_line_of_sight_snapshot(
+		source_position,
+		target_position,
+		source_movement_layer,
+		target_movement_layer,
+		terrain_registry,
+		max_range,
+		source_altitude_band,
+		target_altitude_band
+	).get("has_line_of_sight", false))
+
+
+func get_layered_line_of_sight_snapshot(
+	source_position: Vector2,
+	target_position: Vector2,
+	source_movement_layer: String = "ground",
+	target_movement_layer: String = "ground",
+	terrain_registry = null,
+	max_range: float = DEFAULT_MAX_RANGE,
+	source_altitude_band: int = 0,
+	target_altitude_band: int = 0
+) -> Dictionary:
+	var source_layer: String = MOVEMENT_LAYER_SCRIPT.normalize_layer(source_movement_layer)
+	var target_layer: String = MOVEMENT_LAYER_SCRIPT.normalize_layer(target_movement_layer)
+	var distance: float = source_position.distance_to(target_position)
+	var is_air_context: bool = source_layer == MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_AIR or target_layer == MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_AIR
+	if is_air_context:
+		var blocked_by_range: bool = max_range >= 0.0 and distance > max_range
+		return {
+			"has_line_of_sight": not blocked_by_range,
+			"blocked_by_range": blocked_by_range,
+			"blocking_grid": null,
+			"source_position": source_position,
+			"target_position": target_position,
+			"distance": distance,
+			"max_range": max_range,
+			"source_movement_layer": source_layer,
+			"target_movement_layer": target_layer,
+			"source_altitude_band": MOVEMENT_LAYER_SCRIPT.normalize_altitude_band(source_altitude_band),
+			"target_altitude_band": MOVEMENT_LAYER_SCRIPT.normalize_altitude_band(target_altitude_band),
+			"los_mode": "air" if source_layer == target_layer else "air_ground",
+			"terrain_blockers_ignored": true,
+		}
+
+	var ground_snapshot: Dictionary = get_line_of_sight_snapshot(source_position, target_position, terrain_registry, max_range)
+	ground_snapshot["source_movement_layer"] = source_layer
+	ground_snapshot["target_movement_layer"] = target_layer
+	ground_snapshot["source_altitude_band"] = MOVEMENT_LAYER_SCRIPT.normalize_altitude_band(source_altitude_band)
+	ground_snapshot["target_altitude_band"] = MOVEMENT_LAYER_SCRIPT.normalize_altitude_band(target_altitude_band)
+	ground_snapshot["los_mode"] = "ground"
+	ground_snapshot["terrain_blockers_ignored"] = false
+	return ground_snapshot
 
 
 func get_line_of_sight_snapshot(

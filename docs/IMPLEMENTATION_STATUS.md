@@ -1066,12 +1066,15 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Viele nicht-flache Tiles koennen das Editorbild visuell dicht machen; deshalb bleibt das Overlay auf nicht-default Tiles begrenzt.
 - Naechster Schritt: `TASK_141 - 2.5D Air Layer V1` kann spaeter auf dem stabilisierten Boden-2.5D-Kontext aufsetzen.
 
-### TASK_141 - Geplante 2.5D-Hybrid-Folge
-- Status: geplant
-- Stand: `TASK_141` fuehrt spaeter einen separaten Air-Layer fuer Flieger ein.
-- Offene Punkte: Boden-2.5D sollte vor Air-Layer-Komfort weiter im Editor/Playtest geprueft werden.
-- Risiken: 2.5D darf nicht still zu Full-3D-Gameplay anwachsen. Die autoritative Wahrheit bleibt zunaechst Grid-/Terrain-basiert; 3D ist Darstellung und Picking-Schicht.
-- Naechster Schritt: Bei Freigabe mit `TASK_141` fortfahren.
+### TASK_141 - 2.5D Air Layer V1
+- Status: implementiert
+- Stand: `movement_layer = ground|air` und `altitude_band` sind als kleiner Datenvertrag ueber CommanderCommand, FTLTask, UnitCommand und UnitRuntimeStatus verfuegbar. RuntimeLeader und der Commander->FTL-Translator reichen die Werte durch.
+- Stand: `SimulationRoot` besitzt fuer Air-Move-Commands einen direkten Bewegungs-Sonderpfad: Air-Units ignorieren Boden-Walkability und HPA/A*-Pfadblocker, bleiben aber ueber Registry-Bounds innerhalb der Missionskarte. `get_air_layer_debug_snapshot()` liefert Move- und Targeting-Debugdaten.
+- Stand: Air-Targeting ist V1-regelbasiert getrennt. Boden -> Air braucht `anti_air = true`; optionale `air_to_air` und `air_to_ground` Flags koennen weitere Air-Schuesse sperren. `LineOfSightSystem` bietet layered LOS-Snapshots, bei denen Air-Kontexte Terrain-Blocker ignorieren, Range aber weiter gilt.
+- Stand: `TestUnit` macht Air-Layer mit Schatten, `AIR <altitude_band>` Marker und Debuglabel sichtbar.
+- Offene Punkte: Keine Dogfight-Simulation, keine echte 3D-Flugphysik, keine Air-Formation und keine finalen Air-UI-Controls.
+- Risiken: Air-Units koennen Bodentaktik trivialisieren; V1 bleibt deshalb bewusst an AA-Gates, Range und Missionsgrenzen gebunden.
+- Naechster Schritt: Erst Playtest-Gefuehl pruefen; spaetere Tasks koennen Air-Rollen, Air-Spawns oder AA-Waffendaten getrennt schneiden.
 
 ### TASK_151-153 - Geplante Folge-Labs
 - Status: geplant

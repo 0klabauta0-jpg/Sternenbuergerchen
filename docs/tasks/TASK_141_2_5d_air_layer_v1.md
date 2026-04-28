@@ -3,7 +3,7 @@
 ## Ziel
 Flieger als Sonder-Layer ueber dem 2.5D-Boden einfuehren, ohne das Bodengefecht auf Full-3D umzustellen.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Kontext
 - 2.5D reicht fuer taktischen Bodenkampf mit Hoehen, Deckung und LOS.
@@ -22,12 +22,19 @@ Flieger als Sonder-Layer ueber dem 2.5D-Boden einfuehren, ohne das Bodengefecht 
 - Keine komplexen Fahrzeuge.
 - Kein Multiplayer-Air-Replication-Scope.
 
+## Umsetzung
+- `movement_layer = ground|air` und `altitude_band` laufen durch CommanderCommand, FTLTask, UnitCommand und UnitRuntimeStatus.
+- `SimulationRoot` behandelt Air-Move-Commands als direkten Sonderpfad ueber Boden-Walkability hinweg und clampiert Ziele auf bekannte Missionskarten-Grenzen.
+- Damage-Effects haben ein V1-Air-Targeting-Gate: Boden -> Air braucht `anti_air = true`; optionale `air_to_air`/`air_to_ground` Flags koennen weitere Air-Regeln sperren.
+- `LineOfSightSystem` bietet layered LOS-Snapshots, bei denen Air-Kontexte Bodenblocker ignorieren, Range aber weiter gilt.
+- `TestUnit` zeigt Air-Units mit Schatten/Marker und Debugtext `AIR <band>`.
+
 ## Akzeptanzkriterien
-- [ ] Air-Units bewegen sich ueber Bodenblocker hinweg.
-- [ ] Air-Units bleiben innerhalb der Missionskarte.
-- [ ] Boden- und Air-Targeting sind regelbasiert getrennt.
-- [ ] Darstellung macht Hoehe/Layer lesbar.
-- [ ] Verifier prueft Air-Movement ueber Blocker und Anti-Air-Gate.
+- [x] Air-Units bewegen sich ueber Bodenblocker hinweg.
+- [x] Air-Units bleiben innerhalb der Missionskarte.
+- [x] Boden- und Air-Targeting sind regelbasiert getrennt.
+- [x] Darstellung macht Hoehe/Layer lesbar.
+- [x] Verifier prueft Air-Movement ueber Blocker und Anti-Air-Gate.
 
 ## Risiken
 - Flieger koennen Bodentaktik trivialisieren; V1 muss klare Gegenregeln wie AA, Sichtbarkeit und Missionsrollen behalten.

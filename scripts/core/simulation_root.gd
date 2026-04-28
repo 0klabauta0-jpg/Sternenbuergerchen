@@ -7,6 +7,7 @@ const MOVE_SPEED_PER_SECOND: float = 120.0
 const DAMAGE_MODEL_SCRIPT: GDScript = preload("res://scripts/core/damage_model.gd")
 const OBJECTIVE_STATUS_SCRIPT: GDScript = preload("res://scripts/core/objective_status.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
+const MOVEMENT_LAYER_SCRIPT: GDScript = preload("res://scripts/core/movement_layer.gd")
 const CONTACT_PATH_RECOMPUTE_INTERVAL_MSEC: int = 600
 const TERRAIN_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_pathfinder.gd")
 const HPA_NAVIGATION_GRAPH_SCRIPT: GDScript = preload("res://scripts/terrain/hpa_navigation_graph.gd")
@@ -80,6 +81,8 @@ var _local_avoidance_resolver = LOCAL_AVOIDANCE_RESOLVER_SCRIPT.new()
 var _local_avoidance_prepared_tick: int = -1
 var _local_avoidance_debug_by_unit_id: Dictionary = {}
 var _local_avoidance_stuck_seconds_by_unit_id: Dictionary = {}
+var _last_air_move_debug_by_unit_id: Dictionary = {}
+var _last_air_targeting_debug: Dictionary = {}
 
 
 func _init() -> void:
@@ -189,6 +192,23 @@ func get_local_avoidance_debug_snapshot(unit_id: String = "") -> Variant:
 			result.append(Dictionary(_local_avoidance_debug_by_unit_id.get(unit_id_variant, {})).duplicate(true))
 		return result
 	return Dictionary(_local_avoidance_debug_by_unit_id.get(unit_id.strip_edges(), {})).duplicate(true)
+
+
+func get_air_layer_debug_snapshot(unit_id: String = "") -> Dictionary:
+	var movement_records: Variant = null
+	if unit_id.strip_edges().is_empty():
+		var records: Array = []
+		var unit_ids: Array = _last_air_move_debug_by_unit_id.keys()
+		unit_ids.sort()
+		for unit_id_variant in unit_ids:
+			records.append(Dictionary(_last_air_move_debug_by_unit_id.get(unit_id_variant, {})).duplicate(true))
+		movement_records = records
+	else:
+		movement_records = Dictionary(_last_air_move_debug_by_unit_id.get(unit_id.strip_edges(), {})).duplicate(true)
+	return {
+		"movement": movement_records,
+		"targeting": _last_air_targeting_debug.duplicate(true),
+	}
 
 
 func clear_queues() -> void:
@@ -753,8 +773,10 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 	if _is_stale_tokenized_move_command(cmd, unit):
 		return
 
+	var movement_layer: String = _extract_movement_layer(cmd, unit)
+	var altitude_band: int = _extract_altitude_band(cmd, unit)
 	if unit.has_method("set_target_position"):
-		unit.call("set_target_position", target_position, int(cmd.get("target_floor_index", 0)))
+		unit.call("set_target_position", target_position, int(cmd.get("target_floor_index", 0)), movement_layer, altitude_band)
 
 	var node_2d: Node2D = unit
 	var move_speed_factor: float = _extract_move_speed_factor(cmd, unit)
@@ -762,6 +784,10 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 		return
 
 	var terrain_registry = _get_terrain_registry()
+	if movement_layer == MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_AIR:
+		_apply_air_move_command(cmd, node_2d, target_position, move_speed_factor, delta, terrain_registry, altitude_band)
+		return
+
 	if terrain_registry != null:
 		_apply_move_command_with_terrain(cmd, node_2d, target_position, move_speed_factor, delta, terrain_registry)
 		return
@@ -790,6 +816,120 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 		unit.call("refresh_terrain_readability")
 	if bool(cmd.get("requeue_until_target", true)):
 		enqueue_command(cmd.duplicate(true))
+
+
+func _apply_air_move_command(
+	cmd: Dictionary,
+	unit_node: Node2D,
+	target_position: Vector2,
+	move_speed_factor: float,
+	delta: float,
+	terrain_registry,
+	altitude_band: int
+) -> void:
+	var unit_id: String = String(cmd.get("unit_id", _extract_unit_id_for_path_recompute(unit_node)))
+	var target_resolution: Dictionary = _resolve_air_move_target(target_position, terrain_registry)
+	var resolved_target_position: Vector2 = Vector2(target_resolution.get("replacement_position", target_position))
+	var current_position: Vector2 = unit_node.global_position
+	var direction: Vector2 = resolved_target_position - current_position
+	var step_distance: float = MOVE_SPEED_PER_SECOND * move_speed_factor * delta
+	if direction.length() <= step_distance:
+		unit_node.global_position = resolved_target_position
+	else:
+		if direction.is_zero_approx():
+			_record_air_move_debug(cmd, unit_id, current_position, resolved_target_position, target_resolution, altitude_band, true)
+			return
+		unit_node.global_position = current_position + direction.normalized() * step_distance
+
+	_update_local_avoidance_agent_position(unit_id, unit_node.global_position)
+	if unit_node.has_method("refresh_terrain_readability"):
+		unit_node.call("refresh_terrain_readability")
+	var reached_target: bool = unit_node.global_position.distance_to(resolved_target_position) <= 0.5
+	_record_air_move_debug(cmd, unit_id, current_position, resolved_target_position, target_resolution, altitude_band, reached_target)
+	if bool(cmd.get("requeue_until_target", true)) and not reached_target:
+		var next_cmd: Dictionary = cmd.duplicate(true)
+		next_cmd["target_position"] = resolved_target_position
+		next_cmd["air_target_resolution"] = target_resolution.duplicate(true)
+		enqueue_command(next_cmd)
+
+
+func _resolve_air_move_target(target_position: Vector2, terrain_registry) -> Dictionary:
+	if terrain_registry == null or not terrain_registry.has_method("get_all_tiles") or not terrain_registry.has_method("world_to_grid") or not terrain_registry.has_method("grid_to_world"):
+		return {
+			"original_position": target_position,
+			"original_grid": null,
+			"replacement_grid": null,
+			"replacement_position": target_position,
+			"clamped_to_bounds": false,
+			"reason": "terrain_registry_missing",
+		}
+
+	var tiles: Array = Array(terrain_registry.call("get_all_tiles"))
+	if tiles.is_empty():
+		return {
+			"original_position": target_position,
+			"original_grid": null,
+			"replacement_grid": null,
+			"replacement_position": target_position,
+			"clamped_to_bounds": false,
+			"reason": "mission_bounds_missing",
+		}
+
+	var min_grid: Vector2i = Vector2i(2147483647, 2147483647)
+	var max_grid: Vector2i = Vector2i(-2147483648, -2147483648)
+	for tile_data in tiles:
+		if tile_data == null:
+			continue
+		var grid_position: Vector2i = Vector2i(tile_data.grid_position)
+		min_grid.x = mini(min_grid.x, grid_position.x)
+		min_grid.y = mini(min_grid.y, grid_position.y)
+		max_grid.x = maxi(max_grid.x, grid_position.x)
+		max_grid.y = maxi(max_grid.y, grid_position.y)
+
+	var original_grid: Vector2i = terrain_registry.call("world_to_grid", target_position)
+	var replacement_grid: Vector2i = Vector2i(
+		clampi(original_grid.x, min_grid.x, max_grid.x),
+		clampi(original_grid.y, min_grid.y, max_grid.y)
+	)
+	var clamped_to_bounds: bool = replacement_grid != original_grid
+	return {
+		"original_position": target_position,
+		"original_grid": original_grid,
+		"replacement_grid": replacement_grid,
+		"replacement_position": terrain_registry.call("grid_to_world", replacement_grid) if clamped_to_bounds else target_position,
+		"min_grid": min_grid,
+		"max_grid": max_grid,
+		"clamped_to_bounds": clamped_to_bounds,
+		"reason": "clamped_to_mission_bounds" if clamped_to_bounds else "inside_mission_bounds",
+	}
+
+
+func _record_air_move_debug(
+	cmd: Dictionary,
+	unit_id: String,
+	from_position: Vector2,
+	target_position: Vector2,
+	target_resolution: Dictionary,
+	altitude_band: int,
+	reached_target: bool
+) -> void:
+	if unit_id.strip_edges().is_empty():
+		return
+	_last_air_move_debug_by_unit_id[unit_id] = {
+		"tick": tick_counter,
+		"unit_id": unit_id,
+		"command_type": String(cmd.get("command_type", cmd.get("type", ""))),
+		"movement_layer": MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_AIR,
+		"altitude_band": altitude_band,
+		"from_position": from_position,
+		"target_position": target_position,
+		"original_target_position": target_resolution.get("original_position", target_position),
+		"original_target_grid": target_resolution.get("original_grid", null),
+		"replacement_target_grid": target_resolution.get("replacement_grid", null),
+		"clamped_to_bounds": bool(target_resolution.get("clamped_to_bounds", false)),
+		"reason": String(target_resolution.get("reason", "")),
+		"reached_target": reached_target,
+	}
 
 
 func _apply_move_command_with_terrain(
@@ -1270,6 +1410,22 @@ func _extract_unit_id_for_path_recompute(unit) -> String:
 	return String(unit.call("get_unit_id"))
 
 
+func _extract_movement_layer(cmd: Dictionary, unit = null) -> String:
+	if cmd.has("movement_layer"):
+		return MOVEMENT_LAYER_SCRIPT.normalize_layer(String(cmd.get("movement_layer", "")))
+	if unit != null and unit.has_method("get_movement_layer"):
+		return MOVEMENT_LAYER_SCRIPT.normalize_layer(String(unit.call("get_movement_layer")))
+	return MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_GROUND
+
+
+func _extract_altitude_band(cmd: Dictionary, unit = null) -> int:
+	if cmd.has("altitude_band"):
+		return MOVEMENT_LAYER_SCRIPT.normalize_altitude_band(cmd.get("altitude_band"))
+	if unit != null and unit.has_method("get_altitude_band"):
+		return MOVEMENT_LAYER_SCRIPT.normalize_altitude_band(unit.call("get_altitude_band"))
+	return MOVEMENT_LAYER_SCRIPT.DEFAULT_ALTITUDE_BAND
+
+
 func _is_unit_in_contact(unit) -> bool:
 	return unit != null and unit.has_method("is_in_contact") and bool(unit.call("is_in_contact"))
 
@@ -1626,6 +1782,11 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		return
 
 	var attacker_unit = _resolve_attacker_unit(attacker_unit_id)
+	var air_targeting_gate: Dictionary = _build_air_targeting_gate(effect, attacker_unit, unit)
+	_last_air_targeting_debug = air_targeting_gate.duplicate(true)
+	if not bool(air_targeting_gate.get("allowed", true)):
+		return
+
 	var target_cover_profile: Dictionary = _build_terrain_cover_height_profile(unit, attacker_unit)
 	var target_cover_score: float = _extract_effective_cover_score(unit, attacker_unit)
 	if effect.has("target_cover_override"):
@@ -1663,6 +1824,11 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		"target_cover_score": target_cover_score,
 		"target_cover_profile": target_cover_profile,
 		"friendly_fire": is_friendly_fire,
+		"attacker_movement_layer": String(air_targeting_gate.get("attacker_movement_layer", MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_GROUND)),
+		"target_movement_layer": String(air_targeting_gate.get("target_movement_layer", MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_GROUND)),
+		"attacker_altitude_band": int(air_targeting_gate.get("attacker_altitude_band", 0)),
+		"target_altitude_band": int(air_targeting_gate.get("target_altitude_band", 0)),
+		"air_targeting_reason": String(air_targeting_gate.get("reason", "allowed")),
 	}
 	if bool(effect.get("is_flank", false)):
 		hit_context["is_flank"] = true
@@ -1759,6 +1925,66 @@ func _resolve_attacker_unit(attacker_unit_id: String):
 		return null
 
 	return _resolve_known_unit(attacker_unit_id)
+
+
+func _build_air_targeting_gate(effect: Dictionary, attacker_unit, target_unit) -> Dictionary:
+	var attacker_layer: String = _get_unit_movement_layer(attacker_unit)
+	var target_layer: String = _get_unit_movement_layer(target_unit)
+	var attacker_altitude_band: int = _get_unit_altitude_band(attacker_unit)
+	var target_altitude_band: int = _get_unit_altitude_band(target_unit)
+	var result: Dictionary = {
+		"allowed": true,
+		"reason": "allowed",
+		"attacker_unit_id": String(effect.get("attacker_unit_id", "")),
+		"target_unit_id": String(effect.get("unit_id", "")),
+		"attacker_movement_layer": attacker_layer,
+		"target_movement_layer": target_layer,
+		"attacker_altitude_band": attacker_altitude_band,
+		"target_altitude_band": target_altitude_band,
+		"requires_anti_air": false,
+	}
+	if target_layer == MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_AIR and attacker_layer != MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_AIR:
+		result["requires_anti_air"] = true
+		if not bool(effect.get("anti_air", false)):
+			result["allowed"] = false
+			result["reason"] = "anti_air_required"
+			return result
+
+	if attacker_layer == MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_AIR and target_layer == MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_AIR and effect.has("air_to_air") and not bool(effect.get("air_to_air", true)):
+		result["allowed"] = false
+		result["reason"] = "air_to_air_disabled"
+		return result
+
+	if attacker_layer == MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_AIR and target_layer == MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_GROUND and effect.has("air_to_ground") and not bool(effect.get("air_to_ground", true)):
+		result["allowed"] = false
+		result["reason"] = "air_to_ground_disabled"
+		return result
+
+	return result
+
+
+func _get_unit_movement_layer(unit) -> String:
+	if unit == null:
+		return MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_GROUND
+	if unit.has_method("get_movement_layer"):
+		return MOVEMENT_LAYER_SCRIPT.normalize_layer(String(unit.call("get_movement_layer")))
+	if unit.has_method("get_runtime_status"):
+		var runtime_status = unit.call("get_runtime_status")
+		if runtime_status != null and runtime_status is Object:
+			return MOVEMENT_LAYER_SCRIPT.normalize_layer(String(runtime_status.get("movement_layer")))
+	return MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_GROUND
+
+
+func _get_unit_altitude_band(unit) -> int:
+	if unit == null:
+		return MOVEMENT_LAYER_SCRIPT.DEFAULT_ALTITUDE_BAND
+	if unit.has_method("get_altitude_band"):
+		return MOVEMENT_LAYER_SCRIPT.normalize_altitude_band(unit.call("get_altitude_band"))
+	if unit.has_method("get_runtime_status"):
+		var runtime_status = unit.call("get_runtime_status")
+		if runtime_status != null and runtime_status is Object:
+			return MOVEMENT_LAYER_SCRIPT.normalize_altitude_band(runtime_status.get("altitude_band"))
+	return MOVEMENT_LAYER_SCRIPT.DEFAULT_ALTITUDE_BAND
 
 
 func _extract_unit_cover_score(unit) -> float:

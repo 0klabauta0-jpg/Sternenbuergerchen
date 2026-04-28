@@ -1,6 +1,7 @@
 class_name UnitCommand
 extends RefCounted
 
+const MOVEMENT_LAYER_SCRIPT: GDScript = preload("res://scripts/core/movement_layer.gd")
 const TYPE_MOVE_TO_POSITION: String = "move_to_position"
 const TYPE_HOLD_POSITION: String = "hold_position"
 const TYPE_ENGAGE_AREA: String = "engage_area"
@@ -31,6 +32,8 @@ var cover_score: float = 0.0
 var attack_bonus: float = 0.0
 var target_position: Variant = null
 var target_floor_index: int = 0
+var movement_layer: String = MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_GROUND
+var altitude_band: int = MOVEMENT_LAYER_SCRIPT.DEFAULT_ALTITUDE_BAND
 var target_area_id: String = ""
 var source_task_type: String = ""
 var command_token: String = ""
@@ -67,6 +70,12 @@ func is_valid() -> bool:
 	if target_floor_index < 0:
 		return false
 
+	if not MOVEMENT_LAYER_SCRIPT.is_valid_layer(movement_layer):
+		return false
+
+	if altitude_band < MOVEMENT_LAYER_SCRIPT.DEFAULT_ALTITUDE_BAND or altitude_band > MOVEMENT_LAYER_SCRIPT.MAX_ALTITUDE_BAND:
+		return false
+
 	return true
 
 
@@ -81,6 +90,8 @@ func to_dict() -> Dictionary:
 		"move_speed_factor": move_speed_factor,
 		"cover_score": cover_score,
 		"attack_bonus": attack_bonus,
+		"movement_layer": movement_layer,
+		"altitude_band": altitude_band,
 	}
 
 	if target_position != null:
@@ -146,6 +157,12 @@ func _apply_dict(data: Dictionary) -> void:
 		var raw_target_floor_index: Variant = data["target_floor_index"]
 		if typeof(raw_target_floor_index) == TYPE_INT or typeof(raw_target_floor_index) == TYPE_FLOAT:
 			target_floor_index = int(raw_target_floor_index)
+
+	if data.has("movement_layer"):
+		movement_layer = MOVEMENT_LAYER_SCRIPT.normalize_layer(String(data["movement_layer"]))
+
+	if data.has("altitude_band"):
+		altitude_band = MOVEMENT_LAYER_SCRIPT.normalize_altitude_band(data["altitude_band"])
 
 	if data.has("target_area_id"):
 		target_area_id = String(data["target_area_id"])

@@ -1,6 +1,7 @@
 class_name CommanderCommand
 extends RefCounted
 
+const MOVEMENT_LAYER_SCRIPT: GDScript = preload("res://scripts/core/movement_layer.gd")
 const TYPE_MOVE: String = "move"
 const TYPE_ENGAGE: String = "engage"
 const TYPE_TAKE: String = "take"
@@ -28,6 +29,8 @@ var unit_id: String = ""
 var team_id: String = ""
 var target_position: Variant = null
 var target_floor_index: int = 0
+var movement_layer: String = MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_GROUND
+var altitude_band: int = MOVEMENT_LAYER_SCRIPT.DEFAULT_ALTITUDE_BAND
 var phase: int = -1
 
 
@@ -87,6 +90,12 @@ func is_valid() -> bool:
 	if target_floor_index < 0:
 		return false
 
+	if not MOVEMENT_LAYER_SCRIPT.is_valid_layer(movement_layer):
+		return false
+
+	if altitude_band < MOVEMENT_LAYER_SCRIPT.DEFAULT_ALTITUDE_BAND or altitude_band > MOVEMENT_LAYER_SCRIPT.MAX_ALTITUDE_BAND:
+		return false
+
 	return true
 
 
@@ -103,6 +112,11 @@ func to_dict() -> Dictionary:
 		data["target_position"] = target_position
 		if target_floor_index != 0:
 			data["target_floor_index"] = target_floor_index
+
+	if movement_layer != MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_GROUND:
+		data["movement_layer"] = movement_layer
+	if altitude_band != MOVEMENT_LAYER_SCRIPT.DEFAULT_ALTITUDE_BAND:
+		data["altitude_band"] = altitude_band
 
 	if phase >= 0:
 		data["phase"] = phase
@@ -134,6 +148,12 @@ func _apply_dict(data: Dictionary) -> void:
 		var raw_target_floor_index: Variant = data["target_floor_index"]
 		if typeof(raw_target_floor_index) == TYPE_INT or typeof(raw_target_floor_index) == TYPE_FLOAT:
 			target_floor_index = int(raw_target_floor_index)
+
+	if data.has("movement_layer"):
+		movement_layer = MOVEMENT_LAYER_SCRIPT.normalize_layer(String(data["movement_layer"]))
+
+	if data.has("altitude_band"):
+		altitude_band = MOVEMENT_LAYER_SCRIPT.normalize_altitude_band(data["altitude_band"])
 
 	if data.has("phase"):
 		var raw_phase: Variant = data["phase"]

@@ -20,6 +20,8 @@ func translate(command) -> RefCounted:
 	task.team_id = command.team_id
 	task.target_position = command.target_position
 	task.target_floor_index = int(command.get("target_floor_index"))
+	task.movement_layer = String(command.get("movement_layer"))
+	task.altitude_band = int(command.get("altitude_band"))
 	task.source_command_type = command.command_type
 	task.phase = command.phase
 

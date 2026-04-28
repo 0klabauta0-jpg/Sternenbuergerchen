@@ -4,6 +4,7 @@ extends Node2D
 const COMMANDER_COMMAND_SCRIPT: GDScript = preload("res://scripts/command/commander_command.gd")
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
+const MOVEMENT_LAYER_SCRIPT: GDScript = preload("res://scripts/core/movement_layer.gd")
 const UNIT_SKILLS_SCRIPT: GDScript = preload("res://scripts/npc/unit_skills.gd")
 const UNIT_TRAIT_SCRIPT: GDScript = preload("res://scripts/npc/unit_trait.gd")
 const UNIT_PROFILE_MATH_SCRIPT: GDScript = preload("res://scripts/npc/unit_profile_math.gd")
@@ -23,10 +24,13 @@ const FIRETEAM_LABEL_NAME: String = "DebugFireteamLabel"
 const PHASE_LABEL_NAME: String = "DebugPhaseLabel"
 const TACTICAL_STANCE_LABEL_NAME: String = "DebugTacticalStanceLabel"
 const EVENT_LABEL_NAME: String = "DebugEventLabel"
+const AIR_LAYER_SHADOW_NAME: String = "AirLayerShadow"
+const AIR_LAYER_MARKER_NAME: String = "AirLayerMarker"
 const SELECTION_RING_NAME: String = "SelectionRing"
 const STATUS_LABEL_OFFSET: Vector2 = Vector2(-54.0, -48.0)
 const FIRETEAM_LABEL_SPACING: float = 8.0
 const EVENT_LABEL_OFFSET: Vector2 = Vector2(-42.0, -70.0)
+const AIR_LAYER_MARKER_OFFSET: Vector2 = Vector2(-26.0, -82.0)
 const EVENT_DURATION_SECONDS: float = 1.2
 const REMOTE_POSITION_LERP_WEIGHT: float = 0.75
 const WORLD_EVENT_LABEL_ALLOWLIST: PackedStringArray = [
@@ -92,6 +96,8 @@ var _fireteam_label: Label = null
 var _phase_label: Label = null
 var _tactical_stance_label: Label = null
 var _event_label: Label = null
+var _air_layer_shadow: Line2D = null
+var _air_layer_marker: Label = null
 var _current_event_text: String = ""
 var _current_event_color: Color = Color(1.0, 0.95, 0.5, 1.0)
 var _event_time_remaining: float = 0.0
@@ -113,6 +119,7 @@ func _ready() -> void:
 		child_entered_tree.connect(_on_child_entered_tree)
 	_rebuild_identity_data()
 	_ensure_readability_labels()
+	_ensure_air_layer_visuals()
 	_runtime_status = _build_runtime_status("idle")
 	_vital_status = _build_vital_status("fit", max_health_points, 0)
 	_apply_vital_visual()
@@ -139,6 +146,22 @@ func get_runtime_status():
 
 func get_current_unit_command():
 	return _current_unit_command
+
+
+func get_movement_layer() -> String:
+	if _runtime_status == null:
+		return MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_GROUND
+	return MOVEMENT_LAYER_SCRIPT.normalize_layer(String(_runtime_status.movement_layer))
+
+
+func get_altitude_band() -> int:
+	if _runtime_status == null:
+		return MOVEMENT_LAYER_SCRIPT.DEFAULT_ALTITUDE_BAND
+	return MOVEMENT_LAYER_SCRIPT.normalize_altitude_band(_runtime_status.altitude_band)
+
+
+func is_air_unit() -> bool:
+	return MOVEMENT_LAYER_SCRIPT.is_air_layer(get_movement_layer())
 
 
 func get_health() -> int:
@@ -655,7 +678,10 @@ func set_fireteam_id(next_fireteam_id: String) -> bool:
 		float(_runtime_status.cover_score),
 		float(_runtime_status.attack_bonus),
 		int(_runtime_status.phase),
-		_runtime_status.target_position
+		_runtime_status.target_position,
+		int(_runtime_status.target_floor_index),
+		String(_runtime_status.movement_layer),
+		int(_runtime_status.altitude_band)
 	)
 	if not bool(runtime_status.call("is_valid")):
 		return false
@@ -862,8 +888,15 @@ func respawn(spawn_position: Vector2) -> bool:
 	return true
 
 
-func set_target_position(target_position: Variant, target_floor_index: int = -1) -> bool:
+func set_target_position(
+	target_position: Variant,
+	target_floor_index: int = -1,
+	movement_layer: String = "",
+	altitude_band: int = -1
+) -> bool:
 	var resolved_target_floor_index: int = int(_runtime_status.target_floor_index) if target_floor_index < 0 else target_floor_index
+	var resolved_movement_layer: String = String(_runtime_status.movement_layer) if movement_layer.strip_edges().is_empty() else MOVEMENT_LAYER_SCRIPT.normalize_layer(movement_layer)
+	var resolved_altitude_band: int = int(_runtime_status.altitude_band) if altitude_band < 0 else MOVEMENT_LAYER_SCRIPT.normalize_altitude_band(altitude_band)
 	return set_runtime_status(
 		String(_runtime_status.status),
 		String(_runtime_status.active_command_type),
@@ -875,7 +908,9 @@ func set_target_position(target_position: Variant, target_floor_index: int = -1)
 		float(_runtime_status.attack_bonus),
 		int(_runtime_status.phase),
 		target_position,
-		resolved_target_floor_index
+		resolved_target_floor_index,
+		resolved_movement_layer,
+		resolved_altitude_band
 	)
 
 
@@ -898,7 +933,9 @@ func assign_unit_command(command) -> bool:
 		float(command.get("attack_bonus")),
 		int(command.get("phase")),
 		command.get("target_position"),
-		int(command.get("target_floor_index"))
+		int(command.get("target_floor_index")),
+		String(command.get("movement_layer")),
+		int(command.get("altitude_band"))
 	):
 		return false
 
@@ -918,7 +955,9 @@ func set_runtime_status(
 	attack_bonus: float = 0.0,
 	phase: int = -1,
 	target_position: Variant = null,
-	target_floor_index: int = 0
+	target_floor_index: int = 0,
+	movement_layer: String = MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_GROUND,
+	altitude_band: int = MOVEMENT_LAYER_SCRIPT.DEFAULT_ALTITUDE_BAND
 ) -> bool:
 	var runtime_status = _build_runtime_status(
 		status_name,
@@ -931,7 +970,9 @@ func set_runtime_status(
 		attack_bonus,
 		phase,
 		target_position,
-		target_floor_index
+		target_floor_index,
+		movement_layer,
+		altitude_band
 	)
 	if not bool(runtime_status.call("is_valid")):
 		push_warning("TestUnit.set_runtime_status expects a valid UnitRuntimeStatus-compatible value.")
@@ -998,7 +1039,9 @@ func _build_runtime_status(
 	attack_bonus: float = 0.0,
 	phase: int = -1,
 	target_position: Variant = null,
-	target_floor_index: int = 0
+	target_floor_index: int = 0,
+	movement_layer: String = MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_GROUND,
+	altitude_band: int = MOVEMENT_LAYER_SCRIPT.DEFAULT_ALTITUDE_BAND
 ):
 	var runtime_status = UNIT_RUNTIME_STATUS_SCRIPT.new()
 	runtime_status.status = status_name
@@ -1014,6 +1057,8 @@ func _build_runtime_status(
 	runtime_status.attack_bonus = attack_bonus
 	runtime_status.target_position = target_position
 	runtime_status.target_floor_index = target_floor_index
+	runtime_status.movement_layer = MOVEMENT_LAYER_SCRIPT.normalize_layer(movement_layer)
+	runtime_status.altitude_band = MOVEMENT_LAYER_SCRIPT.normalize_altitude_band(altitude_band)
 	runtime_status.phase = phase
 	return runtime_status
 
@@ -1090,6 +1135,8 @@ func _build_remote_runtime_dict(snapshot: Dictionary) -> Dictionary:
 		"move_speed_factor": float(snapshot.get("move_speed_factor", _runtime_status.move_speed_factor)),
 		"cover_score": float(snapshot.get("cover_score", _runtime_status.cover_score)),
 		"attack_bonus": float(snapshot.get("attack_bonus", _runtime_status.attack_bonus)),
+		"movement_layer": String(snapshot.get("movement_layer", _runtime_status.movement_layer)),
+		"altitude_band": int(snapshot.get("altitude_band", _runtime_status.altitude_band)),
 		"phase": int(snapshot.get("phase", _runtime_status.phase)),
 	}
 	return runtime_dict
@@ -1280,6 +1327,7 @@ func _ensure_readability_labels() -> void:
 	_tactical_stance_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
 	_event_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
 	_ensure_selection_ring()
+	_ensure_air_layer_visuals()
 	_sync_readability_positions()
 
 
@@ -1322,6 +1370,11 @@ func _sync_readability_positions() -> void:
 		_event_label.visible = show_world_event_labels and is_visible_in_tree() and not _current_event_text.is_empty()
 		_event_label.global_position = global_position + EVENT_LABEL_OFFSET
 
+	if _air_layer_marker != null:
+		var altitude_band: int = get_altitude_band()
+		_air_layer_marker.visible = is_air_unit() and is_visible_in_tree()
+		_air_layer_marker.global_position = global_position + AIR_LAYER_MARKER_OFFSET + Vector2(0.0, -float(altitude_band) * 5.0)
+
 
 func _refresh_readability() -> void:
 	_refresh_status_label()
@@ -1329,6 +1382,7 @@ func _refresh_readability() -> void:
 	_refresh_phase_label()
 	_refresh_tactical_stance_label()
 	_refresh_event_label()
+	_refresh_air_layer_visuals()
 	_refresh_selection_ring()
 	_sync_readability_positions()
 
@@ -1403,6 +1457,47 @@ func _refresh_event_label() -> void:
 	_event_label.visible = show_world_event_labels and not _current_event_text.is_empty()
 
 
+func _ensure_air_layer_visuals() -> void:
+	_air_layer_shadow = get_node_or_null(AIR_LAYER_SHADOW_NAME) as Line2D
+	if _air_layer_shadow == null:
+		_air_layer_shadow = Line2D.new()
+		_air_layer_shadow.name = AIR_LAYER_SHADOW_NAME
+		_air_layer_shadow.width = 2.0
+		_air_layer_shadow.closed = true
+		_air_layer_shadow.z_index = -2
+		_air_layer_shadow.default_color = Color(0.0, 0.0, 0.0, 0.32)
+		_air_layer_shadow.points = PackedVector2Array([
+			Vector2(0.0, -10.0),
+			Vector2(22.0, 0.0),
+			Vector2(0.0, 10.0),
+			Vector2(-22.0, 0.0),
+		])
+		add_child(_air_layer_shadow)
+
+	_air_layer_marker = get_node_or_null(AIR_LAYER_MARKER_NAME) as Label
+	if _air_layer_marker == null:
+		_air_layer_marker = Label.new()
+		_air_layer_marker.name = AIR_LAYER_MARKER_NAME
+		_air_layer_marker.top_level = true
+		add_child(_air_layer_marker)
+	_air_layer_marker.add_theme_font_size_override("font_size", 10)
+	_air_layer_marker.add_theme_constant_override("outline_size", 2)
+	_air_layer_marker.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
+	_refresh_air_layer_visuals()
+
+
+func _refresh_air_layer_visuals() -> void:
+	var air_unit: bool = is_air_unit()
+	var altitude_band: int = get_altitude_band()
+	if _air_layer_shadow != null:
+		_air_layer_shadow.visible = air_unit and is_visible_in_tree()
+		_air_layer_shadow.position = Vector2(0.0, 16.0 + float(altitude_band) * 2.0)
+	if _air_layer_marker != null:
+		_air_layer_marker.text = "AIR %d" % altitude_band
+		_air_layer_marker.modulate = Color(0.75, 0.92, 1.0, 1.0)
+		_air_layer_marker.visible = air_unit and is_visible_in_tree()
+
+
 func _build_unit_name_label() -> String:
 	if not display_name.is_empty():
 		return display_name
@@ -1452,6 +1547,9 @@ func _build_secondary_status_label() -> String:
 		return ""
 
 	var parts: PackedStringArray = []
+	if is_air_unit():
+		parts.append("AIR%d" % get_altitude_band())
+
 	var fire_status: String = String(_runtime_status.fire_status)
 	if fire_status == "hold_fire":
 		parts.append("HF")
@@ -1468,6 +1566,9 @@ func _build_secondary_status_label() -> String:
 
 
 func _build_terrain_status_label() -> String:
+	if is_air_unit():
+		return "LAYER:AIR ALT:%d" % get_altitude_band()
+
 	var effective_cover: int = get_effective_cover_score()
 	var height_level: int = get_height_level()
 	var surface_type: String = get_surface_type()
