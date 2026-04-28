@@ -307,6 +307,10 @@ TASK_138 - 2.5D Multi-Floor Foundation
 TASK_139 - 2.5D Kamera und Picking
 TASK_140 - 2.5D Editor und Visual Sync
 TASK_141 - 2.5D Air Layer V1
+TASK_142 - 2.5D Live Mission Visual Bridge
+TASK_143 - Unit Height Visual Sync
+TASK_144 - Editor-to-Mission 2.5D Smoke Test
+TASK_145 - 2.5D Tactical Debug Overlay
 
 Batch-Empfehlung
 
