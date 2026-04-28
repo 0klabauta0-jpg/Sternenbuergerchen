@@ -152,6 +152,14 @@ func get_unit_loadout_modifiers_dict(unit_id: String) -> Dictionary:
 	return Dictionary(unit_loadout_modifiers_by_unit_id.get(normalized_unit_id, {})).duplicate(true)
 
 
+func get_loaded_terrain_map_data():
+	return _loaded_terrain_map_data
+
+
+func get_loaded_map_file_path() -> String:
+	return map_file_path
+
+
 func _build_unit_loadout_modifiers() -> void:
 	unit_loadout_modifiers_by_unit_id.clear()
 	if member_loadouts.is_empty():

@@ -3,7 +3,7 @@
 ## Ziel
 Die echte Missions-Testszene rendert dieselbe autoritative Missionskarte zusaetzlich mit 2.5D/3D-Visuals, ohne `SimulationRoot`, Navigation, Combat oder den bestehenden 2D-Spielpfad umzubauen.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Kontext
 - TASK_133/134 haben den 3D-Renderer als Spike bewiesen.
@@ -23,12 +23,19 @@ Die echte Missions-Testszene rendert dieselbe autoritative Missionskarte zusaetz
 - Keine Editor-Smoke-Test-Kette; das ist TASK_144.
 - Keine neue Gameplay-Logik.
 
+## Umsetzung
+- `MissionLive25DVisualBridge` rendert als rein lesende Node3D-Schicht die geladene Live-Missionskarte ueber `TerrainMap3DRenderer`.
+- `mission_reactivity_test.tscn` enthaelt die Bridge direkt; `mission_fireteam_dev_test.tscn` erbt sie ueber seine Instanz.
+- Die Bridge liest `TerrainMapData` aus `MissionTestSetup`, vergleicht Tile-Anzahl mit `TerrainRegistry` und stellt einen Snapshot fuer Verifier/Debug bereit.
+- Die 2D-Map bleibt standardmaessig sichtbar; sie kann ueber `hide_2d_map_when_visible` als Fallback/Compare-Pfad umgeschaltet werden.
+- Kamera, Licht, `MapRoot3D/Terrain3D` und `MapRoot3D/Object3D` werden automatisch erzeugt.
+
 ## Akzeptanzkriterien
-- [ ] Live-Missions-Testszene kann mit 2.5D/3D-Visual-Layer gestartet werden.
-- [ ] 2.5D-Layer nutzt dieselbe Kartenquelle wie die Missionssimulation.
-- [ ] Boden- und Objektlayer bleiben visuell getrennt.
-- [ ] Bestehende Simulation/Command-Verarbeitung bleibt unveraendert lauffaehig.
-- [ ] Verifier prueft Live-Bridge ohne manuelle Editor-Schritte.
+- [x] Live-Missions-Testszene kann mit 2.5D/3D-Visual-Layer gestartet werden.
+- [x] 2.5D-Layer nutzt dieselbe Kartenquelle wie die Missionssimulation.
+- [x] Boden- und Objektlayer bleiben visuell getrennt.
+- [x] Bestehende Simulation/Command-Verarbeitung bleibt unveraendert lauffaehig.
+- [x] Verifier prueft Live-Bridge ohne manuelle Editor-Schritte.
 
 ## Risiken
 - Doppelte Darstellung kann verwirren, wenn 2D und 2.5D gleichzeitig sichtbar sind. Deshalb braucht der Task klare Toggle-/Fallback-Regeln.

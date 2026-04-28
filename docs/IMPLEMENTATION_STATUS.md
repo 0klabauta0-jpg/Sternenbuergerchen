@@ -1076,12 +1076,21 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Air-Units koennen Bodentaktik trivialisieren; V1 bleibt deshalb bewusst an AA-Gates, Range und Missionsgrenzen gebunden.
 - Naechster Schritt: Erst Playtest-Gefuehl pruefen; spaetere Tasks koennen Air-Rollen, Air-Spawns oder AA-Waffendaten getrennt schneiden.
 
-### TASK_142-145 - Geplante 2.5D-Live-Integration
-- Status: geplant
+### TASK_142-145 - 2.5D-Live-Integration
+- Status: teilweise implementiert
 - Stand: Vier Folge-Tasks sind geschnitten, um den vorhandenen 2D-Spielstand kontrolliert in den 2.5D-Pfad zu integrieren: `TASK_142 - 2.5D Live Mission Visual Bridge`, `TASK_143 - Unit Height Visual Sync`, `TASK_144 - Editor-to-Mission 2.5D Smoke Test` und `TASK_145 - 2.5D Tactical Debug Overlay`.
-- Offene Punkte: Noch keine Implementierung; die Tasks definieren die Reihenfolge fuer Live-Mission-Visuals, Unit-/Marker-Hoehensync, Editor-zu-Mission-Smoke-Test und taktische Debug-Overlays.
+- Offene Punkte: `TASK_142` ist implementiert; `TASK_143` bis `TASK_145` bleiben offen.
 - Risiken: Diese Tasks muessen Darstellung und Simulation weiter strikt trennen. 2.5D darf nicht still zu Full-3D-Gameplay werden.
-- Naechster Schritt: `TASK_142` starten, sobald der 141-Branch integriert ist.
+- Naechster Schritt: `TASK_143` starten, sobald der 142-Branch integriert ist.
+
+### TASK_142 - 2.5D Live Mission Visual Bridge
+- Status: implementiert
+- Stand: `MissionLive25DVisualBridge` bindet den bestehenden `TerrainMap3DRenderer` als rein lesende Node3D-Schicht in die Live-Missions-Testszene ein. `mission_fireteam_dev_test.tscn` erbt die Bridge ueber `mission_reactivity_test.tscn`.
+- Stand: Die Bridge liest die von `MissionTestSetup` geladene `TerrainMapData`, rendert daraus `MapRoot3D/Terrain3D` und `MapRoot3D/Object3D`, erzeugt Kamera/Licht und liefert `get_bridge_snapshot()` sowie `get_render_result()` fuer Debug/Verifier.
+- Stand: Die bestehende 2D-Map bleibt sichtbar und kann ueber `hide_2d_map_when_visible` als Fallback/Compare-Pfad umgeschaltet werden. Die Simulation bleibt bei `SimulationRoot`/`TerrainRegistry`; die Bridge mutiert keine Commands.
+- Offene Punkte: Keine Unit-Hoehensynchronisierung, keine Editor-Smoke-Test-Kette und keine finalen 3D-Material-/Kameraentscheidungen.
+- Risiken: 2D und 3D koennen bei gleichzeitig sichtbarer Darstellung visuell doppelt wirken. Das ist fuer V1 bewusst ein Compare-/Bridge-Zustand und wird in TASK_143/144 weiter integriert.
+- Naechster Schritt: `TASK_143 - Unit Height Visual Sync`, damit Units, Selection und Marker zur 2.5D-Karte passen.
 
 ### TASK_151-153 - Geplante Folge-Labs
 - Status: geplant
