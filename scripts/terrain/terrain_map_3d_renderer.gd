@@ -67,7 +67,7 @@ func render_map(terrain_map_data, map_root: Node3D, options: Dictionary = {}) ->
 			result["stats"]["missing_models"] = missing_models
 			continue
 		object_node.name = "Object_%s_%d_%d" % [object_type_id, tile_data.grid_position.x, tile_data.grid_position.y]
-		var object_position: Vector3 = grid_to_world_3d(tile_data.grid_position, int(tile_data.height_level)) + Vector3(0.0, _get_object_y_offset() + get_model_y_offset_for_type(object_type_id), 0.0)
+		var object_position: Vector3 = grid_to_world_3d_floor(tile_data.grid_position, float(tile_data.floor_height)) + Vector3(0.0, _get_object_y_offset() + get_model_y_offset_for_type(object_type_id), 0.0)
 		object_node.position = object_position
 		object_node.rotation.y = deg_to_rad(get_rotation_degrees_for_type(object_type_id) + get_model_rotation_offset_degrees_for_type(object_type_id))
 		var object_scale: float = get_model_scale_for_type(object_type_id)
@@ -88,6 +88,25 @@ func grid_to_world_3d(grid_position: Vector2i, height_level: int = 0) -> Vector3
 	var cell_size: float = _get_grid_number("cell_size", 2.0)
 	var height_step: float = _get_grid_number("height_step", 0.35)
 	return Vector3(float(grid_position.x) * cell_size, float(height_level) * height_step, float(grid_position.y) * cell_size)
+
+
+func grid_to_world_3d_floor(grid_position: Vector2i, floor_height: float = 0.0) -> Vector3:
+	var cell_size: float = _get_grid_number("cell_size", 2.0)
+	var height_step: float = _get_grid_number("height_step", 0.35)
+	return Vector3(float(grid_position.x) * cell_size, floor_height * height_step, float(grid_position.y) * cell_size)
+
+
+func world_3d_to_grid(world_position: Vector3) -> Vector2i:
+	var cell_size: float = _get_grid_number("cell_size", 2.0)
+	return Vector2i(roundi(world_position.x / cell_size), roundi(world_position.z / cell_size))
+
+
+func get_grid_cell_size() -> float:
+	return _get_grid_number("cell_size", 2.0)
+
+
+func get_grid_height_step() -> float:
+	return _get_grid_number("height_step", 0.35)
 
 
 func get_tile_object_type_id(tile_data) -> String:
@@ -172,7 +191,7 @@ func _create_ground_tile(tile_data) -> MeshInstance3D:
 	node.name = "Ground_%d_%d" % [tile_data.grid_position.x, tile_data.grid_position.y]
 	node.mesh = _ground_mesh
 	node.material_override = _ground_material if not _show_debug_grid or (tile_data.grid_position.x + tile_data.grid_position.y) % 2 == 0 else _ground_material_alt
-	node.position = grid_to_world_3d(tile_data.grid_position, int(tile_data.height_level))
+	node.position = grid_to_world_3d_floor(tile_data.grid_position, float(tile_data.floor_height))
 	return node
 
 

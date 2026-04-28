@@ -1048,12 +1048,21 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Multi-Floor ist ab jetzt als Daten- und Testpfad vorhanden, aber noch nicht fuer breite Maps optimiert. Editor- und Visual-Sync muessen den Floor-Kontext sichtbar machen, bevor echte Karten damit angenehm gebaut werden koennen.
 - Naechster Schritt: `TASK_139 - 2.5D Kamera und Picking` kann jetzt Floor-Kontext beim Auswaehlen und Anvisieren beruecksichtigen.
 
-### TASK_139-141 - Geplante 2.5D-Hybrid-Folge
+### TASK_139 - 2.5D Kamera und Picking
+- Status: implementiert
+- Stand: `Terrain25DCameraController` kapselt die bisherige 3D-Spike-Kamera als wiederverwendbare Orthokamera mit Fokus, Rotation, Pan und Zoom. Die Spike-Szene nutzt den Controller weiter ueber ihre bisherigen Test-APIs.
+- Stand: `Terrain25DPicker` rechnet Camera-Screen-Rays auf 2.5D-Floor-Ebenen zurueck und liefert autoritative Ziel-Snapshots mit `grid_position`, `target_position`, `floor_index`, `target_floor_index`, Walkability und 3D-Debugposition. Multi-Floor-Ziele koennen per explizitem `floor_index` oder `floor_mode = "highest"` gewaehlt werden.
+- Stand: `TerrainMap3DRenderer` platziert Boden und Objekte mit `floor_height` statt nur `height_level` und exponiert Grid/3D-Konvertierungswerte fuer Picking. `mission_map_3d_render_spike.gd` zeigt den letzten Pick-Hit als kleinen Debug-Marker.
+- Offene Punkte: Noch keine finale Tactical-UI-Integration und keine komfortable Floor-Auswahl im Editor. Der Live-Command-Pfad ist vorbereitet, aber die Testszene bleibt bewusst Spike-/Verifier-Schicht.
+- Risiken: Picking verwendet die aktuelle rechteckige 3D-Spike-Gridprojektion. Wenn der finale 3D-Renderer spaeter echte Isometrie-Geometrie statt dieses Lab-Grids nutzt, muss die Konvertierung an einer Stelle angepasst werden.
+- Naechster Schritt: `TASK_140` kann Hoehendaten/Floor-Kontext im Editor und 3D-Renderer sichtbar machen.
+
+### TASK_140-141 - Geplante 2.5D-Hybrid-Folge
 - Status: geplant
-- Stand: Die restliche 2.5D-Folgereihe bleibt getrennt: `TASK_139` schneidet drehbare Kamera und Grid-/Floor-Picking, `TASK_140` macht Hoehendaten im Editor und 3D-Renderer sichtbar, und `TASK_141` fuehrt spaeter einen separaten Air-Layer fuer Flieger ein.
+- Stand: Die restliche 2.5D-Folgereihe bleibt getrennt: `TASK_140` macht Hoehendaten im Editor und 3D-Renderer sichtbar, und `TASK_141` fuehrt spaeter einen separaten Air-Layer fuer Flieger ein.
 - Offene Punkte: Boden-2.5D sollte vor Air-Layer und Multi-Floor-Komfort stabilisiert werden.
 - Risiken: 2.5D darf nicht still zu Full-3D-Gameplay anwachsen. Die autoritative Wahrheit bleibt zunaechst Grid-/Terrain-basiert; 3D ist Darstellung und Picking-Schicht.
-- Naechster Schritt: Bei Freigabe mit `TASK_139 - 2.5D Kamera und Picking` fortfahren.
+- Naechster Schritt: Bei Freigabe mit `TASK_140` fortfahren.
 
 ### TASK_151-153 - Geplante Folge-Labs
 - Status: geplant
