@@ -17,6 +17,7 @@ const DEFAULT_COVER_HEIGHT: float = 0.0
 const DEFAULT_BLOCKS_LOS_HEIGHT: float = 0.0
 const DEFAULT_IS_ELEVATED_SURFACE: bool = false
 const DEFAULT_SURFACE_TYPE: String = SURFACE_GROUND
+const DEFAULT_HEIGHT_TRANSITION_TYPE: String = "none"
 const MAX_HEIGHT_LEVEL: int = 8
 const MAX_OBJECT_HEIGHT: int = 8
 const MAX_WORLD_HEIGHT: float = 64.0
@@ -24,6 +25,9 @@ const MAX_WORLD_HEIGHT: float = 64.0
 const EDGE_CLIFF: String = "cliff"
 const EDGE_SLOPE: String = "slope"
 const EDGE_NONE: String = "none"
+const HEIGHT_TRANSITION_NONE: String = "none"
+const HEIGHT_TRANSITION_RAMP: String = "ramp"
+const HEIGHT_TRANSITION_STAIRS: String = "stairs"
 
 var tile_id: String = ""
 var type_id: String = ""
@@ -42,6 +46,7 @@ var blocks_los_height: float = DEFAULT_BLOCKS_LOS_HEIGHT
 var is_elevated_surface: bool = DEFAULT_IS_ELEVATED_SURFACE
 var surface_type: String = DEFAULT_SURFACE_TYPE
 var edge_type: String = EDGE_CLIFF
+var height_transition_type: String = DEFAULT_HEIGHT_TRANSITION_TYPE
 
 
 func _init(data: Dictionary = {}) -> void:
@@ -77,6 +82,7 @@ func to_dict() -> Dictionary:
 		"is_elevated_surface": is_elevated_surface,
 		"surface_type": surface_type,
 		"edge_type": edge_type,
+		"height_transition_type": height_transition_type,
 	}
 
 
@@ -125,6 +131,17 @@ static func _normalize_edge_type(value: String) -> String:
 			return EDGE_CLIFF
 
 
+static func normalize_height_transition_type(value: String, fallback_edge_type: String = EDGE_CLIFF) -> String:
+	var normalized: String = value.strip_edges().to_lower()
+	match normalized:
+		HEIGHT_TRANSITION_NONE, HEIGHT_TRANSITION_RAMP, HEIGHT_TRANSITION_STAIRS:
+			return normalized
+		EDGE_SLOPE:
+			return HEIGHT_TRANSITION_RAMP
+		_:
+			return HEIGHT_TRANSITION_RAMP if _normalize_edge_type(fallback_edge_type) == EDGE_SLOPE else HEIGHT_TRANSITION_NONE
+
+
 static func _normalize_surface_type(next_surface_type: String) -> String:
 	var normalized_surface_type: String = next_surface_type.strip_edges().to_lower()
 	if normalized_surface_type.is_empty():
@@ -159,6 +176,7 @@ func _apply_dict(data: Dictionary) -> void:
 	is_elevated_surface = bool(data.get("is_elevated_surface", floor_height > 0.0 or height_level > 0))
 	surface_type = _normalize_surface_type(String(data.get("surface_type", DEFAULT_SURFACE_TYPE)))
 	edge_type = _normalize_edge_type(String(data.get("edge_type", EDGE_CLIFF)))
+	height_transition_type = normalize_height_transition_type(String(data.get("height_transition_type", "")), edge_type)
 
 
 func _derive_cover_height() -> float:

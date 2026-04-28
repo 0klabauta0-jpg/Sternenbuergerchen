@@ -76,6 +76,8 @@ static func load_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCa
 		var cover_height: float = _coerce_height_float(entry.get("cover_height", _derive_cover_height(cover_value, object_height)))
 		var blocks_los_height: float = _coerce_height_float(entry.get("blocks_los_height", _derive_blocks_los_height(blocks_los, height_level, object_height, cover_height)))
 		var is_elevated_surface: bool = bool(entry.get("is_elevated_surface", floor_height > 0.0 or height_level > 0))
+		var edge_type: String = String(entry.get("edge_type", "cliff"))
+		var height_transition_type: String = TERRAIN_TILE_DATA_SCRIPT.normalize_height_transition_type(String(entry.get("height_transition_type", "")), edge_type)
 
 		catalog._tile_types[type_id] = {
 			"type_id": type_id,
@@ -94,7 +96,8 @@ static func load_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCa
 			"cover_height": cover_height,
 			"blocks_los_height": blocks_los_height,
 			"is_elevated_surface": is_elevated_surface,
-			"edge_type": String(entry.get("edge_type", "cliff")),
+			"edge_type": edge_type,
+			"height_transition_type": height_transition_type,
 		}
 		catalog._type_order.append(type_id)
 
@@ -212,6 +215,7 @@ func apply_type_to_tile(tile_data, type_id: String) -> bool:
 	tile_data.is_elevated_surface = bool(entry.get("is_elevated_surface", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_IS_ELEVATED_SURFACE))
 	tile_data.surface_type = String(entry.get("surface_type", "ground"))
 	tile_data.edge_type = String(entry.get("edge_type", "cliff"))
+	tile_data.height_transition_type = String(entry.get("height_transition_type", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_HEIGHT_TRANSITION_TYPE))
 	return true
 
 

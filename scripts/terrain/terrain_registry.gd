@@ -240,6 +240,7 @@ func get_height_profile_at_grid(grid_pos: Vector2i) -> Dictionary:
 		"cover_height": float(tile_data.cover_height),
 		"blocks_los_height": float(tile_data.blocks_los_height),
 		"is_elevated_surface": bool(tile_data.is_elevated_surface),
+		"height_transition_type": String(tile_data.height_transition_type),
 	}
 
 

@@ -140,6 +140,7 @@ static func create_empty(
 					"cover_height": TERRAIN_TILE_DATA_SCRIPT.DEFAULT_COVER_HEIGHT,
 					"blocks_los_height": TERRAIN_TILE_DATA_SCRIPT.DEFAULT_BLOCKS_LOS_HEIGHT,
 					"is_elevated_surface": TERRAIN_TILE_DATA_SCRIPT.DEFAULT_IS_ELEVATED_SURFACE,
+					"height_transition_type": TERRAIN_TILE_DATA_SCRIPT.DEFAULT_HEIGHT_TRANSITION_TYPE,
 				}
 			)
 			terrain_map_data._tiles.append(tile_data)
@@ -202,6 +203,7 @@ func save_to_file(path: String) -> Error:
 			"is_elevated_surface": bool(tile_dict.get("is_elevated_surface", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_IS_ELEVATED_SURFACE)),
 			"surface_type": String(tile_dict.get("surface_type", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFACE_TYPE)),
 			"edge_type": String(tile_dict.get("edge_type", TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF)),
+			"height_transition_type": String(tile_dict.get("height_transition_type", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_HEIGHT_TRANSITION_TYPE)),
 		}
 		var object_type_id: String = String(tile_dict.get("object_type_id", "")).strip_edges()
 		if not object_type_id.is_empty():

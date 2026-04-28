@@ -1032,12 +1032,19 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Die Faktoren fuer niedrige/mittlere/hohe Deckung sind V1-Spielgefuehlwerte und muessen spaeter mit echten Karten getestet werden. Der Debug-Snapshot macht die Entscheidung transparent.
 - Naechster Schritt: `TASK_137 - 2.5D Height-Aware Navigation` kann jetzt auf denselben Hoehenfeldern die Traversal-Regeln fuer Rampen/Treppen vorbereiten.
 
-### TASK_137-141 - Geplante 2.5D-Hybrid-Folge
+### TASK_137 - 2.5D Height-Aware Navigation
+- Status: implementiert
+- Stand: `TerrainTileData` besitzt jetzt `height_transition_type` mit `none`, `ramp` und `stairs`, inklusive Map-/Catalog-Roundtrip und Legacy-Fallback von alten `slope`-Tiles auf Rampen. `TerrainPathfinder` prueft Hoehenschritte zentral ueber `get_step_traversal_snapshot(...)`: gleiche Hoehe bleibt frei, ein kleiner Hoehenwechsel braucht eine explizite Rampe oder Treppe, und groessere vertikale Schritte werden geblockt. Rampen/Treppen bekommen einen kleinen Zusatzpfadkosten-Anteil. HPA-Komponenten und Portale nutzen dieselbe `can_traverse_step`-Logik, und `SimulationRoot` erbt die Regeln ueber seinen bestehenden HPA-/TerrainPathfinder-Pfad.
+- Offene Punkte: Keine mehrstoeckigen Innenraeume, keine Leiter-/Treppenanimationen und keine Air-Layer-Logik. Diese bleiben bewusst Folge-Tasks.
+- Risiken: Alte Karten mit Hoehenkanten ohne Transition koennen jetzt korrekt unpassierbar werden. Das ist gewollt, muss aber im Editor sichtbar werden, damit Map-Arbeit nicht raetselhaft wirkt.
+- Naechster Schritt: `TASK_138 - 2.5D Multi-Floor Foundation` kann jetzt auf stabilen Hoehen-Traversal-Regeln aufbauen.
+
+### TASK_138-141 - Geplante 2.5D-Hybrid-Folge
 - Status: geplant
-- Stand: Die restliche 2.5D-Folgereihe bleibt getrennt: `TASK_137` erweitert Navigation um erlaubte Hoehenwechsel, `TASK_138` bereitet Multi-Floor-Positionen vor, `TASK_139` schneidet drehbare Kamera und Grid-/Floor-Picking, `TASK_140` macht Hoehendaten im Editor und 3D-Renderer sichtbar, und `TASK_141` fuehrt spaeter einen separaten Air-Layer fuer Flieger ein.
+- Stand: Die restliche 2.5D-Folgereihe bleibt getrennt: `TASK_138` bereitet Multi-Floor-Positionen vor, `TASK_139` schneidet drehbare Kamera und Grid-/Floor-Picking, `TASK_140` macht Hoehendaten im Editor und 3D-Renderer sichtbar, und `TASK_141` fuehrt spaeter einen separaten Air-Layer fuer Flieger ein.
 - Offene Punkte: Boden-2.5D sollte vor Air-Layer und Multi-Floor-Komfort stabilisiert werden.
 - Risiken: 2.5D darf nicht still zu Full-3D-Gameplay anwachsen. Die autoritative Wahrheit bleibt zunaechst Grid-/Terrain-basiert; 3D ist Darstellung und Picking-Schicht.
-- Naechster Schritt: Bei Freigabe mit `TASK_137 - 2.5D Height-Aware Navigation` fortfahren.
+- Naechster Schritt: Bei Freigabe mit `TASK_138 - 2.5D Multi-Floor Foundation` fortfahren.
 
 ### TASK_151-153 - Geplante Folge-Labs
 - Status: geplant

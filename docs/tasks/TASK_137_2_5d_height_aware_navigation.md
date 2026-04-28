@@ -3,7 +3,7 @@
 ## Ziel
 Navigation um kontrollierte Hoehenwechsel erweitern: Units duerfen erhoehte Flaechen, Rampen, Treppen oder Stege nutzen, aber keine vertikalen Spruenge durch reine Nachbarschaft im Grid machen.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Kontext
 - HPA/A* ist bereits autoritativ im Move-Pfad integriert.
@@ -26,11 +26,20 @@ Navigation um kontrollierte Hoehenwechsel erweitern: Units duerfen erhoehte Flae
 - Keine Full-3D-Navmesh-Umstellung.
 
 ## Akzeptanzkriterien
-- [ ] Pfade bleiben auf gleicher Hoehe unveraendert stabil.
-- [ ] Unerlaubte Hoehenspruenge werden blockiert.
-- [ ] Erlaubte Rampen-/Treppenverbindungen werden genutzt.
-- [ ] HPA und direkter Pathfinder liefern konsistente Traversal-Regeln.
-- [ ] Verifier deckt gleiche Ebene, erlaubte Transition und blockierten Sprung ab.
+- [x] Pfade bleiben auf gleicher Hoehe unveraendert stabil.
+- [x] Unerlaubte Hoehenspruenge werden blockiert.
+- [x] Erlaubte Rampen-/Treppenverbindungen werden genutzt.
+- [x] HPA und direkter Pathfinder liefern konsistente Traversal-Regeln.
+- [x] Verifier deckt gleiche Ebene, erlaubte Transition und blockierten Sprung ab.
+
+## Umsetzung
+- `TerrainTileData` und Map-/Catalog-Serialisierung fuehren `height_transition_type` mit den Werten `none`, `ramp` und `stairs`.
+- `TerrainPathfinder` prueft Hoehenwechsel zentral ueber einen Traversal-Snapshot: gleiche Hoehe ist frei, kleine Hoehenschritte brauchen Rampen/Treppen, grosse Schritte bleiben blockiert.
+- `HPANavigationGraph` nutzt dieselbe `can_traverse_step`-Logik automatisch fuer Komponenten und Portale.
+- `SimulationRoot` bleibt unveraendert auf dem HPA-/TerrainPathfinder-Pfad und bekommt damit dieselben Hoehenregeln.
+
+## Lokale Checks
+- `godot_console.exe --headless --path . --script scripts/tests/task_137_verifier.gd`
 
 ## Risiken
 - Zu strikte Regeln koennen alte Karten unpassierbar machen; Legacy-Defaults muessen flache Karten unveraendert halten.

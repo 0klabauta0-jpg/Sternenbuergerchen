@@ -23,6 +23,9 @@ const DIAGONAL_COST_MULTIPLIER: float = 1.41421356237
 const MIN_SURFACE_PATH_COST: float = 0.7
 const DEFAULT_EXPOSURE_MAX_GRID_DISTANCE: float = 8.0
 const MIN_COVER_AWARE_STEP_COST: float = 0.05
+const MAX_TRAVERSABLE_HEIGHT_STEP: float = 1.01
+const RAMP_HEIGHT_COST_FACTOR: float = 0.75
+const STAIRS_HEIGHT_COST_FACTOR: float = 1.0
 
 
 func find_path(from_grid: Vector2i, to_grid: Vector2i, registry) -> Array:
@@ -75,6 +78,12 @@ func get_neighbor_directions() -> Array:
 
 func can_traverse_step(current_grid: Vector2i, neighbor_grid: Vector2i, registry) -> bool:
 	return _is_neighbor_walkable(current_grid, neighbor_grid, registry)
+
+
+func get_step_traversal_snapshot(current_grid: Vector2i, neighbor_grid: Vector2i, registry) -> Dictionary:
+	var current_tile = registry.call("get_tile_at_grid", current_grid) if registry != null and registry.has_method("get_tile_at_grid") else null
+	var neighbor_tile = registry.call("get_tile_at_grid", neighbor_grid) if registry != null and registry.has_method("get_tile_at_grid") else null
+	return _build_step_traversal_snapshot(current_grid, neighbor_grid, current_tile, neighbor_tile)
 
 
 func get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry, options: Dictionary = {}) -> float:
@@ -178,24 +187,7 @@ func _is_neighbor_walkable(current_grid: Vector2i, neighbor_grid: Vector2i, regi
 func _is_grid_step_walkable(current_grid: Vector2i, neighbor_grid: Vector2i, registry) -> bool:
 	var current_tile = registry.call("get_tile_at_grid", current_grid)
 	var neighbor_tile = registry.call("get_tile_at_grid", neighbor_grid)
-	if current_tile == null or neighbor_tile == null:
-		return false
-
-	if not bool(neighbor_tile.walkable):
-		return false
-
-	var height_difference: int = abs(int(neighbor_tile.height_level) - int(current_tile.height_level))
-	if height_difference == 0:
-		return true
-
-	# Determine edge_type of the higher tile — it controls traversability
-	var higher_tile = neighbor_tile if int(neighbor_tile.height_level) > int(current_tile.height_level) else current_tile
-	var edge_type: String = String(higher_tile.edge_type)
-
-	if edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE:
-		return true  # slopes are always traversable
-	else:
-		return height_difference <= 1  # cliffs only allow 1 level difference
+	return bool(_build_step_traversal_snapshot(current_grid, neighbor_grid, current_tile, neighbor_tile).get("traversable", false))
 
 
 func _get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry, options: Dictionary = {}) -> float:
@@ -204,16 +196,13 @@ func _get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry, o
 	if current_tile == null or neighbor_tile == null:
 		return INF
 
-	var height_difference: int = abs(int(neighbor_tile.height_level) - int(current_tile.height_level))
+	var transition_snapshot: Dictionary = _build_step_traversal_snapshot(current_grid, neighbor_grid, current_tile, neighbor_tile)
+	var height_difference: float = float(transition_snapshot.get("height_difference", 0.0))
+	var transition_type: String = String(transition_snapshot.get("height_transition_type", TERRAIN_TILE_DATA_SCRIPT.HEIGHT_TRANSITION_NONE))
 	var surface_cost: float = TERRAIN_TILE_DATA_SCRIPT.get_surface_path_cost(String(neighbor_tile.surface_type))
-
-	# Slopes cost more per height level than flat terrain
-	var base_cost: float = surface_cost + (float(height_difference) * 0.5)
-	if height_difference > 0:
-		var higher_tile = neighbor_tile if int(neighbor_tile.height_level) > int(current_tile.height_level) else current_tile
-		var edge_type: String = String(higher_tile.edge_type)
-		if edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE:
-			base_cost = surface_cost + (float(height_difference) * 1.0)
+	var base_cost: float = surface_cost
+	if height_difference > 0.001:
+		base_cost += height_difference * _get_height_transition_cost_factor(transition_type)
 
 	if bool(options.get("cover_aware_enabled", false)):
 		var exposure_weight: float = maxf(float(options.get("exposure_weight", 0.0)), 0.0)
@@ -226,6 +215,97 @@ func _get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry, o
 	if abs(delta.x) == 1 and abs(delta.y) == 1:
 		return base_cost * DIAGONAL_COST_MULTIPLIER
 	return base_cost
+
+
+func _build_step_traversal_snapshot(current_grid: Vector2i, neighbor_grid: Vector2i, current_tile, neighbor_tile) -> Dictionary:
+	var delta: Vector2i = neighbor_grid - current_grid
+	var snapshot: Dictionary = {
+		"from_grid": current_grid,
+		"to_grid": neighbor_grid,
+		"traversable": false,
+		"reason": "",
+		"height_difference": 0.0,
+		"from_height": 0.0,
+		"to_height": 0.0,
+		"height_transition_type": TERRAIN_TILE_DATA_SCRIPT.HEIGHT_TRANSITION_NONE,
+		"transition_grid": null,
+	}
+	if abs(delta.x) > 1 or abs(delta.y) > 1 or delta == Vector2i.ZERO:
+		snapshot["reason"] = "not_adjacent"
+		return snapshot
+	if current_tile == null or neighbor_tile == null:
+		snapshot["reason"] = "tile_missing"
+		return snapshot
+	if not bool(neighbor_tile.walkable):
+		snapshot["reason"] = "target_not_walkable"
+		return snapshot
+
+	var current_height: float = _get_navigation_height(current_tile)
+	var neighbor_height: float = _get_navigation_height(neighbor_tile)
+	var height_difference: float = absf(neighbor_height - current_height)
+	snapshot["from_height"] = current_height
+	snapshot["to_height"] = neighbor_height
+	snapshot["height_difference"] = height_difference
+	if height_difference <= 0.001:
+		snapshot["traversable"] = true
+		snapshot["reason"] = "same_height"
+		return snapshot
+
+	var transition_tile = _resolve_transition_tile(current_tile, neighbor_tile)
+	var transition_type: String = _get_height_transition_type(transition_tile)
+	snapshot["height_transition_type"] = transition_type
+	if transition_tile != null:
+		snapshot["transition_grid"] = Vector2i(transition_tile.grid_position)
+	if height_difference > MAX_TRAVERSABLE_HEIGHT_STEP:
+		snapshot["reason"] = "height_step_too_large"
+		return snapshot
+	if not _is_height_transition_allowed(transition_type):
+		snapshot["reason"] = "height_transition_missing"
+		return snapshot
+
+	snapshot["traversable"] = true
+	snapshot["reason"] = "height_transition_%s" % transition_type
+	return snapshot
+
+
+func _get_navigation_height(tile_data) -> float:
+	if tile_data == null:
+		return 0.0
+	return float(tile_data.floor_height)
+
+
+func _resolve_transition_tile(current_tile, neighbor_tile):
+	var current_type: String = _get_height_transition_type(current_tile)
+	var neighbor_type: String = _get_height_transition_type(neighbor_tile)
+	if _is_height_transition_allowed(neighbor_type):
+		return neighbor_tile
+	if _is_height_transition_allowed(current_type):
+		return current_tile
+	return neighbor_tile if _get_navigation_height(neighbor_tile) >= _get_navigation_height(current_tile) else current_tile
+
+
+func _get_height_transition_type(tile_data) -> String:
+	if tile_data == null:
+		return TERRAIN_TILE_DATA_SCRIPT.HEIGHT_TRANSITION_NONE
+	return TERRAIN_TILE_DATA_SCRIPT.normalize_height_transition_type(String(tile_data.height_transition_type), String(tile_data.edge_type))
+
+
+func _is_height_transition_allowed(transition_type: String) -> bool:
+	match transition_type:
+		TERRAIN_TILE_DATA_SCRIPT.HEIGHT_TRANSITION_RAMP, TERRAIN_TILE_DATA_SCRIPT.HEIGHT_TRANSITION_STAIRS:
+			return true
+		_:
+			return false
+
+
+func _get_height_transition_cost_factor(transition_type: String) -> float:
+	match transition_type:
+		TERRAIN_TILE_DATA_SCRIPT.HEIGHT_TRANSITION_RAMP:
+			return RAMP_HEIGHT_COST_FACTOR
+		TERRAIN_TILE_DATA_SCRIPT.HEIGHT_TRANSITION_STAIRS:
+			return STAIRS_HEIGHT_COST_FACTOR
+		_:
+			return STAIRS_HEIGHT_COST_FACTOR
 
 
 func _get_cover_score(grid_position: Vector2i, registry) -> float:
