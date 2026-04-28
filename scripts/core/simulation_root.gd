@@ -24,6 +24,9 @@ const TARGET_COVER_DAMAGE_PENALTY_FACTOR: float = 0.2
 const DAMAGE_MULTIPLIER_MIN: float = 0.1
 const HEIGHT_ADVANTAGE_ACCURACY_BONUS: float = 0.1
 const HEIGHT_DISADVANTAGE_ACCURACY_PENALTY: float = 0.05
+const LOW_COVER_HEIGHT_THRESHOLD: float = 0.8
+const MID_COVER_HEIGHT_THRESHOLD: float = 1.3
+const HIGH_COVER_HEIGHT_THRESHOLD: float = 2.0
 
 @export var is_server_authoritative: bool = false
 @export var unit_registry_path: NodePath
@@ -1623,7 +1626,8 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		return
 
 	var attacker_unit = _resolve_attacker_unit(attacker_unit_id)
-	var target_cover_score: float = _extract_effective_cover_score(unit)
+	var target_cover_profile: Dictionary = _build_terrain_cover_height_profile(unit, attacker_unit)
+	var target_cover_score: float = _extract_effective_cover_score(unit, attacker_unit)
 	if effect.has("target_cover_override"):
 		target_cover_score = clampf(_extract_float(effect.get("target_cover_override", target_cover_score), target_cover_score), 0.0, 80.0)
 	var attacker_attack_bonus: float = _extract_unit_attack_bonus(attacker_unit)
@@ -1657,6 +1661,7 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		"target_profile_evasion_modifier": _extract_unit_evasion_modifier(unit),
 		"height_accuracy_modifier": _extract_height_accuracy_modifier(attacker_unit, unit),
 		"target_cover_score": target_cover_score,
+		"target_cover_profile": target_cover_profile,
 		"friendly_fire": is_friendly_fire,
 	}
 	if bool(effect.get("is_flank", false)):
@@ -1763,18 +1768,77 @@ func _extract_unit_cover_score(unit) -> float:
 	return float(unit.call("get_cover_score"))
 
 
-func _extract_effective_cover_score(unit) -> float:
+func _extract_effective_cover_score(unit, attacker_unit = null) -> float:
 	var command_cover_score: float = _extract_unit_cover_score(unit)
-	var terrain_cover_score: float = _extract_terrain_cover_score(unit)
+	var terrain_cover_score: float = _extract_terrain_cover_score(unit, attacker_unit)
 	return clampf(command_cover_score + terrain_cover_score, 0.0, 80.0)
 
 
-func _extract_terrain_cover_score(unit) -> float:
+func _extract_terrain_cover_score(unit, attacker_unit = null) -> float:
+	return float(_build_terrain_cover_height_profile(unit, attacker_unit).get("effective_cover_score", 0.0))
+
+
+func _build_terrain_cover_height_profile(unit, attacker_unit = null) -> Dictionary:
 	var terrain_registry = _get_terrain_registry()
 	if terrain_registry == null or unit == null or not (unit is Node2D):
-		return 0.0
+		return {
+			"base_cover_score": 0.0,
+			"effective_cover_score": 0.0,
+			"cover_height": 0.0,
+			"cover_height_factor": 0.0,
+			"height_factor": 1.0,
+			"attacker_floor_height": 0.0,
+			"target_floor_height": 0.0,
+			"attacker_height_advantage": 0.0,
+		}
 
-	return float(terrain_registry.call("get_cover_at_world", (unit as Node2D).global_position))
+	var target_position: Vector2 = (unit as Node2D).global_position
+	var base_cover_score: float = float(terrain_registry.call("get_cover_at_world", target_position))
+	var cover_height: float = 0.0
+	var target_floor_height: float = 0.0
+	if terrain_registry.has_method("get_cover_height_at_world"):
+		cover_height = float(terrain_registry.call("get_cover_height_at_world", target_position))
+	if terrain_registry.has_method("get_floor_height_at_world"):
+		target_floor_height = float(terrain_registry.call("get_floor_height_at_world", target_position))
+	var attacker_floor_height: float = target_floor_height
+	if attacker_unit != null and attacker_unit is Node2D and terrain_registry.has_method("get_floor_height_at_world"):
+		attacker_floor_height = float(terrain_registry.call("get_floor_height_at_world", (attacker_unit as Node2D).global_position))
+	var attacker_height_advantage: float = attacker_floor_height - target_floor_height
+	var cover_height_factor: float = _get_cover_height_factor(cover_height, base_cover_score)
+	var height_factor: float = _get_relative_cover_height_factor(attacker_height_advantage)
+	var effective_cover_score: float = clampf(base_cover_score * cover_height_factor * height_factor, 0.0, 100.0)
+	return {
+		"base_cover_score": base_cover_score,
+		"effective_cover_score": effective_cover_score,
+		"cover_height": cover_height,
+		"cover_height_factor": cover_height_factor,
+		"height_factor": height_factor,
+		"attacker_floor_height": attacker_floor_height,
+		"target_floor_height": target_floor_height,
+		"attacker_height_advantage": attacker_height_advantage,
+	}
+
+
+func _get_cover_height_factor(cover_height: float, base_cover_score: float) -> float:
+	if base_cover_score <= 0.0:
+		return 0.0
+	if cover_height <= 0.0:
+		return 0.75
+	if cover_height < LOW_COVER_HEIGHT_THRESHOLD:
+		return 0.55
+	if cover_height < MID_COVER_HEIGHT_THRESHOLD:
+		return 0.75
+	if cover_height < HIGH_COVER_HEIGHT_THRESHOLD:
+		return 0.9
+	return 1.0
+
+
+func _get_relative_cover_height_factor(attacker_height_advantage: float) -> float:
+	if attacker_height_advantage > 0.0:
+		return clampf(1.0 - (attacker_height_advantage * 0.25), 0.35, 1.0)
+	if attacker_height_advantage < 0.0:
+		return clampf(1.0 + (absf(attacker_height_advantage) * 0.1), 1.0, 1.15)
+	return 1.0
 
 
 func _extract_unit_attack_bonus(unit) -> float:

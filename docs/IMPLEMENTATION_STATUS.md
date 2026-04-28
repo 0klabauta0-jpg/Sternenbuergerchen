@@ -1025,12 +1025,19 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Die neuen Hoehenwerte sind V1-Defaults und noch keine finalen Art-/Combat-Werte; sie schaffen den gemeinsamen Datenvertrag fuer die naechsten 2.5D-Schichten.
 - Naechster Schritt: `TASK_136 - 2.5D LOS und Cover Heights` kann jetzt diese Felder fuer Sicht- und Deckungsauswertung nutzen.
 
-### TASK_136-141 - Geplante 2.5D-Hybrid-Folge
+### TASK_136 - 2.5D LOS und Cover Heights
+- Status: implementiert
+- Stand: `LineOfSightSystem` wertet Sicht jetzt hoehenbewusst aus. Die Sichtlinie verbindet eine Source-Eye-Hoehe mit einer Target-Focus-Hoehe, sampled Terrain-Zellen dazwischen und blockt nur, wenn `blocks_los_height` die interpolierte Sichtlinie erreicht. `get_line_of_sight_snapshot(...)` liefert Debugdaten wie blockierendes Grid, Sichtlinienhoehe und Blockerhoehe. Der autoritative Damage-Pfad in `SimulationRoot` berechnet Terrain-Cover jetzt ueber ein Cover-Height-Profil: `cover_height` unterscheidet niedrige, mittlere und hohe Deckung, und ein Hoehenvorteil des Angreifers reduziert Zieldeckung kontrolliert.
+- Offene Punkte: Keine Projektilphysik, keine Durchschlagslogik und keine neue Combat-Formel ausser dem bestehenden Cover-/Trefferchance-Pfad. Multi-Floor und erlaubte Hoehenwechsel bleiben Folge-Tasks.
+- Risiken: Die Faktoren fuer niedrige/mittlere/hohe Deckung sind V1-Spielgefuehlwerte und muessen spaeter mit echten Karten getestet werden. Der Debug-Snapshot macht die Entscheidung transparent.
+- Naechster Schritt: `TASK_137 - 2.5D Height-Aware Navigation` kann jetzt auf denselben Hoehenfeldern die Traversal-Regeln fuer Rampen/Treppen vorbereiten.
+
+### TASK_137-141 - Geplante 2.5D-Hybrid-Folge
 - Status: geplant
-- Stand: Die restliche 2.5D-Folgereihe bleibt getrennt: `TASK_136` nutzt die Hoehenwerte fuer LOS und Cover, `TASK_137` erweitert Navigation um erlaubte Hoehenwechsel, `TASK_138` bereitet Multi-Floor-Positionen vor, `TASK_139` schneidet drehbare Kamera und Grid-/Floor-Picking, `TASK_140` macht Hoehendaten im Editor und 3D-Renderer sichtbar, und `TASK_141` fuehrt spaeter einen separaten Air-Layer fuer Flieger ein.
+- Stand: Die restliche 2.5D-Folgereihe bleibt getrennt: `TASK_137` erweitert Navigation um erlaubte Hoehenwechsel, `TASK_138` bereitet Multi-Floor-Positionen vor, `TASK_139` schneidet drehbare Kamera und Grid-/Floor-Picking, `TASK_140` macht Hoehendaten im Editor und 3D-Renderer sichtbar, und `TASK_141` fuehrt spaeter einen separaten Air-Layer fuer Flieger ein.
 - Offene Punkte: Boden-2.5D sollte vor Air-Layer und Multi-Floor-Komfort stabilisiert werden.
 - Risiken: 2.5D darf nicht still zu Full-3D-Gameplay anwachsen. Die autoritative Wahrheit bleibt zunaechst Grid-/Terrain-basiert; 3D ist Darstellung und Picking-Schicht.
-- Naechster Schritt: Bei Freigabe mit `TASK_136 - 2.5D LOS und Cover Heights` fortfahren.
+- Naechster Schritt: Bei Freigabe mit `TASK_137 - 2.5D Height-Aware Navigation` fortfahren.
 
 ### TASK_151-153 - Geplante Folge-Labs
 - Status: geplant

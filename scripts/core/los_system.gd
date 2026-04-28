@@ -2,6 +2,9 @@ class_name LineOfSightSystem
 extends RefCounted
 
 const DEFAULT_MAX_RANGE: float = 320.0
+const DEFAULT_SOURCE_EYE_HEIGHT: float = 1.5
+const DEFAULT_TARGET_FOCUS_HEIGHT: float = 1.2
+const LOS_HEIGHT_CLEARANCE: float = 0.05
 
 
 func has_line_of_sight_between_points(
@@ -16,7 +19,7 @@ func has_line_of_sight_between_points(
 	if terrain_registry == null:
 		return true
 
-	return has_line_of_sight_with_terrain(source_position, target_position, terrain_registry, max_range)
+	return bool(get_line_of_sight_snapshot(source_position, target_position, terrain_registry, max_range).get("has_line_of_sight", false))
 
 
 func has_line_of_sight_to_position(
@@ -49,29 +52,120 @@ func has_line_of_sight_with_terrain(
 	terrain_registry,
 	max_range: float = DEFAULT_MAX_RANGE
 ) -> bool:
-	if terrain_registry == null:
-		return has_line_of_sight_between_points(source_position, target_position, max_range, null)
+	return bool(get_line_of_sight_snapshot(source_position, target_position, terrain_registry, max_range).get("has_line_of_sight", false))
 
+
+func get_line_of_sight_snapshot(
+	source_position: Vector2,
+	target_position: Vector2,
+	terrain_registry,
+	max_range: float = DEFAULT_MAX_RANGE
+) -> Dictionary:
 	if max_range >= 0.0 and source_position.distance_to(target_position) > max_range:
-		return false
+		return {
+			"has_line_of_sight": false,
+			"blocked_by_range": true,
+			"blocking_grid": null,
+			"source_position": source_position,
+			"target_position": target_position,
+			"distance": source_position.distance_to(target_position),
+			"max_range": max_range,
+		}
+
+	if terrain_registry == null:
+		return {
+			"has_line_of_sight": true,
+			"blocked_by_range": false,
+			"blocking_grid": null,
+			"source_position": source_position,
+			"target_position": target_position,
+			"distance": source_position.distance_to(target_position),
+			"max_range": max_range,
+		}
 
 	var source_grid: Vector2i = terrain_registry.call("world_to_grid", source_position)
 	var target_grid: Vector2i = terrain_registry.call("world_to_grid", target_position)
-	var source_height: int = int(terrain_registry.call("get_height_at_world", source_position))
-	var target_height: int = int(terrain_registry.call("get_height_at_world", target_position))
-	for stepped_grid in _build_grid_line(source_grid, target_grid):
+	var source_eye_height: float = _get_eye_height_at_world(source_position, terrain_registry)
+	var target_focus_height: float = _get_target_focus_height_at_world(target_position, terrain_registry)
+	var stepped_grids: Array[Vector2i] = _build_grid_line(source_grid, target_grid)
+	var sample_records: Array = []
+	var step_count: int = maxi(stepped_grids.size() - 1, 1)
+	for index in range(stepped_grids.size()):
+		var stepped_grid: Vector2i = stepped_grids[index]
 		if stepped_grid == source_grid or stepped_grid == target_grid:
 			continue
 
 		var tile_data = terrain_registry.call("get_tile_at_grid", stepped_grid)
-		if tile_data == null or not bool(tile_data.blocks_los):
+		if tile_data == null:
 			continue
 
-		var blocker_height: int = int(tile_data.height_level) + int(tile_data.object_height)
-		if blocker_height >= source_height and blocker_height >= target_height:
-			return false
+		var t: float = clampf(float(index) / float(step_count), 0.0, 1.0)
+		var sight_height: float = lerpf(source_eye_height, target_focus_height, t)
+		var blocker_height: float = _get_los_blocker_height(tile_data)
+		var sample_record: Dictionary = {
+			"grid_position": stepped_grid,
+			"sight_height": sight_height,
+			"blocks_los_height": blocker_height,
+			"blocks_los": bool(tile_data.blocks_los),
+		}
+		sample_records.append(sample_record)
+		if blocker_height <= 0.0:
+			continue
 
-	return true
+		if blocker_height + LOS_HEIGHT_CLEARANCE >= sight_height:
+			sample_record["blocked"] = true
+			return {
+				"has_line_of_sight": false,
+				"blocked_by_range": false,
+				"blocking_grid": stepped_grid,
+				"blocking_height": blocker_height,
+				"sight_height_at_blocker": sight_height,
+				"source_grid": source_grid,
+				"target_grid": target_grid,
+				"source_eye_height": source_eye_height,
+				"target_focus_height": target_focus_height,
+				"samples": sample_records,
+			}
+
+	return {
+		"has_line_of_sight": true,
+		"blocked_by_range": false,
+		"blocking_grid": null,
+		"source_grid": source_grid,
+		"target_grid": target_grid,
+		"source_eye_height": source_eye_height,
+		"target_focus_height": target_focus_height,
+		"samples": sample_records,
+	}
+
+
+func _get_eye_height_at_world(world_position: Vector2, terrain_registry) -> float:
+	var floor_height: float = 0.0
+	var eye_bonus: float = 0.0
+	if terrain_registry != null and terrain_registry.has_method("get_floor_height_at_world"):
+		floor_height = float(terrain_registry.call("get_floor_height_at_world", world_position))
+	if terrain_registry != null and terrain_registry.has_method("get_unit_eye_height_bonus_at"):
+		eye_bonus = float(terrain_registry.call("get_unit_eye_height_bonus_at", terrain_registry.call("world_to_grid", world_position)))
+	return floor_height + DEFAULT_SOURCE_EYE_HEIGHT + eye_bonus
+
+
+func _get_target_focus_height_at_world(world_position: Vector2, terrain_registry) -> float:
+	var floor_height: float = 0.0
+	var eye_bonus: float = 0.0
+	if terrain_registry != null and terrain_registry.has_method("get_floor_height_at_world"):
+		floor_height = float(terrain_registry.call("get_floor_height_at_world", world_position))
+	if terrain_registry != null and terrain_registry.has_method("get_unit_eye_height_bonus_at"):
+		eye_bonus = float(terrain_registry.call("get_unit_eye_height_bonus_at", terrain_registry.call("world_to_grid", world_position)))
+	return floor_height + DEFAULT_TARGET_FOCUS_HEIGHT + eye_bonus
+
+
+func _get_los_blocker_height(tile_data) -> float:
+	if tile_data == null:
+		return 0.0
+	var blocker_height: float = float(tile_data.blocks_los_height)
+	if blocker_height <= 0.0 and bool(tile_data.blocks_los):
+		blocker_height = maxf(float(tile_data.height_level), float(tile_data.object_height))
+	return blocker_height
 
 
 func _build_grid_line(source_grid: Vector2i, target_grid: Vector2i) -> Array[Vector2i]:

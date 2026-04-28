@@ -3,7 +3,7 @@
 ## Ziel
 LOS und Cover so erweitern, dass Hoehenwerte aus TASK_135 beruecksichtigt werden: Sicht und Beschuss laufen weiter datenbasiert, koennen aber Auge, Zielhoehe, niedrige Deckung, hohe Deckung und volle Blocker unterscheiden.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Kontext
 - Aktuelle LOS-/Cover-Logik arbeitet grid- und terrainbasiert, aber noch ohne echte Hoeheninterpretation.
@@ -27,11 +27,14 @@ LOS und Cover so erweitern, dass Hoehenwerte aus TASK_135 beruecksichtigt werden
 - Keine neue Combat-Damage-Formel ausser Cover-/LOS-Modifiern.
 
 ## Akzeptanzkriterien
-- [ ] Eine niedrige Mauer blockt nicht automatisch jede Sichtlinie.
-- [ ] Ein hoher Blocker unterbricht LOS nachvollziehbar.
-- [ ] Eine erhoehte Unit kann ueber niedrige Deckung hinweg sehen.
-- [ ] Cover-Modifier enthalten Hoehen- und Coverhoehen-Anteil.
-- [ ] Verifier prueft Boden-vs-Boden, oben-vs-unten und Blocker-Faelle.
+- [x] Eine niedrige Mauer blockt nicht automatisch jede Sichtlinie.
+- [x] Ein hoher Blocker unterbricht LOS nachvollziehbar.
+- [x] Eine erhoehte Unit kann ueber niedrige Deckung hinweg sehen.
+- [x] Cover-Modifier enthalten Hoehen- und Coverhoehen-Anteil.
+- [x] Verifier prueft Boden-vs-Boden, oben-vs-unten und Blocker-Faelle.
+
+## Lokale Pruefung
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_136_verifier.gd`
 
 ## Risiken
 - Zu viele Sonderfaelle koennen Combat unlesbar machen; die V1-Regeln muessen einfach und gut debugbar bleiben.
