@@ -1018,12 +1018,19 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Scale-/Offset-Werte sind optische V1-Schaetzungen und koennen spaeter im Art-Pass ersetzt werden; Kamera-Steuerung ist bewusst nur Spike-Qualitaet.
 - Naechster Schritt: Die Kalibrierungs-Szene visuell pruefen und danach entscheiden, ob der naechste Task 3D-Units, 3D-Auswahl oder Editor-Preview werden soll.
 
-### TASK_135-141 - Geplante 2.5D-Hybrid-Reihe
+### TASK_135 - 2.5D Height Data Contract
+- Status: implementiert
+- Stand: `TerrainTileData` besitzt jetzt explizite 2.5D-Felder fuer `floor_height`, `unit_eye_height_bonus`, `cover_height`, `blocks_los_height` und `is_elevated_surface`. Legacy-Daten mit nur `height_level`, `object_height`, `cover_value` und `blocks_los` leiten daraus konservative Werte ab. `TerrainMapData` speichert und laedt die neuen Felder rueckwaertskompatibel, `TerrainTileCatalog` exponiert per Typfamilie abgeleitete Defaults, und `TerrainRegistry` bietet lesende Hoehen-/Cover-/LOS-Blocker-APIs inklusive kompaktem Height-Profile-Snapshot.
+- Offene Punkte: Keine neue LOS-Formel, keine neue Navigation ueber Rampen/Treppen und keine Multi-Floor-Stapelung. Diese bleiben bewusst `TASK_136` bis `TASK_138`.
+- Risiken: Die neuen Hoehenwerte sind V1-Defaults und noch keine finalen Art-/Combat-Werte; sie schaffen den gemeinsamen Datenvertrag fuer die naechsten 2.5D-Schichten.
+- Naechster Schritt: `TASK_136 - 2.5D LOS und Cover Heights` kann jetzt diese Felder fuer Sicht- und Deckungsauswertung nutzen.
+
+### TASK_136-141 - Geplante 2.5D-Hybrid-Folge
 - Status: geplant
-- Stand: Die 2.5D-Folgereihe ist als kleine, aufeinander aufbauende Task-Gruppe geschnitten. `TASK_135` definiert den Hoehen-/Cover-/Blocker-Datenvertrag, `TASK_136` nutzt diese Werte fuer LOS und Cover, `TASK_137` erweitert Navigation um erlaubte Hoehenwechsel, `TASK_138` bereitet Multi-Floor-Positionen vor, `TASK_139` schneidet drehbare Kamera und Grid-/Floor-Picking, `TASK_140` macht Hoehendaten im Editor und 3D-Renderer sichtbar, und `TASK_141` fuehrt spaeter einen separaten Air-Layer fuer Flieger ein.
-- Offene Punkte: Alle Tasks sind bewusst noch nicht implementiert. Boden-2.5D sollte vor Air-Layer und Multi-Floor-Komfort stabilisiert werden.
+- Stand: Die restliche 2.5D-Folgereihe bleibt getrennt: `TASK_136` nutzt die Hoehenwerte fuer LOS und Cover, `TASK_137` erweitert Navigation um erlaubte Hoehenwechsel, `TASK_138` bereitet Multi-Floor-Positionen vor, `TASK_139` schneidet drehbare Kamera und Grid-/Floor-Picking, `TASK_140` macht Hoehendaten im Editor und 3D-Renderer sichtbar, und `TASK_141` fuehrt spaeter einen separaten Air-Layer fuer Flieger ein.
+- Offene Punkte: Boden-2.5D sollte vor Air-Layer und Multi-Floor-Komfort stabilisiert werden.
 - Risiken: 2.5D darf nicht still zu Full-3D-Gameplay anwachsen. Die autoritative Wahrheit bleibt zunaechst Grid-/Terrain-basiert; 3D ist Darstellung und Picking-Schicht.
-- Naechster Schritt: Bei Freigabe mit `TASK_135 - 2.5D Height Data Contract` starten.
+- Naechster Schritt: Bei Freigabe mit `TASK_136 - 2.5D LOS und Cover Heights` fortfahren.
 
 ### TASK_151-153 - Geplante Folge-Labs
 - Status: geplant

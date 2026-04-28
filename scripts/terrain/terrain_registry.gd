@@ -162,6 +162,87 @@ func get_height_at_world(world_pos: Vector2) -> int:
 	return int(tile_data.height_level)
 
 
+func get_floor_height_at(grid_pos: Vector2i) -> float:
+	var tile_data = get_tile_at_grid(grid_pos)
+	if tile_data == null:
+		return TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_HEIGHT
+
+	return float(tile_data.floor_height)
+
+
+func get_floor_height_at_world(world_pos: Vector2) -> float:
+	var tile_data = get_tile_at_world(world_pos)
+	if tile_data == null:
+		return TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_HEIGHT
+
+	return float(tile_data.floor_height)
+
+
+func get_cover_height_at(grid_pos: Vector2i) -> float:
+	var tile_data = get_tile_at_grid(grid_pos)
+	if tile_data == null:
+		return TERRAIN_TILE_DATA_SCRIPT.DEFAULT_COVER_HEIGHT
+
+	return float(tile_data.cover_height)
+
+
+func get_cover_height_at_world(world_pos: Vector2) -> float:
+	var tile_data = get_tile_at_world(world_pos)
+	if tile_data == null:
+		return TERRAIN_TILE_DATA_SCRIPT.DEFAULT_COVER_HEIGHT
+
+	return float(tile_data.cover_height)
+
+
+func get_los_blocker_height_at(grid_pos: Vector2i) -> float:
+	var tile_data = get_tile_at_grid(grid_pos)
+	if tile_data == null:
+		return TERRAIN_TILE_DATA_SCRIPT.DEFAULT_BLOCKS_LOS_HEIGHT
+
+	return float(tile_data.blocks_los_height)
+
+
+func get_los_blocker_height_at_world(world_pos: Vector2) -> float:
+	var tile_data = get_tile_at_world(world_pos)
+	if tile_data == null:
+		return TERRAIN_TILE_DATA_SCRIPT.DEFAULT_BLOCKS_LOS_HEIGHT
+
+	return float(tile_data.blocks_los_height)
+
+
+func get_unit_eye_height_bonus_at(grid_pos: Vector2i) -> float:
+	var tile_data = get_tile_at_grid(grid_pos)
+	if tile_data == null:
+		return TERRAIN_TILE_DATA_SCRIPT.DEFAULT_UNIT_EYE_HEIGHT_BONUS
+
+	return float(tile_data.unit_eye_height_bonus)
+
+
+func is_elevated_surface_at(grid_pos: Vector2i) -> bool:
+	var tile_data = get_tile_at_grid(grid_pos)
+	if tile_data == null:
+		return TERRAIN_TILE_DATA_SCRIPT.DEFAULT_IS_ELEVATED_SURFACE
+
+	return bool(tile_data.is_elevated_surface)
+
+
+func get_height_profile_at_grid(grid_pos: Vector2i) -> Dictionary:
+	var tile_data = get_tile_at_grid(grid_pos)
+	if tile_data == null:
+		return {}
+
+	return {
+		"grid_position": grid_pos,
+		"height_level": int(tile_data.height_level),
+		"object_height": int(tile_data.object_height),
+		"floor_height": float(tile_data.floor_height),
+		"unit_eye_height_bonus": float(tile_data.unit_eye_height_bonus),
+		"cover_height": float(tile_data.cover_height),
+		"blocks_los_height": float(tile_data.blocks_los_height),
+		"is_elevated_surface": bool(tile_data.is_elevated_surface),
+	}
+
+
 func get_surface_type_at_world(world_pos: Vector2) -> String:
 	var tile_data = get_tile_at_world(world_pos)
 	if tile_data == null:

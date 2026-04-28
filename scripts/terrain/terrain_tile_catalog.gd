@@ -1,6 +1,7 @@
 class_name TerrainTileCatalog
 extends RefCounted
 
+const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const DEFAULT_CATALOG_PATH: String = "res://data/terrain_tile_catalog.json"
 const OBJECT_LAYER_GROUPS: PackedStringArray = [
 	"deko",
@@ -66,6 +67,15 @@ static func load_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCa
 		if palette_group.is_empty():
 			palette_group = "default"
 		catalog._append_palette_group_if_missing(palette_group)
+		var walkable: bool = bool(entry.get("walkable", true))
+		var blocks_los: bool = bool(entry.get("blocks_los", false))
+		var cover_value: int = clampi(int(entry.get("cover_value", 0)), 0, 100)
+		var height_level: int = clampi(int(entry.get("height_level", 0)), 0, TERRAIN_TILE_DATA_SCRIPT.MAX_HEIGHT_LEVEL)
+		var object_height: int = clampi(int(entry.get("object_height", 0)), 0, TERRAIN_TILE_DATA_SCRIPT.MAX_OBJECT_HEIGHT)
+		var floor_height: float = _coerce_height_float(entry.get("floor_height", float(height_level)))
+		var cover_height: float = _coerce_height_float(entry.get("cover_height", _derive_cover_height(cover_value, object_height)))
+		var blocks_los_height: float = _coerce_height_float(entry.get("blocks_los_height", _derive_blocks_los_height(blocks_los, height_level, object_height, cover_height)))
+		var is_elevated_surface: bool = bool(entry.get("is_elevated_surface", floor_height > 0.0 or height_level > 0))
 
 		catalog._tile_types[type_id] = {
 			"type_id": type_id,
@@ -74,11 +84,16 @@ static func load_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCa
 			"placement_layer": String(entry.get("placement_layer", "object" if OBJECT_LAYER_GROUPS.has(palette_group) else "terrain")),
 			"texture_path": String(entry.get("texture_path", "")),
 			"surface_type": String(entry.get("surface_type", "ground")),
-			"walkable": bool(entry.get("walkable", true)),
-			"blocks_los": bool(entry.get("blocks_los", false)),
-			"cover_value": clampi(int(entry.get("cover_value", 0)), 0, 100),
-			"height_level": clampi(int(entry.get("height_level", 0)), 0, 3),
-			"object_height": clampi(int(entry.get("object_height", 0)), 0, 3),
+			"walkable": walkable,
+			"blocks_los": blocks_los,
+			"cover_value": cover_value,
+			"height_level": height_level,
+			"object_height": object_height,
+			"floor_height": floor_height,
+			"unit_eye_height_bonus": _coerce_height_float(entry.get("unit_eye_height_bonus", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_UNIT_EYE_HEIGHT_BONUS)),
+			"cover_height": cover_height,
+			"blocks_los_height": blocks_los_height,
+			"is_elevated_surface": is_elevated_surface,
 			"edge_type": String(entry.get("edge_type", "cliff")),
 		}
 		catalog._type_order.append(type_id)
@@ -98,6 +113,24 @@ static func _build_default_palette_group_label(group_id: String) -> String:
 	if group_id.is_empty():
 		return "Weitere"
 	return group_id.capitalize()
+
+
+static func _derive_cover_height(cover_value: int, object_height: int) -> float:
+	if cover_value <= 0:
+		return TERRAIN_TILE_DATA_SCRIPT.DEFAULT_COVER_HEIGHT
+	return maxf(float(object_height), 0.5)
+
+
+static func _derive_blocks_los_height(blocks_los: bool, height_level: int, object_height: int, cover_height: float) -> float:
+	if not blocks_los:
+		return TERRAIN_TILE_DATA_SCRIPT.DEFAULT_BLOCKS_LOS_HEIGHT
+	return maxf(maxf(float(height_level), float(object_height)), cover_height)
+
+
+static func _coerce_height_float(value: Variant) -> float:
+	if value == null:
+		return 0.0
+	return clampf(float(value), 0.0, TERRAIN_TILE_DATA_SCRIPT.MAX_WORLD_HEIGHT)
 
 
 func _append_palette_group_if_missing(group_id: String, display_name: String = "", collapsed: bool = false) -> void:
@@ -160,6 +193,9 @@ func apply_type_to_tile(tile_data, type_id: String) -> bool:
 		tile_data.blocks_los = bool(entry.get("blocks_los", false))
 		tile_data.cover_value = int(entry.get("cover_value", 0))
 		tile_data.object_height = int(entry.get("object_height", 0))
+		tile_data.unit_eye_height_bonus = float(entry.get("unit_eye_height_bonus", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_UNIT_EYE_HEIGHT_BONUS))
+		tile_data.cover_height = _offset_object_height_for_floor(tile_data, float(entry.get("cover_height", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_COVER_HEIGHT)))
+		tile_data.blocks_los_height = _offset_object_height_for_floor(tile_data, float(entry.get("blocks_los_height", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_BLOCKS_LOS_HEIGHT)))
 		return true
 
 	tile_data.type_id = type_id
@@ -169,6 +205,17 @@ func apply_type_to_tile(tile_data, type_id: String) -> bool:
 	tile_data.cover_value = int(entry.get("cover_value", 0))
 	tile_data.height_level = int(entry.get("height_level", 0))
 	tile_data.object_height = int(entry.get("object_height", 0))
+	tile_data.floor_height = float(entry.get("floor_height", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_HEIGHT))
+	tile_data.unit_eye_height_bonus = float(entry.get("unit_eye_height_bonus", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_UNIT_EYE_HEIGHT_BONUS))
+	tile_data.cover_height = float(entry.get("cover_height", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_COVER_HEIGHT))
+	tile_data.blocks_los_height = float(entry.get("blocks_los_height", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_BLOCKS_LOS_HEIGHT))
+	tile_data.is_elevated_surface = bool(entry.get("is_elevated_surface", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_IS_ELEVATED_SURFACE))
 	tile_data.surface_type = String(entry.get("surface_type", "ground"))
 	tile_data.edge_type = String(entry.get("edge_type", "cliff"))
 	return true
+
+
+func _offset_object_height_for_floor(tile_data, object_relative_height: float) -> float:
+	if object_relative_height <= 0.0:
+		return 0.0
+	return float(tile_data.floor_height) + object_relative_height

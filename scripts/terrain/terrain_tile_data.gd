@@ -11,7 +11,15 @@ const DEFAULT_BLOCKS_LOS: bool = false
 const DEFAULT_COVER_VALUE: int = 0
 const DEFAULT_HEIGHT_LEVEL: int = 0
 const DEFAULT_OBJECT_HEIGHT: int = 0
+const DEFAULT_FLOOR_HEIGHT: float = 0.0
+const DEFAULT_UNIT_EYE_HEIGHT_BONUS: float = 0.0
+const DEFAULT_COVER_HEIGHT: float = 0.0
+const DEFAULT_BLOCKS_LOS_HEIGHT: float = 0.0
+const DEFAULT_IS_ELEVATED_SURFACE: bool = false
 const DEFAULT_SURFACE_TYPE: String = SURFACE_GROUND
+const MAX_HEIGHT_LEVEL: int = 8
+const MAX_OBJECT_HEIGHT: int = 8
+const MAX_WORLD_HEIGHT: float = 64.0
 
 const EDGE_CLIFF: String = "cliff"
 const EDGE_SLOPE: String = "slope"
@@ -27,6 +35,11 @@ var blocks_los: bool = DEFAULT_BLOCKS_LOS
 var cover_value: int = DEFAULT_COVER_VALUE
 var height_level: int = DEFAULT_HEIGHT_LEVEL
 var object_height: int = DEFAULT_OBJECT_HEIGHT
+var floor_height: float = DEFAULT_FLOOR_HEIGHT
+var unit_eye_height_bonus: float = DEFAULT_UNIT_EYE_HEIGHT_BONUS
+var cover_height: float = DEFAULT_COVER_HEIGHT
+var blocks_los_height: float = DEFAULT_BLOCKS_LOS_HEIGHT
+var is_elevated_surface: bool = DEFAULT_IS_ELEVATED_SURFACE
 var surface_type: String = DEFAULT_SURFACE_TYPE
 var edge_type: String = EDGE_CLIFF
 
@@ -57,6 +70,11 @@ func to_dict() -> Dictionary:
 		"cover_value": cover_value,
 		"height_level": height_level,
 		"object_height": object_height,
+		"floor_height": floor_height,
+		"unit_eye_height_bonus": unit_eye_height_bonus,
+		"cover_height": cover_height,
+		"blocks_los_height": blocks_los_height,
+		"is_elevated_surface": is_elevated_surface,
 		"surface_type": surface_type,
 		"edge_type": edge_type,
 	}
@@ -132,10 +150,33 @@ func _apply_dict(data: Dictionary) -> void:
 	walkable = bool(data.get("walkable", DEFAULT_WALKABLE))
 	blocks_los = bool(data.get("blocks_los", DEFAULT_BLOCKS_LOS))
 	cover_value = clampi(int(data.get("cover_value", DEFAULT_COVER_VALUE)), 0, 100)
-	height_level = clampi(int(data.get("height_level", DEFAULT_HEIGHT_LEVEL)), 0, 2)
-	object_height = clampi(int(data.get("object_height", DEFAULT_OBJECT_HEIGHT)), 0, 3)
+	height_level = clampi(int(data.get("height_level", DEFAULT_HEIGHT_LEVEL)), 0, MAX_HEIGHT_LEVEL)
+	object_height = clampi(int(data.get("object_height", DEFAULT_OBJECT_HEIGHT)), 0, MAX_OBJECT_HEIGHT)
+	floor_height = _coerce_height_float(data.get("floor_height", float(height_level)))
+	unit_eye_height_bonus = _coerce_height_float(data.get("unit_eye_height_bonus", DEFAULT_UNIT_EYE_HEIGHT_BONUS))
+	cover_height = _coerce_height_float(data.get("cover_height", _derive_cover_height()))
+	blocks_los_height = _coerce_height_float(data.get("blocks_los_height", _derive_blocks_los_height()))
+	is_elevated_surface = bool(data.get("is_elevated_surface", floor_height > 0.0 or height_level > 0))
 	surface_type = _normalize_surface_type(String(data.get("surface_type", DEFAULT_SURFACE_TYPE)))
 	edge_type = _normalize_edge_type(String(data.get("edge_type", EDGE_CLIFF)))
+
+
+func _derive_cover_height() -> float:
+	if cover_value <= 0:
+		return DEFAULT_COVER_HEIGHT
+	return maxf(float(object_height), 0.5)
+
+
+func _derive_blocks_los_height() -> float:
+	if not blocks_los:
+		return DEFAULT_BLOCKS_LOS_HEIGHT
+	return maxf(maxf(float(height_level), float(object_height)), cover_height)
+
+
+func _coerce_height_float(value: Variant) -> float:
+	if value == null:
+		return 0.0
+	return clampf(float(value), 0.0, MAX_WORLD_HEIGHT)
 
 
 func _coerce_grid_position(value: Variant) -> Vector2i:

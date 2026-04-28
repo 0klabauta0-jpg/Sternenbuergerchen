@@ -135,6 +135,11 @@ static func create_empty(
 					"cover_value": TERRAIN_TILE_DATA_SCRIPT.DEFAULT_COVER_VALUE,
 					"height_level": TERRAIN_TILE_DATA_SCRIPT.DEFAULT_HEIGHT_LEVEL,
 					"surface_type": TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFACE_TYPE,
+					"floor_height": TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_HEIGHT,
+					"unit_eye_height_bonus": TERRAIN_TILE_DATA_SCRIPT.DEFAULT_UNIT_EYE_HEIGHT_BONUS,
+					"cover_height": TERRAIN_TILE_DATA_SCRIPT.DEFAULT_COVER_HEIGHT,
+					"blocks_los_height": TERRAIN_TILE_DATA_SCRIPT.DEFAULT_BLOCKS_LOS_HEIGHT,
+					"is_elevated_surface": TERRAIN_TILE_DATA_SCRIPT.DEFAULT_IS_ELEVATED_SURFACE,
 				}
 			)
 			terrain_map_data._tiles.append(tile_data)
@@ -190,6 +195,11 @@ func save_to_file(path: String) -> Error:
 			"cover_value": int(tile_dict.get("cover_value", 0)),
 			"height_level": int(tile_dict.get("height_level", 0)),
 			"object_height": int(tile_dict.get("object_height", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_OBJECT_HEIGHT)),
+			"floor_height": float(tile_dict.get("floor_height", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_FLOOR_HEIGHT)),
+			"unit_eye_height_bonus": float(tile_dict.get("unit_eye_height_bonus", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_UNIT_EYE_HEIGHT_BONUS)),
+			"cover_height": float(tile_dict.get("cover_height", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_COVER_HEIGHT)),
+			"blocks_los_height": float(tile_dict.get("blocks_los_height", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_BLOCKS_LOS_HEIGHT)),
+			"is_elevated_surface": bool(tile_dict.get("is_elevated_surface", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_IS_ELEVATED_SURFACE)),
 			"surface_type": String(tile_dict.get("surface_type", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFACE_TYPE)),
 			"edge_type": String(tile_dict.get("edge_type", TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF)),
 		}

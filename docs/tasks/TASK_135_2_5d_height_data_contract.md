@@ -3,7 +3,7 @@
 ## Ziel
 Eine kleine, belastbare Datenbasis fuer 2.5D-Bodenkampf einfuehren: Tiles bleiben gridbasiert, bekommen aber explizite Hoehen-, Deckungs- und Blockerwerte, die Navigation, LOS, Cover und 3D-Darstellung spaeter gemeinsam nutzen koennen.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Kontext
 - TASK_133/134 haben eine parallele 3D-Darstellung aufgebaut, ohne Simulation oder Gameplay auf Full-3D umzubauen.
@@ -30,11 +30,14 @@ Eine kleine, belastbare Datenbasis fuer 2.5D-Bodenkampf einfuehren: Tiles bleibe
 - Keine Full-3D-Physik.
 
 ## Akzeptanzkriterien
-- [ ] Alte Map-JSON-Dateien laden ohne Datenverlust.
-- [ ] Neue 2.5D-Felder werden gespeichert und wieder geladen.
-- [ ] Katalogtypen liefern sinnvolle Defaultwerte.
-- [ ] `TerrainRegistry` kann Bodenhoehe, Coverhoehe und LOS-Blockerhoehe pro Grid abfragen.
-- [ ] Verifier deckt Default-, Roundtrip- und Legacy-Faelle ab.
+- [x] Alte Map-JSON-Dateien laden ohne Datenverlust.
+- [x] Neue 2.5D-Felder werden gespeichert und wieder geladen.
+- [x] Katalogtypen liefern sinnvolle Defaultwerte.
+- [x] `TerrainRegistry` kann Bodenhoehe, Coverhoehe und LOS-Blockerhoehe pro Grid abfragen.
+- [x] Verifier deckt Default-, Roundtrip- und Legacy-Faelle ab.
+
+## Lokale Pruefung
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_135_verifier.gd`
 
 ## Risiken
 - Falsche Defaults koennen spaetere LOS-/Cover-Ergebnisse verzerren; Werte deshalb defensiv klein halten.
