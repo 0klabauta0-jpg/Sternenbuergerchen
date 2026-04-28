@@ -54,6 +54,9 @@ script = ExtResource("23_bridge")
 mission_setup_path = NodePath("../MissionSetup")
 terrain_registry_path = NodePath("../TerrainRegistry")
 map_root_2d_path = NodePath("../MapRoot")
+unit_registry_path = NodePath("../UnitRegistry")
+target_marker_path = NodePath("../TargetMarker")
+order_visualizer_path = NodePath("../FireteamOrderVisualizer")
 show_debug_grid = false
 camera_current_when_visible = true
 

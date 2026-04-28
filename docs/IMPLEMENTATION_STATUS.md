@@ -1079,9 +1079,9 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 ### TASK_142-145 - 2.5D-Live-Integration
 - Status: teilweise implementiert
 - Stand: Vier Folge-Tasks sind geschnitten, um den vorhandenen 2D-Spielstand kontrolliert in den 2.5D-Pfad zu integrieren: `TASK_142 - 2.5D Live Mission Visual Bridge`, `TASK_143 - Unit Height Visual Sync`, `TASK_144 - Editor-to-Mission 2.5D Smoke Test` und `TASK_145 - 2.5D Tactical Debug Overlay`.
-- Offene Punkte: `TASK_142` ist implementiert; `TASK_143` bis `TASK_145` bleiben offen.
+- Offene Punkte: `TASK_142` und `TASK_143` sind implementiert; `TASK_144` und `TASK_145` bleiben offen.
 - Risiken: Diese Tasks muessen Darstellung und Simulation weiter strikt trennen. 2.5D darf nicht still zu Full-3D-Gameplay werden.
-- Naechster Schritt: `TASK_143` starten, sobald der 142-Branch integriert ist.
+- Naechster Schritt: `TASK_144 - Editor-to-Mission 2.5D Smoke Test`, sobald der 143-Branch integriert ist.
 
 ### TASK_142 - 2.5D Live Mission Visual Bridge
 - Status: implementiert
@@ -1091,6 +1091,15 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Offene Punkte: Keine Unit-Hoehensynchronisierung, keine Editor-Smoke-Test-Kette und keine finalen 3D-Material-/Kameraentscheidungen.
 - Risiken: 2D und 3D koennen bei gleichzeitig sichtbarer Darstellung visuell doppelt wirken. Das ist fuer V1 bewusst ein Compare-/Bridge-Zustand und wird in TASK_143/144 weiter integriert.
 - Naechster Schritt: `TASK_143 - Unit Height Visual Sync`, damit Units, Selection und Marker zur 2.5D-Karte passen.
+
+### TASK_143 - Unit Height Visual Sync
+- Status: implementiert
+- Stand: `Terrain25DVisualProjection` projiziert 2D-Unit-/Markerpositionen ueber `TerrainRegistry`, `target_floor_index`, `floor_height`, `movement_layer` und `altitude_band` auf die 2.5D/3D-Visualhoehe. Der Helper bewahrt intra-tile Bewegungsversatz und liefert getrennte Anker fuer Unit, Selection, Target/Marker, Debuglabel und Air-Schatten.
+- Stand: `MissionLive25DVisualBridge` besitzt jetzt optionale Runtime-Visuals unter `RuntimeVisual3D`: Unit-, Selection-, DebugLabel-, AirShadow-, TargetMarker- und PathPreview-Container werden aus `UnitRegistry`, `TargetMarker` und optionalem `FireteamOrderVisualizer` synchronisiert. Die Synchronisierung ist rein visuell und veraendert keine autoritativen `Node2D.global_position`-Werte.
+- Stand: Ground- und Multi-Floor-Hoehen sowie Air-Altitudes werden im neuen `task_143_verifier` getrennt geprueft. Air-Units bekommen ein hohes Unit-Visual, einen Bodenschatten und ein `AIR <band>` Debuglabel; Path-/Move-Preview-Anker laufen ueber denselben Projektionshelper.
+- Offene Punkte: Die 3D-Unit-Visuals sind V1-Placeholder, keine finalen Meshes/Animationen. Das PathPreview-Overlay ist bewusst minimal und noch kein finales Taktik-UI.
+- Risiken: Viele Debuglabels koennen im Live-Bild noch dicht wirken. Der Bridge-Sync ist fuer Test-/Integrationsszenen gedacht und sollte bei grossen Missionen spaeter ueber Dirty-Events statt periodisches Polling laufen.
+- Naechster Schritt: `TASK_144 - Editor-to-Mission 2.5D Smoke Test`, damit Editor-Hoehen, Objekte, Rampen und gespeicherte Maps in der Live-Mission zusammen geprueft werden.
 
 ### TASK_151-153 - Geplante Folge-Labs
 - Status: geplant
