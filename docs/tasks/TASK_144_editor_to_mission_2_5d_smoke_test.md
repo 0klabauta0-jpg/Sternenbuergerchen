@@ -3,7 +3,7 @@
 ## Ziel
 Eine im Editor gespeicherte Karte mit Hoehen, Deckung, Objektlayern und Rampen/Treppen wird in der Mission geladen, 2.5D dargestellt und minimal spielbar validiert.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Kontext
 - TASK_140 macht 2.5D-Werte im Editor bearbeitbar.
@@ -29,12 +29,17 @@ Eine im Editor gespeicherte Karte mit Hoehen, Deckung, Objektlayern und Rampen/T
 - Keine neuen Fireteam-Taktiken.
 
 ## Akzeptanzkriterien
-- [ ] Smoke-Test-Map wird aus gespeicherter Datei geladen.
-- [ ] Mission registriert Hoehen-, Cover-, LOS- und Transition-Daten korrekt.
-- [ ] 2.5D-Visuals zeigen Boden und Objektlayer aus derselben Datei.
-- [ ] Bodenbewegung respektiert Rampen/Treppen-Regeln.
-- [ ] LOS/Cover-Snapshot nutzt die gespeicherten Hoehenwerte.
-- [ ] Verifier laeuft ohne manuelle Editorbedienung.
+- [x] Smoke-Test-Map wird aus gespeicherter Datei geladen.
+- [x] Mission registriert Hoehen-, Cover-, LOS- und Transition-Daten korrekt.
+- [x] 2.5D-Visuals zeigen Boden und Objektlayer aus derselben Datei.
+- [x] Bodenbewegung respektiert Rampen/Treppen-Regeln.
+- [x] LOS/Cover-Snapshot nutzt die gespeicherten Hoehenwerte.
+- [x] Verifier laeuft ohne manuelle Editorbedienung.
+
+## Umsetzung
+- `maps/task_144_2_5d_smoke.json` ist eine kleine 5x3-Smoke-Map mit flachem Boden, erhoehtem Boden, Rampe, Treppen-Transition, einem LOS-/Cover-Generator als Objektlayer und einer Plattform auf erhoehtem Boden.
+- `scripts/tests/task_144_verifier.gd` laedt die Datei ueber den normalen `TerrainMapData`-Pfad, prueft Save/Load-Roundtrip, startet die Live-Mission mit dieser Map und validiert `MissionSetup`, `TerrainRegistry`, `MissionLive25DVisualBridge`, Navigation, LOS und Coverprofil.
+- Der Verifier bewegt eine Mission-Unit ueber den gespeicherten Rampenpfad zum erhoehten Objective und prueft zugleich, dass ein Hoehensprung ohne Rampe/Treppe geblockt bleibt.
 
 ## Risiken
 - Wenn der Editor beim Speichern Legacy-/Objektlayerwerte anders serialisiert als die Mission sie erwartet, zeigt dieser Task die Luecke bewusst frueh.

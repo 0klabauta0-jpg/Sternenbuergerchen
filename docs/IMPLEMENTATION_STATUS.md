@@ -1079,9 +1079,9 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 ### TASK_142-145 - 2.5D-Live-Integration
 - Status: teilweise implementiert
 - Stand: Vier Folge-Tasks sind geschnitten, um den vorhandenen 2D-Spielstand kontrolliert in den 2.5D-Pfad zu integrieren: `TASK_142 - 2.5D Live Mission Visual Bridge`, `TASK_143 - Unit Height Visual Sync`, `TASK_144 - Editor-to-Mission 2.5D Smoke Test` und `TASK_145 - 2.5D Tactical Debug Overlay`.
-- Offene Punkte: `TASK_142` und `TASK_143` sind implementiert; `TASK_144` und `TASK_145` bleiben offen.
+- Offene Punkte: `TASK_142` bis `TASK_144` sind implementiert; `TASK_145` bleibt offen.
 - Risiken: Diese Tasks muessen Darstellung und Simulation weiter strikt trennen. 2.5D darf nicht still zu Full-3D-Gameplay werden.
-- Naechster Schritt: `TASK_144 - Editor-to-Mission 2.5D Smoke Test`, sobald der 143-Branch integriert ist.
+- Naechster Schritt: `TASK_145 - 2.5D Tactical Debug Overlay`, sobald der 144-Branch integriert ist.
 
 ### TASK_142 - 2.5D Live Mission Visual Bridge
 - Status: implementiert
@@ -1100,6 +1100,15 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Offene Punkte: Die 3D-Unit-Visuals sind V1-Placeholder, keine finalen Meshes/Animationen. Das PathPreview-Overlay ist bewusst minimal und noch kein finales Taktik-UI.
 - Risiken: Viele Debuglabels koennen im Live-Bild noch dicht wirken. Der Bridge-Sync ist fuer Test-/Integrationsszenen gedacht und sollte bei grossen Missionen spaeter ueber Dirty-Events statt periodisches Polling laufen.
 - Naechster Schritt: `TASK_144 - Editor-to-Mission 2.5D Smoke Test`, damit Editor-Hoehen, Objekte, Rampen und gespeicherte Maps in der Live-Mission zusammen geprueft werden.
+
+### TASK_144 - Editor-to-Mission 2.5D Smoke Test
+- Status: implementiert
+- Stand: `maps/task_144_2_5d_smoke.json` ist eine kleine gespeicherte Smoke-Map mit flachem Boden, erhoehtem Boden, Rampe, Treppen-Transition, einem Generator als Objektlayer mit Cover-/LOS-Hoehen und einer Plattform als zweitem Objektlayer auf erhoehtem Boden.
+- Stand: `scripts/tests/task_144_verifier.gd` prueft die komplette Kette ohne manuelle Editorbedienung: `TerrainMapData`-Load/Save-Roundtrip, MissionSetup-Map-Override, TerrainRegistry-Registrierung, 2.5D-Bridge-Rendering, Objektlayer-Rendering, Markerpositionen, Rampen-/Treppen-Traversal, LOS-Blocker und Cover-Height-Profil.
+- Stand: Der Verifier fuehrt eine minimale Missionsbewegung ueber den gespeicherten Rampenpfad zum erhoehten Objective aus und prueft gleichzeitig, dass ein Hoehensprung ohne Transition weiterhin geblockt bleibt.
+- Offene Punkte: Die Smoke-Map ist absichtlich klein und kein Leveldesign-Ersatz. Multi-Floor-Editor-Bedienung und finales Debug-Overlay bleiben Folgearbeit.
+- Risiken: Die Karte ist als Fruehwarn-Fixture gedacht; wenn spaetere Editor-Serialisierung Objektlayer oder Hoehenfelder aendert, soll dieser Verifier bewusst anschlagen.
+- Naechster Schritt: `TASK_145 - 2.5D Tactical Debug Overlay`, um Cover/LOS/Height/Floor/Walkability/Path im Live-Bild umschaltbar sichtbar zu machen.
 
 ### TASK_151-153 - Geplante Folge-Labs
 - Status: geplant
