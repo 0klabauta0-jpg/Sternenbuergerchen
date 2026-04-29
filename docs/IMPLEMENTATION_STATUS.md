@@ -1077,11 +1077,11 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Naechster Schritt: Erst Playtest-Gefuehl pruefen; spaetere Tasks koennen Air-Rollen, Air-Spawns oder AA-Waffendaten getrennt schneiden.
 
 ### TASK_142-145 - 2.5D-Live-Integration
-- Status: teilweise implementiert
+- Status: implementiert
 - Stand: Vier Folge-Tasks sind geschnitten, um den vorhandenen 2D-Spielstand kontrolliert in den 2.5D-Pfad zu integrieren: `TASK_142 - 2.5D Live Mission Visual Bridge`, `TASK_143 - Unit Height Visual Sync`, `TASK_144 - Editor-to-Mission 2.5D Smoke Test` und `TASK_145 - 2.5D Tactical Debug Overlay`.
-- Offene Punkte: `TASK_142` bis `TASK_144` sind implementiert; `TASK_145` bleibt offen.
+- Offene Punkte: Die 2.5D-Live-Integrationskette ist als Test-/Debugpfad vorhanden. Finales UX, echte 3D-Unit-Assets und breite Performancearbeit bleiben Folgearbeit.
 - Risiken: Diese Tasks muessen Darstellung und Simulation weiter strikt trennen. 2.5D darf nicht still zu Full-3D-Gameplay werden.
-- Naechster Schritt: `TASK_145 - 2.5D Tactical Debug Overlay`, sobald der 144-Branch integriert ist.
+- Naechster Schritt: Playtest der Live-Mission mit 2.5D-Bridge und Overlay; danach entscheiden, ob erst Unit-Asset-Visuals, Kamera/Picking-Komfort oder taktische Hoehenregeln vertieft werden.
 
 ### TASK_142 - 2.5D Live Mission Visual Bridge
 - Status: implementiert
@@ -1109,6 +1109,15 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Offene Punkte: Die Smoke-Map ist absichtlich klein und kein Leveldesign-Ersatz. Multi-Floor-Editor-Bedienung und finales Debug-Overlay bleiben Folgearbeit.
 - Risiken: Die Karte ist als Fruehwarn-Fixture gedacht; wenn spaetere Editor-Serialisierung Objektlayer oder Hoehenfelder aendert, soll dieser Verifier bewusst anschlagen.
 - Naechster Schritt: `TASK_145 - 2.5D Tactical Debug Overlay`, um Cover/LOS/Height/Floor/Walkability/Path im Live-Bild umschaltbar sichtbar zu machen.
+
+### TASK_145 - 2.5D Tactical Debug Overlay
+- Status: implementiert
+- Stand: `Mission25DTacticalDebugOverlay` haengt als deaktivierte Debug-Schicht unter `Mission25DVisualBridge`. `F6` schaltet das Overlay, `1` bis `5` schalten Height/Floor, Cover/LOS, Walkability/Transition, Path und Air einzeln.
+- Stand: Das Overlay baut nur Labels aus bestehenden Datenquellen: Terrain-/Cover-/Walkability-Daten kommen aus `TerrainRegistry`, Pathdaten aus `SimulationRoot.command_queue` plus optionalem `FireteamOrderVisualizer`, Air-Altitude und AA-Gate-Debug aus `UnitRegistry` und `SimulationRoot.get_air_layer_debug_snapshot()`.
+- Stand: `scripts/tests/task_145_verifier.gd` startet die Live-Mission mit der TASK_144-Smoke-Map und prueft Overlay-Aktivierung, einzelne Layer-Toggles, Registry-Daten, SimulationRoot-Pfade und den letzten Air-AA-Gate-Grund.
+- Offene Punkte: Das Overlay ist Debug-V1, keine finale HUD-/Editor-UX. Bei grossen Karten kann die Labelmenge dicht werden; `max_tile_labels`/`max_path_labels` begrenzen den Playtest-Schaden.
+- Risiken: Debuglabels duerfen nicht zur neuen Gameplay-Datenquelle werden. Das Overlay bleibt bewusst pull-basiert und rein lesend.
+- Naechster Schritt: In der Live-Mission mit `F6`/`1-5` testen und entscheiden, welche 2.5D-Informationen spaeter in eine echte taktische UI gehoeren.
 
 ### TASK_151-153 - Geplante Folge-Labs
 - Status: geplant

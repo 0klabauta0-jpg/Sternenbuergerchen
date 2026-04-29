@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3]
+[gd_scene load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://scripts/core/simulation_root.gd" id="1_simulation"]
 [ext_resource type="Script" path="res://scripts/core/event_router.gd" id="2_router"]
@@ -23,6 +23,7 @@
 [ext_resource type="Script" path="res://scripts/tests/phase_controller.gd" id="21_phase_controller"]
 [ext_resource type="Script" path="res://scripts/tests/mission_map_camera_controller.gd" id="22_camera"]
 [ext_resource type="Script" path="res://scripts/tests/mission_live_2_5d_visual_bridge.gd" id="23_bridge"]
+[ext_resource type="Script" path="res://scripts/tests/mission_2_5d_tactical_debug_overlay.gd" id="24_tactical_debug"]
 
 [node name="MissionReactivityTest" type="Node2D"]
 
@@ -59,6 +60,14 @@ target_marker_path = NodePath("../TargetMarker")
 order_visualizer_path = NodePath("../FireteamOrderVisualizer")
 show_debug_grid = false
 camera_current_when_visible = true
+
+[node name="TacticalDebugOverlay25D" type="Node3D" parent="Mission25DVisualBridge"]
+script = ExtResource("24_tactical_debug")
+terrain_registry_path = NodePath("../../TerrainRegistry")
+simulation_root_path = NodePath("../../SimulationRoot")
+unit_registry_path = NodePath("../../UnitRegistry")
+order_visualizer_path = NodePath("../../FireteamOrderVisualizer")
+bridge_path = NodePath("..")
 
 [node name="FTLRegistry" type="Node" parent="."]
 script = ExtResource("4_ftls")

@@ -116,6 +116,13 @@ func get_runtime_visual_snapshot() -> Dictionary:
 	return runtime_visual_snapshot.duplicate(true)
 
 
+func get_visual_projection_config() -> Dictionary:
+	return {
+		"cell_size": float(_visual_projection.cell_size),
+		"height_step": float(_visual_projection.height_step),
+	}
+
+
 func sync_runtime_visuals() -> Dictionary:
 	if not bridge_enabled or not sync_runtime_visuals_enabled:
 		runtime_visual_snapshot = {
