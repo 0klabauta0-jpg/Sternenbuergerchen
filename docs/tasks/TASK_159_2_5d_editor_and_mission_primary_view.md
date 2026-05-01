@@ -50,6 +50,7 @@ Die sichtbare Kartenoberflaeche und die bedienbare Kamera sollen aber nicht mehr
 - [x] Editor-Picking fuer Tile-, Marker- und Patrol-Arbeit nutzt die 2.5D-Karte.
 - [x] Live-Mission blendet alte 2D-Terrain-/Unit-Sprites aus und zeigt 3D-Proxies fuer Friendlies/Enemies.
 - [x] TacticalController kann LZ und taktische Ziele ueber die 2.5D-Ansicht setzen.
+- [x] Kartenobjekte, Waende, Cliffs, Rampen und Felsen nutzen in der 2.5D-View echte Kenney-GLB-Modelle statt Block-Platzhalter, soweit ein Asset im Pack vorhanden ist.
 - [x] Bestehende Authoring-/Live-Verifier bleiben lauffaehig oder dokumentieren bewusst offene GUI-Risiken.
 
 ## Lokale Pruefung
@@ -73,6 +74,7 @@ Die sichtbare Kartenoberflaeche und die bedienbare Kamera sollen aber nicht mehr
 
 ## Ergebnis
 - `TerrainMap3DView` rendert `TerrainMapData` als gemeinsame 2.5D-Primary-View mit `SubViewport`, `Node3D`, `Camera3D`, Terrain-/Objekt-/Marker-/Patrol-Visuals, Unit-Proxies, LZ-/Dropship-Proxy und taktischen Area-/Contact-Overlays.
+- Terrain-Objekte, Waende, Cliffs, Rampen und Felsen werden in dieser View aus den vorhandenen Kenney-GLB-Modellen instanziiert; Block-Platzhalter bleiben nur als Fallback fuer nicht aufloesbare Asset-Typen.
 - Der Map-Editor deaktiviert die alte `Camera2D`, blendet Legacy-2D-Kartencontainer aus und fuehrt WASD, Zoom, Rotation sowie Tile-/Marker-/Patrol-Picking ueber die 3D-View.
 - Die Live-Mission blendet alte Terrain-/Unit-Sprites aus, laesst die `Node2D`-Runtime-Anker fuer Simulation/Selection sichtbar und spiegelt Units, LZ, Dropship, Attack Areas und Contacts in die 3D-View.
 - TASK_158 wurde so angepasst, dass die Live-Visual-Bridge jetzt die 3D-Primary-View akzeptiert statt alte 2D-Sprites als sichtbare Wahrheit zu verlangen.

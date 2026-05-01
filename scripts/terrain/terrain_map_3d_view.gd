@@ -2,6 +2,7 @@ class_name TerrainMap3DView
 extends CanvasLayer
 
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
+const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_catalog.gd")
 
 const VIEWPORT_CONTAINER_NAME: String = "ViewportContainer"
 const VIEWPORT_NAME: String = "SubViewport"
@@ -29,6 +30,32 @@ const CAMERA_PAN_UNITS_PER_SECOND: float = 9.0
 const CAMERA_DRAG_PAN_FACTOR: float = 0.065
 const DEFAULT_HALF_TILE_WIDTH: float = 64.0
 const DEFAULT_HALF_TILE_HEIGHT: float = 32.0
+const KENNEY_MODEL_ROOT: String = "res://Assets/kenney_space-kit/Models/GLTF format"
+
+const LEGACY_MODEL_BY_TYPE: Dictionary = {
+	"wall_straight_se": "corridor_wall",
+	"wall_straight_sw": "corridor_wall",
+	"wall_straight_ne": "corridor_wall",
+	"wall_straight_nw": "corridor_wall",
+	"wall_corner_se": "corridor_wallCorner",
+	"wall_corner_sw": "corridor_wallCorner",
+	"wall_corner_ne": "corridor_wallCorner",
+	"wall_corner_nw": "corridor_wallCorner",
+	"cliff_straight_se": "terrain_sideCliff",
+	"cliff_straight_sw": "terrain_sideCliff",
+	"cliff_straight_ne": "terrain_sideCliff",
+	"cliff_straight_nw": "terrain_sideCliff",
+	"cliff_corner_se": "terrain_sideCorner",
+	"cliff_corner_sw": "terrain_sideCorner",
+	"cliff_corner_ne": "terrain_sideCorner",
+	"cliff_corner_nw": "terrain_sideCorner",
+	"slope_se": "terrain_rampLarge",
+	"slope_sw": "terrain_rampLarge",
+	"slope_ne": "terrain_rampLarge",
+	"slope_nw": "terrain_rampLarge",
+	"rock_small": "rock",
+	"rock_large": "rock_largeB",
+}
 
 var _viewport_container: SubViewportContainer = null
 var _subviewport: SubViewport = null
@@ -44,6 +71,8 @@ var _drop_root: Node3D = null
 var _camera: Camera3D = null
 
 var _terrain_map_data = null
+var _tile_catalog = null
+var _model_scene_cache: Dictionary = {}
 var _unit_nodes: Array = []
 var _unit_proxies_by_id: Dictionary = {}
 var _selected_grid_positions: Array = []
@@ -61,6 +90,8 @@ var _camera_size: float = CAMERA_DEFAULT_SIZE
 var _camera_yaw_degrees: float = 45.0
 var _camera_pitch_degrees: float = 58.0
 var _map_tile_count: int = 0
+var _asset_model_count: int = 0
+var _placeholder_object_count: int = 0
 var _marker_count: int = 0
 var _patrol_segment_count: int = 0
 var _area_order_count: int = 0
@@ -100,6 +131,8 @@ func render_map(terrain_map_data = null) -> void:
 	_clear_children(_contact_root)
 	_clear_children(_drop_root)
 	_map_tile_count = 0
+	_asset_model_count = 0
+	_placeholder_object_count = 0
 	_marker_count = 0
 	_patrol_segment_count = 0
 	if _terrain_map_data == null:
@@ -242,6 +275,8 @@ func screen_rect_to_tile_world_positions(screen_rect: Rect2) -> Array:
 func get_render_snapshot() -> Dictionary:
 	return {
 		"tile_count": _map_tile_count,
+		"asset_model_count": _asset_model_count,
+		"placeholder_object_count": _placeholder_object_count,
 		"marker_count": _marker_count,
 		"patrol_segment_count": _patrol_segment_count,
 		"selected_grid_count": _selected_grid_positions.size(),
@@ -397,13 +432,19 @@ func _add_tile_visual(tile_data) -> void:
 
 	var object_type_id: String = String(tile_data.object_type_id) if tile_data.object_type_id is String else ""
 	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
-	if not object_type_id.is_empty() or type_id.begins_with("wall_") or type_id.begins_with("cliff_") or type_id.begins_with("rock_") or bool(tile_data.blocks_los) or int(tile_data.object_height) > 0:
-		_add_object_visual(tile_data, top_y)
+	var visual_type_id: String = _resolve_tile_asset_type_id(object_type_id, type_id)
+	if not visual_type_id.is_empty() or bool(tile_data.blocks_los) or int(tile_data.object_height) > 0:
+		_add_object_visual(tile_data, top_y, visual_type_id)
 
 
-func _add_object_visual(tile_data, top_y: float) -> void:
+func _add_object_visual(tile_data, top_y: float, visual_type_id: String) -> void:
+	if not visual_type_id.is_empty() and _add_asset_model_visual(tile_data, top_y, visual_type_id):
+		return
+
 	var object_height: float = maxf(float(tile_data.object_height), 1.0) * OBJECT_HEIGHT_STEP
-	var type_id: String = String(tile_data.object_type_id) if tile_data.object_type_id is String else ""
+	var type_id: String = visual_type_id
+	if type_id.is_empty():
+		type_id = String(tile_data.object_type_id) if tile_data.object_type_id is String else ""
 	if type_id.is_empty():
 		type_id = String(tile_data.type_id) if tile_data.type_id is String else ""
 	if type_id.begins_with("rock_"):
@@ -421,6 +462,26 @@ func _add_object_visual(tile_data, top_y: float) -> void:
 	instance.material_override = _make_material(_get_object_color(type_id, tile_data))
 	instance.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + (object_height * 0.5))
 	_map_root.add_child(instance)
+	_placeholder_object_count += 1
+
+
+func _add_asset_model_visual(tile_data, top_y: float, visual_type_id: String) -> bool:
+	var model_scene := _get_asset_model_scene(visual_type_id)
+	if model_scene == null or _map_root == null:
+		return false
+	var model_instance := model_scene.instantiate() as Node3D
+	if model_instance == null:
+		return false
+
+	var visual_root := Node3D.new()
+	visual_root.name = "Asset_%s_%d_%d" % [visual_type_id, tile_data.grid_position.x, tile_data.grid_position.y]
+	visual_root.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + _get_asset_y_offset(visual_type_id))
+	visual_root.rotation_degrees.y = _get_asset_rotation_y(visual_type_id)
+	visual_root.scale = Vector3.ONE * _get_asset_model_scale(visual_type_id)
+	visual_root.add_child(model_instance)
+	_map_root.add_child(visual_root)
+	_asset_model_count += 1
+	return true
 
 
 func _rebuild_marker_visuals() -> void:
@@ -711,6 +772,121 @@ func _make_material(color: Color, transparent: bool = false) -> StandardMaterial
 		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	return material
+
+
+func _resolve_tile_asset_type_id(object_type_id: String, type_id: String) -> String:
+	var normalized_object: String = object_type_id.strip_edges().to_lower()
+	if not normalized_object.is_empty():
+		return normalized_object
+
+	var normalized_type: String = type_id.strip_edges().to_lower()
+	if normalized_type.is_empty() or normalized_type == "ground_flat":
+		return ""
+	if LEGACY_MODEL_BY_TYPE.has(normalized_type):
+		return normalized_type
+
+	var tile_catalog = _get_tile_catalog()
+	if tile_catalog == null:
+		return ""
+	if tile_catalog.has_method("is_object_layer_type") and bool(tile_catalog.call("is_object_layer_type", normalized_type)):
+		return normalized_type
+	var entry: Dictionary = Dictionary(tile_catalog.call("get_type", normalized_type)) if tile_catalog.has_method("get_type") else {}
+	if not String(entry.get("texture_path", "")).strip_edges().is_empty():
+		return normalized_type
+	return ""
+
+
+func _get_asset_model_scene(visual_type_id: String) -> PackedScene:
+	var model_name: String = _resolve_asset_model_name(visual_type_id)
+	if model_name.is_empty():
+		return null
+	var model_path: String = "%s/%s.glb" % [KENNEY_MODEL_ROOT, model_name]
+	if _model_scene_cache.has(model_path):
+		return _model_scene_cache.get(model_path, null) as PackedScene
+	if not ResourceLoader.exists(model_path):
+		_model_scene_cache[model_path] = null
+		return null
+	var packed_scene := load(model_path) as PackedScene
+	_model_scene_cache[model_path] = packed_scene
+	return packed_scene
+
+
+func _resolve_asset_model_name(visual_type_id: String) -> String:
+	var normalized: String = visual_type_id.strip_edges().to_lower()
+	if normalized.is_empty() or normalized == "ground_flat":
+		return ""
+	if LEGACY_MODEL_BY_TYPE.has(normalized):
+		return String(LEGACY_MODEL_BY_TYPE[normalized])
+
+	var tile_catalog = _get_tile_catalog()
+	if tile_catalog == null or not tile_catalog.has_method("get_type"):
+		return ""
+	var entry: Dictionary = Dictionary(tile_catalog.call("get_type", normalized))
+	var texture_path: String = String(entry.get("texture_path", "")).strip_edges()
+	if texture_path.is_empty():
+		return ""
+	return _strip_direction_suffix(texture_path.get_file().get_basename())
+
+
+func _strip_direction_suffix(value: String) -> String:
+	var lowered: String = value.to_lower()
+	for suffix in ["_ne", "_nw", "_se", "_sw"]:
+		if lowered.ends_with(suffix):
+			return value.substr(0, value.length() - suffix.length())
+	return value
+
+
+func _get_asset_rotation_y(visual_type_id: String) -> float:
+	match _get_direction_suffix(visual_type_id):
+		"ne":
+			return 0.0
+		"se":
+			return -90.0
+		"sw":
+			return 180.0
+		"nw":
+			return 90.0
+		_:
+			return 0.0
+
+
+func _get_direction_suffix(visual_type_id: String) -> String:
+	var normalized: String = visual_type_id.strip_edges().to_lower()
+	var parts := normalized.split("_", false)
+	if parts.is_empty():
+		return ""
+	var suffix: String = String(parts[parts.size() - 1])
+	match suffix:
+		"ne", "nw", "se", "sw":
+			return suffix
+		_:
+			return ""
+
+
+func _get_asset_model_scale(visual_type_id: String) -> float:
+	var normalized: String = visual_type_id.strip_edges().to_lower()
+	if normalized.begins_with("rock_") or normalized.begins_with("crater_"):
+		return TILE_SPACING * 0.95
+	if normalized.begins_with("deko_"):
+		return TILE_SPACING * 0.9
+	if normalized.begins_with("fahrzeug_"):
+		return TILE_SPACING * 0.92
+	if normalized.begins_with("gebaeude_"):
+		return TILE_SPACING * 0.96
+	return TILE_SPACING
+
+
+func _get_asset_y_offset(visual_type_id: String) -> float:
+	var normalized: String = visual_type_id.strip_edges().to_lower()
+	if normalized.begins_with("crater_") or normalized.begins_with("rail_") or normalized.begins_with("plattform_"):
+		return 0.018
+	return 0.028
+
+
+func _get_tile_catalog():
+	if _tile_catalog == null:
+		_tile_catalog = TERRAIN_TILE_CATALOG_SCRIPT.call("load_from_file")
+	return _tile_catalog
 
 
 func _get_tile_color(tile_data) -> Color:

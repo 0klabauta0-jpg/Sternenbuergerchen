@@ -35,6 +35,7 @@ func _test_editor_uses_3d_primary_view() -> void:
 	_assert(primary_view != null and primary_view.has_method("get_render_snapshot"), "Editor attaches Primary3DView")
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot")) if primary_view != null else {}
 	_assert(int(snapshot.get("tile_count", 0)) > 0, "Editor Primary3DView renders terrain tiles")
+	_assert(int(snapshot.get("asset_model_count", 0)) > 0, "Editor Primary3DView renders Kenney 3D asset models")
 
 	var camera2d := editor.get_node_or_null("Camera2D") as Camera2D
 	_assert(camera2d != null and not camera2d.enabled, "Editor legacy Camera2D is disabled")
@@ -67,6 +68,7 @@ func _test_live_mission_uses_3d_primary_view() -> void:
 	_assert(primary_view != null and primary_view.has_method("get_render_snapshot"), "Live mission attaches Primary3DView")
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot")) if primary_view != null else {}
 	_assert(int(snapshot.get("tile_count", 0)) > 0 and int(snapshot.get("unit_proxy_count", 0)) >= 2, "Live Primary3DView renders map and runtime unit proxies")
+	_assert(int(snapshot.get("asset_model_count", 0)) > 0, "Live Primary3DView renders Kenney 3D asset models")
 
 	var map_root := live_scene.get_node_or_null("MapRoot") as CanvasItem
 	var mission_camera := live_scene.get_node_or_null("MissionCamera") as Camera2D
