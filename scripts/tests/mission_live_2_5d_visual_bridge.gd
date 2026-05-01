@@ -11,7 +11,13 @@ const MOVEMENT_LAYER_SCRIPT: GDScript = preload("res://scripts/core/movement_lay
 const FRIENDLY_TEAM_ID: String = "team_alpha"
 const LEGACY_2D_VISUAL_META_KEY: String = "task_149_legacy_2d_visible"
 const LEGACY_2D_OVERLAY_META_KEY: String = "task_150_legacy_2d_overlay_visible"
+const FRIENDLY_UNIT_MODEL_PATH: String = "res://Assets/kenney_space-kit/Models/GLTF format/astronautA.glb"
+const ENEMY_UNIT_MODEL_PATH: String = "res://Assets/kenney_space-kit/Models/GLTF format/astronautB.glb"
+const UNIT_MODEL_TARGET_HEIGHT: float = 0.88
+const DROPSHIP_MODEL_TYPE_ID: String = "fahrzeug_speeder_b"
 const DROPSHIP_MODEL_PATH: String = "res://Assets/kenney_space-kit/3d/craft_speederB.glb"
+const DROPSHIP_MARKER_BASE_Y_OFFSET: float = 0.18
+const DROPSHIP_FALLBACK_SCALE: float = 1.48
 
 @export var bridge_enabled: bool = true
 @export var mission_setup_path: NodePath
@@ -33,6 +39,10 @@ const DROPSHIP_MODEL_PATH: String = "res://Assets/kenney_space-kit/3d/craft_spee
 @export var keyboard_fallback_toggle_enabled: bool = true
 @export var sync_runtime_visuals_enabled: bool = true
 @export var show_runtime_debug_labels: bool = false
+@export var use_character_unit_models: bool = true
+@export var unit_model_target_height: float = UNIT_MODEL_TARGET_HEIGHT
+@export var dropship_visual_type_id: String = DROPSHIP_MODEL_TYPE_ID
+@export var dropship_visual_scale_multiplier: float = 1.0
 @export var hide_2d_unit_sprites_when_primary: bool = true
 @export var hide_2d_mission_overlays_when_primary: bool = true
 @export var legacy_2d_mission_overlay_paths: Array[NodePath] = []
@@ -60,7 +70,10 @@ var _lz_mesh: Mesh = null
 var _preview_mesh: Mesh = null
 var _air_shadow_mesh: Mesh = null
 var _dropship_fallback_mesh: Mesh = null
+var _friendly_unit_scene: PackedScene = null
+var _enemy_unit_scene: PackedScene = null
 var _dropship_scene: PackedScene = null
+var _dropship_scene_model_path: String = ""
 var _unit_material_ground: StandardMaterial3D = null
 var _unit_material_air: StandardMaterial3D = null
 var _unit_material_friendly: StandardMaterial3D = null
@@ -489,8 +502,14 @@ func _prepare_runtime_visual_resources() -> void:
 		var dropship_mesh := BoxMesh.new()
 		dropship_mesh.size = Vector3(0.72, 0.18, 1.12)
 		_dropship_fallback_mesh = dropship_mesh
-	if _dropship_scene == null and ResourceLoader.exists(DROPSHIP_MODEL_PATH):
-		_dropship_scene = load(DROPSHIP_MODEL_PATH) as PackedScene
+	if _friendly_unit_scene == null and ResourceLoader.exists(FRIENDLY_UNIT_MODEL_PATH):
+		_friendly_unit_scene = load(FRIENDLY_UNIT_MODEL_PATH) as PackedScene
+	if _enemy_unit_scene == null and ResourceLoader.exists(ENEMY_UNIT_MODEL_PATH):
+		_enemy_unit_scene = load(ENEMY_UNIT_MODEL_PATH) as PackedScene
+	var dropship_model_path: String = _get_dropship_model_path()
+	if _dropship_scene == null and ResourceLoader.exists(dropship_model_path):
+		_dropship_scene = load(dropship_model_path) as PackedScene
+		_dropship_scene_model_path = dropship_model_path
 	_unit_material_ground = _ensure_material(_unit_material_ground, Color(0.25, 0.68, 1.0, 1.0), false)
 	_unit_material_air = _ensure_material(_unit_material_air, Color(1.0, 0.68, 0.24, 1.0), false)
 	_unit_material_friendly = _ensure_material(_unit_material_friendly, Color(0.2, 0.62, 1.0, 1.0), false)
@@ -541,6 +560,12 @@ func _ensure_container(parent: Node3D, node_name: String) -> Node3D:
 	return container
 
 
+func _clear_children(parent: Node) -> void:
+	for child in parent.get_children():
+		parent.remove_child(child)
+		child.free()
+
+
 func _sync_unit_visual(unit_id: String, unit: Node2D, projection: Dictionary, unit_container: Node3D, selection_container: Node3D, debug_container: Node3D, air_container: Node3D) -> Dictionary:
 	var key: String = _sanitize_node_key(unit_id)
 	var movement_layer: String = String(projection.get("movement_layer", MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_GROUND))
@@ -551,6 +576,11 @@ func _sync_unit_visual(unit_id: String, unit: Node2D, projection: Dictionary, un
 	unit_visual.material_override = _get_unit_body_material(descriptor)
 	unit_visual.scale = Vector3(1.08, 1.08, 1.08) if bool(descriptor.get("is_selected", false)) else Vector3.ONE
 	unit_visual.visible = true
+	var uses_character_model: bool = _sync_unit_character_model(unit_visual, descriptor)
+	descriptor["uses_character_model"] = uses_character_model
+	descriptor["character_model_path"] = _get_unit_character_model_path(descriptor) if uses_character_model else ""
+	descriptor["unit_model_target_height"] = unit_model_target_height
+	unit_visual.mesh = null if uses_character_model else _unit_mesh
 	_sync_unit_visual_parts(unit_visual, descriptor)
 
 	var selection_visual := _ensure_mesh_instance(selection_container, key, "Selection_", _selection_mesh)
@@ -571,10 +601,11 @@ func _sync_unit_visual(unit_id: String, unit: Node2D, projection: Dictionary, un
 
 
 func _sync_unit_visual_parts(unit_visual: MeshInstance3D, descriptor: Dictionary) -> void:
+	var uses_character_model: bool = bool(descriptor.get("uses_character_model", false))
 	var head := _ensure_child_mesh_instance(unit_visual, "Head", _unit_head_mesh)
 	head.position = Vector3(0.0, 0.42, 0.0)
 	head.material_override = _unit_head_material
-	head.visible = true
+	head.visible = not uses_character_model
 
 	var team_badge := _ensure_child_mesh_instance(unit_visual, "TeamBadge", _unit_badge_mesh)
 	team_badge.position = Vector3(0.0, 0.02, -0.25)
@@ -582,15 +613,156 @@ func _sync_unit_visual_parts(unit_visual: MeshInstance3D, descriptor: Dictionary
 	team_badge.visible = true
 
 	var lead_marker := _ensure_child_mesh_instance(unit_visual, "LeadMarker", _unit_lead_mesh)
-	lead_marker.position = Vector3(0.0, 0.76, 0.0)
+	var marker_height: float = unit_model_target_height + 0.16 if uses_character_model else 0.76
+	lead_marker.position = Vector3(0.0, marker_height, 0.0)
 	lead_marker.material_override = _unit_lead_material
 	lead_marker.visible = bool(descriptor.get("is_fireteam_lead", false))
 
 	var role_label := _ensure_unit_role_label(unit_visual)
 	role_label.text = String(descriptor.get("role_badge", "OP"))
-	role_label.position = Vector3(0.0, 0.62, 0.0)
+	var role_label_height: float = unit_model_target_height + 0.08 if uses_character_model else 0.62
+	role_label.position = Vector3(0.0, role_label_height, 0.0)
 	role_label.visible = bool(descriptor.get("is_friendly", false))
 	role_label.modulate = Color(0.92, 0.96, 1.0, 1.0) if bool(descriptor.get("is_friendly", false)) else Color(1.0, 0.86, 0.82, 1.0)
+
+
+func _sync_unit_character_model(unit_visual: MeshInstance3D, descriptor: Dictionary) -> bool:
+	var model_path: String = _get_unit_character_model_path(descriptor)
+	if model_path.is_empty():
+		_remove_unit_character_model(unit_visual)
+		return false
+	var scene := _get_unit_character_scene(model_path)
+	if scene == null:
+		_remove_unit_character_model(unit_visual)
+		return false
+	var model_root := unit_visual.get_node_or_null("CharacterModel") as Node3D
+	if model_root != null and String(model_root.get_meta("model_path", "")) != model_path:
+		unit_visual.remove_child(model_root)
+		model_root.free()
+		model_root = null
+	if model_root == null:
+		model_root = Node3D.new()
+		model_root.name = "CharacterModel"
+		model_root.set_meta("model_path", model_path)
+		var model := scene.instantiate() as Node3D
+		if model == null:
+			model_root.free()
+			return false
+		model.name = "Model"
+		model.rotation_degrees.y = 180.0
+		_center_and_scale_model_node_to_height(model, unit_model_target_height)
+		model_root.add_child(model)
+		unit_visual.add_child(model_root)
+	model_root.visible = true
+	return true
+
+
+func _remove_unit_character_model(unit_visual: Node3D) -> void:
+	var model_root := unit_visual.get_node_or_null("CharacterModel") as Node3D
+	if model_root != null:
+		unit_visual.remove_child(model_root)
+		model_root.free()
+
+
+func _get_unit_character_model_path(descriptor: Dictionary) -> String:
+	if not use_character_unit_models:
+		return ""
+	if bool(descriptor.get("is_enemy", false)):
+		return ENEMY_UNIT_MODEL_PATH
+	if bool(descriptor.get("is_friendly", false)):
+		return FRIENDLY_UNIT_MODEL_PATH
+	return ""
+
+
+func _get_unit_character_scene(model_path: String) -> PackedScene:
+	if model_path == FRIENDLY_UNIT_MODEL_PATH:
+		if _friendly_unit_scene == null and ResourceLoader.exists(FRIENDLY_UNIT_MODEL_PATH):
+			_friendly_unit_scene = load(FRIENDLY_UNIT_MODEL_PATH) as PackedScene
+		return _friendly_unit_scene
+	if model_path == ENEMY_UNIT_MODEL_PATH:
+		if _enemy_unit_scene == null and ResourceLoader.exists(ENEMY_UNIT_MODEL_PATH):
+			_enemy_unit_scene = load(ENEMY_UNIT_MODEL_PATH) as PackedScene
+		return _enemy_unit_scene
+	if ResourceLoader.exists(model_path):
+		return load(model_path) as PackedScene
+	return null
+
+
+func _center_and_scale_model_node_to_height(node: Node3D, target_height: float) -> void:
+	var bounds: Dictionary = _get_local_visual_bounds(node)
+	if not bool(bounds.get("valid", false)):
+		return
+	var min_value: Vector3 = Vector3(bounds.get("min", Vector3.ZERO))
+	var max_value: Vector3 = Vector3(bounds.get("max", Vector3.ZERO))
+	var source_height: float = maxf(max_value.y - min_value.y, 0.001)
+	var scale_factor: float = maxf(target_height, 0.001) / source_height
+	_center_model_node_on_ground(node, scale_factor, bounds)
+
+
+func _center_model_node_on_ground(node: Node3D, uniform_scale: float, bounds_override: Dictionary = {}) -> void:
+	var bounds: Dictionary = bounds_override if not bounds_override.is_empty() else _get_local_visual_bounds(node)
+	if not bool(bounds.get("valid", false)):
+		node.scale = Vector3.ONE * uniform_scale
+		return
+	var min_value: Vector3 = Vector3(bounds.get("min", Vector3.ZERO))
+	var max_value: Vector3 = Vector3(bounds.get("max", Vector3.ZERO))
+	var center: Vector3 = (min_value + max_value) * 0.5
+	node.scale = Vector3.ONE * uniform_scale
+	node.position = Vector3(-center.x * uniform_scale, -min_value.y * uniform_scale, -center.z * uniform_scale)
+
+
+func _get_local_visual_bounds(node: Node3D) -> Dictionary:
+	var bounds: Dictionary = {
+		"valid": false,
+		"min": Vector3.ZERO,
+		"max": Vector3.ZERO,
+	}
+	_accumulate_local_visual_bounds(node, Transform3D.IDENTITY, bounds)
+	return bounds
+
+
+func _accumulate_local_visual_bounds(node: Node, parent_transform: Transform3D, bounds: Dictionary) -> void:
+	var current_transform := parent_transform
+	var node_3d := node as Node3D
+	if node_3d != null:
+		current_transform = parent_transform * node_3d.transform
+	var mesh_instance := node as MeshInstance3D
+	if mesh_instance != null and mesh_instance.mesh != null:
+		_merge_transformed_aabb(bounds, current_transform, mesh_instance.get_aabb())
+	for child in node.get_children():
+		_accumulate_local_visual_bounds(child, current_transform, bounds)
+
+
+func _merge_transformed_aabb(bounds: Dictionary, transform: Transform3D, aabb: AABB) -> void:
+	var corners: Array[Vector3] = [
+		aabb.position,
+		aabb.position + Vector3(aabb.size.x, 0.0, 0.0),
+		aabb.position + Vector3(0.0, aabb.size.y, 0.0),
+		aabb.position + Vector3(0.0, 0.0, aabb.size.z),
+		aabb.position + Vector3(aabb.size.x, aabb.size.y, 0.0),
+		aabb.position + Vector3(aabb.size.x, 0.0, aabb.size.z),
+		aabb.position + Vector3(0.0, aabb.size.y, aabb.size.z),
+		aabb.position + aabb.size,
+	]
+	for corner in corners:
+		var transformed_corner: Vector3 = transform * corner
+		if not bool(bounds.get("valid", false)):
+			bounds["valid"] = true
+			bounds["min"] = transformed_corner
+			bounds["max"] = transformed_corner
+			continue
+		var min_value: Vector3 = Vector3(bounds.get("min", Vector3.ZERO))
+		var max_value: Vector3 = Vector3(bounds.get("max", Vector3.ZERO))
+		bounds["min"] = Vector3(
+			minf(min_value.x, transformed_corner.x),
+			minf(min_value.y, transformed_corner.y),
+			minf(min_value.z, transformed_corner.z)
+		)
+		bounds["max"] = Vector3(
+			maxf(max_value.x, transformed_corner.x),
+			maxf(max_value.y, transformed_corner.y),
+			maxf(max_value.z, transformed_corner.z)
+		)
 
 
 func _ensure_child_mesh_instance(parent: Node3D, node_name: String, mesh: Mesh) -> MeshInstance3D:
@@ -774,7 +946,7 @@ func _sync_dropship_marker_visual(terrain_registry, marker_container: Node3D, lz
 		projection["visible"] = false
 		projection["approach_visible"] = false
 		return projection
-	var visual_position: Vector3 = Vector3(projection.get("marker_position_3d", projection.get("target_position_3d", Vector3.ZERO))) + Vector3(0.0, 0.22, 0.0)
+	var visual_position: Vector3 = Vector3(projection.get("marker_position_3d", projection.get("target_position_3d", Vector3.ZERO))) + Vector3(0.0, DROPSHIP_MARKER_BASE_Y_OFFSET + _get_dropship_model_y_offset(), 0.0)
 	var dropship_visual := _ensure_dropship_visual(marker_container, "dropship_marker")
 	dropship_visual.position = visual_position
 	dropship_visual.visible = should_show
@@ -788,6 +960,9 @@ func _sync_dropship_marker_visual(terrain_registry, marker_container: Node3D, lz
 	snapshot["visible"] = should_show
 	snapshot["approach_visible"] = approach_visible
 	snapshot["uses_model"] = _dropship_scene != null
+	snapshot["model_path"] = _get_dropship_model_path()
+	snapshot["model_type_id"] = dropship_visual_type_id
+	snapshot["scale"] = _get_dropship_visual_scale()
 	return snapshot
 
 
@@ -795,23 +970,62 @@ func _ensure_dropship_visual(container: Node3D, key: String) -> Node3D:
 	var node_name: String = "Dropship_%s" % key
 	var visual := container.get_node_or_null(node_name) as Node3D
 	if visual != null:
+		_sync_dropship_visual_asset(visual)
 		return visual
 	visual = Node3D.new()
 	visual.name = node_name
-	if _dropship_scene != null:
-		var model := _dropship_scene.instantiate() as Node3D
-		if model != null:
-			model.name = "Model"
-			model.scale = Vector3.ONE * 0.42
-			visual.add_child(model)
-	if visual.get_child_count() == 0:
-		var fallback := MeshInstance3D.new()
-		fallback.name = "FallbackBody"
-		fallback.mesh = _dropship_fallback_mesh
-		fallback.material_override = _dropship_material
-		visual.add_child(fallback)
+	_sync_dropship_visual_asset(visual)
 	container.add_child(visual)
 	return visual
+
+
+func _sync_dropship_visual_asset(visual: Node3D) -> void:
+	var model_path: String = _get_dropship_model_path()
+	var visual_scale: float = _get_dropship_visual_scale()
+	if (_dropship_scene == null or _dropship_scene_model_path != model_path) and ResourceLoader.exists(model_path):
+		_dropship_scene = load(model_path) as PackedScene
+		_dropship_scene_model_path = model_path
+	if _dropship_scene != null:
+		var model := visual.get_node_or_null("Model") as Node3D
+		if model == null or String(model.get_meta("model_path", "")) != model_path or not is_equal_approx(float(model.get_meta("visual_scale", -1.0)), visual_scale):
+			_clear_children(visual)
+			model = _dropship_scene.instantiate() as Node3D
+			if model != null:
+				model.name = "Model"
+				model.set_meta("model_path", model_path)
+				model.set_meta("visual_scale", visual_scale)
+				_center_model_node_on_ground(model, visual_scale)
+				visual.add_child(model)
+		return
+	_clear_children(visual)
+	var fallback := MeshInstance3D.new()
+	fallback.name = "FallbackBody"
+	fallback.mesh = _dropship_fallback_mesh
+	fallback.material_override = _dropship_material
+	fallback.scale = Vector3.ONE * visual_scale
+	visual.add_child(fallback)
+
+
+func _get_dropship_model_path() -> String:
+	if _renderer != null and _renderer.has_method("get_model_entry_for_type"):
+		var entry: Dictionary = Dictionary(_renderer.call("get_model_entry_for_type", dropship_visual_type_id))
+		var model_path: String = String(entry.get("model_path", "")).strip_edges()
+		if not model_path.is_empty():
+			return model_path
+	return DROPSHIP_MODEL_PATH
+
+
+func _get_dropship_visual_scale() -> float:
+	var base_scale: float = DROPSHIP_FALLBACK_SCALE
+	if _renderer != null and _renderer.has_method("get_model_scale_for_type"):
+		base_scale = float(_renderer.call("get_model_scale_for_type", dropship_visual_type_id))
+	return maxf(base_scale * maxf(dropship_visual_scale_multiplier, 0.05), 0.05)
+
+
+func _get_dropship_model_y_offset() -> float:
+	if _renderer != null and _renderer.has_method("get_model_y_offset_for_type"):
+		return float(_renderer.call("get_model_y_offset_for_type", dropship_visual_type_id))
+	return 0.0
 
 
 func _sync_approach_line_visual(container: Node3D, from_position: Vector3, to_position: Vector3, is_visible: bool) -> void:
