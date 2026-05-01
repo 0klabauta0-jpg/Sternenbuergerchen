@@ -64,3 +64,9 @@ Der Terrain-Editor bleibt fuer Karten- und Markerdaten verantwortlich. Darauf wi
 - `MissionTestSetup` kann eine `scenario_file_path` laden und die Scenario-Daten in die Live-Testmission uebernehmen.
 - Die LZ bleibt weiterhin ausserhalb des Authoring-Vertrags und wird nicht gespeichert.
 - Offen bleibt eine breitere Editor-to-Live-Validation mit mehreren Szenariovarianten (`TASK_158`).
+
+## Update nach TASK_158
+- `data/mission_scenarios/editor_validation_smoke.json` dient als kleiner Editor-to-Live-Smoke ohne gespeicherte LZ.
+- `scripts/tests/task_158_verifier.gd` validiert Editor-Load/Save, Live-Missionsstart, Scenario-Objective, Enemy-Waves, Patrol-Bindings, Spieler-LZ, Dropship-Deploy, Attack Area, Contact Overlay, Objective-Fortschritt und sichtbare Live-Visuals.
+- `docs/manual_checks/editor_to_live_mission_checklist.md` beschreibt den manuellen Editor-to-Live-Durchlauf.
+- Der getrackte Stand besitzt keinen produktiven 3D-Bridge-Code; die automatisierte Pruefung deckt den vorhandenen 2.5D/Live-Visual-Bridge-Stand ab und die Checkliste fordert dieselben Daten fuer einen 3D-primary Branch erneut ein.

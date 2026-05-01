@@ -3,7 +3,7 @@
 ## Ziel
 Der neue Mission-Authoring-Pfad wird gegen die Live-Mission validiert. Ein im Editor gespeichertes Szenario muss mit 3D-Bridge, Enemy-Waves, Patrols, Objective, Contact-System und taktischen Area Orders sauber spielbar sein.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Voraussetzung
 - `TASK_157 - Tactical Mission Editor MVP`
@@ -55,17 +55,17 @@ LZ bleibt Spieleraktion. Der Test darf eine LZ ueber denselben Missions-/Control
 - Keine Gameplay-Wahrheit in UI-Widgets oder 3D-Visuals.
 
 ## Akzeptanzkriterien
-- [ ] Ein Editor-Szenario startet in der Live-Mission.
-- [ ] LZ ist beim Start nicht gesetzt und wird erst ueber den Spielerpfad gesetzt.
-- [ ] Enemy-Waves und Patrols kommen aus dem Szenario an.
-- [ ] Attack Area kann in der gestarteten Mission erstellt und ausgefuehrt werden.
-- [ ] 3D-Bridge zeigt Units, Area-Order und Contact-relevante Overlays.
-- [ ] Manuelle Checkliste ist dokumentiert.
+- [x] Ein Editor-Szenario startet in der Live-Mission.
+- [x] LZ ist beim Start nicht gesetzt und wird erst ueber den Spielerpfad gesetzt.
+- [x] Enemy-Waves und Patrols kommen aus dem Szenario an.
+- [x] Attack Area kann in der gestarteten Mission erstellt und ausgefuehrt werden.
+- [x] Der aktuelle Live-Visual-Bridge-Stand zeigt Units, Area-Order und Contact-relevante Overlays.
+- [x] Manuelle Checkliste ist dokumentiert.
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_158_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_123_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_112_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_158_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_123_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_112_verifier.gd`
 
 ## Dateien (voraussichtlich)
 - `scripts/tests/task_158_verifier.gd`
@@ -74,3 +74,9 @@ LZ bleibt Spieleraktion. Der Test darf eine LZ ueber denselben Missions-/Control
 
 ## Risiken
 - Wenn der Test zu breit wird, wird er langsam und fragil. Deshalb soll er ein Smoke bleiben und Detailregressionen den vorhandenen Task-Verifiern ueberlassen.
+- Im getrackten Branch existieren aktuell keine produktiven 3D-Bridge-Skripte. Der Verifier prueft deshalb den vorhandenen Live-Visual-Bridge-Stand (`FireteamOrderVisualizer`, `ContactMapOverlay`, Unit-/Enemy-Visuals) und die manuelle Checkliste fordert bei einem 3D-primary Branch dieselben Daten erneut in der 3D-Ansicht zu pruefen.
+
+## Ergebnis
+- `data/mission_scenarios/editor_validation_smoke.json` beschreibt ein kleines Editor-Smoke-Szenario ohne LZ mit Objective, zwei Enemy-Waves und Patrol-Bindings.
+- `scripts/tests/task_158_verifier.gd` laedt das Szenario ueber den Editor, speichert es als Live-Test-Scratch, startet die Live-Mission, setzt die LZ ueber den Controller-Pfad, ruft den Dropship, prueft Deploy, Attack Area, Contact Overlay, Objective-Fortschritt und sichtbare Unit-/Enemy-/Area-Visuals.
+- `docs/manual_checks/editor_to_live_mission_checklist.md` dokumentiert den manuellen Editor-to-Live-Durchlauf.

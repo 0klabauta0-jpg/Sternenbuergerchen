@@ -1014,9 +1014,9 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 ### Mission Editor Authoring Audit
 - Status: dokumentiert
 - Stand: `docs/mission_editor_authoring_audit.md` haelt fest, dass der bestehende Map-Editor Terrain, Marker, Mission-Slots und Patrol-Pfade authoren kann, aber noch keinen eigenen taktischen Missionsszenario-Vertrag besitzt. Die LZ bleibt bewusst ausserhalb des Editor-Scopes und wird immer vom Spieler im Missionsflow gesetzt.
-- Offene Punkte: Szenario-Datenvertrag und Editor-MVP sind implementiert; eine breitere Editor-to-Live-Validation bleibt als eigener Folgetask offen.
+- Offene Punkte: Szenario-Datenvertrag, Editor-MVP und Editor-to-Live-Validation sind implementiert; der manuelle GUI-Durchlauf bleibt fuer sichtbare UX/3D-primary Branches weiterhin sinnvoll.
 - Risiken: Wenn TerrainMapData, Editor-UI oder Szenario-Dateien zu viel laufenden Gameplay-State aufnehmen, entsteht eine zweite Gameplay-Wahrheit neben SimulationRoot/TacticalController.
-- Naechster Schritt: `TASK_158 - Editor-to-Live Mission Validation` kann den neuen Editor-MVP mit mehr Szenariovarianten absichern.
+- Naechster Schritt: Nach Review koennen breitere Szenariovarianten oder produktive Meta-Katalog-Anbindung als eigene Tasks geschnitten werden.
 
 ### TASK_155 - Tactical Mission Test Presets
 - Status: implementiert
@@ -1048,11 +1048,13 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Naechster Schritt: `TASK_158 - Editor-to-Live Mission Validation`.
 
 ### TASK_157-158 - Tactical Mission Authoring
-- Status: teilweise implementiert
-- Stand: `TASK_157 - Tactical Mission Editor MVP` ist implementiert; `TASK_158 - Editor-to-Live Mission Validation` bleibt als eigener Folgetask.
-- Offene Punkte: Breitere Editor-to-Live-Validation fehlt noch.
+- Status: implementiert
+- Stand: `TASK_157 - Tactical Mission Editor MVP` ist implementiert; `TASK_158 - Editor-to-Live Mission Validation` validiert den Editor-Szenario-Pfad gegen die Live-Mission.
+- Stand: `data/mission_scenarios/editor_validation_smoke.json` liefert ein kleines Live-Smoke-Szenario ohne LZ mit Objective, zwei Enemy-Waves, Patrol-Bindings und kurzer Wave-Folge.
+- Stand: `scripts/tests/task_158_verifier.gd` instanziiert den Editor, laedt/speichert das Szenario, startet die Live-Mission, setzt die LZ ueber den Controller-Pfad, prueft Dropship-Deploy, Attack Area, Contact Overlay, Objective-Fortschritt und sichtbare Unit-/Enemy-/Area-Visuals. `docs/manual_checks/editor_to_live_mission_checklist.md` dokumentiert den manuellen Durchlauf.
+- Offene Punkte: Der getrackte Branch enthaelt aktuell keinen produktiven 3D-Bridge-Code; der Verifier prueft den vorhandenen 2.5D/Live-Visual-Bridge-Stand. Eine echte 3D-primary-Revalidierung gehoert in den Branch/Task, der diese 3D-Bridge liefert.
 - Risiken: Der Authoring-Pfad muss Karten-/Szenario-Daten strikt von laufendem Tactical-State trennen. Insbesondere darf die LZ nicht im Editor oder Szenario gespeichert werden.
-- Naechster Schritt: `TASK_158` umsetzen, damit mehrere Editor-Szenarien automatisiert gegen die Live-Mission abgesichert sind.
+- Naechster Schritt: Manuelle UX-Pruefung des Editor-Live-Testbuttons und danach bei Bedarf Meta-Katalog-Anbindung oder weitere Szenario-Smokes schneiden.
 
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert

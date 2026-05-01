@@ -299,7 +299,7 @@ Phase 18C - Tactical Mission Authoring
 TASK_155 - Tactical Mission Test Presets (implementiert)
 TASK_156 - Mission Scenario Data Contract (implementiert)
 TASK_157 - Tactical Mission Editor MVP (implementiert)
-TASK_158 - Editor-to-Live Mission Validation
+TASK_158 - Editor-to-Live Mission Validation (implementiert)
 
 Batch-Empfehlung
 
