@@ -60,10 +60,15 @@ Die vorhandene 3D-Kalibrierungsszene wird zu einem brauchbaren Arbeitsraum, mit 
 - Die Szene liefert `get_calibration_snapshot()` fuer Verifier und Debug.
 - `TerrainMap3DRenderer` zentriert GLB-Instanzen jetzt horizontal anhand ihrer Mesh-Bounds auf den Tile-Anker. Dadurch werden importierte Modelle mit seitlich versetztem GLB-Origin nicht mehr neben dem Footprint platziert. Pro Mapping-Eintrag kann das bei Bedarf mit `center_horizontal: false` abgeschaltet werden.
 - Die Szene fuegt eine `astronautA.glb`-NPC-Referenz mit normalisierter Hoehe als Groessenvergleich ein.
+- Die NPC-Referenz wird ueber einen Wrapper zentriert, damit der importierte GLB-Origin sie nicht seitlich vom Vergleichs-Footprint verschiebt.
+- Footprint-Helfer koennen jetzt groessere Zielflaechen anzeigen, z.B. 3x3 fuer Hangar und 4x4 fuer den vergroesserten Speeder.
 - Erste grobe Scale-Korrektur im Mapping:
   - einzelnes Fass deutlich kleiner.
   - Fassgruppe, Plattform, Pipe, Rail und Crater konservativer skaliert.
-  - Gebaeude, Speeder, Wall, Generator und Satellite bleiben als naechste visuelle Vergleichsgruppe erstmal bewusst vorsichtig.
+  - Hangar auf 3x3-Felder-Zielmass gesetzt.
+  - Wall, Structure und Pipe naeher auf 1-Feld-Aussenkante gesetzt.
+  - Satellite Large so skaliert, dass der Sockel naeher an Feldgroesse liegt.
+  - Speeder auf doppelte bisherige Groesse gesetzt.
 - Tastatur im Playmode:
   - `G`: Debug-Grid an/aus.
   - `L`: Labels an/aus.
@@ -79,6 +84,7 @@ Die vorhandene 3D-Kalibrierungsszene wird zu einem brauchbaren Arbeitsraum, mit 
 4. Pro Objekt pruefen:
    - Wirkt das Objekt neben dem NPC plausibel?
    - Ist die farbige Footprint-Flaeche plausibel zum Tile?
+   - Stimmen bei Hangar, Wall, Structure, Pipe und Satellite die Aussenkanten mit dem Ziel-Footprint?
    - Sitzt der gelbe Pivot-Punkt sinnvoll auf dem Tile?
    - Schwebt das Modell oder steckt es im Boden?
    - Wirkt `scale` im Vergleich zu Nachbarobjekten passend?

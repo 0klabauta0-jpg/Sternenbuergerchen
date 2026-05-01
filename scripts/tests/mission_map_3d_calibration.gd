@@ -10,15 +10,15 @@ const CALIBRATION_OBJECTS: Array[Dictionary] = [
 	{"grid": Vector2i(1, 1), "type_id": "deko_barrel_se", "category": "small_prop"},
 	{"grid": Vector2i(3, 1), "type_id": "deko_barrels_nw", "category": "small_prop"},
 	{"grid": Vector2i(5, 1), "type_id": "technik_generator_se", "category": "cover_prop"},
-	{"grid": Vector2i(7, 1), "type_id": "technik_satellite_large_sw", "category": "tall_prop"},
-	{"grid": Vector2i(9, 1), "type_id": "wall_straight_se", "category": "wall"},
-	{"grid": Vector2i(11, 1), "type_id": "gebaeude_structure_closed_se", "category": "building"},
-	{"grid": Vector2i(1, 4), "type_id": "gebaeude_hangar_small_b_sw", "category": "building"},
+	{"grid": Vector2i(7, 1), "type_id": "technik_satellite_large_sw", "category": "tall_prop", "footprint_size": Vector2(1.0, 1.0)},
+	{"grid": Vector2i(9, 1), "type_id": "wall_straight_se", "category": "wall", "footprint_size": Vector2(1.0, 1.0)},
+	{"grid": Vector2i(11, 1), "type_id": "gebaeude_structure_closed_se", "category": "building", "footprint_size": Vector2(1.0, 1.0)},
+	{"grid": Vector2i(1, 4), "type_id": "gebaeude_hangar_small_b_sw", "category": "building", "footprint_size": Vector2(3.0, 3.0)},
 	{"grid": Vector2i(3, 4), "type_id": "plattform_center_se", "category": "platform"},
-	{"grid": Vector2i(5, 4), "type_id": "pipe_straight_ne", "category": "flat_route"},
+	{"grid": Vector2i(5, 4), "type_id": "pipe_straight_ne", "category": "flat_route", "footprint_size": Vector2(1.0, 1.0)},
 	{"grid": Vector2i(7, 4), "type_id": "rail_sw", "category": "flat_route"},
 	{"grid": Vector2i(9, 4), "type_id": "crater_small_se", "category": "flat_decal"},
-	{"grid": Vector2i(11, 4), "type_id": "fahrzeug_speeder_b_se", "category": "vehicle"},
+	{"grid": Vector2i(11, 4), "type_id": "fahrzeug_speeder_b_se", "category": "vehicle", "footprint_size": Vector2(4.0, 4.0)},
 ]
 
 @export var calibration_labels_enabled: bool = true
@@ -112,6 +112,7 @@ func _build_calibration_helpers(map_data, renderer, map_root: Node3D) -> void:
 		var type_id: String = String(item.get("type_id", ""))
 		var grid_position: Vector2i = item.get("grid", Vector2i.ZERO)
 		var category: String = String(item.get("category", "object"))
+		var footprint_size: Vector2 = Vector2(item.get("footprint_size", Vector2.ONE))
 		var tile_data = map_data.call("get_tile_at_grid", grid_position)
 		if tile_data == null:
 			continue
@@ -132,7 +133,7 @@ func _build_calibration_helpers(map_data, renderer, map_root: Node3D) -> void:
 		var label_text: String = "%s\nmodel: %s\nscale %.2f  y %.3f  rot %.0f" % [type_id, model_key, scale, y_offset, total_rotation]
 
 		if calibration_footprints_enabled:
-			_add_footprint(footprint_container, type_id, base_position, float(renderer.call("get_grid_cell_size")), category)
+			_add_footprint(footprint_container, type_id, base_position, float(renderer.call("get_grid_cell_size")), category, footprint_size)
 		if calibration_pivots_enabled:
 			_add_pivot_marker(pivot_container, type_id, object_position)
 		if calibration_labels_enabled:
@@ -142,6 +143,7 @@ func _build_calibration_helpers(map_data, renderer, map_root: Node3D) -> void:
 			"type_id": type_id,
 			"grid_position": grid_position,
 			"category": category,
+			"footprint_size": footprint_size,
 			"model_key": model_key,
 			"model_path": model_path,
 			"model_exists": model_exists,
@@ -183,7 +185,7 @@ func _add_npc_reference(helper_root: Node3D, renderer) -> Dictionary:
 	npc_container.add_child(npc_node)
 
 	if calibration_footprints_enabled:
-		_add_footprint(npc_container, "npc_reference", reference_position - Vector3(0.0, 0.04, 0.0), float(renderer.call("get_grid_cell_size")), "npc_reference")
+		_add_footprint(npc_container, "npc_reference", reference_position - Vector3(0.0, 0.04, 0.0), float(renderer.call("get_grid_cell_size")), "npc_reference", Vector2.ONE)
 	if calibration_pivots_enabled:
 		_add_pivot_marker(npc_container, "npc_reference", reference_position)
 	if calibration_labels_enabled:
@@ -203,12 +205,14 @@ func _instantiate_npc_reference() -> Node3D:
 	var scene := load(NPC_REFERENCE_MODEL_PATH) as PackedScene
 	if scene == null:
 		return null
-	var node := scene.instantiate() as Node3D
-	if node == null:
+	var model_node := scene.instantiate() as Node3D
+	if model_node == null:
 		return null
-	node.rotation_degrees.y = 180.0
-	_center_and_scale_reference_node(node, NPC_REFERENCE_HEIGHT)
-	return node
+	var wrapper := Node3D.new()
+	wrapper.add_child(model_node)
+	model_node.rotation_degrees.y = 180.0
+	_center_and_scale_reference_node(model_node, NPC_REFERENCE_HEIGHT)
+	return wrapper
 
 
 func _create_fallback_npc_reference() -> Node3D:
@@ -292,11 +296,11 @@ func _merge_transformed_aabb(bounds: Dictionary, transform: Transform3D, aabb: A
 		)
 
 
-func _add_footprint(container: Node3D, type_id: String, position: Vector3, cell_size: float, category: String) -> void:
+func _add_footprint(container: Node3D, type_id: String, position: Vector3, cell_size: float, category: String, footprint_size: Vector2 = Vector2.ONE) -> void:
 	var node := MeshInstance3D.new()
 	node.name = "Footprint_%s" % type_id
 	var mesh := BoxMesh.new()
-	mesh.size = Vector3(cell_size * 0.92, 0.018, cell_size * 0.92)
+	mesh.size = Vector3(cell_size * 0.92 * footprint_size.x, 0.018, cell_size * 0.92 * footprint_size.y)
 	node.mesh = mesh
 	node.position = position + Vector3(0.0, 0.075, 0.0)
 	node.material_override = _make_calibration_material(_get_category_color(category, 0.32))

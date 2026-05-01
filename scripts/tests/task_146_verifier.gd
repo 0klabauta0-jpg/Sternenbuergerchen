@@ -51,12 +51,15 @@ func _test_calibration_workspace() -> void:
 	_assert(int(snapshot.get("pivot_count", 0)) == entries.size(), "Calibration workspace creates one pivot marker per object")
 	_assert(_entries_have_calibration_values(entries), "Calibration entries expose scale, offset and rotation data")
 	_assert(_has_npc_reference(snapshot), "Calibration workspace includes an NPC size reference")
+	_assert(_has_target_footprint(entries, "gebaeude_hangar_small_b_sw", Vector2(3.0, 3.0)), "Hangar calibration entry exposes a 3x3 target footprint")
+	_assert(_has_target_footprint(entries, "fahrzeug_speeder_b_se", Vector2(4.0, 4.0)), "Speeder calibration entry exposes a 4x4 target footprint")
 	_assert(_rendered_objects_are_centered(Dictionary(render_result.get("objects", {}))), "Rendered model bounds are centered on their tile anchors")
 
 	var label_container := scene.get_node_or_null("MapRoot/CalibrationHelpers3D/Labels3D")
 	var footprint_container := scene.get_node_or_null("MapRoot/CalibrationHelpers3D/Footprints3D")
 	_assert(label_container != null and label_container.get_child_count() == entries.size(), "Label helper container is present and populated")
 	_assert(footprint_container != null and footprint_container.get_child_count() == entries.size(), "Footprint helper container is present and populated")
+	_assert(_npc_reference_is_centered(scene), "NPC reference is centered on its comparison anchor")
 
 	scene.call("set_calibration_labels_enabled", false)
 	await process_frame
@@ -101,6 +104,28 @@ func _has_npc_reference(snapshot: Dictionary) -> bool:
 		and npc_reference.get("grid_position", Vector2i.ZERO) is Vector2i \
 		and String(npc_reference.get("model_path", "")).contains("astronautA.glb") \
 		and float(npc_reference.get("target_height", 0.0)) > 0.0
+
+
+func _has_target_footprint(entries: Array, type_id: String, expected_size: Vector2) -> bool:
+	for raw_entry in entries:
+		var entry: Dictionary = Dictionary(raw_entry)
+		if String(entry.get("type_id", "")) != type_id:
+			continue
+		var footprint_size: Vector2 = Vector2(entry.get("footprint_size", Vector2.ZERO))
+		return footprint_size.is_equal_approx(expected_size)
+	return false
+
+
+func _npc_reference_is_centered(scene: Node) -> bool:
+	var npc_node := scene.get_node_or_null("MapRoot/CalibrationHelpers3D/NPCReference3D/NPCReference_Astronaut") as Node3D
+	if npc_node == null:
+		return false
+	var bounds: Dictionary = _get_global_visual_bounds(npc_node)
+	if not bool(bounds.get("valid", false)):
+		return false
+	var center: Vector3 = Vector3(bounds.get("center", Vector3.ZERO))
+	var anchor: Vector3 = npc_node.global_position
+	return Vector2(center.x - anchor.x, center.z - anchor.z).length() <= 0.03
 
 
 func _rendered_objects_are_centered(objects: Dictionary) -> bool:
