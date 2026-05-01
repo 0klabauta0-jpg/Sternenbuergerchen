@@ -91,7 +91,7 @@
 		"technik_satellite_large": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/3d/satelliteDish_large.glb",
-			"scale": 1.18,
+			"scale": 1.35,
 			"y_offset": 0.0,
 			"rotation_degrees_offset": 0.0
 		},
@@ -140,7 +140,7 @@
 		"crater_large": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/3d/craterLarge.glb",
-			"scale": 2.2,
+			"scale": 2.25,
 			"y_offset": -0.02,
 			"rotation_degrees_offset": 0.0
 		},
@@ -182,7 +182,7 @@
 		"fahrzeug_cargo_b": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/3d/craft_cargoB.glb",
-			"scale": 1.2,
+			"scale": 2.0,
 			"y_offset": 0.08,
 			"rotation_degrees_offset": 0.0
 		}

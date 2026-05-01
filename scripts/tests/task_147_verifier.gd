@@ -103,6 +103,9 @@ func _test_calibration_scene_expansion() -> void:
 	_assert(Array(snapshot.get("missing_model_paths", [])).is_empty(), "Expanded calibration scene reports no missing model paths")
 	for type_id in CALIBRATION_SAMPLE_TYPES:
 		_assert(_has_calibration_entry(entries, type_id), "Calibration scene includes %s" % type_id)
+	_assert(_has_target_footprint(entries, "fahrzeug_cargo_b_sw", Vector2(3.0, 5.0)), "CargoB calibration entry exposes a 3x5 target footprint")
+	_assert(_has_model_scale(entries, "crater_large_se", 2.25), "Large crater scale fills a 2x2 target footprint")
+	_assert(_has_model_scale(entries, "technik_satellite_large_sw", 1.35), "Large satellite dish scale better fills a 1x1 base footprint")
 	scene.queue_free()
 	await process_frame
 
@@ -112,6 +115,25 @@ func _has_calibration_entry(entries: Array, type_id: String) -> bool:
 		var entry: Dictionary = Dictionary(raw_entry)
 		if String(entry.get("type_id", "")) == type_id:
 			return bool(entry.get("model_exists", false))
+	return false
+
+
+func _has_target_footprint(entries: Array, type_id: String, expected_size: Vector2) -> bool:
+	for raw_entry in entries:
+		var entry: Dictionary = Dictionary(raw_entry)
+		if String(entry.get("type_id", "")) != type_id:
+			continue
+		var footprint_size: Vector2 = Vector2(entry.get("footprint_size", Vector2.ZERO))
+		return footprint_size.is_equal_approx(expected_size)
+	return false
+
+
+func _has_model_scale(entries: Array, type_id: String, expected_scale: float) -> bool:
+	for raw_entry in entries:
+		var entry: Dictionary = Dictionary(raw_entry)
+		if String(entry.get("type_id", "")) != type_id:
+			continue
+		return is_equal_approx(float(entry.get("scale", 0.0)), expected_scale)
 	return false
 
 

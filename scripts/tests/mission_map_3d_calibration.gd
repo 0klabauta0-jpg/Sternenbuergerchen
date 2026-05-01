@@ -21,7 +21,7 @@ const CALIBRATION_OBJECTS: Array[Dictionary] = [
 	{"grid": Vector2i(7, 4), "type_id": "rail_sw", "category": "flat_route"},
 	{"grid": Vector2i(9, 4), "type_id": "crater_small_se", "category": "flat_decal"},
 	{"grid": Vector2i(11, 4), "type_id": "fahrzeug_speeder_b_se", "category": "vehicle", "footprint_size": Vector2(3.0, 3.0)},
-	{"grid": Vector2i(15, 4), "type_id": "fahrzeug_cargo_b_sw", "category": "vehicle", "footprint_size": Vector2(2.0, 3.0)},
+	{"grid": Vector2i(15, 4), "type_id": "fahrzeug_cargo_b_sw", "category": "vehicle", "footprint_size": Vector2(3.0, 5.0)},
 	{"grid": Vector2i(1, 7), "type_id": "corridor_straight_se", "category": "flat_route", "footprint_size": Vector2(1.0, 1.0)},
 	{"grid": Vector2i(3, 7), "type_id": "corridor_corner_sw", "category": "flat_route", "footprint_size": Vector2(1.0, 1.0)},
 	{"grid": Vector2i(5, 7), "type_id": "technik_turret_single_ne", "category": "cover_prop", "footprint_size": Vector2(1.0, 1.0)},
