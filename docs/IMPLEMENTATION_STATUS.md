@@ -1120,7 +1120,7 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Naechster Schritt: Die erweiterte 3D-Kalibrierungsszene manuell pruefen; danach kann `TASK_148 - 3D Primary Mission View` vorbereitet werden.
 
 ### TASK_146-150 - Geplante 3D/2.5D-Umstellung der Missionsdarstellung
-- Status: teilweise implementiert
+- Status: implementiert
 - Stand: `TASK_146 - 3D Calibration Workspace` ist implementiert. `mission_map_3d_calibration.tscn` zeigt jetzt 12 kuratierte Objektfamilien inklusive Wall-Familie und erzeugt rein visuelle Helper fuer Labels, Footprints und Pivot-Marker. Die Szene besitzt Playmode-Toggles: `G` fuer Debug-Grid, `L` fuer Labels und `F` fuer Footprints/Pivots. `get_calibration_snapshot()` liefert testbare Daten zu Modellpfaden, Scale, Offset und Rotation.
 - Stand: `TerrainMap3DRenderer` zentriert importierte GLB-Modelle horizontal ueber ihre Mesh-Bounds auf dem Tile-Anker. Damit werden Modelle mit seitlich versetztem GLB-Origin nicht mehr neben ihrem Footprint gerendert. Das Verhalten kann pro Mapping-Eintrag mit `center_horizontal: false` deaktiviert werden.
 - Stand: Die Kalibrierungsszene enthaelt jetzt eine normalisierte `astronautA.glb`-NPC-Referenz als Groessenvergleich. Die groebsten Scale-Ausreisser wurden korrigiert: einzelnes Fass, Fassgruppe, Plattform, Pipe, Rail und Crater sind konservativer skaliert; Gebaeude, Speeder, Wall, Generator und Satellite bleiben fuer die naechste manuelle Sichtpruefung bewusst erhalten.
@@ -1130,9 +1130,17 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Stand: Zweite manuelle 147-Kalibrierung ist eingearbeitet: CargoB bleibt unveraendert passend, Large Crater nutzt jetzt bewusst 3x3 wegen sichtbarem Pivot-/Footprint-Versatz, und die grosse Satellitenschuessel ist weiter vergroessert, damit der untere weisse Sockel naeher ein Feld ausfuellt.
 - Stand: `TASK_148 - 3D Primary Mission View` ist implementiert. Die Live-Mission startet jetzt mit der 3D-Bridge als primaerer Ansicht, die alte 2D-Map ist standardmaessig verborgen und kann per Bridge-API/F7 als Compare-Fallback wieder sichtbar gemacht werden. `Terrain25DPicker` ist in der Live-Bridge verfuegbar und der Tactical Controller nutzt ihn fuer Target-, LZ- und Waypoint-Zielpositionen, wenn die 3D-Bridge primaer aktiv ist.
 - Stand: `TASK_149 - 3D Unit Visual Replacement` ist implementiert. `MissionLive25DVisualBridge` ersetzt die alten sichtbaren Unit-Sprites im primaeren 3D-Bild durch zusammengesetzte 3D-Unit-Visuals mit Team-/Fireteam-Farbe, Rollenlabel, Selection-Skalierung, Air-Material/Schatten und Fireteam-Lead-Marker. Direkte 2D-Canvas-Visuals unter Unit-Nodes werden im 3D-Primaermodus verborgen und beim 2D-Compare/Fallback wiederhergestellt, ohne autoritative `Node2D`-Positionen zu veraendern.
-- Offene Punkte: `TASK_150 - Legacy 2D Mission Asset Retirement` ist noch nicht implementiert. Die neuen 147-Assets und 149-Unit-Visuals brauchen bei Bedarf weitere manuelle Sichtpruefung in echten Missionskarten.
+- Stand: `TASK_150 - Legacy 2D Mission Asset Retirement` ist implementiert. Die Live-Mission blendet im primaeren 3D-Modus nicht nur `MapRoot` und direkte Unit-Sprites aus, sondern auch explizite Legacy-2D-Missionsoverlays fuer Target, LZ, Dropship-Plan, Fireteam-Orders und Contact-Map. `get_legacy_2d_mission_visual_audit()` dokumentiert den Laufzeitstatus, und `docs/legacy_2d_mission_asset_audit.md` haelt fest, welche 2D-Assets bewusst fuer Editor/UI/Fallback erhalten bleiben.
+- Offene Punkte: Die neuen 147-Assets, 149-Unit-Visuals und 150-Retirement-Regeln brauchen bei Bedarf weitere manuelle Sichtpruefung in echten Missionskarten.
 - Risiken: Die 3D-Schicht darf weiterhin keine Gameplay-Wahrheit werden. 2D-Assets duerfen nicht zu frueh geloescht werden, solange Editor, UI, Icons, Tests oder Debug-Fallbacks sie brauchen.
-- Naechster Schritt: `TASK_150 - Legacy 2D Mission Asset Retirement`, damit nicht mehr benoetigte 2D-Missionsvisuals kontrolliert aus dem normalen Missionsbild verschwinden, ohne Editor-, Icon- oder Debug-Fallbacks zu brechen.
+- Naechster Schritt: `TASK_154 - Gameloop Smoke Test`, damit der aktuelle Stand einmal zusammenhaengend von Homebase ueber FOB und Mission bis zur Rueckkehr geprueft wird.
+
+### TASK_154 - Gameloop Smoke Test
+- Status: geplant
+- Stand: Der Task ist geschnitten. Ziel ist ein kontrollierter End-to-End-Smoke fuer Homebase -> Team -> FOB -> Dropship/LZ -> Mission -> Ergebnis -> Rueckkehr.
+- Offene Punkte: Verifier, manuelle Checkliste und konkrete Blocker-Erfassung sind noch nicht implementiert.
+- Risiken: Der Smoke-Test darf keine Einzelsystemtests ersetzen und soll keine neuen Features in den Loop schmuggeln.
+- Naechster Schritt: Nach Review/Integration von `TASK_150` den Gameloop-Smoke auf dem aktuellen 3D/2.5D-Stand starten.
 
 ### TASK_251-253 - Geplante Folge-Labs
 - Status: geplant

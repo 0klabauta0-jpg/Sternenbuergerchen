@@ -61,6 +61,8 @@ order_visualizer_path = NodePath("../FireteamOrderVisualizer")
 show_debug_grid = false
 hide_2d_map_when_visible = true
 camera_current_when_visible = true
+hide_2d_mission_overlays_when_primary = true
+legacy_2d_mission_overlay_paths = Array[NodePath]([NodePath("../TargetMarker/TargetVisual"), NodePath("../LZMarker"), NodePath("../DropshipPlanMarker"), NodePath("../FireteamOrderVisualizer"), NodePath("../ContactMapOverlay")])
 
 [node name="TacticalDebugOverlay25D" type="Node3D" parent="Mission25DVisualBridge"]
 script = ExtResource("24_tactical_debug")

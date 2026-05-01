@@ -316,6 +316,9 @@ TASK_148 - 3D Primary Mission View
 TASK_149 - 3D Unit Visual Replacement
 TASK_150 - Legacy 2D Mission Asset Retirement
 
+Phase 18F - Gameloop-Smoke
+TASK_154 - Gameloop Smoke Test
+
 Phase 25A - Nachgelagerte Navigation-, Cover- und Rendering-Labs
 TASK_251 - Engpass-Reservierung und MAPF-Light
 TASK_252 - Seeded Cover Placement Lab

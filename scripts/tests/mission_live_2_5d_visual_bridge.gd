@@ -10,6 +10,7 @@ const MOVEMENT_LAYER_SCRIPT: GDScript = preload("res://scripts/core/movement_lay
 
 const FRIENDLY_TEAM_ID: String = "team_alpha"
 const LEGACY_2D_VISUAL_META_KEY: String = "task_149_legacy_2d_visible"
+const LEGACY_2D_OVERLAY_META_KEY: String = "task_150_legacy_2d_overlay_visible"
 
 @export var bridge_enabled: bool = true
 @export var mission_setup_path: NodePath
@@ -24,6 +25,8 @@ const LEGACY_2D_VISUAL_META_KEY: String = "task_149_legacy_2d_visible"
 @export var keyboard_fallback_toggle_enabled: bool = true
 @export var sync_runtime_visuals_enabled: bool = true
 @export var hide_2d_unit_sprites_when_primary: bool = true
+@export var hide_2d_mission_overlays_when_primary: bool = true
+@export var legacy_2d_mission_overlay_paths: Array[NodePath] = []
 @export_range(0.05, 1.0, 0.05) var runtime_visual_sync_interval_seconds: float = 0.15
 
 var render_result: Dictionary = {}
@@ -136,6 +139,7 @@ func set_bridge_visible(is_visible: bool) -> void:
 		camera.current = is_visible and camera_current_when_visible
 	_update_2d_map_visibility()
 	_update_legacy_2d_unit_visual_visibility()
+	_update_legacy_2d_mission_overlay_visibility()
 
 
 func set_2d_fallback_visible(is_visible: bool) -> void:
@@ -143,6 +147,7 @@ func set_2d_fallback_visible(is_visible: bool) -> void:
 	hide_2d_map_when_visible = not is_visible
 	_update_2d_map_visibility()
 	_update_legacy_2d_unit_visual_visibility()
+	_update_legacy_2d_mission_overlay_visibility()
 	if bool(bridge_snapshot.get("valid", false)):
 		bridge_snapshot["hide_2d_map_when_visible"] = hide_2d_map_when_visible
 		bridge_snapshot["fallback_2d_visible"] = is_2d_fallback_visible()
@@ -170,6 +175,41 @@ func get_render_result() -> Dictionary:
 
 func get_runtime_visual_snapshot() -> Dictionary:
 	return runtime_visual_snapshot.duplicate(true)
+
+
+func get_legacy_2d_mission_visual_audit() -> Dictionary:
+	var map_root_2d = get_node_or_null(map_root_2d_path)
+	var map_visible: bool = map_root_2d != null and map_root_2d is CanvasItem and (map_root_2d as CanvasItem).visible
+	var unit_registry = get_node_or_null(unit_registry_path)
+	var unit_count: int = 0
+	var hidden_unit_visual_count: int = 0
+	var visible_unit_visual_count: int = 0
+	if unit_registry != null and unit_registry.has_method("get_all_units"):
+		for unit in Array(unit_registry.call("get_all_units")):
+			if unit == null or not (unit is Node2D):
+				continue
+			unit_count += 1
+			hidden_unit_visual_count += _count_hidden_legacy_2d_unit_visuals(unit)
+			visible_unit_visual_count += _count_visible_legacy_2d_unit_visuals(unit)
+	var overlay_audit: Dictionary = _get_legacy_2d_mission_overlay_audit()
+	return {
+		"valid": true,
+		"primary_3d_view_active": is_primary_3d_view_active(),
+		"fallback_2d_visible": is_2d_fallback_visible(),
+		"map_root_2d_path": String(map_root_2d_path),
+		"map_root_2d_present": map_root_2d != null,
+		"map_root_2d_visible": map_visible,
+		"hide_2d_map_when_visible": hide_2d_map_when_visible,
+		"unit_count": unit_count,
+		"visible_legacy_unit_visual_count": visible_unit_visual_count,
+		"hidden_legacy_unit_visual_count": hidden_unit_visual_count,
+		"hide_2d_unit_sprites_when_primary": hide_2d_unit_sprites_when_primary,
+		"visible_legacy_overlay_count": int(overlay_audit.get("visible_count", 0)),
+		"hidden_legacy_overlay_count": int(overlay_audit.get("hidden_count", 0)),
+		"missing_legacy_overlay_count": int(overlay_audit.get("missing_count", 0)),
+		"legacy_overlay_paths": Array(overlay_audit.get("paths", [])).duplicate(true),
+		"hide_2d_mission_overlays_when_primary": hide_2d_mission_overlays_when_primary,
+	}
 
 
 func pick_screen_position(screen_position: Vector2, options: Dictionary = {}) -> Dictionary:
@@ -231,6 +271,8 @@ func sync_runtime_visuals() -> Dictionary:
 	var unit_snapshots: Dictionary = {}
 	var legacy_2d_hidden_count: int = 0
 	var legacy_2d_visible: bool = _should_show_legacy_2d_unit_visuals()
+	_update_legacy_2d_mission_overlay_visibility()
+	var overlay_audit: Dictionary = _get_legacy_2d_mission_overlay_audit()
 	for unit in Array(unit_registry.call("get_all_units")):
 		if unit == null or not (unit is Node2D):
 			continue
@@ -264,6 +306,10 @@ func sync_runtime_visuals() -> Dictionary:
 		"path_preview": preview_snapshot,
 		"legacy_2d_unit_visuals_visible": legacy_2d_visible,
 		"legacy_2d_unit_visual_hidden_count": legacy_2d_hidden_count,
+		"legacy_2d_mission_overlays_visible": _should_show_legacy_2d_mission_overlays(),
+		"legacy_2d_mission_overlay_hidden_count": int(overlay_audit.get("hidden_count", 0)),
+		"legacy_2d_mission_overlay_visible_count": int(overlay_audit.get("visible_count", 0)),
+		"legacy_2d_mission_overlay_missing_count": int(overlay_audit.get("missing_count", 0)),
 		"has_runtime_root": runtime_root != null,
 		"has_unit_container": unit_container != null,
 		"has_selection_container": selection_container != null,
@@ -758,6 +804,7 @@ func _build_bridge_snapshot(map_data) -> Dictionary:
 		"camera_current_when_visible": camera_current_when_visible,
 		"hide_2d_map_when_visible": hide_2d_map_when_visible,
 		"hide_2d_unit_sprites_when_primary": hide_2d_unit_sprites_when_primary,
+		"hide_2d_mission_overlays_when_primary": hide_2d_mission_overlays_when_primary,
 		"primary_3d_view_active": is_primary_3d_view_active(),
 		"fallback_2d_visible": is_2d_fallback_visible(),
 	}
@@ -816,12 +863,83 @@ func _set_visuals_visible(is_visible: bool) -> void:
 		camera.current = is_visible and camera_current_when_visible
 	_update_2d_map_visibility()
 	_update_legacy_2d_unit_visual_visibility()
+	_update_legacy_2d_mission_overlay_visibility()
 
 
 func _update_2d_map_visibility() -> void:
 	var map_root_2d = get_node_or_null(map_root_2d_path)
 	if map_root_2d != null and map_root_2d is CanvasItem:
 		(map_root_2d as CanvasItem).visible = not (hide_2d_map_when_visible and visible)
+
+
+func _should_show_legacy_2d_mission_overlays() -> bool:
+	if not hide_2d_mission_overlays_when_primary:
+		return true
+	if not is_primary_3d_view_active():
+		return true
+	return is_2d_fallback_visible()
+
+
+func _update_legacy_2d_mission_overlay_visibility() -> void:
+	var should_show: bool = _should_show_legacy_2d_mission_overlays()
+	for overlay in _get_existing_legacy_2d_mission_overlay_items():
+		_set_legacy_2d_overlay_visible(overlay, should_show)
+
+
+func _get_existing_legacy_2d_mission_overlay_items() -> Array[CanvasItem]:
+	var result: Array[CanvasItem] = []
+	for overlay_path in legacy_2d_mission_overlay_paths:
+		var overlay := get_node_or_null(overlay_path) as CanvasItem
+		if overlay != null:
+			result.append(overlay)
+	return result
+
+
+func _set_legacy_2d_overlay_visible(overlay: CanvasItem, should_be_visible: bool) -> void:
+	if overlay == null:
+		return
+	if should_be_visible:
+		var original_visible: bool = bool(overlay.get_meta(LEGACY_2D_OVERLAY_META_KEY, overlay.visible))
+		overlay.visible = original_visible
+		return
+	if overlay.visible:
+		overlay.set_meta(LEGACY_2D_OVERLAY_META_KEY, true)
+	elif not overlay.has_meta(LEGACY_2D_OVERLAY_META_KEY):
+		overlay.set_meta(LEGACY_2D_OVERLAY_META_KEY, false)
+	overlay.visible = false
+
+
+func _get_legacy_2d_mission_overlay_audit() -> Dictionary:
+	var path_entries: Array = []
+	var visible_count: int = 0
+	var hidden_count: int = 0
+	var missing_count: int = 0
+	for overlay_path in legacy_2d_mission_overlay_paths:
+		var overlay := get_node_or_null(overlay_path) as CanvasItem
+		var entry := {
+			"path": String(overlay_path),
+			"present": overlay != null,
+			"visible": false,
+			"remembered_visible": false,
+		}
+		if overlay == null:
+			missing_count += 1
+		else:
+			var visible_now: bool = overlay.visible
+			var remembered_visible: bool = bool(overlay.get_meta(LEGACY_2D_OVERLAY_META_KEY, visible_now))
+			entry["visible"] = visible_now
+			entry["remembered_visible"] = remembered_visible
+			if visible_now:
+				visible_count += 1
+			elif remembered_visible:
+				hidden_count += 1
+		path_entries.append(entry)
+	return {
+		"visible_count": visible_count,
+		"hidden_count": hidden_count,
+		"missing_count": missing_count,
+		"paths": path_entries,
+	}
 
 
 func _should_show_legacy_2d_unit_visuals() -> bool:
@@ -867,3 +985,12 @@ func _count_hidden_legacy_2d_unit_visuals(unit: Node) -> int:
 		if canvas_child != null and child.has_meta(LEGACY_2D_VISUAL_META_KEY) and bool(child.get_meta(LEGACY_2D_VISUAL_META_KEY)) and not canvas_child.visible:
 			hidden_count += 1
 	return hidden_count
+
+
+func _count_visible_legacy_2d_unit_visuals(unit: Node) -> int:
+	var visible_count: int = 0
+	for child in unit.get_children():
+		var canvas_child := child as CanvasItem
+		if canvas_child != null and canvas_child.visible:
+			visible_count += 1
+	return visible_count

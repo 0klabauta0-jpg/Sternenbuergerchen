@@ -3,7 +3,7 @@
 ## Ziel
 Die alte 2D-Missionsdarstellung wird aus dem aktiven Standardpfad entfernt oder klar zum Debug-/Fallbackpfad degradiert, nachdem 3D-Karte und 3D-Unit-Visuals stabil sind.
 
-## Status: GEPLANT
+## Status: ERLEDIGT
 
 ## Voraussetzung
 - `TASK_148 - 3D Primary Mission View`
@@ -41,24 +41,35 @@ Die alte 2D-Missionsdarstellung wird aus dem aktiven Standardpfad entfernt oder 
 - Kein Brechen bestehender Tests durch unnoetige Asset-Loeschungen.
 
 ## Akzeptanzkriterien
-- [ ] Standard-Live-Mission nutzt keine alte 2D-Karte als sichtbaren Hauptpfad.
-- [ ] 2D-Unit-Sprites sind im Standard-Live-Bild verborgen oder ersetzt.
-- [ ] Debug-/Fallbackpfad ist explizit.
-- [ ] Asset-Audit dokumentiert verbleibende 2D-Nutzung.
-- [ ] Verifier prueft Standard- und Fallbackzustand.
+- [x] Standard-Live-Mission nutzt keine alte 2D-Karte als sichtbaren Hauptpfad.
+- [x] 2D-Unit-Sprites sind im Standard-Live-Bild verborgen oder ersetzt.
+- [x] Debug-/Fallbackpfad ist explizit.
+- [x] Asset-Audit dokumentiert verbleibende 2D-Nutzung.
+- [x] Verifier prueft Standard- und Fallbackzustand.
+
+## Umsetzung
+- `MissionLive25DVisualBridge` verwaltet jetzt neben 2D-Map und Unit-Sprites auch explizite Legacy-2D-Missionsoverlays.
+- Im primaeren 3D-Modus werden `TargetMarker/TargetVisual`, `LZMarker`, `DropshipPlanMarker`, `FireteamOrderVisualizer` und `ContactMapOverlay` ausgeblendet, waehrend die 3D-Bridge deren Daten weiterhin lesen kann.
+- `set_2d_fallback_visible(true)` stellt die alte 2D-Karte, Unit-Sprites und Legacy-Overlays fuer Compare/Debug wieder her.
+- `get_legacy_2d_mission_visual_audit()` liefert einen pruefbaren Snapshot zu Map, Units und Overlays.
+- Das Asset-Audit liegt unter `docs/legacy_2d_mission_asset_audit.md`.
 
 ## Erwartetes Ergebnis
 Ab diesem Punkt ist 3D/2.5D faktisch die Missionsdarstellung. 2D bleibt nur dort, wo es noch bewusst gebraucht wird: Editor, UI, Icons, Fallback oder historische Referenz.
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_150_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_150_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_148_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_149_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_145_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_143_verifier.gd`
 - [ ] Manuell Live-Mission und Map-Editor starten.
 
 ## Dateien (voraussichtlich)
 - `scenes/tests/mission_reactivity_test.tscn`
 - `scripts/tests/mission_live_2_5d_visual_bridge.gd`
 - `scripts/tests/task_150_verifier.gd`
-- optional: `docs/rendering/legacy_2d_mission_asset_audit.md`
+- `docs/legacy_2d_mission_asset_audit.md`
 
 ## Risiken
 - Wenn 2D zu frueh entfernt wird, verlieren wir einen guten Debugvergleich. Deshalb ist dieser Task bewusst erst nach 3D-Primary und 3D-Unit-Visuals eingeordnet.
