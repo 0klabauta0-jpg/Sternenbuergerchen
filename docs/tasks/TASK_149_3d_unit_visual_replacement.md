@@ -3,7 +3,7 @@
 ## Ziel
 Die bisherigen 2D-Unit-Sprites im Missionsbild werden durch lesbare 3D-Unit-Visuals ersetzt oder eindeutig ueberlagert, ohne die autoritativen 2D-Unit-Positionen und Runtime-Systeme zu veraendern.
 
-## Status: GEPLANT
+## Status: ERLEDIGT
 
 ## Voraussetzung
 - `TASK_148 - 3D Primary Mission View`
@@ -43,22 +43,29 @@ Die bisherigen 2D-Unit-Sprites im Missionsbild werden durch lesbare 3D-Unit-Visu
 - Registries bleiben Lookup-Pfad, keine SceneTree-Vollscans im Hotpath.
 
 ## Akzeptanzkriterien
-- [ ] Missionsunits erscheinen im 3D-Bild als lesbare 3D-Visuals.
-- [ ] Team, Auswahl und Air/Ground sind unterscheidbar.
-- [ ] 2D-Sprites koennen fuer Debug ausgeblendet werden.
-- [ ] Verifier prueft Projektion und Visualzustand ohne Gameplay-Mutation.
+- [x] Missionsunits erscheinen im 3D-Bild als lesbare 3D-Visuals.
+- [x] Team, Auswahl und Air/Ground sind unterscheidbar.
+- [x] 2D-Sprites koennen fuer Debug ausgeblendet werden.
+- [x] Verifier prueft Projektion und Visualzustand ohne Gameplay-Mutation.
+
+## Umsetzung
+- `MissionLive25DVisualBridge` erzeugt fuer registrierte Units jetzt zusammengesetzte 3D-Unit-Visuals aus Body, Head, Team-/Fireteam-Badge, Rollenlabel und optionalem Lead-Marker.
+- Friendly, Enemy, Neutral, Air/Ground, Selection und Fireteam Lead werden rein visuell ueber Material, Label und Marker unterschieden.
+- Alte direkte 2D-Canvas-Visuals unter Unit-Nodes werden im primaeren 3D-Modus verborgen und beim 2D-Compare/Fallback wiederhergestellt. Die autoritativen `Node2D`-Positionen bleiben unveraendert.
+- Runtime-Snapshots enthalten die neuen Visual-Descriptoren, damit Debug/Verifier den Zustand pruefen koennen, ohne die Szene nach Gameplay-Wahrheit zu durchsuchen.
 
 ## Erwartetes Ergebnis
 Der wichtigste sichtbare Rest der alten 2D-Missionsoptik ist aus dem normalen Spielbild herausgenommen, waehrend die Runtime weiterhin stabil auf dem bestehenden Simulationspfad laeuft.
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_149_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_149_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_143_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_145_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_148_verifier.gd`
 - [ ] Manuell Live-Mission starten und Units, Auswahl, Air-Schatten und Path Preview pruefen.
 
 ## Dateien (voraussichtlich)
 - `scripts/tests/mission_live_2_5d_visual_bridge.gd`
-- `scripts/terrain/terrain_2_5d_visual_projection.gd`
-- `scenes/tests/mission_reactivity_test.tscn`
 - `scripts/tests/task_149_verifier.gd`
 
 ## Risiken

@@ -8,6 +8,9 @@ const TERRAIN_25D_VISUAL_PROJECTION_SCRIPT: GDScript = preload("res://scripts/te
 const TERRAIN_25D_PICKER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_2_5d_picker.gd")
 const MOVEMENT_LAYER_SCRIPT: GDScript = preload("res://scripts/core/movement_layer.gd")
 
+const FRIENDLY_TEAM_ID: String = "team_alpha"
+const LEGACY_2D_VISUAL_META_KEY: String = "task_149_legacy_2d_visible"
+
 @export var bridge_enabled: bool = true
 @export var mission_setup_path: NodePath
 @export var terrain_registry_path: NodePath
@@ -20,12 +23,14 @@ const MOVEMENT_LAYER_SCRIPT: GDScript = preload("res://scripts/core/movement_lay
 @export var camera_current_when_visible: bool = false
 @export var keyboard_fallback_toggle_enabled: bool = true
 @export var sync_runtime_visuals_enabled: bool = true
+@export var hide_2d_unit_sprites_when_primary: bool = true
 @export_range(0.05, 1.0, 0.05) var runtime_visual_sync_interval_seconds: float = 0.15
 
 var render_result: Dictionary = {}
 var bridge_snapshot: Dictionary = {}
 var runtime_visual_snapshot: Dictionary = {}
 var last_pick_snapshot: Dictionary = {}
+var _2d_fallback_compare_visible: bool = false
 
 var _renderer = null
 var _camera_controller = TERRAIN_25D_CAMERA_CONTROLLER_SCRIPT.new()
@@ -33,16 +38,27 @@ var _visual_projection = TERRAIN_25D_VISUAL_PROJECTION_SCRIPT.new()
 var _picker = TERRAIN_25D_PICKER_SCRIPT.new()
 var _sync_accumulator: float = 0.0
 var _unit_mesh: Mesh = null
+var _unit_head_mesh: Mesh = null
+var _unit_badge_mesh: Mesh = null
+var _unit_lead_mesh: Mesh = null
 var _selection_mesh: Mesh = null
 var _target_mesh: Mesh = null
 var _preview_mesh: Mesh = null
 var _air_shadow_mesh: Mesh = null
 var _unit_material_ground: StandardMaterial3D = null
 var _unit_material_air: StandardMaterial3D = null
+var _unit_material_friendly: StandardMaterial3D = null
+var _unit_material_enemy: StandardMaterial3D = null
+var _unit_material_neutral: StandardMaterial3D = null
+var _unit_material_friendly_air: StandardMaterial3D = null
+var _unit_material_enemy_air: StandardMaterial3D = null
+var _unit_head_material: StandardMaterial3D = null
+var _unit_lead_material: StandardMaterial3D = null
 var _selection_material: StandardMaterial3D = null
 var _target_material: StandardMaterial3D = null
 var _preview_material: StandardMaterial3D = null
 var _air_shadow_material: StandardMaterial3D = null
+var _fireteam_materials: Dictionary = {}
 
 
 func _ready() -> void:
@@ -119,11 +135,14 @@ func set_bridge_visible(is_visible: bool) -> void:
 	if camera != null:
 		camera.current = is_visible and camera_current_when_visible
 	_update_2d_map_visibility()
+	_update_legacy_2d_unit_visual_visibility()
 
 
 func set_2d_fallback_visible(is_visible: bool) -> void:
+	_2d_fallback_compare_visible = is_visible
 	hide_2d_map_when_visible = not is_visible
 	_update_2d_map_visibility()
+	_update_legacy_2d_unit_visual_visibility()
 	if bool(bridge_snapshot.get("valid", false)):
 		bridge_snapshot["hide_2d_map_when_visible"] = hide_2d_map_when_visible
 		bridge_snapshot["fallback_2d_visible"] = is_2d_fallback_visible()
@@ -131,7 +150,9 @@ func set_2d_fallback_visible(is_visible: bool) -> void:
 
 func is_2d_fallback_visible() -> bool:
 	var map_root_2d = get_node_or_null(map_root_2d_path)
-	return map_root_2d != null and map_root_2d is CanvasItem and (map_root_2d as CanvasItem).visible
+	if map_root_2d != null and map_root_2d is CanvasItem:
+		return (map_root_2d as CanvasItem).visible
+	return _2d_fallback_compare_visible
 
 
 func is_primary_3d_view_active() -> bool:
@@ -208,6 +229,8 @@ func sync_runtime_visuals() -> Dictionary:
 	var preview_container := _ensure_container(runtime_root, "PathPreviewVisuals3D")
 	var seen_units: PackedStringArray = []
 	var unit_snapshots: Dictionary = {}
+	var legacy_2d_hidden_count: int = 0
+	var legacy_2d_visible: bool = _should_show_legacy_2d_unit_visuals()
 	for unit in Array(unit_registry.call("get_all_units")):
 		if unit == null or not (unit is Node2D):
 			continue
@@ -217,9 +240,14 @@ func sync_runtime_visuals() -> Dictionary:
 		seen_units.append(_sanitize_node_key(unit_id))
 		var projection: Dictionary = Dictionary(_visual_projection.call("project_node2d", unit, terrain_registry))
 		if not bool(projection.get("valid", false)):
+			_set_legacy_2d_unit_visuals_visible(unit, true)
 			continue
-		_sync_unit_visual(unit_id, unit, projection, unit_container, selection_container, debug_container, air_container)
-		unit_snapshots[unit_id] = _projection_snapshot(projection)
+		_set_legacy_2d_unit_visuals_visible(unit, legacy_2d_visible)
+		legacy_2d_hidden_count += _count_hidden_legacy_2d_unit_visuals(unit)
+		var visual_descriptor: Dictionary = _sync_unit_visual(unit_id, unit, projection, unit_container, selection_container, debug_container, air_container)
+		var unit_snapshot: Dictionary = _projection_snapshot(projection)
+		unit_snapshot.merge(visual_descriptor, true)
+		unit_snapshots[unit_id] = unit_snapshot
 
 	_remove_stale_visuals(unit_container, seen_units)
 	_remove_stale_visuals(selection_container, seen_units)
@@ -234,6 +262,8 @@ func sync_runtime_visuals() -> Dictionary:
 		"units": unit_snapshots,
 		"target_marker": target_snapshot,
 		"path_preview": preview_snapshot,
+		"legacy_2d_unit_visuals_visible": legacy_2d_visible,
+		"legacy_2d_unit_visual_hidden_count": legacy_2d_hidden_count,
 		"has_runtime_root": runtime_root != null,
 		"has_unit_container": unit_container != null,
 		"has_selection_container": selection_container != null,
@@ -254,12 +284,28 @@ func _configure_visual_projection() -> void:
 
 func _prepare_runtime_visual_resources() -> void:
 	if _unit_mesh == null:
-		var unit_mesh := CylinderMesh.new()
-		unit_mesh.top_radius = 0.28
-		unit_mesh.bottom_radius = 0.34
-		unit_mesh.height = 0.55
+		var unit_mesh := CapsuleMesh.new()
+		unit_mesh.radius = 0.22
+		unit_mesh.height = 0.62
 		unit_mesh.radial_segments = 12
+		unit_mesh.rings = 4
 		_unit_mesh = unit_mesh
+	if _unit_head_mesh == null:
+		var head_mesh := SphereMesh.new()
+		head_mesh.radius = 0.16
+		head_mesh.height = 0.24
+		_unit_head_mesh = head_mesh
+	if _unit_badge_mesh == null:
+		var badge_mesh := BoxMesh.new()
+		badge_mesh.size = Vector3(0.42, 0.04, 0.18)
+		_unit_badge_mesh = badge_mesh
+	if _unit_lead_mesh == null:
+		var lead_mesh := CylinderMesh.new()
+		lead_mesh.top_radius = 0.0
+		lead_mesh.bottom_radius = 0.16
+		lead_mesh.height = 0.24
+		lead_mesh.radial_segments = 4
+		_unit_lead_mesh = lead_mesh
 	if _selection_mesh == null:
 		var selection_mesh := CylinderMesh.new()
 		selection_mesh.top_radius = 0.48
@@ -288,6 +334,13 @@ func _prepare_runtime_visual_resources() -> void:
 		_air_shadow_mesh = air_shadow_mesh
 	_unit_material_ground = _ensure_material(_unit_material_ground, Color(0.25, 0.68, 1.0, 1.0), false)
 	_unit_material_air = _ensure_material(_unit_material_air, Color(1.0, 0.68, 0.24, 1.0), false)
+	_unit_material_friendly = _ensure_material(_unit_material_friendly, Color(0.2, 0.62, 1.0, 1.0), false)
+	_unit_material_enemy = _ensure_material(_unit_material_enemy, Color(1.0, 0.32, 0.26, 1.0), false)
+	_unit_material_neutral = _ensure_material(_unit_material_neutral, Color(0.7, 0.76, 0.78, 1.0), false)
+	_unit_material_friendly_air = _ensure_material(_unit_material_friendly_air, Color(0.35, 0.92, 1.0, 1.0), false)
+	_unit_material_enemy_air = _ensure_material(_unit_material_enemy_air, Color(1.0, 0.62, 0.2, 1.0), false)
+	_unit_head_material = _ensure_material(_unit_head_material, Color(0.92, 0.94, 0.9, 1.0), false)
+	_unit_lead_material = _ensure_material(_unit_lead_material, Color(1.0, 0.9, 0.24, 1.0), false)
 	_selection_material = _ensure_material(_selection_material, Color(0.7, 0.95, 1.0, 0.55), true)
 	_target_material = _ensure_material(_target_material, Color(1.0, 0.85, 0.18, 1.0), false)
 	_preview_material = _ensure_material(_preview_material, Color(0.5, 0.95, 0.65, 0.72), true)
@@ -326,29 +379,160 @@ func _ensure_container(parent: Node3D, node_name: String) -> Node3D:
 	return container
 
 
-func _sync_unit_visual(unit_id: String, unit: Node2D, projection: Dictionary, unit_container: Node3D, selection_container: Node3D, debug_container: Node3D, air_container: Node3D) -> void:
+func _sync_unit_visual(unit_id: String, unit: Node2D, projection: Dictionary, unit_container: Node3D, selection_container: Node3D, debug_container: Node3D, air_container: Node3D) -> Dictionary:
 	var key: String = _sanitize_node_key(unit_id)
 	var movement_layer: String = String(projection.get("movement_layer", MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_GROUND))
 	var is_air: bool = MOVEMENT_LAYER_SCRIPT.is_air_layer(movement_layer)
+	var descriptor: Dictionary = _build_unit_visual_descriptor(unit, projection)
 	var unit_visual := _ensure_mesh_instance(unit_container, key, "Unit_", _unit_mesh)
 	unit_visual.position = Vector3(projection.get("visual_position_3d", Vector3.ZERO))
-	unit_visual.material_override = _unit_material_air if is_air else _unit_material_ground
+	unit_visual.material_override = _get_unit_body_material(descriptor)
+	unit_visual.scale = Vector3(1.08, 1.08, 1.08) if bool(descriptor.get("is_selected", false)) else Vector3.ONE
 	unit_visual.visible = true
+	_sync_unit_visual_parts(unit_visual, descriptor)
 
 	var selection_visual := _ensure_mesh_instance(selection_container, key, "Selection_", _selection_mesh)
 	selection_visual.position = Vector3(projection.get("selection_position_3d", Vector3.ZERO))
 	selection_visual.material_override = _selection_material
-	selection_visual.visible = unit.has_method("is_tactical_selected") and bool(unit.call("is_tactical_selected"))
+	selection_visual.visible = bool(descriptor.get("is_selected", false))
 
 	var debug_label := _ensure_debug_label(debug_container, key, unit_id)
 	debug_label.position = Vector3(projection.get("debug_label_position_3d", Vector3.ZERO))
-	debug_label.text = _build_debug_label_text(unit_id, projection)
+	debug_label.text = _build_unit_debug_label_text(unit_id, descriptor, projection)
 	debug_label.visible = true
 
 	var air_shadow := _ensure_mesh_instance(air_container, key, "AirShadow_", _air_shadow_mesh)
 	air_shadow.position = Vector3(projection.get("shadow_position_3d", Vector3.ZERO))
 	air_shadow.material_override = _air_shadow_material
 	air_shadow.visible = is_air
+	return descriptor
+
+
+func _sync_unit_visual_parts(unit_visual: MeshInstance3D, descriptor: Dictionary) -> void:
+	var head := _ensure_child_mesh_instance(unit_visual, "Head", _unit_head_mesh)
+	head.position = Vector3(0.0, 0.42, 0.0)
+	head.material_override = _unit_head_material
+	head.visible = true
+
+	var team_badge := _ensure_child_mesh_instance(unit_visual, "TeamBadge", _unit_badge_mesh)
+	team_badge.position = Vector3(0.0, 0.02, -0.25)
+	team_badge.material_override = _get_fireteam_material(String(descriptor.get("fireteam_id", "")), bool(descriptor.get("is_friendly", false)))
+	team_badge.visible = true
+
+	var lead_marker := _ensure_child_mesh_instance(unit_visual, "LeadMarker", _unit_lead_mesh)
+	lead_marker.position = Vector3(0.0, 0.76, 0.0)
+	lead_marker.material_override = _unit_lead_material
+	lead_marker.visible = bool(descriptor.get("is_fireteam_lead", false))
+
+	var role_label := _ensure_unit_role_label(unit_visual)
+	role_label.text = String(descriptor.get("role_badge", "OP"))
+	role_label.position = Vector3(0.0, 0.62, 0.0)
+	role_label.visible = true
+	role_label.modulate = Color(0.92, 0.96, 1.0, 1.0) if bool(descriptor.get("is_friendly", false)) else Color(1.0, 0.86, 0.82, 1.0)
+
+
+func _ensure_child_mesh_instance(parent: Node3D, node_name: String, mesh: Mesh) -> MeshInstance3D:
+	var mesh_instance := parent.get_node_or_null(node_name) as MeshInstance3D
+	if mesh_instance != null:
+		mesh_instance.mesh = mesh
+		return mesh_instance
+	mesh_instance = MeshInstance3D.new()
+	mesh_instance.name = node_name
+	mesh_instance.mesh = mesh
+	parent.add_child(mesh_instance)
+	return mesh_instance
+
+
+func _ensure_unit_role_label(parent: Node3D) -> Label3D:
+	var label := parent.get_node_or_null("RoleBadge") as Label3D
+	if label != null:
+		return label
+	label = Label3D.new()
+	label.name = "RoleBadge"
+	label.font_size = 18
+	label.outline_size = 5
+	label.outline_modulate = Color(0.02, 0.025, 0.03, 0.9)
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	parent.add_child(label)
+	return label
+
+
+func _build_unit_visual_descriptor(unit: Node2D, projection: Dictionary) -> Dictionary:
+	var team_id: String = _extract_unit_method_string(unit, "get_team_id")
+	var fireteam_id: String = _extract_unit_method_string(unit, "get_fireteam_id")
+	var role_id: String = _extract_unit_method_string(unit, "get_role_id")
+	var is_air: bool = MOVEMENT_LAYER_SCRIPT.is_air_layer(String(projection.get("movement_layer", MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_GROUND)))
+	var is_selected: bool = unit.has_method("is_tactical_selected") and bool(unit.call("is_tactical_selected"))
+	var is_fireteam_lead: bool = bool(unit.get("is_fireteam_lead")) if unit != null else false
+	var legacy_hidden_count: int = _count_hidden_legacy_2d_unit_visuals(unit)
+	return {
+		"visual_kind": "tactical_3d_unit_v1",
+		"team_id": team_id,
+		"fireteam_id": fireteam_id,
+		"role_id": role_id,
+		"role_badge": _get_role_badge(role_id),
+		"is_friendly": team_id == FRIENDLY_TEAM_ID,
+		"is_enemy": not team_id.is_empty() and team_id != FRIENDLY_TEAM_ID,
+		"is_air": is_air,
+		"is_ground": not is_air,
+		"is_selected": is_selected,
+		"is_fireteam_lead": is_fireteam_lead,
+		"legacy_2d_visual_hidden_count": legacy_hidden_count,
+		"legacy_2d_visuals_hidden": legacy_hidden_count > 0,
+	}
+
+
+func _extract_unit_method_string(unit: Node, method_name: String) -> String:
+	if unit != null and unit.has_method(method_name):
+		return String(unit.call(method_name)).strip_edges()
+	return ""
+
+
+func _get_role_badge(role_id: String) -> String:
+	var normalized_role_id: String = role_id.strip_edges().to_lower()
+	if normalized_role_id.contains("medic"):
+		return "M"
+	if normalized_role_id.contains("pilot"):
+		return "P"
+	if normalized_role_id.contains("leader") or normalized_role_id.contains("commander"):
+		return "L"
+	if normalized_role_id.contains("sniper") or normalized_role_id.contains("marksman"):
+		return "S"
+	if normalized_role_id.contains("engineer") or normalized_role_id.contains("tech"):
+		return "T"
+	if normalized_role_id.contains("guard") or normalized_role_id.contains("security"):
+		return "G"
+	return "OP"
+
+
+func _get_unit_body_material(descriptor: Dictionary) -> StandardMaterial3D:
+	if bool(descriptor.get("is_air", false)):
+		return _unit_material_friendly_air if bool(descriptor.get("is_friendly", false)) else _unit_material_enemy_air
+	if bool(descriptor.get("is_friendly", false)):
+		return _unit_material_friendly
+	if bool(descriptor.get("is_enemy", false)):
+		return _unit_material_enemy
+	return _unit_material_neutral
+
+
+func _get_fireteam_material(fireteam_id: String, is_friendly: bool) -> StandardMaterial3D:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	var key: String = "%s:%s" % [normalized_fireteam_id, str(is_friendly)]
+	if _fireteam_materials.has(key):
+		return _fireteam_materials[key]
+	var color := Color(0.92, 0.92, 0.92, 1.0)
+	match normalized_fireteam_id:
+		"blue", "ft1":
+			color = Color(0.2, 0.52, 1.0, 1.0)
+		"gold", "ft2":
+			color = Color(1.0, 0.82, 0.24, 1.0)
+		"green", "ft3":
+			color = Color(0.28, 0.9, 0.52, 1.0)
+		_:
+			color = Color(0.78, 0.86, 0.95, 1.0) if is_friendly else Color(1.0, 0.48, 0.34, 1.0)
+	var material := _ensure_material(null, color, false)
+	_fireteam_materials[key] = material
+	return material
 
 
 func _sync_target_marker_visual(terrain_registry, marker_container: Node3D) -> Dictionary:
@@ -517,6 +701,21 @@ func _build_debug_label_text(unit_id: String, projection: Dictionary) -> String:
 	return "%s F%d" % [unit_id, int(projection.get("floor_index", 0))]
 
 
+func _build_unit_debug_label_text(unit_id: String, descriptor: Dictionary, projection: Dictionary) -> String:
+	var parts: PackedStringArray = []
+	var fireteam_id: String = String(descriptor.get("fireteam_id", "")).strip_edges().to_upper()
+	var role_badge: String = String(descriptor.get("role_badge", "OP"))
+	parts.append(unit_id)
+	if not fireteam_id.is_empty():
+		parts.append(fireteam_id)
+	parts.append(role_badge)
+	if bool(descriptor.get("is_air", false)):
+		parts.append("AIR %d" % int(projection.get("altitude_band", 0)))
+	if bool(descriptor.get("is_fireteam_lead", false)):
+		parts.append("LEAD")
+	return " ".join(parts)
+
+
 func _resolve_live_map_data():
 	var mission_setup = get_node_or_null(mission_setup_path)
 	if mission_setup != null and mission_setup.has_method("get_loaded_terrain_map_data"):
@@ -558,6 +757,7 @@ func _build_bridge_snapshot(map_data) -> Dictionary:
 		"show_debug_grid": show_debug_grid,
 		"camera_current_when_visible": camera_current_when_visible,
 		"hide_2d_map_when_visible": hide_2d_map_when_visible,
+		"hide_2d_unit_sprites_when_primary": hide_2d_unit_sprites_when_primary,
 		"primary_3d_view_active": is_primary_3d_view_active(),
 		"fallback_2d_visible": is_2d_fallback_visible(),
 	}
@@ -615,9 +815,55 @@ func _set_visuals_visible(is_visible: bool) -> void:
 	if camera != null:
 		camera.current = is_visible and camera_current_when_visible
 	_update_2d_map_visibility()
+	_update_legacy_2d_unit_visual_visibility()
 
 
 func _update_2d_map_visibility() -> void:
 	var map_root_2d = get_node_or_null(map_root_2d_path)
 	if map_root_2d != null and map_root_2d is CanvasItem:
 		(map_root_2d as CanvasItem).visible = not (hide_2d_map_when_visible and visible)
+
+
+func _should_show_legacy_2d_unit_visuals() -> bool:
+	if not hide_2d_unit_sprites_when_primary:
+		return true
+	if not is_primary_3d_view_active():
+		return true
+	return is_2d_fallback_visible()
+
+
+func _update_legacy_2d_unit_visual_visibility() -> void:
+	var unit_registry = get_node_or_null(unit_registry_path)
+	if unit_registry == null or not unit_registry.has_method("get_all_units"):
+		return
+	var should_show: bool = _should_show_legacy_2d_unit_visuals()
+	for unit in Array(unit_registry.call("get_all_units")):
+		if unit != null and unit is Node2D:
+			_set_legacy_2d_unit_visuals_visible(unit, should_show)
+
+
+func _set_legacy_2d_unit_visuals_visible(unit: Node, should_be_visible: bool) -> int:
+	var affected_count: int = 0
+	for child in unit.get_children():
+		var canvas_child := child as CanvasItem
+		if canvas_child == null:
+			continue
+		if not child.has_meta(LEGACY_2D_VISUAL_META_KEY):
+			child.set_meta(LEGACY_2D_VISUAL_META_KEY, canvas_child.visible)
+		var original_visible: bool = bool(child.get_meta(LEGACY_2D_VISUAL_META_KEY))
+		if should_be_visible:
+			canvas_child.visible = original_visible
+		else:
+			if canvas_child.visible:
+				affected_count += 1
+			canvas_child.visible = false
+	return affected_count
+
+
+func _count_hidden_legacy_2d_unit_visuals(unit: Node) -> int:
+	var hidden_count: int = 0
+	for child in unit.get_children():
+		var canvas_child := child as CanvasItem
+		if canvas_child != null and child.has_meta(LEGACY_2D_VISUAL_META_KEY) and bool(child.get_meta(LEGACY_2D_VISUAL_META_KEY)) and not canvas_child.visible:
+			hidden_count += 1
+	return hidden_count
