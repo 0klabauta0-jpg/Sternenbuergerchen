@@ -57,6 +57,8 @@ terrain_registry_path = NodePath("../TerrainRegistry")
 map_root_2d_path = NodePath("../MapRoot")
 unit_registry_path = NodePath("../UnitRegistry")
 target_marker_path = NodePath("../TargetMarker")
+lz_marker_path = NodePath("../LZMarker")
+dropship_marker_path = NodePath("../DropshipPlanMarker")
 order_visualizer_path = NodePath("../FireteamOrderVisualizer")
 show_debug_grid = false
 hide_2d_map_when_visible = true
@@ -93,6 +95,7 @@ position = Vector2(320, 180)
 [node name="MissionCamera" type="Camera2D" parent="."]
 script = ExtResource("22_camera")
 focus_marker_path = NodePath("../MapRoot/objective_point")
+primary_3d_bridge_path = NodePath("../Mission25DVisualBridge")
 
 [node name="TargetVisual" type="Polygon2D" parent="TargetMarker"]
 color = Color(0.95, 0.85, 0.2, 1)

@@ -7,6 +7,7 @@ const MIN_CAMERA_ZOOM: float = 0.55
 const MAX_CAMERA_ZOOM: float = 1.9
 
 @export var focus_marker_path: NodePath
+@export var primary_3d_bridge_path: NodePath
 
 var _is_panning: bool = false
 
@@ -89,8 +90,18 @@ func _deactivate_camera() -> void:
 
 
 func _is_camera_active() -> bool:
-	return enabled and is_current() and is_visible_in_tree()
+	return enabled and is_current() and is_visible_in_tree() and not _is_primary_3d_bridge_active()
 
 
 func _is_pointer_over_control() -> bool:
 	return get_viewport().gui_get_hovered_control() != null
+
+
+func _is_primary_3d_bridge_active() -> bool:
+	if primary_3d_bridge_path.is_empty():
+		return false
+	var bridge = get_node_or_null(primary_3d_bridge_path)
+	if bridge == null or not bridge.has_method("is_primary_3d_view_active"):
+		return false
+	var fallback_visible: bool = bool(bridge.call("is_2d_fallback_visible")) if bridge.has_method("is_2d_fallback_visible") else false
+	return bool(bridge.call("is_primary_3d_view_active")) and not fallback_visible

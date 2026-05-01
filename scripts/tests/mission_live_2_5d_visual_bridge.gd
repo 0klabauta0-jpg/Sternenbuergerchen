@@ -11,6 +11,7 @@ const MOVEMENT_LAYER_SCRIPT: GDScript = preload("res://scripts/core/movement_lay
 const FRIENDLY_TEAM_ID: String = "team_alpha"
 const LEGACY_2D_VISUAL_META_KEY: String = "task_149_legacy_2d_visible"
 const LEGACY_2D_OVERLAY_META_KEY: String = "task_150_legacy_2d_overlay_visible"
+const DROPSHIP_MODEL_PATH: String = "res://Assets/kenney_space-kit/3d/craft_speederB.glb"
 
 @export var bridge_enabled: bool = true
 @export var mission_setup_path: NodePath
@@ -18,12 +19,20 @@ const LEGACY_2D_OVERLAY_META_KEY: String = "task_150_legacy_2d_overlay_visible"
 @export var map_root_2d_path: NodePath
 @export var unit_registry_path: NodePath
 @export var target_marker_path: NodePath
+@export var lz_marker_path: NodePath
+@export var dropship_marker_path: NodePath
 @export var order_visualizer_path: NodePath
 @export var show_debug_grid: bool = false
 @export var hide_2d_map_when_visible: bool = false
 @export var camera_current_when_visible: bool = false
+@export var camera_controls_enabled: bool = true
+@export var camera_pan_speed: float = 15.0
+@export var camera_zoom_step: float = 1.4
+@export var camera_min_size: float = 5.0
+@export var camera_max_size: float = 42.0
 @export var keyboard_fallback_toggle_enabled: bool = true
 @export var sync_runtime_visuals_enabled: bool = true
+@export var show_runtime_debug_labels: bool = false
 @export var hide_2d_unit_sprites_when_primary: bool = true
 @export var hide_2d_mission_overlays_when_primary: bool = true
 @export var legacy_2d_mission_overlay_paths: Array[NodePath] = []
@@ -34,6 +43,7 @@ var bridge_snapshot: Dictionary = {}
 var runtime_visual_snapshot: Dictionary = {}
 var last_pick_snapshot: Dictionary = {}
 var _2d_fallback_compare_visible: bool = false
+var _is_camera_panning: bool = false
 
 var _renderer = null
 var _camera_controller = TERRAIN_25D_CAMERA_CONTROLLER_SCRIPT.new()
@@ -46,8 +56,11 @@ var _unit_badge_mesh: Mesh = null
 var _unit_lead_mesh: Mesh = null
 var _selection_mesh: Mesh = null
 var _target_mesh: Mesh = null
+var _lz_mesh: Mesh = null
 var _preview_mesh: Mesh = null
 var _air_shadow_mesh: Mesh = null
+var _dropship_fallback_mesh: Mesh = null
+var _dropship_scene: PackedScene = null
 var _unit_material_ground: StandardMaterial3D = null
 var _unit_material_air: StandardMaterial3D = null
 var _unit_material_friendly: StandardMaterial3D = null
@@ -59,8 +72,11 @@ var _unit_head_material: StandardMaterial3D = null
 var _unit_lead_material: StandardMaterial3D = null
 var _selection_material: StandardMaterial3D = null
 var _target_material: StandardMaterial3D = null
+var _lz_material: StandardMaterial3D = null
 var _preview_material: StandardMaterial3D = null
 var _air_shadow_material: StandardMaterial3D = null
+var _dropship_material: StandardMaterial3D = null
+var _approach_material: StandardMaterial3D = null
 var _fireteam_materials: Dictionary = {}
 
 
@@ -74,6 +90,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	_process_camera_controls(delta)
 	if not bridge_enabled or not visible or not sync_runtime_visuals_enabled:
 		return
 	_sync_accumulator += delta
@@ -92,14 +109,87 @@ func _exit_tree() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not keyboard_fallback_toggle_enabled:
-		return
 	var key_event := event as InputEventKey
-	if key_event == null or not key_event.pressed or key_event.echo:
-		return
-	if key_event.keycode == KEY_F7:
+	if keyboard_fallback_toggle_enabled and key_event != null and key_event.pressed and not key_event.echo and key_event.keycode == KEY_F7:
 		set_2d_fallback_visible(not is_2d_fallback_visible())
 		get_viewport().set_input_as_handled()
+		return
+
+	if not _should_handle_camera_controls():
+		return
+	if event is InputEventMouseButton:
+		var mouse_event := event as InputEventMouseButton
+		if mouse_event.button_index == MOUSE_BUTTON_WHEEL_UP and mouse_event.pressed and not _is_pointer_over_control():
+			zoom_camera_by_steps(-1)
+			get_viewport().set_input_as_handled()
+			return
+		if mouse_event.button_index == MOUSE_BUTTON_WHEEL_DOWN and mouse_event.pressed and not _is_pointer_over_control():
+			zoom_camera_by_steps(1)
+			get_viewport().set_input_as_handled()
+			return
+		if mouse_event.button_index == MOUSE_BUTTON_MIDDLE:
+			_is_camera_panning = mouse_event.pressed and not _is_pointer_over_control()
+			if mouse_event.pressed:
+				get_viewport().set_input_as_handled()
+			return
+
+	if event is InputEventMouseMotion and _is_camera_panning:
+		var mouse_motion := event as InputEventMouseMotion
+		var drag_direction := Vector2(-mouse_motion.relative.x, mouse_motion.relative.y)
+		_pan_camera_from_input(drag_direction, get_camera_size() * 0.018)
+		get_viewport().set_input_as_handled()
+
+
+func pan_camera_by_local(input_direction: Vector2, amount: float = -1.0) -> void:
+	if amount < 0.0:
+		amount = camera_pan_speed * 0.016 * maxf(get_camera_size() / 20.0, 0.55)
+	_pan_camera_from_input(input_direction, amount)
+
+
+func zoom_camera_by_steps(step_count: int) -> void:
+	_camera_controller.zoom_step = camera_zoom_step
+	_camera_controller.min_size = camera_min_size
+	_camera_controller.max_size = camera_max_size
+	_camera_controller.call("zoom_by_steps", step_count)
+
+
+func get_camera_focus() -> Vector3:
+	return Vector3(_camera_controller.call("get_focus"))
+
+
+func get_camera_size() -> float:
+	return float(_camera_controller.call("get_camera_size"))
+
+
+func _process_camera_controls(delta: float) -> void:
+	if not _should_handle_camera_controls() or _is_pointer_over_control():
+		return
+	var direction := Vector2.ZERO
+	if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
+		direction.y += 1.0
+	if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
+		direction.y -= 1.0
+	if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
+		direction.x -= 1.0
+	if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
+		direction.x += 1.0
+	if direction == Vector2.ZERO:
+		return
+	_pan_camera_from_input(direction, camera_pan_speed * delta * maxf(get_camera_size() / 20.0, 0.55))
+
+
+func _pan_camera_from_input(input_direction: Vector2, amount: float) -> void:
+	if input_direction == Vector2.ZERO or amount <= 0.0:
+		return
+	_camera_controller.call("pan_by_local", input_direction.normalized(), amount)
+
+
+func _should_handle_camera_controls() -> bool:
+	return camera_controls_enabled and is_primary_3d_view_active() and not is_2d_fallback_visible()
+
+
+func _is_pointer_over_control() -> bool:
+	return get_viewport().gui_get_hovered_control() != null
 
 
 func refresh_bridge() -> Dictionary:
@@ -295,7 +385,15 @@ func sync_runtime_visuals() -> Dictionary:
 	_remove_stale_visuals(selection_container, seen_units)
 	_remove_stale_visuals(debug_container, seen_units)
 	_remove_stale_visuals(air_container, seen_units)
+	var marker_seen_keys: PackedStringArray = []
 	var target_snapshot: Dictionary = _sync_target_marker_visual(terrain_registry, marker_container)
+	if bool(target_snapshot.get("visible", false)):
+		marker_seen_keys.append("target_marker")
+	var strategic_marker_snapshot: Dictionary = _sync_strategic_marker_visuals(terrain_registry, marker_container)
+	for marker_key in PackedStringArray(strategic_marker_snapshot.get("seen_keys", PackedStringArray())):
+		if not marker_seen_keys.has(marker_key):
+			marker_seen_keys.append(marker_key)
+	_remove_stale_visuals(marker_container, marker_seen_keys)
 	var preview_snapshot: Dictionary = _sync_path_preview_visuals(terrain_registry, preview_container)
 	runtime_visual_snapshot = {
 		"enabled": true,
@@ -303,7 +401,9 @@ func sync_runtime_visuals() -> Dictionary:
 		"unit_count": unit_snapshots.size(),
 		"units": unit_snapshots,
 		"target_marker": target_snapshot,
+		"strategic_markers": strategic_marker_snapshot,
 		"path_preview": preview_snapshot,
+		"runtime_debug_labels_visible": show_runtime_debug_labels,
 		"legacy_2d_unit_visuals_visible": legacy_2d_visible,
 		"legacy_2d_unit_visual_hidden_count": legacy_2d_hidden_count,
 		"legacy_2d_mission_overlays_visible": _should_show_legacy_2d_mission_overlays(),
@@ -364,6 +464,13 @@ func _prepare_runtime_visual_resources() -> void:
 		target_mesh.radius = 0.23
 		target_mesh.height = 0.46
 		_target_mesh = target_mesh
+	if _lz_mesh == null:
+		var lz_mesh := CylinderMesh.new()
+		lz_mesh.top_radius = 0.88
+		lz_mesh.bottom_radius = 0.88
+		lz_mesh.height = 0.025
+		lz_mesh.radial_segments = 48
+		_lz_mesh = lz_mesh
 	if _preview_mesh == null:
 		var preview_mesh := CylinderMesh.new()
 		preview_mesh.top_radius = 0.25
@@ -378,6 +485,12 @@ func _prepare_runtime_visual_resources() -> void:
 		air_shadow_mesh.height = 0.02
 		air_shadow_mesh.radial_segments = 24
 		_air_shadow_mesh = air_shadow_mesh
+	if _dropship_fallback_mesh == null:
+		var dropship_mesh := BoxMesh.new()
+		dropship_mesh.size = Vector3(0.72, 0.18, 1.12)
+		_dropship_fallback_mesh = dropship_mesh
+	if _dropship_scene == null and ResourceLoader.exists(DROPSHIP_MODEL_PATH):
+		_dropship_scene = load(DROPSHIP_MODEL_PATH) as PackedScene
 	_unit_material_ground = _ensure_material(_unit_material_ground, Color(0.25, 0.68, 1.0, 1.0), false)
 	_unit_material_air = _ensure_material(_unit_material_air, Color(1.0, 0.68, 0.24, 1.0), false)
 	_unit_material_friendly = _ensure_material(_unit_material_friendly, Color(0.2, 0.62, 1.0, 1.0), false)
@@ -389,8 +502,11 @@ func _prepare_runtime_visual_resources() -> void:
 	_unit_lead_material = _ensure_material(_unit_lead_material, Color(1.0, 0.9, 0.24, 1.0), false)
 	_selection_material = _ensure_material(_selection_material, Color(0.7, 0.95, 1.0, 0.55), true)
 	_target_material = _ensure_material(_target_material, Color(1.0, 0.85, 0.18, 1.0), false)
+	_lz_material = _ensure_material(_lz_material, Color(0.18, 0.95, 0.42, 0.38), true)
 	_preview_material = _ensure_material(_preview_material, Color(0.5, 0.95, 0.65, 0.72), true)
 	_air_shadow_material = _ensure_material(_air_shadow_material, Color(0.02, 0.03, 0.04, 0.32), true)
+	_dropship_material = _ensure_material(_dropship_material, Color(0.56, 1.0, 0.72, 0.92), true)
+	_approach_material = _ensure_material(_approach_material, Color(0.45, 1.0, 0.62, 0.62), true)
 
 
 func _ensure_material(existing_material: StandardMaterial3D, color: Color, transparent: bool) -> StandardMaterial3D:
@@ -445,7 +561,7 @@ func _sync_unit_visual(unit_id: String, unit: Node2D, projection: Dictionary, un
 	var debug_label := _ensure_debug_label(debug_container, key, unit_id)
 	debug_label.position = Vector3(projection.get("debug_label_position_3d", Vector3.ZERO))
 	debug_label.text = _build_unit_debug_label_text(unit_id, descriptor, projection)
-	debug_label.visible = true
+	debug_label.visible = show_runtime_debug_labels
 
 	var air_shadow := _ensure_mesh_instance(air_container, key, "AirShadow_", _air_shadow_mesh)
 	air_shadow.position = Vector3(projection.get("shadow_position_3d", Vector3.ZERO))
@@ -473,7 +589,7 @@ func _sync_unit_visual_parts(unit_visual: MeshInstance3D, descriptor: Dictionary
 	var role_label := _ensure_unit_role_label(unit_visual)
 	role_label.text = String(descriptor.get("role_badge", "OP"))
 	role_label.position = Vector3(0.0, 0.62, 0.0)
-	role_label.visible = true
+	role_label.visible = bool(descriptor.get("is_friendly", false))
 	role_label.modulate = Color(0.92, 0.96, 1.0, 1.0) if bool(descriptor.get("is_friendly", false)) else Color(1.0, 0.86, 0.82, 1.0)
 
 
@@ -495,8 +611,8 @@ func _ensure_unit_role_label(parent: Node3D) -> Label3D:
 		return label
 	label = Label3D.new()
 	label.name = "RoleBadge"
-	label.font_size = 18
-	label.outline_size = 5
+	label.font_size = 12
+	label.outline_size = 3
 	label.outline_modulate = Color(0.02, 0.025, 0.03, 0.9)
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	parent.add_child(label)
@@ -596,10 +712,157 @@ func _sync_target_marker_visual(terrain_registry, marker_container: Node3D) -> D
 	marker_visual.position = Vector3(projection.get("target_position_3d", Vector3.ZERO))
 	marker_visual.material_override = _target_material
 	marker_visual.visible = target_marker.visible
-	_remove_stale_visuals(marker_container, PackedStringArray(["target_marker"]))
 	var snapshot: Dictionary = _projection_snapshot(projection)
 	snapshot["visible"] = marker_visual.visible
 	return snapshot
+
+
+func _sync_strategic_marker_visuals(terrain_registry, marker_container: Node3D) -> Dictionary:
+	var seen_keys := PackedStringArray()
+	var lz_snapshot: Dictionary = _sync_lz_marker_visual(terrain_registry, marker_container)
+	if bool(lz_snapshot.get("visible", false)):
+		seen_keys.append("lz_marker")
+	var dropship_snapshot: Dictionary = _sync_dropship_marker_visual(terrain_registry, marker_container, lz_snapshot)
+	if bool(dropship_snapshot.get("visible", false)):
+		seen_keys.append("dropship_marker")
+	if bool(dropship_snapshot.get("approach_visible", false)):
+		seen_keys.append("approach_line")
+	return {
+		"valid": bool(lz_snapshot.get("valid", false)) or bool(dropship_snapshot.get("valid", false)),
+		"lz": lz_snapshot,
+		"dropship": dropship_snapshot,
+		"seen_keys": seen_keys,
+	}
+
+
+func _sync_lz_marker_visual(terrain_registry, marker_container: Node3D) -> Dictionary:
+	var lz_marker := get_node_or_null(lz_marker_path) as Node2D
+	if lz_marker == null:
+		return {
+			"valid": false,
+			"reason": "lz_marker_missing",
+			"visible": false,
+		}
+	var should_show: bool = _is_canvas_marker_effectively_visible(lz_marker)
+	var projection: Dictionary = Dictionary(_visual_projection.call("project_marker2d", lz_marker, terrain_registry))
+	if not bool(projection.get("valid", false)):
+		projection["visible"] = false
+		return projection
+	var lz_visual := _ensure_mesh_instance(marker_container, "lz_marker", "LZ_", _lz_mesh)
+	lz_visual.position = Vector3(projection.get("marker_position_3d", projection.get("target_position_3d", Vector3.ZERO))) + Vector3(0.0, 0.015, 0.0)
+	lz_visual.material_override = _lz_material
+	lz_visual.visible = should_show
+	var snapshot: Dictionary = _projection_snapshot(projection)
+	snapshot["visible"] = should_show
+	return snapshot
+
+
+func _sync_dropship_marker_visual(terrain_registry, marker_container: Node3D, lz_snapshot: Dictionary) -> Dictionary:
+	var dropship_marker := get_node_or_null(dropship_marker_path) as Node2D
+	if dropship_marker == null:
+		_set_approach_line_visible(marker_container, false)
+		return {
+			"valid": false,
+			"reason": "dropship_marker_missing",
+			"visible": false,
+			"approach_visible": false,
+		}
+	var should_show: bool = _is_canvas_marker_effectively_visible(dropship_marker)
+	var projection: Dictionary = Dictionary(_visual_projection.call("project_marker2d", dropship_marker, terrain_registry))
+	if not bool(projection.get("valid", false)):
+		_set_approach_line_visible(marker_container, false)
+		projection["visible"] = false
+		projection["approach_visible"] = false
+		return projection
+	var visual_position: Vector3 = Vector3(projection.get("marker_position_3d", projection.get("target_position_3d", Vector3.ZERO))) + Vector3(0.0, 0.22, 0.0)
+	var dropship_visual := _ensure_dropship_visual(marker_container, "dropship_marker")
+	dropship_visual.position = visual_position
+	dropship_visual.visible = should_show
+	var lz_visible: bool = bool(lz_snapshot.get("visible", false))
+	var lz_position: Vector3 = Vector3(lz_snapshot.get("target_position_3d", lz_snapshot.get("visual_position_3d", Vector3.ZERO))) + Vector3(0.0, 0.12, 0.0)
+	if should_show and lz_visible:
+		_orient_node_toward_flat(dropship_visual, lz_position)
+	var approach_visible: bool = should_show and lz_visible and visual_position.distance_to(lz_position) > 0.18
+	_sync_approach_line_visual(marker_container, visual_position, lz_position, approach_visible)
+	var snapshot: Dictionary = _projection_snapshot(projection)
+	snapshot["visible"] = should_show
+	snapshot["approach_visible"] = approach_visible
+	snapshot["uses_model"] = _dropship_scene != null
+	return snapshot
+
+
+func _ensure_dropship_visual(container: Node3D, key: String) -> Node3D:
+	var node_name: String = "Dropship_%s" % key
+	var visual := container.get_node_or_null(node_name) as Node3D
+	if visual != null:
+		return visual
+	visual = Node3D.new()
+	visual.name = node_name
+	if _dropship_scene != null:
+		var model := _dropship_scene.instantiate() as Node3D
+		if model != null:
+			model.name = "Model"
+			model.scale = Vector3.ONE * 0.42
+			visual.add_child(model)
+	if visual.get_child_count() == 0:
+		var fallback := MeshInstance3D.new()
+		fallback.name = "FallbackBody"
+		fallback.mesh = _dropship_fallback_mesh
+		fallback.material_override = _dropship_material
+		visual.add_child(fallback)
+	container.add_child(visual)
+	return visual
+
+
+func _sync_approach_line_visual(container: Node3D, from_position: Vector3, to_position: Vector3, is_visible: bool) -> void:
+	var line := container.get_node_or_null("Approach_approach_line") as MeshInstance3D
+	if line == null:
+		line = MeshInstance3D.new()
+		line.name = "Approach_approach_line"
+		line.material_override = _approach_material
+		container.add_child(line)
+	if not is_visible:
+		line.visible = false
+		return
+	var flat_from := Vector3(from_position.x, from_position.y, from_position.z)
+	var flat_to := Vector3(to_position.x, from_position.y, to_position.z)
+	var length: float = flat_from.distance_to(flat_to)
+	if length <= 0.05:
+		line.visible = false
+		return
+	var mesh := line.mesh as BoxMesh
+	if mesh == null:
+		mesh = BoxMesh.new()
+		line.mesh = mesh
+	mesh.size = Vector3(0.055, 0.04, length)
+	line.position = (flat_from + flat_to) * 0.5
+	line.look_at(flat_to, Vector3.UP)
+	line.visible = true
+
+
+func _set_approach_line_visible(container: Node3D, is_visible: bool) -> void:
+	var line := container.get_node_or_null("Approach_approach_line") as MeshInstance3D
+	if line != null:
+		line.visible = is_visible
+
+
+func _orient_node_toward_flat(node: Node3D, target_position: Vector3) -> void:
+	if node == null:
+		return
+	var target := Vector3(target_position.x, node.global_position.y, target_position.z)
+	if node.global_position.distance_to(target) <= 0.05:
+		return
+	node.look_at(target, Vector3.UP)
+
+
+func _is_canvas_marker_effectively_visible(marker: CanvasItem) -> bool:
+	if marker == null:
+		return false
+	if marker.visible:
+		return true
+	if marker.has_meta(LEGACY_2D_OVERLAY_META_KEY):
+		return bool(marker.get_meta(LEGACY_2D_OVERLAY_META_KEY))
+	return false
 
 
 func _sync_path_preview_visuals(terrain_registry, preview_container: Node3D) -> Dictionary:
@@ -829,6 +1092,9 @@ func _ensure_camera_and_light() -> void:
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 	camera.size = 30.0
 	camera.current = visible and camera_current_when_visible
+	_camera_controller.min_size = camera_min_size
+	_camera_controller.max_size = camera_max_size
+	_camera_controller.zoom_step = camera_zoom_step
 	_camera_controller.camera_size = camera.size
 	_camera_controller.call("bind_camera", camera)
 

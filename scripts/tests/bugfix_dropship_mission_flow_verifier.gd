@@ -315,7 +315,7 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 	_assert(mission_craft_card != null and mission_craft_card.modulate.a < 1.0, "Mini shipcard stays greyed out during mission transit")
 	_assert(status_label != null and status_label.text.contains("ETA mission map"), "Mini shipcard reports the live transfer status during mission transit")
 	_assert(ship_texture != null and ship_texture.texture != null and ship_texture.texture.resource_path == "res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png", "Mission mini shipcard uses the isometric dropship texture for mission transit")
-	_assert(dropship_marker != null and dropship_marker.visible, "Live mission renders the dropship marker once the craft is actually on the mission-map route")
+	_assert(_mission_has_visible_dropship_marker(preview_mission), "Live mission renders the dropship marker once the craft is actually on the mission-map route")
 	_assert(Array(fob_screen.call("_get_visible_transport_craft_states")).is_empty(), "FOB stops rendering the sent dropship while it is on the mission-map transfer")
 	_assert(Array(homebase_screen.call("_get_visible_homebase_aircraft_definitions")).is_empty(), "Homebase does not resurrect the sent dropship while it transfers to the mission map")
 	for _step in range(18):
@@ -330,7 +330,7 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 	dropship_marker = preview_mission.get_node("DropshipPlanMarker") as Node2D if preview_mission != null else null
 	_assert(mission_craft_card != null and mission_craft_card.visible and mission_craft_card.modulate.a < 1.0, "Mini shipcard stays visible once the dropship is waiting on the mission map")
 	_assert(status_label != null and status_label.text.contains("Holding on mission map"), "Mini shipcard switches to waiting status after the transfer completes")
-	_assert(dropship_marker != null and dropship_marker.visible, "Live mission keeps the dropship marker visible while the craft is waiting on the mission map")
+	_assert(_mission_has_visible_dropship_marker(preview_mission), "Live mission keeps the dropship marker visible while the craft is waiting on the mission map")
 	scene.queue_free()
 	await process_frame
 
@@ -472,7 +472,7 @@ func _test_preview_drop_button_stays_drop_without_live_sequence() -> void:
 	_assert(String(tactical_controller.get("_drop_sequence_phase")) == "outbound", "Live drop transitions into the return leg after the fireteam is dropped at the LZ")
 	_assert(start_position.distance_to(Vector2(tactical_controller.get("_drop_sequence_position"))) > 0.1, "Live dropship visibly advances toward the LZ after pressing Drop")
 	_assert(call_button != null and call_button.text == "Outbound", "Live drop button reflects the return leg once the drop has been completed")
-	_assert(dropship_marker != null and dropship_marker.visible, "Live mission keeps the dropship marker visible while the return flight is active")
+	_assert(_mission_has_visible_dropship_marker(preview_mission), "Live mission keeps the dropship marker visible while the return flight is active")
 	_assert(Array(preview_drop_state.get("embarked_unit_ids", [])) == [], "Live drop clears the embarked payload once the boarded fireteam has landed")
 	_assert(Array(preview_drop_state.get("deployed_unit_ids", [])) == Array(selected_unit_ids), "Live drop visibly deploys the boarded FOB fireteam onto the mission map")
 	_assert(bool(tactical_controller.call("_is_fireteam_runtime_active", "blue")), "Live drop activates the deployed fireteam for immediate command testing")
@@ -1193,6 +1193,22 @@ func _test_mission_time_limit_resolves_defeat() -> void:
 	_assert(String(mission_result.get("win_condition_type", "")) == "time_limit", "Mission result records the time limit as the resolution condition")
 	scene.queue_free()
 	await process_frame
+
+
+func _mission_has_visible_dropship_marker(mission: Node) -> bool:
+	if mission == null:
+		return false
+	var dropship_marker := mission.get_node_or_null("DropshipPlanMarker") as CanvasItem
+	if dropship_marker != null and dropship_marker.visible:
+		return true
+	var bridge = mission.get_node_or_null("Mission25DVisualBridge")
+	if bridge == null or not bridge.has_method("sync_runtime_visuals"):
+		return false
+	var snapshot: Dictionary = Dictionary(bridge.call("sync_runtime_visuals"))
+	var strategic_markers: Dictionary = Dictionary(snapshot.get("strategic_markers", {}))
+	var dropship_snapshot: Dictionary = Dictionary(strategic_markers.get("dropship", {}))
+	var dropship_visual := bridge.get_node_or_null("RuntimeVisual3D/MarkerVisuals3D/Dropship_dropship_marker") as Node3D
+	return bool(dropship_snapshot.get("visible", false)) and dropship_visual != null and dropship_visual.visible
 
 
 func _assert(condition: bool, message: String) -> void:
