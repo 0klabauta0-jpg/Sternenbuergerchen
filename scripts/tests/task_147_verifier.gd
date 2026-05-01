@@ -104,8 +104,9 @@ func _test_calibration_scene_expansion() -> void:
 	for type_id in CALIBRATION_SAMPLE_TYPES:
 		_assert(_has_calibration_entry(entries, type_id), "Calibration scene includes %s" % type_id)
 	_assert(_has_target_footprint(entries, "fahrzeug_cargo_b_sw", Vector2(3.0, 5.0)), "CargoB calibration entry exposes a 3x5 target footprint")
-	_assert(_has_model_scale(entries, "crater_large_se", 2.25), "Large crater scale fills a 2x2 target footprint")
-	_assert(_has_model_scale(entries, "technik_satellite_large_sw", 1.35), "Large satellite dish scale better fills a 1x1 base footprint")
+	_assert(_has_target_footprint(entries, "crater_large_se", Vector2(3.0, 3.0)), "Large crater calibration entry exposes a 3x3 target footprint")
+	_assert(_has_model_scale(entries, "crater_large_se", 3.4), "Large crater scale fills a 3x3 target footprint")
+	_assert(_has_model_scale(entries, "technik_satellite_large_sw", 1.8), "Large satellite dish scale makes the lower base fill a 1x1 footprint")
 	scene.queue_free()
 	await process_frame
 

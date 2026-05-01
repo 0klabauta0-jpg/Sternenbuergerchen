@@ -27,7 +27,7 @@ const CALIBRATION_OBJECTS: Array[Dictionary] = [
 	{"grid": Vector2i(5, 7), "type_id": "technik_turret_single_ne", "category": "cover_prop", "footprint_size": Vector2(1.0, 1.0)},
 	{"grid": Vector2i(7, 7), "type_id": "technik_turret_double_se", "category": "cover_prop", "footprint_size": Vector2(1.0, 1.0)},
 	{"grid": Vector2i(9, 7), "type_id": "fahrzeug_rover_se", "category": "vehicle", "footprint_size": Vector2(1.0, 1.0)},
-	{"grid": Vector2i(11, 7), "type_id": "crater_large_se", "category": "flat_decal", "footprint_size": Vector2(2.0, 2.0)},
+	{"grid": Vector2i(11, 7), "type_id": "crater_large_se", "category": "flat_decal", "footprint_size": Vector2(3.0, 3.0)},
 	{"grid": Vector2i(13, 7), "type_id": "rock_large_b_sw", "category": "cover_prop", "footprint_size": Vector2(1.0, 1.0)},
 	{"grid": Vector2i(15, 7), "type_id": "rocks_small_a_ne", "category": "small_prop", "footprint_size": Vector2(1.0, 1.0)},
 	{"grid": Vector2i(17, 7), "type_id": "desk_computer_se", "category": "cover_prop", "footprint_size": Vector2(1.0, 1.0)},

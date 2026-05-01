@@ -78,8 +78,8 @@ Der 3D-Assetbestand wird kontrolliert erweitert: nicht der komplette Quellordner
 - Die Kalibrierungsszene wurde auf ein 19x10-Raster erweitert und zeigt jetzt die bisherigen plus die neuen Familien.
 - Manuelle Kalibrierungsrunde:
   - `fahrzeug_cargo_b` auf 3x5-Ziel-Footprint gesetzt.
-  - `crater_large` auf 2x2-Ziel-Footprint ohne angeschnittene Felder gesetzt.
-  - `technik_satellite_large` leicht vergroessert, damit der Sockel ein Feld staerker ausfuellt.
+  - `crater_large` wegen sichtbarem Pivot-/Footprint-Versatz auf 3x3-Ziel-Footprint gesetzt.
+  - `technik_satellite_large` weiter vergroessert, damit der untere weisse Sockel ein Feld staerker ausfuellt.
 - `scripts/tests/task_147_verifier.gd` prueft aktive GLB-Dateien, Import-Metadaten, Mapping-Pfade, ResourceLoader-Ladung und Calibration-Szene.
 
 ## Erwartetes Ergebnis
