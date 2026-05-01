@@ -104,6 +104,30 @@ func get_visible_area_orders() -> Array:
 	return result
 
 
+func get_area_order_preview_payload() -> Dictionary:
+	return _area_order_preview_payload.duplicate(true)
+
+
+func get_visible_ad_hoc_orders() -> Array:
+	var result: Array = []
+	for order_data in _ad_hoc_order_dicts:
+		result.append(Dictionary(order_data).duplicate(true))
+	return result
+
+
+func get_visible_security_states() -> Array:
+	var result: Array = []
+	for security_data in _security_dicts:
+		var security_dict := Dictionary(security_data)
+		var fireteam_id: String = String(security_dict.get("fireteam_id", "")).strip_edges().to_lower()
+		if not _selected_fireteam_ids.is_empty() and not _selected_fireteam_ids.has(fireteam_id):
+			continue
+		if not bool(security_dict.get("is_active", false)):
+			continue
+		result.append(security_dict.duplicate(true))
+	return result
+
+
 func get_waypoint_hit(screen_position: Vector2, canvas_transform: Transform2D) -> Dictionary:
 	for waypoint_data in _visible_waypoints:
 		var marker_screen_position: Vector2 = canvas_transform * Vector2(waypoint_data.get("position", Vector2.ZERO))
@@ -408,11 +432,12 @@ func _rebuild_cache() -> void:
 			continue
 		var fireteam_id: String = String(plan.fireteam_id).strip_edges().to_lower()
 		var marker_offset: Vector2 = _get_marker_offset(fireteam_id)
+		var anchor_position: Vector2 = _get_fireteam_anchor_position(fireteam_id)
 		for waypoint_index in range(plan.waypoints.size()):
 			var waypoint = _coerce_waypoint(plan.waypoints[waypoint_index])
 			if not _is_waypoint_visible(waypoint):
 				continue
-			_visible_waypoints.append({
+			var waypoint_entry: Dictionary = {
 				"fireteam_id": fireteam_id,
 				"phase": int(plan.phase),
 				"waypoint_id": String(waypoint.waypoint_id),
@@ -420,7 +445,10 @@ func _rebuild_cache() -> void:
 				"raw_position": Vector2(waypoint.target_position),
 				"command_type": String(waypoint.command_type),
 				"index": waypoint_index,
-			})
+			}
+			if anchor_position.is_finite():
+				waypoint_entry["anchor_position"] = anchor_position + marker_offset
+			_visible_waypoints.append(waypoint_entry)
 	queue_redraw()
 
 

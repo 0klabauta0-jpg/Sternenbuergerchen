@@ -60,6 +60,7 @@ target_marker_path = NodePath("../TargetMarker")
 lz_marker_path = NodePath("../LZMarker")
 dropship_marker_path = NodePath("../DropshipPlanMarker")
 order_visualizer_path = NodePath("../FireteamOrderVisualizer")
+contact_overlay_path = NodePath("../ContactMapOverlay")
 show_debug_grid = false
 hide_2d_map_when_visible = true
 camera_current_when_visible = true

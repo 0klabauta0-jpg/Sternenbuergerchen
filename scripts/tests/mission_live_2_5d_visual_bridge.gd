@@ -18,6 +18,13 @@ const DROPSHIP_MODEL_TYPE_ID: String = "fahrzeug_speeder_b"
 const DROPSHIP_MODEL_PATH: String = "res://Assets/kenney_space-kit/3d/craft_speederB.glb"
 const DROPSHIP_MARKER_BASE_Y_OFFSET: float = 0.18
 const DROPSHIP_FALLBACK_SCALE: float = 1.48
+const SCREEN_UNIT_HIT_RADIUS: float = 30.0
+const SCREEN_WAYPOINT_HIT_RADIUS: float = 22.0
+const SCREEN_AREA_HIT_RADIUS: float = 34.0
+const AREA_ORDER_ISO_TILE_HALF_WIDTH: float = 64.0
+const AREA_ORDER_ISO_TILE_HALF_HEIGHT: float = 32.0
+const SECURITY_SECTOR_RADIUS: float = 74.0
+const TACTICAL_OVERLAY_Y_OFFSET: float = 0.1
 
 @export var bridge_enabled: bool = true
 @export var mission_setup_path: NodePath
@@ -28,6 +35,7 @@ const DROPSHIP_FALLBACK_SCALE: float = 1.48
 @export var lz_marker_path: NodePath
 @export var dropship_marker_path: NodePath
 @export var order_visualizer_path: NodePath
+@export var contact_overlay_path: NodePath
 @export var show_debug_grid: bool = false
 @export var hide_2d_map_when_visible: bool = false
 @export var camera_current_when_visible: bool = false
@@ -68,6 +76,7 @@ var _selection_mesh: Mesh = null
 var _target_mesh: Mesh = null
 var _lz_mesh: Mesh = null
 var _preview_mesh: Mesh = null
+var _area_tile_mesh: Mesh = null
 var _air_shadow_mesh: Mesh = null
 var _dropship_fallback_mesh: Mesh = null
 var _friendly_unit_scene: PackedScene = null
@@ -87,6 +96,16 @@ var _selection_material: StandardMaterial3D = null
 var _target_material: StandardMaterial3D = null
 var _lz_material: StandardMaterial3D = null
 var _preview_material: StandardMaterial3D = null
+var _area_material_defensive: StandardMaterial3D = null
+var _area_material_offensive: StandardMaterial3D = null
+var _area_material_take: StandardMaterial3D = null
+var _area_material_neutral: StandardMaterial3D = null
+var _area_preview_material: StandardMaterial3D = null
+var _ad_hoc_material: StandardMaterial3D = null
+var _security_material: StandardMaterial3D = null
+var _contact_confirmed_material: StandardMaterial3D = null
+var _contact_suspected_material: StandardMaterial3D = null
+var _contact_lost_material: StandardMaterial3D = null
 var _air_shadow_material: StandardMaterial3D = null
 var _dropship_material: StandardMaterial3D = null
 var _approach_material: StandardMaterial3D = null
@@ -335,6 +354,155 @@ func get_last_pick_snapshot() -> Dictionary:
 	return last_pick_snapshot.duplicate(true)
 
 
+func build_area_order_payload_from_screen_rect(screen_rect: Rect2) -> Dictionary:
+	if not _should_use_primary_3d_interaction():
+		return {}
+	var normalized_rect: Rect2 = _normalize_screen_rect(screen_rect)
+	if normalized_rect.size.x <= 0.0 or normalized_rect.size.y <= 0.0:
+		return {}
+	var terrain_registry = get_node_or_null(terrain_registry_path)
+	if terrain_registry == null:
+		return {}
+	var tile_entries: Array = _get_tile_entries_in_screen_rect(normalized_rect, terrain_registry)
+	if not tile_entries.is_empty():
+		return _build_area_order_payload_from_tile_entries(tile_entries)
+	return _build_area_order_payload_from_screen_rect_corners(normalized_rect, terrain_registry)
+
+
+func project_world_position_to_screen(world_position: Vector2, use_base_position: bool = false) -> Dictionary:
+	if not _should_use_primary_3d_interaction():
+		return {"valid": false, "reason": "primary_3d_inactive"}
+	var terrain_registry = get_node_or_null(terrain_registry_path)
+	if terrain_registry == null:
+		return {"valid": false, "reason": "terrain_registry_missing"}
+	return _project_world_position_to_screen(world_position, terrain_registry, use_base_position)
+
+
+func get_waypoint_hit(screen_position: Vector2) -> Dictionary:
+	if not _should_use_primary_3d_interaction():
+		return {}
+	var order_visualizer = get_node_or_null(order_visualizer_path)
+	var terrain_registry = get_node_or_null(terrain_registry_path)
+	if order_visualizer == null or terrain_registry == null or not order_visualizer.has_method("get_visible_waypoints"):
+		return {}
+	var best_hit: Dictionary = {}
+	var best_distance: float = SCREEN_WAYPOINT_HIT_RADIUS
+	for waypoint_variant in Array(order_visualizer.call("get_visible_waypoints")):
+		if typeof(waypoint_variant) != TYPE_DICTIONARY:
+			continue
+		var waypoint: Dictionary = Dictionary(waypoint_variant)
+		if typeof(waypoint.get("position", null)) != TYPE_VECTOR2:
+			continue
+		var screen_result: Dictionary = _project_world_position_to_screen(Vector2(waypoint.get("position", Vector2.ZERO)), terrain_registry)
+		if not bool(screen_result.get("valid", false)):
+			continue
+		var distance: float = Vector2(screen_result.get("screen_position", Vector2.ZERO)).distance_to(screen_position)
+		if distance > best_distance:
+			continue
+		best_distance = distance
+		best_hit = waypoint.duplicate(true)
+	return best_hit
+
+
+func get_area_order_hit(screen_position: Vector2) -> Dictionary:
+	if not _should_use_primary_3d_interaction():
+		return {}
+	var order_visualizer = get_node_or_null(order_visualizer_path)
+	var terrain_registry = get_node_or_null(terrain_registry_path)
+	if order_visualizer == null or terrain_registry == null or not order_visualizer.has_method("get_visible_area_orders"):
+		return {}
+	var best_hit: Dictionary = {}
+	var best_distance: float = SCREEN_AREA_HIT_RADIUS
+	for area_variant in Array(order_visualizer.call("get_visible_area_orders")):
+		if typeof(area_variant) != TYPE_DICTIONARY:
+			continue
+		var area_order: Dictionary = Dictionary(area_variant)
+		var candidate_positions: Array = []
+		if typeof(area_order.get("center_position", null)) == TYPE_VECTOR2:
+			candidate_positions.append(Vector2(area_order.get("center_position", Vector2.ZERO)))
+		for tile_position_variant in Array(area_order.get("tile_world_positions", [])):
+			if typeof(tile_position_variant) == TYPE_VECTOR2:
+				candidate_positions.append(Vector2(tile_position_variant))
+		for world_position_variant in candidate_positions:
+			var screen_result: Dictionary = _project_world_position_to_screen(Vector2(world_position_variant), terrain_registry)
+			if not bool(screen_result.get("valid", false)):
+				continue
+			var distance: float = Vector2(screen_result.get("screen_position", Vector2.ZERO)).distance_to(screen_position)
+			if distance > best_distance:
+				continue
+			best_distance = distance
+			best_hit = area_order.duplicate(true)
+	return best_hit
+
+
+func get_unit_hit(screen_position: Vector2, friendly_only: bool = true) -> Dictionary:
+	if not _should_use_primary_3d_interaction():
+		return {}
+	var terrain_registry = get_node_or_null(terrain_registry_path)
+	var unit_registry = get_node_or_null(unit_registry_path)
+	if terrain_registry == null or unit_registry == null or not unit_registry.has_method("get_all_units"):
+		return {}
+	var best_hit: Dictionary = {}
+	var best_distance: float = SCREEN_UNIT_HIT_RADIUS
+	for unit in Array(unit_registry.call("get_all_units")):
+		if unit == null or not (unit is Node2D) or not (unit as Node2D).is_visible_in_tree():
+			continue
+		var team_id: String = _extract_unit_method_string(unit, "get_team_id")
+		if friendly_only and team_id != FRIENDLY_TEAM_ID:
+			continue
+		var projection: Dictionary = Dictionary(_visual_projection.call("project_node2d", unit, terrain_registry))
+		if not bool(projection.get("valid", false)):
+			continue
+		var camera := get_node_or_null("Camera3D") as Camera3D
+		if camera == null:
+			continue
+		var screen_position_3d: Vector2 = camera.unproject_position(Vector3(projection.get("visual_position_3d", Vector3.ZERO)))
+		var distance: float = screen_position_3d.distance_to(screen_position)
+		if distance > best_distance:
+			continue
+		best_distance = distance
+		best_hit = {
+			"unit_id": _extract_unit_id(unit),
+			"fireteam_id": _extract_unit_method_string(unit, "get_fireteam_id"),
+			"team_id": team_id,
+			"screen_position": screen_position_3d,
+		}
+	return best_hit
+
+
+func get_unit_hits_in_screen_rect(screen_rect: Rect2, friendly_only: bool = true) -> Array:
+	if not _should_use_primary_3d_interaction():
+		return []
+	var normalized_rect: Rect2 = _normalize_screen_rect(screen_rect)
+	if normalized_rect.size.x <= 0.0 or normalized_rect.size.y <= 0.0:
+		return []
+	var terrain_registry = get_node_or_null(terrain_registry_path)
+	var unit_registry = get_node_or_null(unit_registry_path)
+	var camera := get_node_or_null("Camera3D") as Camera3D
+	if terrain_registry == null or unit_registry == null or camera == null or not unit_registry.has_method("get_all_units"):
+		return []
+	var hits: Array = []
+	for unit in Array(unit_registry.call("get_all_units")):
+		if unit == null or not (unit is Node2D) or not (unit as Node2D).is_visible_in_tree():
+			continue
+		var team_id: String = _extract_unit_method_string(unit, "get_team_id")
+		if friendly_only and team_id != FRIENDLY_TEAM_ID:
+			continue
+		var projection: Dictionary = Dictionary(_visual_projection.call("project_node2d", unit, terrain_registry))
+		if not bool(projection.get("valid", false)):
+			continue
+		var projected_screen_position: Vector2 = camera.unproject_position(Vector3(projection.get("visual_position_3d", Vector3.ZERO)))
+		if not normalized_rect.has_point(projected_screen_position):
+			continue
+		hits.append({
+			"unit_id": _extract_unit_id(unit),
+			"fireteam_id": _extract_unit_method_string(unit, "get_fireteam_id"),
+			"team_id": team_id,
+			"screen_position": projected_screen_position,
+		})
+	return hits
+
+
 func get_visual_projection_config() -> Dictionary:
 	return {
 		"cell_size": float(_visual_projection.cell_size),
@@ -370,6 +538,7 @@ func sync_runtime_visuals() -> Dictionary:
 	var air_container := _ensure_container(runtime_root, "AirShadowVisuals3D")
 	var marker_container := _ensure_container(runtime_root, "MarkerVisuals3D")
 	var preview_container := _ensure_container(runtime_root, "PathPreviewVisuals3D")
+	var tactical_overlay_container := _ensure_container(runtime_root, "TacticalOverlayVisuals3D")
 	var seen_units: PackedStringArray = []
 	var unit_snapshots: Dictionary = {}
 	var legacy_2d_hidden_count: int = 0
@@ -408,6 +577,7 @@ func sync_runtime_visuals() -> Dictionary:
 			marker_seen_keys.append(marker_key)
 	_remove_stale_visuals(marker_container, marker_seen_keys)
 	var preview_snapshot: Dictionary = _sync_path_preview_visuals(terrain_registry, preview_container)
+	var tactical_overlay_snapshot: Dictionary = _sync_tactical_overlay_visuals(terrain_registry, tactical_overlay_container)
 	runtime_visual_snapshot = {
 		"enabled": true,
 		"valid": true,
@@ -416,6 +586,7 @@ func sync_runtime_visuals() -> Dictionary:
 		"target_marker": target_snapshot,
 		"strategic_markers": strategic_marker_snapshot,
 		"path_preview": preview_snapshot,
+		"tactical_overlays": tactical_overlay_snapshot,
 		"runtime_debug_labels_visible": show_runtime_debug_labels,
 		"legacy_2d_unit_visuals_visible": legacy_2d_visible,
 		"legacy_2d_unit_visual_hidden_count": legacy_2d_hidden_count,
@@ -430,8 +601,154 @@ func sync_runtime_visuals() -> Dictionary:
 		"has_air_shadow_container": air_container != null,
 		"has_marker_container": marker_container != null,
 		"has_preview_container": preview_container != null,
+		"has_tactical_overlay_container": tactical_overlay_container != null,
 	}
 	return runtime_visual_snapshot
+
+
+func _should_use_primary_3d_interaction() -> bool:
+	return bridge_enabled and is_primary_3d_view_active() and not is_2d_fallback_visible()
+
+
+func _normalize_screen_rect(screen_rect: Rect2) -> Rect2:
+	var top_left := Vector2(minf(screen_rect.position.x, screen_rect.end.x), minf(screen_rect.position.y, screen_rect.end.y))
+	var bottom_right := Vector2(maxf(screen_rect.position.x, screen_rect.end.x), maxf(screen_rect.position.y, screen_rect.end.y))
+	return Rect2(top_left, bottom_right - top_left)
+
+
+func _get_tile_entries_in_screen_rect(screen_rect: Rect2, terrain_registry) -> Array:
+	if terrain_registry == null or not terrain_registry.has_method("get_all_tiles"):
+		return []
+	var tile_entries: Array = []
+	for tile_data in Array(terrain_registry.call("get_all_tiles")):
+		if tile_data == null or typeof(tile_data.world_position) != TYPE_VECTOR2:
+			continue
+		var screen_result: Dictionary = _project_world_position_to_screen(Vector2(tile_data.world_position), terrain_registry, true)
+		if not bool(screen_result.get("valid", false)):
+			continue
+		if not screen_rect.has_point(Vector2(screen_result.get("screen_position", Vector2.ZERO))):
+			continue
+		tile_entries.append({
+			"grid_position": Vector2i(tile_data.grid_position),
+			"world_position": Vector2(tile_data.world_position),
+			"screen_position": Vector2(screen_result.get("screen_position", Vector2.ZERO)),
+		})
+	return tile_entries
+
+
+func _build_area_order_payload_from_tile_entries(tile_entries: Array) -> Dictionary:
+	if tile_entries.is_empty():
+		return {}
+	var sorted_entries: Array = []
+	for entry_variant in tile_entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		if typeof(entry.get("grid_position", null)) != TYPE_VECTOR2I or typeof(entry.get("world_position", null)) != TYPE_VECTOR2:
+			continue
+		sorted_entries.append(entry)
+	if sorted_entries.is_empty():
+		return {}
+	sorted_entries.sort_custom(_sort_area_tile_entries)
+	var tile_positions: Array = []
+	var tile_world_positions: Array = []
+	var center_position := Vector2.ZERO
+	for entry_variant in sorted_entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		tile_positions.append(Vector2i(entry.get("grid_position", Vector2i.ZERO)))
+		var world_position := Vector2(entry.get("world_position", Vector2.ZERO))
+		tile_world_positions.append(world_position)
+		center_position += world_position
+	center_position /= float(tile_world_positions.size())
+	return {
+		"tile_positions": tile_positions,
+		"tile_world_positions": tile_world_positions,
+		"world_polygon": _build_area_order_world_polygon(tile_world_positions),
+		"center_position": center_position,
+	}
+
+
+func _build_area_order_payload_from_screen_rect_corners(screen_rect: Rect2, terrain_registry) -> Dictionary:
+	var corner_points: Array[Vector2] = [
+		screen_rect.position,
+		Vector2(screen_rect.end.x, screen_rect.position.y),
+		screen_rect.end,
+		Vector2(screen_rect.position.x, screen_rect.end.y),
+	]
+	var world_polygon := PackedVector2Array()
+	for corner in corner_points:
+		var world_position: Variant = _pick_screen_world_position(corner, terrain_registry)
+		if typeof(world_position) != TYPE_VECTOR2:
+			return {}
+		world_polygon.append(Vector2(world_position))
+	if world_polygon.size() < 3:
+		return {}
+	return {
+		"tile_positions": [],
+		"tile_world_positions": [],
+		"world_polygon": world_polygon,
+		"center_position": _average_polygon_points(world_polygon),
+	}
+
+
+func _project_world_position_to_screen(world_position: Vector2, terrain_registry, use_base_position: bool = false) -> Dictionary:
+	var camera := get_node_or_null("Camera3D") as Camera3D
+	if camera == null:
+		return {"valid": false, "reason": "camera_missing"}
+	var projection: Dictionary = Dictionary(_visual_projection.call("project_world_position", world_position, terrain_registry, {
+		"movement_layer": MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_GROUND,
+	}))
+	if not bool(projection.get("valid", false)):
+		return projection
+	var world_3d: Vector3 = Vector3(projection.get("base_position_3d", projection.get("visual_position_3d", Vector3.ZERO))) if use_base_position else Vector3(projection.get("visual_position_3d", Vector3.ZERO))
+	return {
+		"valid": true,
+		"screen_position": camera.unproject_position(world_3d),
+		"world_position_3d": world_3d,
+		"projection": projection,
+	}
+
+
+func _pick_screen_world_position(screen_position: Vector2, terrain_registry) -> Variant:
+	var camera := get_node_or_null("Camera3D") as Camera3D
+	if camera == null or terrain_registry == null:
+		return null
+	var pick_snapshot: Dictionary = Dictionary(_picker.call("pick_screen", camera, screen_position, terrain_registry, {"floor_mode": "highest"}))
+	if not bool(pick_snapshot.get("valid", false)) or typeof(pick_snapshot.get("target_position", null)) != TYPE_VECTOR2:
+		return null
+	return Vector2(pick_snapshot.get("target_position", Vector2.ZERO))
+
+
+func _sort_area_tile_entries(a: Dictionary, b: Dictionary) -> bool:
+	var a_grid := Vector2i(a.get("grid_position", Vector2i.ZERO))
+	var b_grid := Vector2i(b.get("grid_position", Vector2i.ZERO))
+	if a_grid.x == b_grid.x:
+		return a_grid.y < b_grid.y
+	return a_grid.x < b_grid.x
+
+
+func _build_area_order_world_polygon(tile_world_positions: Array) -> PackedVector2Array:
+	if tile_world_positions.is_empty():
+		return PackedVector2Array()
+	var hull_points := PackedVector2Array()
+	for world_position_variant in tile_world_positions:
+		var world_position := Vector2(world_position_variant)
+		hull_points.append(world_position + Vector2(0.0, -AREA_ORDER_ISO_TILE_HALF_HEIGHT))
+		hull_points.append(world_position + Vector2(AREA_ORDER_ISO_TILE_HALF_WIDTH, 0.0))
+		hull_points.append(world_position + Vector2(0.0, AREA_ORDER_ISO_TILE_HALF_HEIGHT))
+		hull_points.append(world_position + Vector2(-AREA_ORDER_ISO_TILE_HALF_WIDTH, 0.0))
+	if hull_points.size() <= 3:
+		return hull_points
+	return Geometry2D.convex_hull(hull_points)
+
+
+func _average_polygon_points(polygon: PackedVector2Array) -> Vector2:
+	if polygon.is_empty():
+		return Vector2.ZERO
+	var center := Vector2.ZERO
+	for point in polygon:
+		center += point
+	return center / float(polygon.size())
 
 
 func _configure_visual_projection() -> void:
@@ -491,6 +808,11 @@ func _prepare_runtime_visual_resources() -> void:
 		preview_mesh.height = 0.045
 		preview_mesh.radial_segments = 18
 		_preview_mesh = preview_mesh
+	if _area_tile_mesh == null:
+		var area_tile_mesh := BoxMesh.new()
+		var cell_size: float = float(_renderer.call("get_grid_cell_size")) if _renderer != null else 2.0
+		area_tile_mesh.size = Vector3(cell_size * 0.88, 0.028, cell_size * 0.88)
+		_area_tile_mesh = area_tile_mesh
 	if _air_shadow_mesh == null:
 		var air_shadow_mesh := CylinderMesh.new()
 		air_shadow_mesh.top_radius = 0.5
@@ -523,6 +845,16 @@ func _prepare_runtime_visual_resources() -> void:
 	_target_material = _ensure_material(_target_material, Color(1.0, 0.85, 0.18, 1.0), false)
 	_lz_material = _ensure_material(_lz_material, Color(0.18, 0.95, 0.42, 0.38), true)
 	_preview_material = _ensure_material(_preview_material, Color(0.5, 0.95, 0.65, 0.72), true)
+	_area_material_defensive = _ensure_material(_area_material_defensive, Color(0.18, 0.95, 0.42, 0.30), true)
+	_area_material_offensive = _ensure_material(_area_material_offensive, Color(1.0, 0.22, 0.16, 0.32), true)
+	_area_material_take = _ensure_material(_area_material_take, Color(1.0, 0.78, 0.22, 0.34), true)
+	_area_material_neutral = _ensure_material(_area_material_neutral, Color(0.48, 0.82, 1.0, 0.26), true)
+	_area_preview_material = _ensure_material(_area_preview_material, Color(0.82, 0.95, 1.0, 0.24), true)
+	_ad_hoc_material = _ensure_material(_ad_hoc_material, Color(0.96, 0.96, 0.96, 0.86), true)
+	_security_material = _ensure_material(_security_material, Color(0.62, 0.86, 1.0, 0.30), true)
+	_contact_confirmed_material = _ensure_material(_contact_confirmed_material, Color(1.0, 0.38, 0.28, 0.86), true)
+	_contact_suspected_material = _ensure_material(_contact_suspected_material, Color(0.95, 0.9, 0.28, 0.72), true)
+	_contact_lost_material = _ensure_material(_contact_lost_material, Color(0.64, 0.68, 0.72, 0.58), true)
 	_air_shadow_material = _ensure_material(_air_shadow_material, Color(0.02, 0.03, 0.04, 0.32), true)
 	_dropship_material = _ensure_material(_dropship_material, Color(0.56, 1.0, 0.72, 0.92), true)
 	_approach_material = _ensure_material(_approach_material, Color(0.45, 1.0, 0.62, 0.62), true)
@@ -1090,8 +1422,13 @@ func _sync_path_preview_visuals(terrain_registry, preview_container: Node3D) -> 
 		}
 	var seen_keys: PackedStringArray = []
 	var preview_count: int = 0
+	var waypoint_count: int = 0
+	var area_order_count: int = 0
+	var area_tile_count: int = 0
+	var area_preview_count: int = 0
 	if order_visualizer.has_method("get_visible_waypoints"):
 		var waypoint_index: int = 0
+		var waypoints_by_fireteam: Dictionary = {}
 		for waypoint_variant in Array(order_visualizer.call("get_visible_waypoints")):
 			if typeof(waypoint_variant) != TYPE_DICTIONARY:
 				continue
@@ -1103,35 +1440,362 @@ func _sync_path_preview_visuals(terrain_registry, preview_container: Node3D) -> 
 			seen_keys.append(key)
 			waypoint_index += 1
 			preview_count += 1
+			waypoint_count += 1
+			var fireteam_id: String = String(waypoint.get("fireteam_id", "")).strip_edges().to_lower()
+			if not waypoints_by_fireteam.has(fireteam_id):
+				waypoints_by_fireteam[fireteam_id] = []
+			waypoints_by_fireteam[fireteam_id].append(waypoint.duplicate(true))
+		for fireteam_variant in waypoints_by_fireteam.keys():
+			var fireteam_id := String(fireteam_variant)
+			var fireteam_waypoints: Array = Array(waypoints_by_fireteam.get(fireteam_id, []))
+			fireteam_waypoints.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+				return int(a.get("index", 0)) < int(b.get("index", 0))
+			)
+			var previous_position: Variant = null
+			if not fireteam_waypoints.is_empty() and typeof(Dictionary(fireteam_waypoints[0]).get("anchor_position", null)) == TYPE_VECTOR2:
+				previous_position = Vector2(Dictionary(fireteam_waypoints[0]).get("anchor_position", Vector2.ZERO))
+			var line_index: int = 0
+			for waypoint_variant in fireteam_waypoints:
+				var waypoint: Dictionary = Dictionary(waypoint_variant)
+				if typeof(previous_position) == TYPE_VECTOR2 and typeof(waypoint.get("position", null)) == TYPE_VECTOR2:
+					var line_key: String = "waypoint_line_%s_%d" % [_sanitize_node_key(fireteam_id), line_index]
+					var material: StandardMaterial3D = _get_area_order_material(String(waypoint.get("command_type", "")))
+					if _sync_world_line_visual(preview_container, line_key, "PreviewLine_", Vector2(previous_position), Vector2(waypoint.get("position", Vector2.ZERO)), terrain_registry, material, 0.045, 0.07):
+						seen_keys.append(line_key)
+						preview_count += 1
+				if typeof(waypoint.get("position", null)) == TYPE_VECTOR2:
+					previous_position = Vector2(waypoint.get("position", Vector2.ZERO))
+				line_index += 1
 	if order_visualizer.has_method("get_visible_area_orders"):
 		var area_index: int = 0
 		for area_variant in Array(order_visualizer.call("get_visible_area_orders")):
 			if typeof(area_variant) != TYPE_DICTIONARY:
 				continue
 			var area_order: Dictionary = Dictionary(area_variant)
-			if typeof(area_order.get("center_position", null)) == TYPE_VECTOR2:
-				var center_key: String = "area_%d_center" % area_index
-				_sync_preview_marker(preview_container, center_key, Vector2(area_order.get("center_position", Vector2.ZERO)), terrain_registry)
-				seen_keys.append(center_key)
-				preview_count += 1
-			var tile_index: int = 0
-			for tile_position_variant in Array(area_order.get("tile_world_positions", [])):
-				if typeof(tile_position_variant) != TYPE_VECTOR2:
-					continue
-				var tile_key: String = "area_%d_tile_%d" % [area_index, tile_index]
-				_sync_preview_marker(preview_container, tile_key, Vector2(tile_position_variant), terrain_registry)
-				seen_keys.append(tile_key)
-				tile_index += 1
-				preview_count += 1
+			var area_seen_keys: PackedStringArray = _sync_area_order_visual(preview_container, "area_%d" % area_index, area_order, terrain_registry, false)
+			for seen_key in area_seen_keys:
+				seen_keys.append(seen_key)
+			area_tile_count += _count_area_order_tile_positions(area_order)
+			area_order_count += 1
+			preview_count += area_seen_keys.size()
 			area_index += 1
+	if order_visualizer.has_method("get_area_order_preview_payload"):
+		var preview_payload: Dictionary = Dictionary(order_visualizer.call("get_area_order_preview_payload"))
+		if not preview_payload.is_empty():
+			var preview_seen_keys: PackedStringArray = _sync_area_order_visual(preview_container, "area_preview", preview_payload, terrain_registry, true)
+			for seen_key in preview_seen_keys:
+				seen_keys.append(seen_key)
+			area_preview_count = preview_seen_keys.size()
+			preview_count += preview_seen_keys.size()
 	_remove_stale_visuals(preview_container, seen_keys)
 	return {
 		"valid": true,
 		"preview_count": preview_count,
+		"waypoint_count": waypoint_count,
+		"area_order_count": area_order_count,
+		"area_tile_count": area_tile_count,
+		"area_preview_count": area_preview_count,
 	}
 
 
-func _sync_preview_marker(preview_container: Node3D, key: String, world_position: Vector2, terrain_registry) -> void:
+func _sync_area_order_visual(preview_container: Node3D, key_prefix: String, area_order: Dictionary, terrain_registry, is_preview: bool) -> PackedStringArray:
+	var seen_keys := PackedStringArray()
+	var material: StandardMaterial3D = _area_preview_material if is_preview else _get_area_order_material(String(area_order.get("command_type", "")))
+	if typeof(area_order.get("center_position", null)) == TYPE_VECTOR2:
+		var center_key: String = "%s_center" % key_prefix
+		_sync_preview_marker(preview_container, center_key, Vector2(area_order.get("center_position", Vector2.ZERO)), terrain_registry, material)
+		seen_keys.append(center_key)
+		if typeof(area_order.get("anchor_position", null)) == TYPE_VECTOR2:
+			var line_key: String = "%s_anchor_line" % key_prefix
+			if _sync_world_line_visual(preview_container, line_key, "AreaLine_", Vector2(area_order.get("anchor_position", Vector2.ZERO)), Vector2(area_order.get("center_position", Vector2.ZERO)), terrain_registry, material, 0.05, 0.08):
+				seen_keys.append(line_key)
+	var tile_index: int = 0
+	for tile_position_variant in Array(area_order.get("tile_world_positions", [])):
+		if typeof(tile_position_variant) != TYPE_VECTOR2:
+			continue
+		var tile_key: String = "%s_tile_%d" % [key_prefix, tile_index]
+		_sync_area_tile_visual(preview_container, tile_key, Vector2(tile_position_variant), terrain_registry, material)
+		seen_keys.append(tile_key)
+		tile_index += 1
+	if tile_index <= 0:
+		var polygon: PackedVector2Array = PackedVector2Array(area_order.get("world_polygon", PackedVector2Array()))
+		var polygon_index: int = 0
+		for point in polygon:
+			var polygon_key: String = "%s_polygon_%d" % [key_prefix, polygon_index]
+			_sync_area_tile_visual(preview_container, polygon_key, point, terrain_registry, material)
+			seen_keys.append(polygon_key)
+			polygon_index += 1
+	return seen_keys
+
+
+func _sync_area_tile_visual(preview_container: Node3D, key: String, world_position: Vector2, terrain_registry, material: StandardMaterial3D) -> void:
+	var projection: Dictionary = Dictionary(_visual_projection.call("project_world_position", world_position, terrain_registry, {
+		"movement_layer": MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_GROUND,
+	}))
+	if not bool(projection.get("valid", false)):
+		return
+	var area_visual := _ensure_mesh_instance(preview_container, key, "AreaTile_", _area_tile_mesh)
+	area_visual.position = Vector3(projection.get("base_position_3d", projection.get("visual_position_3d", Vector3.ZERO))) + Vector3(0.0, 0.06, 0.0)
+	area_visual.material_override = material
+	area_visual.visible = true
+
+
+func _count_area_order_tile_positions(area_order: Dictionary) -> int:
+	var count: int = 0
+	for tile_position_variant in Array(area_order.get("tile_world_positions", [])):
+		if typeof(tile_position_variant) == TYPE_VECTOR2:
+			count += 1
+	return count
+
+
+func _get_area_order_material(command_type: String) -> StandardMaterial3D:
+	match command_type.strip_edges().to_lower():
+		"defend":
+			return _area_material_defensive
+		"take":
+			return _area_material_take
+		"engage", "flank":
+			return _area_material_offensive
+		_:
+			return _area_material_neutral
+
+
+func _sync_tactical_overlay_visuals(terrain_registry, overlay_container: Node3D) -> Dictionary:
+	var seen_keys: PackedStringArray = []
+	var ad_hoc_count: int = 0
+	var security_state_count: int = 0
+	var security_sector_count: int = 0
+	var contact_count: int = 0
+	var order_visualizer = get_node_or_null(order_visualizer_path)
+	if order_visualizer != null:
+		if order_visualizer.has_method("get_visible_ad_hoc_orders"):
+			var ad_hoc_index: int = 0
+			for order_variant in Array(order_visualizer.call("get_visible_ad_hoc_orders")):
+				if typeof(order_variant) != TYPE_DICTIONARY:
+					continue
+				var order_keys: PackedStringArray = _sync_ad_hoc_order_visual(overlay_container, "ad_hoc_%d" % ad_hoc_index, Dictionary(order_variant), terrain_registry)
+				if not order_keys.is_empty():
+					ad_hoc_count += 1
+				for seen_key in order_keys:
+					seen_keys.append(seen_key)
+				ad_hoc_index += 1
+		if order_visualizer.has_method("get_visible_security_states"):
+			var security_index: int = 0
+			for security_variant in Array(order_visualizer.call("get_visible_security_states")):
+				if typeof(security_variant) != TYPE_DICTIONARY:
+					continue
+				var security_result: Dictionary = _sync_security_state_visual(overlay_container, "security_%d" % security_index, Dictionary(security_variant), terrain_registry)
+				if bool(security_result.get("visible", false)):
+					security_state_count += 1
+				security_sector_count += int(security_result.get("sector_count", 0))
+				for seen_key in PackedStringArray(security_result.get("seen_keys", PackedStringArray())):
+					seen_keys.append(seen_key)
+				security_index += 1
+	var contact_overlay = _get_contact_overlay()
+	if contact_overlay != null and contact_overlay.has_method("get_visible_contacts"):
+		var contact_index: int = 0
+		for contact_variant in Array(contact_overlay.call("get_visible_contacts")):
+			if typeof(contact_variant) != TYPE_DICTIONARY:
+				continue
+			var contact_key: String = "contact_%d" % contact_index
+			if _sync_contact_visual(overlay_container, contact_key, Dictionary(contact_variant), terrain_registry):
+				seen_keys.append(contact_key)
+				contact_count += 1
+			contact_index += 1
+	_remove_stale_visuals(overlay_container, seen_keys)
+	return {
+		"valid": order_visualizer != null or contact_overlay != null,
+		"ad_hoc_count": ad_hoc_count,
+		"security_state_count": security_state_count,
+		"security_sector_count": security_sector_count,
+		"contact_count": contact_count,
+		"overlay_count": seen_keys.size(),
+	}
+
+
+func _sync_ad_hoc_order_visual(overlay_container: Node3D, key: String, order_dict: Dictionary, terrain_registry) -> PackedStringArray:
+	var seen_keys: PackedStringArray = []
+	if typeof(order_dict.get("anchor_position", null)) != TYPE_VECTOR2 or typeof(order_dict.get("target_position", null)) != TYPE_VECTOR2:
+		return seen_keys
+	var anchor_position: Vector2 = Vector2(order_dict.get("anchor_position", Vector2.ZERO))
+	var target_position: Vector2 = Vector2(order_dict.get("target_position", anchor_position))
+	var anchor_projection: Dictionary = _project_ground_overlay_position(anchor_position, terrain_registry)
+	var target_projection: Dictionary = _project_ground_overlay_position(target_position, terrain_registry)
+	if not bool(anchor_projection.get("valid", false)) or not bool(target_projection.get("valid", false)):
+		return seen_keys
+	var anchor_visual := _ensure_mesh_instance(overlay_container, "%s_anchor" % key, "AdHoc_", _preview_mesh)
+	anchor_visual.position = Vector3(anchor_projection.get("marker_position_3d", anchor_projection.get("visual_position_3d", Vector3.ZERO))) + Vector3(0.0, TACTICAL_OVERLAY_Y_OFFSET, 0.0)
+	anchor_visual.material_override = _ad_hoc_material
+	anchor_visual.visible = true
+	seen_keys.append("%s_anchor" % key)
+	var target_visual := _ensure_mesh_instance(overlay_container, "%s_target" % key, "AdHoc_", _preview_mesh)
+	target_visual.position = Vector3(target_projection.get("marker_position_3d", target_projection.get("visual_position_3d", Vector3.ZERO))) + Vector3(0.0, TACTICAL_OVERLAY_Y_OFFSET, 0.0)
+	target_visual.material_override = _ad_hoc_material
+	target_visual.visible = true
+	seen_keys.append("%s_target" % key)
+	if _sync_line_visual(overlay_container, "%s_line" % key, "AdHocLine_", anchor_visual.position, target_visual.position, _ad_hoc_material, 0.045):
+		seen_keys.append("%s_line" % key)
+	return seen_keys
+
+
+func _sync_security_state_visual(overlay_container: Node3D, key: String, security_dict: Dictionary, terrain_registry) -> Dictionary:
+	var seen_keys: PackedStringArray = []
+	var sector_count: int = 0
+	if typeof(security_dict.get("anchor_position", null)) != TYPE_VECTOR2:
+		return {
+			"visible": false,
+			"sector_count": 0,
+			"seen_keys": seen_keys,
+		}
+	var anchor_position: Vector2 = Vector2(security_dict.get("anchor_position", Vector2.ZERO))
+	var sector_index: int = 0
+	for assignment_variant in Array(security_dict.get("member_assignments", [])):
+		if typeof(assignment_variant) != TYPE_DICTIONARY:
+			continue
+		var assignment: Dictionary = Dictionary(assignment_variant)
+		var arc_width: float = float(assignment.get("arc_width", 0.0))
+		if arc_width <= 0.001:
+			continue
+		var sector_key: String = "%s_sector_%d" % [key, sector_index]
+		if _sync_security_sector_visual(overlay_container, sector_key, anchor_position, float(assignment.get("center_angle", 0.0)), arc_width, terrain_registry):
+			seen_keys.append(sector_key)
+			sector_count += 1
+		sector_index += 1
+	if bool(security_dict.get("overwatch_ready", false)):
+		var anchor_projection: Dictionary = _project_ground_overlay_position(anchor_position, terrain_registry)
+		if bool(anchor_projection.get("valid", false)):
+			var anchor_key: String = "%s_anchor" % key
+			var anchor_visual := _ensure_mesh_instance(overlay_container, anchor_key, "Security_", _selection_mesh)
+			anchor_visual.position = Vector3(anchor_projection.get("marker_position_3d", anchor_projection.get("visual_position_3d", Vector3.ZERO))) + Vector3(0.0, TACTICAL_OVERLAY_Y_OFFSET + 0.02, 0.0)
+			anchor_visual.material_override = _security_material
+			anchor_visual.visible = true
+			seen_keys.append(anchor_key)
+	return {
+		"visible": sector_count > 0 or seen_keys.size() > 0,
+		"sector_count": sector_count,
+		"seen_keys": seen_keys,
+	}
+
+
+func _sync_security_sector_visual(overlay_container: Node3D, key: String, anchor_position: Vector2, center_angle: float, arc_width: float, terrain_registry) -> bool:
+	var mesh: ArrayMesh = _build_security_sector_mesh(anchor_position, center_angle, arc_width, SECURITY_SECTOR_RADIUS, terrain_registry)
+	if mesh == null:
+		return false
+	var node_name: String = "SecuritySector_%s" % key
+	var sector_visual := overlay_container.get_node_or_null(node_name) as MeshInstance3D
+	if sector_visual == null:
+		sector_visual = MeshInstance3D.new()
+		sector_visual.name = node_name
+		overlay_container.add_child(sector_visual)
+	sector_visual.mesh = mesh
+	sector_visual.material_override = _security_material
+	sector_visual.visible = true
+	return true
+
+
+func _build_security_sector_mesh(anchor_position: Vector2, center_angle: float, arc_width: float, radius: float, terrain_registry) -> ArrayMesh:
+	var anchor_projection: Dictionary = _project_ground_overlay_position(anchor_position, terrain_registry)
+	if not bool(anchor_projection.get("valid", false)):
+		return null
+	var vertices := PackedVector3Array()
+	vertices.append(Vector3(anchor_projection.get("base_position_3d", anchor_projection.get("visual_position_3d", Vector3.ZERO))) + Vector3(0.0, TACTICAL_OVERLAY_Y_OFFSET, 0.0))
+	var start_angle: float = center_angle - (arc_width * 0.5)
+	var steps: int = maxi(int(ceil(arc_width / (PI / 12.0))), 2)
+	for step in range(steps + 1):
+		var t: float = float(step) / float(steps)
+		var angle: float = lerpf(start_angle, start_angle + arc_width, t)
+		var edge_position: Vector2 = anchor_position + Vector2.RIGHT.rotated(angle) * radius
+		var edge_projection: Dictionary = _project_ground_overlay_position(edge_position, terrain_registry)
+		if not bool(edge_projection.get("valid", false)):
+			continue
+		vertices.append(Vector3(edge_projection.get("base_position_3d", edge_projection.get("visual_position_3d", Vector3.ZERO))) + Vector3(0.0, TACTICAL_OVERLAY_Y_OFFSET, 0.0))
+	if vertices.size() < 3:
+		return null
+	var indices := PackedInt32Array()
+	for index in range(1, vertices.size() - 1):
+		indices.append(0)
+		indices.append(index)
+		indices.append(index + 1)
+	var arrays: Array = []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	arrays[Mesh.ARRAY_INDEX] = indices
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return mesh
+
+
+func _sync_contact_visual(overlay_container: Node3D, key: String, contact_dict: Dictionary, terrain_registry) -> bool:
+	if typeof(contact_dict.get("last_known_position", null)) != TYPE_VECTOR2:
+		return false
+	var projection: Dictionary = _project_ground_overlay_position(Vector2(contact_dict.get("last_known_position", Vector2.ZERO)), terrain_registry)
+	if not bool(projection.get("valid", false)):
+		return false
+	var contact_visual := _ensure_mesh_instance(overlay_container, key, "Contact_", _preview_mesh)
+	contact_visual.position = Vector3(projection.get("marker_position_3d", projection.get("visual_position_3d", Vector3.ZERO))) + Vector3(0.0, TACTICAL_OVERLAY_Y_OFFSET + 0.05, 0.0)
+	contact_visual.material_override = _get_contact_material(String(contact_dict.get("detection_state", "")))
+	contact_visual.visible = true
+	return true
+
+
+func _sync_world_line_visual(container: Node3D, key: String, prefix: String, from_world_position: Vector2, to_world_position: Vector2, terrain_registry, material: StandardMaterial3D, width: float, y_offset: float) -> bool:
+	var from_projection: Dictionary = _project_ground_overlay_position(from_world_position, terrain_registry)
+	var to_projection: Dictionary = _project_ground_overlay_position(to_world_position, terrain_registry)
+	if not bool(from_projection.get("valid", false)) or not bool(to_projection.get("valid", false)):
+		return false
+	var from_position: Vector3 = Vector3(from_projection.get("marker_position_3d", from_projection.get("visual_position_3d", Vector3.ZERO))) + Vector3(0.0, y_offset, 0.0)
+	var to_position: Vector3 = Vector3(to_projection.get("marker_position_3d", to_projection.get("visual_position_3d", Vector3.ZERO))) + Vector3(0.0, y_offset, 0.0)
+	return _sync_line_visual(container, key, prefix, from_position, to_position, material, width)
+
+
+func _sync_line_visual(container: Node3D, key: String, prefix: String, from_position: Vector3, to_position: Vector3, material: StandardMaterial3D, width: float) -> bool:
+	var flat_from := Vector3(from_position.x, from_position.y, from_position.z)
+	var flat_to := Vector3(to_position.x, from_position.y, to_position.z)
+	var length: float = flat_from.distance_to(flat_to)
+	var line := container.get_node_or_null("%s%s" % [prefix, key]) as MeshInstance3D
+	if line == null:
+		line = MeshInstance3D.new()
+		line.name = "%s%s" % [prefix, key]
+		container.add_child(line)
+	if length <= 0.05:
+		line.visible = false
+		return false
+	var mesh := line.mesh as BoxMesh
+	if mesh == null:
+		mesh = BoxMesh.new()
+		line.mesh = mesh
+	mesh.size = Vector3(width, 0.035, length)
+	line.position = (flat_from + flat_to) * 0.5
+	line.look_at(flat_to, Vector3.UP)
+	line.material_override = material
+	line.visible = true
+	return true
+
+
+func _project_ground_overlay_position(world_position: Vector2, terrain_registry) -> Dictionary:
+	return Dictionary(_visual_projection.call("project_world_position", world_position, terrain_registry, {
+		"movement_layer": MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_GROUND,
+	}))
+
+
+func _get_contact_overlay():
+	var overlay = get_node_or_null(contact_overlay_path)
+	if overlay != null:
+		return overlay
+	return get_node_or_null("../ContactMapOverlay")
+
+
+func _get_contact_material(detection_state: String) -> StandardMaterial3D:
+	match detection_state.strip_edges().to_lower():
+		"suspected":
+			return _contact_suspected_material
+		"lost":
+			return _contact_lost_material
+		_:
+			return _contact_confirmed_material
+
+
+func _sync_preview_marker(preview_container: Node3D, key: String, world_position: Vector2, terrain_registry, material: StandardMaterial3D = null) -> void:
 	var projection: Dictionary = Dictionary(_visual_projection.call("project_world_position", world_position, terrain_registry, {
 		"movement_layer": MOVEMENT_LAYER_SCRIPT.MOVEMENT_LAYER_GROUND,
 	}))
@@ -1139,7 +1803,7 @@ func _sync_preview_marker(preview_container: Node3D, key: String, world_position
 		return
 	var preview_visual := _ensure_mesh_instance(preview_container, key, "Preview_", _preview_mesh)
 	preview_visual.position = Vector3(projection.get("marker_position_3d", Vector3.ZERO))
-	preview_visual.material_override = _preview_material
+	preview_visual.material_override = material if material != null else _preview_material
 	preview_visual.visible = true
 
 

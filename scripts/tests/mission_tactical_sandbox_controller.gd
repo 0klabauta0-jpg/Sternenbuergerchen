@@ -3324,8 +3324,8 @@ func _screen_to_command_world_position(screen_position: Vector2) -> Vector2:
 
 
 func _screen_to_primary_3d_target_position(screen_position: Vector2) -> Variant:
-	var bridge = get_node_or_null("../Mission25DVisualBridge")
-	if bridge == null or not bridge.has_method("is_primary_3d_view_active") or not bool(bridge.call("is_primary_3d_view_active")):
+	var bridge = _get_primary_3d_interaction_bridge()
+	if bridge == null:
 		return null
 	if not bridge.has_method("pick_screen_position"):
 		return null
@@ -3335,6 +3335,15 @@ func _screen_to_primary_3d_target_position(screen_position: Vector2) -> Variant:
 	if typeof(pick_snapshot.get("target_position", null)) != TYPE_VECTOR2:
 		return null
 	return Vector2(pick_snapshot.get("target_position", Vector2.ZERO))
+
+
+func _get_primary_3d_interaction_bridge():
+	var bridge = get_node_or_null("../Mission25DVisualBridge")
+	if bridge == null or not bridge.has_method("is_primary_3d_view_active") or not bool(bridge.call("is_primary_3d_view_active")):
+		return null
+	if bridge.has_method("is_2d_fallback_visible") and bool(bridge.call("is_2d_fallback_visible")):
+		return null
+	return bridge
 
 
 func _clamp_world_position_to_viewport(world_position: Vector2) -> Vector2:
@@ -3965,16 +3974,27 @@ func _apply_unit_click_selection(unit: Node, ctrl_pressed: bool) -> void:
 
 func _apply_lasso_selection(selection_rect: Rect2, ctrl_pressed: bool) -> void:
 	var lasso_fireteam_ids: PackedStringArray = []
-	for fireteam_id in _get_available_fireteam_ids():
-		var unit: Node2D = _get_selection_anchor_for_fireteam(fireteam_id)
-		if unit == null:
-			continue
-		var screen_pos: Vector2 = get_viewport().get_canvas_transform() * (unit as Node2D).global_position
-		if not selection_rect.has_point(screen_pos):
-			continue
-		if lasso_fireteam_ids.has(fireteam_id):
-			continue
-		lasso_fireteam_ids.append(fireteam_id)
+	var bridge = _get_primary_3d_interaction_bridge()
+	if bridge != null and bridge.has_method("get_unit_hits_in_screen_rect"):
+		for hit_variant in Array(bridge.call("get_unit_hits_in_screen_rect", selection_rect, true)):
+			if typeof(hit_variant) != TYPE_DICTIONARY:
+				continue
+			var hit: Dictionary = Dictionary(hit_variant)
+			var fireteam_id: String = String(hit.get("fireteam_id", "")).strip_edges().to_lower()
+			if fireteam_id.is_empty() or lasso_fireteam_ids.has(fireteam_id):
+				continue
+			lasso_fireteam_ids.append(fireteam_id)
+	else:
+		for fireteam_id in _get_available_fireteam_ids():
+			var unit: Node2D = _get_selection_anchor_for_fireteam(fireteam_id)
+			if unit == null:
+				continue
+			var screen_pos: Vector2 = get_viewport().get_canvas_transform() * (unit as Node2D).global_position
+			if not selection_rect.has_point(screen_pos):
+				continue
+			if lasso_fireteam_ids.has(fireteam_id):
+				continue
+			lasso_fireteam_ids.append(fireteam_id)
 
 	if ctrl_pressed:
 		var merged_fireteam_ids: PackedStringArray = _selected_fireteam_ids.duplicate()
@@ -4438,6 +4458,15 @@ func _resolve_autonomous_flank_target(_fireteam_id: String, leader) -> Vector2:
 
 
 func _find_selectable_unit_at_screen_position(screen_position: Vector2) -> Node:
+	var bridge = _get_primary_3d_interaction_bridge()
+	if bridge != null and bridge.has_method("get_unit_hit"):
+		var hit: Dictionary = Dictionary(bridge.call("get_unit_hit", screen_position, true))
+		var unit_id: String = String(hit.get("unit_id", "")).strip_edges()
+		if not unit_id.is_empty():
+			var unit = _find_friendly_unit_by_id(unit_id)
+			if unit != null:
+				return unit
+
 	var world_position: Vector2 = _screen_to_world_position(screen_position)
 	var best_unit: Node = null
 	var best_distance_sq: float = UNIT_SELECTION_PICK_RADIUS * UNIT_SELECTION_PICK_RADIUS
@@ -6612,6 +6641,15 @@ func _count_selected_phase_waypoints_for_fireteams(fireteam_ids: PackedStringArr
 
 
 func _find_waypoint_target_at_screen_position(screen_position: Vector2) -> Dictionary:
+	var bridge = _get_primary_3d_interaction_bridge()
+	if bridge != null and bridge.has_method("get_waypoint_hit"):
+		var bridge_waypoint_data: Dictionary = Dictionary(bridge.call("get_waypoint_hit", screen_position))
+		if not bridge_waypoint_data.is_empty():
+			return {
+				"fireteam_id": String(bridge_waypoint_data.get("fireteam_id", "")).strip_edges().to_lower(),
+				"phase": int(bridge_waypoint_data.get("phase", _current_phase_index)),
+				"waypoint_id": String(bridge_waypoint_data.get("waypoint_id", "")).strip_edges(),
+			}
 	var visualizer := get_node_or_null("../FireteamOrderVisualizer")
 	if visualizer == null or not visualizer.has_method("get_waypoint_hit"):
 		return {}
@@ -6626,6 +6664,14 @@ func _find_waypoint_target_at_screen_position(screen_position: Vector2) -> Dicti
 
 
 func _find_area_order_target_at_screen_position(screen_position: Vector2) -> Dictionary:
+	var bridge = _get_primary_3d_interaction_bridge()
+	if bridge != null and bridge.has_method("get_area_order_hit"):
+		var bridge_area_order_data: Dictionary = Dictionary(bridge.call("get_area_order_hit", screen_position))
+		if not bridge_area_order_data.is_empty():
+			return {
+				"area_order_id": String(bridge_area_order_data.get("area_order_id", "")).strip_edges(),
+				"fireteam_id": String(bridge_area_order_data.get("fireteam_id", "")).strip_edges().to_lower(),
+			}
 	var visualizer := get_node_or_null("../FireteamOrderVisualizer")
 	if visualizer == null or not visualizer.has_method("get_area_order_hit"):
 		return {}
@@ -6926,6 +6972,12 @@ func _normalize_area_order_command_type(command_type: String) -> String:
 
 
 func _build_area_order_payload_from_screen_rect(screen_rect: Rect2) -> Dictionary:
+	var bridge = _get_primary_3d_interaction_bridge()
+	if bridge != null and bridge.has_method("build_area_order_payload_from_screen_rect"):
+		var bridge_payload: Dictionary = Dictionary(bridge.call("build_area_order_payload_from_screen_rect", screen_rect))
+		if not bridge_payload.is_empty():
+			return bridge_payload
+
 	var terrain_registry = _get_terrain_registry()
 	if terrain_registry != null and terrain_registry.has_method("get_all_tiles"):
 		var canvas_transform: Transform2D = get_viewport().get_canvas_transform()
