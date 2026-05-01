@@ -27,7 +27,7 @@ func _run_tests() -> void:
 
 
 func _test_mapping_calibration(renderer) -> void:
-	_assert(float(renderer.call("get_model_scale_for_type", "deko_barrel_se")) >= 4.0, "Mapping exposes per-family prop scale")
+	_assert(float(renderer.call("get_model_scale_for_type", "deko_barrel_se")) > 1.0, "Mapping exposes per-family prop scale")
 	_assert(float(renderer.call("get_model_y_offset_for_type", "fahrzeug_speeder_b_se")) > 0.0, "Mapping exposes per-family y_offset")
 	_assert(float(renderer.call("get_model_rotation_offset_degrees_for_type", "deko_barrel_se")) == 0.0, "Mapping exposes per-family rotation offset")
 

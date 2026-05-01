@@ -59,18 +59,25 @@ Die vorhandene 3D-Kalibrierungsszene wird zu einem brauchbaren Arbeitsraum, mit 
   - `PivotMarkers3D` als kleine gelbe Pivot-/Ankerpunkte.
 - Die Szene liefert `get_calibration_snapshot()` fuer Verifier und Debug.
 - `TerrainMap3DRenderer` zentriert GLB-Instanzen jetzt horizontal anhand ihrer Mesh-Bounds auf den Tile-Anker. Dadurch werden importierte Modelle mit seitlich versetztem GLB-Origin nicht mehr neben dem Footprint platziert. Pro Mapping-Eintrag kann das bei Bedarf mit `center_horizontal: false` abgeschaltet werden.
+- Die Szene fuegt eine `astronautA.glb`-NPC-Referenz mit normalisierter Hoehe als Groessenvergleich ein.
+- Erste grobe Scale-Korrektur im Mapping:
+  - einzelnes Fass deutlich kleiner.
+  - Fassgruppe, Plattform, Pipe, Rail und Crater konservativer skaliert.
+  - Gebaeude, Speeder, Wall, Generator und Satellite bleiben als naechste visuelle Vergleichsgruppe erstmal bewusst vorsichtig.
 - Tastatur im Playmode:
   - `G`: Debug-Grid an/aus.
   - `L`: Labels an/aus.
   - `F`: Footprints und Pivot-Marker an/aus.
 - `scripts/tests/task_146_verifier.gd` prueft Mapping, fehlende GLB-Pfade, Labels, Footprints, Pivot-Marker und Toggles.
 - Der Verifier prueft zusaetzlich, dass die gerenderten Modell-Bounds horizontal auf ihren Tile-Ankern liegen.
+- Der Verifier prueft, dass die NPC-Referenz im Workspace vorhanden ist.
 
 ## Bedienung fuer visuelle Kalibrierung
 1. In Godot `res://scenes/tests/mission_map_3d_calibration.tscn` oeffnen und starten.
 2. Mit `WASD` die Kamera schieben, mit `Q/E` drehen und mit dem Mausrad zoomen.
 3. Mit `G` zwischen Debug-Grid und geschlossenerer Bodenansicht wechseln.
 4. Pro Objekt pruefen:
+   - Wirkt das Objekt neben dem NPC plausibel?
    - Ist die farbige Footprint-Flaeche plausibel zum Tile?
    - Sitzt der gelbe Pivot-Punkt sinnvoll auf dem Tile?
    - Schwebt das Modell oder steckt es im Boden?
@@ -93,6 +100,7 @@ Wir koennen konkret sagen, welche 3D-Objekte optisch passen und welche Werte noc
 
 ## Dateien
 - `scenes/tests/mission_map_3d_calibration.tscn`
+- `data/terrain_3d_asset_mapping.json`
 - `scripts/terrain/terrain_map_3d_renderer.gd`
 - `scripts/tests/mission_map_3d_calibration.gd`
 - `scripts/tests/task_146_verifier.gd`

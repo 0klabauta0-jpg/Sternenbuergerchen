@@ -2,6 +2,10 @@ extends "res://scripts/tests/mission_map_3d_render_spike.gd"
 
 const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_catalog.gd")
 
+const NPC_REFERENCE_MODEL_PATH: String = "res://Assets/kenney_space-kit/Models/GLTF format/astronautA.glb"
+const NPC_REFERENCE_GRID: Vector2i = Vector2i(12, 6)
+const NPC_REFERENCE_HEIGHT: float = 0.88
+
 const CALIBRATION_OBJECTS: Array[Dictionary] = [
 	{"grid": Vector2i(1, 1), "type_id": "deko_barrel_se", "category": "small_prop"},
 	{"grid": Vector2i(3, 1), "type_id": "deko_barrels_nw", "category": "small_prop"},
@@ -22,6 +26,7 @@ const CALIBRATION_OBJECTS: Array[Dictionary] = [
 @export var calibration_pivots_enabled: bool = true
 @export var calibration_label_height: float = 1.15
 @export var calibration_label_font_size: int = 28
+@export var npc_reference_enabled: bool = true
 
 var calibration_snapshot: Dictionary = {}
 
@@ -101,6 +106,7 @@ func _build_calibration_helpers(map_data, renderer, map_root: Node3D) -> void:
 	var pivot_container := _ensure_container(helper_root, "PivotMarkers3D")
 	var entries: Array[Dictionary] = []
 	var missing_model_paths: Array[String] = []
+	var npc_reference: Dictionary = {}
 
 	for item in CALIBRATION_OBJECTS:
 		var type_id: String = String(item.get("type_id", ""))
@@ -146,10 +152,15 @@ func _build_calibration_helpers(map_data, renderer, map_root: Node3D) -> void:
 			"total_rotation_degrees": total_rotation,
 		})
 
+	if npc_reference_enabled:
+		npc_reference = _add_npc_reference(helper_root, renderer)
+
 	calibration_snapshot = {
 		"object_count": entries.size(),
 		"entries": entries,
 		"missing_model_paths": missing_model_paths,
+		"npc_reference": npc_reference,
+		"npc_reference_enabled": npc_reference_enabled,
 		"labels_enabled": calibration_labels_enabled,
 		"footprints_enabled": calibration_footprints_enabled,
 		"pivots_enabled": calibration_pivots_enabled,
@@ -158,6 +169,127 @@ func _build_calibration_helpers(map_data, renderer, map_root: Node3D) -> void:
 		"pivot_count": pivot_container.get_child_count(),
 		"debug_grid_enabled": bool(get("show_debug_grid")),
 	}
+
+
+func _add_npc_reference(helper_root: Node3D, renderer) -> Dictionary:
+	var npc_container := _ensure_container(helper_root, "NPCReference3D")
+	var reference_position: Vector3 = renderer.call("grid_to_world_3d_floor", NPC_REFERENCE_GRID, 0.0) + Vector3(0.0, 0.04, 0.0)
+	var npc_node := _instantiate_npc_reference()
+	var loaded_model: bool = npc_node != null
+	if npc_node == null:
+		npc_node = _create_fallback_npc_reference()
+	npc_node.name = "NPCReference_Astronaut"
+	npc_node.position = reference_position
+	npc_container.add_child(npc_node)
+
+	if calibration_footprints_enabled:
+		_add_footprint(npc_container, "npc_reference", reference_position - Vector3(0.0, 0.04, 0.0), float(renderer.call("get_grid_cell_size")), "npc_reference")
+	if calibration_pivots_enabled:
+		_add_pivot_marker(npc_container, "npc_reference", reference_position)
+	if calibration_labels_enabled:
+		_add_label(npc_container, "npc_reference", "NPC reference\nheight %.2f tile" % NPC_REFERENCE_HEIGHT, reference_position + Vector3(0.0, NPC_REFERENCE_HEIGHT + 0.35, 0.0), "npc_reference")
+
+	return {
+		"grid_position": NPC_REFERENCE_GRID,
+		"model_path": NPC_REFERENCE_MODEL_PATH,
+		"model_loaded": loaded_model,
+		"target_height": NPC_REFERENCE_HEIGHT,
+	}
+
+
+func _instantiate_npc_reference() -> Node3D:
+	if not ResourceLoader.exists(NPC_REFERENCE_MODEL_PATH):
+		return null
+	var scene := load(NPC_REFERENCE_MODEL_PATH) as PackedScene
+	if scene == null:
+		return null
+	var node := scene.instantiate() as Node3D
+	if node == null:
+		return null
+	node.rotation_degrees.y = 180.0
+	_center_and_scale_reference_node(node, NPC_REFERENCE_HEIGHT)
+	return node
+
+
+func _create_fallback_npc_reference() -> Node3D:
+	var root := Node3D.new()
+	var body := MeshInstance3D.new()
+	body.name = "FallbackNPCBody"
+	var mesh := CapsuleMesh.new()
+	mesh.radius = 0.13
+	mesh.height = NPC_REFERENCE_HEIGHT
+	body.mesh = mesh
+	body.position.y = NPC_REFERENCE_HEIGHT * 0.5
+	body.material_override = _make_calibration_material(Color(0.2, 0.72, 1.0, 1.0))
+	root.add_child(body)
+	return root
+
+
+func _center_and_scale_reference_node(node: Node3D, target_height: float) -> void:
+	var bounds: Dictionary = _get_local_visual_bounds(node)
+	if not bool(bounds.get("valid", false)):
+		return
+	var min_value: Vector3 = Vector3(bounds.get("min", Vector3.ZERO))
+	var max_value: Vector3 = Vector3(bounds.get("max", Vector3.ZERO))
+	var center: Vector3 = (min_value + max_value) * 0.5
+	var source_height: float = maxf(max_value.y - min_value.y, 0.001)
+	var scale_factor: float = target_height / source_height
+	node.scale = Vector3.ONE * scale_factor
+	node.position = Vector3(-center.x * scale_factor, -min_value.y * scale_factor, -center.z * scale_factor)
+
+
+func _get_local_visual_bounds(node: Node3D) -> Dictionary:
+	var bounds: Dictionary = {
+		"valid": false,
+		"min": Vector3.ZERO,
+		"max": Vector3.ZERO,
+	}
+	_accumulate_local_visual_bounds(node, Transform3D.IDENTITY, bounds)
+	return bounds
+
+
+func _accumulate_local_visual_bounds(node: Node, parent_transform: Transform3D, bounds: Dictionary) -> void:
+	var current_transform := parent_transform
+	var node_3d := node as Node3D
+	if node_3d != null:
+		current_transform = parent_transform * node_3d.transform
+	var mesh_instance := node as MeshInstance3D
+	if mesh_instance != null and mesh_instance.mesh != null:
+		_merge_transformed_aabb(bounds, current_transform, mesh_instance.get_aabb())
+	for child in node.get_children():
+		_accumulate_local_visual_bounds(child, current_transform, bounds)
+
+
+func _merge_transformed_aabb(bounds: Dictionary, transform: Transform3D, aabb: AABB) -> void:
+	var corners: Array[Vector3] = [
+		aabb.position,
+		aabb.position + Vector3(aabb.size.x, 0.0, 0.0),
+		aabb.position + Vector3(0.0, aabb.size.y, 0.0),
+		aabb.position + Vector3(0.0, 0.0, aabb.size.z),
+		aabb.position + Vector3(aabb.size.x, aabb.size.y, 0.0),
+		aabb.position + Vector3(aabb.size.x, 0.0, aabb.size.z),
+		aabb.position + Vector3(0.0, aabb.size.y, aabb.size.z),
+		aabb.position + aabb.size,
+	]
+	for corner in corners:
+		var transformed_corner: Vector3 = transform * corner
+		if not bool(bounds.get("valid", false)):
+			bounds["valid"] = true
+			bounds["min"] = transformed_corner
+			bounds["max"] = transformed_corner
+			continue
+		var min_value: Vector3 = Vector3(bounds.get("min", Vector3.ZERO))
+		var max_value: Vector3 = Vector3(bounds.get("max", Vector3.ZERO))
+		bounds["min"] = Vector3(
+			minf(min_value.x, transformed_corner.x),
+			minf(min_value.y, transformed_corner.y),
+			minf(min_value.z, transformed_corner.z)
+		)
+		bounds["max"] = Vector3(
+			maxf(max_value.x, transformed_corner.x),
+			maxf(max_value.y, transformed_corner.y),
+			maxf(max_value.z, transformed_corner.z)
+		)
 
 
 func _add_footprint(container: Node3D, type_id: String, position: Vector3, cell_size: float, category: String) -> void:
@@ -241,5 +373,7 @@ func _get_category_color(category: String, alpha: float) -> Color:
 			return Color(0.82, 0.76, 0.58, alpha)
 		"vehicle":
 			return Color(1.0, 0.42, 0.78, alpha)
+		"npc_reference":
+			return Color(0.2, 0.72, 1.0, alpha)
 		_:
 			return Color(1.0, 1.0, 1.0, alpha)

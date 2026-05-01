@@ -28,14 +28,14 @@
 		"deko_barrel": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/3d/barrel.glb",
-			"scale": 4.0,
+			"scale": 1.25,
 			"y_offset": 0.0,
 			"rotation_degrees_offset": 0.0
 		},
 		"deko_barrels": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/3d/barrels.glb",
-			"scale": 2.2,
+			"scale": 1.35,
 			"y_offset": 0.0,
 			"rotation_degrees_offset": 0.0
 		},
@@ -70,28 +70,28 @@
 		"plattform_center": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/3d/platform_center.glb",
-			"scale": 1.7,
+			"scale": 1.25,
 			"y_offset": -0.015,
 			"rotation_degrees_offset": 0.0
 		},
 		"pipe_straight": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/3d/pipe_straight.glb",
-			"scale": 1.5,
+			"scale": 1.1,
 			"y_offset": 0.0,
 			"rotation_degrees_offset": 0.0
 		},
 		"rail": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/3d/rail.glb",
-			"scale": 1.6,
+			"scale": 1.15,
 			"y_offset": -0.01,
 			"rotation_degrees_offset": 0.0
 		},
 		"crater_small": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/3d/crater.glb",
-			"scale": 1.8,
+			"scale": 1.2,
 			"y_offset": -0.02,
 			"rotation_degrees_offset": 0.0
 		},

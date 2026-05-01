@@ -50,6 +50,7 @@ func _test_calibration_workspace() -> void:
 	_assert(int(snapshot.get("footprint_count", 0)) == entries.size(), "Calibration workspace creates one footprint per object")
 	_assert(int(snapshot.get("pivot_count", 0)) == entries.size(), "Calibration workspace creates one pivot marker per object")
 	_assert(_entries_have_calibration_values(entries), "Calibration entries expose scale, offset and rotation data")
+	_assert(_has_npc_reference(snapshot), "Calibration workspace includes an NPC size reference")
 	_assert(_rendered_objects_are_centered(Dictionary(render_result.get("objects", {}))), "Rendered model bounds are centered on their tile anchors")
 
 	var label_container := scene.get_node_or_null("MapRoot/CalibrationHelpers3D/Labels3D")
@@ -92,6 +93,14 @@ func _entries_have_calibration_values(entries: Array) -> bool:
 		if not entry.has("y_offset") or not entry.has("rotation_offset_degrees") or not entry.has("total_rotation_degrees"):
 			return false
 	return true
+
+
+func _has_npc_reference(snapshot: Dictionary) -> bool:
+	var npc_reference: Dictionary = Dictionary(snapshot.get("npc_reference", {}))
+	return bool(snapshot.get("npc_reference_enabled", false)) \
+		and npc_reference.get("grid_position", Vector2i.ZERO) is Vector2i \
+		and String(npc_reference.get("model_path", "")).contains("astronautA.glb") \
+		and float(npc_reference.get("target_height", 0.0)) > 0.0
 
 
 func _rendered_objects_are_centered(objects: Dictionary) -> bool:
