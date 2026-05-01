@@ -38,8 +38,9 @@ func _test_editor_uses_3d_primary_view() -> void:
 	_assert(primary_view != null and primary_view.has_method("get_render_snapshot"), "Editor attaches Primary3DView")
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot")) if primary_view != null else {}
 	_assert(int(snapshot.get("tile_count", 0)) > 0, "Editor Primary3DView renders terrain tiles")
-	_assert(int(snapshot.get("asset_model_count", 0)) > 0, "Editor Primary3DView renders Kenney 3D asset models")
-	_assert(_asset_model_roots_have_centered_children(primary_view), "Editor Kenney model roots and imported children stay centered on tile anchors")
+	_assert(int(snapshot.get("tile_texture_count", 0)) == int(snapshot.get("tile_count", 0)), "Editor Primary3DView renders authored terrain textures")
+	_assert(int(snapshot.get("asset_texture_count", 0)) > 0, "Editor Primary3DView renders authored Kenney asset textures")
+	_assert(_asset_texture_cards_have_textures(primary_view), "Editor 2.5D asset cards keep non-empty isometric textures")
 
 	var camera2d := editor.get_node_or_null("Camera2D") as Camera2D
 	_assert(camera2d != null and not camera2d.enabled, "Editor legacy Camera2D is disabled")
@@ -72,9 +73,9 @@ func _test_live_mission_uses_3d_primary_view() -> void:
 	_assert(primary_view != null and primary_view.has_method("get_render_snapshot"), "Live mission attaches Primary3DView")
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot")) if primary_view != null else {}
 	_assert(int(snapshot.get("tile_count", 0)) > 0 and int(snapshot.get("unit_proxy_count", 0)) >= 2, "Live Primary3DView renders map and runtime unit proxies")
-	_assert(int(snapshot.get("asset_model_count", 0)) > 0, "Live Primary3DView renders Kenney 3D asset models")
-	_assert(int(snapshot.get("unit_model_count", 0)) >= 2, "Live Primary3DView renders runtime units with Kenney astronaut models")
-	_assert(_asset_model_roots_have_centered_children(primary_view), "Live Kenney model roots and imported children stay centered on tile anchors")
+	_assert(int(snapshot.get("asset_texture_count", 0)) > 0, "Live Primary3DView renders authored Kenney asset textures")
+	_assert(int(snapshot.get("unit_texture_count", 0)) >= 2, "Live Primary3DView renders runtime units with authored isometric sprites")
+	_assert(_asset_texture_cards_have_textures(primary_view), "Live 2.5D asset cards keep non-empty isometric textures")
 
 	var map_root := live_scene.get_node_or_null("MapRoot") as CanvasItem
 	var mission_camera := live_scene.get_node_or_null("MissionCamera") as Camera2D
@@ -127,8 +128,8 @@ func _assert_auxiliary_3d_map_scene_loads(scene_path: String, label: String) -> 
 	_assert(primary_view != null and primary_view.has_method("get_render_snapshot"), "%s 3D map scene attaches Primary3DView" % label)
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot")) if primary_view != null else {}
 	_assert(int(snapshot.get("tile_count", 0)) > 0, "%s 3D map scene renders terrain tiles" % label)
-	_assert(int(snapshot.get("asset_model_count", 0)) > 0, "%s 3D map scene renders asset models" % label)
-	_assert(_asset_model_roots_have_centered_children(primary_view), "%s 3D map scene keeps imported asset children centered" % label)
+	_assert(int(snapshot.get("asset_texture_count", 0)) > 0, "%s 3D map scene renders authored asset textures" % label)
+	_assert(_asset_texture_cards_have_textures(primary_view), "%s 3D map scene keeps textured asset cards" % label)
 	scene_root.queue_free()
 	await _wait_frames(2)
 
@@ -145,7 +146,7 @@ func _canvas_item_hidden(root_node: Node, node_path: String) -> bool:
 	return canvas_item != null and not canvas_item.visible
 
 
-func _asset_model_roots_have_centered_children(primary_view: Node) -> bool:
+func _asset_texture_cards_have_textures(primary_view: Node) -> bool:
 	if primary_view == null:
 		return false
 	var map_root := primary_view.get_node_or_null("ViewportContainer/SubViewport/WorldRoot/MapRoot3D")
@@ -155,18 +156,15 @@ func _asset_model_roots_have_centered_children(primary_view: Node) -> bool:
 	for child in map_root.get_children():
 		if child.is_queued_for_deletion():
 			continue
-		if not child is Node3D or child.get_child_count() < 1 or not String(child.name).begins_with("Asset_"):
+		if not child is Node3D or child.get_child_count() < 1 or not String(child.name).begins_with("AssetTexture_"):
 			continue
-		var model_root := child.get_child(0) as Node3D
-		if model_root == null or model_root.is_queued_for_deletion():
+		var sprite := child.get_child(0) as Sprite3D
+		if sprite == null or sprite.is_queued_for_deletion() or sprite.texture == null:
 			return false
 		inspected_count += 1
-		if absf(model_root.position.x) > 0.001 or absf(model_root.position.z) > 0.001:
+		var texture_path: String = String(sprite.texture.resource_path).strip_edges()
+		if texture_path.is_empty() or not texture_path.begins_with("res://Assets/kenney_space-kit/Isometric/"):
 			return false
-		if model_root.get_child_count() == 1:
-			var imported_child := model_root.get_child(0) as Node3D
-			if imported_child != null and (absf(imported_child.position.x) > 0.001 or absf(imported_child.position.z) > 0.001):
-				return false
 	return inspected_count > 0
 
 

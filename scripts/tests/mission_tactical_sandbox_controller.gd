@@ -3415,6 +3415,7 @@ func _refresh_world_overlays() -> void:
 				"lz_position": _lz_position,
 				"dropship_visible": dropship_visible,
 				"dropship_position": dropship_position,
+				"dropship_texture": _get_mission_dropship_texture(),
 			}
 		)
 		for legacy_path in ["../LZMarker", "../DropshipPlanMarker"]:

@@ -30,6 +30,37 @@ const CAMERA_PAN_UNITS_PER_SECOND: float = 9.0
 const CAMERA_DRAG_PAN_FACTOR: float = 0.065
 const DEFAULT_HALF_TILE_WIDTH: float = 64.0
 const DEFAULT_HALF_TILE_HEIGHT: float = 32.0
+const TILE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_SW.png")
+const CLIFF_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_SE.png")
+const CLIFF_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_SW.png")
+const CLIFF_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_NE.png")
+const CLIFF_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_NW.png")
+const CLIFF_CORNER_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_SE.png")
+const CLIFF_CORNER_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_SW.png")
+const CLIFF_CORNER_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_NE.png")
+const CLIFF_CORNER_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_NW.png")
+const RAMP_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_rampLarge_SE.png")
+const RAMP_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_rampLarge_SW.png")
+const RAMP_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_rampLarge_NE.png")
+const RAMP_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_rampLarge_NW.png")
+const WALL_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wall_SE.png")
+const WALL_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wall_SW.png")
+const WALL_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wall_NE.png")
+const WALL_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wall_NW.png")
+const WALL_CORNER_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_SE.png")
+const WALL_CORNER_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_SW.png")
+const WALL_CORNER_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_NE.png")
+const WALL_CORNER_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_NW.png")
+const ROCK_SMALL_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/rock_SW.png")
+const ROCK_LARGE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/rock_largeB_SW.png")
+const DEFAULT_DROPSHIP_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
+const FRIENDLY_UNIT_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/astronautA_SW.png")
+const ENEMY_UNIT_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/astronautB_SW.png")
+const TEXTURE_CARD_PIXEL_SIZE: float = 0.0062
+const TILE_TEXTURE_PIXEL_SIZE: float = 0.0060
+const UNIT_TEXTURE_PIXEL_SIZE: float = 0.0105
+const DROPSHIP_TEXTURE_PIXEL_SIZE: float = 0.0094
+const KENNEY_DIAMOND_CENTER := Vector2(256.0, 315.0)
 const KENNEY_MODEL_ROOT: String = "res://Assets/kenney_space-kit/Models/GLTF format"
 const KENNEY_AUTHORING_OFFSET_X: float = 2.0
 const KENNEY_AUTHORING_OFFSET_Z: float = 1.5
@@ -98,9 +129,13 @@ var _camera_size: float = CAMERA_DEFAULT_SIZE
 var _camera_yaw_degrees: float = 45.0
 var _camera_pitch_degrees: float = 58.0
 var _map_tile_count: int = 0
+var _tile_texture_count: int = 0
+var _asset_texture_count: int = 0
 var _asset_model_count: int = 0
 var _placeholder_object_count: int = 0
+var _unit_texture_count: int = 0
 var _unit_model_count: int = 0
+var _dropship_texture_visible: bool = false
 var _dropship_model_visible: bool = false
 var _map_render_duration_msec: int = 0
 var _marker_count: int = 0
@@ -143,6 +178,8 @@ func render_map(terrain_map_data = null) -> void:
 	_clear_children(_contact_root)
 	_clear_children(_drop_root)
 	_map_tile_count = 0
+	_tile_texture_count = 0
+	_asset_texture_count = 0
 	_asset_model_count = 0
 	_placeholder_object_count = 0
 	_marker_count = 0
@@ -151,13 +188,8 @@ func render_map(terrain_map_data = null) -> void:
 		_map_render_duration_msec = Time.get_ticks_msec() - render_started_at_msec
 		return
 
-	var tile_vertices := PackedVector3Array()
-	var tile_normals := PackedVector3Array()
-	var tile_colors := PackedColorArray()
-	var tile_indices := PackedInt32Array()
 	for tile_data in Array(_terrain_map_data.call("get_tiles")):
-		_add_tile_visual(tile_data, tile_vertices, tile_normals, tile_colors, tile_indices)
-	_add_tile_mesh_visual(tile_vertices, tile_normals, tile_colors, tile_indices)
+		_add_tile_visual(tile_data)
 	_rebuild_marker_visuals()
 	_rebuild_patrol_visuals()
 	_rebuild_selection_visuals()
@@ -297,8 +329,11 @@ func screen_rect_to_tile_world_positions(screen_rect: Rect2) -> Array:
 func get_render_snapshot() -> Dictionary:
 	return {
 		"tile_count": _map_tile_count,
+		"tile_texture_count": _tile_texture_count,
+		"asset_texture_count": _asset_texture_count,
 		"asset_model_count": _asset_model_count,
 		"placeholder_object_count": _placeholder_object_count,
+		"unit_texture_count": _unit_texture_count,
 		"unit_model_count": _unit_model_count,
 		"marker_count": _marker_count,
 		"patrol_segment_count": _patrol_segment_count,
@@ -308,6 +343,7 @@ func get_render_snapshot() -> Dictionary:
 		"contact_count": _contact_count,
 		"has_lz": bool(_drop_payload.get("has_lz_position", false)),
 		"dropship_visible": bool(_drop_payload.get("dropship_visible", false)),
+		"dropship_texture_visible": _dropship_texture_visible,
 		"dropship_model_visible": _dropship_model_visible,
 		"camera_yaw_degrees": _camera_yaw_degrees,
 		"camera_size": _camera_size,
@@ -449,12 +485,23 @@ func _clamp_focus_to_map() -> void:
 	_focus_grid_position.y = clampf(_focus_grid_position.y, -2.0, float(_grid_size.y) + 2.0)
 
 
-func _add_tile_visual(tile_data, tile_vertices: PackedVector3Array, tile_normals: PackedVector3Array, tile_colors: PackedColorArray, tile_indices: PackedInt32Array) -> void:
+func _add_tile_visual(tile_data) -> void:
 	if tile_data == null or _map_root == null:
 		return
 	var height_level: int = maxi(int(tile_data.height_level), 0)
 	var top_y: float = float(height_level) * HEIGHT_STEP
-	_append_tile_quad(tile_data, top_y, tile_vertices, tile_normals, tile_colors, tile_indices)
+	var tile_texture: Texture2D = _resolve_tile_texture(tile_data)
+	var tile_sprite := _add_texture_card(
+		_map_root,
+		tile_texture,
+		_grid_to_3d_position(Vector2(tile_data.grid_position), top_y + 0.004),
+		"Tile_%d_%d" % [tile_data.grid_position.x, tile_data.grid_position.y],
+		TILE_TEXTURE_PIXEL_SIZE,
+		_get_kenney_anchor_offset(tile_texture),
+		_build_tile_modulate(tile_data)
+	)
+	if tile_sprite != null:
+		_tile_texture_count += 1
 	_map_tile_count += 1
 
 	var object_type_id: String = String(tile_data.object_type_id) if tile_data.object_type_id is String else ""
@@ -464,48 +511,9 @@ func _add_tile_visual(tile_data, tile_vertices: PackedVector3Array, tile_normals
 		_add_object_visual(tile_data, top_y, visual_type_id)
 
 
-func _append_tile_quad(tile_data, top_y: float, tile_vertices: PackedVector3Array, tile_normals: PackedVector3Array, tile_colors: PackedColorArray, tile_indices: PackedInt32Array) -> void:
-	var center: Vector3 = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y)
-	var half_size: float = TILE_SPACING * 0.47
-	var base_index: int = tile_vertices.size()
-	tile_vertices.append(center + Vector3(-half_size, 0.0, -half_size))
-	tile_vertices.append(center + Vector3(half_size, 0.0, -half_size))
-	tile_vertices.append(center + Vector3(half_size, 0.0, half_size))
-	tile_vertices.append(center + Vector3(-half_size, 0.0, half_size))
-	for _index in range(4):
-		tile_normals.append(Vector3.UP)
-		tile_colors.append(_get_tile_color(tile_data))
-	tile_indices.append(base_index)
-	tile_indices.append(base_index + 1)
-	tile_indices.append(base_index + 2)
-	tile_indices.append(base_index)
-	tile_indices.append(base_index + 2)
-	tile_indices.append(base_index + 3)
-
-
-func _add_tile_mesh_visual(tile_vertices: PackedVector3Array, tile_normals: PackedVector3Array, tile_colors: PackedColorArray, tile_indices: PackedInt32Array) -> void:
-	if _map_root == null or tile_vertices.is_empty():
-		return
-	var arrays: Array = []
-	arrays.resize(Mesh.ARRAY_MAX)
-	arrays[Mesh.ARRAY_VERTEX] = tile_vertices
-	arrays[Mesh.ARRAY_NORMAL] = tile_normals
-	arrays[Mesh.ARRAY_COLOR] = tile_colors
-	arrays[Mesh.ARRAY_INDEX] = tile_indices
-	var mesh := ArrayMesh.new()
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	var material := StandardMaterial3D.new()
-	material.vertex_color_use_as_albedo = true
-	material.roughness = 0.88
-	material.metallic = 0.0
-	var tile_instance := MeshInstance3D.new()
-	tile_instance.name = "TerrainTiles"
-	tile_instance.mesh = mesh
-	tile_instance.material_override = material
-	_map_root.add_child(tile_instance)
-
-
 func _add_object_visual(tile_data, top_y: float, visual_type_id: String) -> void:
+	if not visual_type_id.is_empty() and _add_asset_texture_visual(tile_data, top_y, visual_type_id):
+		return
 	if not visual_type_id.is_empty() and _add_asset_model_visual(tile_data, top_y, visual_type_id):
 		return
 
@@ -531,6 +539,158 @@ func _add_object_visual(tile_data, top_y: float, visual_type_id: String) -> void
 	instance.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + (object_height * 0.5))
 	_map_root.add_child(instance)
 	_placeholder_object_count += 1
+
+
+func _add_asset_texture_visual(tile_data, top_y: float, visual_type_id: String) -> bool:
+	var texture_info: Dictionary = _resolve_asset_texture_info(tile_data, visual_type_id)
+	var texture := texture_info.get("texture", null) as Texture2D
+	if texture == null or _map_root == null:
+		return false
+	var visual_root := Node3D.new()
+	visual_root.name = "AssetTexture_%s_%d_%d" % [visual_type_id, tile_data.grid_position.x, tile_data.grid_position.y]
+	visual_root.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + _get_asset_y_offset(visual_type_id))
+	_map_root.add_child(visual_root)
+	var pixel_size: float = _get_asset_texture_pixel_size(visual_type_id)
+	var sprite := _add_texture_card(
+		visual_root,
+		texture,
+		Vector3.ZERO,
+		"Texture",
+		pixel_size,
+		_get_kenney_anchor_offset(texture, Vector2(texture_info.get("offset", Vector2.ZERO))),
+		Color(1.0, 1.0, 1.0, 1.0)
+	)
+	if sprite == null:
+		visual_root.queue_free()
+		return false
+	_asset_texture_count += 1
+	return true
+
+
+func _resolve_asset_texture_info(tile_data, visual_type_id: String) -> Dictionary:
+	var normalized: String = visual_type_id.strip_edges().to_lower()
+	var texture: Texture2D = null
+	var pos_offset := Vector2.ZERO
+
+	match normalized:
+		"wall_straight_se":
+			texture = WALL_TEXTURE_NE
+		"wall_straight_sw":
+			texture = WALL_TEXTURE_SE
+		"wall_straight_ne":
+			texture = WALL_TEXTURE_NW
+		"wall_straight_nw":
+			texture = WALL_TEXTURE_SW
+		"wall_corner_se":
+			texture = WALL_CORNER_NW
+		"wall_corner_sw":
+			texture = WALL_CORNER_NE
+		"wall_corner_ne":
+			texture = WALL_CORNER_SW
+		"wall_corner_nw":
+			texture = WALL_CORNER_SE
+		"cliff_straight_se":
+			texture = CLIFF_TEXTURE_SE
+			pos_offset = Vector2(33.0, 24.0)
+		"cliff_straight_sw":
+			texture = CLIFF_TEXTURE_SW
+			pos_offset = Vector2(33.0, 56.0)
+		"cliff_straight_ne":
+			texture = CLIFF_TEXTURE_NE
+			pos_offset = Vector2(-31.0, 23.0)
+		"cliff_straight_nw":
+			texture = CLIFF_TEXTURE_NW
+			pos_offset = Vector2(-32.0, 56.0)
+		"cliff_corner_se":
+			texture = CLIFF_CORNER_NE
+			pos_offset = Vector2(-64.0, 40.0)
+		"cliff_corner_sw":
+			texture = CLIFF_CORNER_SE
+			pos_offset = Vector2(1.0, 7.0)
+		"cliff_corner_ne":
+			texture = CLIFF_CORNER_NW
+			pos_offset = Vector2(0.0, 73.0)
+		"cliff_corner_nw":
+			texture = CLIFF_CORNER_SW
+			pos_offset = Vector2(65.0, 40.0)
+		"slope_se":
+			texture = RAMP_TEXTURE_SE
+			pos_offset = Vector2(0.0, 32.0)
+		"slope_sw":
+			texture = RAMP_TEXTURE_SW
+			pos_offset = Vector2(0.0, 32.0)
+		"slope_ne":
+			texture = RAMP_TEXTURE_NE
+			pos_offset = Vector2(0.0, 32.0)
+		"slope_nw":
+			texture = RAMP_TEXTURE_NW
+			pos_offset = Vector2(0.0, 32.0)
+		"rock_small":
+			texture = ROCK_SMALL_TEXTURE
+		"rock_large":
+			texture = ROCK_LARGE_TEXTURE
+
+	if texture == null:
+		texture = _resolve_catalog_object_texture(tile_data, normalized)
+	return {
+		"texture": texture,
+		"offset": pos_offset,
+	}
+
+
+func _resolve_tile_texture(tile_data) -> Texture2D:
+	if tile_data == null:
+		return TILE_TEXTURE
+	var tile_catalog = _get_tile_catalog()
+	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
+	if tile_catalog != null and not type_id.is_empty():
+		var is_object_layer_type: bool = false
+		if tile_catalog.has_method("is_object_layer_type"):
+			is_object_layer_type = bool(tile_catalog.call("is_object_layer_type", type_id))
+		if not is_object_layer_type:
+			var type_texture := tile_catalog.get_texture(type_id) as Texture2D
+			if type_texture != null:
+				return type_texture
+	return TILE_TEXTURE
+
+
+func _resolve_catalog_object_texture(tile_data, visual_type_id: String) -> Texture2D:
+	var tile_catalog = _get_tile_catalog()
+	if tile_catalog == null:
+		return null
+	var object_type_id: String = visual_type_id
+	if object_type_id.is_empty() and tile_data != null:
+		object_type_id = String(tile_data.object_type_id) if tile_data.object_type_id is String else ""
+	if object_type_id.is_empty() and tile_data != null:
+		object_type_id = String(tile_data.type_id) if tile_data.type_id is String else ""
+	if object_type_id.is_empty():
+		return null
+	return tile_catalog.get_texture(object_type_id) as Texture2D
+
+
+func _add_texture_card(parent: Node3D, texture: Texture2D, local_position: Vector3, node_name: String, pixel_size: float, pixel_offset: Vector2 = Vector2.ZERO, modulate: Color = Color(1.0, 1.0, 1.0, 1.0)) -> Sprite3D:
+	if parent == null or texture == null:
+		return null
+	var sprite := Sprite3D.new()
+	sprite.name = node_name
+	sprite.texture = texture
+	sprite.centered = true
+	sprite.pixel_size = pixel_size
+	sprite.offset = pixel_offset
+	sprite.modulate = modulate
+	sprite.shaded = false
+	sprite.double_sided = true
+	sprite.transparent = true
+	sprite.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	sprite.position = local_position
+	parent.add_child(sprite)
+	return sprite
+
+
+func _get_kenney_anchor_offset(texture: Texture2D, additional_offset: Vector2 = Vector2.ZERO) -> Vector2:
+	if texture == null:
+		return additional_offset
+	return (texture.get_size() * 0.5) - KENNEY_DIAMOND_CENTER + additional_offset
 
 
 func _add_asset_model_visual(tile_data, top_y: float, visual_type_id: String) -> bool:
@@ -739,6 +899,7 @@ func _rebuild_contact_visuals() -> void:
 
 func _rebuild_drop_visuals() -> void:
 	_clear_children(_drop_root)
+	_dropship_texture_visible = false
 	_dropship_model_visible = false
 	if _drop_root == null or _drop_payload.is_empty():
 		return
@@ -764,6 +925,20 @@ func _rebuild_drop_visuals() -> void:
 
 
 func _add_dropship_proxy(world_position: Vector2) -> void:
+	var dropship_texture := _drop_payload.get("dropship_texture", null) as Texture2D
+	if dropship_texture == null:
+		dropship_texture = DEFAULT_DROPSHIP_TEXTURE
+	var sprite := _add_texture_card(
+		_drop_root,
+		dropship_texture,
+		_world_to_3d_position(world_position, 0.72),
+		"DropshipTexture",
+		DROPSHIP_TEXTURE_PIXEL_SIZE
+	)
+	if sprite != null:
+		_dropship_texture_visible = true
+		return
+
 	var model_scene := _get_asset_model_scene_by_name(DROPSHIP_MODEL_NAME)
 	if model_scene != null:
 		var model_instance := model_scene.instantiate() as Node3D
@@ -815,6 +990,7 @@ func _sync_unit_proxies(force_rebuild: bool = false) -> void:
 	if _unit_root == null:
 		return
 	var seen_ids: Dictionary = {}
+	var unit_texture_count: int = 0
 	var unit_model_count: int = 0
 	var changed: bool = false
 	for unit in _unit_nodes:
@@ -846,6 +1022,8 @@ func _sync_unit_proxies(force_rebuild: bool = false) -> void:
 		if absf(wrapf(proxy.rotation_degrees.y - next_rotation_y, -180.0, 180.0)) > 0.01:
 			changed = true
 		proxy.rotation_degrees.y = next_rotation_y
+		if bool(proxy.get_meta("uses_unit_texture", false)):
+			unit_texture_count += 1
 		if bool(proxy.get_meta("uses_kenney_model", false)):
 			unit_model_count += 1
 	for unit_id_variant in _unit_proxies_by_id.keys():
@@ -857,6 +1035,9 @@ func _sync_unit_proxies(force_rebuild: bool = false) -> void:
 			proxy_to_remove.queue_free()
 		_unit_proxies_by_id.erase(unit_id)
 		changed = true
+	if _unit_texture_count != unit_texture_count:
+		changed = true
+	_unit_texture_count = unit_texture_count
 	if _unit_model_count != unit_model_count:
 		changed = true
 	_unit_model_count = unit_model_count
@@ -866,20 +1047,30 @@ func _sync_unit_proxies(force_rebuild: bool = false) -> void:
 
 func _create_unit_proxy(unit: Node) -> Node3D:
 	var root := Node3D.new()
-	var model_scene := _get_asset_model_scene_by_name(_get_unit_model_name(unit))
-	if model_scene != null:
-		var model_instance := model_scene.instantiate() as Node3D
-		if model_instance != null:
-			_normalize_asset_model_instance(model_instance)
-			var model_root := Node3D.new()
-			model_root.name = "UnitModel_%s" % _get_unit_model_name(unit)
-			model_root.scale = Vector3.ONE * UNIT_MODEL_SCALE
-			model_root.add_child(model_instance)
-			root.add_child(model_root)
-			root.set_meta("uses_kenney_model", true)
+	var unit_texture := _get_unit_visual_texture(unit)
+	if unit_texture != null:
+		var unit_card := _add_texture_card(root, unit_texture, Vector3(0.0, 0.34, 0.0), "UnitTexture", UNIT_TEXTURE_PIXEL_SIZE)
+		if unit_card != null:
+			root.set_meta("uses_unit_texture", true)
+			var weapon_texture := _get_unit_weapon_visual_texture(unit)
+			if weapon_texture != null:
+				_add_texture_card(root, weapon_texture, Vector3(0.0, 0.36, 0.0), "UnitWeaponTexture", UNIT_TEXTURE_PIXEL_SIZE, _get_unit_weapon_visual_offset(unit))
+
+	if not bool(root.get_meta("uses_unit_texture", false)):
+		var model_scene := _get_asset_model_scene_by_name(_get_unit_model_name(unit))
+		if model_scene != null:
+			var model_instance := model_scene.instantiate() as Node3D
+			if model_instance != null:
+				_normalize_asset_model_instance(model_instance)
+				var model_root := Node3D.new()
+				model_root.name = "UnitModel_%s" % _get_unit_model_name(unit)
+				model_root.scale = Vector3.ONE * UNIT_MODEL_SCALE
+				model_root.add_child(model_instance)
+				root.add_child(model_root)
+				root.set_meta("uses_kenney_model", true)
 
 	var body := MeshInstance3D.new()
-	if not bool(root.get_meta("uses_kenney_model", false)):
+	if not bool(root.get_meta("uses_kenney_model", false)) and not bool(root.get_meta("uses_unit_texture", false)):
 		var mesh := CapsuleMesh.new()
 		mesh.radius = 0.24
 		mesh.height = 0.78
@@ -1047,6 +1238,19 @@ func _get_asset_model_scale(visual_type_id: String) -> float:
 	return TILE_SPACING
 
 
+func _get_asset_texture_pixel_size(visual_type_id: String) -> float:
+	var normalized: String = visual_type_id.strip_edges().to_lower()
+	if normalized.begins_with("technik_satellite"):
+		return TEXTURE_CARD_PIXEL_SIZE * 1.32
+	if normalized.begins_with("fahrzeug_"):
+		return TEXTURE_CARD_PIXEL_SIZE * 1.22
+	if normalized.begins_with("gebaeude_") or normalized.begins_with("plattform_"):
+		return TEXTURE_CARD_PIXEL_SIZE * 1.08
+	if normalized.begins_with("rock_"):
+		return TEXTURE_CARD_PIXEL_SIZE * 0.96
+	return TEXTURE_CARD_PIXEL_SIZE
+
+
 func _get_asset_y_offset(visual_type_id: String) -> float:
 	var normalized: String = visual_type_id.strip_edges().to_lower()
 	if normalized.begins_with("crater_") or normalized.begins_with("rail_") or normalized.begins_with("plattform_"):
@@ -1058,6 +1262,43 @@ func _get_tile_catalog():
 	if _tile_catalog == null:
 		_tile_catalog = TERRAIN_TILE_CATALOG_SCRIPT.call("load_from_file")
 	return _tile_catalog
+
+
+func _build_tile_modulate(tile_data) -> Color:
+	if tile_data == null:
+		return Color(1.0, 1.0, 1.0, 1.0)
+
+	var tile_color := Color(1.0, 1.0, 1.0, 1.0)
+	var tile_catalog = _get_tile_catalog()
+	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
+	var has_catalog_texture: bool = not type_id.is_empty() and tile_catalog != null and tile_catalog.get_texture(type_id) != null
+
+	if not has_catalog_texture:
+		match String(tile_data.surface_type):
+			TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROAD:
+				tile_color = Color(0.82, 0.82, 0.84, 1.0)
+			TERRAIN_TILE_DATA_SCRIPT.SURFACE_SAND:
+				tile_color = Color(1.0, 0.95, 0.72, 1.0)
+			TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROCK:
+				tile_color = Color(0.88, 0.78, 0.66, 1.0)
+
+		var height_level: int = int(tile_data.height_level)
+		if height_level == 1:
+			tile_color = tile_color.lightened(0.08)
+		elif height_level >= 2:
+			tile_color = tile_color.lightened(0.16)
+
+		if bool(tile_data.blocks_los):
+			tile_color = tile_color.darkened(0.1)
+
+		if not bool(tile_data.walkable):
+			tile_color = tile_color.darkened(0.14)
+
+	var gp: Vector2i = tile_data.grid_position
+	if (gp.x + gp.y) % 2 == 0:
+		tile_color = tile_color.darkened(0.08)
+
+	return tile_color
 
 
 func _get_tile_color(tile_data) -> Color:
@@ -1123,6 +1364,41 @@ func _get_unit_color(unit: Node) -> Color:
 	if team_id == "team_alpha":
 		return Color(0.32, 0.74, 1.0, 1.0)
 	return Color(1.0, 0.34, 0.26, 1.0)
+
+
+func _get_unit_visual_texture(unit: Node) -> Texture2D:
+	if unit != null:
+		var visual := unit.get_node_or_null("Visual") as Sprite2D
+		if visual != null and visual.texture != null:
+			return visual.texture
+	var team_id: String = ""
+	if unit != null and unit.has_method("get_team_id"):
+		team_id = String(unit.call("get_team_id")).strip_edges().to_lower()
+	return FRIENDLY_UNIT_TEXTURE if team_id == "team_alpha" else ENEMY_UNIT_TEXTURE
+
+
+func _get_unit_weapon_visual_texture(unit: Node) -> Texture2D:
+	if unit == null:
+		return null
+	var visual := unit.get_node_or_null("Visual") as Sprite2D
+	if visual == null:
+		return null
+	var weapon_visual := visual.get_node_or_null("WeaponVisual") as Sprite2D
+	if weapon_visual == null or weapon_visual.texture == null:
+		return null
+	return weapon_visual.texture
+
+
+func _get_unit_weapon_visual_offset(unit: Node) -> Vector2:
+	if unit == null:
+		return Vector2.ZERO
+	var visual := unit.get_node_or_null("Visual") as Sprite2D
+	if visual == null:
+		return Vector2.ZERO
+	var weapon_visual := visual.get_node_or_null("WeaponVisual") as Sprite2D
+	if weapon_visual == null:
+		return Vector2.ZERO
+	return weapon_visual.position
 
 
 func _get_unit_model_name(unit: Node) -> String:
