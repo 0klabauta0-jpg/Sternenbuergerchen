@@ -10,6 +10,13 @@
 
 ## Aktueller Startzustand
 
+### TASK_159 Follow-up - 2.5D Mission Load/Offset Fix
+- Status: implementiert
+- Stand: Der 2.5D-Primary-View-Pfad laedt Terrain-Daten wieder performant, weil `TerrainMapData.load_from_file()` den Tile-Katalog nur noch einmal pro Map laedt und `TerrainTileData.from_dict()` keine Script-Loads pro Tile mehr ausloest. In `TerrainMap3DView` werden Kenney-GLB-Root- und Child-Offsets neutralisiert, der Boden als gebatchtes Mesh gerendert, Runtime-Units als Astronaut-Modelle und das Dropship als Speeder-Modell gespiegelt. Der Live-2.5D-Pfad rendert die versteckte Legacy-2D-Karte nicht mehr parallel.
+- Offene Punkte: Headless-Godot meldet beim Beenden einzelner 3D-Verifier weiterhin RID-Leak-Warnungen; die getesteten Laufzeitpfade bestehen, aber die Exit-Warnung sollte spaeter separat untersucht werden.
+- Risiken: Die Simulation bleibt weiterhin auf den bestehenden `Node2D`-Runtime-Ankern. Die 3D-View ist Darstellung und Eingabeprojektion, nicht Gameplay-Wahrheit.
+- Naechster Schritt: Manuelle Godot-Pruefung von Mission Start -> LZ setzen -> Dropship Call -> Attack Area mit sichtbarer 2.5D-Map.
+
 ### TASK_001 – RuntimeLeader / FTL
 - Status: implementiert
 - Stand: `RuntimeLeader` als eigene `Node`-Komponente mit `class_name`, Signalen fuer Promotion, Demotion, Assignment und Command-Weitergabe sowie der API `promote()`, `demote()`, `assign(entity)` und `command(order)` eingefuehrt.

@@ -499,7 +499,7 @@ func _try_load_terrain_from_json(terrain_registry) -> bool:
 		terrain_registry.call("register_tile", tile_data)
 
 	var map_root: Node = get_node_or_null("../MapRoot")
-	if map_root != null and _terrain_renderer != null:
+	if map_root != null and _terrain_renderer != null and not use_2_5d_primary_view:
 		_terrain_renderer.render_map(terrain_map_data, map_root)
 	_apply_map_marker_positions(terrain_map_data)
 

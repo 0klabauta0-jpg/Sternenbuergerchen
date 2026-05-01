@@ -147,6 +147,7 @@ func _verify_player_lz_and_dropship(live_scene: Node) -> void:
 	controller.call("set_planning_state", planning_state)
 	await _wait_frames(4)
 	_assert(_scene_has_no_player_lz(live_scene), "Waiting dropship state does not create an LZ by itself")
+	_assert(_primary_3d_dropship_model_visible(live_scene), "Waiting dropship is mirrored as a 3D craft model without auto LZ")
 
 	var lz_position := Vector2(448.0, 285.0)
 	_assert(_place_lz_via_player_path(controller, lz_position), "Player/controller LZ path sets the mission LZ")
@@ -297,6 +298,14 @@ func _primary_3d_lz_visible(scene: Node) -> bool:
 		return false
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 	return bool(snapshot.get("has_lz", false))
+
+
+func _primary_3d_dropship_model_visible(scene: Node) -> bool:
+	var primary_view = _get_primary_3d_view(scene)
+	if primary_view == null or not primary_view.has_method("get_render_snapshot"):
+		return false
+	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
+	return bool(snapshot.get("dropship_model_visible", false))
 
 
 func _get_primary_3d_view(scene: Node):

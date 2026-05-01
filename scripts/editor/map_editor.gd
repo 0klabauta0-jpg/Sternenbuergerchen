@@ -422,6 +422,15 @@ func _rebuild_registry_from_map_data() -> void:
 func _rebuild_tile_sprites() -> void:
 	if _terrain_renderer == null:
 		return
+	if _get_primary_3d_view() != null:
+		_tile_sprites_by_grid.clear()
+		_cliff_sprites_by_grid.clear()
+		_wall_sprites_by_grid.clear()
+		_object_sprites_by_grid.clear()
+		_clear_legacy_2d_map_children()
+		_refresh_3d_map_view()
+		_set_legacy_2d_map_visible(false)
+		return
 	_terrain_renderer.set_tile_catalog(_tile_catalog)
 	var render_state: Dictionary = _terrain_renderer.render_map(_terrain_map_data, self)
 	_tile_sprites_by_grid = render_state.get("tiles", {})
@@ -2971,6 +2980,29 @@ func _set_legacy_2d_map_visible(is_visible: bool) -> void:
 		camera.enabled = is_visible
 	if _hover_preview != null:
 		_hover_preview.visible = is_visible and _hover_preview.visible
+
+
+func _clear_legacy_2d_map_children() -> void:
+	for node_name in [
+		"Terrain",
+		"CliffContainer",
+		"WallContainer",
+		"ObjectContainer",
+		"GridOverlay",
+		"SelectionOutline",
+		PATROL_OVERLAY_NAME,
+		MARKER_OVERLAY_NAME,
+	]:
+		var node := get_node_or_null(node_name)
+		if node == null:
+			var container := Node2D.new()
+			container.name = node_name
+			add_child(container)
+			node = container
+		if node == null:
+			continue
+		for child in node.get_children():
+			child.queue_free()
 
 
 func _screen_to_editor_world_position(screen_position: Vector2) -> Vector2:

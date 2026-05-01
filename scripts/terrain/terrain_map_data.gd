@@ -46,6 +46,7 @@ static func load_from_file(path: String) -> TerrainMapData:
 
 	var tiles_variant: Variant = root_dict.get("tiles", [])
 	if tiles_variant is Array:
+		var tile_catalog = TERRAIN_TILE_CATALOG_SCRIPT.call("load_from_file")
 		var legacy_wall_positions: Array[Vector2i] = []
 		for tile_entry in tiles_variant:
 			if typeof(tile_entry) != TYPE_DICTIONARY:
@@ -74,7 +75,7 @@ static func load_from_file(path: String) -> TerrainMapData:
 			normalized_tile_entry["grid_position"] = grid_position
 			normalized_tile_entry["tile_id"] = "tile_%d_%d" % [grid_position.x, grid_position.y]
 			normalized_tile_entry["world_position"] = terrain_map_data._grid_to_world(grid_position)
-			_normalize_legacy_object_layer_tile(normalized_tile_entry)
+			_normalize_legacy_object_layer_tile(normalized_tile_entry, tile_catalog)
 
 			var tile_data = TERRAIN_TILE_DATA_SCRIPT.call("from_dict", normalized_tile_entry)
 			if tile_data == null or not tile_data.has_method("is_valid") or not bool(tile_data.call("is_valid")):
@@ -85,7 +86,7 @@ static func load_from_file(path: String) -> TerrainMapData:
 	return terrain_map_data
 
 
-static func _normalize_legacy_object_layer_tile(tile_entry: Dictionary) -> void:
+static func _normalize_legacy_object_layer_tile(tile_entry: Dictionary, catalog = null) -> void:
 	if tile_entry.is_empty():
 		return
 
@@ -94,7 +95,6 @@ static func _normalize_legacy_object_layer_tile(tile_entry: Dictionary) -> void:
 	if type_id.is_empty() or not object_type_id.is_empty():
 		return
 
-	var catalog = TERRAIN_TILE_CATALOG_SCRIPT.call("load_from_file")
 	if catalog == null or not catalog.has_method("is_object_layer_type"):
 		return
 	if not bool(catalog.call("is_object_layer_type", type_id)):

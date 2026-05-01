@@ -51,7 +51,11 @@ Die sichtbare Kartenoberflaeche und die bedienbare Kamera sollen aber nicht mehr
 - [x] Live-Mission blendet alte 2D-Terrain-/Unit-Sprites aus und zeigt 3D-Proxies fuer Friendlies/Enemies.
 - [x] TacticalController kann LZ und taktische Ziele ueber die 2.5D-Ansicht setzen.
 - [x] Kartenobjekte, Waende, Cliffs, Rampen und Felsen nutzen in der 2.5D-View echte Kenney-GLB-Modelle statt Block-Platzhalter, soweit ein Asset im Pack vorhanden ist.
-- [x] Importierte Kenney-GLB-Root-Offsets werden beim Rendern neutralisiert, damit Modelle auf dem Tile-Anker sitzen.
+- [x] Importierte Kenney-GLB-Root- und Child-Offsets werden beim Rendern neutralisiert, damit Modelle auf dem Tile-Anker sitzen.
+- [x] Runtime-Units nutzen Kenney-Astronaut-Modelle statt Capsule-Platzhaltern.
+- [x] Der Dropship-Marker nutzt das Kenney-Speeder-Modell statt Box-/Wing-Platzhaltern.
+- [x] Die 2.5D-Bodenkarte wird als gebatchtes Mesh gerendert, nicht als tausende einzelne Tile-Nodes.
+- [x] Der 2.5D-Live-Pfad baut die versteckte Legacy-2D-Karte nicht mehr zusaetzlich auf.
 - [x] Die 3D-Kalibrierungs- und Render-Spike-Szenen besitzen ihre Script-Dependencies und laden die gemeinsame `TerrainMap3DView`.
 - [x] Bestehende Authoring-/Live-Verifier bleiben lauffaehig oder dokumentieren bewusst offene GUI-Risiken.
 
@@ -59,6 +63,7 @@ Die sichtbare Kartenoberflaeche und die bedienbare Kamera sollen aber nicht mehr
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_159_verifier.gd`
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_158_verifier.gd`
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_157_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_155_verifier.gd`
 
 ## Dateien (voraussichtlich)
 - `scripts/terrain/terrain_map_3d_view.gd`
@@ -81,8 +86,12 @@ Die sichtbare Kartenoberflaeche und die bedienbare Kamera sollen aber nicht mehr
 ## Ergebnis
 - `TerrainMap3DView` rendert `TerrainMapData` als gemeinsame 2.5D-Primary-View mit `SubViewport`, `Node3D`, `Camera3D`, Terrain-/Objekt-/Marker-/Patrol-Visuals, Unit-Proxies, LZ-/Dropship-Proxy und taktischen Area-/Contact-Overlays.
 - Terrain-Objekte, Waende, Cliffs, Rampen und Felsen werden in dieser View aus den vorhandenen Kenney-GLB-Modellen instanziiert; Block-Platzhalter bleiben nur als Fallback fuer nicht aufloesbare Asset-Typen.
-- Die importierten GLB-Root-Translations werden unter dem `Asset_*`-Wrapper auf `Vector3.ZERO` gesetzt, damit die Wrapper-Position die Tile-Mitte bleibt.
+- Die importierten GLB-Root-Translations und der Kenney-Child-Offset `[2, 0, 1.5]` werden unter dem `Asset_*`-Wrapper auf `Vector3.ZERO` gesetzt, damit die Wrapper-Position die Tile-Mitte bleibt.
+- `TerrainMapData.load_from_file()` laedt den Terrain-Tile-Katalog nur noch einmal pro Map. Vorher wurde der Katalog fuer jedes Tile neu geladen, was die 32x32-Live-Mission beim Start fuer lange Zeit blockiert hat.
+- `TerrainTileData.from_dict()` erzeugt Tiles direkt ueber die bestehende Klasse statt pro Tile das Script erneut zu laden.
+- Die sichtbare Bodenkarte der 2.5D-View wird zu einem einzigen Mesh gebatcht und nutzt eine neutralere Bodenpalette, damit der Boden nicht mehr blau wirkt.
+- Runtime-Units und Dropship werden als Kenney-GLB-Modelle gespiegelt; Capsule- und Box-Platzhalter bleiben nur Fallbacks.
 - `mission_map_3d_calibration.tscn` und `mission_map_3d_render_spike.tscn` laden jetzt ueber kleine Test-Scripts dieselbe 2.5D-Primary-View, sodass Godot sie ohne fehlende Script-Dependencies oeffnen kann.
 - Der Map-Editor deaktiviert die alte `Camera2D`, blendet Legacy-2D-Kartencontainer aus und fuehrt WASD, Zoom, Rotation sowie Tile-/Marker-/Patrol-Picking ueber die 3D-View.
-- Die Live-Mission blendet alte Terrain-/Unit-Sprites aus, laesst die `Node2D`-Runtime-Anker fuer Simulation/Selection sichtbar und spiegelt Units, LZ, Dropship, Attack Areas und Contacts in die 3D-View.
+- Die Live-Mission blendet alte Terrain-/Unit-Sprites aus, laesst die `Node2D`-Runtime-Anker fuer Simulation/Selection sichtbar und spiegelt Units, LZ, Dropship, Attack Areas und Contacts in die 3D-View; die versteckte 2D-Karte wird im 2.5D-Primary-Pfad nicht mehr parallel gerendert.
 - TASK_158 wurde so angepasst, dass die Live-Visual-Bridge jetzt die 3D-Primary-View akzeptiert statt alte 2D-Sprites als sichtbare Wahrheit zu verlangen.

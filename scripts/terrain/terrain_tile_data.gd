@@ -37,8 +37,7 @@ func _init(data: Dictionary = {}) -> void:
 
 
 static func from_dict(data: Dictionary):
-	var script_ref: GDScript = load("res://scripts/terrain/terrain_tile_data.gd")
-	return script_ref.new(data)
+	return TerrainTileData.new(data)
 
 
 func is_valid() -> bool:

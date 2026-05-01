@@ -70,3 +70,10 @@ Der Terrain-Editor bleibt fuer Karten- und Markerdaten verantwortlich. Darauf wi
 - `scripts/tests/task_158_verifier.gd` validiert Editor-Load/Save, Live-Missionsstart, Scenario-Objective, Enemy-Waves, Patrol-Bindings, Spieler-LZ, Dropship-Deploy, Attack Area, Contact Overlay, Objective-Fortschritt und sichtbare Live-Visuals.
 - `docs/manual_checks/editor_to_live_mission_checklist.md` beschreibt den manuellen Editor-to-Live-Durchlauf.
 - Der getrackte Stand besitzt keinen produktiven 3D-Bridge-Code; die automatisierte Pruefung deckt den vorhandenen 2.5D/Live-Visual-Bridge-Stand ab und die Checkliste fordert dieselben Daten fuer einen 3D-primary Branch erneut ein.
+
+## Update nach TASK_159 Follow-up
+- Die 2.5D-Primary-View ist jetzt der gepruefte Editor- und Live-Pfad fuer Terrain, LZ, Dropship, Attack Area und Contacts.
+- Der Missionsstart hing, weil `TerrainMapData.load_from_file()` den Tile-Katalog pro Tile neu geladen hat. Der Loader nutzt den Katalog jetzt einmal pro Map; TASK_159 fiel dadurch lokal von ueber 100 Sekunden auf rund 5 Sekunden.
+- Die sichtbaren Offsets kamen aus Kenney-GLBs: der relevante Offset liegt im ersten importierten Model-Child, nicht nur am GLB-Root. `TerrainMap3DView` neutralisiert jetzt beide Ebenen.
+- Units und Dropship sind in der 2.5D-View keine Capsule-/Box-Platzhalter mehr, sondern Kenney-Astronaut- und Speeder-Modelle.
+- Die alte 2D-Karte bleibt Daten-/Fallback-Pfad, wird im 2.5D-Live-Pfad aber nicht mehr unsichtbar parallel gerendert.

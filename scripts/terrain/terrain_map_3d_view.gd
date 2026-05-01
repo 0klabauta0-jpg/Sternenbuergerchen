@@ -31,6 +31,14 @@ const CAMERA_DRAG_PAN_FACTOR: float = 0.065
 const DEFAULT_HALF_TILE_WIDTH: float = 64.0
 const DEFAULT_HALF_TILE_HEIGHT: float = 32.0
 const KENNEY_MODEL_ROOT: String = "res://Assets/kenney_space-kit/Models/GLTF format"
+const KENNEY_AUTHORING_OFFSET_X: float = 2.0
+const KENNEY_AUTHORING_OFFSET_Z: float = 1.5
+const KENNEY_OFFSET_EPSILON: float = 0.01
+const FRIENDLY_UNIT_MODEL_NAME: String = "astronautA"
+const ENEMY_UNIT_MODEL_NAME: String = "astronautB"
+const DROPSHIP_MODEL_NAME: String = "craft_speederB"
+const UNIT_MODEL_SCALE: float = 2.1
+const DROPSHIP_MODEL_SCALE: float = 2.35
 
 const LEGACY_MODEL_BY_TYPE: Dictionary = {
 	"wall_straight_se": "corridor_wall",
@@ -92,6 +100,9 @@ var _camera_pitch_degrees: float = 58.0
 var _map_tile_count: int = 0
 var _asset_model_count: int = 0
 var _placeholder_object_count: int = 0
+var _unit_model_count: int = 0
+var _dropship_model_visible: bool = false
+var _map_render_duration_msec: int = 0
 var _marker_count: int = 0
 var _patrol_segment_count: int = 0
 var _area_order_count: int = 0
@@ -103,13 +114,13 @@ func _ready() -> void:
 	_ensure_nodes()
 	_resize_subviewport()
 	_update_camera_transform()
+	_request_viewport_redraw()
 	set_process(true)
 
 
 func _process(_delta: float) -> void:
 	_resize_subviewport()
 	_sync_unit_proxies()
-	_update_camera_transform()
 
 
 func configure_from_map(terrain_map_data) -> void:
@@ -119,6 +130,7 @@ func configure_from_map(terrain_map_data) -> void:
 
 
 func render_map(terrain_map_data = null) -> void:
+	var render_started_at_msec: int = Time.get_ticks_msec()
 	if terrain_map_data != null:
 		_terrain_map_data = terrain_map_data
 	_read_map_transform()
@@ -136,11 +148,16 @@ func render_map(terrain_map_data = null) -> void:
 	_marker_count = 0
 	_patrol_segment_count = 0
 	if _terrain_map_data == null:
+		_map_render_duration_msec = Time.get_ticks_msec() - render_started_at_msec
 		return
 
+	var tile_vertices := PackedVector3Array()
+	var tile_normals := PackedVector3Array()
+	var tile_colors := PackedColorArray()
+	var tile_indices := PackedInt32Array()
 	for tile_data in Array(_terrain_map_data.call("get_tiles")):
-		_add_tile_visual(tile_data)
-	_map_tile_count = _map_root.get_child_count()
+		_add_tile_visual(tile_data, tile_vertices, tile_normals, tile_colors, tile_indices)
+	_add_tile_mesh_visual(tile_vertices, tile_normals, tile_colors, tile_indices)
 	_rebuild_marker_visuals()
 	_rebuild_patrol_visuals()
 	_rebuild_selection_visuals()
@@ -149,6 +166,7 @@ func render_map(terrain_map_data = null) -> void:
 	_rebuild_drop_visuals()
 	_sync_unit_proxies()
 	_update_camera_transform()
+	_map_render_duration_msec = Time.get_ticks_msec() - render_started_at_msec
 
 
 func set_unit_nodes(unit_nodes: Array) -> void:
@@ -167,11 +185,13 @@ func set_selected_grid_positions(grid_positions: Array) -> void:
 		elif grid_variant is Vector2:
 			_selected_grid_positions.append(Vector2i(roundi(grid_variant.x), roundi(grid_variant.y)))
 	_rebuild_selection_visuals()
+	_request_viewport_redraw()
 
 
 func set_order_visual_payload(order_payload: Dictionary) -> void:
 	_order_payload = order_payload.duplicate(true)
 	_rebuild_order_visuals()
+	_request_viewport_redraw()
 
 
 func set_contact_entries(contact_entries: Array, selected_fireteam_ids: PackedStringArray = PackedStringArray()) -> void:
@@ -181,11 +201,13 @@ func set_contact_entries(contact_entries: Array, selected_fireteam_ids: PackedSt
 			_contact_entries.append(Dictionary(entry_variant).duplicate(true))
 	_contact_selected_fireteam_ids = selected_fireteam_ids.duplicate()
 	_rebuild_contact_visuals()
+	_request_viewport_redraw()
 
 
 func set_mission_drop_visual_state(drop_payload: Dictionary) -> void:
 	_drop_payload = drop_payload.duplicate(true)
 	_rebuild_drop_visuals()
+	_request_viewport_redraw()
 
 
 func focus_world_position(world_position: Vector2) -> void:
@@ -277,6 +299,7 @@ func get_render_snapshot() -> Dictionary:
 		"tile_count": _map_tile_count,
 		"asset_model_count": _asset_model_count,
 		"placeholder_object_count": _placeholder_object_count,
+		"unit_model_count": _unit_model_count,
 		"marker_count": _marker_count,
 		"patrol_segment_count": _patrol_segment_count,
 		"selected_grid_count": _selected_grid_positions.size(),
@@ -285,8 +308,10 @@ func get_render_snapshot() -> Dictionary:
 		"contact_count": _contact_count,
 		"has_lz": bool(_drop_payload.get("has_lz_position", false)),
 		"dropship_visible": bool(_drop_payload.get("dropship_visible", false)),
+		"dropship_model_visible": _dropship_model_visible,
 		"camera_yaw_degrees": _camera_yaw_degrees,
 		"camera_size": _camera_size,
+		"map_render_duration_msec": _map_render_duration_msec,
 	}
 
 
@@ -306,7 +331,7 @@ func _ensure_nodes() -> void:
 	if _subviewport == null:
 		_subviewport = SubViewport.new()
 		_subviewport.name = VIEWPORT_NAME
-		_subviewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+		_subviewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 		_subviewport.transparent_bg = false
 		_subviewport.size = _get_viewport_size()
 		_viewport_container.add_child(_subviewport)
@@ -361,10 +386,17 @@ func _resize_subviewport() -> void:
 	var viewport_size: Vector2i = _get_viewport_size()
 	if _subviewport.size != viewport_size:
 		_subviewport.size = viewport_size
+		_request_viewport_redraw()
 	_viewport_container.offset_left = 0.0
 	_viewport_container.offset_top = 0.0
 	_viewport_container.offset_right = 0.0
 	_viewport_container.offset_bottom = 0.0
+
+
+func _request_viewport_redraw() -> void:
+	if _subviewport == null:
+		return
+	_subviewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 
 func _get_viewport_size() -> Vector2i:
@@ -407,6 +439,7 @@ func _update_camera_transform() -> void:
 	var offset := Vector3(sin(yaw_rad) * horizontal_distance, height, cos(yaw_rad) * horizontal_distance)
 	_camera.global_position = focus_3d + offset
 	_camera.look_at(focus_3d, Vector3.UP)
+	_request_viewport_redraw()
 
 
 func _clamp_focus_to_map() -> void:
@@ -416,25 +449,60 @@ func _clamp_focus_to_map() -> void:
 	_focus_grid_position.y = clampf(_focus_grid_position.y, -2.0, float(_grid_size.y) + 2.0)
 
 
-func _add_tile_visual(tile_data) -> void:
+func _add_tile_visual(tile_data, tile_vertices: PackedVector3Array, tile_normals: PackedVector3Array, tile_colors: PackedColorArray, tile_indices: PackedInt32Array) -> void:
 	if tile_data == null or _map_root == null:
 		return
 	var height_level: int = maxi(int(tile_data.height_level), 0)
 	var top_y: float = float(height_level) * HEIGHT_STEP
-	var mesh := BoxMesh.new()
-	mesh.size = Vector3(TILE_SPACING * 0.94, TILE_THICKNESS + float(height_level) * HEIGHT_STEP, TILE_SPACING * 0.94)
-	var tile_instance := MeshInstance3D.new()
-	tile_instance.name = "Tile_%d_%d" % [tile_data.grid_position.x, tile_data.grid_position.y]
-	tile_instance.mesh = mesh
-	tile_instance.material_override = _make_material(_get_tile_color(tile_data))
-	tile_instance.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y - (mesh.size.y * 0.5))
-	_map_root.add_child(tile_instance)
+	_append_tile_quad(tile_data, top_y, tile_vertices, tile_normals, tile_colors, tile_indices)
+	_map_tile_count += 1
 
 	var object_type_id: String = String(tile_data.object_type_id) if tile_data.object_type_id is String else ""
 	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
 	var visual_type_id: String = _resolve_tile_asset_type_id(object_type_id, type_id)
 	if not visual_type_id.is_empty() or bool(tile_data.blocks_los) or int(tile_data.object_height) > 0:
 		_add_object_visual(tile_data, top_y, visual_type_id)
+
+
+func _append_tile_quad(tile_data, top_y: float, tile_vertices: PackedVector3Array, tile_normals: PackedVector3Array, tile_colors: PackedColorArray, tile_indices: PackedInt32Array) -> void:
+	var center: Vector3 = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y)
+	var half_size: float = TILE_SPACING * 0.47
+	var base_index: int = tile_vertices.size()
+	tile_vertices.append(center + Vector3(-half_size, 0.0, -half_size))
+	tile_vertices.append(center + Vector3(half_size, 0.0, -half_size))
+	tile_vertices.append(center + Vector3(half_size, 0.0, half_size))
+	tile_vertices.append(center + Vector3(-half_size, 0.0, half_size))
+	for _index in range(4):
+		tile_normals.append(Vector3.UP)
+		tile_colors.append(_get_tile_color(tile_data))
+	tile_indices.append(base_index)
+	tile_indices.append(base_index + 1)
+	tile_indices.append(base_index + 2)
+	tile_indices.append(base_index)
+	tile_indices.append(base_index + 2)
+	tile_indices.append(base_index + 3)
+
+
+func _add_tile_mesh_visual(tile_vertices: PackedVector3Array, tile_normals: PackedVector3Array, tile_colors: PackedColorArray, tile_indices: PackedInt32Array) -> void:
+	if _map_root == null or tile_vertices.is_empty():
+		return
+	var arrays: Array = []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = tile_vertices
+	arrays[Mesh.ARRAY_NORMAL] = tile_normals
+	arrays[Mesh.ARRAY_COLOR] = tile_colors
+	arrays[Mesh.ARRAY_INDEX] = tile_indices
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	var material := StandardMaterial3D.new()
+	material.vertex_color_use_as_albedo = true
+	material.roughness = 0.88
+	material.metallic = 0.0
+	var tile_instance := MeshInstance3D.new()
+	tile_instance.name = "TerrainTiles"
+	tile_instance.mesh = mesh
+	tile_instance.material_override = material
+	_map_root.add_child(tile_instance)
 
 
 func _add_object_visual(tile_data, top_y: float, visual_type_id: String) -> void:
@@ -481,13 +549,44 @@ func _add_asset_model_visual(tile_data, top_y: float, visual_type_id: String) ->
 	visual_root.scale = Vector3.ONE * _get_asset_model_scale(visual_type_id)
 	visual_root.add_child(model_instance)
 	_map_root.add_child(visual_root)
+	_apply_map_asset_material_override(model_instance, visual_type_id)
 	_asset_model_count += 1
 	return true
 
 
 func _normalize_asset_model_instance(model_instance: Node3D) -> void:
-	# Kenney GLB roots carry an authoring offset; the tile anchor lives on the wrapper.
+	# Kenney GLBs carry the pack's 2x1.5 authoring offset on the first model child.
 	model_instance.position = Vector3.ZERO
+	for child in model_instance.get_children():
+		var anchor_child := child as Node3D
+		if anchor_child == null:
+			continue
+		var child_position: Vector3 = anchor_child.position
+		var has_authoring_x: bool = absf(absf(child_position.x) - KENNEY_AUTHORING_OFFSET_X) <= KENNEY_OFFSET_EPSILON
+		var has_authoring_z: bool = absf(absf(child_position.z) - KENNEY_AUTHORING_OFFSET_Z) <= KENNEY_OFFSET_EPSILON
+		if has_authoring_x and has_authoring_z:
+			anchor_child.position = Vector3.ZERO
+
+
+func _apply_map_asset_material_override(model_instance: Node3D, visual_type_id: String) -> void:
+	var normalized: String = visual_type_id.strip_edges().to_lower()
+	var override_color: Color = Color.TRANSPARENT
+	if normalized.begins_with("rock_") or normalized.begins_with("cliff_"):
+		override_color = Color(0.46, 0.45, 0.42, 1.0)
+	elif normalized.begins_with("wall_"):
+		override_color = Color(0.62, 0.65, 0.67, 1.0)
+	elif normalized.begins_with("slope_"):
+		override_color = Color(0.50, 0.52, 0.48, 1.0)
+	if override_color == Color.TRANSPARENT:
+		return
+	_apply_material_override_recursive(model_instance, _make_material(override_color))
+
+
+func _apply_material_override_recursive(node: Node, material: Material) -> void:
+	if node is MeshInstance3D:
+		(node as MeshInstance3D).material_override = material
+	for child in node.get_children():
+		_apply_material_override_recursive(child, material)
 
 
 func _rebuild_marker_visuals() -> void:
@@ -640,6 +739,7 @@ func _rebuild_contact_visuals() -> void:
 
 func _rebuild_drop_visuals() -> void:
 	_clear_children(_drop_root)
+	_dropship_model_visible = false
 	if _drop_root == null or _drop_payload.is_empty():
 		return
 	if bool(_drop_payload.get("has_lz_position", false)) and typeof(_drop_payload.get("lz_position", null)) == TYPE_VECTOR2:
@@ -664,6 +764,21 @@ func _rebuild_drop_visuals() -> void:
 
 
 func _add_dropship_proxy(world_position: Vector2) -> void:
+	var model_scene := _get_asset_model_scene_by_name(DROPSHIP_MODEL_NAME)
+	if model_scene != null:
+		var model_instance := model_scene.instantiate() as Node3D
+		if model_instance != null:
+			_normalize_asset_model_instance(model_instance)
+			var craft_root := Node3D.new()
+			craft_root.name = "DropshipModel_%s" % DROPSHIP_MODEL_NAME
+			craft_root.position = _world_to_3d_position(world_position, 0.68)
+			craft_root.rotation_degrees.y = _get_dropship_rotation_y(world_position)
+			craft_root.scale = Vector3.ONE * DROPSHIP_MODEL_SCALE
+			craft_root.add_child(model_instance)
+			_drop_root.add_child(craft_root)
+			_dropship_model_visible = true
+			return
+
 	var body_mesh := BoxMesh.new()
 	body_mesh.size = Vector3(2.9, 0.46, 1.25)
 	var body := MeshInstance3D.new()
@@ -685,11 +800,23 @@ func _add_dropship_proxy(world_position: Vector2) -> void:
 	_drop_root.add_child(wing)
 
 
+func _get_dropship_rotation_y(world_position: Vector2) -> float:
+	if typeof(_drop_payload.get("lz_position", null)) == TYPE_VECTOR2:
+		var lz_grid: Vector2 = _world_to_grid_float(Vector2(_drop_payload.get("lz_position", Vector2.ZERO)))
+		var ship_grid: Vector2 = _world_to_grid_float(world_position)
+		var delta: Vector2 = lz_grid - ship_grid
+		if delta.length_squared() > 0.001:
+			return rad_to_deg(atan2(delta.x, delta.y))
+	return -_camera_yaw_degrees
+
+
 func _sync_unit_proxies(force_rebuild: bool = false) -> void:
 	_ensure_nodes()
 	if _unit_root == null:
 		return
 	var seen_ids: Dictionary = {}
+	var unit_model_count: int = 0
+	var changed: bool = false
 	for unit in _unit_nodes:
 		if not is_instance_valid(unit):
 			continue
@@ -705,9 +832,22 @@ func _sync_unit_proxies(force_rebuild: bool = false) -> void:
 			proxy.name = "UnitProxy_%s" % unit_id
 			_unit_root.add_child(proxy)
 			_unit_proxies_by_id[unit_id] = proxy
-		proxy.visible = _is_unit_world_visible(unit)
+			changed = true
+		var next_visible: bool = _is_unit_world_visible(unit)
+		if proxy.visible != next_visible:
+			changed = true
+		proxy.visible = next_visible
 		if unit is Node2D:
-			proxy.position = _world_to_3d_position((unit as Node2D).global_position, 0.62)
+			var next_position: Vector3 = _world_to_3d_position((unit as Node2D).global_position, 0.28)
+			if proxy.position.distance_squared_to(next_position) > 0.0001:
+				changed = true
+			proxy.position = next_position
+		var next_rotation_y: float = -_camera_yaw_degrees
+		if absf(wrapf(proxy.rotation_degrees.y - next_rotation_y, -180.0, 180.0)) > 0.01:
+			changed = true
+		proxy.rotation_degrees.y = next_rotation_y
+		if bool(proxy.get_meta("uses_kenney_model", false)):
+			unit_model_count += 1
 	for unit_id_variant in _unit_proxies_by_id.keys():
 		var unit_id := String(unit_id_variant)
 		if seen_ids.has(unit_id):
@@ -716,17 +856,36 @@ func _sync_unit_proxies(force_rebuild: bool = false) -> void:
 		if proxy_to_remove != null and is_instance_valid(proxy_to_remove):
 			proxy_to_remove.queue_free()
 		_unit_proxies_by_id.erase(unit_id)
+		changed = true
+	if _unit_model_count != unit_model_count:
+		changed = true
+	_unit_model_count = unit_model_count
+	if changed:
+		_request_viewport_redraw()
 
 
 func _create_unit_proxy(unit: Node) -> Node3D:
 	var root := Node3D.new()
+	var model_scene := _get_asset_model_scene_by_name(_get_unit_model_name(unit))
+	if model_scene != null:
+		var model_instance := model_scene.instantiate() as Node3D
+		if model_instance != null:
+			_normalize_asset_model_instance(model_instance)
+			var model_root := Node3D.new()
+			model_root.name = "UnitModel_%s" % _get_unit_model_name(unit)
+			model_root.scale = Vector3.ONE * UNIT_MODEL_SCALE
+			model_root.add_child(model_instance)
+			root.add_child(model_root)
+			root.set_meta("uses_kenney_model", true)
+
 	var body := MeshInstance3D.new()
-	var mesh := CapsuleMesh.new()
-	mesh.radius = 0.24
-	mesh.height = 0.78
-	body.mesh = mesh
-	body.material_override = _make_material(_get_unit_color(unit))
-	root.add_child(body)
+	if not bool(root.get_meta("uses_kenney_model", false)):
+		var mesh := CapsuleMesh.new()
+		mesh.radius = 0.24
+		mesh.height = 0.78
+		body.mesh = mesh
+		body.material_override = _make_material(_get_unit_color(unit))
+		root.add_child(body)
 	var base := MeshInstance3D.new()
 	var base_mesh := CylinderMesh.new()
 	base_mesh.top_radius = 0.36
@@ -735,7 +894,7 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 	base_mesh.radial_segments = 16
 	base.mesh = base_mesh
 	base.material_override = _make_material(Color(0.05, 0.08, 0.1, 0.72), true)
-	base.position.y = -0.42
+	base.position.y = -0.02
 	root.add_child(base)
 	return root
 
@@ -805,6 +964,12 @@ func _resolve_tile_asset_type_id(object_type_id: String, type_id: String) -> Str
 func _get_asset_model_scene(visual_type_id: String) -> PackedScene:
 	var model_name: String = _resolve_asset_model_name(visual_type_id)
 	if model_name.is_empty():
+		return null
+	return _get_asset_model_scene_by_name(model_name)
+
+
+func _get_asset_model_scene_by_name(model_name: String) -> PackedScene:
+	if model_name.strip_edges().is_empty():
 		return null
 	var model_path: String = "%s/%s.glb" % [KENNEY_MODEL_ROOT, model_name]
 	if _model_scene_cache.has(model_path):
@@ -896,16 +1061,16 @@ func _get_tile_catalog():
 
 
 func _get_tile_color(tile_data) -> Color:
-	var tile_color := Color(0.48, 0.56, 0.56, 1.0)
+	var tile_color := Color(0.46, 0.50, 0.46, 1.0)
 	match String(tile_data.surface_type):
 		TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROAD:
-			tile_color = Color(0.55, 0.57, 0.59, 1.0)
+			tile_color = Color(0.50, 0.51, 0.49, 1.0)
 		TERRAIN_TILE_DATA_SCRIPT.SURFACE_SAND:
-			tile_color = Color(0.74, 0.69, 0.48, 1.0)
+			tile_color = Color(0.66, 0.60, 0.42, 1.0)
 		TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROCK:
-			tile_color = Color(0.54, 0.50, 0.46, 1.0)
+			tile_color = Color(0.43, 0.42, 0.39, 1.0)
 	if int(tile_data.cover_value) > 0:
-		tile_color = tile_color.lerp(Color(0.38, 0.62, 0.48, 1.0), 0.22)
+		tile_color = tile_color.lerp(Color(0.34, 0.50, 0.38, 1.0), 0.18)
 	if bool(tile_data.blocks_los):
 		tile_color = tile_color.darkened(0.16)
 	if not bool(tile_data.walkable):
@@ -960,6 +1125,13 @@ func _get_unit_color(unit: Node) -> Color:
 	return Color(1.0, 0.34, 0.26, 1.0)
 
 
+func _get_unit_model_name(unit: Node) -> String:
+	var team_id: String = ""
+	if unit != null and unit.has_method("get_team_id"):
+		team_id = String(unit.call("get_team_id")).strip_edges().to_lower()
+	return FRIENDLY_UNIT_MODEL_NAME if team_id == "team_alpha" else ENEMY_UNIT_MODEL_NAME
+
+
 func _get_unit_id(unit: Node) -> String:
 	if unit == null:
 		return ""
@@ -1006,4 +1178,4 @@ func _clear_children(node: Node) -> void:
 	if node == null:
 		return
 	for child in node.get_children():
-		child.queue_free()
+		child.free()
