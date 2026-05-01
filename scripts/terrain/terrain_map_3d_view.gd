@@ -472,6 +472,7 @@ func _add_asset_model_visual(tile_data, top_y: float, visual_type_id: String) ->
 	var model_instance := model_scene.instantiate() as Node3D
 	if model_instance == null:
 		return false
+	_normalize_asset_model_instance(model_instance)
 
 	var visual_root := Node3D.new()
 	visual_root.name = "Asset_%s_%d_%d" % [visual_type_id, tile_data.grid_position.x, tile_data.grid_position.y]
@@ -482,6 +483,11 @@ func _add_asset_model_visual(tile_data, top_y: float, visual_type_id: String) ->
 	_map_root.add_child(visual_root)
 	_asset_model_count += 1
 	return true
+
+
+func _normalize_asset_model_instance(model_instance: Node3D) -> void:
+	# Kenney GLB roots carry an authoring offset; the tile anchor lives on the wrapper.
+	model_instance.position = Vector3.ZERO
 
 
 func _rebuild_marker_visuals() -> void:

@@ -36,6 +36,7 @@ func _test_editor_uses_3d_primary_view() -> void:
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot")) if primary_view != null else {}
 	_assert(int(snapshot.get("tile_count", 0)) > 0, "Editor Primary3DView renders terrain tiles")
 	_assert(int(snapshot.get("asset_model_count", 0)) > 0, "Editor Primary3DView renders Kenney 3D asset models")
+	_assert(_asset_model_roots_have_centered_children(primary_view), "Editor Kenney model roots stay centered on tile anchors")
 
 	var camera2d := editor.get_node_or_null("Camera2D") as Camera2D
 	_assert(camera2d != null and not camera2d.enabled, "Editor legacy Camera2D is disabled")
@@ -69,6 +70,7 @@ func _test_live_mission_uses_3d_primary_view() -> void:
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot")) if primary_view != null else {}
 	_assert(int(snapshot.get("tile_count", 0)) > 0 and int(snapshot.get("unit_proxy_count", 0)) >= 2, "Live Primary3DView renders map and runtime unit proxies")
 	_assert(int(snapshot.get("asset_model_count", 0)) > 0, "Live Primary3DView renders Kenney 3D asset models")
+	_assert(_asset_model_roots_have_centered_children(primary_view), "Live Kenney model roots stay centered on tile anchors")
 
 	var map_root := live_scene.get_node_or_null("MapRoot") as CanvasItem
 	var mission_camera := live_scene.get_node_or_null("MissionCamera") as Camera2D
@@ -115,6 +117,27 @@ func _instantiate_scene(scene_path: String) -> Node:
 func _canvas_item_hidden(root_node: Node, node_path: String) -> bool:
 	var canvas_item := root_node.get_node_or_null(node_path) as CanvasItem
 	return canvas_item != null and not canvas_item.visible
+
+
+func _asset_model_roots_have_centered_children(primary_view: Node) -> bool:
+	if primary_view == null:
+		return false
+	var map_root := primary_view.get_node_or_null("ViewportContainer/SubViewport/WorldRoot/MapRoot3D")
+	if map_root == null:
+		return false
+	var inspected_count: int = 0
+	for child in map_root.get_children():
+		if child.is_queued_for_deletion():
+			continue
+		if not child is Node3D or child.get_child_count() < 1:
+			continue
+		var model_root := child.get_child(0) as Node3D
+		if model_root == null or model_root.is_queued_for_deletion():
+			return false
+		inspected_count += 1
+		if absf(model_root.position.x) > 0.001 or absf(model_root.position.z) > 0.001:
+			return false
+	return inspected_count > 0
 
 
 func _wait_frames(frame_count: int) -> void:
