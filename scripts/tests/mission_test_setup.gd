@@ -4,6 +4,7 @@ const OBJECTIVE_STATUS_SCRIPT: GDScript = preload("res://scripts/core/objective_
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const TERRAIN_MAP_RENDERER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_renderer.gd")
+const TERRAIN_MAP_3D_VIEW_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_3d_view.gd")
 const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
 const LOADOUT_MODIFIER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/command/loadout_modifier_resolver.gd")
 const MISSION_SCENARIO_DATA_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_data.gd")
@@ -27,11 +28,13 @@ const MISSION_SCENARIO_DATA_SCRIPT: GDScript = preload("res://scripts/mission/mi
 @export var scenario_file_path: String = ""
 @export var defer_friendly_runtime_activation: bool = true
 @export var allow_full_roster_when_selection_empty: bool = true
+@export var use_2_5d_primary_view: bool = true
 
 var member_loadouts: Dictionary = {}
 var unit_loadout_modifiers_by_unit_id: Dictionary = {}
 var _is_initialized: bool = false
 var _terrain_renderer = null
+var _terrain_3d_view = null
 var _loaded_terrain_map_data = null
 var _mission_scenario = null
 var _scenario_enemy_ids: PackedStringArray = PackedStringArray()
@@ -68,6 +71,7 @@ func _ready() -> void:
 	var enemy_assignment_slot_index: int = 0
 	var enemy_spawn_index: int = 0
 	var enemy_units: Array = []
+	var visual_unit_nodes: Array = []
 	for unit_path in unit_paths:
 		var unit = get_node_or_null(unit_path)
 		if unit == null or not unit.has_method("get_unit_id"):
@@ -139,6 +143,7 @@ func _ready() -> void:
 		else:
 			unit_registry.call("register_unit", unit_id, unit)
 			enemy_units.append(unit)
+		visual_unit_nodes.append(unit)
 
 		if first_unit == null and unit_team_id == team_id:
 			first_unit = unit
@@ -152,6 +157,7 @@ func _ready() -> void:
 
 	_setup_respawn_manager(spawn_alpha_marker, spawn_bravo_marker)
 	_setup_enemy_waves(enemy_units)
+	_ensure_primary_3d_view(visual_unit_nodes)
 	_is_initialized = true
 
 
@@ -575,6 +581,73 @@ func _apply_marker_position(marker_id: String, marker_node: Marker2D, terrain_ma
 	if not terrain_map_data.has_method("has_marker") or not bool(terrain_map_data.call("has_marker", marker_id)):
 		return
 	marker_node.global_position = terrain_map_data.call("get_marker_position", marker_id, marker_node.global_position)
+
+
+func get_primary_3d_view():
+	return _terrain_3d_view
+
+
+func _ensure_primary_3d_view(unit_nodes: Array) -> void:
+	if not use_2_5d_primary_view:
+		return
+	var mission_root := get_parent()
+	if mission_root == null:
+		return
+	var view = mission_root.get_node_or_null("Primary3DView")
+	if view == null:
+		view = TERRAIN_MAP_3D_VIEW_SCRIPT.new()
+		view.name = "Primary3DView"
+		mission_root.call_deferred("add_child", view)
+	_terrain_3d_view = view
+	_hide_legacy_2d_primary_visuals(unit_nodes)
+	call_deferred("_configure_primary_3d_view", view, unit_nodes)
+
+
+func _configure_primary_3d_view(view: Node, unit_nodes: Array) -> void:
+	if view == null or not is_instance_valid(view):
+		return
+	if not view.is_inside_tree():
+		call_deferred("_configure_primary_3d_view", view, unit_nodes)
+		return
+	if _loaded_terrain_map_data != null and view.has_method("configure_from_map"):
+		view.call("configure_from_map", _loaded_terrain_map_data)
+	if view.has_method("set_unit_nodes"):
+		view.call("set_unit_nodes", unit_nodes)
+	var objective_marker := _resolve_marker(objective_point_path)
+	if objective_marker != null and view.has_method("focus_world_position"):
+		view.call("focus_world_position", objective_marker.global_position)
+
+
+func _hide_legacy_2d_primary_visuals(unit_nodes: Array) -> void:
+	var mission_root := get_parent()
+	if mission_root == null:
+		return
+	for path in [
+		"MapRoot",
+		"StatusLabel",
+		"TargetMarker/TargetVisual",
+		"LZMarker",
+		"DropshipPlanMarker",
+	]:
+		var node := mission_root.get_node_or_null(path)
+		if node is CanvasItem:
+			(node as CanvasItem).visible = false
+	var camera := mission_root.get_node_or_null("MissionCamera") as Camera2D
+	if camera != null:
+		camera.enabled = false
+	for unit in unit_nodes:
+		_hide_legacy_unit_visual_children(unit)
+
+
+func _hide_legacy_unit_visual_children(unit: Node) -> void:
+	if unit == null:
+		return
+	if unit.has_method("set_world_debug_labels_visible"):
+		unit.call("set_world_debug_labels_visible", false)
+	unit.set("show_world_event_labels", false)
+	for child in unit.get_children():
+		if child is Sprite2D or child is Polygon2D or child is Line2D or child is Label:
+			(child as CanvasItem).visible = false
 
 
 

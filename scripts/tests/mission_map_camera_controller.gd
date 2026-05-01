@@ -14,6 +14,8 @@ var _is_panning: bool = false
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_INHERIT
 	_refresh_camera_activity()
+	if _get_primary_3d_view() != null:
+		_deactivate_camera()
 	if focus_marker_path.is_empty():
 		return
 	var focus_marker := get_node_or_null(focus_marker_path) as Node2D
@@ -22,6 +24,25 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null:
+		_deactivate_camera()
+		var primary_direction := Vector2.ZERO
+		if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
+			primary_direction.y -= 1.0
+		if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
+			primary_direction.y += 1.0
+		if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
+			primary_direction.x -= 1.0
+		if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
+			primary_direction.x += 1.0
+		if primary_direction != Vector2.ZERO:
+			primary_3d_view.call("pan_camera", primary_direction.normalized(), delta)
+		if Input.is_key_pressed(KEY_Q):
+			primary_3d_view.call("rotate_camera", -80.0 * delta)
+		if Input.is_key_pressed(KEY_E):
+			primary_3d_view.call("rotate_camera", 80.0 * delta)
+		return
 	if not _is_camera_active():
 		return
 	var direction := Vector2.ZERO
@@ -39,6 +60,29 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null:
+		if event is InputEventMouseButton:
+			var mouse_button_event := event as InputEventMouseButton
+			if mouse_button_event.button_index == MOUSE_BUTTON_WHEEL_UP and mouse_button_event.pressed and not _is_pointer_over_control():
+				primary_3d_view.call("zoom_camera", 1.0)
+				get_viewport().set_input_as_handled()
+				return
+			if mouse_button_event.button_index == MOUSE_BUTTON_WHEEL_DOWN and mouse_button_event.pressed and not _is_pointer_over_control():
+				primary_3d_view.call("zoom_camera", -1.0)
+				get_viewport().set_input_as_handled()
+				return
+			if mouse_button_event.button_index == MOUSE_BUTTON_RIGHT:
+				_is_panning = mouse_button_event.pressed and not _is_pointer_over_control()
+				if mouse_button_event.pressed:
+					get_viewport().set_input_as_handled()
+				return
+		if event is InputEventMouseMotion and _is_panning:
+			var mouse_motion := event as InputEventMouseMotion
+			primary_3d_view.call("rotate_camera", -mouse_motion.relative.x * 0.28)
+			get_viewport().set_input_as_handled()
+			return
+		return
 	if not _is_camera_active():
 		return
 	if event is InputEventMouseButton:
@@ -94,3 +138,10 @@ func _is_camera_active() -> bool:
 
 func _is_pointer_over_control() -> bool:
 	return get_viewport().gui_get_hovered_control() != null
+
+
+func _get_primary_3d_view():
+	var parent := get_parent()
+	if parent == null:
+		return null
+	return parent.get_node_or_null("Primary3DView")

@@ -153,7 +153,9 @@ func _verify_player_lz_and_dropship(live_scene: Node) -> void:
 	await _wait_frames(2)
 	var lz_marker := live_scene.get_node_or_null("LZMarker") as CanvasItem
 	var placed_state: Dictionary = Dictionary(controller.call("get_planning_state"))
-	_assert(bool(placed_state.get("has_lz_position", false)) and lz_marker != null and lz_marker.visible, "LZ becomes visible only after player path placement")
+	var lz_visible_in_primary_3d: bool = _primary_3d_lz_visible(live_scene)
+	var lz_visible_in_legacy_2d: bool = lz_marker != null and lz_marker.visible
+	_assert(bool(placed_state.get("has_lz_position", false)) and (lz_visible_in_primary_3d or lz_visible_in_legacy_2d), "LZ becomes visible only after player path placement")
 
 	controller.call("_on_call_dropship_pressed")
 	await _wait_frames(2)
@@ -229,8 +231,8 @@ func _place_lz_via_player_path(controller: Node, world_position: Vector2) -> boo
 	if controller == null:
 		return false
 	controller.call("_on_set_lz_pressed")
-	var canvas_transform: Transform2D = controller.get_viewport().get_canvas_transform()
-	var screen_position: Vector2 = canvas_transform * world_position
+	var primary_view = _get_primary_3d_view(controller.get_parent())
+	var screen_position: Vector2 = primary_view.call("world_to_screen_position", world_position) if primary_view != null and primary_view.has_method("world_to_screen_position") else controller.get_viewport().get_canvas_transform() * world_position
 	return bool(controller.call("_place_lz_from_screen_position", screen_position))
 
 
@@ -280,7 +282,27 @@ func _collect_visible_friendly_unit_ids(mission_root: Node) -> Array:
 func _visual_node_is_visible(scene: Node, unit_node_name: String) -> bool:
 	var unit := scene.get_node_or_null(unit_node_name) as CanvasItem
 	var visual := scene.get_node_or_null("%s/Visual" % unit_node_name) as Sprite2D
-	return unit != null and unit.visible and visual != null and visual.visible and visual.texture != null
+	if unit == null or not unit.visible:
+		return false
+	var primary_view = _get_primary_3d_view(scene)
+	if primary_view != null and primary_view.has_method("get_render_snapshot"):
+		var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
+		return int(snapshot.get("unit_proxy_count", 0)) > 0
+	return visual != null and visual.visible and visual.texture != null
+
+
+func _primary_3d_lz_visible(scene: Node) -> bool:
+	var primary_view = _get_primary_3d_view(scene)
+	if primary_view == null or not primary_view.has_method("get_render_snapshot"):
+		return false
+	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
+	return bool(snapshot.get("has_lz", false))
+
+
+func _get_primary_3d_view(scene: Node):
+	if scene == null:
+		return null
+	return scene.get_node_or_null("Primary3DView")
 
 
 func _wait_frames(frame_count: int) -> void:

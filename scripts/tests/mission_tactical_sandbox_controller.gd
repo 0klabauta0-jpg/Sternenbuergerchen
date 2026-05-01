@@ -3314,11 +3314,24 @@ func _format_world_position(world_position: Vector2) -> String:
 
 
 func _screen_to_world_position(screen_position: Vector2) -> Vector2:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null and primary_3d_view.has_method("screen_to_world_position"):
+		var world_position = primary_3d_view.call("screen_to_world_position", screen_position)
+		if typeof(world_position) == TYPE_VECTOR2:
+			return Vector2(world_position)
 	var canvas_transform: Transform2D = get_viewport().get_canvas_transform()
 	return canvas_transform.affine_inverse() * screen_position
 
 
 func _clamp_world_position_to_viewport(world_position: Vector2) -> Vector2:
+	if _get_primary_3d_view() != null:
+		var map_bounds: Rect2 = _get_map_world_bounds().grow(128.0)
+		if map_bounds.size.x > 0.0 and map_bounds.size.y > 0.0:
+			return Vector2(
+				clampf(world_position.x, map_bounds.position.x, map_bounds.end.x),
+				clampf(world_position.y, map_bounds.position.y, map_bounds.end.y)
+			)
+		return world_position
 	var visible_rect: Rect2 = get_viewport().get_visible_rect()
 	var canvas_transform: Transform2D = get_viewport().get_canvas_transform()
 	var inverse_transform: Transform2D = canvas_transform.affine_inverse()
@@ -3332,6 +3345,13 @@ func _clamp_world_position_to_viewport(world_position: Vector2) -> Vector2:
 		clampf(world_position.x, min_x, max_x),
 		clampf(world_position.y, min_y, max_y)
 	)
+
+
+func _get_primary_3d_view():
+	var mission_root := get_parent()
+	if mission_root == null:
+		return null
+	return mission_root.get_node_or_null("Primary3DView")
 
 
 func _snap_target_to_objective() -> void:
@@ -3382,6 +3402,28 @@ func _refresh_button_state() -> void:
 
 
 func _refresh_world_overlays() -> void:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null and primary_3d_view.has_method("set_mission_drop_visual_state"):
+		var primary_has_live_drop_state: bool = not _mission_drop_state.is_empty()
+		var primary_has_live_drop_sequence: bool = not _drop_sequence_phase.is_empty()
+		var dropship_visible: bool = primary_has_live_drop_state or primary_has_live_drop_sequence
+		var dropship_position: Vector2 = _drop_sequence_position if primary_has_live_drop_sequence else _get_drop_staging_position()
+		primary_3d_view.call(
+			"set_mission_drop_visual_state",
+			{
+				"has_lz_position": _has_lz_position,
+				"lz_position": _lz_position,
+				"dropship_visible": dropship_visible,
+				"dropship_position": dropship_position,
+			}
+		)
+		for legacy_path in ["../LZMarker", "../DropshipPlanMarker"]:
+			var legacy_node := get_node_or_null(legacy_path)
+			if legacy_node is CanvasItem:
+				(legacy_node as CanvasItem).visible = false
+		_refresh_meta_transfer_route_overlay()
+		return
+
 	var lz_marker := get_node_or_null("../LZMarker") as Node2D
 	if lz_marker != null:
 		lz_marker.visible = _has_lz_position
@@ -3946,11 +3988,12 @@ func _apply_unit_click_selection(unit: Node, ctrl_pressed: bool) -> void:
 
 func _apply_lasso_selection(selection_rect: Rect2, ctrl_pressed: bool) -> void:
 	var lasso_fireteam_ids: PackedStringArray = []
+	var primary_3d_view = _get_primary_3d_view()
 	for fireteam_id in _get_available_fireteam_ids():
 		var unit: Node2D = _get_selection_anchor_for_fireteam(fireteam_id)
 		if unit == null:
 			continue
-		var screen_pos: Vector2 = get_viewport().get_canvas_transform() * (unit as Node2D).global_position
+		var screen_pos: Vector2 = primary_3d_view.call("world_to_screen_position", (unit as Node2D).global_position) if primary_3d_view != null and primary_3d_view.has_method("world_to_screen_position") else get_viewport().get_canvas_transform() * (unit as Node2D).global_position
 		if not selection_rect.has_point(screen_pos):
 			continue
 		if lasso_fireteam_ids.has(fireteam_id):
@@ -4749,8 +4792,11 @@ func _finalize_contact_map_overlay_attach() -> void:
 func _refresh_order_visuals() -> void:
 	var visualizer := get_node_or_null("../FireteamOrderVisualizer")
 	if visualizer == null:
+		_sync_primary_3d_order_visuals()
 		refresh_contact_overlay()
 		return
+	if _get_primary_3d_view() != null and visualizer is CanvasItem:
+		(visualizer as CanvasItem).visible = false
 	visualizer.call("set_phase_index", _get_live_order_phase_index())
 	visualizer.call("set_selected_fireteam_ids", _selected_fireteam_ids)
 	if visualizer.has_method("set_fireteam_anchor_dicts"):
@@ -4760,15 +4806,39 @@ func _refresh_order_visuals() -> void:
 		visualizer.call("set_area_order_dicts", _serialize_area_orders())
 	visualizer.call("set_ad_hoc_order_dicts", _build_ad_hoc_visualization_entries())
 	visualizer.call("set_security_dicts", get_fireteam_security_snapshot())
+	_sync_primary_3d_order_visuals()
 	refresh_contact_overlay()
 
 
 func refresh_contact_overlay() -> void:
 	var overlay := get_node_or_null("../ContactMapOverlay")
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null and primary_3d_view.has_method("set_contact_entries"):
+		primary_3d_view.call("set_contact_entries", get_contact_snapshot(), _selected_fireteam_ids)
 	if overlay == null:
 		return
+	if primary_3d_view != null and overlay is CanvasItem:
+		(overlay as CanvasItem).visible = false
 	overlay.call("set_selected_fireteam_ids", _selected_fireteam_ids)
 	overlay.call("set_contact_entries", get_contact_snapshot())
+
+
+func _sync_primary_3d_order_visuals() -> void:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view == null or not primary_3d_view.has_method("set_order_visual_payload"):
+		return
+	primary_3d_view.call(
+		"set_order_visual_payload",
+		{
+			"phase_index": _get_live_order_phase_index(),
+			"selected_fireteam_ids": _selected_fireteam_ids,
+			"fireteam_anchors": _build_fireteam_anchor_visualization_entries(),
+			"plan_dicts": _serialize_order_plans(),
+			"area_order_dicts": _serialize_area_orders(),
+			"ad_hoc_order_dicts": _build_ad_hoc_visualization_entries(),
+			"security_dicts": get_fireteam_security_snapshot(),
+		}
+	)
 
 
 func refresh_flank_vulnerability_state() -> void:
@@ -6593,6 +6663,21 @@ func _count_selected_phase_waypoints_for_fireteams(fireteam_ids: PackedStringArr
 
 
 func _find_waypoint_target_at_screen_position(screen_position: Vector2) -> Dictionary:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null and primary_3d_view.has_method("world_to_screen_position"):
+		for waypoint_variant in get_visualized_waypoints_snapshot():
+			if typeof(waypoint_variant) != TYPE_DICTIONARY:
+				continue
+			var waypoint_data_3d: Dictionary = Dictionary(waypoint_variant)
+			if typeof(waypoint_data_3d.get("position", null)) != TYPE_VECTOR2:
+				continue
+			var marker_screen_position: Vector2 = primary_3d_view.call("world_to_screen_position", Vector2(waypoint_data_3d.get("position", Vector2.ZERO)))
+			if marker_screen_position.distance_to(screen_position) <= 20.0:
+				return {
+					"fireteam_id": String(waypoint_data_3d.get("fireteam_id", "")).strip_edges().to_lower(),
+					"phase": int(waypoint_data_3d.get("phase", _current_phase_index)),
+					"waypoint_id": String(waypoint_data_3d.get("waypoint_id", "")).strip_edges(),
+				}
 	var visualizer := get_node_or_null("../FireteamOrderVisualizer")
 	if visualizer == null or not visualizer.has_method("get_waypoint_hit"):
 		return {}
@@ -6607,6 +6692,26 @@ func _find_waypoint_target_at_screen_position(screen_position: Vector2) -> Dicti
 
 
 func _find_area_order_target_at_screen_position(screen_position: Vector2) -> Dictionary:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null and primary_3d_view.has_method("world_to_screen_position"):
+		for area_variant in get_visualized_area_orders_snapshot():
+			if typeof(area_variant) != TYPE_DICTIONARY:
+				continue
+			var area_order_data_3d: Dictionary = Dictionary(area_variant)
+			if typeof(area_order_data_3d.get("center_position", null)) == TYPE_VECTOR2:
+				var center_screen_position: Vector2 = primary_3d_view.call("world_to_screen_position", Vector2(area_order_data_3d.get("center_position", Vector2.ZERO)))
+				if center_screen_position.distance_to(screen_position) <= 28.0:
+					return {
+						"area_order_id": String(area_order_data_3d.get("area_order_id", "")).strip_edges(),
+						"fireteam_id": String(area_order_data_3d.get("fireteam_id", "")).strip_edges().to_lower(),
+					}
+			for tile_world_position_variant in Array(area_order_data_3d.get("tile_world_positions", [])):
+				var tile_screen_position: Vector2 = primary_3d_view.call("world_to_screen_position", Vector2(tile_world_position_variant))
+				if tile_screen_position.distance_to(screen_position) <= 22.0:
+					return {
+						"area_order_id": String(area_order_data_3d.get("area_order_id", "")).strip_edges(),
+						"fireteam_id": String(area_order_data_3d.get("fireteam_id", "")).strip_edges().to_lower(),
+					}
 	var visualizer := get_node_or_null("../FireteamOrderVisualizer")
 	if visualizer == null or not visualizer.has_method("get_area_order_hit"):
 		return {}
@@ -6907,6 +7012,32 @@ func _normalize_area_order_command_type(command_type: String) -> String:
 
 
 func _build_area_order_payload_from_screen_rect(screen_rect: Rect2) -> Dictionary:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null and primary_3d_view.has_method("screen_rect_to_tile_world_positions"):
+		var terrain_registry_3d = _get_terrain_registry()
+		var tile_entries_3d: Array = []
+		for tile_world_position_variant in Array(primary_3d_view.call("screen_rect_to_tile_world_positions", screen_rect)):
+			if terrain_registry_3d == null or not terrain_registry_3d.has_method("get_tile_at_world"):
+				continue
+			var tile_data = terrain_registry_3d.call("get_tile_at_world", Vector2(tile_world_position_variant))
+			if tile_data != null:
+				tile_entries_3d.append(tile_data)
+		var tile_payload_3d: Dictionary = _build_area_order_payload_from_tiles(tile_entries_3d)
+		if not tile_payload_3d.is_empty():
+			return tile_payload_3d
+		var world_polygon_3d: PackedVector2Array = PackedVector2Array([
+			_screen_to_world_position(screen_rect.position),
+			_screen_to_world_position(Vector2(screen_rect.end.x, screen_rect.position.y)),
+			_screen_to_world_position(screen_rect.end),
+			_screen_to_world_position(Vector2(screen_rect.position.x, screen_rect.end.y)),
+		])
+		return {
+			"tile_positions": [],
+			"tile_world_positions": [],
+			"world_polygon": world_polygon_3d,
+			"center_position": _average_polygon_points(world_polygon_3d),
+		}
+
 	var terrain_registry = _get_terrain_registry()
 	if terrain_registry != null and terrain_registry.has_method("get_all_tiles"):
 		var canvas_transform: Transform2D = get_viewport().get_canvas_transform()

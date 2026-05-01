@@ -1056,6 +1056,16 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Der Authoring-Pfad muss Karten-/Szenario-Daten strikt von laufendem Tactical-State trennen. Insbesondere darf die LZ nicht im Editor oder Szenario gespeichert werden.
 - Naechster Schritt: Manuelle UX-Pruefung des Editor-Live-Testbuttons und danach bei Bedarf Meta-Katalog-Anbindung oder weitere Szenario-Smokes schneiden.
 
+### TASK_159 - 2.5D Editor and Mission Primary View
+- Status: implementiert
+- Stand: `scripts/terrain/terrain_map_3d_view.gd` fuehrt eine gemeinsame 2.5D-Primary-View fuer Editor und Live-Mission ein. Die View nutzt `SubViewport`, `Node3D` und `Camera3D`, rendert `TerrainMapData` als 3D-Tile-/Objekt-/Marker-/Patrol-Ansicht und spiegelt Live-Units, LZ, Dropship, Area Orders und Contacts als 3D-Proxies.
+- Stand: `scripts/editor/map_editor.gd` deaktiviert die alte `Camera2D`, blendet die Legacy-2D-Kartencontainer aus und fuehrt WASD-Pan, Zoom, Q/E- bzw. Rechtsdrag-Rotation sowie Tile-/Marker-/Patrol-Picking ueber die 2.5D-View. Die Editor-Daten bleiben weiter `TerrainMapData`; die View wird nur bei Daten-/Auswahlupdates neu gespiegelt.
+- Stand: `scripts/tests/mission_test_setup.gd`, `scripts/tests/mission_map_camera_controller.gd` und `scripts/tests/mission_tactical_sandbox_controller.gd` verdrahten dieselbe View in die Live-Mission. Alte Terrain-/Unit-Sprites, LZ- und Dropship-2D-Marker werden ausgeblendet, waehrend die `Node2D`-Runtime-Anker fuer Simulation, Registry, Dropship-Presence und Selection erhalten bleiben.
+- Stand: `scripts/tests/task_159_verifier.gd` prueft Editor- und Live-Primary-View, deaktivierte 2D-Kameras, ausgeblendete Legacy-Sprites, Camera3D-Rotation, 3D-Picking, LZ-Spiegelung und Attack-Area-Spiegelung. `scripts/tests/task_158_verifier.gd` akzeptiert nun die 3D-Primary-View als Live-Visual-Bridge.
+- Offene Punkte: Die 2D-Runtime-Anker sind bewusst noch vorhanden; eine echte `Node3D`-Simulation oder 3D-Navigation ist nicht Teil dieses Tasks. Der Headless-Test ersetzt keinen manuellen Godot-Run fuer Kamera-Gefuehl, Dropship-Groesse und Asset-Lesbarkeit.
+- Risiken: Wenn spaeter weitere Tactical-Overlays entstehen, muessen sie explizit in die 3D-View gespiegelt werden, statt unbemerkt wieder nur im 2D-Fallback sichtbar zu sein.
+- Naechster Schritt: Manuelle Sichtpruefung von Editor und Mission; danach ggf. Asset-/Scale-Politur fuer Dropship, NPC-Proxies und Terrain-Materialien als eigener kleiner Follow-up.
+
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert
 - Stand: Der Meta-Layer fuehrt jetzt durchgaengig auf die echte eingebettete Missionskarte statt auf eine separate read-only Overview. Homebase, FOB und Mission teilen dieselbe kompakte Navigation, die Missions-Tactical-UI traegt direkt die gemeinsamen Block-Labels `#15` bis `#18`, und der Missionspfad bleibt auf dieselbe Kartenbasis, dieselben LZ-/Approach-Marker sowie denselben Dropship-Handoff verdrahtet wie die spaetere Live-Mission.

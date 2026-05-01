@@ -5,6 +5,7 @@ const TERRAIN_REGISTRY_SCRIPT: GDScript = preload("res://scripts/terrain/terrain
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_catalog.gd")
 const TERRAIN_MAP_RENDERER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_renderer.gd")
+const TERRAIN_MAP_3D_VIEW_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_3d_view.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
 const MISSION_SCENARIO_DATA_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_data.gd")
 const TILE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_SW.png")
@@ -100,6 +101,7 @@ var _selected_grids: Array = []
 var _selection_tool_enabled: bool = false
 var _selected_type_id: String = ""
 var _is_panning: bool = false
+var _is_rotating_3d_camera: bool = false
 var _is_painting: bool = false
 var _last_painted_grid: Vector2i = Vector2i(-1, -1)
 var _hover_preview: Sprite2D = null
@@ -126,6 +128,8 @@ var _current_scenario_path: String = ""
 var _scenario_dirty: bool = false
 var _is_refreshing_scenario_controls: bool = false
 var _scenario_feedback_text: String = ""
+var _terrain_3d_view = null
+var _3d_refresh_queued: bool = false
 
 
 func _ready() -> void:
@@ -145,10 +149,30 @@ func _ready() -> void:
 	_ensure_mission_authoring_controls()
 	_ensure_patrol_overlay()
 	_ensure_marker_overlay()
+	_ensure_3d_primary_view()
 	_load_map(map_file_path if not map_file_path.is_empty() else DEFAULT_MAP_PATH)
 
 
 func _process(delta: float) -> void:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null:
+		var view_direction := Vector2.ZERO
+		if Input.is_key_pressed(KEY_W):
+			view_direction.y -= 1.0
+		if Input.is_key_pressed(KEY_S):
+			view_direction.y += 1.0
+		if Input.is_key_pressed(KEY_A):
+			view_direction.x -= 1.0
+		if Input.is_key_pressed(KEY_D):
+			view_direction.x += 1.0
+		if view_direction != Vector2.ZERO:
+			primary_3d_view.call("pan_camera", view_direction.normalized(), delta)
+		if Input.is_key_pressed(KEY_Q):
+			primary_3d_view.call("rotate_camera", -80.0 * delta)
+		if Input.is_key_pressed(KEY_E):
+			primary_3d_view.call("rotate_camera", 80.0 * delta)
+		return
+
 	var camera := _get_camera()
 	if camera == null:
 		return
@@ -187,10 +211,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		if mouse_button_event.button_index == MOUSE_BUTTON_WHEEL_DOWN and mouse_button_event.pressed and not _is_pointer_over_control():
 			_adjust_camera_zoom(-CAMERA_ZOOM_STEP)
 			return
-		if mouse_button_event.button_index == MOUSE_BUTTON_MIDDLE or mouse_button_event.button_index == MOUSE_BUTTON_RIGHT:
-			_is_panning = mouse_button_event.pressed
+		if mouse_button_event.button_index == MOUSE_BUTTON_MIDDLE:
+			_is_panning = mouse_button_event.pressed and not _is_pointer_over_control()
+			return
+		if mouse_button_event.button_index == MOUSE_BUTTON_RIGHT:
+			_is_rotating_3d_camera = mouse_button_event.pressed and not _is_pointer_over_control() and _get_primary_3d_view() != null
+			_is_panning = mouse_button_event.pressed and _get_primary_3d_view() == null
 			return
 		if mouse_button_event.button_index == MOUSE_BUTTON_LEFT:
+			var world_position: Vector2 = _screen_to_editor_world_position(mouse_button_event.position)
 			if _marker_tool_enabled and not _is_pointer_over_control():
 				if mouse_button_event.pressed:
 					if _handle_marker_left_press(mouse_button_event):
@@ -199,7 +228,7 @@ func _unhandled_input(event: InputEvent) -> void:
 					return
 			if _patrol_tool_enabled and not _is_pointer_over_control():
 				if mouse_button_event.pressed:
-					_handle_patrol_left_click(get_global_mouse_position(), mouse_button_event.ctrl_pressed)
+					_handle_patrol_left_click(world_position, mouse_button_event.ctrl_pressed)
 				else:
 					_dragged_patrol_waypoint_index = -1
 				return
@@ -209,7 +238,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				return
 			if _is_pointer_over_control():
 				return
-			var grid_pos = _terrain_registry.world_to_grid(get_global_mouse_position())
+			var grid_pos = _terrain_registry.world_to_grid(world_position)
 			if _selection_tool_enabled:
 				if mouse_button_event.ctrl_pressed:
 					if _selected_grids.has(grid_pos):
@@ -224,28 +253,38 @@ func _unhandled_input(event: InputEvent) -> void:
 			if _is_brush_enabled() and _has_selected_type():
 				_is_painting = true
 				_last_painted_grid = Vector2i(-1, -1)
-				_apply_brush_at_world_position(get_global_mouse_position())
+				_apply_brush_at_world_position(world_position)
 				return
-			_select_tile_at_world_position(get_global_mouse_position())
+			_select_tile_at_world_position(world_position)
 			return
 
 	if event is InputEventMouseMotion:
 		var mouse_motion := event as InputEventMouseMotion
-		if _update_marker_drag(get_global_mouse_position(), mouse_motion.relative):
+		var world_position: Vector2 = _screen_to_editor_world_position(mouse_motion.position)
+		if _update_marker_drag(world_position, mouse_motion.relative):
 			return
 		if _patrol_tool_enabled and _dragged_patrol_waypoint_index >= 0 and not _is_pointer_over_control():
-			_move_patrol_waypoint(_dragged_patrol_waypoint_index, get_global_mouse_position())
+			_move_patrol_waypoint(_dragged_patrol_waypoint_index, world_position)
+			return
+		if _is_rotating_3d_camera:
+			var primary_3d_view = _get_primary_3d_view()
+			if primary_3d_view != null:
+				primary_3d_view.call("rotate_camera", -mouse_motion.relative.x * 0.28)
 			return
 		if _is_panning:
-			var camera := _get_camera()
-			if camera != null:
-				camera.position -= mouse_motion.relative * camera.zoom
+			var primary_3d_view = _get_primary_3d_view()
+			if primary_3d_view != null:
+				primary_3d_view.call("pan_camera_pixels", -mouse_motion.relative)
+			else:
+				var camera := _get_camera()
+				if camera != null:
+					camera.position -= mouse_motion.relative * camera.zoom
 			return
 		if _is_painting and _is_brush_enabled() and _has_selected_type():
-			_apply_brush_at_world_position(get_global_mouse_position())
+			_apply_brush_at_world_position(world_position)
 			return
 		if _is_brush_enabled() and not _is_pointer_over_control():
-			_update_hover_preview(get_global_mouse_position())
+			_update_hover_preview(world_position)
 			return
 		_hide_hover_preview()
 
@@ -390,14 +429,18 @@ func _rebuild_tile_sprites() -> void:
 	_wall_sprites_by_grid = render_state.get("walls", {})
 	_object_sprites_by_grid = render_state.get("objects", {})
 	_rebuild_grid_overlay()
+	_refresh_3d_map_view()
+	_set_legacy_2d_map_visible(false)
 
 
 func _refresh_tile_visual(tile_data) -> void:
 	if tile_data == null or not _tile_sprites_by_grid.has(tile_data.grid_position):
+		_queue_3d_map_refresh()
 		return
 
 	var tile_sprite := _tile_sprites_by_grid[tile_data.grid_position] as Sprite2D
 	if tile_sprite == null:
+		_queue_3d_map_refresh()
 		return
 
 	var tile_texture: Texture2D = _resolve_tile_texture(tile_data)
@@ -407,6 +450,7 @@ func _refresh_tile_visual(tile_data) -> void:
 	_update_cliff_overlays_around(tile_data.grid_position)
 	_update_wall_overlays_around(tile_data.grid_position)
 	_update_object_overlay_at(tile_data.grid_position)
+	_queue_3d_map_refresh()
 
 
 func _build_tile_modulate(tile_data) -> Color:
@@ -496,6 +540,7 @@ func _resolve_tile_at_world_position(world_position: Vector2):
 func _refresh_selection_visual() -> void:
 	var outline_root := get_node_or_null("SelectionOutline") as Node2D
 	if outline_root == null or _terrain_map_data == null:
+		_update_3d_selection_visual()
 		return
 
 	for child in outline_root.get_children():
@@ -524,6 +569,7 @@ func _refresh_selection_visual() -> void:
 		outline.add_point(center + Vector2(0.0, half_height))
 		outline.add_point(center + Vector2(-half_width, 0.0))
 		outline_root.add_child(outline)
+	_update_3d_selection_visual()
 
 
 func _add_selection_tool_button() -> void:
@@ -1979,7 +2025,7 @@ func _select_marker(marker_id: String) -> void:
 
 
 func _handle_marker_left_press(mouse_button_event: InputEventMouseButton) -> bool:
-	var world_position: Vector2 = get_global_mouse_position()
+	var world_position: Vector2 = _screen_to_editor_world_position(mouse_button_event.position)
 	var hit_marker_id: String = _find_marker_id_at_world_position(world_position)
 	if not hit_marker_id.is_empty():
 		_select_marker(hit_marker_id)
@@ -2036,6 +2082,7 @@ func _move_marker_to_world_position(marker_id: String, world_position: Vector2, 
 	_terrain_map_data.call("set_marker_position", marker_id, snapped_position)
 	_mark_dirty(true)
 	_select_marker(marker_id)
+	_queue_3d_map_refresh()
 	if not is_drag:
 		_set_marker_feedback("Marker placed on tile center.")
 	return true
@@ -2122,10 +2169,12 @@ func _ensure_marker_overlay() -> void:
 func _refresh_marker_overlay() -> void:
 	var overlay := get_node_or_null(MARKER_OVERLAY_NAME) as Node2D
 	if overlay == null:
+		_queue_3d_map_refresh()
 		return
 	for child in overlay.get_children():
 		child.queue_free()
 	if _terrain_map_data == null:
+		_queue_3d_map_refresh()
 		return
 	for marker_id in PackedStringArray(_terrain_map_data.call("get_marker_ids")):
 		var marker_record: Dictionary = Dictionary(_terrain_map_data.call("get_marker_record", marker_id))
@@ -2143,6 +2192,7 @@ func _refresh_marker_overlay() -> void:
 		marker_label.modulate = marker_color.lightened(0.18)
 		marker_label.add_theme_font_size_override("font_size", 11)
 		marker_host.add_child(marker_label)
+	_queue_3d_map_refresh()
 
 
 func _add_marker_symbol_to_host(host: Node2D, marker_symbol: String, marker_color: Color, is_selected: bool) -> void:
@@ -2387,6 +2437,11 @@ func _mark_dirty(is_dirty: bool) -> void:
 
 
 func _adjust_camera_zoom(delta: float) -> void:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null:
+		primary_3d_view.call("zoom_camera", delta / CAMERA_ZOOM_STEP)
+		return
+
 	var camera := _get_camera()
 	if camera == null:
 		return
@@ -2396,6 +2451,11 @@ func _adjust_camera_zoom(delta: float) -> void:
 
 
 func _center_camera_on_map() -> void:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null:
+		primary_3d_view.call("focus_map_center")
+		return
+
 	var camera := _get_camera()
 	if camera == null or _terrain_map_data == null:
 		return
@@ -2535,6 +2595,7 @@ func _ensure_patrol_overlay() -> void:
 func _refresh_patrol_overlay() -> void:
 	var overlay := get_node_or_null(PATROL_OVERLAY_NAME) as Node2D
 	if overlay == null or _terrain_map_data == null:
+		_queue_3d_map_refresh()
 		return
 	for child in overlay.get_children():
 		child.queue_free()
@@ -2570,6 +2631,7 @@ func _refresh_patrol_overlay() -> void:
 			label.modulate = base_color
 			label.add_theme_font_size_override("font_size", 10)
 			overlay.add_child(label)
+	_queue_3d_map_refresh()
 
 
 func _refresh_patrol_spawn_selector() -> void:
@@ -2634,6 +2696,7 @@ func _add_patrol_waypoint(world_position: Vector2) -> void:
 	_terrain_map_data.call("set_patrol_path", _patrol_spawn_id, patrol_path)
 	_mark_dirty(true)
 	_refresh_patrol_overlay()
+	_queue_3d_map_refresh()
 
 
 func _move_patrol_waypoint(index: int, world_position: Vector2) -> void:
@@ -2644,6 +2707,7 @@ func _move_patrol_waypoint(index: int, world_position: Vector2) -> void:
 	_terrain_map_data.call("set_patrol_path", _patrol_spawn_id, patrol_path)
 	_mark_dirty(true)
 	_refresh_patrol_overlay()
+	_queue_3d_map_refresh()
 
 
 func _remove_patrol_waypoint(index: int) -> void:
@@ -2654,6 +2718,7 @@ func _remove_patrol_waypoint(index: int) -> void:
 	_terrain_map_data.call("set_patrol_path", _patrol_spawn_id, patrol_path)
 	_mark_dirty(true)
 	_refresh_patrol_overlay()
+	_queue_3d_map_refresh()
 
 
 func _on_load_pressed() -> void:
@@ -2832,6 +2897,89 @@ func _show_load_issue_dialog(issue_message: String, source_path: String) -> void
 	var shown_path: String = source_path if not source_path.is_empty() else "(unbekannt)"
 	dialog.dialog_text = "Das ist eine alte Datei und wird nicht mehr unterstuetzt.\n\nDatei: %s\n\nBitte die Karte im aktuellen Format neu bauen. Der Editor hat stattdessen eine neue leere Karte geoeffnet.\n\nTechnischer Hinweis: %s" % [shown_path, issue_message]
 	dialog.popup_centered()
+
+
+func _ensure_3d_primary_view() -> void:
+	if _terrain_3d_view != null and is_instance_valid(_terrain_3d_view):
+		return
+	var existing_view := get_node_or_null("Primary3DView")
+	if existing_view != null:
+		_terrain_3d_view = existing_view
+	else:
+		_terrain_3d_view = TERRAIN_MAP_3D_VIEW_SCRIPT.new()
+		_terrain_3d_view.name = "Primary3DView"
+		add_child(_terrain_3d_view)
+	_set_legacy_2d_map_visible(false)
+
+
+func _get_primary_3d_view():
+	if _terrain_3d_view != null and is_instance_valid(_terrain_3d_view):
+		return _terrain_3d_view
+	var existing_view := get_node_or_null("Primary3DView")
+	if existing_view != null:
+		_terrain_3d_view = existing_view
+		return _terrain_3d_view
+	return null
+
+
+func _refresh_3d_map_view() -> void:
+	_3d_refresh_queued = false
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view == null:
+		return
+	primary_3d_view.call("render_map", _terrain_map_data)
+	_update_3d_selection_visual()
+	_set_legacy_2d_map_visible(false)
+
+
+func _queue_3d_map_refresh() -> void:
+	if _get_primary_3d_view() == null:
+		return
+	if _3d_refresh_queued:
+		return
+	_3d_refresh_queued = true
+	call_deferred("_refresh_3d_map_view")
+
+
+func _update_3d_selection_visual() -> void:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view == null:
+		return
+	var grids := _selected_grids.duplicate()
+	if grids.is_empty() and _selected_grid_position != Vector2i(-1, -1):
+		grids = [_selected_grid_position]
+	primary_3d_view.call("set_selected_grid_positions", grids)
+
+
+func _set_legacy_2d_map_visible(is_visible: bool) -> void:
+	for node_name in [
+		"TileContainer",
+		"Terrain",
+		"CliffContainer",
+		"WallContainer",
+		"ObjectContainer",
+		"GridOverlay",
+		"SelectionOutline",
+		PATROL_OVERLAY_NAME,
+		MARKER_OVERLAY_NAME,
+	]:
+		var node := get_node_or_null(node_name)
+		if node is CanvasItem:
+			(node as CanvasItem).visible = is_visible
+	var camera := get_node_or_null("Camera2D") as Camera2D
+	if camera != null:
+		camera.enabled = is_visible
+	if _hover_preview != null:
+		_hover_preview.visible = is_visible and _hover_preview.visible
+
+
+func _screen_to_editor_world_position(screen_position: Vector2) -> Vector2:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null and primary_3d_view.has_method("screen_to_world_position"):
+		var world_position = primary_3d_view.call("screen_to_world_position", screen_position)
+		if typeof(world_position) == TYPE_VECTOR2:
+			return Vector2(world_position)
+	return get_global_mouse_position()
 
 
 func _get_camera() -> Camera2D:
@@ -3467,6 +3615,9 @@ func _rebuild_grid_overlay() -> void:
 # --- Hover Preview ---
 
 func _update_hover_preview(world_position: Vector2) -> void:
+	if _get_primary_3d_view() != null:
+		_hide_hover_preview()
+		return
 	if _terrain_map_data == null or _terrain_registry == null:
 		_hide_hover_preview()
 		return
