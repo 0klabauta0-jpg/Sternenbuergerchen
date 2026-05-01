@@ -42,7 +42,7 @@ func _test_calibration_workspace() -> void:
 	var snapshot: Dictionary = Dictionary(scene.call("get_calibration_snapshot"))
 	var entries: Array = Array(snapshot.get("entries", []))
 
-	_assert(int(stats.get("terrain_count", 0)) == 112, "Calibration workspace keeps the compact 14x8 grid")
+	_assert(int(stats.get("terrain_count", 0)) == 190, "Calibration workspace keeps the expanded 19x10 grid")
 	_assert(int(stats.get("object_count", 0)) >= 12, "Calibration workspace renders all curated object families")
 	_assert(int(snapshot.get("object_count", 0)) == entries.size(), "Calibration snapshot lists every calibration object")
 	_assert(Array(snapshot.get("missing_model_paths", [])).is_empty(), "Calibration snapshot reports no missing model paths")

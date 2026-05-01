@@ -1117,7 +1117,7 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Stand: `scripts/tests/task_145_verifier.gd` startet die Live-Mission mit der TASK_144-Smoke-Map und prueft Overlay-Aktivierung, einzelne Layer-Toggles, Registry-Daten, SimulationRoot-Pfade und den letzten Air-AA-Gate-Grund.
 - Offene Punkte: Das Overlay ist Debug-V1, keine finale HUD-/Editor-UX. Bei grossen Karten kann die Labelmenge dicht werden; `max_tile_labels`/`max_path_labels` begrenzen den Playtest-Schaden.
 - Risiken: Debuglabels duerfen nicht zur neuen Gameplay-Datenquelle werden. Das Overlay bleibt bewusst pull-basiert und rein lesend.
-- Naechster Schritt: `TASK_147 - 3D Asset Curation and Mapping Expansion` kann weitere 3D-Modellfamilien kontrolliert kuratieren und in die Kalibrierung aufnehmen.
+- Naechster Schritt: Die erweiterte 3D-Kalibrierungsszene manuell pruefen; danach kann `TASK_148 - 3D Primary Mission View` vorbereitet werden.
 
 ### TASK_146-150 - Geplante 3D/2.5D-Umstellung der Missionsdarstellung
 - Status: teilweise implementiert
@@ -1125,10 +1125,11 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Stand: `TerrainMap3DRenderer` zentriert importierte GLB-Modelle horizontal ueber ihre Mesh-Bounds auf dem Tile-Anker. Damit werden Modelle mit seitlich versetztem GLB-Origin nicht mehr neben ihrem Footprint gerendert. Das Verhalten kann pro Mapping-Eintrag mit `center_horizontal: false` deaktiviert werden.
 - Stand: Die Kalibrierungsszene enthaelt jetzt eine normalisierte `astronautA.glb`-NPC-Referenz als Groessenvergleich. Die groebsten Scale-Ausreisser wurden korrigiert: einzelnes Fass, Fassgruppe, Plattform, Pipe, Rail und Crater sind konservativer skaliert; Gebaeude, Speeder, Wall, Generator und Satellite bleiben fuer die naechste manuelle Sichtpruefung bewusst erhalten.
 - Stand: Die NPC-Referenz wird jetzt intern zentriert, damit sie nicht neben ihrem Vergleichs-Footprint steht. Kalibrier-Footprints koennen groessere Zielflaechen zeigen: Hangar nutzt 3x3, Speeder nutzt 3x3. Mapping-Werte wurden auf Ziel-Footprints nachgezogen: Hangar 3x3, Wall/Structure/Pipe naeher 1 Feld, Satellite-Sockel naeher Feldgroesse, Speeder auf 3x3-Zielmass ohne angeschnittene Nachbarfelder.
-- Stand: Die naechsten offenen Schritte bleiben `TASK_147 - 3D Asset Curation and Mapping Expansion`, `TASK_148 - 3D Primary Mission View`, `TASK_149 - 3D Unit Visual Replacement` und `TASK_150 - Legacy 2D Mission Asset Retirement`.
-- Offene Punkte: Weitere 3D-Modellfamilien, primaere Live-Missionsansicht, 3D-Unit-Visuals und spaetere 2D-Retirement-Schritte sind noch nicht implementiert.
+- Stand: `TASK_147 - 3D Asset Curation and Mapping Expansion` ist implementiert. 12 weitere GLB-Familien wurden kuratiert in `res://Assets/kenney_space-kit/3d/` uebernommen und importiert: Corridor Straight/Corner, Simple/Complex Gate, Single/Double Turret, Large Crater, Large Rock B, Small Rocks A, Desk Computer, Rover und CargoB. Das 3D-Mapping enthaelt passende Keys, und die Kalibrierungsszene wurde auf 19x10 erweitert.
+- Stand: Die naechsten offenen Schritte bleiben `TASK_148 - 3D Primary Mission View`, `TASK_149 - 3D Unit Visual Replacement` und `TASK_150 - Legacy 2D Mission Asset Retirement`.
+- Offene Punkte: Primaere Live-Missionsansicht, 3D-Unit-Visuals und spaetere 2D-Retirement-Schritte sind noch nicht implementiert. Die neuen 147-Assets brauchen noch manuelle Sichtpruefung in der Kalibrierungsszene.
 - Risiken: Die 3D-Schicht darf weiterhin keine Gameplay-Wahrheit werden. 2D-Assets duerfen nicht zu frueh geloescht werden, solange Editor, UI, Icons, Tests oder Debug-Fallbacks sie brauchen.
-- Naechster Schritt: Manuell die Kalibrierungsszene pruefen und danach `TASK_147` starten, wenn weitere Assets in den aktiven 3D-Pfad sollen.
+- Naechster Schritt: Neue 147-Assets in `mission_map_3d_calibration.tscn` manuell pruefen und danach `TASK_148` schneiden, wenn die Mission standardmaessig 3D anzeigen soll.
 
 ### TASK_251-253 - Geplante Folge-Labs
 - Status: geplant

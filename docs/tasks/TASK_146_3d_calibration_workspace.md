@@ -52,7 +52,7 @@ Die vorhandene 3D-Kalibrierungsszene wird zu einem brauchbaren Arbeitsraum, mit 
 - [x] Verifier prueft Szene, Mapping und fehlende Modellpfade.
 
 ## Umsetzung
-- `mission_map_3d_calibration.tscn` zeigt jetzt 12 kuratierte Objektfamilien inklusive `wall_straight`.
+- `mission_map_3d_calibration.tscn` zeigte fuer TASK_146 zunaechst 12 kuratierte Objektfamilien inklusive `wall_straight`; TASK_147 erweitert dieselbe Arbeitsflaeche auf weitere Familien.
 - Die Szene erzeugt rein visuelle Helper unter `MapRoot/CalibrationHelpers3D`:
   - `Labels3D` mit `type_id`, Modellfamilie, `scale`, `y_offset` und Gesamtdrehung.
   - `Footprints3D` als farbige Tile-Footprint-Flaechen.

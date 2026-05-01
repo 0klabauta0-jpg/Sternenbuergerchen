@@ -25,6 +25,34 @@
 			"y_offset": 0.0,
 			"rotation_degrees_offset": 0.0
 		},
+		"corridor_straight": {
+			"layer": "terrain_object",
+			"model_path": "res://Assets/kenney_space-kit/3d/corridor.glb",
+			"scale": 1.0,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0
+		},
+		"corridor_corner": {
+			"layer": "terrain_object",
+			"model_path": "res://Assets/kenney_space-kit/3d/corridor_corner.glb",
+			"scale": 1.0,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0
+		},
+		"gate_simple": {
+			"layer": "terrain_object",
+			"model_path": "res://Assets/kenney_space-kit/3d/gate_simple.glb",
+			"scale": 1.0,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0
+		},
+		"gate_complex": {
+			"layer": "terrain_object",
+			"model_path": "res://Assets/kenney_space-kit/3d/gate_complex.glb",
+			"scale": 1.0,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0
+		},
 		"deko_barrel": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/3d/barrel.glb",
@@ -43,6 +71,20 @@
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/3d/machine_generator.glb",
 			"scale": 1.3,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0
+		},
+		"technik_turret_single": {
+			"layer": "object",
+			"model_path": "res://Assets/kenney_space-kit/3d/turret_single.glb",
+			"scale": 1.0,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0
+		},
+		"technik_turret_double": {
+			"layer": "object",
+			"model_path": "res://Assets/kenney_space-kit/3d/turret_double.glb",
+			"scale": 1.0,
 			"y_offset": 0.0,
 			"rotation_degrees_offset": 0.0
 		},
@@ -95,10 +137,52 @@
 			"y_offset": -0.02,
 			"rotation_degrees_offset": 0.0
 		},
+		"crater_large": {
+			"layer": "object",
+			"model_path": "res://Assets/kenney_space-kit/3d/craterLarge.glb",
+			"scale": 2.2,
+			"y_offset": -0.02,
+			"rotation_degrees_offset": 0.0
+		},
+		"rock_large_b": {
+			"layer": "object",
+			"model_path": "res://Assets/kenney_space-kit/3d/rock_largeB.glb",
+			"scale": 1.1,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0
+		},
+		"rocks_small_a": {
+			"layer": "object",
+			"model_path": "res://Assets/kenney_space-kit/3d/rocks_smallA.glb",
+			"scale": 1.0,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0
+		},
+		"desk_computer": {
+			"layer": "object",
+			"model_path": "res://Assets/kenney_space-kit/3d/desk_computer.glb",
+			"scale": 1.5,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0
+		},
 		"fahrzeug_speeder_b": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/3d/craft_speederB.glb",
 			"scale": 1.48,
+			"y_offset": 0.08,
+			"rotation_degrees_offset": 0.0
+		},
+		"fahrzeug_rover": {
+			"layer": "object",
+			"model_path": "res://Assets/kenney_space-kit/3d/rover.glb",
+			"scale": 2.4,
+			"y_offset": 0.04,
+			"rotation_degrees_offset": 0.0
+		},
+		"fahrzeug_cargo_b": {
+			"layer": "object",
+			"model_path": "res://Assets/kenney_space-kit/3d/craft_cargoB.glb",
+			"scale": 1.2,
 			"y_offset": 0.08,
 			"rotation_degrees_offset": 0.0
 		}

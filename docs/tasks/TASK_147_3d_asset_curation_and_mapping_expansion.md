@@ -3,7 +3,7 @@
 ## Ziel
 Der 3D-Assetbestand wird kontrolliert erweitert: nicht der komplette Quellordner wird blind ins aktive Spiel gezogen, sondern weitere sinnvolle Modellfamilien werden kuratiert, in den Projektpfad uebernommen und sauber im 3D-Mapping verknuepft.
 
-## Status: GEPLANT
+## Status: ERLEDIGT
 
 ## Voraussetzung
 - `TASK_146 - 3D Calibration Workspace`
@@ -43,20 +43,53 @@ Der 3D-Assetbestand wird kontrolliert erweitert: nicht der komplette Quellordner
 - Neue Assetfamilien duerfen keine SimulationRoot- oder UI-Abhaengigkeiten erzeugen.
 
 ## Akzeptanzkriterien
-- [ ] Neue kuratierte Modellfamilien liegen im aktiven 3D-Assetordner.
-- [ ] Mapping referenziert nur vorhandene Projektpfade.
-- [ ] Kalibrierungsszene zeigt neue Familien.
-- [ ] Verifier meldet keine fehlenden Modelle.
+- [x] Neue kuratierte Modellfamilien liegen im aktiven 3D-Assetordner.
+- [x] Mapping referenziert nur vorhandene Projektpfade.
+- [x] Kalibrierungsszene zeigt neue Familien.
+- [x] Verifier meldet keine fehlenden Modelle.
+
+## Umsetzung
+- 12 neue kuratierte GLB-Familien wurden nach `res://Assets/kenney_space-kit/3d/` uebernommen und per Godot-Importlauf mit `.glb.import` versehen:
+  - `corridor.glb`
+  - `corridor_corner.glb`
+  - `gate_simple.glb`
+  - `gate_complex.glb`
+  - `turret_single.glb`
+  - `turret_double.glb`
+  - `craterLarge.glb`
+  - `rock_largeB.glb`
+  - `rocks_smallA.glb`
+  - `desk_computer.glb`
+  - `rover.glb`
+  - `craft_cargoB.glb`
+- `data/terrain_3d_asset_mapping.json` enthaelt neue Mapping-Keys:
+  - `corridor_straight`
+  - `corridor_corner`
+  - `gate_simple`
+  - `gate_complex`
+  - `technik_turret_single`
+  - `technik_turret_double`
+  - `crater_large`
+  - `rock_large_b`
+  - `rocks_small_a`
+  - `desk_computer`
+  - `fahrzeug_rover`
+  - `fahrzeug_cargo_b`
+- Die Kalibrierungsszene wurde auf ein 19x10-Raster erweitert und zeigt jetzt die bisherigen plus die neuen Familien.
+- `scripts/tests/task_147_verifier.gd` prueft aktive GLB-Dateien, Import-Metadaten, Mapping-Pfade, ResourceLoader-Ladung und Calibration-Szene.
 
 ## Erwartetes Ergebnis
 Der 3D-Look bekommt genug visuelle Substanz fuer echte Missionskarten, ohne dass das Repo oder die Map-Palette unkontrolliert anschwillt.
 
 ## Lokale Pruefung
-- [ ] Godot einmal mit Projektpfad starten, damit neue GLBs importiert werden.
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_147_verifier.gd`
+- [x] `godot_console.exe --headless --editor --path . --quit`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_147_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_146_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_134_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_133_verifier.gd`
 - [ ] Manuelle Sichtpruefung der Kalibrierungsszene.
 
-## Dateien (voraussichtlich)
+## Dateien
 - `Assets/kenney_space-kit/3d/*.glb`
 - `Assets/kenney_space-kit/3d/*.glb.import`
 - `data/terrain_3d_asset_mapping.json`

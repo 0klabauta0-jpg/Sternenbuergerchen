@@ -60,7 +60,7 @@ func _test_calibration_scene() -> void:
 		await process_frame
 	var render_result: Dictionary = Dictionary(scene.get("render_result"))
 	var stats: Dictionary = Dictionary(render_result.get("stats", {}))
-	_assert(int(stats.get("terrain_count", 0)) == 112, "Calibration scene renders a compact test map")
+	_assert(int(stats.get("terrain_count", 0)) == 190, "Calibration scene renders the expanded calibration test map")
 	_assert(int(stats.get("object_count", 0)) >= 8, "Calibration scene instantiates many object families")
 	var start_size: float = float(scene.call("get_camera_size"))
 	scene.call("zoom_camera_by_steps", -2)
@@ -72,7 +72,7 @@ func _test_calibration_scene() -> void:
 	scene.call("set_debug_grid_enabled", false)
 	var no_grid_result: Dictionary = Dictionary(scene.get("render_result"))
 	var no_grid_stats: Dictionary = Dictionary(no_grid_result.get("stats", {}))
-	_assert(int(no_grid_stats.get("terrain_count", 0)) == 112, "Calibration scene can rerender with debug grid disabled")
+	_assert(int(no_grid_stats.get("terrain_count", 0)) == 190, "Calibration scene can rerender with debug grid disabled")
 	scene.queue_free()
 	await process_frame
 

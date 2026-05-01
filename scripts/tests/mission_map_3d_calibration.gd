@@ -3,7 +3,7 @@ extends "res://scripts/tests/mission_map_3d_render_spike.gd"
 const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_catalog.gd")
 
 const NPC_REFERENCE_MODEL_PATH: String = "res://Assets/kenney_space-kit/Models/GLTF format/astronautA.glb"
-const NPC_REFERENCE_GRID: Vector2i = Vector2i(12, 6)
+const NPC_REFERENCE_GRID: Vector2i = Vector2i(16, 8)
 const NPC_REFERENCE_HEIGHT: float = 0.88
 
 const CALIBRATION_OBJECTS: Array[Dictionary] = [
@@ -13,12 +13,24 @@ const CALIBRATION_OBJECTS: Array[Dictionary] = [
 	{"grid": Vector2i(7, 1), "type_id": "technik_satellite_large_sw", "category": "tall_prop", "footprint_size": Vector2(1.0, 1.0)},
 	{"grid": Vector2i(9, 1), "type_id": "wall_straight_se", "category": "wall", "footprint_size": Vector2(1.0, 1.0)},
 	{"grid": Vector2i(11, 1), "type_id": "gebaeude_structure_closed_se", "category": "building", "footprint_size": Vector2(1.0, 1.0)},
+	{"grid": Vector2i(13, 1), "type_id": "gate_simple_se", "category": "wall", "footprint_size": Vector2(1.0, 1.0)},
+	{"grid": Vector2i(15, 1), "type_id": "gate_complex_sw", "category": "wall", "footprint_size": Vector2(1.0, 1.0)},
 	{"grid": Vector2i(1, 4), "type_id": "gebaeude_hangar_small_b_sw", "category": "building", "footprint_size": Vector2(3.0, 3.0)},
 	{"grid": Vector2i(3, 4), "type_id": "plattform_center_se", "category": "platform"},
 	{"grid": Vector2i(5, 4), "type_id": "pipe_straight_ne", "category": "flat_route", "footprint_size": Vector2(1.0, 1.0)},
 	{"grid": Vector2i(7, 4), "type_id": "rail_sw", "category": "flat_route"},
 	{"grid": Vector2i(9, 4), "type_id": "crater_small_se", "category": "flat_decal"},
 	{"grid": Vector2i(11, 4), "type_id": "fahrzeug_speeder_b_se", "category": "vehicle", "footprint_size": Vector2(3.0, 3.0)},
+	{"grid": Vector2i(15, 4), "type_id": "fahrzeug_cargo_b_sw", "category": "vehicle", "footprint_size": Vector2(2.0, 3.0)},
+	{"grid": Vector2i(1, 7), "type_id": "corridor_straight_se", "category": "flat_route", "footprint_size": Vector2(1.0, 1.0)},
+	{"grid": Vector2i(3, 7), "type_id": "corridor_corner_sw", "category": "flat_route", "footprint_size": Vector2(1.0, 1.0)},
+	{"grid": Vector2i(5, 7), "type_id": "technik_turret_single_ne", "category": "cover_prop", "footprint_size": Vector2(1.0, 1.0)},
+	{"grid": Vector2i(7, 7), "type_id": "technik_turret_double_se", "category": "cover_prop", "footprint_size": Vector2(1.0, 1.0)},
+	{"grid": Vector2i(9, 7), "type_id": "fahrzeug_rover_se", "category": "vehicle", "footprint_size": Vector2(1.0, 1.0)},
+	{"grid": Vector2i(11, 7), "type_id": "crater_large_se", "category": "flat_decal", "footprint_size": Vector2(2.0, 2.0)},
+	{"grid": Vector2i(13, 7), "type_id": "rock_large_b_sw", "category": "cover_prop", "footprint_size": Vector2(1.0, 1.0)},
+	{"grid": Vector2i(15, 7), "type_id": "rocks_small_a_ne", "category": "small_prop", "footprint_size": Vector2(1.0, 1.0)},
+	{"grid": Vector2i(17, 7), "type_id": "desk_computer_se", "category": "cover_prop", "footprint_size": Vector2(1.0, 1.0)},
 ]
 
 @export var calibration_labels_enabled: bool = true
@@ -83,7 +95,7 @@ func get_calibration_snapshot() -> Dictionary:
 
 
 func _build_calibration_map():
-	var map_data = TERRAIN_MAP_DATA_SCRIPT.call("create_empty", "task_134_3d_calibration", Vector2i(14, 8), Vector2.ZERO)
+	var map_data = TERRAIN_MAP_DATA_SCRIPT.call("create_empty", "task_134_3d_calibration", Vector2i(19, 10), Vector2.ZERO)
 	var catalog = TERRAIN_TILE_CATALOG_SCRIPT.call("load_from_file")
 	for item in CALIBRATION_OBJECTS:
 		var grid_position: Vector2i = item.get("grid", Vector2i.ZERO)
