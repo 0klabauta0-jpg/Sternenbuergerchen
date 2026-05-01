@@ -207,13 +207,86 @@ func _instantiate_model_for_type(type_id: String) -> Node3D:
 			return null
 		_model_cache[model_path] = scene
 	var node := scene.instantiate() as Node3D
-	return node
+	if node == null:
+		return null
+	return _wrap_model_with_centered_anchor(type_id, node, bool(entry.get("center_horizontal", true)))
 
 
 func _is_mapped_object_type(type_id: String) -> bool:
 	var entry: Dictionary = get_model_entry_for_type(type_id)
 	var layer: String = String(entry.get("layer", "")).strip_edges().to_lower()
 	return layer == "object" or layer == "terrain_object"
+
+
+func _wrap_model_with_centered_anchor(type_id: String, model_node: Node3D, center_horizontal: bool) -> Node3D:
+	var wrapper := Node3D.new()
+	wrapper.name = "CenteredModel_%s" % type_id
+	wrapper.add_child(model_node)
+	if center_horizontal:
+		var bounds: Dictionary = _get_visual_bounds(model_node)
+		if bool(bounds.get("valid", false)):
+			var center: Vector3 = Vector3(bounds.get("center", Vector3.ZERO))
+			model_node.position -= Vector3(center.x, 0.0, center.z)
+	return wrapper
+
+
+func _get_visual_bounds(model_node: Node3D) -> Dictionary:
+	var bounds: Dictionary = {
+		"valid": false,
+		"min": Vector3.ZERO,
+		"max": Vector3.ZERO,
+		"center": Vector3.ZERO,
+	}
+	_accumulate_visual_bounds(model_node, Transform3D.IDENTITY, bounds)
+	if bool(bounds.get("valid", false)):
+		var min_value: Vector3 = Vector3(bounds.get("min", Vector3.ZERO))
+		var max_value: Vector3 = Vector3(bounds.get("max", Vector3.ZERO))
+		bounds["center"] = (min_value + max_value) * 0.5
+	return bounds
+
+
+func _accumulate_visual_bounds(node: Node, parent_transform: Transform3D, bounds: Dictionary) -> void:
+	var current_transform := parent_transform
+	var node_3d := node as Node3D
+	if node_3d != null:
+		current_transform = parent_transform * node_3d.transform
+	var mesh_instance := node as MeshInstance3D
+	if mesh_instance != null and mesh_instance.mesh != null:
+		_merge_transformed_aabb(bounds, current_transform, mesh_instance.get_aabb())
+	for child in node.get_children():
+		_accumulate_visual_bounds(child, current_transform, bounds)
+
+
+func _merge_transformed_aabb(bounds: Dictionary, transform: Transform3D, aabb: AABB) -> void:
+	var corners: Array[Vector3] = [
+		aabb.position,
+		aabb.position + Vector3(aabb.size.x, 0.0, 0.0),
+		aabb.position + Vector3(0.0, aabb.size.y, 0.0),
+		aabb.position + Vector3(0.0, 0.0, aabb.size.z),
+		aabb.position + Vector3(aabb.size.x, aabb.size.y, 0.0),
+		aabb.position + Vector3(aabb.size.x, 0.0, aabb.size.z),
+		aabb.position + Vector3(0.0, aabb.size.y, aabb.size.z),
+		aabb.position + aabb.size,
+	]
+	for corner in corners:
+		var transformed_corner: Vector3 = transform * corner
+		if not bool(bounds.get("valid", false)):
+			bounds["valid"] = true
+			bounds["min"] = transformed_corner
+			bounds["max"] = transformed_corner
+			continue
+		var min_value: Vector3 = Vector3(bounds.get("min", Vector3.ZERO))
+		var max_value: Vector3 = Vector3(bounds.get("max", Vector3.ZERO))
+		bounds["min"] = Vector3(
+			minf(min_value.x, transformed_corner.x),
+			minf(min_value.y, transformed_corner.y),
+			minf(min_value.z, transformed_corner.z)
+		)
+		bounds["max"] = Vector3(
+			maxf(max_value.x, transformed_corner.x),
+			maxf(max_value.y, transformed_corner.y),
+			maxf(max_value.z, transformed_corner.z)
+		)
 
 
 func _ensure_container(map_root: Node3D, node_name: String) -> Node3D:

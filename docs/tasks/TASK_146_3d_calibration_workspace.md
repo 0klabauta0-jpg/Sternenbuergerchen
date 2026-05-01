@@ -58,11 +58,13 @@ Die vorhandene 3D-Kalibrierungsszene wird zu einem brauchbaren Arbeitsraum, mit 
   - `Footprints3D` als farbige Tile-Footprint-Flaechen.
   - `PivotMarkers3D` als kleine gelbe Pivot-/Ankerpunkte.
 - Die Szene liefert `get_calibration_snapshot()` fuer Verifier und Debug.
+- `TerrainMap3DRenderer` zentriert GLB-Instanzen jetzt horizontal anhand ihrer Mesh-Bounds auf den Tile-Anker. Dadurch werden importierte Modelle mit seitlich versetztem GLB-Origin nicht mehr neben dem Footprint platziert. Pro Mapping-Eintrag kann das bei Bedarf mit `center_horizontal: false` abgeschaltet werden.
 - Tastatur im Playmode:
   - `G`: Debug-Grid an/aus.
   - `L`: Labels an/aus.
   - `F`: Footprints und Pivot-Marker an/aus.
 - `scripts/tests/task_146_verifier.gd` prueft Mapping, fehlende GLB-Pfade, Labels, Footprints, Pivot-Marker und Toggles.
+- Der Verifier prueft zusaetzlich, dass die gerenderten Modell-Bounds horizontal auf ihren Tile-Ankern liegen.
 
 ## Bedienung fuer visuelle Kalibrierung
 1. In Godot `res://scenes/tests/mission_map_3d_calibration.tscn` oeffnen und starten.
@@ -78,6 +80,7 @@ Die vorhandene 3D-Kalibrierungsszene wird zu einem brauchbaren Arbeitsraum, mit 
    - `scale` fuer Groesse.
    - `y_offset` fuer Hoehe.
    - `rotation_degrees_offset` fuer Korrekturdrehung.
+   - `center_horizontal: false` nur als Ausnahme, wenn ein Modell bewusst nicht auf seine visuelle Mitte gesetzt werden soll.
 6. Szene neu starten oder `G`/anderes Rerendern ausloesen und erneut vergleichen.
 
 ## Erwartetes Ergebnis
@@ -90,6 +93,7 @@ Wir koennen konkret sagen, welche 3D-Objekte optisch passen und welche Werte noc
 
 ## Dateien
 - `scenes/tests/mission_map_3d_calibration.tscn`
+- `scripts/terrain/terrain_map_3d_renderer.gd`
 - `scripts/tests/mission_map_3d_calibration.gd`
 - `scripts/tests/task_146_verifier.gd`
 

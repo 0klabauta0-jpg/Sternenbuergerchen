@@ -1122,6 +1122,7 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 ### TASK_146-150 - Geplante 3D/2.5D-Umstellung der Missionsdarstellung
 - Status: teilweise implementiert
 - Stand: `TASK_146 - 3D Calibration Workspace` ist implementiert. `mission_map_3d_calibration.tscn` zeigt jetzt 12 kuratierte Objektfamilien inklusive Wall-Familie und erzeugt rein visuelle Helper fuer Labels, Footprints und Pivot-Marker. Die Szene besitzt Playmode-Toggles: `G` fuer Debug-Grid, `L` fuer Labels und `F` fuer Footprints/Pivots. `get_calibration_snapshot()` liefert testbare Daten zu Modellpfaden, Scale, Offset und Rotation.
+- Stand: `TerrainMap3DRenderer` zentriert importierte GLB-Modelle horizontal ueber ihre Mesh-Bounds auf dem Tile-Anker. Damit werden Modelle mit seitlich versetztem GLB-Origin nicht mehr neben ihrem Footprint gerendert. Das Verhalten kann pro Mapping-Eintrag mit `center_horizontal: false` deaktiviert werden.
 - Stand: Die naechsten offenen Schritte bleiben `TASK_147 - 3D Asset Curation and Mapping Expansion`, `TASK_148 - 3D Primary Mission View`, `TASK_149 - 3D Unit Visual Replacement` und `TASK_150 - Legacy 2D Mission Asset Retirement`.
 - Offene Punkte: Weitere 3D-Modellfamilien, primaere Live-Missionsansicht, 3D-Unit-Visuals und spaetere 2D-Retirement-Schritte sind noch nicht implementiert.
 - Risiken: Die 3D-Schicht darf weiterhin keine Gameplay-Wahrheit werden. 2D-Assets duerfen nicht zu frueh geloescht werden, solange Editor, UI, Icons, Tests oder Debug-Fallbacks sie brauchen.
