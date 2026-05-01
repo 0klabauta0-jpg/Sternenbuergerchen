@@ -1,0 +1,76 @@
+{
+  "preset_id": "patrol_contact_transition",
+  "display_name": "Patrol: Contact Transition",
+  "map_file_path": "res://maps/test_mission.json",
+  "objective": {
+    "marker_id": "objective_point"
+  },
+  "enemy_setup": [
+    {
+      "unit_id": "enemy_delta",
+      "node_path": "EnemyDelta",
+      "role": "patrol_lead",
+      "world_position": {
+        "x": 680.0,
+        "y": 320.0
+      }
+    },
+    {
+      "unit_id": "enemy_echo",
+      "node_path": "EnemyEcho",
+      "role": "patrol_wing",
+      "world_position": {
+        "x": 740.0,
+        "y": 352.0
+      }
+    }
+  ],
+  "wave_config": {
+    "wave_count": 1,
+    "units_per_wave": 2,
+    "first_wave_delay_seconds": 0.0,
+    "wave_delay_seconds": 120.0
+  },
+  "patrol_paths": {
+    "enemy_delta": [
+      {
+        "x": 680.0,
+        "y": 320.0
+      },
+      {
+        "x": 760.0,
+        "y": 404.0
+      },
+      {
+        "x": 620.0,
+        "y": 440.0
+      }
+    ],
+    "enemy_echo": [
+      {
+        "x": 740.0,
+        "y": 352.0
+      },
+      {
+        "x": 820.0,
+        "y": 432.0
+      },
+      {
+        "x": 680.0,
+        "y": 472.0
+      }
+    ]
+  },
+  "combat": {
+    "contact_range": 210.0,
+    "win_condition": "objective_capture"
+  },
+  "patrol_test": {
+    "contact_unit_id": "enemy_delta",
+    "expected_stop_on_contact": true
+  },
+  "notes": [
+    "Patrol-Pfade werden vom Preset in den EnemyWaveController injiziert und danach im CombatLoop neu initialisiert.",
+    "Bei Kontakt soll der Patrol-Loop stoppen und die bestehende Reaktionslogik uebernehmen."
+  ]
+}

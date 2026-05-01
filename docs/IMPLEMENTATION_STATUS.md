@@ -1014,16 +1014,25 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 ### Mission Editor Authoring Audit
 - Status: dokumentiert
 - Stand: `docs/mission_editor_authoring_audit.md` haelt fest, dass der bestehende Map-Editor Terrain, Marker, Mission-Slots und Patrol-Pfade authoren kann, aber noch keinen eigenen taktischen Missionsszenario-Vertrag besitzt. Die LZ bleibt bewusst ausserhalb des Editor-Scopes und wird immer vom Spieler im Missionsflow gesetzt.
-- Offene Punkte: Szenario-Presets, Szenario-Datenvertrag, Editor-MVP und Editor-to-Live-Validation sind noch nicht implementiert.
+- Offene Punkte: Szenario-Datenvertrag, Editor-MVP und Editor-to-Live-Validation sind noch nicht implementiert.
 - Risiken: Wenn TerrainMapData, Editor-UI oder Szenario-Dateien zu viel laufenden Gameplay-State aufnehmen, entsteht eine zweite Gameplay-Wahrheit neben SimulationRoot/TacticalController.
-- Naechster Schritt: `TASK_155 - Tactical Mission Test Presets` starten, bevor ein groesserer Mission-Editor gebaut wird.
+- Naechster Schritt: `TASK_156 - Mission Scenario Data Contract` starten, bevor der Editor-MVP erweitert wird.
 
-### TASK_155-158 - Tactical Mission Authoring
+### TASK_155 - Tactical Mission Test Presets
+- Status: implementiert
+- Stand: Unter `res://data/mission_presets/` existieren fuenf kleine taktische Presets: `attack_area_two_contacts`, `defend_area_contact_relay`, `patrol_contact_transition`, `dropship_insertion_first_contact` und `take_area_objective`. Sie referenzieren die vorhandene kleine Testkarte, Objective-Marker, bestehende Enemy-TestUnits, Wellenparameter, Patrol-Pfade und optionale Testnotizen.
+- Stand: `scripts/tests/mission_preset_loader.gd` laedt und validiert die Presets, setzt `MissionTestSetup.map_file_path`, konfiguriert `EnemyWaveController`/Combat-Testparameter und injiziert Enemy-Positionen sowie Patrol-Pfade deterministisch in die Live-Mission. LZ-Felder werden rekursiv abgelehnt.
+- Stand: `scripts/tests/task_155_verifier.gd` prueft Preset-Parsing, Map-Existenz, Live-Mission-Anwendung, sichtbare Objective-/Enemy-Setups, Patrol-Zuordnung, Attack-Area-Reproduzierbarkeit, Patrol-Stopp bei Kontaktbedingungen und Dropship-Preset ohne gespeicherte Spieler-LZ.
+- Offene Punkte: Kein finaler Missionsszenario-Vertrag, keine Editor-UI und keine Meta-Katalog-Anbindung in diesem Task.
+- Risiken: Die Presets duerfen nicht zur zweiten Missionsimplementierung wachsen; sie bleiben Test-/Authoringdaten und halten keinen laufenden Gameplay-State.
+- Naechster Schritt: `TASK_156 - Mission Scenario Data Contract` kann den Preset-Schnitt in einen stabileren Szenariovertrag ueberfuehren.
+
+### TASK_156-158 - Tactical Mission Authoring
 - Status: geplant
-- Stand: Vier Tasks sind geschnitten: `TASK_155 - Tactical Mission Test Presets`, `TASK_156 - Mission Scenario Data Contract`, `TASK_157 - Tactical Mission Editor MVP` und `TASK_158 - Editor-to-Live Mission Validation`.
-- Offene Punkte: Noch keine Preset-Dateien, kein `MissionScenarioData`, keine Editor-UI fuer Missionsszenarien und kein Editor-to-Live-Verifier.
+- Stand: Drei Folge-Tasks bleiben geschnitten: `TASK_156 - Mission Scenario Data Contract`, `TASK_157 - Tactical Mission Editor MVP` und `TASK_158 - Editor-to-Live Mission Validation`.
+- Offene Punkte: Noch kein `MissionScenarioData`, keine Editor-UI fuer Missionsszenarien und kein Editor-to-Live-Verifier.
 - Risiken: Der Authoring-Pfad muss Karten-/Szenario-Daten strikt von laufendem Tactical-State trennen. Insbesondere darf die LZ nicht im Editor oder Szenario gespeichert werden.
-- Naechster Schritt: Erst `TASK_155` umsetzen, damit taktische Playtests reproduzierbare Fixtures haben, bevor der Editor-MVP erweitert wird.
+- Naechster Schritt: `TASK_156` umsetzen, damit Presets und spaetere Editor-Daten denselben Datenvertrag teilen.
 
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert
