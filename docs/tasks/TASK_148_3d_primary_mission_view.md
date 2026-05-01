@@ -3,7 +3,7 @@
 ## Ziel
 Die Live-Mission nutzt die 2.5D/3D-Bridge als primaere Missionsdarstellung, waehrend die alte 2D-Karte als Fallback/Compare-Pfad erhalten bleibt.
 
-## Status: GEPLANT
+## Status: ERLEDIGT
 
 ## Voraussetzung
 - `TASK_146 - 3D Calibration Workspace`
@@ -41,17 +41,34 @@ Die Live-Mission nutzt die 2.5D/3D-Bridge als primaere Missionsdarstellung, waeh
 - UI darf weiterhin Commands setzen, aber keine 3D-Darstellung als Gameplay-Wahrheit behandeln.
 
 ## Akzeptanzkriterien
-- [ ] Standard-Testmission zeigt 3D als Hauptbild.
-- [ ] 2D-Fallback/Compare-Pfad ist kontrolliert verfuegbar.
-- [ ] Picking/Marker/Path Preview bleiben funktional.
-- [ ] Debug-Overlay bleibt ueber 3D lesbar.
-- [ ] Verifier bestaetigt, dass keine Gameplay-State-Mutation aus der Bridge erfolgt.
+- [x] Standard-Testmission zeigt 3D als Hauptbild.
+- [x] 2D-Fallback/Compare-Pfad ist kontrolliert verfuegbar.
+- [x] Picking/Marker/Path Preview bleiben funktional.
+- [x] Debug-Overlay bleibt ueber 3D lesbar.
+- [x] Verifier bestaetigt, dass keine Gameplay-State-Mutation aus der Bridge erfolgt.
+
+## Umsetzung
+- `mission_reactivity_test.tscn` startet die `Mission25DVisualBridge` jetzt als primaere Ansicht: die 3D-Kamera ist current und die alte `MapRoot`-2D-Karte wird standardmaessig ausgeblendet.
+- `MissionLive25DVisualBridge` besitzt jetzt eine kleine Fallback-/Compare-API:
+  - `set_2d_fallback_visible(...)`
+  - `is_2d_fallback_visible()`
+  - `is_primary_3d_view_active()`
+  - `F7` toggelt die 2D-Compare-Karte.
+- Die Live-Bridge nutzt `Terrain25DPicker` fuer `pick_screen_position(...)`; der Tactical Controller verwendet diesen Pick fuer Target-, LZ- und Waypoint-Zielpositionen, wenn die 3D-Bridge primaer aktiv ist. Die alte Canvas-Transformation bleibt Fallback.
+- Das Tactical Debug Overlay bleibt unveraendert als lesende 3D-Schicht verfuegbar.
+- `scripts/tests/task_148_verifier.gd` prueft 3D-Startzustand, 2D-Fallback/Compare, 3D-Picking -> TargetMarker, Overlay und ausbleibende SimulationRoot-Command-Mutation.
 
 ## Erwartetes Ergebnis
 Ab diesem Task sieht der normale Missions-Testpfad wie die neue 3D/2.5D-Zielrichtung aus. Die alte 2D-Optik ist nur noch Fallback, nicht mehr Zielbild.
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_148_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_148_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_142_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_143_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_144_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_145_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_147_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_139_verifier.gd`
 - [ ] Manuell `mission_fireteam_dev_test.tscn` starten und 3D/2D-Fallback vergleichen.
 
 ## Dateien (voraussichtlich)
@@ -61,3 +78,5 @@ Ab diesem Task sieht der normale Missions-Testpfad wie die neue 3D/2.5D-Zielrich
 
 ## Risiken
 - Bei paralleler 2D-/3D-Darstellung kann das Bild verwirrend doppelt wirken. Deshalb soll 3D primaer sein und 2D klar als Fallback/Compare markiert bleiben.
+- 3D-Unit-Endvisuals sind weiterhin Nicht-Ziel dieses Tasks und bleiben fuer `TASK_149` offen.
+- Der alte `task_098_verifier.gd` startet mehrere schwere Live-Szenen und lief lokal in den Timeout; die beruehrte Selection-Logik nutzt aber weiterhin den alten Canvas-Pfad, waehrend der neue 3D-Pick nur fuer Command-Ziele verwendet wird.

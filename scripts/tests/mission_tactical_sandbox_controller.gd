@@ -1062,18 +1062,16 @@ func try_place_target_from_screen_position(screen_position: Vector2) -> bool:
 	if target_marker == null:
 		return false
 
-	var world_position: Vector2 = _screen_to_world_position(screen_position)
-	var clamped_position: Vector2 = _clamp_world_position_to_viewport(world_position)
-	target_marker.global_position = clamped_position
-	_last_target_position = clamped_position
-	_last_command_text = "TARGET SET @ %s" % _format_world_position(clamped_position)
+	var target_position: Vector2 = _screen_to_command_world_position(screen_position)
+	target_marker.global_position = target_position
+	_last_target_position = target_position
+	_last_command_text = "TARGET SET @ %s" % _format_world_position(target_position)
 	_update_ui()
 	return true
 
 
 func _place_lz_from_screen_position(screen_position: Vector2) -> bool:
-	var world_position: Vector2 = _screen_to_world_position(screen_position)
-	_lz_position = _clamp_world_position_to_viewport(world_position)
+	_lz_position = _screen_to_command_world_position(screen_position)
 	_has_lz_position = true
 	_is_lz_placement_armed = false
 	_last_command_text = "LZ SET %s @ %s" % [_get_approach_angle_name(), _format_world_position(_lz_position)]
@@ -3318,6 +3316,27 @@ func _screen_to_world_position(screen_position: Vector2) -> Vector2:
 	return canvas_transform.affine_inverse() * screen_position
 
 
+func _screen_to_command_world_position(screen_position: Vector2) -> Vector2:
+	var bridge_target: Variant = _screen_to_primary_3d_target_position(screen_position)
+	if typeof(bridge_target) == TYPE_VECTOR2:
+		return Vector2(bridge_target)
+	return _clamp_world_position_to_viewport(_screen_to_world_position(screen_position))
+
+
+func _screen_to_primary_3d_target_position(screen_position: Vector2) -> Variant:
+	var bridge = get_node_or_null("../Mission25DVisualBridge")
+	if bridge == null or not bridge.has_method("is_primary_3d_view_active") or not bool(bridge.call("is_primary_3d_view_active")):
+		return null
+	if not bridge.has_method("pick_screen_position"):
+		return null
+	var pick_snapshot: Dictionary = Dictionary(bridge.call("pick_screen_position", screen_position))
+	if not bool(pick_snapshot.get("valid", false)):
+		return null
+	if typeof(pick_snapshot.get("target_position", null)) != TYPE_VECTOR2:
+		return null
+	return Vector2(pick_snapshot.get("target_position", Vector2.ZERO))
+
+
 func _clamp_world_position_to_viewport(world_position: Vector2) -> Vector2:
 	var visible_rect: Rect2 = get_viewport().get_visible_rect()
 	var canvas_transform: Transform2D = get_viewport().get_canvas_transform()
@@ -4793,7 +4812,7 @@ func _try_open_waypoint_menu_at_position(screen_position: Vector2) -> bool:
 		_update_ui()
 		return false
 
-	var waypoint_targets: Array = _create_waypoints_for_selected_fireteams(_clamp_world_position_to_viewport(_screen_to_world_position(screen_position)))
+	var waypoint_targets: Array = _create_waypoints_for_selected_fireteams(_screen_to_command_world_position(screen_position))
 	if waypoint_targets.is_empty():
 		return false
 	_focused_waypoint_ref = Dictionary(waypoint_targets[0]).duplicate(true)
@@ -6687,7 +6706,7 @@ func _update_waypoint_drag(screen_position: Vector2) -> bool:
 	if not _has_dragged_waypoint and _dragged_waypoint_press_screen_position.distance_to(screen_position) < WAYPOINT_DRAG_THRESHOLD:
 		return true
 	_has_dragged_waypoint = true
-	_update_waypoint_targets([_dragged_waypoint_ref], _clamp_world_position_to_viewport(_screen_to_world_position(screen_position)))
+	_update_waypoint_targets([_dragged_waypoint_ref], _screen_to_command_world_position(screen_position))
 	return true
 
 
@@ -6695,7 +6714,7 @@ func _finish_waypoint_drag(screen_position: Vector2) -> bool:
 	if not _is_dragging_waypoint:
 		return false
 	if _has_dragged_waypoint:
-		_update_waypoint_targets([_dragged_waypoint_ref], _clamp_world_position_to_viewport(_screen_to_world_position(screen_position)))
+		_update_waypoint_targets([_dragged_waypoint_ref], _screen_to_command_world_position(screen_position))
 		_last_command_text = "WAYPOINT MOVED"
 		_update_ui()
 		_emit_planning_state_changed()

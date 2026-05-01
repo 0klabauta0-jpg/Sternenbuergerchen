@@ -1128,10 +1128,11 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Stand: `TASK_147 - 3D Asset Curation and Mapping Expansion` ist implementiert. 12 weitere GLB-Familien wurden kuratiert in `res://Assets/kenney_space-kit/3d/` uebernommen und importiert: Corridor Straight/Corner, Simple/Complex Gate, Single/Double Turret, Large Crater, Large Rock B, Small Rocks A, Desk Computer, Rover und CargoB. Das 3D-Mapping enthaelt passende Keys, und die Kalibrierungsszene wurde auf 19x10 erweitert.
 - Stand: Erste manuelle 147-Kalibrierung ist eingearbeitet: CargoB nutzt einen 3x5-Ziel-Footprint, Large Crater fuellt 2x2 ohne Feldanschnitt besser aus, und die grosse Satellitenschuessel wurde vergroessert, damit der Sockel ein Feld staerker ausfuellt.
 - Stand: Zweite manuelle 147-Kalibrierung ist eingearbeitet: CargoB bleibt unveraendert passend, Large Crater nutzt jetzt bewusst 3x3 wegen sichtbarem Pivot-/Footprint-Versatz, und die grosse Satellitenschuessel ist weiter vergroessert, damit der untere weisse Sockel naeher ein Feld ausfuellt.
-- Stand: Die naechsten offenen Schritte bleiben `TASK_148 - 3D Primary Mission View`, `TASK_149 - 3D Unit Visual Replacement` und `TASK_150 - Legacy 2D Mission Asset Retirement`.
-- Offene Punkte: Primaere Live-Missionsansicht, 3D-Unit-Visuals und spaetere 2D-Retirement-Schritte sind noch nicht implementiert. Die neuen 147-Assets brauchen noch manuelle Sichtpruefung in der Kalibrierungsszene.
+- Stand: `TASK_148 - 3D Primary Mission View` ist implementiert. Die Live-Mission startet jetzt mit der 3D-Bridge als primaerer Ansicht, die alte 2D-Map ist standardmaessig verborgen und kann per Bridge-API/F7 als Compare-Fallback wieder sichtbar gemacht werden. `Terrain25DPicker` ist in der Live-Bridge verfuegbar und der Tactical Controller nutzt ihn fuer Target-, LZ- und Waypoint-Zielpositionen, wenn die 3D-Bridge primaer aktiv ist.
+- Stand: Die naechsten offenen Schritte bleiben `TASK_149 - 3D Unit Visual Replacement` und `TASK_150 - Legacy 2D Mission Asset Retirement`.
+- Offene Punkte: 3D-Unit-Visuals und spaetere 2D-Retirement-Schritte sind noch nicht implementiert. Die neuen 147-Assets brauchen bei Bedarf weitere manuelle Sichtpruefung in echten Missionskarten.
 - Risiken: Die 3D-Schicht darf weiterhin keine Gameplay-Wahrheit werden. 2D-Assets duerfen nicht zu frueh geloescht werden, solange Editor, UI, Icons, Tests oder Debug-Fallbacks sie brauchen.
-- Naechster Schritt: Neue 147-Assets in `mission_map_3d_calibration.tscn` manuell pruefen und danach `TASK_148` schneiden, wenn die Mission standardmaessig 3D anzeigen soll.
+- Naechster Schritt: `TASK_149 - 3D Unit Visual Replacement`, damit Units nicht mehr als alte 2D-Sprites ueber der primaeren 3D-Missionsansicht liegen.
 
 ### TASK_251-253 - Geplante Folge-Labs
 - Status: geplant

@@ -5,6 +5,7 @@ const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain
 const TERRAIN_MAP_3D_RENDERER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_3d_renderer.gd")
 const TERRAIN_25D_CAMERA_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_2_5d_camera_controller.gd")
 const TERRAIN_25D_VISUAL_PROJECTION_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_2_5d_visual_projection.gd")
+const TERRAIN_25D_PICKER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_2_5d_picker.gd")
 const MOVEMENT_LAYER_SCRIPT: GDScript = preload("res://scripts/core/movement_layer.gd")
 
 @export var bridge_enabled: bool = true
@@ -17,16 +18,19 @@ const MOVEMENT_LAYER_SCRIPT: GDScript = preload("res://scripts/core/movement_lay
 @export var show_debug_grid: bool = false
 @export var hide_2d_map_when_visible: bool = false
 @export var camera_current_when_visible: bool = false
+@export var keyboard_fallback_toggle_enabled: bool = true
 @export var sync_runtime_visuals_enabled: bool = true
 @export_range(0.05, 1.0, 0.05) var runtime_visual_sync_interval_seconds: float = 0.15
 
 var render_result: Dictionary = {}
 var bridge_snapshot: Dictionary = {}
 var runtime_visual_snapshot: Dictionary = {}
+var last_pick_snapshot: Dictionary = {}
 
 var _renderer = null
 var _camera_controller = TERRAIN_25D_CAMERA_CONTROLLER_SCRIPT.new()
 var _visual_projection = TERRAIN_25D_VISUAL_PROJECTION_SCRIPT.new()
+var _picker = TERRAIN_25D_PICKER_SCRIPT.new()
 var _sync_accumulator: float = 0.0
 var _unit_mesh: Mesh = null
 var _selection_mesh: Mesh = null
@@ -42,6 +46,7 @@ var _air_shadow_material: StandardMaterial3D = null
 
 
 func _ready() -> void:
+	set_process_unhandled_input(true)
 	_renderer = TERRAIN_MAP_3D_RENDERER_SCRIPT.new()
 	_configure_visual_projection()
 	_prepare_runtime_visual_resources()
@@ -63,7 +68,19 @@ func _exit_tree() -> void:
 	render_result.clear()
 	bridge_snapshot.clear()
 	runtime_visual_snapshot.clear()
+	last_pick_snapshot.clear()
 	_renderer = null
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not keyboard_fallback_toggle_enabled:
+		return
+	var key_event := event as InputEventKey
+	if key_event == null or not key_event.pressed or key_event.echo:
+		return
+	if key_event.keycode == KEY_F7:
+		set_2d_fallback_visible(not is_2d_fallback_visible())
+		get_viewport().set_input_as_handled()
 
 
 func refresh_bridge() -> Dictionary:
@@ -104,6 +121,24 @@ func set_bridge_visible(is_visible: bool) -> void:
 	_update_2d_map_visibility()
 
 
+func set_2d_fallback_visible(is_visible: bool) -> void:
+	hide_2d_map_when_visible = not is_visible
+	_update_2d_map_visibility()
+	if bool(bridge_snapshot.get("valid", false)):
+		bridge_snapshot["hide_2d_map_when_visible"] = hide_2d_map_when_visible
+		bridge_snapshot["fallback_2d_visible"] = is_2d_fallback_visible()
+
+
+func is_2d_fallback_visible() -> bool:
+	var map_root_2d = get_node_or_null(map_root_2d_path)
+	return map_root_2d != null and map_root_2d is CanvasItem and (map_root_2d as CanvasItem).visible
+
+
+func is_primary_3d_view_active() -> bool:
+	var camera := get_node_or_null("Camera3D") as Camera3D
+	return bridge_enabled and visible and camera != null and camera.current
+
+
 func get_bridge_snapshot() -> Dictionary:
 	return bridge_snapshot.duplicate(true)
 
@@ -114,6 +149,26 @@ func get_render_result() -> Dictionary:
 
 func get_runtime_visual_snapshot() -> Dictionary:
 	return runtime_visual_snapshot.duplicate(true)
+
+
+func pick_screen_position(screen_position: Vector2, options: Dictionary = {}) -> Dictionary:
+	var camera := get_node_or_null("Camera3D") as Camera3D
+	if camera == null:
+		last_pick_snapshot = {
+			"valid": false,
+			"reason": "camera_missing",
+		}
+		return last_pick_snapshot.duplicate(true)
+	var terrain_registry = get_node_or_null(terrain_registry_path)
+	var pick_options := options.duplicate(true)
+	if not pick_options.has("floor_mode"):
+		pick_options["floor_mode"] = "highest"
+	last_pick_snapshot = Dictionary(_picker.call("pick_screen", camera, screen_position, terrain_registry, pick_options))
+	return last_pick_snapshot.duplicate(true)
+
+
+func get_last_pick_snapshot() -> Dictionary:
+	return last_pick_snapshot.duplicate(true)
 
 
 func get_visual_projection_config() -> Dictionary:
@@ -194,6 +249,7 @@ func _configure_visual_projection() -> void:
 	var cell_size: float = float(_renderer.call("get_grid_cell_size")) if _renderer != null else 2.0
 	var height_step: float = float(_renderer.call("get_grid_height_step")) if _renderer != null else 0.35
 	_visual_projection.call("configure_grid", cell_size, height_step)
+	_picker.call("configure_grid", cell_size, height_step)
 
 
 func _prepare_runtime_visual_resources() -> void:
@@ -502,6 +558,8 @@ func _build_bridge_snapshot(map_data) -> Dictionary:
 		"show_debug_grid": show_debug_grid,
 		"camera_current_when_visible": camera_current_when_visible,
 		"hide_2d_map_when_visible": hide_2d_map_when_visible,
+		"primary_3d_view_active": is_primary_3d_view_active(),
+		"fallback_2d_visible": is_2d_fallback_visible(),
 	}
 
 

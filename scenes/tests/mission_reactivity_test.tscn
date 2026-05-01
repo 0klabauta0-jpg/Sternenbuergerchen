@@ -59,6 +59,7 @@ unit_registry_path = NodePath("../UnitRegistry")
 target_marker_path = NodePath("../TargetMarker")
 order_visualizer_path = NodePath("../FireteamOrderVisualizer")
 show_debug_grid = false
+hide_2d_map_when_visible = true
 camera_current_when_visible = true
 
 [node name="TacticalDebugOverlay25D" type="Node3D" parent="Mission25DVisualBridge"]
