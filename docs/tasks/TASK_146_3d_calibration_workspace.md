@@ -61,14 +61,14 @@ Die vorhandene 3D-Kalibrierungsszene wird zu einem brauchbaren Arbeitsraum, mit 
 - `TerrainMap3DRenderer` zentriert GLB-Instanzen jetzt horizontal anhand ihrer Mesh-Bounds auf den Tile-Anker. Dadurch werden importierte Modelle mit seitlich versetztem GLB-Origin nicht mehr neben dem Footprint platziert. Pro Mapping-Eintrag kann das bei Bedarf mit `center_horizontal: false` abgeschaltet werden.
 - Die Szene fuegt eine `astronautA.glb`-NPC-Referenz mit normalisierter Hoehe als Groessenvergleich ein.
 - Die NPC-Referenz wird ueber einen Wrapper zentriert, damit der importierte GLB-Origin sie nicht seitlich vom Vergleichs-Footprint verschiebt.
-- Footprint-Helfer koennen jetzt groessere Zielflaechen anzeigen, z.B. 3x3 fuer Hangar und 4x4 fuer den vergroesserten Speeder.
+- Footprint-Helfer koennen jetzt groessere Zielflaechen anzeigen, z.B. 3x3 fuer Hangar und Speeder.
 - Erste grobe Scale-Korrektur im Mapping:
   - einzelnes Fass deutlich kleiner.
   - Fassgruppe, Plattform, Pipe, Rail und Crater konservativer skaliert.
   - Hangar auf 3x3-Felder-Zielmass gesetzt.
   - Wall, Structure und Pipe naeher auf 1-Feld-Aussenkante gesetzt.
   - Satellite Large so skaliert, dass der Sockel naeher an Feldgroesse liegt.
-  - Speeder auf doppelte bisherige Groesse gesetzt.
+  - Speeder auf 3x3-Zielmass gesetzt, damit er keine Nachbarfelder anschneidet.
 - Tastatur im Playmode:
   - `G`: Debug-Grid an/aus.
   - `L`: Labels an/aus.

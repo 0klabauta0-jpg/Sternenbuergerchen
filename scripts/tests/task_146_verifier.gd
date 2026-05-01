@@ -52,7 +52,7 @@ func _test_calibration_workspace() -> void:
 	_assert(_entries_have_calibration_values(entries), "Calibration entries expose scale, offset and rotation data")
 	_assert(_has_npc_reference(snapshot), "Calibration workspace includes an NPC size reference")
 	_assert(_has_target_footprint(entries, "gebaeude_hangar_small_b_sw", Vector2(3.0, 3.0)), "Hangar calibration entry exposes a 3x3 target footprint")
-	_assert(_has_target_footprint(entries, "fahrzeug_speeder_b_se", Vector2(4.0, 4.0)), "Speeder calibration entry exposes a 4x4 target footprint")
+	_assert(_has_target_footprint(entries, "fahrzeug_speeder_b_se", Vector2(3.0, 3.0)), "Speeder calibration entry exposes a 3x3 target footprint")
 	_assert(_rendered_objects_are_centered(Dictionary(render_result.get("objects", {}))), "Rendered model bounds are centered on their tile anchors")
 
 	var label_container := scene.get_node_or_null("MapRoot/CalibrationHelpers3D/Labels3D")

@@ -18,7 +18,7 @@ const CALIBRATION_OBJECTS: Array[Dictionary] = [
 	{"grid": Vector2i(5, 4), "type_id": "pipe_straight_ne", "category": "flat_route", "footprint_size": Vector2(1.0, 1.0)},
 	{"grid": Vector2i(7, 4), "type_id": "rail_sw", "category": "flat_route"},
 	{"grid": Vector2i(9, 4), "type_id": "crater_small_se", "category": "flat_decal"},
-	{"grid": Vector2i(11, 4), "type_id": "fahrzeug_speeder_b_se", "category": "vehicle", "footprint_size": Vector2(4.0, 4.0)},
+	{"grid": Vector2i(11, 4), "type_id": "fahrzeug_speeder_b_se", "category": "vehicle", "footprint_size": Vector2(3.0, 3.0)},
 ]
 
 @export var calibration_labels_enabled: bool = true
