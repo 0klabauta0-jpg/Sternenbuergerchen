@@ -20,7 +20,7 @@ var _type_textures: Dictionary = {}
 var _palette_groups: Array[Dictionary] = []
 
 
-static func load_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCatalog:
+static func load_from_file(path: String = DEFAULT_CATALOG_PATH, load_textures: bool = true) -> TerrainTileCatalog:
 	var catalog := TerrainTileCatalog.new()
 	if path.is_empty() or not FileAccess.file_exists(path):
 		push_warning("TerrainTileCatalog file not found: %s" % path)
@@ -102,10 +102,14 @@ static func load_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCa
 		catalog._type_order.append(type_id)
 
 		var texture_path: String = String(entry.get("texture_path", ""))
-		if not texture_path.is_empty() and ResourceLoader.exists(texture_path):
+		if load_textures and not texture_path.is_empty() and ResourceLoader.exists(texture_path):
 			catalog._type_textures[type_id] = load(texture_path) as Texture2D
 
 	return catalog
+
+
+static func load_type_metadata_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCatalog:
+	return load_from_file(path, false)
 
 
 static func _normalize_palette_group_id(value: String) -> String:
