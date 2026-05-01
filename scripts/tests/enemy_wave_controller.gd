@@ -16,6 +16,7 @@ const STATUS_LABEL_POSITION: Vector2 = Vector2(542.0, 176.0)
 
 var _enemy_units: Array = []
 var _spawn_positions_by_unit_id: Dictionary = {}
+var _patrol_paths_by_unit_id: Dictionary = {}
 var _current_wave_number: int = 0
 var _time_until_next_wave: float = 0.0
 var _status_label: Label = null
@@ -37,10 +38,13 @@ func initialize_enemy_units(enemy_units: Array) -> void:
 			continue
 
 		_enemy_units.append(enemy_unit)
+		var unit_id: String = String(enemy_unit.call("get_unit_id"))
 		if enemy_unit is Node2D:
-			_spawn_positions_by_unit_id[String(enemy_unit.call("get_unit_id"))] = (enemy_unit as Node2D).global_position
+			_spawn_positions_by_unit_id[unit_id] = (enemy_unit as Node2D).global_position
 
 		_deactivate_enemy_unit(enemy_unit)
+		if _patrol_paths_by_unit_id.has(unit_id) and enemy_unit.has_method("set_patrol_path"):
+			enemy_unit.call("set_patrol_path", Array(_patrol_paths_by_unit_id.get(unit_id, [])).duplicate(true))
 
 	_time_until_next_wave = maxf(first_wave_delay_seconds, 0.0)
 	if _enemy_units.is_empty():
@@ -53,6 +57,22 @@ func initialize_enemy_units(enemy_units: Array) -> void:
 			_time_until_next_wave = maxf(wave_delay_seconds, 0.0)
 
 	_refresh_status_label()
+
+
+func set_patrol_paths(patrol_paths_by_unit_id: Dictionary) -> void:
+	_patrol_paths_by_unit_id.clear()
+	for unit_id_variant in patrol_paths_by_unit_id.keys():
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty():
+			continue
+		_patrol_paths_by_unit_id[unit_id] = Array(patrol_paths_by_unit_id.get(unit_id_variant, [])).duplicate(true)
+
+
+func get_patrol_path_for_unit(unit_id: String) -> Array:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return []
+	return Array(_patrol_paths_by_unit_id.get(normalized_unit_id, [])).duplicate(true)
 
 
 func get_current_wave_number() -> int:

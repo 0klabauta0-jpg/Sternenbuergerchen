@@ -487,6 +487,8 @@ func _apply_effect(effect: Dictionary, delta: float) -> void:
 			_apply_bleedout_effect(effect)
 		"respawn":
 			_apply_respawn_effect(effect)
+		"apply_loadout_modifiers":
+			_apply_loadout_modifiers_effect(effect)
 		_:
 			# TODO: Deterministic effect commits belong here once systems exist.
 			pass
@@ -1148,6 +1150,34 @@ func _apply_respawn_effect(effect: Dictionary) -> void:
 		return
 
 	unit.call("respawn", spawn_position)
+
+
+func _apply_loadout_modifiers_effect(effect: Dictionary) -> void:
+	var unit_id: String = String(effect.get("unit_id", "")).strip_edges()
+	if unit_id.is_empty():
+		push_warning("SimulationRoot loadout modifier effect expects a non-empty unit_id.")
+		return
+	var unit = _resolve_unit_from_registry(unit_id)
+	if unit == null:
+		push_warning("SimulationRoot could not resolve the target unit for a loadout modifier effect.")
+		return
+	if not unit.has_method("apply_loadout_modifiers"):
+		push_warning("SimulationRoot loadout modifier effect expects a unit with apply_loadout_modifiers().")
+		return
+	var modifiers_dict: Dictionary = Dictionary(effect.get("modifiers", {})).duplicate(true)
+	if modifiers_dict.is_empty():
+		modifiers_dict = {
+			"unit_id": unit_id,
+			"armor_id": String(effect.get("armor_id", "medium")),
+			"weapon_1_id": String(effect.get("weapon_1_id", "rifle")),
+			"weapon_2_id": String(effect.get("weapon_2_id", "rifle")),
+			"accuracy_mod": float(effect.get("accuracy_mod", 0.0)),
+			"speed_mod": float(effect.get("speed_mod", 0.0)),
+			"toughness_mod": float(effect.get("toughness_mod", 0.0)),
+			"cover_mod": float(effect.get("cover_mod", 0.0)),
+			"range_class": String(effect.get("range_class", "medium")),
+		}
+	unit.call("apply_loadout_modifiers", modifiers_dict)
 
 
 func _coerce_vector2(value: Variant, fallback: Vector2) -> Vector2:

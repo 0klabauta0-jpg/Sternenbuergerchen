@@ -71,6 +71,9 @@ const MIN_CAMERA_ZOOM: float = 0.1
 const MAX_CAMERA_ZOOM: float = 3.0
 const CAMERA_ZOOM_STEP: float = 0.05
 const CAMERA_PAN_SPEED: float = 800.0
+const PATROL_OVERLAY_NAME: String = "PatrolOverlay"
+const PATROL_SPAWN_IDS: PackedStringArray = ["enemy_delta", "enemy_echo", "enemy_alpha", "enemy_bravo"]
+const PATROL_PICK_RADIUS: float = 28.0
 
 @export var map_file_path: String = ""
 
@@ -98,6 +101,9 @@ var _is_refreshing_map_settings_controls: bool = false
 var _last_undo_state: Dictionary = {}
 var _current_map_path: String = DEFAULT_MAP_PATH
 var _pending_dialog_action: String = ""
+var _patrol_tool_enabled: bool = false
+var _patrol_spawn_id: String = "enemy_delta"
+var _dragged_patrol_waypoint_index: int = -1
 
 
 func _ready() -> void:
@@ -112,6 +118,8 @@ func _ready() -> void:
 	_populate_tile_palette()
 	_connect_ui_signals()
 	_add_selection_tool_button()
+	_add_patrol_tool_controls()
+	_ensure_patrol_overlay()
 	_load_map(map_file_path if not map_file_path.is_empty() else DEFAULT_MAP_PATH)
 
 
@@ -154,6 +162,12 @@ func _unhandled_input(event: InputEvent) -> void:
 			_is_panning = mouse_button_event.pressed
 			return
 		if mouse_button_event.button_index == MOUSE_BUTTON_LEFT:
+			if _patrol_tool_enabled and not _is_pointer_over_control():
+				if mouse_button_event.pressed:
+					_handle_patrol_left_click(get_global_mouse_position(), mouse_button_event.ctrl_pressed)
+				else:
+					_dragged_patrol_waypoint_index = -1
+				return
 			if not mouse_button_event.pressed:
 				_is_painting = false
 				_last_painted_grid = Vector2i(-1, -1)
@@ -182,6 +196,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if event is InputEventMouseMotion:
 		var mouse_motion := event as InputEventMouseMotion
+		if _patrol_tool_enabled and _dragged_patrol_waypoint_index >= 0 and not _is_pointer_over_control():
+			_move_patrol_waypoint(_dragged_patrol_waypoint_index, get_global_mouse_position())
+			return
 		if _is_panning:
 			var camera := _get_camera()
 			if camera != null:
@@ -220,6 +237,7 @@ func _load_map(path: String) -> void:
 	_refresh_selection_visual()
 	_refresh_property_panel()
 	_refresh_top_bar()
+	_refresh_patrol_overlay()
 
 
 func _create_new_map(grid_size: Vector2i = DEFAULT_NEW_MAP_GRID_SIZE) -> void:
@@ -248,6 +266,7 @@ func _create_new_map(grid_size: Vector2i = DEFAULT_NEW_MAP_GRID_SIZE) -> void:
 	_refresh_selection_visual()
 	_refresh_property_panel()
 	_refresh_top_bar()
+	_refresh_patrol_overlay()
 
 
 func _save_current_map() -> void:
@@ -445,11 +464,69 @@ func _add_selection_tool_button() -> void:
 	button_row.add_child(select_btn)
 
 
+func _add_patrol_tool_controls() -> void:
+	var button_row := get_node_or_null("UI/TopBar/Margin/HBox") as HBoxContainer
+	if button_row == null:
+		return
+	var patrol_button := button_row.get_node_or_null("PatrolButton") as Button
+	if patrol_button == null:
+		patrol_button = Button.new()
+		patrol_button.name = "PatrolButton"
+		patrol_button.text = "Patrol"
+		patrol_button.toggle_mode = true
+		patrol_button.toggled.connect(_on_patrol_tool_toggled)
+		button_row.add_child(patrol_button)
+	var spawn_selector := button_row.get_node_or_null("PatrolSpawnOption") as OptionButton
+	if spawn_selector == null:
+		spawn_selector = OptionButton.new()
+		spawn_selector.name = "PatrolSpawnOption"
+		spawn_selector.custom_minimum_size = Vector2(120.0, 0.0)
+		button_row.add_child(spawn_selector)
+	_refresh_patrol_spawn_selector()
+	if not spawn_selector.item_selected.is_connected(_on_patrol_spawn_selected):
+		spawn_selector.item_selected.connect(_on_patrol_spawn_selected)
+	var clear_button := button_row.get_node_or_null("ClearPatrolButton") as Button
+	if clear_button == null:
+		clear_button = Button.new()
+		clear_button.name = "ClearPatrolButton"
+		clear_button.text = "Clear Patrol"
+		clear_button.pressed.connect(_on_clear_patrol_pressed)
+		button_row.add_child(clear_button)
+	_update_patrol_topbar_state()
+
+
 func _on_selection_tool_toggled(pressed: bool) -> void:
 	_selection_tool_enabled = pressed
 	if pressed:
 		_is_painting = false
 		_last_painted_grid = Vector2i(-1, -1)
+
+
+func _on_patrol_tool_toggled(pressed: bool) -> void:
+	_patrol_tool_enabled = pressed
+	if pressed:
+		_selection_tool_enabled = false
+		var select_button := get_node_or_null("UI/TopBar/Margin/HBox/SelectButton") as Button
+		if select_button != null and select_button.button_pressed:
+			select_button.button_pressed = false
+	_update_patrol_topbar_state()
+	_refresh_patrol_overlay()
+
+
+func _on_patrol_spawn_selected(index: int) -> void:
+	var spawn_selector := get_node_or_null("UI/TopBar/Margin/HBox/PatrolSpawnOption") as OptionButton
+	if spawn_selector == null or index < 0 or index >= spawn_selector.item_count:
+		return
+	_patrol_spawn_id = String(spawn_selector.get_item_metadata(index)).strip_edges()
+	_refresh_patrol_overlay()
+
+
+func _on_clear_patrol_pressed() -> void:
+	if _terrain_map_data == null or _patrol_spawn_id.is_empty():
+		return
+	_terrain_map_data.call("set_patrol_path", _patrol_spawn_id, [])
+	_mark_dirty(true)
+	_refresh_patrol_overlay()
 
 
 func _refresh_property_panel() -> void:
@@ -697,6 +774,7 @@ func _refresh_top_bar() -> void:
 		save_button.disabled = _terrain_map_data == null or _current_map_path.is_empty()
 	if undo_button != null:
 		undo_button.disabled = _last_undo_state.is_empty()
+	_update_patrol_topbar_state()
 
 
 func _mark_dirty(is_dirty: bool) -> void:
@@ -837,6 +915,140 @@ func _on_save_as_file_selected(path: String) -> void:
 		return
 	_current_map_path = path
 	_save_current_map()
+
+
+func _ensure_patrol_overlay() -> void:
+	var existing_overlay := get_node_or_null(PATROL_OVERLAY_NAME) as Node2D
+	if existing_overlay != null:
+		return
+	var overlay := Node2D.new()
+	overlay.name = PATROL_OVERLAY_NAME
+	overlay.z_index = 35
+	add_child(overlay)
+
+
+func _refresh_patrol_overlay() -> void:
+	var overlay := get_node_or_null(PATROL_OVERLAY_NAME) as Node2D
+	if overlay == null or _terrain_map_data == null:
+		return
+	for child in overlay.get_children():
+		child.queue_free()
+	var patrol_paths: Dictionary = Dictionary(_terrain_map_data.call("get_patrol_paths"))
+	for spawn_id_variant in patrol_paths.keys():
+		var spawn_id: String = String(spawn_id_variant).strip_edges()
+		if spawn_id.is_empty():
+			continue
+		var is_active_spawn: bool = spawn_id == _patrol_spawn_id
+		var base_color: Color = Color(0.25, 0.9, 0.35, 0.9) if is_active_spawn else Color(0.25, 0.75, 0.3, 0.5)
+		var path_points: Array = Array(_terrain_map_data.call("get_patrol_path", spawn_id))
+		if path_points.size() >= 2:
+			var line := Line2D.new()
+			line.width = 2.0
+			line.default_color = base_color
+			for point_variant in path_points:
+				line.add_point(Vector2(point_variant))
+			overlay.add_child(line)
+		for waypoint_index in range(path_points.size()):
+			var waypoint_position: Vector2 = Vector2(path_points[waypoint_index])
+			var marker := Line2D.new()
+			marker.width = 2.0
+			marker.default_color = base_color
+			marker.add_point(waypoint_position + Vector2(-5.0, 0.0))
+			marker.add_point(waypoint_position + Vector2(5.0, 0.0))
+			marker.add_point(waypoint_position + Vector2(0.0, 0.0))
+			marker.add_point(waypoint_position + Vector2(0.0, -5.0))
+			marker.add_point(waypoint_position + Vector2(0.0, 5.0))
+			overlay.add_child(marker)
+			var label := Label2D.new()
+			label.position = waypoint_position + Vector2(6.0, -12.0)
+			label.text = "%s:%d" % [spawn_id, waypoint_index + 1]
+			label.modulate = base_color
+			label.font_size = 10
+			overlay.add_child(label)
+
+
+func _refresh_patrol_spawn_selector() -> void:
+	var spawn_selector := get_node_or_null("UI/TopBar/Margin/HBox/PatrolSpawnOption") as OptionButton
+	if spawn_selector == null:
+		return
+	spawn_selector.clear()
+	for spawn_id in PATROL_SPAWN_IDS:
+		spawn_selector.add_item(spawn_id)
+		spawn_selector.set_item_metadata(spawn_selector.item_count - 1, spawn_id)
+	var selected_index: int = 0
+	for index in range(spawn_selector.item_count):
+		if String(spawn_selector.get_item_metadata(index)) == _patrol_spawn_id:
+			selected_index = index
+			break
+	spawn_selector.select(selected_index)
+
+
+func _update_patrol_topbar_state() -> void:
+	var spawn_selector := get_node_or_null("UI/TopBar/Margin/HBox/PatrolSpawnOption") as OptionButton
+	var clear_button := get_node_or_null("UI/TopBar/Margin/HBox/ClearPatrolButton") as Button
+	if spawn_selector != null:
+		spawn_selector.disabled = not _patrol_tool_enabled
+	if clear_button != null:
+		clear_button.disabled = not _patrol_tool_enabled
+
+
+func _handle_patrol_left_click(world_position: Vector2, remove_mode: bool) -> void:
+	if _terrain_map_data == null or _patrol_spawn_id.is_empty():
+		return
+	var waypoint_index: int = _find_patrol_waypoint_index_at(world_position)
+	if remove_mode:
+		if waypoint_index >= 0:
+			_remove_patrol_waypoint(waypoint_index)
+		return
+	if waypoint_index >= 0:
+		_dragged_patrol_waypoint_index = waypoint_index
+		_move_patrol_waypoint(waypoint_index, world_position)
+		return
+	_add_patrol_waypoint(world_position)
+
+
+func _find_patrol_waypoint_index_at(world_position: Vector2) -> int:
+	if _terrain_map_data == null:
+		return -1
+	var patrol_path: Array = Array(_terrain_map_data.call("get_patrol_path", _patrol_spawn_id))
+	var best_index: int = -1
+	var best_dist_sq: float = PATROL_PICK_RADIUS * PATROL_PICK_RADIUS
+	for index in range(patrol_path.size()):
+		var waypoint_position: Vector2 = Vector2(patrol_path[index])
+		var dist_sq: float = waypoint_position.distance_squared_to(world_position)
+		if dist_sq > best_dist_sq:
+			continue
+		best_dist_sq = dist_sq
+		best_index = index
+	return best_index
+
+
+func _add_patrol_waypoint(world_position: Vector2) -> void:
+	var patrol_path: Array = Array(_terrain_map_data.call("get_patrol_path", _patrol_spawn_id))
+	patrol_path.append(world_position)
+	_terrain_map_data.call("set_patrol_path", _patrol_spawn_id, patrol_path)
+	_mark_dirty(true)
+	_refresh_patrol_overlay()
+
+
+func _move_patrol_waypoint(index: int, world_position: Vector2) -> void:
+	var patrol_path: Array = Array(_terrain_map_data.call("get_patrol_path", _patrol_spawn_id))
+	if index < 0 or index >= patrol_path.size():
+		return
+	patrol_path[index] = world_position
+	_terrain_map_data.call("set_patrol_path", _patrol_spawn_id, patrol_path)
+	_mark_dirty(true)
+	_refresh_patrol_overlay()
+
+
+func _remove_patrol_waypoint(index: int) -> void:
+	var patrol_path: Array = Array(_terrain_map_data.call("get_patrol_path", _patrol_spawn_id))
+	if index < 0 or index >= patrol_path.size():
+		return
+	patrol_path.remove_at(index)
+	_terrain_map_data.call("set_patrol_path", _patrol_spawn_id, patrol_path)
+	_mark_dirty(true)
+	_refresh_patrol_overlay()
 
 
 func _on_load_pressed() -> void:

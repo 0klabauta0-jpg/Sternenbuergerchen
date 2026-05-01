@@ -258,7 +258,48 @@
 - Stand: `MissionCombatLoopDriver` erlaubt jetzt bidirektionalen Kampf; Enemies koennen Friendlies angreifen, wenn sie `fit` sind und LOS-Kontakt haben. Friendlies koennen ebenfalls downed und bleedout werden, mit anschliessendem Respawn ueber den `RespawnManager`.
 - Offene Punkte: keine echte Gegner-KI, keine Positionierung, keine Deckungssuche und keine Gegner-Befehlskette.
 - Risiken: der Gegnerpfad ist bewusst nur ein symmetrischer Angriffspfad ohne eigene taktische Logik; spaetere Gegner-KI muss explizit und separat folgen.
-- Naechster Schritt: bei Bedarf in eigenen Tasks Gegner-Verhalten oder einfache Positionierungslogik ergaenzen.
+
+### TASK_106 – Dropship-LZ, Insertion und verzoegerte Aktivierung
+- Status: implementiert
+- Stand: `MissionTestSetup` kann Friendly-Units jetzt standardmaessig bis zur Insertion aus `UnitRegistry`/`FTLRegistry` fernhalten (`defer_friendly_runtime_activation = true`) und blendet sie bis zum Einflug aus. `MissionTacticalSandboxController` registriert Units erst beim Deboarding autoritativ in `UnitRegistry`, bindet sie an `RuntimeLeader`/`FTLRegistry` und startet fuer das frisch eingeflogene Fireteam den aktiven Phase-Plan erst ab diesem Aktivierungszeitpunkt. Direkte Commands, Ad-hoc-Orders, Default-Behavior und Cover-Hold-Ausgaben sind vor Insertion fuer nicht aktive Fireteams gesperrt. `MissionCombatLoopDriver` verarbeitet nur Units, die in `UnitRegistry` aktiv sind, damit nicht eingeflogene Teams nicht vorzeitig am Gefecht teilnehmen.
+- Offene Punkte: keine eigene Insertion-Warteschlange fuer mehrere zeitversetzte Transporter und keine erweiterte Missionsanzeige mit explizitem Aktivierungs-Timer pro Fireteam.
+- Risiken: der Aktivierungspfad ist bewusst auf den bestehenden Dropship-Sequencer im Tactical-Sandbox-Controller begrenzt; spaetere echte Multi-Transport- oder Netzwerk-Synchronisierung sollte diesen Pfad explizit erweitern.
+- Naechster Schritt: TASK_107 (LoadoutModifierResolver + initiale Missions-Effects) auf den jetzt zeitlich korrekten Insertion-Aktivierungszeitpunkt aufsetzen.
+
+### TASK_107 – LoadoutModifierResolver und initiale Missions-Effects
+- Status: implementiert
+- Stand: Neuer `LoadoutModifierResolver` uebersetzt FOB-`member_loadouts` (`weapon_1`, `weapon_2`, `armor`) in `UnitLoadoutModifiers` pro Unit inklusive Alias-Normalisierung (`rail_gun`/`sonderwaffe` -> `special`) und fester Formeln fuer Waffen und Armor. `MissionTestSetup` baut die Modifikator-Dictionaries beim Missionsaufbau und enqueued fuer bereits aktive Friendlies initiale `apply_loadout_modifiers`-Effects. Fuer verzoegert eingeflogene Friendlies enqueued der `MissionTacticalSandboxController` denselben Effekt beim Runtime-Insert. `SimulationRoot` verarbeitet den neuen autoritativen Effect-Typ und delegiert an `TestUnit.apply_loadout_modifiers(...)`; `TestUnit` integriert die Modifikatoren in Hit-/Speed-/Damage-Taken-Effekte sowie in den effektiven Cover-Score.
+- Offene Punkte: keine tiefe Distanzklassenlogik im Combat-Loop (range_class ist vorerst Datenvertrag) und keine gestaffelte Waffen-Slot-Gewichtung ueber den eingefuehrten Secondary-Weight hinaus.
+- Risiken: die additive Formel ist bewusst klein und datengetrieben; spaetere Balancing-Runden sollten die Faktoren explizit feinjustieren statt implizit in Einzelpfade einzugreifen.
+- Naechster Schritt: Folge-Tasks koennen `range_class` und weitere Loadout-Effekte gezielt im Combat-Resolver auswerten.
+
+### TASK_108 – PatrolEditorTool und Pre-Contact-Patrol
+- Status: implementiert
+- Stand: `TerrainMapData` traegt jetzt einen Patrol-Datenvertrag (`patrol_paths`) als Dictionary `spawn_id -> waypoint[]` mit JSON-Load/Save. Der interne `MapEditor` hat ein kleines `Patrol`-Tool mit Spawn-Auswahl, sichtbarer Reihenfolge/Overlay, Hinzufuegen per Klick, Verschieben per Drag und Entfernen via `Ctrl+Klick`; Speicherung laeuft ueber die bestehende Map-JSON-Pipeline. `MissionTestSetup` uebergibt Patrol-Pfade aus der geladenen Karten-JSON an den `EnemyWaveController`. `MissionCombatLoopDriver` nutzt diese Pfade fuer pre-contact Bewegung: Enemies folgen Waypoints, bis `enemy_should_hold_position` erstmals Kontaktlage meldet, danach greifen wieder die bestehenden reaktiven Combat-Pfade.
+- Offene Punkte: kein separates Patrol-Tempo pro Segment und keine erweiterten Patrol-Modi (pause/look-at), nur zyklischer Waypoint-Follow.
+- Risiken: Patrol-Follow bleibt bewusst klein und nutzt den bestehenden `move_to_position`-Commandpfad; spaetere KI-Ausbauten sollten diesen Hook gezielt ersetzen statt parallel eine zweite Bewegungslogik zu bauen.
+- Naechster Schritt: bei Bedarf spaetere Awareness-/Stealth-Tasks auf den vorhandenen pre-contact Patrol-Zustand aufsetzen.
+
+### TASK_102 – Ad-hoc-Orders und Return-to-Plan
+- Status: implementiert
+- Stand: Ein neuer `AdHocOrderController` verwaltet laufende Sofortbefehle pro Fireteam (`flank`, `disengage`, `fall_back`, `focus_fire`, `hold_till_last_man`) ausserhalb der geplanten `FireteamOrderPlan`-Wegpunkte. Der `TacticalInputController` kann diese Befehle nur bei aktivem Kontakt ausloesen, unterbricht dabei laufende Plan-Ausfuehrung, visualisiert Ad-hoc-Orders als getrennten Overlay-Pfad und fuehrt nach Abschluss oder manuellem `Return to Plan` wieder zum naechsten pending-Wegpunkt zurueck.
+- Offene Punkte: kein separates Suppression-System, keine dedizierte Beschuss-Heuristik ausser Kontaktstatus und keine komplexe Priorisierungslogik zwischen mehreren gleichzeitig konkurrierenden Sofortbefehlen.
+- Risiken: die Gefechtsfreigabe basiert aktuell bewusst auf dem bestehenden Kontaktzustand pro Unit; spaetere feinere Trigger (z. B. suppressive fire ohne direkten Kontakt) muessen explizit in eigenen Tasks folgen.
+- Naechster Schritt: TASK_103 fuer inter-fireteam Koordination ueber EventRouter und erweiterten Return-to-Plan-Glue umsetzen.
+
+### TASK_103 – Suppression, Interruption und Return-to-Plan
+- Status: implementiert
+- Stand: `TacticalInputController` fuehrt jetzt einen laufenden Suppression-Container pro Fireteam mit Treffer-/Nahmiss-Zuwachs und trait-/leadership-abhaengigem Decay. Bei aktiver Suppression werden Fireteams in den Status `interrupted` ueberfuehrt, erhalten temporaere Malus-Werte (`move_speed_factor`, `attack_bonus`, `semi_disciplined` Fire-Discipline) und priorisieren Cover-Halten gegenueber Wegpunkt-Fortschritt; `hold_till_last_man` bleibt von Suppression ausgenommen. Nach Stabilisierung erfolgt automatisch ein Ruecksprung auf den naechsten `pending`-Wegpunkt, und ein manueller Return-to-Plan ist ueber ein neues `FireteamStatusPanel` verfuegbar.
+- Offene Punkte: keine tiefe Morale-/Panik-Kaskade, keine separate Ballistik-/Munitionslogik und keine ausgebauten Mehrstufen-Reaktionen jenseits des aktuellen Suppression-Slices.
+- Risiken: Suppression basiert aktuell auf Kontakt plus Health-Deltas im Testszenen-Controller; spaetere echte Gefechtsinstrumentierung sollte diese Trigger explizit in Runtime-/Combat-Systeme ueberfuehren, statt sie still im UI-nahen Glue wachsen zu lassen.
+- Naechster Schritt: falls noetig, inter-fireteam Koordination ueber dedizierte EventRouter-Consumer weiter ausbauen (z. B. flankierende Entlastungsreaktionen).
+
+### TASK_104 – Inter-Fireteam-Koordination und Leader-initiiertes Flankieren
+- Status: implementiert
+- Stand: Ein neuer `FireteamCoordinationManager` erkennt enge Zielraeume auf Plan-/Fireteam-Ebene und erzeugt Bounding-Zuweisungen, bei denen das Fireteam mit hoeherem `leadership` zuerst vorrueckt und das andere in Cover/Hold bleibt. `TacticalInputController` integriert diese Koordination in den aktiven Phasenlauf, rotiert Rollen nach `fireteam_ready_to_advance` und behandelt Ad-hoc-Unterbrechungen als temporaere Pause mit Rueckkehr in den Koordinationsfluss. Zusaetzlich kann ein aggressiver/reckless Leader mit `leadership > 0.7` bei aktivem Kontakt und verfuegbarem Terrainfenster autonom einen Ad-hoc-`flank` ausloesen. Alle Koordinations-/Flank-Ereignisse werden ueber erweiterte `EventRouter`-Signale kommuniziert.
+- Offene Punkte: keine globale Multi-Fireteam-KI, keine persistente Koordinationshistorie und keine tiefere Gruppen-Taktik ueber den Bounding-Slice hinaus.
+- Risiken: Die aktuelle Koordination bleibt bewusst leichtgewichtig und testszenenlokal; spaetere komplexere Team-Taktik sollte den Signalvertrag explizit weiterfuehren statt den Controller still zu ueberladen.
+- Naechster Schritt: Falls notwendig, in Folge-Tasks dedizierte EventRouter-Consumer fuer Entlastungs-/Unterstuetzungsreaktionen zwischen Fireteams ausbauen.
 
 ### TASK_038 - Fireteam-Aufteilung
 - Status: implementiert

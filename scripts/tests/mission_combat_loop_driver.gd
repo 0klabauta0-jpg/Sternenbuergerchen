@@ -34,6 +34,7 @@ const FRIENDLY_STANDARD_COVER_RADIUS: float = 48.0
 const FRIENDLY_STANDARD_COVER_MIN_DISTANCE: float = 10.0
 const FRIENDLY_STANDARD_COVER_COOLDOWN_MSEC: int = 1600
 const FRIENDLY_LOW_COVER_THRESHOLD: int = 16
+const ENEMY_PATROL_WAYPOINT_REACHED_DISTANCE: float = 18.0
 
 signal contact_established(attacker, target)
 signal combat_resolved(mission_result: Dictionary)
@@ -89,6 +90,9 @@ var _misidentification_cooldown: Dictionary = {}
 var _medic_support_cooldown: Dictionary = {}
 var _friendly_cover_ready_at_msec: Dictionary = {}
 var _overlays_visible: bool = true
+var _enemy_patrol_paths_by_unit_id: Dictionary = {}
+var _enemy_patrol_waypoint_index_by_unit_id: Dictionary = {}
+var _enemy_patrol_contact_locked: Dictionary = {}
 
 
 func _ready() -> void:
@@ -103,6 +107,7 @@ func _ready() -> void:
 		_connect_respawn_signals()
 		_connect_wave_controller_signals()
 		_init_fireteam_leadership()
+		_initialize_enemy_patrol_paths()
 	if preview_mode:
 		_apply_overlay_visibility()
 	else:
@@ -338,9 +343,14 @@ func _update_combat_resolution() -> void:
 
 func _get_units(paths: Array[NodePath]) -> Array:
 	var units: Array = []
+	var unit_registry = get_node_or_null("../UnitRegistry")
 	for path in paths:
 		var unit = get_node_or_null(path)
 		if unit != null and unit is Node2D:
+			if unit_registry != null and unit.has_method("get_unit_id") and unit_registry.has_method("has_unit"):
+				var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+				if unit_id.is_empty() or not bool(unit_registry.call("has_unit", unit_id)):
+					continue
 			units.append(unit)
 
 	return units
@@ -410,6 +420,7 @@ func _is_acting_lead_fit(uid: String) -> bool:
 func _find_best_successor(ft_id: String, exclude_id: String) -> String:
 	var best_id: String = ""
 	var best_leadership: float = -1.0
+	var best_toughness: float = -1.0
 	var members: Array = _fireteam_members.get(ft_id, [])
 	for uid in members:
 		if String(uid) == exclude_id:
@@ -425,9 +436,17 @@ func _find_best_successor(ft_id: String, exclude_id: String) -> String:
 		var leadership: float = 0.0
 		if unit.has_method("get_leadership_skill"):
 			leadership = float(unit.call("get_leadership_skill"))
+		var toughness: float = 0.0
+		if unit.has_method("get_toughness_skill"):
+			toughness = float(unit.call("get_toughness_skill"))
 
 		if leadership > best_leadership:
 			best_leadership = leadership
+			best_toughness = toughness
+			best_id = String(uid)
+			continue
+		if is_equal_approx(leadership, best_leadership) and toughness > best_toughness:
+			best_toughness = toughness
 			best_id = String(uid)
 
 	return best_id
@@ -1524,6 +1543,9 @@ func _advance_enemy_units(simulation_root: Node) -> void:
 		if String(enemy.call("get_vital_state")) != "fit":
 			continue
 
+		if _try_enqueue_enemy_patrol_move(simulation_root, enemy):
+			continue
+
 		if _enemy_should_hold_position(enemy):
 			continue
 
@@ -1538,6 +1560,65 @@ func _advance_enemy_units(simulation_root: Node) -> void:
 				"requeue_until_target": false,
 			}
 		)
+
+
+func _initialize_enemy_patrol_paths() -> void:
+	_enemy_patrol_paths_by_unit_id.clear()
+	_enemy_patrol_waypoint_index_by_unit_id.clear()
+	_enemy_patrol_contact_locked.clear()
+	var enemy_wave_controller = _get_enemy_wave_controller()
+	if enemy_wave_controller == null or not enemy_wave_controller.has_method("get_patrol_path_for_unit"):
+		return
+	for enemy in _get_units(enemy_unit_paths):
+		if enemy == null or not enemy.has_method("get_unit_id"):
+			continue
+		var unit_id: String = String(enemy.call("get_unit_id")).strip_edges()
+		if unit_id.is_empty():
+			continue
+		var patrol_path: Array = Array(enemy_wave_controller.call("get_patrol_path_for_unit", unit_id)).duplicate(true)
+		if patrol_path.is_empty():
+			continue
+		_enemy_patrol_paths_by_unit_id[unit_id] = patrol_path
+		_enemy_patrol_waypoint_index_by_unit_id[unit_id] = 0
+		_enemy_patrol_contact_locked[unit_id] = false
+
+
+func _try_enqueue_enemy_patrol_move(simulation_root: Node, enemy) -> bool:
+	if enemy == null or not (enemy is Node2D) or not enemy.has_method("get_unit_id"):
+		return false
+	var unit_id: String = String(enemy.call("get_unit_id")).strip_edges()
+	if unit_id.is_empty() or not _enemy_patrol_paths_by_unit_id.has(unit_id):
+		return false
+	if bool(_enemy_patrol_contact_locked.get(unit_id, false)):
+		return false
+	if _enemy_should_hold_position(enemy):
+		_enemy_patrol_contact_locked[unit_id] = true
+		return false
+	var patrol_path: Array = Array(_enemy_patrol_paths_by_unit_id.get(unit_id, []))
+	if patrol_path.is_empty():
+		return false
+	var waypoint_index: int = int(_enemy_patrol_waypoint_index_by_unit_id.get(unit_id, 0))
+	if waypoint_index < 0:
+		waypoint_index = 0
+	if waypoint_index >= patrol_path.size():
+		waypoint_index = 0
+	var target_position: Vector2 = _coerce_vector2(patrol_path[waypoint_index], (enemy as Node2D).global_position)
+	if (enemy as Node2D).global_position.distance_to(target_position) <= ENEMY_PATROL_WAYPOINT_REACHED_DISTANCE:
+		waypoint_index = (waypoint_index + 1) % patrol_path.size()
+		_enemy_patrol_waypoint_index_by_unit_id[unit_id] = waypoint_index
+		target_position = _coerce_vector2(patrol_path[waypoint_index], target_position)
+	simulation_root.call(
+		"enqueue_command",
+		{
+			"command_type": "move_to_position",
+			"priority": 7,
+			"unit_id": unit_id,
+			"target_position": target_position,
+			"move_speed_factor": enemy_advance_speed_factor,
+			"requeue_until_target": false,
+		}
+	)
+	return true
 
 
 func _enemy_should_hold_position(enemy) -> bool:
@@ -1860,3 +1941,14 @@ func _on_enemy_wave_started(wave_number: int) -> void:
 
 	_set_event_text("ENEMY REINFORCEMENTS")
 	_broadcast_remote_event("ENEMY REINFORCEMENTS")
+
+
+func _coerce_vector2(value: Variant, fallback: Vector2) -> Vector2:
+	if value is Vector2:
+		return value
+	if value is Vector2i:
+		return Vector2(value.x, value.y)
+	if typeof(value) == TYPE_DICTIONARY:
+		var value_dict: Dictionary = value
+		return Vector2(float(value_dict.get("x", fallback.x)), float(value_dict.get("y", fallback.y)))
+	return fallback

@@ -10,6 +10,7 @@ var _tile_half_width: float = 64.0
 var _tile_half_height: float = 32.0
 var _grid_origin: Vector2 = Vector2.ZERO
 var _markers: Dictionary = {}
+var _patrol_paths: Dictionary = {}
 var _tiles: Array = []
 
 
@@ -38,6 +39,7 @@ static func load_from_file(path: String) -> TerrainMapData:
 	terrain_map_data._tile_half_height = maxf(float(tile_size_dict.get("half_height", 32.0)), 0.001)
 	terrain_map_data._grid_origin = _coerce_vector2(root_dict.get("grid_origin", Vector2.ZERO))
 	terrain_map_data._markers = _coerce_marker_dictionary(root_dict.get("markers", {}))
+	terrain_map_data._patrol_paths = _coerce_patrol_dictionary(root_dict.get("patrol_paths", {}))
 
 	var tiles_variant: Variant = root_dict.get("tiles", [])
 	if tiles_variant is Array:
@@ -128,6 +130,7 @@ func save_to_file(path: String) -> Error:
 			"y": int(round(_grid_origin.y)),
 		},
 		"markers": _serialize_markers(),
+		"patrol_paths": _serialize_patrol_paths(),
 		"tiles": [],
 	}
 
@@ -203,6 +206,28 @@ func get_grid_origin() -> Vector2:
 
 func get_markers() -> Dictionary:
 	return _markers.duplicate(true)
+
+
+func get_patrol_paths() -> Dictionary:
+	return _patrol_paths.duplicate(true)
+
+
+func get_patrol_path(spawn_id: String) -> Array:
+	var normalized_spawn_id: String = spawn_id.strip_edges()
+	if normalized_spawn_id.is_empty() or not _patrol_paths.has(normalized_spawn_id):
+		return []
+	return _coerce_patrol_waypoints(_patrol_paths.get(normalized_spawn_id, []))
+
+
+func set_patrol_path(spawn_id: String, waypoints: Array) -> void:
+	var normalized_spawn_id: String = spawn_id.strip_edges()
+	if normalized_spawn_id.is_empty():
+		return
+	var normalized_waypoints: Array = _coerce_patrol_waypoints(waypoints)
+	if normalized_waypoints.is_empty():
+		_patrol_paths.erase(normalized_spawn_id)
+		return
+	_patrol_paths[normalized_spawn_id] = normalized_waypoints
 
 
 func get_marker_position(marker_id: String, fallback: Vector2 = Vector2.ZERO) -> Vector2:
@@ -318,3 +343,43 @@ func _serialize_markers() -> Dictionary:
 		}
 
 	return serialized_markers
+
+
+static func _coerce_patrol_dictionary(value: Variant) -> Dictionary:
+	var result: Dictionary = {}
+	if typeof(value) != TYPE_DICTIONARY:
+		return result
+	var patrol_dict: Dictionary = value
+	for spawn_id_variant in patrol_dict.keys():
+		var spawn_id: String = String(spawn_id_variant).strip_edges()
+		if spawn_id.is_empty():
+			continue
+		result[spawn_id] = _coerce_patrol_waypoints(patrol_dict.get(spawn_id_variant, []))
+	return result
+
+
+static func _coerce_patrol_waypoints(value: Variant) -> Array:
+	var result: Array = []
+	if not (value is Array):
+		return result
+	for waypoint_variant in value:
+		result.append(_coerce_vector2(waypoint_variant))
+	return result
+
+
+func _serialize_patrol_paths() -> Dictionary:
+	var serialized_paths: Dictionary = {}
+	for spawn_id_variant in _patrol_paths.keys():
+		var spawn_id: String = String(spawn_id_variant).strip_edges()
+		if spawn_id.is_empty():
+			continue
+		var serialized_waypoints: Array = []
+		for waypoint in _coerce_patrol_waypoints(_patrol_paths.get(spawn_id_variant, [])):
+			serialized_waypoints.append(
+				{
+					"x": int(round(waypoint.x)),
+					"y": int(round(waypoint.y)),
+				}
+			)
+		serialized_paths[spawn_id] = serialized_waypoints
+	return serialized_paths
