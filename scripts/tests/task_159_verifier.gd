@@ -2,6 +2,8 @@ extends SceneTree
 
 const MAP_EDITOR_SCENE_PATH: String = "res://scenes/editor/map_editor.tscn"
 const LIVE_MISSION_SCENE_PATH: String = "res://scenes/tests/mission_reactivity_test.tscn"
+const CALIBRATION_SCENE_PATH: String = "res://scenes/tests/mission_map_3d_calibration.tscn"
+const RENDER_SPIKE_SCENE_PATH: String = "res://scenes/tests/mission_map_3d_render_spike.tscn"
 
 var _passed: int = 0
 var _failed: int = 0
@@ -15,6 +17,7 @@ func _run_tests() -> void:
 	print("=== TASK_159 2.5D Editor and Mission Primary View Verifier ===")
 	await _test_editor_uses_3d_primary_view()
 	await _test_live_mission_uses_3d_primary_view()
+	await _test_auxiliary_3d_map_scenes_load()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	if _failed > 0:
 		print("FAIL")
@@ -104,6 +107,27 @@ func _test_live_mission_uses_3d_primary_view() -> void:
 		_assert(int(order_snapshot.get("area_order_count", 0)) >= 1, "Attack Area is mirrored into the 3D primary view")
 
 	live_scene.queue_free()
+	await _wait_frames(2)
+
+
+func _test_auxiliary_3d_map_scenes_load() -> void:
+	await _assert_auxiliary_3d_map_scene_loads(CALIBRATION_SCENE_PATH, "Calibration")
+	await _assert_auxiliary_3d_map_scene_loads(RENDER_SPIKE_SCENE_PATH, "Render spike")
+
+
+func _assert_auxiliary_3d_map_scene_loads(scene_path: String, label: String) -> void:
+	var scene_root := _instantiate_scene(scene_path)
+	_assert(scene_root != null, "%s 3D map scene instantiates" % label)
+	if scene_root == null:
+		return
+	root.add_child(scene_root)
+	await _wait_frames(10)
+	var primary_view := scene_root.get_node_or_null("Primary3DView")
+	_assert(primary_view != null and primary_view.has_method("get_render_snapshot"), "%s 3D map scene attaches Primary3DView" % label)
+	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot")) if primary_view != null else {}
+	_assert(int(snapshot.get("tile_count", 0)) > 0, "%s 3D map scene renders terrain tiles" % label)
+	_assert(int(snapshot.get("asset_model_count", 0)) > 0, "%s 3D map scene renders asset models" % label)
+	scene_root.queue_free()
 	await _wait_frames(2)
 
 

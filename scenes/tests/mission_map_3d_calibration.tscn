@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://cpmvjntw4jqr0"]
+
+[ext_resource type="Script" path="res://scripts/tests/mission_map_3d_calibration.gd" id="1_o2ux8"]
+
+[node name="MissionMap3DCalibration" type="Node3D" unique_id=520458792]
+script = ExtResource("1_o2ux8")
+
+[node name="MapRoot" type="Node3D" parent="." unique_id=966250275]
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1748795377]
+transform = Transform3D(0.997785, 0, -0.066519, -0.061382, 0.385342, -0.92073, 0.025633, 0.922774, 0.384489, 16, 18, 23)
+projection = 1
+current = true
+size = 14.0
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=2054827914]
+transform = Transform3D(0.819152, 0.469846, -0.328989, 0, 0.573576, 0.819152, 0.573576, -0.67101, 0.469846, 0, 0, 0)
+light_energy = 1.6

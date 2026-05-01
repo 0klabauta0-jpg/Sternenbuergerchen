@@ -52,6 +52,7 @@ Die sichtbare Kartenoberflaeche und die bedienbare Kamera sollen aber nicht mehr
 - [x] TacticalController kann LZ und taktische Ziele ueber die 2.5D-Ansicht setzen.
 - [x] Kartenobjekte, Waende, Cliffs, Rampen und Felsen nutzen in der 2.5D-View echte Kenney-GLB-Modelle statt Block-Platzhalter, soweit ein Asset im Pack vorhanden ist.
 - [x] Importierte Kenney-GLB-Root-Offsets werden beim Rendern neutralisiert, damit Modelle auf dem Tile-Anker sitzen.
+- [x] Die 3D-Kalibrierungs- und Render-Spike-Szenen besitzen ihre Script-Dependencies und laden die gemeinsame `TerrainMap3DView`.
 - [x] Bestehende Authoring-/Live-Verifier bleiben lauffaehig oder dokumentieren bewusst offene GUI-Risiken.
 
 ## Lokale Pruefung
@@ -65,7 +66,11 @@ Die sichtbare Kartenoberflaeche und die bedienbare Kamera sollen aber nicht mehr
 - `scripts/tests/mission_test_setup.gd`
 - `scripts/tests/mission_map_camera_controller.gd`
 - `scripts/tests/mission_tactical_sandbox_controller.gd`
+- `scripts/tests/mission_map_3d_calibration.gd`
+- `scripts/tests/mission_map_3d_render_spike.gd`
 - `scripts/tests/task_159_verifier.gd`
+- `scenes/tests/mission_map_3d_calibration.tscn`
+- `scenes/tests/mission_map_3d_render_spike.tscn`
 - `docs/tasks/TASK_159_2_5d_editor_and_mission_primary_view.md`
 
 ## Risiken
@@ -77,6 +82,7 @@ Die sichtbare Kartenoberflaeche und die bedienbare Kamera sollen aber nicht mehr
 - `TerrainMap3DView` rendert `TerrainMapData` als gemeinsame 2.5D-Primary-View mit `SubViewport`, `Node3D`, `Camera3D`, Terrain-/Objekt-/Marker-/Patrol-Visuals, Unit-Proxies, LZ-/Dropship-Proxy und taktischen Area-/Contact-Overlays.
 - Terrain-Objekte, Waende, Cliffs, Rampen und Felsen werden in dieser View aus den vorhandenen Kenney-GLB-Modellen instanziiert; Block-Platzhalter bleiben nur als Fallback fuer nicht aufloesbare Asset-Typen.
 - Die importierten GLB-Root-Translations werden unter dem `Asset_*`-Wrapper auf `Vector3.ZERO` gesetzt, damit die Wrapper-Position die Tile-Mitte bleibt.
+- `mission_map_3d_calibration.tscn` und `mission_map_3d_render_spike.tscn` laden jetzt ueber kleine Test-Scripts dieselbe 2.5D-Primary-View, sodass Godot sie ohne fehlende Script-Dependencies oeffnen kann.
 - Der Map-Editor deaktiviert die alte `Camera2D`, blendet Legacy-2D-Kartencontainer aus und fuehrt WASD, Zoom, Rotation sowie Tile-/Marker-/Patrol-Picking ueber die 3D-View.
 - Die Live-Mission blendet alte Terrain-/Unit-Sprites aus, laesst die `Node2D`-Runtime-Anker fuer Simulation/Selection sichtbar und spiegelt Units, LZ, Dropship, Attack Areas und Contacts in die 3D-View.
 - TASK_158 wurde so angepasst, dass die Live-Visual-Bridge jetzt die 3D-Primary-View akzeptiert statt alte 2D-Sprites als sichtbare Wahrheit zu verlangen.
