@@ -50,7 +50,7 @@ Die sichtbare Kartenoberflaeche und die bedienbare Kamera sollen aber nicht mehr
 - [x] Editor-Picking fuer Tile-, Marker- und Patrol-Arbeit nutzt die 2.5D-Karte.
 - [x] Live-Mission blendet alte 2D-Terrain-/Unit-Sprites aus und zeigt 3D-Proxies fuer Friendlies/Enemies.
 - [x] TacticalController kann LZ und taktische Ziele ueber die 2.5D-Ansicht setzen.
-- [x] Boden, Kartenobjekte, Waende, Ecken, Cliffs, Rampen und Felsen nutzen in der 2.5D-View die authored Kenney-Isometric-Texturen und das bestehende Richtungs-Mapping; GLB-/Block-Modelle bleiben nur Fallback.
+- [x] Boden, Kartenobjekte, Waende, Ecken, automatische Cliff-/Slope-Kanten, Rampen und Felsen nutzen in der 2.5D-View die authored Kenney-Isometric-Texturen und das bestehende Richtungs-Mapping; GLB-/Block-Modelle bleiben nur Fallback.
 - [x] Runtime-Units spiegeln die vorhandenen Unit-`Visual`-/Weapon-Sprites als 2.5D-Texturkarten statt generische Astronaut-GLBs zu erzwingen.
 - [x] Der Dropship-Marker nutzt die vom TacticalController berechnete Isometric-Speeder-Textur statt Box-/Wing- oder GLB-Platzhaltern.
 - [x] Die 2.5D-Bodenkarte nutzt wieder `terrain_SW.png` mit dem bestehenden Tile-Modulate, damit Farbe und Lesbarkeit dem authored 2D-Stand entsprechen.
@@ -63,6 +63,7 @@ Die sichtbare Kartenoberflaeche und die bedienbare Kamera sollen aber nicht mehr
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_158_verifier.gd`
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_157_verifier.gd`
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_155_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/wall_direction_mapping_verifier.gd`
 
 ## Dateien (voraussichtlich)
 - `scripts/terrain/terrain_map_3d_view.gd`
@@ -84,7 +85,7 @@ Die sichtbare Kartenoberflaeche und die bedienbare Kamera sollen aber nicht mehr
 
 ## Ergebnis
 - `TerrainMap3DView` rendert `TerrainMapData` als gemeinsame 2.5D-Primary-View mit `SubViewport`, `Node3D`, `Camera3D`, Terrain-/Objekt-/Marker-/Patrol-Visuals, Unit-Proxies, LZ-/Dropship-Proxy und taktischen Area-/Contact-Overlays.
-- Terrain-Objekte, Waende, Cliffs, Rampen, Felsen und Katalog-Objekte werden in dieser View wieder aus den vorhandenen Kenney-Isometric-PNGs als `Sprite3D`-Texturkarten gerendert; dadurch bleiben Texturen, Farben, Richtungs-Mapping und authored Sprite-Groessen erhalten.
+- Terrain-Objekte, Waende, automatische Cliff-/Slope-Kanten, Rampen, Felsen und Katalog-Objekte werden in dieser View wieder aus den vorhandenen Kenney-Isometric-PNGs als `Sprite3D`-Texturkarten gerendert; dadurch bleiben Texturen, Farben, Richtungs-Mapping und authored Sprite-Groessen erhalten.
 - GLB-Modelle bleiben nur Fallback fuer nicht aufloesbare Texturen. Der fruehere Versuch, GLBs als primaere Map-Assets zu verwenden, war sichtbar falsch, weil dabei Texturen, Wall-/Corner-Richtungen, Objektfarben und Sprite-Groessen verloren gingen.
 - `TerrainMapData.load_from_file()` laedt den Terrain-Tile-Katalog nur noch einmal pro Map. Vorher wurde der Katalog fuer jedes Tile neu geladen, was die 32x32-Live-Mission beim Start fuer lange Zeit blockiert hat.
 - `TerrainTileData.from_dict()` erzeugt Tiles direkt ueber die bestehende Klasse statt pro Tile das Script erneut zu laden.
@@ -94,3 +95,4 @@ Die sichtbare Kartenoberflaeche und die bedienbare Kamera sollen aber nicht mehr
 - Der Map-Editor deaktiviert die alte `Camera2D`, blendet Legacy-2D-Kartencontainer aus und fuehrt WASD, Zoom, Rotation sowie Tile-/Marker-/Patrol-Picking ueber die 3D-View.
 - Die Live-Mission blendet alte Terrain-/Unit-Sprites aus, laesst die `Node2D`-Runtime-Anker fuer Simulation/Selection sichtbar und spiegelt Units, LZ, Dropship, Attack Areas und Contacts in die 3D-View; die versteckte 2D-Karte wird im 2.5D-Primary-Pfad nicht mehr parallel gerendert.
 - TASK_158 wurde so angepasst, dass die Live-Visual-Bridge jetzt die 3D-Primary-View akzeptiert statt alte 2D-Sprites als sichtbare Wahrheit zu verlangen.
+- TASK_159 und `wall_direction_mapping_verifier.gd` pruefen jetzt explizit Kenney-Anker, automatische Height-Edge-Texturen, Wall-Richtungsmapping, Unit-/Dropship-Texturen, Satellitengroesse und Render-Zeitgrenzen gegen die alten Freeze-/Fallback-Regressionen.

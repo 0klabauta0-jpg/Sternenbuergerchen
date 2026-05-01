@@ -3,6 +3,7 @@ extends SceneTree
 const MAP_EDITOR_SCRIPT: GDScript = preload("res://scripts/editor/map_editor.gd")
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const TERRAIN_MAP_RENDERER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_renderer.gd")
+const TERRAIN_MAP_3D_VIEW_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_3d_view.gd")
 
 const WALL_TYPE_IDS: PackedStringArray = [
 	"wall_straight_se",
@@ -30,6 +31,7 @@ func _run_tests() -> void:
 	print("=== Wall Direction Mapping Verifier ===")
 	_test_terrain_renderer_wall_mapping()
 	_test_map_editor_wall_mapping()
+	await _test_terrain_map_3d_view_wall_mapping()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	if _failed > 0:
 		print("FAIL")
@@ -68,6 +70,23 @@ func _test_map_editor_wall_mapping() -> void:
 		var texture_path: String = sprite.texture.resource_path if sprite != null and sprite.texture != null else ""
 		_assert(texture_path == String(EXPECTED_WALL_TEXTURES[type_id]), "MapEditor maps %s to %s" % [type_id, String(EXPECTED_WALL_TEXTURES[type_id]).get_file()])
 	editor.queue_free()
+
+
+func _test_terrain_map_3d_view_wall_mapping() -> void:
+	var primary_view: Node = TERRAIN_MAP_3D_VIEW_SCRIPT.new()
+	root.add_child(primary_view)
+	primary_view.call("configure_from_map", _make_wall_map_data())
+	await _wait_frames(4)
+	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
+	_assert(int(snapshot.get("asset_texture_count", 0)) == WALL_TYPE_IDS.size(), "TerrainMap3DView renders walls as authored texture cards")
+	_assert(int(snapshot.get("asset_model_count", 0)) == 0 and int(snapshot.get("placeholder_object_count", 0)) == 0, "TerrainMap3DView does not use GLB/block fallback for authored wall textures")
+	for type_id in WALL_TYPE_IDS:
+		var grid_position: Vector2i = _grid_for_type_id(type_id)
+		var sprite := _find_3d_wall_sprite(primary_view, type_id, grid_position)
+		var texture_path: String = sprite.texture.resource_path if sprite != null and sprite.texture != null else ""
+		_assert(texture_path == String(EXPECTED_WALL_TEXTURES[type_id]), "TerrainMap3DView maps %s to %s" % [type_id, String(EXPECTED_WALL_TEXTURES[type_id]).get_file()])
+	primary_view.queue_free()
+	await _wait_frames(2)
 
 
 func _make_wall_map_data():
@@ -111,6 +130,18 @@ func _find_editor_wall_sprite_at(editor, grid_position: Vector2i) -> Sprite2D:
 		if sprite != null and sprite.position == expected_position:
 			return sprite
 	return null
+
+
+func _find_3d_wall_sprite(primary_view: Node, type_id: String, grid_position: Vector2i) -> Sprite3D:
+	var map_root := primary_view.get_node_or_null("ViewportContainer/SubViewport/WorldRoot/MapRoot3D")
+	if map_root == null:
+		return null
+	return map_root.get_node_or_null("AssetTexture_%s_%d_%d/Texture" % [type_id, grid_position.x, grid_position.y]) as Sprite3D
+
+
+func _wait_frames(frame_count: int) -> void:
+	for _index in range(maxi(frame_count, 0)):
+		await process_frame
 
 
 func _assert(condition: bool, message: String) -> void:

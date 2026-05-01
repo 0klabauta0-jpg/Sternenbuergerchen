@@ -43,6 +43,10 @@ const RAMP_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isomet
 const RAMP_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_rampLarge_SW.png")
 const RAMP_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_rampLarge_NE.png")
 const RAMP_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_rampLarge_NW.png")
+const SLOPE_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_side_SE.png")
+const SLOPE_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_side_SW.png")
+const SLOPE_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_side_NE.png")
+const SLOPE_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_side_NW.png")
 const WALL_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wall_SE.png")
 const WALL_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wall_SW.png")
 const WALL_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wall_NE.png")
@@ -112,6 +116,7 @@ var _camera: Camera3D = null
 var _terrain_map_data = null
 var _tile_catalog = null
 var _model_scene_cache: Dictionary = {}
+var _render_tile_by_grid: Dictionary = {}
 var _unit_nodes: Array = []
 var _unit_proxies_by_id: Dictionary = {}
 var _selected_grid_positions: Array = []
@@ -130,6 +135,7 @@ var _camera_yaw_degrees: float = 45.0
 var _camera_pitch_degrees: float = 58.0
 var _map_tile_count: int = 0
 var _tile_texture_count: int = 0
+var _height_edge_texture_count: int = 0
 var _asset_texture_count: int = 0
 var _asset_model_count: int = 0
 var _placeholder_object_count: int = 0
@@ -177,8 +183,10 @@ func render_map(terrain_map_data = null) -> void:
 	_clear_children(_order_root)
 	_clear_children(_contact_root)
 	_clear_children(_drop_root)
+	_render_tile_by_grid.clear()
 	_map_tile_count = 0
 	_tile_texture_count = 0
+	_height_edge_texture_count = 0
 	_asset_texture_count = 0
 	_asset_model_count = 0
 	_placeholder_object_count = 0
@@ -188,8 +196,14 @@ func render_map(terrain_map_data = null) -> void:
 		_map_render_duration_msec = Time.get_ticks_msec() - render_started_at_msec
 		return
 
-	for tile_data in Array(_terrain_map_data.call("get_tiles")):
+	var tiles: Array = Array(_terrain_map_data.call("get_tiles"))
+	for tile_data in tiles:
+		if tile_data != null:
+			_render_tile_by_grid[tile_data.grid_position] = tile_data
+	for tile_data in tiles:
 		_add_tile_visual(tile_data)
+	for tile_data in tiles:
+		_add_height_edge_texture_visuals(tile_data)
 	_rebuild_marker_visuals()
 	_rebuild_patrol_visuals()
 	_rebuild_selection_visuals()
@@ -330,6 +344,7 @@ func get_render_snapshot() -> Dictionary:
 	return {
 		"tile_count": _map_tile_count,
 		"tile_texture_count": _tile_texture_count,
+		"height_edge_texture_count": _height_edge_texture_count,
 		"asset_texture_count": _asset_texture_count,
 		"asset_model_count": _asset_model_count,
 		"placeholder_object_count": _placeholder_object_count,
@@ -539,6 +554,83 @@ func _add_object_visual(tile_data, top_y: float, visual_type_id: String) -> void
 	instance.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + (object_height * 0.5))
 	_map_root.add_child(instance)
 	_placeholder_object_count += 1
+
+
+func _add_height_edge_texture_visuals(tile_data) -> void:
+	if tile_data == null or _map_root == null:
+		return
+	if int(tile_data.height_level) <= 0 or _is_legacy_object_type(tile_data):
+		return
+	var current_edge_type: String = String(tile_data.edge_type)
+	if current_edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE:
+		return
+
+	var grid_pos: Vector2i = tile_data.grid_position
+	var my_height: int = int(tile_data.height_level)
+	var is_slope: bool = current_edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE
+	var cliff_edge_dirs: Array[Vector2i] = []
+	for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		var neighbor = _render_tile_by_grid.get(grid_pos + offset, null)
+		var neighbor_height: int = int(neighbor.height_level) if neighbor != null else 0
+		if neighbor_height < my_height and not _is_legacy_object_type(neighbor):
+			cliff_edge_dirs.append(offset)
+
+	var top_y: float = float(my_height) * HEIGHT_STEP
+	var corner_map: Array = [
+		[Vector2i(1, 0), Vector2i(0, 1), CLIFF_CORNER_NE],
+		[Vector2i(1, 0), Vector2i(0, -1), CLIFF_CORNER_NW],
+		[Vector2i(-1, 0), Vector2i(0, 1), CLIFF_CORNER_SE],
+		[Vector2i(-1, 0), Vector2i(0, -1), CLIFF_CORNER_SW],
+	]
+	var edges_consumed_by_corners: Array[Vector2i] = []
+	for corner_entry in corner_map:
+		var dir_a: Vector2i = corner_entry[0]
+		var dir_b: Vector2i = corner_entry[1]
+		var corner_texture := corner_entry[2] as Texture2D
+		if cliff_edge_dirs.has(dir_a) and cliff_edge_dirs.has(dir_b):
+			_add_height_edge_texture_card(tile_data, top_y, corner_texture, "Corner_%d_%d_%d_%d" % [grid_pos.x, grid_pos.y, dir_a.x + dir_b.x, dir_a.y + dir_b.y])
+			if not edges_consumed_by_corners.has(dir_a):
+				edges_consumed_by_corners.append(dir_a)
+			if not edges_consumed_by_corners.has(dir_b):
+				edges_consumed_by_corners.append(dir_b)
+
+	var edge_texture_map: Dictionary
+	if is_slope:
+		edge_texture_map = {
+			Vector2i(1, 0): SLOPE_TEXTURE_SE,
+			Vector2i(-1, 0): SLOPE_TEXTURE_NW,
+			Vector2i(0, 1): SLOPE_TEXTURE_SW,
+			Vector2i(0, -1): SLOPE_TEXTURE_NE,
+		}
+	else:
+		edge_texture_map = {
+			Vector2i(1, 0): CLIFF_TEXTURE_SE,
+			Vector2i(-1, 0): CLIFF_TEXTURE_NW,
+			Vector2i(0, 1): CLIFF_TEXTURE_SW,
+			Vector2i(0, -1): CLIFF_TEXTURE_NE,
+		}
+
+	for edge_dir in cliff_edge_dirs:
+		if edges_consumed_by_corners.has(edge_dir):
+			continue
+		var edge_texture := edge_texture_map.get(edge_dir, null) as Texture2D
+		_add_height_edge_texture_card(tile_data, top_y, edge_texture, "Edge_%d_%d_%d_%d" % [grid_pos.x, grid_pos.y, edge_dir.x, edge_dir.y])
+
+
+func _add_height_edge_texture_card(tile_data, top_y: float, texture: Texture2D, node_name: String) -> void:
+	if texture == null:
+		return
+	var card := _add_texture_card(
+		_map_root,
+		texture,
+		_grid_to_3d_position(Vector2(tile_data.grid_position), top_y + 0.018),
+		"Height%s" % node_name,
+		TEXTURE_CARD_PIXEL_SIZE,
+		_get_kenney_anchor_offset(texture),
+		Color(1.0, 1.0, 1.0, 1.0)
+	)
+	if card != null:
+		_height_edge_texture_count += 1
 
 
 func _add_asset_texture_visual(tile_data, top_y: float, visual_type_id: String) -> bool:
@@ -1150,6 +1242,13 @@ func _resolve_tile_asset_type_id(object_type_id: String, type_id: String) -> Str
 	if not String(entry.get("texture_path", "")).strip_edges().is_empty():
 		return normalized_type
 	return ""
+
+
+func _is_legacy_object_type(tile_data) -> bool:
+	if tile_data == null:
+		return false
+	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
+	return type_id.begins_with("wall_") or type_id.begins_with("cliff_") or type_id.begins_with("slope_") or type_id.begins_with("rock_")
 
 
 func _get_asset_model_scene(visual_type_id: String) -> PackedScene:

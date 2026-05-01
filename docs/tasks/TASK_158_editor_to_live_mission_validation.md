@@ -1,7 +1,7 @@
 # TASK_158 - Editor-to-Live Mission Validation
 
 ## Ziel
-Der neue Mission-Authoring-Pfad wird gegen die Live-Mission validiert. Ein im Editor gespeichertes Szenario muss mit 3D-Bridge, Enemy-Waves, Patrols, Objective, Contact-System und taktischen Area Orders sauber spielbar sein.
+Der neue Mission-Authoring-Pfad wird gegen die Live-Mission validiert. Ein im Editor gespeichertes Szenario muss mit der 2.5D-Primary-View, Enemy-Waves, Patrols, Objective, Contact-System und taktischen Area Orders sauber spielbar sein.
 
 ## Status: IMPLEMENTIERT
 
@@ -30,7 +30,7 @@ LZ bleibt Spieleraktion. Der Test darf eine LZ ueber denselben Missions-/Control
    - Attack Area erstellen
    - Contact/Enemy-Wave wird sichtbar
    - Objective kann Fortschritt melden
-3. 3D-Bridge-Validierung:
+3. 2.5D-Bridge-Validierung:
    - Unit-/Enemy-Visuals sichtbar
    - Area-Order-Visuals sichtbar
    - Contact-/Patrol-relevante Daten nicht nur im 2D-Fallback haengen
@@ -74,9 +74,9 @@ LZ bleibt Spieleraktion. Der Test darf eine LZ ueber denselben Missions-/Control
 
 ## Risiken
 - Wenn der Test zu breit wird, wird er langsam und fragil. Deshalb soll er ein Smoke bleiben und Detailregressionen den vorhandenen Task-Verifiern ueberlassen.
-- Im getrackten Branch existieren aktuell keine produktiven 3D-Bridge-Skripte. Der Verifier prueft deshalb den vorhandenen Live-Visual-Bridge-Stand (`FireteamOrderVisualizer`, `ContactMapOverlay`, Unit-/Enemy-Visuals) und die manuelle Checkliste fordert bei einem 3D-primary Branch dieselben Daten erneut in der 3D-Ansicht zu pruefen.
+- Der Verifier prueft inzwischen den TASK_159-2.5D-Primary-Pfad: LZ, Dropship, Unit-Proxies, Attack Area, Contact Overlay und Objective-Daten duerfen nicht nur im alten 2D-Fallback sichtbar sein.
 
 ## Ergebnis
 - `data/mission_scenarios/editor_validation_smoke.json` beschreibt ein kleines Editor-Smoke-Szenario ohne LZ mit Objective, zwei Enemy-Waves und Patrol-Bindings.
-- `scripts/tests/task_158_verifier.gd` laedt das Szenario ueber den Editor, speichert es als Live-Test-Scratch, startet die Live-Mission, setzt die LZ ueber den Controller-Pfad, ruft den Dropship, prueft Deploy, Attack Area, Contact Overlay, Objective-Fortschritt und sichtbare Unit-/Enemy-/Area-Visuals.
+- `scripts/tests/task_158_verifier.gd` laedt das Szenario ueber den Editor, speichert es als Live-Test-Scratch, startet die Live-Mission, setzt die LZ ueber den Controller-Pfad, ruft den Dropship, prueft Deploy, Attack Area, Contact Overlay, Objective-Fortschritt und sichtbare Unit-/Enemy-/Area-Visuals in der 2.5D-Primary-View.
 - `docs/manual_checks/editor_to_live_mission_checklist.md` dokumentiert den manuellen Editor-to-Live-Durchlauf.

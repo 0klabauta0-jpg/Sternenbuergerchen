@@ -148,6 +148,8 @@ func _verify_player_lz_and_dropship(live_scene: Node) -> void:
 	await _wait_frames(4)
 	_assert(_scene_has_no_player_lz(live_scene), "Waiting dropship state does not create an LZ by itself")
 	_assert(_primary_3d_dropship_texture_visible(live_scene), "Waiting dropship is mirrored as an authored 2.5D craft texture without auto LZ")
+	_assert(_primary_3d_dropship_texture_path(live_scene).ends_with("craft_speederB_SE.png"), "Waiting dropship uses the authored isometric speeder texture in the 3D primary view")
+	_assert(not _primary_3d_dropship_model_visible(live_scene), "Waiting dropship does not fall back to GLB model when an authored texture exists")
 
 	var lz_position := Vector2(448.0, 285.0)
 	_assert(_place_lz_via_player_path(controller, lz_position), "Player/controller LZ path sets the mission LZ")
@@ -306,6 +308,24 @@ func _primary_3d_dropship_texture_visible(scene: Node) -> bool:
 		return false
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 	return bool(snapshot.get("dropship_texture_visible", false)) or bool(snapshot.get("dropship_model_visible", false))
+
+
+func _primary_3d_dropship_model_visible(scene: Node) -> bool:
+	var primary_view = _get_primary_3d_view(scene)
+	if primary_view == null or not primary_view.has_method("get_render_snapshot"):
+		return false
+	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
+	return bool(snapshot.get("dropship_model_visible", false))
+
+
+func _primary_3d_dropship_texture_path(scene: Node) -> String:
+	var primary_view = _get_primary_3d_view(scene)
+	if primary_view == null:
+		return ""
+	var sprite := primary_view.get_node_or_null("ViewportContainer/SubViewport/WorldRoot/DropRoot3D/DropshipTexture") as Sprite3D
+	if sprite == null or sprite.texture == null:
+		return ""
+	return String(sprite.texture.resource_path).strip_edges()
 
 
 func _get_primary_3d_view(scene: Node):

@@ -4,6 +4,12 @@ const MAP_EDITOR_SCENE_PATH: String = "res://scenes/editor/map_editor.tscn"
 const LIVE_MISSION_SCENE_PATH: String = "res://scenes/tests/mission_reactivity_test.tscn"
 const CALIBRATION_SCENE_PATH: String = "res://scenes/tests/mission_map_3d_calibration.tscn"
 const RENDER_SPIKE_SCENE_PATH: String = "res://scenes/tests/mission_map_3d_render_spike.tscn"
+const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
+const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
+const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_catalog.gd")
+const TERRAIN_MAP_3D_VIEW_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_3d_view.gd")
+const KENNEY_DIAMOND_CENTER := Vector2(256.0, 315.0)
+const MAX_3D_RENDER_DURATION_MSEC: int = 8000
 
 var _passed: int = 0
 var _failed: int = 0
@@ -16,6 +22,7 @@ func _init() -> void:
 func _run_tests() -> void:
 	print("=== TASK_159 2.5D Editor and Mission Primary View Verifier ===")
 	await _test_editor_uses_3d_primary_view()
+	await _test_authored_2_5d_visual_parity_contract()
 	await _test_live_mission_uses_3d_primary_view()
 	await _test_auxiliary_3d_map_scenes_load()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
@@ -41,6 +48,7 @@ func _test_editor_uses_3d_primary_view() -> void:
 	_assert(int(snapshot.get("tile_texture_count", 0)) == int(snapshot.get("tile_count", 0)), "Editor Primary3DView renders authored terrain textures")
 	_assert(int(snapshot.get("asset_texture_count", 0)) > 0, "Editor Primary3DView renders authored Kenney asset textures")
 	_assert(_asset_texture_cards_have_textures(primary_view), "Editor 2.5D asset cards keep non-empty isometric textures")
+	_assert(int(snapshot.get("map_render_duration_msec", MAX_3D_RENDER_DURATION_MSEC + 1)) < MAX_3D_RENDER_DURATION_MSEC, "Editor Primary3DView map render stays below freeze threshold")
 
 	var camera2d := editor.get_node_or_null("Camera2D") as Camera2D
 	_assert(camera2d != null and not camera2d.enabled, "Editor legacy Camera2D is disabled")
@@ -60,6 +68,52 @@ func _test_editor_uses_3d_primary_view() -> void:
 	await _wait_frames(2)
 
 
+func _test_authored_2_5d_visual_parity_contract() -> void:
+	var map_data = TERRAIN_MAP_DATA_SCRIPT.call("create_empty", "visual_parity_3d", Vector2i(4, 4), Vector2(256.0, 128.0), 64.0, 32.0, 3)
+	var catalog = TERRAIN_TILE_CATALOG_SCRIPT.call("load_from_file")
+	_assert(map_data != null and catalog != null, "Visual parity test map and catalog instantiate")
+	if map_data == null or catalog == null:
+		return
+
+	var elevated_tile = map_data.call("get_tile_at_grid", Vector2i(1, 1))
+	elevated_tile.height_level = 1
+	elevated_tile.edge_type = TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF
+	elevated_tile.surface_type = TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROCK
+
+	var wall_tile = map_data.call("get_tile_at_grid", Vector2i(2, 2))
+	_assert(bool(catalog.call("apply_type_to_tile", wall_tile, "wall_straight_se")), "Visual parity map applies wall_straight_se")
+	var satellite_tile = map_data.call("get_tile_at_grid", Vector2i(0, 2))
+	_assert(bool(catalog.call("apply_type_to_tile", satellite_tile, "technik_satellite_large_se")), "Visual parity map applies large satellite object")
+
+	var primary_view: Node = TERRAIN_MAP_3D_VIEW_SCRIPT.new()
+	root.add_child(primary_view)
+	primary_view.call("configure_from_map", map_data)
+	await _wait_frames(6)
+
+	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
+	_assert(int(snapshot.get("tile_texture_count", 0)) == 16, "Visual parity 3D map renders every tile as a terrain texture")
+	_assert(int(snapshot.get("height_edge_texture_count", 0)) > 0, "Visual parity 3D map renders automatic cliff/slope edge textures")
+	_assert(int(snapshot.get("asset_texture_count", 0)) >= 2, "Visual parity 3D map renders wall and satellite as authored texture cards")
+	_assert(int(snapshot.get("asset_model_count", 0)) == 0, "Visual parity 3D map does not use GLB models for known authored texture assets")
+	_assert(int(snapshot.get("placeholder_object_count", 0)) == 0, "Visual parity 3D map does not use block placeholders for known authored texture assets")
+
+	var tile_sprite := _find_map_sprite(primary_view, "Tile_1_1")
+	_assert(tile_sprite != null and _sprite_uses_texture(tile_sprite, "terrain_SW.png"), "Visual parity ground tile uses terrain_SW texture")
+	_assert(tile_sprite != null and tile_sprite.offset.distance_to(_expected_kenney_anchor_offset(tile_sprite.texture)) < 0.05, "Visual parity ground tile keeps the Kenney diamond anchor")
+
+	var wall_sprite := _find_map_sprite(primary_view, "AssetTexture_wall_straight_se_2_2/Texture")
+	_assert(wall_sprite != null and _sprite_uses_texture(wall_sprite, "corridor_wall_NE.png"), "Visual parity wall_straight_se keeps authored corridor_wall_NE mapping")
+	var satellite_sprite := _find_map_sprite(primary_view, "AssetTexture_technik_satellite_large_se_0_2/Texture")
+	_assert(satellite_sprite != null and _sprite_uses_texture(satellite_sprite, "satelliteDish_large_SE.png"), "Visual parity satellite uses authored satelliteDish_large_SE texture")
+	_assert(wall_sprite != null and satellite_sprite != null and satellite_sprite.pixel_size > wall_sprite.pixel_size, "Visual parity large satellite keeps larger 2.5D scale than wall card")
+
+	var height_sprite := _find_first_map_sprite_with_prefix(primary_view, "Height")
+	_assert(height_sprite != null and String(height_sprite.texture.resource_path).get_file().begins_with("terrain_side"), "Visual parity elevated terrain renders Kenney side/cliff texture")
+
+	primary_view.queue_free()
+	await _wait_frames(2)
+
+
 func _test_live_mission_uses_3d_primary_view() -> void:
 	var live_scene := _instantiate_scene(LIVE_MISSION_SCENE_PATH)
 	_assert(live_scene != null, "Live mission scene instantiates")
@@ -76,6 +130,8 @@ func _test_live_mission_uses_3d_primary_view() -> void:
 	_assert(int(snapshot.get("asset_texture_count", 0)) > 0, "Live Primary3DView renders authored Kenney asset textures")
 	_assert(int(snapshot.get("unit_texture_count", 0)) >= 2, "Live Primary3DView renders runtime units with authored isometric sprites")
 	_assert(_asset_texture_cards_have_textures(primary_view), "Live 2.5D asset cards keep non-empty isometric textures")
+	_assert(_unit_texture_cards_have_textures(primary_view), "Live 2.5D unit proxies keep authored unit textures")
+	_assert(int(snapshot.get("map_render_duration_msec", MAX_3D_RENDER_DURATION_MSEC + 1)) < MAX_3D_RENDER_DURATION_MSEC, "Live Primary3DView map render stays below freeze threshold")
 
 	var map_root := live_scene.get_node_or_null("MapRoot") as CanvasItem
 	var mission_camera := live_scene.get_node_or_null("MissionCamera") as Camera2D
@@ -130,6 +186,7 @@ func _assert_auxiliary_3d_map_scene_loads(scene_path: String, label: String) -> 
 	_assert(int(snapshot.get("tile_count", 0)) > 0, "%s 3D map scene renders terrain tiles" % label)
 	_assert(int(snapshot.get("asset_texture_count", 0)) > 0, "%s 3D map scene renders authored asset textures" % label)
 	_assert(_asset_texture_cards_have_textures(primary_view), "%s 3D map scene keeps textured asset cards" % label)
+	_assert(int(snapshot.get("map_render_duration_msec", MAX_3D_RENDER_DURATION_MSEC + 1)) < MAX_3D_RENDER_DURATION_MSEC, "%s 3D map scene render stays below freeze threshold" % label)
 	scene_root.queue_free()
 	await _wait_frames(2)
 
@@ -166,6 +223,57 @@ func _asset_texture_cards_have_textures(primary_view: Node) -> bool:
 		if texture_path.is_empty() or not texture_path.begins_with("res://Assets/kenney_space-kit/Isometric/"):
 			return false
 	return inspected_count > 0
+
+
+func _unit_texture_cards_have_textures(primary_view: Node) -> bool:
+	if primary_view == null:
+		return false
+	var unit_root := primary_view.get_node_or_null("ViewportContainer/SubViewport/WorldRoot/UnitRoot3D")
+	if unit_root == null:
+		return false
+	var inspected_count: int = 0
+	for proxy in unit_root.get_children():
+		if proxy.is_queued_for_deletion() or not proxy is Node3D:
+			continue
+		var sprite := proxy.get_node_or_null("UnitTexture") as Sprite3D
+		if sprite == null or sprite.texture == null:
+			return false
+		inspected_count += 1
+		var texture_file: String = String(sprite.texture.resource_path).get_file()
+		if not texture_file.begins_with("astronautA_") and not texture_file.begins_with("astronautB_"):
+			return false
+	return inspected_count > 0
+
+
+func _find_map_sprite(primary_view: Node, relative_path: String) -> Sprite3D:
+	if primary_view == null or relative_path.is_empty():
+		return null
+	var map_root := primary_view.get_node_or_null("ViewportContainer/SubViewport/WorldRoot/MapRoot3D")
+	if map_root == null:
+		return null
+	return map_root.get_node_or_null(relative_path) as Sprite3D
+
+
+func _find_first_map_sprite_with_prefix(primary_view: Node, name_prefix: String) -> Sprite3D:
+	if primary_view == null:
+		return null
+	var map_root := primary_view.get_node_or_null("ViewportContainer/SubViewport/WorldRoot/MapRoot3D")
+	if map_root == null:
+		return null
+	for child in map_root.get_children():
+		if child is Sprite3D and String(child.name).begins_with(name_prefix):
+			return child as Sprite3D
+	return null
+
+
+func _sprite_uses_texture(sprite: Sprite3D, expected_file: String) -> bool:
+	return sprite != null and sprite.texture != null and String(sprite.texture.resource_path).get_file() == expected_file
+
+
+func _expected_kenney_anchor_offset(texture: Texture2D) -> Vector2:
+	if texture == null:
+		return Vector2.ZERO
+	return (texture.get_size() * 0.5) - KENNEY_DIAMOND_CENTER
 
 
 func _wait_frames(frame_count: int) -> void:

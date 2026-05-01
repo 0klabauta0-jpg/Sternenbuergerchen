@@ -69,12 +69,12 @@ Der Terrain-Editor bleibt fuer Karten- und Markerdaten verantwortlich. Darauf wi
 - `data/mission_scenarios/editor_validation_smoke.json` dient als kleiner Editor-to-Live-Smoke ohne gespeicherte LZ.
 - `scripts/tests/task_158_verifier.gd` validiert Editor-Load/Save, Live-Missionsstart, Scenario-Objective, Enemy-Waves, Patrol-Bindings, Spieler-LZ, Dropship-Deploy, Attack Area, Contact Overlay, Objective-Fortschritt und sichtbare Live-Visuals.
 - `docs/manual_checks/editor_to_live_mission_checklist.md` beschreibt den manuellen Editor-to-Live-Durchlauf.
-- Der getrackte Stand besitzt keinen produktiven 3D-Bridge-Code; die automatisierte Pruefung deckt den vorhandenen 2.5D/Live-Visual-Bridge-Stand ab und die Checkliste fordert dieselben Daten fuer einen 3D-primary Branch erneut ein.
+- Der aktuelle getrackte Stand besitzt inzwischen die TASK_159-2.5D-Primary-View; die automatisierte Pruefung deckt Editor-to-Live-Datenfluss und die 2.5D-Visual-Bridge fuer LZ, Dropship, Attack Area, Contacts und Unit-Proxies ab.
 
 ## Update nach TASK_159 Follow-up
 - Die 2.5D-Primary-View ist jetzt der gepruefte Editor- und Live-Pfad fuer Terrain, LZ, Dropship, Attack Area und Contacts.
 - Der Missionsstart hing, weil `TerrainMapData.load_from_file()` den Tile-Katalog pro Tile neu geladen hat. Der Loader nutzt den Katalog jetzt einmal pro Map; TASK_159 fiel dadurch lokal von ueber 100 Sekunden auf rund 5 Sekunden.
 - Die sichtbaren Asset-Fehler kamen aus dem falschen Primaerpfad: Kenney-GLBs ersetzten kurzzeitig die authored Isometric-PNGs. Dabei gingen Wall-/Corner-Richtungen, Texturen, Farben und Sprite-Groessen verloren.
-- `TerrainMap3DView` rendert Boden, Waende, Cliffs, Rampen, Felsen und Katalog-Objekte jetzt wieder als `Sprite3D`-Texturkarten aus den vorhandenen Isometric-PNGs. Die GLB-Modelle bleiben nur Fallback fuer nicht aufloesbare Texturen.
+- `TerrainMap3DView` rendert Boden, Waende, automatische Cliff-/Slope-Kanten, Rampen, Felsen und Katalog-Objekte jetzt wieder als `Sprite3D`-Texturkarten aus den vorhandenen Isometric-PNGs. Die GLB-Modelle bleiben nur Fallback fuer nicht aufloesbare Texturen.
 - Units und Dropship sind in der 2.5D-View keine Capsule-/Box-Platzhalter mehr und werden auch nicht mehr auf generische GLBs gezwungen; sie spiegeln die vorhandenen Unit-`Visual`-/Weapon-Sprites und die TacticalController-Dropship-Textur.
 - Die alte 2D-Karte bleibt Daten-/Fallback-Pfad, wird im 2.5D-Live-Pfad aber nicht mehr unsichtbar parallel gerendert.
