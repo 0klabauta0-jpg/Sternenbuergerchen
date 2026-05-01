@@ -1025,14 +1025,24 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Stand: `scripts/tests/task_155_verifier.gd` prueft Preset-Parsing, Map-Existenz, Live-Mission-Anwendung, sichtbare Objective-/Enemy-Setups, Patrol-Zuordnung, Attack-Area-Reproduzierbarkeit, Patrol-Stopp bei Kontaktbedingungen und Dropship-Preset ohne gespeicherte Spieler-LZ.
 - Offene Punkte: Kein finaler Missionsszenario-Vertrag, keine Editor-UI und keine Meta-Katalog-Anbindung in diesem Task.
 - Risiken: Die Presets duerfen nicht zur zweiten Missionsimplementierung wachsen; sie bleiben Test-/Authoringdaten und halten keinen laufenden Gameplay-State.
-- Naechster Schritt: `TASK_156 - Mission Scenario Data Contract` kann den Preset-Schnitt in einen stabileren Szenariovertrag ueberfuehren.
+- Naechster Schritt: Die Presets koennen in TASK_157 als schnelle Testauswahl fuer den Editor-MVP dienen.
 
-### TASK_156-158 - Tactical Mission Authoring
+### TASK_156 - Mission Scenario Data Contract
+- Status: implementiert
+- Stand: `scripts/mission/mission_scenario_data.gd` definiert einen scene-unabhaengigen `MissionScenarioData`-Vertrag fuer Authoring-/Setupdaten vor Missionsstart. Der Vertrag enthaelt `scenario_id`, `display_name`, `map_file_path`, Zeitlimit, optionalen Slot-Override, Objective, Enemy-Groups, Wave-Config, Patrol-Bindings und Notizen.
+- Stand: JSON-Load/Save nutzt ein `version`-Feld, robuste Defaults und einen kanonischen `to_dict()`-Roundtrip. Validierung meldet fehlende Maps, fehlende oder nicht aufloesbare Objectives, doppelte Gegner-IDs, fehlerhafte Wave-Parameter und Patrol-Bindings, die auf keine bekannten Gegner- oder Map-Spawn-/Patrol-IDs zeigen.
+- Stand: LZ-nahe Felder werden rekursiv abgelehnt und nicht serialisiert. Die Szenario-Dateien unter `res://data/mission_scenarios/` spiegeln die TASK_155-Testfaelle als editornahe Authoringdaten, ohne Terrain, Marker, Patrol-Pfade oder laufenden Gameplay-State aus `TerrainMapData` zu duplizieren.
+- Stand: `maps/task_156_contract_map.json` dient als kleine Contract-Fixture-Map mit `spawn_alpha`, `spawn_bravo` und `objective_point`, damit der Verifier schnell bleibt.
+- Offene Punkte: Keine Editor-UI, keine automatische Meta-Katalog-Umstellung und noch keine Live-Mission-Loader-Umschaltung in diesem Task.
+- Risiken: Der Vertrag darf spaeter nicht zum zweiten Missionskern werden; er bleibt Setup-/Authoringdaten vor dem Start, waehrend Runtime-Mutationen weiter ueber SimulationRoot und Controller laufen.
+- Naechster Schritt: `TASK_157 - Tactical Mission Editor MVP` kann den Vertrag als Speicherformat verwenden.
+
+### TASK_157-158 - Tactical Mission Authoring
 - Status: geplant
-- Stand: Drei Folge-Tasks bleiben geschnitten: `TASK_156 - Mission Scenario Data Contract`, `TASK_157 - Tactical Mission Editor MVP` und `TASK_158 - Editor-to-Live Mission Validation`.
-- Offene Punkte: Noch kein `MissionScenarioData`, keine Editor-UI fuer Missionsszenarien und kein Editor-to-Live-Verifier.
+- Stand: Zwei Folge-Tasks bleiben geschnitten: `TASK_157 - Tactical Mission Editor MVP` und `TASK_158 - Editor-to-Live Mission Validation`.
+- Offene Punkte: Noch keine Editor-UI fuer Missionsszenarien und kein Editor-to-Live-Verifier.
 - Risiken: Der Authoring-Pfad muss Karten-/Szenario-Daten strikt von laufendem Tactical-State trennen. Insbesondere darf die LZ nicht im Editor oder Szenario gespeichert werden.
-- Naechster Schritt: `TASK_156` umsetzen, damit Presets und spaetere Editor-Daten denselben Datenvertrag teilen.
+- Naechster Schritt: `TASK_157` umsetzen, damit der bestehende Map-Editor Szenario-Dateien erstellen und laden kann.
 
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert

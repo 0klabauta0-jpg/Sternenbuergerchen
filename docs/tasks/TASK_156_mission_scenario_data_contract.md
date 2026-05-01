@@ -3,7 +3,7 @@
 ## Ziel
 Ein klarer Datenvertrag trennt Karten-/Terrain-Daten von taktischen Missionsszenarien. Dadurch kann der Editor spaeter Szenarien speichern, ohne `TerrainMapData` zur Gameplay-Wahrheit aufzublasen.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Voraussetzung
 - `TASK_155 - Tactical Mission Test Presets`
@@ -53,19 +53,29 @@ LZ ist nicht Teil dieses Vertrags. Sie wird immer vom Spieler gesetzt.
 - Der Vertrag darf keine NodePath-Pflicht auf konkrete Test-Szenen enthalten.
 
 ## Akzeptanzkriterien
-- [ ] `MissionScenarioData` laedt und speichert ein Szenario verlustfrei.
-- [ ] Validierung meldet fehlende Map, fehlendes Objective und doppelte Gegner-IDs.
-- [ ] LZ-Felder werden nicht in den Vertrag aufgenommen.
-- [ ] Ein Szenario kann `TerrainMapData` referenzieren, ohne Terrain-Daten zu duplizieren.
+- [x] `MissionScenarioData` laedt und speichert ein Szenario verlustfrei.
+- [x] Validierung meldet fehlende Map, fehlendes Objective und doppelte Gegner-IDs.
+- [x] LZ-Felder werden nicht in den Vertrag aufgenommen.
+- [x] Ein Szenario kann `TerrainMapData` referenzieren, ohne Terrain-Daten zu duplizieren.
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_156_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_155_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_156_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_155_verifier.gd`
 
 ## Dateien (voraussichtlich)
 - `scripts/mission/mission_scenario_data.gd`
 - `data/mission_scenarios/*.json`
 - `scripts/tests/task_156_verifier.gd`
+- `maps/task_156_contract_map.json`
+
+## Ergebnis
+- `MissionScenarioData` ist ein scene-unabhaengiger RefCounted-Vertrag fuer Authoring-/Setupdaten vor Missionsstart.
+- JSON-Load/Save nutzt ein `version`-Feld, robuste Defaults und einen kanonischen `to_dict()`-Roundtrip.
+- Die Validierung prueft Map-Existenz, Objective-Marker oder Objective-Position, Capture-Radius, eindeutige Gegner-IDs, Wave-Parameter und Patrol-Bindings gegen Gegner- oder Map-Spawn-/Patrol-IDs.
+- LZ-nahe Felder werden rekursiv abgelehnt und nie serialisiert.
+- Fuenf Szenario-Dateien spiegeln die TASK_155-Presets als editornahe Szenario-Daten, ohne Terrain, Marker, Patrol-Pfade aus `TerrainMapData` oder laufenden Gameplay-State zu duplizieren.
+- `maps/task_156_contract_map.json` ist eine kleine Contract-Fixture-Map mit `spawn_alpha`, `spawn_bravo` und `objective_point`, damit der Verifier schnell bleibt.
 
 ## Risiken
 - Wenn der Vertrag zu gross wird, entsteht ein zweiter Missionskern. V1 soll nur Start-/Authoringdaten beschreiben.
+- Der Vertrag bereitet Live-Mission-/Meta-Anbindung vor, schaltet sie aber noch nicht produktiv um. Das bleibt bewusst TASK_157/TASK_158 bzw. Folgearbeit.
