@@ -295,6 +295,12 @@ TASK_153 - 3D Transparency Material Presets
 Phase 18B - Editor-Asset-Ausbau
 TASK_132 - Kenney Isometric Asset Palette Expansion
 
+Phase 18C - Tactical Mission Authoring
+TASK_155 - Tactical Mission Test Presets
+TASK_156 - Mission Scenario Data Contract
+TASK_157 - Tactical Mission Editor MVP
+TASK_158 - Editor-to-Live Mission Validation
+
 Batch-Empfehlung
 
 Codex soll Tasks in kleinen Gruppen bearbeiten:

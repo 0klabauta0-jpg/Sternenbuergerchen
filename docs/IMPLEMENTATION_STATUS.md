@@ -1011,6 +1011,20 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: CBS/MAPF, JPS/D* Lite, automatische Cover-Verteilung und Transparenz-Presets beruehren unterschiedliche Schichten; deshalb sind sie getrennt geplant und nicht als gemeinsamer Grossumbau gebuendelt.
 - Naechster Schritt: Bei Bedarf `TASK_151` starten, wenn Engpaesse nach den Benchmark-Werten weiterhin der groesste Bewegungsschmerz sind.
 
+### Mission Editor Authoring Audit
+- Status: dokumentiert
+- Stand: `docs/mission_editor_authoring_audit.md` haelt fest, dass der bestehende Map-Editor Terrain, Marker, Mission-Slots und Patrol-Pfade authoren kann, aber noch keinen eigenen taktischen Missionsszenario-Vertrag besitzt. Die LZ bleibt bewusst ausserhalb des Editor-Scopes und wird immer vom Spieler im Missionsflow gesetzt.
+- Offene Punkte: Szenario-Presets, Szenario-Datenvertrag, Editor-MVP und Editor-to-Live-Validation sind noch nicht implementiert.
+- Risiken: Wenn TerrainMapData, Editor-UI oder Szenario-Dateien zu viel laufenden Gameplay-State aufnehmen, entsteht eine zweite Gameplay-Wahrheit neben SimulationRoot/TacticalController.
+- Naechster Schritt: `TASK_155 - Tactical Mission Test Presets` starten, bevor ein groesserer Mission-Editor gebaut wird.
+
+### TASK_155-158 - Tactical Mission Authoring
+- Status: geplant
+- Stand: Vier Tasks sind geschnitten: `TASK_155 - Tactical Mission Test Presets`, `TASK_156 - Mission Scenario Data Contract`, `TASK_157 - Tactical Mission Editor MVP` und `TASK_158 - Editor-to-Live Mission Validation`.
+- Offene Punkte: Noch keine Preset-Dateien, kein `MissionScenarioData`, keine Editor-UI fuer Missionsszenarien und kein Editor-to-Live-Verifier.
+- Risiken: Der Authoring-Pfad muss Karten-/Szenario-Daten strikt von laufendem Tactical-State trennen. Insbesondere darf die LZ nicht im Editor oder Szenario gespeichert werden.
+- Naechster Schritt: Erst `TASK_155` umsetzen, damit taktische Playtests reproduzierbare Fixtures haben, bevor der Editor-MVP erweitert wird.
+
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert
 - Stand: Der Meta-Layer fuehrt jetzt durchgaengig auf die echte eingebettete Missionskarte statt auf eine separate read-only Overview. Homebase, FOB und Mission teilen dieselbe kompakte Navigation, die Missions-Tactical-UI traegt direkt die gemeinsamen Block-Labels `#15` bis `#18`, und der Missionspfad bleibt auf dieselbe Kartenbasis, dieselben LZ-/Approach-Marker sowie denselben Dropship-Handoff verdrahtet wie die spaetere Live-Mission.
