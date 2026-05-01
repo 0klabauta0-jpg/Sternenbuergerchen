@@ -298,7 +298,7 @@ TASK_132 - Kenney Isometric Asset Palette Expansion
 Phase 18C - Tactical Mission Authoring
 TASK_155 - Tactical Mission Test Presets (implementiert)
 TASK_156 - Mission Scenario Data Contract (implementiert)
-TASK_157 - Tactical Mission Editor MVP
+TASK_157 - Tactical Mission Editor MVP (implementiert)
 TASK_158 - Editor-to-Live Mission Validation
 
 Batch-Empfehlung

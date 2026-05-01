@@ -127,7 +127,7 @@ func validate() -> Dictionary:
 
 	var terrain_map_data = _load_referenced_map(errors)
 	_validate_objective(terrain_map_data, errors)
-	var enemy_ids: PackedStringArray = _validate_enemy_groups(errors)
+	var enemy_ids: PackedStringArray = _validate_enemy_groups(terrain_map_data, errors)
 	_validate_wave_config(errors)
 	_validate_patrol_bindings(terrain_map_data, enemy_ids, errors)
 
@@ -209,7 +209,7 @@ func _validate_objective(terrain_map_data, errors: PackedStringArray) -> void:
 		errors.append("objective.capture_radius must be > 0")
 
 
-func _validate_enemy_groups(errors: PackedStringArray) -> PackedStringArray:
+func _validate_enemy_groups(terrain_map_data, errors: PackedStringArray) -> PackedStringArray:
 	var result: PackedStringArray = PackedStringArray()
 	var seen: Dictionary = {}
 	if enemy_groups.is_empty():
@@ -220,6 +220,12 @@ func _validate_enemy_groups(errors: PackedStringArray) -> PackedStringArray:
 		var group: Dictionary = Dictionary(enemy_groups[group_index])
 		if String(group.get("group_id", "")).strip_edges().is_empty():
 			errors.append("enemy_groups[%d].group_id is required" % group_index)
+		var spawn_marker_id: String = String(group.get("spawn_marker_id", "")).strip_edges()
+		var has_spawn_position: bool = group.has("spawn_position") and _is_vector2_payload(group.get("spawn_position", null))
+		if spawn_marker_id.is_empty() and not has_spawn_position:
+			errors.append("enemy_groups[%d] needs spawn_marker_id or spawn_position" % group_index)
+		elif not spawn_marker_id.is_empty() and terrain_map_data != null and terrain_map_data.has_method("has_marker") and not bool(terrain_map_data.call("has_marker", spawn_marker_id)):
+			errors.append("enemy_groups[%d].spawn_marker_id does not exist in map: %s" % [group_index, spawn_marker_id])
 		var enemy_ids: Array = Array(group.get("enemy_ids", []))
 		if enemy_ids.is_empty():
 			errors.append("enemy_groups[%d].enemy_ids needs at least one enemy id" % group_index)
@@ -304,6 +310,8 @@ func _coerce_enemy_groups(value: Variant) -> Array:
 		var spawn_marker_id: String = String(group_dict.get("spawn_marker_id", "")).strip_edges()
 		if not spawn_marker_id.is_empty():
 			group["spawn_marker_id"] = spawn_marker_id
+		if group_dict.has("spawn_position") and _is_vector2_payload(group_dict.get("spawn_position", null)):
+			group["spawn_position"] = _coerce_vector2(group_dict.get("spawn_position", Vector2.ZERO), Vector2.ZERO)
 		var group_notes: PackedStringArray = _coerce_notes(group_dict.get("notes", []))
 		if not group_notes.is_empty():
 			group["notes"] = Array(group_notes)
@@ -378,6 +386,8 @@ func _serialize_enemy_groups() -> Array:
 		for optional_key in ["display_name", "spawn_marker_id", "notes"]:
 			if group.has(optional_key):
 				serialized_group[optional_key] = group.get(optional_key)
+		if group.has("spawn_position"):
+			serialized_group["spawn_position"] = _serialize_vector2(_coerce_vector2(group.get("spawn_position", Vector2.ZERO), Vector2.ZERO))
 		result.append(serialized_group)
 	return result
 

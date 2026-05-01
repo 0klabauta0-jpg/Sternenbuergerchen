@@ -58,3 +58,9 @@ Der Terrain-Editor bleibt fuer Karten- und Markerdaten verantwortlich. Darauf wi
 - `TASK_156 - Mission Scenario Data Contract`
 - `TASK_157 - Tactical Mission Editor MVP`
 - `TASK_158 - Editor-to-Live Mission Validation`
+
+## Update nach TASK_157
+- Der bestehende Map-Editor besitzt jetzt ein schlankes Mission-Scenario-Panel fuer Load/Save, Objective-Regeln, Enemy-Groups, Wave-Parameter, Spawn-Marker/-Positionen und Patrol-Bindings.
+- `MissionTestSetup` kann eine `scenario_file_path` laden und die Scenario-Daten in die Live-Testmission uebernehmen.
+- Die LZ bleibt weiterhin ausserhalb des Authoring-Vertrags und wird nicht gespeichert.
+- Offen bleibt eine breitere Editor-to-Live-Validation mit mehreren Szenariovarianten (`TASK_158`).

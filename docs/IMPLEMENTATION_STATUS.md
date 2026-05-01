@@ -1014,9 +1014,9 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 ### Mission Editor Authoring Audit
 - Status: dokumentiert
 - Stand: `docs/mission_editor_authoring_audit.md` haelt fest, dass der bestehende Map-Editor Terrain, Marker, Mission-Slots und Patrol-Pfade authoren kann, aber noch keinen eigenen taktischen Missionsszenario-Vertrag besitzt. Die LZ bleibt bewusst ausserhalb des Editor-Scopes und wird immer vom Spieler im Missionsflow gesetzt.
-- Offene Punkte: Szenario-Datenvertrag, Editor-MVP und Editor-to-Live-Validation sind noch nicht implementiert.
+- Offene Punkte: Szenario-Datenvertrag und Editor-MVP sind implementiert; eine breitere Editor-to-Live-Validation bleibt als eigener Folgetask offen.
 - Risiken: Wenn TerrainMapData, Editor-UI oder Szenario-Dateien zu viel laufenden Gameplay-State aufnehmen, entsteht eine zweite Gameplay-Wahrheit neben SimulationRoot/TacticalController.
-- Naechster Schritt: `TASK_156 - Mission Scenario Data Contract` starten, bevor der Editor-MVP erweitert wird.
+- Naechster Schritt: `TASK_158 - Editor-to-Live Mission Validation` kann den neuen Editor-MVP mit mehr Szenariovarianten absichern.
 
 ### TASK_155 - Tactical Mission Test Presets
 - Status: implementiert
@@ -1035,14 +1035,24 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Stand: `maps/task_156_contract_map.json` dient als kleine Contract-Fixture-Map mit `spawn_alpha`, `spawn_bravo` und `objective_point`, damit der Verifier schnell bleibt.
 - Offene Punkte: Keine Editor-UI, keine automatische Meta-Katalog-Umstellung und noch keine Live-Mission-Loader-Umschaltung in diesem Task.
 - Risiken: Der Vertrag darf spaeter nicht zum zweiten Missionskern werden; er bleibt Setup-/Authoringdaten vor dem Start, waehrend Runtime-Mutationen weiter ueber SimulationRoot und Controller laufen.
-- Naechster Schritt: `TASK_157 - Tactical Mission Editor MVP` kann den Vertrag als Speicherformat verwenden.
+- Naechster Schritt: `TASK_158 - Editor-to-Live Mission Validation` kann den Vertrag mit weiteren Live-Szenariovarianten absichern.
+
+### TASK_157 - Tactical Mission Editor MVP
+- Status: implementiert
+- Stand: Der bestehende Map-Editor besitzt jetzt ein schlankes Mission-Scenario-Panel. Es kann Scenario-Dateien laden/speichern, die aktuelle Map referenzieren, Objective-Marker oder Objective-Positionen setzen, Capture-Radius/Zeitlimit bearbeiten, Gegner-IDs/Gruppen, Spawn-Marker oder Spawn-Positionen, Wave-Parameter und Patrol-Bindings authoren.
+- Stand: `MissionTestSetup` kann optional `scenario_file_path` laden und uebernimmt daraus Map, Objective-Regeln, Enemy-IDs/Spawn, Wave-Config und Patrol-Bindings in die Live-Testmission. Objective-Regeln werden weiter an `SimulationRoot.set_objective_status()` uebergeben; Patrols gehen an `EnemyWaveController`.
+- Stand: `MissionScenarioData` serialisiert optionale `enemy_groups[].spawn_position` und validiert, dass Enemy-Groups Spawn-Marker oder Spawn-Position besitzen. LZ-Felder bleiben rekursiv verboten.
+- Stand: `maps/task_157_editor_mvp_map.json`, `data/mission_scenarios/task_157_editor_mvp.json` und `scripts/tests/task_157_verifier.gd` decken Editor-Load/Edit/Save, Live-Teststart, Objective-Propagation, Wave-Propagation, Patrol-Bindings und fehlende gespeicherte Spieler-LZ ab.
+- Offene Punkte: Der manuelle GUI-Durchlauf der Editor-UX bleibt offen; TASK_158 sollte mehr Editor-to-Live-Szenariovarianten und Fehlerfaelle pruefen.
+- Risiken: Das Mission-Panel ist bewusst MVP und textbasiert fuer Patrol-Bindings; eine groessere Designer-UX sollte erst nach der Runtime-Validierung folgen.
+- Naechster Schritt: `TASK_158 - Editor-to-Live Mission Validation`.
 
 ### TASK_157-158 - Tactical Mission Authoring
-- Status: geplant
-- Stand: Zwei Folge-Tasks bleiben geschnitten: `TASK_157 - Tactical Mission Editor MVP` und `TASK_158 - Editor-to-Live Mission Validation`.
-- Offene Punkte: Noch keine Editor-UI fuer Missionsszenarien und kein Editor-to-Live-Verifier.
+- Status: teilweise implementiert
+- Stand: `TASK_157 - Tactical Mission Editor MVP` ist implementiert; `TASK_158 - Editor-to-Live Mission Validation` bleibt als eigener Folgetask.
+- Offene Punkte: Breitere Editor-to-Live-Validation fehlt noch.
 - Risiken: Der Authoring-Pfad muss Karten-/Szenario-Daten strikt von laufendem Tactical-State trennen. Insbesondere darf die LZ nicht im Editor oder Szenario gespeichert werden.
-- Naechster Schritt: `TASK_157` umsetzen, damit der bestehende Map-Editor Szenario-Dateien erstellen und laden kann.
+- Naechster Schritt: `TASK_158` umsetzen, damit mehrere Editor-Szenarien automatisiert gegen die Live-Mission abgesichert sind.
 
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert

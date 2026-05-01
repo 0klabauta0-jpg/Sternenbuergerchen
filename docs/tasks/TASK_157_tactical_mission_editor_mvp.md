@@ -3,7 +3,7 @@
 ## Ziel
 Der bestehende Map-Editor erhaelt einen schlanken Mission-Authoring-Modus fuer taktische Tests. Designer/Entwickler koennen eine Map laden, Gegnergruppen, Objective-Regeln, Wellen und Patrol-Zuordnungen bearbeiten und ein Szenario speichern.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Voraussetzung
 - `TASK_156 - Mission Scenario Data Contract`
@@ -54,15 +54,17 @@ LZ wird nicht im Editor gesetzt oder gespeichert.
 - Keine direkten SimulationRoot-Commands aus Editor-Callbacks.
 
 ## Akzeptanzkriterien
-- [ ] Editor kann ein Szenario laden, bearbeiten und speichern.
-- [ ] Gegnergruppen und Wave-Parameter erscheinen nach Live-Start in der Mission.
-- [ ] Patrol-Zuordnung aus dem Editor erreicht `EnemyWaveController`.
-- [ ] Objective-Regeln werden in `SimulationRoot` gesetzt.
-- [ ] LZ wird weder angezeigt noch gespeichert; die Mission wartet weiter auf Spieler-LZ.
+- [x] Editor kann ein Szenario laden, bearbeiten und speichern.
+- [x] Gegnergruppen und Wave-Parameter erscheinen nach Live-Start in der Mission.
+- [x] Patrol-Zuordnung aus dem Editor erreicht `EnemyWaveController`.
+- [x] Objective-Regeln werden in `SimulationRoot` gesetzt.
+- [x] LZ wird weder angezeigt noch gespeichert; die Mission wartet weiter auf Spieler-LZ.
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_157_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_157_verifier.gd`
 - [ ] Manuell `scenes/editor/map_editor.tscn` starten, Szenario speichern, Live-Test starten.
+
+Hinweis: Der manuelle GUI-Durchlauf bleibt fuer die sichtbare UX offen; der Headless-Verifier instanziiert Editor und Live-Mission, speichert ein Scenario und prueft die Runtime-Uebergabe.
 
 ## Dateien (voraussichtlich)
 - `scripts/editor/map_editor.gd`
