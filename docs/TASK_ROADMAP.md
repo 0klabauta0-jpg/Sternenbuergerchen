@@ -288,9 +288,6 @@ Fahrzeuge
 komplexe Taktik
 Phase 18A - Navigation-, Cover- und Rendering-Labs
 TASK_131 - Navigation Benchmark Harness
-TASK_151 - Engpass-Reservierung und MAPF-Light
-TASK_152 - Seeded Cover Placement Lab
-TASK_153 - 3D Transparency Material Presets
 
 Phase 18B - Editor-Asset-Ausbau
 TASK_132 - Kenney Isometric Asset Palette Expansion
@@ -311,6 +308,18 @@ TASK_142 - 2.5D Live Mission Visual Bridge
 TASK_143 - Unit Height Visual Sync
 TASK_144 - Editor-to-Mission 2.5D Smoke Test
 TASK_145 - 2.5D Tactical Debug Overlay
+
+Phase 18E - 3D/2.5D als primaere Missionsdarstellung
+TASK_146 - 3D Calibration Workspace
+TASK_147 - 3D Asset Curation and Mapping Expansion
+TASK_148 - 3D Primary Mission View
+TASK_149 - 3D Unit Visual Replacement
+TASK_150 - Legacy 2D Mission Asset Retirement
+
+Phase 25A - Nachgelagerte Navigation-, Cover- und Rendering-Labs
+TASK_251 - Engpass-Reservierung und MAPF-Light
+TASK_252 - Seeded Cover Placement Lab
+TASK_253 - 3D Transparency Material Presets
 
 Batch-Empfehlung
 

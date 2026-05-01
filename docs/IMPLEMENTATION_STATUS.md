@@ -981,7 +981,7 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Stand: `scripts/tests/task_131_verifier.gd` prueft, dass HPA/A*, Cover-aware HPA, Budgeting und Avoidance getrennt messbare Dictionary-Metriken liefern. Der Output enthaelt Query-Zeiten, Pfadlaengen, Exposure-/Cover-Summen, Delay-/Pending-Werte sowie Stuck-/Deadlock-Metriken.
 - Offene Punkte: Keine produktive JPS-, D* Lite-, CBS- oder Reservierungslogik. Der Harness misst vorhandene Systeme und bleibt unter `scripts/tests`.
 - Risiken: Benchmark-Szenarien sind kleine Laborkarten und ersetzen keine grossen Playtests in `mission_fireteam_dev_test.tscn`; sie schaffen aber eine stabile Basis fuer Folgeentscheidungen.
-- Naechster Schritt: TASK_151 kann Engpass-Reservierung/MAPF-Light auf Basis der gemessenen Bottleneck- und Avoidance-Werte schneiden.
+- Naechster Schritt: TASK_251 kann spaeter Engpass-Reservierung/MAPF-Light auf Basis der gemessenen Bottleneck- und Avoidance-Werte schneiden.
 
 ### Editor Cleanup - Flank Anchor Marker
 - Status: implementiert
@@ -1117,14 +1117,22 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Stand: `scripts/tests/task_145_verifier.gd` startet die Live-Mission mit der TASK_144-Smoke-Map und prueft Overlay-Aktivierung, einzelne Layer-Toggles, Registry-Daten, SimulationRoot-Pfade und den letzten Air-AA-Gate-Grund.
 - Offene Punkte: Das Overlay ist Debug-V1, keine finale HUD-/Editor-UX. Bei grossen Karten kann die Labelmenge dicht werden; `max_tile_labels`/`max_path_labels` begrenzen den Playtest-Schaden.
 - Risiken: Debuglabels duerfen nicht zur neuen Gameplay-Datenquelle werden. Das Overlay bleibt bewusst pull-basiert und rein lesend.
-- Naechster Schritt: In der Live-Mission mit `F6`/`1-5` testen und entscheiden, welche 2.5D-Informationen spaeter in eine echte taktische UI gehoeren.
+- Naechster Schritt: `TASK_147 - 3D Asset Curation and Mapping Expansion` kann weitere 3D-Modellfamilien kontrolliert kuratieren und in die Kalibrierung aufnehmen.
 
-### TASK_151-153 - Geplante Folge-Labs
+### TASK_146-150 - Geplante 3D/2.5D-Umstellung der Missionsdarstellung
+- Status: teilweise implementiert
+- Stand: `TASK_146 - 3D Calibration Workspace` ist implementiert. `mission_map_3d_calibration.tscn` zeigt jetzt 12 kuratierte Objektfamilien inklusive Wall-Familie und erzeugt rein visuelle Helper fuer Labels, Footprints und Pivot-Marker. Die Szene besitzt Playmode-Toggles: `G` fuer Debug-Grid, `L` fuer Labels und `F` fuer Footprints/Pivots. `get_calibration_snapshot()` liefert testbare Daten zu Modellpfaden, Scale, Offset und Rotation.
+- Stand: Die naechsten offenen Schritte bleiben `TASK_147 - 3D Asset Curation and Mapping Expansion`, `TASK_148 - 3D Primary Mission View`, `TASK_149 - 3D Unit Visual Replacement` und `TASK_150 - Legacy 2D Mission Asset Retirement`.
+- Offene Punkte: Weitere 3D-Modellfamilien, primaere Live-Missionsansicht, 3D-Unit-Visuals und spaetere 2D-Retirement-Schritte sind noch nicht implementiert.
+- Risiken: Die 3D-Schicht darf weiterhin keine Gameplay-Wahrheit werden. 2D-Assets duerfen nicht zu frueh geloescht werden, solange Editor, UI, Icons, Tests oder Debug-Fallbacks sie brauchen.
+- Naechster Schritt: Manuell die Kalibrierungsszene pruefen und danach `TASK_147` starten, wenn weitere Assets in den aktiven 3D-Pfad sollen.
+
+### TASK_251-253 - Geplante Folge-Labs
 - Status: geplant
-- Stand: Aus den zuletzt bewerteten Vorschlaegen bleiben drei bewusst nachgelagerte Tasks offen: `TASK_151 - Engpass-Reservierung und MAPF-Light`, `TASK_152 - Seeded Cover Placement Lab` und `TASK_153 - 3D Transparency Material Presets`.
+- Stand: Aus den zuletzt bewerteten Vorschlaegen bleiben drei bewusst nachgelagerte Tasks offen: `TASK_251 - Engpass-Reservierung und MAPF-Light`, `TASK_252 - Seeded Cover Placement Lab` und `TASK_253 - 3D Transparency Material Presets`.
 - Offene Punkte: Diese Tasks sind noch nicht implementiert und sollen erst nach Review der Navigation-/Movement-Spielgefuehlbasis gestartet werden.
 - Risiken: CBS/MAPF, JPS/D* Lite, automatische Cover-Verteilung und Transparenz-Presets beruehren unterschiedliche Schichten; deshalb sind sie getrennt geplant und nicht als gemeinsamer Grossumbau gebuendelt.
-- Naechster Schritt: Bei Bedarf `TASK_151` starten, wenn Engpaesse nach den Benchmark-Werten weiterhin der groesste Bewegungsschmerz sind.
+- Naechster Schritt: Bei Bedarf `TASK_251` starten, wenn Engpaesse nach den Benchmark-Werten weiterhin der groesste Bewegungsschmerz sind.
 
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert

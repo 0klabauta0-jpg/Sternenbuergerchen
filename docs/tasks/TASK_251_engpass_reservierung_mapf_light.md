@@ -1,4 +1,4 @@
-# TASK_151 - Engpass-Reservierung und MAPF-Light
+# TASK_251 - Engpass-Reservierung und MAPF-Light
 
 ## Ziel
 Engpaesse sollen deterministisch aufgeloest werden, wenn lokale Avoidance nicht reicht. Statt vollstaendiges CBS/ICBS als Standardpfadfinder einzufuehren, entsteht eine kleine Eskalationsschicht fuer Portale, Korridore und Bottlenecks.
@@ -60,14 +60,14 @@ Engpaesse sollen deterministisch aufgeloest werden, wenn lokale Avoidance nicht 
 Engpaesse bekommen eine kleine, nachvollziehbare "Ampel", ohne die gesamte Navigation auf teures MAPF umzustellen.
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_151_verifier.gd`
+- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_251_verifier.gd`
 - [ ] `godot_console.exe --headless --path . --script scripts/tests/task_131_verifier.gd`
 - [ ] `godot_console.exe --headless --path . --script scripts/tests/task_130_verifier.gd`
 
 ## Dateien (voraussichtlich)
 - `scripts/tactical/bottleneck_reservation_resolver.gd`
 - `scripts/core/simulation_root.gd`
-- `scripts/tests/task_151_verifier.gd`
+- `scripts/tests/task_251_verifier.gd`
 
 ## Risiken
 - Zu aggressive Reservierung kann Bewegung steif wirken lassen. Die Schicht muss nur bei echten Engpaessen/Deadlocks greifen.

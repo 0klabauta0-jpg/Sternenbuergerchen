@@ -1,4 +1,4 @@
-# TASK_152 - Seeded Cover Placement Lab
+# TASK_252 - Seeded Cover Placement Lab
 
 ## Ziel
 Test- und Editor-Karten sollen reproduzierbar sinnvolle Cover-Verteilungen erzeugen koennen. Ein seedbares Cover-Lab waehlt walkable Tiles mit Mindestabstand, bewertet sie ueber LOS-/Threat-Heuristik und liefert Terrain-Patches fuer Map-Editor oder Testkarten.
@@ -60,12 +60,12 @@ Test- und Editor-Karten sollen reproduzierbar sinnvolle Cover-Verteilungen erzeu
 Wir koennen schnell gute Cover-Testkarten erzeugen und Task-129-Pfadkosten auf belastbarere Terrain-Daten stellen.
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_152_verifier.gd`
+- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_252_verifier.gd`
 - [ ] `godot_console.exe --headless --path . --script scripts/tests/task_129_verifier.gd`
 
 ## Dateien (voraussichtlich)
 - `scripts/terrain/cover_placement_lab.gd`
-- `scripts/tests/task_152_verifier.gd`
+- `scripts/tests/task_252_verifier.gd`
 - optional spaeter: Map-Editor-Anbindung
 
 ## Risiken
