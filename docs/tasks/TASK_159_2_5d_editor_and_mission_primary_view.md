@@ -87,11 +87,13 @@ Die sichtbare Kartenoberflaeche und die bedienbare Kamera sollen aber nicht mehr
 ## Ergebnis
 - `TerrainMap3DView` rendert `TerrainMapData` als gemeinsame 2.5D-Primary-View mit `SubViewport`, `Node3D`, `Camera3D`, Terrain-/Objekt-/Marker-/Patrol-Visuals, Unit-Proxies, LZ-/Dropship-Proxy und taktischen Area-/Contact-Overlays.
 - Terrain-Objekte, Waende, Rampen, Felsen und Katalog-Objekte werden in dieser View wieder aus der kalibrierten Kenney-GLB-Mapping-Datei `data/terrain_3d_asset_mapping.json` gerendert. Richtung, Scale und Y-Offset kommen aus diesem Mapping oder aus dem bestehenden Richtungssuffix.
+- Mauerecken, Cliffs, Rampen und Felsen sind explizit in der Mapping-Datei abgedeckt, damit sie nicht mehr in den Legacy-Fallback mit pauschalem Material-Override fallen. Wand- und Eckenrotationen folgen der authored Richtungslogik aus dem alten 2D-Mapping.
 - Der kurzzeitige Versuch, Kenney-Isometric-PNGs als primaere `Sprite3D`-Karten zu nutzen, war sichtbar falsch: Bei frei rotierbarer Kamera zeigen flache Karten weiter dieselbe Seite und erzeugen Grid-/Offset-Artefakte.
 - Isometric-PNGs bleiben nur Legacy-/Fallback-Material fuer den alten 2D-Pfad oder nicht aufloesbare Einzelfaelle.
 - `TerrainMapData.load_from_file()` laedt den Terrain-Tile-Katalog nur noch einmal pro Map. Vorher wurde der Katalog fuer jedes Tile neu geladen, was die 32x32-Live-Mission beim Start fuer lange Zeit blockiert hat.
 - `TerrainTileData.from_dict()` erzeugt Tiles direkt ueber die bestehende Klasse statt pro Tile das Script erneut zu laden.
 - Die sichtbare Bodenkarte der 2.5D-View nutzt kalibrierte 3D-Ground-Meshes statt flacher Terrain-PNGs.
+- Ambient Light und wiederverwendete BoxMesh-/Material-Ressourcen reduzieren graue Abschattung und Kamera-/Render-Ruckler, ohne Gameplay-State in die UI zu verschieben.
 - Runtime-Units und Dropship werden als kalibrierte Kenney-GLBs gespiegelt; generische Capsule-/Box-Proxies und PNG-Karten bleiben nur Fallbacks.
 - `mission_map_3d_calibration.tscn` und `mission_map_3d_render_spike.tscn` laden jetzt ueber kleine Test-Scripts dieselbe 2.5D-Primary-View, sodass Godot sie ohne fehlende Script-Dependencies oeffnen kann.
 - Der Map-Editor deaktiviert die alte `Camera2D`, blendet Legacy-2D-Kartencontainer aus und fuehrt WASD, Zoom, Rotation sowie Tile-/Marker-/Patrol-Picking ueber die 3D-View.

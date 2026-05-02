@@ -18,6 +18,7 @@ const DROP_ROOT_NAME: String = "DropRoot3D"
 const STATUS_ROOT_NAME: String = "StatusRoot3D"
 const CAMERA_NAME: String = "Camera3D"
 const LIGHT_NAME: String = "SunLight3D"
+const ENVIRONMENT_NAME: String = "WorldEnvironment"
 
 const TERRAIN_3D_MAPPING_PATH: String = "res://data/terrain_3d_asset_mapping.json"
 const TILE_SPACING: float = 1.0
@@ -30,6 +31,7 @@ const CAMERA_MAX_SIZE: float = 120.0
 const CAMERA_ZOOM_STEP: float = 2.2
 const CAMERA_PAN_UNITS_PER_SECOND: float = 9.0
 const CAMERA_DRAG_PAN_FACTOR: float = 0.065
+const CONTINUOUS_REDRAW_AFTER_CAMERA_MSEC: int = 220
 const DEFAULT_HALF_TILE_WIDTH: float = 64.0
 const DEFAULT_HALF_TILE_HEIGHT: float = 32.0
 const TILE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_SW.png")
@@ -118,11 +120,14 @@ var _contact_root: Node3D = null
 var _drop_root: Node3D = null
 var _status_root: Node3D = null
 var _camera: Camera3D = null
+var _environment: WorldEnvironment = null
 
 var _terrain_map_data = null
 var _tile_catalog = null
 var _terrain_3d_mapping: Dictionary = {}
 var _model_scene_cache: Dictionary = {}
+var _box_mesh_cache: Dictionary = {}
+var _material_cache: Dictionary = {}
 var _render_tile_by_grid: Dictionary = {}
 var _unit_nodes: Array = []
 var _unit_proxies_by_id: Dictionary = {}
@@ -161,6 +166,7 @@ var _waypoint_visual_count: int = 0
 var _contact_count: int = 0
 var _objective_status_visible: bool = false
 var _mission_result_visible: bool = false
+var _continuous_redraw_until_msec: int = 0
 
 
 func _ready() -> void:
@@ -175,6 +181,8 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	_resize_subviewport()
 	_sync_unit_proxies()
+	if _subviewport != null and _subviewport.render_target_update_mode == SubViewport.UPDATE_ALWAYS and Time.get_ticks_msec() > _continuous_redraw_until_msec:
+		_subviewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 
 func configure_from_map(terrain_map_data) -> void:
@@ -306,6 +314,7 @@ func pan_camera(input_direction: Vector2, delta_seconds: float = 1.0) -> void:
 	_focus_grid_position += grid_delta
 	_clamp_focus_to_map()
 	_update_camera_transform()
+	_request_viewport_redraw(true)
 
 
 func pan_camera_pixels(pixel_delta: Vector2) -> void:
@@ -319,11 +328,13 @@ func pan_camera_pixels(pixel_delta: Vector2) -> void:
 func rotate_camera(delta_degrees: float) -> void:
 	_camera_yaw_degrees = wrapf(_camera_yaw_degrees + delta_degrees, 0.0, 360.0)
 	_update_camera_transform()
+	_request_viewport_redraw(true)
 
 
 func zoom_camera(delta_steps: float) -> void:
 	_camera_size = clampf(_camera_size - (delta_steps * CAMERA_ZOOM_STEP), CAMERA_MIN_SIZE, CAMERA_MAX_SIZE)
 	_update_camera_transform()
+	_request_viewport_redraw(true)
 
 
 func get_camera_yaw_degrees() -> float:
@@ -451,9 +462,23 @@ func _ensure_nodes() -> void:
 	if light == null:
 		light = DirectionalLight3D.new()
 		light.name = LIGHT_NAME
-		light.light_energy = 1.25
-		light.rotation_degrees = Vector3(-58.0, -42.0, 0.0)
+		light.light_energy = 1.45
+		light.rotation_degrees = Vector3(-62.0, -38.0, 0.0)
 		_world_root.add_child(light)
+
+	if _environment == null:
+		_environment = _world_root.get_node_or_null(ENVIRONMENT_NAME) as WorldEnvironment
+	if _environment == null:
+		_environment = WorldEnvironment.new()
+		_environment.name = ENVIRONMENT_NAME
+		var environment := Environment.new()
+		environment.background_mode = Environment.BG_COLOR
+		environment.background_color = Color(0.25, 0.27, 0.27, 1.0)
+		environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+		environment.ambient_light_color = Color(0.82, 0.86, 0.88, 1.0)
+		environment.ambient_light_energy = 0.72
+		_environment.environment = environment
+		_world_root.add_child(_environment)
 
 
 func _ensure_node3d(parent: Node, node_name: String) -> Node3D:
@@ -479,8 +504,12 @@ func _resize_subviewport() -> void:
 	_viewport_container.offset_bottom = 0.0
 
 
-func _request_viewport_redraw() -> void:
+func _request_viewport_redraw(continuous: bool = false) -> void:
 	if _subviewport == null:
+		return
+	if continuous:
+		_continuous_redraw_until_msec = Time.get_ticks_msec() + CONTINUOUS_REDRAW_AFTER_CAMERA_MSEC
+		_subviewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 		return
 	_subviewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 
@@ -540,11 +569,10 @@ func _add_tile_visual(tile_data) -> void:
 		return
 	var height_level: int = maxi(int(tile_data.height_level), 0)
 	var top_y: float = float(height_level) * _get_3d_height_step()
-	var tile_mesh := BoxMesh.new()
 	var tile_thickness: float = _get_3d_ground_thickness()
 	var tile_fill: float = _get_3d_ground_fill()
 	var cell_size: float = _get_3d_cell_size()
-	tile_mesh.size = Vector3(cell_size * tile_fill, tile_thickness, cell_size * tile_fill)
+	var tile_mesh := _make_box_mesh(Vector3(cell_size * tile_fill, tile_thickness, cell_size * tile_fill))
 	var tile_instance := MeshInstance3D.new()
 	tile_instance.name = "Tile_%d_%d" % [tile_data.grid_position.x, tile_data.grid_position.y]
 	tile_instance.mesh = tile_mesh
@@ -580,9 +608,8 @@ func _add_object_visual(tile_data, top_y: float, visual_type_id: String) -> void
 	elif not bool(tile_data.blocks_los):
 		object_height = maxf(object_height, 0.35)
 
-	var mesh := BoxMesh.new()
 	var cell_size: float = _get_3d_cell_size()
-	mesh.size = Vector3(cell_size * 0.62, object_height, cell_size * 0.62)
+	var mesh := _make_box_mesh(Vector3(cell_size * 0.62, object_height, cell_size * 0.62))
 	var instance := MeshInstance3D.new()
 	instance.name = "Object_%d_%d" % [tile_data.grid_position.x, tile_data.grid_position.y]
 	instance.mesh = mesh
@@ -995,9 +1022,8 @@ func _rebuild_selection_visuals() -> void:
 		var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
 		if tile_data == null:
 			continue
-		var mesh := BoxMesh.new()
 		var cell_size: float = _get_3d_cell_size()
-		mesh.size = Vector3(cell_size * 0.98, 0.05, cell_size * 0.98)
+		var mesh := _make_box_mesh(Vector3(cell_size * 0.98, 0.05, cell_size * 0.98))
 		var selection := MeshInstance3D.new()
 		selection.name = "Selection_%d_%d" % [grid_position.x, grid_position.y]
 		selection.mesh = mesh
@@ -1043,9 +1069,8 @@ func _add_area_order_visual(area_data: Dictionary) -> void:
 		tile_world_positions = [center]
 	for world_variant in tile_world_positions:
 		var tile_marker := MeshInstance3D.new()
-		var mesh := BoxMesh.new()
 		var cell_size: float = _get_3d_cell_size()
-		mesh.size = Vector3(cell_size * 0.92, 0.045, cell_size * 0.92)
+		var mesh := _make_box_mesh(Vector3(cell_size * 0.92, 0.045, cell_size * 0.92))
 		tile_marker.mesh = mesh
 		tile_marker.material_override = _make_material(Color(color.r, color.g, color.b, 0.34), true)
 		tile_marker.position = _world_to_3d_position(Vector2(world_variant), 0.19)
@@ -1268,8 +1293,7 @@ func _add_dropship_proxy(world_position: Vector2) -> void:
 		_dropship_texture_visible = true
 		return
 
-	var body_mesh := BoxMesh.new()
-	body_mesh.size = Vector3(2.9, 0.46, 1.25)
+	var body_mesh := _make_box_mesh(Vector3(2.9, 0.46, 1.25))
 	var body := MeshInstance3D.new()
 	body.name = "DropshipProxy"
 	body.mesh = body_mesh
@@ -1278,8 +1302,7 @@ func _add_dropship_proxy(world_position: Vector2) -> void:
 	body.rotation_degrees.y = -_camera_yaw_degrees
 	_drop_root.add_child(body)
 
-	var wing_mesh := BoxMesh.new()
-	wing_mesh.size = Vector3(1.05, 0.16, 2.45)
+	var wing_mesh := _make_box_mesh(Vector3(1.05, 0.16, 2.45))
 	var wing := MeshInstance3D.new()
 	wing.name = "DropshipWing"
 	wing.mesh = wing_mesh
@@ -1504,7 +1527,20 @@ func _add_line3d(parent: Node3D, start_position: Vector3, end_position: Vector3,
 	parent.add_child(instance)
 
 
+func _make_box_mesh(size: Vector3) -> BoxMesh:
+	var key: String = "%.3f:%.3f:%.3f" % [size.x, size.y, size.z]
+	if _box_mesh_cache.has(key):
+		return _box_mesh_cache[key] as BoxMesh
+	var mesh := BoxMesh.new()
+	mesh.size = size
+	_box_mesh_cache[key] = mesh
+	return mesh
+
+
 func _make_material(color: Color, transparent: bool = false) -> StandardMaterial3D:
+	var key: String = "%s:%s" % [color.to_html(true), str(transparent or color.a < 0.99)]
+	if _material_cache.has(key):
+		return _material_cache[key] as StandardMaterial3D
 	var material := StandardMaterial3D.new()
 	material.albedo_color = color
 	material.roughness = 0.86
@@ -1512,6 +1548,7 @@ func _make_material(color: Color, transparent: bool = false) -> StandardMaterial
 	if transparent or color.a < 0.99:
 		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_material_cache[key] = material
 	return material
 
 

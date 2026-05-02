@@ -82,8 +82,12 @@ func _test_authored_2_5d_visual_parity_contract() -> void:
 
 	var wall_tile = map_data.call("get_tile_at_grid", Vector2i(2, 2))
 	_assert(bool(catalog.call("apply_type_to_tile", wall_tile, "wall_straight_se")), "Visual parity map applies wall_straight_se")
+	var wall_corner_tile = map_data.call("get_tile_at_grid", Vector2i(3, 1))
+	_assert(bool(catalog.call("apply_type_to_tile", wall_corner_tile, "wall_corner_ne")), "Visual parity map applies wall_corner_ne")
 	var satellite_tile = map_data.call("get_tile_at_grid", Vector2i(0, 2))
 	_assert(bool(catalog.call("apply_type_to_tile", satellite_tile, "technik_satellite_large_se")), "Visual parity map applies large satellite object")
+	var rock_tile = map_data.call("get_tile_at_grid", Vector2i(3, 3))
+	_assert(bool(catalog.call("apply_type_to_tile", rock_tile, "rock_large")), "Visual parity map applies rock_large")
 
 	var primary_view: Node = TERRAIN_MAP_3D_VIEW_SCRIPT.new()
 	root.add_child(primary_view)
@@ -93,7 +97,7 @@ func _test_authored_2_5d_visual_parity_contract() -> void:
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 	_assert(int(snapshot.get("ground_mesh_count", 0)) == 16, "Visual parity 3D map renders every tile as calibrated ground mesh")
 	_assert(int(snapshot.get("tile_texture_count", 0)) == 0 and int(snapshot.get("height_edge_texture_count", 0)) == 0, "Visual parity 3D map does not use flat Sprite3D texture cards as primary terrain")
-	_assert(int(snapshot.get("asset_model_count", 0)) >= 2, "Visual parity 3D map renders wall and satellite as calibrated GLB models")
+	_assert(int(snapshot.get("asset_model_count", 0)) >= 4, "Visual parity 3D map renders wall, wall corner, rock and satellite as calibrated GLB models")
 	_assert(int(snapshot.get("asset_texture_count", 0)) == 0, "Visual parity 3D map does not fall back to isometric Sprite3D asset cards for mapped assets")
 	_assert(int(snapshot.get("placeholder_object_count", 0)) == 0, "Visual parity 3D map does not use block placeholders for mapped assets")
 
@@ -103,10 +107,17 @@ func _test_authored_2_5d_visual_parity_contract() -> void:
 
 	var wall_node := _find_map_node(primary_view, "Asset_wall_straight_se_2_2")
 	_assert(wall_node != null and _node_has_mesh(wall_node), "Visual parity wall_straight_se loads the calibrated corridor wall model")
-	_assert(wall_node != null and absf(wrapf(wall_node.rotation_degrees.y - 90.0, -180.0, 180.0)) < 0.1, "Visual parity wall_straight_se keeps calibrated SE rotation")
+	_assert(wall_node != null and absf(wrapf(wall_node.rotation_degrees.y - 0.0, -180.0, 180.0)) < 0.1, "Visual parity wall_straight_se keeps calibrated SE rotation")
+	var wall_corner_node := _find_map_node(primary_view, "Asset_wall_corner_ne_3_1")
+	_assert(wall_corner_node != null and _node_has_mesh(wall_corner_node), "Visual parity wall_corner_ne loads the calibrated corridor corner model")
+	_assert(wall_corner_node != null and absf(wrapf(wall_corner_node.rotation_degrees.y - 180.0, -180.0, 180.0)) < 0.1, "Visual parity wall_corner_ne keeps calibrated NE corner rotation")
 	var satellite_node := _find_map_node(primary_view, "Asset_technik_satellite_large_se_0_2")
 	_assert(satellite_node != null and _node_has_mesh(satellite_node), "Visual parity satellite loads the calibrated satelliteDish_large model")
+	var rock_node := _find_map_node(primary_view, "Asset_rock_large_3_3")
+	_assert(rock_node != null and _node_has_mesh(rock_node), "Visual parity rock_large loads the calibrated rock model")
 	_assert(wall_node != null and satellite_node != null and satellite_node.scale.x > wall_node.scale.x, "Visual parity large satellite keeps larger calibrated 3D scale than wall")
+	_assert(wall_corner_node != null and not _node_has_material_override(wall_corner_node), "Visual parity wall corner keeps model materials instead of fallback override")
+	_assert(rock_node != null and not _node_has_material_override(rock_node), "Visual parity rock keeps model materials instead of fallback override")
 
 	primary_view.queue_free()
 	await _wait_frames(2)
@@ -264,6 +275,17 @@ func _node_has_mesh(node: Node) -> bool:
 		return true
 	for child in node.get_children():
 		if _node_has_mesh(child):
+			return true
+	return false
+
+
+func _node_has_material_override(node: Node) -> bool:
+	if node == null:
+		return false
+	if node is MeshInstance3D and (node as MeshInstance3D).material_override != null:
+		return true
+	for child in node.get_children():
+		if _node_has_material_override(child):
 			return true
 	return false
 

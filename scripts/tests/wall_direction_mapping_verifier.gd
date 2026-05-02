@@ -11,6 +11,16 @@ const WALL_TYPE_IDS: PackedStringArray = [
 	"wall_straight_ne",
 	"wall_straight_nw",
 ]
+const WALL_3D_TYPE_IDS: PackedStringArray = [
+	"wall_straight_se",
+	"wall_straight_sw",
+	"wall_straight_ne",
+	"wall_straight_nw",
+	"wall_corner_se",
+	"wall_corner_sw",
+	"wall_corner_ne",
+	"wall_corner_nw",
+]
 const KENNEY_DIAMOND_CENTER := Vector2(256.0, 315.0)
 const EXPECTED_WALL_TEXTURES: Dictionary = {
 	"wall_straight_se": "res://Assets/kenney_space-kit/Isometric/corridor_wall_NE.png",
@@ -19,10 +29,14 @@ const EXPECTED_WALL_TEXTURES: Dictionary = {
 	"wall_straight_nw": "res://Assets/kenney_space-kit/Isometric/corridor_wall_SW.png",
 }
 const EXPECTED_3D_WALL_ROTATION_DEGREES: Dictionary = {
-	"wall_straight_se": 90.0,
-	"wall_straight_sw": 180.0,
-	"wall_straight_ne": 0.0,
-	"wall_straight_nw": 270.0,
+	"wall_straight_se": 0.0,
+	"wall_straight_sw": 90.0,
+	"wall_straight_ne": 270.0,
+	"wall_straight_nw": 180.0,
+	"wall_corner_se": 270.0,
+	"wall_corner_sw": 0.0,
+	"wall_corner_ne": 180.0,
+	"wall_corner_nw": 90.0,
 }
 
 var _passed: int = 0
@@ -84,9 +98,9 @@ func _test_terrain_map_3d_view_wall_mapping() -> void:
 	primary_view.call("configure_from_map", _make_wall_map_data())
 	await _wait_frames(4)
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
-	_assert(int(snapshot.get("asset_model_count", 0)) == WALL_TYPE_IDS.size(), "TerrainMap3DView renders walls as calibrated Kenney GLB models")
+	_assert(int(snapshot.get("asset_model_count", 0)) == WALL_3D_TYPE_IDS.size(), "TerrainMap3DView renders walls as calibrated Kenney GLB models")
 	_assert(int(snapshot.get("asset_texture_count", 0)) == 0 and int(snapshot.get("placeholder_object_count", 0)) == 0, "TerrainMap3DView does not use Sprite3D/block fallback for calibrated wall models")
-	for type_id in WALL_TYPE_IDS:
+	for type_id in WALL_3D_TYPE_IDS:
 		var grid_position: Vector2i = _grid_for_type_id(type_id)
 		var wall_node := _find_3d_wall_model(primary_view, type_id, grid_position)
 		_assert(wall_node != null and _node_has_mesh(wall_node), "TerrainMap3DView loads %s as a 3D wall model" % type_id)
@@ -97,9 +111,9 @@ func _test_terrain_map_3d_view_wall_mapping() -> void:
 
 
 func _make_wall_map_data():
-	var map_data = TERRAIN_MAP_DATA_SCRIPT.call("create_empty", "wall_direction_mapping", Vector2i(4, 1), Vector2.ZERO)
+	var map_data = TERRAIN_MAP_DATA_SCRIPT.call("create_empty", "wall_direction_mapping", Vector2i(WALL_3D_TYPE_IDS.size(), 1), Vector2.ZERO)
 	var index: int = 0
-	for type_id in WALL_TYPE_IDS:
+	for type_id in WALL_3D_TYPE_IDS:
 		var tile_data = map_data.call("get_tile_at_grid", Vector2i(index, 0))
 		tile_data.type_id = String(type_id)
 		tile_data.walkable = false
@@ -110,7 +124,7 @@ func _make_wall_map_data():
 
 
 func _grid_for_type_id(type_id: String) -> Vector2i:
-	var index: int = WALL_TYPE_IDS.find(type_id)
+	var index: int = WALL_3D_TYPE_IDS.find(type_id)
 	return Vector2i(index, 0)
 
 

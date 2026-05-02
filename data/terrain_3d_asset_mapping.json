@@ -23,7 +23,14 @@
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_wall.glb",
 			"scale": 1.0,
 			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0
+			"rotation_degrees_offset": -90.0
+		},
+		"wall_corner": {
+			"layer": "terrain_object",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_wallCorner.glb",
+			"scale": 1.0,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 180.0
 		},
 		"corridor_straight": {
 			"layer": "terrain_object",
@@ -91,7 +98,7 @@
 		"technik_satellite_large": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/satelliteDish_large.glb",
-			"scale": 1.35,
+			"scale": 1.8,
 			"y_offset": 0.0,
 			"rotation_degrees_offset": 0.0
 		},
@@ -130,6 +137,27 @@
 			"y_offset": -0.01,
 			"rotation_degrees_offset": 0.0
 		},
+		"cliff_straight": {
+			"layer": "terrain_object",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_sideCliff.glb",
+			"scale": 1.0,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0
+		},
+		"cliff_corner": {
+			"layer": "terrain_object",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_sideCorner.glb",
+			"scale": 1.0,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": -90.0
+		},
+		"slope": {
+			"layer": "terrain_object",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_rampLarge.glb",
+			"scale": 1.0,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0
+		},
 		"crater_small": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/crater.glb",
@@ -140,7 +168,7 @@
 		"crater_large": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/craterLarge.glb",
-			"scale": 2.25,
+			"scale": 3.4,
 			"y_offset": -0.02,
 			"rotation_degrees_offset": 0.0
 		},
@@ -148,6 +176,20 @@
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rock_largeB.glb",
 			"scale": 1.1,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0
+		},
+		"rock_large": {
+			"layer": "object",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rock_largeB.glb",
+			"scale": 1.1,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0
+		},
+		"rock_small": {
+			"layer": "object",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rock.glb",
+			"scale": 0.95,
 			"y_offset": 0.0,
 			"rotation_degrees_offset": 0.0
 		},
