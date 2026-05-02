@@ -100,15 +100,19 @@ func _test_authored_2_5d_visual_parity_contract() -> void:
 	var tile_sprite := _find_map_sprite(primary_view, "Tile_1_1")
 	_assert(tile_sprite != null and _sprite_uses_texture(tile_sprite, "terrain_SW.png"), "Visual parity ground tile uses terrain_SW texture")
 	_assert(tile_sprite != null and tile_sprite.offset.distance_to(_expected_kenney_anchor_offset(tile_sprite.texture)) < 0.05, "Visual parity ground tile keeps the Kenney diamond anchor")
+	_assert(tile_sprite != null and tile_sprite.pixel_size >= 0.014, "Visual parity ground tile is scaled to fill the 2.5D grid spacing")
+	_assert(_sprite_uses_fixed_map_card_orientation(tile_sprite), "Visual parity ground tile keeps fixed map orientation instead of camera billboarding")
 
 	var wall_sprite := _find_map_sprite(primary_view, "AssetTexture_wall_straight_se_2_2/Texture")
 	_assert(wall_sprite != null and _sprite_uses_texture(wall_sprite, "corridor_wall_NE.png"), "Visual parity wall_straight_se keeps authored corridor_wall_NE mapping")
 	var satellite_sprite := _find_map_sprite(primary_view, "AssetTexture_technik_satellite_large_se_0_2/Texture")
 	_assert(satellite_sprite != null and _sprite_uses_texture(satellite_sprite, "satelliteDish_large_SE.png"), "Visual parity satellite uses authored satelliteDish_large_SE texture")
 	_assert(wall_sprite != null and satellite_sprite != null and satellite_sprite.pixel_size > wall_sprite.pixel_size, "Visual parity large satellite keeps larger 2.5D scale than wall card")
+	_assert(_sprite_uses_fixed_map_card_orientation(wall_sprite) and _sprite_uses_fixed_map_card_orientation(satellite_sprite), "Visual parity authored assets keep fixed map orientation instead of camera billboarding")
 
 	var height_sprite := _find_first_map_sprite_with_prefix(primary_view, "Height")
 	_assert(height_sprite != null and String(height_sprite.texture.resource_path).get_file().begins_with("terrain_side"), "Visual parity elevated terrain renders Kenney side/cliff texture")
+	_assert(_sprite_uses_fixed_map_card_orientation(height_sprite), "Visual parity elevated terrain keeps fixed map orientation instead of camera billboarding")
 
 	primary_view.queue_free()
 	await _wait_frames(2)
@@ -131,6 +135,7 @@ func _test_live_mission_uses_3d_primary_view() -> void:
 	_assert(int(snapshot.get("unit_texture_count", 0)) >= 2, "Live Primary3DView renders runtime units with authored isometric sprites")
 	_assert(_asset_texture_cards_have_textures(primary_view), "Live 2.5D asset cards keep non-empty isometric textures")
 	_assert(_unit_texture_cards_have_textures(primary_view), "Live 2.5D unit proxies keep authored unit textures")
+	_assert(_unit_texture_cards_keep_fixed_orientation(primary_view), "Live 2.5D unit proxies keep fixed map orientation instead of camera billboarding")
 	_assert(int(snapshot.get("map_render_duration_msec", MAX_3D_RENDER_DURATION_MSEC + 1)) < MAX_3D_RENDER_DURATION_MSEC, "Live Primary3DView map render stays below freeze threshold")
 
 	var map_root := live_scene.get_node_or_null("MapRoot") as CanvasItem
@@ -245,6 +250,27 @@ func _unit_texture_cards_have_textures(primary_view: Node) -> bool:
 	return inspected_count > 0
 
 
+func _unit_texture_cards_keep_fixed_orientation(primary_view: Node) -> bool:
+	if primary_view == null:
+		return false
+	var unit_root := primary_view.get_node_or_null("ViewportContainer/SubViewport/WorldRoot/UnitRoot3D")
+	if unit_root == null:
+		return false
+	var inspected_count: int = 0
+	for proxy in unit_root.get_children():
+		if proxy.is_queued_for_deletion() or not proxy is Node3D:
+			continue
+		var sprite := proxy.get_node_or_null("UnitTexture") as Sprite3D
+		if sprite == null:
+			return false
+		inspected_count += 1
+		if not _sprite_uses_fixed_map_card_orientation(sprite):
+			return false
+		if absf(wrapf((proxy as Node3D).rotation_degrees.y, -180.0, 180.0)) > 0.05:
+			return false
+	return inspected_count > 0
+
+
 func _find_map_sprite(primary_view: Node, relative_path: String) -> Sprite3D:
 	if primary_view == null or relative_path.is_empty():
 		return null
@@ -268,6 +294,10 @@ func _find_first_map_sprite_with_prefix(primary_view: Node, name_prefix: String)
 
 func _sprite_uses_texture(sprite: Sprite3D, expected_file: String) -> bool:
 	return sprite != null and sprite.texture != null and String(sprite.texture.resource_path).get_file() == expected_file
+
+
+func _sprite_uses_fixed_map_card_orientation(sprite: Sprite3D) -> bool:
+	return sprite != null and sprite.billboard == BaseMaterial3D.BILLBOARD_DISABLED and absf(sprite.rotation_degrees.y - 45.0) < 0.1
 
 
 func _expected_kenney_anchor_offset(texture: Texture2D) -> Vector2:

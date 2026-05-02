@@ -149,6 +149,7 @@ func _verify_player_lz_and_dropship(live_scene: Node) -> void:
 	_assert(_scene_has_no_player_lz(live_scene), "Waiting dropship state does not create an LZ by itself")
 	_assert(_primary_3d_dropship_texture_visible(live_scene), "Waiting dropship is mirrored as an authored 2.5D craft texture without auto LZ")
 	_assert(_primary_3d_dropship_texture_path(live_scene).ends_with("craft_speederB_SE.png"), "Waiting dropship uses the authored isometric speeder texture in the 3D primary view")
+	_assert(_primary_3d_dropship_uses_fixed_orientation(live_scene), "Waiting dropship keeps fixed map orientation instead of camera billboarding")
 	_assert(not _primary_3d_dropship_model_visible(live_scene), "Waiting dropship does not fall back to GLB model when an authored texture exists")
 
 	var lz_position := Vector2(448.0, 285.0)
@@ -326,6 +327,14 @@ func _primary_3d_dropship_texture_path(scene: Node) -> String:
 	if sprite == null or sprite.texture == null:
 		return ""
 	return String(sprite.texture.resource_path).strip_edges()
+
+
+func _primary_3d_dropship_uses_fixed_orientation(scene: Node) -> bool:
+	var primary_view = _get_primary_3d_view(scene)
+	if primary_view == null:
+		return false
+	var sprite := primary_view.get_node_or_null("ViewportContainer/SubViewport/WorldRoot/DropRoot3D/DropshipTexture") as Sprite3D
+	return sprite != null and sprite.billboard == BaseMaterial3D.BILLBOARD_DISABLED and absf(sprite.rotation_degrees.y - 45.0) < 0.1
 
 
 func _get_primary_3d_view(scene: Node):

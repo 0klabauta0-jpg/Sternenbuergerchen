@@ -61,12 +61,13 @@ const ROCK_LARGE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Iso
 const DEFAULT_DROPSHIP_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
 const FRIENDLY_UNIT_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/astronautA_SW.png")
 const ENEMY_UNIT_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/astronautB_SW.png")
-const TEXTURE_CARD_PIXEL_SIZE: float = 0.0062
-const TILE_TEXTURE_PIXEL_SIZE: float = 0.0060
-const UNIT_TEXTURE_PIXEL_SIZE: float = 0.0105
-const DROPSHIP_TEXTURE_PIXEL_SIZE: float = 0.0094
+const TEXTURE_CARD_PIXEL_SIZE: float = 0.0154
+const TILE_TEXTURE_PIXEL_SIZE: float = 0.0154
+const UNIT_TEXTURE_PIXEL_SIZE: float = 0.0150
+const DROPSHIP_TEXTURE_PIXEL_SIZE: float = 0.0152
 const STATUS_LABEL_PIXEL_SIZE: float = 0.018
 const STATUS_LABEL_HEIGHT: float = 1.16
+const FIXED_CARD_YAW_DEGREES: float = 45.0
 const KENNEY_DIAMOND_CENTER := Vector2(256.0, 315.0)
 const KENNEY_MODEL_ROOT: String = "res://Assets/kenney_space-kit/Models/GLTF format"
 const KENNEY_AUTHORING_OFFSET_X: float = 2.0
@@ -802,10 +803,16 @@ func _add_texture_card(parent: Node3D, texture: Texture2D, local_position: Vecto
 	sprite.shaded = false
 	sprite.double_sided = true
 	sprite.transparent = true
-	sprite.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	sprite.billboard = BaseMaterial3D.BILLBOARD_DISABLED
+	sprite.rotation_degrees = _get_fixed_texture_card_rotation_degrees()
 	sprite.position = local_position
 	parent.add_child(sprite)
 	return sprite
+
+
+func _get_fixed_texture_card_rotation_degrees() -> Vector3:
+	var elevation_degrees: float = rad_to_deg(atan2(sin(deg_to_rad(_camera_pitch_degrees)) * 1.18, 1.08))
+	return Vector3(-elevation_degrees, FIXED_CARD_YAW_DEGREES, 0.0)
 
 
 func _get_kenney_anchor_offset(texture: Texture2D, additional_offset: Vector2 = Vector2.ZERO) -> Vector2:
@@ -1253,7 +1260,7 @@ func _sync_unit_proxies(force_rebuild: bool = false) -> void:
 			if proxy.position.distance_squared_to(next_position) > 0.0001:
 				changed = true
 			proxy.position = next_position
-		var next_rotation_y: float = -_camera_yaw_degrees
+		var next_rotation_y: float = 0.0
 		if absf(wrapf(proxy.rotation_degrees.y - next_rotation_y, -180.0, 180.0)) > 0.01:
 			changed = true
 		proxy.rotation_degrees.y = next_rotation_y

@@ -21,6 +21,7 @@
 ### TASK_159 Follow-up - 2.5D Mission Load/Offset Fix
 - Status: implementiert
 - Stand: Der 2.5D-Primary-View-Pfad laedt Terrain-Daten wieder performant, weil `TerrainMapData.load_from_file()` den Tile-Katalog nur noch einmal pro Map laedt und `TerrainTileData.from_dict()` keine Script-Loads pro Tile mehr ausloest. `TerrainMap3DView` rendert Boden, Waende, Ecken, automatische Cliff-/Slope-Kanten, Rampen, Felsen, Katalog-Objekte, Runtime-Units und Dropship wieder aus den authored Kenney-Isometric-Texturen als 3D-Sprite-Karten; GLB-/Block-Proxies bleiben nur Fallback. Der Live-2.5D-Pfad rendert die versteckte Legacy-2D-Karte nicht mehr parallel.
+- Stand: Nach der manuellen Sichtpruefung wurden die Kenney-Texture-Cards neu skaliert und von Kamera-Billboarding auf feste Map-Orientierung umgestellt. Boden-Diamanten fuellen damit wieder die Grid-Abstaende, und Waende, Assets, Units sowie Dropship drehen sich beim Kamera-Orbit nicht mehr zur Kamera mit.
 - Offene Punkte: Headless-Godot meldet beim Beenden einzelner 3D-Verifier weiterhin RID-Leak-Warnungen; die getesteten Laufzeitpfade bestehen, aber die Exit-Warnung sollte spaeter separat untersucht werden.
 - Risiken: Die Simulation bleibt weiterhin auf den bestehenden `Node2D`-Runtime-Ankern. Die 3D-View ist Darstellung und Eingabeprojektion, nicht Gameplay-Wahrheit.
 - Naechster Schritt: Manuelle Godot-Pruefung von Mission Start -> LZ setzen -> Dropship Call -> Attack Area mit sichtbarer 2.5D-Map.

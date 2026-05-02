@@ -54,6 +54,7 @@ Die sichtbare Kartenoberflaeche und die bedienbare Kamera sollen aber nicht mehr
 - [x] Runtime-Units spiegeln die vorhandenen Unit-`Visual`-/Weapon-Sprites als 2.5D-Texturkarten statt generische Astronaut-GLBs zu erzwingen.
 - [x] Der Dropship-Marker nutzt die vom TacticalController berechnete Isometric-Speeder-Textur statt Box-/Wing- oder GLB-Platzhaltern.
 - [x] Die 2.5D-Bodenkarte nutzt wieder `terrain_SW.png` mit dem bestehenden Tile-Modulate, damit Farbe und Lesbarkeit dem authored 2D-Stand entsprechen.
+- [x] Kenney-Texturkarten sind auf die sichtbare PNG-Flaeche skaliert und bleiben fest in Map-Orientierung statt als Kamera-Billboards mitzudrehen.
 - [x] Der 2.5D-Live-Pfad baut die versteckte Legacy-2D-Karte nicht mehr zusaetzlich auf.
 - [x] Die 3D-Kalibrierungs- und Render-Spike-Szenen besitzen ihre Script-Dependencies und laden die gemeinsame `TerrainMap3DView`.
 - [x] Bestehende Authoring-/Live-Verifier bleiben lauffaehig oder dokumentieren bewusst offene GUI-Risiken.
@@ -86,6 +87,7 @@ Die sichtbare Kartenoberflaeche und die bedienbare Kamera sollen aber nicht mehr
 ## Ergebnis
 - `TerrainMap3DView` rendert `TerrainMapData` als gemeinsame 2.5D-Primary-View mit `SubViewport`, `Node3D`, `Camera3D`, Terrain-/Objekt-/Marker-/Patrol-Visuals, Unit-Proxies, LZ-/Dropship-Proxy und taktischen Area-/Contact-Overlays.
 - Terrain-Objekte, Waende, automatische Cliff-/Slope-Kanten, Rampen, Felsen und Katalog-Objekte werden in dieser View wieder aus den vorhandenen Kenney-Isometric-PNGs als `Sprite3D`-Texturkarten gerendert; dadurch bleiben Texturen, Farben, Richtungs-Mapping und authored Sprite-Groessen erhalten.
+- Die Sprite-Karten sind nicht mehr als Kamera-Billboards konfiguriert. Sie behalten eine feste Map-Orientierung, damit Kamera-Rotation die Karte umkreist statt Boden, Assets, Units und Dropship optisch zur Kamera mitzudrehen.
 - GLB-Modelle bleiben nur Fallback fuer nicht aufloesbare Texturen. Der fruehere Versuch, GLBs als primaere Map-Assets zu verwenden, war sichtbar falsch, weil dabei Texturen, Wall-/Corner-Richtungen, Objektfarben und Sprite-Groessen verloren gingen.
 - `TerrainMapData.load_from_file()` laedt den Terrain-Tile-Katalog nur noch einmal pro Map. Vorher wurde der Katalog fuer jedes Tile neu geladen, was die 32x32-Live-Mission beim Start fuer lange Zeit blockiert hat.
 - `TerrainTileData.from_dict()` erzeugt Tiles direkt ueber die bestehende Klasse statt pro Tile das Script erneut zu laden.

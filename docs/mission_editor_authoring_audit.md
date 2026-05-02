@@ -77,6 +77,7 @@ Der Terrain-Editor bleibt fuer Karten- und Markerdaten verantwortlich. Darauf wi
 - Die sichtbaren Asset-Fehler kamen aus dem falschen Primaerpfad: Kenney-GLBs ersetzten kurzzeitig die authored Isometric-PNGs. Dabei gingen Wall-/Corner-Richtungen, Texturen, Farben und Sprite-Groessen verloren.
 - `TerrainMap3DView` rendert Boden, Waende, automatische Cliff-/Slope-Kanten, Rampen, Felsen und Katalog-Objekte jetzt wieder als `Sprite3D`-Texturkarten aus den vorhandenen Isometric-PNGs. Die GLB-Modelle bleiben nur Fallback fuer nicht aufloesbare Texturen.
 - Units und Dropship sind in der 2.5D-View keine Capsule-/Box-Platzhalter mehr und werden auch nicht mehr auf generische GLBs gezwungen; sie spiegeln die vorhandenen Unit-`Visual`-/Weapon-Sprites und die TacticalController-Dropship-Textur.
+- Die Kenney-Texturkarten sind auf die sichtbare PNG-Flaeche skaliert und behalten feste Map-Orientierung; Kamera-Billboarding bleibt Textlabels vorbehalten.
 - Die alte 2D-Karte bleibt Daten-/Fallback-Pfad, wird im 2.5D-Live-Pfad aber nicht mehr unsichtbar parallel gerendert.
 
 ## Update nach TASK_160
