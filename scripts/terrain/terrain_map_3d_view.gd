@@ -81,7 +81,11 @@ const KENNEY_OFFSET_EPSILON: float = 0.01
 const FRIENDLY_UNIT_MODEL_NAME: String = "astronautA"
 const ENEMY_UNIT_MODEL_NAME: String = "astronautB"
 const DROPSHIP_MODEL_NAME: String = "craft_speederB"
-const UNIT_MODEL_SCALE: float = 0.88
+const UNIT_MODEL_SCALE: float = 0.66
+const UNIT_FALLBACK_BODY_RADIUS: float = 0.18
+const UNIT_FALLBACK_BODY_HEIGHT: float = 0.585
+const UNIT_BASE_RADIUS: float = 0.27
+const UNIT_BASE_HEIGHT: float = 0.034
 const DROPSHIP_MODEL_SCALE: float = 1.48
 
 const LEGACY_MODEL_BY_TYPE: Dictionary = {
@@ -1406,12 +1410,11 @@ func _add_dropship_proxy(world_position: Vector2) -> void:
 
 
 func _get_dropship_rotation_y(world_position: Vector2) -> float:
+	if typeof(_drop_payload.get("dropship_target_position", null)) == TYPE_VECTOR2:
+		var target_position: Vector2 = Vector2(_drop_payload.get("dropship_target_position", world_position))
+		return _get_world_direction_yaw(world_position, target_position, -_camera_yaw_degrees)
 	if typeof(_drop_payload.get("lz_position", null)) == TYPE_VECTOR2:
-		var lz_grid: Vector2 = _world_to_grid_float(Vector2(_drop_payload.get("lz_position", Vector2.ZERO)))
-		var ship_grid: Vector2 = _world_to_grid_float(world_position)
-		var delta: Vector2 = lz_grid - ship_grid
-		if delta.length_squared() > 0.001:
-			return rad_to_deg(atan2(delta.x, delta.y))
+		return _get_world_direction_yaw(world_position, Vector2(_drop_payload.get("lz_position", Vector2.ZERO)), -_camera_yaw_degrees)
 	return -_camera_yaw_degrees
 
 
@@ -1445,7 +1448,8 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 			changed = true
 		proxy.visible = next_visible
 		if unit is Node2D:
-			var next_position: Vector3 = _world_to_3d_position((unit as Node2D).global_position, 0.06)
+			var unit_world_position: Vector2 = (unit as Node2D).global_position
+			var next_position: Vector3 = _world_to_3d_position(unit_world_position, 0.06)
 			var proxy_distance: float = proxy.position.distance_to(next_position)
 			if proxy_distance > 0.0001:
 				changed = true
@@ -1453,10 +1457,19 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 				proxy.position = next_position
 			else:
 				proxy.position = proxy.position.lerp(next_position, clampf(delta * UNIT_PROXY_SMOOTH_SPEED, 0.0, 1.0))
-		var next_rotation_y: float = 0.0
-		if absf(wrapf(proxy.rotation_degrees.y - next_rotation_y, -180.0, 180.0)) > 0.01:
-			changed = true
-		proxy.rotation_degrees.y = next_rotation_y
+			var next_rotation_y: float = _get_unit_proxy_rotation_y(proxy, unit, unit_world_position)
+			if absf(wrapf(proxy.rotation_degrees.y - next_rotation_y, -180.0, 180.0)) > 0.01:
+				changed = true
+			proxy.rotation_degrees.y = next_rotation_y
+			proxy.set_meta("last_world_position", unit_world_position)
+		else:
+			var next_rotation_y: float = proxy.rotation_degrees.y
+			if not proxy.has_meta("last_rotation_y"):
+				next_rotation_y = 0.0
+			if absf(wrapf(proxy.rotation_degrees.y - next_rotation_y, -180.0, 180.0)) > 0.01:
+				changed = true
+			proxy.rotation_degrees.y = next_rotation_y
+		proxy.set_meta("last_rotation_y", proxy.rotation_degrees.y)
 		if _update_unit_status_badge(proxy, unit):
 			unit_status_badge_count += 1
 		if bool(proxy.get_meta("uses_unit_texture", false)):
@@ -1550,6 +1563,31 @@ func _get_unit_status_badge_color(unit: Node) -> Color:
 	return Color(0.62, 0.92, 1.0, 1.0)
 
 
+func _get_unit_proxy_rotation_y(proxy: Node3D, unit: Node, current_world_position: Vector2) -> float:
+	var fallback_yaw: float = proxy.rotation_degrees.y if proxy != null else 0.0
+	var target_position: Variant = unit.call("get_target_position") if unit != null and unit.has_method("get_target_position") else null
+	if typeof(target_position) == TYPE_VECTOR2:
+		var target_world_position: Vector2 = Vector2(target_position)
+		if current_world_position.distance_squared_to(target_world_position) > 0.25:
+			return _get_world_direction_yaw(current_world_position, target_world_position, fallback_yaw)
+
+	if proxy != null and proxy.has_meta("last_world_position"):
+		var previous_position: Variant = proxy.get_meta("last_world_position")
+		if typeof(previous_position) == TYPE_VECTOR2:
+			var previous_world_position: Vector2 = Vector2(previous_position)
+			if previous_world_position.distance_squared_to(current_world_position) > 0.01:
+				return _get_world_direction_yaw(previous_world_position, current_world_position, fallback_yaw)
+
+	return fallback_yaw
+
+
+func _get_world_direction_yaw(from_world_position: Vector2, to_world_position: Vector2, fallback_yaw: float = 0.0) -> float:
+	var delta_grid: Vector2 = _world_to_grid_float(to_world_position) - _world_to_grid_float(from_world_position)
+	if delta_grid.length_squared() <= 0.0001:
+		return fallback_yaw
+	return wrapf(rad_to_deg(atan2(delta_grid.x, -delta_grid.y)), 0.0, 360.0)
+
+
 func _create_unit_proxy(unit: Node) -> Node3D:
 	var root := Node3D.new()
 	var model_scene := _get_asset_model_scene_by_name(_get_unit_model_name(unit))
@@ -1577,16 +1615,16 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 	var body := MeshInstance3D.new()
 	if not bool(root.get_meta("uses_kenney_model", false)) and not bool(root.get_meta("uses_unit_texture", false)):
 		var mesh := CapsuleMesh.new()
-		mesh.radius = 0.24
-		mesh.height = 0.78
+		mesh.radius = UNIT_FALLBACK_BODY_RADIUS
+		mesh.height = UNIT_FALLBACK_BODY_HEIGHT
 		body.mesh = mesh
 		body.material_override = _make_material(_get_unit_color(unit))
 		root.add_child(body)
 	var base := MeshInstance3D.new()
 	var base_mesh := CylinderMesh.new()
-	base_mesh.top_radius = 0.36
-	base_mesh.bottom_radius = 0.36
-	base_mesh.height = 0.045
+	base_mesh.top_radius = UNIT_BASE_RADIUS
+	base_mesh.bottom_radius = UNIT_BASE_RADIUS
+	base_mesh.height = UNIT_BASE_HEIGHT
 	base_mesh.radial_segments = 16
 	base.mesh = base_mesh
 	base.material_override = _make_material(Color(0.05, 0.08, 0.1, 0.72), true)

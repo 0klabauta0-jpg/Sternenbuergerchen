@@ -29,10 +29,10 @@ const EXPECTED_WALL_TEXTURES: Dictionary = {
 	"wall_straight_nw": "res://Assets/kenney_space-kit/Isometric/corridor_wall_SW.png",
 }
 const EXPECTED_3D_WALL_ROTATION_DEGREES: Dictionary = {
-	"wall_straight_se": 90.0,
-	"wall_straight_sw": 180.0,
-	"wall_straight_ne": 0.0,
-	"wall_straight_nw": 270.0,
+	"wall_straight_se": 0.0,
+	"wall_straight_sw": 90.0,
+	"wall_straight_ne": 270.0,
+	"wall_straight_nw": 180.0,
 	"wall_corner_se": 90.0,
 	"wall_corner_sw": 0.0,
 	"wall_corner_ne": 180.0,

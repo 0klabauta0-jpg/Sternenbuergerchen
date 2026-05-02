@@ -3426,6 +3426,7 @@ func _refresh_world_overlays() -> void:
 				"lz_position": _lz_position,
 				"dropship_visible": dropship_visible,
 				"dropship_position": dropship_position,
+				"dropship_target_position": _get_primary_dropship_target_position(dropship_position),
 				"dropship_texture": _get_mission_dropship_texture(),
 			}
 		)
@@ -7491,6 +7492,14 @@ func _get_drop_staging_position() -> Vector2:
 	var map_bounds: Rect2 = _get_map_world_bounds()
 	var map_span: float = maxf(maxf(map_bounds.size.x, map_bounds.size.y) * DROP_OFFMAP_DISTANCE_MULTIPLIER, DROP_OFFMAP_MIN_DISTANCE)
 	return _lz_position + offset.normalized() * map_span
+
+
+func _get_primary_dropship_target_position(current_dropship_position: Vector2) -> Vector2:
+	if _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND or _mission_drop_state == "to_fob":
+		return _get_drop_exit_position()
+	if _has_lz_position:
+		return _lz_position
+	return current_dropship_position
 
 
 func _get_drop_exit_position() -> Vector2:

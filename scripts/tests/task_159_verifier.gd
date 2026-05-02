@@ -112,7 +112,7 @@ func _test_authored_2_5d_visual_parity_contract() -> void:
 
 	var wall_node := _find_map_node(primary_view, "Asset_wall_straight_se_2_2")
 	_assert(wall_node != null and _node_has_mesh(wall_node), "Visual parity wall_straight_se loads the calibrated corridor wall model")
-	_assert(wall_node != null and absf(wrapf(wall_node.rotation_degrees.y - 90.0, -180.0, 180.0)) < 0.1, "Visual parity wall_straight_se keeps calibrated SE rotation")
+	_assert(wall_node != null and absf(wrapf(wall_node.rotation_degrees.y - 0.0, -180.0, 180.0)) < 0.1, "Visual parity wall_straight_se keeps calibrated SE straight-wall rotation")
 	var wall_corner_node := _find_map_node(primary_view, "Asset_wall_corner_ne_3_1")
 	_assert(wall_corner_node != null and _node_has_mesh(wall_corner_node), "Visual parity wall_corner_ne loads the calibrated corridor corner model")
 	_assert(wall_corner_node != null and absf(wrapf(wall_corner_node.rotation_degrees.y - 180.0, -180.0, 180.0)) < 0.1, "Visual parity wall_corner_ne keeps calibrated NE corner rotation")
@@ -175,6 +175,15 @@ func _test_live_mission_uses_3d_primary_view() -> void:
 	_assert(_unit_model_nodes_have_models(primary_view), "Live 2.5D unit proxies contain loaded astronaut model meshes")
 	_assert(int(snapshot.get("map_render_duration_msec", MAX_3D_RENDER_DURATION_MSEC + 1)) < MAX_3D_RENDER_DURATION_MSEC, "Live Primary3DView map render stays below freeze threshold")
 
+	var unit_alpha_node := live_scene.get_node_or_null("UnitAlpha") as Node2D
+	if unit_alpha_node != null and primary_view != null and unit_alpha_node.has_method("set_target_position"):
+		unit_alpha_node.call("set_target_position", unit_alpha_node.global_position + Vector2(64.0, 32.0))
+		await _wait_frames(4)
+		var unit_alpha_proxy := _find_unit_proxy(primary_view, String(unit_alpha_node.call("get_unit_id")))
+		_assert(unit_alpha_proxy != null and absf(wrapf(unit_alpha_proxy.rotation_degrees.y - 90.0, -180.0, 180.0)) < 0.1, "Live 2.5D unit proxy faces its movement target")
+		var unit_alpha_model_root := _find_unit_model_root(unit_alpha_proxy)
+		_assert(unit_alpha_model_root != null and absf(unit_alpha_model_root.scale.x - 0.66) < 0.01, "Live 2.5D astronaut model scale is reduced by 25 percent")
+
 	var map_root := live_scene.get_node_or_null("MapRoot") as CanvasItem
 	var mission_camera := live_scene.get_node_or_null("MissionCamera") as Camera2D
 	_assert(map_root != null and not map_root.visible, "Live legacy MapRoot is hidden")
@@ -200,6 +209,19 @@ func _test_live_mission_uses_3d_primary_view() -> void:
 		_assert(typeof(lz_state.get("lz_position", null)) == TYPE_VECTOR2 and Vector2(lz_state.get("lz_position", Vector2.ZERO)).distance_to(snapped_lz) < 0.1, "LZ placement snaps to a terrain field center")
 		_assert(int(post_lz_snapshot.get("lz_tile_marker_count", 0)) == 1, "LZ is visualized as a selected terrain field")
 		_assert(legacy_lz != null and not legacy_lz.visible, "Old 2D LZ marker stays hidden")
+		primary_view.call(
+			"set_mission_drop_visual_state",
+			{
+				"has_lz_position": true,
+				"lz_position": snapped_lz,
+				"dropship_visible": true,
+				"dropship_position": snapped_lz - Vector2(64.0, 32.0),
+				"dropship_target_position": snapped_lz,
+			}
+		)
+		var dropship_model := _find_drop_node(primary_view, "DropshipModel_craft_speederB")
+		var dropship_yaw: float = dropship_model.rotation_degrees.y if dropship_model != null else -999.0
+		_assert(dropship_model != null and absf(wrapf(dropship_yaw - 90.0, -180.0, 180.0)) < 0.1, "Live 2.5D dropship faces its approach target")
 
 		var available_fireteams: PackedStringArray = controller.call("_get_available_fireteam_ids")
 		if not available_fireteams.is_empty():
@@ -287,9 +309,40 @@ func _unit_model_nodes_have_models(primary_view: Node) -> bool:
 		if model_root == null or not _node_has_mesh(model_root):
 			return false
 		inspected_count += 1
-		if absf(wrapf((proxy as Node3D).rotation_degrees.y, -180.0, 180.0)) > 0.05:
-			return false
 	return inspected_count > 0
+
+
+func _find_unit_proxy(primary_view: Node, unit_id: String) -> Node3D:
+	if primary_view == null or unit_id.strip_edges().is_empty():
+		return null
+	var unit_root := primary_view.get_node_or_null("ViewportContainer/SubViewport/WorldRoot/UnitRoot3D")
+	if unit_root == null:
+		return null
+	return unit_root.get_node_or_null("UnitProxy_%s" % unit_id.strip_edges()) as Node3D
+
+
+func _find_unit_model_root(unit_proxy: Node3D) -> Node3D:
+	if unit_proxy == null:
+		return null
+	for child in unit_proxy.get_children():
+		if child is Node3D and String(child.name).begins_with("UnitModel_"):
+			return child as Node3D
+	return null
+
+
+func _find_drop_node(primary_view: Node, node_name: String) -> Node3D:
+	if primary_view == null or node_name.strip_edges().is_empty():
+		return null
+	var drop_root := primary_view.get_node_or_null("ViewportContainer/SubViewport/WorldRoot/DropRoot3D")
+	if drop_root == null:
+		return null
+	var exact_node := drop_root.get_node_or_null(node_name.strip_edges()) as Node3D
+	if exact_node != null:
+		return exact_node
+	for child in drop_root.get_children():
+		if child is Node3D and String(child.name).begins_with(node_name.strip_edges()):
+			return child as Node3D
+	return null
 
 
 func _find_map_node(primary_view: Node, relative_path: String) -> Node3D:
