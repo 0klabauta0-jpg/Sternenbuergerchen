@@ -29,14 +29,14 @@ const EXPECTED_WALL_TEXTURES: Dictionary = {
 	"wall_straight_nw": "res://Assets/kenney_space-kit/Isometric/corridor_wall_SW.png",
 }
 const EXPECTED_3D_WALL_ROTATION_DEGREES: Dictionary = {
-	"wall_straight_se": 0.0,
-	"wall_straight_sw": 90.0,
-	"wall_straight_ne": 270.0,
-	"wall_straight_nw": 180.0,
-	"wall_corner_se": 270.0,
-	"wall_corner_sw": 0.0,
-	"wall_corner_ne": 180.0,
-	"wall_corner_nw": 90.0,
+	"wall_straight_se": 90.0,
+	"wall_straight_sw": 180.0,
+	"wall_straight_ne": 0.0,
+	"wall_straight_nw": 270.0,
+	"wall_corner_se": 90.0,
+	"wall_corner_sw": 180.0,
+	"wall_corner_ne": 0.0,
+	"wall_corner_nw": 270.0,
 }
 
 var _passed: int = 0
@@ -100,6 +100,7 @@ func _test_terrain_map_3d_view_wall_mapping() -> void:
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 	_assert(int(snapshot.get("asset_model_count", 0)) == WALL_3D_TYPE_IDS.size(), "TerrainMap3DView renders walls as calibrated Kenney GLB models")
 	_assert(int(snapshot.get("asset_texture_count", 0)) == 0 and int(snapshot.get("placeholder_object_count", 0)) == 0, "TerrainMap3DView does not use Sprite3D/block fallback for calibrated wall models")
+	_assert(int(snapshot.get("missing_asset_mapping_count", 0)) == 0, "TerrainMap3DView resolves every calibrated wall model mapping")
 	for type_id in WALL_3D_TYPE_IDS:
 		var grid_position: Vector2i = _grid_for_type_id(type_id)
 		var wall_node := _find_3d_wall_model(primary_view, type_id, grid_position)

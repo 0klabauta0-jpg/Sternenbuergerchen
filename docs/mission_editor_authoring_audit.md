@@ -75,10 +75,10 @@ Der Terrain-Editor bleibt fuer Karten- und Markerdaten verantwortlich. Darauf wi
 - Die 2.5D-Primary-View ist jetzt der gepruefte Editor- und Live-Pfad fuer Terrain, LZ, Dropship, Attack Area und Contacts.
 - Der Missionsstart hing, weil `TerrainMapData.load_from_file()` den Tile-Katalog pro Tile neu geladen hat. Der Loader nutzt den Katalog jetzt einmal pro Map; TASK_159 fiel dadurch lokal von ueber 100 Sekunden auf rund 5 Sekunden.
 - Die sichtbaren Asset-Fehler kamen aus dem falschen Integrationspfad: Kenney-Isometric-PNGs wurden als `Sprite3D`-Karten in eine frei rotierbare Kamera gelegt. Dadurch wirkten Bodenfelder zu klein/versetzt, und Assets zeigten beim Kamera-Orbit weiter dieselbe Seite.
-- `TerrainMap3DView` nutzt im rotierbaren Primaerpfad wieder die kalibrierte Kenney-GLB-Mapping-Datei `data/terrain_3d_asset_mapping.json`. Boden wird als echtes 3D-Ground-Mesh gerendert, Waende/Katalog-Objekte als 3D-Modelle mit Richtungsrotation und kalibrierten Scales.
-- Die Mapping-Luecken fuer Mauerecken, Cliffs/Rampen und Felsen sind geschlossen; diese Typen behalten jetzt ihre GLB-Materialien/Farben statt ueber den Legacy-Fallback pauschal uebermalt zu werden.
+- `TerrainMap3DView` nutzt im rotierbaren Primaerpfad die kalibrierte Kenney-GLB-Mapping-Datei `data/terrain_3d_asset_mapping.json`. Boden wird aus dem Space-Kit-`terrain.glb` gerendert, Waende/Katalog-Objekte als 3D-Modelle mit Richtungsrotation und kalibrierten Scales.
+- Die Mapping-Luecken fuer Mauerecken, Cliffs/Rampen und Felsen sind geschlossen; diese Typen behalten jetzt ihre GLB-Materialien/Farben statt ueber den Legacy-Fallback pauschal uebermalt zu werden. Fehlende Mappings erzeugen im 2.5D-Primary-Pfad jetzt einen sichtbaren `MissingAsset_*`-Marker und einen Snapshot-Zaehler statt still auf PNGs oder Bloecke zu wechseln.
 - Units und Dropship sind in der 2.5D-View keine Capsule-/Box-Platzhalter mehr und werden auch nicht als flache Spritekarten erzwungen; sie verwenden Kenney-Astronaut- und Speeder-GLBs.
-- Kenney-Isometric-PNGs bleiben fuer Legacy-2D oder nicht aufloesbare Fallbacks erhalten, sind aber nicht mehr der Primaerpfad der rotierbaren 2.5D-Karte.
+- Kenney-Isometric-PNGs bleiben fuer Legacy-2D oder den Betrieb ohne 3D-Mapping-Datei erhalten, sind aber nicht mehr der Primaerpfad der rotierbaren 2.5D-Karte.
 - Die alte 2D-Karte bleibt Daten-/Fallback-Pfad, wird im 2.5D-Live-Pfad aber nicht mehr unsichtbar parallel gerendert.
 
 ## Update nach TASK_160

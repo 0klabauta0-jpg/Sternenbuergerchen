@@ -23,6 +23,7 @@ func _run_tests() -> void:
 	print("=== TASK_159 2.5D Editor and Mission Primary View Verifier ===")
 	await _test_editor_uses_3d_primary_view()
 	await _test_authored_2_5d_visual_parity_contract()
+	await _test_strict_3d_mapping_blocks_legacy_fallbacks()
 	await _test_live_mission_uses_3d_primary_view()
 	await _test_auxiliary_3d_map_scenes_load()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
@@ -47,6 +48,7 @@ func _test_editor_uses_3d_primary_view() -> void:
 	_assert(int(snapshot.get("tile_count", 0)) > 0, "Editor Primary3DView renders terrain tiles")
 	_assert(int(snapshot.get("ground_mesh_count", 0)) == int(snapshot.get("tile_count", 0)), "Editor Primary3DView renders calibrated 3D ground meshes")
 	_assert(int(snapshot.get("asset_model_count", 0)) > 0, "Editor Primary3DView renders calibrated Kenney GLB asset models")
+	_assert(int(snapshot.get("missing_asset_mapping_count", 0)) == 0, "Editor Primary3DView has no missing mapped 3D assets")
 	_assert(_asset_model_nodes_have_models(primary_view), "Editor 2.5D asset nodes contain loaded 3D model meshes")
 	_assert(int(snapshot.get("map_render_duration_msec", MAX_3D_RENDER_DURATION_MSEC + 1)) < MAX_3D_RENDER_DURATION_MSEC, "Editor Primary3DView map render stays below freeze threshold")
 
@@ -100,17 +102,18 @@ func _test_authored_2_5d_visual_parity_contract() -> void:
 	_assert(int(snapshot.get("asset_model_count", 0)) >= 4, "Visual parity 3D map renders wall, wall corner, rock and satellite as calibrated GLB models")
 	_assert(int(snapshot.get("asset_texture_count", 0)) == 0, "Visual parity 3D map does not fall back to isometric Sprite3D asset cards for mapped assets")
 	_assert(int(snapshot.get("placeholder_object_count", 0)) == 0, "Visual parity 3D map does not use block placeholders for mapped assets")
+	_assert(int(snapshot.get("missing_asset_mapping_count", 0)) == 0, "Visual parity 3D map resolves all authored 3D asset mappings")
 
-	var tile_mesh := _find_map_mesh(primary_view, "Tile_1_1")
-	_assert(tile_mesh != null and tile_mesh.mesh is BoxMesh, "Visual parity ground tile uses a real 3D ground mesh")
-	_assert(tile_mesh != null and (tile_mesh.mesh as BoxMesh).size.x > 0.9 and (tile_mesh.mesh as BoxMesh).size.z > 0.9, "Visual parity ground tile fills the calibrated 3D grid spacing")
+	var tile_node := _find_map_node(primary_view, "Tile_1_1")
+	_assert(tile_node != null and _node_has_mesh(tile_node), "Visual parity ground tile uses the Kenney terrain GLB")
+	_assert(tile_node != null and not _node_has_material_override(tile_node), "Visual parity ground tile keeps the Kenney terrain material")
 
 	var wall_node := _find_map_node(primary_view, "Asset_wall_straight_se_2_2")
 	_assert(wall_node != null and _node_has_mesh(wall_node), "Visual parity wall_straight_se loads the calibrated corridor wall model")
-	_assert(wall_node != null and absf(wrapf(wall_node.rotation_degrees.y - 0.0, -180.0, 180.0)) < 0.1, "Visual parity wall_straight_se keeps calibrated SE rotation")
+	_assert(wall_node != null and absf(wrapf(wall_node.rotation_degrees.y - 90.0, -180.0, 180.0)) < 0.1, "Visual parity wall_straight_se keeps calibrated SE rotation")
 	var wall_corner_node := _find_map_node(primary_view, "Asset_wall_corner_ne_3_1")
 	_assert(wall_corner_node != null and _node_has_mesh(wall_corner_node), "Visual parity wall_corner_ne loads the calibrated corridor corner model")
-	_assert(wall_corner_node != null and absf(wrapf(wall_corner_node.rotation_degrees.y - 180.0, -180.0, 180.0)) < 0.1, "Visual parity wall_corner_ne keeps calibrated NE corner rotation")
+	_assert(wall_corner_node != null and absf(wrapf(wall_corner_node.rotation_degrees.y - 0.0, -180.0, 180.0)) < 0.1, "Visual parity wall_corner_ne keeps calibrated NE corner rotation")
 	var satellite_node := _find_map_node(primary_view, "Asset_technik_satellite_large_se_0_2")
 	_assert(satellite_node != null and _node_has_mesh(satellite_node), "Visual parity satellite loads the calibrated satelliteDish_large model")
 	var rock_node := _find_map_node(primary_view, "Asset_rock_large_3_3")
@@ -118,6 +121,32 @@ func _test_authored_2_5d_visual_parity_contract() -> void:
 	_assert(wall_node != null and satellite_node != null and satellite_node.scale.x > wall_node.scale.x, "Visual parity large satellite keeps larger calibrated 3D scale than wall")
 	_assert(wall_corner_node != null and not _node_has_material_override(wall_corner_node), "Visual parity wall corner keeps model materials instead of fallback override")
 	_assert(rock_node != null and not _node_has_material_override(rock_node), "Visual parity rock keeps model materials instead of fallback override")
+
+	primary_view.queue_free()
+	await _wait_frames(2)
+
+
+func _test_strict_3d_mapping_blocks_legacy_fallbacks() -> void:
+	var map_data = TERRAIN_MAP_DATA_SCRIPT.call("create_empty", "missing_mapping_guard", Vector2i(1, 1), Vector2.ZERO)
+	_assert(map_data != null, "Strict mapping guard map instantiates")
+	if map_data == null:
+		return
+	var missing_tile = map_data.call("get_tile_at_grid", Vector2i.ZERO)
+	missing_tile.object_type_id = "debug_missing_model_se"
+	missing_tile.blocks_los = true
+	missing_tile.object_height = 1
+
+	var primary_view: Node = TERRAIN_MAP_3D_VIEW_SCRIPT.new()
+	root.add_child(primary_view)
+	primary_view.call("configure_from_map", map_data)
+	await _wait_frames(6)
+
+	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
+	_assert(int(snapshot.get("ground_mesh_count", 0)) == 1, "Strict mapping guard still renders mapped Kenney terrain ground")
+	_assert(int(snapshot.get("missing_asset_mapping_count", 0)) == 1, "Strict mapping guard records the missing asset mapping")
+	_assert(int(snapshot.get("asset_texture_count", 0)) == 0, "Strict mapping guard refuses Sprite3D texture fallback")
+	_assert(int(snapshot.get("placeholder_object_count", 0)) == 0, "Strict mapping guard refuses block placeholder fallback")
+	_assert(_find_map_node(primary_view, "MissingAsset_debug_missing_model_se_0_0") != null, "Strict mapping guard places a visible missing-asset marker")
 
 	primary_view.queue_free()
 	await _wait_frames(2)
@@ -138,6 +167,7 @@ func _test_live_mission_uses_3d_primary_view() -> void:
 	_assert(int(snapshot.get("tile_count", 0)) > 0 and int(snapshot.get("unit_proxy_count", 0)) >= 2, "Live Primary3DView renders map and runtime unit proxies")
 	_assert(int(snapshot.get("ground_mesh_count", 0)) == int(snapshot.get("tile_count", 0)), "Live Primary3DView renders calibrated 3D ground meshes")
 	_assert(int(snapshot.get("asset_model_count", 0)) > 0, "Live Primary3DView renders calibrated Kenney asset models")
+	_assert(int(snapshot.get("missing_asset_mapping_count", 0)) == 0, "Live Primary3DView has no missing mapped 3D assets")
 	_assert(int(snapshot.get("unit_model_count", 0)) >= 2, "Live Primary3DView renders runtime units with Kenney astronaut GLBs")
 	_assert(_asset_model_nodes_have_models(primary_view), "Live 2.5D asset nodes contain loaded 3D model meshes")
 	_assert(_unit_model_nodes_have_models(primary_view), "Live 2.5D unit proxies contain loaded astronaut model meshes")
@@ -196,6 +226,7 @@ func _assert_auxiliary_3d_map_scene_loads(scene_path: String, label: String) -> 
 	_assert(int(snapshot.get("tile_count", 0)) > 0, "%s 3D map scene renders terrain tiles" % label)
 	_assert(int(snapshot.get("ground_mesh_count", 0)) == int(snapshot.get("tile_count", 0)), "%s 3D map scene renders calibrated ground meshes" % label)
 	_assert(int(snapshot.get("asset_model_count", 0)) > 0, "%s 3D map scene renders calibrated asset models" % label)
+	_assert(int(snapshot.get("missing_asset_mapping_count", 0)) == 0, "%s 3D map scene has no missing mapped 3D assets" % label)
 	_assert(_asset_model_nodes_have_models(primary_view), "%s 3D map scene keeps loaded 3D asset meshes" % label)
 	_assert(int(snapshot.get("map_render_duration_msec", MAX_3D_RENDER_DURATION_MSEC + 1)) < MAX_3D_RENDER_DURATION_MSEC, "%s 3D map scene render stays below freeze threshold" % label)
 	scene_root.queue_free()

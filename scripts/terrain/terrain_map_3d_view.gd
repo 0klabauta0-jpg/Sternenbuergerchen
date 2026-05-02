@@ -153,6 +153,7 @@ var _height_edge_texture_count: int = 0
 var _asset_texture_count: int = 0
 var _asset_model_count: int = 0
 var _placeholder_object_count: int = 0
+var _missing_asset_mapping_count: int = 0
 var _unit_texture_count: int = 0
 var _unit_model_count: int = 0
 var _unit_status_badge_count: int = 0
@@ -212,6 +213,7 @@ func render_map(terrain_map_data = null) -> void:
 	_asset_texture_count = 0
 	_asset_model_count = 0
 	_placeholder_object_count = 0
+	_missing_asset_mapping_count = 0
 	_marker_count = 0
 	_patrol_segment_count = 0
 	if _terrain_map_data == null:
@@ -387,6 +389,7 @@ func get_render_snapshot() -> Dictionary:
 		"asset_texture_count": _asset_texture_count,
 		"asset_model_count": _asset_model_count,
 		"placeholder_object_count": _placeholder_object_count,
+		"missing_asset_mapping_count": _missing_asset_mapping_count,
 		"unit_texture_count": _unit_texture_count,
 		"unit_model_count": _unit_model_count,
 		"unit_status_badge_count": _unit_status_badge_count,
@@ -572,14 +575,18 @@ func _add_tile_visual(tile_data) -> void:
 	var tile_thickness: float = _get_3d_ground_thickness()
 	var tile_fill: float = _get_3d_ground_fill()
 	var cell_size: float = _get_3d_cell_size()
-	var tile_mesh := _make_box_mesh(Vector3(cell_size * tile_fill, tile_thickness, cell_size * tile_fill))
-	var tile_instance := MeshInstance3D.new()
-	tile_instance.name = "Tile_%d_%d" % [tile_data.grid_position.x, tile_data.grid_position.y]
-	tile_instance.mesh = tile_mesh
-	tile_instance.material_override = _make_material(_get_tile_color(tile_data))
-	tile_instance.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y - (tile_thickness * 0.5))
-	_map_root.add_child(tile_instance)
-	_ground_mesh_count += 1
+	if _uses_strict_3d_asset_mapping():
+		if not _add_ground_model_visual(tile_data, top_y):
+			_add_missing_asset_marker(tile_data, top_y, "ground_flat")
+	else:
+		var tile_mesh := _make_box_mesh(Vector3(cell_size * tile_fill, tile_thickness, cell_size * tile_fill))
+		var tile_instance := MeshInstance3D.new()
+		tile_instance.name = "Tile_%d_%d" % [tile_data.grid_position.x, tile_data.grid_position.y]
+		tile_instance.mesh = tile_mesh
+		tile_instance.material_override = _make_material(_get_tile_color(tile_data))
+		tile_instance.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y - (tile_thickness * 0.5))
+		_map_root.add_child(tile_instance)
+		_ground_mesh_count += 1
 	_map_tile_count += 1
 
 	var object_type_id: String = String(tile_data.object_type_id) if tile_data.object_type_id is String else ""
@@ -591,6 +598,9 @@ func _add_tile_visual(tile_data) -> void:
 
 func _add_object_visual(tile_data, top_y: float, visual_type_id: String) -> void:
 	if not visual_type_id.is_empty() and _add_asset_model_visual(tile_data, top_y, visual_type_id):
+		return
+	if _uses_strict_3d_asset_mapping():
+		_add_missing_asset_marker(tile_data, top_y, _get_missing_visual_type_id(tile_data, visual_type_id))
 		return
 	if not visual_type_id.is_empty() and _add_asset_texture_visual(tile_data, top_y, visual_type_id):
 		return
@@ -617,6 +627,41 @@ func _add_object_visual(tile_data, top_y: float, visual_type_id: String) -> void
 	instance.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + (object_height * 0.5))
 	_map_root.add_child(instance)
 	_placeholder_object_count += 1
+
+
+func _add_ground_model_visual(tile_data, top_y: float) -> bool:
+	var model_scene := _get_asset_model_scene("ground_flat")
+	if model_scene == null or _map_root == null:
+		return false
+	var model_instance := model_scene.instantiate() as Node3D
+	if model_instance == null:
+		return false
+	_normalize_asset_model_instance(model_instance)
+
+	var ground_root := Node3D.new()
+	ground_root.name = "Tile_%d_%d" % [tile_data.grid_position.x, tile_data.grid_position.y]
+	ground_root.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + 0.002)
+	ground_root.scale = Vector3.ONE * _get_3d_cell_size()
+	ground_root.add_child(model_instance)
+	_map_root.add_child(ground_root)
+	_ground_mesh_count += 1
+	return true
+
+
+func _add_missing_asset_marker(tile_data, top_y: float, visual_type_id: String) -> void:
+	if tile_data == null or _map_root == null:
+		return
+	var type_id: String = visual_type_id.strip_edges().to_lower()
+	if type_id.is_empty():
+		type_id = "unknown"
+	var cell_size: float = _get_3d_cell_size()
+	var marker := MeshInstance3D.new()
+	marker.name = "MissingAsset_%s_%d_%d" % [type_id, tile_data.grid_position.x, tile_data.grid_position.y]
+	marker.mesh = _make_box_mesh(Vector3(cell_size * 0.42, cell_size * 0.22, cell_size * 0.42))
+	marker.material_override = _make_material(Color(1.0, 0.12, 0.72, 1.0))
+	marker.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + 0.14)
+	_map_root.add_child(marker)
+	_missing_asset_mapping_count += 1
 
 
 func _add_height_edge_texture_visuals(tile_data) -> void:
@@ -1574,6 +1619,21 @@ func _resolve_tile_asset_type_id(object_type_id: String, type_id: String) -> Str
 	return ""
 
 
+func _get_missing_visual_type_id(tile_data, visual_type_id: String) -> String:
+	var normalized: String = visual_type_id.strip_edges().to_lower()
+	if not normalized.is_empty():
+		return normalized
+	if tile_data == null:
+		return "unknown"
+	normalized = String(tile_data.object_type_id).strip_edges().to_lower() if tile_data.object_type_id is String else ""
+	if not normalized.is_empty():
+		return normalized
+	normalized = String(tile_data.type_id).strip_edges().to_lower() if tile_data.type_id is String else ""
+	if not normalized.is_empty():
+		return normalized
+	return "unknown"
+
+
 func _is_legacy_object_type(tile_data) -> bool:
 	if tile_data == null:
 		return false
@@ -1585,6 +1645,8 @@ func _get_asset_model_scene(visual_type_id: String) -> PackedScene:
 	var mapped_path: String = _get_model_path_for_type(visual_type_id)
 	if not mapped_path.is_empty():
 		return _get_asset_model_scene_by_path(mapped_path)
+	if _uses_strict_3d_asset_mapping():
+		return null
 	var model_name: String = _resolve_asset_model_name(visual_type_id)
 	if model_name.is_empty():
 		return null
@@ -1613,6 +1675,10 @@ func _get_asset_model_scene_by_path(model_path: String) -> PackedScene:
 
 func _has_3d_asset_mapping() -> bool:
 	return not _get_terrain_3d_mapping().is_empty()
+
+
+func _uses_strict_3d_asset_mapping() -> bool:
+	return _has_3d_asset_mapping()
 
 
 func _has_model_mapping_for_type(type_id: String) -> bool:

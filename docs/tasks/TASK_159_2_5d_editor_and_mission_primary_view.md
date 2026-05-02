@@ -50,10 +50,10 @@ Die sichtbare Kartenoberflaeche und die bedienbare Kamera sollen aber nicht mehr
 - [x] Editor-Picking fuer Tile-, Marker- und Patrol-Arbeit nutzt die 2.5D-Karte.
 - [x] Live-Mission blendet alte 2D-Terrain-/Unit-Sprites aus und zeigt 3D-Proxies fuer Friendlies/Enemies.
 - [x] TacticalController kann LZ und taktische Ziele ueber die 2.5D-Ansicht setzen.
-- [x] Boden, Kartenobjekte, Waende, Ecken, Rampen, Felsen und Katalog-Objekte nutzen im rotierbaren 2.5D-Pfad wieder die kalibrierte Kenney-GLB-Mapping-Datei; flache PNG-/Block-Fallbacks bleiben Fallback.
+- [x] Boden, Kartenobjekte, Waende, Ecken, Rampen, Felsen und Katalog-Objekte nutzen im rotierbaren 2.5D-Pfad die kalibrierte Kenney-GLB-Mapping-Datei; flache PNG-/Block-Fallbacks greifen dort nicht mehr nach einem fehlenden Mapping.
 - [x] Runtime-Units werden als Kenney-Astronaut-GLBs gespiegelt, damit Kamera-Rotation echte 3D-Seiten zeigt.
 - [x] Der Dropship-Marker nutzt den kalibrierten Kenney-Speeder-GLB statt Box-/Wing- oder flachem PNG-Platzhalter.
-- [x] Die 2.5D-Bodenkarte nutzt kalibrierte 3D-Ground-Meshes mit dem alten 3D-Kalibrierungsraster.
+- [x] Die 2.5D-Bodenkarte nutzt das Kenney-`terrain.glb` aus dem Space-Kit statt blau/grau eingefarbter Box-Kacheln.
 - [x] Flache Kenney-Isometric-Texturkarten sind nicht mehr Primaerpfad der rotierbaren Karte, weil sie bei Kamera-Orbit optisch dieselbe Seite zeigen.
 - [x] Der 2.5D-Live-Pfad baut die versteckte Legacy-2D-Karte nicht mehr zusaetzlich auf.
 - [x] Die 3D-Kalibrierungs- und Render-Spike-Szenen besitzen ihre Script-Dependencies und laden die gemeinsame `TerrainMap3DView`.
@@ -86,17 +86,17 @@ Die sichtbare Kartenoberflaeche und die bedienbare Kamera sollen aber nicht mehr
 
 ## Ergebnis
 - `TerrainMap3DView` rendert `TerrainMapData` als gemeinsame 2.5D-Primary-View mit `SubViewport`, `Node3D`, `Camera3D`, Terrain-/Objekt-/Marker-/Patrol-Visuals, Unit-Proxies, LZ-/Dropship-Proxy und taktischen Area-/Contact-Overlays.
-- Terrain-Objekte, Waende, Rampen, Felsen und Katalog-Objekte werden in dieser View wieder aus der kalibrierten Kenney-GLB-Mapping-Datei `data/terrain_3d_asset_mapping.json` gerendert. Richtung, Scale und Y-Offset kommen aus diesem Mapping oder aus dem bestehenden Richtungssuffix.
-- Mauerecken, Cliffs, Rampen und Felsen sind explizit in der Mapping-Datei abgedeckt, damit sie nicht mehr in den Legacy-Fallback mit pauschalem Material-Override fallen. Wand- und Eckenrotationen folgen der authored Richtungslogik aus dem alten 2D-Mapping.
+- Terrain-Boden, Terrain-Objekte, Waende, Rampen, Felsen und Katalog-Objekte werden in dieser View aus der kalibrierten Kenney-GLB-Mapping-Datei `data/terrain_3d_asset_mapping.json` gerendert. Richtung, Scale und Y-Offset kommen aus diesem Mapping oder aus dem bestehenden Richtungssuffix.
+- Mauerecken, Cliffs, Rampen und Felsen sind explizit in der Mapping-Datei abgedeckt, damit sie nicht mehr in den Legacy-Fallback mit pauschalem Material-Override fallen. Wand- und Eckenrotationen folgen im 3D-Pfad der kalibrierten GLB-Richtungskonvention; die alte 2D-Textur-Kompensation bleibt auf den Legacy-2D-Renderer begrenzt.
 - Der kurzzeitige Versuch, Kenney-Isometric-PNGs als primaere `Sprite3D`-Karten zu nutzen, war sichtbar falsch: Bei frei rotierbarer Kamera zeigen flache Karten weiter dieselbe Seite und erzeugen Grid-/Offset-Artefakte.
-- Isometric-PNGs bleiben nur Legacy-/Fallback-Material fuer den alten 2D-Pfad oder nicht aufloesbare Einzelfaelle.
+- Isometric-PNGs bleiben nur Legacy-Material fuer den alten 2D-Pfad oder fuer den Fallback-Betrieb ohne 3D-Mapping-Datei. Wenn ein Mapping im 2.5D-Primary-Pfad fehlt, erzeugt die View jetzt einen `MissingAsset_*`-Marker und einen Snapshot-Zaehler statt still auf PNGs oder Bloecke umzuschalten.
 - `TerrainMapData.load_from_file()` laedt den Terrain-Tile-Katalog nur noch einmal pro Map. Vorher wurde der Katalog fuer jedes Tile neu geladen, was die 32x32-Live-Mission beim Start fuer lange Zeit blockiert hat.
 - `TerrainTileData.from_dict()` erzeugt Tiles direkt ueber die bestehende Klasse statt pro Tile das Script erneut zu laden.
-- Die sichtbare Bodenkarte der 2.5D-View nutzt kalibrierte 3D-Ground-Meshes statt flacher Terrain-PNGs.
-- Ambient Light und wiederverwendete BoxMesh-/Material-Ressourcen reduzieren graue Abschattung und Kamera-/Render-Ruckler, ohne Gameplay-State in die UI zu verschieben.
-- Runtime-Units und Dropship werden als kalibrierte Kenney-GLBs gespiegelt; generische Capsule-/Box-Proxies und PNG-Karten bleiben nur Fallbacks.
+- Die sichtbare Bodenkarte der 2.5D-View nutzt das Kenney-`terrain.glb` und dessen Space-Kit-Material statt flacher Terrain-PNGs oder blau/grau eingefarbter Box-Kacheln.
+- Ambient Light und wiederverwendete Mesh-/Material-Ressourcen reduzieren graue Abschattung und Kamera-/Render-Ruckler, ohne Gameplay-State in die UI zu verschieben.
+- Runtime-Units und Dropship werden als kalibrierte Kenney-GLBs gespiegelt; generische Capsule-/Box-Proxies und PNG-Karten bleiben ausserhalb des 2.5D-Primary-Mappingpfads.
 - `mission_map_3d_calibration.tscn` und `mission_map_3d_render_spike.tscn` laden jetzt ueber kleine Test-Scripts dieselbe 2.5D-Primary-View, sodass Godot sie ohne fehlende Script-Dependencies oeffnen kann.
 - Der Map-Editor deaktiviert die alte `Camera2D`, blendet Legacy-2D-Kartencontainer aus und fuehrt WASD, Zoom, Rotation sowie Tile-/Marker-/Patrol-Picking ueber die 3D-View.
 - Die Live-Mission blendet alte Terrain-/Unit-Sprites aus, laesst die `Node2D`-Runtime-Anker fuer Simulation/Selection sichtbar und spiegelt Units, LZ, Dropship, Attack Areas und Contacts in die 3D-View; die versteckte 2D-Karte wird im 2.5D-Primary-Pfad nicht mehr parallel gerendert.
 - TASK_158 wurde so angepasst, dass die Live-Visual-Bridge jetzt die 3D-Primary-View akzeptiert statt alte 2D-Sprites als sichtbare Wahrheit zu verlangen.
-- TASK_159 und `wall_direction_mapping_verifier.gd` pruefen jetzt explizit kalibrierte Ground-Meshes, GLB-Asset-Modelle, Wall-Richtungsrotation, Unit-/Dropship-Modelle, Satellitengroesse und Render-Zeitgrenzen gegen die alten Freeze-/Fallback-Regressionen.
+- TASK_159 und `wall_direction_mapping_verifier.gd` pruefen jetzt explizit Kenney-`terrain.glb`-Boden, GLB-Asset-Modelle, fehlende-Mapping-Zaehler, Wall-Richtungsrotation, Unit-/Dropship-Modelle, Satellitengroesse und Render-Zeitgrenzen gegen die alten Freeze-/Fallback-Regressionen.

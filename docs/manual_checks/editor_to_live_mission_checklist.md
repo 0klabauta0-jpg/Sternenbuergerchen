@@ -22,6 +22,8 @@
 
 ## Visual Bridge
 - Confirm friendly and enemy visuals are visible in the live mission.
+- Confirm the ground uses the orange Kenney Space Kit terrain material, not blue/gray debug boxes.
+- Confirm no magenta `MissingAsset_*` marker is visible on the authored map.
 - Confirm the Area Order overlay is visible after drawing the area.
 - Confirm contact markers/overlays appear once the fireteam has LOS to an enemy.
 - Confirm Move, Defend and Take waypoints appear in the 2.5D view after authoring the orders.
