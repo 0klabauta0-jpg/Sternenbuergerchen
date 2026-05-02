@@ -47,6 +47,7 @@ func _test_editor_uses_3d_primary_view() -> void:
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot")) if primary_view != null else {}
 	_assert(int(snapshot.get("tile_count", 0)) > 0, "Editor Primary3DView renders terrain tiles")
 	_assert(int(snapshot.get("ground_mesh_count", 0)) == int(snapshot.get("tile_count", 0)), "Editor Primary3DView renders calibrated 3D ground meshes")
+	_assert(int(snapshot.get("tile_grid_line_count", 0)) >= int(snapshot.get("tile_count", 0)) * 4, "Editor Primary3DView renders visible field borders")
 	_assert(int(snapshot.get("asset_model_count", 0)) > 0, "Editor Primary3DView renders calibrated Kenney GLB asset models")
 	_assert(int(snapshot.get("missing_asset_mapping_count", 0)) == 0, "Editor Primary3DView has no missing mapped 3D assets")
 	_assert(_asset_model_nodes_have_models(primary_view), "Editor 2.5D asset nodes contain loaded 3D model meshes")
@@ -98,6 +99,7 @@ func _test_authored_2_5d_visual_parity_contract() -> void:
 
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 	_assert(int(snapshot.get("ground_mesh_count", 0)) == 16, "Visual parity 3D map renders every tile as calibrated ground mesh")
+	_assert(int(snapshot.get("tile_grid_line_count", 0)) == 64, "Visual parity 3D map renders field borders for every tile")
 	_assert(int(snapshot.get("tile_texture_count", 0)) == 0 and int(snapshot.get("height_edge_texture_count", 0)) == 0, "Visual parity 3D map does not use flat Sprite3D texture cards as primary terrain")
 	_assert(int(snapshot.get("asset_model_count", 0)) >= 4, "Visual parity 3D map renders wall, wall corner, rock and satellite as calibrated GLB models")
 	_assert(int(snapshot.get("asset_texture_count", 0)) == 0, "Visual parity 3D map does not fall back to isometric Sprite3D asset cards for mapped assets")
@@ -113,7 +115,7 @@ func _test_authored_2_5d_visual_parity_contract() -> void:
 	_assert(wall_node != null and absf(wrapf(wall_node.rotation_degrees.y - 90.0, -180.0, 180.0)) < 0.1, "Visual parity wall_straight_se keeps calibrated SE rotation")
 	var wall_corner_node := _find_map_node(primary_view, "Asset_wall_corner_ne_3_1")
 	_assert(wall_corner_node != null and _node_has_mesh(wall_corner_node), "Visual parity wall_corner_ne loads the calibrated corridor corner model")
-	_assert(wall_corner_node != null and absf(wrapf(wall_corner_node.rotation_degrees.y - 0.0, -180.0, 180.0)) < 0.1, "Visual parity wall_corner_ne keeps calibrated NE corner rotation")
+	_assert(wall_corner_node != null and absf(wrapf(wall_corner_node.rotation_degrees.y - 180.0, -180.0, 180.0)) < 0.1, "Visual parity wall_corner_ne keeps calibrated NE corner rotation")
 	var satellite_node := _find_map_node(primary_view, "Asset_technik_satellite_large_se_0_2")
 	_assert(satellite_node != null and _node_has_mesh(satellite_node), "Visual parity satellite loads the calibrated satelliteDish_large model")
 	var rock_node := _find_map_node(primary_view, "Asset_rock_large_3_3")
@@ -194,6 +196,9 @@ func _test_live_mission_uses_3d_primary_view() -> void:
 		var post_lz_snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 		var legacy_lz := live_scene.get_node_or_null("LZMarker") as CanvasItem
 		_assert(bool(lz_state.get("has_lz_position", false)) and bool(post_lz_snapshot.get("has_lz", false)), "LZ is mirrored into the 3D primary view")
+		var snapped_lz: Vector2 = primary_view.call("snap_world_position_to_tile_center", lz_world)
+		_assert(typeof(lz_state.get("lz_position", null)) == TYPE_VECTOR2 and Vector2(lz_state.get("lz_position", Vector2.ZERO)).distance_to(snapped_lz) < 0.1, "LZ placement snaps to a terrain field center")
+		_assert(int(post_lz_snapshot.get("lz_tile_marker_count", 0)) == 1, "LZ is visualized as a selected terrain field")
 		_assert(legacy_lz != null and not legacy_lz.visible, "Old 2D LZ marker stays hidden")
 
 		var available_fireteams: PackedStringArray = controller.call("_get_available_fireteam_ids")
@@ -203,6 +208,7 @@ func _test_live_mission_uses_3d_primary_view() -> void:
 		await _wait_frames(3)
 		var order_snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 		_assert(int(order_snapshot.get("area_order_count", 0)) >= 1, "Attack Area is mirrored into the 3D primary view")
+		_assert(int(order_snapshot.get("area_order_tile_marker_count", 0)) >= 1, "Attack Area is visualized as terrain field markers")
 
 	live_scene.queue_free()
 	await _wait_frames(2)

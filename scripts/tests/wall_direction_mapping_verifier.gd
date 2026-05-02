@@ -34,8 +34,8 @@ const EXPECTED_3D_WALL_ROTATION_DEGREES: Dictionary = {
 	"wall_straight_ne": 0.0,
 	"wall_straight_nw": 270.0,
 	"wall_corner_se": 90.0,
-	"wall_corner_sw": 180.0,
-	"wall_corner_ne": 0.0,
+	"wall_corner_sw": 0.0,
+	"wall_corner_ne": 180.0,
 	"wall_corner_nw": 270.0,
 }
 

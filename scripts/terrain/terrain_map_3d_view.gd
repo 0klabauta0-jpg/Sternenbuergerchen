@@ -32,6 +32,8 @@ const CAMERA_ZOOM_STEP: float = 2.2
 const CAMERA_PAN_UNITS_PER_SECOND: float = 9.0
 const CAMERA_DRAG_PAN_FACTOR: float = 0.065
 const CONTINUOUS_REDRAW_AFTER_CAMERA_MSEC: int = 220
+const UNIT_PROXY_SMOOTH_SPEED: float = 18.0
+const UNIT_PROXY_SNAP_DISTANCE: float = 2.4
 const DEFAULT_HALF_TILE_WIDTH: float = 64.0
 const DEFAULT_HALF_TILE_HEIGHT: float = 32.0
 const TILE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_SW.png")
@@ -164,6 +166,10 @@ var _marker_count: int = 0
 var _patrol_segment_count: int = 0
 var _area_order_count: int = 0
 var _waypoint_visual_count: int = 0
+var _area_order_tile_marker_count: int = 0
+var _waypoint_tile_marker_count: int = 0
+var _lz_tile_marker_count: int = 0
+var _tile_grid_line_count: int = 0
 var _contact_count: int = 0
 var _objective_status_visible: bool = false
 var _mission_result_visible: bool = false
@@ -179,9 +185,9 @@ func _ready() -> void:
 	set_process(true)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	_resize_subviewport()
-	_sync_unit_proxies()
+	_sync_unit_proxies(false, delta)
 	if _subviewport != null and _subviewport.render_target_update_mode == SubViewport.UPDATE_ALWAYS and Time.get_ticks_msec() > _continuous_redraw_until_msec:
 		_subviewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 
@@ -214,6 +220,7 @@ func render_map(terrain_map_data = null) -> void:
 	_asset_model_count = 0
 	_placeholder_object_count = 0
 	_missing_asset_mapping_count = 0
+	_tile_grid_line_count = 0
 	_marker_count = 0
 	_patrol_segment_count = 0
 	if _terrain_map_data == null:
@@ -226,6 +233,7 @@ func render_map(terrain_map_data = null) -> void:
 			_render_tile_by_grid[tile_data.grid_position] = tile_data
 	for tile_data in tiles:
 		_add_tile_visual(tile_data)
+	_add_tile_grid_lines(tiles)
 	for tile_data in tiles:
 		_add_height_edge_texture_visuals(tile_data)
 	_rebuild_marker_visuals()
@@ -367,6 +375,15 @@ func world_to_screen_position(world_position: Vector2) -> Vector2:
 	return _camera.unproject_position(_world_to_3d_position(world_position, 0.0))
 
 
+func snap_world_position_to_tile_center(world_position: Vector2) -> Vector2:
+	var grid_position: Vector2i = _world_to_grid_position(world_position)
+	if _terrain_map_data != null:
+		var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
+		if tile_data != null and typeof(tile_data.world_position) == TYPE_VECTOR2:
+			return Vector2(tile_data.world_position)
+	return _grid_float_to_world(Vector2(grid_position))
+
+
 func screen_rect_to_tile_world_positions(screen_rect: Rect2) -> Array:
 	var result: Array = []
 	if _terrain_map_data == null or _camera == null:
@@ -399,6 +416,10 @@ func get_render_snapshot() -> Dictionary:
 		"unit_proxy_count": _unit_proxies_by_id.size(),
 		"area_order_count": _area_order_count,
 		"waypoint_visual_count": _waypoint_visual_count,
+		"area_order_tile_marker_count": _area_order_tile_marker_count,
+		"waypoint_tile_marker_count": _waypoint_tile_marker_count,
+		"lz_tile_marker_count": _lz_tile_marker_count,
+		"tile_grid_line_count": _tile_grid_line_count,
 		"contact_count": _contact_count,
 		"objective_status_visible": _objective_status_visible,
 		"objective_capture_progress": float(_mission_status_payload.get("objective_capture_progress", 0.0)),
@@ -662,6 +683,44 @@ func _add_missing_asset_marker(tile_data, top_y: float, visual_type_id: String) 
 	marker.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + 0.14)
 	_map_root.add_child(marker)
 	_missing_asset_mapping_count += 1
+
+
+func _add_tile_grid_lines(tiles: Array) -> void:
+	if _map_root == null or tiles.is_empty():
+		return
+	var material := _make_material(Color(0.12, 0.08, 0.06, 0.48), true)
+	var mesh := ImmediateMesh.new()
+	mesh.surface_begin(Mesh.PRIMITIVE_LINES, material)
+	var cell_size: float = _get_3d_cell_size()
+	var half_size: float = cell_size * 0.5
+	var line_count: int = 0
+	for tile_data in tiles:
+		if tile_data == null:
+			continue
+		var grid_position: Vector2 = Vector2(tile_data.grid_position)
+		var top_y: float = (float(tile_data.height_level) * _get_3d_height_step()) + 0.018
+		var center: Vector3 = _grid_to_3d_position(grid_position, top_y)
+		var nw := center + Vector3(-half_size, 0.0, -half_size)
+		var ne := center + Vector3(half_size, 0.0, -half_size)
+		var se := center + Vector3(half_size, 0.0, half_size)
+		var sw := center + Vector3(-half_size, 0.0, half_size)
+		mesh.surface_add_vertex(nw)
+		mesh.surface_add_vertex(ne)
+		mesh.surface_add_vertex(ne)
+		mesh.surface_add_vertex(se)
+		mesh.surface_add_vertex(se)
+		mesh.surface_add_vertex(sw)
+		mesh.surface_add_vertex(sw)
+		mesh.surface_add_vertex(nw)
+		line_count += 4
+	mesh.surface_end()
+	if line_count <= 0:
+		return
+	var lines := MeshInstance3D.new()
+	lines.name = "TileGridLines3D"
+	lines.mesh = mesh
+	_map_root.add_child(lines)
+	_tile_grid_line_count = line_count
 
 
 func _add_height_edge_texture_visuals(tile_data) -> void:
@@ -1081,6 +1140,8 @@ func _rebuild_order_visuals() -> void:
 	_clear_children(_order_root)
 	_area_order_count = 0
 	_waypoint_visual_count = 0
+	_area_order_tile_marker_count = 0
+	_waypoint_tile_marker_count = 0
 	if _order_root == null or _order_payload.is_empty():
 		return
 	var phase_index: int = int(_order_payload.get("phase_index", 1))
@@ -1113,15 +1174,9 @@ func _add_area_order_visual(area_data: Dictionary) -> void:
 		var center: Vector2 = Vector2(area_data.get("center_position", Vector2.ZERO))
 		tile_world_positions = [center]
 	for world_variant in tile_world_positions:
-		var tile_marker := MeshInstance3D.new()
-		var cell_size: float = _get_3d_cell_size()
-		var mesh := _make_box_mesh(Vector3(cell_size * 0.92, 0.045, cell_size * 0.92))
-		tile_marker.mesh = mesh
-		tile_marker.material_override = _make_material(Color(color.r, color.g, color.b, 0.34), true)
-		tile_marker.position = _world_to_3d_position(Vector2(world_variant), 0.19)
-		_order_root.add_child(tile_marker)
-	var center_position: Vector2 = Vector2(area_data.get("center_position", tile_world_positions[0]))
-	_add_marker3d(_order_root, center_position, color, "AreaOrder_%s" % String(area_data.get("area_order_id", "")), 0.42, 0.36)
+		var marker_name: String = "AreaOrderTile_%s" % String(area_data.get("area_order_id", ""))
+		if _add_world_tile_marker(_order_root, Vector2(world_variant), Color(color.r, color.g, color.b, 0.34), marker_name, 0.045, 0.92):
+			_area_order_tile_marker_count += 1
 	_area_order_count += 1
 
 
@@ -1140,7 +1195,8 @@ func _add_plan_visual(plan_data: Dictionary, phase_index: int, anchor_by_firetea
 		var command_color: Color = _get_command_color(String(waypoint.get("command_type", "move")))
 		if typeof(last_position) == TYPE_VECTOR2:
 			_add_line3d(_order_root, _world_to_3d_position(Vector2(last_position), 0.36), _world_to_3d_position(target_position, 0.36), command_color, "WaypointLine")
-		_add_marker3d(_order_root, target_position, command_color, "Waypoint", 0.32, 0.30)
+		if _add_world_tile_marker(_order_root, target_position, Color(command_color.r, command_color.g, command_color.b, 0.42), "WaypointTile", 0.05, 0.82):
+			_waypoint_tile_marker_count += 1
 		_waypoint_visual_count += 1
 		last_position = target_position
 
@@ -1172,21 +1228,13 @@ func _rebuild_drop_visuals() -> void:
 	_clear_children(_drop_root)
 	_dropship_texture_visible = false
 	_dropship_model_visible = false
+	_lz_tile_marker_count = 0
 	if _drop_root == null or _drop_payload.is_empty():
 		return
 	if bool(_drop_payload.get("has_lz_position", false)) and typeof(_drop_payload.get("lz_position", null)) == TYPE_VECTOR2:
 		var lz_position: Vector2 = Vector2(_drop_payload.get("lz_position", Vector2.ZERO))
-		var mesh := CylinderMesh.new()
-		mesh.top_radius = 0.88
-		mesh.bottom_radius = 0.88
-		mesh.height = 0.045
-		mesh.radial_segments = 24
-		var lz := MeshInstance3D.new()
-		lz.name = "LZMarker3D"
-		lz.mesh = mesh
-		lz.material_override = _make_material(Color(0.38, 1.0, 0.62, 0.44), true)
-		lz.position = _world_to_3d_position(lz_position, 0.24)
-		_drop_root.add_child(lz)
+		if _add_world_tile_marker(_drop_root, lz_position, Color(0.38, 1.0, 0.62, 0.44), "LZTile", 0.055, 0.96):
+			_lz_tile_marker_count += 1
 
 	if bool(_drop_payload.get("dropship_visible", false)) and typeof(_drop_payload.get("dropship_position", null)) == TYPE_VECTOR2:
 		var ship_position: Vector2 = Vector2(_drop_payload.get("dropship_position", Vector2.ZERO))
@@ -1367,7 +1415,7 @@ func _get_dropship_rotation_y(world_position: Vector2) -> float:
 	return -_camera_yaw_degrees
 
 
-func _sync_unit_proxies(force_rebuild: bool = false) -> void:
+func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> void:
 	_ensure_nodes()
 	if _unit_root == null:
 		return
@@ -1398,9 +1446,13 @@ func _sync_unit_proxies(force_rebuild: bool = false) -> void:
 		proxy.visible = next_visible
 		if unit is Node2D:
 			var next_position: Vector3 = _world_to_3d_position((unit as Node2D).global_position, 0.06)
-			if proxy.position.distance_squared_to(next_position) > 0.0001:
+			var proxy_distance: float = proxy.position.distance_to(next_position)
+			if proxy_distance > 0.0001:
 				changed = true
-			proxy.position = next_position
+			if force_rebuild or delta <= 0.0 or proxy_distance >= UNIT_PROXY_SNAP_DISTANCE:
+				proxy.position = next_position
+			else:
+				proxy.position = proxy.position.lerp(next_position, clampf(delta * UNIT_PROXY_SMOOTH_SPEED, 0.0, 1.0))
 		var next_rotation_y: float = 0.0
 		if absf(wrapf(proxy.rotation_degrees.y - next_rotation_y, -180.0, 180.0)) > 0.01:
 			changed = true
@@ -1541,6 +1593,28 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 	base.position.y = -0.02
 	root.add_child(base)
 	return root
+
+
+func _add_world_tile_marker(parent: Node3D, world_position: Vector2, color: Color, node_name: String, height: float = 0.045, fill: float = 0.9) -> bool:
+	var grid_position: Vector2i = _world_to_grid_position(world_position)
+	return _add_tile_marker(parent, grid_position, color, "%s_%d_%d" % [node_name, grid_position.x, grid_position.y], height, fill)
+
+
+func _add_tile_marker(parent: Node3D, grid_position: Vector2i, color: Color, node_name: String, height: float = 0.045, fill: float = 0.9) -> bool:
+	if parent == null:
+		return false
+	var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position) if _terrain_map_data != null else null
+	if tile_data == null:
+		return false
+	var cell_size: float = _get_3d_cell_size()
+	var marker := MeshInstance3D.new()
+	marker.name = node_name
+	marker.mesh = _make_box_mesh(Vector3(cell_size * clampf(fill, 0.1, 1.0), maxf(height, 0.01), cell_size * clampf(fill, 0.1, 1.0)))
+	marker.material_override = _make_material(color, true)
+	var top_y: float = float(tile_data.height_level) * _get_3d_height_step()
+	marker.position = _grid_to_3d_position(Vector2(grid_position), top_y + 0.014 + (height * 0.5))
+	parent.add_child(marker)
+	return true
 
 
 func _add_marker3d(parent: Node3D, world_position: Vector2, color: Color, node_name: String, radius: float, height: float, radial_segments: int = 12) -> void:
@@ -2007,6 +2081,11 @@ func _world_to_grid_float(world_position: Vector2) -> Vector2:
 	var grid_x: float = ((delta.y / _half_tile_height) + (delta.x / _half_tile_width)) * 0.5
 	var grid_y: float = ((delta.y / _half_tile_height) - (delta.x / _half_tile_width)) * 0.5
 	return Vector2(grid_x, grid_y)
+
+
+func _world_to_grid_position(world_position: Vector2) -> Vector2i:
+	var grid_position: Vector2 = _world_to_grid_float(world_position)
+	return Vector2i(roundi(grid_position.x), roundi(grid_position.y))
 
 
 func _grid_float_to_world(grid_position: Vector2) -> Vector2:

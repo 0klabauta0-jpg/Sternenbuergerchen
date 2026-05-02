@@ -1073,7 +1073,7 @@ func try_place_target_from_screen_position(screen_position: Vector2) -> bool:
 
 func _place_lz_from_screen_position(screen_position: Vector2) -> bool:
 	var world_position: Vector2 = _screen_to_world_position(screen_position)
-	_lz_position = _clamp_world_position_to_viewport(world_position)
+	_lz_position = _snap_world_position_to_primary_tile(_clamp_world_position_to_viewport(world_position))
 	_has_lz_position = true
 	_is_lz_placement_armed = false
 	_last_command_text = "LZ SET %s @ %s" % [_get_approach_angle_name(), _format_world_position(_lz_position)]
@@ -3323,6 +3323,15 @@ func _screen_to_world_position(screen_position: Vector2) -> Vector2:
 			return Vector2(world_position)
 	var canvas_transform: Transform2D = get_viewport().get_canvas_transform()
 	return canvas_transform.affine_inverse() * screen_position
+
+
+func _snap_world_position_to_primary_tile(world_position: Vector2) -> Vector2:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null and primary_3d_view.has_method("snap_world_position_to_tile_center"):
+		var snapped_position = primary_3d_view.call("snap_world_position_to_tile_center", world_position)
+		if typeof(snapped_position) == TYPE_VECTOR2:
+			return Vector2(snapped_position)
+	return world_position
 
 
 func _clamp_world_position_to_viewport(world_position: Vector2) -> Vector2:

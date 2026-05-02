@@ -32,6 +32,20 @@
 			"y_offset": 0.0,
 			"rotation_degrees_offset": 0.0
 		},
+		"wall_corner_ne": {
+			"layer": "terrain_object",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_wallCorner.glb",
+			"scale": 1.0,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 180.0
+		},
+		"wall_corner_sw": {
+			"layer": "terrain_object",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_wallCorner.glb",
+			"scale": 1.0,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 180.0
+		},
 		"corridor_straight": {
 			"layer": "terrain_object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor.glb",

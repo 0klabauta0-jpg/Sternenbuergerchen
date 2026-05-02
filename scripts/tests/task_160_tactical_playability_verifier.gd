@@ -51,6 +51,7 @@ func _test_live_tactical_loop_is_visible_in_2_5d() -> void:
 	await _drive_drop_until_outbound(controller)
 	_assert(String(controller.get("_drop_sequence_phase")) == "outbound", "Dropship deploys the selected fireteam and enters outbound state")
 	_assert(_primary_snapshot_bool(primary_view, "has_lz") and _primary_dropship_visible(primary_view), "2.5D primary view keeps LZ and outbound dropship visible")
+	_assert(int(Dictionary(primary_view.call("get_render_snapshot")).get("lz_tile_marker_count", 0)) == 1, "2.5D primary view shows the LZ as a terrain field marker")
 
 	controller.call("_set_selected_fireteams", PackedStringArray(["blue"]), false)
 	var move_refs: Array = Array(controller.call("_create_waypoints_for_selected_fireteams", objective_position + Vector2(-64.0, -32.0)))
@@ -66,7 +67,9 @@ func _test_live_tactical_loop_is_visible_in_2_5d() -> void:
 	_assert(move_refs.size() == 1 and defend_refs.size() == 1 and take_refs.size() == 1, "Move, Defend and Take waypoints can be authored for the deployed fireteam")
 	_assert(attack_refs.size() == 1 and defend_area_refs.size() == 1, "Attack and Defend Area Orders can be authored for the deployed fireteam")
 	_assert(int(order_snapshot.get("waypoint_visual_count", 0)) >= 3, "2.5D primary view visualizes Move/Defend/Take waypoints")
+	_assert(int(order_snapshot.get("waypoint_tile_marker_count", 0)) >= 3, "2.5D primary view visualizes Move/Defend/Take as terrain field markers")
 	_assert(int(order_snapshot.get("area_order_count", 0)) >= 2, "2.5D primary view visualizes Attack/Defend Area Orders")
+	_assert(int(order_snapshot.get("area_order_tile_marker_count", 0)) >= 2, "2.5D primary view visualizes Attack/Defend Areas as terrain field markers")
 
 	_force_contact(controller, combat_driver)
 	await _wait_frames(8)
