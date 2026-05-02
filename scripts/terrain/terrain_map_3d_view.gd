@@ -15,6 +15,7 @@ const UNIT_ROOT_NAME: String = "UnitRoot3D"
 const ORDER_ROOT_NAME: String = "OrderRoot3D"
 const CONTACT_ROOT_NAME: String = "ContactRoot3D"
 const DROP_ROOT_NAME: String = "DropRoot3D"
+const STATUS_ROOT_NAME: String = "StatusRoot3D"
 const CAMERA_NAME: String = "Camera3D"
 const LIGHT_NAME: String = "SunLight3D"
 
@@ -64,6 +65,8 @@ const TEXTURE_CARD_PIXEL_SIZE: float = 0.0062
 const TILE_TEXTURE_PIXEL_SIZE: float = 0.0060
 const UNIT_TEXTURE_PIXEL_SIZE: float = 0.0105
 const DROPSHIP_TEXTURE_PIXEL_SIZE: float = 0.0094
+const STATUS_LABEL_PIXEL_SIZE: float = 0.018
+const STATUS_LABEL_HEIGHT: float = 1.16
 const KENNEY_DIAMOND_CENTER := Vector2(256.0, 315.0)
 const KENNEY_MODEL_ROOT: String = "res://Assets/kenney_space-kit/Models/GLTF format"
 const KENNEY_AUTHORING_OFFSET_X: float = 2.0
@@ -111,6 +114,7 @@ var _unit_root: Node3D = null
 var _order_root: Node3D = null
 var _contact_root: Node3D = null
 var _drop_root: Node3D = null
+var _status_root: Node3D = null
 var _camera: Camera3D = null
 
 var _terrain_map_data = null
@@ -124,6 +128,7 @@ var _order_payload: Dictionary = {}
 var _contact_entries: Array = []
 var _contact_selected_fireteam_ids: PackedStringArray = PackedStringArray()
 var _drop_payload: Dictionary = {}
+var _mission_status_payload: Dictionary = {}
 
 var _grid_size: Vector2i = Vector2i.ZERO
 var _grid_origin_world: Vector2 = Vector2.ZERO
@@ -141,13 +146,17 @@ var _asset_model_count: int = 0
 var _placeholder_object_count: int = 0
 var _unit_texture_count: int = 0
 var _unit_model_count: int = 0
+var _unit_status_badge_count: int = 0
 var _dropship_texture_visible: bool = false
 var _dropship_model_visible: bool = false
 var _map_render_duration_msec: int = 0
 var _marker_count: int = 0
 var _patrol_segment_count: int = 0
 var _area_order_count: int = 0
+var _waypoint_visual_count: int = 0
 var _contact_count: int = 0
+var _objective_status_visible: bool = false
+var _mission_result_visible: bool = false
 
 
 func _ready() -> void:
@@ -256,6 +265,12 @@ func set_mission_drop_visual_state(drop_payload: Dictionary) -> void:
 	_request_viewport_redraw()
 
 
+func set_mission_status_payload(status_payload: Dictionary) -> void:
+	_mission_status_payload = status_payload.duplicate(true)
+	_rebuild_status_visuals()
+	_request_viewport_redraw()
+
+
 func focus_world_position(world_position: Vector2) -> void:
 	_focus_grid_position = _world_to_grid_float(world_position)
 	_update_camera_transform()
@@ -267,6 +282,13 @@ func focus_map_center() -> void:
 	else:
 		_focus_grid_position = Vector2(maxf(float(_grid_size.x - 1), 0.0) * 0.5, maxf(float(_grid_size.y - 1), 0.0) * 0.5)
 	_update_camera_transform()
+
+
+func _get_map_center_world_position() -> Vector2:
+	if _terrain_map_data != null and _terrain_map_data.has_method("grid_to_world") and _grid_size != Vector2i.ZERO:
+		var center_grid := Vector2i(int(floor(float(maxi(_grid_size.x - 1, 0)) * 0.5)), int(floor(float(maxi(_grid_size.y - 1, 0)) * 0.5)))
+		return Vector2(_terrain_map_data.call("grid_to_world", center_grid))
+	return _grid_float_to_world(_focus_grid_position)
 
 
 func pan_camera(input_direction: Vector2, delta_seconds: float = 1.0) -> void:
@@ -350,12 +372,18 @@ func get_render_snapshot() -> Dictionary:
 		"placeholder_object_count": _placeholder_object_count,
 		"unit_texture_count": _unit_texture_count,
 		"unit_model_count": _unit_model_count,
+		"unit_status_badge_count": _unit_status_badge_count,
 		"marker_count": _marker_count,
 		"patrol_segment_count": _patrol_segment_count,
 		"selected_grid_count": _selected_grid_positions.size(),
 		"unit_proxy_count": _unit_proxies_by_id.size(),
 		"area_order_count": _area_order_count,
+		"waypoint_visual_count": _waypoint_visual_count,
 		"contact_count": _contact_count,
+		"objective_status_visible": _objective_status_visible,
+		"objective_capture_progress": float(_mission_status_payload.get("objective_capture_progress", 0.0)),
+		"mission_result_visible": _mission_result_visible,
+		"mission_result": String(_mission_status_payload.get("result", "")),
 		"has_lz": bool(_drop_payload.get("has_lz_position", false)),
 		"dropship_visible": bool(_drop_payload.get("dropship_visible", false)),
 		"dropship_texture_visible": _dropship_texture_visible,
@@ -402,6 +430,7 @@ func _ensure_nodes() -> void:
 	_order_root = _ensure_node3d(_world_root, ORDER_ROOT_NAME)
 	_contact_root = _ensure_node3d(_world_root, CONTACT_ROOT_NAME)
 	_drop_root = _ensure_node3d(_world_root, DROP_ROOT_NAME)
+	_status_root = _ensure_node3d(_world_root, STATUS_ROOT_NAME)
 
 	if _camera == null:
 		_camera = _world_root.get_node_or_null(CAMERA_NAME) as Camera3D
@@ -903,6 +932,7 @@ func _rebuild_selection_visuals() -> void:
 func _rebuild_order_visuals() -> void:
 	_clear_children(_order_root)
 	_area_order_count = 0
+	_waypoint_visual_count = 0
 	if _order_root == null or _order_payload.is_empty():
 		return
 	var phase_index: int = int(_order_payload.get("phase_index", 1))
@@ -963,6 +993,7 @@ func _add_plan_visual(plan_data: Dictionary, phase_index: int, anchor_by_firetea
 		if typeof(last_position) == TYPE_VECTOR2:
 			_add_line3d(_order_root, _world_to_3d_position(Vector2(last_position), 0.36), _world_to_3d_position(target_position, 0.36), command_color, "WaypointLine")
 		_add_marker3d(_order_root, target_position, command_color, "Waypoint", 0.32, 0.30)
+		_waypoint_visual_count += 1
 		last_position = target_position
 
 
@@ -1014,6 +1045,117 @@ func _rebuild_drop_visuals() -> void:
 		_add_dropship_proxy(ship_position)
 		if typeof(_drop_payload.get("lz_position", null)) == TYPE_VECTOR2:
 			_add_line3d(_drop_root, _world_to_3d_position(ship_position, 0.52), _world_to_3d_position(Vector2(_drop_payload.get("lz_position", Vector2.ZERO)), 0.52), Color(0.56, 1.0, 0.68, 0.86), "DropshipApproach")
+
+
+func _rebuild_status_visuals() -> void:
+	_clear_children(_status_root)
+	_objective_status_visible = false
+	_mission_result_visible = false
+	if _status_root == null or _mission_status_payload.is_empty():
+		return
+	var objective_position_variant = _mission_status_payload.get("objective_position", null)
+	if typeof(objective_position_variant) == TYPE_VECTOR2:
+		_add_objective_status_visual(Vector2(objective_position_variant))
+	if bool(_mission_status_payload.get("mission_resolved", false)):
+		_add_mission_result_visual(Vector2(objective_position_variant) if typeof(objective_position_variant) == TYPE_VECTOR2 else _get_map_center_world_position())
+
+
+func _add_objective_status_visual(world_position: Vector2) -> void:
+	var progress: float = clampf(float(_mission_status_payload.get("objective_capture_progress", 0.0)), 0.0, 1.0)
+	var capture_radius: float = maxf(float(_mission_status_payload.get("objective_capture_radius", 80.0)), 1.0)
+	var ring_radius: float = clampf((capture_radius / maxf(_half_tile_width, 1.0)) * 0.52, 0.48, 2.7)
+	var base_color: Color = _get_objective_status_color()
+	var zone_mesh := CylinderMesh.new()
+	zone_mesh.top_radius = ring_radius
+	zone_mesh.bottom_radius = ring_radius
+	zone_mesh.height = 0.035
+	zone_mesh.radial_segments = 32
+	var zone := MeshInstance3D.new()
+	zone.name = "ObjectiveCaptureZone"
+	zone.mesh = zone_mesh
+	zone.material_override = _make_material(Color(base_color.r, base_color.g, base_color.b, 0.18), true)
+	zone.position = _world_to_3d_position(world_position, 0.31)
+	_status_root.add_child(zone)
+
+	var progress_mesh := CylinderMesh.new()
+	progress_mesh.top_radius = maxf(ring_radius * maxf(progress, 0.08), 0.18)
+	progress_mesh.bottom_radius = progress_mesh.top_radius
+	progress_mesh.height = 0.045
+	progress_mesh.radial_segments = 32
+	var progress_disc := MeshInstance3D.new()
+	progress_disc.name = "ObjectiveCaptureProgress"
+	progress_disc.mesh = progress_mesh
+	progress_disc.material_override = _make_material(Color(base_color.r, base_color.g, base_color.b, 0.42), true)
+	progress_disc.position = _world_to_3d_position(world_position, 0.35)
+	_status_root.add_child(progress_disc)
+
+	var label_text: String = _build_objective_status_label_text(progress)
+	_add_label3d(_status_root, label_text, _world_to_3d_position(world_position, STATUS_LABEL_HEIGHT), "ObjectiveStatusLabel3D", base_color, 18)
+	_objective_status_visible = true
+
+
+func _add_mission_result_visual(anchor_world_position: Vector2) -> void:
+	var result: String = String(_mission_status_payload.get("result", "")).strip_edges().to_upper()
+	if result.is_empty():
+		result = "RESOLVED"
+	var condition: String = String(_mission_status_payload.get("win_condition_type", "")).strip_edges()
+	var winning_team: String = String(_mission_status_payload.get("winning_team_id", "")).strip_edges()
+	var color := Color(0.56, 1.0, 0.68, 1.0) if result == "VICTORY" else Color(1.0, 0.56, 0.48, 1.0)
+	var lines: PackedStringArray = PackedStringArray([result])
+	if not winning_team.is_empty():
+		lines.append("Winner %s" % winning_team)
+	if not condition.is_empty():
+		lines.append(condition)
+	_add_label3d(_status_root, "\n".join(lines), _world_to_3d_position(anchor_world_position, STATUS_LABEL_HEIGHT + 0.74), "MissionResultLabel3D", color, 22)
+	_mission_result_visible = true
+
+
+func _build_objective_status_label_text(progress: float) -> String:
+	var owner_text: String = String(_mission_status_payload.get("objective_owner_team_id", "")).strip_edges()
+	if owner_text.is_empty():
+		owner_text = "neutral"
+	var progress_percent: int = int(round(progress * 100.0))
+	var line_two: String = "CAP %d%%" % progress_percent
+	if bool(_mission_status_payload.get("objective_contested", false)):
+		line_two += " CONTESTED"
+	else:
+		var capturing_team: String = String(_mission_status_payload.get("objective_capturing_team_id", "")).strip_edges()
+		if not capturing_team.is_empty() and capturing_team != owner_text:
+			line_two += " -> %s" % capturing_team
+	return "OBJ %s\n%s" % [owner_text, line_two]
+
+
+func _get_objective_status_color() -> Color:
+	if bool(_mission_status_payload.get("objective_contested", false)):
+		return Color(1.0, 0.78, 0.34, 1.0)
+	var owner_text: String = String(_mission_status_payload.get("objective_owner_team_id", "")).strip_edges()
+	var capturing_team: String = String(_mission_status_payload.get("objective_capturing_team_id", "")).strip_edges()
+	var team_text: String = owner_text if not owner_text.is_empty() else capturing_team
+	match team_text:
+		"team_alpha":
+			return Color(0.45, 0.95, 0.66, 1.0)
+		"team_bravo":
+			return Color(1.0, 0.52, 0.46, 1.0)
+		_:
+			return Color(0.86, 0.9, 0.94, 1.0)
+
+
+func _add_label3d(parent: Node3D, text: String, position: Vector3, node_name: String, color: Color, font_size: int = 18) -> Label3D:
+	var label := Label3D.new()
+	label.name = node_name
+	label.text = text
+	label.font_size = font_size
+	label.pixel_size = STATUS_LABEL_PIXEL_SIZE
+	label.modulate = color
+	label.outline_size = 4
+	label.outline_modulate = Color(0.0, 0.0, 0.0, 0.92)
+	label.no_depth_test = true
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.position = position
+	parent.add_child(label)
+	return label
 
 
 func _add_dropship_proxy(world_position: Vector2) -> void:
@@ -1084,6 +1226,7 @@ func _sync_unit_proxies(force_rebuild: bool = false) -> void:
 	var seen_ids: Dictionary = {}
 	var unit_texture_count: int = 0
 	var unit_model_count: int = 0
+	var unit_status_badge_count: int = 0
 	var changed: bool = false
 	for unit in _unit_nodes:
 		if not is_instance_valid(unit):
@@ -1114,6 +1257,8 @@ func _sync_unit_proxies(force_rebuild: bool = false) -> void:
 		if absf(wrapf(proxy.rotation_degrees.y - next_rotation_y, -180.0, 180.0)) > 0.01:
 			changed = true
 		proxy.rotation_degrees.y = next_rotation_y
+		if _update_unit_status_badge(proxy, unit):
+			unit_status_badge_count += 1
 		if bool(proxy.get_meta("uses_unit_texture", false)):
 			unit_texture_count += 1
 		if bool(proxy.get_meta("uses_kenney_model", false)):
@@ -1133,8 +1278,76 @@ func _sync_unit_proxies(force_rebuild: bool = false) -> void:
 	if _unit_model_count != unit_model_count:
 		changed = true
 	_unit_model_count = unit_model_count
+	if _unit_status_badge_count != unit_status_badge_count:
+		changed = true
+	_unit_status_badge_count = unit_status_badge_count
 	if changed:
 		_request_viewport_redraw()
+
+
+func _update_unit_status_badge(proxy: Node3D, unit: Node) -> bool:
+	if proxy == null:
+		return false
+	var label := proxy.get_node_or_null("UnitStateBadge") as Label3D
+	var badge_text: String = _get_unit_status_badge_text(unit)
+	if badge_text.is_empty() or not proxy.visible:
+		if label != null:
+			label.visible = false
+		return false
+	if label == null:
+		label = _add_label3d(proxy, badge_text, Vector3(0.0, 0.98, 0.0), "UnitStateBadge", _get_unit_status_badge_color(unit), 13)
+		label.pixel_size = 0.014
+		label.outline_size = 3
+	else:
+		label.text = badge_text
+		label.modulate = _get_unit_status_badge_color(unit)
+		label.visible = true
+	return true
+
+
+func _get_unit_status_badge_text(unit: Node) -> String:
+	if unit == null:
+		return ""
+	var vital_state: String = ""
+	if unit.has_method("get_vital_state"):
+		vital_state = String(unit.call("get_vital_state")).strip_edges().to_lower()
+	if not vital_state.is_empty() and vital_state != "fit":
+		return vital_state.to_upper()
+	if unit.has_method("is_in_contact") and bool(unit.call("is_in_contact")):
+		return "CONTACT"
+	var runtime_status = unit.call("get_runtime_status") if unit.has_method("get_runtime_status") else null
+	var status_text: String = ""
+	var source_command: String = ""
+	if runtime_status != null:
+		status_text = String(runtime_status.get("status")).strip_edges().to_lower() if runtime_status.has_method("get") else ""
+		source_command = String(runtime_status.get("source_command_type")).strip_edges().to_lower() if runtime_status.has_method("get") else ""
+	if source_command == "take":
+		return "TAKE"
+	if source_command == "defend":
+		return "DEFEND"
+	if source_command == "flank":
+		return "FLANK"
+	match status_text:
+		"pending_move":
+			return "MOVE"
+		"engaging":
+			return "ENGAGE"
+		"holding":
+			return "HOLD"
+		"assigned":
+			return "READY"
+		"idle":
+			return "IDLE"
+		_:
+			return ""
+
+
+func _get_unit_status_badge_color(unit: Node) -> Color:
+	if unit != null and unit.has_method("get_team_id") and String(unit.call("get_team_id")).strip_edges() != "team_alpha":
+		return Color(1.0, 0.56, 0.46, 1.0)
+	if unit != null and unit.has_method("is_in_contact") and bool(unit.call("is_in_contact")):
+		return Color(1.0, 0.78, 0.34, 1.0)
+	return Color(0.62, 0.92, 1.0, 1.0)
 
 
 func _create_unit_proxy(unit: Node) -> Node3D:

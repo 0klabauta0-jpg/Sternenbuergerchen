@@ -1543,6 +1543,8 @@ func _update_ui() -> void:
 	_apply_compact_mission_control_layout()
 	_refresh_dynamic_button_styles()
 	_refresh_world_overlays()
+	_sync_primary_3d_mission_status_visuals()
+	_suppress_legacy_2d_readability_overlays()
 	_refresh_ad_hoc_panel_visibility()
 	_refresh_selected_fireteam_cards()
 	_refresh_fireteam_mini_cards()
@@ -3456,6 +3458,42 @@ func _refresh_world_overlays() -> void:
 					approach_line.add_point(Vector2.ZERO)
 					approach_line.add_point(line_delta)
 	_refresh_meta_transfer_route_overlay()
+
+
+func _sync_primary_3d_mission_status_visuals() -> void:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view == null or not primary_3d_view.has_method("set_mission_status_payload"):
+		return
+	var payload: Dictionary = {}
+	var combat_driver := get_node_or_null("../CombatLoopDriver")
+	if combat_driver != null and combat_driver.has_method("get_playability_snapshot"):
+		payload = Dictionary(combat_driver.call("get_playability_snapshot")).duplicate(true)
+	if payload.is_empty():
+		var simulation_root := get_node_or_null("../SimulationRoot")
+		var objective_status = simulation_root.call("get_objective_status") if simulation_root != null and simulation_root.has_method("get_objective_status") else null
+		if objective_status != null:
+			payload["objective_position"] = objective_status.position
+			payload["objective_capture_radius"] = float(objective_status.capture_radius)
+			payload["objective_owner_team_id"] = String(objective_status.owning_team_id)
+			payload["objective_capturing_team_id"] = String(objective_status.capturing_team_id)
+			payload["objective_capture_progress"] = clampf(float(objective_status.capture_progress), 0.0, 1.0)
+			payload["objective_contested"] = bool(objective_status.call("is_contested"))
+	if payload.is_empty():
+		return
+	primary_3d_view.call("set_mission_status_payload", payload)
+
+
+func _suppress_legacy_2d_readability_overlays() -> void:
+	if _get_primary_3d_view() == null:
+		return
+	for bridge_path in ["../CombatLoopDriver", "../ObjectiveStatusView", "../EnemyWaveController"]:
+		var bridge_node := get_node_or_null(bridge_path)
+		if bridge_node != null and bridge_node.has_method("set_overlay_visible"):
+			bridge_node.call("set_overlay_visible", false)
+	for legacy_path in ["../StatusLabel", "../CombatContactLine", "../CombatEventLabel", "../CombatWinnerLabel", "../WaveStatusLabel"]:
+		var legacy_node := get_node_or_null(legacy_path)
+		if legacy_node is CanvasItem:
+			(legacy_node as CanvasItem).visible = false
 
 
 func _ensure_meta_transfer_route_overlay() -> Node2D:

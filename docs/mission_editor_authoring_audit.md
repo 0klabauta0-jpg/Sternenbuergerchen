@@ -78,3 +78,10 @@ Der Terrain-Editor bleibt fuer Karten- und Markerdaten verantwortlich. Darauf wi
 - `TerrainMap3DView` rendert Boden, Waende, automatische Cliff-/Slope-Kanten, Rampen, Felsen und Katalog-Objekte jetzt wieder als `Sprite3D`-Texturkarten aus den vorhandenen Isometric-PNGs. Die GLB-Modelle bleiben nur Fallback fuer nicht aufloesbare Texturen.
 - Units und Dropship sind in der 2.5D-View keine Capsule-/Box-Platzhalter mehr und werden auch nicht mehr auf generische GLBs gezwungen; sie spiegeln die vorhandenen Unit-`Visual`-/Weapon-Sprites und die TacticalController-Dropship-Textur.
 - Die alte 2D-Karte bleibt Daten-/Fallback-Pfad, wird im 2.5D-Live-Pfad aber nicht mehr unsichtbar parallel gerendert.
+
+## Update nach TASK_160
+- Die 2.5D-Primary-View zeigt jetzt nicht nur Asset-Parity, sondern einen kompakten taktischen Spielstatus: LZ, Dropship, Move-/Defend-/Take-Wegpunkte, Attack-/Defend-Areas, Contacts, Objective-Capture-Fortschritt und Missionsergebnis.
+- `MissionCombatLoopDriver` liefert dafuer einen read-only Playability-Snapshot; Gameplay-Wahrheit bleibt bei Simulation/Combat-Loop und wird nicht in die UI verschoben.
+- Alte frei schwebende 2D-Readability-Labels fuer Combat, Wave und Objective werden im 2.5D-Pfad unterdrueckt, damit Zoom und Kamera nicht wieder nur Text ueber der Karte bewegen.
+- `scripts/tests/task_160_tactical_playability_verifier.gd` spielt den Mini-Loop LZ -> Dropship -> Deploy -> Move/Defend/Take -> Area Orders -> Contact -> Objective Capture -> Victory durch.
+- Offen bleibt echte optische Feinarbeit am Kampffeedback im laufenden Godot-Fenster; der neue Test sichert Datenfluss und Sichtbarkeit, ersetzt aber keinen manuellen Lesbarkeits-Pass.

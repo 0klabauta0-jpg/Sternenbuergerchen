@@ -163,6 +163,34 @@ func get_mission_result() -> Dictionary:
 	return _mission_result.duplicate(true)
 
 
+func get_playability_snapshot() -> Dictionary:
+	var snapshot: Dictionary = {
+		"combat_state": "resolved" if _combat_finished else "active",
+		"win_condition_type": win_condition,
+		"mission_resolved": _combat_finished,
+		"result": String(_mission_result.get("result", "")),
+		"winning_team_id": _winning_team_id,
+		"enemy_fit_count": _count_fit_enemy_units(),
+		"friendly_fit_count": _count_fit_units(friendly_unit_paths),
+		"duration_seconds": _get_duration_seconds(),
+		"remaining_time_limit_seconds": get_remaining_time_limit_seconds(),
+		"last_event_text": _last_event_text,
+	}
+	var objective_status = _get_objective_status()
+	if objective_status != null:
+		snapshot["objective_position"] = objective_status.position
+		snapshot["objective_capture_radius"] = float(objective_status.capture_radius)
+		snapshot["objective_owner_team_id"] = String(objective_status.owning_team_id)
+		snapshot["objective_capturing_team_id"] = String(objective_status.capturing_team_id)
+		snapshot["objective_capture_progress"] = clampf(float(objective_status.capture_progress), 0.0, 1.0)
+		snapshot["objective_contested"] = bool(objective_status.call("is_contested"))
+	if not _mission_result.is_empty():
+		snapshot["result"] = String(_mission_result.get("result", ""))
+		snapshot["win_condition_type"] = String(_mission_result.get("win_condition_type", win_condition))
+		snapshot["objective_captured"] = bool(_mission_result.get("objective_captured", false))
+	return snapshot
+
+
 func get_contact_snapshot() -> Array:
 	if _contact_tracker == null:
 		return []

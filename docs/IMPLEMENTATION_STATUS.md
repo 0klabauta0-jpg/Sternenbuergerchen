@@ -10,6 +10,14 @@
 
 ## Aktueller Startzustand
 
+### TASK_160 - Tactical Mission Playability Smoke
+- Status: implementiert
+- Stand: Der 2.5D-Live-Missionspfad zeigt jetzt Objective-Capture-Zone, Capture-Fortschritt, Missionsergebnis und kompakte Unit-State-Badges direkt in `TerrainMap3DView`. Move-/Defend-/Take-Wegpunkte, Attack-/Defend-Areas, Contacts, LZ und Dropship sind im 2.5D-Snapshot regressionssicher sichtbar. Frei schwebende alte 2D-Combat-/Wave-/Objective-Labels werden im 2.5D-Pfad unterdrueckt, damit sie nicht wieder ueber der Karte liegen.
+- Stand: `scripts/tests/task_160_tactical_playability_verifier.gd` spielt den kompakten Loop LZ -> Dropship -> Deploy -> Move/Defend/Take -> Area Orders -> Contact -> Objective Capture -> Victory durch. Der Dropship-Bugfix-Verifier akzeptiert jetzt den 2.5D-Dropship-Marker als sichtbaren Primaerpfad statt den alten `DropshipPlanMarker` zu verlangen.
+- Offene Punkte: Manuelle Sichtpruefung bleibt fuer Lesbarkeit der neuen 3D-Labels, Sprite-Sortierung und Kameragefuehl sinnvoll.
+- Risiken: Die 3D-Statusanzeigen sind bewusst Snapshot-Spiegelungen; Gameplay-Wahrheit bleibt in SimulationRoot/TacticalController/CombatLoop.
+- Naechster Schritt: Manuelle Godot-Pruefung des Playability-Loops und danach gezielte Politur fuer Badge-Lesbarkeit oder taktische UX, falls sie im Bild zu laut ist.
+
 ### TASK_159 Follow-up - 2.5D Mission Load/Offset Fix
 - Status: implementiert
 - Stand: Der 2.5D-Primary-View-Pfad laedt Terrain-Daten wieder performant, weil `TerrainMapData.load_from_file()` den Tile-Katalog nur noch einmal pro Map laedt und `TerrainTileData.from_dict()` keine Script-Loads pro Tile mehr ausloest. `TerrainMap3DView` rendert Boden, Waende, Ecken, automatische Cliff-/Slope-Kanten, Rampen, Felsen, Katalog-Objekte, Runtime-Units und Dropship wieder aus den authored Kenney-Isometric-Texturen als 3D-Sprite-Karten; GLB-/Block-Proxies bleiben nur Fallback. Der Live-2.5D-Pfad rendert die versteckte Legacy-2D-Karte nicht mehr parallel.
@@ -1075,6 +1083,15 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Offene Punkte: Die 2D-Runtime-Anker sind bewusst noch vorhanden; eine echte `Node3D`-Simulation oder 3D-Navigation ist nicht Teil dieses Tasks. Der Headless-Test ersetzt keinen manuellen Godot-Run fuer Kamera-Gefuehl, Dropship-Groesse, Sprite-Sortierung und Asset-Lesbarkeit.
 - Risiken: Wenn spaeter weitere Tactical-Overlays entstehen, muessen sie explizit in die 3D-View gespiegelt werden, statt unbemerkt wieder nur im 2D-Fallback sichtbar zu sein.
 - Naechster Schritt: Manuelle Sichtpruefung von Editor und Mission; danach ggf. Asset-/Scale-Politur fuer Dropship, NPC-Proxies und Terrain-Materialien als eigener kleiner Follow-up.
+
+### TASK_160 - Tactical Mission Playability Smoke
+- Status: implementiert
+- Stand: `TerrainMap3DView` spiegelt zusaetzlich Objective-Capture-Zone, Capture-Fortschritt, Missionsergebnis und kurze Unit-State-Badges. Move-/Defend-/Take-Wegpunkte werden im 2.5D-Snapshot gezaehlt, Area Orders und Contacts bleiben sichtbar.
+- Stand: `MissionTacticalSandboxController` uebergibt einen read-only Playability-Snapshot aus dem CombatLoop an die 2.5D-View und unterdrueckt alte frei schwebende 2D-Combat-/Wave-/Objective-Labels, sobald die 2.5D-Primary-View aktiv ist.
+- Stand: `scripts/tests/task_160_tactical_playability_verifier.gd` prueft einen kompakten Live-Loop von LZ ueber Dropship, Fireteam-Deploy, Move/Defend/Take, Area Orders, Contacts, Objective Capture und Victory. `bugfix_dropship_mission_flow_verifier.gd` wurde auf den 2.5D-Dropship-Marker als sichtbaren Primary-Pfad angepasst.
+- Offene Punkte: Manuelle Lesbarkeitspruefung der neuen 3D-Labels bleibt noetig.
+- Risiken: Die Badges duerfen nicht zur zweiten Gameplay-Wahrheit werden; sie lesen nur Unit-/Combat-/Objective-State.
+- Naechster Schritt: Im manuellen Playtest pruefen, ob Unit-Badges zu laut sind und ggf. einen kleinen UX-Politur-Task schneiden.
 
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert
