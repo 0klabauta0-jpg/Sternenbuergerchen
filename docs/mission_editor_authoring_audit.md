@@ -74,10 +74,10 @@ Der Terrain-Editor bleibt fuer Karten- und Markerdaten verantwortlich. Darauf wi
 ## Update nach TASK_159 Follow-up
 - Die 2.5D-Primary-View ist jetzt der gepruefte Editor- und Live-Pfad fuer Terrain, LZ, Dropship, Attack Area und Contacts.
 - Der Missionsstart hing, weil `TerrainMapData.load_from_file()` den Tile-Katalog pro Tile neu geladen hat. Der Loader nutzt den Katalog jetzt einmal pro Map; TASK_159 fiel dadurch lokal von ueber 100 Sekunden auf rund 5 Sekunden.
-- Die sichtbaren Asset-Fehler kamen aus dem falschen Primaerpfad: Kenney-GLBs ersetzten kurzzeitig die authored Isometric-PNGs. Dabei gingen Wall-/Corner-Richtungen, Texturen, Farben und Sprite-Groessen verloren.
-- `TerrainMap3DView` rendert Boden, Waende, automatische Cliff-/Slope-Kanten, Rampen, Felsen und Katalog-Objekte jetzt wieder als `Sprite3D`-Texturkarten aus den vorhandenen Isometric-PNGs. Die GLB-Modelle bleiben nur Fallback fuer nicht aufloesbare Texturen.
-- Units und Dropship sind in der 2.5D-View keine Capsule-/Box-Platzhalter mehr und werden auch nicht mehr auf generische GLBs gezwungen; sie spiegeln die vorhandenen Unit-`Visual`-/Weapon-Sprites und die TacticalController-Dropship-Textur.
-- Die Kenney-Texturkarten sind auf die sichtbare PNG-Flaeche skaliert und behalten feste Map-Orientierung; Kamera-Billboarding bleibt Textlabels vorbehalten.
+- Die sichtbaren Asset-Fehler kamen aus dem falschen Integrationspfad: Kenney-Isometric-PNGs wurden als `Sprite3D`-Karten in eine frei rotierbare Kamera gelegt. Dadurch wirkten Bodenfelder zu klein/versetzt, und Assets zeigten beim Kamera-Orbit weiter dieselbe Seite.
+- `TerrainMap3DView` nutzt im rotierbaren Primaerpfad wieder die kalibrierte Kenney-GLB-Mapping-Datei `data/terrain_3d_asset_mapping.json`. Boden wird als echtes 3D-Ground-Mesh gerendert, Waende/Katalog-Objekte als 3D-Modelle mit Richtungsrotation und kalibrierten Scales.
+- Units und Dropship sind in der 2.5D-View keine Capsule-/Box-Platzhalter mehr und werden auch nicht als flache Spritekarten erzwungen; sie verwenden Kenney-Astronaut- und Speeder-GLBs.
+- Kenney-Isometric-PNGs bleiben fuer Legacy-2D oder nicht aufloesbare Fallbacks erhalten, sind aber nicht mehr der Primaerpfad der rotierbaren 2.5D-Karte.
 - Die alte 2D-Karte bleibt Daten-/Fallback-Pfad, wird im 2.5D-Live-Pfad aber nicht mehr unsichtbar parallel gerendert.
 
 ## Update nach TASK_160

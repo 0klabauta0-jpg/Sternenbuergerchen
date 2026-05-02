@@ -41,7 +41,7 @@ func _test_live_tactical_loop_is_visible_in_2_5d() -> void:
 
 	_assert(_legacy_readability_overlays_are_hidden(scene), "2.5D mission suppresses legacy free-floating 2D readability overlays")
 	await _wait_frames(6)
-	_assert(_primary_snapshot_bool(primary_view, "dropship_texture_visible"), "Waiting mission dropship is visible in the 2.5D primary view")
+	_assert(_primary_dropship_visible(primary_view), "Waiting mission dropship is visible in the 2.5D primary view")
 
 	var objective_position := _get_objective_position(simulation_root, Vector2(448.0, 285.0))
 	var lz_position := objective_position
@@ -50,7 +50,7 @@ func _test_live_tactical_loop_is_visible_in_2_5d() -> void:
 	await _wait_frames(2)
 	await _drive_drop_until_outbound(controller)
 	_assert(String(controller.get("_drop_sequence_phase")) == "outbound", "Dropship deploys the selected fireteam and enters outbound state")
-	_assert(_primary_snapshot_bool(primary_view, "has_lz") and _primary_snapshot_bool(primary_view, "dropship_texture_visible"), "2.5D primary view keeps LZ and outbound dropship visible")
+	_assert(_primary_snapshot_bool(primary_view, "has_lz") and _primary_dropship_visible(primary_view), "2.5D primary view keeps LZ and outbound dropship visible")
 
 	controller.call("_set_selected_fireteams", PackedStringArray(["blue"]), false)
 	var move_refs: Array = Array(controller.call("_create_waypoints_for_selected_fireteams", objective_position + Vector2(-64.0, -32.0)))
@@ -206,6 +206,13 @@ func _primary_snapshot_bool(primary_view: Node, key: String) -> bool:
 	if primary_view == null or not primary_view.has_method("get_render_snapshot"):
 		return false
 	return bool(Dictionary(primary_view.call("get_render_snapshot")).get(key, false))
+
+
+func _primary_dropship_visible(primary_view: Node) -> bool:
+	if primary_view == null or not primary_view.has_method("get_render_snapshot"):
+		return false
+	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
+	return bool(snapshot.get("dropship_model_visible", false)) or bool(snapshot.get("dropship_texture_visible", false))
 
 
 func _wait_frames(frame_count: int) -> void:

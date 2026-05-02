@@ -18,6 +18,12 @@ const EXPECTED_WALL_TEXTURES: Dictionary = {
 	"wall_straight_ne": "res://Assets/kenney_space-kit/Isometric/corridor_wall_NW.png",
 	"wall_straight_nw": "res://Assets/kenney_space-kit/Isometric/corridor_wall_SW.png",
 }
+const EXPECTED_3D_WALL_ROTATION_DEGREES: Dictionary = {
+	"wall_straight_se": 90.0,
+	"wall_straight_sw": 180.0,
+	"wall_straight_ne": 0.0,
+	"wall_straight_nw": 270.0,
+}
 
 var _passed: int = 0
 var _failed: int = 0
@@ -78,13 +84,14 @@ func _test_terrain_map_3d_view_wall_mapping() -> void:
 	primary_view.call("configure_from_map", _make_wall_map_data())
 	await _wait_frames(4)
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
-	_assert(int(snapshot.get("asset_texture_count", 0)) == WALL_TYPE_IDS.size(), "TerrainMap3DView renders walls as authored texture cards")
-	_assert(int(snapshot.get("asset_model_count", 0)) == 0 and int(snapshot.get("placeholder_object_count", 0)) == 0, "TerrainMap3DView does not use GLB/block fallback for authored wall textures")
+	_assert(int(snapshot.get("asset_model_count", 0)) == WALL_TYPE_IDS.size(), "TerrainMap3DView renders walls as calibrated Kenney GLB models")
+	_assert(int(snapshot.get("asset_texture_count", 0)) == 0 and int(snapshot.get("placeholder_object_count", 0)) == 0, "TerrainMap3DView does not use Sprite3D/block fallback for calibrated wall models")
 	for type_id in WALL_TYPE_IDS:
 		var grid_position: Vector2i = _grid_for_type_id(type_id)
-		var sprite := _find_3d_wall_sprite(primary_view, type_id, grid_position)
-		var texture_path: String = sprite.texture.resource_path if sprite != null and sprite.texture != null else ""
-		_assert(texture_path == String(EXPECTED_WALL_TEXTURES[type_id]), "TerrainMap3DView maps %s to %s" % [type_id, String(EXPECTED_WALL_TEXTURES[type_id]).get_file()])
+		var wall_node := _find_3d_wall_model(primary_view, type_id, grid_position)
+		_assert(wall_node != null and _node_has_mesh(wall_node), "TerrainMap3DView loads %s as a 3D wall model" % type_id)
+		var expected_rotation: float = float(EXPECTED_3D_WALL_ROTATION_DEGREES[type_id])
+		_assert(wall_node != null and absf(wrapf(wall_node.rotation_degrees.y - expected_rotation, -180.0, 180.0)) < 0.1, "TerrainMap3DView maps %s to %.0f degree 3D rotation" % [type_id, expected_rotation])
 	primary_view.queue_free()
 	await _wait_frames(2)
 
@@ -132,11 +139,22 @@ func _find_editor_wall_sprite_at(editor, grid_position: Vector2i) -> Sprite2D:
 	return null
 
 
-func _find_3d_wall_sprite(primary_view: Node, type_id: String, grid_position: Vector2i) -> Sprite3D:
+func _find_3d_wall_model(primary_view: Node, type_id: String, grid_position: Vector2i) -> Node3D:
 	var map_root := primary_view.get_node_or_null("ViewportContainer/SubViewport/WorldRoot/MapRoot3D")
 	if map_root == null:
 		return null
-	return map_root.get_node_or_null("AssetTexture_%s_%d_%d/Texture" % [type_id, grid_position.x, grid_position.y]) as Sprite3D
+	return map_root.get_node_or_null("Asset_%s_%d_%d" % [type_id, grid_position.x, grid_position.y]) as Node3D
+
+
+func _node_has_mesh(node: Node) -> bool:
+	if node == null:
+		return false
+	if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
+		return true
+	for child in node.get_children():
+		if _node_has_mesh(child):
+			return true
+	return false
 
 
 func _wait_frames(frame_count: int) -> void:
