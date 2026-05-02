@@ -55,6 +55,7 @@ Die sichtbare Kartenoberflaeche und die bedienbare Kamera sollen aber nicht mehr
 - [x] Der Dropship-Marker nutzt den kalibrierten Kenney-Speeder-GLB statt Box-/Wing- oder flachem PNG-Platzhalter.
 - [x] Die 2.5D-Bodenkarte nutzt das Kenney-`terrain.glb` aus dem Space-Kit statt blau/grau eingefarbter Box-Kacheln.
 - [x] Feldraender bleiben ueber dem Kenney-Boden sichtbar, damit einzelne Tiles taktisch lesbar sind.
+- [x] Der Editor besitzt ein kleines Hoehenwerkzeug fuer 1x1/3x3/5x5-Felder: anheben, absenken oder direkt auf H=0/H=1/H=2 setzen, jeweils mit waehbarer Kante `Hang`, `Cliff` oder `Keine`.
 - [x] LZ, Move-/Defend-/Take-Wegpunkte und Area Orders werden als Terrainfeld-Markierungen gespiegelt; LZ-Placement snappt auf ein Feldzentrum.
 - [x] Flache Kenney-Isometric-Texturkarten sind nicht mehr Primaerpfad der rotierbaren Karte, weil sie bei Kamera-Orbit optisch dieselbe Seite zeigen.
 - [x] Der 2.5D-Live-Pfad baut die versteckte Legacy-2D-Karte nicht mehr zusaetzlich auf.
@@ -96,6 +97,7 @@ Die sichtbare Kartenoberflaeche und die bedienbare Kamera sollen aber nicht mehr
 - `TerrainTileData.from_dict()` erzeugt Tiles direkt ueber die bestehende Klasse statt pro Tile das Script erneut zu laden.
 - Die sichtbare Bodenkarte der 2.5D-View nutzt das Kenney-`terrain.glb` und dessen Space-Kit-Material statt flacher Terrain-PNGs oder blau/grau eingefarbter Box-Kacheln.
 - Feldraender werden als gemeinsames 3D-Line-Mesh ueber die Karte gelegt. LZ, Waypoints und Area Orders nutzen flache Feldmarker statt schwebender Rundmarker.
+- Der Map-Editor hat nun ein bewusst kleines 2.5D-Hoehenwerkzeug in der Topbar. Es nutzt dieselbe Brushgroesse wie der Terrain-Brush und schreibt nur `height_level` und `edge_type` in `TerrainMapData`; Pathfinding, LOS und Live-Mission lesen diese Daten weiterhin aus den bestehenden Terrain-Systemen. `Hang` bleibt die schnelle Option fuer begehbare Huegel, `Cliff` fuer harte Kanten.
 - Ambient Light und wiederverwendete Mesh-/Material-Ressourcen reduzieren graue Abschattung und Kamera-/Render-Ruckler, ohne Gameplay-State in die UI zu verschieben.
 - Runtime-Units bleiben autoritativ `Node2D`-basiert und laufen weiter ueber TerrainRegistry/HPA, wenn Terrain vorhanden ist. Die 3D-Proxies glätten nur ihre sichtbare Position, drehen sich in Ziel-/Marschrichtung und verwenden um 25 Prozent kleinere Astronaut-Modelle, damit die Simulation nicht in die UI verschoben wird.
 - Runtime-Units und Dropship werden als kalibrierte Kenney-GLBs gespiegelt; generische Capsule-/Box-Proxies und PNG-Karten bleiben ausserhalb des 2.5D-Primary-Mappingpfads.

@@ -83,6 +83,11 @@ const DEFAULT_SCENARIO_DIR: String = "res://data/mission_scenarios"
 const LIVE_TEST_SCENE_PATH: String = "res://scenes/tests/mission_reactivity_test.tscn"
 const LIVE_TEST_SCENARIO_SCRATCH_PATH: String = "user://mission_editor_live_test_scenario.json"
 const SCENARIO_POSITION_META: String = "__position__"
+const HEIGHT_TOOL_MODE_RAISE: String = "raise"
+const HEIGHT_TOOL_MODE_LOWER: String = "lower"
+const HEIGHT_TOOL_MODE_SET_0: String = "set_0"
+const HEIGHT_TOOL_MODE_SET_1: String = "set_1"
+const HEIGHT_TOOL_MODE_SET_2: String = "set_2"
 
 @export var map_file_path: String = ""
 
@@ -112,6 +117,9 @@ var _is_refreshing_map_settings_controls: bool = false
 var _last_undo_state: Dictionary = {}
 var _current_map_path: String = DEFAULT_MAP_PATH
 var _pending_dialog_action: String = ""
+var _height_tool_enabled: bool = false
+var _height_tool_mode: String = HEIGHT_TOOL_MODE_RAISE
+var _height_tool_edge_type: String = TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE
 var _patrol_tool_enabled: bool = false
 var _patrol_spawn_id: String = "enemy_delta"
 var _dragged_patrol_waypoint_index: int = -1
@@ -141,8 +149,10 @@ func _ready() -> void:
 	_populate_surface_type_options()
 	_populate_edge_type_options()
 	_populate_brush_size_options()
+	_configure_property_height_spinbox()
 	_populate_tile_palette()
 	_connect_ui_signals()
+	_add_height_tool_controls()
 	_add_selection_tool_button()
 	_add_patrol_tool_controls()
 	_ensure_marker_editor_controls()
@@ -238,6 +248,11 @@ func _unhandled_input(event: InputEvent) -> void:
 				return
 			if _is_pointer_over_control():
 				return
+			if _height_tool_enabled:
+				_is_painting = true
+				_last_painted_grid = Vector2i(-1, -1)
+				_apply_height_tool_at_world_position(world_position)
+				return
 			var grid_pos = _terrain_registry.world_to_grid(world_position)
 			if _selection_tool_enabled:
 				if mouse_button_event.ctrl_pressed:
@@ -279,6 +294,9 @@ func _unhandled_input(event: InputEvent) -> void:
 				var camera := _get_camera()
 				if camera != null:
 					camera.position -= mouse_motion.relative * camera.zoom
+			return
+		if _is_painting and _height_tool_enabled:
+			_apply_height_tool_at_world_position(world_position)
 			return
 		if _is_painting and _is_brush_enabled() and _has_selected_type():
 			_apply_brush_at_world_position(world_position)
@@ -538,6 +556,58 @@ func _apply_brush_at_world_position(world_position: Vector2) -> void:
 	_hide_hover_preview()
 
 
+func _apply_height_tool_at_world_position(world_position: Vector2) -> void:
+	var tile_data = _resolve_tile_at_world_position(world_position)
+	if tile_data == null:
+		return
+
+	if tile_data.grid_position == _last_painted_grid:
+		return
+	_last_painted_grid = tile_data.grid_position
+
+	var center_grid: Vector2i = tile_data.grid_position
+	var radius: int = _get_brush_radius()
+	var any_changed: bool = false
+
+	for dx in range(-radius, radius + 1):
+		for dy in range(-radius, radius + 1):
+			var target_grid: Vector2i = center_grid + Vector2i(dx, dy)
+			var target_tile = _terrain_map_data.call("get_tile_at_grid", target_grid) if _terrain_map_data != null else null
+			if target_tile == null:
+				continue
+
+			var next_height: int = _get_next_height_tool_level(int(target_tile.height_level))
+			var patch: Dictionary = {
+				"height_level": next_height,
+				"edge_type": _height_tool_edge_type if next_height > 0 else TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE,
+			}
+			if _apply_tile_patch(target_tile, patch):
+				any_changed = true
+				_refresh_tile_visual(target_tile)
+
+	if any_changed:
+		_mark_dirty(true)
+
+	_selected_grid_position = center_grid
+	_selected_grids.clear()
+	_refresh_selection_visual()
+	_refresh_property_panel()
+	_hide_hover_preview()
+
+
+func _get_next_height_tool_level(current_height: int) -> int:
+	match _height_tool_mode:
+		HEIGHT_TOOL_MODE_RAISE:
+			return clampi(current_height + 1, 0, 2)
+		HEIGHT_TOOL_MODE_LOWER:
+			return clampi(current_height - 1, 0, 2)
+		HEIGHT_TOOL_MODE_SET_1:
+			return 1
+		HEIGHT_TOOL_MODE_SET_2:
+			return 2
+	return 0
+
+
 func _resolve_tile_at_world_position(world_position: Vector2):
 	if _terrain_map_data == null:
 		return null
@@ -579,6 +649,115 @@ func _refresh_selection_visual() -> void:
 		outline.add_point(center + Vector2(-half_width, 0.0))
 		outline_root.add_child(outline)
 	_update_3d_selection_visual()
+
+
+func _add_height_tool_controls() -> void:
+	var button_row := get_node_or_null("UI/TopBar/Margin/HBox") as HBoxContainer
+	if button_row == null:
+		return
+
+	var insert_index: int = button_row.get_child_count()
+	var brush_size_button := _get_brush_size_option_button()
+	if brush_size_button != null:
+		insert_index = brush_size_button.get_index() + 1
+
+	var height_button := button_row.get_node_or_null("HeightButton") as Button
+	if height_button == null:
+		height_button = Button.new()
+		height_button.name = "HeightButton"
+		height_button.text = "Hoehe"
+		height_button.toggle_mode = true
+		height_button.toggled.connect(_on_height_tool_toggled)
+		button_row.add_child(height_button)
+		button_row.move_child(height_button, insert_index)
+		insert_index += 1
+
+	var mode_option := button_row.get_node_or_null("HeightModeOption") as OptionButton
+	if mode_option == null:
+		mode_option = OptionButton.new()
+		mode_option.name = "HeightModeOption"
+		mode_option.custom_minimum_size = Vector2(96.0, 0.0)
+		button_row.add_child(mode_option)
+		button_row.move_child(mode_option, insert_index)
+		insert_index += 1
+	_populate_height_mode_options(mode_option)
+	if not mode_option.item_selected.is_connected(_on_height_mode_selected):
+		mode_option.item_selected.connect(_on_height_mode_selected)
+
+	var edge_option := button_row.get_node_or_null("HeightEdgeOption") as OptionButton
+	if edge_option == null:
+		edge_option = OptionButton.new()
+		edge_option.name = "HeightEdgeOption"
+		edge_option.custom_minimum_size = Vector2(92.0, 0.0)
+		button_row.add_child(edge_option)
+		button_row.move_child(edge_option, insert_index)
+	_populate_height_edge_options(edge_option)
+	if not edge_option.item_selected.is_connected(_on_height_edge_selected):
+		edge_option.item_selected.connect(_on_height_edge_selected)
+
+	_update_height_topbar_state()
+
+
+func _populate_height_mode_options(option_button: OptionButton) -> void:
+	if option_button == null:
+		return
+	option_button.clear()
+	option_button.add_item("Anheben")
+	option_button.set_item_metadata(0, HEIGHT_TOOL_MODE_RAISE)
+	option_button.add_item("Absenken")
+	option_button.set_item_metadata(1, HEIGHT_TOOL_MODE_LOWER)
+	option_button.add_item("H=0")
+	option_button.set_item_metadata(2, HEIGHT_TOOL_MODE_SET_0)
+	option_button.add_item("H=1")
+	option_button.set_item_metadata(3, HEIGHT_TOOL_MODE_SET_1)
+	option_button.add_item("H=2")
+	option_button.set_item_metadata(4, HEIGHT_TOOL_MODE_SET_2)
+	for index in range(option_button.item_count):
+		if String(option_button.get_item_metadata(index)) == _height_tool_mode:
+			option_button.select(index)
+			return
+	option_button.select(0)
+
+
+func _populate_height_edge_options(option_button: OptionButton) -> void:
+	if option_button == null:
+		return
+	option_button.clear()
+	option_button.add_item("Hang")
+	option_button.set_item_metadata(0, TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE)
+	option_button.add_item("Cliff")
+	option_button.set_item_metadata(1, TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF)
+	option_button.add_item("Keine")
+	option_button.set_item_metadata(2, TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE)
+	for index in range(option_button.item_count):
+		if String(option_button.get_item_metadata(index)) == _height_tool_edge_type:
+			option_button.select(index)
+			return
+	option_button.select(0)
+
+
+func _update_height_topbar_state() -> void:
+	var height_button := _get_height_tool_button()
+	if height_button != null:
+		height_button.disabled = _terrain_map_data == null
+		if height_button.disabled and height_button.button_pressed:
+			height_button.button_pressed = false
+		elif height_button.button_pressed != _height_tool_enabled:
+			height_button.button_pressed = _height_tool_enabled
+	var mode_option := _get_height_mode_option_button()
+	if mode_option != null:
+		mode_option.disabled = not _height_tool_enabled
+	var edge_option := _get_height_edge_option_button()
+	if edge_option != null:
+		edge_option.disabled = not _height_tool_enabled
+
+
+func _clear_height_tool() -> void:
+	_height_tool_enabled = false
+	var height_button := _get_height_tool_button()
+	if height_button != null and height_button.button_pressed:
+		height_button.button_pressed = false
+	_update_height_topbar_state()
 
 
 func _add_selection_tool_button() -> void:
@@ -634,6 +813,7 @@ func _add_patrol_tool_controls() -> void:
 func _on_selection_tool_toggled(pressed: bool) -> void:
 	_selection_tool_enabled = pressed
 	if pressed:
+		_clear_height_tool()
 		_marker_tool_enabled = false
 		var marker_tool_button := _get_marker_tool_button()
 		if marker_tool_button != null and marker_tool_button.button_pressed:
@@ -645,6 +825,7 @@ func _on_selection_tool_toggled(pressed: bool) -> void:
 func _on_patrol_tool_toggled(pressed: bool) -> void:
 	_patrol_tool_enabled = pressed
 	if pressed:
+		_clear_height_tool()
 		_marker_tool_enabled = false
 		var marker_tool_button := _get_marker_tool_button()
 		if marker_tool_button != null and marker_tool_button.button_pressed:
@@ -1890,6 +2071,52 @@ func _on_remove_marker_button_pressed() -> void:
 	_delete_selected_marker()
 
 
+func _on_height_tool_toggled(pressed: bool) -> void:
+	_height_tool_enabled = pressed
+	if pressed:
+		_selection_tool_enabled = false
+		_patrol_tool_enabled = false
+		_marker_tool_enabled = false
+		var select_button := get_node_or_null("UI/TopBar/Margin/HBox/SelectButton") as Button
+		if select_button != null:
+			select_button.button_pressed = false
+		var patrol_button := get_node_or_null("UI/TopBar/Margin/HBox/PatrolButton") as Button
+		if patrol_button != null:
+			patrol_button.button_pressed = false
+		var marker_tool_button := _get_marker_tool_button()
+		if marker_tool_button != null:
+			marker_tool_button.button_pressed = false
+		var brush_button := get_node_or_null("UI/TopBar/Margin/HBox/BrushButton") as Button
+		if brush_button != null and brush_button.button_pressed:
+			brush_button.button_pressed = false
+		_is_painting = false
+		_last_painted_grid = Vector2i(-1, -1)
+		_hide_hover_preview()
+		_refresh_patrol_overlay()
+		_refresh_marker_editor_controls()
+	_update_height_topbar_state()
+	_update_patrol_topbar_state()
+
+
+func _on_height_mode_selected(index: int) -> void:
+	var option_button := _get_height_mode_option_button()
+	if option_button == null or index < 0 or index >= option_button.item_count:
+		return
+	_height_tool_mode = String(option_button.get_item_metadata(index))
+
+
+func _on_height_edge_selected(index: int) -> void:
+	var option_button := _get_height_edge_option_button()
+	if option_button == null or index < 0 or index >= option_button.item_count:
+		return
+	var edge_type: String = String(option_button.get_item_metadata(index))
+	match edge_type:
+		TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF, TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE, TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE:
+			_height_tool_edge_type = edge_type
+		_:
+			_height_tool_edge_type = TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE
+
+
 func _on_marker_tool_toggled(pressed: bool) -> void:
 	_marker_tool_enabled = pressed
 	if not pressed:
@@ -1898,6 +2125,7 @@ func _on_marker_tool_toggled(pressed: bool) -> void:
 		_dragged_marker_id = ""
 		_refresh_marker_editor_controls()
 		return
+	_clear_height_tool()
 	_selection_tool_enabled = false
 	_patrol_tool_enabled = false
 	var select_button := get_node_or_null("UI/TopBar/Margin/HBox/SelectButton") as Button
@@ -2437,6 +2665,7 @@ func _refresh_top_bar() -> void:
 		save_button.disabled = _terrain_map_data == null or _current_map_path.is_empty()
 	if undo_button != null:
 		undo_button.disabled = _last_undo_state.is_empty()
+	_update_height_topbar_state()
 	_update_patrol_topbar_state()
 
 
@@ -2510,6 +2739,15 @@ func _populate_brush_size_options() -> void:
 	option_button.add_item("3x3")
 	option_button.add_item("5x5")
 	option_button.select(0)
+
+
+func _configure_property_height_spinbox() -> void:
+	var height_spinbox := _get_height_spinbox()
+	if height_spinbox == null:
+		return
+	height_spinbox.min_value = 0.0
+	height_spinbox.max_value = 2.0
+	height_spinbox.step = 1.0
 
 
 func _connect_ui_signals() -> void:
@@ -2821,6 +3059,7 @@ func _on_tile_type_selected(index: int) -> void:
 		_selected_type_id = type_ids[index]
 
 	# Auto-enable brush when a type is selected
+	_clear_height_tool()
 	var brush_button := get_node_or_null("UI/TopBar/Margin/HBox/BrushButton") as Button
 	if brush_button != null and not brush_button.button_pressed:
 		brush_button.button_pressed = true
@@ -3100,6 +3339,18 @@ func _get_edge_type_option_button() -> OptionButton:
 
 func _get_brush_size_option_button() -> OptionButton:
 	return get_node_or_null("UI/TopBar/Margin/HBox/BrushSizeOptionButton") as OptionButton
+
+
+func _get_height_tool_button() -> Button:
+	return get_node_or_null("UI/TopBar/Margin/HBox/HeightButton") as Button
+
+
+func _get_height_mode_option_button() -> OptionButton:
+	return get_node_or_null("UI/TopBar/Margin/HBox/HeightModeOption") as OptionButton
+
+
+func _get_height_edge_option_button() -> OptionButton:
+	return get_node_or_null("UI/TopBar/Margin/HBox/HeightEdgeOption") as OptionButton
 
 
 func _get_new_map_dialog() -> ConfirmationDialog:

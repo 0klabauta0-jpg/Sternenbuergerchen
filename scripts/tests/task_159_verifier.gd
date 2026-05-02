@@ -67,6 +67,34 @@ func _test_editor_uses_3d_primary_view() -> void:
 	var picked_world = primary_view.call("screen_to_world_position", screen_position)
 	_assert(typeof(picked_world) == TYPE_VECTOR2 and Vector2(picked_world).distance_to(known_world) < 4.0, "Editor 3D view roundtrips screen picking to map world coordinates")
 
+	var height_button := editor.get_node_or_null("UI/TopBar/Margin/HBox/HeightButton") as Button
+	var height_mode_option := editor.get_node_or_null("UI/TopBar/Margin/HBox/HeightModeOption") as OptionButton
+	var height_edge_option := editor.get_node_or_null("UI/TopBar/Margin/HBox/HeightEdgeOption") as OptionButton
+	_assert(height_button != null and height_mode_option != null and height_edge_option != null, "Editor exposes 2.5D height authoring controls")
+	var map_data = editor.get("_terrain_map_data")
+	var height_tool_tile = map_data.call("get_tile_at_grid", Vector2i(2, 2)) if map_data != null else null
+	_assert(height_tool_tile != null, "Editor height verifier finds a terrain tile")
+	if height_tool_tile != null:
+		height_tool_tile.height_level = 0
+		height_tool_tile.edge_type = TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE
+		height_tool_tile.type_id = ""
+		editor.call("_on_height_tool_toggled", true)
+		editor.set("_height_tool_mode", "raise")
+		editor.set("_height_tool_edge_type", TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE)
+		editor.call("_apply_height_tool_at_world_position", height_tool_tile.world_position)
+		_assert(int(height_tool_tile.height_level) == 1 and String(height_tool_tile.edge_type) == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE, "Editor height tool raises a terrain field as a slope")
+		editor.set("_last_painted_grid", Vector2i(-1, -1))
+		editor.set("_height_tool_mode", "set_2")
+		editor.call("_apply_height_tool_at_world_position", height_tool_tile.world_position)
+		_assert(int(height_tool_tile.height_level) == 2, "Editor height tool can set terrain to height level 2")
+		editor.set("_last_painted_grid", Vector2i(-1, -1))
+		editor.set("_height_tool_mode", "lower")
+		editor.call("_apply_height_tool_at_world_position", height_tool_tile.world_position)
+		_assert(int(height_tool_tile.height_level) == 1, "Editor height tool lowers terrain by one level")
+		await _wait_frames(4)
+		var post_height_snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
+		_assert(int(post_height_snapshot.get("ground_mesh_count", 0)) == int(post_height_snapshot.get("tile_count", 0)), "Editor height edits keep the 2.5D terrain mesh path active")
+
 	editor.queue_free()
 	await _wait_frames(2)
 

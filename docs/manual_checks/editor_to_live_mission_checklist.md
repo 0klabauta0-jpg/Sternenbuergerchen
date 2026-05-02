@@ -24,6 +24,8 @@
 - Confirm friendly and enemy visuals are visible in the live mission.
 - Confirm the ground uses the orange Kenney Space Kit terrain material, not blue/gray debug boxes.
 - Confirm individual terrain fields are readable via visible field borders.
+- In the editor, use `Hoehe` with 1x1 and 3x3 brush sizes to set H=1/H=2 fields and confirm the 2.5D view updates without returning to 2D sprites.
+- Confirm `Hang` height edges remain traversable for hill tests and `Cliff` height edges remain visibly sharp.
 - Confirm no magenta `MissingAsset_*` marker is visible on the authored map.
 - Confirm the Area Order overlay is visible after drawing the area.
 - Confirm LZ, Move/Defend/Take and Area Orders are shown as marked terrain fields rather than floating round markers.
