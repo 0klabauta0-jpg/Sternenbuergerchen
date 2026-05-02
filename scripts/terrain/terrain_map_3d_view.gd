@@ -160,6 +160,8 @@ var _asset_texture_count: int = 0
 var _asset_model_count: int = 0
 var _placeholder_object_count: int = 0
 var _missing_asset_mapping_count: int = 0
+var _missing_unit_model_count: int = 0
+var _missing_dropship_model_count: int = 0
 var _unit_texture_count: int = 0
 var _unit_model_count: int = 0
 var _unit_status_badge_count: int = 0
@@ -224,6 +226,8 @@ func render_map(terrain_map_data = null) -> void:
 	_asset_model_count = 0
 	_placeholder_object_count = 0
 	_missing_asset_mapping_count = 0
+	_missing_unit_model_count = 0
+	_missing_dropship_model_count = 0
 	_tile_grid_line_count = 0
 	_marker_count = 0
 	_patrol_segment_count = 0
@@ -410,7 +414,10 @@ func get_render_snapshot() -> Dictionary:
 		"asset_texture_count": _asset_texture_count,
 		"asset_model_count": _asset_model_count,
 		"placeholder_object_count": _placeholder_object_count,
-		"missing_asset_mapping_count": _missing_asset_mapping_count,
+		"missing_asset_mapping_count": _missing_asset_mapping_count + _missing_unit_model_count + _missing_dropship_model_count,
+		"missing_map_asset_mapping_count": _missing_asset_mapping_count,
+		"missing_unit_model_count": _missing_unit_model_count,
+		"missing_dropship_model_count": _missing_dropship_model_count,
 		"unit_texture_count": _unit_texture_count,
 		"unit_model_count": _unit_model_count,
 		"unit_status_badge_count": _unit_status_badge_count,
@@ -1232,6 +1239,7 @@ func _rebuild_drop_visuals() -> void:
 	_clear_children(_drop_root)
 	_dropship_texture_visible = false
 	_dropship_model_visible = false
+	_missing_dropship_model_count = 0
 	_lz_tile_marker_count = 0
 	if _drop_root == null or _drop_payload.is_empty():
 		return
@@ -1376,6 +1384,15 @@ func _add_dropship_proxy(world_position: Vector2) -> void:
 			_dropship_model_visible = true
 			return
 
+	if _uses_strict_3d_asset_mapping():
+		_add_runtime_missing_asset_marker(
+			_drop_root,
+			_world_to_3d_position(world_position, 0.72),
+			"MissingAsset_dropship_model_%s" % _sanitize_node_name(DROPSHIP_MODEL_NAME)
+		)
+		_missing_dropship_model_count = 1
+		return
+
 	var dropship_texture := _drop_payload.get("dropship_texture", null) as Texture2D
 	if dropship_texture == null:
 		dropship_texture = DEFAULT_DROPSHIP_TEXTURE
@@ -1426,6 +1443,7 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 	var unit_texture_count: int = 0
 	var unit_model_count: int = 0
 	var unit_status_badge_count: int = 0
+	var missing_unit_model_count: int = 0
 	var changed: bool = false
 	for unit in _unit_nodes:
 		if not is_instance_valid(unit):
@@ -1476,6 +1494,8 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 			unit_texture_count += 1
 		if bool(proxy.get_meta("uses_kenney_model", false)):
 			unit_model_count += 1
+		if bool(proxy.get_meta("missing_unit_model", false)):
+			missing_unit_model_count += 1
 	for unit_id_variant in _unit_proxies_by_id.keys():
 		var unit_id := String(unit_id_variant)
 		if seen_ids.has(unit_id):
@@ -1494,6 +1514,9 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 	if _unit_status_badge_count != unit_status_badge_count:
 		changed = true
 	_unit_status_badge_count = unit_status_badge_count
+	if _missing_unit_model_count != missing_unit_model_count:
+		changed = true
+	_missing_unit_model_count = missing_unit_model_count
 	if changed:
 		_request_viewport_redraw()
 
@@ -1602,7 +1625,14 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 			root.add_child(model_root)
 			root.set_meta("uses_kenney_model", true)
 
-	if not bool(root.get_meta("uses_kenney_model", false)):
+	if not bool(root.get_meta("uses_kenney_model", false)) and _uses_strict_3d_asset_mapping():
+		_add_runtime_missing_asset_marker(
+			root,
+			Vector3(0.0, 0.42, 0.0),
+			"MissingAsset_unit_model_%s" % _sanitize_node_name(_get_unit_model_name(unit))
+		)
+		root.set_meta("missing_unit_model", true)
+	elif not bool(root.get_meta("uses_kenney_model", false)):
 		var unit_texture := _get_unit_visual_texture(unit)
 		if unit_texture != null:
 			var unit_card := _add_texture_card(root, unit_texture, Vector3(0.0, 0.34, 0.0), "UnitTexture", UNIT_TEXTURE_PIXEL_SIZE)
@@ -1612,8 +1642,8 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 				if weapon_texture != null:
 					_add_texture_card(root, weapon_texture, Vector3(0.0, 0.36, 0.0), "UnitWeaponTexture", UNIT_TEXTURE_PIXEL_SIZE, _get_unit_weapon_visual_offset(unit))
 
-	var body := MeshInstance3D.new()
-	if not bool(root.get_meta("uses_kenney_model", false)) and not bool(root.get_meta("uses_unit_texture", false)):
+	if not bool(root.get_meta("uses_kenney_model", false)) and not bool(root.get_meta("uses_unit_texture", false)) and not bool(root.get_meta("missing_unit_model", false)):
+		var body := MeshInstance3D.new()
 		var mesh := CapsuleMesh.new()
 		mesh.radius = UNIT_FALLBACK_BODY_RADIUS
 		mesh.height = UNIT_FALLBACK_BODY_HEIGHT
@@ -1631,6 +1661,24 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 	base.position.y = -0.02
 	root.add_child(base)
 	return root
+
+
+func _add_runtime_missing_asset_marker(parent: Node3D, position: Vector3, node_name: String) -> void:
+	if parent == null:
+		return
+	var marker := MeshInstance3D.new()
+	marker.name = node_name
+	marker.mesh = _make_box_mesh(Vector3(0.42, 0.22, 0.42))
+	marker.material_override = _make_material(Color(1.0, 0.12, 0.72, 1.0))
+	marker.position = position
+	parent.add_child(marker)
+
+
+func _sanitize_node_name(value: String) -> String:
+	var result: String = value.strip_edges().to_lower()
+	for token in ["/", "\\", " ", ":", ".", "-"]:
+		result = result.replace(token, "_")
+	return "unknown" if result.is_empty() else result
 
 
 func _add_world_tile_marker(parent: Node3D, world_position: Vector2, color: Color, node_name: String, height: float = 0.045, fill: float = 0.9) -> bool:

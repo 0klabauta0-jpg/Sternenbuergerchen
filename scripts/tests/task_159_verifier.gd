@@ -199,6 +199,7 @@ func _test_live_mission_uses_3d_primary_view() -> void:
 	_assert(int(snapshot.get("asset_model_count", 0)) > 0, "Live Primary3DView renders calibrated Kenney asset models")
 	_assert(int(snapshot.get("missing_asset_mapping_count", 0)) == 0, "Live Primary3DView has no missing mapped 3D assets")
 	_assert(int(snapshot.get("unit_model_count", 0)) >= 2, "Live Primary3DView renders runtime units with Kenney astronaut GLBs")
+	_assert(int(snapshot.get("unit_texture_count", 0)) == 0 and int(snapshot.get("missing_unit_model_count", 0)) == 0, "Live Primary3DView does not use unit texture/capsule fallbacks when GLBs exist")
 	_assert(_asset_model_nodes_have_models(primary_view), "Live 2.5D asset nodes contain loaded 3D model meshes")
 	_assert(_unit_model_nodes_have_models(primary_view), "Live 2.5D unit proxies contain loaded astronaut model meshes")
 	_assert(int(snapshot.get("map_render_duration_msec", MAX_3D_RENDER_DURATION_MSEC + 1)) < MAX_3D_RENDER_DURATION_MSEC, "Live Primary3DView map render stays below freeze threshold")
@@ -247,9 +248,12 @@ func _test_live_mission_uses_3d_primary_view() -> void:
 				"dropship_target_position": snapped_lz,
 			}
 		)
+		var drop_snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 		var dropship_model := _find_drop_node(primary_view, "DropshipModel_craft_speederB")
 		var dropship_yaw: float = dropship_model.rotation_degrees.y if dropship_model != null else -999.0
 		_assert(dropship_model != null and absf(wrapf(dropship_yaw - 90.0, -180.0, 180.0)) < 0.1, "Live 2.5D dropship faces its approach target")
+		_assert(not bool(drop_snapshot.get("dropship_texture_visible", false)) and int(drop_snapshot.get("missing_dropship_model_count", 0)) == 0, "Live Primary3DView does not use dropship texture/box fallbacks when the GLB exists")
+		_assert(_find_drop_node(primary_view, "DropshipProxy") == null and _find_drop_node(primary_view, "DropshipWing") == null, "Live Primary3DView keeps generic dropship proxy boxes out of the primary path")
 
 		var available_fireteams: PackedStringArray = controller.call("_get_available_fireteam_ids")
 		if not available_fireteams.is_empty():
