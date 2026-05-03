@@ -39,10 +39,10 @@ const EXPECTED_3D_WALL_ROTATION_DEGREES: Dictionary = {
 	"wall_corner_nw": 270.0,
 }
 const EXPECTED_3D_WALL_POSITION_OFFSET: Dictionary = {
-	"wall_straight_se": Vector3(0.5, 0.04, 0.0),
-	"wall_straight_sw": Vector3(0.0, 0.04, 0.5),
-	"wall_straight_ne": Vector3(0.0, 0.04, -0.5),
-	"wall_straight_nw": Vector3(-0.5, 0.04, 0.0),
+	"wall_straight_se": Vector3(0.45, 0.04, 0.0),
+	"wall_straight_sw": Vector3(0.0, 0.04, 0.45),
+	"wall_straight_ne": Vector3(0.0, 0.04, -0.45),
+	"wall_straight_nw": Vector3(-0.45, 0.04, 0.0),
 	"wall_corner_se": Vector3(0.0, 0.04, 0.0),
 	"wall_corner_sw": Vector3(0.0, 0.04, 0.0),
 	"wall_corner_ne": Vector3(0.0, 0.04, 0.0),
