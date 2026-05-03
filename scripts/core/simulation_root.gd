@@ -13,6 +13,8 @@ const HPA_NAVIGATION_GRAPH_SCRIPT: GDScript = preload("res://scripts/terrain/hpa
 const HPA_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/hpa_pathfinder.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const LOCAL_AVOIDANCE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/local_avoidance_resolver.gd")
+const MULTIPLAYER_COMMAND_CONTRACT_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_command_contract.gd")
+const MULTIPLAYER_SNAPSHOT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_snapshot_contract.gd")
 const CAPTURE_PROGRESS_PER_TICK: float = 0.01
 const HPA_NAVIGATION_CLUSTER_SIZE: int = 8
 
@@ -57,6 +59,17 @@ var _terrain_pathfinder = TERRAIN_PATHFINDER_SCRIPT.new()
 var _last_terrain_move_debug_by_unit_id: Dictionary = {}
 var _known_units_by_id: Dictionary = {}
 var _peer_team_assignments: Dictionary = {1: "team_alpha"}
+var _peer_role_assignments: Dictionary = {1: "commander"}
+var _peer_fireteam_assignments: Dictionary = {}
+var _last_network_command_rejection: Dictionary = {}
+var _network_command_accept_count: int = 0
+var _network_command_reject_count: int = 0
+var _multiplayer_snapshot_context: Dictionary = {}
+var _last_applied_snapshot_tick: int = -1
+var _snapshot_apply_count: int = 0
+var _snapshot_out_of_order_count: int = 0
+var _snapshot_missing_unit_count: int = 0
+var _last_snapshot_reject_reason: String = ""
 var _last_broadcast_vital_state_by_unit_id: Dictionary = {}
 var _last_server_state: Dictionary = {}
 var _combat_rng := RandomNumberGenerator.new()
@@ -74,6 +87,8 @@ var _navigation_last_tick_queries: Array = []
 var _navigation_most_expensive_query: Dictionary = {}
 var _navigation_last_path_metrics: Dictionary = {}
 var _local_avoidance_resolver = LOCAL_AVOIDANCE_RESOLVER_SCRIPT.new()
+var _multiplayer_command_contract = MULTIPLAYER_COMMAND_CONTRACT_SCRIPT.new()
+var _multiplayer_snapshot_contract = MULTIPLAYER_SNAPSHOT_CONTRACT_SCRIPT.new()
 var _local_avoidance_prepared_tick: int = -1
 var _local_avoidance_debug_by_unit_id: Dictionary = {}
 var _local_avoidance_stuck_seconds_by_unit_id: Dictionary = {}
@@ -224,6 +239,8 @@ func set_peer_team(peer_id: int, team_id: String) -> void:
 		return
 
 	_peer_team_assignments[peer_id] = normalized_team_id
+	if not _peer_role_assignments.has(peer_id):
+		_peer_role_assignments[peer_id] = "commander"
 
 
 func set_peer_team_assignments(assignments: Dictionary) -> void:
@@ -238,6 +255,8 @@ func set_peer_team_assignments(assignments: Dictionary) -> void:
 
 	if not _peer_team_assignments.has(1):
 		_peer_team_assignments[1] = "team_alpha"
+	if not _peer_role_assignments.has(1):
+		_peer_role_assignments[1] = "commander"
 
 
 func get_peer_team(peer_id: int) -> String:
@@ -247,8 +266,100 @@ func get_peer_team(peer_id: int) -> String:
 	return String(_peer_team_assignments.get(peer_id, ""))
 
 
+func set_peer_role(peer_id: int, role_id: String) -> void:
+	if peer_id <= 0:
+		return
+	var normalized_role_id: String = role_id.strip_edges().to_lower()
+	if normalized_role_id.is_empty():
+		_peer_role_assignments.erase(peer_id)
+		return
+	if not MULTIPLAYER_COMMAND_CONTRACT_SCRIPT.call("is_allowed_role", normalized_role_id):
+		push_warning("SimulationRoot rejected an unknown multiplayer peer role.")
+		return
+	_peer_role_assignments[peer_id] = normalized_role_id
+
+
+func get_peer_role(peer_id: int) -> String:
+	if peer_id <= 0:
+		return ""
+	return String(_peer_role_assignments.get(peer_id, "commander"))
+
+
+func set_peer_fireteams(peer_id: int, fireteam_ids: Variant) -> void:
+	if peer_id <= 0:
+		return
+	var normalized_fireteam_ids: PackedStringArray = PackedStringArray()
+	for fireteam_id_variant in Array(fireteam_ids):
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty() or normalized_fireteam_ids.has(fireteam_id):
+			continue
+		normalized_fireteam_ids.append(fireteam_id)
+	if normalized_fireteam_ids.is_empty():
+		_peer_fireteam_assignments.erase(peer_id)
+		return
+	_peer_fireteam_assignments[peer_id] = normalized_fireteam_ids
+
+
+func set_peer_fireteam_assignments(assignments: Dictionary) -> void:
+	_peer_fireteam_assignments.clear()
+	for raw_peer_id in assignments.keys():
+		set_peer_fireteams(int(raw_peer_id), assignments[raw_peer_id])
+
+
+func get_peer_fireteams(peer_id: int) -> PackedStringArray:
+	if peer_id <= 0:
+		return PackedStringArray()
+	return PackedStringArray(_peer_fireteam_assignments.get(peer_id, PackedStringArray()))
+
+
+func get_network_command_contract_snapshot() -> Dictionary:
+	return {
+		"accepted_count": _network_command_accept_count,
+		"rejected_count": _network_command_reject_count,
+		"last_rejection": _last_network_command_rejection.duplicate(true),
+		"peer_teams": _peer_team_assignments.duplicate(true),
+		"peer_roles": _peer_role_assignments.duplicate(true),
+		"peer_fireteams": _duplicate_peer_fireteam_assignments(),
+	}
+
+
 func get_last_server_state() -> Dictionary:
 	return _last_server_state.duplicate(true)
+
+
+func set_multiplayer_snapshot_context(context: Dictionary) -> void:
+	var normalized_context: Dictionary = Dictionary(_multiplayer_snapshot_contract.call("normalize_display_context", context))
+	var next_context: Dictionary = _multiplayer_snapshot_context.duplicate(true)
+	if context.has("dropship"):
+		next_context["dropship"] = Dictionary(normalized_context.get("dropship", {})).duplicate(true)
+	if context.has("contacts"):
+		next_context["contacts"] = Array(normalized_context.get("contacts", [])).duplicate(true)
+	if context.has("mission_result"):
+		next_context["mission_result"] = Dictionary(normalized_context.get("mission_result", {})).duplicate(true)
+	_multiplayer_snapshot_context = next_context
+
+
+func clear_multiplayer_snapshot_context() -> void:
+	_multiplayer_snapshot_context.clear()
+
+
+func get_multiplayer_snapshot_debug_snapshot() -> Dictionary:
+	return {
+		"last_applied_tick": _last_applied_snapshot_tick,
+		"apply_count": _snapshot_apply_count,
+		"out_of_order_count": _snapshot_out_of_order_count,
+		"missing_unit_count": _snapshot_missing_unit_count,
+		"last_reject_reason": _last_snapshot_reject_reason,
+		"transfer_contract": Dictionary(_multiplayer_snapshot_contract.call("get_transfer_contract")).duplicate(true),
+	}
+
+
+func build_multiplayer_snapshot() -> Dictionary:
+	return _build_tick_state()
+
+
+func apply_multiplayer_snapshot(snapshot: Dictionary) -> Dictionary:
+	return _apply_remote_state(snapshot)
 
 
 func set_objective_status(objective_status) -> bool:
@@ -275,28 +386,59 @@ func request_command(command_dict: Dictionary) -> void:
 		return
 
 	if _has_active_multiplayer_peer() and not multiplayer.is_server():
+		_record_network_command_rejection(
+			{
+				"accepted": false,
+				"reason": "request_on_non_authority",
+			},
+			command_dict,
+			multiplayer.get_unique_id()
+		)
 		push_warning("SimulationRoot.request_command can only be executed on the authority while server-authoritative mode is active.")
-		return
-
-	if not _is_valid_network_command(command_dict):
-		push_warning("SimulationRoot rejected an invalid network command.")
 		return
 
 	var sending_peer_id: int = multiplayer.get_remote_sender_id()
 	if sending_peer_id <= 0:
 		sending_peer_id = 1
 
-	var requested_team_id: String = String(command_dict.get("team_id", ""))
-	if not _is_peer_allowed_for_team(sending_peer_id, requested_team_id):
-		push_warning("SimulationRoot rejected a network command for an unauthorized team.")
+	var result: Dictionary = submit_network_command_for_peer(command_dict, sending_peer_id)
+	if not bool(result.get("accepted", false)):
+		push_warning("SimulationRoot rejected a network command: %s." % String(result.get("reason", "unknown")))
 		return
 
-	enqueue_command(command_dict)
+
+func validate_network_command_for_peer(command_dict: Dictionary, peer_id: int = 1) -> Dictionary:
+	if typeof(command_dict) != TYPE_DICTIONARY:
+		return {
+			"accepted": false,
+			"reason": "command_not_dictionary",
+		}
+	return _multiplayer_command_contract.call("validate", command_dict, _build_network_command_context(command_dict, peer_id))
 
 
-@rpc("authority", "unreliable")
+func submit_network_command_for_peer(command_dict: Dictionary, peer_id: int = 1) -> Dictionary:
+	if not is_server_authoritative:
+		enqueue_command(command_dict)
+		return {
+			"accepted": true,
+			"reason": "",
+			"peer_id": peer_id,
+			"command": command_dict.duplicate(true),
+		}
+
+	var sending_peer_id: int = peer_id if peer_id > 0 else 1
+	var validation: Dictionary = validate_network_command_for_peer(command_dict, sending_peer_id)
+	if not bool(validation.get("accepted", false)):
+		_record_network_command_rejection(validation, command_dict, sending_peer_id)
+		return validation
+
+	_network_command_accept_count += 1
+	enqueue_command(Dictionary(validation.get("command", command_dict)).duplicate(true))
+	return validation
+
+
+@rpc("authority", "unreliable_ordered")
 func _receive_tick_state(state_dict: Dictionary) -> void:
-	_last_server_state = state_dict.duplicate(true)
 	_apply_remote_state(state_dict)
 
 
@@ -355,20 +497,62 @@ func _has_active_multiplayer_peer() -> bool:
 
 
 func _is_valid_network_command(command_dict: Dictionary) -> bool:
-	var command = UNIT_COMMAND_SCRIPT.call("from_dict", command_dict)
-	if command == null or not command.has_method("is_valid") or not bool(command.call("is_valid")):
-		return false
+	return bool(validate_network_command_for_peer(command_dict, 1).get("accepted", false))
 
-	var unit_id: String = String(command_dict.get("unit_id", ""))
-	var team_id: String = String(command_dict.get("team_id", ""))
-	if unit_id.is_empty() or team_id.is_empty():
-		return false
 
-	var unit = _resolve_known_unit(unit_id)
-	if unit != null and unit.has_method("get_team_id"):
-		return String(unit.call("get_team_id")) == team_id
+func _build_network_command_context(command_dict: Dictionary, peer_id: int) -> Dictionary:
+	var unit_id: String = String(command_dict.get("unit_id", "")).strip_edges()
+	var unit = _resolve_known_unit_for_contract(unit_id)
+	var unit_team_id: String = ""
+	var unit_fireteam_id: String = ""
+	if unit != null:
+		if unit.has_method("get_team_id"):
+			unit_team_id = String(unit.call("get_team_id")).strip_edges()
+		if unit.has_method("get_fireteam_id"):
+			unit_fireteam_id = String(unit.call("get_fireteam_id")).strip_edges().to_lower()
 
-	return true
+	return {
+		"peer_id": peer_id,
+		"peer_role": get_peer_role(peer_id),
+		"peer_team_id": get_peer_team(peer_id),
+		"peer_fireteam_ids": get_peer_fireteams(peer_id),
+		"unit_team_id": unit_team_id,
+		"unit_fireteam_id": unit_fireteam_id,
+	}
+
+
+func _resolve_known_unit_for_contract(unit_id: String):
+	if unit_id.strip_edges().is_empty():
+		return null
+
+	if _known_units_by_id.has(unit_id):
+		return _known_units_by_id.get(unit_id, null)
+
+	var unit_registry = _get_unit_registry()
+	if unit_registry != null and unit_registry.has_method("get_unit"):
+		return unit_registry.call("get_unit", unit_id)
+
+	return null
+
+
+func _record_network_command_rejection(validation: Dictionary, command_dict: Dictionary, peer_id: int) -> void:
+	_network_command_reject_count += 1
+	_last_network_command_rejection = {
+		"peer_id": peer_id,
+		"reason": String(validation.get("reason", "unknown")),
+		"category": String(validation.get("category", "")),
+		"command_type": _extract_command_type(command_dict),
+		"team_id": String(command_dict.get("team_id", "")),
+		"unit_id": String(command_dict.get("unit_id", "")),
+		"fireteam_id": String(command_dict.get("fireteam_id", "")),
+	}
+
+
+func _duplicate_peer_fireteam_assignments() -> Dictionary:
+	var result: Dictionary = {}
+	for peer_id_variant in _peer_fireteam_assignments.keys():
+		result[peer_id_variant] = PackedStringArray(_peer_fireteam_assignments[peer_id_variant])
+	return result
 
 
 func _is_peer_allowed_for_team(peer_id: int, team_id: String) -> bool:
@@ -394,26 +578,58 @@ func _broadcast_tick_state() -> void:
 
 
 func _build_tick_state() -> Dictionary:
-	var state_dict: Dictionary = {
-		"tick": tick_counter,
-		"units": [],
-	}
+	var snapshot_context: Dictionary = Dictionary(_multiplayer_snapshot_context).duplicate(true)
+	return Dictionary(
+		_multiplayer_snapshot_contract.call(
+			"build_state_snapshot",
+			{
+				"tick": tick_counter,
+				"units": _build_unit_snapshots(),
+				"vital_updates": _build_all_vital_state_snapshots(),
+				"objective": _build_objective_snapshot(),
+				"dropship": snapshot_context.get("dropship", {}),
+				"contacts": snapshot_context.get("contacts", []),
+				"mission_result": snapshot_context.get("mission_result", {}),
+			}
+		)
+	)
+
+
+func _build_unit_snapshots() -> Array:
+	var unit_snapshots: Array = []
 	for unit in _get_snapshot_units():
 		var unit_snapshot: Dictionary = _build_unit_snapshot(unit)
 		if unit_snapshot.is_empty():
 			continue
 
-		state_dict["units"].append(unit_snapshot)
+		unit_snapshots.append(unit_snapshot)
+	return unit_snapshots
 
-	if _is_valid_objective_status(_objective_status):
-		state_dict["objective"] = {
-			"owning_team_id": _objective_status.owning_team_id,
-			"capture_progress": _objective_status.capture_progress,
-			"capturing_team_id": _objective_status.capturing_team_id,
-			"contested": _objective_status.is_contested(),
-		}
 
-	return state_dict
+func _build_objective_snapshot() -> Dictionary:
+	if not _is_valid_objective_status(_objective_status):
+		return {}
+
+	return {
+		"objective_id": _objective_status.objective_id,
+		"position": _objective_status.position,
+		"capture_radius": _objective_status.capture_radius,
+		"owning_team_id": _objective_status.owning_team_id,
+		"capture_progress": _objective_status.capture_progress,
+		"capturing_team_id": _objective_status.capturing_team_id,
+		"contested": _objective_status.is_contested(),
+	}
+
+
+func _build_all_vital_state_snapshots() -> Array:
+	var updates: Array = []
+	for unit in _get_snapshot_units():
+		var vital_update: Dictionary = _build_unit_vital_update(unit)
+		if vital_update.is_empty():
+			continue
+
+		updates.append(vital_update)
+	return updates
 
 
 func _build_vital_state_updates() -> Array:
@@ -521,24 +737,47 @@ func _build_unit_vital_update(unit) -> Dictionary:
 	}
 
 
-func _apply_remote_state(state_dict: Dictionary) -> void:
+func _apply_remote_state(state_dict: Dictionary) -> Dictionary:
 	if typeof(state_dict) != TYPE_DICTIONARY:
-		return
+		_last_snapshot_reject_reason = "snapshot_not_dictionary"
+		return {
+			"accepted": false,
+			"reason": _last_snapshot_reject_reason,
+		}
 
-	var objective_dict: Variant = state_dict.get("objective", {})
+	var validation: Dictionary = Dictionary(_multiplayer_snapshot_contract.call("validate_for_apply", state_dict, _last_applied_snapshot_tick))
+	if not bool(validation.get("accepted", false)):
+		_last_snapshot_reject_reason = String(validation.get("reason", "unknown"))
+		if _last_snapshot_reject_reason == "out_of_order_snapshot":
+			_snapshot_out_of_order_count += 1
+		return validation
+
+	var snapshot: Dictionary = Dictionary(validation.get("snapshot", {})).duplicate(true)
+	_last_server_state = snapshot.duplicate(true)
+	_last_applied_snapshot_tick = int(snapshot.get("tick", _last_applied_snapshot_tick))
+	_snapshot_apply_count += 1
+	_last_snapshot_reject_reason = ""
+
+	var objective_dict: Variant = snapshot.get("objective", {})
 	if typeof(objective_dict) == TYPE_DICTIONARY:
 		_apply_remote_objective_state(objective_dict)
 
-	var unit_snapshots: Variant = state_dict.get("units", [])
+	var unit_snapshots: Variant = snapshot.get("units", [])
 	if not (unit_snapshots is Array):
-		return
+		return {
+			"accepted": true,
+			"tick": _last_applied_snapshot_tick,
+			"missing_unit_count": 0,
+		}
 
+	var missing_unit_count: int = 0
 	for unit_snapshot in unit_snapshots:
 		if typeof(unit_snapshot) != TYPE_DICTIONARY:
 			continue
 
 		var unit = _resolve_known_unit(String(unit_snapshot.get("unit_id", "")))
 		if unit == null:
+			missing_unit_count += 1
 			continue
 
 		if unit.has_method("apply_remote_snapshot"):
@@ -546,6 +785,13 @@ func _apply_remote_state(state_dict: Dictionary) -> void:
 			continue
 
 		_apply_remote_snapshot_fallback(unit, unit_snapshot)
+
+	_snapshot_missing_unit_count += missing_unit_count
+	return {
+		"accepted": true,
+		"tick": _last_applied_snapshot_tick,
+		"missing_unit_count": missing_unit_count,
+	}
 
 
 func _apply_remote_objective_state(objective_dict: Dictionary) -> void:

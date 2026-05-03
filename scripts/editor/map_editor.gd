@@ -5,9 +5,12 @@ const TERRAIN_REGISTRY_SCRIPT: GDScript = preload("res://scripts/terrain/terrain
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_catalog.gd")
 const TERRAIN_MAP_RENDERER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_renderer.gd")
-const TERRAIN_MAP_3D_VIEW_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_3d_view.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
 const MISSION_SCENARIO_DATA_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_data.gd")
+const MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_primary_view_adapter.gd")
+const MAP_EDITOR_HEIGHT_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_height_tool.gd")
+const MAP_EDITOR_PATROL_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_patrol_tool.gd")
+const MAP_EDITOR_MARKER_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_marker_tool.gd")
 const TILE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_SW.png")
 const CLIFF_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_SE.png")
 const CLIFF_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_SW.png")
@@ -78,6 +81,27 @@ const PATROL_PICK_RADIUS: float = 28.0
 const MARKER_OVERLAY_NAME: String = "MarkerOverlay"
 const MARKER_PICK_RADIUS: float = 26.0
 const MARKER_DRAG_THRESHOLD: float = 4.0
+const PRIMARY_VIEW_LEGACY_VISIBILITY_NODES: PackedStringArray = [
+	"TileContainer",
+	"Terrain",
+	"CliffContainer",
+	"WallContainer",
+	"ObjectContainer",
+	"GridOverlay",
+	"SelectionOutline",
+	PATROL_OVERLAY_NAME,
+	MARKER_OVERLAY_NAME,
+]
+const PRIMARY_VIEW_LEGACY_CLEAR_NODES: PackedStringArray = [
+	"Terrain",
+	"CliffContainer",
+	"WallContainer",
+	"ObjectContainer",
+	"GridOverlay",
+	"SelectionOutline",
+	PATROL_OVERLAY_NAME,
+	MARKER_OVERLAY_NAME,
+]
 const DEFAULT_SCENARIO_PATH: String = "res://data/mission_scenarios/new_mission_scenario.json"
 const DEFAULT_SCENARIO_DIR: String = "res://data/mission_scenarios"
 const LIVE_TEST_SCENE_PATH: String = "res://scenes/tests/mission_reactivity_test.tscn"
@@ -576,11 +600,7 @@ func _apply_height_tool_at_world_position(world_position: Vector2) -> void:
 			if target_tile == null:
 				continue
 
-			var next_height: int = _get_next_height_tool_level(int(target_tile.height_level))
-			var patch: Dictionary = {
-				"height_level": next_height,
-				"edge_type": _height_tool_edge_type if next_height > 0 else TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE,
-			}
+			var patch: Dictionary = Dictionary(MAP_EDITOR_HEIGHT_TOOL_SCRIPT.call("build_height_patch", int(target_tile.height_level), _height_tool_mode, _height_tool_edge_type, TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE))
 			if _apply_tile_patch(target_tile, patch):
 				any_changed = true
 				_refresh_tile_visual(target_tile)
@@ -596,16 +616,7 @@ func _apply_height_tool_at_world_position(world_position: Vector2) -> void:
 
 
 func _get_next_height_tool_level(current_height: int) -> int:
-	match _height_tool_mode:
-		HEIGHT_TOOL_MODE_RAISE:
-			return clampi(current_height + 1, 0, 2)
-		HEIGHT_TOOL_MODE_LOWER:
-			return clampi(current_height - 1, 0, 2)
-		HEIGHT_TOOL_MODE_SET_1:
-			return 1
-		HEIGHT_TOOL_MODE_SET_2:
-			return 2
-	return 0
+	return int(MAP_EDITOR_HEIGHT_TOOL_SCRIPT.call("get_next_height_level", current_height, _height_tool_mode))
 
 
 func _resolve_tile_at_world_position(world_position: Vector2):
@@ -2333,47 +2344,20 @@ func _snap_world_position_to_tile_center(world_position: Vector2):
 
 
 func _find_marker_id_at_world_position(world_position: Vector2) -> String:
-	if _terrain_map_data == null:
-		return ""
-	var best_marker_id: String = ""
-	var best_distance_sq: float = MARKER_PICK_RADIUS * MARKER_PICK_RADIUS
-	for marker_id in PackedStringArray(_terrain_map_data.call("get_marker_ids")):
-		var marker_position: Vector2 = _terrain_map_data.call("get_marker_position", marker_id, Vector2.ZERO)
-		var distance_sq: float = marker_position.distance_squared_to(world_position)
-		if distance_sq > best_distance_sq:
-			continue
-		best_distance_sq = distance_sq
-		best_marker_id = String(marker_id)
-	return best_marker_id
+	return String(MAP_EDITOR_MARKER_TOOL_SCRIPT.call("find_marker_id_at_world_position", _terrain_map_data, world_position, MARKER_PICK_RADIUS))
 
 
 func _can_place_marker_at_world_position(marker_id: String, world_position: Vector2) -> bool:
-	if _terrain_map_data == null:
-		return false
-	for other_marker_id in PackedStringArray(_terrain_map_data.call("get_marker_ids")):
-		if String(other_marker_id) == marker_id:
-			continue
-		if _marker_positions_equal(world_position, Vector2(_terrain_map_data.call("get_marker_position", other_marker_id, Vector2.ZERO))):
-			return false
-	return true
+	return bool(MAP_EDITOR_MARKER_TOOL_SCRIPT.call("can_place_marker_at_world_position", _terrain_map_data, marker_id, world_position))
 
 
 func _find_first_available_marker_world_position(preferred_world_position: Vector2, ignore_marker_id: String = ""):
 	var preferred_tile_position = _snap_world_position_to_tile_center(preferred_world_position)
-	if preferred_tile_position != null and _can_place_marker_at_world_position(ignore_marker_id, preferred_tile_position):
-		return preferred_tile_position
-	if _terrain_map_data == null:
-		return null
-	for tile_data in _terrain_map_data.call("get_tiles"):
-		if tile_data == null:
-			continue
-		if _can_place_marker_at_world_position(ignore_marker_id, Vector2(tile_data.world_position)):
-			return Vector2(tile_data.world_position)
-	return null
+	return MAP_EDITOR_MARKER_TOOL_SCRIPT.call("find_first_available_marker_world_position", _terrain_map_data, preferred_tile_position, ignore_marker_id)
 
 
 func _marker_positions_equal(a: Vector2, b: Vector2) -> bool:
-	return a.distance_squared_to(b) <= 1.0
+	return bool(MAP_EDITOR_MARKER_TOOL_SCRIPT.call("marker_positions_equal", a, b))
 
 
 func _get_default_marker_spawn_position() -> Vector2:
@@ -2922,47 +2906,28 @@ func _handle_patrol_left_click(world_position: Vector2, remove_mode: bool) -> vo
 
 
 func _find_patrol_waypoint_index_at(world_position: Vector2) -> int:
-	if _terrain_map_data == null:
-		return -1
-	var patrol_path: Array = Array(_terrain_map_data.call("get_patrol_path", _patrol_spawn_id))
-	var best_index: int = -1
-	var best_dist_sq: float = PATROL_PICK_RADIUS * PATROL_PICK_RADIUS
-	for index in range(patrol_path.size()):
-		var waypoint_position: Vector2 = Vector2(patrol_path[index])
-		var dist_sq: float = waypoint_position.distance_squared_to(world_position)
-		if dist_sq > best_dist_sq:
-			continue
-		best_dist_sq = dist_sq
-		best_index = index
-	return best_index
+	return int(MAP_EDITOR_PATROL_TOOL_SCRIPT.call("find_waypoint_index_at", _terrain_map_data, _patrol_spawn_id, world_position, PATROL_PICK_RADIUS))
 
 
 func _add_patrol_waypoint(world_position: Vector2) -> void:
-	var patrol_path: Array = Array(_terrain_map_data.call("get_patrol_path", _patrol_spawn_id))
-	patrol_path.append(world_position)
-	_terrain_map_data.call("set_patrol_path", _patrol_spawn_id, patrol_path)
+	if not bool(MAP_EDITOR_PATROL_TOOL_SCRIPT.call("add_waypoint", _terrain_map_data, _patrol_spawn_id, world_position)):
+		return
 	_mark_dirty(true)
 	_refresh_patrol_overlay()
 	_queue_3d_map_refresh()
 
 
 func _move_patrol_waypoint(index: int, world_position: Vector2) -> void:
-	var patrol_path: Array = Array(_terrain_map_data.call("get_patrol_path", _patrol_spawn_id))
-	if index < 0 or index >= patrol_path.size():
+	if not bool(MAP_EDITOR_PATROL_TOOL_SCRIPT.call("move_waypoint", _terrain_map_data, _patrol_spawn_id, index, world_position)):
 		return
-	patrol_path[index] = world_position
-	_terrain_map_data.call("set_patrol_path", _patrol_spawn_id, patrol_path)
 	_mark_dirty(true)
 	_refresh_patrol_overlay()
 	_queue_3d_map_refresh()
 
 
 func _remove_patrol_waypoint(index: int) -> void:
-	var patrol_path: Array = Array(_terrain_map_data.call("get_patrol_path", _patrol_spawn_id))
-	if index < 0 or index >= patrol_path.size():
+	if not bool(MAP_EDITOR_PATROL_TOOL_SCRIPT.call("remove_waypoint", _terrain_map_data, _patrol_spawn_id, index)):
 		return
-	patrol_path.remove_at(index)
-	_terrain_map_data.call("set_patrol_path", _patrol_spawn_id, patrol_path)
 	_mark_dirty(true)
 	_refresh_patrol_overlay()
 	_queue_3d_map_refresh()
@@ -3148,26 +3113,12 @@ func _show_load_issue_dialog(issue_message: String, source_path: String) -> void
 
 
 func _ensure_3d_primary_view() -> void:
-	if _terrain_3d_view != null and is_instance_valid(_terrain_3d_view):
-		return
-	var existing_view := get_node_or_null("Primary3DView")
-	if existing_view != null:
-		_terrain_3d_view = existing_view
-	else:
-		_terrain_3d_view = TERRAIN_MAP_3D_VIEW_SCRIPT.new()
-		_terrain_3d_view.name = "Primary3DView"
-		add_child(_terrain_3d_view)
-	_set_legacy_2d_map_visible(false)
+	_terrain_3d_view = MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT.call("ensure_primary_view", self, _terrain_3d_view, PRIMARY_VIEW_LEGACY_VISIBILITY_NODES, _hover_preview)
 
 
 func _get_primary_3d_view():
-	if _terrain_3d_view != null and is_instance_valid(_terrain_3d_view):
-		return _terrain_3d_view
-	var existing_view := get_node_or_null("Primary3DView")
-	if existing_view != null:
-		_terrain_3d_view = existing_view
-		return _terrain_3d_view
-	return null
+	_terrain_3d_view = MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT.call("get_primary_view", self, _terrain_3d_view)
+	return _terrain_3d_view
 
 
 func _refresh_3d_map_view() -> void:
@@ -3175,8 +3126,7 @@ func _refresh_3d_map_view() -> void:
 	var primary_3d_view = _get_primary_3d_view()
 	if primary_3d_view == null:
 		return
-	primary_3d_view.call("render_map", _terrain_map_data)
-	_update_3d_selection_visual()
+	MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT.call("refresh_map_view", primary_3d_view, _terrain_map_data, _selected_grids, _selected_grid_position)
 	_set_legacy_2d_map_visible(false)
 
 
@@ -3193,64 +3143,19 @@ func _update_3d_selection_visual() -> void:
 	var primary_3d_view = _get_primary_3d_view()
 	if primary_3d_view == null:
 		return
-	var grids := _selected_grids.duplicate()
-	if grids.is_empty() and _selected_grid_position != Vector2i(-1, -1):
-		grids = [_selected_grid_position]
-	primary_3d_view.call("set_selected_grid_positions", grids)
+	MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT.call("update_selection_visual", primary_3d_view, _selected_grids, _selected_grid_position)
 
 
 func _set_legacy_2d_map_visible(is_visible: bool) -> void:
-	for node_name in [
-		"TileContainer",
-		"Terrain",
-		"CliffContainer",
-		"WallContainer",
-		"ObjectContainer",
-		"GridOverlay",
-		"SelectionOutline",
-		PATROL_OVERLAY_NAME,
-		MARKER_OVERLAY_NAME,
-	]:
-		var node := get_node_or_null(node_name)
-		if node is CanvasItem:
-			(node as CanvasItem).visible = is_visible
-	var camera := get_node_or_null("Camera2D") as Camera2D
-	if camera != null:
-		camera.enabled = is_visible
-	if _hover_preview != null:
-		_hover_preview.visible = is_visible and _hover_preview.visible
+	MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT.call("set_legacy_2d_map_visible", self, PRIMARY_VIEW_LEGACY_VISIBILITY_NODES, is_visible, _hover_preview)
 
 
 func _clear_legacy_2d_map_children() -> void:
-	for node_name in [
-		"Terrain",
-		"CliffContainer",
-		"WallContainer",
-		"ObjectContainer",
-		"GridOverlay",
-		"SelectionOutline",
-		PATROL_OVERLAY_NAME,
-		MARKER_OVERLAY_NAME,
-	]:
-		var node := get_node_or_null(node_name)
-		if node == null:
-			var container := Node2D.new()
-			container.name = node_name
-			add_child(container)
-			node = container
-		if node == null:
-			continue
-		for child in node.get_children():
-			child.queue_free()
+	MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT.call("clear_legacy_2d_map_children", self, PRIMARY_VIEW_LEGACY_CLEAR_NODES)
 
 
 func _screen_to_editor_world_position(screen_position: Vector2) -> Vector2:
-	var primary_3d_view = _get_primary_3d_view()
-	if primary_3d_view != null and primary_3d_view.has_method("screen_to_world_position"):
-		var world_position = primary_3d_view.call("screen_to_world_position", screen_position)
-		if typeof(world_position) == TYPE_VECTOR2:
-			return Vector2(world_position)
-	return get_global_mouse_position()
+	return Vector2(MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT.call("screen_to_editor_world_position", _get_primary_3d_view(), screen_position, get_global_mouse_position()))
 
 
 func _get_camera() -> Camera2D:

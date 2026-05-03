@@ -1098,6 +1098,116 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Die Badges duerfen nicht zur zweiten Gameplay-Wahrheit werden; sie lesen nur Unit-/Combat-/Objective-State.
 - Naechster Schritt: Im manuellen Playtest pruefen, ob Unit-Badges zu laut sind und ggf. einen kleinen UX-Politur-Task schneiden.
 
+### Strategic Review - UI-Assets und Multiplayer-Vorbereitung
+- Status: dokumentiert
+- Stand: `docs/reviews/strategic_review_ui_assets_multiplayer_2026_05_03.md` sammelt Code-Review-Befunde, Optimierungs- und Designvorschlaege, externe Godot-/Forum-/UI-/Asset-Recherche sowie lokale Asset-Vorschlaege aus `C:\Users\bjoer\Pictures\Sternenbürger`.
+- Stand: Neue geplante Tasks `TASK_161` bis `TASK_170` bereiten Runtime-Grenzen, Combat-Authority, Editor-Schnitt, UI-Theme, lokale Asset-Kuratierung, Multiplayer-Command-Vertrag, Session/Lobby, Snapshot-Replikation, Zwei-Client-Smoke und Warnungs-/Performance-Gates vor.
+- Offene Punkte: `TASK_161` bis `TASK_170` sind umgesetzt. Die manuellen Sichtpruefungen fuer Editor, Mission, UI und zwei lokale Multiplayer-Instanzen bleiben als Playtest-/Abnahme-Schritt offen.
+- Risiken: Der Review darf nicht als Freigabe fuer einen Grossumbau gelesen werden. Jede Empfehlung ist als kleiner Task-Slice auszufuehren und muss die bestehende SimulationRoot-/UI-Trennung respektieren.
+- Naechster Schritt: Manuelle Abnahme der dokumentierten Checks und danach Commit/Push nach ausdruecklicher Freigabe.
+
+### TASK_161 - Mission Runtime Boundary Cleanup
+- Status: implementiert
+- Stand: `MissionTacticalSandboxController` bleibt funktional an der bestehenden Missionstest-Szene, delegiert aber erste produktive Grenzrollen aus dem Testpfad heraus. `scripts/mission/mission_primary_view_bridge.gd` kapselt 2.5D-Primary-View-Picking, LZ-/Dropship-Visuals, Mission-Status, Order-/Contact-Payloads und das Unterdruecken alter 2D-Readability-Overlays.
+- Stand: `scripts/mission/mission_dropship_effect_adapter.gd` baut und enqueued die bestehenden Dropship-Effects weiter ueber `SimulationRoot`, inklusive bekannter Unit-Registrierung, ohne neue Dropship-Semantik einzufuehren. `scripts/mission/mission_command_input_guard.gd` kapselt Host/Observer-Command-Erlaubnis und Planning-Editierbarkeit.
+- Stand: `scripts/tactical/ui/fireteam_selection_adapter.gd` kapselt Fireteam-Klick-/Lasso-Auswahl und das visuelle Spiegeln des Selektionszustands an Units. Command-Dictionary-Vertraege, Szenenpfade und 2D-Runtime-Anker bleiben unveraendert.
+- Offene Punkte: Der Tactical-Controller ist weiterhin gross; dieser Task ist ein erster Boundary-Schnitt und kein kompletter Controller-Split. `TASK_170 - Performance and Warning Budget Gate` ist inzwischen umgesetzt.
+- Risiken: Die neuen Adapter liegen bewusst nah am bestehenden Vertrag. Spaetere Refactors duerfen daraus keine zweite Gameplay-Wahrheit neben `SimulationRoot` machen.
+- Lokale Pruefung: `task_160_tactical_playability_verifier.gd`, `task_159_verifier.gd`, `task_158_verifier.gd` und `bugfix_dropship_mission_flow_verifier.gd` laufen gruen.
+
+### TASK_170 - Performance and Warning Budget Gate
+- Status: implementiert
+- Stand: `TerrainMap3DView` liefert im Render-Snapshot jetzt reine Diagnosezaehler fuer Snapshot-Requests sowie Order-, Contact-, Dropship- und Mission-Status-Payload-Apply-Pfade. Die Zaehler sind read-only Messwerte der View und keine Gameplay-Wahrheit.
+- Stand: `scripts/tests/task_170_performance_warning_gate_verifier.gd` fasst Live-Primary-View, Render-Spike und Navigation-Budget zusammen. Es prueft fehlende 3D-Mappings, alte Sprite3D-/Placeholder-Fallbacks, Renderdauer, Snapshot-/Apply-Zaehler und Navigation-Delay-Budget mit konkreten Counter-Ausgaben.
+- Stand: `scripts/tests/run_task_170_warning_gate.ps1` blockiert lokale Headless-Laeufe bei bekannten Godot-Exit-Leak-Mustern wie `ObjectDB instances leaked`, `RID allocations ... leaked` und `Resources still in use at exit`. Die Policy und Budgetwerte sind in `docs/dev/performance_warning_gate.md` dokumentiert.
+- Offene Punkte: Zeitbudgets bleiben bewusst breit und sollten nach mehreren lokalen Messreihen erst dann geschaerft werden, wenn die Werte stabil sind.
+- Risiken: Godot-Warnungstexte koennen sich versionsabhaengig leicht aendern; das Wrapper-Gate nutzt deshalb robuste Muster, muss bei neuen Texten aber angepasst werden.
+- Lokale Pruefung: `task_170_performance_warning_gate_verifier.gd`, `run_task_170_warning_gate.ps1`, `task_159_verifier.gd`, `task_160_tactical_playability_verifier.gd` und `task_131_verifier.gd` laufen gruen.
+- Naechster Schritt: `TASK_169` ist umgesetzt; Warnungs-/Budgetwerte nach weiteren lokalen Messreihen bei Bedarf schaerfen.
+
+### TASK_162 - Combat Loop Authority Split
+- Status: implementiert
+- Stand: Der Combat-Loop nutzt jetzt produktive Vertragskomponenten unter `scripts/mission/`. `mission_combat_authority_contract.gd` dokumentiert Playability-, Objective-, Contact- und Mission-Result-Keys sowie die erlaubten autoritativen `SimulationRoot`-Effect-Typen.
+- Stand: `MissionCombatLoopDriver.get_playability_snapshot()` und `_build_mission_result()` delegieren an diesen Vertrag. Objective-State wird weiter aus `SimulationRoot.get_objective_status()` gespiegelt; UI und 2.5D-View lesen Snapshots und werden nicht zur Gameplay-Wahrheit.
+- Stand: `mission_combat_remote_event_bridge.gd` kapselt Combat-Remote-Events als `read_only`-Payloads. Die bestehenden Driver-RPCs bleiben erhalten, sind aber klar auf Anzeige/Eventtext begrenzt und committen keinen Gameplay-State.
+- Offene Punkte: Der Driver selbst bleibt gross und liegt weiterhin im historischen Testpfad; dieser Task zieht die multiplayer-relevante Runtime-Grenze sichtbar, ersetzt aber keinen kompletten Driver-Move.
+- Risiken: Snapshot-Keys sind von UI und Verifiern genutzt und wurden deshalb nicht umbenannt. Spaetere Multiplayer-Tasks sollen den dokumentierten Vertrag erweitern statt ad hoc neue UI-Wahrheit einzufuehren.
+- Lokale Pruefung: `task_162_combat_authority_contract_verifier.gd`, `task_160_tactical_playability_verifier.gd`, `task_119_verifier.gd`, `task_118_verifier.gd` und `bugfix_dropship_mission_flow_verifier.gd` laufen gruen.
+- Naechster Schritt: Combat-Vertrag bei neuen Missions-/Multiplayer-Feldern gezielt erweitern.
+
+### TASK_165 - Local Asset Curation and Import Plan
+- Status: implementiert
+- Stand: `docs/assets/local_asset_curation_import_plan.md` dokumentiert den lokalen Asset-Bestand aus dem `Pictures\Sternen*`-Ordner, die bereits im Projekt vorhandenen Asset-Packs, Deduplizierungsbefunde, Importregeln und priorisierte Kandidatenlisten.
+- Stand: In diesem Task wurden keine neuen binaeren Assets importiert. Der Plan blockiert weitere Pack-Komplettimporte und empfiehlt stattdessen kleine Folge-Slices mit Maximalmengen, Quelle, Lizenz, Zielpfad und Verbrauchsort.
+- Stand: `Space Kit` und `3d\Space Kit` wurden als strukturelle Duplikate bewertet: je 924 Dateien und 924 gleiche relative Pfade. Fuer neue 3D-Assets bleibt GLB das bevorzugte Format; FBX/OBJ/DAE/STL werden nicht parallel importiert.
+- Stand: Bereits vorhandene UI-, Input-, Cursor-, Space-Kit- und Char-Assets sollen zuerst genutzt werden. Fehlende P1-Kandidaten sind Ranks-/Role-Badges, kleine Weapon-/Blaster-Previews und Valkyrie-Transportbilder.
+- Offene Punkte: Noch keine Godot-Importpruefung, weil keine neuen Assets importiert wurden. Portraits brauchen vor weiterer Nutzung Naming-, Zuschnitt- und Quellenmetadaten.
+- Risiken: Der Katalog darf nicht als Freigabe fuer Massenimporte gelesen werden. Jeder Folgeimport braucht einen eigenen kleinen Task und darf keine stillen Fallbacks im 2.5D-Primary-Pfad verstecken.
+- Lokale Pruefung: Der lokale Bestand wurde per PowerShell aggregiert; `git diff --check` wird fuer den Abschlussdurchlauf ausgefuehrt.
+- Naechster Schritt: Asset-Import nur ueber kleine Folge-Slices mit Quelle, Lizenz, Zielpfad und Verbrauchsort.
+
+### TASK_163 - Map Editor Module Split
+- Status: implementiert
+- Stand: Der interne Map-Editor bleibt funktional in `scenes/editor/map_editor.tscn`, gibt aber erste klar abgegrenzte Verantwortlichkeiten an produktive Helfer unter `scripts/editor/` ab.
+- Stand: `map_editor_primary_view_adapter.gd` kapselt 2.5D-Primary-View-Setup, Legacy-2D-Sichtbarkeit, View-Refresh, Selection-Spiegelung und Screen-to-World-Picking. `map_editor_height_tool.gd` kapselt die Height-/Edge-Patch-Regeln des Hoehenwerkzeugs.
+- Stand: `map_editor_patrol_tool.gd` kapselt Patrol-Waypoint-Finden, Hinzufuegen, Verschieben und Entfernen auf `TerrainMapData`. `map_editor_marker_tool.gd` kapselt Marker-Hit-Test, belegte Markerpositionen und freie Markerpositionen.
+- Offene Punkte: Scenario-Panel und File-Dialog/Load-Save bleiben bewusst im Editor-Skript und sollten erst in eigenen Folgeschnitten bewegt werden. Die manuelle Editor-Sichtpruefung nach `docs/manual_checks/editor_to_live_mission_checklist.md` wurde im Headless-Durchlauf nicht ausgefuehrt.
+- Risiken: Die neuen Helfer sind absichtlich nah am bestehenden Vertrag; weitere Editor-Splits duerfen `TerrainMapData`, `MissionScenarioData` und die LZ-Regel nicht vermischen.
+- Lokale Pruefung: `task_163_map_editor_module_split_verifier.gd`, `task_157_verifier.gd`, `task_158_verifier.gd` und `task_159_verifier.gd` laufen gruen.
+- Naechster Schritt: Weitere Editor-Splits nur bei konkreter Editor-Arbeit schneiden.
+
+### TASK_164 - UI Theme and Component Library
+- Status: implementiert
+- Stand: Unter `scripts/ui/` existiert jetzt eine kleine gemeinsame UI-Basis fuer taktische Karten, Status-Badges, Command-Buttons, Progress-Zeilen, Unit-Roster-Zeilen sowie ein Tooltip-/Icon-Helfer mit kuratiertem Kenney-Asset-Manifest.
+- Stand: `scripts/ui/tactical_ui_theme.gd` definiert gemeinsame Farben, Statusfarben, Icon-Groessen und StyleBox-Helfer fuer Cards, Badges, Buttons und Progress Bars. Die Komponenten bleiben reine Anzeige-Controls und halten keine Gameplay-Wahrheit.
+- Stand: Der erste sichtbare Screen-Slice ist das Missions-`FireteamStatusPanel`: Es nutzt jetzt `TacticalCard`, `StatusBadge`, `ProgressLine` und `CommandButton`, behaelt aber die bestehende `SuppressionLabel`-Zusammenfassung und den vorhandenen Return-to-Plan-Callback.
+- Stand: Es wurden keine neuen Asset-Dateien importiert. `ui_tooltip_icon_helper.gd` verweist nur auf vorhandene Kenney-Dateien aus `kenney_ui-pack`, `kenney_ui-pack-space-expansion` und `kenney_cursor-pixel-pack`.
+- Offene Punkte: Die manuelle Sichtpruefung von Homebase/FOB/Mission bleibt ausserhalb des Headless-Durchlaufs offen; weitere Screens sollen die Komponenten nur in kleinen Folge-Slices uebernehmen.
+- Risiken: Die neue UI-Basis darf nicht zu einer zweiten Skinning- oder State-Maschine anwachsen. Fachliche Screen-Logik bleibt in den bestehenden Meta-/Mission-Pfaden.
+- Lokale Pruefung: `task_164_ui_theme_component_verifier.gd`, `task_096_recovery_verifier.gd` und `task_160_tactical_playability_verifier.gd` laufen gruen. Die manuelle Homebase/FOB/Mission-Sichtpruefung wurde im Headless-Durchlauf nicht ausgefuehrt.
+- Naechster Schritt: Gemeinsame UI-Komponenten in weiteren Screens nur in kleinen Folge-Slices uebernehmen.
+
+### TASK_166 - Multiplayer Authority Command Contract
+- Status: implementiert
+- Stand: `scripts/multiplayer/multiplayer_command_contract.gd` definiert eine dokumentierte Whitelist fuer Unit-, Commander-, Area-, Ad-hoc- und Dropship-Commands. Der Vertrag lehnt Client-Payloads ab, die Damage-, Vital-, Objective-, Runtime-, Positions- oder Dropship-State als Wahrheit setzen wollen; LZ-Payloads aus Scenario-/Editor-Kontext werden explizit blockiert.
+- Stand: `SimulationRoot.request_command()` validiert server-authoritative RPC-Payloads jetzt ueber diesen Vertrag, enqueued nur akzeptierte Commands und macht Ablehnungen ueber Zaehler sowie den letzten Reject-Grund testbar. Peer-Teams, Rollen und Fireteam-Zuweisungen sind als API fuer die kommende Session-/Lobby-Anbindung vorbereitet.
+- Stand: `docs/dev/multiplayer_authority_command_contract.md` dokumentiert Rollen, Whitelist, harte Rejects und die Abgrenzung zur spaeteren Snapshot-Replikation.
+- Offene Punkte: TASK_167 speist die vorbereitete Peer-Zuweisungs-API jetzt aus der Session-Schicht. TASK_168 definiert den Snapshot-Vertrag; TASK_169 prueft den Zwei-Client-State-Smoke.
+- Risiken: Bestehende lokale Tests duerfen Netzwerk-Commands nicht als Freigabe fuer Client-State-Mutation missverstehen. Gameplay-Wahrheit bleibt bei `SimulationRoot`.
+- Lokale Pruefung: `task_166_multiplayer_authority_command_contract_verifier.gd`, `task_160_tactical_playability_verifier.gd`, `task_117_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Command-Vertrag bei neuen Multiplayer-Command-Typen gezielt erweitern.
+
+### TASK_167 - Multiplayer Session and Lobby Extraction
+- Status: implementiert
+- Stand: `scripts/multiplayer/multiplayer_session.gd` kapselt ENet-Host/Join, Disconnect, Peer-Liste, Ready-State, serverseitigen Missionsstart sowie einfache Team-/Rollen-/Fireteam-Zuweisungen. Die Komponente kennt keinen laufenden Gameplay-State und repliziert keine Gameplay-Snapshots.
+- Stand: `scripts/tests/lobby_test_screen.gd` bleibt als Adapter-Screen bestehen, delegiert Host/Join/Ready/Start aber an die produktive Session-Komponente. `scenes/tests/lobby_test.tscn` enthaelt jetzt Ready- und Disconnect-Controls; Start Mission bleibt host-only.
+- Stand: Beim Missionsstart uebergibt der Adapter die Session-Zuweisungen an `SimulationRoot` ueber `set_peer_team_assignments`, `set_peer_role` und `set_peer_fireteam_assignments`, damit TASK_166-Command-Rechte nicht mehr im Testscreen erfunden werden.
+- Offene Punkte: Der echte Host/Join-LAN-Test mit zwei Godot-Instanzen bleibt manuell offen; TASK_169 dokumentiert die Checkliste und prueft den State-Smoke headless.
+- Risiken: UDP-Port 7777 kann lokal belegt sein; die Session haelt den Port konfigurierbar. Joined Peers nutzen fuer den TASK_169-Smoke die Rolle `commander`; reine Observer-Runden koennen `client_role_id = spectator` setzen.
+- Lokale Pruefung: `task_167_multiplayer_session_verifier.gd`, `task_166_multiplayer_authority_command_contract_verifier.gd` und `git diff --check` laufen gruen. Der manuelle Zwei-Instanzen-LAN-Test wurde nicht ausgefuehrt.
+- Naechster Schritt: Manuellen Zwei-Instanzen-Test nach `docs/manual_checks/multiplayer_two_client_playability_smoke.md` ausfuehren.
+
+### TASK_168 - Multiplayer Snapshot Replication Contract
+- Status: implementiert
+- Stand: `scripts/multiplayer/multiplayer_snapshot_contract.gd` definiert und normalisiert das V1-Snapshot-Schema mit `tick`, `units`, `vital_updates`, `objective`, `dropship`, `contacts` und `mission_result`.
+- Stand: `SimulationRoot` baut State-Snapshots zentral ueber diesen Contract, sendet sie als `unreliable_ordered`, behaelt Vital-Deltas als `reliable` bei und stellt Snapshot-Debugwerte fuer letzten Tick, Apply-Count, Out-of-order-Count und fehlende Units bereit.
+- Stand: Client-Anwendung ueber `apply_multiplayer_snapshot()` ignoriert alte oder doppelte Ticks, wendet Unit-/Objective-State nur als Spiegelung an und enqueued keine Commands oder Effects. `MissionCombatLoopDriver` speist Contacts/Mission-Result ein; `MissionTacticalSandboxController` speist Dropship-Anzeigezustand ein.
+- Offene Punkte: Prediction, Rollback, Interest Management und dedizierter Server bleiben bewusst ausserhalb dieses Tasks. Der sichtbare Zwei-Instanzen-Test bleibt als manuelle Abnahme offen.
+- Risiken: Snapshot-Felder muessen klein bleiben, damit die Kopplung nicht waechst; neue Felder sollen ueber den Contract laufen statt ad hoc in UI oder 3D-View.
+- Lokale Pruefung: `task_168_multiplayer_snapshot_contract_verifier.gd`, `task_160_tactical_playability_verifier.gd` und `git diff --check` laufen gruen. Der manuelle Zwei-Instanzen-Smoke wurde nicht ausgefuehrt.
+- Naechster Schritt: Snapshot-Felder erst erweitern, wenn ein konkreter Folge-Task sie benoetigt.
+
+### TASK_169 - Multiplayer Two-Client Playability Smoke
+- Status: implementiert
+- Stand: `scripts/tests/task_169_multiplayer_two_client_playability_smoke.gd` prueft einen lokalen Host+Client-Commander-State-Smoke mit Peer-IDs `1` und `2`, ready Session, serverseitiger Command-Validation, Unit-Bewegung, Snapshot-Anwendung und Mission-Result-Spiegelung.
+- Stand: `SimulationRoot.submit_network_command_for_peer()` kapselt den validierten Serverpfad fuer Test- und RPC-Einstieg: erlaubte Client-Commands werden gequeued, verbotene State-Mutations-Payloads werden mit sichtbarem Reject-Grund gezaehlt.
+- Stand: Joined Peers nutzen im TASK-169-Smoke standardmaessig Rolle `commander`, Team `team_bravo` und Fireteam `red`; Observer-Runden koennen `client_role_id = spectator` konfigurieren.
+- Stand: `docs/manual_checks/multiplayer_two_client_playability_smoke.md` beschreibt den manuellen Zwei-Instanzen-Ablauf mit konfigurierbarem Port, Debugwerten und erwarteter Trennung zwischen SimulationRoot-Wahrheit und UI-/2.5D-Anzeige.
+- Offene Punkte: Der manuelle Zwei-Godot-Instanzen-Test wurde im Headless-Durchlauf nicht ausgefuehrt und bleibt als Sichtpruefung offen.
+- Risiken: Der Headless-Smoke prueft bewusst State, Vertrag und Snapshot statt fragile Zwei-Prozess-UI-Steuerung. UI-Kommandowege duerfen spaeter nicht um den Serververtrag herum schreiben.
+- Lokale Pruefung: `task_169_multiplayer_two_client_playability_smoke.gd`, `task_167_multiplayer_session_verifier.gd`, `task_166_multiplayer_authority_command_contract_verifier.gd`, `task_160_tactical_playability_verifier.gd` und `git diff --check` laufen gruen. Der TASK_166-Verifier erzeugt erwartete Reject-Warnungen fuer Negativfaelle.
+- Naechster Schritt: Manuellen Zwei-Instanzen-Test und Sichtpruefung ausfuehren; danach Commit/Push nur nach ausdruecklicher Freigabe.
+
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert
 - Stand: Der Meta-Layer fuehrt jetzt durchgaengig auf die echte eingebettete Missionskarte statt auf eine separate read-only Overview. Homebase, FOB und Mission teilen dieselbe kompakte Navigation, die Missions-Tactical-UI traegt direkt die gemeinsamen Block-Labels `#15` bis `#18`, und der Missionspfad bleibt auf dieselbe Kartenbasis, dieselben LZ-/Approach-Marker sowie denselben Dropship-Handoff verdrahtet wie die spaetere Live-Mission.

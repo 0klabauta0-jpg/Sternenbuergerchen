@@ -180,6 +180,11 @@ var _contact_count: int = 0
 var _objective_status_visible: bool = false
 var _mission_result_visible: bool = false
 var _continuous_redraw_until_msec: int = 0
+var _render_snapshot_request_count: int = 0
+var _order_payload_apply_count: int = 0
+var _contact_payload_apply_count: int = 0
+var _drop_payload_apply_count: int = 0
+var _mission_status_payload_apply_count: int = 0
 
 
 func _ready() -> void:
@@ -275,12 +280,14 @@ func set_selected_grid_positions(grid_positions: Array) -> void:
 
 
 func set_order_visual_payload(order_payload: Dictionary) -> void:
+	_order_payload_apply_count += 1
 	_order_payload = order_payload.duplicate(true)
 	_rebuild_order_visuals()
 	_request_viewport_redraw()
 
 
 func set_contact_entries(contact_entries: Array, selected_fireteam_ids: PackedStringArray = PackedStringArray()) -> void:
+	_contact_payload_apply_count += 1
 	_contact_entries.clear()
 	for entry_variant in contact_entries:
 		if typeof(entry_variant) == TYPE_DICTIONARY:
@@ -291,12 +298,14 @@ func set_contact_entries(contact_entries: Array, selected_fireteam_ids: PackedSt
 
 
 func set_mission_drop_visual_state(drop_payload: Dictionary) -> void:
+	_drop_payload_apply_count += 1
 	_drop_payload = drop_payload.duplicate(true)
 	_rebuild_drop_visuals()
 	_request_viewport_redraw()
 
 
 func set_mission_status_payload(status_payload: Dictionary) -> void:
+	_mission_status_payload_apply_count += 1
 	_mission_status_payload = status_payload.duplicate(true)
 	_rebuild_status_visuals()
 	_request_viewport_redraw()
@@ -406,6 +415,7 @@ func screen_rect_to_tile_world_positions(screen_rect: Rect2) -> Array:
 
 
 func get_render_snapshot() -> Dictionary:
+	_render_snapshot_request_count += 1
 	return {
 		"tile_count": _map_tile_count,
 		"ground_mesh_count": _ground_mesh_count,
@@ -443,6 +453,11 @@ func get_render_snapshot() -> Dictionary:
 		"camera_yaw_degrees": _camera_yaw_degrees,
 		"camera_size": _camera_size,
 		"map_render_duration_msec": _map_render_duration_msec,
+		"render_snapshot_request_count": _render_snapshot_request_count,
+		"order_payload_apply_count": _order_payload_apply_count,
+		"contact_payload_apply_count": _contact_payload_apply_count,
+		"drop_payload_apply_count": _drop_payload_apply_count,
+		"mission_status_payload_apply_count": _mission_status_payload_apply_count,
 	}
 
 

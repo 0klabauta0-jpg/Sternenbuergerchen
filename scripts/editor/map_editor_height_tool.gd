@@ -1,0 +1,28 @@
+class_name MapEditorHeightTool
+extends RefCounted
+
+const MODE_RAISE: String = "raise"
+const MODE_LOWER: String = "lower"
+const MODE_SET_1: String = "set_1"
+const MODE_SET_2: String = "set_2"
+
+
+static func build_height_patch(current_height: int, mode: String, edge_type: String, edge_none: String) -> Dictionary:
+	var next_height: int = get_next_height_level(current_height, mode)
+	return {
+		"height_level": next_height,
+		"edge_type": edge_type if next_height > 0 else edge_none,
+	}
+
+
+static func get_next_height_level(current_height: int, mode: String) -> int:
+	match mode:
+		MODE_RAISE:
+			return clampi(current_height + 1, 0, 2)
+		MODE_LOWER:
+			return clampi(current_height - 1, 0, 2)
+		MODE_SET_1:
+			return 1
+		MODE_SET_2:
+			return 2
+	return 0

@@ -2,12 +2,20 @@ class_name TacticalInputController
 extends Node
 
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
+const TACTICAL_CARD_SCRIPT: GDScript = preload("res://scripts/ui/components/tactical_card.gd")
+const STATUS_BADGE_SCRIPT: GDScript = preload("res://scripts/ui/components/status_badge.gd")
+const COMMAND_BUTTON_SCRIPT: GDScript = preload("res://scripts/ui/components/command_button.gd")
+const PROGRESS_LINE_SCRIPT: GDScript = preload("res://scripts/ui/components/progress_line.gd")
 const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_labels.gd")
 const NPC_COMPACT_CARD_SCENE: PackedScene = preload("res://scenes/meta/components/npc_compact_card.tscn")
 const TRANSPORT_CRAFT_CARD_UI_SCRIPT: GDScript = preload("res://scripts/meta/transport_craft_card_ui.gd")
 const META_UNIT_PROFILE_BUILDER_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile_builder.gd")
 const CHARACTER_SHEET_FORMATTER_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_formatter.gd")
 const CHARACTER_SHEET_VIEW_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_view.gd")
+const MISSION_PRIMARY_VIEW_BRIDGE_SCRIPT: GDScript = preload("res://scripts/mission/mission_primary_view_bridge.gd")
+const MISSION_DROPSHIP_EFFECT_ADAPTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_dropship_effect_adapter.gd")
+const MISSION_COMMAND_INPUT_GUARD_SCRIPT: GDScript = preload("res://scripts/mission/mission_command_input_guard.gd")
+const FIRETEAM_SELECTION_ADAPTER_SCRIPT: GDScript = preload("res://scripts/tactical/ui/fireteam_selection_adapter.gd")
 const COMMANDER_COMMAND_SCRIPT: GDScript = preload("res://scripts/command/commander_command.gd")
 const FIRETEAM_ORDER_PLAN_SCRIPT: GDScript = preload("res://scripts/command/fireteam_order_plan.gd")
 const FIRETEAM_WAYPOINT_SCRIPT: GDScript = preload("res://scripts/command/fireteam_waypoint.gd")
@@ -149,6 +157,10 @@ signal planning_state_changed(planning_state)
 
 var preview_mode: bool = false
 var _tactical_ui_visible: bool = true
+var _primary_view_bridge = MISSION_PRIMARY_VIEW_BRIDGE_SCRIPT.new()
+var _dropship_effect_adapter = MISSION_DROPSHIP_EFFECT_ADAPTER_SCRIPT.new()
+var _command_input_guard = MISSION_COMMAND_INPUT_GUARD_SCRIPT.new()
+var _selection_adapter = FIRETEAM_SELECTION_ADAPTER_SCRIPT.new()
 
 var _current_fireteam_index: int = 0
 var _current_phase_index: int = 1
@@ -1621,13 +1633,13 @@ func _ensure_fireteam_status_panel() -> Control:
 	var fireteam_info_vbox := get_node_or_null(FIRETEAM_INFO_VBOX_PATH) as VBoxContainer
 	if fireteam_info_vbox == null:
 		return null
-	var panel := PanelContainer.new()
+	var panel := TACTICAL_CARD_SCRIPT.new() as PanelContainer
 	panel.name = "FireteamStatusPanel"
-	META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "frame")
 	fireteam_info_vbox.add_child(panel)
 	fireteam_info_vbox.move_child(panel, 1)
 
 	var margin := MarginContainer.new()
+	margin.name = "MarginContainer"
 	margin.add_theme_constant_override("margin_left", 8)
 	margin.add_theme_constant_override("margin_top", 6)
 	margin.add_theme_constant_override("margin_right", 8)
@@ -1635,8 +1647,13 @@ func _ensure_fireteam_status_panel() -> Control:
 	panel.add_child(margin)
 
 	var row := HBoxContainer.new()
+	row.name = "HBoxContainer"
 	row.add_theme_constant_override("separation", 8)
 	margin.add_child(row)
+
+	var status_badge := STATUS_BADGE_SCRIPT.new() as Label
+	status_badge.name = "SelectionStateBadge"
+	row.add_child(status_badge)
 
 	var status_label := Label.new()
 	status_label.name = "SuppressionLabel"
@@ -1644,12 +1661,15 @@ func _ensure_fireteam_status_panel() -> Control:
 	META_UI_SKIN_SCRIPT.style_body_label(status_label, 11)
 	row.add_child(status_label)
 
-	var return_button := Button.new()
+	var suppression_progress := PROGRESS_LINE_SCRIPT.new() as Control
+	suppression_progress.name = "SuppressionProgressLine"
+	suppression_progress.custom_minimum_size = Vector2(92.0, 22.0)
+	row.add_child(suppression_progress)
+
+	var return_button := COMMAND_BUTTON_SCRIPT.new() as Button
 	return_button.name = "ReturnToPlanButton"
-	return_button.text = "Return to Plan"
 	return_button.custom_minimum_size = Vector2(94.0, 22.0)
-	return_button.add_theme_font_size_override("font_size", 8)
-	META_UI_SKIN_SCRIPT.style_tactical_button(return_button, false)
+	return_button.call("configure", "Return to Plan", "return_to_plan", "Fuehrt das ausgewaehlte Fireteam zurueck in den geplanten Ablauf.", "command")
 	if not return_button.pressed.is_connected(_on_return_to_plan_button_pressed):
 		return_button.pressed.connect(_on_return_to_plan_button_pressed)
 	row.add_child(return_button)
@@ -1835,7 +1855,9 @@ func _refresh_fireteam_status_panel() -> void:
 	if panel == null:
 		return
 	_refresh_tactical_stance_panel()
+	var selection_badge := panel.get_node_or_null("MarginContainer/HBoxContainer/SelectionStateBadge") as Node
 	var suppression_label := panel.get_node_or_null("MarginContainer/HBoxContainer/SuppressionLabel") as Label
+	var suppression_progress := panel.get_node_or_null("MarginContainer/HBoxContainer/SuppressionProgressLine") as Node
 	var return_button := panel.get_node_or_null("MarginContainer/HBoxContainer/ReturnToPlanButton") as Button
 	var selected_fireteam_id: String = _get_selected_fireteam_id()
 	if selected_fireteam_id.is_empty() and not _selected_fireteam_ids.is_empty():
@@ -1850,6 +1872,25 @@ func _refresh_fireteam_status_panel() -> void:
 	var ad_hoc_type: String = ""
 	if _ad_hoc_order_controller != null:
 		ad_hoc_type = String(Dictionary(_ad_hoc_order_controller.call("get_active_order", selected_fireteam_id)).get("order_type", "")).strip_edges()
+	var badge_text: String = "NO SEL"
+	var badge_status_key: String = "neutral"
+	if not selected_fireteam_id.is_empty():
+		if suppression_threshold > 0.0 and suppression_value >= suppression_threshold:
+			badge_text = "PINNED"
+			badge_status_key = "danger"
+		elif not ad_hoc_type.is_empty():
+			badge_text = "AD HOC"
+			badge_status_key = "warning"
+		elif suppression_value > 0.0:
+			badge_text = "CONTACT"
+			badge_status_key = "warning"
+		else:
+			badge_text = "READY"
+			badge_status_key = "success"
+	if selection_badge != null and selection_badge.has_method("set_badge"):
+		selection_badge.call("set_badge", badge_text, badge_status_key)
+	if suppression_progress != null and suppression_progress.has_method("set_progress"):
+		suppression_progress.call("set_progress", "SUPP", suppression_value, maxf(suppression_threshold, 1.0), badge_status_key)
 	var stance_text: String = _build_selected_tactical_stance_text()
 	var execution_text: String = _build_selected_execution_quality_text()
 	var movement_text: String = _format_movement_state_text(get_fireteam_movement_state(selected_fireteam_id))
@@ -1858,8 +1899,10 @@ func _refresh_fireteam_status_panel() -> void:
 	if suppression_label != null:
 		var ad_hoc_text: String = " | AD-HOC %s" % ad_hoc_type.to_upper() if not ad_hoc_type.is_empty() else ""
 		suppression_label.text = "%s | STANCE %s | EXEC %s | MOVE %s | SEC %s | FLK %s | SUPP %.2f/%.2f%s" % [lead_name, stance_text, execution_text, movement_text, security_text, flank_text, suppression_value, suppression_threshold, ad_hoc_text]
+	var can_return_to_plan: bool = selected_fireteam_id.is_empty() == false and (_has_pending_plan_for_fireteam(selected_fireteam_id) or (_ad_hoc_order_controller != null and bool(_ad_hoc_order_controller.call("has_active_order", selected_fireteam_id))))
 	if return_button != null:
-		return_button.disabled = selected_fireteam_id.is_empty() or not (_has_pending_plan_for_fireteam(selected_fireteam_id) or (_ad_hoc_order_controller != null and bool(_ad_hoc_order_controller.call("has_active_order", selected_fireteam_id))))
+		return_button.call("configure", "Return to Plan", "return_to_plan", "Fuehrt das ausgewaehlte Fireteam zurueck in den geplanten Ablauf.", "command" if can_return_to_plan else "neutral")
+		return_button.disabled = not can_return_to_plan
 
 
 func _has_pending_plan_for_fireteam(fireteam_id: String) -> bool:
@@ -3316,22 +3359,11 @@ func _format_world_position(world_position: Vector2) -> String:
 
 
 func _screen_to_world_position(screen_position: Vector2) -> Vector2:
-	var primary_3d_view = _get_primary_3d_view()
-	if primary_3d_view != null and primary_3d_view.has_method("screen_to_world_position"):
-		var world_position = primary_3d_view.call("screen_to_world_position", screen_position)
-		if typeof(world_position) == TYPE_VECTOR2:
-			return Vector2(world_position)
-	var canvas_transform: Transform2D = get_viewport().get_canvas_transform()
-	return canvas_transform.affine_inverse() * screen_position
+	return Vector2(_primary_view_bridge.call("screen_to_world_position", get_parent(), get_viewport(), screen_position))
 
 
 func _snap_world_position_to_primary_tile(world_position: Vector2) -> Vector2:
-	var primary_3d_view = _get_primary_3d_view()
-	if primary_3d_view != null and primary_3d_view.has_method("snap_world_position_to_tile_center"):
-		var snapped_position = primary_3d_view.call("snap_world_position_to_tile_center", world_position)
-		if typeof(snapped_position) == TYPE_VECTOR2:
-			return Vector2(snapped_position)
-	return world_position
+	return Vector2(_primary_view_bridge.call("snap_world_position_to_tile_center", get_parent(), world_position))
 
 
 func _clamp_world_position_to_viewport(world_position: Vector2) -> Vector2:
@@ -3359,10 +3391,7 @@ func _clamp_world_position_to_viewport(world_position: Vector2) -> Vector2:
 
 
 func _get_primary_3d_view():
-	var mission_root := get_parent()
-	if mission_root == null:
-		return null
-	return mission_root.get_node_or_null("Primary3DView")
+	return _primary_view_bridge.call("get_primary_view", get_parent())
 
 
 func _snap_target_to_objective() -> void:
@@ -3413,14 +3442,27 @@ func _refresh_button_state() -> void:
 
 
 func _refresh_world_overlays() -> void:
+	var primary_has_live_drop_state: bool = not _mission_drop_state.is_empty()
+	var primary_has_live_drop_sequence: bool = not _drop_sequence_phase.is_empty()
+	var dropship_visible: bool = primary_has_live_drop_state or primary_has_live_drop_sequence
+	var dropship_position: Vector2 = _drop_sequence_position if primary_has_live_drop_sequence else _get_drop_staging_position()
+	_publish_dropship_snapshot_context(
+		{
+			"visible": dropship_visible,
+			"state": _drop_sequence_phase if primary_has_live_drop_sequence else _mission_drop_state,
+			"has_lz": _has_lz_position,
+			"lz_position": _lz_position,
+			"position": dropship_position,
+			"target_position": _get_primary_dropship_target_position(dropship_position),
+			"progress": _build_mission_dropship_progress_value(),
+		}
+	)
+
 	var primary_3d_view = _get_primary_3d_view()
-	if primary_3d_view != null and primary_3d_view.has_method("set_mission_drop_visual_state"):
-		var primary_has_live_drop_state: bool = not _mission_drop_state.is_empty()
-		var primary_has_live_drop_sequence: bool = not _drop_sequence_phase.is_empty()
-		var dropship_visible: bool = primary_has_live_drop_state or primary_has_live_drop_sequence
-		var dropship_position: Vector2 = _drop_sequence_position if primary_has_live_drop_sequence else _get_drop_staging_position()
-		primary_3d_view.call(
-			"set_mission_drop_visual_state",
+	if primary_3d_view != null:
+		if _primary_view_bridge.call(
+			"sync_mission_drop_visual_state",
+			get_parent(),
 			{
 				"has_lz_position": _has_lz_position,
 				"lz_position": _lz_position,
@@ -3429,13 +3471,9 @@ func _refresh_world_overlays() -> void:
 				"dropship_target_position": _get_primary_dropship_target_position(dropship_position),
 				"dropship_texture": _get_mission_dropship_texture(),
 			}
-		)
-		for legacy_path in ["../LZMarker", "../DropshipPlanMarker"]:
-			var legacy_node := get_node_or_null(legacy_path)
-			if legacy_node is CanvasItem:
-				(legacy_node as CanvasItem).visible = false
-		_refresh_meta_transfer_route_overlay()
-		return
+		):
+			_refresh_meta_transfer_route_overlay()
+			return
 
 	var lz_marker := get_node_or_null("../LZMarker") as Node2D
 	if lz_marker != null:
@@ -3470,9 +3508,15 @@ func _refresh_world_overlays() -> void:
 	_refresh_meta_transfer_route_overlay()
 
 
+func _publish_dropship_snapshot_context(dropship_context: Dictionary) -> void:
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	if simulation_root == null or not simulation_root.has_method("set_multiplayer_snapshot_context"):
+		return
+	simulation_root.call("set_multiplayer_snapshot_context", {"dropship": dropship_context})
+
+
 func _sync_primary_3d_mission_status_visuals() -> void:
-	var primary_3d_view = _get_primary_3d_view()
-	if primary_3d_view == null or not primary_3d_view.has_method("set_mission_status_payload"):
+	if _get_primary_3d_view() == null:
 		return
 	var payload: Dictionary = {}
 	var combat_driver := get_node_or_null("../CombatLoopDriver")
@@ -3490,20 +3534,11 @@ func _sync_primary_3d_mission_status_visuals() -> void:
 			payload["objective_contested"] = bool(objective_status.call("is_contested"))
 	if payload.is_empty():
 		return
-	primary_3d_view.call("set_mission_status_payload", payload)
+	_primary_view_bridge.call("sync_mission_status_payload", get_parent(), payload)
 
 
 func _suppress_legacy_2d_readability_overlays() -> void:
-	if _get_primary_3d_view() == null:
-		return
-	for bridge_path in ["../CombatLoopDriver", "../ObjectiveStatusView", "../EnemyWaveController"]:
-		var bridge_node := get_node_or_null(bridge_path)
-		if bridge_node != null and bridge_node.has_method("set_overlay_visible"):
-			bridge_node.call("set_overlay_visible", false)
-	for legacy_path in ["../StatusLabel", "../CombatContactLine", "../CombatEventLabel", "../CombatWinnerLabel", "../WaveStatusLabel"]:
-		var legacy_node := get_node_or_null(legacy_path)
-		if legacy_node is CanvasItem:
-			(legacy_node as CanvasItem).visible = false
+	_primary_view_bridge.call("suppress_legacy_readability_overlays", get_parent())
 
 
 func _ensure_meta_transfer_route_overlay() -> Node2D:
@@ -3891,24 +3926,11 @@ func _apply_hud_skin() -> void:
 
 
 func _can_issue_local_commands() -> bool:
-	var simulation_root = get_node_or_null("../SimulationRoot")
-	if simulation_root == null:
-		return true
-
-	if not bool(simulation_root.get("is_server_authoritative")):
-		return true
-
-	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
-	if peer == null or peer.get_connection_status() == MultiplayerPeer.CONNECTION_DISCONNECTED:
-		return true
-
-	return multiplayer.is_server()
+	return bool(_command_input_guard.call("can_issue_local_commands", get_node_or_null("../SimulationRoot"), multiplayer))
 
 
 func _can_edit_planning() -> bool:
-	if preview_mode:
-		return true
-	return _can_issue_local_commands()
+	return bool(_command_input_guard.call("can_edit_planning", preview_mode, get_node_or_null("../SimulationRoot"), multiplayer))
 
 
 func _emit_planning_state_changed() -> void:
@@ -4024,40 +4046,23 @@ func _apply_unit_click_selection(unit: Node, ctrl_pressed: bool) -> void:
 	var fireteam_id: String = String(unit.call("get_fireteam_id")).strip_edges().to_lower()
 	if fireteam_id.is_empty():
 		return
-
-	var next_selected_fireteam_ids: PackedStringArray = _selected_fireteam_ids.duplicate()
-	if ctrl_pressed:
-		if not next_selected_fireteam_ids.has(fireteam_id):
-			next_selected_fireteam_ids.append(fireteam_id)
-	else:
-		next_selected_fireteam_ids = PackedStringArray([fireteam_id])
-
-	_set_selected_fireteams(next_selected_fireteam_ids)
+	_set_selected_fireteams(PackedStringArray(_selection_adapter.call("build_unit_click_selection", _selected_fireteam_ids, fireteam_id, ctrl_pressed)))
 
 
 func _apply_lasso_selection(selection_rect: Rect2, ctrl_pressed: bool) -> void:
 	var lasso_fireteam_ids: PackedStringArray = []
-	var primary_3d_view = _get_primary_3d_view()
 	for fireteam_id in _get_available_fireteam_ids():
 		var unit: Node2D = _get_selection_anchor_for_fireteam(fireteam_id)
 		if unit == null:
 			continue
-		var screen_pos: Vector2 = primary_3d_view.call("world_to_screen_position", (unit as Node2D).global_position) if primary_3d_view != null and primary_3d_view.has_method("world_to_screen_position") else get_viewport().get_canvas_transform() * (unit as Node2D).global_position
+		var screen_pos: Vector2 = Vector2(_primary_view_bridge.call("world_to_screen_position", get_parent(), get_viewport(), (unit as Node2D).global_position))
 		if not selection_rect.has_point(screen_pos):
 			continue
 		if lasso_fireteam_ids.has(fireteam_id):
 			continue
 		lasso_fireteam_ids.append(fireteam_id)
 
-	if ctrl_pressed:
-		var merged_fireteam_ids: PackedStringArray = _selected_fireteam_ids.duplicate()
-		for fireteam_id in lasso_fireteam_ids:
-			if not merged_fireteam_ids.has(fireteam_id):
-				merged_fireteam_ids.append(fireteam_id)
-		_set_selected_fireteams(merged_fireteam_ids)
-		return
-
-	_set_selected_fireteams(lasso_fireteam_ids)
+	_set_selected_fireteams(PackedStringArray(_selection_adapter.call("merge_lasso_selection", _selected_fireteam_ids, lasso_fireteam_ids, ctrl_pressed)))
 
 
 func _clear_selection() -> void:
@@ -4083,11 +4088,7 @@ func _set_selected_fireteams(next_selected_fireteam_ids: PackedStringArray, shou
 
 
 func _refresh_selection_visuals() -> void:
-	for unit in _get_all_friendly_units(true):
-		if unit == null or not unit.has_method("set_tactical_selected") or not unit.has_method("get_fireteam_id"):
-			continue
-		var fireteam_id: String = String(unit.call("get_fireteam_id")).strip_edges().to_lower()
-		unit.call("set_tactical_selected", _selected_fireteam_ids.has(fireteam_id))
+	_selection_adapter.call("apply_unit_selection", _get_all_friendly_units(true), _selected_fireteam_ids)
 
 
 func _sync_unit_tactical_stance_badges() -> void:
@@ -4844,8 +4845,8 @@ func _refresh_order_visuals() -> void:
 		_sync_primary_3d_order_visuals()
 		refresh_contact_overlay()
 		return
-	if _get_primary_3d_view() != null and visualizer is CanvasItem:
-		(visualizer as CanvasItem).visible = false
+	if visualizer is CanvasItem:
+		_primary_view_bridge.call("hide_canvas_item_when_primary", get_parent(), visualizer as CanvasItem)
 	visualizer.call("set_phase_index", _get_live_order_phase_index())
 	visualizer.call("set_selected_fireteam_ids", _selected_fireteam_ids)
 	if visualizer.has_method("set_fireteam_anchor_dicts"):
@@ -4862,22 +4863,22 @@ func _refresh_order_visuals() -> void:
 func refresh_contact_overlay() -> void:
 	var overlay := get_node_or_null("../ContactMapOverlay")
 	var primary_3d_view = _get_primary_3d_view()
-	if primary_3d_view != null and primary_3d_view.has_method("set_contact_entries"):
-		primary_3d_view.call("set_contact_entries", get_contact_snapshot(), _selected_fireteam_ids)
+	if primary_3d_view != null:
+		_primary_view_bridge.call("sync_contact_entries", get_parent(), get_contact_snapshot(), _selected_fireteam_ids)
 	if overlay == null:
 		return
-	if primary_3d_view != null and overlay is CanvasItem:
-		(overlay as CanvasItem).visible = false
+	if overlay is CanvasItem:
+		_primary_view_bridge.call("hide_canvas_item_when_primary", get_parent(), overlay as CanvasItem)
 	overlay.call("set_selected_fireteam_ids", _selected_fireteam_ids)
 	overlay.call("set_contact_entries", get_contact_snapshot())
 
 
 func _sync_primary_3d_order_visuals() -> void:
-	var primary_3d_view = _get_primary_3d_view()
-	if primary_3d_view == null or not primary_3d_view.has_method("set_order_visual_payload"):
+	if _get_primary_3d_view() == null:
 		return
-	primary_3d_view.call(
-		"set_order_visual_payload",
+	_primary_view_bridge.call(
+		"sync_order_visual_payload",
+		get_parent(),
 		{
 			"phase_index": _get_live_order_phase_index(),
 			"selected_fireteam_ids": _selected_fireteam_ids,
@@ -7721,46 +7722,14 @@ func _get_unload_offset(index: int) -> Vector2:
 
 
 func _enqueue_dropship_embark_effect(unit: Node, unit_id: String, world_position: Vector2) -> void:
-	_remember_drop_unit_for_simulation(unit, unit_id)
-	_enqueue_dropship_effect(
-		{
-			"effect_type": "dropship_embark_unit",
-			"unit_id": unit_id,
-			"position": world_position,
-			"visible": false,
-			"priority": 30,
-		}
-	)
+	_dropship_effect_adapter.call("enqueue_embark_effect", get_node_or_null("../SimulationRoot"), unit, unit_id, world_position)
 
 
 func _enqueue_dropship_presence_effect(unit: Node, unit_id: String, is_visible: bool) -> void:
-	_remember_drop_unit_for_simulation(unit, unit_id)
-	var effect_type: String = "dropship_embark_unit"
-	if is_visible:
-		effect_type = "dropship_deploy_unit"
-	_enqueue_dropship_effect(
-		{
-			"effect_type": effect_type,
-			"unit_id": unit_id,
-			"visible": is_visible,
-			"priority": 30,
-		}
-	)
+	_dropship_effect_adapter.call("enqueue_presence_effect", get_node_or_null("../SimulationRoot"), unit, unit_id, is_visible)
 
 
 func _enqueue_dropship_deploy_effect(unit: Node, unit_id: String, world_position: Vector2) -> void:
-	_remember_drop_unit_for_simulation(unit, unit_id)
-	var effect: Dictionary = {
-		"effect_type": "dropship_deploy_unit",
-		"unit_id": unit_id,
-		"position": world_position,
-		"visible": true,
-		"runtime_status": "idle",
-		"runtime_active": true,
-		"runtime_leader_path": NodePath("../RuntimeLeader"),
-		"ftl_registry_path": NodePath("../FTLRegistry"),
-		"priority": 30,
-	}
 	var team_id: String = ""
 	if unit != null and unit.has_method("get_team_id"):
 		team_id = String(unit.call("get_team_id")).strip_edges()
@@ -7768,26 +7737,8 @@ func _enqueue_dropship_deploy_effect(unit: Node, unit_id: String, world_position
 		var mission_setup = get_node_or_null("../MissionSetup")
 		if mission_setup != null:
 			team_id = String(mission_setup.get("team_id")).strip_edges()
-	if not team_id.is_empty():
-		effect["team_id"] = team_id
-	_enqueue_dropship_effect(effect)
+	_dropship_effect_adapter.call("enqueue_deploy_effect", get_node_or_null("../SimulationRoot"), unit, unit_id, world_position, team_id)
 	_enqueue_initial_loadout_effect_for_unit(unit_id)
-
-
-func _remember_drop_unit_for_simulation(unit: Node, unit_id: String) -> void:
-	var normalized_unit_id: String = unit_id.strip_edges()
-	if normalized_unit_id.is_empty() or unit == null:
-		return
-	var simulation_root = get_node_or_null("../SimulationRoot")
-	if simulation_root != null and simulation_root.has_method("register_known_unit"):
-		simulation_root.call("register_known_unit", normalized_unit_id, unit)
-
-
-func _enqueue_dropship_effect(effect: Dictionary) -> void:
-	var simulation_root = get_node_or_null("../SimulationRoot")
-	if simulation_root == null or not simulation_root.has_method("enqueue_effect"):
-		return
-	simulation_root.call("enqueue_effect", effect)
 
 
 func _flush_pending_drop_runtime_phase_starts() -> void:

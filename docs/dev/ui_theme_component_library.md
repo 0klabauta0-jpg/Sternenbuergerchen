@@ -1,0 +1,52 @@
+# UI Theme and Component Library
+
+Status: TASK_164 implementiert
+
+## Zweck
+Diese kleine UI-Basis ist eine gemeinsame Darstellungs-Schicht fuer Homebase, FOB und Mission. Sie ersetzt keine Screen-Logik und haelt keinen Gameplay-State. Komponenten bekommen fertige Daten/Snapshots von bestehenden Runtime- oder Meta-Pfaden und zeigen sie nur an.
+
+## Dateien
+- `scripts/ui/tactical_ui_theme.gd`
+  - zentrale Farben, Statusfarben, Card-/Badge-/Button-/Progress-Styles und kompakte Icon-Groessen.
+- `scripts/ui/components/status_badge.gd`
+  - kompakte Statusanzeige fuer Ready, Contact, Warning, Danger usw.
+- `scripts/ui/components/tactical_card.gd`
+  - kleiner PanelContainer-Basisstil fuer taktische UI-Karten.
+- `scripts/ui/components/unit_roster_row.gd`
+  - read-only Zeile fuer Unit-Snapshots mit Name, Rolle und Status.
+- `scripts/ui/components/command_button.gd`
+  - Button mit Command-ID als UI-Metadatum; keine Command-Ausfuehrung.
+- `scripts/ui/components/progress_line.gd`
+  - kompakte Label-plus-Progressbar-Zeile.
+- `scripts/ui/components/ui_tooltip_icon_helper.gd`
+  - Tooltip-/Icon-Helfer mit kleinem kuratiertem Asset-Manifest.
+
+## Erster Anwendungs-Slice
+Der Missions-Slice `FireteamStatusPanel` in `MissionTacticalSandboxController` nutzt jetzt:
+- `TacticalCard` als Panelbasis
+- `StatusBadge` fuer den ausgewaehlten Fireteam-Zustand
+- `ProgressLine` fuer Suppression-Fortschritt
+- `CommandButton` fuer `Return to Plan`
+
+Die bestehende lesbare `SuppressionLabel`-Zusammenfassung bleibt erhalten. Die neue UI liest nur bestehende Werte wie Suppression, Ad-hoc-Order und Plan-Rueckkehrbarkeit.
+
+## Kuratierte vorhandene Kenney-Assets
+Es wurden keine neuen Asset-Dateien importiert. Das Manifest verweist nur auf vorhandene Repo-Dateien:
+- `res://Assets/kenney_ui-pack/PNG/Grey/Default/icon_checkmark.png`
+- `res://Assets/kenney_ui-pack/PNG/Grey/Default/icon_cross.png`
+- `res://Assets/kenney_ui-pack/PNG/Grey/Default/icon_circle.png`
+- `res://Assets/kenney_ui-pack/PNG/Grey/Default/star.png`
+- `res://Assets/kenney_ui-pack/PNG/Grey/Double/arrow_basic_e_small.png`
+- `res://Assets/kenney_ui-pack-space-expansion/PNG/Grey/Default/bar_square_large.png`
+- `res://Assets/kenney_ui-pack-space-expansion/PNG/Grey/Default/button_square_header_small_rectangle_screws.png`
+- `res://Assets/kenney_cursor-pixel-pack/Tiles/tile_0000.png`
+
+## Grenzen
+- Keine neue Gameplay-Funktion.
+- Keine zweite UI-Wahrheit neben `SimulationRoot`.
+- Kein kompletter Redesign-Pass.
+- Keine Masseneinbindung lokaler Assets.
+
+## Verifier
+- `scripts/tests/task_164_ui_theme_component_verifier.gd`
+  - prueft Theme-Tokens, kuratierte Asset-Pfade, alle Komponenten und den Mission-Selected-Fireteam-Slice.

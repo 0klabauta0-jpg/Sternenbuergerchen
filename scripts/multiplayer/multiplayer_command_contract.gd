@@ -1,0 +1,308 @@
+class_name MultiplayerCommandContract
+extends RefCounted
+
+const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
+const COMMANDER_COMMAND_SCRIPT: GDScript = preload("res://scripts/command/commander_command.gd")
+const AREA_ORDER_SCRIPT: GDScript = preload("res://scripts/command/area_order.gd")
+const AD_HOC_ORDER_SCRIPT: GDScript = preload("res://scripts/command/ad_hoc_order.gd")
+
+const ROLE_HOST: String = "host"
+const ROLE_COMMANDER: String = "commander"
+const ROLE_FIRETEAM: String = "fireteam"
+const ROLE_SPECTATOR: String = "spectator"
+const ALLOWED_ROLES: PackedStringArray = [
+	ROLE_HOST,
+	ROLE_COMMANDER,
+	ROLE_FIRETEAM,
+	ROLE_SPECTATOR,
+]
+
+const CATEGORY_UNIT_COMMAND: String = "unit_command"
+const CATEGORY_COMMANDER_COMMAND: String = "commander_command"
+const CATEGORY_AREA_ORDER: String = "area_order"
+const CATEGORY_AD_HOC_ORDER: String = "ad_hoc_order"
+const CATEGORY_DROPSHIP_COMMAND: String = "dropship_command"
+
+const ALLOWED_AREA_ORDER_TYPES: PackedStringArray = [
+	"engage",
+	"defend",
+]
+const ALLOWED_DROPSHIP_COMMAND_TYPES: PackedStringArray = [
+	"set_lz",
+	"clear_lz",
+	"call_dropship",
+]
+const FORBIDDEN_STATE_KEYS: PackedStringArray = [
+	"effect_type",
+	"damage",
+	"health",
+	"vital_state",
+	"bleedout_ticks",
+	"position",
+	"global_position",
+	"objective",
+	"objective_state",
+	"capture_progress",
+	"owning_team_id",
+	"runtime_state",
+	"runtime_status",
+	"visible",
+	"has_lz_position",
+	"drop_ship_requested",
+	"mission_drop_state",
+	"mission_drop_progress",
+]
+const FORBIDDEN_LZ_SOURCES: PackedStringArray = [
+	"scenario",
+	"mission_scenario",
+	"editor",
+	"map_editor",
+]
+
+
+static func is_allowed_role(role_id: String) -> bool:
+	return ALLOWED_ROLES.has(role_id.strip_edges().to_lower())
+
+
+func validate(command_dict: Dictionary, context: Dictionary = {}) -> Dictionary:
+	if typeof(command_dict) != TYPE_DICTIONARY:
+		return _reject("command_not_dictionary")
+
+	var command: Dictionary = command_dict.duplicate(true)
+	var forbidden_key: String = _find_forbidden_state_key(command)
+	if not forbidden_key.is_empty():
+		return _reject("state_mutation_key:%s" % forbidden_key)
+
+	var category: String = _detect_category(command)
+	if category.is_empty():
+		return _reject("command_not_whitelisted")
+
+	var validation: Dictionary = _validate_category_payload(category, command)
+	if not bool(validation.get("accepted", false)):
+		return validation
+
+	var ownership: Dictionary = Dictionary(validation.get("ownership", {}))
+	var rights_validation: Dictionary = _validate_peer_rights(ownership, context)
+	if not bool(rights_validation.get("accepted", false)):
+		return rights_validation
+
+	return {
+		"accepted": true,
+		"reason": "",
+		"category": category,
+		"command_type": String(validation.get("command_type", "")),
+		"team_id": String(ownership.get("team_id", "")),
+		"unit_id": String(ownership.get("unit_id", "")),
+		"fireteam_id": String(ownership.get("fireteam_id", "")),
+		"command": command,
+	}
+
+
+func _validate_category_payload(category: String, command: Dictionary) -> Dictionary:
+	match category:
+		CATEGORY_UNIT_COMMAND:
+			return _validate_unit_command(command)
+		CATEGORY_COMMANDER_COMMAND:
+			return _validate_commander_command(command)
+		CATEGORY_AREA_ORDER:
+			return _validate_area_order(command)
+		CATEGORY_AD_HOC_ORDER:
+			return _validate_ad_hoc_order(command)
+		CATEGORY_DROPSHIP_COMMAND:
+			return _validate_dropship_command(command)
+		_:
+			return _reject("command_not_whitelisted")
+
+
+func _validate_unit_command(command: Dictionary) -> Dictionary:
+	var unit_command = UNIT_COMMAND_SCRIPT.call("from_dict", command)
+	if unit_command == null or not unit_command.has_method("is_valid") or not bool(unit_command.call("is_valid")):
+		return _reject("invalid_unit_command")
+
+	var command_type: String = String(command.get("command_type", "")).strip_edges().to_lower()
+	var unit_id: String = String(command.get("unit_id", "")).strip_edges()
+	var team_id: String = String(command.get("team_id", "")).strip_edges()
+	if unit_id.is_empty() or team_id.is_empty():
+		return _reject("unit_command_missing_unit_or_team")
+	if command_type == UNIT_COMMAND_SCRIPT.TYPE_MOVE_TO_POSITION and not _has_vector2_or_vector3(command, "target_position"):
+		return _reject("move_command_missing_target")
+	if command_type == UNIT_COMMAND_SCRIPT.TYPE_ENGAGE_AREA and not (_has_vector2_or_vector3(command, "target_position") or not String(command.get("target_area_id", "")).strip_edges().is_empty()):
+		return _reject("engage_area_missing_target")
+
+	return _accept_payload(command_type, unit_id, team_id, String(command.get("fireteam_id", "")).strip_edges().to_lower())
+
+
+func _validate_commander_command(command: Dictionary) -> Dictionary:
+	var commander_command = COMMANDER_COMMAND_SCRIPT.call("from_dict", command)
+	if commander_command == null or not commander_command.has_method("is_valid") or not bool(commander_command.call("is_valid")):
+		return _reject("invalid_commander_command")
+
+	var command_type: String = _extract_command_type(command)
+	var unit_id: String = String(command.get("unit_id", "")).strip_edges()
+	var team_id: String = String(command.get("team_id", "")).strip_edges()
+	if unit_id.is_empty() or team_id.is_empty():
+		return _reject("commander_command_missing_unit_or_team")
+	if command_type != COMMANDER_COMMAND_SCRIPT.TYPE_ENGAGE and not _has_vector2_or_vector3(command, "target_position"):
+		return _reject("commander_command_missing_target")
+
+	return _accept_payload(command_type, unit_id, team_id, String(command.get("fireteam_id", "")).strip_edges().to_lower())
+
+
+func _validate_area_order(command: Dictionary) -> Dictionary:
+	var area_order = AREA_ORDER_SCRIPT.call("from_dict", command)
+	if area_order == null or not area_order.has_method("is_valid") or not bool(area_order.call("is_valid")):
+		return _reject("invalid_area_order")
+
+	var command_type: String = String(command.get("command_type", "")).strip_edges().to_lower()
+	if not ALLOWED_AREA_ORDER_TYPES.has(command_type):
+		return _reject("area_order_not_whitelisted")
+
+	return _accept_payload(
+		command_type,
+		String(command.get("unit_id", "")).strip_edges(),
+		String(command.get("team_id", "")).strip_edges(),
+		String(command.get("fireteam_id", "")).strip_edges().to_lower()
+	)
+
+
+func _validate_ad_hoc_order(command: Dictionary) -> Dictionary:
+	var ad_hoc_order = AD_HOC_ORDER_SCRIPT.call("from_dict", command)
+	if ad_hoc_order == null or not ad_hoc_order.has_method("is_valid") or not bool(ad_hoc_order.call("is_valid")):
+		return _reject("invalid_ad_hoc_order")
+
+	return _accept_payload(
+		String(command.get("order_type", "")).strip_edges().to_lower(),
+		String(command.get("unit_id", "")).strip_edges(),
+		String(command.get("team_id", "")).strip_edges(),
+		String(command.get("fireteam_id", "")).strip_edges().to_lower()
+	)
+
+
+func _validate_dropship_command(command: Dictionary) -> Dictionary:
+	var command_type: String = _extract_command_type(command)
+	if not ALLOWED_DROPSHIP_COMMAND_TYPES.has(command_type):
+		return _reject("dropship_command_not_whitelisted")
+	if _has_forbidden_lz_source(command):
+		return _reject("lz_from_forbidden_source")
+
+	var team_id: String = String(command.get("team_id", "")).strip_edges()
+	if team_id.is_empty():
+		return _reject("dropship_command_missing_team")
+	if command_type == "set_lz" and not (_has_vector2_or_vector3(command, "target_position") or _has_vector2_or_vector3(command, "lz_position")):
+		return _reject("set_lz_missing_position")
+
+	return _accept_payload(command_type, String(command.get("unit_id", "")).strip_edges(), team_id, String(command.get("fireteam_id", "")).strip_edges().to_lower())
+
+
+func _validate_peer_rights(ownership: Dictionary, context: Dictionary) -> Dictionary:
+	var role_id: String = String(context.get("peer_role", ROLE_COMMANDER)).strip_edges().to_lower()
+	if role_id.is_empty():
+		role_id = ROLE_COMMANDER
+	if not is_allowed_role(role_id):
+		return _reject("peer_role_not_allowed")
+	if role_id == ROLE_SPECTATOR:
+		return _reject("spectator_cannot_command")
+	if role_id == ROLE_HOST:
+		return {"accepted": true}
+
+	var peer_team_id: String = String(context.get("peer_team_id", "")).strip_edges()
+	var command_team_id: String = String(ownership.get("team_id", "")).strip_edges()
+	var unit_team_id: String = String(context.get("unit_team_id", "")).strip_edges()
+	if peer_team_id.is_empty():
+		return _reject("peer_has_no_team")
+	if not command_team_id.is_empty() and command_team_id != peer_team_id:
+		return _reject("peer_team_mismatch")
+	if not unit_team_id.is_empty() and unit_team_id != peer_team_id:
+		return _reject("unit_team_mismatch")
+	if role_id == ROLE_COMMANDER:
+		return {"accepted": true}
+
+	var peer_fireteam_ids: PackedStringArray = _normalize_string_array(context.get("peer_fireteam_ids", PackedStringArray()))
+	var command_fireteam_id: String = String(ownership.get("fireteam_id", "")).strip_edges().to_lower()
+	var unit_fireteam_id: String = String(context.get("unit_fireteam_id", "")).strip_edges().to_lower()
+	var resolved_fireteam_id: String = command_fireteam_id if not command_fireteam_id.is_empty() else unit_fireteam_id
+	if role_id == ROLE_FIRETEAM:
+		if resolved_fireteam_id.is_empty():
+			return _reject("fireteam_role_missing_fireteam")
+		if not peer_fireteam_ids.has(resolved_fireteam_id):
+			return _reject("fireteam_not_assigned_to_peer")
+		return {"accepted": true}
+
+	return _reject("peer_role_not_allowed")
+
+
+func _detect_category(command: Dictionary) -> String:
+	var explicit_category: String = String(command.get("contract_category", command.get("payload_kind", ""))).strip_edges().to_lower()
+	if explicit_category in [CATEGORY_UNIT_COMMAND, CATEGORY_COMMANDER_COMMAND, CATEGORY_AREA_ORDER, CATEGORY_AD_HOC_ORDER, CATEGORY_DROPSHIP_COMMAND]:
+		return explicit_category
+	if command.has("area_order_id") or command.has("world_polygon") or command.has("tile_positions"):
+		return CATEGORY_AREA_ORDER
+	if command.has("order_type"):
+		return CATEGORY_AD_HOC_ORDER
+
+	var command_type: String = _extract_command_type(command)
+	if UNIT_COMMAND_SCRIPT.ALLOWED_COMMAND_TYPES.has(command_type):
+		return CATEGORY_UNIT_COMMAND
+	if COMMANDER_COMMAND_SCRIPT.ALLOWED_COMMAND_TYPES.has(command_type):
+		return CATEGORY_COMMANDER_COMMAND
+	if ALLOWED_DROPSHIP_COMMAND_TYPES.has(command_type):
+		return CATEGORY_DROPSHIP_COMMAND
+	return ""
+
+
+func _extract_command_type(command: Dictionary) -> String:
+	if command.has("command_type"):
+		return String(command.get("command_type", "")).strip_edges().to_lower()
+	if command.has("type"):
+		return String(command.get("type", "")).strip_edges().to_lower()
+	return ""
+
+
+func _find_forbidden_state_key(command: Dictionary) -> String:
+	for key_variant in command.keys():
+		var key: String = String(key_variant).strip_edges()
+		if key == "target_position" or key == "lz_position":
+			continue
+		if FORBIDDEN_STATE_KEYS.has(key):
+			return key
+	return ""
+
+
+func _has_forbidden_lz_source(command: Dictionary) -> bool:
+	var source_context: String = String(command.get("source_context", command.get("source", ""))).strip_edges().to_lower()
+	return FORBIDDEN_LZ_SOURCES.has(source_context)
+
+
+func _has_vector2_or_vector3(command: Dictionary, key: String) -> bool:
+	var value: Variant = command.get(key, null)
+	var value_type: int = typeof(value)
+	return value_type == TYPE_VECTOR2 or value_type == TYPE_VECTOR3
+
+
+func _accept_payload(command_type: String, unit_id: String, team_id: String, fireteam_id: String) -> Dictionary:
+	return {
+		"accepted": true,
+		"command_type": command_type,
+		"ownership": {
+			"unit_id": unit_id,
+			"team_id": team_id,
+			"fireteam_id": fireteam_id,
+		},
+	}
+
+
+func _reject(reason: String) -> Dictionary:
+	return {
+		"accepted": false,
+		"reason": reason,
+	}
+
+
+func _normalize_string_array(value: Variant) -> PackedStringArray:
+	var result: PackedStringArray = PackedStringArray()
+	for item_variant in Array(value):
+		var normalized: String = String(item_variant).strip_edges().to_lower()
+		if normalized.is_empty() or result.has(normalized):
+			continue
+		result.append(normalized)
+	return result
