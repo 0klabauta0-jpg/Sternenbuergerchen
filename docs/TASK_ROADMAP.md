@@ -315,6 +315,12 @@ TASK_168 - Multiplayer Snapshot Replication Contract (implementiert)
 TASK_169 - Multiplayer Two-Client Playability Smoke (implementiert)
 TASK_170 - Performance and Warning Budget Gate (implementiert)
 
+Phase 18E - NPC Visual Replacement
+TASK_171 - NPC Model Replacement Animated Characters (implementiert)
+TASK_172 - NPC Animation Scale Helmets and Enemy Visuals (implementiert)
+TASK_173 - NPC Animation Skeleton Socket Contract (implementiert)
+TASK_174 - Character Helmet and Blaster Attachment Visuals (implementiert)
+
 Batch-Empfehlung
 
 Codex soll Tasks in kleinen Gruppen bearbeiten:

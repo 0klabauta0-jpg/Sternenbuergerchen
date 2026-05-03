@@ -1,0 +1,132 @@
+{
+	"source": {
+		"bundle": "Animated Characters Bundle 4.0",
+		"local_path": "C:/Users/bjoer/Pictures/Sternenbuerger/Animated Characters Bundle",
+		"license": "CC0",
+		"imported_for": "TASK_171_TASK_172_TASK_173_TASK_174",
+		"preferred_use": "2.5D runtime unit visual proxies only"
+	},
+	"defaults": {
+		"scale": 0.22,
+		"rotation_degrees_y": 0.0,
+		"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-a.glb",
+		"animation_paths": {
+			"idle": "res://Assets/used/npc/animated_characters/animations/idle.fbx",
+			"walk": "res://Assets/used/npc/animated_characters/animations/walk.fbx"
+		},
+		"helmet_attachment": {
+			"socket_name": "HeadSocket",
+			"bone_names": ["Head", "head", "mixamorig:Head", "Armature/Skeleton3D:Head"],
+			"fallback_anchor": [0.0, 1.38, 0.0],
+			"offset": [0.0, 0.0, 0.0],
+			"visual_offset": [0.0, 0.55, 0.0],
+			"rotation_degrees": [0.0, 0.0, 0.0],
+			"scale_mode": "fit_to_model",
+			"target_height_ratio": 0.11,
+			"target_width_ratio": 0.17,
+			"scale_multiplier": 1.0,
+			"max_scale": 0.010
+		},
+		"blaster_attachment": {
+			"socket_name": "RightHandSocket",
+			"fallback_anchor": [0.22, 0.84, 0.10],
+			"offset": [0.0, 0.0, 0.0],
+			"visual_offset": [0.0, 0.153, 0.050],
+			"rotation_degrees": [90.0, 90.0, 180.0],
+			"scale": 0.014,
+			"texture_path": "res://Assets/used/npc/blaster_kit/models/Textures/colormap.png"
+		},
+		"sockets": {
+			"HeadSocket": {
+				"bone_names": ["Head", "head", "mixamorig:Head", "Armature/Skeleton3D:Head"],
+				"fallback_anchor": [0.0, 1.38, 0.0],
+				"offset": [0.0, 0.0, 0.0],
+				"rotation_degrees": [0.0, 0.0, 0.0]
+			},
+			"RightHandSocket": {
+				"bone_names": ["RightHand", "right_hand", "rightHand", "mixamorig:RightHand", "Armature/Skeleton3D:RightHand"],
+				"fallback_anchor": [0.22, 0.84, 0.10],
+				"offset": [0.0, 0.0, 0.0],
+				"rotation_degrees": [0.0, 0.0, 0.0]
+			},
+			"LeftHandSocket": {
+				"bone_names": ["LeftHand", "left_hand", "leftHand", "mixamorig:LeftHand", "Armature/Skeleton3D:LeftHand"],
+				"fallback_anchor": [-0.22, 0.84, 0.10],
+				"offset": [0.0, 0.0, 0.0],
+				"rotation_degrees": [0.0, 0.0, 0.0]
+			},
+			"BackSocket": {
+				"bone_names": ["Spine", "spine", "Chest", "mixamorig:Spine", "Armature/Skeleton3D:Spine"],
+				"fallback_anchor": [0.0, 1.05, -0.18],
+				"offset": [0.0, 0.0, 0.0],
+				"rotation_degrees": [0.0, 0.0, 0.0]
+			}
+		}
+	},
+	"unit_visuals": {
+		"team_alpha": {
+			"visual_id": "animated_character_medium_astro_male_a",
+			"model_path": "res://Assets/used/npc/animated_characters/models/characterMedium.fbx",
+			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroMaleA.png",
+			"helmet_path": "res://Assets/used/npc/animated_characters/accessories/astroHelmet.fbx",
+			"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-a.glb",
+			"scale": 0.22,
+			"rotation_degrees_y": 0.0
+		},
+		"team_bravo": {
+			"visual_id": "enemy_animated_character_small_astro_female_a",
+			"model_path": "res://Assets/used/npc/animated_characters/models/characterSmall.fbx",
+			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroFemaleA.png",
+			"helmet_path": "res://Assets/used/npc/animated_characters/accessories/militaryHelmet.fbx",
+			"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+			"scale": 0.22,
+			"rotation_degrees_y": 0.0
+		},
+		"default": {
+			"visual_id": "animated_character_medium_astro_male_a",
+			"model_path": "res://Assets/used/npc/animated_characters/models/characterMedium.fbx",
+			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroMaleA.png",
+			"helmet_path": "res://Assets/used/npc/animated_characters/accessories/astroHelmet.fbx",
+			"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-a.glb",
+			"scale": 0.22,
+			"rotation_degrees_y": 0.0
+		}
+	},
+	"unit_ids": {
+		"enemy_delta": {
+			"visual_id": "enemy_delta_animated_character_small_military_helmet",
+			"model_path": "res://Assets/used/npc/animated_characters/models/characterSmall.fbx",
+			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroFemaleA.png",
+			"helmet_path": "res://Assets/used/npc/animated_characters/accessories/militaryHelmet.fbx",
+			"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+			"scale": 0.22,
+			"rotation_degrees_y": 0.0
+		},
+		"enemy_echo": {
+			"visual_id": "enemy_echo_animated_character_medium_military_helmet",
+			"model_path": "res://Assets/used/npc/animated_characters/models/characterMedium.fbx",
+			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroMaleA.png",
+			"helmet_path": "res://Assets/used/npc/animated_characters/accessories/militaryHelmet.fbx",
+			"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-p.glb",
+			"scale": 0.22,
+			"rotation_degrees_y": 0.0
+		}
+	},
+	"animation_paths": {
+		"idle": "res://Assets/used/npc/animated_characters/animations/idle.fbx",
+		"walk": "res://Assets/used/npc/animated_characters/animations/walk.fbx"
+	},
+	"animation_probe_paths": [
+		"res://Assets/used/npc/animated_characters/animations/idle.fbx",
+		"res://Assets/used/npc/animated_characters/animations/walk.fbx"
+	],
+	"helmet_paths": [
+		"res://Assets/used/npc/animated_characters/accessories/astroHelmet.fbx",
+		"res://Assets/used/npc/animated_characters/accessories/militaryHelmet.fbx"
+	],
+	"blaster_paths": [
+		"res://Assets/used/npc/blaster_kit/models/blaster-a.glb",
+		"res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+		"res://Assets/used/npc/blaster_kit/models/blaster-p.glb"
+	]
+}

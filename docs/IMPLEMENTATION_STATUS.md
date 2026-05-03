@@ -1104,7 +1104,7 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Stand: Neue geplante Tasks `TASK_161` bis `TASK_170` bereiten Runtime-Grenzen, Combat-Authority, Editor-Schnitt, UI-Theme, lokale Asset-Kuratierung, Multiplayer-Command-Vertrag, Session/Lobby, Snapshot-Replikation, Zwei-Client-Smoke und Warnungs-/Performance-Gates vor.
 - Offene Punkte: `TASK_161` bis `TASK_170` sind umgesetzt. Die manuellen Sichtpruefungen fuer Editor, Mission, UI und zwei lokale Multiplayer-Instanzen bleiben als Playtest-/Abnahme-Schritt offen.
 - Risiken: Der Review darf nicht als Freigabe fuer einen Grossumbau gelesen werden. Jede Empfehlung ist als kleiner Task-Slice auszufuehren und muss die bestehende SimulationRoot-/UI-Trennung respektieren.
-- Naechster Schritt: Manuelle Abnahme der dokumentierten Checks und danach Commit/Push nach ausdruecklicher Freigabe.
+- Naechster Schritt: TASK_171 ist umgesetzt; als naechstes manuellen Sichtcheck der neuen 2.5D-Unit-Modelle und danach Commit/Push nach ausdruecklicher Freigabe.
 
 ### TASK_161 - Mission Runtime Boundary Cleanup
 - Status: implementiert
@@ -1207,6 +1207,48 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Der Headless-Smoke prueft bewusst State, Vertrag und Snapshot statt fragile Zwei-Prozess-UI-Steuerung. UI-Kommandowege duerfen spaeter nicht um den Serververtrag herum schreiben.
 - Lokale Pruefung: `task_169_multiplayer_two_client_playability_smoke.gd`, `task_167_multiplayer_session_verifier.gd`, `task_166_multiplayer_authority_command_contract_verifier.gd`, `task_160_tactical_playability_verifier.gd` und `git diff --check` laufen gruen. Der TASK_166-Verifier erzeugt erwartete Reject-Warnungen fuer Negativfaelle.
 - Naechster Schritt: Manuellen Zwei-Instanzen-Test und Sichtpruefung ausfuehren; danach Commit/Push nur nach ausdruecklicher Freigabe.
+
+### TASK_171 - NPC Model Replacement Animated Characters
+- Status: implementiert
+- Stand: Das lokale `Animated Characters Bundle` wurde inventarisiert und die CC0-Lizenz dokumentiert. Ein kleines Subset liegt unter `Assets/used/npc/animated_characters/`: zwei Character-FBX, zwei Astro-Skins, Idle-/Walk-FBX als Import-Probes und die Lizenzdatei.
+- Stand: `data/npc_unit_visual_mapping.json` mappt Team Alpha und Team Bravo explizit auf die neuen Character-Modelle. `TerrainMap3DView` nutzt dieses Mapping nur im 2.5D-Visual-Pfad, zaehlt animierte Unit-Modelle und zeigt Missing-Asset-Marker bei fehlenden Modellen oder Skins.
+- Stand: `scripts/tests/task_171_npc_model_replacement_verifier.gd` prueft Import-Subset, Resource-Ladung, Live-2.5D-Unit-Proxies und dass der Visual-Refresh keine `SimulationRoot`-Commands oder -Effects enqueued.
+- Offene Punkte: Manueller Sichtcheck in Godot bleibt offen, weil Headless-Smokes Modellgroesse, Lesbarkeit und Skinwirkung nicht final beurteilen.
+- Risiken: Idle-/Walk-FBX sind nur Import-Probes. Echte Animation/Retargeting bleibt ein eigener Folge-Task, falls die Modelle visuell passen.
+- Lokale Pruefung: `task_171_npc_model_replacement_verifier.gd`, `task_159_verifier.gd`, `task_160_tactical_playability_verifier.gd`, `task_170_performance_warning_gate_verifier.gd` und `run_task_170_warning_gate.ps1` laufen gruen.
+- Naechster Schritt: Manuellen 2.5D-Sichtcheck der neuen Unit-Modelle ausfuehren und danach entscheiden, ob Animation/Retargeting als eigener Task folgt.
+
+### TASK_172 - NPC Animation Scale Helmets and Enemy Visuals
+- Status: implementiert
+- Stand: Die TASK_171-Animated-Character-Unit-Visuals sind im 2.5D-Mapping von `0.66` auf `0.22` skaliert. Die Skalierung betrifft nur den Visual-Pfad; `Node2D`-Runtime-Anker, SimulationRoot-Positionen und Gameplay-State bleiben unveraendert.
+- Stand: `TerrainMap3DView` uebernimmt `idle.fbx` und `walk.fbx` in einen rein visuellen `UnitVisualAnimationPlayer`. Stehende Proxies spielen `idle`, sichtbar bewegte Proxies wechseln auf `walk`; Animation entscheidet keine Bewegung.
+- Stand: Als kleines Accessory-Subset wurden `astroHelmet.fbx` und `militaryHelmet.fbx` importiert. Helme werden als reine Darstellung per `BoneAttachment3D` am Kopf-Bone befestigt oder, falls kein stabiler Kopf-Bone vorhanden ist, an einen dokumentierten `HeadAnchor` gehaengt. Nach Sichtcheck nutzt der Helm-Pfad `fit_to_model` plus `max_scale: 0.016`, damit der bisher noch zu grosse Helm um ca. zwei Drittel kleiner wird.
+- Stand: Gegner-IDs `enemy_delta` und `enemy_echo` haben explizite Enemy-Visual-Mappings und nutzen ebenfalls Animated-Character-Modelle mit Helm. Neue Snapshot-Zaehler melden AnimationPlayer, Animation-Errors, Helmet-Attachments, Helmet-Errors und Enemy-Animated-Modelle.
+- Offene Punkte: Manueller Godot-Sichtcheck bleibt fuer finale Helm-Offsets, Clipping, Modellgroesse und Animationswirkung offen.
+- Risiken: FBX-Retargeting kann bei weiteren Animations- oder Modellvarianten erneut Bone-/Track-Kalibrierung brauchen. Helme bleiben bewusst keine Loadout- oder Ruestungsmechanik.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_172_npc_animation_scale_helmet_enemy_verifier.gd`, `task_171_npc_model_replacement_verifier.gd`, `task_159_verifier.gd`, `task_160_tactical_playability_verifier.gd`, `task_170_performance_warning_gate_verifier.gd`, `run_task_170_warning_gate.ps1` und `git diff --check` laufen gruen.
+- Naechster Schritt: Manuellen 2.5D-Sichtcheck von friendly und enemy Units mit Idle/Walk und Helm-Sitz ausfuehren.
+
+### TASK_173 - NPC Animation Skeleton Socket Contract
+- Status: implementiert
+- Stand: Das bereits importierte Animated-Characters-Subset hat jetzt einen dokumentierten Skeleton-Vertrag fuer `characterMedium.fbx`, `characterSmall.fbx`, `idle.fbx` und `walk.fbx`. Alle vier Ressourcen nutzen die relevanten Kernbones `Hips`, `Spine`, `Head`, `LeftHand` und `RightHand`; fuer diesen Slice ist keine Retarget-Fallback-Schicht noetig.
+- Stand: `data/npc_unit_visual_mapping.json` definiert `HeadSocket`, `RightHandSocket`, `LeftHandSocket` und `BackSocket` mit expliziten Bone-Kandidaten, Offsets und Fallback-Ankern. `TerrainMap3DView` erzeugt diese Sockets im 2.5D-Visual-Pfad bevorzugt als `BoneAttachment3D`; Fallback-Anker bleiben rein diagnostisch und werden gezaehlt.
+- Stand: Der Render-Snapshot enthaelt neue Diagnosewerte fuer Skeletons, Socket-Anzahl, Socket-Fallbacks, Head-/RightHand-Sockets und Animation-Retarget-Fallbacks. Diese Werte sind read-only Visual-Diagnose und veraendern keinen Gameplay-State.
+- Offene Punkte: Helm- und Waffen-Offsets sind bewusst nicht finalisiert; TASK_174 soll Helme und Blaster auf diesen Socket-Vertrag umhaengen und visuell kalibrieren.
+- Risiken: Neue Character- oder Accessory-Assets koennen andere Bone-Namen oder lokale Achsen haben. Solche Varianten muessen das Mapping erweitern statt neue geratenen Code-Offsets einzufuehren.
+- Lokale Pruefung: `task_173_npc_animation_skeleton_socket_verifier.gd`, `task_172_npc_animation_scale_helmet_enemy_verifier.gd`, `task_171_npc_model_replacement_verifier.gd`, `task_160_tactical_playability_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_174 - Helme und Blaster als echte Socket-Attachments kalibrieren.
+
+### TASK_174 - Character Helmet and Blaster Attachment Visuals
+- Status: implementiert
+- Stand: Aus dem lokalen `Blaster Kit (2.1)` wurde ein kleines GLB-only-Subset nach `Assets/used/npc/blaster_kit/` importiert: `blaster-a.glb`, `blaster-f.glb`, `blaster-p.glb`, die gemeinsame `models/Textures/colormap.png`, eine Preview-PNG und die CC0-Lizenz. FBX-/OBJ-/MTL-Duplikate wurden nicht importiert.
+- Stand: `TerrainMap3DView` haengt Helme jetzt bevorzugt an den TASK_173-`HeadSocket` und Blaster an `RightHandSocket`. Die alte Bone-/Anchor-Logik bleibt nur als Reserve fuer fehlende Sockets. Helm- und Blaster-Offset, Rotation und Scale liegen explizit im Visual-Mapping; der Blaster-Sichtbefund wurde mit kleinerem Hand-Scale (`0.014`) und nachgezogenem Griff-Visual-Offset kalibriert. Nach weiterem Sichtbefund bleiben Helm- und Blaster-Offsets auf dem Socket-Nullpunkt, weil lokale FBX-Skeleton-Offsets sonst unter die Karte bzw. aus der Hand rutschen. Die sichtbaren Meshes werden separat kalibriert: Helm lokal weiter angehoben; sichtbare Blaster-Laufachse (`-Z`) zeigt in Idle nach unten, Magazin-/Griffseite (`+Y`) nach hinten vom NPC; Blaster werden mit expliziter `colormap.png` texturiert.
+- Stand: Die Runtime-Animationsauswahl bevorzugt namentlich passende `Idle`-/`Walk`-Clips und ignoriert importierte `0_Targeting Pose`-Clips, damit die Animated-Character-Proxies nicht in der statischen Targeting-/T-Pose bleiben.
+- Stand: Friendly/default- und enemy-Visual-Mappings enthalten eigene Blaster-Pfade. Neue Snapshot-Zaehler melden `unit_blaster_attachment_count` und `unit_blaster_error_count`; fehlende Blaster erzeugen sichtbare Missing-Asset-Marker.
+- Offene Punkte: Der Headless-Verifier prueft Socket-Eltern, Scales und Ressourcen; der finale optische Sitz von Helm und Blaster braucht weiter den manuellen Godot-Sichtcheck in der 2.5D-Kamera.
+- Risiken: GLB-Achsen und Hand-Bone-Lokalachsen koennen trotz korrekter Socket-Anbindung noch visuelle Rotation-/Offset-Politur brauchen. Das bleibt Darstellung und darf nicht in Loadout- oder Combat-State auslaufen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_174_character_helmet_blaster_attachment_verifier.gd`, `task_173_npc_animation_skeleton_socket_verifier.gd`, `task_172_npc_animation_scale_helmet_enemy_verifier.gd`, `task_160_tactical_playability_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Manueller 2.5D-Sichtcheck fuer Helm-Sitz, Blaster-Sitz und Idle-/Walk-Follow.
 
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert

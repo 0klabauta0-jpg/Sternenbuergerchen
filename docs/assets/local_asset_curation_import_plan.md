@@ -105,6 +105,34 @@ Quelle ist der lokale `Pictures\Sternen*`-Assetordner. In diesem TASK wurden kei
 | Particle Pack | lokales `kenney_particle-pack/PNG/` | `Assets/curated/kenney/particles/` | 12 PNG | LZ, Contact, Suppression und Objective-VFX als reine Darstellung. |
 | Portraits | `Assets/Char` und lokales `Char` | `Assets/curated/portraits/` | 12 zugeschnittene PNG | NPC-Karten erst nach Naming-/Metadatenpass. |
 
+### TASK_171: Animated Characters Micro-Subset
+| Quelle | Ziel | Umfang | Zweck |
+| --- | --- | ---: | --- |
+| Lokales `Animated Characters Bundle` | `Assets/used/npc/animated_characters/` | 2 FBX-Modelle, 2 PNG-Skins, 2 FBX-Animations-Probes, Lizenzdatei | Testweiser 2.5D-Unit-Visual-Ersatz ohne Gameplay-State-Aenderung. |
+
+Lizenz: `License.txt` im Bundle nennt Creative Commons Zero, CC0. Der Import bleibt bewusst klein und wird ueber `data/npc_unit_visual_mapping.json` nur als Visual-Mapping verwendet.
+
+### TASK_172: Animated Characters Scale Animation and Helmets
+| Quelle | Ziel | Umfang | Zweck |
+| --- | --- | ---: | --- |
+| Lokales `Animated Characters Bundle/Accessories` | `Assets/used/npc/animated_characters/accessories/` | 2 FBX-Helme | Rein visuelle Helm-Attachments fuer friendly und enemy 2.5D-Unit-Proxies. |
+
+TASK_172 nutzt die bereits importierten Idle-/Walk-FBX-Dateien als rein visuelle `AnimationPlayer`-Quelle, reduziert die Modellskalierung im Mapping auf `0.22` und mappt Gegner-IDs explizit. Helme bleiben Anzeige und werden nicht zu Loadout-, Ruestungs- oder Gameplay-State.
+
+### TASK_173: Animated Character Skeleton Socket Contract
+| Quelle | Ziel | Umfang | Zweck |
+| --- | --- | ---: | --- |
+| Bereits importiertes `Animated Characters Bundle` Subset | kein neuer Asset-Import | 0 | Skeleton-/Bone-Inventar, Idle-/Walk-Vertrag und stabile visuelle Sockets fuer Head/Hands. |
+
+TASK_173 importiert keine neuen Assets. Es dokumentiert den gemeinsamen Skeleton-Vertrag (`Hips`, `Spine`, `Head`, `LeftHand`, `RightHand`) und stellt `HeadSocket`, `RightHandSocket`, `LeftHandSocket` und `BackSocket` als rein visuelle Attachment-Punkte bereit, damit Helme und Waffen nicht per geratenen Offsets schweben.
+
+### TASK_174: Character Helmet and Blaster Attachment Visuals
+| Quelle | Ziel | Umfang | Zweck |
+| --- | --- | ---: | --- |
+| `C:\Users\bjoer\Pictures\Sternenbuerger\Blaster Kit\Models\GLB format` | `Assets/used/npc/blaster_kit/` | 3 GLB-Blaster, 1 gemeinsame Textur, optional 1 Preview-PNG, Lizenz | Rein visuelle Hand-Attachments fuer 2.5D friendly/enemy NPC-Proxies. |
+
+Blaster-Kit-Regel: GLB-only, kein paralleler FBX/OBJ/MTL-Import, kein Komplettimport. Die gemeinsame `colormap.png` wird mitkopiert, weil die GLBs sie referenzieren. Waffen bleiben Anzeige und werden nicht zu Combat-, Loadout- oder Balance-State.
+
 ## Erste Empfohlene Folge-Tasks
 1. `TASK_165A - Rank and Role Badge Subset`
    - Importiert max. 12 PNG aus `kenney_ranks-pack`.

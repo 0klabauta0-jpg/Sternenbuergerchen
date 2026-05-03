@@ -21,6 +21,7 @@ const LIGHT_NAME: String = "SunLight3D"
 const ENVIRONMENT_NAME: String = "WorldEnvironment"
 
 const TERRAIN_3D_MAPPING_PATH: String = "res://data/terrain_3d_asset_mapping.json"
+const NPC_UNIT_VISUAL_MAPPING_PATH: String = "res://data/npc_unit_visual_mapping.json"
 const TILE_SPACING: float = 1.0
 const TILE_THICKNESS: float = 0.035
 const HEIGHT_STEP: float = 0.25
@@ -131,6 +132,7 @@ var _environment: WorldEnvironment = null
 var _terrain_map_data = null
 var _tile_catalog = null
 var _terrain_3d_mapping: Dictionary = {}
+var _npc_unit_visual_mapping: Dictionary = {}
 var _model_scene_cache: Dictionary = {}
 var _box_mesh_cache: Dictionary = {}
 var _material_cache: Dictionary = {}
@@ -164,6 +166,21 @@ var _missing_unit_model_count: int = 0
 var _missing_dropship_model_count: int = 0
 var _unit_texture_count: int = 0
 var _unit_model_count: int = 0
+var _animated_unit_model_count: int = 0
+var _unit_visual_error_count: int = 0
+var _unit_animation_player_count: int = 0
+var _unit_animation_error_count: int = 0
+var _unit_helmet_attachment_count: int = 0
+var _unit_helmet_error_count: int = 0
+var _unit_skeleton_count: int = 0
+var _unit_socket_count: int = 0
+var _unit_socket_fallback_count: int = 0
+var _unit_head_socket_count: int = 0
+var _unit_right_hand_socket_count: int = 0
+var _unit_animation_retarget_fallback_count: int = 0
+var _unit_blaster_attachment_count: int = 0
+var _unit_blaster_error_count: int = 0
+var _enemy_animated_unit_model_count: int = 0
 var _unit_status_badge_count: int = 0
 var _dropship_texture_visible: bool = false
 var _dropship_model_visible: bool = false
@@ -430,6 +447,22 @@ func get_render_snapshot() -> Dictionary:
 		"missing_dropship_model_count": _missing_dropship_model_count,
 		"unit_texture_count": _unit_texture_count,
 		"unit_model_count": _unit_model_count,
+		"animated_unit_model_count": _animated_unit_model_count,
+		"unit_visual_error_count": _unit_visual_error_count,
+		"unit_animation_player_count": _unit_animation_player_count,
+		"unit_animation_error_count": _unit_animation_error_count,
+		"unit_helmet_attachment_count": _unit_helmet_attachment_count,
+		"unit_helmet_error_count": _unit_helmet_error_count,
+		"unit_skeleton_count": _unit_skeleton_count,
+		"unit_socket_count": _unit_socket_count,
+		"unit_socket_fallback_count": _unit_socket_fallback_count,
+		"unit_head_socket_count": _unit_head_socket_count,
+		"unit_right_hand_socket_count": _unit_right_hand_socket_count,
+		"unit_animation_retarget_fallback_count": _unit_animation_retarget_fallback_count,
+		"unit_blaster_attachment_count": _unit_blaster_attachment_count,
+		"unit_blaster_error_count": _unit_blaster_error_count,
+		"enemy_animated_unit_model_count": _enemy_animated_unit_model_count,
+		"unit_visual_mapping_loaded": not _get_npc_unit_visual_mapping().is_empty(),
 		"unit_status_badge_count": _unit_status_badge_count,
 		"marker_count": _marker_count,
 		"patrol_segment_count": _patrol_segment_count,
@@ -1457,6 +1490,21 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 	var seen_ids: Dictionary = {}
 	var unit_texture_count: int = 0
 	var unit_model_count: int = 0
+	var animated_unit_model_count: int = 0
+	var unit_visual_error_count: int = 0
+	var unit_animation_player_count: int = 0
+	var unit_animation_error_count: int = 0
+	var unit_helmet_attachment_count: int = 0
+	var unit_helmet_error_count: int = 0
+	var unit_skeleton_count: int = 0
+	var unit_socket_count: int = 0
+	var unit_socket_fallback_count: int = 0
+	var unit_head_socket_count: int = 0
+	var unit_right_hand_socket_count: int = 0
+	var unit_animation_retarget_fallback_count: int = 0
+	var unit_blaster_attachment_count: int = 0
+	var unit_blaster_error_count: int = 0
+	var enemy_animated_unit_model_count: int = 0
 	var unit_status_badge_count: int = 0
 	var missing_unit_model_count: int = 0
 	var changed: bool = false
@@ -1480,10 +1528,12 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 		if proxy.visible != next_visible:
 			changed = true
 		proxy.visible = next_visible
+		var unit_is_moving: bool = false
 		if unit is Node2D:
 			var unit_world_position: Vector2 = (unit as Node2D).global_position
 			var next_position: Vector3 = _world_to_3d_position(unit_world_position, 0.06)
 			var proxy_distance: float = proxy.position.distance_to(next_position)
+			unit_is_moving = proxy_distance > 0.01
 			if proxy_distance > 0.0001:
 				changed = true
 			if force_rebuild or delta <= 0.0 or proxy_distance >= UNIT_PROXY_SNAP_DISTANCE:
@@ -1503,12 +1553,41 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 				changed = true
 			proxy.rotation_degrees.y = next_rotation_y
 		proxy.set_meta("last_rotation_y", proxy.rotation_degrees.y)
+		if _update_unit_visual_animation(proxy, unit_is_moving):
+			changed = true
 		if _update_unit_status_badge(proxy, unit):
 			unit_status_badge_count += 1
 		if bool(proxy.get_meta("uses_unit_texture", false)):
 			unit_texture_count += 1
 		if bool(proxy.get_meta("uses_kenney_model", false)):
 			unit_model_count += 1
+		if bool(proxy.get_meta("uses_animated_character_model", false)):
+			animated_unit_model_count += 1
+			if _get_unit_team_id(unit) != "team_alpha":
+				enemy_animated_unit_model_count += 1
+		if bool(proxy.get_meta("unit_visual_error", false)):
+			unit_visual_error_count += 1
+		if bool(proxy.get_meta("unit_animation_player_available", false)):
+			unit_animation_player_count += 1
+		if bool(proxy.get_meta("unit_animation_error", false)):
+			unit_animation_error_count += 1
+		if bool(proxy.get_meta("unit_helmet_attachment_available", false)):
+			unit_helmet_attachment_count += 1
+		if bool(proxy.get_meta("unit_helmet_error", false)):
+			unit_helmet_error_count += 1
+		if bool(proxy.get_meta("unit_skeleton_available", false)):
+			unit_skeleton_count += 1
+		unit_socket_count += int(proxy.get_meta("unit_socket_count", 0))
+		unit_socket_fallback_count += int(proxy.get_meta("unit_socket_fallback_count", 0))
+		if bool(proxy.get_meta("unit_head_socket_available", false)):
+			unit_head_socket_count += 1
+		if bool(proxy.get_meta("unit_right_hand_socket_available", false)):
+			unit_right_hand_socket_count += 1
+		unit_animation_retarget_fallback_count += int(proxy.get_meta("unit_animation_retarget_fallback_count", 0))
+		if bool(proxy.get_meta("unit_blaster_attachment_available", false)):
+			unit_blaster_attachment_count += 1
+		if bool(proxy.get_meta("unit_blaster_error", false)):
+			unit_blaster_error_count += 1
 		if bool(proxy.get_meta("missing_unit_model", false)):
 			missing_unit_model_count += 1
 	for unit_id_variant in _unit_proxies_by_id.keys():
@@ -1526,6 +1605,51 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 	if _unit_model_count != unit_model_count:
 		changed = true
 	_unit_model_count = unit_model_count
+	if _animated_unit_model_count != animated_unit_model_count:
+		changed = true
+	_animated_unit_model_count = animated_unit_model_count
+	if _unit_visual_error_count != unit_visual_error_count:
+		changed = true
+	_unit_visual_error_count = unit_visual_error_count
+	if _unit_animation_player_count != unit_animation_player_count:
+		changed = true
+	_unit_animation_player_count = unit_animation_player_count
+	if _unit_animation_error_count != unit_animation_error_count:
+		changed = true
+	_unit_animation_error_count = unit_animation_error_count
+	if _unit_helmet_attachment_count != unit_helmet_attachment_count:
+		changed = true
+	_unit_helmet_attachment_count = unit_helmet_attachment_count
+	if _unit_helmet_error_count != unit_helmet_error_count:
+		changed = true
+	_unit_helmet_error_count = unit_helmet_error_count
+	if _unit_skeleton_count != unit_skeleton_count:
+		changed = true
+	_unit_skeleton_count = unit_skeleton_count
+	if _unit_socket_count != unit_socket_count:
+		changed = true
+	_unit_socket_count = unit_socket_count
+	if _unit_socket_fallback_count != unit_socket_fallback_count:
+		changed = true
+	_unit_socket_fallback_count = unit_socket_fallback_count
+	if _unit_head_socket_count != unit_head_socket_count:
+		changed = true
+	_unit_head_socket_count = unit_head_socket_count
+	if _unit_right_hand_socket_count != unit_right_hand_socket_count:
+		changed = true
+	_unit_right_hand_socket_count = unit_right_hand_socket_count
+	if _unit_animation_retarget_fallback_count != unit_animation_retarget_fallback_count:
+		changed = true
+	_unit_animation_retarget_fallback_count = unit_animation_retarget_fallback_count
+	if _unit_blaster_attachment_count != unit_blaster_attachment_count:
+		changed = true
+	_unit_blaster_attachment_count = unit_blaster_attachment_count
+	if _unit_blaster_error_count != unit_blaster_error_count:
+		changed = true
+	_unit_blaster_error_count = unit_blaster_error_count
+	if _enemy_animated_unit_model_count != enemy_animated_unit_model_count:
+		changed = true
+	_enemy_animated_unit_model_count = enemy_animated_unit_model_count
 	if _unit_status_badge_count != unit_status_badge_count:
 		changed = true
 	_unit_status_badge_count = unit_status_badge_count
@@ -1628,25 +1752,56 @@ func _get_world_direction_yaw(from_world_position: Vector2, to_world_position: V
 
 func _create_unit_proxy(unit: Node) -> Node3D:
 	var root := Node3D.new()
-	var model_scene := _get_asset_model_scene_by_name(_get_unit_model_name(unit))
+	var unit_visual_entry: Dictionary = _get_unit_visual_entry(unit)
+	var model_scene := _get_unit_model_scene(unit, unit_visual_entry)
 	if model_scene != null:
 		var model_instance := model_scene.instantiate() as Node3D
 		if model_instance != null:
 			_normalize_asset_model_instance(model_instance)
 			var model_root := Node3D.new()
-			model_root.name = "UnitModel_%s" % _get_unit_model_name(unit)
-			model_root.scale = Vector3.ONE * UNIT_MODEL_SCALE
+			model_root.name = "UnitModel_%s" % _get_unit_visual_name(unit, unit_visual_entry)
+			model_root.scale = Vector3.ONE * _get_unit_model_scale(unit_visual_entry)
+			model_root.rotation_degrees.y = _get_unit_model_root_rotation_y(unit_visual_entry)
+			var material_applied: bool = _apply_unit_visual_material(model_instance, unit_visual_entry)
+			if not material_applied and _unit_visual_entry_has_skin(unit_visual_entry):
+				_add_runtime_missing_asset_marker(
+					root,
+					Vector3(0.0, 0.72, 0.0),
+					"MissingAsset_unit_skin_%s" % _sanitize_node_name(_get_unit_visual_name(unit, unit_visual_entry))
+				)
+				root.set_meta("unit_visual_error", true)
 			model_root.add_child(model_instance)
+			if not unit_visual_entry.is_empty():
+				if _setup_unit_visual_animation(root, model_root, model_instance, unit_visual_entry):
+					root.set_meta("unit_animation_player_available", true)
+				else:
+					root.set_meta("unit_animation_error", true)
+					root.set_meta("unit_visual_error", true)
+				_setup_unit_visual_sockets(root, model_root, model_instance, unit_visual_entry)
+				if _attach_unit_helmet(root, model_root, model_instance, unit_visual_entry):
+					root.set_meta("unit_helmet_attachment_available", true)
+				elif _unit_visual_entry_has_helmet(unit_visual_entry):
+					root.set_meta("unit_helmet_error", true)
+					root.set_meta("unit_visual_error", true)
+				if _attach_unit_blaster(root, model_root, model_instance, unit_visual_entry):
+					root.set_meta("unit_blaster_attachment_available", true)
+				elif _unit_visual_entry_has_blaster(unit_visual_entry):
+					root.set_meta("unit_blaster_error", true)
+					root.set_meta("unit_visual_error", true)
 			root.add_child(model_root)
 			root.set_meta("uses_kenney_model", true)
+			if not unit_visual_entry.is_empty():
+				root.set_meta("uses_animated_character_model", true)
 
 	if not bool(root.get_meta("uses_kenney_model", false)) and _uses_strict_3d_asset_mapping():
 		_add_runtime_missing_asset_marker(
 			root,
 			Vector3(0.0, 0.42, 0.0),
-			"MissingAsset_unit_model_%s" % _sanitize_node_name(_get_unit_model_name(unit))
+			"MissingAsset_unit_model_%s" % _sanitize_node_name(_get_unit_visual_name(unit, unit_visual_entry))
 		)
 		root.set_meta("missing_unit_model", true)
+		if not unit_visual_entry.is_empty():
+			root.set_meta("unit_visual_error", true)
 	elif not bool(root.get_meta("uses_kenney_model", false)):
 		var unit_texture := _get_unit_visual_texture(unit)
 		if unit_texture != null:
@@ -1676,6 +1831,433 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 	base.position.y = -0.02
 	root.add_child(base)
 	return root
+
+
+func _setup_unit_visual_animation(proxy_root: Node3D, model_root: Node3D, model_instance: Node3D, unit_visual_entry: Dictionary) -> bool:
+	var animation_paths: Dictionary = _get_unit_animation_paths(unit_visual_entry)
+	if animation_paths.is_empty():
+		return true
+	var animation_player := AnimationPlayer.new()
+	animation_player.name = "UnitVisualAnimationPlayer"
+	var library := AnimationLibrary.new()
+	var expected_count: int = 0
+	var imported_count: int = 0
+	for animation_name_variant in animation_paths.keys():
+		var animation_name: String = String(animation_name_variant).strip_edges().to_lower()
+		var animation_path: String = String(animation_paths[animation_name_variant]).strip_edges()
+		if animation_name.is_empty() or animation_path.is_empty():
+			continue
+		expected_count += 1
+		var animation: Animation = _load_animation_from_scene(animation_path, animation_name)
+		if animation == null:
+			continue
+		var duplicated := animation.duplicate(true) as Animation
+		if duplicated == null:
+			continue
+		duplicated.loop_mode = Animation.LOOP_LINEAR
+		animation_player.set_meta("source_animation_%s" % animation_name, String(duplicated.get_meta("source_animation_name", "")))
+		library.add_animation(animation_name, duplicated)
+		imported_count += 1
+	if imported_count > 0:
+		animation_player.add_animation_library("", library)
+		model_root.add_child(animation_player)
+		animation_player.root_node = animation_player.get_path_to(model_instance)
+		model_root.set_meta("unit_animation_player_node", String(animation_player.name))
+		if animation_player.has_animation("idle"):
+			animation_player.play("idle")
+	if expected_count == 0 or imported_count < expected_count:
+		_add_runtime_missing_asset_marker(
+			proxy_root,
+			Vector3(0.0, 0.64, 0.0),
+			"MissingAsset_unit_animation_%s" % _sanitize_node_name(_get_unit_visual_name(null, unit_visual_entry))
+		)
+		return false
+	return true
+
+
+func _load_animation_from_scene(animation_scene_path: String, preferred_animation_name: String = "") -> Animation:
+	if not ResourceLoader.exists(animation_scene_path):
+		return null
+	var animation_scene := _get_asset_model_scene_by_path(animation_scene_path)
+	if animation_scene == null:
+		return null
+	var animation_root := animation_scene.instantiate()
+	if animation_root == null:
+		return null
+	var animation: Animation = _find_best_animation(animation_root, preferred_animation_name)
+	animation_root.free()
+	return animation
+
+
+func _find_best_animation(node: Node, preferred_animation_name: String = "") -> Animation:
+	var animation_player := node as AnimationPlayer
+	if animation_player != null:
+		var preferred_text: String = preferred_animation_name.strip_edges().to_lower()
+		if not preferred_text.is_empty():
+			for animation_name in animation_player.get_animation_list():
+				var name_text: String = String(animation_name)
+				var normalized_name: String = name_text.strip_edges().to_lower()
+				if normalized_name == "reset" or normalized_name.find("targeting pose") >= 0:
+					continue
+				if normalized_name.find(preferred_text) >= 0:
+					var preferred_animation := animation_player.get_animation(name_text)
+					if preferred_animation != null:
+						preferred_animation.set_meta("source_animation_name", name_text)
+						return preferred_animation
+		for animation_name in animation_player.get_animation_list():
+			var name_text: String = String(animation_name)
+			var normalized_name: String = name_text.strip_edges().to_lower()
+			if normalized_name.is_empty() or normalized_name == "reset" or normalized_name.find("targeting pose") >= 0:
+				continue
+			var animation := animation_player.get_animation(name_text)
+			if animation != null:
+				animation.set_meta("source_animation_name", name_text)
+				return animation
+	for child in node.get_children():
+		var child_animation: Animation = _find_best_animation(child, preferred_animation_name)
+		if child_animation != null:
+			return child_animation
+	return null
+
+
+func _update_unit_visual_animation(proxy: Node3D, is_moving: bool) -> bool:
+	var animation_player: AnimationPlayer = _find_unit_visual_animation_player(proxy)
+	if animation_player == null:
+		return false
+	var desired_animation: String = "walk" if is_moving else "idle"
+	if not animation_player.has_animation(desired_animation):
+		return false
+	if animation_player.current_animation == desired_animation and animation_player.is_playing():
+		return false
+	animation_player.play(desired_animation)
+	return true
+
+
+func _find_unit_visual_animation_player(node: Node) -> AnimationPlayer:
+	if node == null:
+		return null
+	var animation_player := node as AnimationPlayer
+	if animation_player != null and animation_player.name == "UnitVisualAnimationPlayer":
+		return animation_player
+	for child in node.get_children():
+		var found: AnimationPlayer = _find_unit_visual_animation_player(child)
+		if found != null:
+			return found
+	return null
+
+
+func _setup_unit_visual_sockets(proxy_root: Node3D, model_root: Node3D, model_instance: Node3D, unit_visual_entry: Dictionary) -> void:
+	var socket_entries: Dictionary = _get_unit_socket_entries(unit_visual_entry)
+	if socket_entries.is_empty():
+		return
+	var skeleton: Skeleton3D = _find_first_skeleton(model_instance)
+	if skeleton != null:
+		proxy_root.set_meta("unit_skeleton_available", true)
+		model_root.set_meta("unit_skeleton_bone_count", skeleton.get_bone_count())
+
+	var socket_count: int = 0
+	var fallback_count: int = 0
+	var head_socket_available: bool = false
+	var right_hand_socket_available: bool = false
+	for socket_name_variant in socket_entries.keys():
+		var socket_name: String = String(socket_name_variant).strip_edges()
+		if socket_name.is_empty():
+			continue
+		var socket_entry: Dictionary = Dictionary(socket_entries.get(socket_name_variant, {}))
+		var socket_node: Node3D = _create_unit_visual_socket(model_root, skeleton, socket_name, socket_entry)
+		if socket_node == null:
+			continue
+		socket_count += 1
+		if bool(socket_node.get_meta("socket_uses_fallback", false)):
+			fallback_count += 1
+		if socket_name == "HeadSocket":
+			head_socket_available = true
+		elif socket_name == "RightHandSocket":
+			right_hand_socket_available = true
+
+	proxy_root.set_meta("unit_socket_count", socket_count)
+	proxy_root.set_meta("unit_socket_fallback_count", fallback_count)
+	proxy_root.set_meta("unit_head_socket_available", head_socket_available)
+	proxy_root.set_meta("unit_right_hand_socket_available", right_hand_socket_available)
+	proxy_root.set_meta("unit_animation_retarget_fallback_count", 0)
+
+
+func _create_unit_visual_socket(model_root: Node3D, skeleton: Skeleton3D, socket_name: String, socket_entry: Dictionary) -> Node3D:
+	var bone_name: String = _find_matching_socket_bone_name(skeleton, _get_socket_bone_names(socket_entry), socket_name)
+	var socket_node: Node3D = null
+	var fallback_anchor: Vector3 = _get_vector3_from_variant(socket_entry.get("fallback_anchor", Vector3.ZERO), Vector3.ZERO)
+	if skeleton != null and not bone_name.is_empty():
+		var bone_attachment := BoneAttachment3D.new()
+		bone_attachment.name = socket_name
+		bone_attachment.bone_name = bone_name
+		bone_attachment.set_meta("socket_mode", "bone:%s" % bone_name)
+		skeleton.add_child(bone_attachment)
+		socket_node = bone_attachment
+		_apply_unit_socket_transform(socket_node, socket_entry, Vector3.ZERO)
+	else:
+		var fallback_socket := Node3D.new()
+		fallback_socket.name = socket_name
+		fallback_socket.set_meta("socket_mode", "fallback_anchor")
+		fallback_socket.set_meta("socket_uses_fallback", true)
+		model_root.add_child(fallback_socket)
+		socket_node = fallback_socket
+		_apply_unit_socket_transform(socket_node, socket_entry, fallback_anchor)
+	return socket_node
+
+
+func _apply_unit_socket_transform(socket_node: Node3D, socket_entry: Dictionary, base_position: Vector3) -> void:
+	if socket_node == null:
+		return
+	var offset: Vector3 = _get_vector3_from_variant(socket_entry.get("offset", Vector3.ZERO), Vector3.ZERO)
+	socket_node.position = base_position + offset
+	socket_node.rotation_degrees = _get_vector3_from_variant(socket_entry.get("rotation_degrees", Vector3.ZERO), Vector3.ZERO)
+
+
+func _find_unit_visual_socket(node: Node, socket_name: String) -> Node3D:
+	if node == null:
+		return null
+	if String(node.name) == socket_name:
+		return node as Node3D
+	for child in node.get_children():
+		var found: Node3D = _find_unit_visual_socket(child, socket_name)
+		if found != null:
+			return found
+	return null
+
+
+func _attach_unit_helmet(proxy_root: Node3D, model_root: Node3D, model_instance: Node3D, unit_visual_entry: Dictionary) -> bool:
+	var helmet_path: String = _get_unit_helmet_path(unit_visual_entry)
+	if helmet_path.is_empty():
+		return true
+	if not ResourceLoader.exists(helmet_path):
+		_add_runtime_missing_asset_marker(
+			proxy_root,
+			Vector3(0.0, 0.56, 0.0),
+			"MissingAsset_unit_helmet_%s" % _sanitize_node_name(_get_unit_visual_name(null, unit_visual_entry))
+		)
+		return false
+	var helmet_scene := _get_asset_model_scene_by_path(helmet_path)
+	if helmet_scene == null:
+		return false
+	var helmet_instance := helmet_scene.instantiate() as Node3D
+	if helmet_instance == null:
+		return false
+	_normalize_asset_model_instance(helmet_instance)
+	helmet_instance.name = "HelmetVisual_%s" % helmet_path.get_file().get_basename()
+	var attachment_entry: Dictionary = _get_unit_helmet_attachment_entry(unit_visual_entry)
+	_apply_unit_helmet_transform(helmet_instance, attachment_entry, model_instance)
+	var socket_name: String = String(attachment_entry.get("socket_name", "HeadSocket")).strip_edges()
+	var socket: Node3D = _find_unit_visual_socket(model_root, socket_name)
+	if socket != null:
+		socket.add_child(helmet_instance)
+		model_root.set_meta("helmet_attachment_mode", "socket:%s" % socket_name)
+		helmet_instance.set_meta("attachment_socket", socket_name)
+		return true
+
+	var skeleton: Skeleton3D = _find_first_skeleton(model_instance)
+	var bone_name: String = _find_matching_bone_name(skeleton, _get_helmet_bone_names(attachment_entry))
+	if skeleton != null and not bone_name.is_empty():
+		var bone_attachment := BoneAttachment3D.new()
+		bone_attachment.name = "HelmetAttachment"
+		bone_attachment.bone_name = bone_name
+		skeleton.add_child(bone_attachment)
+		bone_attachment.add_child(helmet_instance)
+		model_root.set_meta("helmet_attachment_mode", "bone:%s" % bone_name)
+		return true
+
+	var head_anchor := Node3D.new()
+	head_anchor.name = "HeadAnchor"
+	head_anchor.position = _get_vector3_from_variant(attachment_entry.get("fallback_anchor", Vector3(0.0, 1.38, 0.0)), Vector3(0.0, 1.38, 0.0))
+	model_root.add_child(head_anchor)
+	head_anchor.add_child(helmet_instance)
+	model_root.set_meta("helmet_attachment_mode", "head_anchor")
+	return true
+
+
+func _attach_unit_blaster(proxy_root: Node3D, model_root: Node3D, model_instance: Node3D, unit_visual_entry: Dictionary) -> bool:
+	var blaster_path: String = _get_unit_blaster_path(unit_visual_entry)
+	if blaster_path.is_empty():
+		return true
+	if not ResourceLoader.exists(blaster_path):
+		_add_runtime_missing_asset_marker(
+			proxy_root,
+			Vector3(0.0, 0.50, 0.0),
+			"MissingAsset_unit_blaster_%s" % _sanitize_node_name(_get_unit_visual_name(null, unit_visual_entry))
+		)
+		return false
+	var blaster_scene := _get_asset_model_scene_by_path(blaster_path)
+	if blaster_scene == null:
+		return false
+	var blaster_instance := blaster_scene.instantiate() as Node3D
+	if blaster_instance == null:
+		return false
+	_normalize_asset_model_instance(blaster_instance)
+	blaster_instance.name = "BlasterVisual_%s" % blaster_path.get_file().get_basename()
+	var attachment_entry: Dictionary = _get_unit_blaster_attachment_entry(unit_visual_entry)
+	_apply_unit_blaster_transform(blaster_instance, attachment_entry)
+	if not _apply_unit_blaster_material(blaster_instance, attachment_entry):
+		return false
+	var socket_name: String = String(attachment_entry.get("socket_name", "RightHandSocket")).strip_edges()
+	var socket: Node3D = _find_unit_visual_socket(model_root, socket_name)
+	if socket != null:
+		socket.add_child(blaster_instance)
+		model_root.set_meta("blaster_attachment_mode", "socket:%s" % socket_name)
+		blaster_instance.set_meta("attachment_socket", socket_name)
+		return true
+
+	var hand_anchor := Node3D.new()
+	hand_anchor.name = "RightHandAnchor"
+	hand_anchor.position = _get_vector3_from_variant(attachment_entry.get("fallback_anchor", Vector3(0.22, 0.84, 0.10)), Vector3(0.22, 0.84, 0.10))
+	model_root.add_child(hand_anchor)
+	hand_anchor.add_child(blaster_instance)
+	model_root.set_meta("blaster_attachment_mode", "right_hand_anchor")
+	return true
+
+
+func _find_first_skeleton(node: Node) -> Skeleton3D:
+	var skeleton := node as Skeleton3D
+	if skeleton != null:
+		return skeleton
+	for child in node.get_children():
+		var found: Skeleton3D = _find_first_skeleton(child)
+		if found != null:
+			return found
+	return null
+
+
+func _find_matching_bone_name(skeleton: Skeleton3D, candidate_names: PackedStringArray) -> String:
+	if skeleton == null:
+		return ""
+	for candidate in candidate_names:
+		var candidate_text: String = String(candidate).strip_edges()
+		if candidate_text.is_empty():
+			continue
+		var bone_index: int = skeleton.find_bone(candidate_text)
+		if bone_index >= 0:
+			return candidate_text
+	var bone_count: int = skeleton.get_bone_count()
+	for index in range(bone_count):
+		var bone_name: String = skeleton.get_bone_name(index)
+		if bone_name.to_lower().find("head") >= 0:
+			return bone_name
+	return ""
+
+
+func _find_matching_socket_bone_name(skeleton: Skeleton3D, candidate_names: PackedStringArray, socket_name: String) -> String:
+	if skeleton == null:
+		return ""
+	for candidate in candidate_names:
+		var candidate_text: String = String(candidate).strip_edges()
+		if candidate_text.is_empty():
+			continue
+		var bone_index: int = skeleton.find_bone(candidate_text)
+		if bone_index >= 0:
+			return candidate_text
+	var best_match: String = ""
+	var bone_count: int = skeleton.get_bone_count()
+	for index in range(bone_count):
+		var bone_name: String = skeleton.get_bone_name(index)
+		if _bone_name_matches_socket(bone_name, socket_name):
+			if best_match.is_empty() or bone_name.length() < best_match.length():
+				best_match = bone_name
+	return best_match
+
+
+func _bone_name_matches_socket(bone_name: String, socket_name: String) -> bool:
+	var bone_text: String = bone_name.strip_edges().to_lower()
+	if bone_text.is_empty() or bone_text.find("_end") >= 0 or bone_text.ends_with("end"):
+		return false
+	var socket_text: String = socket_name.strip_edges().to_lower()
+	if socket_text == "headsocket":
+		return bone_text.find("head") >= 0
+	if socket_text == "righthandsocket":
+		return bone_text.find("righthand") >= 0 or (bone_text.find("right") >= 0 and bone_text.find("hand") >= 0)
+	if socket_text == "lefthandsocket":
+		return bone_text.find("lefthand") >= 0 or (bone_text.find("left") >= 0 and bone_text.find("hand") >= 0)
+	if socket_text == "backsocket":
+		return bone_text.find("spine") >= 0 or bone_text.find("chest") >= 0
+	return false
+
+
+func _apply_unit_helmet_transform(helmet_instance: Node3D, attachment_entry: Dictionary, model_instance: Node3D) -> void:
+	if helmet_instance == null:
+		return
+	helmet_instance.position = _get_vector3_from_variant(attachment_entry.get("offset", Vector3.ZERO), Vector3.ZERO)
+	helmet_instance.rotation_degrees = _get_vector3_from_variant(attachment_entry.get("rotation_degrees", Vector3.ZERO), Vector3.ZERO)
+	_apply_unit_attachment_visual_adjustment(helmet_instance, attachment_entry)
+	helmet_instance.scale = Vector3.ONE * _get_unit_helmet_scale(helmet_instance, model_instance, attachment_entry)
+
+
+func _apply_unit_blaster_transform(blaster_instance: Node3D, attachment_entry: Dictionary) -> void:
+	if blaster_instance == null:
+		return
+	blaster_instance.position = _get_vector3_from_variant(attachment_entry.get("offset", Vector3.ZERO), Vector3.ZERO)
+	blaster_instance.rotation_degrees = _get_vector3_from_variant(attachment_entry.get("rotation_degrees", Vector3.ZERO), Vector3.ZERO)
+	_apply_unit_attachment_visual_adjustment(blaster_instance, attachment_entry)
+	blaster_instance.scale = Vector3.ONE * float(attachment_entry.get("scale", 0.10))
+
+
+func _apply_unit_attachment_visual_adjustment(attachment_instance: Node3D, attachment_entry: Dictionary) -> void:
+	if attachment_instance == null:
+		return
+	var visual_offset: Vector3 = _get_vector3_from_variant(attachment_entry.get("visual_offset", Vector3.ZERO), Vector3.ZERO)
+	var visual_rotation: Vector3 = _get_vector3_from_variant(attachment_entry.get("visual_rotation_degrees", Vector3.ZERO), Vector3.ZERO)
+	if visual_offset.length_squared() <= 0.000001 and visual_rotation.length_squared() <= 0.000001:
+		return
+	for child in attachment_instance.get_children():
+		var child_3d := child as Node3D
+		if child_3d == null:
+			continue
+		child_3d.position += visual_offset
+		child_3d.rotation_degrees += visual_rotation
+
+
+func _apply_unit_blaster_material(blaster_instance: Node3D, attachment_entry: Dictionary) -> bool:
+	if blaster_instance == null:
+		return false
+	var texture_path: String = String(attachment_entry.get("texture_path", "")).strip_edges()
+	if texture_path.is_empty():
+		return true
+	if not ResourceLoader.exists(texture_path):
+		return false
+	var texture := load(texture_path) as Texture2D
+	if texture == null:
+		return false
+	_apply_material_override_recursive(blaster_instance, _make_texture_material(texture))
+	return true
+
+
+func _get_unit_helmet_scale(helmet_instance: Node3D, model_instance: Node3D, attachment_entry: Dictionary) -> float:
+	var explicit_scale: float = float(attachment_entry.get("scale", 1.0))
+	var scale_mode: String = String(attachment_entry.get("scale_mode", "")).strip_edges().to_lower()
+	if scale_mode != "fit_to_model":
+		return explicit_scale
+
+	var helmet_bounds: Dictionary = _get_local_visual_bounds(helmet_instance)
+	var model_bounds: Dictionary = _get_local_visual_bounds(model_instance)
+	if not bool(helmet_bounds.get("valid", false)) or not bool(model_bounds.get("valid", false)):
+		return explicit_scale
+
+	var helmet_size: Vector3 = Vector3(helmet_bounds.get("max", Vector3.ZERO)) - Vector3(helmet_bounds.get("min", Vector3.ZERO))
+	var model_size: Vector3 = Vector3(model_bounds.get("max", Vector3.ZERO)) - Vector3(model_bounds.get("min", Vector3.ZERO))
+	var fit_scales: Array[float] = []
+	if helmet_size.y > 0.0001 and model_size.y > 0.0001:
+		fit_scales.append((model_size.y * float(attachment_entry.get("target_height_ratio", 0.14))) / helmet_size.y)
+	var helmet_width: float = maxf(helmet_size.x, helmet_size.z)
+	var model_width: float = maxf(model_size.x, model_size.z)
+	if helmet_width > 0.0001 and model_width > 0.0001:
+		fit_scales.append((model_width * float(attachment_entry.get("target_width_ratio", 0.22))) / helmet_width)
+	if fit_scales.is_empty():
+		return explicit_scale
+	var fit_scale: float = fit_scales[0]
+	for scale_value in fit_scales:
+		fit_scale = minf(fit_scale, float(scale_value))
+	fit_scale *= float(attachment_entry.get("scale_multiplier", 1.0))
+	if attachment_entry.has("max_scale"):
+		fit_scale = minf(fit_scale, float(attachment_entry.get("max_scale", fit_scale)))
+	if attachment_entry.has("min_scale"):
+		fit_scale = maxf(fit_scale, float(attachment_entry.get("min_scale", fit_scale)))
+	return fit_scale
 
 
 func _add_runtime_missing_asset_marker(parent: Node3D, position: Vector3, node_name: String) -> void:
@@ -1768,6 +2350,18 @@ func _make_material(color: Color, transparent: bool = false) -> StandardMaterial
 	if transparent or color.a < 0.99:
 		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_material_cache[key] = material
+	return material
+
+
+func _make_texture_material(texture: Texture2D) -> StandardMaterial3D:
+	var key: String = "texture:%s" % String(texture.resource_path)
+	if _material_cache.has(key):
+		return _material_cache[key] as StandardMaterial3D
+	var material := StandardMaterial3D.new()
+	material.albedo_texture = texture
+	material.roughness = 0.86
+	material.metallic = 0.0
 	_material_cache[key] = material
 	return material
 
@@ -1896,6 +2490,19 @@ func _get_terrain_3d_mapping() -> Dictionary:
 	var parsed: Variant = JSON.parse_string(file.get_as_text())
 	_terrain_3d_mapping = Dictionary(parsed) if typeof(parsed) == TYPE_DICTIONARY else {}
 	return _terrain_3d_mapping
+
+
+func _get_npc_unit_visual_mapping() -> Dictionary:
+	if not _npc_unit_visual_mapping.is_empty():
+		return _npc_unit_visual_mapping
+	if not FileAccess.file_exists(NPC_UNIT_VISUAL_MAPPING_PATH):
+		return {}
+	var file := FileAccess.open(NPC_UNIT_VISUAL_MAPPING_PATH, FileAccess.READ)
+	if file == null:
+		return {}
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	_npc_unit_visual_mapping = Dictionary(parsed) if typeof(parsed) == TYPE_DICTIONARY else {}
+	return _npc_unit_visual_mapping
 
 
 func _get_3d_grid_number(key: String, fallback: float) -> float:
@@ -2110,11 +2717,156 @@ func _get_contact_color(detection_state: String) -> Color:
 			return Color(1.0, 0.42, 0.34, 0.92)
 
 
-func _get_unit_color(unit: Node) -> Color:
-	var team_id: String = ""
+func _get_unit_visual_entry(unit: Node) -> Dictionary:
+	var mapping: Dictionary = _get_npc_unit_visual_mapping()
+	if mapping.is_empty():
+		return {}
+	var unit_id: String = _get_unit_id(unit)
+	var unit_entries: Dictionary = Dictionary(mapping.get("unit_ids", {}))
+	var unit_entry: Dictionary = Dictionary(unit_entries.get(unit_id, {}))
+	if not unit_entry.is_empty():
+		return unit_entry
+	var visual_entries: Dictionary = Dictionary(mapping.get("unit_visuals", {}))
+	var team_entry: Dictionary = Dictionary(visual_entries.get(_get_unit_team_id(unit), {}))
+	if not team_entry.is_empty():
+		return team_entry
+	return Dictionary(visual_entries.get("default", {}))
+
+
+func _get_unit_model_scene(unit: Node, unit_visual_entry: Dictionary) -> PackedScene:
+	if not unit_visual_entry.is_empty():
+		return _get_asset_model_scene_by_path(String(unit_visual_entry.get("model_path", "")).strip_edges())
+	return _get_asset_model_scene_by_name(_get_unit_model_name(unit))
+
+
+func _get_unit_visual_name(unit: Node, unit_visual_entry: Dictionary) -> String:
+	var visual_id: String = String(unit_visual_entry.get("visual_id", "")).strip_edges()
+	if not visual_id.is_empty():
+		return visual_id
+	return _get_unit_model_name(unit)
+
+
+func _get_unit_model_scale(unit_visual_entry: Dictionary) -> float:
+	if unit_visual_entry.has("scale"):
+		return float(unit_visual_entry.get("scale", UNIT_MODEL_SCALE))
+	return float(Dictionary(_get_npc_unit_visual_mapping().get("defaults", {})).get("scale", UNIT_MODEL_SCALE))
+
+
+func _get_unit_model_root_rotation_y(unit_visual_entry: Dictionary) -> float:
+	if unit_visual_entry.has("rotation_degrees_y"):
+		return float(unit_visual_entry.get("rotation_degrees_y", 0.0))
+	return float(Dictionary(_get_npc_unit_visual_mapping().get("defaults", {})).get("rotation_degrees_y", 0.0))
+
+
+func _get_unit_animation_paths(unit_visual_entry: Dictionary) -> Dictionary:
+	if unit_visual_entry.has("animation_paths"):
+		return Dictionary(unit_visual_entry.get("animation_paths", {}))
+	var defaults: Dictionary = Dictionary(_get_npc_unit_visual_mapping().get("defaults", {}))
+	if defaults.has("animation_paths"):
+		return Dictionary(defaults.get("animation_paths", {}))
+	return Dictionary(_get_npc_unit_visual_mapping().get("animation_paths", {}))
+
+
+func _get_unit_helmet_path(unit_visual_entry: Dictionary) -> String:
+	var helmet_path: String = String(unit_visual_entry.get("helmet_path", "")).strip_edges()
+	if not helmet_path.is_empty():
+		return helmet_path
+	return String(Dictionary(_get_npc_unit_visual_mapping().get("defaults", {})).get("helmet_path", "")).strip_edges()
+
+
+func _unit_visual_entry_has_helmet(unit_visual_entry: Dictionary) -> bool:
+	return not _get_unit_helmet_path(unit_visual_entry).is_empty()
+
+
+func _get_unit_blaster_path(unit_visual_entry: Dictionary) -> String:
+	var blaster_path: String = String(unit_visual_entry.get("blaster_path", "")).strip_edges()
+	if not blaster_path.is_empty():
+		return blaster_path
+	return String(Dictionary(_get_npc_unit_visual_mapping().get("defaults", {})).get("blaster_path", "")).strip_edges()
+
+
+func _unit_visual_entry_has_blaster(unit_visual_entry: Dictionary) -> bool:
+	return not _get_unit_blaster_path(unit_visual_entry).is_empty()
+
+
+func _get_unit_helmet_attachment_entry(unit_visual_entry: Dictionary) -> Dictionary:
+	if unit_visual_entry.has("helmet_attachment"):
+		return Dictionary(unit_visual_entry.get("helmet_attachment", {}))
+	return Dictionary(Dictionary(_get_npc_unit_visual_mapping().get("defaults", {})).get("helmet_attachment", {}))
+
+
+func _get_unit_blaster_attachment_entry(unit_visual_entry: Dictionary) -> Dictionary:
+	if unit_visual_entry.has("blaster_attachment"):
+		return Dictionary(unit_visual_entry.get("blaster_attachment", {}))
+	return Dictionary(Dictionary(_get_npc_unit_visual_mapping().get("defaults", {})).get("blaster_attachment", {}))
+
+
+func _get_unit_socket_entries(unit_visual_entry: Dictionary) -> Dictionary:
+	if unit_visual_entry.has("sockets"):
+		return Dictionary(unit_visual_entry.get("sockets", {}))
+	return Dictionary(Dictionary(_get_npc_unit_visual_mapping().get("defaults", {})).get("sockets", {}))
+
+
+func _get_helmet_bone_names(attachment_entry: Dictionary) -> PackedStringArray:
+	return _get_string_array_from_variant(attachment_entry.get("bone_names", []))
+
+
+func _get_socket_bone_names(socket_entry: Dictionary) -> PackedStringArray:
+	return _get_string_array_from_variant(socket_entry.get("bone_names", []))
+
+
+func _get_string_array_from_variant(names_variant: Variant) -> PackedStringArray:
+	var result := PackedStringArray()
+	if typeof(names_variant) == TYPE_ARRAY:
+		for name_variant in Array(names_variant):
+			var name_text: String = String(name_variant).strip_edges()
+			if not name_text.is_empty() and not result.has(name_text):
+				result.append(name_text)
+	elif typeof(names_variant) == TYPE_PACKED_STRING_ARRAY:
+		for name_text in PackedStringArray(names_variant):
+			if not name_text.strip_edges().is_empty() and not result.has(name_text):
+				result.append(name_text.strip_edges())
+	return result
+
+
+func _get_vector3_from_variant(value: Variant, fallback: Vector3) -> Vector3:
+	if typeof(value) == TYPE_VECTOR3:
+		return Vector3(value)
+	if typeof(value) == TYPE_ARRAY:
+		var values: Array = Array(value)
+		if values.size() >= 3:
+			return Vector3(float(values[0]), float(values[1]), float(values[2]))
+	if typeof(value) == TYPE_DICTIONARY:
+		var dict: Dictionary = Dictionary(value)
+		return Vector3(float(dict.get("x", fallback.x)), float(dict.get("y", fallback.y)), float(dict.get("z", fallback.z)))
+	return fallback
+
+
+func _unit_visual_entry_has_skin(unit_visual_entry: Dictionary) -> bool:
+	return not String(unit_visual_entry.get("skin_path", "")).strip_edges().is_empty()
+
+
+func _apply_unit_visual_material(model_instance: Node3D, unit_visual_entry: Dictionary) -> bool:
+	var skin_path: String = String(unit_visual_entry.get("skin_path", "")).strip_edges()
+	if skin_path.is_empty():
+		return true
+	if not ResourceLoader.exists(skin_path):
+		return false
+	var skin_texture := load(skin_path) as Texture2D
+	if skin_texture == null:
+		return false
+	_apply_material_override_recursive(model_instance, _make_texture_material(skin_texture))
+	return true
+
+
+func _get_unit_team_id(unit: Node) -> String:
 	if unit != null and unit.has_method("get_team_id"):
-		team_id = String(unit.call("get_team_id")).strip_edges().to_lower()
-	if team_id == "team_alpha":
+		return String(unit.call("get_team_id")).strip_edges().to_lower()
+	return ""
+
+
+func _get_unit_color(unit: Node) -> Color:
+	if _get_unit_team_id(unit) == "team_alpha":
 		return Color(0.32, 0.74, 1.0, 1.0)
 	return Color(1.0, 0.34, 0.26, 1.0)
 
@@ -2124,10 +2876,7 @@ func _get_unit_visual_texture(unit: Node) -> Texture2D:
 		var visual := unit.get_node_or_null("Visual") as Sprite2D
 		if visual != null and visual.texture != null:
 			return visual.texture
-	var team_id: String = ""
-	if unit != null and unit.has_method("get_team_id"):
-		team_id = String(unit.call("get_team_id")).strip_edges().to_lower()
-	return FRIENDLY_UNIT_TEXTURE if team_id == "team_alpha" else ENEMY_UNIT_TEXTURE
+	return FRIENDLY_UNIT_TEXTURE if _get_unit_team_id(unit) == "team_alpha" else ENEMY_UNIT_TEXTURE
 
 
 func _get_unit_weapon_visual_texture(unit: Node) -> Texture2D:
@@ -2155,10 +2904,7 @@ func _get_unit_weapon_visual_offset(unit: Node) -> Vector2:
 
 
 func _get_unit_model_name(unit: Node) -> String:
-	var team_id: String = ""
-	if unit != null and unit.has_method("get_team_id"):
-		team_id = String(unit.call("get_team_id")).strip_edges().to_lower()
-	return FRIENDLY_UNIT_MODEL_NAME if team_id == "team_alpha" else ENEMY_UNIT_MODEL_NAME
+	return FRIENDLY_UNIT_MODEL_NAME if _get_unit_team_id(unit) == "team_alpha" else ENEMY_UNIT_MODEL_NAME
 
 
 func _get_unit_id(unit: Node) -> String:
