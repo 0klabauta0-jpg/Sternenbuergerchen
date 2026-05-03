@@ -1,0 +1,1111 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sternenbuergerchen UI Concepts</title>
+  <style>
+    @font-face {
+      font-family: "KenneyFuture";
+      src: url("../../../Assets/used/ui/Font/Kenney%20Future.ttf") format("truetype");
+    }
+
+    :root {
+      --bg: #171c20;
+      --panel: #242b31;
+      --panel-2: #30383e;
+      --panel-3: #d9dde8;
+      --line: #56626d;
+      --line-soft: #3d4850;
+      --text: #eef3f6;
+      --muted: #a9b3bb;
+      --ink: #1e252b;
+      --teal: #64d4d5;
+      --green: #67c58f;
+      --amber: #d79b2e;
+      --red: #d96d66;
+      --blue: #7da2d8;
+      --map: #d99373;
+      --map-line: rgba(46, 43, 39, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #0d1114;
+      color: var(--text);
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      letter-spacing: 0;
+    }
+
+    .page {
+      width: min(1440px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+
+    .intro {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 16px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
+
+    h1,
+    h2,
+    h3,
+    .label,
+    .button,
+    .tiny-button,
+    .tab {
+      font-family: "KenneyFuture", "Segoe UI", Arial, sans-serif;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 32px;
+      line-height: 1.1;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 19px;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .note,
+    .concept,
+    .research-card {
+      border: 1px solid var(--line-soft);
+      background: var(--panel);
+      border-radius: 8px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+    }
+
+    .note {
+      padding: 16px;
+    }
+
+    .research-card {
+      padding: 16px;
+    }
+
+    .source-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+      font-size: 13px;
+    }
+
+    .source-list a {
+      color: var(--teal);
+      text-decoration: none;
+    }
+
+    .concept {
+      margin-top: 18px;
+      overflow: hidden;
+    }
+
+    .concept-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #1a2025;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .chip-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .chip {
+      min-height: 24px;
+      padding: 5px 8px 4px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #11171b;
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .chip.hot {
+      border-color: rgba(100, 212, 213, 0.75);
+      color: var(--teal);
+    }
+
+    .viewport {
+      position: relative;
+      height: 720px;
+      min-height: 720px;
+      max-height: 720px;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .map {
+      position: absolute;
+      inset: 0;
+      background-color: var(--map);
+      background-image:
+        linear-gradient(30deg, var(--map-line) 1px, transparent 1px),
+        linear-gradient(150deg, var(--map-line) 1px, transparent 1px);
+      background-size: 58px 58px;
+      background-position: 12px 2px, 12px 2px;
+      transform: skewY(-10deg) scale(1.05);
+      transform-origin: center;
+      opacity: 0.92;
+    }
+
+    .map-vignette {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(13, 17, 20, 0.18), transparent 34%, rgba(13, 17, 20, 0.24));
+      pointer-events: none;
+    }
+
+    .hud-panel {
+      position: absolute;
+      border: 1px solid rgba(216, 223, 229, 0.72);
+      background: rgba(31, 38, 43, 0.94);
+      border-radius: 8px;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .hud-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 32px;
+      padding: 0 10px;
+      background: rgba(13, 18, 22, 0.72);
+      border-bottom: 1px solid var(--line-soft);
+      color: var(--text);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .hud-body {
+      padding: 10px;
+    }
+
+    .top-left {
+      top: 16px;
+      left: 16px;
+      width: 298px;
+      height: 148px;
+    }
+
+    .top-right {
+      top: 16px;
+      right: 16px;
+      width: 330px;
+      height: 84px;
+    }
+
+    .bottom-left {
+      left: 16px;
+      bottom: 16px;
+      width: 360px;
+      height: 188px;
+    }
+
+    .bottom-center {
+      left: 392px;
+      right: 316px;
+      bottom: 16px;
+      height: 188px;
+    }
+
+    .bottom-right {
+      right: 16px;
+      bottom: 16px;
+      width: 284px;
+      height: 188px;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      height: 38px;
+    }
+
+    .tab {
+      display: grid;
+      place-items: center;
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #d9dde8;
+      color: #252b31;
+      font-size: 10px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .status-feed {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+      max-height: 76px;
+      overflow: hidden;
+    }
+
+    .feed-row,
+    .unit-row,
+    .loadout-row {
+      display: grid;
+      align-items: center;
+      min-width: 0;
+      border: 1px solid var(--line-soft);
+      background: #151c21;
+      border-radius: 6px;
+    }
+
+    .feed-row {
+      grid-template-columns: 34px 1fr auto;
+      gap: 8px;
+      height: 48px;
+      padding: 6px;
+    }
+
+    .avatar,
+    .small-avatar {
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      background: #29333a;
+      color: var(--teal);
+      font-family: "KenneyFuture", "Segoe UI", Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .small-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 5px;
+      font-size: 10px;
+    }
+
+    .ellipsis {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .minor {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .badge {
+      display: inline-grid;
+      place-items: center;
+      min-width: 48px;
+      height: 22px;
+      padding: 0 8px;
+      border-radius: 5px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: #1c2429;
+      color: var(--muted);
+      font-size: 10px;
+      white-space: nowrap;
+    }
+
+    .badge.green {
+      background: rgba(103, 197, 143, 0.16);
+      color: var(--green);
+      border-color: rgba(103, 197, 143, 0.55);
+    }
+
+    .badge.amber {
+      background: rgba(215, 155, 46, 0.16);
+      color: var(--amber);
+      border-color: rgba(215, 155, 46, 0.55);
+    }
+
+    .badge.red {
+      background: rgba(217, 109, 102, 0.16);
+      color: var(--red);
+      border-color: rgba(217, 109, 102, 0.55);
+    }
+
+    .command-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .button,
+    .tiny-button {
+      display: grid;
+      place-items: center;
+      min-width: 0;
+      border: 1px solid #73808a;
+      border-radius: 6px;
+      background: #d9dde8;
+      color: #252b31;
+      box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.12);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      user-select: none;
+    }
+
+    .button {
+      height: 34px;
+      font-size: 11px;
+    }
+
+    .button.primary {
+      background: var(--green);
+      color: #102018;
+      border-color: #9be0b8;
+    }
+
+    .button.warn {
+      background: var(--amber);
+      color: #241a0a;
+      border-color: #f0c36d;
+    }
+
+    .button.dark {
+      background: #161d22;
+      color: var(--text);
+      border-color: var(--line);
+    }
+
+    .tiny-button {
+      height: 28px;
+      font-size: 10px;
+    }
+
+    .stance-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .execute-row {
+      display: grid;
+      grid-template-columns: 94px 1fr;
+      gap: 8px;
+      margin-top: 10px;
+      align-items: center;
+    }
+
+    .queue-line {
+      height: 34px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      padding: 0 8px;
+      border: 1px solid var(--line-soft);
+      border-radius: 6px;
+      background: #11171b;
+      color: var(--muted);
+      font-size: 11px;
+      overflow: hidden;
+    }
+
+    .team-strip {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: 190px;
+      gap: 8px;
+      overflow: hidden;
+      height: 116px;
+    }
+
+    .unit-row {
+      grid-template-columns: 34px 1fr auto;
+      gap: 8px;
+      height: 76px;
+      padding: 8px;
+    }
+
+    .roster-card {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      height: 116px;
+      border: 1px solid var(--line-soft);
+      background: #182127;
+      border-radius: 7px;
+      overflow: hidden;
+    }
+
+    .roster-card.active {
+      border-color: rgba(103, 197, 143, 0.9);
+      box-shadow: inset 0 0 0 1px rgba(103, 197, 143, 0.28);
+    }
+
+    .roster-main {
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 8px;
+      padding: 8px;
+      min-width: 0;
+    }
+
+    .roster-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      padding: 0 8px 8px;
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .stat {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .mission-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .readout {
+      height: 30px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 8px;
+      border: 1px solid var(--line-soft);
+      border-radius: 6px;
+      background: #151c21;
+      font-size: 11px;
+      min-width: 0;
+    }
+
+    .map-token,
+    .objective-token,
+    .enemy-token {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      transform: rotate(-15deg);
+      font-family: "KenneyFuture", "Segoe UI", Arial, sans-serif;
+      font-size: 10px;
+      color: var(--ink);
+    }
+
+    .map-token {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #e9edf2;
+      border: 5px solid #44525e;
+      box-shadow: 10px 12px 0 rgba(29, 22, 18, 0.58);
+    }
+
+    .objective-token {
+      width: 56px;
+      height: 56px;
+      left: 712px;
+      top: 220px;
+      border-radius: 8px;
+      background: rgba(100, 212, 213, 0.72);
+      border: 2px solid rgba(255, 255, 255, 0.8);
+    }
+
+    .enemy-token {
+      width: 24px;
+      height: 24px;
+      border: 2px solid #18120f;
+      background: #b47662;
+      box-shadow: 6px 7px 0 rgba(29, 22, 18, 0.4);
+    }
+
+    .token-a { left: 608px; top: 308px; }
+    .token-b { left: 660px; top: 330px; }
+    .token-c { left: 710px; top: 352px; }
+    .token-d { left: 1020px; top: 244px; }
+    .token-e { left: 1070px; top: 270px; }
+    .token-f { left: 1118px; top: 292px; }
+    .enemy-a { left: 520px; top: 202px; }
+    .enemy-b { left: 938px; top: 186px; }
+    .enemy-c { left: 1056px; top: 426px; }
+
+    .floating-label {
+      position: absolute;
+      height: 28px;
+      padding: 5px 9px 0;
+      border-radius: 6px;
+      background: rgba(15, 20, 24, 0.76);
+      border: 1px solid rgba(238, 243, 246, 0.36);
+      color: var(--text);
+      font-family: "KenneyFuture", "Segoe UI", Arial, sans-serif;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .objective-label {
+      left: 682px;
+      top: 182px;
+      width: 210px;
+      text-align: center;
+    }
+
+    .enemy-label {
+      left: 1016px;
+      top: 206px;
+      width: 128px;
+      color: #ffd7d4;
+      border-color: rgba(217, 109, 102, 0.7);
+      background: rgba(68, 24, 24, 0.72);
+    }
+
+    .homebase-layout {
+      position: relative;
+      display: grid;
+      grid-template-columns: 292px 1fr 330px;
+      gap: 14px;
+      height: 100%;
+      padding: 16px;
+      background: linear-gradient(90deg, #20282e, #252b30 42%, #1b2227);
+    }
+
+    .column-panel {
+      min-height: 0;
+      border: 1px solid var(--line-soft);
+      border-radius: 8px;
+      background: rgba(18, 24, 28, 0.76);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: 34px 1fr;
+    }
+
+    .column-body {
+      min-height: 0;
+      overflow: hidden;
+      padding: 10px;
+    }
+
+    .npc-list {
+      display: grid;
+      grid-template-rows: repeat(5, 106px);
+      gap: 8px;
+      overflow: hidden;
+    }
+
+    .npc-card {
+      display: grid;
+      grid-template-columns: 42px 1fr 72px;
+      grid-template-rows: 1fr 26px;
+      gap: 6px 8px;
+      min-width: 0;
+      height: 106px;
+      padding: 8px;
+      border: 1px solid var(--line-soft);
+      border-radius: 7px;
+      background: #182126;
+    }
+
+    .status-bar {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      min-width: 0;
+      height: 26px;
+      padding: 0 7px;
+      border-radius: 5px;
+      border: 1px solid rgba(100, 212, 213, 0.36);
+      background: rgba(100, 212, 213, 0.1);
+      color: var(--teal);
+      font-size: 10px;
+    }
+
+    .deck-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      height: 42px;
+      padding: 0 9px;
+      border: 1px solid var(--line-soft);
+      border-radius: 6px;
+      background: #172027;
+      margin-bottom: 8px;
+    }
+
+    .loadout-layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 14px;
+      height: 100%;
+      padding: 16px;
+      background: #20262b;
+    }
+
+    .weapon-preview {
+      width: 52px;
+      height: 42px;
+      object-fit: contain;
+      image-rendering: auto;
+      border-radius: 5px;
+      border: 1px solid var(--line-soft);
+      background: #12181d;
+    }
+
+    .loadout-list {
+      display: grid;
+      grid-template-rows: repeat(5, 72px);
+      gap: 8px;
+      overflow: hidden;
+    }
+
+    .loadout-row {
+      grid-template-columns: 36px 1fr 78px 78px 62px;
+      gap: 8px;
+      height: 72px;
+      padding: 8px;
+    }
+
+    .slot {
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line-soft);
+      border-radius: 6px;
+      background: #11171b;
+      font-size: 10px;
+      color: var(--muted);
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .big-preview {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 12px;
+      min-height: 0;
+      padding: 12px;
+    }
+
+    .preview-stage {
+      display: grid;
+      place-items: center;
+      min-height: 0;
+      border: 1px solid var(--line-soft);
+      border-radius: 8px;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        #151b20;
+      background-size: 28px 28px;
+    }
+
+    .preview-stage img {
+      width: 260px;
+      height: 190px;
+      object-fit: contain;
+    }
+
+    .rule-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .rule {
+      min-height: 72px;
+      padding: 10px;
+      border: 1px solid var(--line-soft);
+      border-radius: 8px;
+      background: #182025;
+    }
+
+    .rule strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--text);
+      font-size: 12px;
+    }
+
+    .rule span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    @media (max-width: 1100px) {
+      .intro {
+        grid-template-columns: 1fr;
+      }
+
+      .viewport {
+        height: 920px;
+        min-height: 920px;
+        max-height: 920px;
+      }
+
+      .bottom-left,
+      .bottom-center,
+      .bottom-right,
+      .top-left,
+      .top-right {
+        left: 16px;
+        right: 16px;
+        width: auto;
+      }
+
+      .top-right { top: 176px; }
+      .bottom-left { bottom: 416px; }
+      .bottom-center { bottom: 216px; }
+      .bottom-right { bottom: 16px; }
+      .homebase-layout,
+      .loadout-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="intro">
+      <div class="note">
+        <h1>Sternenbuergerchen UI Concepts</h1>
+        <p>Drei Vorschlaege als reine HTML-Mockups. Nichts davon ist in Godot integriert. Der Fokus liegt auf festen Panelgroessen, dichter taktischer Lesbarkeit und weniger separaten Hilfsfenstern.</p>
+        <div class="rule-grid">
+          <div class="rule"><strong>Feste Rahmen</strong><span>Panels bleiben gleich gross; Inhalt scrollt oder wird gekuerzt.</span></div>
+          <div class="rule"><strong>Befehlsfluss</strong><span>#16 bekommt Command, Stance und Execute. #17 wird Status.</span></div>
+          <div class="rule"><strong>Karten statt Fenster</strong><span>#04 und #06 werden Statusbalken auf NPC- und Deck-Karten.</span></div>
+          <div class="rule"><strong>Asset-Pfad</strong><span>Lokale Kenney-UI-Assets und Blaster-Previews bleiben nutzbar.</span></div>
+        </div>
+      </div>
+      <div class="research-card">
+        <h2>Rechercheanker</h2>
+        <p>Die Richtung nimmt Kenney Sci-Fi/Space als freie Asset-Basis und schaut bei modernen Tactics-UIs auf kompakte In-Game-, Overlay-, Stats- und Quest-Flaechen.</p>
+        <div class="source-list">
+          <a href="https://kenney.nl/assets/ui-pack-sci-fi">Kenney UI Pack Sci-Fi, CC0</a>
+          <a href="https://www.construct.net/en/game-assets/construct-free-bundled-assets/ui-pack-sci-fi-4935">Construct/Kenney Space Expansion file overview</a>
+          <a href="https://interfaceingame.com/games/into-the-breach/">Into the Breach UI reference gallery</a>
+          <a href="https://en.wikipedia.org/wiki/Tactical_Breach_Wizards">Tactical UI feedback and preview reference</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="concept">
+      <div class="concept-head">
+        <div>
+          <h2>Vorschlag A: Tactical Dock</h2>
+          <p>#16 wird die feste Befehlsmatrix. #17 zeigt nur Auswahlstatus. #18 bleibt Mission Control, aber ohne Button-Wachstum.</p>
+        </div>
+        <div class="chip-row">
+          <span class="chip hot">Mission</span>
+          <span class="chip">Fixe Panels</span>
+          <span class="chip">Execute in #16</span>
+        </div>
+      </div>
+      <div class="viewport">
+        <div class="map"></div>
+        <div class="objective-token">OBJ</div>
+        <div class="map-token token-a">A1</div>
+        <div class="map-token token-b">A2</div>
+        <div class="map-token token-c">A3</div>
+        <div class="map-token token-d">B1</div>
+        <div class="map-token token-e">B2</div>
+        <div class="map-token token-f">B3</div>
+        <div class="enemy-token enemy-a"></div>
+        <div class="enemy-token enemy-b"></div>
+        <div class="enemy-token enemy-c"></div>
+        <div class="floating-label objective-label">OBJ neutral  CAP 0%</div>
+        <div class="floating-label enemy-label">ENEMY FIRETEAM</div>
+        <div class="map-vignette"></div>
+
+        <div class="hud-panel top-left">
+          <div class="hud-title"><span>#15 LIVE TACTICAL GRID</span><span class="badge green">LIVE</span></div>
+          <div class="hud-body">
+            <div class="tabs">
+              <div class="tab">Homebase</div>
+              <div class="tab">FOB</div>
+              <div class="tab">Mission</div>
+            </div>
+            <div class="status-feed">
+              <div class="feed-row">
+                <div class="avatar">AV</div>
+                <div class="ellipsis">
+                  <div class="ellipsis">Lead Anja Voss</div>
+                  <div class="minor ellipsis">5 Mitglieder | 0 Wegpunkte</div>
+                </div>
+                <span class="badge green">BLUE</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hud-panel top-right">
+          <div class="hud-title"><span>CONTACT / OBJECTIVE</span><span class="badge amber">CAP</span></div>
+          <div class="hud-body">
+            <div class="readout"><span class="badge red">Hostile</span><span class="ellipsis">Enemy groups rendered as squads, objective label above marker.</span></div>
+          </div>
+        </div>
+
+        <div class="hud-panel bottom-left">
+          <div class="hud-title"><span>#16 COMMAND MATRIX</span><span class="badge">Queued</span></div>
+          <div class="hud-body">
+            <div class="command-grid">
+              <div class="button">Move</div>
+              <div class="button">Hold</div>
+              <div class="button">Flank</div>
+              <div class="button">Take</div>
+              <div class="button dark">Target</div>
+              <div class="button dark">Clear</div>
+            </div>
+            <div class="stance-row">
+              <div class="tiny-button">Vorsichtig</div>
+              <div class="tiny-button">Normal</div>
+              <div class="tiny-button">Aggressiv</div>
+            </div>
+            <div class="execute-row">
+              <div class="button primary">GO</div>
+              <div class="queue-line"><span class="badge amber">Hold</span><span class="ellipsis">Team GOLD | SEC 360 + OW | wartet auf Ziel</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hud-panel bottom-center">
+          <div class="hud-title"><span>#17 SELECTED FIRETEAM</span><span class="badge green">8 deployed</span></div>
+          <div class="hud-body">
+            <div class="team-strip">
+              <div class="roster-card active">
+                <div class="roster-main">
+                  <div class="avatar">AV</div>
+                  <div class="ellipsis">
+                    <h3 class="ellipsis">Anja Voss</h3>
+                    <div class="minor ellipsis">IDLE | FAW | COV</div>
+                  </div>
+                </div>
+                <div class="roster-stats">
+                  <span class="stat">A:0.7</span><span class="stat">S:0.5</span><span class="stat">L:0.8</span><span class="stat">T:C</span>
+                </div>
+              </div>
+              <div class="roster-card">
+                <div class="roster-main"><div class="avatar">TM</div><div class="ellipsis"><h3 class="ellipsis">Talia Mercer</h3><div class="minor ellipsis">READY | SMG</div></div></div>
+                <div class="roster-stats"><span class="stat">A:0.4</span><span class="stat">S:0.4</span><span class="stat">L:0.8</span><span class="stat">T:C</span></div>
+              </div>
+              <div class="roster-card">
+                <div class="roster-main"><div class="avatar">DH</div><div class="ellipsis"><h3 class="ellipsis">Darius Holt</h3><div class="minor ellipsis">MOVE | MED</div></div></div>
+                <div class="roster-stats"><span class="stat">A:0.6</span><span class="stat">S:0.8</span><span class="stat">L:0.2</span><span class="stat">T:C</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hud-panel bottom-right">
+          <div class="hud-title"><span>#18 MISSION CONTROL</span><span class="badge amber">LZ</span></div>
+          <div class="hud-body">
+            <div class="mission-grid">
+              <div class="button warn">Set LZ</div>
+              <div class="button dark">Drop</div>
+              <div class="tiny-button">NW</div>
+              <div class="tiny-button">NE</div>
+              <div class="tiny-button">SW</div>
+              <div class="tiny-button">SE</div>
+            </div>
+            <div class="status-feed">
+              <div class="readout"><span class="badge">LZ</span><span class="ellipsis">offen | Approach NW</span></div>
+              <div class="readout"><span class="badge amber">ETA</span><span class="ellipsis">Drop wartet</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="concept">
+      <div class="concept-head">
+        <div>
+          <h2>Vorschlag B: Operator Cards</h2>
+          <p>Homebase/FOB bekommt keine Extra-Fenster fuer Inbound und Deck. Der Zustand lebt als kompakter Balken an Karten und Deck-Zeilen.</p>
+        </div>
+        <div class="chip-row">
+          <span class="chip hot">Homebase / FOB</span>
+          <span class="chip">#04/#06 entfallen</span>
+          <span class="chip">Kartenbasiert</span>
+        </div>
+      </div>
+      <div class="viewport">
+        <div class="homebase-layout">
+          <div class="column-panel">
+            <div class="hud-title"><span>ROSTER FILTER</span><span class="badge">ALL</span></div>
+            <div class="column-body">
+              <div class="tabs">
+                <div class="tab">Home</div>
+                <div class="tab">FOB</div>
+                <div class="tab">Ready</div>
+              </div>
+              <div class="status-feed">
+                <div class="readout"><span class="badge green">12</span><span class="ellipsis">einsatzbereit</span></div>
+                <div class="readout"><span class="badge amber">3</span><span class="ellipsis">Transfer / Deck</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="column-panel">
+            <div class="hud-title"><span>NPC CARDS</span><span class="badge green">stable height</span></div>
+            <div class="column-body">
+              <div class="npc-list">
+                <div class="npc-card">
+                  <div class="avatar">AV</div>
+                  <div class="ellipsis"><h3 class="ellipsis">Anja Voss</h3><div class="minor ellipsis">Lead | SMG | Helm</div></div>
+                  <span class="badge green">READY</span>
+                  <div class="status-bar"><span class="ellipsis">FOB inbound: 00:42</span><span>Bay 2</span></div>
+                </div>
+                <div class="npc-card">
+                  <div class="avatar">TM</div>
+                  <div class="ellipsis"><h3 class="ellipsis">Talia Mercer</h3><div class="minor ellipsis">Medic | Medictool</div></div>
+                  <span class="badge amber">DECK</span>
+                  <div class="status-bar"><span class="ellipsis">Deck activity: weapon check</span><span>SMG</span></div>
+                </div>
+                <div class="npc-card">
+                  <div class="avatar">DH</div>
+                  <div class="ellipsis"><h3 class="ellipsis">Darius Holt</h3><div class="minor ellipsis">Rifle | reserve</div></div>
+                  <span class="badge">IDLE</span>
+                  <div class="status-bar"><span class="ellipsis">No transfer assigned</span><span>Base</span></div>
+                </div>
+                <div class="npc-card">
+                  <div class="avatar">KV</div>
+                  <div class="ellipsis"><h3 class="ellipsis">Kenzo Vale</h3><div class="minor ellipsis">Scout | SMG</div></div>
+                  <span class="badge green">READY</span>
+                  <div class="status-bar"><span class="ellipsis">FOB synced</span><span>Gold</span></div>
+                </div>
+                <div class="npc-card">
+                  <div class="avatar">LF</div>
+                  <div class="ellipsis"><h3 class="ellipsis">Leona Falk</h3><div class="minor ellipsis">Engineer | tool</div></div>
+                  <span class="badge red">DOWN</span>
+                  <div class="status-bar"><span class="ellipsis">Medbay: recovery pending</span><span>02:10</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="column-panel">
+            <div class="hud-title"><span>DECK QUEUE</span><span class="badge amber">#06 compact</span></div>
+            <div class="column-body">
+              <div class="deck-row"><span class="ellipsis">Bay 1 | Dropship prep</span><span class="badge amber">72%</span></div>
+              <div class="deck-row"><span class="ellipsis">Bay 2 | Blue team boards</span><span class="badge green">live</span></div>
+              <div class="deck-row"><span class="ellipsis">Cargo | Ammo crates</span><span class="badge">hold</span></div>
+              <div class="deck-row"><span class="ellipsis">Med | Triage pack</span><span class="badge red">low</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="concept">
+      <div class="concept-head">
+        <div>
+          <h2>Vorschlag C: Dense Loadout Drawer</h2>
+          <p>#13 bleibt klein und berechenbar. Waffenbilder sind 52x42, Zeilen sind fix, spaetere Waffen koennen als weitere Slots hinein.</p>
+        </div>
+        <div class="chip-row">
+          <span class="chip hot">#13 LOADOUT</span>
+          <span class="chip">SMG + Medictool</span>
+          <span class="chip">Preview aus Projekt</span>
+        </div>
+      </div>
+      <div class="viewport">
+        <div class="loadout-layout">
+          <div class="column-panel">
+            <div class="hud-title"><span>#13 LOADOUT</span><span class="badge">5 slots</span></div>
+            <div class="column-body">
+              <div class="loadout-list">
+                <div class="loadout-row">
+                  <div class="small-avatar">AV</div>
+                  <div class="ellipsis"><h3 class="ellipsis">Anja Voss</h3><div class="minor ellipsis">Lead | armor light</div></div>
+                  <div class="slot">SMG</div>
+                  <div class="slot">Medkit</div>
+                  <img class="weapon-preview" src="../../../Assets/used/npc/blaster_kit/previews/blaster-a.png" alt="SMG preview">
+                </div>
+                <div class="loadout-row">
+                  <div class="small-avatar">TM</div>
+                  <div class="ellipsis"><h3 class="ellipsis">Talia Mercer</h3><div class="minor ellipsis">Medic | support</div></div>
+                  <div class="slot">SMG</div>
+                  <div class="slot">Medictool</div>
+                  <img class="weapon-preview" src="../../../Assets/used/npc/blaster_kit/previews/blaster-b.png" alt="Medictool preview">
+                </div>
+                <div class="loadout-row">
+                  <div class="small-avatar">DH</div>
+                  <div class="ellipsis"><h3 class="ellipsis">Darius Holt</h3><div class="minor ellipsis">Rifle | cover</div></div>
+                  <div class="slot">SMG</div>
+                  <div class="slot">Empty</div>
+                  <img class="weapon-preview" src="../../../Assets/used/npc/blaster_kit/previews/blaster-a.png" alt="SMG preview">
+                </div>
+                <div class="loadout-row">
+                  <div class="small-avatar">KV</div>
+                  <div class="ellipsis"><h3 class="ellipsis">Kenzo Vale</h3><div class="minor ellipsis">Scout | fast</div></div>
+                  <div class="slot">SMG</div>
+                  <div class="slot">Empty</div>
+                  <img class="weapon-preview" src="../../../Assets/used/npc/blaster_kit/previews/blaster-a.png" alt="SMG preview">
+                </div>
+                <div class="loadout-row">
+                  <div class="small-avatar">LF</div>
+                  <div class="ellipsis"><h3 class="ellipsis">Leona Falk</h3><div class="minor ellipsis">Engineer | utility</div></div>
+                  <div class="slot">SMG</div>
+                  <div class="slot">Medictool</div>
+                  <img class="weapon-preview" src="../../../Assets/used/npc/blaster_kit/previews/blaster-b.png" alt="Medictool preview">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="column-panel">
+            <div class="hud-title"><span>WEAPON PREVIEW</span><span class="badge green">project asset</span></div>
+            <div class="big-preview">
+              <div class="readout"><span class="badge green">SMG</span><span class="ellipsis">Blaster A | primary hand socket | scale locked</span></div>
+              <div class="preview-stage">
+                <img src="../../../Assets/used/npc/blaster_kit/previews/blaster-a.png" alt="Large SMG preview">
+              </div>
+              <div class="command-grid">
+                <div class="button">Primary</div>
+                <div class="button dark">Secondary</div>
+                <div class="button dark">Remove</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
