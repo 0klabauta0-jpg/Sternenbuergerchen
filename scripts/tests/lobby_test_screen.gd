@@ -1,64 +1,47 @@
 extends Control
 
 const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
-const MAX_PLAYERS: int = 2
+const MULTIPLAYER_SESSION_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_session.gd")
 const DEFAULT_PORT: int = 7777
-const HOST_TEAM_ID: String = "team_alpha"
-const CLIENT_TEAM_ID: String = "team_bravo"
+const DEFAULT_ADDRESS: String = "127.0.0.1"
 
 var _active_mission = null
 var _last_mission_result: Dictionary = {}
+var _session: Node = null
 
 
 func _ready() -> void:
+	_ensure_multiplayer_session()
 	_connect_ui_signals()
-	_connect_multiplayer_signals()
-	_refresh_lobby_controls()
-	_set_status_text("Ready. Host or join a local test session.")
 	_get_debrief_screen().visible = false
+	_set_lobby_visible(true)
+	_refresh_from_session()
 
 
 func host_game(port: int = DEFAULT_PORT) -> bool:
 	_release_active_mission()
 	_hide_debrief()
-
-	var peer := ENetMultiplayerPeer.new()
-	var error: Error = peer.create_server(port, MAX_PLAYERS)
-	if error != OK:
-		_set_status_text("Host failed: %s" % error_string(error))
-		return false
-
-	multiplayer.multiplayer_peer = peer
-	_refresh_lobby_controls()
-	_refresh_host_status(true)
-	return true
+	_set_lobby_visible(true)
+	return bool(_session.call("start_host", port))
 
 
-func join_game(address: String = "127.0.0.1", port: int = DEFAULT_PORT) -> bool:
+func join_game(address: String = DEFAULT_ADDRESS, port: int = DEFAULT_PORT) -> bool:
 	_release_active_mission()
 	_hide_debrief()
+	_set_lobby_visible(true)
+	return bool(_session.call("join_session", address, port))
 
-	var peer := ENetMultiplayerPeer.new()
-	var error: Error = peer.create_client(address, port)
-	if error != OK:
-		_set_status_text("Join failed: %s" % error_string(error))
-		return false
 
-	multiplayer.multiplayer_peer = peer
-	_refresh_lobby_controls()
-	_set_status_text("Connecting to %s:%d..." % [address, port])
-	return true
+func disconnect_game() -> void:
+	_session.call("disconnect_session")
+
+
+func set_ready(ready: bool) -> bool:
+	return bool(_session.call("set_local_ready", ready))
 
 
 func start_mission() -> bool:
-	if not _can_host_start_mission():
-		return false
-
-	var assignments: Dictionary = _build_peer_team_assignments()
-	_launch_mission(assignments)
-	_receive_start_mission.rpc(assignments)
-	_refresh_host_status(true)
-	return true
+	return bool(_session.call("request_start_mission"))
 
 
 func has_active_mission() -> bool:
@@ -69,7 +52,6 @@ func get_status_text() -> String:
 	var status_label := get_node_or_null("Panel/Margin/VBox/StatusLabel") as Label
 	if status_label == null:
 		return ""
-
 	return status_label.text
 
 
@@ -77,27 +59,31 @@ func get_last_mission_result() -> Dictionary:
 	return _last_mission_result.duplicate(true)
 
 
-@rpc("authority", "reliable")
-func _receive_lobby_status(status_text: String, can_start: bool) -> void:
-	if multiplayer.is_server():
-		return
-
-	_set_status_text(status_text)
-	_refresh_lobby_controls(can_start)
+func get_session_snapshot() -> Dictionary:
+	return Dictionary(_session.call("get_session_snapshot")).duplicate(true)
 
 
-@rpc("authority", "reliable")
-func _receive_start_mission(assignments: Dictionary) -> void:
-	if multiplayer.is_server():
-		return
+func _ensure_multiplayer_session() -> void:
+	_session = get_node_or_null("MultiplayerSession")
+	if _session == null:
+		_session = MULTIPLAYER_SESSION_SCRIPT.new()
+		_session.name = "MultiplayerSession"
+		add_child(_session)
 
-	_launch_mission(assignments)
+	if not _session.session_snapshot_changed.is_connected(_on_session_snapshot_changed):
+		_session.session_snapshot_changed.connect(_on_session_snapshot_changed)
+	if not _session.mission_start_requested.is_connected(_on_session_mission_start_requested):
+		_session.mission_start_requested.connect(_on_session_mission_start_requested)
+	if not _session.session_disconnected.is_connected(_on_session_disconnected):
+		_session.session_disconnected.connect(_on_session_disconnected)
 
 
 func _connect_ui_signals() -> void:
 	var host_button := get_node_or_null("Panel/Margin/VBox/ButtonRow/HostButton") as Button
 	var join_button := get_node_or_null("Panel/Margin/VBox/ButtonRow/JoinButton") as Button
 	var start_button := get_node_or_null("Panel/Margin/VBox/ButtonRow/StartMissionButton") as Button
+	var ready_button := get_node_or_null("Panel/Margin/VBox/SessionRow/ReadyButton") as Button
+	var disconnect_button := get_node_or_null("Panel/Margin/VBox/SessionRow/DisconnectButton") as Button
 	var debrief_screen = _get_debrief_screen()
 	if host_button != null and not host_button.pressed.is_connected(_on_host_pressed):
 		host_button.pressed.connect(_on_host_pressed)
@@ -105,23 +91,14 @@ func _connect_ui_signals() -> void:
 		join_button.pressed.connect(_on_join_pressed)
 	if start_button != null and not start_button.pressed.is_connected(_on_start_pressed):
 		start_button.pressed.connect(_on_start_pressed)
+	if ready_button != null and not ready_button.pressed.is_connected(_on_ready_pressed):
+		ready_button.pressed.connect(_on_ready_pressed)
+	if disconnect_button != null and not disconnect_button.pressed.is_connected(_on_disconnect_pressed):
+		disconnect_button.pressed.connect(_on_disconnect_pressed)
 	if debrief_screen != null and not debrief_screen.return_to_fob_requested.is_connected(_on_debrief_return_requested):
 		debrief_screen.return_to_fob_requested.connect(_on_debrief_return_requested)
 	if debrief_screen != null and not debrief_screen.return_to_homebase_requested.is_connected(_on_debrief_return_requested):
 		debrief_screen.return_to_homebase_requested.connect(_on_debrief_return_requested)
-
-
-func _connect_multiplayer_signals() -> void:
-	if not multiplayer.peer_connected.is_connected(_on_peer_connected):
-		multiplayer.peer_connected.connect(_on_peer_connected)
-	if not multiplayer.peer_disconnected.is_connected(_on_peer_disconnected):
-		multiplayer.peer_disconnected.connect(_on_peer_disconnected)
-	if not multiplayer.connected_to_server.is_connected(_on_connected_to_server):
-		multiplayer.connected_to_server.connect(_on_connected_to_server)
-	if not multiplayer.connection_failed.is_connected(_on_connection_failed):
-		multiplayer.connection_failed.connect(_on_connection_failed)
-	if not multiplayer.server_disconnected.is_connected(_on_server_disconnected):
-		multiplayer.server_disconnected.connect(_on_server_disconnected)
 
 
 func _on_host_pressed() -> void:
@@ -136,35 +113,35 @@ func _on_start_pressed() -> void:
 	start_mission()
 
 
+func _on_ready_pressed() -> void:
+	var snapshot: Dictionary = get_session_snapshot()
+	set_ready(not bool(snapshot.get("local_ready", false)))
+
+
+func _on_disconnect_pressed() -> void:
+	disconnect_game()
+
+
 func _on_debrief_return_requested() -> void:
 	_hide_debrief()
 	_set_lobby_visible(true)
-	_refresh_local_status()
-	_refresh_lobby_controls()
+	_session.call("complete_mission")
+	_refresh_from_session()
 
 
-func _on_peer_connected(_peer_id: int) -> void:
-	if not multiplayer.is_server():
-		return
-
-	_refresh_host_status(true)
+func _on_session_snapshot_changed(snapshot: Dictionary) -> void:
+	_apply_session_snapshot(snapshot)
 
 
-func _on_peer_disconnected(_peer_id: int) -> void:
-	_handle_disconnect("Peer disconnected. Returning to lobby.")
+func _on_session_mission_start_requested(assignments: Dictionary) -> void:
+	_launch_mission(assignments)
 
 
-func _on_connected_to_server() -> void:
-	_set_status_text("Connected to host. Waiting for start...")
-	_refresh_lobby_controls(false)
-
-
-func _on_connection_failed() -> void:
-	_handle_disconnect("Connection failed. Back in lobby.")
-
-
-func _on_server_disconnected() -> void:
-	_handle_disconnect("Disconnected from host. Back in lobby.")
+func _on_session_disconnected(_message: String) -> void:
+	_release_active_mission()
+	_hide_debrief()
+	_set_lobby_visible(true)
+	_refresh_from_session()
 
 
 func _launch_mission(assignments: Dictionary) -> void:
@@ -178,16 +155,32 @@ func _launch_mission(assignments: Dictionary) -> void:
 
 	var mission_instance = MISSION_TEST_SCENE.instantiate()
 	var simulation_root = mission_instance.get_node_or_null("SimulationRoot")
-	if simulation_root != null:
-		simulation_root.set("is_server_authoritative", true)
-		if simulation_root.has_method("set_peer_team_assignments"):
-			simulation_root.call("set_peer_team_assignments", assignments)
+	_apply_session_assignments_to_simulation_root(simulation_root, assignments)
 
 	mission_host.add_child(mission_instance)
 	_active_mission = mission_instance
 	_connect_mission_signals(mission_instance)
 	_set_lobby_visible(false)
 	_set_status_text("Mission running...")
+	_refresh_lobby_controls()
+
+
+func _apply_session_assignments_to_simulation_root(simulation_root: Node, assignments: Dictionary) -> void:
+	if simulation_root == null:
+		return
+
+	simulation_root.set("is_server_authoritative", true)
+	var team_assignments: Dictionary = Dictionary(assignments.get("peer_teams", assignments)).duplicate(true)
+	if simulation_root.has_method("set_peer_team_assignments"):
+		simulation_root.call("set_peer_team_assignments", team_assignments)
+
+	if simulation_root.has_method("set_peer_role"):
+		var role_assignments: Dictionary = Dictionary(assignments.get("peer_roles", {}))
+		for peer_id_variant in role_assignments.keys():
+			simulation_root.call("set_peer_role", int(peer_id_variant), String(role_assignments[peer_id_variant]))
+
+	if simulation_root.has_method("set_peer_fireteam_assignments"):
+		simulation_root.call("set_peer_fireteam_assignments", Dictionary(assignments.get("peer_fireteams", {})).duplicate(true))
 
 
 func _connect_mission_signals(mission_instance: Node) -> void:
@@ -205,9 +198,9 @@ func _connect_mission_signals(mission_instance: Node) -> void:
 func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 	_last_mission_result = mission_result.duplicate(true)
 	_release_active_mission()
+	_session.call("complete_mission")
 	_show_debrief(mission_result)
-	_refresh_local_status()
-	_refresh_lobby_controls()
+	_refresh_from_session()
 
 
 func _show_debrief(mission_result: Dictionary) -> void:
@@ -235,82 +228,43 @@ func _release_active_mission() -> void:
 	_active_mission = null
 
 
-func _handle_disconnect(message: String) -> void:
-	_release_active_mission()
-	_hide_debrief()
-	_shutdown_multiplayer_peer()
-	_set_lobby_visible(true)
-	_set_status_text(message)
-	_refresh_lobby_controls()
+func _refresh_from_session() -> void:
+	_apply_session_snapshot(get_session_snapshot())
 
 
-func _shutdown_multiplayer_peer() -> void:
-	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
-	if peer == null:
-		return
-
-	multiplayer.multiplayer_peer = null
+func _apply_session_snapshot(snapshot: Dictionary) -> void:
+	_set_status_text(String(snapshot.get("status_text", "Ready. Host or join a local test session.")))
+	_refresh_lobby_controls(snapshot)
 
 
-func _refresh_local_status() -> void:
-	if multiplayer.multiplayer_peer == null:
-		_set_status_text("Ready. Host or join a local test session.")
-		return
-
-	if multiplayer.is_server():
-		_refresh_host_status(true)
-		return
-
-	_set_status_text("Connected (2/2)")
-
-
-func _refresh_host_status(propagate_to_clients: bool) -> void:
-	var connected_players: int = 1 + multiplayer.get_peers().size()
-	var can_start: bool = connected_players >= MAX_PLAYERS and _active_mission == null
-	var status_text: String = "Waiting for players... (%d/%d)" % [connected_players, MAX_PLAYERS]
-	if connected_players >= MAX_PLAYERS:
-		status_text = "Connected (%d/%d)" % [connected_players, MAX_PLAYERS]
-
-	_set_status_text(status_text)
-	_refresh_lobby_controls(can_start)
-	if propagate_to_clients and multiplayer.is_server() and multiplayer.multiplayer_peer != null:
-		_receive_lobby_status.rpc(status_text, can_start)
-
-
-func _refresh_lobby_controls(can_start_override: bool = false) -> void:
+func _refresh_lobby_controls(snapshot: Dictionary = {}) -> void:
 	var host_button := get_node_or_null("Panel/Margin/VBox/ButtonRow/HostButton") as Button
 	var join_button := get_node_or_null("Panel/Margin/VBox/ButtonRow/JoinButton") as Button
 	var start_button := get_node_or_null("Panel/Margin/VBox/ButtonRow/StartMissionButton") as Button
-	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
-	var has_active_peer: bool = peer != null and peer.get_connection_status() != MultiplayerPeer.CONNECTION_DISCONNECTED
-	var is_host: bool = has_active_peer and multiplayer.is_server()
-	var can_start: bool = can_start_override or _can_host_start_mission()
+	var ready_button := get_node_or_null("Panel/Margin/VBox/SessionRow/ReadyButton") as Button
+	var disconnect_button := get_node_or_null("Panel/Margin/VBox/SessionRow/DisconnectButton") as Button
+	var current_snapshot: Dictionary = snapshot if not snapshot.is_empty() else get_session_snapshot()
+	var has_active_peer: bool = bool(current_snapshot.get("has_active_peer", false))
+	var can_toggle_ready: bool = bool(current_snapshot.get("can_toggle_ready", false))
+	var can_disconnect: bool = bool(current_snapshot.get("can_disconnect", false))
+	var is_host: bool = bool(current_snapshot.get("is_host", false))
+	var can_start: bool = bool(current_snapshot.get("can_start_mission", false))
+	var local_ready: bool = bool(current_snapshot.get("local_ready", false))
 
 	if host_button != null:
-		host_button.disabled = has_active_peer
+		host_button.disabled = has_active_peer or has_active_mission()
 	if join_button != null:
-		join_button.disabled = has_active_peer
+		join_button.disabled = has_active_peer or has_active_mission()
 	if start_button != null:
 		start_button.visible = is_host
 		start_button.disabled = not can_start
-
-
-func _can_host_start_mission() -> bool:
-	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
-	if peer == null or peer.get_connection_status() == MultiplayerPeer.CONNECTION_DISCONNECTED:
-		return false
-
-	return multiplayer.is_server() and multiplayer.get_peers().size() >= (MAX_PLAYERS - 1) and _active_mission == null
-
-
-func _build_peer_team_assignments() -> Dictionary:
-	var assignments: Dictionary = {
-		1: HOST_TEAM_ID,
-	}
-	for peer_id in multiplayer.get_peers():
-		assignments[int(peer_id)] = CLIENT_TEAM_ID
-
-	return assignments
+	if ready_button != null:
+		ready_button.visible = has_active_peer or can_toggle_ready
+		ready_button.disabled = not can_toggle_ready
+		ready_button.text = "Unready" if local_ready else "Ready"
+	if disconnect_button != null:
+		disconnect_button.visible = has_active_peer or can_disconnect
+		disconnect_button.disabled = not can_disconnect
 
 
 func _set_status_text(status_text: String) -> void:

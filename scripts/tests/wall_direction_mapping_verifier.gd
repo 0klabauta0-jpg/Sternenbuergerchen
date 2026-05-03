@@ -3,6 +3,7 @@ extends SceneTree
 const MAP_EDITOR_SCRIPT: GDScript = preload("res://scripts/editor/map_editor.gd")
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const TERRAIN_MAP_RENDERER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_renderer.gd")
+const TERRAIN_MAP_3D_VIEW_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_3d_view.gd")
 
 const WALL_TYPE_IDS: PackedStringArray = [
 	"wall_straight_se",
@@ -10,12 +11,42 @@ const WALL_TYPE_IDS: PackedStringArray = [
 	"wall_straight_ne",
 	"wall_straight_nw",
 ]
+const WALL_3D_TYPE_IDS: PackedStringArray = [
+	"wall_straight_se",
+	"wall_straight_sw",
+	"wall_straight_ne",
+	"wall_straight_nw",
+	"wall_corner_se",
+	"wall_corner_sw",
+	"wall_corner_ne",
+	"wall_corner_nw",
+]
 const KENNEY_DIAMOND_CENTER := Vector2(256.0, 315.0)
 const EXPECTED_WALL_TEXTURES: Dictionary = {
 	"wall_straight_se": "res://Assets/kenney_space-kit/Isometric/corridor_wall_NE.png",
 	"wall_straight_sw": "res://Assets/kenney_space-kit/Isometric/corridor_wall_SE.png",
 	"wall_straight_ne": "res://Assets/kenney_space-kit/Isometric/corridor_wall_NW.png",
 	"wall_straight_nw": "res://Assets/kenney_space-kit/Isometric/corridor_wall_SW.png",
+}
+const EXPECTED_3D_WALL_ROTATION_DEGREES: Dictionary = {
+	"wall_straight_se": 0.0,
+	"wall_straight_sw": 90.0,
+	"wall_straight_ne": 270.0,
+	"wall_straight_nw": 180.0,
+	"wall_corner_se": 90.0,
+	"wall_corner_sw": 0.0,
+	"wall_corner_ne": 180.0,
+	"wall_corner_nw": 270.0,
+}
+const EXPECTED_3D_WALL_POSITION_OFFSET: Dictionary = {
+	"wall_straight_se": Vector3(0.45, 0.04, 0.0),
+	"wall_straight_sw": Vector3(0.0, 0.04, 0.45),
+	"wall_straight_ne": Vector3(0.0, 0.04, -0.45),
+	"wall_straight_nw": Vector3(-0.45, 0.04, 0.0),
+	"wall_corner_se": Vector3(0.0, 0.04, 0.0),
+	"wall_corner_sw": Vector3(0.0, 0.04, 0.0),
+	"wall_corner_ne": Vector3(0.0, 0.04, 0.0),
+	"wall_corner_nw": Vector3(0.0, 0.04, 0.0),
 }
 
 var _passed: int = 0
@@ -30,6 +61,7 @@ func _run_tests() -> void:
 	print("=== Wall Direction Mapping Verifier ===")
 	_test_terrain_renderer_wall_mapping()
 	_test_map_editor_wall_mapping()
+	await _test_terrain_map_3d_view_wall_mapping()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	if _failed > 0:
 		print("FAIL")
@@ -70,10 +102,32 @@ func _test_map_editor_wall_mapping() -> void:
 	editor.queue_free()
 
 
+func _test_terrain_map_3d_view_wall_mapping() -> void:
+	var primary_view: Node = TERRAIN_MAP_3D_VIEW_SCRIPT.new()
+	root.add_child(primary_view)
+	primary_view.call("configure_from_map", _make_wall_map_data())
+	await _wait_frames(4)
+	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
+	_assert(int(snapshot.get("asset_model_count", 0)) == WALL_3D_TYPE_IDS.size(), "TerrainMap3DView renders walls as calibrated Kenney GLB models")
+	_assert(int(snapshot.get("asset_texture_count", 0)) == 0 and int(snapshot.get("placeholder_object_count", 0)) == 0, "TerrainMap3DView does not use Sprite3D/block fallback for calibrated wall models")
+	_assert(int(snapshot.get("missing_asset_mapping_count", 0)) == 0, "TerrainMap3DView resolves every calibrated wall model mapping")
+	for type_id in WALL_3D_TYPE_IDS:
+		var grid_position: Vector2i = _grid_for_type_id(type_id)
+		var wall_node := _find_3d_wall_model(primary_view, type_id, grid_position)
+		_assert(wall_node != null and _node_has_mesh(wall_node), "TerrainMap3DView loads %s as a 3D wall model" % type_id)
+		var expected_rotation: float = float(EXPECTED_3D_WALL_ROTATION_DEGREES[type_id])
+		_assert(wall_node != null and absf(wrapf(wall_node.rotation_degrees.y - expected_rotation, -180.0, 180.0)) < 0.1, "TerrainMap3DView maps %s to %.0f degree 3D rotation" % [type_id, expected_rotation])
+		var expected_offset := Vector3(EXPECTED_3D_WALL_POSITION_OFFSET[type_id])
+		var expected_position := Vector3(float(grid_position.x), expected_offset.y, float(grid_position.y)) + Vector3(expected_offset.x, 0.0, expected_offset.z)
+		_assert(wall_node != null and wall_node.position.distance_to(expected_position) < 0.01, "TerrainMap3DView anchors %s on its field edge" % type_id)
+	primary_view.queue_free()
+	await _wait_frames(2)
+
+
 func _make_wall_map_data():
-	var map_data = TERRAIN_MAP_DATA_SCRIPT.call("create_empty", "wall_direction_mapping", Vector2i(4, 1), Vector2.ZERO)
+	var map_data = TERRAIN_MAP_DATA_SCRIPT.call("create_empty", "wall_direction_mapping", Vector2i(WALL_3D_TYPE_IDS.size(), 1), Vector2.ZERO)
 	var index: int = 0
-	for type_id in WALL_TYPE_IDS:
+	for type_id in WALL_3D_TYPE_IDS:
 		var tile_data = map_data.call("get_tile_at_grid", Vector2i(index, 0))
 		tile_data.type_id = String(type_id)
 		tile_data.walkable = false
@@ -84,7 +138,7 @@ func _make_wall_map_data():
 
 
 func _grid_for_type_id(type_id: String) -> Vector2i:
-	var index: int = WALL_TYPE_IDS.find(type_id)
+	var index: int = WALL_3D_TYPE_IDS.find(type_id)
 	return Vector2i(index, 0)
 
 
@@ -111,6 +165,29 @@ func _find_editor_wall_sprite_at(editor, grid_position: Vector2i) -> Sprite2D:
 		if sprite != null and sprite.position == expected_position:
 			return sprite
 	return null
+
+
+func _find_3d_wall_model(primary_view: Node, type_id: String, grid_position: Vector2i) -> Node3D:
+	var map_root := primary_view.get_node_or_null("ViewportContainer/SubViewport/WorldRoot/MapRoot3D")
+	if map_root == null:
+		return null
+	return map_root.get_node_or_null("Asset_%s_%d_%d" % [type_id, grid_position.x, grid_position.y]) as Node3D
+
+
+func _node_has_mesh(node: Node) -> bool:
+	if node == null:
+		return false
+	if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
+		return true
+	for child in node.get_children():
+		if _node_has_mesh(child):
+			return true
+	return false
+
+
+func _wait_frames(frame_count: int) -> void:
+	for _index in range(maxi(frame_count, 0)):
+		await process_frame
 
 
 func _assert(condition: bool, message: String) -> void:

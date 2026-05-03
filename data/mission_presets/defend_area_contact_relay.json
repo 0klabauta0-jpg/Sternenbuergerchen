@@ -1,0 +1,75 @@
+{
+  "preset_id": "defend_area_contact_relay",
+  "display_name": "Defend Area: Contact Relay",
+  "map_file_path": "res://maps/test_mission.json",
+  "objective": {
+    "marker_id": "objective_point"
+  },
+  "enemy_setup": [
+    {
+      "unit_id": "enemy_delta",
+      "node_path": "EnemyDelta",
+      "role": "forward_contact",
+      "world_position": {
+        "x": 420.0,
+        "y": 420.0
+      }
+    },
+    {
+      "unit_id": "enemy_echo",
+      "node_path": "EnemyEcho",
+      "role": "relay_contact",
+      "world_position": {
+        "x": 500.0,
+        "y": 460.0
+      }
+    }
+  ],
+  "wave_config": {
+    "wave_count": 1,
+    "units_per_wave": 2,
+    "first_wave_delay_seconds": 0.0,
+    "wave_delay_seconds": 120.0
+  },
+  "patrol_paths": {
+    "enemy_delta": [
+      {
+        "x": 420.0,
+        "y": 420.0
+      },
+      {
+        "x": 480.0,
+        "y": 448.0
+      }
+    ],
+    "enemy_echo": [
+      {
+        "x": 500.0,
+        "y": 460.0
+      },
+      {
+        "x": 560.0,
+        "y": 488.0
+      }
+    ]
+  },
+  "combat": {
+    "contact_range": 240.0,
+    "win_condition": "objective_capture"
+  },
+  "area_order_test": {
+    "command_type": "defend",
+    "start_world_position": {
+      "x": 360.0,
+      "y": 360.0
+    },
+    "end_world_position": {
+      "x": 560.0,
+      "y": 520.0
+    }
+  },
+  "notes": [
+    "Defend-Area-Test nahe Objective, mit zwei Kontakten fuer Relay-/Contact-Checks.",
+    "Kein gespeicherter Dropship- oder LZ-Zustand."
+  ]
+}

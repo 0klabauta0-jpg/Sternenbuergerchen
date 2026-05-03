@@ -7,6 +7,8 @@ const FLANK_VULNERABILITY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tac
 const MEDIC_SUPPORT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/medic_support_resolver.gd")
 const COMBAT_FIRE_DECISION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/combat_fire_decision_resolver.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
+const MISSION_COMBAT_AUTHORITY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_combat_authority_contract.gd")
+const MISSION_COMBAT_REMOTE_EVENT_BRIDGE_SCRIPT: GDScript = preload("res://scripts/mission/mission_combat_remote_event_bridge.gd")
 const CONTACT_LINE_NAME: String = "CombatContactLine"
 const EVENT_LABEL_NAME: String = "CombatEventLabel"
 const WINNER_LABEL_NAME: String = "CombatWinnerLabel"
@@ -115,6 +117,7 @@ var _enemy_patrol_contact_locked: Dictionary = {}
 var _overwatch_controller = OVERWATCH_CONTROLLER_SCRIPT.new()
 var _contact_tracker = CONTACT_TRACKER_SCRIPT.new()
 var _flank_vulnerability_resolver = FLANK_VULNERABILITY_RESOLVER_SCRIPT.new()
+var _remote_event_bridge = MISSION_COMBAT_REMOTE_EVENT_BRIDGE_SCRIPT.new()
 
 
 func _ready() -> void:
@@ -163,6 +166,26 @@ func get_mission_result() -> Dictionary:
 	return _mission_result.duplicate(true)
 
 
+func get_playability_snapshot() -> Dictionary:
+	var base_snapshot: Dictionary = {
+		"combat_state": "resolved" if _combat_finished else "active",
+		"win_condition_type": win_condition,
+		"mission_resolved": _combat_finished,
+		"result": String(_mission_result.get("result", "")),
+		"winning_team_id": _winning_team_id,
+		"enemy_fit_count": _count_fit_enemy_units(),
+		"friendly_fit_count": _count_fit_units(friendly_unit_paths),
+		"duration_seconds": _get_duration_seconds(),
+		"remaining_time_limit_seconds": get_remaining_time_limit_seconds(),
+		"last_event_text": _last_event_text,
+	}
+	return Dictionary(MISSION_COMBAT_AUTHORITY_CONTRACT_SCRIPT.call("build_playability_snapshot", base_snapshot, _get_objective_status(), _mission_result))
+
+
+func get_authority_contract_snapshot() -> Dictionary:
+	return Dictionary(MISSION_COMBAT_AUTHORITY_CONTRACT_SCRIPT.call("get_contract_snapshot")).duplicate(true)
+
+
 func get_contact_snapshot() -> Array:
 	if _contact_tracker == null:
 		return []
@@ -173,6 +196,19 @@ func get_fireteam_contact_snapshot(fireteam_id: String) -> Array:
 	if _contact_tracker == null:
 		return []
 	return Array(_contact_tracker.call("get_fireteam_contacts", fireteam_id)).duplicate(true)
+
+
+func _publish_multiplayer_snapshot_context(simulation_root: Node) -> void:
+	if simulation_root == null or not simulation_root.has_method("set_multiplayer_snapshot_context"):
+		return
+
+	simulation_root.call(
+		"set_multiplayer_snapshot_context",
+		{
+			"contacts": get_contact_snapshot(),
+			"mission_result": get_mission_result(),
+		}
+	)
 
 
 func get_flank_vulnerability_snapshot() -> Array:
@@ -213,25 +249,18 @@ func _receive_remote_event(
 	if _runs_local_authority:
 		return
 
-	_set_event_text(event_text)
-	if unit_id.is_empty():
-		return
-
-	var unit = _resolve_unit_by_id(unit_id)
-	if unit == null or not unit.has_method("show_event_text"):
-		return
-
-	var resolved_unit_event_text: String = unit_event_text if not unit_event_text.is_empty() else event_text
-	unit.call("show_event_text", resolved_unit_event_text, event_color, duration_seconds)
+	var payload: Dictionary = Dictionary(_remote_event_bridge.call("build_event_payload", event_text, unit_id, event_color, duration_seconds, unit_event_text))
+	_remote_event_bridge.call("apply_event_payload", self, payload)
 
 
 func _on_tick_processed(tick: int) -> void:
 	_current_tick = tick
+	var simulation_root = get_node_or_null(simulation_root_path)
 	if _combat_finished:
 		_update_status_label("resolved")
+		_publish_multiplayer_snapshot_context(simulation_root)
 		return
 
-	var simulation_root = get_node_or_null(simulation_root_path)
 	if simulation_root == null:
 		return
 
@@ -251,6 +280,7 @@ func _on_tick_processed(tick: int) -> void:
 	if overwatch_shots.is_empty():
 		_try_enqueue_attacks(simulation_root)
 	_update_combat_resolution()
+	_publish_multiplayer_snapshot_context(simulation_root)
 	if not _combat_finished:
 		_update_status_label("active")
 
@@ -1447,7 +1477,14 @@ func _broadcast_remote_event(
 	if not _can_broadcast_to_clients():
 		return
 
-	_receive_remote_event.rpc(event_text, unit_id, event_color, duration_seconds, unit_event_text)
+	var payload: Dictionary = Dictionary(_remote_event_bridge.call("build_event_payload", event_text, unit_id, event_color, duration_seconds, unit_event_text))
+	_receive_remote_event.rpc(
+		String(payload.get("event_text", "")),
+		String(payload.get("unit_id", "")),
+		Color(payload.get("event_color", DEFAULT_EVENT_COLOR)),
+		float(payload.get("duration_seconds", EVENT_DEFAULT_DURATION)),
+		String(payload.get("unit_event_text", ""))
+	)
 
 
 func _update_event_label() -> void:
@@ -1632,16 +1669,18 @@ func _resolve_combat(result: String, winning_team_id: String, result_condition_o
 
 func _build_mission_result(result: String, winning_team_id: String) -> Dictionary:
 	var result_condition: String = _mission_result_condition_override if not _mission_result_condition_override.is_empty() else win_condition
-	return {
-		"winning_team_id": winning_team_id,
-		"friendly_team_id": friendly_team_id,
-		"mission_outcome": "won" if result == "victory" else "lost",
-		"result": result,
-		"win_condition_type": result_condition,
-		"objective_captured": _is_objective_captured_by_friendly(),
-		"duration_seconds": _get_duration_seconds(),
-		"team_states": _build_team_states(friendly_unit_paths),
-	}
+	return Dictionary(
+		MISSION_COMBAT_AUTHORITY_CONTRACT_SCRIPT.call(
+			"build_mission_result",
+			result,
+			winning_team_id,
+			friendly_team_id,
+			result_condition,
+			_is_objective_captured_by_friendly(),
+			_get_duration_seconds(),
+			_build_team_states(friendly_unit_paths)
+		)
+	)
 
 
 func _get_enemy_team_id() -> String:

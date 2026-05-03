@@ -6,6 +6,11 @@ const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrai
 const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_catalog.gd")
 const TERRAIN_MAP_RENDERER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_renderer.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
+const MISSION_SCENARIO_DATA_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_data.gd")
+const MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_primary_view_adapter.gd")
+const MAP_EDITOR_HEIGHT_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_height_tool.gd")
+const MAP_EDITOR_PATROL_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_patrol_tool.gd")
+const MAP_EDITOR_MARKER_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_marker_tool.gd")
 const TILE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_SW.png")
 const CLIFF_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_SE.png")
 const CLIFF_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_SW.png")
@@ -76,6 +81,37 @@ const PATROL_PICK_RADIUS: float = 28.0
 const MARKER_OVERLAY_NAME: String = "MarkerOverlay"
 const MARKER_PICK_RADIUS: float = 26.0
 const MARKER_DRAG_THRESHOLD: float = 4.0
+const PRIMARY_VIEW_LEGACY_VISIBILITY_NODES: PackedStringArray = [
+	"TileContainer",
+	"Terrain",
+	"CliffContainer",
+	"WallContainer",
+	"ObjectContainer",
+	"GridOverlay",
+	"SelectionOutline",
+	PATROL_OVERLAY_NAME,
+	MARKER_OVERLAY_NAME,
+]
+const PRIMARY_VIEW_LEGACY_CLEAR_NODES: PackedStringArray = [
+	"Terrain",
+	"CliffContainer",
+	"WallContainer",
+	"ObjectContainer",
+	"GridOverlay",
+	"SelectionOutline",
+	PATROL_OVERLAY_NAME,
+	MARKER_OVERLAY_NAME,
+]
+const DEFAULT_SCENARIO_PATH: String = "res://data/mission_scenarios/new_mission_scenario.json"
+const DEFAULT_SCENARIO_DIR: String = "res://data/mission_scenarios"
+const LIVE_TEST_SCENE_PATH: String = "res://scenes/tests/mission_reactivity_test.tscn"
+const LIVE_TEST_SCENARIO_SCRATCH_PATH: String = "user://mission_editor_live_test_scenario.json"
+const SCENARIO_POSITION_META: String = "__position__"
+const HEIGHT_TOOL_MODE_RAISE: String = "raise"
+const HEIGHT_TOOL_MODE_LOWER: String = "lower"
+const HEIGHT_TOOL_MODE_SET_0: String = "set_0"
+const HEIGHT_TOOL_MODE_SET_1: String = "set_1"
+const HEIGHT_TOOL_MODE_SET_2: String = "set_2"
 
 @export var map_file_path: String = ""
 
@@ -94,6 +130,7 @@ var _selected_grids: Array = []
 var _selection_tool_enabled: bool = false
 var _selected_type_id: String = ""
 var _is_panning: bool = false
+var _is_rotating_3d_camera: bool = false
 var _is_painting: bool = false
 var _last_painted_grid: Vector2i = Vector2i(-1, -1)
 var _hover_preview: Sprite2D = null
@@ -104,6 +141,9 @@ var _is_refreshing_map_settings_controls: bool = false
 var _last_undo_state: Dictionary = {}
 var _current_map_path: String = DEFAULT_MAP_PATH
 var _pending_dialog_action: String = ""
+var _height_tool_enabled: bool = false
+var _height_tool_mode: String = HEIGHT_TOOL_MODE_RAISE
+var _height_tool_edge_type: String = TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE
 var _patrol_tool_enabled: bool = false
 var _patrol_spawn_id: String = "enemy_delta"
 var _dragged_patrol_waypoint_index: int = -1
@@ -115,6 +155,13 @@ var _is_dragging_marker: bool = false
 var _has_dragged_marker: bool = false
 var _is_refreshing_marker_controls: bool = false
 var _marker_feedback_text: String = ""
+var _mission_scenario = null
+var _current_scenario_path: String = ""
+var _scenario_dirty: bool = false
+var _is_refreshing_scenario_controls: bool = false
+var _scenario_feedback_text: String = ""
+var _terrain_3d_view = null
+var _3d_refresh_queued: bool = false
 
 
 func _ready() -> void:
@@ -126,17 +173,40 @@ func _ready() -> void:
 	_populate_surface_type_options()
 	_populate_edge_type_options()
 	_populate_brush_size_options()
+	_configure_property_height_spinbox()
 	_populate_tile_palette()
 	_connect_ui_signals()
+	_add_height_tool_controls()
 	_add_selection_tool_button()
 	_add_patrol_tool_controls()
 	_ensure_marker_editor_controls()
+	_ensure_mission_authoring_controls()
 	_ensure_patrol_overlay()
 	_ensure_marker_overlay()
+	_ensure_3d_primary_view()
 	_load_map(map_file_path if not map_file_path.is_empty() else DEFAULT_MAP_PATH)
 
 
 func _process(delta: float) -> void:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null:
+		var view_direction := Vector2.ZERO
+		if Input.is_key_pressed(KEY_W):
+			view_direction.y -= 1.0
+		if Input.is_key_pressed(KEY_S):
+			view_direction.y += 1.0
+		if Input.is_key_pressed(KEY_A):
+			view_direction.x -= 1.0
+		if Input.is_key_pressed(KEY_D):
+			view_direction.x += 1.0
+		if view_direction != Vector2.ZERO:
+			primary_3d_view.call("pan_camera", view_direction.normalized(), delta)
+		if Input.is_key_pressed(KEY_Q):
+			primary_3d_view.call("rotate_camera", -80.0 * delta)
+		if Input.is_key_pressed(KEY_E):
+			primary_3d_view.call("rotate_camera", 80.0 * delta)
+		return
+
 	var camera := _get_camera()
 	if camera == null:
 		return
@@ -175,10 +245,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		if mouse_button_event.button_index == MOUSE_BUTTON_WHEEL_DOWN and mouse_button_event.pressed and not _is_pointer_over_control():
 			_adjust_camera_zoom(-CAMERA_ZOOM_STEP)
 			return
-		if mouse_button_event.button_index == MOUSE_BUTTON_MIDDLE or mouse_button_event.button_index == MOUSE_BUTTON_RIGHT:
-			_is_panning = mouse_button_event.pressed
+		if mouse_button_event.button_index == MOUSE_BUTTON_MIDDLE:
+			_is_panning = mouse_button_event.pressed and not _is_pointer_over_control()
+			return
+		if mouse_button_event.button_index == MOUSE_BUTTON_RIGHT:
+			_is_rotating_3d_camera = mouse_button_event.pressed and not _is_pointer_over_control() and _get_primary_3d_view() != null
+			_is_panning = mouse_button_event.pressed and _get_primary_3d_view() == null
 			return
 		if mouse_button_event.button_index == MOUSE_BUTTON_LEFT:
+			var world_position: Vector2 = _screen_to_editor_world_position(mouse_button_event.position)
 			if _marker_tool_enabled and not _is_pointer_over_control():
 				if mouse_button_event.pressed:
 					if _handle_marker_left_press(mouse_button_event):
@@ -187,7 +262,7 @@ func _unhandled_input(event: InputEvent) -> void:
 					return
 			if _patrol_tool_enabled and not _is_pointer_over_control():
 				if mouse_button_event.pressed:
-					_handle_patrol_left_click(get_global_mouse_position(), mouse_button_event.ctrl_pressed)
+					_handle_patrol_left_click(world_position, mouse_button_event.ctrl_pressed)
 				else:
 					_dragged_patrol_waypoint_index = -1
 				return
@@ -197,7 +272,12 @@ func _unhandled_input(event: InputEvent) -> void:
 				return
 			if _is_pointer_over_control():
 				return
-			var grid_pos = _terrain_registry.world_to_grid(get_global_mouse_position())
+			if _height_tool_enabled:
+				_is_painting = true
+				_last_painted_grid = Vector2i(-1, -1)
+				_apply_height_tool_at_world_position(world_position)
+				return
+			var grid_pos = _terrain_registry.world_to_grid(world_position)
 			if _selection_tool_enabled:
 				if mouse_button_event.ctrl_pressed:
 					if _selected_grids.has(grid_pos):
@@ -212,28 +292,41 @@ func _unhandled_input(event: InputEvent) -> void:
 			if _is_brush_enabled() and _has_selected_type():
 				_is_painting = true
 				_last_painted_grid = Vector2i(-1, -1)
-				_apply_brush_at_world_position(get_global_mouse_position())
+				_apply_brush_at_world_position(world_position)
 				return
-			_select_tile_at_world_position(get_global_mouse_position())
+			_select_tile_at_world_position(world_position)
 			return
 
 	if event is InputEventMouseMotion:
 		var mouse_motion := event as InputEventMouseMotion
-		if _update_marker_drag(get_global_mouse_position(), mouse_motion.relative):
+		var world_position: Vector2 = _screen_to_editor_world_position(mouse_motion.position)
+		if _update_marker_drag(world_position, mouse_motion.relative):
 			return
 		if _patrol_tool_enabled and _dragged_patrol_waypoint_index >= 0 and not _is_pointer_over_control():
-			_move_patrol_waypoint(_dragged_patrol_waypoint_index, get_global_mouse_position())
+			_move_patrol_waypoint(_dragged_patrol_waypoint_index, world_position)
+			return
+		if _is_rotating_3d_camera:
+			var primary_3d_view = _get_primary_3d_view()
+			if primary_3d_view != null:
+				primary_3d_view.call("rotate_camera", -mouse_motion.relative.x * 0.28)
 			return
 		if _is_panning:
-			var camera := _get_camera()
-			if camera != null:
-				camera.position -= mouse_motion.relative * camera.zoom
+			var primary_3d_view = _get_primary_3d_view()
+			if primary_3d_view != null:
+				primary_3d_view.call("pan_camera_pixels", -mouse_motion.relative)
+			else:
+				var camera := _get_camera()
+				if camera != null:
+					camera.position -= mouse_motion.relative * camera.zoom
+			return
+		if _is_painting and _height_tool_enabled:
+			_apply_height_tool_at_world_position(world_position)
 			return
 		if _is_painting and _is_brush_enabled() and _has_selected_type():
-			_apply_brush_at_world_position(get_global_mouse_position())
+			_apply_brush_at_world_position(world_position)
 			return
 		if _is_brush_enabled() and not _is_pointer_over_control():
-			_update_hover_preview(get_global_mouse_position())
+			_update_hover_preview(world_position)
 			return
 		_hide_hover_preview()
 
@@ -280,6 +373,9 @@ func _load_map(path: String) -> void:
 	_refresh_patrol_overlay()
 	_refresh_marker_overlay()
 	_refresh_marker_editor_controls()
+	if _current_scenario_path.is_empty() and not _scenario_dirty:
+		_mission_scenario = _create_default_mission_scenario()
+	_refresh_mission_authoring_controls()
 
 
 func _create_new_map(grid_size: Vector2i = DEFAULT_NEW_MAP_GRID_SIZE) -> void:
@@ -312,6 +408,9 @@ func _create_new_map(grid_size: Vector2i = DEFAULT_NEW_MAP_GRID_SIZE) -> void:
 	_refresh_patrol_overlay()
 	_refresh_marker_overlay()
 	_refresh_marker_editor_controls()
+	if _current_scenario_path.is_empty() and not _scenario_dirty:
+		_mission_scenario = _create_default_mission_scenario()
+	_refresh_mission_authoring_controls()
 
 
 func _normalize_object_layer_tiles() -> void:
@@ -365,6 +464,15 @@ func _rebuild_registry_from_map_data() -> void:
 func _rebuild_tile_sprites() -> void:
 	if _terrain_renderer == null:
 		return
+	if _get_primary_3d_view() != null:
+		_tile_sprites_by_grid.clear()
+		_cliff_sprites_by_grid.clear()
+		_wall_sprites_by_grid.clear()
+		_object_sprites_by_grid.clear()
+		_clear_legacy_2d_map_children()
+		_refresh_3d_map_view()
+		_set_legacy_2d_map_visible(false)
+		return
 	_terrain_renderer.set_tile_catalog(_tile_catalog)
 	var render_state: Dictionary = _terrain_renderer.render_map(_terrain_map_data, self)
 	_tile_sprites_by_grid = render_state.get("tiles", {})
@@ -372,14 +480,18 @@ func _rebuild_tile_sprites() -> void:
 	_wall_sprites_by_grid = render_state.get("walls", {})
 	_object_sprites_by_grid = render_state.get("objects", {})
 	_rebuild_grid_overlay()
+	_refresh_3d_map_view()
+	_set_legacy_2d_map_visible(false)
 
 
 func _refresh_tile_visual(tile_data) -> void:
 	if tile_data == null or not _tile_sprites_by_grid.has(tile_data.grid_position):
+		_queue_3d_map_refresh()
 		return
 
 	var tile_sprite := _tile_sprites_by_grid[tile_data.grid_position] as Sprite2D
 	if tile_sprite == null:
+		_queue_3d_map_refresh()
 		return
 
 	var tile_texture: Texture2D = _resolve_tile_texture(tile_data)
@@ -389,6 +501,7 @@ func _refresh_tile_visual(tile_data) -> void:
 	_update_cliff_overlays_around(tile_data.grid_position)
 	_update_wall_overlays_around(tile_data.grid_position)
 	_update_object_overlay_at(tile_data.grid_position)
+	_queue_3d_map_refresh()
 
 
 func _build_tile_modulate(tile_data) -> Color:
@@ -467,6 +580,45 @@ func _apply_brush_at_world_position(world_position: Vector2) -> void:
 	_hide_hover_preview()
 
 
+func _apply_height_tool_at_world_position(world_position: Vector2) -> void:
+	var tile_data = _resolve_tile_at_world_position(world_position)
+	if tile_data == null:
+		return
+
+	if tile_data.grid_position == _last_painted_grid:
+		return
+	_last_painted_grid = tile_data.grid_position
+
+	var center_grid: Vector2i = tile_data.grid_position
+	var radius: int = _get_brush_radius()
+	var any_changed: bool = false
+
+	for dx in range(-radius, radius + 1):
+		for dy in range(-radius, radius + 1):
+			var target_grid: Vector2i = center_grid + Vector2i(dx, dy)
+			var target_tile = _terrain_map_data.call("get_tile_at_grid", target_grid) if _terrain_map_data != null else null
+			if target_tile == null:
+				continue
+
+			var patch: Dictionary = Dictionary(MAP_EDITOR_HEIGHT_TOOL_SCRIPT.call("build_height_patch", int(target_tile.height_level), _height_tool_mode, _height_tool_edge_type, TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE))
+			if _apply_tile_patch(target_tile, patch):
+				any_changed = true
+				_refresh_tile_visual(target_tile)
+
+	if any_changed:
+		_mark_dirty(true)
+
+	_selected_grid_position = center_grid
+	_selected_grids.clear()
+	_refresh_selection_visual()
+	_refresh_property_panel()
+	_hide_hover_preview()
+
+
+func _get_next_height_tool_level(current_height: int) -> int:
+	return int(MAP_EDITOR_HEIGHT_TOOL_SCRIPT.call("get_next_height_level", current_height, _height_tool_mode))
+
+
 func _resolve_tile_at_world_position(world_position: Vector2):
 	if _terrain_map_data == null:
 		return null
@@ -478,6 +630,7 @@ func _resolve_tile_at_world_position(world_position: Vector2):
 func _refresh_selection_visual() -> void:
 	var outline_root := get_node_or_null("SelectionOutline") as Node2D
 	if outline_root == null or _terrain_map_data == null:
+		_update_3d_selection_visual()
 		return
 
 	for child in outline_root.get_children():
@@ -506,6 +659,116 @@ func _refresh_selection_visual() -> void:
 		outline.add_point(center + Vector2(0.0, half_height))
 		outline.add_point(center + Vector2(-half_width, 0.0))
 		outline_root.add_child(outline)
+	_update_3d_selection_visual()
+
+
+func _add_height_tool_controls() -> void:
+	var button_row := get_node_or_null("UI/TopBar/Margin/HBox") as HBoxContainer
+	if button_row == null:
+		return
+
+	var insert_index: int = button_row.get_child_count()
+	var brush_size_button := _get_brush_size_option_button()
+	if brush_size_button != null:
+		insert_index = brush_size_button.get_index() + 1
+
+	var height_button := button_row.get_node_or_null("HeightButton") as Button
+	if height_button == null:
+		height_button = Button.new()
+		height_button.name = "HeightButton"
+		height_button.text = "Hoehe"
+		height_button.toggle_mode = true
+		height_button.toggled.connect(_on_height_tool_toggled)
+		button_row.add_child(height_button)
+		button_row.move_child(height_button, insert_index)
+		insert_index += 1
+
+	var mode_option := button_row.get_node_or_null("HeightModeOption") as OptionButton
+	if mode_option == null:
+		mode_option = OptionButton.new()
+		mode_option.name = "HeightModeOption"
+		mode_option.custom_minimum_size = Vector2(96.0, 0.0)
+		button_row.add_child(mode_option)
+		button_row.move_child(mode_option, insert_index)
+		insert_index += 1
+	_populate_height_mode_options(mode_option)
+	if not mode_option.item_selected.is_connected(_on_height_mode_selected):
+		mode_option.item_selected.connect(_on_height_mode_selected)
+
+	var edge_option := button_row.get_node_or_null("HeightEdgeOption") as OptionButton
+	if edge_option == null:
+		edge_option = OptionButton.new()
+		edge_option.name = "HeightEdgeOption"
+		edge_option.custom_minimum_size = Vector2(92.0, 0.0)
+		button_row.add_child(edge_option)
+		button_row.move_child(edge_option, insert_index)
+	_populate_height_edge_options(edge_option)
+	if not edge_option.item_selected.is_connected(_on_height_edge_selected):
+		edge_option.item_selected.connect(_on_height_edge_selected)
+
+	_update_height_topbar_state()
+
+
+func _populate_height_mode_options(option_button: OptionButton) -> void:
+	if option_button == null:
+		return
+	option_button.clear()
+	option_button.add_item("Anheben")
+	option_button.set_item_metadata(0, HEIGHT_TOOL_MODE_RAISE)
+	option_button.add_item("Absenken")
+	option_button.set_item_metadata(1, HEIGHT_TOOL_MODE_LOWER)
+	option_button.add_item("H=0")
+	option_button.set_item_metadata(2, HEIGHT_TOOL_MODE_SET_0)
+	option_button.add_item("H=1")
+	option_button.set_item_metadata(3, HEIGHT_TOOL_MODE_SET_1)
+	option_button.add_item("H=2")
+	option_button.set_item_metadata(4, HEIGHT_TOOL_MODE_SET_2)
+	for index in range(option_button.item_count):
+		if String(option_button.get_item_metadata(index)) == _height_tool_mode:
+			option_button.select(index)
+			return
+	option_button.select(0)
+
+
+func _populate_height_edge_options(option_button: OptionButton) -> void:
+	if option_button == null:
+		return
+	option_button.clear()
+	option_button.add_item("Hang")
+	option_button.set_item_metadata(0, TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE)
+	option_button.add_item("Cliff")
+	option_button.set_item_metadata(1, TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF)
+	option_button.add_item("Keine")
+	option_button.set_item_metadata(2, TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE)
+	for index in range(option_button.item_count):
+		if String(option_button.get_item_metadata(index)) == _height_tool_edge_type:
+			option_button.select(index)
+			return
+	option_button.select(0)
+
+
+func _update_height_topbar_state() -> void:
+	var height_button := _get_height_tool_button()
+	if height_button != null:
+		height_button.disabled = _terrain_map_data == null
+		if height_button.disabled and height_button.button_pressed:
+			height_button.button_pressed = false
+		elif height_button.button_pressed != _height_tool_enabled:
+			height_button.button_pressed = _height_tool_enabled
+	var mode_option := _get_height_mode_option_button()
+	if mode_option != null:
+		mode_option.disabled = not _height_tool_enabled
+	var edge_option := _get_height_edge_option_button()
+	if edge_option != null:
+		edge_option.disabled = not _height_tool_enabled
+
+
+func _clear_height_tool() -> void:
+	_height_tool_enabled = false
+	var height_button := _get_height_tool_button()
+	if height_button != null and height_button.button_pressed:
+		height_button.button_pressed = false
+	_update_height_topbar_state()
 
 
 func _add_selection_tool_button() -> void:
@@ -561,6 +824,7 @@ func _add_patrol_tool_controls() -> void:
 func _on_selection_tool_toggled(pressed: bool) -> void:
 	_selection_tool_enabled = pressed
 	if pressed:
+		_clear_height_tool()
 		_marker_tool_enabled = false
 		var marker_tool_button := _get_marker_tool_button()
 		if marker_tool_button != null and marker_tool_button.button_pressed:
@@ -572,6 +836,7 @@ func _on_selection_tool_toggled(pressed: bool) -> void:
 func _on_patrol_tool_toggled(pressed: bool) -> void:
 	_patrol_tool_enabled = pressed
 	if pressed:
+		_clear_height_tool()
 		_marker_tool_enabled = false
 		var marker_tool_button := _get_marker_tool_button()
 		if marker_tool_button != null and marker_tool_button.button_pressed:
@@ -811,6 +1076,839 @@ func _ensure_marker_editor_controls() -> void:
 	_refresh_marker_editor_controls()
 
 
+func _ensure_mission_authoring_controls() -> void:
+	var panel_parent := get_node_or_null("UI/PropertyPanel/Margin/VBox") as VBoxContainer
+	var ui_root := get_node_or_null("UI") as CanvasLayer
+	if panel_parent == null or ui_root == null:
+		return
+
+	var scenario_panel := panel_parent.get_node_or_null("MissionScenarioPanel") as VBoxContainer
+	if scenario_panel == null:
+		var separator := HSeparator.new()
+		separator.name = "MissionScenarioSeparator"
+		panel_parent.add_child(separator)
+
+		scenario_panel = VBoxContainer.new()
+		scenario_panel.name = "MissionScenarioPanel"
+		scenario_panel.add_theme_constant_override("separation", 5)
+		panel_parent.add_child(scenario_panel)
+		var marker_panel := panel_parent.get_node_or_null("MarkerEditorPanel") as VBoxContainer
+		if marker_panel != null:
+			panel_parent.move_child(separator, marker_panel.get_index())
+			panel_parent.move_child(scenario_panel, marker_panel.get_index())
+
+		var title_label := Label.new()
+		title_label.name = "ScenarioTitleLabel"
+		title_label.text = "Mission Scenario"
+		scenario_panel.add_child(title_label)
+
+		var toolbar := HBoxContainer.new()
+		toolbar.name = "ScenarioToolbarRow"
+		toolbar.add_theme_constant_override("separation", 4)
+		scenario_panel.add_child(toolbar)
+
+		var load_button := Button.new()
+		load_button.name = "ScenarioLoadButton"
+		load_button.text = "Load"
+		toolbar.add_child(load_button)
+
+		var save_button := Button.new()
+		save_button.name = "ScenarioSaveButton"
+		save_button.text = "Save"
+		toolbar.add_child(save_button)
+
+		var save_as_button := Button.new()
+		save_as_button.name = "ScenarioSaveAsButton"
+		save_as_button.text = "Save As"
+		toolbar.add_child(save_as_button)
+
+		var live_test_button := Button.new()
+		live_test_button.name = "ScenarioLiveTestButton"
+		live_test_button.text = "Live Test"
+		toolbar.add_child(live_test_button)
+
+		var path_label := Label.new()
+		path_label.name = "ScenarioPathLabel"
+		path_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		scenario_panel.add_child(path_label)
+
+		var map_label := Label.new()
+		map_label.name = "ScenarioMapLabel"
+		map_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		scenario_panel.add_child(map_label)
+
+		_add_scenario_line_edit_row(scenario_panel, "ScenarioIdRow", "ID:", "ScenarioIdLineEdit")
+		_add_scenario_line_edit_row(scenario_panel, "ScenarioNameRow", "Name:", "ScenarioNameLineEdit")
+		_add_scenario_option_row(scenario_panel, "ScenarioObjectiveRow", "Obj:", "ScenarioObjectiveOption", "ScenarioObjectiveTileButton", "Use Tile")
+		_add_scenario_spinbox_row(scenario_panel, "ScenarioCaptureRadiusRow", "Radius:", "ScenarioCaptureRadiusSpinBox", 1.0, 1000.0, 1.0)
+		_add_scenario_spinbox_row(scenario_panel, "ScenarioTimeLimitRow", "Time:", "ScenarioTimeLimitSpinBox", 0.0, 7200.0, 30.0)
+		_add_scenario_line_edit_row(scenario_panel, "ScenarioEnemyIdsRow", "Enemies:", "ScenarioEnemyIdsLineEdit")
+		_add_scenario_option_row(scenario_panel, "ScenarioSpawnRow", "Spawn:", "ScenarioSpawnOption", "ScenarioSpawnTileButton", "Use Tile")
+		_add_scenario_spinbox_row(scenario_panel, "ScenarioWaveCountRow", "Waves:", "ScenarioWaveCountSpinBox", 0.0, 20.0, 1.0)
+		_add_scenario_spinbox_row(scenario_panel, "ScenarioUnitsPerWaveRow", "Per Wave:", "ScenarioUnitsPerWaveSpinBox", 1.0, 20.0, 1.0)
+		_add_scenario_spinbox_row(scenario_panel, "ScenarioFirstWaveDelayRow", "First:", "ScenarioFirstWaveDelaySpinBox", 0.0, 900.0, 1.0)
+		_add_scenario_spinbox_row(scenario_panel, "ScenarioWaveDelayRow", "Delay:", "ScenarioWaveDelaySpinBox", 0.0, 1800.0, 1.0)
+
+		var patrol_row := HBoxContainer.new()
+		patrol_row.name = "ScenarioPatrolBindingsRow"
+		patrol_row.add_theme_constant_override("separation", 4)
+		scenario_panel.add_child(patrol_row)
+		var patrol_label := Label.new()
+		patrol_label.text = "Patrol:"
+		patrol_row.add_child(patrol_label)
+		var patrol_line_edit := LineEdit.new()
+		patrol_line_edit.name = "ScenarioPatrolBindingsLineEdit"
+		patrol_line_edit.placeholder_text = "enemy_delta:enemy_delta"
+		patrol_line_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		patrol_row.add_child(patrol_line_edit)
+		var auto_bind_button := Button.new()
+		auto_bind_button.name = "ScenarioAutoBindButton"
+		auto_bind_button.text = "Auto"
+		patrol_row.add_child(auto_bind_button)
+
+		var info_label := Label.new()
+		info_label.name = "ScenarioInfoLabel"
+		info_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		scenario_panel.add_child(info_label)
+
+	var load_dialog := ui_root.get_node_or_null("ScenarioLoadDialog") as FileDialog
+	if load_dialog == null:
+		load_dialog = FileDialog.new()
+		load_dialog.name = "ScenarioLoadDialog"
+		load_dialog.title = "Load Mission Scenario"
+		load_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
+		load_dialog.access = FileDialog.ACCESS_RESOURCES
+		load_dialog.current_dir = DEFAULT_SCENARIO_DIR
+		load_dialog.filters = PackedStringArray(["*.json ; JSON mission scenario"])
+		ui_root.add_child(load_dialog)
+
+	var save_dialog := ui_root.get_node_or_null("ScenarioSaveAsDialog") as FileDialog
+	if save_dialog == null:
+		save_dialog = FileDialog.new()
+		save_dialog.name = "ScenarioSaveAsDialog"
+		save_dialog.title = "Save Mission Scenario"
+		save_dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
+		save_dialog.access = FileDialog.ACCESS_RESOURCES
+		save_dialog.current_dir = DEFAULT_SCENARIO_DIR
+		save_dialog.filters = PackedStringArray(["*.json ; JSON mission scenario"])
+		ui_root.add_child(save_dialog)
+
+	_connect_mission_authoring_signals()
+	_refresh_mission_authoring_controls()
+
+
+func _add_scenario_line_edit_row(parent: VBoxContainer, row_name: String, label_text: String, line_edit_name: String) -> void:
+	var row := HBoxContainer.new()
+	row.name = row_name
+	row.add_theme_constant_override("separation", 4)
+	parent.add_child(row)
+	var label := Label.new()
+	label.text = label_text
+	row.add_child(label)
+	var line_edit := LineEdit.new()
+	line_edit.name = line_edit_name
+	line_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(line_edit)
+
+
+func _add_scenario_option_row(parent: VBoxContainer, row_name: String, label_text: String, option_name: String, button_name: String, button_text: String) -> void:
+	var row := HBoxContainer.new()
+	row.name = row_name
+	row.add_theme_constant_override("separation", 4)
+	parent.add_child(row)
+	var label := Label.new()
+	label.text = label_text
+	row.add_child(label)
+	var option := OptionButton.new()
+	option.name = option_name
+	option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(option)
+	var button := Button.new()
+	button.name = button_name
+	button.text = button_text
+	row.add_child(button)
+
+
+func _add_scenario_spinbox_row(parent: VBoxContainer, row_name: String, label_text: String, spinbox_name: String, min_value: float, max_value: float, step_value: float) -> void:
+	var row := HBoxContainer.new()
+	row.name = row_name
+	row.add_theme_constant_override("separation", 4)
+	parent.add_child(row)
+	var label := Label.new()
+	label.text = label_text
+	row.add_child(label)
+	var spinbox := SpinBox.new()
+	spinbox.name = spinbox_name
+	spinbox.min_value = min_value
+	spinbox.max_value = max_value
+	spinbox.step = step_value
+	spinbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(spinbox)
+
+
+func _connect_mission_authoring_signals() -> void:
+	var load_button := _get_scenario_button("ScenarioLoadButton")
+	var save_button := _get_scenario_button("ScenarioSaveButton")
+	var save_as_button := _get_scenario_button("ScenarioSaveAsButton")
+	var live_test_button := _get_scenario_button("ScenarioLiveTestButton")
+	var objective_tile_button := _get_scenario_button("ScenarioObjectiveTileButton")
+	var spawn_tile_button := _get_scenario_button("ScenarioSpawnTileButton")
+	var auto_bind_button := _get_scenario_button("ScenarioAutoBindButton")
+	if load_button != null and not load_button.pressed.is_connected(_on_mission_scenario_load_pressed):
+		load_button.pressed.connect(_on_mission_scenario_load_pressed)
+	if save_button != null and not save_button.pressed.is_connected(_on_mission_scenario_save_pressed):
+		save_button.pressed.connect(_on_mission_scenario_save_pressed)
+	if save_as_button != null and not save_as_button.pressed.is_connected(_on_mission_scenario_save_as_pressed):
+		save_as_button.pressed.connect(_on_mission_scenario_save_as_pressed)
+	if live_test_button != null and not live_test_button.pressed.is_connected(_on_mission_scenario_live_test_pressed):
+		live_test_button.pressed.connect(_on_mission_scenario_live_test_pressed)
+	if objective_tile_button != null and not objective_tile_button.pressed.is_connected(_on_mission_scenario_use_objective_tile_pressed):
+		objective_tile_button.pressed.connect(_on_mission_scenario_use_objective_tile_pressed)
+	if spawn_tile_button != null and not spawn_tile_button.pressed.is_connected(_on_mission_scenario_use_spawn_tile_pressed):
+		spawn_tile_button.pressed.connect(_on_mission_scenario_use_spawn_tile_pressed)
+	if auto_bind_button != null and not auto_bind_button.pressed.is_connected(_on_mission_scenario_auto_bind_pressed):
+		auto_bind_button.pressed.connect(_on_mission_scenario_auto_bind_pressed)
+
+	for line_edit in [
+		_get_scenario_line_edit("ScenarioIdLineEdit"),
+		_get_scenario_line_edit("ScenarioNameLineEdit"),
+		_get_scenario_line_edit("ScenarioEnemyIdsLineEdit"),
+		_get_scenario_line_edit("ScenarioPatrolBindingsLineEdit"),
+	]:
+		if line_edit != null and not line_edit.text_changed.is_connected(_on_mission_scenario_text_changed):
+			line_edit.text_changed.connect(_on_mission_scenario_text_changed)
+
+	for spinbox in [
+		_get_scenario_spinbox("ScenarioCaptureRadiusSpinBox"),
+		_get_scenario_spinbox("ScenarioTimeLimitSpinBox"),
+		_get_scenario_spinbox("ScenarioWaveCountSpinBox"),
+		_get_scenario_spinbox("ScenarioUnitsPerWaveSpinBox"),
+		_get_scenario_spinbox("ScenarioFirstWaveDelaySpinBox"),
+		_get_scenario_spinbox("ScenarioWaveDelaySpinBox"),
+	]:
+		if spinbox != null and not spinbox.value_changed.is_connected(_on_mission_scenario_value_changed):
+			spinbox.value_changed.connect(_on_mission_scenario_value_changed)
+
+	for option_button in [
+		_get_scenario_option_button("ScenarioObjectiveOption"),
+		_get_scenario_option_button("ScenarioSpawnOption"),
+	]:
+		if option_button != null and not option_button.item_selected.is_connected(_on_mission_scenario_option_selected):
+			option_button.item_selected.connect(_on_mission_scenario_option_selected)
+
+	var load_dialog := get_node_or_null("UI/ScenarioLoadDialog") as FileDialog
+	if load_dialog != null and not load_dialog.file_selected.is_connected(_on_mission_scenario_load_file_selected):
+		load_dialog.file_selected.connect(_on_mission_scenario_load_file_selected)
+	var save_dialog := get_node_or_null("UI/ScenarioSaveAsDialog") as FileDialog
+	if save_dialog != null and not save_dialog.file_selected.is_connected(_on_mission_scenario_save_as_file_selected):
+		save_dialog.file_selected.connect(_on_mission_scenario_save_as_file_selected)
+
+
+func _refresh_mission_authoring_controls() -> void:
+	var panel := _get_mission_scenario_panel()
+	if panel == null:
+		return
+	var scenario = _ensure_mission_scenario()
+	if scenario == null:
+		return
+
+	_is_refreshing_scenario_controls = true
+	_refresh_scenario_marker_options()
+
+	var path_label := panel.get_node_or_null("ScenarioPathLabel") as Label
+	var map_label := panel.get_node_or_null("ScenarioMapLabel") as Label
+	var id_line_edit := _get_scenario_line_edit("ScenarioIdLineEdit")
+	var name_line_edit := _get_scenario_line_edit("ScenarioNameLineEdit")
+	var enemy_ids_line_edit := _get_scenario_line_edit("ScenarioEnemyIdsLineEdit")
+	var patrol_line_edit := _get_scenario_line_edit("ScenarioPatrolBindingsLineEdit")
+	var radius_spinbox := _get_scenario_spinbox("ScenarioCaptureRadiusSpinBox")
+	var time_spinbox := _get_scenario_spinbox("ScenarioTimeLimitSpinBox")
+	var wave_count_spinbox := _get_scenario_spinbox("ScenarioWaveCountSpinBox")
+	var units_per_wave_spinbox := _get_scenario_spinbox("ScenarioUnitsPerWaveSpinBox")
+	var first_wave_delay_spinbox := _get_scenario_spinbox("ScenarioFirstWaveDelaySpinBox")
+	var wave_delay_spinbox := _get_scenario_spinbox("ScenarioWaveDelaySpinBox")
+	var info_label := panel.get_node_or_null("ScenarioInfoLabel") as Label
+	if path_label != null:
+		path_label.text = "Scenario: %s%s" % [_current_scenario_path if not _current_scenario_path.is_empty() else "(new)", " *" if _scenario_dirty else ""]
+	if map_label != null:
+		map_label.text = "Map: %s" % (_current_map_path if not _current_map_path.is_empty() else "(unsaved)")
+	if id_line_edit != null:
+		id_line_edit.text = String(scenario.get("scenario_id"))
+	if name_line_edit != null:
+		name_line_edit.text = String(scenario.get("display_name"))
+	if enemy_ids_line_edit != null:
+		enemy_ids_line_edit.text = ", ".join(scenario.call("get_enemy_ids"))
+	if patrol_line_edit != null:
+		patrol_line_edit.text = _format_patrol_bindings_text(Array(scenario.get("patrol_bindings")))
+	if radius_spinbox != null:
+		radius_spinbox.value = float(Dictionary(scenario.get("objective")).get("capture_radius", 80.0))
+	if time_spinbox != null:
+		time_spinbox.value = maxf(float(scenario.get("time_limit_seconds")), 0.0)
+	var wave_config: Dictionary = Dictionary(scenario.get("wave_config"))
+	if wave_count_spinbox != null:
+		wave_count_spinbox.value = int(wave_config.get("wave_count", 1))
+	if units_per_wave_spinbox != null:
+		units_per_wave_spinbox.value = int(wave_config.get("units_per_wave", 2))
+	if first_wave_delay_spinbox != null:
+		first_wave_delay_spinbox.value = float(wave_config.get("first_wave_delay_seconds", 0.0))
+	if wave_delay_spinbox != null:
+		wave_delay_spinbox.value = float(wave_config.get("wave_delay_seconds", 90.0))
+	if info_label != null:
+		info_label.text = _build_mission_scenario_info_text()
+	_is_refreshing_scenario_controls = false
+	_refresh_top_bar()
+
+
+func _ensure_mission_scenario():
+	if _mission_scenario != null:
+		return _mission_scenario
+	_mission_scenario = _create_default_mission_scenario()
+	_current_scenario_path = ""
+	_scenario_dirty = false
+	return _mission_scenario
+
+
+func _create_default_mission_scenario():
+	var map_path: String = _current_map_path if not _current_map_path.is_empty() else DEFAULT_MAP_PATH
+	var scenario_id: String = "%s_scenario" % map_path.get_file().get_basename()
+	var objective: Dictionary = {
+		"capture_radius": 80.0,
+	}
+	if _terrain_map_data != null and bool(_terrain_map_data.call("has_marker", "objective_point")):
+		objective["marker_id"] = "objective_point"
+	else:
+		objective["position"] = _get_selected_or_map_center_position(Vector2.ZERO)
+	var enemy_ids: PackedStringArray = PackedStringArray(["enemy_delta", "enemy_echo"])
+	var enemy_group: Dictionary = {
+		"group_id": "red_test_group",
+		"display_name": "Test Contacts",
+		"team_id": "team_bravo",
+		"enemy_ids": Array(enemy_ids),
+	}
+	if _terrain_map_data != null and bool(_terrain_map_data.call("has_marker", "spawn_bravo")):
+		enemy_group["spawn_marker_id"] = "spawn_bravo"
+	else:
+		enemy_group["spawn_position"] = _get_selected_or_map_center_position(Vector2.ZERO)
+	return MISSION_SCENARIO_DATA_SCRIPT.new(
+		{
+			"version": 1,
+			"scenario_id": scenario_id,
+			"display_name": scenario_id.capitalize(),
+			"map_file_path": map_path,
+			"time_limit_seconds": 900.0,
+			"mission_slot_count_override": _get_current_map_mission_slot_count(),
+			"objective": objective,
+			"enemy_groups": [enemy_group],
+			"wave_config": {
+				"wave_count": 1,
+				"units_per_wave": 2,
+				"first_wave_delay_seconds": 0.0,
+				"wave_delay_seconds": 90.0,
+			},
+			"patrol_bindings": _build_auto_patrol_bindings(enemy_ids),
+			"notes": ["Created by the tactical mission editor MVP."],
+		}
+	)
+
+
+func _refresh_scenario_marker_options() -> void:
+	var scenario = _ensure_mission_scenario()
+	if scenario == null:
+		return
+	var objective: Dictionary = Dictionary(scenario.get("objective"))
+	var objective_option := _get_scenario_option_button("ScenarioObjectiveOption")
+	if objective_option != null:
+		_populate_scenario_marker_option(
+			objective_option,
+			String(objective.get("marker_id", "")).strip_edges(),
+			objective.has("position")
+		)
+
+	var spawn_option := _get_scenario_option_button("ScenarioSpawnOption")
+	if spawn_option != null:
+		var group: Dictionary = _get_primary_enemy_group()
+		_populate_scenario_marker_option(
+			spawn_option,
+			String(group.get("spawn_marker_id", "")).strip_edges(),
+			group.has("spawn_position")
+		)
+
+
+func _populate_scenario_marker_option(option_button: OptionButton, selected_marker_id: String, use_position: bool) -> void:
+	var previous_selection: String = selected_marker_id
+	if use_position:
+		previous_selection = SCENARIO_POSITION_META
+	option_button.clear()
+	var selected_index: int = -1
+	if _terrain_map_data != null:
+		for marker_id in PackedStringArray(_terrain_map_data.call("get_marker_ids")):
+			var marker_text: String = String(marker_id)
+			option_button.add_item(marker_text)
+			option_button.set_item_metadata(option_button.item_count - 1, marker_text)
+			if marker_text == previous_selection:
+				selected_index = option_button.item_count - 1
+	if not selected_marker_id.is_empty() and selected_index < 0:
+		option_button.add_item(selected_marker_id)
+		option_button.set_item_metadata(option_button.item_count - 1, selected_marker_id)
+		selected_index = option_button.item_count - 1
+	option_button.add_item("Position")
+	option_button.set_item_metadata(option_button.item_count - 1, SCENARIO_POSITION_META)
+	if previous_selection == SCENARIO_POSITION_META:
+		selected_index = option_button.item_count - 1
+	if selected_index < 0 and option_button.item_count > 0:
+		selected_index = 0
+	if selected_index >= 0:
+		option_button.select(selected_index)
+
+
+func _sync_mission_scenario_from_controls() -> void:
+	var scenario = _ensure_mission_scenario()
+	if scenario == null:
+		return
+	var id_line_edit := _get_scenario_line_edit("ScenarioIdLineEdit")
+	var name_line_edit := _get_scenario_line_edit("ScenarioNameLineEdit")
+	var enemy_ids_line_edit := _get_scenario_line_edit("ScenarioEnemyIdsLineEdit")
+	var patrol_line_edit := _get_scenario_line_edit("ScenarioPatrolBindingsLineEdit")
+	var radius_spinbox := _get_scenario_spinbox("ScenarioCaptureRadiusSpinBox")
+	var time_spinbox := _get_scenario_spinbox("ScenarioTimeLimitSpinBox")
+	var wave_count_spinbox := _get_scenario_spinbox("ScenarioWaveCountSpinBox")
+	var units_per_wave_spinbox := _get_scenario_spinbox("ScenarioUnitsPerWaveSpinBox")
+	var first_wave_delay_spinbox := _get_scenario_spinbox("ScenarioFirstWaveDelaySpinBox")
+	var wave_delay_spinbox := _get_scenario_spinbox("ScenarioWaveDelaySpinBox")
+
+	var scenario_id: String = id_line_edit.text.strip_edges() if id_line_edit != null else String(scenario.get("scenario_id")).strip_edges()
+	if scenario_id.is_empty():
+		scenario_id = _build_default_scenario_id()
+	var display_name: String = name_line_edit.text.strip_edges() if name_line_edit != null else String(scenario.get("display_name")).strip_edges()
+	if display_name.is_empty():
+		display_name = scenario_id.capitalize()
+	scenario.set("scenario_id", scenario_id)
+	scenario.set("display_name", display_name)
+	scenario.set("map_file_path", _current_map_path if not _current_map_path.is_empty() else DEFAULT_MAP_PATH)
+	scenario.set("mission_slot_count_override", _get_current_map_mission_slot_count())
+	if time_spinbox != null:
+		scenario.set("time_limit_seconds", maxf(float(time_spinbox.value), 0.0))
+
+	var objective: Dictionary = Dictionary(scenario.get("objective")).duplicate(true)
+	objective["capture_radius"] = maxf(float(radius_spinbox.value if radius_spinbox != null else objective.get("capture_radius", 80.0)), 1.0)
+	var objective_selection: String = _get_selected_option_metadata("ScenarioObjectiveOption")
+	if objective_selection == SCENARIO_POSITION_META:
+		objective.erase("marker_id")
+		objective["position"] = _get_selected_or_existing_position(objective, _get_selected_or_map_center_position(Vector2.ZERO))
+	elif not objective_selection.is_empty():
+		objective["marker_id"] = objective_selection
+		objective.erase("position")
+	scenario.set("objective", objective)
+
+	var enemy_ids: PackedStringArray = _parse_string_list(enemy_ids_line_edit.text if enemy_ids_line_edit != null else "")
+	if enemy_ids.is_empty():
+		enemy_ids = PackedStringArray(["enemy_delta", "enemy_echo"])
+	var groups: Array = Array(scenario.get("enemy_groups")).duplicate(true)
+	var group: Dictionary = _get_primary_enemy_group().duplicate(true)
+	if group.is_empty():
+		group = {
+			"group_id": "red_test_group",
+			"display_name": "Test Contacts",
+			"team_id": "team_bravo",
+		}
+	group["enemy_ids"] = Array(enemy_ids)
+	group["team_id"] = String(group.get("team_id", "team_bravo")).strip_edges()
+	if String(group.get("group_id", "")).strip_edges().is_empty():
+		group["group_id"] = "red_test_group"
+	var spawn_selection: String = _get_selected_option_metadata("ScenarioSpawnOption")
+	if spawn_selection == SCENARIO_POSITION_META:
+		group.erase("spawn_marker_id")
+		group["spawn_position"] = _get_selected_or_existing_position(group, _get_selected_or_map_center_position(Vector2.ZERO), "spawn_position")
+	elif not spawn_selection.is_empty():
+		group["spawn_marker_id"] = spawn_selection
+		group.erase("spawn_position")
+	if groups.is_empty():
+		groups.append(group)
+	else:
+		groups[0] = group
+	scenario.set("enemy_groups", groups)
+
+	scenario.set(
+		"wave_config",
+		{
+			"wave_count": maxi(int(wave_count_spinbox.value if wave_count_spinbox != null else 1), 0),
+			"units_per_wave": maxi(int(units_per_wave_spinbox.value if units_per_wave_spinbox != null else 2), 1),
+			"first_wave_delay_seconds": maxf(float(first_wave_delay_spinbox.value if first_wave_delay_spinbox != null else 0.0), 0.0),
+			"wave_delay_seconds": maxf(float(wave_delay_spinbox.value if wave_delay_spinbox != null else 90.0), 0.0),
+		}
+	)
+	scenario.set("patrol_bindings", _parse_patrol_bindings_text(patrol_line_edit.text if patrol_line_edit != null else ""))
+
+
+func _get_primary_enemy_group() -> Dictionary:
+	if _mission_scenario == null:
+		return {}
+	var groups: Array = Array(_mission_scenario.get("enemy_groups"))
+	if groups.is_empty():
+		return {}
+	return Dictionary(groups[0])
+
+
+func _get_current_map_mission_slot_count() -> int:
+	if _terrain_map_data == null or not _terrain_map_data.has_method("get_mission_slot_count"):
+		return -1
+	return int(_terrain_map_data.call("get_mission_slot_count"))
+
+
+func _build_default_scenario_id() -> String:
+	var map_basename: String = _current_map_path.get_file().get_basename() if not _current_map_path.is_empty() else "mission"
+	return "%s_scenario" % map_basename
+
+
+func _get_selected_option_metadata(option_name: String) -> String:
+	var option_button := _get_scenario_option_button(option_name)
+	if option_button == null or option_button.selected < 0 or option_button.selected >= option_button.item_count:
+		return ""
+	return String(option_button.get_item_metadata(option_button.selected)).strip_edges()
+
+
+func _get_selected_or_existing_position(container: Dictionary, fallback_position: Vector2, key: String = "position") -> Vector2:
+	if container.has(key):
+		return _coerce_vector2(container.get(key, fallback_position), fallback_position)
+	return fallback_position
+
+
+func _get_selected_or_map_center_position(fallback_position: Vector2) -> Vector2:
+	var selected_tile = _get_selected_tile()
+	if selected_tile != null:
+		return selected_tile.world_position
+	if _terrain_map_data != null and _terrain_registry != null:
+		var grid_size: Vector2i = _terrain_map_data.call("get_grid_size")
+		if grid_size.x > 0 and grid_size.y > 0:
+			return _terrain_registry.grid_to_world(Vector2i(floori(float(grid_size.x) * 0.5), floori(float(grid_size.y) * 0.5)))
+	return fallback_position
+
+
+func _build_auto_patrol_bindings(enemy_ids: PackedStringArray) -> Array:
+	var result: Array = []
+	if _terrain_map_data == null or not _terrain_map_data.has_method("get_patrol_paths"):
+		return result
+	var patrol_paths: Dictionary = Dictionary(_terrain_map_data.call("get_patrol_paths"))
+	for enemy_id in enemy_ids:
+		var normalized_enemy_id: String = String(enemy_id).strip_edges()
+		if normalized_enemy_id.is_empty() or not patrol_paths.has(normalized_enemy_id):
+			continue
+		result.append(
+			{
+				"binding_id": "%s_patrol" % normalized_enemy_id,
+				"target_id": normalized_enemy_id,
+				"patrol_path_id": normalized_enemy_id,
+				"mode": "pre_contact",
+			}
+		)
+	return result
+
+
+func _parse_string_list(text: String) -> PackedStringArray:
+	var result: PackedStringArray = PackedStringArray()
+	for raw_item in text.split(",", false):
+		var item: String = String(raw_item).strip_edges()
+		if not item.is_empty() and not result.has(item):
+			result.append(item)
+	return result
+
+
+func _format_patrol_bindings_text(patrol_bindings: Array) -> String:
+	var entries: PackedStringArray = PackedStringArray()
+	for binding_variant in patrol_bindings:
+		var binding: Dictionary = Dictionary(binding_variant)
+		var target_id: String = String(binding.get("target_id", "")).strip_edges()
+		var patrol_path_id: String = String(binding.get("patrol_path_id", "")).strip_edges()
+		if target_id.is_empty() or patrol_path_id.is_empty():
+			continue
+		entries.append("%s:%s" % [target_id, patrol_path_id])
+	return ", ".join(entries)
+
+
+func _parse_patrol_bindings_text(text: String) -> Array:
+	var result: Array = []
+	for raw_entry in text.split(",", false):
+		var entry: String = String(raw_entry).strip_edges()
+		if entry.is_empty():
+			continue
+		var parts: PackedStringArray = entry.split(":", false)
+		var target_id: String = String(parts[0]).strip_edges()
+		var patrol_path_id: String = String(parts[1]).strip_edges() if parts.size() > 1 else target_id
+		if target_id.is_empty() or patrol_path_id.is_empty():
+			continue
+		result.append(
+			{
+				"binding_id": "%s_patrol" % target_id,
+				"target_id": target_id,
+				"patrol_path_id": patrol_path_id,
+				"mode": "pre_contact",
+			}
+		)
+	return result
+
+
+func _build_mission_scenario_info_text() -> String:
+	var scenario = _ensure_mission_scenario()
+	if scenario == null:
+		return ""
+	var validation: Dictionary = Dictionary(scenario.call("validate"))
+	var base_text: String = _scenario_feedback_text
+	if bool(validation.get("valid", false)):
+		if base_text.is_empty():
+			base_text = "Scenario valid."
+	else:
+		var errors: PackedStringArray = PackedStringArray(validation.get("errors", PackedStringArray()))
+		var error_text: String = "; ".join(errors)
+		base_text = "%s%s" % [base_text + "\n" if not base_text.is_empty() else "", error_text]
+	return base_text
+
+
+func _mark_scenario_dirty(is_dirty: bool) -> void:
+	_scenario_dirty = is_dirty
+	_refresh_top_bar()
+	var panel := _get_mission_scenario_panel()
+	if panel == null:
+		return
+	var path_label := panel.get_node_or_null("ScenarioPathLabel") as Label
+	if path_label != null:
+		path_label.text = "Scenario: %s%s" % [_current_scenario_path if not _current_scenario_path.is_empty() else "(new)", " *" if _scenario_dirty else ""]
+
+
+func _coerce_vector2(value: Variant, fallback: Vector2) -> Vector2:
+	if value is Vector2:
+		return value
+	if value is Vector2i:
+		return Vector2(value.x, value.y)
+	if typeof(value) == TYPE_DICTIONARY:
+		var value_dict: Dictionary = Dictionary(value)
+		return Vector2(float(value_dict.get("x", fallback.x)), float(value_dict.get("y", fallback.y)))
+	return fallback
+
+
+func load_mission_scenario_for_editor(path: String) -> bool:
+	var normalized_path: String = path.strip_edges()
+	if normalized_path.is_empty():
+		return false
+	var scenario = MISSION_SCENARIO_DATA_SCRIPT.call("load_from_file", normalized_path)
+	if scenario == null:
+		return false
+	_mission_scenario = scenario
+	_current_scenario_path = normalized_path
+	_scenario_feedback_text = "Scenario loaded."
+	_mark_scenario_dirty(false)
+	var scenario_map_path: String = String(scenario.get("map_file_path")).strip_edges()
+	if not scenario_map_path.is_empty() and FileAccess.file_exists(scenario_map_path) and scenario_map_path != _current_map_path:
+		_load_map(scenario_map_path)
+	else:
+		_refresh_mission_authoring_controls()
+	return true
+
+
+func save_mission_scenario_from_editor(path: String = "") -> Error:
+	_sync_mission_scenario_from_controls()
+	var scenario = _ensure_mission_scenario()
+	if scenario == null:
+		return ERR_CANT_CREATE
+	var save_path: String = path.strip_edges()
+	if save_path.is_empty():
+		save_path = _current_scenario_path
+	if save_path.is_empty():
+		save_path = DEFAULT_SCENARIO_PATH
+	scenario.set("map_file_path", _current_map_path if not _current_map_path.is_empty() else DEFAULT_MAP_PATH)
+	var save_error: Error = scenario.call("save_to_file", save_path)
+	if save_error != OK:
+		_scenario_feedback_text = "Scenario could not be saved: %s" % save_path
+		_refresh_mission_authoring_controls()
+		return save_error
+	_current_scenario_path = save_path
+	_scenario_feedback_text = "Scenario saved."
+	_mark_scenario_dirty(false)
+	_refresh_mission_authoring_controls()
+	return OK
+
+
+func set_mission_scenario_authoring_fields(data: Dictionary) -> void:
+	var base_data: Dictionary = Dictionary(_ensure_mission_scenario().call("to_dict"))
+	for key_variant in data.keys():
+		base_data[key_variant] = data.get(key_variant)
+	if not base_data.has("map_file_path") or String(base_data.get("map_file_path", "")).strip_edges().is_empty():
+		base_data["map_file_path"] = _current_map_path if not _current_map_path.is_empty() else DEFAULT_MAP_PATH
+	_mission_scenario = MISSION_SCENARIO_DATA_SCRIPT.new(base_data)
+	_scenario_feedback_text = "Scenario fields updated."
+	_mark_scenario_dirty(true)
+	_refresh_mission_authoring_controls()
+
+
+func get_current_mission_scenario_dict() -> Dictionary:
+	_sync_mission_scenario_from_controls()
+	var scenario = _ensure_mission_scenario()
+	if scenario == null:
+		return {}
+	return Dictionary(scenario.call("to_dict")).duplicate(true)
+
+
+func create_live_test_scene_from_current_scenario():
+	var save_path: String = _current_scenario_path if not _current_scenario_path.is_empty() else LIVE_TEST_SCENARIO_SCRATCH_PATH
+	var save_error: Error = save_mission_scenario_from_editor(save_path)
+	if save_error != OK:
+		return null
+	var packed_scene: PackedScene = load(LIVE_TEST_SCENE_PATH)
+	if packed_scene == null:
+		_scenario_feedback_text = "Live test scene missing."
+		_refresh_mission_authoring_controls()
+		return null
+	var scene := packed_scene.instantiate()
+	var mission_setup := scene.get_node_or_null("MissionSetup")
+	if mission_setup != null:
+		mission_setup.set("scenario_file_path", save_path)
+	return scene
+
+
+func _on_mission_scenario_text_changed(_new_text: String) -> void:
+	_on_mission_scenario_control_changed()
+
+
+func _on_mission_scenario_value_changed(_value: float) -> void:
+	_on_mission_scenario_control_changed()
+
+
+func _on_mission_scenario_option_selected(_index: int) -> void:
+	_on_mission_scenario_control_changed()
+
+
+func _on_mission_scenario_control_changed() -> void:
+	if _is_refreshing_scenario_controls:
+		return
+	_sync_mission_scenario_from_controls()
+	_scenario_feedback_text = ""
+	_mark_scenario_dirty(true)
+
+
+func _on_mission_scenario_load_pressed() -> void:
+	var load_dialog := get_node_or_null("UI/ScenarioLoadDialog") as FileDialog
+	if load_dialog == null:
+		return
+	load_dialog.current_dir = DEFAULT_SCENARIO_DIR
+	load_dialog.popup_centered_ratio(0.65)
+
+
+func _on_mission_scenario_save_pressed() -> void:
+	if _current_scenario_path.is_empty():
+		_on_mission_scenario_save_as_pressed()
+		return
+	save_mission_scenario_from_editor(_current_scenario_path)
+
+
+func _on_mission_scenario_save_as_pressed() -> void:
+	var save_dialog := get_node_or_null("UI/ScenarioSaveAsDialog") as FileDialog
+	if save_dialog == null:
+		return
+	save_dialog.current_dir = DEFAULT_SCENARIO_DIR
+	save_dialog.current_file = _current_scenario_path.get_file() if not _current_scenario_path.is_empty() else "%s.json" % _build_default_scenario_id()
+	save_dialog.popup_centered_ratio(0.65)
+
+
+func _on_mission_scenario_live_test_pressed() -> void:
+	var scene = create_live_test_scene_from_current_scenario()
+	if scene == null:
+		return
+	var tree := get_tree()
+	var current_scene := tree.current_scene
+	tree.root.add_child(scene)
+	tree.current_scene = scene
+	if current_scene != null:
+		current_scene.queue_free()
+
+
+func _on_mission_scenario_use_objective_tile_pressed() -> void:
+	var scenario = _ensure_mission_scenario()
+	if scenario == null:
+		return
+	var objective: Dictionary = Dictionary(scenario.get("objective")).duplicate(true)
+	objective.erase("marker_id")
+	objective["position"] = _get_selected_or_map_center_position(_coerce_vector2(objective.get("position", Vector2.ZERO), Vector2.ZERO))
+	scenario.set("objective", objective)
+	_scenario_feedback_text = "Objective position set."
+	_mark_scenario_dirty(true)
+	_refresh_mission_authoring_controls()
+
+
+func _on_mission_scenario_use_spawn_tile_pressed() -> void:
+	var scenario = _ensure_mission_scenario()
+	if scenario == null:
+		return
+	var groups: Array = Array(scenario.get("enemy_groups")).duplicate(true)
+	var group: Dictionary = _get_primary_enemy_group().duplicate(true)
+	if group.is_empty():
+		group = {
+			"group_id": "red_test_group",
+			"team_id": "team_bravo",
+			"enemy_ids": ["enemy_delta", "enemy_echo"],
+		}
+	group.erase("spawn_marker_id")
+	group["spawn_position"] = _get_selected_or_map_center_position(_coerce_vector2(group.get("spawn_position", Vector2.ZERO), Vector2.ZERO))
+	if groups.is_empty():
+		groups.append(group)
+	else:
+		groups[0] = group
+	scenario.set("enemy_groups", groups)
+	_scenario_feedback_text = "Enemy spawn position set."
+	_mark_scenario_dirty(true)
+	_refresh_mission_authoring_controls()
+
+
+func _on_mission_scenario_auto_bind_pressed() -> void:
+	var scenario = _ensure_mission_scenario()
+	if scenario == null:
+		return
+	_sync_mission_scenario_from_controls()
+	var enemy_ids: PackedStringArray = scenario.call("get_enemy_ids")
+	scenario.set("patrol_bindings", _build_auto_patrol_bindings(enemy_ids))
+	_scenario_feedback_text = "Patrol bindings refreshed."
+	_mark_scenario_dirty(true)
+	_refresh_mission_authoring_controls()
+
+
+func _on_mission_scenario_load_file_selected(path: String) -> void:
+	load_mission_scenario_for_editor(path)
+
+
+func _on_mission_scenario_save_as_file_selected(path: String) -> void:
+	save_mission_scenario_from_editor(path)
+
+
+func _get_mission_scenario_panel() -> VBoxContainer:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MissionScenarioPanel") as VBoxContainer
+
+
+func _get_scenario_button(button_name: String) -> Button:
+	var panel := _get_mission_scenario_panel()
+	if panel == null:
+		return null
+	return panel.find_child(button_name, true, false) as Button
+
+
+func _get_scenario_line_edit(line_edit_name: String) -> LineEdit:
+	var panel := _get_mission_scenario_panel()
+	if panel == null:
+		return null
+	return panel.find_child(line_edit_name, true, false) as LineEdit
+
+
+func _get_scenario_spinbox(spinbox_name: String) -> SpinBox:
+	var panel := _get_mission_scenario_panel()
+	if panel == null:
+		return null
+	return panel.find_child(spinbox_name, true, false) as SpinBox
+
+
+func _get_scenario_option_button(option_name: String) -> OptionButton:
+	var panel := _get_mission_scenario_panel()
+	if panel == null:
+		return null
+	return panel.find_child(option_name, true, false) as OptionButton
+
+
 func _hide_legacy_marker_rows() -> void:
 	for node_path in [
 		"UI/PropertyPanel/Margin/VBox/SpawnAlphaRow",
@@ -984,6 +2082,52 @@ func _on_remove_marker_button_pressed() -> void:
 	_delete_selected_marker()
 
 
+func _on_height_tool_toggled(pressed: bool) -> void:
+	_height_tool_enabled = pressed
+	if pressed:
+		_selection_tool_enabled = false
+		_patrol_tool_enabled = false
+		_marker_tool_enabled = false
+		var select_button := get_node_or_null("UI/TopBar/Margin/HBox/SelectButton") as Button
+		if select_button != null:
+			select_button.button_pressed = false
+		var patrol_button := get_node_or_null("UI/TopBar/Margin/HBox/PatrolButton") as Button
+		if patrol_button != null:
+			patrol_button.button_pressed = false
+		var marker_tool_button := _get_marker_tool_button()
+		if marker_tool_button != null:
+			marker_tool_button.button_pressed = false
+		var brush_button := get_node_or_null("UI/TopBar/Margin/HBox/BrushButton") as Button
+		if brush_button != null and brush_button.button_pressed:
+			brush_button.button_pressed = false
+		_is_painting = false
+		_last_painted_grid = Vector2i(-1, -1)
+		_hide_hover_preview()
+		_refresh_patrol_overlay()
+		_refresh_marker_editor_controls()
+	_update_height_topbar_state()
+	_update_patrol_topbar_state()
+
+
+func _on_height_mode_selected(index: int) -> void:
+	var option_button := _get_height_mode_option_button()
+	if option_button == null or index < 0 or index >= option_button.item_count:
+		return
+	_height_tool_mode = String(option_button.get_item_metadata(index))
+
+
+func _on_height_edge_selected(index: int) -> void:
+	var option_button := _get_height_edge_option_button()
+	if option_button == null or index < 0 or index >= option_button.item_count:
+		return
+	var edge_type: String = String(option_button.get_item_metadata(index))
+	match edge_type:
+		TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF, TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE, TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE:
+			_height_tool_edge_type = edge_type
+		_:
+			_height_tool_edge_type = TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE
+
+
 func _on_marker_tool_toggled(pressed: bool) -> void:
 	_marker_tool_enabled = pressed
 	if not pressed:
@@ -992,6 +2136,7 @@ func _on_marker_tool_toggled(pressed: bool) -> void:
 		_dragged_marker_id = ""
 		_refresh_marker_editor_controls()
 		return
+	_clear_height_tool()
 	_selection_tool_enabled = false
 	_patrol_tool_enabled = false
 	var select_button := get_node_or_null("UI/TopBar/Margin/HBox/SelectButton") as Button
@@ -1128,7 +2273,7 @@ func _select_marker(marker_id: String) -> void:
 
 
 func _handle_marker_left_press(mouse_button_event: InputEventMouseButton) -> bool:
-	var world_position: Vector2 = get_global_mouse_position()
+	var world_position: Vector2 = _screen_to_editor_world_position(mouse_button_event.position)
 	var hit_marker_id: String = _find_marker_id_at_world_position(world_position)
 	if not hit_marker_id.is_empty():
 		_select_marker(hit_marker_id)
@@ -1185,6 +2330,7 @@ func _move_marker_to_world_position(marker_id: String, world_position: Vector2, 
 	_terrain_map_data.call("set_marker_position", marker_id, snapped_position)
 	_mark_dirty(true)
 	_select_marker(marker_id)
+	_queue_3d_map_refresh()
 	if not is_drag:
 		_set_marker_feedback("Marker placed on tile center.")
 	return true
@@ -1198,47 +2344,20 @@ func _snap_world_position_to_tile_center(world_position: Vector2):
 
 
 func _find_marker_id_at_world_position(world_position: Vector2) -> String:
-	if _terrain_map_data == null:
-		return ""
-	var best_marker_id: String = ""
-	var best_distance_sq: float = MARKER_PICK_RADIUS * MARKER_PICK_RADIUS
-	for marker_id in PackedStringArray(_terrain_map_data.call("get_marker_ids")):
-		var marker_position: Vector2 = _terrain_map_data.call("get_marker_position", marker_id, Vector2.ZERO)
-		var distance_sq: float = marker_position.distance_squared_to(world_position)
-		if distance_sq > best_distance_sq:
-			continue
-		best_distance_sq = distance_sq
-		best_marker_id = String(marker_id)
-	return best_marker_id
+	return String(MAP_EDITOR_MARKER_TOOL_SCRIPT.call("find_marker_id_at_world_position", _terrain_map_data, world_position, MARKER_PICK_RADIUS))
 
 
 func _can_place_marker_at_world_position(marker_id: String, world_position: Vector2) -> bool:
-	if _terrain_map_data == null:
-		return false
-	for other_marker_id in PackedStringArray(_terrain_map_data.call("get_marker_ids")):
-		if String(other_marker_id) == marker_id:
-			continue
-		if _marker_positions_equal(world_position, Vector2(_terrain_map_data.call("get_marker_position", other_marker_id, Vector2.ZERO))):
-			return false
-	return true
+	return bool(MAP_EDITOR_MARKER_TOOL_SCRIPT.call("can_place_marker_at_world_position", _terrain_map_data, marker_id, world_position))
 
 
 func _find_first_available_marker_world_position(preferred_world_position: Vector2, ignore_marker_id: String = ""):
 	var preferred_tile_position = _snap_world_position_to_tile_center(preferred_world_position)
-	if preferred_tile_position != null and _can_place_marker_at_world_position(ignore_marker_id, preferred_tile_position):
-		return preferred_tile_position
-	if _terrain_map_data == null:
-		return null
-	for tile_data in _terrain_map_data.call("get_tiles"):
-		if tile_data == null:
-			continue
-		if _can_place_marker_at_world_position(ignore_marker_id, Vector2(tile_data.world_position)):
-			return Vector2(tile_data.world_position)
-	return null
+	return MAP_EDITOR_MARKER_TOOL_SCRIPT.call("find_first_available_marker_world_position", _terrain_map_data, preferred_tile_position, ignore_marker_id)
 
 
 func _marker_positions_equal(a: Vector2, b: Vector2) -> bool:
-	return a.distance_squared_to(b) <= 1.0
+	return bool(MAP_EDITOR_MARKER_TOOL_SCRIPT.call("marker_positions_equal", a, b))
 
 
 func _get_default_marker_spawn_position() -> Vector2:
@@ -1271,10 +2390,12 @@ func _ensure_marker_overlay() -> void:
 func _refresh_marker_overlay() -> void:
 	var overlay := get_node_or_null(MARKER_OVERLAY_NAME) as Node2D
 	if overlay == null:
+		_queue_3d_map_refresh()
 		return
 	for child in overlay.get_children():
 		child.queue_free()
 	if _terrain_map_data == null:
+		_queue_3d_map_refresh()
 		return
 	for marker_id in PackedStringArray(_terrain_map_data.call("get_marker_ids")):
 		var marker_record: Dictionary = Dictionary(_terrain_map_data.call("get_marker_record", marker_id))
@@ -1292,6 +2413,7 @@ func _refresh_marker_overlay() -> void:
 		marker_label.modulate = marker_color.lightened(0.18)
 		marker_label.add_theme_font_size_override("font_size", 11)
 		marker_host.add_child(marker_label)
+	_queue_3d_map_refresh()
 
 
 func _add_marker_symbol_to_host(host: Node2D, marker_symbol: String, marker_color: Color, is_selected: bool) -> void:
@@ -1518,13 +2640,16 @@ func _refresh_top_bar() -> void:
 	var save_button := get_node_or_null("UI/TopBar/Margin/HBox/SaveButton") as Button
 	var undo_button := get_node_or_null("UI/TopBar/Margin/HBox/UndoButton") as Button
 	if title_label != null:
-		title_label.text = "Map Editor%s" % (" *" if _dirty else "")
+		var dirty_suffix: String = " *" if _dirty else ""
+		var scenario_suffix: String = " | Scenario *" if _scenario_dirty else ""
+		title_label.text = "Map Editor%s%s" % [dirty_suffix, scenario_suffix]
 	if path_label != null:
 		path_label.text = _current_map_path if not _current_map_path.is_empty() else "(unsaved)"
 	if save_button != null:
 		save_button.disabled = _terrain_map_data == null or _current_map_path.is_empty()
 	if undo_button != null:
 		undo_button.disabled = _last_undo_state.is_empty()
+	_update_height_topbar_state()
 	_update_patrol_topbar_state()
 
 
@@ -1534,6 +2659,11 @@ func _mark_dirty(is_dirty: bool) -> void:
 
 
 func _adjust_camera_zoom(delta: float) -> void:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null:
+		primary_3d_view.call("zoom_camera", delta / CAMERA_ZOOM_STEP)
+		return
+
 	var camera := _get_camera()
 	if camera == null:
 		return
@@ -1543,6 +2673,11 @@ func _adjust_camera_zoom(delta: float) -> void:
 
 
 func _center_camera_on_map() -> void:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null:
+		primary_3d_view.call("focus_map_center")
+		return
+
 	var camera := _get_camera()
 	if camera == null or _terrain_map_data == null:
 		return
@@ -1588,6 +2723,15 @@ func _populate_brush_size_options() -> void:
 	option_button.add_item("3x3")
 	option_button.add_item("5x5")
 	option_button.select(0)
+
+
+func _configure_property_height_spinbox() -> void:
+	var height_spinbox := _get_height_spinbox()
+	if height_spinbox == null:
+		return
+	height_spinbox.min_value = 0.0
+	height_spinbox.max_value = 2.0
+	height_spinbox.step = 1.0
 
 
 func _connect_ui_signals() -> void:
@@ -1682,6 +2826,7 @@ func _ensure_patrol_overlay() -> void:
 func _refresh_patrol_overlay() -> void:
 	var overlay := get_node_or_null(PATROL_OVERLAY_NAME) as Node2D
 	if overlay == null or _terrain_map_data == null:
+		_queue_3d_map_refresh()
 		return
 	for child in overlay.get_children():
 		child.queue_free()
@@ -1717,6 +2862,7 @@ func _refresh_patrol_overlay() -> void:
 			label.modulate = base_color
 			label.add_theme_font_size_override("font_size", 10)
 			overlay.add_child(label)
+	_queue_3d_map_refresh()
 
 
 func _refresh_patrol_spawn_selector() -> void:
@@ -1760,47 +2906,31 @@ func _handle_patrol_left_click(world_position: Vector2, remove_mode: bool) -> vo
 
 
 func _find_patrol_waypoint_index_at(world_position: Vector2) -> int:
-	if _terrain_map_data == null:
-		return -1
-	var patrol_path: Array = Array(_terrain_map_data.call("get_patrol_path", _patrol_spawn_id))
-	var best_index: int = -1
-	var best_dist_sq: float = PATROL_PICK_RADIUS * PATROL_PICK_RADIUS
-	for index in range(patrol_path.size()):
-		var waypoint_position: Vector2 = Vector2(patrol_path[index])
-		var dist_sq: float = waypoint_position.distance_squared_to(world_position)
-		if dist_sq > best_dist_sq:
-			continue
-		best_dist_sq = dist_sq
-		best_index = index
-	return best_index
+	return int(MAP_EDITOR_PATROL_TOOL_SCRIPT.call("find_waypoint_index_at", _terrain_map_data, _patrol_spawn_id, world_position, PATROL_PICK_RADIUS))
 
 
 func _add_patrol_waypoint(world_position: Vector2) -> void:
-	var patrol_path: Array = Array(_terrain_map_data.call("get_patrol_path", _patrol_spawn_id))
-	patrol_path.append(world_position)
-	_terrain_map_data.call("set_patrol_path", _patrol_spawn_id, patrol_path)
+	if not bool(MAP_EDITOR_PATROL_TOOL_SCRIPT.call("add_waypoint", _terrain_map_data, _patrol_spawn_id, world_position)):
+		return
 	_mark_dirty(true)
 	_refresh_patrol_overlay()
+	_queue_3d_map_refresh()
 
 
 func _move_patrol_waypoint(index: int, world_position: Vector2) -> void:
-	var patrol_path: Array = Array(_terrain_map_data.call("get_patrol_path", _patrol_spawn_id))
-	if index < 0 or index >= patrol_path.size():
+	if not bool(MAP_EDITOR_PATROL_TOOL_SCRIPT.call("move_waypoint", _terrain_map_data, _patrol_spawn_id, index, world_position)):
 		return
-	patrol_path[index] = world_position
-	_terrain_map_data.call("set_patrol_path", _patrol_spawn_id, patrol_path)
 	_mark_dirty(true)
 	_refresh_patrol_overlay()
+	_queue_3d_map_refresh()
 
 
 func _remove_patrol_waypoint(index: int) -> void:
-	var patrol_path: Array = Array(_terrain_map_data.call("get_patrol_path", _patrol_spawn_id))
-	if index < 0 or index >= patrol_path.size():
+	if not bool(MAP_EDITOR_PATROL_TOOL_SCRIPT.call("remove_waypoint", _terrain_map_data, _patrol_spawn_id, index)):
 		return
-	patrol_path.remove_at(index)
-	_terrain_map_data.call("set_patrol_path", _patrol_spawn_id, patrol_path)
 	_mark_dirty(true)
 	_refresh_patrol_overlay()
+	_queue_3d_map_refresh()
 
 
 func _on_load_pressed() -> void:
@@ -1894,6 +3024,7 @@ func _on_tile_type_selected(index: int) -> void:
 		_selected_type_id = type_ids[index]
 
 	# Auto-enable brush when a type is selected
+	_clear_height_tool()
 	var brush_button := get_node_or_null("UI/TopBar/Margin/HBox/BrushButton") as Button
 	if brush_button != null and not brush_button.button_pressed:
 		brush_button.button_pressed = true
@@ -1979,6 +3110,52 @@ func _show_load_issue_dialog(issue_message: String, source_path: String) -> void
 	var shown_path: String = source_path if not source_path.is_empty() else "(unbekannt)"
 	dialog.dialog_text = "Das ist eine alte Datei und wird nicht mehr unterstuetzt.\n\nDatei: %s\n\nBitte die Karte im aktuellen Format neu bauen. Der Editor hat stattdessen eine neue leere Karte geoeffnet.\n\nTechnischer Hinweis: %s" % [shown_path, issue_message]
 	dialog.popup_centered()
+
+
+func _ensure_3d_primary_view() -> void:
+	_terrain_3d_view = MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT.call("ensure_primary_view", self, _terrain_3d_view, PRIMARY_VIEW_LEGACY_VISIBILITY_NODES, _hover_preview)
+
+
+func _get_primary_3d_view():
+	_terrain_3d_view = MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT.call("get_primary_view", self, _terrain_3d_view)
+	return _terrain_3d_view
+
+
+func _refresh_3d_map_view() -> void:
+	_3d_refresh_queued = false
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view == null:
+		return
+	MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT.call("refresh_map_view", primary_3d_view, _terrain_map_data, _selected_grids, _selected_grid_position)
+	_set_legacy_2d_map_visible(false)
+
+
+func _queue_3d_map_refresh() -> void:
+	if _get_primary_3d_view() == null:
+		return
+	if _3d_refresh_queued:
+		return
+	_3d_refresh_queued = true
+	call_deferred("_refresh_3d_map_view")
+
+
+func _update_3d_selection_visual() -> void:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view == null:
+		return
+	MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT.call("update_selection_visual", primary_3d_view, _selected_grids, _selected_grid_position)
+
+
+func _set_legacy_2d_map_visible(is_visible: bool) -> void:
+	MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT.call("set_legacy_2d_map_visible", self, PRIMARY_VIEW_LEGACY_VISIBILITY_NODES, is_visible, _hover_preview)
+
+
+func _clear_legacy_2d_map_children() -> void:
+	MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT.call("clear_legacy_2d_map_children", self, PRIMARY_VIEW_LEGACY_CLEAR_NODES)
+
+
+func _screen_to_editor_world_position(screen_position: Vector2) -> Vector2:
+	return Vector2(MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT.call("screen_to_editor_world_position", _get_primary_3d_view(), screen_position, get_global_mouse_position()))
 
 
 func _get_camera() -> Camera2D:
@@ -2067,6 +3244,18 @@ func _get_edge_type_option_button() -> OptionButton:
 
 func _get_brush_size_option_button() -> OptionButton:
 	return get_node_or_null("UI/TopBar/Margin/HBox/BrushSizeOptionButton") as OptionButton
+
+
+func _get_height_tool_button() -> Button:
+	return get_node_or_null("UI/TopBar/Margin/HBox/HeightButton") as Button
+
+
+func _get_height_mode_option_button() -> OptionButton:
+	return get_node_or_null("UI/TopBar/Margin/HBox/HeightModeOption") as OptionButton
+
+
+func _get_height_edge_option_button() -> OptionButton:
+	return get_node_or_null("UI/TopBar/Margin/HBox/HeightEdgeOption") as OptionButton
 
 
 func _get_new_map_dialog() -> ConfirmationDialog:
@@ -2614,6 +3803,9 @@ func _rebuild_grid_overlay() -> void:
 # --- Hover Preview ---
 
 func _update_hover_preview(world_position: Vector2) -> void:
+	if _get_primary_3d_view() != null:
+		_hide_hover_preview()
+		return
 	if _terrain_map_data == null or _terrain_registry == null:
 		_hide_hover_preview()
 		return

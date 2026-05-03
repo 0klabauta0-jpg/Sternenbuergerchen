@@ -295,6 +295,32 @@ TASK_153 - 3D Transparency Material Presets
 Phase 18B - Editor-Asset-Ausbau
 TASK_132 - Kenney Isometric Asset Palette Expansion
 
+Phase 18C - Tactical Mission Authoring
+TASK_155 - Tactical Mission Test Presets (implementiert)
+TASK_156 - Mission Scenario Data Contract (implementiert)
+TASK_157 - Tactical Mission Editor MVP (implementiert)
+TASK_158 - Editor-to-Live Mission Validation (implementiert)
+TASK_159 - 2.5D Editor and Mission Primary View (implementiert)
+TASK_160 - Tactical Mission Playability Smoke (implementiert)
+
+Phase 18D - Strategic Review, UI-Assets und Multiplayer-Vorbereitung
+TASK_161 - Mission Runtime Boundary Cleanup (implementiert)
+TASK_162 - Combat Loop Authority Split (implementiert)
+TASK_163 - Map Editor Module Split (implementiert)
+TASK_164 - UI Theme and Component Library (implementiert)
+TASK_165 - Local Asset Curation and Import Plan (implementiert)
+TASK_166 - Multiplayer Authority Command Contract (implementiert)
+TASK_167 - Multiplayer Session and Lobby Extraction (implementiert)
+TASK_168 - Multiplayer Snapshot Replication Contract (implementiert)
+TASK_169 - Multiplayer Two-Client Playability Smoke (implementiert)
+TASK_170 - Performance and Warning Budget Gate (implementiert)
+
+Phase 18E - NPC Visual Replacement
+TASK_171 - NPC Model Replacement Animated Characters (implementiert)
+TASK_172 - NPC Animation Scale Helmets and Enemy Visuals (implementiert)
+TASK_173 - NPC Animation Skeleton Socket Contract (implementiert)
+TASK_174 - Character Helmet and Blaster Attachment Visuals (implementiert)
+
 Batch-Empfehlung
 
 Codex soll Tasks in kleinen Gruppen bearbeiten:

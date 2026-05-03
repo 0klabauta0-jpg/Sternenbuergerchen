@@ -4,8 +4,10 @@ const OBJECTIVE_STATUS_SCRIPT: GDScript = preload("res://scripts/core/objective_
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const TERRAIN_MAP_RENDERER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_renderer.gd")
+const TERRAIN_MAP_3D_VIEW_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_3d_view.gd")
 const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
 const LOADOUT_MODIFIER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/command/loadout_modifier_resolver.gd")
+const MISSION_SCENARIO_DATA_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_data.gd")
 
 @export var team_id: String = "team_alpha"
 @export var runtime_leader_path: NodePath
@@ -23,14 +25,19 @@ const LOADOUT_MODIFIER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/comman
 @export var enemy_wave_controller_path: NodePath
 @export var terrain_registry_path: NodePath
 @export var map_file_path: String = "res://maps/test_mission_32x32_slots8.json"
+@export var scenario_file_path: String = ""
 @export var defer_friendly_runtime_activation: bool = true
 @export var allow_full_roster_when_selection_empty: bool = true
+@export var use_2_5d_primary_view: bool = true
 
 var member_loadouts: Dictionary = {}
 var unit_loadout_modifiers_by_unit_id: Dictionary = {}
 var _is_initialized: bool = false
 var _terrain_renderer = null
+var _terrain_3d_view = null
 var _loaded_terrain_map_data = null
+var _mission_scenario = null
+var _scenario_enemy_ids: PackedStringArray = PackedStringArray()
 
 
 func _ready() -> void:
@@ -47,20 +54,24 @@ func _ready() -> void:
 		push_warning("MissionTestSetup requires direct references to RuntimeLeader, UnitRegistry, FTLRegistry and SimulationRoot.")
 		return
 
+	_load_mission_scenario_if_available()
 	var terrain_registry = _setup_terrain_registry()
 	_build_unit_loadout_modifiers()
 	var spawn_alpha_marker := _resolve_marker(spawn_alpha_path)
 	var spawn_bravo_marker := _resolve_marker(spawn_bravo_path)
 	var objective_marker := _resolve_marker(objective_point_path)
 	var target_marker := _resolve_marker(target_marker_path)
+	_apply_scenario_objective_to_marker(objective_marker)
 	if target_marker != null and objective_marker != null:
 		target_marker.global_position = objective_marker.global_position
 
 	var first_unit: Node = null
 	var friendly_spawn_index: int = 0
 	var friendly_slot_index: int = 0
+	var enemy_assignment_slot_index: int = 0
 	var enemy_spawn_index: int = 0
 	var enemy_units: Array = []
+	var visual_unit_nodes: Array = []
 	for unit_path in unit_paths:
 		var unit = get_node_or_null(unit_path)
 		if unit == null or not unit.has_method("get_unit_id"):
@@ -83,6 +94,9 @@ func _ready() -> void:
 
 			unit_id = _get_selected_unit_id_for_friendly_slot(friendly_slot_index, unit_id)
 			friendly_slot_index += 1
+		elif unit_team_id != team_id:
+			unit_id = _get_scenario_enemy_id_for_slot(enemy_assignment_slot_index, unit_id)
+			enemy_assignment_slot_index += 1
 
 		_apply_unit_identity_preset(unit, unit_id, unit_team_id)
 		_apply_fob_loadout_override(unit, unit_id, unit_team_id)
@@ -108,8 +122,8 @@ func _ready() -> void:
 			if unit_team_id == team_id and spawn_alpha_marker != null:
 				unit_node.global_position = spawn_alpha_marker.global_position + _get_friendly_spawn_offset(friendly_spawn_index)
 				friendly_spawn_index += 1
-			elif unit_team_id != team_id and spawn_bravo_marker != null:
-				unit_node.global_position = spawn_bravo_marker.global_position + _get_enemy_spawn_offset(enemy_spawn_index)
+			elif unit_team_id != team_id:
+				unit_node.global_position = _get_enemy_spawn_position(unit_id, spawn_bravo_marker) + _get_enemy_spawn_offset(enemy_spawn_index)
 				enemy_spawn_index += 1
 
 			if unit is CanvasItem:
@@ -129,6 +143,7 @@ func _ready() -> void:
 		else:
 			unit_registry.call("register_unit", unit_id, unit)
 			enemy_units.append(unit)
+		visual_unit_nodes.append(unit)
 
 		if first_unit == null and unit_team_id == team_id:
 			first_unit = unit
@@ -142,6 +157,7 @@ func _ready() -> void:
 
 	_setup_respawn_manager(spawn_alpha_marker, spawn_bravo_marker)
 	_setup_enemy_waves(enemy_units)
+	_ensure_primary_3d_view(visual_unit_nodes)
 	_is_initialized = true
 
 
@@ -274,9 +290,11 @@ func _setup_objective_status(simulation_root: Node, objective_marker: Marker2D) 
 		return
 
 	var objective_status = OBJECTIVE_STATUS_SCRIPT.new()
-	objective_status.objective_id = "objective_point"
-	objective_status.position = objective_marker.global_position
-	objective_status.capture_radius = 80.0
+	var objective_dict: Dictionary = _get_scenario_objective()
+	var objective_marker_id: String = String(objective_dict.get("marker_id", "objective_point")).strip_edges()
+	objective_status.objective_id = objective_marker_id if not objective_marker_id.is_empty() else "scenario_objective"
+	objective_status.position = _get_scenario_objective_position(objective_marker.global_position)
+	objective_status.capture_radius = maxf(float(objective_dict.get("capture_radius", 80.0)), 1.0)
 	simulation_root.call("set_objective_status", objective_status)
 
 
@@ -284,6 +302,7 @@ func _setup_enemy_waves(enemy_units: Array) -> void:
 	var enemy_wave_controller = get_node_or_null(enemy_wave_controller_path)
 	if enemy_wave_controller == null or not enemy_wave_controller.has_method("initialize_enemy_units"):
 		return
+	_apply_scenario_wave_config(enemy_wave_controller)
 	if enemy_wave_controller.has_method("set_patrol_paths"):
 		enemy_wave_controller.call("set_patrol_paths", _build_enemy_patrol_paths())
 
@@ -294,13 +313,150 @@ func _build_enemy_patrol_paths() -> Dictionary:
 	var result: Dictionary = {}
 	if _loaded_terrain_map_data == null or not _loaded_terrain_map_data.has_method("get_patrol_paths"):
 		return result
+	if _mission_scenario != null:
+		for binding_variant in Array(_mission_scenario.get("patrol_bindings")):
+			var binding: Dictionary = Dictionary(binding_variant)
+			var target_id: String = String(binding.get("target_id", "")).strip_edges()
+			var patrol_path_id: String = String(binding.get("patrol_path_id", "")).strip_edges()
+			if target_id.is_empty() or patrol_path_id.is_empty():
+				continue
+			var bound_path: Array = Array(_loaded_terrain_map_data.call("get_patrol_path", patrol_path_id))
+			if bound_path.is_empty():
+				continue
+			var target_unit_ids: PackedStringArray = _resolve_patrol_binding_targets(target_id)
+			for target_unit_id in target_unit_ids:
+				result[String(target_unit_id)] = bound_path.duplicate(true)
 	var patrol_paths: Dictionary = Dictionary(_loaded_terrain_map_data.call("get_patrol_paths"))
 	for spawn_id_variant in patrol_paths.keys():
 		var spawn_id: String = String(spawn_id_variant).strip_edges()
-		if spawn_id.is_empty():
+		if spawn_id.is_empty() or result.has(spawn_id):
 			continue
 		result[spawn_id] = Array(patrol_paths.get(spawn_id_variant, [])).duplicate(true)
 	return result
+
+
+func _load_mission_scenario_if_available() -> void:
+	_mission_scenario = null
+	_scenario_enemy_ids = PackedStringArray()
+	var normalized_path: String = scenario_file_path.strip_edges()
+	if normalized_path.is_empty():
+		return
+	var scenario = MISSION_SCENARIO_DATA_SCRIPT.call("load_from_file", normalized_path)
+	if scenario == null:
+		push_warning("MissionTestSetup could not load mission scenario: %s" % normalized_path)
+		return
+	var validation: Dictionary = Dictionary(scenario.call("validate"))
+	if not bool(validation.get("valid", false)):
+		push_warning("Mission scenario has authoring issues: %s" % ", ".join(PackedStringArray(validation.get("errors", PackedStringArray()))))
+	_mission_scenario = scenario
+	_scenario_enemy_ids = PackedStringArray(_mission_scenario.call("get_enemy_ids"))
+	var scenario_map_path: String = String(_mission_scenario.get("map_file_path")).strip_edges()
+	if not scenario_map_path.is_empty():
+		map_file_path = scenario_map_path
+
+
+func _get_scenario_enemy_id_for_slot(slot_index: int, fallback_unit_id: String) -> String:
+	if _scenario_enemy_ids.is_empty() or slot_index < 0 or slot_index >= _scenario_enemy_ids.size():
+		return fallback_unit_id
+	var scenario_unit_id: String = String(_scenario_enemy_ids[slot_index]).strip_edges()
+	if scenario_unit_id.is_empty():
+		return fallback_unit_id
+	return scenario_unit_id
+
+
+func _get_enemy_spawn_position(unit_id: String, fallback_marker: Marker2D) -> Vector2:
+	var fallback_position: Vector2 = fallback_marker.global_position if fallback_marker != null else Vector2.ZERO
+	var group: Dictionary = _find_scenario_enemy_group_for_unit(unit_id)
+	if group.has("spawn_position"):
+		return _coerce_vector2(group.get("spawn_position", fallback_position), fallback_position)
+	var spawn_marker_id: String = String(group.get("spawn_marker_id", "")).strip_edges()
+	if not spawn_marker_id.is_empty() and _loaded_terrain_map_data != null and _loaded_terrain_map_data.has_method("get_marker_position"):
+		return _loaded_terrain_map_data.call("get_marker_position", spawn_marker_id, fallback_position)
+	return fallback_position
+
+
+func _find_scenario_enemy_group_for_unit(unit_id: String) -> Dictionary:
+	if _mission_scenario == null:
+		return {}
+	var normalized_unit_id: String = unit_id.strip_edges()
+	for group_variant in Array(_mission_scenario.get("enemy_groups")):
+		var group: Dictionary = Dictionary(group_variant)
+		for enemy_id_variant in Array(group.get("enemy_ids", [])):
+			if String(enemy_id_variant).strip_edges() == normalized_unit_id:
+				return group
+	return {}
+
+
+func _resolve_patrol_binding_targets(target_id: String) -> PackedStringArray:
+	var result: PackedStringArray = PackedStringArray()
+	var normalized_target_id: String = target_id.strip_edges()
+	if normalized_target_id.is_empty():
+		return result
+	if _scenario_enemy_ids.has(normalized_target_id):
+		result.append(normalized_target_id)
+		return result
+	if _mission_scenario != null:
+		for group_variant in Array(_mission_scenario.get("enemy_groups")):
+			var group: Dictionary = Dictionary(group_variant)
+			if String(group.get("group_id", "")).strip_edges() == normalized_target_id or String(group.get("spawn_marker_id", "")).strip_edges() == normalized_target_id:
+				for enemy_id_variant in Array(group.get("enemy_ids", [])):
+					var enemy_id: String = String(enemy_id_variant).strip_edges()
+					if not enemy_id.is_empty() and not result.has(enemy_id):
+						result.append(enemy_id)
+	if result.is_empty():
+		result.append(normalized_target_id)
+	return result
+
+
+func _apply_scenario_wave_config(enemy_wave_controller: Node) -> void:
+	if _mission_scenario == null or enemy_wave_controller == null:
+		return
+	var wave_config: Dictionary = Dictionary(_mission_scenario.get("wave_config"))
+	if wave_config.is_empty():
+		return
+	_set_property_if_present(enemy_wave_controller, "wave_count", maxi(int(wave_config.get("wave_count", enemy_wave_controller.get("wave_count"))), 0))
+	_set_property_if_present(enemy_wave_controller, "units_per_wave", maxi(int(wave_config.get("units_per_wave", enemy_wave_controller.get("units_per_wave"))), 1))
+	_set_property_if_present(enemy_wave_controller, "first_wave_delay_seconds", maxf(float(wave_config.get("first_wave_delay_seconds", enemy_wave_controller.get("first_wave_delay_seconds"))), 0.0))
+	_set_property_if_present(enemy_wave_controller, "wave_delay_seconds", maxf(float(wave_config.get("wave_delay_seconds", enemy_wave_controller.get("wave_delay_seconds"))), 0.0))
+
+
+func _set_property_if_present(node: Object, property_name: String, value: Variant) -> void:
+	if node == null or property_name.is_empty():
+		return
+	for property_info in node.get_property_list():
+		var info: Dictionary = Dictionary(property_info)
+		if String(info.get("name", "")) == property_name:
+			node.set(property_name, value)
+			return
+
+
+func _apply_scenario_objective_to_marker(objective_marker: Marker2D) -> void:
+	if objective_marker == null or _mission_scenario == null:
+		return
+	objective_marker.global_position = _get_scenario_objective_position(objective_marker.global_position)
+
+
+func _get_scenario_objective() -> Dictionary:
+	if _mission_scenario == null:
+		return {}
+	return Dictionary(_mission_scenario.get("objective"))
+
+
+func _get_scenario_objective_position(fallback_position: Vector2) -> Vector2:
+	if _mission_scenario == null:
+		return fallback_position
+	return _mission_scenario.call("get_objective_position", _loaded_terrain_map_data, fallback_position)
+
+
+func _coerce_vector2(value: Variant, fallback: Vector2) -> Vector2:
+	if value is Vector2:
+		return value
+	if value is Vector2i:
+		return Vector2(value.x, value.y)
+	if typeof(value) == TYPE_DICTIONARY:
+		var value_dict: Dictionary = Dictionary(value)
+		return Vector2(float(value_dict.get("x", fallback.x)), float(value_dict.get("y", fallback.y)))
+	return fallback
 
 
 func _setup_terrain_registry():
@@ -343,7 +499,7 @@ func _try_load_terrain_from_json(terrain_registry) -> bool:
 		terrain_registry.call("register_tile", tile_data)
 
 	var map_root: Node = get_node_or_null("../MapRoot")
-	if map_root != null and _terrain_renderer != null:
+	if map_root != null and _terrain_renderer != null and not use_2_5d_primary_view:
 		_terrain_renderer.render_map(terrain_map_data, map_root)
 	_apply_map_marker_positions(terrain_map_data)
 
@@ -425,6 +581,73 @@ func _apply_marker_position(marker_id: String, marker_node: Marker2D, terrain_ma
 	if not terrain_map_data.has_method("has_marker") or not bool(terrain_map_data.call("has_marker", marker_id)):
 		return
 	marker_node.global_position = terrain_map_data.call("get_marker_position", marker_id, marker_node.global_position)
+
+
+func get_primary_3d_view():
+	return _terrain_3d_view
+
+
+func _ensure_primary_3d_view(unit_nodes: Array) -> void:
+	if not use_2_5d_primary_view:
+		return
+	var mission_root := get_parent()
+	if mission_root == null:
+		return
+	var view = mission_root.get_node_or_null("Primary3DView")
+	if view == null:
+		view = TERRAIN_MAP_3D_VIEW_SCRIPT.new()
+		view.name = "Primary3DView"
+		mission_root.call_deferred("add_child", view)
+	_terrain_3d_view = view
+	_hide_legacy_2d_primary_visuals(unit_nodes)
+	call_deferred("_configure_primary_3d_view", view, unit_nodes)
+
+
+func _configure_primary_3d_view(view: Node, unit_nodes: Array) -> void:
+	if view == null or not is_instance_valid(view):
+		return
+	if not view.is_inside_tree():
+		call_deferred("_configure_primary_3d_view", view, unit_nodes)
+		return
+	if _loaded_terrain_map_data != null and view.has_method("configure_from_map"):
+		view.call("configure_from_map", _loaded_terrain_map_data)
+	if view.has_method("set_unit_nodes"):
+		view.call("set_unit_nodes", unit_nodes)
+	var objective_marker := _resolve_marker(objective_point_path)
+	if objective_marker != null and view.has_method("focus_world_position"):
+		view.call("focus_world_position", objective_marker.global_position)
+
+
+func _hide_legacy_2d_primary_visuals(unit_nodes: Array) -> void:
+	var mission_root := get_parent()
+	if mission_root == null:
+		return
+	for path in [
+		"MapRoot",
+		"StatusLabel",
+		"TargetMarker/TargetVisual",
+		"LZMarker",
+		"DropshipPlanMarker",
+	]:
+		var node := mission_root.get_node_or_null(path)
+		if node is CanvasItem:
+			(node as CanvasItem).visible = false
+	var camera := mission_root.get_node_or_null("MissionCamera") as Camera2D
+	if camera != null:
+		camera.enabled = false
+	for unit in unit_nodes:
+		_hide_legacy_unit_visual_children(unit)
+
+
+func _hide_legacy_unit_visual_children(unit: Node) -> void:
+	if unit == null:
+		return
+	if unit.has_method("set_world_debug_labels_visible"):
+		unit.call("set_world_debug_labels_visible", false)
+	unit.set("show_world_event_labels", false)
+	for child in unit.get_children():
+		if child is Sprite2D or child is Polygon2D or child is Line2D or child is Label:
+			(child as CanvasItem).visible = false
 
 
 
