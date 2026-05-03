@@ -64,6 +64,10 @@ Damit ist `GO` nicht mehr allein in `#17`; der Execute-Fluss sitzt komplett in `
 
 ## Lokaler Blick
 
-Die Vorschau liegt hier:
+Die bisherigen Mischvorschlaege liegen hier:
 
 `docs/ui_concepts/better_ui/index.html`
+
+Die nach Screen getrennten Vorschlaege liegen hier:
+
+`docs/ui_concepts/better_ui/separated_screens.html`
