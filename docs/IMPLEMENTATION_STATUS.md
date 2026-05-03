@@ -1251,11 +1251,13 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Naechster Schritt: Manueller 2.5D-Sichtcheck fuer Helm-Sitz, Blaster-Sitz und Idle-/Walk-Follow.
 
 ### TASK_175 - NPC Loadout Attachments
-- Status: geplant
-- Stand: TASK_171 bis TASK_174 liefern animierte NPC-Modelle, Sockets, Helme und Blaster als kalibrierte Visual-Attachments. TASK_175 soll daraus einen kleinen Visual-Loadout-Vertrag machen, damit Helm- und Waffenvarianten kontrolliert nach Team, Unit oder Rolle gewaehlt werden koennen.
-- Offene Punkte: Schema fuer Visual-Loadouts in `data/npc_unit_visual_mapping.json`, Default-/Override-Regeln, Missing-Asset-Diagnose und fokussierter Headless-Verifier.
-- Risiken: Loadout-Visuals duerfen nicht mit Combat-Werten, Inventar-UI oder SimulationRoot-Wahrheit vermischt werden.
-- Naechster Schritt: `docs/tasks/TASK_175_npc_loadout_attachments.md` als Umsetzungsvertrag nutzen und danach Mapping plus Verifier in einem kleinen Slice implementieren.
+- Status: implementiert
+- Stand: `data/npc_unit_visual_mapping.json` enthaelt jetzt einen kleinen Visual-Loadout-Vertrag mit `visual_loadouts`, `weapon_visual_loadouts` und `role_visual_loadouts`. Bestehende Team-/Unit-Visuals bleiben erhalten und waehlen Attachments ueber `visual_loadout_id`; Rollen- und Waffen-Mappings koennen Varianten wie `compact_blaster` oder `heavy_blaster` aufloesen.
+- Stand: `TerrainMap3DView` merged Visual-Loadouts rein fuer den 2.5D-Darstellungspfad in den bestehenden Unit-Visual-Eintrag. Neue Snapshot-Zaehler melden `unit_visual_loadout_count` und `unit_visual_loadout_error_count`; fehlende Attachment-Ressourcen erzeugen weiter sichtbare Missing-Asset-Marker.
+- Offene Punkte: Manuelle Sichtpruefung bleibt fuer kuenftige Rollen-/Waffenvarianten sinnvoll; TASK_175 fuehrt keine Combat-Werte, Inventar-UI oder echte Waffenmechanik ein.
+- Risiken: Loadout-Visuals duerfen auch in Folgearbeiten nicht mit Schaden, Reichweite, Munition oder SimulationRoot-Wahrheit vermischt werden.
+- Lokale Pruefung: `task_175_npc_loadout_attachment_verifier.gd`, `task_174_character_helmet_blaster_attachment_verifier.gd`, `task_160_tactical_playability_verifier.gd`, `task_171_npc_model_replacement_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Bei Bedarf kleine Folge-Tasks fuer weitere sichtbare Rollen- oder Waffenvarianten anlegen.
 
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert

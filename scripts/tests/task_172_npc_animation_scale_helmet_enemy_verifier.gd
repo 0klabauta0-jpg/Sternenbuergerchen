@@ -56,14 +56,14 @@ func _test_mapping_scale_animations_helmets_and_enemies() -> void:
 		var entry: Dictionary = Dictionary(visual_entries.get(key, {}))
 		_assert(not entry.is_empty(), "%s visual entry exists" % key)
 		_assert(float(entry.get("scale", 0.0)) >= EXPECTED_MIN_SCALE and float(entry.get("scale", 0.0)) <= EXPECTED_MAX_SCALE, "%s visual entry uses reduced scale" % key)
-		_assert(not String(entry.get("helmet_path", "")).strip_edges().is_empty(), "%s visual entry maps a helmet" % key)
+		_assert(not _resolve_visual_attachment_path(mapping, entry, "helmet_path").is_empty(), "%s visual entry maps a helmet" % key)
 
 	var unit_entries: Dictionary = Dictionary(mapping.get("unit_ids", {}))
 	for enemy_id in ["enemy_delta", "enemy_echo"]:
 		var enemy_entry: Dictionary = Dictionary(unit_entries.get(enemy_id, {}))
 		_assert(not enemy_entry.is_empty(), "%s has explicit enemy visual mapping" % enemy_id)
 		_assert(String(enemy_entry.get("visual_id", "")).begins_with(enemy_id), "%s visual id is enemy-specific" % enemy_id)
-		_assert(not String(enemy_entry.get("helmet_path", "")).strip_edges().is_empty(), "%s maps a helmet" % enemy_id)
+		_assert(not _resolve_visual_attachment_path(mapping, enemy_entry, "helmet_path").is_empty(), "%s maps a helmet" % enemy_id)
 
 	var readme_text: String = _read_text("%s/README.md" % IMPORT_ROOT)
 	_assert(readme_text.find("TASK_172") >= 0 and readme_text.find("astroHelmet.fbx") >= 0, "Animated character README documents TASK_172 helmet usage")
@@ -217,6 +217,17 @@ func _read_text(path: String) -> String:
 	if file == null:
 		return ""
 	return file.get_as_text()
+
+
+func _resolve_visual_attachment_path(mapping: Dictionary, visual_entry: Dictionary, key: String) -> String:
+	var direct_path: String = String(visual_entry.get(key, "")).strip_edges()
+	if not direct_path.is_empty():
+		return direct_path
+	var loadout_id: String = String(visual_entry.get("visual_loadout_id", visual_entry.get("loadout_id", ""))).strip_edges().to_lower()
+	if loadout_id.is_empty():
+		loadout_id = String(Dictionary(mapping.get("defaults", {})).get("visual_loadout_id", "")).strip_edges().to_lower()
+	var loadout: Dictionary = Dictionary(Dictionary(mapping.get("visual_loadouts", {})).get(loadout_id, {}))
+	return String(loadout.get(key, "")).strip_edges()
 
 
 func _get_array_property_size(node: Node, property_name: String) -> int:

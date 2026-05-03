@@ -5,7 +5,7 @@ NPC-Helme und Waffen sollen nicht mehr nur pauschal aus dem Visual-Mapping komme
 
 Der sichtbare 2.5D-Pfad aus TASK_171 bis TASK_174 bleibt erhalten: Modelle, Sockets, Helm- und Blaster-Kalibrierung werden weiter genutzt. TASK_175 fuehrt nur die Entscheidung ein, welches Attachment ein NPC bekommt.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Voraussetzung
 - TASK_171 - NPC Model Replacement Animated Characters
@@ -50,18 +50,19 @@ Das ist fuer die visuelle Abnahme gut, aber fuer spaetere Rollen, Ausruestung un
 - Bestehende Socket-Namen und Attachment-Kalibrierungen aus TASK_173/TASK_174 bleiben die Basis.
 
 ## Akzeptanzkriterien
-- [ ] Bestehende NPCs sehen ohne explizites Loadout weiter aus wie nach TASK_174.
-- [ ] Mindestens eine Unit-/Rollenvariante nutzt eine andere Blaster-GLB aus dem importierten Blaster-Kit.
-- [ ] Enemy-NPCs nutzen weiterhin animierte Character-Modelle und koennen Loadout-Attachments erhalten.
-- [ ] Fehlende oder ungueltige Loadout-Pfade erzeugen sichtbare Diagnose statt stillem Fallback auf falsche Proxies.
-- [ ] Visual-Loadouts veraendern keine SimulationRoot-Command- oder Effect-Queues.
-- [ ] Headless-Verifier prueft Default, Override, Missing-Asset-Diagnose und Architekturgrenze.
+- [x] Bestehende NPCs sehen ohne explizites Loadout weiter aus wie nach TASK_174.
+- [x] Mindestens eine Unit-/Rollenvariante nutzt eine andere Blaster-GLB aus dem importierten Blaster-Kit.
+- [x] Enemy-NPCs nutzen weiterhin animierte Character-Modelle und koennen Loadout-Attachments erhalten.
+- [x] Fehlende oder ungueltige Loadout-Pfade erzeugen sichtbare Diagnose statt stillem Fallback auf falsche Proxies.
+- [x] Visual-Loadouts veraendern keine SimulationRoot-Command- oder Effect-Queues.
+- [x] Headless-Verifier prueft Default, Override, Missing-Asset-Diagnose und Architekturgrenze.
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_175_npc_loadout_attachment_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_174_character_helmet_blaster_attachment_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_160_tactical_playability_verifier.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_175_npc_loadout_attachment_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_174_character_helmet_blaster_attachment_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_160_tactical_playability_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_171_npc_model_replacement_verifier.gd`
+- [x] `git diff --check`
 
 ## Dateien
 - `data/npc_unit_visual_mapping.json`
@@ -76,5 +77,11 @@ Das ist fuer die visuelle Abnahme gut, aber fuer spaetere Rollen, Ausruestung un
 - Socket-/Achsenkalibrierung darf nicht pro Rolle neu geraten werden; Varianten sollen die bestehenden Attachment-Transform-Regeln nutzen.
 - Visuelle Unterschiede koennen in Headless-Tests nur strukturell, nicht final optisch bewertet werden.
 
+## Ergebnis
+- `data/npc_unit_visual_mapping.json` enthaelt jetzt `visual_loadouts`, `weapon_visual_loadouts` und `role_visual_loadouts`. Die Loadouts beschreiben ausschliesslich sichtbare Attachment-Pfade fuer Helm und Blaster.
+- `TerrainMap3DView` merged Visual-Loadouts in den bestehenden Unit-/Team-/Default-Visual-Eintrag. Unit- und Team-Mappings bleiben erhalten; Loadouts koennen per `visual_loadout_id`, Rolle oder Waffe aufgeloest werden.
+- Neue Snapshot-Werte `unit_visual_loadout_count` und `unit_visual_loadout_error_count` machen Loadout-Aufloesung und Missing-Asset-Diagnose sichtbar.
+- `scripts/tests/task_175_npc_loadout_attachment_verifier.gd` prueft Mapping-Vertrag, Default-Erhalt, Waffen-Override, Missing-Asset-Diagnose und die SimulationRoot-Grenze.
+
 ## Naechster Schritt
-Visual-Loadout-Schema im Mapping klein definieren und einen fokussierten TASK_175-Verifier anlegen, bevor `TerrainMap3DView` erweitert wird.
+Manueller Godot-Sichtcheck bleibt sinnvoll, wenn weitere Rollen- oder Waffenvarianten aus dem Blaster-Kit sichtbar unterschieden werden sollen.

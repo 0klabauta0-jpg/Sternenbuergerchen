@@ -180,6 +180,8 @@ var _unit_right_hand_socket_count: int = 0
 var _unit_animation_retarget_fallback_count: int = 0
 var _unit_blaster_attachment_count: int = 0
 var _unit_blaster_error_count: int = 0
+var _unit_visual_loadout_count: int = 0
+var _unit_visual_loadout_error_count: int = 0
 var _enemy_animated_unit_model_count: int = 0
 var _unit_status_badge_count: int = 0
 var _dropship_texture_visible: bool = false
@@ -461,6 +463,8 @@ func get_render_snapshot() -> Dictionary:
 		"unit_animation_retarget_fallback_count": _unit_animation_retarget_fallback_count,
 		"unit_blaster_attachment_count": _unit_blaster_attachment_count,
 		"unit_blaster_error_count": _unit_blaster_error_count,
+		"unit_visual_loadout_count": _unit_visual_loadout_count,
+		"unit_visual_loadout_error_count": _unit_visual_loadout_error_count,
 		"enemy_animated_unit_model_count": _enemy_animated_unit_model_count,
 		"unit_visual_mapping_loaded": not _get_npc_unit_visual_mapping().is_empty(),
 		"unit_status_badge_count": _unit_status_badge_count,
@@ -1504,6 +1508,8 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 	var unit_animation_retarget_fallback_count: int = 0
 	var unit_blaster_attachment_count: int = 0
 	var unit_blaster_error_count: int = 0
+	var unit_visual_loadout_count: int = 0
+	var unit_visual_loadout_error_count: int = 0
 	var enemy_animated_unit_model_count: int = 0
 	var unit_status_badge_count: int = 0
 	var missing_unit_model_count: int = 0
@@ -1588,6 +1594,10 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 			unit_blaster_attachment_count += 1
 		if bool(proxy.get_meta("unit_blaster_error", false)):
 			unit_blaster_error_count += 1
+		if bool(proxy.get_meta("unit_visual_loadout_available", false)):
+			unit_visual_loadout_count += 1
+		if bool(proxy.get_meta("unit_visual_loadout_error", false)):
+			unit_visual_loadout_error_count += 1
 		if bool(proxy.get_meta("missing_unit_model", false)):
 			missing_unit_model_count += 1
 	for unit_id_variant in _unit_proxies_by_id.keys():
@@ -1647,6 +1657,12 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 	if _unit_blaster_error_count != unit_blaster_error_count:
 		changed = true
 	_unit_blaster_error_count = unit_blaster_error_count
+	if _unit_visual_loadout_count != unit_visual_loadout_count:
+		changed = true
+	_unit_visual_loadout_count = unit_visual_loadout_count
+	if _unit_visual_loadout_error_count != unit_visual_loadout_error_count:
+		changed = true
+	_unit_visual_loadout_error_count = unit_visual_loadout_error_count
 	if _enemy_animated_unit_model_count != enemy_animated_unit_model_count:
 		changed = true
 	_enemy_animated_unit_model_count = enemy_animated_unit_model_count
@@ -1772,6 +1788,13 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 				root.set_meta("unit_visual_error", true)
 			model_root.add_child(model_instance)
 			if not unit_visual_entry.is_empty():
+				var visual_loadout_id: String = String(unit_visual_entry.get("resolved_visual_loadout_id", "")).strip_edges()
+				if not visual_loadout_id.is_empty():
+					root.set_meta("unit_visual_loadout_available", true)
+					root.set_meta("unit_visual_loadout_id", visual_loadout_id)
+				if bool(unit_visual_entry.get("visual_loadout_error", false)):
+					root.set_meta("unit_visual_loadout_error", true)
+					root.set_meta("unit_visual_error", true)
 				if _setup_unit_visual_animation(root, model_root, model_instance, unit_visual_entry):
 					root.set_meta("unit_animation_player_available", true)
 				else:
@@ -2030,6 +2053,7 @@ func _attach_unit_helmet(proxy_root: Node3D, model_root: Node3D, model_instance:
 	if helmet_path.is_empty():
 		return true
 	if not ResourceLoader.exists(helmet_path):
+		_mark_unit_visual_loadout_error(proxy_root, unit_visual_entry)
 		_add_runtime_missing_asset_marker(
 			proxy_root,
 			Vector3(0.0, 0.56, 0.0),
@@ -2038,9 +2062,11 @@ func _attach_unit_helmet(proxy_root: Node3D, model_root: Node3D, model_instance:
 		return false
 	var helmet_scene := _get_asset_model_scene_by_path(helmet_path)
 	if helmet_scene == null:
+		_mark_unit_visual_loadout_error(proxy_root, unit_visual_entry)
 		return false
 	var helmet_instance := helmet_scene.instantiate() as Node3D
 	if helmet_instance == null:
+		_mark_unit_visual_loadout_error(proxy_root, unit_visual_entry)
 		return false
 	_normalize_asset_model_instance(helmet_instance)
 	helmet_instance.name = "HelmetVisual_%s" % helmet_path.get_file().get_basename()
@@ -2079,6 +2105,7 @@ func _attach_unit_blaster(proxy_root: Node3D, model_root: Node3D, model_instance
 	if blaster_path.is_empty():
 		return true
 	if not ResourceLoader.exists(blaster_path):
+		_mark_unit_visual_loadout_error(proxy_root, unit_visual_entry)
 		_add_runtime_missing_asset_marker(
 			proxy_root,
 			Vector3(0.0, 0.50, 0.0),
@@ -2087,15 +2114,18 @@ func _attach_unit_blaster(proxy_root: Node3D, model_root: Node3D, model_instance
 		return false
 	var blaster_scene := _get_asset_model_scene_by_path(blaster_path)
 	if blaster_scene == null:
+		_mark_unit_visual_loadout_error(proxy_root, unit_visual_entry)
 		return false
 	var blaster_instance := blaster_scene.instantiate() as Node3D
 	if blaster_instance == null:
+		_mark_unit_visual_loadout_error(proxy_root, unit_visual_entry)
 		return false
 	_normalize_asset_model_instance(blaster_instance)
 	blaster_instance.name = "BlasterVisual_%s" % blaster_path.get_file().get_basename()
 	var attachment_entry: Dictionary = _get_unit_blaster_attachment_entry(unit_visual_entry)
 	_apply_unit_blaster_transform(blaster_instance, attachment_entry)
 	if not _apply_unit_blaster_material(blaster_instance, attachment_entry):
+		_mark_unit_visual_loadout_error(proxy_root, unit_visual_entry)
 		return false
 	var socket_name: String = String(attachment_entry.get("socket_name", "RightHandSocket")).strip_edges()
 	var socket: Node3D = _find_unit_visual_socket(model_root, socket_name)
@@ -2112,6 +2142,14 @@ func _attach_unit_blaster(proxy_root: Node3D, model_root: Node3D, model_instance
 	hand_anchor.add_child(blaster_instance)
 	model_root.set_meta("blaster_attachment_mode", "right_hand_anchor")
 	return true
+
+
+func _mark_unit_visual_loadout_error(proxy_root: Node3D, unit_visual_entry: Dictionary) -> void:
+	if proxy_root == null:
+		return
+	if String(unit_visual_entry.get("resolved_visual_loadout_id", "")).strip_edges().is_empty():
+		return
+	proxy_root.set_meta("unit_visual_loadout_error", true)
 
 
 func _find_first_skeleton(node: Node) -> Skeleton3D:
@@ -2754,12 +2792,69 @@ func _get_unit_visual_entry(unit: Node) -> Dictionary:
 	var unit_entries: Dictionary = Dictionary(mapping.get("unit_ids", {}))
 	var unit_entry: Dictionary = Dictionary(unit_entries.get(unit_id, {}))
 	if not unit_entry.is_empty():
-		return unit_entry
+		return _apply_unit_visual_loadout(unit, unit_entry)
 	var visual_entries: Dictionary = Dictionary(mapping.get("unit_visuals", {}))
 	var team_entry: Dictionary = Dictionary(visual_entries.get(_get_unit_team_id(unit), {}))
 	if not team_entry.is_empty():
-		return team_entry
-	return Dictionary(visual_entries.get("default", {}))
+		return _apply_unit_visual_loadout(unit, team_entry)
+	return _apply_unit_visual_loadout(unit, Dictionary(visual_entries.get("default", {})))
+
+
+func _apply_unit_visual_loadout(unit: Node, unit_visual_entry: Dictionary) -> Dictionary:
+	if unit_visual_entry.is_empty():
+		return {}
+	var result: Dictionary = unit_visual_entry.duplicate(true)
+	var loadout_id: String = _resolve_unit_visual_loadout_id(unit, result)
+	if loadout_id.is_empty():
+		return result
+	var loadout_entry: Dictionary = _get_visual_loadout_entry(loadout_id)
+	if loadout_entry.is_empty():
+		var default_loadout_id: String = String(Dictionary(_get_npc_unit_visual_mapping().get("defaults", {})).get("visual_loadout_id", "")).strip_edges().to_lower()
+		loadout_entry = _get_visual_loadout_entry(default_loadout_id)
+		if not default_loadout_id.is_empty() and not loadout_entry.is_empty():
+			result["resolved_visual_loadout_id"] = default_loadout_id
+		return _merge_unit_visual_entry(result, loadout_entry)
+	result = _merge_unit_visual_entry(result, loadout_entry)
+	result["resolved_visual_loadout_id"] = loadout_id
+	return result
+
+
+func _resolve_unit_visual_loadout_id(unit: Node, unit_visual_entry: Dictionary) -> String:
+	var explicit_loadout_id: String = String(unit_visual_entry.get("visual_loadout_id", unit_visual_entry.get("loadout_id", ""))).strip_edges().to_lower()
+	if not explicit_loadout_id.is_empty():
+		return explicit_loadout_id
+
+	var role_id: String = _get_unit_role_id(unit)
+	var role_loadouts: Dictionary = Dictionary(_get_npc_unit_visual_mapping().get("role_visual_loadouts", {}))
+	if not role_id.is_empty() and role_loadouts.has(role_id):
+		return String(role_loadouts.get(role_id, "")).strip_edges().to_lower()
+
+	var weapon_loadouts: Dictionary = Dictionary(_get_npc_unit_visual_mapping().get("weapon_visual_loadouts", {}))
+	for weapon_id in _get_unit_visual_weapon_ids(unit):
+		if weapon_loadouts.has(weapon_id):
+			return String(weapon_loadouts.get(weapon_id, "")).strip_edges().to_lower()
+
+	return String(Dictionary(_get_npc_unit_visual_mapping().get("defaults", {})).get("visual_loadout_id", "")).strip_edges().to_lower()
+
+
+func _get_visual_loadout_entry(loadout_id: String) -> Dictionary:
+	var normalized_id: String = loadout_id.strip_edges().to_lower()
+	if normalized_id.is_empty():
+		return {}
+	var visual_loadouts: Dictionary = Dictionary(_get_npc_unit_visual_mapping().get("visual_loadouts", {}))
+	return Dictionary(visual_loadouts.get(normalized_id, {}))
+
+
+func _merge_unit_visual_entry(base_entry: Dictionary, override_entry: Dictionary) -> Dictionary:
+	var result: Dictionary = base_entry.duplicate(true)
+	for key_variant in override_entry.keys():
+		var key: String = String(key_variant)
+		var override_value = override_entry.get(key_variant)
+		if override_value is Dictionary and result.get(key, null) is Dictionary:
+			result[key] = _merge_unit_visual_entry(Dictionary(result.get(key, {})), Dictionary(override_value))
+		else:
+			result[key] = override_value
+	return result
 
 
 func _get_unit_model_scene(unit: Node, unit_visual_entry: Dictionary) -> PackedScene:
@@ -2892,6 +2987,27 @@ func _get_unit_team_id(unit: Node) -> String:
 	if unit != null and unit.has_method("get_team_id"):
 		return String(unit.call("get_team_id")).strip_edges().to_lower()
 	return ""
+
+
+func _get_unit_role_id(unit: Node) -> String:
+	if unit != null and unit.has_method("get_role_id"):
+		return String(unit.call("get_role_id")).strip_edges().to_lower()
+	if unit != null:
+		var role_value = unit.get("role_id") if unit.has_method("get") else null
+		if role_value != null:
+			return String(role_value).strip_edges().to_lower()
+	return ""
+
+
+func _get_unit_visual_weapon_ids(unit: Node) -> PackedStringArray:
+	var result := PackedStringArray()
+	for method_name in ["get_active_weapon_id", "get_weapon_1_id", "get_weapon_2_id"]:
+		if unit == null or not unit.has_method(method_name):
+			continue
+		var weapon_id: String = String(unit.call(method_name)).strip_edges().to_lower()
+		if not weapon_id.is_empty() and not result.has(weapon_id):
+			result.append(weapon_id)
+	return result
 
 
 func _get_unit_color(unit: Node) -> Color:

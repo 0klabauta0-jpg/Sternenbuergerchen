@@ -75,13 +75,13 @@ func _test_mapping_attachment_contract() -> void:
 	var visual_entries: Dictionary = Dictionary(mapping.get("unit_visuals", {}))
 	for key in ["team_alpha", "team_bravo", "default"]:
 		var entry: Dictionary = Dictionary(visual_entries.get(key, {}))
-		_assert(not String(entry.get("helmet_path", "")).strip_edges().is_empty(), "%s visual entry maps a helmet" % key)
-		_assert(not String(entry.get("blaster_path", "")).strip_edges().is_empty(), "%s visual entry maps a blaster" % key)
+		_assert(not _resolve_visual_attachment_path(mapping, entry, "helmet_path").is_empty(), "%s visual entry maps a helmet" % key)
+		_assert(not _resolve_visual_attachment_path(mapping, entry, "blaster_path").is_empty(), "%s visual entry maps a blaster" % key)
 
 	var unit_entries: Dictionary = Dictionary(mapping.get("unit_ids", {}))
 	for enemy_id in ["enemy_delta", "enemy_echo"]:
 		var enemy_entry: Dictionary = Dictionary(unit_entries.get(enemy_id, {}))
-		_assert(not String(enemy_entry.get("blaster_path", "")).strip_edges().is_empty(), "%s maps a blaster" % enemy_id)
+		_assert(not _resolve_visual_attachment_path(mapping, enemy_entry, "blaster_path").is_empty(), "%s maps a blaster" % enemy_id)
 
 
 func _test_live_socket_helmet_and_blaster_attachments() -> void:
@@ -256,6 +256,18 @@ func _load_json(path: String) -> Dictionary:
 		return {}
 	var parsed: Variant = JSON.parse_string(file.get_as_text())
 	return Dictionary(parsed) if typeof(parsed) == TYPE_DICTIONARY else {}
+
+
+func _resolve_visual_attachment_path(mapping: Dictionary, visual_entry: Dictionary, key: String) -> String:
+	var direct_path: String = String(visual_entry.get(key, "")).strip_edges()
+	if not direct_path.is_empty():
+		return direct_path
+	var loadout_id: String = String(visual_entry.get("visual_loadout_id", visual_entry.get("loadout_id", ""))).strip_edges().to_lower()
+	if loadout_id.is_empty():
+		loadout_id = String(Dictionary(mapping.get("defaults", {})).get("visual_loadout_id", "")).strip_edges().to_lower()
+	var loadouts: Dictionary = Dictionary(mapping.get("visual_loadouts", {}))
+	var loadout_entry: Dictionary = Dictionary(loadouts.get(loadout_id, {}))
+	return String(loadout_entry.get(key, "")).strip_edges()
 
 
 func _array_vector3_length(value: Variant) -> float:

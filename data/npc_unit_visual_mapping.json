@@ -9,6 +9,7 @@
 	"defaults": {
 		"scale": 0.22,
 		"rotation_degrees_y": 0.0,
+		"visual_loadout_id": "standard_rifle",
 		"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-a.glb",
 		"animation_paths": {
 			"idle": "res://Assets/used/npc/animated_characters/animations/idle.fbx",
@@ -68,8 +69,7 @@
 			"visual_id": "animated_character_medium_astro_male_a",
 			"model_path": "res://Assets/used/npc/animated_characters/models/characterMedium.fbx",
 			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroMaleA.png",
-			"helmet_path": "res://Assets/used/npc/animated_characters/accessories/astroHelmet.fbx",
-			"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-a.glb",
+			"visual_loadout_id": "standard_rifle",
 			"scale": 0.22,
 			"rotation_degrees_y": 0.0
 		},
@@ -77,8 +77,7 @@
 			"visual_id": "enemy_animated_character_small_astro_female_a",
 			"model_path": "res://Assets/used/npc/animated_characters/models/characterSmall.fbx",
 			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroFemaleA.png",
-			"helmet_path": "res://Assets/used/npc/animated_characters/accessories/militaryHelmet.fbx",
-			"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+			"visual_loadout_id": "compact_blaster",
 			"scale": 0.22,
 			"rotation_degrees_y": 0.0
 		},
@@ -86,8 +85,7 @@
 			"visual_id": "animated_character_medium_astro_male_a",
 			"model_path": "res://Assets/used/npc/animated_characters/models/characterMedium.fbx",
 			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroMaleA.png",
-			"helmet_path": "res://Assets/used/npc/animated_characters/accessories/astroHelmet.fbx",
-			"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-a.glb",
+			"visual_loadout_id": "standard_rifle",
 			"scale": 0.22,
 			"rotation_degrees_y": 0.0
 		}
@@ -97,8 +95,7 @@
 			"visual_id": "enemy_delta_animated_character_small_military_helmet",
 			"model_path": "res://Assets/used/npc/animated_characters/models/characterSmall.fbx",
 			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroFemaleA.png",
-			"helmet_path": "res://Assets/used/npc/animated_characters/accessories/militaryHelmet.fbx",
-			"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
+			"visual_loadout_id": "compact_blaster",
 			"scale": 0.22,
 			"rotation_degrees_y": 0.0
 		},
@@ -106,11 +103,33 @@
 			"visual_id": "enemy_echo_animated_character_medium_military_helmet",
 			"model_path": "res://Assets/used/npc/animated_characters/models/characterMedium.fbx",
 			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroMaleA.png",
-			"helmet_path": "res://Assets/used/npc/animated_characters/accessories/militaryHelmet.fbx",
-			"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-p.glb",
+			"visual_loadout_id": "heavy_blaster",
 			"scale": 0.22,
 			"rotation_degrees_y": 0.0
 		}
+	},
+	"visual_loadouts": {
+		"standard_rifle": {
+			"helmet_path": "res://Assets/used/npc/animated_characters/accessories/astroHelmet.fbx",
+			"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-a.glb"
+		},
+		"compact_blaster": {
+			"helmet_path": "res://Assets/used/npc/animated_characters/accessories/militaryHelmet.fbx",
+			"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb"
+		},
+		"heavy_blaster": {
+			"helmet_path": "res://Assets/used/npc/animated_characters/accessories/militaryHelmet.fbx",
+			"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-p.glb"
+		}
+	},
+	"weapon_visual_loadouts": {
+		"rifle": "standard_rifle",
+		"smg": "compact_blaster",
+		"rail_gun": "heavy_blaster"
+	},
+	"role_visual_loadouts": {
+		"medic": "compact_blaster",
+		"support": "heavy_blaster"
 	},
 	"animation_paths": {
 		"idle": "res://Assets/used/npc/animated_characters/animations/idle.fbx",
