@@ -1250,6 +1250,13 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_174_character_helmet_blaster_attachment_verifier.gd`, `task_173_npc_animation_skeleton_socket_verifier.gd`, `task_172_npc_animation_scale_helmet_enemy_verifier.gd`, `task_160_tactical_playability_verifier.gd` und `git diff --check` laufen gruen.
 - Naechster Schritt: Manueller 2.5D-Sichtcheck fuer Helm-Sitz, Blaster-Sitz und Idle-/Walk-Follow.
 
+### TASK_175 - NPC Loadout Attachments
+- Status: geplant
+- Stand: TASK_171 bis TASK_174 liefern animierte NPC-Modelle, Sockets, Helme und Blaster als kalibrierte Visual-Attachments. TASK_175 soll daraus einen kleinen Visual-Loadout-Vertrag machen, damit Helm- und Waffenvarianten kontrolliert nach Team, Unit oder Rolle gewaehlt werden koennen.
+- Offene Punkte: Schema fuer Visual-Loadouts in `data/npc_unit_visual_mapping.json`, Default-/Override-Regeln, Missing-Asset-Diagnose und fokussierter Headless-Verifier.
+- Risiken: Loadout-Visuals duerfen nicht mit Combat-Werten, Inventar-UI oder SimulationRoot-Wahrheit vermischt werden.
+- Naechster Schritt: `docs/tasks/TASK_175_npc_loadout_attachments.md` als Umsetzungsvertrag nutzen und danach Mapping plus Verifier in einem kleinen Slice implementieren.
+
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert
 - Stand: Der Meta-Layer fuehrt jetzt durchgaengig auf die echte eingebettete Missionskarte statt auf eine separate read-only Overview. Homebase, FOB und Mission teilen dieselbe kompakte Navigation, die Missions-Tactical-UI traegt direkt die gemeinsamen Block-Labels `#15` bis `#18`, und der Missionspfad bleibt auf dieselbe Kartenbasis, dieselben LZ-/Approach-Marker sowie denselben Dropship-Handoff verdrahtet wie die spaetere Live-Mission.

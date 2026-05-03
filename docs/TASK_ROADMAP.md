@@ -321,6 +321,9 @@ TASK_172 - NPC Animation Scale Helmets and Enemy Visuals (implementiert)
 TASK_173 - NPC Animation Skeleton Socket Contract (implementiert)
 TASK_174 - Character Helmet and Blaster Attachment Visuals (implementiert)
 
+Phase 18F - NPC Loadout Visuals
+TASK_175 - NPC Loadout Attachments (geplant)
+
 Batch-Empfehlung
 
 Codex soll Tasks in kleinen Gruppen bearbeiten:
