@@ -34,6 +34,15 @@ Dieser Ordner sammelt erste UI-Richtungen fuer den naechsten visuellen Pass. Die
 - Waffenbilder sind klein und stabil, aktuell nur SMG/Blaster A und Medictool/Blaster B.
 - Spaetere Waffen koennen ueber denselben Slot- und Preview-Vertrag ergaenzt werden.
 
+### D - Hangar Ops Board
+
+- `#05 Flightdeck` und `#14 FOB Ops` werden als kleine Operations-Buehne gedacht, nicht als echte Karte.
+- Dropship, Frachter, Bay-Slots, Boarding und Medbay/Respawn werden sichtbar, aber bleiben reine UI-/Staging-Darstellung.
+- NPCs koennen konzeptionell aus `#10 FIRETEAMS` oder `#13 LOADOUT` auf Dropship-/Frachter-Slots gezogen werden.
+- Boarding-Zustand wird direkt am Pad und in kompakten Karten angezeigt.
+- `#18 MISSION CONTROL` nutzt eine kleine Windrose statt grosser NW/NE/SW/SE-Buttons.
+- `#16 COMMAND MATRIX` nutzt kleinere Buttons, damit spaeter mehr Statusinformationen Platz haben.
+
 ## Command-Vorschlag
 
 - `Move`, `Hold`, `Flank`, `Take`: Befehlsintentionen.
@@ -51,10 +60,10 @@ Damit ist `GO` nicht mehr allein in `#17`; der Execute-Fluss sitzt komplett in `
 - Variable Inhalte laufen in ScrollContainer, Clip oder Ellipsis.
 - Labels auf der Map sollen an Marker-/Objective-Hoehe haengen, nicht an Unit-Beinhoehe.
 - Grey helper backplates hinter Squad-Namen nur verwenden, wenn sie Lesbarkeit verbessern; sonst als kleine floating labels oder Map-Badges.
+- Flightdeck-/FOB-Buehnen duerfen Animationen zeigen, aber keine zweite Karten- oder Gameplay-Wahrheit werden.
 
 ## Lokaler Blick
 
 Die Vorschau liegt hier:
 
 `docs/ui_concepts/better_ui/index.html`
-

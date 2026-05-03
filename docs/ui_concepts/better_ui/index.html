@@ -771,6 +771,364 @@
       line-height: 1.35;
     }
 
+    .ops-layout {
+      display: grid;
+      grid-template-columns: 244px 1fr 260px;
+      grid-template-rows: 1fr 172px;
+      gap: 12px;
+      height: 100%;
+      padding: 14px;
+      background: #1c2227;
+    }
+
+    .ops-column {
+      min-height: 0;
+      border: 1px solid var(--line-soft);
+      border-radius: 8px;
+      background: rgba(18, 24, 28, 0.82);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: 30px 1fr;
+    }
+
+    .ops-column .hud-title {
+      height: 30px;
+      font-size: 11px;
+    }
+
+    .ops-body {
+      min-height: 0;
+      overflow: hidden;
+      padding: 8px;
+    }
+
+    .thin-list {
+      display: grid;
+      grid-auto-rows: 48px;
+      gap: 6px;
+      overflow: hidden;
+    }
+
+    .thin-card {
+      display: grid;
+      grid-template-columns: 28px 1fr auto;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+      height: 48px;
+      padding: 6px;
+      border: 1px solid var(--line-soft);
+      border-radius: 6px;
+      background: #151c21;
+    }
+
+    .ops-stage {
+      position: relative;
+      min-height: 0;
+      overflow: hidden;
+      border: 1px solid var(--line-soft);
+      border-radius: 8px;
+      background:
+        linear-gradient(30deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+        linear-gradient(150deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+        #263039;
+      background-size: 54px 54px;
+    }
+
+    .stage-label {
+      position: absolute;
+      left: 12px;
+      top: 10px;
+      z-index: 6;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      height: 26px;
+      padding: 0 8px;
+      border-radius: 6px;
+      border: 1px solid var(--line-soft);
+      background: rgba(14, 19, 23, 0.78);
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .landing-pad {
+      position: absolute;
+      width: 330px;
+      height: 210px;
+      left: 50%;
+      top: 52%;
+      transform: translate(-50%, -50%) rotate(-18deg) skewX(-18deg);
+      border-radius: 18px;
+      background:
+        linear-gradient(90deg, transparent 42%, rgba(100, 212, 213, 0.2) 42%, rgba(100, 212, 213, 0.2) 58%, transparent 58%),
+        linear-gradient(0deg, transparent 42%, rgba(215, 155, 46, 0.28) 42%, rgba(215, 155, 46, 0.28) 58%, transparent 58%),
+        #4d5b63;
+      border: 8px solid #bac5ca;
+      box-shadow: 18px 24px 0 rgba(0, 0, 0, 0.28);
+    }
+
+    .bay-door {
+      position: absolute;
+      width: 152px;
+      height: 72px;
+      top: calc(52% - 36px);
+      background: #b9c4ca;
+      border: 4px solid #dfe6ea;
+      box-shadow: 10px 14px 0 rgba(0, 0, 0, 0.2);
+      transform: rotate(-18deg) skewX(-18deg);
+      animation: bay-open 4.8s ease-in-out infinite;
+      z-index: 2;
+    }
+
+    .bay-door.left {
+      left: calc(50% - 318px);
+    }
+
+    .bay-door.right {
+      right: calc(50% - 318px);
+      animation-name: bay-open-right;
+    }
+
+    .dropship {
+      position: absolute;
+      left: calc(50% - 82px);
+      top: calc(52% - 48px);
+      width: 164px;
+      height: 96px;
+      z-index: 4;
+      transform: rotate(-18deg);
+      animation: ship-lift 4.8s ease-in-out infinite;
+    }
+
+    .ship-body {
+      position: absolute;
+      inset: 22px 16px 14px;
+      border-radius: 48px 48px 26px 26px;
+      background: #e9edf2;
+      border: 5px solid #73808a;
+      box-shadow: 12px 15px 0 rgba(0, 0, 0, 0.32);
+    }
+
+    .ship-body::before {
+      content: "";
+      position: absolute;
+      left: 35px;
+      right: 35px;
+      top: 18px;
+      height: 14px;
+      border-radius: 10px;
+      background: var(--amber);
+    }
+
+    .ship-wing {
+      position: absolute;
+      top: 42px;
+      width: 42px;
+      height: 30px;
+      border-radius: 6px;
+      background: #95a6b0;
+      border: 4px solid #44525e;
+    }
+
+    .ship-wing.left {
+      left: 0;
+    }
+
+    .ship-wing.right {
+      right: 0;
+    }
+
+    .freighter {
+      position: absolute;
+      right: 74px;
+      bottom: 74px;
+      width: 128px;
+      height: 58px;
+      z-index: 3;
+      transform: rotate(-18deg);
+      border-radius: 12px;
+      background: #c8ced3;
+      border: 5px solid #7b878f;
+      box-shadow: 12px 14px 0 rgba(0, 0, 0, 0.28);
+    }
+
+    .freighter::before {
+      content: "";
+      position: absolute;
+      left: 12px;
+      top: 18px;
+      width: 54px;
+      height: 13px;
+      background: var(--amber);
+      border-radius: 8px;
+    }
+
+    .crew-dot {
+      position: absolute;
+      z-index: 5;
+      display: grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 3px solid #dce8ee;
+      background: #252e34;
+      color: var(--teal);
+      font-family: "KenneyFuture", "Segoe UI", Arial, sans-serif;
+      font-size: 8px;
+      box-shadow: 7px 9px 0 rgba(0, 0, 0, 0.24);
+      animation: board-step 4.8s ease-in-out infinite;
+    }
+
+    .crew-dot.a { left: calc(50% - 198px); top: calc(52% + 72px); }
+    .crew-dot.b { left: calc(50% - 156px); top: calc(52% + 50px); animation-delay: 0.25s; }
+    .crew-dot.c { left: calc(50% - 112px); top: calc(52% + 30px); animation-delay: 0.5s; }
+    .crew-dot.d { left: calc(50% - 64px); top: calc(52% + 12px); animation-delay: 0.75s; }
+
+    .med-bay {
+      position: absolute;
+      left: 34px;
+      bottom: 38px;
+      width: 176px;
+      height: 112px;
+      border-radius: 10px;
+      transform: rotate(-18deg) skewX(-12deg);
+      background: rgba(217, 221, 232, 0.9);
+      border: 5px solid #9aa8b2;
+      box-shadow: 12px 16px 0 rgba(0, 0, 0, 0.24);
+    }
+
+    .med-bay::before {
+      content: "+";
+      position: absolute;
+      left: 58px;
+      top: 24px;
+      width: 54px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      color: #f2f8fa;
+      background: var(--red);
+      border-radius: 8px;
+      font-size: 42px;
+      line-height: 1;
+      animation: med-pulse 1.8s ease-in-out infinite;
+    }
+
+    .fob-pod {
+      position: absolute;
+      left: 86px;
+      bottom: 100px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #263039;
+      border: 3px solid var(--teal);
+      transform: rotate(-18deg);
+      animation: med-walk 3.4s ease-in-out infinite;
+      z-index: 3;
+    }
+
+    .compact-command {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+    }
+
+    .compact-command .tiny-button {
+      height: 24px;
+      font-size: 9px;
+    }
+
+    .mini-stance {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr) 58px;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .windrose {
+      position: relative;
+      width: 132px;
+      height: 132px;
+      margin: 6px auto 8px;
+      border-radius: 50%;
+      border: 1px solid var(--line-soft);
+      background:
+        radial-gradient(circle, rgba(100, 212, 213, 0.18) 0 18%, transparent 19%),
+        conic-gradient(from 45deg, rgba(100, 212, 213, 0.16), rgba(215, 155, 46, 0.18), rgba(125, 162, 216, 0.16), rgba(103, 197, 143, 0.16), rgba(100, 212, 213, 0.16));
+    }
+
+    .rose-btn {
+      position: absolute;
+      width: 38px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border: 1px solid #73808a;
+      border-radius: 5px;
+      background: #d9dde8;
+      color: #252b31;
+      font-family: "KenneyFuture", "Segoe UI", Arial, sans-serif;
+      font-size: 9px;
+    }
+
+    .rose-btn.nw { left: 18px; top: 18px; }
+    .rose-btn.ne { right: 18px; top: 18px; }
+    .rose-btn.sw { left: 18px; bottom: 18px; }
+    .rose-btn.se { right: 18px; bottom: 18px; }
+
+    .rose-arrow {
+      position: absolute;
+      left: 59px;
+      top: 16px;
+      width: 14px;
+      height: 54px;
+      background: var(--amber);
+      clip-path: polygon(50% 0, 100% 22%, 70% 22%, 70% 100%, 30% 100%, 30% 22%, 0 22%);
+      transform-origin: 50% 100%;
+      transform: rotate(-45deg);
+    }
+
+    .ops-bottom {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    @keyframes bay-open {
+      0%, 22%, 78%, 100% { transform: translateX(0) rotate(-18deg) skewX(-18deg); }
+      36%, 64% { transform: translateX(-42px) rotate(-18deg) skewX(-18deg); }
+    }
+
+    @keyframes bay-open-right {
+      0%, 22%, 78%, 100% { transform: translateX(0) rotate(-18deg) skewX(-18deg); }
+      36%, 64% { transform: translateX(42px) rotate(-18deg) skewX(-18deg); }
+    }
+
+    @keyframes ship-lift {
+      0%, 24%, 74%, 100% { transform: translateY(0) rotate(-18deg); opacity: 1; }
+      48%, 62% { transform: translateY(-46px) rotate(-18deg); opacity: 0.86; }
+    }
+
+    @keyframes board-step {
+      0%, 18% { transform: translate(0, 0) rotate(-18deg); }
+      50%, 100% { transform: translate(76px, -38px) rotate(-18deg); }
+    }
+
+    @keyframes med-pulse {
+      0%, 100% { transform: scale(1); opacity: 0.86; }
+      50% { transform: scale(1.08); opacity: 1; }
+    }
+
+    @keyframes med-walk {
+      0%, 100% { transform: translate(0, 0) rotate(-18deg); }
+      50% { transform: translate(62px, -20px) rotate(-18deg); }
+    }
+
     @media (max-width: 1100px) {
       .intro {
         grid-template-columns: 1fr;
@@ -797,8 +1155,14 @@
       .bottom-center { bottom: 216px; }
       .bottom-right { bottom: 16px; }
       .homebase-layout,
-      .loadout-layout {
+      .loadout-layout,
+      .ops-layout,
+      .ops-bottom {
         grid-template-columns: 1fr;
+      }
+
+      .ops-bottom {
+        grid-column: auto;
       }
     }
   </style>
@@ -1100,6 +1464,113 @@
                 <div class="button">Primary</div>
                 <div class="button dark">Secondary</div>
                 <div class="button dark">Remove</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="concept">
+      <div class="concept-head">
+        <div>
+          <h2>Vorschlag D: Hangar Ops Board</h2>
+          <p>Flightdeck, FOB-Respawn und Boarding als kleine Pseudo-Buehne: keine echte Karte, aber sichtbare Pads, Slots, Bewegung und Crew-Zuordnung.</p>
+        </div>
+        <div class="chip-row">
+          <span class="chip hot">#05 Flightdeck</span>
+          <span class="chip">#14 FOB Ops</span>
+          <span class="chip">Pseudo Animation</span>
+        </div>
+      </div>
+      <div class="viewport">
+        <div class="ops-layout">
+          <div class="ops-column">
+            <div class="hud-title"><span>#10 FIRETEAMS</span><span class="badge">compact</span></div>
+            <div class="ops-body">
+              <div class="thin-list">
+                <div class="thin-card"><div class="small-avatar">AV</div><div class="ellipsis"><h3 class="ellipsis">Anja Voss</h3><div class="minor ellipsis">Blue | 5/5</div></div><span class="badge green">ready</span></div>
+                <div class="thin-card"><div class="small-avatar">TM</div><div class="ellipsis"><h3 class="ellipsis">Talia Mercer</h3><div class="minor ellipsis">Gold | 3/5</div></div><span class="badge amber">board</span></div>
+                <div class="thin-card"><div class="small-avatar">DH</div><div class="ellipsis"><h3 class="ellipsis">Darius Holt</h3><div class="minor ellipsis">Reserve | 2/5</div></div><span class="badge">idle</span></div>
+                <div class="thin-card"><div class="small-avatar">KV</div><div class="ellipsis"><h3 class="ellipsis">Kenzo Vale</h3><div class="minor ellipsis">Scout | SMG</div></div><span class="badge green">fit</span></div>
+                <div class="thin-card"><div class="small-avatar">LF</div><div class="ellipsis"><h3 class="ellipsis">Leona Falk</h3><div class="minor ellipsis">Medbay | 01:40</div></div><span class="badge red">down</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ops-stage">
+            <div class="stage-label"><span class="badge green">#05</span><span>Flightdeck | Bay A selected</span></div>
+            <div class="landing-pad"></div>
+            <div class="bay-door left"></div>
+            <div class="bay-door right"></div>
+            <div class="dropship" title="Dropship slot">
+              <div class="ship-wing left"></div>
+              <div class="ship-wing right"></div>
+              <div class="ship-body"></div>
+            </div>
+            <div class="freighter" title="Freighter slot"></div>
+            <div class="crew-dot a">AV</div>
+            <div class="crew-dot b">TM</div>
+            <div class="crew-dot c">DH</div>
+            <div class="crew-dot d">KV</div>
+            <div class="med-bay"></div>
+            <div class="fob-pod"></div>
+          </div>
+
+          <div class="ops-column">
+            <div class="hud-title"><span>#18 MISSION CONTROL</span><span class="badge amber">small</span></div>
+            <div class="ops-body">
+              <div class="windrose">
+                <div class="rose-arrow"></div>
+                <div class="rose-btn nw">NW</div>
+                <div class="rose-btn ne">NE</div>
+                <div class="rose-btn sw">SW</div>
+                <div class="rose-btn se">SE</div>
+              </div>
+              <div class="command-grid">
+                <div class="tiny-button">LZ</div>
+                <div class="tiny-button">Drop</div>
+                <div class="tiny-button">Recall</div>
+              </div>
+              <div class="status-feed">
+                <div class="readout"><span class="badge amber">Bay A</span><span class="ellipsis">Dropship 4/6</span></div>
+                <div class="readout"><span class="badge">Bay B</span><span class="ellipsis">Freighter cargo</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ops-bottom">
+            <div class="ops-column">
+              <div class="hud-title"><span>#13 LOADOUT / BOARDING</span><span class="badge">drag target</span></div>
+              <div class="ops-body">
+                <div class="thin-list">
+                  <div class="thin-card"><img class="weapon-preview" src="../../../Assets/used/npc/blaster_kit/previews/blaster-a.png" alt="SMG"><div class="ellipsis"><h3 class="ellipsis">SMG loadout</h3><div class="minor ellipsis">drag unit to Bay A or Bay B</div></div><span class="badge green">4</span></div>
+                  <div class="thin-card"><img class="weapon-preview" src="../../../Assets/used/npc/blaster_kit/previews/blaster-b.png" alt="Medictool"><div class="ellipsis"><h3 class="ellipsis">Medictool</h3><div class="minor ellipsis">medic slot visible on roster</div></div><span class="badge amber">2</span></div>
+                  <div class="thin-card"><div class="small-avatar">BD</div><div class="ellipsis"><h3 class="ellipsis">Boarded</h3><div class="minor ellipsis">AV, TM, DH, KV</div></div><span class="badge green">4/6</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="ops-column">
+              <div class="hud-title"><span>#16 MINI COMMAND MATRIX</span><span class="badge">more room</span></div>
+              <div class="ops-body">
+                <div class="compact-command">
+                  <div class="tiny-button">Move</div>
+                  <div class="tiny-button">Hold</div>
+                  <div class="tiny-button">Flank</div>
+                  <div class="tiny-button">Take</div>
+                  <div class="tiny-button">Target</div>
+                  <div class="tiny-button">Clear</div>
+                </div>
+                <div class="mini-stance">
+                  <div class="tiny-button">Safe</div>
+                  <div class="tiny-button">Norm</div>
+                  <div class="tiny-button">Aggro</div>
+                  <div class="tiny-button primary">GO</div>
+                </div>
+                <div class="status-feed">
+                  <div class="readout"><span class="badge amber">Intent</span><span class="ellipsis">Hold + Target waits for map click, fixed button size</span></div>
+                  <div class="readout"><span class="badge green">UX</span><span class="ellipsis">Commands smaller, status text moves into readout lines</span></div>
+                </div>
               </div>
             </div>
           </div>
