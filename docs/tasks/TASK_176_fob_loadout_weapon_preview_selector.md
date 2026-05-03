@@ -3,7 +3,7 @@
 ## Ziel
 Fenster `#13 LOADOUT` soll Waffen nicht nur als Textauswahl zeigen, sondern mit einem kleinen Bild aus dem Blaster-Kit-Preview-Set sichtbar machen.
 
-Der erste Slice bleibt bewusst klein: Die SMG nutzt `blaster-a` als Preview und Visual-Waffe. Spaeter koennen weitere Blaster-Varianten ergaenzt werden, ohne die Loadout-UI oder den Missionspfad neu zu erfinden.
+Der erste Slice bleibt bewusst klein: Die SMG nutzt `blaster-a` als Preview und Visual-Waffe. Das `Medictool` nutzt `blaster-b` als Preview und Visual-Waffe. Spaeter koennen weitere Blaster-Varianten ergaenzt werden, ohne die Loadout-UI oder den Missionspfad neu zu erfinden.
 
 ## Status: IMPLEMENTIERT
 
@@ -23,17 +23,17 @@ Lokale Arbeitsquellen wie `C:\Users\bjoer\Pictures\Sternenbuerger\Blaster Kit\Pr
 
 ## Umfang
 1. Preview-Asset-Import:
-   - `blaster-a.png` aus dem lokalen Preview-Ordner ins Projekt uebernehmen, falls es nicht bereits vorhanden ist.
-   - Zielpfad: `res://Assets/used/npc/blaster_kit/previews/blaster-a.png`.
+   - `blaster-a.png` und `blaster-b.png` aus dem lokalen Preview-Ordner ins Projekt uebernehmen, falls sie nicht bereits vorhanden sind.
+   - Zielpfade: `res://Assets/used/npc/blaster_kit/previews/blaster-a.png` und `res://Assets/used/npc/blaster_kit/previews/blaster-b.png`.
    - Import/License-Kontext des bestehenden Blaster-Kit-Subsets beibehalten.
 2. Kleine Preview-Mapping-Tabelle:
    - SMG explizit auf `blaster-a` mappen.
-   - `medictool` als eigene Auswahl erhalten, aber ohne falsches Blaster-Bild, solange kein passendes Asset definiert ist.
+   - `medictool` als eigene Auswahl erhalten und auf `blaster-b` mappen.
    - Andere Waffenbezeichnungen vorerst nicht als sichtbare Blaster-Auswahl anbieten.
 3. FOB-UI in `#13 LOADOUT`:
    - Die bestehende pro-Mitglied-Auswahl bleibt erhalten.
    - Neben oder in der Slot-Auswahl wird ein kleines Preview-Bild fuer die ausgewaehlte SMG angezeigt.
-   - Wenn kein Preview existiert, bleibt die UI stabil und zeigt keinen falschen Blaster.
+   - SMG und Medictool zeigen jeweils ihr eigenes Preview; wenn spaeter kein Preview existiert, bleibt die UI stabil und zeigt keinen falschen Blaster.
 4. Datenfluss:
    - Die Auswahl schreibt weiter nur die bestehenden `weapon_1`-/`weapon_2`-IDs.
    - Keine direkten Gameplay-Werte, Schadenswerte, Reichweiten, Munition oder Combat-Regeln in der UI.
@@ -60,7 +60,7 @@ Lokale Arbeitsquellen wie `C:\Users\bjoer\Pictures\Sternenbuerger\Blaster Kit\Pr
 
 ## Akzeptanzkriterien
 - [x] SMG wird in `#13 LOADOUT` mit `blaster-a.png` aus dem Projekt angezeigt.
-- [x] `medictool` bleibt als Auswahl verfuegbar und bekommt kein falsches Blaster-Preview.
+- [x] `medictool` bleibt als Auswahl verfuegbar und bekommt `blaster-b.png` als Preview.
 - [x] Vorerst werden keine weiteren Blaster-Optionen als Auswahl angeboten.
 - [x] Genutzte Preview-Assets liegen unter `Assets/used/...` im Projekt.
 - [x] Es gibt keine absoluten Asset-Pfade auf lokale Benutzerordner.
@@ -71,6 +71,7 @@ Lokale Arbeitsquellen wie `C:\Users\bjoer\Pictures\Sternenbuerger\Blaster Kit\Pr
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_176_fob_loadout_weapon_preview_selector_verifier.gd`
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_087_verifier.gd`
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_175_npc_loadout_attachment_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_174_character_helmet_blaster_attachment_verifier.gd`
 - [x] `godot_console.exe --headless --path . --script scripts/tests/medic_support_verifier.gd`
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_096_recovery_verifier.gd`
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_114_meta_recovery_verifier.gd`
@@ -78,9 +79,13 @@ Lokale Arbeitsquellen wie `C:\Users\bjoer\Pictures\Sternenbuerger\Blaster Kit\Pr
 
 ## Erwartete Dateien
 - `scripts/meta/fob_screen.gd`
+- `scripts/terrain/terrain_map_3d_view.gd`
+- `data/npc_unit_visual_mapping.json`
 - `scripts/tests/task_176_fob_loadout_weapon_preview_selector_verifier.gd`
 - `scripts/tests/medic_support_verifier.gd`
 - `Assets/used/npc/blaster_kit/previews/blaster-a.png`
+- `Assets/used/npc/blaster_kit/previews/blaster-b.png`
+- `Assets/used/npc/blaster_kit/models/blaster-b.glb`
 - `docs/tasks/TASK_176_fob_loadout_weapon_preview_selector.md`
 - `docs/IMPLEMENTATION_STATUS.md`
 - `docs/TASK_ROADMAP.md`
@@ -93,7 +98,9 @@ Lokale Arbeitsquellen wie `C:\Users\bjoer\Pictures\Sternenbuerger\Blaster Kit\Pr
 ## Ergebnis
 - `#13 LOADOUT` zeigt in den Slot-Controls nur noch `SMG` und `Medictool`.
 - Die SMG-Option nutzt `res://Assets/used/npc/blaster_kit/previews/blaster-a.png` als Icon und Slot-Preview.
-- `Medictool` bleibt waehlbar, erhaelt aber bewusst kein Blaster-Preview.
+- `Medictool` bleibt waehlbar und nutzt `res://Assets/used/npc/blaster_kit/previews/blaster-b.png` als Icon und Slot-Preview.
+- `data/npc_unit_visual_mapping.json` enthaelt `medictool_blaster` mit `blaster-b.glb`; `weapon_visual_loadouts.medictool` zeigt darauf.
+- `TerrainMap3DView` laesst `medictool` das Team-Default-Visual-Loadout fuer die sichtbare Waffe uebersteuern, nutzt aber weiterhin die TASK_174-Groessen-, Textur- und Orientierungs-Kalibrierung am `RightHandSocket`.
 - Alte `rifle`-/`rail_gun`-Werte werden im FOB-UI-Slice auf die aktuelle SMG-Auswahl normalisiert; die bestehende Mission-/TestUnit-Waffenlogik bleibt davon getrennt.
 - `scripts/tests/task_176_fob_loadout_weapon_preview_selector_verifier.gd` prueft Assetpfad, UI-Auswahlvertrag, Preview-Verhalten und lokale Pfadgrenze.
 

@@ -1,6 +1,6 @@
 # Blaster Kit Subset
 
-Status: TASK_174 visual attachment subset
+Status: TASK_174 visual attachment subset, extended by TASK_176 for Medictool preview/visual
 
 ## Quelle
 - Lokaler Ordner: `C:\Users\bjoer\Pictures\Sternenbuerger\Blaster Kit`
@@ -12,10 +12,12 @@ Status: TASK_174 visual attachment subset
 
 ## Importiertes Subset
 - `models/blaster-a.glb`
+- `models/blaster-b.glb`
 - `models/blaster-f.glb`
 - `models/blaster-p.glb`
 - `models/Textures/colormap.png`
 - `previews/blaster-a.png`
+- `previews/blaster-b.png`
 - `License.txt`
 
 ## Verbrauchsort

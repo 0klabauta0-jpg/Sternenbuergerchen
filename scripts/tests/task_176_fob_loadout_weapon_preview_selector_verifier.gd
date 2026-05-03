@@ -5,6 +5,7 @@ const FOB_SCREEN_SCRIPT: GDScript = preload("res://scripts/meta/fob_screen.gd")
 const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
 
 const SMG_PREVIEW_PATH := "res://Assets/used/npc/blaster_kit/previews/blaster-a.png"
+const MEDICTOOL_PREVIEW_PATH := "res://Assets/used/npc/blaster_kit/previews/blaster-b.png"
 
 var _passed: int = 0
 var _failed: int = 0
@@ -36,6 +37,10 @@ func _test_preview_asset_contract() -> void:
 	var texture := load(SMG_PREVIEW_PATH) as Texture2D
 	_assert(texture != null, "SMG preview asset loads as Texture2D")
 	_assert(SMG_PREVIEW_PATH.begins_with("res://Assets/used/"), "SMG preview uses a project res:// asset path")
+	_assert(ResourceLoader.exists(MEDICTOOL_PREVIEW_PATH), "Medictool preview asset exists inside the project")
+	var medictool_texture := load(MEDICTOOL_PREVIEW_PATH) as Texture2D
+	_assert(medictool_texture != null, "Medictool preview asset loads as Texture2D")
+	_assert(MEDICTOOL_PREVIEW_PATH.begins_with("res://Assets/used/"), "Medictool preview uses a project res:// asset path")
 
 
 func _test_weapon_selector_contract() -> void:
@@ -49,7 +54,7 @@ func _test_weapon_selector_contract() -> void:
 	_assert(String(fob_screen.call("_weapon_id_from_index", 0)) == "smg", "FOB selector index 0 writes smg")
 	_assert(String(fob_screen.call("_weapon_id_from_index", 1)) == "medictool", "FOB selector index 1 writes medictool")
 	_assert(String(fob_screen.call("_get_weapon_preview_path", "smg")) == SMG_PREVIEW_PATH, "SMG maps to blaster-a preview")
-	_assert(String(fob_screen.call("_get_weapon_preview_path", "medictool")).is_empty(), "Medictool does not receive a false blaster preview")
+	_assert(String(fob_screen.call("_get_weapon_preview_path", "medictool")) == MEDICTOOL_PREVIEW_PATH, "Medictool maps to blaster-b preview")
 	option_button.queue_free()
 	fob_screen.queue_free()
 
@@ -79,8 +84,9 @@ func _test_medictool_keeps_empty_preview() -> void:
 	var weapon_1_select := _find_node_by_name(member_list, "Weapon1Select") as OptionButton
 
 	_assert(weapon_1_select != null and weapon_1_select.get_selected_id() == 1, "#13 can select Medictool in slot 1")
-	_assert(weapon_1_preview != null and not weapon_1_preview.visible, "Medictool slot hides the Blaster preview")
-	_assert(weapon_1_preview != null and String(weapon_1_preview.get_meta("weapon_preview_path", "")).is_empty(), "Medictool slot keeps an empty preview path")
+	_assert(weapon_1_preview != null and weapon_1_preview.visible, "Medictool slot shows the blaster-b preview")
+	_assert(weapon_1_preview != null and String(weapon_1_preview.get_meta("weapon_preview_path", "")) == MEDICTOOL_PREVIEW_PATH, "Medictool slot points at blaster-b.png")
+	_assert(weapon_1_preview != null and weapon_1_preview.texture != null, "Medictool slot has a loaded preview texture")
 
 	screen.queue_free()
 	await process_frame

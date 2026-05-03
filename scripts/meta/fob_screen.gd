@@ -17,6 +17,8 @@ const DROPSHIP_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Is
 const DROPSHIP_FOB_TEXTURE: Texture2D = DROPSHIP_TEXTURE_SE
 const SMG_BLASTER_PREVIEW_TEXTURE: Texture2D = preload("res://Assets/used/npc/blaster_kit/previews/blaster-a.png")
 const SMG_BLASTER_PREVIEW_PATH := "res://Assets/used/npc/blaster_kit/previews/blaster-a.png"
+const MEDICTOOL_BLASTER_PREVIEW_TEXTURE: Texture2D = preload("res://Assets/used/npc/blaster_kit/previews/blaster-b.png")
+const MEDICTOOL_BLASTER_PREVIEW_PATH := "res://Assets/used/npc/blaster_kit/previews/blaster-b.png"
 
 signal mission_start_requested(selected_unit_ids, selected_fireteam_ids)
 signal transport_craft_mission_stage_requested(craft_id)
@@ -1934,6 +1936,8 @@ func _get_weapon_preview_path(weapon_id: String) -> String:
 	match _normalize_weapon_id(weapon_id):
 		"smg":
 			return SMG_BLASTER_PREVIEW_PATH
+		"medictool":
+			return MEDICTOOL_BLASTER_PREVIEW_PATH
 		_:
 			return ""
 
@@ -1942,6 +1946,8 @@ func _get_weapon_preview_texture(weapon_id: String) -> Texture2D:
 	match _normalize_weapon_id(weapon_id):
 		"smg":
 			return SMG_BLASTER_PREVIEW_TEXTURE
+		"medictool":
+			return MEDICTOOL_BLASTER_PREVIEW_TEXTURE
 		_:
 			return null
 

@@ -117,6 +117,10 @@
 			"helmet_path": "res://Assets/used/npc/animated_characters/accessories/militaryHelmet.fbx",
 			"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-f.glb"
 		},
+		"medictool_blaster": {
+			"helmet_path": "res://Assets/used/npc/animated_characters/accessories/astroHelmet.fbx",
+			"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-b.glb"
+		},
 		"heavy_blaster": {
 			"helmet_path": "res://Assets/used/npc/animated_characters/accessories/militaryHelmet.fbx",
 			"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-p.glb"
@@ -124,11 +128,12 @@
 	},
 	"weapon_visual_loadouts": {
 		"rifle": "standard_rifle",
-		"smg": "compact_blaster",
+		"smg": "standard_rifle",
+		"medictool": "medictool_blaster",
 		"rail_gun": "heavy_blaster"
 	},
 	"role_visual_loadouts": {
-		"medic": "compact_blaster",
+		"medic": "medictool_blaster",
 		"support": "heavy_blaster"
 	},
 	"animation_paths": {
@@ -145,6 +150,7 @@
 	],
 	"blaster_paths": [
 		"res://Assets/used/npc/blaster_kit/models/blaster-a.glb",
+		"res://Assets/used/npc/blaster_kit/models/blaster-b.glb",
 		"res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
 		"res://Assets/used/npc/blaster_kit/models/blaster-p.glb"
 	]

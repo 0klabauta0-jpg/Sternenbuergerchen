@@ -3,7 +3,7 @@ extends SceneTree
 const LIVE_MISSION_SCENE_PATH: String = "res://scenes/tests/mission_reactivity_test.tscn"
 const NPC_VISUAL_MAPPING_PATH: String = "res://data/npc_unit_visual_mapping.json"
 const BLASTER_IMPORT_ROOT: String = "res://Assets/used/npc/blaster_kit"
-const EXPECTED_BLASTER_COUNT: int = 3
+const EXPECTED_BLASTER_COUNT: int = 4
 const EXPECTED_LIVE_PROXY_COUNT: int = 2
 const HELMET_SOCKET_NAME: String = "HeadSocket"
 const BLASTER_SOCKET_NAME: String = "RightHandSocket"
@@ -31,7 +31,7 @@ func _run_tests() -> void:
 
 func _test_blaster_import_subset_and_license() -> void:
 	var blaster_paths: PackedStringArray = _list_files_recursive("%s/models" % BLASTER_IMPORT_ROOT, ".glb")
-	_assert(blaster_paths.size() == EXPECTED_BLASTER_COUNT, "Blaster subset imports exactly three GLB models")
+	_assert(blaster_paths.size() == EXPECTED_BLASTER_COUNT, "Blaster subset imports the expected GLB model count")
 	for blaster_path in blaster_paths:
 		_assert(ResourceLoader.exists(blaster_path), "Blaster GLB is loadable: %s" % blaster_path)
 		_assert(blaster_path.get_extension().to_lower() == "glb", "Blaster import is GLB-only: %s" % blaster_path)
@@ -39,7 +39,8 @@ func _test_blaster_import_subset_and_license() -> void:
 	_assert(_list_files_recursive(BLASTER_IMPORT_ROOT, ".obj").is_empty(), "Blaster subset imports no OBJ duplicates")
 	_assert(_list_files_recursive(BLASTER_IMPORT_ROOT, ".mtl").is_empty(), "Blaster subset imports no MTL duplicates")
 	_assert(ResourceLoader.exists("%s/models/Textures/colormap.png" % BLASTER_IMPORT_ROOT), "Blaster GLBs keep their shared colormap texture")
-	_assert(ResourceLoader.exists("%s/previews/blaster-a.png" % BLASTER_IMPORT_ROOT), "Optional blaster preview PNG is loadable")
+	_assert(ResourceLoader.exists("%s/previews/blaster-a.png" % BLASTER_IMPORT_ROOT), "SMG blaster preview PNG is loadable")
+	_assert(ResourceLoader.exists("%s/previews/blaster-b.png" % BLASTER_IMPORT_ROOT), "Medictool blaster preview PNG is loadable")
 
 	var license_text: String = _read_text("%s/License.txt" % BLASTER_IMPORT_ROOT)
 	_assert(license_text.find("Creative Commons Zero") >= 0 and license_text.find("CC0") >= 0, "Blaster subset keeps the CC0 license text")
@@ -66,7 +67,7 @@ func _test_mapping_attachment_contract() -> void:
 	_assert(ResourceLoader.exists(String(blaster_attachment.get("texture_path", ""))), "Blaster attachment maps its shared colormap texture")
 
 	var blaster_paths: Array = Array(mapping.get("blaster_paths", []))
-	_assert(blaster_paths.size() == EXPECTED_BLASTER_COUNT, "Mapping tracks the three imported blaster GLBs")
+	_assert(blaster_paths.size() == EXPECTED_BLASTER_COUNT, "Mapping tracks the imported blaster GLBs")
 	for blaster_path_variant in blaster_paths:
 		var blaster_path: String = String(blaster_path_variant)
 		_assert(ResourceLoader.exists(blaster_path), "Mapped blaster resource is loadable: %s" % blaster_path)

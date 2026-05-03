@@ -2820,6 +2820,11 @@ func _apply_unit_visual_loadout(unit: Node, unit_visual_entry: Dictionary) -> Di
 
 
 func _resolve_unit_visual_loadout_id(unit: Node, unit_visual_entry: Dictionary) -> String:
+	var weapon_loadouts: Dictionary = Dictionary(_get_npc_unit_visual_mapping().get("weapon_visual_loadouts", {}))
+	for weapon_id in _get_unit_visual_weapon_ids(unit):
+		if weapon_id == "medictool" and weapon_loadouts.has(weapon_id):
+			return String(weapon_loadouts.get(weapon_id, "")).strip_edges().to_lower()
+
 	var explicit_loadout_id: String = String(unit_visual_entry.get("visual_loadout_id", unit_visual_entry.get("loadout_id", ""))).strip_edges().to_lower()
 	if not explicit_loadout_id.is_empty():
 		return explicit_loadout_id
@@ -2829,7 +2834,6 @@ func _resolve_unit_visual_loadout_id(unit: Node, unit_visual_entry: Dictionary) 
 	if not role_id.is_empty() and role_loadouts.has(role_id):
 		return String(role_loadouts.get(role_id, "")).strip_edges().to_lower()
 
-	var weapon_loadouts: Dictionary = Dictionary(_get_npc_unit_visual_mapping().get("weapon_visual_loadouts", {}))
 	for weapon_id in _get_unit_visual_weapon_ids(unit):
 		if weapon_loadouts.has(weapon_id):
 			return String(weapon_loadouts.get(weapon_id, "")).strip_edges().to_lower()

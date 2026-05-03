@@ -1262,10 +1262,11 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 ### TASK_176 - FOB Loadout Weapon Preview Selector
 - Status: implementiert
 - Stand: Fenster `#13 LOADOUT` zeigt in den pro-Mitglied-Slots jetzt nur noch `SMG` und `Medictool`. Die SMG-Option nutzt das bereits importierte Projekt-Asset `res://Assets/used/npc/blaster_kit/previews/blaster-a.png` als Icon und kleine Slot-Preview.
-- Stand: `Medictool` bleibt als Loadout-Auswahl erhalten, bekommt aber bewusst kein Blaster-Preview. Alte `rifle`-/`rail_gun`-Werte werden in diesem FOB-UI-Slice auf die aktuelle SMG-Auswahl normalisiert; die bestehende Mission-/TestUnit-Waffenlogik bleibt getrennt.
+- Stand: `Medictool` bleibt als Loadout-Auswahl erhalten und nutzt jetzt `res://Assets/used/npc/blaster_kit/previews/blaster-b.png` als Preview. Das zugehoerige 2.5D-Visual-Loadout `medictool_blaster` nutzt `res://Assets/used/npc/blaster_kit/models/blaster-b.glb` und weiter die TASK_174-Groessen-, Textur- und Orientierungs-Kalibrierung am `RightHandSocket`.
+- Stand: Alte `rifle`-/`rail_gun`-Werte werden in diesem FOB-UI-Slice auf die aktuelle SMG-Auswahl normalisiert; die bestehende Mission-/TestUnit-Waffenlogik bleibt getrennt. `TerrainMap3DView` laesst `medictool` die Team-Default-Waffe fuer die reine Darstellung uebersteuern, ohne Combat-Werte zu veraendern.
 - Offene Punkte: Manueller Sichtcheck in `#13 LOADOUT`; weitere Blaster-Previews erst importieren, wenn sie als eigene Auswahl wirklich genutzt werden.
 - Risiken: Preview-Bilder duerfen keine Combat-Werte oder SimulationRoot-Wahrheit werden. Genutzte Assets muessen aus lokalen Quellen ins Projekt kopiert und ausschliesslich per `res://...` referenziert werden.
-- Lokale Pruefung: `task_176_fob_loadout_weapon_preview_selector_verifier.gd`, `task_087_verifier.gd`, `task_175_npc_loadout_attachment_verifier.gd`, `medic_support_verifier.gd`, `task_096_recovery_verifier.gd`, `task_114_meta_recovery_verifier.gd` und `git diff --check` laufen gruen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_176_fob_loadout_weapon_preview_selector_verifier.gd`, `task_087_verifier.gd`, `task_175_npc_loadout_attachment_verifier.gd`, `task_174_character_helmet_blaster_attachment_verifier.gd`, `medic_support_verifier.gd`, `task_096_recovery_verifier.gd`, `task_114_meta_recovery_verifier.gd` und `git diff --check` laufen gruen.
 - Naechster Schritt: Manuellen FOB-Sichtcheck ausfuehren und danach weitere Blaster nur in eigenen kleinen Follow-ups anbinden.
 
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau

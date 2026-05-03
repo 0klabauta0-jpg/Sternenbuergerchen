@@ -7,6 +7,7 @@ const TERRAIN_MAP_3D_VIEW_SCRIPT: GDScript = preload("res://scripts/terrain/terr
 const TEST_UNIT_SCRIPT: GDScript = preload("res://scripts/npc/test_unit.gd")
 
 const BLASTER_A_PATH: String = "res://Assets/used/npc/blaster_kit/models/blaster-a.glb"
+const BLASTER_B_PATH: String = "res://Assets/used/npc/blaster_kit/models/blaster-b.glb"
 const BLASTER_F_PATH: String = "res://Assets/used/npc/blaster_kit/models/blaster-f.glb"
 const BLASTER_P_PATH: String = "res://Assets/used/npc/blaster_kit/models/blaster-p.glb"
 const BROKEN_BLASTER_PATH: String = "res://Assets/used/npc/blaster_kit/models/missing-task-175.glb"
@@ -39,7 +40,7 @@ func _test_mapping_loadout_contract() -> void:
 	_assert(String(defaults.get("visual_loadout_id", "")) == "standard_rifle", "Defaults select a visual loadout")
 
 	var loadouts: Dictionary = Dictionary(mapping.get("visual_loadouts", {}))
-	for loadout_id in ["standard_rifle", "compact_blaster", "heavy_blaster"]:
+	for loadout_id in ["standard_rifle", "compact_blaster", "medictool_blaster", "heavy_blaster"]:
 		var loadout: Dictionary = Dictionary(loadouts.get(loadout_id, {}))
 		_assert(not loadout.is_empty(), "%s visual loadout exists" % loadout_id)
 		_assert(ResourceLoader.exists(String(loadout.get("helmet_path", ""))), "%s loadout maps a loadable helmet" % loadout_id)
@@ -48,7 +49,8 @@ func _test_mapping_loadout_contract() -> void:
 
 	var weapon_loadouts: Dictionary = Dictionary(mapping.get("weapon_visual_loadouts", {}))
 	_assert(String(weapon_loadouts.get("rifle", "")) == "standard_rifle", "Rifle maps to standard rifle visual loadout")
-	_assert(String(weapon_loadouts.get("smg", "")) == "compact_blaster", "SMG maps to compact blaster visual loadout")
+	_assert(String(weapon_loadouts.get("smg", "")) == "standard_rifle", "SMG maps to blaster-a visual loadout")
+	_assert(String(weapon_loadouts.get("medictool", "")) == "medictool_blaster", "Medictool maps to blaster-b visual loadout")
 	_assert(String(weapon_loadouts.get("rail_gun", "")) == "heavy_blaster", "Rail gun maps to heavy blaster visual loadout")
 
 	var visual_entries: Dictionary = Dictionary(mapping.get("unit_visuals", {}))
@@ -60,7 +62,7 @@ func _test_mapping_loadout_contract() -> void:
 
 func _test_runtime_loadout_override_and_missing_diagnosis() -> void:
 	var mapping: Dictionary = _build_probe_mapping()
-	var map_data = TERRAIN_MAP_DATA_SCRIPT.call("create_empty", "task_175_loadout_probe", Vector2i(3, 1), Vector2.ZERO)
+	var map_data = TERRAIN_MAP_DATA_SCRIPT.call("create_empty", "task_175_loadout_probe", Vector2i(4, 1), Vector2.ZERO)
 	var primary_view: Node = TERRAIN_MAP_3D_VIEW_SCRIPT.new()
 	root.add_child(primary_view)
 	primary_view.call("configure_from_map", map_data)
@@ -68,26 +70,30 @@ func _test_runtime_loadout_override_and_missing_diagnosis() -> void:
 
 	var default_unit := _make_unit("task_175_default_probe", "team_alpha", "security_guard", "rifle", Vector2(0.0, 0.0))
 	var smg_unit := _make_unit("task_175_smg_probe", "team_alpha", "security_guard", "smg", Vector2(64.0, 32.0))
-	var broken_unit := _make_unit("task_175_missing_probe", "team_alpha", "security_guard", "rifle", Vector2(128.0, 64.0))
+	var medictool_unit := _make_unit("task_175_medictool_probe", "team_alpha", "security_guard", "rifle", Vector2(128.0, 64.0), "medictool")
+	var broken_unit := _make_unit("task_175_missing_probe", "team_alpha", "security_guard", "rifle", Vector2(192.0, 96.0))
 	root.add_child(default_unit)
 	root.add_child(smg_unit)
+	root.add_child(medictool_unit)
 	root.add_child(broken_unit)
-	primary_view.call("set_unit_nodes", [default_unit, smg_unit, broken_unit])
+	primary_view.call("set_unit_nodes", [default_unit, smg_unit, medictool_unit, broken_unit])
 	await _wait_frames(10)
 
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
-	_assert(int(snapshot.get("unit_visual_loadout_count", 0)) >= 3, "Runtime proxies resolve visual loadouts")
+	_assert(int(snapshot.get("unit_visual_loadout_count", 0)) >= 4, "Runtime proxies resolve visual loadouts")
 	_assert(int(snapshot.get("unit_visual_loadout_error_count", 0)) == 1, "Broken visual loadout records one diagnostic error")
 	_assert(int(snapshot.get("unit_blaster_error_count", 0)) == 1, "Broken visual loadout exposes a blaster attachment error")
 
 	var unit_root := primary_view.get_node_or_null("ViewportContainer/SubViewport/WorldRoot/UnitRoot3D")
 	_assert(_proxy_has_visual(unit_root, "UnitProxy_task_175_default_probe", "BlasterVisual_blaster-a"), "Default probe keeps standard rifle blaster")
-	_assert(_proxy_has_visual(unit_root, "UnitProxy_task_175_smg_probe", "BlasterVisual_blaster-f"), "Weapon override selects compact blaster")
+	_assert(_proxy_has_visual(unit_root, "UnitProxy_task_175_smg_probe", "BlasterVisual_blaster-a"), "SMG weapon override selects blaster-a")
+	_assert(_proxy_has_visual(unit_root, "UnitProxy_task_175_medictool_probe", "BlasterVisual_blaster-b"), "Medictool weapon override selects blaster-b")
 	_assert(_proxy_has_visual(unit_root, "UnitProxy_task_175_missing_probe", "MissingAsset_unit_blaster"), "Broken visual loadout renders missing-asset diagnosis")
 
 	primary_view.queue_free()
 	default_unit.queue_free()
 	smg_unit.queue_free()
+	medictool_unit.queue_free()
 	broken_unit.queue_free()
 	await process_frame
 
@@ -128,6 +134,8 @@ func _build_probe_mapping() -> Dictionary:
 	smg_entry.erase("visual_loadout_id")
 	smg_entry.erase("loadout_id")
 	unit_entries["task_175_smg_probe"] = smg_entry
+	var medictool_entry: Dictionary = default_visual.duplicate(true)
+	unit_entries["task_175_medictool_probe"] = medictool_entry
 	var broken_entry: Dictionary = default_visual.duplicate(true)
 	broken_entry["visual_loadout_id"] = "broken_blaster"
 	unit_entries["task_175_missing_probe"] = broken_entry
@@ -141,13 +149,13 @@ func _build_probe_mapping() -> Dictionary:
 	return mapping
 
 
-func _make_unit(unit_id: String, team_id: String, role_id: String, weapon_id: String, position: Vector2) -> Node2D:
+func _make_unit(unit_id: String, team_id: String, role_id: String, weapon_id: String, position: Vector2, weapon_2_id: String = "rifle") -> Node2D:
 	var unit := TEST_UNIT_SCRIPT.new() as Node2D
 	unit.unit_id = unit_id
 	unit.team_id = team_id
 	unit.role_id = role_id
 	unit.weapon_1_id = weapon_id
-	unit.weapon_2_id = "rifle"
+	unit.weapon_2_id = weapon_2_id
 	unit.global_position = position
 	return unit
 
