@@ -323,6 +323,7 @@ TASK_174 - Character Helmet and Blaster Attachment Visuals (implementiert)
 
 Phase 18F - NPC Loadout Visuals
 TASK_175 - NPC Loadout Attachments (implementiert)
+TASK_176 - FOB Loadout Weapon Preview Selector (implementiert)
 
 Batch-Empfehlung
 

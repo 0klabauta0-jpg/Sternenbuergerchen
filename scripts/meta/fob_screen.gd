@@ -15,6 +15,8 @@ const DROPSHIP_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Is
 const DROPSHIP_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
 const DROPSHIP_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SW.png")
 const DROPSHIP_FOB_TEXTURE: Texture2D = DROPSHIP_TEXTURE_SE
+const SMG_BLASTER_PREVIEW_TEXTURE: Texture2D = preload("res://Assets/used/npc/blaster_kit/previews/blaster-a.png")
+const SMG_BLASTER_PREVIEW_PATH := "res://Assets/used/npc/blaster_kit/previews/blaster-a.png"
 
 signal mission_start_requested(selected_unit_ids, selected_fireteam_ids)
 signal transport_craft_mission_stage_requested(craft_id)
@@ -22,7 +24,7 @@ signal transport_craft_mission_stage_requested(craft_id)
 const DEFAULT_DROPSHIP_ETA_SECONDS := 18.0
 const DEFAULT_BOARDING_SECONDS := 6.0
 const DROPSHIP_NPC_CAPACITY := 6
-const DEFAULT_MEMBER_WEAPON := "rifle"
+const DEFAULT_MEMBER_WEAPON := "smg"
 const DEFAULT_MISSION_NAME := "Operation: FOB Transfer"
 const DEFAULT_MISSION_MAP := "test_mission_32x32_slots8"
 const DEFAULT_MISSION_SLOT_COUNT := 8
@@ -1483,25 +1485,20 @@ func _build_member_loadout_row(fireteam_id: String, member_unit_id: String, lead
 		armor_select.item_selected.connect(_on_member_armor_selected.bind(fireteam_id, member_unit_id))
 	selectors_row.add_child(armor_select)
 
-	var weapon_1_select := OptionButton.new()
-	weapon_1_select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	weapon_1_select.custom_minimum_size = Vector2(70.0, 0.0)
-	weapon_1_select.add_theme_font_size_override("font_size", 9)
-	_populate_weapon_option_button(weapon_1_select, String(member_loadout.get("weapon_1", member_loadout.get("weapon", DEFAULT_MEMBER_WEAPON))))
-	META_UI_SKIN_SCRIPT.style_secondary_button(weapon_1_select)
-	if not weapon_1_select.item_selected.is_connected(_on_member_weapon_1_selected.bind(fireteam_id, member_unit_id)):
-		weapon_1_select.item_selected.connect(_on_member_weapon_1_selected.bind(fireteam_id, member_unit_id))
-	selectors_row.add_child(weapon_1_select)
-
-	var weapon_2_select := OptionButton.new()
-	weapon_2_select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	weapon_2_select.custom_minimum_size = Vector2(70.0, 0.0)
-	weapon_2_select.add_theme_font_size_override("font_size", 9)
-	_populate_weapon_option_button(weapon_2_select, String(member_loadout.get("weapon_2", DEFAULT_MEMBER_WEAPON)))
-	META_UI_SKIN_SCRIPT.style_secondary_button(weapon_2_select)
-	if not weapon_2_select.item_selected.is_connected(_on_member_weapon_2_selected.bind(fireteam_id, member_unit_id)):
-		weapon_2_select.item_selected.connect(_on_member_weapon_2_selected.bind(fireteam_id, member_unit_id))
-	selectors_row.add_child(weapon_2_select)
+	selectors_row.add_child(_build_weapon_slot_control(
+		"Weapon1",
+		String(member_loadout.get("weapon_1", member_loadout.get("weapon", DEFAULT_MEMBER_WEAPON))),
+		fireteam_id,
+		member_unit_id,
+		1
+	))
+	selectors_row.add_child(_build_weapon_slot_control(
+		"Weapon2",
+		String(member_loadout.get("weapon_2", DEFAULT_MEMBER_WEAPON)),
+		fireteam_id,
+		member_unit_id,
+		2
+	))
 
 	return row_panel
 
@@ -1746,12 +1743,12 @@ func _normalize_loadout_id(value: String) -> String:
 func _normalize_weapon_id(value: String) -> String:
 	var normalized_value: String = value.strip_edges().to_lower()
 	match normalized_value:
-		"smg", "rifle", "rail_gun", "medictool":
+		"smg":
 			return normalized_value
-		"special", "sonderwaffe", "schienenkanone":
-			return "rail_gun"
 		"medic_tool", "medic-tool", "medic tool":
 			return "medictool"
+		"medictool":
+			return normalized_value
 		_:
 			return DEFAULT_MEMBER_WEAPON
 
@@ -1849,12 +1846,16 @@ func _populate_armor_option_button(option_button: OptionButton, selected_armor_i
 func _populate_weapon_option_button(option_button: OptionButton, selected_weapon_id: String) -> void:
 	option_button.clear()
 	for option in [
-		{"id": "smg", "label": "Maschinenpistole"},
-		{"id": "rifle", "label": "Sturmgewehr"},
-		{"id": "rail_gun", "label": "Schienenkanone"},
+		{"id": "smg", "label": "SMG"},
 		{"id": "medictool", "label": "Medictool"},
 	]:
-		option_button.add_item(String(option["label"]))
+		var weapon_id: String = String(option["id"])
+		var preview_texture := _get_weapon_preview_texture(weapon_id)
+		if preview_texture != null:
+			option_button.add_icon_item(preview_texture, String(option["label"]))
+		else:
+			option_button.add_item(String(option["label"]))
+		option_button.set_item_metadata(option_button.item_count - 1, weapon_id)
 		if String(option["id"]) == _normalize_weapon_id(selected_weapon_id):
 			option_button.select(option_button.item_count - 1)
 
@@ -1862,13 +1863,11 @@ func _populate_weapon_option_button(option_button: OptionButton, selected_weapon
 func _build_weapon_label(weapon_id: String) -> String:
 	match _normalize_weapon_id(weapon_id):
 		"smg":
-			return "Maschinenpistole"
-		"rail_gun", "special":
-			return "Schienenkanone"
+			return "SMG"
 		"medictool":
 			return "Medictool"
 		_:
-			return "Sturmgewehr"
+			return "SMG"
 
 
 func _armor_id_from_index(index: int) -> String:
@@ -1888,13 +1887,63 @@ func _weapon_id_from_index(index: int) -> String:
 		0:
 			return "smg"
 		1:
-			return "rifle"
-		2:
-			return "rail_gun"
-		3:
 			return "medictool"
 		_:
 			return DEFAULT_MEMBER_WEAPON
+
+
+func _build_weapon_slot_control(slot_name: String, selected_weapon_id: String, fireteam_id: String, member_unit_id: String, slot_index: int) -> Control:
+	var slot_box := VBoxContainer.new()
+	slot_box.name = "%sSlot" % slot_name
+	slot_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	slot_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	slot_box.add_theme_constant_override("separation", 2)
+
+	var weapon_select := OptionButton.new()
+	weapon_select.name = "%sSelect" % slot_name
+	weapon_select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	weapon_select.custom_minimum_size = Vector2(70.0, 0.0)
+	weapon_select.add_theme_font_size_override("font_size", 9)
+	_populate_weapon_option_button(weapon_select, selected_weapon_id)
+	META_UI_SKIN_SCRIPT.style_secondary_button(weapon_select)
+	if slot_index == 1:
+		if not weapon_select.item_selected.is_connected(_on_member_weapon_1_selected.bind(fireteam_id, member_unit_id)):
+			weapon_select.item_selected.connect(_on_member_weapon_1_selected.bind(fireteam_id, member_unit_id))
+	else:
+		if not weapon_select.item_selected.is_connected(_on_member_weapon_2_selected.bind(fireteam_id, member_unit_id)):
+			weapon_select.item_selected.connect(_on_member_weapon_2_selected.bind(fireteam_id, member_unit_id))
+	slot_box.add_child(weapon_select)
+
+	var preview_rect := TextureRect.new()
+	preview_rect.name = "%sPreview" % slot_name
+	preview_rect.custom_minimum_size = Vector2(56.0, 24.0)
+	preview_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	preview_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	preview_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var preview_path: String = _get_weapon_preview_path(selected_weapon_id)
+	preview_rect.texture = _get_weapon_preview_texture(selected_weapon_id)
+	preview_rect.visible = preview_rect.texture != null
+	preview_rect.set_meta("weapon_id", _normalize_weapon_id(selected_weapon_id))
+	preview_rect.set_meta("weapon_preview_path", preview_path)
+	slot_box.add_child(preview_rect)
+
+	return slot_box
+
+
+func _get_weapon_preview_path(weapon_id: String) -> String:
+	match _normalize_weapon_id(weapon_id):
+		"smg":
+			return SMG_BLASTER_PREVIEW_PATH
+		_:
+			return ""
+
+
+func _get_weapon_preview_texture(weapon_id: String) -> Texture2D:
+	match _normalize_weapon_id(weapon_id):
+		"smg":
+			return SMG_BLASTER_PREVIEW_TEXTURE
+		_:
+			return null
 
 
 func _apply_loadout_member_row_style(panel: PanelContainer, is_lead: bool) -> void:

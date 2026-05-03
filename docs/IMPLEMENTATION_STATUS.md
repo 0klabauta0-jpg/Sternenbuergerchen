@@ -1259,6 +1259,15 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Lokale Pruefung: `task_175_npc_loadout_attachment_verifier.gd`, `task_174_character_helmet_blaster_attachment_verifier.gd`, `task_160_tactical_playability_verifier.gd`, `task_171_npc_model_replacement_verifier.gd` und `git diff --check` laufen gruen.
 - Naechster Schritt: Bei Bedarf kleine Folge-Tasks fuer weitere sichtbare Rollen- oder Waffenvarianten anlegen.
 
+### TASK_176 - FOB Loadout Weapon Preview Selector
+- Status: implementiert
+- Stand: Fenster `#13 LOADOUT` zeigt in den pro-Mitglied-Slots jetzt nur noch `SMG` und `Medictool`. Die SMG-Option nutzt das bereits importierte Projekt-Asset `res://Assets/used/npc/blaster_kit/previews/blaster-a.png` als Icon und kleine Slot-Preview.
+- Stand: `Medictool` bleibt als Loadout-Auswahl erhalten, bekommt aber bewusst kein Blaster-Preview. Alte `rifle`-/`rail_gun`-Werte werden in diesem FOB-UI-Slice auf die aktuelle SMG-Auswahl normalisiert; die bestehende Mission-/TestUnit-Waffenlogik bleibt getrennt.
+- Offene Punkte: Manueller Sichtcheck in `#13 LOADOUT`; weitere Blaster-Previews erst importieren, wenn sie als eigene Auswahl wirklich genutzt werden.
+- Risiken: Preview-Bilder duerfen keine Combat-Werte oder SimulationRoot-Wahrheit werden. Genutzte Assets muessen aus lokalen Quellen ins Projekt kopiert und ausschliesslich per `res://...` referenziert werden.
+- Lokale Pruefung: `task_176_fob_loadout_weapon_preview_selector_verifier.gd`, `task_087_verifier.gd`, `task_175_npc_loadout_attachment_verifier.gd`, `medic_support_verifier.gd`, `task_096_recovery_verifier.gd`, `task_114_meta_recovery_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Manuellen FOB-Sichtcheck ausfuehren und danach weitere Blaster nur in eigenen kleinen Follow-ups anbinden.
+
 ### TASK_096 - Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet-Umbau
 - Status: implementiert
 - Stand: Der Meta-Layer fuehrt jetzt durchgaengig auf die echte eingebettete Missionskarte statt auf eine separate read-only Overview. Homebase, FOB und Mission teilen dieselbe kompakte Navigation, die Missions-Tactical-UI traegt direkt die gemeinsamen Block-Labels `#15` bis `#18`, und der Missionspfad bleibt auf dieselbe Kartenbasis, dieselben LZ-/Approach-Marker sowie denselben Dropship-Handoff verdrahtet wie die spaetere Live-Mission.

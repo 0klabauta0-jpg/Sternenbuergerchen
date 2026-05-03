@@ -58,9 +58,9 @@ func _test_fob_loadout_dropdown_includes_medictool() -> void:
 	var fob_screen = FOB_SCREEN_SCRIPT.new()
 	var option_button := OptionButton.new()
 	fob_screen.call("_populate_weapon_option_button", option_button, "medictool")
-	_assert(option_button.item_count == 4, "FOB loadout dropdown offers four weapon-slot choices including medictool")
-	_assert(option_button.get_item_text(3) == "Medictool", "FOB loadout dropdown labels medictool visibly")
-	_assert(option_button.get_selected_id() == 3, "FOB loadout dropdown can preselect medictool")
+	_assert(option_button.item_count == 2, "FOB loadout dropdown offers SMG and medictool")
+	_assert(option_button.get_item_text(1) == "Medictool", "FOB loadout dropdown labels medictool visibly")
+	_assert(option_button.get_selected_id() == 1, "FOB loadout dropdown can preselect medictool")
 	fob_screen.queue_free()
 	option_button.queue_free()
 
