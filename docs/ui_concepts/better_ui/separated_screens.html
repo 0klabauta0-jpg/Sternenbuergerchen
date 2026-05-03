@@ -342,7 +342,7 @@
       top: 68px;
       bottom: 14px;
       display: grid;
-      grid-template-columns: 268px 1fr 318px;
+      grid-template-columns: 1fr 330px;
       grid-template-rows: 78px 1fr;
       gap: 10px;
     }
@@ -369,6 +369,16 @@
       border: 1px solid #3b4650;
       border-radius: 6px;
       background: #151c21;
+    }
+
+    .roster-focus .narrow-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-auto-rows: 56px;
+    }
+
+    .roster-focus .thin-card {
+      height: 56px;
+      grid-template-columns: 32px 1fr auto;
     }
 
     .stage {
@@ -585,7 +595,7 @@
 
     .homebase-ship-panel {
       display: grid;
-      grid-template-rows: 1fr 106px;
+      grid-template-rows: 1fr 190px;
       gap: 10px;
       min-height: 0;
     }
@@ -630,8 +640,11 @@
       top: 68px;
       bottom: 14px;
       display: grid;
-      grid-template-columns: 240px 1fr 300px;
+      grid-template-columns: 260px 1fr 380px;
       grid-template-rows: 1fr 180px;
+      grid-template-areas:
+        "teams loadout deck"
+        "bottom bottom deck";
       gap: 10px;
     }
 
@@ -640,6 +653,15 @@
       grid-template-rows: 1fr 130px;
       gap: 10px;
       min-height: 0;
+      grid-area: deck;
+    }
+
+    .fob-teams {
+      grid-area: teams;
+    }
+
+    .fob-loadout {
+      grid-area: loadout;
     }
 
     .loadout-rows {
@@ -687,11 +709,40 @@
     }
 
     .fob-bottom {
-      grid-column: 1 / -1;
+      grid-area: bottom;
       display: grid;
       grid-template-columns: 1fr 1fr 320px;
       gap: 10px;
       min-height: 0;
+    }
+
+    .asset-tile {
+      position: absolute;
+      z-index: 2;
+      object-fit: contain;
+      filter: drop-shadow(14px 16px 0 rgba(0, 0, 0, 0.22));
+      pointer-events: none;
+    }
+
+    .asset-tile.hangar {
+      right: 34px;
+      top: 42px;
+      width: 160px;
+      opacity: 0.96;
+    }
+
+    .asset-tile.platform-a {
+      left: 20px;
+      top: 84px;
+      width: 138px;
+      opacity: 0.88;
+    }
+
+    .asset-tile.platform-b {
+      left: 82px;
+      bottom: 64px;
+      width: 116px;
+      opacity: 0.88;
     }
 
     .mission-grid {
@@ -699,7 +750,7 @@
       inset: 0;
       display: grid;
       grid-template-columns: 270px 1fr 250px;
-      grid-template-rows: 62px 1fr 168px;
+      grid-template-rows: 62px 1fr 218px;
       gap: 10px;
       padding: 12px;
     }
@@ -757,15 +808,21 @@
 
     .mini-command-grid {
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(3, 42px);
       gap: 5px;
     }
 
     .stance-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr) 54px;
+      grid-template-columns: repeat(4, 42px);
       gap: 5px;
       margin-top: 6px;
+    }
+
+    .mission-command .mini-button {
+      width: 42px;
+      height: 42px;
+      font-size: 8px;
     }
 
     .team-strip {
@@ -802,9 +859,9 @@
 
     .windrose {
       position: relative;
-      width: 118px;
-      height: 118px;
-      margin: 2px auto 6px;
+      width: 86px;
+      height: 86px;
+      margin: 0 auto 6px;
       border-radius: 50%;
       border: 1px solid #3b4650;
       background:
@@ -814,10 +871,10 @@
 
     .rose-arrow {
       position: absolute;
-      left: 52px;
-      top: 14px;
-      width: 14px;
-      height: 48px;
+      left: 37px;
+      top: 11px;
+      width: 12px;
+      height: 34px;
       background: var(--amber);
       clip-path: polygon(50% 0, 100% 22%, 70% 22%, 70% 100%, 30% 100%, 30% 22%, 0 22%);
       transform-origin: 50% 100%;
@@ -826,8 +883,8 @@
 
     .rose-btn {
       position: absolute;
-      width: 34px;
-      height: 22px;
+      width: 28px;
+      height: 18px;
       display: grid;
       place-items: center;
       border: 1px solid #78848d;
@@ -835,13 +892,13 @@
       background: #d9dee7;
       color: #22292f;
       font-family: "KenneyFuture", "Segoe UI", Arial, sans-serif;
-      font-size: 8px;
+      font-size: 7px;
     }
 
-    .rose-btn.nw { left: 14px; top: 16px; }
-    .rose-btn.ne { right: 14px; top: 16px; }
-    .rose-btn.sw { left: 14px; bottom: 16px; }
-    .rose-btn.se { right: 14px; bottom: 16px; }
+    .rose-btn.nw { left: 8px; top: 10px; }
+    .rose-btn.ne { right: 8px; top: 10px; }
+    .rose-btn.sw { left: 8px; bottom: 10px; }
+    .rose-btn.se { right: 8px; bottom: 10px; }
 
     .map-token,
     .enemy-token,
@@ -968,8 +1025,8 @@
     <section class="screen">
       <div class="screen-head">
         <div>
-          <h2>Homebase: Personnel + Flightdeck</h2>
-          <p>Homebase soll ruhiger sein: kleine Roster-Zeilen, klare Transferlage, ein visuelles Flightdeck fuer Dropship-Auswahl und Startsequenz.</p>
+          <h2>Homebase: Roster + Fleet Assignment</h2>
+          <p>Homebase konzentriert sich auf das Operator-Roster. Fahrzeuge und Flugzeuge werden hier nur ausgewaehlt und mit passendem Piloten verbunden.</p>
         </div>
         <div class="chips">
           <span class="chip hot">Homebase</span>
@@ -984,20 +1041,20 @@
             <div class="tab">FOB</div>
             <div class="tab">Mission</div>
           </div>
-          <div class="status-line"><span class="badge green">Strategic</span><span class="ellipsis">Crew assignment, transfers and ship readiness</span></div>
-          <div class="status-line"><span class="badge amber">Deck</span><span class="ellipsis">Bay A launch cycle ready</span></div>
+          <div class="status-line"><span class="badge green">Roster</span><span class="ellipsis">Operator readiness, traits and availability first</span></div>
+          <div class="status-line"><span class="badge amber">Fleet</span><span class="ellipsis">Pilot + vehicle assignment only</span></div>
         </div>
 
         <div class="homebase-grid">
           <div class="kpi-row">
             <div class="kpi"><div class="kpi-value">18</div><div class="kpi-label">operator roster</div></div>
-            <div class="kpi"><div class="kpi-value">3</div><div class="kpi-label">fireteams ready</div></div>
+            <div class="kpi"><div class="kpi-value">9</div><div class="kpi-label">ready operators</div></div>
             <div class="kpi"><div class="kpi-value">2</div><div class="kpi-label">ships available</div></div>
-            <div class="kpi"><div class="kpi-value">1</div><div class="kpi-label">fob transfer active</div></div>
+            <div class="kpi"><div class="kpi-value">2</div><div class="kpi-label">pilot candidates</div></div>
           </div>
 
-          <div class="panel">
-            <div class="panel-title"><span>ROSTER</span><span class="badge">thin</span></div>
+          <div class="panel roster-focus">
+            <div class="panel-title"><span>ROSTER FOCUS</span><span class="badge">primary</span></div>
             <div class="panel-body">
               <div class="narrow-list">
                 <div class="thin-card"><div class="avatar-small">AV</div><div class="ellipsis"><h3 class="ellipsis">Anja Voss</h3><div class="minor ellipsis">Lead | ready</div></div><span class="badge green">fit</span></div>
@@ -1006,41 +1063,32 @@
                 <div class="thin-card"><div class="avatar-small">KV</div><div class="ellipsis"><h3 class="ellipsis">Kenzo Vale</h3><div class="minor ellipsis">Scout | ready</div></div><span class="badge green">fit</span></div>
                 <div class="thin-card"><div class="avatar-small">LF</div><div class="ellipsis"><h3 class="ellipsis">Leona Falk</h3><div class="minor ellipsis">Engineer | med</div></div><span class="badge red">down</span></div>
                 <div class="thin-card"><div class="avatar-small">MR</div><div class="ellipsis"><h3 class="ellipsis">Mira Roth</h3><div class="minor ellipsis">Reserve | ready</div></div><span class="badge green">fit</span></div>
+                <div class="thin-card"><div class="avatar-small">BR</div><div class="ellipsis"><h3 class="ellipsis">Bjarne Rook</h3><div class="minor ellipsis">Pilot | dropship cert</div></div><span class="badge amber">pilot</span></div>
+                <div class="thin-card"><div class="avatar-small">IK</div><div class="ellipsis"><h3 class="ellipsis">Ira Kess</h3><div class="minor ellipsis">Pilot | freighter cert</div></div><span class="badge amber">pilot</span></div>
+                <div class="thin-card"><div class="avatar-small">SN</div><div class="ellipsis"><h3 class="ellipsis">Sven Nadir</h3><div class="minor ellipsis">Rifle | ready</div></div><span class="badge green">fit</span></div>
+                <div class="thin-card"><div class="avatar-small">JO</div><div class="ellipsis"><h3 class="ellipsis">Juna Okoro</h3><div class="minor ellipsis">Tech | reserve</div></div><span class="badge">idle</span></div>
               </div>
             </div>
           </div>
 
           <div class="homebase-ship-panel">
             <div class="stage">
-              <div class="pad"></div>
-              <div class="bay-door left"></div>
-              <div class="bay-door right"></div>
-              <div class="ship">
+              <img class="asset-tile hangar" src="../../../Assets/kenney_space-kit/Isometric/hangar_largeA_NE.png" alt="">
+              <img class="asset-tile platform-a" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
+              <div class="pad small"></div>
+              <div class="ship static">
                 <div class="wing left"></div>
                 <div class="wing right"></div>
                 <div class="ship-body"></div>
               </div>
-              <div class="crew-dot crew-a walk">AV</div>
-              <div class="crew-dot crew-b walk">TM</div>
-              <div class="crew-dot crew-c walk">DH</div>
-              <div class="float-label" style="left: 22px; top: 18px;">#05 FLIGHTDECK | Bay A</div>
-              <div class="float-label" style="right: 22px; bottom: 18px;">pseudo launch: plates open, ship lifts</div>
+              <div class="crew-dot crew-a">BR</div>
+              <div class="crew-dot crew-b">IK</div>
+              <div class="float-label" style="left: 22px; top: 18px;">FLEET ASSIGNMENT</div>
+              <div class="float-label" style="right: 22px; bottom: 18px;">select ship + pilot</div>
             </div>
             <div class="slot-grid">
-              <div class="vehicle-slot"><h3>Dropship A</h3><div class="status-line"><span class="badge green">6/8</span><span class="ellipsis">mission seats</span></div></div>
-              <div class="vehicle-slot"><h3>Freighter B</h3><div class="status-line"><span class="badge amber">cargo</span><span class="ellipsis">supplies to FOB</span></div></div>
-            </div>
-          </div>
-
-          <div class="panel">
-            <div class="panel-title"><span>TRANSFER / DECK</span><span class="badge amber">compact</span></div>
-            <div class="panel-body">
-              <div class="narrow-list">
-                <div class="thin-card"><div class="avatar-small">A</div><div class="ellipsis"><h3 class="ellipsis">Bay A launch</h3><div class="minor ellipsis">Dropship cycling up</div></div><span class="badge green">92%</span></div>
-                <div class="thin-card"><div class="avatar-small">B</div><div class="ellipsis"><h3 class="ellipsis">Bay B cargo</h3><div class="minor ellipsis">Freighter loading</div></div><span class="badge amber">44%</span></div>
-                <div class="thin-card"><div class="avatar-small">F</div><div class="ellipsis"><h3 class="ellipsis">FOB transfer</h3><div class="minor ellipsis">Talia + med crates</div></div><span class="badge">00:42</span></div>
-                <div class="thin-card"><div class="avatar-small">M</div><div class="ellipsis"><h3 class="ellipsis">Medbay release</h3><div class="minor ellipsis">Leona respawn queue</div></div><span class="badge red">04:10</span></div>
-              </div>
+              <div class="vehicle-slot"><h3>Dropship A</h3><div class="status-line"><span class="badge amber">Pilot</span><span class="ellipsis">Bjarne Rook</span></div><div class="status-line" style="margin-top:6px;"><span class="badge green">ready</span><span class="ellipsis">mission seats</span></div></div>
+              <div class="vehicle-slot"><h3>Freighter B</h3><div class="status-line"><span class="badge amber">Pilot</span><span class="ellipsis">Ira Kess</span></div><div class="status-line" style="margin-top:6px;"><span class="badge">hold</span><span class="ellipsis">cargo route</span></div></div>
             </div>
           </div>
         </div>
@@ -1050,8 +1098,8 @@
     <section class="screen">
       <div class="screen-head">
         <div>
-          <h2>FOB: Loadout + Boarding + Respawn</h2>
-          <p>FOB ist das Arbeitsdeck vor dem Einsatz: Fireteams und Loadout links/rechts, in der Mitte eine kleine Bay-Buehne mit Dropship, Frachter und Medbay.</p>
+          <h2>FOB: Fireteam Assembly + Right Flightdeck</h2>
+          <p>FOB stellt hauptsaechlich Fireteams zusammen. Das Flightdeck sitzt ganz rechts, nutzt Asset-Bilder staerker und zeigt Boarding/Respawn als kleine Ops-Buehne.</p>
         </div>
         <div class="chips">
           <span class="chip hot">FOB</span>
@@ -1066,12 +1114,12 @@
             <div class="tab">FOB</div>
             <div class="tab">Mission</div>
           </div>
-          <div class="status-line"><span class="badge amber">Staging</span><span class="ellipsis">Drag fireteams or loadout rows onto bay slots</span></div>
+          <div class="status-line"><span class="badge amber">Assembly</span><span class="ellipsis">Build fireteams first, then board on the right deck</span></div>
           <div class="status-line"><span class="badge green">Ready</span><span class="ellipsis">Blue 5/5 | Gold 3/5</span></div>
         </div>
 
         <div class="fob-grid">
-          <div class="panel">
+          <div class="panel fob-teams">
             <div class="panel-title"><span>#10 FIRETEAMS</span><span class="badge">teams</span></div>
             <div class="panel-body">
               <div class="narrow-list">
@@ -1085,6 +1133,9 @@
 
           <div class="fob-stage-wrap">
             <div class="stage stage-dark">
+              <img class="asset-tile hangar" src="../../../Assets/kenney_space-kit/Isometric/hangar_largeA_NE.png" alt="">
+              <img class="asset-tile platform-a" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
+              <img class="asset-tile platform-b" src="../../../Assets/kenney_space-kit/Isometric/platform_small_NE.png" alt="">
               <div class="pad"></div>
               <div class="ship static">
                 <div class="wing left"></div>
@@ -1098,8 +1149,8 @@
               <div class="crew-dot crew-b walk">TM</div>
               <div class="crew-dot crew-c walk">DH</div>
               <div class="crew-dot crew-d walk">KV</div>
-              <div class="float-label" style="left: 18px; top: 14px;">#14 FOB OPS | boarding visible</div>
-              <div class="float-label" style="right: 18px; top: 14px;">Dropship 4/6 | Freighter cargo</div>
+              <div class="float-label" style="left: 18px; top: 14px;">#14 FLIGHTDECK | right side</div>
+              <div class="float-label" style="right: 18px; top: 46px;">Dropship 4/6 | Freighter cargo</div>
             </div>
             <div class="slot-grid">
               <div class="vehicle-slot"><h3>Dropship slot</h3><div class="status-line"><span class="badge green">4/6</span><span class="ellipsis">Blue boards</span></div></div>
@@ -1107,7 +1158,7 @@
             </div>
           </div>
 
-          <div class="panel">
+          <div class="panel fob-loadout">
             <div class="panel-title"><span>#13 LOADOUT</span><span class="badge">fixed</span></div>
             <div class="panel-body">
               <div class="loadout-rows">

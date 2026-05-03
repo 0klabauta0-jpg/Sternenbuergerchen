@@ -71,3 +71,9 @@ Die bisherigen Mischvorschlaege liegen hier:
 Die nach Screen getrennten Vorschlaege liegen hier:
 
 `docs/ui_concepts/better_ui/separated_screens.html`
+
+Aktuelle Gewichtung:
+
+- Homebase: Roster im Fokus; nur Fahrzeug-/Flugzeugauswahl mit Pilotenzuordnung.
+- FOB: Fireteam-Zusammenstellung im Fokus; Flightdeck rechts mit sichtbaren Kenney-Space-Kit-Assetbildern.
+- Mission: quadratische Buttons in `#16`; kleinere Windrose in `#18`, damit LZ/Drop-Buttons sichtbar bleiben.
