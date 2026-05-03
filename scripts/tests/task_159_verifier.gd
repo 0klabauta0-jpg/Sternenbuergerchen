@@ -4,6 +4,7 @@ const MAP_EDITOR_SCENE_PATH: String = "res://scenes/editor/map_editor.tscn"
 const LIVE_MISSION_SCENE_PATH: String = "res://scenes/tests/mission_reactivity_test.tscn"
 const CALIBRATION_SCENE_PATH: String = "res://scenes/tests/mission_map_3d_calibration.tscn"
 const RENDER_SPIKE_SCENE_PATH: String = "res://scenes/tests/mission_map_3d_render_spike.tscn"
+const NPC_VISUAL_MAPPING_PATH: String = "res://data/npc_unit_visual_mapping.json"
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_catalog.gd")
@@ -198,10 +199,10 @@ func _test_live_mission_uses_3d_primary_view() -> void:
 	_assert(int(snapshot.get("ground_mesh_count", 0)) == int(snapshot.get("tile_count", 0)), "Live Primary3DView renders calibrated 3D ground meshes")
 	_assert(int(snapshot.get("asset_model_count", 0)) > 0, "Live Primary3DView renders calibrated Kenney asset models")
 	_assert(int(snapshot.get("missing_asset_mapping_count", 0)) == 0, "Live Primary3DView has no missing mapped 3D assets")
-	_assert(int(snapshot.get("unit_model_count", 0)) >= 2, "Live Primary3DView renders runtime units with Kenney astronaut GLBs")
+	_assert(int(snapshot.get("unit_model_count", 0)) >= 2, "Live Primary3DView renders runtime units with configured 3D model assets")
 	_assert(int(snapshot.get("unit_texture_count", 0)) == 0 and int(snapshot.get("missing_unit_model_count", 0)) == 0, "Live Primary3DView does not use unit texture/capsule fallbacks when GLBs exist")
 	_assert(_asset_model_nodes_have_models(primary_view), "Live 2.5D asset nodes contain loaded 3D model meshes")
-	_assert(_unit_model_nodes_have_models(primary_view), "Live 2.5D unit proxies contain loaded astronaut model meshes")
+	_assert(_unit_model_nodes_have_models(primary_view), "Live 2.5D unit proxies contain loaded configured model meshes")
 	_assert(int(snapshot.get("map_render_duration_msec", MAX_3D_RENDER_DURATION_MSEC + 1)) < MAX_3D_RENDER_DURATION_MSEC, "Live Primary3DView map render stays below freeze threshold")
 
 	var unit_alpha_node := live_scene.get_node_or_null("UnitAlpha") as Node2D
@@ -211,7 +212,8 @@ func _test_live_mission_uses_3d_primary_view() -> void:
 		var unit_alpha_proxy := _find_unit_proxy(primary_view, String(unit_alpha_node.call("get_unit_id")))
 		_assert(unit_alpha_proxy != null and absf(wrapf(unit_alpha_proxy.rotation_degrees.y - 90.0, -180.0, 180.0)) < 0.1, "Live 2.5D unit proxy faces its movement target")
 		var unit_alpha_model_root := _find_unit_model_root(unit_alpha_proxy)
-		_assert(unit_alpha_model_root != null and absf(unit_alpha_model_root.scale.x - 0.66) < 0.01, "Live 2.5D astronaut model scale is reduced by 25 percent")
+		var expected_unit_visual_scale: float = _get_expected_unit_visual_scale("team_alpha", 0.66)
+		_assert(unit_alpha_model_root != null and absf(unit_alpha_model_root.scale.x - expected_unit_visual_scale) < 0.01, "Live 2.5D unit model scale remains calibrated")
 
 	var map_root := live_scene.get_node_or_null("MapRoot") as CanvasItem
 	var mission_camera := live_scene.get_node_or_null("MissionCamera") as Camera2D
@@ -360,6 +362,26 @@ func _find_unit_model_root(unit_proxy: Node3D) -> Node3D:
 		if child is Node3D and String(child.name).begins_with("UnitModel_"):
 			return child as Node3D
 	return null
+
+
+func _get_expected_unit_visual_scale(team_id: String, fallback: float) -> float:
+	var mapping: Dictionary = _load_json(NPC_VISUAL_MAPPING_PATH)
+	var visual_entries: Dictionary = Dictionary(mapping.get("unit_visuals", {}))
+	var team_entry: Dictionary = Dictionary(visual_entries.get(team_id, {}))
+	if team_entry.has("scale"):
+		return float(team_entry.get("scale", fallback))
+	var defaults: Dictionary = Dictionary(mapping.get("defaults", {}))
+	return float(defaults.get("scale", fallback))
+
+
+func _load_json(path: String) -> Dictionary:
+	if not FileAccess.file_exists(path):
+		return {}
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return {}
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	return Dictionary(parsed) if typeof(parsed) == TYPE_DICTIONARY else {}
 
 
 func _find_drop_node(primary_view: Node, node_name: String) -> Node3D:

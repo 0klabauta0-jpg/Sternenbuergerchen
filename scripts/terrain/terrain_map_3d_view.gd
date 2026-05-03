@@ -1030,7 +1030,7 @@ func _add_asset_model_visual(tile_data, top_y: float, visual_type_id: String) ->
 
 	var visual_root := Node3D.new()
 	visual_root.name = "Asset_%s_%d_%d" % [visual_type_id, tile_data.grid_position.x, tile_data.grid_position.y]
-	visual_root.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + _get_asset_y_offset(visual_type_id))
+	visual_root.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + _get_asset_y_offset(visual_type_id)) + _get_asset_position_offset(visual_type_id)
 	visual_root.rotation_degrees.y = _get_asset_rotation_y(visual_type_id)
 	visual_root.scale = Vector3.ONE * _get_asset_model_scale(visual_type_id)
 	visual_root.add_child(model_instance)
@@ -2616,6 +2616,35 @@ func _get_asset_y_offset(visual_type_id: String) -> float:
 	if normalized.begins_with("crater_") or normalized.begins_with("rail_") or normalized.begins_with("plattform_"):
 		return 0.018
 	return 0.028
+
+
+func _get_asset_position_offset(visual_type_id: String) -> Vector3:
+	var mapped_entry: Dictionary = _get_model_entry_for_type(visual_type_id)
+	if mapped_entry.is_empty():
+		return Vector3.ZERO
+	if mapped_entry.has("position_offset"):
+		var raw_offset = mapped_entry.get("position_offset", [])
+		if raw_offset is Array and raw_offset.size() >= 3:
+			return Vector3(float(raw_offset[0]), float(raw_offset[1]), float(raw_offset[2]))
+
+	var normalized: String = visual_type_id.strip_edges().to_lower()
+	if not normalized.begins_with("wall_straight_"):
+		return Vector3.ZERO
+	var edge_anchor_offset: float = float(mapped_entry.get("edge_anchor_offset", 0.0))
+	if is_zero_approx(edge_anchor_offset):
+		return Vector3.ZERO
+	var offset_amount: float = edge_anchor_offset * _get_3d_cell_size()
+	match _get_direction_suffix(normalized):
+		"se":
+			return Vector3(offset_amount, 0.0, 0.0)
+		"nw":
+			return Vector3(-offset_amount, 0.0, 0.0)
+		"sw":
+			return Vector3(0.0, 0.0, offset_amount)
+		"ne":
+			return Vector3(0.0, 0.0, -offset_amount)
+		_:
+			return Vector3.ZERO
 
 
 func _get_tile_catalog():

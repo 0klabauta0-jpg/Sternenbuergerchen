@@ -38,6 +38,16 @@ const EXPECTED_3D_WALL_ROTATION_DEGREES: Dictionary = {
 	"wall_corner_ne": 180.0,
 	"wall_corner_nw": 270.0,
 }
+const EXPECTED_3D_WALL_POSITION_OFFSET: Dictionary = {
+	"wall_straight_se": Vector3(0.5, 0.04, 0.0),
+	"wall_straight_sw": Vector3(0.0, 0.04, 0.5),
+	"wall_straight_ne": Vector3(0.0, 0.04, -0.5),
+	"wall_straight_nw": Vector3(-0.5, 0.04, 0.0),
+	"wall_corner_se": Vector3(0.0, 0.04, 0.0),
+	"wall_corner_sw": Vector3(0.0, 0.04, 0.0),
+	"wall_corner_ne": Vector3(0.0, 0.04, 0.0),
+	"wall_corner_nw": Vector3(0.0, 0.04, 0.0),
+}
 
 var _passed: int = 0
 var _failed: int = 0
@@ -107,6 +117,9 @@ func _test_terrain_map_3d_view_wall_mapping() -> void:
 		_assert(wall_node != null and _node_has_mesh(wall_node), "TerrainMap3DView loads %s as a 3D wall model" % type_id)
 		var expected_rotation: float = float(EXPECTED_3D_WALL_ROTATION_DEGREES[type_id])
 		_assert(wall_node != null and absf(wrapf(wall_node.rotation_degrees.y - expected_rotation, -180.0, 180.0)) < 0.1, "TerrainMap3DView maps %s to %.0f degree 3D rotation" % [type_id, expected_rotation])
+		var expected_offset := Vector3(EXPECTED_3D_WALL_POSITION_OFFSET[type_id])
+		var expected_position := Vector3(float(grid_position.x), expected_offset.y, float(grid_position.y)) + Vector3(expected_offset.x, 0.0, expected_offset.z)
+		_assert(wall_node != null and wall_node.position.distance_to(expected_position) < 0.01, "TerrainMap3DView anchors %s on its field edge" % type_id)
 	primary_view.queue_free()
 	await _wait_frames(2)
 
