@@ -75,5 +75,6 @@ Die nach Screen getrennten Vorschlaege liegen hier:
 Aktuelle Gewichtung:
 
 - Homebase: Roster im Fokus; nur Fahrzeug-/Flugzeugauswahl mit Pilotenzuordnung.
+- Homebase Iteration 2: schmaler Roster, weniger Fensterrahmen, mehrere Kenney-Bodenplatten als Launch-Slots, echte Isometric-Kenney-Schiffbilder und einzelne Boarding-Fortschrittsbalken pro Operator.
 - FOB: Fireteam-Zusammenstellung im Fokus; Flightdeck rechts mit sichtbaren Kenney-Space-Kit-Assetbildern.
 - Mission: quadratische Buttons in `#16`; kleinere Windrose in `#18`, damit LZ/Drop-Buttons sichtbar bleiben.
