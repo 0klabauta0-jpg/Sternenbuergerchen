@@ -82,5 +82,6 @@ Aktuelle Gewichtung:
 - Homebase Iteration 6: Die grossen Pads liegen enger aneinander, Schiffe sind auf jedem zweiten Pad zentriert und die Operator-Stapel sitzen naeher direkt ueber dem Schiff.
 - Homebase Iteration 7: Dekorative Mauern entfernt; jedes Schiff bekommt genau drei grosse Pads und sitzt auf der zweiten Kachel der jeweiligen Pad-Reihe.
 - Homebase Iteration 8: Kachelfeld wieder als zusammenhaengendes 3x5-Parallelogramm wie in der Skizze; Schiffe stehen auf jeder zweiten Laengsreihe.
+- Homebase Iteration 9: 3x5-Pads nutzen Rhombus-Vektoren aus der sichtbaren Plattform-Bounding-Box, damit die Kanten durchgehend Linien bilden und die Breite konstant drei Kacheln bleibt.
 - FOB: Fireteam-Zusammenstellung im Fokus; Flightdeck rechts mit sichtbaren Kenney-Space-Kit-Assetbildern.
 - Mission: quadratische Buttons in `#16`; kleinere Windrose in `#18`, damit LZ/Drop-Buttons sichtbar bleiben.
