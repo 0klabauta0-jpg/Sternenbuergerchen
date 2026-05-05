@@ -661,25 +661,21 @@
 
     .hangar-field {
       position: absolute;
-      left: 58px;
-      right: 24px;
-      bottom: 22px;
-      top: 82px;
+      left: 24px;
+      right: 18px;
+      bottom: 10px;
+      top: 72px;
       z-index: 1;
     }
 
     .hangar-tile {
       position: absolute;
-      left: calc(12px + (var(--c) * 92px) - (var(--r) * 28px));
-      top: calc(34px + (var(--r) * 50px) + (var(--c) * 6px));
-      width: 142px;
-      height: 102px;
-      padding: 5px;
-      border: 3px solid rgba(216, 155, 49, 0.82);
-      border-radius: 10px;
-      background: rgba(240, 245, 247, 0.18);
+      left: calc(0px + (var(--c) * 104px) + (var(--r) * 48px));
+      top: calc(46px + (var(--r) * 88px) + (var(--c) * 30px));
+      width: 232px;
+      height: 232px;
       object-fit: contain;
-      filter: drop-shadow(8px 10px 0 rgba(0, 0, 0, 0.14));
+      filter: drop-shadow(10px 12px 0 rgba(0, 0, 0, 0.16));
     }
 
     .hangar-wall {
@@ -690,12 +686,12 @@
       filter: drop-shadow(8px 9px 0 rgba(0, 0, 0, 0.16));
     }
 
-    .hangar-wall.top-a { left: 88px; top: 54px; width: 126px; }
-    .hangar-wall.top-b { left: 205px; top: 62px; width: 126px; }
-    .hangar-wall.top-c { left: 322px; top: 70px; width: 126px; }
-    .hangar-wall.top-d { left: 439px; top: 78px; width: 126px; }
-    .hangar-wall.side-a { left: 26px; top: 158px; width: 114px; }
-    .hangar-wall.side-b { left: 0; top: 258px; width: 114px; }
+    .hangar-wall.top-a { left: 98px; top: 60px; width: 126px; }
+    .hangar-wall.top-b { left: 214px; top: 88px; width: 126px; }
+    .hangar-wall.top-c { left: 330px; top: 116px; width: 126px; }
+    .hangar-wall.top-d { left: 446px; top: 144px; width: 126px; }
+    .hangar-wall.side-a { left: 24px; top: 164px; width: 114px; }
+    .hangar-wall.side-b { left: 72px; top: 252px; width: 114px; }
 
     .deck-pad {
       position: absolute;
@@ -724,28 +720,28 @@
     }
 
     .ship-img.speeder {
-      width: 156px;
-      left: 302px;
-      top: 268px;
+      width: 176px;
+      left: 296px;
+      top: 252px;
     }
 
     .ship-img.cargo {
-      width: 174px;
-      left: 462px;
-      top: 348px;
+      width: 194px;
+      left: 468px;
+      top: 342px;
     }
 
     .ship-img.empty-ghost {
-      width: 138px;
+      width: 154px;
       opacity: 0.24;
-      left: 574px;
-      top: 260px;
+      left: 538px;
+      top: 202px;
     }
 
     .ship-img.incoming {
-      width: 144px;
-      left: 176px;
-      top: 238px;
+      width: 168px;
+      left: 146px;
+      top: 172px;
       opacity: 0;
       animation: ship-call-in 4.8s ease-in-out infinite;
     }
@@ -760,9 +756,9 @@
       pointer-events: none;
     }
 
-    .ship-stack.stack-a { left: 316px; top: 178px; }
-    .ship-stack.stack-b { left: 484px; top: 260px; }
-    .ship-stack.stack-c { left: 182px; top: 162px; }
+    .ship-stack.stack-a { left: 320px; top: 154px; }
+    .ship-stack.stack-b { left: 492px; top: 246px; }
+    .ship-stack.stack-c { left: 164px; top: 76px; }
 
     .stack-card {
       display: grid;
@@ -1361,30 +1357,16 @@
           <div class="homebase-ship-panel">
             <div class="launch-deck">
               <div class="hangar-field">
-                <img class="hangar-tile" style="--c:0;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-                <img class="hangar-tile" style="--c:1;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-                <img class="hangar-tile" style="--c:2;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-                <img class="hangar-tile" style="--c:3;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-                <img class="hangar-tile" style="--c:4;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-                <img class="hangar-tile" style="--c:5;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-                <img class="hangar-tile" style="--c:0;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-                <img class="hangar-tile" style="--c:1;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-                <img class="hangar-tile" style="--c:2;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-                <img class="hangar-tile" style="--c:3;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-                <img class="hangar-tile" style="--c:4;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-                <img class="hangar-tile" style="--c:5;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-                <img class="hangar-tile" style="--c:0;--r:2;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-                <img class="hangar-tile" style="--c:1;--r:2;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-                <img class="hangar-tile" style="--c:2;--r:2;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-                <img class="hangar-tile" style="--c:3;--r:2;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-                <img class="hangar-tile" style="--c:4;--r:2;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-                <img class="hangar-tile" style="--c:5;--r:2;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-                <img class="hangar-tile" style="--c:0;--r:3;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-                <img class="hangar-tile" style="--c:1;--r:3;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-                <img class="hangar-tile" style="--c:2;--r:3;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-                <img class="hangar-tile" style="--c:3;--r:3;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-                <img class="hangar-tile" style="--c:4;--r:3;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-                <img class="hangar-tile" style="--c:5;--r:3;" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
+                <img class="hangar-tile" style="--c:0;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="hangar-tile" style="--c:1;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="hangar-tile" style="--c:2;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="hangar-tile" style="--c:3;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="hangar-tile" style="--c:4;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="hangar-tile" style="--c:0;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="hangar-tile" style="--c:1;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="hangar-tile" style="--c:2;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="hangar-tile" style="--c:3;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="hangar-tile" style="--c:4;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
               </div>
               <img class="hangar-wall top-a" src="../../../Assets/kenney_space-kit/Isometric/corridor_wall_NE.png" alt="">
               <img class="hangar-wall top-b" src="../../../Assets/kenney_space-kit/Isometric/corridor_wall_NE.png" alt="">
@@ -1409,7 +1391,7 @@
                 <div class="stack-card open-slot"><div class="avatar-small">+</div><h3 class="ellipsis">incoming</h3><span class="badge">free</span><div class="progress"><span style="width: 0%;"></span></div></div>
               </div>
               <div class="launch-label" style="left: 18px; top: 16px;"><span class="badge amber">#05</span><span>Launch slots, no map</span></div>
-              <div class="launch-label" style="right: 18px; top: 16px;"><span class="badge green">4x6</span><span>connected hangar plate</span></div>
+              <div class="launch-label" style="right: 18px; top: 16px;"><span class="badge green">NW</span><span>large platform pads</span></div>
             </div>
             <div class="boarding-list">
               <div class="boarding-card">
