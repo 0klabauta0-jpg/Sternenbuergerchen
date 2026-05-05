@@ -85,4 +85,5 @@ Aktuelle Gewichtung:
 - Homebase Iteration 9: 3x5-Pads nutzen Rhombus-Vektoren aus der sichtbaren Plattform-Bounding-Box, damit die Kanten durchgehend Linien bilden und die Breite konstant drei Kacheln bleibt.
 - Homebase Iteration 10: Das komplette 3x5-Kachelfeld ist nach rechts unten verschoben, sodass der obere Flieger mittig auf der obersten Plattform sitzt.
 - FOB: Fireteam-Zusammenstellung im Fokus; Flightdeck rechts mit sichtbaren Kenney-Space-Kit-Assetbildern.
+- FOB Iteration 2: `#14 FLIGHTDECK` nutzt wie Homebase ein 3x5-Feld aus `platform_large_NW.png`, echte Kenney-Schiffbilder und gestapelte Boarding-Karten direkt ueber den Schiffen.
 - Mission: quadratische Buttons in `#16`; kleinere Windrose in `#18`, damit LZ/Drop-Buttons sichtbar bleiben.

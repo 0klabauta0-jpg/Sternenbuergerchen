@@ -991,6 +991,78 @@
       opacity: 0.88;
     }
 
+    .fob-pad-field {
+      position: absolute;
+      left: 74px;
+      top: 84px;
+      right: 0;
+      bottom: 0;
+      z-index: 1;
+    }
+
+    .fob-pad-tile {
+      position: absolute;
+      left: calc(96px + (var(--c) * 40px) - (var(--r) * 40px));
+      top: calc(-38px + (var(--c) * 21px) + (var(--r) * 21px));
+      width: 170px;
+      height: 170px;
+      object-fit: contain;
+      filter: drop-shadow(8px 10px 0 rgba(0, 0, 0, 0.16));
+      pointer-events: none;
+    }
+
+    .fob-ship-img {
+      position: absolute;
+      z-index: 4;
+      object-fit: contain;
+      filter: drop-shadow(10px 12px 0 rgba(0, 0, 0, 0.22));
+      pointer-events: none;
+    }
+
+    .fob-ship-img.dropship {
+      left: 176px;
+      top: 146px;
+      width: 132px;
+    }
+
+    .fob-ship-img.freighter {
+      left: 230px;
+      top: 204px;
+      width: 150px;
+    }
+
+    .fob-ship-stack {
+      position: absolute;
+      z-index: 7;
+      display: grid;
+      grid-auto-rows: minmax(0, 28px);
+      gap: 3px;
+      width: 116px;
+      pointer-events: none;
+    }
+
+    .fob-ship-stack.drop {
+      left: 180px;
+      top: 92px;
+    }
+
+    .fob-ship-stack.cargo {
+      left: 236px;
+      top: 158px;
+    }
+
+    .fob-ship-stack .stack-card {
+      grid-template-columns: 23px 1fr auto;
+      grid-template-rows: 13px 5px;
+      padding: 3px;
+    }
+
+    .fob-ship-stack .avatar-small {
+      width: 23px;
+      height: 23px;
+      font-size: 8px;
+    }
+
     .mission-grid {
       position: absolute;
       inset: 0;
@@ -1413,24 +1485,36 @@
 
           <div class="fob-stage-wrap">
             <div class="stage stage-dark">
-              <img class="asset-tile hangar" src="../../../Assets/kenney_space-kit/Isometric/hangar_largeA_NE.png" alt="">
-              <img class="asset-tile platform-a" src="../../../Assets/kenney_space-kit/Isometric/platform_center_NE.png" alt="">
-              <img class="asset-tile platform-b" src="../../../Assets/kenney_space-kit/Isometric/platform_small_NE.png" alt="">
-              <div class="pad"></div>
-              <div class="ship static">
-                <div class="wing left"></div>
-                <div class="wing right"></div>
-                <div class="ship-body"></div>
+              <div class="fob-pad-field">
+                <img class="fob-pad-tile" style="--c:0;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="fob-pad-tile" style="--c:1;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="fob-pad-tile" style="--c:2;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="fob-pad-tile" style="--c:3;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="fob-pad-tile" style="--c:4;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="fob-pad-tile" style="--c:0;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="fob-pad-tile" style="--c:1;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="fob-pad-tile" style="--c:2;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="fob-pad-tile" style="--c:3;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="fob-pad-tile" style="--c:4;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="fob-pad-tile" style="--c:0;--r:2;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="fob-pad-tile" style="--c:1;--r:2;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="fob-pad-tile" style="--c:2;--r:2;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="fob-pad-tile" style="--c:3;--r:2;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="fob-pad-tile" style="--c:4;--r:2;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
               </div>
-              <div class="freighter"></div>
-              <div class="med-bay"></div>
-              <div class="med-runner"></div>
-              <div class="crew-dot crew-a walk">AV</div>
-              <div class="crew-dot crew-b walk">TM</div>
-              <div class="crew-dot crew-c walk">DH</div>
-              <div class="crew-dot crew-d walk">KV</div>
+              <img class="fob-ship-img dropship" src="../../../Assets/kenney_space-kit/Isometric/craft_speederB_NE.png" alt="Dropship">
+              <img class="fob-ship-img freighter" src="../../../Assets/kenney_space-kit/Isometric/craft_cargoA_NE.png" alt="Freighter">
+              <div class="fob-ship-stack drop">
+                <div class="stack-card"><div class="avatar-small">AV</div><h3 class="ellipsis">Anja</h3><span class="badge green">in</span><div class="progress"><span style="width: 100%;"></span></div></div>
+                <div class="stack-card"><div class="avatar-small">TM</div><h3 class="ellipsis">Talia</h3><span class="badge amber">74%</span><div class="progress"><span style="width: 74%;"></span></div></div>
+                <div class="stack-card"><div class="avatar-small">DH</div><h3 class="ellipsis">Darius</h3><span class="badge amber">48%</span><div class="progress"><span style="width: 48%;"></span></div></div>
+              </div>
+              <div class="fob-ship-stack cargo">
+                <div class="stack-card"><div class="avatar-small">KV</div><h3 class="ellipsis">Kenzo</h3><span class="badge">seat</span><div class="progress"><span style="width: 32%;"></span></div></div>
+                <div class="stack-card open-slot"><div class="avatar-small">+</div><h3 class="ellipsis">Cargo</h3><span class="badge">drop</span><div class="progress"><span style="width: 0%;"></span></div></div>
+              </div>
               <div class="float-label" style="left: 18px; top: 14px;">#14 FLIGHTDECK | right side</div>
-              <div class="float-label" style="right: 18px; top: 46px;">Dropship 4/6 | Freighter cargo</div>
+              <div class="float-label" style="right: 18px; top: 46px;">3x5 pads | ships on every second row</div>
             </div>
             <div class="slot-grid">
               <div class="vehicle-slot"><h3>Dropship slot</h3><div class="status-line"><span class="badge green">4/6</span><span class="ellipsis">Blue boards</span></div></div>
