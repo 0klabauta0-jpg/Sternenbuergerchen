@@ -87,4 +87,5 @@ Aktuelle Gewichtung:
 - FOB: Fireteam-Zusammenstellung im Fokus; Flightdeck rechts mit sichtbaren Kenney-Space-Kit-Assetbildern.
 - FOB Iteration 2: `#14 FLIGHTDECK` nutzt wie Homebase ein 3x5-Feld aus `platform_large_NW.png`, echte Kenney-Schiffbilder und gestapelte Boarding-Karten direkt ueber den Schiffen.
 - FOB Iteration 3: Das 3x5-Feld sitzt mittiger in `#14`; der abstrakt wirkende weisse Frachter ist durch ein zweites Shuttle ersetzt, Medbay bleibt fuer einen eigenen Vorschlag separat.
+- FOB Iteration 4: Schiffe belegen das Flightdeck von oben links aus und lassen jeweils eine Kachel Abstand, damit die NPC-Kartenstapel nur leicht ueberlappen.
 - Mission: quadratische Buttons in `#16`; kleinere Windrose in `#18`, damit LZ/Drop-Buttons sichtbar bleiben.
