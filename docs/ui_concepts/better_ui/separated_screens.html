@@ -661,19 +661,19 @@
 
     .hangar-field {
       position: absolute;
-      left: 34px;
+      left: 24px;
       right: 18px;
       bottom: 4px;
-      top: 54px;
+      top: 60px;
       z-index: 1;
     }
 
     .hangar-tile {
       position: absolute;
-      left: calc(0px + (var(--c) * 126px) + (var(--r) * 52px));
-      top: calc(22px + (var(--c) * 38px) + (var(--r) * 92px));
-      width: 270px;
-      height: 270px;
+      left: calc(20px + (var(--c) * 94px) + (var(--r) * 46px));
+      top: calc(16px + (var(--c) * 28px) + (var(--r) * 64px));
+      width: 226px;
+      height: 226px;
       object-fit: contain;
       filter: drop-shadow(10px 12px 0 rgba(0, 0, 0, 0.16));
     }
@@ -706,22 +706,14 @@
 
     .ship-img.speeder {
       width: 176px;
-      left: 259px;
-      top: 253px;
+      left: 185px;
+      top: 173px;
     }
 
     .ship-img.cargo {
       width: 194px;
-      left: 302px;
-      top: 336px;
-    }
-
-    .ship-img.incoming {
-      width: 168px;
-      left: 211px;
-      top: 165px;
-      opacity: 0;
-      animation: ship-call-in 4.8s ease-in-out infinite;
+      left: 364px;
+      top: 220px;
     }
 
     .ship-stack {
@@ -734,9 +726,8 @@
       pointer-events: none;
     }
 
-    .ship-stack.stack-a { left: 280px; top: 218px; }
-    .ship-stack.stack-b { left: 322px; top: 302px; }
-    .ship-stack.stack-c { left: 226px; top: 126px; }
+    .ship-stack.stack-a { left: 202px; top: 106px; }
+    .ship-stack.stack-b { left: 386px; top: 156px; }
 
     .stack-card {
       display: grid;
@@ -853,12 +844,6 @@
       display: block;
       height: 100%;
       background: linear-gradient(90deg, var(--teal), var(--green));
-    }
-
-    @keyframes ship-call-in {
-      0%, 20% { opacity: 0; transform: translateY(22px) scale(0.92); }
-      42%, 78% { opacity: 1; transform: translateY(0) scale(1); }
-      100% { opacity: 0.38; transform: translateY(0) scale(1); }
     }
 
     .slot-grid {
@@ -1338,14 +1323,19 @@
                 <img class="hangar-tile" style="--c:0;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
                 <img class="hangar-tile" style="--c:1;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
                 <img class="hangar-tile" style="--c:2;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="hangar-tile" style="--c:3;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="hangar-tile" style="--c:4;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
                 <img class="hangar-tile" style="--c:0;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
                 <img class="hangar-tile" style="--c:1;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
                 <img class="hangar-tile" style="--c:2;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="hangar-tile" style="--c:3;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="hangar-tile" style="--c:4;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
                 <img class="hangar-tile" style="--c:0;--r:2;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
                 <img class="hangar-tile" style="--c:1;--r:2;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
                 <img class="hangar-tile" style="--c:2;--r:2;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="hangar-tile" style="--c:3;--r:2;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="hangar-tile" style="--c:4;--r:2;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
               </div>
-              <img class="ship-img incoming" src="../../../Assets/kenney_space-kit/Isometric/craft_speederA_NE.png" alt="Incoming dropship">
               <img class="ship-img speeder" src="../../../Assets/kenney_space-kit/Isometric/craft_speederB_NE.png" alt="Dropship">
               <img class="ship-img cargo" src="../../../Assets/kenney_space-kit/Isometric/craft_cargoA_NE.png" alt="Cargo ship">
               <div class="ship-stack stack-a">
@@ -1357,11 +1347,8 @@
                 <div class="stack-card"><div class="avatar-small">DH</div><h3 class="ellipsis">Darius</h3><span class="badge">22%</span><div class="progress"><span style="width: 22%;"></span></div></div>
                 <div class="stack-card open-slot"><div class="avatar-small">+</div><h3 class="ellipsis">Drop NPC</h3><span class="badge">seat</span><div class="progress"><span style="width: 0%;"></span></div></div>
               </div>
-              <div class="ship-stack stack-c">
-                <div class="stack-card open-slot"><div class="avatar-small">+</div><h3 class="ellipsis">incoming</h3><span class="badge">free</span><div class="progress"><span style="width: 0%;"></span></div></div>
-              </div>
               <div class="launch-label" style="left: 18px; top: 16px;"><span class="badge amber">#05</span><span>Launch slots, no map</span></div>
-              <div class="launch-label" style="right: 18px; top: 16px;"><span class="badge green">3x3</span><span>ship on second pad</span></div>
+              <div class="launch-label" style="right: 18px; top: 16px;"><span class="badge green">3x5</span><span>ships every second row</span></div>
             </div>
             <div class="boarding-list">
               <div class="boarding-card">
