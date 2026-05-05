@@ -72,6 +72,10 @@ Die nach Screen getrennten Vorschlaege liegen hier:
 
 `docs/ui_concepts/better_ui/separated_screens.html`
 
+Die Figma-Aufbauhilfe fuer manuelles Layout-Schieben liegt hier:
+
+`docs/ui_concepts/better_ui/figma_setup.md`
+
 Aktuelle Gewichtung:
 
 - Homebase: Roster im Fokus; nur Fahrzeug-/Flugzeugauswahl mit Pilotenzuordnung.
