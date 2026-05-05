@@ -80,5 +80,6 @@ Aktuelle Gewichtung:
 - Homebase Iteration 4: grosse gelb gerahmte Pads, Schiffe nur auf einzelnen Feldern, gestapelte Operator-Karten direkt ueber den Schiffen und untere Schiffkarten mit Pilot-/Passagier-Dropzone.
 - Homebase Iteration 5: Hangarfeld nutzt `platform_large_NW.png` als grosse gelb gerahmte Pads in einem schraeg verbundenen Streifen; Schiffe sitzen versetzt auf jedem zweiten Pad.
 - Homebase Iteration 6: Die grossen Pads liegen enger aneinander, Schiffe sind auf jedem zweiten Pad zentriert und die Operator-Stapel sitzen naeher direkt ueber dem Schiff.
+- Homebase Iteration 7: Dekorative Mauern entfernt; jedes Schiff bekommt genau drei grosse Pads und sitzt auf der zweiten Kachel der jeweiligen Pad-Reihe.
 - FOB: Fireteam-Zusammenstellung im Fokus; Flightdeck rechts mit sichtbaren Kenney-Space-Kit-Assetbildern.
 - Mission: quadratische Buttons in `#16`; kleinere Windrose in `#18`, damit LZ/Drop-Buttons sichtbar bleiben.

@@ -661,37 +661,22 @@
 
     .hangar-field {
       position: absolute;
-      left: 10px;
+      left: 34px;
       right: 18px;
       bottom: 4px;
-      top: 64px;
+      top: 54px;
       z-index: 1;
     }
 
     .hangar-tile {
       position: absolute;
-      left: calc(0px + (var(--c) * 120px) + (var(--r) * 62px));
-      top: calc(28px + (var(--c) * 36px) + (var(--r) * 64px));
+      left: calc(0px + (var(--c) * 126px) + (var(--r) * 52px));
+      top: calc(22px + (var(--c) * 38px) + (var(--r) * 92px));
       width: 270px;
       height: 270px;
       object-fit: contain;
       filter: drop-shadow(10px 12px 0 rgba(0, 0, 0, 0.16));
     }
-
-    .hangar-wall {
-      position: absolute;
-      z-index: 2;
-      object-fit: contain;
-      opacity: 0.9;
-      filter: drop-shadow(8px 9px 0 rgba(0, 0, 0, 0.16));
-    }
-
-    .hangar-wall.top-a { left: 96px; top: 58px; width: 126px; }
-    .hangar-wall.top-b { left: 218px; top: 94px; width: 126px; }
-    .hangar-wall.top-c { left: 340px; top: 130px; width: 126px; }
-    .hangar-wall.top-d { left: 462px; top: 166px; width: 126px; }
-    .hangar-wall.side-a { left: 22px; top: 152px; width: 114px; }
-    .hangar-wall.side-b { left: 84px; top: 216px; width: 114px; }
 
     .deck-pad {
       position: absolute;
@@ -721,27 +706,20 @@
 
     .ship-img.speeder {
       width: 176px;
-      left: 288px;
-      top: 204px;
+      left: 259px;
+      top: 253px;
     }
 
     .ship-img.cargo {
       width: 194px;
-      left: 464px;
-      top: 294px;
-    }
-
-    .ship-img.empty-ghost {
-      width: 154px;
-      opacity: 0.24;
-      left: 556px;
-      top: 214px;
+      left: 302px;
+      top: 336px;
     }
 
     .ship-img.incoming {
       width: 168px;
-      left: 154px;
-      top: 120px;
+      left: 211px;
+      top: 165px;
       opacity: 0;
       animation: ship-call-in 4.8s ease-in-out infinite;
     }
@@ -756,9 +734,9 @@
       pointer-events: none;
     }
 
-    .ship-stack.stack-a { left: 312px; top: 112px; }
-    .ship-stack.stack-b { left: 498px; top: 206px; }
-    .ship-stack.stack-c { left: 174px; top: 42px; }
+    .ship-stack.stack-a { left: 280px; top: 218px; }
+    .ship-stack.stack-b { left: 322px; top: 302px; }
+    .ship-stack.stack-c { left: 226px; top: 126px; }
 
     .stack-card {
       display: grid;
@@ -1360,24 +1338,16 @@
                 <img class="hangar-tile" style="--c:0;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
                 <img class="hangar-tile" style="--c:1;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
                 <img class="hangar-tile" style="--c:2;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
-                <img class="hangar-tile" style="--c:3;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
-                <img class="hangar-tile" style="--c:4;--r:0;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
                 <img class="hangar-tile" style="--c:0;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
                 <img class="hangar-tile" style="--c:1;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
                 <img class="hangar-tile" style="--c:2;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
-                <img class="hangar-tile" style="--c:3;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
-                <img class="hangar-tile" style="--c:4;--r:1;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="hangar-tile" style="--c:0;--r:2;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="hangar-tile" style="--c:1;--r:2;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
+                <img class="hangar-tile" style="--c:2;--r:2;" src="../../../Assets/kenney_space-kit/Isometric/platform_large_NW.png" alt="">
               </div>
-              <img class="hangar-wall top-a" src="../../../Assets/kenney_space-kit/Isometric/corridor_wall_NE.png" alt="">
-              <img class="hangar-wall top-b" src="../../../Assets/kenney_space-kit/Isometric/corridor_wall_NE.png" alt="">
-              <img class="hangar-wall top-c" src="../../../Assets/kenney_space-kit/Isometric/corridor_wall_NE.png" alt="">
-              <img class="hangar-wall top-d" src="../../../Assets/kenney_space-kit/Isometric/corridor_wall_NE.png" alt="">
-              <img class="hangar-wall side-a" src="../../../Assets/kenney_space-kit/Isometric/corridor_wall_NW.png" alt="">
-              <img class="hangar-wall side-b" src="../../../Assets/kenney_space-kit/Isometric/corridor_wall_NW.png" alt="">
               <img class="ship-img incoming" src="../../../Assets/kenney_space-kit/Isometric/craft_speederA_NE.png" alt="Incoming dropship">
               <img class="ship-img speeder" src="../../../Assets/kenney_space-kit/Isometric/craft_speederB_NE.png" alt="Dropship">
               <img class="ship-img cargo" src="../../../Assets/kenney_space-kit/Isometric/craft_cargoA_NE.png" alt="Cargo ship">
-              <img class="ship-img empty-ghost" src="../../../Assets/kenney_space-kit/Isometric/craft_speederD_NE.png" alt="">
               <div class="ship-stack stack-a">
                 <div class="stack-card"><div class="avatar-small">AV</div><h3 class="ellipsis">Anja</h3><span class="badge green">64%</span><div class="progress"><span style="width: 64%;"></span></div></div>
                 <div class="stack-card"><div class="avatar-small">TM</div><h3 class="ellipsis">Talia</h3><span class="badge amber">38%</span><div class="progress"><span style="width: 38%;"></span></div></div>
@@ -1391,7 +1361,7 @@
                 <div class="stack-card open-slot"><div class="avatar-small">+</div><h3 class="ellipsis">incoming</h3><span class="badge">free</span><div class="progress"><span style="width: 0%;"></span></div></div>
               </div>
               <div class="launch-label" style="left: 18px; top: 16px;"><span class="badge amber">#05</span><span>Launch slots, no map</span></div>
-              <div class="launch-label" style="right: 18px; top: 16px;"><span class="badge green">NW</span><span>large platform pads</span></div>
+              <div class="launch-label" style="right: 18px; top: 16px;"><span class="badge green">3x3</span><span>ship on second pad</span></div>
             </div>
             <div class="boarding-list">
               <div class="boarding-card">
