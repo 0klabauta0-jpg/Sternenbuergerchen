@@ -1,0 +1,332 @@
+{
+  "schema_version": 1,
+  "catalog_id": "nature_kit_classic_subset_v1",
+  "task": "TASK_251",
+  "source_family": "Kenney Nature Kit (Classic) 1.0",
+  "license": "CC0",
+  "project_root": "res://Assets/used/terrain/nature_kit_classic/",
+  "runtime_contract": {
+    "paths": "res_only_no_local_user_paths",
+    "format_preference": "gltf_with_adjacent_bin",
+    "visual_only": true,
+    "no_gameplay_state": true,
+    "no_zip_runtime_dependency": true,
+    "no_fbx_obj_runtime_duplicates": true,
+    "max_curated_model_count": 32
+  },
+  "source_audit": {
+    "source_root_reference": "documented_in_docs_assets_nature_kit_classic_inventory",
+    "gltf_model_count": 232,
+    "gltf_bin_count": 232,
+    "fbx_model_count": 232,
+    "obj_model_count": 232,
+    "obj_material_count": 232,
+    "zip_archive_count": 2,
+    "selected_model_count": 25,
+    "selected_runtime_file_count": 50
+  },
+  "categories": {
+    "cliffs": {
+      "count": 10,
+      "planned_use": "TASK_252 cliff and hill-edge visuals"
+    },
+    "ground": {
+      "count": 3,
+      "planned_use": "TASK_253 editor surface palette candidates"
+    },
+    "rocks": {
+      "count": 4,
+      "planned_use": "TASK_254 cover/prop candidates"
+    },
+    "vegetation": {
+      "count": 5,
+      "planned_use": "TASK_254 tree, bush and cactus candidates"
+    },
+    "props": {
+      "count": 3,
+      "planned_use": "optional visual props, not gameplay truth"
+    }
+  },
+  "documentation_assets": [
+    "res://Assets/used/terrain/nature_kit_classic/License.txt",
+    "res://Assets/used/terrain/nature_kit_classic/documentation/Preview.png",
+    "res://Assets/used/terrain/nature_kit_classic/documentation/Sample.png"
+  ],
+  "assets": [
+    {
+      "asset_id": "nature_cliff_brown_straight",
+      "source_model": "cliffBrown",
+      "category": "cliffs",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown.bin",
+      "preferred_consumer": "terrain_3d_mapping_task_252",
+      "gameplay_role": "visual_cliff_edge",
+      "hill_rule_use": "cliff",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_cliff_brown_outer_corner",
+      "source_model": "cliffBrown_cornerTop",
+      "category": "cliffs",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown_cornerTop.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown_cornerTop.bin",
+      "preferred_consumer": "terrain_3d_mapping_task_252",
+      "gameplay_role": "visual_cliff_corner",
+      "hill_rule_use": "cliff",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_cliff_brown_inner_corner",
+      "source_model": "cliffBrown_cornerInnerTop",
+      "category": "cliffs",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown_cornerInnerTop.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown_cornerInnerTop.bin",
+      "preferred_consumer": "terrain_3d_mapping_task_252",
+      "gameplay_role": "visual_cliff_inner_corner",
+      "hill_rule_use": "cliff",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_cliff_brown_steps",
+      "source_model": "cliffBrown_steps",
+      "category": "cliffs",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown_steps.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown_steps.bin",
+      "preferred_consumer": "terrain_3d_mapping_task_252",
+      "gameplay_role": "visual_slope_steps",
+      "hill_rule_use": "slope",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_cliff_brown_steps_end",
+      "source_model": "cliffBrown_stepsEnd",
+      "category": "cliffs",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown_stepsEnd.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown_stepsEnd.bin",
+      "preferred_consumer": "terrain_3d_mapping_task_252",
+      "gameplay_role": "visual_slope_steps_end",
+      "hill_rule_use": "slope",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_cliff_grey_straight",
+      "source_model": "cliffGrey",
+      "category": "cliffs",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffGrey.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffGrey.bin",
+      "preferred_consumer": "terrain_3d_mapping_task_252",
+      "gameplay_role": "visual_cliff_edge",
+      "hill_rule_use": "cliff",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_cliff_grey_outer_corner",
+      "source_model": "cliffGrey_cornerTop",
+      "category": "cliffs",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffGrey_cornerTop.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffGrey_cornerTop.bin",
+      "preferred_consumer": "terrain_3d_mapping_task_252",
+      "gameplay_role": "visual_cliff_corner",
+      "hill_rule_use": "cliff",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_cliff_grey_inner_corner",
+      "source_model": "cliffGrey_cornerInnerTop",
+      "category": "cliffs",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffGrey_cornerInnerTop.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffGrey_cornerInnerTop.bin",
+      "preferred_consumer": "terrain_3d_mapping_task_252",
+      "gameplay_role": "visual_cliff_inner_corner",
+      "hill_rule_use": "cliff",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_cliff_grey_steps",
+      "source_model": "cliffGrey_steps",
+      "category": "cliffs",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffGrey_steps.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffGrey_steps.bin",
+      "preferred_consumer": "terrain_3d_mapping_task_252",
+      "gameplay_role": "visual_slope_steps",
+      "hill_rule_use": "slope",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_cliff_grey_steps_end",
+      "source_model": "cliffGrey_stepsEnd",
+      "category": "cliffs",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffGrey_stepsEnd.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffGrey_stepsEnd.bin",
+      "preferred_consumer": "terrain_3d_mapping_task_252",
+      "gameplay_role": "visual_slope_steps_end",
+      "hill_rule_use": "slope",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_ground_dirt",
+      "source_model": "ground_dirt",
+      "category": "ground",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/ground/ground_dirt.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/ground/ground_dirt.bin",
+      "preferred_consumer": "editor_surface_palette_task_253",
+      "gameplay_role": "visual_surface_variant",
+      "hill_rule_use": "surface",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_ground_dirt_river_tile",
+      "source_model": "ground_dirtRiverTile",
+      "category": "ground",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/ground/ground_dirtRiverTile.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/ground/ground_dirtRiverTile.bin",
+      "preferred_consumer": "editor_surface_palette_task_253",
+      "gameplay_role": "visual_surface_variant",
+      "hill_rule_use": "surface",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_ground_grass_patch",
+      "source_model": "grass",
+      "category": "ground",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/ground/grass.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/ground/grass.bin",
+      "preferred_consumer": "editor_surface_palette_task_253",
+      "gameplay_role": "visual_surface_detail",
+      "hill_rule_use": "surface_detail",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_rock_large_1",
+      "source_model": "rock_large1",
+      "category": "rocks",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/rocks/rock_large1.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/rocks/rock_large1.bin",
+      "preferred_consumer": "terrain_props_task_254",
+      "gameplay_role": "blocking_cover",
+      "hill_rule_use": "object_visual",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_rock_small_1",
+      "source_model": "rock_small1",
+      "category": "rocks",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/rocks/rock_small1.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/rocks/rock_small1.bin",
+      "preferred_consumer": "terrain_props_task_254",
+      "gameplay_role": "future_decorative_prop_candidate",
+      "hill_rule_use": "object_visual",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_rock_tall_1",
+      "source_model": "rock_tall1",
+      "category": "rocks",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/rocks/rock_tall1.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/rocks/rock_tall1.bin",
+      "preferred_consumer": "terrain_props_task_254",
+      "gameplay_role": "future_cover_prop_candidate",
+      "hill_rule_use": "object_visual",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_stone_block",
+      "source_model": "stone_block",
+      "category": "rocks",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/rocks/stone_block.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/rocks/stone_block.bin",
+      "preferred_consumer": "terrain_props_task_254",
+      "gameplay_role": "future_blocker_prop_candidate",
+      "hill_rule_use": "object_visual",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_tree_default",
+      "source_model": "tree_default",
+      "category": "vegetation",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/vegetation/tree_default.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/vegetation/tree_default.bin",
+      "preferred_consumer": "terrain_props_task_254",
+      "gameplay_role": "visual_tree_cover_candidate",
+      "hill_rule_use": "object_visual",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_tree_pine_tall",
+      "source_model": "tree_pine_tall",
+      "category": "vegetation",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/vegetation/tree_pine_tall.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/vegetation/tree_pine_tall.bin",
+      "preferred_consumer": "terrain_props_task_254",
+      "gameplay_role": "los_blocking_cover",
+      "hill_rule_use": "object_visual",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_bush",
+      "source_model": "plant_bush",
+      "category": "vegetation",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/vegetation/plant_bush.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/vegetation/plant_bush.bin",
+      "preferred_consumer": "terrain_props_task_254",
+      "gameplay_role": "soft_cover_walkable",
+      "hill_rule_use": "object_visual",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_cactus_tall",
+      "source_model": "cactus_tall",
+      "category": "vegetation",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/vegetation/cactus_tall.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/vegetation/cactus_tall.bin",
+      "preferred_consumer": "terrain_props_task_254",
+      "gameplay_role": "future_desert_prop_candidate",
+      "hill_rule_use": "object_visual",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_cactus_large",
+      "source_model": "cactus_large",
+      "category": "vegetation",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/vegetation/cactus_large.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/vegetation/cactus_large.bin",
+      "preferred_consumer": "terrain_props_task_254",
+      "gameplay_role": "blocking_light_cover",
+      "hill_rule_use": "object_visual",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_logs_stack",
+      "source_model": "logs_stack",
+      "category": "props",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/props/logs_stack.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/props/logs_stack.bin",
+      "preferred_consumer": "terrain_props_task_254",
+      "gameplay_role": "visual_only_no_cover",
+      "hill_rule_use": "object_visual",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_campfire_small",
+      "source_model": "campfire_small",
+      "category": "props",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/props/campfire_small.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/props/campfire_small.bin",
+      "preferred_consumer": "terrain_props_task_254",
+      "gameplay_role": "future_decorative_prop_candidate",
+      "hill_rule_use": "object_visual",
+      "scale_hint": 1.0
+    },
+    {
+      "asset_id": "nature_fence_simple",
+      "source_model": "fence_simple",
+      "category": "props",
+      "project_path": "res://Assets/used/terrain/nature_kit_classic/props/fence_simple.gltf",
+      "bin_path": "res://Assets/used/terrain/nature_kit_classic/props/fence_simple.bin",
+      "preferred_consumer": "terrain_props_task_254",
+      "gameplay_role": "future_cover_prop_candidate",
+      "hill_rule_use": "object_visual",
+      "scale_hint": 1.0
+    }
+  ]
+}

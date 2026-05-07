@@ -13,8 +13,10 @@ const HPA_NAVIGATION_GRAPH_SCRIPT: GDScript = preload("res://scripts/terrain/hpa
 const HPA_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/hpa_pathfinder.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const LOCAL_AVOIDANCE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/local_avoidance_resolver.gd")
+const BOTTLENECK_RESERVATION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/bottleneck_reservation_resolver.gd")
 const MULTIPLAYER_COMMAND_CONTRACT_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_command_contract.gd")
 const MULTIPLAYER_SNAPSHOT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_snapshot_contract.gd")
+const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
 const CAPTURE_PROGRESS_PER_TICK: float = 0.01
 const HPA_NAVIGATION_CLUSTER_SIZE: int = 8
 
@@ -30,6 +32,7 @@ const HEIGHT_DISADVANTAGE_ACCURACY_PENALTY: float = 0.05
 @export var is_server_authoritative: bool = false
 @export var unit_registry_path: NodePath
 @export var terrain_registry_path: NodePath
+@export var audio_event_bus_path: NodePath
 @export var combat_rng_seed: int = 1
 @export var terrain_move_debug_enabled: bool = false
 @export var navigation_budget_enabled: bool = true
@@ -40,6 +43,11 @@ const HEIGHT_DISADVANTAGE_ACCURACY_PENALTY: float = 0.05
 @export_range(0.0, 8.0, 0.1) var navigation_default_exposure_weight: float = 0.8
 @export_range(0.0, 8.0, 0.1) var navigation_default_cover_weight: float = 0.25
 @export_range(1.0, 64.0, 1.0) var navigation_exposure_max_grid_distance: float = 8.0
+@export var runtime_tick_budget_debug_enabled: bool = false
+@export var unit_minimum_spacing_enabled: bool = true
+@export_range(8.0, 192.0, 1.0) var unit_minimum_spacing_distance: float = 36.0
+@export_range(1, 8, 1) var unit_minimum_spacing_solver_iterations: int = 4
+@export var unit_minimum_spacing_debug_enabled: bool = false
 @export var local_avoidance_enabled: bool = false
 @export var local_avoidance_debug_enabled: bool = false
 @export_range(4.0, 96.0, 1.0) var local_avoidance_agent_radius: float = 18.0
@@ -48,6 +56,9 @@ const HEIGHT_DISADVANTAGE_ACCURACY_PENALTY: float = 0.05
 @export_range(1, 32, 1) var local_avoidance_max_neighbors: int = 8
 @export_range(0.1, 5.0, 0.1) var local_avoidance_stuck_threshold_seconds: float = 1.0
 @export_range(0.0, 60.0, 1.0) var local_avoidance_stuck_speed_threshold: float = 5.0
+@export var bottleneck_reservation_enabled: bool = false
+@export var bottleneck_reservation_debug_enabled: bool = false
+@export_range(1, 64, 1) var bottleneck_reservation_horizon_ticks: int = 16
 
 var command_queue: Array = []
 var effects_queue: Array = []
@@ -65,11 +76,16 @@ var _last_network_command_rejection: Dictionary = {}
 var _network_command_accept_count: int = 0
 var _network_command_reject_count: int = 0
 var _multiplayer_snapshot_context: Dictionary = {}
+var _air_asset_status_by_id: Dictionary = {}
 var _last_applied_snapshot_tick: int = -1
 var _snapshot_apply_count: int = 0
 var _snapshot_out_of_order_count: int = 0
 var _snapshot_missing_unit_count: int = 0
 var _last_snapshot_reject_reason: String = ""
+var _snapshot_audio_event_ids_played: Dictionary = {}
+var _snapshot_audio_played_count: int = 0
+var _snapshot_audio_suppressed_count: int = 0
+var _last_snapshot_audio_result: Dictionary = {}
 var _last_broadcast_vital_state_by_unit_id: Dictionary = {}
 var _last_server_state: Dictionary = {}
 var _combat_rng := RandomNumberGenerator.new()
@@ -86,12 +102,16 @@ var _navigation_last_delay_reason: String = ""
 var _navigation_last_tick_queries: Array = []
 var _navigation_most_expensive_query: Dictionary = {}
 var _navigation_last_path_metrics: Dictionary = {}
+var _runtime_tick_budget_debug_snapshot: Dictionary = {}
 var _local_avoidance_resolver = LOCAL_AVOIDANCE_RESOLVER_SCRIPT.new()
+var _bottleneck_reservation_resolver = BOTTLENECK_RESERVATION_RESOLVER_SCRIPT.new()
 var _multiplayer_command_contract = MULTIPLAYER_COMMAND_CONTRACT_SCRIPT.new()
 var _multiplayer_snapshot_contract = MULTIPLAYER_SNAPSHOT_CONTRACT_SCRIPT.new()
+var _unit_minimum_spacing_debug_snapshot: Dictionary = {}
 var _local_avoidance_prepared_tick: int = -1
 var _local_avoidance_debug_by_unit_id: Dictionary = {}
 var _local_avoidance_stuck_seconds_by_unit_id: Dictionary = {}
+var _bottleneck_reservation_debug_snapshot: Dictionary = {}
 
 
 func _init() -> void:
@@ -125,6 +145,19 @@ func enqueue_effect(effect: Dictionary) -> void:
 		return
 
 	effects_queue.append(effect)
+
+
+func get_air_asset_status_snapshot(asset_id: String = "") -> Dictionary:
+	var normalized_id: String = asset_id.strip_edges()
+	if normalized_id.is_empty():
+		var result: Dictionary = {}
+		var asset_ids: Array = _air_asset_status_by_id.keys()
+		asset_ids.sort()
+		for id_variant in asset_ids:
+			var key: String = String(id_variant)
+			result[key] = Dictionary(_air_asset_status_by_id.get(key, {})).duplicate(true)
+		return result
+	return Dictionary(_air_asset_status_by_id.get(normalized_id, {})).duplicate(true)
 
 
 func set_terrain_move_debug_enabled(enabled: bool) -> void:
@@ -179,6 +212,48 @@ func get_navigation_debug_snapshot() -> Dictionary:
 	}
 
 
+func set_runtime_tick_budget_debug_enabled(enabled: bool) -> void:
+	runtime_tick_budget_debug_enabled = enabled
+	if not runtime_tick_budget_debug_enabled:
+		_runtime_tick_budget_debug_snapshot.clear()
+
+
+func get_runtime_tick_budget_debug_snapshot() -> Dictionary:
+	return _runtime_tick_budget_debug_snapshot.duplicate(true)
+
+
+func _record_runtime_tick_budget_debug_snapshot(delta: float, tick_started_usec: int, profile_scopes: Dictionary, command_count: int, effect_count: int) -> void:
+	_runtime_tick_budget_debug_snapshot = {
+		"enabled": runtime_tick_budget_debug_enabled,
+		"tick": tick_counter,
+		"delta": delta,
+		"total_tick_usec": Time.get_ticks_usec() - tick_started_usec,
+		"scopes_usec": profile_scopes.duplicate(true),
+		"command_count": command_count,
+		"effect_count": effect_count,
+		"command_queue_after_tick": command_queue.size(),
+		"effect_queue_after_tick": effects_queue.size(),
+		"registered_unit_count": _count_runtime_registered_units(),
+		"known_unit_count": _known_units_by_id.size(),
+		"navigation": get_navigation_debug_snapshot(),
+		"unit_minimum_spacing": get_unit_minimum_spacing_debug_snapshot(),
+		"hotpath_audit": {
+			"authority_root": "SimulationRoot",
+			"command_queue_scope": "drain_order_apply",
+			"effect_queue_scope": "drain_order_apply",
+			"unit_lookup_source": "UnitRegistry_or_known_units",
+			"viewer_paths_read_only": true,
+		},
+	}
+
+
+func _count_runtime_registered_units() -> int:
+	var unit_registry = _get_unit_registry()
+	if unit_registry != null and unit_registry.has_method("get_all_units"):
+		return Array(unit_registry.call("get_all_units")).size()
+	return _known_units_by_id.size()
+
+
 func set_local_avoidance_enabled(enabled: bool) -> void:
 	local_avoidance_enabled = enabled
 	_local_avoidance_prepared_tick = -1
@@ -201,6 +276,68 @@ func get_local_avoidance_debug_snapshot(unit_id: String = "") -> Variant:
 			result.append(Dictionary(_local_avoidance_debug_by_unit_id.get(unit_id_variant, {})).duplicate(true))
 		return result
 	return Dictionary(_local_avoidance_debug_by_unit_id.get(unit_id.strip_edges(), {})).duplicate(true)
+
+
+func set_bottleneck_reservation_enabled(enabled: bool) -> void:
+	bottleneck_reservation_enabled = enabled
+	if not bottleneck_reservation_enabled:
+		_bottleneck_reservation_resolver.clear()
+		_bottleneck_reservation_debug_snapshot.clear()
+
+
+func set_bottleneck_reservation_debug_enabled(enabled: bool) -> void:
+	bottleneck_reservation_debug_enabled = enabled
+	if not bottleneck_reservation_debug_enabled:
+		_bottleneck_reservation_debug_snapshot.clear()
+
+
+func get_bottleneck_reservation_debug_snapshot() -> Dictionary:
+	return _bottleneck_reservation_debug_snapshot.duplicate(true)
+
+
+func resolve_bottleneck_reservation_for_commands(commands: Array, candidates: Array, options: Dictionary = {}) -> Dictionary:
+	if not bottleneck_reservation_enabled:
+		return {}
+	var plan_options: Dictionary = options.duplicate(true)
+	if not plan_options.has("start_tick"):
+		plan_options["start_tick"] = tick_counter
+	if not plan_options.has("horizon_ticks"):
+		plan_options["horizon_ticks"] = bottleneck_reservation_horizon_ticks
+	var plan: Dictionary = Dictionary(_bottleneck_reservation_resolver.call("build_reservation_plan", commands, candidates, plan_options))
+	var decisions_by_unit_id: Dictionary = Dictionary(plan.get("decisions_by_unit_id", {}))
+	for command_variant in commands:
+		if typeof(command_variant) != TYPE_DICTIONARY:
+			continue
+		var command: Dictionary = Dictionary(command_variant)
+		var unit_id: String = String(command.get("unit_id", ""))
+		if decisions_by_unit_id.has(unit_id):
+			_bottleneck_reservation_resolver.call("apply_reservation_metadata", command, Dictionary(decisions_by_unit_id.get(unit_id, {})))
+	if bottleneck_reservation_debug_enabled:
+		_bottleneck_reservation_debug_snapshot = plan.duplicate(true)
+	return plan
+
+
+func resolve_bottleneck_reservation_for_command(command: Dictionary, bottleneck_cells: Array, current_tick: int = -1, options: Dictionary = {}) -> Dictionary:
+	if not bottleneck_reservation_enabled:
+		return {}
+	var plan_options: Dictionary = options.duplicate(true)
+	if not plan_options.has("horizon_ticks"):
+		plan_options["horizon_ticks"] = bottleneck_reservation_horizon_ticks
+	var resolved_tick: int = tick_counter if current_tick < 0 else current_tick
+	var decision: Dictionary = Dictionary(_bottleneck_reservation_resolver.call("resolve_command", command, bottleneck_cells, resolved_tick, plan_options))
+	if bottleneck_reservation_debug_enabled:
+		_bottleneck_reservation_debug_snapshot = _bottleneck_reservation_resolver.call("get_debug_snapshot")
+	return decision
+
+
+func set_unit_minimum_spacing_enabled(enabled: bool) -> void:
+	unit_minimum_spacing_enabled = enabled
+	if not unit_minimum_spacing_enabled:
+		_unit_minimum_spacing_debug_snapshot.clear()
+
+
+func get_unit_minimum_spacing_debug_snapshot() -> Dictionary:
+	return _unit_minimum_spacing_debug_snapshot.duplicate(true)
 
 
 func clear_queues() -> void:
@@ -334,6 +471,30 @@ func set_multiplayer_snapshot_context(context: Dictionary) -> void:
 		next_context["dropship"] = Dictionary(normalized_context.get("dropship", {})).duplicate(true)
 	if context.has("contacts"):
 		next_context["contacts"] = Array(normalized_context.get("contacts", [])).duplicate(true)
+	if context.has("enemy_security"):
+		next_context["enemy_security"] = Array(normalized_context.get("enemy_security", [])).duplicate(true)
+	if context.has("enemy_team_tactics"):
+		next_context["enemy_team_tactics"] = Array(normalized_context.get("enemy_team_tactics", [])).duplicate(true)
+	if context.has("character_gameplay"):
+		next_context["character_gameplay"] = Array(normalized_context.get("character_gameplay", [])).duplicate(true)
+	if context.has("fire_events"):
+		next_context["fire_events"] = Array(normalized_context.get("fire_events", [])).duplicate(true)
+	if context.has("feedback_bubbles"):
+		next_context["feedback_bubbles"] = Array(normalized_context.get("feedback_bubbles", [])).duplicate(true)
+	if context.has("fireteam_tactical"):
+		next_context["fireteam_tactical"] = Array(normalized_context.get("fireteam_tactical", [])).duplicate(true)
+	if context.has("commander_intents"):
+		next_context["commander_intents"] = Array(normalized_context.get("commander_intents", [])).duplicate(true)
+	if context.has("fireteam_plan_status"):
+		next_context["fireteam_plan_status"] = Array(normalized_context.get("fireteam_plan_status", [])).duplicate(true)
+	if context.has("communication_events"):
+		next_context["communication_events"] = Array(normalized_context.get("communication_events", [])).duplicate(true)
+	if context.has("tactical_rules"):
+		next_context["tactical_rules"] = Array(normalized_context.get("tactical_rules", [])).duplicate(true)
+	if context.has("breakout_states"):
+		next_context["breakout_states"] = Array(normalized_context.get("breakout_states", [])).duplicate(true)
+	if context.has("air_asset_status") or context.has("air_asset_statuses"):
+		next_context["air_asset_status"] = Array(normalized_context.get("air_asset_status", [])).duplicate(true)
 	if context.has("mission_result"):
 		next_context["mission_result"] = Dictionary(normalized_context.get("mission_result", {})).duplicate(true)
 	_multiplayer_snapshot_context = next_context
@@ -350,7 +511,19 @@ func get_multiplayer_snapshot_debug_snapshot() -> Dictionary:
 		"out_of_order_count": _snapshot_out_of_order_count,
 		"missing_unit_count": _snapshot_missing_unit_count,
 		"last_reject_reason": _last_snapshot_reject_reason,
+		"audio": get_snapshot_audio_debug_snapshot(),
 		"transfer_contract": Dictionary(_multiplayer_snapshot_contract.call("get_transfer_contract")).duplicate(true),
+	}
+
+
+func get_snapshot_audio_debug_snapshot() -> Dictionary:
+	return {
+		"played_count": _snapshot_audio_played_count,
+		"suppressed_count": _snapshot_audio_suppressed_count,
+		"played_event_ids": _snapshot_audio_event_ids_played.keys(),
+		"last_result": _last_snapshot_audio_result.duplicate(true),
+		"read_only_audio_events": true,
+		"audio_sets_gameplay_state": false,
 	}
 
 
@@ -460,22 +633,59 @@ func _physics_process(delta: float) -> void:
 	if _should_skip_local_tick_processing():
 		return
 
+	var profile_enabled: bool = runtime_tick_budget_debug_enabled
+	var tick_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+	var profile_scopes: Dictionary = {}
+	var scope_started_usec: int = 0
+
 	tick_counter += 1
 	is_processing_tick = true
 	_begin_navigation_budget_tick()
+	if profile_enabled:
+		scope_started_usec = Time.get_ticks_usec()
 	_prepare_local_avoidance_tick()
+	if profile_enabled:
+		profile_scopes["local_avoidance_prepare_usec"] = Time.get_ticks_usec() - scope_started_usec
 
 	var commands: Array = _drain_queue(command_queue)
+	var command_count: int = commands.size()
+	if profile_enabled:
+		scope_started_usec = Time.get_ticks_usec()
 	_process_commands(commands, delta)
+	if profile_enabled:
+		profile_scopes["command_queue_usec"] = Time.get_ticks_usec() - scope_started_usec
 
 	var effects: Array = _drain_queue(effects_queue)
+	var effect_count: int = effects.size()
+	if profile_enabled:
+		scope_started_usec = Time.get_ticks_usec()
 	_process_effects(effects, delta)
+	if profile_enabled:
+		profile_scopes["effect_queue_usec"] = Time.get_ticks_usec() - scope_started_usec
+	if profile_enabled:
+		scope_started_usec = Time.get_ticks_usec()
+	_enforce_unit_minimum_spacing()
+	if profile_enabled:
+		profile_scopes["unit_minimum_spacing_usec"] = Time.get_ticks_usec() - scope_started_usec
+	if profile_enabled:
+		scope_started_usec = Time.get_ticks_usec()
 	_update_objective_capture()
+	if profile_enabled:
+		profile_scopes["objective_capture_usec"] = Time.get_ticks_usec() - scope_started_usec
 
 	_finish_navigation_budget_tick()
 	is_processing_tick = false
+	if profile_enabled:
+		scope_started_usec = Time.get_ticks_usec()
 	_broadcast_tick_state()
+	if profile_enabled:
+		profile_scopes["snapshot_broadcast_usec"] = Time.get_ticks_usec() - scope_started_usec
+	if profile_enabled:
+		scope_started_usec = Time.get_ticks_usec()
 	tick_processed.emit(tick_counter)
+	if profile_enabled:
+		profile_scopes["tick_signal_emit_usec"] = Time.get_ticks_usec() - scope_started_usec
+		_record_runtime_tick_budget_debug_snapshot(delta, tick_started_usec, profile_scopes, command_count, effect_count)
 
 
 func _should_skip_local_tick_processing() -> bool:
@@ -589,6 +799,18 @@ func _build_tick_state() -> Dictionary:
 				"objective": _build_objective_snapshot(),
 				"dropship": snapshot_context.get("dropship", {}),
 				"contacts": snapshot_context.get("contacts", []),
+				"enemy_security": snapshot_context.get("enemy_security", []),
+				"enemy_team_tactics": snapshot_context.get("enemy_team_tactics", []),
+				"character_gameplay": snapshot_context.get("character_gameplay", []),
+				"fire_events": snapshot_context.get("fire_events", []),
+				"feedback_bubbles": snapshot_context.get("feedback_bubbles", []),
+				"fireteam_tactical": snapshot_context.get("fireteam_tactical", []),
+				"commander_intents": snapshot_context.get("commander_intents", []),
+				"fireteam_plan_status": snapshot_context.get("fireteam_plan_status", []),
+				"communication_events": snapshot_context.get("communication_events", []),
+				"tactical_rules": snapshot_context.get("tactical_rules", []),
+				"breakout_states": snapshot_context.get("breakout_states", []),
+				"air_asset_status": _build_air_asset_status_snapshots(snapshot_context.get("air_asset_status", [])),
 				"mission_result": snapshot_context.get("mission_result", {}),
 			}
 		)
@@ -604,6 +826,29 @@ func _build_unit_snapshots() -> Array:
 
 		unit_snapshots.append(unit_snapshot)
 	return unit_snapshots
+
+
+func _build_air_asset_status_snapshots(context_statuses: Variant = []) -> Array:
+	var by_asset_id: Dictionary = {}
+	for status_variant in Array(context_statuses):
+		if typeof(status_variant) != TYPE_DICTIONARY:
+			continue
+		var status: Dictionary = Dictionary(status_variant).duplicate(true)
+		var asset_id: String = String(status.get("asset_id", "")).strip_edges()
+		if asset_id.is_empty():
+			continue
+		by_asset_id[asset_id] = status
+	for asset_id_variant in _air_asset_status_by_id.keys():
+		var asset_id: String = String(asset_id_variant).strip_edges()
+		if asset_id.is_empty():
+			continue
+		by_asset_id[asset_id] = Dictionary(_air_asset_status_by_id.get(asset_id_variant, {})).duplicate(true)
+	var keys: Array = by_asset_id.keys()
+	keys.sort()
+	var result: Array = []
+	for key_variant in keys:
+		result.append(Dictionary(by_asset_id.get(key_variant, {})).duplicate(true))
+	return result
 
 
 func _build_objective_snapshot() -> Dictionary:
@@ -688,6 +933,10 @@ func _build_unit_snapshot(unit) -> Dictionary:
 		"unit_id": unit_id,
 		"visible": true,
 	}
+	if unit.has_method("get_team_id"):
+		snapshot["team_id"] = String(unit.call("get_team_id")).strip_edges()
+	if unit.has_method("get_fireteam_id"):
+		snapshot["fireteam_id"] = String(unit.call("get_fireteam_id")).strip_edges().to_lower()
 	if unit is Node2D:
 		snapshot["position"] = (unit as Node2D).global_position
 
@@ -713,8 +962,35 @@ func _build_unit_snapshot(unit) -> Dictionary:
 		var stance_snapshot_variant: Variant = unit.call("get_tactical_stance_badge_snapshot")
 		if typeof(stance_snapshot_variant) == TYPE_DICTIONARY:
 			snapshot.merge(Dictionary(stance_snapshot_variant), true)
+	if unit.has_method("get_active_weapon_id"):
+		var raw_active_weapon_id: String = String(unit.call("get_active_weapon_id")).strip_edges()
+		if not raw_active_weapon_id.is_empty():
+			var active_weapon_id: String = WEAPON_DATA_SCRIPT.call("sanitize_weapon_id", raw_active_weapon_id)
+			if bool(WEAPON_DATA_SCRIPT.call("is_attack_weapon_id", active_weapon_id)):
+				snapshot["active_weapon_id"] = active_weapon_id
+				snapshot["weapon_tile_range"] = int(WEAPON_DATA_SCRIPT.call("get_effective_tile_range", active_weapon_id))
+				snapshot["weapon_range_world"] = float(WEAPON_DATA_SCRIPT.call("get_effective_world_range", active_weapon_id, _get_terrain_registry()))
+	if unit is Node:
+		_copy_enemy_meta_to_snapshot(unit as Node, snapshot)
 
 	return snapshot
+
+
+func _copy_enemy_meta_to_snapshot(unit: Node, snapshot: Dictionary) -> void:
+	for string_key in [
+		"enemy_security_group_id",
+		"enemy_security_mode",
+		"enemy_tactics_group_id",
+		"enemy_tactic_profile_id",
+		"enemy_visual_archetype_id",
+		"enemy_advance_style",
+		"enemy_role",
+		"enemy_tactic_label",
+	]:
+		if unit.has_meta(string_key):
+			snapshot[string_key] = String(unit.get_meta(string_key, ""))
+	if unit.has_meta("enemy_facing_angle"):
+		snapshot["enemy_facing_angle"] = float(unit.get_meta("enemy_facing_angle", 0.0))
 
 
 func _build_unit_vital_update(unit) -> Dictionary:
@@ -757,6 +1033,7 @@ func _apply_remote_state(state_dict: Dictionary) -> Dictionary:
 	_last_applied_snapshot_tick = int(snapshot.get("tick", _last_applied_snapshot_tick))
 	_snapshot_apply_count += 1
 	_last_snapshot_reject_reason = ""
+	_emit_snapshot_audio_events(snapshot)
 
 	var objective_dict: Variant = snapshot.get("objective", {})
 	if typeof(objective_dict) == TYPE_DICTIONARY:
@@ -792,6 +1069,62 @@ func _apply_remote_state(state_dict: Dictionary) -> Dictionary:
 		"tick": _last_applied_snapshot_tick,
 		"missing_unit_count": missing_unit_count,
 	}
+
+
+func _emit_snapshot_audio_events(snapshot: Dictionary) -> void:
+	var bus = _resolve_audio_event_bus()
+	if bus == null or not bus.has_method("emit_weapon_fire"):
+		return
+	for fire_event_variant in Array(snapshot.get("fire_events", [])):
+		if typeof(fire_event_variant) != TYPE_DICTIONARY:
+			continue
+		var fire_event: Dictionary = Dictionary(fire_event_variant)
+		var event_id: String = String(fire_event.get("event_id", "")).strip_edges()
+		if event_id.is_empty():
+			continue
+		var position: Variant = fire_event.get("muzzle_position", fire_event.get("attacker_position", Vector2.ZERO))
+		var result: Dictionary = Dictionary(bus.call("emit_weapon_fire", String(fire_event.get("weapon_id", "")), {
+			"position": position,
+			"unit_id": String(fire_event.get("attacker_unit_id", "")),
+			"team_id": String(fire_event.get("attacker_team_id", "")),
+			"target_unit_id": String(fire_event.get("target_unit_id", "")),
+			"from_multiplayer_snapshot": true,
+			"network_read_only": true,
+			"source": "multiplayer_snapshot",
+			"visible_to_local": bool(fire_event.get("visible_to_local", true)),
+			"visibility_context": String(fire_event.get("visibility_context", "snapshot_visible")),
+			"dedupe_key": event_id,
+			"dedupe_window_msec": 5000,
+		})).duplicate(true)
+		_last_snapshot_audio_result = result.duplicate(true)
+		if bool(result.get("played", false)):
+			_snapshot_audio_event_ids_played[event_id] = true
+			_snapshot_audio_played_count += 1
+		else:
+			_snapshot_audio_suppressed_count += 1
+
+
+func _resolve_audio_event_bus():
+	if audio_event_bus_path != NodePath():
+		var path_bus := get_node_or_null(audio_event_bus_path)
+		if path_bus != null and path_bus.has_method("emit_weapon_fire"):
+			return path_bus
+	var child_bus := get_node_or_null("AudioEventBus")
+	if child_bus != null and child_bus.has_method("emit_weapon_fire"):
+		return child_bus
+	var tree: SceneTree = null
+	if is_inside_tree():
+		tree = get_tree()
+	if tree != null:
+		var current_scene := tree.current_scene
+		if current_scene != null:
+			var scene_bus := current_scene.find_child("AudioEventBus", true, false)
+			if scene_bus != null and scene_bus.has_method("emit_weapon_fire"):
+				return scene_bus
+		var root_bus := tree.root.find_child("AudioEventBus", true, false)
+		if root_bus != null and root_bus.has_method("emit_weapon_fire"):
+			return root_bus
+	return null
 
 
 func _apply_remote_objective_state(objective_dict: Dictionary) -> void:
@@ -888,6 +1221,8 @@ func _apply_effect(effect: Dictionary, delta: float) -> void:
 			_apply_dropship_embark_unit_effect(effect)
 		"dropship_deploy_unit":
 			_apply_dropship_deploy_unit_effect(effect)
+		"air_asset_status_update":
+			_apply_air_asset_status_update_effect(effect)
 		"apply_loadout_modifiers":
 			_apply_loadout_modifiers_effect(effect)
 		_:
@@ -1402,6 +1737,73 @@ func _prepare_local_avoidance_tick() -> void:
 	_local_avoidance_prepared_tick = tick_counter
 
 
+func _enforce_unit_minimum_spacing() -> void:
+	if not unit_minimum_spacing_enabled:
+		return
+	var unit_registry = _get_unit_registry()
+	if unit_registry == null or not unit_registry.has_method("get_all_units"):
+		return
+	var units: Array = []
+	for unit in Array(unit_registry.call("get_all_units")):
+		if not (unit is Node2D):
+			continue
+		if unit.has_method("get_unit_id") and String(unit.call("get_unit_id")).strip_edges().is_empty():
+			continue
+		units.append(unit)
+	if units.size() < 2:
+		_unit_minimum_spacing_debug_snapshot = {
+			"tick": tick_counter,
+			"enabled": true,
+			"minimum_distance": unit_minimum_spacing_distance,
+			"unit_count": units.size(),
+			"moved_unit_ids": [],
+			"minimum_distance_after": INF,
+			"blocked_pair_count": 0,
+			"downed_units_keep_space": true,
+		}
+		return
+	var result: Dictionary = Dictionary(_local_avoidance_resolver.call(
+		"resolve_minimum_spacing_positions",
+		units,
+		unit_minimum_spacing_distance,
+		_get_terrain_registry(),
+		unit_minimum_spacing_solver_iterations
+	))
+	var positions_by_unit_id: Dictionary = Dictionary(result.get("positions_by_unit_id", {}))
+	var moved_unit_ids: Array = Array(result.get("moved_unit_ids", []))
+	var moved_lookup: Dictionary = {}
+	for unit_id_variant in moved_unit_ids:
+		moved_lookup[String(unit_id_variant)] = true
+	for unit in units:
+		if unit == null or not unit.has_method("get_unit_id"):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+		if unit_id.is_empty() or not moved_lookup.has(unit_id):
+			continue
+		var next_position: Variant = positions_by_unit_id.get(unit_id, null)
+		if typeof(next_position) != TYPE_VECTOR2:
+			continue
+		(unit as Node2D).global_position = Vector2(next_position)
+		if unit.has_method("refresh_terrain_readability"):
+			unit.call("refresh_terrain_readability")
+		_update_local_avoidance_agent_position(unit_id, (unit as Node2D).global_position)
+	_unit_minimum_spacing_debug_snapshot = {
+		"tick": tick_counter,
+		"enabled": true,
+		"minimum_distance": float(result.get("minimum_distance", unit_minimum_spacing_distance)),
+		"minimum_distance_after": float(result.get("minimum_distance_after", INF)),
+		"unit_count": units.size(),
+		"moved_unit_ids": moved_unit_ids,
+		"active_unit_ids": Array(result.get("active_unit_ids", [])),
+		"resolved_pair_count": int(result.get("resolved_pair_count", 0)),
+		"blocked_pair_count": int(result.get("blocked_pair_count", 0)),
+		"blocked_pairs": Array(result.get("blocked_pairs", [])).duplicate(true),
+		"downed_units_keep_space": true,
+	}
+	if unit_minimum_spacing_debug_enabled and int(_unit_minimum_spacing_debug_snapshot.get("blocked_pair_count", 0)) > 0:
+		push_warning("SimulationRoot minimum spacing could not separate every active unit pair.")
+
+
 func _is_local_avoidance_enabled_for_command(cmd: Dictionary) -> bool:
 	if cmd.has("local_avoidance_enabled"):
 		return bool(cmd.get("local_avoidance_enabled", false))
@@ -1904,6 +2306,8 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		"height_accuracy_modifier": _extract_height_accuracy_modifier(attacker_unit, unit),
 		"target_cover_score": target_cover_score,
 		"friendly_fire": is_friendly_fire,
+		"weapon_id": String(effect.get("weapon_id", "")),
+		"fire_event_id": String(effect.get("fire_event_id", "")),
 	}
 	if bool(effect.get("is_flank", false)):
 		hit_context["is_flank"] = true
@@ -2264,6 +2668,31 @@ func _apply_dropship_deploy_unit_effect(effect: Dictionary) -> void:
 		unit.call("set_runtime_status", runtime_status)
 	if unit.has_method("refresh_terrain_readability"):
 		unit.call("refresh_terrain_readability")
+
+
+func _apply_air_asset_status_update_effect(effect: Dictionary) -> void:
+	var status_snapshot: Dictionary = Dictionary(effect.get("status_snapshot", effect.get("air_asset_status", {}))).duplicate(true)
+	if status_snapshot.is_empty():
+		status_snapshot = {
+			"asset_id": String(effect.get("asset_id", "")).strip_edges(),
+			"asset_type": String(effect.get("asset_type", "")).strip_edges(),
+			"state": String(effect.get("state", "")).strip_edges(),
+		}
+	var asset_id: String = String(status_snapshot.get("asset_id", effect.get("asset_id", ""))).strip_edges()
+	if asset_id.is_empty():
+		push_warning("SimulationRoot air asset status effect expects a non-empty asset_id.")
+		return
+	status_snapshot["asset_id"] = asset_id
+	status_snapshot["asset_type"] = String(status_snapshot.get("asset_type", effect.get("asset_type", "dropship"))).strip_edges()
+	status_snapshot["state"] = String(status_snapshot.get("state", effect.get("state", "intact"))).strip_edges()
+	status_snapshot["last_event_id"] = String(status_snapshot.get("last_event_id", effect.get("event_id", ""))).strip_edges()
+	status_snapshot["vfx_events"] = Array(effect.get("vfx_events", status_snapshot.get("vfx_events", []))).duplicate(true)
+	status_snapshot["sfx_events"] = Array(effect.get("sfx_events", status_snapshot.get("sfx_events", []))).duplicate(true)
+	status_snapshot["runtime_authority"] = "SimulationRoot"
+	status_snapshot["applied_by"] = "SimulationRoot"
+	status_snapshot["applied_tick"] = tick_counter
+	status_snapshot["ui_sets_gameplay_truth"] = false
+	_air_asset_status_by_id[asset_id] = status_snapshot
 
 
 func _apply_dropship_position_and_visibility(unit, effect: Dictionary, default_visible: bool) -> void:

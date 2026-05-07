@@ -2,3 +2,6 @@
 .godot/
 /android/
 *.uid
+
+# Local raw source asset packs; commit curated subsets under Assets/used or Assets/curated.
+Assets/Weapon Pack/

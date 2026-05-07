@@ -6,6 +6,16 @@
 			"collapsed": false
 		},
 		{
+			"group_id": "nature_ground",
+			"display_name": "Nature Boden",
+			"collapsed": false
+		},
+		{
+			"group_id": "nature_props",
+			"display_name": "Nature Props",
+			"collapsed": false
+		},
+		{
 			"group_id": "waende",
 			"display_name": "Waende",
 			"collapsed": false
@@ -78,6 +88,66 @@
 			"cover_value": 0,
 			"height_level": 0,
 			"object_height": 0
+		},
+		{
+			"type_id": "nature_ground_dirt",
+			"display_name": "Nature Dirt",
+			"palette_group": "nature_ground",
+			"placement_layer": "terrain",
+			"surface_type": "ground",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 0,
+			"object_height": 0,
+			"edge_type": "none",
+			"preserve_hill_fields": true,
+			"visual_surface_variant": true
+		},
+		{
+			"type_id": "nature_ground_sand_dirt",
+			"display_name": "Nature Sand/Dirt",
+			"palette_group": "nature_ground",
+			"placement_layer": "terrain",
+			"surface_type": "sand",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 0,
+			"object_height": 0,
+			"edge_type": "none",
+			"preserve_hill_fields": true,
+			"visual_surface_variant": true
+		},
+		{
+			"type_id": "nature_ground_rock_dirt",
+			"display_name": "Nature Rock/Dirt",
+			"palette_group": "nature_ground",
+			"placement_layer": "terrain",
+			"surface_type": "rock",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 0,
+			"object_height": 0,
+			"edge_type": "none",
+			"preserve_hill_fields": true,
+			"visual_surface_variant": true
+		},
+		{
+			"type_id": "nature_ground_grass_patch",
+			"display_name": "Nature Grass Patch",
+			"palette_group": "nature_ground",
+			"placement_layer": "terrain",
+			"surface_type": "ground",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 0,
+			"object_height": 0,
+			"edge_type": "none",
+			"preserve_hill_fields": true,
+			"visual_surface_variant": true
 		},
 		{
 			"type_id": "wall_straight_se",
@@ -332,6 +402,71 @@
 			"cover_value": 50,
 			"height_level": 0,
 			"object_height": 2
+		},
+		{
+			"type_id": "nature_tree_blocker",
+			"display_name": "Nature Tree Blocker",
+			"palette_group": "nature_props",
+			"placement_layer": "object",
+			"surface_type": "ground",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 65,
+			"height_level": 0,
+			"object_height": 3,
+			"prop_role": "tree_blocker"
+		},
+		{
+			"type_id": "nature_rock_cover",
+			"display_name": "Nature Rock Cover",
+			"palette_group": "nature_props",
+			"placement_layer": "object",
+			"surface_type": "rock",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 55,
+			"height_level": 0,
+			"object_height": 2,
+			"prop_role": "rock_cover"
+		},
+		{
+			"type_id": "nature_bush_cover",
+			"display_name": "Nature Bush Cover",
+			"palette_group": "nature_props",
+			"placement_layer": "object",
+			"surface_type": "ground",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 25,
+			"height_level": 0,
+			"object_height": 1,
+			"prop_role": "bush_cover"
+		},
+		{
+			"type_id": "nature_cactus_cover",
+			"display_name": "Nature Cactus Cover",
+			"palette_group": "nature_props",
+			"placement_layer": "object",
+			"surface_type": "sand",
+			"walkable": false,
+			"blocks_los": false,
+			"cover_value": 30,
+			"height_level": 0,
+			"object_height": 1,
+			"prop_role": "cactus_cover"
+		},
+		{
+			"type_id": "nature_deco_logs",
+			"display_name": "Nature Deco Logs",
+			"palette_group": "nature_props",
+			"placement_layer": "object",
+			"surface_type": "ground",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 0,
+			"object_height": 0,
+			"prop_role": "deco_small"
 		},
 		{
 			"type_id": "deko_barrel_ne",

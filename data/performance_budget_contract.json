@@ -1,0 +1,104 @@
+{
+	"schema_version": 1,
+	"task": "TASK_222",
+	"policy": {
+		"budget_style": "broad_start_budgets_then_tighten_after_repeated_local_runs",
+		"local_baseline_is_machine_dependent": true,
+		"project_budget_is_gate_input": true,
+		"raise_budget_only_with_report": true,
+		"optimize_only_with_before_after": true
+	},
+	"local_baseline": {
+		"source_reports": [
+			"res://docs/performance/performance_baseline_report.md",
+			"res://docs/performance/2_5d_rendering_profile_report.md",
+			"res://docs/performance/navigation_pathfinding_los_profile_report.md",
+			"res://docs/performance/simulation_combat_ai_tick_profile_report.md",
+			"res://docs/performance/ui_hud_comic_bubble_profile_report.md",
+			"res://docs/performance/asset_vram_shader_pipeline_report.md",
+			"res://docs/performance/multiplayer_snapshot_performance_report.md"
+		],
+		"measurement_date": "2026-05-06",
+		"godot_observed": "4.6.2.stable.official.71f334935",
+		"project_target": "4.6.1",
+		"window_fullhd": {"width": 1920, "height": 1080}
+	},
+	"project_budget": {
+		"render": {
+			"max_map_render_duration_msec": 8000,
+			"max_missing_asset_mapping_count": 0,
+			"max_texture_fallback_count": 0,
+			"require_pipeline_snapshot": true
+		},
+		"navigation": {
+			"max_open_hpa_avg_query_usec": 200000,
+			"max_path_query_budget_per_tick": 1,
+			"require_delay_diagnostics": true,
+			"require_los_and_cover_metrics": true
+		},
+		"simulation": {
+			"max_simulation_tick_p99_usec": 2000000,
+			"max_combat_tick_p99_usec": 2000000,
+			"require_scope_timings": true,
+			"require_hotpath_audit": true
+		},
+		"ui": {
+			"max_screen_node_count": 20000,
+			"max_bubble_visual_count": 4,
+			"require_fixed_window": true,
+			"require_theme_reuse": true
+		},
+		"assets": {
+			"min_catalog_asset_count": 90,
+			"max_texture_estimated_vram_bytes": 1073741824,
+			"max_single_glb_file_bytes": 20971520,
+			"require_all_paths_res": true,
+			"require_pipeline_snapshot": true,
+			"require_warmup_side_effect_free": true
+		},
+		"audio_visual": {
+			"max_audio_pool_total_players": 28,
+			"max_audio_active_voice_count": 12,
+			"max_audio_missing_id_count": 0,
+			"max_audio_missing_resource_count": 0,
+			"require_polyphony_suppression": true,
+			"require_dedupe_suppression": true,
+			"max_background_texture_dimension": 2048,
+			"max_background_total_estimated_vram_bytes": 33554432,
+			"require_background_screen_on_demand": true,
+			"max_muzzle_texture_count": 8,
+			"max_weapon_fire_vfx_visual_count": 12,
+			"require_visual_audio_side_effect_free": true
+		},
+		"snapshot": {
+			"max_build_p99_usec": 2000000,
+			"max_apply_p99_usec": 2000000,
+			"max_large_json_p99_bytes": 262144,
+			"require_deterministic_canonical_payload": true,
+			"require_id_only_payload": true,
+			"require_side_effect_free_apply": true
+		}
+	},
+	"warning_gate": {
+		"integrates_task_170": true,
+		"blocked_patterns": [
+			"ObjectDB instances leaked",
+			"RID allocations.*leaked",
+			"Resources still in use at exit",
+			"Resource.*still in use at exit",
+			"Leaked instance"
+		],
+		"missing_asset_counters_must_be_zero": true,
+		"fallback_texture_counters_must_be_zero": true
+	},
+	"manual_checks": {
+		"checklist": "res://docs/dev/performance_manual_profile_checklist.md",
+		"required_tools": [
+			"Godot Profiler",
+			"Visual Profiler",
+			"Monitors",
+			"Video RAM",
+			"Network Profiler"
+		]
+	}
+}

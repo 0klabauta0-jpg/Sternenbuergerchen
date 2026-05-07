@@ -1,0 +1,132 @@
+{
+	"catalog_version": 1,
+	"status": "TASK_197_central_catalog",
+	"rules": {
+		"runtime_contract": "read_only_asset_paths_no_gameplay_truth",
+		"load_policy": "explicit_res_paths_no_project_scanning",
+		"missing_asset_policy": "diagnostic_no_silent_fallback",
+		"source_catalog_policy": "explicit_whitelist"
+	},
+	"performance_budget": {
+		"task": "TASK_220",
+		"runtime_paths_must_be_res": true,
+		"max_preview_png_bytes": 524288,
+		"max_runtime_texture_estimated_vram_bytes": 4194304,
+		"max_single_glb_bytes": 5242880,
+		"max_materials_per_glb_warning": 8,
+		"pipeline_warmup_policy": "document_candidates_no_visible_gameplay_events"
+	},
+	"required_categories": [
+		"ui",
+		"input_prompt",
+		"cursor",
+		"rank_badge",
+		"particle",
+		"setpiece",
+		"weapon_visual",
+		"terrain_existing"
+	],
+	"source_catalogs": [
+		{
+			"id": "ui_input_cursor_catalog",
+			"path": "res://data/ui_asset_catalog.json",
+			"collections": ["assets"],
+			"category_strategy": "ui_input_cursor",
+			"target_system": "drop_light_ui_mission_hud_editor_tooltips"
+		},
+		{
+			"id": "rank_particle_catalog",
+			"path": "res://data/rank_particle_asset_catalog.json",
+			"collections": ["badges", "particles"],
+			"category_strategy": "rank_particle",
+			"target_system": "npc_cards_mission_visual_feedback"
+		},
+		{
+			"id": "space_setpiece_catalog",
+			"path": "res://data/space_setpiece_catalog.json",
+			"collections": ["setpieces"],
+			"category_strategy": "setpiece",
+			"target_system": "fob_homebase_hangar_setpieces"
+		}
+	],
+	"entries": [
+		{
+			"id": "weapon_visual_sniper_model",
+			"category": "weapon_visual",
+			"path": "res://Assets/used/npc/weapon_pack/models/sniper.glb",
+			"source_id": "weapon_pack",
+			"license": "Creative Commons Zero, CC0",
+			"target_system": "2_5d_weapon_attachment",
+			"load_mode": "resource",
+			"scale_hint": 0.010
+		},
+		{
+			"id": "weapon_preview_sniper",
+			"category": "weapon_visual",
+			"path": "res://Assets/used/npc/weapon_pack/previews/sniper.png",
+			"source_id": "weapon_pack",
+			"license": "Creative Commons Zero, CC0",
+			"target_system": "fob_loadout_preview",
+			"load_mode": "resource"
+		},
+		{
+			"id": "weapon_visual_rocket_launcher_model",
+			"category": "weapon_visual",
+			"path": "res://Assets/used/npc/weapon_pack/models/rocketlauncherModern.glb",
+			"source_id": "weapon_pack",
+			"license": "Creative Commons Zero, CC0",
+			"target_system": "2_5d_weapon_attachment",
+			"load_mode": "resource",
+			"scale_hint": 0.008
+		},
+		{
+			"id": "weapon_preview_rocket_launcher",
+			"category": "weapon_visual",
+			"path": "res://Assets/used/npc/weapon_pack/previews/rocketlauncherModern.png",
+			"source_id": "weapon_pack",
+			"license": "Creative Commons Zero, CC0",
+			"target_system": "fob_loadout_preview",
+			"load_mode": "resource"
+		},
+		{
+			"id": "terrain_existing_ground_flat",
+			"category": "terrain_existing",
+			"path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain.glb",
+			"source_id": "kenney_space_kit",
+			"license": "Creative Commons Zero, CC0",
+			"target_system": "terrain_map_3d_view",
+			"load_mode": "resource",
+			"scale_hint": 1.4
+		},
+		{
+			"id": "terrain_existing_wall_straight",
+			"category": "terrain_existing",
+			"path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_wall.glb",
+			"source_id": "kenney_space_kit",
+			"license": "Creative Commons Zero, CC0",
+			"target_system": "terrain_map_3d_view",
+			"load_mode": "resource",
+			"scale_hint": 1.0
+		},
+		{
+			"id": "terrain_existing_wall_corner",
+			"category": "terrain_existing",
+			"path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_wallCorner.glb",
+			"source_id": "kenney_space_kit",
+			"license": "Creative Commons Zero, CC0",
+			"target_system": "terrain_map_3d_view",
+			"load_mode": "resource",
+			"scale_hint": 1.0
+		},
+		{
+			"id": "terrain_existing_cliff_straight",
+			"category": "terrain_existing",
+			"path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_sideCliff.glb",
+			"source_id": "kenney_space_kit",
+			"license": "Creative Commons Zero, CC0",
+			"target_system": "terrain_map_3d_view",
+			"load_mode": "resource",
+			"scale_hint": 1.0
+		}
+	]
+}

@@ -100,13 +100,17 @@ func _try_build_overwatch_shot(member, enemy, assignment: Dictionary, anchor_pos
 	var arc_width: float = float(assignment.get("arc_width", TAU))
 	if not _angle_within_sector((enemy_position - anchor_position).angle(), center_angle, arc_width):
 		return {}
-	if not _los_system.has_line_of_sight_between_nodes(member, enemy, _get_effective_range(enemy, base_contact_range), terrain_registry):
-		return {}
 	var active_weapon_id: String = _get_active_weapon_id(member)
+	var weapon_range_world: float = WEAPON_DATA_SCRIPT.get_effective_world_range(active_weapon_id, terrain_registry)
+	if not _los_system.has_line_of_sight_between_nodes(member, enemy, weapon_range_world, terrain_registry):
+		return {}
 	return {
 		"attacker_unit_id": String(member.call("get_unit_id")) if member.has_method("get_unit_id") else "",
 		"attacker_team_id": String(member.call("get_team_id")) if member.has_method("get_team_id") else "",
 		"target_unit_id": enemy_unit_id,
+		"weapon_id": active_weapon_id,
+		"weapon_tile_range": WEAPON_DATA_SCRIPT.get_effective_tile_range(active_weapon_id),
+		"weapon_range_world": weapon_range_world,
 		"damage": WEAPON_DATA_SCRIPT.get_damage_per_hit(active_weapon_id),
 		"hit_chance": minf(WEAPON_DATA_SCRIPT.get_base_hit_chance(active_weapon_id) + OVERWATCH_ACCURACY_BONUS, 0.98),
 		"weapon_ticks": WEAPON_DATA_SCRIPT.get_ticks_between_attacks(active_weapon_id),
@@ -128,13 +132,6 @@ func _can_member_overwatch(unit) -> bool:
 	if String(unit.call("get_vital_state")) != "fit":
 		return false
 	return unit is Node2D and not _get_active_weapon_id(unit).is_empty()
-
-
-func _get_effective_range(target, base_contact_range: float) -> float:
-	var target_stealth: float = 0.0
-	if target != null and target.has_method("get_stealth"):
-		target_stealth = clampf(float(target.call("get_stealth")), 0.0, 1.0)
-	return base_contact_range * (1.0 - target_stealth * 0.5)
 
 
 func _get_active_weapon_id(unit) -> String:

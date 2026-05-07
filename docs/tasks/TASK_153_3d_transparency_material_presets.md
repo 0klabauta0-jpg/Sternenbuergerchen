@@ -3,7 +3,7 @@
 ## Ziel
 3D-Assets mit Transparenz sollen klare Material-Regeln bekommen, damit Vegetation, Zaeune, Decals, Hologramme und Effekte performant und konsistent dargestellt werden. Es entstehen Presets und eine kleine Benchmark-/Beispielszene fuer Godot 4.6.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Voraussetzung
 - Bestehende 3D-Asset-/Materialpfade im Projekt
@@ -44,16 +44,16 @@
 - Keine grossen Asset-Massen im Repo ohne eigenen Content-Task.
 
 ## Akzeptanzkriterien
-- [ ] Drei Presets sind im Projekt nutzbar oder dokumentiert reproduzierbar.
-- [ ] Beispielszene zeigt Scissor, Hash und Blend nebeneinander.
-- [ ] Doku nennt klare Einsatzregeln fuer Assetklassen.
-- [ ] Bestehende Szenen starten unveraendert.
+- [x] Drei Presets sind im Projekt nutzbar oder dokumentiert reproduzierbar.
+- [x] Beispielszene zeigt Scissor, Hash und Blend nebeneinander.
+- [x] Doku nennt klare Einsatzregeln fuer Assetklassen.
+- [x] Bestehende Szenen starten unveraendert.
 
 ## Erwartetes Ergebnis
 Transparente 3D-Assets bekommen eine einfache Performance-Leitplanke, bevor viele Props, Vegetation oder Cover-Objekte ins Projekt wandern.
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_153_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_153_verifier.gd`
 - [ ] Manuelle Beispielszene oeffnen und Presets visuell pruefen.
 
 ## Dateien (voraussichtlich)
@@ -64,3 +64,9 @@ Transparente 3D-Assets bekommen eine einfache Performance-Leitplanke, bevor viel
 
 ## Risiken
 - Alpha-Blend kann Performance und Sorting verschlechtern. Deshalb muss Blend als Ausnahme dokumentiert bleiben.
+
+## Umsetzung
+- `MaterialPresetFactory` erzeugt `cutout_scissor`, `dither_hash` und `true_blend` als `StandardMaterial3D`-Presets und dokumentiert den visual-only Vertrag.
+- `transparent_material_benchmark.tscn` nutzt ein kleines Preview-Script, das drei Quad-Previews nebeneinander mit den Presets erzeugt.
+- `docs/rendering/3d_transparency_material_presets.md` beschreibt Einsatzregeln, Factory-Nutzung, Benchmark-Szene und manuelle Profiler-Hinweise.
+- `scripts/tests/task_153_verifier.gd` prueft Factory, Material-Modi, Preview-Szene, Doku, Task-/Status- und Roadmap-Status.

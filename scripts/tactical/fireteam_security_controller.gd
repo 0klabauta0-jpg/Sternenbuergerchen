@@ -1,6 +1,8 @@
 class_name FireteamSecurityController
 extends RefCounted
 
+const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
+
 const SECURITY_MODE_360: String = "360"
 const SECURITY_MODE_DIRECTIONAL: String = "directional"
 const DIRECTIONAL_ARC_WIDTH: float = PI * 0.7
@@ -38,6 +40,58 @@ func get_state_snapshot() -> Array:
 			continue
 		result.append(state)
 	return result
+
+
+static func normalize_enemy_security_mode(value: String) -> String:
+	var normalized_value: String = value.strip_edges().to_lower()
+	if normalized_value == SECURITY_MODE_360:
+		return SECURITY_MODE_360
+	return SECURITY_MODE_DIRECTIONAL
+
+
+static func resolve_facing_angle(facing: String, fallback_angle: float = 0.0) -> float:
+	match facing.strip_edges().to_lower():
+		"east":
+			return 0.0
+		"south_east":
+			return PI * 0.25
+		"south":
+			return PI * 0.5
+		"south_west":
+			return PI * 0.75
+		"west":
+			return PI
+		"north_west":
+			return -PI * 0.75
+		"north":
+			return -PI * 0.5
+		"north_east":
+			return -PI * 0.25
+		_:
+			return fallback_angle
+
+
+static func build_enemy_member_assignments(units: Array, security_mode: String, direction_angle: float, terrain_registry = null) -> Array:
+	var assignments: Array = []
+	var normalized_mode: String = normalize_enemy_security_mode(security_mode)
+	var fit_units: Array = []
+	for unit in units:
+		if unit == null or not unit.has_method("get_unit_id"):
+			continue
+		if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
+			continue
+		fit_units.append(unit)
+	if fit_units.is_empty():
+		return assignments
+	if normalized_mode == SECURITY_MODE_360:
+		var sector_width: float = TAU / float(fit_units.size())
+		for index in range(fit_units.size()):
+			var unit = fit_units[index]
+			assignments.append(_build_enemy_assignment(unit, wrapf(direction_angle + (sector_width * float(index)), -PI, PI), sector_width, terrain_registry))
+		return assignments
+	for unit in fit_units:
+		assignments.append(_build_enemy_assignment(unit, direction_angle, DIRECTIONAL_ARC_WIDTH, terrain_registry))
+	return assignments
 
 
 func update_fireteam_state(
@@ -146,6 +200,22 @@ func _build_fit_members(units: Array) -> Array:
 		return String(a.get("unit_id", "")) < String(b.get("unit_id", ""))
 	)
 	return result
+
+
+static func _build_enemy_assignment(unit, center_angle: float, arc_width: float, terrain_registry = null) -> Dictionary:
+	var weapon_id: String = ""
+	if unit != null and unit.has_method("get_active_weapon_id"):
+		weapon_id = String(unit.call("get_active_weapon_id")).strip_edges()
+	if not bool(WEAPON_DATA_SCRIPT.call("is_attack_weapon_id", weapon_id)):
+		weapon_id = String(WEAPON_DATA_SCRIPT.DEFAULT_WEAPON_ID)
+	return {
+		"unit_id": String(unit.call("get_unit_id")) if unit != null and unit.has_method("get_unit_id") else "",
+		"center_angle": center_angle,
+		"arc_width": arc_width,
+		"weapon_id": String(WEAPON_DATA_SCRIPT.call("normalize_weapon_id", weapon_id)),
+		"weapon_tile_range": int(WEAPON_DATA_SCRIPT.call("get_effective_tile_range", weapon_id)),
+		"weapon_range_world": float(WEAPON_DATA_SCRIPT.call("get_effective_world_range", weapon_id, terrain_registry)),
+	}
 
 
 func _resolve_anchor_position(fit_members: Array, leader) -> Vector2:

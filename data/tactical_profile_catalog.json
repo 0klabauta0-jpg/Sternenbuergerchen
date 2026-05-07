@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "catalog_id": "tactical_profile_authoring_v1",
+  "runtime_authority": "SimulationRoot",
+  "ui_sets_gameplay_truth": false,
+  "enemy_profile_ids": [
+    "guard_hold",
+    "patrol_probe",
+    "aggressive_push",
+    "defensive_cover",
+    "sniper_watch"
+  ],
+  "heavy_weapon_roles": [
+    "none",
+    "anti_armor",
+    "support",
+    "marksman"
+  ],
+  "anti_armor_weapon_ids": [
+    "rocket_launcher",
+    "rail_gun"
+  ],
+  "air_asset_risk_profiles": [
+    "none",
+    "watch_warning",
+    "strike_capable",
+    "loss_capable"
+  ],
+  "communication_intensities": [
+    "low",
+    "normal",
+    "high"
+  ],
+  "safe_defaults": {
+    "communication_intensity": "normal",
+    "air_asset_risk": {
+      "profile_id": "none",
+      "warning_required_before_damage": true,
+      "loss_consequence": "replacement_recovery"
+    }
+  }
+}

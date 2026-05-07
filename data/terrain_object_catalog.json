@@ -1,0 +1,75 @@
+{
+	"schema_version": 1,
+	"catalog_id": "terrain_object_catalog_v1",
+	"task": "TASK_254",
+	"runtime_contract": {
+		"paths": "res_only_no_local_user_paths",
+		"visual_only_meshes": true,
+		"gameplay_truth": "TerrainTileData fields: object_type_id, walkable, blocks_los, cover_value, object_height",
+		"mesh_size_not_gameplay_truth": true,
+		"snapshot_mesh_data_required": false
+	},
+	"source_catalog": "res://data/nature_kit_asset_catalog.json",
+	"object_types": [
+		{
+			"type_id": "nature_tree_blocker",
+			"display_name": "Nature Tree Blocker",
+			"category": "nature_tree_blocker",
+			"source_asset_id": "nature_tree_pine_tall",
+			"model_key": "nature_tree_blocker",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 65,
+			"object_height": 3,
+			"gameplay_role": "los_blocking_cover"
+		},
+		{
+			"type_id": "nature_rock_cover",
+			"display_name": "Nature Rock Cover",
+			"category": "nature_rock_cover",
+			"source_asset_id": "nature_rock_large_1",
+			"model_key": "nature_rock_cover",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 55,
+			"object_height": 2,
+			"gameplay_role": "blocking_cover"
+		},
+		{
+			"type_id": "nature_bush_cover",
+			"display_name": "Nature Bush Cover",
+			"category": "nature_bush_cover",
+			"source_asset_id": "nature_bush",
+			"model_key": "nature_bush_cover",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 25,
+			"object_height": 1,
+			"gameplay_role": "soft_cover_walkable"
+		},
+		{
+			"type_id": "nature_cactus_cover",
+			"display_name": "Nature Cactus Cover",
+			"category": "nature_cactus_cover",
+			"source_asset_id": "nature_cactus_large",
+			"model_key": "nature_cactus_cover",
+			"walkable": false,
+			"blocks_los": false,
+			"cover_value": 30,
+			"object_height": 1,
+			"gameplay_role": "blocking_light_cover"
+		},
+		{
+			"type_id": "nature_deco_logs",
+			"display_name": "Nature Deco Logs",
+			"category": "nature_deco_small",
+			"source_asset_id": "nature_logs_stack",
+			"model_key": "nature_deco_logs",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"object_height": 0,
+			"gameplay_role": "visual_only_no_cover"
+		}
+	]
+}

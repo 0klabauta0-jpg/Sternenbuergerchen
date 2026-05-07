@@ -288,9 +288,9 @@ Fahrzeuge
 komplexe Taktik
 Phase 18A - Navigation-, Cover- und Rendering-Labs
 TASK_131 - Navigation Benchmark Harness
-TASK_151 - Engpass-Reservierung und MAPF-Light
-TASK_152 - Seeded Cover Placement Lab
-TASK_153 - 3D Transparency Material Presets
+TASK_151 - Engpass-Reservierung und MAPF-Light (implementiert)
+TASK_152 - Seeded Cover Placement Lab (implementiert)
+TASK_153 - 3D Transparency Material Presets (implementiert)
 
 Phase 18B - Editor-Asset-Ausbau
 TASK_132 - Kenney Isometric Asset Palette Expansion
@@ -324,6 +324,152 @@ TASK_174 - Character Helmet and Blaster Attachment Visuals (implementiert)
 Phase 18F - NPC Loadout Visuals
 TASK_175 - NPC Loadout Attachments (implementiert)
 TASK_176 - FOB Loadout Weapon Preview Selector (implementiert)
+
+Phase 18G - Drop Light Fixed UI Layout
+TASK_177 - Drop Light Fixed UI Layout Contract (implementiert)
+TASK_178 - FOB Drop Light Fixed FullHD Layout (implementiert)
+TASK_179 - Homebase Drop Light Fixed FullHD Layout (implementiert)
+TASK_180 - Mission Drop Light Fixed HUD Layout (implementiert)
+TASK_181 - Drop Light Fixed Window Audit Patch (implementiert)
+
+Phase 18H - Terrain Height and Hill Rules
+TASK_182 - Terrain Hill Rules Contract (implementiert)
+TASK_183 - Editor Hill Authoring Patch (implementiert)
+TASK_184 - Gameplay Hill Semantics Patch (implementiert)
+TASK_185 - Hill Visuals and Edge Lines Patch (implementiert)
+
+Phase 18I - Mission Map NPC Behavior and Command Feedback
+TASK_186 - Mission Map Unit Presence and Registry Audit (implementiert)
+TASK_187 - NPC Minimum Spacing and Multiplayer Authority (implementiert)
+TASK_188 - Fireteam Advance Styles Map Readability (implementiert)
+TASK_189 - Medic Adjacent Tile Healing Rule (implementiert)
+TASK_190 - Weapon Visual Loadout Expansion and Scale (implementiert)
+TASK_191 - Command Chain Selection and Area Feedback Pass (implementiert)
+TASK_192 - Mission Map NPC Behavior Playability Smoke (implementiert)
+
+Phase 18J - Asset Intake and Availability Expansion
+TASK_193 - Asset Source Inventory and Availability Matrix (implementiert)
+TASK_194 - Space Modular and Station Setpiece Import (implementiert)
+TASK_195 - UI Input and Cursor Asset Availability Pass (implementiert)
+TASK_196 - Rank and Particle Asset Subset Import (implementiert)
+TASK_197 - Curated Asset Catalog and Usage Mapping (implementiert)
+TASK_198 - Asset Import Gate and Visual Smoke (implementiert)
+
+Phase 18K - Main Menu and App Entry
+TASK_199 - Main Menu Shell and Background Image (implementiert)
+
+Phase 18L - Enemy Team Tactics Weapon Ranges and NPC Identity
+TASK_200 - Enemy Team Tactics Contract and Editor Config (implementiert)
+TASK_201 - Weapon Range Scale and Tile Distance Patch (implementiert)
+TASK_202 - Enemy Security Direction and LOS Patch (implementiert)
+TASK_203 - Enemy Cover Advance and Team Tactics Patch (implementiert)
+TASK_204 - Enemy Tactics Multiplayer Authority Snapshot Patch (implementiert)
+TASK_205 - Weapon Fire VFX Muzzle Flash Particles (implementiert)
+TASK_206 - Enemy Visual Faction Archetypes Orange Suit (implementiert)
+TASK_207 - NPC Rank Skill Badge Derivation (implementiert)
+TASK_208 - Enemy Team Tactics Playability Smoke (implementiert)
+
+Phase 18M - Comic Bubble Feedback and NPC Thoughts
+TASK_209 - Comic Bubble Asset Catalog and Visual Contract (implementiert)
+TASK_210 - Fireteamleader Command Feedback Bubbles (implementiert)
+TASK_211 - Comic Bubble Toggles Cooldowns and Settings (implementiert)
+TASK_212 - NPC Thought Bubble Hold to Peek Overlay (implementiert)
+TASK_213 - Skill Based Bubble Text Resolver and Content Pass (implementiert)
+TASK_214 - Comic Bubble Feedback Playability Smoke (implementiert)
+
+Phase 18N - Deep Performance Profiling and Optimization Pass
+TASK_215 - Performance Deep Pass Baseline and Research (implementiert)
+TASK_216 - 2.5D Rendering Node and Draw Budget Pass (implementiert)
+TASK_217 - Navigation Pathfinding LOS Performance Pass (implementiert)
+TASK_218 - Simulation Combat AI Tick Budget Pass (implementiert)
+TASK_219 - UI HUD Meta Comic Bubble Performance Pass (implementiert)
+TASK_220 - Asset Import VRAM Shader Pipeline Stutter Pass (implementiert)
+TASK_221 - Multiplayer Snapshot Serialization Performance Pass (implementiert)
+TASK_222 - Performance Regression Gate and Manual Profile Checklist (implementiert)
+
+Phase 18O - App Shell Settings Fog of War Multiplayer Maps and Editor Usability
+TASK_223 - Fog of War Modes Contract and Settings (implementiert)
+TASK_224 - Fog of War Tile Visibility Height Cover Runtime (implementiert)
+TASK_225 - Fog of War 2.5D Visual Overlay and Contacts (implementiert)
+TASK_226 - Main Menu Settings Shell Display Audio Input Gameplay (implementiert)
+TASK_227 - Main Menu Multiplayer Host Join Lobby Flow (implementiert)
+TASK_228 - Multiplayer Editor Map Manifest Download Consent (implementiert)
+TASK_229 - Map Editor Usability Authoring Pass (implementiert)
+TASK_230 - Flight Altitude Layer and Air Visibility Audit (implementiert)
+TASK_231 - App Shell Game Setup Integration and Open Items Review (implementiert)
+
+Phase 18P - Character Gameplay Roster Progression and Team Identity
+TASK_232 - Start Roster Generation Contract (implementiert)
+TASK_233 - Portrait Identity Catalog and Roster Presentation (implementiert)
+TASK_234 - Persistent Player Roster Save and Reset (implementiert)
+TASK_235 - Character Sheet Roster Gameplay Expansion (implementiert)
+TASK_236 - Fireteam Relationship Affinity and Cohesion (implementiert)
+TASK_237 - Mission Progression XP Morale Frustration (implementiert)
+TASK_238 - Personnel Events Recruit Leave Dismiss Notifications (implementiert)
+TASK_239 - Character Gameplay Bubble Mission Integration (implementiert)
+TASK_240 - Multiplayer Player Roster Ownership Contract (implementiert)
+TASK_241 - Character Gameplay Playability Smoke (implementiert)
+
+Phase 18Q - Audio SFX Backgrounds Asset Locality and Alignment
+TASK_242 - Audio SFX Source Inventory and Curated Import (implementiert)
+TASK_243 - Audio Event Contract and Bus Setup (implementiert)
+TASK_244 - Combat Movement UI SFX Integration (implementiert)
+TASK_245 - Background Image Catalog and Screen Usage (implementiert)
+TASK_246 - Visual Scale Alignment Asset Pass (implementiert)
+TASK_247 - Used Asset Project Locality Audit Gate (implementiert)
+TASK_248 - Audio Visual Import and Playback Smoke (implementiert)
+TASK_249 - Post Audio Visual Performance Optimization Pass (implementiert)
+TASK_250 - Asset Audio Background Playability Smoke (implementiert)
+
+Phase 18R - Nature Kit Terrain Cliffs Ground and Vegetation
+TASK_251 - Nature Kit Classic Source Inventory and Subset Import (implementiert)
+TASK_252 - Nature Cliff Hill Edge Visual Mapping (implementiert)
+TASK_253 - Nature Ground Surface Editor Palette Pass (implementiert)
+TASK_254 - Nature Trees Rocks Vegetation Cover Props (implementiert)
+TASK_255 - Nature Kit Hill Playability Visual Performance Smoke (implementiert)
+
+Phase 18S - Automated Playability QA and UI Flow Coverage
+TASK_256 - Automated Playability Coverage Contract (implementiert)
+TASK_257 - Button Reachability and Interaction Verifier (implementiert)
+TASK_258 - Fixed Window Clipping Scrollbar Playability Audit (implementiert)
+TASK_259 - Character Card Roster Switching Playability (implementiert)
+TASK_260 - Loadout Selection Decorative Weapons Weight Playability (implementiert)
+TASK_261 - Cross Screen State Loss Playability Smoke (implementiert)
+TASK_262 - Playability Regression Gate and Manual Open Items (implementiert)
+
+Phase 18T - Contextual Help Popups and Explainability
+TASK_263 - Contextual Help Popup UX Contract (implementiert)
+TASK_264 - Contextual Help Popup Component Settings Toggle (implementiert)
+TASK_265 - Character Sheet Loadout Help Content Pass (implementiert)
+TASK_266 - Command Mission Editor Settings Help Content Pass (implementiert)
+TASK_267 - Contextual Help Coverage Layout Verifier (implementiert)
+TASK_268 - Post Help Popup Playability Regression Smoke (implementiert)
+
+Phase 18U - Tactical Command Doctrine Fireteam Delegation and Air Asset Risk
+TASK_269 - Tactical Doctrine Source Review Game Abstraction (implementiert)
+TASK_270 - Commander to Fireteam Leader Delegation Contract (implementiert)
+TASK_271 - Tactical Command Modes ROE Fire Rules (implementiert)
+TASK_272 - Multi Fireteam Coordinated Area Plan (implementiert)
+TASK_273 - Fireteam Leader Skill Tactical Progression (implementiert)
+TASK_274 - Tactical Communication Feedback Layer (implementiert)
+TASK_275 - Command Button Hierarchy Arrangement Overhaul (implementiert)
+TASK_276 - Tactical Breakout and Exception Behavior (implementiert)
+TASK_277 - Dropship Freighter Anti Armor Threat Contract (implementiert)
+TASK_278 - Air Asset Loss Recovery Meta Loop (implementiert)
+TASK_279 - LZ Security Air Asset Tactical Playability Smoke (implementiert)
+TASK_280 - Tactical Profile Editor Scenario Authoring (implementiert)
+TASK_281 - Tactical Command Multiplayer Authority Snapshot (implementiert)
+TASK_282 - Tactical Overhaul Playability Performance Help Gate (implementiert)
+
+Phase 18V - Post Tactical Docs Architecture and Sneaky Code Review
+TASK_283 - Post Tactical Docs Consistency Audit (implementiert)
+TASK_284 - Gameplay Truth Architecture Boundary Audit (implementiert)
+TASK_285 - Tactical Decision Branch Integrity Review (implementiert)
+TASK_286 - UI Feedback Truth Regression Review (implementiert)
+TASK_287 - Editor Save Multiplayer Contract Regression Review (implementiert)
+TASK_288 - Regression Gate Coverage Gap Audit (implementiert)
+TASK_289 - Final Sneaky Code Review Patch Queue (implementiert)
+TASK_290 - User Handbuch Weekly Closeout (implementiert)
 
 Batch-Empfehlung
 

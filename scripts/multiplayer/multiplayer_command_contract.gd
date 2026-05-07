@@ -3,6 +3,7 @@ extends RefCounted
 
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const COMMANDER_COMMAND_SCRIPT: GDScript = preload("res://scripts/command/commander_command.gd")
+const COMMANDER_INTENT_SCRIPT: GDScript = preload("res://scripts/command/commander_intent.gd")
 const AREA_ORDER_SCRIPT: GDScript = preload("res://scripts/command/area_order.gd")
 const AD_HOC_ORDER_SCRIPT: GDScript = preload("res://scripts/command/ad_hoc_order.gd")
 
@@ -22,6 +23,10 @@ const CATEGORY_COMMANDER_COMMAND: String = "commander_command"
 const CATEGORY_AREA_ORDER: String = "area_order"
 const CATEGORY_AD_HOC_ORDER: String = "ad_hoc_order"
 const CATEGORY_DROPSHIP_COMMAND: String = "dropship_command"
+const CATEGORY_COMMANDER_INTENT: String = "commander_intent"
+const CATEGORY_ROLE_OVERRIDE: String = "role_override"
+const CATEGORY_BREAKOUT_RESPONSE: String = "breakout_response"
+const CATEGORY_AIR_ASSET_COMMAND: String = "air_asset_command"
 
 const ALLOWED_AREA_ORDER_TYPES: PackedStringArray = [
 	"engage",
@@ -32,10 +37,28 @@ const ALLOWED_DROPSHIP_COMMAND_TYPES: PackedStringArray = [
 	"clear_lz",
 	"call_dropship",
 ]
+const ALLOWED_ROLE_OVERRIDE_COMMAND_TYPES: PackedStringArray = [
+	"role_override",
+	"set_peer_role",
+	"set_peer_fireteams",
+]
+const ALLOWED_BREAKOUT_RESPONSE_TYPES: PackedStringArray = [
+	"breakout_confirm",
+	"breakout_abort",
+	"breakout_regroup",
+	"breakout_override",
+]
+const ALLOWED_AIR_ASSET_COMMAND_TYPES: PackedStringArray = [
+	"air_asset_guard_lz",
+	"air_asset_abort_approach",
+	"air_asset_hold",
+	"air_asset_request_status",
+]
 const FORBIDDEN_STATE_KEYS: PackedStringArray = [
 	"effect_type",
 	"damage",
 	"health",
+	"integrity",
 	"vital_state",
 	"bleedout_ticks",
 	"position",
@@ -51,6 +74,14 @@ const FORBIDDEN_STATE_KEYS: PackedStringArray = [
 	"drop_ship_requested",
 	"mission_drop_state",
 	"mission_drop_progress",
+	"committed_plan_state",
+	"fireteam_plan_status",
+	"breakout_state",
+	"communication_events",
+	"air_asset_status",
+	"air_asset_state",
+	"vfx_events",
+	"sfx_events",
 ]
 const FORBIDDEN_LZ_SOURCES: PackedStringArray = [
 	"scenario",
@@ -110,6 +141,14 @@ func _validate_category_payload(category: String, command: Dictionary) -> Dictio
 			return _validate_ad_hoc_order(command)
 		CATEGORY_DROPSHIP_COMMAND:
 			return _validate_dropship_command(command)
+		CATEGORY_COMMANDER_INTENT:
+			return _validate_commander_intent(command)
+		CATEGORY_ROLE_OVERRIDE:
+			return _validate_role_override(command)
+		CATEGORY_BREAKOUT_RESPONSE:
+			return _validate_breakout_response(command)
+		CATEGORY_AIR_ASSET_COMMAND:
+			return _validate_air_asset_command(command)
 		_:
 			return _reject("command_not_whitelisted")
 
@@ -194,6 +233,63 @@ func _validate_dropship_command(command: Dictionary) -> Dictionary:
 	return _accept_payload(command_type, String(command.get("unit_id", "")).strip_edges(), team_id, String(command.get("fireteam_id", "")).strip_edges().to_lower())
 
 
+func _validate_commander_intent(command: Dictionary) -> Dictionary:
+	var commander_intent = COMMANDER_INTENT_SCRIPT.call("from_dict", command)
+	if commander_intent == null or not commander_intent.has_method("is_valid") or not bool(commander_intent.call("is_valid")):
+		return _reject("invalid_commander_intent")
+
+	var intent_dict: Dictionary = Dictionary(commander_intent.call("to_dict"))
+	var team_id: String = String(intent_dict.get("team_id", command.get("team_id", ""))).strip_edges()
+	if team_id.is_empty():
+		return _reject("commander_intent_missing_team")
+	var fireteam_id: String = String(intent_dict.get("fireteam_id", "")).strip_edges().to_lower()
+	if fireteam_id.is_empty():
+		var fireteam_ids: PackedStringArray = PackedStringArray(intent_dict.get("coordinated_fireteam_ids", PackedStringArray()))
+		if not fireteam_ids.is_empty():
+			fireteam_id = String(fireteam_ids[0]).strip_edges().to_lower()
+	return _accept_payload("commander_intent", "", team_id, fireteam_id)
+
+
+func _validate_role_override(command: Dictionary) -> Dictionary:
+	var command_type: String = _extract_command_type(command)
+	if not ALLOWED_ROLE_OVERRIDE_COMMAND_TYPES.has(command_type):
+		return _reject("role_override_not_whitelisted")
+	var target_peer_id: int = int(command.get("target_peer_id", command.get("peer_id", 0)))
+	if target_peer_id <= 0:
+		return _reject("role_override_missing_peer")
+	if command.has("role_id") and not is_allowed_role(String(command.get("role_id", "")).strip_edges().to_lower()):
+		return _reject("role_override_unknown_role")
+	return _accept_payload(command_type, "", String(command.get("team_id", "")).strip_edges(), String(command.get("fireteam_id", "")).strip_edges().to_lower(), {"requires_host": true})
+
+
+func _validate_breakout_response(command: Dictionary) -> Dictionary:
+	var command_type: String = _extract_command_type(command)
+	if not ALLOWED_BREAKOUT_RESPONSE_TYPES.has(command_type):
+		return _reject("breakout_response_not_whitelisted")
+	var breakout_id: String = String(command.get("breakout_id", "")).strip_edges()
+	var fireteam_id: String = String(command.get("fireteam_id", "")).strip_edges().to_lower()
+	var team_id: String = String(command.get("team_id", "")).strip_edges()
+	if breakout_id.is_empty():
+		return _reject("breakout_response_missing_breakout_id")
+	if fireteam_id.is_empty() or team_id.is_empty():
+		return _reject("breakout_response_missing_owner")
+	return _accept_payload(command_type, "", team_id, fireteam_id)
+
+
+func _validate_air_asset_command(command: Dictionary) -> Dictionary:
+	var command_type: String = _extract_command_type(command)
+	if not ALLOWED_AIR_ASSET_COMMAND_TYPES.has(command_type):
+		return _reject("air_asset_command_not_whitelisted")
+	if _has_forbidden_lz_source(command):
+		return _reject("lz_from_forbidden_source")
+	var team_id: String = String(command.get("team_id", "")).strip_edges()
+	if team_id.is_empty():
+		return _reject("air_asset_command_missing_team")
+	if command_type == "air_asset_guard_lz" and not (_has_vector2_or_vector3(command, "target_position") or _has_vector2_or_vector3(command, "lz_position")):
+		return _reject("air_asset_guard_lz_missing_position")
+	return _accept_payload(command_type, String(command.get("unit_id", "")).strip_edges(), team_id, String(command.get("fireteam_id", "")).strip_edges().to_lower())
+
+
 func _validate_peer_rights(ownership: Dictionary, context: Dictionary) -> Dictionary:
 	var role_id: String = String(context.get("peer_role", ROLE_COMMANDER)).strip_edges().to_lower()
 	if role_id.is_empty():
@@ -202,6 +298,8 @@ func _validate_peer_rights(ownership: Dictionary, context: Dictionary) -> Dictio
 		return _reject("peer_role_not_allowed")
 	if role_id == ROLE_SPECTATOR:
 		return _reject("spectator_cannot_command")
+	if bool(ownership.get("requires_host", false)):
+		return {"accepted": true} if role_id == ROLE_HOST else _reject("host_required")
 	if role_id == ROLE_HOST:
 		return {"accepted": true}
 
@@ -233,7 +331,17 @@ func _validate_peer_rights(ownership: Dictionary, context: Dictionary) -> Dictio
 
 func _detect_category(command: Dictionary) -> String:
 	var explicit_category: String = String(command.get("contract_category", command.get("payload_kind", ""))).strip_edges().to_lower()
-	if explicit_category in [CATEGORY_UNIT_COMMAND, CATEGORY_COMMANDER_COMMAND, CATEGORY_AREA_ORDER, CATEGORY_AD_HOC_ORDER, CATEGORY_DROPSHIP_COMMAND]:
+	if explicit_category in [
+		CATEGORY_UNIT_COMMAND,
+		CATEGORY_COMMANDER_COMMAND,
+		CATEGORY_AREA_ORDER,
+		CATEGORY_AD_HOC_ORDER,
+		CATEGORY_DROPSHIP_COMMAND,
+		CATEGORY_COMMANDER_INTENT,
+		CATEGORY_ROLE_OVERRIDE,
+		CATEGORY_BREAKOUT_RESPONSE,
+		CATEGORY_AIR_ASSET_COMMAND,
+	]:
 		return explicit_category
 	if command.has("area_order_id") or command.has("world_polygon") or command.has("tile_positions"):
 		return CATEGORY_AREA_ORDER
@@ -241,6 +349,14 @@ func _detect_category(command: Dictionary) -> String:
 		return CATEGORY_AD_HOC_ORDER
 
 	var command_type: String = _extract_command_type(command)
+	if command.has("verb") and command.has("command_id"):
+		return CATEGORY_COMMANDER_INTENT
+	if ALLOWED_ROLE_OVERRIDE_COMMAND_TYPES.has(command_type):
+		return CATEGORY_ROLE_OVERRIDE
+	if ALLOWED_BREAKOUT_RESPONSE_TYPES.has(command_type):
+		return CATEGORY_BREAKOUT_RESPONSE
+	if ALLOWED_AIR_ASSET_COMMAND_TYPES.has(command_type):
+		return CATEGORY_AIR_ASSET_COMMAND
 	if UNIT_COMMAND_SCRIPT.ALLOWED_COMMAND_TYPES.has(command_type):
 		return CATEGORY_UNIT_COMMAND
 	if COMMANDER_COMMAND_SCRIPT.ALLOWED_COMMAND_TYPES.has(command_type):
@@ -279,15 +395,17 @@ func _has_vector2_or_vector3(command: Dictionary, key: String) -> bool:
 	return value_type == TYPE_VECTOR2 or value_type == TYPE_VECTOR3
 
 
-func _accept_payload(command_type: String, unit_id: String, team_id: String, fireteam_id: String) -> Dictionary:
+func _accept_payload(command_type: String, unit_id: String, team_id: String, fireteam_id: String, extra_ownership: Dictionary = {}) -> Dictionary:
+	var ownership: Dictionary = {
+		"unit_id": unit_id,
+		"team_id": team_id,
+		"fireteam_id": fireteam_id,
+	}
+	ownership.merge(extra_ownership, true)
 	return {
 		"accepted": true,
 		"command_type": command_type,
-		"ownership": {
-			"unit_id": unit_id,
-			"team_id": team_id,
-			"fireteam_id": fireteam_id,
-		},
+		"ownership": ownership,
 	}
 
 

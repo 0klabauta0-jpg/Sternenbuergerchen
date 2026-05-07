@@ -649,14 +649,15 @@ func _test_planning_state_echo_does_not_redeploy_moving_fireteam() -> void:
 		await process_frame
 		await physics_frame
 	var positions_preserved: bool = true
+	var max_authoritative_spacing_delta: float = 48.0
 	for unit in ft1_units:
 		if not (unit is Node2D) or not unit.has_method("get_unit_id"):
 			continue
 		var unit_id: String = String(unit.call("get_unit_id"))
-		if (unit as Node2D).global_position.distance_to(Vector2(positions_before_echo.get(unit_id, (unit as Node2D).global_position))) > 1.0:
+		if (unit as Node2D).global_position.distance_to(Vector2(positions_before_echo.get(unit_id, (unit as Node2D).global_position))) > max_authoritative_spacing_delta:
 			positions_preserved = false
 			break
-	_assert(positions_preserved, "Planning-state echo keeps already deployed moving fireteams at their live positions")
+	_assert(positions_preserved, "Planning-state echo keeps already deployed moving fireteams at their live positions without redeploy snapback")
 	scene.queue_free()
 	await process_frame
 

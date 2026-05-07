@@ -1,0 +1,228 @@
+{
+	"catalog_version": 1,
+	"status": "TASK_196_curated_rank_particle_subset",
+	"rules": {
+		"runtime_contract": "visual_only_no_gameplay_truth",
+		"rank_png_cap": 12,
+		"particle_png_cap": 12,
+		"format": "png_only",
+		"no_particle_logic": true,
+		"no_status_truth": true
+	},
+	"sources": {
+		"kenney_ranks_pack": {
+			"license": "Creative Commons Zero, CC0",
+			"source_doc": "res://docs/assets/rank_particle_inventory.md",
+			"project_root": "res://Assets/curated/kenney/ranks/",
+			"usage": "role_and_state_badges"
+		},
+		"kenney_particle_pack": {
+			"license": "Creative Commons Zero, CC0",
+			"source_doc": "res://docs/assets/rank_particle_inventory.md",
+			"project_root": "res://Assets/curated/kenney/particles/",
+			"usage": "mission_visual_effect_sprites"
+		}
+	},
+	"badges": [
+		{
+			"id": "badge_role_ftl",
+			"source_id": "kenney_ranks_pack",
+			"category": "role_badge",
+			"path": "res://Assets/curated/kenney/ranks/badge_role_ftl.png",
+			"source_relpath": "PNG/Default size/Silver/rank000.png",
+			"purpose": "fireteam_leader_readability",
+			"target_screen": "npc_cards_selected_fireteam"
+		},
+		{
+			"id": "badge_role_medic",
+			"source_id": "kenney_ranks_pack",
+			"category": "role_badge",
+			"path": "res://Assets/curated/kenney/ranks/badge_role_medic.png",
+			"source_relpath": "PNG/Default size/Silver/rank007.png",
+			"purpose": "medic_readability",
+			"target_screen": "npc_cards_selected_fireteam"
+		},
+		{
+			"id": "badge_role_rifle",
+			"source_id": "kenney_ranks_pack",
+			"category": "role_badge",
+			"path": "res://Assets/curated/kenney/ranks/badge_role_rifle.png",
+			"source_relpath": "PNG/Default size/Silver/rank014.png",
+			"purpose": "rifle_assault_readability",
+			"target_screen": "npc_cards_mission_map"
+		},
+		{
+			"id": "badge_role_heavy",
+			"source_id": "kenney_ranks_pack",
+			"category": "role_badge",
+			"path": "res://Assets/curated/kenney/ranks/badge_role_heavy.png",
+			"source_relpath": "PNG/Default size/Silver/rank021.png",
+			"purpose": "heavy_special_readability",
+			"target_screen": "loadout_selected_fireteam"
+		},
+		{
+			"id": "badge_role_pilot",
+			"source_id": "kenney_ranks_pack",
+			"category": "role_badge",
+			"path": "res://Assets/curated/kenney/ranks/badge_role_pilot.png",
+			"source_relpath": "PNG/Default size/Silver/rank028.png",
+			"purpose": "pilot_transport_context",
+			"target_screen": "flightdeck_fob"
+		},
+		{
+			"id": "badge_role_engineer",
+			"source_id": "kenney_ranks_pack",
+			"category": "role_badge",
+			"path": "res://Assets/curated/kenney/ranks/badge_role_engineer.png",
+			"source_relpath": "PNG/Default size/Silver/rank035.png",
+			"purpose": "engineer_objective_context",
+			"target_screen": "objective_status"
+		},
+		{
+			"id": "badge_role_enemy",
+			"source_id": "kenney_ranks_pack",
+			"category": "role_badge",
+			"path": "res://Assets/curated/kenney/ranks/badge_role_enemy.png",
+			"source_relpath": "PNG/Default size/Gold/rank042.png",
+			"purpose": "enemy_contact_readability",
+			"target_screen": "mission_map_contacts"
+		},
+		{
+			"id": "badge_state_down",
+			"source_id": "kenney_ranks_pack",
+			"category": "state_badge",
+			"path": "res://Assets/curated/kenney/ranks/badge_state_down.png",
+			"source_relpath": "PNG/Default size/Black/rank049.png",
+			"purpose": "down_state_visual_badge",
+			"target_screen": "npc_cards_selected_fireteam"
+		},
+		{
+			"id": "badge_state_ready",
+			"source_id": "kenney_ranks_pack",
+			"category": "state_badge",
+			"path": "res://Assets/curated/kenney/ranks/badge_state_ready.png",
+			"source_relpath": "PNG/Default size/Gold/rank056.png",
+			"purpose": "ready_state_visual_badge",
+			"target_screen": "fob_homebase_roster"
+		},
+		{
+			"id": "badge_state_suppressed",
+			"source_id": "kenney_ranks_pack",
+			"category": "state_badge",
+			"path": "res://Assets/curated/kenney/ranks/badge_state_suppressed.png",
+			"source_relpath": "PNG/Default size/Bronze/rank063.png",
+			"purpose": "suppression_state_visual_badge",
+			"target_screen": "selected_fireteam_status"
+		}
+	],
+	"particles": [
+		{
+			"id": "particle_lz_drop",
+			"source_id": "kenney_particle_pack",
+			"category": "lz_drop",
+			"path": "res://Assets/curated/kenney/particles/particle_lz_drop.png",
+			"source_relpath": "PNG (Transparent)/flare_01.png",
+			"purpose": "dropship_lz_visual",
+			"target_screen": "mission_map"
+		},
+		{
+			"id": "particle_contact_ping",
+			"source_id": "kenney_particle_pack",
+			"category": "contact",
+			"path": "res://Assets/curated/kenney/particles/particle_contact_ping.png",
+			"source_relpath": "PNG (Transparent)/spark_05.png",
+			"purpose": "new_contact_visual_ping",
+			"target_screen": "mission_map_contacts"
+		},
+		{
+			"id": "particle_suppression_smoke",
+			"source_id": "kenney_particle_pack",
+			"category": "suppression",
+			"path": "res://Assets/curated/kenney/particles/particle_suppression_smoke.png",
+			"source_relpath": "PNG (Transparent)/smoke_04.png",
+			"purpose": "suppression_feedback_visual",
+			"target_screen": "mission_map_status"
+		},
+		{
+			"id": "particle_objective_marker",
+			"source_id": "kenney_particle_pack",
+			"category": "objective",
+			"path": "res://Assets/curated/kenney/particles/particle_objective_marker.png",
+			"source_relpath": "PNG (Transparent)/star_04.png",
+			"purpose": "objective_attention_visual",
+			"target_screen": "mission_map_objectives"
+		},
+		{
+			"id": "particle_hit_flash",
+			"source_id": "kenney_particle_pack",
+			"category": "hit",
+			"path": "res://Assets/curated/kenney/particles/particle_hit_flash.png",
+			"source_relpath": "PNG (Transparent)/muzzle_01.png",
+			"purpose": "hit_feedback_visual",
+			"target_screen": "combat_visualizer"
+		},
+		{
+			"id": "particle_heal_pulse",
+			"source_id": "kenney_particle_pack",
+			"category": "heal",
+			"path": "res://Assets/curated/kenney/particles/particle_heal_pulse.png",
+			"source_relpath": "PNG (Transparent)/magic_03.png",
+			"purpose": "medic_heal_feedback_visual",
+			"target_screen": "medic_support_visualizer"
+		},
+		{
+			"id": "particle_warning_glow",
+			"source_id": "kenney_particle_pack",
+			"category": "warning",
+			"path": "res://Assets/curated/kenney/particles/particle_warning_glow.png",
+			"source_relpath": "PNG (Transparent)/light_01.png",
+			"purpose": "warning_attention_visual",
+			"target_screen": "mission_hud"
+		},
+		{
+			"id": "particle_trace_line",
+			"source_id": "kenney_particle_pack",
+			"category": "trace",
+			"path": "res://Assets/curated/kenney/particles/particle_trace_line.png",
+			"source_relpath": "PNG (Transparent)/trace_03.png",
+			"purpose": "shot_trace_visual",
+			"target_screen": "combat_visualizer"
+		},
+		{
+			"id": "particle_fire_burst",
+			"source_id": "kenney_particle_pack",
+			"category": "impact",
+			"path": "res://Assets/curated/kenney/particles/particle_fire_burst.png",
+			"source_relpath": "PNG (Transparent)/fire_01.png",
+			"purpose": "impact_burst_visual",
+			"target_screen": "combat_visualizer"
+		},
+		{
+			"id": "particle_dust_kick",
+			"source_id": "kenney_particle_pack",
+			"category": "movement",
+			"path": "res://Assets/curated/kenney/particles/particle_dust_kick.png",
+			"source_relpath": "PNG (Transparent)/dirt_02.png",
+			"purpose": "movement_or_landing_dust_visual",
+			"target_screen": "mission_map"
+		},
+		{
+			"id": "particle_scorch_mark",
+			"source_id": "kenney_particle_pack",
+			"category": "impact",
+			"path": "res://Assets/curated/kenney/particles/particle_scorch_mark.png",
+			"source_relpath": "PNG (Transparent)/scorch_01.png",
+			"purpose": "temporary_impact_mark_visual",
+			"target_screen": "mission_map"
+		},
+		{
+			"id": "particle_command_ping",
+			"source_id": "kenney_particle_pack",
+			"category": "command",
+			"path": "res://Assets/curated/kenney/particles/particle_command_ping.png",
+			"source_relpath": "PNG (Transparent)/circle_04.png",
+			"purpose": "command_ack_visual",
+			"target_screen": "command_feedback"
+		}
+	]
+}

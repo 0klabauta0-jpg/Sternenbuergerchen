@@ -4,18 +4,23 @@ extends RefCounted
 const RANGE_CLASS_SHORT: String = "short"
 const RANGE_CLASS_MEDIUM: String = "medium"
 const RANGE_CLASS_LONG: String = "long"
+const RANGE_CLASS_HEAVY: String = "heavy"
 const RANGE_CLASS_ANY: String = "any"
+const RANGE_CLASS_NONE: String = "none"
 const ALLOWED_RANGE_CLASSES: PackedStringArray = [
 	RANGE_CLASS_SHORT,
 	RANGE_CLASS_MEDIUM,
 	RANGE_CLASS_LONG,
+	RANGE_CLASS_HEAVY,
 	RANGE_CLASS_ANY,
+	RANGE_CLASS_NONE,
 ]
 
 var unit_id: String = ""
 var armor_id: String = "medium"
 var weapon_1_id: String = "rifle"
 var weapon_2_id: String = "rifle"
+var loadout_weight: float = 0.0
 var accuracy_mod: float = 0.0
 var speed_mod: float = 0.0
 var toughness_mod: float = 0.0
@@ -51,6 +56,7 @@ func to_dict() -> Dictionary:
 		"armor_id": armor_id,
 		"weapon_1_id": weapon_1_id,
 		"weapon_2_id": weapon_2_id,
+		"loadout_weight": loadout_weight,
 		"accuracy_mod": accuracy_mod,
 		"speed_mod": speed_mod,
 		"toughness_mod": toughness_mod,
@@ -65,6 +71,7 @@ func _apply_dict(data: Dictionary) -> void:
 	armor_id = String(data.get("armor_id", "medium")).strip_edges().to_lower()
 	weapon_1_id = String(data.get("weapon_1_id", "rifle")).strip_edges().to_lower()
 	weapon_2_id = String(data.get("weapon_2_id", "rifle")).strip_edges().to_lower()
+	loadout_weight = maxf(float(data.get("loadout_weight", 0.0)), 0.0)
 	accuracy_mod = float(data.get("accuracy_mod", 0.0))
 	speed_mod = float(data.get("speed_mod", 0.0))
 	toughness_mod = float(data.get("toughness_mod", 0.0))

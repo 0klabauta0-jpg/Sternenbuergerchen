@@ -151,6 +151,9 @@ func build_tile_modulate(tile_data) -> Color:
 func is_object_type(tile_data) -> bool:
 	if tile_data == null:
 		return false
+	var object_type_id: String = get_tile_object_type_id(tile_data)
+	if not object_type_id.is_empty():
+		return true
 	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
 	return type_id.begins_with("wall_") or type_id.begins_with("cliff_") or type_id.begins_with("slope_") or type_id.begins_with("rock_")
 
@@ -210,23 +213,23 @@ func _clear_children(container: Node) -> void:
 func _build_cliff_overlays(terrain_map_data, cliff_container: Node2D) -> Dictionary:
 	var cliff_sprites_by_grid: Dictionary = {}
 	for tile_data in terrain_map_data.call("get_tiles"):
-		if int(tile_data.height_level) <= 0 or is_object_type(tile_data):
+		if int(tile_data.height_level) <= 0:
 			continue
 
 		var overlays: Array[Sprite2D] = []
 		var my_height: int = int(tile_data.height_level)
 		var grid_pos: Vector2i = tile_data.grid_position
 		var current_edge_type: String = String(tile_data.edge_type)
-		if current_edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE:
-			continue
 		var is_slope: bool = current_edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE
 
 		var cliff_edge_dirs: Array[Vector2i] = []
 		for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 			var neighbor = terrain_map_data.call("get_tile_at_grid", grid_pos + offset)
 			var neighbor_height: int = int(neighbor.height_level) if neighbor != null else 0
-			if neighbor_height < my_height and not is_object_type(neighbor):
+			if neighbor_height < my_height:
 				cliff_edge_dirs.append(offset)
+		if cliff_edge_dirs.is_empty() or current_edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE:
+			continue
 
 		var corner_map: Array = [
 			[Vector2i(1, 0), Vector2i(0, 1), CLIFF_CORNER_NE],
@@ -236,22 +239,23 @@ func _build_cliff_overlays(terrain_map_data, cliff_container: Node2D) -> Diction
 		]
 		var edges_consumed_by_corners: Array[Vector2i] = []
 
-		for corner_entry in corner_map:
-			var dir_a: Vector2i = corner_entry[0]
-			var dir_b: Vector2i = corner_entry[1]
-			var corner_texture: Texture2D = corner_entry[2]
-			if cliff_edge_dirs.has(dir_a) and cliff_edge_dirs.has(dir_b):
-				var corner_sprite := Sprite2D.new()
-				corner_sprite.texture = corner_texture
-				corner_sprite.centered = false
-				corner_sprite.z_index = -14
-				corner_sprite.position = tile_data.world_position - KENNEY_DIAMOND_CENTER
-				cliff_container.add_child(corner_sprite)
-				overlays.append(corner_sprite)
-				if not edges_consumed_by_corners.has(dir_a):
-					edges_consumed_by_corners.append(dir_a)
-				if not edges_consumed_by_corners.has(dir_b):
-					edges_consumed_by_corners.append(dir_b)
+		if not is_slope:
+			for corner_entry in corner_map:
+				var dir_a: Vector2i = corner_entry[0]
+				var dir_b: Vector2i = corner_entry[1]
+				var corner_texture: Texture2D = corner_entry[2]
+				if cliff_edge_dirs.has(dir_a) and cliff_edge_dirs.has(dir_b):
+					var corner_sprite := Sprite2D.new()
+					corner_sprite.texture = corner_texture
+					corner_sprite.centered = false
+					corner_sprite.z_index = -14
+					corner_sprite.position = tile_data.world_position - KENNEY_DIAMOND_CENTER
+					cliff_container.add_child(corner_sprite)
+					overlays.append(corner_sprite)
+					if not edges_consumed_by_corners.has(dir_a):
+						edges_consumed_by_corners.append(dir_a)
+					if not edges_consumed_by_corners.has(dir_b):
+						edges_consumed_by_corners.append(dir_b)
 
 		var edge_texture_map: Dictionary
 		if is_slope:
@@ -292,7 +296,9 @@ func _build_wall_overlays(terrain_map_data, wall_container: Node2D) -> Dictionar
 		if not is_object_type(tile_data):
 			continue
 
-		var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
+		var type_id: String = get_tile_object_type_id(tile_data)
+		if type_id.is_empty():
+			type_id = String(tile_data.type_id) if tile_data.type_id is String else ""
 		var texture: Texture2D = null
 		var pos_offset := Vector2.ZERO
 

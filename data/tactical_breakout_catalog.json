@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "breakout_classes": {
+    "auto_adapt": {
+      "status": "auto_adapting",
+      "return_to_plan_allowed": true,
+      "player_options": ["confirm", "override", "regroup"]
+    },
+    "hold_and_report": {
+      "status": "holding",
+      "return_to_plan_allowed": true,
+      "player_options": ["confirm", "override", "abort", "regroup"]
+    },
+    "request_orders": {
+      "status": "needs_orders",
+      "return_to_plan_allowed": false,
+      "player_options": ["confirm", "override", "abort", "regroup"]
+    },
+    "abort_to_safe": {
+      "status": "aborting",
+      "return_to_plan_allowed": false,
+      "player_options": ["confirm", "override", "abort", "regroup"]
+    }
+  },
+  "triggers": {
+    "contact": {
+      "breakout_class": "hold_and_report",
+      "communication_event_type": "contact_report",
+      "priority": 80,
+      "short_label": "CONTACT",
+      "cause_label": "Contact"
+    },
+    "suppressed_pinned": {
+      "breakout_class": "hold_and_report",
+      "communication_event_type": "breakout_adaptation",
+      "priority": 80,
+      "short_label": "PINNED",
+      "cause_label": "Suppressed"
+    },
+    "casualty_medic_needed": {
+      "breakout_class": "hold_and_report",
+      "communication_event_type": "needs_orders",
+      "priority": 80,
+      "short_label": "MEDIC",
+      "cause_label": "Medic needed"
+    },
+    "blocked_route": {
+      "breakout_class": "auto_adapt",
+      "communication_event_type": "cannot_execute",
+      "priority": 100,
+      "short_label": "BLOCKED",
+      "cause_label": "Blocked route"
+    },
+    "out_of_weapon_range": {
+      "breakout_class": "request_orders",
+      "communication_event_type": "needs_orders",
+      "priority": 80,
+      "short_label": "RANGE",
+      "cause_label": "Out of range"
+    },
+    "low_ammo_no_weapon": {
+      "breakout_class": "request_orders",
+      "communication_event_type": "needs_orders",
+      "priority": 80,
+      "short_label": "AMMO",
+      "cause_label": "Low ammo"
+    },
+    "leader_down": {
+      "breakout_class": "request_orders",
+      "communication_event_type": "needs_orders",
+      "priority": 100,
+      "short_label": "LEADER",
+      "cause_label": "Leader down"
+    },
+    "air_asset_threatened": {
+      "breakout_class": "request_orders",
+      "communication_event_type": "air_asset_threatened",
+      "priority": 100,
+      "short_label": "AIR THREAT",
+      "cause_label": "Air asset threatened"
+    },
+    "air_asset_destroyed": {
+      "breakout_class": "abort_to_safe",
+      "communication_event_type": "air_asset_destroyed",
+      "priority": 100,
+      "short_label": "AIR LOST",
+      "cause_label": "Air asset destroyed"
+    },
+    "rule_conflict": {
+      "breakout_class": "request_orders",
+      "communication_event_type": "needs_orders",
+      "priority": 80,
+      "short_label": "RULE",
+      "cause_label": "Rule conflict"
+    }
+  }
+}

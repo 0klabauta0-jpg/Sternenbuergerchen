@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "catalog_id": "background_image_catalog_v1",
+  "runtime_contract": {
+    "paths": "res_only_no_local_user_paths",
+    "load_policy": "screen_on_demand",
+    "visual_only": true,
+    "no_gameplay_state": true,
+    "max_ui_texture_size": 2048
+  },
+  "backgrounds": [
+    {
+      "background_id": "main_menu_shell",
+      "res_path": "res://Assets/curated/main_menu/sternenbuerger_main_menu_bg.jpeg",
+      "source_file": "TASK_199 curated main menu background",
+      "source_note": "Existing preferred main menu image from TASK_199.",
+      "origin": "task_199_curated_project_asset",
+      "width": 1376,
+      "height": 768,
+      "file_size_bytes": 717441,
+      "screen_hint": ["main_menu", "settings_panel"],
+      "crop_anchor": "center_left",
+      "dim_strength": 0.35,
+      "text_safe_zone": "left_rail_520px",
+      "import_profile": "ui_background_lossless_default"
+    },
+    {
+      "background_id": "multiplayer_lobby_hangar",
+      "res_path": "res://Assets/used/backgrounds/ai_generated/bg_hangar_shiphall.png",
+      "source_file": "Use AI Image Apr 18, 2026, 23_34_01.png",
+      "source_note": "User-provided AI background; hangar and ship hall.",
+      "origin": "user_provided_ai_image",
+      "width": 1344,
+      "height": 768,
+      "file_size_bytes": 1589094,
+      "screen_hint": ["multiplayer_lobby", "mission_setup"],
+      "crop_anchor": "center",
+      "dim_strength": 0.58,
+      "text_safe_zone": "center_panel",
+      "import_profile": "ui_background_with_dim_overlay"
+    },
+    {
+      "background_id": "mission_select_desert_outpost",
+      "res_path": "res://Assets/used/backgrounds/ai_generated/bg_desert_outpost.png",
+      "source_file": "Use AI Image Apr 18, 2026, 23_45_03.png",
+      "source_note": "User-provided AI background; desert base with ships.",
+      "origin": "user_provided_ai_image",
+      "width": 1376,
+      "height": 768,
+      "file_size_bytes": 1526978,
+      "screen_hint": ["singleplayer_setup", "mission_select", "editor_setup"],
+      "crop_anchor": "center",
+      "dim_strength": 0.52,
+      "text_safe_zone": "panel_or_rail_only",
+      "import_profile": "ui_background_with_dim_overlay"
+    },
+    {
+      "background_id": "loading_asteroid_flight",
+      "res_path": "res://Assets/used/backgrounds/ai_generated/bg_asteroid_flight.png",
+      "source_file": "Use AI Image Apr 18, 2026, 23_41_57.png",
+      "source_note": "User-provided AI background; asteroid flight.",
+      "origin": "user_provided_ai_image",
+      "width": 1376,
+      "height": 768,
+      "file_size_bytes": 1702838,
+      "screen_hint": ["loading", "multiplayer_lobby_variant"],
+      "crop_anchor": "center",
+      "dim_strength": 0.5,
+      "text_safe_zone": "bottom_or_center_panel",
+      "import_profile": "ui_background_with_dim_overlay"
+    },
+    {
+      "background_id": "debrief_desert_explosion_base",
+      "res_path": "res://Assets/used/backgrounds/ai_generated/bg_desert_explosion_base.jpg",
+      "source_file": "Use AI Image Apr 18, 2026, 23_21_53.jpeg",
+      "source_note": "User-provided AI background; desert base with explosion.",
+      "origin": "user_provided_ai_image",
+      "width": 1376,
+      "height": 768,
+      "file_size_bytes": 788232,
+      "screen_hint": ["loading", "debrief", "mission_result"],
+      "crop_anchor": "center",
+      "dim_strength": 0.62,
+      "text_safe_zone": "panel_or_bottom_band",
+      "import_profile": "ui_background_with_dim_overlay"
+    }
+  ]
+}

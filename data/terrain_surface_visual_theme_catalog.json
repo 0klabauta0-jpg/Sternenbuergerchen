@@ -1,0 +1,81 @@
+{
+	"schema_version": 1,
+	"catalog_id": "terrain_surface_visual_theme_catalog_v1",
+	"task": "TASK_253",
+	"active_theme_id": "nature_classic_dirt_v1",
+	"runtime_contract": {
+		"paths": "res_only_no_local_user_paths",
+		"visual_only": true,
+		"no_gameplay_state": true,
+		"no_new_surface_types": true,
+		"surface_type_remains_gameplay_truth": true,
+		"height_edge_fields_unchanged": true
+	},
+	"source_catalog": "res://data/nature_kit_asset_catalog.json",
+	"surface_model_by_surface": {
+		"ground": "nature_ground_dirt",
+		"sand": "nature_ground_dirt",
+		"rock": "nature_ground_dirt",
+		"road": "nature_ground_dirt"
+	},
+	"tile_type_overrides": {
+		"nature_ground_dirt": "nature_ground_dirt",
+		"nature_ground_sand_dirt": "nature_ground_dirt",
+		"nature_ground_rock_dirt": "nature_ground_dirt",
+		"nature_ground_grass_patch": "nature_ground_grass_patch",
+		"nature_ground_dirt_river_tile": "nature_ground_dirt_river_tile"
+	},
+	"surface_tint_policy": {
+		"retain_non_ground_tints": true,
+		"reason": "The Nature Kit ground mesh is the base shape; existing sand/rock/road tints keep surface_type gameplay readable.",
+		"affected_surfaces": ["sand", "rock", "road"]
+	},
+	"editor_palette": {
+		"palette_group": "nature_ground",
+		"tile_type_ids": [
+			"nature_ground_dirt",
+			"nature_ground_sand_dirt",
+			"nature_ground_rock_dirt",
+			"nature_ground_grass_patch"
+		],
+		"authoring_policy": "Palette entries may set type_id and surface_type, but must preserve height_level, edge_type, object_type_id, cover, walkable and LOS fields."
+	},
+	"visuals": [
+		{
+			"visual_id": "nature_ground_dirt",
+			"source_id": "kenney_nature_kit_classic",
+			"source_asset_id": "nature_ground_dirt",
+			"model_key": "nature_ground_dirt",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/ground/ground_dirt.gltf",
+			"theme": "dirt",
+			"surface_roles": ["ground", "sand", "rock", "road"],
+			"active_default": true,
+			"fallback_model_key": "ground_flat",
+			"visual_only": true
+		},
+		{
+			"visual_id": "nature_ground_grass_patch",
+			"source_id": "kenney_nature_kit_classic",
+			"source_asset_id": "nature_ground_grass_patch",
+			"model_key": "nature_ground_grass_patch",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/ground/grass.gltf",
+			"theme": "grass_detail",
+			"surface_roles": ["ground"],
+			"active_default": false,
+			"fallback_model_key": "nature_ground_dirt",
+			"visual_only": true
+		},
+		{
+			"visual_id": "nature_ground_dirt_river_tile",
+			"source_id": "kenney_nature_kit_classic",
+			"source_asset_id": "nature_ground_dirt_river_tile",
+			"model_key": "nature_ground_dirt_river_tile",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/ground/ground_dirtRiverTile.gltf",
+			"theme": "dirt_detail_candidate",
+			"surface_roles": ["future_detail"],
+			"active_default": false,
+			"fallback_model_key": "nature_ground_dirt",
+			"visual_only": true
+		}
+	]
+}

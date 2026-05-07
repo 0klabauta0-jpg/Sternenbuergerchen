@@ -3,10 +3,12 @@ extends RefCounted
 
 var unit_id: String = ""
 var display_name: String = ""
+var portrait_id: String = ""
 var portrait_path: String = ""
 var callsign: String = ""
 var role_id: String = ""
 var role_name: String = ""
+var roster_role_category: String = ""
 var specialty_text: String = ""
 var primary_specialty: String = ""
 var secondary_specialty: String = ""
@@ -20,6 +22,7 @@ var weapon_1_id: String = "rifle"
 var weapon_2_id: String = "rifle"
 var team_id: String = ""
 var fireteam_id: String = ""
+var is_fireteam_lead: bool = false
 var skill_values: Dictionary = {}
 var skill_summary_text: String = ""
 var communication_values: Dictionary = {}
@@ -35,6 +38,16 @@ var trait_tags: PackedStringArray = []
 var trait_summary_text: String = ""
 var status_text: String = ""
 var secondary_text: String = ""
+var rank_badges: Array = []
+var availability_status: String = "active"
+var recovery_state: Dictionary = {}
+var relationship_summary_text: String = ""
+var relationship_links: Array = []
+var fireteam_history: Array = []
+var mission_history: Array = []
+var progression: Dictionary = {}
+var ftl_tactical_progression: Dictionary = {}
+var ftl_tactical_effect_text: String = ""
 
 
 func _init(data: Dictionary = {}) -> void:
@@ -55,10 +68,12 @@ func to_dict() -> Dictionary:
 	return {
 		"unit_id": unit_id,
 		"display_name": display_name,
+		"portrait_id": portrait_id,
 		"portrait_path": portrait_path,
 		"callsign": callsign,
 		"role_id": role_id,
 		"role_name": role_name,
+		"roster_role_category": roster_role_category,
 		"specialty_text": specialty_text,
 		"primary_specialty": primary_specialty,
 		"secondary_specialty": secondary_specialty,
@@ -72,6 +87,7 @@ func to_dict() -> Dictionary:
 		"weapon_2_id": weapon_2_id,
 		"team_id": team_id,
 		"fireteam_id": fireteam_id,
+		"is_fireteam_lead": is_fireteam_lead,
 		"skill_values": skill_values.duplicate(true),
 		"skill_summary_text": skill_summary_text,
 		"communication_values": communication_values.duplicate(true),
@@ -87,6 +103,16 @@ func to_dict() -> Dictionary:
 		"trait_summary_text": trait_summary_text,
 		"status_text": status_text,
 		"secondary_text": secondary_text,
+		"rank_badges": rank_badges.duplicate(true),
+		"availability_status": availability_status,
+		"recovery_state": recovery_state.duplicate(true),
+		"relationship_summary_text": relationship_summary_text,
+		"relationship_links": relationship_links.duplicate(true),
+		"fireteam_history": fireteam_history.duplicate(true),
+		"mission_history": mission_history.duplicate(true),
+		"progression": progression.duplicate(true),
+		"ftl_tactical_progression": ftl_tactical_progression.duplicate(true),
+		"ftl_tactical_effect_text": ftl_tactical_effect_text,
 	}
 
 
@@ -98,10 +124,12 @@ func duplicate_profile():
 func _apply_dict(data: Dictionary) -> void:
 	unit_id = String(data.get("unit_id", "")).strip_edges()
 	display_name = String(data.get("display_name", unit_id)).strip_edges()
+	portrait_id = String(data.get("portrait_id", "")).strip_edges()
 	portrait_path = String(data.get("portrait_path", "")).strip_edges()
 	callsign = String(data.get("callsign", "")).strip_edges()
 	role_id = String(data.get("role_id", "")).strip_edges().to_lower()
 	role_name = String(data.get("role_name", "")).strip_edges()
+	roster_role_category = String(data.get("roster_role_category", "")).strip_edges().to_lower()
 	specialty_text = String(data.get("specialty_text", "")).strip_edges()
 	primary_specialty = String(data.get("primary_specialty", specialty_text)).strip_edges()
 	secondary_specialty = String(data.get("secondary_specialty", "")).strip_edges()
@@ -115,6 +143,7 @@ func _apply_dict(data: Dictionary) -> void:
 	weapon_2_id = String(data.get("weapon_2_id", "rifle")).strip_edges().to_lower()
 	team_id = String(data.get("team_id", "")).strip_edges()
 	fireteam_id = String(data.get("fireteam_id", "")).strip_edges().to_lower()
+	is_fireteam_lead = bool(data.get("is_fireteam_lead", false))
 	skill_values = Dictionary(data.get("skill_values", {})).duplicate(true)
 	skill_summary_text = String(data.get("skill_summary_text", "")).strip_edges()
 	communication_values = Dictionary(data.get("communication_values", {})).duplicate(true)
@@ -130,6 +159,16 @@ func _apply_dict(data: Dictionary) -> void:
 	trait_summary_text = String(data.get("trait_summary_text", "")).strip_edges()
 	status_text = String(data.get("status_text", "")).strip_edges()
 	secondary_text = String(data.get("secondary_text", "")).strip_edges()
+	rank_badges = _coerce_badge_array(data.get("rank_badges", []))
+	availability_status = String(data.get("availability_status", "active")).strip_edges().to_lower()
+	recovery_state = Dictionary(data.get("recovery_state", {})).duplicate(true)
+	relationship_summary_text = String(data.get("relationship_summary_text", "")).strip_edges()
+	relationship_links = _coerce_dictionary_array(data.get("relationship_links", []))
+	fireteam_history = _coerce_dictionary_array(data.get("fireteam_history", []))
+	mission_history = _coerce_dictionary_array(data.get("mission_history", []))
+	progression = Dictionary(data.get("progression", {})).duplicate(true)
+	ftl_tactical_progression = Dictionary(data.get("ftl_tactical_progression", progression.get("ftl_tactical_snapshot", {}))).duplicate(true)
+	ftl_tactical_effect_text = String(data.get("ftl_tactical_effect_text", "")).strip_edges()
 
 	if display_name.is_empty():
 		display_name = unit_id
@@ -139,6 +178,9 @@ func _apply_dict(data: Dictionary) -> void:
 
 	if specialty_text.is_empty():
 		specialty_text = primary_specialty
+
+	if availability_status.is_empty():
+		availability_status = "active"
 
 
 func _coerce_string_array(value: Variant) -> PackedStringArray:
@@ -154,4 +196,22 @@ func _coerce_string_array(value: Variant) -> PackedStringArray:
 
 			result.append(text)
 
+	return result
+
+
+func _coerce_badge_array(value: Variant) -> Array:
+	var result: Array = []
+	if value is Array:
+		for entry in Array(value):
+			if typeof(entry) == TYPE_DICTIONARY:
+				result.append(Dictionary(entry).duplicate(true))
+	return result
+
+
+func _coerce_dictionary_array(value: Variant) -> Array:
+	var result: Array = []
+	if value is Array:
+		for entry in Array(value):
+			if typeof(entry) == TYPE_DICTIONARY:
+				result.append(Dictionary(entry).duplicate(true))
 	return result

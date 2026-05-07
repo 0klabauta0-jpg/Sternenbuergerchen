@@ -7,7 +7,7 @@ func _init() -> void:
 	var failed: int = 0
 
 	# Test 1: All weapon IDs are valid
-	for weapon_id in ["smg", "rifle", "rail_gun", "medictool"]:
+	for weapon_id in ["smg", "rifle", "sniper", "rail_gun", "rocket_launcher", "medictool"]:
 		var weapon: Dictionary = WEAPON_DATA_SCRIPT.get_weapon(weapon_id)
 		if weapon.get("id", "") == weapon_id:
 			passed += 1
@@ -61,6 +61,13 @@ func _init() -> void:
 	else:
 		failed += 1
 		print("FAIL: 'sonderwaffe' normalizes to '%s'" % WEAPON_DATA_SCRIPT._normalize_weapon_id("sonderwaffe"))
+
+	if WEAPON_DATA_SCRIPT._normalize_weapon_id("panzerfaust") == "rocket_launcher":
+		passed += 1
+		print("PASS: 'panzerfaust' normalizes to 'rocket_launcher'")
+	else:
+		failed += 1
+		print("FAIL: 'panzerfaust' normalizes to '%s'" % WEAPON_DATA_SCRIPT._normalize_weapon_id("panzerfaust"))
 
 	# Test 6: Display names
 	if WEAPON_DATA_SCRIPT.get_display_name("smg") == "Maschinenpistole":
@@ -123,6 +130,13 @@ func _init() -> void:
 		failed += 1
 		print("FAIL: medictool support/attack flags are incorrect")
 
+	if WEAPON_DATA_SCRIPT.is_attack_weapon_id("sniper") and WEAPON_DATA_SCRIPT.is_attack_weapon_id("rocket_launcher"):
+		passed += 1
+		print("PASS: sniper and rocket_launcher are attack weapons")
+	else:
+		failed += 1
+		print("FAIL: sniper/rocket_launcher attack flags are incorrect")
+
 	var medictool_modulate: Color = WEAPON_DATA_SCRIPT.get_sprite_modulate("medictool")
 	if medictool_modulate == Color(1.0, 0.2, 0.2, 1.0):
 		passed += 1
@@ -142,9 +156,9 @@ func _init() -> void:
 
 	# Test 9: get_all_weapon_ids
 	var all_ids: PackedStringArray = WEAPON_DATA_SCRIPT.get_all_weapon_ids()
-	if all_ids.size() == 4 and all_ids.has("medictool"):
+	if all_ids.size() >= 6 and all_ids.has("sniper") and all_ids.has("rocket_launcher") and all_ids.has("medictool"):
 		passed += 1
-		print("PASS: get_all_weapon_ids returns 4 weapons including medictool")
+		print("PASS: get_all_weapon_ids returns expanded weapons including sniper, rocket_launcher and medictool")
 	else:
 		failed += 1
 		print("FAIL: get_all_weapon_ids returned %d weapons (%s)" % [all_ids.size(), str(all_ids)])

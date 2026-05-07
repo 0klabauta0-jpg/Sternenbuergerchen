@@ -1,0 +1,199 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/multiplayer_lobby_screen.gd" id="1_script"]
+
+[node name="MultiplayerLobby" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+custom_minimum_size = Vector2(1280, 720)
+script = ExtResource("1_script")
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -360.0
+offset_top = -280.0
+offset_right = 360.0
+offset_bottom = 280.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="TitleLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Multiplayer Lobby"
+
+[node name="StatusLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "Ready. Host or join a local session."
+autowrap_mode = 3
+
+[node name="HostJoinGrid" type="GridContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+columns = 3
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 10
+
+[node name="HostPortLabel" type="Label" parent="Panel/Margin/VBox/HostJoinGrid"]
+layout_mode = 2
+text = "Host Port"
+
+[node name="HostPortSpinBox" type="SpinBox" parent="Panel/Margin/VBox/HostJoinGrid"]
+custom_minimum_size = Vector2(140, 38)
+layout_mode = 2
+min_value = 1024.0
+max_value = 65535.0
+step = 1.0
+value = 7777.0
+
+[node name="HostButton" type="Button" parent="Panel/Margin/VBox/HostJoinGrid"]
+custom_minimum_size = Vector2(140, 38)
+layout_mode = 2
+text = "Host"
+
+[node name="JoinAddressLabel" type="Label" parent="Panel/Margin/VBox/HostJoinGrid"]
+layout_mode = 2
+text = "Join Adresse"
+
+[node name="JoinAddressLineEdit" type="LineEdit" parent="Panel/Margin/VBox/HostJoinGrid"]
+custom_minimum_size = Vector2(220, 38)
+layout_mode = 2
+text = "127.0.0.1"
+
+[node name="JoinButton" type="Button" parent="Panel/Margin/VBox/HostJoinGrid"]
+custom_minimum_size = Vector2(140, 38)
+layout_mode = 2
+text = "Join"
+
+[node name="JoinPortLabel" type="Label" parent="Panel/Margin/VBox/HostJoinGrid"]
+layout_mode = 2
+text = "Join Port"
+
+[node name="JoinPortSpinBox" type="SpinBox" parent="Panel/Margin/VBox/HostJoinGrid"]
+custom_minimum_size = Vector2(140, 38)
+layout_mode = 2
+min_value = 1024.0
+max_value = 65535.0
+step = 1.0
+value = 7777.0
+
+[node name="JoinSpacer" type="Control" parent="Panel/Margin/VBox/HostJoinGrid"]
+layout_mode = 2
+
+[node name="SessionRow" type="HBoxContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ReadyButton" type="Button" parent="Panel/Margin/VBox/SessionRow"]
+visible = false
+custom_minimum_size = Vector2(120, 42)
+layout_mode = 2
+text = "Ready"
+
+[node name="StartMissionButton" type="Button" parent="Panel/Margin/VBox/SessionRow"]
+visible = false
+custom_minimum_size = Vector2(140, 42)
+layout_mode = 2
+text = "Start"
+
+[node name="DisconnectButton" type="Button" parent="Panel/Margin/VBox/SessionRow"]
+visible = false
+custom_minimum_size = Vector2(140, 42)
+layout_mode = 2
+text = "Disconnect"
+
+[node name="BackButton" type="Button" parent="Panel/Margin/VBox/SessionRow"]
+custom_minimum_size = Vector2(120, 42)
+layout_mode = 2
+text = "Zurueck"
+
+[node name="RosterModeRow" type="HBoxContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="RosterModeLabel" type="Label" parent="Panel/Margin/VBox/RosterModeRow"]
+layout_mode = 2
+text = "Roster"
+
+[node name="RosterModeOptionButton" type="OptionButton" parent="Panel/Margin/VBox/RosterModeRow"]
+custom_minimum_size = Vector2(190, 38)
+layout_mode = 2
+
+[node name="RosterModeSummaryLabel" type="Label" parent="Panel/Margin/VBox/RosterModeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Roster: Host roster | local=true | authority=host_server"
+autowrap_mode = 3
+
+[node name="PeerLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "Peers: -"
+autowrap_mode = 3
+
+[node name="AssignmentLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "Assignments: -"
+autowrap_mode = 3
+
+[node name="SettingsLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "FoW: known_terrain"
+autowrap_mode = 3
+
+[node name="MapConsentPanel" type="PanelContainer" parent="Panel/Margin/VBox"]
+visible = false
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel/Margin/VBox/MapConsentPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin/VBox/MapConsentPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="MapConsentLabel" type="Label" parent="Panel/Margin/VBox/MapConsentPanel/Margin/VBox"]
+layout_mode = 2
+text = "Host bietet eine unbekannte Map an."
+autowrap_mode = 3
+
+[node name="MapConsentRow" type="HBoxContainer" parent="Panel/Margin/VBox/MapConsentPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="MapAcceptButton" type="Button" parent="Panel/Margin/VBox/MapConsentPanel/Margin/VBox/MapConsentRow"]
+custom_minimum_size = Vector2(140, 38)
+layout_mode = 2
+text = "Download"
+
+[node name="MapRejectButton" type="Button" parent="Panel/Margin/VBox/MapConsentPanel/Margin/VBox/MapConsentRow"]
+custom_minimum_size = Vector2(140, 38)
+layout_mode = 2
+text = "Ablehnen"
+
+[node name="HintLabel" type="Label" parent="Panel/Margin/VBox"]
+layout_mode = 2
+text = "LAN/local only. Start bleibt Host-only und nutzt MultiplayerSession."
+autowrap_mode = 3

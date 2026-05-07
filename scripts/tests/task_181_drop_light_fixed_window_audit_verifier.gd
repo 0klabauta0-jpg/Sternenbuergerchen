@@ -1,0 +1,233 @@
+extends SceneTree
+
+const FOB_TEST_SCENE: PackedScene = preload("res://scenes/meta/fob_test_screen.tscn")
+const HOMEBASE_TEST_SCENE: PackedScene = preload("res://scenes/meta/homebase_test_screen.tscn")
+const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
+const DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/drop_light_layout_contract.gd")
+
+var _passed: int = 0
+var _failed: int = 0
+
+
+func _init() -> void:
+	call_deferred("_run_tests")
+
+
+func _run_tests() -> void:
+	print("=== TASK_181 Drop Light Fixed Window Audit Verifier ===")
+	await _test_fob_windows_are_actual_fixed_rects()
+	await _test_homebase_windows_are_actual_fixed_rects()
+	await _test_mission_hud_windows_are_actual_fixed_rects()
+	_test_no_new_ui_gameplay_truth_paths()
+
+	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
+	if _failed > 0:
+		print("TASK_181: FAILED")
+		quit(1)
+	else:
+		print("TASK_181: ALL PASSED")
+		quit(0)
+
+
+func _test_fob_windows_are_actual_fixed_rects() -> void:
+	root.size = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("TARGET_VIEWPORT")
+	var screen: Control = FOB_TEST_SCENE.instantiate()
+	screen.visible = true
+	root.add_child(screen)
+	await _wait_frames(4)
+
+	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_fob_layout")
+	_assert_fixed_windows(
+		screen,
+		layout,
+		{
+			"topbar": "Panel/Margin/VBox/MissionPanel",
+			"fireteams": "Panel/Margin/VBox/ContentRow/FireteamPanel",
+			"loadout": "Panel/Margin/VBox/ContentRow/StagingPanel",
+			"flightdeck": "Panel/Margin/VBox/ContentRow/DropshipPanel",
+			"boarding_status": "Panel/Margin/VBox/DropLightBottomRow/BoardingStatusPanel",
+			"actions": "Panel/Margin/VBox/DropLightBottomRow/ActionsPanel",
+		},
+		"FOB"
+	)
+	_assert_inside(screen, "Panel/Margin/VBox/ContentRow/FireteamPanel", "Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamScroll", "FOB Fireteam scroll stays inside the fixed #10 window")
+	_assert_inside(screen, "Panel/Margin/VBox/ContentRow/StagingPanel", "Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutMemberScroll", "FOB Loadout scroll stays inside the fixed #13 window")
+	_assert_inside(screen, "Panel/Margin/VBox/ContentRow/DropshipPanel", "Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipQueueScroll", "FOB Flightdeck ship list stays inside the fixed #14 window")
+	_assert_fob_bottom_actions_do_not_expose_fake_active_buttons(screen)
+
+	screen.queue_free()
+	await _wait_frames(2)
+
+
+func _test_homebase_windows_are_actual_fixed_rects() -> void:
+	root.size = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("TARGET_VIEWPORT")
+	var screen: Control = HOMEBASE_TEST_SCENE.instantiate()
+	screen.visible = true
+	root.add_child(screen)
+	await _wait_frames(4)
+
+	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_homebase_layout")
+	_assert_fixed_windows(
+		screen,
+		layout,
+		{
+			"topbar": "DropLightTopbar",
+			"mission_brief": "Panel/Margin/VBox/MissionPanel",
+			"roster": "Panel/Margin/VBox/ContentRow/RosterPanel",
+			"transfer_team": "Panel/Margin/VBox/ContentRow/TeamPanel",
+			"flightdeck": "Panel/Margin/VBox/ContentRow/AircraftPanel",
+			"character_sheet": "Panel/Margin/VBox/ContentRow/InfoPanel",
+		},
+		"Homebase"
+	)
+	_assert_inside(screen, "Panel/Margin/VBox/ContentRow/RosterPanel", "Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox/RosterScroll", "Homebase roster scroll stays inside the fixed #02 window")
+	_assert_inside(screen, "Panel/Margin/VBox/ContentRow/TeamPanel", "Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamDropPanel/DropMargin/DropVBox/SelectedTeamScroll", "Homebase transfer-team scroll stays inside the fixed #03 window")
+	_assert_inside(screen, "Panel/Margin/VBox/ContentRow/AircraftPanel", "Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/ShipCardsScroll", "Homebase flightdeck shipcards stay inside the fixed #05 window")
+	_assert_inside(screen, "Panel/Margin/VBox/ContentRow/InfoPanel", "Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll", "Homebase character-sheet scroll stays inside the fixed #07 window")
+
+	screen.queue_free()
+	await _wait_frames(2)
+
+
+func _test_mission_hud_windows_are_actual_fixed_rects() -> void:
+	root.size = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("TARGET_VIEWPORT")
+	var scene: Node = MISSION_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	await _wait_frames(4)
+
+	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_mission_hud_layout")
+	_assert_fixed_windows(
+		scene,
+		layout,
+		{
+			"mission_identity": "TacticalUI/MissionIdentityPanel",
+			"top_nav": "TacticalUI/TopNavPanel",
+			"fireteam_mini": "TacticalUI/FireteamMiniPanel",
+			"command_matrix": "TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel",
+			"selected_fireteam": "TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel",
+			"mission_control": "TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel",
+		},
+		"Mission HUD"
+	)
+	_assert_inside(scene, "TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel", "TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll", "Mission command scroll stays inside the fixed #16 window")
+	_assert_inside(scene, "TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel", "TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll", "Mission fireteam status scroll stays inside the fixed #17 window")
+	_assert_inside(scene, "TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel", "TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll", "Mission fireteam cards scroll stays inside the fixed #17 window")
+	_assert_inside(scene, "TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel", "TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll", "Mission control scroll stays inside the fixed #18 window")
+
+	var phase_panel := scene.get_node_or_null("TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel") as Control
+	_assert(phase_panel != null and not phase_panel.visible, "Mission HUD keeps disabled phase-template controls hidden")
+
+	scene.queue_free()
+	await _wait_frames(2)
+
+
+func _test_no_new_ui_gameplay_truth_paths() -> void:
+	for file_path in [
+		"res://scripts/meta/fob_screen.gd",
+		"res://scripts/meta/homebase_screen.gd",
+	]:
+		var text := _read_text_file(file_path)
+		_assert(not text.contains("SimulationRoot") and not text.contains("enqueue_command") and not text.contains("enqueue_effect"), "%s does not introduce UI-owned SimulationRoot truth" % file_path)
+	for file_path in [
+		"res://scripts/terrain/terrain_map_3d_view.gd",
+		"res://scripts/core/simulation_root.gd",
+		"res://scripts/terrain/terrain_pathfinder.gd",
+		"res://scripts/terrain/hpa_pathfinder.gd",
+	]:
+		var text := _read_text_file(file_path)
+		_assert(not text.contains("drop_light") and not text.contains("DropLight"), "%s remains outside the drop_light fixed-window audit patch" % file_path)
+
+
+func _assert_fixed_windows(root_node: Node, layout: Dictionary, path_by_key: Dictionary, screen_name: String) -> void:
+	for key_variant in path_by_key.keys():
+		var key := String(key_variant)
+		var path := String(path_by_key[key_variant])
+		var control := root_node.get_node_or_null(path) as Control
+		_assert(_node_rect_matches_actual(control, layout.get(key)), "%s %s uses actual fixed position and size" % [screen_name, key])
+
+
+func _assert_inside(root_node: Node, parent_path: String, child_path: String, message: String) -> void:
+	var parent := root_node.get_node_or_null(parent_path) as Control
+	var child := root_node.get_node_or_null(child_path) as Control
+	_assert(_control_inside(child, parent), message)
+
+
+func _assert_fob_bottom_actions_do_not_expose_fake_active_buttons(screen: Control) -> void:
+	var action_grid := screen.get_node_or_null("Panel/Margin/VBox/DropLightBottomRow/ActionsPanel/Margin/VBox/ActionGrid") as GridContainer
+	_assert(action_grid != null, "FOB bottom action grid exists for fake-action audit")
+	if action_grid == null:
+		return
+	for fake_name in ["UnboardButton", "HoldButton", "CargoButton", "MedbayLaterButton"]:
+		var button := action_grid.get_node_or_null(fake_name) as Button
+		_assert(button != null and button.visible and button.disabled, "FOB %s is visible only as a disabled template action" % fake_name)
+	for real_name in ["BoardButton", "SendButton"]:
+		var button := action_grid.get_node_or_null(real_name) as Button
+		_assert(button != null and button.pressed.get_connections().size() > 0, "FOB %s keeps an existing callback path" % real_name)
+
+
+func _node_rect_matches_actual(control: Control, rect_variant: Variant) -> bool:
+	if control == null or typeof(rect_variant) != TYPE_RECT2I:
+		return false
+	var rect: Rect2i = rect_variant
+	var matches := _approximately_equal(control.global_position.x, float(rect.position.x)) \
+		and _approximately_equal(control.global_position.y, float(rect.position.y)) \
+		and _approximately_equal(control.size.x, float(rect.size.x)) \
+		and _approximately_equal(control.size.y, float(rect.size.y))
+	if not matches:
+		print("  RECT MISMATCH %s actual pos=%s size=%s expected pos=%s size=%s" % [
+			control.name,
+			control.global_position,
+			control.size,
+			rect.position,
+			rect.size,
+		])
+	return matches
+
+
+func _control_inside(child: Control, parent: Control) -> bool:
+	if child == null or parent == null:
+		return false
+	var parent_rect := Rect2(parent.global_position, parent.size)
+	var child_rect := Rect2(child.global_position, child.size)
+	var tolerance := 0.5
+	var inside := child_rect.position.x >= parent_rect.position.x - tolerance \
+		and child_rect.position.y >= parent_rect.position.y - tolerance \
+		and child_rect.end.x <= parent_rect.end.x + tolerance \
+		and child_rect.end.y <= parent_rect.end.y + tolerance
+	if not inside:
+		print("  INNER RECT MISMATCH child=%s pos=%s size=%s parent=%s pos=%s size=%s" % [
+			child.name,
+			child.global_position,
+			child.size,
+			parent.name,
+			parent.global_position,
+			parent.size,
+		])
+	return inside
+
+
+func _approximately_equal(a: float, b: float) -> bool:
+	return absf(a - b) <= 0.5
+
+
+func _read_text_file(file_path: String) -> String:
+	var file := FileAccess.open(file_path, FileAccess.READ)
+	if file == null:
+		return ""
+	var text := file.get_as_text()
+	file.close()
+	return text
+
+
+func _wait_frames(frame_count: int) -> void:
+	for _index in range(frame_count):
+		await process_frame
+
+
+func _assert(condition: bool, message: String) -> void:
+	if condition:
+		_passed += 1
+		print("  PASS: %s" % message)
+	else:
+		_failed += 1
+		print("  FAIL: %s" % message)

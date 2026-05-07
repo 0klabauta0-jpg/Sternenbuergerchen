@@ -3,7 +3,7 @@
 ## Ziel
 Test- und Editor-Karten sollen reproduzierbar sinnvolle Cover-Verteilungen erzeugen koennen. Ein seedbares Cover-Lab waehlt walkable Tiles mit Mindestabstand, bewertet sie ueber LOS-/Threat-Heuristik und liefert Terrain-Patches fuer Map-Editor oder Testkarten.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Voraussetzung
 - `TASK_057 - Cover aus Terrain-Tiles`
@@ -50,18 +50,18 @@ Test- und Editor-Karten sollen reproduzierbar sinnvolle Cover-Verteilungen erzeu
 - Keine UI-Callbacks mit direktem Gameplay-Commit.
 
 ## Akzeptanzkriterien
-- [ ] Cover-Lab liefert reproduzierbare Patches fuer denselben Seed.
-- [ ] Gewaehlte Cover-Tiles halten Mindestabstand.
-- [ ] Nicht-walkable Tiles werden nicht als begehbare Cover-Punkte gewaehlt.
-- [ ] LOS-/Threat-Score beeinflusst Auswahl sichtbar.
-- [ ] Cover-aware Pfadtest zeigt bessere Cover-/Exposure-Metriken nach Patch-Anwendung.
+- [x] Cover-Lab liefert reproduzierbare Patches fuer denselben Seed.
+- [x] Gewaehlte Cover-Tiles halten Mindestabstand.
+- [x] Nicht-walkable Tiles werden nicht als begehbare Cover-Punkte gewaehlt.
+- [x] LOS-/Threat-Score beeinflusst Auswahl sichtbar.
+- [x] Cover-aware Pfadtest zeigt bessere Cover-/Exposure-Metriken nach Patch-Anwendung.
 
 ## Erwartetes Ergebnis
 Wir koennen schnell gute Cover-Testkarten erzeugen und Task-129-Pfadkosten auf belastbarere Terrain-Daten stellen.
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_152_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_129_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_152_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_129_verifier.gd`
 
 ## Dateien (voraussichtlich)
 - `scripts/terrain/cover_placement_lab.gd`
@@ -70,3 +70,8 @@ Wir koennen schnell gute Cover-Testkarten erzeugen und Task-129-Pfadkosten auf b
 
 ## Risiken
 - Automatische Cover-Verteilung kann langweilig oder zu gleichfoermig wirken. Das Lab soll Designer-Arbeit beschleunigen, nicht ersetzen.
+
+## Umsetzung
+- `CoverPlacementLab` sammelt walkable Terrain-Tiles, bewertet sie seedbar ueber Threat-/LOS-Exposure, Objective-/Approach-Naehe und vorhandene Cover-Werte und waehlt greedily mit Mindestabstand.
+- Das Ergebnis sind reine Terrain-Patch-Dictionaries mit `grid_position`, `cover_value` und optionalen `blocks_los`-/`walkable`-Feldern. Das Lab veraendert keine laufende Mission.
+- `scripts/tests/task_152_verifier.gd` prueft reproduzierbare Seeds, Mindestabstand, Walkability, LOS-/Threat-Scoring, Patchform und bessere Cover-Metriken nach Anwendung auf eine Testkarte.

@@ -5,6 +5,9 @@ signal session_snapshot_changed(snapshot: Dictionary)
 signal mission_start_requested(assignments: Dictionary)
 signal session_disconnected(message: String)
 
+const MAP_MANIFEST_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_map_manifest.gd")
+const MULTIPLAYER_ROSTER_CONTRACT_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_roster_contract.gd")
+
 const DEFAULT_PORT: int = 7777
 const DEFAULT_ADDRESS: String = "127.0.0.1"
 const DEFAULT_MAX_PLAYERS: int = 2
@@ -34,6 +37,7 @@ const ALLOWED_CLIENT_ROLES: PackedStringArray = [
 @export var client_role_id: String = ROLE_COMMANDER
 @export var host_fireteam_ids: PackedStringArray = PackedStringArray(["blue", "gold"])
 @export var client_fireteam_ids: PackedStringArray = PackedStringArray(["red"])
+@export var roster_mode: String = MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.ROSTER_MODE_HOST_ROSTER
 
 var _peers_by_id: Dictionary = {}
 var _connection_state: String = STATE_IDLE
@@ -42,6 +46,12 @@ var _last_error: String = ""
 var _mission_started: bool = false
 var _last_start_assignments: Dictionary = {}
 var _local_is_host: bool = false
+var _host_map_manifest: Dictionary = {}
+var _map_transfer_state: Dictionary = {
+	"state": "none",
+	"requires_consent": false,
+	"can_start_client": true,
+}
 
 
 func _ready() -> void:
@@ -168,6 +178,9 @@ func get_session_snapshot() -> Dictionary:
 		"local_ready": _is_local_peer_ready(),
 		"peers": _build_peer_snapshot_array(),
 		"assignments": build_session_assignments(),
+		"roster": MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.call("build_lobby_roster_mode_snapshot", roster_mode, _get_local_peer_id()),
+		"map_manifest": _host_map_manifest.duplicate(true),
+		"map_transfer": _map_transfer_state.duplicate(true),
 	}
 
 
@@ -176,7 +189,27 @@ func build_session_assignments() -> Dictionary:
 		"peer_teams": get_peer_team_assignments(),
 		"peer_roles": get_peer_role_assignments(),
 		"peer_fireteams": get_peer_fireteam_assignments(),
+		"peer_rosters": get_peer_roster_assignments(),
+		"roster_mode": MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.call("normalize_roster_mode", roster_mode),
 	}
+
+
+func set_roster_mode(mode: String) -> bool:
+	if not bool(MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.call("is_valid_roster_mode", mode)):
+		return false
+	if _mission_started:
+		return false
+	if _connection_state == STATE_JOINED and not _is_authority_session():
+		return false
+	roster_mode = String(MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.call("normalize_roster_mode", mode))
+	_refresh_peer_roster_identities()
+	_emit_snapshot()
+	_broadcast_snapshot()
+	return true
+
+
+func get_roster_mode() -> String:
+	return String(MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.call("normalize_roster_mode", roster_mode))
 
 
 func get_peer_team_assignments() -> Dictionary:
@@ -197,6 +230,24 @@ func get_peer_fireteam_assignments() -> Dictionary:
 	var result: Dictionary = {}
 	for peer_id in _peers_by_id.keys():
 		result[int(peer_id)] = PackedStringArray(Dictionary(_peers_by_id[peer_id]).get("fireteam_ids", PackedStringArray()))
+	return result
+
+
+func get_peer_roster_assignments() -> Dictionary:
+	var result: Dictionary = {}
+	for peer_id in _peers_by_id.keys():
+		var peer_data: Dictionary = Dictionary(_peers_by_id[peer_id])
+		result[int(peer_id)] = {
+			"owner_peer_id": int(peer_data.get("owner_peer_id", HOST_PEER_ID)),
+			"roster_source": String(peer_data.get("roster_source", MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.ROSTER_SOURCE_HOST)),
+			"roster_mode": String(peer_data.get("roster_mode", get_roster_mode())),
+			"roster_public_ref": String(peer_data.get("roster_public_ref", "")),
+			"profile_public_ref": String(peer_data.get("profile_public_ref", "")),
+			"uses_local_roster": bool(peer_data.get("uses_local_roster", false)),
+			"can_manage_private_roster": bool(peer_data.get("can_manage_private_roster", false)),
+			"fireteam_ids": PackedStringArray(peer_data.get("fireteam_ids", PackedStringArray())),
+			"character_gameplay_authority": String(peer_data.get("character_gameplay_authority", MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.CHARACTER_GAMEPLAY_AUTHORITY)),
+		}
 	return result
 
 
@@ -228,6 +279,53 @@ func set_peer_ready_for_test(peer_id: int, ready: bool) -> void:
 	_set_peer_ready(peer_id, ready)
 	_refresh_status_text()
 	_emit_snapshot()
+
+
+func set_host_map_manifest(manifest: Dictionary) -> Dictionary:
+	var verification: Dictionary = Dictionary(MAP_MANIFEST_SCRIPT.call("verify_manifest", manifest))
+	if bool(verification.get("valid", false)):
+		_host_map_manifest = Dictionary(verification.get("manifest", {})).duplicate(true)
+		_map_transfer_state = {
+			"state": "host_manifest_ready",
+			"requires_consent": false,
+			"can_start_client": true,
+			"manifest": _host_map_manifest.duplicate(true),
+		}
+	else:
+		_host_map_manifest.clear()
+		_map_transfer_state = {
+			"state": "invalid_manifest",
+			"requires_consent": false,
+			"can_start_client": false,
+			"errors": PackedStringArray(verification.get("errors", PackedStringArray())),
+		}
+	_emit_snapshot()
+	return _map_transfer_state.duplicate(true)
+
+
+func evaluate_client_map_manifest(manifest: Dictionary, local_map_paths: Array = []) -> Dictionary:
+	var result: Dictionary = Dictionary(MAP_MANIFEST_SCRIPT.call("check_local_map", manifest, local_map_paths))
+	_host_map_manifest = Dictionary(result.get("manifest", MAP_MANIFEST_SCRIPT.call("normalize_manifest", manifest))).duplicate(true)
+	_map_transfer_state = result.duplicate(true)
+	_map_transfer_state["can_start_client"] = not bool(result.get("requires_consent", false)) and String(result.get("state", "")) == "known"
+	_emit_snapshot()
+	return _map_transfer_state.duplicate(true)
+
+
+func accept_map_download(manifest: Dictionary, map_json_text: String, cache_root: String = MAP_MANIFEST_SCRIPT.DOWNLOAD_ROOT) -> Dictionary:
+	var result: Dictionary = Dictionary(MAP_MANIFEST_SCRIPT.call("accept_download", manifest, map_json_text, cache_root))
+	_map_transfer_state = result.duplicate(true)
+	if bool(result.get("accepted", false)):
+		_host_map_manifest = Dictionary(result.get("manifest", {})).duplicate(true)
+	_emit_snapshot()
+	return _map_transfer_state.duplicate(true)
+
+
+func reject_map_download(manifest: Dictionary) -> Dictionary:
+	_map_transfer_state = Dictionary(MAP_MANIFEST_SCRIPT.call("reject_download", manifest))
+	_host_map_manifest = Dictionary(_map_transfer_state.get("manifest", {})).duplicate(true)
+	_emit_snapshot()
+	return _map_transfer_state.duplicate(true)
 
 
 @rpc("any_peer", "reliable")
@@ -341,6 +439,13 @@ func _reset_session_state(emit_signal: bool = true) -> void:
 	_last_status_text = "Ready. Host or join a local test session."
 	_mission_started = false
 	_last_start_assignments.clear()
+	_host_map_manifest.clear()
+	_map_transfer_state = {
+		"state": "none",
+		"requires_consent": false,
+		"can_start_client": true,
+	}
+	roster_mode = String(MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.call("normalize_roster_mode", roster_mode))
 	if emit_signal:
 		_emit_snapshot()
 
@@ -363,8 +468,9 @@ func _upsert_peer(peer_id: int, is_host_peer: bool) -> void:
 	existing["is_host"] = is_host_peer
 	existing["team_id"] = host_team_id if is_host_peer else client_team_id
 	existing["role_id"] = role_id
-	existing["fireteam_ids"] = PackedStringArray(existing.get("fireteam_ids", fireteams))
+	existing["fireteam_ids"] = _normalize_fireteam_ids(existing.get("fireteam_ids", fireteams))
 	existing["ready"] = bool(existing.get("ready", false))
+	existing = _apply_peer_roster_identity(peer_id, existing, is_host_peer)
 	_peers_by_id[peer_id] = existing
 
 
@@ -414,6 +520,9 @@ func _broadcast_snapshot() -> void:
 func _apply_authority_snapshot(snapshot: Dictionary) -> void:
 	_last_status_text = String(snapshot.get("status_text", _last_status_text))
 	_mission_started = bool(snapshot.get("mission_started", _mission_started))
+	var roster_snapshot: Dictionary = Dictionary(snapshot.get("roster", {}))
+	if roster_snapshot.has("roster_mode"):
+		roster_mode = String(MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.call("normalize_roster_mode", roster_snapshot.get("roster_mode", roster_mode)))
 	if not _mission_started and _connection_state == STATE_MISSION:
 		_connection_state = STATE_JOINED
 
@@ -426,6 +535,7 @@ func _apply_authority_snapshot(snapshot: Dictionary) -> void:
 		if peer_id <= 0:
 			continue
 		peer_data["fireteam_ids"] = _normalize_fireteam_ids(peer_data.get("fireteam_ids", PackedStringArray()))
+		peer_data = _apply_peer_roster_identity(peer_id, peer_data, bool(peer_data.get("is_host", peer_id == HOST_PEER_ID)))
 		_peers_by_id[peer_id] = peer_data
 
 
@@ -438,6 +548,27 @@ func _build_peer_snapshot_array() -> Array:
 		peer_data["fireteam_ids"] = PackedStringArray(peer_data.get("fireteam_ids", PackedStringArray()))
 		result.append(peer_data)
 	return result
+
+
+func _refresh_peer_roster_identities() -> void:
+	for peer_id_variant in _peers_by_id.keys():
+		var peer_id: int = int(peer_id_variant)
+		var peer_data: Dictionary = Dictionary(_peers_by_id[peer_id_variant]).duplicate(true)
+		_peers_by_id[peer_id_variant] = _apply_peer_roster_identity(peer_id, peer_data, bool(peer_data.get("is_host", peer_id == HOST_PEER_ID)))
+
+
+func _apply_peer_roster_identity(peer_id: int, peer_data: Dictionary, is_host_peer: bool) -> Dictionary:
+	var identity: Dictionary = Dictionary(MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.call(
+		"build_peer_roster_identity",
+		peer_id,
+		roster_mode,
+		is_host_peer,
+		"",
+		peer_data.get("fireteam_ids", PackedStringArray())
+	))
+	for key in identity.keys():
+		peer_data[key] = identity[key]
+	return peer_data
 
 
 func _are_all_connected_peers_ready() -> bool:
@@ -477,6 +608,8 @@ func _is_authority_session() -> bool:
 func _has_active_peer() -> bool:
 	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
 	if peer == null:
+		return false
+	if peer is OfflineMultiplayerPeer:
 		return false
 	return peer.get_connection_status() != MultiplayerPeer.CONNECTION_DISCONNECTED
 

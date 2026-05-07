@@ -4,6 +4,7 @@ const LIVE_MISSION_SCENE_PATH: String = "res://scenes/tests/mission_reactivity_t
 const NPC_VISUAL_MAPPING_PATH: String = "res://data/npc_unit_visual_mapping.json"
 const BLASTER_IMPORT_ROOT: String = "res://Assets/used/npc/blaster_kit"
 const EXPECTED_BLASTER_COUNT: int = 4
+const EXPECTED_MAPPED_WEAPON_VISUAL_COUNT: int = 6
 const EXPECTED_LIVE_PROXY_COUNT: int = 2
 const HELMET_SOCKET_NAME: String = "HeadSocket"
 const BLASTER_SOCKET_NAME: String = "RightHandSocket"
@@ -67,7 +68,7 @@ func _test_mapping_attachment_contract() -> void:
 	_assert(ResourceLoader.exists(String(blaster_attachment.get("texture_path", ""))), "Blaster attachment maps its shared colormap texture")
 
 	var blaster_paths: Array = Array(mapping.get("blaster_paths", []))
-	_assert(blaster_paths.size() == EXPECTED_BLASTER_COUNT, "Mapping tracks the imported blaster GLBs")
+	_assert(blaster_paths.size() == EXPECTED_MAPPED_WEAPON_VISUAL_COUNT, "Mapping tracks imported blaster kit plus expanded weapon visual GLBs")
 	for blaster_path_variant in blaster_paths:
 		var blaster_path: String = String(blaster_path_variant)
 		_assert(ResourceLoader.exists(blaster_path), "Mapped blaster resource is loadable: %s" % blaster_path)

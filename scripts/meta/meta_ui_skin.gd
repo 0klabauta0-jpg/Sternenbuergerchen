@@ -1,23 +1,29 @@
 class_name MetaUISkin
 extends RefCounted
 
-const FRAME_TEXTURE: Texture2D = preload("res://Assets/kenney_ui-pack/PNG/Grey/Default/button_rectangle_depth_border.png")
-const PANEL_TEXTURE: Texture2D = preload("res://Assets/kenney_ui-pack/PNG/Grey/Default/button_rectangle_depth_gradient.png")
-const BUTTON_TEXTURE: Texture2D = preload("res://Assets/kenney_ui-pack/PNG/Grey/Default/button_rectangle_gloss.png")
-const BUTTON_DISABLED_TEXTURE: Texture2D = preload("res://Assets/kenney_ui-pack/PNG/Grey/Default/button_rectangle_flat.png")
-const HEADER_TEXTURE: Texture2D = preload("res://Assets/kenney_ui-pack-space-expansion/PNG/Grey/Default/button_square_header_large_rectangle.png")
-const MISSION_HEADER_TEXTURE: Texture2D = preload("res://Assets/kenney_ui-pack-space-expansion/PNG/Grey/Default/button_square_header_blade_rectangle_screws.png")
-const TACTICAL_FRAME_TEXTURE: Texture2D = preload("res://Assets/kenney_ui-pack-space-expansion/PNG/Grey/Default/bar_square_large.png")
-const TACTICAL_PANEL_TEXTURE: Texture2D = preload("res://Assets/kenney_ui-pack-space-expansion/PNG/Grey/Default/bar_square_gloss_large.png")
-const TACTICAL_BUTTON_TEXTURE: Texture2D = preload("res://Assets/kenney_ui-pack-space-expansion/PNG/Grey/Default/button_square_header_small_rectangle_screws.png")
-const TACTICAL_BUTTON_ACTIVE_TEXTURE: Texture2D = preload("res://Assets/kenney_ui-pack-space-expansion/PNG/Grey/Default/button_square_header_notch_rectangle_screws.png")
-const TRANSFER_READY_TEXTURE: Texture2D = preload("res://Assets/kenney_ui-pack-space-expansion/PNG/Green/Default/button_square_header_blade_rectangle_screws.png")
-const TRANSFER_PRESSED_TEXTURE: Texture2D = preload("res://Assets/kenney_ui-pack-space-expansion/PNG/Yellow/Default/button_square_header_blade_rectangle_screws.png")
+const COLOR_FRAME := Color("252d33")
+const COLOR_FRAME_BORDER := Color("4d5a63")
+const COLOR_PANEL := Color("151c21")
+const COLOR_PANEL_ALT := Color("20282e")
+const COLOR_HEADER := Color("0d1216")
+const COLOR_HEADER_BORDER := Color("38434b")
+const COLOR_BUTTON_LIGHT := Color("d9dee7")
+const COLOR_BUTTON_LIGHT_HOVER := Color("edf3f6")
+const COLOR_BUTTON_PRESSED := Color("bcc7d0")
+const COLOR_BUTTON_DARK := Color("12181d")
+const COLOR_BUTTON_DARK_HOVER := Color("182027")
+const COLOR_BUTTON_BORDER := Color("78848d")
+const COLOR_READY := Color("69c391")
+const COLOR_WARNING := Color("d89b31")
+const COLOR_DANGER := Color("d66c66")
+const COLOR_ACCENT := Color("63d1d2")
+const COLOR_MUTED := Color("8e9aa3")
 
-const TEXT_HEADER := Color(0.17, 0.19, 0.24, 1.0)
-const TEXT_BODY := Color(0.24, 0.27, 0.33, 1.0)
-const TEXT_MUTED := Color(0.34, 0.37, 0.43, 1.0)
-const TEXT_DISABLED := Color(0.47, 0.49, 0.53, 1.0)
+const TEXT_HEADER := Color("edf3f6")
+const TEXT_BODY := Color("a9b4bc")
+const TEXT_MUTED := Color("8e9aa3")
+const TEXT_DISABLED := Color("626b73")
+const TEXT_DARK := Color("1e252a")
 
 
 static func apply_homebase(screen: Control) -> void:
@@ -201,25 +207,25 @@ static func style_tactical_panel(panel: PanelContainer, variant: String = "frame
 
 	match variant:
 		"header":
-			panel.add_theme_stylebox_override("panel", _build_stylebox(MISSION_HEADER_TEXTURE, 14, 14, 12, 12))
+			panel.add_theme_stylebox_override("panel", _build_flat_stylebox(COLOR_HEADER, COLOR_HEADER_BORDER, 6, 1, Vector4(12.0, 10.0, 12.0, 10.0)))
 		"panel":
-			panel.add_theme_stylebox_override("panel", _build_stylebox(TACTICAL_PANEL_TEXTURE, 16, 16, 14, 14))
+			panel.add_theme_stylebox_override("panel", _build_flat_stylebox(COLOR_PANEL_ALT, COLOR_FRAME_BORDER, 6, 1, Vector4(14.0, 12.0, 14.0, 12.0)))
 		_:
-			panel.add_theme_stylebox_override("panel", _build_stylebox(TACTICAL_FRAME_TEXTURE, 16, 16, 14, 14))
+			panel.add_theme_stylebox_override("panel", _build_flat_stylebox(COLOR_FRAME, COLOR_FRAME_BORDER, 6, 1, Vector4(14.0, 12.0, 14.0, 12.0)))
 
 
 static func style_tactical_button(button: Button, is_active: bool = false) -> void:
 	if button == null:
 		return
 
-	button.add_theme_stylebox_override("normal", _build_stylebox(TACTICAL_BUTTON_ACTIVE_TEXTURE if is_active else TACTICAL_BUTTON_TEXTURE, 12, 12, 10, 10))
-	button.add_theme_stylebox_override("hover", _build_stylebox(TACTICAL_BUTTON_ACTIVE_TEXTURE, 12, 12, 10, 10))
-	button.add_theme_stylebox_override("pressed", _build_stylebox(TACTICAL_FRAME_TEXTURE, 14, 14, 12, 12))
-	button.add_theme_stylebox_override("disabled", _build_stylebox(BUTTON_DISABLED_TEXTURE, 10, 10, 10, 10))
-	button.add_theme_color_override("font_color", TEXT_HEADER)
-	button.add_theme_color_override("font_hover_color", TEXT_HEADER)
-	button.add_theme_color_override("font_pressed_color", TEXT_HEADER)
-	button.add_theme_color_override("font_focus_color", TEXT_HEADER)
+	button.add_theme_stylebox_override("normal", _build_flat_stylebox(COLOR_BUTTON_DARK if is_active else COLOR_BUTTON_LIGHT, COLOR_BUTTON_BORDER, 6, 1, Vector4(10.0, 8.0, 10.0, 8.0)))
+	button.add_theme_stylebox_override("hover", _build_flat_stylebox(COLOR_BUTTON_DARK_HOVER if is_active else COLOR_BUTTON_LIGHT_HOVER, COLOR_BUTTON_BORDER, 6, 1, Vector4(10.0, 8.0, 10.0, 8.0)))
+	button.add_theme_stylebox_override("pressed", _build_flat_stylebox(COLOR_BUTTON_DARK.darkened(0.08) if is_active else COLOR_BUTTON_PRESSED, COLOR_BUTTON_BORDER, 6, 1, Vector4(10.0, 8.0, 10.0, 8.0)))
+	button.add_theme_stylebox_override("disabled", _build_flat_stylebox(COLOR_MUTED.darkened(0.25), COLOR_FRAME_BORDER, 6, 1, Vector4(10.0, 8.0, 10.0, 8.0)))
+	button.add_theme_color_override("font_color", TEXT_HEADER if is_active else TEXT_DARK)
+	button.add_theme_color_override("font_hover_color", TEXT_HEADER if is_active else TEXT_DARK)
+	button.add_theme_color_override("font_pressed_color", TEXT_HEADER if is_active else TEXT_DARK)
+	button.add_theme_color_override("font_focus_color", TEXT_HEADER if is_active else TEXT_DARK)
 	button.add_theme_color_override("font_disabled_color", TEXT_DISABLED)
 	button.add_theme_font_size_override("font_size", 9)
 
@@ -248,10 +254,10 @@ static func style_danger_round_button(button: Button) -> void:
 	if button == null:
 		return
 
-	var normal := _build_round_flat_stylebox(Color(0.76, 0.15, 0.15, 1.0), Color(0.98, 0.82, 0.82, 1.0))
-	var hover := _build_round_flat_stylebox(Color(0.87, 0.22, 0.22, 1.0), Color(1.0, 0.90, 0.90, 1.0))
-	var pressed := _build_round_flat_stylebox(Color(0.58, 0.08, 0.08, 1.0), Color(0.90, 0.72, 0.72, 1.0))
-	var disabled := _build_round_flat_stylebox(Color(0.33, 0.18, 0.18, 1.0), Color(0.50, 0.34, 0.34, 1.0))
+	var normal := _build_round_flat_stylebox(COLOR_DANGER, Color("f4c1c1"))
+	var hover := _build_round_flat_stylebox(COLOR_DANGER.lightened(0.08), Color("fee3e3"))
+	var pressed := _build_round_flat_stylebox(COLOR_DANGER.darkened(0.24), Color("d89595"))
+	var disabled := _build_round_flat_stylebox(Color("6e5555"), Color("897171"))
 	button.add_theme_stylebox_override("normal", normal)
 	button.add_theme_stylebox_override("hover", hover)
 	button.add_theme_stylebox_override("pressed", pressed)
@@ -267,14 +273,18 @@ static func style_transfer_button(button: Button, is_ready: bool) -> void:
 	if button == null:
 		return
 
-	button.add_theme_stylebox_override("normal", _build_stylebox(TRANSFER_READY_TEXTURE if is_ready else MISSION_HEADER_TEXTURE, 14, 14, 12, 12))
-	button.add_theme_stylebox_override("hover", _build_stylebox(TRANSFER_READY_TEXTURE if is_ready else BUTTON_TEXTURE, 14, 14, 12, 12))
-	button.add_theme_stylebox_override("pressed", _build_stylebox(TRANSFER_PRESSED_TEXTURE, 14, 14, 12, 12))
-	button.add_theme_stylebox_override("disabled", _build_stylebox(BUTTON_DISABLED_TEXTURE, 10, 10, 10, 10))
-	button.add_theme_color_override("font_color", TEXT_HEADER)
-	button.add_theme_color_override("font_hover_color", TEXT_HEADER)
-	button.add_theme_color_override("font_pressed_color", TEXT_HEADER)
-	button.add_theme_color_override("font_focus_color", TEXT_HEADER)
+	var normal_fill := COLOR_READY if is_ready else COLOR_BUTTON_LIGHT
+	var hover_fill := COLOR_READY.lightened(0.08) if is_ready else COLOR_BUTTON_LIGHT_HOVER
+	var pressed_fill := COLOR_WARNING if is_ready else COLOR_BUTTON_PRESSED
+	var font_color := TEXT_DARK
+	button.add_theme_stylebox_override("normal", _build_flat_stylebox(normal_fill, COLOR_BUTTON_BORDER, 6, 1, Vector4(12.0, 10.0, 12.0, 10.0)))
+	button.add_theme_stylebox_override("hover", _build_flat_stylebox(hover_fill, COLOR_BUTTON_BORDER, 6, 1, Vector4(12.0, 10.0, 12.0, 10.0)))
+	button.add_theme_stylebox_override("pressed", _build_flat_stylebox(pressed_fill, COLOR_BUTTON_BORDER, 6, 1, Vector4(12.0, 10.0, 12.0, 10.0)))
+	button.add_theme_stylebox_override("disabled", _build_flat_stylebox(COLOR_MUTED.darkened(0.25), COLOR_FRAME_BORDER, 6, 1, Vector4(12.0, 10.0, 12.0, 10.0)))
+	button.add_theme_color_override("font_color", font_color)
+	button.add_theme_color_override("font_hover_color", font_color)
+	button.add_theme_color_override("font_pressed_color", font_color)
+	button.add_theme_color_override("font_focus_color", font_color)
 	button.add_theme_color_override("font_disabled_color", TEXT_DISABLED)
 
 
@@ -285,29 +295,32 @@ static func _apply_panel_style(screen: Control, path: String, variant: String) -
 
 	match variant:
 		"header":
-			panel.add_theme_stylebox_override("panel", _build_stylebox(HEADER_TEXTURE, 12, 12, 10, 10))
+			panel.add_theme_stylebox_override("panel", _build_flat_stylebox(COLOR_HEADER, COLOR_HEADER_BORDER, 6, 1, Vector4(10.0, 8.0, 10.0, 8.0)))
 		"mission_header":
-			panel.add_theme_stylebox_override("panel", _build_stylebox(MISSION_HEADER_TEXTURE, 14, 14, 12, 12))
+			panel.add_theme_stylebox_override("panel", _build_flat_stylebox(COLOR_HEADER, COLOR_HEADER_BORDER, 6, 1, Vector4(12.0, 10.0, 12.0, 10.0)))
 		"thin_frame":
 			panel.add_theme_stylebox_override("panel", _build_thin_frame_stylebox())
 		"panel":
-			panel.add_theme_stylebox_override("panel", _build_stylebox(PANEL_TEXTURE, 10, 10, 10, 10))
+			panel.add_theme_stylebox_override("panel", _build_flat_stylebox(COLOR_PANEL, COLOR_FRAME_BORDER, 6, 1, Vector4(10.0, 8.0, 10.0, 8.0)))
 		_:
-			panel.add_theme_stylebox_override("panel", _build_stylebox(FRAME_TEXTURE, 10, 10, 10, 10))
+			panel.add_theme_stylebox_override("panel", _build_flat_stylebox(COLOR_FRAME, COLOR_FRAME_BORDER, 6, 1, Vector4(10.0, 8.0, 10.0, 8.0)))
 
 
 static func _apply_button_style(button: Button, primary: bool) -> void:
 	if button == null:
 		return
 
-	button.add_theme_stylebox_override("normal", _build_stylebox(HEADER_TEXTURE if primary else PANEL_TEXTURE, 12, 12, 10, 10))
-	button.add_theme_stylebox_override("hover", _build_stylebox(BUTTON_TEXTURE, 10, 10, 10, 10))
-	button.add_theme_stylebox_override("pressed", _build_stylebox(FRAME_TEXTURE, 10, 10, 10, 10))
-	button.add_theme_stylebox_override("disabled", _build_stylebox(BUTTON_DISABLED_TEXTURE, 10, 10, 10, 10))
-	button.add_theme_color_override("font_color", TEXT_HEADER)
-	button.add_theme_color_override("font_hover_color", TEXT_HEADER)
-	button.add_theme_color_override("font_pressed_color", TEXT_HEADER)
-	button.add_theme_color_override("font_focus_color", TEXT_HEADER)
+	var fill := COLOR_READY if primary else COLOR_BUTTON_LIGHT
+	var hover_fill := COLOR_READY.lightened(0.08) if primary else COLOR_BUTTON_LIGHT_HOVER
+	var pressed_fill := COLOR_WARNING if primary else COLOR_BUTTON_PRESSED
+	button.add_theme_stylebox_override("normal", _build_flat_stylebox(fill, COLOR_BUTTON_BORDER, 6, 1, Vector4(10.0, 8.0, 10.0, 8.0)))
+	button.add_theme_stylebox_override("hover", _build_flat_stylebox(hover_fill, COLOR_BUTTON_BORDER, 6, 1, Vector4(10.0, 8.0, 10.0, 8.0)))
+	button.add_theme_stylebox_override("pressed", _build_flat_stylebox(pressed_fill, COLOR_BUTTON_BORDER, 6, 1, Vector4(10.0, 8.0, 10.0, 8.0)))
+	button.add_theme_stylebox_override("disabled", _build_flat_stylebox(COLOR_MUTED.darkened(0.25), COLOR_FRAME_BORDER, 6, 1, Vector4(10.0, 8.0, 10.0, 8.0)))
+	button.add_theme_color_override("font_color", TEXT_DARK)
+	button.add_theme_color_override("font_hover_color", TEXT_DARK)
+	button.add_theme_color_override("font_pressed_color", TEXT_DARK)
+	button.add_theme_color_override("font_focus_color", TEXT_DARK)
 	button.add_theme_color_override("font_disabled_color", TEXT_DISABLED)
 
 
@@ -325,21 +338,28 @@ static func _apply_label_style(label: Node, tone: String) -> void:
 			typed_label.add_theme_color_override("font_color", TEXT_BODY)
 
 
-static func _build_stylebox(
-	texture: Texture2D,
-	margin_left: float,
-	margin_right: float,
-	margin_top: float,
-	margin_bottom: float
-) -> StyleBoxTexture:
-	var stylebox := StyleBoxTexture.new()
-	stylebox.texture = texture
-	stylebox.texture_margin_left = margin_left
-	stylebox.texture_margin_right = margin_right
-	stylebox.texture_margin_top = margin_top
-	stylebox.texture_margin_bottom = margin_bottom
-	stylebox.axis_stretch_horizontal = StyleBoxTexture.AXIS_STRETCH_MODE_STRETCH
-	stylebox.axis_stretch_vertical = StyleBoxTexture.AXIS_STRETCH_MODE_STRETCH
+static func _build_flat_stylebox(
+	fill_color: Color,
+	border_color: Color,
+	radius: int,
+	border_width: int,
+	content_margin: Vector4
+) -> StyleBoxFlat:
+	var stylebox := StyleBoxFlat.new()
+	stylebox.bg_color = fill_color
+	stylebox.border_color = border_color
+	stylebox.border_width_left = border_width
+	stylebox.border_width_top = border_width
+	stylebox.border_width_right = border_width
+	stylebox.border_width_bottom = border_width
+	stylebox.corner_radius_top_left = radius
+	stylebox.corner_radius_top_right = radius
+	stylebox.corner_radius_bottom_left = radius
+	stylebox.corner_radius_bottom_right = radius
+	stylebox.content_margin_left = content_margin.x
+	stylebox.content_margin_top = content_margin.y
+	stylebox.content_margin_right = content_margin.z
+	stylebox.content_margin_bottom = content_margin.w
 	return stylebox
 
 
@@ -364,8 +384,8 @@ static func _build_round_flat_stylebox(fill_color: Color, border_color: Color) -
 
 static func _build_thin_frame_stylebox() -> StyleBoxFlat:
 	var stylebox := StyleBoxFlat.new()
-	stylebox.bg_color = Color(0.11, 0.14, 0.16, 1.0)
-	stylebox.border_color = Color(0.33, 0.39, 0.45, 1.0)
+	stylebox.bg_color = COLOR_PANEL_ALT
+	stylebox.border_color = COLOR_FRAME_BORDER
 	stylebox.border_width_left = 1
 	stylebox.border_width_top = 1
 	stylebox.border_width_right = 1

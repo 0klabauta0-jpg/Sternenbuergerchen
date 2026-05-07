@@ -5,6 +5,7 @@ signal all_waves_complete()
 
 const STATUS_LABEL_NAME: String = "WaveStatusLabel"
 const STATUS_LABEL_POSITION: Vector2 = Vector2(542.0, 176.0)
+const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
 
 @export var wave_count: int = 3
 @export var units_per_wave: int = 2
@@ -17,6 +18,7 @@ const STATUS_LABEL_POSITION: Vector2 = Vector2(542.0, 176.0)
 var _enemy_units: Array = []
 var _spawn_positions_by_unit_id: Dictionary = {}
 var _patrol_paths_by_unit_id: Dictionary = {}
+var _enemy_tactics_by_unit_id: Dictionary = {}
 var _current_wave_number: int = 0
 var _time_until_next_wave: float = 0.0
 var _status_label: Label = null
@@ -42,6 +44,7 @@ func initialize_enemy_units(enemy_units: Array) -> void:
 		if enemy_unit is Node2D:
 			_spawn_positions_by_unit_id[unit_id] = (enemy_unit as Node2D).global_position
 
+		_apply_enemy_tactics(enemy_unit)
 		_deactivate_enemy_unit(enemy_unit)
 		if _patrol_paths_by_unit_id.has(unit_id) and enemy_unit.has_method("set_patrol_path"):
 			enemy_unit.call("set_patrol_path", Array(_patrol_paths_by_unit_id.get(unit_id, [])).duplicate(true))
@@ -73,6 +76,24 @@ func get_patrol_path_for_unit(unit_id: String) -> Array:
 	if normalized_unit_id.is_empty():
 		return []
 	return Array(_patrol_paths_by_unit_id.get(normalized_unit_id, [])).duplicate(true)
+
+
+func set_enemy_tactics(tactics_by_unit_id: Dictionary) -> void:
+	_enemy_tactics_by_unit_id.clear()
+	for unit_id_variant in tactics_by_unit_id.keys():
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty():
+			continue
+		_enemy_tactics_by_unit_id[unit_id] = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("normalize_config", tactics_by_unit_id.get(unit_id_variant, {}))
+
+
+func get_tactic_config_for_unit(unit_id: String) -> Dictionary:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_default_config_for_map_size", Vector2i.ZERO)
+	if _enemy_tactics_by_unit_id.has(normalized_unit_id):
+		return Dictionary(_enemy_tactics_by_unit_id.get(normalized_unit_id, {})).duplicate(true)
+	return ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_default_config_for_map_size", Vector2i.ZERO)
 
 
 func get_current_wave_number() -> int:
@@ -152,6 +173,7 @@ func _activate_enemy_unit(enemy_unit) -> void:
 		enemy_unit.call("activate_for_wave", spawn_position)
 	elif enemy_unit is CanvasItem:
 		enemy_unit.visible = true
+	_apply_enemy_tactics(enemy_unit)
 
 	var unit_registry = _get_unit_registry()
 	if unit_registry == null or not unit_registry.has_method("register_unit"):
@@ -176,6 +198,19 @@ func _deactivate_enemy_unit(enemy_unit) -> void:
 		enemy_unit.call("deactivate_for_wave")
 	elif enemy_unit is CanvasItem:
 		enemy_unit.visible = false
+
+
+func _apply_enemy_tactics(enemy_unit) -> void:
+	if enemy_unit == null or not enemy_unit.has_method("get_unit_id") or not (enemy_unit is Node):
+		return
+	var unit_id: String = String(enemy_unit.call("get_unit_id")).strip_edges()
+	if unit_id.is_empty():
+		return
+	var config: Dictionary = get_tactic_config_for_unit(unit_id)
+	(enemy_unit as Node).set_meta("enemy_tactics_config", config.duplicate(true))
+	(enemy_unit as Node).set_meta("enemy_tactics_profile_id", String(config.get("profile_id", "")))
+	(enemy_unit as Node).set_meta("enemy_security_mode", String(config.get("security_mode", "")))
+	(enemy_unit as Node).set_meta("enemy_facing", String(config.get("facing", "")))
 
 
 func _get_unit_registry():

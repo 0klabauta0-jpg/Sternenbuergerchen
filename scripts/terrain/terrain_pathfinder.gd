@@ -89,7 +89,7 @@ func score_path(path_grid_points: Array, registry, options: Dictionary = {}) -> 
 	for grid_variant in path_grid_points:
 		var grid_position: Vector2i = Vector2i(grid_variant)
 		exposure_sum += get_exposure_score(grid_position, registry, options)
-		cover_sum += _get_cover_score(grid_position, registry)
+		cover_sum += _get_cover_score(grid_position, registry, options)
 		if previous_grid != null:
 			path_cost += _get_step_cost(Vector2i(previous_grid), grid_position, registry, options)
 		previous_grid = grid_position
@@ -113,6 +113,7 @@ func get_exposure_score(grid_position: Vector2i, registry, options: Dictionary =
 	var hazard_grids: Array = Array(options.get("hazard_grids", []))
 	if hazard_grids.is_empty():
 		return 0.0
+	_increment_diagnostic_counter(options, "exposure_score_calls")
 	var max_distance: float = maxf(float(options.get("exposure_max_grid_distance", DEFAULT_EXPOSURE_MAX_GRID_DISTANCE)), 0.001)
 	var exposure: float = 0.0
 	for hazard_variant in hazard_grids:
@@ -120,6 +121,7 @@ func get_exposure_score(grid_position: Vector2i, registry, options: Dictionary =
 		var grid_distance: float = _grid_distance_score(grid_position, hazard_grid)
 		if grid_distance > max_distance:
 			continue
+		_increment_diagnostic_counter(options, "los_check_count")
 		if not _has_grid_line_of_sight(hazard_grid, grid_position, registry):
 			continue
 		var contribution: float = 1.0 - clampf(grid_distance / max_distance, 0.0, 1.0)
@@ -195,7 +197,7 @@ func _is_grid_step_walkable(current_grid: Vector2i, neighbor_grid: Vector2i, reg
 	if edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE:
 		return true  # slopes are always traversable
 	else:
-		return height_difference <= 1  # cliffs only allow 1 level difference
+		return false
 
 
 func _get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry, options: Dictionary = {}) -> float:
@@ -203,12 +205,14 @@ func _get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry, o
 	var neighbor_tile = registry.call("get_tile_at_grid", neighbor_grid)
 	if current_tile == null or neighbor_tile == null:
 		return INF
+	if not _is_neighbor_walkable(current_grid, neighbor_grid, registry):
+		return INF
 
 	var height_difference: int = abs(int(neighbor_tile.height_level) - int(current_tile.height_level))
 	var surface_cost: float = TERRAIN_TILE_DATA_SCRIPT.get_surface_path_cost(String(neighbor_tile.surface_type))
 
 	# Slopes cost more per height level than flat terrain
-	var base_cost: float = surface_cost + (float(height_difference) * 0.5)
+	var base_cost: float = surface_cost
 	if height_difference > 0:
 		var higher_tile = neighbor_tile if int(neighbor_tile.height_level) > int(current_tile.height_level) else current_tile
 		var edge_type: String = String(higher_tile.edge_type)
@@ -219,7 +223,7 @@ func _get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry, o
 		var exposure_weight: float = maxf(float(options.get("exposure_weight", 0.0)), 0.0)
 		var cover_weight: float = maxf(float(options.get("cover_weight", 0.0)), 0.0)
 		var exposure_score: float = get_exposure_score(neighbor_grid, registry, options)
-		var cover_score: float = _get_cover_score(neighbor_grid, registry)
+		var cover_score: float = _get_cover_score(neighbor_grid, registry, options)
 		base_cost = maxf(base_cost + (exposure_weight * exposure_score) - (cover_weight * cover_score), MIN_COVER_AWARE_STEP_COST)
 
 	var delta: Vector2i = neighbor_grid - current_grid
@@ -228,7 +232,8 @@ func _get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry, o
 	return base_cost
 
 
-func _get_cover_score(grid_position: Vector2i, registry) -> float:
+func _get_cover_score(grid_position: Vector2i, registry, options: Dictionary = {}) -> float:
+	_increment_diagnostic_counter(options, "cover_check_count")
 	if registry == null or not registry.has_method("get_tile_at_grid"):
 		return 0.0
 	var tile_data = registry.call("get_tile_at_grid", grid_position)
@@ -245,6 +250,10 @@ func _grid_distance_score(a: Vector2i, b: Vector2i) -> float:
 func _has_grid_line_of_sight(source_grid: Vector2i, target_grid: Vector2i, registry) -> bool:
 	if registry == null or not registry.has_method("get_tile_at_grid"):
 		return true
+	var source_tile = registry.call("get_tile_at_grid", source_grid)
+	var target_tile = registry.call("get_tile_at_grid", target_grid)
+	var source_height: int = int(source_tile.height_level) if source_tile != null else 0
+	var target_height: int = int(target_tile.height_level) if target_tile != null else 0
 	var delta: Vector2i = target_grid - source_grid
 	var step_count: int = maxi(abs(delta.x), abs(delta.y))
 	if step_count <= 0:
@@ -256,6 +265,17 @@ func _has_grid_line_of_sight(source_grid: Vector2i, target_grid: Vector2i, regis
 			roundi(lerpf(float(source_grid.y), float(target_grid.y), t))
 		)
 		var tile_data = registry.call("get_tile_at_grid", stepped_grid)
-		if tile_data != null and bool(tile_data.blocks_los):
+		if tile_data == null or not bool(tile_data.blocks_los):
+			continue
+		var blocker_height: int = int(tile_data.height_level) + int(tile_data.object_height)
+		if blocker_height >= source_height and blocker_height >= target_height:
 			return false
 	return true
+
+
+func _increment_diagnostic_counter(options: Dictionary, key: String, amount: int = 1) -> void:
+	var diagnostics_variant: Variant = options.get("diagnostics", null)
+	if typeof(diagnostics_variant) != TYPE_DICTIONARY:
+		return
+	var diagnostics: Dictionary = Dictionary(diagnostics_variant)
+	diagnostics[key] = int(diagnostics.get(key, 0)) + amount

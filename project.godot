@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Sternenbuergerchen"
-run/main_scene="res://scenes/meta/meta_layer_test.tscn"
+run/main_scene="res://scenes/ui/main_menu.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -27,6 +27,13 @@ project/assembly_name="Sternenbuergerchen"
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/godot_mcp/plugin.cfg")
+
+[input]
+
+show_npc_thoughts={
+"deadzone": 0.2,
+"events": []
+}
 
 [physics]
 

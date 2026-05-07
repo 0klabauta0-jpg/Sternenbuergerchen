@@ -2,13 +2,19 @@ extends Node
 
 const LOS_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/los_system.gd")
 const OVERWATCH_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/overwatch_controller.gd")
+const FIRETEAM_SECURITY_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_security_controller.gd")
+const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
+const LOCAL_AVOIDANCE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/local_avoidance_resolver.gd")
 const CONTACT_TRACKER_SCRIPT: GDScript = preload("res://scripts/tactical/contact_tracker.gd")
 const FLANK_VULNERABILITY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/flank_vulnerability_resolver.gd")
 const MEDIC_SUPPORT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/medic_support_resolver.gd")
 const COMBAT_FIRE_DECISION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/combat_fire_decision_resolver.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
+const CHARACTER_GAMEPLAY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/character_gameplay_resolver.gd")
+const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
 const MISSION_COMBAT_AUTHORITY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_combat_authority_contract.gd")
 const MISSION_COMBAT_REMOTE_EVENT_BRIDGE_SCRIPT: GDScript = preload("res://scripts/mission/mission_combat_remote_event_bridge.gd")
+const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_event_bus.gd")
 const CONTACT_LINE_NAME: String = "CombatContactLine"
 const EVENT_LABEL_NAME: String = "CombatEventLabel"
 const WINNER_LABEL_NAME: String = "CombatWinnerLabel"
@@ -33,9 +39,9 @@ const DISCIPLINE_BREAK_EVENT_COLOR: Color = Color(1.0, 0.65, 0.3, 1.0)
 const MISIDENTIFICATION_BASE_CHANCE: float = 0.03
 const MISIDENTIFICATION_COOLDOWN_TICKS: int = 15
 const MISIDENTIFICATION_EVENT_COLOR: Color = Color(1.0, 0.4, 0.4, 1.0)
-const MEDIC_SUPPORT_TILE_RANGE: int = 2
+const MEDIC_SUPPORT_TILE_RANGE: int = 1
 const MEDIC_SUPPORT_MOVE_MAX_TILE_DISTANCE: int = 3
-const MEDIC_SUPPORT_RANGE_FALLBACK_WORLD: float = 144.0
+const MEDIC_SUPPORT_RANGE_FALLBACK_WORLD: float = 80.0
 const MEDIC_SUPPORT_MOVE_MAX_DISTANCE_FALLBACK_WORLD: float = 216.0
 const MEDIC_SUPPORT_MOVE_SPEED_FACTOR: float = 0.55
 const MEDIC_SUPPORT_MOVE_REISSUE_TICKS: int = 4
@@ -52,6 +58,10 @@ const FRIENDLY_STANDARD_COVER_MIN_DISTANCE: float = 10.0
 const FRIENDLY_STANDARD_COVER_COOLDOWN_MSEC: int = 1600
 const FRIENDLY_LOW_COVER_THRESHOLD: int = 16
 const ENEMY_PATROL_WAYPOINT_REACHED_DISTANCE: float = 18.0
+const ENEMY_TACTICS_PUSH_STEP_DISTANCE: float = 144.0
+const ENEMY_TACTICS_PROBE_STEP_DISTANCE: float = 96.0
+const ENEMY_TACTICS_BOUND_STEP_DISTANCE: float = 128.0
+const ENEMY_TACTICS_COVER_SEARCH_RADIUS: float = 220.0
 
 signal contact_established(attacker, target)
 signal combat_resolved(mission_result: Dictionary)
@@ -83,6 +93,7 @@ signal combat_resolved(mission_result: Dictionary)
 @export var terrain_registry_path: NodePath
 @export var tactical_controller_path: NodePath
 @export var preview_mode: bool = false
+@export var combat_tick_budget_debug_enabled: bool = false
 
 var _los_system = LOS_SYSTEM_SCRIPT.new()
 var _queued_bleedout_by_unit_id: Dictionary = {}
@@ -114,10 +125,16 @@ var _overlays_visible: bool = true
 var _enemy_patrol_paths_by_unit_id: Dictionary = {}
 var _enemy_patrol_waypoint_index_by_unit_id: Dictionary = {}
 var _enemy_patrol_contact_locked: Dictionary = {}
+var _enemy_security_states_by_group_id: Dictionary = {}
+var _enemy_team_tactics_states_by_group_id: Dictionary = {}
+var _recent_fire_events: Array = []
+var _next_fire_event_sequence: int = 1
+var _combat_tick_budget_debug_snapshot: Dictionary = {}
 var _overwatch_controller = OVERWATCH_CONTROLLER_SCRIPT.new()
 var _contact_tracker = CONTACT_TRACKER_SCRIPT.new()
 var _flank_vulnerability_resolver = FLANK_VULNERABILITY_RESOLVER_SCRIPT.new()
 var _remote_event_bridge = MISSION_COMBAT_REMOTE_EVENT_BRIDGE_SCRIPT.new()
+var _audio_event_bus = null
 
 
 func _ready() -> void:
@@ -186,10 +203,46 @@ func get_authority_contract_snapshot() -> Dictionary:
 	return Dictionary(MISSION_COMBAT_AUTHORITY_CONTRACT_SCRIPT.call("get_contract_snapshot")).duplicate(true)
 
 
+func set_combat_tick_budget_debug_enabled(enabled: bool) -> void:
+	combat_tick_budget_debug_enabled = enabled
+	if not combat_tick_budget_debug_enabled:
+		_combat_tick_budget_debug_snapshot.clear()
+
+
+func get_combat_tick_budget_debug_snapshot() -> Dictionary:
+	return _combat_tick_budget_debug_snapshot.duplicate(true)
+
+
+func get_combat_hotpath_audit_snapshot() -> Dictionary:
+	return {
+		"authority_root": "SimulationRoot",
+		"combat_driver_role": "authoritative_tick_subscriber",
+		"unit_sources": "configured_unit_paths_with_unit_registry_active_filter",
+		"scene_tree_lookup_policy": "direct_NodePath_or_registry_lookup_only",
+		"client_viewer_paths_read_only": true,
+		"snapshot_publication": "SimulationRoot.set_multiplayer_snapshot_context",
+	}
+
+
 func get_contact_snapshot() -> Array:
 	if _contact_tracker == null:
 		return []
 	return Array(_contact_tracker.call("get_contact_snapshot")).duplicate(true)
+
+
+func get_unit_presence_audit_snapshot() -> Dictionary:
+	var active_friendly_units: Array = _get_units(friendly_unit_paths)
+	var active_enemy_units: Array = _get_active_enemy_units()
+	var all_enemy_units: Array = _get_units_for_presence_audit(enemy_unit_paths)
+	var active_enemy_ids: Array = _extract_presence_audit_unit_ids(active_enemy_units)
+	return {
+		"active_friendly_unit_ids": _extract_presence_audit_unit_ids(active_friendly_units),
+		"active_enemy_unit_ids": active_enemy_ids,
+		"inactive_enemy_unit_ids": _extract_inactive_presence_audit_unit_ids(all_enemy_units, active_enemy_ids),
+		"current_wave_number": _get_enemy_wave_number("get_current_wave_number"),
+		"total_wave_count": _get_enemy_wave_number("get_total_wave_count"),
+		"all_waves_started": _enemy_waves_all_started(),
+	}
 
 
 func get_fireteam_contact_snapshot(fireteam_id: String) -> Array:
@@ -201,11 +254,16 @@ func get_fireteam_contact_snapshot(fireteam_id: String) -> Array:
 func _publish_multiplayer_snapshot_context(simulation_root: Node) -> void:
 	if simulation_root == null or not simulation_root.has_method("set_multiplayer_snapshot_context"):
 		return
+	_prune_recent_fire_events()
 
 	simulation_root.call(
 		"set_multiplayer_snapshot_context",
 		{
 			"contacts": get_contact_snapshot(),
+			"enemy_security": get_enemy_security_snapshot(),
+			"enemy_team_tactics": get_enemy_team_tactics_snapshot(),
+			"character_gameplay": get_character_gameplay_snapshot(),
+			"fire_events": get_fire_event_snapshot(),
 			"mission_result": get_mission_result(),
 		}
 	)
@@ -215,6 +273,249 @@ func get_flank_vulnerability_snapshot() -> Array:
 	if _flank_vulnerability_resolver == null:
 		return []
 	return Array(_flank_vulnerability_resolver.call("get_state_snapshot", _current_tick)).duplicate(true)
+
+
+func get_enemy_security_snapshot() -> Array:
+	var result: Array = []
+	var group_ids: Array = _enemy_security_states_by_group_id.keys()
+	group_ids.sort()
+	for group_id_variant in group_ids:
+		var state: Dictionary = Dictionary(_enemy_security_states_by_group_id.get(group_id_variant, {})).duplicate(true)
+		if state.is_empty():
+			continue
+		result.append(state)
+	return result
+
+
+func get_enemy_security_state_for_unit(unit_id: String) -> Dictionary:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return {}
+	for state_variant in get_enemy_security_snapshot():
+		var state: Dictionary = Dictionary(state_variant)
+		if PackedStringArray(state.get("unit_ids", PackedStringArray())).has(normalized_unit_id):
+			return state
+	return {}
+
+
+func get_enemy_team_tactics_snapshot() -> Array:
+	var result: Array = []
+	var group_ids: Array = _enemy_team_tactics_states_by_group_id.keys()
+	group_ids.sort()
+	for group_id_variant in group_ids:
+		var state: Dictionary = Dictionary(_enemy_team_tactics_states_by_group_id.get(group_id_variant, {})).duplicate(true)
+		if state.is_empty():
+			continue
+		result.append(state)
+	return result
+
+
+func get_enemy_team_tactics_state_for_unit(unit_id: String) -> Dictionary:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return {}
+	for state_variant in get_enemy_team_tactics_snapshot():
+		var state: Dictionary = Dictionary(state_variant)
+		if PackedStringArray(state.get("unit_ids", PackedStringArray())).has(normalized_unit_id):
+			return state
+	return {}
+
+
+func get_fire_event_snapshot() -> Array:
+	var result: Array = []
+	for event_variant in _recent_fire_events:
+		if typeof(event_variant) != TYPE_DICTIONARY:
+			continue
+		result.append(Dictionary(event_variant).duplicate(true))
+	return result
+
+
+func get_audio_sfx_debug_snapshot() -> Dictionary:
+	var bus = _ensure_audio_event_bus(false)
+	if bus != null and bus.has_method("get_diagnostic_snapshot"):
+		return Dictionary(bus.call("get_diagnostic_snapshot")).duplicate(true)
+	return {}
+
+
+func emit_impact_sfx_for_tests(hit_context: Dictionary, unit = null) -> Dictionary:
+	return _emit_impact_sfx(hit_context, unit)
+
+
+func get_character_gameplay_snapshot() -> Array:
+	var mission_context: Dictionary = Dictionary(CHARACTER_GAMEPLAY_RESOLVER_SCRIPT.call("build_mission_character_context", _get_units(friendly_unit_paths)))
+	return Array(mission_context.get("public_snapshot", [])).duplicate(true)
+
+
+func _record_fire_event_from_effect(effect: Dictionary, attacker, target, source: String) -> String:
+	if effect.is_empty():
+		return ""
+	var event: Dictionary = _build_fire_event(
+		String(effect.get("attacker_unit_id", "")),
+		String(effect.get("attacker_team_id", "")),
+		String(effect.get("unit_id", "")),
+		String(target.call("get_team_id")) if target != null and target.has_method("get_team_id") else "",
+		String(effect.get("weapon_id", "")),
+		int(effect.get("weapon_tile_range", 0)),
+		float(effect.get("weapon_range_world", 0.0)),
+		attacker,
+		target,
+		source
+	)
+	return _append_fire_event(event)
+
+
+func _record_fire_event_from_shot(shot: Dictionary, attacker, target, source: String) -> String:
+	if shot.is_empty():
+		return ""
+	var event: Dictionary = _build_fire_event(
+		String(shot.get("attacker_unit_id", "")),
+		String(shot.get("attacker_team_id", "")),
+		String(shot.get("target_unit_id", "")),
+		String(target.call("get_team_id")) if target != null and target.has_method("get_team_id") else "",
+		String(shot.get("weapon_id", "")),
+		int(shot.get("weapon_tile_range", 0)),
+		float(shot.get("weapon_range_world", 0.0)),
+		attacker,
+		target,
+		source
+	)
+	return _append_fire_event(event)
+
+
+func _build_fire_event(
+	attacker_unit_id: String,
+	attacker_team_id: String,
+	target_unit_id: String,
+	target_team_id: String,
+	weapon_id: String,
+	weapon_tile_range: int,
+	weapon_range_world: float,
+	attacker,
+	target,
+	source: String
+) -> Dictionary:
+	var sequence: int = _next_fire_event_sequence
+	var event_id: String = "fire_%08d_%04d_%s_%s" % [_current_tick, sequence, attacker_unit_id, target_unit_id]
+	return {
+		"event_id": event_id,
+		"event_type": "weapon_fire",
+		"source": source,
+		"tick": _current_tick,
+		"sequence": sequence,
+		"attacker_unit_id": attacker_unit_id,
+		"attacker_team_id": attacker_team_id,
+		"target_unit_id": target_unit_id,
+		"target_team_id": target_team_id,
+		"weapon_id": weapon_id,
+		"weapon_tile_range": weapon_tile_range,
+		"weapon_range_world": weapon_range_world,
+		"attacker_position": _get_unit_world_position(attacker),
+		"target_position": _get_unit_world_position(target),
+	}
+
+
+func _append_fire_event(event: Dictionary) -> String:
+	var event_id: String = String(event.get("event_id", "")).strip_edges()
+	if event_id.is_empty():
+		return ""
+	_recent_fire_events.append(event.duplicate(true))
+	_next_fire_event_sequence += 1
+	_prune_recent_fire_events()
+	return event_id
+
+
+func _prune_recent_fire_events() -> void:
+	var retained: Array = []
+	for event_variant in _recent_fire_events:
+		if typeof(event_variant) != TYPE_DICTIONARY:
+			continue
+		var event: Dictionary = Dictionary(event_variant)
+		if _current_tick - int(event.get("tick", _current_tick)) <= 4:
+			retained.append(event)
+	_recent_fire_events = retained
+
+
+func _get_unit_world_position(unit) -> Vector2:
+	if unit is Node2D:
+		return (unit as Node2D).global_position
+	return Vector2.ZERO
+
+
+func _ensure_audio_event_bus(create_if_missing: bool = true):
+	if _audio_event_bus != null and is_instance_valid(_audio_event_bus):
+		return _audio_event_bus
+	var tree: SceneTree = null
+	if is_inside_tree():
+		tree = get_tree()
+	if tree != null:
+		var current_scene := tree.current_scene
+		if current_scene != null:
+			var scene_bus := current_scene.find_child("AudioEventBus", true, false)
+			if scene_bus != null and scene_bus.has_method("emit_impact"):
+				_audio_event_bus = scene_bus
+				return _audio_event_bus
+		var root_bus := tree.root.find_child("AudioEventBus", true, false)
+		if root_bus != null and root_bus.has_method("emit_impact"):
+			_audio_event_bus = root_bus
+			return _audio_event_bus
+	if not create_if_missing:
+		return null
+	_audio_event_bus = AUDIO_EVENT_BUS_SCRIPT.new()
+	_audio_event_bus.name = "AudioEventBus"
+	var parent: Node = self
+	if tree != null and tree.current_scene != null:
+		parent = tree.current_scene
+	parent.add_child(_audio_event_bus)
+	if _audio_event_bus.has_method("initialize"):
+		_audio_event_bus.call("initialize")
+	return _audio_event_bus
+
+
+func _emit_impact_sfx(hit_context: Dictionary, unit = null) -> Dictionary:
+	var bus = _ensure_audio_event_bus()
+	if bus == null or not bus.has_method("emit_impact"):
+		return {"played": false, "reason": "missing_audio_event_bus"}
+	var weapon_id: String = String(hit_context.get("weapon_id", "")).strip_edges().to_lower()
+	var unit_id: String = String(hit_context.get("unit_id", ""))
+	if unit_id.is_empty() and unit != null and unit.has_method("get_unit_id"):
+		unit_id = String(unit.call("get_unit_id"))
+	var fire_event_id: String = String(hit_context.get("fire_event_id", "hit:%s:%d" % [unit_id, _current_tick])).strip_edges()
+	var world_position: Vector2 = _get_unit_world_position(unit)
+	var impact_type: String = _impact_type_for_weapon_id(weapon_id)
+	var result: Dictionary = Dictionary(bus.call("emit_impact", impact_type, {
+		"position": Vector3(world_position.x, 0.0, world_position.y),
+		"unit_id": unit_id,
+		"team_id": String(hit_context.get("attacker_team_id", "")),
+		"source": "mission_damage_applied",
+		"visible_to_local": bool(hit_context.get("visible_to_local", true)),
+		"visibility_context": String(hit_context.get("visibility_context", "damage_visible")),
+		"dedupe_key": "impact:%s" % fire_event_id,
+		"dedupe_window_msec": 5000,
+	})).duplicate(true)
+	if weapon_id == "rocket_launcher" and bus.has_method("emit_explosion"):
+		bus.call("emit_explosion", "large", {
+			"position": Vector3(world_position.x, 0.0, world_position.y),
+			"unit_id": unit_id,
+			"team_id": String(hit_context.get("attacker_team_id", "")),
+			"source": "mission_damage_applied",
+			"visible_to_local": bool(hit_context.get("visible_to_local", true)),
+			"visibility_context": String(hit_context.get("visibility_context", "damage_visible")),
+			"dedupe_key": "explosion:%s" % fire_event_id,
+			"dedupe_window_msec": 5000,
+		})
+	return result
+
+
+func _impact_type_for_weapon_id(weapon_id: String) -> String:
+	match String(WEAPON_DATA_SCRIPT.call("normalize_weapon_id", weapon_id)):
+		"rail_gun", "rocket_launcher":
+			return "metal_heavy"
+		"sniper":
+			return "metal_medium"
+		"smg":
+			return "metal_light"
+		_:
+			return "generic_light"
 
 
 func get_fireteam_flank_vulnerability_state(fireteam_id: String) -> Dictionary:
@@ -256,33 +557,134 @@ func _receive_remote_event(
 func _on_tick_processed(tick: int) -> void:
 	_current_tick = tick
 	var simulation_root = get_node_or_null(simulation_root_path)
+	var profile_enabled: bool = combat_tick_budget_debug_enabled
+	var tick_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+	var profile_scopes: Dictionary = {}
+	var scope_started_usec: int = 0
 	if _combat_finished:
 		_update_status_label("resolved")
+		if profile_enabled:
+			scope_started_usec = Time.get_ticks_usec()
 		_publish_multiplayer_snapshot_context(simulation_root)
+		if profile_enabled:
+			profile_scopes["multiplayer_snapshot_context_usec"] = Time.get_ticks_usec() - scope_started_usec
+			_record_combat_tick_budget_debug_snapshot(tick, tick_started_usec, profile_scopes, simulation_root, "resolved")
 		return
 
 	if simulation_root == null:
+		if profile_enabled:
+			_record_combat_tick_budget_debug_snapshot(tick, tick_started_usec, profile_scopes, simulation_root, "missing_simulation_root")
 		return
 
+	if profile_enabled:
+		scope_started_usec = Time.get_ticks_usec()
 	_queue_bleedout_for_downed_enemy(simulation_root)
 	_queue_bleedout_for_downed_friendly(simulation_root)
+	if profile_enabled:
+		profile_scopes["bleedout_queue_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_update_fireteam_leadership()
+	if profile_enabled:
+		profile_scopes["leadership_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_advance_detection_timers()
+	if profile_enabled:
+		profile_scopes["detection_timers_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_update_contact_tracking()
+	if profile_enabled:
+		profile_scopes["contact_tracking_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
+	_update_enemy_security_state()
+	if profile_enabled:
+		profile_scopes["enemy_security_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
+	_update_enemy_team_tactics_state()
+	if profile_enabled:
+		profile_scopes["enemy_team_tactics_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_advance_flank_vulnerability_state()
+	if profile_enabled:
+		profile_scopes["flank_vulnerability_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_advance_discipline_cooldowns()
 	_advance_misidentification_cooldowns()
 	_advance_medic_support_cooldowns()
+	if profile_enabled:
+		profile_scopes["cooldowns_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_try_enqueue_medic_support(simulation_root)
+	if profile_enabled:
+		profile_scopes["medic_support_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_advance_enemy_units(simulation_root)
+	if profile_enabled:
+		profile_scopes["enemy_advance_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_apply_friendly_standard_behavior(simulation_root)
+	if profile_enabled:
+		profile_scopes["friendly_standard_behavior_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	var overwatch_shots: Array = _try_enqueue_overwatch(simulation_root)
+	if profile_enabled:
+		profile_scopes["overwatch_security_usec"] = Time.get_ticks_usec() - scope_started_usec
 	if overwatch_shots.is_empty():
+		if profile_enabled:
+			scope_started_usec = Time.get_ticks_usec()
 		_try_enqueue_attacks(simulation_root)
+		if profile_enabled:
+			profile_scopes["combat_fire_decision_usec"] = Time.get_ticks_usec() - scope_started_usec
+	elif profile_enabled:
+		profile_scopes["combat_fire_decision_usec"] = 0
+	if profile_enabled:
+		scope_started_usec = Time.get_ticks_usec()
 	_update_combat_resolution()
+	if profile_enabled:
+		profile_scopes["combat_resolution_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_publish_multiplayer_snapshot_context(simulation_root)
+	if profile_enabled:
+		profile_scopes["multiplayer_snapshot_context_usec"] = Time.get_ticks_usec() - scope_started_usec
 	if not _combat_finished:
+		if profile_enabled:
+			scope_started_usec = Time.get_ticks_usec()
 		_update_status_label("active")
+		if profile_enabled:
+			profile_scopes["status_update_usec"] = Time.get_ticks_usec() - scope_started_usec
+	if profile_enabled:
+		_record_combat_tick_budget_debug_snapshot(tick, tick_started_usec, profile_scopes, simulation_root, "active")
+
+
+func _record_combat_tick_budget_debug_snapshot(tick: int, tick_started_usec: int, profile_scopes: Dictionary, simulation_root: Node, state: String) -> void:
+	var command_queue_after_tick: int = 0
+	var effect_queue_after_tick: int = 0
+	if simulation_root != null:
+		var command_queue_variant: Variant = simulation_root.get("command_queue")
+		if command_queue_variant is Array:
+			command_queue_after_tick = (command_queue_variant as Array).size()
+		var effect_queue_variant: Variant = simulation_root.get("effects_queue")
+		if effect_queue_variant is Array:
+			effect_queue_after_tick = (effect_queue_variant as Array).size()
+	var friendly_units: Array = _get_units(friendly_unit_paths)
+	var enemy_units: Array = _get_units(enemy_unit_paths)
+	var active_enemy_units: Array = _get_active_enemy_units()
+	_combat_tick_budget_debug_snapshot = {
+		"enabled": combat_tick_budget_debug_enabled,
+		"tick": tick,
+		"state": state,
+		"total_tick_usec": Time.get_ticks_usec() - tick_started_usec,
+		"scopes_usec": profile_scopes.duplicate(true),
+		"friendly_unit_count": friendly_units.size(),
+		"enemy_unit_count": enemy_units.size(),
+		"active_enemy_unit_count": active_enemy_units.size(),
+		"enemy_security_group_count": _enemy_security_states_by_group_id.size(),
+		"enemy_team_tactics_group_count": _enemy_team_tactics_states_by_group_id.size(),
+		"recent_fire_event_count": _recent_fire_events.size(),
+		"command_queue_after_tick": command_queue_after_tick,
+		"effect_queue_after_tick": effect_queue_after_tick,
+		"authority_side": _runs_local_authority,
+		"hotpath_audit": get_combat_hotpath_audit_snapshot(),
+	}
 
 
 func _queue_bleedout_for_downed_enemy(simulation_root: Node) -> void:
@@ -386,7 +788,11 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 		_set_event_text("%s verwechselt Ziel! -> %s" % [attacker_id, actual_target_id])
 	else:
 		_set_event_text("%s ENGAGE %s" % [attacker_id, actual_target_id])
-	simulation_root.call("enqueue_effect", Dictionary(decision.get("effect", {})))
+	var damage_effect: Dictionary = Dictionary(decision.get("effect", {})).duplicate(true)
+	var fire_event_id: String = _record_fire_event_from_effect(damage_effect, attacker, actual_target, "standard")
+	if not fire_event_id.is_empty():
+		damage_effect["fire_event_id"] = fire_event_id
+	simulation_root.call("enqueue_effect", damage_effect)
 	var flank_modifiers: Dictionary = Dictionary(decision.get("flank_modifiers", {}))
 	_maybe_publish_flank_event(flank_modifiers, attacker, actual_target)
 	if is_friendly_fire and attacker.has_method("show_event_text"):
@@ -429,6 +835,57 @@ func _get_units(paths: Array[NodePath]) -> Array:
 			units.append(unit)
 
 	return units
+
+
+func _get_units_for_presence_audit(paths: Array[NodePath]) -> Array:
+	var units: Array = []
+	for path in paths:
+		var unit = get_node_or_null(path)
+		if unit != null and unit is Node2D and unit.has_method("get_unit_id"):
+			units.append(unit)
+	return units
+
+
+func _extract_presence_audit_unit_ids(units: Array) -> Array:
+	var unit_ids: Array = []
+	for unit in units:
+		if unit == null or not unit.has_method("get_unit_id"):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+		if not unit_id.is_empty():
+			unit_ids.append(unit_id)
+	unit_ids.sort()
+	return unit_ids
+
+
+func _extract_inactive_presence_audit_unit_ids(units: Array, active_unit_ids: Array) -> Array:
+	var active_lookup: Dictionary = {}
+	for unit_id_variant in active_unit_ids:
+		active_lookup[String(unit_id_variant)] = true
+	var unit_ids: Array = []
+	for unit in units:
+		if unit == null or not unit.has_method("get_unit_id"):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+		if unit_id.is_empty() or active_lookup.has(unit_id):
+			continue
+		unit_ids.append(unit_id)
+	unit_ids.sort()
+	return unit_ids
+
+
+func _get_enemy_wave_number(method_name: String) -> int:
+	var enemy_wave_controller = _get_enemy_wave_controller()
+	if enemy_wave_controller == null or not enemy_wave_controller.has_method(method_name):
+		return 0
+	return int(enemy_wave_controller.call(method_name))
+
+
+func _enemy_waves_all_started() -> bool:
+	var enemy_wave_controller = _get_enemy_wave_controller()
+	if enemy_wave_controller == null or not enemy_wave_controller.has_method("are_all_waves_started"):
+		return true
+	return bool(enemy_wave_controller.call("are_all_waves_started"))
 
 
 func _init_fireteam_leadership() -> void:
@@ -678,7 +1135,7 @@ func _enqueue_medic_move_action(simulation_root: Node, action: Dictionary) -> bo
 
 
 func _build_medic_approach_position(medic, target) -> Vector2:
-	return Vector2(MEDIC_SUPPORT_RESOLVER_SCRIPT.call("build_medic_approach_position", medic, target, MEDIC_SUPPORT_APPROACH_STANDOFF))
+	return Vector2(MEDIC_SUPPORT_RESOLVER_SCRIPT.call("build_medic_approach_position", medic, target, MEDIC_SUPPORT_APPROACH_STANDOFF, _get_terrain_registry(), _build_medic_support_config()))
 
 
 func _is_within_medic_support_range(medic, target, fallback_distance: float = -1.0) -> bool:
@@ -1023,6 +1480,13 @@ func _get_effective_range(target) -> float:
 	return contact_range * (1.0 - target_stealth * STEALTH_RANGE_REDUCTION_FACTOR)
 
 
+func _get_weapon_attack_range(attacker, _target = null) -> float:
+	var weapon_id: String = _get_unit_active_weapon_id(attacker)
+	if weapon_id.is_empty():
+		return 0.0
+	return WEAPON_DATA_SCRIPT.call("get_effective_world_range", weapon_id, _get_terrain_registry())
+
+
 func _is_target_attackable(attacker, target) -> bool:
 	return bool(COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("is_target_attackable", attacker, target, _build_fire_decision_context()))
 
@@ -1162,7 +1626,15 @@ func _find_first_contact_pair() -> Dictionary:
 
 
 func resolve_flank_attack(attacker, target) -> Dictionary:
-	if attacker == null or target == null or not target.has_method("get_fireteam_id"):
+	if attacker == null or target == null:
+		return {}
+	if target.has_method("get_team_id") and String(target.call("get_team_id")) != friendly_team_id:
+		var enemy_security_state: Dictionary = get_enemy_security_state_for_unit(String(target.call("get_unit_id")) if target.has_method("get_unit_id") else "")
+		var enemy_group_id: String = String(enemy_security_state.get("security_group_id", "")).strip_edges().to_lower()
+		if enemy_group_id.is_empty():
+			return {}
+		return resolve_flank_attack_with_state(enemy_group_id, attacker, target, enemy_security_state)
+	if not target.has_method("get_fireteam_id"):
 		return {}
 	var tactical_controller = _get_tactical_controller()
 	if tactical_controller == null or not tactical_controller.has_method("get_fireteam_security_state"):
@@ -1238,6 +1710,7 @@ func _build_fire_decision_context(extra: Dictionary = {}) -> Dictionary:
 		"check_misidentification": Callable(self, "_check_misidentification"),
 		"resolve_flank_attack": Callable(self, "resolve_flank_attack"),
 		"get_effective_range": Callable(self, "_get_effective_range"),
+		"get_weapon_attack_range": Callable(self, "_get_weapon_attack_range"),
 		"get_attack_area_context": Callable(self, "_get_attack_area_context_for_fireteam"),
 	}
 	for key in extra.keys():
@@ -1412,6 +1885,7 @@ func _on_unit_damage_applied(amount: int, _health_points: int, _hit_context: Dic
 	if unit.has_method("show_event_text"):
 		unit.call("show_event_text", "HIT -%d" % amount, HIT_EVENT_COLOR)
 	_broadcast_remote_event("%s HIT -%d" % [unit_id, amount], unit_id, HIT_EVENT_COLOR, EVENT_DEFAULT_DURATION, "HIT -%d" % amount)
+	_emit_impact_sfx(_hit_context, unit)
 	_try_reposition_enemy_on_damage(unit, _hit_context)
 	_update_status_label("contact")
 
@@ -1758,6 +2232,554 @@ func _build_objective_status_text() -> String:
 	return status_text
 
 
+func _update_enemy_security_state() -> void:
+	_enemy_security_states_by_group_id.clear()
+	var grouped_units: Dictionary = {}
+	var tactics_by_group: Dictionary = {}
+	for enemy in _get_active_enemy_units():
+		if enemy == null or not enemy.has_method("get_unit_id"):
+			continue
+		var tactics: Dictionary = _get_enemy_tactics_config(enemy)
+		var group_id: String = _get_enemy_security_group_id(enemy, tactics)
+		if group_id.is_empty():
+			continue
+		if not grouped_units.has(group_id):
+			grouped_units[group_id] = []
+			tactics_by_group[group_id] = tactics
+		var units: Array = Array(grouped_units.get(group_id, []))
+		units.append(enemy)
+		grouped_units[group_id] = units
+	for group_id_variant in grouped_units.keys():
+		var group_id: String = String(group_id_variant)
+		var state: Dictionary = _build_enemy_security_state(group_id, Array(grouped_units.get(group_id_variant, [])), Dictionary(tactics_by_group.get(group_id_variant, {})))
+		if state.is_empty():
+			continue
+		_enemy_security_states_by_group_id[group_id] = state
+
+
+func _build_enemy_security_state(group_id: String, units: Array, tactics: Dictionary) -> Dictionary:
+	if units.is_empty():
+		return {}
+	var unit_ids: PackedStringArray = PackedStringArray()
+	var anchor_position: Vector2 = _resolve_enemy_security_anchor(units)
+	var focus_position: Vector2 = _resolve_enemy_security_focus_position(units, anchor_position)
+	var fallback_angle: float = (focus_position - anchor_position).angle() if not focus_position.is_equal_approx(anchor_position) else 0.0
+	var facing: String = String(tactics.get("facing", "auto")).strip_edges().to_lower()
+	var direction_angle: float = FIRETEAM_SECURITY_CONTROLLER_SCRIPT.call("resolve_facing_angle", facing, fallback_angle)
+	var security_mode: String = FIRETEAM_SECURITY_CONTROLLER_SCRIPT.call("normalize_enemy_security_mode", String(tactics.get("security_mode", "directional")))
+	var assignments: Array = Array(FIRETEAM_SECURITY_CONTROLLER_SCRIPT.call("build_enemy_member_assignments", units, security_mode, direction_angle, _get_terrain_registry()))
+	for unit in units:
+		if unit == null or not unit.has_method("get_unit_id"):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+		if unit_id.is_empty():
+			continue
+		unit_ids.append(unit_id)
+		if unit is Node:
+			(unit as Node).set_meta("enemy_security_group_id", group_id)
+			(unit as Node).set_meta("enemy_facing_angle", direction_angle)
+			(unit as Node).set_meta("enemy_security_mode", security_mode)
+	var state: Dictionary = {
+		"security_group_id": group_id,
+		"fireteam_id": group_id,
+		"team_id": String(tactics.get("team_id", _get_enemy_team_id())),
+		"profile_id": String(tactics.get("profile_id", "")),
+		"security_mode": security_mode,
+		"facing": facing,
+		"facing_angle": direction_angle,
+		"direction_angle": direction_angle,
+		"sector_width": TAU if security_mode == "360" else FIRETEAM_SECURITY_CONTROLLER_SCRIPT.DIRECTIONAL_ARC_WIDTH,
+		"anchor_position": anchor_position,
+		"focus_position": focus_position,
+		"unit_ids": unit_ids,
+		"member_assignments": assignments,
+		"is_active": true,
+		"overwatch_ready": security_mode == "360" or String(tactics.get("profile_id", "")).strip_edges().to_lower() == "sniper_watch",
+	}
+	state["watched_unit_ids"] = _build_enemy_watched_unit_ids(units, state)
+	state["watch_label"] = _build_enemy_security_label(state)
+	return state
+
+
+func _build_enemy_watched_unit_ids(units: Array, state: Dictionary) -> PackedStringArray:
+	var result: PackedStringArray = PackedStringArray()
+	var assignment_by_unit_id: Dictionary = {}
+	for assignment_variant in Array(state.get("member_assignments", [])):
+		if typeof(assignment_variant) != TYPE_DICTIONARY:
+			continue
+		var assignment: Dictionary = Dictionary(assignment_variant)
+		assignment_by_unit_id[String(assignment.get("unit_id", ""))] = assignment
+	for enemy in units:
+		if enemy == null or not (enemy is Node2D) or not enemy.has_method("get_unit_id"):
+			continue
+		var enemy_id: String = String(enemy.call("get_unit_id"))
+		var assignment: Dictionary = Dictionary(assignment_by_unit_id.get(enemy_id, {}))
+		if assignment.is_empty():
+			continue
+		for friendly in _get_units(friendly_unit_paths):
+			if friendly == null or not (friendly is Node2D) or not _can_target_receive_attack(friendly):
+				continue
+			var friendly_id: String = String(friendly.call("get_unit_id")) if friendly.has_method("get_unit_id") else ""
+			if friendly_id.is_empty() or result.has(friendly_id):
+				continue
+			var to_target: Vector2 = (friendly as Node2D).global_position - (enemy as Node2D).global_position
+			if String(state.get("security_mode", "")) != "360" and not _angle_within_sector(to_target.angle(), float(assignment.get("center_angle", 0.0)), float(assignment.get("arc_width", 0.0))):
+				continue
+			if to_target.length() > float(assignment.get("weapon_range_world", 0.0)):
+				continue
+			if not _los_system.has_line_of_sight_between_nodes(enemy, friendly, float(assignment.get("weapon_range_world", 0.0)), _get_terrain_registry()):
+				continue
+			result.append(friendly_id)
+	return result
+
+
+func _resolve_enemy_security_anchor(units: Array) -> Vector2:
+	var sum: Vector2 = Vector2.ZERO
+	var count: int = 0
+	for unit in units:
+		if unit is Node2D:
+			sum += (unit as Node2D).global_position
+			count += 1
+	if count <= 0:
+		return Vector2.ZERO
+	return sum / float(count)
+
+
+func _resolve_enemy_security_focus_position(units: Array, fallback_position: Vector2) -> Vector2:
+	var nearest_position: Vector2 = fallback_position
+	var nearest_distance: float = INF
+	for enemy in units:
+		if enemy == null or not (enemy is Node2D):
+			continue
+		for friendly in _get_units(friendly_unit_paths):
+			if friendly == null or not (friendly is Node2D) or not _can_target_receive_attack(friendly):
+				continue
+			var distance: float = (enemy as Node2D).global_position.distance_to((friendly as Node2D).global_position)
+			if distance >= nearest_distance:
+				continue
+			nearest_distance = distance
+			nearest_position = (friendly as Node2D).global_position
+	if nearest_distance < INF:
+		return nearest_position
+	return _get_objective_position()
+
+
+func _get_enemy_tactics_config(enemy) -> Dictionary:
+	if enemy is Node and (enemy as Node).has_meta("enemy_tactics_config"):
+		var metadata_tactics: Dictionary = Dictionary((enemy as Node).get_meta("enemy_tactics_config", {})).duplicate(true)
+		metadata_tactics["has_explicit_tactics"] = true
+		return metadata_tactics
+	var enemy_wave_controller = _get_enemy_wave_controller()
+	if enemy_wave_controller != null and enemy_wave_controller.has_method("get_tactic_config_for_unit") and enemy != null and enemy.has_method("get_unit_id"):
+		var wave_tactics: Dictionary = Dictionary(enemy_wave_controller.call("get_tactic_config_for_unit", String(enemy.call("get_unit_id")))).duplicate(true)
+		if not wave_tactics.is_empty():
+			wave_tactics["has_explicit_tactics"] = true
+			return wave_tactics
+	return {
+		"profile_id": "guard_hold",
+		"security_mode": "directional",
+		"facing": "auto",
+		"has_explicit_tactics": false,
+	}
+
+
+func _get_enemy_security_group_id(enemy, tactics: Dictionary) -> String:
+	var group_id: String = String(tactics.get("group_id", "")).strip_edges().to_lower()
+	if not group_id.is_empty():
+		return group_id
+	if enemy != null and enemy.has_method("get_fireteam_id"):
+		group_id = String(enemy.call("get_fireteam_id")).strip_edges().to_lower()
+		if not group_id.is_empty():
+			return group_id
+	if enemy != null and enemy.has_method("get_team_id"):
+		group_id = String(enemy.call("get_team_id")).strip_edges().to_lower()
+		if not group_id.is_empty():
+			return group_id
+	return "enemy_team"
+
+
+func _build_enemy_security_label(state: Dictionary) -> String:
+	var mode: String = String(state.get("security_mode", "")).strip_edges().to_upper()
+	var watched_count: int = PackedStringArray(state.get("watched_unit_ids", PackedStringArray())).size()
+	if watched_count > 0:
+		return "EN SEC %s W%d" % [mode, watched_count]
+	return "EN SEC %s" % mode
+
+
+func _angle_within_sector(target_angle: float, center_angle: float, arc_width: float) -> bool:
+	return absf(wrapf(target_angle - center_angle, -PI, PI)) <= arc_width * 0.5
+
+
+func _update_enemy_team_tactics_state() -> void:
+	_enemy_team_tactics_states_by_group_id.clear()
+	var grouped_units: Dictionary = {}
+	var tactics_by_group: Dictionary = {}
+	for enemy in _get_active_enemy_units():
+		if enemy == null or not enemy.has_method("get_unit_id"):
+			continue
+		var tactics: Dictionary = _get_enemy_tactics_config(enemy)
+		if not bool(tactics.get("has_explicit_tactics", false)):
+			continue
+		var group_id: String = _get_enemy_security_group_id(enemy, tactics)
+		if group_id.is_empty():
+			continue
+		if not grouped_units.has(group_id):
+			grouped_units[group_id] = []
+			tactics_by_group[group_id] = tactics
+		var units: Array = Array(grouped_units.get(group_id, []))
+		units.append(enemy)
+		grouped_units[group_id] = units
+	for group_id_variant in grouped_units.keys():
+		var group_id: String = String(group_id_variant)
+		var state: Dictionary = _build_enemy_team_tactics_state(group_id, Array(grouped_units.get(group_id_variant, [])), Dictionary(tactics_by_group.get(group_id_variant, {})))
+		if state.is_empty():
+			continue
+		_enemy_team_tactics_states_by_group_id[group_id] = state
+
+
+func _build_enemy_team_tactics_state(group_id: String, units: Array, tactics: Dictionary) -> Dictionary:
+	var fit_units: Array = _sort_enemy_units_by_id(_filter_fit_node2d_units(units))
+	if fit_units.is_empty():
+		return {}
+	var profile_id: String = String(tactics.get("profile_id", ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.DEFAULT_PROFILE_ID)).strip_edges().to_lower()
+	var profile: Dictionary = Dictionary(ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_profile", profile_id))
+	var visual_archetype_id: String = String(tactics.get("visual_archetype", profile.get("visual_archetype", ""))).strip_edges().to_lower()
+	var advance_style: String = String(ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("normalize_advance_style", tactics.get("advance_style", profile.get("advance_style", "hold")), String(profile.get("advance_style", "hold"))))
+	var cover_behavior: String = String(tactics.get("cover_behavior", profile.get("cover_behavior", ""))).strip_edges().to_lower()
+	var anchor_position: Vector2 = _resolve_enemy_security_anchor(fit_units)
+	var focus_position: Vector2 = _resolve_enemy_security_focus_position(fit_units, anchor_position)
+	var advance_direction: Vector2 = (focus_position - anchor_position).normalized() if not focus_position.is_equal_approx(anchor_position) else Vector2.RIGHT
+	var unit_ids: PackedStringArray = _extract_unit_ids_from_units(fit_units)
+	var role_by_unit_id: Dictionary = _build_enemy_team_roles(fit_units)
+	var moving_unit_ids: PackedStringArray = _resolve_enemy_moving_unit_ids(advance_style, unit_ids)
+	var covering_unit_ids: PackedStringArray = _subtract_unit_ids(unit_ids, moving_unit_ids)
+	var target_positions_by_unit_id: Dictionary = _build_enemy_tactics_target_positions(fit_units, unit_ids, moving_unit_ids, advance_style, cover_behavior, anchor_position, focus_position, advance_direction)
+	for unit in fit_units:
+		if unit is Node and unit.has_method("get_unit_id"):
+			var unit_id: String = String(unit.call("get_unit_id"))
+			(unit as Node).set_meta("enemy_tactics_group_id", group_id)
+			(unit as Node).set_meta("enemy_tactic_profile_id", profile_id)
+			(unit as Node).set_meta("enemy_advance_style", advance_style)
+			(unit as Node).set_meta("enemy_role", String(role_by_unit_id.get(unit_id, "")))
+			if not visual_archetype_id.is_empty():
+				(unit as Node).set_meta("enemy_visual_archetype_id", visual_archetype_id)
+	var state: Dictionary = {
+		"security_group_id": group_id,
+		"team_id": String(tactics.get("team_id", _get_enemy_team_id())),
+		"profile_id": profile_id,
+		"visual_archetype": visual_archetype_id,
+		"advance_style": advance_style,
+		"cover_behavior": cover_behavior,
+		"anchor_position": anchor_position,
+		"focus_position": focus_position,
+		"advance_direction": advance_direction,
+		"unit_ids": unit_ids,
+		"moving_unit_ids": moving_unit_ids,
+		"covering_unit_ids": covering_unit_ids,
+		"role_by_unit_id": role_by_unit_id,
+		"target_positions_by_unit_id": target_positions_by_unit_id,
+		"has_explicit_tactics": true,
+		"priority": _get_enemy_tactics_priority(advance_style),
+		"move_speed_factor": _get_enemy_tactics_speed_factor(advance_style),
+	}
+	state["tactic_label"] = _build_enemy_team_tactics_label(state)
+	for unit in fit_units:
+		if unit is Node:
+			(unit as Node).set_meta("enemy_tactic_label", String(state.get("tactic_label", "")))
+	return state
+
+
+func _filter_fit_node2d_units(units: Array) -> Array:
+	var result: Array = []
+	for unit in units:
+		if unit == null or not (unit is Node2D) or not unit.has_method("get_unit_id"):
+			continue
+		if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
+			continue
+		result.append(unit)
+	return result
+
+
+func _sort_enemy_units_by_id(units: Array) -> Array:
+	var sorted_units: Array = units.duplicate()
+	sorted_units.sort_custom(func(a, b) -> bool:
+		var id_a: String = String(a.call("get_unit_id")) if a != null and a.has_method("get_unit_id") else ""
+		var id_b: String = String(b.call("get_unit_id")) if b != null and b.has_method("get_unit_id") else ""
+		return id_a < id_b
+	)
+	return sorted_units
+
+
+func _extract_unit_ids_from_units(units: Array) -> PackedStringArray:
+	var unit_ids: PackedStringArray = PackedStringArray()
+	for unit in units:
+		if unit == null or not unit.has_method("get_unit_id"):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+		if not unit_id.is_empty():
+			unit_ids.append(unit_id)
+	return unit_ids
+
+
+func _build_enemy_team_roles(units: Array) -> Dictionary:
+	var role_by_unit_id: Dictionary = {}
+	for index in range(units.size()):
+		var unit = units[index]
+		if unit == null or not unit.has_method("get_unit_id"):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+		if unit_id.is_empty():
+			continue
+		role_by_unit_id[unit_id] = _resolve_enemy_team_role(unit, index)
+	return role_by_unit_id
+
+
+func _resolve_enemy_team_role(unit, index: int) -> String:
+	var weapon_id: String = _get_unit_active_weapon_id(unit)
+	var role_id: String = String(unit.call("get_role_id")) if unit != null and unit.has_method("get_role_id") else ""
+	if weapon_id == "sniper":
+		return "sniper_watch"
+	if weapon_id == "rail_gun" or weapon_id == "rocket_launcher":
+		return "support"
+	if role_id.find("medic") >= 0 or weapon_id == "medictool":
+		return "medic"
+	if index == 0:
+		return "point"
+	if index == 1:
+		return "cover"
+	return "rifle"
+
+
+func _resolve_enemy_moving_unit_ids(advance_style: String, unit_ids: PackedStringArray) -> PackedStringArray:
+	var result: PackedStringArray = PackedStringArray()
+	if unit_ids.is_empty():
+		return result
+	match advance_style:
+		"hold":
+			return result
+		"probe":
+			result.append(unit_ids[0])
+		"bounding":
+			var moving_count: int = maxi(1, int(ceil(float(unit_ids.size()) * 0.5)))
+			for index in range(moving_count):
+				result.append(unit_ids[index])
+		"push":
+			for unit_id in unit_ids:
+				result.append(unit_id)
+		_:
+			for unit_id in unit_ids:
+				result.append(unit_id)
+	return result
+
+
+func _subtract_unit_ids(all_unit_ids: PackedStringArray, moving_unit_ids: PackedStringArray) -> PackedStringArray:
+	var result: PackedStringArray = PackedStringArray()
+	for unit_id in all_unit_ids:
+		if not moving_unit_ids.has(unit_id):
+			result.append(unit_id)
+	return result
+
+
+func _build_enemy_tactics_target_positions(
+	units: Array,
+	unit_ids: PackedStringArray,
+	moving_unit_ids: PackedStringArray,
+	advance_style: String,
+	cover_behavior: String,
+	anchor_position: Vector2,
+	focus_position: Vector2,
+	advance_direction: Vector2
+) -> Dictionary:
+	var target_positions: Dictionary = {}
+	var claimed_targets: Array = []
+	if _enemy_cover_behavior_uses_slots(cover_behavior):
+		target_positions = _build_enemy_cover_slot_targets(units, focus_position, claimed_targets)
+	if advance_style == "hold":
+		return target_positions
+	var step_distance: float = _get_enemy_tactics_step_distance(advance_style)
+	var movement_anchor: Vector2 = anchor_position + advance_direction * step_distance
+	var spaced_targets: Dictionary = Dictionary(LOCAL_AVOIDANCE_RESOLVER_SCRIPT.call("build_spaced_line_targets", moving_unit_ids, movement_anchor, advance_direction, LOCAL_AVOIDANCE_RESOLVER_SCRIPT.DEFAULT_MINIMUM_SPACING))
+	for unit_id in moving_unit_ids:
+		var target_position: Vector2 = Vector2(target_positions.get(String(unit_id), spaced_targets.get(String(unit_id), movement_anchor)))
+		target_positions[String(unit_id)] = _resolve_enemy_walkable_tactic_target(target_position)
+	for unit_id in unit_ids:
+		if target_positions.has(String(unit_id)):
+			continue
+		var unit = _find_unit_by_id(units, String(unit_id))
+		if unit is Node2D:
+			target_positions[String(unit_id)] = (unit as Node2D).global_position
+	return target_positions
+
+
+func _enemy_cover_behavior_uses_slots(cover_behavior: String) -> bool:
+	return cover_behavior.find("cover") >= 0
+
+
+func _build_enemy_cover_slot_targets(units: Array, focus_position: Vector2, claimed_targets: Array) -> Dictionary:
+	var target_positions: Dictionary = {}
+	var terrain_registry = _get_terrain_registry()
+	if terrain_registry == null or not terrain_registry.has_method("get_walkable_cover_tiles_in_radius"):
+		return target_positions
+	for unit in units:
+		if unit == null or not (unit is Node2D) or not unit.has_method("get_unit_id"):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+		if unit_id.is_empty():
+			continue
+		var candidates: Array = Array(terrain_registry.call("get_walkable_cover_tiles_in_radius", (unit as Node2D).global_position, ENEMY_TACTICS_COVER_SEARCH_RADIUS))
+		candidates.sort_custom(func(a, b) -> bool:
+			return _score_enemy_cover_tile(unit, a, focus_position) > _score_enemy_cover_tile(unit, b, focus_position)
+		)
+		for tile in candidates:
+			if tile == null or typeof(tile.world_position) != TYPE_VECTOR2:
+				continue
+			var candidate_position: Vector2 = Vector2(tile.world_position)
+			if not _is_enemy_tactic_slot_available(candidate_position, claimed_targets):
+				continue
+			if _score_enemy_cover_tile(unit, tile, focus_position) <= -999.0:
+				continue
+			target_positions[unit_id] = candidate_position
+			claimed_targets.append(candidate_position)
+			break
+	return target_positions
+
+
+func _score_enemy_cover_tile(unit, tile, focus_position: Vector2) -> float:
+	if tile == null or typeof(tile.world_position) != TYPE_VECTOR2:
+		return -1000.0
+	if not bool(tile.walkable):
+		return -1000.0
+	var tile_position: Vector2 = Vector2(tile.world_position)
+	var attack_range: float = _get_weapon_attack_range(unit, null)
+	if attack_range > 0.0 and tile_position.distance_to(focus_position) > attack_range:
+		return -1000.0
+	if not _los_system.has_line_of_sight_between_points(tile_position, focus_position, attack_range, _get_terrain_registry()):
+		return -1000.0
+	var unit_position: Vector2 = (unit as Node2D).global_position if unit is Node2D else tile_position
+	var cover_score: float = clampf(float(tile.cover_value) / 100.0, 0.0, 1.0)
+	var height_score: float = clampf(float(tile.height_level) * 0.08, -0.2, 0.35)
+	var move_cost: float = unit_position.distance_to(tile_position) * 0.003
+	var focus_distance: float = tile_position.distance_to(focus_position)
+	var range_score: float = 0.0 if attack_range <= 0.0 else clampf(1.0 - (focus_distance / attack_range), 0.0, 1.0) * 0.25
+	return cover_score * 2.0 + height_score + range_score - move_cost
+
+
+func _is_enemy_tactic_slot_available(candidate_position: Vector2, claimed_targets: Array) -> bool:
+	for claimed_variant in claimed_targets:
+		if typeof(claimed_variant) != TYPE_VECTOR2:
+			continue
+		if candidate_position.distance_to(Vector2(claimed_variant)) < LOCAL_AVOIDANCE_RESOLVER_SCRIPT.DEFAULT_MINIMUM_SPACING - 0.001:
+			return false
+	return true
+
+
+func _resolve_enemy_walkable_tactic_target(target_position: Vector2) -> Vector2:
+	var terrain_registry = _get_terrain_registry()
+	if terrain_registry == null or not terrain_registry.has_method("resolve_walkable_target"):
+		return target_position
+	var resolved: Dictionary = Dictionary(terrain_registry.call("resolve_walkable_target", target_position))
+	return Vector2(resolved.get("replacement_position", target_position))
+
+
+func _find_unit_by_id(units: Array, unit_id: String):
+	for unit in units:
+		if unit != null and unit.has_method("get_unit_id") and String(unit.call("get_unit_id")) == unit_id:
+			return unit
+	return null
+
+
+func _get_enemy_tactics_step_distance(advance_style: String) -> float:
+	match advance_style:
+		"probe":
+			return ENEMY_TACTICS_PROBE_STEP_DISTANCE
+		"bounding":
+			return ENEMY_TACTICS_BOUND_STEP_DISTANCE
+		"push":
+			return ENEMY_TACTICS_PUSH_STEP_DISTANCE
+		_:
+			return 0.0
+
+
+func _get_enemy_tactics_priority(advance_style: String) -> int:
+	match advance_style:
+		"bounding":
+			return 10
+		"push":
+			return 9
+		"probe":
+			return 8
+		_:
+			return 6
+
+
+func _get_enemy_tactics_speed_factor(advance_style: String) -> float:
+	match advance_style:
+		"bounding":
+			return enemy_advance_speed_factor * 0.82
+		"probe":
+			return enemy_advance_speed_factor * 0.7
+		"push":
+			return enemy_advance_speed_factor
+		_:
+			return enemy_advance_speed_factor * 0.5
+
+
+func _build_enemy_team_tactics_label(state: Dictionary) -> String:
+	var style: String = String(state.get("advance_style", "")).strip_edges().to_lower()
+	var prefix: String = "HOLD"
+	match style:
+		"push":
+			prefix = "PUSH"
+		"probe":
+			prefix = "PROBE"
+		"bounding":
+			prefix = "BND"
+		"hold":
+			prefix = "HOLD"
+	var moving_count: int = PackedStringArray(state.get("moving_unit_ids", PackedStringArray())).size()
+	var covering_count: int = PackedStringArray(state.get("covering_unit_ids", PackedStringArray())).size()
+	if covering_count > 0:
+		return "%s M%d C%d" % [prefix, moving_count, covering_count]
+	return "%s M%d" % [prefix, moving_count]
+
+
+func _try_enqueue_enemy_team_tactics_move(simulation_root: Node, enemy) -> bool:
+	if simulation_root == null or enemy == null or not (enemy is Node2D) or not enemy.has_method("get_unit_id"):
+		return false
+	var unit_id: String = String(enemy.call("get_unit_id")).strip_edges()
+	if unit_id.is_empty():
+		return false
+	var state: Dictionary = get_enemy_team_tactics_state_for_unit(unit_id)
+	if state.is_empty() or not bool(state.get("has_explicit_tactics", false)):
+		return false
+	var advance_style: String = String(state.get("advance_style", "hold"))
+	if advance_style == "hold":
+		return true
+	var moving_unit_ids: PackedStringArray = PackedStringArray(state.get("moving_unit_ids", PackedStringArray()))
+	if not moving_unit_ids.has(unit_id):
+		return true
+	var target_positions: Dictionary = Dictionary(state.get("target_positions_by_unit_id", {}))
+	if not target_positions.has(unit_id):
+		return true
+	var target_position: Vector2 = Vector2(target_positions.get(unit_id, (enemy as Node2D).global_position))
+	if (enemy as Node2D).global_position.distance_to(target_position) <= ENEMY_PATROL_WAYPOINT_REACHED_DISTANCE:
+		return true
+	simulation_root.call(
+		"enqueue_command",
+		{
+			"command_type": "move_to_position",
+			"priority": int(state.get("priority", 8)),
+			"unit_id": unit_id,
+			"target_position": target_position,
+			"move_speed_factor": float(state.get("move_speed_factor", enemy_advance_speed_factor)),
+			"requeue_until_target": false,
+			"enemy_tactic_label": String(state.get("tactic_label", "")),
+			"enemy_advance_style": advance_style,
+		}
+	)
+	return true
+
+
 func _advance_enemy_units(simulation_root: Node) -> void:
 	if not enemy_advance_enabled:
 		return
@@ -1768,6 +2790,9 @@ func _advance_enemy_units(simulation_root: Node) -> void:
 			continue
 
 		if String(enemy.call("get_vital_state")) != "fit":
+			continue
+
+		if _try_enqueue_enemy_team_tactics_move(simulation_root, enemy):
 			continue
 
 		if _try_enqueue_enemy_patrol_move(simulation_root, enemy):
@@ -1856,10 +2881,11 @@ func _enemy_should_hold_position(enemy) -> bool:
 		if friendly == null or not _can_target_receive_attack(friendly):
 			continue
 
-		if not _los_system.has_line_of_sight_between_nodes(enemy, friendly, _get_effective_range(friendly), _get_terrain_registry()):
+		var attack_range: float = _get_weapon_attack_range(enemy, friendly)
+		if not _los_system.has_line_of_sight_between_nodes(enemy, friendly, attack_range, _get_terrain_registry()):
 			continue
 
-		if (enemy as Node2D).global_position.distance_to((friendly as Node2D).global_position) <= enemy_engage_distance:
+		if (enemy as Node2D).global_position.distance_to((friendly as Node2D).global_position) <= maxf(enemy_engage_distance, attack_range):
 			return true
 
 	return false
@@ -1953,6 +2979,7 @@ func _try_reposition_enemy_on_damage(unit, hit_context: Dictionary) -> void:
 
 func _build_enemy_reposition_target(unit, hit_context: Dictionary) -> Vector2:
 	var unit_node: Node2D = unit
+	var unit_id: String = String(unit.call("get_unit_id")) if unit != null and unit.has_method("get_unit_id") else ""
 	var attacker_direction: Vector2 = Vector2.ZERO
 	var attacker_unit_id: String = String(hit_context.get("attacker_unit_id", ""))
 	var attacker = _resolve_unit_by_id(attacker_unit_id)
@@ -1960,7 +2987,7 @@ func _build_enemy_reposition_target(unit, hit_context: Dictionary) -> Vector2:
 		attacker_direction = unit_node.global_position - (attacker as Node2D).global_position
 
 	if attacker_direction.is_zero_approx():
-		attacker_direction = Vector2.RIGHT.rotated(randf() * TAU)
+		attacker_direction = _build_deterministic_axis("%s:%s:%d" % [unit_id, attacker_unit_id, _current_tick])
 
 	# Try cover-seeking: find walkable cover tiles in reposition radius
 	var terrain_registry = _get_terrain_registry()
@@ -1979,8 +3006,19 @@ func _build_enemy_reposition_target(unit, hit_context: Dictionary) -> Vector2:
 				return Vector2(candidates[0].world_position)
 
 	# Fallback: random reposition away from attacker
-	var reposition_distance: float = randf_range(enemy_reposition_min_distance, enemy_reposition_max_distance)
+	var t: float = _build_deterministic_unit_interval("%s:%s:%d:reposition" % [unit_id, attacker_unit_id, _current_tick])
+	var reposition_distance: float = lerpf(enemy_reposition_min_distance, enemy_reposition_max_distance, t)
 	return unit_node.global_position + attacker_direction.normalized() * reposition_distance
+
+
+func _build_deterministic_axis(seed_text: String) -> Vector2:
+	var t: float = _build_deterministic_unit_interval(seed_text)
+	return Vector2.RIGHT.rotated(t * TAU)
+
+
+func _build_deterministic_unit_interval(seed_text: String) -> float:
+	var hash_value: int = abs(int(seed_text.hash()))
+	return float(hash_value % 10000) / 9999.0
 
 
 func _resolve_unit_by_id(unit_id: String):
@@ -2107,6 +3145,7 @@ func _try_enqueue_overwatch(simulation_root: Node) -> Array:
 		var shot: Dictionary = Dictionary(shot_variant)
 		var attacker = _resolve_unit_by_id(String(shot.get("attacker_unit_id", "")))
 		var target = _resolve_unit_by_id(String(shot.get("target_unit_id", "")))
+		_record_fire_event_from_shot(shot, attacker, target, "overwatch")
 		if attacker != null and target != null:
 			_set_contact_visuals(attacker, target)
 		var event_text: String = "OVERWATCH %s -> %s" % [String(shot.get("attacker_unit_id", "")), String(shot.get("target_unit_id", ""))]

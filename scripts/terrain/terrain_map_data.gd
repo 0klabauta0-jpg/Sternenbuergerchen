@@ -4,6 +4,7 @@ extends RefCounted
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
 const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_catalog.gd")
+const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
 
 var _map_name: String = ""
 var _mission_slot_count: int = 3
@@ -13,6 +14,7 @@ var _tile_half_height: float = 32.0
 var _grid_origin: Vector2 = Vector2.ZERO
 var _markers: Dictionary = {}
 var _patrol_paths: Dictionary = {}
+var _enemy_team_configs: Dictionary = {}
 var _tiles: Array = []
 var _load_issue_message: String = ""
 
@@ -43,6 +45,7 @@ static func load_from_file(path: String) -> TerrainMapData:
 	terrain_map_data._grid_origin = _coerce_vector2(root_dict.get("grid_origin", Vector2.ZERO))
 	terrain_map_data._markers = _coerce_marker_dictionary(root_dict.get("markers", {}))
 	terrain_map_data._patrol_paths = _coerce_patrol_dictionary(root_dict.get("patrol_paths", {}))
+	terrain_map_data._enemy_team_configs = _coerce_enemy_team_config_dictionary(root_dict.get("enemy_team_configs", {}), terrain_map_data._grid_size)
 
 	var tiles_variant: Variant = root_dict.get("tiles", [])
 	if tiles_variant is Array:
@@ -119,6 +122,7 @@ static func create_empty(
 	terrain_map_data._grid_origin = grid_origin
 	terrain_map_data._tile_half_width = maxf(half_tile_width, 0.001)
 	terrain_map_data._tile_half_height = maxf(half_tile_height, 0.001)
+	terrain_map_data._enemy_team_configs["default"] = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("serialize_config", ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_default_config_for_map_size", grid_size), grid_size)
 
 	for x in range(maxi(grid_size.x, 0)):
 		for y in range(maxi(grid_size.y, 0)):
@@ -173,6 +177,7 @@ func save_to_file(path: String) -> Error:
 		},
 		"markers": _serialize_markers(),
 		"patrol_paths": _serialize_patrol_paths(),
+		"enemy_team_configs": _serialize_enemy_team_configs(),
 		"tiles": [],
 	}
 
@@ -329,6 +334,33 @@ func set_patrol_path(spawn_id: String, waypoints: Array) -> void:
 		_patrol_paths.erase(normalized_spawn_id)
 		return
 	_patrol_paths[normalized_spawn_id] = normalized_waypoints
+
+
+func get_enemy_team_configs() -> Dictionary:
+	return _enemy_team_configs.duplicate(true)
+
+
+func get_enemy_team_config(team_config_id: String) -> Dictionary:
+	var normalized_config_id: String = team_config_id.strip_edges()
+	if normalized_config_id.is_empty():
+		return ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_default_config_for_map_size", _grid_size)
+	if _enemy_team_configs.has(normalized_config_id):
+		return ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("normalize_config", _enemy_team_configs.get(normalized_config_id, {}), _grid_size)
+	return ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_default_config_for_map_size", _grid_size)
+
+
+func set_enemy_team_config(team_config_id: String, config: Dictionary) -> void:
+	var normalized_config_id: String = team_config_id.strip_edges()
+	if normalized_config_id.is_empty():
+		return
+	_enemy_team_configs[normalized_config_id] = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("serialize_config", config, _grid_size)
+
+
+func remove_enemy_team_config(team_config_id: String) -> void:
+	var normalized_config_id: String = team_config_id.strip_edges()
+	if normalized_config_id.is_empty() or normalized_config_id == "default":
+		return
+	_enemy_team_configs.erase(normalized_config_id)
 
 
 func get_marker_position(marker_id: String, fallback: Vector2 = Vector2.ZERO) -> Vector2:
@@ -563,6 +595,20 @@ static func _coerce_patrol_waypoints(value: Variant) -> Array:
 	return result
 
 
+static func _coerce_enemy_team_config_dictionary(value: Variant, grid_size: Vector2i) -> Dictionary:
+	var result: Dictionary = {}
+	if typeof(value) == TYPE_DICTIONARY:
+		var config_dict: Dictionary = Dictionary(value)
+		for config_id_variant in config_dict.keys():
+			var config_id: String = String(config_id_variant).strip_edges()
+			if config_id.is_empty():
+				continue
+			result[config_id] = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("serialize_config", config_dict.get(config_id_variant, {}), grid_size)
+	if not result.has("default"):
+		result["default"] = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("serialize_config", ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_default_config_for_map_size", grid_size), grid_size)
+	return result
+
+
 func _serialize_patrol_paths() -> Dictionary:
 	var serialized_paths: Dictionary = {}
 	for spawn_id_variant in _patrol_paths.keys():
@@ -579,3 +625,15 @@ func _serialize_patrol_paths() -> Dictionary:
 			)
 		serialized_paths[spawn_id] = serialized_waypoints
 	return serialized_paths
+
+
+func _serialize_enemy_team_configs() -> Dictionary:
+	var serialized_configs: Dictionary = {}
+	for config_id_variant in _enemy_team_configs.keys():
+		var config_id: String = String(config_id_variant).strip_edges()
+		if config_id.is_empty():
+			continue
+		serialized_configs[config_id] = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("serialize_config", _enemy_team_configs.get(config_id_variant, {}), _grid_size)
+	if not serialized_configs.has("default"):
+		serialized_configs["default"] = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("serialize_config", ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_default_config_for_map_size", _grid_size), _grid_size)
+	return serialized_configs

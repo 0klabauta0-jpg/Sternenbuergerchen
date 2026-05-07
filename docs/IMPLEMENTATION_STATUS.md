@@ -10,6 +10,1172 @@
 
 ## Aktueller Startzustand
 
+### TASK_177 - Drop Light Fixed UI Layout Contract
+- Status: implementiert
+- Stand: `scripts/meta/drop_light_layout_contract.gd` definiert den gemeinsamen `drop_light`-Vertrag fuer feste Full-HD-Screens, 8-px-Raster, maximal 6-px-Panelradius, quadratische Action-Buttons, erlaubte Projektassets und feste Panel-Rechtecke fuer FOB, Homebase und Mission-HUD.
+- Stand: FOB ist fuer TASK_178 konkret vorbereitet: `#14 FLIGHTDECK` ist breiter als `#13 LOADOUT`, `#13 LOADOUT` bleibt bewusst schmaler, Boarding Status und Actions liegen unten als feste Fenster. Mission ist explizit HUD-only; TerrainMap3DView, SimulationRoot und weitere Runtime-Ziele sind als verbotene Mission-Umbauziele dokumentiert.
+- Offene Punkte: Der Vertrag ist umgesetzt; sichtbare Folgearbeiten fuer Homebase und Mission-HUD bleiben eigene Tasks.
+- Risiken: Wenn Folgetasks nur den Skin statt feste Fenster umsetzen, bleibt das Layoutziel unerfuellt. Mission-HUD und Mission-Map duerfen weiterhin nicht vermischt werden.
+- Lokale Pruefung: `task_177_drop_light_fixed_ui_layout_contract_verifier.gd`, `task_164_ui_theme_component_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Manueller Sichtcheck fuer FOB/Homebase und danach TASK_180 fuer das Mission-HUD.
+
+### TASK_178 - FOB Drop Light Fixed FullHD Layout
+- Status: implementiert
+- Stand: `FOBTestScreen` wendet den `DropLightLayoutContract` als feste FullHD-UI-Schicht an. Die Runtime-Node-Pfade bleiben stabil; Gameplay-Wahrheit bleibt weiter in den bestehenden Meta-/Mission-State-Pfaden.
+- Stand: Die FOB-Hauptaufteilung folgt jetzt `#10 FIRETEAMS`, `#13 LOADOUT` und einem breiteren `#14 FLIGHTDECK`. Die alte Available-Operators-Spalte ist im festen FOB-Layout ausgeblendet, damit das Flightdeck Raum fuer echte Projekt-Fliegerassets bekommt.
+- Stand: `#14 FLIGHTDECK` rendert Transport-Craft-Karten mit vorhandenen Kenney-Space-Kit-Assets. Die Transport- und unteren Actionbuttons sind quadratisch. Eine feste Bottom-Row zeigt Boarding Status und Actions; Board/Send rufen nur vorhandene FOB-Callbacks auf und speichern keinen eigenen Gameplay-State.
+- Offene Punkte: Manueller Godot-Sichtcheck in FullHD bleibt fuer finale optische Einrueckung, Lesbarkeit und Flightdeck-Proportionen offen.
+- Risiken: Die Umsetzung nutzt bewusst eine Layout-Schicht ueber den bestehenden Containern. Falls spaeter pixelgenaue absolute Positionierung gebraucht wird, sollte das als kleiner Folgetask erfolgen, ohne die Meta-State-Pfade umzubauen.
+- Lokale Pruefung: `task_178_fob_drop_light_fixed_fullhd_layout_verifier.gd`, `task_176_fob_loadout_weapon_preview_selector_verifier.gd`, `task_096_recovery_verifier.gd`, `task_114_meta_recovery_verifier.gd`, `bugfix_dropship_mission_flow_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Manuellen FOB-Sichtcheck ausfuehren; danach TASK_180 fuer das Mission-HUD.
+
+### TASK_179 - Homebase Drop Light Fixed FullHD Layout
+- Status: implementiert
+- Stand: `HomebaseTestScreen` setzt Topbar, Mission Brief, Roster, Transfer Team, Flightdeck und Character Sheet als echte feste FullHD-Fenster. Der Verifier prueft nach mehreren Frames `global_position` und `size` gegen den `DropLightLayoutContract`.
+- Stand: `#05 FLIGHT DECK` besitzt jetzt eine read-only Visual-Buehne mit Pad-/Craft-/Stack-Darstellung aus bestehenden Transportdaten. Die Buehne nimmt keinen Input an und speichert keinen eigenen Vehicle- oder Transfer-State.
+- Stand: Homebase nutzt fuer Flightdeck/Shipcards Projektassets unter `res://Assets/kenney_space-kit/Isometric/...`; der Frachterpfad wurde auf die isometrische Projektgrafik umgestellt.
+- Offene Punkte: Manueller Godot-Sichtcheck in FullHD bleibt fuer finale Lesbarkeit, Einrueckung und die optische Wirkung der top-level-Fenster offen.
+- Risiken: Die Hauptfenster sind bewusst fest positioniert, waehrend lange Inhalte weiterhin ueber gezielte Scrollbereiche laufen. Weitere Homebase-Politur darf Pilot-/Cargo-/Transferfluesse nicht in UI-State duplizieren.
+- Lokale Pruefung: `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd`, `task_177_drop_light_fixed_ui_layout_contract_verifier.gd`, `task_178_fob_drop_light_fixed_fullhd_layout_verifier.gd`, `task_096_recovery_verifier.gd`, `task_114_meta_recovery_verifier.gd`, `bugfix_dropship_mission_flow_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Manuellen Homebase-Sichtcheck ausfuehren; danach TASK_180 fuer das Mission-HUD nach `d_mission.svg`.
+
+### TASK_180 - Mission Drop Light Fixed HUD Layout
+- Status: implementiert
+- Stand: Das Mission-HUD nutzt den `DropLightLayoutContract` jetzt HUD-only als feste Full-HD-Schicht. Mission Identity, Topnav, Fireteam-Mini, BottomDock, `#16 COMMAND MATRIX`, `#17 SELECTED FIRETEAM` und `#18 MISSION CONTROL` werden als echte feste Controls mit `global_position` und `size` gegen den Contract gesetzt.
+- Stand: Command-, LZ-/Drop- und Approach-Buttons bleiben an den vorhandenen `TacticalController`-Callbacks, sind aber quadratisch nach Contract. Deaktivierte Phase-Template-Controls werden im festen Mission-HUD ausgeblendet, statt als aktive Fake-Actions sichtbar zu bleiben.
+- Stand: Der TASK_180-Verifier prueft echte Panelrechtecke nach mehreren Frames, die bekannten Blocklabels, quadratische Buttons samt bestehenden Signalpfaden, passive BottomDock-Hosts fuer Karteninput und dass ein reiner HUD-Stylingpass keine `SimulationRoot`-Commands, Effects oder Snapshot-Anwendung erzeugt.
+- Offene Punkte: Manueller Full-HD-Sichtcheck bleibt fuer finale Lesbarkeit und optische Einrueckung offen.
+- Risiken: Die HUD-Panels sind bewusst fest fuer 1920x1080 gesetzt. Weitere Mission-Politur darf TerrainMap3DView, SimulationRoot, Combat, Pathfinding, LZ-/Dropship-Wahrheit und 2.5D-Gameplay nicht beruehren.
+- Lokale Pruefung: `task_180_mission_drop_light_fixed_hud_layout_verifier.gd`, `task_164_ui_theme_component_verifier.gd`, `task_096_recovery_verifier.gd`, `task_160_tactical_playability_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Manuellen Mission-HUD-Sichtcheck ausfuehren oder TASK_181 als Drop-Light-Fenster-Audit starten.
+
+### TASK_181 - Drop Light Fixed Window Audit Patch
+- Status: implementiert
+- Stand: `scripts/tests/task_181_drop_light_fixed_window_audit_verifier.gd` prueft FOB, Homebase und Mission-HUD nach mehreren Frames auf echte `global_position`/`size` der Drop-Light-Hauptfenster gegen den `DropLightLayoutContract`. Der Audit akzeptiert keine reine Mindestgroesse oder Metadaten mehr.
+- Stand: FOB wurde nachgezogen: Topbar, `#10 FIRETEAMS`, `#13 LOADOUT`, `#14 FLIGHTDECK`, Boarding Status und Actions werden als echte feste Fenster gesetzt. Innenlisten und Scrollbereiche bleiben containerbasiert innerhalb dieser festen Fenster.
+- Stand: Der FOB-Topbar-Contract nutzt jetzt 72 px Hoehe im 8er-Raster, damit die vorhandene kompakte Nav-/Header-Zeile ohne Ueberlappung als echtes Fixed Window sitzt. Alte FOB-Statuszeilen in der Topbar sind im festen Layout ausgeblendet; Status bleibt in den bestehenden Fensterinhalten und der Bottom-Row gespiegelt.
+- Offene Punkte: Manueller Full-HD-Sichtcheck fuer FOB, Homebase und Mission-HUD bleibt offen.
+- Risiken: Weitere visuelle Politur darf den festen Hauptfenster-Vertrag nicht wieder durch Stretch-Ratios oder Nachbarfensterabhaengigkeit aufweichen. Innenlayouts duerfen weiter flexibel sein.
+- Lokale Pruefung: `task_181_drop_light_fixed_window_audit_verifier.gd`, `task_177_drop_light_fixed_ui_layout_contract_verifier.gd`, `task_178_fob_drop_light_fixed_fullhd_layout_verifier.gd`, `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd`, `task_180_mission_drop_light_fixed_hud_layout_verifier.gd`, `task_096_recovery_verifier.gd`, `task_114_meta_recovery_verifier.gd`, `bugfix_dropship_mission_flow_verifier.gd`, `task_160_tactical_playability_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Manuellen Full-HD-Sichtcheck der Drop-Light-Screens ausfuehren; danach Politur oder Gameplay-Slices separat schneiden.
+
+### TASK_182 - Terrain Hill Rules Contract
+- Status: implementiert
+- Stand: `docs/dev/terrain_height_hill_rules.md` ist der gemeinsame Huegelvertrag fuer Editor, Runtime, Save/Load, Legacy-2D und 2.5D. Der Vertrag trennt `height_level` als Gelaendehoehe von `object_height` als Objekt-/Blockerhoehe, setzt `height_level + object_height` fuer LOS und sichtbare Objektpositionen fest und haelt fest, dass `surface_type` auf jeder Hoehe weiter gilt.
+- Stand: `edge_type = slope` ist die begehbare Hoehentransition, `edge_type = cliff` ist als harte Klippenblockade entschieden, und `edge_type = none` ist nur fuer gleiche Hoehe bzw. Plateau-Innenbereiche gueltig. Huegellinien werden aus Nachbarhoehen abgeleitet; die hoehere Kachel bestimmt Richtung und Kantenart.
+- Stand: Bestehende Abweichungen sind bewusst nicht gepatcht, sondern als Folgeaufgaben markiert: TASK_183 fuer Editor-Authoring, TASK_184 fuer A*/HPA/LOS/Cover/Combat und TASK_185 fuer 2.5D-/Legacy-Visuals.
+- Risiken: Die Zielregel fuer harte Klippen aendert die bisherige alte TASK_058-Semantik (`height_diff <= 1` bei Cliff war begehbar). TASK_184 muss bestehende Testkarten und HPA-Caches entsprechend absichern.
+- Lokale Pruefung: `task_182_terrain_hill_rules_contract_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_183 umsetzen, damit Editor-Authoring und Save/Load den Vertrag einhalten.
+
+### TASK_183 - Editor Hill Authoring Patch
+- Status: implementiert
+- Stand: `TerrainTileCatalog` hat jetzt den expliziten Vertrag `preserves_hill_fields_when_applied()`. Waende, Felsen, Cliff-/Slope-Visualtypen und bestehende Objekt-Layer setzen beim Platzieren nur die katalogbezogenen Objekt-/Blockerfelder und erhalten `height_level`, `surface_type` und `edge_type`.
+- Stand: Der Map-Editor nutzt beim Brush-Painting von Katalogtypen keinen Sonderpfad mehr, der umgebende Cliff-/Slope-Tiles in Hoehenpatches umdeutet. Surface-Patches erhalten Struktur-`type_id`s wie `wall_*` und `rock_*`; stale Ground-Base-Types unter `object_type_id` werden weiter geloescht, damit Sand/Road/Rock sichtbar bleiben.
+- Stand: `scripts/tests/task_183_editor_hill_authoring_verifier.gd` prueft Hoehenwerkzeug, Katalogplatzierung auf Huegeln, Surface-Patches im Editor, Save/Load fuer Sandhang, Sandklippe, Plateau-Innenbereich, Wand auf Huegel und Fels auf Huegel sowie Editor-Refresh ohne `SimulationRoot`.
+- Offene Punkte: Manueller Editor-Sichtcheck bleibt offen: Huegel malen, Sand setzen, Mauer/Fels platzieren, speichern und neu laden.
+- Risiken: Cliff-/Slope-Paletteintraege sind nun hill-preserving Visual-/Blocker-Platzierung; echte Gameplay-Schrittregeln fuer Klippe/Hang folgen erst in TASK_184.
+- Lokale Pruefung: `task_183_editor_hill_authoring_verifier.gd`, `task_159_verifier.gd`, `task_158_verifier.gd`, `task_132_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_184 umsetzen, damit A*, HPA, LOS, Cover und Combat den Vertrag gameplay-seitig einhalten.
+
+### TASK_184 - Gameplay Hill Semantics Patch
+- Status: implementiert
+- Stand: `TerrainPathfinder` folgt jetzt dem TASK_182-Hoehenvertrag: Hoehenwechsel sind nur ueber `edge_type = slope` begehbar; `cliff` und `none` blockieren Hoehendifferenzen und liefern fuer direkte Schritt-Kosten `INF`.
+- Stand: A* und HPA teilen dieselbe Step-Entscheidung, weil HPA-Komponenten, Portale, lokale Pfade und Portal-Kosten ueber den zentralen TerrainPathfinder laufen. Diagonale Schritte pruefen weiter die orthogonalen Nachbarschritte, damit harte Klippen- und Wand-Ecken nicht geschnitten werden.
+- Stand: Surface-Kosten bleiben Ziel-Tile-basiert, wodurch Sandhang teurer/langsamer als Ground-Hang bleibt. Die cover-aware Grid-LOS im Pathfinder nutzt wie `LineOfSightSystem` die effektive Blockerhoehe `height_level + object_height`; Combat-Hoehenbonus und Cover lesen weiter aus der `TerrainRegistry`.
+- Stand: `scripts/tests/task_184_gameplay_hill_semantics_verifier.gd` deckt Hangkosten, Sandhang, Klippenblockade, A*/HPA-Konsistenz, Diagonal-Corner-Cutting, LOS-Hoehe, Cover, Combat-Hoehe und Fallbacks ohne TerrainRegistry ab.
+- Offene Punkte: Manueller Missionslauf mit Huegel-/Klippen-Testkarte bleibt sinnvoll, weil harte Klippen gegenueber alter TASK_058-Semantik Pfade sichtbar aendern koennen.
+- Risiken: Bestehende Karten, die Klippen bisher als begehbare 1-Level-Uebergaenge genutzt haben, brauchen bewusste `slope`-Tiles statt stiller Runtime-Ausnahme.
+- Lokale Pruefung: `task_184_gameplay_hill_semantics_verifier.gd`, `task_160_tactical_playability_verifier.gd`, `task_096_recovery_verifier.gd`, `bugfix_dropship_mission_flow_verifier.gd`, `task_126_verifier.gd`, `task_125_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_185 umsetzen, damit 2.5D-/Legacy-Visuals die gleiche Huegelwahrheit anzeigen.
+
+### TASK_185 - Hill Visuals and Edge Lines Patch
+- Status: implementiert
+- Stand: `TerrainMap3DView` rendert Hoehenkanten im strikten 3D-Pfad jetzt aus der TASK_182-Kantenregel als GLB-Modelle. `edge_type = slope` erzeugt Hangmodelle, `edge_type = cliff` erzeugt Klippenmodelle, `edge_type = none` erzeugt kein Kantenvisual und wird bei Hoehendifferenz als Authoring-Konflikt gezaehlt.
+- Stand: Nicht-Ground-Surfaces bekommen im 3D-Pfad eine eigene Top-Surface-Tint-Schicht, damit Sand, Rock und Road auch auf H=1/H=2 lesbar bleiben, ohne die Kenney-Ground-Materialien zu ueberschreiben.
+- Stand: Marker, Patrol-/Waypoint-Linien, Contact-/Objective-/Dropship-Overlays, Unit-Proxies und Missing-Asset-Marker lesen die Tile-Oberseite als visuellen Anker. Waende, Felsen und Objekt-Fallbacks sitzen weiterhin auf `height_level * height_step`.
+- Stand: `TerrainMapRenderer` nutzt dieselbe Hoehenkantenregel ohne Objekt-Tile-Ausnahmen und erkennt Objektplatzierung ueber `object_type_id`, damit Wand und Fels auf Huegeln im Legacy-2D-Pfad sichtbar bleiben.
+- Stand: `scripts/tests/task_185_hill_visuals_edge_lines_verifier.gd` prueft eine kleine Plateau-/Sandhang-/Klippen-/Wand-/Fels-Fixture inklusive 3D-Edge-Modellen, Surface-Tints, Overlay-Hoehenankern, Legacy-Kantenregel und Missing-Mapping-Marker auf H=2.
+- Offene Punkte: Manueller 2.5D-Sichtcheck mit Rotation, Zoom und Pitch bleibt offen.
+- Risiken: Die neuen Surface-Tints und Edge-Modelle sind Visuals; sie duerfen keine Terrain-Daten, Gameplay-Walkability oder LOS/Combat-Wahrheit setzen. Bestehende Karten mit vielen Hoehenkanten erzeugen jetzt bewusst mehr 3D-Edge-Nodes.
+- Lokale Pruefung: `task_185_hill_visuals_edge_lines_verifier.gd`, `task_159_verifier.gd`, `task_160_tactical_playability_verifier.gd` laufen gruen. Zusatzcheck `task_170_performance_warning_gate_verifier.gd` lief mit 60 passed / 2 failed bei Live-Dropship-GLB- und Mission-Result-Spiegelchecks, nicht bei den neuen Huegel-/Mapping-Zaehlern.
+- Naechster Schritt: Manuellen Huegel-Sichtcheck ausfuehren; danach TASK_186 fuer Mission-Map-Unit-Presence starten.
+
+### TASK_186 - Mission Map Unit Presence and Registry Audit
+- Status: implementiert
+- Stand: Die Mission Map hat jetzt einen expliziten Unit-Presence-Audit. `SimulationRoot` und `MultiplayerSnapshotContract` transportieren `team_id`/`fireteam_id` in Unit-Snapshots, waehrend TacticalController, CombatLoopDriver und MissionTestSetup Presence-Audit-Snapshots fuer Registry-, Friendly-, Enemy- und Wave-Zustand liefern.
+- Stand: `TerrainMap3DView` exportiert pruefbare Proxy-Diagnostik mit allen Proxy-IDs, sichtbaren Proxy-IDs, Missing-Unit-Model-IDs und Proxy-State pro Unit-ID. Dadurch kann der Audit Visual-only, UI-only und doppelte Proxy-Zustaende erkennen.
+- Stand: `scripts/tests/task_186_mission_map_unit_presence_registry_audit.gd` prueft initialen Enemy-Spawn, Dropship-Deploy der blauen Friendlys, zweiten Enemy-Wave-Start, FTLRegistry-Aktivierung, UnitRegistry, Tactical-/Combat-/2.5D-/Multiplayer-Snapshots und Proxy-Duplizierung.
+- Offene Punkte: Manueller 2.5D-Sichtcheck bleibt sinnvoll, weil der Audit Sichtbarkeit und IDs prueft, aber keine kuenstlerische Lesbarkeit bewertet.
+- Risiken: Die neuen Audit-Snapshots sind Diagnosepfade; Gameplay-Wahrheit bleibt bei `SimulationRoot`, `UnitRegistry`, `FTLRegistry` und Combat/Runtime-Komponenten.
+- Lokale Pruefung: `task_186_mission_map_unit_presence_registry_audit.gd` (46/0), `task_160_tactical_playability_verifier.gd` (20/0) und `task_168_multiplayer_snapshot_contract_verifier.gd` (20/0) laufen gruen.
+- Naechster Schritt: TASK_187 fuer Mindestabstand und Multiplayer-Authority auf dem gesicherten Presence-Vertrag umsetzen.
+
+### TASK_187 - NPC Minimum Spacing and Multiplayer Authority
+- Status: implementiert
+- Stand: `SimulationRoot` erzwingt nach jedem autoritativen Command-/Effect-Tick einen zentralen Unit-Mindestabstand fuer registrierte Runtime-Units. Die Korrektur laeuft vor Objective-Auswertung und Snapshot-Build, damit Multiplayer-Snapshots bereits getrennte Positionen spiegeln.
+- Stand: `LocalAvoidanceResolver` liefert dafuer eine deterministische Positions-Separation mit Unit-ID-Sortierung, TerrainRegistry-Walkability-Schutz, blockierten Paar-Diagnosen und gleichem Raumvertrag fuer fit, downed, bleedout und respawning Units.
+- Stand: Der TASK_187-Verifier prueft Spawn-Cluster, Dropship-Deploy, Enemy-Wave-Cluster, kreuzende Friendlys, Friendly/Enemy-Kontaktstop, Downed-Units, Respawn und Snapshot-Positionen.
+- Offene Punkte: Enge echte Kartenengpaesse koennen weiterhin blockierte Paar-Diagnosen erzeugen; das ist bewusst sichtbar statt ein stiller Teleport auf nicht-walkable Tiles.
+- Risiken: Der Abstand ist autoritativ und kann sehr enge Bewegungen leicht auseinanderziehen. Folge-Tasks fuer Formation/Advance-Stile duerfen darauf aufsetzen, aber keine rein visuellen Gegenoffsets einfuehren.
+- Lokale Pruefung: `task_187_npc_minimum_spacing_and_multiplayer_authority.gd` (16/0), `task_130_verifier.gd` (9/0), `task_160_tactical_playability_verifier.gd` (20/0) und `task_168_multiplayer_snapshot_contract_verifier.gd` (20/0) laufen gruen.
+- Naechster Schritt: TASK_188 fuer lesbare Advance-Stile auf dem gesicherten Abstandspfad umsetzen.
+
+### TASK_188 - Fireteam Advance Styles Map Readability
+- Status: implementiert
+- Stand: `FireteamMovementController` liefert jetzt fuer `rush`, `bounding` und `caterpillar` strukturierte Readability-Snapshots mit Style-Code, Bewegungsgruppe, Deckungsgruppe, Bound-/Group-Fortschritt, Bound-Ziel, Multi-Tile-Markierung und kompakter Statuszeile.
+- Stand: `MissionTacticalSandboxController` nutzt diese Statuszeile in #17 Selected Fireteam und spiegelt die Movement-Snapshots in den Legacy-Visualizer sowie den 2.5D-Primary-View-Payload. `TerrainMap3DView` rendert daraus kompakte Kartenmarker und exportiert pruefbare Movement-Style-Eintraege, ohne Gameplay-State zu mutieren.
+- Stand: `scripts/tests/task_188_fireteam_advance_styles_map_readability.gd` deckt Controller-Snapshots, Mission-Map-Snapshot fuer alle drei Stile, Area-Order-Lesbarkeit und die #17/Map-Phasenkonsistenz ab.
+- Offene Punkte: Manueller Mission-Map-Sichtcheck fuer Rush/Bounding/Caterpillar bleibt offen.
+- Risiken: Die neuen Kartenlabels sind bewusst kompakt; Detailtext gehoert weiter nach #17. Folgearbeiten duerfen keine Bewegungslogik im Visualizer nachbauen.
+- Lokale Pruefung: `task_188_fireteam_advance_styles_map_readability.gd`, `task_110_verifier.gd`, `task_111_verifier.gd`, `task_124_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Manuellen Sichtcheck der Mission Map ausfuehren; danach TASK_189 fuer Medic-Adjacency starten.
+
+### TASK_189 - Medic Adjacent Tile Healing Rule
+- Status: implementiert
+- Stand: `MedicSupportResolver` nutzt jetzt standardmaessig `tile_range = 1`; direkte Heilung greift damit nur noch auf orthogonal benachbartem Terrain-Tile. Der World-Fallback ist auf ein Tile reduziert, damit alte 2-Tile-Heals nicht ueber Distanz weiterlaufen.
+- Stand: Move-to-heal bleibt fuer weiter entfernte eigene Ziele aktiv und waehlt bei vorhandener TerrainRegistry ein begehbares Nachbar-Tile des Patienten als Zielposition. Teamfremde Ziele werden im Resolver verworfen; `medictool` bleibt Voraussetzung fuer Heal und Move-Support.
+- Stand: `medic_support_verifier.gd` ist auf den 1-Tile-Vertrag umgestellt. `scripts/tests/task_189_medic_adjacent_tile_healing_rule.gd` prueft Adjacent-Heal, 2-Tile-Move, Heal-Effect-Metadaten, Medictool-Pflicht und Teamfilter.
+- Offene Punkte: Manueller Sichtcheck bleibt sinnvoll, weil Medics in Live-Missionen nun haeufiger laufen statt sofort zu heilen.
+- Risiken: Sehr enge Kartenstellen koennen den Move-to-heal-Pfad blockieren; das ist bewusst sichtbarer als ein zu weiter Sofort-Heal.
+- Lokale Pruefung: `task_189_medic_adjacent_tile_healing_rule.gd` (17/0), `medic_support_verifier.gd` (30/0), `task_160_tactical_playability_verifier.gd` (20/0) und `task_176_fob_loadout_weapon_preview_selector_verifier.gd` (24/0) laufen gruen.
+- Naechster Schritt: TASK_190 fuer weitere Waffenvisuals und Loadout-Skalierung umsetzen.
+
+### TASK_190 - Weapon Visual Loadout Expansion and Scale
+- Status: implementiert
+- Stand: `WeaponData` kennt jetzt die stabilen IDs `sniper` und `rocket_launcher` mit Preview-Pfad, Visual-Loadout-ID, Rolle und kleinen bestehenden Combat-/Modifier-Werten. Deutsche/kurze Aliase wie `panzerfaust`, `raketenwerfer`, `rocketlauncher`, `sniper_rifle`, `scharfschuetzengewehr` und `praezisionsgewehr` normalisieren auf die internen IDs.
+- Stand: Aus dem Kenney `Weapon Pack (1.0)` ist nur ein kleines Subset nach `Assets/used/npc/weapon_pack/` kopiert: `sniper.glb`, `rocketlauncherModern.glb`, die zwei Render-Previews und die CC0-Lizenz. `docs/assets/weapon_visuals_inventory.md` dokumentiert Quelle, Lizenz und Runtime-Vertrag.
+- Stand: #13 LOADOUT bietet jetzt kompakt `SMG`, `Rifle`, `Sniper`, `Rocket` und `Medictool` mit Projektpfad-Previews. `TerrainMap3DView` normalisiert Waffen-IDs fuer Visual-Loadouts; `sniper_rifle` haengt am `RightHandSocket`, `rocket_launcher` am `BackSocket`, beide mit expliziten Scale-/Rotation-/Offset-Werten.
+- Offene Punkte: Manueller 2.5D-Sichtcheck fuer den finalen Sitz von Sniper und Rocket Launcher bleibt offen; Headless prueft Resource-Ladung, Socket-Metadaten und Scale-Grenzen.
+- Risiken: Rocket Launcher ist in TASK_190 nur sichtbares Loadout/Visual und keine Splash-Damage- oder Munitionsmechanik. Folge-Balancing muss separat bleiben.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_190_weapon_visual_loadout_expansion_and_scale.gd` (48/0), `task_176_fob_loadout_weapon_preview_selector_verifier.gd` (30/0), `task_175_npc_loadout_attachment_verifier.gd` (38/0) und `test_weapon_data.gd` (24/0) laufen gruen.
+- Naechster Schritt: Manuellen Sichtcheck fuer Waffen-Sitz ausfuehren; danach TASK_191 fuer Befehlskette und Mission-Feedback umsetzen.
+
+### TASK_191 - Command Chain Selection and Area Feedback Pass
+- Status: implementiert
+- Stand: `MissionTacticalSandboxController.get_command_feedback_snapshot()` liefert jetzt einen kompakten Headless-Pruefpunkt fuer Auswahl, #16-Command-Buttons, #17/#18-Texte, Waypoint-/Area-Zaehler, visualisierte Orders und aktive Area-Snapshots.
+- Stand: `TerrainMap3DView.get_render_snapshot()` spiegelt `order_selected_fireteam_ids` und `order_phase_index`, sodass Map-Auswahl und UI-Auswahl gegeneinander verifiziert werden koennen.
+- Stand: `docs/dev/mission_command_feedback_contract.md` dokumentiert Datenfluss und Rollen von #16 Command Matrix, #17 Selected Fireteam, #18 Mission Control und Mission Map. `task_191_command_chain_selection_area_feedback_pass.gd` prueft Auswahlwechsel, Multi-Selection, Move/Defend/Take-Waypoints, Take-/Engage-Areas, kompakte Texte und Map-Snapshot-Konsistenz.
+- Offene Punkte: Manueller Mission-Map-Sichtcheck fuer Auswahl, Take Area, GO, Fortschritt und Kontakt bleibt offen.
+- Risiken: Der neue Snapshot darf Diagnose bleiben und keine UI-seitige Gameplay-Wahrheit werden.
+- Lokale Pruefung: `task_191_command_chain_selection_area_feedback_pass.gd` (24/0), `task_121_verifier.gd` (13/0), `task_122_verifier.gd` (15/0), `task_123_verifier.gd` (28/0), `task_124_verifier.gd` (21/0) und `task_160_tactical_playability_verifier.gd` (20/0) laufen gruen.
+- Naechster Schritt: TASK_192 als zusammenfassenden Playability-Smoke fuer die NPC-/Command-Feedback-Reihe umsetzen.
+
+### TASK_192 - Mission Map NPC Behavior Playability Smoke
+- Status: implementiert
+- Stand: `scripts/tests/task_192_mission_map_npc_behavior_playability_smoke.gd` startet die Live-Testmission, staged das Dropship, deployed BLUE, aktiviert die zweite Enemy-Wave und auditiert UnitRegistry, Tactical-/Combat-Presence, 2.5D-Proxies und Multiplayer-Snapshots in einem zusammenhaengenden Run.
+- Stand: Der Smoke baut Move/Defend/Take-Waypoints plus Engage-/Defend-Areas, fuehrt GO mit cautious-Stance aus und prueft Bounding/Caterpillar-Readability, kompakte Map-Labels, Contact-Marker, aktive Area-Snapshots und #16/#17/#18-Feedback.
+- Stand: Der Medic-Fall laeuft innerhalb derselben Mission: benachbarter Patient erzeugt Heal, ein zwei Tiles entfernter Patient erzeugt nur Move-to-neighbor-Tile. Zwei Live-Friendlys werden temporaer auf `sniper` und `rocket_launcher` gesetzt, damit der TASK_190-Visualpfad im Missionskontext mitgeprueft wird.
+- Offene Punkte: Manueller Mission-Map-Sichtcheck des gesamten Ablaufs bleibt offen; der Headless-Smoke bewertet keine finale optische Lesbarkeit von Waffensitz, NPC-Abstaenden und Overlays.
+- Risiken: Der Smoke lokalisiert Fehler schlechter als Einzelverifier; er bleibt Abschluss-Gate und ersetzt die Verifier aus TASK_186 bis TASK_191 nicht.
+- Lokale Pruefung: `task_192_mission_map_npc_behavior_playability_smoke.gd` (65/0), `task_160_tactical_playability_verifier.gd` (20/0), `task_168_multiplayer_snapshot_contract_verifier.gd` (20/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_193 fuer Asset Source Inventory and Availability Matrix umsetzen.
+
+### TASK_193 - Asset Source Inventory and Availability Matrix
+- Status: implementiert
+- Stand: `docs/assets/asset_source_availability_matrix.md` listet alle neun Pflichtquellen mit Source-ID, lokaler Quelle, Projektpfad, CC0-Lizenzlage, Dateitypen/Groesse, Importstatus, Maximalmenge, Verbrauchsort und Folge-Task.
+- Stand: Vorhandene Projektkopien sind als `reuse existing project copy` markiert: UI-Pack, Sci-Fi-UI-Pack, Space-Kit, Keyboard-&-Mouse-Input-Prompts und Cursor-Pixel-Pack. Fehlende Subsets sind nur Folgeaufgaben zugeordnet: Modular/Space Station zu TASK_194, Ranks/Particles zu TASK_196.
+- Stand: Alte absolute `C:/Users/...`-Quellhinweise in Runtime-Mapping-Daten wurden zuerst normalisiert und im TASK_198-Gate endgueltig aus `data/*.json` entfernt; Runtime-Daten enthalten jetzt Projektpfade oder Doku-Verweise statt lokaler Pictures-Quellen.
+- Offene Punkte: Keine binaeren Assets wurden importiert. Die konkreten Subsets bleiben TASK_194 bis TASK_196 vorbehalten.
+- Risiken: Die Matrix darf nicht als Freigabe fuer Pack-Komplettimporte gelesen werden. Jede spaetere Datei braucht weiter Quelle, Lizenz, Zielpfad und Verbrauchsort im passenden Manifest.
+- Lokale Pruefung: `task_193_asset_source_inventory_availability_verifier.gd` (71/0), `task_176_fob_loadout_weapon_preview_selector_verifier.gd` (30/0), `task_177_drop_light_fixed_ui_layout_contract_verifier.gd` (63/0), `task_178_fob_drop_light_fixed_fullhd_layout_verifier.gd` (22/0), `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd` (25/0), `task_190_weapon_visual_loadout_expansion_and_scale.gd` (48/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_194 fuer kuratierte Space-/Station-Setpiece-Subsets umsetzen.
+
+### TASK_194 - Space Modular and Station Setpiece Import
+- Status: implementiert
+- Stand: Aus `Modular Space Kit` wurden 10 GLB-Setpieces nach `Assets/curated/kenney/modular_space/models/` importiert; aus `Space Station Kit` wurden 12 GLB-Setpieces nach `Assets/curated/kenney/space_station/models/` importiert. Je Kit liegen `License.txt`, README und die benoetigte shared `models/Textures/colormap.png` bei.
+- Stand: `docs/assets/space_setpiece_inventory.md` dokumentiert Quelle, Lizenz, Projektpfad, Kategorie, Einsatzort und Scale-Hinweis. `data/space_setpiece_catalog.json` stellt die Setpieces Visual-only per ID fuer spaetere UI-/Editor-/Preview-Pfade bereit.
+- Stand: `kenney_space-kit` wurde nicht doppelt kopiert, sondern bleibt als vorhandene Projektkopie referenziert. Es wurden keine FBX/OBJ/MTL/DAE/STL-Duplikate importiert.
+- Offene Punkte: Manueller Godot-Sichtcheck einer spaeteren Preview-/Staging-Szene bleibt offen; TASK_194 legt selbst keine Szene und kein Layout um.
+- Risiken: Setpieces bleiben Visuals und duerfen keine Terrain-, Kollisions-, Walkability- oder Gameplay-Wahrheit werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_194_space_modular_station_setpiece_import_verifier.gd` (160/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_195 fuer UI/Input/Cursor-Availability-Pass umsetzen.
+
+### TASK_195 - UI Input and Cursor Asset Availability Pass
+- Status: implementiert
+- Stand: `docs/assets/ui_input_cursor_availability.md` dokumentiert die vorhandenen Projektkopien fuer UI-Pack, Space-UI-Expansion, Keyboard-&-Mouse-Prompts und Cursor-Pixel-Pack als `reuse existing`.
+- Stand: `data/ui_asset_catalog.json` definiert stabile Visual-only-IDs fuer Panel-/Button-/Icon-/Crosshair-Assets, LMB/RMB, Shift/Ctrl, Q/E/R/F/G/Space/Escape sowie Cursor-Zustaende fuer Select, Move, Attack, Defend, Take, Area-Drag, Editor-Brush, Height, Marker und Patrol.
+- Stand: Es wurden keine Assets nach `Assets/curated` kopiert. Der Katalog ersetzt keine Theme- oder Eingabelogik; TASK_164 bleibt die UI-Komponentenbasis.
+- Offene Punkte: Manueller Sichtcheck fuer Tooltips/Cursor bleibt erst relevant, wenn ein spaeterer UI-Slice die IDs sichtbar nutzt.
+- Risiken: Katalog darf keine zweite Theme-Wahrheit neben TASK_164 werden; Prompts und Cursor bleiben Anzeige, nicht Gameplay-Input-State.
+- Lokale Pruefung: `task_195_ui_input_cursor_asset_availability_verifier.gd` (171/0), `task_164_ui_theme_component_verifier.gd` (15/0), `task_181_drop_light_fixed_window_audit_verifier.gd` (43/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_196 fuer Rank- und Particle-Subset-Import umsetzen.
+
+### TASK_196 - Rank and Particle Asset Subset Import
+- Status: implementiert
+- Stand: `Assets/curated/kenney/ranks/` enthaelt ein kleines 10-PNG-Subset fuer Rollen-/Status-Badges: FTL, Medic, Rifle/Assault, Heavy/Special, Pilot, Engineer, Enemy, Down, Ready und Suppressed.
+- Stand: `Assets/curated/kenney/particles/` enthaelt ein kleines 12-PNG-Subset fuer LZ/Drop, Contact, Suppression, Objective, Hit, Heal, Warning, Trace, Impact, Movement/Dust, Scorch und Command-Ping.
+- Stand: `data/rank_particle_asset_catalog.json` und `docs/assets/rank_particle_inventory.md` dokumentieren stabile IDs, `res://`-Pfade, Quell-Relativpfade, Zielscreen, Lizenz und Visual-only-Grenzen.
+- Offene Punkte: Keine konkrete UI- oder Effekt-Layer-Nutzung in diesem Task; TASK_197 darf die IDs zentral zusammenfuehren.
+- Risiken: Particles duerfen keine SimulationRoot-Effects ersetzen; Badges duerfen NPC-Karten nicht ueberladen und bleiben Statusanzeige statt Statuswahrheit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_196_rank_particle_asset_subset_import_verifier.gd` (225/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_197 fuer zentralen kuratierten Asset-Katalog und Usage-Mapping umsetzen.
+
+### TASK_197 - Curated Asset Catalog and Usage Mapping
+- Status: implementiert
+- Stand: `data/curated_asset_catalog.json` bindet die bestehenden Fachkataloge fuer UI/Input/Cursor, Rank/Particle und Space-Setpieces explizit ein und fuegt zentrale Eintraege fuer Weapon-Visuals und bestehende Terrain-Visuals hinzu.
+- Stand: `scripts/assets/curated_asset_catalog.gd` stellt einen read-only Resolver bereit, der keine Projektordner scannt, alle Eintraege als stabile IDs mit `res://`-Pfaden sammelt und fehlende IDs/Pfade mit Diagnosewerten statt stillen Fallbacks meldet.
+- Stand: `docs/assets/asset_usage_mapping.md` dokumentiert Kategorie-Mapping, Zielsysteme und Resolver-Vertrag fuer `ui`, `input_prompt`, `cursor`, `rank_badge`, `particle`, `setpiece`, `weapon_visual` und `terrain_existing`.
+- Offene Punkte: Der Katalog wird noch nicht in UI-/Visualizer-Code konsumiert; TASK_198 nutzt ihn zunaechst als Gate/Smoke-Einstieg.
+- Risiken: Der Katalog darf keine Gameplay- oder Renderer-Wahrheit werden; er stellt nur Pfade und Metadaten bereit.
+- Lokale Pruefung: `task_197_curated_asset_catalog_usage_mapping_verifier.gd` (799/0), `task_195_ui_input_cursor_asset_availability_verifier.gd` (171/0), `task_196_rank_particle_asset_subset_import_verifier.gd` (225/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_198 fuer Asset-Import-Gate und Visual-Smoke umsetzen.
+
+### TASK_198 - Asset Import Gate and Visual Smoke
+- Status: implementiert
+- Stand: `scripts/tests/task_198_asset_import_gate_visual_smoke.gd` prueft den zentralen Asset-Katalog, Pflichtkategorien, Godot-Importmetadaten, Import-Maximalmengen, Texture-/PackedScene-Loadbarkeit, Mesh-Grundsignal fuer GLB-Samples und Missing-Asset-Diagnosen.
+- Stand: `docs/manual_checks/asset_expansion_visual_smoke.md` dokumentiert den manuellen Sichtcheck fuer FOB/Homebase/Mission-HUD-Icons, Input/Cursor, Rank-Badges, Particles, Setpieces, Weapon-Visuals und Terrain-Referenzen.
+- Stand: `data/terrain_3d_asset_mapping.json`, `data/npc_unit_visual_mapping.json` und `data/rank_particle_asset_catalog.json` enthalten keine lokalen Pictures-Quellen mehr; Quelle bleibt in Docs/Inventaren, Runtime-Daten bleiben projektlokal.
+- Offene Punkte: Der manuelle GUI-Sichtcheck aus der Checkliste ist dokumentiert, aber nicht interaktiv ausgefuehrt.
+- Risiken: Der Smoke ersetzt die Einzelverifier nicht; bei zu grossem Import-Diff wird Review und Fehlersuche unuebersichtlich.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_198_asset_import_gate_visual_smoke.gd` (167/0), `task_193_asset_source_inventory_availability_verifier.gd` (71/0), `task_196_rank_particle_asset_subset_import_verifier.gd` (225/0), `task_197_curated_asset_catalog_usage_mapping_verifier.gd` (799/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_199 fuer Main-Menu-Shell und Hintergrundbild vorbereiten.
+
+### TASK_199 - Main Menu Shell and Background Image
+- Status: implementiert
+- Stand: Das vom User bereitgestellte Bild liegt als `Assets/curated/main_menu/sternenbuerger_main_menu_bg.jpeg` im Projekt und wird von `scenes/ui/main_menu.tscn` als vollflaechiger `TextureRect`-Hintergrund genutzt.
+- Stand: `scripts/ui/main_menu_screen.gd` stellt den App-Shell-Einstieg mit `Einzelspieler`, `Multiplayer`, `Editor` und `Einstellungen` bereit. Einzelspieler routet auf den bestehenden Meta-Flow, Multiplayer bewusst auf den TASK_167-Lobby-Adapter, Editor auf `res://scenes/editor/map_editor.tscn`, Einstellungen auf ein lokales Panel.
+- Stand: `project.godot` startet jetzt in `res://scenes/ui/main_menu.tscn`. Das Settings-Panel bietet Master-Audio, Vollbild-Schalter und Zurueck ohne Persistenzversprechen.
+- Offene Punkte: Manueller GUI-Sichtcheck fuer Lesbarkeit, Buttonklicks und Settings-Panel ist offen.
+- Risiken: Das Hintergrundbild wurde FullHD-first per Covered-Crop eingebunden; andere Seitenverhaeltnisse brauchen spaeter einen eigenen visuellen Check. Multiplayer ist noch der bestehende Lobby-Testadapter, aber explizit markiert.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_199_main_menu_shell_background_image_verifier.gd` (50/0), `task_167_multiplayer_session_verifier.gd` (22/0), `task_164_ui_theme_component_verifier.gd` (15/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_200 fuer Enemy-Team-Tactics-Contract und Editor-Konfiguration umsetzen.
+
+### TASK_200 - Enemy Team Tactics Contract and Editor Config
+- Status: implementiert
+- Stand: `scripts/tactical/enemy_team_tactics_profile.gd` definiert stabile Enemy-Team-Profile `guard_hold`, `patrol_probe`, `aggressive_push`, `defensive_cover` und `sniper_watch` mit Security-Modus, Facing, Haltung, Cover-Verhalten, Advance-Stil, Sicht-/Kontaktverhalten, Waffenrollen, Weapon-Profile und Visual-Archetyp.
+- Stand: `MissionScenarioData` speichert `enemy_groups[].tactics`, `TerrainMapData` speichert `enemy_team_configs`, und der Map-Editor kann Profil, Security-Modus und Facing fuer die primaere Enemy-Gruppe authoren und speichern. 32x32-Maps defaulten auf `guard_hold`, 64x64-Maps auf `patrol_probe`.
+- Stand: `MissionTestSetup` und `EnemyWaveController` lesen normalisierte Taktik-Dictionaries und legen sie nur als Enemy-Unit-Metadaten ab; es gibt noch keine neue KI- oder Combat-Nebenwirkung.
+- Offene Punkte: Manueller Editor-Sichtcheck bleibt offen: Enemy-Gruppe setzen, Profil/Facing speichern und neu laden.
+- Risiken: Folge-Tasks duerfen den Profilvertrag auswerten, aber keine zweite Taktik-Wahrheit in UI, Mission-HUD oder Combat-Loop duplizieren.
+- Lokale Pruefung: `task_200_enemy_team_tactics_contract_and_editor_config.gd` (116/0), `task_186_mission_map_unit_presence_registry_audit.gd` (46/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_201 fuer Waffenreichweiten auf dem neuen Profilvertrag umsetzen.
+
+### TASK_201 - Weapon Range Scale and Tile Distance Patch
+- Status: implementiert
+- Stand: `WeaponData` liefert jetzt `effective_tile_range` und daraus abgeleitete Weltreichweiten. Defaults: SMG 10 Tiles, Support/`rail_gun` 20 Tiles, Rifle 25 Tiles, Sniper 40 Tiles, Medictool 1 Tile; `support_lmg`/`lmg` normalisieren auf den bestehenden Support-Waffenpfad.
+- Stand: Combat-Fire-Entscheidungen und Overwatch nutzen die aktive Waffenreichweite des Angreifers. `contact_range` bleibt Wahrnehmung/Detection mit Stealth-Fallback und ersetzt keine Waffenreichweite mehr.
+- Stand: Multiplayer-Snapshots normalisieren `active_weapon_id`, `weapon_tile_range` und `weapon_range_world` nur als Anzeige-/Diagnosefelder; clientseitige Range-Entscheidungen werden nicht uebernommen. FOB-Loadout-Optionen zeigen die Tile-Reichweite kompakt im Label.
+- Offene Punkte: Manuelle Balancepruefung auf echten 32x32-/64x64-Missionen bleibt offen; die Werte sind Startwerte, keine finale Waffenbalance.
+- Risiken: Folge-Tasks duerfen `contact_range` nicht wieder als Waffenreichweite verwenden. Sniper-Range ist bewusst lang, aber nicht als globale Map-Wahrheit gedacht.
+- Lokale Pruefung: `task_201_weapon_range_scale_and_tile_distance_patch.gd` (34/0), `task_092_verifier.gd` (12/0), `task_111_verifier.gd` (16/0), `task_168_multiplayer_snapshot_contract_verifier.gd` (20/0) und `task_176_fob_loadout_weapon_preview_selector_verifier.gd` (30/0) laufen gruen.
+- Naechster Schritt: TASK_202 fuer Enemy-Security-Richtung und LOS auf der neuen Waffenrange umsetzen.
+
+### TASK_202 - Enemy Security Direction and LOS Patch
+- Status: implementiert
+- Stand: `MissionCombatLoopDriver` baut pro Enemy-Gruppe eigene Security-Snapshots mit `security_mode`, Facing-/Direction-Angle, Sector Width, Member-Assignments, Waffenreichweite und `watched_unit_ids`. Defaults kommen aus den TASK_200-Tactics-Metadaten; `360` bleibt explizit und directional Profile richten sich an Facing, Kontakt/Fokus oder Objective aus.
+- Stand: Enemy-Watch wird durch Winkel, LOS und TASK_201-Waffenrange begrenzt. `resolve_flank_attack()` kann jetzt auch Enemy-Ziele gegen deren Security-State pruefen: directional Gegner sind seitlich/rear flankierbar, 360 blockt den Flankbonus.
+- Stand: `TerrainMap3DView` rendert enemy-seitige Security knapp als orangefarbenen Richtungsmarker und exportiert pruefbare `enemy_security_entries`; `MissionTacticalSandboxController` spiegelt den Combat-Snapshot in den Primary-View-Payload.
+- Offene Punkte: Manueller 2.5D-Sichtcheck fuer Enemy-Facing/Sektorlesbarkeit bleibt offen; die Headless-Pruefung deckt Snapshot und kompakte Map-Diagnose ab.
+- Risiken: Enemy-Security darf nicht in UI-State auswandern. Folge-Tasks sollten auf dem Snapshot lesen, nicht eigene Gegner-Wahrheit in HUD/Renderer aufbauen.
+- Lokale Pruefung: `task_202_enemy_security_direction_and_los_patch.gd` (24/0), `task_111_verifier.gd` (16/0), `task_113_verifier.gd` (26/0), `task_184_gameplay_hill_semantics_verifier.gd` (30/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_203 fuer Enemy-Cover-Advance und Team-Tactics auf Security/Range umsetzen.
+
+### TASK_203 - Enemy Cover Advance and Team Tactics Patch
+- Status: implementiert
+- Stand: `MissionCombatLoopDriver` baut jetzt pro explizit konfigurierter Enemy-Gruppe einen Team-Tactics-Snapshot mit Advance-Style (`hold`, `probe`, `push`, `bounding`), Moving-/Covering-Gruppen, kleinen Rollenlabels, Zielpositionen und kompaktem `tactic_label`.
+- Stand: Cover-orientierte Profile bewerten walkable Cover-Tiles nach Coverwert, LOS zum Fokus, TASK_201-Waffenrange, Hoehe und Bewegungskosten. Zielslots werden verteilt und halten den TASK_187-Mindestabstand, statt mehrere Gegner auf denselben Punkt zu ziehen.
+- Stand: Explizite Enemy-Profile steuern die Movement-Commands: `guard_hold` bleibt ohne Objective-Rush im Sektor, `aggressive_push` bewegt mehrere Units ueber mehrere Tile-Distanzen, `defensive_cover` nutzt bounding-/coverartige Slots. `TerrainMap3DView` und `MissionTacticalSandboxController` spiegeln kurze Enemy-Tactics-Labels in den Primary-View-Snapshot.
+- Offene Punkte: Manueller Mission-Map-Sichtcheck fuer Enemy-Push/Hold bleibt offen; Headless prueft Snapshot und Map-Diagnose.
+- Risiken: Die Tactics-Entscheidung bleibt autoritativ im Combat-Driver. Renderer und UI duerfen nur Snapshot-Felder anzeigen und keine Enemy-KI nachrechnen.
+- Lokale Pruefung: `task_203_enemy_cover_advance_and_team_tactics_patch.gd` (16/0), `task_089_verifier.gd` (7/0), `task_187_npc_minimum_spacing_and_multiplayer_authority.gd` (16/0), `task_188_fireteam_advance_styles_map_readability.gd` (37/0), `task_200_enemy_team_tactics_contract_and_editor_config.gd` (116/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_204 fuer Multiplayer-Authority-Snapshots der Enemy-Taktiken umsetzen.
+
+### TASK_204 - Enemy Tactics Multiplayer Authority Snapshot Patch
+- Status: implementiert
+- Stand: `MissionCombatLoopDriver` veroeffentlicht Enemy-Security, Enemy-Team-Tactics und Fire-Events ueber den bestehenden `set_multiplayer_snapshot_context()`-Authority-Pfad. Fire-Events bekommen stabile IDs mit Tick/Sequenz und enthalten Weapon-/Range-/Positionsdaten fuer spaetere VFX.
+- Stand: `MultiplayerSnapshotContract` normalisiert `enemy_security`, `enemy_team_tactics`, `fire_events` sowie enemy-seitige Unit-Diagnosefelder (`enemy_facing_angle`, Security-/Tactics-Gruppe, Profil, Rolle, Label). Clientseitige Rechenfelder werden verworfen.
+- Stand: `SimulationRoot` nimmt die neuen Context-Felder in den Tick-State auf und kopiert Enemy-Metadaten nur als Anzeige-/Diagnosedaten in Unit-Snapshots. Snapshot-Apply speichert die Daten, erzeugt aber keine Commands oder Effects.
+- Offene Punkte: Echte Netzwerkverbindung/Prediction bleiben ausser Scope; TASK_205 kann Muzzle-VFX nun an `fire_events` haengen.
+- Risiken: Folgearbeiten duerfen Fire-Events nur anzeigen. Schaden, Trefferwurf und Enemy-Bewegung bleiben authority-seitig.
+- Lokale Pruefung: `task_204_enemy_tactics_multiplayer_authority_snapshot_patch.gd` (20/0), `task_168_multiplayer_snapshot_contract_verifier.gd` (20/0), `task_187_npc_minimum_spacing_and_multiplayer_authority.gd` (16/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_205 fuer Weapon-Fire-VFX und Muzzle-Flash-Partikel umsetzen.
+
+### TASK_205 - Weapon Fire VFX Muzzle Flash Particles
+- Status: implementiert
+- Stand: Fuenf Muzzle-Flash-PNGs aus dem Kenney Particle Pack liegen projektlokal unter `Assets/curated/kenney/particles/muzzle/` inklusive CC0-Lizenz und Godot-Imports.
+- Stand: `data/weapon_fire_vfx_catalog.json` und `docs/assets/weapon_fire_vfx_inventory.md` dokumentieren stabile VFX-IDs, Quellen, Weapon-Zuordnung und Barrel-Offsets.
+- Stand: `TerrainMap3DView` rendert kurze Muzzle-Flash-Tokens plus Trace-Linie aus `fire_event_dicts`; Friendly- und Enemy-Events laufen ueber denselben Snapshot-/Eventpfad und erzeugen keine Commands, Damage-Entscheidungen oder Effects.
+- Stand: `MissionTacticalSandboxController` leitet autoritative Fire-Events an die primaere 2.5D-Ansicht weiter.
+- Offene Punkte: Manueller 2.5D-Sichtcheck fuer SMG/Rifle/Enemy-Schuss bleibt offen.
+- Risiken: Folgearbeiten muessen die VFX weiter als reine Anzeige behandeln; Combat-Wahrheit bleibt im Combat-System.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_205_weapon_fire_vfx_muzzle_flash_particles.gd` (33/0), `task_204_enemy_tactics_multiplayer_authority_snapshot_patch.gd` (20/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_206 fuer Enemy-Faction-Archetypen und orange Raumanzug-Lesbarkeit umsetzen.
+
+### TASK_206 - Enemy Visual Faction Archetypes Orange Suit
+- Status: implementiert
+- Stand: `astroFemaleB.png` und `astroMaleB.png` sind aus dem Kenney Animated Characters Bundle projektlokal importiert und bilden den produktiven Enemy-Archetyp `enemy_space_suit_orange`.
+- Stand: `data/npc_unit_visual_mapping.json` definiert `friendly_space_suit_white`, `enemy_space_suit_orange` sowie vorbereitete IDs `enemy_robot`, `enemy_alien`, `enemy_zombie` und `enemy_soldier` mit Fallback auf Orange. Team Bravo und `enemy_delta`/`enemy_echo` nutzen orange B-Skins; Team Alpha/default bleibt hell.
+- Stand: `TerrainMap3DView` loest `visual_archetype_id` und `enemy_visual_archetype_id` rein visuell auf, setzt pruefbare Proxy-Metadaten und faellt fuer geplante Archetypen auf den orange Enemy-Anzug zurueck.
+- Stand: Enemy-Team-Tactics-Profile referenzieren die stabile Archetyp-ID `enemy_space_suit_orange`; Multiplayer-Unit-Snapshots transportieren `enemy_visual_archetype_id` als Anzeige-/Diagnosedatum.
+- Offene Punkte: Manueller 2.5D-Sichtcheck Friendly vs. Enemy bleibt offen.
+- Risiken: Spaetere Robot/Alien/Zombie/Soldier-Imports duerfen die Fallback-ID nicht als produktiven Import missverstehen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_206_enemy_visual_faction_archetypes_orange_suit.gd` (48/0), `task_175_npc_loadout_attachment_verifier.gd` (38/0), `task_172_npc_animation_scale_helmet_enemy_verifier.gd` (47/0), `task_171_npc_model_replacement_verifier.gd` (26/0), `task_204_enemy_tactics_multiplayer_authority_snapshot_patch.gd` (20/0), `task_200_enemy_team_tactics_contract_and_editor_config.gd` (116/0; bekannte Godot-Leak-Warnung beim Editor-Exit) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_207 fuer Rank-/Skill-Badges pro NPC umsetzen.
+
+### TASK_207 - NPC Rank Skill Badge Derivation
+- Status: implementiert
+- Stand: `scripts/meta/npc_rank_badge_resolver.gd` leitet maximal drei Primaerbadges deterministisch aus Rolle, Loadout, Skills, Plattformwerten, Team und Fireteam-Lead-Status ab. Unterstuetzt sind Medic, Shooter, Pilot, Engineer, Leader, Heavy und Enemy.
+- Stand: `MetaUnitProfileBuilder` erzeugt Badge-Eintraege aus vorhandenen Profil-/Unitdaten; `MetaUnitProfile` transportiert diese Anzeige-Daten ohne Gameplay-Wahrheit zu speichern.
+- Stand: `NPCCompactCard` zeigt Badges in FOB und #17 Selected Fireteam, `NPCMetaCard` in Homebase/Roster und `CharacterSheetView` im Character Sheet. Fehlende Badge-Assets erzeugen einen diagnostischen Fallback-Knoten statt UI-Bruch.
+- Offene Punkte: Manueller Sichtcheck Homebase/FOB/#17 fuer Badge-Lesbarkeit bleibt offen.
+- Risiken: Spaetere manuelle Badge-Felder duerfen nicht zur autoritativen Wahrheit werden; Resolver bleibt die Quelle fuer Anzeige-Badges.
+- Lokale Pruefung: `task_207_npc_rank_skill_badge_derivation.gd` (31/0), `task_196_rank_particle_asset_subset_import_verifier.gd` (225/0), `task_176_fob_loadout_weapon_preview_selector_verifier.gd` (30/0), `task_164_ui_theme_component_verifier.gd` (15/0), `task_178_fob_drop_light_fixed_fullhd_layout_verifier.gd` (22/0), `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd` (25/0), `task_180_mission_drop_light_fixed_hud_layout_verifier.gd` (54/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_208 als integrierter Enemy-Team-Tactics Playability-Smoke.
+
+### TASK_208 - Enemy Team Tactics Playability Smoke
+- Status: implementiert
+- Stand: `maps/enemy_tactics_smoke_32x32.json` stellt eine kompakte 32x32-Fixture mit Sand, Hoehe/Slope, Cliff, walkable Cover, Alpha-Spawn, Enemy-Hold, Enemy-Push und Objective bereit.
+- Stand: `scripts/tests/task_208_enemy_team_tactics_playability_smoke.gd` prueft Editor-Roundtrip, MissionTestSetup-Konfigurationslesung, Hold/Cover/Push-Taktiken, Enemy-Security/Facing, Reichweitenbegrenzung, Mindestabstand, Fire-Events, Muzzle-Flash-VFX, orange Enemy-/weisse Friendly-Archetypen, Rank-/Skill-Badges und Multiplayer-Snapshot-Side-Effects in einem integrierten Pass.
+- Stand: `docs/dev/enemy_team_tactics_manual_smoke_checklist.md` dokumentiert den verbleibenden manuellen 2.5D-Sichtcheck.
+- Offene Punkte: Manueller Mission-Map-Sichtcheck anhand der Checkliste bleibt offen; die optionale 64x64-Range-Fixture wurde nicht angelegt, weil der 32x32-Smoke die geforderten Range-Grenzen bereits automatisiert abdeckt.
+- Risiken: Der Smoke ersetzt die Einzelverifier nicht; bei Fehlern muss weiter in TASK_200 bis TASK_207 lokalisiert werden.
+- Lokale Pruefung: `task_208_enemy_team_tactics_playability_smoke.gd` (57/0), `task_160_tactical_playability_verifier.gd` (20/0), `task_168_multiplayer_snapshot_contract_verifier.gd` (20/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_209 fuer den Comic-Bubble-Asset-Katalog starten.
+
+### TASK_209 - Comic Bubble Asset Catalog and Visual Contract
+- Status: implementiert
+- Stand: `data/comic_bubble_asset_catalog.json` katalogisiert `comic-1.png` bis `comic-10.png` mit stabilen Runtime-IDs, Purpose, Anchor, Tail-Offset, Text-Inset, Maximalgroesse und z-Order. `preview.png` ist als Inventar-/Doku-Preview dokumentiert und kein Runtime-Bubble.
+- Stand: `scripts/ui/comic_bubble_visual_contract.gd` validiert den Katalog, liefert Runtime-IDs und baut reine Display-Payloads mit Textkuerzung auf maximal zwei Zeilen.
+- Stand: `docs/assets/comic_bubble_inventory.md` dokumentiert Quelle, Purpose-IDs, Runtime-IDs, Textregeln und Folgepfad.
+- Offene Punkte: Noch keine Fireteamleader-Dialoglogik, NPC-Gedankenlogik oder Settings/Toggles; das ist Folgeumfang ab TASK_210.
+- Risiken: Bubbles koennen die Mission Map schnell unruhig machen; die Groessen-, Text- und Aktivitaetsgrenzen muessen in den Folge-Tasks respektiert werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_209_comic_bubble_asset_catalog_and_visual_contract.gd` (132/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_210 fuer Fireteamleader-Command-Feedback-Bubbles umsetzen.
+
+### TASK_210 - Fireteamleader Command Feedback Bubbles
+- Status: implementiert
+- Stand: `FireteamleaderFeedbackBubbleResolver` baut kurze visual-only Comic-Bubble-Payloads fuer angenommene, laufende, blockierte, Kontakt-, Deckungs- und Objective-Rueckmeldungen. Die Payloads nutzen stabile TASK_209-Bubble-IDs und speichern nur Anzeige-Kontext wie `feedback_action`, `feedback_state`, Skill-Tier und Anchor.
+- Stand: `MissionTacticalSandboxController` haengt die Bubbles an bestehende Command-Pfade fuer `move`, `defend`, `flank`, `take` und `GO`, ohne SimulationRoot, Command-Ergebnis oder Flow-Driver-Wahrheit zu veraendern. Ein zentraler Toggle leert die Visual-Payloads, laesst Befehle aber weiter durchlaufen.
+- Stand: `TerrainMap3DView` rendert die Feedback-Bubbles im 2.5D-Order-Layer und spiegelt `feedback_bubble_visual_count` plus Entries im Render-Snapshot.
+- Offene Punkte: Manueller Mission-Map-Sichtcheck fuer finale Position, Lesbarkeit und Stoerfaktor bleibt offen. Cooldowns, Modi und Hold-Settings sind bewusst TASK_211.
+- Risiken: Ohne TASK_211 koennen schnelle Befehlsfolgen noch haeufige Bubbles erzeugen; die aktuelle Umsetzung begrenzt nur aktive Payloads pro FTL.
+- Lokale Pruefung: `task_210_fireteamleader_command_feedback_bubbles.gd` (27/0), `task_191_command_chain_selection_area_feedback_pass.gd` (24/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_211 fuer Toggles, Cooldowns und Anzeige-Modi umsetzen.
+
+### TASK_211 - Comic Bubble Toggles Cooldowns and Settings
+- Status: implementiert
+- Stand: `ComicBubbleSettings` definiert sichere Defaults, Modi `off`, `minimal`, `normal`, optional `debug`, Kategorien, Maximalzahlen, Cooldowns, Persistenz per `ConfigFile` und den InputMap-Fallback `show_npc_thoughts`.
+- Stand: `ComicBubbleRuntimeGate` filtert visual-only Bubble-Payloads nach Modus, Kategorie, Cooldown, Prioritaet und Maximalzahl. NPC-Gedanken werden nur durch Hold-to-Peek freigegeben.
+- Stand: `MissionTacticalSandboxController` nutzt das Gate fuer Fireteamleader-Feedback; `off` erzeugt keine Payloads und keine 2.5D-Visual-Nodes, ohne den Command-Flow zu blockieren. Das Main-Menu-Settingspanel kann den Bubble-Modus `Aus`/`Minimal`/`Normal` persistent setzen.
+- Offene Punkte: Manueller Settings-/Mission-Sichtcheck fuer Off/Minimal/Normal und Hold-Taste bleibt offen.
+- Risiken: TASK_212 muss Gedankeninhalte weiter visual-only halten; das Gate erlaubt die Anzeige, erzeugt aber keine Textlogik.
+- Lokale Pruefung: `task_211_comic_bubble_toggles_cooldowns_and_settings.gd` (25/0), `task_210_fireteamleader_command_feedback_bubbles.gd` (27/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_212 fuer NPC-Gedanken-Hold-to-Peek umsetzen.
+
+### TASK_212 - NPC Thought Bubble Hold to Peek Overlay
+- Status: implementiert
+- Stand: `NPCThoughtBubbleResolver` erzeugt kurze visual-only Gedanken aus vorhandenen NPC-Daten: Health/Vital-State, Rolle, Fireteamlead-Flag und aktuellem Befehl/Status. Die Payloads nutzen `bubble_npc_*`-IDs und markieren `spoiler_safe`.
+- Stand: `MissionTacticalSandboxController` zeigt Gedanken nur ueber `ComicBubbleRuntimeGate`, also nur bei aktivem `show_npc_thoughts`-Hold, nicht im Modus `off`, fuer das ausgewaehlte Fireteam oder sichtbare Friendlys und mit hartem Maximalwert.
+- Stand: `TerrainMap3DView` rendert dieselben visual-only Payloads im bestehenden Bubble-Layer und spiegelt Source, Kategorie, Purpose und Thought-Kind im Render-Snapshot.
+- Offene Punkte: Manueller Mission-Map-Sichtcheck mit gehaltener Taste bleibt offen.
+- Risiken: TASK_213 muss die Textauswahl zentralisieren, damit FTL- und NPC-Texte stilistisch nicht auseinanderlaufen.
+- Lokale Pruefung: `task_212_npc_thought_bubble_hold_to_peek_overlay.gd` (19/0), `task_211_comic_bubble_toggles_cooldowns_and_settings.gd` (25/0), `task_210_fireteamleader_command_feedback_bubbles.gd` (27/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_213 fuer den zentralen skill-/rollenbasierten Textresolver umsetzen.
+
+### TASK_213 - Skill Based Bubble Text Resolver and Content Pass
+- Status: implementiert
+- Stand: `ComicBubbleTextResolver` und `data/comic_bubble_text_catalog.json` liefern jetzt zentral die kurzen deutschen Texte fuer FTL-Rueckmeldungen und NPC-Gedanken. Die Auswahl ist deterministisch und haengt an stabilen Keys fuer Command-Status, Health/Recovery, Order, Leader, Medic, Shooter, Pilot, Engineer und Heavy/Support.
+- Stand: Leadership/Communication, rollenrelevante Skills und Situation beeinflussen nur Text-Tier und Informationsgrad. Fehlende Skilldaten fallen auf `neutral` zurueck; niedrige Skills aendern kein Command-Ergebnis und erzeugen keine Gameplay-Payloads.
+- Stand: FTL- und NPC-Bubble-Payloads tragen `text_source`, `text_key`, `skill_tier`, Rollen-/Situationsdiagnose und bleiben `visual_only`. `TerrainMap3DView` spiegelt diese Diagnosefelder im Bubble-Snapshot fuer Tests.
+- Offene Punkte: Manueller Mission-Map-Sichtcheck fuer Ton, Lesbarkeit und Stoerfaktor bleibt offen.
+- Risiken: Weitere Textpolitur muss die TASK_209-Laengengrenzen und den visual-only-Vertrag beibehalten; keine versteckten Gegnerinformationen in NPC-Gedanken.
+- Lokale Pruefung: `task_213_skill_based_bubble_text_resolver_and_content_pass.gd` (31/0), `task_210_fireteamleader_command_feedback_bubbles.gd` (27/0), `task_212_npc_thought_bubble_hold_to_peek_overlay.gd` (19/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_214 als abschliessenden Bubble-Feedback-Playability-Smoke umsetzen.
+
+### TASK_214 - Comic Bubble Feedback Playability Smoke
+- Status: implementiert
+- Stand: `scripts/tests/task_214_comic_bubble_feedback_playability_smoke.gd` prueft die Bubble-Reihe integriert ueber `MissionTacticalSandboxController`, `ComicBubbleRuntimeGate`, `TerrainMap3DView` und `SimulationRoot`: Normal/Minimal/Off, akzeptierte und blockierte FTL-Befehle, Cooldown, Maximalzahl, NPC-Gedanken per Hold, skillbasierte Texte und 2.5D-Snapshot-Diagnose.
+- Stand: Der Smoke bestaetigt, dass Off/Minimal/Normal nur Sichtbarkeit steuern, Befehle weiter denselben Return-Wert behalten, NPC-Gedanken nur waehrend Hold erscheinen und Viewer-/Snapshot-Pfade keine `SimulationRoot`-Commands oder Effects erzeugen.
+- Stand: `docs/dev/comic_bubble_manual_smoke_checklist.md` dokumentiert den manuellen Sichtcheck fuer Lesbarkeit, Timing, Nervfaktor, Kamera/Zoom und Abschaltbarkeit.
+- Offene Punkte: Manueller Mission-Map-Sichtcheck anhand der Checkliste bleibt offen.
+- Risiken: Headless prueft Timing-/Maximalgrenzen und Snapshot-Vertrag, aber nicht den subjektiven Stoerfaktor im echten Viewport. Falls Bubbles im Sichtcheck zu dominant wirken, sollte ein kleiner Opacity-/Duration-Polish folgen.
+- Lokale Pruefung: `task_214_comic_bubble_feedback_playability_smoke.gd` (34/0), `task_160_tactical_playability_verifier.gd` (20/0), `task_168_multiplayer_snapshot_contract_verifier.gd` (20/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: Manuellen Bubble-Sichtcheck ausfuehren oder TASK_215 Performance Deep Pass starten.
+
+### TASK_215 - Performance Deep Pass Baseline and Research
+- Status: implementiert
+- Stand: `scripts/tests/performance_deep_pass_harness.gd` misst Homebase, FOB, Live Mission 2.5D, Render Spike, Navigation und Multiplayer-Snapshot-Roundtrip. Der Harness nutzt `Performance.get_monitor()` und `Time.get_ticks_usec()` und aggregiert `Median`, `P95`, `P99`, `min`, `max` und `count`.
+- Stand: `docs/performance/performance_baseline_report.md` dokumentiert Godot-Version, lokale Testfenster, Szenenmatrix, TASK_170-Ankerwerte und die manuelle Profiler-/Visual-Profiler-Checkliste. Der letzte TASK_170-Lauf war 62/0 gruen; lokal beobachtet wurden Live/Render-Spike je 36 ms und Open-HPA ca. 2642.25 usec.
+- Stand: `docs/dev/performance_deep_pass_research_notes.md` enthaelt den Godot-Doku-/Forum-Abgleich und den TASK_215-Messrahmen; Forumshinweise bleiben explizit Hypothesen.
+- Offene Punkte: Manueller Godot-Profiler-/Visual-Profiler-Lauf bei fester Viewportgroesse bleibt offen.
+- Risiken: Performancewerte sind maschinenabhaengig und Headless ersetzt keinen echten Viewport-/GPU-Sichtcheck. Folge-Tasks duerfen erst nach messbarem Befund optimieren.
+- Lokale Pruefung: `task_215_performance_deep_pass_baseline_and_research.gd` (32/0), `task_170_performance_warning_gate_verifier.gd` (62/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_216 fuer den 2.5D-Rendering-Node- und Draw-Budget-Pass umsetzen.
+
+### TASK_216 - 2.5D Rendering Node and Draw Budget Pass
+- Status: implementiert
+- Stand: `TerrainMap3DView.get_render_snapshot()` enthaelt jetzt vertiefte Renderbudgets: Kategoriezaehler fuer Map, Marker, Patrol, Selection, Unit, Order, Contact, Drop und Status sowie Summen fuer Nodes, MeshInstances, MultiMeshInstances, Sprite3D, Label3D, Material- und Transparenzzaehler.
+- Stand: Zusaetzliche Snapshots erfassen Transparenz-/Overlay-Budget, Draw-Monitorwerte und Pipeline-Compilation-Monitorwerte ueber dynamische `Performance`-Monitor-Keys. Bestehende TASK_170-Fallback-Zaehler bleiben erhalten.
+- Stand: `docs/performance/2_5d_rendering_profile_report.md` priorisiert Kostenkategorien, bewertet MultiMesh-/Instancing-Kandidaten, dokumentiert Transparenz-/VFX-/Label-Budgets, Pipeline-Stutter-Kandidaten und den manuellen Visual-Profiler-Ablauf.
+- Offene Punkte: Manueller Visual-Profiler-Lauf in Godot bei 1920x1080 bleibt offen.
+- Risiken: Die neuen Zaehler sind Diagnose. MultiMesh-/Warmup-/Materialoptimierungen bleiben Folgeaufgaben und duerfen erst nach messbarem Befund erfolgen.
+- Lokale Pruefung: `task_216_2_5d_rendering_node_draw_budget_pass.gd` (23/0), `task_170_performance_warning_gate_verifier.gd` (62/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_217 fuer Navigation, Pathfinding und LOS Performance umsetzen.
+
+### TASK_217 - Navigation Pathfinding LOS Performance Pass
+- Status: implementiert
+- Stand: `scripts/tests/navigation_benchmark_harness.gd` deckt jetzt offene 32x32-/64x64-Karten, 32x32-Huegel/Deckung, 64x64-Engpass/Deckung, eine isolierte LOS-/Cover-Probe und Query-Flood-Staggering ab.
+- Stand: Path-Batches liefern `query_time_usec` und `path_length_stats` mit `Median`, `P95`, `P99`, `min`, `max`, `avg` und `count`. `TerrainPathfinder` zaehlt optional `exposure_score_calls`, `los_check_count` und `cover_check_count`.
+- Stand: Cache-Diagnose ist bewusst als aktueller No-Cache-Befund sichtbar (`path_cache_supported: false`, Hits 0, Misses = Queries), damit ein spaeterer Cache eine explizite Invalidation-Diagnose braucht. Die Avoidance-Probe nutzt einen direkten, reproduzierbaren Crossing-Step und die bestehenden Deadlock-/Neighbor-Diagnosen.
+- Stand: `docs/performance/navigation_pathfinding_los_profile_report.md` dokumentiert Matrix, breite Startbudgets, LOS/Cover-Zaehler, Cache-Befund, Avoidance und Staggering.
+- Offene Punkte: Performancewerte bleiben lokale Startbaselines; ein echter Path-Cache waere ein eigener Folge-Task.
+- Risiken: LOS und Cover duerfen nicht durch schnelle, aber falsche Approximationen kaputtoptimiert werden. Der neue Diagnosepfad darf keine Gameplay-Wahrheit in Tests oder UI verschieben.
+- Lokale Pruefung: `task_217_navigation_pathfinding_los_performance_pass.gd` (51/0), `task_131_verifier.gd` (21/0), `task_184_gameplay_hill_semantics_verifier.gd` (30/0), `task_187_npc_minimum_spacing_and_multiplayer_authority.gd` (16/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_218 fuer Simulation, Combat und AI Tick-Budgets umsetzen.
+
+### TASK_218 - Simulation Combat AI Tick Budget Pass
+- Status: implementiert
+- Stand: `SimulationRoot.get_runtime_tick_budget_debug_snapshot()` liefert bei aktivem Debug Tick-Gesamtzeit, Scopezeiten fuer Command Queue, Effect Queue, Local Avoidance, Minimum Spacing, Objective Capture, Snapshot Broadcast und Tick-Signal sowie Queue-, Unit-, Navigation- und Spacing-Zaehler.
+- Stand: `MissionCombatLoopDriver.get_combat_tick_budget_debug_snapshot()` liefert Scopezeiten fuer Contact Tracking, Enemy Security, Enemy Team Tactics, Medic Support, Enemy Advance, Friendly Standard Behavior, Overwatch/Security, Combat Fire Decision, Combat Resolution und Multiplayer-Snapshot-Kontext.
+- Stand: `scripts/tests/simulation_combat_ai_tick_budget_harness.gd` misst kleine Mission, zwei Fireteams gegen Enemy-Team und vier Fireteams mit Medic/Downed/Tactics-Druck. Alle Szenarien liefern Median/P95/P99 fuer Simulation- und Combat-Ticks sowie Scope-Statistiken.
+- Stand: `docs/performance/simulation_combat_ai_tick_profile_report.md` dokumentiert Scopes, Scale-Matrix, Hotpath-Audit, Authority-Grenze und breite Startbudgets.
+- Offene Punkte: Zeitbudgets bleiben bewusst breit und sollten nach echten lokalen Profiling-Laeufen geschaerft werden.
+- Risiken: Die Debug-Snapshots sind Diagnose und duerfen keine neue Gameplay-Wahrheit werden. Combat-/AI-Optimierungen muessen weiter authority-seitig bleiben.
+- Lokale Pruefung: `task_218_simulation_combat_ai_tick_budget_pass.gd` (81/0), `task_160_tactical_playability_verifier.gd` (20/0), `task_162_combat_authority_contract_verifier.gd` (23/0), `task_187_npc_minimum_spacing_and_multiplayer_authority.gd` (16/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_219 fuer UI, HUD, Meta-Screens und Comic-Bubble-Performance umsetzen.
+
+### TASK_219 - UI HUD Meta Comic Bubble Performance Pass
+- Status: implementiert
+- Stand: `scripts/tests/ui_hud_comic_bubble_performance_harness.gd` zaehlt Nodes, Controls, sichtbare Controls, Labels, RichTextLabels, TextureRects, Buttons, Panels, ScrollContainer und Tiefe fuer Homebase, FOB, Mission-HUD und Main Menu bei fester Drop-Light-Zielgroesse.
+- Stand: `TacticalUITheme.build_flat_stylebox()` nutzt einen kleinen Parameter-Cache fuer wiederverwendete `StyleBoxFlat`-Ressourcen. Der Verifier prueft gleiche Parameter als gleiche Instanz und unterschiedliche Varianten als getrennte StyleBoxes.
+- Stand: `ComicBubbleRuntimeGate.build_filter_performance_snapshot()` liefert eine read-only Probe fuer Input, Emits, Rejections, Cooldown-Key-Restore und Filterzeit. Off/Minimal/Normal sowie Thought-Hold werden gegen `TerrainMap3DView.get_render_snapshot()` geprueft.
+- Stand: `docs/performance/ui_hud_comic_bubble_profile_report.md` dokumentiert Screen-Matrix, Theme-Reuse, Bubble-Budgets, Fixed-Window-Stabilitaet und den offenen manuellen Profiler-Lauf.
+- Offene Punkte: Manueller Profiler-Lauf auf Homebase/FOB/Mission-HUD bleibt offen.
+- Risiken: StyleBox-Reuse setzt voraus, dass gecachte StyleBoxes nicht nachtraeglich pro Control mutiert werden. Staerkeres Bubble-Pooling bleibt ein Folgeentscheid nach echten Messwerten.
+- Lokale Pruefung: `task_219_ui_hud_meta_comic_bubble_performance_pass.gd` (48/0), `task_181_drop_light_fixed_window_audit_verifier.gd` (43/0), `task_214_comic_bubble_feedback_playability_smoke.gd` (34/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_220 fuer Asset-Import, VRAM und Shader-/Pipeline-Stutter umsetzen.
+
+### TASK_220 - Asset Import VRAM Shader Pipeline Stutter Pass
+- Status: implementiert
+- Stand: `data/curated_asset_catalog.json`, `data/weapon_fire_vfx_catalog.json` und `data/comic_bubble_asset_catalog.json` enthalten jetzt TASK_220-`performance_budget`-Metadaten fuer `res://`-Runtime-Pfade, grobe Groessen-/VRAM-Grenzen und verdeckte Warmup-Policy.
+- Stand: `scripts/tests/asset_vram_shader_pipeline_harness.gd` misst 98 Runtime-Assetpfade aus den Katalogen, davon 70 Texturen und 28 GLB-/PackedScene-Ressourcen. Texturen erhalten Dateigroesse, Dimensionen und `width * height * 4` als konservative VRAM-Schaetzung; GLBs erhalten Datei-, Node-, Mesh-, Surface- und Materialzaehler.
+- Stand: Die Pipeline-Probe instanziert `scenes/tests/mission_map_3d_render_spike.tscn` und liest Draw-Budget, Transparenzbudget und Pipeline-Compilation-Zaehler aus `TerrainMap3DView.get_render_snapshot()`. Warmup laedt eine begrenzte Auswahl verdeckt und bleibt side-effect-frei.
+- Stand: `docs/performance/asset_vram_shader_pipeline_report.md` dokumentiert Messumfang, Ampel, Warmup-Kandidaten, `res://`-Grenzen und offene Video-RAM-/Visual-Profiler-Sichtpruefung.
+- Offene Punkte: Manueller Godot Video-RAM-/Visual-Profiler-Check bleibt offen, weil GPU-/Driverwerte lokal unterschiedlich sind.
+- Risiken: Pipeline-Stutter ist hardwareabhaengig; Importkompression darf den Pixel-/Comic-Stil nicht sichtbar beschaedigen. Warmup darf keine Combat-, Bubble-, Objective- oder andere Gameplay-Events erzeugen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_220_asset_import_vram_shader_pipeline_stutter_pass.gd` (399/0), `task_198_asset_import_gate_visual_smoke.gd` (170/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_221 fuer Multiplayer-Snapshot-Serialisierung und Payload-Kosten umsetzen.
+
+### TASK_221 - Multiplayer Snapshot Serialization Performance Pass
+- Status: implementiert
+- Stand: `MultiplayerSnapshotContract` normalisiert Units, Vital-Updates, Contacts, Enemy-Security, Enemy-Team-Tactics, Fire-Events und neue `feedback_bubbles` stabil. Fire-/Muzzle-/Bubble-/Textreferenzen bleiben IDs (`weapon_id`, `muzzle_id`, `bubble_id`, `text_key`) statt Texture-, Pfad- oder Raw-Text-Payloads.
+- Stand: `build_serialization_metrics()` liefert JSON-Byte-Schaetzung, Dictionary-/Array-/Scalar-Zaehler, Feldzaehler, ID-only-Offender und kanonische JSON-Diagnose. `SimulationRoot` reicht `feedback_bubbles` aus dem Snapshot-Kontext als reine Anzeige-/Snapshotdaten weiter.
+- Stand: `scripts/tests/multiplayer_snapshot_performance_harness.gd` misst 8-, 32- und 96-Unit-Szenarien auf Build-/Apply-Zeit, JSON-Groesse, Dictionary-Anzahl, Event-/Bubble-/Enemy-Tactics-Zaehler, deterministische Sortierung und side-effect-freies Client-Apply.
+- Stand: `docs/performance/multiplayer_snapshot_performance_report.md` dokumentiert Build/Apply/JSON-Messung, ID-only-Payload, Frequenzplan, Apply-Grenze und den offenen Network-Profiler-Lauf.
+- Offene Punkte: Manueller Godot Network-Profiler-Lauf mit zwei Instanzen bleibt offen.
+- Risiken: JSON-Bytes sind nur eine Schaetzung fuer das spaetere Wire-Format. Delta-Kompression bleibt bewusst ein Folgeentscheid nach echten Profilingdaten.
+- Lokale Pruefung: `task_221_multiplayer_snapshot_serialization_performance_pass.gd` (63/0), `task_168_multiplayer_snapshot_contract_verifier.gd` (20/0), `task_169_multiplayer_two_client_playability_smoke.gd` (15/0), `task_204_enemy_tactics_multiplayer_authority_snapshot_patch.gd` (20/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_222 fuer Performance-Regression-Gate und manuelle Profiling-Checkliste umsetzen.
+
+### TASK_222 - Performance Regression Gate and Manual Profile Checklist
+- Status: implementiert
+- Stand: `data/performance_budget_contract.json` trennt lokale Baseline, breite Projektbudgets, Warning-Gate-Regeln und manuelle Checks. Die Budgets decken render, navigation, simulation, UI, assets und snapshot ab und starten bewusst tolerant.
+- Stand: `scripts/tests/task_222_performance_regression_gate_and_manual_profile_checklist.gd` laeuft als zusammenfassendes Headless-Gate ueber Render-Spike, Navigation, Simulation/Combat, UI/Bubbles, Asset/VRAM/Pipeline und Multiplayer-Snapshot. Fehlertexte nennen Bereich, Messwert und Budget.
+- Stand: `scripts/tests/run_task_222_performance_gate.ps1` fuehrt das Gate aus und blockiert echte RID-/ObjectDB-/Resource-Leak-Muster in der Godot-Ausgabe. TASK_170 bleibt als eigenes Warning-/Render-Gate erhalten und wird von TASK_222 referenziert.
+- Stand: `docs/performance/performance_regression_gate.md` dokumentiert Budgetvertrag, Headless-Gate, TASK_170-Integration und Pflege-Regeln. `docs/dev/performance_manual_profile_checklist.md` ist auf Godot 4.6 Profiler, Visual Profiler, Monitors, Video RAM, Network Profiler und Stutter-Tests ausgerichtet.
+- Offene Punkte: Manueller Profiling-Lauf nach Checkliste bleibt offen.
+- Risiken: Headless-Werte ersetzen keine GPU-/Netzwerk-Sichtmessung. Budgets muessen nach mehreren echten lokalen Laeufen geschaerft werden, nicht aus Bauchgefuehl.
+- Lokale Pruefung: `task_222_performance_regression_gate_and_manual_profile_checklist.gd` (82/0), `run_task_222_performance_gate.ps1`, `task_170_performance_warning_gate_verifier.gd` (62/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: Ab TASK_223 neue Gameplay-/UI-/Asset-Patches wieder gegen TASK_222 absichern.
+
+### TASK_223 - Fog of War Modes Contract and Settings
+- Status: implementiert
+- Stand: `scripts/core/fog_of_war_mode_contract.gd` definiert die stabilen Modi `off`, `known_terrain` und `unexplored_blackout`, Default `known_terrain`, Settings-Normalisierung und Team-State-Snapshots mit getrenntem `terrain_knowledge`, `current_visibility` und `last_known_contacts`.
+- Stand: `FogOfWarSystem` behaelt die alte boolesche Ziel-Sichtbarkeit pro Team/Target bei und ergaenzt Team-Modus, aktuelle Tile-/Event-Sicht, erkundete Tiles, letzte bekannte Kontakte sowie Peer-Team-Snapshots.
+- Stand: `scripts/ui/game_settings_contract.gd` bereitet `fog_of_war_mode` als Gameplay-Settings-Wert vor. `MainMenuScreen.get_settings_snapshot()` meldet den Gameplay-/FoW-Settings-Snapshot mit.
+- Stand: `docs/dev/fog_of_war_modes_contract.md` dokumentiert Mode-Verhalten, Settings, Multiplayer-Grenze und 32x32/64x64-Beispiele.
+- Offene Punkte: Keine Visualisierung in diesem Task; TASK_224/TASK_225 setzen Tile-Runtime und 2.5D-Overlay um.
+- Risiken: UI darf FoW-Zustand nur lesen. Terrain-Walkability, LOS, Cover und Combat-Wahrheit bleiben ausserhalb des FoW-View-Vertrags.
+- Lokale Pruefung: `task_223_fog_of_war_modes_contract_and_settings.gd` (39/0), `task_092_verifier.gd` (12/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_224 fuer Tile-Sicht, Hoehenlinien, Deckung und LOS umsetzen.
+
+### TASK_224 - Fog of War Tile Visibility Height Cover Runtime
+- Status: implementiert
+- Stand: `FogOfWarSystem.update_tile_visibility_for_team()` aktualisiert aktuelle und erkundete Tiles pro Team aus Observern, TerrainRegistry und `LineOfSightSystem`. Die Update-Diagnose meldet Tile-Anzahl, Observer, sichtbare Tiles, Checks, Dauer und die Policy `on_movement_command_tick_budget_or_relevant_state_change`.
+- Stand: `known_terrain` haelt Terraininformationen lesbar, ohne hidden Dynamic Targets zu zeigen. `unexplored_blackout` trennt `visible`, `explored` und `unknown`; unbekannte Tiles liefern keine Cover-/Height-Infos.
+- Stand: `get_known_tile_info()` liefert Cover, Height, Object Height, Surface, Edge Type und LOS-Blocker nur fuer bekannte Tiles. Wand-/Object-Blocker, Klippen-Infos und Hoehenblick werden ueber den bestehenden Terrain-/LOS-Vertrag gelesen.
+- Stand: `filter_dynamic_entries_for_team()` liefert FoW-sichere dynamische Snapshotdaten: aktuell sichtbare Eintraege plus separate letzte bekannte Kontakte, aber keine Hidden-IDs als aktuelle Client-View.
+- Stand: `TerrainRegistry` hat Lookup-Helfer fuer `tile_id` und sortierte Tile-Iteration.
+- Offene Punkte: Finale 2.5D-Overlay-Darstellung bleibt TASK_225.
+- Risiken: Tile-Sicht darf nur bei Bewegung, Command, Tick-Budget oder relevanten Statechanges aktualisiert werden; keine per-frame Raycast-Flut.
+- Lokale Pruefung: `task_224_fog_of_war_tile_visibility_height_cover_runtime.gd` (25/0), `task_184_gameplay_hill_semantics_verifier.gd` (30/0), `task_217_navigation_pathfinding_los_performance_pass.gd` (51/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_225 fuer 2.5D-FoW-Overlay und Contacts umsetzen.
+
+### TASK_225 - Fog of War 2.5D Visual Overlay and Contacts
+- Status: implementiert
+- Stand: `TerrainMap3DView` hat jetzt `set_fog_of_war_state()`/`set_fog_of_war_visual_state()` als reinen 2.5D-Visual-Eingang fuer die Modi `off`, `known_terrain` und `unexplored_blackout`. `off` erzeugt kein Overlay; `known_terrain` dimmt nicht sichtbare bekannte Tiles; `unexplored_blackout` trennt sichtbare, explored und unbekannte Tiles.
+- Stand: Die FoW-Overlays werden als batched `MultiMeshInstance3D`-Layer gebaut, statt pro Tile eigene Nodes zu erzeugen. Der Render-Snapshot meldet Modus, Team, visible/known-dim/explored/unknown/Overlay-Tile-Zaehler und Overlay-Rebuilds; ein gleicher State baut nicht erneut.
+- Stand: Dynamische 2.5D-Daten werden FoW-sicher gefiltert: Enemy-Security, Enemy-Tactics, Muzzle/VFX, Comic-Bubbles, Contacts und Enemy-Unit-Proxies erscheinen nur bei aktueller Tile-/Target-/Event-Sicht oder als eigener erlaubter letzter bekannter Contact.
+- Stand: `FogOfWarSystem.build_team_visual_state_snapshot()` liefert Visual-Counter fuer sichtbare, explored, known und unknown Tiles, ohne die UI zur Gameplay-Wahrheit zu machen.
+- Offene Punkte: Manueller 2.5D-Sichtcheck fuer die drei Modi bleibt offen, weil Headless nur Material, Counter und Node-Vertrag prueft.
+- Risiken: Die Blackout-Abdeckung ist bewusst ein V1-Visual-Layer; spaeterer Shader-Polish darf die FoW-Daten nicht in Gameplay- oder UI-State duplizieren.
+- Lokale Pruefung: `task_225_fog_of_war_2_5d_visual_overlay_and_contacts.gd` (33/0), `task_160_tactical_playability_verifier.gd` (20/0), `task_216_2_5d_rendering_node_draw_budget_pass.gd` (23/0), `task_223_fog_of_war_modes_contract_and_settings.gd` (39/0), `task_224_fog_of_war_tile_visibility_height_cover_runtime.gd` (25/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_226 fuer Settings-Shell und FoW-Auswahl im Hauptmenue umsetzen.
+
+### TASK_226 - Main Menu Settings Shell Display Audio Input Gameplay
+- Status: implementiert
+- Stand: `GameSettingsContract` speichert jetzt Display-, Audio- und Gameplay-Settings zentral: Resolution-Preset, Window Mode (`windowed`, `borderless`, `fullscreen`), VSync, Master/Music/SFX und `fog_of_war_mode`. Der alte FoW-Top-Level-Snapshot bleibt kompatibel.
+- Stand: `MainMenuScreen` baut im vorhandenen Settings-Panel eine V1-Shell mit sichtbaren Sektionen fuer Anzeige, Audio, Eingabe und Gameplay. Apply/Cancel/Reset arbeiten ueber Draft-Settings; Menue-Oeffnen speichert nichts und erzeugt keinen Gameplay-State.
+- Stand: Comic-Bubble-Settings bleiben im TASK_211-Vertrag, werden aber im Gameplay-Bereich angezeigt und zusammen mit Apply/Reset gespeichert. `scripts/ui/settings_screen.gd` kapselt kleine UI-/Snapshot-Helfer fuer Sektionen, Labels und OptionButton-Metadaten.
+- Offene Punkte: Manueller Hauptmenue-Settings-Sichtcheck bleibt offen, vor allem fuer Aufloesung/Vollbild/Borderless auf echter lokaler Anzeige.
+- Risiken: Display-Apply ist bewusst strukturell und Headless-sicher; echte Monitor-/Fullscreen-Eigenheiten muessen manuell geprueft werden.
+- Lokale Pruefung: `task_226_main_menu_settings_shell_display_audio_input_gameplay.gd` (31/0), `task_199_main_menu_shell_background_image_verifier.gd` (50/0), `task_223_fog_of_war_modes_contract_and_settings.gd` (39/0), `task_211_comic_bubble_toggles_cooldowns_and_settings.gd` (25/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_227 fuer Multiplayer-Host/Join-Lobby-Flow aus dem Hauptmenue umsetzen.
+
+### TASK_227 - Main Menu Multiplayer Host Join Lobby Flow
+- Status: implementiert
+- Stand: Das Hauptmenue routet `Multiplayer` jetzt auf `res://scenes/ui/multiplayer_lobby.tscn` und markiert den Pfad als produktiven Lobby-Flow statt als alten Testscreen-Adapter.
+- Stand: `MultiplayerLobbyScreen` stellt Host-Port, Join-Adresse/-Port, Ready, host-only Start, Disconnect, Zurueck, Peer-Liste, Assignments und eine FoW-Settings-Zusammenfassung dar. Die UI spiegelt ausschliesslich `MultiplayerSession.get_session_snapshot()`.
+- Stand: Host/Join/Ready/Start/Disconnect laufen ueber die bestehende `MultiplayerSession`. Start bleibt server-authoritativ ueber `request_start_mission()`; Client-Testzustand sieht keinen Start-Button und kann nicht starten.
+- Stand: `MultiplayerSession._has_active_peer()` behandelt den Godot-Offline-Peer als inaktiv, damit idle Lobby-Snapshots nicht faelschlich als verbundene Session gelten.
+- Offene Punkte: Manueller Zwei-Instanzen-Host/Join-Test bleibt offen.
+- Risiken: Echter ENet-LAN-Test bleibt lokaler und portabhaengiger als der Headless-State-Verifier; Map-Download/Consent folgt erst in TASK_228.
+- Lokale Pruefung: `task_227_main_menu_multiplayer_host_join_lobby_flow.gd` (27/0), `task_167_multiplayer_session_verifier.gd` (22/0), `task_169_multiplayer_two_client_playability_smoke.gd` (15/0), `task_199_main_menu_shell_background_image_verifier.gd` (50/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_228 fuer Multiplayer-Editor-Map-Manifest und Download-Consent vorbereiten.
+
+### TASK_228 - Multiplayer Editor Map Manifest Download Consent
+- Status: implementiert
+- Stand: `scripts/multiplayer/multiplayer_map_manifest.gd` erzeugt und validiert V1-Editor-Map-Manifeste mit sicherer Map-ID, SHA-256-Hash, Groesse, optionalen Scenario-Metadaten und striktem Pfad-/JSON-Schutz.
+- Stand: `MultiplayerSession` spiegelt Host-Map-Manifest und Map-Transfer-Zustand im Lobby-Snapshot. Clients erkennen bekannte, fehlende, abweichende oder ungueltige Maps und setzen Consent-/Startfaehigkeitsstatus, ohne Mapdaten in laufende Mission-Snapshots zu packen.
+- Stand: `MultiplayerLobbyScreen` zeigt bei unbekannter oder abweichender Host-Map einen Consent-Prompt, blockiert den Client-Missionsstart bis zur Annahme und laesst Ablehnung ohne kaputten Session-State im Lobby-State.
+- Stand: Angenommene Map-JSONs werden gegen Hash, Groesse, Grundstruktur und verbotene Pfadfelder validiert und nur unter `user://downloaded_maps/` mit versioniertem Dateinamen gespeichert.
+- Offene Punkte: Echter Host/Join-Test mit unbekannter Editor-Map und spaeterer Payload-Transport bleiben manuell bzw. Folgethema.
+- Risiken: Map-Download bleibt ein Sicherheitsrand; Asset-Pack-Synchronisation und Workshop-/Mod-Browser bleiben bewusst ausser Scope.
+- Lokale Pruefung: `task_228_multiplayer_editor_map_manifest_download_consent.gd` (27/0), `task_167_multiplayer_session_verifier.gd` (22/0), `task_168_multiplayer_snapshot_contract_verifier.gd` (20/0), `task_227_main_menu_multiplayer_host_join_lobby_flow.gd` (27/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_229 fuer Editor-Bedienbarkeit, Validierungsdiagnosen und Multiplayer-Manifest-Vorbereitung umsetzen.
+
+### TASK_229 - Map Editor Usability Authoring Pass
+- Status: implementiert
+- Stand: Der Map Editor zeigt jetzt ein kompaktes `Authoring Status`-Panel mit aktivem Werkzeug, Brushradius, selektiertem Tile, Validierungszaehlern und Multiplayer-Map-Manifeststatus.
+- Stand: `get_map_editor_usability_snapshot()` und `get_authoring_validation_snapshot()` liefern pruefbare Tool-, Tile-, Marker-, Patrol-, Scenario-, Hoehen-, Walkability-, FoW- und Manifestdiagnosen, ohne Gameplay-State zu erzeugen.
+- Stand: `build_multiplayer_map_manifest_preview()` bereitet Manifeste nur aus gespeicherten Mapdaten vor und diagnostiziert ungespeicherte oder fehlende Mapdateien. `create_live_test_scene_from_current_scenario()` bleibt aus dem Editor erreichbar.
+- Stand: `get_authoring_action_contract_snapshot()` dokumentiert den aktuellen Single-Tile-Patch-Scope fuer Undo/Redo-Folgearbeiten, ohne ein grosses Undo-System in diesen Task zu ziehen.
+- Offene Punkte: Manueller Editor-Sichtcheck nach `docs/manual_checks/map_editor_usability_authoring_checklist.md` bleibt offen.
+- Risiken: Die neuen Snapshots sind Diagnose- und Bedienbarkeitsoberflaeche; Map-, Scenario- und Gameplay-Wahrheit bleiben in TerrainMapData, MissionScenarioData und Runtime-Systemen.
+- Lokale Pruefung: `task_229_map_editor_usability_authoring_pass.gd` (31/0), `task_163_map_editor_module_split_verifier.gd` (17/0), `task_183_editor_hill_authoring_verifier.gd` (66/0), `task_158_verifier.gd` (42/0), `task_200_enemy_team_tactics_contract_and_editor_config.gd` (116/0), `task_228_multiplayer_editor_map_manifest_download_consent.gd` (27/0) und `git diff --check` laufen gruen. TASK_200 meldet nach Erfolg bekannte Headless-Ressourcenwarnungen beim Exit.
+- Naechster Schritt: TASK_230 fuer Flight Altitude Layer und Air Visibility Audit umsetzen.
+
+### TASK_230 - Flight Altitude Layer and Air Visibility Audit
+- Status: implementiert
+- Stand: `docs/dev/flight_altitude_layer_contract.md` trennt `mission_air` klar von Terrain-`height_level`: Air-Visuals setzen keine Walkability, Cover, LOS oder Objekt-Hoehe und veraendern Gameplay nur ueber autoritative SimulationRoot-Events.
+- Stand: `TerrainMap3DView` normalisiert Dropship-Payloads auf einen expliziten Air-Layer, setzt eine Mindest-Clearance ueber der lokalen Terrainoberflaeche und exportiert Air-Diagnosen im Render-Snapshot.
+- Stand: FoW blendet LZ-/Approach-Surface-Marker aus, wenn deren Tile nicht sichtbar ist. Friendly Dropship bleibt fuer das eigene Team sichtbar; Enemy-/Air-Contacts folgen weiter der bestehenden FoW-/Contact-Regel.
+- Stand: `MultiplayerSnapshotContract` normalisiert Dropship-Air-Felder read-only (`air_layer`, `flight_altitude_clearance`, `terrain_height_independent`, `reveals_unknown_terrain`) und Clients wenden sie an, ohne Commands zu enqueuen.
+- Offene Punkte: Manueller Mission-Map-Sichtcheck mit Huegeln, Waenden und Dropship bleibt offen.
+- Risiken: Air-Layer ist weiterhin Darstellung/Missionsstatus, keine neue Flugphysik und kein LZ-Regelwechsel.
+- Lokale Pruefung: `task_230_flight_altitude_layer_and_air_visibility_audit.gd` (27/0), `task_160_tactical_playability_verifier.gd` (20/0), `task_225_fog_of_war_2_5d_visual_overlay_and_contacts.gd` (33/0), `task_168_multiplayer_snapshot_contract_verifier.gd` (20/0), `task_185_hill_visuals_edge_lines_verifier.gd` (30/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_231 fuer App-Shell Game Setup Integration und Open Items Review umsetzen.
+
+### TASK_231 - App Shell Game Setup Integration and Open Items Review
+- Status: implementiert
+- Stand: `docs/reviews/app_shell_game_setup_open_items_review.md` fasst Hauptmenue, Singleplayer, Multiplayer-Lobby, Settings, Editor, Map-Consent, FoW und `mission_air` als zusammenhaengenden App-Einstieg zusammen.
+- Stand: `docs/manual_checks/app_shell_full_flow_checklist.md` beschreibt den manuellen Full-Flow-Sichtcheck fuer Hauptmenue, Einzelspieler, Multiplayer, Editor und FoW/Air.
+- Stand: `scripts/tests/task_231_app_shell_game_setup_integration_and_open_items_review.gd` prueft Routing, Settings-Persistenz, FoW-/Bubble-Uebergabe, Lobby-Consent, Host/Client-Startgrenzen, Editor-Manifest-/Live-Test-Vorbereitung und Air/FoW-Unknown-Boundary.
+- Offene Punkte: Manueller Full-Flow-Sichtcheck, echter Zwei-Instanzen-LAN-Test, echter Peer-Payload-Transport fuer Editor-Maps und vollstaendiges Editor-Undo/Redo bleiben bewusst als kleine Folgepunkte dokumentiert.
+- Risiken: TASK_231 ist ein Review-/Smoke-Slice; Folgearbeiten duerfen keine zweite Gameplay-Wahrheit in UI-, Editor- oder Visual-Skripten erzeugen.
+- Lokale Pruefung: `task_231_app_shell_game_setup_integration_and_open_items_review.gd`, `task_199_main_menu_shell_background_image_verifier.gd`, `task_227_main_menu_multiplayer_host_join_lobby_flow.gd`, `task_225_fog_of_war_2_5d_visual_overlay_and_contacts.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_232 fuer den Start-Roster-Generation-Contract umsetzen.
+
+### TASK_232 - Start Roster Generation Contract
+- Status: implementiert
+- Stand: `scripts/meta/start_roster_generator.gd` erzeugt seeded, reproduzierbar 20 bis 30 Start-NPCs, default 24, als gueltige `MetaUnitProfile`-Daten mit Namen, Callsigns, Portraitpfaden, Rollenmix, Skills, Traits und TASK_207-Rank-Badges.
+- Stand: Der Generator liefert Fireteam-Vorschlaege mit `balanced_not_optimal`-Policy und dokumentiert die Multiplayer-Grenze `player_profile_local`, ohne private volle Roster ungefragt in Snapshots zu veroeffentlichen.
+- Stand: `MainMenuScreen` erzeugt beim ersten Start ein In-Memory-Roster und stellt einen Button `Neues Team generieren` bereit, der ein vorhandenes Roster erst nach Bestaetigung ersetzt. Persistenz bleibt TASK_234.
+- Stand: `docs/dev/character_roster_generation_contract.md` dokumentiert Generator, Rollenmix, Fireteam-Vorschlaege, Main-Menu-Grenze und Multiplayer-Ownership.
+- Offene Punkte: Portrait-Katalog/Identity-Asset-Zuordnung folgt in TASK_233. Persistenter Roster-Store, Save/Load und Reset-Archivierung folgen in TASK_234.
+- Risiken: Der V1-Generator ist bewusst ein Contract- und Spielstart-Slice; weitere Roster-Lebensdauer, Progression oder Recruiting duerfen nicht im Main Menu gespeichert werden.
+- Lokale Pruefung: `task_232_start_roster_generation_contract.gd`, `task_207_npc_rank_skill_badge_derivation.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_233 fuer Portrait Identity Catalog und Roster Presentation umsetzen.
+
+### TASK_233 - Portrait Identity Catalog and Roster Presentation
+- Status: implementiert
+- Stand: `data/portrait_identity_catalog.json` katalogisiert 30 Start-Roster-Kandidaten aus `res://Assets/Char/` mit stabilen `char_portrait_*`-IDs, `res://`-Pfaden, Bildgroessen, Tags und Diagnosen fuer grosse Quellen.
+- Stand: `docs/assets/portrait_identity_inventory.md` dokumentiert den Scan von 88 PNG-Dateien, die Aufloesungsverteilung und feste Zielgroessen fuer Character Sheet, Roster-Karten und Compact-Karten.
+- Stand: `scripts/meta/portrait_identity_catalog.gd` validiert den Katalog, laedt Texturen, setzt feste `TextureRect`-Vertraege und liefert deterministische Seed-Zuweisungen fuer 20 bis 30 Start-NPCs. `MetaUnitProfile` traegt nun `portrait_id` neben `portrait_path`.
+- Stand: `StartRosterGenerator` weist Portrait-ID und Runtime-Pfad deterministisch zu; `CharacterSheetView` und `NPCCompactCard` laden Portraits ueber den Katalog-Helper, ohne Layoutgroessen aus grossen Original-PNGs abzuleiten.
+- Offene Punkte: Manueller Sichtcheck fuer Character Sheet, Homebase-Roster und FOB-Karten bleibt offen; ein spaeterer Crop-/Thumbnail-Pass kann die uneinheitlichen Ausschnitte kuenstlerisch nachziehen.
+- Risiken: Der Katalog nutzt bewusst Original-PNGs mit festen UI-Rechtecken statt physische Thumbnail-Dateien. Falls Scroll-Performance sichtbar leidet, sollte ein eigener Import-/Thumbnail-Slice folgen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_233_portrait_identity_catalog_and_roster_presentation.gd`, `task_232_start_roster_generation_contract.gd`, `task_207_npc_rank_skill_badge_derivation.gd`, `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd` und `task_176_fob_loadout_weapon_preview_selector_verifier.gd` laufen gruen.
+- Naechster Schritt: TASK_234 fuer persistente Player-Roster-Saves und sicheren New-Team-Reset umsetzen.
+
+### TASK_234 - Persistent Player Roster Save and Reset
+- Status: implementiert
+- Stand: `scripts/meta/player_roster_store.gd` speichert und laedt V1-Roster unter `user://profiles/<profile>/roster_v1.json` mit `schema_version`, `store_id`, `profile_id`, `generator_seed`, `roster_size`, vollstaendigem Roster-Snapshot und dokumentierter Multiplayer-Grenze.
+- Stand: Fehlende oder ungueltige Saves erzeugen einen sicheren TASK_232/TASK_233-Fallback. Reset/New-Team archiviert den alten Save unter `user://profiles/<profile>/archive/`, bevor ein neuer Seed geschrieben wird.
+- Stand: `MainMenuScreen` nutzt den Store fuer First-Start, Load und bestaetigten Reset; Testpfade koennen isoliert gesetzt werden. `MetaLayerFlow` uebernimmt ein gueltiges `local_player`-Save fuer Homebase/FOB und faellt sonst auf `UnitRosterPresets` zurueck.
+- Stand: `docs/dev/player_roster_save_contract.md` dokumentiert Speicherort, Format V1, Unit-Felder inklusive `portrait_id`/Traits, Reset-Archiv und lokale Multiplayer-Profilgrenze.
+- Offene Punkte: Manueller Start/Reset-Sichtcheck bleibt offen; echte Recovery-/Mission-Folgefelder werden erst von spaeteren Character-Gameplay-Tasks fachlich befuellt.
+- Risiken: Der V1-Store schreibt Original-Roster-Dictionaries. Schema-Migrationen sollten ab jetzt explizit versioniert werden, statt Felder still umzubenennen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_234_persistent_player_roster_save_and_reset.gd`, `task_232_start_roster_generation_contract.gd`, `task_231_app_shell_game_setup_integration_and_open_items_review.gd`, `task_226_main_menu_settings_shell_display_audio_input_gameplay.gd`, `task_233_portrait_identity_catalog_and_roster_presentation.gd` und `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd` laufen gruen.
+- Naechster Schritt: TASK_235 fuer Character Sheet und Roster Gameplay Expansion umsetzen.
+
+### TASK_235 - Character Sheet Roster Gameplay Expansion
+- Status: implementiert
+- Stand: `MetaUnitProfile` traegt jetzt optionale V1-Character-Gameplay-Felder fuer Verfuegbarkeit, Recovery, Relationship-Zusammenfassung, Relationship-Links, Fireteam-Historie, Mission-Historie und Progression.
+- Stand: `StartRosterGenerator` initialisiert aktive Status-/Progress-Fallbacks, damit neue gespeicherte Roster schon stabile Felder fuer Folge-Tasks besitzen, ohne Gameplaywirkung zu behaupten.
+- Stand: `CharacterSheetFormatter` und `CharacterSheetView` zeigen neben Identity, Portrait, Traits, Kernwerten und Badges nun kurze Sektionen fuer Rolle/Loadout, Status/Recovery, Teamfit und Progress.
+- Stand: Homebase-Rosterkarten bleiben bei 20 bis 30 NPCs kompakt und zeigen Status plus Standort in einer Kurzzeile. Homebase und FOB akzeptieren denselben Profil-Payload.
+- Offene Punkte: Manueller Homebase/FOB-Sichtcheck mit 24+ NPCs bleibt offen; echte Relationship- und Progressionswerte folgen fachlich in TASK_236 und TASK_237.
+- Risiken: Die neuen Felder sind Darstellungs- und Speicherfelder. Gameplaywirkung darf erst durch eigene Resolver-/Simulation-Tasks entstehen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_235_character_sheet_roster_gameplay_expansion.gd`, `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd`, `task_176_fob_loadout_weapon_preview_selector_verifier.gd`, `task_207_npc_rank_skill_badge_derivation.gd`, `task_234_persistent_player_roster_save_and_reset.gd` und `task_232_start_roster_generation_contract.gd` laufen gruen.
+- Naechster Schritt: TASK_236 fuer Fireteam Relationship, Affinity und Cohesion umsetzen.
+
+### TASK_236 - Fireteam Relationship Affinity and Cohesion
+- Status: implementiert
+- Stand: `RosterRelationshipModel` verwaltet pairwise Affinity, Relationship-Tags und symmetrische V1-Links fuer NPC-Paare.
+- Stand: `StartRosterGenerator` erzeugt deterministisch milde Startbeziehungen und schreibt `relationship_pairs` sowie Unit-`relationship_links`; `PlayerRosterStore` validiert und speichert diese Daten im Roster-Payload.
+- Stand: `FireteamCohesionResolver` berechnet Fireteam-Cohesion aus Affinity, bekannter Paarzahl, Fireteam-Historie und Leadership und gibt kleine zentrale Gameplay-Modifikatoren fuer Morale, Communication, Coordination und Advance-Readability zurueck.
+- Stand: Character Sheet zeigt Teamfit, beste Beziehung und groesste Spannung; die FOB-Fireteam-Card zeigt eine kurze Cohesion-/Teamfit-Zeile.
+- Offene Punkte: Kein Dialog-/Drama-System; echte Progressionsveraenderungen aus Missionsergebnissen folgen in TASK_237.
+- Risiken: Relationship-Werte bleiben absichtlich mild, damit Skills, Loadout und taktische Entscheidungen nicht entwertet werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_236_fireteam_relationship_affinity_and_cohesion.gd`, `task_235_character_sheet_roster_gameplay_expansion.gd`, `task_234_persistent_player_roster_save_and_reset.gd`, `task_232_start_roster_generation_contract.gd`, `task_176_fob_loadout_weapon_preview_selector_verifier.gd`, `task_178_fob_drop_light_fixed_fullhd_layout_verifier.gd` und `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd` laufen gruen.
+- Naechster Schritt: TASK_237 fuer Mission Progression, XP, Morale und Frustration umsetzen.
+
+### TASK_237 - Mission Progression XP Morale Frustration
+- Status: implementiert
+- Stand: `MissionProgressionResolver` wertet Missionsergebnisse, Unit-Events, Team-State und Fireteam-Cohesion zentral aus und erzeugt kleine XP-, Skill-, Rollen-, Morale-, Frustration-, Mission-History- und Fireteam-History-Updates.
+- Stand: Downed Units gehen in Recovery; Relationship-/Cohesion-Drift bleibt pro Mission bewusst klein und basiert auf den TASK_236-Relationship-Daten.
+- Stand: `MetaLayerFlow` wendet Progression beim Combat-Resolve auf den lokalen Player-Roster an und speichert den aktualisierten Roster ueber `PlayerRosterStore`; der Save-Payload traegt `progression_schema_version`.
+- Stand: `DebriefTestScreen` zeigt bis zu fuenf knappe Character-Updates neben Missionsergebnis und Rueckkehrstatus.
+- Offene Punkte: Kein Skilltree, keine Perks und kein Permadeath. Personalereignisse aus Frust/Morale folgen in TASK_238.
+- Risiken: Die Formeln sind absichtlich klein und clampen Morale/Frustration/Skill-Gains, damit eine einzelne Mission die Balance nicht sprengt.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_237_mission_progression_xp_morale_frustration.gd`, `task_096_recovery_verifier.gd`, `task_160_tactical_playability_verifier.gd`, `task_236_fireteam_relationship_affinity_and_cohesion.gd` und `task_234_persistent_player_roster_save_and_reset.gd` laufen gruen.
+- Naechster Schritt: TASK_238 fuer Personalereignisse, Recruiting und Entlassen vorbereiten.
+
+### TASK_238 - Personnel Events Recruit Leave Dismiss Notifications
+- Status: implementiert
+- Stand: `PersonnelEventModel` definiert stabile Event-IDs, Payloads und Nachrichten fuer `recruit_available`, `joins_roster`, `leaves_roster`, `dismissed`, `unavailable`, `returns` und `requests_change`.
+- Stand: `PersonnelEventResolver` erzeugt V1-Events nach mehreren Missionen, hohem Frust und Recovery/Unavailable-Status, baut Recruit-Kandidaten aus dem Start-Roster-Generator und erzwingt Dismiss nur ueber Bestaetigungs-Events.
+- Stand: `MetaLayerFlow` laesst Personalereignisse nach der Mission-Progression laufen und speichert sie im Player-Roster; `PlayerRosterStore` validiert die Eventliste beim Save/Load.
+- Stand: Homebase und Debrief zeigen knappe Personnel-Nachrichten, ohne Gameplay-Zustand in UI-Skripte zu verschieben.
+- Offene Punkte: Kein HR-/Markt-/Storydeck-System; echte Player-UI-Aktionen fuer Recruit-Annahme und Dismiss koennen spaeter separat polishen.
+- Risiken: Event-Haeufigkeit muss nach Playtests feinjustiert werden, damit Nachrichten nicht willkuerlich wirken.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_238_personnel_events_recruit_leave_dismiss_notifications.gd`, `task_237_mission_progression_xp_morale_frustration.gd`, `task_236_fireteam_relationship_affinity_and_cohesion.gd`, `task_234_persistent_player_roster_save_and_reset.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_239 fuer Character Gameplay Bubble Mission Integration umsetzen.
+
+### TASK_239 - Character Gameplay Bubble Mission Integration
+- Status: implementiert
+- Stand: `CharacterGameplayResolver` fasst Unit- und Fireteam-Character-State zentral zusammen und liefert kleine, clampte Modifikatoren fuer Communication, Coordination, Advance-Readability und FTL-Clarity.
+- Stand: FTL-Feedback-Bubbles bekommen Character-Kontext aus Leadership/Communication/Cohesion; NPC-Thought-Bubbles koennen bei Frust, niedriger Morale und Teamfit-Hinweisen kurze Character-Texte ausgeben, ohne Command- oder Combat-Effekte zu setzen.
+- Stand: `MissionCombatLoopDriver` stellt einen public Character-Gameplay-Snapshot aus Mission-Units bereit; `SimulationRoot` und `MultiplayerSnapshotContract` transportieren nur Fireteam-ID, Cohesion-/Morale-/Frust-Status und Member-Count, keine privaten Roster-Details.
+- Stand: Der Resolver dokumentiert die Summary-Grenze (`summarized_context_not_per_frame`) und vermeidet neue direkte Relationship-/Frust-Looks in UI-Hotpaths.
+- Offene Punkte: Kein komplexes Persoenlichkeitssystem und keine grossen Combat-Boni; weitere Textpolitur und echte Player-Sichtchecks koennen spaeter separat erfolgen.
+- Risiken: Weitere Character-Gameplay-Erweiterungen muessen den zentralen Resolver respektieren, damit Combat/AI lesbar bleiben.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_239_character_gameplay_bubble_mission_integration.gd`, `task_213_skill_based_bubble_text_resolver_and_content_pass.gd`, `task_218_simulation_combat_ai_tick_budget_pass.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_240 fuer Multiplayer Player Roster Ownership Contract umsetzen.
+
+### TASK_240 - Multiplayer Player Roster Ownership Contract
+- Status: implementiert
+- Stand: `MultiplayerRosterContract` dokumentiert und validiert `host_roster`, `player_rosters` und `scenario_roster`; Peer- und Unit-Ownership liefern `owner_peer_id`, `roster_source`, `roster_mode`, `roster_public_ref` und `character_gameplay_authority`.
+- Stand: `MultiplayerSession` fuehrt einen Host-waehlbaren `roster_mode`, `peer_rosters` in den Start-Assignments und einen Lobby-Snapshot mit Public-/Private-Field-Policy.
+- Stand: `MultiplayerSnapshotContract` normalisiert Ownership-Felder fuer Unit-Snapshots und ignoriert private Roster-Profile; `PlayerRosterStore` erzeugt public-safe Roster-Previews ohne Progression, Beziehungen, Seeds oder Asset-Pfade.
+- Stand: Die Multiplayer-Lobby zeigt den Roster-Modus strukturell an und kann ihn als Host vor Missionsstart wechseln.
+- Offene Punkte: Noch kein Account-/Cloud-Sync und kein echter Cross-Client-Save-Transfer; das bleibt bewusst ausserhalb des Vertrags.
+- Risiken: Spaetere Multiplayer-Features muessen diesen Public-/Private-Vertrag einhalten, sonst leaken Character-Save-Daten schnell in Snapshot- oder Lobby-Pfade.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_240_multiplayer_player_roster_ownership_contract.gd`, `task_168_multiplayer_snapshot_contract_verifier.gd` und `task_227_main_menu_multiplayer_host_join_lobby_flow.gd` laufen gruen.
+- Naechster Schritt: TASK_241 fuer Character Gameplay Playability Smoke umsetzen.
+
+### TASK_241 - Character Gameplay Playability Smoke
+- Status: implementiert
+- Stand: `task_241_character_gameplay_playability_smoke.gd` prueft den kompletten Character-Gameplay-Datenfluss: First-start-Roster erzeugen, speichern, laden, Character Sheet rendern, Homebase-/FOB-Karten speisen, Fireteam-Cohesion berechnen, Mission-Progression anwenden, Debrief und Personnel-Event anzeigen.
+- Stand: Der Smoke prueft FTL-Feedback-Bubbles und NPC-Gedanken gegen Character-State sowie den public Character-Gameplay-Snapshot ohne private Roster-Felder.
+- Stand: Multiplayer-Grenze wird im selben Flow mit public Roster Preview und Unit-Snapshot-Ownership aus TASK_240 geprueft.
+- Stand: `docs/manual_checks/character_gameplay_playability_checklist.md` und `docs/reviews/character_gameplay_balance_and_open_items_review.md` halten Sichtcheck und Balance-/Open-Items fest.
+- Offene Punkte: Manueller Character-Gameplay-Sichtcheck ist vorbereitet, aber im Headless-Lauf nicht ausgefuehrt.
+- Risiken: Der Integrationssmoke findet Zusammenspiel, lokalisiert Fehler aber grober als Einzelverifier; echte Balance bleibt Playtest-Arbeit.
+- Lokale Pruefung: `task_241_character_gameplay_playability_smoke.gd`, `task_160_tactical_playability_verifier.gd` und `task_214_comic_bubble_feedback_playability_smoke.gd` laufen gruen.
+- Naechster Schritt: TASK_244 fuer Combat Movement UI SFX Integration umsetzen.
+
+### TASK_242 - Audio SFX Source Inventory and Curated Import
+- Status: implementiert
+- Stand: Die Kenney-All-in-1-Audioquelle wurde inventarisiert und als kleines projektlokales SFX-Subset unter `Assets/used/audio/kenney_all_in_one/` importiert. `data/audio_sfx_catalog.json` beschreibt 29 stabile Audio-IDs fuer UI, Combat, Movement, Impact, Explosion und kurze Sci-Fi-Ambiences.
+- Offene Punkte: Finale Soundmischung und Runtime-Hooks folgen in TASK_243 und TASK_244.
+- Risiken: Movement-Sand/Rock nutzt vorerst bewusst markierte Platzhalter; spaetere Integration muss Event-Spam und FoW-Audio-Leaks vermeiden.
+- Naechster Schritt: TASK_243 baut den Audio-Event-Vertrag und die Bus-/Player-Schicht.
+
+### TASK_243 - Audio Event Contract and Bus Setup
+- Status: implementiert
+- Stand: `AudioEventContract` laedt `data/audio_sfx_catalog.json` und normalisiert stabile Event-IDs, Bus-Routing, Spatial/Non-Spatial, Cooldowns, Polyphony, Pitch-Ranges und Read-only-Multiplayer-Kontext.
+- Stand: `AudioEventBus` richtet die Busse `SFX`, `UI`, `Combat`, `Movement`, `Ambient` und `Music` ein, routet Kategorie-Busse in `SFX`, wendet Master/SFX/UI/Combat/Movement/Ambient-Settings an und liefert Diagnosewerte fuer Stimmen, fehlende IDs/Ressourcen und unterdrueckte Events.
+- Stand: `AudioEventPlayerPool` begrenzt und wiederverwendet 2D-/3D-Player. Headless-Tests simulieren Playback, damit Verifier sauber ohne Audio-Playback-Leaks laufen; normale Fensterlaeufe nutzen echte `play()`-Aufrufe.
+- Offene Punkte: UI-, Combat-, Movement-, Impact- und Explosion-Hooks folgen in TASK_244.
+- Risiken: Der Bus ist Darstellung; Folgearbeiten duerfen ihn nicht als Gameplay-Wahrheit oder versteckte FoW-/Multiplayer-Informationsquelle nutzen.
+- Naechster Schritt: TASK_244 bindet die Events an Spiel- und UI-Ablaeufe an.
+
+### TASK_244 - Combat Movement UI SFX Integration
+- Status: implementiert
+- Stand: `AudioEventBus` besitzt jetzt Integrations-Helfer fuer UI-Aktionen, Waffenfeuer, Movement-Steps, Impacts und Explosionen. Diagnose-Snapshots zaehlen Events nach Kategorie/Event sowie Dedupe-, Cooldown-, Polyphony-, Settings- und Visibility-Unterdrueckung.
+- Stand: Hauptmenue und Multiplayer-Lobby melden zentrale Click/Confirm/Switch/Cancel/Warning-Aktionen ueber projektlokale UI-Audio-Events. Slider-/Draft-Audio-Aenderungen loesen bewusst keine Dauer-SFX aus.
+- Stand: `TerrainMap3DView` spielt sichtbare Fire-Events am Muzzle-Flash-Kontext und sichtbare bewegte Unit-Steps mit per-Unit-Rate-Limit. `MissionCombatLoopDriver` meldet Impacts und Rocket-Explosionen aus autoritativem Damage-Kontext.
+- Stand: `SimulationRoot` leitet Fire-Events aus akzeptierten Multiplayer-Snapshots read-only an einen vorhandenen Audio-Bus weiter; Fire-Event-IDs dienen als Dedupe-Key, damit lokale und Snapshot-Ausgabe nicht doppeln.
+- Offene Punkte: Manueller Fenster-Hoercheck nach `docs/manual_checks/audio_sfx_playability_checklist.md` bleibt offen; finale Mischung bleibt spaeterer Politur vorbehalten.
+- Risiken: SFX-Integration bleibt Darstellung. Folgearbeiten duerfen Audio nicht als Gameplay-Wahrheit, FoW-Sensorik oder versteckten Multiplayer-State verwenden.
+- Lokale Pruefung: `task_244_combat_movement_ui_sfx_integration_verifier.gd`, `task_160_tactical_playability_verifier.gd`, `task_168_multiplayer_snapshot_contract_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_245 fuer Background Image Catalog and Screen Usage umsetzen.
+
+### TASK_245 - Background Image Catalog and Screen Usage
+- Status: implementiert
+- Stand: Die vier gelieferten Apr-18-Backgrounds liegen mit stabilen ASCII-Dateinamen unter `Assets/used/backgrounds/ai_generated/` und sind als Godot-Texturen importiert.
+- Stand: `data/background_image_catalog.json` katalogisiert die neuen Bilder plus das bestehende TASK_199-Main-Menu-Bild mit stabilen Background-IDs, `res://`-Pfaden, Screen-Hints, Crop-Ankern, Dimming und UI-Texture-Budget.
+- Stand: `BackgroundImageCatalog` kapselt Katalogladen, `TextureRect`-Anwendung und Screen-Assignment-Diagnose. Das Main Menu nutzt den Katalog fuer `main_menu_shell`; die Multiplayer-Lobby nutzt `multiplayer_lobby_hangar` mit dunklem Shade hinter dem bestehenden Panel.
+- Offene Punkte: Manueller Full-HD-Sichtcheck nach `docs/manual_checks/background_screen_readability_checklist.md` bleibt offen; Mission-Select/Loading/Debrief nutzen die vorbereiteten IDs erst, wenn diese Screens als eigene Shells umgesetzt werden.
+- Risiken: Backgrounds bleiben visual-only. Folgearbeiten duerfen keine lokalen User-Pfade einbauen und keine Backgrounds im Gameplay-Hotpath vorladen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_245_background_image_catalog_and_screen_usage_verifier.gd`, `task_199_main_menu_shell_background_image_verifier.gd`, `task_227_main_menu_multiplayer_host_join_lobby_flow.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_246 fuer Visual Scale Alignment Asset Pass umsetzen.
+
+### TASK_246 - Visual Scale Alignment Asset Pass
+- Status: implementiert
+- Stand: `docs/reviews/asset_scale_alignment_matrix.md` dokumentiert den gemeinsamen Alignment-Vertrag fuer Friendly-/Enemy-NPCs, Helme, Standard-/Compact-/Medic-/Heavy-Blaster, Sniper, Rocket, Muzzle-Flash, Audio-Anker, Background-Crops und Terrain-Hoehenanker.
+- Stand: `scripts/tests/task_246_visual_scale_alignment_asset_pass_verifier.gd` prueft Resource-Ladung, Skala, Sockets, Weapon-Visual-Loadouts, VFX-Katalog, Muzzle-/Audio-/Impact-Kompatibilitaet, Background-Metadaten und feste Main-Menu-/Lobby-Fenster. `scripts/tests/task_174_character_helmet_blaster_attachment_verifier.gd` akzeptiert jetzt die seit TASK_190 erweiterte 6er Weapon-Visual-Mapping-Liste bei weiterhin 4 Blaster-Kit-Import-GLBs.
+- Offene Punkte: Manueller 2.5D-/Full-HD-Sichtcheck nach `docs/manual_checks/visual_scale_alignment_checklist.md` bleibt offen.
+- Risiken: Visuelle Offsets duerfen Gameplay-Hoehe, LOS, Cover oder Tile-Wahrheit nicht veraendern; Performance-Wirkung von VFX, Audio und Backgrounds wird erst in TASK_249 gemessen.
+- Lokale Pruefung: `task_246_visual_scale_alignment_asset_pass_verifier.gd`, `task_174_character_helmet_blaster_attachment_verifier.gd` und `task_190_weapon_visual_loadout_expansion_and_scale.gd` laufen gruen.
+- Naechster Schritt: TASK_247 fuer Used Asset Project Locality Audit Gate umsetzen.
+
+### TASK_247 - Used Asset Project Locality Audit Gate
+- Status: implementiert
+- Stand: `scripts/tests/task_247_used_asset_project_locality_audit_gate.gd` prueft die genutzten Audio-, Background-, Comic-Bubble-, Curated-, NPC-, Portrait-, Rank-/Particle-, Setpiece-, Terrain-, UI- und Weapon-VFX-Kataloge sowie Runtime-`res://`-Referenzen aus Scenes/Scripts/Maps.
+- Stand: `scripts/tests/run_task_247_asset_locality_scan.ps1` scannt Textdateien auf lokale User-/Source-Pfade und trennt Runtime-Verstoesse von Guard-Literalen, Test-Harness und Dokumentations-/Source-Notes.
+- Stand: `docs/reviews/used_asset_project_locality_audit.md` dokumentiert Scope, erlaubte Ausnahmen, ResourceLoader-Gate und lokalen Lauf: 10536 Textdateien, 0 Runtime-Verstoesse, 19 Guard-Literale, 71 Dokumentations-/Source-Notes.
+- Offene Punkte: Keine Runtime-Korrektur erforderlich; kuenftige Asset-Imports sollen das Gate erneut laufen lassen.
+- Risiken: Dynamische Runtime-Prefixe und beschreibbare Szenario-Zielpfade sind bewusst vom Asset-Resource-Gate getrennt; neue echte Asset-Pfade muessen katalogisiert oder als konkrete `res://`-Resource pruefbar gemacht werden.
+- Lokale Pruefung: `task_247_used_asset_project_locality_audit_gate.gd` und `run_task_247_asset_locality_scan.ps1` laufen gruen.
+- Naechster Schritt: TASK_248 fuer Audio Visual Import and Playback Smoke umsetzen.
+
+### TASK_248 - Audio Visual Import and Playback Smoke
+- Status: implementiert
+- Stand: `scripts/tests/task_248_audio_visual_import_and_playback_smoke.gd` prueft Import-Samples, `AudioEventBus`-Playback fuer UI click, Combat shot, Movement step, Impact und Explosion, Settings-Mute, Background-Instanzen, Muzzle-/Particle-/Weapon-/NPC-Visuals, Snapshot-Fire-Events und isolierte Missing-Diagnosen.
+- Stand: `docs/reports/audio_visual_import_and_playback_smoke.md` dokumentiert den lokalen Lauf: `--import` ohne Fehler, TASK_248-Smoke 93/0 und TASK_160 20/0.
+- Offene Punkte: Manueller Hoer-/Mixcheck bleibt sinnvoll; Performance folgt erst in TASK_249.
+- Risiken: Headless prueft Hoereindruck nur indirekt; der Smoke beweist Zaehler, Routing und Resource-Ladung, aber nicht finalen Mix.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_248_audio_visual_import_and_playback_smoke.gd` und `task_160_tactical_playability_verifier.gd` laufen gruen.
+- Naechster Schritt: TASK_249 fuer Post Audio Visual Performance Optimization Pass umsetzen.
+
+### TASK_249 - Post Audio Visual Performance Optimization Pass
+- Status: implementiert
+- Stand: `data/performance_budget_contract.json` enthaelt einen zusaetzlichen `project_budget.audio_visual`-Abschnitt fuer Audio-Pool, aktive Stimmen, Missing-Zaehler, Background-VRAM, Muzzle-Texturen und Weapon-Fire-VFX-Count.
+- Stand: `scripts/tests/task_249_post_audio_visual_performance_optimization_pass.gd` misst Audio-Spam/Polyphony/Dedupe, Background-Loadpolicy/VRAM, VFX-Burst und den bestehenden Asset-Harness; der Lauf endet mit 39/0.
+- Stand: `docs/performance/audio_visual_performance_report.md` dokumentiert Before/After, Budgetentscheidung und lokale TASK_222-Ergebnisse; bestehende TASK_222-Budgets wurden nicht angehoben.
+- Offene Punkte: Manueller Godot-Profiler-, Visual-Profiler- und Video-RAM-Check bleibt fuer sichtbare GPU-/Mix-/Stutter-Bewertung offen.
+- Risiken: Performancewerte sind lokal maschinenabhaengig; der neue Audio-/Visual-Abschnitt ist deshalb Diagnosegrenze, keine Plattformfreigabe.
+- Lokale Pruefung: `task_249_post_audio_visual_performance_optimization_pass.gd`, `task_222_performance_regression_gate_and_manual_profile_checklist.gd`, `run_task_222_performance_gate.ps1` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_250 als End-to-End Asset Audio Background Playability Smoke umsetzen.
+
+### TASK_250 - Asset Audio Background Playability Smoke
+- Status: implementiert
+- Stand: `scripts/tests/task_250_asset_audio_background_playability_smoke.gd` prueft Main-Menu-/Settings-/Lobby-Pfade, UI-Audio, feste Fenster, projektlokale Backgrounds, Mission-Unit-Visuals, Weapon-VFX, Schuss-, Schritt-, Impact- und Explosion-SFX sowie FoW-Filterung fuer Fire-Events.
+- Stand: `docs/manual_checks/asset_audio_background_playability_checklist.md` dokumentiert den offenen manuellen Hoer-/Sichtcheck; `docs/reports/asset_audio_background_playability_smoke.md` dokumentiert den lokalen Lauf.
+- Offene Punkte: Manueller End-to-End-Hoer-/Sichtcheck bleibt offen; finaler Mix, Background-Lesbarkeit und Attachment-Sitz sind headless nur indirekt bewertbar.
+- Risiken: Der End-to-End-Smoke verbindet viele Pfade und lokalisiert Fehler weniger fein als die Einzeltests; er ersetzt TASK_247/TASK_249 nicht, sondern laesst sie als Abschlussgates mitlaufen.
+- Lokale Pruefung: `task_250_asset_audio_background_playability_smoke.gd` (102/0), `task_247_used_asset_project_locality_audit_gate.gd` (27/0), `task_249_post_audio_visual_performance_optimization_pass.gd` (39/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_251 fuer Nature Kit Classic Source Inventory and Subset Import starten.
+
+### TASK_251 - Nature Kit Classic Source Inventory and Subset Import
+- Status: implementiert
+- Stand: `docs/assets/nature_kit_classic_inventory.md` dokumentiert Quelle, CC0-Lizenz, Source-Audit und die bewusste Entscheidung fuer ein kleines glTF-Subset statt Komplettimport.
+- Stand: 25 kuratierte glTF-Modelle plus gleichnamige `.bin` liegen unter `Assets/used/terrain/nature_kit_classic/` in `cliffs`, `ground`, `rocks`, `vegetation` und `props`; `License.txt`, `Preview.png` und `Sample.png` sind projektlokal fuer Lizenz/Doku kopiert.
+- Stand: `data/nature_kit_asset_catalog.json` enthaelt stabile Asset-IDs, Kategorie, Projektpfad, `.bin`-Abhaengigkeit, geplanten Verbrauchsort und Gameplay-Rollenhinweis.
+- Offene Punkte: Die Assets sind noch nicht in das Terrain-Mapping eingebunden; das folgt in TASK_252 bis TASK_254.
+- Risiken: Nature-Kit-Visuals bleiben reine Darstellung und duerfen Walkability, LOS, Cover oder SimulationRoot-Wahrheit nicht still veraendern.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_251_nature_kit_classic_source_inventory_and_subset_import.gd` (316/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_252 fuer Nature Cliff Hill Edge Visual Mapping umsetzen.
+
+### TASK_252 - Nature Cliff Hill Edge Visual Mapping
+- Status: implementiert
+- Stand: `data/terrain_3d_asset_mapping.json` mappt die aktiven Height-Edge-Keys `cliff_straight`, `cliff_corner` und `slope` auf projektlokale Nature-Kit-Classic-Cliff-/Step-Modelle. Brown ist fuer V1 die aktive Hoehenkanten-Theme; Grey-Varianten bleiben als ladbare Kandidaten fuer Rock-/Asteroid-Folgearbeit dokumentiert.
+- Stand: `TerrainMap3DView` meldet im Render-Snapshot Nature-Kit-Cliff-Modelle, Nature-Slope-Step-Modelle, Theme-Zaehler und konkrete Height-Edge-Visual-Eintraege. Diese Diagnose bleibt rein visuell und schreibt keine Gameplay-Wahrheit.
+- Stand: Der TASK_252-Verifier prueft Mapping, Resource-Ladung, Runtime-Edge-Zaehler, Step-vs-Cliff-Rollen, Plateau-Innenbereiche, Missing-Mapping-Diagnose und die unveraenderte TASK_182-Bewegungssemantik.
+- Offene Punkte: Manueller 2.5D-Sichtcheck mit Rotation, Zoom und Pitch bleibt offen; Headless prueft Pivot-/Lesbarkeitswirkung nur indirekt.
+- Risiken: Falsche Corner-Pivots oder Theme-Wahl koennen taktische Lesbarkeit verschlechtern, auch wenn die Gameplay-Regeln korrekt bleiben.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_252_nature_cliff_hill_edge_visual_mapping.gd` (58/0), `task_185_hill_visuals_edge_lines_verifier.gd` (30/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_253 Ground-/Surface-Visuals und Editor-Palette fuer Nature-Kit-Bodenvarianten vorbereiten.
+
+### TASK_253 - Nature Ground Surface Editor Palette Pass
+- Status: implementiert
+- Stand: `data/terrain_surface_visual_theme_catalog.json` definiert die aktive Nature-Classic-Dirt-Theme, Projektpfade, Surface-Default-Zuordnung und den Vertrag, dass `surface_type` die Gameplay-Wahrheit bleibt und keine neuen Surface-Typen entstehen.
+- Stand: `TerrainMap3DView` nutzt Nature-Kit-Ground-Modelle fuer 2.5D-Top-Surfaces und meldet Surface-Visual-Eintraege, Nature-Surface-Zaehler und Theme-Verteilung im Render-Snapshot. Sand/Rock/Road behalten die bestehenden Surface-Tints fuer taktische Lesbarkeit.
+- Stand: `terrain_tile_catalog.json` enthaelt die neue Palette `Nature Boden`. `TerrainTileCatalog` behandelt diese Eintraege als visuelle Surface-Varianten: `type_id` und `surface_type` koennen wechseln, waehrend `height_level`, `edge_type`, `object_type_id`, Cover, Walkable und LOS erhalten bleiben.
+- Offene Punkte: Manueller Editor-/Mission-Sichtcheck bleibt offen; Headless prueft Overlays und Ressourcenzuordnung, aber nicht die finale optische Wirkung.
+- Risiken: Viele Ground-Modelle koennen Node-/Draw-Budget belasten; TASK_255 misst die Nature-Kit-Integration als Abschluss-Gate.
+- Lokale Pruefung: `task_253_nature_ground_surface_editor_palette_pass.gd` (67/0), `task_183_editor_hill_authoring_verifier.gd` (66/0), `task_185_hill_visuals_edge_lines_verifier.gd` (30/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_254 Baeume, Felsen und Vegetation als platzierbare Objekte mit sauberer Gameplay-Rolle integrieren.
+
+### TASK_254 - Nature Trees Rocks Vegetation Cover Props
+- Status: implementiert
+- Stand: `data/terrain_object_catalog.json` dokumentiert die ersten Nature-Prop-Rollen und bindet Gameplay ausdruecklich an `TerrainTileData` statt an Mesh-Groessen. Die Objektpalette `Nature Props` enthaelt Tree-Blocker, Rock-Cover, Bush-Cover, Cactus-Cover und Deco-Logs.
+- Stand: `terrain_3d_asset_mapping.json` mappt diese Props auf projektlokale Nature-Kit-Modelle. `TerrainMap3DView` meldet Nature-Prop-Modelle, Rollen-Zaehler und konkrete Visual-Eintraege im Render-Snapshot.
+- Stand: `docs/dev/nature_terrain_prop_rules.md` beschreibt Gameplay Truth, Rollen, Editor-Platzierung und visuelle Anker. Deko-Logs sind explizit walkable, ohne LOS-Block und ohne Cover.
+- Offene Punkte: Manueller Editor-/Mission-Sichtcheck bleibt offen; finale Groessenwirkung und taktische Lesbarkeit sind headless nur indirekt bewertet.
+- Risiken: Vegetation kann trotz korrekter Daten optisch zu dominant sein; TASK_255 misst die gesamte Nature-Kit-Integration mit Playability-/Performance-Smoke.
+- Lokale Pruefung: `task_254_nature_trees_rocks_vegetation_cover_props.gd` (100/0), `task_184_gameplay_hill_semantics_verifier.gd` (30/0), `task_185_hill_visuals_edge_lines_verifier.gd` (30/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_255 als Nature-Kit-Hill-Playability- und Performance-Abschluss-Gate umsetzen.
+
+### TASK_255 - Nature Kit Hill Playability Visual Performance Smoke
+- Status: implementiert
+- Stand: `scripts/tests/task_255_nature_kit_hill_playability_visual_performance_smoke.gd` baut eine 32x32-Nature-Fixture mit H0/H1/H2, harten Klippen, begehbarem Slope-Einstieg, Sand/Rock/Road/Ground, Tree/Rock/Bush/Cactus/Deco-Props und Marker. Save/Load, Pathfinding, LOS und Cover pruefen dieselbe Terrain-Wahrheit wie die Mission.
+- Stand: Der 2.5D-Smoke rendert dieselbe Fixture ueber `TerrainMap3DView` und prueft Nature-Ground, Cliff-/Slope-Modelle, Props, Surface-Tints, Selection, Marker, LZ, Waypoint, Area-Order, FoW, fehlende Asset-Mappings, Texturfallbacks, Renderdauer, Node-Budget und gebundene Prop-Anzahl.
+- Stand: `docs/reports/nature_kit_hill_playability_visual_performance_smoke.md` und `docs/manual_checks/nature_kit_hill_playability_visual_checklist.md` dokumentieren Abschlussbefund und offene Sichtcheck-Punkte.
+- Offene Punkte: Manueller Editor-/Mission-Sichtcheck bleibt offen fuer finale Kunst-/Scale-Beurteilung, Kamera-Rotation/Zoom/Pitch und laengere echte Bewegung um dichte Nature-Props.
+- Risiken: Groessere Biome-Karten mit deutlich mehr Nature-Props koennen spaeter Instancing, Batching oder strengere Editor-Budgets brauchen; der kuratierte Smoke bleibt bewusst klein.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_255_nature_kit_hill_playability_visual_performance_smoke.gd` (183/0), `task_247_used_asset_project_locality_audit_gate.gd` (27/0), `task_249_post_audio_visual_performance_optimization_pass.gd` (39/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_256 fuer den gemeinsamen Automated-Playability-Coverage-Vertrag starten.
+
+### TASK_256 - Automated Playability Coverage Contract
+- Status: implementiert
+- Stand: `docs/qa/playability_coverage_matrix.md` definiert die gemeinsame QA-Matrix fuer Main Menu, Settings, Singleplayer-Setup, Multiplayer-Lobby, Editor, Homebase, FOB, Character Sheet, Loadout, Mission-HUD und Debrief. Automatisierte, manuelle, blockierte und nicht anwendbare Checks sind explizit getrennt.
+- Stand: `scripts/tests/playability/playability_test_harness.gd` liefert wiederverwendbare Headless-Helfer fuer Scene-Instanzierung, Button-Suche per Name/Text/Metadaten, Callback-Diagnose, sicheres Test-Pressing, feste Rechtecke, Viewport-Clipping, ScrollContainer und strukturierte Screen-Reports.
+- Stand: Der TASK_256-Verifier prueft Matrix-Pflichtabschnitte, relevante Screen-/Flow-/Layout-IDs und Harness-Basisfunktionen an Main-Menu- und synthetischen Controls.
+- Offene Punkte: Die Folgetasks muessen die Matrix jetzt screenweise gegen echte UI-Oberflaechen auswerten; finale Text-/Art-Clipping- und Spielgefuehlpunkte bleiben bewusst manuell markiert.
+- Risiken: Die Matrix darf nicht zur Wunschliste anwachsen. Neue Reihen sollen nur echte Spielerwege, Pflichtcontrols oder begruendete manuelle Restpunkte aufnehmen.
+- Lokale Pruefung: `task_256_automated_playability_coverage_contract.gd` (50/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_257 fuer Button-Reachability und Interaktion gegen die Matrix umsetzen.
+
+### TASK_257 - Button Reachability and Interaction Verifier
+- Status: implementiert
+- Stand: `scripts/tests/task_257_button_reachability_and_interaction_verifier.gd` inventarisiert Pflichtcontrols in Main Menu, Settings, Multiplayer Lobby, Map Editor, Homebase, FOB, Mission-HUD und Debrief. Geprueft werden Existenz, Sichtbarkeit, Viewport-Erreichbarkeit, Vollverdeckung, Signalbindung, Fokus auf Kernbuttons und dokumentierte Disabled-/Hidden-Gruende.
+- Stand: Sichere Kernklicks sind abgedeckt: Settings oeffnen/schliessen, Lobby-Start bleibt vor Ready disabled und erzeugt nach Host-Ready genau einen Mission-Start-Request.
+- Stand: Der gemeinsame `PlayabilityTestHarness` kann nun neben Button-Suche auch generische Signalverbindungen, Control-Deskriptoren und eine einfache Full-Cover-Heuristik pruefen. `docs/reports/playability_button_reachability_report.md` dokumentiert abgedeckte Screens und manuelle Restpunkte.
+- Offene Punkte: Echte Hover-/Fokuswirkung, lokalisierte Textlesbarkeit und tiefer FOB->Mission->Debrief-Playthrough bleiben manuelle Playability-Punkte.
+- Risiken: Kontextabhaengige Buttons duerfen nicht durch starre Aktivierungsannahmen zu false positives werden; der Verifier verlangt deshalb jeweils einen dokumentierten Grund.
+- Lokale Pruefung: `task_257_button_reachability_and_interaction_verifier.gd` (427/0), `task_181_drop_light_fixed_window_audit_verifier.gd` (43/0), `task_256_automated_playability_coverage_contract.gd` (50/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_258 fuer fixed-window Clipping, Scrollbars und Overflow-Pruefung umsetzen.
+
+### TASK_258 - Fixed Window Clipping Scrollbar Playability Audit
+- Status: implementiert
+- Stand: `scripts/tests/task_258_fixed_window_clipping_scrollbar_playability_audit.gd` prueft Main Menu, Multiplayer Lobby, Homebase, FOB, Mission-HUD und Map Editor gegen feste Fenster, Viewport-Clipping, ScrollContainer, lange Testdaten und kritische Text-/Button-Ueberlaeufe.
+- Stand: Homebase, FOB und Mission werden mit langen Roster-, Transfer-/Loadout-, Shipcard- und HUD-Inhalten aufgebaut, waehrend Top-Level-Fenster weiter dem DropLight-Fixed-Window-Vertrag folgen.
+- Stand: `docs/reports/playability_layout_clipping_scrollbar_report.md` dokumentiert die automatisierte Abdeckung; `docs/manual_checks/playability_layout_remaining_visual_checklist.md` haelt die verbleibenden visuellen Full-HD-/1280x720-Pruefpunkte fest.
+- Offene Punkte: Echte Pixel-Clips, Hover-/Fokuswirkung und leserische Qualitaet langer lokalisierter Texte bleiben manuelle Playability-Punkte.
+- Risiken: Headless kann visuelles Clipping nur naeherungsweise pruefen; gewollte Masken brauchen erlaubte Ausnahmen.
+- Lokale Pruefung: `task_258_fixed_window_clipping_scrollbar_playability_audit.gd` (67/0), `task_181_drop_light_fixed_window_audit_verifier.gd` (43/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: Nach TASK_258 Charakter- und Rosterfluesse gegen lange Daten pruefen.
+
+### TASK_259 - Character Card Roster Switching Playability
+- Status: implementiert
+- Stand: `scripts/tests/task_259_character_card_roster_switching_playability.gd` prueft Character-Card-Zugriff in Homebase-Roster, Homebase-Transfer-Team, FOB-Fireteams, FOB-Loadout-Slots, Mission-Selected-Fireteam und Debrief-Progression ueber bestehende Card-Signale und Screen-APIs.
+- Stand: Abgedeckt sind Pool -> Team, Team -> Pool, Fireteam -> Fireteam, Clear-to-Pool, Pool -> Fireteam, blockierte Duplikate/ungueltige Umstellungen, Character-Sheet-Synchronitaet, Save/Load und Mission-Progression ohne Unit-Verlust.
+- Stand: `docs/reports/playability_character_card_roster_switching_report.md` dokumentiert Screens, State-Integrity-Regeln, automatische Findings und manuelle Restpunkte.
+- Offene Punkte: Echte Drag-and-drop-Haptik, Hover-State und Portrait-by-Portrait-Sichtkontrolle bleiben manuelle Playability-Punkte.
+- Risiken: Drag-and-drop ist headless schwerer zu pruefen und wird deshalb von direkten Signal-/API-Pfaden getrennt.
+- Lokale Pruefung: `task_259_character_card_roster_switching_playability.gd` (51/0), `task_241_character_gameplay_playability_smoke.gd` (34/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: Nach TASK_259 Loadout und Gewicht als durchgehenden Playability-Pfad pruefen.
+
+### TASK_260 - Loadout Selection Decorative Weapons Weight Playability
+- Status: implementiert
+- Stand: `scripts/tests/task_260_loadout_selection_decorative_weapons_weight_playability.gd` prueft spielbare Loadout-IDs gegen Visual-only-IDs, blockierte Dekor-Selections, `none`, Gewichte, FOB-Selector/Preview, Character-Overlay, Combat-Active-Weapon, Simulation-Snapshot und 3D-Weapon-Visuals.
+- Stand: `WeaponData` fuehrt `none` als explizites leeres Loadout ohne Schaden, Preview, Visual-Loadout und Gewicht; `LoadoutModifierResolver` serialisiert `loadout_weight` und bleibt frei von Preview-/Socket-/Modelldaten.
+- Stand: `SimulationRoot` faellt bei leerem Active-Weapon-Rueckgabewert nicht mehr auf Rifle zurueck; `TerrainMap3DView` behandelt zwei `none`-Slots als absichtlich waffenlos und haengt kein Default-Blaster-Visual an.
+- Stand: `docs/reports/playability_loadout_weight_report.md` und `docs/dev/loadout_playability_rules.md` dokumentieren Befund, Regeln und manuelle Restpunkte.
+- Offene Punkte: Live-Dropdown-Haptik und Balancing-Zahlen bleiben manuelle/fachliche Folgepunkte, sobald echte Unlock-/Inventarlisten existieren.
+- Risiken: Visual-only-IDs duerfen auch in Folgearbeiten nicht zu Gameplay-IDs werden, ausser sie werden bewusst in `WeaponData` aufgenommen.
+- Lokale Pruefung: `task_260_loadout_selection_decorative_weapons_weight_playability.gd` (72/0), `task_176_fob_loadout_weapon_preview_selector_verifier.gd` (30/0), `task_190_weapon_visual_loadout_expansion_and_scale.gd` (48/0), `test_weapon_data.gd` (24/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_261 prueft Screenwechsel und Rueckwege auf State-Loss.
+
+### TASK_261 - Cross Screen State Loss Playability Smoke
+- Status: implementiert
+- Stand: `scripts/tests/task_261_cross_screen_state_loss_playability_smoke.gd` fuehrt Main Menu/Settings, Homebase, FOB, Mission, Debrief, Editor und Multiplayer-Lobby nacheinander mit stabilen Preset-Unit-IDs aus.
+- Stand: Geprueft werden Routen, Settings-Persistenz, Homebase-Transfer, FOB-Fireteam-/Loadout-Uebergabe, Mission-Registry, Mission-Loadout-Gewicht, Debrief-Identitaet, Rueckkehr nach Homebase, Editor-Save/Load und Multiplayer Host/Client/Disconnect.
+- Stand: Der Smoke prueft zusaetzlich, dass Settings-, Editor- und Lobby-Wege keinen unerwarteten `SimulationRoot` erzeugen, idle UI-Audio nicht duplizieren und den selektierten Unit-State nicht mutieren.
+- Stand: `docs/reports/playability_cross_screen_state_loss_report.md` dokumentiert Hauptflow, Editorflow, Multiplayer-Vorbereitung, State-Invarianten und offene manuelle Punkte.
+- Offene Punkte: Echte Drag-and-drop-Haptik, visuelle Screen-Transitionen und Zwei-Client-Netzwerkverhalten bleiben manuelle bzw. eigene Smoke-Pfade.
+- Risiken: Der lange Smoke lokalisiert Fehler grober als die Einzelverifier; er soll deshalb als Gate-Ergaenzung laufen, nicht als Ersatz.
+- Lokale Pruefung: `task_261_cross_screen_state_loss_playability_smoke.gd` (67/0), `task_241_character_gameplay_playability_smoke.gd` (34/0), `task_250_asset_audio_background_playability_smoke.gd` (102/0) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_262 fasst die Playability-Smokes in ein wiederholbares Regression-Gate zusammen.
+
+### TASK_262 - Playability Regression Gate and Manual Open Items
+- Status: implementiert
+- Stand: `scripts/tests/run_task_262_playability_gate.ps1` fuehrt TASK_256 bis TASK_261 in Reihenfolge aus und laesst anschliessend `git diff --check` laufen. Der lokale Gate-Lauf war mit allen sechs Tasks gruen.
+- Stand: `scripts/tests/task_262_playability_regression_gate_and_manual_open_items.gd` prueft den Gate-Vertrag, die Reihenfolge, Report-Referenzen, Matrix-Abdeckung und die kurze manuelle Restcheckliste.
+- Stand: `docs/reports/playability_regression_gate_report.md` trennt Hard Failures, Warnings, Manual Items, Coverage Matrix und Standardbefehle. `docs/manual_checks/playability_manual_open_items.md` haelt nur subjektive/manuelle Restpunkte fest.
+- Stand: `docs/qa/playability_coverage_matrix.md` ist um die Gate Coverage Summary erweitert und markiert die durch TASK_259 bis TASK_261 automatisierten Character-/Debrief-/Meta-Flows.
+- Offene Punkte: Das Gate ersetzt keine sichtbare Zwei-Client- und Drag-and-drop-Haptikpruefung; diese Punkte bleiben kurz in der manuellen Liste.
+- Risiken: Der Gate-Lauf ist bewusst grob und soll Fehler priorisieren. Einzelverifier bleiben fuer Diagnose und Reparatur massgeblich.
+- Lokale Pruefung: `task_262_playability_regression_gate_and_manual_open_items.gd` (60/0), `run_task_262_playability_gate.ps1` (TASK_256 50/0, TASK_257 427/0, TASK_258 67/0, TASK_259 51/0, TASK_260 72/0, TASK_261 67/0, `git diff --check`) und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_263 startet den Kontext-Hilfe-Popup-UX-Vertrag.
+
+### TASK_263 - Contextual Help Popup UX Contract
+- Status: implementiert
+- Stand: `docs/dev/contextual_help_popup_ux_contract.md` definiert den gemeinsamen UX-Vertrag fuer Hilfe-Popups mit `none`, `compact` und `detail`, Hover-/Fokus-Timing, Touch-/Controller-Fallback, Maximalbreiten, Viewport-Clamp, Settings-Modi `off`/`compact`/`expanded` und globalem Hilfe-Button `shell.global_help_button`.
+- Stand: `data/contextual_help_catalog.json` legt das Katalogschema mit stabilen `help_id`s, Pflichtfeldern, erlaubten Statuswerten, Pflichtbereichen und Laengenregeln an. Die ersten Draft-/Planned-Eintraege decken Main Menu, Settings, Homebase, FOB, Loadout, Character Sheet, Mission HUD, Map Editor, Multiplayer Lobby und Debrief ab.
+- Stand: `docs/qa/playability_coverage_matrix.md` enthaelt eine eigene Contextual-Help-Coverage-Sektion fuer Pflichtscreens, Katalogschema, Timing, Layout und globalen Help-Button. `scripts/tests/task_263_contextual_help_popup_ux_contract.gd` prueft Dokumentabschnitte, Katalogschema, Pflichtbereiche, stabile IDs und Textlaengen.
+- Offene Punkte: TASK_264 muss daraus die Runtime-Komponente mit Settings-Anbindung und globalem Help-Button bauen; TASK_265/TASK_266 fuellen und verdrahten konkrete Screen-Inhalte.
+- Risiken: Hilfe bleibt bewusst UI-only. Folgearbeiten duerfen keine Gameplay-Werte im Hilfesystem nachrechnen oder Help-Popups als zweite Command-/State-Schicht nutzen.
+- Lokale Pruefung: `task_263_contextual_help_popup_ux_contract.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_264 fuer Popup-Komponente, Settings-Toggle und globale Help-Taste umsetzen.
+
+### TASK_264 - Contextual Help Popup Component Settings Toggle
+- Status: implementiert
+- Stand: `scripts/ui/contextual_help_service.gd` laedt `data/contextual_help_catalog.json`, normalisiert die Modi `off`/`compact`/`expanded`, trennt Kurz- und Detailhilfe, setzt die TASK_263-Timing-Regeln um und diagnostiziert fehlende IDs, leere Texte, deaktivierte Requests und registrierte Controls.
+- Stand: `scripts/ui/contextual_help_popup.gd` ist eine wiederverwendbare Panel-Komponente mit Titel, kompakten Wrap-Zeilen, optionalem Detailbereich, Maximalbreiten, Maximalhoehe und Viewport-Clamp. Die Komponente verschiebt keine festen Fenster und bleibt reine Overlay-Darstellung.
+- Stand: `GameSettingsContract`, `SettingsScreen` und `MainMenu` unterstuetzen `contextual_help_mode`. Das Main Menu bereitet den kleinen globalen Help-Button `shell.global_help_button`, eine Help-Popup-Instanz, Help-IDs fuer App-Shell-/Settings-Ziele und einfache Hover-/Fokus-Verzoegerung vor.
+- Offene Punkte: TASK_265/TASK_266 muessen die konkreten Character-, Loadout-, Mission-, Editor- und Settings-Hilfeinhalte verbreitern und weitere Controls registrieren.
+- Risiken: Die Runtime-Schicht ist absichtlich UI-only. Folgearbeiten duerfen keine SimulationRoot-Commands, Loadout-Werte oder Character-State aus Hilfe-Popups ableiten.
+- Lokale Pruefung: `task_264_contextual_help_popup_component_settings_toggle.gd`, `task_258_fixed_window_clipping_scrollbar_playability_audit.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_265 fuer Character Sheet und Loadout Help Content Pass umsetzen.
+
+### TASK_265 - Character Sheet Loadout Help Content Pass
+- Status: implementiert
+- Stand: `data/contextual_help_catalog.json` enthaelt jetzt Hilfe-Copy fuer Character-Sheet-Identitaet, Rolle, Fireteam, Badges, Traits, Status/Recovery, Morale/Frustration, Teamfit, Progress, Kernwerte, Kommunikation, Plattform-Skills, abgeleitete Werte, Verhalten sowie Loadout-Gewicht, Armor, Waffenoptionen, No Weapon, Visual-only, Preview und Disabled-Gruende.
+- Stand: `CharacterSheetFormatter` liefert `help_id`s pro relevanter Zeile; `CharacterSheetView` setzt diese IDs auf Header, Labels, Balken, Portrait und Badges. `FOBScreen` markiert Loadout-Panel, Member Rows, Armor Select, Weapon Slots, Previews, Empty Slot, Weight und Clear-Fokus mit stabilen IDs.
+- Stand: `docs/content/character_sheet_loadout_help_copy.md` dokumentiert die Copy- und Source-Regeln: Character-State aus `MetaUnitProfile`, Badges aus `NPCRankBadgeResolver`, Waffen aus `WeaponData`, Gewicht aus `LoadoutModifierResolver`.
+- Offene Punkte: TASK_266 muss Mission-HUD, Befehle, Editor, Multiplayer und Settings mit Help-Copy und IDs ausstatten.
+- Risiken: LMG ist bewusst als `planned` markiert, solange `WeaponData` keinen echten Gameplay-Eintrag hat. Hilfe darf weiterhin keine finalen Balanceformeln behaupten.
+- Lokale Pruefung: `task_265_character_sheet_loadout_help_content_pass.gd`, `task_259_character_card_roster_switching_playability.gd`, `task_260_loadout_selection_decorative_weapons_weight_playability.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_266 fuer Command-, Mission-, Editor-, Multiplayer- und Settings-Hilfe umsetzen.
+
+### TASK_266 - Command Mission Editor Settings Help Content Pass
+- Status: implementiert
+- Stand: `data/contextual_help_catalog.json` enthaelt jetzt gruppierte Help-Copy fuer Mission Commands, Area Orders, Fireteam-Status, Settings, FoW-Modi, Multiplayer Host/Join/Ready/Map Transfer und Editor-Werkzeuge. `editor.back` und `mission.command.roe_fire_rules` bleiben bewusst als `todo` fuer Folgearbeiten markiert.
+- Stand: Main Menu Settings, Multiplayer Lobby, Map Editor und Mission Sandbox setzen stabile `help_id`-Metadaten auf sichtbare Controls, dynamisch erzeugte Mission Panels und relevante Popup-/Menu-Knoten, ohne Gameplay-State aus der UI abzuleiten.
+- Stand: `docs/content/command_mission_editor_settings_help_copy.md`, die Playability-Coverage-Matrix und `task_266_command_mission_editor_settings_help_content_pass.gd` dokumentieren und pruefen die neue Abdeckung.
+- Offene Punkte: Ein sichtbarer Editor-Back-Flow und echte ROE-/Fire-Rule-Controls werden erst in den naechsten passenden Tasks verdrahtet.
+- Risiken: Hilfe bleibt UI-only. Folgearbeiten duerfen keine Befehle ausloesen, Mission-State veraendern oder taktische UI bei Planung verdecken.
+- Lokale Pruefung: `task_266_command_mission_editor_settings_help_content_pass.gd`, `task_257_button_reachability_and_interaction_verifier.gd`, `task_223_fog_of_war_modes_contract_and_settings.gd`, `task_263_contextual_help_popup_ux_contract.gd`, `task_264_contextual_help_popup_component_settings_toggle.gd`, `task_265_character_sheet_loadout_help_content_pass.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_267 fuer Help-Coverage, Layout-Clamping, Timing und Settings-Modi als zusammenhaengendes Gate umsetzen.
+
+### TASK_267 - Contextual Help Coverage Layout Verifier
+- Status: implementiert
+- Stand: `scripts/tests/task_267_contextual_help_coverage_layout_verifier.gd` prueft den Help-Katalog auf Pflichtfelder, stabile IDs, Textlaengen, wrappbare Zeilen, erlaubte Statuswerte und dokumentierte `todo`-Ausnahmen.
+- Stand: Der Verifier rendert jede Katalog-ID in kompaktem und detailfaehigem Popup-Layout gegen mehrere Zielpositionen, prueft Viewport-Clamp, Maximalbreite, Maximalhoehe, Ziel-Control-Ueberdeckung, off/compact/expanded, Long-hover, Pin und globalen Help-Button.
+- Stand: Main Menu, Multiplayer Lobby, Map Editor, Homebase, FOB, Debrief und Mission HUD werden headless instanziert und auf sichtbare `help_id`-Metadaten gegen den Katalog gescannt. Alte TASK_263-Kompatibilitaets-IDs wurden als reine UI-Metadaten nachgezogen.
+- Stand: `docs/reports/contextual_help_coverage_layout_report.md` und `docs/qa/playability_coverage_matrix.md` dokumentieren Gate-Abdeckung, ungenutzte Fixture-IDs, manuelle Restpunkte und die Ausnahmen `editor.back` sowie `mission.command.roe_fire_rules`.
+- Offene Punkte: Ready-IDs fuer konkrete Waffenoptionszeilen, FoW-Untermodi, Plattform-Skills und `mission.command.hold` sind im Katalog vorhanden, aber nicht in jedem Fixture sichtbar; der Verifier meldet sie als Warnung. `editor.back` und `mission.command.roe_fire_rules` bleiben echte Folgepunkte.
+- Risiken: Der Gate prueft harte Layout-/Timingregeln headless; finales Copy-Reading und subjektive Lesbarkeit bleiben manuell.
+- Lokale Pruefung: `task_267_contextual_help_coverage_layout_verifier.gd`, `task_258_fixed_window_clipping_scrollbar_playability_audit.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_268 als Post-Help-Playability-Smoke fuer Hilfe aus/kompakt/erweitert umsetzen.
+
+### TASK_268 - Post Help Popup Playability Regression Smoke
+- Status: implementiert
+- Stand: `scripts/tests/task_268_post_help_popup_playability_regression_smoke.gd` prueft Hilfe `off`, `compact` und `expanded` gegen Main Menu/Settings, Multiplayer Lobby, Map Editor, Homebase, FOB, Mission HUD und Debrief.
+- Stand: Der Smoke verknuepft TASK_262 und TASK_267 als Gates, prueft globale Hilfe, Popup-Viewport-Lage, input-transparente Popups, Pflichtbutton-Erreichbarkeit und dass Homebase-/FOB-/Mission-Fixed-Windows durch sichtbare Hilfe nicht verschoben werden.
+- Stand: `ContextualHelpPopup` setzt jetzt auch seine inneren Margin-/VBox-/Label-Kinder auf `MOUSE_FILTER_IGNORE`, damit Hilfe nicht nur optisch overlayt, sondern auch in Coverage-/Input-Heuristiken keine Controls blockiert.
+- Stand: `docs/reports/post_help_popup_playability_regression_report.md`, `docs/manual_checks/post_help_popup_manual_readability_checklist.md`, `scripts/tests/run_task_268_post_help_playability_gate.ps1` und die Matrix-Zeile dokumentieren das Post-Help-Gate.
+- Offene Punkte: Finales Copy-Reading und subjektive Lesbarkeit bleiben manuell.
+- Risiken: Der Smoke ist absichtlich ein Integrationscheck ueber die Help-Modi; die tiefen Button-/Layout-/Coverage-Checks bleiben bei TASK_262 und TASK_267.
+- Lokale Pruefung: `task_268_post_help_popup_playability_regression_smoke.gd`, `task_262_playability_regression_gate_and_manual_open_items.gd`, `task_267_contextual_help_coverage_layout_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Hilfe als Standardanforderung fuer neue UI-, Character-, Loadout-, Mission- und Editor-Controls behandeln.
+
+### TASK_269 - Tactical Doctrine Source Review Game Abstraction
+- Status: implementiert
+- Stand: `docs/research/tactical_doctrine_source_matrix.md` vergleicht US-, deutsche, franzoesische und Arma-/Game-Quellen als reine Game-Design-Inspiration. Die Matrix dokumentiert pro Quelle Ebene, relevante Konzepte, Sternenbuergerchen-Ableitung und klare Nicht-uebernehmen-Hinweise.
+- Stand: `docs/dev/tactical_command_doctrine_game_abstraction.md` definiert den sicheren Spielvertrag fuer Commander-Intent, Fireteam-Leader-Ausfuehrung, Unit-Aktionen, taktische Regeln, Ausbrueche und #16/#17/#18-/Map-/Bubble-/Help-Feedback.
+- Stand: Der Verifier `scripts/tests/task_269_tactical_doctrine_source_review_game_abstraction.gd` prueft Pflichtabschnitte, Quellenabdeckung, neutralisierte Begriffe, Sicherheitsnotiz, Folge-Task-Referenzen und Task-Status.
+- Offene Punkte: Keine im TASK_269-Scope; die Umsetzung der Datenvertraege folgt bewusst erst ab TASK_270.
+- Risiken: Folge-Tasks muessen die Dokumente als Spielabstraktion behandeln. Keine realen Schritt-fuer-Schritt-Taktiken, keine nationalen Ingame-Schubladen und keine UI-seitige Gameplay-Wahrheit.
+- Lokale Pruefung: `task_269_tactical_doctrine_source_review_game_abstraction.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_270 baut darauf den Commander-zu-FTL-Delegationsvertrag.
+
+### TASK_270 - Commander to Fireteam Leader Delegation Contract
+- Status: implementiert
+- Stand: `docs/dev/commander_fireteam_delegation_contract.md` definiert die Kette `CommanderIntent -> FireteamExecutionPlan -> UnitAction -> UnitCommand/SimulationRoot` samt Authority-Grenzen, Statusantworten, Snapshot-Feldern und UnitAction-Dictionary-Regeln.
+- Stand: `scripts/command/commander_intent.gd` kapselt fireteam-scoped Commander-Absicht mit `command_id`, Verb, Ziel, Tempo, Fire Rule, Contact Response, Risiko und Legacy-Mapping fuer Move/Defend/Take/Engage/Flank. Direkte `unit_id`-Payloads werden nicht als Intent-Wahrheit serialisiert.
+- Stand: `scripts/tactical/fireteam_execution_plan.gd` erzeugt aus CommanderIntent plus FTL-Skill einen plan-scoped FireteamExecutionPlan mit `plan_id`, `status_response`, Movement Style, Security, Cover Priority, Route Bias, Breakout-Klassen und UnitAction-Dictionaries. Die Klasse baut nur Runtime-Command-Dictionaries und enqueued nichts selbst.
+- Stand: `scripts/tests/task_270_commander_to_fireteam_leader_delegation_contract.gd` prueft Dokument, Legacy-Command-Mapping, FTL-Skill-Einfluss, UnitAction-Planbindung und dass die neuen Vertragsklassen keine UI-/SceneTree-/SimulationRoot-Mutation ausfuehren.
+- Offene Punkte: Keine im TASK_270-Scope; konkrete UI-Regeln und Fire-Rule-Controls folgen in TASK_271.
+- Risiken: Folge-Tasks muessen die neuen Klassen als Vertrag nutzen, ohne daraus eine zweite SimulationRoot oder eine direkte UI-Unit-Steuerung zu machen.
+- Lokale Pruefung: `task_270_commander_to_fireteam_leader_delegation_contract.gd`, `task_191_command_chain_selection_area_feedback_pass.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_271 definiert konkrete taktische Command Modes und Fire Rules.
+
+### TASK_271 - Tactical Command Modes ROE Fire Rules
+- Status: implementiert
+- Stand: `scripts/tactical/tactical_command_rules.gd` definiert Tempo, Feuerregel, Kontaktverhalten, Deckungsprioritaet und Security als kleine Commander-Regelstruktur mit Katalog, Defaults, Help-IDs, Feedback-Snapshot und Konfliktnormalisierung. `CommanderIntent` transportiert die Regeln; `FireteamExecutionPlan` liest sie als Planvorgabe, ohne UI-Unit-Mutation. Der Vertrag steht in `docs/dev/tactical_command_rules_contract.md`.
+- Offene Punkte: Keine im TASK_271-Scope; konkrete Mehr-Fireteam-Koordination folgt in TASK_272.
+- Risiken: Folge-Tasks duerfen die Regeln nur als Planvorgaben verwenden und nicht als zweite Gameplay-Wahrheit neben SimulationRoot.
+- Lokale Pruefung: `task_271_tactical_command_modes_roe_fire_rules.gd`, `task_109_verifier.gd`, `task_111_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_272 koordiniert mehrere Fireteams auf gemeinsame Area-Plaene.
+
+### TASK_272 - Multi Fireteam Coordinated Area Plan
+- Status: implementiert
+- Stand: `scripts/tactical/multi_fireteam_plan_resolver.gd` erzeugt aus einem gemeinsamen `CommanderIntent` und Fireteam-Kontexten nachvollziehbare Rollenplaene mit Lead, Support, Security, Reserve und Recon. Der Vertrag steht in `docs/dev/multi_fireteam_plan_contract.md`.
+- Stand: `CommanderIntent` kann koordinierte Fireteam-IDs transportieren; `FireteamExecutionPlan` spiegelt `coordination_plan_id` und `coordination_role`. Der Mission-Controller erzeugt fuer gemeinsame Multi-Fireteam-Area-Orders einen Pre-GO-Plan, zeigt #17/#18-Snapshots und reicht kompakte Rollenlabels an die Primary Map weiter.
+- Offene Punkte: Keine im TASK_272-Scope; feinere Skill-Progression und Kommunikationsereignisse folgen in TASK_273/TASK_274.
+- Risiken: Der Plan bleibt bewusst Vorschau/Delegation und darf nicht als neue Gameplay-Wahrheit neben SimulationRoot genutzt werden.
+- Lokale Pruefung: `task_272_multi_fireteam_coordinated_area_plan.gd`, `task_188_fireteam_advance_styles_map_readability.gd`, `task_191_command_chain_selection_area_feedback_pass.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_273 bindet FTL-Skill und Teamfortschritt sichtbar in die Planqualitaet ein.
+
+### TASK_273 - Fireteam Leader Skill Tactical Progression
+- Status: implementiert
+- Stand: `docs/dev/fireteam_leader_tactical_progression.md` definiert den FTL-Skillvertrag mit Leadership, Tactical Sense, Communication, Discipline, Initiative und Team Cohesion sowie fair begrenzten Effekten auf Planqualitaet, Kommunikation, Ausbruchsentscheidungen, Contact-Reports, Spacing und Tempo.
+- Stand: `FireteamBehaviorResolver`, `MultiFireteamPlanResolver` und `FireteamExecutionPlan` nutzen den FTL-Snapshot deterministisch fuer Ausfuehrungsprofil, Rollen-Vorschlaege und Skill-Faktoren, ohne UI- oder Map-Code zur Gameplay-Wahrheit zu machen.
+- Stand: `MissionProgressionResolver` schreibt langsame, gedeckelte FTL-Fortschritte nach Missionen in `progression.ftl_tactical`, erzeugt Debrief-Ereignisse und `CharacterSheetFormatter` zeigt die kompakte Zeile `FTL Impact` mit Help-ID `character_sheet.ftl_tactical_impact`.
+- Stand: `MultiplayerSnapshotContract` normalisiert optionale `fireteam_tactical`-Eintraege als oeffentliche Kennzahlen und entfernt private Profil-, Beziehungs- und History-Daten.
+- Offene Punkte: Sichtbare Kommunikationsereignisse fuer #17/#18, Bubbles und Map bleiben TASK_274.
+- Risiken: Fortschritt ist bewusst klein und capped; Folgearbeiten duerfen aus FTL-Skill keine Trefferbonus- oder Super-KI-Schiene machen.
+- Lokale Pruefung: `task_273_fireteam_leader_skill_tactical_progression.gd`, `task_237_mission_progression_xp_morale_frustration.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_274 baut die sichtbare taktische Kommunikationsschicht auf dem oeffentlichen FTL-Snapshot.
+
+### TASK_274 - Tactical Communication Feedback Layer
+- Status: implementiert
+- Stand: `scripts/tactical/tactical_communication_event.gd` definiert visual-only Kommunikationsereignisse fuer Order-Ack, Rollen, Phasen, Kontakt, Ausbrueche, Blockaden, Objectives und Air-Asset-Bedrohung mit stabiler Event-ID, Fireteam-/Unit-ID, Prioritaet, Dauer und Kanaelen.
+- Stand: `scripts/tactical/tactical_communication_resolver.gd` priorisiert kritische Meldungen, setzt Cooldowns gegen Bubble-/Status-Spam und nutzt `data/tactical_communication_copy.json`, damit FTL-Communication die Praezision der Texte beeinflusst, ohne neue Gameplay-Wahrheit einzufuehren.
+- Stand: `MissionTacticalSandboxController` speist Multi-Fireteam-Planereignisse in #17/#18, FTL-Bubbles und die Primary-Map. `TerrainMap3DView` rendert kompakte Map-Marker und stellt reine Diagnose-Snapshots fuer die Ereignisse bereit.
+- Offene Punkte: Audio bleibt als optionaler Kanal markiert; die eigentliche Air-Asset-Exception- und Recovery-Mechanik folgt in TASK_277/TASK_278.
+- Risiken: Die Kommunikationsschicht ist bewusst Anzeige/Snapshot. Folgearbeiten duerfen daraus keine zweite Runtime-Wahrheit neben SimulationRoot machen.
+- Lokale Pruefung: `task_274_tactical_communication_feedback_layer.gd`, `task_214_comic_bubble_feedback_playability_smoke.gd`, `task_191_command_chain_selection_area_feedback_pass.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_275 ordnet die Command-Buttons an die neuen Befehlsebenen an.
+
+### TASK_275 - Command Button Hierarchy Arrangement Overhaul
+- Status: implementiert
+- Stand: `scripts/ui/mission_command_hierarchy_contract.gd` definiert eine visual-only Buttonhierarchie fuer Ziel, Regel, Plan, Air/LZ und Ausbruch inklusive #16/#17/#18-Rollen, Kontextgates und Disabled-Gruenden.
+- Stand: `MissionTacticalSandboxController` haelt die alten Buttonpfade und Signalwege, ordnet #16 als kurze Goal-Matrix, versieht Pflichtbuttons mit Hierarchie-/Help-Metadaten und stellt `get_command_hierarchy_snapshot()` bereit.
+- Stand: `docs/dev/mission_command_button_hierarchy.md` dokumentiert Vorher/Nachher-Matrix, Disabled-Reasons, Help-IDs und offene UX-Fragen.
+- Offene Punkte: Echte Ausbruch- und Air-Exception-Aktionen bleiben bewusst fuer TASK_276 bis TASK_278 reserviert.
+- Risiken: Die neue Hierarchie darf weiter nur UI-/Snapshot-Schicht bleiben; Folgearbeiten duerfen daraus keine zweite Gameplay-Wahrheit machen.
+- Lokale Pruefung: `task_275_command_button_hierarchy_arrangement_overhaul.gd`, `task_257_button_reachability_and_interaction_verifier.gd`, `task_258_fixed_window_clipping_scrollbar_playability_audit.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_276 baut das taktische Ausbruchssystem auf den sichtbaren Rueckfrage-/Override-Slots auf.
+
+### TASK_276 - Tactical Breakout and Exception Behavior
+- Status: implementiert
+- Stand: `data/tactical_breakout_catalog.json` definiert Ausbruchsklassen und Kerntrigger fuer Kontakt, Suppression, Medic/Casualty, Blockade, Reichweite, Ammo/Weapon, Leader down, Air-Asset und Regelkonflikte.
+- Stand: `scripts/tactical/tactical_breakout_resolver.gd` normalisiert Trigger, erzwingt `FireteamExecutionPlan.allowed_breakout_classes`, bewertet FTL-Skill, erzeugt Event-IDs, Spieleroptionen, Feedbackstatus und Return-to-plan-Snapshots.
+- Stand: `MissionTacticalSandboxController` kann Breakouts aufzeichnen, in TacticalCommunicationEvents fuer #17/#18/Map/Bubbles uebersetzen und Suppression-Ausbrueche beim Stabilisieren wieder als `returned_to_plan` markieren.
+- Offene Punkte: Echte Air-Asset-Schadenslogik und Meta-Folgen bleiben TASK_277/TASK_278.
+- Risiken: Der Resolver ist bewusst Vertrags-/Feedbackschicht; Folgearbeiten muessen Runtime-Mutationen weiter ueber bestehende Controller und SimulationRoot halten.
+- Lokale Pruefung: `task_276_tactical_breakout_and_exception_behavior.gd`, `task_103_verifier.gd`, `task_189_medic_adjacent_tile_healing_rule.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_277 definiert Dropship-/Frachter-Bedrohung und Air-Asset-Schadensstatus.
+
+### TASK_277 - Dropship Freighter Anti Armor Threat Contract
+- Status: implementiert
+- Stand: `scripts/mission/air_asset_status.gd` definiert Dropship-/Frachter-Zustaende von `intact` ueber `threatened`/`locked` und `hit`/`damaged` bis `destroyed`/`crashed` sowie `recovering`/`unavailable`; Snapshots deklarieren `runtime_authority = "SimulationRoot"` und `ui_sets_gameplay_truth = false`.
+- Stand: `scripts/combat/air_asset_threat_resolver.gd` erlaubt nur definierte Anti-Armor-Waffen (`rocket_launcher`, `rail_gun`), respektiert Range/LOS/FoW/Hoehe, erzwingt eine Warnphase vor Hit/Destroy und berechnet LZ-/Enemy-AT-Risiko.
+- Stand: `SimulationRoot` verarbeitet `air_asset_status_update`-Effects und stellt `get_air_asset_status_snapshot()` bereit; der Mission Controller spiegelt Status, VFX/SFX-Payload, TacticalCommunicationEvent und Breakout in seinen Snapshots.
+- Offene Punkte: Dauerhafte Reparatur-/Ersatz- und Debrief-Folgen folgen in TASK_278.
+- Risiken: Balancing der Risikowerte muss im Playability-Smoke gegen Frust geprueft werden; der Contract verhindert Sofortabschuesse ohne Warnung.
+- Lokale Pruefung: `task_277_dropship_freighter_anti_armor_threat_contract.gd`, `bugfix_dropship_mission_flow_verifier.gd`, `task_160_tactical_playability_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_278 baut Meta-Folgen, Recovery und Softlock-Schutz auf dem AirAssetStatus auf.
+
+### TASK_278 - Air Asset Loss Recovery Meta Loop
+- Status: implementiert
+- Stand: `scripts/meta/air_asset_recovery_state.gd` uebersetzt Mission-`AirAssetStatus` in Meta-Zustaende `craft_available`, `damaged_repairing` und `destroyed_replacement_pending` inklusive Pilotstatus, ETA, Softlock-Guard und Snapshot-Persistenz.
+- Stand: `MetaLayerFlow` uebernimmt Air-Asset-Status ins Missionsergebnis, baut `air_asset_recovery`, haelt `get_air_asset_recovery_snapshot()`/`load_air_asset_recovery_snapshot()` bereit und laesst Reparatur/Ersatz ueber bestehenden Transport-Timer oder `advance_air_asset_recovery_time()` laufen.
+- Stand: Debrief, Homebase-Flightdeck und FOB-Flightdeck zeigen Verlust/Reparatur/Ersatz-ETA; Boarding, Send und Missionsstart sind fuer nicht verfuegbare Air Assets blockiert.
+- Offene Punkte: End-to-End-Balancing mit Enemy-AT/LZ-Sicherung folgt in TASK_279.
+- Risiken: Die Zeitwerte sind Contract-/Balance-Defaults; finale Schwierigkeit gehoert in den Playability-Smoke.
+- Lokale Pruefung: `task_278_air_asset_loss_recovery_meta_loop.gd`, `task_096_recovery_verifier.gd`, `task_261_cross_screen_state_loss_playability_smoke.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_279 prueft LZ-Sicherung, Air-Asset-Bedrohung, Verlust, Kommunikation und Meta-Folgen im zusammengesetzten Mission-Smoke.
+
+### TASK_279 - LZ Security Air Asset Tactical Playability Smoke
+- Status: implementiert
+- Stand: `scripts/tests/task_279_lz_security_air_asset_tactical_playability_smoke.gd` prueft den zusammengesetzten LZ-/Air-Asset-Smoke mit zwei Fireteams, koordiniertem Take-Area-Plan, sicherem LZ-Warnfall, riskantem Enemy-AT-Warnfall, Air-Asset-Verlust und Meta-Roundtrip.
+- Stand: `maps/test_lz_air_asset_threat_fixture.json` beschreibt eine kleine 32x32-Fixture mit `lz_secure`, `lz_risky`, `enemy_at_team` und `objective_point`; `docs/reports/lz_security_air_asset_playability_smoke.md` dokumentiert Success-, Threat-, Loss- und Meta-Pfad.
+- Stand: Der Smoke prueft Role-/Breakout-/Air-Asset-Kommunikation, Explosion-VFX/SFX, `SimulationRoot`-Status, `MetaLayerFlow`-Recovery, Debrief/Homebase/FOB-Blockaden, `softlock_guard` und `ui_sets_gameplay_truth = false`.
+- Offene Punkte: Manueller Mission-Sichtcheck bleibt sinnvoll, weil der Headless-Smoke Feedback- und Statusdaten prueft, aber nicht die finale visuelle Fairness beurteilt.
+- Risiken: Der Smoke ist bewusst breit und kann Folgefehler nur auf die betroffene Integrationszone eingrenzen; Balancewerte fuer AT-Risiko bleiben weiter keine finalen Werte.
+- Lokale Pruefung: `task_279_lz_security_air_asset_tactical_playability_smoke.gd`, `task_160_tactical_playability_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_280 macht Taktikprofile, Heavy-/AT-Rollen und Air-Asset-Risiko im Editor/Szenario authorbar.
+
+### TASK_280 - Tactical Profile Editor Scenario Authoring
+- Status: implementiert
+- Stand: `MissionScenarioData` speichert validierte taktische Authoring-Daten inklusive Enemy-Taktikprofil, Security/Facing, Heavy-/AT-Rolle, optionaler LZ-Threat-Zone, Air-Asset-Risk-Profile und Kommunikationsintensitaet mit sicheren Defaults fuer alte Szenarien.
+- Stand: `MapEditor` bietet kompakte Auswahlfelder, Help-Metadaten und Warnungen; `data/tactical_profile_catalog.json` dokumentiert Profile, Rollen, Risiko-Stufen und sichere Defaults.
+- Stand: `MissionTestSetup` reicht die validierten Daten an Runtime-Controller weiter; Editor-UI bleibt keine Gameplay-Wahrheit.
+- Offene Punkte: Manuelle Editor-UX bleibt als Nachpolitur sinnvoll, weil der Verifier Roundtrip/Fallback/Glue prueft, nicht Lesetempo im echten Editor.
+- Risiken: Profilkombinationen koennen spaeter Balance-Tuning brauchen; Validierung verhindert zunaechst nur unvollstaendige oder unfaire Grundkonfigurationen.
+- Lokale Pruefung: `task_280_tactical_profile_editor_scenario_authoring.gd`, `task_156_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_281 sichert Multiplayer-Authority und Snapshot-Vertrag fuer taktische Planung ab.
+
+### TASK_281 - Tactical Command Multiplayer Authority Snapshot
+- Status: implementiert
+- Stand: `MultiplayerCommandContract` whitelisted CommanderIntent, Breakout-Response, AirAsset-Commands und Host-only Role-Override; taktische State-Mutationsfelder wie `air_asset_status`, `breakout_state`, `communication_events`, `vfx_events` und `sfx_events` werden hart abgelehnt.
+- Stand: `MultiplayerSnapshotContract` spiegelt `commander_intents`, `fireteam_plan_status`, `communication_events`, `tactical_rules`, `breakout_states` und `air_asset_status` als kleine, stabil sortierte read-only Payloads.
+- Stand: `SimulationRoot` publiziert den autoritativen AirAssetStatus mit und wendet Tactical-Snapshots clientseitig nur als Spiegelung an; Commands und Effects bleiben beim Snapshot-Apply leer.
+- Offene Punkte: Echter LAN-Zwei-Instanzen-Sichtcheck bleibt manuell, der Headless-Smoke prueft Vertrag, Deduplizierung und Apply-Grenzen.
+- Risiken: Weitere taktische Snapshot-Felder muessen ueber denselben Contract laufen, damit Netzlast und Privacy kontrollierbar bleiben.
+- Lokale Pruefung: `task_281_tactical_command_multiplayer_authority_snapshot.gd`, `task_168_multiplayer_snapshot_contract_verifier.gd`, `task_169_multiplayer_two_client_playability_smoke.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_282 schliesst die Tactical-Overhaul-Reihe mit Playability-, Performance- und Help-Gate ab.
+
+### TASK_282 - Tactical Overhaul Playability Performance Help Gate
+- Status: implementiert
+- Stand: `scripts/tests/task_282_tactical_overhaul_playability_performance_help_gate.gd` prueft die Tactical-Overhaul-Kette von TASK_269 bis TASK_281 plus TASK_268, baut eine kompakte Zwei-Fireteam-Tactical-Payload und validiert CommanderIntent, Fireteam-Planstatus, TacticalRules, CommunicationEvents, BreakoutState und AirAssetStatus.
+- Stand: Das Gate verweist auf TASK_279 als End-to-End-LZ/AirAsset-Smoke, TASK_268 als UI/Help/Playability-Gate, TASK_281 als Multiplayer-Authority-Smoke und TASK_222/TASK_249 als Performance-/Audio-Visual-Budgetbasis.
+- Stand: `docs/reports/tactical_overhaul_playability_performance_help_gate.md` dokumentiert automatisierte Abdeckung, Multiplayer-/Performance-Grenzen, Balance-Open-Items und manuelle Restpunkte; `docs/manual_checks/tactical_overhaul_manual_playability_checklist.md` haelt den Full-HD-/LAN-/Spielgefuehl-Check fest.
+- Offene Punkte: Echter Zwei-Instanzen-LAN-Test, Full-HD-Sichtcheck und Balance-Gefuehl bleiben manuell.
+- Risiken: Der Gate schuetzt Integration und Authority, ersetzt aber keinen finalen Kampagnenbalance-Pass.
+- Lokale Pruefung: `task_282_tactical_overhaul_playability_performance_help_gate.gd`, `task_268_post_help_popup_playability_regression_smoke.gd`, `task_281_tactical_command_multiplayer_authority_snapshot.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_283 prueft Doku-Konsistenz nach der Tactical-Overhaul-Reihe.
+
+### TASK_283 - Post Tactical Docs Consistency Audit
+- Status: implementiert
+- Stand: `docs/reviews/post_tactical_docs_consistency_audit.md` prueft TASK_269 bis TASK_282, Roadmap, Implementation Status, Dev-Dokumente, Reports, Linkziele, Kernbegriffe und Quellen-/Design-Drift.
+- Stand: Ein Cleanup-Befund wurde direkt korrigiert: `docs/reports/contextual_help_coverage_layout_report.md` bezeichnet `mission.command.roe_fire_rules` nicht mehr als bis TASK_271 offen.
+- Stand: `scripts/tests/task_283_post_tactical_docs_consistency_audit.gd` verifiziert Task-Status, Roadmap-/Status-Abgleich, eindeutige Taskdateien, lokale Linkziele, Begriffsanker und Game-Abstraktionsgrenzen.
+- Offene Punkte: Folgeaudits TASK_284 bis TASK_288 pruefen Code-Authority, Branch-Integritaet, UI-Truth, Editor/Multiplayer-Grenzen und Coverage-Gaps.
+- Risiken: Dieser Audit schuetzt Dokumentwahrheit, nicht jede Laufzeitentscheidung.
+- Lokale Pruefung: `task_283_post_tactical_docs_consistency_audit.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_284 prueft Architekturgrenzen und Gameplay-Wahrheit im Code.
+
+### TASK_284 - Gameplay Truth Architecture Boundary Audit
+- Status: implementiert
+- Stand: `docs/reviews/gameplay_truth_architecture_boundary_audit.md` dokumentiert die Authority-Linien fuer UI, Visualizer, Help, Editor, Multiplayer, Tactical-Daten, AirAssetStatus, Loadout/Gewicht und Character Card. Der Audit fand keine Blocker; zwei wichtige Restrisiken bleiben als Monitor-Punkte dokumentiert: clientseitige Snapshot-Mirror-Fallbacks und der breite historische `MissionTacticalSandboxController`.
+- Stand: `scripts/tests/task_284_gameplay_truth_architecture_boundary_audit.gd` scannt UI-/Meta-/Editor-/Visualizer-Dateien auf verbotene Runtime-Mutationsmuster, prueft Multiplayer-State-Key-Guards und smoke-testet Help-Popup sowie Tactical-Snapshot-Apply ohne neue `SimulationRoot`-Commands oder Effects.
+- Offene Punkte: Keine grossen Fixes im Audit-Scope. Folgeaudits TASK_285 bis TASK_288 pruefen Entscheidungszweige, UI-Feedback, Editor/Save/Multiplayer-Vertraege und Coverage-Gaps.
+- Risiken: Statische Suche kann weiterhin False Positives oder bewusst erlaubte Adapter uebersehen; der neue Guard schuetzt die bekannten Boundary-Risiken, ersetzt aber keine Code-Review fuer neue Runtime-Adapter.
+- Lokale Pruefung: `task_284_gameplay_truth_architecture_boundary_audit.gd`, `run_task_284_truth_boundary_scan.ps1`, `task_166_multiplayer_authority_command_contract_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_285 prueft Entscheidungslogiken auf tote, doppelte oder widerspruechliche Zweige.
+
+### TASK_285 - Tactical Decision Branch Integrity Review
+- Status: implementiert
+- Stand: `docs/dev/tactical_decision_priority_matrix.md` dokumentiert die aktuellen Decision Tables fuer CommanderIntent, TacticalRules, FireteamExecutionPlan, MultiFireteamPlan, BreakoutState, TacticalCommunicationEvent, EnemyProfile und AirAssetThreat. Konfliktprioritaeten sind als feste Gewinnerreihenfolge beschrieben.
+- Stand: `docs/reviews/tactical_decision_branch_integrity_review.md` nennt keine Blocker, aber drei wichtige Branch-Befunde: CommanderIntent-Fallbacks ohne eigenes Diagnosefeld, ein praktisch unreachable Risk-/Tempo-Cover-Pfad wegen default `cover_priority = normal`, und AirAssetStatus-State-Fallback ohne Diagnose. Cleanup-Befunde betreffen leere Breakout-Ergebnisse ohne blocked_reason.
+- Stand: `scripts/tests/task_285_tactical_decision_branch_integrity_review.gd` prueft CommanderIntent-Aliase, TacticalRules-Konflikte, ExecutionPlan-Mapping, Multi-Fireteam-Rollen/Statusprioritaet, Breakout-Downgrades, AirAssetThreat-Gates und EnemyProfile-Diagnostics.
+- Offene Punkte: Die Befunde sind bewusst nicht in diesem Review-Task gepatcht; kleine Folgepatches koennen in TASK_289 priorisiert werden.
+- Risiken: Die Matrix pinnt Verhalten und kann bei spaeterem Balancing bewusst angepasst werden muessen; sie soll dann zusammen mit dem Verifier aktualisiert werden.
+- Lokale Pruefung: `task_285_tactical_decision_branch_integrity_review.gd`, `task_272_multi_fireteam_coordinated_area_plan.gd`, `task_276_tactical_breakout_and_exception_behavior.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_286 prueft UI-/Feedback-Schicht auf Wahrheits-Rueckfaelle und stale State.
+
+### TASK_286 - UI Feedback Truth Regression Review
+- Status: implementiert
+- Stand: `docs/reviews/ui_feedback_truth_regression_review.md` dokumentiert keine Blocker, aber wichtige UI-Truth-Risiken: Selection darf nicht pro Panel dupliziert werden, Disabled-Reasons muessen spezifisch bleiben, Comic-Bubble-Cooldowns sind nur Presentation-State und Charakter-/Bubble-Modifier duerfen nicht als Combat-Wahrheit gelesen werden.
+- Stand: `scripts/tests/task_286_ui_feedback_truth_regression_review.gd` prueft statisch UI-/Meta-/Editor-/Visualizer-Grenzen, gleicht Mission-Selektion zwischen `get_command_feedback_snapshot()`, Command-Hierarchy und `TerrainMap3DView.get_render_snapshot()` ab und kontrolliert Help/Bubbles ohne `SimulationRoot`-Side-Effects.
+- Stand: Map-Feedback-Filter werden gegen nicht-visuelle Bubble- und TacticalCommunicationEvent-Payloads geprueft. Character Card, FOB-Loadout und Editoranzeigen bleiben Display-/Authoringpfade ohne direkte Runtime-Mutation.
+- Offene Punkte: Die Befunde sind Review-Feststellungen; kleine Folgepatches koennen in TASK_289 priorisiert werden, falls neue UI-Panels Selection oder Disabled-Reasons erweitern.
+- Risiken: UI braucht weiterhin legitimen Fokus-/Hover-/Layout-State. Dieser State ist erlaubt, solange er nicht in taktische Wahrheit, Combat-Werte oder Command-Verfuegbarkeit umgedeutet wird.
+- Lokale Pruefung: `task_286_ui_feedback_truth_regression_review.gd`, `task_257_button_reachability_and_interaction_verifier.gd`, `task_267_contextual_help_coverage_layout_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_287 prueft Editor-, Save/Load- und Multiplayer-Grenzen im Zusammenspiel.
+
+### TASK_287 - Editor Save Multiplayer Contract Regression Review
+- Status: implementiert
+- Stand: `docs/reviews/editor_save_multiplayer_contract_regression_review.md` prueft Scenario/Editor, Local Roster Save, Settings, AirAssetMeta, Multiplayer-Commands, Snapshot-Privacy und Downloaded-Map-Grenzen nach den Tactical-/AirAsset-Erweiterungen.
+- Stand: `GameSettingsContract` persistiert nur noch bekannte Settings-Keys; unbekannte Roster-/Map-/Runtime-Felder werden beim Normalisieren verworfen.
+- Stand: `MultiplayerMapManifest.validate_map_json_text()` prueft Download-Payloads rekursiv auf `script`, `resource_path` und `absolute_path` und validiert `enemy_team_configs` gegen `EnemyTeamTacticsProfile`.
+- Stand: `scripts/tests/task_287_editor_save_multiplayer_contract_regression_review.gd` deckt Scenario-Runtime-Bleed, Settings-/Roster-/Meta-Trennung, Client-Command-Rejects, Snapshot-Privacy und Downloaded-Map-Rejects ab.
+- Offene Punkte: Keine im TASK-287-Scope; TASK_288 gleicht die Regression-Gates gegen diese Risiken ab.
+- Risiken: Neue Save-/Settings-/Download-Felder muessen weiter ueber die jeweiligen Contracts laufen, statt unbekannte Payloads blind zu serialisieren.
+- Lokale Pruefung: `task_287_editor_save_multiplayer_contract_regression_review.gd`, `task_281_tactical_command_multiplayer_authority_snapshot.gd`, `task_228_multiplayer_editor_map_manifest_download_consent.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_288 prueft Testabdeckung und Gate-Luecken.
+
+### TASK_288 - Regression Gate Coverage Gap Audit
+- Status: implementiert
+- Stand: `docs/qa/regression_gate_coverage_crosswalk.md` ordnet Performance, Asset-Lokalitaet, Playability, Help, Tactical, Multiplayer, Gameplay-Truth, UI-Feedback-Truth, Editor/Save/Multiplayer und Doku-Truth jeweils einem Gate/Test, Report, harten Fehlern, Warning-only-Anteilen und Manual-Rest zu.
+- Stand: `docs/reviews/regression_gate_coverage_gap_audit.md` dokumentiert keine Blocker, trennt Gate-Qualitaet nach harten Fehlern/Warnungen/Manual-Rest und priorisiert P1-Gaps fuer TASK_289: CommanderIntent-Normalisierungswarnungen und AirAssetStatus-Fallback-Diagnosen.
+- Stand: `scripts/tests/task_288_regression_gate_coverage_gap_audit.gd` prueft Crosswalk-Pflichtbereiche, Dateilinks, High-Risk-Automation, Patch-Backlog und Post-Tactical-Patch-Run-List.
+- Offene Punkte: Keine im TASK-288-Scope; TASK_289 entscheidet, welche kleinen Diagnose-/Review-Patches tatsaechlich umgesetzt werden.
+- Risiken: Statische Gate-Listen muessen bei neuen Runtime-APIs, UI-Panels und Snapshot-Feldern weiter gepflegt werden.
+- Lokale Pruefung: `task_288_regression_gate_coverage_gap_audit.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_289 fuehrt die finale Sneaky-Code-Review mit Patchqueue aus.
+
+### TASK_289 - Final Sneaky Code Review Patch Queue
+- Status: implementiert
+- Stand: `docs/reviews/final_sneaky_code_review_patch_queue.md` fuehrt Findings zuerst, dokumentiert keine P0-Blocker, zwei in TASK_289 gefixte P1-Diagnosebefunde und eine kleine P2/P3-Patchqueue.
+- Stand: `CommanderIntent` sammelt `normalization_warnings` fuer unbekannte Verb-/Tempo-/FireRule-/Contact-/Risk-Fallbacks und synchronisiert sie in Metadata/Dict/Snapshot.
+- Stand: `AirAssetStatus` sammelt `normalization_warnings` fuer unbekannte State-Fallbacks in `from_dict()`, `apply_threat()` und lethal `apply_damage()` und spiegelt sie in Metadata/Snapshot.
+- Stand: `MultiplayerSnapshotContract` uebernimmt diese Diagnose-IDs kompakt fuer CommanderIntent- und AirAssetStatus-Snapshots; `scripts/tests/task_289_final_sneaky_code_review_patch_queue.gd` prueft Reportform, Diagnose-Fixes, Snapshot-Kompaktheit und Patchqueue.
+- Offene Punkte: P2-Folgepatch fuer explizite Cover-/Security-Defaults in `CommanderIntent`/`FireteamExecutionPlan`; P2/P3 fuer Breakout-Diagnosen, Boundary-Tokenpflege und manuelle LAN-/Full-HD-/Balance-Smokes.
+- Risiken: Die neuen Diagnosefelder aendern keine Fallback-Semantik, muessen aber bei UI/Debug-Anzeigen als Diagnose und nicht als Gameplay-Befehl behandelt werden.
+- Lokale Pruefung: `task_289_final_sneaky_code_review_patch_queue.gd`, relevante TASK_285/TASK_277/TASK_281/TASK_288-Gates und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_290 schreibt das User-Handbuch und markiert die verbleibenden P2/P3-Punkte als bekannte Einschraenkungen/manuelle Pruefungen.
+
+### TASK_290 - User Handbuch Weekly Closeout
+- Status: implementiert
+- Stand: `docs/User-Handbuch.md` ist als Spielerhandbuch erstellt und deckt Hauptmenue, Singleplayer, Multiplayer, Editor, Einstellungen, Homebase/FOB, Mission Map, Fireteam-Befehle, NPC-Verhalten, Waffen/Loadout, Medic-Regeln, Terrain/Huegel, Fog of War, Audio, Feedback, Help-Popups, Troubleshooting und Glossar ab.
+- Stand: Der Abschnitt "Noch in Arbeit / bekannte Einschraenkungen" markiert die verbleibenden manuellen LAN-/Full-HD-/Balance-/Audio-/VFX-/Drag-and-drop-Smokes sowie kleine P2/P3-Folgepunkte, ohne sie als final poliertes Verhalten zu verkaufen.
+- Stand: `scripts/tests/task_290_user_handbuch_weekly_closeout.gd` prueft Pflichtabschnitte, Spielerperspektive, UI-Truth-Grenze, interne Task-ID-Abwesenheit, Kernthemen, bekannte Einschraenkungen und Markdown-Linkaufloesung.
+- Offene Punkte: Keine im TASK-290-Scope; kuenftige spielbare Features muessen das Handbuch im selben Patch mitpflegen.
+- Risiken: Das Handbuch kann bei neuen Gameplay-, Multiplayer-, Editor- oder Settings-Slices driften, wenn der Pflegehinweis nicht beachtet wird.
+- Lokale Pruefung: `task_290_user_handbuch_weekly_closeout.gd`, Markdown-Link-/Pfadcheck und `git diff --check` laufen gruen.
+- Naechster Schritt: Bei neuen Features `docs/User-Handbuch.md` aktualisieren und den TASK_290-Gate erneut ausfuehren.
+
 ### TASK_160 - Tactical Mission Playability Smoke
 - Status: implementiert
 - Stand: Der 2.5D-Live-Missionspfad zeigt jetzt Objective-Capture-Zone, Capture-Fortschritt, Missionsergebnis und kompakte Unit-State-Badges direkt in `TerrainMap3DView`. Move-/Defend-/Take-Wegpunkte, Attack-/Defend-Areas, Contacts, LZ und Dropship sind im 2.5D-Snapshot regressionssicher sichtbar. Frei schwebende alte 2D-Combat-/Wave-/Objective-Labels werden im 2.5D-Pfad unterdrueckt, damit sie nicht wieder ueber der Karte liegen.
@@ -1003,6 +2169,26 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Benchmark-Szenarien sind kleine Laborkarten und ersetzen keine grossen Playtests in `mission_fireteam_dev_test.tscn`; sie schaffen aber eine stabile Basis fuer Folgeentscheidungen.
 - Naechster Schritt: TASK_151 kann Engpass-Reservierung/MAPF-Light auf Basis der gemessenen Bottleneck- und Avoidance-Werte schneiden.
 
+### TASK_151 - Engpass-Reservierung und MAPF-Light
+- Status: implementiert
+- Stand: `scripts/tactical/bottleneck_reservation_resolver.gd` erstellt kleine Bottleneck-Kandidaten aus HPA-Portalen, schmalen Korridorzellen oder expliziten Zellen und plant deterministische Zeitfenster fuer kleine Agentengruppen.
+- Stand: Der Resolver sortiert nach Command-Prioritaet, Fireteam-ID, Unit-ID und Queue-Reihenfolge, prueft gleiche Zelle/Zeit sowie Gegenverkehr ueber dieselbe Kante und schreibt nur Command-Metadaten/Debug, keine direkte Unit-Bewegung.
+- Stand: `SimulationRoot` hat eine standardmaessig deaktivierte Bottleneck-Reservation-Anbindung mit Debug-Snapshot. Lokale Avoidance, HPA/A* und Minimum-Spacing bleiben die bestehenden Bewegungssysteme.
+- Offene Punkte: Keine im TASK-151-Scope; echte Missionskorridore sollten spaeter manuell auf Spielgefuehl und steife Wartefenster geprueft werden.
+- Risiken: Zu aggressive Aktivierung kann Bewegung steif wirken lassen. Deshalb ist die Runtime-Anbindung optional und der Resolver fuer kleine Horizonte/Agentengruppen begrenzt.
+- Lokale Pruefung: `task_151_verifier.gd`, `task_131_verifier.gd`, `task_130_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_152 fuer seedbares Cover-Placement-Lab umsetzen.
+
+### TASK_152 - Seeded Cover Placement Lab
+- Status: implementiert
+- Stand: `scripts/terrain/cover_placement_lab.gd` erzeugt seedbare Cover-Vorschlaege aus walkable Terrain-Tiles. Das Scoring nutzt Threat-/LOS-Exposure, Objective-/Approach-Naehe, vorhandene Cover-Werte und einen winzigen seedbaren Tie-Breaker.
+- Stand: Die Auswahl laeuft greedily mit Mindestabstand und gibt reine Terrain-Patch-Dictionaries mit `grid_position`, `cover_value` und optionalen `blocks_los`-/`walkable`-Feldern zurueck. Das Lab veraendert keine laufende Mission und ersetzt keine Designer-Platzierung.
+- Stand: `scripts/tests/task_152_verifier.gd` prueft reproduzierbare Seeds, Mindestabstand, Walkability, LOS-/Threat-Scoring, Patchform und verbesserte Cover-aware Path-Metriken nach Anwendung auf eine Testkarte.
+- Offene Punkte: Keine im TASK-152-Scope; Editor-Anwendung und kuenstlerische Cover-Verteilung bleiben separate UX-/Content-Slices.
+- Risiken: Automatisch erzeugte Deckung kann spielerisch gleichfoermig wirken. Das Lab ist ein Fixture-/Authoring-Helfer, nicht die finale Encounter-Gestaltung.
+- Lokale Pruefung: `task_152_verifier.gd`, `task_129_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: TASK_153 fuer 3D-Transparency-Material-Presets umsetzen.
+
 ### Editor Cleanup - Flank Anchor Marker
 - Status: implementiert
 - Stand: Die veralteten festen Mapmarker `flank_anchor_left` und `flank_anchor_right` sind aus Marker-Katalog, Editor-Festmarkerzeilen, Standardmap und Missions-Setup-Fallback entfernt. Der eigentliche `flank`-Befehl, Flank-Areas und die Flank-Vulnerability-Logik bleiben unveraendert.
@@ -1024,12 +2210,15 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Grosse Sprites koennen visuell noch spezifische Anchor-/Offset-Nacharbeit brauchen; Gameplay-Werte sind bewusst defensive V1-Defaults und werden aktuell noch als aggregierte Tile-Felder gespeichert, nicht als getrennte Objekt-/Boden-Gameplaywerte.
 - Naechster Schritt: Bei Bedarf eine zweite Palette-Erweiterung fuer Gates, Turrets, Monorail oder Desks schneiden, nachdem die aktuelle Auswahl im Editor visuell geprueft wurde.
 
-### TASK_151-153 - Geplante Folge-Labs
-- Status: geplant
-- Stand: Aus den zuletzt bewerteten Vorschlaegen bleiben drei bewusst nachgelagerte Tasks offen: `TASK_151 - Engpass-Reservierung und MAPF-Light`, `TASK_152 - Seeded Cover Placement Lab` und `TASK_153 - 3D Transparency Material Presets`.
-- Offene Punkte: Diese Tasks sind noch nicht implementiert und sollen erst nach Review der Navigation-/Movement-Spielgefuehlbasis gestartet werden.
-- Risiken: CBS/MAPF, JPS/D* Lite, automatische Cover-Verteilung und Transparenz-Presets beruehren unterschiedliche Schichten; deshalb sind sie getrennt geplant und nicht als gemeinsamer Grossumbau gebuendelt.
-- Naechster Schritt: Bei Bedarf `TASK_151` starten, wenn Engpaesse nach den Benchmark-Werten weiterhin der groesste Bewegungsschmerz sind.
+### TASK_153 - 3D Transparency Material Presets
+- Status: implementiert
+- Stand: `scripts/rendering/material_preset_factory.gd` erzeugt die drei Presets `cutout_scissor`, `dither_hash` und `true_blend` als `StandardMaterial3D`-Materialien mit dokumentiertem visual-only Vertrag.
+- Stand: `scenes/tests/transparent_material_benchmark.tscn` nutzt `scripts/rendering/transparency_material_benchmark.gd`, um drei Quad-Previews nebeneinander fuer Scissor, Hash und Blend aufzubauen.
+- Stand: `docs/rendering/3d_transparency_material_presets.md` beschreibt Einsatzregeln, Factory-Nutzung, Benchmark-Szene, Profiler-Hinweise und die Grenze zu Gameplay/LOS/Navigation.
+- Offene Punkte: Manueller Godot-Sichtcheck der Beispielszene bleibt fuer echte Sortier-/Kanten-/Profilerbeurteilung offen.
+- Risiken: Alpha Blend kann Overdraw und Sorting verschlechtern; deshalb bleibt `true_blend` als Ausnahme fuer echte Halbtransparenz dokumentiert.
+- Lokale Pruefung: `task_153_verifier.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Bei neuen transparenten Assets zuerst diese Presets nutzen und die Beispielszene fuer Sicht-/Profilerchecks erweitern.
 
 ### Mission Editor Authoring Audit
 - Status: dokumentiert

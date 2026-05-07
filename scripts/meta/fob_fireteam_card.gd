@@ -17,7 +17,7 @@ func _ready() -> void:
 	_apply_visual_state()
 
 
-func setup_card(fireteam_id: String, label: String, is_selected: bool, respawn_enabled: bool, loadout_id: String, member_summary_text: String, source_context: String = "fireteam_list") -> void:
+func setup_card(fireteam_id: String, label: String, is_selected: bool, respawn_enabled: bool, loadout_id: String, member_summary_text: String, source_context: String = "fireteam_list", teamfit_summary_text: String = "") -> void:
 	_fireteam_id = fireteam_id.strip_edges().to_lower()
 	_is_selected = is_selected
 	_source_context = source_context.strip_edges() if not source_context.strip_edges().is_empty() else "fireteam_list"
@@ -26,6 +26,7 @@ func setup_card(fireteam_id: String, label: String, is_selected: bool, respawn_e
 	var title_edit := get_node("Margin/VBox/HeaderRow/TitleEdit") as LineEdit
 	var stage_label := get_node("Margin/VBox/StageLabel") as Label
 	var member_label := get_node("Margin/VBox/MemberLabel") as Label
+	var teamfit_label := get_node("Margin/VBox/TeamfitLabel") as Label
 	var drop_hint_label := get_node("Margin/VBox/DropHintLabel") as Label
 	var margin := get_node("Margin") as MarginContainer
 	var vbox := get_node("Margin/VBox") as VBoxContainer
@@ -38,6 +39,7 @@ func setup_card(fireteam_id: String, label: String, is_selected: bool, respawn_e
 	header_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stage_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	member_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	teamfit_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	drop_hint_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	member_host.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
@@ -49,9 +51,12 @@ func setup_card(fireteam_id: String, label: String, is_selected: bool, respawn_e
 	title_edit.add_theme_font_size_override("font_size", 11)
 	stage_label.add_theme_font_size_override("font_size", 9)
 	member_label.add_theme_font_size_override("font_size", 9)
+	teamfit_label.add_theme_font_size_override("font_size", 9)
 	drop_hint_label.add_theme_font_size_override("font_size", 9)
 	stage_label.text = "Respawn: %s | Loadout: %s" % ["FOB" if respawn_enabled else "off", loadout_id.to_upper()]
 	member_label.text = member_summary_text
+	teamfit_label.text = teamfit_summary_text.strip_edges()
+	teamfit_label.visible = not teamfit_label.text.is_empty()
 	drop_hint_label.text = "Drop operator cards here"
 	_apply_visual_state()
 
@@ -166,6 +171,12 @@ func _ensure_ui() -> void:
 	member_label.name = "MemberLabel"
 	member_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	vbox.add_child(member_label)
+
+	var teamfit_label := Label.new()
+	teamfit_label.name = "TeamfitLabel"
+	teamfit_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	teamfit_label.visible = false
+	vbox.add_child(teamfit_label)
 
 	var drop_hint_label := Label.new()
 	drop_hint_label.name = "DropHintLabel"

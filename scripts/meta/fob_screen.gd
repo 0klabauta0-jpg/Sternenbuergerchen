@@ -7,9 +7,13 @@ const CHARACTER_SHEET_VIEW_SCRIPT: GDScript = preload("res://scripts/meta/charac
 const NPC_COMPACT_CARD_SCENE: PackedScene = preload("res://scenes/meta/components/npc_compact_card.tscn")
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
 const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_labels.gd")
+const DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/drop_light_layout_contract.gd")
 const TRANSPORT_CRAFT_CARD_UI_SCRIPT: GDScript = preload("res://scripts/meta/transport_craft_card_ui.gd")
 const FOB_FIRETEAM_CARD_SCRIPT: GDScript = preload("res://scripts/meta/fob_fireteam_card.gd")
 const FOB_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/fob_drop_panel.gd")
+const FIRETEAM_COHESION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/fireteam_cohesion_resolver.gd")
+const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
+const LOADOUT_MODIFIER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/command/loadout_modifier_resolver.gd")
 const DROPSHIP_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NE.png")
 const DROPSHIP_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NW.png")
 const DROPSHIP_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
@@ -19,6 +23,10 @@ const SMG_BLASTER_PREVIEW_TEXTURE: Texture2D = preload("res://Assets/used/npc/bl
 const SMG_BLASTER_PREVIEW_PATH := "res://Assets/used/npc/blaster_kit/previews/blaster-a.png"
 const MEDICTOOL_BLASTER_PREVIEW_TEXTURE: Texture2D = preload("res://Assets/used/npc/blaster_kit/previews/blaster-b.png")
 const MEDICTOOL_BLASTER_PREVIEW_PATH := "res://Assets/used/npc/blaster_kit/previews/blaster-b.png"
+const SNIPER_PREVIEW_TEXTURE: Texture2D = preload("res://Assets/used/npc/weapon_pack/previews/sniper.png")
+const SNIPER_PREVIEW_PATH := "res://Assets/used/npc/weapon_pack/previews/sniper.png"
+const ROCKET_LAUNCHER_PREVIEW_TEXTURE: Texture2D = preload("res://Assets/used/npc/weapon_pack/previews/rocketlauncherModern.png")
+const ROCKET_LAUNCHER_PREVIEW_PATH := "res://Assets/used/npc/weapon_pack/previews/rocketlauncherModern.png"
 
 signal mission_start_requested(selected_unit_ids, selected_fireteam_ids)
 signal transport_craft_mission_stage_requested(craft_id)
@@ -27,6 +35,14 @@ const DEFAULT_DROPSHIP_ETA_SECONDS := 18.0
 const DEFAULT_BOARDING_SECONDS := 6.0
 const DROPSHIP_NPC_CAPACITY := 6
 const DEFAULT_MEMBER_WEAPON := "smg"
+const WEAPON_LOADOUT_OPTIONS: Array = [
+	{"id": "smg", "label": "SMG"},
+	{"id": "rifle", "label": "Rifle"},
+	{"id": "sniper", "label": "Sniper"},
+	{"id": "rocket_launcher", "label": "Rocket"},
+	{"id": "medictool", "label": "Medictool"},
+	{"id": "none", "label": "None"},
+]
 const DEFAULT_MISSION_NAME := "Operation: FOB Transfer"
 const DEFAULT_MISSION_MAP := "test_mission_32x32_slots8"
 const DEFAULT_MISSION_SLOT_COUNT := 8
@@ -66,6 +82,7 @@ var _mission_launch_ready_craft_id: String = ""
 
 func _ready() -> void:
 	META_UI_SKIN_SCRIPT.apply_fob(self)
+	_apply_drop_light_fixed_layout()
 	var start_button := get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/StartMissionButton") as Button
 	var add_team_button := get_node("Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamToolbar/AddTeamButton") as Button
 	var remove_team_button := get_node("Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamToolbar/RemoveTeamButton") as Button
@@ -79,6 +96,8 @@ func _ready() -> void:
 	var clear_loadout_button := get_node("Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutHeaderRow/ClearLoadoutButton") as Button
 	var loadout_panel := get_node("Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel")
 	var dropship_panel := get_node("Panel/Margin/VBox/ContentRow/DropshipPanel")
+	_apply_help_id(get_node_or_null("Panel/Margin/VBox/ContentRow/FireteamPanel") as Control, "fob.fireteams")
+	_apply_help_id(dropship_panel as Control, "fob.flightdeck")
 	var start_boarding_button := get_node("Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipHeaderRow/StartBoardingButton") as Button
 	var remove_dropship_fireteam_button := get_node("Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipHeaderRow/RemoveDropshipFireteamButton") as Button
 	var dropship_timer := get_node("DropshipTimer") as Timer
@@ -137,6 +156,253 @@ func _ready() -> void:
 	_sanitize_staging_state()
 	_rebuild_profiles()
 	_refresh_ui_state()
+
+
+func _apply_drop_light_fixed_layout() -> void:
+	var target_viewport: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("TARGET_VIEWPORT")
+	custom_minimum_size = Vector2(float(target_viewport.x), float(target_viewport.y))
+	set_meta("drop_light_fixed_fullhd_layout", true)
+	set_meta("drop_light_screen", DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("SCREEN_FOB"))
+
+	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_fob_layout")
+	var base_spacing: int = int(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("BASE_SPACING"))
+	_apply_fixed_control_contract("Panel", layout.get("viewport"))
+	_apply_fixed_control_contract("Panel/Margin/VBox/MissionPanel", layout.get("topbar"))
+	_apply_fixed_control_contract("Panel/Margin/VBox/ContentRow/FireteamPanel", layout.get("fireteams"))
+	_apply_fixed_control_contract("Panel/Margin/VBox/ContentRow/StagingPanel", layout.get("loadout"))
+	_apply_fixed_control_contract("Panel/Margin/VBox/ContentRow/DropshipPanel", layout.get("flightdeck"))
+	_apply_fixed_control_contract("Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipQueueScroll", layout.get("ship_slots"))
+
+	var vbox := get_node_or_null("Panel/Margin/VBox") as VBoxContainer
+	if vbox != null:
+		vbox.add_theme_constant_override("separation", base_spacing)
+
+	var content_row := get_node_or_null("Panel/Margin/VBox/ContentRow") as HBoxContainer
+	if content_row != null:
+		content_row.custom_minimum_size = Vector2(0.0, float((layout.get("fireteams") as Rect2i).size.y))
+		content_row.add_theme_constant_override("separation", base_spacing * 2)
+
+	var available_panel := get_node_or_null("Panel/Margin/VBox/ContentRow/AvailablePanel") as Control
+	if available_panel != null:
+		available_panel.visible = false
+		available_panel.custom_minimum_size = Vector2.ZERO
+		available_panel.size_flags_stretch_ratio = 0.0
+		available_panel.set_meta("drop_light_hidden_by_fixed_contract", true)
+
+	var staging_header_label := get_node_or_null("Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/StagingHeaderLabel") as Label
+	if staging_header_label != null:
+		staging_header_label.visible = false
+
+	_apply_drop_light_topbar_compaction()
+
+	var loadout_panel := get_node_or_null("Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel") as Control
+	if loadout_panel != null:
+		var loadout_rect: Rect2i = layout.get("loadout")
+		loadout_panel.custom_minimum_size = Vector2(float(loadout_rect.size.x - base_spacing * 4 - 4), 0.0)
+		loadout_panel.set_meta("drop_light_rect", loadout_rect)
+
+	var dropship_visual := get_node_or_null("Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipTopRow/DropshipVisualVBox/DropshipSpriteRect") as TextureRect
+	if dropship_visual != null:
+		dropship_visual.custom_minimum_size = Vector2(280.0, 160.0)
+		dropship_visual.set_meta("drop_light_uses_project_craft_asset", true)
+
+	_apply_square_button_contract("Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipHeaderRow/StartBoardingButton")
+	_apply_square_button_contract("Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipHeaderRow/RemoveDropshipFireteamButton")
+	_ensure_drop_light_bottom_row(layout)
+	_enforce_drop_light_fixed_layout()
+	call_deferred("_enforce_drop_light_fixed_layout")
+
+
+func _enforce_drop_light_fixed_layout() -> void:
+	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_fob_layout")
+	_apply_fixed_window_contract("Panel", layout.get("viewport"))
+	_apply_fixed_window_contract("Panel/Margin/VBox/MissionPanel", layout.get("topbar"))
+	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/FireteamPanel", layout.get("fireteams"))
+	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/StagingPanel", layout.get("loadout"))
+	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/DropshipPanel", layout.get("flightdeck"))
+	_apply_fixed_window_contract("Panel/Margin/VBox/DropLightBottomRow/BoardingStatusPanel", layout.get("boarding_status"))
+	_apply_fixed_window_contract("Panel/Margin/VBox/DropLightBottomRow/ActionsPanel", layout.get("actions"))
+
+
+func _apply_fixed_window_contract(path: String, rect_variant: Variant) -> void:
+	if typeof(rect_variant) != TYPE_RECT2I:
+		return
+	var control := get_node_or_null(path) as Control
+	if control == null:
+		return
+	var rect: Rect2i = rect_variant
+	var fixed_position := Vector2(float(rect.position.x), float(rect.position.y))
+	var fixed_size := Vector2(float(rect.size.x), float(rect.size.y))
+	control.set_as_top_level(true)
+	control.anchor_left = 0.0
+	control.anchor_top = 0.0
+	control.anchor_right = 0.0
+	control.anchor_bottom = 0.0
+	control.position = fixed_position
+	control.size = fixed_size
+	control.custom_minimum_size = fixed_size
+	control.set_deferred("position", fixed_position)
+	control.set_deferred("size", fixed_size)
+	control.set_meta("drop_light_rect", rect)
+	control.set_meta("drop_light_fixed_fullhd_layout", true)
+
+
+func _apply_drop_light_topbar_compaction() -> void:
+	var mission_vbox := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox") as VBoxContainer
+	if mission_vbox != null:
+		mission_vbox.add_theme_constant_override("separation", 0)
+
+	var mission_header_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionHeaderLabel") as Label
+	if mission_header_label != null:
+		mission_header_label.add_theme_font_size_override("font_size", 10)
+
+	var mission_info_row := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow") as HBoxContainer
+	if mission_info_row != null:
+		mission_info_row.visible = false
+
+	var mission_summary_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionSummaryLabel") as Label
+	if mission_summary_label != null:
+		mission_summary_label.visible = false
+
+	for path in [
+		"Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/TeamStatusLabel",
+		"Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/FireteamStatusLabel",
+		"Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/DropshipStatusLabel",
+	]:
+		var label := get_node_or_null(path) as Label
+		if label != null:
+			label.add_theme_font_size_override("font_size", 8)
+
+
+func _apply_fixed_control_contract(path: String, rect_variant: Variant) -> void:
+	if typeof(rect_variant) != TYPE_RECT2I:
+		return
+	var control := get_node_or_null(path) as Control
+	if control == null:
+		return
+	var rect: Rect2i = rect_variant
+	control.custom_minimum_size = Vector2(float(rect.size.x), float(rect.size.y))
+	control.size_flags_stretch_ratio = float(maxi(rect.size.x, 1))
+	control.set_meta("drop_light_rect", rect)
+	control.set_meta("drop_light_fixed_fullhd_layout", true)
+
+
+func _apply_square_button_contract(path: String) -> void:
+	var button := get_node_or_null(path) as Button
+	if button == null:
+		return
+	var action_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("ACTION_BUTTON_SIZE")
+	button.custom_minimum_size = Vector2(float(action_size.x), float(action_size.y))
+	button.set_meta("drop_light_square_action_button", true)
+
+
+func _ensure_drop_light_bottom_row(layout: Dictionary) -> void:
+	var vbox := get_node_or_null("Panel/Margin/VBox") as VBoxContainer
+	if vbox == null or vbox.get_node_or_null("DropLightBottomRow") != null:
+		return
+	var bottom_row := HBoxContainer.new()
+	bottom_row.name = "DropLightBottomRow"
+	bottom_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bottom_row.add_theme_constant_override("separation", int(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("BASE_SPACING")) * 2)
+	bottom_row.custom_minimum_size = Vector2(0.0, float((layout.get("boarding_status") as Rect2i).size.y))
+	bottom_row.set_meta("drop_light_fixed_fullhd_layout", true)
+	vbox.add_child(bottom_row)
+
+	var boarding_panel := _create_drop_light_bottom_panel("BoardingStatusPanel", "BOARDING STATUS", layout.get("boarding_status"))
+	bottom_row.add_child(boarding_panel)
+
+	var actions_panel := _create_drop_light_bottom_panel("ActionsPanel", "ACTIONS", layout.get("actions"))
+	var actions_grid := GridContainer.new()
+	actions_grid.name = "ActionGrid"
+	actions_grid.columns = 6
+	actions_grid.add_theme_constant_override("h_separation", int(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("BASE_SPACING")))
+	actions_grid.add_theme_constant_override("v_separation", int(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("BASE_SPACING")))
+	var actions_vbox := actions_panel.get_node("Margin/VBox") as VBoxContainer
+	actions_vbox.add_child(actions_grid)
+	for button_data in [
+		["BoardButton", "Board"],
+		["UnboardButton", "Unboard"],
+		["SendButton", "Send"],
+		["HoldButton", "Hold"],
+		["CargoButton", "Cargo"],
+		["MedbayLaterButton", "Medbay"],
+	]:
+		var action_button := Button.new()
+		action_button.name = String(button_data[0])
+		action_button.text = String(button_data[1])
+		action_button.add_theme_font_size_override("font_size", 8)
+		_style_drop_light_action_button(action_button)
+		actions_grid.add_child(action_button)
+	bottom_row.add_child(actions_panel)
+
+	var board_button := actions_grid.get_node("BoardButton") as Button
+	if not board_button.pressed.is_connected(_on_drop_light_board_action_pressed):
+		board_button.pressed.connect(_on_drop_light_board_action_pressed)
+	var send_button := actions_grid.get_node("SendButton") as Button
+	if not send_button.pressed.is_connected(_on_drop_light_send_action_pressed):
+		send_button.pressed.connect(_on_drop_light_send_action_pressed)
+
+
+func _create_drop_light_bottom_panel(panel_name: String, title_text: String, rect_variant: Variant) -> PanelContainer:
+	var panel := PanelContainer.new()
+	panel.name = panel_name
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if typeof(rect_variant) == TYPE_RECT2I:
+		var rect: Rect2i = rect_variant
+		panel.custom_minimum_size = Vector2(float(rect.size.x), float(rect.size.y))
+		panel.size_flags_stretch_ratio = float(maxi(rect.size.x, 1))
+		panel.set_meta("drop_light_rect", rect)
+	panel.set_meta("drop_light_fixed_fullhd_layout", true)
+
+	var margin := MarginContainer.new()
+	margin.name = "Margin"
+	var margin_size: int = int(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("BASE_SPACING"))
+	margin.add_theme_constant_override("margin_left", margin_size)
+	margin.add_theme_constant_override("margin_top", margin_size)
+	margin.add_theme_constant_override("margin_right", margin_size)
+	margin.add_theme_constant_override("margin_bottom", margin_size)
+	panel.add_child(margin)
+
+	var vbox := VBoxContainer.new()
+	vbox.name = "VBox"
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.add_theme_constant_override("separation", margin_size)
+	margin.add_child(vbox)
+
+	var title_label := Label.new()
+	title_label.name = "TitleLabel"
+	title_label.text = title_text
+	title_label.add_theme_font_size_override("font_size", 11)
+	META_UI_SKIN_SCRIPT.style_body_label(title_label, 11)
+	vbox.add_child(title_label)
+
+	var body_label := Label.new()
+	body_label.name = "BodyLabel"
+	body_label.text = ""
+	body_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	body_label.add_theme_font_size_override("font_size", 10)
+	META_UI_SKIN_SCRIPT.style_body_label(body_label, 10)
+	vbox.add_child(body_label)
+	return panel
+
+
+func _style_drop_light_action_button(button: Button) -> void:
+	var action_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("ACTION_BUTTON_SIZE")
+	button.custom_minimum_size = Vector2(float(action_size.x), float(action_size.y))
+	button.set_meta("drop_light_square_action_button", true)
+	META_UI_SKIN_SCRIPT.style_secondary_button(button)
+
+
+func _on_drop_light_board_action_pressed() -> void:
+	var selected_craft_state: Dictionary = _get_selected_transport_craft_state()
+	if _can_start_boarding_for_craft(selected_craft_state):
+		_on_transport_craft_boarding_requested(String(selected_craft_state.get("craft_id", "")).strip_edges())
+
+
+func _on_drop_light_send_action_pressed() -> void:
+	var selected_craft_state: Dictionary = _get_selected_transport_craft_state()
+	if _can_mark_transport_craft_launch_ready(selected_craft_state):
+		_on_transport_craft_mission_stage_requested(String(selected_craft_state.get("craft_id", "")).strip_edges())
 
 
 func set_available_units(available_units: Array) -> void:
@@ -326,6 +592,7 @@ func build_meta_overview() -> Dictionary:
 
 		var definition: Dictionary = definition_variant
 		var fireteam_id: String = String(definition.get("id", "")).strip_edges().to_lower()
+		var cohesion_snapshot: Dictionary = _build_fireteam_cohesion_snapshot(fireteam_id, definition)
 		fireteams.append(
 			{
 				"id": fireteam_id,
@@ -334,6 +601,9 @@ func build_meta_overview() -> Dictionary:
 				"member_names": _build_fireteam_member_names(fireteam_id),
 				"respawn_enabled": bool(definition.get("respawn_enabled", false)),
 				"loadout": String(definition.get("loadout", "medium")),
+				"cohesion": float(cohesion_snapshot.get("cohesion", 0.0)),
+				"teamfit_summary_text": String(cohesion_snapshot.get("summary_text", "")),
+				"gameplay_modifiers": Dictionary(cohesion_snapshot.get("gameplay_modifiers", {})).duplicate(true),
 			}
 		)
 
@@ -346,6 +616,19 @@ func build_meta_overview() -> Dictionary:
 		"dropship_queue": _build_boarding_queue_text(),
 		"mission_craft": mission_craft_state,
 		"fireteams": fireteams,
+	}
+
+
+func get_flightdeck_snapshot() -> Dictionary:
+	var selected_craft_state: Dictionary = _get_selected_transport_craft_state()
+	return {
+		"selected_craft_id": String(selected_craft_state.get("craft_id", "")).strip_edges(),
+		"visible_transport_craft_states": _get_visible_transport_craft_states(),
+		"dropship_status": _build_dropship_status_text(selected_craft_state),
+		"dropship_eta": _build_dropship_eta_text(selected_craft_state),
+		"can_board": _can_start_boarding_for_craft(selected_craft_state),
+		"can_send": _can_mark_transport_craft_launch_ready(selected_craft_state),
+		"can_start_mission": can_request_mission_start(),
 	}
 
 
@@ -456,8 +739,10 @@ func _refresh_ui_state() -> void:
 	_update_fireteam_toolbar()
 	_update_staging_panel()
 	_update_dropship_panel()
+	_update_drop_light_bottom_row()
 	_update_character_overlay()
 	_update_character_overlay_visibility()
+	_enforce_drop_light_fixed_layout()
 
 
 func _refresh_dropship_status_ui() -> void:
@@ -573,7 +858,8 @@ func _render_fireteam_rows() -> void:
 			bool(definition.get("respawn_enabled", false)),
 			String(definition.get("loadout", "medium")),
 			"Lead: %s | Members: %s" % [_build_display_name(String(definition.get("lead_unit_id", ""))), _format_member_names(_build_fireteam_member_names(fireteam_id))],
-			"fireteam_list"
+			"fireteam_list",
+			_build_fireteam_card_teamfit_summary(fireteam_id, definition)
 		)
 		if not fireteam_card.card_pressed.is_connected(_on_fireteam_card_pressed):
 			fireteam_card.card_pressed.connect(_on_fireteam_card_pressed)
@@ -663,6 +949,11 @@ func _update_staging_panel() -> void:
 	var loadout_help_label := get_node("Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutHelpLabel") as Label
 	var loadout_fireteam_list := get_node("Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutFireteamList") as VBoxContainer
 	var loadout_member_list := get_node("Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutMemberScroll/LoadoutMemberList") as VBoxContainer
+	_apply_help_id(clear_loadout_button, "loadout.clear_selection")
+	_apply_help_id(loadout_status_label, "loadout.weight")
+	_apply_help_id(loadout_help_label, "loadout.empty_team_default")
+	_apply_help_id(loadout_fireteam_list, "fob.fireteams")
+	_apply_help_id(loadout_member_list, "loadout.member_row")
 
 	var loadout_fireteam_id: String = _normalize_fireteam_id(_loadout_staged_fireteam_id)
 	var loadout_definition: Dictionary = _get_fireteam_definition(loadout_fireteam_id)
@@ -682,8 +973,8 @@ func _update_staging_panel() -> void:
 	set_respawn_button.disabled = respawn_fireteam_id.is_empty() or respawn_enabled
 	clear_respawn_button.disabled = respawn_fireteam_id.is_empty() or not respawn_enabled
 
-	loadout_status_label.text = "Staged fireteam: %s | Lead: %s | Members: %d" % [loadout_fireteam_label, _build_display_name(lead_unit_id), member_ids.size()]
-	loadout_help_label.text = "Kein Team-Default mehr: Armor sowie Slot 1 und Slot 2 werden direkt pro Mitglied gepflegt."
+	loadout_status_label.text = "Staged fireteam: %s | Lead: %s | Members: %d | Weight %.1f" % [loadout_fireteam_label, _build_display_name(lead_unit_id), member_ids.size(), _calculate_fireteam_loadout_weight(loadout_fireteam_id, member_ids)]
+	loadout_help_label.text = "Kein Team-Default mehr: Armor, Slot 1, Slot 2 und None werden direkt pro Mitglied gepflegt."
 	clear_loadout_button.disabled = not has_loadout_fireteam
 
 	_render_staging_fireteam_card(respawn_fireteam_list, respawn_fireteam_id, "Drop fireteam for FOB respawn.", "respawn_staging", respawn_member_ids, respawn_lead_unit_id)
@@ -702,6 +993,15 @@ func _update_dropship_panel() -> void:
 	var start_boarding_button := get_node("Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipHeaderRow/StartBoardingButton") as Button
 	var remove_dropship_fireteam_button := get_node("Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipHeaderRow/RemoveDropshipFireteamButton") as Button
 	var queue_list := get_node("Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipQueueScroll/DropshipQueueList") as VBoxContainer
+	_apply_help_id(status_label, "fob.flightdeck")
+	_apply_help_id(eta_label, "fob.flightdeck")
+	_apply_help_id(queue_label, "fob.flightdeck")
+	_apply_help_id(help_label, "fob.flightdeck")
+	_apply_help_id(dropship_sprite_rect, "fob.flightdeck")
+	_apply_help_id(dropship_arrival_progress, "fob.flightdeck")
+	_apply_help_id(dropship_arrival_label, "fob.flightdeck")
+	_apply_help_id(start_boarding_button, "fob.flightdeck")
+	_apply_help_id(remove_dropship_fireteam_button, "fob.flightdeck")
 	var selected_craft_state: Dictionary = _get_selected_transport_craft_state()
 
 	status_label.text = _build_dropship_status_text(selected_craft_state)
@@ -716,6 +1016,43 @@ func _update_dropship_panel() -> void:
 	start_boarding_button.disabled = true
 	remove_dropship_fireteam_button.disabled = not _dropship_staged_fireteam_ids.has(_focused_fireteam_id)
 	_render_dropship_fireteam_cards(queue_list)
+
+
+func _update_drop_light_bottom_row() -> void:
+	var bottom_row := get_node_or_null("Panel/Margin/VBox/DropLightBottomRow") as HBoxContainer
+	if bottom_row == null:
+		return
+	var body_label := bottom_row.get_node_or_null("BoardingStatusPanel/Margin/VBox/BodyLabel") as Label
+	var selected_craft_state: Dictionary = _get_selected_transport_craft_state()
+	var selected_craft_name: String = String(selected_craft_state.get("display_name", "")).strip_edges()
+	if selected_craft_name.is_empty():
+		selected_craft_name = "no craft"
+	if body_label != null:
+		body_label.text = "Selected: %s\nQueue: %d fireteams\nInside dropship: %d NPC" % [
+			selected_craft_name,
+			_boarding_order.size(),
+			_boarded_unit_ids.size(),
+		]
+
+	var action_grid := bottom_row.get_node_or_null("ActionsPanel/Margin/VBox/ActionGrid") as GridContainer
+	if action_grid == null:
+		return
+	var board_button := action_grid.get_node_or_null("BoardButton") as Button
+	var send_button := action_grid.get_node_or_null("SendButton") as Button
+	var board_enabled := _can_start_boarding_for_craft(selected_craft_state)
+	var send_enabled := _can_mark_transport_craft_launch_ready(selected_craft_state)
+	for child in action_grid.get_children():
+		var button := child as Button
+		if button == null:
+			continue
+		_style_drop_light_action_button(button)
+		button.disabled = true
+	if board_button != null:
+		board_button.disabled = not board_enabled
+		META_UI_SKIN_SCRIPT.style_transfer_button(board_button, board_enabled)
+	if send_button != null:
+		send_button.disabled = not send_enabled
+		META_UI_SKIN_SCRIPT.style_transfer_button(send_button, send_enabled)
 
 
 func _open_character_overlay(unit_id: String) -> void:
@@ -787,6 +1124,9 @@ func _build_dropship_status_text(selected_craft_state: Dictionary = {}) -> Strin
 	if not selected_craft_state.is_empty():
 		var craft_name: String = String(selected_craft_state.get("display_name", "craft")).strip_edges()
 		var craft_id: String = String(selected_craft_state.get("craft_id", "")).strip_edges()
+		if bool(selected_craft_state.get("air_asset_unavailable", false)):
+			var meta_state: String = String(selected_craft_state.get("air_asset_meta_status", "")).strip_edges()
+			return "%s: replacement pending" % craft_name if meta_state == "destroyed_replacement_pending" else "%s: repairing" % craft_name
 		if bool(selected_craft_state.get("mission_waiting", false)):
 			return "%s: waiting on mission map" % craft_name
 		if bool(selected_craft_state.get("mission_transit_to_map", false)):
@@ -823,6 +1163,8 @@ func _build_dropship_status_text(selected_craft_state: Dictionary = {}) -> Strin
 
 func _build_dropship_eta_text(selected_craft_state: Dictionary = {}) -> String:
 	if not selected_craft_state.is_empty():
+		if bool(selected_craft_state.get("air_asset_unavailable", false)):
+			return "Recovery ETA: %ds" % int(selected_craft_state.get("air_asset_recovery_eta_seconds", 0))
 		if bool(selected_craft_state.get("mission_waiting", false)):
 			return "Mission ETA: on-station | awaiting Drop"
 		if bool(selected_craft_state.get("mission_transit_to_map", false)) or bool(selected_craft_state.get("mission_transit_to_fob", false)):
@@ -1414,6 +1756,7 @@ func _build_member_loadout_row(fireteam_id: String, member_unit_id: String, lead
 	var row_panel := PanelContainer.new()
 	row_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_apply_help_id(row_panel, "loadout.member_row")
 	_apply_loadout_member_row_style(row_panel, member_unit_id == lead_unit_id)
 
 	var row_margin := MarginContainer.new()
@@ -1468,6 +1811,7 @@ func _build_member_loadout_row(fireteam_id: String, member_unit_id: String, lead
 		selector_label.text = label_text
 		selector_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		selector_label.add_theme_font_size_override("font_size", 9)
+		_apply_help_id(selector_label, "loadout.armor" if label_text == "Armor" else "loadout.weapon_slot")
 		selectors_label_row.add_child(selector_label)
 
 	var selectors_row := HBoxContainer.new()
@@ -1481,6 +1825,7 @@ func _build_member_loadout_row(fireteam_id: String, member_unit_id: String, lead
 	armor_select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	armor_select.custom_minimum_size = Vector2(54.0, 0.0)
 	armor_select.add_theme_font_size_override("font_size", 9)
+	_apply_help_id(armor_select, "loadout.armor")
 	_populate_armor_option_button(armor_select, String(member_loadout.get("armor", "medium")))
 	META_UI_SKIN_SCRIPT.style_secondary_button(armor_select)
 	if not armor_select.item_selected.is_connected(_on_member_armor_selected.bind(fireteam_id, member_unit_id)):
@@ -1579,6 +1924,43 @@ func _build_fireteam_member_names(fireteam_id: String) -> PackedStringArray:
 		member_names.append(_build_display_name(unit_id))
 
 	return member_names
+
+
+func _build_fireteam_card_teamfit_summary(fireteam_id: String, definition: Dictionary) -> String:
+	var snapshot: Dictionary = _build_fireteam_cohesion_snapshot(fireteam_id, definition)
+	if snapshot.is_empty():
+		return "Teamfit: no members"
+	return String(snapshot.get("summary_text", "Teamfit: n/a"))
+
+
+func _build_fireteam_cohesion_snapshot(fireteam_id: String, definition: Dictionary = {}) -> Dictionary:
+	var member_units: Array = _get_fireteam_member_profile_data(fireteam_id)
+	var lead_unit_id: String = String(definition.get("lead_unit_id", "")).strip_edges()
+	return Dictionary(FIRETEAM_COHESION_RESOLVER_SCRIPT.call("build_fireteam_snapshot", fireteam_id, member_units, lead_unit_id))
+
+
+func _get_fireteam_member_profile_data(fireteam_id: String) -> Array:
+	var member_units: Array = []
+	for member_unit_id in _get_member_unit_ids_for_fireteam(fireteam_id):
+		var profile = _profiles_by_id.get(member_unit_id, null)
+		if profile != null and profile.has_method("to_dict"):
+			member_units.append(Dictionary(profile.call("to_dict")).duplicate(true))
+			continue
+		var unit_data: Dictionary = _get_available_unit_data(member_unit_id)
+		if not unit_data.is_empty():
+			member_units.append(unit_data)
+	return member_units
+
+
+func _get_available_unit_data(unit_id: String) -> Dictionary:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	for unit_variant in _available_units:
+		if typeof(unit_variant) != TYPE_DICTIONARY:
+			continue
+		var unit: Dictionary = Dictionary(unit_variant)
+		if String(unit.get("unit_id", "")).strip_edges() == normalized_unit_id:
+			return unit.duplicate(true)
+	return {}
 
 
 func _get_member_unit_ids_for_fireteam(fireteam_id: String) -> PackedStringArray:
@@ -1745,12 +2127,18 @@ func _normalize_loadout_id(value: String) -> String:
 func _normalize_weapon_id(value: String) -> String:
 	var normalized_value: String = value.strip_edges().to_lower()
 	match normalized_value:
-		"smg":
-			return normalized_value
-		"medic_tool", "medic-tool", "medic tool":
+		"smg", "maschinenpistole", "mp":
+			return "smg"
+		"rifle", "assault_rifle", "sturmgewehr":
+			return "rifle"
+		"sniper", "sniper_rifle", "sniper-rifle", "sniper rifle", "scharfschuetzengewehr", "praezisionsgewehr":
+			return "sniper"
+		"rocket_launcher", "rocket", "rocketlauncher", "rocket-launcher", "rocket launcher", "panzerfaust", "raketenwerfer":
+			return "rocket_launcher"
+		"medic_tool", "medic-tool", "medic tool", "medictool":
 			return "medictool"
-		"medictool":
-			return normalized_value
+		"none", "no_weapon", "no-weapon", "no weapon", "unarmed", "keine_waffe", "keine-waffe", "keine waffe":
+			return "none"
 		_:
 			return DEFAULT_MEMBER_WEAPON
 
@@ -1847,27 +2235,41 @@ func _populate_armor_option_button(option_button: OptionButton, selected_armor_i
 
 func _populate_weapon_option_button(option_button: OptionButton, selected_weapon_id: String) -> void:
 	option_button.clear()
-	for option in [
-		{"id": "smg", "label": "SMG"},
-		{"id": "medictool", "label": "Medictool"},
-	]:
+	for option in WEAPON_LOADOUT_OPTIONS:
 		var weapon_id: String = String(option["id"])
+		var option_label: String = _build_weapon_option_label(weapon_id, String(option["label"]))
 		var preview_texture := _get_weapon_preview_texture(weapon_id)
 		if preview_texture != null:
-			option_button.add_icon_item(preview_texture, String(option["label"]))
+			option_button.add_icon_item(preview_texture, option_label)
 		else:
-			option_button.add_item(String(option["label"]))
+			option_button.add_item(option_label)
 		option_button.set_item_metadata(option_button.item_count - 1, weapon_id)
 		if String(option["id"]) == _normalize_weapon_id(selected_weapon_id):
 			option_button.select(option_button.item_count - 1)
+
+
+func _build_weapon_option_label(weapon_id: String, fallback_label: String = "") -> String:
+	var label: String = fallback_label.strip_edges()
+	if label.is_empty():
+		label = _build_weapon_label(weapon_id)
+	var tile_range: int = int(WEAPON_DATA_SCRIPT.call("get_effective_tile_range", weapon_id))
+	return "%s %d" % [label, tile_range]
 
 
 func _build_weapon_label(weapon_id: String) -> String:
 	match _normalize_weapon_id(weapon_id):
 		"smg":
 			return "SMG"
+		"rifle":
+			return "Rifle"
+		"sniper":
+			return "Sniper"
+		"rocket_launcher":
+			return "Rocket"
 		"medictool":
 			return "Medictool"
+		"none":
+			return "None"
 		_:
 			return "SMG"
 
@@ -1885,13 +2287,9 @@ func _armor_id_from_index(index: int) -> String:
 
 
 func _weapon_id_from_index(index: int) -> String:
-	match index:
-		0:
-			return "smg"
-		1:
-			return "medictool"
-		_:
-			return DEFAULT_MEMBER_WEAPON
+	if index >= 0 and index < WEAPON_LOADOUT_OPTIONS.size():
+		return _normalize_weapon_id(String(Dictionary(WEAPON_LOADOUT_OPTIONS[index]).get("id", DEFAULT_MEMBER_WEAPON)))
+	return DEFAULT_MEMBER_WEAPON
 
 
 func _build_weapon_slot_control(slot_name: String, selected_weapon_id: String, fireteam_id: String, member_unit_id: String, slot_index: int) -> Control:
@@ -1900,12 +2298,14 @@ func _build_weapon_slot_control(slot_name: String, selected_weapon_id: String, f
 	slot_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	slot_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	slot_box.add_theme_constant_override("separation", 2)
+	_apply_help_id(slot_box, "loadout.weapon_slot")
 
 	var weapon_select := OptionButton.new()
 	weapon_select.name = "%sSelect" % slot_name
 	weapon_select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	weapon_select.custom_minimum_size = Vector2(70.0, 0.0)
 	weapon_select.add_theme_font_size_override("font_size", 9)
+	_apply_help_id(weapon_select, "loadout.weapon_slot")
 	_populate_weapon_option_button(weapon_select, selected_weapon_id)
 	META_UI_SKIN_SCRIPT.style_secondary_button(weapon_select)
 	if slot_index == 1:
@@ -1927,6 +2327,8 @@ func _build_weapon_slot_control(slot_name: String, selected_weapon_id: String, f
 	preview_rect.visible = preview_rect.texture != null
 	preview_rect.set_meta("weapon_id", _normalize_weapon_id(selected_weapon_id))
 	preview_rect.set_meta("weapon_preview_path", preview_path)
+	_apply_help_id(preview_rect, "loadout.weapon_none" if _normalize_weapon_id(selected_weapon_id) == "none" else "loadout.weapon_preview")
+	preview_rect.tooltip_text = "No weapon selected." if _normalize_weapon_id(selected_weapon_id) == "none" else preview_path
 	slot_box.add_child(preview_rect)
 
 	return slot_box
@@ -1936,8 +2338,16 @@ func _get_weapon_preview_path(weapon_id: String) -> String:
 	match _normalize_weapon_id(weapon_id):
 		"smg":
 			return SMG_BLASTER_PREVIEW_PATH
+		"rifle":
+			return SMG_BLASTER_PREVIEW_PATH
+		"sniper":
+			return SNIPER_PREVIEW_PATH
+		"rocket_launcher":
+			return ROCKET_LAUNCHER_PREVIEW_PATH
 		"medictool":
 			return MEDICTOOL_BLASTER_PREVIEW_PATH
+		"none":
+			return ""
 		_:
 			return ""
 
@@ -1946,10 +2356,32 @@ func _get_weapon_preview_texture(weapon_id: String) -> Texture2D:
 	match _normalize_weapon_id(weapon_id):
 		"smg":
 			return SMG_BLASTER_PREVIEW_TEXTURE
+		"rifle":
+			return SMG_BLASTER_PREVIEW_TEXTURE
+		"sniper":
+			return SNIPER_PREVIEW_TEXTURE
+		"rocket_launcher":
+			return ROCKET_LAUNCHER_PREVIEW_TEXTURE
 		"medictool":
 			return MEDICTOOL_BLASTER_PREVIEW_TEXTURE
+		"none":
+			return null
 		_:
 			return null
+
+
+func _calculate_fireteam_loadout_weight(fireteam_id: String, member_ids: PackedStringArray) -> float:
+	var total_weight: float = 0.0
+	for member_unit_id in member_ids:
+		total_weight += _calculate_member_loadout_weight(_get_member_loadout(fireteam_id, String(member_unit_id)))
+	return total_weight
+
+
+func _calculate_member_loadout_weight(member_loadout: Dictionary) -> float:
+	var resolver = LOADOUT_MODIFIER_RESOLVER_SCRIPT.new()
+	if resolver == null:
+		return 0.0
+	return float(resolver.call("calculate_loadout_weight", member_loadout))
 
 
 func _apply_loadout_member_row_style(panel: PanelContainer, is_lead: bool) -> void:
@@ -1969,6 +2401,17 @@ func _apply_loadout_member_row_style(panel: PanelContainer, is_lead: bool) -> vo
 		stylebox.bg_color = Color(0.14, 0.16, 0.19, 1.0)
 		stylebox.border_color = Color(0.36, 0.40, 0.46, 1.0)
 	panel.add_theme_stylebox_override("panel", stylebox)
+
+
+func _apply_help_id(control: Control, help_id: String) -> void:
+	if control == null:
+		return
+	var normalized_help_id: String = help_id.strip_edges()
+	if normalized_help_id.is_empty():
+		return
+	control.set_meta("help_id", normalized_help_id)
+	if normalized_help_id != "loadout.weapon_none":
+		control.tooltip_text = ""
 
 
 func _find_fireteam_definition_index(fireteam_id: String) -> int:
@@ -2177,7 +2620,8 @@ func _create_fireteam_card(fireteam_id: String, source_context: String = "firete
 		bool(definition.get("respawn_enabled", false)),
 		String(definition.get("loadout", "medium")),
 		"Lead: %s | Members: %s" % [_build_display_name(String(definition.get("lead_unit_id", ""))), _format_member_names(_build_fireteam_member_names(fireteam_id))],
-		source_context
+		source_context,
+		_build_fireteam_card_teamfit_summary(fireteam_id, definition)
 	)
 	if not fireteam_card.card_pressed.is_connected(_on_fireteam_card_pressed):
 		fireteam_card.card_pressed.connect(_on_fireteam_card_pressed)
@@ -2205,13 +2649,14 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 	var is_waiting_on_mission: bool = bool(craft_state.get("mission_waiting", false))
 	var is_transit_to_mission: bool = bool(craft_state.get("mission_transit_to_map", false))
 	var is_transit_to_fob: bool = bool(craft_state.get("mission_transit_to_fob", false))
+	var is_air_asset_recovery: bool = bool(craft_state.get("air_asset_unavailable", false))
 	var is_launch_ready_in_fob: bool = craft_id == _mission_launch_ready_craft_id and _has_boarded_mission_payload() and not is_waiting_on_mission and not is_transit_to_mission and not is_transit_to_fob
 	var pilot_unit_id: String = String(craft_state.get("pilot_unit_id", "")).strip_edges()
 	TRANSPORT_CRAFT_CARD_UI_SCRIPT.apply_card_state(
 		craft_card,
 		{
 			"selected": is_selected,
-			"in_transit": is_in_transit,
+			"in_transit": is_in_transit or is_air_asset_recovery,
 			"can_stage": can_stage_fireteams,
 			"title_text": UI_BLOCK_LABELS_SCRIPT.prefixed_transport_title(_build_transport_craft_title(craft_state)),
 			"ship_texture": _get_transport_craft_texture(craft_state),
@@ -2226,21 +2671,21 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 				_build_transport_craft_cargo_text(craft_state),
 				_build_transport_craft_status_line(craft_state),
 			],
-			"progress_visible": is_in_transit,
+			"progress_visible": is_in_transit or is_air_asset_recovery,
 			"progress_value": _build_transport_craft_progress_value(craft_state),
 			"primary_action": {
 				"visible": true,
 				"text": "Board",
 				"disabled": not _can_start_boarding_for_craft(craft_state),
-				"minimum_width": 52.0,
+				"square_size": 48.0,
 				"ready_style": true,
 				"callback": Callable(self, "_on_transport_craft_boarding_requested").bind(craft_id),
 			},
 			"secondary_action": {
 				"visible": true,
 				"text": "Waiting" if is_waiting_on_mission else "En Route" if is_transit_to_mission else "Return" if is_transit_to_fob else "Ready" if is_launch_ready_in_fob else "Send",
-				"disabled": is_launch_ready_in_fob or is_waiting_on_mission or is_transit_to_mission or is_transit_to_fob or not _can_mark_transport_craft_launch_ready(craft_state),
-				"minimum_width": 58.0,
+				"disabled": is_air_asset_recovery or is_launch_ready_in_fob or is_waiting_on_mission or is_transit_to_mission or is_transit_to_fob or not _can_mark_transport_craft_launch_ready(craft_state),
+				"square_size": 48.0,
 				"ready_style": true,
 				"callback": Callable(self, "_on_transport_craft_mission_stage_requested").bind(craft_id),
 			},
@@ -2275,6 +2720,9 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 
 func _build_transport_craft_title(craft_state: Dictionary) -> String:
 	var craft_name: String = String(craft_state.get("display_name", "craft")).strip_edges()
+	if bool(craft_state.get("air_asset_unavailable", false)):
+		var meta_state: String = String(craft_state.get("air_asset_meta_status", "")).strip_edges()
+		return "%s Â· REPLACE" % craft_name if meta_state == "destroyed_replacement_pending" else "%s Â· REPAIR" % craft_name
 	if bool(craft_state.get("mission_waiting", false)):
 		return "%s · MAP" % craft_name
 	if bool(craft_state.get("mission_transit_to_map", false)):
@@ -2300,6 +2748,11 @@ func _build_transport_craft_cargo_text(craft_state: Dictionary) -> String:
 
 
 func _build_transport_craft_status_line(craft_state: Dictionary) -> String:
+	if bool(craft_state.get("air_asset_unavailable", false)):
+		var meta_state: String = String(craft_state.get("air_asset_meta_status", "")).strip_edges()
+		var eta_seconds: int = int(craft_state.get("air_asset_recovery_eta_seconds", 0))
+		var label: String = "replacement pending" if meta_state == "destroyed_replacement_pending" else "repairing"
+		return "Status: %s | ETA %ds" % [label, eta_seconds]
 	if bool(craft_state.get("mission_waiting", false)):
 		return "Status: Holding on mission map | waiting for Drop"
 	if bool(craft_state.get("mission_transit_to_map", false)):
@@ -2325,6 +2778,8 @@ func _build_transport_craft_capacity_text(craft_state: Dictionary) -> String:
 
 
 func _build_transport_craft_progress_value(craft_state: Dictionary) -> float:
+	if bool(craft_state.get("air_asset_unavailable", false)):
+		return float(craft_state.get("air_asset_recovery_progress", 0.0))
 	if bool(craft_state.get("is_in_transit", false)):
 		return float(craft_state.get("transfer_progress", 0.0))
 	return 100.0
@@ -2419,6 +2874,8 @@ func _can_stage_fireteam_into_craft(craft_state: Dictionary, fireteam_id: String
 func _can_mark_transport_craft_launch_ready(craft_state: Dictionary) -> bool:
 	if craft_state.is_empty():
 		return false
+	if bool(craft_state.get("air_asset_unavailable", false)):
+		return false
 	if not _has_boarded_mission_payload():
 		return false
 	if String(craft_state.get("craft_id", "")).strip_edges() != _dropship_transport_craft_id:
@@ -2431,6 +2888,8 @@ func _can_mark_transport_craft_launch_ready(craft_state: Dictionary) -> bool:
 func _can_request_homebase_mission_start(craft_state: Dictionary) -> bool:
 	if craft_state.is_empty():
 		return false
+	if bool(craft_state.get("air_asset_unavailable", false)):
+		return false
 	if not _has_boarded_mission_payload():
 		return false
 	return bool(craft_state.get("mission_waiting", false))
@@ -2438,6 +2897,10 @@ func _can_request_homebase_mission_start(craft_state: Dictionary) -> bool:
 
 func _can_start_boarding_for_craft(craft_state: Dictionary) -> bool:
 	if craft_state.is_empty():
+		return false
+	if bool(craft_state.get("air_asset_unavailable", false)):
+		return false
+	if not bool(craft_state.get("is_boardable", false)):
 		return false
 	if String(craft_state.get("craft_id", "")).strip_edges() != _dropship_transport_craft_id:
 		return false
@@ -2777,8 +3240,19 @@ func _build_overlay_loadout_text(unit_id: String, profile) -> String:
 	var assigned_fireteam_id := _get_selected_fireteam_id_for_unit(unit_id)
 	if not assigned_fireteam_id.is_empty():
 		var member_loadout := _get_member_loadout(assigned_fireteam_id, unit_id)
-		return CHARACTER_SHEET_FORMATTER_SCRIPT.build_loadout_text_from_member_loadout(member_loadout, "standard kit")
-	return CHARACTER_SHEET_FORMATTER_SCRIPT.build_loadout_text_from_ids(String(profile.armor_id), String(profile.weapon_1_id), String(profile.weapon_2_id), "standard kit")
+		return "%s | Weight %.1f" % [
+			CHARACTER_SHEET_FORMATTER_SCRIPT.build_loadout_text_from_member_loadout(member_loadout, "standard kit"),
+			_calculate_member_loadout_weight(member_loadout),
+		]
+	var profile_loadout: Dictionary = {
+		"armor": String(profile.armor_id),
+		"weapon_1": String(profile.weapon_1_id),
+		"weapon_2": String(profile.weapon_2_id),
+	}
+	return "%s | Weight %.1f" % [
+		CHARACTER_SHEET_FORMATTER_SCRIPT.build_loadout_text_from_ids(String(profile.armor_id), String(profile.weapon_1_id), String(profile.weapon_2_id), "standard kit"),
+		_calculate_member_loadout_weight(profile_loadout),
+	]
 
 
 func _load_portrait_texture(portrait_path: String) -> Texture2D:

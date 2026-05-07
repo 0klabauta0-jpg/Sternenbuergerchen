@@ -1,0 +1,244 @@
+{
+	"catalog_version": 1,
+	"status": "TASK_195_reuse_existing_project_copies",
+	"rules": {
+		"import_status": "reuse_existing_project_copies",
+		"runtime_contract": "visual_only_no_input_logic",
+		"preferred_ui_format": "png",
+		"no_curated_duplicate_import": true
+	},
+	"sources": {
+		"kenney_ui_pack_space_expansion": {
+			"license": "Creative Commons Zero, CC0",
+			"project_root": "res://Assets/kenney_ui-pack-space-expansion/",
+			"usage": "drop_light_bars_buttons_crosshair"
+		},
+		"kenney_ui_pack": {
+			"license": "Creative Commons Zero, CC0",
+			"project_root": "res://Assets/kenney_ui-pack/",
+			"usage": "basic_buttons_and_icons"
+		},
+		"kenney_input_keyboard_mouse": {
+			"license": "Creative Commons Zero, CC0",
+			"project_root": "res://Assets/kenney_input-prompts_1.4.1/Keyboard & Mouse/",
+			"usage": "tooltip_prompts_only"
+		},
+		"kenney_cursor_pixel_pack": {
+			"license": "Creative Commons Zero, CC0",
+			"project_root": "res://Assets/kenney_cursor-pixel-pack/",
+			"usage": "cursor_visual_states_only"
+		}
+	},
+	"assets": [
+		{
+			"id": "ui_panel_frame_blue",
+			"source_id": "kenney_ui_pack_space_expansion",
+			"category": "panel_frame",
+			"path": "res://Assets/kenney_ui-pack-space-expansion/PNG/Blue/Default/bar_square_large.png",
+			"usage": "drop_light_panel_frame"
+		},
+		{
+			"id": "ui_progress_bar_blue",
+			"source_id": "kenney_ui_pack_space_expansion",
+			"category": "panel_frame",
+			"path": "res://Assets/kenney_ui-pack-space-expansion/PNG/Blue/Default/bar_square_small.png",
+			"usage": "compact_progress_bar"
+		},
+		{
+			"id": "ui_button_square_blue",
+			"source_id": "kenney_ui_pack",
+			"category": "button",
+			"path": "res://Assets/kenney_ui-pack/PNG/Blue/Default/button_square_flat.png",
+			"usage": "square_command_button"
+		},
+		{
+			"id": "ui_button_rect_blue",
+			"source_id": "kenney_ui_pack",
+			"category": "button",
+			"path": "res://Assets/kenney_ui-pack/PNG/Blue/Default/button_rectangle_flat.png",
+			"usage": "compact_text_button"
+		},
+		{
+			"id": "ui_button_sci_square_header",
+			"source_id": "kenney_ui_pack_space_expansion",
+			"category": "button",
+			"path": "res://Assets/kenney_ui-pack-space-expansion/PNG/Blue/Default/button_square_header_small_square.png",
+			"usage": "sci_fi_square_button_frame"
+		},
+		{
+			"id": "ui_icon_check",
+			"source_id": "kenney_ui_pack",
+			"category": "icon",
+			"path": "res://Assets/kenney_ui-pack/PNG/Blue/Default/icon_checkmark.png",
+			"usage": "ready_confirm_state"
+		},
+		{
+			"id": "ui_icon_cross",
+			"source_id": "kenney_ui_pack",
+			"category": "icon",
+			"path": "res://Assets/kenney_ui-pack/PNG/Blue/Default/icon_cross.png",
+			"usage": "cancel_blocked_state"
+		},
+		{
+			"id": "ui_icon_square",
+			"source_id": "kenney_ui_pack",
+			"category": "icon",
+			"path": "res://Assets/kenney_ui-pack/PNG/Blue/Default/icon_square.png",
+			"usage": "generic_slot_state"
+		},
+		{
+			"id": "ui_tactical_crosshair",
+			"source_id": "kenney_ui_pack_space_expansion",
+			"category": "tactical_marker",
+			"path": "res://Assets/kenney_ui-pack-space-expansion/PNG/Blue/Default/crosshair_color_a.png",
+			"usage": "target_or_contact_marker"
+		},
+		{
+			"id": "prompt_lmb",
+			"source_id": "kenney_input_keyboard_mouse",
+			"category": "command_prompt",
+			"path": "res://Assets/kenney_input-prompts_1.4.1/Keyboard & Mouse/Default/mouse_left.png",
+			"usage": "select_place_confirm_tooltip"
+		},
+		{
+			"id": "prompt_rmb",
+			"source_id": "kenney_input_keyboard_mouse",
+			"category": "command_prompt",
+			"path": "res://Assets/kenney_input-prompts_1.4.1/Keyboard & Mouse/Default/mouse_right.png",
+			"usage": "cancel_context_tooltip"
+		},
+		{
+			"id": "prompt_shift",
+			"source_id": "kenney_input_keyboard_mouse",
+			"category": "command_prompt",
+			"path": "res://Assets/kenney_input-prompts_1.4.1/Keyboard & Mouse/Default/keyboard_shift.png",
+			"usage": "multi_select_modifier_tooltip"
+		},
+		{
+			"id": "prompt_ctrl",
+			"source_id": "kenney_input_keyboard_mouse",
+			"category": "command_prompt",
+			"path": "res://Assets/kenney_input-prompts_1.4.1/Keyboard & Mouse/Default/keyboard_ctrl.png",
+			"usage": "alternate_modifier_tooltip"
+		},
+		{
+			"id": "prompt_q",
+			"source_id": "kenney_input_keyboard_mouse",
+			"category": "command_prompt",
+			"path": "res://Assets/kenney_input-prompts_1.4.1/Keyboard & Mouse/Default/keyboard_q.png",
+			"usage": "cycle_left_tooltip"
+		},
+		{
+			"id": "prompt_e",
+			"source_id": "kenney_input_keyboard_mouse",
+			"category": "command_prompt",
+			"path": "res://Assets/kenney_input-prompts_1.4.1/Keyboard & Mouse/Default/keyboard_e.png",
+			"usage": "cycle_right_tooltip"
+		},
+		{
+			"id": "prompt_r",
+			"source_id": "kenney_input_keyboard_mouse",
+			"category": "command_prompt",
+			"path": "res://Assets/kenney_input-prompts_1.4.1/Keyboard & Mouse/Default/keyboard_r.png",
+			"usage": "rotate_or_reset_tooltip"
+		},
+		{
+			"id": "prompt_f",
+			"source_id": "kenney_input_keyboard_mouse",
+			"category": "command_prompt",
+			"path": "res://Assets/kenney_input-prompts_1.4.1/Keyboard & Mouse/Default/keyboard_f.png",
+			"usage": "focus_or_follow_tooltip"
+		},
+		{
+			"id": "prompt_g",
+			"source_id": "kenney_input_keyboard_mouse",
+			"category": "command_prompt",
+			"path": "res://Assets/kenney_input-prompts_1.4.1/Keyboard & Mouse/Default/keyboard_g.png",
+			"usage": "go_execute_tooltip"
+		},
+		{
+			"id": "prompt_space",
+			"source_id": "kenney_input_keyboard_mouse",
+			"category": "command_prompt",
+			"path": "res://Assets/kenney_input-prompts_1.4.1/Keyboard & Mouse/Default/keyboard_space.png",
+			"usage": "pause_or_confirm_tooltip"
+		},
+		{
+			"id": "prompt_escape",
+			"source_id": "kenney_input_keyboard_mouse",
+			"category": "command_prompt",
+			"path": "res://Assets/kenney_input-prompts_1.4.1/Keyboard & Mouse/Default/keyboard_escape.png",
+			"usage": "close_cancel_tooltip"
+		},
+		{
+			"id": "cursor_select",
+			"source_id": "kenney_cursor_pixel_pack",
+			"category": "cursor",
+			"path": "res://Assets/kenney_cursor-pixel-pack/Tiles/tile_0000.png",
+			"usage": "select_mode_cursor"
+		},
+		{
+			"id": "cursor_move",
+			"source_id": "kenney_cursor_pixel_pack",
+			"category": "cursor",
+			"path": "res://Assets/kenney_cursor-pixel-pack/Tiles/tile_0001.png",
+			"usage": "move_command_cursor"
+		},
+		{
+			"id": "cursor_attack",
+			"source_id": "kenney_cursor_pixel_pack",
+			"category": "cursor",
+			"path": "res://Assets/kenney_cursor-pixel-pack/Tiles/tile_0002.png",
+			"usage": "attack_engage_cursor"
+		},
+		{
+			"id": "cursor_defend",
+			"source_id": "kenney_cursor_pixel_pack",
+			"category": "cursor",
+			"path": "res://Assets/kenney_cursor-pixel-pack/Tiles/tile_0003.png",
+			"usage": "defend_command_cursor"
+		},
+		{
+			"id": "cursor_take",
+			"source_id": "kenney_cursor_pixel_pack",
+			"category": "cursor",
+			"path": "res://Assets/kenney_cursor-pixel-pack/Tiles/tile_0004.png",
+			"usage": "take_objective_cursor"
+		},
+		{
+			"id": "cursor_area_drag",
+			"source_id": "kenney_cursor_pixel_pack",
+			"category": "cursor",
+			"path": "res://Assets/kenney_cursor-pixel-pack/Tiles/tile_0005.png",
+			"usage": "area_order_drag_cursor"
+		},
+		{
+			"id": "cursor_editor_brush",
+			"source_id": "kenney_cursor_pixel_pack",
+			"category": "editor_tool",
+			"path": "res://Assets/kenney_cursor-pixel-pack/Tiles/tile_0006.png",
+			"usage": "map_editor_brush_cursor"
+		},
+		{
+			"id": "cursor_height",
+			"source_id": "kenney_cursor_pixel_pack",
+			"category": "editor_tool",
+			"path": "res://Assets/kenney_cursor-pixel-pack/Tiles/tile_0007.png",
+			"usage": "height_tool_cursor"
+		},
+		{
+			"id": "cursor_marker",
+			"source_id": "kenney_cursor_pixel_pack",
+			"category": "editor_tool",
+			"path": "res://Assets/kenney_cursor-pixel-pack/Tiles/tile_0008.png",
+			"usage": "marker_tool_cursor"
+		},
+		{
+			"id": "cursor_patrol",
+			"source_id": "kenney_cursor_pixel_pack",
+			"category": "editor_tool",
+			"path": "res://Assets/kenney_cursor-pixel-pack/Tiles/tile_0009.png",
+			"usage": "patrol_tool_cursor"
+		}
+	]
+}

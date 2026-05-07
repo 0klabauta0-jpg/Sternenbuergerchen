@@ -1,8 +1,25 @@
 {
 	"source": {
-		"local_path": "C:/Users/bjoer/Pictures/Sternenbuerger/3d/Space Kit",
+		"source_id": "kenney_space_kit",
+		"source_doc": "res://docs/assets/asset_source_availability_matrix.md",
+		"project_root": "res://Assets/kenney_space-kit/",
 		"preferred_format": "glb",
 		"audited_glb_count": 153
+	},
+	"nature_kit": {
+		"source_id": "kenney_nature_kit_classic",
+		"source_doc": "res://docs/assets/nature_kit_classic_inventory.md",
+		"asset_catalog": "res://data/nature_kit_asset_catalog.json",
+		"surface_visual_theme_catalog": "res://data/terrain_surface_visual_theme_catalog.json",
+		"project_root": "res://Assets/used/terrain/nature_kit_classic/",
+		"active_height_edge_theme": "brown",
+		"theme_policy": "TASK_252 uses brown Nature-Kit cliffs/steps as the V1 active edge theme; grey variants are catalogued and loadable for rock/asteroid follow-up mapping.",
+		"surface_theme_candidates": {
+			"ground": "brown",
+			"sand": "brown",
+			"rock": "grey",
+			"road": "grey"
+		}
 	},
 	"grid": {
 		"cell_size": 1.0,
@@ -17,6 +34,30 @@
 		"ground_flat": {
 			"layer": "terrain",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain.glb"
+		},
+		"nature_ground_dirt": {
+			"layer": "terrain_surface",
+			"source_id": "kenney_nature_kit_classic",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/ground/ground_dirt.gltf",
+			"scale": 1.0,
+			"nature_theme": "dirt",
+			"surface_visual_role": "ground_base"
+		},
+		"nature_ground_grass_patch": {
+			"layer": "terrain_surface",
+			"source_id": "kenney_nature_kit_classic",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/ground/grass.gltf",
+			"scale": 1.0,
+			"nature_theme": "grass_detail",
+			"surface_visual_role": "ground_detail"
+		},
+		"nature_ground_dirt_river_tile": {
+			"layer": "terrain_surface",
+			"source_id": "kenney_nature_kit_classic",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/ground/ground_dirtRiverTile.gltf",
+			"scale": 1.0,
+			"nature_theme": "dirt_detail_candidate",
+			"surface_visual_role": "future_detail_candidate"
 		},
 		"wall_straight": {
 			"layer": "terrain_object",
@@ -154,24 +195,133 @@
 		},
 		"cliff_straight": {
 			"layer": "terrain_object",
-			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_sideCliff.glb",
+			"source_id": "kenney_nature_kit_classic",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown.gltf",
 			"scale": 1.0,
 			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0
+			"rotation_degrees_offset": 0.0,
+			"nature_theme": "brown",
+			"edge_role": "cliff_straight"
 		},
 		"cliff_corner": {
 			"layer": "terrain_object",
-			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_sideCorner.glb",
+			"source_id": "kenney_nature_kit_classic",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown_cornerTop.gltf",
 			"scale": 1.0,
 			"y_offset": 0.0,
-			"rotation_degrees_offset": -90.0
+			"rotation_degrees_offset": -90.0,
+			"nature_theme": "brown",
+			"edge_role": "cliff_outer_corner"
 		},
 		"slope": {
 			"layer": "terrain_object",
-			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_rampLarge.glb",
+			"source_id": "kenney_nature_kit_classic",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown_steps.gltf",
 			"scale": 1.0,
 			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0
+			"rotation_degrees_offset": 0.0,
+			"nature_theme": "brown",
+			"edge_role": "slope_steps"
+		},
+		"nature_cliff_brown_straight": {
+			"layer": "terrain_object",
+			"source_id": "kenney_nature_kit_classic",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown.gltf",
+			"scale": 1.0,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0,
+			"nature_theme": "brown",
+			"edge_role": "cliff_straight"
+		},
+		"nature_cliff_brown_outer_corner": {
+			"layer": "terrain_object",
+			"source_id": "kenney_nature_kit_classic",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown_cornerTop.gltf",
+			"scale": 1.0,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": -90.0,
+			"nature_theme": "brown",
+			"edge_role": "cliff_outer_corner"
+		},
+		"nature_cliff_brown_inner_corner": {
+			"layer": "terrain_object",
+			"source_id": "kenney_nature_kit_classic",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown_cornerInnerTop.gltf",
+			"scale": 1.0,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": -90.0,
+			"nature_theme": "brown",
+			"edge_role": "cliff_inner_corner"
+		},
+		"nature_slope_brown_steps": {
+			"layer": "terrain_object",
+			"source_id": "kenney_nature_kit_classic",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown_steps.gltf",
+			"scale": 1.0,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0,
+			"nature_theme": "brown",
+			"edge_role": "slope_steps"
+		},
+		"nature_slope_brown_steps_end": {
+			"layer": "terrain_object",
+			"source_id": "kenney_nature_kit_classic",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown_stepsEnd.gltf",
+			"scale": 1.0,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0,
+			"nature_theme": "brown",
+			"edge_role": "slope_steps_end"
+		},
+		"nature_cliff_grey_straight": {
+			"layer": "terrain_object",
+			"source_id": "kenney_nature_kit_classic",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffGrey.gltf",
+			"scale": 1.0,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0,
+			"nature_theme": "grey",
+			"edge_role": "cliff_straight"
+		},
+		"nature_cliff_grey_outer_corner": {
+			"layer": "terrain_object",
+			"source_id": "kenney_nature_kit_classic",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffGrey_cornerTop.gltf",
+			"scale": 1.0,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": -90.0,
+			"nature_theme": "grey",
+			"edge_role": "cliff_outer_corner"
+		},
+		"nature_cliff_grey_inner_corner": {
+			"layer": "terrain_object",
+			"source_id": "kenney_nature_kit_classic",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffGrey_cornerInnerTop.gltf",
+			"scale": 1.0,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": -90.0,
+			"nature_theme": "grey",
+			"edge_role": "cliff_inner_corner"
+		},
+		"nature_slope_grey_steps": {
+			"layer": "terrain_object",
+			"source_id": "kenney_nature_kit_classic",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffGrey_steps.gltf",
+			"scale": 1.0,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0,
+			"nature_theme": "grey",
+			"edge_role": "slope_steps"
+		},
+		"nature_slope_grey_steps_end": {
+			"layer": "terrain_object",
+			"source_id": "kenney_nature_kit_classic",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffGrey_stepsEnd.gltf",
+			"scale": 1.0,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0,
+			"nature_theme": "grey",
+			"edge_role": "slope_steps_end"
 		},
 		"crater_small": {
 			"layer": "object",
@@ -207,6 +357,56 @@
 			"scale": 0.95,
 			"y_offset": 0.0,
 			"rotation_degrees_offset": 0.0
+		},
+		"nature_tree_blocker": {
+			"layer": "object",
+			"source_id": "kenney_nature_kit_classic",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/vegetation/tree_pine_tall.gltf",
+			"scale": 0.78,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0,
+			"prop_role": "tree_blocker",
+			"gameplay_role": "los_blocking_cover"
+		},
+		"nature_rock_cover": {
+			"layer": "object",
+			"source_id": "kenney_nature_kit_classic",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/rocks/rock_large1.gltf",
+			"scale": 0.72,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0,
+			"prop_role": "rock_cover",
+			"gameplay_role": "blocking_cover"
+		},
+		"nature_bush_cover": {
+			"layer": "object",
+			"source_id": "kenney_nature_kit_classic",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/vegetation/plant_bush.gltf",
+			"scale": 0.62,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0,
+			"prop_role": "bush_cover",
+			"gameplay_role": "soft_cover_walkable"
+		},
+		"nature_cactus_cover": {
+			"layer": "object",
+			"source_id": "kenney_nature_kit_classic",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/vegetation/cactus_large.gltf",
+			"scale": 0.58,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0,
+			"prop_role": "cactus_cover",
+			"gameplay_role": "blocking_light_cover"
+		},
+		"nature_deco_logs": {
+			"layer": "object",
+			"source_id": "kenney_nature_kit_classic",
+			"model_path": "res://Assets/used/terrain/nature_kit_classic/props/logs_stack.gltf",
+			"scale": 0.58,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0,
+			"prop_role": "deco_small",
+			"gameplay_role": "visual_only_no_cover"
 		},
 		"rocks_small_a": {
 			"layer": "object",

@@ -133,6 +133,13 @@ TASK_173 importiert keine neuen Assets. Es dokumentiert den gemeinsamen Skeleton
 
 Blaster-Kit-Regel: GLB-only, kein paralleler FBX/OBJ/MTL-Import, kein Komplettimport. Die gemeinsame `colormap.png` wird mitkopiert, weil die GLBs sie referenzieren. Waffen bleiben Anzeige und werden nicht zu Combat-, Loadout- oder Balance-State.
 
+### TASK_190: Weapon Visual Loadout Expansion
+| Quelle | Ziel | Umfang | Zweck |
+| --- | --- | ---: | --- |
+| `Assets/Weapon Pack/Models/GLTF format` und `Assets/Weapon Pack/Sprites/Render` | `Assets/used/npc/weapon_pack/` | 2 GLB-Waffen, 2 Preview-PNGs, Lizenz | Sniper- und Rocket-Launcher-Loadout-Previews sowie 2.5D-Weapon-Visuals. |
+
+Weapon-Pack-Regel: Sniper und Rocket Launcher sind das kuratierte V1-Subset. Keine FBX/OBJ/DAE/STL-Duplikate und kein kompletter Pack-Import. Die neuen IDs bleiben Loadout-/Visual-Metadaten; Projektilphysik, Splash-Damage und Munition bleiben ausserhalb von TASK_190.
+
 ## Erste Empfohlene Folge-Tasks
 1. `TASK_165A - Rank and Role Badge Subset`
    - Importiert max. 12 PNG aus `kenney_ranks-pack`.

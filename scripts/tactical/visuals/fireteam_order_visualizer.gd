@@ -15,6 +15,9 @@ const ISO_MARKER_HALF_HEIGHT: float = 10.0
 const NEUTRAL_ORDER_LINE_COLOR: Color = Color(0.24, 0.72, 1.0, 0.95)
 const DEFENSIVE_ORDER_LINE_COLOR: Color = Color(0.28, 0.9, 0.48, 0.95)
 const OFFENSIVE_ORDER_LINE_COLOR: Color = Color(1.0, 0.28, 0.22, 0.95)
+const MOVEMENT_RUSH_COLOR: Color = Color(0.32, 0.72, 1.0, 0.9)
+const MOVEMENT_BOUNDING_COLOR: Color = Color(1.0, 0.78, 0.24, 0.92)
+const MOVEMENT_CATERPILLAR_COLOR: Color = Color(0.48, 0.96, 0.62, 0.92)
 
 var _phase_index: int = 0
 var _selected_fireteam_ids: PackedStringArray = []
@@ -24,6 +27,7 @@ var _visible_waypoints: Array = []
 var _visible_area_orders: Array = []
 var _ad_hoc_order_dicts: Array = []
 var _security_dicts: Array = []
+var _movement_state_dicts: Array = []
 var _fireteam_anchor_positions: Dictionary = {}
 var _area_order_preview_payload: Dictionary = {}
 
@@ -90,6 +94,15 @@ func set_security_dicts(security_dicts: Array) -> void:
 	queue_redraw()
 
 
+func set_movement_state_dicts(movement_state_dicts: Array) -> void:
+	_movement_state_dicts = []
+	for movement_variant in movement_state_dicts:
+		if typeof(movement_variant) != TYPE_DICTIONARY:
+			continue
+		_movement_state_dicts.append(Dictionary(movement_variant).duplicate(true))
+	queue_redraw()
+
+
 func get_visible_waypoints() -> Array:
 	var result: Array = []
 	for waypoint_data in _visible_waypoints:
@@ -135,6 +148,7 @@ func _draw() -> void:
 		if plan == null or not plan.is_valid() or int(plan.phase) != _phase_index:
 			continue
 		_draw_plan(plan)
+	_draw_movement_states()
 	_draw_ad_hoc_orders()
 	_draw_security_states()
 
@@ -319,6 +333,69 @@ func _draw_security_states() -> void:
 			var fallback_font: Font = ThemeDB.fallback_font
 			if fallback_font != null:
 				draw_string(fallback_font, anchor_position + Vector2(12.0, -10.0), "OVW", HORIZONTAL_ALIGNMENT_LEFT, -1.0, 11, Color(0.95, 0.98, 1.0, 0.95))
+
+
+func _draw_movement_states() -> void:
+	for movement_state_variant in _movement_state_dicts:
+		if typeof(movement_state_variant) != TYPE_DICTIONARY:
+			continue
+		var movement_state: Dictionary = Dictionary(movement_state_variant)
+		var fireteam_id: String = String(movement_state.get("fireteam_id", "")).strip_edges().to_lower()
+		if not _selected_fireteam_ids.is_empty() and not _selected_fireteam_ids.has(fireteam_id):
+			continue
+		var style: String = String(movement_state.get("advance_style", movement_state.get("effective_style", ""))).strip_edges().to_lower()
+		var origin_position: Vector2 = Vector2(movement_state.get("bound_origin_position", movement_state.get("progress_anchor_position", Vector2.ZERO)))
+		var target_position: Vector2 = Vector2(movement_state.get("bound_target_position", movement_state.get("current_anchor_target_position", origin_position)))
+		var draw_color: Color = _get_movement_style_color(style)
+		draw_line(origin_position, target_position, draw_color, 3.0, true)
+		_draw_iso_marker_base(target_position, Color(draw_color.r, draw_color.g, draw_color.b, 0.26), draw_color, 0.86)
+		_draw_movement_member_marks(movement_state, target_position, draw_color)
+		var fallback_font: Font = ThemeDB.fallback_font
+		if fallback_font == null:
+			continue
+		var label_text: String = _build_movement_map_label(movement_state)
+		if label_text.is_empty():
+			continue
+		draw_string(fallback_font, target_position + Vector2(14.0, -14.0), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 11, draw_color.lightened(0.08))
+
+
+func _draw_movement_member_marks(movement_state: Dictionary, bound_target_position: Vector2, draw_color: Color) -> void:
+	var target_positions: Dictionary = Dictionary(movement_state.get("current_target_positions", {}))
+	var moving_unit_ids: PackedStringArray = PackedStringArray(movement_state.get("moving_unit_ids", movement_state.get("current_moving_unit_ids", PackedStringArray())))
+	var covering_unit_ids: PackedStringArray = PackedStringArray(movement_state.get("covering_unit_ids", movement_state.get("current_covering_unit_ids", PackedStringArray())))
+	for unit_id in moving_unit_ids:
+		var marker_position: Vector2 = Vector2(target_positions.get(String(unit_id), bound_target_position))
+		draw_circle(marker_position, 5.0, draw_color.lightened(0.16))
+	for cover_index in range(covering_unit_ids.size()):
+		var cover_position: Vector2 = Vector2(movement_state.get("bound_origin_position", bound_target_position)) + Vector2(float(cover_index) * 7.0, 10.0)
+		draw_circle(cover_position, 3.5, Color(draw_color.r, draw_color.g, draw_color.b, 0.42))
+
+
+func _get_movement_style_color(style: String) -> Color:
+	match style.strip_edges().to_lower():
+		"bounding":
+			return MOVEMENT_BOUNDING_COLOR
+		"caterpillar", "creep":
+			return MOVEMENT_CATERPILLAR_COLOR
+		"rush":
+			return MOVEMENT_RUSH_COLOR
+		_:
+			return Color(0.88, 0.88, 0.88, 0.82)
+
+
+func _build_movement_map_label(movement_state: Dictionary) -> String:
+	var style_code: String = String(movement_state.get("style_code", "")).strip_edges().to_upper()
+	if style_code.is_empty():
+		style_code = String(Dictionary(movement_state.get("map_readability", {})).get("style_code", "")).strip_edges().to_upper()
+	if style_code.is_empty():
+		style_code = "MOV"
+	var bound_index: int = maxi(int(movement_state.get("bound_index", Dictionary(movement_state.get("map_readability", {})).get("bound_index", 1))), 1)
+	var bound_count: int = maxi(int(movement_state.get("bound_count", Dictionary(movement_state.get("map_readability", {})).get("bound_count", 1))), 1)
+	var group_index: int = maxi(int(movement_state.get("group_index", Dictionary(movement_state.get("map_readability", {})).get("group_index", 1))), 1)
+	var group_count: int = maxi(int(movement_state.get("group_count", Dictionary(movement_state.get("map_readability", {})).get("group_count", 1))), 1)
+	if group_count > 1:
+		return "%s %d/%d G%d/%d" % [style_code, bound_index, bound_count, group_index, group_count]
+	return "%s %d/%d" % [style_code, bound_index, bound_count]
 
 
 func _draw_sector(origin: Vector2, center_angle: float, arc_width: float, radius: float, fill_color: Color) -> void:

@@ -1,0 +1,208 @@
+{
+	"catalog_version": 1,
+	"status": "TASK_194_curated_subset",
+	"rules": {
+		"modular_space_max_glb": 10,
+		"space_station_max_glb": 12,
+		"format": "glb_only",
+		"runtime_contract": "visual_only_no_gameplay_truth"
+	},
+	"sources": {
+		"modular_space_kit": {
+			"bundle": "Kenney Modular Space Kit (1.0)",
+			"license": "Creative Commons Zero, CC0",
+			"project_root": "res://Assets/curated/kenney/modular_space/",
+			"shared_texture": "res://Assets/curated/kenney/modular_space/models/Textures/colormap.png"
+		},
+		"space_station_kit": {
+			"bundle": "Kenney Space Station Kit (1.0)",
+			"license": "Creative Commons Zero, CC0",
+			"project_root": "res://Assets/curated/kenney/space_station/",
+			"shared_texture": "res://Assets/curated/kenney/space_station/models/Textures/colormap.png"
+		},
+		"kenney_space_kit": {
+			"bundle": "Kenney Space Kit (2.0)",
+			"license": "Creative Commons Zero, CC0",
+			"project_root": "res://Assets/kenney_space-kit/",
+			"import_status": "reuse_existing_project_copy"
+		}
+	},
+	"setpieces": [
+		{
+			"id": "modular_floor",
+			"source_id": "modular_space_kit",
+			"path": "res://Assets/curated/kenney/modular_space/models/template-floor.glb",
+			"category": "hangar_floor",
+			"recommended_usage": "small floor insert",
+			"scale_hint": 1.0
+		},
+		{
+			"id": "modular_floor_big",
+			"source_id": "modular_space_kit",
+			"path": "res://Assets/curated/kenney/modular_space/models/template-floor-big.glb",
+			"category": "hangar_floor",
+			"recommended_usage": "large floor block",
+			"scale_hint": 1.0
+		},
+		{
+			"id": "modular_floor_raised",
+			"source_id": "modular_space_kit",
+			"path": "res://Assets/curated/kenney/modular_space/models/template-floor-layer-raised.glb",
+			"category": "docking_pad",
+			"recommended_usage": "raised pad or service bay",
+			"scale_hint": 1.0
+		},
+		{
+			"id": "modular_wall",
+			"source_id": "modular_space_kit",
+			"path": "res://Assets/curated/kenney/modular_space/models/template-wall.glb",
+			"category": "wall_panel",
+			"recommended_usage": "straight modular wall",
+			"scale_hint": 1.0
+		},
+		{
+			"id": "modular_wall_corner",
+			"source_id": "modular_space_kit",
+			"path": "res://Assets/curated/kenney/modular_space/models/template-wall-corner.glb",
+			"category": "wall_panel",
+			"recommended_usage": "corner modular wall",
+			"scale_hint": 1.0
+		},
+		{
+			"id": "modular_gate",
+			"source_id": "modular_space_kit",
+			"path": "res://Assets/curated/kenney/modular_space/models/gate.glb",
+			"category": "door_airlock",
+			"recommended_usage": "airlock frame",
+			"scale_hint": 1.0
+		},
+		{
+			"id": "modular_gate_door",
+			"source_id": "modular_space_kit",
+			"path": "res://Assets/curated/kenney/modular_space/models/gate-door.glb",
+			"category": "door_airlock",
+			"recommended_usage": "closed airlock door",
+			"scale_hint": 1.0
+		},
+		{
+			"id": "modular_corridor_wide",
+			"source_id": "modular_space_kit",
+			"path": "res://Assets/curated/kenney/modular_space/models/corridor-wide.glb",
+			"category": "corridor",
+			"recommended_usage": "wide connector corridor",
+			"scale_hint": 1.0
+		},
+		{
+			"id": "modular_corridor_wide_corner",
+			"source_id": "modular_space_kit",
+			"path": "res://Assets/curated/kenney/modular_space/models/corridor-wide-corner.glb",
+			"category": "corridor",
+			"recommended_usage": "wide corridor corner",
+			"scale_hint": 1.0
+		},
+		{
+			"id": "modular_room_wide",
+			"source_id": "modular_space_kit",
+			"path": "res://Assets/curated/kenney/modular_space/models/room-wide.glb",
+			"category": "hangar_room",
+			"recommended_usage": "wide bay or staging room",
+			"scale_hint": 1.0
+		},
+		{
+			"id": "station_floor",
+			"source_id": "space_station_kit",
+			"path": "res://Assets/curated/kenney/space_station/models/floor.glb",
+			"category": "hangar_floor",
+			"recommended_usage": "station floor tile",
+			"scale_hint": 1.0
+		},
+		{
+			"id": "station_floor_panel",
+			"source_id": "space_station_kit",
+			"path": "res://Assets/curated/kenney/space_station/models/floor-panel.glb",
+			"category": "hangar_floor",
+			"recommended_usage": "panelled floor tile",
+			"scale_hint": 1.0
+		},
+		{
+			"id": "station_wall",
+			"source_id": "space_station_kit",
+			"path": "res://Assets/curated/kenney/space_station/models/wall.glb",
+			"category": "wall_panel",
+			"recommended_usage": "straight station wall",
+			"scale_hint": 1.0
+		},
+		{
+			"id": "station_wall_door",
+			"source_id": "space_station_kit",
+			"path": "res://Assets/curated/kenney/space_station/models/wall-door.glb",
+			"category": "door_airlock",
+			"recommended_usage": "door wall segment",
+			"scale_hint": 1.0
+		},
+		{
+			"id": "station_wall_window",
+			"source_id": "space_station_kit",
+			"path": "res://Assets/curated/kenney/space_station/models/wall-window.glb",
+			"category": "wall_panel",
+			"recommended_usage": "window wall segment",
+			"scale_hint": 1.0
+		},
+		{
+			"id": "station_door_single_closed",
+			"source_id": "space_station_kit",
+			"path": "res://Assets/curated/kenney/space_station/models/door-single-closed.glb",
+			"category": "door_airlock",
+			"recommended_usage": "closed inner door",
+			"scale_hint": 1.0
+		},
+		{
+			"id": "station_computer",
+			"source_id": "space_station_kit",
+			"path": "res://Assets/curated/kenney/space_station/models/computer.glb",
+			"category": "console",
+			"recommended_usage": "small console",
+			"scale_hint": 1.0
+		},
+		{
+			"id": "station_computer_wide",
+			"source_id": "space_station_kit",
+			"path": "res://Assets/curated/kenney/space_station/models/computer-wide.glb",
+			"category": "console",
+			"recommended_usage": "wide command console",
+			"scale_hint": 1.0
+		},
+		{
+			"id": "station_table_display",
+			"source_id": "space_station_kit",
+			"path": "res://Assets/curated/kenney/space_station/models/table-display.glb",
+			"category": "console",
+			"recommended_usage": "briefing or planning table",
+			"scale_hint": 1.0
+		},
+		{
+			"id": "station_bed_single",
+			"source_id": "space_station_kit",
+			"path": "res://Assets/curated/kenney/space_station/models/bed-single.glb",
+			"category": "medbay",
+			"recommended_usage": "medbay bed",
+			"scale_hint": 1.0
+		},
+		{
+			"id": "station_container_wide",
+			"source_id": "space_station_kit",
+			"path": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+			"category": "storage_cargo",
+			"recommended_usage": "cargo/storage prop",
+			"scale_hint": 1.0
+		},
+		{
+			"id": "station_structure_panel",
+			"source_id": "space_station_kit",
+			"path": "res://Assets/curated/kenney/space_station/models/structure-panel.glb",
+			"category": "wall_panel",
+			"recommended_usage": "large structural panel",
+			"scale_hint": 1.0
+		}
+	]
+}

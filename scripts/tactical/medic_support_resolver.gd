@@ -3,13 +3,19 @@ extends RefCounted
 
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
 
-const DEFAULT_TILE_RANGE: int = 2
+const DEFAULT_TILE_RANGE: int = 1
 const DEFAULT_MOVE_MAX_TILE_DISTANCE: int = 3
-const DEFAULT_RANGE_FALLBACK_WORLD: float = 144.0
+const DEFAULT_RANGE_FALLBACK_WORLD: float = 80.0
 const DEFAULT_MOVE_MAX_DISTANCE_FALLBACK_WORLD: float = 216.0
 const DEFAULT_APPROACH_STANDOFF: float = 28.0
 const DEFAULT_WOUNDED_THRESHOLD: float = 0.65
 const DEFAULT_REMOTE_WOUNDED_THRESHOLD: float = 0.45
+const ORTHOGONAL_NEIGHBOR_OFFSETS: Array[Vector2i] = [
+	Vector2i(1, 0),
+	Vector2i(-1, 0),
+	Vector2i(0, 1),
+	Vector2i(0, -1),
+]
 
 
 static func build_support_actions(
@@ -55,7 +61,7 @@ static func build_support_actions(
 				"target": move_target,
 				"medic_id": medic_id,
 				"target_id": String(move_target.call("get_unit_id")).strip_edges(),
-				"target_position": build_medic_approach_position(medic, move_target, float(config.get("approach_standoff", DEFAULT_APPROACH_STANDOFF))),
+				"target_position": build_medic_approach_position(medic, move_target, float(config.get("approach_standoff", DEFAULT_APPROACH_STANDOFF)), terrain_registry, config),
 			}
 		)
 	return actions
@@ -147,15 +153,21 @@ static func is_valid_medic_target(medic, ally, reserved_target_ids: Dictionary, 
 	var target_id: String = String(ally.call("get_unit_id"))
 	if target_id.is_empty() or reserved_target_ids.has(target_id):
 		return false
+	if medic.has_method("get_team_id") and ally.has_method("get_team_id"):
+		if String(medic.call("get_team_id")) != String(ally.call("get_team_id")):
+			return false
 	var distance: float = (medic as Node2D).global_position.distance_to((ally as Node2D).global_position)
 	if require_in_range:
 		return is_within_medic_support_range(medic, ally, terrain_registry, distance, config)
 	return is_within_medic_move_range(medic, ally, terrain_registry, distance, config)
 
 
-static func build_medic_approach_position(medic, target, approach_standoff: float = DEFAULT_APPROACH_STANDOFF) -> Vector2:
+static func build_medic_approach_position(medic, target, approach_standoff: float = DEFAULT_APPROACH_STANDOFF, terrain_registry = null, config: Dictionary = {}) -> Vector2:
 	if medic == null or target == null or not (medic is Node2D) or not (target is Node2D):
 		return Vector2.ZERO
+	var neighbor_position = _resolve_neighbor_approach_position(medic, target, terrain_registry)
+	if typeof(neighbor_position) == TYPE_VECTOR2:
+		return Vector2(neighbor_position)
 	var target_position: Vector2 = (target as Node2D).global_position
 	var direction: Vector2 = target_position - (medic as Node2D).global_position
 	if direction.length_squared() <= 0.001:
@@ -192,3 +204,36 @@ static func get_medic_tile_distance(medic, target, terrain_registry = null) -> i
 	var target_grid: Vector2i = Vector2i(terrain_registry.call("world_to_grid", (target as Node2D).global_position))
 	var delta: Vector2i = target_grid - medic_grid
 	return absi(delta.x) + absi(delta.y)
+
+
+static func _resolve_neighbor_approach_position(medic, target, terrain_registry = null) -> Variant:
+	if terrain_registry == null or not terrain_registry.has_method("world_to_grid") or not terrain_registry.has_method("grid_to_world"):
+		return null
+	var target_grid: Vector2i = Vector2i(terrain_registry.call("world_to_grid", (target as Node2D).global_position))
+	var medic_position: Vector2 = (medic as Node2D).global_position
+	var has_tile_data: bool = terrain_registry.has_method("get_all_tiles") and not Array(terrain_registry.call("get_all_tiles")).is_empty()
+	var candidates: Array = []
+	for offset in ORTHOGONAL_NEIGHBOR_OFFSETS:
+		var candidate_grid: Vector2i = target_grid + offset
+		if has_tile_data and terrain_registry.has_method("is_walkable") and not bool(terrain_registry.call("is_walkable", candidate_grid)):
+			continue
+		var candidate_position: Vector2 = Vector2(terrain_registry.call("grid_to_world", candidate_grid))
+		candidates.append({
+			"grid": candidate_grid,
+			"position": candidate_position,
+			"distance": medic_position.distance_squared_to(candidate_position),
+		})
+	if candidates.is_empty():
+		return null
+	candidates.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var distance_a: float = float(a.get("distance", 0.0))
+		var distance_b: float = float(b.get("distance", 0.0))
+		if absf(distance_a - distance_b) > 0.001:
+			return distance_a < distance_b
+		var grid_a: Vector2i = Vector2i(a.get("grid", Vector2i.ZERO))
+		var grid_b: Vector2i = Vector2i(b.get("grid", Vector2i.ZERO))
+		if grid_a.x == grid_b.x:
+			return grid_a.y < grid_b.y
+		return grid_a.x < grid_b.x
+	)
+	return Vector2(Dictionary(candidates[0]).get("position", (target as Node2D).global_position))

@@ -7,6 +7,11 @@ const TRAIT_MODE_AGGRESSIVE: String = "aggressive"
 const TRAIT_MODE_RECKLESS: String = "reckless"
 const TRAIT_MODE_NEUTRAL: String = "neutral"
 const FLANK_COVER_SEARCH_RADIUS: float = 96.0
+const FTL_TACTICAL_SCHEMA_VERSION: int = 1
+const MIN_FAIR_PLAN_QUALITY: float = 0.22
+const MAX_FAIR_PLAN_QUALITY: float = 0.88
+const MIN_REACTION_DELAY_SECONDS: float = 0.08
+const MAX_REACTION_DELAY_SECONDS: float = 0.72
 
 
 static func resolve_profile(
@@ -55,6 +60,10 @@ static func resolve_profile(
 	profile.contact_stability = float(execution_profile.get("contact_stability", profile.contact_stability))
 	profile.initiative = float(execution_profile.get("initiative", profile.initiative))
 	profile.execution_label = String(execution_profile.get("execution_label", profile.execution_label))
+	var leader_tactical_data: Dictionary = _build_leader_tactical_data(leader, profile.fireteam_id)
+	var team_tactical_context: Dictionary = _build_team_tactical_context(units, leader, profile.fireteam_id, execution_profile)
+	var ftl_tactical_snapshot: Dictionary = build_leader_tactical_skill_snapshot(leader_tactical_data, team_tactical_context)
+	_apply_ftl_tactical_snapshot_to_profile(profile, ftl_tactical_snapshot)
 
 	var resolved_target_position = null
 	if typeof(rough_target_position) == TYPE_VECTOR2:
@@ -75,8 +84,253 @@ static func resolve_profile(
 		"resolved_target_position": resolved_target_position,
 		"terrain_cover_used": typeof(resolved_target_position) == TYPE_VECTOR2 and typeof(rough_target_position) == TYPE_VECTOR2 and resolved_target_position != rough_target_position,
 		"execution_profile": execution_profile.duplicate(true),
+		"ftl_tactical_skill": ftl_tactical_snapshot.duplicate(true),
+		"ftl_public_snapshot": build_public_leader_tactical_snapshot(ftl_tactical_snapshot),
 	}
 	return profile
+
+
+static func build_leader_tactical_skill_snapshot(leader_data: Dictionary, team_context: Dictionary = {}) -> Dictionary:
+	var skill_values: Dictionary = Dictionary(leader_data.get("skill_values", {}))
+	var communication_values: Dictionary = Dictionary(leader_data.get("communication_values", {}))
+	var behavior_axes: Dictionary = Dictionary(leader_data.get("behavior_axes", {}))
+	var progression: Dictionary = Dictionary(leader_data.get("progression", {}))
+	var ftl_progression: Dictionary = Dictionary(progression.get("ftl_tactical", leader_data.get("ftl_tactical_progression", {})))
+	var fireteam_id: String = String(team_context.get("fireteam_id", leader_data.get("fireteam_id", ""))).strip_edges().to_lower()
+	var leadership: float = _read_score_from_sources(skill_values, leader_data, "leadership", 0.35)
+	var discipline: float = _read_score_from_sources(skill_values, leader_data, "discipline", float(behavior_axes.get("order_fidelity", leadership)))
+	var awareness: float = _read_score_from_sources(skill_values, leader_data, "awareness", leadership)
+	var recognition: float = _read_score_from_sources(skill_values, leader_data, "recognition", awareness)
+	var initiative: float = clampf(float(ftl_progression.get("initiative", behavior_axes.get("initiative", leader_data.get("initiative", leadership)))), 0.0, 1.0)
+	var contact_stability: float = clampf(float(behavior_axes.get("contact_stability", leader_data.get("contact_stability", discipline))), 0.0, 1.0)
+	var tactical_sense: float = clampf(float(ftl_progression.get("tactical_sense", (leadership * 0.34) + (recognition * 0.26) + (awareness * 0.20) + (discipline * 0.20))), 0.0, 1.0)
+	var communication: float = clampf(float(ftl_progression.get("communication", (float(communication_values.get("speech_quality", leadership)) * 0.56) + (leadership * 0.26) + (discipline * 0.18))), 0.0, 1.0)
+	var team_cohesion: float = _resolve_team_cohesion(team_context, progression, fireteam_id)
+	if ftl_progression.has("team_cohesion"):
+		team_cohesion = clampf(float(ftl_progression.get("team_cohesion", team_cohesion)), 0.0, 1.0)
+	var morale: float = clampf(float(team_context.get("morale", progression.get("morale", 0.50))), 0.0, 1.0)
+	var frustration: float = clampf(float(team_context.get("frustration", progression.get("frustration", 0.0))), 0.0, 1.0)
+	var contact_pressure: float = clampf(float(team_context.get("contact_pressure", 0.0)), 0.0, 1.0)
+	var missions_led: int = maxi(int(ftl_progression.get("missions_led", progression.get("missions_led", 0))), 0)
+	var experience_factor: float = clampf((float(missions_led) * 0.035) + (float(progression.get("xp", 0)) * 0.0025), 0.0, 0.18)
+	var pressure_penalty: float = contact_pressure * maxf(0.0, 0.58 - contact_stability) * 0.16
+	var morale_modifier: float = (morale - 0.50) * 0.08 - frustration * 0.08
+	var plan_quality: float = clampf(
+		(leadership * 0.24)
+		+ (tactical_sense * 0.24)
+		+ (communication * 0.15)
+		+ (discipline * 0.13)
+		+ (team_cohesion * 0.14)
+		+ experience_factor
+		+ morale_modifier
+		- pressure_penalty,
+		MIN_FAIR_PLAN_QUALITY,
+		MAX_FAIR_PLAN_QUALITY
+	)
+	var communication_clarity: float = clampf((communication * 0.38) + (leadership * 0.20) + (team_cohesion * 0.20) + (discipline * 0.16) + (morale * 0.06) - (frustration * 0.08), 0.20, 0.90)
+	var breakout_judgement: float = clampf((tactical_sense * 0.30) + (discipline * 0.22) + (contact_stability * 0.20) + (initiative * 0.16) + (leadership * 0.12) - pressure_penalty, 0.18, 0.90)
+	var spacing_quality: float = clampf((team_cohesion * 0.34) + (leadership * 0.22) + (discipline * 0.22) + (tactical_sense * 0.22), 0.24, 0.90)
+	var contact_report_quality: float = clampf((communication * 0.34) + (recognition * 0.24) + (awareness * 0.16) + (tactical_sense * 0.16) + (discipline * 0.10), 0.20, 0.92)
+	var reaction_quality: float = clampf((plan_quality * 0.48) + (initiative * 0.22) + (communication_clarity * 0.18) + (contact_stability * 0.12), 0.0, 1.0)
+	var reaction_delay_seconds: float = clampf(lerpf(MAX_REACTION_DELAY_SECONDS, MIN_REACTION_DELAY_SECONDS, reaction_quality), MIN_REACTION_DELAY_SECONDS, MAX_REACTION_DELAY_SECONDS)
+	var tempo_modifier: float = clampf(0.90 + (initiative * 0.11) + ((plan_quality - 0.50) * 0.16) - (frustration * 0.08), 0.86, 1.14)
+	var progression_rate_modifier: float = clampf(0.64 + (plan_quality * 0.48) + ((team_cohesion - 0.50) * 0.22) - (frustration * 0.20), 0.50, 1.20)
+	var effect_label: String = _derive_ftl_tactical_label(plan_quality, communication_clarity, breakout_judgement)
+	var snapshot: Dictionary = {
+		"schema_version": FTL_TACTICAL_SCHEMA_VERSION,
+		"unit_id": String(leader_data.get("unit_id", "")).strip_edges(),
+		"fireteam_id": fireteam_id,
+		"leadership": leadership,
+		"tactical_sense": tactical_sense,
+		"communication": communication,
+		"discipline": discipline,
+		"initiative": initiative,
+		"team_cohesion": team_cohesion,
+		"missions_led": missions_led,
+		"plan_quality": plan_quality,
+		"communication_clarity": communication_clarity,
+		"breakout_judgement": breakout_judgement,
+		"spacing_quality": spacing_quality,
+		"spacing_modifier": lerpf(1.12, 0.88, spacing_quality),
+		"contact_report_quality": contact_report_quality,
+		"reaction_delay_seconds": reaction_delay_seconds,
+		"tempo_modifier": tempo_modifier,
+		"progression_rate_modifier": progression_rate_modifier,
+		"effect_label": effect_label,
+	}
+	snapshot["effect_text"] = build_tactical_effect_text(snapshot)
+	return snapshot
+
+
+static func build_skill_factors_from_snapshot(snapshot: Dictionary) -> Dictionary:
+	return {
+		"leadership": clampf(float(snapshot.get("leadership", snapshot.get("plan_quality", 0.5))), 0.0, 1.0),
+		"discipline": clampf(float(snapshot.get("discipline", 0.5)), 0.0, 1.0),
+		"cohesion": clampf(float(snapshot.get("team_cohesion", 0.5)), 0.0, 1.0),
+		"communication": clampf(float(snapshot.get("communication_clarity", snapshot.get("communication", 0.5))), 0.0, 1.0),
+		"initiative": clampf(float(snapshot.get("initiative", 0.5)), 0.0, 1.0),
+		"planning_quality": clampf(float(snapshot.get("plan_quality", 0.5)), 0.0, 1.0),
+		"reaction_delay_seconds": clampf(float(snapshot.get("reaction_delay_seconds", 0.35)), MIN_REACTION_DELAY_SECONDS, MAX_REACTION_DELAY_SECONDS),
+		"breakout_judgement": clampf(float(snapshot.get("breakout_judgement", 0.5)), 0.0, 1.0),
+		"spacing_quality": clampf(float(snapshot.get("spacing_quality", 0.5)), 0.0, 1.0),
+		"contact_report_quality": clampf(float(snapshot.get("contact_report_quality", 0.5)), 0.0, 1.0),
+		"tempo_modifier": clampf(float(snapshot.get("tempo_modifier", 1.0)), 0.86, 1.14),
+	}
+
+
+static func build_public_leader_tactical_snapshot(snapshot: Dictionary) -> Dictionary:
+	if snapshot.is_empty():
+		return {}
+	var result: Dictionary = {
+		"schema_version": FTL_TACTICAL_SCHEMA_VERSION,
+		"unit_id": String(snapshot.get("unit_id", "")).strip_edges(),
+		"fireteam_id": String(snapshot.get("fireteam_id", "")).strip_edges().to_lower(),
+		"plan_quality": clampf(float(snapshot.get("plan_quality", 0.5)), 0.0, 1.0),
+		"communication_clarity": clampf(float(snapshot.get("communication_clarity", 0.5)), 0.0, 1.0),
+		"breakout_judgement": clampf(float(snapshot.get("breakout_judgement", 0.5)), 0.0, 1.0),
+		"spacing_quality": clampf(float(snapshot.get("spacing_quality", 0.5)), 0.0, 1.0),
+		"contact_report_quality": clampf(float(snapshot.get("contact_report_quality", 0.5)), 0.0, 1.0),
+		"reaction_delay_seconds": clampf(float(snapshot.get("reaction_delay_seconds", 0.35)), MIN_REACTION_DELAY_SECONDS, MAX_REACTION_DELAY_SECONDS),
+		"tempo_modifier": clampf(float(snapshot.get("tempo_modifier", 1.0)), 0.86, 1.14),
+		"effect_label": String(snapshot.get("effect_label", "developing_ftl")).strip_edges().to_lower(),
+	}
+	return result
+
+
+static func build_tactical_effect_text(snapshot: Dictionary) -> String:
+	if snapshot.is_empty():
+		return "No FTL impact recorded"
+	return "Plan %d | Comms %d | Breakout %d | Tempo %+d%%" % [
+		int(round(clampf(float(snapshot.get("plan_quality", 0.0)), 0.0, 1.0) * 100.0)),
+		int(round(clampf(float(snapshot.get("communication_clarity", 0.0)), 0.0, 1.0) * 100.0)),
+		int(round(clampf(float(snapshot.get("breakout_judgement", 0.0)), 0.0, 1.0) * 100.0)),
+		int(round((clampf(float(snapshot.get("tempo_modifier", 1.0)), 0.0, 2.0) - 1.0) * 100.0)),
+	]
+
+
+static func _apply_ftl_tactical_snapshot_to_profile(profile, snapshot: Dictionary) -> void:
+	if profile == null or snapshot.is_empty():
+		return
+	var plan_quality: float = float(snapshot.get("plan_quality", 0.5))
+	var communication_clarity: float = float(snapshot.get("communication_clarity", 0.5))
+	var breakout_judgement: float = float(snapshot.get("breakout_judgement", 0.5))
+	var spacing_quality: float = float(snapshot.get("spacing_quality", 0.5))
+	profile.order_fidelity = clampf((profile.order_fidelity * 0.70) + (plan_quality * 0.30), 0.0, 1.0)
+	profile.reaction_delay_seconds = clampf((profile.reaction_delay_seconds * 0.62) + (float(snapshot.get("reaction_delay_seconds", profile.reaction_delay_seconds)) * 0.38), MIN_REACTION_DELAY_SECONDS, 0.85)
+	profile.execution_cohesion = clampf((profile.execution_cohesion * 0.68) + (spacing_quality * 0.32), 0.0, 1.0)
+	profile.execution_fire_discipline = clampf((profile.execution_fire_discipline * 0.72) + (float(snapshot.get("discipline", profile.execution_fire_discipline)) * 0.28), 0.0, 1.0)
+	profile.contact_stability = clampf((profile.contact_stability * 0.70) + (breakout_judgement * 0.30), 0.0, 1.0)
+	profile.initiative = clampf((profile.initiative * 0.75) + (float(snapshot.get("initiative", profile.initiative)) * 0.25), 0.0, 1.0)
+	profile.cohesion_threshold = clampf(profile.cohesion_threshold * lerpf(1.08, 0.88, spacing_quality), 45.0, 190.0)
+	profile.execution_label = _derive_execution_label(profile.order_fidelity, profile.reaction_delay_seconds, profile.execution_cohesion, profile.execution_fire_discipline)
+	if communication_clarity < 0.34 and profile.execution_label == "STEADY":
+		profile.execution_label = "COMMS LOW"
+
+
+static func _build_leader_tactical_data(leader, fireteam_id: String) -> Dictionary:
+	var data: Dictionary = {}
+	if leader == null:
+		return data
+	if leader.has_method("to_dict"):
+		data = Dictionary(leader.call("to_dict")).duplicate(true)
+	var bundle: Dictionary = {}
+	if leader.has_method("get_character_profile_bundle"):
+		bundle = Dictionary(leader.call("get_character_profile_bundle")).duplicate(true)
+	if data.is_empty():
+		data = {
+			"unit_id": _read_string(leader, "get_unit_id"),
+			"fireteam_id": _read_string(leader, "get_fireteam_id"),
+			"skill_values": {},
+			"communication_values": {},
+			"behavior_axes": {},
+			"progression": _read_dictionary_property(leader, "progression"),
+		}
+	if String(data.get("fireteam_id", "")).strip_edges().is_empty():
+		data["fireteam_id"] = fireteam_id
+	var skill_values: Dictionary = Dictionary(data.get("skill_values", bundle.get("core_values", {}))).duplicate(true)
+	if skill_values.is_empty():
+		skill_values = {
+			"leadership": _read_skill_value(leader, "get_leadership_skill", 0.35),
+			"toughness": _read_skill_value(leader, "get_toughness_skill", 0.50),
+			"accuracy": _read_skill_value(leader, "get_accuracy_skill", 0.50),
+			"speed": _read_skill_value(leader, "get_speed_skill", 0.50),
+		}
+	if not skill_values.has("discipline") and leader.has_method("get_discipline"):
+		skill_values["discipline"] = _read_skill_value(leader, "get_discipline", float(skill_values.get("leadership", 0.35)))
+	if not skill_values.has("recognition") and leader.has_method("get_recognition"):
+		skill_values["recognition"] = _read_skill_value(leader, "get_recognition", float(skill_values.get("leadership", 0.35)))
+	data["skill_values"] = skill_values
+	data["communication_values"] = Dictionary(data.get("communication_values", bundle.get("communication_values", {}))).duplicate(true)
+	data["behavior_axes"] = Dictionary(data.get("behavior_axes", bundle.get("behavior_axes", {}))).duplicate(true)
+	if not data.has("progression"):
+		data["progression"] = _read_dictionary_property(leader, "progression")
+	if String(data.get("unit_id", "")).strip_edges().is_empty():
+		data["unit_id"] = _read_string(leader, "get_unit_id")
+	return data
+
+
+static func _build_team_tactical_context(units: Array, leader, fireteam_id: String, execution_profile: Dictionary) -> Dictionary:
+	var context: Dictionary = {
+		"fireteam_id": fireteam_id,
+		"team_cohesion": float(execution_profile.get("execution_cohesion", 0.50)),
+		"contact_pressure": 0.0,
+	}
+	var morale_total: float = 0.0
+	var frustration_total: float = 0.0
+	var count: int = 0
+	for unit in units:
+		if unit == null:
+			continue
+		var progression: Dictionary = _read_dictionary_property(unit, "progression")
+		if progression.is_empty() and unit == leader:
+			progression = _read_dictionary_property(leader, "progression")
+		if progression.is_empty():
+			continue
+		morale_total += clampf(float(progression.get("morale", 0.50)), 0.0, 1.0)
+		frustration_total += clampf(float(progression.get("frustration", 0.0)), 0.0, 1.0)
+		count += 1
+	if count > 0:
+		context["morale"] = morale_total / float(count)
+		context["frustration"] = frustration_total / float(count)
+	return context
+
+
+static func _read_dictionary_property(target, property_name: String) -> Dictionary:
+	if target == null:
+		return {}
+	if target.has_method("get_%s" % property_name):
+		var method_value: Variant = target.call("get_%s" % property_name)
+		return Dictionary(method_value).duplicate(true) if typeof(method_value) == TYPE_DICTIONARY else {}
+	var property_value: Variant = target.get(property_name)
+	if typeof(property_value) == TYPE_DICTIONARY:
+		return Dictionary(property_value).duplicate(true)
+	return {}
+
+
+static func _read_score_from_sources(primary: Dictionary, fallback: Dictionary, key: String, default_value: float) -> float:
+	return clampf(float(primary.get(key, fallback.get(key, default_value))), 0.0, 1.0)
+
+
+static func _resolve_team_cohesion(team_context: Dictionary, progression: Dictionary, fireteam_id: String) -> float:
+	if team_context.has("team_cohesion"):
+		return clampf(float(team_context.get("team_cohesion", 0.50)), 0.0, 1.0)
+	if team_context.has("cohesion"):
+		return clampf(float(team_context.get("cohesion", 0.50)), 0.0, 1.0)
+	var cohesion_by_fireteam: Dictionary = Dictionary(progression.get("fireteam_cohesion_by_id", {}))
+	if not fireteam_id.is_empty() and cohesion_by_fireteam.has(fireteam_id):
+		return clampf(float(cohesion_by_fireteam.get(fireteam_id, 0.50)), 0.0, 1.0)
+	return clampf(float(progression.get("team_cohesion", 0.50)), 0.0, 1.0)
+
+
+static func _derive_ftl_tactical_label(plan_quality: float, communication_clarity: float, breakout_judgement: float) -> String:
+	var combined: float = (plan_quality * 0.45) + (communication_clarity * 0.28) + (breakout_judgement * 0.27)
+	if combined >= 0.78:
+		return "seasoned_ftl"
+	if combined >= 0.60:
+		return "reliable_ftl"
+	if combined >= 0.42:
+		return "developing_ftl"
+	return "raw_ftl"
 
 
 static func _resolve_leader(units: Array, preferred_leader):

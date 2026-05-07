@@ -1,0 +1,258 @@
+class_name MissionCommandHierarchyContract
+extends RefCounted
+
+const SCHEMA_VERSION: int = 1
+const VISUAL_ONLY: bool = true
+const UI_SETS_GAMEPLAY_TRUTH: bool = false
+
+const PANEL_COMMAND_MATRIX: String = "#16"
+const PANEL_FIRETEAM_DETAILS: String = "#17"
+const PANEL_MISSION_CONTROL: String = "#18"
+
+const GROUP_GOAL: String = "goal"
+const GROUP_RULE: String = "rule"
+const GROUP_PLAN: String = "plan"
+const GROUP_AIR_LZ: String = "air_lz"
+const GROUP_BREAKOUT: String = "breakout"
+
+const BUTTON_PATH_MOVE: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/MoveButton"
+const BUTTON_PATH_HOLD: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/HoldButton"
+const BUTTON_PATH_FLANK: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/FlankButton"
+const BUTTON_PATH_TAKE: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton"
+const BUTTON_PATH_TARGET: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton"
+const BUTTON_PATH_CLEAR_TARGET: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton"
+const BUTTON_PATH_SET_LZ: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton"
+const BUTTON_PATH_CALL_DROPSHIP: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton"
+const BUTTON_PATH_GO_PLAN: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/NextPhaseButton"
+const BUTTON_PATH_APPROACH_NW: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/NWButton"
+const BUTTON_PATH_APPROACH_NE: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/NEButton"
+const BUTTON_PATH_APPROACH_SW: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/SWButton"
+const BUTTON_PATH_APPROACH_SE: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/SEButton"
+
+
+static func get_group_order() -> PackedStringArray:
+	return PackedStringArray([GROUP_GOAL, GROUP_RULE, GROUP_PLAN, GROUP_AIR_LZ, GROUP_BREAKOUT])
+
+
+static func get_group_labels() -> Dictionary:
+	return {
+		GROUP_GOAL: "Ziel",
+		GROUP_RULE: "Regeln",
+		GROUP_PLAN: "Plan",
+		GROUP_AIR_LZ: "Air/LZ",
+		GROUP_BREAKOUT: "Ausbruch",
+	}
+
+
+static func get_group_panel_roles() -> Dictionary:
+	return {
+		GROUP_GOAL: PANEL_COMMAND_MATRIX,
+		GROUP_RULE: PANEL_FIRETEAM_DETAILS,
+		GROUP_PLAN: PANEL_MISSION_CONTROL,
+		GROUP_AIR_LZ: PANEL_MISSION_CONTROL,
+		GROUP_BREAKOUT: PANEL_MISSION_CONTROL,
+	}
+
+
+static func get_group_help_ids() -> Dictionary:
+	return {
+		GROUP_GOAL: "mission.command.group.goal",
+		GROUP_RULE: "mission.command.group.rule",
+		GROUP_PLAN: "mission.command.group.plan",
+		GROUP_AIR_LZ: "mission.command.group.air_lz",
+		GROUP_BREAKOUT: "mission.command.group.breakout",
+	}
+
+
+static func get_action_catalog() -> Array:
+	return [
+		_action("move", "Move", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.move", BUTTON_PATH_MOVE, {"requires_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
+		_action("take", "Take", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.take", BUTTON_PATH_TAKE, {"requires_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
+		_action("defend", "Defend", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.defend", BUTTON_PATH_HOLD, {"requires_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
+		_action("engage", "Engage", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.attack_area", BUTTON_PATH_TARGET, {"requires_planning": true, "implemented": true, "context": "area"}),
+		_action("secure", "Secure", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.defend_area", "", {"requires_selection": true, "requires_planning": true, "status_only": true, "context": "area"}),
+		_action("recon", "Recon", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.area_order", "", {"requires_selection": true, "future_task": "future mission objective slice", "context": "area"}),
+		_action("withdraw", "Withdraw", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.area_order", "", {"requires_selection": true, "future_task": "TASK_276 breakout behavior", "context": "breakout"}),
+		_action("flank", "Flank", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.flank", BUTTON_PATH_FLANK, {"requires_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
+		_action("clear_target", "Clear Target", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.clear_target", BUTTON_PATH_CLEAR_TARGET, {"requires_planning": true, "implemented": true, "context": "area"}),
+
+		_action("tempo", "Tempo", GROUP_RULE, PANEL_FIRETEAM_DETAILS, "mission.rule.tempo", "", {"requires_selection": true, "status_only": true, "context": "single_or_multi"}),
+		_action("fire_rule", "Fire Rule", GROUP_RULE, PANEL_FIRETEAM_DETAILS, "mission.rule.fire_rule", "", {"requires_selection": true, "status_only": true, "context": "single_or_multi"}),
+		_action("contact_response", "Contact", GROUP_RULE, PANEL_FIRETEAM_DETAILS, "mission.rule.contact_response", "", {"requires_selection": true, "status_only": true, "context": "single_or_multi"}),
+		_action("cover_priority", "Cover", GROUP_RULE, PANEL_FIRETEAM_DETAILS, "mission.rule.cover_priority", "", {"requires_selection": true, "status_only": true, "context": "single_or_multi"}),
+		_action("security_mode", "Security", GROUP_RULE, PANEL_FIRETEAM_DETAILS, "mission.rule.security_mode", "", {"requires_selection": true, "status_only": true, "context": "single_or_multi"}),
+
+		_action("role_suggestion", "Roles", GROUP_PLAN, PANEL_MISSION_CONTROL, "mission.command.go_plan", "", {"requires_multi_selection": true, "status_only": true, "context": "multi_fireteam"}),
+		_action("swap_roles", "Swap", GROUP_PLAN, PANEL_MISSION_CONTROL, "mission.command.go_plan", "", {"requires_multi_selection": true, "future_task": "multi-plan edit UI", "context": "multi_fireteam"}),
+		_action("preview_plan", "Preview", GROUP_PLAN, PANEL_MISSION_CONTROL, "mission.command.go_plan", "", {"requires_multi_selection": true, "status_only": true, "context": "multi_fireteam"}),
+		_action("go_plan", "GO", GROUP_PLAN, PANEL_MISSION_CONTROL, "mission.command.go_plan", BUTTON_PATH_GO_PLAN, {"requires_selection": true, "requires_local_command": true, "requires_phase_planning": true, "implemented": true, "context": "single_or_multi"}),
+
+		_action("set_lz", "LZ", GROUP_AIR_LZ, PANEL_MISSION_CONTROL, "mission.command.set_lz", BUTTON_PATH_SET_LZ, {"requires_planning": true, "implemented": true, "context": "mission"}),
+		_action("call_dropship", "Drop", GROUP_AIR_LZ, PANEL_MISSION_CONTROL, "mission.command.call_dropship", BUTTON_PATH_CALL_DROPSHIP, {"requires_planning": true, "requires_drop_available": true, "implemented": true, "context": "mission"}),
+		_action("dropship_hold", "Hold Air", GROUP_AIR_LZ, PANEL_MISSION_CONTROL, "mission.command.call_dropship", "", {"future_task": "TASK_277 air asset threat controls", "context": "mission"}),
+		_action("dropship_cancel", "Cancel Drop", GROUP_AIR_LZ, PANEL_MISSION_CONTROL, "mission.command.call_dropship", "", {"future_task": "TASK_277 air asset threat controls", "context": "mission"}),
+		_action("lz_secure", "LZ Secure", GROUP_AIR_LZ, PANEL_MISSION_CONTROL, "mission.command.set_lz", "", {"requires_selection": true, "status_only": true, "context": "mission"}),
+		_action("evac_recover", "Evac", GROUP_AIR_LZ, PANEL_MISSION_CONTROL, "mission.command.call_dropship", "", {"future_task": "TASK_278 air asset recovery loop", "context": "mission"}),
+		_action("approach_nw", "NW", GROUP_AIR_LZ, PANEL_MISSION_CONTROL, "mission.command.approach", BUTTON_PATH_APPROACH_NW, {"requires_planning": true, "implemented": true, "context": "mission"}),
+		_action("approach_ne", "NE", GROUP_AIR_LZ, PANEL_MISSION_CONTROL, "mission.command.approach", BUTTON_PATH_APPROACH_NE, {"requires_planning": true, "implemented": true, "context": "mission"}),
+		_action("approach_sw", "SW", GROUP_AIR_LZ, PANEL_MISSION_CONTROL, "mission.command.approach", BUTTON_PATH_APPROACH_SW, {"requires_planning": true, "implemented": true, "context": "mission"}),
+		_action("approach_se", "SE", GROUP_AIR_LZ, PANEL_MISSION_CONTROL, "mission.command.approach", BUTTON_PATH_APPROACH_SE, {"requires_planning": true, "implemented": true, "context": "mission"}),
+
+		_action("confirm", "Confirm", GROUP_BREAKOUT, PANEL_MISSION_CONTROL, "mission.command.group.breakout", "", {"future_task": "TASK_276 tactical breakout behavior", "context": "breakout"}),
+		_action("override", "Override", GROUP_BREAKOUT, PANEL_MISSION_CONTROL, "mission.command.group.breakout", "", {"future_task": "TASK_276 tactical breakout behavior", "context": "breakout"}),
+		_action("abort", "Abort", GROUP_BREAKOUT, PANEL_MISSION_CONTROL, "mission.command.group.breakout", "", {"future_task": "TASK_276 tactical breakout behavior", "context": "breakout"}),
+		_action("regroup", "Regroup", GROUP_BREAKOUT, PANEL_MISSION_CONTROL, "mission.command.group.breakout", "", {"future_task": "TASK_276 tactical breakout behavior", "context": "breakout"}),
+	]
+
+
+static func build_hierarchy_snapshot(context: Dictionary, button_snapshots: Dictionary = {}) -> Dictionary:
+	var labels: Dictionary = get_group_labels()
+	var panels: Dictionary = get_group_panel_roles()
+	var help_ids: Dictionary = get_group_help_ids()
+	var groups_by_id: Dictionary = {}
+	var actions_by_id: Dictionary = {}
+	for group_id in get_group_order():
+		groups_by_id[group_id] = {
+			"group_id": group_id,
+			"label": str(labels.get(group_id, group_id)),
+			"panel_role": str(panels.get(group_id, "")),
+			"help_id": str(help_ids.get(group_id, "")),
+			"active": false,
+			"disabled_reason": "",
+			"action_count": 0,
+			"active_action_count": 0,
+			"implemented_action_count": 0,
+			"actions": [],
+		}
+
+	for action_variant in get_action_catalog():
+		var action: Dictionary = Dictionary(action_variant).duplicate(true)
+		var action_id: String = str(action.get("action_id", ""))
+		var button_snapshot: Dictionary = Dictionary(button_snapshots.get(action_id, {})) if button_snapshots.has(action_id) else {}
+		var disabled_reason: String = resolve_disabled_reason(action, context, button_snapshot, button_snapshots.has(action_id))
+		action["active"] = disabled_reason.is_empty()
+		action["disabled"] = not disabled_reason.is_empty()
+		action["disabled_reason"] = disabled_reason
+		action["button"] = button_snapshot
+		action["visual_only"] = VISUAL_ONLY
+		action["ui_sets_gameplay_truth"] = UI_SETS_GAMEPLAY_TRUTH
+		actions_by_id[action_id] = action
+
+		var group_id: String = str(action.get("group_id", ""))
+		if not groups_by_id.has(group_id):
+			continue
+		var group: Dictionary = Dictionary(groups_by_id[group_id])
+		group["action_count"] = int(group.get("action_count", 0)) + 1
+		if bool(action.get("implemented", false)):
+			group["implemented_action_count"] = int(group.get("implemented_action_count", 0)) + 1
+		if bool(action.get("active", false)):
+			group["active"] = true
+			group["active_action_count"] = int(group.get("active_action_count", 0)) + 1
+		var group_actions: Array = Array(group.get("actions", []))
+		group_actions.append(action)
+		group["actions"] = group_actions
+		groups_by_id[group_id] = group
+
+	var groups: Array = []
+	for group_id in get_group_order():
+		var group: Dictionary = Dictionary(groups_by_id[group_id])
+		if not bool(group.get("active", false)):
+			group["disabled_reason"] = _resolve_group_disabled_reason(group_id, context)
+		groups.append(group)
+
+	return {
+		"schema_version": SCHEMA_VERSION,
+		"visual_only": VISUAL_ONLY,
+		"ui_sets_gameplay_truth": UI_SETS_GAMEPLAY_TRUTH,
+		"selected_fireteam_count": int(context.get("selected_fireteam_count", 0)),
+		"single_fireteam_context": bool(context.get("single_fireteam_context", false)),
+		"multi_fireteam_context": bool(context.get("multi_fireteam_context", false)),
+		"preview_mode": bool(context.get("preview_mode", false)),
+		"panels": {
+			PANEL_COMMAND_MATRIX: GROUP_GOAL,
+			PANEL_FIRETEAM_DETAILS: GROUP_RULE,
+			PANEL_MISSION_CONTROL: [GROUP_PLAN, GROUP_AIR_LZ, GROUP_BREAKOUT],
+		},
+		"groups": groups,
+		"groups_by_id": groups_by_id,
+		"actions_by_id": actions_by_id,
+	}
+
+
+static func resolve_disabled_reason(action: Dictionary, context: Dictionary, button_snapshot: Dictionary = {}, has_button_snapshot: bool = false) -> String:
+	if bool(action.get("requires_phase_planning", false)) and not bool(context.get("phase_planning_enabled", false)):
+		return "phase planning hidden in fixed HUD"
+	if bool(action.get("requires_multi_selection", false)) and int(context.get("selected_fireteam_count", 0)) < 2:
+		return "select multiple fireteams"
+	if bool(action.get("requires_selection", false)) and int(context.get("selected_fireteam_count", 0)) <= 0:
+		return "select one or more fireteams"
+	if bool(action.get("requires_local_command", false)) and not bool(context.get("can_issue_local_commands", true)):
+		return "host controls mission commands"
+	if bool(action.get("requires_planning", false)) and not bool(context.get("can_edit_planning", true)):
+		return "planning locked in this mode"
+	if bool(action.get("requires_drop_available", false)) and not bool(context.get("drop_available", true)):
+		return "dropship unavailable"
+	if str(action.get("action_id", "")) == "call_dropship" and float(context.get("drop_cooldown_remaining", 0.0)) > 0.0:
+		return "dropship cooldown"
+	if not str(action.get("future_task", "")).is_empty():
+		return "reserved for %s" % str(action.get("future_task", "later task"))
+	if has_button_snapshot:
+		if not bool(button_snapshot.get("exists", false)):
+			return "not implemented in this slice"
+		if not bool(button_snapshot.get("visible", true)):
+			return "hidden in current context"
+		if bool(button_snapshot.get("disabled", false)):
+			return "context gated"
+	return ""
+
+
+static func build_button_metadata(action: Dictionary, context: Dictionary, button_snapshot: Dictionary = {}) -> Dictionary:
+	var disabled_reason: String = resolve_disabled_reason(action, context, button_snapshot, not button_snapshot.is_empty())
+	return {
+		"command_hierarchy_action_id": str(action.get("action_id", "")),
+		"command_hierarchy_group_id": str(action.get("group_id", "")),
+		"command_hierarchy_panel_role": str(action.get("panel_role", "")),
+		"command_hierarchy_help_id": str(action.get("help_id", "")),
+		"command_hierarchy_context": str(action.get("context", "")),
+		"command_hierarchy_disabled_reason": disabled_reason,
+		"visual_only": VISUAL_ONLY,
+		"ui_sets_gameplay_truth": UI_SETS_GAMEPLAY_TRUTH,
+	}
+
+
+static func _action(action_id: String, label: String, group_id: String, panel_role: String, help_id: String, button_path: String, options: Dictionary = {}) -> Dictionary:
+	var result: Dictionary = {
+		"action_id": action_id,
+		"label": label,
+		"group_id": group_id,
+		"panel_role": panel_role,
+		"help_id": help_id,
+		"button_path": button_path,
+		"context": str(options.get("context", "mission")),
+		"implemented": bool(options.get("implemented", false)),
+		"status_only": bool(options.get("status_only", false)),
+		"requires_selection": bool(options.get("requires_selection", false)),
+		"requires_multi_selection": bool(options.get("requires_multi_selection", false)),
+		"requires_local_command": bool(options.get("requires_local_command", false)),
+		"requires_planning": bool(options.get("requires_planning", false)),
+		"requires_phase_planning": bool(options.get("requires_phase_planning", false)),
+		"requires_drop_available": bool(options.get("requires_drop_available", false)),
+		"future_task": str(options.get("future_task", "")),
+	}
+	return result
+
+
+static func _resolve_group_disabled_reason(group_id: String, context: Dictionary) -> String:
+	match group_id:
+		GROUP_GOAL:
+			return "select one or more fireteams"
+		GROUP_RULE:
+			return "select one or more fireteams"
+		GROUP_PLAN:
+			return "select multiple fireteams or build a plan"
+		GROUP_AIR_LZ:
+			return "planning or air context gated"
+		GROUP_BREAKOUT:
+			return "reserved for TASK_276 tactical breakout behavior"
+		_:
+			return "context gated"

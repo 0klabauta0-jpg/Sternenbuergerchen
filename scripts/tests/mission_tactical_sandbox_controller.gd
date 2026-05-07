@@ -7,6 +7,7 @@ const STATUS_BADGE_SCRIPT: GDScript = preload("res://scripts/ui/components/statu
 const COMMAND_BUTTON_SCRIPT: GDScript = preload("res://scripts/ui/components/command_button.gd")
 const PROGRESS_LINE_SCRIPT: GDScript = preload("res://scripts/ui/components/progress_line.gd")
 const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_labels.gd")
+const DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/drop_light_layout_contract.gd")
 const NPC_COMPACT_CARD_SCENE: PackedScene = preload("res://scenes/meta/components/npc_compact_card.tscn")
 const TRANSPORT_CRAFT_CARD_UI_SCRIPT: GDScript = preload("res://scripts/meta/transport_craft_card_ui.gd")
 const META_UNIT_PROFILE_BUILDER_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile_builder.gd")
@@ -14,13 +15,17 @@ const CHARACTER_SHEET_FORMATTER_SCRIPT: GDScript = preload("res://scripts/meta/c
 const CHARACTER_SHEET_VIEW_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_view.gd")
 const MISSION_PRIMARY_VIEW_BRIDGE_SCRIPT: GDScript = preload("res://scripts/mission/mission_primary_view_bridge.gd")
 const MISSION_DROPSHIP_EFFECT_ADAPTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_dropship_effect_adapter.gd")
+const AIR_ASSET_STATUS_SCRIPT: GDScript = preload("res://scripts/mission/air_asset_status.gd")
+const AIR_ASSET_THREAT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/combat/air_asset_threat_resolver.gd")
 const MISSION_COMMAND_INPUT_GUARD_SCRIPT: GDScript = preload("res://scripts/mission/mission_command_input_guard.gd")
 const FIRETEAM_SELECTION_ADAPTER_SCRIPT: GDScript = preload("res://scripts/tactical/ui/fireteam_selection_adapter.gd")
 const COMMANDER_COMMAND_SCRIPT: GDScript = preload("res://scripts/command/commander_command.gd")
+const COMMANDER_INTENT_SCRIPT: GDScript = preload("res://scripts/command/commander_intent.gd")
 const FIRETEAM_ORDER_PLAN_SCRIPT: GDScript = preload("res://scripts/command/fireteam_order_plan.gd")
 const FIRETEAM_WAYPOINT_SCRIPT: GDScript = preload("res://scripts/command/fireteam_waypoint.gd")
 const AREA_ORDER_SCRIPT: GDScript = preload("res://scripts/command/area_order.gd")
 const FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_behavior_resolver.gd")
+const MULTI_FIRETEAM_PLAN_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/multi_fireteam_plan_resolver.gd")
 const FIRETEAM_ORDER_VISUALIZER_SCRIPT: GDScript = preload("res://scripts/tactical/visuals/fireteam_order_visualizer.gd")
 const AD_HOC_ORDER_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/ad_hoc_order_controller.gd")
 const AD_HOC_ORDER_SCRIPT: GDScript = preload("res://scripts/command/ad_hoc_order.gd")
@@ -32,6 +37,14 @@ const TACTICAL_STANCE_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tacti
 const FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_movement_controller.gd")
 const FIRETEAM_SECURITY_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_security_controller.gd")
 const CONTACT_MAP_OVERLAY_SCRIPT: GDScript = preload("res://scripts/tactical/visuals/contact_map_overlay.gd")
+const FIRETEAMLEADER_FEEDBACK_BUBBLE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/ui/fireteamleader_feedback_bubble_resolver.gd")
+const TACTICAL_COMMUNICATION_EVENT_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_communication_event.gd")
+const TACTICAL_COMMUNICATION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_communication_resolver.gd")
+const TACTICAL_BREAKOUT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_breakout_resolver.gd")
+const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
+const COMIC_BUBBLE_SETTINGS_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_settings.gd")
+const COMIC_BUBBLE_RUNTIME_GATE_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_runtime_gate.gd")
+const NPC_THOUGHT_BUBBLE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/ui/npc_thought_bubble_resolver.gd")
 const DROPSHIP_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NE.png")
 const DROPSHIP_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NW.png")
 const DROPSHIP_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
@@ -154,6 +167,7 @@ signal planning_state_changed(planning_state)
 @export var defend_button_path: NodePath
 @export var flank_button_path: NodePath
 @export var take_button_path: NodePath
+@export var fireteamleader_feedback_bubbles_enabled: bool = true
 
 var preview_mode: bool = false
 var _tactical_ui_visible: bool = true
@@ -166,6 +180,15 @@ var _current_fireteam_index: int = 0
 var _current_phase_index: int = 1
 var _current_approach_index: int = 0
 var _selected_fireteam_ids: PackedStringArray = []
+var _fireteamleader_feedback_bubbles: Array = []
+var _fireteamleader_feedback_sequence: int = 0
+var _tactical_communication_resolver = null
+var _tactical_communication_events: Array = []
+var _tactical_breakout_resolver = null
+var _tactical_breakout_records: Array = []
+var _npc_thought_bubbles: Array = []
+var _npc_thought_peek_active_last_frame: bool = false
+var _npc_thought_bubble_refresh_msec: int = 0
 var _last_command_text: String = "AWAITING INPUT"
 var _last_target_position: Vector2 = Vector2.ZERO
 var _lz_position: Vector2 = Vector2.ZERO
@@ -188,6 +211,10 @@ var _mission_drop_pilot_display_name: String = ""
 var _mission_drop_pilot_portrait_path: String = ""
 var _mission_drop_passenger_count: int = 0
 var _mission_drop_return_requested: bool = false
+var _air_asset_status = null
+var _air_asset_threat_resolver = null
+var _air_asset_threat_events: Array = []
+var _air_asset_lz_secure_level: float = 0.0
 var _meta_transfer_routes: Array = []
 var _drop_ship_cooldown_remaining: float = 0.0
 var _card_refresh_time_remaining: float = 0.0
@@ -213,8 +240,10 @@ var _selection_press_unit_id: String = ""
 var _selection_press_ctrl: bool = false
 var _order_plans_by_key: Dictionary = {}
 var _area_orders_by_id: Dictionary = {}
+var _multi_fireteam_plans_by_id: Dictionary = {}
 var _waypoint_sequence: int = 0
 var _area_order_sequence: int = 0
+var _multi_fireteam_plan_sequence: int = 0
 var _waypoint_menu_targets: Array = []
 var _area_order_menu_targets: Array = []
 var _focused_waypoint_ref: Dictionary = {}
@@ -232,6 +261,7 @@ var _phase_execution_by_fireteam: Dictionary = {}
 var _active_behavior_profiles_by_fireteam: Dictionary = {}
 var _ad_hoc_order_controller = null
 var _area_order_resolver = null
+var _multi_fireteam_plan_resolver = null
 var _tactical_stance_controller = null
 var _ad_hoc_execution_by_fireteam: Dictionary = {}
 var _ad_hoc_resume_state_by_fireteam: Dictionary = {}
@@ -244,6 +274,7 @@ var _tracked_health_by_unit_id: Dictionary = {}
 var _coordination_manager = null
 var _fireteam_movement_controller = null
 var _fireteam_security_controller = null
+var _comic_bubble_runtime_gate = null
 var _active_coordination_by_id: Dictionary = {}
 var _leader_initiated_flank_ready_at_msec_by_fireteam: Dictionary = {}
 var _contact_overlay_pending: bool = false
@@ -288,10 +319,15 @@ func _ready() -> void:
 	_ensure_coordination_manager()
 	_ensure_fireteam_movement_controller()
 	_ensure_fireteam_security_controller()
+	_get_comic_bubble_runtime_gate()
 	_ensure_order_visualizer()
 	_ensure_contact_map_overlay()
 	_ensure_mission_nav_timer_label()
 	_ensure_mission_dropship_panel()
+	_ensure_air_asset_status()
+	_apply_drop_light_fixed_hud_layout()
+	_apply_contextual_help_ids()
+	_apply_command_hierarchy_metadata()
 	_sync_phase_selection_from_controller()
 	_initialize_fireteam_suppression_state()
 	_ensure_default_fireteam_selection()
@@ -317,6 +353,7 @@ func _process(delta: float) -> void:
 	_update_active_phase_execution(delta)
 	_update_area_defense_execution(delta)
 	_update_area_attack_execution(delta)
+	_update_npc_thought_peek_visuals()
 	_flush_pending_drop_runtime_phase_starts()
 	_refresh_fireteam_runtime_ui_if_pending()
 	refresh_fireteam_security_state()
@@ -568,6 +605,8 @@ func set_planning_state(planning_state: Dictionary) -> void:
 		_mission_drop_passenger_count = maxi(int(planning_state.get("mission_drop_passenger_count", 0)), 0)
 	if planning_state.has("mission_drop_return_requested"):
 		_mission_drop_return_requested = bool(planning_state.get("mission_drop_return_requested", false))
+	if planning_state.has("air_asset_status"):
+		_air_asset_status = AIR_ASSET_STATUS_SCRIPT.call("from_dict", Dictionary(planning_state.get("air_asset_status", {})))
 	if planning_state.has("meta_transfer_routes"):
 		_meta_transfer_routes = _sanitize_meta_transfer_routes(Array(planning_state.get("meta_transfer_routes", [])))
 	if planning_state.has("embarked_unit_ids"):
@@ -586,6 +625,8 @@ func set_planning_state(planning_state: Dictionary) -> void:
 		_load_order_plans_from_state(Array(planning_state.get("order_plans", [])))
 	if planning_state.has("area_orders"):
 		_load_area_orders_from_state(Array(planning_state.get("area_orders", [])))
+	if planning_state.has("multi_fireteam_plans"):
+		_load_multi_fireteam_plans_from_state(Array(planning_state.get("multi_fireteam_plans", [])))
 	var phase_controller = _get_phase_controller()
 	if phase_controller != null and phase_controller.has_method("load_from_planning_state"):
 		phase_controller.call("load_from_planning_state", planning_state, _get_max_order_plan_phase(), false)
@@ -647,6 +688,7 @@ func get_planning_state() -> Dictionary:
 		"mission_drop_pilot_portrait_path": _mission_drop_pilot_portrait_path,
 		"mission_drop_passenger_count": _mission_drop_passenger_count,
 		"mission_drop_return_requested": _mission_drop_return_requested,
+		"air_asset_status": get_air_asset_status_snapshot(),
 		"meta_transfer_routes": _serialize_meta_transfer_routes(),
 		"embarked_unit_ids": _build_sorted_drop_unit_id_array(_embarked_unit_ids),
 		"deployed_unit_ids": _build_sorted_drop_unit_id_array(_deployed_unit_ids),
@@ -655,6 +697,7 @@ func get_planning_state() -> Dictionary:
 		"selected_phase": _get_phase_name(),
 		"order_plans": _serialize_order_plans(),
 		"area_orders": _serialize_area_orders(),
+		"multi_fireteam_plans": _serialize_multi_fireteam_plans(),
 	}
 	if _tactical_stance_controller != null:
 		planning_state["tactical_stances"] = Dictionary(_tactical_stance_controller.call("get_stance_snapshot"))
@@ -721,6 +764,8 @@ func execute_selected_fireteam_orders() -> bool:
 		return false
 	if not _can_issue_local_commands():
 		_last_command_text = "OBSERVER MODE"
+		_record_fireteamleader_feedback_for_selected_fireteams("go", "blocked", "observer")
+		_refresh_order_visuals()
 		_update_ui()
 		return false
 	if _selected_fireteam_ids.is_empty():
@@ -734,6 +779,8 @@ func execute_selected_fireteam_orders() -> bool:
 			inactive_fireteams.append(fireteam_id.to_upper())
 	if not inactive_fireteams.is_empty():
 		_last_command_text = "WAIT FOR INSERTION: %s" % ", ".join(inactive_fireteams)
+		_record_fireteamleader_feedback_for_selected_fireteams("go", "blocked", "inactive")
+		_refresh_order_visuals()
 		_update_ui()
 		return false
 	var target_phase_index: int = _get_live_order_phase_index()
@@ -789,6 +836,8 @@ func execute_selected_fireteam_orders() -> bool:
 			issued_fireteams.append(fireteam_id.to_upper())
 	if issued_fireteams.is_empty() and already_active_fireteams.is_empty() and continued_fireteams.is_empty():
 		_last_command_text = "NO ORDERS TO EXECUTE"
+		_record_fireteamleader_feedback_for_selected_fireteams("go", "blocked", "no_orders")
+		_refresh_order_visuals()
 		_update_ui()
 		return false
 	if not issued_fireteams.is_empty():
@@ -801,6 +850,9 @@ func execute_selected_fireteam_orders() -> bool:
 	if not already_active_fireteams.is_empty():
 		go_bits.append("ACTIVE %s" % ", ".join(already_active_fireteams))
 	_last_command_text = " | ".join(go_bits)
+	_record_fireteamleader_feedback_for_fireteam_ids(issued_fireteams, "go", "accepted", "issued")
+	_record_fireteamleader_feedback_for_fireteam_ids(continued_fireteams, "go", "running", "continued")
+	_record_fireteamleader_feedback_for_fireteam_ids(already_active_fireteams, "go", "running", "already_active")
 	_refresh_button_state()
 	_refresh_order_visuals()
 	_update_ui()
@@ -878,6 +930,27 @@ func get_flank_vulnerability_snapshot() -> Array:
 	if combat_driver == null or not combat_driver.has_method("get_flank_vulnerability_snapshot"):
 		return []
 	return Array(combat_driver.call("get_flank_vulnerability_snapshot")).duplicate(true)
+
+
+func get_enemy_security_snapshot() -> Array:
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver == null or not combat_driver.has_method("get_enemy_security_snapshot"):
+		return []
+	return Array(combat_driver.call("get_enemy_security_snapshot")).duplicate(true)
+
+
+func get_enemy_team_tactics_snapshot() -> Array:
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver == null or not combat_driver.has_method("get_enemy_team_tactics_snapshot"):
+		return []
+	return Array(combat_driver.call("get_enemy_team_tactics_snapshot")).duplicate(true)
+
+
+func get_fire_event_snapshot() -> Array:
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver == null or not combat_driver.has_method("get_fire_event_snapshot"):
+		return []
+	return Array(combat_driver.call("get_fire_event_snapshot")).duplicate(true)
 
 
 func get_terrain_move_debug_snapshot(unit_id: String = "") -> Variant:
@@ -1098,6 +1171,8 @@ func _place_lz_from_screen_position(screen_position: Vector2) -> bool:
 func _issue_command(command_type: String, display_text: String) -> bool:
 	if not _can_issue_local_commands():
 		_last_command_text = "OBSERVER MODE"
+		_record_fireteamleader_feedback_for_selected_fireteams(command_type, "blocked", "observer")
+		_refresh_order_visuals()
 		_update_ui()
 		return false
 
@@ -1111,6 +1186,8 @@ func _issue_command(command_type: String, display_text: String) -> bool:
 			inactive_fireteams.append(String(fireteam_id).to_upper())
 	if not inactive_fireteams.is_empty():
 		_last_command_text = "WAIT FOR INSERTION: %s" % ", ".join(inactive_fireteams)
+		_record_fireteamleader_feedback_for_selected_fireteams(command_type, "blocked", "inactive")
+		_refresh_order_visuals()
 		_update_ui()
 		return false
 
@@ -1124,10 +1201,14 @@ func _issue_command(command_type: String, display_text: String) -> bool:
 
 	if issued_count == 0:
 		_last_command_text = "%s FAILED" % display_text
+		_record_fireteamleader_feedback_for_selected_fireteams(command_type, "blocked", "failed")
+		_refresh_order_visuals()
 		_update_ui()
 		return false
 
 	_last_command_text = "%s (%s)" % [display_text, _get_fireteam_name()]
+	_record_fireteamleader_feedback_for_selected_fireteams(command_type, "accepted", "accepted")
+	_refresh_order_visuals()
 	_update_ui()
 	return true
 
@@ -1554,6 +1635,9 @@ func _update_ui() -> void:
 
 	_apply_compact_mission_control_layout()
 	_refresh_dynamic_button_styles()
+	_apply_drop_light_hud_button_labels()
+	_apply_command_hierarchy_metadata()
+	_enforce_drop_light_fixed_hud_layout()
 	_refresh_world_overlays()
 	_sync_primary_3d_mission_status_visuals()
 	_suppress_legacy_2d_readability_overlays()
@@ -2547,6 +2631,10 @@ func _build_compact_weapon_label(weapon_id: String) -> String:
 	match weapon_id.strip_edges().to_lower():
 		"smg":
 			return "SMG"
+		"sniper", "sniper_rifle":
+			return "SNP"
+		"rocket_launcher", "rocket", "panzerfaust":
+			return "RKT"
 		"rail_gun", "special":
 			return "Rail"
 		"medictool", "medic_tool", "medic-tool":
@@ -2648,6 +2736,10 @@ func _build_fireteam_status_text() -> String:
 func _build_selected_waypoint_info_text() -> String:
 	if _selected_fireteam_ids.is_empty():
 		return "WP -"
+	var tactical_text: String = _build_selected_tactical_communication_text()
+	var multi_plan_text: String = _build_selected_multi_fireteam_plan_info_text()
+	if not multi_plan_text.is_empty():
+		return "%s\n%s" % [tactical_text, multi_plan_text] if not tactical_text.is_empty() else multi_plan_text
 	var info_lines: PackedStringArray = []
 	for fireteam_id_variant in _selected_fireteam_ids:
 		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
@@ -2661,8 +2753,81 @@ func _build_selected_waypoint_info_text() -> String:
 		else:
 			info_lines.append(info_text)
 	if info_lines.is_empty():
-		return "WP -"
-	return "\n".join(info_lines)
+		return "%s\nWP -" % tactical_text if not tactical_text.is_empty() else "WP -"
+	var base_text: String = "\n".join(info_lines)
+	return "%s\n%s" % [tactical_text, base_text] if not tactical_text.is_empty() else base_text
+
+
+func _build_selected_multi_fireteam_plan_info_text() -> String:
+	if _selected_fireteam_ids.is_empty():
+		return ""
+	var lines: PackedStringArray = PackedStringArray()
+	for fireteam_id_variant in _selected_fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		var assignment: Dictionary = _find_multi_fireteam_assignment_for_fireteam(fireteam_id)
+		if assignment.is_empty():
+			continue
+		lines.append("%s %s P%d | %s | %s" % [
+			_get_fireteam_display_label(fireteam_id),
+			String(assignment.get("role_label", "")).to_upper(),
+			int(assignment.get("plan_phase_index", 0)),
+			String(assignment.get("next_step", "")),
+			String(assignment.get("status", "")),
+		])
+	if lines.is_empty():
+		return ""
+	return "\n".join(lines)
+
+
+func _build_mission_control_multi_fireteam_plan_text() -> String:
+	var selected_plan: Dictionary = _find_multi_fireteam_plan_for_selected_fireteams()
+	var tactical_text: String = _build_mission_control_tactical_communication_text()
+	if selected_plan.is_empty():
+		return tactical_text
+	var plan_text: String = String(selected_plan.get("mission_control_text", ""))
+	if tactical_text.is_empty():
+		return plan_text
+	if plan_text.is_empty():
+		return tactical_text
+	return "%s | %s" % [tactical_text, plan_text]
+
+
+func _find_multi_fireteam_plan_for_selected_fireteams() -> Dictionary:
+	for fireteam_id_variant in _selected_fireteam_ids:
+		var plan: Dictionary = _find_multi_fireteam_plan_for_fireteam(String(fireteam_id_variant))
+		if not plan.is_empty():
+			return plan
+	return {}
+
+
+func _find_multi_fireteam_plan_for_fireteam(fireteam_id: String) -> Dictionary:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return {}
+	for plan_variant in _multi_fireteam_plans_by_id.values():
+		if typeof(plan_variant) != TYPE_DICTIONARY:
+			continue
+		var plan: Dictionary = Dictionary(plan_variant)
+		for assignment_variant in Array(plan.get("role_assignments", [])):
+			if typeof(assignment_variant) != TYPE_DICTIONARY:
+				continue
+			if String(Dictionary(assignment_variant).get("fireteam_id", "")).strip_edges().to_lower() == normalized_fireteam_id:
+				return plan.duplicate(true)
+	return {}
+
+
+func _find_multi_fireteam_assignment_for_fireteam(fireteam_id: String) -> Dictionary:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	var plan: Dictionary = _find_multi_fireteam_plan_for_fireteam(normalized_fireteam_id)
+	if plan.is_empty():
+		return {}
+	for assignment_variant in Array(plan.get("role_assignments", [])):
+		if typeof(assignment_variant) != TYPE_DICTIONARY:
+			continue
+		var assignment: Dictionary = Dictionary(assignment_variant)
+		if String(assignment.get("fireteam_id", "")).strip_edges().to_lower() == normalized_fireteam_id:
+			return assignment.duplicate(true)
+	return {}
 
 
 func _build_fireteam_waypoint_info_text(fireteam_id: String) -> String:
@@ -3037,6 +3202,9 @@ func _build_mission_time_limit_text() -> String:
 
 
 func _is_mission_drop_available() -> bool:
+	var air_state: String = str(get_air_asset_status_snapshot().get("state", "intact")).strip_edges().to_lower()
+	if bool(AIR_ASSET_STATUS_SCRIPT.call("is_terminal_state", air_state)) or air_state == "recovering" or air_state == "unavailable":
+		return false
 	if _mission_drop_state == "waiting":
 		return true
 	if _drop_ship_staged and _mission_drop_craft_id.is_empty():
@@ -3218,9 +3386,20 @@ func _set_control_tree_mouse_filter(root: Node, mouse_filter: Control.MouseFilte
 
 
 func _build_mission_dropship_title_text() -> String:
+	var air_status: Dictionary = get_air_asset_status_snapshot()
+	var air_state: String = str(air_status.get("state", "intact")).strip_edges().to_lower()
+	var air_suffix: String = ""
+	if bool(AIR_ASSET_STATUS_SCRIPT.call("is_terminal_state", air_state)):
+		air_suffix = "LOST"
+	elif air_state == "damaged" or air_state == "hit":
+		air_suffix = "DAMAGED"
+	elif bool(AIR_ASSET_STATUS_SCRIPT.call("is_warning_state", air_state)):
+		air_suffix = "AIR RISK"
 	if not _mission_drop_title_text.is_empty():
-		return _mission_drop_title_text
+		return "%s Â· %s" % [_mission_drop_title_text, air_suffix] if not air_suffix.is_empty() else _mission_drop_title_text
 	var craft_name: String = _mission_drop_display_name if not _mission_drop_display_name.is_empty() else "Dropship"
+	if not air_suffix.is_empty():
+		return "%s Â· %s" % [craft_name, air_suffix]
 	match _mission_drop_state:
 		"waiting":
 			return "%s · MAP" % craft_name
@@ -3287,6 +3466,16 @@ func _build_mission_dropship_pilot_profile():
 
 
 func _build_mission_dropship_status_text() -> String:
+	var air_status: Dictionary = get_air_asset_status_snapshot()
+	var air_state: String = str(air_status.get("state", "intact")).strip_edges().to_lower()
+	if bool(AIR_ASSET_STATUS_SCRIPT.call("is_terminal_state", air_state)):
+		return "Air asset lost"
+	if air_state == "recovering" or air_state == "unavailable":
+		return "Air asset unavailable"
+	if air_state == "damaged" or air_state == "hit":
+		return "Damage %d%%" % int(round((1.0 - float(air_status.get("integrity_ratio", 1.0))) * 100.0))
+	if bool(AIR_ASSET_STATUS_SCRIPT.call("is_warning_state", air_state)):
+		return "Threat lock %d%%" % int(round(float(air_status.get("risk", 0.0)) * 100.0))
 	if _is_drop_sequence_active():
 		match _drop_sequence_phase:
 			DROP_SEQUENCE_INBOUND:
@@ -3335,6 +3524,84 @@ func _connect_named_button(button_path: String, callback: Callable) -> void:
 		return
 	if not button.pressed.is_connected(callback):
 		button.pressed.connect(callback)
+
+
+func _apply_contextual_help_ids() -> void:
+	_ensure_fireteam_status_panel()
+	_ensure_tactical_stance_panel()
+	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel", "mission.command_matrix")
+	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll", "mission_hud.command_matrix")
+	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandHeaderLabel", "mission.command_matrix")
+	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/MoveButton", "mission.command.move")
+	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/HoldButton", "mission.command.defend")
+	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/FlankButton", "mission.command.flank")
+	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton", "mission.command.take")
+	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton", "mission.command.attack_area")
+	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton", "mission.command.clear_target")
+	_apply_help_id("../TacticalUI/AreaOrderCommandMenu", "mission.command.defend_area")
+	_apply_help_id(FIRETEAM_PANEL_PATH, "mission.selected_fireteam")
+	_apply_help_id(FIRETEAM_HEADER_LABEL_PATH, "mission.selected_fireteam")
+	_apply_help_id(FIRETEAM_STATUS_LABEL_PATH, "mission.command.advance_style")
+	_apply_help_id(FIRETEAM_ALL_BUTTON_PATH, "mission.selected_fireteam")
+	_apply_help_id(command_feedback_label_path, "mission.command.area_order")
+	_apply_help_id(hotkey_legend_label_path, "mission.command.area_order")
+	_apply_help_id("%s/FireteamStatusPanel" % FIRETEAM_INFO_VBOX_PATH, "mission.command.overwatch")
+	_apply_help_id("%s/FireteamStatusPanel/MarginContainer/HBoxContainer/SuppressionLabel" % FIRETEAM_INFO_VBOX_PATH, "mission.command.security")
+	_apply_help_id("%s/FireteamStatusPanel/MarginContainer/HBoxContainer/ReturnToPlanButton" % FIRETEAM_INFO_VBOX_PATH, "mission.command.go_plan")
+	_apply_help_id("%s/TacticalStancePanel" % FIRETEAM_INFO_VBOX_PATH, "mission.command.stance")
+	_apply_help_id("%s/TacticalStancePanel/MarginContainer/VBoxContainer/HBoxContainer/CautiousButton" % FIRETEAM_INFO_VBOX_PATH, "mission.command.stance")
+	_apply_help_id("%s/TacticalStancePanel/MarginContainer/VBoxContainer/HBoxContainer/NormalButton" % FIRETEAM_INFO_VBOX_PATH, "mission.command.stance")
+	_apply_help_id("%s/TacticalStancePanel/MarginContainer/VBoxContainer/HBoxContainer/AggressiveButton" % FIRETEAM_INFO_VBOX_PATH, "mission.command.stance")
+	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel", "mission.mission_control")
+	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll", "mission_hud.mission_control")
+	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicHeaderLabel", "mission.mission_control")
+	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel", "mission.command.go_plan")
+	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton", "mission.command.set_lz")
+	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton", "mission.command.call_dropship")
+	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid", "mission.command.approach")
+	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicStatusLabel", "mission.command.medic_adjacent")
+	_apply_command_hierarchy_group_help_ids()
+
+
+func _apply_help_id(path: Variant, help_id: String) -> void:
+	var node := get_node_or_null(NodePath(str(path)))
+	if node == null:
+		return
+	var normalized_id: String = help_id.strip_edges()
+	if normalized_id.is_empty():
+		return
+	node.set_meta("help_id", normalized_id)
+
+
+func _apply_command_hierarchy_group_help_ids() -> void:
+	var group_help_ids: Dictionary = Dictionary(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.call("get_group_help_ids"))
+	_set_command_hierarchy_panel_meta(
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel",
+		str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("PANEL_COMMAND_MATRIX")),
+		PackedStringArray([str(group_help_ids.get("goal", ""))])
+	)
+	_set_command_hierarchy_panel_meta(
+		FIRETEAM_PANEL_PATH,
+		str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("PANEL_FIRETEAM_DETAILS")),
+		PackedStringArray([str(group_help_ids.get("rule", ""))])
+	)
+	_set_command_hierarchy_panel_meta(
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel",
+		str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("PANEL_MISSION_CONTROL")),
+		PackedStringArray([
+			str(group_help_ids.get("plan", "")),
+			str(group_help_ids.get("air_lz", "")),
+			str(group_help_ids.get("breakout", "")),
+		])
+	)
+
+
+func _set_command_hierarchy_panel_meta(path: Variant, panel_role: String, group_help_ids: PackedStringArray) -> void:
+	var node := get_node_or_null(NodePath(str(path)))
+	if node == null:
+		return
+	node.set_meta("command_hierarchy_panel_role", panel_role)
+	node.set_meta("command_hierarchy_group_help_ids", group_help_ids)
 
 
 func _is_pointer_over_control() -> bool:
@@ -3421,14 +3688,22 @@ func _refresh_button_state() -> void:
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton",
-		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/PrevEditPhaseButton",
-		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/AddPhaseButton",
-		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/NextEditPhaseButton",
 	]:
 		var utility_button := get_node_or_null(path) as BaseButton
 		if utility_button == null:
 			continue
 		utility_button.disabled = not _can_edit_planning()
+
+	for path in [
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/PrevEditPhaseButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/AddPhaseButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/NextEditPhaseButton",
+	]:
+		var phase_button := get_node_or_null(path) as BaseButton
+		if phase_button == null:
+			continue
+		phase_button.visible = PHASE_PLANNING_ENABLED
+		phase_button.disabled = true if not PHASE_PLANNING_ENABLED else not _can_edit_planning()
 
 	var call_dropship_button := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton") as BaseButton
 	if call_dropship_button != null:
@@ -3439,6 +3714,156 @@ func _refresh_button_state() -> void:
 		next_phase_button.visible = PHASE_PLANNING_ENABLED
 		next_phase_button.disabled = true if not PHASE_PLANNING_ENABLED else preview_mode or not _can_issue_local_commands() or not _has_pending_global_phase()
 	_refresh_tactical_stance_panel()
+
+
+func _build_command_control_snapshot() -> Dictionary:
+	return {
+		"move": _build_button_snapshot(move_button_path),
+		"defend": _build_button_snapshot(defend_button_path),
+		"flank": _build_button_snapshot(flank_button_path),
+		"take": _build_button_snapshot(take_button_path),
+		"target": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_TARGET")))),
+		"clear_target": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_CLEAR_TARGET")))),
+		"set_lz": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_SET_LZ")))),
+		"call_dropship": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_CALL_DROPSHIP")))),
+		"hierarchy": get_command_hierarchy_snapshot(),
+	}
+
+
+func _build_button_snapshot(button_path: NodePath) -> Dictionary:
+	var button := get_node_or_null(button_path) as BaseButton
+	if button == null:
+		return {
+			"exists": false,
+			"path": str(button_path),
+			"text": "",
+			"disabled": true,
+			"visible": false,
+			"is_visible_in_tree": false,
+			"tooltip_text": "",
+			"help_id": "",
+			"command_hierarchy_action_id": "",
+			"command_hierarchy_group_id": "",
+			"command_hierarchy_panel_role": "",
+			"command_hierarchy_disabled_reason": "missing button",
+			"pressed_signal_connection_count": 0,
+		}
+	var global_rect: Rect2 = button.get_global_rect() if button.is_inside_tree() else Rect2()
+	return {
+		"exists": true,
+		"path": str(button_path),
+		"text": str(button.get("text")),
+		"disabled": bool(button.disabled),
+		"visible": bool(button.visible),
+		"is_visible_in_tree": bool(button.is_visible_in_tree()) if button.is_inside_tree() else bool(button.visible),
+		"tooltip_text": button.tooltip_text,
+		"help_id": str(button.get_meta("help_id", "")),
+		"command_hierarchy_action_id": str(button.get_meta("command_hierarchy_action_id", "")),
+		"command_hierarchy_group_id": str(button.get_meta("command_hierarchy_group_id", "")),
+		"command_hierarchy_panel_role": str(button.get_meta("command_hierarchy_panel_role", "")),
+		"command_hierarchy_help_id": str(button.get_meta("command_hierarchy_help_id", "")),
+		"command_hierarchy_context": str(button.get_meta("command_hierarchy_context", "")),
+		"command_hierarchy_disabled_reason": str(button.get_meta("command_hierarchy_disabled_reason", "")),
+		"global_rect": global_rect,
+		"pressed_signal_connection_count": button.pressed.get_connections().size(),
+	}
+
+
+func get_command_hierarchy_snapshot() -> Dictionary:
+	return Dictionary(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.call(
+		"build_hierarchy_snapshot",
+		_build_command_hierarchy_context(),
+		_build_full_command_button_snapshot()
+	))
+
+
+func _build_full_command_button_snapshot() -> Dictionary:
+	var button_snapshots: Dictionary = {}
+	for action_variant in Array(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.call("get_action_catalog")):
+		var action: Dictionary = Dictionary(action_variant)
+		var action_id: String = str(action.get("action_id", ""))
+		var button_path: String = str(action.get("button_path", ""))
+		if action_id.is_empty() or button_path.is_empty():
+			continue
+		button_snapshots[action_id] = _build_hierarchy_button_snapshot(action_id, NodePath(button_path))
+	return button_snapshots
+
+
+func _build_hierarchy_button_snapshot(action_id: String, button_path: NodePath) -> Dictionary:
+	var snapshot: Dictionary = _build_button_snapshot(button_path)
+	snapshot["action_id"] = action_id
+	return snapshot
+
+
+func _build_command_hierarchy_context() -> Dictionary:
+	return {
+		"selected_fireteam_ids": Array(_selected_fireteam_ids),
+		"selected_fireteam_count": _selected_fireteam_ids.size(),
+		"single_fireteam_context": _selected_fireteam_ids.size() == 1,
+		"multi_fireteam_context": _selected_fireteam_ids.size() > 1,
+		"preview_mode": preview_mode,
+		"can_issue_local_commands": _can_issue_local_commands(),
+		"can_edit_planning": _can_edit_planning(),
+		"phase_planning_enabled": PHASE_PLANNING_ENABLED,
+		"has_pending_global_phase": _has_pending_global_phase(),
+		"has_multi_fireteam_plan": not _find_multi_fireteam_plan_for_selected_fireteams().is_empty(),
+		"has_target": get_node_or_null(target_marker_path) != null,
+		"has_lz": _has_lz_position,
+		"drop_available": _is_mission_drop_available(),
+		"drop_requested": _drop_ship_requested,
+		"drop_cooldown_remaining": _drop_ship_cooldown_remaining,
+		"target_placement_armed": _is_target_placement_armed,
+		"lz_placement_armed": _is_lz_placement_armed,
+	}
+
+
+func _apply_command_hierarchy_metadata() -> void:
+	var context: Dictionary = _build_command_hierarchy_context()
+	var button_snapshots: Dictionary = _build_full_command_button_snapshot()
+	var hierarchy: Dictionary = Dictionary(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.call("build_hierarchy_snapshot", context, button_snapshots))
+	var actions_by_id: Dictionary = Dictionary(hierarchy.get("actions_by_id", {}))
+	for action_id_variant in actions_by_id.keys():
+		var action: Dictionary = Dictionary(actions_by_id[action_id_variant])
+		var button_path: String = str(action.get("button_path", ""))
+		if button_path.is_empty():
+			continue
+		var button := get_node_or_null(NodePath(button_path)) as Button
+		if button == null:
+			continue
+		var metadata: Dictionary = Dictionary(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.call(
+			"build_button_metadata",
+			action,
+			context,
+			Dictionary(button_snapshots.get(str(action_id_variant), {}))
+		))
+		for key_variant in metadata.keys():
+			button.set_meta(str(key_variant), metadata[key_variant])
+		button.set_meta("command_hierarchy_group_help_id", _get_command_hierarchy_group_help_id(str(action.get("group_id", ""))))
+		button.tooltip_text = _build_command_hierarchy_tooltip(action, button, str(metadata.get("command_hierarchy_disabled_reason", "")))
+
+
+func _get_command_hierarchy_group_help_id(group_id: String) -> String:
+	var group_help_ids: Dictionary = Dictionary(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.call("get_group_help_ids"))
+	return str(group_help_ids.get(group_id, ""))
+
+
+func _build_command_hierarchy_tooltip(action: Dictionary, button: Button, disabled_reason: String) -> String:
+	var label: String = str(action.get("label", ""))
+	if label.is_empty():
+		label = button.text
+	var group_labels: Dictionary = Dictionary(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.call("get_group_labels"))
+	var group_label: String = str(group_labels.get(str(action.get("group_id", "")), ""))
+	var prefix: String = label if group_label.is_empty() else "%s | %s" % [group_label, label]
+	if disabled_reason.is_empty():
+		return prefix
+	return "%s | %s" % [prefix, disabled_reason]
+
+
+func _get_label_text(label_path: Variant) -> String:
+	var label := get_node_or_null(NodePath(String(label_path))) as Label
+	if label == null:
+		return ""
+	return label.text
 
 
 func _refresh_world_overlays() -> void:
@@ -3455,6 +3880,7 @@ func _refresh_world_overlays() -> void:
 			"position": dropship_position,
 			"target_position": _get_primary_dropship_target_position(dropship_position),
 			"progress": _build_mission_dropship_progress_value(),
+			"air_asset_status": get_air_asset_status_snapshot(),
 		}
 	)
 
@@ -3774,10 +4200,131 @@ func _serialize_meta_transfer_routes() -> Array:
 	return serialized_routes
 
 
+func _apply_drop_light_fixed_hud_layout() -> void:
+	var tactical_ui := get_node_or_null("../TacticalUI") as CanvasLayer
+	if tactical_ui != null:
+		tactical_ui.set_meta("drop_light_fixed_fullhd_layout", true)
+		tactical_ui.set_meta("drop_light_screen", DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("SCREEN_MISSION_HUD"))
+	var target_viewport: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("TARGET_VIEWPORT")
+	for path in [
+		"../TacticalUI/MissionTint",
+		"../TacticalUI/BottomDock",
+		"../TacticalUI/BottomDock/BottomMargin",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow",
+	]:
+		var passive_control := get_node_or_null(path) as Control
+		if passive_control != null:
+			passive_control.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var tint := get_node_or_null("../TacticalUI/MissionTint") as Control
+	if tint != null:
+		tint.custom_minimum_size = Vector2(float(target_viewport.x), float(target_viewport.y))
+	_enforce_drop_light_fixed_hud_layout()
+	call_deferred("_deferred_enforce_drop_light_fixed_hud_layout")
+
+
+func _enforce_drop_light_fixed_hud_layout() -> void:
+	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_mission_hud_layout")
+	_apply_fixed_hud_window_contract("../TacticalUI/MissionIdentityPanel", layout.get("mission_identity"))
+	_apply_fixed_hud_window_contract("../TacticalUI/TopNavPanel", layout.get("top_nav"))
+	_apply_fixed_hud_window_contract(FIRETEAM_MINI_PANEL_PATH, layout.get("fireteam_mini"))
+	_apply_fixed_hud_window_contract("../TacticalUI/BottomDock", layout.get("bottom_dock"))
+	_apply_fixed_hud_window_contract("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel", layout.get("command_matrix"))
+	_apply_fixed_hud_window_contract(FIRETEAM_PANEL_PATH, layout.get("selected_fireteam"))
+	_apply_fixed_hud_window_contract("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel", layout.get("mission_control"))
+
+
+func _deferred_enforce_drop_light_fixed_hud_layout() -> void:
+	_enforce_drop_light_fixed_hud_layout()
+
+
+func _apply_fixed_hud_window_contract(path: String, rect_variant: Variant) -> void:
+	if typeof(rect_variant) != TYPE_RECT2I:
+		return
+	var control := get_node_or_null(path) as Control
+	if control == null:
+		return
+	var rect: Rect2i = rect_variant
+	var fixed_position := Vector2(float(rect.position.x), float(rect.position.y))
+	var fixed_size := Vector2(float(rect.size.x), float(rect.size.y))
+	control.set_as_top_level(true)
+	control.anchor_left = 0.0
+	control.anchor_top = 0.0
+	control.anchor_right = 0.0
+	control.anchor_bottom = 0.0
+	control.position = fixed_position
+	control.size = fixed_size
+	control.custom_minimum_size = fixed_size
+	control.set_deferred("position", fixed_position)
+	control.set_deferred("size", fixed_size)
+	control.set_meta("drop_light_rect", rect)
+	control.set_meta("drop_light_fixed_fullhd_layout", true)
+
+
+func _set_square_hud_button(path: String, size: Vector2i, font_size: int = 8) -> void:
+	var button := get_node_or_null(path) as Button
+	if button == null:
+		return
+	var fixed_size := Vector2(float(size.x), float(size.y))
+	button.custom_minimum_size = fixed_size
+	button.size = fixed_size
+	button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	button.clip_text = true
+	button.add_theme_font_size_override("font_size", font_size)
+	button.set_meta("drop_light_square_action_button", true)
+
+
+func _apply_drop_light_hud_button_labels() -> void:
+	var command_labels: Dictionary = {
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/MoveButton": "Move",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/HoldButton": "Hold",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/FlankButton": "Flank",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton": "Take",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton": "Pick" if _is_target_placement_armed else "Target",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton": "Clear",
+	}
+	for path_variant in command_labels.keys():
+		var button := get_node_or_null(String(path_variant)) as Button
+		if button == null:
+			continue
+		button.text = String(command_labels[path_variant])
+		button.tooltip_text = String(command_labels[path_variant])
+
+	var lz_button := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton") as Button
+	if lz_button != null:
+		lz_button.text = "Pick" if _is_lz_placement_armed else "LZ"
+		lz_button.tooltip_text = "Pick landing zone" if _is_lz_placement_armed else "Set landing zone"
+
+	var drop_button := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton") as Button
+	if drop_button != null:
+		drop_button.text = _build_drop_light_drop_button_label()
+		drop_button.tooltip_text = "Call dropship"
+
+
+func _build_drop_light_drop_button_label() -> String:
+	if not preview_mode and _drop_ship_cooldown_remaining > 0.0 and not _is_drop_sequence_active():
+		return "Cooldown %ds" % int(ceil(_drop_ship_cooldown_remaining))
+	match _drop_sequence_phase:
+		DROP_SEQUENCE_INBOUND:
+			return "Inbound"
+		DROP_SEQUENCE_LANDED:
+			return "Landed"
+		DROP_SEQUENCE_UNLOADING:
+			return "Deboarding"
+		DROP_SEQUENCE_OUTBOUND:
+			return "Outbound"
+		DROP_SEQUENCE_COMPLETE:
+			return "Drop Complete"
+		_:
+			return "Drop"
+
+
 func _apply_compact_mission_control_layout() -> void:
+	var action_button_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("ACTION_BUTTON_SIZE")
+	var small_button_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("SMALL_ACTION_BUTTON_SIZE")
 	var top_nav_panel := get_node_or_null("../TacticalUI/TopNavPanel") as Control
 	if top_nav_panel != null:
-		top_nav_panel.offset_right = 332.0
+		top_nav_panel.clip_contents = true
 	for path in [
 		"../TacticalUI/TopNavPanel/NavMargin/NavRow/HomebaseNavButton",
 		"../TacticalUI/TopNavPanel/NavMargin/NavRow/FOBNavButton",
@@ -3786,48 +4333,89 @@ func _apply_compact_mission_control_layout() -> void:
 		var nav_button := get_node_or_null(path) as Button
 		if nav_button == null:
 			continue
-		nav_button.custom_minimum_size = Vector2(60.0, 22.0)
+		nav_button.custom_minimum_size = Vector2(96.0, 32.0)
 		nav_button.add_theme_font_size_override("font_size", 8)
 	var nav_timer_label := get_node_or_null("../TacticalUI/TopNavPanel/NavMargin/NavRow/MissionTimerLabel") as Label
 	if nav_timer_label != null:
 		nav_timer_label.custom_minimum_size = Vector2(40.0, 0.0)
 	var bottom_dock := get_node_or_null("../TacticalUI/BottomDock") as Control
 	if bottom_dock != null:
-		bottom_dock.offset_top = -254.0
-		bottom_dock.offset_bottom = -6.0
+		bottom_dock.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		bottom_dock.clip_contents = false
+	for path in [
+		"../TacticalUI/BottomDock/BottomMargin",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow",
+	]:
+		var passive_control := get_node_or_null(path) as Control
+		if passive_control != null:
+			passive_control.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var strategic_action_row := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow") as HBoxContainer
 	if strategic_action_row != null:
 		strategic_action_row.alignment = BoxContainer.ALIGNMENT_END
 		strategic_action_row.add_theme_constant_override("separation", 4)
+	var phase_control_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel") as Control
+	if phase_control_panel != null:
+		phase_control_panel.visible = PHASE_PLANNING_ENABLED
+	var command_grid := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid") as GridContainer
+	if command_grid != null:
+		command_grid.columns = 2
+		command_grid.add_theme_constant_override("h_separation", 8)
+		command_grid.add_theme_constant_override("v_separation", 8)
+		_apply_command_grid_hierarchy_order(command_grid)
 	for path in [
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/MoveButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/HoldButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/FlankButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton",
+	]:
+		_set_square_hud_button(path, action_button_size)
+	var approach_grid := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid") as GridContainer
+	if approach_grid != null:
+		approach_grid.columns = 2
+		approach_grid.add_theme_constant_override("h_separation", 8)
+		approach_grid.add_theme_constant_override("v_separation", 8)
+	for path in [
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/NWButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/NEButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/SWButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/SEButton",
 	]:
-		var button := get_node_or_null(path) as Button
-		if button == null:
-			continue
-		button.custom_minimum_size = Vector2(62.0, 22.0)
-		button.add_theme_font_size_override("font_size", 8)
+		_set_square_hud_button(path, small_button_size)
 	var strategic_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel") as Control
 	if strategic_panel != null:
-		strategic_panel.custom_minimum_size = Vector2(276.0, 170.0)
+		strategic_panel.clip_contents = true
 	var command_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel") as Control
 	if command_panel != null:
-		command_panel.custom_minimum_size = Vector2(296.0, 170.0)
+		command_panel.clip_contents = true
 	var fireteam_panel := get_node_or_null(FIRETEAM_PANEL_PATH) as Control
 	if fireteam_panel != null:
-		fireteam_panel.custom_minimum_size = Vector2(428.0, 170.0)
+		fireteam_panel.clip_contents = true
 	var fireteam_mini_panel := get_node_or_null(FIRETEAM_MINI_PANEL_PATH) as Control
 	if fireteam_mini_panel != null:
-		fireteam_mini_panel.anchor_bottom = 0.0
-		fireteam_mini_panel.offset_left = 16.0
-		fireteam_mini_panel.offset_top = 84.0
-		fireteam_mini_panel.offset_right = 264.0
-		fireteam_mini_panel.offset_bottom = 236.0
+		fireteam_mini_panel.clip_contents = true
+	_enforce_drop_light_fixed_hud_layout()
+
+
+func _apply_command_grid_hierarchy_order(command_grid: GridContainer) -> void:
+	var ordered_names: PackedStringArray = PackedStringArray([
+		"MoveButton",
+		"TakeButton",
+		"HoldButton",
+		"FlankButton",
+		"TargetButton",
+		"ClearTargetButton",
+	])
+	for index in range(ordered_names.size()):
+		var child := command_grid.get_node_or_null(ordered_names[index])
+		if child == null:
+			continue
+		command_grid.move_child(child, index)
+	command_grid.set_meta("command_hierarchy_order", PackedStringArray(["move", "take", "defend", "flank", "engage", "clear_target"]))
+	command_grid.set_meta("command_hierarchy_columns", command_grid.columns)
 
 
 func _refresh_dynamic_button_styles() -> void:
@@ -3939,6 +4527,650 @@ func _emit_planning_state_changed() -> void:
 
 func get_selected_fireteam_ids() -> PackedStringArray:
 	return _selected_fireteam_ids.duplicate()
+
+
+func set_fireteamleader_feedback_bubbles_enabled(enabled: bool) -> void:
+	var settings: Dictionary = get_fireteamleader_feedback_bubble_settings()
+	settings["mode"] = COMIC_BUBBLE_SETTINGS_SCRIPT.MODE_NORMAL if enabled else COMIC_BUBBLE_SETTINGS_SCRIPT.MODE_OFF
+	settings["ftl_command_feedback_enabled"] = enabled
+	set_comic_bubble_settings(settings)
+
+
+func get_fireteamleader_feedback_bubble_settings() -> Dictionary:
+	var settings: Dictionary = Dictionary(_get_comic_bubble_runtime_gate().call("get_settings"))
+	settings["enabled"] = bool(settings.get("enabled", true)) and fireteamleader_feedback_bubbles_enabled and bool(settings.get("ftl_command_feedback_enabled", true))
+	return Dictionary(FIRETEAMLEADER_FEEDBACK_BUBBLE_RESOLVER_SCRIPT.call("normalize_settings", settings))
+
+
+func set_comic_bubble_settings(settings: Dictionary) -> void:
+	var normalized_settings: Dictionary = Dictionary(COMIC_BUBBLE_SETTINGS_SCRIPT.call("normalize_settings", settings))
+	_get_comic_bubble_runtime_gate().call("set_settings", normalized_settings)
+	fireteamleader_feedback_bubbles_enabled = bool(normalized_settings.get("enabled", true)) and bool(normalized_settings.get("ftl_command_feedback_enabled", true))
+	if not fireteamleader_feedback_bubbles_enabled:
+		_fireteamleader_feedback_bubbles.clear()
+	if not bool(normalized_settings.get("enabled", true)) or not bool(normalized_settings.get("npc_thought_peek_enabled", true)):
+		_npc_thought_bubbles.clear()
+	_refresh_order_visuals()
+
+
+func set_comic_bubble_mode(mode: String) -> void:
+	var settings: Dictionary = Dictionary(_get_comic_bubble_runtime_gate().call("get_settings"))
+	settings["mode"] = COMIC_BUBBLE_SETTINGS_SCRIPT.call("normalize_mode", mode)
+	set_comic_bubble_settings(settings)
+
+
+func get_comic_bubble_settings_snapshot() -> Dictionary:
+	return Dictionary(_get_comic_bubble_runtime_gate().call("get_snapshot"))
+
+
+func get_fireteamleader_feedback_bubble_snapshot() -> Array:
+	if not fireteamleader_feedback_bubbles_enabled or not bool(Dictionary(_get_comic_bubble_runtime_gate().call("get_settings")).get("enabled", true)):
+		return []
+	return _fireteamleader_feedback_bubbles.duplicate(true)
+
+
+func set_npc_thought_peek_override(active: bool) -> void:
+	_get_comic_bubble_runtime_gate().call("set_thought_peek_override", active)
+	_refresh_npc_thought_bubbles(true)
+	_refresh_order_visuals()
+
+
+func clear_npc_thought_peek_override() -> void:
+	_get_comic_bubble_runtime_gate().call("clear_thought_peek_override")
+	_refresh_npc_thought_bubbles(true)
+	_refresh_order_visuals()
+
+
+func get_npc_thought_bubble_snapshot() -> Array:
+	_refresh_npc_thought_bubbles(false)
+	return _npc_thought_bubbles.duplicate(true)
+
+
+func get_comic_bubble_visual_payload_snapshot() -> Array:
+	var payloads: Array = []
+	payloads.append_array(get_fireteamleader_feedback_bubble_snapshot())
+	payloads.append_array(get_npc_thought_bubble_snapshot())
+	return payloads
+
+
+func get_tactical_communication_event_snapshot() -> Array:
+	return _tactical_communication_events.duplicate(true)
+
+
+func get_tactical_breakout_snapshot() -> Array:
+	return _tactical_breakout_records.duplicate(true)
+
+
+func get_air_asset_status_snapshot() -> Dictionary:
+	_ensure_air_asset_status()
+	if _air_asset_status == null or not _air_asset_status.has_method("to_snapshot"):
+		return {}
+	return Dictionary(_air_asset_status.call("to_snapshot")).duplicate(true)
+
+
+func get_air_asset_threat_snapshot() -> Array:
+	return _air_asset_threat_events.duplicate(true)
+
+
+func set_air_asset_lz_secure_level_for_test(level: float) -> void:
+	_air_asset_lz_secure_level = clampf(level, 0.0, 1.0)
+	_ensure_air_asset_status()
+	if _air_asset_status != null:
+		_air_asset_status.lz_secure_level = _air_asset_lz_secure_level
+	_update_ui()
+
+
+func evaluate_air_asset_threat(context: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
+	_ensure_air_asset_status()
+	_ensure_air_asset_threat_resolver()
+	if _air_asset_threat_resolver == null:
+		return {}
+	return Dictionary(_air_asset_threat_resolver.call("evaluate_threat", get_air_asset_status_snapshot(), _build_air_asset_threat_context(context), options))
+
+
+func apply_air_asset_threat(context: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
+	var result: Dictionary = evaluate_air_asset_threat(context, options)
+	if result.is_empty():
+		return {}
+	_store_air_asset_threat_event(result)
+	if not bool(result.get("eligible", false)):
+		_last_command_text = "AIR THREAT BLOCKED: %s" % str(result.get("blocked_reason", "")).to_upper()
+		_update_ui()
+		return result
+	var next_status: Dictionary = Dictionary(result.get("next_status", {})).duplicate(true)
+	_air_asset_status = AIR_ASSET_STATUS_SCRIPT.call("from_dict", next_status)
+	_enqueue_air_asset_status_effect(next_status, result)
+	_record_air_asset_threat_communication(result)
+	_record_air_asset_breakout(result)
+	if bool(result.get("destroy_allow", result.get("destroy_allowed", false))):
+		_last_command_text = "AIR ASSET LOST"
+	elif bool(result.get("hit_allowed", false)):
+		_last_command_text = "AIR ASSET HIT"
+	else:
+		_last_command_text = "AIR THREAT WARNING"
+	_refresh_mission_dropship_panel()
+	_refresh_world_overlays()
+	_update_ui()
+	return result
+
+
+func record_tactical_breakout(trigger: String, fireteam_id: String = "", context: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty() and not _selected_fireteam_ids.is_empty():
+		normalized_fireteam_id = str(_selected_fireteam_ids[0]).strip_edges().to_lower()
+	var breakout_context: Dictionary = context.duplicate(true)
+	breakout_context["trigger"] = trigger
+	if not normalized_fireteam_id.is_empty():
+		breakout_context["fireteam_id"] = normalized_fireteam_id
+	var plan_context: Dictionary = _build_tactical_breakout_plan_context(normalized_fireteam_id, breakout_context)
+	return _record_tactical_breakout(plan_context, breakout_context, options)
+
+
+func record_tactical_breakout_from_context(context: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
+	var breakout_context: Dictionary = context.duplicate(true)
+	var normalized_fireteam_id: String = str(breakout_context.get("fireteam_id", "")).strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty() and not _selected_fireteam_ids.is_empty():
+		normalized_fireteam_id = str(_selected_fireteam_ids[0]).strip_edges().to_lower()
+	breakout_context["fireteam_id"] = normalized_fireteam_id
+	var plan_context: Dictionary = _build_tactical_breakout_plan_context(normalized_fireteam_id, breakout_context)
+	return _record_tactical_breakout(plan_context, breakout_context, options)
+
+
+func resolve_tactical_breakout_return_to_plan(breakout_id: String, context: Dictionary = {}) -> Dictionary:
+	_ensure_tactical_breakout_resolver()
+	var normalized_id: String = breakout_id.strip_edges()
+	if normalized_id.is_empty():
+		return {}
+	for index in range(_tactical_breakout_records.size()):
+		var record: Dictionary = Dictionary(_tactical_breakout_records[index])
+		if str(record.get("breakout_id", "")) != normalized_id:
+			continue
+		var returned: Dictionary = Dictionary(TACTICAL_BREAKOUT_RESOLVER_SCRIPT.call("mark_return_to_plan", record, context))
+		_tactical_breakout_records[index] = returned
+		if bool(returned.get("resolved", false)) and not bool(context.get("skip_runtime_return", false)):
+			_return_fireteam_to_plan(str(returned.get("fireteam_id", "")), false)
+			var event: Dictionary = Dictionary(TACTICAL_COMMUNICATION_RESOLVER_SCRIPT.call("build_event", TACTICAL_COMMUNICATION_EVENT_SCRIPT.EVENT_PHASE_COMPLETED, {
+				"event_id": str(returned.get("return_to_plan_event_id", "")),
+				"plan_id": str(returned.get("plan_id", "")),
+				"fireteam_id": str(returned.get("fireteam_id", "")),
+				"phase": int(returned.get("phase", 0)),
+				"role": "return_to_plan",
+				"step": str(returned.get("trigger", "")),
+				"short_text": "RETURN PLAN",
+				"detail_text": "Breakout resolved | return to plan",
+				"priority": TACTICAL_COMMUNICATION_EVENT_SCRIPT.PRIORITY_NORMAL,
+			}, context))
+			_record_tactical_communication_events([event], context)
+		_update_ui()
+		return returned
+	return {}
+
+
+func record_tactical_communication_event(event_type: String, context: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
+	_ensure_tactical_communication_resolver()
+	var event: Dictionary = Dictionary(TACTICAL_COMMUNICATION_RESOLVER_SCRIPT.call("build_event", event_type, context, options))
+	var emitted_events: Array = _record_tactical_communication_events([event], options)
+	if emitted_events.is_empty():
+		return {}
+	_refresh_order_visuals()
+	_update_ui()
+	return Dictionary(emitted_events[0])
+
+
+func record_tactical_communication_events(events: Array, options: Dictionary = {}) -> Array:
+	var emitted_events: Array = _record_tactical_communication_events(events, options)
+	if not emitted_events.is_empty():
+		_refresh_order_visuals()
+		_update_ui()
+	return emitted_events
+
+
+func _record_tactical_breakout(plan_context: Dictionary, breakout_context: Dictionary, options: Dictionary = {}) -> Dictionary:
+	_ensure_tactical_breakout_resolver()
+	if _tactical_breakout_resolver == null:
+		return {}
+	var breakout: Dictionary = Dictionary(_tactical_breakout_resolver.call("evaluate_breakout", plan_context, breakout_context, options))
+	if breakout.is_empty():
+		return {}
+	_store_tactical_breakout_record(breakout)
+	var event: Dictionary = Dictionary(TACTICAL_BREAKOUT_RESOLVER_SCRIPT.call("build_communication_event", breakout, options))
+	if not event.is_empty():
+		_record_tactical_communication_events([event], options)
+	_update_ui()
+	return breakout
+
+
+func _store_tactical_breakout_record(breakout: Dictionary) -> void:
+	var retained_records: Array = []
+	var breakout_id: String = str(breakout.get("breakout_id", ""))
+	for existing_variant in _tactical_breakout_records:
+		if typeof(existing_variant) != TYPE_DICTIONARY:
+			continue
+		var existing: Dictionary = Dictionary(existing_variant)
+		if str(existing.get("breakout_id", "")) == breakout_id:
+			continue
+		retained_records.append(existing)
+	retained_records.append(breakout.duplicate(true))
+	while retained_records.size() > 12:
+		retained_records.pop_front()
+	_tactical_breakout_records = retained_records
+
+
+func _ensure_air_asset_status() -> void:
+	if _air_asset_status != null:
+		return
+	var asset_id: String = _mission_drop_craft_id.strip_edges()
+	if asset_id.is_empty():
+		asset_id = "mission_dropship"
+	var display_name: String = _mission_drop_display_name.strip_edges()
+	if display_name.is_empty():
+		display_name = "Mission Dropship"
+	_air_asset_status = AIR_ASSET_STATUS_SCRIPT.call("from_dict", {
+		"asset_id": asset_id,
+		"asset_type": "dropship",
+		"display_name": display_name,
+		"state": "intact",
+		"integrity": 100,
+		"max_integrity": 100,
+		"lz_secure_level": _air_asset_lz_secure_level,
+		"position": _get_air_asset_position(),
+		"metadata": {
+			"source": "MissionTacticalSandboxController",
+			"visual_only": false,
+		},
+	})
+
+
+func _ensure_air_asset_threat_resolver() -> void:
+	if _air_asset_threat_resolver == null:
+		_air_asset_threat_resolver = AIR_ASSET_THREAT_RESOLVER_SCRIPT.new()
+
+
+func _build_air_asset_threat_context(context: Dictionary) -> Dictionary:
+	_ensure_air_asset_status()
+	var status: Dictionary = get_air_asset_status_snapshot()
+	var result: Dictionary = context.duplicate(true)
+	result["asset_id"] = str(result.get("asset_id", status.get("asset_id", "mission_dropship"))).strip_edges()
+	result["asset_type"] = str(result.get("asset_type", status.get("asset_type", "dropship"))).strip_edges()
+	result["asset_position"] = result.get("asset_position", _get_air_asset_position())
+	result["lz_secure_level"] = clampf(float(result.get("lz_secure_level", _air_asset_lz_secure_level)), 0.0, 1.0)
+	result["has_line_of_sight"] = bool(result.get("has_line_of_sight", result.get("los", true)))
+	result["visible_in_fow"] = bool(result.get("visible_in_fow", result.get("fow_visible", true)))
+	result["altitude_layer"] = str(result.get("altitude_layer", result.get("height_layer", "low"))).strip_edges().to_lower()
+	result["warning_seen"] = bool(result.get("warning_seen", bool(status.get("warning_visible", false)) or bool(AIR_ASSET_STATUS_SCRIPT.call("is_warning_state", str(status.get("state", ""))))))
+	if not result.has("range_tiles"):
+		result["range_tiles"] = float(result.get("distance_tiles", 10.0))
+	if not result.has("enemy_at_pressure"):
+		result["enemy_at_pressure"] = float(result.get("anti_armor_pressure", 0.5))
+	if not result.has("enemy_security_pressure"):
+		result["enemy_security_pressure"] = float(result.get("enemy_security", 0.25))
+	return result
+
+
+func _store_air_asset_threat_event(result: Dictionary) -> void:
+	var retained_events: Array = []
+	var threat_id: String = str(result.get("threat_id", result.get("event_id", ""))).strip_edges()
+	for existing_variant in _air_asset_threat_events:
+		if typeof(existing_variant) != TYPE_DICTIONARY:
+			continue
+		var existing: Dictionary = Dictionary(existing_variant)
+		if str(existing.get("threat_id", existing.get("event_id", ""))).strip_edges() == threat_id:
+			continue
+		retained_events.append(existing)
+	retained_events.append(result.duplicate(true))
+	while retained_events.size() > 12:
+		retained_events.pop_front()
+	_air_asset_threat_events = retained_events
+
+
+func _record_air_asset_threat_communication(result: Dictionary) -> void:
+	var trigger: String = str(result.get("tactical_breakout_trigger", "air_asset_threatened")).strip_edges()
+	var event_type: String = TACTICAL_COMMUNICATION_EVENT_SCRIPT.EVENT_AIR_ASSET_DESTROYED if trigger == "air_asset_destroyed" else TACTICAL_COMMUNICATION_EVENT_SCRIPT.EVENT_AIR_ASSET_THREATENED
+	var status: Dictionary = Dictionary(result.get("next_status", {}))
+	var state: String = str(result.get("next_state", status.get("state", ""))).strip_edges()
+	var risk_percent: int = int(round(float(result.get("risk", 0.0)) * 100.0))
+	record_tactical_communication_event(event_type, {
+		"event_id": str(result.get("event_id", "")),
+		"fireteam_id": _get_air_asset_feedback_fireteam_id(),
+		"phase": _current_phase_index,
+		"role": "air_asset",
+		"step": state,
+		"short_text": "AIR LOST" if event_type == TACTICAL_COMMUNICATION_EVENT_SCRIPT.EVENT_AIR_ASSET_DESTROYED else "AIR THREAT",
+		"detail_text": "%s %s | %s | risk %d%%" % [str(status.get("display_name", "Dropship")), state.to_upper(), str(result.get("weapon_id", "")), risk_percent],
+		"map_label": "AIR LOST" if event_type == TACTICAL_COMMUNICATION_EVENT_SCRIPT.EVENT_AIR_ASSET_DESTROYED else "AIR RISK",
+		"target_position": _get_air_asset_position(),
+		"anchor_position": _get_air_asset_position(),
+		"priority": TACTICAL_COMMUNICATION_EVENT_SCRIPT.PRIORITY_CRITICAL if event_type == TACTICAL_COMMUNICATION_EVENT_SCRIPT.EVENT_AIR_ASSET_DESTROYED else TACTICAL_COMMUNICATION_EVENT_SCRIPT.PRIORITY_HIGH,
+		"metadata": {
+			"air_asset_status": status,
+			"threat_id": str(result.get("threat_id", "")),
+		},
+	}, {"now_msec": Time.get_ticks_msec()})
+
+
+func _record_air_asset_breakout(result: Dictionary) -> void:
+	var trigger: String = str(result.get("tactical_breakout_trigger", "")).strip_edges()
+	if trigger.is_empty():
+		return
+	record_tactical_breakout(trigger, _get_air_asset_feedback_fireteam_id(), {
+		"air_asset_state": str(result.get("next_state", "")),
+		"air_asset_threatened": trigger == "air_asset_threatened",
+		"air_asset_destroyed": trigger == "air_asset_destroyed",
+		"weapon_id": str(result.get("weapon_id", "")),
+		"risk": float(result.get("risk", 0.0)),
+		"sequence": str(result.get("event_id", "")),
+		"target_position": _get_air_asset_position(),
+		"allowed_breakout_classes": PackedStringArray(["auto_adapt", "hold_and_report", "request_orders", "abort_to_safe"]),
+	})
+
+
+func _enqueue_air_asset_status_effect(status_snapshot: Dictionary, result: Dictionary) -> void:
+	if _dropship_effect_adapter == null or not _dropship_effect_adapter.has_method("enqueue_air_asset_status_effect"):
+		return
+	_dropship_effect_adapter.call("enqueue_air_asset_status_effect", get_node_or_null("../SimulationRoot"), status_snapshot, result)
+
+
+func _get_air_asset_feedback_fireteam_id() -> String:
+	if not _selected_fireteam_ids.is_empty():
+		return str(_selected_fireteam_ids[0]).strip_edges().to_lower()
+	var ids: PackedStringArray = _get_available_fireteam_ids()
+	if not ids.is_empty():
+		return str(ids[0]).strip_edges().to_lower()
+	return "blue"
+
+
+func _get_air_asset_position() -> Vector2:
+	if _drop_sequence_phase == DROP_SEQUENCE_INBOUND or _drop_sequence_phase == DROP_SEQUENCE_LANDED or _drop_sequence_phase == DROP_SEQUENCE_UNLOADING or _drop_sequence_phase == DROP_SEQUENCE_COMPLETE or _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND:
+		return _drop_sequence_position
+	if _has_lz_position:
+		return _lz_position
+	return _get_drop_staging_position()
+
+
+func _build_tactical_breakout_plan_context(fireteam_id: String, context: Dictionary = {}) -> Dictionary:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	var behavior_profile: Dictionary = get_active_behavior_profile(normalized_fireteam_id)
+	var skill: Dictionary = _build_tactical_breakout_skill_context(normalized_fireteam_id, behavior_profile, context)
+	var plan_context: Dictionary = {
+		"plan_id": str(context.get("plan_id", "runtime_%s_p%d" % [normalized_fireteam_id if not normalized_fireteam_id.is_empty() else "none", _current_phase_index])),
+		"command_id": str(context.get("command_id", _last_command_text)),
+		"fireteam_id": normalized_fireteam_id,
+		"phase": int(context.get("phase", _current_phase_index)),
+		"target_position": context.get("target_position", _get_target_position()),
+		"allowed_breakout_classes": PackedStringArray(context.get("allowed_breakout_classes", [
+			"auto_adapt",
+			"hold_and_report",
+			"request_orders",
+		])),
+		"ftl_skill_factors": skill,
+		"metadata": {
+			"source": "MissionTacticalSandboxController",
+			"visual_only": true,
+		},
+	}
+	if not behavior_profile.is_empty():
+		plan_context["behavior_profile"] = behavior_profile
+	return plan_context
+
+
+func _build_tactical_breakout_skill_context(fireteam_id: String, behavior_profile: Dictionary, context: Dictionary = {}) -> Dictionary:
+	var metadata: Dictionary = Dictionary(behavior_profile.get("metadata", {}))
+	var leader = _resolve_fireteam_leader_for_behavior(fireteam_id)
+	var leadership: float = float(context.get("leadership", 0.5))
+	if leader != null and leader.has_method("get_leadership_skill"):
+		leadership = float(leader.call("get_leadership_skill"))
+	var breakout_judgement: float = clampf(float(context.get("breakout_judgement", metadata.get("breakout_judgement", leadership))), 0.0, 1.0)
+	var communication_clarity: float = clampf(float(context.get("communication_clarity", metadata.get("communication_clarity", leadership))), 0.0, 1.0)
+	return {
+		"leadership": leadership,
+		"planning_quality": clampf(float(context.get("planning_quality", metadata.get("planning_quality", leadership))), 0.0, 1.0),
+		"breakout_judgement": breakout_judgement,
+		"communication_clarity": communication_clarity,
+		"reaction_delay_seconds": clampf(float(context.get("reaction_delay_seconds", lerpf(0.8, 0.12, breakout_judgement))), 0.05, 1.25),
+	}
+
+
+func _record_tactical_communication_events(events: Array, options: Dictionary = {}) -> Array:
+	_ensure_tactical_communication_resolver()
+	if _tactical_communication_resolver == null:
+		return []
+	var emitted_events: Array = Array(_tactical_communication_resolver.call("resolve_events", events, options))
+	for event_variant in emitted_events:
+		if typeof(event_variant) != TYPE_DICTIONARY:
+			continue
+		_store_tactical_communication_event(Dictionary(event_variant))
+	return emitted_events
+
+
+func _store_tactical_communication_event(event: Dictionary) -> void:
+	var event_id: String = String(event.get("event_id", "")).strip_edges()
+	if event_id.is_empty():
+		return
+	var retained_events: Array = []
+	for existing_variant in _tactical_communication_events:
+		if typeof(existing_variant) != TYPE_DICTIONARY:
+			continue
+		var existing: Dictionary = Dictionary(existing_variant)
+		if String(existing.get("event_id", "")).strip_edges() == event_id:
+			continue
+		retained_events.append(existing)
+	retained_events.append(event.duplicate(true))
+	while retained_events.size() > 10:
+		retained_events.pop_front()
+	_tactical_communication_events = retained_events
+	_maybe_store_tactical_communication_bubble(event)
+
+
+func _maybe_store_tactical_communication_bubble(event: Dictionary) -> void:
+	if not fireteamleader_feedback_bubbles_enabled:
+		return
+	var channels: PackedStringArray = PackedStringArray(event.get("channels", PackedStringArray()))
+	if not channels.has(TACTICAL_COMMUNICATION_EVENT_SCRIPT.CHANNEL_FTL_BUBBLE):
+		return
+	var fireteam_id: String = String(event.get("fireteam_id", "")).strip_edges().to_lower()
+	var leader = _resolve_fireteam_leader_for_behavior(fireteam_id)
+	var anchor_position_variant = event.get("anchor_position", null)
+	if typeof(anchor_position_variant) != TYPE_VECTOR2:
+		anchor_position_variant = _resolve_fireteamleader_feedback_anchor_position(leader, fireteam_id)
+	if typeof(anchor_position_variant) != TYPE_VECTOR2:
+		return
+	var payload: Dictionary = Dictionary(TACTICAL_COMMUNICATION_RESOLVER_SCRIPT.call(
+		"build_bubble_payload",
+		event,
+		leader,
+		Vector2(anchor_position_variant),
+		get_fireteamleader_feedback_bubble_settings(),
+		{
+			"fireteam_id": fireteam_id,
+			"unit_id": String(event.get("unit_id", "")),
+			"fireteam_units": _get_units_for_fireteam(fireteam_id),
+		}
+	))
+	if not bool(payload.get("ok", false)):
+		return
+	if not bool(_get_comic_bubble_runtime_gate().call("should_emit_payload", payload, COMIC_BUBBLE_SETTINGS_SCRIPT.CATEGORY_FTL_COMMAND_FEEDBACK)):
+		return
+	_store_fireteamleader_feedback_bubble(payload)
+
+
+func _build_selected_tactical_communication_text() -> String:
+	return String(TACTICAL_COMMUNICATION_RESOLVER_SCRIPT.call("build_selected_fireteam_text", _tactical_communication_events, _selected_fireteam_ids, 2)).strip_edges()
+
+
+func _build_mission_control_tactical_communication_text() -> String:
+	return String(TACTICAL_COMMUNICATION_RESOLVER_SCRIPT.call("build_mission_control_text", _tactical_communication_events, 2)).strip_edges()
+
+
+func record_fireteamleader_feedback_bubble_for_unit(
+	feedback_action: String,
+	feedback_state: String,
+	leader,
+	fireteam_id: String = "",
+	detail: String = ""
+) -> Dictionary:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty() and leader != null and leader.has_method("get_fireteam_id"):
+		normalized_fireteam_id = String(leader.call("get_fireteam_id")).strip_edges().to_lower()
+	var anchor_position_variant: Variant = _resolve_fireteamleader_feedback_anchor_position(leader, normalized_fireteam_id)
+	if typeof(anchor_position_variant) != TYPE_VECTOR2:
+		return {}
+	var unit_id: String = String(leader.call("get_unit_id")).strip_edges() if leader != null and leader.has_method("get_unit_id") else ""
+	var payload: Dictionary = Dictionary(FIRETEAMLEADER_FEEDBACK_BUBBLE_RESOLVER_SCRIPT.call(
+		"build_command_feedback",
+		feedback_action,
+		feedback_state,
+		leader,
+		Vector2(anchor_position_variant),
+		get_fireteamleader_feedback_bubble_settings(),
+		{
+			"fireteam_id": normalized_fireteam_id,
+			"unit_id": unit_id,
+			"detail": detail,
+			"fireteam_units": _get_units_for_fireteam(normalized_fireteam_id),
+		}
+	))
+	if not bool(payload.get("ok", false)):
+		return {}
+	if not bool(_get_comic_bubble_runtime_gate().call("should_emit_payload", payload, COMIC_BUBBLE_SETTINGS_SCRIPT.CATEGORY_FTL_COMMAND_FEEDBACK)):
+		return {}
+	_store_fireteamleader_feedback_bubble(payload)
+	return payload
+
+
+func _record_fireteamleader_feedback_for_selected_fireteams(feedback_action: String, feedback_state: String, detail: String = "") -> void:
+	_record_fireteamleader_feedback_for_fireteam_ids(_selected_fireteam_ids, feedback_action, feedback_state, detail)
+
+
+func _record_fireteamleader_feedback_for_fireteam_ids(fireteam_ids: PackedStringArray, feedback_action: String, feedback_state: String, detail: String = "") -> void:
+	for fireteam_id_variant in fireteam_ids:
+		var normalized_fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if normalized_fireteam_id.is_empty():
+			continue
+		_record_fireteamleader_feedback_for_fireteam(normalized_fireteam_id, feedback_action, feedback_state, detail)
+
+
+func _record_fireteamleader_feedback_for_fireteam(fireteam_id: String, feedback_action: String, feedback_state: String, detail: String = "") -> Dictionary:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return {}
+	var leader = _resolve_fireteam_leader_for_behavior(normalized_fireteam_id)
+	return record_fireteamleader_feedback_bubble_for_unit(feedback_action, feedback_state, leader, normalized_fireteam_id, detail)
+
+
+func _resolve_fireteamleader_feedback_anchor_position(leader, fireteam_id: String) -> Variant:
+	if leader is Node2D:
+		return (leader as Node2D).global_position
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if not normalized_fireteam_id.is_empty():
+		var fireteam_anchor_position: Variant = _resolve_fireteam_visual_anchor_position(normalized_fireteam_id)
+		if typeof(fireteam_anchor_position) == TYPE_VECTOR2:
+			return Vector2(fireteam_anchor_position)
+	return null
+
+
+func _store_fireteamleader_feedback_bubble(payload: Dictionary) -> void:
+	if not fireteamleader_feedback_bubbles_enabled:
+		return
+	var normalized_payload: Dictionary = payload.duplicate(true)
+	_fireteamleader_feedback_sequence += 1
+	normalized_payload["feedback_sequence"] = _fireteamleader_feedback_sequence
+	var identity_key: String = _build_fireteamleader_feedback_identity(normalized_payload)
+	var retained_bubbles: Array = []
+	for existing_variant in _fireteamleader_feedback_bubbles:
+		if typeof(existing_variant) != TYPE_DICTIONARY:
+			continue
+		var existing_payload: Dictionary = Dictionary(existing_variant).duplicate(true)
+		if _build_fireteamleader_feedback_identity(existing_payload) == identity_key:
+			continue
+		retained_bubbles.append(existing_payload)
+	retained_bubbles.append(normalized_payload)
+	var settings: Dictionary = get_fireteamleader_feedback_bubble_settings()
+	var max_total: int = maxi(int(settings.get("max_active_bubbles_total", 4)), 1)
+	while retained_bubbles.size() > max_total:
+		retained_bubbles.pop_front()
+	_fireteamleader_feedback_bubbles = retained_bubbles
+
+
+func _build_fireteamleader_feedback_identity(payload: Dictionary) -> String:
+	var unit_id: String = String(payload.get("unit_id", "")).strip_edges()
+	if not unit_id.is_empty():
+		return "unit:%s" % unit_id
+	var fireteam_id: String = String(payload.get("fireteam_id", "")).strip_edges().to_lower()
+	if not fireteam_id.is_empty():
+		return "fireteam:%s" % fireteam_id
+	return "bubble:%s" % String(payload.get("feedback_sequence", payload.get("bubble_id", ""))).strip_edges()
+
+
+func _update_npc_thought_peek_visuals() -> void:
+	var active: bool = bool(_get_comic_bubble_runtime_gate().call("is_thought_peek_active"))
+	if active == _npc_thought_peek_active_last_frame:
+		return
+	_npc_thought_peek_active_last_frame = active
+	_refresh_npc_thought_bubbles(true)
+	_refresh_order_visuals()
+
+
+func _refresh_npc_thought_bubbles(force_refresh: bool = false) -> void:
+	var gate = _get_comic_bubble_runtime_gate()
+	if not bool(gate.call("is_thought_peek_active")):
+		if not _npc_thought_bubbles.is_empty():
+			_npc_thought_bubbles.clear()
+		_npc_thought_bubble_refresh_msec = 0
+		return
+	var now_msec: int = Time.get_ticks_msec()
+	if not force_refresh and not _npc_thought_bubbles.is_empty() and now_msec - _npc_thought_bubble_refresh_msec < 500:
+		return
+	var candidates: Array = _get_npc_thought_candidate_units()
+	var settings: Dictionary = Dictionary(gate.call("get_settings"))
+	var thought_limit: int = maxi(int(settings.get("max_thought_bubbles_total", 4)), 0)
+	settings["max_active_bubbles_total"] = mini(maxi(int(settings.get("max_active_bubbles_total", 4)), 0), thought_limit)
+	var raw_payloads: Array = Array(NPC_THOUGHT_BUBBLE_RESOLVER_SCRIPT.call("build_thoughts_for_units", candidates, settings, {"selected_fireteam_ids": _selected_fireteam_ids}))
+	var filtered_payloads: Array = Array(gate.call("filter_payloads", raw_payloads, COMIC_BUBBLE_SETTINGS_SCRIPT.CATEGORY_NPC_THOUGHT_PEEK, now_msec))
+	if thought_limit > 0 and filtered_payloads.size() > thought_limit:
+		filtered_payloads = filtered_payloads.slice(0, thought_limit)
+	_npc_thought_bubbles = filtered_payloads
+	_npc_thought_bubble_refresh_msec = now_msec
+
+
+func _get_npc_thought_candidate_units() -> Array:
+	var selected_lookup: Dictionary = {}
+	for fireteam_id_variant in _selected_fireteam_ids:
+		var selected_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if not selected_id.is_empty():
+			selected_lookup[selected_id] = true
+	var result: Array = []
+	for unit in _get_all_friendly_units(false):
+		if unit == null or not (unit is Node2D) or not unit.has_method("get_fireteam_id"):
+			continue
+		var fireteam_id: String = String(unit.call("get_fireteam_id")).strip_edges().to_lower()
+		if not selected_lookup.is_empty() and not selected_lookup.has(fireteam_id):
+			continue
+		result.append(unit)
+	if not result.is_empty():
+		return result
+	for unit in _get_all_friendly_units(true):
+		if unit is Node2D:
+			result.append(unit)
+	return result
+
+
+func get_unit_presence_audit_snapshot() -> Dictionary:
+	var unit_registry = get_node_or_null("../UnitRegistry")
+	var friendly_entries: Array = _build_unit_presence_audit_entries(_get_all_friendly_units(true), unit_registry)
+	var enemy_entries: Array = _build_unit_presence_audit_entries(_get_all_enemy_units(true), unit_registry)
+	var all_entries: Array = friendly_entries + enemy_entries
+	return {
+		"friendly_units": friendly_entries,
+		"enemy_units": enemy_entries,
+		"active_unit_ids": _extract_presence_audit_unit_ids(all_entries, "registry_active", true),
+		"active_friendly_unit_ids": _extract_presence_audit_unit_ids(friendly_entries, "registry_active", true),
+		"active_enemy_unit_ids": _extract_presence_audit_unit_ids(enemy_entries, "registry_active", true),
+		"visible_unit_ids": _extract_presence_audit_unit_ids(all_entries, "visible", true),
+		"hidden_registered_unit_ids": _extract_hidden_registered_presence_unit_ids(all_entries),
+		"inactive_enemy_unit_ids": _extract_presence_audit_unit_ids(enemy_entries, "registry_active", false),
+		"embarked_unit_ids": _build_sorted_drop_unit_id_array(_embarked_unit_ids),
+		"deployed_unit_ids": _build_sorted_drop_unit_id_array(_deployed_unit_ids),
+	}
 
 
 func _ensure_default_fireteam_selection() -> void:
@@ -4128,12 +5360,94 @@ func _get_all_enemy_units(include_hidden: bool = true) -> Array:
 	for child in mission_root.get_children():
 		if not child.has_method("get_team_id") or not child.has_method("get_unit_id"):
 			continue
-		if String(child.call("get_team_id")).strip_edges() == FRIENDLY_TEAM_ID:
+		var child_team_id: String = String(child.call("get_team_id")).strip_edges()
+		if child_team_id == FRIENDLY_TEAM_ID or child_team_id.is_empty() or child_team_id == "team_unused":
 			continue
 		if not include_hidden and child is CanvasItem and not (child as CanvasItem).visible:
 			continue
 		result.append(child)
 	return result
+
+
+func _build_unit_presence_audit_entries(units: Array, unit_registry) -> Array:
+	var entries: Array = []
+	for unit in units:
+		var entry: Dictionary = _build_unit_presence_audit_entry(unit, unit_registry)
+		if not entry.is_empty():
+			entries.append(entry)
+	entries.sort_custom(Callable(self, "_sort_unit_presence_audit_entries"))
+	return entries
+
+
+func _build_unit_presence_audit_entry(unit, unit_registry) -> Dictionary:
+	if unit == null or not unit.has_method("get_unit_id"):
+		return {}
+	var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+	if unit_id.is_empty():
+		return {}
+	var entry: Dictionary = {
+		"unit_id": unit_id,
+		"team_id": String(unit.call("get_team_id")).strip_edges() if unit.has_method("get_team_id") else "",
+		"fireteam_id": String(unit.call("get_fireteam_id")).strip_edges().to_lower() if unit.has_method("get_fireteam_id") else "",
+		"visible": bool((unit as CanvasItem).visible) if unit is CanvasItem else unit.is_inside_tree(),
+		"registry_active": _is_presence_audit_unit_registered(unit_registry, unit_id),
+		"node_path": String(unit.get_path()),
+		"vital_state": String(unit.call("get_vital_state")).strip_edges().to_lower() if unit.has_method("get_vital_state") else "",
+		"runtime_state": "",
+		"role_id": String(unit.call("get_role_id")).strip_edges() if unit.has_method("get_role_id") else "",
+		"weapon_1_id": String(unit.call("get_weapon_1_id")).strip_edges() if unit.has_method("get_weapon_1_id") else "",
+		"weapon_2_id": String(unit.call("get_weapon_2_id")).strip_edges() if unit.has_method("get_weapon_2_id") else "",
+	}
+	if unit.has_method("get_runtime_status"):
+		var runtime_status = unit.call("get_runtime_status")
+		if runtime_status != null and runtime_status.has_method("to_dict"):
+			var runtime_dict: Dictionary = runtime_status.call("to_dict")
+			entry["runtime_state"] = String(runtime_dict.get("status", "")).strip_edges()
+	return entry
+
+
+func _is_presence_audit_unit_registered(unit_registry, unit_id: String) -> bool:
+	if unit_registry == null or unit_id.is_empty():
+		return false
+	if unit_registry.has_method("has_unit"):
+		return bool(unit_registry.call("has_unit", unit_id))
+	if unit_registry.has_method("get_unit"):
+		return unit_registry.call("get_unit", unit_id) != null
+	return false
+
+
+func _extract_presence_audit_unit_ids(entries: Array, key: String, expected_value: bool) -> Array:
+	var unit_ids: Array = []
+	for entry_variant in entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		if bool(entry.get(key, false)) != expected_value:
+			continue
+		var unit_id: String = String(entry.get("unit_id", "")).strip_edges()
+		if not unit_id.is_empty():
+			unit_ids.append(unit_id)
+	unit_ids.sort()
+	return unit_ids
+
+
+func _extract_hidden_registered_presence_unit_ids(entries: Array) -> Array:
+	var unit_ids: Array = []
+	for entry_variant in entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		if not bool(entry.get("registry_active", false)) or bool(entry.get("visible", false)):
+			continue
+		var unit_id: String = String(entry.get("unit_id", "")).strip_edges()
+		if not unit_id.is_empty():
+			unit_ids.append(unit_id)
+	unit_ids.sort()
+	return unit_ids
+
+
+func _sort_unit_presence_audit_entries(a: Dictionary, b: Dictionary) -> bool:
+	return String(a.get("unit_id", "")) < String(b.get("unit_id", ""))
 
 
 func _sync_initial_runtime_active_units() -> void:
@@ -4317,7 +5631,8 @@ func _compute_suppression_gain_from_damage(units: Array) -> float:
 		_tracked_health_by_unit_id[unit_id] = current_health
 		if current_health >= previous_health:
 			continue
-		gain += SUPPRESSION_HIT_GAIN + (float(previous_health - current_health) / 100.0)
+		var damage_delta: int = previous_health - current_health
+		gain += SUPPRESSION_HIT_GAIN + clampf(float(damage_delta) / 8.0, 0.25, 2.5)
 	return gain
 
 
@@ -4358,6 +5673,12 @@ func _interrupt_plan_for_suppression(fireteam_id: String) -> void:
 	if _fireteam_movement_controller != null:
 		_fireteam_movement_controller.call("reset_fireteam", fireteam_id)
 	_suppression_interrupt_pending_by_fireteam[fireteam_id] = true
+	var anchor = _get_selection_anchor_for_fireteam(fireteam_id)
+	record_tactical_breakout("suppressed_pinned", fireteam_id, {
+		"is_suppressed": true,
+		"anchor_position": anchor.global_position if anchor != null else _get_target_position(),
+		"sequence": Time.get_ticks_msec(),
+	}, {"now_msec": Time.get_ticks_msec()})
 
 
 func _apply_suppression_effects_for_fireteam(fireteam_id: String, suppression_state: Dictionary) -> void:
@@ -4414,6 +5735,19 @@ func _try_auto_resume_after_suppression(fireteam_id: String) -> void:
 		return
 	_suppression_interrupt_pending_by_fireteam[fireteam_id] = false
 	_return_fireteam_to_plan(fireteam_id, false)
+	var breakout_id_to_resolve: String = ""
+	for record_variant in _tactical_breakout_records:
+		if typeof(record_variant) != TYPE_DICTIONARY:
+			continue
+		var record: Dictionary = Dictionary(record_variant)
+		if str(record.get("fireteam_id", "")) != fireteam_id:
+			continue
+		if str(record.get("trigger", "")) != "suppressed_pinned" or bool(record.get("resolved", false)):
+			continue
+		breakout_id_to_resolve = str(record.get("breakout_id", ""))
+		break
+	if not breakout_id_to_resolve.is_empty():
+		resolve_tactical_breakout_return_to_plan(breakout_id_to_resolve, {"reason": "suppression_clear", "now_msec": Time.get_ticks_msec(), "skip_runtime_return": true})
 
 
 func _notify_suppression_changed(fireteam_id: String, suppression_state: Dictionary) -> void:
@@ -4719,6 +6053,10 @@ func get_area_orders_snapshot() -> Array:
 	return _serialize_area_orders()
 
 
+func get_multi_fireteam_plan_snapshot() -> Array:
+	return _serialize_multi_fireteam_plans()
+
+
 func get_visualized_waypoints_snapshot() -> Array:
 	var visualizer := get_node_or_null("../FireteamOrderVisualizer")
 	if visualizer == null or not visualizer.has_method("get_visible_waypoints"):
@@ -4731,6 +6069,46 @@ func get_visualized_area_orders_snapshot() -> Array:
 	if visualizer == null or not visualizer.has_method("get_visible_area_orders"):
 		return []
 	return Array(visualizer.call("get_visible_area_orders"))
+
+
+func get_command_feedback_snapshot() -> Dictionary:
+	return {
+		"selected_fireteam_ids": Array(_selected_fireteam_ids),
+		"selected_fireteam_label": _get_fireteam_name(),
+		"phase_name": _get_phase_name(),
+		"target_text": _build_target_text(),
+		"selected_order_text": _build_selected_waypoint_info_text(),
+		"selected_multi_fireteam_plan_text": _build_selected_multi_fireteam_plan_info_text(),
+		"mission_control_plan_text": _build_mission_control_multi_fireteam_plan_text(),
+		"selected_status_text": _build_fireteam_status_text(),
+		"last_command_text": _last_command_text,
+		"command_feedback_text": _get_label_text(command_feedback_label_path),
+		"selected_fireteam_status_label_text": _get_label_text(FIRETEAM_STATUS_LABEL_PATH),
+		"mission_control_status_text": _get_label_text("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicStatusLabel"),
+		"command_buttons": _build_command_control_snapshot(),
+		"command_hierarchy": get_command_hierarchy_snapshot(),
+		"planned_waypoint_count": _count_selected_phase_waypoints(),
+		"planned_area_order_count": _count_selected_area_orders(),
+		"multi_fireteam_plan_count": _serialize_multi_fireteam_plans().size(),
+		"visualized_waypoint_count": get_visualized_waypoints_snapshot().size(),
+		"visualized_area_order_count": get_visualized_area_orders_snapshot().size(),
+		"active_area_defense": get_active_area_defense_snapshot(),
+		"active_area_attack": get_active_area_attack_snapshot(),
+		"fireteamleader_feedback_bubbles_enabled": fireteamleader_feedback_bubbles_enabled,
+		"fireteamleader_feedback_bubble_count": get_fireteamleader_feedback_bubble_snapshot().size(),
+		"fireteamleader_feedback_bubbles": get_fireteamleader_feedback_bubble_snapshot(),
+		"tactical_communication_event_count": get_tactical_communication_event_snapshot().size(),
+		"tactical_communication_events": get_tactical_communication_event_snapshot(),
+		"tactical_breakout_count": get_tactical_breakout_snapshot().size(),
+		"tactical_breakouts": get_tactical_breakout_snapshot(),
+		"air_asset_status": get_air_asset_status_snapshot(),
+		"air_asset_threat_count": get_air_asset_threat_snapshot().size(),
+		"air_asset_threats": get_air_asset_threat_snapshot(),
+		"selected_tactical_communication_text": _build_selected_tactical_communication_text(),
+		"mission_control_tactical_communication_text": _build_mission_control_tactical_communication_text(),
+		"npc_thought_bubble_count": get_npc_thought_bubble_snapshot().size(),
+		"npc_thought_bubbles": get_npc_thought_bubble_snapshot(),
+	}
 
 
 func get_active_ad_hoc_orders_snapshot() -> Array:
@@ -4780,6 +6158,24 @@ func _ensure_area_order_resolver() -> void:
 	_area_order_resolver = AREA_ORDER_RESOLVER_SCRIPT.new()
 
 
+func _ensure_multi_fireteam_plan_resolver() -> void:
+	if _multi_fireteam_plan_resolver != null:
+		return
+	_multi_fireteam_plan_resolver = MULTI_FIRETEAM_PLAN_RESOLVER_SCRIPT.new()
+
+
+func _ensure_tactical_communication_resolver() -> void:
+	if _tactical_communication_resolver != null:
+		return
+	_tactical_communication_resolver = TACTICAL_COMMUNICATION_RESOLVER_SCRIPT.new()
+
+
+func _ensure_tactical_breakout_resolver() -> void:
+	if _tactical_breakout_resolver != null:
+		return
+	_tactical_breakout_resolver = TACTICAL_BREAKOUT_RESOLVER_SCRIPT.new()
+
+
 func _ensure_tactical_stance_controller() -> void:
 	if _tactical_stance_controller != null:
 		return
@@ -4802,6 +6198,17 @@ func _ensure_fireteam_security_controller() -> void:
 	if _fireteam_security_controller != null:
 		return
 	_fireteam_security_controller = FIRETEAM_SECURITY_CONTROLLER_SCRIPT.new()
+
+
+func _get_comic_bubble_runtime_gate():
+	if _comic_bubble_runtime_gate != null:
+		return _comic_bubble_runtime_gate
+	COMIC_BUBBLE_SETTINGS_SCRIPT.call("ensure_input_map_actions")
+	_comic_bubble_runtime_gate = COMIC_BUBBLE_RUNTIME_GATE_SCRIPT.new()
+	_comic_bubble_runtime_gate.call("load_settings")
+	var settings: Dictionary = Dictionary(_comic_bubble_runtime_gate.call("get_settings"))
+	fireteamleader_feedback_bubbles_enabled = bool(settings.get("enabled", true)) and bool(settings.get("ftl_command_feedback_enabled", true))
+	return _comic_bubble_runtime_gate
 
 
 func _ensure_order_visualizer() -> void:
@@ -4856,6 +6263,8 @@ func _refresh_order_visuals() -> void:
 		visualizer.call("set_area_order_dicts", _serialize_area_orders())
 	visualizer.call("set_ad_hoc_order_dicts", _build_ad_hoc_visualization_entries())
 	visualizer.call("set_security_dicts", get_fireteam_security_snapshot())
+	if visualizer.has_method("set_movement_state_dicts"):
+		visualizer.call("set_movement_state_dicts", get_fireteam_movement_snapshot())
 	_sync_primary_3d_order_visuals()
 	refresh_contact_overlay()
 
@@ -4885,8 +6294,15 @@ func _sync_primary_3d_order_visuals() -> void:
 			"fireteam_anchors": _build_fireteam_anchor_visualization_entries(),
 			"plan_dicts": _serialize_order_plans(),
 			"area_order_dicts": _serialize_area_orders(),
+			"multi_fireteam_plan_dicts": _serialize_multi_fireteam_plans(),
 			"ad_hoc_order_dicts": _build_ad_hoc_visualization_entries(),
 			"security_dicts": get_fireteam_security_snapshot(),
+			"movement_state_dicts": get_fireteam_movement_snapshot(),
+			"enemy_security_dicts": get_enemy_security_snapshot(),
+			"enemy_tactics_dicts": get_enemy_team_tactics_snapshot(),
+			"fire_event_dicts": get_fire_event_snapshot(),
+			"feedback_bubble_dicts": get_comic_bubble_visual_payload_snapshot(),
+			"tactical_communication_event_dicts": get_tactical_communication_event_snapshot(),
 		}
 	)
 
@@ -4987,12 +6403,156 @@ func _create_area_orders_from_payload(fireteam_ids: PackedStringArray, payload: 
 	if targets.is_empty():
 		return []
 	_focused_area_order_ref = Dictionary(targets[0]).duplicate(true)
+	var coordinated_plan: Dictionary = _maybe_create_multi_fireteam_area_plan(sanitized_fireteam_ids, normalized_command_type, payload, targets)
 	_refresh_order_visuals()
-	_last_command_text = "AREA %s (%d)" % [normalized_command_type.to_upper(), targets.size()]
+	_last_command_text = "PLAN %s (%d)" % [normalized_command_type.to_upper(), targets.size()] if not coordinated_plan.is_empty() else "AREA %s (%d)" % [normalized_command_type.to_upper(), targets.size()]
 	_update_ui()
 	if should_emit_signal:
 		_emit_planning_state_changed()
 	return targets
+
+
+func _maybe_create_multi_fireteam_area_plan(fireteam_ids: PackedStringArray, command_type: String, payload: Dictionary, targets: Array) -> Dictionary:
+	if fireteam_ids.size() < 2:
+		return {}
+	_ensure_multi_fireteam_plan_resolver()
+	if _multi_fireteam_plan_resolver == null:
+		return {}
+	_multi_fireteam_plan_sequence += 1
+	var plan_id: String = "mission_multi_%04d" % _multi_fireteam_plan_sequence
+	var area_context: Dictionary = payload.duplicate(true)
+	area_context["command_type"] = command_type
+	area_context["area_order_refs"] = targets.duplicate(true)
+	var intent = COMMANDER_INTENT_SCRIPT.new({
+		"verb": _map_area_command_to_commander_verb(command_type),
+		"coordinated_fireteam_ids": fireteam_ids,
+		"target_position": Vector2(payload.get("center_position", _get_target_position())),
+		"target_area_id": "area_%04d" % _area_order_sequence,
+		"sync_group_id": plan_id,
+		"phase": _get_live_order_phase_index(),
+		"tempo": "normal",
+		"fire_rule": "return",
+		"contact_response": "report",
+		"risk": "normal",
+	})
+	var plan: Dictionary = Dictionary(MULTI_FIRETEAM_PLAN_RESOLVER_SCRIPT.call("resolve_area_plan", intent, _build_multi_fireteam_contexts(fireteam_ids), {
+		"plan_id": plan_id,
+		"phase": _get_live_order_phase_index(),
+		"area_context": area_context,
+		"min_spacing": 96.0,
+	}))
+	if plan.is_empty():
+		return {}
+	_multi_fireteam_plans_by_id[String(plan.get("plan_id", plan_id))] = plan
+	_record_tactical_communication_events(TACTICAL_COMMUNICATION_RESOLVER_SCRIPT.call("build_events_for_multi_fireteam_plan", plan, {
+		"plan_id": plan_id,
+		"phase": _get_live_order_phase_index(),
+		"max_events": 6,
+	}))
+	for target_variant in targets:
+		var target: Dictionary = Dictionary(target_variant)
+		var area_order = _area_orders_by_id.get(String(target.get("area_order_id", "")), null)
+		if area_order == null:
+			continue
+		area_order.metadata["multi_fireteam_plan_id"] = String(plan.get("plan_id", plan_id))
+		area_order.metadata["sync_group_id"] = String(plan.get("sync_group_id", plan_id))
+	return plan
+
+
+func _map_area_command_to_commander_verb(command_type: String) -> String:
+	match command_type.strip_edges().to_lower():
+		AREA_ORDER_SCRIPT.COMMAND_TYPE_TAKE:
+			return COMMANDER_INTENT_SCRIPT.VERB_TAKE
+		AREA_ORDER_SCRIPT.COMMAND_TYPE_ENGAGE:
+			return COMMANDER_INTENT_SCRIPT.VERB_ENGAGE
+		AREA_ORDER_SCRIPT.COMMAND_TYPE_FLANK:
+			return COMMANDER_INTENT_SCRIPT.VERB_FLANK
+		_:
+			return COMMANDER_INTENT_SCRIPT.VERB_DEFEND
+
+
+func _build_multi_fireteam_contexts(fireteam_ids: PackedStringArray) -> Array:
+	var contexts: Array = []
+	for fireteam_id_variant in fireteam_ids:
+		var context: Dictionary = _build_multi_fireteam_context(String(fireteam_id_variant))
+		if not context.is_empty():
+			contexts.append(context)
+	return contexts
+
+
+func _build_multi_fireteam_context(fireteam_id: String) -> Dictionary:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return {}
+	var units: Array = _get_fireteam_units(normalized_fireteam_id, true)
+	var anchor_position: Variant = _resolve_fireteam_visual_anchor_position(normalized_fireteam_id)
+	var position: Vector2 = Vector2(anchor_position) if typeof(anchor_position) == TYPE_VECTOR2 else _get_target_position()
+	var member_count: int = 0
+	var medic_count: int = 0
+	var leadership_total: float = 0.0
+	var discipline_total: float = 0.0
+	var speed_total: float = 0.0
+	var accuracy_total: float = 0.0
+	var awareness_total: float = 0.0
+	var stealth_total: float = 0.0
+	for unit in units:
+		if unit == null:
+			continue
+		var vital_state: String = String(unit.call("get_vital_state")) if unit.has_method("get_vital_state") else "fit"
+		if vital_state != "fit":
+			continue
+		member_count += 1
+		leadership_total += _read_multi_fireteam_unit_skill(unit, "get_leadership_skill", "skill_leadership", 0.5)
+		discipline_total += _read_multi_fireteam_unit_skill(unit, "get_discipline_skill", "discipline", 0.5)
+		speed_total += _read_multi_fireteam_unit_skill(unit, "get_speed_skill", "skill_speed", 0.5)
+		accuracy_total += _read_multi_fireteam_unit_skill(unit, "get_accuracy_skill", "skill_accuracy", 0.5)
+		awareness_total += _read_multi_fireteam_unit_skill(unit, "get_awareness_skill", "awareness", 0.5)
+		stealth_total += _read_multi_fireteam_unit_skill(unit, "get_stealth_skill", "stealth", 0.5)
+		if _unit_looks_like_medic(unit):
+			medic_count += 1
+	var divisor: float = float(maxi(member_count, 1))
+	return {
+		"fireteam_id": normalized_fireteam_id,
+		"team_id": FRIENDLY_TEAM_ID,
+		"display_label": _get_fireteam_display_label(normalized_fireteam_id),
+		"position": position,
+		"member_count": member_count,
+		"medic_count": medic_count,
+		"leadership": leadership_total / divisor,
+		"discipline": discipline_total / divisor,
+		"cohesion": 0.68,
+		"communication": leadership_total / divisor,
+		"initiative": speed_total / divisor,
+		"speed": speed_total / divisor,
+		"accuracy": accuracy_total / divisor,
+		"awareness": awareness_total / divisor,
+		"stealth": stealth_total / divisor,
+		"readiness": clampf(float(member_count) / 4.0, 0.0, 1.0),
+		"weapon_range": clampf((accuracy_total / divisor) * 0.7 + 0.25, 0.0, 1.0),
+		"cover_quality": 0.5,
+		"contact_pressure": clampf(float(get_fireteam_contact_snapshot(normalized_fireteam_id).size()) / 3.0, 0.0, 1.0),
+		"blocked_path": false,
+	}
+
+
+func _read_multi_fireteam_unit_skill(unit, method_name: String, property_name: String, fallback: float) -> float:
+	if unit != null and unit.has_method(method_name):
+		return clampf(float(unit.call(method_name)), 0.0, 1.0)
+	if unit != null and unit.has_method("get"):
+		var value = unit.get(property_name)
+		if value != null:
+			return clampf(float(value), 0.0, 1.0)
+	return fallback
+
+
+func _unit_looks_like_medic(unit) -> bool:
+	if unit == null or not unit.has_method("get"):
+		return false
+	for property_name in ["role_id", "mission_role", "primary_weapon_id", "secondary_weapon_id", "loadout_id"]:
+		var value = unit.get(property_name)
+		if value != null and String(value).strip_edges().to_lower().contains("medic"):
+			return true
+	return false
 
 
 func _build_fireteam_anchor_visualization_entries() -> Array:
@@ -5077,6 +6637,13 @@ func _next_area_order_id() -> String:
 	return "area_%04d" % _area_order_sequence
 
 
+func _extract_multi_fireteam_plan_sequence(plan_id: String) -> int:
+	var parts: PackedStringArray = plan_id.strip_edges().split("_")
+	if parts.size() < 1:
+		return 0
+	return int(parts[parts.size() - 1])
+
+
 func _serialize_order_plans() -> Array:
 	var result: Array = []
 	var keys: Array = _order_plans_by_key.keys()
@@ -5099,6 +6666,36 @@ func _serialize_area_orders() -> Array:
 			continue
 		result.append(area_order.to_dict())
 	return result
+
+
+func _serialize_multi_fireteam_plans() -> Array:
+	var result: Array = []
+	var keys: Array = _multi_fireteam_plans_by_id.keys()
+	keys.sort()
+	for key in keys:
+		var plan: Dictionary = Dictionary(_multi_fireteam_plans_by_id.get(key, {})).duplicate(true)
+		if plan.is_empty() or not bool(MULTI_FIRETEAM_PLAN_RESOLVER_SCRIPT.call("is_valid_plan", plan)):
+			continue
+		result.append(plan)
+	return result
+
+
+func _load_multi_fireteam_plans_from_state(plan_dicts: Array) -> void:
+	_multi_fireteam_plans_by_id.clear()
+	for plan_variant in plan_dicts:
+		if typeof(plan_variant) != TYPE_DICTIONARY:
+			continue
+		var plan: Dictionary = Dictionary(plan_variant).duplicate(true)
+		if plan.is_empty() or not bool(MULTI_FIRETEAM_PLAN_RESOLVER_SCRIPT.call("is_valid_plan", plan)):
+			continue
+		var plan_id: String = String(plan.get("plan_id", "")).strip_edges()
+		if plan_id.is_empty():
+			continue
+		_multi_fireteam_plans_by_id[plan_id] = plan
+		var sequence: int = _extract_multi_fireteam_plan_sequence(plan_id)
+		if sequence > _multi_fireteam_plan_sequence:
+			_multi_fireteam_plan_sequence = sequence
+	_refresh_order_visuals()
 
 
 func _load_order_plans_from_state(plan_dicts: Array) -> void:
@@ -5588,6 +7185,11 @@ func _build_selected_flank_vulnerability_text() -> String:
 func _format_movement_state_text(state: Dictionary) -> String:
 	if state.is_empty():
 		return "-"
+	var readability_status_line: String = String(state.get("readability_status_line", "")).strip_edges()
+	if readability_status_line.is_empty():
+		readability_status_line = String(Dictionary(state.get("map_readability", {})).get("status_line", "")).strip_edges()
+	if not readability_status_line.is_empty():
+		return readability_status_line
 	var style_label: String = _get_movement_style_short_label(String(state.get("effective_style", "")))
 	var stage_index: int = int(state.get("stage_index", 0)) + 1
 	if bool(state.get("simplified_due_to_losses", false)):
@@ -7021,6 +8623,7 @@ func _delete_area_order_targets(area_order_targets: Array) -> bool:
 		var area_order_id: String = String(Dictionary(area_order_target).get("area_order_id", "")).strip_edges()
 		if area_order_id.is_empty() or not _area_orders_by_id.has(area_order_id):
 			continue
+		_remove_multi_fireteam_plans_for_area_order_id(area_order_id)
 		_area_orders_by_id.erase(area_order_id)
 		did_delete = true
 	if not did_delete:
@@ -7030,6 +8633,21 @@ func _delete_area_order_targets(area_order_targets: Array) -> bool:
 	_update_ui()
 	_emit_planning_state_changed()
 	return true
+
+
+func _remove_multi_fireteam_plans_for_area_order_id(area_order_id: String) -> void:
+	var normalized_area_order_id: String = area_order_id.strip_edges()
+	if normalized_area_order_id.is_empty():
+		return
+	for plan_id in _multi_fireteam_plans_by_id.keys().duplicate():
+		var plan: Dictionary = Dictionary(_multi_fireteam_plans_by_id.get(plan_id, {}))
+		var area_context: Dictionary = Dictionary(plan.get("area_context", {}))
+		for ref_variant in Array(area_context.get("area_order_refs", [])):
+			if typeof(ref_variant) != TYPE_DICTIONARY:
+				continue
+			if String(Dictionary(ref_variant).get("area_order_id", "")).strip_edges() == normalized_area_order_id:
+				_multi_fireteam_plans_by_id.erase(plan_id)
+				break
 
 
 func _get_area_order_from_ref(area_order_target: Dictionary):

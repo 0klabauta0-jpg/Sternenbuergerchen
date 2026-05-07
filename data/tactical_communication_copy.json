@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "purpose": "Short visual-only tactical communication copy for #17, #18, map markers and FTL bubbles.",
+  "events": {
+    "order_received": {
+      "priority": 20,
+      "duration_seconds": 1.8,
+      "channels": ["selected_fireteam", "mission_control", "ftl_bubble"],
+      "feedback_action": "move",
+      "feedback_state": "accepted",
+      "map_label": "ACK",
+      "copy": {
+        "low": {"short": "{team} ok", "detail": "{team} nimmt Befehl an"},
+        "neutral": {"short": "{team} bestaetigt", "detail": "{team} bestaetigt den Befehl"},
+        "high": {"short": "{team} bestaetigt Q{quality}", "detail": "{team} meldet Befehl verstanden, Q{quality}"}
+      }
+    },
+    "plan_role_assigned": {
+      "priority": 50,
+      "duration_seconds": 2.0,
+      "channels": ["selected_fireteam", "mission_control", "map_marker", "ftl_bubble"],
+      "feedback_action": "move",
+      "feedback_state": "accepted",
+      "map_label": "{role_label}",
+      "copy": {
+        "low": {"short": "{team} {role_label}", "detail": "{team} bekommt Rolle {role_label}"},
+        "neutral": {"short": "{team} {role_label} | {step}", "detail": "{team} Rolle {role_label}: {step}"},
+        "high": {"short": "{team} {role_label} P{phase}", "detail": "{team} Rolle {role_label}, naechster Schritt {step}, Q{quality}"}
+      }
+    },
+    "phase_started": {
+      "priority": 50,
+      "duration_seconds": 2.0,
+      "channels": ["selected_fireteam", "mission_control", "map_marker", "ftl_bubble"],
+      "feedback_action": "go",
+      "feedback_state": "running",
+      "map_label": "P{phase}",
+      "copy": {
+        "low": {"short": "Phase {phase} laeuft", "detail": "Phase {phase} gestartet"},
+        "neutral": {"short": "Phase {phase} startet", "detail": "Phase {phase} ist aktiv"},
+        "high": {"short": "Phase {phase} aktiv Q{quality}", "detail": "Phase {phase} aktiv, Meldungen klar Q{quality}"}
+      }
+    },
+    "phase_completed": {
+      "priority": 50,
+      "duration_seconds": 2.1,
+      "channels": ["selected_fireteam", "mission_control", "map_marker", "ftl_bubble"],
+      "feedback_action": "go",
+      "feedback_state": "done",
+      "map_label": "DONE",
+      "copy": {
+        "low": {"short": "{team} fertig", "detail": "{team} meldet Phase fertig"},
+        "neutral": {"short": "{team} Phase {phase} fertig", "detail": "{team} hat Phase {phase} abgeschlossen"},
+        "high": {"short": "{team} P{phase} komplett", "detail": "{team} Phase {phase} abgeschlossen, bereit fuer Folgeauftrag"}
+      }
+    },
+    "contact_report": {
+      "priority": 80,
+      "duration_seconds": 2.6,
+      "channels": ["selected_fireteam", "mission_control", "map_marker", "ftl_bubble", "audio_blip"],
+      "feedback_action": "engage",
+      "feedback_state": "contact",
+      "map_label": "KONTAKT",
+      "copy": {
+        "low": {"short": "{team} Kontakt", "detail": "{team} meldet Kontakt"},
+        "neutral": {"short": "{team} Kontakt {direction}", "detail": "{team} meldet Kontakt {direction}"},
+        "high": {"short": "{team} Kontakt {direction} Q{quality}", "detail": "{team} bestaetigt Kontakt {direction}, Rueckmeldung Q{quality}"}
+      }
+    },
+    "breakout_adaptation": {
+      "priority": 80,
+      "duration_seconds": 2.6,
+      "channels": ["selected_fireteam", "mission_control", "map_marker", "ftl_bubble", "audio_blip"],
+      "feedback_action": "flank",
+      "feedback_state": "running",
+      "map_label": "ADAPT",
+      "copy": {
+        "low": {"short": "{team} weicht aus", "detail": "{team} passt Route an"},
+        "neutral": {"short": "{team} Route angepasst", "detail": "{team} weicht aus und haelt Ziel {objective}"},
+        "high": {"short": "{team} Breakout Q{quality}", "detail": "{team} passt Route kontrolliert an, Ziel bleibt {objective}"}
+      }
+    },
+    "cannot_execute": {
+      "priority": 100,
+      "duration_seconds": 3.2,
+      "channels": ["selected_fireteam", "mission_control", "map_marker", "ftl_bubble", "audio_blip"],
+      "feedback_action": "move",
+      "feedback_state": "blocked",
+      "map_label": "BLOCK",
+      "copy": {
+        "low": {"short": "{team} kann nicht", "detail": "{team} meldet blockiert"},
+        "neutral": {"short": "{team} blockiert", "detail": "{team} kann den Schritt nicht ausfuehren"},
+        "high": {"short": "{team} blockiert Q{quality}", "detail": "{team} meldet Blockade, neue Order noetig"}
+      }
+    },
+    "needs_orders": {
+      "priority": 100,
+      "duration_seconds": 3.0,
+      "channels": ["selected_fireteam", "mission_control", "map_marker", "ftl_bubble", "audio_blip"],
+      "feedback_action": "move",
+      "feedback_state": "blocked",
+      "map_label": "ORDERS?",
+      "copy": {
+        "low": {"short": "{team} wartet", "detail": "{team} braucht neue Order"},
+        "neutral": {"short": "{team} braucht Order", "detail": "{team} wartet auf neuen Befehl"},
+        "high": {"short": "{team} braucht Folgeorder", "detail": "{team} meldet sauberen Haltepunkt, Folgeorder noetig"}
+      }
+    },
+    "objective_progress": {
+      "priority": 50,
+      "duration_seconds": 2.1,
+      "channels": ["mission_control", "map_marker", "ftl_bubble"],
+      "feedback_action": "take",
+      "feedback_state": "running",
+      "map_label": "OBJ",
+      "copy": {
+        "low": {"short": "{objective} laeuft", "detail": "{objective} wird bearbeitet"},
+        "neutral": {"short": "{objective} Fortschritt", "detail": "{objective} macht Fortschritt"},
+        "high": {"short": "{objective} Fortschritt Q{quality}", "detail": "{objective} Fortschritt stabil, Q{quality}"}
+      }
+    },
+    "objective_complete": {
+      "priority": 80,
+      "duration_seconds": 2.7,
+      "channels": ["selected_fireteam", "mission_control", "map_marker", "ftl_bubble", "audio_blip"],
+      "feedback_action": "take",
+      "feedback_state": "done",
+      "map_label": "OBJ DONE",
+      "copy": {
+        "low": {"short": "{objective} fertig", "detail": "{objective} abgeschlossen"},
+        "neutral": {"short": "{objective} gesichert", "detail": "{objective} wurde gesichert"},
+        "high": {"short": "{objective} gesichert Q{quality}", "detail": "{objective} gesichert, Teams bereit fuer Folgeauftrag"}
+      }
+    },
+    "air_asset_threatened": {
+      "priority": 80,
+      "duration_seconds": 2.8,
+      "channels": ["selected_fireteam", "mission_control", "map_marker", "ftl_bubble", "audio_blip"],
+      "feedback_action": "engage",
+      "feedback_state": "contact",
+      "map_label": "AIR RISK",
+      "copy": {
+        "low": {"short": "Air Gefahr", "detail": "Air Asset bedroht"},
+        "neutral": {"short": "Air Asset bedroht", "detail": "Air Asset meldet Bedrohung {direction}"},
+        "high": {"short": "Air bedroht {direction}", "detail": "Air Asset bedroht {direction}, LZ pruefen"}
+      }
+    },
+    "air_asset_destroyed": {
+      "priority": 100,
+      "duration_seconds": 3.4,
+      "channels": ["selected_fireteam", "mission_control", "map_marker", "ftl_bubble", "audio_blip"],
+      "feedback_action": "engage",
+      "feedback_state": "contact",
+      "map_label": "AIR LOST",
+      "copy": {
+        "low": {"short": "Air verloren", "detail": "Air Asset verloren"},
+        "neutral": {"short": "Air Asset verloren", "detail": "Air Asset zerstort, Recovery noetig"},
+        "high": {"short": "Air Asset verloren", "detail": "Air Asset verloren, Recovery-Loop aktivieren"}
+      }
+    }
+  }
+}

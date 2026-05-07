@@ -1,0 +1,2492 @@
+{
+  "schema_version": 1,
+  "catalog_id": "contextual_help_v1",
+  "runtime_contract": {
+    "visual_only": true,
+    "no_gameplay_truth": true,
+    "controls_reference_help_id": true,
+    "compact_delay_seconds": 0.45,
+    "detail_delay_seconds": 3.5,
+    "compact_max_width_px": 360,
+    "detail_max_width_px": 460,
+    "max_viewport_height_ratio": 0.45
+  },
+  "help_levels": [
+    "none",
+    "compact",
+    "detail"
+  ],
+  "settings_modes": [
+    "off",
+    "compact",
+    "expanded"
+  ],
+  "required_fields": [
+    "help_id",
+    "screen_id",
+    "area_id",
+    "status",
+    "title",
+    "compact_lines",
+    "detail_lines",
+    "target_audience",
+    "manual_review"
+  ],
+  "allowed_statuses": [
+    "ready",
+    "draft",
+    "planned",
+    "todo",
+    "not_applicable"
+  ],
+  "allowed_audiences": [
+    "new_player",
+    "returning_player",
+    "advanced",
+    "developer"
+  ],
+  "required_screen_areas": [
+    {
+      "screen_id": "main_menu",
+      "area_id": "primary_routes"
+    },
+    {
+      "screen_id": "settings",
+      "area_id": "contextual_help_mode"
+    },
+    {
+      "screen_id": "settings",
+      "area_id": "fog_of_war_mode"
+    },
+    {
+      "screen_id": "shell",
+      "area_id": "global_help_button"
+    },
+    {
+      "screen_id": "homebase",
+      "area_id": "roster"
+    },
+    {
+      "screen_id": "homebase",
+      "area_id": "transfer_team"
+    },
+    {
+      "screen_id": "fob",
+      "area_id": "fireteams"
+    },
+    {
+      "screen_id": "fob",
+      "area_id": "flightdeck"
+    },
+    {
+      "screen_id": "loadout",
+      "area_id": "weight"
+    },
+    {
+      "screen_id": "character_sheet",
+      "area_id": "core_values"
+    },
+    {
+      "screen_id": "mission_hud",
+      "area_id": "command_matrix"
+    },
+    {
+      "screen_id": "mission_hud",
+      "area_id": "mission_control"
+    },
+    {
+      "screen_id": "map_editor",
+      "area_id": "height_tool"
+    },
+    {
+      "screen_id": "map_editor",
+      "area_id": "save_load"
+    },
+    {
+      "screen_id": "map_editor",
+      "area_id": "tactical_profile"
+    },
+    {
+      "screen_id": "multiplayer_lobby",
+      "area_id": "host_join"
+    },
+    {
+      "screen_id": "debrief",
+      "area_id": "character_updates"
+    }
+  ],
+  "entries": [
+    {
+      "help_id": "main_menu.primary_routes",
+      "screen_id": "main_menu",
+      "area_id": "primary_routes",
+      "status": "draft",
+      "title": "Start and Routes",
+      "compact_lines": [
+        "Choose the next game area without changing saved roster or mission state.",
+        "Settings and editor routes stay in the shell until you confirm a handoff."
+      ],
+      "detail_lines": [
+        "Route buttons expose screen metadata for tests; gameplay state changes only in owned systems.",
+        "New roster creation needs an explicit confirmation before existing roster data is replaced."
+      ],
+      "target_audience": "new_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "settings.contextual_help_mode",
+      "screen_id": "settings",
+      "area_id": "contextual_help_mode",
+      "status": "planned",
+      "title": "Context Help Mode",
+      "compact_lines": [
+        "Controls whether short help popups appear on hover or focus.",
+        "Off, compact and expanded modes change presentation only."
+      ],
+      "detail_lines": [
+        "This setting must not alter commands, loadouts, character values or mission simulation state."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "settings.fog_of_war_mode",
+      "screen_id": "settings",
+      "area_id": "fog_of_war_mode",
+      "status": "draft",
+      "title": "Fog of War",
+      "compact_lines": [
+        "Changes how much hidden map information the mission view reveals.",
+        "Uses the existing FoW contract instead of storing UI-side truth."
+      ],
+      "detail_lines": [
+        "Mode names and visibility behavior must match the fog-of-war contracts and runtime resolver."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "shell.global_help_button",
+      "screen_id": "shell",
+      "area_id": "global_help_button",
+      "status": "planned",
+      "title": "Help Mode",
+      "compact_lines": [
+        "Toggles help inspection for the current screen.",
+        "It is a UI overlay control and does not issue gameplay commands."
+      ],
+      "detail_lines": [
+        "In off mode it may open a short overview, but hover popups stay disabled until settings change."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "homebase.roster",
+      "screen_id": "homebase",
+      "area_id": "roster",
+      "status": "draft",
+      "title": "Roster",
+      "compact_lines": [
+        "Shows available crew and their current assignment state.",
+        "Selecting a character updates detail panels without duplicating roster truth."
+      ],
+      "detail_lines": [
+        "Roster data comes from the player roster store and meta profile builder."
+      ],
+      "target_audience": "new_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "homebase.transfer_team",
+      "screen_id": "homebase",
+      "area_id": "transfer_team",
+      "status": "draft",
+      "title": "Transfer Team",
+      "compact_lines": [
+        "Stages crew for movement toward the FOB or mission chain.",
+        "A staged card is not final mission truth until the transfer flow confirms it."
+      ],
+      "detail_lines": [
+        "The help must stay read-only because transfer state belongs to the existing meta flow."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "fob.fireteams",
+      "screen_id": "fob",
+      "area_id": "fireteams",
+      "status": "draft",
+      "title": "Fireteams",
+      "compact_lines": [
+        "Groups crew into squads for mission staging.",
+        "Selection changes the focused team view, not the SimulationRoot directly."
+      ],
+      "detail_lines": [
+        "Mission handoff preserves stable unit IDs and fireteam order for later setup."
+      ],
+      "target_audience": "new_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "fob.flightdeck",
+      "screen_id": "fob",
+      "area_id": "flightdeck",
+      "status": "draft",
+      "title": "Flightdeck",
+      "compact_lines": [
+        "Shows available transport craft and boarding status.",
+        "Boarding buttons call existing FOB callbacks only."
+      ],
+      "detail_lines": [
+        "Visual craft cards and pads are presentation; vehicle truth stays in transport state.",
+        "Damaged or lost air assets show repair/replacement ETA and stay unavailable until recovery completes."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "loadout.weight",
+      "screen_id": "loadout",
+      "area_id": "weight",
+      "status": "ready",
+      "title": "Loadout Weight",
+      "compact_lines": [
+        "Shows combined armor and weapon weight for this loadout.",
+        "No Weapon adds zero weapon weight."
+      ],
+      "detail_lines": [
+        "Weight is calculated by LoadoutModifierResolver from armor and WeaponData weights."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.core_values",
+      "screen_id": "character_sheet",
+      "area_id": "core_values",
+      "status": "ready",
+      "title": "Core Values",
+      "compact_lines": [
+        "Main 0.00 to 1.00 values used by character and mission systems.",
+        "Bars are display only and mirror profile skill values."
+      ],
+      "detail_lines": [
+        "Core rows come from MetaUnitProfile skill_values and character-bundle derivation."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission_hud.command_matrix",
+      "screen_id": "mission_hud",
+      "area_id": "command_matrix",
+      "status": "draft",
+      "title": "Command Matrix",
+      "compact_lines": [
+        "Issues tactical orders through existing command controllers.",
+        "The HUD never writes mission state as its own truth."
+      ],
+      "detail_lines": [
+        "Detailed help can name command modes after the command-mode contract exists."
+      ],
+      "target_audience": "advanced",
+      "manual_review": true
+    },
+    {
+      "help_id": "mission_hud.mission_control",
+      "screen_id": "mission_hud",
+      "area_id": "mission_control",
+      "status": "draft",
+      "title": "Mission Control",
+      "compact_lines": [
+        "Shows mission phase, route and high-level control state.",
+        "Controls must stay reachable while help is visible."
+      ],
+      "detail_lines": [
+        "Help positioning should avoid active command buttons when another side has room."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "map_editor.height_tool",
+      "screen_id": "map_editor",
+      "area_id": "height_tool",
+      "status": "draft",
+      "title": "Height Tool",
+      "compact_lines": [
+        "Edits terrain height while preserving surface and object fields.",
+        "Slopes and cliffs follow the terrain hill rules contract."
+      ],
+      "detail_lines": [
+        "Height authoring must roundtrip through map save/load without changing gameplay fields."
+      ],
+      "target_audience": "advanced",
+      "manual_review": true
+    },
+    {
+      "help_id": "map_editor.save_load",
+      "screen_id": "map_editor",
+      "area_id": "save_load",
+      "status": "draft",
+      "title": "Save and Load",
+      "compact_lines": [
+        "Stores the authored map and loads it back for editor or mission use.",
+        "Map transfer to multiplayer keeps manifest consent explicit."
+      ],
+      "detail_lines": [
+        "Help may reference file identity and manifest checks, but must not auto-accept downloads."
+      ],
+      "target_audience": "advanced",
+      "manual_review": true
+    },
+    {
+      "help_id": "map_editor.tactical_profile",
+      "screen_id": "map_editor",
+      "area_id": "tactical_profile",
+      "status": "ready",
+      "title": "Tactical Profiles",
+      "compact_lines": [
+        "Sets enemy tactic, heavy role, air-asset risk and comms for the scenario.",
+        "These fields save into mission data and stay out of UI gameplay truth."
+      ],
+      "detail_lines": [
+        "Anti-armor threat requires a valid AT weapon such as rocket launcher or rail gun.",
+        "Air-risk profiles are scenario authoring hints; runtime still resolves damage through SimulationRoot."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "multiplayer_lobby.host_join",
+      "screen_id": "multiplayer_lobby",
+      "area_id": "host_join",
+      "status": "draft",
+      "title": "Host or Join",
+      "compact_lines": [
+        "Starts or joins a lobby before gameplay state exists.",
+        "Ready and mission start remain server-authoritative."
+      ],
+      "detail_lines": [
+        "Lobby help may explain map consent and roster ownership without bypassing session checks."
+      ],
+      "target_audience": "new_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "debrief.character_updates",
+      "screen_id": "debrief",
+      "area_id": "character_updates",
+      "status": "draft",
+      "title": "Character Updates",
+      "compact_lines": [
+        "Shows mission results that were applied to roster progression.",
+        "Returning to meta screens keeps the same character IDs."
+      ],
+      "detail_lines": [
+        "Debrief help must not apply XP, morale or frustration by itself."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "character_sheet.identity",
+      "screen_id": "character_sheet",
+      "area_id": "identity",
+      "status": "ready",
+      "title": "Identity",
+      "compact_lines": [
+        "Name, portrait and callsign identify the same roster unit across screens.",
+        "Changing focus must not create a new character record."
+      ],
+      "detail_lines": [
+        "Identity values come from MetaUnitProfile and roster generation or saved roster data."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.role_loadout",
+      "screen_id": "character_sheet",
+      "area_id": "role_loadout",
+      "status": "ready",
+      "title": "Role and Loadout",
+      "compact_lines": [
+        "Shows role, fireteam and the currently staged equipment summary.",
+        "Loadout text is read from the active profile or FOB member loadout."
+      ],
+      "detail_lines": [
+        "The sheet displays loadout state; weapon and weight rules stay in WeaponData and the resolver."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.role",
+      "screen_id": "character_sheet",
+      "area_id": "role",
+      "status": "ready",
+      "title": "Role",
+      "compact_lines": [
+        "Primary job label for reading the character quickly.",
+        "Role can influence badges and suggested duties, not direct UI truth."
+      ],
+      "detail_lines": [
+        "Role labels are built from roster identity and character-bundle derivation."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.role_category",
+      "screen_id": "character_sheet",
+      "area_id": "role_category",
+      "status": "ready",
+      "title": "Role Category",
+      "compact_lines": [
+        "Broad roster grouping used for scanability and assignment hints.",
+        "It is not a hidden stat and does not replace skill values."
+      ],
+      "detail_lines": [
+        "Category comes from MetaUnitProfile roster_role_category when present."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.fireteam_assignment",
+      "screen_id": "character_sheet",
+      "area_id": "fireteam_assignment",
+      "status": "ready",
+      "title": "Fireteam",
+      "compact_lines": [
+        "Shows the current fireteam assignment or UNASSIGNED.",
+        "Moving the character between teams changes staging, not sheet-local state."
+      ],
+      "detail_lines": [
+        "Fireteam text is supplied by Homebase or FOB context and preserves stable unit IDs."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.rank_badges",
+      "screen_id": "character_sheet",
+      "area_id": "rank_badges",
+      "status": "ready",
+      "title": "Badges",
+      "compact_lines": [
+        "Small badges summarize derived strengths, role hints or loadout identity.",
+        "They are visual summaries of existing profile data."
+      ],
+      "detail_lines": [
+        "Badges are derived by NPCRankBadgeResolver from role, skills and loadout fields."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.traits",
+      "screen_id": "character_sheet",
+      "area_id": "traits",
+      "status": "ready",
+      "title": "Traits",
+      "compact_lines": [
+        "Traits are notable character tags from the roster profile.",
+        "They explain tendencies but are not free-form balance formulas."
+      ],
+      "detail_lines": [
+        "Trait names come from UnitTrait data or stored trait tags on the profile."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.status_recovery",
+      "screen_id": "character_sheet",
+      "area_id": "status_recovery",
+      "status": "ready",
+      "title": "Status and Recovery",
+      "compact_lines": [
+        "Shows availability, injury or recovery state for the character.",
+        "Recovery text is read from profile state and does not heal by itself."
+      ],
+      "detail_lines": [
+        "Follow-up systems may make recovery actionable; the sheet remains read-only."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.status",
+      "screen_id": "character_sheet",
+      "area_id": "status",
+      "status": "ready",
+      "title": "Status",
+      "compact_lines": [
+        "Current availability or screen-specific status text.",
+        "Use it to see whether the character is active, staged or recovering."
+      ],
+      "detail_lines": [
+        "Status text is passed in by the owning screen and mirrors existing meta state."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.recovery",
+      "screen_id": "character_sheet",
+      "area_id": "recovery",
+      "status": "ready",
+      "title": "Recovery",
+      "compact_lines": [
+        "Shows medbay or downtime state when the unit is not fully ready.",
+        "Remaining turns or days are display values from the profile."
+      ],
+      "detail_lines": [
+        "The character sheet does not advance timers; recovery logic belongs to meta progression."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.morale",
+      "screen_id": "character_sheet",
+      "area_id": "morale",
+      "status": "ready",
+      "title": "Morale",
+      "compact_lines": [
+        "Morale summarizes how well the character is holding up after missions.",
+        "Higher values are generally better for future team feel."
+      ],
+      "detail_lines": [
+        "The number is stored in progression data; this help does not define final balance effects."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "character_sheet.frustration",
+      "screen_id": "character_sheet",
+      "area_id": "frustration",
+      "status": "ready",
+      "title": "Frustration",
+      "compact_lines": [
+        "Frustration tracks pressure or bad mission experience.",
+        "Lower values are usually easier to manage."
+      ],
+      "detail_lines": [
+        "The value is progression data and should be explained by future morale rules when finalized."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "character_sheet.teamfit",
+      "screen_id": "character_sheet",
+      "area_id": "teamfit",
+      "status": "ready",
+      "title": "Teamfit",
+      "compact_lines": [
+        "Summarizes relationship fit with other roster members.",
+        "Use it as a staging hint, not as a hidden command override."
+      ],
+      "detail_lines": [
+        "Teamfit text is built from relationship links and the roster relationship model."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.best_fit",
+      "screen_id": "character_sheet",
+      "area_id": "best_fit",
+      "status": "ready",
+      "title": "Best Fit",
+      "compact_lines": [
+        "Shows the strongest positive known relationship link.",
+        "A good fit is a planning clue for future cohesion decisions."
+      ],
+      "detail_lines": [
+        "Best Fit is summarized from relationship link affinity data when available."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.tension",
+      "screen_id": "character_sheet",
+      "area_id": "tension",
+      "status": "ready",
+      "title": "Tension",
+      "compact_lines": [
+        "Shows the strongest negative known relationship link.",
+        "Use it to avoid rough team combinations when possible."
+      ],
+      "detail_lines": [
+        "Tension is read from relationship link affinity data and is not recalculated in UI."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.relationship_links",
+      "screen_id": "character_sheet",
+      "area_id": "relationship_links",
+      "status": "ready",
+      "title": "Relationship Links",
+      "compact_lines": [
+        "Lists a small set of known links to other roster members.",
+        "Longer relationship simulation remains outside this screen."
+      ],
+      "detail_lines": [
+        "Links come from stored relationship data and are shortened for compact UI."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.progression",
+      "screen_id": "character_sheet",
+      "area_id": "progression",
+      "status": "ready",
+      "title": "Progress",
+      "compact_lines": [
+        "Shows XP, mission history and recent team history.",
+        "Progress is applied by mission results, not by this panel."
+      ],
+      "detail_lines": [
+        "Progress rows read from MetaUnitProfile progression and history arrays."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.xp",
+      "screen_id": "character_sheet",
+      "area_id": "xp",
+      "status": "ready",
+      "title": "XP",
+      "compact_lines": [
+        "Experience gained from resolved mission outcomes.",
+        "Current help avoids promising a final leveling formula."
+      ],
+      "detail_lines": [
+        "XP is stored in progression data after mission/debrief flow applies results."
+      ],
+      "target_audience": "new_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "character_sheet.missions",
+      "screen_id": "character_sheet",
+      "area_id": "missions",
+      "status": "ready",
+      "title": "Missions",
+      "compact_lines": [
+        "Count of completed or recorded missions for this character.",
+        "It helps separate rookies from veterans at a glance."
+      ],
+      "detail_lines": [
+        "Mission count comes from progression data or mission history length."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.ftl_tactical_impact",
+      "screen_id": "character_sheet",
+      "area_id": "ftl_tactical_impact",
+      "status": "ready",
+      "title": "FTL Impact",
+      "compact_lines": [
+        "Shows how a fireteam leader affects plan quality, communication and breakouts.",
+        "It summarizes tactical progression without exposing private history."
+      ],
+      "detail_lines": [
+        "The value is derived from Leadership, Tactical Sense, Communication, Discipline, Initiative and Team Cohesion.",
+        "Mission outcomes can improve it slowly, while frustration or poor cohesion can slow progress."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.core.accuracy",
+      "screen_id": "character_sheet",
+      "area_id": "core.accuracy",
+      "status": "ready",
+      "title": "Accuracy",
+      "compact_lines": [
+        "How reliable the character is with aimed combat tasks.",
+        "Used as a character value, not recalculated by the sheet."
+      ],
+      "detail_lines": [
+        "Accuracy comes from skill_values and may feed combat effects through existing resolvers."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.core.speed",
+      "screen_id": "character_sheet",
+      "area_id": "core.speed",
+      "status": "ready",
+      "title": "Speed",
+      "compact_lines": [
+        "How quickly the character tends to move or act.",
+        "Loadout weight can later modify movement through the resolver."
+      ],
+      "detail_lines": [
+        "Speed is stored as a profile skill; movement modifiers come from existing loadout logic."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.core.toughness",
+      "screen_id": "character_sheet",
+      "area_id": "core.toughness",
+      "status": "ready",
+      "title": "Toughness",
+      "compact_lines": [
+        "How well the character handles pressure and harm.",
+        "Shown as profile data, not as a new health formula."
+      ],
+      "detail_lines": [
+        "Toughness can be used by combat and recovery systems through their own contracts."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.core.awareness",
+      "screen_id": "character_sheet",
+      "area_id": "core.awareness",
+      "status": "ready",
+      "title": "Awareness",
+      "compact_lines": [
+        "How well the character notices battlefield context.",
+        "Useful for reading scouts, guards and overwatch roles."
+      ],
+      "detail_lines": [
+        "Awareness is part of profile skill values and may feed perception-related resolvers."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.core.recognition",
+      "screen_id": "character_sheet",
+      "area_id": "core.recognition",
+      "status": "ready",
+      "title": "Recognition",
+      "compact_lines": [
+        "How well the character identifies contacts and friend-or-foe cues.",
+        "It helps explain cautious or reliable combat reads."
+      ],
+      "detail_lines": [
+        "Recognition comes from skill values and should follow perception contracts when expanded."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.core.stealth",
+      "screen_id": "character_sheet",
+      "area_id": "core.stealth",
+      "status": "ready",
+      "title": "Stealth",
+      "compact_lines": [
+        "How quietly or subtly the character can operate.",
+        "Useful for scouts and concealed approaches."
+      ],
+      "detail_lines": [
+        "Stealth is profile data and may affect concealment through existing mission rules."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.core.discipline",
+      "screen_id": "character_sheet",
+      "area_id": "core.discipline",
+      "status": "ready",
+      "title": "Discipline",
+      "compact_lines": [
+        "How reliably the character follows orders under stress.",
+        "Higher discipline supports steadier behavior in planned actions."
+      ],
+      "detail_lines": [
+        "Discipline is a profile value; command behavior effects belong to tactical resolvers."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.core.leadership",
+      "screen_id": "character_sheet",
+      "area_id": "core.leadership",
+      "status": "ready",
+      "title": "Leadership",
+      "compact_lines": [
+        "How well the character supports team command and coordination.",
+        "It is useful when choosing fireteam leads."
+      ],
+      "detail_lines": [
+        "Leadership comes from profile skills and feeds existing leader/teamfit derivation."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.communication",
+      "screen_id": "character_sheet",
+      "area_id": "communication",
+      "status": "ready",
+      "title": "Communication",
+      "compact_lines": [
+        "Shows speech quality and quantity style values.",
+        "These values explain feedback tone, not direct mission truth."
+      ],
+      "detail_lines": [
+        "Communication rows are read from MetaUnitProfile communication_values."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.platform_skills",
+      "screen_id": "character_sheet",
+      "area_id": "platform_skills",
+      "status": "ready",
+      "title": "Platform Skills",
+      "compact_lines": [
+        "Vehicle or platform skills appear only when relevant.",
+        "They help choose pilots, drivers or craft crew."
+      ],
+      "detail_lines": [
+        "Platform rows come from profile platform_values and remain read-only here."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.derived_badges",
+      "screen_id": "character_sheet",
+      "area_id": "derived_badges",
+      "status": "ready",
+      "title": "Derived Values",
+      "compact_lines": [
+        "Summaries derived from methods, functions and specialties.",
+        "They help scan fit without replacing the detailed rows."
+      ],
+      "detail_lines": [
+        "Derived text is built by the profile formatter and rank badge resolver."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.behavior_profile",
+      "screen_id": "character_sheet",
+      "area_id": "behavior_profile",
+      "status": "ready",
+      "title": "Behavior Profile",
+      "compact_lines": [
+        "Behavior axes describe tendencies such as initiative and order fidelity.",
+        "They are hints for future tactical behavior, not UI commands."
+      ],
+      "detail_lines": [
+        "Behavior rows come from profile behavior_axes and character-bundle derivation."
+      ],
+      "target_audience": "advanced",
+      "manual_review": true
+    },
+    {
+      "help_id": "character_sheet.last_mission",
+      "screen_id": "character_sheet",
+      "area_id": "last_mission",
+      "status": "ready",
+      "title": "Last Mission",
+      "compact_lines": [
+        "Shows the latest recorded mission result for this character.",
+        "It is a history readout, not an active mission control."
+      ],
+      "detail_lines": [
+        "Last mission text is read from the profile mission_history array."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.fireteam_history",
+      "screen_id": "character_sheet",
+      "area_id": "fireteam_history",
+      "status": "ready",
+      "title": "Fireteam History",
+      "compact_lines": [
+        "Shows the latest known fireteam history entry.",
+        "It helps explain past assignment context."
+      ],
+      "detail_lines": [
+        "History comes from MetaUnitProfile fireteam_history and is shortened for the sheet."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.method_tags",
+      "screen_id": "character_sheet",
+      "area_id": "method_tags",
+      "status": "ready",
+      "title": "Method Tags",
+      "compact_lines": [
+        "Summarizes how this character tends to approach tasks.",
+        "Tags are scan hints and do not issue orders."
+      ],
+      "detail_lines": [
+        "Method tags are formatted from method_scores or stored method summary text."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.function_scores",
+      "screen_id": "character_sheet",
+      "area_id": "function_scores",
+      "status": "ready",
+      "title": "Function Scores",
+      "compact_lines": [
+        "Shows derived fit for functions such as scout or coordinator.",
+        "Use it as assignment guidance, not a hard class lock."
+      ],
+      "detail_lines": [
+        "Function scores are built from profile function_scores and character-bundle derivation."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.primary_specialty",
+      "screen_id": "character_sheet",
+      "area_id": "primary_specialty",
+      "status": "ready",
+      "title": "Primary Specialty",
+      "compact_lines": [
+        "Best readable specialty for this character.",
+        "It helps choose roles without hiding the underlying values."
+      ],
+      "detail_lines": [
+        "Primary specialty is read from the profile or character bundle."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.secondary_specialty",
+      "screen_id": "character_sheet",
+      "area_id": "secondary_specialty",
+      "status": "ready",
+      "title": "Secondary Specialty",
+      "compact_lines": [
+        "Secondary fit or backup specialty when one is known.",
+        "Empty values mean no strong secondary has been recorded."
+      ],
+      "detail_lines": [
+        "Secondary specialty is display data from MetaUnitProfile."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.speech_quality",
+      "screen_id": "character_sheet",
+      "area_id": "speech_quality",
+      "status": "ready",
+      "title": "Speech Quality",
+      "compact_lines": [
+        "How clear or useful the character's communication tends to be.",
+        "Useful for reading command feedback style."
+      ],
+      "detail_lines": [
+        "Speech quality comes from profile communication_values."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.speech_quantity",
+      "screen_id": "character_sheet",
+      "area_id": "speech_quantity",
+      "status": "ready",
+      "title": "Speech Quantity",
+      "compact_lines": [
+        "How often the character tends to communicate.",
+        "More speech is not always better; it describes style."
+      ],
+      "detail_lines": [
+        "Speech quantity comes from profile communication_values."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.initiative",
+      "screen_id": "character_sheet",
+      "area_id": "initiative",
+      "status": "ready",
+      "title": "Initiative",
+      "compact_lines": [
+        "Tendency to act without waiting for perfect certainty.",
+        "This describes behavior style, not a direct command."
+      ],
+      "detail_lines": [
+        "Initiative is read from behavior_axes and may inform later behavior resolvers."
+      ],
+      "target_audience": "advanced",
+      "manual_review": true
+    },
+    {
+      "help_id": "character_sheet.order_fidelity",
+      "screen_id": "character_sheet",
+      "area_id": "order_fidelity",
+      "status": "ready",
+      "title": "Order Fidelity",
+      "compact_lines": [
+        "How closely the character tends to follow assigned orders.",
+        "Useful when choosing steady fireteam members."
+      ],
+      "detail_lines": [
+        "Order fidelity is read from behavior_axes and does not override commands in UI."
+      ],
+      "target_audience": "advanced",
+      "manual_review": true
+    },
+    {
+      "help_id": "character_sheet.signature_control",
+      "screen_id": "character_sheet",
+      "area_id": "signature_control",
+      "status": "ready",
+      "title": "Signature Control",
+      "compact_lines": [
+        "Tendency to keep noise and exposure under control.",
+        "Helpful for stealth or careful movement reads."
+      ],
+      "detail_lines": [
+        "Signature control is a behavior axis and not a separate visibility formula here."
+      ],
+      "target_audience": "advanced",
+      "manual_review": true
+    },
+    {
+      "help_id": "character_sheet.contact_stability",
+      "screen_id": "character_sheet",
+      "area_id": "contact_stability",
+      "status": "ready",
+      "title": "Contact Stability",
+      "compact_lines": [
+        "How steady the character tends to be after contact.",
+        "Useful for reading pressure behavior."
+      ],
+      "detail_lines": [
+        "Contact stability is read from behavior_axes and may support later tactical logic."
+      ],
+      "target_audience": "advanced",
+      "manual_review": true
+    },
+    {
+      "help_id": "character_sheet.autonomy",
+      "screen_id": "character_sheet",
+      "area_id": "autonomy",
+      "status": "ready",
+      "title": "Autonomy",
+      "compact_lines": [
+        "How independently the character tends to operate.",
+        "High autonomy is a behavior tendency, not permission to ignore authority."
+      ],
+      "detail_lines": [
+        "Autonomy comes from behavior_axes and must stay below command authority contracts."
+      ],
+      "target_audience": "advanced",
+      "manual_review": true
+    },
+    {
+      "help_id": "character_sheet.platform.ground_vehicle_handling",
+      "screen_id": "character_sheet",
+      "area_id": "platform.ground_vehicle_handling",
+      "status": "ready",
+      "title": "Ground Vehicle",
+      "compact_lines": [
+        "Fit for operating ground vehicles when that role exists.",
+        "Hidden when the value is not relevant."
+      ],
+      "detail_lines": [
+        "Ground vehicle handling is read from profile platform_values."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.platform.dropship_piloting",
+      "screen_id": "character_sheet",
+      "area_id": "platform.dropship_piloting",
+      "status": "ready",
+      "title": "Dropship Piloting",
+      "compact_lines": [
+        "Fit for dropship pilot assignments.",
+        "Useful when choosing flightdeck crew."
+      ],
+      "detail_lines": [
+        "Dropship piloting is read from profile platform_values."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.platform.freighter_piloting",
+      "screen_id": "character_sheet",
+      "area_id": "platform.freighter_piloting",
+      "status": "ready",
+      "title": "Freighter Piloting",
+      "compact_lines": [
+        "Fit for freighter or cargo craft assignments.",
+        "Shown only when the profile has a relevant value."
+      ],
+      "detail_lines": [
+        "Freighter piloting is read from profile platform_values."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.platform.fighter_piloting",
+      "screen_id": "character_sheet",
+      "area_id": "platform.fighter_piloting",
+      "status": "ready",
+      "title": "Fighter Piloting",
+      "compact_lines": [
+        "Fit for fighter craft assignments when those assets are used.",
+        "It is not a current ground combat stat."
+      ],
+      "detail_lines": [
+        "Fighter piloting is read from profile platform_values."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.loadout_summary",
+      "screen_id": "character_sheet",
+      "area_id": "loadout_summary",
+      "status": "ready",
+      "title": "Loadout Summary",
+      "compact_lines": [
+        "Shows armor and both weapon slots for the focused character.",
+        "FOB member loadout overrides profile text when editing a team."
+      ],
+      "detail_lines": [
+        "Weapon names are resolved through WeaponData; weight comes from LoadoutModifierResolver."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "loadout.armor",
+      "screen_id": "loadout",
+      "area_id": "armor",
+      "status": "ready",
+      "title": "Armor",
+      "compact_lines": [
+        "Armor changes the carried loadout weight and protection intent.",
+        "Light, medium and heavy are the current playable armor choices."
+      ],
+      "detail_lines": [
+        "Armor weight is resolved by LoadoutModifierResolver and not stored in the selector UI."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "loadout.weapon_slot",
+      "screen_id": "loadout",
+      "area_id": "weapon_slot",
+      "status": "ready",
+      "title": "Weapon Slot",
+      "compact_lines": [
+        "Each member has two selectable gameplay weapon slots.",
+        "Visual-only attachment IDs are not selectable here."
+      ],
+      "detail_lines": [
+        "Selections are normalized through WeaponData before mission setup receives them."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "loadout.weapon.smg",
+      "screen_id": "loadout",
+      "area_id": "weapon.smg",
+      "status": "ready",
+      "title": "SMG",
+      "compact_lines": [
+        "Short-range attack weapon with light carried weight.",
+        "Good default when mobility matters."
+      ],
+      "detail_lines": [
+        "SMG range, damage and weight come from WeaponData."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "loadout.weapon.rifle",
+      "screen_id": "loadout",
+      "area_id": "weapon.rifle",
+      "status": "ready",
+      "title": "Rifle",
+      "compact_lines": [
+        "Balanced attack weapon for general combat range.",
+        "Use it when no specialist role is needed."
+      ],
+      "detail_lines": [
+        "Rifle stats are read from WeaponData and may map to an existing visual loadout."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "loadout.weapon.sniper",
+      "screen_id": "loadout",
+      "area_id": "weapon.sniper",
+      "status": "ready",
+      "title": "Sniper",
+      "compact_lines": [
+        "Longer-range attack weapon with higher carried weight.",
+        "Better for overwatch-style roles than close pushes."
+      ],
+      "detail_lines": [
+        "Sniper range and weight are resolved from WeaponData."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "loadout.weapon.rocket_launcher",
+      "screen_id": "loadout",
+      "area_id": "weapon.rocket_launcher",
+      "status": "ready",
+      "title": "Rocket",
+      "compact_lines": [
+        "Heavy attack weapon with high carried weight.",
+        "Use it when anti-armor or heavy impact is worth slower loadout."
+      ],
+      "detail_lines": [
+        "Rocket weight and attack classification come from WeaponData and the resolver."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "loadout.weapon.medictool",
+      "screen_id": "loadout",
+      "area_id": "weapon.medictool",
+      "status": "ready",
+      "title": "Medictool",
+      "compact_lines": [
+        "Support item for medic roles, not an attack weapon.",
+        "It is lighter than regular weapons."
+      ],
+      "detail_lines": [
+        "Medictool is non-attack in WeaponData; healing rules stay in medic support logic."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "loadout.weapon.none",
+      "screen_id": "loadout",
+      "area_id": "weapon.none",
+      "status": "ready",
+      "title": "No Weapon",
+      "compact_lines": [
+        "Leaves the slot empty and adds zero weapon weight.",
+        "A character may carry no attack weapon if both slots are empty."
+      ],
+      "detail_lines": [
+        "None is normalized by WeaponData and produces no hidden fallback weapon."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "loadout.weapon.lmg",
+      "screen_id": "loadout",
+      "area_id": "weapon.lmg",
+      "status": "planned",
+      "title": "LMG",
+      "compact_lines": [
+        "LMG is reserved for a future playable weapon entry.",
+        "It is not selectable until WeaponData defines gameplay stats."
+      ],
+      "detail_lines": [
+        "Do not expose a visual-only heavy blaster as LMG without a WeaponData entry."
+      ],
+      "target_audience": "advanced",
+      "manual_review": true
+    },
+    {
+      "help_id": "loadout.weapon_visual_only",
+      "screen_id": "loadout",
+      "area_id": "weapon_visual_only",
+      "status": "ready",
+      "title": "Visual Only",
+      "compact_lines": [
+        "Some weapon-looking assets are decorative attachments only.",
+        "They do not become selectable gameplay weapons by appearance."
+      ],
+      "detail_lines": [
+        "Selectors must use WeaponData IDs, not visual_loadout IDs from the render mapping."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "loadout.weapon_preview",
+      "screen_id": "loadout",
+      "area_id": "weapon_preview",
+      "status": "ready",
+      "title": "Weapon Preview",
+      "compact_lines": [
+        "Small image showing the selected weapon family.",
+        "Preview art is decorative and does not decide stats."
+      ],
+      "detail_lines": [
+        "The preview path comes from WeaponData or FOB preview mapping and stays visual-only."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "loadout.weapon_none",
+      "screen_id": "loadout",
+      "area_id": "weapon_none",
+      "status": "ready",
+      "title": "Empty Slot",
+      "compact_lines": [
+        "This slot has no weapon selected.",
+        "The preview is intentionally hidden."
+      ],
+      "detail_lines": [
+        "An empty slot must not create a fallback rifle or hidden 3D weapon attachment."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "loadout.disabled_reason",
+      "screen_id": "loadout",
+      "area_id": "disabled_reason",
+      "status": "ready",
+      "title": "Unavailable Choice",
+      "compact_lines": [
+        "A disabled choice is blocked because it is not a playable item here.",
+        "Visual-only assets need a real WeaponData entry before selection."
+      ],
+      "detail_lines": [
+        "Disabled reasons should stay short and point to data boundaries, not hidden balance."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "loadout.clear_selection",
+      "screen_id": "loadout",
+      "area_id": "clear_selection",
+      "status": "ready",
+      "title": "Clear Loadout Focus",
+      "compact_lines": [
+        "Clears the currently focused fireteam from loadout editing.",
+        "It does not delete the roster member or mission state."
+      ],
+      "detail_lines": [
+        "The button only resets FOB loadout focus and leaves authoritative data paths intact."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "loadout.member_row",
+      "screen_id": "loadout",
+      "area_id": "member_row",
+      "status": "ready",
+      "title": "Member Loadout Row",
+      "compact_lines": [
+        "Edits armor and two weapon slots for one fireteam member.",
+        "Each row keeps the member's stable unit ID."
+      ],
+      "detail_lines": [
+        "Member rows update FOB member_loadouts, later handed to mission setup by unit ID."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "loadout.empty_team_default",
+      "screen_id": "loadout",
+      "area_id": "empty_team_default",
+      "status": "ready",
+      "title": "No Team Default",
+      "compact_lines": [
+        "Armor and weapon choices are stored per member.",
+        "There is no hidden team-wide weapon default in this UI."
+      ],
+      "detail_lines": [
+        "This keeps loadout handoff explicit for each unit before mission setup."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "settings.display",
+      "screen_id": "settings",
+      "area_id": "display",
+      "status": "ready",
+      "title": "Display Settings",
+      "compact_lines": [
+        "Controls resolution, window mode and sync behavior.",
+        "Display settings change presentation only."
+      ],
+      "detail_lines": [
+        "They must not alter simulation timing, mission commands or saved roster state."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "settings.audio",
+      "screen_id": "settings",
+      "area_id": "audio",
+      "status": "ready",
+      "title": "Audio Settings",
+      "compact_lines": [
+        "Adjusts master, music and SFX volume.",
+        "The sliders feed the audio bus, not gameplay logic."
+      ],
+      "detail_lines": [
+        "Combat and UI events emit audio requests; these values only scale playback volume."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "settings.input",
+      "screen_id": "settings",
+      "area_id": "input",
+      "status": "ready",
+      "title": "Input Reference",
+      "compact_lines": [
+        "Shows current action prompts and common controls.",
+        "This panel is a reference, not a keybinding editor yet."
+      ],
+      "detail_lines": [
+        "Changing command behavior still belongs to the command and input contracts."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "settings.gameplay",
+      "screen_id": "settings",
+      "area_id": "gameplay",
+      "status": "ready",
+      "title": "Gameplay Settings",
+      "compact_lines": [
+        "Collects UI-facing gameplay options such as FoW and bubbles.",
+        "Settings describe modes; runtime systems still own truth."
+      ],
+      "detail_lines": [
+        "Use this section to change presentation and feedback preferences before entering play."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "settings.fog_of_war.off",
+      "screen_id": "settings",
+      "area_id": "fog_of_war_off",
+      "status": "ready",
+      "title": "FoW Off",
+      "compact_lines": [
+        "Reveals the mission map without hidden or unexplored masking.",
+        "Useful for debugging or open-information tests."
+      ],
+      "detail_lines": [
+        "This mode should not create contacts or enemy knowledge by itself; it only changes visibility."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "settings.fog_of_war.known_terrain",
+      "screen_id": "settings",
+      "area_id": "fog_of_war_known_terrain",
+      "status": "ready",
+      "title": "Known Terrain FoW",
+      "compact_lines": [
+        "Keeps the terrain readable while unit vision controls contact visibility.",
+        "Good default when learning the map."
+      ],
+      "detail_lines": [
+        "Runtime vision still decides contacts; terrain remains visible so navigation context is not lost."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "settings.fog_of_war.unexplored_blackout",
+      "screen_id": "settings",
+      "area_id": "fog_of_war_unexplored_blackout",
+      "status": "ready",
+      "title": "Blackout FoW",
+      "compact_lines": [
+        "Hides unexplored terrain until your units reveal it.",
+        "Use it for stricter reconnaissance play."
+      ],
+      "detail_lines": [
+        "Known tiles and contacts still come from the FoW runtime, not from UI labels or help text."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "multiplayer.host",
+      "screen_id": "multiplayer",
+      "area_id": "host",
+      "status": "ready",
+      "title": "Host Lobby",
+      "compact_lines": [
+        "Starts a local ENet lobby on the selected port.",
+        "The host owns mission start and authority checks."
+      ],
+      "detail_lines": [
+        "Hosting creates session state only; gameplay truth begins later in SimulationRoot."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "multiplayer.join",
+      "screen_id": "multiplayer",
+      "area_id": "join",
+      "status": "ready",
+      "title": "Join Lobby",
+      "compact_lines": [
+        "Connects to a host address and port.",
+        "Joined clients cannot bypass host authority."
+      ],
+      "detail_lines": [
+        "The lobby records peer, roster and ready state before any mission commands are accepted."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "multiplayer.ready",
+      "screen_id": "multiplayer",
+      "area_id": "ready",
+      "status": "ready",
+      "title": "Ready State",
+      "compact_lines": [
+        "Marks your peer ready or unready for mission start.",
+        "The host still decides when to start."
+      ],
+      "detail_lines": [
+        "Ready state is lobby session data and must not mutate units, maps or combat state."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "multiplayer.start",
+      "screen_id": "multiplayer",
+      "area_id": "start",
+      "status": "ready",
+      "title": "Start Mission",
+      "compact_lines": [
+        "Host-only request to begin the mission with current lobby data.",
+        "Blocked when required consent or readiness is missing."
+      ],
+      "detail_lines": [
+        "The session hands roster, map and peer assignments forward; clients do not start themselves."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "multiplayer.disconnect",
+      "screen_id": "multiplayer",
+      "area_id": "disconnect",
+      "status": "ready",
+      "title": "Leave Lobby",
+      "compact_lines": [
+        "Disconnects from the current multiplayer session.",
+        "Back returns to the menu after the session is closed."
+      ],
+      "detail_lines": [
+        "Leaving the lobby clears session state and does not fabricate mission results."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "multiplayer.map_download",
+      "screen_id": "multiplayer",
+      "area_id": "map_download",
+      "status": "ready",
+      "title": "Map Download Consent",
+      "compact_lines": [
+        "Appears when the host offers a map your client does not have.",
+        "Accepting or rejecting is explicit."
+      ],
+      "detail_lines": [
+        "Consent checks the map manifest and must not auto-accept unknown files."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "multiplayer.roster_ownership",
+      "screen_id": "multiplayer",
+      "area_id": "roster_ownership",
+      "status": "ready",
+      "title": "Roster Ownership",
+      "compact_lines": [
+        "Shows whether the host roster or local roster is used.",
+        "Authority stays with the host/server contract."
+      ],
+      "detail_lines": [
+        "Roster mode decides lobby assignment sources, not client-side gameplay truth."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "editor.tile_palette",
+      "screen_id": "editor",
+      "area_id": "tile_palette",
+      "status": "ready",
+      "title": "Tile Palette",
+      "compact_lines": [
+        "Chooses the tile, wall, cliff or object type for painting.",
+        "Painting uses the editor data model, not runtime state."
+      ],
+      "detail_lines": [
+        "Palette choices preserve hill fields where the terrain catalog marks them visual or object-only."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "editor.brush_size",
+      "screen_id": "editor",
+      "area_id": "brush_size",
+      "status": "ready",
+      "title": "Brush Size",
+      "compact_lines": [
+        "Sets whether the brush paints one tile or a wider square.",
+        "Large brushes still apply the same tile rules per field."
+      ],
+      "detail_lines": [
+        "Use small brushes for edges and markers; wider brushes are better for surfaces."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "editor.height_tool",
+      "screen_id": "editor",
+      "area_id": "height_tool",
+      "status": "ready",
+      "title": "Height Tool",
+      "compact_lines": [
+        "Raises, lowers or sets terrain height on selected tiles.",
+        "Height is terrain truth and roundtrips through map save/load."
+      ],
+      "detail_lines": [
+        "This tool changes height_level while preserving surface and object fields where possible."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "editor.edge.slope",
+      "screen_id": "editor",
+      "area_id": "edge_slope",
+      "status": "ready",
+      "title": "Slope Edge",
+      "compact_lines": [
+        "Marks a height transition as walkable slope.",
+        "Use slopes where units should climb between levels."
+      ],
+      "detail_lines": [
+        "Gameplay pathfinding treats slope as the allowed height transition."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "editor.edge.cliff",
+      "screen_id": "editor",
+      "area_id": "edge_cliff",
+      "status": "ready",
+      "title": "Cliff Edge",
+      "compact_lines": [
+        "Marks a height transition as a hard cliff.",
+        "Cliffs block movement across the height step."
+      ],
+      "detail_lines": [
+        "Use cliffs for cover and readable barriers; do not rely on them as hidden ramps."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "editor.surface",
+      "screen_id": "editor",
+      "area_id": "surface",
+      "status": "ready",
+      "title": "Surface Type",
+      "compact_lines": [
+        "Sets ground, road, sand or rock surface behavior.",
+        "Surface stays valid on flat ground and hills."
+      ],
+      "detail_lines": [
+        "Surface cost and readability remain separate from object height and blocker fields."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "editor.object",
+      "screen_id": "editor",
+      "area_id": "object",
+      "status": "ready",
+      "title": "Objects and Markers",
+      "compact_lines": [
+        "Places object-layer tiles or mission markers.",
+        "Objects must keep terrain height and surface data intact."
+      ],
+      "detail_lines": [
+        "Markers define mission authoring anchors; object tiles influence visuals, cover or LOS by data."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "editor.save",
+      "screen_id": "editor",
+      "area_id": "save",
+      "status": "ready",
+      "title": "Save Map",
+      "compact_lines": [
+        "Writes the current terrain and mission authoring data.",
+        "Use it after validating markers and scenario fields."
+      ],
+      "detail_lines": [
+        "Saved maps can later create multiplayer manifests, but consent stays in the lobby."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "editor.load",
+      "screen_id": "editor",
+      "area_id": "load",
+      "status": "ready",
+      "title": "Load Map",
+      "compact_lines": [
+        "Opens an existing map file into the editor.",
+        "Unsaved changes require confirmation before replacement."
+      ],
+      "detail_lines": [
+        "Load checks preserve authored terrain fields instead of rebuilding gameplay state."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "editor.save_as",
+      "screen_id": "editor",
+      "area_id": "save_as",
+      "status": "ready",
+      "title": "Save As",
+      "compact_lines": [
+        "Writes the current map or scenario under a chosen path.",
+        "Use it before branching a test map."
+      ],
+      "detail_lines": [
+        "A new file path changes editor file identity, not live mission state."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "editor.playtest",
+      "screen_id": "editor",
+      "area_id": "playtest",
+      "status": "ready",
+      "title": "Live Test",
+      "compact_lines": [
+        "Prepares the current scenario for a live mission smoke test.",
+        "It uses the existing mission test scene."
+      ],
+      "detail_lines": [
+        "Playtest export should validate map, markers and enemy setup before handoff."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "editor.back",
+      "screen_id": "editor",
+      "area_id": "back",
+      "status": "todo",
+      "title": "Back From Editor",
+      "compact_lines": [
+        "Reserved for the editor back/return control once that route exists.",
+        "Current editor scene has no visible Back button."
+      ],
+      "detail_lines": [
+        "TASK_266 records the missing help target so the coverage gate can report it."
+      ],
+      "target_audience": "developer",
+      "manual_review": true
+    },
+    {
+      "help_id": "mission.command_matrix",
+      "screen_id": "mission",
+      "area_id": "command_matrix",
+      "status": "ready",
+      "title": "Command Matrix",
+      "compact_lines": [
+        "Issues the focused fireteam command through existing controllers.",
+        "The HUD does not store gameplay truth."
+      ],
+      "detail_lines": [
+        "Orders become CommanderCommand and plan data before SimulationRoot applies effects."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.selected_fireteam",
+      "screen_id": "mission",
+      "area_id": "selected_fireteam",
+      "status": "ready",
+      "title": "Selected Fireteam",
+      "compact_lines": [
+        "Shows the fireteam currently receiving orders.",
+        "All selects every available friendly fireteam."
+      ],
+      "detail_lines": [
+        "Selection changes command focus only; individual NPCs remain FTL-driven."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.mission_control",
+      "screen_id": "mission",
+      "area_id": "mission_control",
+      "status": "ready",
+      "title": "Mission Control",
+      "compact_lines": [
+        "Controls landing zone, dropship and mission-level phase actions.",
+        "It mirrors mission state without owning it."
+      ],
+      "detail_lines": [
+        "Dropship and LZ choices use existing controller paths and remain separate from help."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.move",
+      "screen_id": "mission",
+      "area_id": "command_move",
+      "status": "ready",
+      "title": "Move Order",
+      "compact_lines": [
+        "Sends the selected fireteam toward the current target or waypoint.",
+        "Movement style still comes from FTL behavior."
+      ],
+      "detail_lines": [
+        "Move is useful for repositioning without asking the team to hold ground or take an objective."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.defend",
+      "screen_id": "mission",
+      "area_id": "command_defend",
+      "status": "ready",
+      "title": "Defend or Hold",
+      "compact_lines": [
+        "Orders the fireteam to hold and secure the chosen area.",
+        "Security and overwatch are resolved by tactical systems."
+      ],
+      "detail_lines": [
+        "Use it when you want a team to protect terrain rather than push forward."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.hold",
+      "screen_id": "mission",
+      "area_id": "command_hold",
+      "status": "ready",
+      "title": "Hold",
+      "compact_lines": [
+        "Short UI label for the defend behavior.",
+        "The team stays anchored instead of advancing."
+      ],
+      "detail_lines": [
+        "Hold shares the same gameplay path as the defend command in the current HUD."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.flank",
+      "screen_id": "mission",
+      "area_id": "command_flank",
+      "status": "ready",
+      "title": "Flank Order",
+      "compact_lines": [
+        "Asks the fireteam to approach from a better angle.",
+        "Leader skill and risk still affect execution."
+      ],
+      "detail_lines": [
+        "Flank is a command intent; pathing, cover and timing stay with tactical runtime systems."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.take",
+      "screen_id": "mission",
+      "area_id": "command_take",
+      "status": "ready",
+      "title": "Take Objective",
+      "compact_lines": [
+        "Orders the selected team to take or occupy the objective area.",
+        "Objective truth stays in mission systems."
+      ],
+      "detail_lines": [
+        "Use Take when a team should move with purpose toward capture rather than simple movement."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.attack_area",
+      "screen_id": "mission",
+      "area_id": "command_attack_area",
+      "status": "ready",
+      "title": "Attack Area",
+      "compact_lines": [
+        "Uses the dragged or targeted area as an attack focus.",
+        "The area order resolver owns execution."
+      ],
+      "detail_lines": [
+        "Attack-area help explains intent only; it does not create contacts or damage."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.defend_area",
+      "screen_id": "mission",
+      "area_id": "command_defend_area",
+      "status": "ready",
+      "title": "Defend Area",
+      "compact_lines": [
+        "Turns the selected area into a defensive assignment.",
+        "Teams spread by tactical and spacing rules."
+      ],
+      "detail_lines": [
+        "Area defense uses existing order payloads and keeps map visualization read-only."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.area_order",
+      "screen_id": "mission",
+      "area_id": "command_area_order",
+      "status": "ready",
+      "title": "Area Orders",
+      "compact_lines": [
+        "Drag on the map to create area orders.",
+        "Popup choices decide defend, engage, take or flank intent."
+      ],
+      "detail_lines": [
+        "Area order visuals help plan commands; SimulationRoot still applies runtime effects."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.go_plan",
+      "screen_id": "mission",
+      "area_id": "command_go_plan",
+      "status": "ready",
+      "title": "GO and Plan",
+      "compact_lines": [
+        "Executes the selected plan step when mission state allows it.",
+        "Preview mode can block live execution."
+      ],
+      "detail_lines": [
+        "GO should advance existing plan data, not invent a command outside the controller."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.stance",
+      "screen_id": "mission",
+      "area_id": "command_stance",
+      "status": "ready",
+      "title": "Fireteam Stance",
+      "compact_lines": [
+        "Sets cautious, normal or aggressive intent for selected fireteams.",
+        "It influences FTL behavior, not direct NPC control."
+      ],
+      "detail_lines": [
+        "Stance is synchronized as planning data and later interpreted by behavior resolvers."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.advance_style",
+      "screen_id": "mission",
+      "area_id": "command_advance_style",
+      "status": "ready",
+      "title": "Advance Style",
+      "compact_lines": [
+        "Shows whether the team rushes, bounds or moves carefully.",
+        "Style comes from team behavior and mission context."
+      ],
+      "detail_lines": [
+        "The HUD reports the style; FireteamMovementController owns the actual execution."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.overwatch",
+      "screen_id": "mission",
+      "area_id": "command_overwatch",
+      "status": "ready",
+      "title": "Overwatch",
+      "compact_lines": [
+        "Shows whether members can cover movement or hold a lane.",
+        "Overwatch fires only through tactical combat systems."
+      ],
+      "detail_lines": [
+        "The help text cannot trigger shots; it only explains the readiness marker."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.security",
+      "screen_id": "mission",
+      "area_id": "command_security",
+      "status": "ready",
+      "title": "Security Arc",
+      "compact_lines": [
+        "Summarizes the team's current security direction or 360 state.",
+        "Security affects flank exposure and overwatch."
+      ],
+      "detail_lines": [
+        "FireteamSecurityController resolves the assignments from current command context."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.medic_adjacent",
+      "screen_id": "mission",
+      "area_id": "command_medic_adjacent",
+      "status": "ready",
+      "title": "Medic Adjacent Rule",
+      "compact_lines": [
+        "Medics must reach an adjacent terrain tile for direct support.",
+        "The HUD only reports this rule."
+      ],
+      "detail_lines": [
+        "MedicSupportResolver owns target choice, movement approach and cooldowns."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.set_lz",
+      "screen_id": "mission",
+      "area_id": "command_set_lz",
+      "status": "ready",
+      "title": "Set LZ",
+      "compact_lines": [
+        "Arms landing-zone placement for the mission map.",
+        "Clicking the map chooses the LZ through existing controls."
+      ],
+      "detail_lines": [
+        "The LZ changes dropship planning only after the controller accepts the placement."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.call_dropship",
+      "screen_id": "mission",
+      "area_id": "command_call_dropship",
+      "status": "ready",
+      "title": "Call Dropship",
+      "compact_lines": [
+        "Requests dropship insertion or return if mission state allows it.",
+        "Cooldowns and staged units can block the request."
+      ],
+      "detail_lines": [
+        "The button calls existing dropship controller paths and does not decide unit presence alone."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.approach",
+      "screen_id": "mission",
+      "area_id": "command_approach",
+      "status": "ready",
+      "title": "Dropship Approach",
+      "compact_lines": [
+        "Chooses the approach direction for the dropship route.",
+        "It changes presentation and insertion path planning."
+      ],
+      "detail_lines": [
+        "Approach direction is command context; air asset risk follows later tactical tasks."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.clear_target",
+      "screen_id": "mission",
+      "area_id": "command_clear_target",
+      "status": "ready",
+      "title": "Clear Target",
+      "compact_lines": [
+        "Clears the current target selection.",
+        "It does not cancel already applied SimulationRoot effects."
+      ],
+      "detail_lines": [
+        "Use it before picking a new target or area when the current focus is stale."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.roe_fire_rules",
+      "screen_id": "mission",
+      "area_id": "command_roe_fire_rules",
+      "status": "ready",
+      "title": "Fire Rules",
+      "compact_lines": [
+        "Sets game fire permission for the selected fireteam.",
+        "This is not a real ROE simulation."
+      ],
+      "detail_lines": [
+        "Fire rules are Commander intent. FTL plans read them, but UI does not assign unit truth."
+      ],
+      "target_audience": "developer",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.rule.tempo",
+      "screen_id": "mission",
+      "area_id": "rule_tempo",
+      "status": "ready",
+      "title": "Tempo",
+      "compact_lines": [
+        "Chooses cautious, normal, or rapid execution.",
+        "Tempo changes FTL plan pacing, not direct unit state."
+      ],
+      "detail_lines": [
+        "Cautious favors cover and slower movement. Rapid favors speed and shorter exposure checks."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.rule.tempo_cautious",
+      "screen_id": "mission",
+      "area_id": "rule_tempo_cautious",
+      "status": "ready",
+      "title": "Cautious Tempo",
+      "compact_lines": [
+        "Slower movement with stronger cover preference.",
+        "Useful when contact is likely or the route is unclear."
+      ],
+      "detail_lines": [
+        "The FTL may choose safer pacing inside the Commander intent."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.rule.tempo_normal",
+      "screen_id": "mission",
+      "area_id": "rule_tempo_normal",
+      "status": "ready",
+      "title": "Normal Tempo",
+      "compact_lines": [
+        "Balanced movement speed and cover preference.",
+        "This is the default rule set for most orders."
+      ],
+      "detail_lines": [
+        "Normal tempo keeps plans readable without forcing slow or risky behavior."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.rule.tempo_rapid",
+      "screen_id": "mission",
+      "area_id": "rule_tempo_rapid",
+      "status": "ready",
+      "title": "Rapid Tempo",
+      "compact_lines": [
+        "Faster movement with lower cover preference.",
+        "Conflicting all-round security normalizes to facing."
+      ],
+      "detail_lines": [
+        "Use rapid tempo when speed matters more than perfect security."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.rule.fire_rule",
+      "screen_id": "mission",
+      "area_id": "rule_fire_rule",
+      "status": "ready",
+      "title": "Fire Rule",
+      "compact_lines": [
+        "Sets hold, return, free, or suppress fire behavior.",
+        "It is game intent, not real-world ROE."
+      ],
+      "detail_lines": [
+        "The rule rides with the plan and is applied by tactical/runtime systems."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.rule.fire_rule_hold",
+      "screen_id": "mission",
+      "area_id": "rule_fire_hold",
+      "status": "ready",
+      "title": "Hold Fire",
+      "compact_lines": [
+        "Avoids voluntary fire unless a later rule allows it.",
+        "Conflicts with assault contact and becomes fix."
+      ],
+      "detail_lines": [
+        "Hold fire can still be overridden by future breakout rules if survival requires it."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.rule.fire_rule_return",
+      "screen_id": "mission",
+      "area_id": "rule_fire_return",
+      "status": "ready",
+      "title": "Return Fire",
+      "compact_lines": [
+        "Lets the team answer contact without pushing aggression.",
+        "This is the default fire rule."
+      ],
+      "detail_lines": [
+        "Return fire is the safest broad rule for most mixed movement and defense plans."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.rule.fire_rule_free",
+      "screen_id": "mission",
+      "area_id": "rule_fire_free",
+      "status": "ready",
+      "title": "Free Fire",
+      "compact_lines": [
+        "Allows active fire when contacts are valid.",
+        "Avoid contact normalizes this back to hold."
+      ],
+      "detail_lines": [
+        "Free fire is stronger intent and should stay visible in #17."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.rule.fire_rule_suppress",
+      "screen_id": "mission",
+      "area_id": "rule_fire_suppress",
+      "status": "ready",
+      "title": "Suppress",
+      "compact_lines": [
+        "Prioritizes pressure on a contact or target area.",
+        "Map feedback may show a compact SUPPRESS tag."
+      ],
+      "detail_lines": [
+        "Suppress changes plan intent only; combat authority and ammo checks stay elsewhere."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.rule.contact_response",
+      "screen_id": "mission",
+      "area_id": "rule_contact_response",
+      "status": "ready",
+      "title": "Contact Response",
+      "compact_lines": [
+        "Sets avoid, report, fix, assault, or withdraw behavior.",
+        "Conflicts are normalized with visible warnings."
+      ],
+      "detail_lines": [
+        "This tells the FTL how to react after contact without making UI a combat authority."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.rule.cover_priority",
+      "screen_id": "mission",
+      "area_id": "rule_cover_priority",
+      "status": "ready",
+      "title": "Cover Priority",
+      "compact_lines": [
+        "Sets low, normal, or high cover preference.",
+        "The plan converts it into numeric cover bias."
+      ],
+      "detail_lines": [
+        "Cover priority can alter routing and stop choices, but not damage truth."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.rule.security_mode",
+      "screen_id": "mission",
+      "area_id": "rule_security_mode",
+      "status": "ready",
+      "title": "Security Mode",
+      "compact_lines": [
+        "Sets 360, facing, sector, or none-in-transit security.",
+        "Rapid tempo cannot keep full 360 security."
+      ],
+      "detail_lines": [
+        "Security mode feeds the FTL plan and later overwatch/security systems."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.group.goal",
+      "screen_id": "mission",
+      "area_id": "command_group_goal",
+      "status": "ready",
+      "title": "Goal Commands",
+      "compact_lines": [
+        "Short #16 actions set what selected fireteams should do.",
+        "Move, Take, Defend, Engage, Secure, Recon and Withdraw stay grouped as intent."
+      ],
+      "detail_lines": [
+        "These buttons keep using existing command controllers; the hierarchy only labels and gates them."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.group.rule",
+      "screen_id": "mission",
+      "area_id": "command_group_rule",
+      "status": "ready",
+      "title": "Fireteam Rules",
+      "compact_lines": [
+        "#17 shows tempo, fire rule, contact response, cover and security.",
+        "Rules describe selected fireteam intent without becoming unit truth."
+      ],
+      "detail_lines": [
+        "Tactical resolvers read plan data and runtime state; the HUD only exposes the active rule layer."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.group.plan",
+      "screen_id": "mission",
+      "area_id": "command_group_plan",
+      "status": "ready",
+      "title": "Plan Commands",
+      "compact_lines": [
+        "#18 owns plan preview, role status and GO context.",
+        "Multi-fireteam plans stay separate from single-team buttons."
+      ],
+      "detail_lines": [
+        "Phase planning can be hidden by the fixed HUD, so GO exposes a clear disabled reason."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.group.air_lz",
+      "screen_id": "mission",
+      "area_id": "command_group_air_lz",
+      "status": "ready",
+      "title": "Air and LZ Commands",
+      "compact_lines": [
+        "#18 groups landing zone, dropship call and approach controls.",
+        "Air actions cannot crowd the short #16 command matrix."
+      ],
+      "detail_lines": [
+        "Later air-threat tasks can add hold, cancel, secure-LZ and evac actions to this group."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "mission.command.group.breakout",
+      "screen_id": "mission",
+      "area_id": "command_group_breakout",
+      "status": "ready",
+      "title": "Breakout Commands",
+      "compact_lines": [
+        "Confirm, Override, Abort and Regroup are reserved for exception handling.",
+        "The current HUD reports them disabled until TASK_276 defines behavior."
+      ],
+      "detail_lines": [
+        "Breakout commands must answer FTL requests without turning the UI into hidden gameplay authority."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    }
+  ]
+}

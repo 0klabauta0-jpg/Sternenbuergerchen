@@ -75,6 +75,7 @@ func _test_snapshot_schema_contains_v1_fields() -> void:
 	_assert(String(snapshot.get("transfer_mode", "")) == "unreliable_ordered", "State snapshot declares unreliable ordered transfer")
 	_assert(int(snapshot.get("tick", 0)) == 12, "Snapshot carries the authoritative tick")
 	_assert(Array(snapshot.get("units", [])).size() == 1, "Snapshot includes unit state")
+	_assert(String(Dictionary(Array(snapshot.get("units", []))[0]).get("team_id", "")) == "team_alpha", "Snapshot includes unit team identity")
 	_assert(Array(snapshot.get("vital_updates", [])).size() == 1, "Snapshot includes vital state entries")
 	_assert(not Dictionary(snapshot.get("objective", {})).is_empty(), "Snapshot includes objective state")
 	_assert(String(Dictionary(snapshot.get("dropship", {})).get("state", "")) == "inbound", "Snapshot includes dropship display state")

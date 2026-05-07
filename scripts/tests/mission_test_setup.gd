@@ -8,6 +8,7 @@ const TERRAIN_MAP_3D_VIEW_SCRIPT: GDScript = preload("res://scripts/terrain/terr
 const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
 const LOADOUT_MODIFIER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/command/loadout_modifier_resolver.gd")
 const MISSION_SCENARIO_DATA_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_data.gd")
+const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
 
 @export var team_id: String = "team_alpha"
 @export var runtime_leader_path: NodePath
@@ -38,6 +39,7 @@ var _terrain_3d_view = null
 var _loaded_terrain_map_data = null
 var _mission_scenario = null
 var _scenario_enemy_ids: PackedStringArray = PackedStringArray()
+var _scenario_tactical_authoring: Dictionary = {}
 
 
 func _ready() -> void:
@@ -166,6 +168,52 @@ func get_unit_loadout_modifiers_dict(unit_id: String) -> Dictionary:
 	if normalized_unit_id.is_empty():
 		return {}
 	return Dictionary(unit_loadout_modifiers_by_unit_id.get(normalized_unit_id, {})).duplicate(true)
+
+
+func get_expected_unit_presence_snapshot() -> Dictionary:
+	var friendly_unit_ids: Array = []
+	var inactive_friendly_unit_ids: Array = []
+	var enemy_unit_ids: Array = []
+	for unit_path in unit_paths:
+		var unit = get_node_or_null(unit_path)
+		if unit == null or not unit.has_method("get_unit_id") or not unit.has_method("get_team_id"):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+		var unit_team_id: String = String(unit.call("get_team_id")).strip_edges()
+		if unit_id.is_empty():
+			continue
+		if unit_team_id == team_id:
+			friendly_unit_ids.append(unit_id)
+		elif unit_team_id == "team_unused":
+			inactive_friendly_unit_ids.append(unit_id)
+		else:
+			enemy_unit_ids.append(unit_id)
+	friendly_unit_ids.sort()
+	inactive_friendly_unit_ids.sort()
+	enemy_unit_ids.sort()
+	return {
+		"friendly_unit_ids": friendly_unit_ids,
+		"inactive_friendly_unit_ids": inactive_friendly_unit_ids,
+		"enemy_unit_ids": enemy_unit_ids,
+		"defer_friendly_runtime_activation": defer_friendly_runtime_activation,
+	}
+
+
+func get_scenario_tactical_authoring_snapshot() -> Dictionary:
+	return _scenario_tactical_authoring.duplicate(true)
+
+
+func get_scenario_air_asset_risk_context_for_unit(enemy_id: String) -> Dictionary:
+	if _mission_scenario == null:
+		return {}
+	var normalized_enemy_id: String = enemy_id.strip_edges()
+	if normalized_enemy_id.is_empty():
+		return {}
+	for threat_variant in Array(_mission_scenario.call("get_enemy_air_asset_threats", _loaded_terrain_map_data)):
+		var threat: Dictionary = Dictionary(threat_variant)
+		if Array(threat.get("enemy_ids", [])).has(normalized_enemy_id):
+			return threat.duplicate(true)
+	return {}
 
 
 func _build_unit_loadout_modifiers() -> void:
@@ -305,8 +353,48 @@ func _setup_enemy_waves(enemy_units: Array) -> void:
 	_apply_scenario_wave_config(enemy_wave_controller)
 	if enemy_wave_controller.has_method("set_patrol_paths"):
 		enemy_wave_controller.call("set_patrol_paths", _build_enemy_patrol_paths())
+	if enemy_wave_controller.has_method("set_enemy_tactics"):
+		enemy_wave_controller.call("set_enemy_tactics", _build_enemy_tactics_by_unit_id(enemy_units))
 
 	enemy_wave_controller.call("initialize_enemy_units", enemy_units)
+
+
+func _build_enemy_tactics_by_unit_id(enemy_units: Array) -> Dictionary:
+	var result: Dictionary = {}
+	var grid_size: Vector2i = _get_loaded_grid_size()
+	var default_config: Dictionary = _get_default_enemy_tactics_config()
+	if _mission_scenario != null:
+		for group_variant in Array(_mission_scenario.get("enemy_groups")):
+			var group: Dictionary = Dictionary(group_variant)
+			var group_tactics: Dictionary = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("normalize_config", group.get("tactics", default_config), grid_size)
+			var group_id: String = String(group.get("group_id", "")).strip_edges()
+			if not group_id.is_empty():
+				group_tactics["group_id"] = group_id
+			for enemy_id_variant in Array(group.get("enemy_ids", [])):
+				var enemy_id: String = String(enemy_id_variant).strip_edges()
+				if enemy_id.is_empty():
+					continue
+				result[enemy_id] = group_tactics.duplicate(true)
+	for enemy_unit in enemy_units:
+		if enemy_unit == null or not enemy_unit.has_method("get_unit_id"):
+			continue
+		var unit_id: String = String(enemy_unit.call("get_unit_id")).strip_edges()
+		if unit_id.is_empty() or result.has(unit_id):
+			continue
+		result[unit_id] = default_config.duplicate(true)
+	return result
+
+
+func _get_default_enemy_tactics_config() -> Dictionary:
+	if _loaded_terrain_map_data != null and _loaded_terrain_map_data.has_method("get_enemy_team_config"):
+		return _loaded_terrain_map_data.call("get_enemy_team_config", "default")
+	return ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_default_config_for_map_size", _get_loaded_grid_size())
+
+
+func _get_loaded_grid_size() -> Vector2i:
+	if _loaded_terrain_map_data != null and _loaded_terrain_map_data.has_method("get_grid_size"):
+		return _loaded_terrain_map_data.call("get_grid_size")
+	return Vector2i.ZERO
 
 
 func _build_enemy_patrol_paths() -> Dictionary:
@@ -338,6 +426,7 @@ func _build_enemy_patrol_paths() -> Dictionary:
 func _load_mission_scenario_if_available() -> void:
 	_mission_scenario = null
 	_scenario_enemy_ids = PackedStringArray()
+	_scenario_tactical_authoring = {}
 	var normalized_path: String = scenario_file_path.strip_edges()
 	if normalized_path.is_empty():
 		return
@@ -350,6 +439,7 @@ func _load_mission_scenario_if_available() -> void:
 		push_warning("Mission scenario has authoring issues: %s" % ", ".join(PackedStringArray(validation.get("errors", PackedStringArray()))))
 	_mission_scenario = scenario
 	_scenario_enemy_ids = PackedStringArray(_mission_scenario.call("get_enemy_ids"))
+	_scenario_tactical_authoring = Dictionary(_mission_scenario.call("get_tactical_authoring_config")).duplicate(true)
 	var scenario_map_path: String = String(_mission_scenario.get("map_file_path")).strip_edges()
 	if not scenario_map_path.is_empty():
 		map_file_path = scenario_map_path

@@ -12,6 +12,12 @@ const OBJECT_LAYER_GROUPS: PackedStringArray = [
 	"crater",
 	"fahrzeuge",
 ]
+const HILL_PRESERVING_TYPE_PREFIXES: PackedStringArray = [
+	"wall_",
+	"rock_",
+	"cliff_",
+	"slope_",
+]
 
 var _tile_types: Dictionary = {}
 var _type_order: Array[String] = []
@@ -80,6 +86,9 @@ static func load_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCa
 			"height_level": clampi(int(entry.get("height_level", 0)), 0, 2),
 			"object_height": clampi(int(entry.get("object_height", 0)), 0, 3),
 			"edge_type": String(entry.get("edge_type", "cliff")),
+			"preserve_hill_fields": bool(entry.get("preserve_hill_fields", false)),
+			"visual_surface_variant": bool(entry.get("visual_surface_variant", false)),
+			"prop_role": String(entry.get("prop_role", "")),
 		}
 		catalog._type_order.append(type_id)
 
@@ -149,13 +158,42 @@ func is_object_layer_type(type_id: String) -> bool:
 	return String(entry.get("placement_layer", "terrain")).strip_edges().to_lower() == "object"
 
 
+func preserves_hill_fields_when_applied(type_id: String) -> bool:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty():
+		return false
+	var entry: Dictionary = _tile_types.get(normalized_type_id, {})
+	if bool(entry.get("preserve_hill_fields", false)) or bool(entry.get("visual_surface_variant", false)):
+		return true
+	if is_object_layer_type(normalized_type_id):
+		return true
+	for prefix in HILL_PRESERVING_TYPE_PREFIXES:
+		if normalized_type_id.begins_with(prefix):
+			return true
+	return false
+
+
 func apply_type_to_tile(tile_data, type_id: String) -> bool:
 	if tile_data == null or not has_type(type_id):
 		return false
 
 	var entry: Dictionary = _tile_types[type_id]
+	if bool(entry.get("visual_surface_variant", false)):
+		tile_data.type_id = type_id
+		tile_data.surface_type = String(entry.get("surface_type", tile_data.surface_type))
+		return true
+
 	if is_object_layer_type(type_id):
 		tile_data.object_type_id = type_id
+		tile_data.walkable = bool(entry.get("walkable", true))
+		tile_data.blocks_los = bool(entry.get("blocks_los", false))
+		tile_data.cover_value = int(entry.get("cover_value", 0))
+		tile_data.object_height = int(entry.get("object_height", 0))
+		return true
+
+	if preserves_hill_fields_when_applied(type_id):
+		tile_data.type_id = type_id
+		tile_data.object_type_id = ""
 		tile_data.walkable = bool(entry.get("walkable", true))
 		tile_data.blocks_los = bool(entry.get("blocks_los", false))
 		tile_data.cover_value = int(entry.get("cover_value", 0))

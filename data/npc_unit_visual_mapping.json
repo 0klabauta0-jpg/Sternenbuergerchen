@@ -1,15 +1,18 @@
 {
 	"source": {
 		"bundle": "Animated Characters Bundle 4.0",
-		"local_path": "C:/Users/bjoer/Pictures/Sternenbuerger/Animated Characters Bundle",
+		"source_doc": "res://docs/assets/animated_characters_bundle_inventory.md",
+		"project_root": "res://Assets/used/npc/animated_characters/",
 		"license": "CC0",
-		"imported_for": "TASK_171_TASK_172_TASK_173_TASK_174",
+		"imported_for": "TASK_171_TASK_172_TASK_173_TASK_174_TASK_206",
 		"preferred_use": "2.5D runtime unit visual proxies only"
 	},
 	"defaults": {
 		"scale": 0.22,
 		"rotation_degrees_y": 0.0,
 		"visual_loadout_id": "standard_rifle",
+		"friendly_visual_archetype_id": "friendly_space_suit_white",
+		"enemy_visual_archetype_id": "enemy_space_suit_orange",
 		"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-a.glb",
 		"animation_paths": {
 			"idle": "res://Assets/used/npc/animated_characters/animations/idle.fbx",
@@ -67,6 +70,8 @@
 	"unit_visuals": {
 		"team_alpha": {
 			"visual_id": "animated_character_medium_astro_male_a",
+			"visual_archetype_id": "friendly_space_suit_white",
+			"faction_id": "friendly",
 			"model_path": "res://Assets/used/npc/animated_characters/models/characterMedium.fbx",
 			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroMaleA.png",
 			"visual_loadout_id": "standard_rifle",
@@ -74,15 +79,19 @@
 			"rotation_degrees_y": 0.0
 		},
 		"team_bravo": {
-			"visual_id": "enemy_animated_character_small_astro_female_a",
+			"visual_id": "enemy_space_suit_orange_small",
+			"visual_archetype_id": "enemy_space_suit_orange",
+			"faction_id": "enemy",
 			"model_path": "res://Assets/used/npc/animated_characters/models/characterSmall.fbx",
-			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroFemaleA.png",
+			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroFemaleB.png",
 			"visual_loadout_id": "compact_blaster",
 			"scale": 0.22,
 			"rotation_degrees_y": 0.0
 		},
 		"default": {
 			"visual_id": "animated_character_medium_astro_male_a",
+			"visual_archetype_id": "friendly_space_suit_white",
+			"faction_id": "friendly",
 			"model_path": "res://Assets/used/npc/animated_characters/models/characterMedium.fbx",
 			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroMaleA.png",
 			"visual_loadout_id": "standard_rifle",
@@ -92,21 +101,108 @@
 	},
 	"unit_ids": {
 		"enemy_delta": {
-			"visual_id": "enemy_delta_animated_character_small_military_helmet",
+			"visual_id": "enemy_delta_space_suit_orange_small",
+			"visual_archetype_id": "enemy_space_suit_orange",
+			"faction_id": "enemy",
 			"model_path": "res://Assets/used/npc/animated_characters/models/characterSmall.fbx",
-			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroFemaleA.png",
+			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroFemaleB.png",
 			"visual_loadout_id": "compact_blaster",
 			"scale": 0.22,
 			"rotation_degrees_y": 0.0
 		},
 		"enemy_echo": {
-			"visual_id": "enemy_echo_animated_character_medium_military_helmet",
+			"visual_id": "enemy_echo_space_suit_orange_medium",
+			"visual_archetype_id": "enemy_space_suit_orange",
+			"faction_id": "enemy",
 			"model_path": "res://Assets/used/npc/animated_characters/models/characterMedium.fbx",
-			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroMaleA.png",
+			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroMaleB.png",
 			"visual_loadout_id": "heavy_blaster",
 			"scale": 0.22,
 			"rotation_degrees_y": 0.0
 		}
+	},
+	"visual_archetypes": {
+		"friendly_space_suit_white": {
+			"display_name": "Friendly Space Suit White",
+			"faction_id": "friendly",
+			"visual_id": "friendly_space_suit_white",
+			"model_path": "res://Assets/used/npc/animated_characters/models/characterMedium.fbx",
+			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroMaleA.png",
+			"visual_loadout_id": "standard_rifle",
+			"scale": 0.22,
+			"socket_compatibility": {
+				"helmet_socket": "HeadSocket",
+				"weapon_sockets": ["RightHandSocket", "BackSocket"],
+				"uses_default_socket_contract": true
+			},
+			"fallback_archetype_id": "friendly_space_suit_white",
+			"readability_color": "white_light"
+		},
+		"enemy_space_suit_orange": {
+			"display_name": "Enemy Space Suit Orange",
+			"faction_id": "enemy",
+			"visual_id": "enemy_space_suit_orange",
+			"model_path": "res://Assets/used/npc/animated_characters/models/characterSmall.fbx",
+			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroFemaleB.png",
+			"alternate_skin_paths": [
+				"res://Assets/used/npc/animated_characters/skins/astroMaleB.png"
+			],
+			"visual_loadout_id": "compact_blaster",
+			"scale": 0.22,
+			"socket_compatibility": {
+				"helmet_socket": "HeadSocket",
+				"weapon_sockets": ["RightHandSocket", "BackSocket"],
+				"uses_default_socket_contract": true
+			},
+			"fallback_archetype_id": "friendly_space_suit_white",
+			"readability_color": "orange"
+		},
+		"enemy_robot": {
+			"display_name": "Enemy Robot",
+			"faction_id": "enemy",
+			"status": "planned",
+			"fallback_archetype_id": "enemy_space_suit_orange",
+			"socket_compatibility": {
+				"planned": true,
+				"fallback_uses_default_socket_contract": true
+			}
+		},
+		"enemy_alien": {
+			"display_name": "Enemy Alien",
+			"faction_id": "enemy",
+			"status": "planned",
+			"fallback_archetype_id": "enemy_space_suit_orange",
+			"socket_compatibility": {
+				"planned": true,
+				"fallback_uses_default_socket_contract": true
+			}
+		},
+		"enemy_zombie": {
+			"display_name": "Enemy Zombie",
+			"faction_id": "enemy",
+			"status": "planned",
+			"fallback_archetype_id": "enemy_space_suit_orange",
+			"socket_compatibility": {
+				"planned": true,
+				"fallback_uses_default_socket_contract": true
+			}
+		},
+		"enemy_soldier": {
+			"display_name": "Enemy Soldier",
+			"faction_id": "enemy",
+			"status": "planned",
+			"fallback_archetype_id": "enemy_space_suit_orange",
+			"socket_compatibility": {
+				"planned": true,
+				"fallback_uses_default_socket_contract": true
+			}
+		}
+	},
+	"visual_archetype_aliases": {
+		"orange_suit": "enemy_space_suit_orange",
+		"orange_assault": "enemy_space_suit_orange",
+		"orange_cover": "enemy_space_suit_orange",
+		"orange_marksman": "enemy_space_suit_orange"
 	},
 	"visual_loadouts": {
 		"standard_rifle": {
@@ -124,11 +220,38 @@
 		"heavy_blaster": {
 			"helmet_path": "res://Assets/used/npc/animated_characters/accessories/militaryHelmet.fbx",
 			"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-p.glb"
+		},
+		"sniper_rifle": {
+			"helmet_path": "res://Assets/used/npc/animated_characters/accessories/astroHelmet.fbx",
+			"blaster_path": "res://Assets/used/npc/weapon_pack/models/sniper.glb",
+			"blaster_attachment": {
+				"socket_name": "RightHandSocket",
+				"fallback_anchor": [0.22, 0.84, 0.10],
+				"offset": [0.0, 0.0, 0.0],
+				"visual_offset": [0.0, 0.105, 0.020],
+				"rotation_degrees": [90.0, 90.0, 180.0],
+				"scale": 0.010
+			}
+		},
+		"rocket_launcher": {
+			"helmet_path": "res://Assets/used/npc/animated_characters/accessories/militaryHelmet.fbx",
+			"blaster_path": "res://Assets/used/npc/weapon_pack/models/rocketlauncherModern.glb",
+			"blaster_attachment": {
+				"socket_name": "BackSocket",
+				"fallback_anchor": [0.0, 1.05, -0.18],
+				"offset": [0.0, 0.0, 0.0],
+				"visual_offset": [0.0, 0.120, -0.030],
+				"rotation_degrees": [0.0, 90.0, 0.0],
+				"scale": 0.008
+			}
 		}
 	},
 	"weapon_visual_loadouts": {
 		"rifle": "standard_rifle",
 		"smg": "standard_rifle",
+		"sniper": "sniper_rifle",
+		"rocket_launcher": "rocket_launcher",
+		"panzerfaust": "rocket_launcher",
 		"medictool": "medictool_blaster",
 		"rail_gun": "heavy_blaster"
 	},
@@ -152,6 +275,8 @@
 		"res://Assets/used/npc/blaster_kit/models/blaster-a.glb",
 		"res://Assets/used/npc/blaster_kit/models/blaster-b.glb",
 		"res://Assets/used/npc/blaster_kit/models/blaster-f.glb",
-		"res://Assets/used/npc/blaster_kit/models/blaster-p.glb"
+		"res://Assets/used/npc/blaster_kit/models/blaster-p.glb",
+		"res://Assets/used/npc/weapon_pack/models/sniper.glb",
+		"res://Assets/used/npc/weapon_pack/models/rocketlauncherModern.glb"
 	]
 }

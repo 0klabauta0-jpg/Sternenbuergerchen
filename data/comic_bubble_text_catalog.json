@@ -1,0 +1,156 @@
+{
+	"catalog_version": 1,
+	"status": "TASK_213_skill_based_bubble_text_resolver",
+	"rules": {
+		"runtime_contract": "visual_only_no_gameplay_truth",
+		"language": "de",
+		"selection": "deterministic_first_matching_key",
+		"text_lines_max": 2,
+		"text_chars_per_line_max": 22,
+		"fallback_skill_tier": "neutral",
+		"high_skill_threshold": 0.65,
+		"no_hidden_enemy_information": true
+	},
+	"ftl": {
+		"fallback": {
+			"neutral": "Verstanden.",
+			"high": "Verstanden.",
+			"low": "Okay."
+		},
+		"accepted": {
+			"move": {
+				"high": "Verstanden.\nRuecke vor.",
+				"low": "Okay.\nIch geh los.",
+				"neutral": "Verstanden.\nWir gehen."
+			},
+			"defend": {
+				"high": "In Deckung.\nSektor halten.",
+				"low": "Halte hier.\nDeckung suchen.",
+				"neutral": "Deckung.\nPosition halten."
+			},
+			"flank": {
+				"high": "Flanke laeuft.\nLeise vor.",
+				"low": "Flanke.\nIch probier's.",
+				"neutral": "Flanke.\nLangsam vor."
+			},
+			"take": {
+				"high": "Objective laeuft.\nWir nehmen es.",
+				"low": "Zum Objective.\nWir versuchen's.",
+				"neutral": "Objective.\nWir ruecken vor."
+			},
+			"support": {
+				"high": "Support kommt.\nHalte durch.",
+				"low": "Bin unterwegs.\nBleib liegen.",
+				"neutral": "Support kommt.\nHalte durch."
+			},
+			"go": {
+				"high": "GO bestaetigt.\nAusfuehren.",
+				"low": "GO gehoert.\nWir gehen.",
+				"neutral": "GO bestaetigt.\nWir gehen."
+			}
+		},
+		"blocked": {
+			"default": {
+				"high": "Nicht moeglich.\nNeuer Punkt.",
+				"low": "Geht nicht.\nNeuer Punkt?",
+				"neutral": "Nicht moeglich.\nNeu waehlen."
+			}
+		},
+		"running": {
+			"default": {
+				"high": "Laeuft.\nNaechster Schritt.",
+				"low": "Bin dran.\nWeiter.",
+				"neutral": "Laeuft.\nWir bleiben dran."
+			},
+			"take": {
+				"high": "Objective laeuft.\nWir nehmen es.",
+				"low": "Zum Objective.\nWir versuchen's.",
+				"neutral": "Objective.\nWir arbeiten."
+			}
+		},
+		"done": {
+			"default": {
+				"high": "Auftrag erledigt.",
+				"low": "Fertig.\nSoweit klar.",
+				"neutral": "Auftrag erledigt."
+			}
+		},
+		"contact": {
+			"default": {
+				"high": "Kontakt.\nFeuer frei.",
+				"low": "Kontakt da.\nIch halte drauf.",
+				"neutral": "Kontakt.\nWir sichern."
+			}
+		},
+		"cover": {
+			"default": {
+				"high": "In Deckung.\nSektor halten.",
+				"low": "Deckung suchen.\nIch halte hier.",
+				"neutral": "Deckung.\nSektor halten."
+			}
+		}
+	},
+	"npc": {
+		"health": {
+			"downed": {
+				"high": "Ich brauche Hilfe.",
+				"low": "Hilfe.\nIch bin unten.",
+				"neutral": "Ich brauche Hilfe."
+			},
+			"respawning": {
+				"high": "Zurueckholen.\nBin noch da.",
+				"low": "Nicht weg.\nIch komm wieder.",
+				"neutral": "Zurueckholen.\nBin noch da."
+			},
+			"wounded": {
+				"high": "Getroffen.\nHalte durch.",
+				"low": "Tut weh.\nIch bleib dran.",
+				"neutral": "Getroffen.\nHalte durch."
+			}
+		},
+		"order": {
+			"default": {
+				"high": "Befehl sitzt.\nIch bewege.",
+				"low": "Befehl da.\nIch gehe.",
+				"neutral": "Befehl da.\nIch bewege."
+			}
+		},
+		"role": {
+			"leader": {
+				"high": "Team bleibt\nbei mir.",
+				"low": "Alle bei mir.\nLangsam.",
+				"neutral": "Team bleibt\nbei mir."
+			},
+			"medic": {
+				"high": "Wunden im Blick.\nIch bleibe nah.",
+				"low": "Ich helfe.\nSo gut ich kann.",
+				"neutral": "Wunden im Blick.\nIch bleibe nah."
+			},
+			"shooter": {
+				"high": "Linie frei.\nIch sichere.",
+				"low": "Ich sehe wenig.\nIch sichere.",
+				"neutral": "Ich sichere.\nWeiter ruhig."
+			},
+			"pilot": {
+				"high": "Landezone\nim Kopf.",
+				"low": "Landezone...\nIch merk sie mir.",
+				"neutral": "Landezone\nim Kopf."
+			},
+			"engineer": {
+				"high": "Technik klar.\nWeiter.",
+				"low": "Technik wirkt.\nIch pruefe.",
+				"neutral": "Technik klar.\nWeiter."
+			},
+			"heavy": {
+				"high": "Schweres Geraet\nbereit.",
+				"low": "Schwer dabei.\nIch halte.",
+				"neutral": "Schweres Geraet\nbereit."
+			},
+			"default": {
+				"high": "Ich sichere.\nWeiter ruhig.",
+				"low": "Ruhig bleiben.\nAugen offen.",
+				"neutral": "Ruhig bleiben.\nAugen offen."
+			}
+		}
+	}
+}

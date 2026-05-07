@@ -3,6 +3,10 @@ extends Node
 const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
 const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
+const PLAYER_ROSTER_STORE_SCRIPT: GDScript = preload("res://scripts/meta/player_roster_store.gd")
+const MISSION_PROGRESSION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/mission_progression_resolver.gd")
+const PERSONNEL_EVENT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/personnel_event_resolver.gd")
+const AIR_ASSET_RECOVERY_STATE_SCRIPT: GDScript = preload("res://scripts/meta/air_asset_recovery_state.gd")
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const FRIENDLY_NODE_NAMES: PackedStringArray = ["UnitAlpha", "UnitBravo", "UnitCharlie", "UnitDelta", "UnitEcho", "UnitFoxtrot", "UnitGolf", "UnitHotel"]
 const DEFAULT_META_MAP_PATH: String = "res://maps/test_mission_32x32_slots8.json"
@@ -49,7 +53,7 @@ const HOMEBASE_AIRCRAFT_BASE_DEFINITIONS: Dictionary = {
 		"craft_type": "craft_cargoB",
 		"display_name": "Frachter",
 		"summary": "Cargo freighter for Rover-sized payloads.",
-		"texture_path": "res://Assets/kenney_space-kit/Side/craft_cargoB.png",
+		"texture_path": "res://Assets/kenney_space-kit/Isometric/craft_cargoA_NE.png",
 		"supports_cargo": true,
 		"cargo_options": [
 			{"cargo_id": "", "display_name": "No Cargo"},
@@ -96,6 +100,7 @@ var _pending_homebase_team_transfers: Array = []
 var _pending_homebase_pilot_transfers: Array = []
 var _pending_homebase_cargo_loads: Array = []
 var _pending_mission_craft_transfers: Array = []
+var _air_asset_recovery_by_craft: Dictionary = {}
 var _transfer_sequence: int = 0
 var _preview_mission = null
 var _preview_mission_signature: Dictionary = {}
@@ -114,6 +119,7 @@ func _ready() -> void:
 		push_warning("MetaLayerFlow requires HomebaseScreen, FOBScreen and DebriefScreen children.")
 		return
 
+	_load_persistent_player_roster()
 	META_UI_SKIN_SCRIPT.apply_meta_navigation(self)
 	_connect_navigation_buttons()
 	_ensure_homebase_aircraft_locations()
@@ -174,6 +180,45 @@ func get_selected_unit_ids() -> PackedStringArray:
 
 func get_active_mission():
 	return _active_mission
+
+
+func get_air_asset_recovery_snapshot() -> Dictionary:
+	var result: Dictionary = {}
+	var craft_ids: Array = _air_asset_recovery_by_craft.keys()
+	craft_ids.sort()
+	for craft_id_variant in craft_ids:
+		var craft_id: String = String(craft_id_variant).strip_edges()
+		result[craft_id] = Dictionary(_air_asset_recovery_by_craft.get(craft_id, {})).duplicate(true)
+	return result
+
+
+func load_air_asset_recovery_snapshot(snapshot: Dictionary) -> void:
+	_air_asset_recovery_by_craft.clear()
+	for craft_id_variant in snapshot.keys():
+		var craft_id: String = String(craft_id_variant).strip_edges()
+		if craft_id.is_empty() or typeof(snapshot.get(craft_id_variant)) != TYPE_DICTIONARY:
+			continue
+		_air_asset_recovery_by_craft[craft_id] = Dictionary(snapshot.get(craft_id_variant, {})).duplicate(true)
+		if bool(AIR_ASSET_RECOVERY_STATE_SCRIPT.call("is_recovery_active", Dictionary(_air_asset_recovery_by_craft.get(craft_id, {})))):
+			_aircraft_location_by_craft[craft_id] = "homebase"
+	_refresh_homebase_screen()
+	_refresh_fob_screen()
+	_ensure_transport_timer_state()
+
+
+func advance_air_asset_recovery_time(delta_seconds: float) -> void:
+	_advance_air_asset_recoveries(maxf(delta_seconds, 0.0))
+	_refresh_homebase_screen()
+	_refresh_fob_screen()
+	_ensure_transport_timer_state()
+
+
+func apply_air_asset_recovery_from_mission_result_for_test(mission_result: Dictionary) -> Dictionary:
+	var result: Dictionary = _apply_air_asset_recovery_from_mission_result(mission_result)
+	_refresh_homebase_screen()
+	_refresh_fob_screen()
+	_ensure_transport_timer_state()
+	return result
 
 
 func _connect_navigation_buttons() -> void:
@@ -501,6 +546,8 @@ func _on_mission_combat_resolved(mission_result: Dictionary) -> void:
 		return
 
 	_last_mission_result = _build_mission_result(_active_mission, mission_result)
+	_last_mission_result = _apply_air_asset_recovery_from_mission_result(_last_mission_result)
+	_last_mission_result = _apply_mission_progression_to_roster(_last_mission_result)
 	var fob_screen = _get_fob_screen()
 	if fob_screen != null:
 		fob_screen.set_last_mission_result(_last_mission_result)
@@ -562,7 +609,146 @@ func _build_mission_result(mission_instance: Node, mission_result: Dictionary) -
 	merged_result["selected_unit_ids"] = _selected_unit_ids.duplicate()
 	merged_result["selected_fireteam_ids"] = _selected_fireteam_ids.duplicate()
 	merged_result["team_states"] = team_states
+	var air_asset_status: Dictionary = _extract_air_asset_status_from_mission(mission_instance)
+	if not air_asset_status.is_empty():
+		merged_result["air_asset_status"] = air_asset_status
 	return merged_result
+
+
+func _extract_air_asset_status_from_mission(mission_instance: Node) -> Dictionary:
+	if mission_instance == null:
+		return {}
+	var tactical_controller := mission_instance.get_node_or_null("TacticalController")
+	if tactical_controller != null and tactical_controller.has_method("get_air_asset_status_snapshot"):
+		var controller_status: Dictionary = Dictionary(tactical_controller.call("get_air_asset_status_snapshot")).duplicate(true)
+		if not controller_status.is_empty():
+			return controller_status
+	var simulation_root := mission_instance.get_node_or_null("SimulationRoot")
+	if simulation_root != null and simulation_root.has_method("get_air_asset_status_snapshot"):
+		var simulation_status: Dictionary = Dictionary(simulation_root.call("get_air_asset_status_snapshot")).duplicate(true)
+		if simulation_status.has(String(_mission_planning_state.get("mission_drop_craft_id", ""))):
+			return Dictionary(simulation_status.get(String(_mission_planning_state.get("mission_drop_craft_id", "")), {})).duplicate(true)
+		for key_variant in simulation_status.keys():
+			if typeof(simulation_status.get(key_variant)) == TYPE_DICTIONARY:
+				return Dictionary(simulation_status.get(key_variant, {})).duplicate(true)
+	return {}
+
+
+func _apply_air_asset_recovery_from_mission_result(mission_result: Dictionary) -> Dictionary:
+	var result: Dictionary = mission_result.duplicate(true)
+	var air_asset_status: Dictionary = Dictionary(result.get("air_asset_status", {})).duplicate(true)
+	if air_asset_status.is_empty():
+		return result
+	var craft_id: String = String(air_asset_status.get("asset_id", _mission_planning_state.get("mission_drop_craft_id", ""))).strip_edges()
+	if craft_id.is_empty():
+		craft_id = String(_mission_planning_state.get("launch_ready_craft_id", "")).strip_edges()
+	if craft_id.is_empty():
+		return result
+	var craft_definition: Dictionary = _find_homebase_aircraft_definition(craft_id)
+	var craft_context: Dictionary = {
+		"craft_id": craft_id,
+		"craft_type": String(craft_definition.get("craft_type", air_asset_status.get("asset_type", "dropship"))).strip_edges(),
+		"display_name": String(craft_definition.get("display_name", air_asset_status.get("display_name", craft_id))).strip_edges(),
+		"pilot_unit_id": String(_assigned_aircraft_pilot_by_craft.get(craft_id, air_asset_status.get("pilot_unit_id", _mission_planning_state.get("mission_drop_pilot_unit_id", "")))).strip_edges(),
+	}
+	var recovery_state: Dictionary = Dictionary(AIR_ASSET_RECOVERY_STATE_SCRIPT.call("from_air_asset_status", air_asset_status, craft_context, {})).duplicate(true)
+	if String(recovery_state.get("meta_state", "craft_available")) == "craft_available":
+		result["air_asset_recovery"] = recovery_state
+		return result
+	_air_asset_recovery_by_craft[craft_id] = recovery_state
+	_aircraft_location_by_craft[craft_id] = "homebase"
+	_remove_pending_mission_craft_transfer(craft_id)
+	if String(_mission_planning_state.get("launch_ready_craft_id", "")).strip_edges() == craft_id:
+		_mission_planning_state["launch_ready_craft_id"] = ""
+	if String(_mission_planning_state.get("mission_drop_craft_id", "")).strip_edges() == craft_id:
+		_mission_planning_state["mission_drop_state"] = "unavailable"
+		_mission_planning_state["mission_drop_return_requested"] = true
+		_mission_planning_state["drop_ship_staged"] = false
+	result["air_asset_recovery"] = recovery_state
+	result["air_asset_loss_recovery_summary"] = String(AIR_ASSET_RECOVERY_STATE_SCRIPT.call("build_debrief_summary", recovery_state))
+	result["softlock_guard"] = true
+	return result
+
+
+func _apply_mission_progression_to_roster(mission_result: Dictionary) -> Dictionary:
+	var result: Dictionary = mission_result.duplicate(true)
+	if _all_team_units.is_empty():
+		return result
+	var roster: Dictionary = _build_progression_roster_payload()
+	if roster.is_empty():
+		return result
+	var progression_result: Dictionary = Dictionary(MISSION_PROGRESSION_RESOLVER_SCRIPT.call("apply_mission_result", roster, result))
+	var updated_roster: Dictionary = Dictionary(progression_result.get("updated_roster", {})).duplicate(true)
+	var updated_units: Array = Array(updated_roster.get("units", []))
+	if not updated_units.is_empty():
+		_replace_roster_units(updated_units)
+	result["character_events"] = Array(progression_result.get("character_events", [])).duplicate(true)
+	result["progression_summary"] = Dictionary(progression_result.get("summary", {})).duplicate(true)
+	result["progression_unit_updates"] = Array(progression_result.get("unit_updates", [])).duplicate(true)
+	result["fireteam_cohesion"] = Dictionary(progression_result.get("fireteam_cohesion", {})).duplicate(true)
+	var personnel_result: Dictionary = Dictionary(PERSONNEL_EVENT_RESOLVER_SCRIPT.call("evaluate_roster", updated_roster, {"mission_result": result}))
+	updated_roster = Dictionary(personnel_result.get("updated_roster", updated_roster)).duplicate(true)
+	result["personnel_events"] = Array(personnel_result.get("events", [])).duplicate(true)
+	result["personnel_notifications"] = PackedStringArray(personnel_result.get("notifications", PackedStringArray()))
+	var save_result: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("save_roster", updated_roster, PLAYER_ROSTER_STORE_SCRIPT.DEFAULT_PROFILE_ID))
+	result["progression_save_ok"] = bool(save_result.get("ok", false))
+	result["progression_save_path"] = String(save_result.get("path", ""))
+	result["progression_save_diagnostics"] = PackedStringArray(save_result.get("diagnostics", PackedStringArray()))
+	return result
+
+
+func _build_progression_roster_payload() -> Dictionary:
+	var load_result: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("load_roster", PLAYER_ROSTER_STORE_SCRIPT.DEFAULT_PROFILE_ID))
+	var roster: Dictionary = Dictionary(load_result.get("roster", {})).duplicate(true) if bool(load_result.get("ok", false)) else {}
+	if roster.is_empty():
+		roster = {
+			"schema_version": 1,
+			"generator_id": "meta_layer_progression_runtime",
+			"seed": "meta_layer_runtime",
+			"player_profile_id": PLAYER_ROSTER_STORE_SCRIPT.DEFAULT_PROFILE_ID,
+			"units": _all_team_units.duplicate(true),
+			"relationship_pairs": [],
+			"fireteam_suggestions": [],
+			"multiplayer_boundary": {
+				"ownership_scope": "player_profile_local",
+			},
+		}
+	else:
+		roster["units"] = _all_team_units.duplicate(true)
+	roster["roster_size"] = Array(roster.get("units", [])).size()
+	return roster
+
+
+func _replace_roster_units(updated_units: Array) -> void:
+	var units_by_id: Dictionary = {}
+	var next_all_units: Array = []
+	for unit_variant in updated_units:
+		if typeof(unit_variant) != TYPE_DICTIONARY:
+			continue
+		var unit: Dictionary = Dictionary(unit_variant).duplicate(true)
+		var unit_id: String = String(unit.get("unit_id", "")).strip_edges()
+		if unit_id.is_empty():
+			continue
+		units_by_id[unit_id] = unit
+		next_all_units.append(unit)
+	if next_all_units.is_empty():
+		return
+	_all_team_units = next_all_units
+	_available_team_units = _replace_units_by_id(_available_team_units, units_by_id)
+
+
+func _replace_units_by_id(source_units: Array, units_by_id: Dictionary) -> Array:
+	var result: Array = []
+	for unit_variant in source_units:
+		if typeof(unit_variant) != TYPE_DICTIONARY:
+			continue
+		var unit: Dictionary = Dictionary(unit_variant)
+		var unit_id: String = String(unit.get("unit_id", "")).strip_edges()
+		if units_by_id.has(unit_id):
+			result.append(Dictionary(units_by_id.get(unit_id, {})).duplicate(true))
+		else:
+			result.append(unit.duplicate(true))
+	return result
 
 
 func _release_active_mission() -> void:
@@ -628,6 +814,7 @@ func _on_homebase_transport_timer_timeout() -> void:
 			active_mission_craft_transfers.append(entry)
 	_pending_mission_craft_transfers = active_mission_craft_transfers
 
+	_advance_air_asset_recoveries(1.0)
 	var fob_changed: bool = false
 	for entry_variant in completed_team_transfers:
 		_complete_homebase_team_transfer(Dictionary(entry_variant))
@@ -646,6 +833,26 @@ func _on_homebase_transport_timer_timeout() -> void:
 	_refresh_homebase_screen()
 	_refresh_map_screen()
 	_ensure_transport_timer_state()
+
+
+func _advance_air_asset_recoveries(delta_seconds: float) -> bool:
+	if _air_asset_recovery_by_craft.is_empty():
+		return false
+	var changed: bool = false
+	var next_recoveries: Dictionary = {}
+	for craft_id_variant in _air_asset_recovery_by_craft.keys():
+		var craft_id: String = String(craft_id_variant).strip_edges()
+		if craft_id.is_empty():
+			continue
+		var previous_state: Dictionary = Dictionary(_air_asset_recovery_by_craft.get(craft_id, {})).duplicate(true)
+		var next_state: Dictionary = Dictionary(AIR_ASSET_RECOVERY_STATE_SCRIPT.call("tick_recovery", previous_state, delta_seconds)).duplicate(true)
+		next_recoveries[craft_id] = next_state
+		if JSON.stringify(previous_state) != JSON.stringify(next_state):
+			changed = true
+		if String(next_state.get("meta_state", "craft_available")) == "craft_available":
+			_aircraft_location_by_craft[craft_id] = "homebase"
+	_air_asset_recovery_by_craft = next_recoveries
+	return changed
 
 
 func _complete_homebase_team_transfer(entry: Dictionary) -> void:
@@ -710,6 +917,19 @@ func _find_pending_mission_craft_transfer(craft_id: String) -> Dictionary:
 	return {}
 
 
+func _remove_pending_mission_craft_transfer(craft_id: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return
+	var retained: Array = []
+	for entry_variant in _pending_mission_craft_transfers:
+		var entry: Dictionary = Dictionary(entry_variant).duplicate(true)
+		if String(entry.get("craft_id", "")).strip_edges() == normalized_craft_id:
+			continue
+		retained.append(entry)
+	_pending_mission_craft_transfers = retained
+
+
 func _append_unit_to_fob(unit_id: String) -> void:
 	if unit_id.is_empty() or _selected_unit_ids.has(unit_id):
 		return
@@ -732,7 +952,7 @@ func _refresh_homebase_screen() -> void:
 		String(selected_mission.get("mission_id", _selected_mission_id)).strip_edges()
 	)
 	homebase_screen.set_transport_state(
-		_homebase_aircraft_definitions,
+		_build_homebase_aircraft_definitions_with_recovery(),
 		_assigned_aircraft_pilot_by_craft,
 		_pending_homebase_team_transfers,
 		_pending_homebase_pilot_transfers,
@@ -751,6 +971,38 @@ func _refresh_homebase_screen() -> void:
 		)
 	else:
 		homebase_screen.set_mission_launch_state(_has_preview_deployed_mission_payload(), "Fireteam already deployed on the mission map. Start live mission when ready.")
+	if homebase_screen.has_method("set_personnel_events"):
+		homebase_screen.call("set_personnel_events", Array(_last_mission_result.get("personnel_events", [])))
+
+
+func _build_homebase_aircraft_definitions_with_recovery() -> Array:
+	var definitions: Array = []
+	for craft_variant in _homebase_aircraft_definitions:
+		if typeof(craft_variant) != TYPE_DICTIONARY:
+			continue
+		var craft_def: Dictionary = Dictionary(craft_variant).duplicate(true)
+		var craft_id: String = String(craft_def.get("craft_id", "")).strip_edges()
+		if _air_asset_recovery_by_craft.has(craft_id):
+			craft_def.merge(Dictionary(AIR_ASSET_RECOVERY_STATE_SCRIPT.call("build_transport_patch", Dictionary(_air_asset_recovery_by_craft.get(craft_id, {})))), true)
+		definitions.append(craft_def)
+	return definitions
+
+
+func _load_persistent_player_roster() -> void:
+	var load_result: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("load_roster", PLAYER_ROSTER_STORE_SCRIPT.DEFAULT_PROFILE_ID))
+	if not bool(load_result.get("ok", false)):
+		set_meta("player_roster_source", "unit_roster_presets")
+		set_meta("player_roster_diagnostics", PackedStringArray(load_result.get("diagnostics", PackedStringArray())))
+		return
+	var units: Array = Array(PLAYER_ROSTER_STORE_SCRIPT.call("roster_to_unit_array", Dictionary(load_result.get("roster", {}))))
+	if units.is_empty():
+		set_meta("player_roster_source", "unit_roster_presets_empty_save")
+		return
+	_all_team_units = units.duplicate(true)
+	_available_team_units = units.duplicate(true)
+	set_meta("player_roster_source", "user_save")
+	set_meta("player_roster_profile_id", String(load_result.get("profile_id", PLAYER_ROSTER_STORE_SCRIPT.DEFAULT_PROFILE_ID)))
+	set_meta("player_roster_store_path", String(load_result.get("path", "")))
 
 
 func _refresh_fob_screen() -> void:
@@ -775,7 +1027,7 @@ func _ensure_transport_timer_state() -> void:
 	var transport_timer := _get_transport_timer()
 	if transport_timer == null:
 		return
-	var has_pending_transfers: bool = not _pending_homebase_team_transfers.is_empty() or not _pending_homebase_pilot_transfers.is_empty() or not _pending_homebase_cargo_loads.is_empty() or not _pending_mission_craft_transfers.is_empty()
+	var has_pending_transfers: bool = not _pending_homebase_team_transfers.is_empty() or not _pending_homebase_pilot_transfers.is_empty() or not _pending_homebase_cargo_loads.is_empty() or not _pending_mission_craft_transfers.is_empty() or _has_active_air_asset_recovery()
 	transport_timer.wait_time = 1.0
 	transport_timer.one_shot = false
 	if has_pending_transfers:
@@ -783,6 +1035,15 @@ func _ensure_transport_timer_state() -> void:
 			transport_timer.start()
 	else:
 		transport_timer.stop()
+
+
+func _has_active_air_asset_recovery() -> bool:
+	for recovery_variant in _air_asset_recovery_by_craft.values():
+		if typeof(recovery_variant) != TYPE_DICTIONARY:
+			continue
+		if bool(AIR_ASSET_RECOVERY_STATE_SCRIPT.call("is_recovery_active", Dictionary(recovery_variant))):
+			return true
+	return false
 
 
 func _build_homebase_team_transfer_entry(unit_ids: PackedStringArray) -> Dictionary:
@@ -911,6 +1172,12 @@ func _build_transport_craft_states() -> Array:
 			mission_phase = "waiting"
 		elif craft_location != "fob" and craft_location != "transit":
 			craft_location = "homebase"
+		var recovery_state: Dictionary = Dictionary(_air_asset_recovery_by_craft.get(craft_id, {})).duplicate(true)
+		var recovery_patch: Dictionary = {}
+		var recovery_active: bool = false
+		if not recovery_state.is_empty():
+			recovery_patch = Dictionary(AIR_ASSET_RECOVERY_STATE_SCRIPT.call("build_transport_patch", recovery_state)).duplicate(true)
+			recovery_active = bool(recovery_patch.get("air_asset_unavailable", false))
 
 		var passenger_count: int = 0
 		if mission_phase == "to_mission" or mission_phase == "waiting":
@@ -933,32 +1200,33 @@ func _build_transport_craft_states() -> Array:
 		elif craft_location == "fob":
 			progress_value = 100.0
 
-		craft_states.append(
-			{
-				"craft_id": craft_id,
-				"craft_type": String(craft_def.get("craft_type", "dropship")).strip_edges(),
-				"display_name": String(craft_def.get("display_name", craft_id)).strip_edges(),
-				"summary": String(craft_def.get("summary", "")).strip_edges(),
-				"texture_path": String(craft_def.get("texture_path", "")).strip_edges(),
-				"location": craft_location,
-				"visible_in_homebase": craft_location == "homebase",
-				"visible_in_fob": craft_location == "fob" or (craft_location == "transit" and not pilot_transfer_entry.is_empty()),
-				"is_in_transit": is_in_transit,
-				"pilot_unit_id": pilot_unit_id,
-				"pilot_display_name": _resolve_unit_display_name(pilot_unit_id),
-				"pilot_portrait_path": _resolve_unit_portrait_path(pilot_unit_id),
-				"cargo_id": cargo_id,
-				"cargo_display_name": _build_homebase_cargo_display_name(craft_def, cargo_id),
-				"passenger_count": passenger_count,
-				"transfer_progress": progress_value,
-				"transfer_eta_seconds": eta_seconds,
-				"is_boardable": String(craft_def.get("craft_type", "dropship")).strip_edges() == "dropship" and craft_location == "fob" and mission_phase.is_empty(),
-				"mission_phase": mission_phase,
-				"mission_waiting": mission_phase == "waiting",
-				"mission_transit_to_map": mission_phase == "to_mission",
-				"mission_transit_to_fob": mission_phase == "to_fob",
-			}
-		)
+		var craft_state: Dictionary = {
+			"craft_id": craft_id,
+			"craft_type": String(craft_def.get("craft_type", "dropship")).strip_edges(),
+			"display_name": String(craft_def.get("display_name", craft_id)).strip_edges(),
+			"summary": String(craft_def.get("summary", "")).strip_edges(),
+			"texture_path": String(craft_def.get("texture_path", "")).strip_edges(),
+			"location": craft_location,
+			"visible_in_homebase": craft_location == "homebase" or recovery_active,
+			"visible_in_fob": craft_location == "fob" or recovery_active or (craft_location == "transit" and not pilot_transfer_entry.is_empty()),
+			"is_in_transit": is_in_transit,
+			"pilot_unit_id": pilot_unit_id,
+			"pilot_display_name": _resolve_unit_display_name(pilot_unit_id),
+			"pilot_portrait_path": _resolve_unit_portrait_path(pilot_unit_id),
+			"cargo_id": cargo_id,
+			"cargo_display_name": _build_homebase_cargo_display_name(craft_def, cargo_id),
+			"passenger_count": passenger_count,
+			"transfer_progress": progress_value,
+			"transfer_eta_seconds": eta_seconds,
+			"is_boardable": (not recovery_active) and String(craft_def.get("craft_type", "dropship")).strip_edges() == "dropship" and craft_location == "fob" and mission_phase.is_empty(),
+			"mission_phase": mission_phase,
+			"mission_waiting": mission_phase == "waiting",
+			"mission_transit_to_map": mission_phase == "to_mission",
+			"mission_transit_to_fob": mission_phase == "to_fob",
+		}
+		if not recovery_patch.is_empty():
+			craft_state.merge(recovery_patch, true)
+		craft_states.append(craft_state)
 	return craft_states
 
 

@@ -2,6 +2,7 @@ class_name NPCMetaCard
 extends PanelContainer
 
 const META_UNIT_PROFILE_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile.gd")
+const NPC_RANK_BADGE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
 
 signal card_pressed(unit_id, profile)
 
@@ -109,6 +110,11 @@ func _ensure_ui() -> void:
 	traits_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	vbox.add_child(traits_label)
 
+	var badge_row := HBoxContainer.new()
+	badge_row.name = "BadgeRow"
+	badge_row.add_theme_constant_override("separation", 4)
+	vbox.add_child(badge_row)
+
 	var status_label := Label.new()
 	status_label.name = "StatusLabel"
 	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -120,6 +126,7 @@ func _refresh_card() -> void:
 	var name_label: Label = get_node("Margin/VBox/NameLabel")
 	var skills_label: Label = get_node("Margin/VBox/SkillsLabel")
 	var traits_label: Label = get_node("Margin/VBox/TraitsLabel")
+	var badge_row: HBoxContainer = get_node("Margin/VBox/BadgeRow")
 	var status_label: Label = get_node("Margin/VBox/StatusLabel")
 
 	var display_name: String = "Unknown Unit"
@@ -135,6 +142,7 @@ func _refresh_card() -> void:
 	name_label.text = display_name
 	skills_label.text = skill_summary_text
 	traits_label.text = trait_summary_text
+	_populate_badge_row(badge_row)
 	status_label.text = status_line
 	status_label.visible = _show_status_line and not status_line.is_empty()
 
@@ -194,6 +202,32 @@ func _build_status_line() -> String:
 		lines.append(secondary_text)
 
 	return " | ".join(lines)
+
+
+func _populate_badge_row(badge_row: HBoxContainer) -> void:
+	for child in badge_row.get_children():
+		badge_row.remove_child(child)
+		child.queue_free()
+	var badges: Array = Array(NPC_RANK_BADGE_RESOLVER_SCRIPT.call("get_badges_for_profile", _profile))
+	badge_row.visible = not badges.is_empty()
+	for badge_variant in badges:
+		if typeof(badge_variant) != TYPE_DICTIONARY:
+			continue
+		var badge: Dictionary = Dictionary(badge_variant)
+		var texture_rect := TextureRect.new()
+		texture_rect.name = "RankBadge_%s" % String(badge.get("badge_key", badge.get("badge_id", "unknown"))).strip_edges()
+		texture_rect.custom_minimum_size = Vector2(18.0, 18.0)
+		texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		texture_rect.tooltip_text = "%s: %s" % [String(badge.get("label", "Badge")), String(badge.get("reason", ""))]
+		var badge_path: String = String(badge.get("path", "")).strip_edges()
+		if not badge_path.is_empty() and ResourceLoader.exists(badge_path):
+			texture_rect.texture = load(badge_path) as Texture2D
+		if texture_rect.texture == null:
+			texture_rect.modulate = Color(1.0, 0.45, 0.35, 0.95)
+			texture_rect.set_meta("missing_rank_badge_asset", true)
+		badge_row.add_child(texture_rect)
 
 
 func _can_emit_press() -> bool:

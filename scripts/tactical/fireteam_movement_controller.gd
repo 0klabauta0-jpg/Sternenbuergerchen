@@ -26,6 +26,7 @@ const BOUNDING_MIN_STEP_DISTANCE: float = 84.0
 const BOUNDING_MAX_STEP_DISTANCE: float = 176.0
 const CATERPILLAR_MIN_STEP_DISTANCE: float = 56.0
 const CATERPILLAR_MAX_STEP_DISTANCE: float = 104.0
+const READABILITY_MULTI_TILE_DISTANCE: float = 48.0
 const FORMATION_SLOT_LAYOUT := [
 	Vector2.ZERO,
 	Vector2(-0.85, 0.65),
@@ -119,6 +120,7 @@ func start_execution(
 		"leader_unit_id": leader_unit_id,
 		"requested_target_position": target_position,
 		"final_target_position": resolved_target_position,
+		"origin_anchor_position": origin_anchor,
 		"progress_anchor_position": origin_anchor,
 		"cover_priority": cover_priority,
 		"cohesion_threshold": maxf(cohesion_threshold * lerpf(1.25, 0.88, float(execution_profile.get("execution_cohesion", 0.65))), 1.0),
@@ -134,6 +136,7 @@ func start_execution(
 		"order_target_offset": resolved_target_position - target_position,
 		"stage_index": 0,
 		"completed_stage_count": 0,
+		"current_anchor_origin_position": origin_anchor,
 		"current_anchor_target_position": resolved_target_position,
 		"current_target_positions": {},
 		"current_moving_unit_ids": PackedStringArray(),
@@ -240,6 +243,7 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root) -> 
 			state["next_group_index"] = (sequence_index + 1) % sequence.size()
 		_:
 			moving_unit_ids = _packed_unit_ids(member_records)
+	var anchor_origin_position: Vector2 = Vector2(state.get("progress_anchor_position", state.get("current_anchor_target_position", Vector2.ZERO)))
 	var next_anchor_target: Vector2 = _resolve_stage_anchor_target(state, member_records, group_count)
 	var stage_scatter_factor: float = _resolve_stage_formation_scatter_factor(state, next_anchor_target)
 	var formation_targets: Dictionary = _build_formation_targets(
@@ -295,6 +299,7 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root) -> 
 			_build_stage_command_token(state, unit_id)
 		):
 			issued_count += 1
+	state["current_anchor_origin_position"] = anchor_origin_position
 	state["current_anchor_target_position"] = next_anchor_target
 	state["current_target_positions"] = formation_targets
 	state["current_moving_unit_ids"] = moving_unit_ids
@@ -879,25 +884,167 @@ func _read_skill_value(unit, method_name: String, fallback: float) -> float:
 	return clampf(float(unit.call(method_name)), 0.0, 1.0)
 
 
+func _build_readability_snapshot(state: Dictionary) -> Dictionary:
+	var style: String = String(state.get("effective_style", ADVANCE_STYLE_RUSH)).strip_edges().to_lower()
+	var moving_unit_ids: PackedStringArray = PackedStringArray(state.get("current_moving_unit_ids", PackedStringArray()))
+	var covering_unit_ids: PackedStringArray = PackedStringArray(state.get("current_covering_unit_ids", PackedStringArray()))
+	var group_count: int = maxi(int(state.get("group_count_for_anchor", 1)), 1)
+	var group_index: int = clampi(int(state.get("groups_issued_for_anchor", 1)), 1, group_count)
+	var bound_count: int = _estimate_bound_count(state)
+	var bound_index: int = clampi(int(floor(float(int(state.get("stage_index", 0))) / float(group_count))) + 1, 1, bound_count)
+	var bound_origin_position: Vector2 = Vector2(state.get("current_anchor_origin_position", state.get("progress_anchor_position", Vector2.ZERO)))
+	var bound_target_position: Vector2 = Vector2(state.get("current_anchor_target_position", state.get("final_target_position", Vector2.ZERO)))
+	var bound_distance: float = bound_origin_position.distance_to(bound_target_position)
+	var status_line: String = _build_readability_status_line(style, bound_index, bound_count, group_index, group_count, moving_unit_ids, covering_unit_ids, bool(state.get("simplified_due_to_losses", false)))
+	return {
+		"advance_style": style,
+		"style_code": _get_readability_style_code(style),
+		"moving_unit_ids": moving_unit_ids,
+		"covering_unit_ids": covering_unit_ids,
+		"bound_index": bound_index,
+		"bound_count": bound_count,
+		"group_index": group_index,
+		"group_count": group_count,
+		"bound_origin_position": bound_origin_position,
+		"bound_target_position": bound_target_position,
+		"bound_distance": bound_distance,
+		"multi_tile_bound": bound_distance >= READABILITY_MULTI_TILE_DISTANCE,
+		"status_line": status_line,
+		"movement_sequence": PackedStringArray(state.get("movement_sequence", PackedStringArray())),
+		"group_cycle": _duplicate_group_cycle(Array(state.get("group_cycle", []))),
+	}
+
+
+func _estimate_bound_count(state: Dictionary) -> int:
+	var style: String = String(state.get("effective_style", ADVANCE_STYLE_RUSH)).strip_edges().to_lower()
+	if style == ADVANCE_STYLE_RUSH:
+		return 1
+	var origin_anchor_position: Vector2 = Vector2(state.get("origin_anchor_position", state.get("progress_anchor_position", Vector2.ZERO)))
+	var final_target_position: Vector2 = Vector2(state.get("final_target_position", origin_anchor_position))
+	var travel_distance: float = origin_anchor_position.distance_to(final_target_position)
+	if travel_distance <= ANCHOR_REACHED_RADIUS:
+		return 1
+	var step_distance: float = _estimate_step_distance(state)
+	return maxi(int(ceil(travel_distance / maxf(step_distance, 1.0))), 1)
+
+
+func _estimate_step_distance(state: Dictionary) -> float:
+	var style: String = String(state.get("effective_style", ADVANCE_STYLE_RUSH)).strip_edges().to_lower()
+	var cohesion_threshold: float = maxf(float(state.get("cohesion_threshold", 100.0)), 1.0)
+	if style == ADVANCE_STYLE_CATERPILLAR:
+		return clampf(cohesion_threshold * 0.62, CATERPILLAR_MIN_STEP_DISTANCE, CATERPILLAR_MAX_STEP_DISTANCE)
+	if style == ADVANCE_STYLE_BOUNDING:
+		return clampf(cohesion_threshold * 1.12, BOUNDING_MIN_STEP_DISTANCE, BOUNDING_MAX_STEP_DISTANCE)
+	var origin_anchor_position: Vector2 = Vector2(state.get("origin_anchor_position", state.get("progress_anchor_position", Vector2.ZERO)))
+	var final_target_position: Vector2 = Vector2(state.get("final_target_position", origin_anchor_position))
+	return maxf(origin_anchor_position.distance_to(final_target_position), 1.0)
+
+
+func _get_readability_style_code(style: String) -> String:
+	match style.strip_edges().to_lower():
+		ADVANCE_STYLE_BOUNDING:
+			return "BND"
+		ADVANCE_STYLE_CATERPILLAR, ADVANCE_STYLE_CREEP:
+			return "CAT"
+		ADVANCE_STYLE_RUSH:
+			return "RSH"
+		_:
+			return "MOV"
+
+
+func _build_readability_status_line(
+	style: String,
+	bound_index: int,
+	bound_count: int,
+	group_index: int,
+	group_count: int,
+	moving_unit_ids: PackedStringArray,
+	covering_unit_ids: PackedStringArray,
+	simplified_due_to_losses: bool
+) -> String:
+	var style_code: String = _get_readability_style_code(style)
+	var first_part: String = "%s %d/%d" % [style_code, bound_index, maxi(bound_count, 1)]
+	if group_count > 1:
+		first_part = "%s G%d/%d" % [first_part, group_index, group_count]
+	var parts: PackedStringArray = PackedStringArray([first_part])
+	parts.append(_format_readability_actor_part(moving_unit_ids, "moves", "move"))
+	if not covering_unit_ids.is_empty():
+		parts.append(_format_readability_actor_part(covering_unit_ids, "covers", "cover"))
+	if simplified_due_to_losses:
+		parts.append("LOSS")
+	return " | ".join(parts)
+
+
+func _format_readability_actor_part(unit_ids: PackedStringArray, singular_label: String, plural_label: String) -> String:
+	if unit_ids.is_empty():
+		return "0 %s" % plural_label
+	if unit_ids.size() == 1:
+		return "%s %s" % [_compact_unit_id_label(String(unit_ids[0])), singular_label]
+	return "%d %s" % [unit_ids.size(), plural_label]
+
+
+func _compact_unit_id_label(unit_id: String) -> String:
+	var normalized: String = unit_id.strip_edges()
+	if normalized.is_empty():
+		return "-"
+	var parts: PackedStringArray = normalized.split("_", false)
+	var value: String = normalized
+	if not parts.is_empty():
+		value = String(parts[parts.size() - 1])
+	value = value.substr(0, mini(value.length(), 10))
+	return value.to_upper()
+
+
+func _duplicate_group_cycle(group_cycle: Array) -> Array:
+	var result: Array = []
+	for group_variant in group_cycle:
+		result.append(PackedStringArray(group_variant))
+	return result
+
+
 func _build_public_state(state: Dictionary) -> Dictionary:
 	if state.is_empty():
 		return {}
+	var moving_unit_ids: PackedStringArray = PackedStringArray(state.get("current_moving_unit_ids", PackedStringArray()))
+	var covering_unit_ids: PackedStringArray = PackedStringArray(state.get("current_covering_unit_ids", PackedStringArray()))
+	var readability: Dictionary = _build_readability_snapshot(state)
 	return {
 		"fireteam_id": String(state.get("fireteam_id", "")),
 		"phase": int(state.get("phase", -1)),
 		"command_type": String(state.get("command_type", "")),
 		"raw_style": String(state.get("raw_style", "")),
 		"effective_style": String(state.get("effective_style", "")),
+		"advance_style": String(readability.get("advance_style", "")),
+		"style_code": String(readability.get("style_code", "")),
 		"leader_unit_id": String(state.get("leader_unit_id", "")),
 		"stage_index": int(state.get("stage_index", 0)),
 		"completed_stage_count": int(state.get("completed_stage_count", 0)),
 		"requested_target_position": Vector2(state.get("requested_target_position", state.get("final_target_position", Vector2.ZERO))),
+		"origin_anchor_position": Vector2(state.get("origin_anchor_position", state.get("progress_anchor_position", Vector2.ZERO))),
+		"progress_anchor_position": Vector2(state.get("progress_anchor_position", Vector2.ZERO)),
+		"current_anchor_origin_position": Vector2(state.get("current_anchor_origin_position", state.get("progress_anchor_position", Vector2.ZERO))),
 		"current_anchor_target_position": Vector2(state.get("current_anchor_target_position", Vector2.ZERO)),
+		"bound_origin_position": Vector2(readability.get("bound_origin_position", Vector2.ZERO)),
+		"bound_target_position": Vector2(readability.get("bound_target_position", Vector2.ZERO)),
+		"bound_distance": float(readability.get("bound_distance", 0.0)),
+		"multi_tile_bound": bool(readability.get("multi_tile_bound", false)),
+		"bound_index": int(readability.get("bound_index", 1)),
+		"bound_count": int(readability.get("bound_count", 1)),
+		"group_index": int(readability.get("group_index", 1)),
+		"group_count": int(readability.get("group_count", 1)),
+		"group_count_for_anchor": int(state.get("group_count_for_anchor", 1)),
+		"groups_issued_for_anchor": int(state.get("groups_issued_for_anchor", 0)),
 		"final_target_position": Vector2(state.get("final_target_position", Vector2.ZERO)),
 		"order_target_offset": Vector2(state.get("order_target_offset", Vector2.ZERO)),
 		"current_target_positions": Dictionary(state.get("current_target_positions", {})).duplicate(true),
-		"current_moving_unit_ids": PackedStringArray(state.get("current_moving_unit_ids", PackedStringArray())),
-		"current_covering_unit_ids": PackedStringArray(state.get("current_covering_unit_ids", PackedStringArray())),
+		"current_moving_unit_ids": moving_unit_ids,
+		"current_covering_unit_ids": covering_unit_ids,
+		"moving_unit_ids": moving_unit_ids,
+		"covering_unit_ids": covering_unit_ids,
+		"movement_sequence": PackedStringArray(state.get("movement_sequence", PackedStringArray())),
+		"group_cycle": _duplicate_group_cycle(Array(state.get("group_cycle", []))),
+		"readability_status_line": String(readability.get("status_line", "")),
+		"map_readability": readability.duplicate(true),
 		"simplified_due_to_losses": bool(state.get("simplified_due_to_losses", false)),
 		"order_fidelity": float(state.get("order_fidelity", 0.65)),
 		"reaction_delay_seconds": float(state.get("reaction_delay_seconds", 0.25)),

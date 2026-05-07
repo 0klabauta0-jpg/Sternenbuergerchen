@@ -1,0 +1,66 @@
+{
+	"status": "TASK_205_weapon_fire_vfx_muzzle_flash_particles",
+	"source_id": "kenney_particle_pack",
+	"license": "Creative Commons Zero, CC0",
+	"source_doc": "res://docs/assets/weapon_fire_vfx_inventory.md",
+	"project_root": "res://Assets/curated/kenney/particles/muzzle/",
+	"runtime_contract": {
+		"driven_by": "authoritative_fire_events",
+		"no_damage_logic": true,
+		"no_client_combat_decision": true,
+		"max_muzzle_pngs": 8
+	},
+	"performance_budget": {
+		"task": "TASK_220",
+		"max_png_bytes": 262144,
+		"max_estimated_vram_bytes_per_png": 1048576,
+		"transparency_policy": "short_lived_alpha_only",
+		"warmup_candidate": true,
+		"warmup_side_effect_policy": "hidden_resource_load_no_fire_event"
+	},
+	"default_id": "muzzle_flash_01",
+	"default_by_weapon": {
+		"smg": "muzzle_flash_02",
+		"rifle": "muzzle_flash_01",
+		"sniper": "muzzle_flash_04",
+		"rail_gun": "muzzle_flash_05",
+		"rocket_launcher": "muzzle_flash_05"
+	},
+	"muzzle_flashes": [
+		{
+			"id": "muzzle_flash_01",
+			"path": "res://Assets/curated/kenney/particles/muzzle/muzzle_01.png",
+			"source_relpath": "PNG (Transparent)/muzzle_01.png",
+			"barrel_offset_world": 28.0,
+			"pixel_size": 0.010
+		},
+		{
+			"id": "muzzle_flash_02",
+			"path": "res://Assets/curated/kenney/particles/muzzle/muzzle_02.png",
+			"source_relpath": "PNG (Transparent)/muzzle_02.png",
+			"barrel_offset_world": 24.0,
+			"pixel_size": 0.009
+		},
+		{
+			"id": "muzzle_flash_03",
+			"path": "res://Assets/curated/kenney/particles/muzzle/muzzle_03.png",
+			"source_relpath": "PNG (Transparent)/muzzle_03.png",
+			"barrel_offset_world": 26.0,
+			"pixel_size": 0.010
+		},
+		{
+			"id": "muzzle_flash_04",
+			"path": "res://Assets/curated/kenney/particles/muzzle/muzzle_04.png",
+			"source_relpath": "PNG (Transparent)/muzzle_04.png",
+			"barrel_offset_world": 34.0,
+			"pixel_size": 0.011
+		},
+		{
+			"id": "muzzle_flash_05",
+			"path": "res://Assets/curated/kenney/particles/muzzle/muzzle_05.png",
+			"source_relpath": "PNG (Transparent)/muzzle_05.png",
+			"barrel_offset_world": 38.0,
+			"pixel_size": 0.012
+		}
+	]
+}

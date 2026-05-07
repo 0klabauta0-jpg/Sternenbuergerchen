@@ -120,6 +120,7 @@ func _make_simulation_context(enable_avoidance: bool, enable_debug: bool) -> Dic
 	var simulation_root = SIMULATION_ROOT_SCRIPT.new()
 	simulation_root.name = "SimulationRoot"
 	simulation_root.unit_registry_path = NodePath("../UnitRegistry")
+	simulation_root.unit_minimum_spacing_enabled = false
 	simulation_root.local_avoidance_enabled = enable_avoidance
 	simulation_root.local_avoidance_debug_enabled = enable_debug
 	simulation_root.local_avoidance_neighbor_radius = 72.0
@@ -165,6 +166,7 @@ func _make_terrain_context() -> Dictionary:
 	simulation_root.name = "SimulationRoot"
 	simulation_root.unit_registry_path = NodePath("../UnitRegistry")
 	simulation_root.terrain_registry_path = NodePath("../TerrainRegistry")
+	simulation_root.unit_minimum_spacing_enabled = false
 	scene.add_child(simulation_root)
 	var alpha = _make_unit("alpha", terrain_registry.grid_to_world(Vector2i(1, 1)))
 	var bravo = _make_unit("bravo", terrain_registry.grid_to_world(Vector2i(1, 1)))

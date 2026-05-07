@@ -34,6 +34,23 @@ func get_tile_at_grid(grid_pos: Vector2i):
 	return _tiles[grid_pos]
 
 
+func get_tile_by_id(tile_id: String):
+	var normalized_id: String = tile_id.strip_edges()
+	if normalized_id.is_empty():
+		return null
+	for tile_data in _tiles.values():
+		if String(tile_data.tile_id) == normalized_id:
+			return tile_data
+	return null
+
+
+func get_tile_id_at_grid(grid_pos: Vector2i) -> String:
+	var tile_data = get_tile_at_grid(grid_pos)
+	if tile_data == null:
+		return ""
+	return String(tile_data.tile_id)
+
+
 func get_tile_at_world(world_pos: Vector2):
 	var exact_grid: Vector2i = world_to_grid(world_pos)
 	if _tiles.has(exact_grid):
@@ -54,6 +71,18 @@ func get_tile_at_world(world_pos: Vector2):
 
 func get_all_tiles() -> Array:
 	return _tiles.values()
+
+
+func get_sorted_tiles() -> Array:
+	var tiles: Array = _tiles.values()
+	tiles.sort_custom(func(a, b) -> bool:
+		var grid_a: Vector2i = a.grid_position
+		var grid_b: Vector2i = b.grid_position
+		if grid_a.x == grid_b.x:
+			return grid_a.y < grid_b.y
+		return grid_a.x < grid_b.x
+	)
+	return tiles
 
 
 func is_walkable(grid_pos: Vector2i) -> bool:

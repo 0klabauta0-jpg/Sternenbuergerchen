@@ -2,6 +2,8 @@ class_name NPCCompactCard
 extends PanelContainer
 
 const META_UNIT_PROFILE_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile.gd")
+const NPC_RANK_BADGE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
+const PORTRAIT_IDENTITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
 
 signal card_pressed(unit_id, profile, source_context)
 signal card_open_requested(unit_id, profile, source_context)
@@ -201,9 +203,7 @@ func _ensure_ui() -> void:
 
 	var portrait_rect := TextureRect.new()
 	portrait_rect.name = "PortraitRect"
-	portrait_rect.custom_minimum_size = Vector2(64.0, 64.0)
-	portrait_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	portrait_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	PORTRAIT_IDENTITY_CATALOG_SCRIPT.apply_texture_rect_contract(portrait_rect, "roster")
 	hbox.add_child(portrait_rect)
 
 	var text_vbox := VBoxContainer.new()
@@ -226,6 +226,11 @@ func _ensure_ui() -> void:
 	data_b_label.name = "DataBLabel"
 	data_b_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text_vbox.add_child(data_b_label)
+
+	var badge_row := HBoxContainer.new()
+	badge_row.name = "BadgeRow"
+	badge_row.add_theme_constant_override("separation", 3)
+	text_vbox.add_child(badge_row)
 
 	var progress_bar := ProgressBar.new()
 	progress_bar.name = "ProgressBar"
@@ -255,6 +260,7 @@ func _refresh_card() -> void:
 	var name_label: Label = get_node("Margin/HBox/TextVBox/NameLabel")
 	var data_a_label: Label = get_node("Margin/HBox/TextVBox/DataALabel")
 	var data_b_label: Label = get_node("Margin/HBox/TextVBox/DataBLabel")
+	var badge_row: HBoxContainer = get_node("Margin/HBox/TextVBox/BadgeRow")
 	var margin: MarginContainer = get_node("Margin")
 	var hbox: HBoxContainer = get_node("Margin/HBox")
 	var text_vbox: VBoxContainer = get_node("Margin/HBox/TextVBox")
@@ -267,6 +273,7 @@ func _refresh_card() -> void:
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	data_a_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	data_b_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	badge_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	progress_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	data_a_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -315,17 +322,18 @@ func _refresh_card() -> void:
 		display_name = String(_profile.display_name if not String(_profile.display_name).is_empty() else _profile.unit_id)
 		data_a_text = _build_primary_data_text()
 		data_b_text = _build_secondary_data_text()
-		portrait_texture = _load_portrait_texture(String(_profile.portrait_path))
+		portrait_texture = _load_portrait_texture(String(_profile.portrait_id), String(_profile.portrait_path))
 
 	name_label.text = display_name
 	data_a_label.text = data_a_text
 	data_b_label.text = data_b_text
+	_populate_badge_row(badge_row)
 	portrait_rect.texture = portrait_texture
 	portrait_rect.modulate = Color(1.0, 1.0, 1.0, 1.0) if portrait_texture != null else Color(0.35, 0.37, 0.42, 1.0)
 	progress_bar.visible = _show_progress
 	progress_bar.value = _progress_value
 	progress_bar.modulate = Color(0.48, 0.82, 0.58, 1.0) if not _is_disabled else Color(0.42, 0.46, 0.44, 0.92)
-	_apply_density(margin, hbox, text_vbox, portrait_rect, name_label, data_a_label, data_b_label, progress_bar)
+	_apply_density(margin, hbox, text_vbox, portrait_rect, name_label, data_a_label, data_b_label, badge_row, progress_bar)
 
 	_apply_state_visuals(name_label, data_a_label, data_b_label)
 
@@ -362,6 +370,7 @@ func _apply_density(
 	name_label: Label,
 	data_a_label: Label,
 	data_b_label: Label,
+	badge_row: HBoxContainer,
 	progress_bar: ProgressBar
 ) -> void:
 	if _compact_mode:
@@ -374,6 +383,8 @@ func _apply_density(
 		var compact_height := 46.0 if is_mission_drop_pilot else COMPACT_CARD_MIN_SIZE.y
 		if _is_drag_preview and _drag_preview_size.y > compact_height:
 			compact_height = _drag_preview_size.y
+		if badge_row.visible:
+			compact_height = maxf(compact_height, 64.0)
 		if _show_progress:
 			compact_height = maxf(compact_height, 68.0)
 		custom_minimum_size = Vector2(compact_width, compact_height)
@@ -383,7 +394,8 @@ func _apply_density(
 		margin.add_theme_constant_override("margin_bottom", 2 if is_mission_drop_pilot else 4)
 		hbox.add_theme_constant_override("separation", 4 if is_mission_drop_pilot else 6)
 		text_vbox.add_theme_constant_override("separation", 0 if is_mission_drop_pilot else 1)
-		portrait_rect.custom_minimum_size = Vector2(30.0, 30.0) if is_mission_drop_pilot else Vector2(COMPACT_PORTRAIT_SIZE, COMPACT_PORTRAIT_SIZE)
+		portrait_rect.custom_minimum_size = Vector2(30.0, 30.0) if is_mission_drop_pilot else PORTRAIT_IDENTITY_CATALOG_SCRIPT.get_target_size("compact")
+		portrait_rect.set_meta("portrait_target_size", portrait_rect.custom_minimum_size)
 		var compact_text_width := 76.0 if is_mission_drop_pilot else COMPACT_TEXT_MIN_WIDTH
 		if _drag_preview_text_width > compact_text_width:
 			compact_text_width = _drag_preview_text_width
@@ -391,6 +403,7 @@ func _apply_density(
 		name_label.custom_minimum_size = Vector2(0.0, 12.0 if is_mission_drop_pilot else 14.0)
 		data_a_label.custom_minimum_size = Vector2(0.0, 10.0 if is_mission_drop_pilot else 12.0)
 		data_b_label.custom_minimum_size = Vector2(0.0, 10.0 if is_mission_drop_pilot else 12.0)
+		badge_row.custom_minimum_size = Vector2(0.0, 12.0)
 		name_label.add_theme_font_size_override("font_size", 10 if is_mission_drop_pilot else 12)
 		data_a_label.add_theme_font_size_override("font_size", 8 if is_mission_drop_pilot else 10)
 		data_b_label.add_theme_font_size_override("font_size", 8 if is_mission_drop_pilot else 10)
@@ -404,11 +417,12 @@ func _apply_density(
 	margin.add_theme_constant_override("margin_bottom", 6)
 	hbox.add_theme_constant_override("separation", 8)
 	text_vbox.add_theme_constant_override("separation", 2)
-	portrait_rect.custom_minimum_size = Vector2(64.0, 64.0)
+	PORTRAIT_IDENTITY_CATALOG_SCRIPT.apply_texture_rect_contract(portrait_rect, "roster")
 	text_vbox.custom_minimum_size = Vector2.ZERO
 	name_label.custom_minimum_size = Vector2.ZERO
 	data_a_label.custom_minimum_size = Vector2.ZERO
 	data_b_label.custom_minimum_size = Vector2.ZERO
+	badge_row.custom_minimum_size = Vector2(0.0, 18.0)
 	name_label.add_theme_font_size_override("font_size", 14)
 	data_a_label.add_theme_font_size_override("font_size", 12)
 	data_b_label.add_theme_font_size_override("font_size", 12)
@@ -424,30 +438,59 @@ func _get_compact_required_width() -> float:
 	return required_width
 
 
+func _populate_badge_row(badge_row: HBoxContainer) -> void:
+	for child in badge_row.get_children():
+		badge_row.remove_child(child)
+		child.queue_free()
+	var badges: Array = Array(NPC_RANK_BADGE_RESOLVER_SCRIPT.call("get_badges_for_profile", _profile))
+	badge_row.visible = not badges.is_empty()
+	if badges.is_empty():
+		return
+	var icon_size: float = 12.0 if _compact_mode else 16.0
+	for badge_variant in badges:
+		if typeof(badge_variant) != TYPE_DICTIONARY:
+			continue
+		var badge: Dictionary = Dictionary(badge_variant)
+		var texture_rect := TextureRect.new()
+		texture_rect.name = "RankBadge_%s" % String(badge.get("badge_key", badge.get("badge_id", "unknown"))).strip_edges()
+		texture_rect.custom_minimum_size = Vector2(icon_size, icon_size)
+		texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		texture_rect.tooltip_text = "%s: %s" % [String(badge.get("label", "Badge")), String(badge.get("reason", ""))]
+		var badge_path: String = String(badge.get("path", "")).strip_edges()
+		if not badge_path.is_empty() and ResourceLoader.exists(badge_path):
+			texture_rect.texture = load(badge_path) as Texture2D
+		if texture_rect.texture == null:
+			texture_rect.modulate = Color(1.0, 0.45, 0.35, 0.95)
+			texture_rect.set_meta("missing_rank_badge_asset", true)
+		badge_row.add_child(texture_rect)
+
+
 func _apply_state_visuals(name_label: Label, data_a_label: Label, data_b_label: Label) -> void:
 	var stylebox := StyleBoxFlat.new()
 	stylebox.border_width_left = 2
 	stylebox.border_width_top = 2
 	stylebox.border_width_right = 2
 	stylebox.border_width_bottom = 2
-	stylebox.corner_radius_top_left = 8
-	stylebox.corner_radius_top_right = 8
-	stylebox.corner_radius_bottom_right = 8
-	stylebox.corner_radius_bottom_left = 8
+	stylebox.corner_radius_top_left = 6
+	stylebox.corner_radius_top_right = 6
+	stylebox.corner_radius_bottom_right = 6
+	stylebox.corner_radius_bottom_left = 6
 
-	var name_color := Color(0.94, 0.96, 0.98, 1.0)
-	var detail_color := Color(0.76, 0.82, 0.90, 1.0)
+	var name_color := Color("edf3f6")
+	var detail_color := Color("a9b4bc")
 	if _is_disabled:
-		stylebox.bg_color = Color(0.11, 0.11, 0.13, 1.0)
-		stylebox.border_color = Color(0.28, 0.28, 0.31, 1.0)
-		name_color = Color(0.56, 0.58, 0.62, 1.0)
-		detail_color = Color(0.46, 0.48, 0.52, 1.0)
+		stylebox.bg_color = Color("1a2024")
+		stylebox.border_color = Color("3d454b")
+		name_color = Color("707981")
+		detail_color = Color("5b646c")
 	elif _is_selected:
-		stylebox.bg_color = Color(0.15, 0.22, 0.19, 1.0)
-		stylebox.border_color = Color(0.62, 0.84, 0.66, 1.0)
+		stylebox.bg_color = Color("0c1114")
+		stylebox.border_color = Color("63d1d2")
 	else:
-		stylebox.bg_color = Color(0.13, 0.14, 0.17, 1.0)
-		stylebox.border_color = Color(0.34, 0.38, 0.45, 1.0)
+		stylebox.bg_color = Color("151c21")
+		stylebox.border_color = Color("4d5a63")
 
 	add_theme_stylebox_override("panel", stylebox)
 	name_label.add_theme_color_override("font_color", name_color)
@@ -461,9 +504,5 @@ func _on_star_button_pressed() -> void:
 		lead_toggle_requested.emit(get_unit_id())
 
 
-func _load_portrait_texture(portrait_path: String) -> Texture2D:
-	if portrait_path.is_empty():
-		return null
-
-	var resource: Resource = load(portrait_path)
-	return resource as Texture2D
+func _load_portrait_texture(portrait_id: String, portrait_path: String) -> Texture2D:
+	return PORTRAIT_IDENTITY_CATALOG_SCRIPT.load_texture(portrait_id, portrait_path)

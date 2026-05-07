@@ -1,0 +1,124 @@
+{
+	"map_name": "enemy_tactics_smoke_32x32",
+	"mission_slot_count": 8,
+	"grid_size": {
+		"x": 32,
+		"y": 32
+	},
+	"tile_size": {
+		"half_width": 64,
+		"half_height": 32
+	},
+	"grid_origin": {
+		"x": 1024,
+		"y": 128
+	},
+	"markers": {
+		"spawn_alpha": {
+			"marker_type_id": "spawn_alpha",
+			"name": "Smoke Alpha",
+			"placement_context": "editor_only",
+			"symbol": "diamond",
+			"color": {"r": 0.38, "g": 0.78, "b": 1.0, "a": 0.98},
+			"x": 704,
+			"y": 1120
+		},
+		"spawn_enemy_hold": {
+			"marker_type_id": "spawn_bravo",
+			"name": "Enemy Hold",
+			"placement_context": "editor_only",
+			"symbol": "diamond",
+			"color": {"r": 1.0, "g": 0.56, "b": 0.42, "a": 0.98},
+			"x": 1024,
+			"y": 1152
+		},
+		"spawn_enemy_push": {
+			"marker_type_id": "spawn_bravo",
+			"name": "Enemy Push",
+			"placement_context": "editor_only",
+			"symbol": "diamond",
+			"color": {"r": 1.0, "g": 0.56, "b": 0.42, "a": 0.98},
+			"x": 1344,
+			"y": 1440
+		},
+		"objective_point": {
+			"marker_type_id": "objective_point",
+			"name": "Smoke Objective",
+			"placement_context": "editor_only",
+			"symbol": "flag",
+			"color": {"r": 1.0, "g": 0.86, "b": 0.24, "a": 0.98},
+			"x": 1152,
+			"y": 1344
+		}
+	},
+	"patrol_paths": {},
+	"enemy_team_configs": {
+		"default": {
+			"profile_id": "guard_hold",
+			"security_mode": "directional",
+			"facing": "west"
+		},
+		"smoke_hold": {
+			"profile_id": "guard_hold",
+			"security_mode": "360",
+			"facing": "west"
+		},
+		"smoke_cover": {
+			"profile_id": "defensive_cover",
+			"security_mode": "cover_arc",
+			"facing": "west"
+		},
+		"smoke_push": {
+			"profile_id": "aggressive_push",
+			"security_mode": "directional",
+			"facing": "west"
+		}
+	},
+	"tiles": [
+		{"grid_position": {"x": 12, "y": 20}, "type_id": "cliff_straight_ne", "walkable": false, "blocks_los": true, "cover_value": 0, "height_level": 2, "object_height": 0, "surface_type": "rock", "edge_type": "cliff"},
+		{"grid_position": {"x": 13, "y": 16}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 13, "y": 17}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 13, "y": 18}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 13, "y": 19}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 14, "y": 16}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 14, "y": 17}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "sand", "edge_type": "none"},
+		{"grid_position": {"x": 14, "y": 18}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "sand", "edge_type": "none"},
+		{"grid_position": {"x": 14, "y": 19}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "sand", "edge_type": "none"},
+		{"grid_position": {"x": 15, "y": 16}, "type_id": "slope_ne", "walkable": true, "blocks_los": false, "cover_value": 10, "height_level": 1, "object_height": 0, "surface_type": "ground", "edge_type": "slope"},
+		{"grid_position": {"x": 15, "y": 17}, "type_id": "slope_ne", "walkable": true, "blocks_los": false, "cover_value": 10, "height_level": 1, "object_height": 0, "surface_type": "ground", "edge_type": "slope"},
+		{"grid_position": {"x": 15, "y": 18}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 15, "y": 19}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 16, "y": 16}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 15, "height_level": 1, "object_height": 0, "surface_type": "ground", "edge_type": "slope"},
+		{"grid_position": {"x": 16, "y": 17}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 15, "height_level": 1, "object_height": 0, "surface_type": "ground", "edge_type": "slope"},
+		{"grid_position": {"x": 16, "y": 18}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 16, "y": 19}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 17, "y": 16}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 20, "height_level": 1, "object_height": 0, "surface_type": "ground", "edge_type": "slope"},
+		{"grid_position": {"x": 17, "y": 17}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 30, "height_level": 1, "object_height": 0, "surface_type": "ground", "edge_type": "slope"},
+		{"grid_position": {"x": 17, "y": 18}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 17, "y": 19}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 18, "y": 16}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 60, "height_level": 1, "object_height": 0, "surface_type": "rock", "edge_type": "slope"},
+		{"grid_position": {"x": 18, "y": 17}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 85, "height_level": 1, "object_height": 0, "surface_type": "rock", "edge_type": "slope"},
+		{"grid_position": {"x": 18, "y": 18}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 75, "height_level": 0, "object_height": 0, "surface_type": "rock", "edge_type": "none"},
+		{"grid_position": {"x": 18, "y": 19}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 65, "height_level": 0, "object_height": 0, "surface_type": "rock", "edge_type": "none"},
+		{"grid_position": {"x": 19, "y": 16}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 40, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 19, "y": 17}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 45, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 19, "y": 18}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 20, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 19, "y": 19}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 20, "y": 16}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 20, "y": 17}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 20, "y": 18}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 20, "y": 19}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 21, "y": 16}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 21, "y": 17}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 21, "y": 18}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 21, "y": 19}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 22, "y": 16}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 22, "y": 17}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 22, "y": 18}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 22, "y": 19}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 23, "y": 16}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 23, "y": 17}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 23, "y": 18}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"},
+		{"grid_position": {"x": 23, "y": 19}, "type_id": "ground_flat", "walkable": true, "blocks_los": false, "cover_value": 0, "height_level": 0, "object_height": 0, "surface_type": "ground", "edge_type": "none"}
+	]
+}

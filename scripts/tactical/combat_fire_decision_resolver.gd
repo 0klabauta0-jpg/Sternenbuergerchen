@@ -85,6 +85,8 @@ static func build_damage_effect(contact_pair: Dictionary, context: Dictionary) -
 		actual_target_id = String(misid_result.get("target_id", target_id)).strip_edges()
 		is_friendly_fire = true
 	var active_weapon_id: String = get_unit_active_weapon_id(attacker)
+	var weapon_tile_range: int = WEAPON_DATA_SCRIPT.get_effective_tile_range(active_weapon_id)
+	var weapon_range_world: float = _get_weapon_attack_range(attacker, actual_target, context)
 	var weapon_hit_chance: float = WEAPON_DATA_SCRIPT.get_base_hit_chance(active_weapon_id)
 	var friendly_team_id: String = String(context.get("friendly_team_id", ""))
 	var contact_state: String = String(contact_pair.get("contact_state", "")).strip_edges().to_lower()
@@ -101,6 +103,9 @@ static func build_damage_effect(contact_pair: Dictionary, context: Dictionary) -
 			"attacker_unit_id": attacker_id,
 			"attacker_team_id": _get_team_id(attacker),
 			"allow_friendly_fire": is_friendly_fire,
+			"weapon_id": active_weapon_id,
+			"weapon_tile_range": weapon_tile_range,
+			"weapon_range_world": weapon_range_world,
 			"damage": WEAPON_DATA_SCRIPT.get_damage_per_hit(active_weapon_id),
 			"hit_chance": weapon_hit_chance,
 			"damage_multiplier": float(context.get("base_damage_multiplier", 1.0)) * float(flank_modifiers.get("damage_multiplier", 1.0)),
@@ -177,10 +182,7 @@ static func is_target_attackable(attacker, target, context: Dictionary) -> bool:
 	var los_system = context.get("los_system", null)
 	if los_system == null or not los_system.has_method("has_line_of_sight_between_nodes"):
 		return false
-	var effective_range: Callable = context.get("get_effective_range", Callable())
-	var effective_attack_range: float = float(context.get("contact_range", 0.0))
-	if effective_range.is_valid():
-		effective_attack_range = float(effective_range.call(target))
+	var effective_attack_range: float = _get_weapon_attack_range(attacker, target, context)
 	return bool(los_system.call("has_line_of_sight_between_nodes", attacker, target, effective_attack_range, context.get("terrain_registry", null)))
 
 
@@ -216,6 +218,19 @@ static func get_unit_active_weapon_id(unit) -> String:
 		if WEAPON_DATA_SCRIPT.is_attack_weapon_id(weapon_id):
 			return weapon_id
 	return ""
+
+
+static func _get_weapon_attack_range(attacker, target, context: Dictionary) -> float:
+	var get_weapon_attack_range: Callable = context.get("get_weapon_attack_range", Callable())
+	if get_weapon_attack_range.is_valid():
+		return maxf(float(get_weapon_attack_range.call(attacker, target)), 0.0)
+	var active_weapon_id: String = get_unit_active_weapon_id(attacker)
+	if not active_weapon_id.is_empty():
+		return WEAPON_DATA_SCRIPT.get_effective_world_range(active_weapon_id, context.get("terrain_registry", null))
+	var effective_range: Callable = context.get("get_effective_range", Callable())
+	if effective_range.is_valid():
+		return maxf(float(effective_range.call(target)), 0.0)
+	return maxf(float(context.get("contact_range", 0.0)), 0.0)
 
 
 static func _get_team_id(unit) -> String:

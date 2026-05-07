@@ -2,6 +2,7 @@ class_name LocalAvoidanceResolver
 extends RefCounted
 
 const DEFAULT_AGENT_RADIUS: float = 18.0
+const DEFAULT_MINIMUM_SPACING: float = DEFAULT_AGENT_RADIUS * 2.0
 const DEFAULT_NEIGHBOR_RADIUS: float = 56.0
 const DEFAULT_CELL_SIZE: float = 64.0
 const DEFAULT_MAX_NEIGHBORS: int = 8
@@ -16,6 +17,23 @@ var _cell_agents: Dictionary = {}
 func clear() -> void:
 	_agents_by_id.clear()
 	_cell_agents.clear()
+
+
+static func build_spaced_line_targets(unit_ids: PackedStringArray, anchor_position: Vector2, advance_direction: Vector2, minimum_distance: float = DEFAULT_MINIMUM_SPACING) -> Dictionary:
+	var result: Dictionary = {}
+	var count: int = unit_ids.size()
+	if count <= 0:
+		return result
+	var direction: Vector2 = advance_direction.normalized() if not advance_direction.is_zero_approx() else Vector2.RIGHT
+	var lateral: Vector2 = direction.orthogonal()
+	var spacing: float = maxf(minimum_distance, 1.0)
+	var centered_offset: float = float(count - 1) * 0.5
+	for index in range(count):
+		var unit_id: String = String(unit_ids[index]).strip_edges()
+		if unit_id.is_empty():
+			continue
+		result[unit_id] = anchor_position + lateral * ((float(index) - centered_offset) * spacing)
+	return result
 
 
 func build_from_units(units: Array, default_radius: float = DEFAULT_AGENT_RADIUS, next_cell_size: float = DEFAULT_CELL_SIZE) -> void:
@@ -114,6 +132,96 @@ func solve_velocity(
 	}
 
 
+func resolve_minimum_spacing_positions(
+	units: Array,
+	minimum_distance: float = DEFAULT_MINIMUM_SPACING,
+	terrain_registry = null,
+	max_iterations: int = 4
+) -> Dictionary:
+	var sorted_units: Array = units.duplicate()
+	sorted_units.sort_custom(_sort_units_by_id)
+	var positions_by_unit_id: Dictionary = {}
+	var initial_positions_by_unit_id: Dictionary = {}
+	var active_unit_ids: Array = []
+	for unit in sorted_units:
+		if not (unit is Node2D):
+			continue
+		var unit_id: String = _extract_unit_id(unit)
+		if unit_id.is_empty():
+			continue
+		active_unit_ids.append(unit_id)
+		positions_by_unit_id[unit_id] = (unit as Node2D).global_position
+		initial_positions_by_unit_id[unit_id] = (unit as Node2D).global_position
+
+	var resolved_minimum_distance: float = maxf(minimum_distance, 0.0)
+	var blocked_pairs: Array = []
+	var resolved_pair_count: int = 0
+	var iteration_count: int = maxi(max_iterations, 0)
+	for _iteration in range(iteration_count):
+		var moved_this_iteration: bool = false
+		for index_a in range(active_unit_ids.size()):
+			for index_b in range(index_a + 1, active_unit_ids.size()):
+				var unit_id_a: String = String(active_unit_ids[index_a])
+				var unit_id_b: String = String(active_unit_ids[index_b])
+				var position_a: Vector2 = Vector2(positions_by_unit_id.get(unit_id_a, Vector2.ZERO))
+				var position_b: Vector2 = Vector2(positions_by_unit_id.get(unit_id_b, Vector2.ZERO))
+				var delta: Vector2 = position_b - position_a
+				var distance: float = delta.length()
+				if distance >= resolved_minimum_distance - 0.001:
+					continue
+				var axis: Vector2 = delta.normalized() if distance > 0.001 else _deterministic_pair_axis(unit_id_a, unit_id_b)
+				var overlap: float = resolved_minimum_distance - distance
+				var move_a: Vector2 = -axis * overlap * 0.5
+				var move_b: Vector2 = axis * overlap * 0.5
+				var candidate_a: Vector2 = position_a + move_a
+				var candidate_b: Vector2 = position_b + move_b
+				var moved_pair: bool = false
+				if _is_position_walkable(candidate_a, terrain_registry) and _is_position_walkable(candidate_b, terrain_registry):
+					positions_by_unit_id[unit_id_a] = candidate_a
+					positions_by_unit_id[unit_id_b] = candidate_b
+					moved_pair = true
+				else:
+					var candidate_a_full: Vector2 = position_a - axis * overlap
+					var candidate_b_full: Vector2 = position_b + axis * overlap
+					if _is_position_walkable(candidate_a_full, terrain_registry):
+						positions_by_unit_id[unit_id_a] = candidate_a_full
+						moved_pair = true
+					elif _is_position_walkable(candidate_b_full, terrain_registry):
+						positions_by_unit_id[unit_id_b] = candidate_b_full
+						moved_pair = true
+				if moved_pair:
+					moved_this_iteration = true
+					resolved_pair_count += 1
+				else:
+					blocked_pairs.append({
+						"unit_id_a": unit_id_a,
+						"unit_id_b": unit_id_b,
+						"distance": distance,
+					})
+		if not moved_this_iteration:
+			break
+
+	var moved_unit_ids: Array = []
+	for unit_id_variant in active_unit_ids:
+		var unit_id: String = String(unit_id_variant)
+		var initial_position: Vector2 = Vector2(initial_positions_by_unit_id.get(unit_id, Vector2.ZERO))
+		var resolved_position: Vector2 = Vector2(positions_by_unit_id.get(unit_id, initial_position))
+		if initial_position.distance_to(resolved_position) > 0.001:
+			moved_unit_ids.append(unit_id)
+	moved_unit_ids.sort()
+
+	return {
+		"positions_by_unit_id": positions_by_unit_id.duplicate(true),
+		"moved_unit_ids": moved_unit_ids,
+		"active_unit_ids": active_unit_ids,
+		"minimum_distance": resolved_minimum_distance,
+		"minimum_distance_after": _calculate_minimum_distance_between_positions(positions_by_unit_id),
+		"resolved_pair_count": resolved_pair_count,
+		"blocked_pair_count": blocked_pairs.size(),
+		"blocked_pairs": blocked_pairs,
+	}
+
+
 func get_neighbors(position: Vector2, radius: float, exclude_unit_id: String = "", max_neighbors: int = DEFAULT_MAX_NEIGHBORS) -> Array:
 	var result: Array = []
 	var center_cell: Vector2i = _cell_for_position(position)
@@ -181,3 +289,38 @@ func _extract_unit_id(unit) -> String:
 
 func _deterministic_axis(unit_id: String, neighbor_id: String) -> Vector2:
 	return Vector2.UP if unit_id < neighbor_id else Vector2.DOWN
+
+
+func _deterministic_pair_axis(unit_id_a: String, unit_id_b: String) -> Vector2:
+	var pair_key: String = "%s:%s" % [unit_id_a, unit_id_b]
+	var bytes: PackedByteArray = pair_key.to_utf8_buffer()
+	var seed: int = 17
+	for value in bytes:
+		seed = int((seed * 31 + int(value)) % 360)
+	var angle: float = deg_to_rad(float(seed))
+	var axis := Vector2(cos(angle), sin(angle))
+	if axis.is_zero_approx():
+		return Vector2.RIGHT
+	return axis.normalized()
+
+
+func _is_position_walkable(position: Vector2, terrain_registry) -> bool:
+	if terrain_registry == null:
+		return true
+	if not terrain_registry.has_method("world_to_grid") or not terrain_registry.has_method("is_walkable"):
+		return true
+	return bool(terrain_registry.call("is_walkable", terrain_registry.call("world_to_grid", position)))
+
+
+func _calculate_minimum_distance_between_positions(positions_by_unit_id: Dictionary) -> float:
+	var unit_ids: Array = positions_by_unit_id.keys()
+	unit_ids.sort()
+	if unit_ids.size() < 2:
+		return INF
+	var minimum_distance: float = INF
+	for index_a in range(unit_ids.size()):
+		for index_b in range(index_a + 1, unit_ids.size()):
+			var position_a: Vector2 = Vector2(positions_by_unit_id.get(unit_ids[index_a], Vector2.ZERO))
+			var position_b: Vector2 = Vector2(positions_by_unit_id.get(unit_ids[index_b], Vector2.ZERO))
+			minimum_distance = minf(minimum_distance, position_a.distance_to(position_b))
+	return minimum_distance

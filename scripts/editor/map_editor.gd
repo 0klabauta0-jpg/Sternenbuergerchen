@@ -7,10 +7,12 @@ const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/ter
 const TERRAIN_MAP_RENDERER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_renderer.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
 const MISSION_SCENARIO_DATA_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_data.gd")
+const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
 const MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_primary_view_adapter.gd")
 const MAP_EDITOR_HEIGHT_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_height_tool.gd")
 const MAP_EDITOR_PATROL_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_patrol_tool.gd")
 const MAP_EDITOR_MARKER_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_marker_tool.gd")
+const MULTIPLAYER_MAP_MANIFEST_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_map_manifest.gd")
 const TILE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_SW.png")
 const CLIFF_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_SE.png")
 const CLIFF_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_SW.png")
@@ -181,10 +183,54 @@ func _ready() -> void:
 	_add_patrol_tool_controls()
 	_ensure_marker_editor_controls()
 	_ensure_mission_authoring_controls()
+	_ensure_authoring_status_controls()
+	_apply_contextual_help_ids()
 	_ensure_patrol_overlay()
 	_ensure_marker_overlay()
 	_ensure_3d_primary_view()
 	_load_map(map_file_path if not map_file_path.is_empty() else DEFAULT_MAP_PATH)
+
+
+func _apply_contextual_help_ids() -> void:
+	_apply_help_id(get_node_or_null("UI/PalettePanel"), "editor.tile_palette")
+	_apply_help_id(get_node_or_null("UI/PalettePanel/Margin/VBox/TileTypeList"), "editor.tile_palette")
+	_apply_help_id(get_node_or_null("UI/TopBar/Margin/HBox/BrushButton"), "editor.tile_palette")
+	_apply_help_id(_get_brush_size_option_button(), "editor.brush_size")
+	_apply_help_id(_get_height_tool_button(), "editor.height_tool")
+	_apply_help_id(_get_height_mode_option_button(), "editor.height_tool")
+	_apply_help_id(_get_height_spinbox(), "editor.height_tool")
+	_apply_help_id(get_node_or_null("UI/PropertyPanel/Margin/VBox/HeightRow"), "map_editor.height_tool")
+	_apply_help_id(_get_height_edge_option_button(), "editor.edge.slope")
+	_apply_help_id(_get_edge_type_option_button(), "editor.edge.cliff")
+	_apply_help_id(_get_surface_option_button(), "editor.surface")
+	_apply_help_id(_get_marker_tool_button(), "editor.object")
+	_apply_help_id(_get_add_marker_type_option_button(), "editor.object")
+	_apply_help_id(_get_add_marker_button(), "editor.object")
+	_apply_help_id(_get_marker_list(), "editor.object")
+	_apply_help_id(_get_remove_marker_button(), "editor.object")
+	_apply_help_id(get_node_or_null("UI/TopBar/Margin/HBox/LoadButton"), "editor.load")
+	_apply_help_id(get_node_or_null("UI/TopBar/Margin/HBox/SaveButton"), "editor.save")
+	_apply_help_id(get_node_or_null("UI/TopBar"), "map_editor.save_load")
+	_apply_help_id(get_node_or_null("UI/SaveAsDialog"), "editor.save_as")
+	_apply_help_id(_get_scenario_button("ScenarioLoadButton"), "editor.load")
+	_apply_help_id(_get_scenario_button("ScenarioSaveButton"), "editor.save")
+	_apply_help_id(_get_scenario_button("ScenarioSaveAsButton"), "editor.save_as")
+	_apply_help_id(_get_scenario_button("ScenarioLiveTestButton"), "editor.playtest")
+	_apply_help_id(_get_scenario_option_button("ScenarioEnemyTacticProfileOption"), "map_editor.tactical_profile")
+	_apply_help_id(_get_scenario_option_button("ScenarioEnemyHeavyRoleOption"), "map_editor.tactical_profile")
+	_apply_help_id(_get_scenario_option_button("ScenarioEnemyATWeaponOption"), "map_editor.tactical_profile")
+	_apply_help_id(_get_scenario_option_button("ScenarioAirAssetRiskOption"), "map_editor.tactical_profile")
+	_apply_help_id(_get_scenario_option_button("ScenarioLZThreatZoneOption"), "map_editor.tactical_profile")
+	_apply_help_id(_get_scenario_option_button("ScenarioCommIntensityOption"), "map_editor.tactical_profile")
+
+
+func _apply_help_id(node: Node, help_id: String) -> void:
+	if node == null:
+		return
+	var normalized_id: String = help_id.strip_edges()
+	if normalized_id.is_empty():
+		return
+	node.set_meta("help_id", normalized_id)
 
 
 func _process(delta: float) -> void:
@@ -544,24 +590,9 @@ func _apply_brush_at_world_position(world_position: Vector2) -> void:
 			if not _selected_type_id.is_empty() and _tile_catalog != null and _tile_catalog.has_type(_selected_type_id):
 				if dx == 0 and dy == 0:
 					_store_undo_state(target_tile)
-				var is_directional: bool = _selected_type_id.begins_with("cliff_") or _selected_type_id.begins_with("slope_")
-				if is_directional and (dx != 0 or dy != 0):
-					# Surrounding tiles get height + edge properties only, not directional type_id
-					var entry: Dictionary = _tile_catalog.get_type(_selected_type_id)
-					var patch: Dictionary = {
-						"height_level": int(entry.get("height_level", 0)),
-						"edge_type": String(entry.get("edge_type", "cliff")),
-						"walkable": bool(entry.get("walkable", true)),
-						"blocks_los": bool(entry.get("blocks_los", false)),
-						"surface_type": String(entry.get("surface_type", "ground")),
-					}
-					if _apply_tile_patch(target_tile, patch):
-						any_changed = true
-						_refresh_tile_visual(target_tile)
-				else:
-					if _tile_catalog.apply_type_to_tile(target_tile, _selected_type_id):
-						any_changed = true
-						_refresh_tile_visual(target_tile)
+				if _tile_catalog.apply_type_to_tile(target_tile, _selected_type_id):
+					any_changed = true
+					_refresh_tile_visual(target_tile)
 			else:
 				var patch: Dictionary = {
 					"walkable": _get_walkable_checkbox().button_pressed,
@@ -831,6 +862,7 @@ func _on_selection_tool_toggled(pressed: bool) -> void:
 			marker_tool_button.button_pressed = false
 		_is_painting = false
 		_last_painted_grid = Vector2i(-1, -1)
+	_refresh_authoring_status_controls()
 
 
 func _on_patrol_tool_toggled(pressed: bool) -> void:
@@ -847,6 +879,7 @@ func _on_patrol_tool_toggled(pressed: bool) -> void:
 			select_button.button_pressed = false
 	_update_patrol_topbar_state()
 	_refresh_patrol_overlay()
+	_refresh_authoring_status_controls()
 
 
 func _on_patrol_spawn_selected(index: int) -> void:
@@ -855,6 +888,7 @@ func _on_patrol_spawn_selected(index: int) -> void:
 		return
 	_patrol_spawn_id = String(spawn_selector.get_item_metadata(index)).strip_edges()
 	_refresh_patrol_overlay()
+	_refresh_authoring_status_controls()
 
 
 func _on_clear_patrol_pressed() -> void:
@@ -863,6 +897,7 @@ func _on_clear_patrol_pressed() -> void:
 	_terrain_map_data.call("set_patrol_path", _patrol_spawn_id, [])
 	_mark_dirty(true)
 	_refresh_patrol_overlay()
+	_refresh_authoring_status_controls()
 
 
 func _refresh_property_panel() -> void:
@@ -899,6 +934,7 @@ func _refresh_property_panel() -> void:
 			edge_type_option_button.select(edge_idx)
 		_set_property_controls_enabled(false)
 		_is_refreshing_property_controls = false
+		_refresh_authoring_status_controls()
 		return
 
 	tile_label.text = "Tile: (%d, %d)" % [tile_data.grid_position.x, tile_data.grid_position.y]
@@ -931,6 +967,7 @@ func _refresh_property_panel() -> void:
 		edge_type_option_button.select(edge_idx)
 	_set_property_controls_enabled(true)
 	_is_refreshing_property_controls = false
+	_refresh_authoring_status_controls()
 
 
 func _refresh_map_settings_panel() -> void:
@@ -1144,6 +1181,14 @@ func _ensure_mission_authoring_controls() -> void:
 		_add_scenario_spinbox_row(scenario_panel, "ScenarioTimeLimitRow", "Time:", "ScenarioTimeLimitSpinBox", 0.0, 7200.0, 30.0)
 		_add_scenario_line_edit_row(scenario_panel, "ScenarioEnemyIdsRow", "Enemies:", "ScenarioEnemyIdsLineEdit")
 		_add_scenario_option_row(scenario_panel, "ScenarioSpawnRow", "Spawn:", "ScenarioSpawnOption", "ScenarioSpawnTileButton", "Use Tile")
+		_add_scenario_select_row(scenario_panel, "ScenarioEnemyTacticProfileRow", "Tactic:", "ScenarioEnemyTacticProfileOption")
+		_add_scenario_select_row(scenario_panel, "ScenarioEnemySecurityModeRow", "Security:", "ScenarioEnemySecurityModeOption")
+		_add_scenario_select_row(scenario_panel, "ScenarioEnemyFacingRow", "Facing:", "ScenarioEnemyFacingOption")
+		_add_scenario_select_row(scenario_panel, "ScenarioEnemyHeavyRoleRow", "Heavy:", "ScenarioEnemyHeavyRoleOption")
+		_add_scenario_select_row(scenario_panel, "ScenarioEnemyATWeaponRow", "AT Wpn:", "ScenarioEnemyATWeaponOption")
+		_add_scenario_select_row(scenario_panel, "ScenarioAirAssetRiskRow", "AirRisk:", "ScenarioAirAssetRiskOption")
+		_add_scenario_select_row(scenario_panel, "ScenarioLZThreatZoneRow", "LZ Risk:", "ScenarioLZThreatZoneOption")
+		_add_scenario_select_row(scenario_panel, "ScenarioCommIntensityRow", "Comms:", "ScenarioCommIntensityOption")
 		_add_scenario_spinbox_row(scenario_panel, "ScenarioWaveCountRow", "Waves:", "ScenarioWaveCountSpinBox", 0.0, 20.0, 1.0)
 		_add_scenario_spinbox_row(scenario_panel, "ScenarioUnitsPerWaveRow", "Per Wave:", "ScenarioUnitsPerWaveSpinBox", 1.0, 20.0, 1.0)
 		_add_scenario_spinbox_row(scenario_panel, "ScenarioFirstWaveDelayRow", "First:", "ScenarioFirstWaveDelaySpinBox", 0.0, 900.0, 1.0)
@@ -1194,7 +1239,68 @@ func _ensure_mission_authoring_controls() -> void:
 		ui_root.add_child(save_dialog)
 
 	_connect_mission_authoring_signals()
+	_apply_contextual_help_ids()
 	_refresh_mission_authoring_controls()
+
+
+func _ensure_authoring_status_controls() -> void:
+	var panel_parent := get_node_or_null("UI/PropertyPanel/Margin/VBox") as VBoxContainer
+	if panel_parent == null:
+		return
+	var status_panel := panel_parent.get_node_or_null("AuthoringStatusPanel") as VBoxContainer
+	if status_panel == null:
+		var separator := HSeparator.new()
+		separator.name = "AuthoringStatusSeparator"
+		panel_parent.add_child(separator)
+
+		status_panel = VBoxContainer.new()
+		status_panel.name = "AuthoringStatusPanel"
+		status_panel.add_theme_constant_override("separation", 3)
+		panel_parent.add_child(status_panel)
+
+		var title_label := Label.new()
+		title_label.name = "AuthoringStatusTitle"
+		title_label.text = "Authoring Status"
+		status_panel.add_child(title_label)
+
+		for label_name in ["AuthoringToolStatusLabel", "AuthoringValidationLabel", "AuthoringManifestLabel"]:
+			var status_label := Label.new()
+			status_label.name = label_name
+			status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			status_panel.add_child(status_label)
+
+		var insert_index: int = panel_parent.get_node_or_null("MapSettingsSeparator").get_index() if panel_parent.get_node_or_null("MapSettingsSeparator") != null else 3
+		panel_parent.move_child(separator, insert_index)
+		panel_parent.move_child(status_panel, insert_index + 1)
+	_refresh_authoring_status_controls()
+
+
+func _refresh_authoring_status_controls() -> void:
+	var status_panel := get_node_or_null("UI/PropertyPanel/Margin/VBox/AuthoringStatusPanel") as VBoxContainer
+	if status_panel == null:
+		return
+	var snapshot: Dictionary = get_map_editor_usability_snapshot(false)
+	var validation: Dictionary = Dictionary(snapshot.get("validation", {}))
+	var manifest: Dictionary = Dictionary(snapshot.get("map_manifest", {}))
+	var tool_label := status_panel.get_node_or_null("AuthoringToolStatusLabel") as Label
+	var validation_label := status_panel.get_node_or_null("AuthoringValidationLabel") as Label
+	var manifest_label := status_panel.get_node_or_null("AuthoringManifestLabel") as Label
+	if tool_label != null:
+		var selected_grid: Vector2i = Vector2i(snapshot.get("selected_grid", Vector2i(-1, -1)))
+		var selected_text: String = "(%d,%d)" % [selected_grid.x, selected_grid.y] if selected_grid.x >= 0 and selected_grid.y >= 0 else "-"
+		tool_label.text = "Tool: %s | Brush: %d | Tile: %s" % [
+			_format_option_label(String(snapshot.get("active_tool", "select"))),
+			int(snapshot.get("brush_radius", 0)),
+			selected_text,
+		]
+	if validation_label != null:
+		validation_label.text = "Check: %s | Errors: %d | Warnings: %d" % [
+			"OK" if bool(validation.get("valid", false)) else "Needs attention",
+			int(validation.get("error_count", 0)),
+			int(validation.get("warning_count", 0)),
+		]
+	if manifest_label != null:
+		manifest_label.text = "MP Map: %s" % String(manifest.get("state", "not_ready")).replace("_", " ")
 
 
 func _add_scenario_line_edit_row(parent: VBoxContainer, row_name: String, label_text: String, line_edit_name: String) -> void:
@@ -1227,6 +1333,20 @@ func _add_scenario_option_row(parent: VBoxContainer, row_name: String, label_tex
 	button.name = button_name
 	button.text = button_text
 	row.add_child(button)
+
+
+func _add_scenario_select_row(parent: VBoxContainer, row_name: String, label_text: String, option_name: String) -> void:
+	var row := HBoxContainer.new()
+	row.name = row_name
+	row.add_theme_constant_override("separation", 4)
+	parent.add_child(row)
+	var label := Label.new()
+	label.text = label_text
+	row.add_child(label)
+	var option := OptionButton.new()
+	option.name = option_name
+	option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(option)
 
 
 func _add_scenario_spinbox_row(parent: VBoxContainer, row_name: String, label_text: String, spinbox_name: String, min_value: float, max_value: float, step_value: float) -> void:
@@ -1292,6 +1412,14 @@ func _connect_mission_authoring_signals() -> void:
 	for option_button in [
 		_get_scenario_option_button("ScenarioObjectiveOption"),
 		_get_scenario_option_button("ScenarioSpawnOption"),
+		_get_scenario_option_button("ScenarioEnemyTacticProfileOption"),
+		_get_scenario_option_button("ScenarioEnemySecurityModeOption"),
+		_get_scenario_option_button("ScenarioEnemyFacingOption"),
+		_get_scenario_option_button("ScenarioEnemyHeavyRoleOption"),
+		_get_scenario_option_button("ScenarioEnemyATWeaponOption"),
+		_get_scenario_option_button("ScenarioAirAssetRiskOption"),
+		_get_scenario_option_button("ScenarioLZThreatZoneOption"),
+		_get_scenario_option_button("ScenarioCommIntensityOption"),
 	]:
 		if option_button != null and not option_button.item_selected.is_connected(_on_mission_scenario_option_selected):
 			option_button.item_selected.connect(_on_mission_scenario_option_selected)
@@ -1314,6 +1442,7 @@ func _refresh_mission_authoring_controls() -> void:
 
 	_is_refreshing_scenario_controls = true
 	_refresh_scenario_marker_options()
+	_refresh_enemy_tactics_options()
 
 	var path_label := panel.get_node_or_null("ScenarioPathLabel") as Label
 	var map_label := panel.get_node_or_null("ScenarioMapLabel") as Label
@@ -1384,6 +1513,7 @@ func _create_default_mission_scenario():
 		"display_name": "Test Contacts",
 		"team_id": "team_bravo",
 		"enemy_ids": Array(enemy_ids),
+		"tactics": ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("serialize_config", ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_default_config_for_map_size", _get_current_grid_size()), _get_current_grid_size()),
 	}
 	if _terrain_map_data != null and bool(_terrain_map_data.call("has_marker", "spawn_bravo")):
 		enemy_group["spawn_marker_id"] = "spawn_bravo"
@@ -1432,6 +1562,108 @@ func _refresh_scenario_marker_options() -> void:
 			String(group.get("spawn_marker_id", "")).strip_edges(),
 			group.has("spawn_position")
 		)
+
+
+func _refresh_enemy_tactics_options() -> void:
+	var group: Dictionary = _get_primary_enemy_group()
+	var tactics: Dictionary = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("normalize_config", group.get("tactics", {}), _get_current_grid_size())
+	_populate_string_option(
+		_get_scenario_option_button("ScenarioEnemyTacticProfileOption"),
+		ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_profile_ids"),
+		String(tactics.get("profile_id", ""))
+	)
+	_populate_string_option(
+		_get_scenario_option_button("ScenarioEnemySecurityModeOption"),
+		ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_security_modes"),
+		String(tactics.get("security_mode", ""))
+	)
+	_populate_string_option(
+		_get_scenario_option_button("ScenarioEnemyFacingOption"),
+		ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_facing_options"),
+		String(tactics.get("facing", ""))
+	)
+	_populate_string_option(
+		_get_scenario_option_button("ScenarioEnemyHeavyRoleOption"),
+		ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_heavy_weapon_roles"),
+		String(tactics.get("heavy_weapon_role", "none"))
+	)
+	_populate_optional_string_option(
+		_get_scenario_option_button("ScenarioEnemyATWeaponOption"),
+		ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_anti_armor_weapon_ids"),
+		String(tactics.get("weapon_id", ""))
+	)
+	_populate_string_option(
+		_get_scenario_option_button("ScenarioAirAssetRiskOption"),
+		ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_air_asset_risk_profiles"),
+		String(tactics.get("air_asset_risk_profile", Dictionary(_ensure_mission_scenario().call("get_air_asset_risk_config")).get("profile_id", "none")))
+	)
+	_populate_optional_marker_option(
+		_get_scenario_option_button("ScenarioLZThreatZoneOption"),
+		String(tactics.get("lz_threat_zone_id", Dictionary(_ensure_mission_scenario().call("get_air_asset_risk_config")).get("lz_threat_zone_id", "")))
+	)
+	_populate_string_option(
+		_get_scenario_option_button("ScenarioCommIntensityOption"),
+		ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_communication_intensities"),
+		String(tactics.get("communication_intensity", Dictionary(_ensure_mission_scenario().call("get_tactical_authoring_config")).get("communication_intensity", "normal")))
+	)
+
+
+func _populate_string_option(option_button: OptionButton, values: PackedStringArray, selected_value: String) -> void:
+	if option_button == null:
+		return
+	option_button.clear()
+	var selected_index: int = -1
+	var normalized_selected: String = selected_value.strip_edges().to_lower()
+	for value_variant in values:
+		var value: String = String(value_variant).strip_edges()
+		if value.is_empty():
+			continue
+		option_button.add_item(_format_option_label(value))
+		option_button.set_item_metadata(option_button.item_count - 1, value)
+		if value == normalized_selected:
+			selected_index = option_button.item_count - 1
+	if selected_index < 0 and option_button.item_count > 0:
+		selected_index = 0
+	if selected_index >= 0:
+		option_button.select(selected_index)
+
+
+func _populate_optional_string_option(option_button: OptionButton, values: PackedStringArray, selected_value: String) -> void:
+	if option_button == null:
+		return
+	var options: PackedStringArray = PackedStringArray(["none"])
+	for value in values:
+		if not options.has(String(value)):
+			options.append(String(value))
+	_populate_string_option(option_button, options, selected_value if not selected_value.strip_edges().is_empty() else "none")
+
+
+func _populate_optional_marker_option(option_button: OptionButton, selected_marker_id: String) -> void:
+	if option_button == null:
+		return
+	option_button.clear()
+	option_button.add_item("None")
+	option_button.set_item_metadata(0, "")
+	var selected_index: int = 0
+	if _terrain_map_data != null:
+		for marker_id in PackedStringArray(_terrain_map_data.call("get_marker_ids")):
+			var marker_text: String = String(marker_id)
+			option_button.add_item(marker_text)
+			option_button.set_item_metadata(option_button.item_count - 1, marker_text)
+			if marker_text == selected_marker_id:
+				selected_index = option_button.item_count - 1
+	if not selected_marker_id.is_empty() and selected_index == 0:
+		option_button.add_item(selected_marker_id)
+		option_button.set_item_metadata(option_button.item_count - 1, selected_marker_id)
+		selected_index = option_button.item_count - 1
+	option_button.select(selected_index)
+
+
+func _format_option_label(value: String) -> String:
+	var normalized_value: String = value.strip_edges()
+	if normalized_value.is_empty():
+		return ""
+	return normalized_value.replace("_", " ").capitalize()
 
 
 func _populate_scenario_marker_option(option_button: OptionButton, selected_marker_id: String, use_position: bool) -> void:
@@ -1522,11 +1754,39 @@ func _sync_mission_scenario_from_controls() -> void:
 	elif not spawn_selection.is_empty():
 		group["spawn_marker_id"] = spawn_selection
 		group.erase("spawn_position")
+	var tactic_input: Dictionary = Dictionary(group.get("tactics", {})).duplicate(true)
+	var tactic_profile_id: String = _get_selected_option_metadata("ScenarioEnemyTacticProfileOption")
+	var security_mode: String = _get_selected_option_metadata("ScenarioEnemySecurityModeOption")
+	var facing: String = _get_selected_option_metadata("ScenarioEnemyFacingOption")
+	var heavy_weapon_role: String = _get_selected_option_metadata("ScenarioEnemyHeavyRoleOption")
+	var at_weapon_id: String = _get_selected_option_metadata("ScenarioEnemyATWeaponOption")
+	var air_asset_risk_profile: String = _get_selected_option_metadata("ScenarioAirAssetRiskOption")
+	var lz_threat_zone_id: String = _get_selected_option_metadata("ScenarioLZThreatZoneOption")
+	var communication_intensity: String = _get_selected_option_metadata("ScenarioCommIntensityOption")
+	if not tactic_profile_id.is_empty():
+		tactic_input["profile_id"] = tactic_profile_id
+	if not security_mode.is_empty():
+		tactic_input["security_mode"] = security_mode
+	if not facing.is_empty():
+		tactic_input["facing"] = facing
+	if not heavy_weapon_role.is_empty():
+		tactic_input["heavy_weapon_role"] = heavy_weapon_role
+	if at_weapon_id == "none":
+		tactic_input["weapon_id"] = ""
+	elif not at_weapon_id.is_empty():
+		tactic_input["weapon_id"] = at_weapon_id
+	if not air_asset_risk_profile.is_empty():
+		tactic_input["air_asset_risk_profile"] = air_asset_risk_profile
+	tactic_input["lz_threat_zone_id"] = lz_threat_zone_id
+	if not communication_intensity.is_empty():
+		tactic_input["communication_intensity"] = communication_intensity
+	group["tactics"] = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("serialize_config", tactic_input, _get_current_grid_size())
 	if groups.is_empty():
 		groups.append(group)
 	else:
 		groups[0] = group
 	scenario.set("enemy_groups", groups)
+	_apply_tactical_authoring_from_controls(scenario, group)
 
 	scenario.set(
 		"wave_config",
@@ -1538,6 +1798,21 @@ func _sync_mission_scenario_from_controls() -> void:
 		}
 	)
 	scenario.set("patrol_bindings", _parse_patrol_bindings_text(patrol_line_edit.text if patrol_line_edit != null else ""))
+
+
+func _apply_tactical_authoring_from_controls(scenario, group: Dictionary) -> void:
+	if scenario == null:
+		return
+	var tactical_authoring: Dictionary = Dictionary(scenario.call("get_tactical_authoring_config")).duplicate(true)
+	var tactics: Dictionary = Dictionary(group.get("tactics", {}))
+	var risk: Dictionary = Dictionary(tactical_authoring.get("air_asset_risk", {})).duplicate(true)
+	risk["profile_id"] = String(tactics.get("air_asset_risk_profile", risk.get("profile_id", "none"))).strip_edges().to_lower()
+	risk["enemy_group_id"] = String(group.get("group_id", risk.get("enemy_group_id", ""))).strip_edges()
+	risk["lz_threat_zone_id"] = String(tactics.get("lz_threat_zone_id", risk.get("lz_threat_zone_id", ""))).strip_edges()
+	risk["warning_required_before_damage"] = bool(risk.get("warning_required_before_damage", true))
+	tactical_authoring["air_asset_risk"] = risk
+	tactical_authoring["communication_intensity"] = String(tactics.get("communication_intensity", tactical_authoring.get("communication_intensity", "normal"))).strip_edges().to_lower()
+	scenario.set("tactical_authoring", tactical_authoring)
 
 
 func _get_primary_enemy_group() -> Dictionary:
@@ -1553,6 +1828,12 @@ func _get_current_map_mission_slot_count() -> int:
 	if _terrain_map_data == null or not _terrain_map_data.has_method("get_mission_slot_count"):
 		return -1
 	return int(_terrain_map_data.call("get_mission_slot_count"))
+
+
+func _get_current_grid_size() -> Vector2i:
+	if _terrain_map_data != null and _terrain_map_data.has_method("get_grid_size"):
+		return _terrain_map_data.call("get_grid_size")
+	return DEFAULT_NEW_MAP_GRID_SIZE
 
 
 func _build_default_scenario_id() -> String:
@@ -1739,6 +2020,82 @@ func set_mission_scenario_authoring_fields(data: Dictionary) -> void:
 	_refresh_mission_authoring_controls()
 
 
+func set_enemy_tactics_authoring_fields(data: Dictionary) -> void:
+	var scenario = _ensure_mission_scenario()
+	if scenario == null:
+		return
+	var groups: Array = Array(scenario.get("enemy_groups")).duplicate(true)
+	var group: Dictionary = _get_primary_enemy_group().duplicate(true)
+	if group.is_empty():
+		group = {
+			"group_id": "red_test_group",
+			"display_name": "Test Contacts",
+			"team_id": "team_bravo",
+			"enemy_ids": ["enemy_delta", "enemy_echo"],
+		}
+	group["tactics"] = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("serialize_config", data, _get_current_grid_size())
+	if groups.is_empty():
+		groups.append(group)
+	else:
+		groups[0] = group
+	scenario.set("enemy_groups", groups)
+	_scenario_feedback_text = "Enemy tactics updated."
+	_mark_scenario_dirty(true)
+	_refresh_mission_authoring_controls()
+
+
+func set_tactical_profile_authoring_fields(data: Dictionary) -> void:
+	set_enemy_tactics_authoring_fields(data)
+	var scenario = _ensure_mission_scenario()
+	if scenario == null:
+		return
+	var tactical_authoring: Dictionary = Dictionary(scenario.call("get_tactical_authoring_config")).duplicate(true)
+	if data.has("communication_intensity"):
+		tactical_authoring["communication_intensity"] = String(data.get("communication_intensity", "normal")).strip_edges().to_lower()
+	var risk: Dictionary = Dictionary(tactical_authoring.get("air_asset_risk", {})).duplicate(true)
+	if data.has("air_asset_risk_profile"):
+		risk["profile_id"] = String(data.get("air_asset_risk_profile", "none")).strip_edges().to_lower()
+	if data.has("lz_threat_zone_id"):
+		risk["lz_threat_zone_id"] = String(data.get("lz_threat_zone_id", "")).strip_edges()
+	if data.has("enemy_group_id"):
+		risk["enemy_group_id"] = String(data.get("enemy_group_id", "")).strip_edges()
+	tactical_authoring["air_asset_risk"] = risk
+	scenario.set("tactical_authoring", tactical_authoring)
+	_scenario_feedback_text = "Tactical profile updated."
+	_mark_scenario_dirty(true)
+	_refresh_mission_authoring_controls()
+
+
+func get_enemy_tactics_authoring_snapshot() -> Dictionary:
+	_ensure_mission_scenario()
+	var group: Dictionary = _get_primary_enemy_group()
+	return ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("normalize_config", group.get("tactics", {}), _get_current_grid_size())
+
+
+func get_tactical_profile_authoring_snapshot() -> Dictionary:
+	var scenario = _ensure_mission_scenario()
+	if scenario == null:
+		return {}
+	var group: Dictionary = _get_primary_enemy_group()
+	var tactics: Dictionary = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("normalize_config", group.get("tactics", {}), _get_current_grid_size())
+	var tactical_authoring: Dictionary = Dictionary(scenario.call("get_tactical_authoring_config")).duplicate(true)
+	return {
+		"group_id": String(group.get("group_id", "")),
+		"profile_id": String(tactics.get("profile_id", "")),
+		"security_mode": String(tactics.get("security_mode", "")),
+		"facing": String(tactics.get("facing", "")),
+		"heavy_weapon_role": String(tactics.get("heavy_weapon_role", "none")),
+		"weapon_id": String(tactics.get("weapon_id", "")),
+		"anti_armor_threat": bool(tactics.get("anti_armor_threat", false)),
+		"air_asset_risk_profile": String(tactics.get("air_asset_risk_profile", Dictionary(tactical_authoring.get("air_asset_risk", {})).get("profile_id", "none"))),
+		"lz_threat_zone_id": String(tactics.get("lz_threat_zone_id", Dictionary(tactical_authoring.get("air_asset_risk", {})).get("lz_threat_zone_id", ""))),
+		"communication_intensity": String(tactics.get("communication_intensity", tactical_authoring.get("communication_intensity", "normal"))),
+		"tactical_authoring": tactical_authoring,
+		"help_id": "map_editor.tactical_profile",
+		"ui_sets_gameplay_truth": false,
+	}
+
+
 func get_current_mission_scenario_dict() -> Dictionary:
 	_sync_mission_scenario_from_controls()
 	var scenario = _ensure_mission_scenario()
@@ -1762,6 +2119,445 @@ func create_live_test_scene_from_current_scenario():
 	if mission_setup != null:
 		mission_setup.set("scenario_file_path", save_path)
 	return scene
+
+
+func set_authoring_tool(tool_id: String) -> bool:
+	var normalized_tool_id: String = tool_id.strip_edges().to_lower()
+	if normalized_tool_id.is_empty():
+		normalized_tool_id = "select"
+	var brush_button := get_node_or_null("UI/TopBar/Margin/HBox/BrushButton") as Button
+	var height_button := _get_height_tool_button()
+	var marker_button := _get_marker_tool_button()
+	var patrol_button := get_node_or_null("UI/TopBar/Margin/HBox/PatrolButton") as Button
+	var select_button := get_node_or_null("UI/TopBar/Margin/HBox/SelectButton") as Button
+	if not ["select", "selection", "terrain_brush", "brush", "height", "marker", "patrol"].has(normalized_tool_id):
+		return false
+
+	_selection_tool_enabled = normalized_tool_id == "select" or normalized_tool_id == "selection"
+	_height_tool_enabled = normalized_tool_id == "height"
+	_marker_tool_enabled = normalized_tool_id == "marker"
+	_patrol_tool_enabled = normalized_tool_id == "patrol"
+	if brush_button != null:
+		brush_button.button_pressed = normalized_tool_id == "terrain_brush" or normalized_tool_id == "brush"
+	if height_button != null:
+		height_button.button_pressed = _height_tool_enabled
+	if marker_button != null:
+		marker_button.button_pressed = _marker_tool_enabled
+	if patrol_button != null:
+		patrol_button.button_pressed = _patrol_tool_enabled
+	if select_button != null:
+		select_button.button_pressed = _selection_tool_enabled
+	_is_painting = false
+	_last_painted_grid = Vector2i(-1, -1)
+	_update_height_topbar_state()
+	_update_patrol_topbar_state()
+	_refresh_authoring_status_controls()
+	return true
+
+
+func select_grid_for_authoring(grid_position: Vector2i) -> bool:
+	if _terrain_map_data == null:
+		return false
+	var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
+	if tile_data == null:
+		return false
+	_selected_grid_position = grid_position
+	_selected_grids = [grid_position]
+	_refresh_selection_visual()
+	_refresh_property_panel()
+	_refresh_authoring_status_controls()
+	return true
+
+
+func get_map_editor_usability_snapshot(sync_from_controls: bool = true) -> Dictionary:
+	if sync_from_controls and not _is_refreshing_scenario_controls:
+		_sync_mission_scenario_from_controls()
+	var selected_tile_context: Dictionary = _build_selected_tile_context()
+	var validation: Dictionary = get_authoring_validation_snapshot(false)
+	var manifest_preview: Dictionary = build_multiplayer_map_manifest_preview()
+	return {
+		"active_tool": _get_active_authoring_tool(),
+		"brush_radius": _get_brush_radius(),
+		"brush_footprint_tiles": _get_brush_footprint_tile_count(),
+		"selected_grid": _selected_grid_position,
+		"hover_grid": _hover_grid_position,
+		"selected_type_id": _selected_type_id,
+		"selected_tile": selected_tile_context,
+		"height_tool": {
+			"enabled": _height_tool_enabled,
+			"mode": _height_tool_mode,
+			"edge_type": _height_tool_edge_type,
+		},
+		"marker_tool": {
+			"enabled": _marker_tool_enabled,
+			"selected_marker_id": _selected_marker_id,
+			"feedback": _marker_feedback_text,
+		},
+		"patrol_tool": {
+			"enabled": _patrol_tool_enabled,
+			"spawn_id": _patrol_spawn_id,
+			"waypoint_count": _get_patrol_waypoint_count(_patrol_spawn_id),
+		},
+		"map_path": _current_map_path,
+		"scenario_path": _current_scenario_path,
+		"dirty": _dirty,
+		"scenario_dirty": _scenario_dirty,
+		"validation": validation,
+		"live_test": _build_live_test_readiness(validation),
+		"map_manifest": manifest_preview,
+		"action_contract": get_authoring_action_contract_snapshot(),
+	}
+
+
+func get_authoring_validation_snapshot(sync_from_controls: bool = true) -> Dictionary:
+	if sync_from_controls and not _is_refreshing_scenario_controls:
+		_sync_mission_scenario_from_controls()
+	var errors: Array = []
+	var warnings: Array = []
+	var sections: Dictionary = {}
+	sections["map"] = _validate_authoring_map(errors, warnings)
+	sections["markers"] = _validate_authoring_markers(errors, warnings)
+	sections["patrols"] = _validate_authoring_patrols(errors, warnings)
+	sections["hills"] = _validate_authoring_hills(errors, warnings)
+	sections["walkability"] = _validate_authoring_walkability(errors, warnings)
+	sections["fow"] = _build_fow_authoring_diagnostics()
+	sections["scenario"] = _validate_authoring_scenario(errors, warnings)
+	sections["multiplayer"] = build_multiplayer_map_manifest_preview()
+	return {
+		"valid": errors.is_empty(),
+		"errors": PackedStringArray(errors),
+		"warnings": PackedStringArray(warnings),
+		"error_count": errors.size(),
+		"warning_count": warnings.size(),
+		"sections": sections,
+	}
+
+
+func build_multiplayer_map_manifest_preview(author: String = "") -> Dictionary:
+	var result: Dictionary = {
+		"ready": false,
+		"state": "not_ready",
+		"errors": PackedStringArray(),
+	}
+	if _terrain_map_data == null:
+		result["state"] = "map_not_loaded"
+		result["errors"] = PackedStringArray(["map_not_loaded"])
+		return result
+	if _current_map_path.strip_edges().is_empty() or not FileAccess.file_exists(_current_map_path):
+		result["state"] = "map_needs_save"
+		result["errors"] = PackedStringArray(["map_needs_save"])
+		return result
+	if _dirty:
+		result["state"] = "map_has_unsaved_changes"
+		result["errors"] = PackedStringArray(["map_has_unsaved_changes"])
+		return result
+	var manifest: Dictionary = MULTIPLAYER_MAP_MANIFEST_SCRIPT.call("build_manifest_for_map", _current_map_path, _current_scenario_path, author)
+	if not bool(manifest.get("valid", false)):
+		result["state"] = "manifest_invalid"
+		result["errors"] = PackedStringArray(manifest.get("errors", PackedStringArray()))
+		result["manifest"] = manifest
+		return result
+	result["ready"] = true
+	result["state"] = "manifest_ready"
+	result["manifest"] = MULTIPLAYER_MAP_MANIFEST_SCRIPT.call("normalize_manifest", manifest)
+	return result
+
+
+func get_authoring_action_contract_snapshot() -> Dictionary:
+	return {
+		"undo_redo_scope": "single_tile_patch_v1",
+		"undo_available": not _last_undo_state.is_empty(),
+		"redo_available": false,
+		"tile_patch_fields": PackedStringArray([
+			"grid_position",
+			"walkable",
+			"blocks_los",
+			"cover_value",
+			"height_level",
+			"object_height",
+			"surface_type",
+			"edge_type",
+			"type_id",
+			"object_type_id",
+		]),
+		"tool_action_fields": PackedStringArray([
+			"tool_id",
+			"brush_radius",
+			"affected_grids",
+			"before_tiles",
+			"after_tiles",
+		]),
+	}
+
+
+func _get_active_authoring_tool() -> String:
+	if _height_tool_enabled:
+		return "height"
+	if _marker_tool_enabled:
+		return "marker"
+	if _patrol_tool_enabled:
+		return "patrol"
+	if _is_brush_enabled():
+		return "terrain_brush"
+	if _selection_tool_enabled:
+		return "select"
+	return "select"
+
+
+func _get_brush_footprint_tile_count() -> int:
+	var radius: int = _get_brush_radius()
+	return (radius * 2 + 1) * (radius * 2 + 1)
+
+
+func _get_patrol_waypoint_count(spawn_id: String) -> int:
+	if _terrain_map_data == null:
+		return 0
+	return Array(_terrain_map_data.call("get_patrol_path", spawn_id)).size()
+
+
+func _build_selected_tile_context() -> Dictionary:
+	var tile_data = _get_selected_tile()
+	if tile_data == null:
+		return {
+			"has_tile": false,
+			"grid_position": Vector2i(-1, -1),
+		}
+	return {
+		"has_tile": true,
+		"grid_position": tile_data.grid_position,
+		"type_id": String(tile_data.type_id),
+		"object_type_id": String(tile_data.object_type_id),
+		"walkable": bool(tile_data.walkable),
+		"blocks_los": bool(tile_data.blocks_los),
+		"cover_value": int(tile_data.cover_value),
+		"height_level": int(tile_data.height_level),
+		"object_height": int(tile_data.object_height),
+		"surface_type": String(tile_data.surface_type),
+		"edge_type": String(tile_data.edge_type),
+	}
+
+
+func _validate_authoring_map(errors: Array, warnings: Array) -> Dictionary:
+	if _terrain_map_data == null:
+		errors.append("map_not_loaded")
+		return {"loaded": false}
+	var grid_size: Vector2i = _terrain_map_data.call("get_grid_size")
+	var tiles: Array = Array(_terrain_map_data.call("get_tiles"))
+	if grid_size.x <= 0 or grid_size.y <= 0:
+		errors.append("map_grid_size_invalid")
+	if tiles.is_empty():
+		errors.append("map_has_no_tiles")
+	if _current_map_path.strip_edges().is_empty():
+		warnings.append("map_path_empty")
+	elif not FileAccess.file_exists(_current_map_path):
+		warnings.append("map_not_saved")
+	if _dirty:
+		warnings.append("map_has_unsaved_changes")
+	return {
+		"loaded": true,
+		"map_name": String(_terrain_map_data.call("get_map_name")),
+		"grid_size": grid_size,
+		"tile_count": tiles.size(),
+		"mission_slot_count": _get_current_map_mission_slot_count(),
+		"dirty": _dirty,
+	}
+
+
+func _validate_authoring_markers(errors: Array, warnings: Array) -> Dictionary:
+	var marker_ids: PackedStringArray = PackedStringArray()
+	if _terrain_map_data == null:
+		return {"marker_count": 0, "required_present": false}
+	marker_ids = _terrain_map_data.call("get_marker_ids")
+	for required_marker_id in EDITABLE_MARKER_IDS:
+		if not bool(_terrain_map_data.call("has_marker", required_marker_id)):
+			warnings.append("marker_missing:%s" % required_marker_id)
+	for marker_id in marker_ids:
+		var marker_position: Vector2 = _terrain_map_data.call("get_marker_position", marker_id, Vector2.ZERO)
+		var marker_tile = _get_tile_at_authoring_position(marker_position)
+		if marker_tile == null:
+			errors.append("marker_outside_map:%s" % marker_id)
+			continue
+		if not bool(marker_tile.walkable):
+			warnings.append("marker_on_non_walkable_tile:%s" % marker_id)
+	return {
+		"marker_count": marker_ids.size(),
+		"required_present": _has_required_authoring_markers(),
+		"marker_ids": marker_ids,
+	}
+
+
+func _validate_authoring_patrols(errors: Array, warnings: Array) -> Dictionary:
+	var path_count: int = 0
+	var waypoint_count: int = 0
+	if _terrain_map_data == null:
+		return {"path_count": 0, "waypoint_count": 0}
+	var patrol_paths: Dictionary = Dictionary(_terrain_map_data.call("get_patrol_paths"))
+	path_count = patrol_paths.size()
+	for path_id_variant in patrol_paths.keys():
+		var path_id: String = String(path_id_variant).strip_edges()
+		var waypoints: Array = Array(_terrain_map_data.call("get_patrol_path", path_id))
+		waypoint_count += waypoints.size()
+		if waypoints.size() < 2:
+			warnings.append("patrol_path_short:%s" % path_id)
+		for waypoint_index in range(waypoints.size()):
+			var waypoint_tile = _get_tile_at_authoring_position(Vector2(waypoints[waypoint_index]))
+			if waypoint_tile == null:
+				errors.append("patrol_waypoint_outside_map:%s:%d" % [path_id, waypoint_index])
+	return {
+		"path_count": path_count,
+		"waypoint_count": waypoint_count,
+		"active_spawn_id": _patrol_spawn_id,
+	}
+
+
+func _validate_authoring_hills(errors: Array, warnings: Array) -> Dictionary:
+	var hill_tile_count: int = 0
+	var exposed_edge_count: int = 0
+	var blocker_object_count: int = 0
+	if _terrain_map_data == null:
+		return {"hill_tile_count": 0, "exposed_edge_count": 0}
+	for tile_data in Array(_terrain_map_data.call("get_tiles")):
+		if tile_data == null:
+			continue
+		var height_level: int = int(tile_data.height_level)
+		var edge_type: String = String(tile_data.edge_type)
+		if int(tile_data.object_height) > 0:
+			blocker_object_count += 1
+		if height_level <= 0:
+			if edge_type != TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE:
+				warnings.append("ground_tile_has_edge:%s" % String(tile_data.tile_id))
+			continue
+		hill_tile_count += 1
+		var has_lower_neighbor: bool = _has_lower_neighbor(tile_data.grid_position, height_level)
+		if has_lower_neighbor:
+			exposed_edge_count += 1
+			if edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE:
+				errors.append("height_edge_missing:%s" % String(tile_data.tile_id))
+		elif edge_type != TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE:
+			warnings.append("plateau_interior_has_edge:%s" % String(tile_data.tile_id))
+	return {
+		"hill_tile_count": hill_tile_count,
+		"exposed_edge_count": exposed_edge_count,
+		"blocker_object_count": blocker_object_count,
+	}
+
+
+func _validate_authoring_walkability(errors: Array, warnings: Array) -> Dictionary:
+	var walkable_count: int = 0
+	var blocker_count: int = 0
+	var cover_tile_count: int = 0
+	if _terrain_map_data == null:
+		return {"walkable_count": 0}
+	for tile_data in Array(_terrain_map_data.call("get_tiles")):
+		if tile_data == null:
+			continue
+		if bool(tile_data.walkable):
+			walkable_count += 1
+		if bool(tile_data.blocks_los) or int(tile_data.object_height) > 0:
+			blocker_count += 1
+		if int(tile_data.cover_value) > 0:
+			cover_tile_count += 1
+	if walkable_count <= 0:
+		errors.append("map_has_no_walkable_tiles")
+	if cover_tile_count <= 0:
+		warnings.append("map_has_no_cover_tiles")
+	return {
+		"walkable_count": walkable_count,
+		"blocker_count": blocker_count,
+		"cover_tile_count": cover_tile_count,
+	}
+
+
+func _build_fow_authoring_diagnostics() -> Dictionary:
+	var los_blocker_count: int = 0
+	var cover_tile_count: int = 0
+	var elevated_tile_count: int = 0
+	if _terrain_map_data == null:
+		return {
+			"los_blocker_count": 0,
+			"cover_tile_count": 0,
+			"elevated_tile_count": 0,
+		}
+	for tile_data in Array(_terrain_map_data.call("get_tiles")):
+		if tile_data == null:
+			continue
+		if bool(tile_data.blocks_los) or int(tile_data.object_height) > 0:
+			los_blocker_count += 1
+		if int(tile_data.cover_value) > 0:
+			cover_tile_count += 1
+		if int(tile_data.height_level) > 0:
+			elevated_tile_count += 1
+	return {
+		"los_blocker_count": los_blocker_count,
+		"cover_tile_count": cover_tile_count,
+		"elevated_tile_count": elevated_tile_count,
+	}
+
+
+func _validate_authoring_scenario(errors: Array, warnings: Array) -> Dictionary:
+	var scenario = _ensure_mission_scenario()
+	if scenario == null:
+		errors.append("scenario_not_loaded")
+		return {"valid": false}
+	var validation: Dictionary = Dictionary(scenario.call("validate"))
+	for error_variant in PackedStringArray(validation.get("errors", PackedStringArray())):
+		errors.append("scenario:%s" % String(error_variant))
+	for diagnostic_variant in PackedStringArray(scenario.call("get_enemy_tactics_diagnostics", _terrain_map_data)):
+		warnings.append("enemy_tactics:%s" % String(diagnostic_variant))
+	if _scenario_dirty:
+		warnings.append("scenario_has_unsaved_changes")
+	var enemy_ids: PackedStringArray = scenario.call("get_enemy_ids")
+	return {
+		"valid": bool(validation.get("valid", false)),
+		"enemy_count": enemy_ids.size(),
+		"enemy_ids": enemy_ids,
+		"patrol_binding_count": Array(scenario.get("patrol_bindings")).size(),
+		"dirty": _scenario_dirty,
+	}
+
+
+func _build_live_test_readiness(validation: Dictionary) -> Dictionary:
+	var errors: PackedStringArray = PackedStringArray()
+	if not bool(validation.get("valid", false)):
+		errors.append("authoring_validation_failed")
+	if _dirty:
+		errors.append("map_has_unsaved_changes")
+	if _current_map_path.strip_edges().is_empty() or not FileAccess.file_exists(_current_map_path):
+		errors.append("map_needs_save")
+	if not FileAccess.file_exists(LIVE_TEST_SCENE_PATH):
+		errors.append("live_test_scene_missing")
+	return {
+		"ready": errors.is_empty(),
+		"errors": errors,
+		"scene_path": LIVE_TEST_SCENE_PATH,
+		"scenario_scratch_path": LIVE_TEST_SCENARIO_SCRATCH_PATH,
+	}
+
+
+func _has_required_authoring_markers() -> bool:
+	if _terrain_map_data == null:
+		return false
+	for marker_id in EDITABLE_MARKER_IDS:
+		if not bool(_terrain_map_data.call("has_marker", marker_id)):
+			return false
+	return true
+
+
+func _get_tile_at_authoring_position(world_position: Vector2):
+	if _terrain_registry == null:
+		return null
+	return _terrain_registry.call("get_tile_at_world", world_position)
+
+
+func _has_lower_neighbor(grid_position: Vector2i, height_level: int) -> bool:
+	if _terrain_map_data == null:
+		return false
+	for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		var neighbor = _terrain_map_data.call("get_tile_at_grid", grid_position + offset)
+		var neighbor_height: int = int(neighbor.height_level) if neighbor != null else 0
+		if neighbor_height < height_level:
+			return true
+	return false
 
 
 func _on_mission_scenario_text_changed(_new_text: String) -> void:
@@ -2009,6 +2805,7 @@ func _refresh_marker_editor_controls() -> void:
 		marker_color_button.color = Color(0.9, 0.9, 0.9, 1.0)
 		marker_info_label.text = _marker_feedback_text if not _marker_feedback_text.is_empty() else "Create a marker from the list above and place it directly on the map."
 		_is_refreshing_marker_controls = false
+		_refresh_authoring_status_controls()
 		return
 
 	var marker_type_id: String = String(selected_record.get("marker_type_id", "")).strip_edges()
@@ -2020,6 +2817,7 @@ func _refresh_marker_editor_controls() -> void:
 	marker_color_button.color = Color(selected_record.get("color", Color(0.9, 0.9, 0.9, 1.0)))
 	marker_info_label.text = _build_marker_info_text(selected_record)
 	_is_refreshing_marker_controls = false
+	_refresh_authoring_status_controls()
 
 
 func _refresh_marker_list() -> void:
@@ -2107,6 +2905,7 @@ func _on_height_tool_toggled(pressed: bool) -> void:
 		_refresh_marker_editor_controls()
 	_update_height_topbar_state()
 	_update_patrol_topbar_state()
+	_refresh_authoring_status_controls()
 
 
 func _on_height_mode_selected(index: int) -> void:
@@ -2114,6 +2913,7 @@ func _on_height_mode_selected(index: int) -> void:
 	if option_button == null or index < 0 or index >= option_button.item_count:
 		return
 	_height_tool_mode = String(option_button.get_item_metadata(index))
+	_refresh_authoring_status_controls()
 
 
 func _on_height_edge_selected(index: int) -> void:
@@ -2126,6 +2926,7 @@ func _on_height_edge_selected(index: int) -> void:
 			_height_tool_edge_type = edge_type
 		_:
 			_height_tool_edge_type = TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE
+	_refresh_authoring_status_controls()
 
 
 func _on_marker_tool_toggled(pressed: bool) -> void:
@@ -2150,6 +2951,7 @@ func _on_marker_tool_toggled(pressed: bool) -> void:
 		brush_button.button_pressed = false
 	_hide_hover_preview()
 	_refresh_marker_editor_controls()
+	_refresh_authoring_status_controls()
 
 
 func _on_marker_list_item_selected(index: int) -> void:
@@ -2565,6 +3367,7 @@ func _apply_tile_patch(tile_data, patch: Dictionary) -> bool:
 	var next_blocks_los: bool = bool(patch.get("blocks_los", tile_data.blocks_los))
 	var next_cover_value: int = clampi(int(patch.get("cover_value", tile_data.cover_value)), 0, 100)
 	var next_height_level: int = clampi(int(patch.get("height_level", tile_data.height_level)), 0, 2)
+	var next_object_height: int = clampi(int(patch.get("object_height", tile_data.object_height)), 0, 3)
 	var next_surface_type: String = String(patch.get("surface_type", tile_data.surface_type))
 	var next_edge_type: String = String(patch.get("edge_type", tile_data.edge_type))
 
@@ -2573,6 +3376,7 @@ func _apply_tile_patch(tile_data, patch: Dictionary) -> bool:
 		or tile_data.blocks_los != next_blocks_los
 		or int(tile_data.cover_value) != next_cover_value
 		or int(tile_data.height_level) != next_height_level
+		or int(tile_data.object_height) != next_object_height
 		or String(tile_data.surface_type) != next_surface_type
 		or String(tile_data.edge_type) != next_edge_type
 	)
@@ -2584,9 +3388,28 @@ func _apply_tile_patch(tile_data, patch: Dictionary) -> bool:
 	tile_data.blocks_los = next_blocks_los
 	tile_data.cover_value = next_cover_value
 	tile_data.height_level = next_height_level
+	tile_data.object_height = next_object_height
 	tile_data.surface_type = next_surface_type
 	tile_data.edge_type = next_edge_type
-	tile_data.type_id = ""
+	if _should_clear_type_id_for_patch(tile_data, patch):
+		tile_data.type_id = ""
+	return true
+
+
+func _should_clear_type_id_for_patch(tile_data, patch: Dictionary) -> bool:
+	if tile_data == null:
+		return false
+	if bool(patch.get("preserve_type_id", false)):
+		return false
+
+	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
+	if type_id.is_empty():
+		return false
+	if _tile_catalog != null and _tile_catalog.has_method("preserves_hill_fields_when_applied") and bool(_tile_catalog.call("preserves_hill_fields_when_applied", type_id)):
+		return false
+	for prefix in ["wall_", "rock_", "cliff_", "slope_"]:
+		if type_id.begins_with(prefix):
+			return false
 	return true
 
 
@@ -2651,6 +3474,7 @@ func _refresh_top_bar() -> void:
 		undo_button.disabled = _last_undo_state.is_empty()
 	_update_height_topbar_state()
 	_update_patrol_topbar_state()
+	_refresh_authoring_status_controls()
 
 
 func _mark_dirty(is_dirty: bool) -> void:

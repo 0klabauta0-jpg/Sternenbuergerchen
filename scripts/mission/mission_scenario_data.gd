@@ -2,11 +2,27 @@ class_name MissionScenarioData
 extends RefCounted
 
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
+const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
+const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
 
 const CONTRACT_VERSION: int = 1
 const DEFAULT_CAPTURE_RADIUS: float = 80.0
 const DEFAULT_TEAM_ID: String = "team_bravo"
 const DEFAULT_PATROL_MODE: String = "pre_contact"
+const DEFAULT_TACTICAL_AUTHORING: Dictionary = {
+	"communication_intensity": "normal",
+	"fireteam_defaults": {
+		"advance_style": "bounding",
+		"security_mode": "360",
+	},
+	"air_asset_risk": {
+		"profile_id": "none",
+		"enemy_group_id": "",
+		"lz_threat_zone_id": "",
+		"warning_required_before_damage": true,
+		"loss_consequence": "replacement_recovery",
+	},
+}
 const FORBIDDEN_LZ_KEYS: PackedStringArray = [
 	"lz",
 	"player_lz",
@@ -29,6 +45,7 @@ var objective: Dictionary = {}
 var enemy_groups: Array = []
 var wave_config: Dictionary = {}
 var patrol_bindings: Array = []
+var tactical_authoring: Dictionary = {}
 var notes: PackedStringArray = PackedStringArray()
 
 var _load_issues: PackedStringArray = PackedStringArray()
@@ -98,6 +115,7 @@ func to_dict() -> Dictionary:
 		"enemy_groups": _serialize_enemy_groups(),
 		"wave_config": _serialize_wave_config(),
 		"patrol_bindings": _serialize_patrol_bindings(),
+		"tactical_authoring": _serialize_tactical_authoring(),
 	}
 	if mission_slot_count_override > 0:
 		data["mission_slot_count_override"] = mission_slot_count_override
@@ -130,6 +148,7 @@ func validate() -> Dictionary:
 	var enemy_ids: PackedStringArray = _validate_enemy_groups(terrain_map_data, errors)
 	_validate_wave_config(errors)
 	_validate_patrol_bindings(terrain_map_data, enemy_ids, errors)
+	_validate_tactical_authoring(terrain_map_data, errors)
 
 	return {
 		"valid": errors.is_empty(),
@@ -150,6 +169,83 @@ func get_enemy_ids() -> PackedStringArray:
 			if not enemy_id.is_empty() and not result.has(enemy_id):
 				result.append(enemy_id)
 	return result
+
+
+func get_enemy_tactics_for_unit(enemy_id: String, terrain_map_data = null) -> Dictionary:
+	var normalized_enemy_id: String = enemy_id.strip_edges()
+	if normalized_enemy_id.is_empty():
+		return ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_default_config_for_map_size", _get_terrain_grid_size(terrain_map_data))
+	for group_variant in enemy_groups:
+		var group: Dictionary = Dictionary(group_variant)
+		for group_enemy_id_variant in Array(group.get("enemy_ids", [])):
+			if String(group_enemy_id_variant).strip_edges() == normalized_enemy_id:
+				return ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("normalize_config", group.get("tactics", {}), _get_terrain_grid_size(terrain_map_data))
+	return ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_default_config_for_map_size", _get_terrain_grid_size(terrain_map_data))
+
+
+func get_enemy_tactics_diagnostics(terrain_map_data = null) -> PackedStringArray:
+	var result: PackedStringArray = PackedStringArray()
+	var grid_size: Vector2i = _get_terrain_grid_size(terrain_map_data)
+	for group_variant in enemy_groups:
+		var group: Dictionary = Dictionary(group_variant)
+		var group_id: String = String(group.get("group_id", "")).strip_edges()
+		var normalized: Dictionary = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("normalize_config", group.get("tactics", {}), grid_size)
+		for diagnostic_variant in PackedStringArray(normalized.get("diagnostics", PackedStringArray())):
+			var diagnostic: String = String(diagnostic_variant).strip_edges()
+			if diagnostic.is_empty():
+				continue
+			result.append("%s:%s" % [group_id if not group_id.is_empty() else "enemy_group", diagnostic])
+	for diagnostic_variant in get_tactical_authoring_diagnostics(terrain_map_data):
+		result.append("scenario:%s" % String(diagnostic_variant))
+	return result
+
+
+func get_tactical_authoring_config() -> Dictionary:
+	return _coerce_tactical_authoring(tactical_authoring)
+
+
+func get_air_asset_risk_config() -> Dictionary:
+	return Dictionary(get_tactical_authoring_config().get("air_asset_risk", {})).duplicate(true)
+
+
+func get_enemy_air_asset_threats(terrain_map_data = null) -> Array:
+	var result: Array = []
+	var risk: Dictionary = get_air_asset_risk_config()
+	for group_variant in enemy_groups:
+		var group: Dictionary = Dictionary(group_variant)
+		var tactics: Dictionary = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("normalize_config", group.get("tactics", {}), _get_terrain_grid_size(terrain_map_data))
+		if not bool(tactics.get("anti_armor_threat", false)) and String(tactics.get("air_asset_risk_profile", "none")) == "none":
+			continue
+		result.append({
+			"group_id": String(group.get("group_id", "")),
+			"enemy_ids": Array(group.get("enemy_ids", [])).duplicate(true),
+			"weapon_id": String(tactics.get("weapon_id", "")),
+			"heavy_weapon_role": String(tactics.get("heavy_weapon_role", "none")),
+			"air_asset_risk_profile": String(tactics.get("air_asset_risk_profile", risk.get("profile_id", "none"))),
+			"lz_threat_zone_id": String(tactics.get("lz_threat_zone_id", risk.get("lz_threat_zone_id", ""))),
+			"communication_intensity": String(tactics.get("communication_intensity", tactical_authoring.get("communication_intensity", "normal"))),
+			"runtime_authority": "SimulationRoot",
+			"ui_sets_gameplay_truth": false,
+		})
+	return result
+
+
+func get_tactical_authoring_diagnostics(terrain_map_data = null) -> PackedStringArray:
+	var diagnostics: PackedStringArray = PackedStringArray()
+	var grid_size: Vector2i = _get_terrain_grid_size(terrain_map_data)
+	for group_variant in enemy_groups:
+		var group: Dictionary = Dictionary(group_variant)
+		var group_id: String = String(group.get("group_id", "enemy_group")).strip_edges()
+		var tactics: Dictionary = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("normalize_config", group.get("tactics", {}), grid_size)
+		for diagnostic_variant in PackedStringArray(tactics.get("diagnostics", PackedStringArray())):
+			diagnostics.append("%s:%s" % [group_id, String(diagnostic_variant)])
+		if bool(tactics.get("anti_armor_threat", false)) and String(tactics.get("air_asset_risk_profile", "none")) == "none":
+			diagnostics.append("%s:anti_armor_without_air_asset_risk_profile" % group_id)
+	var risk: Dictionary = get_air_asset_risk_config()
+	var risk_profile: String = String(risk.get("profile_id", "none"))
+	if risk_profile != "none" and String(risk.get("lz_threat_zone_id", "")).strip_edges().is_empty():
+		diagnostics.append("air_asset_risk_missing_lz_threat_zone:%s" % risk_profile)
+	return diagnostics
 
 
 func get_objective_position(terrain_map_data = null, fallback: Vector2 = Vector2.ZERO) -> Vector2:
@@ -177,6 +273,7 @@ func _apply_dict(data: Dictionary) -> void:
 	enemy_groups = _coerce_enemy_groups(data.get("enemy_groups", []))
 	wave_config = _coerce_wave_config(Dictionary(data.get("wave_config", {})))
 	patrol_bindings = _coerce_patrol_bindings(data.get("patrol_bindings", []))
+	tactical_authoring = _coerce_tactical_authoring(Dictionary(data.get("tactical_authoring", data.get("tactical_profile", {}))))
 	notes = _coerce_notes(data.get("notes", []))
 
 
@@ -239,7 +336,20 @@ func _validate_enemy_groups(terrain_map_data, errors: PackedStringArray) -> Pack
 				continue
 			seen[enemy_id] = true
 			result.append(enemy_id)
+		var tactic_validation: Dictionary = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("validate_config", group.get("tactics", {}), _get_terrain_grid_size(terrain_map_data))
+		for error_variant in PackedStringArray(tactic_validation.get("errors", PackedStringArray())):
+			errors.append("enemy_groups[%d].tactics.%s" % [group_index, String(error_variant)])
 	return result
+
+
+func _validate_tactical_authoring(terrain_map_data, errors: PackedStringArray) -> void:
+	var risk: Dictionary = get_air_asset_risk_config()
+	var risk_profile: String = String(risk.get("profile_id", "none")).strip_edges()
+	var lz_threat_zone_id: String = String(risk.get("lz_threat_zone_id", "")).strip_edges()
+	if not lz_threat_zone_id.is_empty() and terrain_map_data != null and terrain_map_data.has_method("has_marker") and not bool(terrain_map_data.call("has_marker", lz_threat_zone_id)):
+		errors.append("tactical_authoring.air_asset_risk.lz_threat_zone_id does not exist in map: %s" % lz_threat_zone_id)
+	if risk_profile == "loss_capable" and get_enemy_air_asset_threats(terrain_map_data).is_empty():
+		errors.append("tactical_authoring.air_asset_risk loss_capable needs at least one anti-armor enemy group")
 
 
 func _validate_wave_config(errors: PackedStringArray) -> void:
@@ -303,6 +413,7 @@ func _coerce_enemy_groups(value: Variant) -> Array:
 			"group_id": String(group_dict.get("group_id", "")).strip_edges(),
 			"team_id": String(group_dict.get("team_id", DEFAULT_TEAM_ID)).strip_edges(),
 			"enemy_ids": _coerce_string_array(group_dict.get("enemy_ids", [])),
+			"tactics": ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("normalize_config", group_dict.get("tactics", {}), Vector2i.ZERO),
 		}
 		var display_text: String = String(group_dict.get("display_name", "")).strip_edges()
 		if not display_text.is_empty():
@@ -316,6 +427,33 @@ func _coerce_enemy_groups(value: Variant) -> Array:
 		if not group_notes.is_empty():
 			group["notes"] = Array(group_notes)
 		result.append(group)
+	return result
+
+
+func _coerce_tactical_authoring(raw_data: Dictionary) -> Dictionary:
+	var result: Dictionary = DEFAULT_TACTICAL_AUTHORING.duplicate(true)
+	var raw: Dictionary = raw_data.duplicate(true)
+	var communication_intensity: String = _normalize_list_value(raw.get("communication_intensity", result.get("communication_intensity", "normal")), ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_communication_intensities"), "normal")
+	result["communication_intensity"] = communication_intensity
+	var fireteam_defaults: Dictionary = Dictionary(DEFAULT_TACTICAL_AUTHORING.get("fireteam_defaults", {})).duplicate(true)
+	fireteam_defaults.merge(Dictionary(raw.get("fireteam_defaults", {})), true)
+	fireteam_defaults["advance_style"] = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("normalize_advance_style", fireteam_defaults.get("advance_style", "bounding"), "bounding")
+	fireteam_defaults["security_mode"] = _normalize_list_value(fireteam_defaults.get("security_mode", "360"), ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_security_modes"), "360")
+	result["fireteam_defaults"] = fireteam_defaults
+	var risk_input: Dictionary = {}
+	var raw_risk = raw.get("air_asset_risk", raw.get("air_asset_risk_profile", {}))
+	if typeof(raw_risk) == TYPE_DICTIONARY:
+		risk_input = Dictionary(raw_risk)
+	elif not String(raw_risk).strip_edges().is_empty():
+		risk_input["profile_id"] = String(raw_risk).strip_edges()
+	var risk: Dictionary = Dictionary(DEFAULT_TACTICAL_AUTHORING.get("air_asset_risk", {})).duplicate(true)
+	risk.merge(risk_input, true)
+	risk["profile_id"] = _normalize_list_value(risk.get("profile_id", risk.get("risk_profile", "none")), ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_air_asset_risk_profiles"), "none")
+	risk["enemy_group_id"] = String(risk.get("enemy_group_id", "")).strip_edges()
+	risk["lz_threat_zone_id"] = String(risk.get("lz_threat_zone_id", risk.get("lz_threat_marker_id", ""))).strip_edges()
+	risk["warning_required_before_damage"] = bool(risk.get("warning_required_before_damage", true))
+	risk["loss_consequence"] = String(risk.get("loss_consequence", "replacement_recovery")).strip_edges()
+	result["air_asset_risk"] = risk
 	return result
 
 
@@ -388,8 +526,13 @@ func _serialize_enemy_groups() -> Array:
 				serialized_group[optional_key] = group.get(optional_key)
 		if group.has("spawn_position"):
 			serialized_group["spawn_position"] = _serialize_vector2(_coerce_vector2(group.get("spawn_position", Vector2.ZERO), Vector2.ZERO))
+		serialized_group["tactics"] = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("serialize_config", group.get("tactics", {}), Vector2i.ZERO)
 		result.append(serialized_group)
 	return result
+
+
+func _serialize_tactical_authoring() -> Dictionary:
+	return _coerce_tactical_authoring(tactical_authoring)
 
 
 func _serialize_wave_config() -> Dictionary:
@@ -472,3 +615,16 @@ static func _serialize_vector2(value: Vector2) -> Dictionary:
 		"x": value.x,
 		"y": value.y,
 	}
+
+
+static func _get_terrain_grid_size(terrain_map_data) -> Vector2i:
+	if terrain_map_data != null and terrain_map_data.has_method("get_grid_size"):
+		return terrain_map_data.call("get_grid_size")
+	return Vector2i.ZERO
+
+
+static func _normalize_list_value(value: Variant, allowed_values: PackedStringArray, fallback: String) -> String:
+	var normalized: String = String(value).strip_edges().to_lower()
+	if allowed_values.has(normalized):
+		return normalized
+	return fallback

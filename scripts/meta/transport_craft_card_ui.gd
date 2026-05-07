@@ -2,6 +2,7 @@ class_name TransportCraftCardUI
 extends RefCounted
 
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
+const DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/drop_light_layout_contract.gd")
 const NPC_COMPACT_CARD_SCENE: PackedScene = preload("res://scenes/meta/components/npc_compact_card.tscn")
 
 
@@ -41,7 +42,8 @@ static func ensure_card_structure(card: PanelContainer) -> void:
 		var action_button := Button.new()
 		action_button.name = button_name
 		action_button.visible = false
-		action_button.custom_minimum_size = Vector2(58.0, 0.0)
+		var action_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("ACTION_BUTTON_SIZE")
+		action_button.custom_minimum_size = Vector2(float(action_size.x), float(action_size.y))
 		action_button.add_theme_font_size_override("font_size", 8)
 		header_row.add_child(action_button)
 
@@ -182,7 +184,9 @@ static func _apply_action_button(button: Button, config: Dictionary) -> void:
 		return
 	button.text = String(config.get("text", "")).strip_edges()
 	button.disabled = bool(config.get("disabled", false))
-	button.custom_minimum_size = Vector2(float(config.get("minimum_width", 58.0)), 0.0)
+	var action_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("ACTION_BUTTON_SIZE")
+	var square_size := float(config.get("square_size", config.get("minimum_width", action_size.x)))
+	button.custom_minimum_size = Vector2(square_size, square_size)
 	button.tooltip_text = String(config.get("tooltip_text", "")).strip_edges()
 	var use_ready_style: bool = bool(config.get("ready_style", false))
 	if not button.disabled and use_ready_style:

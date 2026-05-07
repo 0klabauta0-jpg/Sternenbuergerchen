@@ -3,12 +3,17 @@ extends CanvasLayer
 
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_catalog.gd")
+const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
+const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
+const FOG_OF_WAR_MODE_CONTRACT_SCRIPT: GDScript = preload("res://scripts/core/fog_of_war_mode_contract.gd")
+const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_event_bus.gd")
 
 const VIEWPORT_CONTAINER_NAME: String = "ViewportContainer"
 const VIEWPORT_NAME: String = "SubViewport"
 const WORLD_ROOT_NAME: String = "WorldRoot"
 const MAP_ROOT_NAME: String = "MapRoot3D"
 const MARKER_ROOT_NAME: String = "MarkerRoot3D"
+const FOW_ROOT_NAME: String = "FogOfWarRoot3D"
 const PATROL_ROOT_NAME: String = "PatrolRoot3D"
 const SELECTION_ROOT_NAME: String = "SelectionRoot3D"
 const UNIT_ROOT_NAME: String = "UnitRoot3D"
@@ -19,9 +24,24 @@ const STATUS_ROOT_NAME: String = "StatusRoot3D"
 const CAMERA_NAME: String = "Camera3D"
 const LIGHT_NAME: String = "SunLight3D"
 const ENVIRONMENT_NAME: String = "WorldEnvironment"
+const RENDER_MONITOR_NAMES: PackedStringArray = [
+	"RENDER_TOTAL_OBJECTS_IN_FRAME",
+	"RENDER_TOTAL_PRIMITIVES_IN_FRAME",
+	"RENDER_TOTAL_DRAW_CALLS_IN_FRAME",
+	"RENDER_VIDEO_MEM_USED",
+	"RENDER_TEXTURE_MEM_USED",
+	"RENDER_BUFFER_MEM_USED",
+	"PIPELINE_COMPILATIONS_CANVAS",
+	"PIPELINE_COMPILATIONS_MESH",
+	"PIPELINE_COMPILATIONS_SURFACE",
+	"PIPELINE_COMPILATIONS_DRAW",
+	"PIPELINE_COMPILATIONS_SPECIALIZATION",
+]
 
 const TERRAIN_3D_MAPPING_PATH: String = "res://data/terrain_3d_asset_mapping.json"
+const TERRAIN_SURFACE_VISUAL_THEME_CATALOG_PATH: String = "res://data/terrain_surface_visual_theme_catalog.json"
 const NPC_UNIT_VISUAL_MAPPING_PATH: String = "res://data/npc_unit_visual_mapping.json"
+const WEAPON_FIRE_VFX_CATALOG_PATH: String = "res://data/weapon_fire_vfx_catalog.json"
 const TILE_SPACING: float = 1.0
 const TILE_THICKNESS: float = 0.035
 const HEIGHT_STEP: float = 0.25
@@ -35,6 +55,7 @@ const CAMERA_DRAG_PAN_FACTOR: float = 0.065
 const CONTINUOUS_REDRAW_AFTER_CAMERA_MSEC: int = 220
 const UNIT_PROXY_SMOOTH_SPEED: float = 18.0
 const UNIT_PROXY_SNAP_DISTANCE: float = 2.4
+const MOVEMENT_STEP_SFX_RATE_LIMIT_MSEC: int = 420
 const DEFAULT_HALF_TILE_WIDTH: float = 64.0
 const DEFAULT_HALF_TILE_HEIGHT: float = 32.0
 const TILE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_SW.png")
@@ -73,6 +94,7 @@ const UNIT_TEXTURE_PIXEL_SIZE: float = 0.0150
 const DROPSHIP_TEXTURE_PIXEL_SIZE: float = 0.0152
 const STATUS_LABEL_PIXEL_SIZE: float = 0.018
 const STATUS_LABEL_HEIGHT: float = 1.16
+const MOVEMENT_LABEL_HEIGHT: float = 1.06
 const FIXED_CARD_YAW_DEGREES: float = 45.0
 const KENNEY_DIAMOND_CENTER := Vector2(256.0, 315.0)
 const KENNEY_MODEL_ROOT: String = "res://Assets/kenney_space-kit/Models/GLTF format"
@@ -88,6 +110,16 @@ const UNIT_FALLBACK_BODY_HEIGHT: float = 0.585
 const UNIT_BASE_RADIUS: float = 0.27
 const UNIT_BASE_HEIGHT: float = 0.034
 const DROPSHIP_MODEL_SCALE: float = 1.48
+const AIR_LAYER_ID: String = "mission_air"
+const AIR_LAYER_DEFAULT_TEAM_ID: String = "team_alpha"
+const AIR_LAYER_MIN_CLEARANCE: float = 0.72
+const AIR_LAYER_DEFAULT_CLEARANCE: float = 1.28
+const FOW_OVERLAY_HEIGHT: float = 0.032
+const FOW_OVERLAY_SURFACE_Y_OFFSET: float = 0.074
+const FOW_BLACKOUT_COVER_Y_OFFSET: float = 0.42
+const FOW_KNOWN_DIM_COLOR: Color = Color(0.02, 0.05, 0.06, 0.18)
+const FOW_EXPLORED_DIM_COLOR: Color = Color(0.02, 0.04, 0.06, 0.46)
+const FOW_UNKNOWN_BLACK_COLOR: Color = Color(0.0, 0.0, 0.0, 1.0)
 
 const LEGACY_MODEL_BY_TYPE: Dictionary = {
 	"wall_straight_se": "corridor_wall",
@@ -119,6 +151,7 @@ var _subviewport: SubViewport = null
 var _world_root: Node3D = null
 var _map_root: Node3D = null
 var _marker_root: Node3D = null
+var _fow_root: Node3D = null
 var _patrol_root: Node3D = null
 var _selection_root: Node3D = null
 var _unit_root: Node3D = null
@@ -132,7 +165,11 @@ var _environment: WorldEnvironment = null
 var _terrain_map_data = null
 var _tile_catalog = null
 var _terrain_3d_mapping: Dictionary = {}
+var _terrain_surface_visual_theme_catalog: Dictionary = {}
 var _npc_unit_visual_mapping: Dictionary = {}
+var _weapon_fire_vfx_catalog: Dictionary = {}
+var _weapon_fire_vfx_texture_cache: Dictionary = {}
+var _comic_bubble_texture_cache: Dictionary = {}
 var _model_scene_cache: Dictionary = {}
 var _box_mesh_cache: Dictionary = {}
 var _material_cache: Dictionary = {}
@@ -145,6 +182,15 @@ var _contact_entries: Array = []
 var _contact_selected_fireteam_ids: PackedStringArray = PackedStringArray()
 var _drop_payload: Dictionary = {}
 var _mission_status_payload: Dictionary = {}
+var _fog_of_war_state: Dictionary = {}
+var _fog_of_war_mode: String = FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF
+var _fog_of_war_team_id: String = ""
+var _fog_of_war_state_signature: String = ""
+var _fow_visible_tile_ids: Dictionary = {}
+var _fow_explored_tile_ids: Dictionary = {}
+var _fow_visible_target_ids: Dictionary = {}
+var _fow_visible_event_ids: Dictionary = {}
+var _fow_last_known_contacts: Array = []
 
 var _grid_size: Vector2i = Vector2i.ZERO
 var _grid_origin_world: Vector2 = Vector2.ZERO
@@ -158,8 +204,24 @@ var _map_tile_count: int = 0
 var _ground_mesh_count: int = 0
 var _tile_texture_count: int = 0
 var _height_edge_texture_count: int = 0
+var _height_edge_model_count: int = 0
+var _slope_edge_model_count: int = 0
+var _cliff_edge_model_count: int = 0
+var _nature_cliff_edge_model_count: int = 0
+var _nature_slope_step_model_count: int = 0
+var _nature_cliff_theme_counts: Dictionary = {}
+var _height_edge_visual_entries: Array = []
+var _height_edge_authoring_conflict_count: int = 0
+var _surface_tint_count: int = 0
+var _elevated_surface_tint_count: int = 0
+var _nature_surface_ground_model_count: int = 0
+var _nature_surface_theme_counts: Dictionary = {}
+var _surface_visual_entries: Array = []
 var _asset_texture_count: int = 0
 var _asset_model_count: int = 0
+var _nature_prop_model_count: int = 0
+var _nature_prop_role_counts: Dictionary = {}
+var _nature_prop_visual_entries: Array = []
 var _placeholder_object_count: int = 0
 var _missing_asset_mapping_count: int = 0
 var _missing_unit_model_count: int = 0
@@ -186,6 +248,12 @@ var _enemy_animated_unit_model_count: int = 0
 var _unit_status_badge_count: int = 0
 var _dropship_texture_visible: bool = false
 var _dropship_model_visible: bool = false
+var _air_visual_count: int = 0
+var _fow_hidden_air_visual_count: int = 0
+var _air_unknown_terrain_reveal_block_count: int = 0
+var _dropship_air_y: float = 0.0
+var _dropship_surface_y: float = 0.0
+var _dropship_air_clearance: float = 0.0
 var _map_render_duration_msec: int = 0
 var _marker_count: int = 0
 var _patrol_segment_count: int = 0
@@ -193,9 +261,44 @@ var _area_order_count: int = 0
 var _waypoint_visual_count: int = 0
 var _area_order_tile_marker_count: int = 0
 var _waypoint_tile_marker_count: int = 0
+var _movement_style_visual_count: int = 0
+var _movement_bound_marker_count: int = 0
+var _movement_group_marker_count: int = 0
+var _movement_style_entries: Array = []
+var _multi_fireteam_plan_visual_count: int = 0
+var _multi_fireteam_plan_entries: Array = []
+var _enemy_security_visual_count: int = 0
+var _enemy_security_entries: Array = []
+var _enemy_tactics_visual_count: int = 0
+var _enemy_tactics_entries: Array = []
+var _weapon_fire_vfx_visual_count: int = 0
+var _weapon_fire_vfx_entries: Array = []
+var _weapon_fire_sfx_count: int = 0
+var _weapon_fire_sfx_suppressed_count: int = 0
+var _feedback_bubble_visual_count: int = 0
+var _feedback_bubble_entries: Array = []
+var _tactical_communication_event_visual_count: int = 0
+var _tactical_communication_event_entries: Array = []
+var _movement_step_ready_at_msec: Dictionary = {}
+var _movement_step_sfx_count: int = 0
+var _movement_step_sfx_suppressed_rate_limit_count: int = 0
+var _movement_step_sfx_entries: Array = []
+var _audio_event_bus = null
+var _fow_overlay_tile_count: int = 0
+var _fow_visible_tile_count: int = 0
+var _fow_known_dim_tile_count: int = 0
+var _fow_explored_tile_count: int = 0
+var _fow_unknown_tile_count: int = 0
+var _fow_tile_total_count: int = 0
+var _fow_overlay_rebuild_count: int = 0
+var _fow_hidden_order_visual_count: int = 0
+var _fow_hidden_contact_count: int = 0
+var _fow_hidden_unit_proxy_count: int = 0
+var _fow_allowed_contact_count: int = 0
 var _lz_tile_marker_count: int = 0
 var _tile_grid_line_count: int = 0
 var _contact_count: int = 0
+var _contact_visual_entries: Array = []
 var _objective_status_visible: bool = false
 var _mission_result_visible: bool = false
 var _continuous_redraw_until_msec: int = 0
@@ -236,6 +339,7 @@ func render_map(terrain_map_data = null) -> void:
 	_ensure_nodes()
 	_clear_children(_map_root)
 	_clear_children(_marker_root)
+	_clear_children(_fow_root)
 	_clear_children(_patrol_root)
 	_clear_children(_selection_root)
 	_clear_children(_order_root)
@@ -246,8 +350,24 @@ func render_map(terrain_map_data = null) -> void:
 	_ground_mesh_count = 0
 	_tile_texture_count = 0
 	_height_edge_texture_count = 0
+	_height_edge_model_count = 0
+	_slope_edge_model_count = 0
+	_cliff_edge_model_count = 0
+	_nature_cliff_edge_model_count = 0
+	_nature_slope_step_model_count = 0
+	_nature_cliff_theme_counts.clear()
+	_height_edge_visual_entries.clear()
+	_height_edge_authoring_conflict_count = 0
+	_surface_tint_count = 0
+	_elevated_surface_tint_count = 0
+	_nature_surface_ground_model_count = 0
+	_nature_surface_theme_counts.clear()
+	_surface_visual_entries.clear()
 	_asset_texture_count = 0
 	_asset_model_count = 0
+	_nature_prop_model_count = 0
+	_nature_prop_role_counts.clear()
+	_nature_prop_visual_entries.clear()
 	_placeholder_object_count = 0
 	_missing_asset_mapping_count = 0
 	_missing_unit_model_count = 0
@@ -255,6 +375,21 @@ func render_map(terrain_map_data = null) -> void:
 	_tile_grid_line_count = 0
 	_marker_count = 0
 	_patrol_segment_count = 0
+	_movement_style_visual_count = 0
+	_movement_bound_marker_count = 0
+	_movement_group_marker_count = 0
+	_movement_style_entries.clear()
+	_enemy_security_visual_count = 0
+	_enemy_security_entries.clear()
+	_enemy_tactics_visual_count = 0
+	_enemy_tactics_entries.clear()
+	_weapon_fire_vfx_visual_count = 0
+	_weapon_fire_vfx_entries.clear()
+	_feedback_bubble_visual_count = 0
+	_feedback_bubble_entries.clear()
+	_tactical_communication_event_visual_count = 0
+	_tactical_communication_event_entries.clear()
+	_reset_fow_overlay_counters(false)
 	if _terrain_map_data == null:
 		_map_render_duration_msec = Time.get_ticks_msec() - render_started_at_msec
 		return
@@ -267,7 +402,8 @@ func render_map(terrain_map_data = null) -> void:
 		_add_tile_visual(tile_data)
 	_add_tile_grid_lines(tiles)
 	for tile_data in tiles:
-		_add_height_edge_texture_visuals(tile_data)
+		_add_height_edge_visuals(tile_data)
+	_rebuild_fog_of_war_visuals()
 	_rebuild_marker_visuals()
 	_rebuild_patrol_visuals()
 	_rebuild_selection_visuals()
@@ -316,9 +452,28 @@ func set_contact_entries(contact_entries: Array, selected_fireteam_ids: PackedSt
 	_request_viewport_redraw()
 
 
+func set_fog_of_war_state(fog_of_war_state: Dictionary) -> void:
+	var normalized_state: Dictionary = _normalize_fog_of_war_visual_state(fog_of_war_state)
+	var next_signature: String = _build_fog_of_war_visual_signature(normalized_state)
+	if next_signature == _fog_of_war_state_signature:
+		return
+	_fog_of_war_state_signature = next_signature
+	_apply_fog_of_war_visual_state(normalized_state)
+	_rebuild_fog_of_war_visuals()
+	_rebuild_order_visuals()
+	_rebuild_contact_visuals()
+	_rebuild_drop_visuals()
+	_sync_unit_proxies(true)
+	_request_viewport_redraw()
+
+
+func set_fog_of_war_visual_state(fog_of_war_state: Dictionary) -> void:
+	set_fog_of_war_state(fog_of_war_state)
+
+
 func set_mission_drop_visual_state(drop_payload: Dictionary) -> void:
 	_drop_payload_apply_count += 1
-	_drop_payload = drop_payload.duplicate(true)
+	_drop_payload = _normalize_mission_drop_visual_payload(drop_payload)
 	_rebuild_drop_visuals()
 	_request_viewport_redraw()
 
@@ -433,15 +588,46 @@ func screen_rect_to_tile_world_positions(screen_rect: Rect2) -> Array:
 	return result
 
 
+func get_audio_sfx_debug_snapshot() -> Dictionary:
+	var bus = _ensure_audio_event_bus(false)
+	if bus != null and bus.has_method("get_diagnostic_snapshot"):
+		return Dictionary(bus.call("get_diagnostic_snapshot")).duplicate(true)
+	return {}
+
+
+func emit_movement_step_sfx_for_tests(unit_id: String, surface_type: String, visible: bool, moving: bool, now_msec: int) -> Dictionary:
+	return _maybe_emit_unit_step_sfx(unit_id, Vector2.ZERO, moving, visible, surface_type, now_msec)
+
+
 func get_render_snapshot() -> Dictionary:
 	_render_snapshot_request_count += 1
+	var render_budget_by_category: Dictionary = _build_render_budget_by_category()
+	var render_budget_totals: Dictionary = _build_render_budget_totals(render_budget_by_category)
+	var render_monitor_snapshot: Dictionary = _build_render_monitor_snapshot()
 	return {
 		"tile_count": _map_tile_count,
 		"ground_mesh_count": _ground_mesh_count,
 		"tile_texture_count": _tile_texture_count,
 		"height_edge_texture_count": _height_edge_texture_count,
+		"height_edge_model_count": _height_edge_model_count,
+		"slope_edge_model_count": _slope_edge_model_count,
+		"cliff_edge_model_count": _cliff_edge_model_count,
+		"nature_cliff_edge_model_count": _nature_cliff_edge_model_count,
+		"nature_slope_step_model_count": _nature_slope_step_model_count,
+		"nature_cliff_theme_counts": _nature_cliff_theme_counts.duplicate(true),
+		"height_edge_visual_entries": _height_edge_visual_entries.duplicate(true),
+		"height_edge_authoring_conflict_count": _height_edge_authoring_conflict_count,
+		"surface_tint_count": _surface_tint_count,
+		"elevated_surface_tint_count": _elevated_surface_tint_count,
+		"nature_surface_ground_model_count": _nature_surface_ground_model_count,
+		"nature_surface_theme_counts": _nature_surface_theme_counts.duplicate(true),
+		"surface_visual_entries": _surface_visual_entries.duplicate(true),
+		"surface_visual_theme_catalog_loaded": not _get_terrain_surface_visual_theme_catalog().is_empty(),
 		"asset_texture_count": _asset_texture_count,
 		"asset_model_count": _asset_model_count,
+		"nature_prop_model_count": _nature_prop_model_count,
+		"nature_prop_role_counts": _nature_prop_role_counts.duplicate(true),
+		"nature_prop_visual_entries": _nature_prop_visual_entries.duplicate(true),
 		"placeholder_object_count": _placeholder_object_count,
 		"missing_asset_mapping_count": _missing_asset_mapping_count + _missing_unit_model_count + _missing_dropship_model_count,
 		"missing_map_asset_mapping_count": _missing_asset_mapping_count,
@@ -472,13 +658,59 @@ func get_render_snapshot() -> Dictionary:
 		"patrol_segment_count": _patrol_segment_count,
 		"selected_grid_count": _selected_grid_positions.size(),
 		"unit_proxy_count": _unit_proxies_by_id.size(),
+		"unit_proxy_ids": _get_unit_proxy_ids(false),
+		"visible_unit_proxy_ids": _get_unit_proxy_ids(true),
+		"missing_unit_model_ids": _get_unit_proxy_ids_with_meta("missing_unit_model"),
+		"unit_visual_error_ids": _get_unit_proxy_ids_with_meta("unit_visual_error"),
+		"unit_proxy_state_by_id": _get_unit_proxy_state_by_id(),
 		"area_order_count": _area_order_count,
 		"waypoint_visual_count": _waypoint_visual_count,
 		"area_order_tile_marker_count": _area_order_tile_marker_count,
 		"waypoint_tile_marker_count": _waypoint_tile_marker_count,
+		"order_selected_fireteam_ids": Array(_get_string_array_from_variant(_order_payload.get("selected_fireteam_ids", PackedStringArray()))),
+		"order_phase_index": int(_order_payload.get("phase_index", 0)),
+		"movement_style_visual_count": _movement_style_visual_count,
+		"movement_bound_marker_count": _movement_bound_marker_count,
+		"movement_group_marker_count": _movement_group_marker_count,
+		"movement_style_entries": _movement_style_entries.duplicate(true),
+		"multi_fireteam_plan_visual_count": _multi_fireteam_plan_visual_count,
+		"multi_fireteam_plan_entries": _multi_fireteam_plan_entries.duplicate(true),
+		"enemy_security_visual_count": _enemy_security_visual_count,
+		"enemy_security_entries": _enemy_security_entries.duplicate(true),
+		"enemy_tactics_visual_count": _enemy_tactics_visual_count,
+		"enemy_tactics_entries": _enemy_tactics_entries.duplicate(true),
+		"weapon_fire_vfx_visual_count": _weapon_fire_vfx_visual_count,
+		"weapon_fire_vfx_entries": _weapon_fire_vfx_entries.duplicate(true),
+		"weapon_fire_vfx_catalog_loaded": not _get_weapon_fire_vfx_catalog().is_empty(),
+		"weapon_fire_sfx_count": _weapon_fire_sfx_count,
+		"weapon_fire_sfx_suppressed_count": _weapon_fire_sfx_suppressed_count,
+		"feedback_bubble_visual_count": _feedback_bubble_visual_count,
+		"feedback_bubble_entries": _feedback_bubble_entries.duplicate(true),
+		"tactical_communication_event_visual_count": _tactical_communication_event_visual_count,
+		"tactical_communication_event_entries": _tactical_communication_event_entries.duplicate(true),
+		"movement_step_sfx_count": _movement_step_sfx_count,
+		"movement_step_sfx_suppressed_rate_limit_count": _movement_step_sfx_suppressed_rate_limit_count,
+		"movement_step_sfx_entries": _movement_step_sfx_entries.duplicate(true),
+		"audio_sfx": get_audio_sfx_debug_snapshot(),
+		"fog_of_war_mode": _fog_of_war_mode,
+		"fog_of_war_team_id": _fog_of_war_team_id,
+		"fog_of_war_active": _is_fog_of_war_visual_filter_active(),
+		"fow_tile_total_count": _fow_tile_total_count,
+		"fow_visible_tile_count": _fow_visible_tile_count,
+		"fow_known_dim_tile_count": _fow_known_dim_tile_count,
+		"fow_explored_tile_count": _fow_explored_tile_count,
+		"fow_unknown_tile_count": _fow_unknown_tile_count,
+		"fow_overlay_tile_count": _fow_overlay_tile_count,
+		"fow_overlay_rebuild_count": _fow_overlay_rebuild_count,
+		"fow_hidden_order_visual_count": _fow_hidden_order_visual_count,
+		"fow_hidden_contact_count": _fow_hidden_contact_count,
+		"fow_hidden_unit_proxy_count": _fow_hidden_unit_proxy_count,
+		"fow_dynamic_hidden_count": _get_fow_dynamic_hidden_count(),
+		"fow_allowed_contact_count": _fow_allowed_contact_count,
 		"lz_tile_marker_count": _lz_tile_marker_count,
 		"tile_grid_line_count": _tile_grid_line_count,
 		"contact_count": _contact_count,
+		"contact_entries": _get_contact_visual_entries(),
 		"objective_status_visible": _objective_status_visible,
 		"objective_capture_progress": float(_mission_status_payload.get("objective_capture_progress", 0.0)),
 		"mission_result_visible": _mission_result_visible,
@@ -487,6 +719,21 @@ func get_render_snapshot() -> Dictionary:
 		"dropship_visible": bool(_drop_payload.get("dropship_visible", false)),
 		"dropship_texture_visible": _dropship_texture_visible,
 		"dropship_model_visible": _dropship_model_visible,
+		"flight_altitude_layer": String(_drop_payload.get("air_layer", AIR_LAYER_ID)),
+		"air_visual_count": _air_visual_count,
+		"fow_hidden_air_visual_count": _fow_hidden_air_visual_count,
+		"air_unknown_terrain_reveal_block_count": _air_unknown_terrain_reveal_block_count,
+		"dropship_air_y": _dropship_air_y,
+		"dropship_surface_y": _dropship_surface_y,
+		"dropship_air_clearance": _dropship_air_clearance,
+		"dropship_above_terrain": (_dropship_model_visible or _dropship_texture_visible) and _dropship_air_clearance >= AIR_LAYER_MIN_CLEARANCE,
+		"dropship_fow_policy": String(_drop_payload.get("fow_policy", "friendly_air_visible_lz_requires_visible_tile")),
+		"dropship_team_id": String(_drop_payload.get("team_id", AIR_LAYER_DEFAULT_TEAM_ID)),
+		"render_budget_by_category": render_budget_by_category,
+		"render_budget_totals": render_budget_totals,
+		"render_transparency_budget": _build_render_transparency_budget(render_budget_totals),
+		"draw_budget_snapshot": _build_draw_budget_snapshot(render_monitor_snapshot),
+		"pipeline_compilation_snapshot": _build_pipeline_compilation_snapshot(render_monitor_snapshot),
 		"camera_yaw_degrees": _camera_yaw_degrees,
 		"camera_size": _camera_size,
 		"map_render_duration_msec": _map_render_duration_msec,
@@ -495,6 +742,160 @@ func get_render_snapshot() -> Dictionary:
 		"contact_payload_apply_count": _contact_payload_apply_count,
 		"drop_payload_apply_count": _drop_payload_apply_count,
 		"mission_status_payload_apply_count": _mission_status_payload_apply_count,
+	}
+
+
+func _build_render_budget_by_category() -> Dictionary:
+	return {
+		"map": _build_node_budget_for_root(_map_root),
+		"marker": _build_node_budget_for_root(_marker_root),
+		"patrol": _build_node_budget_for_root(_patrol_root),
+		"selection": _build_node_budget_for_root(_selection_root),
+		"fow": _build_node_budget_for_root(_fow_root),
+		"unit": _build_node_budget_for_root(_unit_root),
+		"order": _build_node_budget_for_root(_order_root),
+		"contact": _build_node_budget_for_root(_contact_root),
+		"drop": _build_node_budget_for_root(_drop_root),
+		"status": _build_node_budget_for_root(_status_root),
+	}
+
+
+func _build_node_budget_for_root(node: Node) -> Dictionary:
+	var counts: Dictionary = {
+		"node_count": 0,
+		"node3d_count": 0,
+		"geometry_instance_count": 0,
+		"mesh_instance_count": 0,
+		"multimesh_instance_count": 0,
+		"sprite3d_count": 0,
+		"label3d_count": 0,
+		"material_count": 0,
+		"transparent_material_count": 0,
+	}
+	var material_keys: Dictionary = {}
+	_accumulate_node_budget(node, counts, material_keys)
+	counts["material_count"] = material_keys.size()
+	return counts
+
+
+func _accumulate_node_budget(node: Node, counts: Dictionary, material_keys: Dictionary) -> void:
+	if node == null:
+		return
+	counts["node_count"] = int(counts.get("node_count", 0)) + 1
+	if node is Node3D:
+		counts["node3d_count"] = int(counts.get("node3d_count", 0)) + 1
+	if node is GeometryInstance3D:
+		counts["geometry_instance_count"] = int(counts.get("geometry_instance_count", 0)) + 1
+	if node is MeshInstance3D:
+		counts["mesh_instance_count"] = int(counts.get("mesh_instance_count", 0)) + 1
+		_accumulate_mesh_materials(node as MeshInstance3D, counts, material_keys)
+	if node is MultiMeshInstance3D:
+		counts["multimesh_instance_count"] = int(counts.get("multimesh_instance_count", 0)) + 1
+	if node is Sprite3D:
+		counts["sprite3d_count"] = int(counts.get("sprite3d_count", 0)) + 1
+	if node is Label3D:
+		counts["label3d_count"] = int(counts.get("label3d_count", 0)) + 1
+	for child in node.get_children():
+		_accumulate_node_budget(child, counts, material_keys)
+
+
+func _accumulate_mesh_materials(mesh_instance: MeshInstance3D, counts: Dictionary, material_keys: Dictionary) -> void:
+	if mesh_instance == null:
+		return
+	_register_budget_material(mesh_instance.material_override, counts, material_keys)
+	var mesh: Mesh = mesh_instance.mesh
+	if mesh == null:
+		return
+	for surface_index in range(mesh.get_surface_count()):
+		_register_budget_material(mesh.surface_get_material(surface_index), counts, material_keys)
+
+
+func _register_budget_material(material: Material, counts: Dictionary, material_keys: Dictionary) -> void:
+	if material == null:
+		return
+	var key: String = material.resource_path.strip_edges()
+	if key.is_empty():
+		key = "instance:%d" % material.get_instance_id()
+	material_keys[key] = true
+	if material is BaseMaterial3D and int((material as BaseMaterial3D).transparency) != BaseMaterial3D.TRANSPARENCY_DISABLED:
+		counts["transparent_material_count"] = int(counts.get("transparent_material_count", 0)) + 1
+
+
+func _build_render_budget_totals(category_budgets: Dictionary) -> Dictionary:
+	var totals: Dictionary = {
+		"category_count": category_budgets.size(),
+		"node_count": 0,
+		"node3d_count": 0,
+		"geometry_instance_count": 0,
+		"mesh_instance_count": 0,
+		"multimesh_instance_count": 0,
+		"sprite3d_count": 0,
+		"label3d_count": 0,
+		"material_count": 0,
+		"transparent_material_count": 0,
+	}
+	for budget_variant in category_budgets.values():
+		var budget: Dictionary = Dictionary(budget_variant)
+		for key_variant in totals.keys():
+			var key: String = String(key_variant)
+			if key == "category_count":
+				continue
+			totals[key] = int(totals.get(key, 0)) + int(budget.get(key, 0))
+	return totals
+
+
+func _build_render_transparency_budget(render_budget_totals: Dictionary) -> Dictionary:
+	var label_count: int = int(render_budget_totals.get("label3d_count", 0))
+	var sprite_count: int = int(render_budget_totals.get("sprite3d_count", 0))
+	var transparent_material_count: int = int(render_budget_totals.get("transparent_material_count", 0))
+	return {
+		"label3d_count": label_count,
+		"sprite3d_count": sprite_count,
+		"transparent_material_count": transparent_material_count,
+		"feedback_bubble_count": _feedback_bubble_visual_count,
+		"weapon_fire_vfx_count": _weapon_fire_vfx_visual_count,
+		"surface_tint_count": _surface_tint_count,
+		"fog_of_war_overlay_count": _fow_overlay_tile_count,
+		"transparent_overlay_count": label_count + sprite_count + transparent_material_count + _feedback_bubble_visual_count + _weapon_fire_vfx_visual_count + _surface_tint_count + _fow_known_dim_tile_count + _fow_explored_tile_count,
+		"budget_policy": "observe_and_keep_small_before_optimizing",
+	}
+
+
+func _build_render_monitor_snapshot() -> Dictionary:
+	var result: Dictionary = {}
+	for monitor_name in RENDER_MONITOR_NAMES:
+		result[String(monitor_name)] = _get_performance_monitor_value(String(monitor_name))
+	return result
+
+
+func _get_performance_monitor_value(monitor_name: String) -> Dictionary:
+	if not ClassDB.class_has_integer_constant("Performance", monitor_name):
+		return {"available": false, "value": -1.0}
+	var monitor_id: int = ClassDB.class_get_integer_constant("Performance", monitor_name)
+	return {
+		"available": true,
+		"value": float(Performance.get_monitor(monitor_id)),
+	}
+
+
+func _build_draw_budget_snapshot(render_monitor_snapshot: Dictionary) -> Dictionary:
+	return {
+		"objects_in_frame": Dictionary(render_monitor_snapshot.get("RENDER_TOTAL_OBJECTS_IN_FRAME", {})),
+		"primitives_in_frame": Dictionary(render_monitor_snapshot.get("RENDER_TOTAL_PRIMITIVES_IN_FRAME", {})),
+		"draw_calls_in_frame": Dictionary(render_monitor_snapshot.get("RENDER_TOTAL_DRAW_CALLS_IN_FRAME", {})),
+		"video_mem_used": Dictionary(render_monitor_snapshot.get("RENDER_VIDEO_MEM_USED", {})),
+		"texture_mem_used": Dictionary(render_monitor_snapshot.get("RENDER_TEXTURE_MEM_USED", {})),
+		"buffer_mem_used": Dictionary(render_monitor_snapshot.get("RENDER_BUFFER_MEM_USED", {})),
+	}
+
+
+func _build_pipeline_compilation_snapshot(render_monitor_snapshot: Dictionary) -> Dictionary:
+	return {
+		"canvas": Dictionary(render_monitor_snapshot.get("PIPELINE_COMPILATIONS_CANVAS", {})),
+		"mesh": Dictionary(render_monitor_snapshot.get("PIPELINE_COMPILATIONS_MESH", {})),
+		"surface": Dictionary(render_monitor_snapshot.get("PIPELINE_COMPILATIONS_SURFACE", {})),
+		"draw": Dictionary(render_monitor_snapshot.get("PIPELINE_COMPILATIONS_DRAW", {})),
+		"specialization": Dictionary(render_monitor_snapshot.get("PIPELINE_COMPILATIONS_SPECIALIZATION", {})),
 	}
 
 
@@ -528,6 +929,7 @@ func _ensure_nodes() -> void:
 
 	_map_root = _ensure_node3d(_world_root, MAP_ROOT_NAME)
 	_marker_root = _ensure_node3d(_world_root, MARKER_ROOT_NAME)
+	_fow_root = _ensure_node3d(_world_root, FOW_ROOT_NAME)
 	_patrol_root = _ensure_node3d(_world_root, PATROL_ROOT_NAME)
 	_selection_root = _ensure_node3d(_world_root, SELECTION_ROOT_NAME)
 	_unit_root = _ensure_node3d(_world_root, UNIT_ROOT_NAME)
@@ -660,8 +1062,9 @@ func _add_tile_visual(tile_data) -> void:
 	var tile_fill: float = _get_3d_ground_fill()
 	var cell_size: float = _get_3d_cell_size()
 	if _uses_strict_3d_asset_mapping():
-		if not _add_ground_model_visual(tile_data, top_y):
-			_add_missing_asset_marker(tile_data, top_y, "ground_flat")
+		var ground_visual_type_id: String = _resolve_ground_surface_model_key(tile_data)
+		if not _add_ground_model_visual(tile_data, top_y, ground_visual_type_id):
+			_add_missing_asset_marker(tile_data, top_y, ground_visual_type_id)
 	else:
 		var tile_mesh := _make_box_mesh(Vector3(cell_size * tile_fill, tile_thickness, cell_size * tile_fill))
 		var tile_instance := MeshInstance3D.new()
@@ -671,6 +1074,7 @@ func _add_tile_visual(tile_data) -> void:
 		tile_instance.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y - (tile_thickness * 0.5))
 		_map_root.add_child(tile_instance)
 		_ground_mesh_count += 1
+	_add_surface_tint_visual(tile_data, top_y)
 	_map_tile_count += 1
 
 	var object_type_id: String = String(tile_data.object_type_id) if tile_data.object_type_id is String else ""
@@ -713,8 +1117,11 @@ func _add_object_visual(tile_data, top_y: float, visual_type_id: String) -> void
 	_placeholder_object_count += 1
 
 
-func _add_ground_model_visual(tile_data, top_y: float) -> bool:
-	var model_scene := _get_asset_model_scene("ground_flat")
+func _add_ground_model_visual(tile_data, top_y: float, visual_type_id: String = "ground_flat") -> bool:
+	var normalized_visual_type_id: String = visual_type_id.strip_edges().to_lower()
+	if normalized_visual_type_id.is_empty():
+		normalized_visual_type_id = "ground_flat"
+	var model_scene := _get_asset_model_scene(normalized_visual_type_id)
 	if model_scene == null or _map_root == null:
 		return false
 	var model_instance := model_scene.instantiate() as Node3D
@@ -729,7 +1136,53 @@ func _add_ground_model_visual(tile_data, top_y: float) -> bool:
 	ground_root.add_child(model_instance)
 	_map_root.add_child(ground_root)
 	_ground_mesh_count += 1
+	_register_ground_surface_visual(tile_data, normalized_visual_type_id)
 	return true
+
+
+func _resolve_ground_surface_model_key(tile_data) -> String:
+	if tile_data == null:
+		return "ground_flat"
+	var catalog: Dictionary = _get_terrain_surface_visual_theme_catalog()
+	if catalog.is_empty():
+		return "ground_flat"
+	var type_id: String = String(tile_data.type_id).strip_edges().to_lower() if tile_data.type_id is String else ""
+	var type_overrides: Dictionary = Dictionary(catalog.get("tile_type_overrides", {}))
+	if not type_id.is_empty() and type_overrides.has(type_id):
+		var override_key: String = String(type_overrides.get(type_id, "")).strip_edges().to_lower()
+		if not override_key.is_empty():
+			return override_key
+	var surface_type: String = String(tile_data.surface_type).strip_edges().to_lower()
+	var surface_models: Dictionary = Dictionary(catalog.get("surface_model_by_surface", {}))
+	var model_key: String = String(surface_models.get(surface_type, "")).strip_edges().to_lower()
+	if model_key.is_empty():
+		model_key = String(surface_models.get(TERRAIN_TILE_DATA_SCRIPT.SURFACE_GROUND, "ground_flat")).strip_edges().to_lower()
+	return model_key if not model_key.is_empty() else "ground_flat"
+
+
+func _register_ground_surface_visual(tile_data, visual_type_id: String) -> void:
+	if tile_data == null:
+		return
+	var mapped_entry: Dictionary = _get_model_entry_for_type(visual_type_id)
+	var visual_entry: Dictionary = _get_surface_visual_entry_for_model_key(visual_type_id)
+	var is_nature_kit: bool = _is_nature_kit_model_entry(mapped_entry)
+	var theme: String = String(visual_entry.get("theme", mapped_entry.get("nature_theme", ""))).strip_edges()
+	if theme.is_empty():
+		theme = "default"
+	if is_nature_kit:
+		_nature_surface_ground_model_count += 1
+		_nature_surface_theme_counts[theme] = int(_nature_surface_theme_counts.get(theme, 0)) + 1
+	_surface_visual_entries.append({
+		"grid_position": tile_data.grid_position,
+		"type_id": String(tile_data.type_id),
+		"surface_type": String(tile_data.surface_type),
+		"model_key": visual_type_id,
+		"model_path": String(mapped_entry.get("model_path", "")),
+		"source_id": String(mapped_entry.get("source_id", "")),
+		"theme": theme,
+		"visual_id": String(visual_entry.get("visual_id", visual_type_id)),
+		"is_nature_kit": is_nature_kit,
+	})
 
 
 func _add_missing_asset_marker(tile_data, top_y: float, visual_type_id: String) -> void:
@@ -746,6 +1199,34 @@ func _add_missing_asset_marker(tile_data, top_y: float, visual_type_id: String) 
 	marker.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + 0.14)
 	_map_root.add_child(marker)
 	_missing_asset_mapping_count += 1
+
+
+func _add_surface_tint_visual(tile_data, top_y: float) -> void:
+	if tile_data == null or _map_root == null or not _uses_strict_3d_asset_mapping():
+		return
+	var surface_type: String = String(tile_data.surface_type).strip_edges().to_lower()
+	if surface_type == TERRAIN_TILE_DATA_SCRIPT.SURFACE_GROUND:
+		return
+	var tint_color := Color.TRANSPARENT
+	match surface_type:
+		TERRAIN_TILE_DATA_SCRIPT.SURFACE_SAND:
+			tint_color = Color(1.0, 0.86, 0.34, 0.34)
+		TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROAD:
+			tint_color = Color(0.64, 0.69, 0.72, 0.30)
+		TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROCK:
+			tint_color = Color(0.54, 0.50, 0.42, 0.32)
+		_:
+			return
+	var cell_size: float = _get_3d_cell_size()
+	var tint := MeshInstance3D.new()
+	tint.name = "SurfaceTint_%s_%d_%d" % [surface_type, tile_data.grid_position.x, tile_data.grid_position.y]
+	tint.mesh = _make_box_mesh(Vector3(cell_size * 0.82, 0.012, cell_size * 0.82))
+	tint.material_override = _make_material(tint_color, true)
+	tint.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + 0.018)
+	_map_root.add_child(tint)
+	_surface_tint_count += 1
+	if int(tile_data.height_level) > 0:
+		_elevated_surface_tint_count += 1
 
 
 func _add_tile_grid_lines(tiles: Array) -> void:
@@ -786,26 +1267,156 @@ func _add_tile_grid_lines(tiles: Array) -> void:
 	_tile_grid_line_count = line_count
 
 
+func _add_height_edge_visuals(tile_data) -> void:
+	if _uses_strict_3d_asset_mapping():
+		_add_height_edge_model_visuals(tile_data)
+	else:
+		_add_height_edge_texture_visuals(tile_data)
+
+
+func _add_height_edge_model_visuals(tile_data) -> void:
+	if tile_data == null or _map_root == null:
+		return
+	if int(tile_data.height_level) <= 0:
+		return
+	var current_edge_type: String = String(tile_data.edge_type)
+	var edge_dirs: Array[Vector2i] = _collect_lower_height_edge_dirs(tile_data)
+	if edge_dirs.is_empty():
+		return
+	if current_edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE:
+		_height_edge_authoring_conflict_count += edge_dirs.size()
+		return
+
+	var grid_pos: Vector2i = tile_data.grid_position
+	var top_y: float = float(int(tile_data.height_level)) * _get_3d_height_step()
+	if current_edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF:
+		var corner_map: Array = [
+			[Vector2i(1, 0), Vector2i(0, 1), "cliff_corner_ne"],
+			[Vector2i(1, 0), Vector2i(0, -1), "cliff_corner_nw"],
+			[Vector2i(-1, 0), Vector2i(0, 1), "cliff_corner_se"],
+			[Vector2i(-1, 0), Vector2i(0, -1), "cliff_corner_sw"],
+		]
+		var edges_consumed_by_corners: Array[Vector2i] = []
+		for corner_entry in corner_map:
+			var dir_a: Vector2i = corner_entry[0]
+			var dir_b: Vector2i = corner_entry[1]
+			var visual_type_id: String = String(corner_entry[2])
+			if edge_dirs.has(dir_a) and edge_dirs.has(dir_b):
+				if _add_height_edge_model(tile_data, top_y, visual_type_id, "HeightCorner_%d_%d_%d_%d" % [grid_pos.x, grid_pos.y, dir_a.x + dir_b.x, dir_a.y + dir_b.y]):
+					if not edges_consumed_by_corners.has(dir_a):
+						edges_consumed_by_corners.append(dir_a)
+					if not edges_consumed_by_corners.has(dir_b):
+						edges_consumed_by_corners.append(dir_b)
+		for edge_dir in edge_dirs:
+			if edges_consumed_by_corners.has(edge_dir):
+				continue
+			_add_height_edge_model(tile_data, top_y, _get_height_edge_visual_type_id(current_edge_type, edge_dir), "HeightEdge_%d_%d_%d_%d" % [grid_pos.x, grid_pos.y, edge_dir.x, edge_dir.y])
+		return
+
+	if current_edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE:
+		for edge_dir in edge_dirs:
+			_add_height_edge_model(tile_data, top_y, _get_height_edge_visual_type_id(current_edge_type, edge_dir), "HeightEdge_%d_%d_%d_%d" % [grid_pos.x, grid_pos.y, edge_dir.x, edge_dir.y])
+
+
+func _add_height_edge_model(tile_data, top_y: float, visual_type_id: String, node_name: String) -> bool:
+	var model_scene := _get_asset_model_scene(visual_type_id)
+	if model_scene == null or _map_root == null:
+		_add_missing_asset_marker(tile_data, top_y, visual_type_id)
+		return false
+	var mapped_entry: Dictionary = _get_model_entry_for_type(visual_type_id)
+	var model_instance := model_scene.instantiate() as Node3D
+	if model_instance == null:
+		_add_missing_asset_marker(tile_data, top_y, visual_type_id)
+		return false
+	_normalize_asset_model_instance(model_instance)
+	var visual_root := Node3D.new()
+	visual_root.name = "%s_%s" % [node_name, visual_type_id]
+	visual_root.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + _get_asset_y_offset(visual_type_id)) + _get_asset_position_offset(visual_type_id)
+	visual_root.rotation_degrees.y = _get_asset_rotation_y(visual_type_id)
+	visual_root.scale = Vector3.ONE * _get_asset_model_scale(visual_type_id)
+	visual_root.add_child(model_instance)
+	_map_root.add_child(visual_root)
+	_asset_model_count += 1
+	_height_edge_model_count += 1
+	var is_slope_edge: bool = String(tile_data.edge_type) == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE
+	var is_nature_kit: bool = _is_nature_kit_model_entry(mapped_entry)
+	if String(tile_data.edge_type) == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE:
+		_slope_edge_model_count += 1
+	else:
+		_cliff_edge_model_count += 1
+	if is_nature_kit:
+		var theme: String = String(mapped_entry.get("nature_theme", "default")).strip_edges()
+		if theme.is_empty():
+			theme = "default"
+		_nature_cliff_theme_counts[theme] = int(_nature_cliff_theme_counts.get(theme, 0)) + 1
+		if is_slope_edge:
+			_nature_slope_step_model_count += 1
+		else:
+			_nature_cliff_edge_model_count += 1
+	_height_edge_visual_entries.append({
+		"node_name": visual_root.name,
+		"visual_type_id": visual_type_id,
+		"edge_type": String(tile_data.edge_type),
+		"surface_type": String(tile_data.surface_type),
+		"grid_position": tile_data.grid_position,
+		"model_path": String(mapped_entry.get("model_path", "")),
+		"source_id": String(mapped_entry.get("source_id", "")),
+		"nature_theme": String(mapped_entry.get("nature_theme", "")),
+		"edge_role": String(mapped_entry.get("edge_role", "")),
+		"is_nature_kit": is_nature_kit,
+	})
+	return true
+
+
+func _collect_lower_height_edge_dirs(tile_data) -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
+	if tile_data == null:
+		return result
+	var grid_pos: Vector2i = tile_data.grid_position
+	var my_height: int = int(tile_data.height_level)
+	for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		var neighbor = _render_tile_by_grid.get(grid_pos + offset, null)
+		var neighbor_height: int = int(neighbor.height_level) if neighbor != null else 0
+		if neighbor_height < my_height:
+			result.append(offset)
+	return result
+
+
+func _get_height_edge_visual_type_id(edge_type: String, edge_dir: Vector2i) -> String:
+	var suffix: String = ""
+	match edge_dir:
+		Vector2i(1, 0):
+			suffix = "se"
+		Vector2i(-1, 0):
+			suffix = "nw"
+		Vector2i(0, 1):
+			suffix = "sw"
+		Vector2i(0, -1):
+			suffix = "ne"
+		_:
+			suffix = "se"
+	if edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE:
+		return "slope_%s" % suffix
+	return "cliff_straight_%s" % suffix
+
+
 func _add_height_edge_texture_visuals(tile_data) -> void:
 	if tile_data == null or _map_root == null:
 		return
 	if _has_3d_asset_mapping():
 		return
-	if int(tile_data.height_level) <= 0 or _is_legacy_object_type(tile_data):
+	if int(tile_data.height_level) <= 0:
 		return
 	var current_edge_type: String = String(tile_data.edge_type)
-	if current_edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE:
-		return
-
 	var grid_pos: Vector2i = tile_data.grid_position
 	var my_height: int = int(tile_data.height_level)
+	var cliff_edge_dirs: Array[Vector2i] = _collect_lower_height_edge_dirs(tile_data)
+	if cliff_edge_dirs.is_empty():
+		return
+	if current_edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE:
+		_height_edge_authoring_conflict_count += cliff_edge_dirs.size()
+		return
 	var is_slope: bool = current_edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE
-	var cliff_edge_dirs: Array[Vector2i] = []
-	for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-		var neighbor = _render_tile_by_grid.get(grid_pos + offset, null)
-		var neighbor_height: int = int(neighbor.height_level) if neighbor != null else 0
-		if neighbor_height < my_height and not _is_legacy_object_type(neighbor):
-			cliff_edge_dirs.append(offset)
 
 	var top_y: float = float(my_height) * _get_3d_height_step()
 	var corner_map: Array = [
@@ -815,16 +1426,17 @@ func _add_height_edge_texture_visuals(tile_data) -> void:
 		[Vector2i(-1, 0), Vector2i(0, -1), CLIFF_CORNER_SW],
 	]
 	var edges_consumed_by_corners: Array[Vector2i] = []
-	for corner_entry in corner_map:
-		var dir_a: Vector2i = corner_entry[0]
-		var dir_b: Vector2i = corner_entry[1]
-		var corner_texture := corner_entry[2] as Texture2D
-		if cliff_edge_dirs.has(dir_a) and cliff_edge_dirs.has(dir_b):
-			_add_height_edge_texture_card(tile_data, top_y, corner_texture, "Corner_%d_%d_%d_%d" % [grid_pos.x, grid_pos.y, dir_a.x + dir_b.x, dir_a.y + dir_b.y])
-			if not edges_consumed_by_corners.has(dir_a):
-				edges_consumed_by_corners.append(dir_a)
-			if not edges_consumed_by_corners.has(dir_b):
-				edges_consumed_by_corners.append(dir_b)
+	if not is_slope:
+		for corner_entry in corner_map:
+			var dir_a: Vector2i = corner_entry[0]
+			var dir_b: Vector2i = corner_entry[1]
+			var corner_texture := corner_entry[2] as Texture2D
+			if cliff_edge_dirs.has(dir_a) and cliff_edge_dirs.has(dir_b):
+				_add_height_edge_texture_card(tile_data, top_y, corner_texture, "Corner_%d_%d_%d_%d" % [grid_pos.x, grid_pos.y, dir_a.x + dir_b.x, dir_a.y + dir_b.y])
+				if not edges_consumed_by_corners.has(dir_a):
+					edges_consumed_by_corners.append(dir_a)
+				if not edges_consumed_by_corners.has(dir_b):
+					edges_consumed_by_corners.append(dir_b)
 
 	var edge_texture_map: Dictionary
 	if is_slope:
@@ -1042,7 +1654,37 @@ func _add_asset_model_visual(tile_data, top_y: float, visual_type_id: String) ->
 	if not _has_model_mapping_for_type(visual_type_id):
 		_apply_map_asset_material_override(model_instance, visual_type_id)
 	_asset_model_count += 1
+	_register_nature_prop_visual(tile_data, visual_type_id, visual_root)
 	return true
+
+
+func _register_nature_prop_visual(tile_data, visual_type_id: String, visual_root: Node3D) -> void:
+	if tile_data == null:
+		return
+	var mapped_entry: Dictionary = _get_model_entry_for_type(visual_type_id)
+	if not _is_nature_kit_model_entry(mapped_entry):
+		return
+	var prop_role: String = String(mapped_entry.get("prop_role", "nature_prop")).strip_edges()
+	if prop_role.is_empty():
+		prop_role = "nature_prop"
+	_nature_prop_model_count += 1
+	_nature_prop_role_counts[prop_role] = int(_nature_prop_role_counts.get(prop_role, 0)) + 1
+	_nature_prop_visual_entries.append({
+		"node_name": visual_root.name if visual_root != null else "",
+		"visual_type_id": visual_type_id,
+		"object_type_id": String(tile_data.object_type_id),
+		"type_id": String(tile_data.type_id),
+		"grid_position": tile_data.grid_position,
+		"height_level": int(tile_data.height_level),
+		"object_height": int(tile_data.object_height),
+		"walkable": bool(tile_data.walkable),
+		"blocks_los": bool(tile_data.blocks_los),
+		"cover_value": int(tile_data.cover_value),
+		"model_path": String(mapped_entry.get("model_path", "")),
+		"source_id": String(mapped_entry.get("source_id", "")),
+		"prop_role": prop_role,
+		"gameplay_role": String(mapped_entry.get("gameplay_role", "")),
+	})
 
 
 func _normalize_asset_model_instance(model_instance: Node3D) -> void:
@@ -1158,7 +1800,7 @@ func _rebuild_marker_visuals() -> void:
 		mesh.radial_segments = 4
 		marker.mesh = mesh
 		marker.material_override = _make_material(Color(color.r, color.g, color.b, 0.92))
-		marker.position = _world_to_3d_position(world_position, 0.22)
+		marker.position = _world_to_surface_3d_position(world_position, 0.22)
 		marker.rotation_degrees.y = 45.0
 		_marker_root.add_child(marker)
 		_marker_count += 1
@@ -1176,7 +1818,7 @@ func _rebuild_patrol_visuals() -> void:
 			continue
 		var color := Color(0.25, 0.92, 0.4, 0.82)
 		for index in range(1, path_points.size()):
-			_add_line3d(_patrol_root, _world_to_3d_position(Vector2(path_points[index - 1]), 0.28), _world_to_3d_position(Vector2(path_points[index]), 0.28), color, "Patrol_%s_%d" % [String(spawn_id_variant), index])
+			_add_line3d(_patrol_root, _world_to_surface_3d_position(Vector2(path_points[index - 1]), 0.28), _world_to_surface_3d_position(Vector2(path_points[index]), 0.28), color, "Patrol_%s_%d" % [String(spawn_id_variant), index])
 			_patrol_segment_count += 1
 
 
@@ -1199,12 +1841,438 @@ func _rebuild_selection_visuals() -> void:
 		_selection_root.add_child(selection)
 
 
+func _normalize_fog_of_war_visual_state(fog_of_war_state: Dictionary) -> Dictionary:
+	var raw_mode: String = String(fog_of_war_state.get("mode", fog_of_war_state.get("fog_of_war_mode", FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF))).strip_edges()
+	var mode: String = FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF if raw_mode.is_empty() else String(FOG_OF_WAR_MODE_CONTRACT_SCRIPT.call("normalize_mode", raw_mode))
+	var terrain_knowledge: Dictionary = Dictionary(fog_of_war_state.get("terrain_knowledge", {}))
+	var current_visibility: Dictionary = Dictionary(fog_of_war_state.get("current_visibility", {}))
+	return {
+		"mode": mode,
+		"team_id": String(fog_of_war_state.get("team_id", "")).strip_edges(),
+		"terrain_knowledge": {
+			"visible_tile_ids": _normalize_fow_string_array(terrain_knowledge.get("visible_tile_ids", fog_of_war_state.get("visible_tile_ids", []))),
+			"explored_tile_ids": _normalize_fow_string_array(terrain_knowledge.get("explored_tile_ids", fog_of_war_state.get("explored_tile_ids", []))),
+		},
+		"current_visibility": {
+			"visible_target_ids": _normalize_fow_string_array(current_visibility.get("visible_target_ids", fog_of_war_state.get("visible_target_ids", []))),
+			"visible_event_ids": _normalize_fow_string_array(current_visibility.get("visible_event_ids", fog_of_war_state.get("visible_event_ids", []))),
+		},
+		"last_known_contacts": _normalize_fow_last_known_contacts(fog_of_war_state.get("last_known_contacts", [])),
+	}
+
+
+func _build_fog_of_war_visual_signature(fog_of_war_state: Dictionary) -> String:
+	var terrain_knowledge: Dictionary = Dictionary(fog_of_war_state.get("terrain_knowledge", {}))
+	var current_visibility: Dictionary = Dictionary(fog_of_war_state.get("current_visibility", {}))
+	var parts: PackedStringArray = PackedStringArray([
+		String(fog_of_war_state.get("mode", FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF)),
+		String(fog_of_war_state.get("team_id", "")),
+		_join_fow_string_array(PackedStringArray(terrain_knowledge.get("visible_tile_ids", PackedStringArray()))),
+		_join_fow_string_array(PackedStringArray(terrain_knowledge.get("explored_tile_ids", PackedStringArray()))),
+		_join_fow_string_array(PackedStringArray(current_visibility.get("visible_target_ids", PackedStringArray()))),
+		_join_fow_string_array(PackedStringArray(current_visibility.get("visible_event_ids", PackedStringArray()))),
+	])
+	for contact_variant in Array(fog_of_war_state.get("last_known_contacts", [])):
+		if typeof(contact_variant) != TYPE_DICTIONARY:
+			continue
+		var contact: Dictionary = Dictionary(contact_variant)
+		var contact_part: String = "%s:%s:%d" % [
+			String(contact.get("target_id", "")),
+			_format_fow_position(contact.get("last_known_position", null)),
+			int(contact.get("last_seen_tick", 0)),
+		]
+		parts.append(contact_part)
+	return "|".join(parts)
+
+
+func _apply_fog_of_war_visual_state(fog_of_war_state: Dictionary) -> void:
+	_fog_of_war_state = fog_of_war_state.duplicate(true)
+	_fog_of_war_mode = String(fog_of_war_state.get("mode", FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF))
+	_fog_of_war_team_id = String(fog_of_war_state.get("team_id", "")).strip_edges()
+	var terrain_knowledge: Dictionary = Dictionary(fog_of_war_state.get("terrain_knowledge", {}))
+	var current_visibility: Dictionary = Dictionary(fog_of_war_state.get("current_visibility", {}))
+	_fow_visible_tile_ids = _build_fow_lookup(PackedStringArray(terrain_knowledge.get("visible_tile_ids", PackedStringArray())))
+	_fow_explored_tile_ids = _build_fow_lookup(PackedStringArray(terrain_knowledge.get("explored_tile_ids", PackedStringArray())))
+	_fow_visible_target_ids = _build_fow_lookup(PackedStringArray(current_visibility.get("visible_target_ids", PackedStringArray())))
+	_fow_visible_event_ids = _build_fow_lookup(PackedStringArray(current_visibility.get("visible_event_ids", PackedStringArray())))
+	_fow_last_known_contacts = Array(fog_of_war_state.get("last_known_contacts", [])).duplicate(true)
+
+
+func _normalize_fow_string_array(value: Variant) -> PackedStringArray:
+	var result: PackedStringArray = PackedStringArray()
+	if value is PackedStringArray:
+		result = PackedStringArray(value)
+	elif value is Array:
+		for entry_variant in Array(value):
+			var entry: String = String(entry_variant).strip_edges()
+			if not entry.is_empty():
+				result.append(entry)
+	result.sort()
+	return result
+
+
+func _normalize_fow_last_known_contacts(value: Variant) -> Array:
+	var result: Array = []
+	if not (value is Array):
+		return result
+	for contact_variant in Array(value):
+		if typeof(contact_variant) != TYPE_DICTIONARY:
+			continue
+		var source: Dictionary = Dictionary(contact_variant)
+		var target_id: String = String(source.get("target_id", source.get("unit_id", ""))).strip_edges()
+		if target_id.is_empty():
+			continue
+		var contact: Dictionary = {
+			"target_id": target_id,
+			"unit_id": target_id,
+			"team_id": String(source.get("team_id", "")).strip_edges(),
+			"last_seen_tick": maxi(int(source.get("last_seen_tick", 0)), 0),
+			"detection_state": String(source.get("detection_state", "lost")).strip_edges().to_lower(),
+			"fow_last_known": true,
+		}
+		var position: Variant = _coerce_fow_position(source.get("last_known_position", source.get("position", null)))
+		if position != null:
+			contact["last_known_position"] = position
+		result.append(contact)
+	result.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return String(a.get("target_id", "")) < String(b.get("target_id", ""))
+	)
+	return result
+
+
+func _coerce_fow_position(value: Variant) -> Variant:
+	if typeof(value) == TYPE_VECTOR2:
+		return value
+	if typeof(value) == TYPE_VECTOR2I:
+		var grid_position := Vector2i(value)
+		return Vector2(grid_position.x, grid_position.y)
+	if typeof(value) == TYPE_DICTIONARY:
+		var dict: Dictionary = Dictionary(value)
+		return Vector2(float(dict.get("x", 0.0)), float(dict.get("y", 0.0)))
+	return null
+
+
+func _build_fow_lookup(ids: PackedStringArray) -> Dictionary:
+	var lookup: Dictionary = {}
+	for id in ids:
+		var normalized_id: String = String(id).strip_edges()
+		if not normalized_id.is_empty():
+			lookup[normalized_id] = true
+	return lookup
+
+
+func _join_fow_string_array(ids: PackedStringArray) -> String:
+	return ",".join(ids)
+
+
+func _format_fow_position(value: Variant) -> String:
+	if typeof(value) != TYPE_VECTOR2:
+		return ""
+	var position := Vector2(value)
+	return "%.2f,%.2f" % [position.x, position.y]
+
+
+func _is_fog_of_war_visual_filter_active() -> bool:
+	return _fog_of_war_mode != FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF
+
+
+func _reset_fow_overlay_counters(preserve_rebuild_count: bool = true) -> void:
+	_fow_overlay_tile_count = 0
+	_fow_visible_tile_count = 0
+	_fow_known_dim_tile_count = 0
+	_fow_explored_tile_count = 0
+	_fow_unknown_tile_count = 0
+	_fow_tile_total_count = 0
+	_fow_hidden_order_visual_count = 0
+	_fow_hidden_contact_count = 0
+	_fow_hidden_unit_proxy_count = 0
+	_fow_allowed_contact_count = 0
+	if not preserve_rebuild_count:
+		_fow_overlay_rebuild_count = 0
+
+
+func _rebuild_fog_of_war_visuals() -> void:
+	_clear_children(_fow_root)
+	_fow_overlay_tile_count = 0
+	_fow_visible_tile_count = 0
+	_fow_known_dim_tile_count = 0
+	_fow_explored_tile_count = 0
+	_fow_unknown_tile_count = 0
+	_fow_tile_total_count = 0
+	if _fow_root == null or _terrain_map_data == null:
+		return
+	var tiles: Array = Array(_terrain_map_data.call("get_tiles"))
+	_fow_tile_total_count = tiles.size()
+	if not _is_fog_of_war_visual_filter_active():
+		_fow_visible_tile_count = tiles.size()
+		return
+
+	var known_dim_transforms: Array = []
+	var explored_transforms: Array = []
+	var unknown_transforms: Array = []
+	var blackout_y: float = _get_fow_blackout_cover_y(tiles)
+	for tile_data in tiles:
+		if tile_data == null:
+			continue
+		var tile_state: String = _get_fow_tile_state(tile_data)
+		match tile_state:
+			FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_VISIBLE:
+				_fow_visible_tile_count += 1
+			FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_KNOWN:
+				_fow_known_dim_tile_count += 1
+				known_dim_transforms.append(_get_fow_surface_overlay_transform(tile_data))
+			FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_EXPLORED:
+				_fow_explored_tile_count += 1
+				explored_transforms.append(_get_fow_surface_overlay_transform(tile_data))
+			_:
+				_fow_unknown_tile_count += 1
+				unknown_transforms.append(_get_fow_blackout_overlay_transform(tile_data, blackout_y))
+	_fow_overlay_tile_count = known_dim_transforms.size() + explored_transforms.size() + unknown_transforms.size()
+	_add_fow_overlay_multimesh("FoWKnownDimOverlay", known_dim_transforms, FOW_KNOWN_DIM_COLOR, true)
+	_add_fow_overlay_multimesh("FoWExploredOverlay", explored_transforms, FOW_EXPLORED_DIM_COLOR, true)
+	_add_fow_overlay_multimesh("FoWUnknownBlackoutOverlay", unknown_transforms, FOW_UNKNOWN_BLACK_COLOR, false)
+	_fow_overlay_rebuild_count += 1
+
+
+func _get_fow_tile_state(tile_data) -> String:
+	if not _is_fog_of_war_visual_filter_active():
+		return FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_VISIBLE
+	var tile_id: String = _get_tile_id_for_fow(tile_data)
+	if not tile_id.is_empty() and _fow_visible_tile_ids.has(tile_id):
+		return FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_VISIBLE
+	if _fog_of_war_mode == FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_KNOWN_TERRAIN:
+		return FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_KNOWN
+	if not tile_id.is_empty() and _fow_explored_tile_ids.has(tile_id):
+		return FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_EXPLORED
+	return FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_UNKNOWN
+
+
+func _get_tile_id_for_fow(tile_data) -> String:
+	if tile_data == null:
+		return ""
+	var tile_id: String = String(tile_data.tile_id).strip_edges()
+	if not tile_id.is_empty():
+		return tile_id
+	var grid_position: Vector2i = tile_data.grid_position
+	return "tile_%d_%d" % [grid_position.x, grid_position.y]
+
+
+func _get_fow_surface_overlay_transform(tile_data) -> Transform3D:
+	var grid_position: Vector2 = Vector2(tile_data.grid_position)
+	var top_y: float = (float(tile_data.height_level) * _get_3d_height_step()) + FOW_OVERLAY_SURFACE_Y_OFFSET
+	return Transform3D(Basis(), _grid_to_3d_position(grid_position, top_y))
+
+
+func _get_fow_blackout_overlay_transform(tile_data, blackout_y: float) -> Transform3D:
+	return Transform3D(Basis(), _grid_to_3d_position(Vector2(tile_data.grid_position), blackout_y))
+
+
+func _get_fow_blackout_cover_y(tiles: Array) -> float:
+	var max_y: float = 0.0
+	for tile_data in tiles:
+		if tile_data == null:
+			continue
+		var tile_top_y: float = float(tile_data.height_level) * _get_3d_height_step()
+		var object_top_y: float = tile_top_y + (maxf(float(tile_data.object_height), 0.0) * OBJECT_HEIGHT_STEP)
+		max_y = maxf(max_y, object_top_y)
+	return max_y + FOW_BLACKOUT_COVER_Y_OFFSET
+
+
+func _add_fow_overlay_multimesh(node_name: String, transforms: Array, color: Color, transparent: bool) -> void:
+	if _fow_root == null or transforms.is_empty():
+		return
+	var cell_size: float = _get_3d_cell_size()
+	var multi_mesh := MultiMesh.new()
+	multi_mesh.transform_format = MultiMesh.TRANSFORM_3D
+	multi_mesh.mesh = _make_box_mesh(Vector3(cell_size * 0.99, FOW_OVERLAY_HEIGHT, cell_size * 0.99))
+	multi_mesh.instance_count = transforms.size()
+	for index in range(transforms.size()):
+		var transform: Transform3D = transforms[index]
+		multi_mesh.set_instance_transform(index, transform)
+	var instance := MultiMeshInstance3D.new()
+	instance.name = node_name
+	instance.multimesh = multi_mesh
+	instance.material_override = _make_material(color, transparent)
+	_fow_root.add_child(instance)
+
+
+func _fow_is_target_currently_visible(target_id: String) -> bool:
+	if not _is_fog_of_war_visual_filter_active():
+		return true
+	var normalized_id: String = target_id.strip_edges()
+	return not normalized_id.is_empty() and _fow_visible_target_ids.has(normalized_id)
+
+
+func _fow_is_event_currently_visible(event_id: String) -> bool:
+	if not _is_fog_of_war_visual_filter_active():
+		return true
+	var normalized_id: String = event_id.strip_edges()
+	return not normalized_id.is_empty() and _fow_visible_event_ids.has(normalized_id)
+
+
+func _fow_is_world_position_currently_visible(position_variant: Variant) -> bool:
+	if not _is_fog_of_war_visual_filter_active():
+		return true
+	if typeof(position_variant) != TYPE_VECTOR2:
+		return false
+	if _terrain_map_data == null or not _terrain_map_data.has_method("get_tile_at_grid"):
+		return false
+	var tile_data = _terrain_map_data.call("get_tile_at_grid", _world_to_grid_position(Vector2(position_variant)))
+	if tile_data == null:
+		return false
+	var tile_id: String = _get_tile_id_for_fow(tile_data)
+	return not tile_id.is_empty() and _fow_visible_tile_ids.has(tile_id)
+
+
+func _fow_allows_unit_proxy(unit: Node) -> bool:
+	if not _is_fog_of_war_visual_filter_active():
+		return true
+	if unit == null:
+		return false
+	var unit_team_id: String = _get_unit_team_id(unit)
+	if not _fog_of_war_team_id.is_empty() and unit_team_id == _fog_of_war_team_id:
+		return true
+	var unit_id: String = _get_unit_id(unit)
+	if _fow_is_target_currently_visible(unit_id):
+		return true
+	if unit is Node2D:
+		return _fow_is_world_position_currently_visible((unit as Node2D).global_position)
+	return false
+
+
+func _fow_allows_enemy_security_visual(security_state: Dictionary) -> bool:
+	if not _is_fog_of_war_visual_filter_active():
+		return true
+	if _fow_is_world_position_currently_visible(security_state.get("anchor_position", null)):
+		return true
+	if _fow_any_unit_id_visible(PackedStringArray(security_state.get("watched_unit_ids", PackedStringArray()))):
+		return true
+	for assignment_variant in Array(security_state.get("member_assignments", [])):
+		if typeof(assignment_variant) != TYPE_DICTIONARY:
+			continue
+		var assignment: Dictionary = Dictionary(assignment_variant)
+		if _fow_is_target_currently_visible(String(assignment.get("unit_id", assignment.get("member_id", "")))):
+			return true
+	return false
+
+
+func _fow_allows_enemy_tactics_visual(tactics_state: Dictionary) -> bool:
+	if not _is_fog_of_war_visual_filter_active():
+		return true
+	if _fow_is_world_position_currently_visible(tactics_state.get("anchor_position", null)):
+		return true
+	if _fow_any_unit_id_visible(PackedStringArray(tactics_state.get("moving_unit_ids", PackedStringArray()))):
+		return true
+	if _fow_any_unit_id_visible(PackedStringArray(tactics_state.get("covering_unit_ids", PackedStringArray()))):
+		return true
+	for position_variant in Dictionary(tactics_state.get("target_positions_by_unit_id", {})).values():
+		if _fow_is_world_position_currently_visible(position_variant):
+			return true
+	return false
+
+
+func _fow_allows_fire_event_visual(fire_event: Dictionary) -> bool:
+	if not _is_fog_of_war_visual_filter_active():
+		return true
+	if _fow_is_event_currently_visible(String(fire_event.get("event_id", ""))):
+		return true
+	if _fow_is_target_currently_visible(String(fire_event.get("attacker_unit_id", ""))):
+		return true
+	if _fow_is_target_currently_visible(String(fire_event.get("target_unit_id", ""))):
+		return true
+	return _fow_is_world_position_currently_visible(fire_event.get("attacker_position", null)) or _fow_is_world_position_currently_visible(fire_event.get("target_position", null))
+
+
+func _fow_allows_feedback_bubble_visual(feedback_bubble: Dictionary) -> bool:
+	if not _is_fog_of_war_visual_filter_active():
+		return true
+	if _fow_is_target_currently_visible(String(feedback_bubble.get("unit_id", ""))):
+		return true
+	return _fow_is_world_position_currently_visible(feedback_bubble.get("anchor_position", null))
+
+
+func _fow_allows_tactical_communication_event_visual(communication_event: Dictionary) -> bool:
+	if not _is_fog_of_war_visual_filter_active():
+		return true
+	if _fow_is_event_currently_visible(String(communication_event.get("event_id", ""))):
+		return true
+	if _fow_is_target_currently_visible(String(communication_event.get("unit_id", ""))):
+		return true
+	if _fow_is_world_position_currently_visible(communication_event.get("anchor_position", null)):
+		return true
+	return _fow_is_world_position_currently_visible(communication_event.get("target_position", null))
+
+
+func _fow_allows_contact_visual(contact: Dictionary) -> bool:
+	if not _is_fog_of_war_visual_filter_active():
+		return true
+	if bool(contact.get("fow_last_known", false)):
+		return true
+	var target_id: String = String(contact.get("target_id", contact.get("unit_id", ""))).strip_edges()
+	if _fow_is_target_currently_visible(target_id):
+		return true
+	return _fow_is_world_position_currently_visible(contact.get("last_known_position", contact.get("position", null)))
+
+
+func _fow_any_unit_id_visible(unit_ids: PackedStringArray) -> bool:
+	for unit_id in unit_ids:
+		if _fow_is_target_currently_visible(String(unit_id)):
+			return true
+	return false
+
+
+func _get_fow_dynamic_hidden_count() -> int:
+	return _fow_hidden_order_visual_count + _fow_hidden_contact_count + _fow_hidden_unit_proxy_count + _fow_hidden_air_visual_count
+
+
+func _get_contact_visual_entries() -> Array:
+	return _contact_visual_entries.duplicate(true)
+
+
+func _normalize_mission_drop_visual_payload(drop_payload: Dictionary) -> Dictionary:
+	var payload: Dictionary = drop_payload.duplicate(true)
+	if payload.has("visible") and not payload.has("dropship_visible"):
+		payload["dropship_visible"] = bool(payload.get("visible", false))
+	if payload.has("position") and not payload.has("dropship_position"):
+		payload["dropship_position"] = payload.get("position")
+	if payload.has("target_position") and not payload.has("dropship_target_position"):
+		payload["dropship_target_position"] = payload.get("target_position")
+	if payload.has("has_lz") and not payload.has("has_lz_position"):
+		payload["has_lz_position"] = bool(payload.get("has_lz", false))
+	if not payload.has("air_layer"):
+		payload["air_layer"] = AIR_LAYER_ID
+	if not payload.has("team_id"):
+		payload["team_id"] = AIR_LAYER_DEFAULT_TEAM_ID
+	payload["flight_altitude_clearance"] = maxf(float(payload.get("flight_altitude_clearance", AIR_LAYER_DEFAULT_CLEARANCE)), AIR_LAYER_MIN_CLEARANCE)
+	payload["terrain_height_independent"] = true
+	payload["reveals_unknown_terrain"] = false
+	payload["fow_policy"] = "friendly_air_visible_lz_requires_visible_tile"
+	return payload
+
+
 func _rebuild_order_visuals() -> void:
 	_clear_children(_order_root)
 	_area_order_count = 0
 	_waypoint_visual_count = 0
 	_area_order_tile_marker_count = 0
 	_waypoint_tile_marker_count = 0
+	_movement_style_visual_count = 0
+	_movement_bound_marker_count = 0
+	_movement_group_marker_count = 0
+	_movement_style_entries.clear()
+	_multi_fireteam_plan_visual_count = 0
+	_multi_fireteam_plan_entries.clear()
+	_enemy_security_visual_count = 0
+	_enemy_security_entries.clear()
+	_enemy_tactics_visual_count = 0
+	_enemy_tactics_entries.clear()
+	_weapon_fire_vfx_visual_count = 0
+	_weapon_fire_vfx_entries.clear()
+	_feedback_bubble_visual_count = 0
+	_feedback_bubble_entries.clear()
+	_tactical_communication_event_visual_count = 0
+	_tactical_communication_event_entries.clear()
+	_fow_hidden_order_visual_count = 0
 	if _order_root == null or _order_payload.is_empty():
 		return
 	var phase_index: int = int(_order_payload.get("phase_index", 1))
@@ -1227,6 +2295,61 @@ func _rebuild_order_visuals() -> void:
 		if typeof(plan_variant) != TYPE_DICTIONARY:
 			continue
 		_add_plan_visual(Dictionary(plan_variant), phase_index, anchor_by_fireteam)
+
+	for movement_variant in Array(_order_payload.get("movement_state_dicts", [])):
+		if typeof(movement_variant) != TYPE_DICTIONARY:
+			continue
+		_add_movement_state_visual(Dictionary(movement_variant))
+
+	for multi_plan_variant in Array(_order_payload.get("multi_fireteam_plan_dicts", [])):
+		if typeof(multi_plan_variant) != TYPE_DICTIONARY:
+			continue
+		_add_multi_fireteam_plan_visual(Dictionary(multi_plan_variant))
+
+	for enemy_security_variant in Array(_order_payload.get("enemy_security_dicts", [])):
+		if typeof(enemy_security_variant) != TYPE_DICTIONARY:
+			continue
+		var enemy_security: Dictionary = Dictionary(enemy_security_variant)
+		if not _fow_allows_enemy_security_visual(enemy_security):
+			_fow_hidden_order_visual_count += 1
+			continue
+		_add_enemy_security_visual(enemy_security)
+
+	for enemy_tactics_variant in Array(_order_payload.get("enemy_tactics_dicts", [])):
+		if typeof(enemy_tactics_variant) != TYPE_DICTIONARY:
+			continue
+		var enemy_tactics: Dictionary = Dictionary(enemy_tactics_variant)
+		if not _fow_allows_enemy_tactics_visual(enemy_tactics):
+			_fow_hidden_order_visual_count += 1
+			continue
+		_add_enemy_tactics_visual(enemy_tactics)
+
+	for fire_event_variant in Array(_order_payload.get("fire_event_dicts", [])):
+		if typeof(fire_event_variant) != TYPE_DICTIONARY:
+			continue
+		var fire_event: Dictionary = Dictionary(fire_event_variant)
+		if not _fow_allows_fire_event_visual(fire_event):
+			_fow_hidden_order_visual_count += 1
+			continue
+		_add_weapon_fire_vfx_visual(fire_event)
+
+	for feedback_bubble_variant in Array(_order_payload.get("feedback_bubble_dicts", [])):
+		if typeof(feedback_bubble_variant) != TYPE_DICTIONARY:
+			continue
+		var feedback_bubble: Dictionary = Dictionary(feedback_bubble_variant)
+		if not _fow_allows_feedback_bubble_visual(feedback_bubble):
+			_fow_hidden_order_visual_count += 1
+			continue
+		_add_feedback_bubble_visual(feedback_bubble)
+
+	for communication_event_variant in Array(_order_payload.get("tactical_communication_event_dicts", [])):
+		if typeof(communication_event_variant) != TYPE_DICTIONARY:
+			continue
+		var communication_event: Dictionary = Dictionary(communication_event_variant)
+		if not _fow_allows_tactical_communication_event_visual(communication_event):
+			_fow_hidden_order_visual_count += 1
+			continue
+		_add_tactical_communication_event_visual(communication_event)
 
 
 func _add_area_order_visual(area_data: Dictionary) -> void:
@@ -1257,33 +2380,537 @@ func _add_plan_visual(plan_data: Dictionary, phase_index: int, anchor_by_firetea
 		var target_position: Vector2 = Vector2(waypoint.get("target_position", Vector2.ZERO))
 		var command_color: Color = _get_command_color(String(waypoint.get("command_type", "move")))
 		if typeof(last_position) == TYPE_VECTOR2:
-			_add_line3d(_order_root, _world_to_3d_position(Vector2(last_position), 0.36), _world_to_3d_position(target_position, 0.36), command_color, "WaypointLine")
+			_add_line3d(_order_root, _world_to_surface_3d_position(Vector2(last_position), 0.36), _world_to_surface_3d_position(target_position, 0.36), command_color, "WaypointLine")
 		if _add_world_tile_marker(_order_root, target_position, Color(command_color.r, command_color.g, command_color.b, 0.42), "WaypointTile", 0.05, 0.82):
 			_waypoint_tile_marker_count += 1
 		_waypoint_visual_count += 1
 		last_position = target_position
 
 
+func _add_movement_state_visual(movement_state: Dictionary) -> void:
+	var style: String = String(movement_state.get("advance_style", movement_state.get("effective_style", ""))).strip_edges().to_lower()
+	if style.is_empty():
+		return
+	var origin_position: Vector2 = Vector2(movement_state.get("bound_origin_position", movement_state.get("progress_anchor_position", Vector2.ZERO)))
+	var target_position: Vector2 = Vector2(movement_state.get("bound_target_position", movement_state.get("current_anchor_target_position", origin_position)))
+	var color: Color = _get_movement_style_color(style)
+	var fireteam_id: String = String(movement_state.get("fireteam_id", "")).strip_edges().to_lower()
+	_add_line3d(_order_root, _world_to_surface_3d_position(origin_position, 0.64), _world_to_surface_3d_position(target_position, 0.64), color, "AdvanceLine_%s_%s" % [style, fireteam_id])
+	_movement_style_visual_count += 1
+	if _add_world_tile_marker(_order_root, target_position, Color(color.r, color.g, color.b, 0.42), "AdvanceBound_%s_%s" % [style, fireteam_id], 0.06, _get_movement_bound_marker_fill(style)):
+		_movement_bound_marker_count += 1
+	_add_movement_group_markers(movement_state, origin_position, target_position, color)
+	var label_text: String = _build_movement_map_label(movement_state)
+	if not label_text.is_empty():
+		_add_label3d(_order_root, label_text, _world_to_surface_3d_position(target_position, MOVEMENT_LABEL_HEIGHT), "AdvanceLabel_%s_%s" % [style, fireteam_id], color.lightened(0.08), 13)
+	_movement_style_entries.append(_build_movement_style_entry(movement_state, label_text))
+
+
+func _add_movement_group_markers(movement_state: Dictionary, origin_position: Vector2, target_position: Vector2, color: Color) -> void:
+	var target_positions: Dictionary = Dictionary(movement_state.get("current_target_positions", {}))
+	var moving_unit_ids: PackedStringArray = PackedStringArray(movement_state.get("moving_unit_ids", movement_state.get("current_moving_unit_ids", PackedStringArray())))
+	var covering_unit_ids: PackedStringArray = PackedStringArray(movement_state.get("covering_unit_ids", movement_state.get("current_covering_unit_ids", PackedStringArray())))
+	for unit_id in moving_unit_ids:
+		var marker_position: Vector2 = Vector2(target_positions.get(String(unit_id), target_position))
+		_add_marker3d(_order_root, marker_position, color.lightened(0.12), "AdvanceMoving_%s" % String(unit_id), 0.17, 0.14, 4)
+		_movement_group_marker_count += 1
+	for cover_index in range(covering_unit_ids.size()):
+		var cover_position: Vector2 = origin_position + Vector2(8.0 * float(cover_index), 8.0)
+		_add_marker3d(_order_root, cover_position, Color(color.r, color.g, color.b, 0.46), "AdvanceCover_%s" % String(covering_unit_ids[cover_index]), 0.11, 0.09, 8)
+		_movement_group_marker_count += 1
+
+
+func _add_multi_fireteam_plan_visual(plan_data: Dictionary) -> void:
+	var plan_id: String = String(plan_data.get("plan_id", "")).strip_edges()
+	for assignment_variant in Array(plan_data.get("role_assignments", [])):
+		if typeof(assignment_variant) != TYPE_DICTIONARY:
+			continue
+		var assignment: Dictionary = Dictionary(assignment_variant)
+		if typeof(assignment.get("planned_position", null)) != TYPE_VECTOR2:
+			continue
+		var role: String = String(assignment.get("role", "")).strip_edges().to_lower()
+		var fireteam_id: String = String(assignment.get("fireteam_id", "")).strip_edges().to_lower()
+		var planned_position: Vector2 = Vector2(assignment.get("planned_position", Vector2.ZERO))
+		var color: Color = _get_multi_fireteam_role_color(role)
+		var marker_name: String = "MultiPlan_%s_%s_%s" % [_sanitize_node_name(plan_id), _sanitize_node_name(fireteam_id), _sanitize_node_name(role)]
+		if _add_world_tile_marker(_order_root, planned_position, Color(color.r, color.g, color.b, 0.46), marker_name, 0.068, 0.58):
+			_multi_fireteam_plan_visual_count += 1
+		var label_text: String = String(assignment.get("map_label_text", "")).strip_edges()
+		if label_text.is_empty():
+			label_text = String(assignment.get("role_label", role.substr(0, mini(role.length(), 3)).to_upper()))
+		_add_label3d(_order_root, label_text, _world_to_surface_3d_position(planned_position, MOVEMENT_LABEL_HEIGHT + 0.16), "%s_Label" % marker_name, color.lightened(0.08), 12)
+		_multi_fireteam_plan_entries.append({
+			"plan_id": plan_id,
+			"fireteam_id": fireteam_id,
+			"role": role,
+			"role_label": String(assignment.get("role_label", "")),
+			"map_label_text": label_text,
+			"planned_position": planned_position,
+			"status": String(assignment.get("status", "")),
+		})
+
+
+func _get_multi_fireteam_role_color(role: String) -> Color:
+	match role.strip_edges().to_lower():
+		"lead":
+			return Color(0.42, 0.92, 1.0, 0.96)
+		"support":
+			return Color(1.0, 0.78, 0.24, 0.96)
+		"security":
+			return Color(0.48, 0.96, 0.62, 0.94)
+		"reserve":
+			return Color(0.86, 0.86, 0.94, 0.88)
+		"recon":
+			return Color(0.76, 0.62, 1.0, 0.92)
+		_:
+			return Color(0.86, 0.9, 0.94, 0.84)
+
+
+func _build_movement_style_entry(movement_state: Dictionary, label_text: String) -> Dictionary:
+	var readability: Dictionary = Dictionary(movement_state.get("map_readability", {}))
+	return {
+		"fireteam_id": String(movement_state.get("fireteam_id", "")),
+		"advance_style": String(movement_state.get("advance_style", movement_state.get("effective_style", readability.get("advance_style", "")))),
+		"style_code": String(movement_state.get("style_code", readability.get("style_code", ""))),
+		"moving_unit_ids": PackedStringArray(movement_state.get("moving_unit_ids", movement_state.get("current_moving_unit_ids", readability.get("moving_unit_ids", PackedStringArray())))),
+		"covering_unit_ids": PackedStringArray(movement_state.get("covering_unit_ids", movement_state.get("current_covering_unit_ids", readability.get("covering_unit_ids", PackedStringArray())))),
+		"bound_index": int(movement_state.get("bound_index", readability.get("bound_index", 1))),
+		"bound_count": int(movement_state.get("bound_count", readability.get("bound_count", 1))),
+		"group_index": int(movement_state.get("group_index", readability.get("group_index", 1))),
+		"group_count": int(movement_state.get("group_count", readability.get("group_count", 1))),
+		"bound_distance": float(movement_state.get("bound_distance", readability.get("bound_distance", 0.0))),
+		"multi_tile_bound": bool(movement_state.get("multi_tile_bound", readability.get("multi_tile_bound", false))),
+		"bound_target_position": Vector2(movement_state.get("bound_target_position", readability.get("bound_target_position", movement_state.get("current_anchor_target_position", Vector2.ZERO)))),
+		"map_label_text": label_text,
+		"status_line": String(movement_state.get("readability_status_line", readability.get("status_line", ""))),
+	}
+
+
+func _build_movement_map_label(movement_state: Dictionary) -> String:
+	var readability: Dictionary = Dictionary(movement_state.get("map_readability", {}))
+	var style_code: String = String(movement_state.get("style_code", readability.get("style_code", ""))).strip_edges().to_upper()
+	if style_code.is_empty():
+		style_code = "MOV"
+	var bound_index: int = maxi(int(movement_state.get("bound_index", readability.get("bound_index", 1))), 1)
+	var bound_count: int = maxi(int(movement_state.get("bound_count", readability.get("bound_count", 1))), 1)
+	var group_index: int = maxi(int(movement_state.get("group_index", readability.get("group_index", 1))), 1)
+	var group_count: int = maxi(int(movement_state.get("group_count", readability.get("group_count", 1))), 1)
+	if group_count > 1:
+		return "%s %d/%d G%d/%d" % [style_code, bound_index, bound_count, group_index, group_count]
+	return "%s %d/%d" % [style_code, bound_index, bound_count]
+
+
+func _add_enemy_security_visual(security_state: Dictionary) -> void:
+	if typeof(security_state.get("anchor_position", null)) != TYPE_VECTOR2:
+		return
+	var anchor_position: Vector2 = Vector2(security_state.get("anchor_position"))
+	var direction_angle: float = float(security_state.get("direction_angle", security_state.get("facing_angle", 0.0)))
+	var security_mode: String = String(security_state.get("security_mode", "")).strip_edges().to_lower()
+	var sector_width: float = float(security_state.get("sector_width", TAU if security_mode == "360" else PI * 0.7))
+	var group_id: String = String(security_state.get("security_group_id", security_state.get("fireteam_id", "enemy"))).strip_edges().to_lower()
+	if group_id.is_empty():
+		group_id = "enemy"
+	var color: Color = Color(1.0, 0.46, 0.12, 0.88)
+	var range_hint: float = _resolve_enemy_security_visual_length(security_state)
+	var direction_tip: Vector2 = anchor_position + Vector2.RIGHT.rotated(direction_angle) * range_hint
+	_add_line3d(_order_root, _world_to_surface_3d_position(anchor_position, 0.76), _world_to_surface_3d_position(direction_tip, 0.76), color, "EnemySecurityFacing_%s" % group_id)
+	_add_marker3d(_order_root, direction_tip, Color(color.r, color.g, color.b, 0.58), "EnemySecurityTip_%s" % group_id, 0.12, 0.12, 3)
+	if _add_world_tile_marker(_order_root, anchor_position, Color(color.r, color.g, color.b, 0.22), "EnemySecurityAnchor_%s" % group_id, 0.035, 0.42):
+		_enemy_security_visual_count += 1
+	var label_text: String = String(security_state.get("watch_label", "")).strip_edges()
+	if label_text.is_empty():
+		label_text = "EN SEC %s" % security_mode.to_upper()
+	_add_label3d(_order_root, label_text, _world_to_surface_3d_position(anchor_position, MOVEMENT_LABEL_HEIGHT + 0.22), "EnemySecurityLabel_%s" % group_id, color.lightened(0.08), 12)
+	_enemy_security_entries.append({
+		"security_group_id": group_id,
+		"security_mode": security_mode,
+		"facing_angle": direction_angle,
+		"sector_width": sector_width,
+		"watched_unit_ids": PackedStringArray(security_state.get("watched_unit_ids", PackedStringArray())),
+		"watch_label": label_text,
+	})
+
+
+func _resolve_enemy_security_visual_length(security_state: Dictionary) -> float:
+	var max_range: float = 0.0
+	for assignment_variant in Array(security_state.get("member_assignments", [])):
+		if typeof(assignment_variant) != TYPE_DICTIONARY:
+			continue
+		max_range = maxf(max_range, float(Dictionary(assignment_variant).get("weapon_range_world", 0.0)))
+	if max_range <= 0.0:
+		max_range = 144.0
+	return clampf(max_range * 0.18, 72.0, 180.0)
+
+
+func _add_enemy_tactics_visual(tactics_state: Dictionary) -> void:
+	if typeof(tactics_state.get("anchor_position", null)) != TYPE_VECTOR2:
+		return
+	var group_id: String = String(tactics_state.get("security_group_id", tactics_state.get("fireteam_id", "enemy"))).strip_edges().to_lower()
+	if group_id.is_empty():
+		group_id = "enemy"
+	var anchor_position: Vector2 = Vector2(tactics_state.get("anchor_position"))
+	var label_text: String = String(tactics_state.get("tactic_label", "")).strip_edges()
+	if label_text.is_empty():
+		label_text = String(tactics_state.get("advance_style", "hold")).strip_edges().to_upper()
+	var color: Color = Color(1.0, 0.66, 0.18, 0.86)
+	var target_positions: Dictionary = Dictionary(tactics_state.get("target_positions_by_unit_id", {}))
+	var moving_unit_ids: PackedStringArray = PackedStringArray(tactics_state.get("moving_unit_ids", PackedStringArray()))
+	for unit_id in moving_unit_ids:
+		if not target_positions.has(String(unit_id)):
+			continue
+		var target_position: Vector2 = Vector2(target_positions.get(String(unit_id), anchor_position))
+		_add_line3d(_order_root, _world_to_surface_3d_position(anchor_position, 0.58), _world_to_surface_3d_position(target_position, 0.58), color, "EnemyTacticLine_%s_%s" % [group_id, String(unit_id)])
+		_add_marker3d(_order_root, target_position, Color(color.r, color.g, color.b, 0.48), "EnemyTacticTarget_%s_%s" % [group_id, String(unit_id)], 0.1, 0.09, 4)
+	_enemy_tactics_visual_count += 1
+	_add_label3d(_order_root, label_text, _world_to_surface_3d_position(anchor_position, MOVEMENT_LABEL_HEIGHT + 0.44), "EnemyTacticLabel_%s" % group_id, color.lightened(0.06), 12)
+	_enemy_tactics_entries.append({
+		"security_group_id": group_id,
+		"advance_style": String(tactics_state.get("advance_style", "")),
+		"tactic_label": label_text,
+		"moving_unit_ids": moving_unit_ids,
+		"covering_unit_ids": PackedStringArray(tactics_state.get("covering_unit_ids", PackedStringArray())),
+		"role_by_unit_id": Dictionary(tactics_state.get("role_by_unit_id", {})).duplicate(true),
+	})
+
+
+func _ensure_audio_event_bus(create_if_missing: bool = true):
+	if _audio_event_bus != null and is_instance_valid(_audio_event_bus):
+		return _audio_event_bus
+	var tree: SceneTree = null
+	if is_inside_tree():
+		tree = get_tree()
+	if tree != null:
+		var current_scene := tree.current_scene
+		if current_scene != null:
+			var scene_bus := current_scene.find_child("AudioEventBus", true, false)
+			if scene_bus != null and scene_bus.has_method("emit_weapon_fire"):
+				_audio_event_bus = scene_bus
+				return _audio_event_bus
+		var root_bus := tree.root.find_child("AudioEventBus", true, false)
+		if root_bus != null and root_bus.has_method("emit_weapon_fire"):
+			_audio_event_bus = root_bus
+			return _audio_event_bus
+	if not create_if_missing:
+		return null
+	_audio_event_bus = AUDIO_EVENT_BUS_SCRIPT.new()
+	_audio_event_bus.name = "AudioEventBus"
+	var parent: Node = self
+	if tree != null and tree.current_scene != null:
+		parent = tree.current_scene
+	parent.add_child(_audio_event_bus)
+	if _audio_event_bus.has_method("initialize"):
+		_audio_event_bus.call("initialize")
+	return _audio_event_bus
+
+
+func _emit_weapon_fire_sfx_from_fire_event(fire_event: Dictionary, weapon_id: String, muzzle_position: Vector2) -> Dictionary:
+	var event_id: String = String(fire_event.get("event_id", "")).strip_edges()
+	if event_id.is_empty():
+		return {"played": false, "reason": "missing_fire_event_id"}
+	var bus = _ensure_audio_event_bus()
+	if bus == null or not bus.has_method("emit_weapon_fire"):
+		return {"played": false, "reason": "missing_audio_event_bus"}
+	var result: Dictionary = Dictionary(bus.call("emit_weapon_fire", weapon_id, {
+		"position": _world_to_surface_3d_position(muzzle_position, 0.78),
+		"unit_id": String(fire_event.get("attacker_unit_id", "")),
+		"team_id": String(fire_event.get("attacker_team_id", "")),
+		"target_unit_id": String(fire_event.get("target_unit_id", "")),
+		"source": "terrain_weapon_fire_vfx",
+		"visible_to_local": true,
+		"visibility_context": "visible_fire_event",
+		"dedupe_key": event_id,
+		"dedupe_window_msec": 5000,
+	})).duplicate(true)
+	if bool(result.get("played", false)):
+		_weapon_fire_sfx_count += 1
+	else:
+		_weapon_fire_sfx_suppressed_count += 1
+	return result
+
+
+func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
+	var event_id: String = String(fire_event.get("event_id", "")).strip_edges()
+	if event_id.is_empty():
+		return
+	if typeof(fire_event.get("attacker_position", null)) != TYPE_VECTOR2 or typeof(fire_event.get("target_position", null)) != TYPE_VECTOR2:
+		return
+	var attacker_position: Vector2 = Vector2(fire_event.get("attacker_position"))
+	var target_position: Vector2 = Vector2(fire_event.get("target_position"))
+	var direction: Vector2 = target_position - attacker_position
+	if direction.is_zero_approx():
+		direction = Vector2.RIGHT
+	var weapon_id: String = WEAPON_DATA_SCRIPT.call("normalize_weapon_id", String(fire_event.get("weapon_id", "rifle")))
+	var muzzle_entry: Dictionary = _get_weapon_fire_vfx_entry(weapon_id)
+	var texture: Texture2D = _get_weapon_fire_vfx_texture(String(muzzle_entry.get("path", "")))
+	if texture == null:
+		return
+	var barrel_offset: float = float(muzzle_entry.get("barrel_offset_world", 28.0))
+	var muzzle_position: Vector2 = attacker_position + direction.normalized() * barrel_offset
+	var pixel_size: float = float(muzzle_entry.get("pixel_size", 0.010))
+	var color: Color = Color(1.0, 0.78, 0.28, 0.82)
+	_add_texture_card(_order_root, texture, _world_to_surface_3d_position(muzzle_position, 0.92), "WeaponFireMuzzle_%s" % _sanitize_node_name(event_id), pixel_size, Vector2.ZERO, Color(1.0, 0.95, 0.62, 0.92))
+	_add_line3d(_order_root, _world_to_surface_3d_position(muzzle_position, 0.78), _world_to_surface_3d_position(target_position, 0.78), color, "WeaponFireTrace_%s" % _sanitize_node_name(event_id))
+	var audio_result: Dictionary = _emit_weapon_fire_sfx_from_fire_event(fire_event, weapon_id, muzzle_position)
+	_weapon_fire_vfx_visual_count += 1
+	_weapon_fire_vfx_entries.append({
+		"event_id": event_id,
+		"weapon_id": weapon_id,
+		"muzzle_id": String(muzzle_entry.get("id", "")),
+		"attacker_unit_id": String(fire_event.get("attacker_unit_id", "")),
+		"target_unit_id": String(fire_event.get("target_unit_id", "")),
+		"muzzle_position": muzzle_position,
+		"audio_event_id": String(audio_result.get("event_id", "")),
+		"audio_played": bool(audio_result.get("played", false)),
+		"audio_reason": String(audio_result.get("reason", "")),
+		"source": String(fire_event.get("source", "")),
+	})
+
+
+func _add_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
+	if String(feedback_bubble.get("display_type", "")).strip_edges() != "comic_bubble":
+		return
+	if not bool(feedback_bubble.get("visual_only", false)):
+		return
+	if typeof(feedback_bubble.get("anchor_position", null)) != TYPE_VECTOR2:
+		return
+	var bubble_id: String = String(feedback_bubble.get("bubble_id", "")).strip_edges()
+	var text: String = String(feedback_bubble.get("text", "")).strip_edges()
+	if bubble_id.is_empty() or text.is_empty():
+		return
+	var anchor_position: Vector2 = Vector2(feedback_bubble.get("anchor_position", Vector2.ZERO))
+	var card_position: Vector3 = _world_to_surface_3d_position(anchor_position + Vector2(0.0, -22.0), MOVEMENT_LABEL_HEIGHT + 0.78)
+	var texture: Texture2D = _get_comic_bubble_texture(String(feedback_bubble.get("path", "")))
+	if texture != null:
+		var sprite := _add_texture_card(
+			_order_root,
+			texture,
+			card_position,
+			"FeedbackBubble_%s_%d" % [_sanitize_node_name(bubble_id), _feedback_bubble_visual_count],
+			0.0066,
+			Vector2.ZERO,
+			Color(1.0, 1.0, 1.0, 0.96)
+		)
+		if sprite != null:
+			sprite.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+			sprite.no_depth_test = true
+	else:
+		_add_marker3d(_order_root, anchor_position, Color(0.96, 0.92, 0.82, 0.78), "FeedbackBubbleFallback_%s" % _sanitize_node_name(bubble_id), 0.24, 0.12, 16)
+	var label: Label3D = _add_label3d(
+		_order_root,
+		text,
+		card_position + Vector3(0.0, 0.035, -0.02),
+		"FeedbackBubbleText_%s_%d" % [_sanitize_node_name(bubble_id), _feedback_bubble_visual_count],
+		TACTICAL_UI_THEME_SCRIPT.COLOR_FEEDBACK_BUBBLE_TEXT,
+		TACTICAL_UI_THEME_SCRIPT.FEEDBACK_BUBBLE_LABEL_FONT_SIZE
+	)
+	label.pixel_size = STATUS_LABEL_PIXEL_SIZE * 0.68
+	label.outline_size = 3
+	label.outline_modulate = Color(TACTICAL_UI_THEME_SCRIPT.COLOR_FEEDBACK_BUBBLE_OUTLINE.r, TACTICAL_UI_THEME_SCRIPT.COLOR_FEEDBACK_BUBBLE_OUTLINE.g, TACTICAL_UI_THEME_SCRIPT.COLOR_FEEDBACK_BUBBLE_OUTLINE.b, 0.9)
+	_feedback_bubble_visual_count += 1
+	_feedback_bubble_entries.append({
+		"bubble_id": bubble_id,
+		"fireteam_id": String(feedback_bubble.get("fireteam_id", "")).strip_edges().to_lower(),
+		"unit_id": String(feedback_bubble.get("unit_id", "")).strip_edges(),
+		"feedback_action": String(feedback_bubble.get("feedback_action", "")).strip_edges(),
+		"feedback_state": String(feedback_bubble.get("feedback_state", "")).strip_edges(),
+		"source": String(feedback_bubble.get("source", "")).strip_edges(),
+		"category": String(feedback_bubble.get("category", "")).strip_edges(),
+		"purpose": String(feedback_bubble.get("purpose", "")).strip_edges(),
+		"thought_kind": String(feedback_bubble.get("thought_kind", "")).strip_edges(),
+		"skill_tier": String(feedback_bubble.get("skill_tier", "")).strip_edges(),
+		"text_source": String(feedback_bubble.get("text_source", "")).strip_edges(),
+		"text_key": String(feedback_bubble.get("text_key", "")).strip_edges(),
+		"role_text_key": String(feedback_bubble.get("role_text_key", "")).strip_edges(),
+		"situation_key": String(feedback_bubble.get("situation_key", "")).strip_edges(),
+		"text": text,
+		"path": String(feedback_bubble.get("path", "")).strip_edges(),
+		"anchor_position": anchor_position,
+		"visual_only": true,
+	})
+
+
+func _add_tactical_communication_event_visual(communication_event: Dictionary) -> void:
+	if not bool(communication_event.get("visual_only", true)):
+		return
+	var channels: PackedStringArray = PackedStringArray(communication_event.get("channels", PackedStringArray()))
+	if not channels.has("map_marker"):
+		return
+	var anchor_variant = communication_event.get("anchor_position", communication_event.get("target_position", null))
+	if typeof(anchor_variant) != TYPE_VECTOR2:
+		return
+	var anchor_position: Vector2 = Vector2(anchor_variant)
+	var event_id: String = String(communication_event.get("event_id", "")).strip_edges()
+	if event_id.is_empty():
+		return
+	var priority: int = int(communication_event.get("priority", 0))
+	var color: Color = _get_tactical_communication_color(priority, String(communication_event.get("event_type", "")))
+	var marker_name: String = "TacCom_%s" % _sanitize_node_name(event_id)
+	if not _add_world_tile_marker(_order_root, anchor_position, Color(color.r, color.g, color.b, 0.32), marker_name, 0.048, 0.52):
+		return
+	var label_text: String = String(communication_event.get("map_label", communication_event.get("short_text", ""))).strip_edges()
+	if label_text.is_empty():
+		label_text = String(communication_event.get("event_type", "")).strip_edges().to_upper()
+	_add_label3d(_order_root, label_text, _world_to_surface_3d_position(anchor_position, MOVEMENT_LABEL_HEIGHT + 0.38), "%s_Label" % marker_name, color.lightened(0.08), 11)
+	_tactical_communication_event_visual_count += 1
+	_tactical_communication_event_entries.append({
+		"event_id": event_id,
+		"event_type": String(communication_event.get("event_type", "")),
+		"fireteam_id": String(communication_event.get("fireteam_id", "")).strip_edges().to_lower(),
+		"unit_id": String(communication_event.get("unit_id", "")).strip_edges(),
+		"priority": priority,
+		"channels": channels,
+		"short_text": String(communication_event.get("short_text", "")),
+		"map_label": label_text,
+		"anchor_position": anchor_position,
+		"visual_only": true,
+	})
+
+
+func _get_tactical_communication_color(priority: int, event_type: String) -> Color:
+	if priority >= 100:
+		return Color(1.0, 0.34, 0.24, 0.94)
+	if priority >= 80:
+		return Color(1.0, 0.76, 0.24, 0.92)
+	if event_type.strip_edges().to_lower().contains("objective"):
+		return Color(0.50, 0.94, 0.66, 0.9)
+	return Color(0.52, 0.88, 1.0, 0.88)
+
+
+func _get_comic_bubble_texture(path: String) -> Texture2D:
+	var normalized_path: String = path.strip_edges()
+	if normalized_path.is_empty():
+		return null
+	if _comic_bubble_texture_cache.has(normalized_path):
+		return _comic_bubble_texture_cache[normalized_path] as Texture2D
+	if not ResourceLoader.exists(normalized_path):
+		return null
+	var texture := load(normalized_path) as Texture2D
+	if texture != null:
+		_comic_bubble_texture_cache[normalized_path] = texture
+	return texture
+
+
+func _get_weapon_fire_vfx_entry(weapon_id: String) -> Dictionary:
+	var catalog: Dictionary = _get_weapon_fire_vfx_catalog()
+	if catalog.is_empty():
+		return {}
+	var default_by_weapon: Dictionary = Dictionary(catalog.get("default_by_weapon", {}))
+	var entry_id: String = String(default_by_weapon.get(weapon_id, catalog.get("default_id", "muzzle_flash_01"))).strip_edges()
+	for entry_variant in Array(catalog.get("muzzle_flashes", [])):
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("id", "")) == entry_id:
+			return entry
+	for entry_variant in Array(catalog.get("muzzle_flashes", [])):
+		if typeof(entry_variant) == TYPE_DICTIONARY:
+			return Dictionary(entry_variant)
+	return {}
+
+
+func _get_weapon_fire_vfx_texture(path: String) -> Texture2D:
+	var normalized_path: String = path.strip_edges()
+	if normalized_path.is_empty():
+		return null
+	if _weapon_fire_vfx_texture_cache.has(normalized_path):
+		return _weapon_fire_vfx_texture_cache[normalized_path] as Texture2D
+	if not ResourceLoader.exists(normalized_path):
+		return null
+	var texture := load(normalized_path) as Texture2D
+	if texture != null:
+		_weapon_fire_vfx_texture_cache[normalized_path] = texture
+	return texture
+
+
+func _get_weapon_fire_vfx_catalog() -> Dictionary:
+	if not _weapon_fire_vfx_catalog.is_empty():
+		return _weapon_fire_vfx_catalog
+	if not FileAccess.file_exists(WEAPON_FIRE_VFX_CATALOG_PATH):
+		return {}
+	var file := FileAccess.open(WEAPON_FIRE_VFX_CATALOG_PATH, FileAccess.READ)
+	if file == null:
+		return {}
+	var parsed = JSON.parse_string(file.get_as_text())
+	if typeof(parsed) == TYPE_DICTIONARY:
+		_weapon_fire_vfx_catalog = Dictionary(parsed)
+	return _weapon_fire_vfx_catalog
+
+
+func _get_movement_style_color(style: String) -> Color:
+	match style.strip_edges().to_lower():
+		"bounding":
+			return Color(1.0, 0.78, 0.24, 0.94)
+		"caterpillar", "creep":
+			return Color(0.48, 0.96, 0.62, 0.94)
+		"rush":
+			return Color(0.32, 0.72, 1.0, 0.92)
+		_:
+			return Color(0.86, 0.9, 0.94, 0.84)
+
+
+func _get_movement_bound_marker_fill(style: String) -> float:
+	match style.strip_edges().to_lower():
+		"bounding":
+			return 0.76
+		"caterpillar", "creep":
+			return 0.56
+		_:
+			return 0.9
+
+
 func _rebuild_contact_visuals() -> void:
 	_clear_children(_contact_root)
 	_contact_count = 0
+	_contact_visual_entries.clear()
+	_fow_hidden_contact_count = 0
+	_fow_allowed_contact_count = 0
 	if _contact_root == null:
 		return
 	var selected_lookup: Dictionary = {}
 	for fireteam_id_variant in _contact_selected_fireteam_ids:
 		selected_lookup[String(fireteam_id_variant).strip_edges().to_lower()] = true
-	for contact_variant in _contact_entries:
+	var contact_source_entries: Array = _contact_entries.duplicate(true)
+	var current_contact_ids: Dictionary = {}
+	for current_variant in _contact_entries:
+		if typeof(current_variant) != TYPE_DICTIONARY:
+			continue
+		var current_contact: Dictionary = Dictionary(current_variant)
+		var current_id: String = String(current_contact.get("target_id", current_contact.get("unit_id", ""))).strip_edges()
+		if not current_id.is_empty():
+			current_contact_ids[current_id] = true
+	if _is_fog_of_war_visual_filter_active():
+		for last_known_variant in _fow_last_known_contacts:
+			if typeof(last_known_variant) != TYPE_DICTIONARY:
+				continue
+			var last_known_contact: Dictionary = Dictionary(last_known_variant)
+			var last_known_id: String = String(last_known_contact.get("target_id", last_known_contact.get("unit_id", ""))).strip_edges()
+			if last_known_id.is_empty() or current_contact_ids.has(last_known_id):
+				continue
+			contact_source_entries.append(last_known_contact)
+	for contact_variant in contact_source_entries:
 		if typeof(contact_variant) != TYPE_DICTIONARY:
 			continue
 		var contact: Dictionary = Dictionary(contact_variant)
 		var fireteam_id: String = String(contact.get("fireteam_id", "")).strip_edges().to_lower()
 		if not selected_lookup.is_empty() and not selected_lookup.has(fireteam_id):
 			continue
+		if not _fow_allows_contact_visual(contact):
+			_fow_hidden_contact_count += 1
+			continue
 		var position_variant = contact.get("last_known_position", null)
 		if typeof(position_variant) != TYPE_VECTOR2:
 			continue
 		var detection_state: String = String(contact.get("detection_state", "unknown")).strip_edges().to_lower()
 		_add_marker3d(_contact_root, Vector2(position_variant), _get_contact_color(detection_state), "Contact_%s" % String(contact.get("unit_id", _contact_count)), 0.36, 0.48, 4)
+		if bool(contact.get("fow_last_known", false)):
+			_fow_allowed_contact_count += 1
+		_contact_visual_entries.append({
+			"unit_id": String(contact.get("unit_id", contact.get("target_id", ""))).strip_edges(),
+			"target_id": String(contact.get("target_id", contact.get("unit_id", ""))).strip_edges(),
+			"detection_state": detection_state,
+			"last_known_position": Vector2(position_variant),
+			"fow_last_known": bool(contact.get("fow_last_known", false)),
+		})
 		_contact_count += 1
 
 
@@ -1293,18 +2920,55 @@ func _rebuild_drop_visuals() -> void:
 	_dropship_model_visible = false
 	_missing_dropship_model_count = 0
 	_lz_tile_marker_count = 0
+	_air_visual_count = 0
+	_fow_hidden_air_visual_count = 0
+	_air_unknown_terrain_reveal_block_count = 0
+	_dropship_air_y = 0.0
+	_dropship_surface_y = 0.0
+	_dropship_air_clearance = 0.0
 	if _drop_root == null or _drop_payload.is_empty():
 		return
 	if bool(_drop_payload.get("has_lz_position", false)) and typeof(_drop_payload.get("lz_position", null)) == TYPE_VECTOR2:
 		var lz_position: Vector2 = Vector2(_drop_payload.get("lz_position", Vector2.ZERO))
-		if _add_world_tile_marker(_drop_root, lz_position, Color(0.38, 1.0, 0.62, 0.44), "LZTile", 0.055, 0.96):
-			_lz_tile_marker_count += 1
+		if _air_layer_allows_surface_marker(lz_position):
+			if _add_world_tile_marker(_drop_root, lz_position, Color(0.38, 1.0, 0.62, 0.44), "LZTile", 0.055, 0.96):
+				_lz_tile_marker_count += 1
+		else:
+			_fow_hidden_air_visual_count += 1
+			_air_unknown_terrain_reveal_block_count += 1
 
 	if bool(_drop_payload.get("dropship_visible", false)) and typeof(_drop_payload.get("dropship_position", null)) == TYPE_VECTOR2:
 		var ship_position: Vector2 = Vector2(_drop_payload.get("dropship_position", Vector2.ZERO))
-		_add_dropship_proxy(ship_position)
-		if typeof(_drop_payload.get("lz_position", null)) == TYPE_VECTOR2:
-			_add_line3d(_drop_root, _world_to_3d_position(ship_position, 0.52), _world_to_3d_position(Vector2(_drop_payload.get("lz_position", Vector2.ZERO)), 0.52), Color(0.56, 1.0, 0.68, 0.86), "DropshipApproach")
+		if _air_layer_allows_air_visual(ship_position):
+			_add_dropship_proxy(ship_position)
+			if typeof(_drop_payload.get("lz_position", null)) == TYPE_VECTOR2:
+				var lz_line_position: Vector2 = Vector2(_drop_payload.get("lz_position", Vector2.ZERO))
+				if _air_layer_allows_surface_marker(lz_line_position):
+					_add_line3d(_drop_root, _world_to_air_layer_3d_position(ship_position), _world_to_surface_3d_position(lz_line_position, 0.52), Color(0.56, 1.0, 0.68, 0.86), "DropshipApproach")
+		else:
+			_fow_hidden_air_visual_count += 1
+
+
+func _air_layer_allows_surface_marker(world_position: Vector2) -> bool:
+	if not _is_fog_of_war_visual_filter_active():
+		return true
+	return _fow_is_world_position_currently_visible(world_position)
+
+
+func _air_layer_allows_air_visual(world_position: Vector2) -> bool:
+	if not _is_fog_of_war_visual_filter_active():
+		return true
+	var team_id: String = String(_drop_payload.get("team_id", AIR_LAYER_DEFAULT_TEAM_ID)).strip_edges()
+	if _fog_of_war_team_id.is_empty() or team_id.is_empty() or team_id == _fog_of_war_team_id:
+		return true
+	return _fow_is_world_position_currently_visible(world_position)
+
+
+func _world_to_air_layer_3d_position(world_position: Vector2, extra_y_offset: float = 0.0) -> Vector3:
+	_dropship_surface_y = _get_world_surface_y(world_position)
+	_dropship_air_clearance = maxf(float(_drop_payload.get("flight_altitude_clearance", AIR_LAYER_DEFAULT_CLEARANCE)) + extra_y_offset, AIR_LAYER_MIN_CLEARANCE)
+	_dropship_air_y = _dropship_surface_y + _dropship_air_clearance
+	return _world_to_3d_position(world_position, _dropship_air_y)
 
 
 func _rebuild_status_visuals() -> void:
@@ -1334,7 +2998,7 @@ func _add_objective_status_visual(world_position: Vector2) -> void:
 	zone.name = "ObjectiveCaptureZone"
 	zone.mesh = zone_mesh
 	zone.material_override = _make_material(Color(base_color.r, base_color.g, base_color.b, 0.18), true)
-	zone.position = _world_to_3d_position(world_position, 0.31)
+	zone.position = _world_to_surface_3d_position(world_position, 0.31)
 	_status_root.add_child(zone)
 
 	var progress_mesh := CylinderMesh.new()
@@ -1346,11 +3010,11 @@ func _add_objective_status_visual(world_position: Vector2) -> void:
 	progress_disc.name = "ObjectiveCaptureProgress"
 	progress_disc.mesh = progress_mesh
 	progress_disc.material_override = _make_material(Color(base_color.r, base_color.g, base_color.b, 0.42), true)
-	progress_disc.position = _world_to_3d_position(world_position, 0.35)
+	progress_disc.position = _world_to_surface_3d_position(world_position, 0.35)
 	_status_root.add_child(progress_disc)
 
 	var label_text: String = _build_objective_status_label_text(progress)
-	_add_label3d(_status_root, label_text, _world_to_3d_position(world_position, STATUS_LABEL_HEIGHT), "ObjectiveStatusLabel3D", base_color, 18)
+	_add_label3d(_status_root, label_text, _world_to_surface_3d_position(world_position, STATUS_LABEL_HEIGHT), "ObjectiveStatusLabel3D", base_color, 18)
 	_objective_status_visible = true
 
 
@@ -1366,7 +3030,7 @@ func _add_mission_result_visual(anchor_world_position: Vector2) -> void:
 		lines.append("Winner %s" % winning_team)
 	if not condition.is_empty():
 		lines.append(condition)
-	_add_label3d(_status_root, "\n".join(lines), _world_to_3d_position(anchor_world_position, STATUS_LABEL_HEIGHT + 0.74), "MissionResultLabel3D", color, 22)
+	_add_label3d(_status_root, "\n".join(lines), _world_to_surface_3d_position(anchor_world_position, STATUS_LABEL_HEIGHT + 0.74), "MissionResultLabel3D", color, 22)
 	_mission_result_visible = true
 
 
@@ -1428,18 +3092,21 @@ func _add_dropship_proxy(world_position: Vector2) -> void:
 			_normalize_asset_model_instance(model_instance)
 			var craft_root := Node3D.new()
 			craft_root.name = "DropshipModel_%s" % DROPSHIP_MODEL_NAME
-			craft_root.position = _world_to_3d_position(world_position, _get_asset_y_offset("fahrzeug_speeder_b_se"))
+			craft_root.position = _world_to_air_layer_3d_position(world_position, _get_asset_y_offset("fahrzeug_speeder_b_se"))
+			craft_root.set_meta("flight_altitude_layer", String(_drop_payload.get("air_layer", AIR_LAYER_ID)))
+			craft_root.set_meta("terrain_height_independent", true)
 			craft_root.rotation_degrees.y = _get_dropship_rotation_y(world_position)
 			craft_root.scale = Vector3.ONE * (_get_asset_model_scale("fahrzeug_speeder_b_se") if _has_model_mapping_for_type("fahrzeug_speeder_b_se") else DROPSHIP_MODEL_SCALE)
 			craft_root.add_child(model_instance)
 			_drop_root.add_child(craft_root)
 			_dropship_model_visible = true
+			_air_visual_count += 1
 			return
 
 	if _uses_strict_3d_asset_mapping():
 		_add_runtime_missing_asset_marker(
 			_drop_root,
-			_world_to_3d_position(world_position, 0.72),
+			_world_to_air_layer_3d_position(world_position),
 			"MissingAsset_dropship_model_%s" % _sanitize_node_name(DROPSHIP_MODEL_NAME)
 		)
 		_missing_dropship_model_count = 1
@@ -1451,12 +3118,15 @@ func _add_dropship_proxy(world_position: Vector2) -> void:
 	var sprite := _add_texture_card(
 		_drop_root,
 		dropship_texture,
-		_world_to_3d_position(world_position, 0.72),
+		_world_to_air_layer_3d_position(world_position),
 		"DropshipTexture",
 		DROPSHIP_TEXTURE_PIXEL_SIZE
 	)
 	if sprite != null:
+		sprite.set_meta("flight_altitude_layer", String(_drop_payload.get("air_layer", AIR_LAYER_ID)))
+		sprite.set_meta("terrain_height_independent", true)
 		_dropship_texture_visible = true
+		_air_visual_count += 1
 		return
 
 	var body_mesh := _make_box_mesh(Vector3(2.9, 0.46, 1.25))
@@ -1464,9 +3134,12 @@ func _add_dropship_proxy(world_position: Vector2) -> void:
 	body.name = "DropshipProxy"
 	body.mesh = body_mesh
 	body.material_override = _make_material(Color(0.95, 0.76, 0.32, 0.96))
-	body.position = _world_to_3d_position(world_position, 0.72)
+	body.position = _world_to_air_layer_3d_position(world_position)
+	body.set_meta("flight_altitude_layer", String(_drop_payload.get("air_layer", AIR_LAYER_ID)))
+	body.set_meta("terrain_height_independent", true)
 	body.rotation_degrees.y = -_camera_yaw_degrees
 	_drop_root.add_child(body)
+	_air_visual_count += 1
 
 	var wing_mesh := _make_box_mesh(Vector3(1.05, 0.16, 2.45))
 	var wing := MeshInstance3D.new()
@@ -1485,6 +3158,71 @@ func _get_dropship_rotation_y(world_position: Vector2) -> float:
 	if typeof(_drop_payload.get("lz_position", null)) == TYPE_VECTOR2:
 		return _get_world_direction_yaw(world_position, Vector2(_drop_payload.get("lz_position", Vector2.ZERO)), -_camera_yaw_degrees)
 	return -_camera_yaw_degrees
+
+
+func _maybe_emit_unit_step_sfx(
+	unit_id: String,
+	world_position: Vector2,
+	unit_is_moving: bool,
+	unit_is_visible: bool,
+	surface_type_override: String = "",
+	now_msec_override: int = -1
+) -> Dictionary:
+	if unit_id.strip_edges().is_empty():
+		return {"played": false, "reason": "missing_unit_id"}
+	if not unit_is_visible:
+		return {"played": false, "reason": "hidden_unit"}
+	if not unit_is_moving:
+		return {"played": false, "reason": "unit_not_moving"}
+	var now_msec: int = now_msec_override if now_msec_override >= 0 else Time.get_ticks_msec()
+	var ready_msec: int = int(_movement_step_ready_at_msec.get(unit_id, 0))
+	if now_msec < ready_msec:
+		_movement_step_sfx_suppressed_rate_limit_count += 1
+		return {"played": false, "reason": "movement_step_rate_limited"}
+	var bus = _ensure_audio_event_bus()
+	if bus == null or not bus.has_method("emit_movement_step"):
+		return {"played": false, "reason": "missing_audio_event_bus"}
+	var surface_type: String = surface_type_override.strip_edges().to_lower()
+	if surface_type.is_empty():
+		surface_type = _get_surface_type_for_world_position(world_position)
+	var result: Dictionary = Dictionary(bus.call("emit_movement_step", surface_type, {
+		"position": _world_to_surface_3d_position(world_position, 0.08),
+		"unit_id": unit_id,
+		"source": "terrain_unit_proxy",
+		"visible_to_local": true,
+		"visibility_context": "visible_unit_proxy",
+		"dedupe_key": "step:%s" % unit_id,
+		"dedupe_window_msec": MOVEMENT_STEP_SFX_RATE_LIMIT_MSEC,
+		"now_msec": now_msec,
+	})).duplicate(true)
+	if bool(result.get("played", false)):
+		_movement_step_ready_at_msec[unit_id] = now_msec + MOVEMENT_STEP_SFX_RATE_LIMIT_MSEC
+		_movement_step_sfx_count += 1
+		_movement_step_sfx_entries.append({
+			"unit_id": unit_id,
+			"surface_type": surface_type,
+			"event_id": String(result.get("event_id", "")),
+			"position": world_position,
+			"now_msec": now_msec,
+		})
+		if _movement_step_sfx_entries.size() > 24:
+			_movement_step_sfx_entries.pop_front()
+	else:
+		_movement_step_sfx_suppressed_rate_limit_count += 1
+	return result
+
+
+func _get_surface_type_for_world_position(world_position: Vector2) -> String:
+	if _terrain_map_data == null:
+		return "neutral"
+	var grid_position: Vector2i = _world_to_grid_position(world_position)
+	var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
+	if tile_data == null:
+		return "neutral"
+	var surface_type: String = String(tile_data.surface_type).strip_edges().to_lower()
+	if surface_type.is_empty():
+		return "neutral"
+	return surface_type
 
 
 func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> void:
@@ -1513,6 +3251,7 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 	var enemy_animated_unit_model_count: int = 0
 	var unit_status_badge_count: int = 0
 	var missing_unit_model_count: int = 0
+	var fow_hidden_unit_proxy_count: int = 0
 	var changed: bool = false
 	for unit in _unit_nodes:
 		if not is_instance_valid(unit):
@@ -1530,16 +3269,24 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 			_unit_root.add_child(proxy)
 			_unit_proxies_by_id[unit_id] = proxy
 			changed = true
-		var next_visible: bool = _is_unit_world_visible(unit)
+		var base_visible: bool = _is_unit_base_world_visible(unit)
+		var fow_allowed: bool = _fow_allows_unit_proxy(unit)
+		if base_visible and not fow_allowed:
+			fow_hidden_unit_proxy_count += 1
+		var next_visible: bool = base_visible and fow_allowed
 		if proxy.visible != next_visible:
 			changed = true
 		proxy.visible = next_visible
+		proxy.set_meta("unit_id", unit_id)
+		proxy.set_meta("team_id", _get_unit_team_id(unit))
+		proxy.set_meta("vital_state", _get_unit_vital_state(unit))
 		var unit_is_moving: bool = false
 		if unit is Node2D:
 			var unit_world_position: Vector2 = (unit as Node2D).global_position
-			var next_position: Vector3 = _world_to_3d_position(unit_world_position, 0.06)
+			var next_position: Vector3 = _world_to_surface_3d_position(unit_world_position, 0.06)
 			var proxy_distance: float = proxy.position.distance_to(next_position)
 			unit_is_moving = proxy_distance > 0.01
+			_maybe_emit_unit_step_sfx(unit_id, unit_world_position, unit_is_moving, next_visible)
 			if proxy_distance > 0.0001:
 				changed = true
 			if force_rebuild or delta <= 0.0 or proxy_distance >= UNIT_PROXY_SNAP_DISTANCE:
@@ -1672,6 +3419,9 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 	if _missing_unit_model_count != missing_unit_model_count:
 		changed = true
 	_missing_unit_model_count = missing_unit_model_count
+	if _fow_hidden_unit_proxy_count != fow_hidden_unit_proxy_count:
+		changed = true
+	_fow_hidden_unit_proxy_count = fow_hidden_unit_proxy_count
 	if changed:
 		_request_viewport_redraw()
 
@@ -1788,6 +3538,12 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 				root.set_meta("unit_visual_error", true)
 			model_root.add_child(model_instance)
 			if not unit_visual_entry.is_empty():
+				var visual_archetype_id: String = String(unit_visual_entry.get("resolved_visual_archetype_id", unit_visual_entry.get("visual_archetype_id", ""))).strip_edges()
+				if not visual_archetype_id.is_empty():
+					root.set_meta("unit_visual_archetype_id", visual_archetype_id)
+				var faction_id: String = String(unit_visual_entry.get("faction_id", "")).strip_edges()
+				if not faction_id.is_empty():
+					root.set_meta("unit_visual_faction_id", faction_id)
 				var visual_loadout_id: String = String(unit_visual_entry.get("resolved_visual_loadout_id", "")).strip_edges()
 				if not visual_loadout_id.is_empty():
 					root.set_meta("unit_visual_loadout_available", true)
@@ -2103,7 +3859,7 @@ func _attach_unit_helmet(proxy_root: Node3D, model_root: Node3D, model_instance:
 func _attach_unit_blaster(proxy_root: Node3D, model_root: Node3D, model_instance: Node3D, unit_visual_entry: Dictionary) -> bool:
 	var blaster_path: String = _get_unit_blaster_path(unit_visual_entry)
 	if blaster_path.is_empty():
-		return true
+		return false
 	if not ResourceLoader.exists(blaster_path):
 		_mark_unit_visual_loadout_error(proxy_root, unit_visual_entry)
 		_add_runtime_missing_asset_marker(
@@ -2215,6 +3971,63 @@ func _bone_name_matches_socket(bone_name: String, socket_name: String) -> bool:
 	if socket_text == "backsocket":
 		return bone_text.find("spine") >= 0 or bone_text.find("chest") >= 0
 	return false
+
+
+func _get_unit_proxy_ids(visible_only: bool) -> Array:
+	var unit_ids: Array = []
+	for unit_id_variant in _unit_proxies_by_id.keys():
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty():
+			continue
+		var proxy := _unit_proxies_by_id.get(unit_id_variant, null) as Node3D
+		if proxy == null or not is_instance_valid(proxy):
+			continue
+		if visible_only and not proxy.visible:
+			continue
+		unit_ids.append(unit_id)
+	unit_ids.sort()
+	return unit_ids
+
+
+func _get_unit_proxy_ids_with_meta(meta_name: String) -> Array:
+	var unit_ids: Array = []
+	var normalized_meta_name: String = meta_name.strip_edges()
+	if normalized_meta_name.is_empty():
+		return unit_ids
+	for unit_id_variant in _unit_proxies_by_id.keys():
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty():
+			continue
+		var proxy := _unit_proxies_by_id.get(unit_id_variant, null) as Node3D
+		if proxy == null or not is_instance_valid(proxy):
+			continue
+		if bool(proxy.get_meta(normalized_meta_name, false)):
+			unit_ids.append(unit_id)
+	unit_ids.sort()
+	return unit_ids
+
+
+func _get_unit_proxy_state_by_id() -> Dictionary:
+	var result: Dictionary = {}
+	for unit_id_variant in _unit_proxies_by_id.keys():
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty():
+			continue
+		var proxy := _unit_proxies_by_id.get(unit_id_variant, null) as Node3D
+		if proxy == null or not is_instance_valid(proxy):
+			continue
+		result[unit_id] = {
+			"visible": proxy.visible,
+			"team_id": String(proxy.get_meta("team_id", "")).strip_edges(),
+			"vital_state": String(proxy.get_meta("vital_state", "")).strip_edges(),
+			"missing_unit_model": bool(proxy.get_meta("missing_unit_model", false)),
+			"unit_visual_error": bool(proxy.get_meta("unit_visual_error", false)),
+			"uses_unit_texture": bool(proxy.get_meta("uses_unit_texture", false)),
+			"uses_kenney_model": bool(proxy.get_meta("uses_kenney_model", false)),
+			"unit_visual_archetype_id": String(proxy.get_meta("unit_visual_archetype_id", "")).strip_edges(),
+			"unit_visual_faction_id": String(proxy.get_meta("unit_visual_faction_id", "")).strip_edges(),
+		}
+	return result
 
 
 func _apply_unit_helmet_transform(helmet_instance: Node3D, attachment_entry: Dictionary, model_instance: Node3D) -> void:
@@ -2348,7 +4161,7 @@ func _add_marker3d(parent: Node3D, world_position: Vector2, color: Color, node_n
 	marker.name = node_name
 	marker.mesh = mesh
 	marker.material_override = _make_material(color)
-	marker.position = _world_to_3d_position(world_position, 0.28 + height * 0.5)
+	marker.position = _world_to_surface_3d_position(world_position, 0.28 + height * 0.5)
 	if radial_segments == 4:
 		marker.rotation_degrees.y = 45.0
 	parent.add_child(marker)
@@ -2480,6 +4293,14 @@ func _get_asset_model_scene_by_path(model_path: String) -> PackedScene:
 	return packed_scene
 
 
+func _is_nature_kit_model_entry(entry: Dictionary) -> bool:
+	if entry.is_empty():
+		return false
+	var source_id: String = String(entry.get("source_id", "")).strip_edges()
+	var model_path: String = String(entry.get("model_path", "")).strip_edges()
+	return source_id == "kenney_nature_kit_classic" or model_path.contains("res://Assets/used/terrain/nature_kit_classic/")
+
+
 func _has_3d_asset_mapping() -> bool:
 	return not _get_terrain_3d_mapping().is_empty()
 
@@ -2528,6 +4349,32 @@ func _get_terrain_3d_mapping() -> Dictionary:
 	var parsed: Variant = JSON.parse_string(file.get_as_text())
 	_terrain_3d_mapping = Dictionary(parsed) if typeof(parsed) == TYPE_DICTIONARY else {}
 	return _terrain_3d_mapping
+
+
+func _get_terrain_surface_visual_theme_catalog() -> Dictionary:
+	if not _terrain_surface_visual_theme_catalog.is_empty():
+		return _terrain_surface_visual_theme_catalog
+	if not FileAccess.file_exists(TERRAIN_SURFACE_VISUAL_THEME_CATALOG_PATH):
+		return {}
+	var file := FileAccess.open(TERRAIN_SURFACE_VISUAL_THEME_CATALOG_PATH, FileAccess.READ)
+	if file == null:
+		return {}
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	_terrain_surface_visual_theme_catalog = Dictionary(parsed) if typeof(parsed) == TYPE_DICTIONARY else {}
+	return _terrain_surface_visual_theme_catalog
+
+
+func _get_surface_visual_entry_for_model_key(model_key: String) -> Dictionary:
+	var normalized_key: String = model_key.strip_edges().to_lower()
+	if normalized_key.is_empty():
+		return {}
+	for entry_variant in Array(_get_terrain_surface_visual_theme_catalog().get("visuals", [])):
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("model_key", "")).strip_edges().to_lower() == normalized_key:
+			return entry
+	return {}
 
 
 func _get_npc_unit_visual_mapping() -> Dictionary:
@@ -2792,18 +4639,102 @@ func _get_unit_visual_entry(unit: Node) -> Dictionary:
 	var unit_entries: Dictionary = Dictionary(mapping.get("unit_ids", {}))
 	var unit_entry: Dictionary = Dictionary(unit_entries.get(unit_id, {}))
 	if not unit_entry.is_empty():
-		return _apply_unit_visual_loadout(unit, unit_entry)
+		return _apply_unit_visual_loadout(unit, _apply_unit_visual_archetype(unit, unit_entry))
+	var archetype_entry: Dictionary = _get_unit_meta_visual_archetype_entry(unit)
+	if not archetype_entry.is_empty():
+		return _apply_unit_visual_loadout(unit, archetype_entry)
 	var visual_entries: Dictionary = Dictionary(mapping.get("unit_visuals", {}))
 	var team_entry: Dictionary = Dictionary(visual_entries.get(_get_unit_team_id(unit), {}))
 	if not team_entry.is_empty():
-		return _apply_unit_visual_loadout(unit, team_entry)
-	return _apply_unit_visual_loadout(unit, Dictionary(visual_entries.get("default", {})))
+		return _apply_unit_visual_loadout(unit, _apply_unit_visual_archetype(unit, team_entry))
+	return _apply_unit_visual_loadout(unit, _apply_unit_visual_archetype(unit, Dictionary(visual_entries.get("default", {}))))
+
+
+func _apply_unit_visual_archetype(unit: Node, unit_visual_entry: Dictionary) -> Dictionary:
+	if unit_visual_entry.is_empty():
+		return {}
+	var archetype_id: String = _resolve_unit_visual_archetype_id(unit, unit_visual_entry)
+	if archetype_id.is_empty():
+		return unit_visual_entry
+	var archetype_entry: Dictionary = _get_visual_archetype_entry(archetype_id)
+	if archetype_entry.is_empty():
+		return unit_visual_entry
+	var result: Dictionary = _merge_unit_visual_entry(archetype_entry, unit_visual_entry)
+	result["resolved_visual_archetype_id"] = String(archetype_entry.get("resolved_visual_archetype_id", _normalize_visual_archetype_id(archetype_id))).strip_edges()
+	return result
+
+
+func _get_unit_meta_visual_archetype_entry(unit: Node) -> Dictionary:
+	var archetype_id: String = _resolve_unit_visual_archetype_id(unit, {})
+	if archetype_id.is_empty():
+		return {}
+	var archetype_entry: Dictionary = _get_visual_archetype_entry(archetype_id)
+	if not archetype_entry.is_empty() and String(archetype_entry.get("resolved_visual_archetype_id", "")).strip_edges().is_empty():
+		archetype_entry["resolved_visual_archetype_id"] = _normalize_visual_archetype_id(archetype_id)
+	return archetype_entry
+
+
+func _resolve_unit_visual_archetype_id(unit: Node, unit_visual_entry: Dictionary) -> String:
+	var explicit_archetype_id: String = String(unit_visual_entry.get("visual_archetype_id", unit_visual_entry.get("visual_archetype", ""))).strip_edges().to_lower()
+	if not explicit_archetype_id.is_empty():
+		return explicit_archetype_id
+	if unit != null:
+		for meta_key in ["visual_archetype_id", "enemy_visual_archetype_id", "visual_archetype", "enemy_visual_archetype"]:
+			if unit.has_meta(meta_key):
+				var meta_value: String = String(unit.get_meta(meta_key, "")).strip_edges().to_lower()
+				if not meta_value.is_empty():
+					return meta_value
+		if unit.has_meta("enemy_tactics_config"):
+			var tactics_variant: Variant = unit.get_meta("enemy_tactics_config")
+			if typeof(tactics_variant) == TYPE_DICTIONARY:
+				var tactics_archetype: String = String(Dictionary(tactics_variant).get("visual_archetype", "")).strip_edges().to_lower()
+				if not tactics_archetype.is_empty():
+					return tactics_archetype
+	return ""
+
+
+func _get_visual_archetype_entry(archetype_id: String, visited: PackedStringArray = PackedStringArray()) -> Dictionary:
+	var normalized_id: String = _normalize_visual_archetype_id(archetype_id)
+	if normalized_id.is_empty() or visited.has(normalized_id):
+		return {}
+	var visual_archetypes: Dictionary = Dictionary(_get_npc_unit_visual_mapping().get("visual_archetypes", {}))
+	var entry: Dictionary = Dictionary(visual_archetypes.get(normalized_id, {})).duplicate(true)
+	if entry.is_empty():
+		return {}
+	var model_path: String = String(entry.get("model_path", "")).strip_edges()
+	var skin_path: String = String(entry.get("skin_path", "")).strip_edges()
+	var status: String = String(entry.get("status", "")).strip_edges().to_lower()
+	if status == "planned" or model_path.is_empty() or skin_path.is_empty():
+		var fallback_id: String = String(entry.get("fallback_archetype_id", "")).strip_edges().to_lower()
+		if not fallback_id.is_empty() and fallback_id != normalized_id:
+			var next_visited: PackedStringArray = visited.duplicate()
+			next_visited.append(normalized_id)
+			return _get_visual_archetype_entry(fallback_id, next_visited)
+		return {}
+	entry["resolved_visual_archetype_id"] = normalized_id
+	return entry
+
+
+func _normalize_visual_archetype_id(archetype_id: String) -> String:
+	var normalized_id: String = archetype_id.strip_edges().to_lower()
+	if normalized_id.is_empty():
+		return ""
+	var aliases: Dictionary = Dictionary(_get_npc_unit_visual_mapping().get("visual_archetype_aliases", {}))
+	return String(aliases.get(normalized_id, normalized_id)).strip_edges().to_lower()
 
 
 func _apply_unit_visual_loadout(unit: Node, unit_visual_entry: Dictionary) -> Dictionary:
 	if unit_visual_entry.is_empty():
 		return {}
 	var result: Dictionary = unit_visual_entry.duplicate(true)
+	if _unit_has_only_empty_weapon_slots(unit):
+		result["weapon_visual_disabled"] = true
+		result.erase("resolved_visual_loadout_id")
+		result.erase("visual_loadout_id")
+		result.erase("loadout_id")
+		result.erase("blaster_path")
+		result.erase("blaster_attachment")
+		return result
 	var loadout_id: String = _resolve_unit_visual_loadout_id(unit, result)
 	if loadout_id.is_empty():
 		return result
@@ -2819,10 +4750,29 @@ func _apply_unit_visual_loadout(unit: Node, unit_visual_entry: Dictionary) -> Di
 	return result
 
 
+func _unit_has_only_empty_weapon_slots(unit: Node) -> bool:
+	if unit == null:
+		return false
+	var saw_slot: bool = false
+	for method_name in ["get_weapon_1_id", "get_weapon_2_id"]:
+		if not unit.has_method(method_name):
+			continue
+		var weapon_id: String = String(WEAPON_DATA_SCRIPT.call("normalize_weapon_id", String(unit.call(method_name)))).strip_edges().to_lower()
+		if weapon_id.is_empty():
+			continue
+		saw_slot = true
+		if weapon_id != "none":
+			return false
+	return saw_slot
+
+
 func _resolve_unit_visual_loadout_id(unit: Node, unit_visual_entry: Dictionary) -> String:
 	var weapon_loadouts: Dictionary = Dictionary(_get_npc_unit_visual_mapping().get("weapon_visual_loadouts", {}))
 	for weapon_id in _get_unit_visual_weapon_ids(unit):
 		if weapon_id == "medictool" and weapon_loadouts.has(weapon_id):
+			return String(weapon_loadouts.get(weapon_id, "")).strip_edges().to_lower()
+	for weapon_id in _get_unit_visual_weapon_ids(unit):
+		if (weapon_id == "sniper" or weapon_id == "rocket_launcher") and weapon_loadouts.has(weapon_id):
 			return String(weapon_loadouts.get(weapon_id, "")).strip_edges().to_lower()
 
 	var explicit_loadout_id: String = String(unit_visual_entry.get("visual_loadout_id", unit_visual_entry.get("loadout_id", ""))).strip_edges().to_lower()
@@ -2907,6 +4857,8 @@ func _unit_visual_entry_has_helmet(unit_visual_entry: Dictionary) -> bool:
 
 
 func _get_unit_blaster_path(unit_visual_entry: Dictionary) -> String:
+	if bool(unit_visual_entry.get("weapon_visual_disabled", false)):
+		return ""
 	var blaster_path: String = String(unit_visual_entry.get("blaster_path", "")).strip_edges()
 	if not blaster_path.is_empty():
 		return blaster_path
@@ -2993,6 +4945,12 @@ func _get_unit_team_id(unit: Node) -> String:
 	return ""
 
 
+func _get_unit_vital_state(unit: Node) -> String:
+	if unit != null and unit.has_method("get_vital_state"):
+		return String(unit.call("get_vital_state")).strip_edges().to_lower()
+	return ""
+
+
 func _get_unit_role_id(unit: Node) -> String:
 	if unit != null and unit.has_method("get_role_id"):
 		return String(unit.call("get_role_id")).strip_edges().to_lower()
@@ -3008,7 +4966,7 @@ func _get_unit_visual_weapon_ids(unit: Node) -> PackedStringArray:
 	for method_name in ["get_active_weapon_id", "get_weapon_1_id", "get_weapon_2_id"]:
 		if unit == null or not unit.has_method(method_name):
 			continue
-		var weapon_id: String = String(unit.call(method_name)).strip_edges().to_lower()
+		var weapon_id: String = String(WEAPON_DATA_SCRIPT.call("normalize_weapon_id", String(unit.call(method_name)))).strip_edges().to_lower()
 		if not weapon_id.is_empty() and not result.has(weapon_id):
 			result.append(weapon_id)
 	return result
@@ -3065,6 +5023,10 @@ func _get_unit_id(unit: Node) -> String:
 
 
 func _is_unit_world_visible(unit: Node) -> bool:
+	return _is_unit_base_world_visible(unit) and _fow_allows_unit_proxy(unit)
+
+
+func _is_unit_base_world_visible(unit: Node) -> bool:
 	if unit == null:
 		return false
 	if unit is CanvasItem:
@@ -3093,6 +5055,23 @@ func _grid_float_to_world(grid_position: Vector2) -> Vector2:
 
 func _world_to_3d_position(world_position: Vector2, y_offset: float) -> Vector3:
 	return _grid_to_3d_position(_world_to_grid_float(world_position), y_offset)
+
+
+func _world_to_surface_3d_position(world_position: Vector2, y_offset: float) -> Vector3:
+	return _world_to_3d_position(world_position, _get_world_surface_y(world_position) + y_offset)
+
+
+func _get_world_surface_y(world_position: Vector2) -> float:
+	return _get_grid_surface_y(_world_to_grid_position(world_position))
+
+
+func _get_grid_surface_y(grid_position: Vector2i) -> float:
+	if _terrain_map_data == null or not _terrain_map_data.has_method("get_tile_at_grid"):
+		return 0.0
+	var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
+	if tile_data == null:
+		return 0.0
+	return float(tile_data.height_level) * _get_3d_height_step()
 
 
 func _grid_to_3d_position(grid_position: Vector2, y_offset: float) -> Vector3:
