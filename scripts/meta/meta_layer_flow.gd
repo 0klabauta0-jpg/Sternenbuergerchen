@@ -1051,6 +1051,7 @@ func _build_homebase_team_transfer_entry(unit_ids: PackedStringArray) -> Diction
 	return {
 		"transfer_id": "team_%d" % _transfer_sequence,
 		"unit_ids": unit_ids.duplicate(),
+		"unit_profiles": _build_unit_subset_by_ids(unit_ids),
 		"elapsed_seconds": 0.0,
 		"duration_seconds": HOMEBASE_TEAM_TRANSFER_DURATION_SECONDS,
 	}

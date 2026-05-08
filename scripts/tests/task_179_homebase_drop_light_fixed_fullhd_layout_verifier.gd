@@ -20,6 +20,7 @@ func _run_tests() -> void:
 	print("=== TASK_179 Homebase Drop Light Fixed FullHD Layout Verifier ===")
 	await _test_homebase_fixed_window_positions()
 	await _test_homebase_flightdeck_shipcards_are_primary_status_region()
+	await _test_homebase_transfer_ghost_cards_remain_in_team_panel()
 	_test_no_absolute_user_paths_in_runtime_files()
 
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
@@ -121,6 +122,48 @@ func _test_homebase_flightdeck_shipcards_are_primary_status_region() -> void:
 	_assert(not _contains_button(pad_stage), "Flightdeck visual stage introduces no unbound action buttons")
 	_assert(_contains_texture_path(shipcards_list, DROPSHIP_TEXTURE_PATH), "Homebase shipcards keep using project dropship assets")
 	_assert(_contains_texture_path(shipcards_list, CARGO_TEXTURE_PATH), "Homebase shipcards keep using project cargo craft assets")
+	_assert(_max_texture_min_size(shipcards_list, DROPSHIP_TEXTURE_PATH).x >= 200.0 and _max_texture_min_size(shipcards_list, DROPSHIP_TEXTURE_PATH).y >= 136.0, "Homebase dropship image uses the enlarged shipcard size")
+
+	screen.queue_free()
+	await process_frame
+
+
+func _test_homebase_transfer_ghost_cards_remain_in_team_panel() -> void:
+	var screen: Control = HOMEBASE_TEST_SCENE.instantiate()
+	root.add_child(screen)
+	await process_frame
+
+	var roster: Array = UNIT_ROSTER_PRESETS_SCRIPT.call("get_homebase_roster")
+	var transfer_units: Array = [Dictionary(roster[0]).duplicate(true), Dictionary(roster[1]).duplicate(true)]
+	screen.call("setup_roster", [], PackedStringArray())
+	screen.call(
+		"set_transport_state",
+		[],
+		{},
+		[
+			{
+				"transfer_id": "team_test",
+				"unit_ids": PackedStringArray(["unit_alpha", "unit_bravo"]),
+				"unit_profiles": transfer_units,
+				"duration_seconds": 12.0,
+				"elapsed_seconds": 6.0,
+			},
+		],
+		[],
+		{},
+		{},
+		{},
+		[]
+	)
+	await process_frame
+	await process_frame
+
+	var selected_team_list := screen.get_node("Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamDropPanel/DropMargin/DropVBox/SelectedTeamScroll/SelectedTeamList") as VBoxContainer
+	var ghost_cards: Array = _collect_cards_by_source_context(selected_team_list, "transfer_ghost")
+	var first_display_name: String = String(Dictionary(roster[0]).get("display_name", "")).strip_edges()
+	_assert(ghost_cards.size() == 2, "#03 keeps transferred operators visible as ghost cards")
+	_assert(_cards_have_visible_progress(ghost_cards, 50.0), "#03 transfer ghost cards show the shared transit progress")
+	_assert(_cards_contain_display_name(ghost_cards, first_display_name), "#03 ghost cards keep the real operator profile snapshot")
 
 	screen.queue_free()
 	await process_frame
@@ -167,6 +210,53 @@ func _contains_texture_path(root_node: Node, expected_path: String) -> bool:
 		if texture_rect == null or texture_rect.texture == null:
 			continue
 		if texture_rect.texture.resource_path == expected_path:
+			return true
+	return false
+
+
+func _max_texture_min_size(root_node: Node, expected_path: String) -> Vector2:
+	var max_size := Vector2.ZERO
+	for node in _collect_nodes(root_node):
+		var texture_rect := node as TextureRect
+		if texture_rect == null or texture_rect.texture == null:
+			continue
+		if texture_rect.texture.resource_path != expected_path:
+			continue
+		if texture_rect.custom_minimum_size.x * texture_rect.custom_minimum_size.y > max_size.x * max_size.y:
+			max_size = texture_rect.custom_minimum_size
+	return max_size
+
+
+func _collect_cards_by_source_context(root_node: Node, expected_context: String) -> Array:
+	var cards: Array = []
+	for node in _collect_nodes(root_node):
+		if not node.has_method("get_source_context"):
+			continue
+		if String(node.call("get_source_context")) == expected_context:
+			cards.append(node)
+	return cards
+
+
+func _cards_have_visible_progress(cards: Array, expected_value: float) -> bool:
+	for card_variant in cards:
+		var card := card_variant as Node
+		if card == null:
+			return false
+		var progress_bar := card.get_node_or_null("Margin/HBox/TextVBox/ProgressBar") as ProgressBar
+		if progress_bar == null or not progress_bar.visible:
+			return false
+		if absf(float(progress_bar.value) - expected_value) > 0.5:
+			return false
+	return not cards.is_empty()
+
+
+func _cards_contain_display_name(cards: Array, expected_display_name: String) -> bool:
+	for card_variant in cards:
+		var card := card_variant as Node
+		if card == null or not card.has_method("get_profile"):
+			continue
+		var profile = card.call("get_profile")
+		if profile != null and String(profile.display_name).strip_edges() == expected_display_name:
 			return true
 	return false
 

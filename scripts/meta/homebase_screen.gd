@@ -16,6 +16,9 @@ const DROPSHIP_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isome
 const CARGO_CRAFT_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_cargoA_NE.png")
 const HOMEBASE_OPERATOR_CARD_SIZE := Vector2(316.0, 66.0)
 const HOMEBASE_STAGED_CARD_SIZE := Vector2(316.0, 66.0)
+const HOMEBASE_TRANSFER_GHOST_CARD_SIZE := Vector2(316.0, 74.0)
+const HOMEBASE_SHIPCARD_IMAGE_SIZE := Vector2(200.0, 136.0)
+const HOMEBASE_SHIPCARD_BUTTON_SIZE := Vector2(200.0, 144.0)
 
 signal selection_changed(selected_unit_ids)
 signal team_confirmed(selected_unit_ids)
@@ -547,6 +550,77 @@ func _render_staged_team() -> void:
 			card.remove_requested.connect(_on_staged_card_remove_requested)
 		selected_team_list.add_child(card)
 		_staged_cards_by_unit_id[unit_id] = card
+
+	_render_team_transfer_ghost_cards(selected_team_list)
+
+
+func _render_team_transfer_ghost_cards(selected_team_list: VBoxContainer) -> void:
+	var rendered_unit_ids: Dictionary = {}
+	for entry_variant in _team_transfer_entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		for unit_id_variant in Array(entry.get("unit_ids", [])):
+			var unit_id: String = String(unit_id_variant).strip_edges()
+			if unit_id.is_empty() or _selected_unit_ids.has(unit_id) or rendered_unit_ids.has(unit_id):
+				continue
+
+			var profile = _build_transfer_card_profile(unit_id, entry)
+			if profile == null:
+				continue
+
+			var card_profile = profile.duplicate_profile()
+			card_profile.secondary_text = _build_transfer_ghost_secondary_text(entry)
+
+			var card = NPC_COMPACT_CARD_SCENE.instantiate()
+			card.set_meta("homebase_transfer_ghost_card", true)
+			card.set_meta("transfer_id", String(entry.get("transfer_id", "")).strip_edges())
+			card.setup_from_profile(
+				card_profile,
+				{
+					"source_context": "transfer_ghost",
+					"selected": false,
+					"disabled": true,
+					"drag_enabled": false,
+					"compact_mode": true,
+					"show_progress": true,
+					"progress_value": _build_transfer_progress_value(entry),
+					"fixed_size": true,
+					"fixed_card_size": HOMEBASE_TRANSFER_GHOST_CARD_SIZE,
+				}
+			)
+			selected_team_list.add_child(card)
+			rendered_unit_ids[unit_id] = true
+
+
+func _build_transfer_card_profile(unit_id: String, entry: Dictionary):
+	var profile = _profiles_by_id.get(unit_id, null)
+	if profile != null and profile.has_method("duplicate_profile"):
+		return profile
+
+	for unit_variant in Array(entry.get("unit_profiles", [])):
+		if typeof(unit_variant) != TYPE_DICTIONARY:
+			continue
+		var unit_data: Dictionary = Dictionary(unit_variant)
+		if String(unit_data.get("unit_id", "")).strip_edges() != unit_id:
+			continue
+		var transfer_profiles: Dictionary = META_UNIT_PROFILE_BUILDER_SCRIPT.build_profiles_by_unit_id([unit_data])
+		return transfer_profiles.get(unit_id, null)
+
+	var fallback_profiles: Dictionary = META_UNIT_PROFILE_BUILDER_SCRIPT.build_profiles_by_unit_id(
+		[
+			{
+				"unit_id": unit_id,
+				"display_name": unit_id.replace("_", " ").capitalize(),
+				"role_name": "Operator",
+				"availability_status": "in_transit",
+				"status_text": "In Transit",
+			}
+		]
+	)
+	return fallback_profiles.get(unit_id, null)
+
+
+func _build_transfer_ghost_secondary_text(entry: Dictionary) -> String:
+	return "Transit to FOB | ETA %s" % _build_transfer_eta_text(entry)
 
 
 func _update_team_summary() -> void:
@@ -1479,7 +1553,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 
 	var shipcard := PanelContainer.new()
 	shipcard.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	shipcard.custom_minimum_size = Vector2(0.0, 136.0 if cargo_capable else 112.0)
+	shipcard.custom_minimum_size = Vector2(0.0, 210.0 if cargo_capable else 184.0)
 	shipcard.add_theme_stylebox_override("panel", _build_shipcard_stylebox(is_selected, craft_busy or cargo_loading or air_asset_unavailable, craft_in_transit or air_asset_unavailable))
 	shipcard.modulate = Color(1.0, 1.0, 1.0, 0.56) if craft_in_transit or air_asset_unavailable else Color(1.0, 1.0, 1.0, 1.0)
 
@@ -1496,7 +1570,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	margin.add_child(row)
 
 	var ship_box := VBoxContainer.new()
-	ship_box.custom_minimum_size = Vector2(104.0, 0.0)
+	ship_box.custom_minimum_size = Vector2(HOMEBASE_SHIPCARD_BUTTON_SIZE.x + 4.0, 0.0)
 	ship_box.add_theme_constant_override("separation", 1)
 	row.add_child(ship_box)
 
@@ -1509,7 +1583,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	var ship_button := Button.new()
 	ship_button.flat = true
 	ship_button.focus_mode = Control.FOCUS_NONE
-	ship_button.custom_minimum_size = Vector2(100.0, 72.0)
+	ship_button.custom_minimum_size = HOMEBASE_SHIPCARD_BUTTON_SIZE
 	ship_button.clip_contents = true
 	ship_button.pressed.connect(_on_shipcard_select_requested.bind(craft_id))
 	ship_box.add_child(ship_button)
@@ -1518,7 +1592,9 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	ship_texture.texture = _get_aircraft_texture(craft_def)
 	ship_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	ship_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	ship_texture.custom_minimum_size = Vector2(100.0, 68.0)
+	ship_texture.custom_minimum_size = HOMEBASE_SHIPCARD_IMAGE_SIZE
+	ship_texture.size = HOMEBASE_SHIPCARD_BUTTON_SIZE
+	ship_texture.set_anchors_preset(Control.PRESET_FULL_RECT)
 	ship_texture.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if ship_texture.texture != null:
 		ship_texture.modulate = Color(1.0, 1.0, 1.0, 0.46 if craft_in_transit or air_asset_unavailable else 1.0)
