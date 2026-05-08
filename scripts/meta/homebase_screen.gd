@@ -14,6 +14,8 @@ const PERSONNEL_EVENT_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/perso
 const FLIGHTDECK_PLATFORM_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/platform_large_NW.png")
 const DROPSHIP_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
 const CARGO_CRAFT_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_cargoA_NE.png")
+const HOMEBASE_OPERATOR_CARD_SIZE := Vector2(316.0, 66.0)
+const HOMEBASE_STAGED_CARD_SIZE := Vector2(316.0, 66.0)
 
 signal selection_changed(selected_unit_ids)
 signal team_confirmed(selected_unit_ids)
@@ -214,6 +216,9 @@ func get_aircraft_panel_snapshot() -> Dictionary:
 		) if not selected_craft.is_empty() else "",
 		"can_send_selected": _can_send_craft(selected_craft, _selected_aircraft_id) if not selected_craft.is_empty() else false,
 		"can_remove_selected": _can_remove_selected_aircraft(),
+		"flightdeck_stage_visible": _node_is_visible("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/DropLightFlightdeckStage"),
+		"deck_activity_visible": _node_is_visible("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftTransfersScroll"),
+		"shipcards_are_primary_status": true,
 	}
 
 
@@ -238,6 +243,7 @@ func _rebuild_ui() -> void:
 	_ensure_focused_unit_id()
 	_ensure_selected_aircraft_id()
 	_apply_block_labels()
+	_apply_homebase_compact_panel_policy()
 	_render_roster()
 	_render_staged_team()
 	_update_mission_info()
@@ -247,6 +253,7 @@ func _rebuild_ui() -> void:
 	_update_character_sheet()
 	_update_character_sheet_visibility()
 	_update_drop_light_flightdeck_stage()
+	_apply_mission_brief_contrast_policy()
 	_apply_contextual_help_ids()
 	call_deferred("_enforce_drop_light_fixed_layout")
 
@@ -411,6 +418,55 @@ func _apply_block_labels() -> void:
 			label.text = String(label_text_by_path[path_variant])
 
 
+func _apply_homebase_compact_panel_policy() -> void:
+	for path in [
+		"Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/ActiveTransfersHeaderLabel",
+		"Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/ActiveTransfersScroll",
+		"Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftTransfersHeaderLabel",
+		"Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftTransfersScroll",
+		"Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/DropLightFlightdeckStage",
+	]:
+		var control := get_node_or_null(path) as Control
+		if control == null:
+			continue
+		control.visible = false
+		control.custom_minimum_size = Vector2.ZERO
+		control.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		control.set_meta("homebase_compact_status_hidden", true)
+
+	var shipcards_scroll := get_node_or_null("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/ShipCardsScroll") as ScrollContainer
+	if shipcards_scroll != null:
+		shipcards_scroll.custom_minimum_size = Vector2.ZERO
+		shipcards_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		shipcards_scroll.set_meta("homebase_primary_status_region", true)
+
+	var team_drop_panel := _get_team_drop_panel() as Control
+	if team_drop_panel != null:
+		team_drop_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+
+func _apply_mission_brief_contrast_policy() -> void:
+	var mission_panel := get_node_or_null("Panel/Margin/VBox/MissionPanel") as PanelContainer
+	if mission_panel != null:
+		META_UI_SKIN_SCRIPT.style_tactical_panel(mission_panel, "header")
+		mission_panel.set_meta("mission_brief_contrast_policy", "high_contrast_dark_panel")
+
+	var header_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionHeaderLabel") as Label
+	META_UI_SKIN_SCRIPT.style_header_label(header_label, 12)
+	for path in [
+		"Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/MissionNameLabel",
+		"Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/MissionTeamLimitLabel",
+		"Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/MissionTransferLabel",
+		"Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionSummaryLabel",
+		"Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PersonnelEventsLabel",
+	]:
+		var label := get_node_or_null(path) as Label
+		if label == null:
+			continue
+		META_UI_SKIN_SCRIPT.style_body_label(label, 10)
+		label.add_theme_color_override("font_color", Color("d7e2e8"))
+
+
 func _render_roster() -> void:
 	var roster_list: VBoxContainer = get_node("Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox/RosterScroll/RosterList")
 	_clear_container(roster_list)
@@ -430,6 +486,8 @@ func _render_roster() -> void:
 			continue
 		var card_profile = profile.duplicate_profile()
 		card_profile.secondary_text = _build_roster_card_secondary_text(unit_id, card_profile)
+		var transit_entry: Dictionary = _find_transfer_entry_for_unit(unit_id)
+		var is_in_transit: bool = not transit_entry.is_empty()
 
 		var card = NPC_COMPACT_CARD_SCENE.instantiate()
 		card.setup_from_profile(
@@ -437,9 +495,13 @@ func _render_roster() -> void:
 			{
 				"source_context": "roster",
 				"selected": _is_roster_card_highlighted(unit_id),
-				"disabled": false,
-				"drag_enabled": not _selected_unit_ids.has(unit_id),
+				"disabled": is_in_transit,
+				"drag_enabled": not is_in_transit and not _selected_unit_ids.has(unit_id),
 				"compact_mode": true,
+				"show_progress": is_in_transit,
+				"progress_value": _build_transfer_progress_value(transit_entry) if is_in_transit else 0.0,
+				"fixed_size": true,
+				"fixed_card_size": HOMEBASE_OPERATOR_CARD_SIZE,
 			}
 		)
 		if not card.card_pressed.is_connected(_on_compact_card_pressed):
@@ -463,12 +525,7 @@ func _render_staged_team() -> void:
 		var card_profile = profile.duplicate_profile()
 		card_profile.secondary_text = _build_roster_card_secondary_text(unit_id, card_profile)
 
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 8)
-		selected_team_list.add_child(row)
-
 		var card = NPC_COMPACT_CARD_SCENE.instantiate()
-		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		card.setup_from_profile(
 			card_profile,
 			{
@@ -477,21 +534,19 @@ func _render_staged_team() -> void:
 				"disabled": false,
 				"drag_enabled": false,
 				"compact_mode": true,
+				"show_remove_action": true,
+				"fixed_size": true,
+				"fixed_card_size": HOMEBASE_STAGED_CARD_SIZE,
 			}
 		)
 		if not card.card_pressed.is_connected(_on_compact_card_pressed):
 			card.card_pressed.connect(_on_compact_card_pressed)
 		if not card.card_open_requested.is_connected(_on_compact_card_open_requested):
 			card.card_open_requested.connect(_on_compact_card_open_requested)
-		row.add_child(card)
+		if card.has_signal("remove_requested") and not card.remove_requested.is_connected(_on_staged_card_remove_requested):
+			card.remove_requested.connect(_on_staged_card_remove_requested)
+		selected_team_list.add_child(card)
 		_staged_cards_by_unit_id[unit_id] = card
-
-		var remove_button := Button.new()
-		remove_button.text = "Remove"
-		remove_button.custom_minimum_size = Vector2(84.0, 0.0)
-		META_UI_SKIN_SCRIPT.style_secondary_button(remove_button)
-		remove_button.pressed.connect(_on_remove_button_pressed.bind(unit_id))
-		row.add_child(remove_button)
 
 
 func _update_team_summary() -> void:
@@ -663,7 +718,10 @@ func _update_aircraft_panel() -> void:
 
 
 func _update_drop_light_flightdeck_stage() -> void:
-	var pad_stage := get_node_or_null("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/DropLightFlightdeckStage/Margin/PadStage") as Control
+	var stage_panel := get_node_or_null("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/DropLightFlightdeckStage") as Control
+	if stage_panel == null or not stage_panel.visible:
+		return
+	var pad_stage := stage_panel.get_node_or_null("Margin/PadStage") as Control
 	if pad_stage == null:
 		return
 	for child in pad_stage.get_children():
@@ -775,6 +833,10 @@ func _on_compact_card_open_requested(unit_id: String, _profile, _source_context:
 	_update_character_sheet()
 	_update_character_sheet_visibility()
 	_refresh_card_highlights()
+
+
+func _on_staged_card_remove_requested(unit_id: String, _source_context: String) -> void:
+	_on_remove_button_pressed(unit_id)
 
 
 func _on_team_drop_panel_unit_dropped(unit_id: String) -> void:
@@ -1018,8 +1080,9 @@ func _refresh_card_highlights() -> void:
 		if roster_card == null:
 			continue
 
-		roster_card.set_visual_state(_is_roster_card_highlighted(String(unit_id)), false)
-		roster_card.set_drag_enabled(not _selected_unit_ids.has(String(unit_id)) and not _is_unit_assigned_to_aircraft(String(unit_id)))
+		var unit_in_transit: bool = not _find_transfer_entry_for_unit(String(unit_id)).is_empty()
+		roster_card.set_visual_state(_is_roster_card_highlighted(String(unit_id)), unit_in_transit)
+		roster_card.set_drag_enabled(not unit_in_transit and not _selected_unit_ids.has(String(unit_id)) and not _is_unit_assigned_to_aircraft(String(unit_id)))
 
 	for unit_id in _staged_cards_by_unit_id.keys():
 		var staged_card = _staged_cards_by_unit_id.get(unit_id, null)
@@ -1416,7 +1479,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 
 	var shipcard := PanelContainer.new()
 	shipcard.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	shipcard.custom_minimum_size = Vector2(0.0, 112.0 if cargo_capable else 72.0)
+	shipcard.custom_minimum_size = Vector2(0.0, 136.0 if cargo_capable else 112.0)
 	shipcard.add_theme_stylebox_override("panel", _build_shipcard_stylebox(is_selected, craft_busy or cargo_loading or air_asset_unavailable, craft_in_transit or air_asset_unavailable))
 	shipcard.modulate = Color(1.0, 1.0, 1.0, 0.56) if craft_in_transit or air_asset_unavailable else Color(1.0, 1.0, 1.0, 1.0)
 
@@ -1433,12 +1496,12 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	margin.add_child(row)
 
 	var ship_box := VBoxContainer.new()
-	ship_box.custom_minimum_size = Vector2(72.0, 0.0)
+	ship_box.custom_minimum_size = Vector2(104.0, 0.0)
 	ship_box.add_theme_constant_override("separation", 1)
 	row.add_child(ship_box)
 
 	var ship_label := Label.new()
-	ship_label.text = "%s%s%s" % [craft_name, " *" if is_selected else "", " · TRANSIT" if craft_in_transit else ""]
+	ship_label.text = "%s%s%s" % [craft_name, " *" if is_selected else "", " | TRANSIT" if craft_in_transit else ""]
 	ship_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	ship_label.add_theme_font_size_override("font_size", 9)
 	ship_box.add_child(ship_label)
@@ -1446,7 +1509,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	var ship_button := Button.new()
 	ship_button.flat = true
 	ship_button.focus_mode = Control.FOCUS_NONE
-	ship_button.custom_minimum_size = Vector2(64.0, 40.0)
+	ship_button.custom_minimum_size = Vector2(100.0, 72.0)
 	ship_button.clip_contents = true
 	ship_button.pressed.connect(_on_shipcard_select_requested.bind(craft_id))
 	ship_box.add_child(ship_button)
@@ -1455,7 +1518,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	ship_texture.texture = _get_aircraft_texture(craft_def)
 	ship_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	ship_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	ship_texture.custom_minimum_size = Vector2(64.0, 36.0)
+	ship_texture.custom_minimum_size = Vector2(100.0, 68.0)
 	ship_texture.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if ship_texture.texture != null:
 		ship_texture.modulate = Color(1.0, 1.0, 1.0, 0.46 if craft_in_transit or air_asset_unavailable else 1.0)
@@ -1532,6 +1595,10 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 		cargo_load_button.pressed.connect(_on_shipcard_load_cargo_pressed.bind(craft_id))
 		cargo_row.add_child(cargo_load_button)
 
+	var progress_block := _build_shipcard_progress_block(craft_id, cargo_loading, craft_in_transit)
+	if progress_block != null:
+		content_vbox.add_child(progress_block)
+
 	var actions := VBoxContainer.new()
 	actions.alignment = BoxContainer.ALIGNMENT_CENTER
 	actions.add_theme_constant_override("separation", 3)
@@ -1556,7 +1623,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	actions.add_child(clear_button)
 
 	var remove_button := Button.new()
-	remove_button.text = "-"
+	remove_button.text = "X"
 	remove_button.tooltip_text = "Remove this shipcard from the flight deck."
 	remove_button.custom_minimum_size = Vector2(52.0, 20.0)
 	remove_button.add_theme_font_size_override("font_size", 8)
@@ -1566,6 +1633,38 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	actions.add_child(remove_button)
 
 	return shipcard
+
+
+func _build_shipcard_progress_block(craft_id: String, cargo_loading: bool, craft_in_transit: bool) -> Control:
+	var entry: Dictionary = _find_transfer_entry_for_craft(craft_id)
+	var label_text := "Inbound to FOB"
+	if entry.is_empty() and cargo_loading:
+		entry = _find_cargo_load_entry_for_craft(craft_id)
+		label_text = "Cargo loading"
+	if entry.is_empty() or (not craft_in_transit and not cargo_loading):
+		return null
+
+	var vbox := VBoxContainer.new()
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.add_theme_constant_override("separation", 2)
+
+	var label := Label.new()
+	label.text = "%s | ETA %s" % [label_text, _build_transfer_eta_text(entry)]
+	label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	label.clip_text = true
+	label.add_theme_font_size_override("font_size", 8)
+	META_UI_SKIN_SCRIPT.style_body_label(label, 8)
+	vbox.add_child(label)
+
+	var progress_bar := ProgressBar.new()
+	progress_bar.min_value = 0.0
+	progress_bar.max_value = 100.0
+	progress_bar.value = _build_transfer_progress_value(entry)
+	progress_bar.show_percentage = false
+	progress_bar.custom_minimum_size = Vector2(0.0, 8.0)
+	progress_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.add_child(progress_bar)
+	return vbox
 
 
 func _build_shipcard_pilot_panel(craft_id: String, craft_name: String, assigned_pilot_id: String, craft_busy: bool, craft_in_transit: bool = false) -> PanelContainer:
@@ -1610,7 +1709,7 @@ func _build_assigned_pilot_row(unit_id: String, craft_name: String, craft_busy: 
 		return _build_empty_state_label("Pilot profile unavailable.")
 
 	var card_profile = profile.duplicate_profile()
-	card_profile.secondary_text = "Loc: Transit To FOB / %s" % craft_name if craft_in_transit else "Loc: Homebase / Flight Deck / %s" % craft_name
+	card_profile.secondary_text = "Inbound to FOB / %s" % craft_name if craft_in_transit else "Assigned to %s" % craft_name
 	var card = NPC_COMPACT_CARD_SCENE.instantiate()
 	card.setup_from_profile(
 		card_profile,
@@ -1900,6 +1999,14 @@ func _get_visible_cargo_load_entries(craft_id: String) -> Array:
 	return entries
 
 
+func _find_cargo_load_entry_for_craft(craft_id: String) -> Dictionary:
+	for entry_variant in _cargo_load_entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("craft_id", "")).strip_edges() == craft_id:
+			return entry
+	return {}
+
+
 func _can_load_selected_cargo(craft_def: Dictionary, craft_id: String) -> bool:
 	if craft_def.is_empty() or not _craft_supports_cargo(craft_def):
 		return false
@@ -1997,6 +2104,11 @@ func _get_team_drop_panel():
 
 func _get_roster_drop_panel():
 	return get_node_or_null("Panel/Margin/VBox/ContentRow/RosterPanel")
+
+
+func _node_is_visible(path: String) -> bool:
+	var control := get_node_or_null(path) as Control
+	return control != null and control.visible and (control.is_visible_in_tree() if control.is_inside_tree() else true)
 
 
 func _clear_container(container: Node) -> void:

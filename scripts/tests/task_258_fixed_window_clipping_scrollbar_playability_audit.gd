@@ -101,9 +101,12 @@ func _test_homebase_fixed_windows_and_long_roster_scrolls() -> void:
 	_assert(_node_rect_matches_actual(homebase.get_node("Panel/Margin/VBox/ContentRow/InfoPanel") as Control, layout.get("character_sheet")), "Homebase character sheet window remains fixed")
 	_assert(_scroll_container_is_usable(homebase, "Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox/RosterScroll", true), "Homebase roster has a usable ScrollContainer")
 	_assert(_scroll_container_is_usable(homebase, "Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamDropPanel/DropMargin/DropVBox/SelectedTeamScroll", true), "Homebase selected team has a usable ScrollContainer")
-	_assert(_scroll_container_is_usable(homebase, "Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/ActiveTransfersScroll", true), "Homebase active transfers have a usable ScrollContainer")
 	_assert(_scroll_container_is_usable(homebase, "Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/ShipCardsScroll", true), "Homebase shipcards have a usable ScrollContainer")
 	_assert(_scroll_container_is_usable(homebase, "Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll", true), "Homebase character sheet has a usable ScrollContainer")
+	var active_transfers_scroll := homebase.get_node_or_null("Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/ActiveTransfersScroll") as ScrollContainer
+	var aircraft_transfers_scroll := homebase.get_node_or_null("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftTransfersScroll") as ScrollContainer
+	_assert(active_transfers_scroll != null and not active_transfers_scroll.visible, "Homebase inbound-to-FOB window is hidden because cards carry progress")
+	_assert(aircraft_transfers_scroll != null and not aircraft_transfers_scroll.visible, "Homebase deck-activity window is hidden because shipcards carry progress")
 	var roster_list := homebase.get_node("Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox/RosterScroll/RosterList") as VBoxContainer
 	_assert(roster_list.get_child_count() >= 24, "Homebase long roster renders many cards inside scroll content")
 	_assert(_critical_labels_do_not_overflow("homebase", homebase, [

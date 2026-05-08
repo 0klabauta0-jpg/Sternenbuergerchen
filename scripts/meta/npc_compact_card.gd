@@ -4,17 +4,20 @@ extends PanelContainer
 const META_UNIT_PROFILE_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile.gd")
 const NPC_RANK_BADGE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
 const PORTRAIT_IDENTITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
+const META_USEROLOGY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/meta_userology_contract.gd")
 
 signal card_pressed(unit_id, profile, source_context)
 signal card_open_requested(unit_id, profile, source_context)
 signal card_unit_dropped(dropped_unit_id, source_context)
 signal lead_toggle_requested(unit_id)
+signal remove_requested(unit_id, source_context)
 
 const COMPACT_CARD_MIN_SIZE := Vector2(148.0, 58.0)
 const FULL_CARD_MIN_HEIGHT := 92.0
 const COMPACT_TEXT_MIN_WIDTH := 88.0
 const COMPACT_PORTRAIT_SIZE := 38.0
 const COMPACT_STAR_WIDTH := 16.0
+const COMPACT_REMOVE_BUTTON_SIZE := 18.0
 const COMPACT_MARGIN_WIDTH := 8.0
 const COMPACT_HBOX_SEPARATION := 6.0
 
@@ -28,13 +31,18 @@ var _is_lead: bool = false
 var _show_lead_indicator: bool = false
 var _show_progress: bool = false
 var _progress_value: float = 0.0
+var _show_remove_action: bool = false
+var _fixed_size: bool = false
+var _fixed_card_size: Vector2 = Vector2.ZERO
 var _is_drag_preview: bool = false
 var _drag_preview_size: Vector2 = Vector2.ZERO
 var _drag_preview_text_width: float = 0.0
 
 
 func _ready() -> void:
-	size_flags_horizontal = Control.SIZE_SHRINK_BEGIN if _is_drag_preview else Control.SIZE_EXPAND_FILL
+	size_flags_horizontal = Control.SIZE_SHRINK_BEGIN if _is_drag_preview or _fixed_size else Control.SIZE_EXPAND_FILL
+	set_meta("drag_preview_z_index_contract", int(META_USEROLOGY_CONTRACT_SCRIPT.get("DRAG_PREVIEW_Z_INDEX")))
+	set_meta("badge_layout_contract", "right_of_main_text")
 	focus_mode = Control.FOCUS_NONE
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_ensure_ui()
@@ -42,7 +50,7 @@ func _ready() -> void:
 
 
 func setup_from_profile(profile, options: Dictionary = {}) -> void:
-	if profile != null and profile.has_method("duplicate_profile"):
+	if typeof(profile) == TYPE_OBJECT and profile != null and profile.has_method("duplicate_profile"):
 		_profile = profile.duplicate_profile()
 	elif typeof(profile) == TYPE_DICTIONARY:
 		_profile = META_UNIT_PROFILE_SCRIPT.new(profile)
@@ -61,10 +69,15 @@ func setup_from_profile(profile, options: Dictionary = {}) -> void:
 	_show_lead_indicator = bool(options.get("show_lead_indicator", _show_lead_indicator))
 	_show_progress = bool(options.get("show_progress", _show_progress))
 	_progress_value = clampf(float(options.get("progress_value", _progress_value)), 0.0, 100.0)
+	_show_remove_action = bool(options.get("show_remove_action", _show_remove_action))
+	_fixed_size = bool(options.get("fixed_size", _fixed_size))
+	var requested_fixed_size = options.get("fixed_card_size", _fixed_card_size)
+	if typeof(requested_fixed_size) == TYPE_VECTOR2:
+		_fixed_card_size = requested_fixed_size
 	_is_drag_preview = bool(options.get("drag_preview", _is_drag_preview))
 	_drag_preview_size = options.get("drag_preview_size", _drag_preview_size) if typeof(options.get("drag_preview_size", _drag_preview_size)) == TYPE_VECTOR2 else _drag_preview_size
 	_drag_preview_text_width = float(options.get("drag_preview_text_width", _drag_preview_text_width))
-	size_flags_horizontal = Control.SIZE_SHRINK_BEGIN if _is_drag_preview else Control.SIZE_EXPAND_FILL
+	size_flags_horizontal = Control.SIZE_SHRINK_BEGIN if _is_drag_preview or _fixed_size else Control.SIZE_EXPAND_FILL
 
 	if is_inside_tree():
 		_refresh_card()
@@ -99,6 +112,27 @@ func get_profile():
 
 func get_source_context() -> String:
 	return _source_context
+
+
+func get_card_userology_snapshot() -> Dictionary:
+	var badge_row := get_node_or_null("Margin/HBox/TextVBox/NameRow/BadgeRow") as HBoxContainer
+	var min_badge_size: Vector2 = Vector2.ZERO
+	if badge_row != null and badge_row.get_child_count() > 0:
+		var first_badge := badge_row.get_child(0) as Control
+		min_badge_size = first_badge.custom_minimum_size if first_badge != null else Vector2.ZERO
+	var remove_button := get_node_or_null("Margin/HBox/TextVBox/NameRow/RemoveButton") as Button
+	return {
+		"unit_id": get_unit_id(),
+		"source_context": _source_context,
+		"drag_enabled": _drag_enabled,
+		"drag_preview_z_index": int(META_USEROLOGY_CONTRACT_SCRIPT.get("DRAG_PREVIEW_Z_INDEX")),
+		"drag_preview_above_windows": true,
+		"badge_layout": "right_of_main_text",
+		"badge_minimum_size": min_badge_size,
+		"badge_tooltips_available": _badge_tooltips_available(badge_row),
+		"compact_remove_action": remove_button != null and remove_button.visible,
+		"fixed_size": _fixed_size,
+	}
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -157,6 +191,9 @@ func _get_drag_data(_at_position: Vector2):
 	preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	preview.custom_minimum_size = preview_size
 	preview.size = preview.custom_minimum_size
+	preview.z_index = int(META_USEROLOGY_CONTRACT_SCRIPT.get("DRAG_PREVIEW_Z_INDEX"))
+	preview.set_meta("global_drag_layer", true)
+	preview.set_meta("above_windows", true)
 	preview.modulate = Color(1.0, 1.0, 1.0, 0.92)
 	set_drag_preview(preview)
 
@@ -212,10 +249,37 @@ func _ensure_ui() -> void:
 	text_vbox.add_theme_constant_override("separation", 2)
 	hbox.add_child(text_vbox)
 
+	var name_row := HBoxContainer.new()
+	name_row.name = "NameRow"
+	name_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_row.add_theme_constant_override("separation", 4)
+	text_vbox.add_child(name_row)
+
 	var name_label := Label.new()
 	name_label.name = "NameLabel"
 	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	text_vbox.add_child(name_label)
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_row.add_child(name_label)
+
+	var badge_row := HBoxContainer.new()
+	badge_row.name = "BadgeRow"
+	badge_row.add_theme_constant_override("separation", 3)
+	name_row.add_child(badge_row)
+
+	var remove_button := Button.new()
+	remove_button.name = "RemoveButton"
+	remove_button.text = "X"
+	remove_button.tooltip_text = "Remove from this slot"
+	remove_button.flat = true
+	remove_button.focus_mode = Control.FOCUS_NONE
+	remove_button.custom_minimum_size = Vector2(COMPACT_REMOVE_BUTTON_SIZE, COMPACT_REMOVE_BUTTON_SIZE)
+	remove_button.visible = false
+	remove_button.mouse_filter = Control.MOUSE_FILTER_STOP
+	remove_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	remove_button.add_theme_font_size_override("font_size", 9)
+	if not remove_button.pressed.is_connected(_on_remove_action_pressed):
+		remove_button.pressed.connect(_on_remove_action_pressed)
+	name_row.add_child(remove_button)
 
 	var data_a_label := Label.new()
 	data_a_label.name = "DataALabel"
@@ -226,11 +290,6 @@ func _ensure_ui() -> void:
 	data_b_label.name = "DataBLabel"
 	data_b_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text_vbox.add_child(data_b_label)
-
-	var badge_row := HBoxContainer.new()
-	badge_row.name = "BadgeRow"
-	badge_row.add_theme_constant_override("separation", 3)
-	text_vbox.add_child(badge_row)
 
 	var progress_bar := ProgressBar.new()
 	progress_bar.name = "ProgressBar"
@@ -257,10 +316,12 @@ func _ensure_ui() -> void:
 func _refresh_card() -> void:
 	_ensure_ui()
 	var portrait_rect: TextureRect = get_node("Margin/HBox/PortraitRect")
-	var name_label: Label = get_node("Margin/HBox/TextVBox/NameLabel")
+	var name_row: HBoxContainer = get_node("Margin/HBox/TextVBox/NameRow")
+	var name_label: Label = get_node("Margin/HBox/TextVBox/NameRow/NameLabel")
 	var data_a_label: Label = get_node("Margin/HBox/TextVBox/DataALabel")
 	var data_b_label: Label = get_node("Margin/HBox/TextVBox/DataBLabel")
-	var badge_row: HBoxContainer = get_node("Margin/HBox/TextVBox/BadgeRow")
+	var badge_row: HBoxContainer = get_node("Margin/HBox/TextVBox/NameRow/BadgeRow")
+	var remove_button: Button = get_node("Margin/HBox/TextVBox/NameRow/RemoveButton")
 	var margin: MarginContainer = get_node("Margin")
 	var hbox: HBoxContainer = get_node("Margin/HBox")
 	var text_vbox: VBoxContainer = get_node("Margin/HBox/TextVBox")
@@ -269,6 +330,7 @@ func _refresh_card() -> void:
 	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	text_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	name_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	portrait_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	data_a_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -328,6 +390,9 @@ func _refresh_card() -> void:
 	data_a_label.text = data_a_text
 	data_b_label.text = data_b_text
 	_populate_badge_row(badge_row)
+	remove_button.visible = _show_remove_action
+	remove_button.disabled = _is_disabled
+	remove_button.tooltip_text = "Return %s to Available Operators" % display_name
 	portrait_rect.texture = portrait_texture
 	portrait_rect.modulate = Color(1.0, 1.0, 1.0, 1.0) if portrait_texture != null else Color(0.35, 0.37, 0.42, 1.0)
 	progress_bar.visible = _show_progress
@@ -378,15 +443,19 @@ func _apply_density(
 		var compact_width := _get_compact_required_width()
 		if custom_minimum_size.x > compact_width:
 			compact_width = custom_minimum_size.x
+		if _fixed_size and _fixed_card_size.x > 0.0:
+			compact_width = _fixed_card_size.x
 		if _is_drag_preview and _drag_preview_size.x > 0.0:
 			compact_width = _drag_preview_size.x
 		var compact_height := 46.0 if is_mission_drop_pilot else COMPACT_CARD_MIN_SIZE.y
 		if _is_drag_preview and _drag_preview_size.y > compact_height:
 			compact_height = _drag_preview_size.y
 		if badge_row.visible:
-			compact_height = maxf(compact_height, 64.0)
+			compact_height = maxf(compact_height, 58.0)
 		if _show_progress:
 			compact_height = maxf(compact_height, 68.0)
+		if _fixed_size and _fixed_card_size.y > 0.0:
+			compact_height = _fixed_card_size.y
 		custom_minimum_size = Vector2(compact_width, compact_height)
 		margin.add_theme_constant_override("margin_left", 2 if is_mission_drop_pilot else 4)
 		margin.add_theme_constant_override("margin_top", 2 if is_mission_drop_pilot else 4)
@@ -394,6 +463,9 @@ func _apply_density(
 		margin.add_theme_constant_override("margin_bottom", 2 if is_mission_drop_pilot else 4)
 		hbox.add_theme_constant_override("separation", 4 if is_mission_drop_pilot else 6)
 		text_vbox.add_theme_constant_override("separation", 0 if is_mission_drop_pilot else 1)
+		var compact_name_row := name_label.get_parent() as HBoxContainer
+		if compact_name_row != null:
+			compact_name_row.add_theme_constant_override("separation", 3)
 		portrait_rect.custom_minimum_size = Vector2(30.0, 30.0) if is_mission_drop_pilot else PORTRAIT_IDENTITY_CATALOG_SCRIPT.get_target_size("compact")
 		portrait_rect.set_meta("portrait_target_size", portrait_rect.custom_minimum_size)
 		var compact_text_width := 76.0 if is_mission_drop_pilot else COMPACT_TEXT_MIN_WIDTH
@@ -403,7 +475,7 @@ func _apply_density(
 		name_label.custom_minimum_size = Vector2(0.0, 12.0 if is_mission_drop_pilot else 14.0)
 		data_a_label.custom_minimum_size = Vector2(0.0, 10.0 if is_mission_drop_pilot else 12.0)
 		data_b_label.custom_minimum_size = Vector2(0.0, 10.0 if is_mission_drop_pilot else 12.0)
-		badge_row.custom_minimum_size = Vector2(0.0, 12.0)
+		badge_row.custom_minimum_size = Vector2(0.0, 22.0)
 		name_label.add_theme_font_size_override("font_size", 10 if is_mission_drop_pilot else 12)
 		data_a_label.add_theme_font_size_override("font_size", 8 if is_mission_drop_pilot else 10)
 		data_b_label.add_theme_font_size_override("font_size", 8 if is_mission_drop_pilot else 10)
@@ -417,6 +489,9 @@ func _apply_density(
 	margin.add_theme_constant_override("margin_bottom", 6)
 	hbox.add_theme_constant_override("separation", 8)
 	text_vbox.add_theme_constant_override("separation", 2)
+	var full_name_row := name_label.get_parent() as HBoxContainer
+	if full_name_row != null:
+		full_name_row.add_theme_constant_override("separation", 4)
 	PORTRAIT_IDENTITY_CATALOG_SCRIPT.apply_texture_rect_contract(portrait_rect, "roster")
 	text_vbox.custom_minimum_size = Vector2.ZERO
 	name_label.custom_minimum_size = Vector2.ZERO
@@ -431,6 +506,9 @@ func _apply_density(
 
 func _get_compact_required_width() -> float:
 	var required_width := COMPACT_MARGIN_WIDTH + COMPACT_PORTRAIT_SIZE + COMPACT_HBOX_SEPARATION + COMPACT_TEXT_MIN_WIDTH
+	required_width += 28.0
+	if _show_remove_action:
+		required_width += COMPACT_HBOX_SEPARATION + COMPACT_REMOVE_BUTTON_SIZE
 	if _show_lead_indicator:
 		required_width += COMPACT_HBOX_SEPARATION + COMPACT_STAR_WIDTH
 	if required_width < COMPACT_CARD_MIN_SIZE.x:
@@ -446,7 +524,7 @@ func _populate_badge_row(badge_row: HBoxContainer) -> void:
 	badge_row.visible = not badges.is_empty()
 	if badges.is_empty():
 		return
-	var icon_size: float = 12.0 if _compact_mode else 16.0
+	var icon_size: float = 22.0 if _compact_mode else 24.0
 	for badge_variant in badges:
 		if typeof(badge_variant) != TYPE_DICTIONARY:
 			continue
@@ -456,7 +534,7 @@ func _populate_badge_row(badge_row: HBoxContainer) -> void:
 		texture_rect.custom_minimum_size = Vector2(icon_size, icon_size)
 		texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		texture_rect.mouse_filter = Control.MOUSE_FILTER_STOP
 		texture_rect.tooltip_text = "%s: %s" % [String(badge.get("label", "Badge")), String(badge.get("reason", ""))]
 		var badge_path: String = String(badge.get("path", "")).strip_edges()
 		if not badge_path.is_empty() and ResourceLoader.exists(badge_path):
@@ -465,6 +543,16 @@ func _populate_badge_row(badge_row: HBoxContainer) -> void:
 			texture_rect.modulate = Color(1.0, 0.45, 0.35, 0.95)
 			texture_rect.set_meta("missing_rank_badge_asset", true)
 		badge_row.add_child(texture_rect)
+
+
+func _badge_tooltips_available(badge_row: HBoxContainer) -> bool:
+	if badge_row == null:
+		return true
+	for child in badge_row.get_children():
+		var control := child as Control
+		if control != null and control.visible and control.tooltip_text.strip_edges().is_empty():
+			return false
+	return true
 
 
 func _apply_state_visuals(name_label: Label, data_a_label: Label, data_b_label: Label) -> void:
@@ -502,6 +590,11 @@ func _apply_state_visuals(name_label: Label, data_a_label: Label, data_b_label: 
 func _on_star_button_pressed() -> void:
 	if _profile != null and _profile.is_valid():
 		lead_toggle_requested.emit(get_unit_id())
+
+
+func _on_remove_action_pressed() -> void:
+	if _profile != null and _profile.is_valid():
+		remove_requested.emit(get_unit_id(), _source_context)
 
 
 func _load_portrait_texture(portrait_id: String, portrait_path: String) -> Texture2D:

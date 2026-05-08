@@ -19,7 +19,7 @@ func _init() -> void:
 func _run_tests() -> void:
 	print("=== TASK_179 Homebase Drop Light Fixed FullHD Layout Verifier ===")
 	await _test_homebase_fixed_window_positions()
-	await _test_homebase_flightdeck_read_only_visual_stage()
+	await _test_homebase_flightdeck_shipcards_are_primary_status_region()
 	_test_no_absolute_user_paths_in_runtime_files()
 
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
@@ -58,7 +58,7 @@ func _test_homebase_fixed_window_positions() -> void:
 	await process_frame
 
 
-func _test_homebase_flightdeck_read_only_visual_stage() -> void:
+func _test_homebase_flightdeck_shipcards_are_primary_status_region() -> void:
 	var screen: Control = HOMEBASE_TEST_SCENE.instantiate()
 	root.add_child(screen)
 	await process_frame
@@ -106,13 +106,21 @@ func _test_homebase_flightdeck_read_only_visual_stage() -> void:
 
 	var stage_panel := screen.get_node("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/DropLightFlightdeckStage") as PanelContainer
 	var pad_stage := stage_panel.get_node("Margin/PadStage") as Control
-	_assert(stage_panel != null and bool(stage_panel.get_meta("drop_light_read_only_visual_stage", false)), "Homebase flightdeck has a read-only visual stage")
+	var shipcards_scroll := screen.get_node("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/ShipCardsScroll") as ScrollContainer
+	var shipcards_list := screen.get_node("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/ShipCardsScroll/ShipCardsList") as VBoxContainer
+	var deck_activity_scroll := screen.get_node("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftTransfersScroll") as ScrollContainer
+	var snapshot: Dictionary = Dictionary(screen.call("get_aircraft_panel_snapshot"))
+	_assert(stage_panel != null and bool(stage_panel.get_meta("drop_light_read_only_visual_stage", false)), "Homebase keeps the legacy visual stage node for compatibility")
+	_assert(stage_panel != null and not stage_panel.visible and bool(stage_panel.get_meta("homebase_compact_status_hidden", false)), "Homebase hides the old empty flightdeck stage")
 	_assert(stage_panel.mouse_filter == Control.MOUSE_FILTER_IGNORE and pad_stage.mouse_filter == Control.MOUSE_FILTER_IGNORE, "Flightdeck visual stage does not take input away from existing controls")
-	_assert(_contains_texture_path(pad_stage, PLATFORM_TEXTURE_PATH), "Flightdeck stage renders the project platform asset")
-	_assert(_contains_texture_path(pad_stage, DROPSHIP_TEXTURE_PATH), "Flightdeck stage renders the project dropship asset")
-	_assert(_contains_texture_path(pad_stage, CARGO_TEXTURE_PATH), "Flightdeck stage renders the project cargo craft asset")
+	_assert(shipcards_scroll.visible and bool(shipcards_scroll.get_meta("homebase_primary_status_region", false)), "Homebase shipcards are the primary flightdeck status region")
+	_assert(deck_activity_scroll != null and not deck_activity_scroll.visible, "Homebase hides the old deck activity window")
+	_assert(bool(snapshot.get("shipcards_are_primary_status", false)), "Homebase snapshot declares shipcards as the status truth")
+	_assert(not bool(snapshot.get("flightdeck_stage_visible", true)), "Homebase snapshot reports hidden stage")
+	_assert(not bool(snapshot.get("deck_activity_visible", true)), "Homebase snapshot reports hidden deck activity")
 	_assert(not _contains_button(pad_stage), "Flightdeck visual stage introduces no unbound action buttons")
-	_assert(_contains_texture_path(screen.get_node("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/ShipCardsScroll/ShipCardsList"), DROPSHIP_TEXTURE_PATH), "Homebase shipcards keep using project aircraft assets")
+	_assert(_contains_texture_path(shipcards_list, DROPSHIP_TEXTURE_PATH), "Homebase shipcards keep using project dropship assets")
+	_assert(_contains_texture_path(shipcards_list, CARGO_TEXTURE_PATH), "Homebase shipcards keep using project cargo craft assets")
 
 	screen.queue_free()
 	await process_frame

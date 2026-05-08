@@ -3,6 +3,7 @@ extends Control
 
 const PERSONNEL_EVENT_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/personnel_event_model.gd")
 const AIR_ASSET_RECOVERY_STATE_SCRIPT: GDScript = preload("res://scripts/meta/air_asset_recovery_state.gd")
+const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
 
 signal return_to_fob_requested()
 signal return_to_homebase_requested()
@@ -18,6 +19,7 @@ func _ready() -> void:
 	if not to_homebase_button.pressed.is_connected(_on_return_to_homebase_pressed):
 		to_homebase_button.pressed.connect(_on_return_to_homebase_pressed)
 
+	_apply_readability_style()
 	_render_result()
 	_apply_contextual_help_ids()
 
@@ -47,6 +49,7 @@ func _render_result() -> void:
 		air_asset_label.text = "Air asset: pending"
 		character_events_label.text = "Character updates: pending"
 		personnel_events_label.text = "Personnel updates: pending"
+		_apply_readability_style()
 		return
 
 	var winner_team_id: String = String(_mission_result.get("winning_team_id", ""))
@@ -117,6 +120,7 @@ func _render_result() -> void:
 		personnel_events_label.text = "Personnel updates: none"
 	else:
 		personnel_events_label.text = "Personnel updates:\n%s" % "\n".join(personnel_event_lines)
+	_apply_readability_style()
 
 
 func _ensure_character_events_label() -> Label:
@@ -156,6 +160,33 @@ func _ensure_air_asset_events_label() -> Label:
 func _apply_contextual_help_ids() -> void:
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/CharacterEventsLabel") as Control, "debrief.character_updates")
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/AirAssetEventsLabel") as Control, "fob.flightdeck")
+
+
+func _apply_readability_style() -> void:
+	var panel := get_node_or_null("Panel") as PanelContainer
+	if panel != null:
+		META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "frame")
+		panel.set_meta("debrief_contrast_policy", "high_contrast_dark_panel")
+
+	META_UI_SKIN_SCRIPT.style_header_label(get_node_or_null("Panel/Margin/VBox/TitleLabel"), 18)
+	for path in [
+		"Panel/Margin/VBox/ResultLabel",
+		"Panel/Margin/VBox/TeamStateLabel",
+		"Panel/Margin/VBox/AirAssetEventsLabel",
+		"Panel/Margin/VBox/CharacterEventsLabel",
+		"Panel/Margin/VBox/PersonnelEventsLabel",
+	]:
+		var label := get_node_or_null(path) as Label
+		if label == null:
+			continue
+		META_UI_SKIN_SCRIPT.style_body_label(label, 13)
+		label.add_theme_color_override("font_color", Color("d7e2e8"))
+
+	for path in [
+		"Panel/Margin/VBox/ButtonRow/ReturnToFOBButton",
+		"Panel/Margin/VBox/ButtonRow/ReturnToHomebaseButton",
+	]:
+		META_UI_SKIN_SCRIPT.style_secondary_button(get_node_or_null(path) as Button)
 
 
 func _apply_help_id(control: Control, help_id: String) -> void:
