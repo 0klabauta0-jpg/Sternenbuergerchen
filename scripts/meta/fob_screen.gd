@@ -497,6 +497,15 @@ func get_fireteam_definitions() -> Array:
 	return definitions
 
 
+func get_selected_unit_configs() -> Array:
+	var configs: Array = []
+	for config_variant in _build_selected_unit_configs():
+		if typeof(config_variant) != TYPE_DICTIONARY:
+			continue
+		configs.append(Dictionary(config_variant).duplicate(true))
+	return configs
+
+
 func set_last_mission_result(mission_result: Dictionary) -> void:
 	_last_mission_result = mission_result.duplicate(true)
 	if is_inside_tree():

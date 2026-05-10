@@ -10,6 +10,14 @@
 
 ## Aktueller Startzustand
 
+### Manual Playtest - Mission Fireteam FOB Payload and Bubbles
+- Status: implementiert
+- Stand: MissionStart uebergibt jetzt neben Unit-/Fireteam-IDs auch die FOB-Unit-Konfigurationen an `MissionTestSetup`. Die Mission spiegelt damit die in der FOB zusammengestellten Fireteam-Mitglieder, Namen, Profile und Portraits statt auf generische Preset-Fallbacks zu fallen.
+- Stand: `MissionTestSetup` priorisiert Fireteam-Definitionen fuer Mitgliedschaft und Lead-Markierung. `#17 SELECTED FIRETEAM` und die Fireteam-Mini-Karte zeigen dadurch den konfigurierten FOB-Fireteam-Lead inklusive Portrait.
+- Stand: HUD-Sprechblasen an Fireteam-Mini-Karten sind kleiner, starten rechts neben der Karte und werden vertikal versetzt, wenn mehrere Bubbles sonst uebereinander liegen wuerden.
+- Risiken: Manueller FullHD-Sichtcheck der genauen Bubble-Optik bleibt sinnvoll; der Patch veraendert keine SimulationRoot- oder Combat-Wahrheit.
+- Lokale Pruefung: `bugfix_mission_fireteam_fob_payload_and_bubbles.gd`, `task_210_fireteamleader_command_feedback_bubbles.gd`, `task_087_verifier.gd`, `task_160_tactical_playability_verifier.gd`, `task_316_fob_fireteam_staging_migration.gd`, `bugfix_dropship_mission_flow_verifier.gd` und `git diff --check` laufen gruen.
+
 ### TASK_177 - Drop Light Fixed UI Layout Contract
 - Status: implementiert
 - Stand: `scripts/meta/drop_light_layout_contract.gd` definiert den gemeinsamen `drop_light`-Vertrag fuer feste Full-HD-Screens, 8-px-Raster, maximal 6-px-Panelradius, quadratische Action-Buttons, erlaubte Projektassets und feste Panel-Rechtecke fuer FOB, Homebase und Mission-HUD.

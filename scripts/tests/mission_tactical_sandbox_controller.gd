@@ -5601,7 +5601,7 @@ func _resolve_fireteam_mini_card_bubble_anchor_position(fireteam_id: String) -> 
 		var rect: Rect2 = card.get_global_rect()
 		if rect.size.x <= 0.0 or rect.size.y <= 0.0:
 			return null
-		return rect.position + Vector2(rect.size.x + 42.0, clampf(rect.size.y * 0.42, 24.0, 44.0))
+		return rect.position + Vector2(rect.size.x + 6.0, clampf(rect.size.y * 0.42, 22.0, 38.0))
 	return null
 
 
@@ -5615,7 +5615,7 @@ func _store_fireteamleader_feedback_bubble(payload: Dictionary) -> void:
 	_apply_fireteamleader_feedback_hud_anchor(normalized_payload, String(normalized_payload.get("fireteam_id", "")))
 	normalized_payload["z_index"] = maxi(int(normalized_payload.get("z_index", 0)), 420)
 	if not normalized_payload.has("max_size"):
-		normalized_payload["max_size"] = Vector2i(176, 64)
+		normalized_payload["max_size"] = Vector2i(148, 52)
 	var now_msec: int = Time.get_ticks_msec()
 	var duration_seconds: float = clampf(float(normalized_payload.get("duration_seconds", 1.8)), 0.4, 6.0)
 	normalized_payload["created_at_msec"] = now_msec

@@ -21,6 +21,7 @@ const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tacti
 @export var unit_paths: Array[NodePath] = []
 @export var selected_team_unit_ids: PackedStringArray = []
 @export var selected_team_fireteam_ids: PackedStringArray = []
+@export var selected_team_unit_configs: Array = []
 @export var selected_fireteam_definitions: Array = []
 @export var respawn_manager_path: NodePath
 @export var enemy_wave_controller_path: NodePath
@@ -746,6 +747,12 @@ func _apply_unit_identity_preset(unit, unit_id: String, unit_team_id: String) ->
 		return
 
 	var preset: Dictionary = UNIT_ROSTER_PRESETS_SCRIPT.get_preset(unit_id, unit_team_id)
+	var selected_config: Dictionary = _get_selected_unit_config(unit_id)
+	if not selected_config.is_empty():
+		preset.merge(selected_config, true)
+		preset["unit_id"] = unit_id
+		if not unit_team_id.strip_edges().is_empty():
+			preset["team_id"] = unit_team_id
 	if preset.is_empty():
 		return
 
@@ -755,15 +762,19 @@ func _apply_unit_identity_preset(unit, unit_id: String, unit_team_id: String) ->
 func _apply_fob_loadout_override(unit, unit_id: String, unit_team_id: String) -> void:
 	if unit_team_id != team_id:
 		return
-	if member_loadouts.is_empty():
-		return
 	if unit == null or not unit.has_method("apply_identity_config"):
 		return
+	var is_configured_lead: bool = _is_configured_fireteam_lead(unit_id)
+	if member_loadouts.is_empty():
+		unit.call("apply_identity_config", {"is_fireteam_lead": is_configured_lead})
+		return
 	if not member_loadouts.has(unit_id):
+		unit.call("apply_identity_config", {"is_fireteam_lead": is_configured_lead})
 		return
 
 	var loadout: Dictionary = member_loadouts[unit_id]
 	if typeof(loadout) != TYPE_DICTIONARY or loadout.is_empty():
+		unit.call("apply_identity_config", {"is_fireteam_lead": is_configured_lead})
 		return
 
 	var config: Dictionary = {}
@@ -773,8 +784,7 @@ func _apply_fob_loadout_override(unit, unit_id: String, unit_team_id: String) ->
 		config["weapon_2_id"] = String(loadout["weapon_2"])
 	if loadout.has("armor"):
 		config["armor"] = String(loadout["armor"])
-	if loadout.has("is_fireteam_lead"):
-		config["is_fireteam_lead"] = bool(loadout["is_fireteam_lead"])
+	config["is_fireteam_lead"] = bool(loadout.get("is_fireteam_lead", is_configured_lead))
 
 	if not config.is_empty():
 		unit.call("apply_identity_config", config)
@@ -784,13 +794,66 @@ func _get_fireteam_id_for_friendly_slot(slot_index: int, unit_id: String, unit_t
 	if unit_team_id != team_id:
 		return ""
 
-	if slot_index >= 0 and slot_index < selected_team_fireteam_ids.size():
+	var configured_fireteam_id: String = _get_definition_fireteam_id_for_unit(unit_id)
+	if not configured_fireteam_id.is_empty():
+		return configured_fireteam_id
+
+	if selected_team_fireteam_ids.size() == selected_team_unit_ids.size() and slot_index >= 0 and slot_index < selected_team_fireteam_ids.size():
 		var selected_fireteam_id: String = String(selected_team_fireteam_ids[slot_index]).strip_edges().to_lower()
 		if not selected_fireteam_id.is_empty():
 			return selected_fireteam_id
+	if selected_team_fireteam_ids.size() != selected_team_unit_ids.size() and slot_index >= 0 and slot_index < selected_team_fireteam_ids.size():
+		var fallback_selected_fireteam_id: String = String(selected_team_fireteam_ids[slot_index]).strip_edges().to_lower()
+		if not fallback_selected_fireteam_id.is_empty():
+			return fallback_selected_fireteam_id
 
 	var preset: Dictionary = UNIT_ROSTER_PRESETS_SCRIPT.get_preset(unit_id, unit_team_id)
 	return String(preset.get("fireteam_id", "")).strip_edges().to_lower()
+
+
+func _get_selected_unit_config(unit_id: String) -> Dictionary:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return {}
+	for config_variant in selected_team_unit_configs:
+		if typeof(config_variant) != TYPE_DICTIONARY:
+			continue
+		var config: Dictionary = Dictionary(config_variant)
+		if String(config.get("unit_id", "")).strip_edges() == normalized_unit_id:
+			return config.duplicate(true)
+	return {}
+
+
+func _get_definition_fireteam_id_for_unit(unit_id: String) -> String:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return ""
+	for definition_variant in selected_fireteam_definitions:
+		if typeof(definition_variant) != TYPE_DICTIONARY:
+			continue
+		var definition: Dictionary = Dictionary(definition_variant)
+		var fireteam_id: String = String(definition.get("id", "")).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		if String(definition.get("lead_unit_id", "")).strip_edges() == normalized_unit_id:
+			return fireteam_id
+		var member_loadouts = definition.get("member_loadouts", {})
+		if typeof(member_loadouts) == TYPE_DICTIONARY and Dictionary(member_loadouts).has(normalized_unit_id):
+			return fireteam_id
+	return ""
+
+
+func _is_configured_fireteam_lead(unit_id: String) -> bool:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return false
+	for definition_variant in selected_fireteam_definitions:
+		if typeof(definition_variant) != TYPE_DICTIONARY:
+			continue
+		var definition: Dictionary = Dictionary(definition_variant)
+		if String(definition.get("lead_unit_id", "")).strip_edges() == normalized_unit_id:
+			return true
+	return false
 
 
 func _get_tile_world_center(tile_sprite: Sprite2D) -> Vector2:

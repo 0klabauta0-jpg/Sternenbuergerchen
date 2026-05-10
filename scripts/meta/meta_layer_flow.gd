@@ -494,6 +494,8 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 		var fob_screen: Node = get_node_or_null("FOBScreen")
 		if fob_screen != null and fob_screen.has_method("get_fireteam_definitions"):
 			mission_setup.set("selected_fireteam_definitions", Array(fob_screen.call("get_fireteam_definitions")).duplicate(true))
+		if fob_screen != null and fob_screen.has_method("get_selected_unit_configs"):
+			mission_setup.set("selected_team_unit_configs", Array(fob_screen.call("get_selected_unit_configs")).duplicate(true))
 		mission_setup.set("map_file_path", String(_get_selected_mission_definition().get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges())
 		mission_setup.set("defer_friendly_runtime_activation", _should_defer_friendly_runtime_activation())
 		mission_setup.set("allow_full_roster_when_selection_empty", false)

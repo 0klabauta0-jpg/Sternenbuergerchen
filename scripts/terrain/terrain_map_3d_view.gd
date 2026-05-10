@@ -3341,13 +3341,13 @@ func _add_hud_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 	if bubble_id.is_empty() or text.is_empty():
 		return
 	var hud_anchor_position: Vector2 = Vector2(feedback_bubble.get("hud_anchor_position", Vector2.ZERO))
-	var bubble_size: Vector2 = _coerce_hud_bubble_size(feedback_bubble.get("max_size", Vector2i(168, 72)))
-	bubble_size.x = clampf(bubble_size.x, 120.0, 188.0)
-	bubble_size.y = clampf(bubble_size.y, 48.0, 76.0)
+	var bubble_size: Vector2 = _coerce_hud_bubble_size(feedback_bubble.get("max_size", Vector2i(148, 52)))
+	bubble_size.x = clampf(bubble_size.x, 104.0, 160.0)
+	bubble_size.y = clampf(bubble_size.y, 40.0, 60.0)
 	var viewport_size := Vector2(_get_viewport_size())
-	var bubble_position: Vector2 = hud_anchor_position + Vector2(12.0, -bubble_size.y * 0.52)
-	bubble_position.x = clampf(bubble_position.x, 0.0, maxf(viewport_size.x - bubble_size.x, 0.0))
-	bubble_position.y = clampf(bubble_position.y, 0.0, maxf(viewport_size.y - bubble_size.y, 0.0))
+	if viewport_size.x < bubble_size.x + 1.0 or viewport_size.y < bubble_size.y + 1.0:
+		viewport_size = Vector2(1280.0, 720.0)
+	var bubble_position: Vector2 = _resolve_hud_feedback_bubble_position(hud_anchor_position, bubble_size, viewport_size)
 
 	var bubble_root := Control.new()
 	bubble_root.name = "HudFeedbackBubble_%s_%d" % [_sanitize_node_name(bubble_id), _feedback_bubble_visual_count]
@@ -3384,9 +3384,9 @@ func _add_hud_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_FEEDBACK_BUBBLE_TEXT)
-	label.add_theme_font_size_override("font_size", 10)
-	label.position = Vector2(12.0, 10.0)
-	label.size = Vector2(maxf(bubble_size.x - 24.0, 1.0), maxf(bubble_size.y - 18.0, 1.0))
+	label.add_theme_font_size_override("font_size", 9)
+	label.position = Vector2(10.0, 8.0)
+	label.size = Vector2(maxf(bubble_size.x - 20.0, 1.0), maxf(bubble_size.y - 15.0, 1.0))
 	bubble_root.add_child(label)
 
 	var world_anchor: Vector2 = Vector2(feedback_bubble.get("anchor_position", Vector2.ZERO)) if typeof(feedback_bubble.get("anchor_position", null)) == TYPE_VECTOR2 else Vector2.ZERO
@@ -3413,6 +3413,7 @@ func _add_hud_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 		"hud_anchor_source": String(feedback_bubble.get("hud_anchor_source", "")).strip_edges(),
 		"hud_anchor_position": hud_anchor_position,
 		"hud_bubble_position": bubble_position,
+		"hud_bubble_size": bubble_size,
 		"visual_only": true,
 	})
 
@@ -3427,6 +3428,45 @@ func _coerce_hud_bubble_size(value: Variant) -> Vector2:
 		var dict: Dictionary = Dictionary(value)
 		return Vector2(float(dict.get("x", 168.0)), float(dict.get("y", 72.0)))
 	return Vector2(168.0, 72.0)
+
+
+func _resolve_hud_feedback_bubble_position(hud_anchor_position: Vector2, bubble_size: Vector2, viewport_size: Vector2) -> Vector2:
+	var base_position: Vector2 = _clamp_hud_feedback_bubble_position(
+		hud_anchor_position + Vector2(6.0, -bubble_size.y * 0.52),
+		bubble_size,
+		viewport_size
+	)
+	var step: float = bubble_size.y + 4.0
+	for offset_y in [0.0, step, -step, step * 2.0, -step * 2.0]:
+		var candidate: Vector2 = _clamp_hud_feedback_bubble_position(base_position + Vector2(0.0, offset_y), bubble_size, viewport_size)
+		if not _hud_feedback_bubble_position_overlaps(candidate, bubble_size):
+			return candidate
+	return base_position
+
+
+func _clamp_hud_feedback_bubble_position(position: Vector2, bubble_size: Vector2, viewport_size: Vector2) -> Vector2:
+	return Vector2(
+		clampf(position.x, 0.0, maxf(viewport_size.x - bubble_size.x, 0.0)),
+		clampf(position.y, 0.0, maxf(viewport_size.y - bubble_size.y, 0.0))
+	)
+
+
+func _hud_feedback_bubble_position_overlaps(position: Vector2, bubble_size: Vector2) -> bool:
+	var candidate_rect := Rect2(position, bubble_size).grow(3.0)
+	for entry_variant in _feedback_bubble_entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("anchor_space", "")).strip_edges().to_lower() != "hud":
+			continue
+		if typeof(entry.get("hud_bubble_position", null)) != TYPE_VECTOR2:
+			continue
+		var existing_position: Vector2 = Vector2(entry.get("hud_bubble_position", Vector2.ZERO))
+		var existing_size: Vector2 = _coerce_hud_bubble_size(entry.get("hud_bubble_size", Vector2(148.0, 52.0)))
+		var existing_rect := Rect2(existing_position, existing_size).grow(3.0)
+		if candidate_rect.intersects(existing_rect):
+			return true
+	return false
 
 
 func _build_hud_bubble_stylebox() -> StyleBoxFlat:
