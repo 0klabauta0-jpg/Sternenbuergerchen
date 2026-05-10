@@ -6,14 +6,9 @@ const FTL_RUNTIME_STATUS_SCRIPT: GDScript = preload("res://scripts/ftl/ftl_runti
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const FLANK_OFFSET_DISTANCE: float = 72.0
 const FORMATION_SLOT_SPACING: float = 42.0
-const FORMATION_SLOT_LAYOUT: Array[Vector2] = [
-	Vector2(0.0, 0.0),
-	Vector2(-1.0, -1.0),
-	Vector2(1.0, -1.0),
-	Vector2(-2.0, -2.0),
-	Vector2(2.0, -2.0),
-	Vector2(0.0, -2.0),
-]
+const FORMATION_BUDDY_SLOT_SEPARATION: float = 0.44
+const FORMATION_BUDDY_PAIR_STEP: float = 0.72
+const FORMATION_BUDDY_PAIR_FORWARD_STEP: float = 0.18
 const PHASE_APPROACH_COVER_BONUS: float = 0.2
 const PHASE_HOLD_COVER_BONUS: float = 0.3
 
@@ -409,8 +404,7 @@ func _get_formation_slot_index(unit: Node) -> int:
 
 
 func _get_formation_slot_offset(slot_index: int, unit_position: Vector2, target_position: Vector2) -> Vector2:
-	var layout_index: int = mini(slot_index, FORMATION_SLOT_LAYOUT.size() - 1)
-	var slot: Vector2 = FORMATION_SLOT_LAYOUT[layout_index]
+	var slot: Vector2 = _build_buddy_formation_slot(slot_index, _assigned_units.size())
 	var direction: Vector2 = target_position - unit_position
 	if direction.is_zero_approx():
 		direction = Vector2.DOWN
@@ -418,3 +412,21 @@ func _get_formation_slot_offset(slot_index: int, unit_position: Vector2, target_
 	var forward: Vector2 = direction.normalized()
 	var lateral: Vector2 = forward.orthogonal()
 	return ((lateral * slot.x) + (forward * slot.y)) * FORMATION_SLOT_SPACING
+
+
+func _build_buddy_formation_slot(slot_index: int, member_count: int) -> Vector2:
+	if slot_index <= 0 or member_count <= 1:
+		return Vector2.ZERO
+	if slot_index == 1:
+		return Vector2(-FORMATION_BUDDY_SLOT_SEPARATION, -FORMATION_BUDDY_PAIR_FORWARD_STEP)
+	var pair_index: int = int(slot_index / 2)
+	var pair_member_count: int = mini(2, maxi(member_count - (pair_index * 2), 0))
+	var slot_in_pair: int = slot_index % 2
+	var side_order: int = pair_index - 1
+	var side_sign: float = 1.0 if side_order % 2 == 0 else -1.0
+	var side_ring: float = float(int(side_order / 2) + 1)
+	var pair_center_x: float = side_sign * (FORMATION_BUDDY_PAIR_STEP * side_ring)
+	var local_x: float = 0.0
+	if pair_member_count > 1:
+		local_x = (-0.5 if slot_in_pair == 0 else 0.5) * FORMATION_BUDDY_SLOT_SEPARATION
+	return Vector2(pair_center_x + local_x, -FORMATION_BUDDY_PAIR_FORWARD_STEP * float(pair_index))

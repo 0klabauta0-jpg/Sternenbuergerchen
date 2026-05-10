@@ -633,6 +633,7 @@ func build_mission_drop_state() -> Dictionary:
 		"mission_drop_pilot_display_name": String(mission_craft_state.get("pilot_display_name", "")).strip_edges(),
 		"mission_drop_pilot_portrait_path": String(mission_craft_state.get("pilot_portrait_path", "")).strip_edges(),
 		"mission_drop_passenger_count": boarded_unit_ids.size(),
+		"mission_drop_cards": _build_mission_drop_cards(),
 	}
 
 
@@ -826,27 +827,67 @@ func _build_assignment_lookup() -> Dictionary:
 
 
 func _get_meta_mission_craft_state() -> Dictionary:
+	var craft_states: Array = _get_meta_mission_craft_states()
+	if craft_states.is_empty():
+		return {}
+	return Dictionary(craft_states[0]).duplicate(true)
+
+
+func _get_meta_mission_craft_states() -> Array:
+	var craft_states: Array = []
 	for craft_state_variant in _transport_craft_states:
 		if typeof(craft_state_variant) != TYPE_DICTIONARY:
 			continue
 		var craft_state: Dictionary = Dictionary(craft_state_variant)
 		if not bool(craft_state.get("mission_waiting", false)) and not bool(craft_state.get("mission_transit_to_map", false)) and not bool(craft_state.get("mission_transit_to_fob", false)):
 			continue
-		var craft_id: String = String(craft_state.get("craft_id", "")).strip_edges()
-		return {
-			"craft_id": craft_id,
-			"display_name": String(craft_state.get("display_name", "Dropship")).strip_edges(),
-			"texture_path": String(craft_state.get("texture_path", "")).strip_edges(),
-			"pilot_display_name": String(craft_state.get("pilot_display_name", "")).strip_edges(),
-			"pilot_portrait_path": String(craft_state.get("pilot_portrait_path", "")).strip_edges(),
-			"passenger_count": _get_boarded_unit_ids_for_craft(craft_id).size(),
-			"transfer_progress": float(craft_state.get("transfer_progress", 0.0)),
-			"transfer_eta_seconds": int(craft_state.get("transfer_eta_seconds", 0)),
-			"mission_waiting": bool(craft_state.get("mission_waiting", false)),
-			"mission_transit_to_map": bool(craft_state.get("mission_transit_to_map", false)),
-			"mission_transit_to_fob": bool(craft_state.get("mission_transit_to_fob", false)),
-		}
-	return {}
+		craft_states.append(_build_meta_mission_craft_state(craft_state))
+	return craft_states
+
+
+func _build_meta_mission_craft_state(craft_state: Dictionary) -> Dictionary:
+	var craft_id: String = String(craft_state.get("craft_id", "")).strip_edges()
+	return {
+		"craft_id": craft_id,
+		"display_name": String(craft_state.get("display_name", "Dropship")).strip_edges(),
+		"texture_path": String(craft_state.get("texture_path", "")).strip_edges(),
+		"pilot_unit_id": String(craft_state.get("pilot_unit_id", "")).strip_edges(),
+		"pilot_display_name": String(craft_state.get("pilot_display_name", "")).strip_edges(),
+		"pilot_portrait_path": String(craft_state.get("pilot_portrait_path", "")).strip_edges(),
+		"passenger_count": _get_boarded_unit_ids_for_craft(craft_id).size(),
+		"transfer_progress": float(craft_state.get("transfer_progress", 0.0)),
+		"transfer_eta_seconds": int(craft_state.get("transfer_eta_seconds", 0)),
+		"mission_waiting": bool(craft_state.get("mission_waiting", false)),
+		"mission_transit_to_map": bool(craft_state.get("mission_transit_to_map", false)),
+		"mission_transit_to_fob": bool(craft_state.get("mission_transit_to_fob", false)),
+	}
+
+
+func _build_mission_drop_cards() -> Array:
+	var cards: Array = []
+	for craft_state_variant in _get_meta_mission_craft_states():
+		if typeof(craft_state_variant) != TYPE_DICTIONARY:
+			continue
+		var craft_state: Dictionary = Dictionary(craft_state_variant)
+		var mission_drop_state: String = "waiting" if bool(craft_state.get("mission_waiting", false)) else ("to_mission" if bool(craft_state.get("mission_transit_to_map", false)) else ("to_fob" if bool(craft_state.get("mission_transit_to_fob", false)) else ""))
+		cards.append(
+			{
+				"craft_id": String(craft_state.get("craft_id", "")).strip_edges(),
+				"display_name": String(craft_state.get("display_name", "Dropship")).strip_edges(),
+				"title_text": UI_BLOCK_LABELS_SCRIPT.prefixed_transport_title(_build_transport_craft_title(craft_state)),
+				"texture_path": String(craft_state.get("texture_path", "")).strip_edges(),
+				"state": mission_drop_state,
+				"pilot_text": _build_transport_craft_pilot_text(craft_state),
+				"status_line": _build_transport_craft_status_line(craft_state),
+				"progress": float(craft_state.get("transfer_progress", 0.0)),
+				"eta_seconds": int(craft_state.get("transfer_eta_seconds", 0)),
+				"pilot_unit_id": String(craft_state.get("pilot_unit_id", "")).strip_edges(),
+				"pilot_display_name": String(craft_state.get("pilot_display_name", "")).strip_edges(),
+				"pilot_portrait_path": String(craft_state.get("pilot_portrait_path", "")).strip_edges(),
+				"passenger_count": int(craft_state.get("passenger_count", 0)),
+			}
+		)
+	return cards
 
 
 func _rebuild_profiles() -> void:
@@ -1701,6 +1742,30 @@ func _on_start_mission_button_pressed() -> void:
 
 func _on_dropship_timer_timeout() -> void:
 	_tick_respawn_anchor_progress()
+	_save_current_dropship_state()
+	var selected_craft_id: String = _dropship_transport_craft_id.strip_edges()
+	var known_craft_ids: PackedStringArray = _get_known_dropship_craft_ids()
+	if known_craft_ids.is_empty():
+		_tick_selected_dropship_progress()
+	for craft_id in known_craft_ids:
+		var stored_state: Dictionary = _get_stored_dropship_state_for_craft(String(craft_id))
+		if not _is_dropship_craft_phase_ticking(String(stored_state.get("phase", "idle"))):
+			continue
+		_dropship_transport_craft_id = String(craft_id)
+		_apply_dropship_craft_state(stored_state)
+		_tick_selected_dropship_progress()
+		_save_current_dropship_state()
+	if not selected_craft_id.is_empty():
+		_dropship_transport_craft_id = selected_craft_id
+		_apply_dropship_craft_state(_get_stored_dropship_state_for_craft(selected_craft_id))
+	else:
+		_dropship_transport_craft_id = ""
+
+	_update_dropship_timer_state()
+	_refresh_dropship_status_ui()
+
+
+func _tick_selected_dropship_progress() -> void:
 	match _dropship_phase:
 		"incoming":
 			_dropship_eta_seconds = maxf(_dropship_eta_seconds - 1.0, 0.0)
@@ -1714,10 +1779,6 @@ func _on_dropship_timer_timeout() -> void:
 				_start_next_boarding_step()
 		_:
 			pass
-
-	_update_dropship_timer_state()
-	_save_current_dropship_state()
-	_refresh_dropship_status_ui()
 
 
 func _start_next_boarding_step() -> void:
@@ -1735,6 +1796,7 @@ func _start_next_boarding_step() -> void:
 				_boarding_member_index += 1
 				continue
 			_current_boarding_unit_id = candidate_unit_id
+			_current_boarding_fireteam_id = candidate_fireteam_id
 			_dropship_phase = "boarding"
 			_boarding_seconds = DEFAULT_BOARDING_SECONDS
 			if dropship_timer != null:
@@ -1749,6 +1811,7 @@ func _start_next_boarding_step() -> void:
 	_dropship_phase = "boarded"
 	_boarding_seconds = 0.0
 	_current_boarding_unit_id = ""
+	_current_boarding_fireteam_id = ""
 	_update_dropship_timer_state()
 	_save_current_dropship_state()
 
@@ -1809,7 +1872,7 @@ func _update_dropship_timer_state() -> void:
 	if dropship_timer == null:
 		return
 
-	var timer_needed: bool = _is_respawn_anchor_active() or _dropship_phase == "incoming" or _dropship_phase == "boarding"
+	var timer_needed: bool = _is_respawn_anchor_active() or _has_active_dropship_craft_timer_state()
 	if timer_needed:
 		if dropship_timer.is_stopped():
 			dropship_timer.start()
@@ -2022,6 +2085,52 @@ func _get_dropship_state_for_craft(craft_id: String) -> Dictionary:
 	return _coerce_dropship_craft_state(stored_state)
 
 
+func _get_stored_dropship_state_for_craft(craft_id: String) -> Dictionary:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return _build_empty_dropship_craft_state()
+	var stored_variant = _dropship_state_by_craft.get(normalized_craft_id, _build_empty_dropship_craft_state())
+	var stored_state: Dictionary = stored_variant if typeof(stored_variant) == TYPE_DICTIONARY else _build_empty_dropship_craft_state()
+	return _coerce_dropship_craft_state(stored_state)
+
+
+func _get_known_dropship_craft_ids() -> PackedStringArray:
+	var craft_ids: PackedStringArray = []
+	for craft_id_variant in _dropship_state_by_craft.keys():
+		var craft_id: String = String(craft_id_variant).strip_edges()
+		if craft_id.is_empty() or craft_ids.has(craft_id):
+			continue
+		craft_ids.append(craft_id)
+	for craft_state_variant in _get_visible_transport_craft_states():
+		if typeof(craft_state_variant) != TYPE_DICTIONARY:
+			continue
+		var craft_state: Dictionary = Dictionary(craft_state_variant)
+		var craft_id: String = String(craft_state.get("craft_id", "")).strip_edges()
+		if craft_id.is_empty() or craft_ids.has(craft_id):
+			continue
+		craft_ids.append(craft_id)
+	if not _dropship_transport_craft_id.is_empty() and not craft_ids.has(_dropship_transport_craft_id):
+		craft_ids.append(_dropship_transport_craft_id)
+	return craft_ids
+
+
+func _is_dropship_craft_phase_ticking(phase: String) -> bool:
+	var normalized_phase: String = phase.strip_edges()
+	return normalized_phase == "incoming" or normalized_phase == "boarding"
+
+
+func _has_active_dropship_craft_timer_state() -> bool:
+	if _is_dropship_craft_phase_ticking(_dropship_phase):
+		return true
+	for craft_id in _get_known_dropship_craft_ids():
+		if String(craft_id) == _dropship_transport_craft_id:
+			continue
+		var state: Dictionary = _get_stored_dropship_state_for_craft(String(craft_id))
+		if _is_dropship_craft_phase_ticking(String(state.get("phase", "idle"))):
+			return true
+	return false
+
+
 func _get_staged_fireteam_ids_for_craft(craft_id: String) -> PackedStringArray:
 	return _copy_packed_string_array(_get_dropship_state_for_craft(craft_id).get("staged_fireteam_ids", PackedStringArray()))
 
@@ -2058,6 +2167,10 @@ func _build_dropship_state_by_craft_snapshot() -> Dictionary:
 			"boarded_unit_ids": Array(_copy_packed_string_array(state.get("boarded_unit_ids", PackedStringArray()))),
 			"boarded_fireteam_ids": Array(_copy_packed_string_array(state.get("boarded_fireteam_ids", PackedStringArray()))),
 			"phase": String(state.get("phase", "idle")).strip_edges(),
+			"boarding_seconds": float(state.get("boarding_seconds", 0.0)),
+			"eta_seconds": float(state.get("eta_seconds", 0.0)),
+			"current_boarding_unit_id": String(state.get("current_boarding_unit_id", "")).strip_edges(),
+			"current_boarding_fireteam_id": String(state.get("current_boarding_fireteam_id", "")).strip_edges(),
 		}
 	return snapshot
 

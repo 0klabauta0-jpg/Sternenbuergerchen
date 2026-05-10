@@ -124,6 +124,7 @@ const MISSION_DROPSHIP_PANEL_SIZE: Vector2 = Vector2(312.0, 104.0)
 const MISSION_DROPSHIP_PANEL_MARGIN_RIGHT: float = 16.0
 const MISSION_DROPSHIP_PANEL_MARGIN_TOP: float = 100.0
 const MISSION_DROPSHIP_PANEL_GAP_BELOW_IDENTITY: float = 10.0
+const MISSION_DROPSHIP_PANEL_STACK_GAP: float = 8.0
 const MISSION_DROPSHIP_TITLE_FONT_SIZE: int = 10
 const MISSION_DROPSHIP_SHIP_TEXTURE_SIZE: Vector2 = Vector2(72.0, 42.0)
 const MISSION_DROPSHIP_PILOT_CARD_SIZE: Vector2 = Vector2(136.0, 50.0)
@@ -223,6 +224,7 @@ var _mission_drop_pilot_display_name: String = ""
 var _mission_drop_pilot_portrait_path: String = ""
 var _mission_drop_passenger_count: int = 0
 var _mission_drop_return_requested: bool = false
+var _mission_drop_cards: Array = []
 var _air_asset_status = null
 var _air_asset_threat_resolver = null
 var _air_asset_threat_events: Array = []
@@ -622,6 +624,8 @@ func set_planning_state(planning_state: Dictionary) -> void:
 		_mission_drop_passenger_count = maxi(int(planning_state.get("mission_drop_passenger_count", 0)), 0)
 	if planning_state.has("mission_drop_return_requested"):
 		_mission_drop_return_requested = bool(planning_state.get("mission_drop_return_requested", false))
+	if planning_state.has("mission_drop_cards"):
+		_mission_drop_cards = _sanitize_mission_dropship_cards(Array(planning_state.get("mission_drop_cards", [])))
 	if planning_state.has("air_asset_status"):
 		_air_asset_status = AIR_ASSET_STATUS_SCRIPT.call("from_dict", Dictionary(planning_state.get("air_asset_status", {})))
 	if planning_state.has("meta_transfer_routes"):
@@ -729,6 +733,7 @@ func get_planning_state() -> Dictionary:
 		"mission_drop_pilot_portrait_path": _mission_drop_pilot_portrait_path,
 		"mission_drop_passenger_count": _mission_drop_passenger_count,
 		"mission_drop_return_requested": _mission_drop_return_requested,
+		"mission_drop_cards": _sanitize_mission_dropship_cards(_mission_drop_cards),
 		"air_asset_status": get_air_asset_status_snapshot(),
 		"meta_transfer_routes": _serialize_meta_transfer_routes(),
 		"embarked_unit_ids": _build_sorted_drop_unit_id_array(_embarked_unit_ids),
@@ -3533,6 +3538,70 @@ func _load_optional_texture(texture_path: String) -> Texture2D:
 	return resource as Texture2D
 
 
+func _sanitize_mission_dropship_cards(cards: Array) -> Array:
+	var sanitized_cards: Array = []
+	var seen_craft_ids: Dictionary = {}
+	for card_variant in cards:
+		if typeof(card_variant) != TYPE_DICTIONARY:
+			continue
+		var card: Dictionary = _sanitize_mission_dropship_card(Dictionary(card_variant))
+		var craft_id: String = String(card.get("craft_id", "")).strip_edges()
+		if craft_id.is_empty() or seen_craft_ids.has(craft_id):
+			continue
+		seen_craft_ids[craft_id] = true
+		sanitized_cards.append(card)
+	return sanitized_cards
+
+
+func _sanitize_mission_dropship_card(card: Dictionary) -> Dictionary:
+	var craft_id: String = String(card.get("craft_id", card.get("mission_drop_craft_id", ""))).strip_edges()
+	var display_name: String = String(card.get("display_name", card.get("mission_drop_display_name", "Dropship"))).strip_edges()
+	if display_name.is_empty():
+		display_name = "Dropship"
+	return {
+		"craft_id": craft_id,
+		"display_name": display_name,
+		"title_text": String(card.get("title_text", card.get("mission_drop_title_text", display_name))).strip_edges(),
+		"texture_path": String(card.get("texture_path", card.get("mission_drop_texture_path", ""))).strip_edges(),
+		"state": String(card.get("state", card.get("mission_drop_state", ""))).strip_edges().to_lower(),
+		"pilot_text": String(card.get("pilot_text", card.get("mission_drop_pilot_text", ""))).strip_edges(),
+		"status_line": String(card.get("status_line", card.get("mission_drop_status_line", ""))).strip_edges(),
+		"progress": clampf(float(card.get("progress", card.get("mission_drop_progress", 0.0))), 0.0, 100.0),
+		"eta_seconds": maxi(int(card.get("eta_seconds", card.get("mission_drop_eta_seconds", 0))), 0),
+		"pilot_unit_id": String(card.get("pilot_unit_id", card.get("mission_drop_pilot_unit_id", ""))).strip_edges(),
+		"pilot_display_name": String(card.get("pilot_display_name", card.get("mission_drop_pilot_display_name", ""))).strip_edges(),
+		"pilot_portrait_path": String(card.get("pilot_portrait_path", card.get("mission_drop_pilot_portrait_path", ""))).strip_edges(),
+		"passenger_count": maxi(int(card.get("passenger_count", card.get("mission_drop_passenger_count", 0))), 0),
+	}
+
+
+func _build_current_mission_dropship_card() -> Dictionary:
+	return _sanitize_mission_dropship_card(
+		{
+			"craft_id": _mission_drop_craft_id if not _mission_drop_craft_id.is_empty() else "mission_drop_sequence",
+			"display_name": _mission_drop_display_name if not _mission_drop_display_name.is_empty() else "Dropship",
+			"title_text": _mission_drop_title_text,
+			"texture_path": _mission_drop_texture_path,
+			"state": _mission_drop_state if not _is_drop_sequence_active() else _drop_sequence_phase,
+			"pilot_text": _mission_drop_pilot_text,
+			"status_line": _mission_drop_status_line,
+			"progress": _build_mission_dropship_progress_value(),
+			"eta_seconds": _mission_drop_eta_seconds,
+			"pilot_unit_id": _mission_drop_pilot_unit_id,
+			"pilot_display_name": _mission_drop_pilot_display_name,
+			"pilot_portrait_path": _mission_drop_pilot_portrait_path,
+			"passenger_count": _mission_drop_passenger_count if _mission_drop_passenger_count > 0 else _embarked_unit_ids.size(),
+		}
+	)
+
+
+func _get_mission_dropship_card_entries() -> Array:
+	var entries: Array = _sanitize_mission_dropship_cards(_mission_drop_cards)
+	if entries.is_empty() and (not _mission_drop_craft_id.is_empty() or _is_drop_sequence_active()):
+		entries.append(_build_current_mission_dropship_card())
+	return entries
+
+
 func _ensure_mission_nav_timer_label() -> void:
 	var nav_row := get_node_or_null("../TacticalUI/TopNavPanel/NavMargin/NavRow") as HBoxContainer
 	if nav_row == null:
@@ -3565,30 +3634,122 @@ func _ensure_mission_dropship_panel() -> void:
 	var tactical_ui := get_node_or_null("../TacticalUI") as CanvasLayer
 	if tactical_ui == null:
 		return
-	var panel := tactical_ui.get_node_or_null("MissionDropshipPanel") as PanelContainer
+	var panel := tactical_ui.get_node_or_null("MissionDropshipPanel") as Control
 	if panel != null:
 		return
-	panel = PanelContainer.new()
+	panel = VBoxContainer.new()
 	panel.name = "MissionDropshipPanel"
 	panel.visible = false
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	panel.clip_contents = true
+	panel.clip_contents = false
+	panel.add_theme_constant_override("separation", int(MISSION_DROPSHIP_PANEL_STACK_GAP))
 	_enforce_mission_dropship_panel_geometry(panel)
 	tactical_ui.add_child(panel)
-	TRANSPORT_CRAFT_CARD_UI_SCRIPT.ensure_card_structure(panel)
 	_set_control_tree_mouse_filter(panel, Control.MOUSE_FILTER_IGNORE)
 
 
 func _refresh_mission_dropship_panel() -> void:
-	var panel := get_node_or_null("../TacticalUI/MissionDropshipPanel") as PanelContainer
+	var panel := get_node_or_null("../TacticalUI/MissionDropshipPanel") as Control
 	if panel == null:
 		return
 	_enforce_mission_dropship_panel_geometry(panel)
-	var show_panel: bool = _tactical_ui_visible and (not _mission_drop_craft_id.is_empty() or _is_drop_sequence_active())
+	var card_entries: Array = _get_mission_dropship_card_entries()
+	var show_panel: bool = _tactical_ui_visible and not card_entries.is_empty()
 	if not show_panel:
 		panel.visible = false
 		return
 	panel.visible = false
+	_clear_mission_dropship_panel_cards(panel)
+	for card_variant in card_entries:
+		var card: Dictionary = Dictionary(card_variant)
+		var is_transit: bool = _is_mission_dropship_card_in_transit(card)
+		var ship_texture := _get_mission_dropship_texture(card)
+		var card_panel := PanelContainer.new()
+		card_panel.name = "MissionDropshipCard_%s" % _sanitize_node_name(String(card.get("craft_id", "dropship")))
+		card_panel.custom_minimum_size = MISSION_DROPSHIP_PANEL_SIZE
+		card_panel.size_flags_horizontal = Control.SIZE_SHRINK_END
+		card_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		card_panel.set_meta("mission_dropship_card", true)
+		card_panel.set_meta("mission_dropship_craft_id", String(card.get("craft_id", "")).strip_edges())
+		panel.add_child(card_panel)
+		TRANSPORT_CRAFT_CARD_UI_SCRIPT.ensure_card_structure(card_panel)
+		TRANSPORT_CRAFT_CARD_UI_SCRIPT.apply_card_state(
+			card_panel,
+			{
+				"selected": false,
+				"in_transit": is_transit,
+				"can_stage": false,
+				"title_text": _build_mission_dropship_title_text(card),
+				"title_font_size": 9,
+				"margin_left": 4,
+				"margin_top": 1,
+				"margin_right": 4,
+				"margin_bottom": 1,
+				"vbox_separation": 0,
+				"header_separation": 4,
+				"content_separation": 4,
+				"ship_texture": ship_texture,
+				"ship_texture_width": 64.0,
+				"ship_texture_height": 36.0,
+				"content_minimum_height": 42.0,
+				"pilot_profile": _build_mission_dropship_pilot_profile(card),
+				"pilot_text": _build_mission_dropship_pilot_text(card),
+				"pilot_text_font_size": MISSION_DROPSHIP_INFO_FONT_SIZE,
+				"pilot_source_context": "mission_drop_pilot",
+				"pilot_disabled": is_transit,
+				"pilot_mouse_filter": Control.MOUSE_FILTER_IGNORE,
+				"pilot_card_minimum_width": 128.0,
+				"pilot_card_minimum_height": 42.0,
+				"pilot_host_separation": 0,
+				"info_vbox_separation": 0,
+				"info_lines_separation": 0,
+				"info_lines": [
+					_build_mission_dropship_passenger_text(card),
+					_build_mission_dropship_status_text(card),
+				],
+				"info_line_font_size": MISSION_DROPSHIP_INFO_FONT_SIZE,
+				"progress_bar_height": 4.0,
+				"progress_visible": is_transit,
+				"progress_value": _build_mission_dropship_progress_value(card),
+				"primary_action": {
+					"visible": false,
+				},
+				"secondary_action": {
+					"visible": false,
+				},
+				"clear_extra_content": true,
+			}
+		)
+		_set_control_tree_mouse_filter(card_panel, Control.MOUSE_FILTER_IGNORE)
+	_enforce_mission_dropship_panel_geometry(panel)
+	panel.visible = true
+	call_deferred("_deferred_enforce_mission_dropship_panel_geometry")
+
+
+func _clear_mission_dropship_panel_cards(panel: Control) -> void:
+	for child in panel.get_children():
+		panel.remove_child(child)
+		child.queue_free()
+
+
+func _sanitize_node_name(value: String) -> String:
+	var safe_name: String = value.strip_edges()
+	if safe_name.is_empty():
+		return "dropship"
+	for token in [" ", "/", "\\", ":", "|", ".", ","]:
+		safe_name = safe_name.replace(token, "_")
+	return safe_name
+
+
+func _is_mission_dropship_card_in_transit(card: Dictionary) -> bool:
+	var state: String = String(card.get("state", "")).strip_edges().to_lower()
+	return state == "to_mission" or state == "to_fob" or state == "waiting" or state == DROP_SEQUENCE_INBOUND or state == DROP_SEQUENCE_OUTBOUND
+
+
+func _refresh_legacy_mission_dropship_panel() -> void:
+	var panel := get_node_or_null("../TacticalUI/MissionDropshipPanel") as PanelContainer
+	if panel == null:
+		return
 	var is_transit: bool = _mission_drop_state == "to_mission" or _mission_drop_state == "to_fob" or _mission_drop_state == "waiting" or _drop_sequence_phase == DROP_SEQUENCE_INBOUND or _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND
 	var ship_texture := _get_mission_dropship_texture()
 	TRANSPORT_CRAFT_CARD_UI_SCRIPT.apply_card_state(
@@ -3644,13 +3805,18 @@ func _refresh_mission_dropship_panel() -> void:
 	call_deferred("_deferred_enforce_mission_dropship_panel_geometry")
 
 
-func _enforce_mission_dropship_panel_geometry(panel: PanelContainer) -> void:
+func _enforce_mission_dropship_panel_geometry(panel: Control) -> void:
 	if panel == null:
 		return
 	var viewport := get_viewport()
 	var viewport_size: Vector2 = viewport.get_visible_rect().size if viewport != null else Vector2(1920.0, 1080.0)
+	var card_count: int = maxi(_get_mission_dropship_card_entries().size(), 1)
+	var panel_size := Vector2(
+		MISSION_DROPSHIP_PANEL_SIZE.x,
+		MISSION_DROPSHIP_PANEL_SIZE.y * float(card_count) + MISSION_DROPSHIP_PANEL_STACK_GAP * float(card_count - 1)
+	)
 	var panel_position := Vector2(
-		maxf(viewport_size.x - MISSION_DROPSHIP_PANEL_SIZE.x - MISSION_DROPSHIP_PANEL_MARGIN_RIGHT, 0.0),
+		maxf(viewport_size.x - panel_size.x - MISSION_DROPSHIP_PANEL_MARGIN_RIGHT, 0.0),
 		_get_mission_dropship_panel_top_offset()
 	)
 	panel.top_level = true
@@ -3659,19 +3825,19 @@ func _enforce_mission_dropship_panel_geometry(panel: PanelContainer) -> void:
 	panel.anchor_right = 0.0
 	panel.anchor_bottom = 0.0
 	panel.position = panel_position
-	panel.size = MISSION_DROPSHIP_PANEL_SIZE
-	panel.custom_minimum_size = MISSION_DROPSHIP_PANEL_SIZE
+	panel.size = panel_size
+	panel.custom_minimum_size = panel_size
 	panel.offset_left = panel_position.x
 	panel.offset_top = panel_position.y
-	panel.offset_right = panel_position.x + MISSION_DROPSHIP_PANEL_SIZE.x
-	panel.offset_bottom = panel_position.y + MISSION_DROPSHIP_PANEL_SIZE.y
-	panel.clip_contents = true
+	panel.offset_right = panel_position.x + panel_size.x
+	panel.offset_bottom = panel_position.y + panel_size.y
+	panel.clip_contents = false
 	panel.set_deferred("position", panel_position)
-	panel.set_deferred("size", MISSION_DROPSHIP_PANEL_SIZE)
+	panel.set_deferred("size", panel_size)
 
 
 func _deferred_enforce_mission_dropship_panel_geometry() -> void:
-	var panel := get_node_or_null("../TacticalUI/MissionDropshipPanel") as PanelContainer
+	var panel := get_node_or_null("../TacticalUI/MissionDropshipPanel") as Control
 	if panel == null:
 		return
 	_enforce_mission_dropship_panel_geometry(panel)
@@ -3692,7 +3858,7 @@ func _set_control_tree_mouse_filter(root: Node, mouse_filter: Control.MouseFilte
 		_set_control_tree_mouse_filter(child, mouse_filter)
 
 
-func _build_mission_dropship_title_text() -> String:
+func _build_mission_dropship_title_text(card: Dictionary = {}) -> String:
 	var air_status: Dictionary = get_air_asset_status_snapshot()
 	var air_state: String = str(air_status.get("state", "intact")).strip_edges().to_lower()
 	var air_suffix: String = ""
@@ -3702,6 +3868,11 @@ func _build_mission_dropship_title_text() -> String:
 		air_suffix = "DAMAGED"
 	elif bool(AIR_ASSET_STATUS_SCRIPT.call("is_warning_state", air_state)):
 		air_suffix = "AIR RISK"
+	if not card.is_empty():
+		var card_title: String = String(card.get("title_text", "")).strip_edges()
+		if card_title.is_empty():
+			card_title = String(card.get("display_name", "Dropship")).strip_edges()
+		return "%s Â· %s" % [card_title, air_suffix] if not air_suffix.is_empty() else card_title
 	if not _mission_drop_title_text.is_empty():
 		return "%s Â· %s" % [_mission_drop_title_text, air_suffix] if not air_suffix.is_empty() else _mission_drop_title_text
 	var craft_name: String = _mission_drop_display_name if not _mission_drop_display_name.is_empty() else "Dropship"
@@ -3718,18 +3889,28 @@ func _build_mission_dropship_title_text() -> String:
 			return craft_name
 
 
-func _build_mission_dropship_pilot_text() -> String:
+func _build_mission_dropship_pilot_text(card: Dictionary = {}) -> String:
+	if not card.is_empty():
+		var pilot_text: String = String(card.get("pilot_text", "")).strip_edges()
+		if not pilot_text.is_empty():
+			return pilot_text
+		var pilot_display_name: String = String(card.get("pilot_display_name", "")).strip_edges()
+		return "Pilot: %s" % (pilot_display_name if not pilot_display_name.is_empty() else "unassigned")
 	if not _mission_drop_pilot_text.is_empty():
 		return _mission_drop_pilot_text
 	return "Pilot: %s" % (_mission_drop_pilot_display_name if not _mission_drop_pilot_display_name.is_empty() else "unassigned")
 
 
-func _build_mission_dropship_passenger_text() -> String:
+func _build_mission_dropship_passenger_text(card: Dictionary = {}) -> String:
+	if not card.is_empty():
+		return "Passengers: %d" % maxi(int(card.get("passenger_count", 0)), 0)
 	var passenger_count: int = _mission_drop_passenger_count if _mission_drop_passenger_count > 0 else _embarked_unit_ids.size()
 	return "Passengers: %d" % passenger_count
 
 
-func _build_mission_dropship_progress_value() -> float:
+func _build_mission_dropship_progress_value(card: Dictionary = {}) -> float:
+	if not card.is_empty():
+		return clampf(float(card.get("progress", 0.0)), 0.0, 100.0)
 	if _drop_sequence_phase == DROP_SEQUENCE_INBOUND:
 		var staging_position: Vector2 = _get_drop_staging_position()
 		var total_distance: float = staging_position.distance_to(_lz_position)
@@ -3747,7 +3928,33 @@ func _build_mission_dropship_progress_value() -> float:
 	return _mission_drop_progress
 
 
-func _build_mission_dropship_pilot_profile():
+func _build_mission_dropship_pilot_profile(card: Dictionary = {}):
+	if not card.is_empty():
+		var card_pilot_unit_id: String = String(card.get("pilot_unit_id", "")).strip_edges()
+		var card_pilot_display_name: String = String(card.get("pilot_display_name", "")).strip_edges()
+		var card_pilot_portrait_path: String = String(card.get("pilot_portrait_path", "")).strip_edges()
+		if card_pilot_display_name.is_empty() and card_pilot_portrait_path.is_empty():
+			return null
+		var card_pilot_unit = _find_friendly_unit_by_id(card_pilot_unit_id)
+		if card_pilot_unit != null:
+			var card_pilot_profile = _build_profile_from_unit(card_pilot_unit)
+			if card_pilot_profile != null and card_pilot_profile.has_method("duplicate_profile"):
+				var duplicated_card_profile = card_pilot_profile.duplicate_profile()
+				duplicated_card_profile.secondary_text = _build_mission_dropship_pilot_text(card)
+				return duplicated_card_profile
+			return card_pilot_profile
+		return META_UNIT_PROFILE_BUILDER_SCRIPT.build_from_identity_config(
+			{
+				"unit_id": card_pilot_unit_id if not card_pilot_unit_id.is_empty() else "mission_drop_pilot",
+				"display_name": card_pilot_display_name if not card_pilot_display_name.is_empty() else "Unassigned Pilot",
+				"portrait_path": card_pilot_portrait_path,
+				"role_name": "Dropship Pilot",
+				"team_id": FRIENDLY_TEAM_ID,
+			},
+			{
+				"secondary_text": _build_mission_dropship_pilot_text(card),
+			}
+		)
 	if _mission_drop_pilot_display_name.is_empty() and _mission_drop_pilot_portrait_path.is_empty():
 		return null
 	var pilot_unit = _find_friendly_unit_by_id(_mission_drop_pilot_unit_id)
@@ -3772,7 +3979,7 @@ func _build_mission_dropship_pilot_profile():
 	)
 
 
-func _build_mission_dropship_status_text() -> String:
+func _build_mission_dropship_status_text(card: Dictionary = {}) -> String:
 	var air_status: Dictionary = get_air_asset_status_snapshot()
 	var air_state: String = str(air_status.get("state", "intact")).strip_edges().to_lower()
 	if bool(AIR_ASSET_STATUS_SCRIPT.call("is_terminal_state", air_state)):
@@ -3783,7 +3990,7 @@ func _build_mission_dropship_status_text() -> String:
 		return "Damage %d%%" % int(round((1.0 - float(air_status.get("integrity_ratio", 1.0))) * 100.0))
 	if bool(AIR_ASSET_STATUS_SCRIPT.call("is_warning_state", air_state)):
 		return "Threat lock %d%%" % int(round(float(air_status.get("risk", 0.0)) * 100.0))
-	if _is_drop_sequence_active():
+	if _is_drop_sequence_active() and card.is_empty():
 		match _drop_sequence_phase:
 			DROP_SEQUENCE_INBOUND:
 				return "Inbound to LZ"
@@ -3795,6 +4002,19 @@ func _build_mission_dropship_status_text() -> String:
 				return "Leaving mission map"
 			DROP_SEQUENCE_COMPLETE:
 				return "Drop complete"
+	if not card.is_empty():
+		var card_status_line: String = String(card.get("status_line", "")).strip_edges()
+		if not card_status_line.is_empty():
+			return card_status_line
+		match String(card.get("state", "")).strip_edges().to_lower():
+			"waiting":
+				return "Holding on mission map"
+			"to_mission":
+				return "ETA mission map %ds" % maxi(int(card.get("eta_seconds", 0)), 0)
+			"to_fob":
+				return "Returning to FOB %ds" % maxi(int(card.get("eta_seconds", 0)), 0)
+			_:
+				return "Mission transport offline"
 	if not _mission_drop_status_line.is_empty():
 		return _mission_drop_status_line
 	match _mission_drop_state:
@@ -9903,10 +10123,11 @@ func _get_dropship_marker_texture() -> Texture2D:
 			return _get_dropship_texture_for_angle(_get_opposite_approach_angle_name())
 
 
-func _get_mission_dropship_texture() -> Texture2D:
-	if _is_drop_sequence_active():
+func _get_mission_dropship_texture(card: Dictionary = {}) -> Texture2D:
+	if _is_drop_sequence_active() and card.is_empty():
 		return _get_dropship_marker_texture()
-	match _mission_drop_state:
+	var state: String = String(card.get("state", _mission_drop_state)).strip_edges().to_lower()
+	match state:
 		"to_mission":
 			return _get_dropship_texture_for_angle(_get_opposite_approach_angle_name())
 		"to_fob":
@@ -9914,7 +10135,7 @@ func _get_mission_dropship_texture() -> Texture2D:
 		"waiting":
 			return _get_dropship_texture_for_angle("SE")
 		_:
-			var mission_drop_texture := _load_optional_texture(_mission_drop_texture_path)
+			var mission_drop_texture := _load_optional_texture(String(card.get("texture_path", _mission_drop_texture_path)).strip_edges())
 			return mission_drop_texture if mission_drop_texture != null else _get_dropship_texture_for_angle("SE")
 
 

@@ -2943,7 +2943,7 @@ func _rebuild_order_visuals() -> void:
 			continue
 		_add_weapon_fire_vfx_visual(fire_event)
 
-	for feedback_bubble_variant in Array(_order_payload.get("feedback_bubble_dicts", [])):
+	for feedback_bubble_variant in _select_feedback_bubbles_for_visuals(Array(_order_payload.get("feedback_bubble_dicts", []))):
 		if typeof(feedback_bubble_variant) != TYPE_DICTIONARY:
 			continue
 		var feedback_bubble: Dictionary = Dictionary(feedback_bubble_variant)
@@ -2960,6 +2960,59 @@ func _rebuild_order_visuals() -> void:
 			_fow_hidden_order_visual_count += 1
 			continue
 		_add_tactical_communication_event_visual(communication_event)
+
+
+func _select_feedback_bubbles_for_visuals(feedback_bubbles: Array) -> Array:
+	var selected_by_anchor: Dictionary = {}
+	var ordered_keys: PackedStringArray = []
+	for bubble_variant in feedback_bubbles:
+		if typeof(bubble_variant) != TYPE_DICTIONARY:
+			continue
+		var bubble: Dictionary = Dictionary(bubble_variant)
+		var anchor_key: String = _build_feedback_bubble_anchor_key(bubble)
+		if anchor_key.is_empty():
+			anchor_key = "bubble:%d" % ordered_keys.size()
+		if not selected_by_anchor.has(anchor_key):
+			selected_by_anchor[anchor_key] = bubble
+			ordered_keys.append(anchor_key)
+			continue
+		var previous: Dictionary = Dictionary(selected_by_anchor.get(anchor_key, {}))
+		if _get_feedback_bubble_visual_priority(bubble) > _get_feedback_bubble_visual_priority(previous):
+			selected_by_anchor[anchor_key] = bubble
+	var selected: Array = []
+	for anchor_key in ordered_keys:
+		selected.append(Dictionary(selected_by_anchor.get(String(anchor_key), {})))
+	return selected
+
+
+func _build_feedback_bubble_anchor_key(feedback_bubble: Dictionary) -> String:
+	var anchor_space: String = String(feedback_bubble.get("anchor_space", "")).strip_edges().to_lower()
+	var fireteam_id: String = String(feedback_bubble.get("fireteam_id", "")).strip_edges().to_lower()
+	if not fireteam_id.is_empty():
+		return "%s:ft:%s" % [anchor_space, fireteam_id]
+	var unit_id: String = String(feedback_bubble.get("unit_id", "")).strip_edges()
+	if not unit_id.is_empty():
+		return "%s:unit:%s" % [anchor_space, unit_id]
+	if anchor_space == "hud" and typeof(feedback_bubble.get("hud_anchor_position", null)) == TYPE_VECTOR2:
+		var hud_anchor_position: Vector2 = Vector2(feedback_bubble.get("hud_anchor_position", Vector2.ZERO))
+		return "hud:pos:%d:%d" % [roundi(hud_anchor_position.x / 8.0), roundi(hud_anchor_position.y / 8.0)]
+	if typeof(feedback_bubble.get("anchor_position", null)) == TYPE_VECTOR2:
+		var anchor_position: Vector2 = Vector2(feedback_bubble.get("anchor_position", Vector2.ZERO))
+		return "world:pos:%d:%d" % [roundi(anchor_position.x / 8.0), roundi(anchor_position.y / 8.0)]
+	return ""
+
+
+func _get_feedback_bubble_visual_priority(feedback_bubble: Dictionary) -> int:
+	var source: String = String(feedback_bubble.get("source", "")).strip_edges().to_lower()
+	var purpose: String = String(feedback_bubble.get("purpose", "")).strip_edges().to_lower()
+	var category: String = String(feedback_bubble.get("category", "")).strip_edges().to_lower()
+	if purpose == "command_feedback" or source == "fireteamleader_command_feedback" or category == "ftl_command_feedback":
+		return 30
+	if source.find("fireteamleader") >= 0:
+		return 20
+	if purpose == "npc_thought" or category == "npc_thought_peek":
+		return 10
+	return 1
 
 
 func _add_area_order_visual(area_data: Dictionary) -> void:
@@ -3351,8 +3404,7 @@ func _add_hud_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 		return
 	var hud_anchor_position: Vector2 = Vector2(feedback_bubble.get("hud_anchor_position", Vector2.ZERO))
 	var bubble_size: Vector2 = _coerce_hud_bubble_size(feedback_bubble.get("max_size", Vector2i(148, 52)))
-	bubble_size.x = clampf(bubble_size.x, 104.0, 160.0)
-	bubble_size.y = clampf(bubble_size.y, 40.0, 60.0)
+	bubble_size = _build_compact_hud_bubble_size(text, bubble_size)
 	var viewport_size := Vector2(_get_viewport_size())
 	if viewport_size.x < bubble_size.x + 1.0 or viewport_size.y < bubble_size.y + 1.0:
 		viewport_size = Vector2(1280.0, 720.0)
@@ -3367,23 +3419,23 @@ func _add_hud_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 	bubble_root.z_index = int(feedback_bubble.get("z_index", 76))
 	_feedback_bubble_hud_root.add_child(bubble_root)
 
-	var texture: Texture2D = _get_comic_bubble_texture(String(feedback_bubble.get("path", "")))
-	if texture != null:
-		var texture_rect := TextureRect.new()
-		texture_rect.name = "BubbleTexture"
-		texture_rect.texture = texture
-		texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		texture_rect.stretch_mode = TextureRect.STRETCH_SCALE
-		texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		texture_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
-		bubble_root.add_child(texture_rect)
-	else:
-		var fallback := PanelContainer.new()
-		fallback.name = "BubbleFallback"
-		fallback.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		fallback.set_anchors_preset(Control.PRESET_FULL_RECT)
-		fallback.add_theme_stylebox_override("panel", _build_hud_bubble_stylebox())
-		bubble_root.add_child(fallback)
+	var tail := Polygon2D.new()
+	tail.name = "BubbleTailLeft"
+	tail.polygon = PackedVector2Array([
+		Vector2(0.0, bubble_size.y * 0.54),
+		Vector2(11.0, bubble_size.y * 0.54 - 6.0),
+		Vector2(11.0, bubble_size.y * 0.54 + 6.0),
+	])
+	tail.color = Color(0.94, 0.97, 0.98, 0.96)
+	tail.position = Vector2(-8.0, 0.0)
+	bubble_root.add_child(tail)
+
+	var fallback := PanelContainer.new()
+	fallback.name = "BubbleFallback"
+	fallback.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fallback.set_anchors_preset(Control.PRESET_FULL_RECT)
+	fallback.add_theme_stylebox_override("panel", _build_hud_bubble_stylebox())
+	bubble_root.add_child(fallback)
 
 	var label := Label.new()
 	label.name = "BubbleText"
@@ -3393,9 +3445,9 @@ func _add_hud_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_FEEDBACK_BUBBLE_TEXT)
-	label.add_theme_font_size_override("font_size", 9)
-	label.position = Vector2(10.0, 8.0)
-	label.size = Vector2(maxf(bubble_size.x - 20.0, 1.0), maxf(bubble_size.y - 15.0, 1.0))
+	label.add_theme_font_size_override("font_size", 8 if text.length() <= 18 else 9)
+	label.position = Vector2(8.0, 6.0)
+	label.size = Vector2(maxf(bubble_size.x - 16.0, 1.0), maxf(bubble_size.y - 12.0, 1.0))
 	bubble_root.add_child(label)
 
 	var world_anchor: Vector2 = Vector2(feedback_bubble.get("anchor_position", Vector2.ZERO)) if typeof(feedback_bubble.get("anchor_position", null)) == TYPE_VECTOR2 else Vector2.ZERO
@@ -3423,6 +3475,8 @@ func _add_hud_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 		"hud_anchor_position": hud_anchor_position,
 		"hud_bubble_position": bubble_position,
 		"hud_bubble_size": bubble_size,
+		"hud_tail_side": "left",
+		"hud_tail_points_to_anchor": true,
 		"visual_only": true,
 	})
 
@@ -3439,9 +3493,21 @@ func _coerce_hud_bubble_size(value: Variant) -> Vector2:
 	return Vector2(168.0, 72.0)
 
 
+func _build_compact_hud_bubble_size(text: String, requested_size: Vector2) -> Vector2:
+	var trimmed_text: String = text.strip_edges()
+	var character_count: int = trimmed_text.length()
+	var line_count: int = maxi(trimmed_text.split("\n").size(), 1)
+	var target_width: float = 88.0 + float(mini(character_count, 28)) * 2.0
+	var target_height: float = 34.0 + float(maxi(line_count - 1, 0)) * 10.0
+	return Vector2(
+		clampf(minf(requested_size.x, target_width), 84.0, 148.0),
+		clampf(minf(requested_size.y, target_height), 34.0, 54.0)
+	)
+
+
 func _resolve_hud_feedback_bubble_position(hud_anchor_position: Vector2, bubble_size: Vector2, viewport_size: Vector2) -> Vector2:
 	var base_position: Vector2 = _clamp_hud_feedback_bubble_position(
-		hud_anchor_position + Vector2(6.0, -bubble_size.y * 0.52),
+		hud_anchor_position + Vector2(10.0, -bubble_size.y * 0.52),
 		bubble_size,
 		viewport_size
 	)
