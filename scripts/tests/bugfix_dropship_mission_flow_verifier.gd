@@ -315,7 +315,10 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 	_assert(status_label != null and status_label.text.contains("ETA mission map"), "Mini shipcard reports the live transfer status during mission transit")
 	_assert(ship_texture != null and ship_texture.texture != null and ship_texture.texture.resource_path == "res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png", "Mission mini shipcard uses the isometric dropship texture for mission transit")
 	_assert(_live_mission_dropship_visible(preview_mission), "Live mission renders the dropship marker once the craft is actually on the mission-map route")
-	_assert(Array(fob_screen.call("_get_visible_transport_craft_states")).is_empty(), "FOB stops rendering the sent dropship while it is on the mission-map transfer")
+	var visible_fob_craft_states: Array = Array(fob_screen.call("_get_visible_transport_craft_states"))
+	var visible_fob_craft_state: Dictionary = Dictionary(visible_fob_craft_states[0]) if not visible_fob_craft_states.is_empty() else {}
+	_assert(not visible_fob_craft_states.is_empty(), "FOB keeps the sent dropship visible while it is on the mission-map transfer")
+	_assert(bool(visible_fob_craft_state.get("mission_transit_to_map", false)) and bool(visible_fob_craft_state.get("is_in_transit", false)), "FOB marks the sent dropship as greyed in-transit mission handover state")
 	_assert(Array(homebase_screen.call("_get_visible_homebase_aircraft_definitions")).is_empty(), "Homebase does not resurrect the sent dropship while it transfers to the mission map")
 	for _step in range(18):
 		scene.call("_on_homebase_transport_timer_timeout")

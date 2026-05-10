@@ -16,6 +16,8 @@ func _run_tests() -> void:
 	var blocked: Dictionary = Dictionary(LZ_CONTRACT_SCRIPT.call("build_command_matrix_state", {"has_lz": false, "has_pilot": true, "has_boarded_team": true}))
 	var ready: Dictionary = Dictionary(COMMAND_HIERARCHY_SCRIPT.call("build_dropship_command_matrix_layout_snapshot", {"has_lz": true, "has_pilot": true, "has_boarded_team": true}))
 	_assert(String(blocked.get("go_button_panel_role", "")) == "#16", "Dropship Go belongs to Command Matrix #16")
+	_assert(String(blocked.get("go_button_slot", "")) == "16.15", "GO is assigned to command matrix button 16.15")
+	_assert(String(ready.get("plan_button_slot", "")) == "16.20", "Plan is assigned to command matrix button 16.20")
 	_assert(PackedStringArray(blocked.get("disabled_reasons", PackedStringArray())).has("no_lz"), "Go disabled explains missing LZ")
 	_assert(bool(ready.get("go_enabled", false)), "Go enables when LZ/pilot/team are ready")
 	_assert(bool(ready.get("legacy_window_17_go_removed", false)), "Large old window-17 Go slot is retired")

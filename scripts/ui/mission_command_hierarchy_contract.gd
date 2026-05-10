@@ -23,7 +23,8 @@ const BUTTON_PATH_TARGET: String = "../TacticalUI/BottomDock/BottomMargin/Bottom
 const BUTTON_PATH_CLEAR_TARGET: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton"
 const BUTTON_PATH_SET_LZ: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton"
 const BUTTON_PATH_CALL_DROPSHIP: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton"
-const BUTTON_PATH_GO_PLAN: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/NextPhaseButton"
+const BUTTON_PATH_GO_PLAN: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton"
+const BUTTON_PATH_RETURN_TO_PLAN: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/PlanCommandMatrixButton"
 const BUTTON_PATH_APPROACH_NW: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/NWButton"
 const BUTTON_PATH_APPROACH_NE: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/NEButton"
 const BUTTON_PATH_APPROACH_SW: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/SWButton"
@@ -85,7 +86,8 @@ static func get_action_catalog() -> Array:
 		_action("role_suggestion", "Roles", GROUP_PLAN, PANEL_MISSION_CONTROL, "mission.command.go_plan", "", {"requires_multi_selection": true, "status_only": true, "context": "multi_fireteam"}),
 		_action("swap_roles", "Swap", GROUP_PLAN, PANEL_MISSION_CONTROL, "mission.command.go_plan", "", {"requires_multi_selection": true, "future_task": "multi-plan edit UI", "context": "multi_fireteam"}),
 		_action("preview_plan", "Preview", GROUP_PLAN, PANEL_MISSION_CONTROL, "mission.command.go_plan", "", {"requires_multi_selection": true, "status_only": true, "context": "multi_fireteam"}),
-		_action("go_plan", "GO", GROUP_PLAN, PANEL_MISSION_CONTROL, "mission.command.go_plan", BUTTON_PATH_GO_PLAN, {"requires_selection": true, "requires_local_command": true, "requires_phase_planning": true, "implemented": true, "context": "single_or_multi"}),
+		_action("go_plan", "GO", GROUP_PLAN, PANEL_COMMAND_MATRIX, "mission.command.go_plan", BUTTON_PATH_GO_PLAN, {"requires_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
+		_action("return_to_plan", "Plan", GROUP_PLAN, PANEL_COMMAND_MATRIX, "mission.command.go_plan", BUTTON_PATH_RETURN_TO_PLAN, {"requires_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
 
 		_action("set_lz", "LZ", GROUP_AIR_LZ, PANEL_MISSION_CONTROL, "mission.command.set_lz", BUTTON_PATH_SET_LZ, {"requires_planning": true, "implemented": true, "context": "mission"}),
 		_action("call_dropship", "Drop", GROUP_AIR_LZ, PANEL_MISSION_CONTROL, "mission.command.call_dropship", BUTTON_PATH_CALL_DROPSHIP, {"requires_planning": true, "requires_drop_available": true, "implemented": true, "context": "mission"}),
@@ -194,6 +196,8 @@ static func build_dropship_command_matrix_layout_snapshot(context: Dictionary = 
 		"go_action_id": "call_dropship",
 		"go_button_panel_role": PANEL_COMMAND_MATRIX,
 		"go_button_source_action": "call_dropship",
+		"go_button_slot": "16.15",
+		"plan_button_slot": "16.20",
 		"legacy_window_17_go_removed": true,
 		"status_preview_panel_role": PANEL_FIRETEAM_DETAILS,
 		"lz_pick_panel_role": PANEL_COMMAND_MATRIX,

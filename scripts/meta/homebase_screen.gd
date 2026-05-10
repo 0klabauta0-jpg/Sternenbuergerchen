@@ -78,6 +78,9 @@ func _ready() -> void:
 	var aircraft_cargo_row: HBoxContainer = get_node("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftCargoRow")
 	var cargo_selector: OptionButton = get_node("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftCargoRow/CargoSelector")
 	var load_cargo_button: Button = get_node("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftCargoRow/LoadCargoButton")
+	_configure_flightdeck_option_button(mission_selector)
+	_configure_flightdeck_option_button(aircraft_selector)
+	_configure_flightdeck_option_button(cargo_selector)
 	if not confirm_button.pressed.is_connected(_on_confirm_button_pressed):
 		confirm_button.pressed.connect(_on_confirm_button_pressed)
 	if not mission_selector.item_selected.is_connected(_on_mission_selector_item_selected):
@@ -321,6 +324,33 @@ func _apply_fixed_window_contract(path: String, rect_variant: Variant) -> void:
 	control.set_deferred("size", Vector2(float(rect.size.x), float(rect.size.y)))
 	control.set_meta("drop_light_rect", rect)
 	control.set_meta("drop_light_fixed_fullhd_layout", true)
+
+
+func _configure_flightdeck_option_button(selector: OptionButton) -> void:
+	if selector == null:
+		return
+	selector.clip_text = true
+	selector.set_meta("homebase_flightdeck_dropdown_unclipped", true)
+	var popup := selector.get_popup()
+	if popup == null:
+		return
+	popup.set_meta("homebase_flightdeck_dropdown_unclipped", true)
+	popup.set_meta("homebase_dropdown_owner", selector.name)
+	if popup.has_method("set_as_top_level"):
+		popup.call("set_as_top_level", true)
+	_set_object_property_if_available(popup, "always_on_top", true)
+	_set_object_property_if_available(popup, "unresizable", false)
+	_set_object_property_if_available(popup, "max_size", Vector2i(420, 280))
+	_set_object_property_if_available(popup, "min_size", Vector2i(180, 0))
+
+
+func _set_object_property_if_available(target: Object, property_name: String, value: Variant) -> void:
+	if target == null:
+		return
+	for property_info in target.get_property_list():
+		if String(Dictionary(property_info).get("name", "")) == property_name:
+			target.set(property_name, value)
+			return
 
 
 func _ensure_drop_light_topbar() -> void:
@@ -1334,6 +1364,7 @@ func _build_selected_mission_map_label() -> String:
 func _populate_mission_selector(selector: OptionButton) -> void:
 	if selector == null:
 		return
+	_configure_flightdeck_option_button(selector)
 	selector.clear()
 	var mission_catalog: Array = _mission_catalog if not _mission_catalog.is_empty() else [
 		{
@@ -1670,6 +1701,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 		cargo_dropdown.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		cargo_dropdown.custom_minimum_size = Vector2(0.0, 22.0)
 		cargo_dropdown.add_theme_font_size_override("font_size", 8)
+		_configure_flightdeck_option_button(cargo_dropdown)
 		var selected_cargo_index: int = -1
 		for cargo_option_variant in _get_cargo_options_for_craft(craft_def):
 			var cargo_option: Dictionary = Dictionary(cargo_option_variant)
@@ -1849,15 +1881,16 @@ func _build_shipcard_stylebox(is_selected: bool, craft_busy: bool, craft_in_tran
 	var stylebox := StyleBoxFlat.new()
 	stylebox.bg_color = Color(0.12, 0.14, 0.17, 0.72) if craft_in_transit else Color(0.12, 0.14, 0.17, 1.0)
 	if is_selected:
-		stylebox.border_color = Color(0.52, 0.66, 0.76, 0.92)
+		stylebox.border_color = Color(0.40, 0.92, 0.56, 1.0)
 	elif craft_in_transit:
 		stylebox.border_color = Color(0.56, 0.58, 0.62, 0.82)
 	else:
 		stylebox.border_color = Color(0.55, 0.46, 0.22, 1.0) if craft_busy else Color(0.31, 0.36, 0.42, 1.0)
-	stylebox.border_width_left = 1
-	stylebox.border_width_top = 1
-	stylebox.border_width_right = 1
-	stylebox.border_width_bottom = 1
+	var border_width: int = 2 if is_selected else 1
+	stylebox.border_width_left = border_width
+	stylebox.border_width_top = border_width
+	stylebox.border_width_right = border_width
+	stylebox.border_width_bottom = border_width
 	stylebox.corner_radius_top_left = 8
 	stylebox.corner_radius_top_right = 8
 	stylebox.corner_radius_bottom_left = 8
@@ -1967,6 +2000,7 @@ func _can_remove_aircraft(craft_id: String) -> bool:
 func _populate_aircraft_selector(selector: OptionButton) -> void:
 	if selector == null:
 		return
+	_configure_flightdeck_option_button(selector)
 	var selected_type: String = "dropship"
 	if selector.item_count > 0 and selector.selected >= 0 and selector.selected < selector.item_count:
 		selected_type = String(selector.get_item_metadata(selector.selected)).strip_edges()

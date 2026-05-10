@@ -125,6 +125,11 @@ func _test_homebase_flightdeck_shipcards_are_primary_status_region() -> void:
 	_assert(_max_texture_min_size(shipcards_list, DROPSHIP_TEXTURE_PATH).x >= 300.0 and _max_texture_min_size(shipcards_list, DROPSHIP_TEXTURE_PATH).y >= 210.0, "Homebase dropship image uses the enlarged shipcard size")
 	_assert(_shipcard_visuals_are_top_left_anchored(shipcards_list), "Homebase shipcard visuals use a shifted top-left deck anchor")
 	_assert(_shipcard_actions_top_aligned(shipcards_list), "Homebase shipcard action buttons are top-aligned")
+	var aircraft_selector := screen.get_node("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftSelectorRow/AircraftSelector") as OptionButton
+	var shipcard_cargo_selector := _find_first_option_button(shipcards_list)
+	_assert(aircraft_selector != null and bool(aircraft_selector.get_meta("homebase_flightdeck_dropdown_unclipped", false)), "Homebase flightdeck aircraft dropdown is marked as unclipped")
+	_assert(shipcard_cargo_selector != null and bool(shipcard_cargo_selector.get_meta("homebase_flightdeck_dropdown_unclipped", false)), "Homebase shipcard cargo dropdown is marked as unclipped")
+	_assert(shipcard_cargo_selector != null and shipcard_cargo_selector.get_popup() != null and bool(shipcard_cargo_selector.get_popup().get_meta("homebase_flightdeck_dropdown_unclipped", false)), "Homebase shipcard cargo popup carries the unclipped dropdown policy")
 
 	screen.queue_free()
 	await process_frame
@@ -259,6 +264,14 @@ func _shipcard_actions_top_aligned(root_node: Node) -> bool:
 			return false
 		checked_count += 1
 	return checked_count > 0
+
+
+func _find_first_option_button(root_node: Node) -> OptionButton:
+	for node in _collect_nodes(root_node):
+		var option_button := node as OptionButton
+		if option_button != null:
+			return option_button
+	return null
 
 
 func _collect_cards_by_source_context(root_node: Node, expected_context: String) -> Array:

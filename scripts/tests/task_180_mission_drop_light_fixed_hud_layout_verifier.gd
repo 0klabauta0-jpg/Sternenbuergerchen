@@ -88,10 +88,16 @@ func _test_mission_hud_buttons_keep_existing_paths() -> void:
 
 	var command_grid := scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid") as GridContainer
 	_assert(command_grid != null and int(command_grid.columns) == 5, "#16 command matrix uses five equal command columns")
-	_assert(command_grid.get_child_count() >= 20 and int(command_grid.get_meta("command_placeholder_slots", 0)) >= 14, "#16 command matrix exposes reserved same-size command slots")
+	_assert(command_grid.get_child_count() >= 20 and int(command_grid.get_meta("command_placeholder_slots", 0)) >= 12, "#16 command matrix exposes reserved same-size command slots")
 	for slot_index in range(7, 21):
+		if slot_index == 15 or slot_index == 20:
+			continue
 		var slot := command_grid.get_node_or_null("CommandSlot%02d" % slot_index) as Button
 		_assert(slot != null and _button_is_square(slot) and bool(slot.get_meta("drop_light_command_placeholder", false)) and slot.disabled, "CommandSlot%02d is a disabled same-size reserve button" % slot_index)
+	var go_button := command_grid.get_node_or_null("GoCommandMatrixButton") as Button
+	var plan_button := command_grid.get_node_or_null("PlanCommandMatrixButton") as Button
+	_assert(go_button != null and go_button.get_index() == 14 and _button_is_square(go_button) and go_button.pressed.get_connections().size() > 0, "GO lives in #16.15 as an active command matrix button")
+	_assert(plan_button != null and plan_button.get_index() == 19 and _button_is_square(plan_button) and plan_button.pressed.get_connections().size() > 0, "Plan lives in #16.20 as an active command matrix button")
 
 	for path in [
 		"TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton",

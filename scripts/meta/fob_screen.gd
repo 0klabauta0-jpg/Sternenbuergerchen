@@ -563,14 +563,27 @@ func mark_transport_craft_launch_ready(craft_id: String) -> void:
 		_refresh_ui_state()
 
 
-func clear_mission_boarded_payload() -> void:
-	_boarded_unit_ids = PackedStringArray()
-	_boarded_fireteam_ids = PackedStringArray()
-	_dropship_staged_fireteam_ids = PackedStringArray()
-	_dropship_state_by_craft.clear()
-	_current_boarding_unit_id = ""
-	_current_boarding_fireteam_id = ""
-	_dropship_phase = "idle"
+func clear_mission_boarded_payload(craft_id: String = "") -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		_boarded_unit_ids = PackedStringArray()
+		_boarded_fireteam_ids = PackedStringArray()
+		_dropship_staged_fireteam_ids = PackedStringArray()
+		_dropship_state_by_craft.clear()
+		_current_boarding_unit_id = ""
+		_current_boarding_fireteam_id = ""
+		_dropship_phase = "idle"
+		if is_inside_tree():
+			_refresh_ui_state()
+		return
+	var cleared_state: Dictionary = _build_empty_dropship_craft_state()
+	if normalized_craft_id == _dropship_transport_craft_id:
+		_apply_dropship_craft_state(cleared_state)
+		_save_current_dropship_state()
+	else:
+		_dropship_state_by_craft[normalized_craft_id] = cleared_state
+	if normalized_craft_id == _mission_launch_ready_craft_id:
+		_mission_launch_ready_craft_id = ""
 	if is_inside_tree():
 		_refresh_ui_state()
 

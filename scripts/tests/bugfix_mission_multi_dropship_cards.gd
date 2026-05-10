@@ -45,6 +45,9 @@ func _test_multiple_mission_dropships_render_as_stacked_cards() -> void:
 			"passenger_count": 4,
 			"embarked_unit_ids": ["unit_alpha", "unit_bravo", "unit_charlie", "unit_delta"],
 			"boarded_fireteam_ids": ["blue"],
+			"has_lz_position": true,
+			"lz_position": Vector2(224.0, 144.0),
+			"approach_angle": "NW",
 		},
 		{
 			"craft_id": "dropship_2",
@@ -87,6 +90,26 @@ func _test_multiple_mission_dropships_render_as_stacked_cards() -> void:
 		_assert(String(selected_state.get("mission_drop_state", "")) == "waiting", "Selected Dropship 2 carries its waiting state into Mission Control")
 		_assert(Array(selected_state.get("embarked_unit_ids", [])) == ["unit_echo", "unit_foxtrot", "unit_golf", "unit_hotel"], "Selected Dropship 2 carries its own boarded payload")
 		_assert(bool(refreshed_second_card.get_meta("mission_dropship_selected", false)), "Selected mission dropship card is marked in the #19 panel")
+		var selected_stylebox := refreshed_second_card.get_theme_stylebox("panel") as StyleBoxFlat
+		_assert(selected_stylebox != null and selected_stylebox.border_color.g > selected_stylebox.border_color.r and selected_stylebox.border_width_left >= 2, "Selected mission dropship card uses a clear green outline")
+		_assert(not bool(selected_state.get("has_lz_position", true)), "Selecting Dropship 2 does not inherit Dropship 1 LZ")
+		controller.set("_has_lz_position", true)
+		controller.set("_lz_position", Vector2(640.0, 320.0))
+		controller.call("_select_approach_angle", "SE")
+		await _wait_frames(4)
+		var planned_second_state: Dictionary = Dictionary(controller.call("get_planning_state"))
+		var planned_cards: Array = Array(planned_second_state.get("mission_drop_cards", []))
+		var planned_second_card: Dictionary = _find_card(planned_cards, "dropship_2")
+		_assert(bool(planned_second_card.get("has_lz_position", false)) and Vector2(planned_second_card.get("lz_position", Vector2.ZERO)).is_equal_approx(Vector2(640.0, 320.0)), "Dropship 2 stores its own LZ")
+		_assert(String(planned_second_card.get("approach_angle", "")) == "SE", "Dropship 2 stores its own approach")
+		var summary_panel := scene.get_node_or_null("TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/MissionCraftSummary") as Control
+		_assert(summary_panel != null and summary_panel.visible and String(summary_panel.get_meta("mission_drop_craft_id", "")) == "dropship_2", "Mission Control shows the selected dropship summary next to Drop")
+		var refreshed_first_card := panel.get_child(0) as Control
+		refreshed_first_card.emit_signal("gui_input", click)
+		await _wait_frames(4)
+		var reselected_first_state: Dictionary = Dictionary(controller.call("get_planning_state"))
+		_assert(String(reselected_first_state.get("mission_drop_craft_id", "")) == "dropship_1" and Vector2(reselected_first_state.get("lz_position", Vector2.ZERO)).is_equal_approx(Vector2(224.0, 144.0)), "Reselecting Dropship 1 restores its own LZ")
+		_assert(String(reselected_first_state.get("approach_angle", "")) == "NW", "Reselecting Dropship 1 restores its own approach")
 
 	var synced_state: Dictionary = Dictionary(controller.call("get_planning_state"))
 	_assert(Array(synced_state.get("mission_drop_cards", [])).size() == 2, "Planning state preserves both mission dropship cards")
@@ -98,6 +121,16 @@ func _test_multiple_mission_dropships_render_as_stacked_cards() -> void:
 func _wait_frames(frame_count: int) -> void:
 	for _index in range(frame_count):
 		await process_frame
+
+
+func _find_card(cards: Array, craft_id: String) -> Dictionary:
+	for card_variant in cards:
+		if typeof(card_variant) != TYPE_DICTIONARY:
+			continue
+		var card: Dictionary = Dictionary(card_variant)
+		if String(card.get("craft_id", "")).strip_edges() == craft_id:
+			return card
+	return {}
 
 
 func _assert(condition: bool, message: String) -> void:

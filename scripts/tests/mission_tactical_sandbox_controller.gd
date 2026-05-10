@@ -626,6 +626,23 @@ func set_planning_state(planning_state: Dictionary) -> void:
 		_mission_drop_return_requested = bool(planning_state.get("mission_drop_return_requested", false))
 	if planning_state.has("mission_drop_cards"):
 		_mission_drop_cards = _sanitize_mission_dropship_cards(Array(planning_state.get("mission_drop_cards", [])))
+		if not _mission_drop_craft_id.is_empty():
+			var selected_drop_card: Dictionary = _find_mission_dropship_card_entry(_mission_drop_craft_id)
+			if not selected_drop_card.is_empty():
+				selected_drop_card = selected_drop_card.duplicate(true)
+				if bool(planning_state.get("has_lz_position", false)):
+					selected_drop_card["has_lz_position"] = true
+					if planning_state.has("lz_position"):
+						selected_drop_card["lz_position"] = planning_state["lz_position"]
+				elif not selected_drop_card.has("has_lz_position") and planning_state.has("has_lz_position"):
+					selected_drop_card["has_lz_position"] = false
+				if not selected_drop_card.has("approach_angle") and planning_state.has("approach_angle"):
+					selected_drop_card["approach_angle"] = planning_state["approach_angle"]
+				if planning_state.has("drop_ship_requested"):
+					selected_drop_card["drop_ship_requested"] = bool(selected_drop_card.get("drop_ship_requested", false)) or bool(planning_state.get("drop_ship_requested", false))
+				if planning_state.has("drop_ship_staged"):
+					selected_drop_card["drop_ship_staged"] = bool(selected_drop_card.get("drop_ship_staged", false)) or bool(planning_state.get("drop_ship_staged", false))
+				_apply_mission_dropship_card_selection(selected_drop_card)
 	if planning_state.has("air_asset_status"):
 		_air_asset_status = AIR_ASSET_STATUS_SCRIPT.call("from_dict", Dictionary(planning_state.get("air_asset_status", {})))
 	if planning_state.has("meta_transfer_routes"):
@@ -713,6 +730,7 @@ func _should_preserve_live_execution_during_planning_sync(planning_state: Dictio
 
 func get_planning_state() -> Dictionary:
 	_ensure_tactical_stance_controller()
+	_store_selected_mission_dropship_plan()
 	var planning_state: Dictionary = {
 		"has_lz_position": _has_lz_position,
 		"lz_position": _lz_position,
@@ -733,7 +751,7 @@ func get_planning_state() -> Dictionary:
 		"mission_drop_pilot_portrait_path": _mission_drop_pilot_portrait_path,
 		"mission_drop_passenger_count": _mission_drop_passenger_count,
 		"mission_drop_return_requested": _mission_drop_return_requested,
-		"mission_drop_cards": _sanitize_mission_dropship_cards(_mission_drop_cards),
+		"mission_drop_cards": _build_mission_drop_cards_snapshot(),
 		"air_asset_status": get_air_asset_status_snapshot(),
 		"meta_transfer_routes": _serialize_meta_transfer_routes(),
 		"embarked_unit_ids": _build_sorted_drop_unit_id_array(_embarked_unit_ids),
@@ -1386,6 +1404,7 @@ func _place_lz_from_screen_position(screen_position: Vector2) -> bool:
 	_has_lz_position = true
 	_is_lz_placement_armed = false
 	_last_command_text = "LZ SET %s @ %s" % [_get_approach_angle_name(), _format_world_position(_lz_position)]
+	_store_selected_mission_dropship_plan()
 	_refresh_button_state()
 	_refresh_world_overlays()
 	_update_ui()
@@ -1492,6 +1511,7 @@ func _select_approach_angle(angle_name: String) -> void:
 		return
 	_current_approach_index = next_index
 	_last_command_text = "APPROACH %s" % normalized_name
+	_store_selected_mission_dropship_plan()
 	_refresh_world_overlays()
 	_update_ui()
 	_emit_planning_state_changed()
@@ -1615,6 +1635,7 @@ func _on_call_dropship_pressed() -> void:
 	else:
 		_drop_ship_requested = false
 		_last_command_text = "NO DROP TEAM AVAILABLE"
+	_store_selected_mission_dropship_plan()
 	_refresh_world_overlays()
 	_update_ui()
 	_emit_planning_state_changed()
@@ -1879,6 +1900,7 @@ func _update_ui() -> void:
 					call_dropship_button.text = "Drop"
 
 	_apply_compact_mission_control_layout()
+	_refresh_mission_control_craft_summary()
 	_refresh_dynamic_button_styles()
 	_apply_drop_light_hud_button_labels()
 	_apply_command_hierarchy_metadata()
@@ -3562,7 +3584,8 @@ func _sanitize_mission_dropship_card(card: Dictionary) -> Dictionary:
 	if display_name.is_empty():
 		display_name = "Dropship"
 	var has_embarked_payload: bool = card.has("embarked_unit_ids")
-	return {
+	var approach_angle: String = _sanitize_approach_angle_name(String(card.get("approach_angle", _get_approach_angle_name())))
+	var result: Dictionary = {
 		"craft_id": craft_id,
 		"display_name": display_name,
 		"title_text": String(card.get("title_text", card.get("mission_drop_title_text", display_name))).strip_edges(),
@@ -3581,6 +3604,97 @@ func _sanitize_mission_dropship_card(card: Dictionary) -> Dictionary:
 		"queued_fireteam_ids": _sanitize_drop_payload_ids(Array(card.get("queued_fireteam_ids", []))),
 		"has_embarked_payload": has_embarked_payload,
 	}
+	if card.has("has_lz_position"):
+		result["has_lz_position"] = bool(card.get("has_lz_position", false))
+	if card.has("lz_position"):
+		result["lz_position"] = _coerce_vector2_value(card.get("lz_position", Vector2.ZERO), Vector2.ZERO)
+	if card.has("approach_angle"):
+		result["approach_angle"] = approach_angle
+	if card.has("drop_ship_requested"):
+		result["drop_ship_requested"] = bool(card.get("drop_ship_requested", false))
+	if card.has("drop_ship_staged"):
+		result["drop_ship_staged"] = bool(card.get("drop_ship_staged", false))
+	return result
+
+
+func _sanitize_approach_angle_name(angle_name: String, fallback: String = "NW") -> String:
+	var normalized_name: String = angle_name.strip_edges().to_upper()
+	if APPROACH_ANGLES.has(normalized_name):
+		return normalized_name
+	var normalized_fallback: String = fallback.strip_edges().to_upper()
+	if APPROACH_ANGLES.has(normalized_fallback):
+		return normalized_fallback
+	return "NW"
+
+
+func _coerce_vector2_value(value: Variant, fallback: Vector2 = Vector2.ZERO) -> Vector2:
+	if typeof(value) == TYPE_VECTOR2:
+		return Vector2(value)
+	if typeof(value) == TYPE_VECTOR2I:
+		return Vector2(value)
+	if typeof(value) == TYPE_DICTIONARY:
+		var dict_value: Dictionary = Dictionary(value)
+		return Vector2(float(dict_value.get("x", fallback.x)), float(dict_value.get("y", fallback.y)))
+	if typeof(value) == TYPE_ARRAY:
+		var array_value: Array = Array(value)
+		if array_value.size() >= 2:
+			return Vector2(float(array_value[0]), float(array_value[1]))
+	return fallback
+
+
+func _build_mission_drop_cards_snapshot() -> Array:
+	var cards: Array = _sanitize_mission_dropship_cards(_mission_drop_cards)
+	var selected_craft_id: String = _mission_drop_craft_id.strip_edges()
+	if selected_craft_id.is_empty():
+		return cards
+	var did_merge_selected_card: bool = false
+	for index in range(cards.size()):
+		var card: Dictionary = Dictionary(cards[index]).duplicate(true)
+		if String(card.get("craft_id", "")).strip_edges() != selected_craft_id:
+			continue
+		cards[index] = _write_current_mission_dropship_state_to_card(card)
+		did_merge_selected_card = true
+		break
+	if not did_merge_selected_card:
+		cards.append(_write_current_mission_dropship_state_to_card(_build_current_mission_dropship_card()))
+	return _sanitize_mission_dropship_cards(cards)
+
+
+func _store_selected_mission_dropship_plan() -> void:
+	var selected_craft_id: String = _mission_drop_craft_id.strip_edges()
+	if selected_craft_id.is_empty():
+		return
+	_mission_drop_cards = _build_mission_drop_cards_snapshot()
+
+
+func _write_current_mission_dropship_state_to_card(card: Dictionary) -> Dictionary:
+	var result: Dictionary = card.duplicate(true)
+	result["craft_id"] = _mission_drop_craft_id if not _mission_drop_craft_id.is_empty() else String(result.get("craft_id", "mission_drop_sequence")).strip_edges()
+	if not _mission_drop_display_name.is_empty():
+		result["display_name"] = _mission_drop_display_name
+	if not _mission_drop_title_text.is_empty():
+		result["title_text"] = _mission_drop_title_text
+	if not _mission_drop_texture_path.is_empty():
+		result["texture_path"] = _mission_drop_texture_path
+	if not _mission_drop_state.is_empty():
+		result["state"] = _mission_drop_state
+	if not _mission_drop_pilot_text.is_empty():
+		result["pilot_text"] = _mission_drop_pilot_text
+	if not _mission_drop_status_line.is_empty():
+		result["status_line"] = _mission_drop_status_line
+	result["progress"] = _mission_drop_progress
+	result["eta_seconds"] = _mission_drop_eta_seconds
+	result["pilot_unit_id"] = _mission_drop_pilot_unit_id
+	result["pilot_display_name"] = _mission_drop_pilot_display_name
+	result["pilot_portrait_path"] = _mission_drop_pilot_portrait_path
+	result["passenger_count"] = _mission_drop_passenger_count if _mission_drop_passenger_count > 0 else _embarked_unit_ids.size()
+	result["embarked_unit_ids"] = _build_sorted_drop_unit_id_array(_embarked_unit_ids)
+	result["has_lz_position"] = _has_lz_position
+	result["lz_position"] = _lz_position
+	result["approach_angle"] = _get_approach_angle_name()
+	result["drop_ship_requested"] = _drop_ship_requested
+	result["drop_ship_staged"] = _drop_ship_staged
+	return result
 
 
 func _sanitize_drop_payload_ids(source_ids: Array) -> Array:
@@ -3638,6 +3752,7 @@ func select_mission_dropship_craft(craft_id: String) -> bool:
 
 
 func _select_mission_dropship_craft(craft_id: String, should_emit_signal: bool = true) -> bool:
+	_store_selected_mission_dropship_plan()
 	var selected_card: Dictionary = _find_mission_dropship_card_entry(craft_id)
 	if selected_card.is_empty():
 		return false
@@ -3666,6 +3781,27 @@ func _apply_mission_dropship_card_selection(card: Dictionary) -> void:
 	_mission_drop_pilot_display_name = String(card.get("pilot_display_name", "")).strip_edges()
 	_mission_drop_pilot_portrait_path = String(card.get("pilot_portrait_path", "")).strip_edges()
 	_mission_drop_passenger_count = maxi(int(card.get("passenger_count", 0)), 0)
+	var card_count: int = _get_mission_dropship_card_entries().size()
+	if card.has("approach_angle"):
+		var angle_index: int = APPROACH_ANGLES.find(_sanitize_approach_angle_name(String(card.get("approach_angle", _get_approach_angle_name()))))
+		if angle_index >= 0:
+			_current_approach_index = angle_index
+	elif card_count > 1:
+		_current_approach_index = APPROACH_ANGLES.find("NW")
+	if card.has("has_lz_position"):
+		_has_lz_position = bool(card.get("has_lz_position", false))
+		_lz_position = _coerce_vector2_value(card.get("lz_position", Vector2.ZERO), Vector2.ZERO)
+	elif card_count > 1:
+		_has_lz_position = false
+		_lz_position = Vector2.ZERO
+	if card.has("drop_ship_requested"):
+		_drop_ship_requested = bool(card.get("drop_ship_requested", false))
+	elif card_count > 1:
+		_drop_ship_requested = false
+	if card.has("drop_ship_staged"):
+		_drop_ship_staged = bool(card.get("drop_ship_staged", false))
+	elif card_count > 1:
+		_drop_ship_staged = false
 	if bool(card.get("has_embarked_payload", false)):
 		_embarked_unit_ids = _build_drop_unit_state_dict(Array(card.get("embarked_unit_ids", [])))
 	var selected_fireteam_ids: PackedStringArray = _extract_mission_dropship_card_fireteam_ids(card)
@@ -3814,6 +3950,92 @@ func _refresh_mission_dropship_panel() -> void:
 	_enforce_mission_dropship_panel_geometry(panel)
 	panel.visible = true
 	call_deferred("_deferred_enforce_mission_dropship_panel_geometry")
+
+
+func _ensure_mission_control_craft_summary() -> PanelContainer:
+	var action_row := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow") as HBoxContainer
+	if action_row == null:
+		return null
+	var existing_panel := action_row.get_node_or_null("MissionCraftSummary") as PanelContainer
+	if existing_panel != null:
+		return existing_panel
+	var panel := PanelContainer.new()
+	panel.name = "MissionCraftSummary"
+	panel.custom_minimum_size = Vector2(126.0, 48.0)
+	panel.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.set_meta("mission_control_selected_craft_summary", true)
+	META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "thin_frame")
+	action_row.add_child(panel)
+	var drop_button := action_row.get_node_or_null("CallDropshipButton") as Button
+	if drop_button != null:
+		action_row.move_child(panel, drop_button.get_index() + 1)
+
+	var margin := MarginContainer.new()
+	margin.name = "Margin"
+	margin.add_theme_constant_override("margin_left", 4)
+	margin.add_theme_constant_override("margin_top", 3)
+	margin.add_theme_constant_override("margin_right", 4)
+	margin.add_theme_constant_override("margin_bottom", 3)
+	panel.add_child(margin)
+
+	var row := HBoxContainer.new()
+	row.name = "Row"
+	row.add_theme_constant_override("separation", 4)
+	margin.add_child(row)
+
+	var ship_texture := TextureRect.new()
+	ship_texture.name = "ShipTexture"
+	ship_texture.custom_minimum_size = Vector2(36.0, 28.0)
+	ship_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	ship_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	ship_texture.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(ship_texture)
+
+	var info := VBoxContainer.new()
+	info.name = "Info"
+	info.add_theme_constant_override("separation", 0)
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(info)
+
+	for label_name in ["NameLabel", "PilotLabel", "PlanLabel"]:
+		var label := Label.new()
+		label.name = label_name
+		label.clip_text = true
+		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		label.add_theme_font_size_override("font_size", 7 if label_name != "NameLabel" else 8)
+		META_UI_SKIN_SCRIPT.style_body_label(label, 7 if label_name != "NameLabel" else 8)
+		info.add_child(label)
+	return panel
+
+
+func _refresh_mission_control_craft_summary() -> void:
+	var panel := _ensure_mission_control_craft_summary()
+	if panel == null:
+		return
+	var selected_craft_id: String = _mission_drop_craft_id.strip_edges()
+	panel.visible = not selected_craft_id.is_empty() or not _mission_drop_display_name.is_empty()
+	panel.set_meta("mission_drop_craft_id", selected_craft_id)
+	if not panel.visible:
+		return
+	var selected_card: Dictionary = _find_mission_dropship_card_entry(selected_craft_id)
+	var ship_texture := panel.get_node_or_null("Margin/Row/ShipTexture") as TextureRect
+	if ship_texture != null:
+		ship_texture.texture = _get_mission_dropship_texture(selected_card)
+	var name_label := panel.get_node_or_null("Margin/Row/Info/NameLabel") as Label
+	if name_label != null:
+		name_label.text = _mission_drop_display_name if not _mission_drop_display_name.is_empty() else String(selected_card.get("display_name", "Dropship")).strip_edges()
+	var pilot_name: String = _mission_drop_pilot_display_name
+	if pilot_name.is_empty():
+		pilot_name = String(selected_card.get("pilot_display_name", "")).strip_edges()
+	if pilot_name.is_empty():
+		pilot_name = "Pilot: none"
+	var pilot_label := panel.get_node_or_null("Margin/Row/Info/PilotLabel") as Label
+	if pilot_label != null:
+		pilot_label.text = pilot_name
+	var plan_label := panel.get_node_or_null("Margin/Row/Info/PlanLabel") as Label
+	if plan_label != null:
+		plan_label.text = "%s | %s" % [_get_approach_angle_name(), "LZ OK" if _has_lz_position else "LZ offen"]
 
 
 func _on_mission_dropship_card_gui_input(event: InputEvent, craft_id: String) -> void:
@@ -4169,6 +4391,8 @@ func _apply_contextual_help_ids() -> void:
 	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton", "mission.command.take")
 	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton", "mission.command.attack_area")
 	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton", "mission.command.clear_target")
+	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton", "mission.command.go_plan")
+	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/PlanCommandMatrixButton", "mission.command.go_plan")
 	_apply_help_id("../TacticalUI/AreaOrderCommandMenu", "mission.command.defend_area")
 	_apply_help_id(FIRETEAM_PANEL_PATH, "mission.selected_fireteam")
 	_apply_help_id(FIRETEAM_HEADER_LABEL_PATH, "mission.selected_fireteam")
@@ -4351,6 +4575,12 @@ func _refresh_button_state() -> void:
 	if next_phase_button != null:
 		next_phase_button.visible = PHASE_PLANNING_ENABLED
 		next_phase_button.disabled = true if not PHASE_PLANNING_ENABLED else preview_mode or not _can_issue_local_commands() or not _has_pending_global_phase()
+	var go_matrix_button := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton") as BaseButton
+	if go_matrix_button != null:
+		go_matrix_button.disabled = preview_mode or not _can_issue_local_commands() or _selected_fireteam_ids.is_empty()
+	var plan_matrix_button := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/PlanCommandMatrixButton") as BaseButton
+	if plan_matrix_button != null:
+		plan_matrix_button.disabled = preview_mode or not _can_issue_local_commands() or _selected_fireteam_ids.is_empty()
 	_refresh_tactical_stance_panel()
 
 
@@ -4364,6 +4594,8 @@ func _build_command_control_snapshot() -> Dictionary:
 		"clear_target": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_CLEAR_TARGET")))),
 		"set_lz": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_SET_LZ")))),
 		"call_dropship": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_CALL_DROPSHIP")))),
+		"go_plan": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_GO_PLAN")))),
+		"return_to_plan": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_RETURN_TO_PLAN")))),
 		"hierarchy": get_command_hierarchy_snapshot(),
 	}
 
@@ -4932,10 +5164,14 @@ func _apply_command_button_markers() -> void:
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/FlankButton": "16.4",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton": "16.5",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton": "16.6",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton": "16.15",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/PlanCommandMatrixButton": "16.20",
 	}
 	for path_variant in marker_by_path.keys():
 		_apply_button_corner_marker(String(path_variant), String(marker_by_path[path_variant]))
 	for slot_index in range(7, 21):
+		if slot_index == 15 or slot_index == 20:
+			continue
 		_apply_button_corner_marker("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/CommandSlot%02d" % slot_index, "16.%d" % slot_index)
 
 
@@ -4968,6 +5204,8 @@ func _apply_drop_light_hud_button_labels() -> void:
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton": "Take",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton": "Pick" if _is_target_placement_armed else "Target",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton": "Clear",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton": "GO",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/PlanCommandMatrixButton": "Plan",
 	}
 	for path_variant in command_labels.keys():
 		var button := get_node_or_null(String(path_variant)) as Button
@@ -5041,13 +5279,14 @@ func _apply_compact_mission_control_layout() -> void:
 		strategic_action_row.alignment = BoxContainer.ALIGNMENT_BEGIN
 		strategic_action_row.add_theme_constant_override("separation", 4)
 		strategic_action_row.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		_ensure_mission_control_craft_summary()
 	var phase_control_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel") as Control
 	if phase_control_panel != null:
 		phase_control_panel.visible = PHASE_PLANNING_ENABLED
 	var command_grid := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid") as GridContainer
 	if command_grid != null:
 		command_grid.columns = 5
-		command_grid.add_theme_constant_override("h_separation", 8)
+		command_grid.add_theme_constant_override("h_separation", 7)
 		command_grid.add_theme_constant_override("v_separation", 8)
 		_apply_command_grid_hierarchy_order(command_grid)
 		_ensure_command_grid_placeholder_buttons(command_grid)
@@ -5058,6 +5297,8 @@ func _apply_compact_mission_control_layout() -> void:
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/PlanCommandMatrixButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton",
 	]:
@@ -5145,6 +5386,12 @@ func _ensure_command_grid_placeholder_buttons(command_grid: GridContainer) -> vo
 		return
 	var action_button_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("ACTION_BUTTON_SIZE")
 	for slot_index in range(7, 21):
+		if slot_index == 15:
+			_ensure_command_grid_action_button(command_grid, "GoCommandMatrixButton", "GO", "Execute selected orders", Callable(self, "_on_go_phase_pressed"), slot_index)
+			continue
+		if slot_index == 20:
+			_ensure_command_grid_action_button(command_grid, "PlanCommandMatrixButton", "Plan", "Return selected fireteam to plan", Callable(self, "_on_return_to_plan_button_pressed"), slot_index)
+			continue
 		var slot_name := "CommandSlot%02d" % slot_index
 		var button := command_grid.get_node_or_null(slot_name) as Button
 		if button == null:
@@ -5162,7 +5409,31 @@ func _ensure_command_grid_placeholder_buttons(command_grid: GridContainer) -> vo
 		_configure_square_hud_button(button, action_button_size)
 		META_UI_SKIN_SCRIPT.style_tactical_button(button, false)
 		command_grid.move_child(button, slot_index - 1)
-	command_grid.set_meta("command_placeholder_slots", 14)
+	command_grid.set_meta("command_placeholder_slots", 12)
+
+
+func _ensure_command_grid_action_button(command_grid: GridContainer, button_name: String, text: String, tooltip: String, callback: Callable, slot_index: int) -> void:
+	var stale_placeholder := command_grid.get_node_or_null("CommandSlot%02d" % slot_index) as Button
+	if stale_placeholder != null:
+		command_grid.remove_child(stale_placeholder)
+		stale_placeholder.queue_free()
+	var button := command_grid.get_node_or_null(button_name) as Button
+	if button == null:
+		button = Button.new()
+		button.name = button_name
+		button.focus_mode = Control.FOCUS_ALL
+		command_grid.add_child(button)
+	button.text = text
+	button.tooltip_text = tooltip
+	button.disabled = false
+	button.mouse_filter = Control.MOUSE_FILTER_STOP
+	button.set_meta("drop_light_command_placeholder", false)
+	button.set_meta("command_matrix_slot_id", "16.%d" % slot_index)
+	if callback.is_valid() and not button.pressed.is_connected(callback):
+		button.pressed.connect(callback)
+	_configure_square_hud_button(button, DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("ACTION_BUTTON_SIZE"))
+	META_UI_SKIN_SCRIPT.style_tactical_button(button, false)
+	command_grid.move_child(button, slot_index - 1)
 
 
 func _apply_compact_fireteam_info_text_contract() -> void:
@@ -5225,6 +5496,8 @@ func _refresh_dynamic_button_styles() -> void:
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/PlanCommandMatrixButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/PrevEditPhaseButton",
@@ -5243,6 +5516,7 @@ func _refresh_dynamic_button_styles() -> void:
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/TopNavPanel/NavMargin/NavRow/MissionNavButton") as Button, true)
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null(FIRETEAM_ALL_BUTTON_PATH) as Button, _is_all_fireteams_selected())
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton") as Button, _is_target_placement_armed)
+	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton") as Button, not preview_mode and _can_issue_local_commands() and not _selected_fireteam_ids.is_empty())
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton") as Button, _is_lz_placement_armed)
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton") as Button, _drop_ship_requested)
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/NextPhaseButton") as Button, PHASE_PLANNING_ENABLED and not preview_mode and _can_issue_local_commands() and not _phase_execution_by_fireteam.is_empty())
@@ -9994,6 +10268,7 @@ func _try_start_drop_sequence() -> bool:
 		_drop_ship_staged = true
 		_drop_sequence_visual_only = false
 		_drop_sequence_position = _get_drop_staging_position()
+		_store_selected_mission_dropship_plan()
 		_emit_planning_state_changed()
 		_refresh_world_overlays()
 		_update_ui()
@@ -10010,6 +10285,7 @@ func _try_start_drop_sequence() -> bool:
 	_drop_sequence_visual_only = false
 	_drop_sequence_position = _get_drop_staging_position()
 	_live_drop_bootstrap_consumed = true
+	_store_selected_mission_dropship_plan()
 	_refresh_world_overlays()
 	_update_ui()
 	return true
@@ -10078,6 +10354,7 @@ func _update_drop_sequence(delta: float) -> void:
 				_drop_sequence_visual_only = false
 				_live_drop_bootstrap_consumed = false
 				_last_command_text = "DROPSHIP CLEARED"
+				_store_selected_mission_dropship_plan()
 				_emit_planning_state_changed()
 				_update_ui()
 				_refresh_world_overlays()
@@ -10094,6 +10371,7 @@ func _complete_drop_sequence_deployment() -> void:
 		_deploy_next_embarked_unit()
 	_mission_drop_passenger_count = _embarked_unit_ids.size()
 	_drop_sequence_position = _lz_position
+	_store_selected_mission_dropship_plan()
 	_emit_planning_state_changed()
 
 
@@ -10106,6 +10384,7 @@ func _begin_drop_sequence_outbound() -> void:
 	_drop_sequence_phase = DROP_SEQUENCE_OUTBOUND
 	_drop_sequence_timer = 0.0
 	_last_command_text = "DROPSHIP RTB"
+	_store_selected_mission_dropship_plan()
 	_emit_planning_state_changed()
 	_update_ui()
 	_refresh_world_overlays()

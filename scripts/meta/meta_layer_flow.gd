@@ -1182,11 +1182,20 @@ func _build_transport_craft_states() -> Array:
 			recovery_patch = Dictionary(AIR_ASSET_RECOVERY_STATE_SCRIPT.call("build_transport_patch", recovery_state)).duplicate(true)
 			recovery_active = bool(recovery_patch.get("air_asset_unavailable", false))
 
+		var planning_card: Dictionary = _find_mission_drop_card_in_planning_state(craft_id)
 		var passenger_count: int = 0
 		if mission_phase == "to_mission" or mission_phase == "waiting":
-			passenger_count = Array(_mission_planning_state.get("embarked_unit_ids", [])).size()
+			if not planning_card.is_empty() and planning_card.has("passenger_count"):
+				passenger_count = int(planning_card.get("passenger_count", 0))
+			elif not planning_card.is_empty() and planning_card.has("embarked_unit_ids"):
+				passenger_count = Array(planning_card.get("embarked_unit_ids", [])).size()
+			else:
+				passenger_count = Array(_mission_planning_state.get("embarked_unit_ids", [])).size()
 		elif mission_phase == "to_fob":
-			passenger_count = int(_mission_planning_state.get("mission_drop_passenger_count", 0))
+			if not planning_card.is_empty() and planning_card.has("passenger_count"):
+				passenger_count = int(planning_card.get("passenger_count", 0))
+			else:
+				passenger_count = int(_mission_planning_state.get("mission_drop_passenger_count", 0))
 
 		var progress_value: float = 0.0
 		var eta_seconds: int = 0
@@ -1211,7 +1220,7 @@ func _build_transport_craft_states() -> Array:
 			"texture_path": String(craft_def.get("texture_path", "")).strip_edges(),
 			"location": craft_location,
 			"visible_in_homebase": craft_location == "homebase" or recovery_active,
-			"visible_in_fob": craft_location == "fob" or recovery_active or (craft_location == "transit" and not pilot_transfer_entry.is_empty()),
+			"visible_in_fob": craft_location == "fob" or recovery_active or mission_phase == "to_mission" or (craft_location == "transit" and not pilot_transfer_entry.is_empty()),
 			"is_in_transit": is_in_transit,
 			"pilot_unit_id": pilot_unit_id,
 			"pilot_display_name": _resolve_unit_display_name(pilot_unit_id),
@@ -1650,7 +1659,7 @@ func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: boo
 			_mission_planning_state["deployed_unit_ids"] = []
 		return
 
-	var drop_state: Dictionary = _apply_selected_mission_drop_card_override(Dictionary(fob_screen.call("build_mission_drop_state")).duplicate(true))
+	var drop_state: Dictionary = _apply_selected_mission_drop_card_override(_merge_existing_mission_drop_card_planning_fields(Dictionary(fob_screen.call("build_mission_drop_state")).duplicate(true)))
 	_mission_planning_state["embarked_unit_ids"] = Array(PackedStringArray(Array(drop_state.get("embarked_unit_ids", []))))
 	_mission_planning_state["drop_queued_fireteam_ids"] = Array(PackedStringArray(Array(drop_state.get("queued_fireteam_ids", []))))
 	_mission_planning_state["drop_ship_staged"] = bool(drop_state.get("drop_ship_staged", false))
@@ -1681,7 +1690,7 @@ func _sync_mission_drop_transport_fields_from_fob() -> void:
 	if fob_screen == null or not fob_screen.has_method("build_mission_drop_state"):
 		return
 
-	var drop_state: Dictionary = _apply_selected_mission_drop_card_override(Dictionary(fob_screen.call("build_mission_drop_state")).duplicate(true))
+	var drop_state: Dictionary = _apply_selected_mission_drop_card_override(_merge_existing_mission_drop_card_planning_fields(Dictionary(fob_screen.call("build_mission_drop_state")).duplicate(true)))
 	_mission_planning_state["drop_ship_staged"] = bool(drop_state.get("drop_ship_staged", false))
 	_mission_planning_state["launch_ready_craft_id"] = String(drop_state.get("launch_ready_craft_id", "")).strip_edges()
 	_mission_planning_state["mission_drop_craft_id"] = String(drop_state.get("mission_drop_craft_id", "")).strip_edges()
@@ -1728,7 +1737,52 @@ func _apply_selected_mission_drop_card_override(drop_state: Dictionary) -> Dicti
 		result["queued_fireteam_ids"] = Array(PackedStringArray(Array(selected_card.get("queued_fireteam_ids", []))))
 	if selected_card.has("boarded_fireteam_ids"):
 		result["boarded_fireteam_ids"] = Array(PackedStringArray(Array(selected_card.get("boarded_fireteam_ids", []))))
+	for planning_key in ["has_lz_position", "lz_position", "approach_angle"]:
+		if selected_card.has(planning_key):
+			result[planning_key] = selected_card[planning_key]
+	if selected_card.has("drop_ship_requested"):
+		result["drop_ship_requested"] = bool(result.get("drop_ship_requested", false)) or bool(selected_card.get("drop_ship_requested", false))
+	if selected_card.has("drop_ship_staged"):
+		result["drop_ship_staged"] = bool(result.get("drop_ship_staged", false)) or bool(selected_card.get("drop_ship_staged", false))
 	return result
+
+
+func _merge_existing_mission_drop_card_planning_fields(drop_state: Dictionary) -> Dictionary:
+	var result: Dictionary = drop_state.duplicate(true)
+	var selected_craft_id: String = String(_mission_planning_state.get("mission_drop_craft_id", "")).strip_edges()
+	var existing_cards_by_craft: Dictionary = {}
+	for existing_variant in Array(_mission_planning_state.get("mission_drop_cards", [])):
+		if typeof(existing_variant) != TYPE_DICTIONARY:
+			continue
+		var existing_card: Dictionary = Dictionary(existing_variant)
+		var existing_craft_id: String = String(existing_card.get("craft_id", "")).strip_edges()
+		if existing_craft_id.is_empty():
+			continue
+		existing_cards_by_craft[existing_craft_id] = existing_card
+	var merged_cards: Array = []
+	for card_variant in Array(result.get("mission_drop_cards", [])):
+		if typeof(card_variant) != TYPE_DICTIONARY:
+			continue
+		var card: Dictionary = Dictionary(card_variant).duplicate(true)
+		var craft_id: String = String(card.get("craft_id", "")).strip_edges()
+		var existing_card: Dictionary = Dictionary(existing_cards_by_craft.get(craft_id, {}))
+		for planning_key in ["has_lz_position", "lz_position", "approach_angle", "drop_ship_requested", "drop_ship_staged"]:
+			if existing_card.has(planning_key):
+				card[planning_key] = existing_card[planning_key]
+			elif craft_id == selected_craft_id and _mission_planning_state.has(planning_key):
+				card[planning_key] = _mission_planning_state[planning_key]
+		for payload_key in ["embarked_unit_ids", "boarded_fireteam_ids", "queued_fireteam_ids"]:
+			if Array(card.get(payload_key, [])).is_empty() and existing_card.has(payload_key) and not Array(existing_card.get(payload_key, [])).is_empty():
+				card[payload_key] = Array(existing_card.get(payload_key, [])).duplicate()
+		if int(card.get("passenger_count", 0)) <= 0 and int(existing_card.get("passenger_count", 0)) > 0:
+			card["passenger_count"] = int(existing_card.get("passenger_count", 0))
+		merged_cards.append(card)
+	result["mission_drop_cards"] = merged_cards
+	return result
+
+
+func _find_mission_drop_card_in_planning_state(craft_id: String) -> Dictionary:
+	return _find_mission_drop_card_in_state({"mission_drop_cards": Array(_mission_planning_state.get("mission_drop_cards", []))}, craft_id)
 
 
 func _find_mission_drop_card_in_state(drop_state: Dictionary, craft_id: String) -> Dictionary:
@@ -1919,9 +1973,9 @@ func _on_mission_planning_state_changed(planning_state: Dictionary) -> void:
 		_mission_planning_state[key] = planning_state[key_variant]
 	if bool(_mission_planning_state.get("mission_drop_return_requested", false)):
 		var fob_screen = _get_fob_screen()
-		if fob_screen != null and fob_screen.has_method("clear_mission_boarded_payload"):
-			fob_screen.call("clear_mission_boarded_payload")
 		var mission_craft_id: String = String(_mission_planning_state.get("mission_drop_craft_id", "")).strip_edges()
+		if fob_screen != null and fob_screen.has_method("clear_mission_boarded_payload"):
+			fob_screen.call("clear_mission_boarded_payload", mission_craft_id)
 		if not mission_craft_id.is_empty():
 			_begin_mission_craft_transfer(mission_craft_id, "to_fob", MISSION_DROPSHIP_TO_FOB_SECONDS)
 		_mission_planning_state["mission_drop_return_requested"] = false

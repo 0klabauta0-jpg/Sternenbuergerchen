@@ -270,17 +270,18 @@ static func _build_transport_craft_stylebox(is_selected: bool, is_in_transit: bo
 	var stylebox := StyleBoxFlat.new()
 	stylebox.bg_color = Color(0.11, 0.14, 0.17, 0.72) if is_in_transit else Color(0.11, 0.14, 0.17, 1.0)
 	if is_selected:
-		stylebox.border_color = Color(0.66, 0.73, 0.80, 0.96)
+		stylebox.border_color = Color(0.40, 0.92, 0.56, 1.0)
 	elif is_in_transit:
 		stylebox.border_color = Color(0.56, 0.59, 0.63, 0.82)
 	elif can_stage:
 		stylebox.border_color = Color(0.48, 0.63, 0.49, 1.0)
 	else:
 		stylebox.border_color = Color(0.31, 0.36, 0.42, 1.0)
-	stylebox.border_width_left = 1
-	stylebox.border_width_top = 1
-	stylebox.border_width_right = 1
-	stylebox.border_width_bottom = 1
+	var border_width: int = 2 if is_selected else 1
+	stylebox.border_width_left = border_width
+	stylebox.border_width_top = border_width
+	stylebox.border_width_right = border_width
+	stylebox.border_width_bottom = border_width
 	stylebox.corner_radius_top_left = 8
 	stylebox.corner_radius_top_right = 8
 	stylebox.corner_radius_bottom_left = 8

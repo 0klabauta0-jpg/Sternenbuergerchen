@@ -80,7 +80,7 @@ func _test_contract_catalog_and_snapshot() -> void:
 	var actions_by_id: Dictionary = Dictionary(snapshot.get("actions_by_id", {}))
 	_assert(Dictionary(actions_by_id.get("tempo", {})).get("panel_role", "") == "#17", "Rule actions live in #17")
 	_assert(Dictionary(actions_by_id.get("set_lz", {})).get("group_id", "") == "air_lz", "Set LZ is grouped as Air/LZ")
-	_assert(str(Dictionary(actions_by_id.get("go_plan", {})).get("disabled_reason", "")).contains("fixed HUD"), "GO exposes fixed HUD phase disabled reason")
+	_assert(Dictionary(actions_by_id.get("go_plan", {})).get("panel_role", "") == "#16", "GO lives in #16 for the fixed HUD command matrix")
 	_assert(str(Dictionary(actions_by_id.get("confirm", {})).get("disabled_reason", "")).contains("TASK_276"), "Breakout actions are reserved for TASK_276")
 
 
@@ -158,7 +158,7 @@ func _test_mission_scene_hierarchy() -> void:
 		var order: PackedStringArray = PackedStringArray(command_grid.get_meta("command_hierarchy_order", PackedStringArray()))
 		_assert(order.size() >= 6 and order[0] == "move" and order[1] == "take", "#16 command grid order starts with Move/Take goal pair")
 		_assert(command_grid.get_child_count() >= 20, "#16 command grid exposes the full 5x4 slot frame")
-		_assert(int(command_grid.get_meta("command_placeholder_slots", 0)) >= 14, "#16 command grid keeps reserve slots marked for communication")
+		_assert(int(command_grid.get_meta("command_placeholder_slots", 0)) >= 12, "#16 command grid keeps reserve slots marked for communication")
 
 	controller.call("_set_selected_fireteams", PackedStringArray(["blue"]), false)
 	await _wait_frames(3)
