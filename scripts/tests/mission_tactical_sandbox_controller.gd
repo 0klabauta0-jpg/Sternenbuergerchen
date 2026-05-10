@@ -54,7 +54,7 @@ const DROPSHIP_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Is
 
 const ALL_FIRETEAM_LABEL: String = "ALL"
 const APPROACH_ANGLES: PackedStringArray = ["NW", "NE", "SW", "SE"]
-const HOTKEY_LEGEND: String = "LMB Select | RMB Waypoint | SHIFT+Drag Area | CTRL+LMB Add | Drag Lasso | DEL Marker | 1 Move | 2 Hold | 3 Flank | 4 Take | Q/E Team | R/F Edit Phase | G GO"
+const HOTKEY_LEGEND: String = "LMB Select/Center | Doubleclick Center | RMB Waypoint | SHIFT+Drag Area | CTRL+LMB Add | DEL/Del Button Order | 1 Move | 2 Hold | 3 Flank | 4 Take | T Sort | G GO"
 const LIVE_ORDER_PHASE_INDEX: int = 1
 const PHASE_PLANNING_ENABLED: bool = false
 const FRIENDLY_TEAM_ID: String = "team_alpha"
@@ -67,6 +67,9 @@ const FIRETEAM_SELECTED_CARDS_ROW_PATH: String = "../TacticalUI/BottomDock/Botto
 const FIRETEAM_MINI_PANEL_PATH: String = "../TacticalUI/FireteamMiniPanel"
 const FIRETEAM_MINI_HEADER_LABEL_PATH: String = "../TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniHeaderLabel"
 const FIRETEAM_MINI_CARDS_VBOX_PATH: String = "../TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox"
+const COMMAND_GRID_PATH: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid"
+const DELETE_ORDER_BUTTON_PATH: String = COMMAND_GRID_PATH + "/DeleteOrderButton"
+const SORT_COMMAND_BUTTON_PATH: String = COMMAND_GRID_PATH + "/SortCommandMatrixButton"
 const CARD_REFRESH_INTERVAL_SECONDS: float = 0.35
 const UNIT_SELECTION_PICK_RADIUS: float = 34.0
 const SELECTION_DRAG_THRESHOLD: float = 10.0
@@ -409,6 +412,11 @@ func _unhandled_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 				return
 
+			if mouse_button_event.double_click:
+				if _try_center_fireteam_from_map_click(mouse_button_event.position, mouse_button_event.ctrl_pressed):
+					get_viewport().set_input_as_handled()
+				return
+
 			if _is_lz_placement_armed:
 				if _place_lz_from_screen_position(mouse_button_event.position):
 					get_viewport().set_input_as_handled()
@@ -419,6 +427,10 @@ func _unhandled_input(event: InputEvent) -> void:
 					_is_target_placement_armed = false
 					_update_ui()
 					get_viewport().set_input_as_handled()
+				return
+
+			if _try_focus_area_order_at_position(mouse_button_event.position):
+				get_viewport().set_input_as_handled()
 				return
 
 			_begin_selection_interaction(mouse_button_event.position, mouse_button_event.ctrl_pressed)
@@ -456,8 +468,11 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	match key_event.physical_keycode:
 		KEY_DELETE:
-			if _delete_focused_area_order() or _delete_focused_waypoint():
+			if _delete_selected_order():
 				get_viewport().set_input_as_handled()
+		KEY_T:
+			_on_sort_fireteam_pressed()
+			get_viewport().set_input_as_handled()
 		KEY_1:
 			issue_move()
 			get_viewport().set_input_as_handled()
@@ -1538,6 +1553,7 @@ func _on_fireteam_group_pressed(fireteam_id: String) -> void:
 	if normalized_fireteam_id.is_empty():
 		return
 	_set_selected_fireteams(PackedStringArray([normalized_fireteam_id]))
+	_focus_primary_view_on_selected_fireteams()
 
 
 func _on_target_button_pressed() -> void:
@@ -1580,6 +1596,35 @@ func _on_next_phase_pressed() -> void:
 
 func _on_go_phase_pressed() -> void:
 	execute_selected_fireteam_orders()
+
+
+func _on_delete_order_pressed() -> void:
+	if _delete_selected_order():
+		return
+	_last_command_text = "NO ORDER SELECTED"
+	_refresh_button_state()
+	_update_ui()
+
+
+func _on_sort_fireteam_pressed() -> void:
+	if preview_mode:
+		_last_command_text = "PREVIEW MODE"
+		_update_ui()
+		return
+	if not _can_issue_local_commands():
+		_last_command_text = "OBSERVER MODE"
+		_update_ui()
+		return
+	if _selected_fireteam_ids.is_empty():
+		_last_command_text = "SELECT FIRETEAM FIRST"
+		_update_ui()
+		return
+	var did_focus: bool = _focus_primary_view_on_selected_fireteams()
+	_record_fireteamleader_feedback_for_selected_fireteams("sort", "accepted", "center" if did_focus else "selected")
+	_last_command_text = "SORT %s" % _get_fireteam_name().to_upper()
+	_refresh_order_visuals()
+	_refresh_button_state()
+	_update_ui()
 
 
 func _on_clear_target_pressed() -> void:
@@ -2197,6 +2242,7 @@ func _refresh_fireteam_phase_panel() -> void:
 		button.disabled = true if not PHASE_PLANNING_ENABLED else not _can_edit_planning()
 		META_UI_SKIN_SCRIPT.style_tactical_button(button, false)
 	if go_phase_button != null:
+		go_phase_button.visible = false
 		go_phase_button.disabled = preview_mode or not _can_issue_local_commands() or not _has_selected_fireteam_orders_to_execute()
 		go_phase_button.tooltip_text = "Start the live mission from Homebase before GO can execute orders." if preview_mode else "Fuehrt das ausgewaehlte Fireteam zum naechsten offenen Zielpunkt."
 		META_UI_SKIN_SCRIPT.style_tactical_button(go_phase_button, not go_phase_button.disabled)
@@ -4442,6 +4488,8 @@ func _apply_contextual_help_ids() -> void:
 	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton", "mission.command.take")
 	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton", "mission.command.attack_area")
 	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton", "mission.command.clear_target")
+	_apply_help_id(DELETE_ORDER_BUTTON_PATH, "mission.command.clear_target")
+	_apply_help_id(SORT_COMMAND_BUTTON_PATH, "mission.command.go_plan")
 	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton", "mission.command.go_plan")
 	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/PlanCommandMatrixButton", "mission.command.go_plan")
 	_apply_help_id("../TacticalUI/AreaOrderCommandMenu", "mission.command.defend_area")
@@ -4607,6 +4655,14 @@ func _refresh_button_state() -> void:
 			continue
 		utility_button.disabled = not _can_edit_planning()
 
+	var delete_order_button := get_node_or_null(DELETE_ORDER_BUTTON_PATH) as BaseButton
+	if delete_order_button != null:
+		delete_order_button.disabled = not _can_edit_planning() or not _has_deletable_order_focus()
+
+	var sort_button := get_node_or_null(SORT_COMMAND_BUTTON_PATH) as BaseButton
+	if sort_button != null:
+		sort_button.disabled = preview_mode or not _can_issue_local_commands() or _selected_fireteam_ids.is_empty()
+
 	for path in [
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/PrevEditPhaseButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/AddPhaseButton",
@@ -4643,6 +4699,8 @@ func _build_command_control_snapshot() -> Dictionary:
 		"take": _build_button_snapshot(take_button_path),
 		"target": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_TARGET")))),
 		"clear_target": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_CLEAR_TARGET")))),
+		"delete_order": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_DELETE_ORDER")))),
+		"sort_fireteam": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_SORT")))),
 		"set_lz": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_SET_LZ")))),
 		"call_dropship": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_CALL_DROPSHIP")))),
 		"go_plan": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_GO_PLAN")))),
@@ -5215,13 +5273,15 @@ func _apply_command_button_markers() -> void:
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/FlankButton": "16.4",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton": "16.5",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton": "16.6",
+		DELETE_ORDER_BUTTON_PATH: "16.7",
+		SORT_COMMAND_BUTTON_PATH: "16.10",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton": "16.15",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/PlanCommandMatrixButton": "16.20",
 	}
 	for path_variant in marker_by_path.keys():
 		_apply_button_corner_marker(String(path_variant), String(marker_by_path[path_variant]))
 	for slot_index in range(7, 21):
-		if slot_index == 15 or slot_index == 20:
+		if [7, 10, 15, 20].has(slot_index):
 			continue
 		_apply_button_corner_marker("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/CommandSlot%02d" % slot_index, "16.%d" % slot_index)
 
@@ -5255,6 +5315,8 @@ func _apply_drop_light_hud_button_labels() -> void:
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton": "Take",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton": "Pick" if _is_target_placement_armed else "Target",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton": "Clear",
+		DELETE_ORDER_BUTTON_PATH: "Del",
+		SORT_COMMAND_BUTTON_PATH: "Sort",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton": "GO",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/PlanCommandMatrixButton": "Plan",
 	}
@@ -5348,6 +5410,8 @@ func _apply_compact_mission_control_layout() -> void:
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton",
+		DELETE_ORDER_BUTTON_PATH,
+		SORT_COMMAND_BUTTON_PATH,
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/PlanCommandMatrixButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton",
@@ -5428,7 +5492,7 @@ func _apply_command_grid_hierarchy_order(command_grid: GridContainer) -> void:
 		if child == null:
 			continue
 		command_grid.move_child(child, index)
-	command_grid.set_meta("command_hierarchy_order", PackedStringArray(["move", "take", "defend", "flank", "engage", "clear_target"]))
+	command_grid.set_meta("command_hierarchy_order", PackedStringArray(["move", "take", "defend", "flank", "engage", "clear_target", "delete_order", "sort_fireteam"]))
 	command_grid.set_meta("command_hierarchy_columns", command_grid.columns)
 
 
@@ -5437,6 +5501,12 @@ func _ensure_command_grid_placeholder_buttons(command_grid: GridContainer) -> vo
 		return
 	var action_button_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("ACTION_BUTTON_SIZE")
 	for slot_index in range(7, 21):
+		if slot_index == 7:
+			_ensure_command_grid_action_button(command_grid, "DeleteOrderButton", "Del", "Delete selected waypoint or area order", Callable(self, "_on_delete_order_pressed"), slot_index)
+			continue
+		if slot_index == 10:
+			_ensure_command_grid_action_button(command_grid, "SortCommandMatrixButton", "Sort", "Center and sort selected fireteam", Callable(self, "_on_sort_fireteam_pressed"), slot_index)
+			continue
 		if slot_index == 15:
 			_ensure_command_grid_action_button(command_grid, "GoCommandMatrixButton", "GO", "Execute selected orders", Callable(self, "_on_go_phase_pressed"), slot_index)
 			continue
@@ -5460,7 +5530,7 @@ func _ensure_command_grid_placeholder_buttons(command_grid: GridContainer) -> vo
 		_configure_square_hud_button(button, action_button_size)
 		META_UI_SKIN_SCRIPT.style_tactical_button(button, false)
 		command_grid.move_child(button, slot_index - 1)
-	command_grid.set_meta("command_placeholder_slots", 12)
+	command_grid.set_meta("command_placeholder_slots", 10)
 
 
 func _ensure_command_grid_action_button(command_grid: GridContainer, button_name: String, text: String, tooltip: String, callback: Callable, slot_index: int) -> void:
@@ -5547,6 +5617,8 @@ func _refresh_dynamic_button_styles() -> void:
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton",
+		DELETE_ORDER_BUTTON_PATH,
+		SORT_COMMAND_BUTTON_PATH,
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/PlanCommandMatrixButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton",
@@ -5567,6 +5639,8 @@ func _refresh_dynamic_button_styles() -> void:
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/TopNavPanel/NavMargin/NavRow/MissionNavButton") as Button, true)
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null(FIRETEAM_ALL_BUTTON_PATH) as Button, _is_all_fireteams_selected())
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton") as Button, _is_target_placement_armed)
+	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null(DELETE_ORDER_BUTTON_PATH) as Button, _has_deletable_order_focus())
+	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null(SORT_COMMAND_BUTTON_PATH) as Button, not preview_mode and _can_issue_local_commands() and not _selected_fireteam_ids.is_empty())
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton") as Button, not preview_mode and _can_issue_local_commands() and not _selected_fireteam_ids.is_empty())
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton") as Button, _is_lz_placement_armed)
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton") as Button, _drop_ship_requested)
@@ -6518,6 +6592,41 @@ func _apply_unit_click_selection(unit: Node, ctrl_pressed: bool) -> void:
 	if fireteam_id.is_empty():
 		return
 	_set_selected_fireteams(PackedStringArray(_selection_adapter.call("build_unit_click_selection", _selected_fireteam_ids, fireteam_id, ctrl_pressed)))
+	_focus_primary_view_on_selected_fireteams()
+
+
+func _try_center_fireteam_from_map_click(screen_position: Vector2, ctrl_pressed: bool) -> bool:
+	var unit = _find_selectable_unit_at_screen_position(screen_position)
+	if unit != null:
+		_apply_unit_click_selection(unit, ctrl_pressed)
+		_last_command_text = "CENTER %s" % _get_fireteam_name().to_upper()
+		_update_ui()
+		return true
+	if _selected_fireteam_ids.is_empty():
+		return false
+	if not _focus_primary_view_on_selected_fireteams():
+		return false
+	_last_command_text = "CENTER %s" % _get_fireteam_name().to_upper()
+	_update_ui()
+	return true
+
+
+func _focus_primary_view_on_selected_fireteams() -> bool:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view == null or not primary_3d_view.has_method("focus_world_position"):
+		return false
+	var center := Vector2.ZERO
+	var anchor_count: int = 0
+	for fireteam_id_variant in _selected_fireteam_ids:
+		var anchor := _get_selection_anchor_for_fireteam(String(fireteam_id_variant))
+		if anchor == null:
+			continue
+		center += anchor.global_position
+		anchor_count += 1
+	if anchor_count <= 0:
+		return false
+	primary_3d_view.call("focus_world_position", center / float(anchor_count))
+	return true
 
 
 func _apply_lasso_selection(selection_rect: Rect2, ctrl_pressed: bool) -> void:
@@ -7570,11 +7679,15 @@ func _try_open_waypoint_menu_at_position(screen_position: Vector2) -> bool:
 	var existing_target: Dictionary = _find_waypoint_target_at_screen_position(screen_position)
 	if not existing_target.is_empty():
 		_focused_waypoint_ref = existing_target.duplicate(true)
+		_focused_area_order_ref = {}
+		_refresh_button_state()
 		_open_waypoint_command_menu(screen_position, [existing_target], true)
 		return true
 	var existing_area_order_target: Dictionary = _find_area_order_target_at_screen_position(screen_position)
 	if not existing_area_order_target.is_empty():
 		_focused_area_order_ref = existing_area_order_target.duplicate(true)
+		_focused_waypoint_ref = {}
+		_refresh_button_state()
 		_open_area_order_command_menu(screen_position, [existing_area_order_target], true)
 		return true
 
@@ -7587,6 +7700,7 @@ func _try_open_waypoint_menu_at_position(screen_position: Vector2) -> bool:
 	if waypoint_targets.is_empty():
 		return false
 	_focused_waypoint_ref = Dictionary(waypoint_targets[0]).duplicate(true)
+	_focused_area_order_ref = {}
 	_open_waypoint_command_menu(screen_position, waypoint_targets, false)
 	_last_command_text = "WAYPOINT ADDED (%s)" % _get_phase_name()
 	_update_ui()
@@ -9807,10 +9921,12 @@ func _try_begin_waypoint_drag(screen_position: Vector2) -> bool:
 		return false
 	_dragged_waypoint_ref = waypoint_ref.duplicate(true)
 	_focused_waypoint_ref = waypoint_ref.duplicate(true)
+	_focused_area_order_ref = {}
 	_dragged_waypoint_press_screen_position = screen_position
 	_is_dragging_waypoint = true
 	_has_dragged_waypoint = false
 	_hide_waypoint_command_menu()
+	_refresh_button_state()
 	return true
 
 
@@ -9832,6 +9948,10 @@ func _finish_waypoint_drag(screen_position: Vector2) -> bool:
 		_last_command_text = "WAYPOINT MOVED"
 		_update_ui()
 		_emit_planning_state_changed()
+	else:
+		_last_command_text = "WAYPOINT SELECTED"
+		_refresh_button_state()
+		_update_ui()
 	_is_dragging_waypoint = false
 	_has_dragged_waypoint = false
 	_dragged_waypoint_ref = {}
@@ -9856,6 +9976,39 @@ func _delete_focused_area_order() -> bool:
 		_focused_area_order_ref = {}
 		_hide_area_order_command_menu()
 	return did_delete
+
+
+func _delete_selected_order() -> bool:
+	if _delete_focused_area_order():
+		_refresh_button_state()
+		return true
+	if _delete_focused_waypoint():
+		_refresh_button_state()
+		return true
+	_focused_area_order_ref = {}
+	_focused_waypoint_ref = {}
+	return false
+
+
+func _has_deletable_order_focus() -> bool:
+	if not _focused_area_order_ref.is_empty() and _get_area_order_from_ref(_focused_area_order_ref) != null:
+		return true
+	if not _focused_waypoint_ref.is_empty() and _get_waypoint_from_ref(_focused_waypoint_ref) != null:
+		return true
+	return false
+
+
+func _try_focus_area_order_at_position(screen_position: Vector2) -> bool:
+	var existing_area_order_target: Dictionary = _find_area_order_target_at_screen_position(screen_position)
+	if existing_area_order_target.is_empty():
+		return false
+	_focused_area_order_ref = existing_area_order_target.duplicate(true)
+	_focused_waypoint_ref = {}
+	_hide_waypoint_command_menu()
+	_last_command_text = "AREA ORDER SELECTED"
+	_refresh_button_state()
+	_update_ui()
+	return true
 
 
 func _open_waypoint_command_menu(screen_position: Vector2, waypoint_targets: Array, include_delete_action: bool) -> void:

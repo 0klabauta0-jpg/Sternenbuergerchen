@@ -21,6 +21,8 @@ const BUTTON_PATH_FLANK: String = "../TacticalUI/BottomDock/BottomMargin/BottomR
 const BUTTON_PATH_TAKE: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton"
 const BUTTON_PATH_TARGET: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton"
 const BUTTON_PATH_CLEAR_TARGET: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton"
+const BUTTON_PATH_DELETE_ORDER: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/DeleteOrderButton"
+const BUTTON_PATH_SORT: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/SortCommandMatrixButton"
 const BUTTON_PATH_SET_LZ: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton"
 const BUTTON_PATH_CALL_DROPSHIP: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton"
 const BUTTON_PATH_GO_PLAN: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton"
@@ -76,6 +78,7 @@ static func get_action_catalog() -> Array:
 		_action("withdraw", "Withdraw", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.area_order", "", {"requires_selection": true, "future_task": "TASK_276 breakout behavior", "context": "breakout"}),
 		_action("flank", "Flank", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.flank", BUTTON_PATH_FLANK, {"requires_selection": true, "requires_tile_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
 		_action("clear_target", "Clear Target", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.clear_target", BUTTON_PATH_CLEAR_TARGET, {"requires_planning": true, "implemented": true, "context": "area"}),
+		_action("delete_order", "Delete", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.clear_target", BUTTON_PATH_DELETE_ORDER, {"requires_planning": true, "implemented": true, "context": "waypoint_or_area"}),
 
 		_action("tempo", "Tempo", GROUP_RULE, PANEL_FIRETEAM_DETAILS, "mission.rule.tempo", "", {"requires_selection": true, "status_only": true, "context": "single_or_multi"}),
 		_action("fire_rule", "Fire Rule", GROUP_RULE, PANEL_FIRETEAM_DETAILS, "mission.rule.fire_rule", "", {"requires_selection": true, "status_only": true, "context": "single_or_multi"}),
@@ -86,6 +89,7 @@ static func get_action_catalog() -> Array:
 		_action("role_suggestion", "Roles", GROUP_PLAN, PANEL_MISSION_CONTROL, "mission.command.go_plan", "", {"requires_multi_selection": true, "status_only": true, "context": "multi_fireteam"}),
 		_action("swap_roles", "Swap", GROUP_PLAN, PANEL_MISSION_CONTROL, "mission.command.go_plan", "", {"requires_multi_selection": true, "future_task": "multi-plan edit UI", "context": "multi_fireteam"}),
 		_action("preview_plan", "Preview", GROUP_PLAN, PANEL_MISSION_CONTROL, "mission.command.go_plan", "", {"requires_multi_selection": true, "status_only": true, "context": "multi_fireteam"}),
+		_action("sort_fireteam", "Sort", GROUP_PLAN, PANEL_COMMAND_MATRIX, "mission.command.go_plan", BUTTON_PATH_SORT, {"requires_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
 		_action("go_plan", "GO", GROUP_PLAN, PANEL_COMMAND_MATRIX, "mission.command.go_plan", BUTTON_PATH_GO_PLAN, {"requires_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
 		_action("return_to_plan", "Plan", GROUP_PLAN, PANEL_COMMAND_MATRIX, "mission.command.go_plan", BUTTON_PATH_RETURN_TO_PLAN, {"requires_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
 

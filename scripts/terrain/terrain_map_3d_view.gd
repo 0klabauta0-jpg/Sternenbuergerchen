@@ -147,6 +147,8 @@ const TILE_SELECTION_SURFACE_Y_OFFSET: float = 0.12
 const TILE_SELECTION_BORDER_WIDTH_FACTOR: float = 0.078
 const TILE_SELECTION_FILL_COLOR: Color = Color(0.05, 0.58, 1.0, 0.46)
 const TILE_SELECTION_BORDER_COLOR: Color = Color(0.78, 0.98, 1.0, 1.0)
+const FRIENDLY_AIM_LINE_COLOR: Color = Color(0.42, 1.0, 0.74, 0.72)
+const FRIENDLY_AIM_TIP_COLOR: Color = Color(0.74, 1.0, 0.88, 0.78)
 
 const LEGACY_MODEL_BY_TYPE: Dictionary = {
 	"wall_straight_se": "corridor_wall",
@@ -307,6 +309,8 @@ var _enemy_security_visual_count: int = 0
 var _enemy_security_entries: Array = []
 var _enemy_tactics_visual_count: int = 0
 var _enemy_tactics_entries: Array = []
+var _friendly_aim_visual_count: int = 0
+var _friendly_aim_entries: Array = []
 var _weapon_fire_vfx_visual_count: int = 0
 var _weapon_fire_vfx_entries: Array = []
 var _weapon_fire_sfx_count: int = 0
@@ -427,6 +431,8 @@ func render_map(terrain_map_data = null) -> void:
 	_enemy_security_entries.clear()
 	_enemy_tactics_visual_count = 0
 	_enemy_tactics_entries.clear()
+	_friendly_aim_visual_count = 0
+	_friendly_aim_entries.clear()
 	_weapon_fire_vfx_visual_count = 0
 	_weapon_fire_vfx_entries.clear()
 	_feedback_bubble_visual_count = 0
@@ -840,6 +846,8 @@ func get_render_snapshot() -> Dictionary:
 		"enemy_security_entries": _enemy_security_entries.duplicate(true),
 		"enemy_tactics_visual_count": _enemy_tactics_visual_count,
 		"enemy_tactics_entries": _enemy_tactics_entries.duplicate(true),
+		"friendly_aim_visual_count": _friendly_aim_visual_count,
+		"friendly_aim_entries": _friendly_aim_entries.duplicate(true),
 		"weapon_fire_vfx_visual_count": _weapon_fire_vfx_visual_count,
 		"weapon_fire_vfx_entries": _weapon_fire_vfx_entries.duplicate(true),
 		"weapon_fire_vfx_catalog_loaded": not _get_weapon_fire_vfx_catalog().is_empty(),
@@ -1070,9 +1078,10 @@ func _build_render_transparency_budget(render_budget_totals: Dictionary) -> Dict
 		"transparent_material_count": transparent_material_count,
 		"feedback_bubble_count": _feedback_bubble_visual_count,
 		"weapon_fire_vfx_count": _weapon_fire_vfx_visual_count,
+		"friendly_aim_visual_count": _friendly_aim_visual_count,
 		"surface_tint_count": _surface_tint_count,
 		"fog_of_war_overlay_count": _fow_overlay_tile_count,
-		"transparent_overlay_count": label_count + sprite_count + transparent_material_count + _feedback_bubble_visual_count + _weapon_fire_vfx_visual_count + _surface_tint_count + _fow_known_dim_tile_count + _fow_explored_tile_count,
+		"transparent_overlay_count": label_count + sprite_count + transparent_material_count + _feedback_bubble_visual_count + _weapon_fire_vfx_visual_count + _friendly_aim_visual_count + _surface_tint_count + _fow_known_dim_tile_count + _fow_explored_tile_count,
 		"budget_policy": "observe_and_keep_small_before_optimizing",
 	}
 
@@ -2923,6 +2932,8 @@ func _rebuild_order_visuals() -> void:
 			continue
 		anchor_by_fireteam[fireteam_id] = Vector2(anchor_dict.get("position", Vector2.ZERO))
 
+	_add_selected_fireteam_aim_visuals()
+
 	for area_variant in Array(_order_payload.get("area_order_dicts", [])):
 		if typeof(area_variant) != TYPE_DICTIONARY:
 			continue
@@ -3261,6 +3272,82 @@ func _add_enemy_tactics_visual(tactics_state: Dictionary) -> void:
 		"covering_unit_ids": PackedStringArray(tactics_state.get("covering_unit_ids", PackedStringArray())),
 		"role_by_unit_id": Dictionary(tactics_state.get("role_by_unit_id", {})).duplicate(true),
 	})
+
+
+func _add_selected_fireteam_aim_visuals() -> void:
+	var selected_fireteam_ids: PackedStringArray = _get_string_array_from_variant(_order_payload.get("selected_fireteam_ids", PackedStringArray()))
+	if selected_fireteam_ids.is_empty():
+		return
+	for unit in _unit_nodes:
+		if unit == null or not (unit is Node2D):
+			continue
+		var fireteam_id: String = _get_unit_fireteam_id(unit)
+		if fireteam_id.is_empty() or not selected_fireteam_ids.has(fireteam_id):
+			continue
+		if not _is_unit_world_visible(unit):
+			continue
+		var weapon_id: String = _get_unit_active_attack_weapon_id(unit)
+		if weapon_id.is_empty():
+			continue
+		var range_world: float = float(WEAPON_DATA_SCRIPT.call("get_effective_world_range", weapon_id, _terrain_map_data))
+		if range_world <= 0.0:
+			continue
+		var unit_position: Vector2 = (unit as Node2D).global_position
+		var aim_direction: Vector2 = _resolve_unit_aim_direction(unit, unit_position)
+		if aim_direction.length_squared() <= 0.0001:
+			continue
+		var tip_position: Vector2 = unit_position + aim_direction.normalized() * range_world
+		var unit_id: String = _get_unit_id(unit)
+		_add_line3d(_order_root, _world_to_surface_3d_position(unit_position, 0.82), _world_to_surface_3d_position(tip_position, 0.82), FRIENDLY_AIM_LINE_COLOR, "FriendlyAimLine_%s" % unit_id)
+		_add_marker3d(_order_root, tip_position, FRIENDLY_AIM_TIP_COLOR, "FriendlyAimTip_%s" % unit_id, 0.11, 0.09, 12)
+		_friendly_aim_visual_count += 1
+		_friendly_aim_entries.append({
+			"unit_id": unit_id,
+			"fireteam_id": fireteam_id,
+			"weapon_id": weapon_id,
+			"range_world": range_world,
+			"origin_position": unit_position,
+			"tip_position": tip_position,
+			"visual_only": true,
+		})
+
+
+func _get_unit_fireteam_id(unit: Node) -> String:
+	if unit != null and unit.has_method("get_fireteam_id"):
+		return String(unit.call("get_fireteam_id")).strip_edges().to_lower()
+	return ""
+
+
+func _get_unit_active_attack_weapon_id(unit: Node) -> String:
+	var candidates := PackedStringArray()
+	if unit != null and unit.has_method("get_active_weapon_id"):
+		candidates.append(String(unit.call("get_active_weapon_id")))
+	for weapon_id in _get_unit_visual_weapon_ids(unit):
+		if not candidates.has(String(weapon_id)):
+			candidates.append(String(weapon_id))
+	for candidate in candidates:
+		var normalized: String = String(WEAPON_DATA_SCRIPT.call("normalize_weapon_id", String(candidate))).strip_edges().to_lower()
+		if not normalized.is_empty() and bool(WEAPON_DATA_SCRIPT.call("is_attack_weapon_id", normalized)):
+			return normalized
+	return ""
+
+
+func _resolve_unit_aim_direction(unit: Node, unit_world_position: Vector2) -> Vector2:
+	if unit != null and unit.has_meta("facing_angle"):
+		return Vector2.RIGHT.rotated(float(unit.get_meta("facing_angle", 0.0))).normalized()
+	var target_position_variant = unit.call("get_target_position") if unit != null and unit.has_method("get_target_position") else null
+	if typeof(target_position_variant) == TYPE_VECTOR2:
+		var target_position: Vector2 = Vector2(target_position_variant)
+		if unit_world_position.distance_squared_to(target_position) > 1.0:
+			return (target_position - unit_world_position).normalized()
+	var proxy := _unit_proxies_by_id.get(_get_unit_id(unit), null) as Node3D
+	if proxy != null and is_instance_valid(proxy):
+		var yaw_radians: float = deg_to_rad(float(proxy.rotation_degrees.y))
+		var grid_direction := Vector2(sin(yaw_radians), -cos(yaw_radians))
+		var world_tip: Vector2 = _grid_float_to_world(_world_to_grid_float(unit_world_position) + grid_direction)
+		if unit_world_position.distance_squared_to(world_tip) > 0.001:
+			return (world_tip - unit_world_position).normalized()
+	return Vector2.RIGHT
 
 
 func _ensure_audio_event_bus(create_if_missing: bool = true):
