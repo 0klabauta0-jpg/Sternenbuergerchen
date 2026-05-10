@@ -53,6 +53,12 @@ var _settings_reset_button: Button = null
 var _team_name_edit: LineEdit = null
 var _team_name_suggest_button: Button = null
 var _new_roster_button: Button = null
+var _team_library_panel: PanelContainer = null
+var _team_library_list: VBoxContainer = null
+var _team_library_status_label: Label = null
+var _team_library_delete_button: Button = null
+var _team_library_entries: Array = []
+var _selected_roster_entry_path: String = ""
 var _start_roster: Dictionary = {}
 var _start_roster_seed: String = START_ROSTER_GENERATOR_SCRIPT.DEFAULT_SEED
 var _start_roster_size: int = START_ROSTER_GENERATOR_SCRIPT.DEFAULT_ROSTER_SIZE
@@ -178,6 +184,38 @@ func get_start_roster_snapshot() -> Dictionary:
 	return summary
 
 
+func get_team_library_snapshot() -> Dictionary:
+	var selected_entry: Dictionary = _find_team_library_entry(_selected_roster_entry_path)
+	var active_entry: Dictionary = {}
+	for entry_variant in _team_library_entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		if bool(entry.get("active", false)):
+			active_entry = entry
+			break
+	return {
+		"visible": _team_library_panel != null and _team_library_panel.visible,
+		"entry_count": _team_library_entries.size(),
+		"entries": _team_library_entries.duplicate(true),
+		"selected_path": _selected_roster_entry_path,
+		"selected_team_name": String(selected_entry.get("team_name", "")),
+		"selected_is_active": bool(selected_entry.get("active", false)),
+		"active_path": String(active_entry.get("path", _start_roster_save_path)),
+		"active_team_name": String(active_entry.get("team_name", "")),
+		"delete_enabled": _team_library_delete_button != null and not _team_library_delete_button.disabled,
+	}
+
+
+func select_team_library_entry_for_tests(entry_path: String) -> void:
+	_selected_roster_entry_path = entry_path.strip_edges()
+	_refresh_team_library()
+
+
+func delete_selected_team_entry_for_tests() -> Dictionary:
+	return _delete_selected_team_entry(false)
+
+
 func ensure_start_roster_exists(seed: String = "", roster_size: int = -1) -> Dictionary:
 	if not seed.strip_edges().is_empty():
 		_start_roster_seed = seed.strip_edges()
@@ -191,6 +229,8 @@ func ensure_start_roster_exists(seed: String = "", roster_size: int = -1) -> Dic
 	_start_roster_reset_confirmation_pending = false
 	_refresh_start_roster_button()
 	_refresh_team_name_controls()
+	_selected_roster_entry_path = _start_roster_save_path
+	_refresh_team_library()
 	_status_label.text = "Roster ready" if bool(Dictionary(first_start.get("summary", {})).get("valid", false)) else "Roster invalid"
 	return first_start
 
@@ -219,7 +259,9 @@ func set_start_roster_store_path_for_tests(save_path: String, profile_id: String
 	_start_roster_reset_confirmation_pending = false
 	_last_start_roster_store_result = {}
 	_last_start_roster_loaded_from_save = false
+	_selected_roster_entry_path = _start_roster_save_path
 	_start_roster.clear()
+	_refresh_team_library()
 
 
 func request_new_start_roster() -> Dictionary:
@@ -245,6 +287,8 @@ func confirm_new_start_roster() -> Dictionary:
 	_start_roster_reset_confirmation_pending = false
 	_refresh_start_roster_button()
 	_refresh_team_name_controls()
+	_selected_roster_entry_path = _start_roster_save_path
+	_refresh_team_library()
 	_status_label.text = "Neues Team bereit" if bool(reset_result.get("ok", false)) else "Roster save failed"
 	return {
 		"created": true,
@@ -266,6 +310,8 @@ func set_start_team_name(next_team_name: String) -> Dictionary:
 	_start_roster = Dictionary(renamed.get("roster", _start_roster)).duplicate(true)
 	_last_start_roster_store_result = Dictionary(renamed.get("save", {})).duplicate(true)
 	_refresh_team_name_controls()
+	_selected_roster_entry_path = _start_roster_save_path
+	_refresh_team_library()
 	_status_label.text = "Team name saved" if bool(renamed.get("ok", false)) else "Team name save failed"
 	return renamed
 
@@ -541,8 +587,78 @@ func _ensure_start_roster_button() -> void:
 		menu_buttons.add_child(_new_roster_button)
 	_new_roster_button.set_meta("roster_action", "new_start_roster")
 	_new_roster_button.set_meta("requires_confirmation", true)
+	_ensure_team_library_panel(menu_buttons)
 	_refresh_start_roster_button()
 	_refresh_team_name_controls()
+	_refresh_team_library()
+
+
+func _ensure_team_library_panel(menu_buttons: VBoxContainer) -> void:
+	_team_library_panel = menu_buttons.get_node_or_null("TeamLibraryPanel") as PanelContainer
+	if _team_library_panel == null:
+		_team_library_panel = PanelContainer.new()
+		_team_library_panel.name = "TeamLibraryPanel"
+		_team_library_panel.custom_minimum_size = Vector2(360.0, 176.0)
+		menu_buttons.add_child(_team_library_panel)
+	var margin := _team_library_panel.get_node_or_null("TeamLibraryMargin") as MarginContainer
+	if margin == null:
+		margin = MarginContainer.new()
+		margin.name = "TeamLibraryMargin"
+		margin.add_theme_constant_override("margin_left", 10)
+		margin.add_theme_constant_override("margin_top", 8)
+		margin.add_theme_constant_override("margin_right", 10)
+		margin.add_theme_constant_override("margin_bottom", 8)
+		_team_library_panel.add_child(margin)
+	var vbox := margin.get_node_or_null("TeamLibraryVBox") as VBoxContainer
+	if vbox == null:
+		vbox = VBoxContainer.new()
+		vbox.name = "TeamLibraryVBox"
+		vbox.add_theme_constant_override("separation", 6)
+		margin.add_child(vbox)
+	var header_row := vbox.get_node_or_null("TeamLibraryHeaderRow") as HBoxContainer
+	if header_row == null:
+		header_row = HBoxContainer.new()
+		header_row.name = "TeamLibraryHeaderRow"
+		header_row.add_theme_constant_override("separation", 8)
+		vbox.add_child(header_row)
+	var header_label := header_row.get_node_or_null("TeamLibraryHeaderLabel") as Label
+	if header_label == null:
+		header_label = Label.new()
+		header_label.name = "TeamLibraryHeaderLabel"
+		header_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		header_row.add_child(header_label)
+	header_label.text = "Erstellte Teams"
+	header_label.add_theme_font_size_override("font_size", 13)
+	_team_library_delete_button = header_row.get_node_or_null("TeamLibraryDeleteButton") as Button
+	if _team_library_delete_button == null:
+		_team_library_delete_button = Button.new()
+		_team_library_delete_button.name = "TeamLibraryDeleteButton"
+		_team_library_delete_button.text = "Loeschen"
+		_team_library_delete_button.custom_minimum_size = Vector2(92.0, 32.0)
+		header_row.add_child(_team_library_delete_button)
+	if not _team_library_delete_button.pressed.is_connected(_on_team_library_delete_pressed):
+		_team_library_delete_button.pressed.connect(_on_team_library_delete_pressed)
+	_team_library_status_label = vbox.get_node_or_null("TeamLibraryStatusLabel") as Label
+	if _team_library_status_label == null:
+		_team_library_status_label = Label.new()
+		_team_library_status_label.name = "TeamLibraryStatusLabel"
+		_team_library_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		vbox.add_child(_team_library_status_label)
+	_team_library_status_label.add_theme_font_size_override("font_size", 11)
+	var scroll := vbox.get_node_or_null("TeamLibraryScroll") as ScrollContainer
+	if scroll == null:
+		scroll = ScrollContainer.new()
+		scroll.name = "TeamLibraryScroll"
+		scroll.custom_minimum_size = Vector2(340.0, 94.0)
+		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		vbox.add_child(scroll)
+	_team_library_list = scroll.get_node_or_null("TeamLibraryList") as VBoxContainer
+	if _team_library_list == null:
+		_team_library_list = VBoxContainer.new()
+		_team_library_list.name = "TeamLibraryList"
+		_team_library_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_team_library_list.add_theme_constant_override("separation", 4)
+		scroll.add_child(_team_library_list)
 
 
 func _refresh_start_roster_button() -> void:
@@ -560,6 +676,102 @@ func _refresh_team_name_controls() -> void:
 	_team_name_edit.tooltip_text = "Teamname fuer Roster/Homebase/FOB."
 	if _team_name_suggest_button != null:
 		_team_name_suggest_button.tooltip_text = "Neuen Teamnamen vorschlagen."
+
+
+func _refresh_team_library() -> void:
+	if _team_library_list == null:
+		return
+	var library: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("list_roster_entries", _start_roster_profile_id, _start_roster_save_path))
+	_team_library_entries = Array(library.get("entries", [])).duplicate(true)
+	var active_path: String = String(library.get("active_path", _start_roster_save_path))
+	if _selected_roster_entry_path.strip_edges().is_empty() or _find_team_library_entry(_selected_roster_entry_path).is_empty():
+		_selected_roster_entry_path = active_path
+	_clear_children(_team_library_list)
+	for entry_variant in _team_library_entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var row := Button.new()
+		row.name = "TeamLibraryEntryButton"
+		row.toggle_mode = true
+		row.focus_mode = Control.FOCUS_ALL
+		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.custom_minimum_size = Vector2(320.0, 30.0)
+		row.clip_text = true
+		row.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		row.text = _format_team_library_entry(entry)
+		row.tooltip_text = String(entry.get("path", ""))
+		row.set_meta("roster_entry_path", String(entry.get("path", "")))
+		row.set_meta("team_name", String(entry.get("team_name", "")))
+		row.set_meta("active_roster", bool(entry.get("active", false)))
+		row.set_meta("archived_roster", bool(entry.get("archived", false)))
+		row.set_pressed_no_signal(String(entry.get("path", "")) == _selected_roster_entry_path)
+		row.pressed.connect(_on_team_library_row_pressed.bind(String(entry.get("path", ""))))
+		_team_library_list.add_child(row)
+	_refresh_team_library_status()
+
+
+func _refresh_team_library_status() -> void:
+	var selected_entry: Dictionary = _find_team_library_entry(_selected_roster_entry_path)
+	var selected_name: String = String(selected_entry.get("team_name", "")).strip_edges()
+	if selected_name.is_empty():
+		selected_name = "kein Team"
+	var selected_active: bool = bool(selected_entry.get("active", false))
+	if _team_library_status_label != null:
+		var prefix: String = "Ausgewaehlt"
+		if selected_active:
+			prefix = "Ausgewaehlt aktiv"
+		elif bool(selected_entry.get("archived", false)):
+			prefix = "Ausgewaehlt Archiv"
+		_team_library_status_label.text = "%s: %s" % [prefix, selected_name]
+	if _team_library_delete_button != null:
+		var can_delete: bool = not selected_entry.is_empty() and bool(selected_entry.get("can_delete", false)) and not selected_active
+		_team_library_delete_button.disabled = not can_delete
+		_team_library_delete_button.tooltip_text = "Archiv-Team loeschen." if can_delete else "Aktives Team bleibt geschuetzt."
+
+
+func _format_team_library_entry(entry: Dictionary) -> String:
+	var team_name: String = String(entry.get("team_name", "")).strip_edges()
+	if team_name.is_empty():
+		team_name = "Unbenanntes Team"
+	var marker: String = "AKTIV" if bool(entry.get("active", false)) else "ARCHIV"
+	var roster_size: int = int(entry.get("roster_size", 0))
+	return "%s  %s  (%d)" % [marker, team_name, roster_size]
+
+
+func _find_team_library_entry(entry_path: String) -> Dictionary:
+	var normalized_path: String = entry_path.strip_edges()
+	for entry_variant in _team_library_entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("path", "")) == normalized_path:
+			return entry
+	return {}
+
+
+func _delete_selected_team_entry(play_sound: bool = true) -> Dictionary:
+	var selected_entry: Dictionary = _find_team_library_entry(_selected_roster_entry_path)
+	if selected_entry.is_empty():
+		return {"ok": false, "reason": "missing_selection"}
+	var result: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("delete_roster_entry", _selected_roster_entry_path, _start_roster_profile_id, _start_roster_save_path))
+	if bool(result.get("ok", false)):
+		_selected_roster_entry_path = _start_roster_save_path
+		_status_label.text = "Team geloescht"
+		if play_sound:
+			_play_ui_sfx("confirm", "delete_roster_entry")
+	else:
+		_status_label.text = "Team bleibt aktiv" if String(result.get("reason", "")) == "active_roster_protected" else "Loeschen fehlgeschlagen"
+		if play_sound:
+			_play_ui_sfx("warning", "delete_roster_entry_failed")
+	_refresh_team_library()
+	return result
+
+
+func _clear_children(container: Node) -> void:
+	for child in container.get_children():
+		container.remove_child(child)
+		child.queue_free()
 
 
 func _ensure_contextual_help_ui() -> void:
@@ -599,6 +811,7 @@ func _register_main_menu_help_ids() -> void:
 	_connect_help_control(_editor_button, "main_menu.primary_routes")
 	_connect_help_control(_settings_button, "main_menu.primary_routes")
 	_connect_help_control(_new_roster_button, "main_menu.primary_routes")
+	_connect_help_control(_team_library_delete_button, "main_menu.primary_routes")
 	_connect_help_control(_global_help_button, "shell.global_help_button")
 	_connect_help_control(_display_section_label, "settings.display")
 	_connect_help_control(_resolution_option, "settings.display")
@@ -982,6 +1195,16 @@ func _on_team_name_edit_focus_exited() -> void:
 
 func _on_team_name_suggest_pressed() -> void:
 	request_start_team_name_suggestion()
+
+
+func _on_team_library_row_pressed(entry_path: String) -> void:
+	_selected_roster_entry_path = entry_path.strip_edges()
+	_refresh_team_library()
+	_play_ui_sfx("switch", "team_library_select")
+
+
+func _on_team_library_delete_pressed() -> void:
+	_delete_selected_team_entry(true)
 
 
 func _on_global_help_pressed() -> void:

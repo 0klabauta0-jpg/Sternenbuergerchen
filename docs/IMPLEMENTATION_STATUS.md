@@ -10,6 +10,13 @@
 
 ## Aktueller Startzustand
 
+### Manual Playtest - Debrief Background and Main Menu Team Library
+- Status: implementiert
+- Stand: `DebriefTestScreen` nutzt jetzt den katalogisierten Background `debrief_desert_explosion_base` mit Dim-Shade und dokumentierter Readability-Policy. Das bleibt rein visuell und erzeugt keinen Gameplay-State.
+- Stand: Das Hauptmenue zeigt unter Teamname/Neues Team eine Liste der erstellten Teams aus aktuellem Roster-Save plus archivierten Reset-Saves. Das aktive Team ist sichtbar ausgewaehlt; Archivteams koennen markiert und geloescht werden, waehrend das aktive Team gegen versehentliches Loeschen geschuetzt bleibt.
+- Risiken: Es gibt weiterhin nur ein aktives lokales Roster pro Profil; die Liste ist eine UI auf Current-Save plus Reset-Archive, kein neues Kampagnen- oder Multiplayer-Teamslot-System.
+- Lokale Pruefung: `bugfix_debrief_background_and_main_menu_team_library.gd`, `task_245_background_image_catalog_and_screen_usage_verifier.gd`, `task_234_persistent_player_roster_save_and_reset.gd` und `git diff --check` laufen gruen.
+
 ### Manual Playtest - Mission Fireteam FOB Payload and Bubbles
 - Status: implementiert
 - Stand: MissionStart uebergibt jetzt neben Unit-/Fireteam-IDs auch die FOB-Unit-Konfigurationen an `MissionTestSetup`. Die Mission spiegelt damit die in der FOB zusammengestellten Fireteam-Mitglieder, Namen, Profile und Portraits statt auf generische Preset-Fallbacks zu fallen.

@@ -149,6 +149,54 @@ static func reset_roster(seed: String, roster_size: int, profile_id: String = DE
 	}
 
 
+static func list_roster_entries(profile_id: String = DEFAULT_PROFILE_ID, save_path: String = "") -> Dictionary:
+	var current_path: String = _resolve_save_path(profile_id, save_path)
+	var entries: Array = []
+	if FileAccess.file_exists(current_path):
+		entries.append(_build_roster_entry(current_path, profile_id, true, false))
+	var archive_dir: String = "%s/archive" % current_path.get_base_dir()
+	var dir := DirAccess.open(archive_dir)
+	if dir != null:
+		dir.list_dir_begin()
+		var file_name: String = dir.get_next()
+		while not file_name.is_empty():
+			if not dir.current_is_dir() and file_name.ends_with(".json"):
+				var entry_path: String = "%s/%s" % [archive_dir, file_name]
+				entries.append(_build_roster_entry(entry_path, profile_id, false, true))
+			file_name = dir.get_next()
+		dir.list_dir_end()
+	entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return _sort_roster_entries(a, b))
+	return {
+		"ok": true,
+		"profile_id": _sanitize_profile_id(profile_id),
+		"active_path": current_path,
+		"archive_dir": archive_dir,
+		"entries": entries,
+		"entry_count": entries.size(),
+	}
+
+
+static func delete_roster_entry(entry_path: String, profile_id: String = DEFAULT_PROFILE_ID, save_path: String = "") -> Dictionary:
+	var path: String = entry_path.strip_edges()
+	var current_path: String = _resolve_save_path(profile_id, save_path)
+	if path.is_empty():
+		return {"ok": false, "reason": "missing_entry_path", "path": path}
+	if path == current_path:
+		return {"ok": false, "reason": "active_roster_protected", "path": path}
+	var archive_dir: String = "%s/archive" % current_path.get_base_dir()
+	if not _is_archive_entry_path(path, archive_dir):
+		return {"ok": false, "reason": "outside_roster_archive", "path": path, "archive_dir": archive_dir}
+	if not FileAccess.file_exists(path):
+		return {"ok": false, "reason": "entry_missing", "path": path}
+	var error: Error = DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	return {
+		"ok": error == OK,
+		"reason": "deleted" if error == OK else "delete_failed",
+		"error": error,
+		"path": path,
+	}
+
+
 static func archive_existing_roster(profile_id: String = DEFAULT_PROFILE_ID, save_path: String = "") -> Dictionary:
 	var path: String = _resolve_save_path(profile_id, save_path)
 	if not FileAccess.file_exists(path):
@@ -165,7 +213,7 @@ static func archive_existing_roster(profile_id: String = DEFAULT_PROFILE_ID, sav
 			"archive_path": "",
 			"diagnostics": PackedStringArray(["archive_dir_failed:%s:%d" % [archive_dir, dir_error]]),
 		}
-	var archive_path: String = "%s/roster_v1_%d.json" % [archive_dir, int(Time.get_unix_time_from_system())]
+	var archive_path: String = _build_unique_archive_path(archive_dir)
 	var source_file := FileAccess.open(path, FileAccess.READ)
 	if source_file == null:
 		return {
@@ -295,6 +343,64 @@ static func delete_roster_for_tests(profile_id: String = DEFAULT_PROFILE_ID, sav
 	var path: String = _resolve_save_path(profile_id, save_path)
 	if FileAccess.file_exists(path):
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+
+
+static func _build_roster_entry(path: String, profile_id: String, active: bool, archived: bool) -> Dictionary:
+	var load_result: Dictionary = load_roster(profile_id, path)
+	var roster: Dictionary = Dictionary(load_result.get("roster", {})).duplicate(true)
+	var payload: Dictionary = Dictionary(load_result.get("payload", {}))
+	var identity: Dictionary = Dictionary(TEAM_NAME_GENERATOR_SCRIPT.call("build_team_identity_snapshot", roster))
+	var team_name: String = String(identity.get("team_name", "")).strip_edges()
+	if team_name.is_empty() and not bool(load_result.get("ok", false)):
+		team_name = "Ungueltiger Team-Save"
+	return {
+		"entry_id": path,
+		"path": path,
+		"profile_id": String(load_result.get("profile_id", _sanitize_profile_id(profile_id))),
+		"team_name": team_name,
+		"seed": String(roster.get("seed", payload.get("generator_seed", ""))),
+		"roster_size": Array(roster.get("units", [])).size(),
+		"saved_at_unix_time": int(payload.get("saved_at_unix_time", 0)),
+		"active": active,
+		"archived": archived,
+		"valid": bool(load_result.get("ok", false)),
+		"can_delete": not active,
+		"source": "current" if active else "archive",
+		"diagnostics": PackedStringArray(load_result.get("diagnostics", PackedStringArray())),
+	}
+
+
+static func _sort_roster_entries(a: Dictionary, b: Dictionary) -> bool:
+	if bool(a.get("active", false)) != bool(b.get("active", false)):
+		return bool(a.get("active", false))
+	var a_saved: int = int(a.get("saved_at_unix_time", 0))
+	var b_saved: int = int(b.get("saved_at_unix_time", 0))
+	if a_saved != b_saved:
+		return a_saved > b_saved
+	return String(a.get("path", "")) < String(b.get("path", ""))
+
+
+static func _is_archive_entry_path(path: String, archive_dir: String) -> bool:
+	if path.is_empty() or archive_dir.is_empty():
+		return false
+	if not path.ends_with(".json"):
+		return false
+	var normalized_archive_dir: String = archive_dir
+	while normalized_archive_dir.ends_with("/"):
+		normalized_archive_dir = normalized_archive_dir.substr(0, normalized_archive_dir.length() - 1)
+	var prefix: String = "%s/" % normalized_archive_dir
+	return path.begins_with(prefix)
+
+
+static func _build_unique_archive_path(archive_dir: String) -> String:
+	var timestamp: int = int(Time.get_unix_time_from_system())
+	var base_path: String = "%s/roster_v1_%d" % [archive_dir, timestamp]
+	var candidate: String = "%s.json" % base_path
+	var suffix: int = 1
+	while FileAccess.file_exists(candidate):
+		candidate = "%s_%02d.json" % [base_path, suffix]
+		suffix += 1
+	return candidate
 
 
 static func _resolve_save_path(profile_id: String, save_path: String) -> String:

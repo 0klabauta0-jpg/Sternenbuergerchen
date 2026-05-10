@@ -4,6 +4,8 @@ extends Control
 const PERSONNEL_EVENT_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/personnel_event_model.gd")
 const AIR_ASSET_RECOVERY_STATE_SCRIPT: GDScript = preload("res://scripts/meta/air_asset_recovery_state.gd")
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
+const BACKGROUND_IMAGE_CATALOG_SCRIPT: GDScript = preload("res://scripts/assets/background_image_catalog.gd")
+const BACKGROUND_ID: String = "debrief_desert_explosion_base"
 
 signal return_to_fob_requested()
 signal return_to_homebase_requested()
@@ -12,6 +14,7 @@ var _mission_result: Dictionary = {}
 
 
 func _ready() -> void:
+	_apply_background_texture()
 	var to_fob_button: Button = get_node("Panel/Margin/VBox/ButtonRow/ReturnToFOBButton")
 	var to_homebase_button: Button = get_node("Panel/Margin/VBox/ButtonRow/ReturnToHomebaseButton")
 	if not to_fob_button.pressed.is_connected(_on_return_to_fob_pressed):
@@ -32,6 +35,22 @@ func set_mission_result(mission_result: Dictionary) -> void:
 
 func get_mission_result() -> Dictionary:
 	return _mission_result.duplicate(true)
+
+
+func get_background_catalog_snapshot() -> Dictionary:
+	var entry: Dictionary = Dictionary(BACKGROUND_IMAGE_CATALOG_SCRIPT.call("get_entry", BACKGROUND_ID))
+	var background := get_node_or_null("Background") as TextureRect
+	var shade := get_node_or_null("BackgroundShade") as ColorRect
+	return {
+		"background_id": BACKGROUND_ID,
+		"path": String(entry.get("res_path", "")),
+		"entry": entry,
+		"uses_catalog": not entry.is_empty(),
+		"has_texture": background != null and background.texture != null,
+		"stretch_mode": int(background.stretch_mode) if background != null else -1,
+		"shade_alpha": shade.color.a if shade != null else 0.0,
+		"visual_only": true,
+	}
 
 
 func _render_result() -> void:
@@ -166,7 +185,9 @@ func _apply_readability_style() -> void:
 	var panel := get_node_or_null("Panel") as PanelContainer
 	if panel != null:
 		META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "frame")
+		_apply_debrief_panel_style(panel)
 		panel.set_meta("debrief_contrast_policy", "high_contrast_dark_panel")
+		panel.set_meta("background_readability_policy", "dimmed_catalog_background")
 
 	META_UI_SKIN_SCRIPT.style_header_label(get_node_or_null("Panel/Margin/VBox/TitleLabel"), 18)
 	for path in [
@@ -197,6 +218,69 @@ func _apply_help_id(control: Control, help_id: String) -> void:
 		return
 	control.set_meta("help_id", normalized_id)
 	control.tooltip_text = ""
+
+
+func _apply_background_texture() -> void:
+	var nodes: Dictionary = _ensure_background_nodes()
+	var background := nodes.get("background") as TextureRect
+	var shade := nodes.get("shade") as ColorRect
+	var result: Dictionary = Dictionary(BACKGROUND_IMAGE_CATALOG_SCRIPT.call("apply_to_texture_rect", background, BACKGROUND_ID))
+	var entry: Dictionary = Dictionary(result.get("entry", BACKGROUND_IMAGE_CATALOG_SCRIPT.call("get_entry", BACKGROUND_ID)))
+	if shade != null:
+		var dim_strength: float = clampf(float(entry.get("dim_strength", 0.62)), 0.0, 0.95)
+		shade.color = Color(0.015, 0.027, 0.033, dim_strength)
+		shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if background != null:
+		background.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		background.set_meta("background_id", BACKGROUND_ID)
+		background.set_meta("visual_only", true)
+
+
+func _ensure_background_nodes() -> Dictionary:
+	var background := get_node_or_null("Background") as TextureRect
+	if background == null:
+		background = TextureRect.new()
+		background.name = "Background"
+		add_child(background)
+		move_child(background, 0)
+	background.set_anchors_preset(Control.PRESET_FULL_RECT)
+	background.offset_left = 0.0
+	background.offset_top = 0.0
+	background.offset_right = 0.0
+	background.offset_bottom = 0.0
+	background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	background.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	var shade := get_node_or_null("BackgroundShade") as ColorRect
+	if shade == null:
+		shade = ColorRect.new()
+		shade.name = "BackgroundShade"
+		add_child(shade)
+		move_child(shade, min(1, get_child_count() - 1))
+	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	shade.offset_left = 0.0
+	shade.offset_top = 0.0
+	shade.offset_right = 0.0
+	shade.offset_bottom = 0.0
+	return {"background": background, "shade": shade}
+
+
+func _apply_debrief_panel_style(panel: PanelContainer) -> void:
+	var stylebox := StyleBoxFlat.new()
+	stylebox.bg_color = Color(0.145, 0.176, 0.200, 0.90)
+	stylebox.border_color = Color(0.302, 0.353, 0.388, 0.95)
+	stylebox.border_width_left = 1
+	stylebox.border_width_top = 1
+	stylebox.border_width_right = 1
+	stylebox.border_width_bottom = 1
+	stylebox.corner_radius_top_left = 6
+	stylebox.corner_radius_top_right = 6
+	stylebox.corner_radius_bottom_left = 6
+	stylebox.corner_radius_bottom_right = 6
+	stylebox.content_margin_left = 14
+	stylebox.content_margin_top = 12
+	stylebox.content_margin_right = 14
+	stylebox.content_margin_bottom = 12
+	panel.add_theme_stylebox_override("panel", stylebox)
 
 
 func _ensure_personnel_events_label() -> Label:
