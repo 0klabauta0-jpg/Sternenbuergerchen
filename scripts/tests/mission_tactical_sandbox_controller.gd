@@ -3937,7 +3937,13 @@ func _refresh_mission_dropship_panel() -> void:
 				"progress_visible": is_transit,
 				"progress_value": _build_mission_dropship_progress_value(card),
 				"primary_action": {
-					"visible": false,
+					"visible": _can_request_mission_dropship_return(card),
+					"text": "FOB",
+					"tooltip_text": "Return this dropship to FOB.",
+					"disabled": not _can_request_mission_dropship_return(card),
+					"square_size": 42.0,
+					"ready_style": true,
+					"callback": Callable(self, "_on_mission_dropship_return_pressed").bind(craft_id),
 				},
 				"secondary_action": {
 					"visible": false,
@@ -3947,9 +3953,32 @@ func _refresh_mission_dropship_panel() -> void:
 		)
 		_set_control_tree_mouse_filter(card_panel, Control.MOUSE_FILTER_IGNORE)
 		card_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+		_restore_mission_dropship_action_button_mouse_filters(card_panel)
 	_enforce_mission_dropship_panel_geometry(panel)
 	panel.visible = true
 	call_deferred("_deferred_enforce_mission_dropship_panel_geometry")
+
+
+func _can_request_mission_dropship_return(card: Dictionary) -> bool:
+	if _is_drop_sequence_active():
+		return false
+	var craft_id: String = String(card.get("craft_id", "")).strip_edges()
+	if craft_id.is_empty():
+		return false
+	return String(card.get("state", "")).strip_edges().to_lower() == "waiting"
+
+
+func _restore_mission_dropship_action_button_mouse_filters(card_panel: PanelContainer) -> void:
+	if card_panel == null:
+		return
+	for button_path in [
+		"MarginContainer/VBox/HeaderRow/PrimaryActionButton",
+		"MarginContainer/VBox/HeaderRow/SecondaryActionButton",
+	]:
+		var button := card_panel.get_node_or_null(button_path) as Button
+		if button == null or not button.visible:
+			continue
+		button.mouse_filter = Control.MOUSE_FILTER_STOP
 
 
 func _ensure_mission_control_craft_summary() -> PanelContainer:
@@ -4050,6 +4079,28 @@ func _on_mission_dropship_card_gui_input(event: InputEvent, craft_id: String) ->
 		if key_event.pressed and (key_event.keycode == KEY_ENTER or key_event.keycode == KEY_SPACE):
 			if _select_mission_dropship_craft(craft_id, true):
 				get_viewport().set_input_as_handled()
+
+
+func _on_mission_dropship_return_pressed(craft_id: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return
+	var selected_card: Dictionary = _find_mission_dropship_card_entry(normalized_craft_id)
+	if selected_card.is_empty() or not _can_request_mission_dropship_return(selected_card):
+		return
+	_select_mission_dropship_craft(normalized_craft_id, false)
+	_drop_ship_requested = false
+	_drop_ship_staged = false
+	_mission_drop_state = "to_fob"
+	_mission_drop_progress = 0.0
+	_mission_drop_eta_seconds = 0
+	_mission_drop_return_requested = true
+	_last_command_text = "%s RTB FOB" % _mission_drop_display_name
+	_store_selected_mission_dropship_plan()
+	_emit_planning_state_changed()
+	_refresh_button_state()
+	_update_ui()
+	_refresh_world_overlays()
 
 
 func _clear_mission_dropship_panel_cards(panel: Control) -> void:
@@ -10366,7 +10417,9 @@ func _complete_drop_sequence_deployment() -> void:
 		return
 	if _drop_sequence_phase != DROP_SEQUENCE_UNLOADING:
 		_drop_sequence_phase = DROP_SEQUENCE_UNLOADING
-		_last_command_text = "DEBOARDING %s" % _drop_sequence_fireteam_name
+		_last_command_text = "TOUCHDOWN %s" % _drop_sequence_fireteam_name
+		_show_drop_team_event_text("TOUCHDOWN", Color(0.58, 0.84, 1.0, 1.0), 1.4)
+		_update_ui()
 	while _drop_sequence_unit_index < _drop_sequence_units.size():
 		_deploy_next_embarked_unit()
 	_mission_drop_passenger_count = _embarked_unit_ids.size()
@@ -10383,7 +10436,7 @@ func _begin_drop_sequence_outbound() -> void:
 	_mission_drop_return_requested = true
 	_drop_sequence_phase = DROP_SEQUENCE_OUTBOUND
 	_drop_sequence_timer = 0.0
-	_last_command_text = "DROPSHIP RTB"
+	_last_command_text = "%s AB | DROPSHIP RTB" % _drop_sequence_fireteam_name
 	_store_selected_mission_dropship_plan()
 	_emit_planning_state_changed()
 	_update_ui()
@@ -10415,7 +10468,7 @@ func _deploy_next_embarked_unit() -> void:
 		_enqueue_dropship_deploy_effect(unit, unit_id, deploy_position)
 		_fireteam_runtime_ui_refresh_frames_remaining = 6
 	if unit.has_method("show_event_text"):
-		unit.call("show_event_text", "DISEMBARK", Color(0.55, 1.0, 0.72, 1.0), 1.5)
+		unit.call("show_event_text", "AB", Color(0.55, 1.0, 0.72, 1.0), 1.5)
 	var fireteam_id: String = String(unit.call("get_fireteam_id")).strip_edges().to_lower() if unit.has_method("get_fireteam_id") else ""
 	if not fireteam_id.is_empty():
 		_post_drop_security_pending_fireteam_ids[fireteam_id] = true
@@ -10423,8 +10476,15 @@ func _deploy_next_embarked_unit() -> void:
 			_maybe_start_active_phase_for_fireteam(fireteam_id)
 		else:
 			_runtime_activation_pending_fireteam_ids[fireteam_id] = true
-	_last_command_text = "DEBOARD %d/%d" % [_drop_sequence_unit_index, _drop_sequence_units.size()]
+	_last_command_text = "AB %d/%d" % [_drop_sequence_unit_index, _drop_sequence_units.size()]
 	_update_ui()
+
+
+func _show_drop_team_event_text(event_text: String, color: Color, duration_seconds: float) -> void:
+	for unit in _drop_sequence_units:
+		if unit == null or not unit.has_method("show_event_text"):
+			continue
+		unit.call("show_event_text", event_text, color, duration_seconds)
 
 
 func _is_drop_sequence_active() -> bool:

@@ -10,6 +10,15 @@
 
 ## Aktueller Startzustand
 
+### Manual Playtest - Dropship Cards, Per-Craft Dispatch and Return
+- Status: implementiert
+- Stand: Homebase `#05 FLIGHT DECK` rendert Shipcards kompakter ohne horizontalen Scrollbalken. Das Dropship-Visual ist im kleineren Sichtfenster nach links/oben eingerueckt, damit transparente Asset-Raender weniger Leerraum erzeugen und die Pilotenkarte mehr Breite bekommt.
+- Stand: FOB-Dropship-Karten zeigen Fireteam-/Insassenreferenzen jetzt auch fuer nicht selektierte Dropships. Ein voll/boarded Dropship kann einzeln zur Mission Map geschickt werden, ohne auf ein zweites Dropship oder dessen Auswahlzustand zu warten.
+- Stand: Mission-Dropship-Karten behalten pro Craft die eigene Payload und LZ-/Approach-Planung. Waiting-Karten haben einen `FOB`-Button fuer direkte Rueckkehr; Dropships fliegen nach erfolgreichem Drop weiter automatisch zur FOB zurueck. Manuelle Rueckkehr mit noch sitzenden Truppen loescht die Payload nicht, der automatische Leer-Rueckflug nach Drop dagegen schon.
+- Stand: Beim Absetzen meldet der Drop-Flow `TOUCHDOWN`; beim Aussteigen sagen die Units kurz `AB`.
+- Risiken: Der finale FullHD-Sichtcheck der Homebase-Shipcard-Proportionen bleibt manuell sinnvoll, weil Headless-Tests Clipping und Statusvertraege, aber nicht die exakte optische Balance bewerten.
+- Lokale Pruefung: `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd`, `bugfix_mission_multi_dropship_cards.gd`, `bugfix_dropship_mission_flow_verifier.gd`, `bugfix_fob_second_dropship_assignment_and_scale.gd`, `task_308_compact_flightdeck_dropship_occupants_actions.gd`, `task_312_dropship_command_matrix_lz_go_layout.gd`, `task_313_dropship_arrival_visibility_feedback_smoke.gd`, `task_180_mission_drop_light_fixed_hud_layout_verifier.gd`, `task_316_fob_fireteam_staging_migration.gd` und `git diff --check` laufen gruen.
+
 ### Manual Playtest - Map Editor Station Floor, Layering and Undo
 - Status: implementiert
 - Stand: `station_floor_panel` ist jetzt eine Terrain-/Surface-Variante statt ein Object-Layer-Prop. In der 3D-Ansicht wird es als top-anchored Boden gerendert; Station-Wall-Tiles nutzen darunter ebenfalls das Station-Floor-Panel, damit Station-Gebaeude einen passenden Boden behalten.

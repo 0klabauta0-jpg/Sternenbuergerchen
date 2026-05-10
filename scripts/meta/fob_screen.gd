@@ -2174,6 +2174,30 @@ func _get_boarded_fireteam_ids_for_craft(craft_id: String) -> PackedStringArray:
 	return _copy_packed_string_array(_get_dropship_state_for_craft(craft_id).get("boarded_fireteam_ids", PackedStringArray()))
 
 
+func _append_unique_fireteam_ids(target: PackedStringArray, source: PackedStringArray) -> PackedStringArray:
+	var result: PackedStringArray = target.duplicate()
+	for fireteam_id_variant in source:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty() or result.has(fireteam_id):
+			continue
+		result.append(fireteam_id)
+	return result
+
+
+func _get_visible_transport_craft_fireteam_ids(craft_id: String) -> PackedStringArray:
+	var fireteam_ids: PackedStringArray = PackedStringArray()
+	fireteam_ids = _append_unique_fireteam_ids(fireteam_ids, _get_boarding_order_for_craft(craft_id))
+	fireteam_ids = _append_unique_fireteam_ids(fireteam_ids, _get_boarded_fireteam_ids_for_craft(craft_id))
+	fireteam_ids = _append_unique_fireteam_ids(fireteam_ids, _get_staged_fireteam_ids_for_craft(craft_id))
+	for unit_id_variant in _get_boarded_unit_ids_for_craft(craft_id):
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		var fireteam_id: String = _get_selected_fireteam_id_for_unit(unit_id)
+		if fireteam_id.is_empty() or fireteam_ids.has(fireteam_id):
+			continue
+		fireteam_ids.append(fireteam_id)
+	return fireteam_ids
+
+
 func _build_dropship_state_by_craft_snapshot() -> Dictionary:
 	var snapshot: Dictionary = {}
 	for craft_state_variant in _get_visible_transport_craft_states():
@@ -3580,20 +3604,24 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 
 	var extra_content_host: VBoxContainer = TRANSPORT_CRAFT_CARD_UI_SCRIPT.get_extra_content_host(craft_card)
 
-	if is_boardable:
-		var staged_fireteam_ids: PackedStringArray = _get_staged_fireteam_ids_for_craft(craft_id)
-		var boarding_order: PackedStringArray = _get_boarding_order_for_craft(craft_id)
+	var visible_fireteam_ids: PackedStringArray = _get_visible_transport_craft_fireteam_ids(craft_id)
+	var visible_member_count: int = maxi(_get_transport_craft_staged_member_count(craft_id), _get_boarded_unit_ids_for_craft(craft_id).size())
+	craft_card.set_meta("transport_craft_payload_visible", not visible_fireteam_ids.is_empty() or visible_member_count > 0)
+	craft_card.set_meta("transport_craft_visible_fireteam_ids", Array(visible_fireteam_ids))
+	if is_boardable or not visible_fireteam_ids.is_empty() or visible_member_count > 0:
 		var drop_label := Label.new()
-		if is_selected and not staged_fireteam_ids.is_empty():
-			if _get_transport_craft_remaining_capacity(craft_state) <= 0:
-				drop_label.text = "Full %d/%d NPC assigned + pilot" % [_get_transport_craft_staged_member_count(craft_id), DROPSHIP_NPC_CAPACITY]
+		if not visible_fireteam_ids.is_empty() or visible_member_count > 0:
+			if _get_transport_craft_remaining_capacity(craft_state) <= 0 and is_boardable:
+				drop_label.text = "Full %d/%d NPC assigned + pilot" % [visible_member_count, DROPSHIP_NPC_CAPACITY]
+			elif _has_boarded_mission_payload(craft_id):
+				drop_label.text = "Inside dropship | %d/%d NPC + pilot" % [visible_member_count, DROPSHIP_NPC_CAPACITY]
 			else:
-				drop_label.text = "Assigned fireteams | %d/%d NPC + pilot" % [_get_transport_craft_staged_member_count(craft_id), DROPSHIP_NPC_CAPACITY]
+				drop_label.text = "Assigned fireteams | %d/%d NPC + pilot" % [visible_member_count, DROPSHIP_NPC_CAPACITY]
 			drop_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			drop_label.add_theme_font_size_override("font_size", 9)
 			extra_content_host.add_child(drop_label)
-		if is_selected and not boarding_order.is_empty():
-			for fireteam_id_variant in boarding_order:
+		if not visible_fireteam_ids.is_empty():
+			for fireteam_id_variant in visible_fireteam_ids:
 				var fireteam_id: String = String(fireteam_id_variant)
 				var fireteam_card := _create_fireteam_card(fireteam_id, "dropship_wait")
 				if fireteam_card == null:
@@ -3767,8 +3795,6 @@ func _can_mark_transport_craft_launch_ready(craft_state: Dictionary) -> bool:
 		return false
 	var craft_id: String = String(craft_state.get("craft_id", "")).strip_edges()
 	if not _has_boarded_mission_payload(craft_id):
-		return false
-	if craft_id != _dropship_transport_craft_id:
 		return false
 	if not bool(craft_state.get("is_boardable", false)):
 		return false

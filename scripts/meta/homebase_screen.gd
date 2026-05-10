@@ -17,9 +17,9 @@ const CARGO_CRAFT_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Is
 const HOMEBASE_OPERATOR_CARD_SIZE := Vector2(316.0, 66.0)
 const HOMEBASE_STAGED_CARD_SIZE := Vector2(316.0, 66.0)
 const HOMEBASE_TRANSFER_GHOST_CARD_SIZE := Vector2(316.0, 74.0)
-const HOMEBASE_SHIPCARD_IMAGE_SIZE := Vector2(300.0, 210.0)
-const HOMEBASE_SHIPCARD_BUTTON_SIZE := Vector2(240.0, 168.0)
-const HOMEBASE_SHIPCARD_IMAGE_OFFSET := Vector2(-42.0, -48.0)
+const HOMEBASE_SHIPCARD_IMAGE_SIZE := Vector2(248.0, 164.0)
+const HOMEBASE_SHIPCARD_BUTTON_SIZE := Vector2(166.0, 114.0)
+const HOMEBASE_SHIPCARD_IMAGE_OFFSET := Vector2(-58.0, -36.0)
 
 signal selection_changed(selected_unit_ids)
 signal team_confirmed(selected_unit_ids)
@@ -471,8 +471,10 @@ func _apply_homebase_compact_panel_policy() -> void:
 	var shipcards_scroll := get_node_or_null("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/ShipCardsScroll") as ScrollContainer
 	if shipcards_scroll != null:
 		shipcards_scroll.custom_minimum_size = Vector2.ZERO
+		shipcards_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 		shipcards_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		shipcards_scroll.set_meta("homebase_primary_status_region", true)
+		shipcards_scroll.set_meta("homebase_shipcards_fit_without_horizontal_scroll", true)
 
 	var team_drop_panel := _get_team_drop_panel() as Control
 	if team_drop_panel != null:
@@ -1599,9 +1601,10 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 
 	var shipcard := PanelContainer.new()
 	shipcard.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	shipcard.custom_minimum_size = Vector2(0.0, 210.0 if cargo_capable else 184.0)
+	shipcard.custom_minimum_size = Vector2(0.0, 168.0 if cargo_capable else 144.0)
 	shipcard.add_theme_stylebox_override("panel", _build_shipcard_stylebox(is_selected, craft_busy or cargo_loading or air_asset_unavailable, craft_in_transit or air_asset_unavailable))
 	shipcard.modulate = Color(1.0, 1.0, 1.0, 0.56) if craft_in_transit or air_asset_unavailable else Color(1.0, 1.0, 1.0, 1.0)
+	shipcard.set_meta("homebase_shipcard_no_horizontal_overflow", true)
 
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 5)
@@ -1614,12 +1617,13 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	row.name = "ShipcardContentRow"
 	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	row.add_theme_constant_override("separation", 5)
+	row.add_theme_constant_override("separation", 4)
 	margin.add_child(row)
 
 	var ship_box := VBoxContainer.new()
 	ship_box.name = "ShipVisualBox"
-	ship_box.custom_minimum_size = Vector2(HOMEBASE_SHIPCARD_BUTTON_SIZE.x + 4.0, 0.0)
+	ship_box.custom_minimum_size = Vector2(HOMEBASE_SHIPCARD_BUTTON_SIZE.x + 2.0, 0.0)
+	ship_box.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	ship_box.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	ship_box.add_theme_constant_override("separation", 1)
 	row.add_child(ship_box)
@@ -1653,6 +1657,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	ship_texture.set_meta("homebase_shipcard_visual_anchor", "left_top")
 	ship_texture.set_meta("homebase_shipcard_visual_offset", HOMEBASE_SHIPCARD_IMAGE_OFFSET)
 	ship_texture.set_meta("homebase_shipcard_visual_enlarged", true)
+	ship_texture.set_meta("homebase_shipcard_visual_crop_compensates_transparency", true)
 	if ship_texture.texture != null:
 		ship_texture.modulate = Color(1.0, 1.0, 1.0, 0.46 if craft_in_transit or air_asset_unavailable else 1.0)
 	else:
@@ -1738,6 +1743,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	var actions := VBoxContainer.new()
 	actions.name = "ShipActionColumn"
 	actions.alignment = BoxContainer.ALIGNMENT_BEGIN
+	actions.custom_minimum_size = Vector2(44.0, 0.0)
 	actions.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	actions.add_theme_constant_override("separation", 3)
 	actions.set_meta("homebase_actions_top_aligned", true)
@@ -1745,7 +1751,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 
 	var send_button := Button.new()
 	send_button.text = "Send"
-	send_button.custom_minimum_size = Vector2(52.0, 22.0)
+	send_button.custom_minimum_size = Vector2(42.0, 22.0)
 	send_button.add_theme_font_size_override("font_size", 8)
 	send_button.disabled = air_asset_unavailable or assigned_pilot_id.is_empty() or not _can_send_craft(craft_def, craft_id)
 	META_UI_SKIN_SCRIPT.style_transfer_button(send_button, not send_button.disabled)
@@ -1754,7 +1760,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 
 	var clear_button := Button.new()
 	clear_button.text = "Clear"
-	clear_button.custom_minimum_size = Vector2(52.0, 20.0)
+	clear_button.custom_minimum_size = Vector2(42.0, 20.0)
 	clear_button.add_theme_font_size_override("font_size", 8)
 	clear_button.disabled = assigned_pilot_id.is_empty() or craft_in_transit or air_asset_unavailable
 	META_UI_SKIN_SCRIPT.style_secondary_button(clear_button)
@@ -1764,7 +1770,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	var remove_button := Button.new()
 	remove_button.text = "X"
 	remove_button.tooltip_text = "Remove this shipcard from the flight deck."
-	remove_button.custom_minimum_size = Vector2(52.0, 20.0)
+	remove_button.custom_minimum_size = Vector2(42.0, 20.0)
 	remove_button.add_theme_font_size_override("font_size", 8)
 	remove_button.disabled = not _can_remove_aircraft(craft_id)
 	META_UI_SKIN_SCRIPT.style_secondary_button(remove_button)

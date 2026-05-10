@@ -18,6 +18,7 @@ func _run_tests() -> void:
 	print("=== Dropship Mission Bugfix Verifier ===")
 	await _test_fob_refresh_preserves_boarded_units()
 	await _test_shipcard_start_dispatches_boarded_craft_without_full_team_boarded()
+	await _test_unselected_full_dropship_can_dispatch_individually()
 	await _test_fob_header_start_is_hidden()
 	await _test_homebase_start_button_lives_in_header()
 	await _test_preview_mission_only_exists_in_map_view()
@@ -190,6 +191,77 @@ func _test_shipcard_start_dispatches_boarded_craft_without_full_team_boarded() -
 	fob_screen.call("_on_transport_craft_mission_stage_requested", "dropship_test")
 	var pending_transfers: Array = Array(scene.get("_pending_mission_craft_transfers"))
 	_assert(pending_transfers.size() == 1, "Shipcard start dispatches the boarded craft even when other selected operators stay behind")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_unselected_full_dropship_can_dispatch_individually() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	for _frame in range(4):
+		await process_frame
+
+	var fob_screen: Control = scene.get_node("FOBScreen")
+	var selected_unit_ids := PackedStringArray(["unit_alpha", "unit_bravo", "unit_delta", "unit_echo", "unit_foxtrot", "unit_golf"])
+	var selected_fireteam_ids := PackedStringArray(["blue", "blue", "blue", "gold", "gold", "gold"])
+	var fireteam_definitions := [
+		{
+			"id": "blue",
+			"label": "BLUE",
+			"lead_unit_id": "unit_alpha",
+			"respawn_enabled": false,
+			"loadout": "medium",
+		},
+		{
+			"id": "gold",
+			"label": "GOLD",
+			"lead_unit_id": "unit_echo",
+			"respawn_enabled": false,
+			"loadout": "medium",
+		}
+	]
+	scene.set(
+		"_homebase_aircraft_definitions",
+		[
+			{
+				"craft_id": "dropship_1",
+				"display_name": "Dropship 1",
+				"craft_type": "dropship",
+				"texture_path": "res://Assets/kenney_space-kit/Side/craft_speederB.png",
+			},
+			{
+				"craft_id": "dropship_2",
+				"display_name": "Dropship 2",
+				"craft_type": "dropship",
+				"texture_path": "res://Assets/kenney_space-kit/Side/craft_speederB.png",
+			}
+		]
+	)
+	scene.set("_assigned_aircraft_pilot_by_craft", {"dropship_1": "unit_hotel", "dropship_2": "unit_india"})
+	scene.set("_aircraft_location_by_craft", {"dropship_1": "fob", "dropship_2": "fob"})
+	scene.set("_selected_unit_ids", selected_unit_ids)
+	scene.set("_selected_fireteam_ids", selected_fireteam_ids)
+	scene.call("_refresh_fob_screen")
+	fob_screen.call("configure_transfer", selected_unit_ids, selected_fireteam_ids, fireteam_definitions)
+	fob_screen.set("_dropship_transport_craft_id", "dropship_1")
+	fob_screen.set("_dropship_staged_fireteam_ids", PackedStringArray(["blue"]))
+	fob_screen.set("_boarding_order", PackedStringArray(["blue"]))
+	fob_screen.set("_dropship_phase", "boarded")
+	fob_screen.set("_boarded_unit_ids", PackedStringArray(["unit_alpha", "unit_bravo", "unit_delta"]))
+	fob_screen.set("_boarded_fireteam_ids", PackedStringArray(["blue"]))
+	fob_screen.call("_save_current_dropship_state")
+	fob_screen.call("_set_selected_transport_craft_state", "dropship_2")
+	fob_screen.call("_refresh_ui_state")
+	await process_frame
+
+	var craft_state: Dictionary = Dictionary(fob_screen.call("_get_transport_craft_state", "dropship_1"))
+	_assert(bool(fob_screen.call("_can_mark_transport_craft_launch_ready", craft_state)), "A full non-selected Dropship 1 can be sent without waiting for Dropship 2")
+	var queue_list := fob_screen.get_node("Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipQueueScroll/DropshipQueueList") as VBoxContainer
+	var dropship_1_card := _find_transport_craft_card(queue_list, "dropship_1")
+	_assert(dropship_1_card != null and bool(dropship_1_card.get_meta("transport_craft_payload_visible", false)) and Array(dropship_1_card.get_meta("transport_craft_visible_fireteam_ids", [])).has("blue"), "FOB dropship card keeps boarded troops visible even when another dropship is selected")
+	fob_screen.call("_on_transport_craft_mission_stage_requested", "dropship_1")
+	var pending_transfers: Array = Array(scene.get("_pending_mission_craft_transfers"))
+	_assert(pending_transfers.size() == 1 and String(Dictionary(pending_transfers[0]).get("craft_id", "")) == "dropship_1", "Sending the full non-selected dropship dispatches only that craft")
 	scene.queue_free()
 	await process_frame
 
@@ -1220,6 +1292,19 @@ func _test_mission_time_limit_resolves_defeat() -> void:
 	_assert(String(mission_result.get("win_condition_type", "")) == "time_limit", "Mission result records the time limit as the resolution condition")
 	scene.queue_free()
 	await process_frame
+
+
+func _find_transport_craft_card(node: Node, craft_id: String) -> Control:
+	if node == null:
+		return null
+	var control := node as Control
+	if control != null and String(control.get_meta("transport_craft_id", "")).strip_edges() == craft_id:
+		return control
+	for child in node.get_children():
+		var found := _find_transport_craft_card(child, craft_id)
+		if found != null:
+			return found
+	return null
 
 
 func _assert(condition: bool, message: String) -> void:

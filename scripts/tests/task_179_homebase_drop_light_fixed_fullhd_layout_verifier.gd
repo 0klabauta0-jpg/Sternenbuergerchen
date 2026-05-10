@@ -115,6 +115,7 @@ func _test_homebase_flightdeck_shipcards_are_primary_status_region() -> void:
 	_assert(stage_panel != null and not stage_panel.visible and bool(stage_panel.get_meta("homebase_compact_status_hidden", false)), "Homebase hides the old empty flightdeck stage")
 	_assert(stage_panel.mouse_filter == Control.MOUSE_FILTER_IGNORE and pad_stage.mouse_filter == Control.MOUSE_FILTER_IGNORE, "Flightdeck visual stage does not take input away from existing controls")
 	_assert(shipcards_scroll.visible and bool(shipcards_scroll.get_meta("homebase_primary_status_region", false)), "Homebase shipcards are the primary flightdeck status region")
+	_assert(shipcards_scroll.horizontal_scroll_mode == ScrollContainer.SCROLL_MODE_DISABLED and bool(shipcards_scroll.get_meta("homebase_shipcards_fit_without_horizontal_scroll", false)), "Homebase flightdeck shipcards fit without a horizontal scrollbar")
 	_assert(deck_activity_scroll != null and not deck_activity_scroll.visible, "Homebase hides the old deck activity window")
 	_assert(bool(snapshot.get("shipcards_are_primary_status", false)), "Homebase snapshot declares shipcards as the status truth")
 	_assert(not bool(snapshot.get("flightdeck_stage_visible", true)), "Homebase snapshot reports hidden stage")
@@ -122,7 +123,7 @@ func _test_homebase_flightdeck_shipcards_are_primary_status_region() -> void:
 	_assert(not _contains_button(pad_stage), "Flightdeck visual stage introduces no unbound action buttons")
 	_assert(_contains_texture_path(shipcards_list, DROPSHIP_TEXTURE_PATH), "Homebase shipcards keep using project dropship assets")
 	_assert(_contains_texture_path(shipcards_list, CARGO_TEXTURE_PATH), "Homebase shipcards keep using project cargo craft assets")
-	_assert(_max_texture_min_size(shipcards_list, DROPSHIP_TEXTURE_PATH).x >= 300.0 and _max_texture_min_size(shipcards_list, DROPSHIP_TEXTURE_PATH).y >= 210.0, "Homebase dropship image uses the enlarged shipcard size")
+	_assert(_max_texture_min_size(shipcards_list, DROPSHIP_TEXTURE_PATH).x >= 248.0 and _max_texture_min_size(shipcards_list, DROPSHIP_TEXTURE_PATH).y >= 164.0, "Homebase dropship image uses a cropped top-left shipcard size")
 	_assert(_shipcard_visuals_are_top_left_anchored(shipcards_list), "Homebase shipcard visuals use a shifted top-left deck anchor")
 	_assert(_shipcard_actions_top_aligned(shipcards_list), "Homebase shipcard action buttons are top-aligned")
 	var aircraft_selector := screen.get_node("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftSelectorRow/AircraftSelector") as OptionButton
@@ -245,6 +246,8 @@ func _shipcard_visuals_are_top_left_anchored(root_node: Node) -> bool:
 		if texture_rect.stretch_mode != TextureRect.STRETCH_KEEP_ASPECT_CENTERED:
 			return false
 		if not bool(texture_rect.get_meta("homebase_shipcard_visual_enlarged", false)):
+			return false
+		if not bool(texture_rect.get_meta("homebase_shipcard_visual_crop_compensates_transparency", false)):
 			return false
 		if texture_rect.position.x > 0.0 or texture_rect.position.y > 0.0:
 			return false

@@ -1974,7 +1974,10 @@ func _on_mission_planning_state_changed(planning_state: Dictionary) -> void:
 	if bool(_mission_planning_state.get("mission_drop_return_requested", false)):
 		var fob_screen = _get_fob_screen()
 		var mission_craft_id: String = String(_mission_planning_state.get("mission_drop_craft_id", "")).strip_edges()
-		if fob_screen != null and fob_screen.has_method("clear_mission_boarded_payload"):
+		var returning_payload_unit_ids: Array = Array(_mission_planning_state.get("embarked_unit_ids", []))
+		var returning_passenger_count: int = int(_mission_planning_state.get("mission_drop_passenger_count", returning_payload_unit_ids.size()))
+		var clear_return_payload: bool = returning_payload_unit_ids.is_empty() and returning_passenger_count <= 0
+		if clear_return_payload and fob_screen != null and fob_screen.has_method("clear_mission_boarded_payload"):
 			fob_screen.call("clear_mission_boarded_payload", mission_craft_id)
 		if not mission_craft_id.is_empty():
 			_begin_mission_craft_transfer(mission_craft_id, "to_fob", MISSION_DROPSHIP_TO_FOB_SECONDS)

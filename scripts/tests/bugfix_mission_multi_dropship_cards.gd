@@ -92,6 +92,15 @@ func _test_multiple_mission_dropships_render_as_stacked_cards() -> void:
 		_assert(bool(refreshed_second_card.get_meta("mission_dropship_selected", false)), "Selected mission dropship card is marked in the #19 panel")
 		var selected_stylebox := refreshed_second_card.get_theme_stylebox("panel") as StyleBoxFlat
 		_assert(selected_stylebox != null and selected_stylebox.border_color.g > selected_stylebox.border_color.r and selected_stylebox.border_width_left >= 2, "Selected mission dropship card uses a clear green outline")
+		var return_button := refreshed_second_card.get_node_or_null("MarginContainer/VBox/HeaderRow/PrimaryActionButton") as Button
+		_assert(return_button != null and return_button.visible and not return_button.disabled and return_button.text == "FOB", "Waiting mission dropship card exposes a direct Return-to-FOB button")
+		if return_button != null:
+			return_button.emit_signal("pressed")
+			await _wait_frames(2)
+			var return_state: Dictionary = Dictionary(controller.call("get_planning_state"))
+			_assert(String(return_state.get("mission_drop_state", "")) == "to_fob" and bool(return_state.get("mission_drop_return_requested", false)), "Return-to-FOB button marks the selected dropship as RTB")
+			_assert(Array(return_state.get("embarked_unit_ids", [])) == ["unit_echo", "unit_foxtrot", "unit_golf", "unit_hotel"], "Manual RTB keeps the selected dropship payload until it reaches FOB")
+			selected_state = return_state
 		_assert(not bool(selected_state.get("has_lz_position", true)), "Selecting Dropship 2 does not inherit Dropship 1 LZ")
 		controller.set("_has_lz_position", true)
 		controller.set("_lz_position", Vector2(640.0, 320.0))
