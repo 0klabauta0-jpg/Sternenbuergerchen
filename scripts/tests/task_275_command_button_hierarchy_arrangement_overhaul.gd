@@ -153,10 +153,12 @@ func _test_mission_scene_hierarchy() -> void:
 	_assert_button_metadata(controller, "approach_nw", str(CONTRACT_SCRIPT.get("BUTTON_PATH_APPROACH_NW")), "air_lz", "#18")
 
 	var command_grid := controller.get_node_or_null(str(CONTRACT_SCRIPT.get("BUTTON_PATH_MOVE")).get_base_dir()) as GridContainer
-	_assert(command_grid != null and int(command_grid.columns) == 2, "#16 command grid uses two columns for fixed hierarchy rows")
+	_assert(command_grid != null and int(command_grid.columns) == 5, "#16 command grid uses five columns for the fixed 5x4 command matrix")
 	if command_grid != null:
 		var order: PackedStringArray = PackedStringArray(command_grid.get_meta("command_hierarchy_order", PackedStringArray()))
 		_assert(order.size() >= 6 and order[0] == "move" and order[1] == "take", "#16 command grid order starts with Move/Take goal pair")
+		_assert(command_grid.get_child_count() >= 20, "#16 command grid exposes the full 5x4 slot frame")
+		_assert(int(command_grid.get_meta("command_placeholder_slots", 0)) >= 14, "#16 command grid keeps reserve slots marked for communication")
 
 	controller.call("_set_selected_fireteams", PackedStringArray(["blue"]), false)
 	await _wait_frames(3)

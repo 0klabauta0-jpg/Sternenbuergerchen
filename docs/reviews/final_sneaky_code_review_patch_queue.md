@@ -22,11 +22,8 @@ Keine P0-Blocker gefunden.
 
 ### P2 - Patch Queue
 
-1. `scripts/command/commander_intent.gd:178` und `scripts/tactical/fireteam_execution_plan.gd:433` bis `scripts/tactical/fireteam_execution_plan.gd:478`
-   - Risiko: `CommanderIntent.to_dict()` serialisiert `cover_priority = normal` und `security_mode = facing` auch dann, wenn der Spieler nie explizit Cover/Security gewaehlt hat. Dadurch gewinnen diese Default-Strings gegen einige intent-basierte Fallbacks in `FireteamExecutionPlan`.
-   - Repro: Ein `take`-Intent ohne explizite Security kommt als `security_mode = facing` an; der `take -> sector`-Fallback ist dadurch praktisch unreachable.
-   - Empfehlung: In einem kleinen Folgepatch explizite Spielerwahl von Default unterscheiden, z.B. ueber `explicit_tactical_fields` oder indem `to_dict()` Default-Felder nur schreibt, wenn sie gesetzt wurden.
-   - Gate: `task_285_tactical_decision_branch_integrity_review.gd`, danach TASK_282 und TASK_281.
+1. Behoben im aktuellen Review-Folgepatch: `scripts/command/commander_intent.gd` unterscheidet explizite Tactical-Felder von Defaults. `cover_priority` und `security_mode` werden nur serialisiert, wenn sie wirklich gesetzt wurden; dadurch greift `take -> sector` wieder als Fireteam-Leader-Fallback.
+   - Gate: `task_270_commander_to_fireteam_leader_delegation_contract.gd`, `task_271_tactical_command_modes_roe_fire_rules.gd`, `task_285_tactical_decision_branch_integrity_review.gd`.
 
 2. `scripts/tactical/tactical_breakout_resolver.gd:123`, `scripts/tactical/tactical_breakout_resolver.gd:128`, `scripts/tactical/tactical_breakout_resolver.gd:137`
    - Risiko: Leere Breakout-Ergebnisse bleiben korrekt, aber schwer zu debuggen.

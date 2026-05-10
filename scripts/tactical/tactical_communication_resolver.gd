@@ -211,12 +211,15 @@ static func build_bubble_payload(event: Dictionary, leader, anchor_position: Vec
 			"unit_id": String(event.get("unit_id", context.get("unit_id", ""))),
 			"detail": String(event.get("detail_text", "")),
 			"fireteam_units": Array(context.get("fireteam_units", [])),
+			"tactical_event_type": String(event.get("event_type", "")),
+			"event_type": String(event.get("event_type", "")),
+			"active_command": String(event.get("feedback_action", "")),
 		}
 	))
 	if not bool(payload.get("ok", false)):
 		return {}
 	var event_text: String = String(event.get("short_text", "")).strip_edges()
-	if not event_text.is_empty():
+	if not event_text.is_empty() and String(payload.get("text_source", "")).strip_edges() != "comms_lines":
 		payload["text"] = event_text
 	payload["source"] = SOURCE_ID
 	payload["tactical_communication_event_id"] = String(event.get("event_id", ""))

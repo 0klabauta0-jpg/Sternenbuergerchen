@@ -3,15 +3,15 @@
   "catalog_id": "portrait_identity_catalog_v1",
   "source_root": "res://Assets/Char/",
   "source_inventory": {
-    "scanned_png_count": 88,
+    "scanned_png_count": 87,
     "dimension_distribution": {
       "1024x1024": 9,
       "1184x864": 67,
       "1200x896": 1,
       "1254x1254": 2,
-      "1920x1920": 9
+      "1920x1920": 8
     },
-    "large_png_count": 9,
+    "large_png_count": 8,
     "max_bytes": 6307311
   },
   "minimum_start_roster_candidates": 30,
@@ -29,7 +29,7 @@
     {"id": "char_portrait_003", "path": "res://Assets/Char/Use AI Image Apr 5, 2026, 22_22_42.png", "file_name": "Use AI Image Apr 5, 2026, 22_22_42.png", "width": 1024, "height": 1024, "bytes": 1004437, "candidate": true, "duplicate_group": "", "tags": ["engineer"], "diagnostics": []},
     {"id": "char_portrait_004", "path": "res://Assets/Char/Use AI Image Apr 5, 2026, 22_30_03.png", "file_name": "Use AI Image Apr 5, 2026, 22_30_03.png", "width": 1024, "height": 1024, "bytes": 1065580, "candidate": true, "duplicate_group": "", "tags": ["pilot"], "diagnostics": []},
     {"id": "char_portrait_005", "path": "res://Assets/Char/Use AI Image Apr 5, 2026, 22_31_30.png", "file_name": "Use AI Image Apr 5, 2026, 22_31_30.png", "width": 1920, "height": 1920, "bytes": 5443830, "candidate": true, "duplicate_group": "", "tags": ["heavy_support"], "diagnostics": ["large_source_png_use_scaled_texture_rect"]},
-    {"id": "char_portrait_006", "path": "res://Assets/Char/Use AI Image Apr 5, 2026, 22_33_24.png", "file_name": "Use AI Image Apr 5, 2026, 22_33_24.png", "width": 1920, "height": 1920, "bytes": 5902178, "candidate": true, "duplicate_group": "", "tags": ["scout_sniper"], "diagnostics": ["large_source_png_use_scaled_texture_rect"]},
+    {"id": "char_portrait_006", "path": "res://Assets/Char/Use AI Image Apr 5, 2026, 23_41_44.png", "file_name": "Use AI Image Apr 5, 2026, 23_41_44.png", "width": 1184, "height": 864, "bytes": 1116865, "candidate": true, "duplicate_group": "", "tags": ["leader"], "diagnostics": []},
     {"id": "char_portrait_007", "path": "res://Assets/Char/Use AI Image Apr 5, 2026, 22_34_25.png", "file_name": "Use AI Image Apr 5, 2026, 22_34_25.png", "width": 1920, "height": 1920, "bytes": 5097735, "candidate": true, "duplicate_group": "", "tags": ["shooter"], "diagnostics": ["large_source_png_use_scaled_texture_rect"]},
     {"id": "char_portrait_008", "path": "res://Assets/Char/Use AI Image Apr 5, 2026, 22_37_07.png", "file_name": "Use AI Image Apr 5, 2026, 22_37_07.png", "width": 1920, "height": 1920, "bytes": 5402379, "candidate": true, "duplicate_group": "", "tags": ["leader"], "diagnostics": ["large_source_png_use_scaled_texture_rect"]},
     {"id": "char_portrait_009", "path": "res://Assets/Char/Use AI Image Apr 5, 2026, 22_41_47.png", "file_name": "Use AI Image Apr 5, 2026, 22_41_47.png", "width": 1920, "height": 1920, "bytes": 5607951, "candidate": true, "duplicate_group": "", "tags": ["medic", "cybernetic"], "diagnostics": ["large_source_png_use_scaled_texture_rect"]},

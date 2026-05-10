@@ -55,7 +55,8 @@ text = "(unsaved)"
 [node name="BrushButton" type="Button" parent="UI/TopBar/Margin/HBox"]
 layout_mode = 2
 toggle_mode = true
-text = "Brush"
+custom_minimum_size = Vector2(34, 30)
+text = "B"
 
 [node name="BrushSizeOptionButton" type="OptionButton" parent="UI/TopBar/Margin/HBox"]
 layout_mode = 2
@@ -105,7 +106,7 @@ text = "Tile-Palette"
 [node name="PaletteGroups" type="VBoxContainer" parent="UI/PalettePanel/Margin/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 6
-visible = false
+visible = true
 
 [node name="TileTypeList" type="ItemList" parent="UI/PalettePanel/Margin/VBox"]
 layout_mode = 2
@@ -121,17 +122,19 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -300.0
 offset_top = 44.0
+offset_right = 0.0
 grow_horizontal = 0
 
-[node name="Margin" type="MarginContainer" parent="UI/PropertyPanel"]
+[node name="Margin" type="ScrollContainer" parent="UI/PropertyPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 12
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 1
+follow_focus = true
 
 [node name="VBox" type="VBoxContainer" parent="UI/PropertyPanel/Margin"]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 theme_override_constants/separation = 8
 
 [node name="TitleLabel" type="Label" parent="UI/PropertyPanel/Margin/VBox"]

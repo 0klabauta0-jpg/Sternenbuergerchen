@@ -52,7 +52,7 @@ func _test_docs_report_and_status() -> void:
 	_assert(not task_text.contains("- [ ]"), "Task checklist is complete")
 	_assert(status_text.contains("### TASK_285 - Tactical Decision Branch Integrity Review") and status_text.contains("- Status: implementiert"), "Implementation status marks TASK_285 implemented")
 	_assert(roadmap_text.contains("TASK_285 - Tactical Decision Branch Integrity Review (implementiert)"), "Roadmap marks TASK_285 implemented")
-	for token in ["## Findings", "Blocker", "Important", "Cleanup", "branch", "duplicate", "diagnostics", "unreachable"]:
+	for token in ["## Findings", "Blocker", "Important", "Cleanup", "branch", "diagnostics", "expliziter", "take -> sector"]:
 		_assert(report_text.to_lower().contains(token.to_lower()), "Review report contains %s" % token)
 	for token in ["CommanderIntent", "TacticalRules", "FireteamExecutionPlan", "MultiFireteamPlan", "Breakout Priority", "TacticalCommunicationEvent", "Enemy Profile", "AirAssetThreat", "Conflict Priority Summary", "Regression Fixtures"]:
 		_assert(matrix_text.contains(token), "Decision matrix contains %s" % token)
@@ -81,7 +81,7 @@ func _test_commander_intent_aliases_and_reported_smells() -> void:
 	var unknown_snapshot: Dictionary = Dictionary(unknown.call("get_snapshot"))
 	_assert(String(unknown_snapshot.get("verb", "")) == "move", "Unknown CommanderIntent verb falls back to safe move")
 	var report_text: String = _read_text(REPORT_PATH)
-	_assert(report_text.contains("normalization_warnings") and report_text.contains("cover_priority") and report_text.contains("security_mode") and report_text.contains("unreachable"), "Report records CommanderIntent diagnostic and default-field branch smells")
+	_assert(report_text.contains("normalization_warnings") and report_text.contains("cover_priority") and report_text.contains("security_mode") and report_text.contains("nur bei expliziter"), "Report records CommanderIntent diagnostics and explicit tactical default boundary")
 
 
 func _test_tactical_rules_conflict_matrix() -> void:
@@ -104,7 +104,7 @@ func _test_tactical_rules_conflict_matrix() -> void:
 
 func _test_execution_plan_branch_matrix() -> void:
 	var default_take_plan = EXECUTION_PLAN_SCRIPT.call("from_intent", _intent("take", {"cover_priority": "high"}), _skill(0.84), {})
-	_assert(String(default_take_plan.get("security_mode")) == "facing", "Current CommanderIntent default security overrides take fallback; report marks this branch smell")
+	_assert(String(default_take_plan.get("security_mode")) == "sector", "Take without explicit security uses the verb fallback")
 	var take_plan = EXECUTION_PLAN_SCRIPT.call("from_intent", _intent("take", {"cover_priority": "high", "security_mode": "sector"}), _skill(0.84), {})
 	_assert(String(take_plan.get("movement_style")) == "bounding", "Take intent maps to bounding movement")
 	_assert(String(take_plan.get("security_mode")) == "sector", "Explicit sector security reaches execution plan")

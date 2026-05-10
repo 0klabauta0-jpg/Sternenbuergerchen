@@ -4,6 +4,7 @@ extends RefCounted
 const COMIC_BUBBLE_VISUAL_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_visual_contract.gd")
 const COMIC_BUBBLE_TEXT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_text_resolver.gd")
 const CHARACTER_GAMEPLAY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/character_gameplay_resolver.gd")
+const COMMS_LINES_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/comms_lines_resolver.gd")
 
 const SOURCE_ID: String = "fireteamleader_command_feedback"
 const DEFAULT_ENABLED: bool = true
@@ -62,13 +63,18 @@ static func build_command_feedback(
 	if skill_tier.is_empty():
 		skill_tier = resolve_skill_tier(leader)
 	var bubble_id: String = _resolve_bubble_id(action, state)
-	var text_payload: Dictionary = Dictionary(COMIC_BUBBLE_TEXT_RESOLVER_SCRIPT.call(
-		"resolve_ftl_text_payload",
-		action,
-		state,
-		leader,
-		{"skill_tier": skill_tier, "character_gameplay_context": character_context}
-	))
+	var text_context: Dictionary = context.duplicate(true)
+	text_context["skill_tier"] = skill_tier
+	text_context["character_gameplay_context"] = character_context
+	var text_payload: Dictionary = Dictionary(COMMS_LINES_RESOLVER_SCRIPT.call("resolve_feedback_text_payload", action, state, leader, text_context))
+	if not bool(text_payload.get("ok", false)):
+		text_payload = Dictionary(COMIC_BUBBLE_TEXT_RESOLVER_SCRIPT.call(
+			"resolve_ftl_text_payload",
+			action,
+			state,
+			leader,
+			text_context
+		))
 	var text: String = String(text_payload.get("text", ""))
 	if text.is_empty():
 		text = _resolve_text(action, state, skill_tier)
@@ -95,6 +101,9 @@ static func build_command_feedback(
 	payload["skill_tier"] = skill_tier
 	payload["text_source"] = String(text_payload.get("text_source", ""))
 	payload["text_key"] = String(text_payload.get("text_key", ""))
+	payload["comms_trigger"] = String(text_payload.get("trigger", ""))
+	payload["communication_quality_level"] = int(text_payload.get("quality_level", -1))
+	payload["communication_delay_seconds"] = float(text_payload.get("delay_seconds", 0.0))
 	payload["fireteam_id"] = String(context.get("fireteam_id", "")).strip_edges().to_lower()
 	payload["detail"] = String(context.get("detail", "")).strip_edges()
 	payload["settings_mode"] = String(normalized_settings.get("mode", DEFAULT_MODE))

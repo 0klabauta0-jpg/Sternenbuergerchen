@@ -25,7 +25,7 @@ Mehr Taktikoptionen duerfen nicht einfach als weitere Buttons in #16 landen. Die
    - Air/LZ: Dropship halten/rufen/abbrechen, LZ secure, Evac/Recover.
    - Ausbrueche: Confirm, Override, Abort, Regroup.
 2. UI-Anordnung:
-   - #16 Command Matrix fuer kurze Actions.
+   - #16 Command Matrix fuer kurze Actions als feste 5x4-Matrix.
    - #17 Fireteam Details fuer aktive Regeln/Plan.
    - #18 Mission Control fuer Gesamtplan, GO, Air, critical warnings.
    - Keine langen Erklaertexte in Buttons.
@@ -70,7 +70,7 @@ Mehr Taktikoptionen duerfen nicht einfach als weitere Buttons in #16 landen. Die
 
 ## Risiken
 - Mehr Ordnung darf nicht mehr Klicks fuer Standardbefehle erzeugen.
-- Air-/Ausbruch-Buttons duerfen normale Missionsbefehle nicht verdraengen.
+- Air-/Ausbruch-Buttons duerfen normale Missionsbefehle nicht verdraengen; Reserve-Slots in #16 bleiben bewusst kleine Kommunikationsanker.
 
 ## Naechster Schritt
 Nach TASK_275 kann TASK_276 definieren, wie Fireteams bei Kontakt, Blockade oder Risiko eigenstaendig ausbrechen duerfen.

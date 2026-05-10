@@ -54,8 +54,9 @@ static func get_fob_layout() -> Dictionary:
 	return {
 		"viewport": Rect2i(Vector2i.ZERO, TARGET_VIEWPORT),
 		"topbar": Rect2i(0, 0, 1920, 72),
-		"fireteams": Rect2i(24, 80, 304, 736),
-		"loadout": Rect2i(344, 80, 608, 736),
+		"unassigned_pool": Rect2i(24, 80, 240, 736),
+		"fireteams": Rect2i(280, 80, 304, 736),
+		"loadout": Rect2i(600, 80, 352, 736),
 		"flightdeck": Rect2i(968, 80, 928, 736),
 		"boarding_status": Rect2i(24, 832, 448, 224),
 		"actions": Rect2i(488, 832, 464, 224),

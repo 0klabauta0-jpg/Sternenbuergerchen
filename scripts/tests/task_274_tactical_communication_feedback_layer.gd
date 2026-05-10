@@ -2,11 +2,14 @@ extends SceneTree
 
 const EVENT_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_communication_event.gd")
 const RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_communication_resolver.gd")
+const COMMS_LINES_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/comms_lines_resolver.gd")
 const TERRAIN_MAP_3D_VIEW_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_3d_view.gd")
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
 
 const COPY_PATH: String = "res://data/tactical_communication_copy.json"
+const COMMS_LINES_PATH: String = "res://data/comms_lines.json"
+const COMMS_DESIGN_PATH: String = "res://docs/dev/tactical_communication_system_design.md"
 const TASK_PATH: String = "res://docs/tasks/TASK_274_tactical_communication_feedback_layer.md"
 const STATUS_PATH: String = "res://docs/IMPLEMENTATION_STATUS.md"
 
@@ -24,6 +27,7 @@ func _run_tests() -> void:
 	_test_event_snapshot_contract()
 	_test_priority_and_cooldown_rules()
 	_test_ftl_skill_precision_without_hidden_truth()
+	_test_comms_lines_drive_bubble_text()
 	_test_multi_fireteam_plan_event_generation()
 	await _test_map_marker_visual_snapshot()
 	await _test_mission_scene_feedback_layer()
@@ -41,8 +45,15 @@ func _run_tests() -> void:
 func _test_contract_files_and_copy_catalog() -> void:
 	_assert(FileAccess.file_exists("res://scripts/tactical/tactical_communication_event.gd"), "Tactical communication event file exists")
 	_assert(FileAccess.file_exists("res://scripts/tactical/tactical_communication_resolver.gd"), "Tactical communication resolver file exists")
+	_assert(FileAccess.file_exists("res://scripts/tactical/comms_lines_resolver.gd"), "Comms line resolver file exists")
+	_assert(FileAccess.file_exists(COMMS_DESIGN_PATH), "Communication system design doc is moved under docs/dev")
 	var copy_catalog: Dictionary = _read_json(COPY_PATH)
 	_assert(not copy_catalog.is_empty(), "Communication copy catalog is valid JSON")
+	var comms_catalog: Dictionary = _read_json(COMMS_LINES_PATH)
+	_assert(not comms_catalog.is_empty(), "Comms line catalog is valid JSON")
+	_assert(COMMS_LINES_RESOLVER_SCRIPT.call("validate_catalog", comms_catalog).is_empty(), "Comms line catalog passes resolver validation")
+	_assert(_has_comms_trigger(comms_catalog, "order_confirmed"), "Comms line catalog covers order-confirmed bubble text")
+	_assert(_has_comms_trigger(comms_catalog, "enemy_contact"), "Comms line catalog covers contact bubble text")
 	var events: Dictionary = Dictionary(copy_catalog.get("events", {}))
 	for event_type in [
 		EVENT_SCRIPT.EVENT_ORDER_RECEIVED,
@@ -116,6 +127,16 @@ func _test_ftl_skill_precision_without_hidden_truth() -> void:
 	_assert(not String(low_event.get("short_text", "")).contains("links"), "Low/no-direction event does not invent direction")
 	_assert(String(high_event.get("short_text", "")).contains("links"), "High clarity event can include provided direction")
 	_assert(String(Dictionary(low_event.get("metadata", {})).get("private_truth", "")).is_empty(), "Snapshot does not expose hidden truth metadata")
+
+
+func _test_comms_lines_drive_bubble_text() -> void:
+	var payload: Dictionary = Dictionary(COMMS_LINES_RESOLVER_SCRIPT.call("resolve_feedback_text_payload", "defend", "cover", null, {
+		"fireteam_id": "blue",
+		"communication_clarity": 0.90,
+	}))
+	_assert(bool(payload.get("ok", false)), "Comms line resolver returns a direct bubble payload")
+	_assert(String(payload.get("text_source", "")) == "comms_lines", "Comms line resolver marks payload source")
+	_assert(String(payload.get("text", "")).contains("Rundumsicherung") or String(payload.get("text", "")).contains("Stellung"), "Comms line text is used for defend/cover speech")
 
 
 func _test_multi_fireteam_plan_event_generation() -> void:
@@ -203,12 +224,14 @@ func _test_mission_scene_feedback_layer() -> void:
 	var events: Array = Array(feedback.get("tactical_communication_events", []))
 	var map_snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 	var bubbles: Array = Array(feedback.get("fireteamleader_feedback_bubbles", []))
+	var bubble_entries: Array = Array(map_snapshot.get("feedback_bubble_entries", []))
 	_assert(int(feedback.get("tactical_communication_event_count", 0)) >= 2, "Mission scene stores tactical communication event snapshot")
 	_assert(_has_event_type(events, EVENT_SCRIPT.EVENT_PLAN_ROLE_ASSIGNED), "Mission scene emits role assignment event")
 	_assert(String(feedback.get("selected_order_text", "")).contains("LEAD") or String(feedback.get("selected_order_text", "")).contains("SUP"), "#17 selected text shows role communication")
 	_assert(String(feedback.get("mission_control_plan_text", "")).contains("PLAN"), "#18 mission text still exposes plan truth")
 	_assert(int(map_snapshot.get("tactical_communication_event_visual_count", 0)) >= 1, "Primary 3D view receives map communication markers")
 	_assert(_bubbles_match_event_ids(bubbles, events), "FTL bubbles reference known tactical communication events")
+	_assert(_has_hud_fireteam_card_bubble(bubble_entries), "FTL bubbles are anchored from the left fireteam mini card")
 	scene.queue_free()
 	await _wait_frames(2)
 
@@ -217,6 +240,7 @@ func _test_no_ui_truth_mutation() -> void:
 	for path in [
 		"res://scripts/tactical/tactical_communication_event.gd",
 		"res://scripts/tactical/tactical_communication_resolver.gd",
+		"res://scripts/tactical/comms_lines_resolver.gd",
 	]:
 		var text: String = _read_text(path)
 		_assert(not text.contains("extends Control"), "%s is not UI node truth" % path)
@@ -238,6 +262,15 @@ func _has_event_type(events: Array, event_type: String) -> bool:
 		if typeof(event_variant) != TYPE_DICTIONARY:
 			continue
 		if String(Dictionary(event_variant).get("event_type", "")) == event_type:
+			return true
+	return false
+
+
+func _has_comms_trigger(catalog: Dictionary, trigger: String) -> bool:
+	for line_variant in Array(catalog.get("lines", [])):
+		if typeof(line_variant) != TYPE_DICTIONARY:
+			continue
+		if String(Dictionary(line_variant).get("trigger", "")).strip_edges().to_lower() == trigger:
 			return true
 	return false
 
@@ -270,6 +303,16 @@ func _bubbles_match_event_ids(bubbles: Array, events: Array) -> bool:
 		if not event_ids.has(event_id):
 			return false
 	return checked_bubbles > 0
+
+
+func _has_hud_fireteam_card_bubble(entries: Array) -> bool:
+	for entry_variant in entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("anchor_space", "")) == "hud" and String(entry.get("hud_anchor_source", "")) == "fireteam_mini_card" and typeof(entry.get("hud_anchor_position", null)) == TYPE_VECTOR2:
+			return true
+	return false
 
 
 func _get_objective_position(scene: Node, fallback: Vector2) -> Vector2:

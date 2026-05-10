@@ -11,6 +11,7 @@ const CONTEXTUAL_HELP_SERVICE_SCRIPT: GDScript = preload("res://scripts/ui/conte
 const CONTEXTUAL_HELP_POPUP_SCRIPT: GDScript = preload("res://scripts/ui/contextual_help_popup.gd")
 const START_ROSTER_GENERATOR_SCRIPT: GDScript = preload("res://scripts/meta/start_roster_generator.gd")
 const PLAYER_ROSTER_STORE_SCRIPT: GDScript = preload("res://scripts/meta/player_roster_store.gd")
+const TEAM_NAME_GENERATOR_SCRIPT: GDScript = preload("res://scripts/meta/team_name_generator.gd")
 const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_event_bus.gd")
 const BACKGROUND_IMAGE_CATALOG_SCRIPT: GDScript = preload("res://scripts/assets/background_image_catalog.gd")
 const BACKGROUND_ID: String = "main_menu_shell"
@@ -49,6 +50,8 @@ var _contextual_help_option: OptionButton = null
 var _input_actions_label: Label = null
 var _settings_apply_button: Button = null
 var _settings_reset_button: Button = null
+var _team_name_edit: LineEdit = null
+var _team_name_suggest_button: Button = null
 var _new_roster_button: Button = null
 var _start_roster: Dictionary = {}
 var _start_roster_seed: String = START_ROSTER_GENERATOR_SCRIPT.DEFAULT_SEED
@@ -158,6 +161,9 @@ func get_audio_sfx_debug_snapshot() -> Dictionary:
 func get_start_roster_snapshot() -> Dictionary:
 	var summary: Dictionary = Dictionary(START_ROSTER_GENERATOR_SCRIPT.call("build_summary_snapshot", _start_roster))
 	summary["has_roster"] = bool(summary.get("valid", false))
+	summary["team_identity"] = TEAM_NAME_GENERATOR_SCRIPT.call("build_team_identity_snapshot", _start_roster)
+	summary["team_name_edit_visible"] = _team_name_edit != null and _team_name_edit.visible
+	summary["team_name_suggest_button_visible"] = _team_name_suggest_button != null and _team_name_suggest_button.visible
 	summary["created_on_first_start"] = _last_start_roster_created
 	summary["loaded_from_save"] = _last_start_roster_loaded_from_save
 	summary["reset_confirmation_pending"] = _start_roster_reset_confirmation_pending
@@ -184,6 +190,7 @@ func ensure_start_roster_exists(seed: String = "", roster_size: int = -1) -> Dic
 	_last_start_roster_store_result = first_start.duplicate(true)
 	_start_roster_reset_confirmation_pending = false
 	_refresh_start_roster_button()
+	_refresh_team_name_controls()
 	_status_label.text = "Roster ready" if bool(Dictionary(first_start.get("summary", {})).get("valid", false)) else "Roster invalid"
 	return first_start
 
@@ -237,6 +244,7 @@ func confirm_new_start_roster() -> Dictionary:
 	_last_start_roster_store_result = reset_result.duplicate(true)
 	_start_roster_reset_confirmation_pending = false
 	_refresh_start_roster_button()
+	_refresh_team_name_controls()
 	_status_label.text = "Neues Team bereit" if bool(reset_result.get("ok", false)) else "Roster save failed"
 	return {
 		"created": true,
@@ -251,6 +259,22 @@ func cancel_new_start_roster() -> void:
 	_start_roster_reset_confirmation_pending = false
 	_refresh_start_roster_button()
 	_status_label.text = "Roster ready"
+
+
+func set_start_team_name(next_team_name: String) -> Dictionary:
+	var renamed: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("rename_team", _start_roster, next_team_name, _start_roster_profile_id, _start_roster_save_path))
+	_start_roster = Dictionary(renamed.get("roster", _start_roster)).duplicate(true)
+	_last_start_roster_store_result = Dictionary(renamed.get("save", {})).duplicate(true)
+	_refresh_team_name_controls()
+	_status_label.text = "Team name saved" if bool(renamed.get("ok", false)) else "Team name save failed"
+	return renamed
+
+
+func request_start_team_name_suggestion() -> Dictionary:
+	_start_roster_generation_index += 1
+	var generated: Dictionary = Dictionary(TEAM_NAME_GENERATOR_SCRIPT.call("generate_team_name", _start_roster_seed, _start_roster_profile_id, _start_roster_generation_index))
+	set_start_team_name(String(generated.get("team_name", "")))
+	return generated
 
 
 func set_settings_path_for_tests(config_path: String) -> void:
@@ -481,6 +505,33 @@ func _ensure_start_roster_button() -> void:
 	var menu_buttons := get_node_or_null("MenuRail/MenuMargin/MenuVBox/MenuButtons") as VBoxContainer
 	if menu_buttons == null:
 		return
+	var team_name_row := menu_buttons.get_node_or_null("TeamNameRow") as HBoxContainer
+	if team_name_row == null:
+		team_name_row = HBoxContainer.new()
+		team_name_row.name = "TeamNameRow"
+		team_name_row.add_theme_constant_override("separation", 8)
+		menu_buttons.add_child(team_name_row)
+	_team_name_edit = team_name_row.get_node_or_null("TeamNameEdit") as LineEdit
+	if _team_name_edit == null:
+		_team_name_edit = LineEdit.new()
+		_team_name_edit.name = "TeamNameEdit"
+		_team_name_edit.custom_minimum_size = Vector2(276.0, 42.0)
+		_team_name_edit.placeholder_text = "Teamname"
+		_team_name_edit.focus_mode = Control.FOCUS_ALL
+		team_name_row.add_child(_team_name_edit)
+	if not _team_name_edit.text_submitted.is_connected(_on_team_name_edit_submitted):
+		_team_name_edit.text_submitted.connect(_on_team_name_edit_submitted)
+	if not _team_name_edit.focus_exited.is_connected(_on_team_name_edit_focus_exited):
+		_team_name_edit.focus_exited.connect(_on_team_name_edit_focus_exited)
+	_team_name_suggest_button = team_name_row.get_node_or_null("TeamNameSuggestButton") as Button
+	if _team_name_suggest_button == null:
+		_team_name_suggest_button = Button.new()
+		_team_name_suggest_button.name = "TeamNameSuggestButton"
+		_team_name_suggest_button.text = "Neu"
+		_team_name_suggest_button.custom_minimum_size = Vector2(76.0, 42.0)
+		team_name_row.add_child(_team_name_suggest_button)
+	if not _team_name_suggest_button.pressed.is_connected(_on_team_name_suggest_pressed):
+		_team_name_suggest_button.pressed.connect(_on_team_name_suggest_pressed)
 	_new_roster_button = menu_buttons.get_node_or_null("NewRosterButton") as Button
 	if _new_roster_button == null:
 		_new_roster_button = Button.new()
@@ -491,6 +542,7 @@ func _ensure_start_roster_button() -> void:
 	_new_roster_button.set_meta("roster_action", "new_start_roster")
 	_new_roster_button.set_meta("requires_confirmation", true)
 	_refresh_start_roster_button()
+	_refresh_team_name_controls()
 
 
 func _refresh_start_roster_button() -> void:
@@ -498,6 +550,16 @@ func _refresh_start_roster_button() -> void:
 		return
 	_new_roster_button.text = "Team neu bestaetigen" if _start_roster_reset_confirmation_pending else "Neues Team generieren"
 	_new_roster_button.tooltip_text = "Ersetzt das Startteam erst nach Bestaetigung." if _start_roster_reset_confirmation_pending else "Startteam-Generator vorbereiten."
+
+
+func _refresh_team_name_controls() -> void:
+	if _team_name_edit == null:
+		return
+	var snapshot: Dictionary = Dictionary(TEAM_NAME_GENERATOR_SCRIPT.call("build_team_identity_snapshot", _start_roster))
+	_team_name_edit.text = String(snapshot.get("team_name", ""))
+	_team_name_edit.tooltip_text = "Teamname fuer Roster/Homebase/FOB."
+	if _team_name_suggest_button != null:
+		_team_name_suggest_button.tooltip_text = "Neuen Teamnamen vorschlagen."
 
 
 func _ensure_contextual_help_ui() -> void:
@@ -907,6 +969,19 @@ func _on_new_roster_pressed() -> void:
 		confirm_new_start_roster()
 	else:
 		request_new_start_roster()
+
+
+func _on_team_name_edit_submitted(next_text: String) -> void:
+	set_start_team_name(next_text)
+
+
+func _on_team_name_edit_focus_exited() -> void:
+	if _team_name_edit != null:
+		set_start_team_name(_team_name_edit.text)
+
+
+func _on_team_name_suggest_pressed() -> void:
+	request_start_team_name_suggestion()
 
 
 func _on_global_help_pressed() -> void:

@@ -28,12 +28,12 @@ Konflikte werden in `TacticalCommandRules._normalize_conflicts()` in fester Reih
 | CommanderIntent | Movement | Security | UnitAction |
 | --- | --- | --- | --- |
 | `defend`, `hold` | `hold` | `all_round` | `hold_position` |
-| `take`, `engage`, `flank`, `support` | `bounding` | `sector` fuer take/engage/support, falls nicht durch Intent-Default ueberschrieben | `engage_area` bei take/engage |
+| `take`, `engage`, `flank`, `support` | `bounding` | `sector` fuer take/engage/support, falls nicht durch explizite Security ueberschrieben | `engage_area` bei take/engage |
 | `recon`, `secure` | `probe` | `sector`/requested mode | `seek_cover` |
 | `move` + `tempo = cautious` | `caterpillar` | `facing` | `move_to_position` |
 | `withdraw` | `rush` oder requested movement fallback | `facing` | `retreat` |
 
-Security und Cover werden zuerst durch explizite Intent-Felder gesetzt. Ohne explizite Security gewinnt der Verb-Fallback; ohne explizite Cover-Angabe gewinnt Risiko/Tempo: `risk = low` hebt Cover, `risk = high` senkt Cover, `tempo = cautious` hebt, `tempo = rapid` senkt. Review-Notiz: Der aktuelle `CommanderIntent` serialisiert `security_mode` standardmaessig als `facing` und `cover_priority` standardmaessig als `normal`; fuer regulaere Intent-Payloads sind diese beiden Fallbacks daher markierte tote Nebenaste, bis Default und explizite Wahl unterscheidbar sind.
+Security und Cover werden zuerst durch explizite Intent-Felder gesetzt. Ohne explizite Security gewinnt der Verb-Fallback; ohne explizite Cover-Angabe gewinnt Risiko/Tempo: `risk = low` hebt Cover, `risk = high` senkt Cover, `tempo = cautious` hebt, `tempo = rapid` senkt. `CommanderIntent` schreibt `security_mode` und `cover_priority` nur noch bei expliziter Wahl in den Payload, damit Defaults diese FTL-Fallbacks nicht verdecken.
 
 ## MultiFireteamPlan
 | Verbgruppe | Rollenfolge |

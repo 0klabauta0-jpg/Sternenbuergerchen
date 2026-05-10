@@ -14,7 +14,7 @@ Keine Blocker gefunden. Die hohen Risikoflaechen haben mindestens einen harten a
 
 3. Manuelle Restchecks sind legitim, aber begrenzt: echter Zwei-Instanzen-LAN-Smoke, Full-HD-Lesbarkeit, Audio-/VFX-Gefuehl, Drag-and-drop-Feeling und AirAsset-/Combat-Balance lassen sich headless nicht ausreichend beurteilen.
 
-4. TASK_285 bleibt die wichtigste Patchquelle fuer TASK_289: CommanderIntent-Fallbacks und AirAssetStatus-State-Fallbacks sollten eigene Diagnosefelder bekommen, damit still normalisierte Eingaben nicht wie perfekte Spielerabsicht aussehen.
+4. TASK_285 bleibt die wichtigste Patchquelle fuer TASK_289: CommanderIntent-Fallbacks und AirAssetStatus-State-Fallbacks brauchen Diagnosefelder, damit still normalisierte Eingaben nicht wie perfekte Spielerabsicht aussehen. CommanderIntent fuehrt diese Warnungen inzwischen; AirAssetStatus und Breakout-Diagnosen bleiben die relevanten Folgepunkte.
 
 ### Cleanup
 

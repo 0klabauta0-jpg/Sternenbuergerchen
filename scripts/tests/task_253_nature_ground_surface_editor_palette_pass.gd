@@ -49,7 +49,10 @@ func _test_surface_visual_catalog(terrain_mapping: Dictionary, surface_catalog: 
 		TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROCK,
 		TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROAD,
 	]:
-		_assert(String(surface_model_by_surface.get(surface_type, "")) == "nature_ground_dirt", "Surface maps to Nature ground base: %s" % surface_type)
+		_assert(String(surface_model_by_surface.get(surface_type, "")) == "ground_flat", "Surface keeps Space Kit ground base: %s" % surface_type)
+	var detail_by_type: Dictionary = Dictionary(surface_catalog.get("surface_detail_by_tile_type", {}))
+	for type_id in ["nature_ground_dirt", "nature_ground_sand_dirt", "nature_ground_rock_dirt", "nature_ground_grass_patch"]:
+		_assert(not String(detail_by_type.get(type_id, "")).is_empty(), "Nature Boden maps to offset detail visual: %s" % type_id)
 	var models: Dictionary = Dictionary(terrain_mapping.get("models", {}))
 	for model_key in ["nature_ground_dirt", "nature_ground_grass_patch", "nature_ground_dirt_river_tile"]:
 		var entry: Dictionary = Dictionary(models.get(model_key, {}))
@@ -83,6 +86,20 @@ func _test_editor_palette_contract() -> void:
 	_assert(String(hill_tile.edge_type) == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE, "Nature surface palette preserves edge_type")
 	_assert(String(hill_tile.object_type_id) == "technik_generator_se", "Nature surface palette preserves object_type_id")
 	_assert(int(hill_tile.cover_value) == 45 and bool(hill_tile.blocks_los) and not bool(hill_tile.walkable), "Nature surface palette preserves cover, LOS and walkable state")
+
+	var legacy_rock_tile = _make_hill_tile(Vector2i(1, 0))
+	legacy_rock_tile.type_id = "rock_large"
+	legacy_rock_tile.object_height = 2
+	legacy_rock_tile.cover_value = 40
+	legacy_rock_tile.blocks_los = true
+	legacy_rock_tile.walkable = false
+	_assert(bool(catalog.call("apply_type_to_tile", legacy_rock_tile, "ground_flat")), "Ground brush applies under a legacy rock")
+	_assert(String(legacy_rock_tile.type_id) == "rock_large", "Ground brush preserves legacy rock type_id")
+	_assert(String(legacy_rock_tile.surface_type) == TERRAIN_TILE_DATA_SCRIPT.SURFACE_GROUND, "Ground brush still sets ground surface")
+	_assert(int(legacy_rock_tile.object_height) == 2 and int(legacy_rock_tile.cover_value) == 40 and bool(legacy_rock_tile.blocks_los) and not bool(legacy_rock_tile.walkable), "Ground brush preserves rock gameplay fields")
+	_assert(bool(catalog.call("apply_type_to_tile", legacy_rock_tile, "nature_ground_sand_dirt")), "Nature surface brush applies under a legacy rock")
+	_assert(String(legacy_rock_tile.type_id) == "rock_large", "Nature surface brush preserves legacy rock type_id")
+	_assert(String(legacy_rock_tile.surface_type) == TERRAIN_TILE_DATA_SCRIPT.SURFACE_SAND, "Nature surface brush changes only the surface under the rock")
 
 
 func _test_save_load_and_surface_gameplay_contract() -> void:
@@ -137,16 +154,22 @@ func _test_runtime_surface_visuals() -> void:
 
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 	var entries: Array = Array(snapshot.get("surface_visual_entries", []))
+	var detail_entries: Array = Array(snapshot.get("surface_detail_visual_entries", []))
 	_assert(bool(snapshot.get("surface_visual_theme_catalog_loaded", false)), "Runtime loads surface visual theme catalog")
 	_assert(int(snapshot.get("ground_mesh_count", 0)) == int(snapshot.get("tile_count", -1)), "Runtime still renders one ground mesh per tile")
-	_assert(int(snapshot.get("nature_surface_ground_model_count", 0)) == int(snapshot.get("tile_count", -1)), "Runtime uses Nature ground model for each tile")
+	_assert(int(snapshot.get("nature_surface_ground_model_count", -1)) == 0, "Runtime does not replace base ground with Nature ground")
+	_assert(int(snapshot.get("nature_surface_detail_model_count", 0)) >= 4, "Runtime renders Nature Boden as offset detail visuals")
 	_assert(entries.size() == int(snapshot.get("tile_count", -1)), "Runtime exposes one surface visual entry per tile")
 	_assert(_entries_include_surface_types(entries, [TERRAIN_TILE_DATA_SCRIPT.SURFACE_GROUND, TERRAIN_TILE_DATA_SCRIPT.SURFACE_SAND, TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROCK, TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROAD]), "Runtime entries cover ground, sand, rock and road")
-	_assert(_entries_include_model_key(entries, "nature_ground_grass_patch"), "Runtime honors Nature ground tile-type override")
-	_assert(_entries_are_nature_kit(entries), "Runtime surface visuals are Nature Kit backed")
+	_assert(_entries_include_model_key(entries, "ground_flat"), "Runtime keeps standard Boden on Space Kit ground_flat")
+	_assert(_entries_are_space_kit_ground(entries), "Runtime base surface visuals are standard Space Kit ground backed")
+	_assert(_entries_include_model_key(detail_entries, "nature_ground_grass_patch"), "Runtime renders grass patch as a Nature detail on existing ground")
+	_assert(_entries_are_nature_kit(detail_entries), "Runtime Nature Boden detail visuals are Nature Kit backed")
 	_assert(int(snapshot.get("surface_tint_count", 0)) >= 3, "Non-ground surface tints remain visible")
 	_assert(int(snapshot.get("elevated_surface_tint_count", 0)) >= 2, "Elevated surface tints remain visible")
 	_assert(int(snapshot.get("tile_grid_line_count", 0)) > 0, "Grid lines remain visible")
+	_assert(int(snapshot.get("tile_grid_line_count", 0)) >= _expected_min_grid_line_count(map_data), "Grid covers the full editor map dimensions")
+	_assert(_editor_grid_material_is_depth_tested(primary_view), "Grid uses depth-tested editor helper material")
 	_assert(int(snapshot.get("marker_count", 0)) >= 1, "Map markers remain visible")
 	_assert(int(snapshot.get("selected_grid_count", 0)) == 1, "Selection remains visible")
 	_assert(int(snapshot.get("waypoint_tile_marker_count", 0)) >= 1, "Waypoint tiles remain visible")
@@ -248,6 +271,18 @@ func _entries_include_model_key(entries: Array, model_key: String) -> bool:
 	return false
 
 
+func _entries_are_space_kit_ground(entries: Array) -> bool:
+	if entries.is_empty():
+		return false
+	for entry_variant in entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("model_key", "")) != "ground_flat":
+			return false
+		if bool(entry.get("is_nature_kit", false)):
+			return false
+	return true
+
+
 func _entries_are_nature_kit(entries: Array) -> bool:
 	if entries.is_empty():
 		return false
@@ -255,6 +290,26 @@ func _entries_are_nature_kit(entries: Array) -> bool:
 		if not bool(Dictionary(entry_variant).get("is_nature_kit", false)):
 			return false
 	return true
+
+
+func _expected_min_grid_line_count(map_data) -> int:
+	if map_data == null:
+		return 0
+	var grid_size: Vector2i = Vector2i(map_data.call("get_grid_size"))
+	return (grid_size.x * (grid_size.y + 1)) + (grid_size.y * (grid_size.x + 1))
+
+
+func _editor_grid_material_is_depth_tested(primary_view: Node) -> bool:
+	if primary_view == null:
+		return false
+	var grid_node := primary_view.get_node_or_null("ViewportContainer/SubViewport/WorldRoot/MapRoot3D/TileGridLines3D") as MeshInstance3D
+	if grid_node == null or grid_node.mesh == null or grid_node.mesh.get_surface_count() <= 0:
+		return false
+	var material := grid_node.mesh.surface_get_material(0) as StandardMaterial3D
+	return material != null \
+		and not material.no_depth_test \
+		and material.cull_mode == BaseMaterial3D.CULL_DISABLED \
+		and material.shading_mode == BaseMaterial3D.SHADING_MODE_UNSHADED
 
 
 func _is_project_loadable(path: String) -> bool:

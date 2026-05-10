@@ -39,19 +39,22 @@ func _test_fob_scene_uses_fixed_fullhd_layout_contract() -> void:
 	_assert(screen.custom_minimum_size == Vector2(float(target_viewport.x), float(target_viewport.y)), "FOB root fixes the FullHD workspace size")
 	_assert(bool(screen.get_meta("drop_light_fixed_fullhd_layout", false)), "FOB root is marked as a drop_light fixed layout")
 
+	var available_panel := screen.get_node("Panel/Margin/VBox/ContentRow/AvailablePanel") as Control
 	var fireteam_panel := screen.get_node("Panel/Margin/VBox/ContentRow/FireteamPanel") as Control
 	var loadout_panel := screen.get_node("Panel/Margin/VBox/ContentRow/StagingPanel") as Control
 	var flightdeck_panel := screen.get_node("Panel/Margin/VBox/ContentRow/DropshipPanel") as Control
+	_assert(_node_rect_matches_contract(available_panel, layout.get("unassigned_pool")), "#09 NPC POOL uses the fixed contract rectangle")
 	_assert(_node_rect_matches_contract(fireteam_panel, layout.get("fireteams")), "#10 FIRETEAMS uses the fixed contract rectangle")
 	_assert(_node_rect_matches_contract(loadout_panel, layout.get("loadout")), "#13 LOADOUT uses the fixed contract rectangle")
 	_assert(_node_rect_matches_contract(flightdeck_panel, layout.get("flightdeck")), "#14 FLIGHTDECK uses the fixed contract rectangle")
 	_assert(flightdeck_panel.custom_minimum_size.x > loadout_panel.custom_minimum_size.x, "#14 FLIGHTDECK is wider than #13 LOADOUT")
+	_assert(available_panel != null and available_panel.visible, "#09 NPC POOL is visible next to #10 in the fixed FOB runtime layout")
+	_assert(_rect_left_of(layout.get("unassigned_pool"), layout.get("fireteams")), "#09 NPC POOL sits left of #10 FIRETEAMS")
 
-	var available_panel := screen.get_node("Panel/Margin/VBox/ContentRow/AvailablePanel") as Control
-	_assert(available_panel != null and not available_panel.visible, "#09 available operators is not part of the fixed FOB runtime layout")
-
+	var available_label := screen.get_node("Panel/Margin/VBox/ContentRow/AvailablePanel/AvailableMargin/AvailableVBox/AvailableHeaderLabel") as Label
 	var dropship_label := screen.get_node("Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipHeaderRow/DropshipHeaderLabel") as Label
 	var loadout_label := screen.get_node("Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutHeaderRow/LoadoutHeaderLabel") as Label
+	_assert(available_label != null and available_label.text == "#09 NPC POOL", "FOB left panel is labeled #09 NPC POOL")
 	_assert(dropship_label != null and dropship_label.text == "#14 FLIGHTDECK", "FOB right panel is labeled #14 FLIGHTDECK")
 	_assert(loadout_label != null and loadout_label.text == "#13 LOADOUT", "FOB middle panel is labeled #13 LOADOUT")
 
@@ -93,6 +96,7 @@ func _test_flightdeck_renders_project_craft_assets() -> void:
 	_assert(queue_list != null and queue_list.get_child_count() >= 2, "#14 FLIGHTDECK renders visible transport craft cards")
 	_assert(_contains_texture_path(queue_list, DROPSHIP_TEXTURE_PATH), "Flightdeck uses the project dropship asset")
 	_assert(_contains_texture_path(queue_list, SHUTTLE_TEXTURE_PATH), "Flightdeck uses the project shuttle asset")
+	_assert(_transport_ship_visuals_are_enlarged(queue_list), "#14 transport ship visuals are enlarged")
 	_assert(_transport_card_buttons_are_square(queue_list), "Transport craft card actions are square")
 
 	screen.queue_free()
@@ -119,6 +123,14 @@ func _node_rect_matches_contract(control: Control, rect_variant: Variant) -> boo
 		and control.get_meta("drop_light_rect", Rect2i()) == rect
 
 
+func _rect_left_of(left_variant: Variant, right_variant: Variant) -> bool:
+	if typeof(left_variant) != TYPE_RECT2I or typeof(right_variant) != TYPE_RECT2I:
+		return false
+	var left_rect: Rect2i = left_variant
+	var right_rect: Rect2i = right_variant
+	return left_rect.end.x <= right_rect.position.x
+
+
 func _all_buttons_square(container: Node) -> bool:
 	if container == null:
 		return false
@@ -143,6 +155,20 @@ func _transport_card_buttons_are_square(root_node: Node) -> bool:
 		if button.custom_minimum_size.x <= 0.0 or button.custom_minimum_size.x != button.custom_minimum_size.y:
 			return false
 	return found_button
+
+
+func _transport_ship_visuals_are_enlarged(root_node: Node) -> bool:
+	var checked_count := 0
+	for node in _collect_nodes(root_node):
+		var texture_rect := node as TextureRect
+		if texture_rect == null or texture_rect.name != "ShipTexture":
+			continue
+		checked_count += 1
+		if not bool(texture_rect.get_meta("transport_ship_texture_enlarged", false)):
+			return false
+		if texture_rect.custom_minimum_size.x < 128.0 or texture_rect.custom_minimum_size.y < 76.0:
+			return false
+	return checked_count > 0
 
 
 func _contains_texture_path(root_node: Node, expected_path: String) -> bool:

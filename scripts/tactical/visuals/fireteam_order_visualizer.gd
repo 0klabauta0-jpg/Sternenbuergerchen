@@ -321,17 +321,27 @@ func _draw_security_states() -> void:
 		var base_color: Color = _get_fireteam_color(fireteam_id)
 		var overlay_color: Color = base_color.lightened(0.15)
 		overlay_color.a = 0.32
+		var security_mode: String = String(security_dict.get("security_mode", "")).strip_edges().to_lower()
+		var radius_hint: float = float(security_dict.get("security_radius_world", 74.0))
+		var visual_radius: float = clampf(radius_hint if radius_hint > 0.0 else 74.0, 74.0, 256.0)
+		if security_mode == "360":
+			overlay_color.a = 0.22
 		for assignment_variant in Array(security_dict.get("member_assignments", [])):
 			if typeof(assignment_variant) != TYPE_DICTIONARY:
 				continue
 			var assignment: Dictionary = Dictionary(assignment_variant)
 			var center_angle: float = float(assignment.get("center_angle", 0.0))
 			var arc_width: float = float(assignment.get("arc_width", 0.0))
-			_draw_sector(anchor_position, center_angle, arc_width, 74.0, overlay_color)
+			_draw_sector(anchor_position, center_angle, arc_width, visual_radius, overlay_color)
+		var fallback_font: Font = ThemeDB.fallback_font
+		if fallback_font != null and security_mode == "360":
+			var radius_tiles: int = int(security_dict.get("security_radius_tiles", 0))
+			var radius_text: String = " R%d" % radius_tiles if radius_tiles > 0 else ""
+			var overwatch_suffix := " +OVW" if bool(security_dict.get("overwatch_ready", false)) else ""
+			draw_string(fallback_font, anchor_position + Vector2(12.0, -10.0), "SEC 360%s%s" % [radius_text, overwatch_suffix], HORIZONTAL_ALIGNMENT_LEFT, -1.0, 11, Color(0.95, 0.98, 1.0, 0.95))
 		if bool(security_dict.get("overwatch_ready", false)):
 			_draw_iso_marker_base(anchor_position, Color(0.95, 0.98, 1.0, 0.45), Color(0.95, 0.98, 1.0, 0.9), 0.55)
-			var fallback_font: Font = ThemeDB.fallback_font
-			if fallback_font != null:
+			if fallback_font != null and security_mode != "360":
 				draw_string(fallback_font, anchor_position + Vector2(12.0, -10.0), "OVW", HORIZONTAL_ALIGNMENT_LEFT, -1.0, 11, Color(0.95, 0.98, 1.0, 0.95))
 
 

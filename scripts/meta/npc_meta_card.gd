@@ -3,6 +3,7 @@ extends PanelContainer
 
 const META_UNIT_PROFILE_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile.gd")
 const NPC_RANK_BADGE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
+const META_USEROLOGY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/meta_userology_contract.gd")
 
 signal card_pressed(unit_id, profile)
 
@@ -16,6 +17,7 @@ var _show_status_line: bool = true
 func _ready() -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	custom_minimum_size = Vector2(220.0, 0.0)
+	set_meta("badge_layout_contract", "right_of_main_text")
 	focus_mode = Control.FOCUS_NONE
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	_ensure_ui()
@@ -23,7 +25,7 @@ func _ready() -> void:
 
 
 func setup_from_profile(profile, options: Dictionary = {}) -> void:
-	if profile != null and profile.has_method("duplicate_profile"):
+	if typeof(profile) == TYPE_OBJECT and profile != null and profile.has_method("duplicate_profile"):
 		_profile = profile.duplicate_profile()
 	elif typeof(profile) == TYPE_DICTIONARY:
 		_profile = META_UNIT_PROFILE_SCRIPT.new(profile)
@@ -65,6 +67,21 @@ func get_profile():
 		return null
 
 	return _profile.duplicate_profile()
+
+
+func get_card_userology_snapshot() -> Dictionary:
+	var badge_row := get_node_or_null("Margin/VBox/BadgeRow") as HBoxContainer
+	var min_badge_size: Vector2 = Vector2.ZERO
+	if badge_row != null and badge_row.get_child_count() > 0:
+		var first_badge := badge_row.get_child(0) as Control
+		min_badge_size = first_badge.custom_minimum_size if first_badge != null else Vector2.ZERO
+	return {
+		"unit_id": get_unit_id(),
+		"badge_layout": "right_of_main_text",
+		"badge_minimum_size": min_badge_size,
+		"badge_tooltips_available": _badge_tooltips_available(badge_row),
+		"character_sheet_compatible": true,
+	}
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -216,10 +233,10 @@ func _populate_badge_row(badge_row: HBoxContainer) -> void:
 		var badge: Dictionary = Dictionary(badge_variant)
 		var texture_rect := TextureRect.new()
 		texture_rect.name = "RankBadge_%s" % String(badge.get("badge_key", badge.get("badge_id", "unknown"))).strip_edges()
-		texture_rect.custom_minimum_size = Vector2(18.0, 18.0)
+		texture_rect.custom_minimum_size = META_USEROLOGY_CONTRACT_SCRIPT.get("MIN_BADGE_SIZE")
 		texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		texture_rect.mouse_filter = Control.MOUSE_FILTER_STOP
 		texture_rect.tooltip_text = "%s: %s" % [String(badge.get("label", "Badge")), String(badge.get("reason", ""))]
 		var badge_path: String = String(badge.get("path", "")).strip_edges()
 		if not badge_path.is_empty() and ResourceLoader.exists(badge_path):
@@ -228,6 +245,16 @@ func _populate_badge_row(badge_row: HBoxContainer) -> void:
 			texture_rect.modulate = Color(1.0, 0.45, 0.35, 0.95)
 			texture_rect.set_meta("missing_rank_badge_asset", true)
 		badge_row.add_child(texture_rect)
+
+
+func _badge_tooltips_available(badge_row: HBoxContainer) -> bool:
+	if badge_row == null:
+		return true
+	for child in badge_row.get_children():
+		var control := child as Control
+		if control != null and control.visible and control.tooltip_text.strip_edges().is_empty():
+			return false
+	return true
 
 
 func _can_emit_press() -> bool:

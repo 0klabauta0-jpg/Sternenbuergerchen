@@ -148,6 +148,7 @@ static func apply_card_state(card: PanelContainer, state: Dictionary) -> void:
 		float(state.get("ship_texture_width", 88.0)),
 		float(state.get("ship_texture_height", 52.0))
 	)
+	ship_texture.set_meta("transport_ship_texture_enlarged", ship_texture.custom_minimum_size.x > 88.0 or ship_texture.custom_minimum_size.y > 52.0)
 	ship_texture.modulate = Color(1.0, 1.0, 1.0, 0.52) if is_in_transit else Color(1.0, 1.0, 1.0, 1.0)
 
 	_refresh_pilot_content(card, state)

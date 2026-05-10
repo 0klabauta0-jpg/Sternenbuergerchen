@@ -82,6 +82,8 @@ var contact_response: String = CONTACT_RESPONSE_REPORT
 var risk: String = RISK_NORMAL
 var cover_priority: String = "normal"
 var security_mode: String = "facing"
+var cover_priority_explicit: bool = false
+var security_mode_explicit: bool = false
 var sync_group_id: String = ""
 var coordinated_fireteam_ids: PackedStringArray = PackedStringArray()
 var phase: int = -1
@@ -175,12 +177,16 @@ func to_dict() -> Dictionary:
 		"fire_rule": fire_rule,
 		"contact_response": contact_response,
 		"risk": risk,
-		"cover_priority": cover_priority,
-		"security_mode": security_mode,
 		"phase": phase,
 		"tactical_rules": tactical_rules.duplicate(true),
 		"metadata": metadata.duplicate(true),
 	}
+	if cover_priority_explicit:
+		data["cover_priority"] = cover_priority
+		data["cover_priority_explicit"] = true
+	if security_mode_explicit:
+		data["security_mode"] = security_mode
+		data["security_mode_explicit"] = true
 	if not coordinated_fireteam_ids.is_empty():
 		data["coordinated_fireteam_ids"] = PackedStringArray(coordinated_fireteam_ids)
 	if not team_id.is_empty():
@@ -231,6 +237,8 @@ func _apply_dict(data: Dictionary) -> void:
 	var raw_fire_rule: String = String(data.get("fire_rule", data.get("fire_status", FIRE_RULE_RETURN)))
 	var raw_contact_response: String = String(data.get("contact_response", CONTACT_RESPONSE_REPORT))
 	var raw_risk: String = String(data.get("risk", RISK_NORMAL))
+	cover_priority_explicit = bool(data.get("cover_priority_explicit", source_metadata.get("cover_priority_explicit", false))) or data.has("cover_priority") or data.has("cover_rule")
+	security_mode_explicit = bool(data.get("security_mode_explicit", source_metadata.get("security_mode_explicit", false))) or data.has("security_mode")
 	command_id = String(data.get("command_id", "")).strip_edges()
 	verb = _normalize_verb(raw_verb)
 	fireteam_id = String(data.get("fireteam_id", data.get("team_id", ""))).strip_edges().to_lower()

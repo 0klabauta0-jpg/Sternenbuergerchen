@@ -3,9 +3,12 @@ extends RefCounted
 
 const DEFAULT_CATALOG_PATH: String = "res://data/terrain_tile_catalog.json"
 const OBJECT_LAYER_GROUPS: PackedStringArray = [
+	"nature_props",
 	"deko",
+	"technik_deko",
 	"technik",
 	"gebaeude",
+	"space_station",
 	"plattformen",
 	"pipes",
 	"rails",
@@ -17,6 +20,9 @@ const HILL_PRESERVING_TYPE_PREFIXES: PackedStringArray = [
 	"rock_",
 	"cliff_",
 	"slope_",
+]
+const SURFACE_BRUSH_TYPE_IDS: PackedStringArray = [
+	"ground_flat",
 ]
 
 var _tile_types: Dictionary = {}
@@ -162,6 +168,8 @@ func preserves_hill_fields_when_applied(type_id: String) -> bool:
 	var normalized_type_id: String = type_id.strip_edges().to_lower()
 	if normalized_type_id.is_empty():
 		return false
+	if SURFACE_BRUSH_TYPE_IDS.has(normalized_type_id):
+		return true
 	var entry: Dictionary = _tile_types.get(normalized_type_id, {})
 	if bool(entry.get("preserve_hill_fields", false)) or bool(entry.get("visual_surface_variant", false)):
 		return true
@@ -178,9 +186,12 @@ func apply_type_to_tile(tile_data, type_id: String) -> bool:
 		return false
 
 	var entry: Dictionary = _tile_types[type_id]
+	if SURFACE_BRUSH_TYPE_IDS.has(type_id):
+		_apply_surface_brush_to_tile(tile_data, type_id, entry)
+		return true
+
 	if bool(entry.get("visual_surface_variant", false)):
-		tile_data.type_id = type_id
-		tile_data.surface_type = String(entry.get("surface_type", tile_data.surface_type))
+		_apply_surface_brush_to_tile(tile_data, type_id, entry)
 		return true
 
 	if is_object_layer_type(type_id):
@@ -210,3 +221,21 @@ func apply_type_to_tile(tile_data, type_id: String) -> bool:
 	tile_data.surface_type = String(entry.get("surface_type", "ground"))
 	tile_data.edge_type = String(entry.get("edge_type", "cliff"))
 	return true
+
+
+func _apply_surface_brush_to_tile(tile_data, type_id: String, entry: Dictionary) -> void:
+	tile_data.surface_type = String(entry.get("surface_type", tile_data.surface_type))
+	var current_type_id: String = String(tile_data.type_id).strip_edges().to_lower() if tile_data.type_id is String else ""
+	if _is_legacy_object_type_id(current_type_id):
+		return
+	tile_data.type_id = type_id
+
+
+func _is_legacy_object_type_id(type_id: String) -> bool:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty():
+		return false
+	for prefix in HILL_PRESERVING_TYPE_PREFIXES:
+		if normalized_type_id.begins_with(prefix):
+			return true
+	return false

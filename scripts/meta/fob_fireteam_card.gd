@@ -5,6 +5,11 @@ signal card_pressed(fireteam_id)
 signal rename_committed(fireteam_id, next_label)
 signal unit_dropped(unit_id, fireteam_id)
 
+const META_USEROLOGY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/meta_userology_contract.gd")
+
+const REFERENCE_CARD_MIN_SIZE := Vector2(280.0, 74.0)
+const CARD_Z_INDEX := 24
+
 var _fireteam_id: String = ""
 var _is_selected: bool = false
 var _source_context: String = "fireteam_list"
@@ -13,6 +18,7 @@ var _source_context: String = "fireteam_list"
 func _ready() -> void:
 	focus_mode = Control.FOCUS_NONE
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	_apply_canvas_order(false)
 	_ensure_ui()
 	_apply_visual_state()
 
@@ -53,12 +59,33 @@ func setup_card(fireteam_id: String, label: String, is_selected: bool, respawn_e
 	member_label.add_theme_font_size_override("font_size", 9)
 	teamfit_label.add_theme_font_size_override("font_size", 9)
 	drop_hint_label.add_theme_font_size_override("font_size", 9)
-	stage_label.text = "Respawn: %s | Loadout: %s" % ["FOB" if respawn_enabled else "off", loadout_id.to_upper()]
-	member_label.text = member_summary_text
+	stage_label.visible = true
+	stage_label.text = _build_loadout_stage_text(loadout_id, _source_context)
+	stage_label.set_meta("fireteam_card_loadout_visible", true)
+	var show_member_summary: bool = _source_context == "fireteam_list" or _source_context == "mission_mini"
+	if show_member_summary:
+		member_label.text = member_summary_text
+		member_label.visible = true
+	else:
+		member_label.text = ""
+		member_label.visible = false
 	teamfit_label.text = teamfit_summary_text.strip_edges()
 	teamfit_label.visible = not teamfit_label.text.is_empty()
 	drop_hint_label.text = "Drop operator cards here"
+	_apply_density(editable_in_list, margin, vbox, title_edit, stage_label, member_label, teamfit_label, drop_hint_label)
+	if _source_context == "loadout_staging":
+		custom_minimum_size = Vector2(custom_minimum_size.x, 48.0)
+		set_meta("loadout_reference_summary_hidden", true)
 	_apply_visual_state()
+
+
+func _build_loadout_stage_text(loadout_id: String, source_context: String) -> String:
+	var loadout_text: String = loadout_id.strip_edges().to_upper()
+	if loadout_text.is_empty():
+		loadout_text = "MEDIUM"
+	if source_context == "loadout_staging":
+		return "FOB | Loadout: %s" % loadout_text
+	return "Loadout: %s" % loadout_text
 
 
 func get_member_host() -> VBoxContainer:
@@ -90,6 +117,10 @@ func _get_drag_data(_at_position: Vector2):
 		return null
 
 	var preview := PanelContainer.new()
+	preview.z_as_relative = false
+	preview.z_index = int(META_USEROLOGY_CONTRACT_SCRIPT.get("DRAG_PREVIEW_Z_INDEX"))
+	preview.set_meta("global_drag_layer", true)
+	preview.set_meta("above_windows", true)
 	var stylebox := StyleBoxFlat.new()
 	stylebox.bg_color = Color(0.18, 0.20, 0.25, 0.95)
 	stylebox.border_color = Color(0.64, 0.69, 0.76, 1.0)
@@ -118,6 +149,73 @@ func _get_drag_data(_at_position: Vector2):
 		"fireteam_id": _fireteam_id,
 		"source_context": _source_context,
 	}
+
+
+func _apply_canvas_order(is_drag_preview: bool) -> void:
+	z_as_relative = false
+	z_index = int(META_USEROLOGY_CONTRACT_SCRIPT.get("DRAG_PREVIEW_Z_INDEX")) if is_drag_preview else CARD_Z_INDEX
+	set_meta("global_card_z_order", true)
+
+
+func _apply_density(
+	editable_in_list: bool,
+	margin: MarginContainer,
+	vbox: VBoxContainer,
+	title_edit: LineEdit,
+	stage_label: Label,
+	member_label: Label,
+	teamfit_label: Label,
+	drop_hint_label: Label
+) -> void:
+	if editable_in_list:
+		size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		custom_minimum_size = Vector2.ZERO
+		clip_contents = false
+		margin.add_theme_constant_override("margin_left", 6)
+		margin.add_theme_constant_override("margin_top", 6)
+		margin.add_theme_constant_override("margin_right", 6)
+		margin.add_theme_constant_override("margin_bottom", 6)
+		vbox.add_theme_constant_override("separation", 2)
+		stage_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		member_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		teamfit_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		drop_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		stage_label.max_lines_visible = -1
+		member_label.max_lines_visible = -1
+		teamfit_label.max_lines_visible = -1
+		drop_hint_label.max_lines_visible = -1
+		stage_label.clip_text = false
+		member_label.clip_text = false
+		teamfit_label.clip_text = false
+		drop_hint_label.clip_text = false
+		drop_hint_label.visible = true
+		set_meta("fob_fireteam_reference_card", false)
+		return
+
+	size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	custom_minimum_size = REFERENCE_CARD_MIN_SIZE
+	clip_contents = true
+	margin.add_theme_constant_override("margin_left", 4)
+	margin.add_theme_constant_override("margin_top", 4)
+	margin.add_theme_constant_override("margin_right", 4)
+	margin.add_theme_constant_override("margin_bottom", 4)
+	vbox.add_theme_constant_override("separation", 1)
+	title_edit.custom_minimum_size = Vector2(0.0, 22.0)
+	stage_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	member_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	teamfit_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	drop_hint_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	stage_label.max_lines_visible = 1
+	member_label.max_lines_visible = 1
+	teamfit_label.max_lines_visible = 1
+	drop_hint_label.max_lines_visible = 1
+	stage_label.clip_text = true
+	member_label.clip_text = true
+	teamfit_label.clip_text = true
+	drop_hint_label.clip_text = true
+	teamfit_label.visible = false
+	drop_hint_label.visible = false
+	set_meta("fob_fireteam_reference_card", true)
 
 
 func _can_drop_data(_at_position: Vector2, data) -> bool:

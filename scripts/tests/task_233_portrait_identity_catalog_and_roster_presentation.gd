@@ -39,8 +39,9 @@ func _test_inventory_doc_and_json() -> void:
 	_assert(not doc.is_empty(), "Portrait inventory doc exists")
 	_assert(int(catalog.get("schema_version", 0)) == 1, "Portrait catalog schema is v1")
 	_assert(String(catalog.get("catalog_id", "")) == "portrait_identity_catalog_v1", "Portrait catalog has stable catalog id")
-	_assert(int(Dictionary(catalog.get("source_inventory", {})).get("scanned_png_count", 0)) == _count_char_pngs(), "Inventory records all source PNGs under Assets/Char")
-	_assert(doc.contains("PNG-Dateien gesamt: 88"), "Inventory doc records total PNG count")
+	var source_png_count: int = _count_char_pngs()
+	_assert(int(Dictionary(catalog.get("source_inventory", {})).get("scanned_png_count", 0)) == source_png_count, "Inventory records all source PNGs under Assets/Char")
+	_assert(doc.contains("PNG-Dateien gesamt: %d" % source_png_count), "Inventory doc records total PNG count")
 	_assert(doc.contains("96x120") and doc.contains("64x64") and doc.contains("38x38"), "Inventory doc documents fixed UI target sizes")
 
 

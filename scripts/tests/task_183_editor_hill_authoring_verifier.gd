@@ -43,6 +43,16 @@ func _test_height_tool_patch_contract() -> void:
 	_assert(int(raise_patch.get("height_level", -1)) == 1, "Height tool raises H=0 to H=1")
 	_assert(String(raise_patch.get("edge_type", "")) == TERRAIN_TILE_DATA_SCRIPT.get("EDGE_SLOPE"), "Height tool applies selected slope edge above H=0")
 
+	var raise_none_patch: Dictionary = MAP_EDITOR_HEIGHT_TOOL_SCRIPT.call(
+		"build_height_patch",
+		0,
+		MAP_EDITOR_HEIGHT_TOOL_SCRIPT.get("MODE_RAISE"),
+		TERRAIN_TILE_DATA_SCRIPT.get("EDGE_NONE"),
+		TERRAIN_TILE_DATA_SCRIPT.get("EDGE_NONE")
+	)
+	_assert(int(raise_none_patch.get("height_level", -1)) == 1, "Height tool can raise H=0 with explicit edge none")
+	_assert(String(raise_none_patch.get("edge_type", "")) == TERRAIN_TILE_DATA_SCRIPT.get("EDGE_NONE"), "Height tool preserves selected edge none above H=0")
+
 	var set_2_patch: Dictionary = MAP_EDITOR_HEIGHT_TOOL_SCRIPT.call(
 		"build_height_patch",
 		0,

@@ -50,6 +50,13 @@ func _test_live_tactical_loop_is_visible_in_2_5d() -> void:
 	await _wait_frames(2)
 	await _drive_drop_until_outbound(controller)
 	_assert(String(controller.get("_drop_sequence_phase")) == "outbound", "Dropship deploys the selected fireteam and enters outbound state")
+	await _wait_frames(4)
+	await _wait_physics_frames(2)
+	controller.call("refresh_fireteam_security_state")
+	var post_drop_profile: Dictionary = Dictionary(controller.call("get_active_behavior_profile", "blue"))
+	var post_drop_security: Dictionary = _get_fireteam_security_state(controller, "blue")
+	_assert(String(Dictionary(post_drop_profile.get("metadata", {})).get("origin", "")) == "post_drop_360_security", "Dropped fireteam receives the post-drop security behavior profile")
+	_assert(String(post_drop_security.get("security_mode", "")) == "360", "Dropped fireteam automatically takes 360 security")
 	_assert(_primary_snapshot_bool(primary_view, "has_lz") and _primary_dropship_visible(primary_view), "2.5D primary view keeps LZ and outbound dropship visible")
 	_assert(int(Dictionary(primary_view.call("get_render_snapshot")).get("lz_tile_marker_count", 0)) == 1, "2.5D primary view shows the LZ as a terrain field marker")
 
@@ -216,6 +223,16 @@ func _primary_dropship_visible(primary_view: Node) -> bool:
 		return false
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 	return bool(snapshot.get("dropship_model_visible", false)) or bool(snapshot.get("dropship_texture_visible", false))
+
+
+func _get_fireteam_security_state(controller: Node, fireteam_id: String) -> Dictionary:
+	for state_variant in Array(controller.call("get_fireteam_security_snapshot")):
+		if typeof(state_variant) != TYPE_DICTIONARY:
+			continue
+		var state: Dictionary = Dictionary(state_variant)
+		if String(state.get("fireteam_id", "")).strip_edges().to_lower() == fireteam_id.strip_edges().to_lower():
+			return state
+	return {}
 
 
 func _wait_frames(frame_count: int) -> void:

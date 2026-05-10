@@ -122,8 +122,11 @@ func update_fireteam_state(
 	var leadership: float = _read_skill_value(leader, "get_leadership_skill", 0.0)
 	var trait_ids: PackedStringArray = PackedStringArray(leader.call("get_trait_ids")) if leader != null and leader.has_method("get_trait_ids") else PackedStringArray()
 	var command_type: String = _extract_command_type(behavior_profile_dict, area_context)
-	var mode: String = _resolve_security_mode(leadership, trait_ids, threat_position)
-	var direction_angle: float = float(previous_state.get("direction_angle", 0.0))
+	var mode_override: String = _resolve_security_mode_override(behavior_profile_dict, area_context)
+	var mode: String = mode_override if not mode_override.is_empty() else _resolve_security_mode(leadership, trait_ids, threat_position)
+	var security_radius_world: float = _extract_security_radius_world(behavior_profile_dict, area_context)
+	var security_radius_tiles: int = _extract_security_radius_tiles(behavior_profile_dict, area_context)
+	var direction_angle: float = float(previous_state.get("direction_angle", _extract_security_direction_angle(behavior_profile_dict, area_context)))
 	var now_msec: int = Time.get_ticks_msec()
 	if previous_state.is_empty() and typeof(threat_position) == TYPE_VECTOR2:
 		direction_angle = (Vector2(threat_position) - anchor_position).angle()
@@ -153,7 +156,7 @@ func update_fireteam_state(
 		pending_ready_at_msec = 0
 		if typeof(threat_position) == TYPE_VECTOR2:
 			direction_angle = (Vector2(threat_position) - anchor_position).angle()
-	var member_assignments: Array = _build_member_assignments(fit_members, mode, direction_angle)
+	var member_assignments: Array = _build_member_assignments(fit_members, mode, direction_angle, security_radius_world)
 	var overwatch_ready: bool = _is_overwatch_ready(command_type, movement_state, suppression_state, ad_hoc_order, fit_members)
 	var state: Dictionary = {
 		"fireteam_id": normalized_fireteam_id,
@@ -167,6 +170,8 @@ func update_fireteam_state(
 		"main_threat_position": Vector2(threat_position) if typeof(threat_position) == TYPE_VECTOR2 else null,
 		"main_threat_distance": threat_distance,
 		"member_assignments": member_assignments,
+		"security_radius_world": security_radius_world,
+		"security_radius_tiles": security_radius_tiles,
 		"overwatch_ready": overwatch_ready,
 		"is_active": _is_security_active(command_type, fit_members),
 		"area_order_id": String(area_context.get("area_order_id", "")),
@@ -304,7 +309,31 @@ func _resolve_security_mode(leadership: float, trait_ids: PackedStringArray, thr
 	return SECURITY_MODE_360
 
 
-func _build_member_assignments(fit_members: Array, security_mode: String, direction_angle: float) -> Array:
+func _resolve_security_mode_override(behavior_profile_dict: Dictionary, area_context: Dictionary = {}) -> String:
+	var area_mode: String = _normalize_security_mode(area_context.get("security_mode", ""))
+	if not area_mode.is_empty():
+		return area_mode
+	var metadata: Dictionary = Dictionary(behavior_profile_dict.get("metadata", {}))
+	for key in ["security_mode_override", "security_mode"]:
+		var metadata_mode: String = _normalize_security_mode(metadata.get(key, ""))
+		if not metadata_mode.is_empty():
+			return metadata_mode
+	return ""
+
+
+func _normalize_security_mode(value: Variant) -> String:
+	var normalized_value: String = String(value).strip_edges().to_lower()
+	normalized_value = normalized_value.replace("_", "-").replace(" ", "-")
+	match normalized_value:
+		"360", "360-security", "360-degree", "all-round", "allround", "all-around", "omni", "omnidirectional":
+			return SECURITY_MODE_360
+		"directional", "sector", "sector-security", "facing", "front", "forward", "arc":
+			return SECURITY_MODE_DIRECTIONAL
+		_:
+			return ""
+
+
+func _build_member_assignments(fit_members: Array, security_mode: String, direction_angle: float, security_radius_world: float = 0.0) -> Array:
 	var assignments: Array = []
 	if fit_members.is_empty():
 		return assignments
@@ -316,6 +345,7 @@ func _build_member_assignments(fit_members: Array, security_mode: String, direct
 				"unit_id": String(member.get("unit_id", "")),
 				"center_angle": wrapf(direction_angle + (sector_width * float(index)), -PI, PI),
 				"arc_width": sector_width,
+				"security_radius_world": security_radius_world,
 			})
 		return assignments
 	for member in fit_members:
@@ -323,6 +353,7 @@ func _build_member_assignments(fit_members: Array, security_mode: String, direct
 			"unit_id": String(member.get("unit_id", "")),
 			"center_angle": direction_angle,
 			"arc_width": DIRECTIONAL_ARC_WIDTH,
+			"security_radius_world": security_radius_world,
 		})
 	return assignments
 
@@ -359,6 +390,29 @@ func _extract_command_type(behavior_profile_dict: Dictionary, area_context: Dict
 	if command_type == "defend":
 		return "hold_position"
 	return command_type
+
+
+func _extract_security_radius_world(behavior_profile_dict: Dictionary, area_context: Dictionary = {}) -> float:
+	var area_radius: float = float(area_context.get("security_radius_world", 0.0))
+	if area_radius > 0.0:
+		return area_radius
+	var metadata: Dictionary = Dictionary(behavior_profile_dict.get("metadata", {}))
+	return maxf(float(metadata.get("security_radius_world", 0.0)), 0.0)
+
+
+func _extract_security_radius_tiles(behavior_profile_dict: Dictionary, area_context: Dictionary = {}) -> int:
+	var area_radius_tiles: int = int(area_context.get("security_radius_tiles", 0))
+	if area_radius_tiles > 0:
+		return area_radius_tiles
+	var metadata: Dictionary = Dictionary(behavior_profile_dict.get("metadata", {}))
+	return maxi(int(metadata.get("security_radius_tiles", 0)), 0)
+
+
+func _extract_security_direction_angle(behavior_profile_dict: Dictionary, area_context: Dictionary = {}) -> float:
+	if area_context.has("security_direction_angle"):
+		return float(area_context.get("security_direction_angle", 0.0))
+	var metadata: Dictionary = Dictionary(behavior_profile_dict.get("metadata", {}))
+	return float(metadata.get("security_direction_angle", 0.0))
 
 
 func _build_shift_delay_msec(leadership: float) -> int:
@@ -400,6 +454,8 @@ func _build_public_state(state: Dictionary) -> Dictionary:
 		"main_threat_position": state.get("main_threat_position", null),
 		"main_threat_distance": float(state.get("main_threat_distance", INF)),
 		"member_assignments": Array(state.get("member_assignments", [])).duplicate(true),
+		"security_radius_world": float(state.get("security_radius_world", 0.0)),
+		"security_radius_tiles": int(state.get("security_radius_tiles", 0)),
 		"overwatch_ready": bool(state.get("overwatch_ready", false)),
 		"is_active": bool(state.get("is_active", false)),
 		"area_order_id": String(state.get("area_order_id", "")),

@@ -17,8 +17,9 @@ const CARGO_CRAFT_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Is
 const HOMEBASE_OPERATOR_CARD_SIZE := Vector2(316.0, 66.0)
 const HOMEBASE_STAGED_CARD_SIZE := Vector2(316.0, 66.0)
 const HOMEBASE_TRANSFER_GHOST_CARD_SIZE := Vector2(316.0, 74.0)
-const HOMEBASE_SHIPCARD_IMAGE_SIZE := Vector2(200.0, 136.0)
-const HOMEBASE_SHIPCARD_BUTTON_SIZE := Vector2(200.0, 144.0)
+const HOMEBASE_SHIPCARD_IMAGE_SIZE := Vector2(300.0, 210.0)
+const HOMEBASE_SHIPCARD_BUTTON_SIZE := Vector2(240.0, 168.0)
+const HOMEBASE_SHIPCARD_IMAGE_OFFSET := Vector2(-42.0, -48.0)
 
 signal selection_changed(selected_unit_ids)
 signal team_confirmed(selected_unit_ids)
@@ -587,6 +588,10 @@ func _render_team_transfer_ghost_cards(selected_team_list: VBoxContainer) -> voi
 					"fixed_card_size": HOMEBASE_TRANSFER_GHOST_CARD_SIZE,
 				}
 			)
+			if not card.card_pressed.is_connected(_on_compact_card_pressed):
+				card.card_pressed.connect(_on_compact_card_pressed)
+			if not card.card_open_requested.is_connected(_on_compact_card_open_requested):
+				card.card_open_requested.connect(_on_compact_card_open_requested)
 			selected_team_list.add_child(card)
 			rendered_unit_ids[unit_id] = true
 
@@ -891,6 +896,7 @@ func _get_character_sheet_content_host() -> VBoxContainer:
 
 
 func _on_compact_card_pressed(unit_id: String, _profile, _source_context: String) -> void:
+	_remember_card_profile(unit_id, _profile)
 	_focused_unit_id = unit_id
 	_team_feedback_text = ""
 	_update_team_summary()
@@ -900,6 +906,7 @@ func _on_compact_card_pressed(unit_id: String, _profile, _source_context: String
 
 
 func _on_compact_card_open_requested(unit_id: String, _profile, _source_context: String) -> void:
+	_remember_card_profile(unit_id, _profile)
 	_focused_unit_id = unit_id
 	_character_sheet_open = true
 	_team_feedback_text = ""
@@ -907,6 +914,14 @@ func _on_compact_card_open_requested(unit_id: String, _profile, _source_context:
 	_update_character_sheet()
 	_update_character_sheet_visibility()
 	_refresh_card_highlights()
+
+
+func _remember_card_profile(unit_id: String, profile) -> void:
+	var normalized_unit_id := unit_id.strip_edges()
+	if normalized_unit_id.is_empty() or profile == null or _profiles_by_id.has(normalized_unit_id):
+		return
+	if typeof(profile) == TYPE_OBJECT and profile.has_method("duplicate_profile"):
+		_profiles_by_id[normalized_unit_id] = profile.duplicate_profile()
 
 
 func _on_staged_card_remove_requested(unit_id: String, _source_context: String) -> void:
@@ -1565,37 +1580,48 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	shipcard.add_child(margin)
 
 	var row := HBoxContainer.new()
+	row.name = "ShipcardContentRow"
 	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	row.add_theme_constant_override("separation", 5)
 	margin.add_child(row)
 
 	var ship_box := VBoxContainer.new()
+	ship_box.name = "ShipVisualBox"
 	ship_box.custom_minimum_size = Vector2(HOMEBASE_SHIPCARD_BUTTON_SIZE.x + 4.0, 0.0)
+	ship_box.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	ship_box.add_theme_constant_override("separation", 1)
 	row.add_child(ship_box)
 
 	var ship_label := Label.new()
+	ship_label.name = "ShipVisualLabel"
 	ship_label.text = "%s%s%s" % [craft_name, " *" if is_selected else "", " | TRANSIT" if craft_in_transit else ""]
 	ship_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	ship_label.add_theme_font_size_override("font_size", 9)
 	ship_box.add_child(ship_label)
 
 	var ship_button := Button.new()
+	ship_button.name = "ShipVisualButton"
 	ship_button.flat = true
 	ship_button.focus_mode = Control.FOCUS_NONE
 	ship_button.custom_minimum_size = HOMEBASE_SHIPCARD_BUTTON_SIZE
+	ship_button.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	ship_button.clip_contents = true
 	ship_button.pressed.connect(_on_shipcard_select_requested.bind(craft_id))
 	ship_box.add_child(ship_button)
 
 	var ship_texture := TextureRect.new()
+	ship_texture.name = "ShipTexture"
 	ship_texture.texture = _get_aircraft_texture(craft_def)
 	ship_texture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	ship_texture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	ship_texture.custom_minimum_size = HOMEBASE_SHIPCARD_IMAGE_SIZE
-	ship_texture.size = HOMEBASE_SHIPCARD_BUTTON_SIZE
-	ship_texture.set_anchors_preset(Control.PRESET_FULL_RECT)
+	ship_texture.size = HOMEBASE_SHIPCARD_IMAGE_SIZE
+	ship_texture.position = HOMEBASE_SHIPCARD_IMAGE_OFFSET
 	ship_texture.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ship_texture.set_meta("homebase_shipcard_visual_anchor", "left_top")
+	ship_texture.set_meta("homebase_shipcard_visual_offset", HOMEBASE_SHIPCARD_IMAGE_OFFSET)
+	ship_texture.set_meta("homebase_shipcard_visual_enlarged", true)
 	if ship_texture.texture != null:
 		ship_texture.modulate = Color(1.0, 1.0, 1.0, 0.46 if craft_in_transit or air_asset_unavailable else 1.0)
 	else:
@@ -1624,7 +1650,9 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 		ship_box.add_child(recovery_label)
 
 	var content_vbox := VBoxContainer.new()
+	content_vbox.name = "ShipcardInfoVBox"
 	content_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content_vbox.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	content_vbox.add_theme_constant_override("separation", 4)
 	row.add_child(content_vbox)
 
@@ -1676,8 +1704,11 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 		content_vbox.add_child(progress_block)
 
 	var actions := VBoxContainer.new()
-	actions.alignment = BoxContainer.ALIGNMENT_CENTER
+	actions.name = "ShipActionColumn"
+	actions.alignment = BoxContainer.ALIGNMENT_BEGIN
+	actions.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	actions.add_theme_constant_override("separation", 3)
+	actions.set_meta("homebase_actions_top_aligned", true)
 	row.add_child(actions)
 
 	var send_button := Button.new()

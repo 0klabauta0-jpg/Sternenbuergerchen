@@ -22,7 +22,7 @@
 ### TASK_178 - FOB Drop Light Fixed FullHD Layout
 - Status: implementiert
 - Stand: `FOBTestScreen` wendet den `DropLightLayoutContract` als feste FullHD-UI-Schicht an. Die Runtime-Node-Pfade bleiben stabil; Gameplay-Wahrheit bleibt weiter in den bestehenden Meta-/Mission-State-Pfaden.
-- Stand: Die FOB-Hauptaufteilung folgt jetzt `#10 FIRETEAMS`, `#13 LOADOUT` und einem breiteren `#14 FLIGHTDECK`. Die alte Available-Operators-Spalte ist im festen FOB-Layout ausgeblendet, damit das Flightdeck Raum fuer echte Projekt-Fliegerassets bekommt.
+- Stand: Die FOB-Hauptaufteilung folgt jetzt `#10 FIRETEAMS`, `#13 LOADOUT` und einem breiteren `#14 FLIGHTDECK`. TASK_314 reaktiviert die alte Available-Operators-Spalte als festes `#09 NPC POOL` links neben `#10`, damit unzugewiesene FOB-NPCs wieder sichtbar in Fireteams gezogen werden koennen.
 - Stand: `#14 FLIGHTDECK` rendert Transport-Craft-Karten mit vorhandenen Kenney-Space-Kit-Assets. Die Transport- und unteren Actionbuttons sind quadratisch. Eine feste Bottom-Row zeigt Boarding Status und Actions; Board/Send rufen nur vorhandene FOB-Callbacks auf und speichern keinen eigenen Gameplay-State.
 - Offene Punkte: Manueller Godot-Sichtcheck in FullHD bleibt fuer finale optische Einrueckung, Lesbarkeit und Flightdeck-Proportionen offen.
 - Risiken: Die Umsetzung nutzt bewusst eine Layout-Schicht ueber den bestehenden Containern. Falls spaeter pixelgenaue absolute Positionierung gebraucht wird, sollte das als kleiner Folgetask erfolgen, ohne die Meta-State-Pfade umzubauen.
@@ -1117,7 +1117,7 @@
 ### TASK_285 - Tactical Decision Branch Integrity Review
 - Status: implementiert
 - Stand: `docs/dev/tactical_decision_priority_matrix.md` dokumentiert die aktuellen Decision Tables fuer CommanderIntent, TacticalRules, FireteamExecutionPlan, MultiFireteamPlan, BreakoutState, TacticalCommunicationEvent, EnemyProfile und AirAssetThreat. Konfliktprioritaeten sind als feste Gewinnerreihenfolge beschrieben.
-- Stand: `docs/reviews/tactical_decision_branch_integrity_review.md` nennt keine Blocker, aber drei wichtige Branch-Befunde: CommanderIntent-Fallbacks ohne eigenes Diagnosefeld, ein praktisch unreachable Risk-/Tempo-Cover-Pfad wegen default `cover_priority = normal`, und AirAssetStatus-State-Fallback ohne Diagnose. Cleanup-Befunde betreffen leere Breakout-Ergebnisse ohne blocked_reason.
+- Stand: `docs/reviews/tactical_decision_branch_integrity_review.md` nennt keine Blocker. CommanderIntent-Fallbacks haben inzwischen `normalization_warnings`, und `security_mode`/`cover_priority` werden nur noch bei expliziter Wahl serialisiert, damit `take -> sector` und Risk-/Tempo-Cover-Fallbacks wieder erreichbar sind. AirAssetStatus-State-Fallbacks sind diagnostiziert; Cleanup-Befunde betreffen leere Breakout-Ergebnisse ohne blocked_reason.
 - Stand: `scripts/tests/task_285_tactical_decision_branch_integrity_review.gd` prueft CommanderIntent-Aliase, TacticalRules-Konflikte, ExecutionPlan-Mapping, Multi-Fireteam-Rollen/Statusprioritaet, Breakout-Downgrades, AirAssetThreat-Gates und EnemyProfile-Diagnostics.
 - Offene Punkte: Die Befunde sind bewusst nicht in diesem Review-Task gepatcht; kleine Folgepatches koennen in TASK_289 priorisiert werden.
 - Risiken: Die Matrix pinnt Verhalten und kann bei spaeterem Balancing bewusst angepasst werden muessen; sie soll dann zusammen mit dem Verifier aktualisiert werden.
@@ -1161,7 +1161,7 @@
 - Stand: `CommanderIntent` sammelt `normalization_warnings` fuer unbekannte Verb-/Tempo-/FireRule-/Contact-/Risk-Fallbacks und synchronisiert sie in Metadata/Dict/Snapshot.
 - Stand: `AirAssetStatus` sammelt `normalization_warnings` fuer unbekannte State-Fallbacks in `from_dict()`, `apply_threat()` und lethal `apply_damage()` und spiegelt sie in Metadata/Snapshot.
 - Stand: `MultiplayerSnapshotContract` uebernimmt diese Diagnose-IDs kompakt fuer CommanderIntent- und AirAssetStatus-Snapshots; `scripts/tests/task_289_final_sneaky_code_review_patch_queue.gd` prueft Reportform, Diagnose-Fixes, Snapshot-Kompaktheit und Patchqueue.
-- Offene Punkte: P2-Folgepatch fuer explizite Cover-/Security-Defaults in `CommanderIntent`/`FireteamExecutionPlan`; P2/P3 fuer Breakout-Diagnosen, Boundary-Tokenpflege und manuelle LAN-/Full-HD-/Balance-Smokes.
+- Offene Punkte: P2/P3 fuer Breakout-Diagnosen, Boundary-Tokenpflege und manuelle LAN-/Full-HD-/Balance-Smokes. Der explizite Cover-/Security-Default-Fix in `CommanderIntent` ist umgesetzt.
 - Risiken: Die neuen Diagnosefelder aendern keine Fallback-Semantik, muessen aber bei UI/Debug-Anzeigen als Diagnose und nicht als Gameplay-Befehl behandelt werden.
 - Lokale Pruefung: `task_289_final_sneaky_code_review_patch_queue.gd`, relevante TASK_285/TASK_277/TASK_281/TASK_288-Gates und `git diff --check` laufen gruen.
 - Naechster Schritt: TASK_290 schreibt das User-Handbuch und markiert die verbleibenden P2/P3-Punkte als bekannte Einschraenkungen/manuelle Pruefungen.
@@ -2465,3 +2465,42 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Offene Punkte: Keine innerhalb des TASK-096-Scopes; spaetere Meta-Map-Folgearbeiten beschraenken sich jetzt auf optionale Politur wie Ruecktransfer-Varianten oder zusaetzliche Routenarten.
 - Risiken: Die Meta-Ansichten bleiben bewusst Staging- und Read-Only-Schichten auf dem bestehenden Missions-/Transportzustand. Weitere Komfort- oder Kartenpolitur sollte darauf in kleinen Folge-Tasks aufsetzen, statt daraus eine zweite Missions- oder Fahrzeugwahrheit aufzubauen.
 - Naechster Schritt: Nur bei Bedarf neue klar benannte Follow-up-Tasks fuer Meta-Map-Politur oder weitergehende Transfervisualisierung schneiden.
+
+### TASK_291-TASK_298 - Editor Terrain Visual Recovery and Authoring UX
+- Status: implementiert
+- Stand: `docs/dev/editor_terrain_visual_recovery_contract.md` dokumentiert Diagnose, Hoehenkanon, Legacy-Space-Kit-Cliff-/Ramp-Referenz, Grid-Depth-Verhalten, Lichtwerte und die gemeinsame Referenzfixture `maps/editor_terrain_visual_recovery_reference.json`.
+- Stand: `TerrainMap3DView` nutzt fuer das Editor-Grid wieder Depth-Test statt Always-Front-Overlay, exponiert Visual-Recovery- und Light-Snapshots, kalibriert Licht zentral und stellt einen Shadow-Debug-Hook bereit. Cliff-/Slope-Daten bleiben am hoeheren Tile, die sichtbaren Edge-Modelle werden aber auf dem niedrigeren Nachbartile bzw. bei Ecken auf dem diagonalen unteren Aussentile verankert. Nature-Props haben groessere, sichtbare Scale-Werte und melden Anchor-/Scale-Daten im Render-Snapshot.
+- Stand: Der Map Editor hat eine kompakte Tool-Leiste mit Select, Brush, Eraser, Height, Marker/Patrol-Vertraegen; der Eraser leert nur die Objekt-Ebene und bewahrt Hoehe, Surface, Edge und Szenario-Daten. Die Palette ist gruppenfilterbar und enthaelt ein kleines projektlokales Space-Station-Subset.
+- Stand: Der rechte Inspector kann Map Settings, Markers und Mission Scenario einzeln ein-/ausklappen, waehrend Tile Properties sichtbar bleiben. Der integrierte TASK_298-Smoke prueft Referenzmap, Toolbar, Palette, Inspector, Render-Snapshot und Missing-Asset-Gate.
+
+### TASK_299-TASK_313 - Meta, FOB and Dropship Userology Contracts
+
+- Stand: Teamnamen werden seeded generiert, im Player-Roster persistiert und im Main Menu editierbar/suggestbar gemacht. App-Shell-Ruecknavigation, NPC-Drag/Badge-Lesbarkeit, unified Transit-Ghosting, FOB-Unassigned-Pool, kompakte Flightdeck-/Dropship-Karten, Fireteam-Assignment-Frames und Dropship-LZ/Go/Feedback-Vertraege sind als Headless-Gates abgedeckt.
+- Wichtig: UI bleibt Darstellung; Teamname/Transit/LZ-Resolved-State sind Daten-/Contract-Felder und ersetzen keine SimulationRoot-Wahrheit. Dropship requested/resolved LZ wird im 3D-Primary-View getrennt visualisiert.
+- Verifier: `task_299` bis `task_313` laufen gruen; gemeinsame Smokes sind `task_306_meta_userology_playability_smoke.gd` und `task_310_fob_flightdeck_fireteam_userology_smoke.gd`.
+- Offene Punkte: Manueller Godot-Screenshot-/Klickcheck fuer finale Art-Direction, Scroll-Komfort im rechten Inspector und Sichtvergleich gegen den User-Screenshot bleiben offen.
+- Risiken: Multi-Tile-Space-Station-Strukturen sind bewusst noch nicht gesnappt; weitere Asset- oder Inspector-Politur soll in kleinen Folge-Tasks passieren.
+- Lokale Pruefung: `task_291_editor_terrain_visual_recovery_coordinator.gd` bis `task_298_editor_terrain_visual_playability_smoke.gd` plus bestehende Regressionen werden im aktuellen Arbeitsblock ausgefuehrt.
+
+### TASK_314 - FOB NPC Pool Window Left Of Fireteams
+- Status: implementiert
+- Stand: `DropLightLayoutContract.get_fob_layout()` enthaelt jetzt ein festes `unassigned_pool`-Fenster. `FOBTestScreen` zeigt es als `#09 NPC POOL` links neben `#10 FIRETEAMS`, statt den alten Available-Bereich im fixed Layout auszublenden.
+- Stand: Der Pool nutzt weiter die bestehenden FOB-Drag/Drop-Pfade: unzugewiesene NPC-Karten wandern in Fireteams, Fireteam-Mitglieder koennen zurueck in den Pool geloest werden. `#14 FLIGHTDECK` bleibt breit; die zusaetzliche Spalte wird durch ein schmaleres `#13 LOADOUT` aufgefangen.
+- Risiken: Das sichtbare Fenster zeigt nur FOB/VB-unassigned Operatoren und darf nicht als neues Homebase-Roster oder SimulationRoot-Wahrheit behandelt werden.
+- Lokale Pruefung: `task_314_fob_npc_pool_window_left_of_fireteams.gd`, `task_178_fob_drop_light_fixed_fullhd_layout_verifier.gd`, `task_181_drop_light_fixed_window_audit_verifier.gd`, `task_307_fob_arrivals_unassigned_operator_pool.gd`, `task_309_fireteam_assignment_board_compact_frames.gd` und `git diff --check` laufen gruen.
+
+### TASK_315 - Mission Grid Tile Selection Command Gate
+- Status: implementiert
+- Stand: `TerrainMap3DView` rendert das Mission-/Editor-Grid jetzt mit kontrastreichem Cyan-Highlight plus dunkler Schattenlinie, bleibt aber depth-tested und nah an der Tile-Oberflaeche. Der Render-Snapshot meldet Grid- und Selection-Farben sowie die sichtbare `selected_grid_positions`-Liste.
+- Stand: `TacticalInputController` fuehrt eine explizite ausgewaehlte Tile-Planungsmarke. Beim Missionsstart wird das Objective-Tile selektiert; Linksklick auf freie Karte, Target-Pick und LZ-Pick aktualisieren die sichtbare Tile-Auswahl, ohne Fireteam-Auswahl oder SimulationRoot-Wahrheit zu ersetzen.
+- Stand: Move, Take, Defend und Flank deklarieren im `MissionCommandHierarchyContract` `requires_tile_selection`. Ohne ausgewaehltes Tile sind die Buttons gesperrt und ein Command wird mit `SELECT TILE FIRST` geblockt; mit Tile wird die Tile-Weltposition an den bestehenden Flow-Driver uebergeben.
+- Risiken: Die Tile-Auswahl ist UI-/Planungszustand und darf nicht als zweite Terrain- oder SimulationRoot-Wahrheit erweitert werden. Die staerkeren Grid-Linien brauchen noch den manuellen FullHD-Sichtcheck fuer finale Art-Direction.
+- Lokale Pruefung: `task_315_mission_grid_tile_selection_command_gate.gd`, `task_292_editor_hill_cliff_grid_depth_repair.gd`, `task_160_tactical_playability_verifier.gd`, `task_275_command_button_hierarchy_arrangement_overhaul.gd` und `git diff --check` laufen gruen.
+
+### TASK_316 - FOB Fireteam Staging Migration
+- Status: implementiert
+- Stand: Fireteam-Karten wandern jetzt zwischen `#10 FIRETEAMS`, `#12 FOB RESPAWN`, `#13 LOADOUT` und `#19 Dropship`, statt in `#10` sichtbar zu bleiben, waehrend sie bereits in einem Staging-Fenster referenziert werden.
+- Stand: `#12` zeigt Verorten-Fortschritt pro Fireteam-Mitglied, `#13` behaelt kompakte Loadout-Reihen mit Rang-Badges und Dropdowns, und die Fireteam-Karten behalten ueberall die kompakte Breite inklusive sichtbarem Loadout.
+- Stand: Kompakte NPC-Karten koennen per Doppelklick weiter das Character Sheet anfordern, auch wenn sie fuer Staging-/Transit-Zustaende optisch disabled sind.
+- Risiken: Die FOB-UI bleibt Staging-/Darstellungsschicht; Transport-, Respawn- und Fireteam-Zustand duerfen nicht als zweite Gameplay-Wahrheit in den Karten landen. Der finale FullHD-Sichtcheck der kompakten Karten bleibt offen.
+- Lokale Pruefung: `task_316_fob_fireteam_staging_migration.gd`, `task_309_fireteam_assignment_board_compact_frames.gd` und `git diff --check` laufen gruen.

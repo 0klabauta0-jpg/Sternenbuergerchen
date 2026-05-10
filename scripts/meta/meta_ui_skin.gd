@@ -22,7 +22,7 @@ const COLOR_MUTED := Color("8e9aa3")
 const TEXT_HEADER := Color("edf3f6")
 const TEXT_BODY := Color("a9b4bc")
 const TEXT_MUTED := Color("8e9aa3")
-const TEXT_DISABLED := Color("626b73")
+const TEXT_DISABLED := Color("d3dde4")
 const TEXT_DARK := Color("1e252a")
 
 

@@ -5,7 +5,7 @@ TASK_233 stellt einen stabilen Portrait-Katalog fuer das Start-Roster bereit. Di
 
 ## Scan
 - Quelle: `res://Assets/Char/`
-- PNG-Dateien gesamt: 88
+- PNG-Dateien gesamt: 87
 - Runtime-Katalog fuer Start-Roster: 30 Kandidaten
 - Mindestbedarf Start-Roster: 20 bis 30 NPCs
 - Lokale absolute Pfade: keine
@@ -17,10 +17,10 @@ TASK_233 stellt einen stabilen Portrait-Katalog fuer das Start-Roster bereit. Di
 | 1184x864 | 67 |
 | 1200x896 | 1 |
 | 1254x1254 | 2 |
-| 1920x1920 | 9 |
+| 1920x1920 | 8 |
 
 ## Groessen-Diagnose
-- 9 Dateien sind groesser als 4 MB und/oder 1920x1920.
+- 8 Dateien sind groesser als 4 MB und/oder 1920x1920.
 - Der Katalog markiert diese Quellen mit `large_source_png_use_scaled_texture_rect`.
 - Roster-Karten duerfen die Originalgroesse nicht als Layoutgroesse verwenden.
 

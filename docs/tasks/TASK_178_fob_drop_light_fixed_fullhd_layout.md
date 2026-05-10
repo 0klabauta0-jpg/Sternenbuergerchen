@@ -88,7 +88,7 @@ Die Vorlage bleibt fachlich fuehrend. Die letzte reine Theme-/Skin-Aenderung ist
 ## Ergebnis
 - `FOBTestScreen` wendet den `DropLightLayoutContract` jetzt beim Start auf den FOB-Screen an.
 - Die alten Runtime-Datenpfade bleiben erhalten: Fireteams, Loadout, Boarding und Transport-Craft-State werden weiterhin aus den bestehenden Meta-State-Feldern gelesen.
-- Die bisherige Available-Operators-Spalte wird im festen FOB-Layout ausgeblendet, damit die Zielaufteilung `#10 FIRETEAMS`, `#13 LOADOUT`, `#14 FLIGHTDECK` dem `c_fob.svg`-Layout folgt.
+- Die bisherige Available-Operators-Spalte wurde in TASK_314 als festes `#09 NPC POOL` links neben `#10 FIRETEAMS` reaktiviert; `#13 LOADOUT` ist dadurch schmaler, `#14 FLIGHTDECK` bleibt breit.
 - `#14` nutzt die vorhandenen Transport-Craft-Karten mit echten `res://Assets/kenney_space-kit/...`-Texturen.
 - Eine feste Bottom-Row fuer Boarding Status und Actions wurde als UI-Schicht ergaenzt; Board/Send triggern nur die vorhandenen FOB-Callbacks, halten aber keinen eigenen Gameplay-State.
 - Transport-Craft-Actionbuttons und Bottom-Actionbuttons sind quadratisch.

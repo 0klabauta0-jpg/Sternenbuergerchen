@@ -249,9 +249,10 @@ func _build_cliff_overlays(terrain_map_data, cliff_container: Node2D) -> Diction
 					corner_sprite.texture = corner_texture
 					corner_sprite.centered = false
 					corner_sprite.z_index = -14
-					corner_sprite.position = tile_data.world_position - KENNEY_DIAMOND_CENTER
+					var corner_anchor_grid: Vector2i = grid_pos + dir_a + dir_b
+					corner_sprite.position = _get_edge_anchor_world_position(terrain_map_data, corner_anchor_grid, tile_data.world_position) - KENNEY_DIAMOND_CENTER
 					cliff_container.add_child(corner_sprite)
-					overlays.append(corner_sprite)
+					_register_cliff_overlay(cliff_sprites_by_grid, corner_anchor_grid, corner_sprite)
 					if not edges_consumed_by_corners.has(dir_a):
 						edges_consumed_by_corners.append(dir_a)
 					if not edges_consumed_by_corners.has(dir_b):
@@ -280,14 +281,31 @@ func _build_cliff_overlays(terrain_map_data, cliff_container: Node2D) -> Diction
 			edge_sprite.texture = edge_texture_map[edge_dir]
 			edge_sprite.centered = false
 			edge_sprite.z_index = -15
-			edge_sprite.position = tile_data.world_position - KENNEY_DIAMOND_CENTER
+			var edge_anchor_grid: Vector2i = grid_pos + edge_dir
+			edge_sprite.position = _get_edge_anchor_world_position(terrain_map_data, edge_anchor_grid, tile_data.world_position) - KENNEY_DIAMOND_CENTER
 			cliff_container.add_child(edge_sprite)
-			overlays.append(edge_sprite)
-
-		if not overlays.is_empty():
-			cliff_sprites_by_grid[grid_pos] = overlays
+			_register_cliff_overlay(cliff_sprites_by_grid, edge_anchor_grid, edge_sprite)
 
 	return cliff_sprites_by_grid
+
+
+func _register_cliff_overlay(cliff_sprites_by_grid: Dictionary, anchor_grid: Vector2i, overlay: Sprite2D) -> void:
+	if overlay == null:
+		return
+	var overlays: Array = Array(cliff_sprites_by_grid.get(anchor_grid, []))
+	overlays.append(overlay)
+	cliff_sprites_by_grid[anchor_grid] = overlays
+
+
+func _get_edge_anchor_world_position(terrain_map_data, anchor_grid: Vector2i, fallback_world_position: Vector2) -> Vector2:
+	if terrain_map_data == null:
+		return fallback_world_position
+	var anchor_tile = terrain_map_data.call("get_tile_at_grid", anchor_grid)
+	if anchor_tile != null:
+		return Vector2(anchor_tile.world_position)
+	if terrain_map_data.has_method("_grid_to_world"):
+		return Vector2(terrain_map_data.call("_grid_to_world", anchor_grid))
+	return fallback_world_position
 
 
 func _build_wall_overlays(terrain_map_data, wall_container: Node2D) -> Dictionary:

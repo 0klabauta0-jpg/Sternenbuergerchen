@@ -70,6 +70,42 @@
 			"cover_value": 0,
 			"object_height": 0,
 			"gameplay_role": "visual_only_no_cover"
+		},
+		{
+			"type_id": "station_wall",
+			"display_name": "Station Wall",
+			"category": "space_station_wall",
+			"source_asset_id": "station_wall",
+			"model_key": "station_wall",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 60,
+			"object_height": 2,
+			"gameplay_role": "blocking_cover"
+		},
+		{
+			"type_id": "station_computer",
+			"display_name": "Station Computer",
+			"category": "space_station_console",
+			"source_asset_id": "station_computer",
+			"model_key": "station_computer",
+			"walkable": false,
+			"blocks_los": false,
+			"cover_value": 25,
+			"object_height": 1,
+			"gameplay_role": "soft_cover_console"
+		},
+		{
+			"type_id": "station_container_wide",
+			"display_name": "Station Cargo Container",
+			"category": "space_station_storage",
+			"source_asset_id": "station_container_wide",
+			"model_key": "station_container_wide",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 45,
+			"object_height": 2,
+			"gameplay_role": "blocking_cover"
 		}
 	]
 }

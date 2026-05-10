@@ -1,0 +1,994 @@
+{
+  "meta": {
+    "version": "1.0",
+    "language": "de-en-mix",
+    "placeholders": {
+      "{member_name}": "Name des betroffenen Members",
+      "{fireteam_id}": "Fireteam-Bezeichnung z.B. Blue, Gold",
+      "{direction}": "Himmelsrichtung z.B. Nord, Südost",
+      "{distance}": "Entfernung in Metern (gerundet)",
+      "{enemy_count}": "Anzahl bestätigter Feinde",
+      "{leader_name}": "Name des aktuellen Leaders",
+      "{new_leader_name}": "Name des Nachfolgers"
+    }
+  },
+
+  "lines": [
+
+    {
+      "trigger": "enemy_contact",
+      "quality_level": 0,
+      "delay_seconds": 3.0,
+      "icon": null,
+      "variants": [
+        {
+          "text": "...da ist was. Glaub ich.",
+          "conditions": { "detection_state": ["suspected"] }
+        },
+        {
+          "text": "Moment... da bewegt sich was.",
+          "conditions": { "detection_state": ["suspected"] }
+        },
+        {
+          "text": "Contact? Weiß nicht genau...",
+          "conditions": { "detection_state": ["spotted"] }
+        },
+        {
+          "text": "...da ist einer. Oder zwei.",
+          "conditions": { "detection_state": ["spotted", "confirmed"] }
+        },
+        {
+          "text": "Irgendwas da vorne. Keine Ahnung wie viele.",
+          "conditions": { "detection_state": ["confirmed"] }
+        }
+      ],
+      "trait_overrides": {
+        "reckless": {
+          "variants": [
+            { "text": "CONTACT! Irgendwo—", "conditions": { "detection_state": ["confirmed"] } },
+            { "text": "Da sind welche!! Vorne!!", "conditions": { "detection_state": ["confirmed"] } }
+          ]
+        },
+        "cautious": {
+          "variants": [
+            { "text": "...möglicher Kontakt. Bitte bestätigen.", "conditions": { "detection_state": ["suspected"] } },
+            { "text": "Ich bin nicht sicher... da war was.", "conditions": { "detection_state": ["spotted"] } }
+          ]
+        }
+      }
+    },
+
+    {
+      "trigger": "enemy_contact",
+      "quality_level": 1,
+      "delay_seconds": 1.0,
+      "icon": "contact",
+      "variants": [
+        {
+          "text": "Contact, {direction}!",
+          "conditions": { "detection_state": ["confirmed"] }
+        },
+        {
+          "text": "Feind gesichtet, {direction}.",
+          "conditions": { "detection_state": ["confirmed"] }
+        },
+        {
+          "text": "Verdacht {direction}, beobachten.",
+          "conditions": { "detection_state": ["suspected", "spotted"] }
+        },
+        {
+          "text": "Bewegung {direction}, halten.",
+          "conditions": { "detection_state": ["spotted"] }
+        },
+        {
+          "text": "Possible contact, {direction}.",
+          "conditions": { "detection_state": ["suspected"] }
+        }
+      ],
+      "trait_overrides": {
+        "reckless": {
+          "variants": [
+            { "text": "CONTACT {direction}! Feuer frei!", "conditions": { "detection_state": ["confirmed"] } }
+          ]
+        }
+      }
+    },
+
+    {
+      "trigger": "enemy_contact",
+      "quality_level": 2,
+      "delay_seconds": 0.2,
+      "icon": "contact",
+      "variants": [
+        {
+          "text": "Zwei Feinde {direction}, hinter Deckung.",
+          "conditions": { "detection_state": ["confirmed"], "enemy_count": ["few"] }
+        },
+        {
+          "text": "Contact {direction}, einzelner Feind, in Deckung.",
+          "conditions": { "detection_state": ["confirmed"], "enemy_count": ["single"] }
+        },
+        {
+          "text": "Multiple contacts {direction}!",
+          "conditions": { "detection_state": ["confirmed"], "enemy_count": ["many"] }
+        },
+        {
+          "text": "Feind suspected {direction}, ca. {distance}m.",
+          "conditions": { "detection_state": ["suspected"] }
+        },
+        {
+          "text": "Spotted {direction}, Deckung suchen.",
+          "conditions": { "detection_state": ["spotted"] }
+        }
+      ]
+    },
+
+    {
+      "trigger": "enemy_contact",
+      "quality_level": 3,
+      "delay_seconds": 0.0,
+      "icon": "contact",
+      "variants": [
+        {
+          "text": "{enemy_count} Feinde bestätigt, {direction}, {distance}m, hinter Deckung.",
+          "conditions": { "detection_state": ["confirmed"], "enemy_count": ["few"] }
+        },
+        {
+          "text": "Single enemy confirmed, {direction}, {distance}m, schwer bewaffnet.",
+          "conditions": { "detection_state": ["confirmed"], "enemy_count": ["single"] }
+        },
+        {
+          "text": "Multiple enemies, {direction}, {distance}m – mindestens {enemy_count}. Deckung!",
+          "conditions": { "detection_state": ["confirmed"], "enemy_count": ["many"] }
+        },
+        {
+          "text": "Suspected contact {direction}, Bewegungsmuster erkannt, {distance}m.",
+          "conditions": { "detection_state": ["suspected"] }
+        },
+        {
+          "text": "Feind kurz gesichtet {direction}, {distance}m, verloren. Overwatch.",
+          "conditions": { "detection_state": ["spotted"] }
+        }
+      ]
+    },
+
+    {
+      "trigger": "enemy_lost",
+      "quality_level": 0,
+      "delay_seconds": 4.0,
+      "icon": null,
+      "variants": [
+        { "text": "...weg. War da eben noch.", "conditions": {} },
+        { "text": "Wo ist der hin.", "conditions": {} },
+        { "text": "Hab ihn verloren glaub ich.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "enemy_lost",
+      "quality_level": 1,
+      "delay_seconds": 1.0,
+      "icon": "lost",
+      "variants": [
+        { "text": "Contact lost.", "conditions": {} },
+        { "text": "Feind aus den Augen verloren.", "conditions": {} },
+        { "text": "Visual lost, letzte Position {direction}.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "enemy_lost",
+      "quality_level": 2,
+      "delay_seconds": 0.2,
+      "icon": "lost",
+      "variants": [
+        { "text": "Contact lost {direction}, letzte bekannte Position {distance}m.", "conditions": {} },
+        { "text": "Feind abgetaucht, {direction}. Overwatch aktiv.", "conditions": {} },
+        { "text": "Lost visual, {direction}, {distance}m. Halten Position.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "enemy_lost",
+      "quality_level": 3,
+      "delay_seconds": 0.0,
+      "icon": "lost",
+      "variants": [
+        { "text": "Contact lost. Letzter Standort {direction}, {distance}m. Sektor wird überwacht.", "conditions": {} },
+        { "text": "Enemy evaded, {direction}. Möglicherweise Flanke. Überprüfen.", "conditions": {} },
+        { "text": "Visual lost nach {distance}m {direction}. Wahrscheinlich hinter {direction}er Deckung.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "taking_fire",
+      "quality_level": 0,
+      "delay_seconds": 2.5,
+      "icon": null,
+      "variants": [
+        { "text": "Scheiße—", "conditions": {} },
+        { "text": "Wir werden beschossen!!", "conditions": {} },
+        { "text": "...Feuer! Deckung!!", "conditions": {} },
+        { "text": "Contact! Taking fire!!", "conditions": {} }
+      ],
+      "trait_overrides": {
+        "reckless": {
+          "variants": [
+            { "text": "TAKING FIRE!! FEUER FREI!!", "conditions": {} },
+            { "text": "BESCHUSS!! DRAUF!!", "conditions": {} }
+          ]
+        },
+        "cautious": {
+          "variants": [
+            { "text": "...Beschuss... Deckung, alle in Deckung!", "conditions": {} }
+          ]
+        }
+      }
+    },
+
+    {
+      "trigger": "taking_fire",
+      "quality_level": 1,
+      "delay_seconds": 0.8,
+      "icon": "warning",
+      "variants": [
+        { "text": "Taking fire, {direction}!", "conditions": {} },
+        { "text": "Unter Beschuss, {direction}!", "conditions": {} },
+        { "text": "Contact! Feuer aus {direction}!", "conditions": {} },
+        { "text": "Beschossen! {direction}!", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "taking_fire",
+      "quality_level": 2,
+      "delay_seconds": 0.2,
+      "icon": "warning",
+      "variants": [
+        { "text": "Taking fire {direction}, suche Deckung.", "conditions": {} },
+        { "text": "Schwerer Beschuss {direction}, brauche Deckung.", "conditions": {} },
+        { "text": "Under fire from {direction}, moving to cover.", "conditions": {} },
+        { "text": "Kontakt {direction}, Feuerkampf begonnen.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "taking_fire",
+      "quality_level": 3,
+      "delay_seconds": 0.0,
+      "icon": "warning",
+      "variants": [
+        { "text": "Taking fire {direction}, {distance}m. {enemy_count} Feinde, wir reagieren.", "conditions": {} },
+        { "text": "Schwerer Beschuss aus {direction}. Alle in Deckung, Feuer erwidern.", "conditions": {} },
+        { "text": "Contact {direction}, {distance}m. Fire superiority herstellen.", "conditions": {} },
+        { "text": "Under fire {direction}. {fireteam_id} nimmt Deckung, Gegenfeuer.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "suppression_start",
+      "quality_level": 0,
+      "delay_seconds": 3.0,
+      "icon": null,
+      "variants": [
+        { "text": "...können nicht vor!", "conditions": {} },
+        { "text": "Wir stecken fest!", "conditions": {} },
+        { "text": "Zu viel Feuer—", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "suppression_start",
+      "quality_level": 1,
+      "delay_seconds": 1.0,
+      "icon": "suppressed",
+      "variants": [
+        { "text": "Suppressed! Deckung!", "conditions": {} },
+        { "text": "Wir sind fixiert, {direction}!", "conditions": {} },
+        { "text": "Pinned down!", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "suppression_start",
+      "quality_level": 2,
+      "delay_seconds": 0.2,
+      "icon": "suppressed",
+      "variants": [
+        { "text": "Suppressed by {direction}, können nicht bewegen.", "conditions": {} },
+        { "text": "We're pinned, {direction}. Brauche Feuerunterstützung.", "conditions": {} },
+        { "text": "Massives Feuer aus {direction}, {fireteam_id} fixiert.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "suppression_start",
+      "quality_level": 3,
+      "delay_seconds": 0.0,
+      "icon": "suppressed",
+      "variants": [
+        { "text": "Suppressed by {enemy_count} enemies, {direction}, {distance}m. Brauche Ablenkungsfeuer.", "conditions": {} },
+        { "text": "{fireteam_id} ist fixiert, {direction}. Flanke oder Feuerunterstützung erforderlich.", "conditions": {} },
+        { "text": "Pinned down {direction}. Fire superiority verloren. Support requested.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "suppression_end",
+      "quality_level": 0,
+      "delay_seconds": 2.0,
+      "icon": null,
+      "variants": [
+        { "text": "...okay. Okay. Weiter.", "conditions": {} },
+        { "text": "Feuer lässt nach.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "suppression_end",
+      "quality_level": 1,
+      "delay_seconds": 0.5,
+      "icon": "ok",
+      "variants": [
+        { "text": "Suppression lifted. Moving.", "conditions": {} },
+        { "text": "Feuer lässt nach, wir bewegen uns.", "conditions": {} },
+        { "text": "Clear. Weiter.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "suppression_end",
+      "quality_level": 2,
+      "delay_seconds": 0.1,
+      "icon": "ok",
+      "variants": [
+        { "text": "Suppression lifted, {fireteam_id} setzt Bewegung fort.", "conditions": {} },
+        { "text": "Feuer reduziert, wir nehmen Plan wieder auf.", "conditions": {} },
+        { "text": "We're moving again. Contact {direction} noch aktiv.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "suppression_end",
+      "quality_level": 3,
+      "delay_seconds": 0.0,
+      "icon": "ok",
+      "variants": [
+        { "text": "Suppression lifted. {fireteam_id} setzt Befehlskette fort, Feind {direction} noch im Sektor.", "conditions": {} },
+        { "text": "Fire reduced. Returning to plan, Overwatch auf {direction} aktiv.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "member_down",
+      "quality_level": 0,
+      "delay_seconds": 2.5,
+      "icon": null,
+      "variants": [
+        { "text": "{member_name} ist... glaub down.", "conditions": {} },
+        { "text": "Wir haben einen Verlust.", "conditions": {} },
+        { "text": "{member_name}!! ...scheißegal, weiter!", "conditions": { "trait": ["reckless", "aggressive"] } },
+        { "text": "Mann down.", "conditions": {} }
+      ],
+      "trait_overrides": {
+        "reckless": {
+          "variants": [
+            { "text": "{member_name} IST DOWN!! DRAUF DRAUF DRAUF!!", "conditions": {} }
+          ]
+        },
+        "cautious": {
+          "variants": [
+            { "text": "{member_name} braucht Hilfe... wir können nicht—", "conditions": {} }
+          ]
+        }
+      }
+    },
+
+    {
+      "trigger": "member_down",
+      "quality_level": 1,
+      "delay_seconds": 0.8,
+      "icon": "down",
+      "variants": [
+        { "text": "{member_name} ist down!", "conditions": {} },
+        { "text": "Man down! {member_name}!", "conditions": {} },
+        { "text": "{fireteam_id} hat Verluste.", "conditions": {} },
+        { "text": "Casualty! {member_name}!", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "member_down",
+      "quality_level": 2,
+      "delay_seconds": 0.2,
+      "icon": "down",
+      "variants": [
+        { "text": "{member_name} down, {direction}seite. Weiter.", "conditions": {} },
+        { "text": "Man down – {member_name}, hinter Deckung gezogen.", "conditions": {} },
+        { "text": "Casualty, {member_name} ist raus. {fireteam_id} macht weiter.", "conditions": {} },
+        { "text": "{member_name} hit, nicht mehr einsatzfähig.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "member_down",
+      "quality_level": 3,
+      "delay_seconds": 0.0,
+      "icon": "down",
+      "variants": [
+        { "text": "{member_name} down, {direction}seite, hinter Deckung. {fireteam_id} setzt Befehl fort.", "conditions": {} },
+        { "text": "Casualty – {member_name} nicht mehr kampffähig. Formation angepasst.", "conditions": {} },
+        { "text": "{member_name} ist down. Verbleibende Stärke: unverändert einsatzbereit.", "conditions": { "friendly_status": ["all_fit"] } },
+        { "text": "{member_name} ist down. Wir sind geschwächt, aber operativ.", "conditions": { "friendly_status": ["casualties"] } }
+      ]
+    },
+
+    {
+      "trigger": "leader_down",
+      "quality_level": 0,
+      "delay_seconds": 2.0,
+      "icon": "down",
+      "variants": [
+        { "text": "...{leader_name} ist weg.", "conditions": {} },
+        { "text": "Leader down!!", "conditions": {} },
+        { "text": "Scheiße – {leader_name}!!", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "leader_down",
+      "quality_level": 1,
+      "delay_seconds": 0.5,
+      "icon": "down",
+      "variants": [
+        { "text": "Leader down! {leader_name} ist raus!", "conditions": {} },
+        { "text": "{leader_name} down! Übernehme Führung.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "leader_down",
+      "quality_level": 2,
+      "delay_seconds": 0.2,
+      "icon": "down",
+      "variants": [
+        { "text": "{leader_name} ist down. {new_leader_name} übernimmt Führung.", "conditions": {} },
+        { "text": "Leader casualty – {leader_name}. Command transfer zu {new_leader_name}.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "leader_down",
+      "quality_level": 3,
+      "delay_seconds": 0.0,
+      "icon": "down",
+      "variants": [
+        { "text": "{leader_name} down. {new_leader_name} übernimmt Führung. {fireteam_id} bleibt operativ.", "conditions": {} },
+        { "text": "Leadership casualty. Command transfer zu {new_leader_name}, Plan wird fortgesetzt.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "leader_succession",
+      "quality_level": 0,
+      "delay_seconds": 3.5,
+      "icon": null,
+      "variants": [
+        { "text": "...ich übernehme jetzt, glaub ich.", "conditions": {} },
+        { "text": "Äh... {new_leader_name} hier. Ich hab das jetzt.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "leader_succession",
+      "quality_level": 1,
+      "delay_seconds": 1.0,
+      "icon": "lead",
+      "variants": [
+        { "text": "{new_leader_name}, übernehme Führung.", "conditions": {} },
+        { "text": "I have command. {new_leader_name}.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "leader_succession",
+      "quality_level": 2,
+      "delay_seconds": 0.2,
+      "icon": "lead",
+      "variants": [
+        { "text": "{new_leader_name} übernimmt {fireteam_id}. Weiter nach Plan.", "conditions": {} },
+        { "text": "Command transfer abgeschlossen. {new_leader_name} führt {fireteam_id}.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "leader_succession",
+      "quality_level": 3,
+      "delay_seconds": 0.0,
+      "icon": "lead",
+      "variants": [
+        { "text": "{new_leader_name} übernimmt Führung {fireteam_id}. Befehlskette intakt, weiter nach Plan.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "order_confirmed",
+      "quality_level": 0,
+      "delay_seconds": 2.0,
+      "icon": null,
+      "variants": [
+        { "text": "Ja... okay.", "conditions": {} },
+        { "text": "...hab's.", "conditions": {} },
+        { "text": "Roger... ich glaub.", "conditions": {} },
+        { "text": "Okay okay okay.", "conditions": {} }
+      ],
+      "trait_overrides": {
+        "reckless": {
+          "variants": [
+            { "text": "JA! MACHEN WIR!", "conditions": {} },
+            { "text": "Endlich!", "conditions": {} }
+          ]
+        }
+      }
+    },
+
+    {
+      "trigger": "order_confirmed",
+      "quality_level": 1,
+      "delay_seconds": 0.8,
+      "icon": "thumbs_up",
+      "variants": [
+        { "text": "Roger.", "conditions": {} },
+        { "text": "Verstanden.", "conditions": {} },
+        { "text": "Copy.", "conditions": {} },
+        { "text": "Wilco.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "order_confirmed",
+      "quality_level": 2,
+      "delay_seconds": 0.1,
+      "icon": "thumbs_up",
+      "variants": [
+        { "text": "Roger, {fireteam_id} bewegt sich.", "conditions": { "active_command": ["move", "flank"] } },
+        { "text": "Copy. {fireteam_id} bezieht Stellung.", "conditions": { "active_command": ["defend"] } },
+        { "text": "Wilco. Angriff {direction}.", "conditions": { "active_command": ["engage", "take"] } },
+        { "text": "Verstanden, setze Befehl um.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "order_confirmed",
+      "quality_level": 3,
+      "delay_seconds": 0.0,
+      "icon": "thumbs_up",
+      "variants": [
+        { "text": "Roger. {fireteam_id}, Bounding-Vorgehen Richtung {direction}, Ziel {distance}m.", "conditions": { "active_command": ["move"] } },
+        { "text": "Copy. {fireteam_id} bezieht Verteidigungsstellung, Rundumsicherung aktiv.", "conditions": { "active_command": ["defend"] } },
+        { "text": "Wilco. {fireteam_id} flankt {direction}, Feuerunterstützung angefordert.", "conditions": { "active_command": ["flank"] } },
+        { "text": "Verstanden. {fireteam_id} rückt auf Objective vor, {distance}m.", "conditions": { "active_command": ["take"] } },
+        { "text": "Roger. {fireteam_id} eröffnet Kampf, Feuer frei.", "conditions": { "active_command": ["engage"] } }
+      ]
+    },
+
+    {
+      "trigger": "waypoint_reached",
+      "quality_level": 0,
+      "delay_seconds": 2.5,
+      "icon": null,
+      "variants": [
+        { "text": "...wir sind da, glaub ich.", "conditions": {} },
+        { "text": "Okay. Hier sind wir.", "conditions": {} },
+        { "text": "Position erreicht. Ungefähr.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "waypoint_reached",
+      "quality_level": 1,
+      "delay_seconds": 0.5,
+      "icon": "ok",
+      "variants": [
+        { "text": "Position reached.", "conditions": {} },
+        { "text": "Ziel erreicht.", "conditions": {} },
+        { "text": "Auf Position.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "waypoint_reached",
+      "quality_level": 2,
+      "delay_seconds": 0.1,
+      "icon": "ok",
+      "variants": [
+        { "text": "{fireteam_id} auf Position. Bereit.", "conditions": {} },
+        { "text": "Waypoint reached. {fireteam_id} hält.", "conditions": {} },
+        { "text": "Position eingenommen, Sektor wird gesichert.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "waypoint_reached",
+      "quality_level": 3,
+      "delay_seconds": 0.0,
+      "icon": "ok",
+      "variants": [
+        { "text": "{fireteam_id} auf Zielposition. Rundumsicherung aktiv, kein Kontakt.", "conditions": { "detection_state": ["unknown"] } },
+        { "text": "{fireteam_id} auf Position. Kontakt {direction} noch bestätigt.", "conditions": { "detection_state": ["confirmed"] } },
+        { "text": "Waypoint reached. {fireteam_id} bereit für nächsten Befehl.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "flanking_initiated",
+      "quality_level": 0,
+      "delay_seconds": 2.5,
+      "icon": null,
+      "variants": [
+        { "text": "Wir gehen... drumherum.", "conditions": {} },
+        { "text": "Flanke... irgendwie.", "conditions": {} },
+        { "text": "Ich versuch die Seite.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "flanking_initiated",
+      "quality_level": 1,
+      "delay_seconds": 0.8,
+      "icon": "flank",
+      "variants": [
+        { "text": "Flanking!", "conditions": {} },
+        { "text": "Wir flankieren {direction}.", "conditions": {} },
+        { "text": "Going around!", "conditions": {} }
+      ],
+      "trait_overrides": {
+        "reckless": {
+          "variants": [
+            { "text": "FLANKE! JETZT! {direction}!!", "conditions": {} }
+          ]
+        }
+      }
+    },
+
+    {
+      "trigger": "flanking_initiated",
+      "quality_level": 2,
+      "delay_seconds": 0.2,
+      "icon": "flank",
+      "variants": [
+        { "text": "{fireteam_id} flankt {direction}. Feuerunterstützung hilfreich.", "conditions": {} },
+        { "text": "Going wide {direction}, Flanke auf feindliche Position.", "conditions": {} },
+        { "text": "Flank {direction} eingeleitet. Bitte Feuer aufrechterhalten.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "flanking_initiated",
+      "quality_level": 3,
+      "delay_seconds": 0.0,
+      "icon": "flank",
+      "variants": [
+        { "text": "{fireteam_id} flankt {direction}, nutzt Deckung. Bite Feind fixieren während wir umgehen.", "conditions": {} },
+        { "text": "Flank {direction} über {distance}m. Terrain wird ausgenutzt. Feuerunterstützung angefordert.", "conditions": {} },
+        { "text": "Going {direction}, autonomous flank auf bekannte Feindposition. {distance}m.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "bounding_switch",
+      "quality_level": 0,
+      "delay_seconds": 2.0,
+      "icon": null,
+      "variants": [
+        { "text": "...wechsel. Oder so.", "conditions": {} },
+        { "text": "Jetzt ihr.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "bounding_switch",
+      "quality_level": 1,
+      "delay_seconds": 0.5,
+      "icon": null,
+      "variants": [
+        { "text": "Switch! Ihr vor, wir decken.", "conditions": {} },
+        { "text": "Bound! Move!", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "bounding_switch",
+      "quality_level": 2,
+      "delay_seconds": 0.1,
+      "icon": null,
+      "variants": [
+        { "text": "{member_name}, vor! Wir decken.", "conditions": {} },
+        { "text": "Bound switch – {member_name} läuft, Rest deckt.", "conditions": {} },
+        { "text": "Moving! {member_name}, cover uns.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "bounding_switch",
+      "quality_level": 3,
+      "delay_seconds": 0.0,
+      "icon": null,
+      "variants": [
+        { "text": "{member_name}, vor zur nächsten Deckung! Wir halten Feuer auf {direction}.", "conditions": {} },
+        { "text": "Bound. {member_name} läuft, {fireteam_id} Rest deckt {direction}.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "sector_alert",
+      "quality_level": 0,
+      "delay_seconds": 3.0,
+      "icon": null,
+      "variants": [
+        { "text": "...da war was. Von der Seite.", "conditions": {} },
+        { "text": "Seitlich... irgendwas.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "sector_alert",
+      "quality_level": 1,
+      "delay_seconds": 1.0,
+      "icon": "warning",
+      "variants": [
+        { "text": "Bewegung {direction}!", "conditions": {} },
+        { "text": "Flanke {direction}!", "conditions": {} },
+        { "text": "Seite {direction}!", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "sector_alert",
+      "quality_level": 2,
+      "delay_seconds": 0.2,
+      "icon": "warning",
+      "variants": [
+        { "text": "Bewegung ungesicherter Sektor {direction}!", "conditions": {} },
+        { "text": "Flanke {direction}, Sektor offen!", "conditions": {} },
+        { "text": "Contact ungesichert {direction}, drehen!", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "sector_alert",
+      "quality_level": 3,
+      "delay_seconds": 0.0,
+      "icon": "warning",
+      "variants": [
+        { "text": "Bewegung in ungesichertem Sektor {direction}. {member_name} dreht ab, Überprüfung.", "conditions": {} },
+        { "text": "Flankenbedrohung {direction}. Sektorverteilung angepasst.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "objective_contested",
+      "quality_level": 0,
+      "delay_seconds": 3.0,
+      "icon": null,
+      "variants": [
+        { "text": "...Feind auf dem Objective.", "conditions": {} },
+        { "text": "Jemand anderes ist schon da.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "objective_contested",
+      "quality_level": 1,
+      "delay_seconds": 0.5,
+      "icon": "objective",
+      "variants": [
+        { "text": "Objective contested!", "conditions": {} },
+        { "text": "Feind auf dem Ziel!", "conditions": {} },
+        { "text": "Objective unter Streit!", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "objective_contested",
+      "quality_level": 2,
+      "delay_seconds": 0.1,
+      "icon": "objective",
+      "variants": [
+        { "text": "Objective contested, Feind auf Zielposition. Drücken!", "conditions": {} },
+        { "text": "Enemy on objective! {fireteam_id} muss ran.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "objective_contested",
+      "quality_level": 3,
+      "delay_seconds": 0.0,
+      "icon": "objective",
+      "variants": [
+        { "text": "Objective contested. Feind hält Teilbereich. {fireteam_id} drängt, Fortschritt gestoppt.", "conditions": {} },
+        { "text": "Enemy contesting objective. Numerische Unterlegenheit auf Ziel. Verstärkung empfohlen.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "objective_captured",
+      "quality_level": 0,
+      "delay_seconds": 2.5,
+      "icon": null,
+      "variants": [
+        { "text": "...wir haben's, glaub ich.", "conditions": {} },
+        { "text": "Objective... gehört uns?", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "objective_captured",
+      "quality_level": 1,
+      "delay_seconds": 0.3,
+      "icon": "objective_ok",
+      "variants": [
+        { "text": "Objective secured!", "conditions": {} },
+        { "text": "Ziel eingenommen!", "conditions": {} },
+        { "text": "We have the objective!", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "objective_captured",
+      "quality_level": 2,
+      "delay_seconds": 0.1,
+      "icon": "objective_ok",
+      "variants": [
+        { "text": "Objective secured! {fireteam_id} hält Zielposition.", "conditions": {} },
+        { "text": "Ziel eingenommen, {fireteam_id} sichert Bereich.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "objective_captured",
+      "quality_level": 3,
+      "delay_seconds": 0.0,
+      "icon": "objective_ok",
+      "variants": [
+        { "text": "Objective secured. {fireteam_id} hält und sichert. Kein Feindkontakt auf Ziel.", "conditions": {} },
+        { "text": "Ziel eingenommen. Rundumsicherung aktiv, Objective in unserem Besitz.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "objective_lost",
+      "quality_level": 0,
+      "delay_seconds": 3.5,
+      "icon": null,
+      "variants": [
+        { "text": "...wir haben's verloren.", "conditions": {} },
+        { "text": "Feind hat das Ziel.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "objective_lost",
+      "quality_level": 1,
+      "delay_seconds": 0.8,
+      "icon": "objective_lost",
+      "variants": [
+        { "text": "Objective lost!", "conditions": {} },
+        { "text": "Ziel verloren!", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "objective_lost",
+      "quality_level": 2,
+      "delay_seconds": 0.2,
+      "icon": "objective_lost",
+      "variants": [
+        { "text": "Objective lost! Feind hat Kontrolle übernommen.", "conditions": {} },
+        { "text": "Ziel verloren, {fireteam_id} zieht sich zurück.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "objective_lost",
+      "quality_level": 3,
+      "delay_seconds": 0.0,
+      "icon": "objective_lost",
+      "variants": [
+        { "text": "Objective lost. Feind hat numerische Überlegenheit auf Ziel. Rückeroberung erfordert Verstärkung.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "all_clear",
+      "quality_level": 0,
+      "delay_seconds": 4.0,
+      "icon": null,
+      "conditions_global": { "detection_state_all": ["unknown"] },
+      "variants": [
+        { "text": "...nichts. Glaub ich.", "conditions": {} },
+        { "text": "Sieht... ruhig aus.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "all_clear",
+      "quality_level": 1,
+      "delay_seconds": 1.0,
+      "icon": "ok",
+      "conditions_global": { "detection_state_all": ["unknown"] },
+      "variants": [
+        { "text": "Clear.", "conditions": {} },
+        { "text": "Kein Kontakt.", "conditions": {} },
+        { "text": "All clear.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "all_clear",
+      "quality_level": 2,
+      "delay_seconds": 0.2,
+      "icon": "ok",
+      "conditions_global": { "detection_state_all": ["unknown"] },
+      "variants": [
+        { "text": "All clear. Kein Feindkontakt im Sektor.", "conditions": {} },
+        { "text": "Sektor geprüft, keine Feinde. Clear.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "all_clear",
+      "quality_level": 3,
+      "delay_seconds": 0.0,
+      "icon": "ok",
+      "conditions_global": { "detection_state_all": ["unknown"] },
+      "variants": [
+        { "text": "All clear. {fireteam_id} meldet Sektor sauber, kein Kontakt, Bewegung frei.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "returning_to_plan",
+      "quality_level": 0,
+      "delay_seconds": 3.0,
+      "icon": null,
+      "variants": [
+        { "text": "...okay, weiter mit dem Plan.", "conditions": {} },
+        { "text": "Wir machen weiter. Glaub ich.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "returning_to_plan",
+      "quality_level": 1,
+      "delay_seconds": 0.8,
+      "icon": "ok",
+      "variants": [
+        { "text": "Returning to plan.", "conditions": {} },
+        { "text": "Weiter nach Plan.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "returning_to_plan",
+      "quality_level": 2,
+      "delay_seconds": 0.2,
+      "icon": "ok",
+      "variants": [
+        { "text": "{fireteam_id} setzt Befehlskette fort.", "conditions": {} },
+        { "text": "Störung überwunden. Returning to plan.", "conditions": {} }
+      ]
+    },
+
+    {
+      "trigger": "returning_to_plan",
+      "quality_level": 3,
+      "delay_seconds": 0.0,
+      "icon": "ok",
+      "variants": [
+        { "text": "{fireteam_id} kehrt zu Befehlskette zurück. Nächster Wegpunkt {direction}, {distance}m.", "conditions": {} }
+      ]
+    }
+
+  ]
+}

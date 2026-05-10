@@ -5,6 +5,7 @@ const START_ROSTER_GENERATOR_SCRIPT: GDScript = preload("res://scripts/meta/star
 const ROSTER_RELATIONSHIP_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/roster_relationship_model.gd")
 const PERSONNEL_EVENT_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/personnel_event_model.gd")
 const MULTIPLAYER_ROSTER_CONTRACT_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_roster_contract.gd")
+const TEAM_NAME_GENERATOR_SCRIPT: GDScript = preload("res://scripts/meta/team_name_generator.gd")
 
 const SCHEMA_VERSION: int = 1
 const STORE_ID: String = "player_roster_store_v1"
@@ -114,6 +115,7 @@ static func load_roster(profile_id: String = DEFAULT_PROFILE_ID, save_path: Stri
 			"diagnostics": PackedStringArray(validation.get("errors", PackedStringArray())),
 		}
 	var roster: Dictionary = Dictionary(payload.get("roster", {})).duplicate(true)
+	roster = TEAM_NAME_GENERATOR_SCRIPT.call("apply_team_name", roster, String(roster.get("team_name", "")), String(roster.get("seed", "")), int(Dictionary(roster.get("team_identity", {})).get("name_generation_index", 0)))
 	return {
 		"ok": true,
 		"exists": true,
@@ -191,6 +193,7 @@ static func archive_existing_roster(profile_id: String = DEFAULT_PROFILE_ID, sav
 
 static func build_save_payload(roster: Dictionary, profile_id: String = DEFAULT_PROFILE_ID) -> Dictionary:
 	var normalized_roster: Dictionary = roster.duplicate(true)
+	normalized_roster = TEAM_NAME_GENERATOR_SCRIPT.call("apply_team_name", normalized_roster, String(normalized_roster.get("team_name", "")), String(normalized_roster.get("seed", "")), int(Dictionary(normalized_roster.get("team_identity", {})).get("name_generation_index", 0)))
 	var validation: Dictionary = Dictionary(START_ROSTER_GENERATOR_SCRIPT.call("validate_roster", normalized_roster))
 	normalized_roster["valid"] = bool(validation.get("valid", false))
 	normalized_roster["validation"] = validation
@@ -212,6 +215,17 @@ static func build_save_payload(roster: Dictionary, profile_id: String = DEFAULT_
 			"public_preview_policy": "identity_role_portrait_fireteam_badges_only",
 			"snapshot_policy": "owner_source_and_calculated_mission_state_only",
 		},
+	}
+
+
+static func rename_team(roster: Dictionary, next_team_name: String, profile_id: String = DEFAULT_PROFILE_ID, save_path: String = "") -> Dictionary:
+	var renamed_roster: Dictionary = TEAM_NAME_GENERATOR_SCRIPT.call("apply_team_name", roster, next_team_name, String(roster.get("seed", "")), int(Dictionary(roster.get("team_identity", {})).get("name_generation_index", 0)))
+	var save_result: Dictionary = save_roster(renamed_roster, profile_id, save_path)
+	return {
+		"ok": bool(save_result.get("ok", false)),
+		"roster": renamed_roster,
+		"summary": START_ROSTER_GENERATOR_SCRIPT.call("build_summary_snapshot", renamed_roster),
+		"save": save_result,
 	}
 
 

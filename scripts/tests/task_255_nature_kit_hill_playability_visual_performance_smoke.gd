@@ -76,7 +76,15 @@ func _test_import_locality_gate(nature_catalog: Dictionary, terrain_mapping: Dic
 		_assert(ResourceLoader.exists(path), "Nature glTF resource loads: %s" % String(asset.get("asset_id", "")))
 	_assert(asset_count >= 25, "Nature catalog covers curated imported asset set")
 	var model_entries: Dictionary = Dictionary(terrain_mapping.get("models", {}))
-	for required_model in ["cliff_straight", "slope", "nature_ground_dirt"] + REQUIRED_PROP_IDS:
+	for active_edge_model in ["cliff_straight", "slope"]:
+		var edge_entry: Dictionary = Dictionary(model_entries.get(active_edge_model, {}))
+		_assert(String(edge_entry.get("source_id", "")) == "kenney_space_kit", "Active height-edge model uses legacy Space Kit: %s" % active_edge_model)
+		_assert(ResourceLoader.exists(String(edge_entry.get("model_path", ""))), "Active height-edge model loads: %s" % active_edge_model)
+	for nature_alias in ["nature_cliff_brown_straight", "nature_slope_brown_steps", "nature_cliff_grey_straight", "nature_slope_grey_steps"]:
+		var alias_entry: Dictionary = Dictionary(model_entries.get(nature_alias, {}))
+		_assert(String(alias_entry.get("source_id", "")) == "kenney_nature_kit_classic", "Nature candidate edge alias uses Nature Kit: %s" % nature_alias)
+		_assert(ResourceLoader.exists(String(alias_entry.get("model_path", ""))), "Nature candidate edge alias loads: %s" % nature_alias)
+	for required_model in ["nature_ground_dirt"] + REQUIRED_PROP_IDS:
 		var entry: Dictionary = Dictionary(model_entries.get(required_model, {}))
 		_assert(String(entry.get("source_id", "")) == "kenney_nature_kit_classic", "Required Nature model mapping uses Nature Kit: %s" % required_model)
 		_assert(ResourceLoader.exists(String(entry.get("model_path", ""))), "Required Nature model mapping loads: %s" % required_model)
@@ -162,10 +170,14 @@ func _test_mission_visual_and_performance_smoke(fixture_map, budget: Dictionary)
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 	_assert(int(snapshot.get("tile_count", 0)) == FIXTURE_SIZE.x * FIXTURE_SIZE.y, "Mission fixture renders all 32x32 tiles")
 	_assert(int(snapshot.get("ground_mesh_count", 0)) == int(snapshot.get("tile_count", -1)), "Ground mesh count matches tile count")
-	_assert(int(snapshot.get("nature_surface_ground_model_count", 0)) == int(snapshot.get("tile_count", -1)), "Nature ground covers all fixture tiles")
+	_assert(int(snapshot.get("nature_surface_ground_model_count", -1)) == 0, "Nature ground does not replace Space Kit base terrain")
+	_assert(int(snapshot.get("nature_surface_detail_model_count", 0)) == int(snapshot.get("tile_count", -1)), "Nature ground detail covers all fixture tiles as an offset layer")
 	_assert(int(snapshot.get("height_edge_model_count", 0)) > 0, "Mission fixture renders height edge models")
-	_assert(int(snapshot.get("nature_cliff_edge_model_count", 0)) > 0, "Mission fixture renders Nature cliff models")
-	_assert(int(snapshot.get("nature_slope_step_model_count", 0)) > 0, "Mission fixture renders Nature slope steps")
+	_assert(int(snapshot.get("cliff_edge_model_count", 0)) > 0, "Mission fixture renders active cliff models")
+	_assert(int(snapshot.get("slope_edge_model_count", 0)) > 0, "Mission fixture renders active slope/ramp models")
+	var height_edge_entries: Array = Array(snapshot.get("height_edge_visual_entries", []))
+	_assert(_entries_use_active_edge_source(height_edge_entries, "kenney_space_kit"), "Mission fixture uses active legacy Space Kit height edges")
+	_assert(_cliffs_never_use_ramp_models(height_edge_entries), "Mission fixture keeps ramp models off hard cliffs")
 	_assert(int(snapshot.get("nature_prop_model_count", 0)) >= REQUIRED_PROP_IDS.size(), "Mission fixture renders Nature props")
 	_assert(int(snapshot.get("surface_tint_count", 0)) > 0, "Mission fixture keeps surface tints")
 	_assert(int(snapshot.get("selected_grid_count", 0)) == 1, "Selection overlay remains visible")
@@ -271,6 +283,24 @@ func _map_contains_surface_type(map_data, surface_type: String) -> bool:
 		if tile_data != null and String(tile_data.surface_type) == surface_type:
 			return true
 	return false
+
+
+func _entries_use_active_edge_source(entries: Array, source_id: String) -> bool:
+	if entries.is_empty():
+		return false
+	for entry_variant in entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("source_id", "")) != source_id:
+			return false
+	return true
+
+
+func _cliffs_never_use_ramp_models(entries: Array) -> bool:
+	for entry_variant in entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("edge_type", "")) == TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF and String(entry.get("model_path", "")).contains("ramp"):
+			return false
+	return true
 
 
 func _is_nature_project_path(path: String) -> bool:

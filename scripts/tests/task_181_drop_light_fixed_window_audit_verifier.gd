@@ -42,6 +42,7 @@ func _test_fob_windows_are_actual_fixed_rects() -> void:
 		layout,
 		{
 			"topbar": "Panel/Margin/VBox/MissionPanel",
+			"unassigned_pool": "Panel/Margin/VBox/ContentRow/AvailablePanel",
 			"fireteams": "Panel/Margin/VBox/ContentRow/FireteamPanel",
 			"loadout": "Panel/Margin/VBox/ContentRow/StagingPanel",
 			"flightdeck": "Panel/Margin/VBox/ContentRow/DropshipPanel",
@@ -50,6 +51,7 @@ func _test_fob_windows_are_actual_fixed_rects() -> void:
 		},
 		"FOB"
 	)
+	_assert_inside(screen, "Panel/Margin/VBox/ContentRow/AvailablePanel", "Panel/Margin/VBox/ContentRow/AvailablePanel/AvailableMargin/AvailableVBox/AvailableScroll", "FOB NPC pool scroll stays inside the fixed #09 window")
 	_assert_inside(screen, "Panel/Margin/VBox/ContentRow/FireteamPanel", "Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamScroll", "FOB Fireteam scroll stays inside the fixed #10 window")
 	_assert_inside(screen, "Panel/Margin/VBox/ContentRow/StagingPanel", "Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutMemberScroll", "FOB Loadout scroll stays inside the fixed #13 window")
 	_assert_inside(screen, "Panel/Margin/VBox/ContentRow/DropshipPanel", "Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipQueueScroll", "FOB Flightdeck ship list stays inside the fixed #14 window")

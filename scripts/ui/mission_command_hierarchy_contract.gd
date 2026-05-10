@@ -66,14 +66,14 @@ static func get_group_help_ids() -> Dictionary:
 
 static func get_action_catalog() -> Array:
 	return [
-		_action("move", "Move", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.move", BUTTON_PATH_MOVE, {"requires_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
-		_action("take", "Take", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.take", BUTTON_PATH_TAKE, {"requires_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
-		_action("defend", "Defend", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.defend", BUTTON_PATH_HOLD, {"requires_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
+		_action("move", "Move", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.move", BUTTON_PATH_MOVE, {"requires_selection": true, "requires_tile_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
+		_action("take", "Take", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.take", BUTTON_PATH_TAKE, {"requires_selection": true, "requires_tile_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
+		_action("defend", "Defend", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.defend", BUTTON_PATH_HOLD, {"requires_selection": true, "requires_tile_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
 		_action("engage", "Engage", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.attack_area", BUTTON_PATH_TARGET, {"requires_planning": true, "implemented": true, "context": "area"}),
 		_action("secure", "Secure", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.defend_area", "", {"requires_selection": true, "requires_planning": true, "status_only": true, "context": "area"}),
 		_action("recon", "Recon", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.area_order", "", {"requires_selection": true, "future_task": "future mission objective slice", "context": "area"}),
 		_action("withdraw", "Withdraw", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.area_order", "", {"requires_selection": true, "future_task": "TASK_276 breakout behavior", "context": "breakout"}),
-		_action("flank", "Flank", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.flank", BUTTON_PATH_FLANK, {"requires_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
+		_action("flank", "Flank", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.flank", BUTTON_PATH_FLANK, {"requires_selection": true, "requires_tile_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
 		_action("clear_target", "Clear Target", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.clear_target", BUTTON_PATH_CLEAR_TARGET, {"requires_planning": true, "implemented": true, "context": "area"}),
 
 		_action("tempo", "Tempo", GROUP_RULE, PANEL_FIRETEAM_DETAILS, "mission.rule.tempo", "", {"requires_selection": true, "status_only": true, "context": "single_or_multi"}),
@@ -167,6 +167,7 @@ static func build_hierarchy_snapshot(context: Dictionary, button_snapshots: Dict
 		"selected_fireteam_count": int(context.get("selected_fireteam_count", 0)),
 		"single_fireteam_context": bool(context.get("single_fireteam_context", false)),
 		"multi_fireteam_context": bool(context.get("multi_fireteam_context", false)),
+		"has_selected_tile": bool(context.get("has_selected_tile", false)),
 		"preview_mode": bool(context.get("preview_mode", false)),
 		"panels": {
 			PANEL_COMMAND_MATRIX: GROUP_GOAL,
@@ -179,6 +180,31 @@ static func build_hierarchy_snapshot(context: Dictionary, button_snapshots: Dict
 	}
 
 
+static func build_dropship_command_matrix_layout_snapshot(context: Dictionary = {}) -> Dictionary:
+	var disabled_reasons: PackedStringArray = PackedStringArray()
+	if not bool(context.get("has_lz", context.get("has_lz_position", false))):
+		disabled_reasons.append("no_lz")
+	if not bool(context.get("has_pilot", false)):
+		disabled_reasons.append("no_pilot")
+	if not bool(context.get("has_boarded_team", false)):
+		disabled_reasons.append("no_team_boarded")
+	if not bool(context.get("has_dropship", true)):
+		disabled_reasons.append("no_dropship")
+	return {
+		"go_action_id": "call_dropship",
+		"go_button_panel_role": PANEL_COMMAND_MATRIX,
+		"go_button_source_action": "call_dropship",
+		"legacy_window_17_go_removed": true,
+		"status_preview_panel_role": PANEL_FIRETEAM_DETAILS,
+		"lz_pick_panel_role": PANEL_COMMAND_MATRIX,
+		"lz_pick_group": "target_selection_left",
+		"approach_style_options": PackedStringArray(["vorsichtig", "normal", "aggressiv"]),
+		"go_enabled": disabled_reasons.is_empty(),
+		"disabled_reasons": disabled_reasons,
+		"ui_sets_gameplay_truth": UI_SETS_GAMEPLAY_TRUTH,
+	}
+
+
 static func resolve_disabled_reason(action: Dictionary, context: Dictionary, button_snapshot: Dictionary = {}, has_button_snapshot: bool = false) -> String:
 	if bool(action.get("requires_phase_planning", false)) and not bool(context.get("phase_planning_enabled", false)):
 		return "phase planning hidden in fixed HUD"
@@ -186,6 +212,8 @@ static func resolve_disabled_reason(action: Dictionary, context: Dictionary, but
 		return "select multiple fireteams"
 	if bool(action.get("requires_selection", false)) and int(context.get("selected_fireteam_count", 0)) <= 0:
 		return "select one or more fireteams"
+	if bool(action.get("requires_tile_selection", false)) and bool(context.get("requires_tile_selection", true)) and not bool(context.get("has_selected_tile", false)):
+		return "select a map tile"
 	if bool(action.get("requires_local_command", false)) and not bool(context.get("can_issue_local_commands", true)):
 		return "host controls mission commands"
 	if bool(action.get("requires_planning", false)) and not bool(context.get("can_edit_planning", true)):
@@ -214,6 +242,7 @@ static func build_button_metadata(action: Dictionary, context: Dictionary, butto
 		"command_hierarchy_panel_role": str(action.get("panel_role", "")),
 		"command_hierarchy_help_id": str(action.get("help_id", "")),
 		"command_hierarchy_context": str(action.get("context", "")),
+		"command_hierarchy_requires_tile_selection": bool(action.get("requires_tile_selection", false)),
 		"command_hierarchy_disabled_reason": disabled_reason,
 		"visual_only": VISUAL_ONLY,
 		"ui_sets_gameplay_truth": UI_SETS_GAMEPLAY_TRUTH,
@@ -232,6 +261,7 @@ static func _action(action_id: String, label: String, group_id: String, panel_ro
 		"implemented": bool(options.get("implemented", false)),
 		"status_only": bool(options.get("status_only", false)),
 		"requires_selection": bool(options.get("requires_selection", false)),
+		"requires_tile_selection": bool(options.get("requires_tile_selection", false)),
 		"requires_multi_selection": bool(options.get("requires_multi_selection", false)),
 		"requires_local_command": bool(options.get("requires_local_command", false)),
 		"requires_planning": bool(options.get("requires_planning", false)),

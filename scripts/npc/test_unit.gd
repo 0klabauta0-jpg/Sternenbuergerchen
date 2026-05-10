@@ -32,6 +32,7 @@ const REMOTE_POSITION_LERP_WEIGHT: float = 0.75
 const WORLD_EVENT_LABEL_ALLOWLIST: PackedStringArray = [
 	"FEUERSTOPP GEBROCHEN!",
 	"EIGENBESCHUSS!",
+	"SEC 360",
 	"DOWN",
 	"BLEEDOUT",
 ]
@@ -883,6 +884,11 @@ func assign_unit_command(command) -> bool:
 		return false
 
 	_current_unit_command = command
+	var source_task_type: String = String(command.get("source_task_type")).strip_edges().to_lower()
+	if source_task_type == "post_drop_360_security":
+		set_meta("post_drop_security_active", true)
+	else:
+		remove_meta("post_drop_security_active")
 
 	var status_name: String = _map_unit_command_to_status(String(command.get("command_type")))
 	if not set_runtime_status(
@@ -1417,6 +1423,8 @@ func _build_primary_status_label() -> String:
 			return "RESPAWNING"
 
 	var source_command_type: String = String(_runtime_status.source_command_type)
+	if bool(get_meta("post_drop_security_active", false)):
+		return "SEC 360"
 	match source_command_type:
 		"move":
 			return "MOVE"

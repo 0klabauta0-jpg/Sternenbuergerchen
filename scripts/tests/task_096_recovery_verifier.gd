@@ -44,7 +44,7 @@ func _test_live_mission_block_labels_use_shared_ids() -> void:
 	_assert(command_label != null and command_label.text == UI_BLOCK_LABELS_SCRIPT.MISSION_COMMAND_MATRIX, "Mission HUD shows the shared #16 command label")
 	_assert(fireteam_label != null and fireteam_label.text == UI_BLOCK_LABELS_SCRIPT.MISSION_SELECTED_FIRETEAM, "Mission HUD shows the shared #17 selected-fireteam label")
 	_assert(strategic_label != null and strategic_label.text == UI_BLOCK_LABELS_SCRIPT.MISSION_CONTROL, "Mission HUD shows the shared #18 mission-control label")
-	var command_grid_uses_current_contract: bool = command_grid != null and (command_grid.columns == 2 or command_grid.columns == 3)
+	var command_grid_uses_current_contract: bool = command_grid != null and command_grid.columns == 5
 	_assert(command_grid_uses_current_contract and legacy_team_button_missing, "Mission command panel keeps #16 command-only and no longer shows old team-selection buttons")
 
 	scene.queue_free()

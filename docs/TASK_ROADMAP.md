@@ -471,6 +471,46 @@ TASK_288 - Regression Gate Coverage Gap Audit (implementiert)
 TASK_289 - Final Sneaky Code Review Patch Queue (implementiert)
 TASK_290 - User Handbuch Weekly Closeout (implementiert)
 
+Phase 18W - Editor Terrain Visual Recovery and Authoring UX
+TASK_291 - Editor Terrain Visual Recovery Coordinator (implementiert)
+TASK_292 - Editor Hill Cliff Grid Depth Repair (implementiert)
+TASK_293 - Editor Lighting Shadow Readability Pass (implementiert)
+TASK_294 - Nature Prop Scale Cover Visibility Repair (implementiert)
+TASK_295 - Map Editor Paint Toolbar Tools Polish (implementiert)
+TASK_296 - Map Editor Palette Taxonomy Space Station Assets (implementiert)
+TASK_297 - Map Editor Inspector Collapsible Panels (implementiert)
+TASK_298 - Editor Terrain Visual Playability Smoke (implementiert)
+
+Phase 18X - Meta Userology Main Menu FOB Transfer UX
+TASK_299 - Team Identity Name Generation Userology (implementiert)
+TASK_300 - App Shell Return To Main Menu Navigation (implementiert)
+TASK_301 - NPC Card Drag Z-Order Badges Tooltips (implementiert)
+TASK_302 - Dropship Flight Deck Boarding Rename Userology (implementiert)
+TASK_303 - FOB Transfer Dragdrop Card Readability (implementiert)
+TASK_304 - Unified Transit Progress Ghosting Homebase FOB (implementiert)
+TASK_305 - Fireteam Staging Copy Cohesion Status (implementiert)
+TASK_306 - Meta Userology Playability Smoke (implementiert)
+
+Phase 18Y - FOB VB Flightdeck Fireteam Assignment UX
+TASK_307 - FOB Arrivals Unassigned Operator Pool (implementiert)
+TASK_308 - Compact Flightdeck Dropship Occupants Actions (implementiert)
+TASK_309 - Fireteam Assignment Board Compact Frames (implementiert)
+TASK_310 - FOB Flightdeck Fireteam Userology Smoke (implementiert)
+
+Phase 18Z - Dropship LZ Command Matrix Targeting Feedback
+TASK_311 - Dropship LZ Target Pick Accuracy Contract (implementiert)
+TASK_312 - Dropship Command Matrix LZ Go Layout (implementiert)
+TASK_313 - Dropship Arrival Visibility Feedback Smoke (implementiert)
+
+Phase 18ZA - FOB Fireteam Assignment Visibility Fix
+TASK_314 - FOB NPC Pool Window Left Of Fireteams (implementiert)
+
+Phase 18ZB - Mission Grid Tile Selection Visibility Fix
+TASK_315 - Mission Grid Tile Selection Command Gate (implementiert)
+
+Phase 18ZC - FOB Fireteam Staging Migration
+TASK_316 - FOB Fireteam Staging Migration (implementiert)
+
 Batch-Empfehlung
 
 Codex soll Tasks in kleinen Gruppen bearbeiten:

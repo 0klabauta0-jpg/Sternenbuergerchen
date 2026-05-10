@@ -12,8 +12,8 @@
 		"asset_catalog": "res://data/nature_kit_asset_catalog.json",
 		"surface_visual_theme_catalog": "res://data/terrain_surface_visual_theme_catalog.json",
 		"project_root": "res://Assets/used/terrain/nature_kit_classic/",
-		"active_height_edge_theme": "brown",
-		"theme_policy": "TASK_252 uses brown Nature-Kit cliffs/steps as the V1 active edge theme; grey variants are catalogued and loadable for rock/asteroid follow-up mapping.",
+		"active_height_edge_theme": "legacy_space",
+		"theme_policy": "Editor V1 uses the older Kenney Space Kit cliff/ramp models for active height edges; brown/grey Nature-Kit variants stay catalogued and loadable for follow-up terrain themes.",
 		"surface_theme_candidates": {
 			"ground": "brown",
 			"sand": "brown",
@@ -23,7 +23,7 @@
 	},
 	"grid": {
 		"cell_size": 1.0,
-		"height_step": 0.25,
+		"height_step": 0.5,
 		"ground_thickness": 0.035,
 		"ground_fill": 0.92,
 		"ground_fill_no_grid": 0.995,
@@ -41,7 +41,7 @@
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/ground/ground_dirt.gltf",
 			"scale": 1.0,
 			"nature_theme": "dirt",
-			"surface_visual_role": "ground_base"
+			"surface_visual_role": "ground_detail"
 		},
 		"nature_ground_grass_patch": {
 			"layer": "terrain_surface",
@@ -176,7 +176,7 @@
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/platform_center.glb",
 			"scale": 1.25,
-			"y_offset": -0.015,
+			"y_offset": 0.04,
 			"rotation_degrees_offset": 0.0
 		},
 		"pipe_straight": {
@@ -195,32 +195,32 @@
 		},
 		"cliff_straight": {
 			"layer": "terrain_object",
-			"source_id": "kenney_nature_kit_classic",
-			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown.gltf",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_sideCliff.glb",
 			"scale": 1.0,
 			"y_offset": 0.0,
 			"rotation_degrees_offset": 0.0,
-			"nature_theme": "brown",
+			"nature_theme": "legacy_space",
 			"edge_role": "cliff_straight"
 		},
 		"cliff_corner": {
 			"layer": "terrain_object",
-			"source_id": "kenney_nature_kit_classic",
-			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown_cornerTop.gltf",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_sideCorner.glb",
 			"scale": 1.0,
 			"y_offset": 0.0,
 			"rotation_degrees_offset": -90.0,
-			"nature_theme": "brown",
+			"nature_theme": "legacy_space",
 			"edge_role": "cliff_outer_corner"
 		},
 		"slope": {
 			"layer": "terrain_object",
-			"source_id": "kenney_nature_kit_classic",
-			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown_steps.gltf",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_rampLarge.glb",
 			"scale": 1.0,
 			"y_offset": 0.0,
 			"rotation_degrees_offset": 0.0,
-			"nature_theme": "brown",
+			"nature_theme": "legacy_space",
 			"edge_role": "slope_steps"
 		},
 		"nature_cliff_brown_straight": {
@@ -362,7 +362,7 @@
 			"layer": "object",
 			"source_id": "kenney_nature_kit_classic",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/vegetation/tree_pine_tall.gltf",
-			"scale": 0.78,
+			"scale": 1.05,
 			"y_offset": 0.0,
 			"rotation_degrees_offset": 0.0,
 			"prop_role": "tree_blocker",
@@ -372,7 +372,7 @@
 			"layer": "object",
 			"source_id": "kenney_nature_kit_classic",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/rocks/rock_large1.gltf",
-			"scale": 0.72,
+			"scale": 0.95,
 			"y_offset": 0.0,
 			"rotation_degrees_offset": 0.0,
 			"prop_role": "rock_cover",
@@ -382,7 +382,7 @@
 			"layer": "object",
 			"source_id": "kenney_nature_kit_classic",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/vegetation/plant_bush.gltf",
-			"scale": 0.62,
+			"scale": 0.9,
 			"y_offset": 0.0,
 			"rotation_degrees_offset": 0.0,
 			"prop_role": "bush_cover",
@@ -392,7 +392,7 @@
 			"layer": "object",
 			"source_id": "kenney_nature_kit_classic",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/vegetation/cactus_large.gltf",
-			"scale": 0.58,
+			"scale": 0.88,
 			"y_offset": 0.0,
 			"rotation_degrees_offset": 0.0,
 			"prop_role": "cactus_cover",
@@ -402,11 +402,74 @@
 			"layer": "object",
 			"source_id": "kenney_nature_kit_classic",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/props/logs_stack.gltf",
-			"scale": 0.58,
+			"scale": 0.78,
 			"y_offset": 0.0,
 			"rotation_degrees_offset": 0.0,
 			"prop_role": "deco_small",
 			"gameplay_role": "visual_only_no_cover"
+		},
+		"station_wall": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models/wall.glb",
+			"scale": 0.86,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0,
+			"space_station_role": "wall_panel"
+		},
+		"station_wall_door": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models/wall-door.glb",
+			"scale": 0.86,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0,
+			"space_station_role": "door_airlock"
+		},
+		"station_computer": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models/computer.glb",
+			"scale": 0.92,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0,
+			"space_station_role": "console"
+		},
+		"station_table_display": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models/table-display.glb",
+			"scale": 0.9,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0,
+			"space_station_role": "console"
+		},
+		"station_container_wide": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
+			"scale": 0.9,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0,
+			"space_station_role": "storage_cargo"
+		},
+		"station_bed_single": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models/bed-single.glb",
+			"scale": 0.92,
+			"y_offset": 0.0,
+			"rotation_degrees_offset": 0.0,
+			"space_station_role": "medbay"
+		},
+		"station_floor_panel": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models/floor-panel.glb",
+			"scale": 0.88,
+			"y_offset": -0.02,
+			"rotation_degrees_offset": 0.0,
+			"space_station_role": "floor_insert"
 		},
 		"rocks_small_a": {
 			"layer": "object",

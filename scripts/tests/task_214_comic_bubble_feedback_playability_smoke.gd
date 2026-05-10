@@ -77,7 +77,12 @@ func _test_mission_command_feedback_modes_and_blocked_path() -> void:
 	_assert(accepted, "Normal mode keeps an accepted move command accepted")
 	_assert(normal_bubbles.size() == 1, "Normal mode emits one FTL command bubble")
 	_assert(String(Dictionary(normal_bubbles[0]).get("feedback_state", "")) == "accepted", "Normal command bubble stores accepted feedback state")
-	_assert(String(Dictionary(normal_bubbles[0]).get("text_source", "")) == "comic_bubble_text_catalog", "Normal command bubble uses skill-based catalog text")
+	_assert(String(Dictionary(normal_bubbles[0]).get("text_source", "")) == "comms_lines", "Normal command bubble uses comms line catalog text")
+	var normal_bubble_expires_at_msec: int = int(Dictionary(normal_bubbles[0]).get("expires_at_msec", 0))
+	_assert(normal_bubble_expires_at_msec > 0, "Normal command bubble carries an expiry timestamp")
+	controller.call("_prune_fireteamleader_feedback_bubbles", normal_bubble_expires_at_msec + 1)
+	var expired_bubbles: Array = Array(Dictionary(controller.call("get_command_feedback_snapshot")).get("fireteamleader_feedback_bubbles", []))
+	_assert(expired_bubbles.is_empty(), "Normal command bubble disappears after its display duration")
 
 	controller.call("set_comic_bubble_mode", "off")
 	var issued_before_off: int = Array(driver.get("issued_commands")).size()
@@ -351,7 +356,8 @@ func _entries_have_text_source(entries: Array) -> bool:
 	if entries.is_empty():
 		return false
 	for entry_variant in entries:
-		if String(Dictionary(entry_variant).get("text_source", "")) != "comic_bubble_text_catalog":
+		var text_source: String = String(Dictionary(entry_variant).get("text_source", "")).strip_edges()
+		if text_source != "comic_bubble_text_catalog" and text_source != "comms_lines":
 			return false
 	return true
 

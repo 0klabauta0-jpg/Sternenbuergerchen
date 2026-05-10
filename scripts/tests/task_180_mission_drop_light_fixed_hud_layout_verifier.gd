@@ -31,6 +31,7 @@ func _run_tests() -> void:
 	print("=== TASK_180 Mission Drop Light Fixed HUD Layout Verifier ===")
 	await _test_mission_hud_fixed_window_positions()
 	await _test_mission_hud_buttons_keep_existing_paths()
+	await _test_inbound_fireteam_cards_remain_selectable()
 	await _test_styling_pass_does_not_mutate_simulation_root()
 	_test_mission_runtime_boundary_files()
 
@@ -63,6 +64,7 @@ func _test_mission_hud_fixed_window_positions() -> void:
 	_assert((scene.get_node("TacticalUI/BottomDock") as Control).mouse_filter == Control.MOUSE_FILTER_IGNORE, "Bottom dock host does not consume map input outside fixed panels")
 	_assert((scene.get_node("TacticalUI/BottomDock/BottomMargin") as Control).mouse_filter == Control.MOUSE_FILTER_IGNORE, "Bottom margin host does not consume map input outside fixed panels")
 	_assert((scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow") as Control).mouse_filter == Control.MOUSE_FILTER_IGNORE, "Bottom row host does not consume map input outside fixed panels")
+	_assert(bool((scene.get_node("TacticalUI/FireteamMiniPanel") as Control).get_meta("mission_fireteam_mini_backgroundless", false)), "Fireteam mini HUD renders as cards without a background window")
 
 	_assert((scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandHeaderLabel") as Label).text == "#16 COMMAND MATRIX", "#16 block label is preserved")
 	_assert((scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamHeaderLabel") as Label).text == "#17 SELECTED FIRETEAM", "#17 block label is preserved")
@@ -82,6 +84,14 @@ func _test_mission_hud_buttons_keep_existing_paths() -> void:
 		_assert(_button_is_square(button), "%s is a square command button" % button.name)
 		_assert(button.pressed.get_connections().size() > 0, "%s keeps an existing pressed callback" % button.name)
 		_assert(button.visible and not button.text.strip_edges().is_empty(), "%s remains a visible existing command entry" % button.name)
+		_assert(_button_has_tiny_marker(button), "%s has a tiny #16 reference marker" % button.name)
+
+	var command_grid := scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid") as GridContainer
+	_assert(command_grid != null and int(command_grid.columns) == 5, "#16 command matrix uses five equal command columns")
+	_assert(command_grid.get_child_count() >= 20 and int(command_grid.get_meta("command_placeholder_slots", 0)) >= 14, "#16 command matrix exposes reserved same-size command slots")
+	for slot_index in range(7, 21):
+		var slot := command_grid.get_node_or_null("CommandSlot%02d" % slot_index) as Button
+		_assert(slot != null and _button_is_square(slot) and bool(slot.get_meta("drop_light_command_placeholder", false)) and slot.disabled, "CommandSlot%02d is a disabled same-size reserve button" % slot_index)
 
 	for path in [
 		"TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton",
@@ -96,8 +106,72 @@ func _test_mission_hud_buttons_keep_existing_paths() -> void:
 		_assert(_button_is_square(button), "%s is a small square approach button" % button.name)
 		_assert(button.pressed.get_connections().size() > 0, "%s keeps an existing approach callback" % button.name)
 
+	var action_row := scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow") as HBoxContainer
+	_assert(action_row.alignment == BoxContainer.ALIGNMENT_BEGIN, "#18 mission-control action buttons are left aligned")
+	var fireteam_info_scroll := scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll") as Control
+	var fireteam_cards_scroll := scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll") as Control
+	var fireteam_cards_spacer := scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll/FireteamCardsBody/FireteamCardsSpacer") as Control
+	_assert(fireteam_info_scroll.custom_minimum_size.x <= 320.0 and fireteam_cards_scroll.custom_minimum_size.x >= 800.0 and String(fireteam_cards_scroll.get_meta("selected_fireteam_cards_source", "")) == "_refresh_selected_fireteam_cards", "#17 selected-fireteam layout reserves the wide right member-card lane")
+	_assert(not fireteam_cards_spacer.visible and fireteam_cards_spacer.custom_minimum_size == Vector2.ZERO, "#17 selected-fireteam card spacer no longer pushes cards off to the side")
+	for stance_id in ["cautious", "normal", "aggressive"]:
+		var stance_button := _find_stance_button(scene, stance_id)
+		_assert(_button_is_square(stance_button), "%s stance button uses the same #16 button size" % stance_id)
+
 	var phase_control_panel := scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel") as Control
 	_assert(not phase_control_panel.visible, "Disabled phase-planning template controls are hidden in the fixed Mission HUD")
+
+	scene.queue_free()
+	await _wait_frames(2)
+
+
+func _test_inbound_fireteam_cards_remain_selectable() -> void:
+	var scene: Node = MISSION_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	await _wait_frames(4)
+
+	var controller := scene.get_node_or_null("TacticalController")
+	var mission_setup := scene.get_node_or_null("MissionSetup")
+	_assert(controller != null and mission_setup != null, "Mission test scene exposes controller and setup for inbound fireteam cards")
+	if controller == null or mission_setup == null:
+		scene.queue_free()
+		await _wait_frames(2)
+		return
+
+	mission_setup.set("defer_friendly_runtime_activation", true)
+	var available_fireteams: PackedStringArray = PackedStringArray(controller.call("_get_available_fireteam_ids"))
+	_assert(not available_fireteams.is_empty(), "Mission fixture exposes at least one fireteam")
+	if available_fireteams.is_empty():
+		scene.queue_free()
+		await _wait_frames(2)
+		return
+	var fireteam_id: String = String(available_fireteams[0])
+	var units: Array = Array(controller.call("_get_fireteam_units", fireteam_id, true))
+	var embarked_unit_ids: Array = []
+	for unit in units:
+		if unit != null and unit.has_method("get_unit_id"):
+			embarked_unit_ids.append(String(unit.call("get_unit_id")).strip_edges())
+	var planning_state: Dictionary = Dictionary(controller.call("get_planning_state"))
+	planning_state["mission_drop_state"] = "to_mission"
+	planning_state["embarked_unit_ids"] = embarked_unit_ids
+	planning_state["deployed_unit_ids"] = []
+	planning_state["selected_fireteams"] = [fireteam_id]
+	controller.call("set_planning_state", planning_state)
+	await _wait_frames(2)
+
+	var mini_host := scene.get_node("TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox") as VBoxContainer
+	var selected_card_row := scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll/FireteamCardsBody/FireteamCardsRow") as HBoxContainer
+	_assert(mini_host.get_child_count() > 0, "Inbound dropship fireteam stays visible in the top-left mini cards")
+	var mini_card: Control = null
+	if mini_host.get_child_count() > 0:
+		mini_card = mini_host.get_child(0) as Control
+	_assert(mini_card != null and mini_card.modulate.a < 1.0, "Inbound dropship fireteam mini card is greyed out while in transit")
+	_assert(mini_card != null and bool(mini_card.get_meta("fob_fireteam_reference_card", false)), "Top-left inbound fireteam uses the same reference-card component as dropship fireteams")
+	var leader_portrait: TextureRect = null
+	if mini_card != null:
+		leader_portrait = mini_card.get_node_or_null("Margin/VBox/HeaderRow/LeaderPortraitRect") as TextureRect
+	_assert(leader_portrait != null and leader_portrait.texture != null, "Top-left fireteam mini card shows the fireteam leader portrait")
+	_assert(String(selected_card_row.get_meta("selected_member_cards_fireteam_id", "")).strip_edges().to_lower() == fireteam_id, "#17 member-card lane is sourced from the selected fireteam")
+	_assert(selected_card_row.get_child_count() >= max(1, units.size()), "Selecting the inbound fireteam populates #17's right member-card lane")
 
 	scene.queue_free()
 	await _wait_frames(2)
@@ -175,6 +249,26 @@ func _button_is_square(button: Button) -> bool:
 	if not bool(button.get_meta("drop_light_square_action_button", false)):
 		return false
 	return _approximately_equal(button.size.x, button.size.y)
+
+
+func _button_has_tiny_marker(button: Button) -> bool:
+	if button == null:
+		return false
+	var marker_text: String = String(button.get_meta("drop_light_button_marker", "")).strip_edges()
+	var marker := button.get_node_or_null("TinyButtonMarker") as Label
+	return marker != null and marker_text.begins_with("16.") and marker.text == marker_text and int(marker.get_theme_font_size("font_size")) <= 7
+
+
+func _find_stance_button(scene: Node, stance_id: String) -> Button:
+	if scene == null:
+		return null
+	for node in scene.find_children("*", "Button", true, false):
+		var button := node as Button
+		if button == null:
+			continue
+		if String(button.get_meta("tactical_stance_id", "")).strip_edges().to_lower() == stance_id:
+			return button
+	return null
 
 
 func _approximately_equal(a: float, b: float) -> bool:

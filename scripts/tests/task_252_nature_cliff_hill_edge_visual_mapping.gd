@@ -40,16 +40,17 @@ func _test_mapping_contract(terrain_mapping: Dictionary, nature_catalog: Diction
 	var nature_section: Dictionary = Dictionary(terrain_mapping.get("nature_kit", {}))
 	_assert(String(nature_section.get("source_id", "")) == "kenney_nature_kit_classic", "Terrain mapping references Nature Kit source")
 	_assert(String(nature_section.get("asset_catalog", "")) == NATURE_CATALOG_PATH, "Terrain mapping links Nature Kit asset catalog")
-	_assert(String(nature_section.get("active_height_edge_theme", "")) == "brown", "Active V1 height-edge theme is documented")
+	_assert(String(nature_section.get("active_height_edge_theme", "")) == "legacy_space", "Active V1 height-edge theme is documented")
 	_assert(String(Dictionary(nature_section.get("surface_theme_candidates", {})).get("rock", "")) == "grey", "Grey candidate theme is documented for rock")
 	var models: Dictionary = Dictionary(terrain_mapping.get("models", {}))
 	for active_key in ["cliff_straight", "cliff_corner", "slope"]:
 		var entry: Dictionary = Dictionary(models.get(active_key, {}))
-		_assert(String(entry.get("source_id", "")) == "kenney_nature_kit_classic", "Active edge key uses Nature Kit: %s" % active_key)
+		_assert(String(entry.get("source_id", "")) == "kenney_space_kit", "Active edge key uses legacy Space Kit: %s" % active_key)
 		_assert(_is_project_loadable(String(entry.get("model_path", ""))), "Active edge model loads: %s" % active_key)
 	_assert(String(Dictionary(models.get("slope", {})).get("edge_role", "")) == "slope_steps", "Active slope key maps to steps role")
-	_assert(not String(Dictionary(models.get("cliff_straight", {})).get("model_path", "")).contains("steps"), "Active cliff straight does not use step model")
-	_assert(not String(Dictionary(models.get("cliff_corner", {})).get("model_path", "")).contains("steps"), "Active cliff corner does not use step model")
+	_assert(String(Dictionary(models.get("slope", {})).get("model_path", "")).contains("terrain_rampLarge"), "Active slope uses the older ramp model")
+	_assert(String(Dictionary(models.get("cliff_straight", {})).get("model_path", "")).contains("terrain_sideCliff"), "Active cliff straight uses the older cliff model")
+	_assert(String(Dictionary(models.get("cliff_corner", {})).get("model_path", "")).contains("terrain_sideCorner"), "Active cliff corner uses the older cliff corner model")
 	for alias_key in [
 		"nature_cliff_brown_straight",
 		"nature_cliff_brown_outer_corner",
@@ -87,16 +88,14 @@ func _test_runtime_nature_edge_visuals() -> void:
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 	var entries: Array = Array(snapshot.get("height_edge_visual_entries", []))
 	_assert(int(snapshot.get("height_edge_model_count", 0)) > 0, "Runtime renders height edge models")
-	_assert(int(snapshot.get("nature_cliff_edge_model_count", 0)) > 0, "Runtime renders Nature Kit cliff models")
-	_assert(int(snapshot.get("nature_slope_step_model_count", 0)) > 0, "Runtime renders Nature Kit slope-step models")
-	_assert(int(Dictionary(snapshot.get("nature_cliff_theme_counts", {})).get("brown", 0)) == int(snapshot.get("height_edge_model_count", -1)), "Active runtime theme count is brown for every edge model")
+	_assert(_entries_use_active_edge_source(entries, "kenney_space_kit"), "Runtime uses the active legacy Space Kit edge source")
 	_assert(int(snapshot.get("missing_map_asset_mapping_count", 0)) == 0, "Nature edge fixture has no missing mappings")
-	_assert(_entries_are_nature_kit(entries), "All height edge entries are Nature Kit backed")
 	_assert(_entries_include_role(entries, "cliff_straight"), "Runtime has straight cliff edge entries")
 	_assert(_entries_include_role(entries, "cliff_outer_corner"), "Runtime has cliff outer-corner entries")
 	_assert(_entries_include_role(entries, "slope_steps"), "Runtime has slope step entries")
 	_assert(_slope_steps_only_on_slope(entries), "Step visuals are used only for slope edges")
-	_assert(_cliffs_never_use_step_models(entries), "Hard cliff edges never use step models")
+	_assert(_cliffs_never_use_ramp_models(entries), "Hard cliff edges never use ramp models")
+	_assert(_height_edges_anchor_to_lower_neighbor(entries), "Height edges anchor between lower neighbor and upper surface")
 	_assert(_plateau_interior_has_no_edge(primary_view, Vector2i(2, 2)), "Plateau interior stays free of false edge models")
 	_assert(_pathfinder_keeps_cliff_and_slope_rules(map_data), "Visual remap does not alter TASK_182 movement semantics")
 
@@ -156,6 +155,16 @@ func _entries_are_nature_kit(entries: Array) -> bool:
 	return true
 
 
+func _entries_use_active_edge_source(entries: Array, source_id: String) -> bool:
+	if entries.is_empty():
+		return false
+	for entry_variant in entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("source_id", "")) != source_id:
+			return false
+	return true
+
+
 func _entries_include_role(entries: Array, role: String) -> bool:
 	for entry_variant in entries:
 		if String(Dictionary(entry_variant).get("edge_role", "")) == role:
@@ -171,10 +180,25 @@ func _slope_steps_only_on_slope(entries: Array) -> bool:
 	return true
 
 
-func _cliffs_never_use_step_models(entries: Array) -> bool:
+func _cliffs_never_use_ramp_models(entries: Array) -> bool:
 	for entry_variant in entries:
 		var entry: Dictionary = Dictionary(entry_variant)
-		if String(entry.get("edge_type", "")) == TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF and String(entry.get("model_path", "")).contains("steps"):
+		if String(entry.get("edge_type", "")) == TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF and String(entry.get("model_path", "")).contains("ramp"):
+			return false
+	return true
+
+
+func _height_edges_anchor_to_lower_neighbor(entries: Array) -> bool:
+	if entries.is_empty():
+		return false
+	for entry_variant in entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		var base_y: float = float(entry.get("base_y", INF))
+		var top_y: float = float(entry.get("top_y", -INF))
+		var height_span: float = float(entry.get("height_span", 0.0))
+		if base_y >= top_y:
+			return false
+		if not _float_eq(height_span, top_y - base_y):
 			return false
 	return true
 
@@ -205,10 +229,17 @@ func _catalog_assets_by_id(catalog: Dictionary) -> Dictionary:
 
 func _is_project_loadable(path: String) -> bool:
 	var normalized_path: String = path.strip_edges()
-	return normalized_path.begins_with("res://Assets/used/terrain/nature_kit_classic/") \
+	return (
+		normalized_path.begins_with("res://Assets/used/terrain/nature_kit_classic/")
+		or normalized_path.begins_with("res://Assets/kenney_space-kit/")
+	) \
 		and not normalized_path.contains("C:/") \
 		and not normalized_path.contains("C:" + "\\") \
 		and ResourceLoader.exists(normalized_path)
+
+
+func _float_eq(actual: float, expected: float) -> bool:
+	return absf(actual - expected) <= 0.001
 
 
 func _load_json(path: String) -> Dictionary:

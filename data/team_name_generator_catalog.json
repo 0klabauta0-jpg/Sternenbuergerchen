@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "catalog_id": "team_name_generator_catalog_v1",
+  "prefixes": [
+    "Sternen",
+    "Nova",
+    "Orbit",
+    "Kometen",
+    "Rift",
+    "Anker",
+    "Signal",
+    "Morgen",
+    "Aussenposten",
+    "Bastion"
+  ],
+  "cores": [
+    "Wache",
+    "Kuriere",
+    "Garde",
+    "Pioniere",
+    "Staffel",
+    "Trupp",
+    "Kollektiv",
+    "Kompanie",
+    "Lanzen",
+    "Kommando"
+  ],
+  "suffixes": [
+    "Sieben",
+    "Iona",
+    "Khepri",
+    "Meridian",
+    "Rimehold",
+    "Nadir",
+    "Anchor Nine",
+    "Cinder",
+    "Volkov",
+    "Solaris"
+  ],
+  "fallback_name": "Sternenwache Sieben"
+}

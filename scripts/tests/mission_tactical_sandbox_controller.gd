@@ -10,7 +10,9 @@ const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_la
 const DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/drop_light_layout_contract.gd")
 const NPC_COMPACT_CARD_SCENE: PackedScene = preload("res://scenes/meta/components/npc_compact_card.tscn")
 const TRANSPORT_CRAFT_CARD_UI_SCRIPT: GDScript = preload("res://scripts/meta/transport_craft_card_ui.gd")
+const FOB_FIRETEAM_CARD_SCRIPT: GDScript = preload("res://scripts/meta/fob_fireteam_card.gd")
 const META_UNIT_PROFILE_BUILDER_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile_builder.gd")
+const PORTRAIT_IDENTITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
 const CHARACTER_SHEET_FORMATTER_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_formatter.gd")
 const CHARACTER_SHEET_VIEW_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_view.gd")
 const MISSION_PRIMARY_VIEW_BRIDGE_SCRIPT: GDScript = preload("res://scripts/mission/mission_primary_view_bridge.gd")
@@ -153,6 +155,12 @@ const DROP_UNLOAD_OFFSETS := [
 	Vector2(-24.0, 42.0),
 	Vector2(26.0, -42.0),
 ]
+const TILE_TARGET_COMMAND_TYPES: PackedStringArray = ["move", "defend", "flank", "take"]
+const POST_DROP_SECURITY_ORIGIN: String = "post_drop_360_security"
+const POST_DROP_SECURITY_MODE: String = "360"
+const POST_DROP_SECURITY_RADIUS_TILES: int = 4
+const POST_DROP_SECURITY_TILE_WORLD_STEP: float = 64.0
+const POST_DROP_SECURITY_MOVE_SPEED_FACTOR: float = 0.68
 
 signal planning_state_changed(planning_state)
 
@@ -180,6 +188,7 @@ var _current_fireteam_index: int = 0
 var _current_phase_index: int = 1
 var _current_approach_index: int = 0
 var _selected_fireteam_ids: PackedStringArray = []
+var _focused_fireteam_id: String = ""
 var _fireteamleader_feedback_bubbles: Array = []
 var _fireteamleader_feedback_sequence: int = 0
 var _tactical_communication_resolver = null
@@ -193,6 +202,9 @@ var _last_command_text: String = "AWAITING INPUT"
 var _last_target_position: Vector2 = Vector2.ZERO
 var _lz_position: Vector2 = Vector2.ZERO
 var _has_lz_position: bool = false
+var _has_selected_tile: bool = false
+var _selected_tile_grid_position: Vector2i = Vector2i.ZERO
+var _selected_tile_world_position: Vector2 = Vector2.ZERO
 var _is_lz_placement_armed: bool = false
 var _is_target_placement_armed: bool = false
 var _drop_ship_requested: bool = false
@@ -228,6 +240,7 @@ var _drop_sequence_visual_only: bool = false
 var _embarked_unit_ids: Dictionary = {}
 var _deployed_unit_ids: Dictionary = {}
 var _runtime_activation_pending_fireteam_ids: Dictionary = {}
+var _post_drop_security_pending_fireteam_ids: Dictionary = {}
 var _fireteam_runtime_ui_refresh_frames_remaining: int = 0
 var _live_drop_bootstrap_consumed: bool = false
 var _character_overlay_open: bool = false
@@ -331,6 +344,7 @@ func _ready() -> void:
 	_sync_phase_selection_from_controller()
 	_initialize_fireteam_suppression_state()
 	_ensure_default_fireteam_selection()
+	_ensure_default_tile_selection(false)
 	_sync_initial_runtime_active_units()
 	_apply_drop_presence_state_to_units()
 	_refresh_selection_visuals()
@@ -340,6 +354,7 @@ func _ready() -> void:
 	_update_ui()
 	_refresh_ad_hoc_panel_visibility()
 	_emit_planning_state_changed()
+	call_deferred("_ensure_default_tile_selection")
 	call_deferred("_maybe_bootstrap_live_drop")
 
 
@@ -354,6 +369,8 @@ func _process(delta: float) -> void:
 	_update_area_defense_execution(delta)
 	_update_area_attack_execution(delta)
 	_update_npc_thought_peek_visuals()
+	if _prune_fireteamleader_feedback_bubbles():
+		_refresh_order_visuals()
 	_flush_pending_drop_runtime_phase_starts()
 	_refresh_fireteam_runtime_ui_if_pending()
 	refresh_fireteam_security_state()
@@ -500,7 +517,6 @@ func issue_take() -> bool:
 		_last_command_text = "PREVIEW MODE"
 		_update_ui()
 		return false
-	_snap_target_to_objective()
 	return _issue_command("take", "TAKE / ENGAGE")
 
 
@@ -561,6 +577,7 @@ func set_planning_state(planning_state: Dictionary) -> void:
 		_update_ui()
 		return
 	var preserve_live_execution: bool = _should_preserve_live_execution_during_planning_sync(planning_state)
+	var selected_tile_state_provided: bool = planning_state.has("has_selected_tile") or planning_state.has("selected_tile") or planning_state.has("selected_tile_world_position")
 	_ensure_tactical_stance_controller()
 	if planning_state.has("approach_angle"):
 		var approach_angle: String = String(planning_state.get("approach_angle", "NW")).strip_edges().to_upper()
@@ -617,6 +634,26 @@ func set_planning_state(planning_state: Dictionary) -> void:
 		_select_fireteam_by_name(String(planning_state.get("selected_fireteam", _get_fireteam_name())), false)
 	if planning_state.has("selected_fireteams"):
 		_set_selected_fireteams(_sanitize_fireteam_ids(PackedStringArray(Array(planning_state.get("selected_fireteams", [])))), false)
+	if selected_tile_state_provided:
+		var tile_state: Dictionary = Dictionary(planning_state.get("selected_tile", {}))
+		var has_tile: bool = bool(planning_state.get("has_selected_tile", tile_state.get("has_selected_tile", false)))
+		if has_tile:
+			var grid_variant = planning_state.get("selected_tile_grid_position", tile_state.get("grid_position", Vector2i.ZERO))
+			var world_variant = planning_state.get("selected_tile_world_position", tile_state.get("world_position", Vector2.ZERO))
+			var tile_context: Dictionary = {}
+			if typeof(grid_variant) == TYPE_VECTOR2I and typeof(world_variant) == TYPE_VECTOR2:
+				tile_context = {
+					"grid_position": Vector2i(grid_variant),
+					"world_position": Vector2(world_variant),
+				}
+			elif typeof(world_variant) == TYPE_VECTOR2:
+				tile_context = _build_tile_context_from_world_position(Vector2(world_variant))
+			if not tile_context.is_empty():
+				_set_selected_tile_context(tile_context, "", false, false)
+			else:
+				_clear_selected_tile_selection(false, false)
+		else:
+			_clear_selected_tile_selection(false, false)
 	if planning_state.has("tactical_stance_sync") and _tactical_stance_controller != null:
 		_tactical_stance_controller.call("load_sync_state", Dictionary(planning_state.get("tactical_stance_sync", {})), _get_available_fireteam_ids())
 	elif planning_state.has("tactical_stances") and _tactical_stance_controller != null:
@@ -639,6 +676,10 @@ func set_planning_state(planning_state: Dictionary) -> void:
 		_area_attack_execution_by_fireteam.clear()
 		_active_coordination_by_id.clear()
 		_initialize_fireteam_suppression_state()
+	if not selected_tile_state_provided:
+		_ensure_default_tile_selection(false)
+	else:
+		_refresh_tile_selection_visuals()
 	_refresh_button_state()
 	_refresh_selection_visuals()
 	_refresh_order_visuals()
@@ -694,6 +735,10 @@ func get_planning_state() -> Dictionary:
 		"deployed_unit_ids": _build_sorted_drop_unit_id_array(_deployed_unit_ids),
 		"selected_fireteam": _get_fireteam_name(),
 		"selected_fireteams": Array(_selected_fireteam_ids),
+		"has_selected_tile": _has_selected_tile,
+		"selected_tile": _build_selected_tile_snapshot(),
+		"selected_tile_grid_position": _selected_tile_grid_position,
+		"selected_tile_world_position": _selected_tile_world_position,
 		"selected_phase": _get_phase_name(),
 		"order_plans": _serialize_order_plans(),
 		"area_orders": _serialize_area_orders(),
@@ -1142,26 +1187,201 @@ func get_fireteam_suppression_snapshot(fireteam_id: String = "") -> Dictionary:
 	return Dictionary(_suppression_state_by_fireteam.get(normalized_fireteam_id, {})).duplicate(true)
 
 
+func get_selected_tile_snapshot() -> Dictionary:
+	return _build_selected_tile_snapshot()
+
+
+func select_tile_from_world_position_for_test(world_position: Vector2) -> Dictionary:
+	var tile_context: Dictionary = _build_tile_context_from_world_position(world_position)
+	if tile_context.is_empty():
+		return {"has_selected_tile": false, "selected": false}
+	_set_selected_tile_context(tile_context, "TILE SELECTED %s" % _format_grid_position(Vector2i(tile_context.get("grid_position", Vector2i.ZERO))), false)
+	return _build_selected_tile_snapshot()
+
+
+func clear_selected_tile_for_test() -> Dictionary:
+	_clear_selected_tile_selection(false, true)
+	return _build_selected_tile_snapshot()
+
+
+func _has_primary_grid_for_command_selection() -> bool:
+	var primary_view = _get_primary_3d_view()
+	return primary_view != null and primary_view.has_method("world_to_grid_position") and primary_view.has_method("set_selected_grid_positions")
+
+
+func _requires_selected_tile_for_command(command_type: String) -> bool:
+	return TILE_TARGET_COMMAND_TYPES.has(command_type.strip_edges().to_lower())
+
+
+func _build_tile_context_from_screen_position(screen_position: Vector2) -> Dictionary:
+	if _has_primary_grid_for_command_selection():
+		var grid_variant = _primary_view_bridge.call("screen_to_grid_position", get_parent(), screen_position)
+		if typeof(grid_variant) != TYPE_VECTOR2I:
+			return {}
+		return _build_tile_context_from_grid_position(Vector2i(grid_variant))
+	var world_position: Vector2 = _clamp_world_position_to_viewport(_screen_to_world_position(screen_position))
+	return {
+		"grid_position": Vector2i.ZERO,
+		"world_position": world_position,
+	}
+
+
+func _build_tile_context_from_world_position(world_position: Vector2) -> Dictionary:
+	var clamped_position: Vector2 = _clamp_world_position_to_viewport(world_position)
+	if _has_primary_grid_for_command_selection():
+		var snapped_position: Vector2 = _snap_world_position_to_primary_tile(clamped_position)
+		var grid_variant = _primary_view_bridge.call("world_to_grid_position", get_parent(), snapped_position)
+		if typeof(grid_variant) != TYPE_VECTOR2I:
+			grid_variant = _primary_view_bridge.call("world_to_grid_position", get_parent(), clamped_position)
+		if typeof(grid_variant) != TYPE_VECTOR2I:
+			return {}
+		return _build_tile_context_from_grid_position(Vector2i(grid_variant))
+	return {
+		"grid_position": Vector2i.ZERO,
+		"world_position": clamped_position,
+	}
+
+
+func _build_tile_context_from_grid_position(grid_position: Vector2i) -> Dictionary:
+	if _has_primary_grid_for_command_selection():
+		var world_variant = _primary_view_bridge.call("grid_to_world_position", get_parent(), grid_position)
+		if typeof(world_variant) != TYPE_VECTOR2:
+			return {}
+		return {
+			"grid_position": grid_position,
+			"world_position": Vector2(world_variant),
+		}
+	return {
+		"grid_position": grid_position,
+		"world_position": _selected_tile_world_position,
+	}
+
+
+func _select_tile_from_screen_position(screen_position: Vector2, command_text: String = "TILE SELECTED") -> bool:
+	var tile_context: Dictionary = _build_tile_context_from_screen_position(screen_position)
+	if tile_context.is_empty():
+		_last_command_text = "NO TILE UNDER CURSOR"
+		_refresh_button_state()
+		_update_ui()
+		return false
+	var grid_position := Vector2i(tile_context.get("grid_position", Vector2i.ZERO))
+	return _set_selected_tile_context(tile_context, "%s %s" % [command_text, _format_grid_position(grid_position)])
+
+
+func _ensure_default_tile_selection(should_update_ui: bool = true) -> bool:
+	if _has_selected_tile:
+		_refresh_tile_selection_visuals()
+		return true
+	var objective_marker := get_node_or_null(objective_point_path) as Node2D
+	var tile_context: Dictionary = {}
+	if objective_marker != null:
+		tile_context = _build_tile_context_from_world_position(objective_marker.global_position)
+	if tile_context.is_empty():
+		tile_context = _build_tile_context_from_world_position(_get_target_position())
+	if tile_context.is_empty():
+		return false
+	return _set_selected_tile_context(tile_context, "", false, should_update_ui)
+
+
+func _set_selected_tile_context(tile_context: Dictionary, command_text: String = "", should_emit_signal: bool = true, should_update_ui: bool = true) -> bool:
+	var grid_variant = tile_context.get("grid_position", null)
+	var world_variant = tile_context.get("world_position", null)
+	if typeof(grid_variant) != TYPE_VECTOR2I or typeof(world_variant) != TYPE_VECTOR2:
+		return false
+	_has_selected_tile = true
+	_selected_tile_grid_position = Vector2i(grid_variant)
+	_selected_tile_world_position = Vector2(world_variant)
+	_refresh_tile_selection_visuals()
+	if not command_text.strip_edges().is_empty():
+		_last_command_text = command_text
+	_refresh_button_state()
+	if should_update_ui:
+		_update_ui()
+	if should_emit_signal:
+		_emit_planning_state_changed()
+	return true
+
+
+func _clear_selected_tile_selection(should_emit_signal: bool = true, should_update_ui: bool = true) -> void:
+	_has_selected_tile = false
+	_selected_tile_grid_position = Vector2i.ZERO
+	_selected_tile_world_position = Vector2.ZERO
+	_refresh_tile_selection_visuals()
+	_refresh_button_state()
+	if should_update_ui:
+		_update_ui()
+	if should_emit_signal:
+		_emit_planning_state_changed()
+
+
+func _refresh_tile_selection_visuals() -> void:
+	var selected_grids: Array = []
+	if _has_selected_tile:
+		selected_grids.append(_selected_tile_grid_position)
+	_primary_view_bridge.call("set_selected_grid_positions", get_parent(), selected_grids)
+
+
+func _build_selected_tile_snapshot() -> Dictionary:
+	return {
+		"has_selected_tile": _has_selected_tile,
+		"grid_position": _selected_tile_grid_position,
+		"grid_x": _selected_tile_grid_position.x,
+		"grid_y": _selected_tile_grid_position.y,
+		"world_position": _selected_tile_world_position,
+		"world_text": _format_world_position(_selected_tile_world_position) if _has_selected_tile else "",
+		"grid_text": _format_grid_position(_selected_tile_grid_position) if _has_selected_tile else "",
+	}
+
+
+func _format_grid_position(grid_position: Vector2i) -> String:
+	return "G%d,%d" % [grid_position.x, grid_position.y]
+
+
+func _apply_selected_tile_to_target_marker() -> bool:
+	if not _has_selected_tile:
+		return false
+	var target_marker := get_node_or_null(target_marker_path) as Node2D
+	if target_marker == null:
+		return false
+	target_marker.global_position = _selected_tile_world_position
+	_last_target_position = _selected_tile_world_position
+	return true
+
+
 func try_place_target_from_screen_position(screen_position: Vector2) -> bool:
 	var target_marker := get_node_or_null(target_marker_path) as Node2D
 	if target_marker == null:
 		return false
 
-	var world_position: Vector2 = _screen_to_world_position(screen_position)
-	var clamped_position: Vector2 = _clamp_world_position_to_viewport(world_position)
+	var tile_context: Dictionary = _build_tile_context_from_screen_position(screen_position)
+	if _has_primary_grid_for_command_selection() and tile_context.is_empty():
+		_last_command_text = "NO TILE UNDER CURSOR"
+		_update_ui()
+		return false
+	var clamped_position: Vector2 = Vector2(tile_context.get("world_position", _clamp_world_position_to_viewport(_screen_to_world_position(screen_position)))) if not tile_context.is_empty() else _clamp_world_position_to_viewport(_screen_to_world_position(screen_position))
+	if not tile_context.is_empty():
+		_set_selected_tile_context(tile_context, "", false, false)
 	target_marker.global_position = clamped_position
 	_last_target_position = clamped_position
 	_last_command_text = "TARGET SET @ %s" % _format_world_position(clamped_position)
+	_refresh_button_state()
 	_update_ui()
 	return true
 
 
 func _place_lz_from_screen_position(screen_position: Vector2) -> bool:
-	var world_position: Vector2 = _screen_to_world_position(screen_position)
-	_lz_position = _snap_world_position_to_primary_tile(_clamp_world_position_to_viewport(world_position))
+	var tile_context: Dictionary = _build_tile_context_from_screen_position(screen_position)
+	if _has_primary_grid_for_command_selection() and tile_context.is_empty():
+		_last_command_text = "NO TILE UNDER CURSOR"
+		_update_ui()
+		return false
+	_lz_position = Vector2(tile_context.get("world_position", _snap_world_position_to_primary_tile(_clamp_world_position_to_viewport(_screen_to_world_position(screen_position))))) if not tile_context.is_empty() else _snap_world_position_to_primary_tile(_clamp_world_position_to_viewport(_screen_to_world_position(screen_position)))
+	if not tile_context.is_empty():
+		_set_selected_tile_context(tile_context, "", false, false)
 	_has_lz_position = true
 	_is_lz_placement_armed = false
 	_last_command_text = "LZ SET %s @ %s" % [_get_approach_angle_name(), _format_world_position(_lz_position)]
+	_refresh_button_state()
 	_refresh_world_overlays()
 	_update_ui()
 	_emit_planning_state_changed()
@@ -1191,12 +1411,28 @@ func _issue_command(command_type: String, display_text: String) -> bool:
 		_update_ui()
 		return false
 
+	var requires_tile: bool = _requires_selected_tile_for_command(command_type) and _has_primary_grid_for_command_selection()
+	if requires_tile and not _has_selected_tile:
+		_last_command_text = "SELECT TILE FIRST"
+		_record_fireteamleader_feedback_for_selected_fireteams(command_type, "blocked", "no_tile")
+		_refresh_button_state()
+		_refresh_order_visuals()
+		_update_ui()
+		return false
+	if requires_tile:
+		_apply_selected_tile_to_target_marker()
+
 	var issued_count: int = 0
 	for driver in _get_active_flow_drivers():
-		if driver == null or not driver.has_method("issue_command"):
+		if driver == null or (not driver.has_method("issue_command") and not driver.has_method("issue_command_at_position")):
 			continue
 
-		if bool(driver.call("issue_command", command_type, _get_live_order_phase_index())):
+		var did_issue: bool = false
+		if requires_tile and driver.has_method("issue_command_at_position"):
+			did_issue = bool(driver.call("issue_command_at_position", _selected_tile_world_position, command_type, _get_live_order_phase_index()))
+		elif driver.has_method("issue_command"):
+			did_issue = bool(driver.call("issue_command", command_type, _get_live_order_phase_index()))
+		if did_issue:
 			issued_count += 1
 
 	if issued_count == 0:
@@ -1282,7 +1518,7 @@ func _on_fireteam_group_pressed(fireteam_id: String) -> void:
 func _on_target_button_pressed() -> void:
 	_is_lz_placement_armed = false
 	_is_target_placement_armed = not _is_target_placement_armed
-	_last_command_text = "CLICK MAP FOR TARGET" if _is_target_placement_armed else "TARGET PLACEMENT CANCELLED"
+	_last_command_text = "CLICK MAP FOR TARGET TILE" if _is_target_placement_armed else "TARGET PLACEMENT CANCELLED"
 	_update_ui()
 
 
@@ -1323,7 +1559,11 @@ func _on_go_phase_pressed() -> void:
 
 func _on_clear_target_pressed() -> void:
 	_snap_target_to_objective()
+	var target_context: Dictionary = _build_tile_context_from_world_position(_get_target_position())
+	if not target_context.is_empty():
+		_set_selected_tile_context(target_context, "", false, false)
 	_last_command_text = "TARGET RESET TO OBJECTIVE"
+	_refresh_button_state()
 	_update_ui()
 
 
@@ -1333,7 +1573,7 @@ func _on_set_lz_pressed() -> void:
 		_update_ui()
 		return
 	_is_lz_placement_armed = not _is_lz_placement_armed
-	_last_command_text = "CLICK MAP FOR LZ" if _is_lz_placement_armed else "LZ PLACEMENT CANCELLED"
+	_last_command_text = "CLICK MAP FOR LZ TILE" if _is_lz_placement_armed else "LZ PLACEMENT CANCELLED"
 	_update_ui()
 
 
@@ -1902,6 +2142,7 @@ func _refresh_tactical_stance_panel() -> void:
 		var stance_id: String = String(button.get_meta("tactical_stance_id", "")).strip_edges().to_lower()
 		META_UI_SKIN_SCRIPT.style_tactical_button(button, not shared_stance.is_empty() and stance_id == shared_stance)
 		button.disabled = not _can_edit_planning() or _selected_fireteam_ids.is_empty()
+	_apply_fireteam_panel_action_button_contract()
 
 
 func _refresh_fireteam_phase_panel() -> void:
@@ -1932,6 +2173,7 @@ func _refresh_fireteam_phase_panel() -> void:
 		go_phase_button.disabled = preview_mode or not _can_issue_local_commands() or not _has_selected_fireteam_orders_to_execute()
 		go_phase_button.tooltip_text = "Start the live mission from Homebase before GO can execute orders." if preview_mode else "Fuehrt das ausgewaehlte Fireteam zum naechsten offenen Zielpunkt."
 		META_UI_SKIN_SCRIPT.style_tactical_button(go_phase_button, not go_phase_button.disabled)
+	_apply_fireteam_panel_action_button_contract()
 
 
 func _refresh_fireteam_status_panel() -> void:
@@ -1987,6 +2229,7 @@ func _refresh_fireteam_status_panel() -> void:
 	if return_button != null:
 		return_button.call("configure", "Return to Plan", "return_to_plan", "Fuehrt das ausgewaehlte Fireteam zurueck in den geplanten Ablauf.", "command" if can_return_to_plan else "neutral")
 		return_button.disabled = not can_return_to_plan
+	_apply_fireteam_panel_action_button_contract()
 
 
 func _has_pending_plan_for_fireteam(fireteam_id: String) -> bool:
@@ -2042,7 +2285,13 @@ func _refresh_selected_fireteam_cards() -> void:
 	for child in card_row.get_children():
 		child.queue_free()
 
-	var units: Array = _get_selected_friendly_units(not _use_visible_units_for_fireteam_ui())
+	var selected_cards_fireteam_id: String = _get_selected_member_cards_fireteam_id()
+	var units: Array = []
+	if not selected_cards_fireteam_id.is_empty():
+		units = _get_fireteam_units(selected_cards_fireteam_id, true)
+	else:
+		units = _get_selected_friendly_units(not _use_visible_units_for_fireteam_ui())
+	card_row.set_meta("selected_member_cards_fireteam_id", selected_cards_fireteam_id)
 	if units.is_empty():
 		var empty_label := Label.new()
 		empty_label.text = "Kein aktives Fireteam im Sichtbereich."
@@ -2056,18 +2305,23 @@ func _refresh_selected_fireteam_cards() -> void:
 
 	for unit in units:
 		var card = NPC_COMPACT_CARD_SCENE.instantiate()
-		card.custom_minimum_size = Vector2(180.0 if preview_mode else 156.0, 58.0)
+		var unit_id: String = String(unit.call("get_unit_id")).strip_edges() if unit != null and unit.has_method("get_unit_id") else ""
+		var in_drop_transit: bool = not unit_id.is_empty() and _embarked_unit_ids.has(unit_id) and not _deployed_unit_ids.has(unit_id)
+		card.custom_minimum_size = Vector2(156.0, 70.0)
 		card.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		card.call(
 			"setup_from_profile",
 			_build_fireteam_card_profile(unit),
 			{
-				"source_context": "mission_tactical",
+				"source_context": "mission_selected_fireteam_member",
 				"compact_mode": true,
 				"drag_enabled": false,
 				"show_lead_indicator": true,
 				"is_lead": _is_unit_current_fireteam_lead(unit),
-				"selected": _is_unit_selected(unit),
+				"selected": _is_selected_member_card_unit(unit, selected_cards_fireteam_id),
+				"disabled": in_drop_transit,
+				"fixed_size": true,
+				"fixed_card_size": Vector2(156.0, 70.0),
 			}
 		)
 		if not card.card_open_requested.is_connected(_on_fireteam_card_open_requested):
@@ -2094,67 +2348,34 @@ func _refresh_fireteam_mini_cards() -> void:
 	for fireteam_id in available_fireteam_ids:
 		var normalized_fireteam_id: String = String(fireteam_id).strip_edges().to_lower()
 		var units: Array = _get_fireteam_units(normalized_fireteam_id, not _use_visible_units_for_fireteam_ui())
-		var card := PanelContainer.new()
+		var card: FOBFireteamCard = FOB_FIRETEAM_CARD_SCRIPT.new()
 		card.name = "FireteamMiniCard_%s" % normalized_fireteam_id.capitalize()
-		card.custom_minimum_size = Vector2(0.0, 0.0)
+		card.custom_minimum_size = Vector2(0.0, 86.0)
 		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		card.mouse_filter = Control.MOUSE_FILTER_STOP
 		card.set_meta("fireteam_id", normalized_fireteam_id)
-		var card_click_callback: Callable = Callable(self, "_on_fireteam_mini_card_gui_input").bind(normalized_fireteam_id)
-		if not card.gui_input.is_connected(card_click_callback):
-			card.gui_input.connect(card_click_callback)
-		card_host.add_child(card)
 
 		var lead = _resolve_fireteam_leader_for_behavior(normalized_fireteam_id)
 		var selected_fireteam: bool = _selected_fireteam_ids.has(normalized_fireteam_id)
 		var runtime_inactive: bool = not preview_mode and not _is_fireteam_runtime_active(normalized_fireteam_id)
 		var lead_name: String = String(lead.call("get_display_name")) if lead != null and lead.has_method("get_display_name") else "Kein Lead"
-		var lead_portrait_path: String = String(lead.call("get_portrait_path")) if lead != null and lead.has_method("get_portrait_path") else ""
-		var fireteam_texture: Texture2D = _load_portrait_texture(lead_portrait_path)
-		if fireteam_texture == null and lead != null and lead.has_method("get_weapon_visual_texture_path"):
-			fireteam_texture = _load_optional_texture(String(lead.call("get_weapon_visual_texture_path")))
-		TRANSPORT_CRAFT_CARD_UI_SCRIPT.apply_card_state(
-			card,
-			{
-				"selected": selected_fireteam,
-				"in_transit": runtime_inactive,
-				"can_stage": false,
-				"title_text": _get_fireteam_display_label(normalized_fireteam_id),
-				"title_font_size": 10,
-				"margin_left": 6,
-				"margin_top": 6,
-				"margin_right": 6,
-				"margin_bottom": 6,
-				"vbox_separation": 2,
-				"header_separation": 4,
-				"content_separation": 4,
-				"ship_texture": fireteam_texture,
-				"ship_texture_width": 40.0,
-				"ship_texture_height": 40.0,
-				"content_minimum_height": 42.0,
-				"pilot_profile": null,
-				"pilot_text": "Lead %s" % lead_name,
-				"pilot_text_font_size": 8,
-				"pilot_source_context": "mission_fireteam_lead",
-				"pilot_disabled": runtime_inactive,
-				"pilot_mouse_filter": Control.MOUSE_FILTER_IGNORE,
-				"pilot_card_minimum_width": 124.0,
-				"pilot_card_minimum_height": 32.0,
-				"pilot_host_separation": 0,
-				"info_vbox_separation": 0,
-				"info_lines_separation": 0,
-				"info_lines": _build_fireteam_mini_info_lines(normalized_fireteam_id, units),
-				"info_line_font_size": 8,
-				"progress_visible": false,
-				"primary_action": {
-					"visible": false,
-				},
-				"secondary_action": {
-					"visible": false,
-				},
-				"clear_extra_content": true,
-			}
+		card.call(
+			"setup_card",
+			normalized_fireteam_id,
+			_get_fireteam_display_label(normalized_fireteam_id),
+			selected_fireteam,
+			false,
+			_get_mission_fireteam_loadout_id(normalized_fireteam_id),
+			_build_mission_fireteam_reference_summary(normalized_fireteam_id, lead_name, units),
+			"mission_mini"
 		)
+		_apply_fireteam_mini_card_leader_portrait(card, lead)
+		card.set_meta("mission_fireteam_mini_card", true)
+		card.set_meta("fob_fireteam_reference_card", true)
+		card.modulate = Color(1.0, 1.0, 1.0, 0.58) if runtime_inactive else Color.WHITE
+		if not card.card_pressed.is_connected(_on_fireteam_mini_reference_card_pressed):
+			card.card_pressed.connect(_on_fireteam_mini_reference_card_pressed)
+		card_host.add_child(card)
 
 
 func _on_fireteam_mini_card_gui_input(event: InputEvent, fireteam_id: String) -> void:
@@ -2166,6 +2387,88 @@ func _on_fireteam_mini_card_gui_input(event: InputEvent, fireteam_id: String) ->
 		get_viewport().set_input_as_handled()
 		if mouse_button_event.pressed:
 			_on_fireteam_group_pressed(fireteam_id)
+
+
+func _on_fireteam_mini_reference_card_pressed(fireteam_id: String) -> void:
+	_cancel_selection_interaction()
+	var viewport := get_viewport()
+	if viewport != null:
+		viewport.set_input_as_handled()
+	_on_fireteam_group_pressed(fireteam_id)
+
+
+func _get_mission_fireteam_loadout_id(fireteam_id: String) -> String:
+	var definition: Dictionary = _get_mission_fireteam_definition(fireteam_id)
+	var loadout_id: String = String(definition.get("loadout", definition.get("loadout_id", "medium"))).strip_edges()
+	return loadout_id if not loadout_id.is_empty() else "medium"
+
+
+func _get_selected_member_cards_fireteam_id() -> String:
+	var selected_fireteam_id: String = _get_selected_fireteam_id().strip_edges().to_lower()
+	if not selected_fireteam_id.is_empty():
+		return selected_fireteam_id
+	if not _focused_fireteam_id.is_empty():
+		var available_fireteam_ids: PackedStringArray = _get_available_fireteam_ids()
+		if available_fireteam_ids.has(_focused_fireteam_id) and not _get_fireteam_units(_focused_fireteam_id, true).is_empty():
+			return _focused_fireteam_id
+	for fireteam_id_variant in _selected_fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		if _is_fireteam_runtime_active(fireteam_id) or not _get_fireteam_units(fireteam_id, true).is_empty():
+			return fireteam_id
+	var displayable_fireteam_ids: PackedStringArray = _get_displayable_fireteam_ids()
+	if not displayable_fireteam_ids.is_empty():
+		return String(displayable_fireteam_ids[0]).strip_edges().to_lower()
+	return ""
+
+
+func _is_selected_member_card_unit(unit: Node, selected_cards_fireteam_id: String) -> bool:
+	if unit == null:
+		return false
+	var normalized_fireteam_id: String = selected_cards_fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return _is_unit_selected(unit)
+	if not unit.has_method("get_fireteam_id"):
+		return false
+	return String(unit.call("get_fireteam_id")).strip_edges().to_lower() == normalized_fireteam_id
+
+
+func _apply_fireteam_mini_card_leader_portrait(card: Control, lead) -> void:
+	if card == null or lead == null:
+		return
+	var header_row := card.get_node_or_null("Margin/VBox/HeaderRow") as HBoxContainer
+	if header_row == null:
+		return
+	var portrait_rect := header_row.get_node_or_null("LeaderPortraitRect") as TextureRect
+	if portrait_rect == null:
+		portrait_rect = TextureRect.new()
+		portrait_rect.name = "LeaderPortraitRect"
+		portrait_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		portrait_rect.custom_minimum_size = Vector2(34.0, 34.0)
+		portrait_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		portrait_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		header_row.add_child(portrait_rect)
+		header_row.move_child(portrait_rect, 0)
+	var profile = _build_profile_from_unit(lead)
+	var portrait_id: String = ""
+	var portrait_path: String = ""
+	if profile != null:
+		portrait_id = String(profile.get("portrait_id")).strip_edges()
+		portrait_path = String(profile.get("portrait_path")).strip_edges()
+	if portrait_path.is_empty() and lead.has_method("get_portrait_path"):
+		portrait_path = String(lead.call("get_portrait_path")).strip_edges()
+	portrait_rect.texture = _load_portrait_identity_texture(portrait_id, portrait_path)
+	portrait_rect.modulate = Color.WHITE if portrait_rect.texture != null else Color(0.36, 0.39, 0.44, 1.0)
+	portrait_rect.set_meta("mission_fireteam_leader_portrait", true)
+
+
+func _build_mission_fireteam_reference_summary(fireteam_id: String, lead_name: String, units: Array) -> String:
+	var info_lines: Array = _build_fireteam_mini_info_lines(fireteam_id, units)
+	var info_text: String = " | ".join(PackedStringArray(info_lines))
+	if info_text.is_empty():
+		return "Lead %s" % lead_name
+	return "Lead %s | %s" % [lead_name, info_text]
 
 
 func _build_fireteam_card_profile(unit: Node):
@@ -3219,6 +3522,10 @@ func _load_portrait_texture(portrait_path: String) -> Texture2D:
 	return resource as Texture2D
 
 
+func _load_portrait_identity_texture(portrait_id: String, portrait_path: String) -> Texture2D:
+	return PORTRAIT_IDENTITY_CATALOG_SCRIPT.load_texture(portrait_id.strip_edges(), portrait_path.strip_edges()) as Texture2D
+
+
 func _load_optional_texture(texture_path: String) -> Texture2D:
 	if texture_path.strip_edges().is_empty():
 		return null
@@ -3642,8 +3949,11 @@ func _clamp_world_position_to_viewport(world_position: Vector2) -> Vector2:
 				clampf(world_position.y, map_bounds.position.y, map_bounds.end.y)
 			)
 		return world_position
-	var visible_rect: Rect2 = get_viewport().get_visible_rect()
-	var canvas_transform: Transform2D = get_viewport().get_canvas_transform()
+	var viewport := get_viewport()
+	if viewport == null:
+		return world_position
+	var visible_rect: Rect2 = viewport.get_visible_rect()
+	var canvas_transform: Transform2D = viewport.get_canvas_transform()
 	var inverse_transform: Transform2D = canvas_transform.affine_inverse()
 	var world_a: Vector2 = inverse_transform * visible_rect.position
 	var world_b: Vector2 = inverse_transform * visible_rect.end
@@ -3673,16 +3983,20 @@ func _snap_target_to_objective() -> void:
 
 func _refresh_button_state() -> void:
 	var command_buttons: Array = [
-		move_button_path,
-		defend_button_path,
-		flank_button_path,
-		take_button_path,
+		{"path": move_button_path, "command_type": "move"},
+		{"path": defend_button_path, "command_type": "defend"},
+		{"path": flank_button_path, "command_type": "flank"},
+		{"path": take_button_path, "command_type": "take"},
 	]
-	for button_path in command_buttons:
+	for button_entry_variant in command_buttons:
+		var button_entry: Dictionary = Dictionary(button_entry_variant)
+		var button_path: NodePath = NodePath(str(button_entry.get("path", "")))
+		var command_type: String = String(button_entry.get("command_type", "")).strip_edges().to_lower()
 		var command_button := get_node_or_null(button_path) as BaseButton
 		if command_button == null:
 			continue
-		command_button.disabled = preview_mode or not _can_issue_local_commands() or _selected_fireteam_ids.is_empty()
+		var needs_tile: bool = _requires_selected_tile_for_command(command_type) and _has_primary_grid_for_command_selection()
+		command_button.disabled = preview_mode or not _can_issue_local_commands() or _selected_fireteam_ids.is_empty() or (needs_tile and not _has_selected_tile)
 
 	for path in [
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton",
@@ -3746,6 +4060,7 @@ func _build_button_snapshot(button_path: NodePath) -> Dictionary:
 			"command_hierarchy_group_id": "",
 			"command_hierarchy_panel_role": "",
 			"command_hierarchy_disabled_reason": "missing button",
+			"command_hierarchy_requires_tile_selection": false,
 			"pressed_signal_connection_count": 0,
 		}
 	var global_rect: Rect2 = button.get_global_rect() if button.is_inside_tree() else Rect2()
@@ -3763,6 +4078,7 @@ func _build_button_snapshot(button_path: NodePath) -> Dictionary:
 		"command_hierarchy_panel_role": str(button.get_meta("command_hierarchy_panel_role", "")),
 		"command_hierarchy_help_id": str(button.get_meta("command_hierarchy_help_id", "")),
 		"command_hierarchy_context": str(button.get_meta("command_hierarchy_context", "")),
+		"command_hierarchy_requires_tile_selection": bool(button.get_meta("command_hierarchy_requires_tile_selection", false)),
 		"command_hierarchy_disabled_reason": str(button.get_meta("command_hierarchy_disabled_reason", "")),
 		"global_rect": global_rect,
 		"pressed_signal_connection_count": button.pressed.get_connections().size(),
@@ -3809,6 +4125,10 @@ func _build_command_hierarchy_context() -> Dictionary:
 		"has_multi_fireteam_plan": not _find_multi_fireteam_plan_for_selected_fireteams().is_empty(),
 		"has_target": get_node_or_null(target_marker_path) != null,
 		"has_lz": _has_lz_position,
+		"has_selected_tile": _has_selected_tile,
+		"requires_tile_selection": _has_primary_grid_for_command_selection(),
+		"selected_tile_grid_position": _selected_tile_grid_position,
+		"selected_tile_world_position": _selected_tile_world_position,
 		"drop_available": _is_mission_drop_available(),
 		"drop_requested": _drop_ship_requested,
 		"drop_cooldown_remaining": _drop_ship_cooldown_remaining,
@@ -4264,6 +4584,12 @@ func _set_square_hud_button(path: String, size: Vector2i, font_size: int = 8) ->
 	var button := get_node_or_null(path) as Button
 	if button == null:
 		return
+	_configure_square_hud_button(button, size, font_size)
+
+
+func _configure_square_hud_button(button: Button, size: Vector2i, font_size: int = 8) -> void:
+	if button == null:
+		return
 	var fixed_size := Vector2(float(size.x), float(size.y))
 	button.custom_minimum_size = fixed_size
 	button.size = fixed_size
@@ -4272,6 +4598,42 @@ func _set_square_hud_button(path: String, size: Vector2i, font_size: int = 8) ->
 	button.clip_text = true
 	button.add_theme_font_size_override("font_size", font_size)
 	button.set_meta("drop_light_square_action_button", true)
+
+
+func _apply_command_button_markers() -> void:
+	var marker_by_path: Dictionary = {
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/MoveButton": "16.1",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton": "16.2",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/HoldButton": "16.3",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/FlankButton": "16.4",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton": "16.5",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton": "16.6",
+	}
+	for path_variant in marker_by_path.keys():
+		_apply_button_corner_marker(String(path_variant), String(marker_by_path[path_variant]))
+	for slot_index in range(7, 21):
+		_apply_button_corner_marker("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/CommandSlot%02d" % slot_index, "16.%d" % slot_index)
+
+
+func _apply_button_corner_marker(path: String, marker_text: String) -> void:
+	var button := get_node_or_null(path) as Button
+	if button == null:
+		return
+	var marker := button.get_node_or_null("TinyButtonMarker") as Label
+	if marker == null:
+		marker = Label.new()
+		marker.name = "TinyButtonMarker"
+		marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		marker.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		marker.vertical_alignment = VERTICAL_ALIGNMENT_TOP
+		button.add_child(marker)
+	marker.text = marker_text
+	marker.position = Vector2(2.0, 1.0)
+	marker.size = Vector2(24.0, 9.0)
+	marker.z_index = 8
+	marker.add_theme_font_size_override("font_size", 6)
+	marker.add_theme_color_override("font_color", Color(0.78, 0.91, 0.96, 0.9))
+	button.set_meta("drop_light_button_marker", marker_text)
 
 
 func _apply_drop_light_hud_button_labels() -> void:
@@ -4299,6 +4661,7 @@ func _apply_drop_light_hud_button_labels() -> void:
 	if drop_button != null:
 		drop_button.text = _build_drop_light_drop_button_label()
 		drop_button.tooltip_text = "Call dropship"
+	_apply_command_button_markers()
 
 
 func _build_drop_light_drop_button_label() -> String:
@@ -4351,17 +4714,19 @@ func _apply_compact_mission_control_layout() -> void:
 			passive_control.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var strategic_action_row := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow") as HBoxContainer
 	if strategic_action_row != null:
-		strategic_action_row.alignment = BoxContainer.ALIGNMENT_END
+		strategic_action_row.alignment = BoxContainer.ALIGNMENT_BEGIN
 		strategic_action_row.add_theme_constant_override("separation", 4)
+		strategic_action_row.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	var phase_control_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel") as Control
 	if phase_control_panel != null:
 		phase_control_panel.visible = PHASE_PLANNING_ENABLED
 	var command_grid := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid") as GridContainer
 	if command_grid != null:
-		command_grid.columns = 2
+		command_grid.columns = 5
 		command_grid.add_theme_constant_override("h_separation", 8)
 		command_grid.add_theme_constant_override("v_separation", 8)
 		_apply_command_grid_hierarchy_order(command_grid)
+		_ensure_command_grid_placeholder_buttons(command_grid)
 	for path in [
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/MoveButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/HoldButton",
@@ -4378,6 +4743,7 @@ func _apply_compact_mission_control_layout() -> void:
 		approach_grid.columns = 2
 		approach_grid.add_theme_constant_override("h_separation", 8)
 		approach_grid.add_theme_constant_override("v_separation", 8)
+		approach_grid.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	for path in [
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/NWButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/NEButton",
@@ -4394,9 +4760,41 @@ func _apply_compact_mission_control_layout() -> void:
 	var fireteam_panel := get_node_or_null(FIRETEAM_PANEL_PATH) as Control
 	if fireteam_panel != null:
 		fireteam_panel.clip_contents = true
+	_ensure_tactical_stance_panel()
+	_ensure_fireteam_status_panel()
+	_apply_compact_fireteam_info_text_contract()
+	var fireteam_body_row := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow") as HBoxContainer
+	if fireteam_body_row != null:
+		fireteam_body_row.add_theme_constant_override("separation", 8)
+	var fireteam_info_scroll := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll") as Control
+	if fireteam_info_scroll != null:
+		fireteam_info_scroll.custom_minimum_size = Vector2(304.0, 0.0)
+		fireteam_info_scroll.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		fireteam_info_scroll.clip_contents = true
+	var fireteam_cards_scroll := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll") as Control
+	if fireteam_cards_scroll != null:
+		fireteam_cards_scroll.custom_minimum_size = Vector2(840.0, 0.0)
+		fireteam_cards_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		fireteam_cards_scroll.clip_contents = true
+		fireteam_cards_scroll.set_meta("selected_fireteam_cards_source", "_refresh_selected_fireteam_cards")
+	var fireteam_cards_spacer := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll/FireteamCardsBody/FireteamCardsSpacer") as Control
+	if fireteam_cards_spacer != null:
+		fireteam_cards_spacer.visible = false
+		fireteam_cards_spacer.custom_minimum_size = Vector2.ZERO
+		fireteam_cards_spacer.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	var fireteam_cards_body := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll/FireteamCardsBody") as HBoxContainer
+	if fireteam_cards_body != null:
+		fireteam_cards_body.alignment = BoxContainer.ALIGNMENT_BEGIN
+		fireteam_cards_body.clip_contents = true
+	var fireteam_cards_row := get_node_or_null(FIRETEAM_SELECTED_CARDS_ROW_PATH) as HBoxContainer
+	if fireteam_cards_row != null:
+		fireteam_cards_row.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		fireteam_cards_row.clip_contents = false
 	var fireteam_mini_panel := get_node_or_null(FIRETEAM_MINI_PANEL_PATH) as Control
 	if fireteam_mini_panel != null:
-		fireteam_mini_panel.clip_contents = true
+		fireteam_mini_panel.clip_contents = false
+		_apply_fireteam_mini_overlay_style()
+	_apply_fireteam_panel_action_button_contract()
 	_enforce_drop_light_fixed_hud_layout()
 
 
@@ -4416,6 +4814,79 @@ func _apply_command_grid_hierarchy_order(command_grid: GridContainer) -> void:
 		command_grid.move_child(child, index)
 	command_grid.set_meta("command_hierarchy_order", PackedStringArray(["move", "take", "defend", "flank", "engage", "clear_target"]))
 	command_grid.set_meta("command_hierarchy_columns", command_grid.columns)
+
+
+func _ensure_command_grid_placeholder_buttons(command_grid: GridContainer) -> void:
+	if command_grid == null:
+		return
+	var action_button_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("ACTION_BUTTON_SIZE")
+	for slot_index in range(7, 21):
+		var slot_name := "CommandSlot%02d" % slot_index
+		var button := command_grid.get_node_or_null(slot_name) as Button
+		if button == null:
+			button = Button.new()
+			button.name = slot_name
+			button.focus_mode = Control.FOCUS_NONE
+			button.text = ""
+			button.tooltip_text = "Reserve command slot"
+			button.disabled = true
+			button.set_meta("drop_light_command_placeholder", true)
+			button.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			command_grid.add_child(button)
+		button.set_meta("drop_light_command_placeholder", true)
+		button.disabled = true
+		_configure_square_hud_button(button, action_button_size)
+		META_UI_SKIN_SCRIPT.style_tactical_button(button, false)
+		command_grid.move_child(button, slot_index - 1)
+	command_grid.set_meta("command_placeholder_slots", 14)
+
+
+func _apply_compact_fireteam_info_text_contract() -> void:
+	var info_vbox := get_node_or_null(FIRETEAM_INFO_VBOX_PATH) as Control
+	if info_vbox != null:
+		info_vbox.custom_minimum_size = Vector2.ZERO
+		info_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for path in [
+		command_feedback_label_path,
+		hotkey_legend_label_path,
+		NodePath("%s/TacticalStancePanel/MarginContainer/VBoxContainer/SummaryLabel" % FIRETEAM_INFO_VBOX_PATH),
+		NodePath("%s/FireteamStatusPanel/MarginContainer/HBoxContainer/SuppressionLabel" % FIRETEAM_INFO_VBOX_PATH),
+		NodePath("%s/FireteamPhasePanel/MarginContainer/VBoxContainer/PhaseStatusLabel" % FIRETEAM_INFO_VBOX_PATH),
+		NodePath("%s/FireteamPhasePanel/MarginContainer/VBoxContainer/PhaseListLabel" % FIRETEAM_INFO_VBOX_PATH),
+	]:
+		var label := get_node_or_null(path) as Label
+		if label == null:
+			continue
+		label.custom_minimum_size = Vector2.ZERO
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		label.clip_text = true
+		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		label.max_lines_visible = 1
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var status_progress := get_node_or_null("%s/FireteamStatusPanel/MarginContainer/HBoxContainer/SuppressionProgressLine" % FIRETEAM_INFO_VBOX_PATH) as Control
+	if status_progress != null:
+		status_progress.custom_minimum_size = Vector2(64.0, 22.0)
+
+
+func _apply_fireteam_panel_action_button_contract() -> void:
+	var action_button_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("ACTION_BUTTON_SIZE")
+	var fireteam_info_vbox := get_node_or_null(FIRETEAM_INFO_VBOX_PATH) as Node
+	if fireteam_info_vbox == null:
+		return
+	for node in fireteam_info_vbox.find_children("*", "Button", true, false):
+		var button := node as Button
+		if button == null:
+			continue
+		var stance_id: String = String(button.get_meta("tactical_stance_id", "")).strip_edges().to_lower()
+		if not stance_id.is_empty():
+			button.tooltip_text = _get_tactical_stance_button_text(stance_id)
+			button.text = _get_tactical_stance_short_label(stance_id)
+		elif button.name == "ReturnToPlanButton":
+			button.tooltip_text = "Return to Plan"
+			button.text = "Plan"
+		elif button.name != "GoPhaseButton":
+			continue
+		_configure_square_hud_button(button, action_button_size, 7)
 
 
 func _refresh_dynamic_button_styles() -> void:
@@ -4472,7 +4943,6 @@ func _apply_hud_skin() -> void:
 	for path in [
 		"../TacticalUI/MissionIdentityPanel",
 		"../TacticalUI/TopNavPanel",
-		FIRETEAM_MINI_PANEL_PATH,
 		"../TacticalUI/BottomDock",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel",
 		FIRETEAM_PANEL_PATH,
@@ -4511,6 +4981,26 @@ func _apply_hud_skin() -> void:
 	_refresh_tactical_stance_panel()
 	_refresh_button_state()
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayHeaderRow/CloseOverlayButton") as Button, false)
+	_apply_fireteam_mini_overlay_style()
+
+
+func _apply_fireteam_mini_overlay_style() -> void:
+	var panel := get_node_or_null(FIRETEAM_MINI_PANEL_PATH) as PanelContainer
+	if panel == null:
+		return
+	panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.clip_contents = false
+	panel.set_meta("mission_fireteam_mini_backgroundless", true)
+	for path in [
+		"../TacticalUI/FireteamMiniPanel/MiniMargin",
+		"../TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox",
+		"../TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll",
+		"../TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox",
+	]:
+		var passive_control := get_node_or_null(path) as Control
+		if passive_control != null:
+			passive_control.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
 func _can_issue_local_commands() -> bool:
@@ -4566,7 +5056,15 @@ func get_comic_bubble_settings_snapshot() -> Dictionary:
 func get_fireteamleader_feedback_bubble_snapshot() -> Array:
 	if not fireteamleader_feedback_bubbles_enabled or not bool(Dictionary(_get_comic_bubble_runtime_gate().call("get_settings")).get("enabled", true)):
 		return []
-	return _fireteamleader_feedback_bubbles.duplicate(true)
+	_prune_fireteamleader_feedback_bubbles()
+	var snapshot: Array = []
+	for bubble_variant in _fireteamleader_feedback_bubbles:
+		if typeof(bubble_variant) != TYPE_DICTIONARY:
+			continue
+		var bubble: Dictionary = Dictionary(bubble_variant).duplicate(true)
+		_apply_fireteamleader_feedback_hud_anchor(bubble, String(bubble.get("fireteam_id", "")))
+		snapshot.append(bubble)
+	return snapshot
 
 
 func set_npc_thought_peek_override(active: bool) -> void:
@@ -4588,7 +5086,12 @@ func get_npc_thought_bubble_snapshot() -> Array:
 
 func get_comic_bubble_visual_payload_snapshot() -> Array:
 	var payloads: Array = []
-	payloads.append_array(get_fireteamleader_feedback_bubble_snapshot())
+	for bubble_variant in get_fireteamleader_feedback_bubble_snapshot():
+		if typeof(bubble_variant) != TYPE_DICTIONARY:
+			continue
+		var bubble: Dictionary = Dictionary(bubble_variant).duplicate(true)
+		_apply_fireteamleader_feedback_hud_anchor(bubble, String(bubble.get("fireteam_id", "")))
+		payloads.append(bubble)
 	payloads.append_array(get_npc_thought_bubble_snapshot())
 	return payloads
 
@@ -5068,10 +5571,55 @@ func _resolve_fireteamleader_feedback_anchor_position(leader, fireteam_id: Strin
 	return null
 
 
+func _apply_fireteamleader_feedback_hud_anchor(payload: Dictionary, fireteam_id: String) -> void:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		normalized_fireteam_id = String(payload.get("fireteam_id", "")).strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return
+	var hud_anchor_variant: Variant = _resolve_fireteam_mini_card_bubble_anchor_position(normalized_fireteam_id)
+	if typeof(hud_anchor_variant) != TYPE_VECTOR2:
+		return
+	payload["anchor_space"] = "hud"
+	payload["hud_anchor_source"] = "fireteam_mini_card"
+	payload["hud_anchor_position"] = Vector2(hud_anchor_variant)
+
+
+func _resolve_fireteam_mini_card_bubble_anchor_position(fireteam_id: String) -> Variant:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return null
+	var card_host := get_node_or_null(FIRETEAM_MINI_CARDS_VBOX_PATH) as VBoxContainer
+	if card_host == null:
+		return null
+	for child in card_host.get_children():
+		var card := child as Control
+		if card == null:
+			continue
+		if String(card.get_meta("fireteam_id", "")).strip_edges().to_lower() != normalized_fireteam_id:
+			continue
+		var rect: Rect2 = card.get_global_rect()
+		if rect.size.x <= 0.0 or rect.size.y <= 0.0:
+			return null
+		return rect.position + Vector2(rect.size.x + 42.0, clampf(rect.size.y * 0.42, 24.0, 44.0))
+	return null
+
+
 func _store_fireteamleader_feedback_bubble(payload: Dictionary) -> void:
 	if not fireteamleader_feedback_bubbles_enabled:
 		return
+	_prune_fireteamleader_feedback_bubbles()
 	var normalized_payload: Dictionary = payload.duplicate(true)
+	if not _normalize_fireteamleader_feedback_speaker(normalized_payload):
+		return
+	_apply_fireteamleader_feedback_hud_anchor(normalized_payload, String(normalized_payload.get("fireteam_id", "")))
+	normalized_payload["z_index"] = maxi(int(normalized_payload.get("z_index", 0)), 420)
+	if not normalized_payload.has("max_size"):
+		normalized_payload["max_size"] = Vector2i(176, 64)
+	var now_msec: int = Time.get_ticks_msec()
+	var duration_seconds: float = clampf(float(normalized_payload.get("duration_seconds", 1.8)), 0.4, 6.0)
+	normalized_payload["created_at_msec"] = now_msec
+	normalized_payload["expires_at_msec"] = now_msec + maxi(roundi(duration_seconds * 1000.0), 250)
 	_fireteamleader_feedback_sequence += 1
 	normalized_payload["feedback_sequence"] = _fireteamleader_feedback_sequence
 	var identity_key: String = _build_fireteamleader_feedback_identity(normalized_payload)
@@ -5089,6 +5637,46 @@ func _store_fireteamleader_feedback_bubble(payload: Dictionary) -> void:
 	while retained_bubbles.size() > max_total:
 		retained_bubbles.pop_front()
 	_fireteamleader_feedback_bubbles = retained_bubbles
+
+
+func _prune_fireteamleader_feedback_bubbles(now_msec: int = -1) -> bool:
+	if _fireteamleader_feedback_bubbles.is_empty():
+		return false
+	var resolved_now_msec: int = Time.get_ticks_msec() if now_msec < 0 else now_msec
+	var retained_bubbles: Array = []
+	var changed: bool = false
+	for bubble_variant in _fireteamleader_feedback_bubbles:
+		if typeof(bubble_variant) != TYPE_DICTIONARY:
+			changed = true
+			continue
+		var bubble: Dictionary = Dictionary(bubble_variant).duplicate(true)
+		var expires_at_msec: int = int(bubble.get("expires_at_msec", 0))
+		if expires_at_msec > 0 and resolved_now_msec >= expires_at_msec:
+			changed = true
+			continue
+		retained_bubbles.append(bubble)
+	if changed:
+		_fireteamleader_feedback_bubbles = retained_bubbles
+	return changed
+
+
+func _normalize_fireteamleader_feedback_speaker(payload: Dictionary) -> bool:
+	var fireteam_id: String = String(payload.get("fireteam_id", "")).strip_edges().to_lower()
+	if fireteam_id.is_empty():
+		return false
+	var leader = _resolve_fireteam_leader_for_behavior(fireteam_id)
+	if leader == null or not leader.has_method("get_unit_id"):
+		return false
+	var leader_unit_id: String = String(leader.call("get_unit_id")).strip_edges()
+	if leader_unit_id.is_empty():
+		return false
+	var payload_unit_id: String = String(payload.get("unit_id", "")).strip_edges()
+	if not payload_unit_id.is_empty() and payload_unit_id != leader_unit_id:
+		return false
+	payload["unit_id"] = leader_unit_id
+	payload["speaker_role"] = "fireteamleader"
+	payload["leader_only_bubble"] = true
+	return true
 
 
 func _build_fireteamleader_feedback_identity(payload: Dictionary) -> String:
@@ -5266,6 +5854,8 @@ func _finish_selection_interaction(screen_position: Vector2) -> bool:
 			return true
 
 	if not ctrl_pressed:
+		if _select_tile_from_screen_position(screen_position):
+			return true
 		_clear_selection()
 		return true
 
@@ -5303,6 +5893,7 @@ func _clear_selection() -> void:
 
 func _set_selected_fireteams(next_selected_fireteam_ids: PackedStringArray, should_emit_signal: bool = true) -> void:
 	_selected_fireteam_ids = _sanitize_fireteam_ids(next_selected_fireteam_ids)
+	_update_focused_fireteam_from_selection()
 	_current_fireteam_index = 0
 	var selection_options: Array = _get_fireteam_selection_options()
 	for option_index in range(selection_options.size()):
@@ -5319,8 +5910,21 @@ func _set_selected_fireteams(next_selected_fireteam_ids: PackedStringArray, shou
 		_emit_planning_state_changed()
 
 
+func _update_focused_fireteam_from_selection() -> void:
+	if _selected_fireteam_ids.is_empty():
+		_focused_fireteam_id = ""
+		return
+	if _selected_fireteam_ids.size() == 1:
+		_focused_fireteam_id = String(_selected_fireteam_ids[0]).strip_edges().to_lower()
+		return
+	if not _focused_fireteam_id.is_empty() and _selected_fireteam_ids.has(_focused_fireteam_id):
+		return
+	_focused_fireteam_id = String(_selected_fireteam_ids[0]).strip_edges().to_lower()
+
+
 func _refresh_selection_visuals() -> void:
 	_selection_adapter.call("apply_unit_selection", _get_all_friendly_units(true), _selected_fireteam_ids)
+	_refresh_tile_selection_visuals()
 
 
 func _sync_unit_tactical_stance_badges() -> void:
@@ -6075,6 +6679,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 	return {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
 		"selected_fireteam_label": _get_fireteam_name(),
+		"selected_tile": _build_selected_tile_snapshot(),
 		"phase_name": _get_phase_name(),
 		"target_text": _build_target_text(),
 		"selected_order_text": _build_selected_waypoint_info_text(),
@@ -7451,6 +8056,128 @@ func _apply_default_fireteam_behavior(fireteam_id: String, phase_index: int) -> 
 		if bool(driver.call("issue_command_at_position", anchor_position, "defend", phase_index)):
 			issued_count += 1
 	return issued_count > 0
+
+
+func _apply_post_drop_360_security_behavior(fireteam_id: String, phase_index: int) -> bool:
+	_ensure_fireteam_movement_controller()
+	if _fireteam_movement_controller != null:
+		_fireteam_movement_controller.call("reset_fireteam", fireteam_id)
+	_clear_fireteam_runtime_execution_for_post_drop(fireteam_id)
+	if not _is_fireteam_runtime_active(fireteam_id):
+		_set_active_behavior_profile(fireteam_id, null)
+		return false
+	var leader = _resolve_fireteam_leader_for_behavior(fireteam_id)
+	if leader == null or not (leader is Node2D):
+		_set_active_behavior_profile(fireteam_id, null)
+		return false
+	var anchor_position: Vector2 = (leader as Node2D).global_position
+	var behavior_profile = _resolve_fireteam_behavior_profile(fireteam_id, "hold_position", anchor_position)
+	if behavior_profile == null:
+		return false
+	var metadata: Dictionary = Dictionary(behavior_profile.metadata).duplicate(true)
+	metadata["origin"] = POST_DROP_SECURITY_ORIGIN
+	metadata["origin_command_type"] = "hold_position"
+	metadata["phase"] = phase_index
+	metadata["rough_target_position"] = anchor_position
+	metadata["security_mode_override"] = POST_DROP_SECURITY_MODE
+	metadata["security_radius_tiles"] = POST_DROP_SECURITY_RADIUS_TILES
+	metadata["security_radius_world"] = _get_post_drop_security_radius_world()
+	metadata["security_direction_angle"] = -PI * 0.5
+	behavior_profile.metadata = metadata
+	_set_active_behavior_profile(fireteam_id, behavior_profile)
+	var issued: bool = _issue_fireteam_post_drop_360_security_positions(fireteam_id, phase_index, anchor_position)
+	_mirror_flow_driver_order_for_fireteam(fireteam_id, anchor_position, "defend", phase_index)
+	_record_fireteamleader_feedback_for_fireteam(fireteam_id, "defend", "cover", POST_DROP_SECURITY_ORIGIN)
+	refresh_fireteam_security_state()
+	return issued
+
+
+func _clear_fireteam_runtime_execution_for_post_drop(fireteam_id: String) -> void:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return
+	_phase_execution_by_fireteam.erase(normalized_fireteam_id)
+	_ad_hoc_execution_by_fireteam.erase(normalized_fireteam_id)
+	_ad_hoc_resume_state_by_fireteam.erase(normalized_fireteam_id)
+	_area_defense_execution_by_fireteam.erase(normalized_fireteam_id)
+	_area_attack_execution_by_fireteam.erase(normalized_fireteam_id)
+	_suppression_interrupt_pending_by_fireteam.erase(normalized_fireteam_id)
+
+
+func _issue_fireteam_post_drop_360_security_positions(fireteam_id: String, phase_index: int, anchor_position: Vector2) -> bool:
+	var simulation_root = get_node_or_null("../SimulationRoot")
+	if simulation_root == null:
+		return false
+	var units: Array = _get_fireteam_units(fireteam_id, true)
+	units.sort_custom(Callable(self, "_sort_unit_nodes_for_cards"))
+	if units.is_empty():
+		return false
+	var ring_radius: float = _get_post_drop_security_radius_world()
+	var sector_count: int = maxi(units.size(), 1)
+	var issued_count: int = 0
+	for index in range(units.size()):
+		var unit = units[index]
+		if not (unit is Node2D):
+			continue
+		if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
+			continue
+		if not unit.has_method("get_unit_id"):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+		if unit_id.is_empty():
+			continue
+		var sector_angle: float = wrapf((-PI * 0.5) + (TAU * float(index) / float(sector_count)), -PI, PI)
+		var target_position: Vector2 = anchor_position
+		var command_type: String = UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION
+		var speed_factor: float = 0.0
+		if index > 0:
+			target_position = anchor_position + Vector2.RIGHT.rotated(sector_angle) * ring_radius
+			command_type = UNIT_COMMAND_SCRIPT.TYPE_MOVE_TO_POSITION
+			speed_factor = POST_DROP_SECURITY_MOVE_SPEED_FACTOR
+		_set_unit_map_facing_angle(unit, sector_angle)
+		if unit is Node:
+			(unit as Node).set_meta("post_drop_security_active", true)
+			(unit as Node).set_meta("post_drop_security_radius_tiles", POST_DROP_SECURITY_RADIUS_TILES)
+		if unit.has_method("show_event_text"):
+			unit.call("show_event_text", "SEC 360", Color(0.58, 0.92, 1.0, 1.0), 2.4)
+		var command = UNIT_COMMAND_SCRIPT.new()
+		command.command_type = command_type
+		command.priority = 13
+		command.unit_id = unit_id
+		command.team_id = FRIENDLY_TEAM_ID
+		if unit.has_method("get_team_id"):
+			command.team_id = String(unit.call("get_team_id"))
+		command.target_position = target_position
+		command.move_speed_factor = speed_factor
+		command.cover_score = float(unit.call("get_cover_score")) if unit.has_method("get_cover_score") else 0.0
+		command.attack_bonus = 0.0
+		command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL
+		command.source_command_type = "hold_position"
+		command.source_task_type = POST_DROP_SECURITY_ORIGIN
+		command.phase = phase_index
+		if not bool(command.call("is_valid")):
+			continue
+		if unit.has_method("assign_unit_command"):
+			unit.call("assign_unit_command", command)
+		var command_dict: Dictionary = command.to_dict()
+		command_dict["requeue_until_target"] = command_type == UNIT_COMMAND_SCRIPT.TYPE_MOVE_TO_POSITION
+		command_dict["security_mode"] = POST_DROP_SECURITY_MODE
+		command_dict["security_radius_tiles"] = POST_DROP_SECURITY_RADIUS_TILES
+		command_dict["facing_angle"] = sector_angle
+		simulation_root.call("enqueue_command", command_dict)
+		issued_count += 1
+	return issued_count > 0
+
+
+func _get_post_drop_security_radius_world() -> float:
+	return float(POST_DROP_SECURITY_RADIUS_TILES) * POST_DROP_SECURITY_TILE_WORLD_STEP
+
+
+func _set_unit_map_facing_angle(unit, facing_angle: float) -> void:
+	if unit == null or not (unit is Node):
+		return
+	(unit as Node).set_meta("facing_angle", facing_angle)
+	(unit as Node).set_meta("map_facing_angle", facing_angle)
 
 
 func _issue_fireteam_hold_current_positions(fireteam_id: String, phase_index: int) -> bool:
@@ -9088,6 +9815,7 @@ func _deploy_next_embarked_unit() -> void:
 		unit.call("show_event_text", "DISEMBARK", Color(0.55, 1.0, 0.72, 1.0), 1.5)
 	var fireteam_id: String = String(unit.call("get_fireteam_id")).strip_edges().to_lower() if unit.has_method("get_fireteam_id") else ""
 	if not fireteam_id.is_empty():
+		_post_drop_security_pending_fireteam_ids[fireteam_id] = true
 		if preview_mode:
 			_maybe_start_active_phase_for_fireteam(fireteam_id)
 		else:
@@ -9359,6 +10087,33 @@ func _enqueue_dropship_deploy_effect(unit: Node, unit_id: String, world_position
 	_enqueue_initial_loadout_effect_for_unit(unit_id)
 
 
+func _fireteam_deploy_effects_are_applied(fireteam_id: String) -> bool:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return false
+	var checked_deployed_member: bool = false
+	var deployed_unit_lookup: Dictionary = {}
+	for unit in _get_fireteam_units(normalized_fireteam_id, false):
+		if unit == null or not unit.has_method("get_unit_id"):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+		if unit_id.is_empty() or not _deployed_unit_ids.has(unit_id):
+			continue
+		checked_deployed_member = true
+		deployed_unit_lookup[unit_id] = true
+	var simulation_root = get_node_or_null("../SimulationRoot")
+	if simulation_root != null:
+		for effect_variant in Array(simulation_root.get("effects_queue")):
+			if typeof(effect_variant) != TYPE_DICTIONARY:
+				continue
+			var effect: Dictionary = Dictionary(effect_variant)
+			if String(effect.get("effect_type", "")) != "dropship_deploy_unit":
+				continue
+			if deployed_unit_lookup.has(String(effect.get("unit_id", "")).strip_edges()):
+				return false
+	return checked_deployed_member
+
+
 func _flush_pending_drop_runtime_phase_starts() -> void:
 	if preview_mode or _runtime_activation_pending_fireteam_ids.is_empty():
 		return
@@ -9366,8 +10121,10 @@ func _flush_pending_drop_runtime_phase_starts() -> void:
 		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
 		if fireteam_id.is_empty() or not _is_fireteam_runtime_active(fireteam_id):
 			continue
-		_maybe_start_active_phase_for_fireteam(fireteam_id)
-		_runtime_activation_pending_fireteam_ids.erase(fireteam_id_variant)
+		if _post_drop_security_pending_fireteam_ids.has(fireteam_id) and not _fireteam_deploy_effects_are_applied(fireteam_id):
+			continue
+		if _maybe_start_active_phase_for_fireteam(fireteam_id):
+			_runtime_activation_pending_fireteam_ids.erase(fireteam_id_variant)
 	_refresh_selected_fireteam_cards()
 	_refresh_fireteam_mini_cards()
 
@@ -9423,19 +10180,24 @@ func _is_fireteam_runtime_active(fireteam_id: String) -> bool:
 	return false
 
 
-func _maybe_start_active_phase_for_fireteam(fireteam_id: String) -> void:
+func _maybe_start_active_phase_for_fireteam(fireteam_id: String) -> bool:
 	if preview_mode or fireteam_id.strip_edges().is_empty():
-		return
-	if not PHASE_PLANNING_ENABLED:
-		return
+		return false
+	var active_phase_index: int = LIVE_ORDER_PHASE_INDEX
+	if PHASE_PLANNING_ENABLED:
+		var phase_controller = _get_phase_controller()
+		if phase_controller == null or not phase_controller.has_method("get_active_phase_index"):
+			return false
+		active_phase_index = int(phase_controller.call("get_active_phase_index"))
+		if active_phase_index < 0:
+			return false
+	if _post_drop_security_pending_fireteam_ids.has(fireteam_id):
+		var applied_post_drop_security: bool = _apply_post_drop_360_security_behavior(fireteam_id, active_phase_index)
+		if applied_post_drop_security:
+			_post_drop_security_pending_fireteam_ids.erase(fireteam_id)
+		return applied_post_drop_security
 	if _phase_execution_by_fireteam.has(fireteam_id):
-		return
-	var phase_controller = _get_phase_controller()
-	if phase_controller == null or not phase_controller.has_method("get_active_phase_index"):
-		return
-	var active_phase_index: int = int(phase_controller.call("get_active_phase_index"))
-	if active_phase_index < 0:
-		return
+		return true
 	var plan = _order_plans_by_key.get(_build_order_plan_key(fireteam_id, active_phase_index), null)
 	if plan != null and not plan.waypoints.is_empty():
 		for waypoint in plan.waypoints:
@@ -9444,5 +10206,6 @@ func _maybe_start_active_phase_for_fireteam(fireteam_id: String) -> void:
 		plan.status = FIRETEAM_ORDER_PLAN_SCRIPT.STATUS_PENDING
 		plan.active_waypoint_index = -1
 		_activate_next_waypoint_for_plan(plan, fireteam_id, 0)
-		return
-	_apply_default_fireteam_behavior(fireteam_id, active_phase_index)
+		_post_drop_security_pending_fireteam_ids.erase(fireteam_id)
+		return true
+	return _apply_default_fireteam_behavior(fireteam_id, active_phase_index)

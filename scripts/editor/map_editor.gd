@@ -114,6 +114,31 @@ const HEIGHT_TOOL_MODE_LOWER: String = "lower"
 const HEIGHT_TOOL_MODE_SET_0: String = "set_0"
 const HEIGHT_TOOL_MODE_SET_1: String = "set_1"
 const HEIGHT_TOOL_MODE_SET_2: String = "set_2"
+const AUTO_CLIFF_EDGE_OFFSETS: Array = [
+	Vector2i(-1, 0),
+	Vector2i(1, 0),
+	Vector2i(0, -1),
+	Vector2i(0, 1),
+]
+const AUTO_CLIFF_CORNER_ENTRIES: Array = [
+	[Vector2i(-1, 0), Vector2i(0, -1), Vector2i(-1, -1), "cliff_corner_sw"],
+	[Vector2i(1, 0), Vector2i(0, -1), Vector2i(1, -1), "cliff_corner_se"],
+	[Vector2i(-1, 0), Vector2i(0, 1), Vector2i(-1, 1), "cliff_corner_nw"],
+	[Vector2i(1, 0), Vector2i(0, 1), Vector2i(1, 1), "cliff_corner_ne"],
+]
+const AUTHORING_TOOL_SELECT: String = "select"
+const AUTHORING_TOOL_BRUSH: String = "terrain_brush"
+const AUTHORING_TOOL_ERASER: String = "eraser"
+const AUTHORING_TOOL_HEIGHT: String = "height"
+const AUTHORING_TOOL_MARKER: String = "marker"
+const AUTHORING_TOOL_PATROL: String = "patrol"
+const TOOL_BUTTON_SIZE: Vector2 = Vector2(34.0, 30.0)
+const PALETTE_ITEM_FG_COLOR: Color = Color(0.9, 0.93, 0.9, 1.0)
+const PALETTE_SELECTED_BG_COLOR: Color = Color(1.0, 0.86, 0.22, 0.84)
+const PALETTE_SELECTED_FG_COLOR: Color = Color(0.08, 0.06, 0.02, 1.0)
+const INSPECTOR_SECTION_MAP_SETTINGS: String = "map_settings"
+const INSPECTOR_SECTION_MARKERS: String = "markers"
+const INSPECTOR_SECTION_MISSION_SCENARIO: String = "mission_scenario"
 
 @export var map_file_path: String = ""
 
@@ -130,6 +155,7 @@ var _last_selected_surface_type: String = TERRAIN_TILE_DATA_SCRIPT.DEFAULT_SURFA
 var _last_selected_edge_type: String = TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF
 var _selected_grids: Array = []
 var _selection_tool_enabled: bool = false
+var _eraser_tool_enabled: bool = false
 var _selected_type_id: String = ""
 var _is_panning: bool = false
 var _is_rotating_3d_camera: bool = false
@@ -164,6 +190,12 @@ var _is_refreshing_scenario_controls: bool = false
 var _scenario_feedback_text: String = ""
 var _terrain_3d_view = null
 var _3d_refresh_queued: bool = false
+var _active_palette_group_id: String = ""
+var _inspector_section_collapsed: Dictionary = {
+	INSPECTOR_SECTION_MAP_SETTINGS: false,
+	INSPECTOR_SECTION_MARKERS: false,
+	INSPECTOR_SECTION_MISSION_SCENARIO: true,
+}
 
 
 func _ready() -> void:
@@ -180,10 +212,12 @@ func _ready() -> void:
 	_connect_ui_signals()
 	_add_height_tool_controls()
 	_add_selection_tool_button()
+	_add_eraser_tool_button()
 	_add_patrol_tool_controls()
 	_ensure_marker_editor_controls()
 	_ensure_mission_authoring_controls()
 	_ensure_authoring_status_controls()
+	_ensure_inspector_section_controls()
 	_apply_contextual_help_ids()
 	_ensure_patrol_overlay()
 	_ensure_marker_overlay()
@@ -323,17 +357,14 @@ func _unhandled_input(event: InputEvent) -> void:
 				_last_painted_grid = Vector2i(-1, -1)
 				_apply_height_tool_at_world_position(world_position)
 				return
+			if _eraser_tool_enabled:
+				_is_painting = true
+				_last_painted_grid = Vector2i(-1, -1)
+				_apply_eraser_at_world_position(world_position)
+				return
 			var grid_pos = _terrain_registry.world_to_grid(world_position)
 			if _selection_tool_enabled:
-				if mouse_button_event.ctrl_pressed:
-					if _selected_grids.has(grid_pos):
-						_selected_grids.erase(grid_pos)
-					else:
-						_selected_grids.append(grid_pos)
-				else:
-					_selected_grids = [grid_pos]
-				_refresh_selection_visual()
-				_refresh_property_panel()
+				_select_grid_with_selection_tool(grid_pos, mouse_button_event.ctrl_pressed)
 				return
 			if _is_brush_enabled() and _has_selected_type():
 				_is_painting = true
@@ -367,6 +398,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 		if _is_painting and _height_tool_enabled:
 			_apply_height_tool_at_world_position(world_position)
+			return
+		if _is_painting and _eraser_tool_enabled:
+			_apply_eraser_at_world_position(world_position)
 			return
 		if _is_painting and _is_brush_enabled() and _has_selected_type():
 			_apply_brush_at_world_position(world_position)
@@ -407,7 +441,7 @@ func _load_map(path: String) -> void:
 	_tile_sprites_by_grid.clear()
 	_cliff_sprites_by_grid.clear()
 	_object_sprites_by_grid.clear()
-	_selected_grid_position = Vector2i(-1, -1)
+	_set_selected_grid_position(Vector2i(-1, -1))
 	_last_undo_state.clear()
 	_mark_dirty(false)
 	_rebuild_registry_from_map_data()
@@ -441,8 +475,7 @@ func _create_new_map(grid_size: Vector2i = DEFAULT_NEW_MAP_GRID_SIZE) -> void:
 	_tile_sprites_by_grid.clear()
 	_cliff_sprites_by_grid.clear()
 	_object_sprites_by_grid.clear()
-	_selected_grid_position = Vector2i(-1, -1)
-	_selected_grids.clear()
+	_set_selected_grid_position(Vector2i(-1, -1))
 	_last_undo_state.clear()
 	_mark_dirty(false)
 	_rebuild_registry_from_map_data()
@@ -562,9 +595,39 @@ func _select_tile_at_world_position(world_position: Vector2) -> void:
 	if tile_data == null:
 		return
 
-	_selected_grid_position = tile_data.grid_position
+	_set_selected_grid_position(tile_data.grid_position)
 	_refresh_selection_visual()
 	_refresh_property_panel()
+
+
+func _set_selected_grid_position(grid_position: Vector2i) -> void:
+	_selected_grid_position = grid_position
+	_selected_grids.clear()
+	if grid_position != Vector2i(-1, -1):
+		_selected_grids.append(grid_position)
+
+
+func _select_grid_with_selection_tool(grid_position: Vector2i, additive: bool = false) -> bool:
+	if _terrain_map_data == null:
+		return false
+	var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
+	if tile_data == null:
+		return false
+	if additive:
+		if _selected_grids.has(grid_position):
+			_selected_grids.erase(grid_position)
+		else:
+			_selected_grids.append(grid_position)
+	else:
+		_selected_grids = [grid_position]
+	if _selected_grids.is_empty():
+		_selected_grid_position = Vector2i(-1, -1)
+	else:
+		_selected_grid_position = Vector2i(_selected_grids[_selected_grids.size() - 1])
+	_refresh_selection_visual()
+	_refresh_property_panel()
+	_refresh_authoring_status_controls()
+	return true
 
 
 func _apply_brush_at_world_position(world_position: Vector2) -> void:
@@ -605,7 +668,7 @@ func _apply_brush_at_world_position(world_position: Vector2) -> void:
 	if any_changed:
 		_mark_dirty(true)
 
-	_selected_grid_position = center_grid
+	_set_selected_grid_position(center_grid)
 	_refresh_selection_visual()
 	_refresh_property_panel()
 	_hide_hover_preview()
@@ -623,6 +686,7 @@ func _apply_height_tool_at_world_position(world_position: Vector2) -> void:
 	var center_grid: Vector2i = tile_data.grid_position
 	var radius: int = _get_brush_radius()
 	var any_changed: bool = false
+	var changed_grids: Array[Vector2i] = []
 
 	for dx in range(-radius, radius + 1):
 		for dy in range(-radius, radius + 1):
@@ -634,16 +698,69 @@ func _apply_height_tool_at_world_position(world_position: Vector2) -> void:
 			var patch: Dictionary = Dictionary(MAP_EDITOR_HEIGHT_TOOL_SCRIPT.call("build_height_patch", int(target_tile.height_level), _height_tool_mode, _height_tool_edge_type, TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE))
 			if _apply_tile_patch(target_tile, patch):
 				any_changed = true
+				changed_grids.append(target_grid)
 				_refresh_tile_visual(target_tile)
 
 	if any_changed:
+		_refresh_reconciled_height_edges(changed_grids, _height_tool_edge_type)
 		_mark_dirty(true)
 
-	_selected_grid_position = center_grid
-	_selected_grids.clear()
+	_set_selected_grid_position(center_grid)
 	_refresh_selection_visual()
 	_refresh_property_panel()
 	_hide_hover_preview()
+
+
+func _apply_eraser_at_world_position(world_position: Vector2) -> void:
+	var tile_data = _resolve_tile_at_world_position(world_position)
+	if tile_data == null:
+		return
+
+	if tile_data.grid_position == _last_painted_grid:
+		return
+	_last_painted_grid = tile_data.grid_position
+
+	if not _erase_object_layer_from_tile(tile_data):
+		_set_selected_grid_position(tile_data.grid_position)
+		_refresh_selection_visual()
+		_refresh_property_panel()
+		return
+
+	_set_selected_grid_position(tile_data.grid_position)
+	_refresh_tile_visual(tile_data)
+	_refresh_selection_visual()
+	_refresh_property_panel()
+	_mark_dirty(true)
+	_hide_hover_preview()
+
+
+func _erase_object_layer_from_tile(tile_data) -> bool:
+	if tile_data == null:
+		return false
+	var type_id: String = String(tile_data.type_id).strip_edges().to_lower() if tile_data.type_id is String else ""
+	var object_type_id: String = String(tile_data.object_type_id).strip_edges().to_lower() if tile_data.object_type_id is String else ""
+	var has_object_layer: bool = not object_type_id.is_empty()
+	if not has_object_layer and _tile_catalog != null and _tile_catalog.has_method("is_object_layer_type"):
+		has_object_layer = bool(_tile_catalog.call("is_object_layer_type", type_id))
+	if not has_object_layer:
+		for prefix in ["wall_", "rock_", "cliff_", "slope_"]:
+			if type_id.begins_with(prefix):
+				has_object_layer = true
+				break
+	if not has_object_layer:
+		return false
+
+	_store_undo_state(tile_data)
+	tile_data.object_type_id = ""
+	if _tile_catalog != null and _tile_catalog.has_method("is_object_layer_type") and bool(_tile_catalog.call("is_object_layer_type", type_id)):
+		tile_data.type_id = "ground_flat"
+	elif type_id.begins_with("wall_") or type_id.begins_with("rock_") or type_id.begins_with("cliff_") or type_id.begins_with("slope_"):
+		tile_data.type_id = "ground_flat"
+	tile_data.walkable = true
+	tile_data.blocks_los = false
+	tile_data.cover_value = 0
+	tile_data.object_height = 0
+	return true
 
 
 func _get_next_height_tool_level(current_height: int) -> int:
@@ -707,12 +824,12 @@ func _add_height_tool_controls() -> void:
 	if height_button == null:
 		height_button = Button.new()
 		height_button.name = "HeightButton"
-		height_button.text = "Hoehe"
 		height_button.toggle_mode = true
 		height_button.toggled.connect(_on_height_tool_toggled)
 		button_row.add_child(height_button)
 		button_row.move_child(height_button, insert_index)
 		insert_index += 1
+	_configure_tool_button(height_button, "H", "Height: raise, lower or set H0/H1/H2.")
 
 	var mode_option := button_row.get_node_or_null("HeightModeOption") as OptionButton
 	if mode_option == null:
@@ -809,16 +926,44 @@ func _add_selection_tool_button() -> void:
 
 	var existing_button := button_row.get_node_or_null("SelectButton") as Button
 	if existing_button != null:
+		_configure_tool_button(existing_button, "S", "Select tiles; Ctrl-click toggles multiple tiles.")
 		existing_button.button_pressed = _selection_tool_enabled
 		return
 
 	var select_btn := Button.new()
 	select_btn.name = "SelectButton"
-	select_btn.text = "Select"
 	select_btn.toggle_mode = true
 	select_btn.button_pressed = _selection_tool_enabled
+	_configure_tool_button(select_btn, "S", "Select tiles; Ctrl-click toggles multiple tiles.")
 	select_btn.toggled.connect(_on_selection_tool_toggled)
 	button_row.add_child(select_btn)
+
+
+func _add_eraser_tool_button() -> void:
+	var button_row := get_node_or_null("UI/TopBar/Margin/HBox") as HBoxContainer
+	if button_row == null:
+		return
+
+	var eraser_button := button_row.get_node_or_null("EraserButton") as Button
+	if eraser_button == null:
+		eraser_button = Button.new()
+		eraser_button.name = "EraserButton"
+		eraser_button.toggle_mode = true
+		eraser_button.toggled.connect(_on_eraser_tool_toggled)
+		button_row.add_child(eraser_button)
+		var select_button := button_row.get_node_or_null("SelectButton") as Button
+		if select_button != null:
+			button_row.move_child(eraser_button, select_button.get_index() + 1)
+	_configure_tool_button(eraser_button, "E", "Eraser: clear only the object layer on clicked tiles.")
+	eraser_button.button_pressed = _eraser_tool_enabled
+
+
+func _configure_tool_button(button: Button, label_text: String, tooltip: String) -> void:
+	if button == null:
+		return
+	button.text = label_text
+	button.custom_minimum_size = TOOL_BUTTON_SIZE
+	button.tooltip_text = tooltip
 
 
 func _add_patrol_tool_controls() -> void:
@@ -829,10 +974,10 @@ func _add_patrol_tool_controls() -> void:
 	if patrol_button == null:
 		patrol_button = Button.new()
 		patrol_button.name = "PatrolButton"
-		patrol_button.text = "Patrol"
 		patrol_button.toggle_mode = true
 		patrol_button.toggled.connect(_on_patrol_tool_toggled)
 		button_row.add_child(patrol_button)
+	_configure_tool_button(patrol_button, "P", "Patrol markers and pre-contact waypoint authoring.")
 	var spawn_selector := button_row.get_node_or_null("PatrolSpawnOption") as OptionButton
 	if spawn_selector == null:
 		spawn_selector = OptionButton.new()
@@ -856,12 +1001,79 @@ func _on_selection_tool_toggled(pressed: bool) -> void:
 	_selection_tool_enabled = pressed
 	if pressed:
 		_clear_height_tool()
+		_eraser_tool_enabled = false
+		var eraser_button := _get_eraser_tool_button()
+		if eraser_button != null and eraser_button.button_pressed:
+			eraser_button.button_pressed = false
+		var brush_button := get_node_or_null("UI/TopBar/Margin/HBox/BrushButton") as Button
+		if brush_button != null and brush_button.button_pressed:
+			brush_button.button_pressed = false
 		_marker_tool_enabled = false
 		var marker_tool_button := _get_marker_tool_button()
 		if marker_tool_button != null and marker_tool_button.button_pressed:
 			marker_tool_button.button_pressed = false
+		_patrol_tool_enabled = false
+		var patrol_button := get_node_or_null("UI/TopBar/Margin/HBox/PatrolButton") as Button
+		if patrol_button != null and patrol_button.button_pressed:
+			patrol_button.button_pressed = false
 		_is_painting = false
 		_last_painted_grid = Vector2i(-1, -1)
+		_hide_hover_preview()
+	_update_patrol_topbar_state()
+	_refresh_authoring_status_controls()
+
+
+func _on_brush_tool_toggled(pressed: bool) -> void:
+	if pressed:
+		_clear_height_tool()
+		_selection_tool_enabled = false
+		_eraser_tool_enabled = false
+		var select_button := get_node_or_null("UI/TopBar/Margin/HBox/SelectButton") as Button
+		if select_button != null and select_button.button_pressed:
+			select_button.button_pressed = false
+		var eraser_button := _get_eraser_tool_button()
+		if eraser_button != null and eraser_button.button_pressed:
+			eraser_button.button_pressed = false
+		_marker_tool_enabled = false
+		var marker_tool_button := _get_marker_tool_button()
+		if marker_tool_button != null and marker_tool_button.button_pressed:
+			marker_tool_button.button_pressed = false
+		_patrol_tool_enabled = false
+		var patrol_button := get_node_or_null("UI/TopBar/Margin/HBox/PatrolButton") as Button
+		if patrol_button != null and patrol_button.button_pressed:
+			patrol_button.button_pressed = false
+	else:
+		_is_painting = false
+		_last_painted_grid = Vector2i(-1, -1)
+		_hide_hover_preview()
+	_update_patrol_topbar_state()
+	_refresh_authoring_status_controls()
+
+
+func _on_eraser_tool_toggled(pressed: bool) -> void:
+	_eraser_tool_enabled = pressed
+	if pressed:
+		_clear_height_tool()
+		_selection_tool_enabled = false
+		var select_button := get_node_or_null("UI/TopBar/Margin/HBox/SelectButton") as Button
+		if select_button != null and select_button.button_pressed:
+			select_button.button_pressed = false
+		var brush_button := get_node_or_null("UI/TopBar/Margin/HBox/BrushButton") as Button
+		if brush_button != null and brush_button.button_pressed:
+			brush_button.button_pressed = false
+		_marker_tool_enabled = false
+		var marker_tool_button := _get_marker_tool_button()
+		if marker_tool_button != null and marker_tool_button.button_pressed:
+			marker_tool_button.button_pressed = false
+		_patrol_tool_enabled = false
+		var patrol_button := get_node_or_null("UI/TopBar/Margin/HBox/PatrolButton") as Button
+		if patrol_button != null and patrol_button.button_pressed:
+			patrol_button.button_pressed = false
+	else:
+		_is_painting = false
+		_last_painted_grid = Vector2i(-1, -1)
+		_hide_hover_preview()
+	_update_patrol_topbar_state()
 	_refresh_authoring_status_controls()
 
 
@@ -870,9 +1082,13 @@ func _on_patrol_tool_toggled(pressed: bool) -> void:
 	if pressed:
 		_clear_height_tool()
 		_marker_tool_enabled = false
+		_eraser_tool_enabled = false
 		var marker_tool_button := _get_marker_tool_button()
 		if marker_tool_button != null and marker_tool_button.button_pressed:
 			marker_tool_button.button_pressed = false
+		var eraser_button := _get_eraser_tool_button()
+		if eraser_button != null and eraser_button.button_pressed:
+			eraser_button.button_pressed = false
 		_selection_tool_enabled = false
 		var select_button := get_node_or_null("UI/TopBar/Margin/HBox/SelectButton") as Button
 		if select_button != null and select_button.button_pressed:
@@ -935,6 +1151,7 @@ func _refresh_property_panel() -> void:
 		_set_property_controls_enabled(false)
 		_is_refreshing_property_controls = false
 		_refresh_authoring_status_controls()
+		_apply_inspector_section_visibility()
 		return
 
 	tile_label.text = "Tile: (%d, %d)" % [tile_data.grid_position.x, tile_data.grid_position.y]
@@ -968,6 +1185,7 @@ func _refresh_property_panel() -> void:
 	_set_property_controls_enabled(true)
 	_is_refreshing_property_controls = false
 	_refresh_authoring_status_controls()
+	_apply_inspector_section_visibility()
 
 
 func _refresh_map_settings_panel() -> void:
@@ -983,6 +1201,7 @@ func _refresh_map_settings_panel() -> void:
 		mission_slot_spinbox.editable = false
 		_refresh_marker_editor_controls()
 		_is_refreshing_map_settings_controls = false
+		_apply_inspector_section_visibility()
 		return
 
 	var grid_size: Vector2i = _terrain_map_data.call("get_grid_size")
@@ -991,6 +1210,7 @@ func _refresh_map_settings_panel() -> void:
 	mission_slot_spinbox.editable = true
 	_refresh_marker_editor_controls()
 	_is_refreshing_map_settings_controls = false
+	_apply_inspector_section_visibility()
 
 
 func _update_marker_controls(marker_id: String, marker_position: Vector2, has_marker: bool, can_assign: bool) -> void:
@@ -1042,9 +1262,9 @@ func _ensure_marker_editor_controls() -> void:
 
 		var marker_tool_button := Button.new()
 		marker_tool_button.name = "MarkerToolButton"
-		marker_tool_button.text = "Marker Tool"
 		marker_tool_button.toggle_mode = true
 		toolbar.add_child(marker_tool_button)
+		_configure_tool_button(marker_tool_button, "M", "Marker tool: place or drag mission/editor markers.")
 
 		var remove_marker_button := Button.new()
 		remove_marker_button.name = "RemoveMarkerButton"
@@ -1108,6 +1328,9 @@ func _ensure_marker_editor_controls() -> void:
 		marker_info_label.text = "Select a marker to edit it."
 		marker_panel.add_child(marker_info_label)
 
+	var marker_tool_button := _get_marker_tool_button()
+	if marker_tool_button != null:
+		_configure_tool_button(marker_tool_button, "M", "Marker tool: place or drag mission/editor markers.")
 	_populate_marker_type_options()
 	_connect_marker_editor_signals()
 	_refresh_marker_editor_controls()
@@ -1303,6 +1526,141 @@ func _refresh_authoring_status_controls() -> void:
 		manifest_label.text = "MP Map: %s" % String(manifest.get("state", "not_ready")).replace("_", " ")
 
 
+func _ensure_inspector_section_controls() -> void:
+	var panel_parent := get_node_or_null("UI/PropertyPanel/Margin/VBox") as VBoxContainer
+	if panel_parent == null:
+		return
+	_ensure_inspector_toggle(panel_parent, "MapSettingsToggle", INSPECTOR_SECTION_MAP_SETTINGS, "Map Settings", "Grid and mission slot metadata")
+	_ensure_inspector_toggle(panel_parent, "MarkersToggle", INSPECTOR_SECTION_MARKERS, "Markers", "Editor and mission marker authoring")
+	_ensure_inspector_toggle(panel_parent, "MissionScenarioToggle", INSPECTOR_SECTION_MISSION_SCENARIO, "Mission Scenario", "Mission scenario authoring fields")
+	_apply_inspector_section_visibility()
+
+
+func _ensure_inspector_toggle(parent: VBoxContainer, node_name: String, section_id: String, title: String, tooltip: String) -> void:
+	var button := parent.get_node_or_null(node_name) as Button
+	if button == null:
+		button = Button.new()
+		button.name = node_name
+		button.toggle_mode = true
+		button.tooltip_text = tooltip
+		button.pressed.connect(_on_inspector_toggle_pressed.bind(section_id))
+		parent.add_child(button)
+	var anchor_node := _get_inspector_section_anchor(section_id)
+	if anchor_node != null:
+		parent.move_child(button, anchor_node.get_index())
+	button.button_pressed = not bool(_inspector_section_collapsed.get(section_id, false))
+	button.text = "%s %s" % ["v" if button.button_pressed else ">", title]
+
+
+func _get_inspector_section_anchor(section_id: String) -> Node:
+	match section_id:
+		INSPECTOR_SECTION_MAP_SETTINGS:
+			return get_node_or_null("UI/PropertyPanel/Margin/VBox/MapSettingsSeparator")
+		INSPECTOR_SECTION_MARKERS:
+			return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkersTitle")
+		INSPECTOR_SECTION_MISSION_SCENARIO:
+			return get_node_or_null("UI/PropertyPanel/Margin/VBox/MissionScenarioSeparator")
+	return null
+
+
+func _on_inspector_toggle_pressed(section_id: String) -> void:
+	set_inspector_section_collapsed(section_id, not bool(_inspector_section_collapsed.get(section_id, false)))
+
+
+func set_inspector_section_collapsed(section_id: String, collapsed: bool) -> bool:
+	var normalized_section_id: String = section_id.strip_edges().to_lower()
+	if not [
+		INSPECTOR_SECTION_MAP_SETTINGS,
+		INSPECTOR_SECTION_MARKERS,
+		INSPECTOR_SECTION_MISSION_SCENARIO,
+	].has(normalized_section_id):
+		return false
+	_inspector_section_collapsed[normalized_section_id] = collapsed
+	_apply_inspector_section_visibility()
+	return true
+
+
+func _apply_inspector_section_visibility() -> void:
+	_set_nodes_visible(_get_map_settings_section_nodes(), _is_inspector_section_visible(INSPECTOR_SECTION_MAP_SETTINGS))
+	_set_nodes_visible(_get_marker_section_nodes(), _is_inspector_section_visible(INSPECTOR_SECTION_MARKERS))
+	_set_nodes_visible(_get_mission_scenario_section_nodes(), _is_inspector_section_visible(INSPECTOR_SECTION_MISSION_SCENARIO))
+	_refresh_inspector_toggle_labels()
+
+
+func _refresh_inspector_toggle_labels() -> void:
+	var label_by_button: Dictionary = {
+		"MapSettingsToggle": "Map Settings",
+		"MarkersToggle": "Markers",
+		"MissionScenarioToggle": "Mission Scenario",
+	}
+	var section_by_button: Dictionary = {
+		"MapSettingsToggle": INSPECTOR_SECTION_MAP_SETTINGS,
+		"MarkersToggle": INSPECTOR_SECTION_MARKERS,
+		"MissionScenarioToggle": INSPECTOR_SECTION_MISSION_SCENARIO,
+	}
+	for button_name in label_by_button.keys():
+		var button := get_node_or_null("UI/PropertyPanel/Margin/VBox/%s" % String(button_name)) as Button
+		if button == null:
+			continue
+		var visible: bool = _is_inspector_section_visible(String(section_by_button.get(button_name, "")))
+		button.button_pressed = visible
+		button.text = "%s %s" % ["v" if visible else ">", String(label_by_button.get(button_name, button_name))]
+
+
+func _is_inspector_section_visible(section_id: String) -> bool:
+	return not bool(_inspector_section_collapsed.get(section_id, false))
+
+
+func _set_nodes_visible(nodes: Array, is_visible: bool) -> void:
+	for node_variant in nodes:
+		var control := node_variant as Control
+		if control != null:
+			control.visible = is_visible
+
+
+func _get_map_settings_section_nodes() -> Array:
+	return [
+		get_node_or_null("UI/PropertyPanel/Margin/VBox/MapSettingsSeparator"),
+		get_node_or_null("UI/PropertyPanel/Margin/VBox/MapSettingsTitle"),
+		get_node_or_null("UI/PropertyPanel/Margin/VBox/GridSizeLabel"),
+		get_node_or_null("UI/PropertyPanel/Margin/VBox/MissionSlotRow"),
+	]
+
+
+func _get_marker_section_nodes() -> Array:
+	return [
+		get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkersTitle"),
+		get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerHelpLabel"),
+		get_node_or_null("UI/PropertyPanel/Margin/VBox/SpawnAlphaRow"),
+		get_node_or_null("UI/PropertyPanel/Margin/VBox/SpawnBravoRow"),
+		get_node_or_null("UI/PropertyPanel/Margin/VBox/ObjectivePointRow"),
+		get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel"),
+	]
+
+
+func _get_mission_scenario_section_nodes() -> Array:
+	return [
+		get_node_or_null("UI/PropertyPanel/Margin/VBox/MissionScenarioSeparator"),
+		get_node_or_null("UI/PropertyPanel/Margin/VBox/MissionScenarioPanel"),
+	]
+
+
+func _tile_property_controls_are_visible() -> bool:
+	var required_nodes: Array = [
+		get_node_or_null("UI/PropertyPanel/Margin/VBox/TitleLabel"),
+		get_node_or_null("UI/PropertyPanel/Margin/VBox/TileLabel"),
+		get_node_or_null("UI/PropertyPanel/Margin/VBox/TypeLabel"),
+		get_node_or_null("UI/PropertyPanel/Margin/VBox/WalkableCheckBox"),
+		get_node_or_null("UI/PropertyPanel/Margin/VBox/CoverRow"),
+		get_node_or_null("UI/PropertyPanel/Margin/VBox/HeightRow"),
+	]
+	for node_variant in required_nodes:
+		var control := node_variant as Control
+		if control == null or not control.visible:
+			return false
+	return true
+
+
 func _add_scenario_line_edit_row(parent: VBoxContainer, row_name: String, label_text: String, line_edit_name: String) -> void:
 	var row := HBoxContainer.new()
 	row.name = row_name
@@ -1486,6 +1844,7 @@ func _refresh_mission_authoring_controls() -> void:
 		info_label.text = _build_mission_scenario_info_text()
 	_is_refreshing_scenario_controls = false
 	_refresh_top_bar()
+	_apply_inspector_section_visibility()
 
 
 func _ensure_mission_scenario():
@@ -1865,6 +2224,15 @@ func _get_selected_or_map_center_position(fallback_position: Vector2) -> Vector2
 	return fallback_position
 
 
+func _get_required_selected_tile_world_position(feedback_text: String):
+	var selected_tile = _get_selected_tile()
+	if selected_tile != null:
+		return Vector2(selected_tile.world_position)
+	_scenario_feedback_text = feedback_text
+	_refresh_mission_authoring_controls()
+	return null
+
+
 func _build_auto_patrol_bindings(enemy_ids: PackedStringArray) -> Array:
 	var result: Array = []
 	if _terrain_map_data == null or not _terrain_map_data.has_method("get_patrol_paths"):
@@ -2127,18 +2495,22 @@ func set_authoring_tool(tool_id: String) -> bool:
 		normalized_tool_id = "select"
 	var brush_button := get_node_or_null("UI/TopBar/Margin/HBox/BrushButton") as Button
 	var height_button := _get_height_tool_button()
+	var eraser_button := _get_eraser_tool_button()
 	var marker_button := _get_marker_tool_button()
 	var patrol_button := get_node_or_null("UI/TopBar/Margin/HBox/PatrolButton") as Button
 	var select_button := get_node_or_null("UI/TopBar/Margin/HBox/SelectButton") as Button
-	if not ["select", "selection", "terrain_brush", "brush", "height", "marker", "patrol"].has(normalized_tool_id):
+	if not ["select", "selection", "terrain_brush", "brush", "eraser", "erase", "height", "marker", "patrol"].has(normalized_tool_id):
 		return false
 
-	_selection_tool_enabled = normalized_tool_id == "select" or normalized_tool_id == "selection"
-	_height_tool_enabled = normalized_tool_id == "height"
-	_marker_tool_enabled = normalized_tool_id == "marker"
-	_patrol_tool_enabled = normalized_tool_id == "patrol"
+	_selection_tool_enabled = normalized_tool_id == AUTHORING_TOOL_SELECT or normalized_tool_id == "selection"
+	_eraser_tool_enabled = normalized_tool_id == AUTHORING_TOOL_ERASER or normalized_tool_id == "erase"
+	_height_tool_enabled = normalized_tool_id == AUTHORING_TOOL_HEIGHT
+	_marker_tool_enabled = normalized_tool_id == AUTHORING_TOOL_MARKER
+	_patrol_tool_enabled = normalized_tool_id == AUTHORING_TOOL_PATROL
 	if brush_button != null:
-		brush_button.button_pressed = normalized_tool_id == "terrain_brush" or normalized_tool_id == "brush"
+		brush_button.button_pressed = normalized_tool_id == AUTHORING_TOOL_BRUSH or normalized_tool_id == "brush"
+	if eraser_button != null:
+		eraser_button.button_pressed = _eraser_tool_enabled
 	if height_button != null:
 		height_button.button_pressed = _height_tool_enabled
 	if marker_button != null:
@@ -2161,8 +2533,7 @@ func select_grid_for_authoring(grid_position: Vector2i) -> bool:
 	var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
 	if tile_data == null:
 		return false
-	_selected_grid_position = grid_position
-	_selected_grids = [grid_position]
+	_set_selected_grid_position(grid_position)
 	_refresh_selection_visual()
 	_refresh_property_panel()
 	_refresh_authoring_status_controls()
@@ -2198,6 +2569,13 @@ func get_map_editor_usability_snapshot(sync_from_controls: bool = true) -> Dicti
 			"spawn_id": _patrol_spawn_id,
 			"waypoint_count": _get_patrol_waypoint_count(_patrol_spawn_id),
 		},
+		"eraser_tool": {
+			"enabled": _eraser_tool_enabled,
+			"scope": "object_layer_only",
+		},
+		"toolbar": _build_toolbar_snapshot(),
+		"palette": _build_palette_snapshot(),
+		"inspector": _build_inspector_snapshot(),
 		"map_path": _current_map_path,
 		"scenario_path": _current_scenario_path,
 		"dirty": _dirty,
@@ -2230,6 +2608,77 @@ func get_authoring_validation_snapshot(sync_from_controls: bool = true) -> Dicti
 		"error_count": errors.size(),
 		"warning_count": warnings.size(),
 		"sections": sections,
+	}
+
+
+func _build_toolbar_snapshot() -> Dictionary:
+	var tool_ids: PackedStringArray = PackedStringArray([
+		AUTHORING_TOOL_SELECT,
+		AUTHORING_TOOL_BRUSH,
+		AUTHORING_TOOL_ERASER,
+		AUTHORING_TOOL_HEIGHT,
+		AUTHORING_TOOL_MARKER,
+		AUTHORING_TOOL_PATROL,
+	])
+	var pressed: Dictionary = {
+		AUTHORING_TOOL_SELECT: _selection_tool_enabled,
+		AUTHORING_TOOL_BRUSH: _is_brush_enabled(),
+		AUTHORING_TOOL_ERASER: _eraser_tool_enabled,
+		AUTHORING_TOOL_HEIGHT: _height_tool_enabled,
+		AUTHORING_TOOL_MARKER: _marker_tool_enabled,
+		AUTHORING_TOOL_PATROL: _patrol_tool_enabled,
+	}
+	var active_count: int = 0
+	for tool_id in tool_ids:
+		if bool(pressed.get(tool_id, false)):
+			active_count += 1
+	return {
+		"tool_ids": tool_ids,
+		"pressed": pressed,
+		"active_tool": _get_active_authoring_tool(),
+		"active_count": active_count,
+		"exclusive": active_count <= 1,
+		"eraser_scope": "object_layer_only",
+	}
+
+
+func _build_palette_snapshot() -> Dictionary:
+	var visible_type_ids: PackedStringArray = PackedStringArray()
+	var selected_items: PackedInt32Array = PackedInt32Array()
+	var tile_type_list := _get_tile_type_list()
+	if tile_type_list != null:
+		selected_items = tile_type_list.get_selected_items()
+		for index in range(tile_type_list.item_count):
+			var type_id: String = String(tile_type_list.get_item_metadata(index)).strip_edges()
+			if not type_id.is_empty() and not type_id.begins_with("__group:"):
+				visible_type_ids.append(type_id)
+	var group_ids: PackedStringArray = PackedStringArray()
+	if _tile_catalog != null:
+		for group_variant in _tile_catalog.get_palette_groups():
+			var group: Dictionary = Dictionary(group_variant)
+			group_ids.append(String(group.get("group_id", "")))
+	return {
+		"active_group": _active_palette_group_id,
+		"group_ids": group_ids,
+		"visible_type_ids": visible_type_ids,
+		"selected_type_id": _selected_type_id,
+		"selected_type_visible": visible_type_ids.has(_selected_type_id),
+		"selected_item_count": selected_items.size(),
+		"selected_item_index": int(selected_items[0]) if selected_items.size() > 0 else -1,
+		"filtered": not _active_palette_group_id.is_empty(),
+	}
+
+
+func _build_inspector_snapshot() -> Dictionary:
+	var property_scroll := get_node_or_null("UI/PropertyPanel/Margin") as ScrollContainer
+	return {
+		"tile_properties_visible": _tile_property_controls_are_visible(),
+		"property_panel_scrollable": property_scroll != null,
+		"property_panel_vertical_scroll_enabled": property_scroll != null and int(property_scroll.vertical_scroll_mode) != int(ScrollContainer.SCROLL_MODE_DISABLED),
+		"sections": _inspector_section_collapsed.duplicate(true),
+		"map_settings_visible": _is_inspector_section_visible(INSPECTOR_SECTION_MAP_SETTINGS),
+		"markers_visible": _is_inspector_section_visible(INSPECTOR_SECTION_MARKERS),
+		"mission_scenario_visible": _is_inspector_section_visible(INSPECTOR_SECTION_MISSION_SCENARIO),
 	}
 
 
@@ -2292,16 +2741,18 @@ func get_authoring_action_contract_snapshot() -> Dictionary:
 
 func _get_active_authoring_tool() -> String:
 	if _height_tool_enabled:
-		return "height"
+		return AUTHORING_TOOL_HEIGHT
 	if _marker_tool_enabled:
-		return "marker"
+		return AUTHORING_TOOL_MARKER
 	if _patrol_tool_enabled:
-		return "patrol"
-	if _is_brush_enabled():
-		return "terrain_brush"
+		return AUTHORING_TOOL_PATROL
+	if _eraser_tool_enabled:
+		return AUTHORING_TOOL_ERASER
 	if _selection_tool_enabled:
-		return "select"
-	return "select"
+		return AUTHORING_TOOL_SELECT
+	if _is_brush_enabled():
+		return AUTHORING_TOOL_BRUSH
+	return AUTHORING_TOOL_SELECT
 
 
 func _get_brush_footprint_tile_count() -> int:
@@ -2620,9 +3071,12 @@ func _on_mission_scenario_use_objective_tile_pressed() -> void:
 	var scenario = _ensure_mission_scenario()
 	if scenario == null:
 		return
+	var selected_position = _get_required_selected_tile_world_position("Select a tile first before setting the objective position.")
+	if selected_position == null:
+		return
 	var objective: Dictionary = Dictionary(scenario.get("objective")).duplicate(true)
 	objective.erase("marker_id")
-	objective["position"] = _get_selected_or_map_center_position(_coerce_vector2(objective.get("position", Vector2.ZERO), Vector2.ZERO))
+	objective["position"] = Vector2(selected_position)
 	scenario.set("objective", objective)
 	_scenario_feedback_text = "Objective position set."
 	_mark_scenario_dirty(true)
@@ -2633,6 +3087,9 @@ func _on_mission_scenario_use_spawn_tile_pressed() -> void:
 	var scenario = _ensure_mission_scenario()
 	if scenario == null:
 		return
+	var selected_position = _get_required_selected_tile_world_position("Select a tile first before setting the enemy spawn position.")
+	if selected_position == null:
+		return
 	var groups: Array = Array(scenario.get("enemy_groups")).duplicate(true)
 	var group: Dictionary = _get_primary_enemy_group().duplicate(true)
 	if group.is_empty():
@@ -2642,7 +3099,7 @@ func _on_mission_scenario_use_spawn_tile_pressed() -> void:
 			"enemy_ids": ["enemy_delta", "enemy_echo"],
 		}
 	group.erase("spawn_marker_id")
-	group["spawn_position"] = _get_selected_or_map_center_position(_coerce_vector2(group.get("spawn_position", Vector2.ZERO), Vector2.ZERO))
+	group["spawn_position"] = Vector2(selected_position)
 	if groups.is_empty():
 		groups.append(group)
 	else:
@@ -2806,6 +3263,7 @@ func _refresh_marker_editor_controls() -> void:
 		marker_info_label.text = _marker_feedback_text if not _marker_feedback_text.is_empty() else "Create a marker from the list above and place it directly on the map."
 		_is_refreshing_marker_controls = false
 		_refresh_authoring_status_controls()
+		_apply_inspector_section_visibility()
 		return
 
 	var marker_type_id: String = String(selected_record.get("marker_type_id", "")).strip_edges()
@@ -2818,6 +3276,7 @@ func _refresh_marker_editor_controls() -> void:
 	marker_info_label.text = _build_marker_info_text(selected_record)
 	_is_refreshing_marker_controls = false
 	_refresh_authoring_status_controls()
+	_apply_inspector_section_visibility()
 
 
 func _refresh_marker_list() -> void:
@@ -2884,11 +3343,15 @@ func _on_height_tool_toggled(pressed: bool) -> void:
 	_height_tool_enabled = pressed
 	if pressed:
 		_selection_tool_enabled = false
+		_eraser_tool_enabled = false
 		_patrol_tool_enabled = false
 		_marker_tool_enabled = false
 		var select_button := get_node_or_null("UI/TopBar/Margin/HBox/SelectButton") as Button
 		if select_button != null:
 			select_button.button_pressed = false
+		var eraser_button := _get_eraser_tool_button()
+		if eraser_button != null:
+			eraser_button.button_pressed = false
 		var patrol_button := get_node_or_null("UI/TopBar/Margin/HBox/PatrolButton") as Button
 		if patrol_button != null:
 			patrol_button.button_pressed = false
@@ -2939,10 +3402,14 @@ func _on_marker_tool_toggled(pressed: bool) -> void:
 		return
 	_clear_height_tool()
 	_selection_tool_enabled = false
+	_eraser_tool_enabled = false
 	_patrol_tool_enabled = false
 	var select_button := get_node_or_null("UI/TopBar/Margin/HBox/SelectButton") as Button
 	if select_button != null:
 		select_button.button_pressed = false
+	var eraser_button := _get_eraser_tool_button()
+	if eraser_button != null:
+		eraser_button.button_pressed = false
 	var patrol_button := get_node_or_null("UI/TopBar/Margin/HBox/PatrolButton") as Button
 	if patrol_button != null:
 		patrol_button.button_pressed = false
@@ -3065,10 +3532,12 @@ func _select_marker(marker_id: String) -> void:
 	var normalized_marker_id: String = marker_id.strip_edges()
 	if _terrain_map_data == null or normalized_marker_id.is_empty() or not bool(_terrain_map_data.call("has_marker", normalized_marker_id)):
 		_selected_marker_id = ""
+		_set_selected_grid_position(Vector2i(-1, -1))
 	else:
 		_selected_marker_id = normalized_marker_id
 		var marker_position: Vector2 = _terrain_map_data.call("get_marker_position", normalized_marker_id, Vector2.ZERO)
-		_selected_grid_position = _terrain_registry.world_to_grid(marker_position) if _terrain_registry != null else _selected_grid_position
+		if _terrain_registry != null:
+			_set_selected_grid_position(_terrain_registry.world_to_grid(marker_position))
 	_refresh_selection_visual()
 	_refresh_marker_overlay()
 	_refresh_marker_editor_controls()
@@ -3340,6 +3809,7 @@ func _apply_property_controls_to_selected_tile() -> void:
 	var center_grid: Vector2i = tile_data.grid_position
 	var radius: int = _get_brush_radius()
 	var any_changed: bool = false
+	var changed_grids: Array[Vector2i] = []
 
 	for dx in range(-radius, radius + 1):
 		for dy in range(-radius, radius + 1):
@@ -3350,10 +3820,15 @@ func _apply_property_controls_to_selected_tile() -> void:
 
 			if _apply_tile_patch(target_tile, patch):
 				any_changed = true
+				if patch.has("height_level"):
+					changed_grids.append(target_grid)
 				_refresh_tile_visual(target_tile)
 
 	if not any_changed:
 		return
+
+	if patch.has("height_level"):
+		_refresh_reconciled_height_edges(changed_grids, _get_selected_edge_type())
 
 	_mark_dirty(true)
 	_refresh_property_panel()
@@ -3405,12 +3880,226 @@ func _should_clear_type_id_for_patch(tile_data, patch: Dictionary) -> bool:
 	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
 	if type_id.is_empty():
 		return false
+	var object_type_id: String = String(tile_data.object_type_id) if tile_data.object_type_id is String else ""
+	if not object_type_id.is_empty() and type_id == "ground_flat":
+		return true
 	if _tile_catalog != null and _tile_catalog.has_method("preserves_hill_fields_when_applied") and bool(_tile_catalog.call("preserves_hill_fields_when_applied", type_id)):
 		return false
 	for prefix in ["wall_", "rock_", "cliff_", "slope_"]:
 		if type_id.begins_with(prefix):
 			return false
 	return true
+
+
+func _refresh_reconciled_height_edges(changed_grids: Array[Vector2i], preferred_edge_type: String) -> void:
+	var refresh_lookup: Dictionary = {}
+	var visual_seed_lookup: Dictionary = {}
+	for grid_position in changed_grids:
+		var changed_positions: Array[Vector2i] = _reconcile_height_edges_around(Vector2i(grid_position), preferred_edge_type)
+		refresh_lookup[Vector2i(grid_position)] = true
+		visual_seed_lookup[Vector2i(grid_position)] = true
+		for changed_position in changed_positions:
+			refresh_lookup[changed_position] = true
+			visual_seed_lookup[changed_position] = true
+
+	var visual_seed_grids: Array[Vector2i] = []
+	for grid_variant in visual_seed_lookup.keys():
+		visual_seed_grids.append(Vector2i(grid_variant))
+	for changed_position in _reconcile_lower_neighbor_cliff_visuals_around(visual_seed_grids):
+		refresh_lookup[changed_position] = true
+
+	for grid_variant in refresh_lookup.keys():
+		var tile_data = _terrain_map_data.call("get_tile_at_grid", Vector2i(grid_variant)) if _terrain_map_data != null else null
+		if tile_data != null:
+			_refresh_tile_visual(tile_data)
+
+
+func _reconcile_height_edges_around(grid_position: Vector2i, preferred_edge_type: String = "") -> Array[Vector2i]:
+	if _terrain_map_data == null:
+		return []
+	var positions: Array[Vector2i] = [grid_position]
+	for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		positions.append(grid_position + offset)
+
+	var changed_positions: Array[Vector2i] = []
+	for pos in positions:
+		var tile_data = _terrain_map_data.call("get_tile_at_grid", pos)
+		if tile_data == null:
+			continue
+		var next_edge_type: String = _resolve_auto_height_edge_type(tile_data, preferred_edge_type)
+		if String(tile_data.edge_type) == next_edge_type:
+			continue
+		_store_undo_state(tile_data)
+		tile_data.edge_type = next_edge_type
+		changed_positions.append(pos)
+	return changed_positions
+
+
+func _resolve_auto_height_edge_type(tile_data, preferred_edge_type: String = "") -> String:
+	if tile_data == null:
+		return TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE
+	var height_level: int = int(tile_data.height_level)
+	if height_level <= 0:
+		return TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE
+	if not _has_lower_neighbor(tile_data.grid_position, height_level):
+		return TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE
+
+	var current_edge_type: String = String(tile_data.edge_type)
+	if current_edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF or current_edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE:
+		return current_edge_type
+
+	var normalized_preferred: String = preferred_edge_type.strip_edges().to_lower()
+	if normalized_preferred == TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE:
+		return TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE
+	if normalized_preferred == TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF or normalized_preferred == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE:
+		return normalized_preferred
+	return TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE
+
+
+func _reconcile_lower_neighbor_cliff_visuals_around(seed_grids: Array[Vector2i]) -> Array[Vector2i]:
+	if _terrain_map_data == null or seed_grids.is_empty():
+		return []
+
+	var candidate_lookup: Dictionary = {}
+	for seed_grid in seed_grids:
+		for dx in range(-2, 3):
+			for dy in range(-2, 3):
+				candidate_lookup[Vector2i(seed_grid) + Vector2i(dx, dy)] = true
+
+	var required_visuals: Dictionary = _build_required_lower_neighbor_cliff_visuals(candidate_lookup)
+	var changed_positions: Array[Vector2i] = []
+	for grid_variant in candidate_lookup.keys():
+		var grid_position := Vector2i(grid_variant)
+		var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
+		if tile_data == null:
+			continue
+		var required_type_id: String = String(required_visuals.get(grid_position, ""))
+		if required_type_id.is_empty():
+			if _is_auto_cliff_visual_tile(tile_data):
+				_store_undo_state(tile_data)
+				_reset_auto_cliff_visual_tile(tile_data)
+				changed_positions.append(grid_position)
+			continue
+		if _apply_auto_cliff_visual_tile(tile_data, required_type_id):
+			changed_positions.append(grid_position)
+
+	return changed_positions
+
+
+func _build_required_lower_neighbor_cliff_visuals(candidate_lookup: Dictionary) -> Dictionary:
+	var required_visuals: Dictionary = {}
+	for grid_variant in candidate_lookup.keys():
+		var grid_position := Vector2i(grid_variant)
+		var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
+		if not _tile_emits_auto_cliff_visuals(tile_data):
+			continue
+		for edge_offset_variant in AUTO_CLIFF_EDGE_OFFSETS:
+			var edge_offset := Vector2i(edge_offset_variant)
+			var lower_grid_position: Vector2i = grid_position + edge_offset
+			if _is_lower_auto_cliff_neighbor(tile_data, lower_grid_position):
+				var straight_type_id: String = _get_auto_cliff_straight_type_id(edge_offset)
+				if not straight_type_id.is_empty():
+					required_visuals[lower_grid_position] = straight_type_id
+
+		for corner_entry in AUTO_CLIFF_CORNER_ENTRIES:
+			var edge_a := Vector2i(corner_entry[0])
+			var edge_b := Vector2i(corner_entry[1])
+			var corner_offset := Vector2i(corner_entry[2])
+			var corner_grid_position: Vector2i = grid_position + corner_offset
+			if (
+				_is_lower_auto_cliff_neighbor(tile_data, grid_position + edge_a)
+				and _is_lower_auto_cliff_neighbor(tile_data, grid_position + edge_b)
+				and _is_lower_auto_cliff_neighbor(tile_data, corner_grid_position)
+			):
+				required_visuals[corner_grid_position] = String(corner_entry[3])
+
+	return required_visuals
+
+
+func _tile_emits_auto_cliff_visuals(tile_data) -> bool:
+	return (
+		tile_data != null
+		and int(tile_data.height_level) > 0
+		and String(tile_data.edge_type) == TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF
+		and not _is_object_type(tile_data)
+	)
+
+
+func _is_lower_auto_cliff_neighbor(source_tile, lower_grid_position: Vector2i) -> bool:
+	if source_tile == null:
+		return false
+	var lower_tile = _terrain_map_data.call("get_tile_at_grid", lower_grid_position) if _terrain_map_data != null else null
+	return (
+		lower_tile != null
+		and int(lower_tile.height_level) < int(source_tile.height_level)
+		and (not _is_object_type(lower_tile) or _is_auto_cliff_visual_tile(lower_tile))
+	)
+
+
+func _get_auto_cliff_straight_type_id(edge_offset: Vector2i) -> String:
+	match edge_offset:
+		Vector2i(-1, 0):
+			return "cliff_straight_se"
+		Vector2i(1, 0):
+			return "cliff_straight_nw"
+		Vector2i(0, -1):
+			return "cliff_straight_ne"
+		Vector2i(0, 1):
+			return "cliff_straight_sw"
+	return ""
+
+
+func _apply_auto_cliff_visual_tile(tile_data, type_id: String) -> bool:
+	if tile_data == null or type_id.is_empty() or not _can_rewrite_auto_cliff_visual_tile(tile_data):
+		return false
+
+	var changed: bool = (
+		String(tile_data.type_id) != type_id
+		or bool(tile_data.walkable)
+		or not bool(tile_data.blocks_los)
+		or int(tile_data.cover_value) != 0
+		or int(tile_data.object_height) != 0
+		or String(tile_data.edge_type) != TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE
+	)
+	if not changed:
+		return false
+
+	_store_undo_state(tile_data)
+	tile_data.type_id = type_id
+	tile_data.walkable = false
+	tile_data.blocks_los = true
+	tile_data.cover_value = 0
+	tile_data.object_height = 0
+	tile_data.edge_type = TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE
+	return true
+
+
+func _reset_auto_cliff_visual_tile(tile_data) -> void:
+	if tile_data == null:
+		return
+	tile_data.type_id = "ground_flat"
+	tile_data.walkable = true
+	tile_data.blocks_los = false
+	tile_data.cover_value = 0
+	tile_data.object_height = 0
+	tile_data.edge_type = TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE
+
+
+func _can_rewrite_auto_cliff_visual_tile(tile_data) -> bool:
+	if tile_data == null:
+		return false
+	var object_type_id: String = String(tile_data.object_type_id).strip_edges() if tile_data.object_type_id is String else ""
+	if not object_type_id.is_empty():
+		return false
+	var type_id: String = String(tile_data.type_id).strip_edges().to_lower() if tile_data.type_id is String else ""
+	return type_id.is_empty() or type_id == "ground_flat" or type_id.begins_with("cliff_")
+
+
+func _is_auto_cliff_visual_tile(tile_data) -> bool:
+	if tile_data == null:
+		return false
+	var type_id: String = String(tile_data.type_id).strip_edges().to_lower() if tile_data.type_id is String else ""
+	return type_id.begins_with("cliff_")
 
 
 func _store_undo_state(tile_data) -> void:
@@ -3448,7 +4137,7 @@ func _undo_last_change() -> void:
 	tile_data.edge_type = restored_tile.edge_type
 	tile_data.object_height = restored_tile.object_height
 
-	_selected_grid_position = grid_position
+	_set_selected_grid_position(grid_position)
 	_last_undo_state.clear()
 	_refresh_tile_visual(tile_data)
 	_mark_dirty(true)
@@ -3559,6 +4248,7 @@ func _configure_property_height_spinbox() -> void:
 
 
 func _connect_ui_signals() -> void:
+	var brush_button := get_node_or_null("UI/TopBar/Margin/HBox/BrushButton") as Button
 	var save_button := get_node_or_null("UI/TopBar/Margin/HBox/SaveButton") as Button
 	var save_as_dialog := get_node_or_null("UI/SaveAsDialog") as FileDialog
 	var load_button := get_node_or_null("UI/TopBar/Margin/HBox/LoadButton") as Button
@@ -3575,6 +4265,10 @@ func _connect_ui_signals() -> void:
 	var confirm_dialog := get_node_or_null("UI/DirtyConfirmDialog") as ConfirmationDialog
 	var new_map_dialog := _get_new_map_dialog()
 	var tile_type_list := _get_tile_type_list()
+	if brush_button != null:
+		_configure_tool_button(brush_button, "B", "Brush: paint the selected palette entry onto tiles.")
+		if not brush_button.toggled.is_connected(_on_brush_tool_toggled):
+			brush_button.toggled.connect(_on_brush_tool_toggled)
 	if save_button != null and not save_button.pressed.is_connected(_on_save_pressed):
 		save_button.pressed.connect(_on_save_pressed)
 	if save_as_dialog != null and not save_as_dialog.file_selected.is_connected(_on_save_as_file_selected):
@@ -3801,8 +4495,10 @@ func _on_marker_assign_button_pressed(marker_id: String) -> void:
 		return
 	var tile_data = _get_selected_tile()
 	if tile_data == null:
+		_set_marker_feedback("Select a tile first before assigning this marker.")
 		return
 	_terrain_map_data.call("set_marker_position", marker_id, tile_data.world_position)
+	_set_marker_feedback("Marker assigned to selected tile.")
 	_mark_dirty(true)
 	_refresh_map_settings_panel()
 
@@ -3835,6 +4531,7 @@ func _on_tile_type_selected(index: int) -> void:
 
 	if index < 0 or index >= tile_type_list.item_count:
 		_selected_type_id = ""
+		_refresh_palette_selection_visual()
 		return
 
 	_selected_type_id = String(tile_type_list.get_item_metadata(index))
@@ -3849,6 +4546,10 @@ func _on_tile_type_selected(index: int) -> void:
 
 	# Auto-enable brush when a type is selected
 	_clear_height_tool()
+	_eraser_tool_enabled = false
+	var eraser_button := _get_eraser_tool_button()
+	if eraser_button != null and eraser_button.button_pressed:
+		eraser_button.button_pressed = false
 	var brush_button := get_node_or_null("UI/TopBar/Margin/HBox/BrushButton") as Button
 	if brush_button != null and not brush_button.button_pressed:
 		brush_button.button_pressed = true
@@ -3856,6 +4557,8 @@ func _on_tile_type_selected(index: int) -> void:
 		var marker_tool_button := _get_marker_tool_button()
 		if marker_tool_button != null and marker_tool_button.button_pressed:
 			marker_tool_button.button_pressed = false
+	_refresh_palette_selection_visual()
+	_refresh_authoring_status_controls()
 
 
 # Deselect palette item to enter select mode
@@ -3866,6 +4569,8 @@ func _on_tile_type_deselected() -> void:
 			tile_type_list.deselect(i)
 	_selected_type_id = ""
 	_hide_hover_preview()
+	_refresh_palette_selection_visual()
+	_refresh_authoring_status_controls()
 
 
 func _on_load_file_selected(path: String) -> void:
@@ -4004,6 +4709,10 @@ func _has_selected_type() -> bool:
 func _is_brush_enabled() -> bool:
 	var brush_button := get_node_or_null("UI/TopBar/Margin/HBox/BrushButton") as Button
 	return brush_button != null and brush_button.button_pressed
+
+
+func _get_eraser_tool_button() -> Button:
+	return get_node_or_null("UI/TopBar/Margin/HBox/EraserButton") as Button
 
 
 func _get_walkable_checkbox() -> CheckBox:
@@ -4176,13 +4885,6 @@ func _populate_tile_palette() -> void:
 	if tile_type_list == null or _tile_catalog == null:
 		return
 
-	tile_type_list.clear()
-	tile_type_list.visible = true
-	if palette_groups_root != null:
-		palette_groups_root.visible = false
-		for child in palette_groups_root.get_children():
-			child.queue_free()
-
 	var types_by_group: Dictionary = {}
 	for tile_type in _tile_catalog.get_all_types():
 		var palette_group: String = String(tile_type.get("palette_group", "default")).strip_edges().to_lower()
@@ -4192,19 +4894,72 @@ func _populate_tile_palette() -> void:
 		group_types.append(tile_type)
 		types_by_group[palette_group] = group_types
 
+	var available_group_ids: PackedStringArray = PackedStringArray()
 	for group in _tile_catalog.get_palette_groups():
 		var group_id: String = String(Dictionary(group).get("group_id", "")).strip_edges().to_lower()
 		if group_id.is_empty() or not types_by_group.has(group_id):
 			continue
-		var header_index: int = tile_type_list.item_count
-		tile_type_list.add_item("-- %s --" % String(Dictionary(group).get("display_name", group_id.capitalize())))
-		tile_type_list.set_item_metadata(header_index, "__group:%s" % group_id)
-		tile_type_list.set_item_selectable(header_index, false)
-		for tile_type in Array(types_by_group.get(group_id, [])):
-			var type_id := String(Dictionary(tile_type).get("type_id", ""))
-			var display_name := String(Dictionary(tile_type).get("display_name", type_id))
-			tile_type_list.add_item(display_name)
-			tile_type_list.set_item_metadata(tile_type_list.item_count - 1, type_id)
+		available_group_ids.append(group_id)
+	if _active_palette_group_id.is_empty() or not available_group_ids.has(_active_palette_group_id):
+		_active_palette_group_id = available_group_ids[0] if not available_group_ids.is_empty() else ""
+
+	tile_type_list.clear()
+	tile_type_list.visible = true
+	if palette_groups_root != null:
+		palette_groups_root.visible = true
+		for child in palette_groups_root.get_children():
+			child.queue_free()
+		for group in _tile_catalog.get_palette_groups():
+			var group_dict: Dictionary = Dictionary(group)
+			var group_id: String = String(group_dict.get("group_id", "")).strip_edges().to_lower()
+			if group_id.is_empty() or not types_by_group.has(group_id):
+				continue
+			var group_button := Button.new()
+			group_button.name = "PaletteGroup_%s" % group_id
+			group_button.text = String(group_dict.get("display_name", group_id.capitalize()))
+			group_button.toggle_mode = true
+			group_button.button_pressed = group_id == _active_palette_group_id
+			group_button.tooltip_text = "Filter palette group: %s" % group_button.text
+			group_button.pressed.connect(_on_palette_group_button_pressed.bind(group_id))
+			palette_groups_root.add_child(group_button)
+
+	var visible_types: Array = Array(types_by_group.get(_active_palette_group_id, []))
+	var visible_type_ids: PackedStringArray = PackedStringArray()
+	for tile_type in visible_types:
+		var type_id := String(Dictionary(tile_type).get("type_id", ""))
+		var display_name := String(Dictionary(tile_type).get("display_name", type_id))
+		tile_type_list.add_item(display_name)
+		tile_type_list.set_item_metadata(tile_type_list.item_count - 1, type_id)
+		if not type_id.is_empty():
+			visible_type_ids.append(type_id)
+	if not visible_type_ids.has(_selected_type_id):
+		_selected_type_id = String(visible_type_ids[0]) if not visible_type_ids.is_empty() else ""
+	_refresh_palette_selection_visual()
+
+
+func _on_palette_group_button_pressed(group_id: String) -> void:
+	_active_palette_group_id = group_id.strip_edges().to_lower()
+	_populate_tile_palette()
+	_refresh_authoring_status_controls()
+
+
+func _refresh_palette_selection_visual() -> void:
+	var tile_type_list := _get_tile_type_list()
+	if tile_type_list == null:
+		return
+	var selected_index: int = -1
+	for index in range(tile_type_list.item_count):
+		var type_id: String = String(tile_type_list.get_item_metadata(index)).strip_edges()
+		tile_type_list.deselect(index)
+		tile_type_list.set_item_custom_bg_color(index, Color(0.0, 0.0, 0.0, 0.0))
+		tile_type_list.set_item_custom_fg_color(index, PALETTE_ITEM_FG_COLOR)
+		if not _selected_type_id.is_empty() and type_id == _selected_type_id:
+			selected_index = index
+	if selected_index < 0:
+		return
+	tile_type_list.select(selected_index)
+	tile_type_list.set_item_custom_bg_color(selected_index, PALETTE_SELECTED_BG_COLOR)
+	tile_type_list.set_item_custom_fg_color(selected_index, PALETTE_SELECTED_FG_COLOR)
 
 
 func _get_tile_type_list() -> ItemList:

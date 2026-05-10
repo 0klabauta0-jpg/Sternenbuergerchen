@@ -8,6 +8,7 @@ const NPC_RANK_BADGE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/npc
 const PORTRAIT_IDENTITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
 const ROSTER_RELATIONSHIP_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/roster_relationship_model.gd")
 const FIRETEAM_COHESION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/fireteam_cohesion_resolver.gd")
+const TEAM_NAME_GENERATOR_SCRIPT: GDScript = preload("res://scripts/meta/team_name_generator.gd")
 
 const SCHEMA_VERSION: int = 1
 const DEFAULT_SEED: String = "sternenbuergerchen_start_roster_v1"
@@ -229,6 +230,7 @@ static func generate_start_roster(seed: String = DEFAULT_SEED, roster_size: int 
 			"snapshot_policy": "do_not_publish_full_private_roster_without_mode_consent",
 		},
 	}
+	roster = TEAM_NAME_GENERATOR_SCRIPT.call("apply_team_name", roster, "", normalized_seed, 0)
 	var validation: Dictionary = validate_roster(roster)
 	roster["valid"] = bool(validation.get("valid", false))
 	roster["validation"] = validation
@@ -272,6 +274,7 @@ static func build_summary_snapshot(roster: Dictionary) -> Dictionary:
 		"role_mix": _build_role_mix(Array(roster.get("units", []))),
 		"relationship_pair_count": Array(roster.get("relationship_pairs", [])).size(),
 		"fireteam_count": Array(roster.get("fireteam_suggestions", [])).size(),
+		"team_identity": TEAM_NAME_GENERATOR_SCRIPT.call("build_team_identity_snapshot", roster),
 		"multiplayer_boundary": Dictionary(roster.get("multiplayer_boundary", {})).duplicate(true),
 		"errors": PackedStringArray(validation.get("errors", PackedStringArray())),
 		"warnings": PackedStringArray(validation.get("warnings", PackedStringArray())),
@@ -335,6 +338,10 @@ static func validate_roster(roster: Dictionary) -> Dictionary:
 	var boundary: Dictionary = Dictionary(roster.get("multiplayer_boundary", {}))
 	if String(boundary.get("ownership_scope", "")) != "player_profile_local":
 		errors.append("multiplayer_boundary_missing_player_profile_scope")
+	var team_identity_validation: Dictionary = Dictionary(TEAM_NAME_GENERATOR_SCRIPT.call("validate_team_identity", roster))
+	if not bool(team_identity_validation.get("valid", false)):
+		for team_error in PackedStringArray(team_identity_validation.get("errors", PackedStringArray())):
+			warnings.append(team_error)
 	return {
 		"valid": errors.is_empty(),
 		"errors": errors,

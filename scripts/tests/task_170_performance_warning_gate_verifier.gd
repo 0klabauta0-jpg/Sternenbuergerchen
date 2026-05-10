@@ -112,8 +112,9 @@ func _test_live_primary_snapshot_gate() -> void:
 			"winning_team_id": "team_alpha",
 		}
 	)
-	await _wait_frames(6)
 
+	# Sample the synthetic payload before the live controller heartbeat rewrites it
+	# with its current mission-authoritative state.
 	var applied_snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 	_assert_no_primary_fallbacks("Live applied", applied_snapshot)
 	_assert_render_budget("Live applied", applied_snapshot)

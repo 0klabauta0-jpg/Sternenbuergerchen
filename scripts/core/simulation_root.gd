@@ -939,6 +939,8 @@ func _build_unit_snapshot(unit) -> Dictionary:
 		snapshot["fireteam_id"] = String(unit.call("get_fireteam_id")).strip_edges().to_lower()
 	if unit is Node2D:
 		snapshot["position"] = (unit as Node2D).global_position
+		if unit.has_meta("facing_angle"):
+			snapshot["facing_angle"] = float(unit.get_meta("facing_angle", 0.0))
 
 	if unit is CanvasItem:
 		snapshot["visible"] = bool((unit as CanvasItem).visible)
@@ -1153,6 +1155,8 @@ func _apply_remote_snapshot_fallback(unit, unit_snapshot: Dictionary) -> void:
 	if unit is Node2D:
 		var target_position: Vector2 = _coerce_vector2(unit_snapshot.get("position", (unit as Node2D).global_position), (unit as Node2D).global_position)
 		(unit as Node2D).global_position = (unit as Node2D).global_position.lerp(target_position, 0.75)
+		if unit_snapshot.has("facing_angle") and unit is Node:
+			(unit as Node).set_meta("facing_angle", float(unit_snapshot.get("facing_angle", 0.0)))
 
 
 func _resolve_known_unit(unit_id: String):
@@ -1348,6 +1352,7 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 	var direction: Vector2 = target_position - current_position
 	var step_distance: float = MOVE_SPEED_PER_SECOND * move_speed_factor * delta
 	if direction.length() <= step_distance:
+		_store_unit_facing_from_positions(unit, current_position, target_position)
 		node_2d.position = target_position
 		if unit.has_method("refresh_terrain_readability"):
 			unit.call("refresh_terrain_readability")
@@ -1362,7 +1367,9 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 	var displacement: Vector2 = safe_velocity * delta
 	if displacement.length() > step_distance:
 		displacement = displacement.normalized() * step_distance
-	node_2d.position = current_position + displacement
+	var next_position: Vector2 = current_position + displacement
+	_store_unit_facing_from_positions(unit, current_position, next_position)
+	node_2d.position = next_position
 	_update_local_avoidance_agent_position(unit_id, node_2d.global_position)
 	if unit.has_method("refresh_terrain_readability"):
 		unit.call("refresh_terrain_readability")
@@ -1387,6 +1394,7 @@ func _apply_move_command_with_terrain(
 		return
 
 	var current_position: Vector2 = unit_node.global_position
+	var previous_position: Vector2 = current_position
 	var step_distance: float = MOVE_SPEED_PER_SECOND * move_speed_factor * _extract_surface_speed_factor(unit_node) * delta
 	while step_distance > 0.0 and not path_world_points.is_empty():
 		var next_waypoint: Vector2 = _coerce_vector2(path_world_points[0], target_position)
@@ -1405,6 +1413,7 @@ func _apply_move_command_with_terrain(
 		current_position += direction_to_waypoint.normalized() * step_distance
 		step_distance = 0.0
 
+	_store_unit_facing_from_positions(unit_node, previous_position, current_position)
 	unit_node.global_position = current_position
 	_update_local_avoidance_agent_position(_extract_unit_id_for_path_recompute(unit_node), unit_node.global_position)
 	cmd["path"] = path_world_points.duplicate(true)
@@ -1425,6 +1434,7 @@ func _apply_move_command_with_terrain_avoidance(
 	path_world_points: Array
 ) -> void:
 	var current_position: Vector2 = unit_node.global_position
+	var previous_position: Vector2 = current_position
 	while not path_world_points.is_empty():
 		var first_waypoint: Vector2 = _coerce_vector2(path_world_points[0], target_position)
 		if current_position.distance_to(first_waypoint) > 0.001:
@@ -1458,6 +1468,7 @@ func _apply_move_command_with_terrain_avoidance(
 		current_position = next_waypoint
 		path_world_points.pop_front()
 
+	_store_unit_facing_from_positions(unit_node, previous_position, current_position)
 	unit_node.global_position = current_position
 	_update_local_avoidance_agent_position(_extract_unit_id_for_path_recompute(unit_node), unit_node.global_position)
 	cmd["path"] = path_world_points.duplicate(true)
@@ -1466,6 +1477,15 @@ func _apply_move_command_with_terrain_avoidance(
 
 	if bool(cmd.get("requeue_until_target", true)) and (not path_world_points.is_empty() or current_position.distance_to(target_position) > 0.5):
 		enqueue_command(cmd.duplicate(true))
+
+
+func _store_unit_facing_from_positions(unit, from_position: Vector2, to_position: Vector2) -> void:
+	if unit == null or not (unit is Node):
+		return
+	var direction: Vector2 = to_position - from_position
+	if direction.length_squared() <= 0.0001:
+		return
+	(unit as Node).set_meta("facing_angle", direction.angle())
 
 
 func _is_stale_tokenized_move_command(cmd: Dictionary, unit) -> bool:

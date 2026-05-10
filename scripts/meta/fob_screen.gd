@@ -12,8 +12,10 @@ const TRANSPORT_CRAFT_CARD_UI_SCRIPT: GDScript = preload("res://scripts/meta/tra
 const FOB_FIRETEAM_CARD_SCRIPT: GDScript = preload("res://scripts/meta/fob_fireteam_card.gd")
 const FOB_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/fob_drop_panel.gd")
 const FIRETEAM_COHESION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/fireteam_cohesion_resolver.gd")
+const META_USEROLOGY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/meta_userology_contract.gd")
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
 const LOADOUT_MODIFIER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/command/loadout_modifier_resolver.gd")
+const NPC_RANK_BADGE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
 const DROPSHIP_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NE.png")
 const DROPSHIP_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NW.png")
 const DROPSHIP_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
@@ -33,6 +35,7 @@ signal transport_craft_mission_stage_requested(craft_id)
 
 const DEFAULT_DROPSHIP_ETA_SECONDS := 18.0
 const DEFAULT_BOARDING_SECONDS := 6.0
+const DEFAULT_RESPAWN_ANCHOR_SECONDS := 6.0
 const DROPSHIP_NPC_CAPACITY := 6
 const DEFAULT_MEMBER_WEAPON := "smg"
 const WEAPON_LOADOUT_OPTIONS: Array = [
@@ -46,6 +49,8 @@ const WEAPON_LOADOUT_OPTIONS: Array = [
 const DEFAULT_MISSION_NAME := "Operation: FOB Transfer"
 const DEFAULT_MISSION_MAP := "test_mission_32x32_slots8"
 const DEFAULT_MISSION_SLOT_COUNT := 8
+const FOB_FIRETEAM_REFERENCE_CARD_WIDTH := 280.0
+const FOB_TRANSPORT_CARD_WIDTH := 440.0
 
 var _available_units: Array = []
 var _selected_unit_ids: PackedStringArray = []
@@ -60,6 +65,8 @@ var _focused_unit_id: String = ""
 var _focused_fireteam_id: String = "ft1"
 var _loadout_staged_fireteam_id: String = ""
 var _respawn_staged_fireteam_id: String = ""
+var _respawn_anchor_fireteam_id: String = ""
+var _respawn_anchor_seconds: float = 0.0
 var _dropship_staged_fireteam_ids: PackedStringArray = []
 var _dropship_phase: String = "idle"
 var _dropship_eta_seconds: float = 0.0
@@ -78,6 +85,8 @@ var _character_overlay_open: bool = false
 var _transport_craft_states: Array = []
 var _dropship_transport_craft_id: String = ""
 var _mission_launch_ready_craft_id: String = ""
+var _unified_transit_entries: Array = []
+var _pending_transport_remove: Dictionary = {}
 
 
 func _ready() -> void:
@@ -168,6 +177,7 @@ func _apply_drop_light_fixed_layout() -> void:
 	var base_spacing: int = int(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("BASE_SPACING"))
 	_apply_fixed_control_contract("Panel", layout.get("viewport"))
 	_apply_fixed_control_contract("Panel/Margin/VBox/MissionPanel", layout.get("topbar"))
+	_apply_fixed_control_contract("Panel/Margin/VBox/ContentRow/AvailablePanel", layout.get("unassigned_pool"))
 	_apply_fixed_control_contract("Panel/Margin/VBox/ContentRow/FireteamPanel", layout.get("fireteams"))
 	_apply_fixed_control_contract("Panel/Margin/VBox/ContentRow/StagingPanel", layout.get("loadout"))
 	_apply_fixed_control_contract("Panel/Margin/VBox/ContentRow/DropshipPanel", layout.get("flightdeck"))
@@ -184,10 +194,15 @@ func _apply_drop_light_fixed_layout() -> void:
 
 	var available_panel := get_node_or_null("Panel/Margin/VBox/ContentRow/AvailablePanel") as Control
 	if available_panel != null:
-		available_panel.visible = false
-		available_panel.custom_minimum_size = Vector2.ZERO
-		available_panel.size_flags_stretch_ratio = 0.0
-		available_panel.set_meta("drop_light_hidden_by_fixed_contract", true)
+		var unassigned_pool_rect: Rect2i = layout.get("unassigned_pool")
+		available_panel.visible = true
+		available_panel.custom_minimum_size = Vector2(float(unassigned_pool_rect.size.x), float(unassigned_pool_rect.size.y))
+		available_panel.size_flags_stretch_ratio = float(maxi(unassigned_pool_rect.size.x, 1))
+		available_panel.set_meta("drop_light_unassigned_pool_window", true)
+
+	var available_header_label := get_node_or_null("Panel/Margin/VBox/ContentRow/AvailablePanel/AvailableMargin/AvailableVBox/AvailableHeaderLabel") as Label
+	if available_header_label != null:
+		available_header_label.text = "#09 NPC POOL"
 
 	var staging_header_label := get_node_or_null("Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/StagingHeaderLabel") as Label
 	if staging_header_label != null:
@@ -200,6 +215,12 @@ func _apply_drop_light_fixed_layout() -> void:
 		var loadout_rect: Rect2i = layout.get("loadout")
 		loadout_panel.custom_minimum_size = Vector2(float(loadout_rect.size.x - base_spacing * 4 - 4), 0.0)
 		loadout_panel.set_meta("drop_light_rect", loadout_rect)
+
+	var dropship_top_row := get_node_or_null("Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipTopRow") as Control
+	if dropship_top_row != null:
+		dropship_top_row.visible = false
+		dropship_top_row.custom_minimum_size = Vector2.ZERO
+		dropship_top_row.set_meta("replaced_by_transport_card_19", true)
 
 	var dropship_visual := get_node_or_null("Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipTopRow/DropshipVisualVBox/DropshipSpriteRect") as TextureRect
 	if dropship_visual != null:
@@ -217,6 +238,7 @@ func _enforce_drop_light_fixed_layout() -> void:
 	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_fob_layout")
 	_apply_fixed_window_contract("Panel", layout.get("viewport"))
 	_apply_fixed_window_contract("Panel/Margin/VBox/MissionPanel", layout.get("topbar"))
+	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/AvailablePanel", layout.get("unassigned_pool"))
 	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/FireteamPanel", layout.get("fireteams"))
 	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/StagingPanel", layout.get("loadout"))
 	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/DropshipPanel", layout.get("flightdeck"))
@@ -632,6 +654,138 @@ func get_flightdeck_snapshot() -> Dictionary:
 	}
 
 
+func set_unified_transit_entries_for_test(entries: Array) -> void:
+	_unified_transit_entries = Array(Dictionary(META_USEROLOGY_CONTRACT_SCRIPT.call("build_transit_snapshot", entries)).get("entries", [])).duplicate(true)
+	if is_inside_tree():
+		_rebuild_profiles()
+		_refresh_ui_state()
+
+
+func get_unified_transit_snapshot() -> Dictionary:
+	return META_USEROLOGY_CONTRACT_SCRIPT.call("build_transit_snapshot", _unified_transit_entries)
+
+
+func complete_unified_transit_for_test(entity_id: String) -> Dictionary:
+	var result: Dictionary = Dictionary(META_USEROLOGY_CONTRACT_SCRIPT.call("complete_transit", _unified_transit_entries, entity_id))
+	_unified_transit_entries = Array(result.get("remaining", [])).duplicate(true)
+	return result
+
+
+func get_unassigned_operator_pool_snapshot() -> Dictionary:
+	return META_USEROLOGY_CONTRACT_SCRIPT.call(
+		"build_unassigned_pool",
+		_build_selected_unit_configs(),
+		_build_assignment_lookup(),
+		{},
+		{},
+		_unified_transit_entries
+	)
+
+
+func get_fireteam_assignment_board_snapshot() -> Dictionary:
+	return META_USEROLOGY_CONTRACT_SCRIPT.call(
+		"build_fireteam_board",
+		_fireteam_definitions,
+		_build_selected_unit_configs(),
+		_build_assignment_lookup()
+	)
+
+
+func get_compact_flightdeck_snapshot() -> Dictionary:
+	var selected_craft_state: Dictionary = _get_selected_transport_craft_state()
+	var passenger_units: Array = []
+	for unit_id_variant in _boarded_unit_ids:
+		var profile = _profiles_by_id.get(String(unit_id_variant), null)
+		if profile != null and profile.has_method("to_dict"):
+			passenger_units.append(profile.call("to_dict"))
+		else:
+			passenger_units.append(_build_fallback_unit_config(String(unit_id_variant)))
+	var card: Dictionary = Dictionary(META_USEROLOGY_CONTRACT_SCRIPT.call("build_compact_flightdeck_card", selected_craft_state, passenger_units))
+	card["pilot_status_text"] = _build_transport_craft_pilot_text(selected_craft_state) if not selected_craft_state.is_empty() else "Pilot: none"
+	card["boarding_uses_transport_contract"] = true
+	return card
+
+
+func get_fob_userology_snapshot() -> Dictionary:
+	return {
+		"flightdeck": get_flightdeck_snapshot(),
+		"compact_flightdeck": get_compact_flightdeck_snapshot(),
+		"unassigned_pool": get_unassigned_operator_pool_snapshot(),
+		"fireteam_board": get_fireteam_assignment_board_snapshot(),
+		"transit": get_unified_transit_snapshot(),
+		"drag_badges": META_USEROLOGY_CONTRACT_SCRIPT.call("build_drag_badge_contract"),
+		"grey_text_contrast_policy": "important_labels_use_skin_body_or_badge",
+		"remove_action_policy": "small_x_with_confirmation",
+	}
+
+
+func rename_transport_craft_for_test(craft_id: String, next_display_name: String) -> Dictionary:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	var safe_name: String = next_display_name.strip_edges()
+	if safe_name.is_empty():
+		safe_name = "Dropship"
+	for index in range(_transport_craft_states.size()):
+		if typeof(_transport_craft_states[index]) != TYPE_DICTIONARY:
+			continue
+		var craft_state: Dictionary = Dictionary(_transport_craft_states[index]).duplicate(true)
+		if String(craft_state.get("craft_id", "")).strip_edges() != normalized_craft_id:
+			continue
+		craft_state["display_name"] = safe_name
+		craft_state["rename_persisted_in_meta_state"] = true
+		_transport_craft_states[index] = craft_state
+		if is_inside_tree():
+			_refresh_ui_state()
+		return {"ok": true, "craft_id": normalized_craft_id, "display_name": safe_name}
+	return {"ok": false, "craft_id": normalized_craft_id, "display_name": ""}
+
+
+func assign_unit_to_fireteam_for_test(unit_id: String, fireteam_id: String) -> void:
+	_set_selected_fireteam_for_unit(unit_id, fireteam_id)
+
+
+func remove_unit_to_unassigned_for_test(unit_id: String) -> void:
+	_set_selected_fireteam_for_unit(unit_id, "")
+
+
+func request_transport_remove_confirm_for_test(unit_id: String, craft_id: String = "") -> Dictionary:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		normalized_craft_id = _dropship_transport_craft_id
+	_pending_transport_remove = {
+		"unit_id": normalized_unit_id,
+		"craft_id": normalized_craft_id,
+		"requires_confirmation": true,
+		"target_after_remove": "fob_unassigned",
+	}
+	return _pending_transport_remove.duplicate(true)
+
+
+func confirm_transport_remove_for_test() -> Dictionary:
+	var pending: Dictionary = _pending_transport_remove.duplicate(true)
+	var unit_id: String = String(pending.get("unit_id", "")).strip_edges()
+	if unit_id.is_empty():
+		return {"ok": false, "reason": "no_pending_remove"}
+	if _boarded_unit_ids.has(unit_id):
+		_boarded_unit_ids.remove_at(_boarded_unit_ids.find(unit_id))
+	_set_selected_fireteam_for_unit(unit_id, "")
+	_pending_transport_remove.clear()
+	return {"ok": true, "unit_id": unit_id, "target_after_remove": "fob_unassigned"}
+
+
+func _build_assignment_lookup() -> Dictionary:
+	var assignments: Dictionary = {}
+	for index in range(_selected_unit_ids.size()):
+		var unit_id: String = String(_selected_unit_ids[index]).strip_edges()
+		if unit_id.is_empty():
+			continue
+		var fireteam_id: String = ""
+		if index < _selected_fireteam_ids.size():
+			fireteam_id = String(_selected_fireteam_ids[index]).strip_edges().to_lower()
+		assignments[unit_id] = fireteam_id
+	return assignments
+
+
 func _get_meta_mission_craft_state() -> Dictionary:
 	for craft_state_variant in _transport_craft_states:
 		if typeof(craft_state_variant) != TYPE_DICTIONARY:
@@ -747,7 +901,9 @@ func _refresh_ui_state() -> void:
 
 func _refresh_dropship_status_ui() -> void:
 	_update_brief_panel()
+	_update_staging_panel()
 	_update_dropship_panel()
+	_update_drop_light_bottom_row()
 
 
 func _apply_block_labels() -> void:
@@ -849,6 +1005,7 @@ func _render_fireteam_rows() -> void:
 		var fireteam_id: String = String(definition.get("id", "")).strip_edges().to_lower()
 		if _is_fireteam_staged_in_window(fireteam_id):
 			continue
+
 		var fireteam_card: FOBFireteamCard = FOB_FIRETEAM_CARD_SCRIPT.new()
 		fireteam_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		fireteam_card.setup_card(
@@ -965,20 +1122,28 @@ func _update_staging_panel() -> void:
 	var respawn_fireteam_id: String = _normalize_fireteam_id(_respawn_staged_fireteam_id)
 	var respawn_definition: Dictionary = _get_fireteam_definition(respawn_fireteam_id)
 	var respawn_enabled: bool = bool(respawn_definition.get("respawn_enabled", false)) if not respawn_definition.is_empty() else false
+	var respawn_anchor_active: bool = _is_respawn_anchor_active(respawn_fireteam_id)
 	var respawn_fireteam_label: String = _get_fireteam_label(respawn_fireteam_id)
 	var respawn_lead_unit_id: String = String(respawn_definition.get("lead_unit_id", "")) if not respawn_definition.is_empty() else ""
 	var respawn_member_ids: PackedStringArray = _get_member_unit_ids_for_fireteam(respawn_fireteam_id)
 
-	respawn_status_label.text = "Respawn anchor: %s" % ("FOB active for %s" % respawn_fireteam_label if respawn_enabled else "not set")
-	set_respawn_button.disabled = respawn_fireteam_id.is_empty() or respawn_enabled
-	clear_respawn_button.disabled = respawn_fireteam_id.is_empty() or not respawn_enabled
+	if respawn_anchor_active:
+		respawn_status_label.text = "Respawn anchor: locating %s | %.0fs" % [respawn_fireteam_label, _respawn_anchor_seconds]
+	elif respawn_enabled:
+		respawn_status_label.text = "Respawn anchor: FOB active for %s" % respawn_fireteam_label
+	else:
+		respawn_status_label.text = "Respawn anchor: not set"
+	set_respawn_button.disabled = respawn_fireteam_id.is_empty() or respawn_enabled or respawn_anchor_active
+	clear_respawn_button.disabled = respawn_fireteam_id.is_empty() or (not respawn_enabled and not respawn_anchor_active)
 
-	loadout_status_label.text = "Staged fireteam: %s | Lead: %s | Members: %d | Weight %.1f" % [loadout_fireteam_label, _build_display_name(lead_unit_id), member_ids.size(), _calculate_fireteam_loadout_weight(loadout_fireteam_id, member_ids)]
-	loadout_help_label.text = "Kein Team-Default mehr: Armor, Slot 1, Slot 2 und None werden direkt pro Mitglied gepflegt."
+	loadout_status_label.visible = has_loadout_fireteam
+	loadout_status_label.text = "Loadout: %s | Weight %.1f" % [String(loadout_definition.get("loadout", "medium")).strip_edges().to_upper(), _calculate_fireteam_loadout_weight(loadout_fireteam_id, member_ids)]
+	loadout_help_label.text = ""
+	loadout_help_label.visible = false
 	clear_loadout_button.disabled = not has_loadout_fireteam
 
-	_render_staging_fireteam_card(respawn_fireteam_list, respawn_fireteam_id, "Drop fireteam for FOB respawn.", "respawn_staging", respawn_member_ids, respawn_lead_unit_id)
-	_render_staging_fireteam_card(loadout_fireteam_list, loadout_fireteam_id, "Drop fireteam for loadout editing.", "loadout_staging")
+	_render_staging_fireteam_card(respawn_fireteam_list, respawn_fireteam_id, "", "respawn_staging", respawn_member_ids, respawn_lead_unit_id)
+	_render_staging_fireteam_card(loadout_fireteam_list, loadout_fireteam_id, "", "loadout_staging")
 	_render_loadout_member_rows(loadout_member_list, loadout_fireteam_id, member_ids, lead_unit_id, has_loadout_fireteam)
 
 
@@ -1008,6 +1173,7 @@ func _update_dropship_panel() -> void:
 	eta_label.text = _build_dropship_eta_text(selected_craft_state)
 	queue_label.text = _build_boarding_queue_text()
 	help_label.text = "Ziehen Sie Fireteam-Karten direkt auf eine FOB-Shipcard. In Transit sichtbare Schiffe bleiben hier ausgegraut, bis sie eintreffen."
+	help_label.visible = false
 	dropship_sprite_rect.texture = _build_dropship_visual_texture(selected_craft_state)
 	dropship_arrival_progress.value = _build_dropship_arrival_progress_value(selected_craft_state)
 	dropship_arrival_progress.visible = not selected_craft_state.is_empty() and bool(selected_craft_state.get("is_in_transit", false))
@@ -1107,8 +1273,8 @@ func _build_available_help_text() -> String:
 	var inbound_count: int = _get_transit_to_fob_unit_ids().size()
 	if _focused_unit_id.is_empty():
 		if inbound_count > 0:
-			return "Links stehen unzugewiesene FOB-Operators. Grau markierte Karten sind noch im Anflug und zeigen ihren Transferfortschritt."
-		return "Links stehen nur unzugewiesene FOB-Operators. Ziehe Mitglieder auf Fireteams oder zurueck hierher, um sie zu loesen."
+			return "Unzugewiesene FOB-Operators stehen direkt links neben #10. Grau markierte Karten sind noch im Anflug."
+		return "Ziehe NPC-Karten von hier auf #10 FIRETEAMS oder zurueck in diesen Pool, um sie zu loesen."
 
 	return "Focused operator: %s | Current fireteam: %s" % [_build_display_name(_focused_unit_id), _build_fireteam_display_text(_get_selected_fireteam_id_for_unit(_focused_unit_id))]
 
@@ -1174,7 +1340,7 @@ func _build_dropship_eta_text(selected_craft_state: Dictionary = {}) -> String:
 		if _dropship_transport_craft_id == String(selected_craft_state.get("craft_id", "")).strip_edges() and not _boarding_order.is_empty():
 			match _dropship_phase:
 				"ready":
-					return "Arrival ETA: docked | manual start ready"
+					return "Arrival ETA: docked | auto boarding"
 				"boarding":
 					return "NPC boarding timer: %.0fs" % _boarding_seconds
 				"boarded":
@@ -1184,7 +1350,7 @@ func _build_dropship_eta_text(selected_craft_state: Dictionary = {}) -> String:
 		"incoming":
 			return "Arrival ETA: %.0fs" % _dropship_eta_seconds
 		"ready":
-			return "Arrival ETA: docked | manual start ready"
+			return "Arrival ETA: docked | auto boarding"
 		"boarding":
 			return "NPC boarding timer: %.0fs" % _boarding_seconds
 		"boarded":
@@ -1214,7 +1380,8 @@ func _build_boarding_queue_text() -> String:
 	return "Boarding queue: %s" % " | ".join(queued_labels)
 
 
-func _on_operator_card_pressed(unit_id: String, _profile, _source_context: String) -> void:
+func _on_operator_card_pressed(unit_id: String, profile, _source_context: String) -> void:
+	_remember_card_profile(unit_id, profile)
 	_focused_unit_id = unit_id
 	_refresh_card_highlights()
 	_update_brief_panel()
@@ -1227,10 +1394,19 @@ func _on_operator_card_pressed(unit_id: String, _profile, _source_context: Strin
 		available_help_label.text = _build_available_help_text()
 
 
-func _on_operator_card_open_requested(unit_id: String, _profile, _source_context: String) -> void:
+func _on_operator_card_open_requested(unit_id: String, profile, _source_context: String) -> void:
+	_remember_card_profile(unit_id, profile)
 	_focused_unit_id = unit_id
 	_refresh_card_highlights()
 	_open_character_overlay(unit_id)
+
+
+func _remember_card_profile(unit_id: String, profile) -> void:
+	var normalized_unit_id := unit_id.strip_edges()
+	if normalized_unit_id.is_empty() or profile == null or _profiles_by_id.has(normalized_unit_id):
+		return
+	if typeof(profile) == TYPE_OBJECT and profile.has_method("duplicate_profile"):
+		_profiles_by_id[normalized_unit_id] = profile.duplicate_profile()
 
 
 func _on_select_fireteam_pressed(fireteam_id: String) -> void:
@@ -1366,12 +1542,13 @@ func _on_available_panel_unit_dropped(unit_id: String) -> void:
 func _on_set_respawn_button_pressed() -> void:
 	if _respawn_staged_fireteam_id.is_empty():
 		return
-	_set_fireteam_respawn_enabled(_respawn_staged_fireteam_id, true)
+	_start_respawn_anchor_progress(_respawn_staged_fireteam_id)
 
 
 func _on_clear_respawn_button_pressed() -> void:
 	if _respawn_staged_fireteam_id.is_empty():
 		return
+	_clear_respawn_anchor_progress(_respawn_staged_fireteam_id)
 	_set_fireteam_respawn_enabled(_respawn_staged_fireteam_id, false)
 	_respawn_staged_fireteam_id = ""
 	_refresh_ui_state()
@@ -1401,8 +1578,16 @@ func _on_remove_dropship_fireteam_button_pressed() -> void:
 
 
 func _on_start_boarding_button_pressed() -> void:
-	if _dropship_phase != "ready" or _boarding_order.is_empty():
-		return
+	_start_boarding_sequence()
+
+
+func _start_boarding_sequence() -> bool:
+	var selected_craft_state: Dictionary = _get_transport_craft_state(_dropship_transport_craft_id)
+	if selected_craft_state.is_empty():
+		if _dropship_phase != "ready" or _boarding_order.is_empty():
+			return false
+	elif not _can_start_boarding_for_craft(selected_craft_state):
+		return false
 	_boarding_index = 0
 	_boarding_member_index = 0
 	_current_boarding_unit_id = ""
@@ -1410,6 +1595,7 @@ func _on_start_boarding_button_pressed() -> void:
 	_boarded_fireteam_ids = PackedStringArray()
 	_start_next_boarding_step()
 	_refresh_dropship_status_ui()
+	return true
 
 
 func _on_staging_fireteam_dropped(fireteam_id: String, drop_kind: String) -> void:
@@ -1426,7 +1612,7 @@ func _on_staging_fireteam_dropped(fireteam_id: String, drop_kind: String) -> voi
 	var dropship_queue_changed: bool = _remove_fireteam_from_other_staging(normalized_fireteam_id, normalized_drop_kind)
 	if normalized_drop_kind == "respawn":
 		_respawn_staged_fireteam_id = normalized_fireteam_id
-		_set_fireteam_respawn_enabled(normalized_fireteam_id, true)
+		_start_respawn_anchor_progress(normalized_fireteam_id)
 		if dropship_queue_changed:
 			_restart_dropship_cycle()
 		return
@@ -1479,23 +1665,22 @@ func _on_start_mission_button_pressed() -> void:
 
 
 func _on_dropship_timer_timeout() -> void:
+	_tick_respawn_anchor_progress()
 	match _dropship_phase:
 		"incoming":
 			_dropship_eta_seconds = maxf(_dropship_eta_seconds - 1.0, 0.0)
 			if _dropship_eta_seconds <= 0.0:
 				_dropship_eta_seconds = 0.0
 				_dropship_phase = "ready"
-				var ready_timer := get_node("DropshipTimer") as Timer
-				ready_timer.stop()
 		"boarding":
 			_boarding_seconds = maxf(_boarding_seconds - 1.0, 0.0)
 			if _boarding_seconds <= 0.0:
 				_complete_current_boarding_member()
 				_start_next_boarding_step()
 		_:
-			var dropship_timer := get_node("DropshipTimer") as Timer
-			dropship_timer.stop()
+			pass
 
+	_update_dropship_timer_state()
 	_refresh_dropship_status_ui()
 
 
@@ -1527,8 +1712,7 @@ func _start_next_boarding_step() -> void:
 	_dropship_phase = "boarded"
 	_boarding_seconds = 0.0
 	_current_boarding_unit_id = ""
-	if dropship_timer != null:
-		dropship_timer.stop()
+	_update_dropship_timer_state()
 
 
 func _restart_dropship_cycle() -> void:
@@ -1550,6 +1734,7 @@ func _restart_dropship_cycle() -> void:
 		_dropship_eta_seconds = 0.0
 		if _dropship_staged_fireteam_ids.is_empty():
 			_dropship_transport_craft_id = ""
+		_update_dropship_timer_state()
 		if is_inside_tree():
 			_refresh_dropship_status_ui()
 		return
@@ -1558,6 +1743,9 @@ func _restart_dropship_cycle() -> void:
 	if not selected_craft_state.is_empty() and _can_stage_fireteam_into_craft(selected_craft_state):
 		_dropship_phase = "ready"
 		_dropship_eta_seconds = 0.0
+		if _start_boarding_sequence():
+			return
+		_update_dropship_timer_state()
 		if is_inside_tree():
 			_refresh_dropship_status_ui()
 		return
@@ -1566,8 +1754,63 @@ func _restart_dropship_cycle() -> void:
 	_dropship_eta_seconds = DEFAULT_DROPSHIP_ETA_SECONDS
 	if dropship_timer != null:
 		dropship_timer.start()
+	_update_dropship_timer_state()
 	if is_inside_tree():
 		_refresh_dropship_status_ui()
+
+
+func _update_dropship_timer_state() -> void:
+	var dropship_timer := get_node_or_null("DropshipTimer") as Timer
+	if dropship_timer == null:
+		return
+
+	var timer_needed: bool = _is_respawn_anchor_active() or _dropship_phase == "incoming" or _dropship_phase == "boarding"
+	if timer_needed:
+		if dropship_timer.is_stopped():
+			dropship_timer.start()
+		return
+	dropship_timer.stop()
+
+
+func _start_respawn_anchor_progress(fireteam_id: String) -> void:
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	if normalized_fireteam_id.is_empty():
+		return
+	if not _set_fireteam_respawn_flag(normalized_fireteam_id, false):
+		return
+
+	_respawn_staged_fireteam_id = normalized_fireteam_id
+	_respawn_anchor_fireteam_id = normalized_fireteam_id
+	_respawn_anchor_seconds = DEFAULT_RESPAWN_ANCHOR_SECONDS
+	_update_dropship_timer_state()
+	_refresh_ui_state()
+
+
+func _clear_respawn_anchor_progress(fireteam_id: String = "") -> void:
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	if normalized_fireteam_id.is_empty() or _respawn_anchor_fireteam_id == normalized_fireteam_id:
+		_respawn_anchor_fireteam_id = ""
+		_respawn_anchor_seconds = 0.0
+
+
+func _tick_respawn_anchor_progress() -> void:
+	if not _is_respawn_anchor_active():
+		return
+
+	_respawn_anchor_seconds = maxf(_respawn_anchor_seconds - 1.0, 0.0)
+	if _respawn_anchor_seconds > 0.0:
+		return
+
+	var completed_fireteam_id: String = _respawn_anchor_fireteam_id
+	_clear_respawn_anchor_progress(completed_fireteam_id)
+	_set_fireteam_respawn_enabled(completed_fireteam_id, true)
+
+
+func _is_respawn_anchor_active(fireteam_id: String = "") -> bool:
+	if _respawn_anchor_fireteam_id.is_empty() or _respawn_anchor_seconds <= 0.0:
+		return false
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	return normalized_fireteam_id.is_empty() or normalized_fireteam_id == _respawn_anchor_fireteam_id
 
 
 func _count_assigned_operators() -> int:
@@ -1655,18 +1898,32 @@ func _set_focused_fireteam_respawn_enabled(enabled: bool) -> void:
 	_set_fireteam_respawn_enabled(_focused_fireteam_id, enabled)
 
 
-func _set_fireteam_respawn_enabled(fireteam_id: String, enabled: bool) -> void:
+func _set_fireteam_respawn_flag(fireteam_id: String, enabled: bool) -> bool:
 	var definition_index: int = _find_fireteam_definition_index(fireteam_id)
 	if definition_index < 0:
-		return
+		return false
 
 	var definition: Dictionary = _fireteam_definitions[definition_index]
 	definition["respawn_enabled"] = enabled
 	_fireteam_definitions[definition_index] = definition
+	return true
+
+
+func _set_fireteam_respawn_enabled(fireteam_id: String, enabled: bool) -> void:
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	if normalized_fireteam_id.is_empty():
+		return
+	if not _set_fireteam_respawn_flag(normalized_fireteam_id, enabled):
+		return
 	if enabled:
-		_respawn_staged_fireteam_id = fireteam_id
-	elif _respawn_staged_fireteam_id == fireteam_id:
+		_clear_respawn_anchor_progress(normalized_fireteam_id)
+		_respawn_staged_fireteam_id = normalized_fireteam_id
+	elif _respawn_staged_fireteam_id == normalized_fireteam_id:
+		_clear_respawn_anchor_progress(normalized_fireteam_id)
 		_respawn_staged_fireteam_id = ""
+	elif _respawn_anchor_fireteam_id == normalized_fireteam_id:
+		_clear_respawn_anchor_progress(normalized_fireteam_id)
+	_update_dropship_timer_state()
 	_refresh_ui_state()
 
 
@@ -1717,6 +1974,8 @@ func _is_fireteam_staged_in_window(fireteam_id: String) -> bool:
 		return true
 	if _respawn_staged_fireteam_id == normalized_fireteam_id:
 		return true
+	if _boarded_fireteam_ids.has(normalized_fireteam_id):
+		return true
 	return _dropship_staged_fireteam_ids.has(normalized_fireteam_id)
 
 
@@ -1729,17 +1988,9 @@ func _render_loadout_member_rows(
 ) -> void:
 	_clear_container(container)
 	if not has_focus_fireteam:
-		var empty_focus_label := Label.new()
-		empty_focus_label.text = "No fireteam focused."
-		empty_focus_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		container.add_child(empty_focus_label)
 		return
 
 	if member_ids.is_empty():
-		var empty_members_label := Label.new()
-		empty_members_label.text = "No members assigned to %s yet." % _get_fireteam_label(fireteam_id)
-		empty_members_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		container.add_child(empty_members_label)
 		return
 
 	for member_unit_id in member_ids:
@@ -1754,100 +2005,247 @@ func _build_member_loadout_row(fireteam_id: String, member_unit_id: String, lead
 		return null
 
 	var row_panel := PanelContainer.new()
+	row_panel.name = "LoadoutMemberRow_%s" % member_unit_id
+	row_panel.custom_minimum_size = Vector2(0.0, 58.0)
 	row_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row_panel.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	row_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	row_panel.set_meta("compact_loadout_member_row", true)
+	row_panel.set_meta("unit_id", member_unit_id)
+	row_panel.gui_input.connect(_on_loadout_member_row_gui_input.bind(member_unit_id))
 	_apply_help_id(row_panel, "loadout.member_row")
 	_apply_loadout_member_row_style(row_panel, member_unit_id == lead_unit_id)
 
 	var row_margin := MarginContainer.new()
 	row_margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row_margin.add_theme_constant_override("margin_left", 6)
-	row_margin.add_theme_constant_override("margin_top", 6)
-	row_margin.add_theme_constant_override("margin_right", 6)
-	row_margin.add_theme_constant_override("margin_bottom", 6)
+	row_margin.add_theme_constant_override("margin_left", 4)
+	row_margin.add_theme_constant_override("margin_top", 4)
+	row_margin.add_theme_constant_override("margin_right", 4)
+	row_margin.add_theme_constant_override("margin_bottom", 4)
 	row_panel.add_child(row_margin)
 
 	var content_row := HBoxContainer.new()
 	content_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	content_row.add_theme_constant_override("separation", 8)
+	content_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	content_row.add_theme_constant_override("separation", 6)
 	row_margin.add_child(content_row)
 
-	var member_card = NPC_COMPACT_CARD_SCENE.instantiate()
-	member_card.custom_minimum_size = Vector2(208.0, 58.0)
-	member_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	member_card.setup_from_profile(
-		member_profile,
-		{
-			"source_context": "respawn_staging" if drag_enabled else "loadout_staging",
-			"selected": member_unit_id == _focused_unit_id,
-			"disabled": false,
-			"drag_enabled": drag_enabled,
-			"compact_mode": true,
-			"show_lead_indicator": true,
-			"is_lead": member_unit_id == lead_unit_id,
-		}
-	)
-	if not member_card.card_pressed.is_connected(_on_operator_card_pressed):
-		member_card.card_pressed.connect(_on_operator_card_pressed)
-	if not member_card.card_open_requested.is_connected(_on_operator_card_open_requested):
-		member_card.card_open_requested.connect(_on_operator_card_open_requested)
-	if not member_card.lead_toggle_requested.is_connected(_on_member_lead_toggle.bind(fireteam_id)):
-		member_card.lead_toggle_requested.connect(_on_member_lead_toggle.bind(fireteam_id))
-	content_row.add_child(member_card)
+	var portrait := TextureRect.new()
+	portrait.name = "Portrait"
+	portrait.custom_minimum_size = Vector2(34.0, 34.0)
+	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	portrait.texture = _load_portrait_texture(String(member_profile.portrait_path))
+	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	content_row.add_child(portrait)
 
-	var controls_vbox := VBoxContainer.new()
-	controls_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	controls_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	controls_vbox.add_theme_constant_override("separation", 4)
-	content_row.add_child(controls_vbox)
+	var identity_vbox := VBoxContainer.new()
+	identity_vbox.name = "Identity"
+	identity_vbox.custom_minimum_size = Vector2(108.0, 0.0)
+	identity_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	identity_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	identity_vbox.add_theme_constant_override("separation", 1)
+	content_row.add_child(identity_vbox)
 
-	var selectors_label_row := HBoxContainer.new()
-	selectors_label_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	selectors_label_row.add_theme_constant_override("separation", 4)
-	controls_vbox.add_child(selectors_label_row)
+	var name_row := HBoxContainer.new()
+	name_row.name = "NameRow"
+	name_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	name_row.add_theme_constant_override("separation", 4)
+	identity_vbox.add_child(name_row)
 
-	for label_text in ["Armor", "Slot 1", "Slot 2"]:
-		var selector_label := Label.new()
-		selector_label.text = label_text
-		selector_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		selector_label.add_theme_font_size_override("font_size", 9)
-		_apply_help_id(selector_label, "loadout.armor" if label_text == "Armor" else "loadout.weapon_slot")
-		selectors_label_row.add_child(selector_label)
+	var name_label := Label.new()
+	name_label.name = "NameLabel"
+	name_label.text = _build_display_name(member_unit_id)
+	name_label.clip_text = true
+	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_label.add_theme_font_size_override("font_size", 10)
+	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	name_row.add_child(name_label)
 
-	var selectors_row := HBoxContainer.new()
-	selectors_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	selectors_row.add_theme_constant_override("separation", 4)
-	controls_vbox.add_child(selectors_row)
+	var badge_row := HBoxContainer.new()
+	badge_row.name = "RankBadgeRow"
+	badge_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	badge_row.add_theme_constant_override("separation", 2)
+	name_row.add_child(badge_row)
+	_populate_compact_loadout_badge_row(badge_row, member_profile, member_unit_id == lead_unit_id)
 
 	var member_loadout: Dictionary = _get_member_loadout(fireteam_id, member_unit_id)
 
-	var armor_select := OptionButton.new()
-	armor_select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	armor_select.custom_minimum_size = Vector2(54.0, 0.0)
-	armor_select.add_theme_font_size_override("font_size", 9)
+	var status_label := Label.new()
+	status_label.name = "LoadoutStatusLabel"
+	status_label.text = _build_compact_member_loadout_status(member_unit_id, member_loadout)
+	status_label.clip_text = true
+	status_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	status_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	status_label.add_theme_font_size_override("font_size", 8)
+	status_label.add_theme_color_override("font_color", Color(0.72, 0.78, 0.83, 1.0))
+	status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	identity_vbox.add_child(status_label)
+
+	var selectors_row := HBoxContainer.new()
+	selectors_row.name = "LoadoutDropdowns"
+	selectors_row.custom_minimum_size = Vector2(152.0, 0.0)
+	selectors_row.size_flags_horizontal = Control.SIZE_SHRINK_END
+	selectors_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	selectors_row.add_theme_constant_override("separation", 3)
+	content_row.add_child(selectors_row)
+
+	var armor_select := _build_compact_loadout_select("ArmorSelect", 46.0, "loadout.armor")
 	_apply_help_id(armor_select, "loadout.armor")
-	_populate_armor_option_button(armor_select, String(member_loadout.get("armor", "medium")))
-	META_UI_SKIN_SCRIPT.style_secondary_button(armor_select)
+	_populate_compact_armor_option_button(armor_select, String(member_loadout.get("armor", "medium")))
 	if not armor_select.item_selected.is_connected(_on_member_armor_selected.bind(fireteam_id, member_unit_id)):
 		armor_select.item_selected.connect(_on_member_armor_selected.bind(fireteam_id, member_unit_id))
 	selectors_row.add_child(armor_select)
 
-	selectors_row.add_child(_build_weapon_slot_control(
-		"Weapon1",
-		String(member_loadout.get("weapon_1", member_loadout.get("weapon", DEFAULT_MEMBER_WEAPON))),
-		fireteam_id,
-		member_unit_id,
-		1
-	))
-	selectors_row.add_child(_build_weapon_slot_control(
-		"Weapon2",
-		String(member_loadout.get("weapon_2", DEFAULT_MEMBER_WEAPON)),
-		fireteam_id,
-		member_unit_id,
-		2
-	))
+	var weapon_1_id: String = String(member_loadout.get("weapon_1", member_loadout.get("weapon", DEFAULT_MEMBER_WEAPON)))
+	var weapon_1_select := _build_compact_loadout_select("Weapon1Select", 50.0, "loadout.weapon_slot")
+	_populate_compact_weapon_option_button(weapon_1_select, weapon_1_id)
+	if not weapon_1_select.item_selected.is_connected(_on_member_weapon_1_selected.bind(fireteam_id, member_unit_id)):
+		weapon_1_select.item_selected.connect(_on_member_weapon_1_selected.bind(fireteam_id, member_unit_id))
+	selectors_row.add_child(weapon_1_select)
+	selectors_row.add_child(_build_compact_weapon_preview("Weapon1Preview", weapon_1_id))
+
+	var weapon_2_id: String = String(member_loadout.get("weapon_2", DEFAULT_MEMBER_WEAPON))
+	var weapon_2_select := _build_compact_loadout_select("Weapon2Select", 50.0, "loadout.weapon_slot")
+	_populate_compact_weapon_option_button(weapon_2_select, weapon_2_id)
+	if not weapon_2_select.item_selected.is_connected(_on_member_weapon_2_selected.bind(fireteam_id, member_unit_id)):
+		weapon_2_select.item_selected.connect(_on_member_weapon_2_selected.bind(fireteam_id, member_unit_id))
+	selectors_row.add_child(weapon_2_select)
+	selectors_row.add_child(_build_compact_weapon_preview("Weapon2Preview", weapon_2_id))
 
 	return row_panel
+
+
+func _build_compact_loadout_select(control_name: String, min_width: float, help_id: String) -> OptionButton:
+	var option_button := OptionButton.new()
+	option_button.name = control_name
+	option_button.custom_minimum_size = Vector2(min_width, 24.0)
+	option_button.size_flags_horizontal = Control.SIZE_SHRINK_END
+	option_button.add_theme_font_size_override("font_size", 8)
+	option_button.mouse_filter = Control.MOUSE_FILTER_STOP
+	option_button.set_meta("compact_loadout_dropdown", true)
+	_apply_help_id(option_button, help_id)
+	META_UI_SKIN_SCRIPT.style_secondary_button(option_button)
+	return option_button
+
+
+func _populate_compact_armor_option_button(option_button: OptionButton, selected_armor_id: String) -> void:
+	option_button.clear()
+	var armor_options: Array = [
+		{"id": "light", "label": "L"},
+		{"id": "medium", "label": "M"},
+		{"id": "heavy", "label": "H"},
+	]
+	for option_variant in armor_options:
+		var option: Dictionary = Dictionary(option_variant)
+		var armor_id: String = String(option.get("id", "medium"))
+		option_button.add_item(String(option.get("label", armor_id.capitalize())))
+		option_button.set_item_metadata(option_button.item_count - 1, armor_id)
+		if armor_id == _normalize_loadout_id(selected_armor_id):
+			option_button.select(option_button.item_count - 1)
+
+
+func _populate_compact_weapon_option_button(option_button: OptionButton, selected_weapon_id: String) -> void:
+	option_button.clear()
+	for option_variant in WEAPON_LOADOUT_OPTIONS:
+		var option: Dictionary = Dictionary(option_variant)
+		var weapon_id: String = String(option.get("id", DEFAULT_MEMBER_WEAPON))
+		option_button.add_item(_build_compact_weapon_label(weapon_id))
+		option_button.set_item_metadata(option_button.item_count - 1, weapon_id)
+		if weapon_id == _normalize_weapon_id(selected_weapon_id):
+			option_button.select(option_button.item_count - 1)
+
+
+func _build_compact_weapon_label(weapon_id: String) -> String:
+	match _normalize_weapon_id(weapon_id):
+		"smg":
+			return "SMG"
+		"rifle":
+			return "Rifle"
+		"sniper":
+			return "Snip"
+		"rocket_launcher":
+			return "Rkt"
+		"medictool":
+			return "Med"
+		"none":
+			return "-"
+		_:
+			return "SMG"
+
+
+func _build_compact_weapon_preview(preview_name: String, weapon_id: String) -> TextureRect:
+	var preview_rect := TextureRect.new()
+	preview_rect.name = preview_name
+	preview_rect.custom_minimum_size = Vector2.ZERO
+	preview_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	preview_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	preview_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var normalized_weapon_id: String = _normalize_weapon_id(weapon_id)
+	preview_rect.texture = _get_weapon_preview_texture(normalized_weapon_id)
+	preview_rect.visible = preview_rect.texture != null
+	preview_rect.tooltip_text = "No weapon" if normalized_weapon_id == "none" else _build_weapon_label(normalized_weapon_id)
+	preview_rect.set_meta("weapon_id", normalized_weapon_id)
+	preview_rect.set_meta("weapon_preview_path", _get_weapon_preview_path(normalized_weapon_id))
+	return preview_rect
+
+
+func _populate_compact_loadout_badge_row(badge_row: HBoxContainer, member_profile, is_lead: bool) -> void:
+	for child in badge_row.get_children():
+		badge_row.remove_child(child)
+		child.queue_free()
+
+	var badge_source = member_profile
+	if member_profile != null and member_profile.has_method("to_dict"):
+		var profile_data: Dictionary = Dictionary(member_profile.call("to_dict")).duplicate(true)
+		profile_data["is_fireteam_lead"] = is_lead
+		badge_source = profile_data
+
+	var badges: Array = Array(NPC_RANK_BADGE_RESOLVER_SCRIPT.call("get_badges_for_profile", badge_source, 2))
+	badge_row.visible = not badges.is_empty()
+	for badge_variant in badges:
+		if typeof(badge_variant) != TYPE_DICTIONARY:
+			continue
+		var badge: Dictionary = Dictionary(badge_variant)
+		var texture_rect := TextureRect.new()
+		texture_rect.name = "RankBadge_%s" % String(badge.get("badge_key", badge.get("badge_id", "unknown"))).strip_edges()
+		texture_rect.custom_minimum_size = Vector2(18.0, 18.0)
+		texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		texture_rect.mouse_filter = Control.MOUSE_FILTER_STOP
+		texture_rect.tooltip_text = "%s: %s" % [String(badge.get("label", "Badge")), String(badge.get("reason", ""))]
+		var badge_path: String = String(badge.get("path", "")).strip_edges()
+		if not badge_path.is_empty() and ResourceLoader.exists(badge_path):
+			texture_rect.texture = load(badge_path) as Texture2D
+		if texture_rect.texture == null:
+			texture_rect.modulate = Color(1.0, 0.45, 0.35, 0.95)
+			texture_rect.set_meta("missing_rank_badge_asset", true)
+		badge_row.add_child(texture_rect)
+
+
+func _build_compact_member_loadout_status(unit_id: String, member_loadout: Dictionary) -> String:
+	var respawn_text: String = _build_unit_respawn_text(unit_id)
+	return "FOB | %s | %s" % [respawn_text, _format_member_loadout_short(member_loadout)]
+
+
+func _format_member_loadout_short(member_loadout: Dictionary) -> String:
+	var armor_label: String = _normalize_loadout_id(String(member_loadout.get("armor", "medium"))).capitalize()
+	var weapon_1_label: String = _build_weapon_label(String(member_loadout.get("weapon_1", member_loadout.get("weapon", DEFAULT_MEMBER_WEAPON))))
+	var weapon_2_label: String = _build_weapon_label(String(member_loadout.get("weapon_2", DEFAULT_MEMBER_WEAPON)))
+	return "%s / %s / %s" % [armor_label, weapon_1_label, weapon_2_label]
+
+
+func _on_loadout_member_row_gui_input(event: InputEvent, unit_id: String) -> void:
+	if event is InputEventMouseButton:
+		var mouse_event := event as InputEventMouseButton
+		if mouse_event.button_index != MOUSE_BUTTON_LEFT or not mouse_event.pressed:
+			return
+		var profile = _profiles_by_id.get(unit_id, null)
+		if mouse_event.double_click:
+			_open_character_overlay(unit_id)
+			return
+		_on_operator_card_pressed(unit_id, profile, "loadout_staging")
 
 
 func _render_fireteam_card_member_loadout_rows(container: VBoxContainer, fireteam_id: String, member_ids: PackedStringArray, lead_unit_id: String) -> void:
@@ -1858,8 +2256,16 @@ func _render_fireteam_card_member_loadout_rows(container: VBoxContainer, firetea
 
 
 func _render_dropship_member_rows(container: VBoxContainer, fireteam_id: String, member_ids: PackedStringArray) -> void:
+	_render_fireteam_member_progress_rows(container, fireteam_id, member_ids, "boarding")
+
+
+func _render_respawn_anchor_member_rows(container: VBoxContainer, fireteam_id: String, member_ids: PackedStringArray) -> void:
+	_render_fireteam_member_progress_rows(container, fireteam_id, member_ids, "respawn_anchor")
+
+
+func _render_fireteam_member_progress_rows(container: VBoxContainer, fireteam_id: String, member_ids: PackedStringArray, progress_mode: String) -> void:
 	var status_label := Label.new()
-	status_label.text = _build_boarding_progress_text(fireteam_id)
+	status_label.text = _build_fireteam_progress_text(fireteam_id, progress_mode)
 	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	status_label.add_theme_font_size_override("font_size", 9)
 	status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -1879,7 +2285,8 @@ func _render_dropship_member_rows(container: VBoxContainer, fireteam_id: String,
 		var row := HBoxContainer.new()
 		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_theme_constant_override("separation", 6)
-		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row.mouse_filter = Control.MOUSE_FILTER_STOP
+		row.gui_input.connect(_on_progress_member_row_gui_input.bind(member_unit_id))
 		member_vbox.add_child(row)
 
 		var portrait := TextureRect.new()
@@ -1898,7 +2305,7 @@ func _render_dropship_member_rows(container: VBoxContainer, fireteam_id: String,
 		row.add_child(name_label)
 
 		var member_status_label := Label.new()
-		member_status_label.text = _build_member_boarding_status_text(fireteam_id, member_unit_id)
+		member_status_label.text = _build_member_progress_status_text(fireteam_id, member_unit_id, progress_mode)
 		member_status_label.add_theme_font_size_override("font_size", 9)
 		member_status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row.add_child(member_status_label)
@@ -1906,11 +2313,23 @@ func _render_dropship_member_rows(container: VBoxContainer, fireteam_id: String,
 		var progress_bar := ProgressBar.new()
 		progress_bar.min_value = 0.0
 		progress_bar.max_value = 100.0
-		progress_bar.value = _build_member_boarding_progress_value(fireteam_id, member_unit_id)
+		progress_bar.value = _build_member_progress_value(fireteam_id, member_unit_id, progress_mode)
 		progress_bar.show_percentage = false
 		progress_bar.custom_minimum_size = Vector2(0.0, 8.0)
 		progress_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		member_vbox.add_child(progress_bar)
+
+
+func _on_progress_member_row_gui_input(event: InputEvent, unit_id: String) -> void:
+	if event is InputEventMouseButton:
+		var mouse_event := event as InputEventMouseButton
+		if mouse_event.button_index != MOUSE_BUTTON_LEFT or not mouse_event.pressed:
+			return
+		var profile = _profiles_by_id.get(unit_id, null)
+		if mouse_event.double_click:
+			_open_character_overlay(unit_id)
+			return
+		_on_operator_card_pressed(unit_id, profile, "fireteam_progress")
 
 
 func _on_close_overlay_button_pressed() -> void:
@@ -2555,6 +2974,8 @@ func _build_unit_location_text(unit_id: String) -> String:
 		return "Loc: Rover / %s / Boarding" % location_text
 	if _boarding_order.has(assigned_fireteam_id):
 		return "Loc: Rover / %s / Wait Zone" % location_text
+	if _is_respawn_anchor_active(assigned_fireteam_id):
+		return "Loc: FOB / %s / Locating" % location_text
 	if bool(_get_fireteam_definition(assigned_fireteam_id).get("respawn_enabled", false)):
 		return "Loc: FOB / %s / Respawn" % location_text
 	if assigned_fireteam_id == _loadout_staged_fireteam_id:
@@ -2566,6 +2987,8 @@ func _build_unit_respawn_text(unit_id: String) -> String:
 	var assigned_fireteam_id := _get_selected_fireteam_id_for_unit(unit_id)
 	if assigned_fireteam_id.is_empty():
 		return "Respawn: off"
+	if _is_respawn_anchor_active(assigned_fireteam_id):
+		return "Respawn: locating"
 	return "Respawn: %s" % ("FOB" if bool(_get_fireteam_definition(assigned_fireteam_id).get("respawn_enabled", false)) else "off")
 
 
@@ -2591,6 +3014,8 @@ func _render_staging_fireteam_card(container: VBoxContainer, fireteam_id: String
 	_clear_container(container)
 	var normalized_fireteam_id := _normalize_fireteam_id(fireteam_id)
 	if normalized_fireteam_id.is_empty():
+		if empty_text.strip_edges().is_empty():
+			return
 		var empty_label := Label.new()
 		empty_label.text = empty_text
 		empty_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -2601,8 +3026,9 @@ func _render_staging_fireteam_card(container: VBoxContainer, fireteam_id: String
 	var fireteam_card := _create_fireteam_card(normalized_fireteam_id, source_context)
 	if fireteam_card == null:
 		return
+	_apply_fireteam_reference_card_contract(fireteam_card, source_context)
 	if source_context == "respawn_staging":
-		_render_fireteam_card_member_loadout_rows(fireteam_card.get_member_host(), normalized_fireteam_id, member_ids, lead_unit_id)
+		_render_respawn_anchor_member_rows(fireteam_card.get_member_host(), normalized_fireteam_id, member_ids)
 	container.add_child(fireteam_card)
 
 
@@ -2629,7 +3055,17 @@ func _create_fireteam_card(fireteam_id: String, source_context: String = "firete
 		fireteam_card.rename_committed.connect(_on_fireteam_card_label_committed)
 	if not fireteam_card.unit_dropped.is_connected(_on_fireteam_card_unit_dropped):
 		fireteam_card.unit_dropped.connect(_on_fireteam_card_unit_dropped)
+	_apply_fireteam_reference_card_contract(fireteam_card, source_context)
 	return fireteam_card
+
+
+func _apply_fireteam_reference_card_contract(fireteam_card: Control, source_context: String) -> void:
+	if fireteam_card == null or source_context == "fireteam_list":
+		return
+	fireteam_card.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	fireteam_card.custom_minimum_size = Vector2(FOB_FIRETEAM_REFERENCE_CARD_WIDTH, fireteam_card.custom_minimum_size.y)
+	fireteam_card.set_meta("fob_fireteam_reference_card", true)
+	fireteam_card.set_meta("fob_fireteam_reference_width", FOB_FIRETEAM_REFERENCE_CARD_WIDTH)
 
 
 func _build_transport_craft_card(craft_state: Dictionary) -> Control:
@@ -2641,7 +3077,10 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 	var is_boardable: bool = bool(craft_state.get("is_boardable", false))
 	var can_stage_fireteams: bool = _can_stage_fireteam_into_craft(craft_state)
 	var craft_card: PanelContainer = PanelContainer.new()
-	craft_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	craft_card.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	craft_card.custom_minimum_size = Vector2(FOB_TRANSPORT_CARD_WIDTH, 0.0)
+	craft_card.set_meta("shared_transport_card_width", FOB_TRANSPORT_CARD_WIDTH)
+	craft_card.set_meta("shared_transport_card_half_width", true)
 	if can_stage_fireteams:
 		craft_card.set_script(FOB_DROP_PANEL_SCRIPT)
 		craft_card.drop_kind = "dropship|%s" % craft_id
@@ -2660,6 +3099,9 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 			"can_stage": can_stage_fireteams,
 			"title_text": UI_BLOCK_LABELS_SCRIPT.prefixed_transport_title(_build_transport_craft_title(craft_state)),
 			"ship_texture": _get_transport_craft_texture(craft_state),
+			"ship_texture_width": 128.0,
+			"ship_texture_height": 76.0,
+			"content_minimum_height": 76.0,
 			"pilot_profile": _profiles_by_id.get(pilot_unit_id, null),
 			"pilot_text": _build_transport_craft_pilot_text(craft_state),
 			"pilot_source_context": "transport_craft_pilot",
@@ -2701,17 +3143,16 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 				drop_label.text = "Full %d/%d NPC assigned + pilot" % [_get_transport_craft_staged_member_count(craft_id), DROPSHIP_NPC_CAPACITY]
 			else:
 				drop_label.text = "Assigned fireteams | %d/%d NPC + pilot" % [_get_transport_craft_staged_member_count(craft_id), DROPSHIP_NPC_CAPACITY]
-		else:
-			drop_label.text = "Drop FT here to board this ship (max 6 NPC + pilot)"
-		drop_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		drop_label.add_theme_font_size_override("font_size", 9)
-		extra_content_host.add_child(drop_label)
+			drop_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			drop_label.add_theme_font_size_override("font_size", 9)
+			extra_content_host.add_child(drop_label)
 		if is_selected and not _boarding_order.is_empty():
 			for fireteam_id_variant in _boarding_order:
 				var fireteam_id: String = String(fireteam_id_variant)
 				var fireteam_card := _create_fireteam_card(fireteam_id, "dropship_wait")
 				if fireteam_card == null:
 					continue
+				_apply_fireteam_reference_card_contract(fireteam_card, "dropship_wait")
 				_render_dropship_member_rows(fireteam_card.get_member_host(), fireteam_id, _get_member_unit_ids_for_fireteam(fireteam_id))
 				extra_content_host.add_child(fireteam_card)
 
@@ -2946,8 +3387,13 @@ func _sanitize_staging_state() -> void:
 		_loadout_staged_fireteam_id = ""
 
 	_respawn_staged_fireteam_id = _normalize_fireteam_id(_respawn_staged_fireteam_id)
-	if _find_fireteam_definition_index(_respawn_staged_fireteam_id) < 0 or not bool(_get_fireteam_definition(_respawn_staged_fireteam_id).get("respawn_enabled", false)):
+	if _find_fireteam_definition_index(_respawn_staged_fireteam_id) < 0 or (not bool(_get_fireteam_definition(_respawn_staged_fireteam_id).get("respawn_enabled", false)) and not _is_respawn_anchor_active(_respawn_staged_fireteam_id)):
 		_respawn_staged_fireteam_id = ""
+		_clear_respawn_anchor_progress()
+
+	_respawn_anchor_fireteam_id = _normalize_fireteam_id(_respawn_anchor_fireteam_id)
+	if _respawn_anchor_fireteam_id != _respawn_staged_fireteam_id or _find_fireteam_definition_index(_respawn_anchor_fireteam_id) < 0:
+		_clear_respawn_anchor_progress()
 
 	var sanitized_dropship_ids: PackedStringArray = []
 	for fireteam_id_variant in _dropship_staged_fireteam_ids:
@@ -3149,7 +3595,7 @@ func _build_boarding_progress_text(fireteam_id: String) -> String:
 		"incoming":
 			return "Boarding: dropship inbound | %d/%d boarded" % [boarded_members, total_members]
 		"ready":
-			return "Boarding: manual start ready | %d/%d boarded" % [boarded_members, total_members]
+			return "Boarding: auto start ready | %d/%d boarded" % [boarded_members, total_members]
 		"boarding":
 			if fireteam_id == _get_boarding_fireteam_id():
 				return "Boarding: %d/%d boarded | active: %s" % [boarded_members, total_members, _build_display_name(_get_boarding_member_id())]
@@ -3158,6 +3604,29 @@ func _build_boarding_progress_text(fireteam_id: String) -> String:
 			return "Boarding: completed | %d/%d boarded" % [boarded_members, total_members]
 		_:
 			return "Boarding: waiting for dropship"
+
+
+func _build_respawn_anchor_progress_value(fireteam_id: String) -> float:
+	if bool(_get_fireteam_definition(fireteam_id).get("respawn_enabled", false)):
+		return 100.0
+	if _is_respawn_anchor_active(fireteam_id):
+		return clampf((1.0 - (_respawn_anchor_seconds / DEFAULT_RESPAWN_ANCHOR_SECONDS)) * 100.0, 0.0, 100.0)
+	return 0.0
+
+
+func _build_respawn_anchor_progress_text(fireteam_id: String) -> String:
+	var total_members: int = _get_member_unit_ids_for_fireteam(fireteam_id).size()
+	if bool(_get_fireteam_definition(fireteam_id).get("respawn_enabled", false)):
+		return "Verorten: FOB anchor active | %d members ready" % total_members
+	if _is_respawn_anchor_active(fireteam_id):
+		return "Verorten: FOB anchor in progress | %.0fs" % _respawn_anchor_seconds
+	return "Verorten: waiting for FOB anchor"
+
+
+func _build_fireteam_progress_text(fireteam_id: String, progress_mode: String) -> String:
+	if progress_mode == "respawn_anchor":
+		return _build_respawn_anchor_progress_text(fireteam_id)
+	return _build_boarding_progress_text(fireteam_id)
 
 
 func _build_dropship_visual_texture(selected_craft_state: Dictionary = {}) -> Texture2D:
@@ -3223,7 +3692,7 @@ func _build_member_boarding_status_text(fireteam_id: String, unit_id: String) ->
 		"incoming":
 			return "Awaiting dropship"
 		"ready":
-			return "Ready for manual boarding"
+			return "Ready for auto boarding"
 		"boarding":
 			if fireteam_id == _get_boarding_fireteam_id() and unit_id == _get_boarding_member_id():
 				return "Boarding %.0fs" % _boarding_seconds
@@ -3232,6 +3701,30 @@ func _build_member_boarding_status_text(fireteam_id: String, unit_id: String) ->
 			return "Completed"
 		_:
 			return "Waiting"
+
+
+func _build_member_respawn_anchor_progress_value(fireteam_id: String, _unit_id: String) -> float:
+	return _build_respawn_anchor_progress_value(fireteam_id)
+
+
+func _build_member_respawn_anchor_status_text(fireteam_id: String, _unit_id: String) -> String:
+	if bool(_get_fireteam_definition(fireteam_id).get("respawn_enabled", false)):
+		return "Located"
+	if _is_respawn_anchor_active(fireteam_id):
+		return "Locating %.0fs" % _respawn_anchor_seconds
+	return "Waiting"
+
+
+func _build_member_progress_value(fireteam_id: String, unit_id: String, progress_mode: String) -> float:
+	if progress_mode == "respawn_anchor":
+		return _build_member_respawn_anchor_progress_value(fireteam_id, unit_id)
+	return _build_member_boarding_progress_value(fireteam_id, unit_id)
+
+
+func _build_member_progress_status_text(fireteam_id: String, unit_id: String, progress_mode: String) -> String:
+	if progress_mode == "respawn_anchor":
+		return _build_member_respawn_anchor_status_text(fireteam_id, unit_id)
+	return _build_member_boarding_status_text(fireteam_id, unit_id)
 
 
 func _build_overlay_loadout_text(unit_id: String, profile) -> String:

@@ -21,6 +21,7 @@ const ORDER_ROOT_NAME: String = "OrderRoot3D"
 const CONTACT_ROOT_NAME: String = "ContactRoot3D"
 const DROP_ROOT_NAME: String = "DropRoot3D"
 const STATUS_ROOT_NAME: String = "StatusRoot3D"
+const FEEDBACK_BUBBLE_HUD_ROOT_NAME: String = "FeedbackBubbleHudRoot"
 const CAMERA_NAME: String = "Camera3D"
 const LIGHT_NAME: String = "SunLight3D"
 const ENVIRONMENT_NAME: String = "WorldEnvironment"
@@ -44,7 +45,7 @@ const NPC_UNIT_VISUAL_MAPPING_PATH: String = "res://data/npc_unit_visual_mapping
 const WEAPON_FIRE_VFX_CATALOG_PATH: String = "res://data/weapon_fire_vfx_catalog.json"
 const TILE_SPACING: float = 1.0
 const TILE_THICKNESS: float = 0.035
-const HEIGHT_STEP: float = 0.25
+const HEIGHT_STEP: float = 0.5
 const OBJECT_HEIGHT_STEP: float = 0.42
 const CAMERA_DEFAULT_SIZE: float = 34.0
 const CAMERA_MIN_SIZE: float = 5.5
@@ -59,6 +60,9 @@ const MOVEMENT_STEP_SFX_RATE_LIMIT_MSEC: int = 420
 const DEFAULT_HALF_TILE_WIDTH: float = 64.0
 const DEFAULT_HALF_TILE_HEIGHT: float = 32.0
 const TILE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_SW.png")
+const SPACE_STATION_COLORMAP_TEXTURE: Texture2D = preload("res://Assets/curated/kenney/space_station/models/Textures/colormap.png")
+const SPACE_KIT_TERRAIN_TOP_SAMPLE: Vector2i = Vector2i(256, 315)
+const SPACE_KIT_TERRAIN_TOP_COLOR_FALLBACK: Color = Color(1.0, 0.6235, 0.4667, 1.0)
 const CLIFF_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_SE.png")
 const CLIFF_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_SW.png")
 const CLIFF_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_NE.png")
@@ -110,6 +114,7 @@ const UNIT_FALLBACK_BODY_HEIGHT: float = 0.585
 const UNIT_BASE_RADIUS: float = 0.27
 const UNIT_BASE_HEIGHT: float = 0.034
 const DROPSHIP_MODEL_SCALE: float = 1.48
+const DROPSHIP_MODEL_FORWARD_ROTATION_OFFSET_DEGREES: float = 180.0
 const AIR_LAYER_ID: String = "mission_air"
 const AIR_LAYER_DEFAULT_TEAM_ID: String = "team_alpha"
 const AIR_LAYER_MIN_CLEARANCE: float = 0.72
@@ -120,6 +125,28 @@ const FOW_BLACKOUT_COVER_Y_OFFSET: float = 0.42
 const FOW_KNOWN_DIM_COLOR: Color = Color(0.02, 0.05, 0.06, 0.18)
 const FOW_EXPLORED_DIM_COLOR: Color = Color(0.02, 0.04, 0.06, 0.46)
 const FOW_UNKNOWN_BLACK_COLOR: Color = Color(0.0, 0.0, 0.0, 1.0)
+const EDITOR_EMPTY_BACKGROUND_COLOR: Color = Color(0.12, 0.13, 0.12, 1.0)
+const EDITOR_LIGHT_ROTATION_DEGREES: Vector3 = Vector3(-58.0, -32.0, 0.0)
+const EDITOR_LIGHT_ENERGY: float = 1.18
+const EDITOR_LIGHT_SHADOW_ENABLED_DEFAULT: bool = true
+const EDITOR_LIGHT_SHADOW_OPACITY: float = 0.42
+const EDITOR_LIGHT_SHADOW_BLUR: float = 2.15
+const EDITOR_AMBIENT_LIGHT_COLOR: Color = Color(0.82, 0.86, 0.88, 1.0)
+const EDITOR_AMBIENT_LIGHT_ENERGY: float = 0.92
+const TILE_GRID_LINE_COLOR: Color = Color(0.56, 0.97, 1.0, 0.96)
+const TILE_GRID_LINE_SHADOW_COLOR: Color = Color(0.015, 0.025, 0.03, 0.96)
+const TILE_GRID_LINE_WIDTH_FACTOR: float = 0.045
+const TILE_GRID_LINE_SHADOW_WIDTH_FACTOR: float = 0.078
+const TILE_GRID_LINE_SURFACE_Y_OFFSET: float = 0.058
+const TILE_GRID_LINE_HIGHLIGHT_Y_OFFSET: float = 0.004
+const TILE_GRID_LINE_MATERIAL_KEY: String = "editor_tile_grid_overlay"
+const TILE_GRID_LINE_SHADOW_MATERIAL_KEY: String = "editor_tile_grid_shadow_overlay"
+const TILE_SELECTION_FILL_MATERIAL_KEY: String = "editor_tile_selection_fill"
+const TILE_SELECTION_BORDER_MATERIAL_KEY: String = "editor_tile_selection_border"
+const TILE_SELECTION_SURFACE_Y_OFFSET: float = 0.12
+const TILE_SELECTION_BORDER_WIDTH_FACTOR: float = 0.078
+const TILE_SELECTION_FILL_COLOR: Color = Color(0.05, 0.58, 1.0, 0.46)
+const TILE_SELECTION_BORDER_COLOR: Color = Color(0.78, 0.98, 1.0, 1.0)
 
 const LEGACY_MODEL_BY_TYPE: Dictionary = {
 	"wall_straight_se": "corridor_wall",
@@ -148,6 +175,7 @@ const LEGACY_MODEL_BY_TYPE: Dictionary = {
 
 var _viewport_container: SubViewportContainer = null
 var _subviewport: SubViewport = null
+var _feedback_bubble_hud_root: Control = null
 var _world_root: Node3D = null
 var _map_root: Node3D = null
 var _marker_root: Node3D = null
@@ -168,11 +196,13 @@ var _terrain_3d_mapping: Dictionary = {}
 var _terrain_surface_visual_theme_catalog: Dictionary = {}
 var _npc_unit_visual_mapping: Dictionary = {}
 var _weapon_fire_vfx_catalog: Dictionary = {}
+var _editor_light_shadows_enabled: bool = EDITOR_LIGHT_SHADOW_ENABLED_DEFAULT
 var _weapon_fire_vfx_texture_cache: Dictionary = {}
 var _comic_bubble_texture_cache: Dictionary = {}
 var _model_scene_cache: Dictionary = {}
 var _box_mesh_cache: Dictionary = {}
 var _material_cache: Dictionary = {}
+var _space_kit_terrain_top_color: Color = Color.TRANSPARENT
 var _render_tile_by_grid: Dictionary = {}
 var _unit_nodes: Array = []
 var _unit_proxies_by_id: Dictionary = {}
@@ -215,10 +245,14 @@ var _height_edge_authoring_conflict_count: int = 0
 var _surface_tint_count: int = 0
 var _elevated_surface_tint_count: int = 0
 var _nature_surface_ground_model_count: int = 0
+var _nature_surface_detail_model_count: int = 0
 var _nature_surface_theme_counts: Dictionary = {}
 var _surface_visual_entries: Array = []
+var _surface_detail_visual_entries: Array = []
 var _asset_texture_count: int = 0
 var _asset_model_count: int = 0
+var _space_station_model_count: int = 0
+var _space_station_textured_surface_count: int = 0
 var _nature_prop_model_count: int = 0
 var _nature_prop_role_counts: Dictionary = {}
 var _nature_prop_visual_entries: Array = []
@@ -254,8 +288,10 @@ var _air_unknown_terrain_reveal_block_count: int = 0
 var _dropship_air_y: float = 0.0
 var _dropship_surface_y: float = 0.0
 var _dropship_air_clearance: float = 0.0
+var _dropship_rotation_y: float = 0.0
 var _map_render_duration_msec: int = 0
 var _marker_count: int = 0
+var _compass_marker_count: int = 0
 var _patrol_segment_count: int = 0
 var _area_order_count: int = 0
 var _waypoint_visual_count: int = 0
@@ -296,6 +332,8 @@ var _fow_hidden_contact_count: int = 0
 var _fow_hidden_unit_proxy_count: int = 0
 var _fow_allowed_contact_count: int = 0
 var _lz_tile_marker_count: int = 0
+var _requested_lz_marker_count: int = 0
+var _resolved_lz_marker_count: int = 0
 var _tile_grid_line_count: int = 0
 var _contact_count: int = 0
 var _contact_visual_entries: Array = []
@@ -345,6 +383,7 @@ func render_map(terrain_map_data = null) -> void:
 	_clear_children(_order_root)
 	_clear_children(_contact_root)
 	_clear_children(_drop_root)
+	_clear_children(_feedback_bubble_hud_root)
 	_render_tile_by_grid.clear()
 	_map_tile_count = 0
 	_ground_mesh_count = 0
@@ -361,10 +400,14 @@ func render_map(terrain_map_data = null) -> void:
 	_surface_tint_count = 0
 	_elevated_surface_tint_count = 0
 	_nature_surface_ground_model_count = 0
+	_nature_surface_detail_model_count = 0
 	_nature_surface_theme_counts.clear()
 	_surface_visual_entries.clear()
+	_surface_detail_visual_entries.clear()
 	_asset_texture_count = 0
 	_asset_model_count = 0
+	_space_station_model_count = 0
+	_space_station_textured_surface_count = 0
 	_nature_prop_model_count = 0
 	_nature_prop_role_counts.clear()
 	_nature_prop_visual_entries.clear()
@@ -374,6 +417,7 @@ func render_map(terrain_map_data = null) -> void:
 	_missing_dropship_model_count = 0
 	_tile_grid_line_count = 0
 	_marker_count = 0
+	_compass_marker_count = 0
 	_patrol_segment_count = 0
 	_movement_style_visual_count = 0
 	_movement_bound_marker_count = 0
@@ -387,6 +431,7 @@ func render_map(terrain_map_data = null) -> void:
 	_weapon_fire_vfx_entries.clear()
 	_feedback_bubble_visual_count = 0
 	_feedback_bubble_entries.clear()
+	_clear_children(_feedback_bubble_hud_root)
 	_tactical_communication_event_visual_count = 0
 	_tactical_communication_event_entries.clear()
 	_reset_fow_overlay_counters(false)
@@ -432,6 +477,10 @@ func set_selected_grid_positions(grid_positions: Array) -> void:
 			_selected_grid_positions.append(Vector2i(roundi(grid_variant.x), roundi(grid_variant.y)))
 	_rebuild_selection_visuals()
 	_request_viewport_redraw()
+
+
+func get_selected_grid_positions() -> Array:
+	return _selected_grid_positions.duplicate()
 
 
 func set_order_visual_payload(order_payload: Dictionary) -> void:
@@ -522,8 +571,8 @@ func pan_camera_pixels(pixel_delta: Vector2) -> void:
 	if pixel_delta == Vector2.ZERO:
 		return
 	var viewport_height: float = maxf(float(_get_viewport_size().y), 1.0)
-	var scale: float = _camera_size / viewport_height
-	pan_camera(pixel_delta * CAMERA_DRAG_PAN_FACTOR * scale, 1.0)
+	var drag_scale: float = _camera_size / viewport_height
+	pan_camera(pixel_delta * CAMERA_DRAG_PAN_FACTOR * drag_scale, 1.0)
 
 
 func rotate_camera(delta_degrees: float) -> void:
@@ -551,6 +600,9 @@ func screen_to_world_position(screen_position: Vector2):
 	if _camera == null or _subviewport == null:
 		return null
 	var viewport_position: Vector2 = _screen_to_viewport_position(screen_position)
+	var picked_tile = _pick_tile_at_screen_position(viewport_position)
+	if picked_tile != null and typeof(picked_tile.world_position) == TYPE_VECTOR2:
+		return Vector2(picked_tile.world_position)
 	var ray_origin: Vector3 = _camera.project_ray_origin(viewport_position)
 	var ray_dir: Vector3 = _camera.project_ray_normal(viewport_position)
 	var hit = Plane(Vector3.UP, 0.0).intersects_ray(ray_origin, ray_dir)
@@ -559,11 +611,43 @@ func screen_to_world_position(screen_position: Vector2):
 	return _position_3d_to_world(Vector3(hit))
 
 
+func screen_to_grid_position(screen_position: Vector2):
+	_ensure_nodes()
+	if _camera == null or _terrain_map_data == null:
+		return null
+	var viewport_position: Vector2 = _screen_to_viewport_position(screen_position)
+	var picked_tile = _pick_tile_at_screen_position(viewport_position)
+	if picked_tile == null:
+		return null
+	if typeof(picked_tile.grid_position) == TYPE_VECTOR2I:
+		return Vector2i(picked_tile.grid_position)
+	if typeof(picked_tile.world_position) == TYPE_VECTOR2:
+		return _world_to_grid_position(Vector2(picked_tile.world_position))
+	return null
+
+
 func world_to_screen_position(world_position: Vector2) -> Vector2:
 	_ensure_nodes()
 	if _camera == null:
 		return Vector2.ZERO
-	return _camera.unproject_position(_world_to_3d_position(world_position, 0.0))
+	return _camera.unproject_position(_world_to_surface_3d_position(world_position, 0.0))
+
+
+func world_to_grid_position(world_position: Vector2):
+	var grid_position: Vector2i = _world_to_grid_position(world_position)
+	if _terrain_map_data != null and _terrain_map_data.has_method("get_tile_at_grid"):
+		var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
+		if tile_data == null:
+			return null
+	return grid_position
+
+
+func grid_to_world_position(grid_position: Vector2i):
+	if _terrain_map_data != null and _terrain_map_data.has_method("get_tile_at_grid"):
+		var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
+		if tile_data != null and typeof(tile_data.world_position) == TYPE_VECTOR2:
+			return Vector2(tile_data.world_position)
+	return _grid_float_to_world(Vector2(grid_position))
 
 
 func snap_world_position_to_tile_center(world_position: Vector2) -> Vector2:
@@ -588,6 +672,68 @@ func screen_rect_to_tile_world_positions(screen_rect: Rect2) -> Array:
 	return result
 
 
+func _pick_tile_at_screen_position(viewport_position: Vector2):
+	if _terrain_map_data == null or _camera == null:
+		return null
+	var best_tile = null
+	var best_score: float = INF
+	var camera_origin: Vector3 = _camera.global_position
+	var camera_forward: Vector3 = -_camera.global_transform.basis.z.normalized()
+	for tile_data in Array(_terrain_map_data.call("get_tiles")):
+		if tile_data == null:
+			continue
+		var screen_quad: Array[Vector2] = _get_tile_top_screen_quad(tile_data)
+		if screen_quad.size() != 4 or not _screen_point_is_inside_convex_quad(viewport_position, screen_quad):
+			continue
+		var surface_y: float = (float(tile_data.height_level) * _get_3d_height_step()) + TILE_SELECTION_SURFACE_Y_OFFSET
+		var tile_center_3d: Vector3 = _grid_to_3d_position(Vector2(tile_data.grid_position), surface_y)
+		var camera_depth: float = (tile_center_3d - camera_origin).dot(camera_forward)
+		var center_screen: Vector2 = _camera.unproject_position(tile_center_3d)
+		var score: float = camera_depth + (viewport_position.distance_squared_to(center_screen) * 0.0001)
+		if score < best_score:
+			best_score = score
+			best_tile = tile_data
+	return best_tile
+
+
+func _get_tile_top_screen_quad(tile_data) -> Array[Vector2]:
+	var result: Array[Vector2] = []
+	if tile_data == null or _camera == null:
+		return result
+	var cell_size: float = _get_3d_cell_size()
+	var half_size: float = cell_size * 0.5
+	var top_y: float = (float(tile_data.height_level) * _get_3d_height_step()) + TILE_GRID_LINE_SURFACE_Y_OFFSET
+	var center: Vector3 = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y)
+	for corner in [
+		center + Vector3(-half_size, 0.0, -half_size),
+		center + Vector3(half_size, 0.0, -half_size),
+		center + Vector3(half_size, 0.0, half_size),
+		center + Vector3(-half_size, 0.0, half_size),
+	]:
+		result.append(_camera.unproject_position(corner))
+	return result
+
+
+func _screen_point_is_inside_convex_quad(point: Vector2, quad: Array[Vector2]) -> bool:
+	if quad.size() != 4:
+		return false
+	var saw_positive: bool = false
+	var saw_negative: bool = false
+	for index in range(quad.size()):
+		var a: Vector2 = quad[index]
+		var b: Vector2 = quad[(index + 1) % quad.size()]
+		var edge: Vector2 = b - a
+		var to_point: Vector2 = point - a
+		var cross: float = edge.cross(to_point)
+		if cross > 0.001:
+			saw_positive = true
+		elif cross < -0.001:
+			saw_negative = true
+		if saw_positive and saw_negative:
+			return false
+	return true
+
+
 func get_audio_sfx_debug_snapshot() -> Dictionary:
 	var bus = _ensure_audio_event_bus(false)
 	if bus != null and bus.has_method("get_diagnostic_snapshot"):
@@ -595,8 +741,14 @@ func get_audio_sfx_debug_snapshot() -> Dictionary:
 	return {}
 
 
-func emit_movement_step_sfx_for_tests(unit_id: String, surface_type: String, visible: bool, moving: bool, now_msec: int) -> Dictionary:
-	return _maybe_emit_unit_step_sfx(unit_id, Vector2.ZERO, moving, visible, surface_type, now_msec)
+func emit_movement_step_sfx_for_tests(unit_id: String, surface_type: String, is_unit_visible: bool, moving: bool, now_msec: int) -> Dictionary:
+	return _maybe_emit_unit_step_sfx(unit_id, Vector2.ZERO, moving, is_unit_visible, surface_type, now_msec)
+
+
+func set_editor_shadow_readability_enabled(enabled: bool) -> void:
+	_editor_light_shadows_enabled = enabled
+	_apply_editor_light_settings()
+	_request_viewport_redraw()
 
 
 func get_render_snapshot() -> Dictionary:
@@ -606,6 +758,8 @@ func get_render_snapshot() -> Dictionary:
 	var render_monitor_snapshot: Dictionary = _build_render_monitor_snapshot()
 	return {
 		"tile_count": _map_tile_count,
+		"editor_visual_recovery": _build_editor_visual_recovery_snapshot(),
+		"editor_light": _build_editor_light_snapshot(),
 		"ground_mesh_count": _ground_mesh_count,
 		"tile_texture_count": _tile_texture_count,
 		"height_edge_texture_count": _height_edge_texture_count,
@@ -620,11 +774,16 @@ func get_render_snapshot() -> Dictionary:
 		"surface_tint_count": _surface_tint_count,
 		"elevated_surface_tint_count": _elevated_surface_tint_count,
 		"nature_surface_ground_model_count": _nature_surface_ground_model_count,
+		"nature_surface_detail_model_count": _nature_surface_detail_model_count,
 		"nature_surface_theme_counts": _nature_surface_theme_counts.duplicate(true),
 		"surface_visual_entries": _surface_visual_entries.duplicate(true),
+		"surface_detail_visual_entries": _surface_detail_visual_entries.duplicate(true),
+		"surface_detail_visual_count": _surface_detail_visual_entries.size(),
 		"surface_visual_theme_catalog_loaded": not _get_terrain_surface_visual_theme_catalog().is_empty(),
 		"asset_texture_count": _asset_texture_count,
 		"asset_model_count": _asset_model_count,
+		"space_station_model_count": _space_station_model_count,
+		"space_station_textured_surface_count": _space_station_textured_surface_count,
 		"nature_prop_model_count": _nature_prop_model_count,
 		"nature_prop_role_counts": _nature_prop_role_counts.duplicate(true),
 		"nature_prop_visual_entries": _nature_prop_visual_entries.duplicate(true),
@@ -655,8 +814,10 @@ func get_render_snapshot() -> Dictionary:
 		"unit_visual_mapping_loaded": not _get_npc_unit_visual_mapping().is_empty(),
 		"unit_status_badge_count": _unit_status_badge_count,
 		"marker_count": _marker_count,
+		"compass_marker_count": _compass_marker_count,
 		"patrol_segment_count": _patrol_segment_count,
 		"selected_grid_count": _selected_grid_positions.size(),
+		"selected_grid_positions": _selected_grid_positions.duplicate(),
 		"unit_proxy_count": _unit_proxies_by_id.size(),
 		"unit_proxy_ids": _get_unit_proxy_ids(false),
 		"visible_unit_proxy_ids": _get_unit_proxy_ids(true),
@@ -708,6 +869,12 @@ func get_render_snapshot() -> Dictionary:
 		"fow_dynamic_hidden_count": _get_fow_dynamic_hidden_count(),
 		"fow_allowed_contact_count": _fow_allowed_contact_count,
 		"lz_tile_marker_count": _lz_tile_marker_count,
+		"requested_lz_marker_visible": _requested_lz_marker_count > 0,
+		"resolved_lz_marker_visible": _resolved_lz_marker_count > 0,
+		"requested_lz_marker_count": _requested_lz_marker_count,
+		"resolved_lz_marker_count": _resolved_lz_marker_count,
+		"requested_lz_position": _drop_payload.get("requested_lz_position", _drop_payload.get("target_lz_position", _drop_payload.get("lz_position", null))),
+		"resolved_lz_position": _drop_payload.get("resolved_lz_position", _drop_payload.get("actual_landing_position", null)),
 		"tile_grid_line_count": _tile_grid_line_count,
 		"contact_count": _contact_count,
 		"contact_entries": _get_contact_visual_entries(),
@@ -726,6 +893,7 @@ func get_render_snapshot() -> Dictionary:
 		"dropship_air_y": _dropship_air_y,
 		"dropship_surface_y": _dropship_surface_y,
 		"dropship_air_clearance": _dropship_air_clearance,
+		"dropship_rotation_y": _dropship_rotation_y,
 		"dropship_above_terrain": (_dropship_model_visible or _dropship_texture_visible) and _dropship_air_clearance >= AIR_LAYER_MIN_CLEARANCE,
 		"dropship_fow_policy": String(_drop_payload.get("fow_policy", "friendly_air_visible_lz_requires_visible_tile")),
 		"dropship_team_id": String(_drop_payload.get("team_id", AIR_LAYER_DEFAULT_TEAM_ID)),
@@ -743,6 +911,54 @@ func get_render_snapshot() -> Dictionary:
 		"drop_payload_apply_count": _drop_payload_apply_count,
 		"mission_status_payload_apply_count": _mission_status_payload_apply_count,
 	}
+
+
+func _build_editor_visual_recovery_snapshot() -> Dictionary:
+	var grid_material := _get_tile_grid_material_for_snapshot()
+	return {
+		"height_step": _get_3d_height_step(),
+		"ground_thickness": _get_3d_ground_thickness(),
+		"grid_line_color": TILE_GRID_LINE_COLOR.to_html(true),
+		"grid_line_width_factor": TILE_GRID_LINE_WIDTH_FACTOR,
+		"grid_line_shadow_width_factor": TILE_GRID_LINE_SHADOW_WIDTH_FACTOR,
+		"grid_line_surface_y_offset": TILE_GRID_LINE_SURFACE_Y_OFFSET,
+		"grid_depth_tested": grid_material != null and not grid_material.no_depth_test,
+		"grid_depth_draw_mode": int(grid_material.depth_draw_mode) if grid_material != null else -1,
+		"selection_fill_color": TILE_SELECTION_FILL_COLOR.to_html(true),
+		"selection_border_color": TILE_SELECTION_BORDER_COLOR.to_html(true),
+		"selection_surface_y_offset": TILE_SELECTION_SURFACE_Y_OFFSET,
+		"selection_border_width_factor": TILE_SELECTION_BORDER_WIDTH_FACTOR,
+	}
+
+
+func _build_editor_light_snapshot() -> Dictionary:
+	var light: DirectionalLight3D = null
+	if _world_root != null:
+		light = _world_root.get_node_or_null(LIGHT_NAME) as DirectionalLight3D
+	var environment: Environment = null
+	if _environment != null:
+		environment = _environment.environment
+	return {
+		"rotation_degrees": light.rotation_degrees if light != null else EDITOR_LIGHT_ROTATION_DEGREES,
+		"energy": float(light.light_energy) if light != null else EDITOR_LIGHT_ENERGY,
+		"shadow_enabled": bool(light.shadow_enabled) if light != null else _editor_light_shadows_enabled,
+		"shadow_opacity": float(light.shadow_opacity) if light != null else EDITOR_LIGHT_SHADOW_OPACITY,
+		"shadow_blur": float(light.shadow_blur) if light != null else EDITOR_LIGHT_SHADOW_BLUR,
+		"ambient_light_color": environment.ambient_light_color.to_html(true) if environment != null else EDITOR_AMBIENT_LIGHT_COLOR.to_html(true),
+		"ambient_light_energy": float(environment.ambient_light_energy) if environment != null else EDITOR_AMBIENT_LIGHT_ENERGY,
+		"background_color": environment.background_color.to_html(true) if environment != null else EDITOR_EMPTY_BACKGROUND_COLOR.to_html(true),
+	}
+
+
+func _get_tile_grid_material_for_snapshot() -> StandardMaterial3D:
+	if _material_cache.has(TILE_GRID_LINE_MATERIAL_KEY):
+		return _material_cache[TILE_GRID_LINE_MATERIAL_KEY] as StandardMaterial3D
+	var grid_node: MeshInstance3D = null
+	if _map_root != null:
+		grid_node = _map_root.get_node_or_null("TileGridLines3D") as MeshInstance3D
+	if grid_node != null and grid_node.mesh != null and grid_node.mesh.get_surface_count() > 0:
+		return grid_node.mesh.surface_get_material(0) as StandardMaterial3D
+	return null
 
 
 func _build_render_budget_by_category() -> Dictionary:
@@ -920,6 +1136,17 @@ func _ensure_nodes() -> void:
 		_subviewport.size = _get_viewport_size()
 		_viewport_container.add_child(_subviewport)
 
+	if _feedback_bubble_hud_root == null:
+		_feedback_bubble_hud_root = get_node_or_null(FEEDBACK_BUBBLE_HUD_ROOT_NAME) as Control
+	if _feedback_bubble_hud_root == null:
+		_feedback_bubble_hud_root = Control.new()
+		_feedback_bubble_hud_root.name = FEEDBACK_BUBBLE_HUD_ROOT_NAME
+		_feedback_bubble_hud_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_feedback_bubble_hud_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+		add_child(_feedback_bubble_hud_root)
+	_feedback_bubble_hud_root.z_as_relative = false
+	_feedback_bubble_hud_root.z_index = 512
+
 	if _world_root == null:
 		_world_root = _subviewport.get_node_or_null(WORLD_ROOT_NAME) as Node3D
 	if _world_root == null:
@@ -951,23 +1178,36 @@ func _ensure_nodes() -> void:
 	if light == null:
 		light = DirectionalLight3D.new()
 		light.name = LIGHT_NAME
-		light.light_energy = 1.45
-		light.rotation_degrees = Vector3(-62.0, -38.0, 0.0)
 		_world_root.add_child(light)
+	_apply_editor_light_settings()
 
 	if _environment == null:
 		_environment = _world_root.get_node_or_null(ENVIRONMENT_NAME) as WorldEnvironment
 	if _environment == null:
 		_environment = WorldEnvironment.new()
 		_environment.name = ENVIRONMENT_NAME
-		var environment := Environment.new()
-		environment.background_mode = Environment.BG_COLOR
-		environment.background_color = Color(0.25, 0.27, 0.27, 1.0)
-		environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-		environment.ambient_light_color = Color(0.82, 0.86, 0.88, 1.0)
-		environment.ambient_light_energy = 0.72
-		_environment.environment = environment
 		_world_root.add_child(_environment)
+	if _environment.environment == null:
+		_environment.environment = Environment.new()
+	var environment := _environment.environment
+	environment.background_mode = Environment.BG_COLOR
+	environment.background_color = EDITOR_EMPTY_BACKGROUND_COLOR
+	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	environment.ambient_light_color = EDITOR_AMBIENT_LIGHT_COLOR
+	environment.ambient_light_energy = EDITOR_AMBIENT_LIGHT_ENERGY
+
+
+func _apply_editor_light_settings() -> void:
+	if _world_root == null:
+		return
+	var light := _world_root.get_node_or_null(LIGHT_NAME) as DirectionalLight3D
+	if light == null:
+		return
+	light.light_energy = EDITOR_LIGHT_ENERGY
+	light.rotation_degrees = EDITOR_LIGHT_ROTATION_DEGREES
+	light.shadow_enabled = _editor_light_shadows_enabled
+	light.shadow_opacity = EDITOR_LIGHT_SHADOW_OPACITY
+	light.shadow_blur = EDITOR_LIGHT_SHADOW_BLUR
 
 
 func _ensure_node3d(parent: Node, node_name: String) -> Node3D:
@@ -991,6 +1231,11 @@ func _resize_subviewport() -> void:
 	_viewport_container.offset_top = 0.0
 	_viewport_container.offset_right = 0.0
 	_viewport_container.offset_bottom = 0.0
+	if _feedback_bubble_hud_root != null:
+		_feedback_bubble_hud_root.offset_left = 0.0
+		_feedback_bubble_hud_root.offset_top = 0.0
+		_feedback_bubble_hud_root.offset_right = 0.0
+		_feedback_bubble_hud_root.offset_bottom = 0.0
 
 
 func _request_viewport_redraw(continuous: bool = false) -> void:
@@ -1040,8 +1285,8 @@ func _update_camera_transform() -> void:
 	var pitch_rad: float = deg_to_rad(_camera_pitch_degrees)
 	var horizontal_distance: float = maxf(_camera_size * 1.08, 10.0)
 	var height: float = maxf(sin(pitch_rad) * _camera_size * 1.18, 8.0)
-	var offset := Vector3(sin(yaw_rad) * horizontal_distance, height, cos(yaw_rad) * horizontal_distance)
-	_camera.global_position = focus_3d + offset
+	var camera_offset := Vector3(sin(yaw_rad) * horizontal_distance, height, cos(yaw_rad) * horizontal_distance)
+	_camera.global_position = focus_3d + camera_offset
 	_camera.look_at(focus_3d, Vector3.UP)
 	_request_viewport_redraw()
 
@@ -1075,6 +1320,7 @@ func _add_tile_visual(tile_data) -> void:
 		_map_root.add_child(tile_instance)
 		_ground_mesh_count += 1
 	_add_surface_tint_visual(tile_data, top_y)
+	_add_surface_detail_visual(tile_data, top_y)
 	_map_tile_count += 1
 
 	var object_type_id: String = String(tile_data.object_type_id) if tile_data.object_type_id is String else ""
@@ -1128,15 +1374,23 @@ func _add_ground_model_visual(tile_data, top_y: float, visual_type_id: String = 
 	if model_instance == null:
 		return false
 	_normalize_asset_model_instance(model_instance)
+	var material_override_color: Color = _apply_ground_surface_material_override(model_instance, normalized_visual_type_id, tile_data)
+	var material_override_unshaded: bool = material_override_color != Color.TRANSPARENT and normalized_visual_type_id == "ground_flat"
 
 	var ground_root := Node3D.new()
 	ground_root.name = "Tile_%d_%d" % [tile_data.grid_position.x, tile_data.grid_position.y]
-	ground_root.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + 0.002)
+	var model_height: float = _get_normalized_model_height(model_instance)
+	var model_scale: float = _get_3d_cell_size()
+	var visual_height: float = model_height * model_scale
+	var ground_y: float = top_y
+	if visual_height > 0.001:
+		ground_y = top_y - visual_height
+	ground_root.position = _grid_to_3d_position(Vector2(tile_data.grid_position), ground_y)
 	ground_root.scale = Vector3.ONE * _get_3d_cell_size()
 	ground_root.add_child(model_instance)
 	_map_root.add_child(ground_root)
 	_ground_mesh_count += 1
-	_register_ground_surface_visual(tile_data, normalized_visual_type_id)
+	_register_ground_surface_visual(tile_data, normalized_visual_type_id, ground_y, top_y, visual_height, material_override_color, material_override_unshaded)
 	return true
 
 
@@ -1160,7 +1414,81 @@ func _resolve_ground_surface_model_key(tile_data) -> String:
 	return model_key if not model_key.is_empty() else "ground_flat"
 
 
-func _register_ground_surface_visual(tile_data, visual_type_id: String) -> void:
+func _add_surface_detail_visual(tile_data, top_y: float) -> void:
+	if tile_data == null or _map_root == null or not _uses_strict_3d_asset_mapping():
+		return
+	var detail_model_key: String = _resolve_surface_detail_model_key(tile_data)
+	if detail_model_key.is_empty():
+		return
+	var model_scene := _get_asset_model_scene(detail_model_key)
+	if model_scene == null:
+		_add_missing_asset_marker(tile_data, top_y, detail_model_key)
+		return
+	var model_instance := model_scene.instantiate() as Node3D
+	if model_instance == null:
+		return
+	_normalize_asset_model_instance(model_instance)
+
+	var detail_root := Node3D.new()
+	detail_root.name = "SurfaceDetail_%s_%d_%d" % [detail_model_key, tile_data.grid_position.x, tile_data.grid_position.y]
+	detail_root.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + _get_asset_y_offset(detail_model_key)) + _get_asset_position_offset(detail_model_key)
+	detail_root.rotation_degrees.y = _get_asset_rotation_y(detail_model_key)
+	detail_root.scale = Vector3.ONE * _get_asset_model_scale(detail_model_key)
+	detail_root.add_child(model_instance)
+	_map_root.add_child(detail_root)
+	_register_surface_detail_visual(tile_data, detail_model_key, detail_root, top_y)
+
+
+func _resolve_surface_detail_model_key(tile_data) -> String:
+	if tile_data == null:
+		return ""
+	var type_id: String = String(tile_data.type_id).strip_edges().to_lower() if tile_data.type_id is String else ""
+	if type_id.is_empty():
+		return ""
+	var catalog: Dictionary = _get_terrain_surface_visual_theme_catalog()
+	var detail_by_type: Dictionary = Dictionary(catalog.get("surface_detail_by_tile_type", {}))
+	return String(detail_by_type.get(type_id, "")).strip_edges().to_lower()
+
+
+func _register_surface_detail_visual(tile_data, visual_type_id: String, visual_root: Node3D, top_y: float) -> void:
+	if tile_data == null:
+		return
+	var mapped_entry: Dictionary = _get_model_entry_for_type(visual_type_id)
+	var visual_entry: Dictionary = _get_surface_visual_entry_for_model_key(visual_type_id)
+	var is_nature_kit: bool = _is_nature_kit_model_entry(mapped_entry)
+	var theme: String = String(visual_entry.get("theme", mapped_entry.get("nature_theme", ""))).strip_edges()
+	if theme.is_empty():
+		theme = "detail"
+	if is_nature_kit:
+		_nature_surface_detail_model_count += 1
+		_nature_surface_theme_counts[theme] = int(_nature_surface_theme_counts.get(theme, 0)) + 1
+	_surface_detail_visual_entries.append({
+		"node_name": String(visual_root.name) if visual_root != null else "",
+		"grid_position": tile_data.grid_position,
+		"type_id": String(tile_data.type_id),
+		"surface_type": String(tile_data.surface_type),
+		"model_key": visual_type_id,
+		"model_path": String(mapped_entry.get("model_path", "")),
+		"source_id": String(mapped_entry.get("source_id", "")),
+		"theme": theme,
+		"visual_id": String(visual_entry.get("visual_id", visual_type_id)),
+		"is_nature_kit": is_nature_kit,
+		"surface_y": top_y,
+		"world_y": visual_root.position.y if visual_root != null else top_y,
+		"y_offset": _get_asset_y_offset(visual_type_id),
+		"position_offset": _get_asset_position_offset(visual_type_id),
+	})
+
+
+func _register_ground_surface_visual(
+	tile_data,
+	visual_type_id: String,
+	ground_y: float = 0.0,
+	top_y: float = 0.0,
+	visual_height: float = 0.0,
+	material_override_color: Color = Color.TRANSPARENT,
+	material_override_unshaded: bool = false
+) -> void:
 	if tile_data == null:
 		return
 	var mapped_entry: Dictionary = _get_model_entry_for_type(visual_type_id)
@@ -1182,7 +1510,81 @@ func _register_ground_surface_visual(tile_data, visual_type_id: String) -> void:
 		"theme": theme,
 		"visual_id": String(visual_entry.get("visual_id", visual_type_id)),
 		"is_nature_kit": is_nature_kit,
+		"surface_y": top_y,
+		"world_y": ground_y,
+		"visual_bottom_y": ground_y,
+		"visual_top_y": ground_y + visual_height,
+		"visual_height": visual_height,
+		"has_material_override": material_override_color != Color.TRANSPARENT,
+		"material_override_color": material_override_color,
+		"material_override_unshaded": material_override_unshaded,
 	})
+
+
+func _apply_ground_surface_material_override(model_instance: Node3D, visual_type_id: String, tile_data) -> Color:
+	var override_color: Color = _get_ground_surface_model_override_color(visual_type_id, tile_data)
+	if override_color == Color.TRANSPARENT:
+		return Color.TRANSPARENT
+	var material: StandardMaterial3D = _make_unshaded_material(override_color) if visual_type_id.strip_edges().to_lower() == "ground_flat" else _make_material(override_color)
+	_apply_material_override_recursive(model_instance, material)
+	return override_color
+
+
+func _get_ground_surface_model_override_color(visual_type_id: String, tile_data) -> Color:
+	var normalized: String = visual_type_id.strip_edges().to_lower()
+	if normalized == "ground_flat":
+		return _get_space_kit_terrain_top_color()
+	if normalized != "nature_ground_dirt":
+		return Color.TRANSPARENT
+	var surface_type: String = TERRAIN_TILE_DATA_SCRIPT.SURFACE_GROUND
+	if tile_data != null and tile_data.surface_type is String:
+		surface_type = String(tile_data.surface_type).strip_edges().to_lower()
+	match surface_type:
+		TERRAIN_TILE_DATA_SCRIPT.SURFACE_SAND:
+			return Color(0.62, 0.48, 0.30, 1.0)
+		TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROCK:
+			return Color(0.36, 0.35, 0.31, 1.0)
+		TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROAD:
+			return Color(0.34, 0.36, 0.34, 1.0)
+		_:
+			return Color(0.38, 0.34, 0.24, 1.0)
+
+
+func _get_space_kit_terrain_top_color() -> Color:
+	if _space_kit_terrain_top_color != Color.TRANSPARENT:
+		return _space_kit_terrain_top_color
+	var sampled_color: Color = _sample_space_kit_terrain_top_color()
+	_space_kit_terrain_top_color = sampled_color if sampled_color != Color.TRANSPARENT else SPACE_KIT_TERRAIN_TOP_COLOR_FALLBACK
+	return _space_kit_terrain_top_color
+
+
+func _sample_space_kit_terrain_top_color() -> Color:
+	if TILE_TEXTURE == null:
+		return Color.TRANSPARENT
+	var image: Image = TILE_TEXTURE.get_image()
+	if image == null or image.is_empty():
+		return Color.TRANSPARENT
+	var sample_position := Vector2i(
+		clampi(SPACE_KIT_TERRAIN_TOP_SAMPLE.x, 0, image.get_width() - 1),
+		clampi(SPACE_KIT_TERRAIN_TOP_SAMPLE.y, 0, image.get_height() - 1)
+	)
+	var sampled_color: Color = image.get_pixelv(sample_position)
+	if sampled_color.a < 0.5:
+		sampled_color = _find_opaque_space_kit_terrain_pixel(image, sample_position)
+	if sampled_color.a < 0.5:
+		return Color.TRANSPARENT
+	sampled_color.a = 1.0
+	return sampled_color
+
+
+func _find_opaque_space_kit_terrain_pixel(image: Image, sample_position: Vector2i) -> Color:
+	var radius: int = 64
+	for y in range(maxi(sample_position.y - radius, 0), mini(sample_position.y + radius + 1, image.get_height())):
+		for x in range(maxi(sample_position.x - radius, 0), mini(sample_position.x + radius + 1, image.get_width())):
+			var sampled_color: Color = image.get_pixel(x, y)
+			if sampled_color.a >= 0.5:
+				return sampled_color
+	return Color.TRANSPARENT
 
 
 func _add_missing_asset_marker(tile_data, top_y: float, visual_type_id: String) -> void:
@@ -1232,39 +1634,97 @@ func _add_surface_tint_visual(tile_data, top_y: float) -> void:
 func _add_tile_grid_lines(tiles: Array) -> void:
 	if _map_root == null or tiles.is_empty():
 		return
-	var material := _make_material(Color(0.12, 0.08, 0.06, 0.48), true)
-	var mesh := ImmediateMesh.new()
-	mesh.surface_begin(Mesh.PRIMITIVE_LINES, material)
+	var shadow_material := _make_editor_grid_material(false)
+	var highlight_material := _make_editor_grid_material(true)
+	var shadow_mesh := ImmediateMesh.new()
+	shadow_mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, shadow_material)
+	var highlight_mesh := ImmediateMesh.new()
+	highlight_mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, highlight_material)
 	var cell_size: float = _get_3d_cell_size()
 	var half_size: float = cell_size * 0.5
+	var line_width: float = maxf(cell_size * TILE_GRID_LINE_WIDTH_FACTOR, 0.012)
+	var shadow_line_width: float = maxf(cell_size * TILE_GRID_LINE_SHADOW_WIDTH_FACTOR, 0.018)
 	var line_count: int = 0
+	var rendered_edges: Dictionary = {}
 	for tile_data in tiles:
 		if tile_data == null:
 			continue
 		var grid_position: Vector2 = Vector2(tile_data.grid_position)
-		var top_y: float = (float(tile_data.height_level) * _get_3d_height_step()) + 0.018
+		var top_y: float = (float(tile_data.height_level) * _get_3d_height_step()) + TILE_GRID_LINE_SURFACE_Y_OFFSET
 		var center: Vector3 = _grid_to_3d_position(grid_position, top_y)
+		var highlight_center: Vector3 = center + Vector3(0.0, TILE_GRID_LINE_HIGHLIGHT_Y_OFFSET, 0.0)
 		var nw := center + Vector3(-half_size, 0.0, -half_size)
 		var ne := center + Vector3(half_size, 0.0, -half_size)
 		var se := center + Vector3(half_size, 0.0, half_size)
 		var sw := center + Vector3(-half_size, 0.0, half_size)
-		mesh.surface_add_vertex(nw)
-		mesh.surface_add_vertex(ne)
-		mesh.surface_add_vertex(ne)
-		mesh.surface_add_vertex(se)
-		mesh.surface_add_vertex(se)
-		mesh.surface_add_vertex(sw)
-		mesh.surface_add_vertex(sw)
-		mesh.surface_add_vertex(nw)
-		line_count += 4
-	mesh.surface_end()
+		var hnw := highlight_center + Vector3(-half_size, 0.0, -half_size)
+		var hne := highlight_center + Vector3(half_size, 0.0, -half_size)
+		var hse := highlight_center + Vector3(half_size, 0.0, half_size)
+		var hsw := highlight_center + Vector3(-half_size, 0.0, half_size)
+		if _add_unique_grid_line_quad(shadow_mesh, rendered_edges, nw, ne, shadow_line_width):
+			_add_grid_line_quad(highlight_mesh, hnw, hne, line_width)
+			line_count += 1
+		if _add_unique_grid_line_quad(shadow_mesh, rendered_edges, ne, se, shadow_line_width):
+			_add_grid_line_quad(highlight_mesh, hne, hse, line_width)
+			line_count += 1
+		if _add_unique_grid_line_quad(shadow_mesh, rendered_edges, se, sw, shadow_line_width):
+			_add_grid_line_quad(highlight_mesh, hse, hsw, line_width)
+			line_count += 1
+		if _add_unique_grid_line_quad(shadow_mesh, rendered_edges, sw, nw, shadow_line_width):
+			_add_grid_line_quad(highlight_mesh, hsw, hnw, line_width)
+			line_count += 1
+	shadow_mesh.surface_end()
+	highlight_mesh.surface_end()
 	if line_count <= 0:
 		return
+	var shadow_lines := MeshInstance3D.new()
+	shadow_lines.name = "TileGridShadowLines3D"
+	shadow_lines.mesh = shadow_mesh
+	_map_root.add_child(shadow_lines)
 	var lines := MeshInstance3D.new()
 	lines.name = "TileGridLines3D"
-	lines.mesh = mesh
+	lines.mesh = highlight_mesh
 	_map_root.add_child(lines)
 	_tile_grid_line_count = line_count
+
+
+func _add_unique_grid_line_quad(mesh: ImmediateMesh, rendered_edges: Dictionary, start_point: Vector3, end_point: Vector3, line_width: float) -> bool:
+	var edge_key: String = _get_grid_edge_key(start_point, end_point)
+	if rendered_edges.has(edge_key):
+		return false
+	rendered_edges[edge_key] = true
+	_add_grid_line_quad(mesh, start_point, end_point, line_width)
+	return true
+
+
+func _add_grid_line_quad(mesh: ImmediateMesh, start_point: Vector3, end_point: Vector3, line_width: float) -> void:
+	var direction: Vector3 = end_point - start_point
+	if direction.length_squared() <= 0.000001:
+		return
+	direction = direction.normalized()
+	var side := Vector3(-direction.z, 0.0, direction.x) * (line_width * 0.5)
+	var a := start_point + side
+	var b := end_point + side
+	var c := end_point - side
+	var d := start_point - side
+	mesh.surface_add_vertex(a)
+	mesh.surface_add_vertex(b)
+	mesh.surface_add_vertex(c)
+	mesh.surface_add_vertex(a)
+	mesh.surface_add_vertex(c)
+	mesh.surface_add_vertex(d)
+
+
+func _get_grid_edge_key(start_point: Vector3, end_point: Vector3) -> String:
+	var start_key: String = _get_grid_point_key(start_point)
+	var end_key: String = _get_grid_point_key(end_point)
+	if end_key.naturalnocasecmp_to(start_key) < 0:
+		return "%s|%s" % [end_key, start_key]
+	return "%s|%s" % [start_key, end_key]
+
+
+func _get_grid_point_key(point: Vector3) -> String:
+	return "%d,%d,%d" % [roundi(point.x * 1000.0), roundi(point.y * 1000.0), roundi(point.z * 1000.0)]
 
 
 func _add_height_edge_visuals(tile_data) -> void:
@@ -1302,7 +1762,7 @@ func _add_height_edge_model_visuals(tile_data) -> void:
 			var dir_b: Vector2i = corner_entry[1]
 			var visual_type_id: String = String(corner_entry[2])
 			if edge_dirs.has(dir_a) and edge_dirs.has(dir_b):
-				if _add_height_edge_model(tile_data, top_y, visual_type_id, "HeightCorner_%d_%d_%d_%d" % [grid_pos.x, grid_pos.y, dir_a.x + dir_b.x, dir_a.y + dir_b.y]):
+				if _add_height_edge_model(tile_data, top_y, visual_type_id, "HeightCorner_%d_%d_%d_%d" % [grid_pos.x, grid_pos.y, dir_a.x + dir_b.x, dir_a.y + dir_b.y], [dir_a, dir_b]):
 					if not edges_consumed_by_corners.has(dir_a):
 						edges_consumed_by_corners.append(dir_a)
 					if not edges_consumed_by_corners.has(dir_b):
@@ -1310,15 +1770,17 @@ func _add_height_edge_model_visuals(tile_data) -> void:
 		for edge_dir in edge_dirs:
 			if edges_consumed_by_corners.has(edge_dir):
 				continue
-			_add_height_edge_model(tile_data, top_y, _get_height_edge_visual_type_id(current_edge_type, edge_dir), "HeightEdge_%d_%d_%d_%d" % [grid_pos.x, grid_pos.y, edge_dir.x, edge_dir.y])
+			_add_height_edge_model(tile_data, top_y, _get_height_edge_visual_type_id(current_edge_type, edge_dir), "HeightEdge_%d_%d_%d_%d" % [grid_pos.x, grid_pos.y, edge_dir.x, edge_dir.y], [edge_dir])
 		return
 
 	if current_edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE:
 		for edge_dir in edge_dirs:
-			_add_height_edge_model(tile_data, top_y, _get_height_edge_visual_type_id(current_edge_type, edge_dir), "HeightEdge_%d_%d_%d_%d" % [grid_pos.x, grid_pos.y, edge_dir.x, edge_dir.y])
+			_add_height_edge_model(tile_data, top_y, _get_height_edge_visual_type_id(current_edge_type, edge_dir), "HeightEdge_%d_%d_%d_%d" % [grid_pos.x, grid_pos.y, edge_dir.x, edge_dir.y], [edge_dir])
 
 
-func _add_height_edge_model(tile_data, top_y: float, visual_type_id: String, node_name: String) -> bool:
+func _add_height_edge_model(tile_data, top_y: float, visual_type_id: String, node_name: String, edge_dirs: Array = []) -> bool:
+	if String(tile_data.edge_type) == TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF and _has_explicit_cliff_visual_at_height_edge_anchor(tile_data, edge_dirs):
+		return false
 	var model_scene := _get_asset_model_scene(visual_type_id)
 	if model_scene == null or _map_root == null:
 		_add_missing_asset_marker(tile_data, top_y, visual_type_id)
@@ -1329,11 +1791,16 @@ func _add_height_edge_model(tile_data, top_y: float, visual_type_id: String, nod
 		_add_missing_asset_marker(tile_data, top_y, visual_type_id)
 		return false
 	_normalize_asset_model_instance(model_instance)
+	var edge_base_y: float = _get_height_edge_base_y(tile_data, edge_dirs)
+	var edge_span: float = maxf(top_y - edge_base_y, _get_3d_height_step())
+	var model_height: float = _get_normalized_model_height(model_instance)
+	var model_scale: float = _get_asset_model_scale(visual_type_id)
 	var visual_root := Node3D.new()
 	visual_root.name = "%s_%s" % [node_name, visual_type_id]
-	visual_root.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + _get_asset_y_offset(visual_type_id)) + _get_asset_position_offset(visual_type_id)
+	var anchor_grid_position: Vector2 = _get_height_edge_anchor_grid_position(tile_data, edge_dirs)
+	visual_root.position = _grid_to_3d_position(anchor_grid_position, edge_base_y + _get_height_edge_asset_y_offset(visual_type_id)) + _get_asset_position_offset(visual_type_id)
 	visual_root.rotation_degrees.y = _get_asset_rotation_y(visual_type_id)
-	visual_root.scale = Vector3.ONE * _get_asset_model_scale(visual_type_id)
+	visual_root.scale = Vector3(model_scale, edge_span / model_height, model_scale)
 	visual_root.add_child(model_instance)
 	_map_root.add_child(visual_root)
 	_asset_model_count += 1
@@ -1359,6 +1826,11 @@ func _add_height_edge_model(tile_data, top_y: float, visual_type_id: String, nod
 		"edge_type": String(tile_data.edge_type),
 		"surface_type": String(tile_data.surface_type),
 		"grid_position": tile_data.grid_position,
+		"anchor_grid_position": anchor_grid_position,
+		"edge_dirs": edge_dirs.duplicate(),
+		"base_y": edge_base_y,
+		"top_y": top_y,
+		"height_span": edge_span,
 		"model_path": String(mapped_entry.get("model_path", "")),
 		"source_id": String(mapped_entry.get("source_id", "")),
 		"nature_theme": String(mapped_entry.get("nature_theme", "")),
@@ -1368,17 +1840,74 @@ func _add_height_edge_model(tile_data, top_y: float, visual_type_id: String, nod
 	return true
 
 
+func _has_explicit_cliff_visual_at_height_edge_anchor(tile_data, edge_dirs: Array) -> bool:
+	if tile_data == null or edge_dirs.is_empty():
+		return false
+	var anchor_grid_position := Vector2i(tile_data.grid_position)
+	for edge_dir_variant in edge_dirs:
+		anchor_grid_position += Vector2i(edge_dir_variant)
+	var anchor_tile = _render_tile_by_grid.get(anchor_grid_position, null)
+	if anchor_tile == null:
+		return false
+	var anchor_type_id: String = String(anchor_tile.type_id).strip_edges().to_lower() if anchor_tile.type_id is String else ""
+	return anchor_type_id.begins_with("cliff_")
+
+
+func _get_height_edge_anchor_grid_position(tile_data, edge_dirs: Array) -> Vector2:
+	if tile_data == null:
+		return Vector2.ZERO
+	var anchor_grid := Vector2(tile_data.grid_position)
+	if edge_dirs.is_empty():
+		return anchor_grid
+	var offset := Vector2.ZERO
+	for edge_dir_variant in edge_dirs:
+		offset += Vector2(Vector2i(edge_dir_variant))
+	return anchor_grid + offset
+
+
+func _get_height_edge_base_y(tile_data, edge_dirs: Array) -> float:
+	if tile_data == null:
+		return 0.0
+	var current_height: int = int(tile_data.height_level)
+	var lower_height: int = maxi(current_height - 1, 0)
+	var grid_pos: Vector2i = tile_data.grid_position
+	for edge_dir_variant in edge_dirs:
+		var edge_dir := Vector2i(edge_dir_variant)
+		var neighbor = _render_tile_by_grid.get(grid_pos + edge_dir, null)
+		var neighbor_height: int = int(neighbor.height_level) if neighbor != null else 0
+		lower_height = mini(lower_height, neighbor_height)
+	return float(maxi(lower_height, 0)) * _get_3d_height_step()
+
+
+func _get_height_edge_asset_y_offset(visual_type_id: String) -> float:
+	var mapped_entry: Dictionary = _get_model_entry_for_type(visual_type_id)
+	if mapped_entry.is_empty():
+		return 0.0
+	return float(mapped_entry.get("y_offset", 0.0))
+
+
+func _get_normalized_model_height(model_instance: Node3D) -> float:
+	if model_instance == null:
+		return 1.0
+	var bounds: Dictionary = _get_local_visual_bounds(model_instance)
+	if not bool(bounds.get("valid", false)):
+		return 1.0
+	var min_value: Vector3 = Vector3(bounds.get("min", Vector3.ZERO))
+	var max_value: Vector3 = Vector3(bounds.get("max", Vector3.ZERO))
+	return maxf(max_value.y - min_value.y, 0.001)
+
+
 func _collect_lower_height_edge_dirs(tile_data) -> Array[Vector2i]:
 	var result: Array[Vector2i] = []
 	if tile_data == null:
 		return result
 	var grid_pos: Vector2i = tile_data.grid_position
 	var my_height: int = int(tile_data.height_level)
-	for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-		var neighbor = _render_tile_by_grid.get(grid_pos + offset, null)
+	for neighbor_offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+		var neighbor = _render_tile_by_grid.get(grid_pos + neighbor_offset, null)
 		var neighbor_height: int = int(neighbor.height_level) if neighbor != null else 0
 		if neighbor_height < my_height:
-			result.append(offset)
+			result.append(neighbor_offset)
 	return result
 
 
@@ -1432,7 +1961,7 @@ func _add_height_edge_texture_visuals(tile_data) -> void:
 			var dir_b: Vector2i = corner_entry[1]
 			var corner_texture := corner_entry[2] as Texture2D
 			if cliff_edge_dirs.has(dir_a) and cliff_edge_dirs.has(dir_b):
-				_add_height_edge_texture_card(tile_data, top_y, corner_texture, "Corner_%d_%d_%d_%d" % [grid_pos.x, grid_pos.y, dir_a.x + dir_b.x, dir_a.y + dir_b.y])
+				_add_height_edge_texture_card(tile_data, top_y, corner_texture, "Corner_%d_%d_%d_%d" % [grid_pos.x, grid_pos.y, dir_a.x + dir_b.x, dir_a.y + dir_b.y], [dir_a, dir_b])
 				if not edges_consumed_by_corners.has(dir_a):
 					edges_consumed_by_corners.append(dir_a)
 				if not edges_consumed_by_corners.has(dir_b):
@@ -1458,16 +1987,16 @@ func _add_height_edge_texture_visuals(tile_data) -> void:
 		if edges_consumed_by_corners.has(edge_dir):
 			continue
 		var edge_texture := edge_texture_map.get(edge_dir, null) as Texture2D
-		_add_height_edge_texture_card(tile_data, top_y, edge_texture, "Edge_%d_%d_%d_%d" % [grid_pos.x, grid_pos.y, edge_dir.x, edge_dir.y])
+		_add_height_edge_texture_card(tile_data, top_y, edge_texture, "Edge_%d_%d_%d_%d" % [grid_pos.x, grid_pos.y, edge_dir.x, edge_dir.y], [edge_dir])
 
 
-func _add_height_edge_texture_card(tile_data, top_y: float, texture: Texture2D, node_name: String) -> void:
+func _add_height_edge_texture_card(tile_data, top_y: float, texture: Texture2D, node_name: String, edge_dirs: Array = []) -> void:
 	if texture == null:
 		return
 	var card := _add_texture_card(
 		_map_root,
 		texture,
-		_grid_to_3d_position(Vector2(tile_data.grid_position), top_y + 0.018),
+		_grid_to_3d_position(_get_height_edge_anchor_grid_position(tile_data, edge_dirs), top_y + 0.018),
 		"Height%s" % node_name,
 		TEXTURE_CARD_PIXEL_SIZE,
 		_get_kenney_anchor_offset(texture),
@@ -1651,6 +2180,10 @@ func _add_asset_model_visual(tile_data, top_y: float, visual_type_id: String) ->
 	visual_root.scale = Vector3.ONE * _get_asset_model_scale(visual_type_id)
 	visual_root.add_child(model_instance)
 	_map_root.add_child(visual_root)
+	var mapped_entry: Dictionary = _get_model_entry_for_type(visual_type_id)
+	if _is_space_station_model_entry(mapped_entry):
+		_space_station_model_count += 1
+		_space_station_textured_surface_count += _apply_space_station_colormap_recursive(model_instance)
 	if not _has_model_mapping_for_type(visual_type_id):
 		_apply_map_asset_material_override(model_instance, visual_type_id)
 	_asset_model_count += 1
@@ -1669,8 +2202,10 @@ func _register_nature_prop_visual(tile_data, visual_type_id: String, visual_root
 		prop_role = "nature_prop"
 	_nature_prop_model_count += 1
 	_nature_prop_role_counts[prop_role] = int(_nature_prop_role_counts.get(prop_role, 0)) + 1
+	var visual_scale: Vector3 = visual_root.scale if visual_root != null else Vector3.ZERO
+	var surface_y: float = float(tile_data.height_level) * _get_3d_height_step()
 	_nature_prop_visual_entries.append({
-		"node_name": visual_root.name if visual_root != null else "",
+		"node_name": String(visual_root.name) if visual_root != null else "",
 		"visual_type_id": visual_type_id,
 		"object_type_id": String(tile_data.object_type_id),
 		"type_id": String(tile_data.type_id),
@@ -1684,6 +2219,11 @@ func _register_nature_prop_visual(tile_data, visual_type_id: String, visual_root
 		"source_id": String(mapped_entry.get("source_id", "")),
 		"prop_role": prop_role,
 		"gameplay_role": String(mapped_entry.get("gameplay_role", "")),
+		"scale": visual_scale.x,
+		"y_offset": _get_asset_y_offset(visual_type_id),
+		"surface_y": surface_y,
+		"world_y": visual_root.position.y if visual_root != null else surface_y,
+		"position_offset": _get_asset_position_offset(visual_type_id),
 	})
 
 
@@ -1729,7 +2269,7 @@ func _accumulate_local_visual_bounds(node: Node, parent_transform: Transform3D, 
 		_accumulate_local_visual_bounds(child, current_transform, bounds)
 
 
-func _merge_transformed_aabb(bounds: Dictionary, transform: Transform3D, aabb: AABB) -> void:
+func _merge_transformed_aabb(bounds: Dictionary, source_transform: Transform3D, aabb: AABB) -> void:
 	var corners: Array[Vector3] = [
 		aabb.position,
 		aabb.position + Vector3(aabb.size.x, 0.0, 0.0),
@@ -1741,7 +2281,7 @@ func _merge_transformed_aabb(bounds: Dictionary, transform: Transform3D, aabb: A
 		aabb.position + aabb.size,
 	]
 	for corner in corners:
-		var transformed_corner: Vector3 = transform * corner
+		var transformed_corner: Vector3 = source_transform * corner
 		if not bool(bounds.get("valid", false)):
 			bounds["valid"] = true
 			bounds["min"] = transformed_corner
@@ -1782,15 +2322,35 @@ func _apply_material_override_recursive(node: Node, material: Material) -> void:
 		_apply_material_override_recursive(child, material)
 
 
+func _apply_space_station_colormap_recursive(node: Node) -> int:
+	var applied_surface_count: int = 0
+	var mesh_instance := node as MeshInstance3D
+	if mesh_instance != null and mesh_instance.mesh != null:
+		var material := _make_space_station_colormap_material()
+		for surface_index in range(mesh_instance.mesh.get_surface_count()):
+			mesh_instance.set_surface_override_material(surface_index, material)
+			applied_surface_count += 1
+	for child in node.get_children():
+		applied_surface_count += _apply_space_station_colormap_recursive(child)
+	return applied_surface_count
+
+
 func _rebuild_marker_visuals() -> void:
 	_clear_children(_marker_root)
 	_marker_count = 0
+	_compass_marker_count = 0
 	if _terrain_map_data == null or _marker_root == null:
 		return
 	for marker_id in PackedStringArray(_terrain_map_data.call("get_marker_ids")):
 		var marker_record: Dictionary = Dictionary(_terrain_map_data.call("get_marker_record", marker_id))
 		var world_position: Vector2 = Vector2(marker_record.get("position", _terrain_map_data.call("get_marker_position", marker_id, Vector2.ZERO)))
 		var color: Color = Color(marker_record.get("color", Color(0.9, 0.9, 0.9, 1.0)))
+		var compass_letter: String = _get_compass_marker_letter(marker_id, marker_record)
+		if not compass_letter.is_empty():
+			_add_label3d(_marker_root, compass_letter, _world_to_3d_position(world_position, 0.62), "CompassMarker_%s" % String(marker_id), Color(0.98, 0.96, 0.9, 1.0), 30)
+			_marker_count += 1
+			_compass_marker_count += 1
+			continue
 		var marker := MeshInstance3D.new()
 		marker.name = "Marker_%s" % String(marker_id)
 		var mesh := CylinderMesh.new()
@@ -1804,6 +2364,20 @@ func _rebuild_marker_visuals() -> void:
 		marker.rotation_degrees.y = 45.0
 		_marker_root.add_child(marker)
 		_marker_count += 1
+
+
+func _get_compass_marker_letter(marker_id: String, marker_record: Dictionary = {}) -> String:
+	match marker_id.strip_edges().to_lower():
+		"corner_north":
+			return "N"
+		"corner_east":
+			return "E"
+		"corner_south":
+			return "S"
+		"corner_west":
+			return "W"
+	var marker_name: String = String(marker_record.get("name", "")).strip_edges().to_upper()
+	return marker_name if ["N", "E", "S", "W"].has(marker_name) and marker_id.begins_with("compass_") else ""
 
 
 func _rebuild_patrol_visuals() -> void:
@@ -1832,13 +2406,40 @@ func _rebuild_selection_visuals() -> void:
 		if tile_data == null:
 			continue
 		var cell_size: float = _get_3d_cell_size()
-		var mesh := _make_box_mesh(Vector3(cell_size * 0.98, 0.05, cell_size * 0.98))
+		var mesh := _make_box_mesh(Vector3(cell_size * 0.98, 0.045, cell_size * 0.98))
 		var selection := MeshInstance3D.new()
 		selection.name = "Selection_%d_%d" % [grid_position.x, grid_position.y]
 		selection.mesh = mesh
-		selection.material_override = _make_material(Color(1.0, 0.94, 0.35, 0.52), true)
-		selection.position = _grid_to_3d_position(Vector2(grid_position), (float(tile_data.height_level) * _get_3d_height_step()) + 0.09)
+		selection.material_override = _make_editor_selection_material(false)
+		var selection_y: float = (float(tile_data.height_level) * _get_3d_height_step()) + TILE_SELECTION_SURFACE_Y_OFFSET
+		selection.position = _grid_to_3d_position(Vector2(grid_position), selection_y)
 		_selection_root.add_child(selection)
+		_add_selection_border(grid_position, selection_y + 0.035)
+
+
+func _add_selection_border(grid_position: Vector2i, y_position: float) -> void:
+	if _selection_root == null:
+		return
+	var material := _make_editor_selection_material(true)
+	var mesh := ImmediateMesh.new()
+	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, material)
+	var cell_size: float = _get_3d_cell_size()
+	var half_size: float = cell_size * 0.5
+	var line_width: float = maxf(cell_size * TILE_SELECTION_BORDER_WIDTH_FACTOR, 0.026)
+	var center: Vector3 = _grid_to_3d_position(Vector2(grid_position), y_position)
+	var nw := center + Vector3(-half_size, 0.0, -half_size)
+	var ne := center + Vector3(half_size, 0.0, -half_size)
+	var se := center + Vector3(half_size, 0.0, half_size)
+	var sw := center + Vector3(-half_size, 0.0, half_size)
+	_add_grid_line_quad(mesh, nw, ne, line_width)
+	_add_grid_line_quad(mesh, ne, se, line_width)
+	_add_grid_line_quad(mesh, se, sw, line_width)
+	_add_grid_line_quad(mesh, sw, nw, line_width)
+	mesh.surface_end()
+	var border := MeshInstance3D.new()
+	border.name = "SelectionBorder_%d_%d" % [grid_position.x, grid_position.y]
+	border.mesh = mesh
+	_selection_root.add_child(border)
 
 
 func _normalize_fog_of_war_visual_state(fog_of_war_state: Dictionary) -> Dictionary:
@@ -2087,8 +2688,8 @@ func _add_fow_overlay_multimesh(node_name: String, transforms: Array, color: Col
 	multi_mesh.mesh = _make_box_mesh(Vector3(cell_size * 0.99, FOW_OVERLAY_HEIGHT, cell_size * 0.99))
 	multi_mesh.instance_count = transforms.size()
 	for index in range(transforms.size()):
-		var transform: Transform3D = transforms[index]
-		multi_mesh.set_instance_transform(index, transform)
+		var instance_transform: Transform3D = transforms[index]
+		multi_mesh.set_instance_transform(index, instance_transform)
 	var instance := MultiMeshInstance3D.new()
 	instance.name = node_name
 	instance.multimesh = multi_mesh
@@ -2671,6 +3272,9 @@ func _add_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 		return
 	if not bool(feedback_bubble.get("visual_only", false)):
 		return
+	if String(feedback_bubble.get("anchor_space", "")).strip_edges().to_lower() == "hud" and typeof(feedback_bubble.get("hud_anchor_position", null)) == TYPE_VECTOR2:
+		_add_hud_feedback_bubble_visual(feedback_bubble)
+		return
 	if typeof(feedback_bubble.get("anchor_position", null)) != TYPE_VECTOR2:
 		return
 	var bubble_id: String = String(feedback_bubble.get("bubble_id", "")).strip_edges()
@@ -2727,6 +3331,115 @@ func _add_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 		"anchor_position": anchor_position,
 		"visual_only": true,
 	})
+
+
+func _add_hud_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
+	if _feedback_bubble_hud_root == null:
+		return
+	var bubble_id: String = String(feedback_bubble.get("bubble_id", "")).strip_edges()
+	var text: String = String(feedback_bubble.get("text", "")).strip_edges()
+	if bubble_id.is_empty() or text.is_empty():
+		return
+	var hud_anchor_position: Vector2 = Vector2(feedback_bubble.get("hud_anchor_position", Vector2.ZERO))
+	var bubble_size: Vector2 = _coerce_hud_bubble_size(feedback_bubble.get("max_size", Vector2i(168, 72)))
+	bubble_size.x = clampf(bubble_size.x, 120.0, 188.0)
+	bubble_size.y = clampf(bubble_size.y, 48.0, 76.0)
+	var viewport_size := Vector2(_get_viewport_size())
+	var bubble_position: Vector2 = hud_anchor_position + Vector2(12.0, -bubble_size.y * 0.52)
+	bubble_position.x = clampf(bubble_position.x, 0.0, maxf(viewport_size.x - bubble_size.x, 0.0))
+	bubble_position.y = clampf(bubble_position.y, 0.0, maxf(viewport_size.y - bubble_size.y, 0.0))
+
+	var bubble_root := Control.new()
+	bubble_root.name = "HudFeedbackBubble_%s_%d" % [_sanitize_node_name(bubble_id), _feedback_bubble_visual_count]
+	bubble_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bubble_root.position = bubble_position
+	bubble_root.size = bubble_size
+	bubble_root.z_as_relative = false
+	bubble_root.z_index = int(feedback_bubble.get("z_index", 76))
+	_feedback_bubble_hud_root.add_child(bubble_root)
+
+	var texture: Texture2D = _get_comic_bubble_texture(String(feedback_bubble.get("path", "")))
+	if texture != null:
+		var texture_rect := TextureRect.new()
+		texture_rect.name = "BubbleTexture"
+		texture_rect.texture = texture
+		texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		texture_rect.stretch_mode = TextureRect.STRETCH_SCALE
+		texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		texture_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+		bubble_root.add_child(texture_rect)
+	else:
+		var fallback := PanelContainer.new()
+		fallback.name = "BubbleFallback"
+		fallback.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		fallback.set_anchors_preset(Control.PRESET_FULL_RECT)
+		fallback.add_theme_stylebox_override("panel", _build_hud_bubble_stylebox())
+		bubble_root.add_child(fallback)
+
+	var label := Label.new()
+	label.name = "BubbleText"
+	label.text = text
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_FEEDBACK_BUBBLE_TEXT)
+	label.add_theme_font_size_override("font_size", 10)
+	label.position = Vector2(12.0, 10.0)
+	label.size = Vector2(maxf(bubble_size.x - 24.0, 1.0), maxf(bubble_size.y - 18.0, 1.0))
+	bubble_root.add_child(label)
+
+	var world_anchor: Vector2 = Vector2(feedback_bubble.get("anchor_position", Vector2.ZERO)) if typeof(feedback_bubble.get("anchor_position", null)) == TYPE_VECTOR2 else Vector2.ZERO
+	_feedback_bubble_visual_count += 1
+	_feedback_bubble_entries.append({
+		"bubble_id": bubble_id,
+		"fireteam_id": String(feedback_bubble.get("fireteam_id", "")).strip_edges().to_lower(),
+		"unit_id": String(feedback_bubble.get("unit_id", "")).strip_edges(),
+		"feedback_action": String(feedback_bubble.get("feedback_action", "")).strip_edges(),
+		"feedback_state": String(feedback_bubble.get("feedback_state", "")).strip_edges(),
+		"source": String(feedback_bubble.get("source", "")).strip_edges(),
+		"category": String(feedback_bubble.get("category", "")).strip_edges(),
+		"purpose": String(feedback_bubble.get("purpose", "")).strip_edges(),
+		"thought_kind": String(feedback_bubble.get("thought_kind", "")).strip_edges(),
+		"skill_tier": String(feedback_bubble.get("skill_tier", "")).strip_edges(),
+		"text_source": String(feedback_bubble.get("text_source", "")).strip_edges(),
+		"text_key": String(feedback_bubble.get("text_key", "")).strip_edges(),
+		"role_text_key": String(feedback_bubble.get("role_text_key", "")).strip_edges(),
+		"situation_key": String(feedback_bubble.get("situation_key", "")).strip_edges(),
+		"text": text,
+		"path": String(feedback_bubble.get("path", "")).strip_edges(),
+		"anchor_position": world_anchor,
+		"anchor_space": "hud",
+		"hud_anchor_source": String(feedback_bubble.get("hud_anchor_source", "")).strip_edges(),
+		"hud_anchor_position": hud_anchor_position,
+		"hud_bubble_position": bubble_position,
+		"visual_only": true,
+	})
+
+
+func _coerce_hud_bubble_size(value: Variant) -> Vector2:
+	if value is Vector2i:
+		var vector_i: Vector2i = value
+		return Vector2(float(vector_i.x), float(vector_i.y))
+	if value is Vector2:
+		return Vector2(value)
+	if typeof(value) == TYPE_DICTIONARY:
+		var dict: Dictionary = Dictionary(value)
+		return Vector2(float(dict.get("x", 168.0)), float(dict.get("y", 72.0)))
+	return Vector2(168.0, 72.0)
+
+
+func _build_hud_bubble_stylebox() -> StyleBoxFlat:
+	var stylebox := StyleBoxFlat.new()
+	stylebox.bg_color = Color(0.94, 0.97, 0.98, 0.96)
+	stylebox.border_color = Color(0.08, 0.13, 0.16, 0.85)
+	stylebox.set_border_width_all(1)
+	stylebox.set_corner_radius_all(6)
+	stylebox.content_margin_left = 10.0
+	stylebox.content_margin_top = 8.0
+	stylebox.content_margin_right = 10.0
+	stylebox.content_margin_bottom = 8.0
+	return stylebox
 
 
 func _add_tactical_communication_event_visual(communication_event: Dictionary) -> void:
@@ -2920,12 +3633,15 @@ func _rebuild_drop_visuals() -> void:
 	_dropship_model_visible = false
 	_missing_dropship_model_count = 0
 	_lz_tile_marker_count = 0
+	_requested_lz_marker_count = 0
+	_resolved_lz_marker_count = 0
 	_air_visual_count = 0
 	_fow_hidden_air_visual_count = 0
 	_air_unknown_terrain_reveal_block_count = 0
 	_dropship_air_y = 0.0
 	_dropship_surface_y = 0.0
 	_dropship_air_clearance = 0.0
+	_dropship_rotation_y = 0.0
 	if _drop_root == null or _drop_payload.is_empty():
 		return
 	if bool(_drop_payload.get("has_lz_position", false)) and typeof(_drop_payload.get("lz_position", null)) == TYPE_VECTOR2:
@@ -2936,6 +3652,20 @@ func _rebuild_drop_visuals() -> void:
 		else:
 			_fow_hidden_air_visual_count += 1
 			_air_unknown_terrain_reveal_block_count += 1
+
+	var requested_lz_variant = _drop_payload.get("requested_lz_position", _drop_payload.get("target_lz_position", null))
+	if typeof(requested_lz_variant) == TYPE_VECTOR2:
+		var requested_lz_position: Vector2 = Vector2(requested_lz_variant)
+		if _air_layer_allows_surface_marker(requested_lz_position):
+			if _add_world_tile_marker(_drop_root, requested_lz_position, Color(0.42, 0.72, 1.0, 0.42), "RequestedLZTile", 0.075, 1.04):
+				_requested_lz_marker_count += 1
+
+	var resolved_lz_variant = _drop_payload.get("resolved_lz_position", _drop_payload.get("actual_landing_position", null))
+	if typeof(resolved_lz_variant) == TYPE_VECTOR2:
+		var resolved_lz_position: Vector2 = Vector2(resolved_lz_variant)
+		if _air_layer_allows_surface_marker(resolved_lz_position):
+			if _add_world_tile_marker(_drop_root, resolved_lz_position, Color(1.0, 0.78, 0.28, 0.50), "ResolvedLZTile", 0.105, 0.82):
+				_resolved_lz_marker_count += 1
 
 	if bool(_drop_payload.get("dropship_visible", false)) and typeof(_drop_payload.get("dropship_position", null)) == TYPE_VECTOR2:
 		var ship_position: Vector2 = Vector2(_drop_payload.get("dropship_position", Vector2.ZERO))
@@ -3083,6 +3813,7 @@ func _add_label3d(parent: Node3D, text: String, position: Vector3, node_name: St
 
 
 func _add_dropship_proxy(world_position: Vector2) -> void:
+	_dropship_rotation_y = _get_dropship_rotation_y(world_position)
 	var model_scene := _get_asset_model_scene("fahrzeug_speeder_b_se")
 	if model_scene == null:
 		model_scene = _get_asset_model_scene_by_name(DROPSHIP_MODEL_NAME)
@@ -3095,7 +3826,7 @@ func _add_dropship_proxy(world_position: Vector2) -> void:
 			craft_root.position = _world_to_air_layer_3d_position(world_position, _get_asset_y_offset("fahrzeug_speeder_b_se"))
 			craft_root.set_meta("flight_altitude_layer", String(_drop_payload.get("air_layer", AIR_LAYER_ID)))
 			craft_root.set_meta("terrain_height_independent", true)
-			craft_root.rotation_degrees.y = _get_dropship_rotation_y(world_position)
+			craft_root.rotation_degrees.y = _dropship_rotation_y
 			craft_root.scale = Vector3.ONE * (_get_asset_model_scale("fahrzeug_speeder_b_se") if _has_model_mapping_for_type("fahrzeug_speeder_b_se") else DROPSHIP_MODEL_SCALE)
 			craft_root.add_child(model_instance)
 			_drop_root.add_child(craft_root)
@@ -3154,10 +3885,15 @@ func _add_dropship_proxy(world_position: Vector2) -> void:
 func _get_dropship_rotation_y(world_position: Vector2) -> float:
 	if typeof(_drop_payload.get("dropship_target_position", null)) == TYPE_VECTOR2:
 		var target_position: Vector2 = Vector2(_drop_payload.get("dropship_target_position", world_position))
-		return _get_world_direction_yaw(world_position, target_position, -_camera_yaw_degrees)
+		return _get_dropship_model_yaw(world_position, target_position, -_camera_yaw_degrees)
 	if typeof(_drop_payload.get("lz_position", null)) == TYPE_VECTOR2:
-		return _get_world_direction_yaw(world_position, Vector2(_drop_payload.get("lz_position", Vector2.ZERO)), -_camera_yaw_degrees)
-	return -_camera_yaw_degrees
+		return _get_dropship_model_yaw(world_position, Vector2(_drop_payload.get("lz_position", Vector2.ZERO)), -_camera_yaw_degrees)
+	return wrapf(-_camera_yaw_degrees + DROPSHIP_MODEL_FORWARD_ROTATION_OFFSET_DEGREES, 0.0, 360.0)
+
+
+func _get_dropship_model_yaw(from_world_position: Vector2, to_world_position: Vector2, fallback_yaw: float = 0.0) -> float:
+	var direction_yaw: float = _get_world_direction_yaw(from_world_position, to_world_position, fallback_yaw)
+	return wrapf(direction_yaw + DROPSHIP_MODEL_FORWARD_ROTATION_OFFSET_DEGREES, 0.0, 360.0)
 
 
 func _maybe_emit_unit_step_sfx(
@@ -3493,6 +4229,9 @@ func _get_unit_status_badge_color(unit: Node) -> Color:
 
 func _get_unit_proxy_rotation_y(proxy: Node3D, unit: Node, current_world_position: Vector2) -> float:
 	var fallback_yaw: float = proxy.rotation_degrees.y if proxy != null else 0.0
+	if unit != null and unit.has_meta("facing_angle"):
+		var facing_angle: float = float(unit.get_meta("facing_angle", 0.0))
+		return _get_world_direction_yaw(current_world_position, current_world_position + Vector2.RIGHT.rotated(facing_angle), fallback_yaw)
 	var target_position: Variant = unit.call("get_target_position") if unit != null and unit.has_method("get_target_position") else null
 	if typeof(target_position) == TYPE_VECTOR2:
 		var target_world_position: Vector2 = Vector2(target_position)
@@ -3787,8 +4526,8 @@ func _create_unit_visual_socket(model_root: Node3D, skeleton: Skeleton3D, socket
 func _apply_unit_socket_transform(socket_node: Node3D, socket_entry: Dictionary, base_position: Vector3) -> void:
 	if socket_node == null:
 		return
-	var offset: Vector3 = _get_vector3_from_variant(socket_entry.get("offset", Vector3.ZERO), Vector3.ZERO)
-	socket_node.position = base_position + offset
+	var socket_offset: Vector3 = _get_vector3_from_variant(socket_entry.get("offset", Vector3.ZERO), Vector3.ZERO)
+	socket_node.position = base_position + socket_offset
 	socket_node.rotation_degrees = _get_vector3_from_variant(socket_entry.get("rotation_degrees", Vector3.ZERO), Vector3.ZERO)
 
 
@@ -3856,7 +4595,7 @@ func _attach_unit_helmet(proxy_root: Node3D, model_root: Node3D, model_instance:
 	return true
 
 
-func _attach_unit_blaster(proxy_root: Node3D, model_root: Node3D, model_instance: Node3D, unit_visual_entry: Dictionary) -> bool:
+func _attach_unit_blaster(proxy_root: Node3D, model_root: Node3D, _model_instance: Node3D, unit_visual_entry: Dictionary) -> bool:
 	var blaster_path: String = _get_unit_blaster_path(unit_visual_entry)
 	if blaster_path.is_empty():
 		return false
@@ -4205,6 +4944,57 @@ func _make_material(color: Color, transparent: bool = false) -> StandardMaterial
 	return material
 
 
+func _make_unshaded_material(color: Color, transparent: bool = false) -> StandardMaterial3D:
+	var key: String = "unshaded:%s:%s" % [color.to_html(true), str(transparent or color.a < 0.99)]
+	if _material_cache.has(key):
+		return _material_cache[key] as StandardMaterial3D
+	var material := StandardMaterial3D.new()
+	material.albedo_color = color
+	material.roughness = 0.86
+	material.metallic = 0.0
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.disable_receive_shadows = true
+	if transparent or color.a < 0.99:
+		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_material_cache[key] = material
+	return material
+
+
+func _make_editor_grid_material(is_highlight: bool = true) -> StandardMaterial3D:
+	var key: String = TILE_GRID_LINE_MATERIAL_KEY if is_highlight else TILE_GRID_LINE_SHADOW_MATERIAL_KEY
+	if _material_cache.has(key):
+		return _material_cache[key] as StandardMaterial3D
+	var material := StandardMaterial3D.new()
+	material.albedo_color = TILE_GRID_LINE_COLOR if is_highlight else TILE_GRID_LINE_SHADOW_COLOR
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.blend_mode = BaseMaterial3D.BLEND_MODE_MIX
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	material.no_depth_test = false
+	material.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+	material.disable_receive_shadows = true
+	_material_cache[key] = material
+	return material
+
+
+func _make_editor_selection_material(is_border: bool) -> StandardMaterial3D:
+	var key: String = TILE_SELECTION_BORDER_MATERIAL_KEY if is_border else TILE_SELECTION_FILL_MATERIAL_KEY
+	if _material_cache.has(key):
+		return _material_cache[key] as StandardMaterial3D
+	var material := StandardMaterial3D.new()
+	material.albedo_color = TILE_SELECTION_BORDER_COLOR if is_border else TILE_SELECTION_FILL_COLOR
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.blend_mode = BaseMaterial3D.BLEND_MODE_MIX
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	material.no_depth_test = true
+	material.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_ALWAYS
+	material.disable_receive_shadows = true
+	_material_cache[key] = material
+	return material
+
+
 func _make_texture_material(texture: Texture2D) -> StandardMaterial3D:
 	var key: String = "texture:%s" % String(texture.resource_path)
 	if _material_cache.has(key):
@@ -4213,6 +5003,20 @@ func _make_texture_material(texture: Texture2D) -> StandardMaterial3D:
 	material.albedo_texture = texture
 	material.roughness = 0.86
 	material.metallic = 0.0
+	_material_cache[key] = material
+	return material
+
+
+func _make_space_station_colormap_material() -> StandardMaterial3D:
+	var key: String = "space_station_colormap:%s" % String(SPACE_STATION_COLORMAP_TEXTURE.resource_path)
+	if _material_cache.has(key):
+		return _material_cache[key] as StandardMaterial3D
+	var material := StandardMaterial3D.new()
+	material.albedo_texture = SPACE_STATION_COLORMAP_TEXTURE
+	material.albedo_color = Color.WHITE
+	material.roughness = 0.78
+	material.metallic = 0.0
+	material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	_material_cache[key] = material
 	return material
 
@@ -4299,6 +5103,14 @@ func _is_nature_kit_model_entry(entry: Dictionary) -> bool:
 	var source_id: String = String(entry.get("source_id", "")).strip_edges()
 	var model_path: String = String(entry.get("model_path", "")).strip_edges()
 	return source_id == "kenney_nature_kit_classic" or model_path.contains("res://Assets/used/terrain/nature_kit_classic/")
+
+
+func _is_space_station_model_entry(entry: Dictionary) -> bool:
+	if entry.is_empty():
+		return false
+	var source_id: String = String(entry.get("source_id", "")).strip_edges()
+	var model_path: String = String(entry.get("model_path", "")).strip_edges()
+	return source_id == "space_station_kit" or model_path.contains("res://Assets/curated/kenney/space_station/")
 
 
 func _has_3d_asset_mapping() -> bool:
@@ -4576,7 +5388,7 @@ func _build_tile_modulate(tile_data) -> Color:
 
 
 func _get_tile_color(tile_data) -> Color:
-	var tile_color := Color(0.30, 0.35, 0.39, 1.0)
+	var tile_color := _get_space_kit_terrain_top_color()
 	match String(tile_data.surface_type):
 		TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROAD:
 			tile_color = Color(0.37, 0.40, 0.41, 1.0)

@@ -13,12 +13,15 @@
 	},
 	"source_catalog": "res://data/nature_kit_asset_catalog.json",
 	"surface_model_by_surface": {
-		"ground": "nature_ground_dirt",
-		"sand": "nature_ground_dirt",
-		"rock": "nature_ground_dirt",
-		"road": "nature_ground_dirt"
+		"ground": "ground_flat",
+		"sand": "ground_flat",
+		"rock": "ground_flat",
+		"road": "ground_flat"
 	},
 	"tile_type_overrides": {
+		"ground_flat": "ground_flat"
+	},
+	"surface_detail_by_tile_type": {
 		"nature_ground_dirt": "nature_ground_dirt",
 		"nature_ground_sand_dirt": "nature_ground_dirt",
 		"nature_ground_rock_dirt": "nature_ground_dirt",
@@ -27,7 +30,7 @@
 	},
 	"surface_tint_policy": {
 		"retain_non_ground_tints": true,
-		"reason": "The Nature Kit ground mesh is the base shape; existing sand/rock/road tints keep surface_type gameplay readable.",
+		"reason": "The Space Kit ground mesh remains the base shape; Nature Boden entries are offset detail visuals and existing sand/rock/road tints keep surface_type gameplay readable.",
 		"affected_surfaces": ["sand", "rock", "road"]
 	},
 	"editor_palette": {
@@ -49,7 +52,7 @@
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/ground/ground_dirt.gltf",
 			"theme": "dirt",
 			"surface_roles": ["ground", "sand", "rock", "road"],
-			"active_default": true,
+			"active_default": false,
 			"fallback_model_key": "ground_flat",
 			"visual_only": true
 		},
@@ -62,7 +65,7 @@
 			"theme": "grass_detail",
 			"surface_roles": ["ground"],
 			"active_default": false,
-			"fallback_model_key": "nature_ground_dirt",
+			"fallback_model_key": "ground_flat",
 			"visual_only": true
 		},
 		{
@@ -74,7 +77,7 @@
 			"theme": "dirt_detail_candidate",
 			"surface_roles": ["future_detail"],
 			"active_default": false,
-			"fallback_model_key": "nature_ground_dirt",
+			"fallback_model_key": "ground_flat",
 			"visual_only": true
 		}
 	]

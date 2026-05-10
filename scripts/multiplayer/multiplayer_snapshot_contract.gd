@@ -164,6 +164,7 @@ func _normalize_unit_snapshots(value: Variant) -> Array:
 		_copy_int_if_present(entry, unit_snapshot, "tactical_stance_revision")
 		_copy_int_if_present(entry, unit_snapshot, "weapon_tile_range")
 		_copy_float_if_present(entry, unit_snapshot, "weapon_range_world")
+		_copy_float_if_present(entry, unit_snapshot, "facing_angle")
 		_copy_float_if_present(entry, unit_snapshot, "enemy_facing_angle")
 		result.append(unit_snapshot)
 	result.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:

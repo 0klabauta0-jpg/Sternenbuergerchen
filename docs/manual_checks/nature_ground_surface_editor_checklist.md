@@ -7,10 +7,12 @@
 ## Editor Palette
 - The `Nature Boden` palette group is visible.
 - `Nature Dirt`, `Nature Sand/Dirt`, `Nature Rock/Dirt` and `Nature Grass Patch` can be selected.
-- Painting a Nature Boden entry changes the intended surface/theme only and does not reset `height_level`, `edge_type`, `object_type_id`, cover, walkable or LOS fields.
+- Painting a Nature Boden entry changes the intended surface/theme/detail only and does not reset `height_level`, `edge_type`, `object_type_id`, cover, walkable or LOS fields.
 
 ## Mission View
-- Nature ground is visible on flat and elevated tiles.
+- Standard terrain remains the Space Kit base color on flat and elevated tiles.
+- Nature Boden renders as an offset detail/patch on top of the existing terrain and does not replace the base floor.
+- Nature Grass Patch reads as a detail object on the existing floor.
 - Sand, rock and road remain distinguishable through the existing surface tint overlays.
 - Cliff and slope side models are not covered by top-surface visuals.
 

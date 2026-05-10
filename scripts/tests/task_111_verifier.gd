@@ -24,6 +24,7 @@ func _run_tests() -> void:
 	print("=== TASK_111 Fireteam Security + Overwatch Verifier ===")
 	_test_security_controller_assigns_360_sectors_for_high_leadership()
 	_test_security_controller_prefers_directional_with_low_leadership_and_aggressive_focus()
+	_test_security_mode_override_keeps_post_drop_360()
 	await _test_directional_sector_shift_reacts_with_leadership_delay()
 	_test_overwatch_triggers_on_enemy_movement_inside_watched_sector()
 	_test_overwatch_stays_disabled_under_suppression_or_movement()
@@ -61,6 +62,21 @@ func _test_security_controller_prefers_directional_with_low_leadership_and_aggre
 		var first_angle: float = float(Dictionary(assignments[0]).get("center_angle", 0.0))
 		var second_angle: float = float(Dictionary(assignments[1]).get("center_angle", 99.0))
 		_assert(absf(first_angle - second_angle) < 0.001, "Directional security points all assignments at the same main threat direction")
+	_cleanup_units([leader, wing, enemy])
+
+
+func _test_security_mode_override_keeps_post_drop_360() -> void:
+	var controller = FIRETEAM_SECURITY_CONTROLLER_SCRIPT.new()
+	var leader = _make_unit("drop_lead", "blue", true, Vector2(0.0, 0.0), 0.55, 0.48, 0.28, ["aggressive"])
+	var wing = _make_unit("drop_wing", "blue", false, Vector2(14.0, 14.0), 0.45, 0.7, 0.28, [])
+	var enemy = _make_enemy("drop_enemy", Vector2(90.0, 0.0))
+	var profile: Dictionary = _build_behavior_profile("hold_position")
+	var metadata: Dictionary = Dictionary(profile.get("metadata", {}))
+	metadata["origin"] = "post_drop_360_security"
+	metadata["security_mode_override"] = "360"
+	profile["metadata"] = metadata
+	var state: Dictionary = controller.update_fireteam_state("blue", [leader, wing], leader, profile, {}, {}, {}, [enemy])
+	_assert(String(state.get("security_mode", "")) == "360", "Post-drop behavior profile can force immediate 360 security")
 	_cleanup_units([leader, wing, enemy])
 
 

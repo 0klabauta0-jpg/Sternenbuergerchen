@@ -16,10 +16,11 @@ const COMPACT_CARD_MIN_SIZE := Vector2(148.0, 58.0)
 const FULL_CARD_MIN_HEIGHT := 92.0
 const COMPACT_TEXT_MIN_WIDTH := 88.0
 const COMPACT_PORTRAIT_SIZE := 38.0
-const COMPACT_STAR_WIDTH := 16.0
+const COMPACT_STAR_WIDTH := 22.0
 const COMPACT_REMOVE_BUTTON_SIZE := 18.0
 const COMPACT_MARGIN_WIDTH := 8.0
 const COMPACT_HBOX_SEPARATION := 6.0
+const CARD_Z_INDEX := 24
 
 var _profile = null
 var _source_context: String = "roster"
@@ -41,6 +42,7 @@ var _drag_preview_text_width: float = 0.0
 
 func _ready() -> void:
 	size_flags_horizontal = Control.SIZE_SHRINK_BEGIN if _is_drag_preview or _fixed_size else Control.SIZE_EXPAND_FILL
+	_apply_canvas_order()
 	set_meta("drag_preview_z_index_contract", int(META_USEROLOGY_CONTRACT_SCRIPT.get("DRAG_PREVIEW_Z_INDEX")))
 	set_meta("badge_layout_contract", "right_of_main_text")
 	focus_mode = Control.FOCUS_NONE
@@ -78,6 +80,7 @@ func setup_from_profile(profile, options: Dictionary = {}) -> void:
 	_drag_preview_size = options.get("drag_preview_size", _drag_preview_size) if typeof(options.get("drag_preview_size", _drag_preview_size)) == TYPE_VECTOR2 else _drag_preview_size
 	_drag_preview_text_width = float(options.get("drag_preview_text_width", _drag_preview_text_width))
 	size_flags_horizontal = Control.SIZE_SHRINK_BEGIN if _is_drag_preview or _fixed_size else Control.SIZE_EXPAND_FILL
+	_apply_canvas_order()
 
 	if is_inside_tree():
 		_refresh_card()
@@ -136,7 +139,7 @@ func get_card_userology_snapshot() -> Dictionary:
 
 
 func _gui_input(event: InputEvent) -> void:
-	if _is_disabled or _profile == null or not _profile.is_valid():
+	if _profile == null or not _profile.is_valid():
 		return
 
 	if event is InputEventMouseButton:
@@ -144,6 +147,8 @@ func _gui_input(event: InputEvent) -> void:
 		if mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed:
 			if mouse_event.double_click:
 				card_open_requested.emit(get_unit_id(), get_profile(), _source_context)
+				return
+			if _is_disabled:
 				return
 			card_pressed.emit(get_unit_id(), get_profile(), _source_context)
 
@@ -202,6 +207,12 @@ func _get_drag_data(_at_position: Vector2):
 		"unit_id": get_unit_id(),
 		"source_context": _source_context,
 	}
+
+
+func _apply_canvas_order() -> void:
+	z_as_relative = false
+	z_index = int(META_USEROLOGY_CONTRACT_SCRIPT.get("DRAG_PREVIEW_Z_INDEX")) if _is_drag_preview else CARD_Z_INDEX
+	set_meta("global_card_z_order", true)
 
 
 func _can_drop_data(_at_position: Vector2, data) -> bool:
@@ -366,15 +377,15 @@ func _refresh_card() -> void:
 	if star_button != null:
 		star_button.visible = _show_lead_indicator
 		star_button.button_pressed = _is_lead
-		star_button.custom_minimum_size = Vector2(COMPACT_STAR_WIDTH, COMPACT_STAR_WIDTH) if _compact_mode else Vector2(20.0, 20.0)
+		star_button.custom_minimum_size = Vector2(COMPACT_STAR_WIDTH, COMPACT_STAR_WIDTH) if _compact_mode else Vector2(24.0, 24.0)
 		star_button.tooltip_text = "Lead aktiv" if _is_lead else "Als Lead setzen"
 		star_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		if _is_lead:
 			star_button.add_theme_color_override("font_color", Color(1.0, 0.84, 0.0, 1.0))
-			star_button.add_theme_font_size_override("font_size", 16 if not _compact_mode else 14)
+			star_button.add_theme_font_size_override("font_size", 22 if not _compact_mode else 20)
 		else:
 			star_button.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5, 1.0))
-			star_button.add_theme_font_size_override("font_size", 16 if not _compact_mode else 14)
+			star_button.add_theme_font_size_override("font_size", 22 if not _compact_mode else 20)
 
 	var display_name: String = "Unknown Operator"
 	var data_a_text: String = "Role unavailable"
@@ -534,7 +545,7 @@ func _populate_badge_row(badge_row: HBoxContainer) -> void:
 		texture_rect.custom_minimum_size = Vector2(icon_size, icon_size)
 		texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		texture_rect.mouse_filter = Control.MOUSE_FILTER_STOP
+		texture_rect.mouse_filter = Control.MOUSE_FILTER_PASS
 		texture_rect.tooltip_text = "%s: %s" % [String(badge.get("label", "Badge")), String(badge.get("reason", ""))]
 		var badge_path: String = String(badge.get("path", "")).strip_edges()
 		if not badge_path.is_empty() and ResourceLoader.exists(badge_path):

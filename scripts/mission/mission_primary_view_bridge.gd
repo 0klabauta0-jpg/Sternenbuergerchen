@@ -40,6 +40,41 @@ func world_to_screen_position(mission_root: Node, viewport: Viewport, world_posi
 	return viewport.get_canvas_transform() * world_position
 
 
+func screen_to_grid_position(mission_root: Node, screen_position: Vector2):
+	var primary_view := get_primary_view(mission_root)
+	if primary_view != null and primary_view.has_method("screen_to_grid_position"):
+		var grid_position = primary_view.call("screen_to_grid_position", screen_position)
+		if typeof(grid_position) == TYPE_VECTOR2I:
+			return Vector2i(grid_position)
+	return null
+
+
+func world_to_grid_position(mission_root: Node, world_position: Vector2):
+	var primary_view := get_primary_view(mission_root)
+	if primary_view != null and primary_view.has_method("world_to_grid_position"):
+		var grid_position = primary_view.call("world_to_grid_position", world_position)
+		if typeof(grid_position) == TYPE_VECTOR2I:
+			return Vector2i(grid_position)
+	return null
+
+
+func grid_to_world_position(mission_root: Node, grid_position: Vector2i):
+	var primary_view := get_primary_view(mission_root)
+	if primary_view != null and primary_view.has_method("grid_to_world_position"):
+		var world_position = primary_view.call("grid_to_world_position", grid_position)
+		if typeof(world_position) == TYPE_VECTOR2:
+			return Vector2(world_position)
+	return null
+
+
+func set_selected_grid_positions(mission_root: Node, grid_positions: Array) -> bool:
+	var primary_view := get_primary_view(mission_root)
+	if primary_view == null or not primary_view.has_method("set_selected_grid_positions"):
+		return false
+	primary_view.call("set_selected_grid_positions", grid_positions)
+	return true
+
+
 func snap_world_position_to_tile_center(mission_root: Node, world_position: Vector2) -> Vector2:
 	var primary_view := get_primary_view(mission_root)
 	if primary_view != null and primary_view.has_method("snap_world_position_to_tile_center"):

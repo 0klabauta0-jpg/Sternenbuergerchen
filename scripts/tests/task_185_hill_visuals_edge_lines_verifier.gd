@@ -83,6 +83,8 @@ func _test_3d_hill_edges_surfaces_and_anchors() -> void:
 
 	_assert(slope_edge != null and _node_has_mesh(slope_edge), "Slope edge uses a 3D slope model")
 	_assert(cliff_edge != null and _node_has_mesh(cliff_edge), "Cliff edge uses a 3D cliff model")
+	_assert(slope_edge != null and _node_is_at_grid(slope_edge, Vector2(0, 2)), "Slope edge visual is anchored on the lower neighbor tile")
+	_assert(cliff_edge != null and _node_is_at_grid(cliff_edge, Vector2(4, 2)), "Cliff edge visual is anchored on the lower neighbor tile")
 	_assert(surface_tint != null and surface_tint.position.y > _top_y(2), "Sand surface tint sits on the elevated top surface")
 	_assert(_edge_nodes_for_grid(primary_view, Vector2i(2, 2)).is_empty(), "Plateau interior with edge none has no false height edge models")
 	_assert(wall_node != null and wall_node.position.y >= _top_y(2), "Wall on hill is anchored on the hilltop")
@@ -106,8 +108,8 @@ func _test_legacy_renderer_uses_same_height_edge_rule() -> void:
 	var cliff_map: Dictionary = Dictionary(render_result.get("cliffs", {}))
 	var wall_map: Dictionary = Dictionary(render_result.get("walls", {}))
 	var object_map: Dictionary = Dictionary(render_result.get("objects", {}))
-	_assert(cliff_map.has(Vector2i(1, 2)), "Legacy renderer draws slope edge where higher slope tile meets lower neighbor")
-	_assert(cliff_map.has(Vector2i(3, 2)), "Legacy renderer draws cliff edge where higher cliff tile meets lower neighbor")
+	_assert(cliff_map.has(Vector2i(0, 2)), "Legacy renderer draws slope edge on the lower neighbor tile")
+	_assert(cliff_map.has(Vector2i(4, 2)), "Legacy renderer draws cliff edge on the lower neighbor tile")
 	_assert(not cliff_map.has(Vector2i(2, 2)), "Legacy renderer does not draw false edge on plateau interior")
 	_assert(wall_map.has(Vector2i(2, 2)) or object_map.has(Vector2i(2, 2)), "Legacy renderer keeps wall object on hill tile")
 	_assert(wall_map.has(Vector2i(2, 1)) or object_map.has(Vector2i(2, 1)), "Legacy renderer keeps rock object on hill tile")
@@ -207,6 +209,13 @@ func _node_has_mesh(node: Node) -> bool:
 		if _node_has_mesh(child):
 			return true
 	return false
+
+
+func _node_is_at_grid(node: Node3D, grid_position: Vector2) -> bool:
+	if node == null:
+		return false
+	var expected := Vector3(grid_position.x, node.position.y, grid_position.y)
+	return node.position.distance_squared_to(expected) <= 0.0001
 
 
 func _top_y(height_level: int) -> float:

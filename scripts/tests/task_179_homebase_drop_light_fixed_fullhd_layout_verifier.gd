@@ -122,7 +122,9 @@ func _test_homebase_flightdeck_shipcards_are_primary_status_region() -> void:
 	_assert(not _contains_button(pad_stage), "Flightdeck visual stage introduces no unbound action buttons")
 	_assert(_contains_texture_path(shipcards_list, DROPSHIP_TEXTURE_PATH), "Homebase shipcards keep using project dropship assets")
 	_assert(_contains_texture_path(shipcards_list, CARGO_TEXTURE_PATH), "Homebase shipcards keep using project cargo craft assets")
-	_assert(_max_texture_min_size(shipcards_list, DROPSHIP_TEXTURE_PATH).x >= 200.0 and _max_texture_min_size(shipcards_list, DROPSHIP_TEXTURE_PATH).y >= 136.0, "Homebase dropship image uses the enlarged shipcard size")
+	_assert(_max_texture_min_size(shipcards_list, DROPSHIP_TEXTURE_PATH).x >= 300.0 and _max_texture_min_size(shipcards_list, DROPSHIP_TEXTURE_PATH).y >= 210.0, "Homebase dropship image uses the enlarged shipcard size")
+	_assert(_shipcard_visuals_are_top_left_anchored(shipcards_list), "Homebase shipcard visuals use a shifted top-left deck anchor")
+	_assert(_shipcard_actions_top_aligned(shipcards_list), "Homebase shipcard action buttons are top-aligned")
 
 	screen.queue_free()
 	await process_frame
@@ -225,6 +227,38 @@ func _max_texture_min_size(root_node: Node, expected_path: String) -> Vector2:
 		if texture_rect.custom_minimum_size.x * texture_rect.custom_minimum_size.y > max_size.x * max_size.y:
 			max_size = texture_rect.custom_minimum_size
 	return max_size
+
+
+func _shipcard_visuals_are_top_left_anchored(root_node: Node) -> bool:
+	var checked_count := 0
+	for node in _collect_nodes(root_node):
+		var texture_rect := node as TextureRect
+		if texture_rect == null or texture_rect.name != "ShipTexture":
+			continue
+		if String(texture_rect.get_meta("homebase_shipcard_visual_anchor", "")) != "left_top":
+			return false
+		if texture_rect.stretch_mode != TextureRect.STRETCH_KEEP_ASPECT_CENTERED:
+			return false
+		if not bool(texture_rect.get_meta("homebase_shipcard_visual_enlarged", false)):
+			return false
+		if texture_rect.position.x > 0.0 or texture_rect.position.y > 0.0:
+			return false
+		checked_count += 1
+	return checked_count > 0
+
+
+func _shipcard_actions_top_aligned(root_node: Node) -> bool:
+	var checked_count := 0
+	for node in _collect_nodes(root_node):
+		var action_column := node as VBoxContainer
+		if action_column == null or action_column.name != "ShipActionColumn":
+			continue
+		if action_column.alignment != BoxContainer.ALIGNMENT_BEGIN:
+			return false
+		if not bool(action_column.get_meta("homebase_actions_top_aligned", false)):
+			return false
+		checked_count += 1
+	return checked_count > 0
 
 
 func _collect_cards_by_source_context(root_node: Node, expected_context: String) -> Array:

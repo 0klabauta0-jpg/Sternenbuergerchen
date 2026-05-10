@@ -36,6 +36,11 @@
 			"collapsed": false
 		},
 		{
+			"group_id": "space_station",
+			"display_name": "Space Station",
+			"collapsed": false
+		},
+		{
 			"group_id": "deko",
 			"display_name": "Deko",
 			"collapsed": false
@@ -74,6 +79,11 @@
 			"group_id": "fahrzeuge",
 			"display_name": "Fahrzeuge",
 			"collapsed": false
+		},
+		{
+			"group_id": "missionsmarker",
+			"display_name": "Missionsmarker",
+			"collapsed": true
 		}
 	],
 	"tile_types": [
@@ -467,6 +477,90 @@
 			"height_level": 0,
 			"object_height": 0,
 			"prop_role": "deco_small"
+		},
+		{
+			"type_id": "station_wall",
+			"display_name": "Station Wall",
+			"palette_group": "space_station",
+			"placement_layer": "object",
+			"surface_type": "rock",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 60,
+			"height_level": 0,
+			"object_height": 2
+		},
+		{
+			"type_id": "station_wall_door",
+			"display_name": "Station Door Wall",
+			"palette_group": "space_station",
+			"placement_layer": "object",
+			"surface_type": "rock",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 55,
+			"height_level": 0,
+			"object_height": 2
+		},
+		{
+			"type_id": "station_computer",
+			"display_name": "Station Computer",
+			"palette_group": "space_station",
+			"placement_layer": "object",
+			"surface_type": "road",
+			"walkable": false,
+			"blocks_los": false,
+			"cover_value": 25,
+			"height_level": 0,
+			"object_height": 1
+		},
+		{
+			"type_id": "station_table_display",
+			"display_name": "Station Display Table",
+			"palette_group": "space_station",
+			"placement_layer": "object",
+			"surface_type": "road",
+			"walkable": false,
+			"blocks_los": false,
+			"cover_value": 30,
+			"height_level": 0,
+			"object_height": 1
+		},
+		{
+			"type_id": "station_container_wide",
+			"display_name": "Station Cargo Container",
+			"palette_group": "space_station",
+			"placement_layer": "object",
+			"surface_type": "rock",
+			"walkable": false,
+			"blocks_los": true,
+			"cover_value": 45,
+			"height_level": 0,
+			"object_height": 2
+		},
+		{
+			"type_id": "station_bed_single",
+			"display_name": "Station Med Bed",
+			"palette_group": "space_station",
+			"placement_layer": "object",
+			"surface_type": "road",
+			"walkable": false,
+			"blocks_los": false,
+			"cover_value": 20,
+			"height_level": 0,
+			"object_height": 1
+		},
+		{
+			"type_id": "station_floor_panel",
+			"display_name": "Station Floor Panel",
+			"palette_group": "space_station",
+			"placement_layer": "object",
+			"surface_type": "road",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 0,
+			"object_height": 0
 		},
 		{
 			"type_id": "deko_barrel_ne",

@@ -20,8 +20,8 @@ const BOUNDING_MIN_SPEED_FACTOR: float = 0.52
 const BOUNDING_MAX_SPEED_FACTOR: float = 0.92
 const CATERPILLAR_MIN_SPEED_FACTOR: float = 0.38
 const CATERPILLAR_MAX_SPEED_FACTOR: float = 0.68
-const MOVE_TRAVEL_FORMATION_SCATTER_FACTOR: float = 0.45
-const MOVE_MAX_FORMATION_SCATTER_FACTOR: float = 0.72
+const MOVE_TRAVEL_FORMATION_SCATTER_FACTOR: float = 0.85
+const MOVE_MAX_FORMATION_SCATTER_FACTOR: float = 1.0
 const BOUNDING_MIN_STEP_DISTANCE: float = 84.0
 const BOUNDING_MAX_STEP_DISTANCE: float = 176.0
 const CATERPILLAR_MIN_STEP_DISTANCE: float = 56.0
@@ -37,7 +37,8 @@ const FORMATION_SLOT_LAYOUT := [
 	Vector2(2.15, 1.95),
 	Vector2(0.0, 2.3),
 ]
-const FORMATION_SLOT_SPACING: float = 28.0
+const FORMATION_SLOT_SPACING: float = 64.0
+const FORMATION_MAX_DISTANCE_FROM_ANCHOR: float = 64.0 * 6.0
 
 var _execution_by_fireteam: Dictionary = {}
 var _execution_sequence: int = 0
@@ -554,7 +555,10 @@ func _build_formation_targets(anchor_position: Vector2, member_records: Array, l
 		var slot: Vector2 = FORMATION_SLOT_LAYOUT[slot_index]
 		if not allow_trailing_slots:
 			slot.y = minf(slot.y, 0.0)
-		targets[String(record.get("unit_id", ""))] = anchor_position + ((lateral * slot.x) + (forward * slot.y)) * FORMATION_SLOT_SPACING * maxf(scatter_factor, 0.5)
+		var offset: Vector2 = ((lateral * slot.x) + (forward * slot.y)) * FORMATION_SLOT_SPACING * maxf(scatter_factor, 0.5)
+		if offset.length() > FORMATION_MAX_DISTANCE_FROM_ANCHOR:
+			offset = offset.normalized() * FORMATION_MAX_DISTANCE_FROM_ANCHOR
+		targets[String(record.get("unit_id", ""))] = anchor_position + offset
 	return targets
 
 
@@ -567,17 +571,7 @@ func _build_current_positions(member_records: Array) -> Dictionary:
 	return positions
 
 
-func _avoid_backward_move_target(state: Dictionary, current_position: Vector2, target_position: Vector2) -> Vector2:
-	if String(state.get("command_type", "")) != "move":
-		return target_position
-	var final_target_position: Vector2 = Vector2(state.get("final_target_position", target_position))
-	var to_final: Vector2 = final_target_position - current_position
-	var to_target: Vector2 = target_position - current_position
-	if to_final.length() <= ANCHOR_REACHED_RADIUS or to_target.length() <= 0.001:
-		return target_position
-	var target_alignment: float = to_final.normalized().dot(to_target.normalized())
-	if target_alignment < -0.25 and to_target.length() > FORMATION_SLOT_SPACING * 0.5:
-		return current_position
+func _avoid_backward_move_target(_state: Dictionary, _current_position: Vector2, target_position: Vector2) -> Vector2:
 	return target_position
 
 
