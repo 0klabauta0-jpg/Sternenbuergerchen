@@ -193,6 +193,7 @@ var _current_phase_index: int = 1
 var _current_approach_index: int = 0
 var _selected_fireteam_ids: PackedStringArray = []
 var _focused_fireteam_id: String = ""
+var _fire_sector_overlay_enabled: bool = false
 var _fireteamleader_feedback_bubbles: Array = []
 var _fireteamleader_feedback_sequence: int = 0
 var _tactical_communication_resolver = null
@@ -470,6 +471,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_DELETE:
 			if _delete_selected_order():
 				get_viewport().set_input_as_handled()
+		KEY_C:
+			_toggle_fire_sector_overlay()
+			get_viewport().set_input_as_handled()
 		KEY_T:
 			_on_sort_fireteam_pressed()
 			get_viewport().set_input_as_handled()
@@ -503,6 +507,23 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_G:
 			if execute_selected_fireteam_orders():
 				get_viewport().set_input_as_handled()
+
+
+func is_fire_sector_overlay_enabled() -> bool:
+	return _fire_sector_overlay_enabled
+
+
+func set_fire_sector_overlay_enabled(enabled: bool) -> void:
+	if _fire_sector_overlay_enabled == enabled:
+		return
+	_fire_sector_overlay_enabled = enabled
+	_last_command_text = "FIRE ARC ON" if _fire_sector_overlay_enabled else "FIRE ARC OFF"
+	_refresh_order_visuals()
+	_update_ui()
+
+
+func _toggle_fire_sector_overlay() -> void:
+	set_fire_sector_overlay_enabled(not _fire_sector_overlay_enabled)
 
 
 func issue_move() -> bool:
@@ -2224,6 +2245,10 @@ func _refresh_fireteam_phase_panel() -> void:
 	var panel := _ensure_fireteam_phase_panel()
 	if panel == null:
 		return
+	panel.visible = PHASE_PLANNING_ENABLED
+	if not PHASE_PLANNING_ENABLED:
+		_apply_fireteam_panel_action_button_contract()
+		return
 	var status_label := panel.get_node_or_null("MarginContainer/VBoxContainer/PhaseStatusLabel") as Label
 	if status_label != null:
 		status_label.text = _build_phase_status_text()
@@ -2290,6 +2315,8 @@ func _refresh_fireteam_status_panel() -> void:
 		selection_badge.call("set_badge", badge_text, badge_status_key)
 	if suppression_progress != null and suppression_progress.has_method("set_progress"):
 		suppression_progress.call("set_progress", "SUPP", suppression_value, maxf(suppression_threshold, 1.0), badge_status_key)
+		if suppression_progress is Control:
+			(suppression_progress as Control).tooltip_text = "SUPP = Suppression. Steigt unter Beschuss; bei vollem Balken ist das Fireteam gepinnt."
 	var stance_text: String = _build_selected_tactical_stance_text()
 	var execution_text: String = _build_selected_execution_quality_text()
 	var movement_text: String = _format_movement_state_text(get_fireteam_movement_state(selected_fireteam_id))
@@ -2298,9 +2325,10 @@ func _refresh_fireteam_status_panel() -> void:
 	if suppression_label != null:
 		var ad_hoc_text: String = " | AD-HOC %s" % ad_hoc_type.to_upper() if not ad_hoc_type.is_empty() else ""
 		suppression_label.text = "%s | STANCE %s | EXEC %s | MOVE %s | SEC %s | FLK %s | SUPP %.2f/%.2f%s" % [lead_name, stance_text, execution_text, movement_text, security_text, flank_text, suppression_value, suppression_threshold, ad_hoc_text]
-	var can_return_to_plan: bool = selected_fireteam_id.is_empty() == false and (_has_pending_plan_for_fireteam(selected_fireteam_id) or (_ad_hoc_order_controller != null and bool(_ad_hoc_order_controller.call("has_active_order", selected_fireteam_id))))
+	var can_return_to_plan: bool = _can_return_fireteam_to_plan(selected_fireteam_id)
 	if return_button != null:
 		return_button.call("configure", "Return to Plan", "return_to_plan", "Fuehrt das ausgewaehlte Fireteam zurueck in den geplanten Ablauf.", "command" if can_return_to_plan else "neutral")
+		return_button.visible = can_return_to_plan
 		return_button.disabled = not can_return_to_plan
 	_apply_fireteam_panel_action_button_contract()
 
@@ -2312,6 +2340,22 @@ func _has_pending_plan_for_fireteam(fireteam_id: String) -> bool:
 		return false
 	for waypoint in plan.waypoints:
 		if String(waypoint.status) == FIRETEAM_WAYPOINT_SCRIPT.STATUS_PENDING or String(waypoint.status) == FIRETEAM_WAYPOINT_SCRIPT.STATUS_INTERRUPTED:
+			return true
+	return false
+
+
+func _can_return_fireteam_to_plan(fireteam_id: String) -> bool:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return false
+	if _has_pending_plan_for_fireteam(normalized_fireteam_id):
+		return true
+	return _ad_hoc_order_controller != null and bool(_ad_hoc_order_controller.call("has_active_order", normalized_fireteam_id))
+
+
+func _can_return_selected_fireteams_to_plan() -> bool:
+	for fireteam_id_variant in _selected_fireteam_ids:
+		if _can_return_fireteam_to_plan(String(fireteam_id_variant)):
 			return true
 	return false
 
@@ -4684,10 +4728,10 @@ func _refresh_button_state() -> void:
 		next_phase_button.disabled = true if not PHASE_PLANNING_ENABLED else preview_mode or not _can_issue_local_commands() or not _has_pending_global_phase()
 	var go_matrix_button := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton") as BaseButton
 	if go_matrix_button != null:
-		go_matrix_button.disabled = preview_mode or not _can_issue_local_commands() or _selected_fireteam_ids.is_empty()
+		go_matrix_button.disabled = preview_mode or not _can_issue_local_commands() or not _has_selected_fireteam_orders_to_execute()
 	var plan_matrix_button := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/PlanCommandMatrixButton") as BaseButton
 	if plan_matrix_button != null:
-		plan_matrix_button.disabled = preview_mode or not _can_issue_local_commands() or _selected_fireteam_ids.is_empty()
+		plan_matrix_button.disabled = preview_mode or not _can_issue_local_commands() or not _can_return_selected_fireteams_to_plan()
 	_refresh_tactical_stance_panel()
 
 
@@ -5598,7 +5642,7 @@ func _apply_fireteam_panel_action_button_contract() -> void:
 			button.tooltip_text = _get_tactical_stance_button_text(stance_id)
 			button.text = _get_tactical_stance_short_label(stance_id)
 		elif button.name == "ReturnToPlanButton":
-			button.tooltip_text = "Return to Plan"
+			button.tooltip_text = "Plan: kehrt nur aus Ad-hoc oder Unterbrechung in die geplante Wegpunktkette zurueck."
 			button.text = "Plan"
 		elif button.name != "GoPhaseButton":
 			continue
@@ -5641,7 +5685,8 @@ func _refresh_dynamic_button_styles() -> void:
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton") as Button, _is_target_placement_armed)
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null(DELETE_ORDER_BUTTON_PATH) as Button, _has_deletable_order_focus())
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null(SORT_COMMAND_BUTTON_PATH) as Button, not preview_mode and _can_issue_local_commands() and not _selected_fireteam_ids.is_empty())
-	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton") as Button, not preview_mode and _can_issue_local_commands() and not _selected_fireteam_ids.is_empty())
+	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton") as Button, not preview_mode and _can_issue_local_commands() and _has_selected_fireteam_orders_to_execute())
+	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/PlanCommandMatrixButton") as Button, not preview_mode and _can_issue_local_commands() and _can_return_selected_fireteams_to_plan())
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton") as Button, _is_lz_placement_armed)
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton") as Button, _drop_ship_requested)
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/NextPhaseButton") as Button, PHASE_PLANNING_ENABLED and not preview_mode and _can_issue_local_commands() and not _phase_execution_by_fireteam.is_empty())
@@ -7654,6 +7699,7 @@ func _sync_primary_3d_order_visuals() -> void:
 		{
 			"phase_index": _get_live_order_phase_index(),
 			"selected_fireteam_ids": _selected_fireteam_ids,
+			"fire_sector_overlay_enabled": _fire_sector_overlay_enabled,
 			"fireteam_anchors": _build_fireteam_anchor_visualization_entries(),
 			"plan_dicts": _serialize_order_plans(),
 			"area_order_dicts": _serialize_area_orders(),

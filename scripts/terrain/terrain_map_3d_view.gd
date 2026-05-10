@@ -147,8 +147,15 @@ const TILE_SELECTION_SURFACE_Y_OFFSET: float = 0.12
 const TILE_SELECTION_BORDER_WIDTH_FACTOR: float = 0.078
 const TILE_SELECTION_FILL_COLOR: Color = Color(0.05, 0.58, 1.0, 0.46)
 const TILE_SELECTION_BORDER_COLOR: Color = Color(0.78, 0.98, 1.0, 1.0)
-const FRIENDLY_AIM_LINE_COLOR: Color = Color(0.42, 1.0, 0.74, 0.72)
-const FRIENDLY_AIM_TIP_COLOR: Color = Color(0.74, 1.0, 0.88, 0.78)
+const FRIENDLY_AIM_LINE_COLOR: Color = Color(0.66, 1.0, 0.72, 0.82)
+const FRIENDLY_AIM_TIP_COLOR: Color = Color(0.78, 1.0, 0.84, 0.92)
+const FRIENDLY_FIRE_SECTOR_COLOR: Color = Color(0.52, 1.0, 0.58, 0.14)
+const FRIENDLY_FIRE_SECTOR_BORDER_COLOR: Color = Color(0.72, 1.0, 0.68, 0.42)
+const FRIENDLY_FIRE_SECTOR_ANGLE_DEGREES: float = 70.0
+const FRIENDLY_FIRE_SECTOR_SEGMENTS: int = 10
+const FRIENDLY_FIRE_FACING_STEM_MIN_WORLD: float = 30.0
+const FRIENDLY_FIRE_FACING_STEM_MAX_WORLD: float = 88.0
+const FRIENDLY_AIM_DIRECTION_DEADZONE_RADIANS: float = 0.14
 
 const LEGACY_MODEL_BY_TYPE: Dictionary = {
 	"wall_straight_se": "corridor_wall",
@@ -311,6 +318,7 @@ var _enemy_tactics_visual_count: int = 0
 var _enemy_tactics_entries: Array = []
 var _friendly_aim_visual_count: int = 0
 var _friendly_aim_entries: Array = []
+var _friendly_aim_direction_by_unit_id: Dictionary = {}
 var _weapon_fire_vfx_visual_count: int = 0
 var _weapon_fire_vfx_entries: Array = []
 var _weapon_fire_sfx_count: int = 0
@@ -848,6 +856,8 @@ func get_render_snapshot() -> Dictionary:
 		"enemy_tactics_entries": _enemy_tactics_entries.duplicate(true),
 		"friendly_aim_visual_count": _friendly_aim_visual_count,
 		"friendly_aim_entries": _friendly_aim_entries.duplicate(true),
+		"friendly_fire_sector_overlay_enabled": bool(_order_payload.get("fire_sector_overlay_enabled", false)),
+		"friendly_fire_sector_angle_degrees": FRIENDLY_FIRE_SECTOR_ANGLE_DEGREES,
 		"weapon_fire_vfx_visual_count": _weapon_fire_vfx_visual_count,
 		"weapon_fire_vfx_entries": _weapon_fire_vfx_entries.duplicate(true),
 		"weapon_fire_vfx_catalog_loaded": not _get_weapon_fire_vfx_catalog().is_empty(),
@@ -2912,6 +2922,8 @@ func _rebuild_order_visuals() -> void:
 	_enemy_security_entries.clear()
 	_enemy_tactics_visual_count = 0
 	_enemy_tactics_entries.clear()
+	_friendly_aim_visual_count = 0
+	_friendly_aim_entries.clear()
 	_weapon_fire_vfx_visual_count = 0
 	_weapon_fire_vfx_entries.clear()
 	_feedback_bubble_visual_count = 0
@@ -3275,9 +3287,14 @@ func _add_enemy_tactics_visual(tactics_state: Dictionary) -> void:
 
 
 func _add_selected_fireteam_aim_visuals() -> void:
+	if not bool(_order_payload.get("fire_sector_overlay_enabled", false)):
+		_friendly_aim_direction_by_unit_id.clear()
+		return
 	var selected_fireteam_ids: PackedStringArray = _get_string_array_from_variant(_order_payload.get("selected_fireteam_ids", PackedStringArray()))
 	if selected_fireteam_ids.is_empty():
+		_friendly_aim_direction_by_unit_id.clear()
 		return
+	var seen_unit_ids: Dictionary = {}
 	for unit in _unit_nodes:
 		if unit == null or not (unit is Node2D):
 			continue
@@ -3296,10 +3313,16 @@ func _add_selected_fireteam_aim_visuals() -> void:
 		var aim_direction: Vector2 = _resolve_unit_aim_direction(unit, unit_position)
 		if aim_direction.length_squared() <= 0.0001:
 			continue
-		var tip_position: Vector2 = unit_position + aim_direction.normalized() * range_world
 		var unit_id: String = _get_unit_id(unit)
-		_add_line3d(_order_root, _world_to_surface_3d_position(unit_position, 0.82), _world_to_surface_3d_position(tip_position, 0.82), FRIENDLY_AIM_LINE_COLOR, "FriendlyAimLine_%s" % unit_id)
-		_add_marker3d(_order_root, tip_position, FRIENDLY_AIM_TIP_COLOR, "FriendlyAimTip_%s" % unit_id, 0.11, 0.09, 12)
+		aim_direction = _stabilize_friendly_aim_direction(unit_id, aim_direction)
+		seen_unit_ids[unit_id] = true
+		var tip_position: Vector2 = unit_position + aim_direction * range_world
+		var facing_length: float = clampf(range_world * 0.16, FRIENDLY_FIRE_FACING_STEM_MIN_WORLD, FRIENDLY_FIRE_FACING_STEM_MAX_WORLD)
+		var facing_tip_position: Vector2 = unit_position + aim_direction * facing_length
+		_add_fire_sector3d(_order_root, unit_position, aim_direction, range_world, deg_to_rad(FRIENDLY_FIRE_SECTOR_ANGLE_DEGREES), FRIENDLY_FIRE_SECTOR_COLOR, "FriendlyFireSector_%s" % unit_id)
+		_add_fire_sector_outline3d(_order_root, unit_position, aim_direction, range_world, deg_to_rad(FRIENDLY_FIRE_SECTOR_ANGLE_DEGREES), FRIENDLY_FIRE_SECTOR_BORDER_COLOR, "FriendlyFireSectorOutline_%s" % unit_id)
+		_add_line3d(_order_root, _world_to_surface_3d_position(unit_position, 0.86), _world_to_surface_3d_position(facing_tip_position, 0.86), FRIENDLY_AIM_LINE_COLOR, "FriendlyFacingLine_%s" % unit_id)
+		_add_marker3d(_order_root, facing_tip_position, FRIENDLY_AIM_TIP_COLOR, "FriendlyFacingTip_%s" % unit_id, 0.075, 0.07, 10)
 		_friendly_aim_visual_count += 1
 		_friendly_aim_entries.append({
 			"unit_id": unit_id,
@@ -3308,8 +3331,34 @@ func _add_selected_fireteam_aim_visuals() -> void:
 			"range_world": range_world,
 			"origin_position": unit_position,
 			"tip_position": tip_position,
+			"facing_tip_position": facing_tip_position,
+			"visual_shape": "sector",
+			"sector_angle_degrees": FRIENDLY_FIRE_SECTOR_ANGLE_DEGREES,
 			"visual_only": true,
 		})
+	_prune_stabilized_friendly_aim_directions(seen_unit_ids)
+
+
+func _stabilize_friendly_aim_direction(unit_id: String, raw_direction: Vector2) -> Vector2:
+	var normalized_direction: Vector2 = raw_direction.normalized()
+	if unit_id.strip_edges().is_empty():
+		return normalized_direction
+	var previous_variant = _friendly_aim_direction_by_unit_id.get(unit_id, null)
+	if typeof(previous_variant) == TYPE_VECTOR2:
+		var previous_direction: Vector2 = Vector2(previous_variant)
+		if previous_direction.length_squared() > 0.0001:
+			var angle_delta: float = absf(wrapf(normalized_direction.angle() - previous_direction.normalized().angle(), -PI, PI))
+			if angle_delta < FRIENDLY_AIM_DIRECTION_DEADZONE_RADIANS:
+				return previous_direction.normalized()
+	_friendly_aim_direction_by_unit_id[unit_id] = normalized_direction
+	return normalized_direction
+
+
+func _prune_stabilized_friendly_aim_directions(seen_unit_ids: Dictionary) -> void:
+	for key_variant in _friendly_aim_direction_by_unit_id.keys():
+		var unit_id: String = String(key_variant)
+		if not seen_unit_ids.has(unit_id):
+			_friendly_aim_direction_by_unit_id.erase(unit_id)
 
 
 func _get_unit_fireteam_id(unit: Node) -> String:
@@ -5133,6 +5182,64 @@ func _add_marker3d(parent: Node3D, world_position: Vector2, color: Color, node_n
 	if radial_segments == 4:
 		marker.rotation_degrees.y = 45.0
 	parent.add_child(marker)
+
+
+func _add_fire_sector3d(parent: Node3D, origin_world: Vector2, center_direction: Vector2, range_world: float, sector_angle_radians: float, color: Color, node_name: String) -> void:
+	if parent == null or center_direction.length_squared() <= 0.0001 or range_world <= 0.0:
+		return
+	var direction: Vector2 = center_direction.normalized()
+	var half_angle: float = sector_angle_radians * 0.5
+	var segment_count: int = maxi(FRIENDLY_FIRE_SECTOR_SEGMENTS, 2)
+	var material := _make_unshaded_material(color, true)
+	var mesh := ImmediateMesh.new()
+	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, material)
+	var origin_3d: Vector3 = _world_to_surface_3d_position(origin_world, 0.52)
+	for index in range(segment_count):
+		var start_ratio: float = float(index) / float(segment_count)
+		var end_ratio: float = float(index + 1) / float(segment_count)
+		var start_angle: float = lerpf(-half_angle, half_angle, start_ratio)
+		var end_angle: float = lerpf(-half_angle, half_angle, end_ratio)
+		var start_world: Vector2 = origin_world + direction.rotated(start_angle) * range_world
+		var end_world: Vector2 = origin_world + direction.rotated(end_angle) * range_world
+		mesh.surface_add_vertex(origin_3d)
+		mesh.surface_add_vertex(_world_to_surface_3d_position(start_world, 0.52))
+		mesh.surface_add_vertex(_world_to_surface_3d_position(end_world, 0.52))
+	mesh.surface_end()
+	var instance := MeshInstance3D.new()
+	instance.name = node_name
+	instance.mesh = mesh
+	parent.add_child(instance)
+
+
+func _add_fire_sector_outline3d(parent: Node3D, origin_world: Vector2, center_direction: Vector2, range_world: float, sector_angle_radians: float, color: Color, node_name: String) -> void:
+	if parent == null or center_direction.length_squared() <= 0.0001 or range_world <= 0.0:
+		return
+	var direction: Vector2 = center_direction.normalized()
+	var half_angle: float = sector_angle_radians * 0.5
+	var segment_count: int = maxi(FRIENDLY_FIRE_SECTOR_SEGMENTS, 2)
+	var material := _make_unshaded_material(color, true)
+	var mesh := ImmediateMesh.new()
+	mesh.surface_begin(Mesh.PRIMITIVE_LINES, material)
+	var origin_3d: Vector3 = _world_to_surface_3d_position(origin_world, 0.55)
+	var left_world: Vector2 = origin_world + direction.rotated(-half_angle) * range_world
+	var right_world: Vector2 = origin_world + direction.rotated(half_angle) * range_world
+	mesh.surface_add_vertex(origin_3d)
+	mesh.surface_add_vertex(_world_to_surface_3d_position(left_world, 0.55))
+	mesh.surface_add_vertex(origin_3d)
+	mesh.surface_add_vertex(_world_to_surface_3d_position(right_world, 0.55))
+	var previous_world: Vector2 = left_world
+	for index in range(1, segment_count + 1):
+		var ratio: float = float(index) / float(segment_count)
+		var angle: float = lerpf(-half_angle, half_angle, ratio)
+		var current_world: Vector2 = origin_world + direction.rotated(angle) * range_world
+		mesh.surface_add_vertex(_world_to_surface_3d_position(previous_world, 0.55))
+		mesh.surface_add_vertex(_world_to_surface_3d_position(current_world, 0.55))
+		previous_world = current_world
+	mesh.surface_end()
+	var instance := MeshInstance3D.new()
+	instance.name = node_name
+	instance.mesh = mesh
+	parent.add_child(instance)
 
 
 func _add_line3d(parent: Node3D, start_position: Vector3, end_position: Vector3, color: Color, node_name: String) -> void:
