@@ -1330,13 +1330,13 @@ func _add_tile_visual(tile_data) -> void:
 		_add_object_visual(tile_data, top_y, structure_visual_type_id)
 	var object_visual_type_id: String = _resolve_tile_asset_type_id(object_type_id, "" if not structure_visual_type_id.is_empty() else type_id)
 	if not object_visual_type_id.is_empty():
-		_add_object_visual(tile_data, top_y, object_visual_type_id)
+		_add_object_visual(tile_data, top_y, object_visual_type_id, true)
 	elif structure_visual_type_id.is_empty() and (bool(tile_data.blocks_los) or int(tile_data.object_height) > 0):
 		_add_object_visual(tile_data, top_y, "")
 
 
-func _add_object_visual(tile_data, top_y: float, visual_type_id: String) -> void:
-	if not visual_type_id.is_empty() and _add_asset_model_visual(tile_data, top_y, visual_type_id):
+func _add_object_visual(tile_data, top_y: float, visual_type_id: String, apply_tile_rotation: bool = false) -> void:
+	if not visual_type_id.is_empty() and _add_asset_model_visual(tile_data, top_y, visual_type_id, apply_tile_rotation):
 		return
 	if _uses_strict_3d_asset_mapping():
 		_add_missing_asset_marker(tile_data, top_y, _get_missing_visual_type_id(tile_data, visual_type_id))
@@ -1409,6 +1409,8 @@ func _resolve_ground_surface_model_key(tile_data) -> String:
 	var catalog: Dictionary = _get_terrain_surface_visual_theme_catalog()
 	if catalog.is_empty():
 		return "ground_flat"
+	if _tile_should_use_station_floor_surface(tile_data):
+		return "station_floor_panel"
 	var type_id: String = String(tile_data.type_id).strip_edges().to_lower() if tile_data.type_id is String else ""
 	var type_overrides: Dictionary = Dictionary(catalog.get("tile_type_overrides", {}))
 	if not type_id.is_empty() and type_overrides.has(type_id):
@@ -1421,6 +1423,21 @@ func _resolve_ground_surface_model_key(tile_data) -> String:
 	if model_key.is_empty():
 		model_key = String(surface_models.get(TERRAIN_TILE_DATA_SCRIPT.SURFACE_GROUND, "ground_flat")).strip_edges().to_lower()
 	return model_key if not model_key.is_empty() else "ground_flat"
+
+
+func _tile_should_use_station_floor_surface(tile_data) -> bool:
+	if tile_data == null:
+		return false
+	var type_id: String = String(tile_data.type_id).strip_edges().to_lower() if tile_data.type_id is String else ""
+	var object_type_id: String = String(tile_data.object_type_id).strip_edges().to_lower() if tile_data.object_type_id is String else ""
+	if type_id == "station_floor_panel" or type_id.begins_with("station_") or object_type_id.begins_with("station_"):
+		return true
+	if String(tile_data.surface_type).strip_edges().to_lower() != TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROAD:
+		return false
+	for prefix in ["wall_", "station_wall"]:
+		if type_id.begins_with(prefix):
+			return true
+	return false
 
 
 func _add_surface_detail_visual(tile_data, top_y: float) -> void:
@@ -1614,6 +1631,8 @@ func _add_missing_asset_marker(tile_data, top_y: float, visual_type_id: String) 
 
 func _add_surface_tint_visual(tile_data, top_y: float) -> void:
 	if tile_data == null or _map_root == null or not _uses_strict_3d_asset_mapping():
+		return
+	if _tile_should_use_station_floor_surface(tile_data):
 		return
 	var surface_type: String = String(tile_data.surface_type).strip_edges().to_lower()
 	if surface_type == TERRAIN_TILE_DATA_SCRIPT.SURFACE_GROUND:
@@ -2173,7 +2192,7 @@ func _get_kenney_anchor_offset(texture: Texture2D, additional_offset: Vector2 = 
 	return (texture.get_size() * 0.5) - KENNEY_DIAMOND_CENTER + additional_offset
 
 
-func _add_asset_model_visual(tile_data, top_y: float, visual_type_id: String) -> bool:
+func _add_asset_model_visual(tile_data, top_y: float, visual_type_id: String, apply_tile_rotation: bool = false) -> bool:
 	var model_scene := _get_asset_model_scene(visual_type_id)
 	if model_scene == null or _map_root == null:
 		return false
@@ -2186,6 +2205,8 @@ func _add_asset_model_visual(tile_data, top_y: float, visual_type_id: String) ->
 	visual_root.name = "Asset_%s_%d_%d" % [visual_type_id, tile_data.grid_position.x, tile_data.grid_position.y]
 	visual_root.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + _get_asset_y_offset(visual_type_id)) + _get_asset_position_offset(visual_type_id)
 	visual_root.rotation_degrees.y = _get_asset_rotation_y(visual_type_id)
+	if apply_tile_rotation:
+		visual_root.rotation_degrees.y += _get_tile_object_rotation_degrees(tile_data)
 	visual_root.scale = Vector3.ONE * _get_asset_model_scale(visual_type_id)
 	visual_root.add_child(model_instance)
 	_map_root.add_child(visual_root)
@@ -2198,6 +2219,12 @@ func _add_asset_model_visual(tile_data, top_y: float, visual_type_id: String) ->
 	_asset_model_count += 1
 	_register_nature_prop_visual(tile_data, visual_type_id, visual_root)
 	return true
+
+
+func _get_tile_object_rotation_degrees(tile_data) -> float:
+	if tile_data == null:
+		return 0.0
+	return fposmod(float(tile_data.object_rotation_degrees), 360.0)
 
 
 func _register_nature_prop_visual(tile_data, visual_type_id: String, visual_root: Node3D) -> void:

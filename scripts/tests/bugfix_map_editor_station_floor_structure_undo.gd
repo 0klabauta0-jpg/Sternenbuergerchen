@@ -7,6 +7,7 @@ const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/ter
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 
 const TERRAIN_MAPPING_PATH: String = "res://data/terrain_3d_asset_mapping.json"
+const TEMP_SAVE_AS_MAP_PATH: String = "user://ground_map_scenario_1_rotation_test.json"
 
 var _passed: int = 0
 var _failed: int = 0
@@ -77,7 +78,34 @@ func _test_editor_palette_undo_and_bounds() -> void:
 		_assert(bool(palette.get("all_visible_items_have_preview_icons", false)), "Palette group has preview icons: %s" % group_id)
 		_assert(Vector2i(palette.get("preview_icon_size", Vector2i.ZERO)) == Vector2i(16, 16), "Palette preview icons stay text-sized")
 
+	editor.call("_on_palette_group_button_pressed", "space_station")
+	await _wait_frames(1)
+	_assert(_palette_icon_has_shape(editor, "station_wall"), "Station wall palette icon is a shaped preview, not a flat color square")
+	_assert(_palette_icon_has_shape(editor, "station_floor_panel"), "Station floor palette icon is a shaped preview")
+	editor.call("_on_palette_group_button_pressed", "technik")
+	await _wait_frames(1)
+	_assert(_palette_icon_fills_preview(editor, "technik_generator_ne"), "Generator palette thumbnail crops transparent margins")
+
 	var map_data = editor.get("_terrain_map_data")
+	map_data.call("set_map_name", "Ground Map Scenario 1")
+	editor.set("_current_map_path", "res://maps/new_map.json")
+	editor.call("_refresh_map_settings_panel")
+	var save_snapshot: Dictionary = Dictionary(editor.call("get_map_editor_usability_snapshot", false))
+	_assert(bool(save_snapshot.get("save_routes_to_save_as", false)), "Renaming default New Map routes normal Save to Save As")
+	_assert(String(save_snapshot.get("save_as_suggested_file", "")) == "ground_map_scenario_1.json", "Save As suggests a file name from the edited map ID")
+	editor.set("_current_map_path", TEMP_SAVE_AS_MAP_PATH)
+	editor.call("_save_current_map")
+	var reloaded_named_map = TERRAIN_MAP_DATA_SCRIPT.call("load_from_file", TEMP_SAVE_AS_MAP_PATH)
+	_assert(reloaded_named_map != null and String(reloaded_named_map.call("get_map_name")) == "Ground Map Scenario 1", "Saving preserves edited map name instead of overwriting it with the file stem")
+	var rotation_roundtrip_tile = map_data.call("get_tile_at_grid", Vector2i(1, 1))
+	if rotation_roundtrip_tile != null:
+		rotation_roundtrip_tile.object_type_id = "station_computer"
+		rotation_roundtrip_tile.object_rotation_degrees = 270.0
+		editor.call("_save_current_map")
+		var reloaded_rotation_map = TERRAIN_MAP_DATA_SCRIPT.call("load_from_file", TEMP_SAVE_AS_MAP_PATH)
+		var reloaded_rotation_tile = reloaded_rotation_map.call("get_tile_at_grid", Vector2i(1, 1)) if reloaded_rotation_map != null else null
+		_assert(reloaded_rotation_tile != null and absf(float(reloaded_rotation_tile.object_rotation_degrees) - 270.0) < 0.1, "Object rotation persists through map save/load")
+
 	var first_tile = map_data.call("get_tile_at_grid", Vector2i(2, 2))
 	var second_tile = map_data.call("get_tile_at_grid", Vector2i(3, 2))
 	_assert(first_tile != null and second_tile != null, "Undo fixture has two editable tiles")
@@ -128,6 +156,7 @@ func _test_station_floor_and_layered_station_rendering() -> void:
 	var floor_tile = map_data.call("get_tile_at_grid", Vector2i(1, 0))
 	catalog.call("apply_type_to_tile", layered_tile, "station_wall")
 	catalog.call("apply_type_to_tile", layered_tile, "station_bed_single")
+	layered_tile.object_rotation_degrees = 90.0
 	catalog.call("apply_type_to_tile", floor_tile, "station_floor_panel")
 
 	var view: Node = TERRAIN_MAP_3D_VIEW_SCRIPT.new()
@@ -137,10 +166,28 @@ func _test_station_floor_and_layered_station_rendering() -> void:
 	var snapshot: Dictionary = Dictionary(view.call("get_render_snapshot"))
 	_assert(int(snapshot.get("space_station_model_count", 0)) >= 4, "3D view renders station floor, wall and prop layers")
 	_assert(int(snapshot.get("missing_map_asset_mapping_count", 99)) == 0, "Layered station fixture has no missing 3D asset mappings")
+	var bed_node := view.find_child("Asset_station_bed_single_0_0", true, false) as Node3D
+	_assert(bed_node != null and absf(wrapf(bed_node.rotation_degrees.y - 90.0, -180.0, 180.0)) < 0.1, "Tile object rotation turns the station bed model")
 	var surface_entries: Array = Array(snapshot.get("surface_visual_entries", []))
 	_assert(_has_top_anchored_station_floor(surface_entries, Vector2i(1, 0)), "Station floor panel renders top-aligned as terrain")
 	_assert(_has_top_anchored_station_floor(surface_entries, Vector2i(0, 0)), "Station wall tiles use the station floor panel underneath")
 	view.queue_free()
+	await _wait_frames(2)
+
+	var legacy_wall_map = TERRAIN_MAP_DATA_SCRIPT.call("create_empty", "legacy_wall_station_floor", Vector2i(1, 1), Vector2.ZERO)
+	var legacy_wall_tile = legacy_wall_map.call("get_tile_at_grid", Vector2i(0, 0))
+	legacy_wall_tile.type_id = "wall_straight_se"
+	legacy_wall_tile.surface_type = TERRAIN_TILE_DATA_SCRIPT.get("SURFACE_ROAD")
+	legacy_wall_tile.walkable = false
+	legacy_wall_tile.blocks_los = true
+	var legacy_view: Node = TERRAIN_MAP_3D_VIEW_SCRIPT.new()
+	root.add_child(legacy_view)
+	legacy_view.call("configure_from_map", legacy_wall_map)
+	await _wait_frames(12)
+	var legacy_snapshot: Dictionary = Dictionary(legacy_view.call("get_render_snapshot"))
+	_assert(_has_top_anchored_station_floor(Array(legacy_snapshot.get("surface_visual_entries", [])), Vector2i(0, 0)), "Legacy wall_* tiles with station road surface render the station floor underneath")
+	_assert(int(legacy_snapshot.get("surface_tint_count", 99)) == 0, "Station floor under legacy walls is not covered by road tint")
+	legacy_view.queue_free()
 	await _wait_frames(2)
 
 
@@ -153,6 +200,64 @@ func _has_top_anchored_station_floor(entries: Array, grid_position: Vector2i) ->
 			continue
 		return absf(float(entry.get("visual_top_y", 999.0)) - float(entry.get("surface_y", -999.0))) <= 0.015
 	return false
+
+
+func _palette_icon_has_shape(editor, type_id: String) -> bool:
+	var image: Image = _get_palette_icon_image(editor, type_id)
+	if image == null:
+		return false
+	var transparent_count: int = 0
+	var opaque_count: int = 0
+	var colors: Dictionary = {}
+	for y in range(image.get_height()):
+		for x in range(image.get_width()):
+			var pixel: Color = image.get_pixel(x, y)
+			if pixel.a <= 0.04:
+				transparent_count += 1
+			else:
+				opaque_count += 1
+				colors[pixel.to_html(true)] = true
+	return transparent_count > 0 and opaque_count > 12 and colors.size() >= 3
+
+
+func _palette_icon_fills_preview(editor, type_id: String) -> bool:
+	var image: Image = _get_palette_icon_image(editor, type_id)
+	if image == null:
+		return false
+	var bounds: Rect2i = _get_opaque_bounds(image)
+	return bounds.size.x >= 8 and bounds.size.y >= 8
+
+
+func _get_palette_icon_image(editor, type_id: String) -> Image:
+	var tile_type_list := editor.get_node_or_null("UI/PalettePanel/Margin/VBox/TileTypeList") as ItemList
+	if tile_type_list == null:
+		return null
+	for index in range(tile_type_list.item_count):
+		if String(tile_type_list.get_item_metadata(index)).strip_edges() != type_id:
+			continue
+		var texture := tile_type_list.get_item_icon(index) as Texture2D
+		if texture == null:
+			return null
+		return texture.get_image()
+	return null
+
+
+func _get_opaque_bounds(image: Image) -> Rect2i:
+	var min_x: int = image.get_width()
+	var min_y: int = image.get_height()
+	var max_x: int = -1
+	var max_y: int = -1
+	for y in range(image.get_height()):
+		for x in range(image.get_width()):
+			if image.get_pixel(x, y).a <= 0.04:
+				continue
+			min_x = mini(min_x, x)
+			min_y = mini(min_y, y)
+			max_x = maxi(max_x, x)
+			max_y = maxi(max_y, y)
+	if max_x < min_x or max_y < min_y:
+		return Rect2i()
+	return Rect2i(min_x, min_y, max_x - min_x + 1, max_y - min_y + 1)
 
 
 func _make_editor():

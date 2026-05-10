@@ -213,6 +213,9 @@ func _ready() -> void:
 	_populate_brush_size_options()
 	_configure_property_height_spinbox()
 	_apply_editor_control_panel_style()
+	_ensure_editor_save_controls()
+	_ensure_map_name_controls()
+	_ensure_object_rotation_controls()
 	_populate_tile_palette()
 	_connect_ui_signals()
 	_add_height_tool_controls()
@@ -517,9 +520,9 @@ func _save_current_map() -> void:
 	if _terrain_map_data == null or _current_map_path.is_empty():
 		return
 
-	var map_name: String = _current_map_path.get_file().get_basename()
-	if not map_name.is_empty() and _terrain_map_data.has_method("set_map_name"):
-		_terrain_map_data.call("set_map_name", map_name)
+	_commit_map_name_editor_text(false)
+	if _get_current_map_name().is_empty() and _terrain_map_data.has_method("set_map_name"):
+		_terrain_map_data.call("set_map_name", _current_map_path.get_file().get_basename())
 
 	var save_error: Error = _terrain_map_data.call("save_to_file", _current_map_path)
 	if save_error != OK:
@@ -527,6 +530,7 @@ func _save_current_map() -> void:
 		return
 
 	_mark_dirty(false)
+	_refresh_map_settings_panel()
 	_refresh_top_bar()
 
 
@@ -758,10 +762,12 @@ func _erase_object_layer_from_tile(tile_data) -> bool:
 	_store_undo_state(tile_data)
 	if has_object_layer and not object_type_id.is_empty():
 		tile_data.object_type_id = ""
+		tile_data.object_rotation_degrees = 0.0
 		_restore_tile_base_gameplay_fields(tile_data)
 		return true
 
 	tile_data.object_type_id = ""
+	tile_data.object_rotation_degrees = 0.0
 	if (
 		(_tile_catalog != null and _tile_catalog.has_method("is_object_layer_type") and bool(_tile_catalog.call("is_object_layer_type", type_id)))
 		or has_structure_layer
@@ -990,6 +996,84 @@ func _configure_tool_button(button: Button, label_text: String, tooltip: String)
 	button.tooltip_text = tooltip
 
 
+func _ensure_editor_save_controls() -> void:
+	var button_row := get_node_or_null("UI/TopBar/Margin/HBox") as HBoxContainer
+	if button_row == null:
+		return
+	var save_as_button := button_row.get_node_or_null("SaveAsButton") as Button
+	if save_as_button == null:
+		save_as_button = Button.new()
+		save_as_button.name = "SaveAsButton"
+		save_as_button.text = "Save As"
+		save_as_button.tooltip_text = "Save the current map under a new file name."
+		button_row.add_child(save_as_button)
+		var save_button := button_row.get_node_or_null("SaveButton") as Button
+		if save_button != null:
+			button_row.move_child(save_as_button, save_button.get_index() + 1)
+
+
+func _ensure_map_name_controls() -> void:
+	var panel_parent := get_node_or_null("UI/PropertyPanel/Margin/VBox") as VBoxContainer
+	if panel_parent == null:
+		return
+	if panel_parent.get_node_or_null("MapNameRow") != null:
+		return
+	var row := HBoxContainer.new()
+	row.name = "MapNameRow"
+	row.custom_minimum_size = Vector2(0.0, 28.0)
+	var label := Label.new()
+	label.name = "MapNameLabel"
+	label.text = "Map ID"
+	label.custom_minimum_size = Vector2(72.0, 0.0)
+	row.add_child(label)
+	var line_edit := LineEdit.new()
+	line_edit.name = "MapNameLineEdit"
+	line_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	line_edit.placeholder_text = DEFAULT_NEW_MAP_NAME
+	line_edit.tooltip_text = "Used as the map name and as the suggested Save As file name."
+	row.add_child(line_edit)
+	panel_parent.add_child(row)
+	var insert_before := panel_parent.get_node_or_null("GridSizeLabel")
+	if insert_before != null:
+		panel_parent.move_child(row, insert_before.get_index())
+
+
+func _ensure_object_rotation_controls() -> void:
+	var panel_parent := get_node_or_null("UI/PropertyPanel/Margin/VBox") as VBoxContainer
+	if panel_parent == null:
+		return
+	if panel_parent.get_node_or_null("ObjectRotationRow") != null:
+		return
+	var row := HBoxContainer.new()
+	row.name = "ObjectRotationRow"
+	row.custom_minimum_size = Vector2(0.0, 28.0)
+	var label := Label.new()
+	label.name = "ObjectRotationLabel"
+	label.text = "Obj Rot"
+	label.custom_minimum_size = Vector2(72.0, 0.0)
+	row.add_child(label)
+	var rotate_left := Button.new()
+	rotate_left.name = "ObjectRotateLeftButton"
+	rotate_left.text = "Rot -"
+	rotate_left.tooltip_text = "Rotate selected object left by 90 degrees."
+	row.add_child(rotate_left)
+	var rotate_right := Button.new()
+	rotate_right.name = "ObjectRotateRightButton"
+	rotate_right.text = "Rot +"
+	rotate_right.tooltip_text = "Rotate selected object right by 90 degrees."
+	row.add_child(rotate_right)
+	var value_label := Label.new()
+	value_label.name = "ObjectRotationValueLabel"
+	value_label.text = "-"
+	value_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	row.add_child(value_label)
+	panel_parent.add_child(row)
+	var insert_after := panel_parent.get_node_or_null("SurfaceRow")
+	if insert_after != null:
+		panel_parent.move_child(row, insert_after.get_index() + 1)
+
+
 func _apply_editor_control_panel_style() -> void:
 	_apply_panel_style(get_node_or_null("UI/TopBar") as PanelContainer, Color(0.06, 0.09, 0.11, 0.94), Color(0.32, 0.55, 0.62, 0.72))
 	_apply_panel_style(get_node_or_null("UI/PalettePanel") as PanelContainer, Color(0.055, 0.075, 0.085, 0.96), Color(0.28, 0.47, 0.52, 0.68))
@@ -1199,6 +1283,7 @@ func _refresh_property_panel() -> void:
 				TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE:
 					edge_idx = 2
 			edge_type_option_button.select(edge_idx)
+		_refresh_object_rotation_controls(null)
 		_set_property_controls_enabled(false)
 		_is_refreshing_property_controls = false
 		_refresh_authoring_status_controls()
@@ -1233,6 +1318,7 @@ func _refresh_property_panel() -> void:
 			TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE:
 				edge_idx = 2
 		edge_type_option_button.select(edge_idx)
+	_refresh_object_rotation_controls(tile_data)
 	_set_property_controls_enabled(true)
 	_is_refreshing_property_controls = false
 	_refresh_authoring_status_controls()
@@ -1242,6 +1328,7 @@ func _refresh_property_panel() -> void:
 func _refresh_map_settings_panel() -> void:
 	var grid_size_label := get_node_or_null("UI/PropertyPanel/Margin/VBox/GridSizeLabel") as Label
 	var mission_slot_spinbox := _get_mission_slot_spinbox()
+	var map_name_line_edit := _get_map_name_line_edit()
 	if grid_size_label == null or mission_slot_spinbox == null:
 		return
 
@@ -1250,12 +1337,18 @@ func _refresh_map_settings_panel() -> void:
 		grid_size_label.text = "Grid: -"
 		mission_slot_spinbox.value = MIN_MISSION_SLOT_COUNT
 		mission_slot_spinbox.editable = false
+		if map_name_line_edit != null:
+			map_name_line_edit.text = ""
+			map_name_line_edit.editable = false
 		_refresh_marker_editor_controls()
 		_is_refreshing_map_settings_controls = false
 		_apply_inspector_section_visibility()
 		return
 
 	var grid_size: Vector2i = _terrain_map_data.call("get_grid_size")
+	if map_name_line_edit != null:
+		map_name_line_edit.text = _get_current_map_name()
+		map_name_line_edit.editable = true
 	grid_size_label.text = "Grid: %d x %d" % [grid_size.x, grid_size.y]
 	mission_slot_spinbox.value = clampi(int(_terrain_map_data.call("get_mission_slot_count")), MIN_MISSION_SLOT_COUNT, MAX_MISSION_SLOT_COUNT)
 	mission_slot_spinbox.editable = true
@@ -1673,6 +1766,7 @@ func _get_map_settings_section_nodes() -> Array:
 	return [
 		get_node_or_null("UI/PropertyPanel/Margin/VBox/MapSettingsSeparator"),
 		get_node_or_null("UI/PropertyPanel/Margin/VBox/MapSettingsTitle"),
+		get_node_or_null("UI/PropertyPanel/Margin/VBox/MapNameRow"),
 		get_node_or_null("UI/PropertyPanel/Margin/VBox/GridSizeLabel"),
 		get_node_or_null("UI/PropertyPanel/Margin/VBox/MissionSlotRow"),
 	]
@@ -1704,6 +1798,7 @@ func _tile_property_controls_are_visible() -> bool:
 		get_node_or_null("UI/PropertyPanel/Margin/VBox/WalkableCheckBox"),
 		get_node_or_null("UI/PropertyPanel/Margin/VBox/CoverRow"),
 		get_node_or_null("UI/PropertyPanel/Margin/VBox/HeightRow"),
+		get_node_or_null("UI/PropertyPanel/Margin/VBox/ObjectRotationRow"),
 	]
 	for node_variant in required_nodes:
 		var control := node_variant as Control
@@ -2627,7 +2722,10 @@ func get_map_editor_usability_snapshot(sync_from_controls: bool = true) -> Dicti
 		"toolbar": _build_toolbar_snapshot(),
 		"palette": _build_palette_snapshot(),
 		"inspector": _build_inspector_snapshot(),
+		"map_name": _get_current_map_name(),
 		"map_path": _current_map_path,
+		"save_as_suggested_file": _build_suggested_map_filename(),
+		"save_routes_to_save_as": _should_route_save_to_save_as(),
 		"scenario_path": _current_scenario_path,
 		"dirty": _dirty,
 		"scenario_dirty": _scenario_dirty,
@@ -2787,6 +2885,7 @@ func get_authoring_action_contract_snapshot() -> Dictionary:
 			"edge_type",
 			"type_id",
 			"object_type_id",
+			"object_rotation_degrees",
 		]),
 		"tool_action_fields": PackedStringArray([
 			"tool_id",
@@ -2842,6 +2941,8 @@ func _build_selected_tile_context() -> Dictionary:
 		"cover_value": int(tile_data.cover_value),
 		"height_level": int(tile_data.height_level),
 		"object_height": int(tile_data.object_height),
+		"object_rotation_degrees": _get_tile_object_rotation_degrees(tile_data),
+		"object_rotatable": _tile_has_rotatable_object(tile_data),
 		"surface_type": String(tile_data.surface_type),
 		"edge_type": String(tile_data.edge_type),
 	}
@@ -3848,6 +3949,60 @@ func _set_property_controls_enabled(is_enabled: bool) -> void:
 		edge_type_btn.disabled = not is_enabled
 
 
+func _refresh_object_rotation_controls(tile_data) -> void:
+	var row := get_node_or_null("UI/PropertyPanel/Margin/VBox/ObjectRotationRow") as HBoxContainer
+	var left_button := _get_object_rotate_left_button()
+	var right_button := _get_object_rotate_right_button()
+	var value_label := _get_object_rotation_value_label()
+	var has_rotatable_object: bool = _tile_has_rotatable_object(tile_data)
+	if row != null:
+		row.visible = tile_data != null
+	if left_button != null:
+		left_button.disabled = not has_rotatable_object
+	if right_button != null:
+		right_button.disabled = not has_rotatable_object
+	if value_label != null:
+		value_label.text = "%d deg" % int(round(_get_tile_object_rotation_degrees(tile_data))) if has_rotatable_object else "-"
+
+
+func _tile_has_rotatable_object(tile_data) -> bool:
+	if tile_data == null:
+		return false
+	var object_type_id: String = String(tile_data.object_type_id).strip_edges().to_lower() if tile_data.object_type_id is String else ""
+	if not object_type_id.is_empty():
+		return true
+	var type_id: String = String(tile_data.type_id).strip_edges().to_lower() if tile_data.type_id is String else ""
+	if type_id.is_empty() or _tile_catalog == null or not _tile_catalog.has_method("is_object_layer_type"):
+		return false
+	return bool(_tile_catalog.call("is_object_layer_type", type_id))
+
+
+func _get_tile_object_rotation_degrees(tile_data) -> float:
+	if tile_data == null:
+		return 0.0
+	return fposmod(float(tile_data.object_rotation_degrees), 360.0)
+
+
+func _rotate_selected_object(delta_degrees: float) -> bool:
+	var tile_data = _get_selected_tile()
+	if not _tile_has_rotatable_object(tile_data):
+		return false
+	_store_undo_state(tile_data)
+	tile_data.object_rotation_degrees = fposmod(float(tile_data.object_rotation_degrees) + delta_degrees, 360.0)
+	_refresh_tile_visual(tile_data)
+	_mark_dirty(true)
+	_refresh_property_panel()
+	return true
+
+
+func _on_object_rotate_left_pressed() -> void:
+	_rotate_selected_object(-90.0)
+
+
+func _on_object_rotate_right_pressed() -> void:
+	_rotate_selected_object(90.0)
+
+
 func _apply_property_controls_to_selected_tile() -> void:
 	if _is_refreshing_property_controls:
 		return
@@ -4202,6 +4357,7 @@ func _undo_last_change() -> void:
 	tile_data.surface_type = restored_tile.surface_type
 	tile_data.edge_type = restored_tile.edge_type
 	tile_data.object_height = restored_tile.object_height
+	tile_data.object_rotation_degrees = restored_tile.object_rotation_degrees
 
 	_set_selected_grid_position(grid_position)
 	_refresh_tile_visual(tile_data)
@@ -4220,15 +4376,20 @@ func _refresh_top_bar() -> void:
 	var title_label := get_node_or_null("UI/TopBar/Margin/HBox/TitleLabel") as Label
 	var path_label := get_node_or_null("UI/TopBar/Margin/HBox/PathLabel") as Label
 	var save_button := get_node_or_null("UI/TopBar/Margin/HBox/SaveButton") as Button
+	var save_as_button := get_node_or_null("UI/TopBar/Margin/HBox/SaveAsButton") as Button
 	var undo_button := get_node_or_null("UI/TopBar/Margin/HBox/UndoButton") as Button
 	if title_label != null:
 		var dirty_suffix: String = " *" if _dirty else ""
 		var scenario_suffix: String = " | Scenario *" if _scenario_dirty else ""
 		title_label.text = "Map Editor%s%s" % [dirty_suffix, scenario_suffix]
 	if path_label != null:
-		path_label.text = _current_map_path if not _current_map_path.is_empty() else "(unsaved)"
+		var map_name: String = _get_current_map_name()
+		var path_text: String = _current_map_path if not _current_map_path.is_empty() else "(unsaved)"
+		path_label.text = "%s | %s" % [map_name, path_text] if not map_name.is_empty() else path_text
 	if save_button != null:
 		save_button.disabled = _terrain_map_data == null or _current_map_path.is_empty()
+	if save_as_button != null:
+		save_as_button.disabled = _terrain_map_data == null
 	if undo_button != null:
 		undo_button.disabled = _undo_stack.is_empty()
 		undo_button.tooltip_text = "Undo last editor change (%d/%d)." % [_undo_stack.size(), MAX_UNDO_STACK_SIZE]
@@ -4321,6 +4482,7 @@ func _configure_property_height_spinbox() -> void:
 func _connect_ui_signals() -> void:
 	var brush_button := get_node_or_null("UI/TopBar/Margin/HBox/BrushButton") as Button
 	var save_button := get_node_or_null("UI/TopBar/Margin/HBox/SaveButton") as Button
+	var save_as_button := get_node_or_null("UI/TopBar/Margin/HBox/SaveAsButton") as Button
 	var save_as_dialog := get_node_or_null("UI/SaveAsDialog") as FileDialog
 	var load_button := get_node_or_null("UI/TopBar/Margin/HBox/LoadButton") as Button
 	var new_map_button := get_node_or_null("UI/TopBar/Margin/HBox/NewMapButton") as Button
@@ -4332,6 +4494,9 @@ func _connect_ui_signals() -> void:
 	var surface_option_button := _get_surface_option_button()
 	var edge_type_option_button := _get_edge_type_option_button()
 	var mission_slot_spinbox := _get_mission_slot_spinbox()
+	var map_name_line_edit := _get_map_name_line_edit()
+	var object_rotate_left_button := _get_object_rotate_left_button()
+	var object_rotate_right_button := _get_object_rotate_right_button()
 	var file_dialog := get_node_or_null("UI/LoadDialog") as FileDialog
 	var confirm_dialog := get_node_or_null("UI/DirtyConfirmDialog") as ConfirmationDialog
 	var new_map_dialog := _get_new_map_dialog()
@@ -4342,6 +4507,8 @@ func _connect_ui_signals() -> void:
 			brush_button.toggled.connect(_on_brush_tool_toggled)
 	if save_button != null and not save_button.pressed.is_connected(_on_save_pressed):
 		save_button.pressed.connect(_on_save_pressed)
+	if save_as_button != null and not save_as_button.pressed.is_connected(_on_save_as_pressed):
+		save_as_button.pressed.connect(_on_save_as_pressed)
 	if save_as_dialog != null and not save_as_dialog.file_selected.is_connected(_on_save_as_file_selected):
 		save_as_dialog.file_selected.connect(_on_save_as_file_selected)
 	if load_button != null and not load_button.pressed.is_connected(_on_load_pressed):
@@ -4364,6 +4531,15 @@ func _connect_ui_signals() -> void:
 		edge_type_option_button.item_selected.connect(_on_edge_type_selected)
 	if mission_slot_spinbox != null and not mission_slot_spinbox.value_changed.is_connected(_on_mission_slot_spinbox_value_changed):
 		mission_slot_spinbox.value_changed.connect(_on_mission_slot_spinbox_value_changed)
+	if map_name_line_edit != null:
+		if not map_name_line_edit.text_submitted.is_connected(_on_map_name_text_submitted):
+			map_name_line_edit.text_submitted.connect(_on_map_name_text_submitted)
+		if not map_name_line_edit.focus_exited.is_connected(_on_map_name_focus_exited):
+			map_name_line_edit.focus_exited.connect(_on_map_name_focus_exited)
+	if object_rotate_left_button != null and not object_rotate_left_button.pressed.is_connected(_on_object_rotate_left_pressed):
+		object_rotate_left_button.pressed.connect(_on_object_rotate_left_pressed)
+	if object_rotate_right_button != null and not object_rotate_right_button.pressed.is_connected(_on_object_rotate_right_pressed):
+		object_rotate_right_button.pressed.connect(_on_object_rotate_right_pressed)
 	if tile_type_list != null and not tile_type_list.item_selected.is_connected(_on_tile_type_selected):
 		tile_type_list.item_selected.connect(_on_tile_type_selected)
 	for marker_id in EDITABLE_MARKER_IDS:
@@ -4387,19 +4563,121 @@ func _connect_ui_signals() -> void:
 func _on_save_pressed() -> void:
 	# Check if Ctrl is pressed for Save As
 	if Input.is_key_pressed(KEY_CTRL):
-		var save_as_dialog := get_node_or_null("UI/SaveAsDialog") as FileDialog
-		if save_as_dialog != null:
-			save_as_dialog.current_dir = "res://maps"
-			save_as_dialog.current_file = _current_map_path.get_file() if not _current_map_path.is_empty() else "new_map.json"
-			save_as_dialog.popup_centered_ratio(0.65)
+		_open_save_as_dialog()
+		return
+	if _should_route_save_to_save_as():
+		_open_save_as_dialog()
 		return
 	_save_current_map()
+
+
+func _on_save_as_pressed() -> void:
+	_open_save_as_dialog()
+
 
 func _on_save_as_file_selected(path: String) -> void:
 	if path.is_empty():
 		return
-	_current_map_path = path
+	var existing_name: String = _get_current_map_name()
+	_current_map_path = _normalize_map_save_path(path)
+	if (
+		_terrain_map_data != null
+		and _terrain_map_data.has_method("set_map_name")
+		and (existing_name.is_empty() or existing_name == DEFAULT_NEW_MAP_NAME)
+	):
+		_terrain_map_data.call("set_map_name", _current_map_path.get_file().get_basename())
+	_refresh_map_settings_panel()
 	_save_current_map()
+
+
+func _open_save_as_dialog() -> void:
+	_commit_map_name_editor_text(false)
+	var save_as_dialog := get_node_or_null("UI/SaveAsDialog") as FileDialog
+	if save_as_dialog == null:
+		return
+	save_as_dialog.current_dir = "res://maps"
+	save_as_dialog.current_file = _build_suggested_map_filename()
+	save_as_dialog.popup_centered_ratio(0.65)
+
+
+func _should_route_save_to_save_as() -> bool:
+	if _current_map_path.strip_edges().is_empty():
+		return true
+	var normalized_path: String = _current_map_path.strip_edges().replace("\\", "/").to_lower()
+	var default_path: String = DEFAULT_NEW_MAP_PATH.replace("\\", "/").to_lower()
+	if normalized_path != default_path:
+		return false
+	var current_name: String = _get_current_map_name().strip_edges()
+	if current_name.is_empty() or current_name == DEFAULT_NEW_MAP_NAME:
+		return false
+	return _sanitize_file_stem(current_name) != DEFAULT_NEW_MAP_NAME
+
+
+func _build_suggested_map_filename() -> String:
+	var stem: String = _sanitize_file_stem(_get_current_map_name())
+	if stem.is_empty() and not _current_map_path.is_empty():
+		stem = _sanitize_file_stem(_current_map_path.get_file().get_basename())
+	if stem.is_empty():
+		stem = DEFAULT_NEW_MAP_NAME
+	return "%s.json" % stem
+
+
+func _normalize_map_save_path(path: String) -> String:
+	var normalized_path: String = path.strip_edges()
+	if normalized_path.is_empty():
+		return normalized_path
+	if normalized_path.get_extension().strip_edges().to_lower() != "json":
+		normalized_path = "%s.json" % normalized_path
+	return normalized_path
+
+
+func _sanitize_file_stem(value: String) -> String:
+	var sanitized: String = value.strip_edges().to_lower()
+	if sanitized.is_empty():
+		return ""
+	for invalid_character in ["\\", "/", ":", "*", "?", "\"", "<", ">", "|", "."]:
+		sanitized = sanitized.replace(invalid_character, "_")
+	sanitized = sanitized.replace(" ", "_")
+	while sanitized.contains("__"):
+		sanitized = sanitized.replace("__", "_")
+	sanitized = sanitized.strip_edges().trim_prefix("_").trim_suffix("_")
+	return sanitized
+
+
+func _get_current_map_name() -> String:
+	if _terrain_map_data == null or not _terrain_map_data.has_method("get_map_name"):
+		return ""
+	return String(_terrain_map_data.call("get_map_name")).strip_edges()
+
+
+func _commit_map_name_editor_text(mark_dirty: bool = true) -> void:
+	if _is_refreshing_map_settings_controls:
+		return
+	if _terrain_map_data == null or not _terrain_map_data.has_method("set_map_name"):
+		return
+	var line_edit := _get_map_name_line_edit()
+	if line_edit == null:
+		return
+	var next_name: String = line_edit.text.strip_edges()
+	if next_name.is_empty():
+		next_name = DEFAULT_NEW_MAP_NAME
+	if next_name == _get_current_map_name():
+		return
+	_terrain_map_data.call("set_map_name", next_name)
+	if mark_dirty:
+		_mark_dirty(true)
+	else:
+		_refresh_top_bar()
+
+
+func _on_map_name_text_submitted(_new_text: String) -> void:
+	_commit_map_name_editor_text(true)
+	_refresh_map_settings_panel()
+
+
+func _on_map_name_focus_exited() -> void:
+	_commit_map_name_editor_text(true)
+	_refresh_map_settings_panel()
 
 
 func _ensure_patrol_overlay() -> void:
@@ -4812,6 +5090,22 @@ func _get_mission_slot_spinbox() -> SpinBox:
 	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MissionSlotRow/MissionSlotSpinBox") as SpinBox
 
 
+func _get_map_name_line_edit() -> LineEdit:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MapNameRow/MapNameLineEdit") as LineEdit
+
+
+func _get_object_rotate_left_button() -> Button:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/ObjectRotationRow/ObjectRotateLeftButton") as Button
+
+
+func _get_object_rotate_right_button() -> Button:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/ObjectRotationRow/ObjectRotateRightButton") as Button
+
+
+func _get_object_rotation_value_label() -> Label:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/ObjectRotationRow/ObjectRotationValueLabel") as Label
+
+
 func _get_add_marker_type_option_button() -> OptionButton:
 	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/MarkerToolbarRow/AddMarkerTypeOption") as OptionButton
 
@@ -5056,29 +5350,70 @@ func _get_palette_preview_texture(type_id: String) -> Texture2D:
 	if _tile_catalog != null:
 		var catalog_texture: Texture2D = _tile_catalog.get_texture(normalized_type_id)
 		if catalog_texture != null:
-			_palette_preview_textures[normalized_type_id] = catalog_texture
-			return catalog_texture
+			var thumbnail: Texture2D = _get_thumbnail_palette_preview_texture(catalog_texture, normalized_type_id)
+			_palette_preview_textures[normalized_type_id] = thumbnail
+			return thumbnail
 	var entry: Dictionary = Dictionary(_tile_catalog.call("get_type", normalized_type_id)) if _tile_catalog != null and _tile_catalog.has_method("get_type") else {}
 	var color: Color = _get_palette_preview_color(normalized_type_id, entry)
-	var generated_texture: Texture2D = _get_generated_palette_preview_texture(normalized_type_id, color)
+	var generated_texture: Texture2D = _get_generated_palette_preview_texture(normalized_type_id, color, entry)
 	_palette_preview_textures[normalized_type_id] = generated_texture
 	return generated_texture
 
 
-func _get_generated_palette_preview_texture(cache_key: String, color: Color) -> Texture2D:
+func _get_thumbnail_palette_preview_texture(source_texture: Texture2D, cache_key: String) -> Texture2D:
+	var key: String = "__thumbnail:%s" % cache_key.strip_edges().to_lower()
+	if _palette_preview_textures.has(key):
+		return _palette_preview_textures[key] as Texture2D
+	var image: Image = source_texture.get_image()
+	if image == null or image.is_empty():
+		return source_texture
+	var bounds: Rect2i = _get_opaque_image_bounds(image)
+	if bounds.size.x <= 0 or bounds.size.y <= 0:
+		return source_texture
+	var cropped := Image.create(bounds.size.x, bounds.size.y, false, Image.FORMAT_RGBA8)
+	cropped.fill(Color(0.0, 0.0, 0.0, 0.0))
+	cropped.blit_rect(image, bounds, Vector2i.ZERO)
+	var max_size: Vector2i = PALETTE_PREVIEW_ICON_SIZE - Vector2i(2, 2)
+	var scale: float = minf(float(max_size.x) / float(bounds.size.x), float(max_size.y) / float(bounds.size.y))
+	var target_size := Vector2i(maxi(1, roundi(float(bounds.size.x) * scale)), maxi(1, roundi(float(bounds.size.y) * scale)))
+	cropped.resize(target_size.x, target_size.y, Image.INTERPOLATE_LANCZOS)
+	var thumbnail := Image.create(PALETTE_PREVIEW_ICON_SIZE.x, PALETTE_PREVIEW_ICON_SIZE.y, false, Image.FORMAT_RGBA8)
+	thumbnail.fill(Color(0.0, 0.0, 0.0, 0.0))
+	var target_position := Vector2i(
+		floori(float(PALETTE_PREVIEW_ICON_SIZE.x - target_size.x) * 0.5),
+		floori(float(PALETTE_PREVIEW_ICON_SIZE.y - target_size.y) * 0.5)
+	)
+	thumbnail.blit_rect(cropped, Rect2i(Vector2i.ZERO, target_size), target_position)
+	var texture := ImageTexture.create_from_image(thumbnail)
+	_palette_preview_textures[key] = texture
+	return texture
+
+
+func _get_opaque_image_bounds(image: Image) -> Rect2i:
+	var min_x: int = image.get_width()
+	var min_y: int = image.get_height()
+	var max_x: int = -1
+	var max_y: int = -1
+	for y in range(image.get_height()):
+		for x in range(image.get_width()):
+			if image.get_pixel(x, y).a <= 0.04:
+				continue
+			min_x = mini(min_x, x)
+			min_y = mini(min_y, y)
+			max_x = maxi(max_x, x)
+			max_y = maxi(max_y, y)
+	if max_x < min_x or max_y < min_y:
+		return Rect2i(0, 0, image.get_width(), image.get_height())
+	return Rect2i(min_x, min_y, max_x - min_x + 1, max_y - min_y + 1)
+
+
+func _get_generated_palette_preview_texture(cache_key: String, color: Color, entry: Dictionary = {}) -> Texture2D:
 	var key: String = "__generated:%s" % cache_key.strip_edges().to_lower()
 	if _palette_preview_textures.has(key):
 		return _palette_preview_textures[key] as Texture2D
 	var image := Image.create(PALETTE_PREVIEW_ICON_SIZE.x, PALETTE_PREVIEW_ICON_SIZE.y, false, Image.FORMAT_RGBA8)
-	image.fill(color)
-	var edge_color: Color = color.lightened(0.32)
-	var shadow_color: Color = color.darkened(0.32)
-	for x in range(PALETTE_PREVIEW_ICON_SIZE.x):
-		image.set_pixel(x, 0, edge_color)
-		image.set_pixel(x, PALETTE_PREVIEW_ICON_SIZE.y - 1, shadow_color)
-	for y in range(PALETTE_PREVIEW_ICON_SIZE.y):
-		image.set_pixel(0, y, edge_color)
-		image.set_pixel(PALETTE_PREVIEW_ICON_SIZE.x - 1, y, shadow_color)
+	image.fill(Color(0.0, 0.0, 0.0, 0.0))
+	_paint_palette_preview_icon(image, cache_key.strip_edges().to_lower(), color, entry)
 	var texture := ImageTexture.create_from_image(image)
 	_palette_preview_textures[key] = texture
 	return texture
@@ -5100,6 +5435,131 @@ func _get_palette_preview_color(type_id: String, entry: Dictionary) -> Color:
 	if palette_group == "fahrzeuge":
 		return Color(0.62, 0.50, 0.34, 1.0)
 	return Color(0.48, 0.50, 0.54, 1.0)
+
+
+func _paint_palette_preview_icon(image: Image, type_id: String, color: Color, entry: Dictionary) -> void:
+	var icon_style: String = _resolve_palette_preview_icon_style(type_id, entry)
+	var light: Color = color.lightened(0.30)
+	var dark: Color = color.darkened(0.38)
+	var accent: Color = Color(0.44, 0.92, 1.0, 1.0) if type_id.contains("computer") or type_id.contains("display") else color.lightened(0.52)
+	match icon_style:
+		"station_floor":
+			_paint_icon_diamond(image, 8, 2, 14, 8, 8, 14, 2, 8, color.darkened(0.04))
+			_paint_icon_line(image, Vector2i(8, 2), Vector2i(14, 8), light)
+			_paint_icon_line(image, Vector2i(14, 8), Vector2i(8, 14), dark)
+			_paint_icon_line(image, Vector2i(8, 14), Vector2i(2, 8), dark)
+			_paint_icon_line(image, Vector2i(2, 8), Vector2i(8, 2), light)
+			_paint_icon_line(image, Vector2i(5, 8), Vector2i(11, 8), dark.lightened(0.22))
+			_paint_icon_line(image, Vector2i(8, 5), Vector2i(8, 11), light.darkened(0.12))
+		"station_wall":
+			_paint_icon_diamond(image, 8, 7, 14, 11, 8, 15, 2, 11, color.darkened(0.18))
+			_paint_icon_rect(image, Rect2i(4, 2, 9, 9), color)
+			_paint_icon_line(image, Vector2i(4, 2), Vector2i(12, 2), light)
+			_paint_icon_line(image, Vector2i(12, 2), Vector2i(12, 10), dark)
+			_paint_icon_line(image, Vector2i(4, 6), Vector2i(12, 6), dark.lightened(0.18))
+		"station_door":
+			_paint_icon_diamond(image, 8, 7, 14, 11, 8, 15, 2, 11, color.darkened(0.18))
+			_paint_icon_rect(image, Rect2i(4, 2, 9, 9), color)
+			_paint_icon_rect(image, Rect2i(7, 4, 3, 7), dark)
+			_paint_icon_line(image, Vector2i(7, 4), Vector2i(9, 4), accent)
+		"computer":
+			_paint_icon_rect(image, Rect2i(3, 9, 10, 4), dark)
+			_paint_icon_rect(image, Rect2i(5, 3, 7, 6), color)
+			_paint_icon_rect(image, Rect2i(6, 4, 5, 3), accent)
+			_paint_icon_line(image, Vector2i(5, 3), Vector2i(11, 3), light)
+		"bed":
+			_paint_icon_rect(image, Rect2i(3, 6, 10, 6), color)
+			_paint_icon_rect(image, Rect2i(4, 7, 3, 3), light)
+			_paint_icon_line(image, Vector2i(3, 12), Vector2i(12, 12), dark)
+		"crate":
+			_paint_icon_rect(image, Rect2i(4, 4, 9, 9), color)
+			_paint_icon_line(image, Vector2i(4, 4), Vector2i(12, 12), dark)
+			_paint_icon_line(image, Vector2i(12, 4), Vector2i(4, 12), light)
+			_paint_icon_line(image, Vector2i(4, 4), Vector2i(12, 4), light)
+		"nature_tree":
+			_paint_icon_rect(image, Rect2i(7, 8, 2, 6), Color(0.42, 0.24, 0.12, 1.0))
+			_paint_icon_diamond(image, 8, 2, 13, 8, 8, 12, 3, 8, color)
+		"terrain":
+			_paint_icon_diamond(image, 8, 2, 14, 8, 8, 14, 2, 8, color)
+			_paint_icon_line(image, Vector2i(3, 8), Vector2i(13, 8), dark)
+		_:
+			_paint_icon_rect(image, Rect2i(4, 4, 9, 9), color)
+			_paint_icon_line(image, Vector2i(4, 4), Vector2i(12, 4), light)
+			_paint_icon_line(image, Vector2i(12, 4), Vector2i(12, 12), dark)
+			_paint_icon_line(image, Vector2i(4, 12), Vector2i(12, 12), dark)
+
+
+func _resolve_palette_preview_icon_style(type_id: String, entry: Dictionary) -> String:
+	var palette_group: String = String(entry.get("palette_group", "")).strip_edges().to_lower()
+	var placement_layer: String = String(entry.get("placement_layer", "")).strip_edges().to_lower()
+	if type_id == "station_floor_panel":
+		return "station_floor"
+	if type_id == "station_wall_door":
+		return "station_door"
+	if type_id == "station_wall" or type_id.begins_with("wall_"):
+		return "station_wall"
+	if type_id.contains("computer") or type_id.contains("display") or type_id.contains("console"):
+		return "computer"
+	if type_id.contains("bed"):
+		return "bed"
+	if type_id.contains("container") or type_id.contains("crate") or type_id.contains("cargo"):
+		return "crate"
+	if palette_group == "nature_props" and type_id.contains("tree"):
+		return "nature_tree"
+	if bool(entry.get("visual_surface_variant", false)) or placement_layer == "terrain":
+		return "terrain"
+	return "default"
+
+
+func _paint_icon_rect(image: Image, rect: Rect2i, color: Color) -> void:
+	for y in range(rect.position.y, rect.position.y + rect.size.y):
+		for x in range(rect.position.x, rect.position.x + rect.size.x):
+			_paint_icon_pixel(image, x, y, color)
+
+
+func _paint_icon_diamond(image: Image, top_x: int, top_y: int, right_x: int, right_y: int, bottom_x: int, bottom_y: int, left_x: int, left_y: int, color: Color) -> void:
+	var center_y: int = left_y
+	for y in range(top_y, bottom_y + 1):
+		var span: int = 0
+		if y <= center_y:
+			span = roundi(float(y - top_y) / maxf(float(center_y - top_y), 1.0) * float(right_x - top_x))
+		else:
+			span = roundi(float(bottom_y - y) / maxf(float(bottom_y - center_y), 1.0) * float(right_x - top_x))
+		for x in range(top_x - span, top_x + span + 1):
+			_paint_icon_pixel(image, x, y, color)
+	_paint_icon_line(image, Vector2i(top_x, top_y), Vector2i(right_x, right_y), color.lightened(0.24))
+	_paint_icon_line(image, Vector2i(right_x, right_y), Vector2i(bottom_x, bottom_y), color.darkened(0.30))
+	_paint_icon_line(image, Vector2i(bottom_x, bottom_y), Vector2i(left_x, left_y), color.darkened(0.30))
+	_paint_icon_line(image, Vector2i(left_x, left_y), Vector2i(top_x, top_y), color.lightened(0.24))
+
+
+func _paint_icon_line(image: Image, start: Vector2i, end: Vector2i, color: Color) -> void:
+	var x0: int = start.x
+	var y0: int = start.y
+	var x1: int = end.x
+	var y1: int = end.y
+	var dx: int = abs(x1 - x0)
+	var sx: int = 1 if x0 < x1 else -1
+	var dy: int = -abs(y1 - y0)
+	var sy: int = 1 if y0 < y1 else -1
+	var error: int = dx + dy
+	while true:
+		_paint_icon_pixel(image, x0, y0, color)
+		if x0 == x1 and y0 == y1:
+			break
+		var next_error: int = 2 * error
+		if next_error >= dy:
+			error += dy
+			x0 += sx
+		if next_error <= dx:
+			error += dx
+			y0 += sy
+
+
+func _paint_icon_pixel(image: Image, x: int, y: int, color: Color) -> void:
+	if x < 0 or y < 0 or x >= image.get_width() or y >= image.get_height():
+		return
+	image.set_pixel(x, y, color)
 
 
 func _refresh_palette_selection_visual() -> void:
