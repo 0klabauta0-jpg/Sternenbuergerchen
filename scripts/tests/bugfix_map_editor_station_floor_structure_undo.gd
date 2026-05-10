@@ -76,7 +76,8 @@ func _test_editor_palette_undo_and_bounds() -> void:
 		await _wait_frames(1)
 		var palette: Dictionary = Dictionary(Dictionary(editor.call("get_map_editor_usability_snapshot", false)).get("palette", {}))
 		_assert(bool(palette.get("all_visible_items_have_preview_icons", false)), "Palette group has preview icons: %s" % group_id)
-		_assert(Vector2i(palette.get("preview_icon_size", Vector2i.ZERO)) == Vector2i(16, 16), "Palette preview icons stay text-sized")
+		var preview_size := Vector2i(palette.get("preview_icon_size", Vector2i.ZERO))
+		_assert(preview_size.x >= 16 and preview_size.x <= 24 and preview_size.y >= 16 and preview_size.y <= 24, "Palette preview icons stay compact and readable")
 
 	editor.call("_on_palette_group_button_pressed", "space_station")
 	await _wait_frames(1)

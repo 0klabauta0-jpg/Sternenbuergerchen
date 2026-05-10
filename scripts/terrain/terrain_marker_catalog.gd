@@ -34,6 +34,7 @@ const _TYPE_DEFINITIONS: Dictionary = {
 	TYPE_CUSTOM: {
 		"display_name": "Custom Marker",
 		"default_name": "Custom Marker",
+		"tooltip": "Free editor-only marker without special mission behavior.",
 		"color": Color(0.86, 0.88, 0.92, 0.96),
 		"symbol": SYMBOL_CIRCLE,
 		"placement_context": CONTEXT_EDITOR_ONLY,
@@ -41,24 +42,27 @@ const _TYPE_DEFINITIONS: Dictionary = {
 		"user_visible": false,
 	},
 	"spawn_alpha": {
-		"display_name": "Spawn Alpha",
-		"default_name": "Spawn Alpha",
+		"display_name": "PC Spawn",
+		"default_name": "PC Spawn",
+		"tooltip": "Player-controlled deployment start. Use this for the player/PC side's entry point.",
 		"color": Color(0.38, 0.78, 1.0, 0.98),
 		"symbol": SYMBOL_DIAMOND,
 		"placement_context": CONTEXT_EDITOR_ONLY,
 		"single_instance": true,
 	},
 	"spawn_bravo": {
-		"display_name": "Spawn Bravo",
-		"default_name": "Spawn Bravo",
+		"display_name": "NPC Spawn",
+		"default_name": "NPC Spawn",
+		"tooltip": "Computer-controlled enemy deployment start. Use this for AI/NPC opponents.",
 		"color": Color(1.0, 0.56, 0.42, 0.98),
 		"symbol": SYMBOL_DIAMOND,
 		"placement_context": CONTEXT_EDITOR_ONLY,
 		"single_instance": true,
 	},
 	"objective_point": {
-		"display_name": "Objective",
-		"default_name": "Objective",
+		"display_name": "Objective Point",
+		"default_name": "Objective Point",
+		"tooltip": "Primary mission objective anchor. Scripts can use this as the target location or interaction point.",
 		"color": Color(1.0, 0.86, 0.24, 0.98),
 		"symbol": SYMBOL_FLAG,
 		"placement_context": CONTEXT_EDITOR_ONLY,
@@ -67,6 +71,7 @@ const _TYPE_DEFINITIONS: Dictionary = {
 	"rally_point": {
 		"display_name": "Rally Point",
 		"default_name": "Rally Point",
+		"tooltip": "Optional regroup or staging point for squads before or after contact.",
 		"color": Color(0.48, 0.9, 1.0, 0.98),
 		"symbol": SYMBOL_CIRCLE,
 		"placement_context": CONTEXT_EDITOR_ONLY,
@@ -75,6 +80,7 @@ const _TYPE_DEFINITIONS: Dictionary = {
 	"danger_zone": {
 		"display_name": "Danger Zone",
 		"default_name": "Danger Zone",
+		"tooltip": "Editor warning area for high-risk map spaces such as hazards, ambushes or strong enemy control.",
 		"color": Color(0.98, 0.35, 0.29, 0.98),
 		"symbol": SYMBOL_TRIANGLE,
 		"placement_context": CONTEXT_EDITOR_ONLY,
@@ -83,14 +89,16 @@ const _TYPE_DEFINITIONS: Dictionary = {
 	"loot_cache": {
 		"display_name": "Loot Cache",
 		"default_name": "Loot Cache",
+		"tooltip": "Possible loot or reward location. It marks intent; it does not spawn loot by itself yet.",
 		"color": Color(0.98, 0.82, 0.32, 0.98),
 		"symbol": SYMBOL_SQUARE,
 		"placement_context": CONTEXT_EDITOR_ONLY,
 		"single_instance": false,
 	},
 	"recon_note": {
-		"display_name": "Recon Note",
-		"default_name": "Recon Note",
+		"display_name": "Recon Node",
+		"default_name": "Recon Node",
+		"tooltip": "Recon/intel point for scenario notes, scan targets or future mission briefing hooks.",
 		"color": Color(0.86, 0.68, 1.0, 0.98),
 		"symbol": SYMBOL_CROSS,
 		"placement_context": CONTEXT_EDITOR_ONLY,
@@ -99,6 +107,7 @@ const _TYPE_DEFINITIONS: Dictionary = {
 	"move": {
 		"display_name": "Move",
 		"default_name": "Move",
+		"tooltip": "Mission command marker: move toward this position.",
 		"color": Color(0.72, 0.9, 1.0, 0.95),
 		"symbol": SYMBOL_CIRCLE,
 		"placement_context": CONTEXT_MISSION_PLAYER,
@@ -107,6 +116,7 @@ const _TYPE_DEFINITIONS: Dictionary = {
 	"defend": {
 		"display_name": "Defend",
 		"default_name": "Defend",
+		"tooltip": "Mission command marker: hold and defend this position.",
 		"color": Color(0.66, 0.94, 0.78, 0.95),
 		"symbol": SYMBOL_SQUARE,
 		"placement_context": CONTEXT_MISSION_PLAYER,
@@ -115,6 +125,7 @@ const _TYPE_DEFINITIONS: Dictionary = {
 	"engage": {
 		"display_name": "Engage",
 		"default_name": "Engage",
+		"tooltip": "Mission command marker: prioritize contact or fire toward this position.",
 		"color": Color(1.0, 0.68, 0.58, 0.95),
 		"symbol": SYMBOL_CROSS,
 		"placement_context": CONTEXT_MISSION_PLAYER,
@@ -123,6 +134,7 @@ const _TYPE_DEFINITIONS: Dictionary = {
 	"flank": {
 		"display_name": "Flank",
 		"default_name": "Flank",
+		"tooltip": "Mission command marker: approach from an alternate angle.",
 		"color": Color(0.95, 0.84, 0.48, 0.95),
 		"symbol": SYMBOL_DIAMOND,
 		"placement_context": CONTEXT_MISSION_PLAYER,
@@ -131,6 +143,7 @@ const _TYPE_DEFINITIONS: Dictionary = {
 	"take": {
 		"display_name": "Take",
 		"default_name": "Take",
+		"tooltip": "Mission command marker: take, secure or interact with this target.",
 		"color": Color(1.0, 0.95, 0.8, 0.95),
 		"symbol": SYMBOL_FLAG,
 		"placement_context": CONTEXT_MISSION_PLAYER,
@@ -153,6 +166,11 @@ static func get_type_definition(marker_type_id: String) -> Dictionary:
 static func get_display_name(marker_type_id: String) -> String:
 	var definition: Dictionary = get_type_definition(marker_type_id)
 	return String(definition.get("display_name", marker_type_id)).strip_edges()
+
+
+static func get_tooltip(marker_type_id: String) -> String:
+	var definition: Dictionary = get_type_definition(marker_type_id)
+	return String(definition.get("tooltip", get_display_name(marker_type_id))).strip_edges()
 
 
 static func get_default_name(marker_type_id: String, fallback_marker_id: String = "") -> String:

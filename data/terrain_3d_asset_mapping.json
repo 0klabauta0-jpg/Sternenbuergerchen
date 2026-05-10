@@ -22,7 +22,7 @@
 		}
 	},
 	"grid": {
-		"cell_size": 1.0,
+		"cell_size": 1,
 		"height_step": 0.5,
 		"ground_thickness": 0.035,
 		"ground_fill": 0.92,
@@ -39,7 +39,7 @@
 			"layer": "terrain_surface",
 			"source_id": "kenney_nature_kit_classic",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/ground/ground_dirt.gltf",
-			"scale": 1.0,
+			"scale": 1,
 			"nature_theme": "dirt",
 			"surface_visual_role": "ground_detail"
 		},
@@ -47,7 +47,7 @@
 			"layer": "terrain_surface",
 			"source_id": "kenney_nature_kit_classic",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/ground/grass.gltf",
-			"scale": 1.0,
+			"scale": 1,
 			"nature_theme": "grass_detail",
 			"surface_visual_role": "ground_detail"
 		},
@@ -55,151 +55,151 @@
 			"layer": "terrain_surface",
 			"source_id": "kenney_nature_kit_classic",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/ground/ground_dirtRiverTile.gltf",
-			"scale": 1.0,
+			"scale": 1,
 			"nature_theme": "dirt_detail_candidate",
 			"surface_visual_role": "future_detail_candidate"
 		},
 		"wall_straight": {
 			"layer": "terrain_object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_wall.glb",
-			"scale": 1.0,
-			"y_offset": 0.0,
+			"scale": 1,
+			"y_offset": 0,
 			"edge_anchor_offset": 0.45,
-			"rotation_degrees_offset": -90.0
+			"rotation_degrees_offset": -90
 		},
 		"wall_corner": {
 			"layer": "terrain_object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_wallCorner.glb",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
 		},
 		"wall_corner_ne": {
 			"layer": "terrain_object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_wallCorner.glb",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 180.0
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 180
 		},
 		"wall_corner_sw": {
 			"layer": "terrain_object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_wallCorner.glb",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 180.0
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 180
 		},
 		"corridor_straight": {
 			"layer": "terrain_object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor.glb",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
 		},
 		"corridor_corner": {
 			"layer": "terrain_object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_corner.glb",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
 		},
 		"gate_simple": {
 			"layer": "terrain_object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/gate_simple.glb",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
 		},
 		"gate_complex": {
 			"layer": "terrain_object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/gate_complex.glb",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
 		},
 		"deko_barrel": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/barrel.glb",
 			"scale": 1.25,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
 		},
 		"deko_barrels": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/barrels.glb",
 			"scale": 1.35,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
 		},
 		"technik_generator": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/machine_generator.glb",
 			"scale": 1.3,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
 		},
 		"technik_turret_single": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/turret_single.glb",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
 		},
 		"technik_turret_double": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/turret_double.glb",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
 		},
 		"technik_satellite_large": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/satelliteDish_large.glb",
 			"scale": 1.8,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
 		},
 		"gebaeude_structure_closed": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/structure_closed.glb",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
 		},
 		"gebaeude_hangar_small_b": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_smallB.glb",
 			"scale": 1.5,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
 		},
 		"plattform_center": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/platform_center.glb",
 			"scale": 1.25,
 			"y_offset": 0.04,
-			"rotation_degrees_offset": 0.0
+			"rotation_degrees_offset": 0
 		},
 		"pipe_straight": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/pipe_straight.glb",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
 		},
 		"rail": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rail.glb",
 			"scale": 1.15,
 			"y_offset": -0.01,
-			"rotation_degrees_offset": 0.0
+			"rotation_degrees_offset": 0
 		},
 		"cliff_straight": {
 			"layer": "terrain_object",
 			"source_id": "kenney_space_kit",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_sideCliff.glb",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0,
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
 			"nature_theme": "legacy_space",
 			"edge_role": "cliff_straight"
 		},
@@ -207,9 +207,9 @@
 			"layer": "terrain_object",
 			"source_id": "kenney_space_kit",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_sideCorner.glb",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": -90.0,
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": -90,
 			"nature_theme": "legacy_space",
 			"edge_role": "cliff_outer_corner"
 		},
@@ -217,9 +217,9 @@
 			"layer": "terrain_object",
 			"source_id": "kenney_space_kit",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_rampLarge.glb",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0,
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
 			"nature_theme": "legacy_space",
 			"edge_role": "slope_steps"
 		},
@@ -227,9 +227,9 @@
 			"layer": "terrain_object",
 			"source_id": "kenney_nature_kit_classic",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown.gltf",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0,
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
 			"nature_theme": "brown",
 			"edge_role": "cliff_straight"
 		},
@@ -237,9 +237,9 @@
 			"layer": "terrain_object",
 			"source_id": "kenney_nature_kit_classic",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown_cornerTop.gltf",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": -90.0,
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": -90,
 			"nature_theme": "brown",
 			"edge_role": "cliff_outer_corner"
 		},
@@ -247,9 +247,9 @@
 			"layer": "terrain_object",
 			"source_id": "kenney_nature_kit_classic",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown_cornerInnerTop.gltf",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": -90.0,
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": -90,
 			"nature_theme": "brown",
 			"edge_role": "cliff_inner_corner"
 		},
@@ -257,9 +257,9 @@
 			"layer": "terrain_object",
 			"source_id": "kenney_nature_kit_classic",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown_steps.gltf",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0,
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
 			"nature_theme": "brown",
 			"edge_role": "slope_steps"
 		},
@@ -267,9 +267,9 @@
 			"layer": "terrain_object",
 			"source_id": "kenney_nature_kit_classic",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffBrown_stepsEnd.gltf",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0,
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
 			"nature_theme": "brown",
 			"edge_role": "slope_steps_end"
 		},
@@ -277,9 +277,9 @@
 			"layer": "terrain_object",
 			"source_id": "kenney_nature_kit_classic",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffGrey.gltf",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0,
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
 			"nature_theme": "grey",
 			"edge_role": "cliff_straight"
 		},
@@ -287,9 +287,9 @@
 			"layer": "terrain_object",
 			"source_id": "kenney_nature_kit_classic",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffGrey_cornerTop.gltf",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": -90.0,
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": -90,
 			"nature_theme": "grey",
 			"edge_role": "cliff_outer_corner"
 		},
@@ -297,9 +297,9 @@
 			"layer": "terrain_object",
 			"source_id": "kenney_nature_kit_classic",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffGrey_cornerInnerTop.gltf",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": -90.0,
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": -90,
 			"nature_theme": "grey",
 			"edge_role": "cliff_inner_corner"
 		},
@@ -307,9 +307,9 @@
 			"layer": "terrain_object",
 			"source_id": "kenney_nature_kit_classic",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffGrey_steps.gltf",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0,
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
 			"nature_theme": "grey",
 			"edge_role": "slope_steps"
 		},
@@ -317,9 +317,9 @@
 			"layer": "terrain_object",
 			"source_id": "kenney_nature_kit_classic",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/cliffs/cliffGrey_stepsEnd.gltf",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0,
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
 			"nature_theme": "grey",
 			"edge_role": "slope_steps_end"
 		},
@@ -328,43 +328,43 @@
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/crater.glb",
 			"scale": 1.2,
 			"y_offset": -0.02,
-			"rotation_degrees_offset": 0.0
+			"rotation_degrees_offset": 0
 		},
 		"crater_large": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/craterLarge.glb",
 			"scale": 3.4,
 			"y_offset": -0.02,
-			"rotation_degrees_offset": 0.0
+			"rotation_degrees_offset": 0
 		},
 		"rock_large_b": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rock_largeB.glb",
 			"scale": 1.1,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
 		},
 		"rock_large": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rock_largeB.glb",
 			"scale": 1.1,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
 		},
 		"rock_small": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rock.glb",
 			"scale": 0.95,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
 		},
 		"nature_tree_blocker": {
 			"layer": "object",
 			"source_id": "kenney_nature_kit_classic",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/vegetation/tree_pine_tall.gltf",
 			"scale": 1.05,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
 			"prop_role": "tree_blocker",
 			"gameplay_role": "los_blocking_cover"
 		},
@@ -373,8 +373,8 @@
 			"source_id": "kenney_nature_kit_classic",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/rocks/rock_large1.gltf",
 			"scale": 0.95,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
 			"prop_role": "rock_cover",
 			"gameplay_role": "blocking_cover"
 		},
@@ -383,8 +383,8 @@
 			"source_id": "kenney_nature_kit_classic",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/vegetation/plant_bush.gltf",
 			"scale": 0.9,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
 			"prop_role": "bush_cover",
 			"gameplay_role": "soft_cover_walkable"
 		},
@@ -393,8 +393,8 @@
 			"source_id": "kenney_nature_kit_classic",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/vegetation/cactus_large.gltf",
 			"scale": 0.88,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
 			"prop_role": "cactus_cover",
 			"gameplay_role": "blocking_light_cover"
 		},
@@ -403,8 +403,8 @@
 			"source_id": "kenney_nature_kit_classic",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/props/logs_stack.gltf",
 			"scale": 0.78,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
 			"prop_role": "deco_small",
 			"gameplay_role": "visual_only_no_cover"
 		},
@@ -413,8 +413,8 @@
 			"source_id": "space_station_kit",
 			"model_path": "res://Assets/curated/kenney/space_station/models/wall.glb",
 			"scale": 0.86,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
 			"space_station_role": "wall_panel"
 		},
 		"station_wall_door": {
@@ -422,8 +422,8 @@
 			"source_id": "space_station_kit",
 			"model_path": "res://Assets/curated/kenney/space_station/models/wall-door.glb",
 			"scale": 0.86,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
 			"space_station_role": "door_airlock"
 		},
 		"station_computer": {
@@ -431,8 +431,8 @@
 			"source_id": "space_station_kit",
 			"model_path": "res://Assets/curated/kenney/space_station/models/computer.glb",
 			"scale": 0.92,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
 			"space_station_role": "console"
 		},
 		"station_table_display": {
@@ -440,8 +440,8 @@
 			"source_id": "space_station_kit",
 			"model_path": "res://Assets/curated/kenney/space_station/models/table-display.glb",
 			"scale": 0.9,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
 			"space_station_role": "console"
 		},
 		"station_container_wide": {
@@ -449,8 +449,8 @@
 			"source_id": "space_station_kit",
 			"model_path": "res://Assets/curated/kenney/space_station/models/container-wide.glb",
 			"scale": 0.9,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
 			"space_station_role": "storage_cargo"
 		},
 		"station_bed_single": {
@@ -458,8 +458,8 @@
 			"source_id": "space_station_kit",
 			"model_path": "res://Assets/curated/kenney/space_station/models/bed-single.glb",
 			"scale": 0.92,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
 			"space_station_role": "medbay"
 		},
 		"station_floor_panel": {
@@ -468,43 +468,2140 @@
 			"model_path": "res://Assets/curated/kenney/space_station/models/floor-panel.glb",
 			"scale": 0.88,
 			"y_offset": -0.04,
-			"rotation_degrees_offset": 0.0,
+			"rotation_degrees_offset": 0,
 			"space_station_role": "floor_insert"
 		},
 		"rocks_small_a": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rocks_smallA.glb",
-			"scale": 1.0,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
 		},
 		"desk_computer": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/desk_computer.glb",
 			"scale": 1.5,
-			"y_offset": 0.0,
-			"rotation_degrees_offset": 0.0
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
 		},
 		"fahrzeug_speeder_b": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/craft_speederB.glb",
 			"scale": 1.48,
 			"y_offset": 0.08,
-			"rotation_degrees_offset": 0.0
+			"rotation_degrees_offset": 0
 		},
 		"fahrzeug_rover": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rover.glb",
 			"scale": 2.4,
 			"y_offset": 0.04,
-			"rotation_degrees_offset": 0.0
+			"rotation_degrees_offset": 0
 		},
 		"fahrzeug_cargo_b": {
 			"layer": "object",
 			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/craft_cargoB.glb",
-			"scale": 2.0,
+			"scale": 2,
 			"y_offset": 0.08,
-			"rotation_degrees_offset": 0.0
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_alien": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/alien.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_astronaut_a": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/astronautA.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_astronaut_b": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/astronautB.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_barrel": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/barrel.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_barrels": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/barrels.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_barrels_rail": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/barrels_rail.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_bones": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/bones.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_chimney": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/chimney.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_chimney_detailed": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/chimney_detailed.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_corridor": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_corridor_corner": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_corner.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_corridor_corner_round": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_cornerRound.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_corridor_corner_round_window": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_cornerRoundWindow.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_corridor_cross": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_cross.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_corridor_detailed": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_detailed.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_corridor_end": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_end.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_corridor_open": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_open.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_corridor_roof": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_roof.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_corridor_split": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_split.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_corridor_wall": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_wall.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_corridor_wall_corner": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_wallCorner.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_corridor_window": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_window.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_corridor_window_closed": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/corridor_windowClosed.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_craft_cargo_a": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/craft_cargoA.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_craft_cargo_b": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/craft_cargoB.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_craft_miner": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/craft_miner.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_craft_racer": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/craft_racer.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_craft_speeder_a": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/craft_speederA.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_craft_speeder_b": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/craft_speederB.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_craft_speeder_c": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/craft_speederC.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_craft_speeder_d": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/craft_speederD.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_crater": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/crater.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_crater_large": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/craterLarge.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_desk_chair": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/desk_chair.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_desk_chair_arms": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/desk_chairArms.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_desk_chair_stool": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/desk_chairStool.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_desk_computer": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/desk_computer.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_desk_computer_corner": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/desk_computerCorner.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_desk_computer_screen": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/desk_computerScreen.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_gate_complex": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/gate_complex.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_gate_simple": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/gate_simple.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_hangar_large_a": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_largeA.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_hangar_large_b": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_largeB.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_hangar_round_a": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_roundA.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_hangar_round_b": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_roundB.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_hangar_round_glass": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_roundGlass.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_hangar_small_a": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_smallA.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_hangar_small_b": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/hangar_smallB.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_machine_barrel": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/machine_barrel.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_machine_barrel_large": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/machine_barrelLarge.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_machine_generator": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/machine_generator.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_machine_generator_large": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/machine_generatorLarge.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_machine_wireless": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/machine_wireless.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_machine_wireless_cable": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/machine_wirelessCable.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_meteor": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/meteor.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_meteor_detailed": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/meteor_detailed.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_meteor_half": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/meteor_half.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_monorail_track_corner_large": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/monorail_trackCornerLarge.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_monorail_track_corner_small": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/monorail_trackCornerSmall.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_monorail_track_slope": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/monorail_trackSlope.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_monorail_track_straight": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/monorail_trackStraight.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_monorail_track_support": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/monorail_trackSupport.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_monorail_track_support_corner": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/monorail_trackSupportCorner.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_monorail_train_box": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/monorail_trainBox.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_monorail_train_cargo": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/monorail_trainCargo.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_monorail_train_end": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/monorail_trainEnd.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_monorail_train_flat": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/monorail_trainFlat.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_monorail_train_front": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/monorail_trainFront.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_monorail_train_passenger": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/monorail_trainPassenger.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_pipe_corner": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/pipe_corner.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_pipe_corner_diagonal": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/pipe_cornerDiagonal.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_pipe_corner_round": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/pipe_cornerRound.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_pipe_corner_round_large": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/pipe_cornerRoundLarge.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_pipe_cross": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/pipe_cross.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_pipe_end": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/pipe_end.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_pipe_entrance": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/pipe_entrance.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_pipe_open": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/pipe_open.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_pipe_ramp_large": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/pipe_rampLarge.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_pipe_ramp_small": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/pipe_rampSmall.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_pipe_ring": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/pipe_ring.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_pipe_ring_high": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/pipe_ringHigh.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_pipe_ring_high_end": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/pipe_ringHighEnd.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_pipe_ring_support": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/pipe_ringSupport.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_pipe_split": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/pipe_split.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_pipe_straight": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/pipe_straight.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_pipe_support_high": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/pipe_supportHigh.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_pipe_support_low": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/pipe_supportLow.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_platform_center": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/platform_center.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_platform_corner": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/platform_corner.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_platform_corner_open": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/platform_cornerOpen.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_platform_corner_round": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/platform_cornerRound.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_platform_end": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/platform_end.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_platform_high": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/platform_high.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_platform_large": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/platform_large.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_platform_long": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/platform_long.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_platform_low": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/platform_low.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_platform_side": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/platform_side.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_platform_small": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/platform_small.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_platform_small_diagonal": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/platform_smallDiagonal.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_platform_straight": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/platform_straight.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_rail": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rail.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_rail_corner": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rail_corner.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_rail_end": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rail_end.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_rail_middle": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rail_middle.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_rock": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rock.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_rock_crystals": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rock_crystals.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_rock_crystals_large_a": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rock_crystalsLargeA.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_rock_crystals_large_b": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rock_crystalsLargeB.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_rock_large_a": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rock_largeA.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_rock_large_b": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rock_largeB.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_rocket_base_a": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rocket_baseA.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_rocket_base_b": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rocket_baseB.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_rocket_fins_a": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rocket_finsA.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_rocket_fins_b": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rocket_finsB.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_rocket_fuel_a": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rocket_fuelA.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_rocket_fuel_b": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rocket_fuelB.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_rocket_sides_a": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rocket_sidesA.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_rocket_sides_b": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rocket_sidesB.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_rocket_top_a": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rocket_topA.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_rocket_top_b": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rocket_topB.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_rocks_small_a": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rocks_smallA.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_rocks_small_b": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rocks_smallB.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_rover": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rover.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_satellite_dish": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/satelliteDish.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_satellite_dish_detailed": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/satelliteDish_detailed.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_satellite_dish_large": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/satelliteDish_large.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_stairs": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/stairs.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_stairs_corner": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/stairs_corner.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_stairs_short": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/stairs_short.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_structure": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/structure.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_structure_closed": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/structure_closed.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_structure_detailed": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/structure_detailed.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_structure_diagonal": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/structure_diagonal.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_supports_high": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/supports_high.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_supports_low": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/supports_low.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_terrain": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_terrain_ramp": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_ramp.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_terrain_ramp_large": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_rampLarge.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_terrain_ramp_large_detailed": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_rampLarge_detailed.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_terrain_road_corner": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_roadCorner.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_terrain_road_cross": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_roadCross.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_terrain_road_end": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_roadEnd.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_terrain_road_split": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_roadSplit.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_terrain_road_straight": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_roadStraight.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_terrain_side": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_side.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_terrain_side_cliff": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_sideCliff.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_terrain_side_corner": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_sideCorner.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_terrain_side_corner_inner": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_sideCornerInner.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_terrain_side_end": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_sideEnd.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_turret_double": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/turret_double.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_turret_single": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/turret_single.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_weapon_gun": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/weapon_gun.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"spacekit_weapon_rifle": {
+			"layer": "object",
+			"source_id": "kenney_space_kit",
+			"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/weapon_rifle.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0
+		},
+		"station_set_balcony_floor_center": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/balcony-floor-center.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_balcony_floor_corner": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/balcony-floor-corner.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_balcony_floor": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/balcony-floor.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_balcony_rail_center": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/balcony-rail-center.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_balcony_rail_corner": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/balcony-rail-corner.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_balcony_rail": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/balcony-rail.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_bed_double_cover": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/bed-double-cover.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_bed_double": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/bed-double.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_bed_single_cover": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/bed-single-cover.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_bed_single": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/bed-single.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_chair_armrest_headrest": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/chair-armrest-headrest.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_chair_armrest": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/chair-armrest.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_chair_cushion_headrest": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/chair-cushion-headrest.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_chair_cushion": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/chair-cushion.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_chair_headrest": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/chair-headrest.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_chair": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/chair.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_computer_screen": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/computer-screen.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_computer_system": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/computer-system.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_computer_wide": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/computer-wide.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_computer": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/computer.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_container_flat_open": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/container-flat-open.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_container_flat": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/container-flat.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_container_tall": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/container-tall.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_container_wide": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/container-wide.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_container": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/container.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_display_wall_wide": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/display-wall-wide.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_display_wall": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/display-wall.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_door_double_closed": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/door-double-closed.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_door_double_half": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/door-double-half.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_door_double": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/door-double.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_door_single_closed": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/door-single-closed.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_door_single_half": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/door-single-half.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_door_single": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/door-single.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_floor_corner": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/floor-corner.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_floor_detail": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/floor-detail.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_floor_panel_corner": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/floor-panel-corner.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_floor_panel_end": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/floor-panel-end.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_floor_panel_straight": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/floor-panel-straight.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_floor_panel": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/floor-panel.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_floor": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/floor.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_pipe_bend_diagonal": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/pipe-bend-diagonal.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_pipe_bend": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/pipe-bend.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_pipe_end_colored": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/pipe-end-colored.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_pipe_end": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/pipe-end.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_pipe_ring_colored": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/pipe-ring-colored.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_pipe_ring": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/pipe-ring.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_pipe": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/pipe.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_rail_narrow": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/rail-narrow.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_rail": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/rail.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_rocks": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/rocks.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_skip_rocks": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/skip-rocks.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_skip": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/skip.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_stairs_corner_inner": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/stairs-corner-inner.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_stairs_corner": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/stairs-corner.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_stairs_handrail_single": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/stairs-handrail-single.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_stairs_handrail": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/stairs-handrail.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_stairs_ramp": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/stairs-ramp.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_stairs_small_center": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/stairs-small-center.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_stairs_small_corner_inner": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/stairs-small-corner-inner.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_stairs_small_corner": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/stairs-small-corner.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_stairs_small_edge_handrail": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/stairs-small-edge-handrail.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_stairs_small_edge": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/stairs-small-edge.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_stairs_small_edges_handrail": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/stairs-small-edges-handrail.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_stairs_small_edges": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/stairs-small-edges.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_stairs": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/stairs.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_structure_barrier_high": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/structure-barrier-high.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_structure_barrier": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/structure-barrier.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_structure_panel": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/structure-panel.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_structure": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/structure.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_table_display_planet": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/table-display-planet.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_table_display_small": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/table-display-small.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_table_display": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/table-display.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_table_inset_small": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/table-inset-small.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_table_inset": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/table-inset.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_table_large": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/table-large.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_table": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/table.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_wall_banner": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/wall-banner.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_wall_corner_banner": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/wall-corner-banner.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_wall_corner_round_banner": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/wall-corner-round-banner.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_wall_corner_round": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/wall-corner-round.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_wall_corner": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/wall-corner.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_wall_detail": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/wall-detail.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_wall_door_banner": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/wall-door-banner.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_wall_door_center": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/wall-door-center.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_wall_door_edge_banner": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/wall-door-edge-banner.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_wall_door_edge": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/wall-door-edge.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_wall_door_wide_banner": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/wall-door-wide-banner.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_wall_door_wide": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/wall-door-wide.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_wall_door": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/wall-door.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_wall_pillar_banner": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/wall-pillar-banner.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_wall_pillar": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/wall-pillar.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_wall_switch": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/wall-switch.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_wall_window_banner": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/wall-window-banner.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_wall_window_frame": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/wall-window-frame.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_wall_window_shutters": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/wall-window-shutters.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_wall_window": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/wall-window.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
+		},
+		"station_set_wall": {
+			"layer": "object",
+			"source_id": "space_station_kit",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/wall.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"space_station_role": "full_set_asset"
 		}
 	}
 }

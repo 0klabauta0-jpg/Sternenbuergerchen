@@ -14,6 +14,8 @@ const OBJECT_LAYER_GROUPS: PackedStringArray = [
 	"rails",
 	"crater",
 	"fahrzeuge",
+	"space_kit_full",
+	"space_station_full",
 ]
 const STRUCTURE_LAYER_NAMES: PackedStringArray = [
 	"structure",

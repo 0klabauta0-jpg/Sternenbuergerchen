@@ -134,7 +134,7 @@ const AUTHORING_TOOL_MARKER: String = "marker"
 const AUTHORING_TOOL_PATROL: String = "patrol"
 const TOOL_BUTTON_SIZE: Vector2 = Vector2(34.0, 30.0)
 const MAX_UNDO_STACK_SIZE: int = 32
-const PALETTE_PREVIEW_ICON_SIZE: Vector2i = Vector2i(16, 16)
+const PALETTE_PREVIEW_ICON_SIZE: Vector2i = Vector2i(20, 20)
 const PALETTE_ITEM_FG_COLOR: Color = Color(0.9, 0.93, 0.9, 1.0)
 const PALETTE_SELECTED_BG_COLOR: Color = Color(1.0, 0.86, 0.22, 0.84)
 const PALETTE_SELECTED_FG_COLOR: Color = Color(0.08, 0.06, 0.02, 1.0)
@@ -222,6 +222,7 @@ func _ready() -> void:
 	_add_selection_tool_button()
 	_add_eraser_tool_button()
 	_add_patrol_tool_controls()
+	_arrange_topbar_authoring_tools()
 	_ensure_marker_editor_controls()
 	_ensure_mission_authoring_controls()
 	_ensure_authoring_status_controls()
@@ -859,13 +860,14 @@ func _add_height_tool_controls() -> void:
 		button_row.add_child(height_button)
 		button_row.move_child(height_button, insert_index)
 		insert_index += 1
-	_configure_tool_button(height_button, "H", "Height: raise, lower or set H0/H1/H2.")
+	_configure_tool_button(height_button, "H", "Height: raises, lowers or sets tile height. Use Hang for walkable slopes and Cliff for hard height edges.")
 
 	var mode_option := button_row.get_node_or_null("HeightModeOption") as OptionButton
 	if mode_option == null:
 		mode_option = OptionButton.new()
 		mode_option.name = "HeightModeOption"
 		mode_option.custom_minimum_size = Vector2(96.0, 0.0)
+		mode_option.tooltip_text = "Height mode: Anheben/Absenken changes one step; H=0/H=1/H=2 writes an exact level."
 		button_row.add_child(mode_option)
 		button_row.move_child(mode_option, insert_index)
 		insert_index += 1
@@ -878,6 +880,7 @@ func _add_height_tool_controls() -> void:
 		edge_option = OptionButton.new()
 		edge_option.name = "HeightEdgeOption"
 		edge_option.custom_minimum_size = Vector2(92.0, 0.0)
+		edge_option.tooltip_text = "Height edge: Hang creates a walkable slope; Cliff creates a blocking vertical side; Keine suppresses visible side pieces."
 		button_row.add_child(edge_option)
 		button_row.move_child(edge_option, insert_index)
 	_populate_height_edge_options(edge_option)
@@ -956,7 +959,7 @@ func _add_selection_tool_button() -> void:
 
 	var existing_button := button_row.get_node_or_null("SelectButton") as Button
 	if existing_button != null:
-		_configure_tool_button(existing_button, "S", "Select tiles; Ctrl-click toggles multiple tiles.")
+		_configure_tool_button(existing_button, "S", "Select: inspect or edit tiles and objects. Ctrl-click toggles multiple tiles without painting.")
 		existing_button.button_pressed = _selection_tool_enabled
 		return
 
@@ -964,7 +967,7 @@ func _add_selection_tool_button() -> void:
 	select_btn.name = "SelectButton"
 	select_btn.toggle_mode = true
 	select_btn.button_pressed = _selection_tool_enabled
-	_configure_tool_button(select_btn, "S", "Select tiles; Ctrl-click toggles multiple tiles.")
+	_configure_tool_button(select_btn, "S", "Select: inspect or edit tiles and objects. Ctrl-click toggles multiple tiles without painting.")
 	select_btn.toggled.connect(_on_selection_tool_toggled)
 	button_row.add_child(select_btn)
 
@@ -984,7 +987,7 @@ func _add_eraser_tool_button() -> void:
 		var select_button := button_row.get_node_or_null("SelectButton") as Button
 		if select_button != null:
 			button_row.move_child(eraser_button, select_button.get_index() + 1)
-	_configure_tool_button(eraser_button, "E", "Eraser: clear only the object layer on clicked tiles.")
+	_configure_tool_button(eraser_button, "E", "Eraser: removes the object/structure layer on clicked tiles. Terrain, height and markers stay intact.")
 	eraser_button.button_pressed = _eraser_tool_enabled
 
 
@@ -994,6 +997,31 @@ func _configure_tool_button(button: Button, label_text: String, tooltip: String)
 	button.text = label_text
 	button.custom_minimum_size = TOOL_BUTTON_SIZE
 	button.tooltip_text = tooltip
+
+
+func _arrange_topbar_authoring_tools() -> void:
+	var button_row := get_node_or_null("UI/TopBar/Margin/HBox") as HBoxContainer
+	if button_row == null:
+		return
+	var insert_index: int = 0
+	var brush_size_option := button_row.get_node_or_null("BrushSizeOptionButton") as Control
+	if brush_size_option != null:
+		insert_index = brush_size_option.get_index() + 1
+	for node_name in [
+		"SelectButton",
+		"EraserButton",
+		"HeightButton",
+		"HeightModeOption",
+		"HeightEdgeOption",
+		"PatrolButton",
+		"PatrolSpawnOption",
+		"ClearPatrolButton",
+	]:
+		var node := button_row.get_node_or_null(node_name) as Control
+		if node == null:
+			continue
+		button_row.move_child(node, insert_index)
+		insert_index += 1
 
 
 func _ensure_editor_save_controls() -> void:
@@ -1024,13 +1052,14 @@ func _ensure_map_name_controls() -> void:
 	var label := Label.new()
 	label.name = "MapNameLabel"
 	label.text = "Map ID"
+	label.tooltip_text = "Map ID: stable internal name used by save files, manifests and mission/testmap lookup."
 	label.custom_minimum_size = Vector2(72.0, 0.0)
 	row.add_child(label)
 	var line_edit := LineEdit.new()
 	line_edit.name = "MapNameLineEdit"
 	line_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	line_edit.placeholder_text = DEFAULT_NEW_MAP_NAME
-	line_edit.tooltip_text = "Used as the map name and as the suggested Save As file name."
+	line_edit.tooltip_text = "Map ID: change this before Save As to store the map under a clear scenario/testmap name."
 	row.add_child(line_edit)
 	panel_parent.add_child(row)
 	var insert_before := panel_parent.get_node_or_null("GridSizeLabel")
@@ -1112,12 +1141,13 @@ func _add_patrol_tool_controls() -> void:
 		patrol_button.toggle_mode = true
 		patrol_button.toggled.connect(_on_patrol_tool_toggled)
 		button_row.add_child(patrol_button)
-	_configure_tool_button(patrol_button, "P", "Patrol markers and pre-contact waypoint authoring.")
+	_configure_tool_button(patrol_button, "P", "Patrol: place NPC pre-contact path points for the selected spawn/group.")
 	var spawn_selector := button_row.get_node_or_null("PatrolSpawnOption") as OptionButton
 	if spawn_selector == null:
 		spawn_selector = OptionButton.new()
 		spawn_selector.name = "PatrolSpawnOption"
 		spawn_selector.custom_minimum_size = Vector2(120.0, 0.0)
+		spawn_selector.tooltip_text = "NPC patrol source: choose which spawn/group receives new patrol points."
 		button_row.add_child(spawn_selector)
 	_refresh_patrol_spawn_selector()
 	if not spawn_selector.item_selected.is_connected(_on_patrol_spawn_selected):
@@ -1127,9 +1157,11 @@ func _add_patrol_tool_controls() -> void:
 		clear_button = Button.new()
 		clear_button.name = "ClearPatrolButton"
 		clear_button.text = "Clear Patrol"
+		clear_button.tooltip_text = "Clears the patrol waypoint chain for the selected spawn/group."
 		clear_button.pressed.connect(_on_clear_patrol_pressed)
 		button_row.add_child(clear_button)
 	_update_patrol_topbar_state()
+	_arrange_topbar_authoring_tools()
 
 
 func _on_selection_tool_toggled(pressed: bool) -> void:
@@ -1376,6 +1408,7 @@ func _ensure_marker_editor_controls() -> void:
 	var marker_help_label := get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerHelpLabel") as Label
 	if marker_help_label != null:
 		marker_help_label.text = "Markers come from a fixed list. Add one, place or drag it on the map, double-click to rename, and use DEL to remove it. Markers snap to tiles and do not overlap."
+		marker_help_label.tooltip_text = "Markers are editor-authored map annotations. PC/NPC spawns and objectives feed mission setup; notes and danger/loot/recon points guide later gameplay content."
 	_hide_legacy_marker_rows()
 
 	var marker_panel_parent := get_node_or_null("UI/PropertyPanel/Margin/VBox") as VBoxContainer
@@ -1397,22 +1430,25 @@ func _ensure_marker_editor_controls() -> void:
 		var add_type_option := OptionButton.new()
 		add_type_option.name = "AddMarkerTypeOption"
 		add_type_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		add_type_option.tooltip_text = "Marker type to add. The marker info panel explains the selected type."
 		toolbar.add_child(add_type_option)
 
 		var add_marker_button := Button.new()
 		add_marker_button.name = "AddMarkerButton"
 		add_marker_button.text = "Add"
+		add_marker_button.tooltip_text = "Create the selected marker type. Single-instance markers such as PC/NPC Spawn are reused instead of duplicated."
 		toolbar.add_child(add_marker_button)
 
 		var marker_tool_button := Button.new()
 		marker_tool_button.name = "MarkerToolButton"
 		marker_tool_button.toggle_mode = true
 		toolbar.add_child(marker_tool_button)
-		_configure_tool_button(marker_tool_button, "M", "Marker tool: place or drag mission/editor markers.")
+		_configure_tool_button(marker_tool_button, "M", "Marker: place selected map markers or drag existing markers on the grid.")
 
 		var remove_marker_button := Button.new()
 		remove_marker_button.name = "RemoveMarkerButton"
 		remove_marker_button.text = "Remove"
+		remove_marker_button.tooltip_text = "Delete the selected marker from this map."
 		toolbar.add_child(remove_marker_button)
 
 		var marker_list := ItemList.new()
@@ -1421,6 +1457,7 @@ func _ensure_marker_editor_controls() -> void:
 		marker_list.allow_reselect = true
 		marker_list.custom_minimum_size = Vector2(0.0, 170.0)
 		marker_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		marker_list.tooltip_text = "All markers currently stored on this map. Double-click a marker to focus it."
 		marker_panel.add_child(marker_list)
 
 		var type_row := HBoxContainer.new()
@@ -1435,6 +1472,7 @@ func _ensure_marker_editor_controls() -> void:
 		var selected_type_option := OptionButton.new()
 		selected_type_option.name = "SelectedMarkerTypeOption"
 		selected_type_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		selected_type_option.tooltip_text = "Change the selected marker's type while keeping its position."
 		type_row.add_child(selected_type_option)
 
 		var name_row := HBoxContainer.new()
@@ -1449,6 +1487,7 @@ func _ensure_marker_editor_controls() -> void:
 		var name_line_edit := LineEdit.new()
 		name_line_edit.name = "MarkerNameLineEdit"
 		name_line_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		name_line_edit.tooltip_text = "Display name stored with this marker."
 		name_row.add_child(name_line_edit)
 
 		var color_row := HBoxContainer.new()
@@ -1464,6 +1503,7 @@ func _ensure_marker_editor_controls() -> void:
 		color_picker_button.name = "MarkerColorButton"
 		color_picker_button.custom_minimum_size = Vector2(88.0, 0.0)
 		color_picker_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		color_picker_button.tooltip_text = "Marker color used in the 2D editor overlay."
 		color_row.add_child(color_picker_button)
 
 		var marker_info_label := Label.new()
@@ -1474,7 +1514,7 @@ func _ensure_marker_editor_controls() -> void:
 
 	var marker_tool_button := _get_marker_tool_button()
 	if marker_tool_button != null:
-		_configure_tool_button(marker_tool_button, "M", "Marker tool: place or drag mission/editor markers.")
+		_configure_tool_button(marker_tool_button, "M", "Marker: place selected map markers or drag existing markers on the grid.")
 	_populate_marker_type_options()
 	_connect_marker_editor_signals()
 	_refresh_marker_editor_controls()
@@ -1660,14 +1700,45 @@ func _refresh_authoring_status_controls() -> void:
 			int(snapshot.get("brush_radius", 0)),
 			selected_text,
 		]
+		tool_label.tooltip_text = "Tool: current editing mode. Brush is the paint radius. Tile is the selected grid coordinate; '-' means no tile is selected."
 	if validation_label != null:
 		validation_label.text = "Check: %s | Errors: %d | Warnings: %d" % [
 			"OK" if bool(validation.get("valid", false)) else "Needs attention",
 			int(validation.get("error_count", 0)),
 			int(validation.get("warning_count", 0)),
 		]
+		validation_label.tooltip_text = _build_authoring_validation_tooltip(validation)
 	if manifest_label != null:
 		manifest_label.text = "MP Map: %s" % String(manifest.get("state", "not_ready")).replace("_", " ")
+		manifest_label.tooltip_text = "MP Map: multiplayer/mission-map readiness state derived from the current map manifest."
+
+
+func _build_authoring_validation_tooltip(validation: Dictionary) -> String:
+	var errors: Array = Array(validation.get("errors", []))
+	var warnings: Array = Array(validation.get("warnings", []))
+	var lines: Array[String] = [
+		"Errors block a clean map export or playtest setup.",
+		"Warnings are playable but should be reviewed before using the map as a mission source.",
+	]
+	if not errors.is_empty():
+		lines.append("Errors:")
+		lines.append_array(_format_validation_tooltip_lines(errors, 4))
+	if not warnings.is_empty():
+		lines.append("Warnings:")
+		lines.append_array(_format_validation_tooltip_lines(warnings, 4))
+	if errors.is_empty() and warnings.is_empty():
+		lines.append("No current validation findings.")
+	return "\n".join(lines)
+
+
+func _format_validation_tooltip_lines(values: Array, max_items: int) -> Array[String]:
+	var result: Array[String] = []
+	var count: int = mini(values.size(), max_items)
+	for index in range(count):
+		result.append("- %s" % String(values[index]))
+	if values.size() > max_items:
+		result.append("- ... %d more" % int(values.size() - max_items))
+	return result
 
 
 func _ensure_inspector_section_controls() -> void:
@@ -1686,14 +1757,25 @@ func _ensure_inspector_toggle(parent: VBoxContainer, node_name: String, section_
 		button = Button.new()
 		button.name = node_name
 		button.toggle_mode = true
-		button.tooltip_text = tooltip
 		button.pressed.connect(_on_inspector_toggle_pressed.bind(section_id))
 		parent.add_child(button)
+	button.tooltip_text = _get_inspector_section_tooltip(section_id, tooltip)
 	var anchor_node := _get_inspector_section_anchor(section_id)
 	if anchor_node != null:
 		parent.move_child(button, anchor_node.get_index())
 	button.button_pressed = not bool(_inspector_section_collapsed.get(section_id, false))
 	button.text = "%s %s" % ["v" if button.button_pressed else ">", title]
+
+
+func _get_inspector_section_tooltip(section_id: String, fallback_text: String) -> String:
+	match section_id:
+		INSPECTOR_SECTION_MAP_SETTINGS:
+			return "Map Settings: grid size, Map ID, terrain/object metadata and validation context for the current map file."
+		INSPECTOR_SECTION_MARKERS:
+			return "Markers: authoring points used by mission setup, AI spawns, objectives, rally points and editor-only notes."
+		INSPECTOR_SECTION_MISSION_SCENARIO:
+			return "Mission Scenario: optional mission-specific setup layered on top of this terrain map."
+	return fallback_text
 
 
 func _get_inspector_section_anchor(section_id: String) -> Node:
@@ -3345,6 +3427,9 @@ func _populate_marker_type_options() -> void:
 		for marker_type_id in editor_marker_type_ids:
 			option_button.add_item(String(TERRAIN_MARKER_CATALOG_SCRIPT.call("get_display_name", marker_type_id)))
 			option_button.set_item_metadata(option_button.item_count - 1, marker_type_id)
+			var popup: PopupMenu = option_button.get_popup()
+			if popup != null and popup.has_method("set_item_tooltip"):
+				popup.call("set_item_tooltip", option_button.item_count - 1, _get_marker_type_tooltip(String(marker_type_id)))
 		var selected_index: int = 0
 		for index in range(option_button.item_count):
 			if String(option_button.get_item_metadata(index)) == previous_type_id:
@@ -3352,6 +3437,21 @@ func _populate_marker_type_options() -> void:
 				break
 		if option_button.item_count > 0:
 			option_button.select(selected_index)
+
+
+func _get_option_selected_metadata(option_button: OptionButton) -> String:
+	if option_button == null or option_button.selected < 0 or option_button.selected >= option_button.item_count:
+		return ""
+	return String(option_button.get_item_metadata(option_button.selected)).strip_edges().to_lower()
+
+
+func _get_marker_type_tooltip(marker_type_id: String) -> String:
+	var normalized_type_id: String = marker_type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty():
+		return ""
+	if TERRAIN_MARKER_CATALOG_SCRIPT.has_method("get_tooltip"):
+		return String(TERRAIN_MARKER_CATALOG_SCRIPT.call("get_tooltip", normalized_type_id)).strip_edges()
+	return String(TERRAIN_MARKER_CATALOG_SCRIPT.call("get_display_name", normalized_type_id)).strip_edges()
 
 
 func _connect_marker_editor_signals() -> void:
@@ -3409,6 +3509,9 @@ func _refresh_marker_editor_controls() -> void:
 		_selected_marker_id = ""
 
 	add_type_option.disabled = not has_map_data
+	var add_marker_type_id: String = _get_option_selected_metadata(add_type_option)
+	var add_marker_tooltip: String = _get_marker_type_tooltip(add_marker_type_id)
+	add_type_option.tooltip_text = "Marker type to add.\n%s" % add_marker_tooltip if not add_marker_tooltip.is_empty() else "Marker type to add."
 	add_marker_button.disabled = not has_map_data
 	marker_tool_button.disabled = not has_map_data
 	marker_tool_button.button_pressed = _marker_tool_enabled
@@ -3421,6 +3524,7 @@ func _refresh_marker_editor_controls() -> void:
 		marker_name_line_edit.text = ""
 		marker_color_button.color = Color(0.9, 0.9, 0.9, 1.0)
 		marker_info_label.text = _marker_feedback_text if not _marker_feedback_text.is_empty() else "Create a marker from the list above and place it directly on the map."
+		marker_info_label.tooltip_text = add_marker_tooltip
 		_is_refreshing_marker_controls = false
 		_refresh_authoring_status_controls()
 		_apply_inspector_section_visibility()
@@ -3434,6 +3538,9 @@ func _refresh_marker_editor_controls() -> void:
 	marker_name_line_edit.text = String(selected_record.get("name", _selected_marker_id))
 	marker_color_button.color = Color(selected_record.get("color", Color(0.9, 0.9, 0.9, 1.0)))
 	marker_info_label.text = _build_marker_info_text(selected_record)
+	var selected_marker_tooltip: String = _get_marker_type_tooltip(marker_type_id)
+	selected_type_option.tooltip_text = "Selected marker type.\n%s" % selected_marker_tooltip if not selected_marker_tooltip.is_empty() else "Selected marker type."
+	marker_info_label.tooltip_text = selected_marker_tooltip
 	_is_refreshing_marker_controls = false
 	_refresh_authoring_status_controls()
 	_apply_inspector_section_visibility()
@@ -3475,6 +3582,9 @@ func _build_marker_info_text(marker_record: Dictionary) -> String:
 	var marker_context: String = String(marker_record.get("placement_context", "")).strip_edges().to_lower()
 	var context_text: String = "Editor only" if marker_context == TERRAIN_MARKER_CATALOG_SCRIPT.CONTEXT_EDITOR_ONLY else "Mission player"
 	var base_text: String = "%s | %s | %d, %d | %s" % [String(TERRAIN_MARKER_CATALOG_SCRIPT.call("get_display_name", marker_type_id)), marker_name, int(round(marker_position.x)), int(round(marker_position.y)), context_text]
+	var tooltip_text: String = _get_marker_type_tooltip(marker_type_id)
+	if not tooltip_text.is_empty():
+		base_text = "%s\n%s" % [base_text, tooltip_text]
 	if _marker_feedback_text.is_empty():
 		return base_text
 	return "%s\n%s" % [_marker_feedback_text, base_text]
@@ -4097,6 +4207,9 @@ func _should_clear_type_id_for_patch(tile_data, patch: Dictionary) -> bool:
 	var object_type_id: String = String(tile_data.object_type_id) if tile_data.object_type_id is String else ""
 	if not object_type_id.is_empty() and type_id == "ground_flat":
 		return true
+	if patch.has("height_level") or patch.has("edge_type"):
+		if type_id.begins_with("cliff_") or type_id.begins_with("slope_"):
+			return true
 	if _tile_catalog != null and _tile_catalog.has_method("preserves_hill_fields_when_applied") and bool(_tile_catalog.call("preserves_hill_fields_when_applied", type_id)):
 		return false
 	for prefix in ["wall_", "rock_", "cliff_", "slope_"]:
@@ -4291,12 +4404,18 @@ func _apply_auto_cliff_visual_tile(tile_data, type_id: String) -> bool:
 func _reset_auto_cliff_visual_tile(tile_data) -> void:
 	if tile_data == null:
 		return
+	var preserved_edge_type: String = String(tile_data.edge_type)
 	tile_data.type_id = "ground_flat"
 	tile_data.walkable = true
 	tile_data.blocks_los = false
 	tile_data.cover_value = 0
 	tile_data.object_height = 0
-	tile_data.edge_type = TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE
+	if int(tile_data.height_level) <= 0:
+		tile_data.edge_type = TERRAIN_TILE_DATA_SCRIPT.EDGE_NONE
+	elif preserved_edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF or preserved_edge_type == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE:
+		tile_data.edge_type = preserved_edge_type
+	else:
+		tile_data.edge_type = _resolve_auto_height_edge_type(tile_data, TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE)
 
 
 func _can_rewrite_auto_cliff_visual_tile(tile_data) -> bool:
@@ -5411,9 +5530,11 @@ func _get_generated_palette_preview_texture(cache_key: String, color: Color, ent
 	var key: String = "__generated:%s" % cache_key.strip_edges().to_lower()
 	if _palette_preview_textures.has(key):
 		return _palette_preview_textures[key] as Texture2D
-	var image := Image.create(PALETTE_PREVIEW_ICON_SIZE.x, PALETTE_PREVIEW_ICON_SIZE.y, false, Image.FORMAT_RGBA8)
+	var image := Image.create(16, 16, false, Image.FORMAT_RGBA8)
 	image.fill(Color(0.0, 0.0, 0.0, 0.0))
 	_paint_palette_preview_icon(image, cache_key.strip_edges().to_lower(), color, entry)
+	if PALETTE_PREVIEW_ICON_SIZE != Vector2i(16, 16):
+		image.resize(PALETTE_PREVIEW_ICON_SIZE.x, PALETTE_PREVIEW_ICON_SIZE.y, Image.INTERPOLATE_NEAREST)
 	var texture := ImageTexture.create_from_image(image)
 	_palette_preview_textures[key] = texture
 	return texture
@@ -5422,6 +5543,16 @@ func _get_generated_palette_preview_texture(cache_key: String, color: Color, ent
 func _get_palette_preview_color(type_id: String, entry: Dictionary) -> Color:
 	var palette_group: String = String(entry.get("palette_group", "")).strip_edges().to_lower()
 	var placement_layer: String = String(entry.get("placement_layer", "")).strip_edges().to_lower()
+	if type_id.contains("sand"):
+		return Color(0.66, 0.56, 0.36, 1.0)
+	if type_id.contains("grass") or type_id.contains("bush"):
+		return Color(0.24, 0.56, 0.28, 1.0)
+	if type_id.contains("rock") or type_id.contains("cliff"):
+		return Color(0.46, 0.47, 0.43, 1.0)
+	if type_id.contains("cactus"):
+		return Color(0.28, 0.58, 0.36, 1.0)
+	if type_id.contains("logs"):
+		return Color(0.48, 0.30, 0.18, 1.0)
 	if bool(entry.get("visual_surface_variant", false)) or placement_layer == "terrain":
 		return Color(0.36, 0.48, 0.42, 1.0)
 	if palette_group == "space_station" or type_id.begins_with("station_"):
@@ -5479,6 +5610,23 @@ func _paint_palette_preview_icon(image: Image, type_id: String, color: Color, en
 		"nature_tree":
 			_paint_icon_rect(image, Rect2i(7, 8, 2, 6), Color(0.42, 0.24, 0.12, 1.0))
 			_paint_icon_diamond(image, 8, 2, 13, 8, 8, 12, 3, 8, color)
+		"nature_bush":
+			_paint_icon_diamond(image, 7, 4, 13, 8, 7, 13, 2, 8, color)
+			_paint_icon_diamond(image, 10, 3, 15, 8, 10, 12, 5, 8, color.lightened(0.12))
+		"nature_cactus":
+			_paint_icon_rect(image, Rect2i(7, 3, 3, 11), color)
+			_paint_icon_rect(image, Rect2i(4, 7, 3, 3), color.darkened(0.08))
+			_paint_icon_rect(image, Rect2i(10, 5, 3, 3), color.lightened(0.08))
+			_paint_icon_line(image, Vector2i(8, 3), Vector2i(8, 13), light)
+		"nature_logs":
+			_paint_icon_rect(image, Rect2i(3, 6, 10, 3), color)
+			_paint_icon_rect(image, Rect2i(5, 10, 10, 3), color.darkened(0.08))
+			_paint_icon_line(image, Vector2i(3, 6), Vector2i(12, 6), light)
+			_paint_icon_line(image, Vector2i(5, 12), Vector2i(14, 12), dark)
+		"rock":
+			_paint_icon_diamond(image, 8, 3, 14, 8, 9, 14, 2, 9, color)
+			_paint_icon_line(image, Vector2i(8, 3), Vector2i(9, 14), dark)
+			_paint_icon_line(image, Vector2i(3, 9), Vector2i(13, 8), light)
 		"terrain":
 			_paint_icon_diamond(image, 8, 2, 14, 8, 8, 14, 2, 8, color)
 			_paint_icon_line(image, Vector2i(3, 8), Vector2i(13, 8), dark)
@@ -5506,6 +5654,16 @@ func _resolve_palette_preview_icon_style(type_id: String, entry: Dictionary) -> 
 		return "crate"
 	if palette_group == "nature_props" and type_id.contains("tree"):
 		return "nature_tree"
+	if palette_group == "nature_props" and type_id.contains("cactus"):
+		return "nature_cactus"
+	if palette_group == "nature_props" and type_id.contains("rock"):
+		return "rock"
+	if palette_group == "nature_props" and (type_id.contains("bush") or type_id.contains("cover")):
+		return "nature_bush"
+	if palette_group == "nature_props" and type_id.contains("logs"):
+		return "nature_logs"
+	if type_id.contains("rock") or type_id.contains("felsen"):
+		return "rock"
 	if bool(entry.get("visual_surface_variant", false)) or placement_layer == "terrain":
 		return "terrain"
 	return "default"
