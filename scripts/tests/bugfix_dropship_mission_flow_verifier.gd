@@ -304,7 +304,7 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 		tactical_controller.call("set_planning_state", preview_planning_state)
 	for _frame in range(6):
 		await process_frame
-	var mission_craft_card := preview_mission.get_node("TacticalUI/MissionDropshipPanel") as PanelContainer if preview_mission != null else null
+	var mission_craft_card := _get_mission_dropship_card(preview_mission)
 	var info_lines_host := mission_craft_card.get_node("MarginContainer/VBox/ContentRow/InfoVBox/InfoLinesHost") as VBoxContainer if mission_craft_card != null else null
 	var status_label := info_lines_host.get_child(1) as Label if info_lines_host != null and info_lines_host.get_child_count() > 1 else null
 	var ship_texture := mission_craft_card.get_node("MarginContainer/VBox/ContentRow/ShipTexture") as TextureRect if mission_craft_card != null else null
@@ -323,10 +323,10 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 	for _frame in range(2):
 		await process_frame
 	preview_mission = mission_host.get_child(0) if mission_host.get_child_count() > 0 else null
-	mission_craft_card = preview_mission.get_node("TacticalUI/MissionDropshipPanel") as PanelContainer if preview_mission != null else null
+	mission_craft_card = _get_mission_dropship_card(preview_mission)
 	info_lines_host = mission_craft_card.get_node("MarginContainer/VBox/ContentRow/InfoVBox/InfoLinesHost") as VBoxContainer if mission_craft_card != null else null
 	status_label = info_lines_host.get_child(1) as Label if info_lines_host != null and info_lines_host.get_child_count() > 1 else null
-	_assert(mission_craft_card != null and mission_craft_card.visible and mission_craft_card.modulate.a < 1.0, "Mini shipcard stays visible once the dropship is waiting on the mission map")
+	_assert(mission_craft_card != null and mission_craft_card.visible and mission_craft_card.modulate.a >= 0.99, "Mini shipcard stays full color once the dropship is waiting on the mission map")
 	_assert(status_label != null and status_label.text.contains("Holding on mission map"), "Mini shipcard switches to waiting status after the transfer completes")
 	_assert(_live_mission_dropship_visible(preview_mission), "Live mission keeps the dropship marker visible while the craft is waiting on the mission map")
 	scene.queue_free()
@@ -1184,6 +1184,21 @@ func _live_mission_dropship_visible(mission_root: Node) -> bool:
 			return true
 	var dropship_marker := mission_root.get_node_or_null("DropshipPlanMarker") as Node2D
 	return dropship_marker != null and dropship_marker.visible
+
+
+func _get_mission_dropship_card(mission_instance: Node) -> PanelContainer:
+	if mission_instance == null:
+		return null
+	var panel := mission_instance.get_node_or_null("TacticalUI/MissionDropshipPanel") as Control
+	if panel == null:
+		return null
+	if panel is PanelContainer:
+		return panel as PanelContainer
+	for child in panel.get_children():
+		var card := child as PanelContainer
+		if card != null and bool(card.get_meta("mission_dropship_card", false)):
+			return card
+	return null
 
 
 func _test_mission_time_limit_resolves_defeat() -> void:

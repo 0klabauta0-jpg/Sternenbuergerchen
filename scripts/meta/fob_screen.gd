@@ -847,6 +847,10 @@ func _get_meta_mission_craft_states() -> Array:
 
 func _build_meta_mission_craft_state(craft_state: Dictionary) -> Dictionary:
 	var craft_id: String = String(craft_state.get("craft_id", "")).strip_edges()
+	var dropship_state: Dictionary = _get_dropship_state_for_craft(craft_id)
+	var boarded_unit_ids: PackedStringArray = _copy_packed_string_array(dropship_state.get("boarded_unit_ids", PackedStringArray()))
+	var boarded_fireteam_ids: PackedStringArray = _copy_packed_string_array(dropship_state.get("boarded_fireteam_ids", PackedStringArray()))
+	var queued_fireteam_ids: PackedStringArray = _copy_packed_string_array(dropship_state.get("staged_fireteam_ids", PackedStringArray()))
 	return {
 		"craft_id": craft_id,
 		"display_name": String(craft_state.get("display_name", "Dropship")).strip_edges(),
@@ -854,7 +858,10 @@ func _build_meta_mission_craft_state(craft_state: Dictionary) -> Dictionary:
 		"pilot_unit_id": String(craft_state.get("pilot_unit_id", "")).strip_edges(),
 		"pilot_display_name": String(craft_state.get("pilot_display_name", "")).strip_edges(),
 		"pilot_portrait_path": String(craft_state.get("pilot_portrait_path", "")).strip_edges(),
-		"passenger_count": _get_boarded_unit_ids_for_craft(craft_id).size(),
+		"passenger_count": boarded_unit_ids.size(),
+		"embarked_unit_ids": Array(boarded_unit_ids),
+		"boarded_fireteam_ids": Array(boarded_fireteam_ids),
+		"queued_fireteam_ids": Array(queued_fireteam_ids),
 		"transfer_progress": float(craft_state.get("transfer_progress", 0.0)),
 		"transfer_eta_seconds": int(craft_state.get("transfer_eta_seconds", 0)),
 		"mission_waiting": bool(craft_state.get("mission_waiting", false)),
@@ -885,6 +892,9 @@ func _build_mission_drop_cards() -> Array:
 				"pilot_display_name": String(craft_state.get("pilot_display_name", "")).strip_edges(),
 				"pilot_portrait_path": String(craft_state.get("pilot_portrait_path", "")).strip_edges(),
 				"passenger_count": int(craft_state.get("passenger_count", 0)),
+				"embarked_unit_ids": Array(craft_state.get("embarked_unit_ids", [])),
+				"boarded_fireteam_ids": Array(craft_state.get("boarded_fireteam_ids", [])),
+				"queued_fireteam_ids": Array(craft_state.get("queued_fireteam_ids", [])),
 			}
 		)
 	return cards

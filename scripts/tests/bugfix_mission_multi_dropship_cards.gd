@@ -43,16 +43,20 @@ func _test_multiple_mission_dropships_render_as_stacked_cards() -> void:
 			"eta_seconds": 11,
 			"pilot_display_name": "Sena Novak",
 			"passenger_count": 4,
+			"embarked_unit_ids": ["unit_alpha", "unit_bravo", "unit_charlie", "unit_delta"],
+			"boarded_fireteam_ids": ["blue"],
 		},
 		{
 			"craft_id": "dropship_2",
 			"display_name": "Dropship 2",
 			"title_text": "#19 Dropship 2",
-			"state": "to_mission",
-			"progress": 12.0,
-			"eta_seconds": 17,
+			"state": "waiting",
+			"progress": 100.0,
+			"eta_seconds": 0,
 			"pilot_display_name": "Mara Iven",
 			"passenger_count": 4,
+			"embarked_unit_ids": ["unit_echo", "unit_foxtrot", "unit_golf", "unit_hotel"],
+			"boarded_fireteam_ids": ["gold"],
 		},
 	]
 	controller.call("set_planning_state", planning_state)
@@ -68,6 +72,21 @@ func _test_multiple_mission_dropships_render_as_stacked_cards() -> void:
 		_assert(String(second_card.get_meta("mission_dropship_craft_id", "")) == "dropship_2", "Second card keeps Dropship 2 identity")
 		_assert(second_card.global_position.y > first_card.global_position.y, "Dropship cards are stacked vertically")
 		_assert(panel.size.y >= 216.0, "Panel reserves vertical space for both cards")
+		_assert(first_card.modulate.a < 1.0, "Inbound Dropship 1 remains visually in transit")
+		_assert(second_card.modulate.a >= 0.99, "Waiting Dropship 2 renders at full color on the mission map")
+
+		var click := InputEventMouseButton.new()
+		click.button_index = MOUSE_BUTTON_LEFT
+		click.pressed = true
+		second_card.emit_signal("gui_input", click)
+		await _wait_frames(4)
+
+		var selected_state: Dictionary = Dictionary(controller.call("get_planning_state"))
+		var refreshed_second_card := panel.get_child(1) as Control
+		_assert(String(selected_state.get("mission_drop_craft_id", "")) == "dropship_2", "Clicking the right-side Dropship 2 card selects it for Mission Control")
+		_assert(String(selected_state.get("mission_drop_state", "")) == "waiting", "Selected Dropship 2 carries its waiting state into Mission Control")
+		_assert(Array(selected_state.get("embarked_unit_ids", [])) == ["unit_echo", "unit_foxtrot", "unit_golf", "unit_hotel"], "Selected Dropship 2 carries its own boarded payload")
+		_assert(bool(refreshed_second_card.get_meta("mission_dropship_selected", false)), "Selected mission dropship card is marked in the #19 panel")
 
 	var synced_state: Dictionary = Dictionary(controller.call("get_planning_state"))
 	_assert(Array(synced_state.get("mission_drop_cards", [])).size() == 2, "Planning state preserves both mission dropship cards")

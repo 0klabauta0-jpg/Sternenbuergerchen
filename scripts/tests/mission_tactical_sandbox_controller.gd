@@ -3513,6 +3513,9 @@ func _is_mission_drop_available() -> bool:
 	var air_state: String = str(get_air_asset_status_snapshot().get("state", "intact")).strip_edges().to_lower()
 	if bool(AIR_ASSET_STATUS_SCRIPT.call("is_terminal_state", air_state)) or air_state == "recovering" or air_state == "unavailable":
 		return false
+	var selected_card: Dictionary = _find_mission_dropship_card_entry(_mission_drop_craft_id)
+	if not selected_card.is_empty():
+		return String(selected_card.get("state", "")).strip_edges().to_lower() == "waiting"
 	if _mission_drop_state == "waiting":
 		return true
 	if _drop_ship_staged and _mission_drop_craft_id.is_empty():
@@ -3558,6 +3561,7 @@ func _sanitize_mission_dropship_card(card: Dictionary) -> Dictionary:
 	var display_name: String = String(card.get("display_name", card.get("mission_drop_display_name", "Dropship"))).strip_edges()
 	if display_name.is_empty():
 		display_name = "Dropship"
+	var has_embarked_payload: bool = card.has("embarked_unit_ids")
 	return {
 		"craft_id": craft_id,
 		"display_name": display_name,
@@ -3572,7 +3576,23 @@ func _sanitize_mission_dropship_card(card: Dictionary) -> Dictionary:
 		"pilot_display_name": String(card.get("pilot_display_name", card.get("mission_drop_pilot_display_name", ""))).strip_edges(),
 		"pilot_portrait_path": String(card.get("pilot_portrait_path", card.get("mission_drop_pilot_portrait_path", ""))).strip_edges(),
 		"passenger_count": maxi(int(card.get("passenger_count", card.get("mission_drop_passenger_count", 0))), 0),
+		"embarked_unit_ids": _sanitize_drop_payload_ids(Array(card.get("embarked_unit_ids", []))),
+		"boarded_fireteam_ids": _sanitize_drop_payload_ids(Array(card.get("boarded_fireteam_ids", []))),
+		"queued_fireteam_ids": _sanitize_drop_payload_ids(Array(card.get("queued_fireteam_ids", []))),
+		"has_embarked_payload": has_embarked_payload,
 	}
+
+
+func _sanitize_drop_payload_ids(source_ids: Array) -> Array:
+	var result: Array = []
+	var seen_ids: Dictionary = {}
+	for id_variant in source_ids:
+		var normalized_id: String = String(id_variant).strip_edges()
+		if normalized_id.is_empty() or seen_ids.has(normalized_id):
+			continue
+		seen_ids[normalized_id] = true
+		result.append(normalized_id)
+	return result
 
 
 func _build_current_mission_dropship_card() -> Dictionary:
@@ -3600,6 +3620,68 @@ func _get_mission_dropship_card_entries() -> Array:
 	if entries.is_empty() and (not _mission_drop_craft_id.is_empty() or _is_drop_sequence_active()):
 		entries.append(_build_current_mission_dropship_card())
 	return entries
+
+
+func _find_mission_dropship_card_entry(craft_id: String) -> Dictionary:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return {}
+	for card_variant in _get_mission_dropship_card_entries():
+		var card: Dictionary = Dictionary(card_variant)
+		if String(card.get("craft_id", "")).strip_edges() == normalized_craft_id:
+			return card
+	return {}
+
+
+func select_mission_dropship_craft(craft_id: String) -> bool:
+	return _select_mission_dropship_craft(craft_id, true)
+
+
+func _select_mission_dropship_craft(craft_id: String, should_emit_signal: bool = true) -> bool:
+	var selected_card: Dictionary = _find_mission_dropship_card_entry(craft_id)
+	if selected_card.is_empty():
+		return false
+	_apply_mission_dropship_card_selection(selected_card)
+	if not _is_drop_sequence_active():
+		_drop_ship_requested = false
+	_last_command_text = "DROPSHIP SELECTED: %s" % _mission_drop_display_name
+	_refresh_button_state()
+	_update_ui()
+	if should_emit_signal:
+		_emit_planning_state_changed()
+	return true
+
+
+func _apply_mission_dropship_card_selection(card: Dictionary) -> void:
+	_mission_drop_craft_id = String(card.get("craft_id", "")).strip_edges()
+	_mission_drop_display_name = String(card.get("display_name", "Dropship")).strip_edges()
+	_mission_drop_title_text = String(card.get("title_text", _mission_drop_display_name)).strip_edges()
+	_mission_drop_texture_path = String(card.get("texture_path", "")).strip_edges()
+	_mission_drop_state = String(card.get("state", "")).strip_edges().to_lower()
+	_mission_drop_pilot_text = String(card.get("pilot_text", "")).strip_edges()
+	_mission_drop_status_line = String(card.get("status_line", "")).strip_edges()
+	_mission_drop_progress = clampf(float(card.get("progress", 0.0)), 0.0, 100.0)
+	_mission_drop_eta_seconds = maxi(int(card.get("eta_seconds", 0)), 0)
+	_mission_drop_pilot_unit_id = String(card.get("pilot_unit_id", "")).strip_edges()
+	_mission_drop_pilot_display_name = String(card.get("pilot_display_name", "")).strip_edges()
+	_mission_drop_pilot_portrait_path = String(card.get("pilot_portrait_path", "")).strip_edges()
+	_mission_drop_passenger_count = maxi(int(card.get("passenger_count", 0)), 0)
+	if bool(card.get("has_embarked_payload", false)):
+		_embarked_unit_ids = _build_drop_unit_state_dict(Array(card.get("embarked_unit_ids", [])))
+	var selected_fireteam_ids: PackedStringArray = _extract_mission_dropship_card_fireteam_ids(card)
+	if not selected_fireteam_ids.is_empty():
+		_set_selected_fireteams(selected_fireteam_ids, false)
+
+
+func _extract_mission_dropship_card_fireteam_ids(card: Dictionary) -> PackedStringArray:
+	var result := PackedStringArray()
+	for source_key in ["boarded_fireteam_ids", "queued_fireteam_ids"]:
+		for fireteam_id_variant in Array(card.get(source_key, [])):
+			var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+			if fireteam_id.is_empty() or result.has(fireteam_id):
+				continue
+			result.append(fireteam_id)
+	return result
 
 
 func _ensure_mission_nav_timer_label() -> void:
@@ -3663,20 +3745,27 @@ func _refresh_mission_dropship_panel() -> void:
 	for card_variant in card_entries:
 		var card: Dictionary = Dictionary(card_variant)
 		var is_transit: bool = _is_mission_dropship_card_in_transit(card)
+		var craft_id: String = String(card.get("craft_id", "")).strip_edges()
+		var is_selected: bool = not craft_id.is_empty() and craft_id == _mission_drop_craft_id.strip_edges()
 		var ship_texture := _get_mission_dropship_texture(card)
 		var card_panel := PanelContainer.new()
-		card_panel.name = "MissionDropshipCard_%s" % _sanitize_node_name(String(card.get("craft_id", "dropship")))
+		card_panel.name = "MissionDropshipCard_%s" % _sanitize_node_name(craft_id)
 		card_panel.custom_minimum_size = MISSION_DROPSHIP_PANEL_SIZE
 		card_panel.size_flags_horizontal = Control.SIZE_SHRINK_END
-		card_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		card_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+		card_panel.focus_mode = Control.FOCUS_ALL
 		card_panel.set_meta("mission_dropship_card", true)
-		card_panel.set_meta("mission_dropship_craft_id", String(card.get("craft_id", "")).strip_edges())
+		card_panel.set_meta("mission_dropship_craft_id", craft_id)
+		card_panel.set_meta("mission_dropship_selected", is_selected)
+		card_panel.tooltip_text = "Select %s for Mission Control" % String(card.get("display_name", "Dropship")).strip_edges()
+		if not card_panel.gui_input.is_connected(_on_mission_dropship_card_gui_input.bind(craft_id)):
+			card_panel.gui_input.connect(_on_mission_dropship_card_gui_input.bind(craft_id))
 		panel.add_child(card_panel)
 		TRANSPORT_CRAFT_CARD_UI_SCRIPT.ensure_card_structure(card_panel)
 		TRANSPORT_CRAFT_CARD_UI_SCRIPT.apply_card_state(
 			card_panel,
 			{
-				"selected": false,
+				"selected": is_selected,
 				"in_transit": is_transit,
 				"can_stage": false,
 				"title_text": _build_mission_dropship_title_text(card),
@@ -3721,9 +3810,24 @@ func _refresh_mission_dropship_panel() -> void:
 			}
 		)
 		_set_control_tree_mouse_filter(card_panel, Control.MOUSE_FILTER_IGNORE)
+		card_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	_enforce_mission_dropship_panel_geometry(panel)
 	panel.visible = true
 	call_deferred("_deferred_enforce_mission_dropship_panel_geometry")
+
+
+func _on_mission_dropship_card_gui_input(event: InputEvent, craft_id: String) -> void:
+	if event is InputEventMouseButton:
+		var mouse_event := event as InputEventMouseButton
+		if mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed:
+			if _select_mission_dropship_craft(craft_id, true):
+				get_viewport().set_input_as_handled()
+			return
+	if event is InputEventKey:
+		var key_event := event as InputEventKey
+		if key_event.pressed and (key_event.keycode == KEY_ENTER or key_event.keycode == KEY_SPACE):
+			if _select_mission_dropship_craft(craft_id, true):
+				get_viewport().set_input_as_handled()
 
 
 func _clear_mission_dropship_panel_cards(panel: Control) -> void:
@@ -3743,14 +3847,14 @@ func _sanitize_node_name(value: String) -> String:
 
 func _is_mission_dropship_card_in_transit(card: Dictionary) -> bool:
 	var state: String = String(card.get("state", "")).strip_edges().to_lower()
-	return state == "to_mission" or state == "to_fob" or state == "waiting" or state == DROP_SEQUENCE_INBOUND or state == DROP_SEQUENCE_OUTBOUND
+	return state == "to_mission" or state == "to_fob" or state == DROP_SEQUENCE_INBOUND or state == DROP_SEQUENCE_OUTBOUND
 
 
 func _refresh_legacy_mission_dropship_panel() -> void:
 	var panel := get_node_or_null("../TacticalUI/MissionDropshipPanel") as PanelContainer
 	if panel == null:
 		return
-	var is_transit: bool = _mission_drop_state == "to_mission" or _mission_drop_state == "to_fob" or _mission_drop_state == "waiting" or _drop_sequence_phase == DROP_SEQUENCE_INBOUND or _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND
+	var is_transit: bool = _mission_drop_state == "to_mission" or _mission_drop_state == "to_fob" or _drop_sequence_phase == DROP_SEQUENCE_INBOUND or _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND
 	var ship_texture := _get_mission_dropship_texture()
 	TRANSPORT_CRAFT_CARD_UI_SCRIPT.apply_card_state(
 		panel,
@@ -10164,6 +10268,9 @@ func _get_opposite_approach_angle_name() -> String:
 
 
 func _get_units_for_drop_operation() -> Array:
+	var selected_payload_units: Array = _get_selected_mission_dropship_payload_units()
+	if not selected_payload_units.is_empty():
+		return selected_payload_units
 	var requested_fireteam_id: String = _get_drop_fireteam_id()
 	var result: Array = []
 	var fallback_units: Array = []
@@ -10177,6 +10284,24 @@ func _get_units_for_drop_operation() -> Array:
 	if not result.is_empty():
 		return result
 	return fallback_units
+
+
+func _get_selected_mission_dropship_payload_units() -> Array:
+	var selected_card: Dictionary = _find_mission_dropship_card_entry(_mission_drop_craft_id)
+	if selected_card.is_empty() or not bool(selected_card.get("has_embarked_payload", false)):
+		return []
+	var payload_ids: Array = Array(selected_card.get("embarked_unit_ids", []))
+	if payload_ids.is_empty():
+		return []
+	var result: Array = []
+	for unit_id_variant in payload_ids:
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty() or _deployed_unit_ids.has(unit_id):
+			continue
+		var unit = _find_friendly_unit_by_id(unit_id)
+		if unit != null:
+			result.append(unit)
+	return result
 
 
 func _get_drop_fireteam_id() -> String:
