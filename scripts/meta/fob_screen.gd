@@ -3557,7 +3557,11 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 	var is_transit_to_fob: bool = bool(craft_state.get("mission_transit_to_fob", false))
 	var is_air_asset_recovery: bool = bool(craft_state.get("air_asset_unavailable", false))
 	var is_launch_ready_in_fob: bool = craft_id == _mission_launch_ready_craft_id and _has_boarded_mission_payload(craft_id) and not is_waiting_on_mission and not is_transit_to_mission and not is_transit_to_fob
+	var can_send_to_mission: bool = _can_mark_transport_craft_launch_ready(craft_state)
+	var send_block_reason: String = _get_transport_craft_launch_block_reason(craft_state)
 	var pilot_unit_id: String = String(craft_state.get("pilot_unit_id", "")).strip_edges()
+	craft_card.set_meta("transport_craft_can_send", can_send_to_mission)
+	craft_card.set_meta("transport_craft_send_block_reason", send_block_reason)
 	TRANSPORT_CRAFT_CARD_UI_SCRIPT.apply_card_state(
 		craft_card,
 		{
@@ -3594,7 +3598,7 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 			"secondary_action": {
 				"visible": true,
 				"text": "Waiting" if is_waiting_on_mission else "En Route" if is_transit_to_mission else "Return" if is_transit_to_fob else "Ready" if is_launch_ready_in_fob else "Send",
-				"disabled": is_air_asset_recovery or is_launch_ready_in_fob or is_waiting_on_mission or is_transit_to_mission or is_transit_to_fob or not _can_mark_transport_craft_launch_ready(craft_state),
+				"disabled": is_air_asset_recovery or is_launch_ready_in_fob or is_waiting_on_mission or is_transit_to_mission or is_transit_to_fob or not can_send_to_mission,
 				"square_size": 48.0,
 				"ready_style": true,
 				"callback": Callable(self, "_on_transport_craft_mission_stage_requested").bind(craft_id),
@@ -3680,6 +3684,13 @@ func _build_transport_craft_status_line(craft_state: Dictionary) -> String:
 	if craft_id == _mission_launch_ready_craft_id and _has_boarded_mission_payload(craft_id):
 		return "Status: staged in FOB | start mission to launch"
 	if bool(craft_state.get("is_boardable", false)):
+		var launch_block_reason: String = _get_transport_craft_launch_block_reason(craft_state)
+		if launch_block_reason == "boarding_in_progress":
+			return "Status: boarding in progress | %s" % _build_transport_craft_boarding_count_text(craft_id)
+		if launch_block_reason == "boarding_pending":
+			return "Status: boarding pending | %s" % _build_transport_craft_boarding_count_text(craft_id)
+		if launch_block_reason == "boarding_incomplete":
+			return "Status: boarding incomplete | %s" % _build_transport_craft_boarding_count_text(craft_id)
 		return "Status: docked in FOB | %s" % _build_transport_craft_capacity_text(craft_state)
 	return "Status: visible in FOB as delivered cargo state"
 
@@ -3789,16 +3800,80 @@ func _can_stage_fireteam_into_craft(craft_state: Dictionary, fireteam_id: String
 
 
 func _can_mark_transport_craft_launch_ready(craft_state: Dictionary) -> bool:
+	return _get_transport_craft_launch_block_reason(craft_state).is_empty()
+
+
+func _get_transport_craft_launch_block_reason(craft_state: Dictionary) -> String:
 	if craft_state.is_empty():
-		return false
+		return "missing_craft"
 	if bool(craft_state.get("air_asset_unavailable", false)):
-		return false
-	var craft_id: String = String(craft_state.get("craft_id", "")).strip_edges()
-	if not _has_boarded_mission_payload(craft_id):
-		return false
+		return "air_asset_unavailable"
 	if not bool(craft_state.get("is_boardable", false)):
-		return false
-	return not bool(craft_state.get("mission_waiting", false)) and not bool(craft_state.get("mission_transit_to_map", false)) and not bool(craft_state.get("mission_transit_to_fob", false))
+		return "not_boardable"
+	if bool(craft_state.get("mission_waiting", false)):
+		return "mission_waiting"
+	if bool(craft_state.get("mission_transit_to_map", false)):
+		return "mission_transit_to_map"
+	if bool(craft_state.get("mission_transit_to_fob", false)):
+		return "mission_transit_to_fob"
+
+	var craft_id: String = String(craft_state.get("craft_id", "")).strip_edges()
+	var dropship_state: Dictionary = _get_dropship_state_for_craft(craft_id)
+	var phase: String = String(dropship_state.get("phase", "idle")).strip_edges()
+	var boarding_counts: Dictionary = _get_transport_craft_boarding_counts(craft_id)
+	var missing_unit_ids: PackedStringArray = _copy_packed_string_array(boarding_counts.get("missing_unit_ids", PackedStringArray()))
+
+	if phase == "boarding":
+		return "boarding_in_progress"
+	if phase == "incoming" and not missing_unit_ids.is_empty():
+		return "dropship_inbound"
+	if phase == "ready" and not missing_unit_ids.is_empty():
+		return "boarding_pending"
+	if not missing_unit_ids.is_empty():
+		return "boarding_incomplete"
+	if not _has_boarded_mission_payload(craft_id):
+		return "no_boarded_payload"
+	return ""
+
+
+func _get_transport_craft_required_boarding_unit_ids(craft_id: String) -> PackedStringArray:
+	var required_unit_ids: PackedStringArray = []
+	for fireteam_id_variant in _get_visible_transport_craft_fireteam_ids(craft_id):
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges()
+		if fireteam_id.is_empty():
+			continue
+		for unit_id_variant in _get_member_unit_ids_for_fireteam(fireteam_id):
+			var unit_id: String = String(unit_id_variant).strip_edges()
+			if unit_id.is_empty() or required_unit_ids.has(unit_id):
+				continue
+			required_unit_ids.append(unit_id)
+	return required_unit_ids
+
+
+func _get_transport_craft_boarding_counts(craft_id: String) -> Dictionary:
+	var required_unit_ids: PackedStringArray = _get_transport_craft_required_boarding_unit_ids(craft_id)
+	var boarded_unit_ids: PackedStringArray = _get_boarded_unit_ids_for_craft(craft_id)
+	var missing_unit_ids: PackedStringArray = []
+	var boarded_required_count: int = 0
+	for unit_id_variant in required_unit_ids:
+		var unit_id: String = String(unit_id_variant)
+		if boarded_unit_ids.has(unit_id):
+			boarded_required_count += 1
+			continue
+		missing_unit_ids.append(unit_id)
+	return {
+		"boarded_count": boarded_required_count,
+		"required_count": required_unit_ids.size(),
+		"missing_unit_ids": missing_unit_ids,
+	}
+
+
+func _build_transport_craft_boarding_count_text(craft_id: String) -> String:
+	var boarding_counts: Dictionary = _get_transport_craft_boarding_counts(craft_id)
+	var required_count: int = int(boarding_counts.get("required_count", 0))
+	if required_count <= 0:
+		return "%d NPC boarded" % _get_boarded_unit_ids_for_craft(craft_id).size()
+	return "%d/%d NPC boarded" % [int(boarding_counts.get("boarded_count", 0)), required_count]
 
 
 func _can_request_homebase_mission_start(craft_state: Dictionary) -> bool:

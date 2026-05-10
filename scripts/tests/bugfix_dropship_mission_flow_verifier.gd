@@ -18,6 +18,7 @@ func _run_tests() -> void:
 	print("=== Dropship Mission Bugfix Verifier ===")
 	await _test_fob_refresh_preserves_boarded_units()
 	await _test_shipcard_start_dispatches_boarded_craft_without_full_team_boarded()
+	await _test_send_blocks_while_dropship_boarding_is_incomplete()
 	await _test_unselected_full_dropship_can_dispatch_individually()
 	await _test_fob_header_start_is_hidden()
 	await _test_homebase_start_button_lives_in_header()
@@ -191,6 +192,80 @@ func _test_shipcard_start_dispatches_boarded_craft_without_full_team_boarded() -
 	fob_screen.call("_on_transport_craft_mission_stage_requested", "dropship_test")
 	var pending_transfers: Array = Array(scene.get("_pending_mission_craft_transfers"))
 	_assert(pending_transfers.size() == 1, "Shipcard start dispatches the boarded craft even when other selected operators stay behind")
+	scene.queue_free()
+	await process_frame
+
+
+func _test_send_blocks_while_dropship_boarding_is_incomplete() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	for _frame in range(4):
+		await process_frame
+
+	var fob_screen: Control = scene.get_node("FOBScreen")
+	var selected_unit_ids := PackedStringArray(["unit_alpha", "unit_bravo", "unit_delta"])
+	var selected_fireteam_ids := PackedStringArray(["ft1", "ft1", "ft1"])
+	var fireteam_definitions := [
+		{
+			"id": "ft1",
+			"label": "FT1",
+			"lead_unit_id": "unit_alpha",
+			"respawn_enabled": false,
+			"loadout": "medium",
+		}
+	]
+	scene.set(
+		"_homebase_aircraft_definitions",
+		[
+			{
+				"craft_id": "dropship_test",
+				"display_name": "Dropship Test",
+				"craft_type": "dropship",
+				"texture_path": "res://Assets/kenney_space-kit/Side/craft_speederB.png",
+			}
+		]
+	)
+	scene.set("_assigned_aircraft_pilot_by_craft", {"dropship_test": "unit_hotel"})
+	scene.set("_aircraft_location_by_craft", {"dropship_test": "fob"})
+	scene.set("_selected_unit_ids", selected_unit_ids)
+	scene.set("_selected_fireteam_ids", selected_fireteam_ids)
+	scene.call("_refresh_fob_screen")
+	fob_screen.call("configure_transfer", selected_unit_ids, selected_fireteam_ids, fireteam_definitions)
+	fob_screen.set("_dropship_transport_craft_id", "dropship_test")
+	fob_screen.set("_dropship_staged_fireteam_ids", PackedStringArray(["ft1"]))
+	fob_screen.set("_boarding_order", PackedStringArray(["ft1"]))
+	fob_screen.set("_dropship_phase", "boarding")
+	fob_screen.set("_boarding_index", 0)
+	fob_screen.set("_boarding_member_index", 1)
+	fob_screen.set("_current_boarding_unit_id", "unit_bravo")
+	fob_screen.set("_current_boarding_fireteam_id", "ft1")
+	fob_screen.set("_boarding_seconds", 3.0)
+	fob_screen.set("_boarded_unit_ids", PackedStringArray(["unit_alpha"]))
+	fob_screen.set("_boarded_fireteam_ids", PackedStringArray())
+	fob_screen.call("_save_current_dropship_state")
+
+	var craft_state: Dictionary = Dictionary(fob_screen.call("_get_transport_craft_state", "dropship_test"))
+	_assert(not bool(fob_screen.call("_can_mark_transport_craft_launch_ready", craft_state)), "Send stays blocked while the selected Dropship is still boarding")
+	_assert(String(fob_screen.call("_get_transport_craft_launch_block_reason", craft_state)) == "boarding_in_progress", "Boarding-in-progress is reported as the Send block reason")
+	fob_screen.call("_on_transport_craft_mission_stage_requested", "dropship_test")
+	var pending_transfers: Array = Array(scene.get("_pending_mission_craft_transfers"))
+	_assert(pending_transfers.is_empty(), "Pressing Send during boarding does not create a mission transfer")
+
+	fob_screen.set("_dropship_phase", "boarded")
+	fob_screen.set("_current_boarding_unit_id", "")
+	fob_screen.set("_current_boarding_fireteam_id", "")
+	fob_screen.set("_boarded_unit_ids", PackedStringArray(["unit_alpha", "unit_bravo"]))
+	fob_screen.set("_boarded_fireteam_ids", PackedStringArray())
+	fob_screen.call("_save_current_dropship_state")
+	craft_state = Dictionary(fob_screen.call("_get_transport_craft_state", "dropship_test"))
+	_assert(not bool(fob_screen.call("_can_mark_transport_craft_launch_ready", craft_state)), "Send stays blocked when a queued Fireteam is only partially boarded")
+	_assert(String(fob_screen.call("_get_transport_craft_launch_block_reason", craft_state)) == "boarding_incomplete", "Partial boarding is reported as an incomplete boarding block")
+
+	fob_screen.set("_boarded_unit_ids", selected_unit_ids)
+	fob_screen.set("_boarded_fireteam_ids", PackedStringArray(["ft1"]))
+	fob_screen.call("_save_current_dropship_state")
+	craft_state = Dictionary(fob_screen.call("_get_transport_craft_state", "dropship_test"))
+	_assert(bool(fob_screen.call("_can_mark_transport_craft_launch_ready", craft_state)), "Send becomes available after the queued Fireteam is fully boarded")
 	scene.queue_free()
 	await process_frame
 
