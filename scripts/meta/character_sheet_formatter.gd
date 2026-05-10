@@ -167,8 +167,8 @@ static func build_sheet_view_model(profile, options: Dictionary = {}) -> Diction
 			"name": "No operator selected",
 			"trait_text": "Keine Traits verfuegbar.",
 			"short_description": "Keine Kurzbeschreibung verfuegbar.",
-			"core_rows": _build_scored_rows({}, CORE_ORDER),
-			"communication_rows": _build_value_rows({}, COMMUNICATION_ORDER),
+			"core_rows": _build_scored_rows({}, CORE_ORDER, "skill_values", "character_sheet.core"),
+			"communication_rows": _build_value_rows({}, COMMUNICATION_ORDER, "communication_values", "character_sheet"),
 			"platform_rows": [],
 			"role_loadout_rows": [],
 			"status_rows": [],
@@ -180,7 +180,7 @@ static func build_sheet_view_model(profile, options: Dictionary = {}) -> Diction
 				{"label": "Primary Specialty", "value_text": "n/a"},
 				{"label": "Secondary Specialty", "value_text": "n/a"},
 			],
-			"behavior_rows": _build_value_rows({}, BEHAVIOR_ORDER),
+			"behavior_rows": _build_value_rows({}, BEHAVIOR_ORDER, "behavior_axes", "character_sheet"),
 		}
 
 	var trait_text: String = _build_expanded_trait_text(profile)
@@ -193,8 +193,8 @@ static func build_sheet_view_model(profile, options: Dictionary = {}) -> Diction
 		"name": _optional_text(String(profile.display_name), "Unknown Operator"),
 		"trait_text": trait_text,
 		"short_description": short_description,
-		"core_rows": _build_scored_rows(Dictionary(profile.skill_values), CORE_ORDER),
-		"communication_rows": _build_value_rows(Dictionary(profile.communication_values), COMMUNICATION_ORDER),
+		"core_rows": _build_scored_rows(Dictionary(profile.skill_values), CORE_ORDER, "skill_values", "character_sheet.core"),
+		"communication_rows": _build_value_rows(Dictionary(profile.communication_values), COMMUNICATION_ORDER, "communication_values", "character_sheet"),
 		"platform_rows": _build_platform_value_rows(Dictionary(profile.platform_values)),
 		"role_loadout_rows": _build_role_loadout_rows(profile, options),
 		"status_rows": _build_status_rows(profile, options),
@@ -206,7 +206,7 @@ static func build_sheet_view_model(profile, options: Dictionary = {}) -> Diction
 			{"label": "Primary Specialty", "value_text": _optional_text(String(profile.primary_specialty), _optional_text(String(profile.specialty_text), "n/a")), "help_id": "character_sheet.primary_specialty"},
 			{"label": "Secondary Specialty", "value_text": _optional_text(String(profile.secondary_specialty), "n/a"), "help_id": "character_sheet.secondary_specialty"},
 		],
-		"behavior_rows": _build_value_rows(Dictionary(profile.behavior_axes), BEHAVIOR_ORDER),
+		"behavior_rows": _build_value_rows(Dictionary(profile.behavior_axes), BEHAVIOR_ORDER, "behavior_axes", "character_sheet"),
 	}
 
 
@@ -235,11 +235,15 @@ static func _build_status_rows(profile, options: Dictionary = {}) -> Array:
 	var status_text: String = String(options.get("status_text", profile.status_text)).strip_edges()
 	var recovery_text: String = _format_recovery_state(Dictionary(profile.recovery_state))
 	var progression: Dictionary = Dictionary(profile.progression)
+	var morale_row: Dictionary = {"label": "Morale", "value_text": _format_fraction_or_na(progression.get("morale", "n/a")), "help_id": "character_sheet.morale"}
+	_apply_fraction_row_metadata(morale_row, progression.get("morale", "n/a"), "progression", "morale")
+	var frustration_row: Dictionary = {"label": "Frustration", "value_text": _format_fraction_or_na(progression.get("frustration", "n/a")), "help_id": "character_sheet.frustration"}
+	_apply_fraction_row_metadata(frustration_row, progression.get("frustration", "n/a"), "progression", "frustration")
 	return [
 		{"label": "Status", "value_text": _optional_text(status_text, _optional_text(String(profile.availability_status), "active")), "help_id": "character_sheet.status"},
 		{"label": "Recovery", "value_text": recovery_text, "help_id": "character_sheet.recovery"},
-		{"label": "Morale", "value_text": _format_fraction_or_na(progression.get("morale", "n/a")), "help_id": "character_sheet.morale"},
-		{"label": "Frustration", "value_text": _format_fraction_or_na(progression.get("frustration", "n/a")), "help_id": "character_sheet.frustration"},
+		morale_row,
+		frustration_row,
 	]
 
 
@@ -354,7 +358,7 @@ static func _normalize_weapon_id(weapon_id: String) -> String:
 	return normalized_weapon_id
 
 
-static func _build_scored_rows(source_values: Dictionary, order: Array) -> Array:
+static func _build_scored_rows(source_values: Dictionary, order: Array, value_group: String = "", help_prefix: String = "character_sheet") -> Array:
 	var rows: Array = []
 	for entry in order:
 		var key: String = String(entry[0])
@@ -365,7 +369,9 @@ static func _build_scored_rows(source_values: Dictionary, order: Array) -> Array
 				"label": label,
 				"value": clampf(value, 0.0, 1.0),
 				"value_text": _format_decimal_comma(value),
-				"help_id": "character_sheet.core.%s" % key,
+				"value_group": value_group,
+				"value_key": key,
+				"help_id": "%s.%s" % [help_prefix, key],
 			}
 		)
 	return rows
@@ -398,7 +404,10 @@ static func _build_platform_value_rows(platform_values: Dictionary) -> Array:
 		rows.append(
 			{
 				"label": label,
+				"value": clampf(value, 0.0, 1.0),
 				"value_text": _format_decimal_comma(value),
+				"value_group": "platform_values",
+				"value_key": key,
 				"help_id": "character_sheet.platform.%s" % key,
 			}
 		)
@@ -415,25 +424,38 @@ static func _build_ordered_score_rows(source_values: Dictionary, order: Array) -
 				"label": label,
 				"value": clampf(float(source_values.get(key, 0.0)), 0.0, 1.0),
 				"value_text": _format_decimal_comma(float(source_values.get(key, 0.0))),
+				"value_key": key,
 				"help_id": "character_sheet.%s" % key,
 			}
 		)
 	return rows
 
 
-static func _build_value_rows(source_values: Dictionary, order: Array) -> Array:
+static func _build_value_rows(source_values: Dictionary, order: Array, value_group: String = "", help_prefix: String = "character_sheet") -> Array:
 	var rows: Array = []
 	for entry in order:
 		var key: String = String(entry[0])
 		var label: String = String(entry[1])
+		var value: float = float(source_values.get(key, 0.0))
 		rows.append(
 			{
 				"label": label,
-				"value_text": _format_decimal_comma(float(source_values.get(key, 0.0))),
-				"help_id": "character_sheet.%s" % key,
+				"value": clampf(value, 0.0, 1.0),
+				"value_text": _format_decimal_comma(value),
+				"value_group": value_group,
+				"value_key": key,
+				"help_id": "%s.%s" % [help_prefix, key],
 			}
 		)
 	return rows
+
+
+static func _apply_fraction_row_metadata(row: Dictionary, raw_value: Variant, value_group: String, value_key: String) -> void:
+	if typeof(raw_value) == TYPE_STRING and String(raw_value) == "n/a":
+		return
+	row["value"] = clampf(float(raw_value), 0.0, 1.0)
+	row["value_group"] = value_group
+	row["value_key"] = value_key
 
 
 static func _format_score_summary(scores: Dictionary, fallback: String) -> String:

@@ -197,6 +197,69 @@ static func delete_roster_entry(entry_path: String, profile_id: String = DEFAULT
 	}
 
 
+static func activate_roster_entry(entry_path: String, profile_id: String = DEFAULT_PROFILE_ID, save_path: String = "") -> Dictionary:
+	var path: String = entry_path.strip_edges()
+	var current_path: String = _resolve_save_path(profile_id, save_path)
+	if path.is_empty():
+		return {"ok": false, "reason": "missing_entry_path", "path": path}
+	if path == current_path:
+		var active_load: Dictionary = load_roster(profile_id, save_path)
+		return {
+			"ok": bool(active_load.get("ok", false)),
+			"reason": "already_active",
+			"path": current_path,
+			"profile_id": _sanitize_profile_id(profile_id),
+			"roster": Dictionary(active_load.get("roster", {})).duplicate(true),
+			"diagnostics": PackedStringArray(active_load.get("diagnostics", PackedStringArray())),
+		}
+	var archive_dir: String = "%s/archive" % current_path.get_base_dir()
+	if not _is_archive_entry_path(path, archive_dir):
+		return {"ok": false, "reason": "outside_roster_archive", "path": path, "archive_dir": archive_dir}
+	if not FileAccess.file_exists(path):
+		return {"ok": false, "reason": "entry_missing", "path": path}
+	var load_result: Dictionary = load_roster(profile_id, path)
+	if not bool(load_result.get("ok", false)):
+		return {
+			"ok": false,
+			"reason": "entry_invalid",
+			"path": path,
+			"diagnostics": PackedStringArray(load_result.get("diagnostics", PackedStringArray())),
+		}
+	var archive_result: Dictionary = {}
+	if FileAccess.file_exists(current_path):
+		archive_result = archive_existing_roster(profile_id, save_path)
+		if not bool(archive_result.get("ok", false)):
+			return {
+				"ok": false,
+				"reason": "active_archive_failed",
+				"path": path,
+				"archive": archive_result,
+				"diagnostics": PackedStringArray(archive_result.get("diagnostics", PackedStringArray())),
+			}
+	var roster: Dictionary = Dictionary(load_result.get("roster", {})).duplicate(true)
+	var save_result: Dictionary = save_roster(roster, profile_id, save_path)
+	var remove_error: Error = OK
+	if bool(save_result.get("ok", false)) and FileAccess.file_exists(path):
+		remove_error = DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	var diagnostics: PackedStringArray = _merge_diagnostics(load_result, save_result)
+	for diagnostic in PackedStringArray(archive_result.get("diagnostics", PackedStringArray())):
+		diagnostics.append(String(diagnostic))
+	if remove_error != OK:
+		diagnostics.append("activated_archive_remove_failed:%s:%d" % [path, remove_error])
+	return {
+		"ok": bool(save_result.get("ok", false)),
+		"reason": "activated" if bool(save_result.get("ok", false)) else "save_failed",
+		"path": current_path,
+		"activated_from_path": path,
+		"profile_id": _sanitize_profile_id(profile_id),
+		"roster": roster,
+		"save": save_result,
+		"archive": archive_result,
+		"removed_activated_archive": remove_error == OK,
+		"diagnostics": diagnostics,
+	}
+
+
 static func archive_existing_roster(profile_id: String = DEFAULT_PROFILE_ID, save_path: String = "") -> Dictionary:
 	var path: String = _resolve_save_path(profile_id, save_path)
 	if not FileAccess.file_exists(path):

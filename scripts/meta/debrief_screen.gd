@@ -41,6 +41,10 @@ func get_background_catalog_snapshot() -> Dictionary:
 	var entry: Dictionary = Dictionary(BACKGROUND_IMAGE_CATALOG_SCRIPT.call("get_entry", BACKGROUND_ID))
 	var background := get_node_or_null("Background") as TextureRect
 	var shade := get_node_or_null("BackgroundShade") as ColorRect
+	var panel := get_node_or_null("Panel") as PanelContainer
+	var panel_style: StyleBoxFlat = null
+	if panel != null:
+		panel_style = panel.get_theme_stylebox("panel") as StyleBoxFlat
 	return {
 		"background_id": BACKGROUND_ID,
 		"path": String(entry.get("res_path", "")),
@@ -49,6 +53,7 @@ func get_background_catalog_snapshot() -> Dictionary:
 		"has_texture": background != null and background.texture != null,
 		"stretch_mode": int(background.stretch_mode) if background != null else -1,
 		"shade_alpha": shade.color.a if shade != null else 0.0,
+		"panel_alpha": panel_style.bg_color.a if panel_style != null else 0.0,
 		"visual_only": true,
 	}
 
@@ -186,7 +191,7 @@ func _apply_readability_style() -> void:
 	if panel != null:
 		META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "frame")
 		_apply_debrief_panel_style(panel)
-		panel.set_meta("debrief_contrast_policy", "high_contrast_dark_panel")
+		panel.set_meta("debrief_contrast_policy", "translucent_high_contrast_panel")
 		panel.set_meta("background_readability_policy", "dimmed_catalog_background")
 
 	META_UI_SKIN_SCRIPT.style_header_label(get_node_or_null("Panel/Margin/VBox/TitleLabel"), 18)
@@ -266,8 +271,8 @@ func _ensure_background_nodes() -> Dictionary:
 
 func _apply_debrief_panel_style(panel: PanelContainer) -> void:
 	var stylebox := StyleBoxFlat.new()
-	stylebox.bg_color = Color(0.145, 0.176, 0.200, 0.90)
-	stylebox.border_color = Color(0.302, 0.353, 0.388, 0.95)
+	stylebox.bg_color = Color(0.145, 0.176, 0.200, 0.58)
+	stylebox.border_color = Color(0.302, 0.353, 0.388, 0.82)
 	stylebox.border_width_left = 1
 	stylebox.border_width_top = 1
 	stylebox.border_width_right = 1

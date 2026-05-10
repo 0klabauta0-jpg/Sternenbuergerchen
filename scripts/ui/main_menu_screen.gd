@@ -12,9 +12,11 @@ const CONTEXTUAL_HELP_POPUP_SCRIPT: GDScript = preload("res://scripts/ui/context
 const START_ROSTER_GENERATOR_SCRIPT: GDScript = preload("res://scripts/meta/start_roster_generator.gd")
 const PLAYER_ROSTER_STORE_SCRIPT: GDScript = preload("res://scripts/meta/player_roster_store.gd")
 const TEAM_NAME_GENERATOR_SCRIPT: GDScript = preload("res://scripts/meta/team_name_generator.gd")
+const PORTRAIT_IDENTITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
 const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_event_bus.gd")
 const BACKGROUND_IMAGE_CATALOG_SCRIPT: GDScript = preload("res://scripts/assets/background_image_catalog.gd")
 const BACKGROUND_ID: String = "main_menu_shell"
+const TEAM_EDITOR_POINT_DELTA: int = 1
 
 @onready var _background: TextureRect = get_node("Background")
 @onready var _singleplayer_button: Button = get_node("MenuRail/MenuMargin/MenuVBox/MenuButtons/SingleplayerButton")
@@ -56,9 +58,16 @@ var _new_roster_button: Button = null
 var _team_library_panel: PanelContainer = null
 var _team_library_list: VBoxContainer = null
 var _team_library_status_label: Label = null
+var _team_library_activate_button: Button = null
 var _team_library_delete_button: Button = null
 var _team_library_entries: Array = []
 var _selected_roster_entry_path: String = ""
+var _team_editor_panel: PanelContainer = null
+var _team_editor_emblem_option: OptionButton = null
+var _team_editor_emblem_preview: TextureRect = null
+var _team_editor_budget_label: Label = null
+var _team_editor_stats_vbox: VBoxContainer = null
+var _team_editor_stat_rows: Dictionary = {}
 var _start_roster: Dictionary = {}
 var _start_roster_seed: String = START_ROSTER_GENERATOR_SCRIPT.DEFAULT_SEED
 var _start_roster_size: int = START_ROSTER_GENERATOR_SCRIPT.DEFAULT_ROSTER_SIZE
@@ -203,7 +212,24 @@ func get_team_library_snapshot() -> Dictionary:
 		"selected_is_active": bool(selected_entry.get("active", false)),
 		"active_path": String(active_entry.get("path", _start_roster_save_path)),
 		"active_team_name": String(active_entry.get("team_name", "")),
+		"activate_enabled": _team_library_activate_button != null and not _team_library_activate_button.disabled,
 		"delete_enabled": _team_library_delete_button != null and not _team_library_delete_button.disabled,
+	}
+
+
+func get_team_editor_snapshot() -> Dictionary:
+	var editor: Dictionary = _get_normalized_team_editor(false)
+	return {
+		"visible": _team_editor_panel != null and _team_editor_panel.visible,
+		"budget_max": int(editor.get("point_budget_max", 0)),
+		"budget_used": int(editor.get("point_budget_used", 0)),
+		"budget_available": int(editor.get("point_budget_available", 0)),
+		"allocations": Dictionary(editor.get("stat_allocations", {})).duplicate(true),
+		"stat_definitions": Array(editor.get("stat_definitions", [])).duplicate(true),
+		"emblem_id": String(editor.get("emblem_id", "")),
+		"emblem_path": String(editor.get("emblem_path", "")),
+		"emblem_option_count": _team_editor_emblem_option.item_count if _team_editor_emblem_option != null else 0,
+		"has_emblem_texture": _team_editor_emblem_preview != null and _team_editor_emblem_preview.texture != null,
 	}
 
 
@@ -212,8 +238,24 @@ func select_team_library_entry_for_tests(entry_path: String) -> void:
 	_refresh_team_library()
 
 
+func activate_selected_team_entry_for_tests() -> Dictionary:
+	return _activate_selected_team_entry(false)
+
+
 func delete_selected_team_entry_for_tests() -> Dictionary:
 	return _delete_selected_team_entry(false)
+
+
+func adjust_team_editor_stat_for_tests(stat_id: String, delta: int) -> Dictionary:
+	return _adjust_team_editor_stat(stat_id, delta, false)
+
+
+func set_team_editor_stat_for_tests(stat_id: String, value: int) -> Dictionary:
+	return _set_team_editor_stat(stat_id, value, false)
+
+
+func set_team_editor_emblem_for_tests(emblem_id: String) -> Dictionary:
+	return _set_team_editor_emblem(emblem_id, false)
 
 
 func ensure_start_roster_exists(seed: String = "", roster_size: int = -1) -> Dictionary:
@@ -223,6 +265,7 @@ func ensure_start_roster_exists(seed: String = "", roster_size: int = -1) -> Dic
 		_start_roster_size = clampi(roster_size, START_ROSTER_GENERATOR_SCRIPT.MIN_ROSTER_SIZE, START_ROSTER_GENERATOR_SCRIPT.MAX_ROSTER_SIZE)
 	var first_start: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("ensure_roster", _start_roster_seed, _start_roster_size, _start_roster_profile_id, _start_roster_save_path))
 	_start_roster = Dictionary(first_start.get("roster", {})).duplicate(true)
+	_normalize_start_team_editor(true)
 	_last_start_roster_created = bool(first_start.get("created", false))
 	_last_start_roster_loaded_from_save = bool(first_start.get("loaded", false))
 	_last_start_roster_store_result = first_start.duplicate(true)
@@ -231,6 +274,7 @@ func ensure_start_roster_exists(seed: String = "", roster_size: int = -1) -> Dic
 	_refresh_team_name_controls()
 	_selected_roster_entry_path = _start_roster_save_path
 	_refresh_team_library()
+	_refresh_team_editor()
 	_status_label.text = "Roster ready" if bool(Dictionary(first_start.get("summary", {})).get("valid", false)) else "Roster invalid"
 	return first_start
 
@@ -262,6 +306,7 @@ func set_start_roster_store_path_for_tests(save_path: String, profile_id: String
 	_selected_roster_entry_path = _start_roster_save_path
 	_start_roster.clear()
 	_refresh_team_library()
+	_refresh_team_editor()
 
 
 func request_new_start_roster() -> Dictionary:
@@ -281,6 +326,7 @@ func confirm_new_start_roster() -> Dictionary:
 	var next_seed: String = "%s_reset_%02d" % [_start_roster_seed, _start_roster_generation_index]
 	var reset_result: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("reset_roster", next_seed, _start_roster_size, _start_roster_profile_id, _start_roster_save_path, true))
 	_start_roster = Dictionary(reset_result.get("roster", {})).duplicate(true)
+	_normalize_start_team_editor(true)
 	_last_start_roster_created = true
 	_last_start_roster_loaded_from_save = false
 	_last_start_roster_store_result = reset_result.duplicate(true)
@@ -289,6 +335,7 @@ func confirm_new_start_roster() -> Dictionary:
 	_refresh_team_name_controls()
 	_selected_roster_entry_path = _start_roster_save_path
 	_refresh_team_library()
+	_refresh_team_editor()
 	_status_label.text = "Neues Team bereit" if bool(reset_result.get("ok", false)) else "Roster save failed"
 	return {
 		"created": true,
@@ -308,10 +355,12 @@ func cancel_new_start_roster() -> void:
 func set_start_team_name(next_team_name: String) -> Dictionary:
 	var renamed: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("rename_team", _start_roster, next_team_name, _start_roster_profile_id, _start_roster_save_path))
 	_start_roster = Dictionary(renamed.get("roster", _start_roster)).duplicate(true)
+	_normalize_start_team_editor(false)
 	_last_start_roster_store_result = Dictionary(renamed.get("save", {})).duplicate(true)
 	_refresh_team_name_controls()
 	_selected_roster_entry_path = _start_roster_save_path
 	_refresh_team_library()
+	_refresh_team_editor()
 	_status_label.text = "Team name saved" if bool(renamed.get("ok", false)) else "Team name save failed"
 	return renamed
 
@@ -588,9 +637,11 @@ func _ensure_start_roster_button() -> void:
 	_new_roster_button.set_meta("roster_action", "new_start_roster")
 	_new_roster_button.set_meta("requires_confirmation", true)
 	_ensure_team_library_panel(menu_buttons)
+	_ensure_team_editor_panel(menu_buttons)
 	_refresh_start_roster_button()
 	_refresh_team_name_controls()
 	_refresh_team_library()
+	_refresh_team_editor()
 
 
 func _ensure_team_library_panel(menu_buttons: VBoxContainer) -> void:
@@ -598,8 +649,8 @@ func _ensure_team_library_panel(menu_buttons: VBoxContainer) -> void:
 	if _team_library_panel == null:
 		_team_library_panel = PanelContainer.new()
 		_team_library_panel.name = "TeamLibraryPanel"
-		_team_library_panel.custom_minimum_size = Vector2(360.0, 176.0)
 		menu_buttons.add_child(_team_library_panel)
+	_team_library_panel.custom_minimum_size = Vector2(360.0, 154.0)
 	var margin := _team_library_panel.get_node_or_null("TeamLibraryMargin") as MarginContainer
 	if margin == null:
 		margin = MarginContainer.new()
@@ -629,12 +680,21 @@ func _ensure_team_library_panel(menu_buttons: VBoxContainer) -> void:
 		header_row.add_child(header_label)
 	header_label.text = "Erstellte Teams"
 	header_label.add_theme_font_size_override("font_size", 13)
+	_team_library_activate_button = header_row.get_node_or_null("TeamLibraryActivateButton") as Button
+	if _team_library_activate_button == null:
+		_team_library_activate_button = Button.new()
+		_team_library_activate_button.name = "TeamLibraryActivateButton"
+		_team_library_activate_button.text = "Aktiv"
+		_team_library_activate_button.custom_minimum_size = Vector2(72.0, 32.0)
+		header_row.add_child(_team_library_activate_button)
+	if not _team_library_activate_button.pressed.is_connected(_on_team_library_activate_pressed):
+		_team_library_activate_button.pressed.connect(_on_team_library_activate_pressed)
 	_team_library_delete_button = header_row.get_node_or_null("TeamLibraryDeleteButton") as Button
 	if _team_library_delete_button == null:
 		_team_library_delete_button = Button.new()
 		_team_library_delete_button.name = "TeamLibraryDeleteButton"
 		_team_library_delete_button.text = "Loeschen"
-		_team_library_delete_button.custom_minimum_size = Vector2(92.0, 32.0)
+		_team_library_delete_button.custom_minimum_size = Vector2(82.0, 32.0)
 		header_row.add_child(_team_library_delete_button)
 	if not _team_library_delete_button.pressed.is_connected(_on_team_library_delete_pressed):
 		_team_library_delete_button.pressed.connect(_on_team_library_delete_pressed)
@@ -649,9 +709,9 @@ func _ensure_team_library_panel(menu_buttons: VBoxContainer) -> void:
 	if scroll == null:
 		scroll = ScrollContainer.new()
 		scroll.name = "TeamLibraryScroll"
-		scroll.custom_minimum_size = Vector2(340.0, 94.0)
 		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 		vbox.add_child(scroll)
+	scroll.custom_minimum_size = Vector2(340.0, 74.0)
 	_team_library_list = scroll.get_node_or_null("TeamLibraryList") as VBoxContainer
 	if _team_library_list == null:
 		_team_library_list = VBoxContainer.new()
@@ -659,6 +719,83 @@ func _ensure_team_library_panel(menu_buttons: VBoxContainer) -> void:
 		_team_library_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		_team_library_list.add_theme_constant_override("separation", 4)
 		scroll.add_child(_team_library_list)
+
+
+func _ensure_team_editor_panel(menu_buttons: VBoxContainer) -> void:
+	_team_editor_panel = menu_buttons.get_node_or_null("TeamEditorPanel") as PanelContainer
+	if _team_editor_panel == null:
+		_team_editor_panel = PanelContainer.new()
+		_team_editor_panel.name = "TeamEditorPanel"
+		menu_buttons.add_child(_team_editor_panel)
+	_team_editor_panel.custom_minimum_size = Vector2(360.0, 258.0)
+	var margin := _team_editor_panel.get_node_or_null("TeamEditorMargin") as MarginContainer
+	if margin == null:
+		margin = MarginContainer.new()
+		margin.name = "TeamEditorMargin"
+		margin.add_theme_constant_override("margin_left", 10)
+		margin.add_theme_constant_override("margin_top", 8)
+		margin.add_theme_constant_override("margin_right", 10)
+		margin.add_theme_constant_override("margin_bottom", 8)
+		_team_editor_panel.add_child(margin)
+	var vbox := margin.get_node_or_null("TeamEditorVBox") as VBoxContainer
+	if vbox == null:
+		vbox = VBoxContainer.new()
+		vbox.name = "TeamEditorVBox"
+		vbox.add_theme_constant_override("separation", 6)
+		margin.add_child(vbox)
+	var header_label := vbox.get_node_or_null("TeamEditorHeaderLabel") as Label
+	if header_label == null:
+		header_label = Label.new()
+		header_label.name = "TeamEditorHeaderLabel"
+		vbox.add_child(header_label)
+	header_label.text = "Team-Editor"
+	header_label.add_theme_font_size_override("font_size", 13)
+	header_label.tooltip_text = "Rookie-Teams haben maximal 30 Startpunkte. Fortschritt soll spaeter spuerbar bleiben."
+	var emblem_row := vbox.get_node_or_null("TeamEditorEmblemRow") as HBoxContainer
+	if emblem_row == null:
+		emblem_row = HBoxContainer.new()
+		emblem_row.name = "TeamEditorEmblemRow"
+		emblem_row.add_theme_constant_override("separation", 8)
+		vbox.add_child(emblem_row)
+	_team_editor_emblem_preview = emblem_row.get_node_or_null("TeamEditorEmblemPreview") as TextureRect
+	if _team_editor_emblem_preview == null:
+		_team_editor_emblem_preview = TextureRect.new()
+		_team_editor_emblem_preview.name = "TeamEditorEmblemPreview"
+		_team_editor_emblem_preview.custom_minimum_size = Vector2(34.0, 34.0)
+		_team_editor_emblem_preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		_team_editor_emblem_preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		emblem_row.add_child(_team_editor_emblem_preview)
+	_team_editor_emblem_option = emblem_row.get_node_or_null("TeamEditorEmblemOption") as OptionButton
+	if _team_editor_emblem_option == null:
+		_team_editor_emblem_option = OptionButton.new()
+		_team_editor_emblem_option.name = "TeamEditorEmblemOption"
+		_team_editor_emblem_option.custom_minimum_size = Vector2(290.0, 34.0)
+		_team_editor_emblem_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		emblem_row.add_child(_team_editor_emblem_option)
+	_team_editor_emblem_option.tooltip_text = "Team-Bild aus vorhandenen Portrait-Assets."
+	if not _team_editor_emblem_option.item_selected.is_connected(_on_team_editor_emblem_selected):
+		_team_editor_emblem_option.item_selected.connect(_on_team_editor_emblem_selected)
+	_team_editor_budget_label = vbox.get_node_or_null("TeamEditorBudgetLabel") as Label
+	if _team_editor_budget_label == null:
+		_team_editor_budget_label = Label.new()
+		_team_editor_budget_label.name = "TeamEditorBudgetLabel"
+		vbox.add_child(_team_editor_budget_label)
+	_team_editor_budget_label.add_theme_font_size_override("font_size", 11)
+	_team_editor_budget_label.tooltip_text = "Punkte koennen frei verteilt werden, aber nie ueber das Rookie-Limit hinaus."
+	var scroll := vbox.get_node_or_null("TeamEditorStatsScroll") as ScrollContainer
+	if scroll == null:
+		scroll = ScrollContainer.new()
+		scroll.name = "TeamEditorStatsScroll"
+		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		vbox.add_child(scroll)
+	scroll.custom_minimum_size = Vector2(340.0, 152.0)
+	_team_editor_stats_vbox = scroll.get_node_or_null("TeamEditorStatsVBox") as VBoxContainer
+	if _team_editor_stats_vbox == null:
+		_team_editor_stats_vbox = VBoxContainer.new()
+		_team_editor_stats_vbox.name = "TeamEditorStatsVBox"
+		_team_editor_stats_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_team_editor_stats_vbox.add_theme_constant_override("separation", 4)
+		scroll.add_child(_team_editor_stats_vbox)
 
 
 func _refresh_start_roster_button() -> void:
@@ -728,6 +865,10 @@ func _refresh_team_library_status() -> void:
 		var can_delete: bool = not selected_entry.is_empty() and bool(selected_entry.get("can_delete", false)) and not selected_active
 		_team_library_delete_button.disabled = not can_delete
 		_team_library_delete_button.tooltip_text = "Archiv-Team loeschen." if can_delete else "Aktives Team bleibt geschuetzt."
+	if _team_library_activate_button != null:
+		var can_activate: bool = not selected_entry.is_empty() and not selected_active and bool(selected_entry.get("valid", false))
+		_team_library_activate_button.disabled = not can_activate
+		_team_library_activate_button.tooltip_text = "Archiv-Team als aktives Startteam verwenden." if can_activate else "Aktives Team ist bereits ausgewaehlt."
 
 
 func _format_team_library_entry(entry: Dictionary) -> String:
@@ -766,6 +907,253 @@ func _delete_selected_team_entry(play_sound: bool = true) -> Dictionary:
 			_play_ui_sfx("warning", "delete_roster_entry_failed")
 	_refresh_team_library()
 	return result
+
+
+func _activate_selected_team_entry(play_sound: bool = true) -> Dictionary:
+	var selected_entry: Dictionary = _find_team_library_entry(_selected_roster_entry_path)
+	if selected_entry.is_empty():
+		return {"ok": false, "reason": "missing_selection"}
+	var result: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("activate_roster_entry", _selected_roster_entry_path, _start_roster_profile_id, _start_roster_save_path))
+	if bool(result.get("ok", false)):
+		_start_roster = Dictionary(result.get("roster", {})).duplicate(true)
+		_normalize_start_team_editor(true)
+		_selected_roster_entry_path = _start_roster_save_path
+		_last_start_roster_store_result = Dictionary(result.get("save", result)).duplicate(true)
+		_refresh_team_name_controls()
+		_status_label.text = "Team aktiviert"
+		if play_sound:
+			_play_ui_sfx("confirm", "activate_roster_entry")
+	else:
+		_status_label.text = "Aktivieren fehlgeschlagen"
+		if play_sound:
+			_play_ui_sfx("warning", "activate_roster_entry_failed")
+	_refresh_team_library()
+	_refresh_team_editor()
+	return result
+
+
+func _get_normalized_team_editor(save_if_changed: bool) -> Dictionary:
+	if _start_roster.is_empty():
+		return Dictionary(START_ROSTER_GENERATOR_SCRIPT.call("normalize_team_editor", {}, _start_roster_seed, _start_roster_profile_id))
+	return _normalize_start_team_editor(save_if_changed)
+
+
+func _normalize_start_team_editor(save_if_changed: bool) -> Dictionary:
+	var current_editor: Dictionary = Dictionary(_start_roster.get("team_editor", {})).duplicate(true)
+	var normalized: Dictionary = Dictionary(START_ROSTER_GENERATOR_SCRIPT.call("normalize_team_editor", current_editor, String(_start_roster.get("seed", _start_roster_seed)), _start_roster_profile_id))
+	if _start_roster.is_empty():
+		return normalized
+	if current_editor != normalized:
+		_start_roster["team_editor"] = normalized
+		if save_if_changed:
+			_save_start_roster_state("team_editor_normalized")
+	return normalized
+
+
+func _refresh_team_editor() -> void:
+	if _team_editor_panel == null or _team_editor_stats_vbox == null:
+		return
+	var editor: Dictionary = _get_normalized_team_editor(false)
+	_refresh_team_editor_emblems(editor)
+	var budget_used: int = int(editor.get("point_budget_used", 0))
+	var budget_max: int = int(editor.get("point_budget_max", 0))
+	var budget_available: int = int(editor.get("point_budget_available", 0))
+	if _team_editor_budget_label != null:
+		_team_editor_budget_label.text = "Rookie-Punkte %d/%d | frei %d" % [budget_used, budget_max, budget_available]
+	_clear_children(_team_editor_stats_vbox)
+	_team_editor_stat_rows.clear()
+	var allocations: Dictionary = Dictionary(editor.get("stat_allocations", {}))
+	for definition_variant in Array(editor.get("stat_definitions", [])):
+		if typeof(definition_variant) != TYPE_DICTIONARY:
+			continue
+		var definition: Dictionary = Dictionary(definition_variant)
+		var stat_id: String = String(definition.get("id", "")).strip_edges()
+		if stat_id.is_empty():
+			continue
+		var row := _build_team_editor_stat_row(definition, int(allocations.get(stat_id, 0)), budget_available)
+		_team_editor_stats_vbox.add_child(row)
+
+
+func _refresh_team_editor_emblems(editor: Dictionary) -> void:
+	if _team_editor_emblem_option == null:
+		return
+	var selected_emblem_id: String = String(editor.get("emblem_id", "")).strip_edges()
+	_team_editor_emblem_option.clear()
+	var options: Array = _build_team_editor_emblem_options(editor)
+	for option_variant in options:
+		var option: Dictionary = Dictionary(option_variant)
+		var emblem_id: String = String(option.get("id", "")).strip_edges()
+		var texture: Texture2D = _load_res_texture(String(option.get("path", "")))
+		if texture != null:
+			_team_editor_emblem_option.add_icon_item(texture, String(option.get("label", emblem_id)))
+		else:
+			_team_editor_emblem_option.add_item(String(option.get("label", emblem_id)))
+		var item_index: int = _team_editor_emblem_option.item_count - 1
+		_team_editor_emblem_option.set_item_metadata(item_index, option)
+		if emblem_id == selected_emblem_id:
+			_team_editor_emblem_option.select(item_index)
+	if _team_editor_emblem_option.selected < 0 and _team_editor_emblem_option.item_count > 0:
+		_team_editor_emblem_option.select(0)
+	if _team_editor_emblem_preview != null:
+		_team_editor_emblem_preview.texture = _load_res_texture(String(editor.get("emblem_path", "")))
+		_team_editor_emblem_preview.modulate = Color(1.0, 1.0, 1.0, 1.0) if _team_editor_emblem_preview.texture != null else Color(0.38, 0.44, 0.48, 0.85)
+
+
+func _build_team_editor_stat_row(definition: Dictionary, value: int, budget_available: int) -> HBoxContainer:
+	var stat_id: String = String(definition.get("id", "")).strip_edges()
+	var row := HBoxContainer.new()
+	row.name = "TeamEditorStat_%s" % stat_id
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_theme_constant_override("separation", 6)
+	row.tooltip_text = String(definition.get("description", ""))
+	var label := Label.new()
+	label.name = "TeamEditorStatLabel_%s" % stat_id
+	label.text = String(definition.get("label", stat_id.capitalize()))
+	label.custom_minimum_size = Vector2(90.0, 0.0)
+	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	label.clip_text = true
+	label.tooltip_text = row.tooltip_text
+	label.add_theme_font_size_override("font_size", 10)
+	row.add_child(label)
+	var minus_button := Button.new()
+	minus_button.name = "TeamEditorMinus_%s" % stat_id
+	minus_button.text = "-"
+	minus_button.custom_minimum_size = Vector2(24.0, 24.0)
+	minus_button.disabled = value <= 0
+	minus_button.tooltip_text = "Punkt abziehen: %s" % String(definition.get("description", ""))
+	minus_button.pressed.connect(_on_team_editor_stat_delta_pressed.bind(stat_id, -TEAM_EDITOR_POINT_DELTA))
+	row.add_child(minus_button)
+	var value_bar := ProgressBar.new()
+	value_bar.name = "TeamEditorValue_%s" % stat_id
+	value_bar.min_value = 0.0
+	value_bar.max_value = float(START_ROSTER_GENERATOR_SCRIPT.TEAM_EDITOR_POINT_BUDGET_MAX)
+	value_bar.value = float(value)
+	value_bar.show_percentage = false
+	value_bar.custom_minimum_size = Vector2(54.0, 18.0)
+	value_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	value_bar.tooltip_text = row.tooltip_text
+	row.add_child(value_bar)
+	var value_label := Label.new()
+	value_label.name = "TeamEditorValueLabel_%s" % stat_id
+	value_label.text = "%02d" % value
+	value_label.custom_minimum_size = Vector2(28.0, 0.0)
+	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	value_label.add_theme_font_size_override("font_size", 10)
+	row.add_child(value_label)
+	var plus_button := Button.new()
+	plus_button.name = "TeamEditorPlus_%s" % stat_id
+	plus_button.text = "+"
+	plus_button.custom_minimum_size = Vector2(24.0, 24.0)
+	plus_button.disabled = budget_available <= 0
+	plus_button.tooltip_text = "Punkt vergeben: %s" % String(definition.get("description", ""))
+	plus_button.pressed.connect(_on_team_editor_stat_delta_pressed.bind(stat_id, TEAM_EDITOR_POINT_DELTA))
+	row.add_child(plus_button)
+	_team_editor_stat_rows[stat_id] = {
+		"row": row,
+		"minus": minus_button,
+		"plus": plus_button,
+		"value": value_label,
+		"bar": value_bar,
+	}
+	return row
+
+
+func _adjust_team_editor_stat(stat_id: String, delta: int, play_sound: bool = true) -> Dictionary:
+	var editor: Dictionary = _get_normalized_team_editor(false)
+	var allocations: Dictionary = Dictionary(editor.get("stat_allocations", {})).duplicate(true)
+	var normalized_stat_id: String = stat_id.strip_edges()
+	if normalized_stat_id.is_empty() or not allocations.has(normalized_stat_id):
+		return {"ok": false, "reason": "unknown_stat", "stat_id": stat_id}
+	var current_value: int = int(allocations.get(normalized_stat_id, 0))
+	var target_value: int = current_value + delta
+	return _set_team_editor_stat(normalized_stat_id, target_value, play_sound)
+
+
+func _set_team_editor_stat(stat_id: String, target_value: int, play_sound: bool = true) -> Dictionary:
+	var editor: Dictionary = _get_normalized_team_editor(false)
+	var allocations: Dictionary = Dictionary(editor.get("stat_allocations", {})).duplicate(true)
+	var normalized_stat_id: String = stat_id.strip_edges()
+	if normalized_stat_id.is_empty() or not allocations.has(normalized_stat_id):
+		return {"ok": false, "reason": "unknown_stat", "stat_id": stat_id}
+	var current_value: int = int(allocations.get(normalized_stat_id, 0))
+	var other_used: int = int(editor.get("point_budget_used", 0)) - current_value
+	var budget_max: int = int(editor.get("point_budget_max", START_ROSTER_GENERATOR_SCRIPT.TEAM_EDITOR_POINT_BUDGET_MAX))
+	var next_value: int = clampi(target_value, 0, maxi(budget_max - other_used, 0))
+	allocations[normalized_stat_id] = next_value
+	editor["stat_allocations"] = allocations
+	_start_roster["team_editor"] = START_ROSTER_GENERATOR_SCRIPT.call("normalize_team_editor", editor, String(_start_roster.get("seed", _start_roster_seed)), _start_roster_profile_id)
+	var save_result: Dictionary = _save_start_roster_state("team_editor_stat")
+	_refresh_team_editor()
+	if play_sound:
+		_play_ui_sfx("switch" if next_value != current_value else "warning", "team_editor_stat")
+	return {
+		"ok": bool(save_result.get("ok", false)),
+		"changed": next_value != current_value,
+		"stat_id": normalized_stat_id,
+		"value": next_value,
+		"save": save_result,
+	}
+
+
+func _set_team_editor_emblem(emblem_id: String, play_sound: bool = true) -> Dictionary:
+	var normalized_id: String = emblem_id.strip_edges()
+	var options: Array = _build_team_editor_emblem_options(_get_normalized_team_editor(false))
+	for option_variant in options:
+		var option: Dictionary = Dictionary(option_variant)
+		if String(option.get("id", "")) != normalized_id:
+			continue
+		var editor: Dictionary = _get_normalized_team_editor(false)
+		editor["emblem_id"] = normalized_id
+		editor["emblem_path"] = String(option.get("path", ""))
+		_start_roster["team_editor"] = START_ROSTER_GENERATOR_SCRIPT.call("normalize_team_editor", editor, String(_start_roster.get("seed", _start_roster_seed)), _start_roster_profile_id)
+		var save_result: Dictionary = _save_start_roster_state("team_editor_emblem")
+		_refresh_team_editor()
+		if play_sound:
+			_play_ui_sfx("switch", "team_editor_emblem")
+		return {"ok": bool(save_result.get("ok", false)), "emblem_id": normalized_id, "save": save_result}
+	return {"ok": false, "reason": "unknown_emblem", "emblem_id": emblem_id}
+
+
+func _save_start_roster_state(_reason: String) -> Dictionary:
+	if _start_roster.is_empty():
+		return {"ok": false, "reason": "missing_roster"}
+	var save_result: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("save_roster", _start_roster, _start_roster_profile_id, _start_roster_save_path))
+	_last_start_roster_store_result = save_result.duplicate(true)
+	return save_result
+
+
+func _build_team_editor_emblem_options(editor: Dictionary) -> Array:
+	var result: Array = []
+	var seen_ids: Dictionary = {}
+	var current_id: String = String(editor.get("emblem_id", "")).strip_edges()
+	var current_path: String = String(editor.get("emblem_path", "")).strip_edges()
+	if not current_id.is_empty():
+		result.append({"id": current_id, "path": current_path, "label": _format_emblem_label(current_id)})
+		seen_ids[current_id] = true
+	for entry_variant in Array(PORTRAIT_IDENTITY_CATALOG_SCRIPT.call("get_candidate_entries")):
+		if result.size() >= 12:
+			break
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var entry_id: String = String(entry.get("id", "")).strip_edges()
+		if entry_id.is_empty() or seen_ids.has(entry_id):
+			continue
+		result.append({"id": entry_id, "path": String(entry.get("path", "")), "label": _format_emblem_label(entry_id)})
+		seen_ids[entry_id] = true
+	return result
+
+
+func _format_emblem_label(emblem_id: String) -> String:
+	var normalized: String = emblem_id.replace("char_portrait_", "Portrait ").replace("_", " ")
+	return normalized.capitalize()
+
+
+func _load_res_texture(path: String) -> Texture2D:
+	var normalized_path: String = path.strip_edges()
+	if normalized_path.is_empty() or not ResourceLoader.exists(normalized_path):
+		return null
+	return load(normalized_path) as Texture2D
 
 
 func _clear_children(container: Node) -> void:
@@ -811,7 +1199,9 @@ func _register_main_menu_help_ids() -> void:
 	_connect_help_control(_editor_button, "main_menu.primary_routes")
 	_connect_help_control(_settings_button, "main_menu.primary_routes")
 	_connect_help_control(_new_roster_button, "main_menu.primary_routes")
+	_connect_help_control(_team_library_activate_button, "main_menu.primary_routes")
 	_connect_help_control(_team_library_delete_button, "main_menu.primary_routes")
+	_connect_help_control(_team_editor_emblem_option, "main_menu.primary_routes")
 	_connect_help_control(_global_help_button, "shell.global_help_button")
 	_connect_help_control(_display_section_label, "settings.display")
 	_connect_help_control(_resolution_option, "settings.display")
@@ -1203,8 +1593,23 @@ func _on_team_library_row_pressed(entry_path: String) -> void:
 	_play_ui_sfx("switch", "team_library_select")
 
 
+func _on_team_library_activate_pressed() -> void:
+	_activate_selected_team_entry(true)
+
+
 func _on_team_library_delete_pressed() -> void:
 	_delete_selected_team_entry(true)
+
+
+func _on_team_editor_emblem_selected(index: int) -> void:
+	if _team_editor_emblem_option == null or index < 0 or index >= _team_editor_emblem_option.item_count:
+		return
+	var option: Dictionary = Dictionary(_team_editor_emblem_option.get_item_metadata(index))
+	_set_team_editor_emblem(String(option.get("id", "")), true)
+
+
+func _on_team_editor_stat_delta_pressed(stat_id: String, delta: int) -> void:
+	_adjust_team_editor_stat(stat_id, delta, true)
 
 
 func _on_global_help_pressed() -> void:

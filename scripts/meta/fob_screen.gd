@@ -2651,6 +2651,7 @@ func _build_compact_weapon_preview(preview_name: String, weapon_id: String) -> T
 	preview_rect.tooltip_text = "No weapon" if normalized_weapon_id == "none" else _build_weapon_label(normalized_weapon_id)
 	preview_rect.set_meta("weapon_id", normalized_weapon_id)
 	preview_rect.set_meta("weapon_preview_path", _get_weapon_preview_path(normalized_weapon_id))
+	_apply_help_id(preview_rect, "loadout.weapon_none" if normalized_weapon_id == "none" else "loadout.weapon_preview")
 	return preview_rect
 
 

@@ -18,6 +18,8 @@ const MIN_ROSTER_SIZE: int = 20
 const MAX_ROSTER_SIZE: int = 30
 const MIN_SKILL_VALUE: float = 0.22
 const MAX_SKILL_VALUE: float = 0.86
+const TEAM_EDITOR_SCHEMA_VERSION: int = 1
+const TEAM_EDITOR_POINT_BUDGET_MAX: int = 30
 const VALID_ROLE_CATEGORIES: PackedStringArray = [
 	"medic",
 	"shooter",
@@ -28,6 +30,22 @@ const VALID_ROLE_CATEGORIES: PackedStringArray = [
 	"scout_sniper",
 ]
 const FIRETEAM_IDS: PackedStringArray = ["blue", "gold", "reserve", "med", "flight"]
+const TEAM_EDITOR_STAT_DEFINITIONS: Array = [
+	{"id": "tactics", "label": "Taktik", "description": "Bessere Startplanung, ruhigere Befehlsausfuehrung und spaeter FTL-Boni."},
+	{"id": "medical", "label": "Medizin", "description": "Stabilere Versorgung, schnellere Recovery und bessere Medic-Rollen."},
+	{"id": "engineering", "label": "Technik", "description": "Reparatur, Tueren, Generatoren und Missionsobjekte werden verlaesslicher."},
+	{"id": "piloting", "label": "Piloten", "description": "Dropship-, Frachter- und spaeter Fighter-Handhabung startet etwas sauberer."},
+	{"id": "discipline", "label": "Disziplin", "description": "Weniger Panik, bessere Formationstreue und weniger Frust-Spitzen."},
+	{"id": "recon", "label": "Aufklaerung", "description": "Besseres Erkennen, vorsichtigeres Bewegen und staerkere Scout-Rollen."},
+]
+const TEAM_EDITOR_DEFAULT_ALLOCATIONS: Dictionary = {
+	"tactics": 5,
+	"medical": 5,
+	"engineering": 5,
+	"piloting": 5,
+	"discipline": 5,
+	"recon": 5,
+}
 
 const ROLE_TEMPLATES: Dictionary = {
 	"leader": {
@@ -223,6 +241,7 @@ static func generate_start_roster(seed: String = DEFAULT_SEED, roster_size: int 
 		"role_mix": _build_role_mix(units),
 		"relationship_pairs": relationship_pairs,
 		"fireteam_suggestions": fireteam_suggestions,
+		"team_editor": normalize_team_editor({}, normalized_seed, player_profile_id),
 		"multiplayer_boundary": {
 			"ownership_scope": "player_profile_local",
 			"host_roster_scope": "host_player_profile",
@@ -275,9 +294,42 @@ static func build_summary_snapshot(roster: Dictionary) -> Dictionary:
 		"relationship_pair_count": Array(roster.get("relationship_pairs", [])).size(),
 		"fireteam_count": Array(roster.get("fireteam_suggestions", [])).size(),
 		"team_identity": TEAM_NAME_GENERATOR_SCRIPT.call("build_team_identity_snapshot", roster),
+		"team_editor": normalize_team_editor(Dictionary(roster.get("team_editor", {})), String(roster.get("seed", DEFAULT_SEED)), String(roster.get("player_profile_id", DEFAULT_PLAYER_PROFILE_ID))),
 		"multiplayer_boundary": Dictionary(roster.get("multiplayer_boundary", {})).duplicate(true),
 		"errors": PackedStringArray(validation.get("errors", PackedStringArray())),
 		"warnings": PackedStringArray(validation.get("warnings", PackedStringArray())),
+	}
+
+
+static func normalize_team_editor(team_editor: Dictionary = {}, seed: String = DEFAULT_SEED, player_profile_id: String = DEFAULT_PLAYER_PROFILE_ID) -> Dictionary:
+	var budget_max: int = maxi(int(team_editor.get("point_budget_max", TEAM_EDITOR_POINT_BUDGET_MAX)), 1)
+	budget_max = mini(budget_max, TEAM_EDITOR_POINT_BUDGET_MAX)
+	var source_allocations: Dictionary = Dictionary(team_editor.get("stat_allocations", TEAM_EDITOR_DEFAULT_ALLOCATIONS)).duplicate(true)
+	var allocations: Dictionary = {}
+	var used: int = 0
+	for definition_variant in TEAM_EDITOR_STAT_DEFINITIONS:
+		var definition: Dictionary = Dictionary(definition_variant)
+		var stat_id: String = String(definition.get("id", "")).strip_edges()
+		if stat_id.is_empty():
+			continue
+		var fallback_value: int = int(TEAM_EDITOR_DEFAULT_ALLOCATIONS.get(stat_id, 0))
+		var requested_value: int = clampi(int(source_allocations.get(stat_id, fallback_value)), 0, budget_max)
+		var value: int = mini(requested_value, maxi(budget_max - used, 0))
+		allocations[stat_id] = value
+		used += value
+	var emblem: Dictionary = _resolve_team_emblem(Dictionary(team_editor), seed, player_profile_id)
+	return {
+		"schema_version": TEAM_EDITOR_SCHEMA_VERSION,
+		"mode": "rookie_point_budget",
+		"point_budget_max": budget_max,
+		"point_budget_used": used,
+		"point_budget_available": maxi(budget_max - used, 0),
+		"stat_allocations": allocations,
+		"stat_definitions": TEAM_EDITOR_STAT_DEFINITIONS.duplicate(true),
+		"emblem_id": String(emblem.get("id", "")),
+		"emblem_path": String(emblem.get("path", "")),
+		"tier_label": "Rookies",
+		"design_note": "Startteams bleiben auf ein 30-Punkte-Rookie-Kontingent begrenzt.",
 	}
 
 
@@ -342,6 +394,7 @@ static func validate_roster(roster: Dictionary) -> Dictionary:
 	if not bool(team_identity_validation.get("valid", false)):
 		for team_error in PackedStringArray(team_identity_validation.get("errors", PackedStringArray())):
 			warnings.append(team_error)
+	_validate_team_editor(Dictionary(roster.get("team_editor", {})), warnings)
 	return {
 		"valid": errors.is_empty(),
 		"errors": errors,
@@ -401,6 +454,29 @@ static func _build_identity(index: int, role_category: String, fireteam_id: Stri
 	var traits: PackedStringArray = _merge_traits(PackedStringArray(identity.get("trait_ids", PackedStringArray())), rng)
 	identity["trait_ids"] = traits
 	return identity
+
+
+static func _validate_team_editor(team_editor: Dictionary, warnings: PackedStringArray) -> void:
+	if team_editor.is_empty():
+		warnings.append("team_editor_missing")
+		return
+	var normalized: Dictionary = normalize_team_editor(team_editor, String(team_editor.get("seed", DEFAULT_SEED)), DEFAULT_PLAYER_PROFILE_ID)
+	if int(normalized.get("point_budget_used", 0)) > TEAM_EDITOR_POINT_BUDGET_MAX:
+		warnings.append("team_editor_budget_over_cap")
+	if String(normalized.get("emblem_id", "")).strip_edges().is_empty():
+		warnings.append("team_editor_emblem_missing")
+
+
+static func _resolve_team_emblem(team_editor: Dictionary, seed: String, player_profile_id: String) -> Dictionary:
+	var emblem_id: String = String(team_editor.get("emblem_id", "")).strip_edges()
+	var emblem_path: String = String(team_editor.get("emblem_path", "")).strip_edges()
+	if not emblem_id.is_empty() and emblem_path.begins_with("res://") and ResourceLoader.exists(emblem_path):
+		return {"id": emblem_id, "path": emblem_path}
+	var assignment: Array = Array(PORTRAIT_IDENTITY_CATALOG_SCRIPT.call("build_deterministic_assignment", "%s:team_emblem:%s" % [seed, player_profile_id], 1))
+	if not assignment.is_empty():
+		var entry: Dictionary = Dictionary(assignment[0])
+		return {"id": String(entry.get("id", "")), "path": String(entry.get("path", ""))}
+	return {"id": "", "path": ""}
 
 
 static func _build_role_plan(roster_size: int) -> PackedStringArray:
