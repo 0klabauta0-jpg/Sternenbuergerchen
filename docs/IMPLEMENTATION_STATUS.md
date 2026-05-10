@@ -10,6 +10,13 @@
 
 ## Aktueller Startzustand
 
+### Manual Playtest - FOB Second Dropship Assignment and Scale
+- Status: implementiert
+- Stand: `#14 FLIGHTDECK` speichert die FOB-Boarding-/Staging-Queue jetzt pro Transport-Craft-ID. Ein Fireteam, das auf `Dropship 2` gedroppt wird, bleibt damit auf `Dropship 2` und rutscht nicht mehr automatisch in die Queue von `Dropship 1`.
+- Stand: Transport-Craft-Karten im FOB sind klickbar/selectable, behalten dedizierte Drop-Ziele wie `dropship|dropship_2` und rendern das Dropship-Bild groesser mit Covered-Crop gegen transparente Asset-Raender.
+- Risiken: Der Patch bleibt im FOB-UI-/Meta-Staging-State und macht keine SimulationRoot-Gameplay-Wahrheit daraus. Manueller Sichtcheck in FullHD bleibt fuer finale Proportionen der Shipcards sinnvoll.
+- Lokale Pruefung: `bugfix_fob_second_dropship_assignment_and_scale.gd`, `task_316_fob_fireteam_staging_migration.gd`, `task_308_compact_flightdeck_dropship_occupants_actions.gd`, `task_310_fob_flightdeck_fireteam_userology_smoke.gd`, `bugfix_dropship_mission_flow_verifier.gd` und `git diff --check` laufen gruen.
+
 ### Manual Playtest - Debrief Background and Main Menu Team Library
 - Status: implementiert
 - Stand: `DebriefTestScreen` nutzt jetzt den katalogisierten Background `debrief_desert_explosion_base` mit Dim-Shade und dokumentierter Readability-Policy. Das bleibt rein visuell und erzeugt keinen Gameplay-State.

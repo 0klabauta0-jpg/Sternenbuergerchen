@@ -51,6 +51,8 @@ const DEFAULT_MISSION_MAP := "test_mission_32x32_slots8"
 const DEFAULT_MISSION_SLOT_COUNT := 8
 const FOB_FIRETEAM_REFERENCE_CARD_WIDTH := 280.0
 const FOB_TRANSPORT_CARD_WIDTH := 440.0
+const FOB_TRANSPORT_SHIP_TEXTURE_WIDTH := 176.0
+const FOB_TRANSPORT_SHIP_TEXTURE_HEIGHT := 104.0
 
 var _available_units: Array = []
 var _selected_unit_ids: PackedStringArray = []
@@ -68,6 +70,7 @@ var _respawn_staged_fireteam_id: String = ""
 var _respawn_anchor_fireteam_id: String = ""
 var _respawn_anchor_seconds: float = 0.0
 var _dropship_staged_fireteam_ids: PackedStringArray = []
+var _dropship_state_by_craft: Dictionary = {}
 var _dropship_phase: String = "idle"
 var _dropship_eta_seconds: float = 0.0
 var _boarding_seconds: float = 0.0
@@ -528,6 +531,7 @@ func request_mission_start() -> void:
 
 
 func can_request_mission_start() -> bool:
+	_save_current_dropship_state()
 	return _can_request_homebase_mission_start(_get_transport_craft_state(_mission_launch_ready_craft_id))
 
 
@@ -552,6 +556,8 @@ func mark_transport_craft_launch_ready(craft_id: String) -> void:
 	var normalized_craft_id: String = craft_id.strip_edges()
 	if normalized_craft_id.is_empty():
 		return
+	if normalized_craft_id == _dropship_transport_craft_id:
+		_save_current_dropship_state()
 	_mission_launch_ready_craft_id = normalized_craft_id
 	if is_inside_tree():
 		_refresh_ui_state()
@@ -561,6 +567,7 @@ func clear_mission_boarded_payload() -> void:
 	_boarded_unit_ids = PackedStringArray()
 	_boarded_fireteam_ids = PackedStringArray()
 	_dropship_staged_fireteam_ids = PackedStringArray()
+	_dropship_state_by_craft.clear()
 	_current_boarding_unit_id = ""
 	_current_boarding_fireteam_id = ""
 	_dropship_phase = "idle"
@@ -580,21 +587,37 @@ func _is_mission_ready_for_launch() -> bool:
 	return true
 
 
-func _has_boarded_mission_payload() -> bool:
-	return not _boarded_unit_ids.is_empty()
+func _has_boarded_mission_payload(craft_id: String = "") -> bool:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty() or normalized_craft_id == _dropship_transport_craft_id:
+		return not _boarded_unit_ids.is_empty()
+	return not _get_boarded_unit_ids_for_craft(normalized_craft_id).is_empty()
 
 
 func build_mission_drop_state() -> Dictionary:
+	_save_current_dropship_state()
 	var mission_craft_state: Dictionary = _get_transport_craft_state(_mission_launch_ready_craft_id)
 	if mission_craft_state.is_empty():
 		mission_craft_state = _get_meta_mission_craft_state()
+	var payload_craft_id: String = _mission_launch_ready_craft_id.strip_edges()
+	if payload_craft_id.is_empty():
+		payload_craft_id = _dropship_transport_craft_id.strip_edges()
+	var payload_state: Dictionary = _get_dropship_state_for_craft(payload_craft_id)
+	var queued_fireteam_ids: PackedStringArray = _copy_packed_string_array(payload_state.get("staged_fireteam_ids", PackedStringArray()))
+	var boarded_fireteam_ids: PackedStringArray = _copy_packed_string_array(payload_state.get("boarded_fireteam_ids", PackedStringArray()))
+	var boarded_unit_ids: PackedStringArray = _copy_packed_string_array(payload_state.get("boarded_unit_ids", PackedStringArray()))
+	if (not payload_craft_id.is_empty() and payload_craft_id == _dropship_transport_craft_id) or (payload_craft_id.is_empty() and not _boarded_unit_ids.is_empty()):
+		queued_fireteam_ids = _dropship_staged_fireteam_ids.duplicate()
+		boarded_fireteam_ids = _boarded_fireteam_ids.duplicate()
+		boarded_unit_ids = _boarded_unit_ids.duplicate()
+	var payload_phase: String = String(payload_state.get("phase", _dropship_phase)).strip_edges()
 	var mission_drop_state: String = "waiting" if bool(mission_craft_state.get("mission_waiting", false)) else ("to_mission" if bool(mission_craft_state.get("mission_transit_to_map", false)) else ("to_fob" if bool(mission_craft_state.get("mission_transit_to_fob", false)) else ""))
 	return {
-		"transport_craft_id": _dropship_transport_craft_id,
-		"dropship_phase": _dropship_phase,
-		"queued_fireteam_ids": Array(_dropship_staged_fireteam_ids),
-		"boarded_fireteam_ids": Array(_boarded_fireteam_ids),
-		"embarked_unit_ids": Array(_boarded_unit_ids),
+		"transport_craft_id": payload_craft_id,
+		"dropship_phase": payload_phase,
+		"queued_fireteam_ids": Array(queued_fireteam_ids),
+		"boarded_fireteam_ids": Array(boarded_fireteam_ids),
+		"embarked_unit_ids": Array(boarded_unit_ids),
 		"launch_ready_craft_id": _mission_launch_ready_craft_id,
 		"drop_ship_staged": can_request_mission_start(),
 		"mission_drop_craft_id": String(mission_craft_state.get("craft_id", _mission_launch_ready_craft_id)).strip_edges(),
@@ -609,7 +632,7 @@ func build_mission_drop_state() -> Dictionary:
 		"mission_drop_pilot_unit_id": String(mission_craft_state.get("pilot_unit_id", "")).strip_edges(),
 		"mission_drop_pilot_display_name": String(mission_craft_state.get("pilot_display_name", "")).strip_edges(),
 		"mission_drop_pilot_portrait_path": String(mission_craft_state.get("pilot_portrait_path", "")).strip_edges(),
-		"mission_drop_passenger_count": _boarded_unit_ids.size(),
+		"mission_drop_passenger_count": boarded_unit_ids.size(),
 	}
 
 
@@ -655,6 +678,7 @@ func get_flightdeck_snapshot() -> Dictionary:
 	return {
 		"selected_craft_id": String(selected_craft_state.get("craft_id", "")).strip_edges(),
 		"visible_transport_craft_states": _get_visible_transport_craft_states(),
+		"dropship_state_by_craft": _build_dropship_state_by_craft_snapshot(),
 		"dropship_status": _build_dropship_status_text(selected_craft_state),
 		"dropship_eta": _build_dropship_eta_text(selected_craft_state),
 		"can_board": _can_start_boarding_for_craft(selected_craft_state),
@@ -702,8 +726,10 @@ func get_fireteam_assignment_board_snapshot() -> Dictionary:
 
 func get_compact_flightdeck_snapshot() -> Dictionary:
 	var selected_craft_state: Dictionary = _get_selected_transport_craft_state()
+	var selected_craft_id: String = String(selected_craft_state.get("craft_id", "")).strip_edges()
+	var boarded_unit_ids: PackedStringArray = _get_boarded_unit_ids_for_craft(selected_craft_id)
 	var passenger_units: Array = []
-	for unit_id_variant in _boarded_unit_ids:
+	for unit_id_variant in boarded_unit_ids:
 		var profile = _profiles_by_id.get(String(unit_id_variant), null)
 		if profile != null and profile.has_method("to_dict"):
 			passenger_units.append(profile.call("to_dict"))
@@ -775,8 +801,12 @@ func confirm_transport_remove_for_test() -> Dictionary:
 	var unit_id: String = String(pending.get("unit_id", "")).strip_edges()
 	if unit_id.is_empty():
 		return {"ok": false, "reason": "no_pending_remove"}
+	var craft_id: String = String(pending.get("craft_id", "")).strip_edges()
+	if not craft_id.is_empty():
+		_set_selected_transport_craft_state(craft_id)
 	if _boarded_unit_ids.has(unit_id):
 		_boarded_unit_ids.remove_at(_boarded_unit_ids.find(unit_id))
+		_save_current_dropship_state()
 	_set_selected_fireteam_for_unit(unit_id, "")
 	_pending_transport_remove.clear()
 	return {"ok": true, "unit_id": unit_id, "target_after_remove": "fob_unassigned"}
@@ -802,13 +832,14 @@ func _get_meta_mission_craft_state() -> Dictionary:
 		var craft_state: Dictionary = Dictionary(craft_state_variant)
 		if not bool(craft_state.get("mission_waiting", false)) and not bool(craft_state.get("mission_transit_to_map", false)) and not bool(craft_state.get("mission_transit_to_fob", false)):
 			continue
+		var craft_id: String = String(craft_state.get("craft_id", "")).strip_edges()
 		return {
-			"craft_id": String(craft_state.get("craft_id", "")).strip_edges(),
+			"craft_id": craft_id,
 			"display_name": String(craft_state.get("display_name", "Dropship")).strip_edges(),
 			"texture_path": String(craft_state.get("texture_path", "")).strip_edges(),
 			"pilot_display_name": String(craft_state.get("pilot_display_name", "")).strip_edges(),
 			"pilot_portrait_path": String(craft_state.get("pilot_portrait_path", "")).strip_edges(),
-			"passenger_count": _boarded_unit_ids.size(),
+			"passenger_count": _get_boarded_unit_ids_for_craft(craft_id).size(),
 			"transfer_progress": float(craft_state.get("transfer_progress", 0.0)),
 			"transfer_eta_seconds": int(craft_state.get("transfer_eta_seconds", 0)),
 			"mission_waiting": bool(craft_state.get("mission_waiting", false)),
@@ -1189,7 +1220,7 @@ func _update_dropship_panel() -> void:
 	dropship_arrival_label.text = _build_dropship_arrival_visual_text(selected_craft_state)
 	start_boarding_button.visible = false
 	start_boarding_button.disabled = true
-	remove_dropship_fireteam_button.disabled = not _dropship_staged_fireteam_ids.has(_focused_fireteam_id)
+	remove_dropship_fireteam_button.disabled = not _get_staged_fireteam_ids_for_craft(_dropship_transport_craft_id).has(_focused_fireteam_id)
 	_render_dropship_fireteam_cards(queue_list)
 
 
@@ -1310,7 +1341,7 @@ func _build_dropship_status_text(selected_craft_state: Dictionary = {}) -> Strin
 			return "%s: returning from mission map" % craft_name
 		if bool(selected_craft_state.get("is_in_transit", false)):
 			return "%s: inbound from Homebase" % craft_name
-		if craft_id == _mission_launch_ready_craft_id and _has_boarded_mission_payload():
+		if craft_id == _mission_launch_ready_craft_id and _has_boarded_mission_payload(craft_id):
 			return "%s: staged for mission start" % craft_name
 		if not bool(selected_craft_state.get("is_boardable", false)):
 			return "%s: cargo visible in FOB" % craft_name
@@ -1571,19 +1602,13 @@ func _on_clear_loadout_button_pressed() -> void:
 
 
 func _on_remove_dropship_fireteam_button_pressed() -> void:
-	if not _dropship_staged_fireteam_ids.has(_focused_fireteam_id):
+	if not _get_staged_fireteam_ids_for_craft(_dropship_transport_craft_id).has(_focused_fireteam_id):
 		return
-	var next_queue: PackedStringArray = []
-	for fireteam_id_variant in _dropship_staged_fireteam_ids:
-		var fireteam_id: String = String(fireteam_id_variant)
-		if fireteam_id == _focused_fireteam_id:
-			continue
-		next_queue.append(fireteam_id)
-	_dropship_staged_fireteam_ids = next_queue
-	if _dropship_staged_fireteam_ids.is_empty():
-		_dropship_transport_craft_id = ""
-	_restart_dropship_cycle()
-	_refresh_ui_state()
+	if _remove_fireteam_from_dropship_queues(_focused_fireteam_id):
+		if _dropship_staged_fireteam_ids.is_empty():
+			_dropship_transport_craft_id = ""
+		_restart_dropship_cycle()
+		_refresh_ui_state()
 
 
 func _on_start_boarding_button_pressed() -> void:
@@ -1603,6 +1628,7 @@ func _start_boarding_sequence() -> bool:
 	_boarded_unit_ids = PackedStringArray()
 	_boarded_fireteam_ids = PackedStringArray()
 	_start_next_boarding_step()
+	_save_current_dropship_state()
 	_refresh_dropship_status_ui()
 	return true
 
@@ -1690,6 +1716,7 @@ func _on_dropship_timer_timeout() -> void:
 			pass
 
 	_update_dropship_timer_state()
+	_save_current_dropship_state()
 	_refresh_dropship_status_ui()
 
 
@@ -1712,6 +1739,7 @@ func _start_next_boarding_step() -> void:
 			_boarding_seconds = DEFAULT_BOARDING_SECONDS
 			if dropship_timer != null:
 				dropship_timer.start()
+			_save_current_dropship_state()
 			return
 		if _is_fireteam_fully_boarded(candidate_fireteam_id) and not _boarded_fireteam_ids.has(candidate_fireteam_id):
 			_boarded_fireteam_ids.append(candidate_fireteam_id)
@@ -1722,6 +1750,7 @@ func _start_next_boarding_step() -> void:
 	_boarding_seconds = 0.0
 	_current_boarding_unit_id = ""
 	_update_dropship_timer_state()
+	_save_current_dropship_state()
 
 
 func _restart_dropship_cycle() -> void:
@@ -1742,8 +1771,12 @@ func _restart_dropship_cycle() -> void:
 		_dropship_phase = "idle"
 		_dropship_eta_seconds = 0.0
 		if _dropship_staged_fireteam_ids.is_empty():
+			var previous_craft_id: String = _dropship_transport_craft_id
+			if not previous_craft_id.is_empty():
+				_dropship_state_by_craft.erase(previous_craft_id)
 			_dropship_transport_craft_id = ""
 		_update_dropship_timer_state()
+		_save_current_dropship_state()
 		if is_inside_tree():
 			_refresh_dropship_status_ui()
 		return
@@ -1753,8 +1786,10 @@ func _restart_dropship_cycle() -> void:
 		_dropship_phase = "ready"
 		_dropship_eta_seconds = 0.0
 		if _start_boarding_sequence():
+			_save_current_dropship_state()
 			return
 		_update_dropship_timer_state()
+		_save_current_dropship_state()
 		if is_inside_tree():
 			_refresh_dropship_status_ui()
 		return
@@ -1764,6 +1799,7 @@ func _restart_dropship_cycle() -> void:
 	if dropship_timer != null:
 		dropship_timer.start()
 	_update_dropship_timer_state()
+	_save_current_dropship_state()
 	if is_inside_tree():
 		_refresh_dropship_status_ui()
 
@@ -1850,8 +1886,12 @@ func _count_fireteams_with_members() -> int:
 
 
 func _build_boarding_order() -> PackedStringArray:
+	return _build_boarding_order_from_queue(_dropship_staged_fireteam_ids)
+
+
+func _build_boarding_order_from_queue(staged_fireteam_ids: PackedStringArray) -> PackedStringArray:
 	var order: PackedStringArray = []
-	for fireteam_id_variant in _dropship_staged_fireteam_ids:
+	for fireteam_id_variant in staged_fireteam_ids:
 		var fireteam_id: String = _normalize_fireteam_id(String(fireteam_id_variant))
 		if fireteam_id.is_empty():
 			continue
@@ -1859,6 +1899,167 @@ func _build_boarding_order() -> PackedStringArray:
 			continue
 		order.append(fireteam_id)
 	return order
+
+
+func _copy_packed_string_array(value) -> PackedStringArray:
+	var result: PackedStringArray = []
+	if typeof(value) == TYPE_PACKED_STRING_ARRAY:
+		var packed_entries: PackedStringArray = value
+		for entry in packed_entries:
+			var normalized_entry: String = String(entry).strip_edges()
+			if not normalized_entry.is_empty():
+				result.append(normalized_entry)
+		return result
+	if typeof(value) == TYPE_ARRAY:
+		var array_entries: Array = value
+		for entry in array_entries:
+			var normalized_entry: String = String(entry).strip_edges()
+			if not normalized_entry.is_empty():
+				result.append(normalized_entry)
+	return result
+
+
+func _build_empty_dropship_craft_state() -> Dictionary:
+	return {
+		"staged_fireteam_ids": PackedStringArray(),
+		"phase": "idle",
+		"eta_seconds": 0.0,
+		"boarding_seconds": 0.0,
+		"boarding_order": PackedStringArray(),
+		"boarding_index": 0,
+		"boarding_member_index": 0,
+		"current_boarding_unit_id": "",
+		"current_boarding_fireteam_id": "",
+		"boarded_unit_ids": PackedStringArray(),
+		"boarded_fireteam_ids": PackedStringArray(),
+	}
+
+
+func _capture_current_dropship_state() -> Dictionary:
+	return {
+		"staged_fireteam_ids": _dropship_staged_fireteam_ids.duplicate(),
+		"phase": _dropship_phase,
+		"eta_seconds": _dropship_eta_seconds,
+		"boarding_seconds": _boarding_seconds,
+		"boarding_order": _boarding_order.duplicate(),
+		"boarding_index": _boarding_index,
+		"boarding_member_index": _boarding_member_index,
+		"current_boarding_unit_id": _current_boarding_unit_id,
+		"current_boarding_fireteam_id": _current_boarding_fireteam_id,
+		"boarded_unit_ids": _boarded_unit_ids.duplicate(),
+		"boarded_fireteam_ids": _boarded_fireteam_ids.duplicate(),
+	}
+
+
+func _coerce_dropship_craft_state(raw_state: Dictionary) -> Dictionary:
+	var state: Dictionary = _build_empty_dropship_craft_state()
+	state["staged_fireteam_ids"] = _copy_packed_string_array(raw_state.get("staged_fireteam_ids", PackedStringArray()))
+	state["phase"] = String(raw_state.get("phase", "idle")).strip_edges()
+	if String(state.get("phase", "")).is_empty():
+		state["phase"] = "idle"
+	state["eta_seconds"] = float(raw_state.get("eta_seconds", 0.0))
+	state["boarding_seconds"] = float(raw_state.get("boarding_seconds", 0.0))
+	state["boarding_order"] = _copy_packed_string_array(raw_state.get("boarding_order", PackedStringArray()))
+	var boarding_order: PackedStringArray = _copy_packed_string_array(state.get("boarding_order", PackedStringArray()))
+	var staged_fireteam_ids: PackedStringArray = _copy_packed_string_array(state.get("staged_fireteam_ids", PackedStringArray()))
+	if boarding_order.is_empty() and not staged_fireteam_ids.is_empty():
+		state["boarding_order"] = _build_boarding_order_from_queue(state["staged_fireteam_ids"])
+	state["boarding_index"] = int(raw_state.get("boarding_index", 0))
+	state["boarding_member_index"] = int(raw_state.get("boarding_member_index", 0))
+	state["current_boarding_unit_id"] = String(raw_state.get("current_boarding_unit_id", "")).strip_edges()
+	state["current_boarding_fireteam_id"] = String(raw_state.get("current_boarding_fireteam_id", "")).strip_edges()
+	state["boarded_unit_ids"] = _copy_packed_string_array(raw_state.get("boarded_unit_ids", PackedStringArray()))
+	state["boarded_fireteam_ids"] = _copy_packed_string_array(raw_state.get("boarded_fireteam_ids", PackedStringArray()))
+	return state
+
+
+func _apply_dropship_craft_state(state: Dictionary) -> void:
+	var coerced_state: Dictionary = _coerce_dropship_craft_state(state)
+	_dropship_staged_fireteam_ids = _copy_packed_string_array(coerced_state.get("staged_fireteam_ids", PackedStringArray()))
+	_dropship_phase = String(coerced_state.get("phase", "idle")).strip_edges()
+	if _dropship_phase.is_empty():
+		_dropship_phase = "idle"
+	_dropship_eta_seconds = float(coerced_state.get("eta_seconds", 0.0))
+	_boarding_seconds = float(coerced_state.get("boarding_seconds", 0.0))
+	_boarding_order = _copy_packed_string_array(coerced_state.get("boarding_order", PackedStringArray()))
+	_boarding_index = int(coerced_state.get("boarding_index", 0))
+	_boarding_member_index = int(coerced_state.get("boarding_member_index", 0))
+	_current_boarding_unit_id = String(coerced_state.get("current_boarding_unit_id", "")).strip_edges()
+	_current_boarding_fireteam_id = String(coerced_state.get("current_boarding_fireteam_id", "")).strip_edges()
+	_boarded_unit_ids = _copy_packed_string_array(coerced_state.get("boarded_unit_ids", PackedStringArray()))
+	_boarded_fireteam_ids = _copy_packed_string_array(coerced_state.get("boarded_fireteam_ids", PackedStringArray()))
+
+
+func _save_current_dropship_state() -> void:
+	var craft_id: String = _dropship_transport_craft_id.strip_edges()
+	if craft_id.is_empty():
+		return
+	_dropship_state_by_craft[craft_id] = _capture_current_dropship_state()
+
+
+func _set_selected_transport_craft_state(craft_id: String, save_previous: bool = true) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return
+	if normalized_craft_id == _dropship_transport_craft_id:
+		return
+	if save_previous:
+		_save_current_dropship_state()
+	_dropship_transport_craft_id = normalized_craft_id
+	var stored_variant = _dropship_state_by_craft.get(normalized_craft_id, _build_empty_dropship_craft_state())
+	var stored_state: Dictionary = stored_variant if typeof(stored_variant) == TYPE_DICTIONARY else _build_empty_dropship_craft_state()
+	_apply_dropship_craft_state(stored_state)
+
+
+func _get_dropship_state_for_craft(craft_id: String) -> Dictionary:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return _build_empty_dropship_craft_state()
+	if normalized_craft_id == _dropship_transport_craft_id:
+		return _capture_current_dropship_state()
+	var stored_variant = _dropship_state_by_craft.get(normalized_craft_id, _build_empty_dropship_craft_state())
+	var stored_state: Dictionary = stored_variant if typeof(stored_variant) == TYPE_DICTIONARY else _build_empty_dropship_craft_state()
+	return _coerce_dropship_craft_state(stored_state)
+
+
+func _get_staged_fireteam_ids_for_craft(craft_id: String) -> PackedStringArray:
+	return _copy_packed_string_array(_get_dropship_state_for_craft(craft_id).get("staged_fireteam_ids", PackedStringArray()))
+
+
+func _get_boarding_order_for_craft(craft_id: String) -> PackedStringArray:
+	var state: Dictionary = _get_dropship_state_for_craft(craft_id)
+	var order: PackedStringArray = _copy_packed_string_array(state.get("boarding_order", PackedStringArray()))
+	if order.is_empty():
+		order = _build_boarding_order_from_queue(_copy_packed_string_array(state.get("staged_fireteam_ids", PackedStringArray())))
+	return order
+
+
+func _get_boarded_unit_ids_for_craft(craft_id: String) -> PackedStringArray:
+	return _copy_packed_string_array(_get_dropship_state_for_craft(craft_id).get("boarded_unit_ids", PackedStringArray()))
+
+
+func _get_boarded_fireteam_ids_for_craft(craft_id: String) -> PackedStringArray:
+	return _copy_packed_string_array(_get_dropship_state_for_craft(craft_id).get("boarded_fireteam_ids", PackedStringArray()))
+
+
+func _build_dropship_state_by_craft_snapshot() -> Dictionary:
+	var snapshot: Dictionary = {}
+	for craft_state_variant in _get_visible_transport_craft_states():
+		if typeof(craft_state_variant) != TYPE_DICTIONARY:
+			continue
+		var craft_state: Dictionary = craft_state_variant
+		var craft_id: String = String(craft_state.get("craft_id", "")).strip_edges()
+		if craft_id.is_empty():
+			continue
+		var state: Dictionary = _get_dropship_state_for_craft(craft_id)
+		snapshot[craft_id] = {
+			"staged_fireteam_ids": Array(_copy_packed_string_array(state.get("staged_fireteam_ids", PackedStringArray()))),
+			"boarding_order": Array(_copy_packed_string_array(state.get("boarding_order", PackedStringArray()))),
+			"boarded_unit_ids": Array(_copy_packed_string_array(state.get("boarded_unit_ids", PackedStringArray()))),
+			"boarded_fireteam_ids": Array(_copy_packed_string_array(state.get("boarded_fireteam_ids", PackedStringArray()))),
+			"phase": String(state.get("phase", "idle")).strip_edges(),
+		}
+	return snapshot
 
 
 func _get_boarding_fireteam_id() -> String:
@@ -1883,6 +2084,7 @@ func _complete_current_boarding_member() -> void:
 		_boarded_fireteam_ids.append(current_fireteam_id)
 	_boarding_member_index += 1
 	_current_boarding_unit_id = ""
+	_save_current_dropship_state()
 
 
 func _is_fireteam_fully_boarded(fireteam_id: String) -> bool:
@@ -1936,24 +2138,124 @@ func _set_fireteam_respawn_enabled(fireteam_id: String, enabled: bool) -> void:
 	_refresh_ui_state()
 
 
-func _queue_fireteam_for_dropship(fireteam_id: String, craft_id: String = "") -> void:
+func _remove_fireteam_from_dropship_state(state: Dictionary, fireteam_id: String) -> Dictionary:
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	var next_state: Dictionary = _coerce_dropship_craft_state(state)
+	if normalized_fireteam_id.is_empty():
+		next_state["changed"] = false
+		return next_state
+
+	var changed := false
+	var next_staged_fireteam_ids: PackedStringArray = []
+	for queued_fireteam_id in _copy_packed_string_array(next_state.get("staged_fireteam_ids", PackedStringArray())):
+		if String(queued_fireteam_id) == normalized_fireteam_id:
+			changed = true
+			continue
+		next_staged_fireteam_ids.append(String(queued_fireteam_id))
+	next_state["staged_fireteam_ids"] = next_staged_fireteam_ids
+	next_state["boarding_order"] = _build_boarding_order_from_queue(next_staged_fireteam_ids)
+
+	var next_boarded_fireteam_ids: PackedStringArray = []
+	for boarded_fireteam_id in _copy_packed_string_array(next_state.get("boarded_fireteam_ids", PackedStringArray())):
+		if String(boarded_fireteam_id) == normalized_fireteam_id:
+			changed = true
+			continue
+		next_boarded_fireteam_ids.append(String(boarded_fireteam_id))
+	next_state["boarded_fireteam_ids"] = next_boarded_fireteam_ids
+
+	var member_ids: PackedStringArray = _get_member_unit_ids_for_fireteam(normalized_fireteam_id)
+	var next_boarded_unit_ids: PackedStringArray = []
+	for boarded_unit_id in _copy_packed_string_array(next_state.get("boarded_unit_ids", PackedStringArray())):
+		if member_ids.has(String(boarded_unit_id)):
+			changed = true
+			continue
+		next_boarded_unit_ids.append(String(boarded_unit_id))
+	next_state["boarded_unit_ids"] = next_boarded_unit_ids
+
+	if String(next_state.get("current_boarding_fireteam_id", "")).strip_edges() == normalized_fireteam_id:
+		next_state["current_boarding_fireteam_id"] = ""
+		next_state["current_boarding_unit_id"] = ""
+		changed = true
+	if next_staged_fireteam_ids.is_empty() and next_boarded_unit_ids.is_empty():
+		next_state["phase"] = "idle"
+		next_state["eta_seconds"] = 0.0
+		next_state["boarding_seconds"] = 0.0
+		next_state["boarding_index"] = 0
+		next_state["boarding_member_index"] = 0
+	next_state["changed"] = changed
+	return next_state
+
+
+func _remove_fireteam_from_dropship_queues(fireteam_id: String) -> bool:
 	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
 	if normalized_fireteam_id.is_empty():
-		return
+		return false
+
+	var changed := false
+	var selected_state: Dictionary = _remove_fireteam_from_dropship_state(_capture_current_dropship_state(), normalized_fireteam_id)
+	if bool(selected_state.get("changed", false)):
+		selected_state.erase("changed")
+		_apply_dropship_craft_state(selected_state)
+		changed = true
+
+	for craft_id_variant in _dropship_state_by_craft.keys():
+		var craft_id: String = String(craft_id_variant).strip_edges()
+		if craft_id.is_empty() or craft_id == _dropship_transport_craft_id:
+			continue
+		var stored_variant = _dropship_state_by_craft.get(craft_id, {})
+		if typeof(stored_variant) != TYPE_DICTIONARY:
+			continue
+		var next_state: Dictionary = _remove_fireteam_from_dropship_state(stored_variant, normalized_fireteam_id)
+		if bool(next_state.get("changed", false)):
+			next_state.erase("changed")
+			_dropship_state_by_craft[craft_id] = next_state
+			changed = true
+
+	if changed:
+		_save_current_dropship_state()
+	return changed
+
+
+func _is_fireteam_in_any_dropship_state(fireteam_id: String) -> bool:
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	if normalized_fireteam_id.is_empty():
+		return false
+	if _dropship_staged_fireteam_ids.has(normalized_fireteam_id) or _boarded_fireteam_ids.has(normalized_fireteam_id):
+		return true
+	for craft_id_variant in _dropship_state_by_craft.keys():
+		var craft_id: String = String(craft_id_variant).strip_edges()
+		if craft_id.is_empty() or craft_id == _dropship_transport_craft_id:
+			continue
+		var state: Dictionary = _get_dropship_state_for_craft(craft_id)
+		if _copy_packed_string_array(state.get("staged_fireteam_ids", PackedStringArray())).has(normalized_fireteam_id):
+			return true
+		if _copy_packed_string_array(state.get("boarded_fireteam_ids", PackedStringArray())).has(normalized_fireteam_id):
+			return true
+	return false
+
+
+func _queue_fireteam_for_dropship(fireteam_id: String, craft_id: String = "") -> void:
 	var target_craft_id: String = craft_id.strip_edges()
 	if target_craft_id.is_empty():
 		target_craft_id = _dropship_transport_craft_id
 	if target_craft_id.is_empty():
 		var fallback_craft_state: Dictionary = _get_selected_transport_craft_state()
 		target_craft_id = String(fallback_craft_state.get("craft_id", "")).strip_edges()
+	if not target_craft_id.is_empty():
+		_set_selected_transport_craft_state(target_craft_id)
+
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	if normalized_fireteam_id.is_empty():
+		_refresh_ui_state()
+		return
 	var target_craft_state: Dictionary = _get_transport_craft_state(target_craft_id)
 	if not target_craft_state.is_empty() and not _can_stage_fireteam_into_craft(target_craft_state, normalized_fireteam_id):
 		return
-	if not target_craft_id.is_empty():
-		_dropship_transport_craft_id = target_craft_id
+	_remove_fireteam_from_dropship_queues(normalized_fireteam_id)
 	if not _dropship_staged_fireteam_ids.has(normalized_fireteam_id):
 		_dropship_staged_fireteam_ids.append(normalized_fireteam_id)
 	_restart_dropship_cycle()
+	_save_current_dropship_state()
 	_refresh_ui_state()
 
 
@@ -1964,14 +2266,8 @@ func _remove_fireteam_from_other_staging(fireteam_id: String, target_drop_kind: 
 	if target_drop_kind != "respawn" and _respawn_staged_fireteam_id == fireteam_id:
 		_set_fireteam_respawn_enabled(fireteam_id, false)
 		_respawn_staged_fireteam_id = ""
-	if target_drop_kind != "dropship" and _dropship_staged_fireteam_ids.has(fireteam_id):
-		var next_queue: PackedStringArray = []
-		for queued_fireteam_id in _dropship_staged_fireteam_ids:
-			if String(queued_fireteam_id) == fireteam_id:
-				continue
-			next_queue.append(String(queued_fireteam_id))
-		_dropship_staged_fireteam_ids = next_queue
-		dropship_queue_changed = true
+	if target_drop_kind != "dropship":
+		dropship_queue_changed = _remove_fireteam_from_dropship_queues(fireteam_id)
 	return dropship_queue_changed
 
 
@@ -1983,9 +2279,7 @@ func _is_fireteam_staged_in_window(fireteam_id: String) -> bool:
 		return true
 	if _respawn_staged_fireteam_id == normalized_fireteam_id:
 		return true
-	if _boarded_fireteam_ids.has(normalized_fireteam_id):
-		return true
-	return _dropship_staged_fireteam_ids.has(normalized_fireteam_id)
+	return _is_fireteam_in_any_dropship_state(normalized_fireteam_id)
 
 
 func _render_loadout_member_rows(
@@ -3088,8 +3382,12 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 	var craft_card: PanelContainer = PanelContainer.new()
 	craft_card.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	craft_card.custom_minimum_size = Vector2(FOB_TRANSPORT_CARD_WIDTH, 0.0)
+	craft_card.mouse_filter = Control.MOUSE_FILTER_STOP
+	craft_card.set_meta("transport_craft_id", craft_id)
 	craft_card.set_meta("shared_transport_card_width", FOB_TRANSPORT_CARD_WIDTH)
 	craft_card.set_meta("shared_transport_card_half_width", true)
+	craft_card.set_meta("fob_ship_texture_size", Vector2(FOB_TRANSPORT_SHIP_TEXTURE_WIDTH, FOB_TRANSPORT_SHIP_TEXTURE_HEIGHT))
+	craft_card.gui_input.connect(_on_transport_craft_card_gui_input.bind(craft_id))
 	if can_stage_fireteams:
 		craft_card.set_script(FOB_DROP_PANEL_SCRIPT)
 		craft_card.drop_kind = "dropship|%s" % craft_id
@@ -3098,7 +3396,7 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 	var is_transit_to_mission: bool = bool(craft_state.get("mission_transit_to_map", false))
 	var is_transit_to_fob: bool = bool(craft_state.get("mission_transit_to_fob", false))
 	var is_air_asset_recovery: bool = bool(craft_state.get("air_asset_unavailable", false))
-	var is_launch_ready_in_fob: bool = craft_id == _mission_launch_ready_craft_id and _has_boarded_mission_payload() and not is_waiting_on_mission and not is_transit_to_mission and not is_transit_to_fob
+	var is_launch_ready_in_fob: bool = craft_id == _mission_launch_ready_craft_id and _has_boarded_mission_payload(craft_id) and not is_waiting_on_mission and not is_transit_to_mission and not is_transit_to_fob
 	var pilot_unit_id: String = String(craft_state.get("pilot_unit_id", "")).strip_edges()
 	TRANSPORT_CRAFT_CARD_UI_SCRIPT.apply_card_state(
 		craft_card,
@@ -3108,9 +3406,10 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 			"can_stage": can_stage_fireteams,
 			"title_text": UI_BLOCK_LABELS_SCRIPT.prefixed_transport_title(_build_transport_craft_title(craft_state)),
 			"ship_texture": _get_transport_craft_texture(craft_state),
-			"ship_texture_width": 128.0,
-			"ship_texture_height": 76.0,
-			"content_minimum_height": 76.0,
+			"ship_texture_width": FOB_TRANSPORT_SHIP_TEXTURE_WIDTH,
+			"ship_texture_height": FOB_TRANSPORT_SHIP_TEXTURE_HEIGHT,
+			"ship_texture_stretch_mode": TextureRect.STRETCH_KEEP_ASPECT_COVERED,
+			"content_minimum_height": FOB_TRANSPORT_SHIP_TEXTURE_HEIGHT,
 			"pilot_profile": _profiles_by_id.get(pilot_unit_id, null),
 			"pilot_text": _build_transport_craft_pilot_text(craft_state),
 			"pilot_source_context": "transport_craft_pilot",
@@ -3146,8 +3445,10 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 	var extra_content_host: VBoxContainer = TRANSPORT_CRAFT_CARD_UI_SCRIPT.get_extra_content_host(craft_card)
 
 	if is_boardable:
+		var staged_fireteam_ids: PackedStringArray = _get_staged_fireteam_ids_for_craft(craft_id)
+		var boarding_order: PackedStringArray = _get_boarding_order_for_craft(craft_id)
 		var drop_label := Label.new()
-		if is_selected and not _dropship_staged_fireteam_ids.is_empty():
+		if is_selected and not staged_fireteam_ids.is_empty():
 			if _get_transport_craft_remaining_capacity(craft_state) <= 0:
 				drop_label.text = "Full %d/%d NPC assigned + pilot" % [_get_transport_craft_staged_member_count(craft_id), DROPSHIP_NPC_CAPACITY]
 			else:
@@ -3155,8 +3456,8 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 			drop_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			drop_label.add_theme_font_size_override("font_size", 9)
 			extra_content_host.add_child(drop_label)
-		if is_selected and not _boarding_order.is_empty():
-			for fireteam_id_variant in _boarding_order:
+		if is_selected and not boarding_order.is_empty():
+			for fireteam_id_variant in boarding_order:
 				var fireteam_id: String = String(fireteam_id_variant)
 				var fireteam_card := _create_fireteam_card(fireteam_id, "dropship_wait")
 				if fireteam_card == null:
@@ -3211,7 +3512,8 @@ func _build_transport_craft_status_line(craft_state: Dictionary) -> String:
 		return "Status: returning to FOB | ETA %ds" % int(craft_state.get("transfer_eta_seconds", 0))
 	if bool(craft_state.get("is_in_transit", false)):
 		return "Status: inbound to FOB | ETA %ds | 6 NPC + pilot" % int(craft_state.get("transfer_eta_seconds", 0))
-	if String(craft_state.get("craft_id", "")).strip_edges() == _mission_launch_ready_craft_id and _has_boarded_mission_payload():
+	var craft_id: String = String(craft_state.get("craft_id", "")).strip_edges()
+	if craft_id == _mission_launch_ready_craft_id and _has_boarded_mission_payload(craft_id):
 		return "Status: staged in FOB | start mission to launch"
 	if bool(craft_state.get("is_boardable", false)):
 		return "Status: docked in FOB | %s" % _build_transport_craft_capacity_text(craft_state)
@@ -3286,10 +3588,10 @@ func _get_selected_transport_craft_state() -> Dictionary:
 
 func _get_transport_craft_staged_member_count(craft_id: String) -> int:
 	var normalized_craft_id: String = craft_id.strip_edges()
-	if normalized_craft_id.is_empty() or normalized_craft_id != _dropship_transport_craft_id:
+	if normalized_craft_id.is_empty():
 		return 0
 	var staged_member_count: int = 0
-	for fireteam_id_variant in _dropship_staged_fireteam_ids:
+	for fireteam_id_variant in _get_staged_fireteam_ids_for_craft(normalized_craft_id):
 		staged_member_count += _get_member_unit_ids_for_fireteam(String(fireteam_id_variant)).size()
 	return staged_member_count
 
@@ -3301,9 +3603,10 @@ func _get_transport_craft_remaining_capacity(craft_state: Dictionary) -> int:
 
 func _has_transport_craft_capacity_for_fireteam(craft_state: Dictionary, fireteam_id: String) -> bool:
 	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	var craft_id: String = String(craft_state.get("craft_id", "")).strip_edges()
 	if normalized_fireteam_id.is_empty():
 		return _get_transport_craft_remaining_capacity(craft_state) > 0
-	if _dropship_staged_fireteam_ids.has(normalized_fireteam_id):
+	if _get_staged_fireteam_ids_for_craft(craft_id).has(normalized_fireteam_id):
 		return true
 	var member_count: int = _get_member_unit_ids_for_fireteam(normalized_fireteam_id).size()
 	if member_count <= 0:
@@ -3326,9 +3629,10 @@ func _can_mark_transport_craft_launch_ready(craft_state: Dictionary) -> bool:
 		return false
 	if bool(craft_state.get("air_asset_unavailable", false)):
 		return false
-	if not _has_boarded_mission_payload():
+	var craft_id: String = String(craft_state.get("craft_id", "")).strip_edges()
+	if not _has_boarded_mission_payload(craft_id):
 		return false
-	if String(craft_state.get("craft_id", "")).strip_edges() != _dropship_transport_craft_id:
+	if craft_id != _dropship_transport_craft_id:
 		return false
 	if not bool(craft_state.get("is_boardable", false)):
 		return false
@@ -3340,7 +3644,9 @@ func _can_request_homebase_mission_start(craft_state: Dictionary) -> bool:
 		return false
 	if bool(craft_state.get("air_asset_unavailable", false)):
 		return false
-	if not _has_boarded_mission_payload():
+	var craft_id: String = String(craft_state.get("craft_id", "")).strip_edges()
+	var has_boarded_payload: bool = _has_boarded_mission_payload(craft_id) or int(craft_state.get("passenger_count", 0)) > 0
+	if not has_boarded_payload:
 		return false
 	return bool(craft_state.get("mission_waiting", false))
 
@@ -3363,15 +3669,26 @@ func _on_transport_craft_selected(craft_id: String) -> void:
 	var normalized_craft_id: String = craft_id.strip_edges()
 	if normalized_craft_id.is_empty():
 		return
-	_dropship_transport_craft_id = normalized_craft_id
+	_set_selected_transport_craft_state(normalized_craft_id)
 	_refresh_ui_state()
+
+
+func _on_transport_craft_card_gui_input(event: InputEvent, craft_id: String) -> void:
+	if event is InputEventMouseButton:
+		var mouse_event := event as InputEventMouseButton
+		if mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed:
+			_on_transport_craft_selected(craft_id)
+	elif event is InputEventScreenTouch:
+		var touch_event := event as InputEventScreenTouch
+		if touch_event.pressed:
+			_on_transport_craft_selected(craft_id)
 
 
 func _on_transport_craft_boarding_requested(craft_id: String) -> void:
 	var normalized_craft_id: String = craft_id.strip_edges()
 	if normalized_craft_id.is_empty():
 		return
-	_dropship_transport_craft_id = normalized_craft_id
+	_set_selected_transport_craft_state(normalized_craft_id)
 	_on_start_boarding_button_pressed()
 	_refresh_ui_state()
 
@@ -3380,14 +3697,86 @@ func _on_transport_craft_mission_stage_requested(craft_id: String) -> void:
 	var normalized_craft_id: String = craft_id.strip_edges()
 	if normalized_craft_id.is_empty():
 		return
-	_dropship_transport_craft_id = normalized_craft_id
+	_set_selected_transport_craft_state(normalized_craft_id)
 	var craft_state: Dictionary = _get_transport_craft_state(normalized_craft_id)
 	if not _can_mark_transport_craft_launch_ready(craft_state):
 		_refresh_ui_state()
 		return
+	_save_current_dropship_state()
 	_mission_launch_ready_craft_id = normalized_craft_id
 	transport_craft_mission_stage_requested.emit(normalized_craft_id)
 	_refresh_ui_state()
+
+
+func _sanitize_dropship_fireteam_queue(source_ids: PackedStringArray) -> PackedStringArray:
+	var sanitized_ids: PackedStringArray = []
+	for fireteam_id_variant in source_ids:
+		var fireteam_id: String = _normalize_fireteam_id(String(fireteam_id_variant))
+		if fireteam_id.is_empty() or _find_fireteam_definition_index(fireteam_id) < 0:
+			continue
+		if _build_fireteam_member_names(fireteam_id).is_empty() or sanitized_ids.has(fireteam_id):
+			continue
+		sanitized_ids.append(fireteam_id)
+	return sanitized_ids
+
+
+func _trim_dropship_queue_for_capacity(source_ids: PackedStringArray) -> PackedStringArray:
+	var remaining_capacity: int = DROPSHIP_NPC_CAPACITY
+	var trimmed_queue: PackedStringArray = []
+	for fireteam_id_variant in source_ids:
+		var fireteam_id: String = _normalize_fireteam_id(String(fireteam_id_variant))
+		if fireteam_id.is_empty() or trimmed_queue.has(fireteam_id):
+			continue
+		var member_count: int = _get_member_unit_ids_for_fireteam(fireteam_id).size()
+		if member_count <= 0 or member_count > remaining_capacity:
+			continue
+		trimmed_queue.append(fireteam_id)
+		remaining_capacity -= member_count
+	return trimmed_queue
+
+
+func _sanitize_boarded_unit_ids(source_ids: PackedStringArray) -> PackedStringArray:
+	var sanitized_ids: PackedStringArray = []
+	for unit_id_variant in source_ids:
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty() or not _selected_unit_ids.has(unit_id) or sanitized_ids.has(unit_id):
+			continue
+		sanitized_ids.append(unit_id)
+	return sanitized_ids
+
+
+func _sanitize_boarded_fireteam_ids(source_ids: PackedStringArray) -> PackedStringArray:
+	var sanitized_ids: PackedStringArray = []
+	for fireteam_id_variant in source_ids:
+		var fireteam_id: String = _normalize_fireteam_id(String(fireteam_id_variant))
+		if fireteam_id.is_empty() or _find_fireteam_definition_index(fireteam_id) < 0 or sanitized_ids.has(fireteam_id):
+			continue
+		sanitized_ids.append(fireteam_id)
+	return sanitized_ids
+
+
+func _sanitize_saved_dropship_states() -> void:
+	var sanitized_states: Dictionary = {}
+	for craft_id_variant in _dropship_state_by_craft.keys():
+		var craft_id: String = String(craft_id_variant).strip_edges()
+		if craft_id.is_empty():
+			continue
+		var craft_state: Dictionary = _get_transport_craft_state(craft_id)
+		if craft_state.is_empty():
+			continue
+		var raw_state_variant = _dropship_state_by_craft.get(craft_id, {})
+		if typeof(raw_state_variant) != TYPE_DICTIONARY:
+			continue
+		var state: Dictionary = _coerce_dropship_craft_state(raw_state_variant)
+		var staged_ids: PackedStringArray = _trim_dropship_queue_for_capacity(_sanitize_dropship_fireteam_queue(_copy_packed_string_array(state.get("staged_fireteam_ids", PackedStringArray()))))
+		state["staged_fireteam_ids"] = staged_ids
+		state["boarding_order"] = _build_boarding_order_from_queue(staged_ids)
+		state["boarded_unit_ids"] = _sanitize_boarded_unit_ids(_copy_packed_string_array(state.get("boarded_unit_ids", PackedStringArray())))
+		state["boarded_fireteam_ids"] = _sanitize_boarded_fireteam_ids(_copy_packed_string_array(state.get("boarded_fireteam_ids", PackedStringArray())))
+		if staged_ids.is_empty() and _copy_packed_string_array(state.get("boarded_unit_ids", PackedStringArray())).is_empty() and String(state.get("phase", "idle")).strip_edges() == "idle":
+			continue
+		sanitized_states[craft_id] = state
+	_dropship_state_by_craft = sanitized_states
 
 
 func _sanitize_staging_state() -> void:
@@ -3404,35 +3793,19 @@ func _sanitize_staging_state() -> void:
 	if _respawn_anchor_fireteam_id != _respawn_staged_fireteam_id or _find_fireteam_definition_index(_respawn_anchor_fireteam_id) < 0:
 		_clear_respawn_anchor_progress()
 
-	var sanitized_dropship_ids: PackedStringArray = []
-	for fireteam_id_variant in _dropship_staged_fireteam_ids:
-		var fireteam_id: String = _normalize_fireteam_id(String(fireteam_id_variant))
-		if fireteam_id.is_empty() or _find_fireteam_definition_index(fireteam_id) < 0:
-			continue
-		if _build_fireteam_member_names(fireteam_id).is_empty() or sanitized_dropship_ids.has(fireteam_id):
-			continue
-		sanitized_dropship_ids.append(fireteam_id)
-	_dropship_staged_fireteam_ids = sanitized_dropship_ids
+	_dropship_staged_fireteam_ids = _sanitize_dropship_fireteam_queue(_dropship_staged_fireteam_ids)
 	_sanitize_transport_craft_state()
 	_trim_dropship_queue_to_capacity()
 	_boarding_order = _build_boarding_order()
+	_save_current_dropship_state()
+	_sanitize_saved_dropship_states()
 
 
 func _trim_dropship_queue_to_capacity() -> void:
 	if _dropship_transport_craft_id.is_empty():
 		return
-	var remaining_capacity: int = DROPSHIP_NPC_CAPACITY
-	var trimmed_queue: PackedStringArray = []
-	for fireteam_id_variant in _dropship_staged_fireteam_ids:
-		var fireteam_id: String = _normalize_fireteam_id(String(fireteam_id_variant))
-		if fireteam_id.is_empty() or trimmed_queue.has(fireteam_id):
-			continue
-		var member_count: int = _get_member_unit_ids_for_fireteam(fireteam_id).size()
-		if member_count <= 0 or member_count > remaining_capacity:
-			continue
-		trimmed_queue.append(fireteam_id)
-		remaining_capacity -= member_count
-	_dropship_staged_fireteam_ids = trimmed_queue
+	_dropship_staged_fireteam_ids = _trim_dropship_queue_for_capacity(_dropship_staged_fireteam_ids)
+	_save_current_dropship_state()
 
 
 func _sanitize_transport_craft_state() -> void:
@@ -3449,6 +3822,7 @@ func _sanitize_transport_craft_state() -> void:
 			_mission_launch_ready_craft_id = ""
 		return
 	_dropship_transport_craft_id = ""
+	_dropship_state_by_craft.erase(selected_craft_id)
 	_dropship_staged_fireteam_ids = PackedStringArray()
 	_boarding_order = PackedStringArray()
 	_dropship_phase = "idle"
