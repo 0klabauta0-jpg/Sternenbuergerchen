@@ -51,6 +51,7 @@ func _test_main_menu_and_settings_buttons() -> void:
 		_button_spec("EditorButton", "MenuRail/MenuMargin/MenuVBox/MenuButtons/EditorButton", ["pressed"], "enabled", "required", {"route": MAP_EDITOR_SCENE_PATH, "focus": true}),
 		_button_spec("SettingsButton", "MenuRail/MenuMargin/MenuVBox/MenuButtons/SettingsButton", ["pressed"], "enabled", "required", {"route": "local_settings_panel", "focus": true}),
 		_button_spec("NewRosterButton", "MenuRail/MenuMargin/MenuVBox/MenuButtons/NewRosterButton", ["pressed"], "enabled", "required", {"meta_key": "roster_action", "meta_value": "new_start_roster", "focus": true}),
+		_button_spec("TeamEditorToggleButton", "MenuRail/MenuMargin/MenuVBox/MenuButtons/TeamEditorToggleButton", ["pressed"], "enabled", "required", {"meta_key": "roster_action", "meta_value": "toggle_team_editor", "focus": true}),
 	], Vector2(1920.0, 1080.0))
 	var settings_button := screen.get_node_or_null("MenuRail/MenuMargin/MenuVBox/MenuButtons/SettingsButton") as BaseButton
 	var press_result: Dictionary = Dictionary(HARNESS_SCRIPT.press_button_for_test(settings_button))

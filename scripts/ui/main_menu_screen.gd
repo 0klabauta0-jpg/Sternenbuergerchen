@@ -55,6 +55,7 @@ var _settings_reset_button: Button = null
 var _team_name_edit: LineEdit = null
 var _team_name_suggest_button: Button = null
 var _new_roster_button: Button = null
+var _team_editor_toggle_button: Button = null
 var _team_library_panel: PanelContainer = null
 var _team_library_list: VBoxContainer = null
 var _team_library_status_label: Label = null
@@ -63,6 +64,7 @@ var _team_library_delete_button: Button = null
 var _team_library_entries: Array = []
 var _selected_roster_entry_path: String = ""
 var _team_editor_panel: PanelContainer = null
+var _team_editor_open: bool = false
 var _team_editor_emblem_option: OptionButton = null
 var _team_editor_emblem_preview: TextureRect = null
 var _team_editor_budget_label: Label = null
@@ -221,6 +223,8 @@ func get_team_editor_snapshot() -> Dictionary:
 	var editor: Dictionary = _get_normalized_team_editor(false)
 	return {
 		"visible": _team_editor_panel != null and _team_editor_panel.visible,
+		"toggle_visible": _team_editor_toggle_button != null and _team_editor_toggle_button.visible,
+		"toggle_text": _team_editor_toggle_button.text if _team_editor_toggle_button != null else "",
 		"budget_max": int(editor.get("point_budget_max", 0)),
 		"budget_used": int(editor.get("point_budget_used", 0)),
 		"budget_available": int(editor.get("point_budget_available", 0)),
@@ -256,6 +260,18 @@ func set_team_editor_stat_for_tests(stat_id: String, value: int) -> Dictionary:
 
 func set_team_editor_emblem_for_tests(emblem_id: String) -> Dictionary:
 	return _set_team_editor_emblem(emblem_id, false)
+
+
+func open_team_editor() -> void:
+	_set_team_editor_open(true)
+
+
+func close_team_editor() -> void:
+	_set_team_editor_open(false)
+
+
+func toggle_team_editor() -> void:
+	_set_team_editor_open(not _team_editor_open)
 
 
 func ensure_start_roster_exists(seed: String = "", roster_size: int = -1) -> Dictionary:
@@ -636,9 +652,21 @@ func _ensure_start_roster_button() -> void:
 		menu_buttons.add_child(_new_roster_button)
 	_new_roster_button.set_meta("roster_action", "new_start_roster")
 	_new_roster_button.set_meta("requires_confirmation", true)
+	_team_editor_toggle_button = menu_buttons.get_node_or_null("TeamEditorToggleButton") as Button
+	if _team_editor_toggle_button == null:
+		_team_editor_toggle_button = Button.new()
+		_team_editor_toggle_button.name = "TeamEditorToggleButton"
+		_team_editor_toggle_button.custom_minimum_size = Vector2(360.0, 48.0)
+		_team_editor_toggle_button.focus_mode = Control.FOCUS_ALL
+		menu_buttons.add_child(_team_editor_toggle_button)
+	_team_editor_toggle_button.set_meta("roster_action", "toggle_team_editor")
+	_team_editor_toggle_button.tooltip_text = "Eigenes Rookie-Team mit Bild und Startpunkten bearbeiten."
+	if not _team_editor_toggle_button.pressed.is_connected(_on_team_editor_toggle_pressed):
+		_team_editor_toggle_button.pressed.connect(_on_team_editor_toggle_pressed)
 	_ensure_team_library_panel(menu_buttons)
 	_ensure_team_editor_panel(menu_buttons)
 	_refresh_start_roster_button()
+	_refresh_team_editor_toggle()
 	_refresh_team_name_controls()
 	_refresh_team_library()
 	_refresh_team_editor()
@@ -651,6 +679,7 @@ func _ensure_team_library_panel(menu_buttons: VBoxContainer) -> void:
 		_team_library_panel.name = "TeamLibraryPanel"
 		menu_buttons.add_child(_team_library_panel)
 	_team_library_panel.custom_minimum_size = Vector2(360.0, 154.0)
+	_team_library_panel.visible = not _team_editor_open
 	var margin := _team_library_panel.get_node_or_null("TeamLibraryMargin") as MarginContainer
 	if margin == null:
 		margin = MarginContainer.new()
@@ -727,7 +756,9 @@ func _ensure_team_editor_panel(menu_buttons: VBoxContainer) -> void:
 		_team_editor_panel = PanelContainer.new()
 		_team_editor_panel.name = "TeamEditorPanel"
 		menu_buttons.add_child(_team_editor_panel)
-	_team_editor_panel.custom_minimum_size = Vector2(360.0, 258.0)
+	_team_editor_panel.custom_minimum_size = Vector2(360.0, 242.0)
+	_team_editor_panel.visible = _team_editor_open
+	_team_editor_panel.mouse_filter = Control.MOUSE_FILTER_STOP if _team_editor_open else Control.MOUSE_FILTER_IGNORE
 	var margin := _team_editor_panel.get_node_or_null("TeamEditorMargin") as MarginContainer
 	if margin == null:
 		margin = MarginContainer.new()
@@ -748,7 +779,7 @@ func _ensure_team_editor_panel(menu_buttons: VBoxContainer) -> void:
 		header_label = Label.new()
 		header_label.name = "TeamEditorHeaderLabel"
 		vbox.add_child(header_label)
-	header_label.text = "Team-Editor"
+	header_label.text = "Team selbst erstellen"
 	header_label.add_theme_font_size_override("font_size", 13)
 	header_label.tooltip_text = "Rookie-Teams haben maximal 30 Startpunkte. Fortschritt soll spaeter spuerbar bleiben."
 	var emblem_row := vbox.get_node_or_null("TeamEditorEmblemRow") as HBoxContainer
@@ -788,7 +819,7 @@ func _ensure_team_editor_panel(menu_buttons: VBoxContainer) -> void:
 		scroll.name = "TeamEditorStatsScroll"
 		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 		vbox.add_child(scroll)
-	scroll.custom_minimum_size = Vector2(340.0, 152.0)
+	scroll.custom_minimum_size = Vector2(340.0, 136.0)
 	_team_editor_stats_vbox = scroll.get_node_or_null("TeamEditorStatsVBox") as VBoxContainer
 	if _team_editor_stats_vbox == null:
 		_team_editor_stats_vbox = VBoxContainer.new()
@@ -802,7 +833,25 @@ func _refresh_start_roster_button() -> void:
 	if _new_roster_button == null:
 		return
 	_new_roster_button.text = "Team neu bestaetigen" if _start_roster_reset_confirmation_pending else "Neues Team generieren"
-	_new_roster_button.tooltip_text = "Ersetzt das Startteam erst nach Bestaetigung." if _start_roster_reset_confirmation_pending else "Startteam-Generator vorbereiten."
+	_new_roster_button.tooltip_text = "Ersetzt das Startteam erst nach Bestaetigung." if _start_roster_reset_confirmation_pending else "Automatisch ein neues Startteam generieren."
+
+
+func _refresh_team_editor_toggle() -> void:
+	if _team_editor_toggle_button == null:
+		return
+	_team_editor_toggle_button.text = "Team-Editor schliessen" if _team_editor_open else "Team selbst erstellen"
+	_team_editor_toggle_button.tooltip_text = "Team-Editor einklappen." if _team_editor_open else "Eigenes Rookie-Team mit Bild und Startpunkten bearbeiten."
+
+
+func _set_team_editor_open(open: bool) -> void:
+	_team_editor_open = open
+	if _team_editor_panel != null:
+		_team_editor_panel.visible = _team_editor_open
+		_team_editor_panel.mouse_filter = Control.MOUSE_FILTER_STOP if _team_editor_open else Control.MOUSE_FILTER_IGNORE
+	if _team_library_panel != null:
+		_team_library_panel.visible = not _team_editor_open
+		_team_library_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE if _team_editor_open else Control.MOUSE_FILTER_STOP
+	_refresh_team_editor_toggle()
 
 
 func _refresh_team_name_controls() -> void:
@@ -983,11 +1032,7 @@ func _refresh_team_editor_emblems(editor: Dictionary) -> void:
 	for option_variant in options:
 		var option: Dictionary = Dictionary(option_variant)
 		var emblem_id: String = String(option.get("id", "")).strip_edges()
-		var texture: Texture2D = _load_res_texture(String(option.get("path", "")))
-		if texture != null:
-			_team_editor_emblem_option.add_icon_item(texture, String(option.get("label", emblem_id)))
-		else:
-			_team_editor_emblem_option.add_item(String(option.get("label", emblem_id)))
+		_team_editor_emblem_option.add_item(String(option.get("label", emblem_id)))
 		var item_index: int = _team_editor_emblem_option.item_count - 1
 		_team_editor_emblem_option.set_item_metadata(item_index, option)
 		if emblem_id == selected_emblem_id:
@@ -1199,6 +1244,7 @@ func _register_main_menu_help_ids() -> void:
 	_connect_help_control(_editor_button, "main_menu.primary_routes")
 	_connect_help_control(_settings_button, "main_menu.primary_routes")
 	_connect_help_control(_new_roster_button, "main_menu.primary_routes")
+	_connect_help_control(_team_editor_toggle_button, "main_menu.primary_routes")
 	_connect_help_control(_team_library_activate_button, "main_menu.primary_routes")
 	_connect_help_control(_team_library_delete_button, "main_menu.primary_routes")
 	_connect_help_control(_team_editor_emblem_option, "main_menu.primary_routes")
@@ -1572,6 +1618,12 @@ func _on_new_roster_pressed() -> void:
 		confirm_new_start_roster()
 	else:
 		request_new_start_roster()
+
+
+func _on_team_editor_toggle_pressed() -> void:
+	toggle_team_editor()
+	_status_label.text = "Team-Editor" if _team_editor_open else "Ready"
+	_play_ui_sfx("switch", "team_editor_toggle")
 
 
 func _on_team_name_edit_submitted(next_text: String) -> void:

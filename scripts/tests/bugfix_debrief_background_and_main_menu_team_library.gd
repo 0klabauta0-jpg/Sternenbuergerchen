@@ -44,6 +44,7 @@ func _test_debrief_uses_catalog_background() -> void:
 
 
 func _test_main_menu_lists_created_teams_and_deletes_archives() -> void:
+	root.size = Vector2i(1920, 1080)
 	var save_path: String = "user://bugfix_team_library_%d/roster_v1.json" % Time.get_ticks_msec()
 	var menu := MAIN_MENU_SCENE.instantiate() as Control
 	root.add_child(menu)
@@ -56,10 +57,22 @@ func _test_main_menu_lists_created_teams_and_deletes_archives() -> void:
 	_assert(bool(initial_snapshot.get("selected_is_active", false)), "Active team is visibly selected")
 	_assert(not bool(initial_snapshot.get("delete_enabled", true)), "Delete is disabled for the active team")
 	var initial_editor: Dictionary = Dictionary(menu.call("get_team_editor_snapshot"))
-	_assert(bool(initial_editor.get("visible", false)), "Start screen shows the team editor")
+	_assert(bool(initial_editor.get("toggle_visible", false)), "Start screen exposes a button for manual team creation")
+	_assert(not bool(initial_editor.get("visible", true)), "Start screen keeps the team editor behind the manual creation button")
+	_assert(_control_inside_viewport(menu.get_node("MenuRail/MenuMargin/MenuVBox/MenuButtons/SingleplayerButton") as Control, Vector2(1920.0, 1080.0)), "Singleplayer button remains reachable before opening the team editor")
+	menu.call("open_team_editor")
+	await process_frame
+	initial_editor = Dictionary(menu.call("get_team_editor_snapshot"))
+	initial_snapshot = Dictionary(menu.call("get_team_library_snapshot"))
+	_assert(bool(initial_editor.get("visible", false)), "Manual creation button opens the team editor")
+	_assert(not bool(initial_snapshot.get("visible", true)), "Team list yields the rail space while the editor is open")
 	_assert(int(initial_editor.get("budget_max", 0)) == 30, "Team editor uses a 30 point rookie cap")
 	_assert(int(initial_editor.get("budget_used", 0)) <= 30, "Team editor never exceeds the rookie cap")
 	_assert(int(initial_editor.get("emblem_option_count", 0)) > 1 and bool(initial_editor.get("has_emblem_texture", false)), "Team editor exposes existing image choices")
+	var emblem_option := menu.find_child("TeamEditorEmblemOption", true, false) as OptionButton
+	var emblem_preview := menu.find_child("TeamEditorEmblemPreview", true, false) as TextureRect
+	_assert(emblem_option != null and emblem_option.size.y <= 48.0 and emblem_option.size.x <= 360.0 and not _option_button_has_icons(emblem_option), "Team emblem dropdown stays compact instead of rendering full-size portraits")
+	_assert(emblem_preview != null and emblem_preview.size.x <= 40.0 and emblem_preview.size.y <= 40.0, "Team emblem preview remains a small thumbnail")
 	var blocked_plus: Dictionary = Dictionary(menu.call("adjust_team_editor_stat_for_tests", "tactics", 1))
 	_assert(bool(blocked_plus.get("ok", false)) and not bool(blocked_plus.get("changed", true)), "Full rookie budget blocks extra points")
 	var lowered_stat: Dictionary = Dictionary(menu.call("adjust_team_editor_stat_for_tests", "tactics", -1))
@@ -162,6 +175,22 @@ func _has_disabled_nonselected_item(option_button: OptionButton) -> bool:
 func _wait_frames(frame_count: int) -> void:
 	for _index in range(frame_count):
 		await process_frame
+
+
+func _control_inside_viewport(control: Control, viewport_size: Vector2) -> bool:
+	if control == null:
+		return false
+	var rect := Rect2(control.global_position, control.size)
+	return rect.position.x >= 0.0 and rect.position.y >= 0.0 and rect.end.x <= viewport_size.x and rect.end.y <= viewport_size.y
+
+
+func _option_button_has_icons(option_button: OptionButton) -> bool:
+	if option_button == null:
+		return false
+	for index in range(option_button.item_count):
+		if option_button.get_item_icon(index) != null:
+			return true
+	return false
 
 
 func _assert(condition: bool, message: String) -> void:
