@@ -47,6 +47,7 @@ const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scrip
 const COMIC_BUBBLE_SETTINGS_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_settings.gd")
 const COMIC_BUBBLE_RUNTIME_GATE_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_runtime_gate.gd")
 const NPC_THOUGHT_BUBBLE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/ui/npc_thought_bubble_resolver.gd")
+const HOVER_SCROLL_BEHAVIOR_SCRIPT: GDScript = preload("res://scripts/ui/hover_scroll_behavior.gd")
 const DROPSHIP_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NE.png")
 const DROPSHIP_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NW.png")
 const DROPSHIP_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
@@ -54,7 +55,7 @@ const DROPSHIP_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Is
 
 const ALL_FIRETEAM_LABEL: String = "ALL"
 const APPROACH_ANGLES: PackedStringArray = ["NW", "NE", "SW", "SE"]
-const HOTKEY_LEGEND: String = "LMB Select/Center | Doubleclick Center | RMB Waypoint | SHIFT+Drag Area | CTRL+LMB Add | DEL/Del Button Order | 1 Move | 2 Hold | 3 Flank | 4 Take | T Sort | G GO"
+const HOTKEY_LEGEND: String = "LMB Select/Center | Doubleclick Center | RMB Order | RMB Drag Area | Shift+RMB Append | CTRL+LMB Add | DEL/Del Button Order | T Sort | G GO"
 const LIVE_ORDER_PHASE_INDEX: int = 1
 const PHASE_PLANNING_ENABLED: bool = false
 const FRIENDLY_TEAM_ID: String = "team_alpha"
@@ -112,9 +113,9 @@ const AREA_ORDER_MENU_ENGAGE_ID: int = 202
 const AREA_ORDER_MENU_TAKE_ID: int = 203
 const AREA_ORDER_MENU_FLANK_ID: int = 204
 const AREA_ORDER_MENU_DELETE_ID: int = 299
-const DROP_OFFMAP_DISTANCE_MULTIPLIER: float = 2.0
-const DROP_OFFMAP_MIN_DISTANCE: float = 720.0
-const DROP_SHIP_SPEED: float = 340.0
+const DROP_OFFMAP_DISTANCE_MULTIPLIER: float = 3.0
+const DROP_OFFMAP_MIN_DISTANCE: float = 1080.0
+const DROP_SHIP_SPEED: float = 520.0
 const DROP_LANDING_HOLD_SECONDS: float = 0.75
 const DROP_UNLOAD_INTERVAL_SECONDS: float = 0.45
 const DROP_SHIP_RECALL_COOLDOWN_SECONDS: float = 2.5
@@ -166,6 +167,8 @@ const POST_DROP_SECURITY_MODE: String = "360"
 const POST_DROP_SECURITY_RADIUS_TILES: int = 4
 const POST_DROP_SECURITY_TILE_WORLD_STEP: float = 64.0
 const POST_DROP_SECURITY_MOVE_SPEED_FACTOR: float = 0.68
+const POST_DROP_COVER_SEARCH_RADIUS_FACTOR: float = 1.65
+const POST_DROP_COVER_MIN_SCORE: float = 32.0
 
 signal planning_state_changed(planning_state)
 
@@ -276,6 +279,13 @@ var _area_order_press_active: bool = false
 var _area_order_drag_active: bool = false
 var _area_order_press_screen_position: Vector2 = Vector2.ZERO
 var _area_order_drag_screen_position: Vector2 = Vector2.ZERO
+var _right_order_press_active: bool = false
+var _right_order_drag_active: bool = false
+var _right_order_press_screen_position: Vector2 = Vector2.ZERO
+var _right_order_drag_screen_position: Vector2 = Vector2.ZERO
+var _right_order_append_mode: bool = false
+var _waypoint_menu_append_mode: bool = false
+var _area_order_menu_append_mode: bool = false
 var _order_visualizer_pending: bool = false
 var _phase_execution_by_fireteam: Dictionary = {}
 var _active_behavior_profiles_by_fireteam: Dictionary = {}
@@ -308,6 +318,7 @@ func _ready() -> void:
 	if not _has_lz_position:
 		_lz_position = _last_target_position
 	_apply_hud_skin()
+	HOVER_SCROLL_BEHAVIOR_SCRIPT.call("install", get_parent() if get_parent() != null else self)
 	_connect_button(move_button_path, Callable(self, "issue_move"))
 	_connect_button(defend_button_path, Callable(self, "issue_defend"))
 	_connect_button(flank_button_path, Callable(self, "issue_flank"))
@@ -397,7 +408,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		if mouse_button_event.button_index == MOUSE_BUTTON_RIGHT and mouse_button_event.pressed:
 			if _is_pointer_over_control() or _is_lz_placement_armed or _is_target_placement_armed:
 				return
-			if _try_open_waypoint_menu_at_position(mouse_button_event.position):
+			if _begin_right_order_context_interaction(mouse_button_event.position, mouse_button_event.shift_pressed):
+				get_viewport().set_input_as_handled()
+			return
+
+		if mouse_button_event.button_index == MOUSE_BUTTON_RIGHT and not mouse_button_event.pressed:
+			if _finish_right_order_context_interaction(mouse_button_event.position, mouse_button_event.shift_pressed):
 				get_viewport().set_input_as_handled()
 			return
 
@@ -451,6 +467,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 
 	if event is InputEventMouseMotion:
+		if _update_right_order_context_drag((event as InputEventMouseMotion).position):
+			get_viewport().set_input_as_handled()
+			return
 		if _update_area_order_drag((event as InputEventMouseMotion).position):
 			get_viewport().set_input_as_handled()
 			return
@@ -767,6 +786,7 @@ func _should_preserve_live_execution_during_planning_sync(planning_state: Dictio
 
 func get_planning_state() -> Dictionary:
 	_ensure_tactical_stance_controller()
+	_mission_drop_progress = _build_mission_dropship_progress_value()
 	_store_selected_mission_dropship_plan()
 	var planning_state: Dictionary = {
 		"has_lz_position": _has_lz_position,
@@ -1694,7 +1714,7 @@ func _on_call_dropship_pressed() -> void:
 			_last_command_text = "DROP INBOUND %s" % _get_approach_angle_name()
 		else:
 			_last_command_text = "DROP %s" % _get_approach_angle_name()
-	elif _is_drop_sequence_active():
+	elif _is_drop_sequence_active() and _drop_sequence_phase != DROP_SEQUENCE_OUTBOUND:
 		_last_command_text = "DROP ALREADY ACTIVE"
 	elif _try_start_drop_sequence():
 		_drop_ship_requested = true
@@ -2962,6 +2982,7 @@ func _ensure_character_overlay() -> void:
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	overlay_vbox.add_child(scroll)
+	HOVER_SCROLL_BEHAVIOR_SCRIPT.call("install", scroll)
 
 	var content_vbox := VBoxContainer.new()
 	content_vbox.name = "OverlayContentVBox"
@@ -3775,7 +3796,7 @@ func _write_current_mission_dropship_state_to_card(card: Dictionary) -> Dictiona
 		result["pilot_text"] = _mission_drop_pilot_text
 	if not _mission_drop_status_line.is_empty():
 		result["status_line"] = _mission_drop_status_line
-	result["progress"] = _mission_drop_progress
+	result["progress"] = _build_mission_dropship_progress_value()
 	result["eta_seconds"] = _mission_drop_eta_seconds
 	result["pilot_unit_id"] = _mission_drop_pilot_unit_id
 	result["pilot_display_name"] = _mission_drop_pilot_display_name
@@ -3824,9 +3845,21 @@ func _build_current_mission_dropship_card() -> Dictionary:
 
 func _get_mission_dropship_card_entries() -> Array:
 	var entries: Array = _sanitize_mission_dropship_cards(_mission_drop_cards)
+	var selected_craft_id: String = _mission_drop_craft_id.strip_edges()
+	if not selected_craft_id.is_empty():
+		var did_merge_selected_card: bool = false
+		for index in range(entries.size()):
+			var card: Dictionary = Dictionary(entries[index]).duplicate(true)
+			if String(card.get("craft_id", "")).strip_edges() != selected_craft_id:
+				continue
+			entries[index] = _write_current_mission_dropship_state_to_card(card)
+			did_merge_selected_card = true
+			break
+		if not did_merge_selected_card:
+			entries.append(_write_current_mission_dropship_state_to_card(_build_current_mission_dropship_card()))
 	if entries.is_empty() and (not _mission_drop_craft_id.is_empty() or _is_drop_sequence_active()):
 		entries.append(_build_current_mission_dropship_card())
-	return entries
+	return _sanitize_mission_dropship_cards(entries)
 
 
 func _find_mission_dropship_card_entry(craft_id: String) -> Dictionary:
@@ -3845,8 +3878,17 @@ func select_mission_dropship_craft(craft_id: String) -> bool:
 
 
 func _select_mission_dropship_craft(craft_id: String, should_emit_signal: bool = true) -> bool:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	var current_craft_id: String = _mission_drop_craft_id.strip_edges()
+	if _is_drop_sequence_active() and normalized_craft_id != current_craft_id:
+		if _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND:
+			_handoff_outbound_drop_sequence_to_card()
+		else:
+			_last_command_text = "DROP ACTIVE: %s" % (_mission_drop_display_name if not _mission_drop_display_name.is_empty() else "Dropship")
+			_update_ui()
+			return false
 	_store_selected_mission_dropship_plan()
-	var selected_card: Dictionary = _find_mission_dropship_card_entry(craft_id)
+	var selected_card: Dictionary = _find_mission_dropship_card_entry(normalized_craft_id)
 	if selected_card.is_empty():
 		return false
 	_apply_mission_dropship_card_selection(selected_card)
@@ -4488,7 +4530,11 @@ func _build_mission_dropship_status_text(card: Dictionary = {}) -> String:
 			DROP_SEQUENCE_COMPLETE:
 				return "Drop complete"
 			"waiting":
-				return "Holding on mission map"
+				if bool(card.get("drop_ship_requested", false)):
+					return "Drop queued | %s" % ("LZ set" if bool(card.get("has_lz_position", false)) else "set LZ")
+				if bool(card.get("has_lz_position", false)):
+					return "Ready to drop | LZ set"
+				return "Holding on mission map | set LZ"
 			"to_mission":
 				return "ETA mission map %ds" % maxi(int(card.get("eta_seconds", 0)), 0)
 			"to_fob":
@@ -4913,7 +4959,7 @@ func _refresh_world_overlays() -> void:
 	var primary_has_live_drop_sequence: bool = not _drop_sequence_phase.is_empty()
 	var dropship_position: Vector2 = _drop_sequence_position if primary_has_live_drop_sequence else _get_drop_staging_position()
 	var dropship_visuals: Array = _build_mission_dropship_visual_entries(primary_has_live_drop_state or primary_has_live_drop_sequence, dropship_position)
-	var dropship_visible: bool = primary_has_live_drop_state or primary_has_live_drop_sequence or not dropship_visuals.is_empty()
+	var dropship_visible: bool = not dropship_visuals.is_empty()
 	var primary_dropship_position: Vector2 = dropship_position
 	var primary_dropship_target: Vector2 = _get_primary_dropship_target_position(primary_dropship_position)
 	if not dropship_visuals.is_empty() and not (primary_has_live_drop_state or primary_has_live_drop_sequence):
@@ -4973,6 +5019,8 @@ func _refresh_world_overlays() -> void:
 				dropship_marker.global_position = _get_drop_staging_position()
 			else:
 				dropship_marker.global_position = _get_drop_staging_position()
+			if not _is_mission_dropship_position_inside_map_airspace(dropship_marker.global_position):
+				dropship_marker.visible = false
 			if sprite != null:
 				sprite.texture = _get_mission_dropship_texture()
 			var approach_line := dropship_marker.get_node_or_null("ApproachLine") as Line2D
@@ -5002,7 +5050,7 @@ func _build_mission_dropship_visual_entries(primary_visible: bool, primary_posit
 			continue
 		seen_craft_ids[craft_id] = true
 		entries.append(entry)
-	if entries.is_empty() and primary_visible:
+	if entries.is_empty() and primary_visible and _is_mission_dropship_position_inside_map_airspace(primary_position):
 		var target_position: Vector2 = _get_primary_dropship_target_position(primary_position)
 		entries.append(
 			{
@@ -5037,13 +5085,18 @@ func _build_mission_dropship_visual_entry(card: Dictionary, index: int, primary_
 	var target_position: Vector2 = _get_mission_dropship_card_target_position(card, index, state, ship_position)
 	var has_lz: bool = bool(card.get("has_lz_position", false))
 	var lz_position: Vector2 = _coerce_vector2_value(card.get("lz_position", _lz_position if is_selected else Vector2.ZERO), _lz_position if is_selected else Vector2.ZERO)
+	var body_visible: bool = _should_show_mission_dropship_body_for_state(state) and _is_mission_dropship_position_inside_player_area(ship_position)
+	if not body_visible and not has_lz and typeof(target_position) != TYPE_VECTOR2:
+		return {}
+	var approach_origin_position: Vector2 = _get_mission_dropship_approach_origin_position(card, index, state, ship_position, has_lz, lz_position, is_selected)
 	return {
 		"craft_id": craft_id,
 		"display_name": String(card.get("display_name", "Dropship")).strip_edges(),
 		"state": state,
-		"dropship_visible": true,
+		"dropship_visible": body_visible,
 		"dropship_position": ship_position,
 		"dropship_target_position": target_position,
+		"approach_origin_position": approach_origin_position,
 		"has_lz_position": has_lz,
 		"lz_position": lz_position,
 		"dropship_texture": _get_mission_dropship_texture(card),
@@ -5052,12 +5105,34 @@ func _build_mission_dropship_visual_entry(card: Dictionary, index: int, primary_
 	}
 
 
+func _should_show_mission_dropship_body_for_state(state: String) -> bool:
+	match state.strip_edges().to_lower():
+		"waiting", DROP_SEQUENCE_INBOUND, DROP_SEQUENCE_LANDED, DROP_SEQUENCE_UNLOADING, DROP_SEQUENCE_COMPLETE:
+			return true
+		_:
+			return false
+
+
 func _is_mission_dropship_state_visible_on_map(state: String) -> bool:
 	match state.strip_edges().to_lower():
 		"to_mission", "waiting", "to_fob", DROP_SEQUENCE_INBOUND, DROP_SEQUENCE_LANDED, DROP_SEQUENCE_UNLOADING, DROP_SEQUENCE_COMPLETE, DROP_SEQUENCE_OUTBOUND:
 			return true
 		_:
 			return false
+
+
+func _is_mission_dropship_position_inside_map_airspace(world_position: Vector2) -> bool:
+	var map_bounds: Rect2 = _get_map_world_bounds()
+	if map_bounds.size.x <= 1.0 or map_bounds.size.y <= 1.0:
+		return true
+	return map_bounds.grow(128.0).has_point(world_position)
+
+
+func _is_mission_dropship_position_inside_player_area(world_position: Vector2) -> bool:
+	var map_bounds: Rect2 = _get_map_world_bounds()
+	if map_bounds.size.x <= 1.0 or map_bounds.size.y <= 1.0:
+		return true
+	return map_bounds.has_point(world_position)
 
 
 func _get_mission_dropship_card_position(card: Dictionary, index: int, state: String) -> Vector2:
@@ -5074,6 +5149,19 @@ func _get_mission_dropship_card_position(card: Dictionary, index: int, state: St
 			return hold_position.lerp(staging_position, progress)
 		_:
 			return hold_position
+
+
+func _get_mission_dropship_approach_origin_position(card: Dictionary, index: int, state: String, ship_position: Vector2, has_lz: bool, lz_position: Vector2, is_selected: bool) -> Vector2:
+	if not has_lz:
+		return ship_position
+	var approach_angle: String = _sanitize_approach_angle_name(String(card.get("approach_angle", _get_approach_angle_name())))
+	if is_selected:
+		approach_angle = _get_approach_angle_name()
+	match state.strip_edges().to_lower():
+		"waiting", "to_mission":
+			return _get_drop_staging_position_for_lz(lz_position, approach_angle)
+		_:
+			return ship_position
 
 
 func _get_mission_dropship_card_target_position(card: Dictionary, index: int, state: String, ship_position: Vector2) -> Vector2:
@@ -7870,20 +7958,20 @@ func refresh_flank_vulnerability_state() -> void:
 	_update_ui()
 
 
-func _try_open_waypoint_menu_at_position(screen_position: Vector2) -> bool:
+func _try_open_waypoint_menu_at_position(screen_position: Vector2, append_mode: bool = false) -> bool:
 	var existing_target: Dictionary = _find_waypoint_target_at_screen_position(screen_position)
 	if not existing_target.is_empty():
 		_focused_waypoint_ref = existing_target.duplicate(true)
 		_focused_area_order_ref = {}
 		_refresh_button_state()
-		_open_waypoint_command_menu(screen_position, [existing_target], true)
+		_open_waypoint_command_menu(screen_position, [existing_target], true, false)
 		return true
 	var existing_area_order_target: Dictionary = _find_area_order_target_at_screen_position(screen_position)
 	if not existing_area_order_target.is_empty():
 		_focused_area_order_ref = existing_area_order_target.duplicate(true)
 		_focused_waypoint_ref = {}
 		_refresh_button_state()
-		_open_area_order_command_menu(screen_position, [existing_area_order_target], true)
+		_open_area_order_command_menu(screen_position, [existing_area_order_target], true, false)
 		return true
 
 	if _selected_fireteam_ids.is_empty():
@@ -7891,21 +7979,32 @@ func _try_open_waypoint_menu_at_position(screen_position: Vector2) -> bool:
 		_update_ui()
 		return false
 
-	var waypoint_targets: Array = _create_waypoints_for_selected_fireteams(_clamp_world_position_to_viewport(_screen_to_world_position(screen_position)))
+	var tile_context: Dictionary = _build_tile_context_from_screen_position(screen_position)
+	if _has_primary_grid_for_command_selection() and tile_context.is_empty():
+		_last_command_text = "NO TILE UNDER CURSOR"
+		_refresh_button_state()
+		_update_ui()
+		return false
+	var waypoint_world_position: Vector2 = Vector2(tile_context.get("world_position", _snap_planning_position_to_tile_center(_clamp_world_position_to_viewport(_screen_to_world_position(screen_position)))))
+	if not tile_context.is_empty():
+		_set_selected_tile_context(tile_context, "", false, false)
+	var waypoint_targets: Array = _create_waypoints_for_selected_fireteams(waypoint_world_position, not append_mode)
 	if waypoint_targets.is_empty():
 		return false
 	_focused_waypoint_ref = Dictionary(waypoint_targets[0]).duplicate(true)
 	_focused_area_order_ref = {}
-	_open_waypoint_command_menu(screen_position, waypoint_targets, false)
-	_last_command_text = "WAYPOINT ADDED (%s)" % _get_phase_name()
+	_open_waypoint_command_menu(screen_position, waypoint_targets, false, append_mode)
+	_last_command_text = "WAYPOINT %s (%s)" % ["APPENDED" if append_mode else "SET", _get_phase_name()]
 	_update_ui()
 	_emit_planning_state_changed()
 	return true
 
 
-func _create_waypoints_for_selected_fireteams(world_position: Vector2) -> Array:
+func _create_waypoints_for_selected_fireteams(world_position: Vector2, replace_existing_next_order: bool = false) -> Array:
 	var waypoint_targets: Array = []
 	var snapped_world_position: Vector2 = _snap_planning_position_to_tile_center(world_position)
+	if replace_existing_next_order:
+		_replace_next_orders_for_fireteams(_selected_fireteam_ids, _get_live_order_phase_index())
 	for fireteam_id in _selected_fireteam_ids:
 		var waypoint_target: Dictionary = _append_waypoint_to_plan(String(fireteam_id), _get_live_order_phase_index(), snapped_world_position)
 		if waypoint_target.is_empty():
@@ -7913,6 +8012,92 @@ func _create_waypoints_for_selected_fireteams(world_position: Vector2) -> Array:
 		waypoint_targets.append(waypoint_target)
 	_refresh_order_visuals()
 	return waypoint_targets
+
+
+func _replace_next_orders_for_fireteams(fireteam_ids: PackedStringArray, phase_index: int) -> void:
+	var sanitized_fireteam_ids: PackedStringArray = _sanitize_fireteam_ids(fireteam_ids)
+	if sanitized_fireteam_ids.is_empty():
+		return
+	for fireteam_id_variant in sanitized_fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		_remove_replaceable_waypoints_for_fireteam(fireteam_id, phase_index)
+		_remove_replaceable_area_orders_for_fireteam(fireteam_id)
+	_remove_empty_multi_fireteam_plans()
+
+
+func _remove_replaceable_waypoints_for_fireteam(fireteam_id: String, phase_index: int) -> void:
+	var plan_key: String = _build_order_plan_key(fireteam_id, phase_index)
+	var plan = _order_plans_by_key.get(plan_key, null)
+	if plan == null or plan.waypoints.is_empty():
+		return
+	var retained_waypoints: Array = []
+	var next_active_index: int = -1
+	for waypoint in plan.waypoints:
+		if waypoint == null:
+			continue
+		var status: String = String(waypoint.status).strip_edges().to_lower()
+		if status == FIRETEAM_WAYPOINT_SCRIPT.STATUS_PENDING or status == FIRETEAM_WAYPOINT_SCRIPT.STATUS_INTERRUPTED or status == FIRETEAM_WAYPOINT_SCRIPT.STATUS_CANCELLED:
+			continue
+		if status == FIRETEAM_WAYPOINT_SCRIPT.STATUS_ACTIVE:
+			next_active_index = retained_waypoints.size()
+		retained_waypoints.append(waypoint)
+	plan.waypoints = retained_waypoints
+	plan.active_waypoint_index = next_active_index
+	if plan.waypoints.is_empty():
+		_order_plans_by_key.erase(plan_key)
+	elif next_active_index < 0 and String(plan.status) != FIRETEAM_ORDER_PLAN_SCRIPT.STATUS_COMPLETED:
+		plan.status = FIRETEAM_ORDER_PLAN_SCRIPT.STATUS_DRAFT
+
+
+func _remove_replaceable_area_orders_for_fireteam(fireteam_id: String) -> void:
+	for area_order_id_variant in _area_orders_by_id.keys().duplicate():
+		var area_order_id: String = String(area_order_id_variant)
+		var area_order = _area_orders_by_id.get(area_order_id, null)
+		if area_order == null:
+			continue
+		if String(area_order.fireteam_id).strip_edges().to_lower() != fireteam_id:
+			continue
+		var status: String = String(area_order.status).strip_edges().to_lower()
+		if status != AREA_ORDER_SCRIPT.STATUS_PENDING and status != AREA_ORDER_SCRIPT.STATUS_CANCELLED:
+			continue
+		_remove_multi_fireteam_plans_for_area_order_id(area_order_id)
+		_area_orders_by_id.erase(area_order_id)
+
+
+func _remove_empty_multi_fireteam_plans() -> void:
+	for plan_id_variant in _multi_fireteam_plans_by_id.keys().duplicate():
+		var plan_id: String = String(plan_id_variant)
+		var plan: Dictionary = Dictionary(_multi_fireteam_plans_by_id.get(plan_id, {}))
+		var area_context: Dictionary = Dictionary(plan.get("area_context", {}))
+		var refs: Array = Array(area_context.get("area_order_refs", []))
+		var has_live_ref: bool = false
+		for ref_variant in refs:
+			if typeof(ref_variant) != TYPE_DICTIONARY:
+				continue
+			if _area_orders_by_id.has(String(Dictionary(ref_variant).get("area_order_id", "")).strip_edges()):
+				has_live_ref = true
+				break
+		if not has_live_ref:
+			_multi_fireteam_plans_by_id.erase(plan_id)
+
+
+func issue_right_click_command_for_test(world_position: Vector2, command_type: String, append_mode: bool = false) -> bool:
+	var waypoint_targets: Array = _create_waypoints_for_selected_fireteams(world_position, not append_mode)
+	if waypoint_targets.is_empty():
+		return false
+	_waypoint_menu_append_mode = append_mode
+	return _set_waypoint_command_for_targets(waypoint_targets, command_type)
+
+
+func issue_right_drag_area_command_for_test(start_world_position: Vector2, end_world_position: Vector2, command_type: String, append_mode: bool = false) -> bool:
+	var payload: Dictionary = _build_area_order_payload_from_world_rect(start_world_position, end_world_position)
+	var area_targets: Array = _create_area_orders_from_payload(_selected_fireteam_ids, payload, AREA_ORDER_SCRIPT.COMMAND_TYPE_DEFEND, true, not append_mode)
+	if area_targets.is_empty():
+		return false
+	_area_order_menu_append_mode = append_mode
+	return _set_area_order_command_for_targets(area_targets, command_type)
 
 
 func create_area_order_for_selected_fireteams_from_world_rect(start_world_position: Vector2, end_world_position: Vector2, command_type: String = AREA_ORDER_SCRIPT.COMMAND_TYPE_DEFEND) -> Array:
@@ -7929,13 +8114,15 @@ func _create_area_orders_for_selected_fireteams_from_screen_rect(screen_rect: Re
 	return _create_area_orders_from_payload(_selected_fireteam_ids, payload, command_type, true)
 
 
-func _create_area_orders_from_payload(fireteam_ids: PackedStringArray, payload: Dictionary, command_type: String, should_emit_signal: bool) -> Array:
+func _create_area_orders_from_payload(fireteam_ids: PackedStringArray, payload: Dictionary, command_type: String, should_emit_signal: bool, replace_existing_next_order: bool = false) -> Array:
 	var normalized_command_type: String = _normalize_area_order_command_type(command_type)
 	var sanitized_fireteam_ids: PackedStringArray = _sanitize_fireteam_ids(fireteam_ids)
 	if sanitized_fireteam_ids.is_empty():
 		return []
 	if Array(payload.get("tile_positions", [])).is_empty() and PackedVector2Array(payload.get("world_polygon", PackedVector2Array())).is_empty():
 		return []
+	if replace_existing_next_order:
+		_replace_next_orders_for_fireteams(sanitized_fireteam_ids, _get_live_order_phase_index())
 
 	var targets: Array = []
 	for fireteam_id_variant in sanitized_fireteam_ids:
@@ -9002,6 +9189,8 @@ func _apply_default_fireteam_behavior(fireteam_id: String, phase_index: int) -> 
 	var metadata: Dictionary = Dictionary(behavior_profile.metadata).duplicate(true)
 	metadata["origin"] = "standard_behavior"
 	metadata["phase"] = phase_index
+	metadata["security_mode_override"] = "directional"
+	metadata["security_direction_angle"] = _resolve_objective_security_angle_for_fireteam(fireteam_id, anchor_position)
 	behavior_profile.metadata = metadata
 	_set_active_behavior_profile(fireteam_id, behavior_profile)
 	if _issue_fireteam_hold_current_positions(fireteam_id, phase_index):
@@ -9040,7 +9229,7 @@ func _apply_post_drop_360_security_behavior(fireteam_id: String, phase_index: in
 	metadata["security_mode_override"] = POST_DROP_SECURITY_MODE
 	metadata["security_radius_tiles"] = POST_DROP_SECURITY_RADIUS_TILES
 	metadata["security_radius_world"] = _get_post_drop_security_radius_world()
-	metadata["security_direction_angle"] = -PI * 0.5
+	metadata["security_direction_angle"] = _resolve_objective_security_angle_for_fireteam(fireteam_id, anchor_position)
 	behavior_profile.metadata = metadata
 	_set_active_behavior_profile(fireteam_id, behavior_profile)
 	var issued: bool = _issue_fireteam_post_drop_360_security_positions(fireteam_id, phase_index, anchor_position)
@@ -9072,6 +9261,8 @@ func _issue_fireteam_post_drop_360_security_positions(fireteam_id: String, phase
 		return false
 	var ring_radius: float = _get_post_drop_security_radius_world()
 	var sector_count: int = maxi(units.size(), 1)
+	var objective_angle: float = _resolve_objective_security_angle_for_fireteam(fireteam_id, anchor_position)
+	var used_cover_positions: Array = []
 	var issued_count: int = 0
 	for index in range(units.size()):
 		var unit = units[index]
@@ -9084,14 +9275,16 @@ func _issue_fireteam_post_drop_360_security_positions(fireteam_id: String, phase
 		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
 		if unit_id.is_empty():
 			continue
-		var sector_angle: float = wrapf((-PI * 0.5) + (TAU * float(index) / float(sector_count)), -PI, PI)
+		var sector_angle: float = _resolve_post_drop_security_sector_angle(index, sector_count, objective_angle)
 		var target_position: Vector2 = anchor_position
 		var command_type: String = UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION
 		var speed_factor: float = 0.0
 		if index > 0:
-			target_position = anchor_position + Vector2.RIGHT.rotated(sector_angle) * ring_radius
+			target_position = _resolve_post_drop_cover_position(anchor_position, sector_angle, ring_radius, used_cover_positions)
 			command_type = UNIT_COMMAND_SCRIPT.TYPE_MOVE_TO_POSITION
 			speed_factor = POST_DROP_SECURITY_MOVE_SPEED_FACTOR
+		else:
+			used_cover_positions.append(anchor_position)
 		_set_unit_map_facing_angle(unit, sector_angle)
 		if unit is Node:
 			(unit as Node).set_meta("post_drop_security_active", true)
@@ -9107,7 +9300,7 @@ func _issue_fireteam_post_drop_360_security_positions(fireteam_id: String, phase
 			command.team_id = String(unit.call("get_team_id"))
 		command.target_position = target_position
 		command.move_speed_factor = speed_factor
-		command.cover_score = float(unit.call("get_cover_score")) if unit.has_method("get_cover_score") else 0.0
+		command.cover_score = maxf(float(unit.call("get_cover_score")) if unit.has_method("get_cover_score") else 0.0, _estimate_cover_score_at_world_position(target_position))
 		command.attack_bonus = 0.0
 		command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL
 		command.source_command_type = "hold_position"
@@ -9129,6 +9322,102 @@ func _issue_fireteam_post_drop_360_security_positions(fireteam_id: String, phase
 
 func _get_post_drop_security_radius_world() -> float:
 	return float(POST_DROP_SECURITY_RADIUS_TILES) * POST_DROP_SECURITY_TILE_WORLD_STEP
+
+
+func _resolve_objective_security_angle_for_fireteam(fireteam_id: String, anchor_position: Vector2) -> float:
+	var objective_position: Vector2 = _get_target_position()
+	var base_angle: float = 0.0
+	if anchor_position.distance_squared_to(objective_position) > 4.0:
+		base_angle = (objective_position - anchor_position).angle()
+	var nearby_ids: PackedStringArray = _get_nearby_runtime_fireteam_ids(anchor_position, 260.0)
+	if nearby_ids.size() <= 1:
+		return base_angle
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	var own_index: int = nearby_ids.find(normalized_fireteam_id)
+	if own_index < 0:
+		return base_angle
+	var center_index: float = (float(nearby_ids.size()) - 1.0) * 0.5
+	return wrapf(base_angle + ((float(own_index) - center_index) * 0.48), -PI, PI)
+
+
+func _get_nearby_runtime_fireteam_ids(anchor_position: Vector2, radius: float) -> PackedStringArray:
+	var result := PackedStringArray()
+	for fireteam_id_variant in _get_available_fireteam_ids():
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty() or not _is_fireteam_runtime_active(fireteam_id):
+			continue
+		var fireteam_anchor: Variant = _resolve_fireteam_visual_anchor_position(fireteam_id)
+		if typeof(fireteam_anchor) != TYPE_VECTOR2:
+			continue
+		if Vector2(fireteam_anchor).distance_to(anchor_position) <= radius:
+			result.append(fireteam_id)
+	result.sort()
+	return result
+
+
+func _resolve_post_drop_security_sector_angle(index: int, member_count: int, objective_angle: float) -> float:
+	if member_count <= 1:
+		return objective_angle
+	if index == 0:
+		return objective_angle
+	if index == member_count - 1 and member_count >= 4:
+		return wrapf(objective_angle + PI, -PI, PI)
+	var side_index: int = index - 1
+	var side_sign: float = -1.0 if side_index % 2 == 0 else 1.0
+	var side_step: float = 0.56 + (0.38 * float(int(side_index / 2)))
+	return wrapf(objective_angle + (side_sign * side_step), -PI, PI)
+
+
+func _resolve_post_drop_cover_position(anchor_position: Vector2, sector_angle: float, fallback_radius: float, used_positions: Array) -> Vector2:
+	var fallback_position: Vector2 = anchor_position + Vector2.RIGHT.rotated(sector_angle) * fallback_radius
+	var terrain_registry = _get_terrain_registry()
+	if terrain_registry == null or not terrain_registry.has_method("get_walkable_cover_tiles_in_radius"):
+		used_positions.append(fallback_position)
+		return fallback_position
+	var cover_tiles: Array = Array(terrain_registry.call("get_walkable_cover_tiles_in_radius", anchor_position, fallback_radius * POST_DROP_COVER_SEARCH_RADIUS_FACTOR))
+	var sector_direction: Vector2 = Vector2.RIGHT.rotated(sector_angle)
+	var best_score: float = -INF
+	var best_position: Vector2 = fallback_position
+	for tile in cover_tiles:
+		if tile == null:
+			continue
+		var tile_position: Vector2 = Vector2(tile.world_position)
+		var cover_value: float = float(tile.cover_value)
+		if cover_value < POST_DROP_COVER_MIN_SCORE:
+			continue
+		if _is_position_already_reserved(tile_position, used_positions, 42.0):
+			continue
+		var offset: Vector2 = tile_position - anchor_position
+		if offset.length_squared() <= 4.0:
+			continue
+		var sector_alignment: float = clampf(offset.normalized().dot(sector_direction), -1.0, 1.0)
+		var distance_penalty: float = absf(offset.length() - fallback_radius) * 0.06
+		var score: float = cover_value + (sector_alignment * 26.0) - distance_penalty
+		if score <= best_score:
+			continue
+		best_score = score
+		best_position = tile_position
+	used_positions.append(best_position)
+	return best_position
+
+
+func _is_position_already_reserved(world_position: Vector2, used_positions: Array, min_distance: float) -> bool:
+	for used_position_variant in used_positions:
+		if typeof(used_position_variant) != TYPE_VECTOR2:
+			continue
+		if Vector2(used_position_variant).distance_to(world_position) < min_distance:
+			return true
+	return false
+
+
+func _estimate_cover_score_at_world_position(world_position: Vector2) -> float:
+	var terrain_registry = _get_terrain_registry()
+	if terrain_registry == null or not terrain_registry.has_method("get_tile_at_world"):
+		return 0.0
+	var tile = terrain_registry.call("get_tile_at_world", world_position)
+	if tile == null:
+		return 0.0
+	return float(tile.cover_value)
 
 
 func _set_unit_map_facing_angle(unit, facing_angle: float) -> void:
@@ -9158,10 +9447,12 @@ func _issue_fireteam_hold_current_positions(fireteam_id: String, phase_index: in
 		if unit.has_method("get_team_id"):
 			command.team_id = String(unit.call("get_team_id"))
 		command.target_position = (unit as Node2D).global_position
+		_set_unit_map_facing_angle(unit, _resolve_objective_security_angle_for_fireteam(fireteam_id, command.target_position))
 		command.move_speed_factor = 0.0
 		command.cover_score = 0.0
 		if unit.has_method("get_cover_score"):
 			command.cover_score = float(unit.call("get_cover_score"))
+		command.cover_score = maxf(command.cover_score, _estimate_cover_score_at_world_position(command.target_position))
 		command.attack_bonus = 0.0
 		command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL
 		command.source_command_type = "hold_position"
@@ -10061,6 +10352,68 @@ func _find_area_order_target_at_screen_position(screen_position: Vector2) -> Dic
 	}
 
 
+func _begin_right_order_context_interaction(screen_position: Vector2, append_mode: bool) -> bool:
+	if _is_lz_placement_armed or _is_target_placement_armed:
+		return false
+	_right_order_press_active = true
+	_right_order_drag_active = false
+	_right_order_press_screen_position = screen_position
+	_right_order_drag_screen_position = screen_position
+	_right_order_append_mode = append_mode
+	_hide_waypoint_command_menu()
+	_hide_area_order_command_menu()
+	_update_area_order_overlay(Rect2())
+	return true
+
+
+func _update_right_order_context_drag(screen_position: Vector2) -> bool:
+	if not _right_order_press_active:
+		return false
+	_right_order_drag_screen_position = screen_position
+	if not _right_order_drag_active and _right_order_press_screen_position.distance_to(screen_position) < AREA_ORDER_DRAG_THRESHOLD:
+		return true
+	_right_order_drag_active = true
+	if _selected_fireteam_ids.is_empty():
+		_last_command_text = "SELECT FIRETEAM FIRST"
+		_update_ui()
+		_update_area_order_overlay(Rect2())
+		return true
+	_update_area_order_overlay(_build_selection_rect(_right_order_press_screen_position, screen_position))
+	return true
+
+
+func _finish_right_order_context_interaction(screen_position: Vector2, append_pressed: bool = false) -> bool:
+	if not _right_order_press_active:
+		return false
+	var was_dragging: bool = _right_order_drag_active
+	var start_position: Vector2 = _right_order_press_screen_position
+	var append_mode: bool = _right_order_append_mode or append_pressed
+	_right_order_press_active = false
+	_right_order_drag_active = false
+	_right_order_press_screen_position = Vector2.ZERO
+	_right_order_drag_screen_position = Vector2.ZERO
+	_right_order_append_mode = false
+	_update_area_order_overlay(Rect2())
+	if was_dragging:
+		if _selected_fireteam_ids.is_empty():
+			_last_command_text = "SELECT FIRETEAM FIRST"
+			_update_ui()
+			return true
+		var area_payload: Dictionary = _build_area_order_payload_from_screen_rect(_build_selection_rect(start_position, screen_position))
+		if area_payload.is_empty():
+			_last_command_text = "AREA EMPTY"
+			_update_ui()
+			return true
+		var area_order_targets: Array = _create_area_orders_from_payload(_selected_fireteam_ids, area_payload, AREA_ORDER_SCRIPT.COMMAND_TYPE_DEFEND, true, not append_mode)
+		if area_order_targets.is_empty():
+			_last_command_text = "AREA EMPTY"
+			_update_ui()
+			return true
+		_open_area_order_command_menu(screen_position, area_order_targets, false, append_mode)
+		return true
+	return _try_open_waypoint_menu_at_position(screen_position, append_mode)
+
+
 func _begin_area_order_interaction(screen_position: Vector2) -> bool:
 	if _is_lz_placement_armed or _is_target_placement_armed:
 		return false
@@ -10206,13 +10559,14 @@ func _try_focus_area_order_at_position(screen_position: Vector2) -> bool:
 	return true
 
 
-func _open_waypoint_command_menu(screen_position: Vector2, waypoint_targets: Array, include_delete_action: bool) -> void:
+func _open_waypoint_command_menu(screen_position: Vector2, waypoint_targets: Array, include_delete_action: bool, append_mode: bool = false) -> void:
 	var menu := get_node_or_null("../TacticalUI/WaypointCommandMenu") as PopupMenu
 	if menu == null:
 		return
 	_waypoint_menu_targets = []
 	for waypoint_target in waypoint_targets:
 		_waypoint_menu_targets.append(Dictionary(waypoint_target).duplicate(true))
+	_waypoint_menu_append_mode = append_mode
 	menu.clear()
 	for marker_type_id in PackedStringArray(TERRAIN_MARKER_CATALOG_SCRIPT.call("get_type_ids_for_context", TERRAIN_MARKER_CATALOG_SCRIPT.CONTEXT_MISSION_PLAYER)):
 		menu.add_item(String(TERRAIN_MARKER_CATALOG_SCRIPT.call("get_display_name", marker_type_id)), _waypoint_menu_id_for_command(String(marker_type_id)))
@@ -10224,13 +10578,14 @@ func _open_waypoint_command_menu(screen_position: Vector2, waypoint_targets: Arr
 	menu.popup()
 
 
-func _open_area_order_command_menu(screen_position: Vector2, area_order_targets: Array, include_delete_action: bool) -> void:
+func _open_area_order_command_menu(screen_position: Vector2, area_order_targets: Array, include_delete_action: bool, append_mode: bool = false) -> void:
 	var menu := get_node_or_null("../TacticalUI/AreaOrderCommandMenu") as PopupMenu
 	if menu == null:
 		return
 	_area_order_menu_targets = []
 	for area_order_target in area_order_targets:
 		_area_order_menu_targets.append(Dictionary(area_order_target).duplicate(true))
+	_area_order_menu_append_mode = append_mode
 	menu.clear()
 	menu.add_item("Defend Area", AREA_ORDER_MENU_DEFEND_ID)
 	menu.add_item("Engage Area", AREA_ORDER_MENU_ENGAGE_ID)
@@ -10249,6 +10604,7 @@ func _hide_waypoint_command_menu() -> void:
 	if menu != null:
 		menu.hide()
 	_waypoint_menu_targets.clear()
+	_waypoint_menu_append_mode = false
 
 
 func _hide_area_order_command_menu() -> void:
@@ -10256,6 +10612,7 @@ func _hide_area_order_command_menu() -> void:
 	if menu != null:
 		menu.hide()
 	_area_order_menu_targets.clear()
+	_area_order_menu_append_mode = false
 
 
 func _on_waypoint_menu_id_pressed(item_id: int) -> void:
@@ -10301,7 +10658,7 @@ func _set_waypoint_command_for_targets(waypoint_targets: Array, command_type: St
 	if not did_change:
 		return false
 	_refresh_order_visuals()
-	_last_command_text = "WAYPOINT %s" % command_type.to_upper()
+	_last_command_text = "WAYPOINT %s%s" % [command_type.to_upper(), " APPEND" if _waypoint_menu_append_mode else ""]
 	_update_ui()
 	_emit_planning_state_changed()
 	return true
@@ -10319,7 +10676,7 @@ func _set_area_order_command_for_targets(area_order_targets: Array, command_type
 	if not did_change:
 		return false
 	_refresh_order_visuals()
-	_last_command_text = "AREA %s" % normalized_command_type.to_upper()
+	_last_command_text = "AREA %s%s" % [normalized_command_type.to_upper(), " APPEND" if _area_order_menu_append_mode else ""]
 	_update_ui()
 	_emit_planning_state_changed()
 	return true
@@ -10639,6 +10996,8 @@ func _maybe_bootstrap_live_drop() -> void:
 
 
 func _try_start_drop_sequence() -> bool:
+	if _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND:
+		_handoff_outbound_drop_sequence_to_card()
 	if not _has_lz_position:
 		return false
 	if not preview_mode and _drop_ship_cooldown_remaining > 0.0:
@@ -10667,6 +11026,7 @@ func _try_start_drop_sequence() -> bool:
 		_drop_ship_staged = true
 		_drop_sequence_visual_only = false
 		_drop_sequence_position = _get_drop_staging_position()
+		_mission_drop_progress = _build_mission_dropship_progress_value()
 		_store_selected_mission_dropship_plan()
 		_emit_planning_state_changed()
 		_refresh_world_overlays()
@@ -10684,6 +11044,7 @@ func _try_start_drop_sequence() -> bool:
 	_drop_sequence_visual_only = false
 	_drop_sequence_position = _get_drop_staging_position()
 	_live_drop_bootstrap_consumed = true
+	_mission_drop_progress = _build_mission_dropship_progress_value()
 	_store_selected_mission_dropship_plan()
 	_refresh_world_overlays()
 	_update_ui()
@@ -10712,6 +11073,7 @@ func _update_drop_sequence(delta: float) -> void:
 	match _drop_sequence_phase:
 		DROP_SEQUENCE_INBOUND:
 			_drop_sequence_position = _drop_sequence_position.move_toward(_lz_position, DROP_SHIP_SPEED * delta)
+			_mission_drop_progress = _build_mission_dropship_progress_value()
 			if _drop_sequence_position.distance_to(_lz_position) <= 2.0:
 				_drop_sequence_position = _lz_position
 				if _drop_sequence_visual_only:
@@ -10737,6 +11099,7 @@ func _update_drop_sequence(delta: float) -> void:
 		DROP_SEQUENCE_OUTBOUND:
 			var exit_position: Vector2 = _get_drop_exit_position()
 			_drop_sequence_position = _drop_sequence_position.move_toward(exit_position, DROP_SHIP_SPEED * delta)
+			_mission_drop_progress = _build_mission_dropship_progress_value()
 			if _drop_sequence_position.distance_to(exit_position) <= 2.0:
 				_drop_ship_cooldown_remaining = DROP_SHIP_RECALL_COOLDOWN_SECONDS
 				_drop_ship_requested = false
@@ -10784,7 +11147,29 @@ func _begin_drop_sequence_outbound() -> void:
 	_mission_drop_return_requested = true
 	_drop_sequence_phase = DROP_SEQUENCE_OUTBOUND
 	_drop_sequence_timer = 0.0
+	_mission_drop_progress = _build_mission_dropship_progress_value()
 	_last_command_text = "%s AB | DROPSHIP RTB" % _drop_sequence_fireteam_name
+	_store_selected_mission_dropship_plan()
+	_emit_planning_state_changed()
+	_update_ui()
+	_refresh_world_overlays()
+
+
+func _handoff_outbound_drop_sequence_to_card() -> void:
+	if _drop_sequence_phase != DROP_SEQUENCE_OUTBOUND:
+		return
+	_mission_drop_progress = _build_mission_dropship_progress_value()
+	_mission_drop_state = "to_fob"
+	_drop_sequence_position = Vector2.ZERO
+	_drop_sequence_phase = ""
+	_drop_sequence_units = []
+	_drop_sequence_unit_index = 0
+	_drop_sequence_timer = 0.0
+	_drop_sequence_fireteam_name = "ALL"
+	_drop_sequence_visual_only = false
+	_live_drop_bootstrap_consumed = false
+	_drop_ship_requested = false
+	_drop_ship_staged = false
 	_store_selected_mission_dropship_plan()
 	_emit_planning_state_changed()
 	_update_ui()

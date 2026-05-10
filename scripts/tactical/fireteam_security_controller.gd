@@ -341,9 +341,10 @@ func _build_member_assignments(fit_members: Array, security_mode: String, direct
 		var sector_width: float = TAU / float(fit_members.size())
 		for index in range(fit_members.size()):
 			var member: Dictionary = fit_members[index]
+			var center_angle: float = _resolve_360_member_angle(index, fit_members.size(), direction_angle, sector_width)
 			assignments.append({
 				"unit_id": String(member.get("unit_id", "")),
-				"center_angle": wrapf(direction_angle + (sector_width * float(index)), -PI, PI),
+				"center_angle": center_angle,
 				"arc_width": sector_width,
 				"security_radius_world": security_radius_world,
 			})
@@ -356,6 +357,19 @@ func _build_member_assignments(fit_members: Array, security_mode: String, direct
 			"security_radius_world": security_radius_world,
 		})
 	return assignments
+
+
+func _resolve_360_member_angle(index: int, member_count: int, direction_angle: float, sector_width: float) -> float:
+	if member_count <= 1:
+		return direction_angle
+	if index == 0:
+		return direction_angle
+	if index == member_count - 1 and member_count >= 4:
+		return wrapf(direction_angle + PI, -PI, PI)
+	var side_index: int = index - 1
+	var side_sign: float = -1.0 if side_index % 2 == 0 else 1.0
+	var side_ring: int = int(side_index / 2) + 1
+	return wrapf(direction_angle + (side_sign * minf(sector_width * float(side_ring), PI * 0.72)), -PI, PI)
 
 
 func _is_security_active(command_type: String, fit_members: Array) -> bool:

@@ -19,6 +19,26 @@ const HEAVY_WEAPONS: PackedStringArray = ["rail_gun", "rocket_launcher", "panzer
 const SHOOTER_WEAPONS: PackedStringArray = ["rifle", "smg", "sniper"]
 const PILOT_KEYS: PackedStringArray = ["dropship_piloting", "freighter_piloting", "fighter_piloting", "ground_vehicle_handling"]
 
+const BADGE_HELP_IDS: Dictionary = {
+	"medic": "character_sheet.rank_badge.medic",
+	"leader": "character_sheet.rank_badge.leader",
+	"heavy": "character_sheet.rank_badge.heavy",
+	"pilot": "character_sheet.rank_badge.pilot",
+	"engineer": "character_sheet.rank_badge.engineer",
+	"shooter": "character_sheet.rank_badge.shooter",
+	"enemy": "character_sheet.rank_badge.enemy",
+}
+
+const BADGE_FORMULAS: Dictionary = {
+	"medic": "Sources: medic role text, medictool loadout or medic trait tag. Highest matching source wins the badge score.",
+	"leader": "Sources: fireteam lead flag, leader role text or Leadership. Leadership 0.68+ contributes 0.62 plus Leadership times 0.30.",
+	"heavy": "Sources: heavy weapon loadout or heavy/support role text. Heavy weapons are rail gun, rocket launcher and panzerfaust.",
+	"pilot": "Sources: pilot role text or best platform skill. Dropship, freighter, fighter and ground vehicle handling are checked.",
+	"engineer": "Sources: engineer/tech/repair role text, engineer function score or engineer trait tag.",
+	"shooter": "Sources: weapon loadout, shooter role text or Accuracy. Accuracy 0.68+ contributes 0.56 plus Accuracy times 0.34.",
+	"enemy": "Source: profile team_id marks the unit as Team Bravo or enemy.",
+}
+
 
 static func derive_badges(profile_or_data: Variant, max_count: int = MAX_PRIMARY_BADGES) -> Array:
 	var data: Dictionary = _profile_to_dictionary(profile_or_data)
@@ -62,6 +82,36 @@ static func get_badges_for_profile(profile_or_data: Variant, max_count: int = MA
 	return derive_badges(data, max_count)
 
 
+static func get_badge_help_id(badge_key: String) -> String:
+	var normalized_key: String = badge_key.strip_edges().to_lower()
+	return String(BADGE_HELP_IDS.get(normalized_key, "character_sheet.rank_badges"))
+
+
+static func format_badge_tooltip(badge: Dictionary) -> String:
+	var label: String = String(badge.get("label", "Badge")).strip_edges()
+	var reason: String = String(badge.get("reason", "")).strip_edges()
+	var detail: String = String(badge.get("detail_text", badge.get("formula_text", ""))).strip_edges()
+	var score_text: String = "Score %.2f" % float(badge.get("score", 0.0))
+	var lines: PackedStringArray = PackedStringArray()
+	lines.append("%s: %s" % [_optional_text(label, "Badge"), score_text])
+	if not reason.is_empty():
+		lines.append(reason)
+	if not detail.is_empty():
+		lines.append(detail)
+	return "\n".join(lines)
+
+
+static func apply_badge_help_metadata(control: Control, badge: Dictionary) -> void:
+	if control == null:
+		return
+	var help_id: String = String(badge.get("help_id", get_badge_help_id(String(badge.get("badge_key", ""))))).strip_edges()
+	control.set_meta("help_id", help_id)
+	control.set_meta("help_dynamic_title", String(badge.get("label", "Badge")).strip_edges())
+	control.set_meta("help_compact_lines", _badge_compact_lines(badge))
+	control.set_meta("help_detail_lines", _badge_detail_lines(badge))
+	control.tooltip_text = format_badge_tooltip(badge)
+
+
 static func get_badge_asset_path(badge_id: String) -> String:
 	var catalog_entry: Dictionary = _get_catalog_badge_entry(badge_id)
 	return String(catalog_entry.get("path", "")).strip_edges()
@@ -78,6 +128,8 @@ static func _add_candidate(candidates: Dictionary, badge_key: String, score: flo
 		"score": clampf(score, 0.0, 1.0),
 		"priority": int(definition.get("priority", 999)),
 		"reason": reason,
+		"help_id": get_badge_help_id(badge_key),
+		"detail_text": String(BADGE_FORMULAS.get(badge_key, "")),
 	}
 
 
@@ -184,19 +236,19 @@ static func _score_enemy(data: Dictionary) -> float:
 static func _reason_for(badge_key: String, data: Dictionary) -> String:
 	match badge_key:
 		"medic":
-			return "role/loadout medic"
+			return "Medic score reads role/loadout text and medic trait tags."
 		"leader":
-			return "leadership/fireteam lead"
+			return "Leader score reads fireteam lead flag, role text and Leadership %.2f." % _score_value(data, "leadership")
 		"heavy":
-			return "heavy weapon/loadout"
+			return "Heavy score reads heavy weapon loadout and support role text."
 		"pilot":
-			return "platform skill"
+			return "Pilot score reads pilot role text and best platform skill %.2f." % _best_platform_value(data)
 		"engineer":
-			return "engineer role"
+			return "Engineer score reads engineer role, function score and trait tags."
 		"shooter":
-			return "weapon/accuracy"
+			return "Shooter score reads weapon loadout, role text and Accuracy %.2f." % _score_value(data, "accuracy")
 		"enemy":
-			return "enemy faction"
+			return "Enemy badge is set by team_id or faction context."
 		_:
 			return String(data.get("unit_id", "npc"))
 
@@ -223,6 +275,32 @@ static func _weapon_ids(data: Dictionary) -> PackedStringArray:
 static func _score_value(data: Dictionary, key: String) -> float:
 	var skill_values: Dictionary = Dictionary(data.get("skill_values", data.get("core_values", {})))
 	return clampf(float(skill_values.get(key, data.get("skill_%s" % key, 0.0))), 0.0, 1.0)
+
+
+static func _best_platform_value(data: Dictionary) -> float:
+	var platform_values: Dictionary = Dictionary(data.get("platform_values", {}))
+	var best_platform: float = -1.0
+	for key in PILOT_KEYS:
+		best_platform = maxf(best_platform, float(platform_values.get(key, -1.0)))
+	return maxf(best_platform, 0.0)
+
+
+static func _badge_compact_lines(badge: Dictionary) -> PackedStringArray:
+	var lines: PackedStringArray = PackedStringArray()
+	var label: String = String(badge.get("label", "Badge")).strip_edges()
+	lines.append("%s badge score %.2f." % [_optional_text(label, "Badge"), float(badge.get("score", 0.0))])
+	var reason: String = String(badge.get("reason", "")).strip_edges()
+	if not reason.is_empty():
+		lines.append(reason)
+	return lines
+
+
+static func _badge_detail_lines(badge: Dictionary) -> PackedStringArray:
+	var lines: PackedStringArray = PackedStringArray()
+	var detail: String = String(badge.get("detail_text", badge.get("formula_text", ""))).strip_edges()
+	if not detail.is_empty():
+		lines.append(detail)
+	return lines
 
 
 static func _profile_to_dictionary(profile_or_data: Variant) -> Dictionary:
@@ -274,3 +352,8 @@ static func _string_array_has_fragment(values: PackedStringArray, fragment: Stri
 		if String(value).contains(fragment):
 			return true
 	return false
+
+
+static func _optional_text(value: String, fallback: String) -> String:
+	var normalized: String = value.strip_edges()
+	return fallback if normalized.is_empty() else normalized

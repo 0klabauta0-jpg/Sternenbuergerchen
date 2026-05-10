@@ -120,8 +120,8 @@ func _test_documentation_and_local_path_gate() -> void:
 	_assert(doc_text.contains("Readability Rules"), "Background docs include readability rules")
 	var forbidden_patterns: PackedStringArray = PackedStringArray([
 		"C:" + "\\" + "Users" + "\\",
-		"C:/Users/",
-		"file:///C:/Users/",
+		"C:" + "/" + "Users" + "/",
+		"file:///" + "C:" + "/" + "Users" + "/",
 	])
 	var scan_paths: PackedStringArray = PackedStringArray([
 		CATALOG_PATH,

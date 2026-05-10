@@ -10,7 +10,7 @@
 
 ## Aktueller Startzustand
 
-### Manual Playtest - Dropship Cards, Per-Craft Dispatch and Return
+### TASK_320 - Manual Playtest Dropship Cards Per-Craft Dispatch and Return
 - Status: implementiert
 - Stand: Homebase `#05 FLIGHT DECK` rendert Shipcards kompakter ohne horizontalen Scrollbalken. Das Dropship-Visual ist im kleineren Sichtfenster nach links/oben eingerueckt, damit transparente Asset-Raender weniger Leerraum erzeugen und die Pilotenkarte mehr Breite bekommt.
 - Stand: FOB-Dropship-Karten zeigen Fireteam-/Insassenreferenzen jetzt auch fuer nicht selektierte Dropships. Ein voll/boarded Dropship kann einzeln zur Mission Map geschickt werden, ohne auf ein zweites Dropship oder dessen Auswahlzustand zu warten.
@@ -19,35 +19,96 @@
 - Risiken: Der finale FullHD-Sichtcheck der Homebase-Shipcard-Proportionen bleibt manuell sinnvoll, weil Headless-Tests Clipping und Statusvertraege, aber nicht die exakte optische Balance bewerten.
 - Lokale Pruefung: `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd`, `bugfix_mission_multi_dropship_cards.gd`, `bugfix_dropship_mission_flow_verifier.gd`, `bugfix_fob_second_dropship_assignment_and_scale.gd`, `task_308_compact_flightdeck_dropship_occupants_actions.gd`, `task_312_dropship_command_matrix_lz_go_layout.gd`, `task_313_dropship_arrival_visibility_feedback_smoke.gd`, `task_180_mission_drop_light_fixed_hud_layout_verifier.gd`, `task_316_fob_fireteam_staging_migration.gd` und `git diff --check` laufen gruen.
 
-### Manual Playtest - Map Editor Station Floor, Layering and Undo
+### TASK_321 - Manual Playtest Map Editor Station Floor Layering Undo
 - Status: implementiert
 - Stand: `station_floor_panel` ist jetzt eine Terrain-/Surface-Variante statt ein Object-Layer-Prop. In der 3D-Ansicht wird es als top-anchored Boden gerendert; Station-Wall-Tiles nutzen darunter ebenfalls das Station-Floor-Panel, damit Station-Gebaeude einen passenden Boden behalten.
 - Stand: `station_wall` und `station_wall_door` liegen auf einer Structure-Schicht. Station-Props wie Med Bed, Computer oder Cargo koennen dadurch zusaetzlich auf demselben Tile in `object_type_id` liegen, ohne die Wand zu verdraengen. Der Eraser entfernt zuerst das Prop und erst im zweiten Pass die Struktur.
 - Stand: Der Map Editor hat einen 32-Schritt-Undo-Stack, textgrosse Preview-Icons in allen Palette-Gruppen, einen etwas klareren Panel-Skin und blockt Patrol-Waypoints ausserhalb echter Map-Tiles.
+- Stand: Ground-Surface-Modelle koennen jetzt einen eigenen `surface_top_y_offset` melden. Das `station_floor_panel` nutzt dadurch den Mapping-Offset und sitzt mit seiner sichtbaren Oberkante auf derselben Hoehe wie die Station-Floor-Unterlagen der Waende.
 - Risiken: Das Datenmodell bleibt bei Terrain/Structure/Object in zwei gespeicherten Type-Feldern; ein echtes drittes Floor-Feld gibt es noch nicht. Fuer Station-Waende wird der passende Floor deshalb ueber den 3D-Surface-Override erzeugt.
-- Lokale Pruefung: `bugfix_map_editor_station_floor_structure_undo.gd`, `task_229_map_editor_usability_authoring_pass.gd`, `task_295_map_editor_paint_toolbar_tools_polish.gd`, `task_296_map_editor_palette_taxonomy_space_station_assets.gd`, `task_298_editor_terrain_visual_playability_smoke.gd`, `editor_height_edge_surface_anchor_verifier.gd`, `task_253_nature_ground_surface_editor_palette_pass.gd`, `task_183_editor_hill_authoring_verifier.gd`, `task_254_nature_trees_rocks_vegetation_cover_props.gd`, `task_132_verifier.gd` und `git diff --check` laufen gruen.
+- Lokale Pruefung: `bugfix_map_editor_station_floor_structure_undo.gd`, `task_229_map_editor_usability_authoring_pass.gd`, `task_295_map_editor_paint_toolbar_tools_polish.gd`, `task_296_map_editor_palette_taxonomy_space_station_assets.gd`, `task_298_editor_terrain_visual_playability_smoke.gd`, `editor_height_edge_surface_anchor_verifier.gd`, `hill_mechanics_16x16_testmap_verifier.gd`, `task_292_editor_hill_cliff_grid_depth_repair.gd`, `task_253_nature_ground_surface_editor_palette_pass.gd`, `task_183_editor_hill_authoring_verifier.gd`, `task_254_nature_trees_rocks_vegetation_cover_props.gd`, `task_132_verifier.gd` und `git diff --check` laufen gruen.
 
-### Manual Playtest - FOB Second Dropship Assignment and Scale
+### TASK_319 - Manual Playtest FOB Second Dropship Assignment and Scale
 - Status: implementiert
 - Stand: `#14 FLIGHTDECK` speichert die FOB-Boarding-/Staging-Queue jetzt pro Transport-Craft-ID. Ein Fireteam, das auf `Dropship 2` gedroppt wird, bleibt damit auf `Dropship 2` und rutscht nicht mehr automatisch in die Queue von `Dropship 1`.
 - Stand: Transport-Craft-Karten im FOB sind klickbar/selectable, behalten dedizierte Drop-Ziele wie `dropship|dropship_2` und rendern das Dropship-Bild groesser mit Covered-Crop gegen transparente Asset-Raender.
 - Risiken: Der Patch bleibt im FOB-UI-/Meta-Staging-State und macht keine SimulationRoot-Gameplay-Wahrheit daraus. Manueller Sichtcheck in FullHD bleibt fuer finale Proportionen der Shipcards sinnvoll.
 - Lokale Pruefung: `bugfix_fob_second_dropship_assignment_and_scale.gd`, `task_316_fob_fireteam_staging_migration.gd`, `task_308_compact_flightdeck_dropship_occupants_actions.gd`, `task_310_fob_flightdeck_fireteam_userology_smoke.gd`, `bugfix_dropship_mission_flow_verifier.gd` und `git diff --check` laufen gruen.
 
-### Manual Playtest - Debrief Background and Main Menu Team Library
+### TASK_318 - Manual Playtest Debrief Background and Main Menu Team Library
 - Status: implementiert
 - Stand: `DebriefTestScreen` nutzt jetzt den katalogisierten Background `debrief_desert_explosion_base` mit Dim-Shade und dokumentierter Readability-Policy. Das bleibt rein visuell und erzeugt keinen Gameplay-State.
 - Stand: Das Hauptmenue zeigt unter Teamname/Neues Team eine Liste der erstellten Teams aus aktuellem Roster-Save plus archivierten Reset-Saves. Das aktive Team ist sichtbar ausgewaehlt; Archivteams koennen markiert und geloescht werden, waehrend das aktive Team gegen versehentliches Loeschen geschuetzt bleibt.
 - Risiken: Es gibt weiterhin nur ein aktives lokales Roster pro Profil; die Liste ist eine UI auf Current-Save plus Reset-Archive, kein neues Kampagnen- oder Multiplayer-Teamslot-System.
 - Lokale Pruefung: `bugfix_debrief_background_and_main_menu_team_library.gd`, `task_245_background_image_catalog_and_screen_usage_verifier.gd`, `task_234_persistent_player_roster_save_and_reset.gd` und `git diff --check` laufen gruen.
 
-### Manual Playtest - Mission Fireteam FOB Payload and Bubbles
+### TASK_317 - Manual Playtest Mission Fireteam FOB Payload and Bubbles
 - Status: implementiert
 - Stand: MissionStart uebergibt jetzt neben Unit-/Fireteam-IDs auch die FOB-Unit-Konfigurationen an `MissionTestSetup`. Die Mission spiegelt damit die in der FOB zusammengestellten Fireteam-Mitglieder, Namen, Profile und Portraits statt auf generische Preset-Fallbacks zu fallen.
 - Stand: `MissionTestSetup` priorisiert Fireteam-Definitionen fuer Mitgliedschaft und Lead-Markierung. `#17 SELECTED FIRETEAM` und die Fireteam-Mini-Karte zeigen dadurch den konfigurierten FOB-Fireteam-Lead inklusive Portrait.
 - Stand: HUD-Sprechblasen an Fireteam-Mini-Karten sind kleiner, starten rechts neben der Karte und werden vertikal versetzt, wenn mehrere Bubbles sonst uebereinander liegen wuerden.
 - Risiken: Manueller FullHD-Sichtcheck der genauen Bubble-Optik bleibt sinnvoll; der Patch veraendert keine SimulationRoot- oder Combat-Wahrheit.
 - Lokale Pruefung: `bugfix_mission_fireteam_fob_payload_and_bubbles.gd`, `task_210_fireteamleader_command_feedback_bubbles.gd`, `task_087_verifier.gd`, `task_160_tactical_playability_verifier.gd`, `task_316_fob_fireteam_staging_migration.gd`, `bugfix_dropship_mission_flow_verifier.gd` und `git diff --check` laufen gruen.
+
+### TASK_322 - Manual Playtest Map Editor Asset Import Rotation Context Menu
+- Status: implementiert im Arbeitsstand
+- Stand: Factory Kit, isometrische Space-Interior-/Space-Kit-Ergaenzungen und weitere Kenney-Assets sind projektlokal in die Editor-Kataloge/Mappings aufgenommen. Die Asset-Pfade bleiben `res://...`-basiert.
+- Stand: Rotierbare Station-/Modular-/Factory-Assets koennen ueber die Editor-UI gedreht werden; das Kontextmenue wird erst auf rechter-Maus-Release geoeffnet, damit Area-Markierung mit rechter Maus nicht sofort abbricht.
+- Stand: Palette-Previews und Help-Anker wurden fuer neue Assetgruppen, Marker und Settings nachgezogen.
+- Risiken: Einzelne Previews und Asset-Scales brauchen weiter manuellen Sichtcheck; importierte Deko darf nicht unbemerkt Gameplay-Blocker werden.
+- Lokale Pruefung: `bugfix_map_editor_asset_rotation_context_menu.gd`, `bugfix_editor_hill_marker_asset_import.gd`, `task_251_nature_kit_classic_source_inventory_and_subset_import.gd`, `run_task_247_asset_locality_scan.ps1`, `task_296_map_editor_palette_taxonomy_space_station_assets.gd` und `git diff --check` laufen gruen.
+
+### TASK_323 - Manual Playtest Mission Command Visuals Fire Sector Dropships
+- Status: implementiert im Arbeitsstand
+- Stand: Mission-Fire-Sector-Visuals sind tile-aligned und melden sichtbare Tiles, LOS-Blocker und Facing/Aim getrennt im Render-Snapshot. Der Scan ist auf den Waffenradius begrenzt, nutzt einen LOS-Blocker-Cache und begrenzt Debug-Linien, damit das Overlay nicht pro Tick ueber die ganze Map frisst.
+- Stand: Die Blick-/Sichtbereichsrichtung folgt der sichtbaren 3D-Proxy-Drehung der NPCs, damit Facing-Linie, Sichtkegel und Modellrotation zusammenlaufen.
+- Stand: Dropship-Karten auf der Mission Map koennen das aktive Craft fuer Mission-Control-LZ-/Drop-Kommandos setzen. Waiting-Dropships bleiben als kommandierbare Karten sichtbar; Offmap-Inbound/RTB zeigt Karten-Progress, rendert aber kein Schiff neben der Karte.
+- Stand: Nach dem Absetzen wird ein outbound Dropship in den RTB-Kartenstatus uebergeben, damit ein zweites Dropship den naechsten Drop starten kann, waehrend das erste weiter zur FOB verfolgt wird.
+- Stand: Command-Matrix-/Plan-/Go-Verhalten ist fuer den aktuellen Arbeitsstand dokumentiert; die alte fachliche Unklarheit zwischen Plan/Go/Ready bleibt als Folgeentscheidung fuer Command-Hierarchy-Politur sichtbar.
+- Risiken: Fire-Sector-Winkel, Facing-Lesbarkeit und die genaue Bedeutung von Move/Take/Hold/Flag/Target/Clear brauchen weiter manuelle Mission-Abnahme und ggf. einen separaten Folge-Task.
+- Lokale Pruefung: `bugfix_mission_fire_sector_overlay.gd`, `bugfix_mission_multi_dropship_cards.gd`, `bugfix_dropship_mission_flow_verifier.gd`, `task_313_dropship_arrival_visibility_feedback_smoke.gd`, `task_180_mission_drop_light_fixed_hud_layout_verifier.gd`, `task_315_mission_grid_tile_selection_command_gate.gd`, `task_230_flight_altitude_layer_and_air_visibility_audit.gd` und `git diff --check` laufen gruen.
+
+### TASK_324 - Manual Playtest Team Editor Character Overlay Usability
+- Status: implementiert im Arbeitsstand
+- Stand: Team-Erstellung und Teambearbeitung sind als eigene Editor-Ansicht dokumentiert, statt grosse Portrait-/Editorflaechen direkt in den Hauptscreen zu legen. Bestehende Teams koennen zur Bearbeitung geoeffnet werden.
+- Stand: Character-Overlay/Team-Editor erlauben Name-/Portrait-Anpassung, Plus-/Minus-Wertbearbeitung, Live-Aktualisierung abgeleiteter Werte, Punktebudget und Help-Popups fuer Werte, Traits, Rollen und Skills.
+- Stand: Kurzbeschreibung ist aus dem Vordergrund genommen; letzte Ausruestung wandert nach unten. Zusaetzliche Flug-/Pilotenwerte sind als fachlicher Bedarf fuer gute Dropshippiloten notiert.
+- Risiken: Punktebudget und Flugwerte sind noch Rookie-/Authoring-Vertraege, kein finales Progressionsbalancing. Teamgroesse und Multiplayer-Grenzen brauchen spaeter eigene Balance-Entscheidung.
+- Lokale Pruefung: `bugfix_character_team_editor_usability_pass.gd`, `task_235_character_sheet_roster_gameplay_expansion.gd`, `task_259_character_card_roster_switching_playability.gd`, `task_265_character_sheet_loadout_help_content_pass.gd` und `git diff --check` laufen gruen.
+
+### TASK_325 - Manual Playtest Documentation Backfill
+- Status: implementiert
+- Stand: Die Playtest-Aenderungen der letzten Stunden sind als `TASK_317` bis `TASK_324` nachdokumentiert. `docs/reports/manual_playtest_session_backfill_2026_05_10.md` fasst den Arbeitsblock zusammen.
+- Stand: `docs/TASK_ROADMAP.md` enthaelt die neue Backfill-Phase `18ZD`; der Playtest-Audit reserviert seine empfohlenen Folgepatches jetzt ab `TASK_326`, damit keine Nummernkollision entsteht.
+- Risiken: Der Backfill ersetzt keine manuelle Abnahme; er macht den aktuellen Branch-Stand nachvollziehbar.
+- Lokale Pruefung: `rg "TASK_317|TASK_318|TASK_319|TASK_320|TASK_321|TASK_322|TASK_323|TASK_324|TASK_325" docs` und `git diff --check` laufen gruen.
+
+### TASK_326 - Manual Playtest Multiplayer Setup Asset Catalog Floor Followup
+- Status: implementiert im Arbeitsstand
+- Stand: Die Multiplayer-Lobby hat jetzt Spielername, lokalen Roster, Spielerseite, Teammodus, Map-Auswahl und Verbindungsmodus. Die Session fuehrt `lobby_setup` in Snapshot und Start-Assignments mit.
+- Stand: Direct-IP-Internet wird nicht mehr als LAN-only beschrieben: Der Screen nennt UDP-Portfreigabe/Firewall/Router oder VPN als Voraussetzung; Relay/UPnP bleibt Folgearbeit.
+- Stand: Importierte Space-/Station-/Modular-/Factory-Assets werden im Editor dynamisch in vorhandene Palette-Gruppen einsortiert. Crater/Meteor/Rock landen bei Crater/Felsen, Walls/Doors/Gates bei Waende.
+- Stand: Nature-Boden rendert als flushes Ground-Surface-Visual statt als erhoehter Detail-Layer. Station-Set-Floor-Panel-Varianten sind Terrain-/Surface-Varianten und werden top-anchored gerendert; Modular-Space-Walls/Gates wurden auf Station-Wall-Scale gebracht.
+- Risiken: Direct-IP funktioniert ueber Internet nur bei erreichbarem Host-UDP-Port oder VPN. Die Kit-Einsortierung ist namensbasiert und kann fuer einzelne Spezialassets noch manuell nachjustiert werden.
+- Lokale Pruefung: `bugfix_multiplayer_lobby_setup_and_asset_catalog_followup.gd`, `task_231_app_shell_game_setup_integration_and_open_items_review.gd`, `task_253_nature_ground_surface_editor_palette_pass.gd`, `task_255_nature_kit_hill_playability_visual_performance_smoke.gd`, `hill_mechanics_16x16_testmap_verifier.gd`, `bugfix_map_editor_station_floor_structure_undo.gd`, `task_266_command_mission_editor_settings_help_content_pass.gd` laufen gruen.
+
+### TASK_327 - Manual Playtest Right Click Orders Tactics Dropship Visibility
+- Status: implementiert im Arbeitsstand
+- Stand: Rechtsklick auf der Mission Map setzt jetzt den naechsten Befehl und ersetzt ohne Shift die vorherige pending Waypoint-/Area-Order des Fireteams. `Shift+RMB` haengt bewusst einen Folgebefehl an. Rechtsklick-Drag baut eine Tile-Area-Vorschau auf und oeffnet das Area-Kontextmenue erst beim Loslassen.
+- Stand: Abgeschlossene Waypoints werden in der Primary-3D-Order-Schicht nicht mehr weiter als Route/Tile angezeigt. Nach abgearbeiteter Kette faellt das Fireteam ueber den bestehenden Default-Hold wieder in Sicherung.
+- Stand: Post-Drop-Sicherung richtet sich an Objective/benachbarten Fireteams aus, laesst maximal eine Rueckwaertsicherung entstehen und sucht fuer die Sicherungspositionen bevorzugt nahe Deckung. Facing-Metadaten treiben jetzt die Sicht-/Feuersektoren, damit Modellrotation und Blickrichtung nicht links/rechts auseinanderlaufen.
+- Stand: Dropship-Planvisuals koennen LZ und Approach-Linie pro Craft anzeigen, auch wenn das Craft selbst offmap/inbound als Modell verborgen bleibt. Approach-Wechsel aktualisieren die geplante Linie des selektierten Dropships sofort.
+- Stand: Ein lokaler ENet-Connectivity-Smoke prueft Host/Client ueber `127.0.0.1`; echte Internet-Erreichbarkeit bleibt Router/Firewall/VPN-abhaengig.
+- Risiken: Echte NAT-/Router-Verbindung kann lokal nicht voll abgenommen werden. Die exakte taktische Sektorbreite und Cover-Auswahl brauchen weiter manuelles Spielgefuehl-Balancing.
+- Lokale Pruefung: `bugfix_mission_right_click_order_flow.gd`, `bugfix_mission_dropship_plans_and_facing.gd`, `bugfix_multiplayer_enet_connectivity_smoke.gd`, `bugfix_mission_multi_dropship_cards.gd`, `bugfix_dropship_mission_flow_verifier.gd`, `bugfix_mission_fire_sector_overlay.gd` und `git diff --check` laufen gruen.
+
+### TASK_328 - Manual Playtest Marker Help Roster UPnP Followup
+- Status: implementiert im Arbeitsstand
+- Stand: Mission-Auswahl- und Bewegungsgruppenmarker werden auf gueltige Map-Tiles gesnappt. Offmap-Positionen werden aus der Auswahl und aus den Movement-Group-Markern entfernt, damit keine versetzten gelben Rauten neben der Karte stehen bleiben.
+- Stand: Charakter-/Team-Hilfen wurden fuer Werte, Plattformwerte, abgeleitete Funktionswerte und Rang-Badges erweitert. Badges wie Shooter, Leader und Pilot tragen dynamische Hover-Daten mit Quelle, Schwelle und Score-Zusammensetzung; dieselben Metadaten sind in Homebase/FOB-Karten verfuegbar.
+- Stand: Multiplayer verwendet standardmaessig lokale Spieler-Roster, die Lobby waehlt den aktiven lokalen Roster vor und bietet UPnP als Verbindungsmodus. Beim Hoststart versucht die Session eine UDP-Portfreigabe am Gateway und meldet den Mapping-Status im Snapshot.
+- Risiken: UPnP ist router-/firewallabhaengig und kann lokal nicht als echte Internet-Erreichbarkeit bewiesen werden. Tooltip-Formeln muessen bei zukuenftigen Badge-Balancing-Aenderungen synchron gehalten werden.
+- Lokale Pruefung: `bugfix_character_team_editor_usability_pass.gd`, `bugfix_mission_dropship_plans_and_facing.gd`, `bugfix_multiplayer_lobby_setup_and_asset_catalog_followup.gd` sowie Check-only-Laeufe fuer die betroffenen Terrain-, Meta-, UI- und Multiplayer-Skripte laufen gruen.
 
 ### TASK_177 - Drop Light Fixed UI Layout Contract
 - Status: implementiert

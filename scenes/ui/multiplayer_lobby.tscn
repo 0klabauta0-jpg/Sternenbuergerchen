@@ -195,5 +195,5 @@ text = "Ablehnen"
 
 [node name="HintLabel" type="Label" parent="Panel/Margin/VBox"]
 layout_mode = 2
-text = "LAN/local only. Start bleibt Host-only und nutzt MultiplayerSession."
+text = "Direct IP: LAN/VPN sofort; Internet nur mit erreichbarem Host-UDP-Port oder spaeterem Relay."
 autowrap_mode = 3

@@ -11,6 +11,7 @@ const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_la
 const DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/drop_light_layout_contract.gd")
 const HOMEBASE_TEAM_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/homebase_team_drop_panel.gd")
 const PERSONNEL_EVENT_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/personnel_event_model.gd")
+const HOVER_SCROLL_BEHAVIOR_SCRIPT: GDScript = preload("res://scripts/ui/hover_scroll_behavior.gd")
 const FLIGHTDECK_PLATFORM_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/platform_large_NW.png")
 const DROPSHIP_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
 const CARGO_CRAFT_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_cargoA_NE.png")
@@ -67,6 +68,7 @@ var _personnel_events: Array = []
 func _ready() -> void:
 	META_UI_SKIN_SCRIPT.apply_homebase(self)
 	_apply_drop_light_fixed_layout()
+	HOVER_SCROLL_BEHAVIOR_SCRIPT.call("install", self)
 	_apply_contextual_help_ids()
 	var mission_selector: OptionButton = get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/MissionSelector")
 	var start_mission_button: Button = get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/StartMissionButton")

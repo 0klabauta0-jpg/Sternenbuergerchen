@@ -16,10 +16,13 @@ const DEFAULT_PLAYER_PROFILE_ID: String = "local_player"
 const DEFAULT_ROSTER_SIZE: int = 24
 const MIN_ROSTER_SIZE: int = 20
 const MAX_ROSTER_SIZE: int = 30
+const MULTIPLAYER_SIDE_CAP: int = 40
 const MIN_SKILL_VALUE: float = 0.22
 const MAX_SKILL_VALUE: float = 0.86
 const TEAM_EDITOR_SCHEMA_VERSION: int = 1
 const TEAM_EDITOR_POINT_BUDGET_MAX: int = 30
+const TEAM_EDITOR_STAT_MIN: int = 0
+const TEAM_EDITOR_STAT_MAX: int = 10
 const VALID_ROLE_CATEGORIES: PackedStringArray = [
 	"medic",
 	"shooter",
@@ -31,12 +34,12 @@ const VALID_ROLE_CATEGORIES: PackedStringArray = [
 ]
 const FIRETEAM_IDS: PackedStringArray = ["blue", "gold", "reserve", "med", "flight"]
 const TEAM_EDITOR_STAT_DEFINITIONS: Array = [
-	{"id": "tactics", "label": "Taktik", "description": "Bessere Startplanung, ruhigere Befehlsausfuehrung und spaeter FTL-Boni."},
-	{"id": "medical", "label": "Medizin", "description": "Stabilere Versorgung, schnellere Recovery und bessere Medic-Rollen."},
-	{"id": "engineering", "label": "Technik", "description": "Reparatur, Tueren, Generatoren und Missionsobjekte werden verlaesslicher."},
-	{"id": "piloting", "label": "Piloten", "description": "Dropship-, Frachter- und spaeter Fighter-Handhabung startet etwas sauberer."},
-	{"id": "discipline", "label": "Disziplin", "description": "Weniger Panik, bessere Formationstreue und weniger Frust-Spitzen."},
-	{"id": "recon", "label": "Aufklaerung", "description": "Besseres Erkennen, vorsichtigeres Bewegen und staerkere Scout-Rollen."},
+	{"id": "tactics", "label": "Taktik", "help_id": "team_editor.stat.tactics", "min_value": TEAM_EDITOR_STAT_MIN, "max_value": TEAM_EDITOR_STAT_MAX, "description": "Bessere Startplanung, ruhigere Befehlsausfuehrung und spaeter FTL-Boni.", "effect_text": "Hebt Leadership, Order Fidelity, FTL-Impact und koordinierte Fireteam-Starts."},
+	{"id": "medical", "label": "Medizin", "help_id": "team_editor.stat.medical", "min_value": TEAM_EDITOR_STAT_MIN, "max_value": TEAM_EDITOR_STAT_MAX, "description": "Stabilere Versorgung, schnellere Recovery und bessere Medic-Rollen.", "effect_text": "Mehr Medic-Fit, bessere Recovery-Tendenz und weniger Frust nach Verletzungen."},
+	{"id": "engineering", "label": "Technik", "help_id": "team_editor.stat.engineering", "min_value": TEAM_EDITOR_STAT_MIN, "max_value": TEAM_EDITOR_STAT_MAX, "description": "Reparatur, Tueren, Generatoren und Missionsobjekte werden verlaesslicher.", "effect_text": "Staerkt Engineer-Rollen, Objektinteraktion und technische Missionsloesungen."},
+	{"id": "piloting", "label": "Piloten", "help_id": "team_editor.stat.piloting", "min_value": TEAM_EDITOR_STAT_MIN, "max_value": TEAM_EDITOR_STAT_MAX, "description": "Dropship-, Frachter- und spaeter Fighter-Handhabung startet etwas sauberer.", "effect_text": "Erhoeht Dropship-/Freighter-/Fighter-Piloting und macht Flugpersonal wahrscheinlicher."},
+	{"id": "discipline", "label": "Disziplin", "help_id": "team_editor.stat.discipline", "min_value": TEAM_EDITOR_STAT_MIN, "max_value": TEAM_EDITOR_STAT_MAX, "description": "Weniger Panik, bessere Formationstreue und weniger Frust-Spitzen.", "effect_text": "Staerkt Toughness, Contact Stability, Order Fidelity und ruhiges Buddy-Team-Verhalten."},
+	{"id": "recon", "label": "Aufklaerung", "help_id": "team_editor.stat.recon", "min_value": TEAM_EDITOR_STAT_MIN, "max_value": TEAM_EDITOR_STAT_MAX, "description": "Besseres Erkennen, vorsichtigeres Bewegen und staerkere Scout-Rollen.", "effect_text": "Hebt Awareness, Recognition, Stealth und Scout-/Sniper-/Pathfinder-Tendenzen."},
 ]
 const TEAM_EDITOR_DEFAULT_ALLOCATIONS: Dictionary = {
 	"tactics": 5,
@@ -242,10 +245,12 @@ static func generate_start_roster(seed: String = DEFAULT_SEED, roster_size: int 
 		"relationship_pairs": relationship_pairs,
 		"fireteam_suggestions": fireteam_suggestions,
 		"team_editor": normalize_team_editor({}, normalized_seed, player_profile_id),
+		"team_size_policy": build_team_size_policy(),
 		"multiplayer_boundary": {
 			"ownership_scope": "player_profile_local",
 			"host_roster_scope": "host_player_profile",
 			"join_roster_scope": "joining_player_profile",
+			"side_cap": MULTIPLAYER_SIDE_CAP,
 			"snapshot_policy": "do_not_publish_full_private_roster_without_mode_consent",
 		},
 	}
@@ -295,9 +300,20 @@ static func build_summary_snapshot(roster: Dictionary) -> Dictionary:
 		"fireteam_count": Array(roster.get("fireteam_suggestions", [])).size(),
 		"team_identity": TEAM_NAME_GENERATOR_SCRIPT.call("build_team_identity_snapshot", roster),
 		"team_editor": normalize_team_editor(Dictionary(roster.get("team_editor", {})), String(roster.get("seed", DEFAULT_SEED)), String(roster.get("player_profile_id", DEFAULT_PLAYER_PROFILE_ID))),
+		"team_size_policy": Dictionary(roster.get("team_size_policy", build_team_size_policy())).duplicate(true),
 		"multiplayer_boundary": Dictionary(roster.get("multiplayer_boundary", {})).duplicate(true),
 		"errors": PackedStringArray(validation.get("errors", PackedStringArray())),
 		"warnings": PackedStringArray(validation.get("warnings", PackedStringArray())),
+	}
+
+
+static func build_team_size_policy() -> Dictionary:
+	return {
+		"singleplayer_initial_min": MIN_ROSTER_SIZE,
+		"singleplayer_initial_max": MAX_ROSTER_SIZE,
+		"singleplayer_growth_policy": "start_rookies_then_recruit_or_join_later",
+		"multiplayer_side_cap": MULTIPLAYER_SIDE_CAP,
+		"window_policy": "large_rosters_must_use_hover_scroll_lists",
 	}
 
 
@@ -307,16 +323,25 @@ static func normalize_team_editor(team_editor: Dictionary = {}, seed: String = D
 	var source_allocations: Dictionary = Dictionary(team_editor.get("stat_allocations", TEAM_EDITOR_DEFAULT_ALLOCATIONS)).duplicate(true)
 	var allocations: Dictionary = {}
 	var used: int = 0
+	var per_stat_minimum: int = budget_max
+	var per_stat_maximum: int = TEAM_EDITOR_STAT_MAX
 	for definition_variant in TEAM_EDITOR_STAT_DEFINITIONS:
 		var definition: Dictionary = Dictionary(definition_variant)
 		var stat_id: String = String(definition.get("id", "")).strip_edges()
 		if stat_id.is_empty():
 			continue
+		var stat_min: int = clampi(int(definition.get("min_value", TEAM_EDITOR_STAT_MIN)), 0, budget_max)
+		var stat_max: int = clampi(int(definition.get("max_value", TEAM_EDITOR_STAT_MAX)), stat_min, budget_max)
+		per_stat_minimum = mini(per_stat_minimum, stat_min)
+		per_stat_maximum = maxi(per_stat_maximum, stat_max)
 		var fallback_value: int = int(TEAM_EDITOR_DEFAULT_ALLOCATIONS.get(stat_id, 0))
-		var requested_value: int = clampi(int(source_allocations.get(stat_id, fallback_value)), 0, budget_max)
-		var value: int = mini(requested_value, maxi(budget_max - used, 0))
+		var requested_value: int = clampi(int(source_allocations.get(stat_id, fallback_value)), stat_min, stat_max)
+		var available_for_stat: int = clampi(budget_max - used, stat_min, stat_max)
+		var value: int = clampi(requested_value, stat_min, available_for_stat)
 		allocations[stat_id] = value
 		used += value
+	if allocations.is_empty():
+		per_stat_minimum = TEAM_EDITOR_STAT_MIN
 	var emblem: Dictionary = _resolve_team_emblem(Dictionary(team_editor), seed, player_profile_id)
 	return {
 		"schema_version": TEAM_EDITOR_SCHEMA_VERSION,
@@ -329,6 +354,13 @@ static func normalize_team_editor(team_editor: Dictionary = {}, seed: String = D
 		"emblem_id": String(emblem.get("id", "")),
 		"emblem_path": String(emblem.get("path", "")),
 		"tier_label": "Rookies",
+		"point_budget_policy": {
+			"min_per_stat": per_stat_minimum,
+			"max_per_stat": per_stat_maximum,
+			"total_cap": TEAM_EDITOR_POINT_BUDGET_MAX,
+			"rookie_tier": true,
+		},
+		"team_size_policy": build_team_size_policy(),
 		"design_note": "Startteams bleiben auf ein 30-Punkte-Rookie-Kontingent begrenzt.",
 	}
 

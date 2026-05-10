@@ -13,6 +13,7 @@ func _init() -> void:
 func _run_tests() -> void:
 	print("=== Mission Multi Dropship Cards Bugfix ===")
 	await _test_multiple_mission_dropships_render_as_stacked_cards()
+	await _test_second_dropship_can_drop_after_first_hands_off_to_return()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	quit(1 if _failed > 0 else 0)
 
@@ -71,7 +72,7 @@ func _test_multiple_mission_dropships_render_as_stacked_cards() -> void:
 	var primary_view := scene.get_node_or_null("Primary3DView")
 	if primary_view != null and primary_view.has_method("get_render_snapshot"):
 		var render_snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
-		_assert(int(render_snapshot.get("dropship_visual_count", 0)) >= 2, "Mission map renders every arrived/inbound dropship, not only the selected craft")
+		_assert(int(render_snapshot.get("dropship_visual_count", 0)) == 1, "Mission map hides off-map inbound dropships and keeps only arrived/holding ships visible")
 	if panel != null and panel.get_child_count() >= 2:
 		var first_card := panel.get_child(0) as Control
 		var second_card := panel.get_child(1) as Control
@@ -81,6 +82,8 @@ func _test_multiple_mission_dropships_render_as_stacked_cards() -> void:
 		_assert(panel.size.y >= 216.0, "Panel reserves vertical space for both cards")
 		_assert(first_card.modulate.a < 1.0, "Inbound Dropship 1 remains visually in transit")
 		_assert(second_card.modulate.a >= 0.99, "Waiting Dropship 2 renders at full color on the mission map")
+		var first_progress := first_card.get_node_or_null("MarginContainer/VBox/ProgressBar") as ProgressBar
+		_assert(first_progress != null and first_progress.visible and absf(first_progress.value - 35.0) <= 0.1, "Inbound mission dropship card shows transfer progress while the ship itself is still off-map")
 
 		var click := InputEventMouseButton.new()
 		click.button_index = MOUSE_BUTTON_LEFT
@@ -126,6 +129,69 @@ func _test_multiple_mission_dropships_render_as_stacked_cards() -> void:
 
 	var synced_state: Dictionary = Dictionary(controller.call("get_planning_state"))
 	_assert(Array(synced_state.get("mission_drop_cards", [])).size() == 2, "Planning state preserves both mission dropship cards")
+
+	scene.queue_free()
+	await _wait_frames(2)
+
+
+func _test_second_dropship_can_drop_after_first_hands_off_to_return() -> void:
+	root.size = Vector2i(1920, 1080)
+	var scene: Node = MISSION_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	await _wait_frames(4)
+
+	var controller := scene.get_node_or_null("TacticalController")
+	_assert(controller != null, "Mission scene exposes tactical controller for sequential dropship drop")
+	if controller == null:
+		scene.queue_free()
+		await _wait_frames(2)
+		return
+
+	var planning_state: Dictionary = Dictionary(controller.call("get_planning_state"))
+	planning_state["mission_drop_craft_id"] = "dropship_1"
+	planning_state["mission_drop_state"] = "waiting"
+	planning_state["has_lz_position"] = true
+	planning_state["lz_position"] = Vector2(320.0, 180.0)
+	planning_state["mission_drop_cards"] = [
+		{
+			"craft_id": "dropship_1",
+			"display_name": "Dropship 1",
+			"state": "waiting",
+			"progress": 100.0,
+			"embarked_unit_ids": ["unit_alpha", "unit_bravo", "unit_charlie", "unit_delta"],
+			"boarded_fireteam_ids": ["blue"],
+			"has_lz_position": true,
+			"lz_position": Vector2(320.0, 180.0),
+			"approach_angle": "NW",
+		},
+		{
+			"craft_id": "dropship_2",
+			"display_name": "Dropship 2",
+			"state": "waiting",
+			"progress": 100.0,
+			"embarked_unit_ids": ["unit_echo", "unit_foxtrot", "unit_golf", "unit_hotel"],
+			"boarded_fireteam_ids": ["gold"],
+			"has_lz_position": true,
+			"lz_position": Vector2(576.0, 288.0),
+			"approach_angle": "SE",
+		},
+	]
+	controller.call("set_planning_state", planning_state)
+	_assert(bool(controller.call("_try_start_drop_sequence")), "First waiting dropship can start its drop sequence")
+	for _step in range(180):
+		controller.call("_update_drop_sequence", 0.2)
+		if String(controller.get("_drop_sequence_phase")) == "outbound":
+			break
+	_assert(String(controller.get("_drop_sequence_phase")) == "outbound", "First dropship reaches outbound return after deploying its team")
+
+	_assert(bool(controller.call("_select_mission_dropship_craft", "dropship_2", false)), "Selecting Dropship 2 hands off the outbound first craft instead of keeping the global drop slot blocked")
+	var after_select_state: Dictionary = Dictionary(controller.call("get_planning_state"))
+	var first_card: Dictionary = _find_card(Array(after_select_state.get("mission_drop_cards", [])), "dropship_1")
+	_assert(String(first_card.get("state", "")) == "to_fob", "First dropship remains tracked as RTB after handoff")
+	controller.set("_has_lz_position", true)
+	controller.set("_lz_position", Vector2(576.0, 288.0))
+	_assert(bool(controller.call("_try_start_drop_sequence")), "Second waiting dropship can start its own drop after the first one is returning")
+	_assert(String(controller.get("_drop_sequence_phase")) == "inbound", "Second dropship owns the next inbound sequence")
 
 	scene.queue_free()
 	await _wait_frames(2)

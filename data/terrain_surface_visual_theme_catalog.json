@@ -20,17 +20,27 @@
 	},
 	"tile_type_overrides": {
 		"ground_flat": "ground_flat",
-		"station_floor_panel": "station_floor_panel",
-		"station_wall": "station_floor_panel",
-		"station_wall_door": "station_floor_panel"
-	},
-	"surface_detail_by_tile_type": {
 		"nature_ground_dirt": "nature_ground_dirt",
 		"nature_ground_sand_dirt": "nature_ground_dirt",
 		"nature_ground_rock_dirt": "nature_ground_dirt",
 		"nature_ground_grass_patch": "nature_ground_grass_patch",
-		"nature_ground_dirt_river_tile": "nature_ground_dirt_river_tile"
+		"nature_ground_dirt_river_tile": "nature_ground_dirt_river_tile",
+		"station_floor_panel": "station_floor_panel",
+		"station_set_floor_panel_corner": "station_set_floor_panel_corner",
+		"station_set_floor_panel_end": "station_set_floor_panel_end",
+		"station_set_floor_panel_straight": "station_set_floor_panel_straight",
+		"station_set_floor_panel": "station_set_floor_panel",
+		"station_set_floor": "station_set_floor",
+		"station_wall": "station_floor_panel",
+		"station_wall_door": "station_floor_panel",
+		"modular_floor": "modular_floor",
+		"modular_floor_big": "modular_floor_big",
+		"modular_wall": "modular_floor",
+		"modular_wall_corner": "modular_floor",
+		"modular_gate": "modular_floor",
+		"modular_gate_door": "modular_floor"
 	},
+	"surface_detail_by_tile_type": {},
 	"surface_tint_policy": {
 		"retain_non_ground_tints": true,
 		"reason": "The Space Kit ground mesh remains the base shape; Nature Boden entries are offset detail visuals and existing sand/rock/road tints keep surface_type gameplay readable.",
@@ -81,6 +91,66 @@
 			"surface_roles": ["future_detail"],
 			"active_default": false,
 			"fallback_model_key": "ground_flat",
+			"visual_only": true
+		},
+		{
+			"visual_id": "station_set_floor_panel_corner",
+			"source_id": "space_station_kit",
+			"source_asset_id": "station_set_floor_panel_corner",
+			"model_key": "station_set_floor_panel_corner",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/floor-panel-corner.glb",
+			"theme": "station_floor",
+			"surface_roles": ["ground", "road"],
+			"active_default": false,
+			"fallback_model_key": "station_floor_panel",
+			"visual_only": true
+		},
+		{
+			"visual_id": "station_set_floor_panel_end",
+			"source_id": "space_station_kit",
+			"source_asset_id": "station_set_floor_panel_end",
+			"model_key": "station_set_floor_panel_end",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/floor-panel-end.glb",
+			"theme": "station_floor",
+			"surface_roles": ["ground", "road"],
+			"active_default": false,
+			"fallback_model_key": "station_floor_panel",
+			"visual_only": true
+		},
+		{
+			"visual_id": "station_set_floor_panel_straight",
+			"source_id": "space_station_kit",
+			"source_asset_id": "station_set_floor_panel_straight",
+			"model_key": "station_set_floor_panel_straight",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/floor-panel-straight.glb",
+			"theme": "station_floor",
+			"surface_roles": ["ground", "road"],
+			"active_default": false,
+			"fallback_model_key": "station_floor_panel",
+			"visual_only": true
+		},
+		{
+			"visual_id": "station_set_floor_panel",
+			"source_id": "space_station_kit",
+			"source_asset_id": "station_set_floor_panel",
+			"model_key": "station_set_floor_panel",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/floor-panel.glb",
+			"theme": "station_floor",
+			"surface_roles": ["ground", "road"],
+			"active_default": false,
+			"fallback_model_key": "station_floor_panel",
+			"visual_only": true
+		},
+		{
+			"visual_id": "station_set_floor",
+			"source_id": "space_station_kit",
+			"source_asset_id": "station_set_floor",
+			"model_key": "station_set_floor",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/floor.glb",
+			"theme": "station_floor",
+			"surface_roles": ["ground", "road"],
+			"active_default": false,
+			"fallback_model_key": "station_floor_panel",
 			"visual_only": true
 		}
 	]

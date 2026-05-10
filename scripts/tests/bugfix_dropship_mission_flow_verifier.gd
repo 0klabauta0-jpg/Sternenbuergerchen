@@ -1296,8 +1296,8 @@ func _test_drop_ship_starts_far_outside_the_map() -> void:
 	var start_position: Vector2 = Vector2(tactical_controller.call("_get_drop_staging_position"))
 	var lz_position: Vector2 = Vector2(tactical_controller.get("_lz_position"))
 	var map_bounds: Rect2 = Rect2(tactical_controller.call("_get_map_world_bounds"))
-	var required_distance: float = maxf(maxf(map_bounds.size.x, map_bounds.size.y) * 2.0, 720.0)
-	_assert(start_position.distance_to(lz_position) >= required_distance - 1.0, "Dropship staging starts at least two map-widths away from the LZ")
+	var required_distance: float = maxf(maxf(map_bounds.size.x, map_bounds.size.y) * 3.0, 1080.0)
+	_assert(start_position.distance_to(lz_position) >= required_distance - 1.0, "Dropship staging starts farther away from the LZ before entering the mission map")
 	scene.queue_free()
 	await process_frame
 

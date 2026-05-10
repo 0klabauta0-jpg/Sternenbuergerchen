@@ -466,7 +466,7 @@
 			"layer": "terrain_surface",
 			"source_id": "space_station_kit",
 			"model_path": "res://Assets/curated/kenney/space_station/models/floor-panel.glb",
-			"scale": 0.88,
+			"scale": 0.84,
 			"y_offset": -0.04,
 			"rotation_degrees_offset": 0,
 			"space_station_role": "floor_insert"
@@ -2046,47 +2046,47 @@
 			"space_station_role": "full_set_asset"
 		},
 		"station_set_floor_panel_corner": {
-			"layer": "object",
+			"layer": "terrain_surface",
 			"source_id": "space_station_kit",
 			"model_path": "res://Assets/curated/kenney/space_station/models_all/floor-panel-corner.glb",
-			"scale": 0.9,
-			"y_offset": 0,
+			"scale": 0.84,
+			"y_offset": -0.04,
 			"rotation_degrees_offset": 0,
 			"space_station_role": "full_set_asset"
 		},
 		"station_set_floor_panel_end": {
-			"layer": "object",
+			"layer": "terrain_surface",
 			"source_id": "space_station_kit",
 			"model_path": "res://Assets/curated/kenney/space_station/models_all/floor-panel-end.glb",
-			"scale": 0.9,
-			"y_offset": 0,
+			"scale": 0.84,
+			"y_offset": -0.04,
 			"rotation_degrees_offset": 0,
 			"space_station_role": "full_set_asset"
 		},
 		"station_set_floor_panel_straight": {
-			"layer": "object",
+			"layer": "terrain_surface",
 			"source_id": "space_station_kit",
 			"model_path": "res://Assets/curated/kenney/space_station/models_all/floor-panel-straight.glb",
-			"scale": 0.9,
-			"y_offset": 0,
+			"scale": 0.84,
+			"y_offset": -0.04,
 			"rotation_degrees_offset": 0,
 			"space_station_role": "full_set_asset"
 		},
 		"station_set_floor_panel": {
-			"layer": "object",
+			"layer": "terrain_surface",
 			"source_id": "space_station_kit",
 			"model_path": "res://Assets/curated/kenney/space_station/models_all/floor-panel.glb",
-			"scale": 0.9,
-			"y_offset": 0,
+			"scale": 0.84,
+			"y_offset": -0.04,
 			"rotation_degrees_offset": 0,
 			"space_station_role": "full_set_asset"
 		},
 		"station_set_floor": {
-			"layer": "object",
+			"layer": "terrain_surface",
 			"source_id": "space_station_kit",
 			"model_path": "res://Assets/curated/kenney/space_station/models_all/floor.glb",
-			"scale": 0.9,
-			"y_offset": 0,
+			"scale": 0.84,
+			"y_offset": -0.04,
 			"rotation_degrees_offset": 0,
 			"space_station_role": "full_set_asset"
 		},
@@ -2602,6 +2602,393 @@
 			"y_offset": 0,
 			"rotation_degrees_offset": 0,
 			"space_station_role": "full_set_asset"
+		},
+		"modular_floor": {
+			"layer": "terrain_surface",
+			"source_id": "modular_space_kit",
+			"model_path": "res://Assets/curated/kenney/modular_space/models/template-floor.glb",
+			"scale": 0.88,
+			"y_offset": -0.04,
+			"rotation_degrees_offset": 0,
+			"modular_space_role": "hangar_floor"
+		},
+		"modular_floor_big": {
+			"layer": "terrain_surface",
+			"source_id": "modular_space_kit",
+			"model_path": "res://Assets/curated/kenney/modular_space/models/template-floor-big.glb",
+			"scale": 0.88,
+			"y_offset": -0.04,
+			"rotation_degrees_offset": 0,
+			"modular_space_role": "hangar_floor"
+		},
+		"modular_floor_raised": {
+			"layer": "object",
+			"source_id": "modular_space_kit",
+			"model_path": "res://Assets/curated/kenney/modular_space/models/template-floor-layer-raised.glb",
+			"scale": 0.9,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"modular_space_role": "docking_pad"
+		},
+		"modular_wall": {
+			"layer": "terrain_object",
+			"source_id": "modular_space_kit",
+			"model_path": "res://Assets/curated/kenney/modular_space/models/template-wall.glb",
+			"scale": 0.86,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"modular_space_role": "wall_panel"
+		},
+		"modular_wall_corner": {
+			"layer": "terrain_object",
+			"source_id": "modular_space_kit",
+			"model_path": "res://Assets/curated/kenney/modular_space/models/template-wall-corner.glb",
+			"scale": 0.86,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"modular_space_role": "wall_panel"
+		},
+		"modular_gate": {
+			"layer": "terrain_object",
+			"source_id": "modular_space_kit",
+			"model_path": "res://Assets/curated/kenney/modular_space/models/gate.glb",
+			"scale": 0.86,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"modular_space_role": "door_airlock"
+		},
+		"modular_gate_door": {
+			"layer": "terrain_object",
+			"source_id": "modular_space_kit",
+			"model_path": "res://Assets/curated/kenney/modular_space/models/gate-door.glb",
+			"scale": 0.86,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"modular_space_role": "door_airlock"
+		},
+		"modular_corridor_wide": {
+			"layer": "object",
+			"source_id": "modular_space_kit",
+			"model_path": "res://Assets/curated/kenney/modular_space/models/corridor-wide.glb",
+			"scale": 0.88,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"modular_space_role": "corridor"
+		},
+		"modular_corridor_wide_corner": {
+			"layer": "object",
+			"source_id": "modular_space_kit",
+			"model_path": "res://Assets/curated/kenney/modular_space/models/corridor-wide-corner.glb",
+			"scale": 0.88,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"modular_space_role": "corridor"
+		},
+		"modular_room_wide": {
+			"layer": "object",
+			"source_id": "modular_space_kit",
+			"model_path": "res://Assets/curated/kenney/modular_space/models/room-wide.glb",
+			"scale": 0.88,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"modular_space_role": "hangar_room"
+		},
+		"factory_building_a": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/building-a.glb",
+			"scale": 0.78,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "industrial_building"
+		},
+		"factory_building_b": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/building-b.glb",
+			"scale": 0.78,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "industrial_building"
+		},
+		"factory_building_c": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/building-c.glb",
+			"scale": 0.78,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "industrial_building"
+		},
+		"factory_building_d": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/building-d.glb",
+			"scale": 0.78,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "industrial_building"
+		},
+		"factory_building_e": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/building-e.glb",
+			"scale": 0.78,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "industrial_building"
+		},
+		"factory_building_f": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/building-f.glb",
+			"scale": 0.78,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "industrial_building"
+		},
+		"factory_building_g": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/building-g.glb",
+			"scale": 0.78,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "industrial_building"
+		},
+		"factory_building_h": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/building-h.glb",
+			"scale": 0.78,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "industrial_building"
+		},
+		"factory_building_i": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/building-i.glb",
+			"scale": 0.78,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "industrial_building"
+		},
+		"factory_building_j": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/building-j.glb",
+			"scale": 0.78,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "industrial_building"
+		},
+		"factory_building_k": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/building-k.glb",
+			"scale": 0.78,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "industrial_building"
+		},
+		"factory_building_l": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/building-l.glb",
+			"scale": 0.78,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "industrial_building"
+		},
+		"factory_building_m": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/building-m.glb",
+			"scale": 0.78,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "industrial_building"
+		},
+		"factory_building_n": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/building-n.glb",
+			"scale": 0.78,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "industrial_building"
+		},
+		"factory_building_o": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/building-o.glb",
+			"scale": 0.78,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "industrial_building"
+		},
+		"factory_building_p": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/building-p.glb",
+			"scale": 0.78,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "industrial_building"
+		},
+		"factory_building_q": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/building-q.glb",
+			"scale": 0.78,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "industrial_building"
+		},
+		"factory_building_r": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/building-r.glb",
+			"scale": 0.78,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "industrial_building"
+		},
+		"factory_building_s": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/building-s.glb",
+			"scale": 0.78,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "industrial_building"
+		},
+		"factory_building_t": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/building-t.glb",
+			"scale": 0.78,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "industrial_building"
+		},
+		"factory_chimney_basic": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/chimney-basic.glb",
+			"scale": 0.72,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "chimney"
+		},
+		"factory_chimney_large": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/chimney-large.glb",
+			"scale": 0.72,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "chimney"
+		},
+		"factory_chimney_medium": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/chimney-medium.glb",
+			"scale": 0.72,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "chimney"
+		},
+		"factory_chimney_small": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/chimney-small.glb",
+			"scale": 0.72,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "chimney"
+		},
+		"factory_detail_tank": {
+			"layer": "object",
+			"source_id": "factory_kit",
+			"model_path": "res://Assets/curated/kenney/factory/models/detail-tank.glb",
+			"scale": 0.82,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "tank"
+		},
+		"factory_conveyor": {
+			"layer": "object",
+			"source_id": "factory_kit_3_0",
+			"model_path": "res://Assets/curated/kenney/factory/models/conveyor.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "conveyor"
+		},
+		"factory_conveyor_corner": {
+			"layer": "object",
+			"source_id": "factory_kit_3_0",
+			"model_path": "res://Assets/curated/kenney/factory/models/conveyor-corner.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "conveyor"
+		},
+		"factory_catwalk_straight": {
+			"layer": "object",
+			"source_id": "factory_kit_3_0",
+			"model_path": "res://Assets/curated/kenney/factory/models/catwalk-straight.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "catwalk"
+		},
+		"factory_floor": {
+			"layer": "object",
+			"source_id": "factory_kit_3_0",
+			"model_path": "res://Assets/curated/kenney/factory/models/floor.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "floor"
+		},
+		"factory_crane": {
+			"layer": "object",
+			"source_id": "factory_kit_3_0",
+			"model_path": "res://Assets/curated/kenney/factory/models/crane.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "machinery"
+		},
+		"factory_door": {
+			"layer": "object",
+			"source_id": "factory_kit_3_0",
+			"model_path": "res://Assets/curated/kenney/factory/models/door.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "door"
+		},
+		"factory_box_large": {
+			"layer": "object",
+			"source_id": "factory_kit_3_0",
+			"model_path": "res://Assets/curated/kenney/factory/models/box-large.glb",
+			"scale": 1,
+			"y_offset": 0,
+			"rotation_degrees_offset": 0,
+			"factory_role": "cargo"
+		},
+		"factory_indicator_arrow": {
+			"layer": "object",
+			"source_id": "factory_kit_3_0",
+			"model_path": "res://Assets/curated/kenney/factory/models/indicator-special-arrow.glb",
+			"scale": 1,
+			"y_offset": 0.01,
+			"rotation_degrees_offset": 0,
+			"factory_role": "floor_marker"
 		}
 	}
 }

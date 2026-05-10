@@ -16,6 +16,7 @@ const META_USEROLOGY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/met
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
 const LOADOUT_MODIFIER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/command/loadout_modifier_resolver.gd")
 const NPC_RANK_BADGE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
+const HOVER_SCROLL_BEHAVIOR_SCRIPT: GDScript = preload("res://scripts/ui/hover_scroll_behavior.gd")
 const DROPSHIP_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NE.png")
 const DROPSHIP_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NW.png")
 const DROPSHIP_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
@@ -95,6 +96,7 @@ var _pending_transport_remove: Dictionary = {}
 func _ready() -> void:
 	META_UI_SKIN_SCRIPT.apply_fob(self)
 	_apply_drop_light_fixed_layout()
+	HOVER_SCROLL_BEHAVIOR_SCRIPT.call("install", self)
 	var start_button := get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/StartMissionButton") as Button
 	var add_team_button := get_node("Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamToolbar/AddTeamButton") as Button
 	var remove_team_button := get_node("Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamToolbar/RemoveTeamButton") as Button
@@ -2678,7 +2680,7 @@ func _populate_compact_loadout_badge_row(badge_row: HBoxContainer, member_profil
 		texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		texture_rect.mouse_filter = Control.MOUSE_FILTER_STOP
-		texture_rect.tooltip_text = "%s: %s" % [String(badge.get("label", "Badge")), String(badge.get("reason", ""))]
+		NPC_RANK_BADGE_RESOLVER_SCRIPT.call("apply_badge_help_metadata", texture_rect, badge)
 		var badge_path: String = String(badge.get("path", "")).strip_edges()
 		if not badge_path.is_empty() and ResourceLoader.exists(badge_path):
 			texture_rect.texture = load(badge_path) as Texture2D

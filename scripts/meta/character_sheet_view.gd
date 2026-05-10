@@ -41,10 +41,12 @@ static func render(host: VBoxContainer, profile, options: Dictionary = {}) -> vo
 	host.add_child(sheet_root)
 
 	_add_identity_block(sheet_root, model, profile)
-	_add_text_section(sheet_root, "TRAIT:", String(model.get("trait_text", "Keine Traits verfuegbar.")))
-	_add_text_section(sheet_root, "KURZBESCHREIBUNG:", String(model.get("short_description", "Keine Kurzbeschreibung verfuegbar.")))
+	_add_trait_section(sheet_root, String(model.get("trait_text", "Keine Traits verfuegbar.")), Array(model.get("trait_rows", [])))
+	if not bool(options.get("hide_short_description", false)):
+		_add_text_section(sheet_root, "KURZBESCHREIBUNG:", String(model.get("short_description", "Keine Kurzbeschreibung verfuegbar.")))
 	_add_value_section(sheet_root, "ROLLE / LOADOUT:", Array(model.get("role_loadout_rows", [])), profile, options)
-	_add_loadout_dropdown_section(sheet_root, profile)
+	if not bool(options.get("move_last_loadout_to_bottom", false)):
+		_add_loadout_dropdown_section(sheet_root, profile)
 	_add_value_section(sheet_root, "STATUS / RECOVERY:", Array(model.get("status_rows", [])), profile, options)
 	_add_value_section(sheet_root, "TEAMFIT:", Array(model.get("relationship_rows", [])), profile, options)
 	_add_value_section(sheet_root, "PROGRESS:", Array(model.get("progress_rows", [])), profile, options)
@@ -55,6 +57,8 @@ static func render(host: VBoxContainer, profile, options: Dictionary = {}) -> vo
 		_add_value_section(sheet_root, "PLATTFORM-SKILLS (nur falls relevant):", platform_rows, profile, options)
 	_add_value_section(sheet_root, "ABGELEITET:", Array(model.get("derived_rows", [])), profile, options)
 	_add_value_section(sheet_root, "VERHALTENSPROFIL:", Array(model.get("behavior_rows", [])), profile, options)
+	if bool(options.get("move_last_loadout_to_bottom", false)):
+		_add_loadout_dropdown_section(sheet_root, profile)
 
 
 static func _clear_container(host: VBoxContainer) -> void:
@@ -67,11 +71,12 @@ static func _add_identity_block(host: VBoxContainer, model: Dictionary, profile)
 	var summary_row := HBoxContainer.new()
 	summary_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	summary_row.add_theme_constant_override("separation", 12)
+	_set_help_id(summary_row, "character_sheet.identity")
 	host.add_child(summary_row)
 
 	var portrait_rect := TextureRect.new()
 	portrait_rect.name = "PortraitRect"
-	_set_help_id(portrait_rect, "character_sheet.identity")
+	_set_help_id(portrait_rect, "character_sheet.portrait")
 	PORTRAIT_IDENTITY_CATALOG_SCRIPT.apply_texture_rect_contract(portrait_rect, "character_sheet")
 	portrait_rect.texture = _load_portrait_texture(String(profile.portrait_id), String(profile.portrait_path)) if profile != null else null
 	portrait_rect.modulate = Color(1.0, 1.0, 1.0, 1.0) if portrait_rect.texture != null else Color(0.35, 0.37, 0.42, 1.0)
@@ -85,7 +90,7 @@ static func _add_identity_block(host: VBoxContainer, model: Dictionary, profile)
 	var name_label := Label.new()
 	name_label.text = String(model.get("name", "Unknown Operator"))
 	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_set_help_id(name_label, "character_sheet.identity")
+	_set_help_id(name_label, "character_sheet.name")
 	META_UI_SKIN_SCRIPT.style_header_label(name_label, 16)
 	summary_vbox.add_child(name_label)
 
@@ -116,7 +121,7 @@ static func _add_badge_row(host: VBoxContainer, profile) -> void:
 		texture_rect.custom_minimum_size = Vector2(18.0, 18.0)
 		texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		texture_rect.tooltip_text = "%s: %s" % [String(badge.get("label", "Badge")), String(badge.get("reason", ""))]
+		NPC_RANK_BADGE_RESOLVER_SCRIPT.call("apply_badge_help_metadata", texture_rect, badge)
 		var badge_path: String = String(badge.get("path", "")).strip_edges()
 		if not badge_path.is_empty() and ResourceLoader.exists(badge_path):
 			texture_rect.texture = load(badge_path) as Texture2D
@@ -134,6 +139,54 @@ static func _add_text_section(host: VBoxContainer, title: String, body_text: Str
 	_set_help_id(body_label, String(SECTION_HELP_IDS.get(title, "")))
 	META_UI_SKIN_SCRIPT.style_body_label(body_label, 10)
 	host.add_child(body_label)
+
+
+static func _add_trait_section(host: VBoxContainer, trait_text: String, trait_rows: Array) -> void:
+	_add_section_header(host, "TRAIT:")
+	if trait_rows.is_empty():
+		var body_label := Label.new()
+		body_label.text = trait_text
+		body_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_set_help_id(body_label, "character_sheet.traits")
+		META_UI_SKIN_SCRIPT.style_body_label(body_label, 10)
+		host.add_child(body_label)
+		return
+	var section_vbox := VBoxContainer.new()
+	section_vbox.name = "TraitRows"
+	section_vbox.add_theme_constant_override("separation", 4)
+	_set_help_id(section_vbox, "character_sheet.traits")
+	host.add_child(section_vbox)
+	for row_variant in trait_rows:
+		if typeof(row_variant) != TYPE_DICTIONARY:
+			continue
+		var row_data: Dictionary = Dictionary(row_variant)
+		var help_id: String = String(row_data.get("help_id", "character_sheet.traits")).strip_edges()
+		var detail_text: String = String(row_data.get("detail_text", "")).strip_edges()
+		var row := VBoxContainer.new()
+		row.name = "TraitRow_%s" % _sanitize_node_fragment(String(row_data.get("trait_id", row_data.get("label", "trait"))))
+		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_theme_constant_override("separation", 1)
+		row.tooltip_text = detail_text
+		_set_help_id(row, help_id)
+		section_vbox.add_child(row)
+		var title_label := Label.new()
+		title_label.name = "TraitLabel_%s" % _sanitize_node_fragment(String(row_data.get("trait_id", row_data.get("label", "trait"))))
+		title_label.text = "%s  [%s]" % [String(row_data.get("label", "Trait")), String(row_data.get("value_text", "TAG"))]
+		title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		title_label.tooltip_text = detail_text
+		_set_help_id(title_label, help_id)
+		META_UI_SKIN_SCRIPT.style_body_label(title_label, 10)
+		row.add_child(title_label)
+		if not detail_text.is_empty():
+			var detail_label := Label.new()
+			detail_label.name = "TraitDetail_%s" % _sanitize_node_fragment(String(row_data.get("trait_id", row_data.get("label", "trait"))))
+			detail_label.text = detail_text
+			detail_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			detail_label.modulate = Color(0.72, 0.82, 0.86, 0.92)
+			detail_label.tooltip_text = detail_text
+			_set_help_id(detail_label, help_id)
+			META_UI_SKIN_SCRIPT.style_body_label(detail_label, 9)
+			row.add_child(detail_label)
 
 
 static func _add_bar_section(host: VBoxContainer, title: String, rows: Array, profile = null, options: Dictionary = {}) -> void:
@@ -176,33 +229,53 @@ static func _add_value_rows(host: VBoxContainer, rows: Array, profile = null, op
 		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_theme_constant_override("separation", 8)
 		var help_id: String = String(row_data.get("help_id", ""))
+		var detail_text: String = String(row_data.get("detail_text", row_data.get("effect_text", ""))).strip_edges()
 		_set_help_id(row, help_id)
+		row.tooltip_text = detail_text
 		section_vbox.add_child(row)
 
 		var label := Label.new()
 		label.text = "%s:" % String(row_data.get("label", "Value"))
 		label.custom_minimum_size = Vector2(ROW_LABEL_WIDTH, 0.0)
 		_set_help_id(label, help_id)
+		label.tooltip_text = detail_text
 		META_UI_SKIN_SCRIPT.style_body_label(label, 10)
 		row.add_child(label)
 
+		var value_vbox := VBoxContainer.new()
+		value_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		value_vbox.add_theme_constant_override("separation", 1)
+		row.add_child(value_vbox)
 		var value_label := Label.new()
 		value_label.text = String(row_data.get("value_text", "n/a"))
 		value_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		value_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_set_help_id(value_label, help_id)
+		value_label.tooltip_text = detail_text
 		META_UI_SKIN_SCRIPT.style_body_label(value_label, 10)
-		row.add_child(value_label)
+		value_vbox.add_child(value_label)
+		if not detail_text.is_empty():
+			var detail_label := Label.new()
+			detail_label.name = "DerivedDetail_%s" % _sanitize_node_fragment(String(row_data.get("label", "detail")))
+			detail_label.text = detail_text
+			detail_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			detail_label.modulate = Color(0.72, 0.82, 0.86, 0.92)
+			_set_help_id(detail_label, help_id)
+			detail_label.tooltip_text = detail_text
+			META_UI_SKIN_SCRIPT.style_body_label(detail_label, 9)
+			value_vbox.add_child(detail_label)
 
 
 static func _add_metric_editor_row(host: VBoxContainer, row_data: Dictionary, profile = null, options: Dictionary = {}) -> void:
 	var help_id: String = String(row_data.get("help_id", ""))
+	var detail_text: String = String(row_data.get("detail_text", row_data.get("effect_text", ""))).strip_edges()
 	var row := HBoxContainer.new()
 	row.name = "EditableMetricRow_%s" % _sanitize_node_fragment(String(row_data.get("value_key", row_data.get("label", "metric"))))
 	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.focus_mode = Control.FOCUS_ALL
 	row.add_theme_constant_override("separation", 5)
 	_set_help_id(row, help_id)
+	row.tooltip_text = detail_text
 	host.add_child(row)
 
 	var label := Label.new()
@@ -212,6 +285,7 @@ static func _add_metric_editor_row(host: VBoxContainer, row_data: Dictionary, pr
 	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	label.clip_text = true
 	_set_help_id(label, help_id)
+	label.tooltip_text = detail_text
 	META_UI_SKIN_SCRIPT.style_body_label(label, 10)
 	row.add_child(label)
 
@@ -221,6 +295,7 @@ static func _add_metric_editor_row(host: VBoxContainer, row_data: Dictionary, pr
 	minus_button.custom_minimum_size = Vector2(24.0, 22.0)
 	minus_button.focus_mode = Control.FOCUS_ALL
 	_set_help_id(minus_button, help_id)
+	minus_button.tooltip_text = detail_text
 	row.add_child(minus_button)
 
 	var bar_host := Control.new()
@@ -228,6 +303,7 @@ static func _add_metric_editor_row(host: VBoxContainer, row_data: Dictionary, pr
 	bar_host.custom_minimum_size = Vector2(0.0, 18.0)
 	bar_host.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_set_help_id(bar_host, help_id)
+	bar_host.tooltip_text = detail_text
 	row.add_child(bar_host)
 
 	var progress_bar := ProgressBar.new()
@@ -243,6 +319,7 @@ static func _add_metric_editor_row(host: VBoxContainer, row_data: Dictionary, pr
 	progress_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	progress_bar.modulate = Color(0.65, 0.79, 0.92, 1.0) if String(row_data.get("value_text", "n/a")) != "n/a" else Color(0.32, 0.34, 0.38, 0.55)
 	_set_help_id(progress_bar, help_id)
+	progress_bar.tooltip_text = detail_text
 	bar_host.add_child(progress_bar)
 
 	var value_label := Label.new()
@@ -256,6 +333,7 @@ static func _add_metric_editor_row(host: VBoxContainer, row_data: Dictionary, pr
 	value_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	value_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_set_help_id(value_label, help_id)
+	value_label.tooltip_text = detail_text
 	META_UI_SKIN_SCRIPT.style_body_label(value_label, 10)
 	bar_host.add_child(value_label)
 
@@ -265,6 +343,7 @@ static func _add_metric_editor_row(host: VBoxContainer, row_data: Dictionary, pr
 	plus_button.custom_minimum_size = Vector2(24.0, 22.0)
 	plus_button.focus_mode = Control.FOCUS_ALL
 	_set_help_id(plus_button, help_id)
+	plus_button.tooltip_text = detail_text
 	row.add_child(plus_button)
 
 	var initial_value: float = clampf(float(row_data.get("value", 0.0)), 0.0, 1.0)
@@ -308,6 +387,7 @@ static func _add_loadout_dropdown_section(host: VBoxContainer, profile) -> void:
 	var section_vbox := VBoxContainer.new()
 	section_vbox.name = "LastLoadoutDropdownSection"
 	section_vbox.add_theme_constant_override("separation", 4)
+	_set_help_id(section_vbox, "character_sheet.loadout_summary")
 	host.add_child(section_vbox)
 	_add_armor_dropdown_row(section_vbox, String(profile.armor_id))
 	_add_weapon_dropdown_row(section_vbox, "Waffe 1", "Weapon1LastSelect", "Weapon1LastPreview", String(profile.weapon_1_id))
@@ -321,6 +401,7 @@ static func _add_armor_dropdown_row(host: VBoxContainer, selected_armor_id: Stri
 	option.custom_minimum_size = Vector2(170.0, 26.0)
 	option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	option.tooltip_text = "Zeigt die zuletzt getragene Ruestung. Andere Eintraege sind hier absichtlich gesperrt."
+	_set_help_id(option, "character_sheet.loadout_summary")
 	option.add_theme_font_size_override("font_size", 9)
 	var normalized_selected: String = _normalize_armor_id(selected_armor_id)
 	for armor_id in PackedStringArray(["light", "medium", "heavy"]):
@@ -348,6 +429,7 @@ static func _add_weapon_dropdown_row(host: VBoxContainer, label_text: String, op
 	preview.tooltip_text = String(WEAPON_DATA_SCRIPT.call("get_display_name", normalized_selected))
 	preview.set_meta("weapon_id", normalized_selected)
 	preview.set_meta("weapon_preview_path", String(WEAPON_DATA_SCRIPT.call("get_preview_path", normalized_selected)))
+	_set_help_id(preview, "character_sheet.loadout_summary")
 	row.add_child(preview)
 
 	var option := OptionButton.new()
@@ -355,6 +437,7 @@ static func _add_weapon_dropdown_row(host: VBoxContainer, label_text: String, op
 	option.custom_minimum_size = Vector2(146.0, 26.0)
 	option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	option.tooltip_text = "Letzte Waffe. Andere Optionen sind ausgegraut, bis Loadout-Aenderungen ueber die FOB laufen."
+	_set_help_id(option, "character_sheet.loadout_summary")
 	option.add_theme_font_size_override("font_size", 9)
 	var all_weapon_ids: PackedStringArray = WEAPON_DATA_SCRIPT.call("get_all_weapon_ids")
 	if not all_weapon_ids.has(normalized_selected):
@@ -380,11 +463,13 @@ static func _build_loadout_row(label_text: String) -> HBoxContainer:
 	row.name = "LastLoadoutRow_%s" % _sanitize_node_fragment(label_text)
 	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_theme_constant_override("separation", 6)
+	_set_help_id(row, "character_sheet.loadout_summary")
 	var label := Label.new()
 	label.text = "%s:" % label_text
 	label.custom_minimum_size = Vector2(72.0, 0.0)
 	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	label.clip_text = true
+	_set_help_id(label, "character_sheet.loadout_summary")
 	META_UI_SKIN_SCRIPT.style_body_label(label, 10)
 	row.add_child(label)
 	return row

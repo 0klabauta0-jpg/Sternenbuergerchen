@@ -7,6 +7,7 @@ const EDGE_MARGIN: float = 16.0
 const TARGET_GAP: float = 8.0
 const COMPACT_HEIGHT_HINT: float = 140.0
 const DETAIL_HEIGHT_HINT: float = 260.0
+const WORD_WRAP_LIMIT: int = 7
 
 var _title_label: Label = null
 var _compact_label: Label = null
@@ -168,5 +169,26 @@ func _to_string_lines(lines: Array) -> PackedStringArray:
 	for line_variant in lines:
 		var line: String = String(line_variant).strip_edges()
 		if not line.is_empty():
-			result.append(line)
+			for wrapped_line in _wrap_line_after_words(line, WORD_WRAP_LIMIT):
+				result.append(wrapped_line)
+	return result
+
+
+func _wrap_line_after_words(line: String, words_per_line: int) -> PackedStringArray:
+	var result: PackedStringArray = PackedStringArray()
+	var tokens: PackedStringArray = line.split(" ", false)
+	var current: PackedStringArray = PackedStringArray()
+	var limit: int = maxi(words_per_line, 1)
+	for token_variant in tokens:
+		var token: String = String(token_variant).strip_edges()
+		if token.is_empty():
+			continue
+		current.append(token)
+		if current.size() >= limit:
+			result.append(" ".join(current))
+			current.clear()
+	if not current.is_empty():
+		result.append(" ".join(current))
+	if result.is_empty():
+		result.append(line)
 	return result

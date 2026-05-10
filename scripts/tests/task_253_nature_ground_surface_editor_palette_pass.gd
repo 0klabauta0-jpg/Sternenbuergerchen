@@ -52,7 +52,10 @@ func _test_surface_visual_catalog(terrain_mapping: Dictionary, surface_catalog: 
 		_assert(String(surface_model_by_surface.get(surface_type, "")) == "ground_flat", "Surface keeps Space Kit ground base: %s" % surface_type)
 	var detail_by_type: Dictionary = Dictionary(surface_catalog.get("surface_detail_by_tile_type", {}))
 	for type_id in ["nature_ground_dirt", "nature_ground_sand_dirt", "nature_ground_rock_dirt", "nature_ground_grass_patch"]:
-		_assert(not String(detail_by_type.get(type_id, "")).is_empty(), "Nature Boden maps to offset detail visual: %s" % type_id)
+		_assert(String(detail_by_type.get(type_id, "")).is_empty(), "Nature Boden no longer maps to an offset detail visual: %s" % type_id)
+	var type_overrides: Dictionary = Dictionary(surface_catalog.get("tile_type_overrides", {}))
+	for type_id in ["nature_ground_dirt", "nature_ground_sand_dirt", "nature_ground_rock_dirt", "nature_ground_grass_patch"]:
+		_assert(not String(type_overrides.get(type_id, "")).is_empty(), "Nature Boden maps to flush ground visual: %s" % type_id)
 	var models: Dictionary = Dictionary(terrain_mapping.get("models", {}))
 	for model_key in ["nature_ground_dirt", "nature_ground_grass_patch", "nature_ground_dirt_river_tile"]:
 		var entry: Dictionary = Dictionary(models.get(model_key, {}))
@@ -157,14 +160,13 @@ func _test_runtime_surface_visuals() -> void:
 	var detail_entries: Array = Array(snapshot.get("surface_detail_visual_entries", []))
 	_assert(bool(snapshot.get("surface_visual_theme_catalog_loaded", false)), "Runtime loads surface visual theme catalog")
 	_assert(int(snapshot.get("ground_mesh_count", 0)) == int(snapshot.get("tile_count", -1)), "Runtime still renders one ground mesh per tile")
-	_assert(int(snapshot.get("nature_surface_ground_model_count", -1)) == 0, "Runtime does not replace base ground with Nature ground")
-	_assert(int(snapshot.get("nature_surface_detail_model_count", 0)) >= 4, "Runtime renders Nature Boden as offset detail visuals")
+	_assert(int(snapshot.get("nature_surface_ground_model_count", -1)) >= 4, "Runtime renders Nature Boden as flush ground visuals")
+	_assert(int(snapshot.get("nature_surface_detail_model_count", 0)) == 0, "Runtime no longer stacks raised Nature Boden detail visuals")
 	_assert(entries.size() == int(snapshot.get("tile_count", -1)), "Runtime exposes one surface visual entry per tile")
 	_assert(_entries_include_surface_types(entries, [TERRAIN_TILE_DATA_SCRIPT.SURFACE_GROUND, TERRAIN_TILE_DATA_SCRIPT.SURFACE_SAND, TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROCK, TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROAD]), "Runtime entries cover ground, sand, rock and road")
 	_assert(_entries_include_model_key(entries, "ground_flat"), "Runtime keeps standard Boden on Space Kit ground_flat")
-	_assert(_entries_are_space_kit_ground(entries), "Runtime base surface visuals are standard Space Kit ground backed")
-	_assert(_entries_include_model_key(detail_entries, "nature_ground_grass_patch"), "Runtime renders grass patch as a Nature detail on existing ground")
-	_assert(_entries_are_nature_kit(detail_entries), "Runtime Nature Boden detail visuals are Nature Kit backed")
+	_assert(_entries_include_model_key(entries, "nature_ground_grass_patch"), "Runtime renders grass patch as a Nature ground surface")
+	_assert(detail_entries.is_empty(), "Runtime has no raised Nature detail leftovers")
 	_assert(int(snapshot.get("surface_tint_count", 0)) >= 3, "Non-ground surface tints remain visible")
 	_assert(int(snapshot.get("elevated_surface_tint_count", 0)) >= 2, "Elevated surface tints remain visible")
 	_assert(int(snapshot.get("tile_grid_line_count", 0)) > 0, "Grid lines remain visible")
@@ -314,7 +316,9 @@ func _editor_grid_material_is_depth_tested(primary_view: Node) -> bool:
 
 func _is_project_loadable(path: String) -> bool:
 	var normalized_path: String = path.strip_edges()
-	return normalized_path.begins_with("res://Assets/used/terrain/nature_kit_classic/") \
+	var allowed_root: bool = normalized_path.begins_with("res://Assets/used/terrain/nature_kit_classic/") \
+		or normalized_path.begins_with("res://Assets/curated/kenney/space_station/")
+	return allowed_root \
 		and not normalized_path.contains("C:/") \
 		and not normalized_path.contains("C:" + "\\") \
 		and ResourceLoader.exists(normalized_path)

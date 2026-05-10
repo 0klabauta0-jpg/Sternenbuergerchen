@@ -7,9 +7,16 @@ const MULTIPLAYER_SESSION_SCRIPT: GDScript = preload("res://scripts/multiplayer/
 const MAP_MANIFEST_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_map_manifest.gd")
 const GAME_SETTINGS_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/game_settings_contract.gd")
 const MULTIPLAYER_ROSTER_CONTRACT_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_roster_contract.gd")
+const PLAYER_ROSTER_STORE_SCRIPT: GDScript = preload("res://scripts/meta/player_roster_store.gd")
 const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_event_bus.gd")
 const BACKGROUND_IMAGE_CATALOG_SCRIPT: GDScript = preload("res://scripts/assets/background_image_catalog.gd")
 const LOBBY_BACKGROUND_ID: String = "multiplayer_lobby_hangar"
+const TEAM_PLAY_MODE_COOP: String = "coop"
+const TEAM_PLAY_MODE_VERSUS: String = "versus"
+const CONNECTION_MODE_LAN: String = "lan"
+const CONNECTION_MODE_DIRECT_WAN: String = "direct_wan"
+const CONNECTION_MODE_UPNP: String = "upnp"
+const DEFAULT_MAP_FILE_NAME: String = "Ground_Mission01_32x32.json"
 
 @onready var _status_label: Label = get_node("Panel/Margin/VBox/StatusLabel")
 @onready var _host_port_spin: SpinBox = get_node("Panel/Margin/VBox/HostJoinGrid/HostPortSpinBox")
@@ -44,6 +51,13 @@ var _map_consent_state: Dictionary = {
 var _audio_event_bus = null
 var _background_rect: TextureRect = null
 var _background_shade: ColorRect = null
+var _player_name_edit: LineEdit = null
+var _player_roster_option: OptionButton = null
+var _player_team_option: OptionButton = null
+var _team_mode_option: OptionButton = null
+var _map_option: OptionButton = null
+var _connection_mode_option: OptionButton = null
+var _network_hint_label: Label = null
 
 
 func _ready() -> void:
@@ -52,6 +66,7 @@ func _ready() -> void:
 	_apply_background_texture()
 	_ensure_multiplayer_session()
 	_ensure_audio_event_bus()
+	_ensure_lobby_setup_controls()
 	_configure_default_inputs()
 	_connect_ui_signals()
 	_apply_contextual_help_ids()
@@ -59,13 +74,17 @@ func _ready() -> void:
 
 
 func host_game(port: int = -1) -> bool:
+	_apply_lobby_setup_to_session()
 	var resolved_port: int = port if port > 0 else int(_host_port_spin.value)
 	var ok: bool = bool(_session.call("start_host", resolved_port))
+	if ok:
+		_apply_selected_map_manifest()
 	_play_ui_sfx("confirm" if ok else "warning", "host_game")
 	return ok
 
 
 func join_game(address: String = "", port: int = -1) -> bool:
+	_apply_lobby_setup_to_session()
 	var resolved_address: String = address.strip_edges() if not address.strip_edges().is_empty() else _join_address_edit.text.strip_edges()
 	if resolved_address.is_empty():
 		resolved_address = MULTIPLAYER_SESSION_SCRIPT.DEFAULT_ADDRESS
@@ -165,6 +184,39 @@ func set_peer_ready_for_test(peer_id: int, ready: bool) -> void:
 	_session.call("set_peer_ready_for_test", peer_id, ready)
 
 
+func set_player_name_for_tests(player_name: String) -> void:
+	if _player_name_edit != null:
+		_player_name_edit.text = player_name
+	_apply_lobby_setup_to_session()
+
+
+func set_player_roster_for_tests(roster_path: String) -> void:
+	_select_option_by_metadata(_player_roster_option, roster_path)
+	_apply_lobby_setup_to_session()
+
+
+func set_player_team_for_tests(team_slot: String) -> void:
+	_select_option_by_metadata(_player_team_option, team_slot)
+	_apply_lobby_setup_to_session()
+
+
+func set_team_play_mode_for_tests(team_play_mode: String) -> void:
+	_select_option_by_metadata(_team_mode_option, team_play_mode)
+	_apply_lobby_setup_to_session()
+
+
+func set_lobby_map_for_tests(map_path: String) -> void:
+	_select_option_by_metadata(_map_option, map_path)
+	_apply_lobby_setup_to_session()
+	_apply_selected_map_manifest()
+
+
+func set_connection_mode_for_tests(connection_mode: String) -> void:
+	_select_option_by_metadata(_connection_mode_option, connection_mode)
+	_apply_lobby_setup_to_session()
+	_refresh_connection_hint()
+
+
 func get_session_snapshot() -> Dictionary:
 	return Dictionary(_session.call("get_session_snapshot")).duplicate(true)
 
@@ -189,6 +241,8 @@ func get_lobby_ui_snapshot() -> Dictionary:
 		"map_consent_visible": _map_consent_panel.visible,
 		"map_consent_text": _map_consent_label.text,
 		"map_consent_state": _map_consent_state.duplicate(true),
+		"setup": _build_lobby_setup_snapshot_from_controls(),
+		"network_hint_text": _network_hint_label.text if _network_hint_label != null else "",
 		"background": get_background_catalog_snapshot(),
 		"start_disabled": _start_button.disabled,
 		"ready_disabled": _ready_button.disabled,
@@ -304,6 +358,97 @@ func _apply_background_texture() -> void:
 		_background_shade.color = Color(0.015, 0.025, 0.03, dim_strength)
 
 
+func _ensure_lobby_setup_controls() -> void:
+	var vbox := get_node_or_null("Panel/Margin/VBox") as VBoxContainer
+	if vbox == null:
+		return
+	var setup_panel := get_node_or_null("Panel/Margin/VBox/LobbySetupPanel") as PanelContainer
+	if setup_panel == null:
+		setup_panel = PanelContainer.new()
+		setup_panel.name = "LobbySetupPanel"
+		setup_panel.mouse_filter = Control.MOUSE_FILTER_PASS
+		var margin := MarginContainer.new()
+		margin.name = "Margin"
+		margin.add_theme_constant_override("margin_left", 10)
+		margin.add_theme_constant_override("margin_top", 8)
+		margin.add_theme_constant_override("margin_right", 10)
+		margin.add_theme_constant_override("margin_bottom", 8)
+		setup_panel.add_child(margin)
+		var setup_vbox := VBoxContainer.new()
+		setup_vbox.name = "VBox"
+		setup_vbox.add_theme_constant_override("separation", 6)
+		margin.add_child(setup_vbox)
+		var title := Label.new()
+		title.name = "SetupTitleLabel"
+		title.text = "Spieler / Team / Map"
+		setup_vbox.add_child(title)
+		var grid := GridContainer.new()
+		grid.name = "SetupGrid"
+		grid.columns = 2
+		grid.add_theme_constant_override("h_separation", 10)
+		grid.add_theme_constant_override("v_separation", 6)
+		setup_vbox.add_child(grid)
+		_add_setup_label(grid, "Spielername", "multiplayer.player_name")
+		_player_name_edit = _add_setup_line_edit(grid, "PlayerNameLineEdit", "Player", "multiplayer.player_name")
+		_add_setup_label(grid, "Roster", "multiplayer.player_roster")
+		_player_roster_option = _add_setup_option(grid, "PlayerRosterOptionButton", "multiplayer.player_roster")
+		_add_setup_label(grid, "Spielerseite", "multiplayer.player_team")
+		_player_team_option = _add_setup_option(grid, "PlayerTeamOptionButton", "multiplayer.player_team")
+		_add_setup_label(grid, "Teammodus", "multiplayer.team_mode")
+		_team_mode_option = _add_setup_option(grid, "TeamModeOptionButton", "multiplayer.team_mode")
+		_add_setup_label(grid, "Map", "multiplayer.map_select")
+		_map_option = _add_setup_option(grid, "MapOptionButton", "multiplayer.map_select")
+		_add_setup_label(grid, "Verbindung", "multiplayer.connection_mode")
+		_connection_mode_option = _add_setup_option(grid, "ConnectionModeOptionButton", "multiplayer.connection_mode")
+		_network_hint_label = Label.new()
+		_network_hint_label.name = "NetworkHintLabel"
+		_network_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_network_hint_label.add_theme_font_size_override("font_size", 12)
+		_apply_help_id(_network_hint_label, "multiplayer.connection_mode")
+		setup_vbox.add_child(_network_hint_label)
+		var host_join_grid := vbox.get_node_or_null("HostJoinGrid")
+		vbox.add_child(setup_panel)
+		if host_join_grid != null:
+			vbox.move_child(setup_panel, host_join_grid.get_index())
+	else:
+		_player_name_edit = setup_panel.find_child("PlayerNameLineEdit", true, false) as LineEdit
+		_player_roster_option = setup_panel.find_child("PlayerRosterOptionButton", true, false) as OptionButton
+		_player_team_option = setup_panel.find_child("PlayerTeamOptionButton", true, false) as OptionButton
+		_team_mode_option = setup_panel.find_child("TeamModeOptionButton", true, false) as OptionButton
+		_map_option = setup_panel.find_child("MapOptionButton", true, false) as OptionButton
+		_connection_mode_option = setup_panel.find_child("ConnectionModeOptionButton", true, false) as OptionButton
+		_network_hint_label = setup_panel.find_child("NetworkHintLabel", true, false) as Label
+
+
+func _add_setup_label(parent: Node, text: String, help_id: String) -> Label:
+	var label := Label.new()
+	label.text = text
+	label.custom_minimum_size = Vector2(118.0, 0.0)
+	_apply_help_id(label, help_id)
+	parent.add_child(label)
+	return label
+
+
+func _add_setup_line_edit(parent: Node, node_name: String, placeholder: String, help_id: String) -> LineEdit:
+	var line_edit := LineEdit.new()
+	line_edit.name = node_name
+	line_edit.placeholder_text = placeholder
+	line_edit.text = placeholder
+	line_edit.custom_minimum_size = Vector2(250.0, 34.0)
+	_apply_help_id(line_edit, help_id)
+	parent.add_child(line_edit)
+	return line_edit
+
+
+func _add_setup_option(parent: Node, node_name: String, help_id: String) -> OptionButton:
+	var option := OptionButton.new()
+	option.name = node_name
+	option.custom_minimum_size = Vector2(250.0, 34.0)
+	_apply_help_id(option, help_id)
+	parent.add_child(option)
+	return option
+
+
 func _ensure_multiplayer_session() -> void:
 	_session = get_node_or_null("MultiplayerSession")
 	if _session == null:
@@ -323,12 +468,17 @@ func _configure_default_inputs() -> void:
 	_join_port_spin.value = MULTIPLAYER_SESSION_SCRIPT.DEFAULT_PORT
 	_join_address_edit.text = MULTIPLAYER_SESSION_SCRIPT.DEFAULT_ADDRESS
 	_configure_roster_mode_options()
+	_configure_lobby_setup_options()
+	_apply_lobby_setup_to_session()
+	_apply_selected_map_manifest()
 	_refresh_settings_summary()
 
 
 func _connect_ui_signals() -> void:
 	if not _host_button.pressed.is_connected(_on_host_pressed):
 		_host_button.pressed.connect(_on_host_pressed)
+	if not _host_port_spin.value_changed.is_connected(_on_lobby_setup_changed):
+		_host_port_spin.value_changed.connect(_on_lobby_setup_changed)
 	if not _join_button.pressed.is_connected(_on_join_pressed):
 		_join_button.pressed.connect(_on_join_pressed)
 	if not _ready_button.pressed.is_connected(_on_ready_pressed):
@@ -341,6 +491,11 @@ func _connect_ui_signals() -> void:
 		_back_button.pressed.connect(return_to_main_menu)
 	if not _roster_mode_option.item_selected.is_connected(_on_roster_mode_selected):
 		_roster_mode_option.item_selected.connect(_on_roster_mode_selected)
+	if _player_name_edit != null and not _player_name_edit.text_changed.is_connected(_on_lobby_setup_changed):
+		_player_name_edit.text_changed.connect(_on_lobby_setup_changed)
+	for option in [_player_roster_option, _player_team_option, _team_mode_option, _map_option, _connection_mode_option]:
+		if option != null and not option.item_selected.is_connected(_on_lobby_setup_changed):
+			option.item_selected.connect(_on_lobby_setup_changed)
 	if not _map_accept_button.pressed.is_connected(_on_map_accept_pressed):
 		_map_accept_button.pressed.connect(_on_map_accept_pressed)
 	if not _map_reject_button.pressed.is_connected(_on_map_reject_pressed):
@@ -357,6 +512,13 @@ func _apply_contextual_help_ids() -> void:
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/HostJoinGrid/JoinPortLabel"), "multiplayer.join")
 	_apply_help_id(_join_port_spin, "multiplayer.join")
 	_apply_help_id(_join_button, "multiplayer.join")
+	_apply_help_id(_player_name_edit, "multiplayer.player_name")
+	_apply_help_id(_player_roster_option, "multiplayer.player_roster")
+	_apply_help_id(_player_team_option, "multiplayer.player_team")
+	_apply_help_id(_team_mode_option, "multiplayer.team_mode")
+	_apply_help_id(_map_option, "multiplayer.map_select")
+	_apply_help_id(_connection_mode_option, "multiplayer.connection_mode")
+	_apply_help_id(_network_hint_label, "multiplayer.connection_mode")
 	_apply_help_id(_ready_button, "multiplayer.ready")
 	_apply_help_id(_start_button, "multiplayer.start")
 	_apply_help_id(_disconnect_button, "multiplayer.disconnect")
@@ -407,6 +569,13 @@ func _on_roster_mode_selected(index: int) -> void:
 	if index < 0 or index >= _roster_mode_option.item_count:
 		return
 	set_roster_mode(String(_roster_mode_option.get_item_metadata(index)))
+
+
+func _on_lobby_setup_changed(_value: Variant = null) -> void:
+	_apply_lobby_setup_to_session()
+	_apply_selected_map_manifest()
+	_refresh_connection_hint()
+	_refresh_lobby_controls(get_session_snapshot())
 
 
 func _on_map_accept_pressed() -> void:
@@ -464,6 +633,15 @@ func _refresh_lobby_controls(snapshot: Dictionary) -> void:
 	_disconnect_button.visible = has_active_peer or can_disconnect
 	_disconnect_button.disabled = not can_disconnect
 	_roster_mode_option.disabled = not is_host or bool(snapshot.get("mission_started", false))
+	var mission_started: bool = bool(snapshot.get("mission_started", false))
+	for control in [_player_name_edit, _player_roster_option, _player_team_option, _connection_mode_option]:
+		if control is LineEdit:
+			(control as LineEdit).editable = not mission_started
+		elif control is OptionButton:
+			(control as OptionButton).disabled = mission_started
+	for host_only_control in [_team_mode_option, _map_option]:
+		if host_only_control != null:
+			host_only_control.disabled = mission_started or has_active_peer
 
 
 func _show_map_consent_prompt(manifest: Dictionary) -> void:
@@ -474,6 +652,112 @@ func _show_map_consent_prompt(manifest: Dictionary) -> void:
 
 func _hide_map_consent_prompt() -> void:
 	_map_consent_panel.visible = false
+
+
+func _configure_lobby_setup_options() -> void:
+	if _player_name_edit != null and _player_name_edit.text.strip_edges().is_empty():
+		_player_name_edit.text = "Player"
+	_populate_roster_options()
+	_populate_team_options()
+	_populate_team_mode_options()
+	_populate_map_options()
+	_populate_connection_mode_options()
+	_refresh_connection_hint()
+
+
+func _populate_roster_options() -> void:
+	if _player_roster_option == null:
+		return
+	_player_roster_option.clear()
+	var roster_entries: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("list_roster_entries"))
+	if int(roster_entries.get("entry_count", 0)) <= 0:
+		PLAYER_ROSTER_STORE_SCRIPT.call("ensure_roster")
+		roster_entries = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("list_roster_entries"))
+	var active_index: int = -1
+	for entry_variant in Array(roster_entries.get("entries", [])):
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		if not bool(entry.get("valid", false)):
+			continue
+		var label: String = String(entry.get("team_name", "Team")).strip_edges()
+		if label.is_empty():
+			label = String(entry.get("path", "Roster")).get_file().get_basename()
+		if bool(entry.get("active", false)):
+			label = "%s (aktiv)" % label
+		_player_roster_option.add_item(label)
+		var item_index: int = _player_roster_option.item_count - 1
+		_player_roster_option.set_item_metadata(item_index, String(entry.get("path", "")))
+		if bool(entry.get("active", false)):
+			active_index = item_index
+	if _player_roster_option.item_count <= 0:
+		_player_roster_option.add_item("Kein Roster gefunden")
+		_player_roster_option.set_item_metadata(0, "")
+	elif active_index >= 0:
+		_player_roster_option.select(active_index)
+	else:
+		_player_roster_option.select(0)
+
+
+func _populate_team_options() -> void:
+	if _player_team_option == null:
+		return
+	_player_team_option.clear()
+	_player_team_option.add_item("Alpha / Spieler")
+	_player_team_option.set_item_metadata(0, "team_alpha")
+	_player_team_option.add_item("Bravo / Gegner")
+	_player_team_option.set_item_metadata(1, "team_bravo")
+	_player_team_option.select(0)
+
+
+func _populate_team_mode_options() -> void:
+	if _team_mode_option == null:
+		return
+	_team_mode_option.clear()
+	_team_mode_option.add_item("Zusammen")
+	_team_mode_option.set_item_metadata(0, TEAM_PLAY_MODE_COOP)
+	_team_mode_option.add_item("Gegeneinander")
+	_team_mode_option.set_item_metadata(1, TEAM_PLAY_MODE_VERSUS)
+	_team_mode_option.select(0)
+
+
+func _populate_map_options() -> void:
+	if _map_option == null:
+		return
+	_map_option.clear()
+	var dir := DirAccess.open("res://maps")
+	if dir != null:
+		dir.list_dir_begin()
+		var file_name: String = dir.get_next()
+		while not file_name.is_empty():
+			if not dir.current_is_dir() and file_name.ends_with(".json"):
+				var path: String = "res://maps/%s" % file_name
+				_map_option.add_item(file_name.get_basename())
+				_map_option.set_item_metadata(_map_option.item_count - 1, path)
+			file_name = dir.get_next()
+		dir.list_dir_end()
+	if _map_option.item_count <= 0:
+		_map_option.add_item("Keine Map gefunden")
+		_map_option.set_item_metadata(0, "")
+		return
+	for index in range(_map_option.item_count):
+		if String(_map_option.get_item_metadata(index)).ends_with(DEFAULT_MAP_FILE_NAME):
+			_map_option.select(index)
+			return
+	_map_option.select(0)
+
+
+func _populate_connection_mode_options() -> void:
+	if _connection_mode_option == null:
+		return
+	_connection_mode_option.clear()
+	_connection_mode_option.add_item("LAN / VPN")
+	_connection_mode_option.set_item_metadata(0, CONNECTION_MODE_LAN)
+	_connection_mode_option.add_item("Direct IP Internet")
+	_connection_mode_option.set_item_metadata(1, CONNECTION_MODE_DIRECT_WAN)
+	_connection_mode_option.add_item("UPnP Internet")
+	_connection_mode_option.set_item_metadata(2, CONNECTION_MODE_UPNP)
+	_connection_mode_option.select(0)
 
 
 func _configure_roster_mode_options() -> void:
@@ -498,6 +782,64 @@ func _apply_roster_mode_snapshot(roster_snapshot: Dictionary) -> void:
 	]
 
 
+func _apply_lobby_setup_to_session() -> void:
+	if _session == null or not _session.has_method("set_lobby_player_setup"):
+		return
+	_session.call("set_lobby_player_setup", _build_lobby_setup_snapshot_from_controls())
+
+
+func _apply_selected_map_manifest() -> void:
+	if _session == null or not _session.has_method("set_host_map_manifest"):
+		return
+	var setup: Dictionary = _build_lobby_setup_snapshot_from_controls()
+	var map_path: String = String(setup.get("map_path", "")).strip_edges()
+	if map_path.is_empty() or not FileAccess.file_exists(map_path):
+		return
+	var manifest: Dictionary = Dictionary(MAP_MANIFEST_SCRIPT.call("build_manifest_for_map", map_path, "", String(setup.get("player_name", ""))))
+	_session.call("set_host_map_manifest", manifest)
+
+
+func _build_lobby_setup_snapshot_from_controls() -> Dictionary:
+	return {
+		"player_name": _player_name_edit.text.strip_edges() if _player_name_edit != null else "Player",
+		"roster_path": _get_selected_option_metadata(_player_roster_option),
+		"team_slot": _get_selected_option_metadata(_player_team_option),
+		"team_play_mode": _get_selected_option_metadata(_team_mode_option),
+		"map_path": _get_selected_option_metadata(_map_option),
+		"connection_mode": _get_selected_option_metadata(_connection_mode_option),
+	}
+
+
+func _get_selected_option_metadata(option: OptionButton) -> String:
+	if option == null or option.selected < 0 or option.selected >= option.item_count:
+		return ""
+	return String(option.get_item_metadata(option.selected)).strip_edges()
+
+
+func _select_option_by_metadata(option: OptionButton, metadata: String) -> bool:
+	if option == null:
+		return false
+	var normalized: String = metadata.strip_edges()
+	for index in range(option.item_count):
+		if String(option.get_item_metadata(index)).strip_edges() == normalized:
+			option.select(index)
+			return true
+	return false
+
+
+func _refresh_connection_hint() -> void:
+	if _network_hint_label == null:
+		return
+	var mode: String = _get_selected_option_metadata(_connection_mode_option)
+	var port: int = int(_host_port_spin.value) if _host_port_spin != null else MULTIPLAYER_SESSION_SCRIPT.DEFAULT_PORT
+	if mode == CONNECTION_MODE_UPNP:
+		_network_hint_label.text = "UPnP: Host versucht UDP-Port %d automatisch am Router zu oeffnen. Wenn der Router UPnP blockt: manuell freigeben oder VPN nutzen." % port
+	elif mode == CONNECTION_MODE_DIRECT_WAN:
+		_network_hint_label.text = "Internet Direct IP: Host braucht UDP-Port %d in Firewall und Router weitergeleitet; Client nutzt die oeffentliche IP oder VPN." % port
+	else:
+		_network_hint_label.text = "LAN/VPN: beide Spieler muessen im selben lokalen Netz oder VPN sein. Fuer Internet Direct IP bitte Portfreigabe oder UPnP nutzen."
+
+
 func _refresh_settings_summary() -> void:
 	var settings: Dictionary = Dictionary(GAME_SETTINGS_CONTRACT_SCRIPT.call("load_settings", _settings_config_path))
 	var snapshot: Dictionary = Dictionary(GAME_SETTINGS_CONTRACT_SCRIPT.call("build_snapshot", settings))
@@ -512,8 +854,9 @@ func _format_peer_lines(peers: Array) -> String:
 		if typeof(peer_variant) != TYPE_DICTIONARY:
 			continue
 		var peer: Dictionary = Dictionary(peer_variant)
-		lines.append("#%d %s %s ready=%s" % [
+		lines.append("#%d %s %s %s ready=%s" % [
 			int(peer.get("peer_id", 0)),
+			String(peer.get("display_name", "Player")),
 			String(peer.get("team_id", "")),
 			String(peer.get("role_id", "")),
 			str(bool(peer.get("ready", false))),
@@ -528,6 +871,10 @@ func _format_assignment_lines(assignments: Dictionary) -> String:
 	if roles.is_empty() and teams.is_empty() and fireteams.is_empty():
 		return "Assignments: -"
 	var lines: PackedStringArray = PackedStringArray(["Assignments:"])
+	var team_play_mode: String = String(assignments.get("team_play_mode", "coop"))
+	var selected_map_path: String = String(assignments.get("selected_map_path", ""))
+	if not team_play_mode.is_empty() or not selected_map_path.is_empty():
+		lines.append("Mode %s | Map %s" % [team_play_mode, selected_map_path.get_file() if not selected_map_path.is_empty() else "-"])
 	for peer_id_variant in teams.keys():
 		var peer_id: int = int(peer_id_variant)
 		lines.append("#%d %s %s %s" % [

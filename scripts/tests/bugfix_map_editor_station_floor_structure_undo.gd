@@ -170,8 +170,9 @@ func _test_station_floor_and_layered_station_rendering() -> void:
 	var bed_node := view.find_child("Asset_station_bed_single_0_0", true, false) as Node3D
 	_assert(bed_node != null and absf(wrapf(bed_node.rotation_degrees.y - 90.0, -180.0, 180.0)) < 0.1, "Tile object rotation turns the station bed model")
 	var surface_entries: Array = Array(snapshot.get("surface_visual_entries", []))
-	_assert(_has_top_anchored_station_floor(surface_entries, Vector2i(1, 0)), "Station floor panel renders top-aligned as terrain")
+	_assert(_has_top_anchored_station_floor(surface_entries, Vector2i(1, 0)), "Station floor panel renders with the mapped floor-top offset")
 	_assert(_has_top_anchored_station_floor(surface_entries, Vector2i(0, 0)), "Station wall tiles use the station floor panel underneath")
+	_assert(_station_floor_visual_tops_match(surface_entries, Vector2i(1, 0), Vector2i(0, 0)), "Standalone station floors and wall-underlay floors share the same visual top height")
 	view.queue_free()
 	await _wait_frames(2)
 
@@ -199,8 +200,29 @@ func _has_top_anchored_station_floor(entries: Array, grid_position: Vector2i) ->
 			continue
 		if String(entry.get("model_key", "")) != "station_floor_panel":
 			continue
-		return absf(float(entry.get("visual_top_y", 999.0)) - float(entry.get("surface_y", -999.0))) <= 0.015
+		var surface_y: float = float(entry.get("surface_y", -999.0))
+		var surface_top_y_offset: float = float(entry.get("surface_top_y_offset", 0.0))
+		var expected_top_y: float = surface_y + surface_top_y_offset
+		return surface_top_y_offset < -0.001 and absf(float(entry.get("visual_top_y", 999.0)) - expected_top_y) <= 0.015
 	return false
+
+
+func _station_floor_visual_tops_match(entries: Array, first_grid_position: Vector2i, second_grid_position: Vector2i) -> bool:
+	var first_entry: Dictionary = _get_station_floor_surface_entry(entries, first_grid_position)
+	var second_entry: Dictionary = _get_station_floor_surface_entry(entries, second_grid_position)
+	if first_entry.is_empty() or second_entry.is_empty():
+		return false
+	return absf(float(first_entry.get("visual_top_y", INF)) - float(second_entry.get("visual_top_y", -INF))) <= 0.002
+
+
+func _get_station_floor_surface_entry(entries: Array, grid_position: Vector2i) -> Dictionary:
+	for entry_variant in entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		if Vector2i(entry.get("grid_position", Vector2i(-99, -99))) != grid_position:
+			continue
+		if String(entry.get("model_key", "")) == "station_floor_panel":
+			return entry
+	return {}
 
 
 func _palette_icon_has_shape(editor, type_id: String) -> bool:

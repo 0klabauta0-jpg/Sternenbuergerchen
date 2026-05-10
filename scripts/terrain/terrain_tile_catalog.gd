@@ -16,6 +16,14 @@ const OBJECT_LAYER_GROUPS: PackedStringArray = [
 	"fahrzeuge",
 	"space_kit_full",
 	"space_station_full",
+	"modular_space",
+	"factory",
+]
+const IMPORTED_KIT_GROUPS: PackedStringArray = [
+	"space_kit_full",
+	"space_station_full",
+	"modular_space",
+	"factory",
 ]
 const STRUCTURE_LAYER_NAMES: PackedStringArray = [
 	"structure",
@@ -80,7 +88,7 @@ static func load_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCa
 		if type_id.is_empty():
 			continue
 
-		var palette_group: String = _normalize_palette_group_id(String(entry.get("palette_group", "default")))
+		var palette_group: String = _resolve_palette_group_for_entry(entry)
 		if palette_group.is_empty():
 			palette_group = "default"
 		catalog._append_palette_group_if_missing(palette_group)
@@ -119,6 +127,46 @@ static func _build_default_palette_group_label(group_id: String) -> String:
 	if group_id.is_empty():
 		return "Weitere"
 	return group_id.capitalize()
+
+
+static func _resolve_palette_group_for_entry(entry: Dictionary) -> String:
+	var raw_group: String = _normalize_palette_group_id(String(entry.get("palette_group", "default")))
+	if not IMPORTED_KIT_GROUPS.has(raw_group):
+		return raw_group
+	var type_id: String = String(entry.get("type_id", "")).strip_edges().to_lower()
+	var display_name: String = String(entry.get("display_name", "")).strip_edges().to_lower()
+	var searchable: String = "%s %s" % [type_id, display_name]
+	if searchable.contains("crater"):
+		return "crater"
+	if searchable.contains("meteor") or searchable.contains("asteroid") or searchable.contains("rock"):
+		return "felsen"
+	if searchable.contains("cliff") or searchable.contains("sidecliff"):
+		return "cliffs"
+	if searchable.contains("ramp") or searchable.contains("slope"):
+		return "rampen"
+	if searchable.contains("terrain") or searchable.contains("ground"):
+		return "terrain"
+	if searchable.contains("wall") or searchable.contains("door") or searchable.contains("gate"):
+		return "waende"
+	if searchable.contains("pipe"):
+		return "pipes"
+	if searchable.contains("rail") or searchable.contains("monorail"):
+		return "rails"
+	if searchable.contains("craft") or searchable.contains("vehicle") or searchable.contains("rover") or searchable.contains("speeder"):
+		return "fahrzeuge"
+	if raw_group == "factory" and searchable.contains("floor"):
+		return "plattformen"
+	if searchable.contains("floor") or searchable.contains("corridor") or searchable.contains("room"):
+		return "space_station"
+	if searchable.contains("platform") or searchable.contains("catwalk") or searchable.contains("conveyor"):
+		return "plattformen"
+	if searchable.contains("computer") or searchable.contains("console") or searchable.contains("display") or searchable.contains("generator") or searchable.contains("chimney") or searchable.contains("crane") or searchable.contains("tank"):
+		return "technik"
+	if searchable.contains("building") or searchable.contains("hangar") or searchable.contains("structure"):
+		return "gebaeude"
+	if searchable.contains("barrel") or searchable.contains("box") or searchable.contains("crate") or searchable.contains("container") or searchable.contains("bed") or searchable.contains("chair") or searchable.contains("table") or searchable.contains("banner"):
+		return "deko"
+	return "deko"
 
 
 func _append_palette_group_if_missing(group_id: String, display_name: String = "", collapsed: bool = false) -> void:

@@ -56,6 +56,28 @@ const FUNCTION_ORDER: Array = [
 	["escort_pilot", "Escort Pilot"],
 ]
 
+const VALUE_HELP_TEXTS: Dictionary = {
+	"skill_values.accuracy": "Accuracy beeinflusst Trefferchance und Shooter-Badges; hohe Werte staerken Overwatch und Sentinel-Fits.",
+	"skill_values.speed": "Speed beeinflusst Bewegung, Initiative und Scout-Fits; hohe Werte helfen bei schnellen Befehlen.",
+	"skill_values.toughness": "Toughness senkt erlittenen Druck und stuetzt Sentinel, Rapid-Methoden und Recovery-Lesbarkeit.",
+	"skill_values.awareness": "Awareness hilft Wahrnehmung, Pathfinder, Scout, Overwatch und Pilot-Fits.",
+	"skill_values.recognition": "Recognition steht fuer Kontaktlesen und Freund-Feind-Erkennung; wichtig fuer Coordinator und Watchful.",
+	"skill_values.stealth": "Stealth stuetzt leise Bewegung, Silent-Methoden, Scout und Infiltrator-Fits.",
+	"skill_values.discipline": "Discipline stuetzt Order Fidelity, Silent/Steady/Watchful und verlaessliche Sicherung.",
+	"skill_values.leadership": "Leadership beeinflusst Leader-Badges, Coordinator-Fit, Kommunikation und Fireteam-Fuehrung.",
+	"communication_values.speech_quality": "Speech Quality verbessert Fuehrungs- und Kommunikationslesbarkeit, Coordinator und Pilot-Begleitung.",
+	"communication_values.speech_quantity": "Speech Quantity beschreibt Sprechhaeufigkeit; weniger kann Silent-Methoden staerken.",
+	"behavior_axes.initiative": "Initiative entsteht vor allem aus Speed, Awareness und Leadership und beschreibt Handlungsdrang.",
+	"behavior_axes.order_fidelity": "Order Fidelity entsteht aus Discipline, Recognition und Speech Quality und beschreibt Befehlsruhe.",
+	"behavior_axes.signature_control": "Signature Control entsteht aus Stealth, Discipline und geringer Speech Quantity.",
+	"behavior_axes.contact_stability": "Contact Stability entsteht aus Toughness, Discipline und Awareness und hilft unter Druck.",
+	"behavior_axes.autonomy": "Autonomy entsteht aus Recognition, Leadership und Discipline und beschreibt selbststaendiges Arbeiten.",
+	"platform_values.ground_vehicle_handling": "Ground Vehicle Handling beschreibt Bodenfahrzeug-Fit; fuer Rover- und Recon-Aufgaben.",
+	"platform_values.dropship_piloting": "Dropship Piloting beschreibt LZ-Anflug, Touchdown-Ruhe und Rueckflug-Fit.",
+	"platform_values.freighter_piloting": "Freighter Piloting beschreibt Cargo-, Transfer- und schwere Transport-Faehigkeit.",
+	"platform_values.fighter_piloting": "Fighter Piloting beschreibt Escort-, Interceptor- und Strike-Fit.",
+}
+
 
 static func build_sheet_blocks(profile, options: Dictionary = {}) -> Dictionary:
 	if profile == null:
@@ -166,6 +188,7 @@ static func build_sheet_view_model(profile, options: Dictionary = {}) -> Diction
 		return {
 			"name": "No operator selected",
 			"trait_text": "Keine Traits verfuegbar.",
+			"trait_rows": [],
 			"short_description": "Keine Kurzbeschreibung verfuegbar.",
 			"core_rows": _build_scored_rows({}, CORE_ORDER, "skill_values", "character_sheet.core"),
 			"communication_rows": _build_value_rows({}, COMMUNICATION_ORDER, "communication_values", "character_sheet"),
@@ -175,10 +198,10 @@ static func build_sheet_view_model(profile, options: Dictionary = {}) -> Diction
 			"relationship_rows": [],
 			"progress_rows": [],
 			"derived_rows": [
-				{"label": "Method Tags", "value_text": "n/a"},
-				{"label": "Function Scores", "value_text": "n/a"},
-				{"label": "Primary Specialty", "value_text": "n/a"},
-				{"label": "Secondary Specialty", "value_text": "n/a"},
+				{"label": "Method Tags", "value_text": "n/a", "detail_text": "Setzt sich aus Kernwerten, Verhalten und Traits zusammen."},
+				{"label": "Function Scores", "value_text": "n/a", "detail_text": "Rollen-Fit aus Skills, Plattformwerten und Trait-Kontext."},
+				{"label": "Primary Specialty", "value_text": "n/a", "detail_text": "Hoher Function Score plus Rollen- und Trait-Kontext."},
+				{"label": "Secondary Specialty", "value_text": "n/a", "detail_text": "Naechststaerkerer Fit, falls vorhanden."},
 			],
 			"behavior_rows": _build_value_rows({}, BEHAVIOR_ORDER, "behavior_axes", "character_sheet"),
 		}
@@ -192,20 +215,16 @@ static func build_sheet_view_model(profile, options: Dictionary = {}) -> Diction
 	return {
 		"name": _optional_text(String(profile.display_name), "Unknown Operator"),
 		"trait_text": trait_text,
+		"trait_rows": _build_trait_rows(profile),
 		"short_description": short_description,
 		"core_rows": _build_scored_rows(Dictionary(profile.skill_values), CORE_ORDER, "skill_values", "character_sheet.core"),
 		"communication_rows": _build_value_rows(Dictionary(profile.communication_values), COMMUNICATION_ORDER, "communication_values", "character_sheet"),
-		"platform_rows": _build_platform_value_rows(Dictionary(profile.platform_values)),
+		"platform_rows": _build_platform_value_rows(Dictionary(profile.platform_values), bool(options.get("show_all_platform_rows", false))),
 		"role_loadout_rows": _build_role_loadout_rows(profile, options),
 		"status_rows": _build_status_rows(profile, options),
 		"relationship_rows": _build_relationship_rows(profile, options),
 		"progress_rows": _build_progress_rows(profile, options),
-		"derived_rows": [
-			{"label": "Method Tags", "value_text": _optional_text(String(profile.method_summary_text), _format_score_summary(Dictionary(profile.method_scores), "n/a")), "help_id": "character_sheet.method_tags"},
-			{"label": "Function Scores", "value_text": _optional_text(String(profile.function_summary_text), _format_score_summary(Dictionary(profile.function_scores), "n/a")), "help_id": "character_sheet.function_scores"},
-			{"label": "Primary Specialty", "value_text": _optional_text(String(profile.primary_specialty), _optional_text(String(profile.specialty_text), "n/a")), "help_id": "character_sheet.primary_specialty"},
-			{"label": "Secondary Specialty", "value_text": _optional_text(String(profile.secondary_specialty), "n/a"), "help_id": "character_sheet.secondary_specialty"},
-		],
+		"derived_rows": _build_derived_rows(profile),
 		"behavior_rows": _build_value_rows(Dictionary(profile.behavior_axes), BEHAVIOR_ORDER, "behavior_axes", "character_sheet"),
 	}
 
@@ -274,6 +293,32 @@ static func _build_progress_rows(profile, _options: Dictionary = {}) -> Array:
 	]
 
 
+static func _build_derived_rows(profile) -> Array:
+	var skill_values: Dictionary = Dictionary(profile.skill_values) if profile != null else {}
+	var behavior_axes: Dictionary = Dictionary(profile.behavior_axes) if profile != null else {}
+	var platform_values: Dictionary = Dictionary(profile.platform_values) if profile != null else {}
+	var method_detail: String = "Aus Speed %.2f, Discipline %.2f, Stealth %.2f, Initiative %.2f und Trait-Tags entstehen Tags wie steady, rapid, silent oder command." % [
+		float(skill_values.get("speed", 0.0)),
+		float(skill_values.get("discipline", 0.0)),
+		float(skill_values.get("stealth", 0.0)),
+		float(behavior_axes.get("initiative", 0.0)),
+	]
+	var function_detail: String = "Fighting/Shooter liest Weapon und Accuracy %.2f. Scout liest Awareness %.2f, Speed, Stealth und Recognition. Leader/Coordinator liest Leadership %.2f plus Speech Quality, Recognition und Discipline. Pilot liest Platform-Skills wie Dropship %.2f." % [
+		float(skill_values.get("accuracy", 0.0)),
+		float(skill_values.get("awareness", 0.0)),
+		float(skill_values.get("leadership", 0.0)),
+		float(platform_values.get("dropship_piloting", UNIT_PROFILE_MATH_SCRIPT.NOT_APPLICABLE)),
+	]
+	var primary_detail: String = "Der hoechste Function Score plus Rollen- und Trait-Kontext bestimmt die Primaer-Spezialisierung."
+	var secondary_detail: String = "Der naechste belastbare Fit bleibt sichtbar, damit Hybridrollen nicht im Namen verschwinden."
+	return [
+		{"label": "Method Tags", "value_text": _optional_text(String(profile.method_summary_text), _format_score_summary(Dictionary(profile.method_scores), "n/a")), "help_id": "character_sheet.method_tags", "detail_text": method_detail},
+		{"label": "Function Scores", "value_text": _optional_text(String(profile.function_summary_text), _format_score_summary(Dictionary(profile.function_scores), "n/a")), "help_id": "character_sheet.function_scores", "detail_text": function_detail},
+		{"label": "Primary Specialty", "value_text": _optional_text(String(profile.primary_specialty), _optional_text(String(profile.specialty_text), "n/a")), "help_id": "character_sheet.primary_specialty", "detail_text": primary_detail},
+		{"label": "Secondary Specialty", "value_text": _optional_text(String(profile.secondary_specialty), "n/a"), "help_id": "character_sheet.secondary_specialty", "detail_text": secondary_detail},
+	]
+
+
 static func _format_ftl_tactical_impact(profile) -> String:
 	if profile == null:
 		return "n/a"
@@ -333,6 +378,61 @@ static func _build_expanded_trait_text(profile) -> String:
 	return _optional_text(trait_text, "Keine markanten Traits hinterlegt.")
 
 
+static func _build_trait_rows(profile) -> Array:
+	var rows: Array = []
+	if profile == null:
+		return rows
+	var seen_trait_ids: Dictionary = {}
+	if profile.trait_ids is PackedStringArray:
+		for trait_id_variant in profile.trait_ids:
+			var trait_id: String = String(trait_id_variant).strip_edges().to_lower()
+			if trait_id.is_empty() or seen_trait_ids.has(trait_id):
+				continue
+			seen_trait_ids[trait_id] = true
+			var unit_trait = UNIT_TRAIT_SCRIPT.from_id(trait_id)
+			if unit_trait == null:
+				rows.append({
+					"label": trait_id.capitalize(),
+					"value_text": trait_id.to_upper(),
+					"trait_id": trait_id,
+					"help_id": "character_sheet.traits",
+					"detail_text": "Unbekannter Trait aus dem gespeicherten Profil.",
+				})
+				continue
+			rows.append({
+				"label": String(unit_trait.display_name),
+				"value_text": String(unit_trait.short_tag),
+				"trait_id": trait_id,
+				"help_id": "character_sheet.trait.%s" % trait_id,
+				"detail_text": _format_trait_modifier_text(Dictionary(unit_trait.skill_modifiers)),
+			})
+	if rows.is_empty() and profile.trait_tags is PackedStringArray:
+		for trait_tag_variant in profile.trait_tags:
+			var trait_tag: String = String(trait_tag_variant).strip_edges()
+			if trait_tag.is_empty():
+				continue
+			rows.append({
+				"label": trait_tag,
+				"value_text": "TAG",
+				"trait_id": trait_tag.to_lower(),
+				"help_id": "character_sheet.traits",
+				"detail_text": "Trait-Tag aus dem Profil, ohne eigene Trait-Library-Regel.",
+			})
+	return rows
+
+
+static func _format_trait_modifier_text(skill_modifiers: Dictionary) -> String:
+	if skill_modifiers.is_empty():
+		return "Trait beschreibt Verhalten und hat keinen direkten Skill-Modifikator."
+	var keys: Array = skill_modifiers.keys()
+	keys.sort()
+	var parts: PackedStringArray = PackedStringArray()
+	for key_variant in keys:
+		var key: String = String(key_variant)
+		parts.append("%s %+.2f" % [_humanize_key(key), float(skill_modifiers.get(key_variant, 0.0))])
+	return "Skill-Modifikatoren: %s" % " | ".join(parts)
+
+
 static func _build_profile_loadout_text(profile) -> String:
 	if profile == null:
 		return "standard kit"
@@ -372,6 +472,7 @@ static func _build_scored_rows(source_values: Dictionary, order: Array, value_gr
 				"value_group": value_group,
 				"value_key": key,
 				"help_id": "%s.%s" % [help_prefix, key],
+				"detail_text": _value_help_text(value_group, key),
 			}
 		)
 	return rows
@@ -393,22 +494,24 @@ static func _build_platform_rows(platform_values: Dictionary) -> Array:
 	return rows
 
 
-static func _build_platform_value_rows(platform_values: Dictionary) -> Array:
+static func _build_platform_value_rows(platform_values: Dictionary, include_not_applicable: bool = false) -> Array:
 	var rows: Array = []
 	for entry in PLATFORM_ORDER:
 		var key: String = String(entry[0])
 		var label: String = String(entry[1])
 		var value: float = float(platform_values.get(key, UNIT_PROFILE_MATH_SCRIPT.NOT_APPLICABLE))
-		if value < 0.0:
+		if value < 0.0 and not include_not_applicable:
 			continue
+		var editable_value: float = 0.0 if value < 0.0 else value
 		rows.append(
 			{
 				"label": label,
-				"value": clampf(value, 0.0, 1.0),
-				"value_text": _format_decimal_comma(value),
+				"value": clampf(editable_value, 0.0, 1.0),
+				"value_text": _format_decimal_comma(editable_value),
 				"value_group": "platform_values",
 				"value_key": key,
 				"help_id": "character_sheet.platform.%s" % key,
+				"detail_text": "%s %s" % [_value_help_text("platform_values", key), "Nicht gesetzt startet bei 0,00; Plus/Minus speichert den Plattformwert direkt am NPC." if value < 0.0 else "Plus/Minus speichert den Plattformwert direkt am NPC."],
 			}
 		)
 	return rows
@@ -445,9 +548,15 @@ static func _build_value_rows(source_values: Dictionary, order: Array, value_gro
 				"value_group": value_group,
 				"value_key": key,
 				"help_id": "%s.%s" % [help_prefix, key],
+				"detail_text": _value_help_text(value_group, key),
 			}
 		)
 	return rows
+
+
+static func _value_help_text(value_group: String, value_key: String) -> String:
+	var key: String = "%s.%s" % [value_group.strip_edges(), value_key.strip_edges()]
+	return String(VALUE_HELP_TEXTS.get(key, "Dieser Wert ist Profil- oder Ableitungsdaten und wird von bestehenden Resolversystemen gelesen."))
 
 
 static func _apply_fraction_row_metadata(row: Dictionary, raw_value: Variant, value_group: String, value_key: String) -> void:

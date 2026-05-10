@@ -13,6 +13,7 @@ const MAP_EDITOR_HEIGHT_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/ma
 const MAP_EDITOR_PATROL_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_patrol_tool.gd")
 const MAP_EDITOR_MARKER_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_marker_tool.gd")
 const MULTIPLAYER_MAP_MANIFEST_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_map_manifest.gd")
+const HOVER_SCROLL_BEHAVIOR_SCRIPT: GDScript = preload("res://scripts/ui/hover_scroll_behavior.gd")
 const TILE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_SW.png")
 const CLIFF_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_SE.png")
 const CLIFF_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_SW.png")
@@ -138,6 +139,10 @@ const PALETTE_PREVIEW_ICON_SIZE: Vector2i = Vector2i(20, 20)
 const PALETTE_ITEM_FG_COLOR: Color = Color(0.9, 0.93, 0.9, 1.0)
 const PALETTE_SELECTED_BG_COLOR: Color = Color(1.0, 0.86, 0.22, 0.84)
 const PALETTE_SELECTED_FG_COLOR: Color = Color(0.08, 0.06, 0.02, 1.0)
+const RIGHT_CONTEXT_DRAG_THRESHOLD_PX: float = 6.0
+const CONTEXT_MENU_ROTATE_LEFT_ID: int = 101
+const CONTEXT_MENU_ROTATE_RIGHT_ID: int = 102
+const CONTEXT_MENU_ERASE_OBJECT_ID: int = 103
 const INSPECTOR_SECTION_MAP_SETTINGS: String = "map_settings"
 const INSPECTOR_SECTION_MARKERS: String = "markers"
 const INSPECTOR_SECTION_MISSION_SCENARIO: String = "mission_scenario"
@@ -195,6 +200,13 @@ var _terrain_3d_view = null
 var _3d_refresh_queued: bool = false
 var _active_palette_group_id: String = ""
 var _palette_preview_textures: Dictionary = {}
+var _right_mouse_pressed: bool = false
+var _right_mouse_dragged: bool = false
+var _right_mouse_press_screen_position: Vector2 = Vector2.ZERO
+var _right_mouse_press_world_position: Vector2 = Vector2.ZERO
+var _right_mouse_additive_selection: bool = false
+var _right_drag_selection_active: bool = false
+var _editor_context_menu: PopupMenu = null
 var _inspector_section_collapsed: Dictionary = {
 	INSPECTOR_SECTION_MAP_SETTINGS: false,
 	INSPECTOR_SECTION_MARKERS: false,
@@ -216,6 +228,7 @@ func _ready() -> void:
 	_ensure_editor_save_controls()
 	_ensure_map_name_controls()
 	_ensure_object_rotation_controls()
+	_ensure_editor_context_menu()
 	_populate_tile_palette()
 	_connect_ui_signals()
 	_add_height_tool_controls()
@@ -227,6 +240,7 @@ func _ready() -> void:
 	_ensure_mission_authoring_controls()
 	_ensure_authoring_status_controls()
 	_ensure_inspector_section_controls()
+	HOVER_SCROLL_BEHAVIOR_SCRIPT.call("install", self)
 	_apply_contextual_help_ids()
 	_ensure_patrol_overlay()
 	_ensure_marker_overlay()
@@ -338,8 +352,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			_is_panning = mouse_button_event.pressed and not _is_pointer_over_control()
 			return
 		if mouse_button_event.button_index == MOUSE_BUTTON_RIGHT:
-			_is_rotating_3d_camera = mouse_button_event.pressed and not _is_pointer_over_control() and _get_primary_3d_view() != null
-			_is_panning = mouse_button_event.pressed and _get_primary_3d_view() == null
+			if mouse_button_event.pressed:
+				_handle_right_mouse_press(mouse_button_event)
+			else:
+				_handle_right_mouse_release(mouse_button_event)
 			return
 		if mouse_button_event.button_index == MOUSE_BUTTON_LEFT:
 			var world_position: Vector2 = _screen_to_editor_world_position(mouse_button_event.position)
@@ -391,6 +407,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		if _patrol_tool_enabled and _dragged_patrol_waypoint_index >= 0 and not _is_pointer_over_control():
 			_move_patrol_waypoint(_dragged_patrol_waypoint_index, world_position)
 			return
+		if _right_mouse_pressed:
+			if mouse_motion.position.distance_to(_right_mouse_press_screen_position) >= RIGHT_CONTEXT_DRAG_THRESHOLD_PX:
+				_right_mouse_dragged = true
+			if _selection_tool_enabled and not _is_pointer_over_control():
+				if _right_mouse_dragged:
+					_right_drag_selection_active = true
+					_select_grid_area_from_world(_right_mouse_press_world_position, world_position, _right_mouse_additive_selection)
+				return
 		if _is_rotating_3d_camera:
 			var primary_3d_view = _get_primary_3d_view()
 			if primary_3d_view != null:
@@ -418,6 +442,111 @@ func _unhandled_input(event: InputEvent) -> void:
 			_update_hover_preview(world_position)
 			return
 		_hide_hover_preview()
+
+
+func _handle_right_mouse_press(mouse_button_event: InputEventMouseButton) -> void:
+	_right_mouse_pressed = false
+	_right_mouse_dragged = false
+	_right_drag_selection_active = false
+	if mouse_button_event == null or _is_pointer_over_control():
+		_is_rotating_3d_camera = false
+		_is_panning = false
+		return
+	_right_mouse_pressed = true
+	_right_mouse_press_screen_position = mouse_button_event.position
+	_right_mouse_press_world_position = _screen_to_editor_world_position(mouse_button_event.position)
+	_right_mouse_additive_selection = mouse_button_event.ctrl_pressed
+	_is_rotating_3d_camera = not _selection_tool_enabled and _get_primary_3d_view() != null
+	_is_panning = not _selection_tool_enabled and _get_primary_3d_view() == null
+
+
+func _handle_right_mouse_release(mouse_button_event: InputEventMouseButton) -> void:
+	var was_pressed: bool = _right_mouse_pressed
+	var release_position: Vector2 = mouse_button_event.position if mouse_button_event != null else _right_mouse_press_screen_position
+	if was_pressed and release_position.distance_to(_right_mouse_press_screen_position) >= RIGHT_CONTEXT_DRAG_THRESHOLD_PX:
+		_right_mouse_dragged = true
+	var had_area_selection: bool = _right_drag_selection_active
+	_right_mouse_pressed = false
+	_right_drag_selection_active = false
+	_is_rotating_3d_camera = false
+	_is_panning = false
+	if not was_pressed or _is_pointer_over_control():
+		return
+	var release_world_position: Vector2 = _screen_to_editor_world_position(release_position)
+	if had_area_selection:
+		_select_grid_area_from_world(_right_mouse_press_world_position, release_world_position, _right_mouse_additive_selection)
+		return
+	if _right_mouse_dragged:
+		return
+	_select_tile_at_world_position(release_world_position)
+	_show_editor_context_menu(release_position)
+
+
+func _show_editor_context_menu(screen_position: Vector2) -> void:
+	var menu := _ensure_editor_context_menu()
+	if menu == null:
+		return
+	_refresh_editor_context_menu_actions()
+	menu.position = Vector2i(roundi(screen_position.x), roundi(screen_position.y))
+	menu.popup()
+
+
+func _refresh_editor_context_menu_actions() -> void:
+	var menu := _ensure_editor_context_menu()
+	if menu == null:
+		return
+	var has_selected_tile: bool = _get_selected_tile() != null
+	var has_rotatable_object: bool = _tile_has_rotatable_object(_get_selected_tile())
+	var can_erase_object: bool = has_selected_tile and _selected_tile_has_erasable_object()
+	_set_context_menu_item_disabled(menu, CONTEXT_MENU_ROTATE_LEFT_ID, not has_rotatable_object)
+	_set_context_menu_item_disabled(menu, CONTEXT_MENU_ROTATE_RIGHT_ID, not has_rotatable_object)
+	_set_context_menu_item_disabled(menu, CONTEXT_MENU_ERASE_OBJECT_ID, not can_erase_object)
+
+
+func _set_context_menu_item_disabled(menu: PopupMenu, item_id: int, disabled: bool) -> void:
+	if menu == null:
+		return
+	var item_index: int = menu.get_item_index(item_id)
+	if item_index >= 0:
+		menu.set_item_disabled(item_index, disabled)
+
+
+func _on_editor_context_menu_id_pressed(id: int) -> void:
+	match id:
+		CONTEXT_MENU_ROTATE_LEFT_ID:
+			_rotate_selected_object(-90.0)
+		CONTEXT_MENU_ROTATE_RIGHT_ID:
+			_rotate_selected_object(90.0)
+		CONTEXT_MENU_ERASE_OBJECT_ID:
+			_erase_selected_tile_object()
+
+
+func _selected_tile_has_erasable_object() -> bool:
+	var tile_data = _get_selected_tile()
+	if tile_data == null:
+		return false
+	var object_type_id: String = String(tile_data.object_type_id).strip_edges().to_lower() if tile_data.object_type_id is String else ""
+	if not object_type_id.is_empty():
+		return true
+	var type_id: String = String(tile_data.type_id).strip_edges().to_lower() if tile_data.type_id is String else ""
+	if type_id.is_empty() or _tile_catalog == null:
+		return false
+	if _tile_catalog.has_method("is_object_layer_type") and bool(_tile_catalog.call("is_object_layer_type", type_id)):
+		return true
+	if _tile_catalog.has_method("is_structure_layer_type") and bool(_tile_catalog.call("is_structure_layer_type", type_id)):
+		return true
+	return false
+
+
+func _erase_selected_tile_object() -> bool:
+	var tile_data = _get_selected_tile()
+	if tile_data == null or not _erase_object_layer_from_tile(tile_data):
+		return false
+	_refresh_tile_visual(tile_data)
+	_refresh_selection_visual()
+	_refresh_property_panel()
+	_mark_dirty(true)
+	return true
 
 
 func _load_map(path: String) -> void:
@@ -634,6 +763,43 @@ func _select_grid_with_selection_tool(grid_position: Vector2i, additive: bool = 
 		_selected_grid_position = Vector2i(-1, -1)
 	else:
 		_selected_grid_position = Vector2i(_selected_grids[_selected_grids.size() - 1])
+	_refresh_selection_visual()
+	_refresh_property_panel()
+	_refresh_authoring_status_controls()
+	return true
+
+
+func _select_grid_area_from_world(start_world_position: Vector2, end_world_position: Vector2, additive: bool = false) -> bool:
+	if _terrain_registry == null:
+		return false
+	return _select_grid_area(
+		_terrain_registry.world_to_grid(start_world_position),
+		_terrain_registry.world_to_grid(end_world_position),
+		additive
+	)
+
+
+func _select_grid_area(start_grid_position: Vector2i, end_grid_position: Vector2i, additive: bool = false) -> bool:
+	if _terrain_map_data == null:
+		return false
+	var min_x: int = mini(start_grid_position.x, end_grid_position.x)
+	var max_x: int = maxi(start_grid_position.x, end_grid_position.x)
+	var min_y: int = mini(start_grid_position.y, end_grid_position.y)
+	var max_y: int = maxi(start_grid_position.y, end_grid_position.y)
+	var next_selected_grids: Array = _selected_grids.duplicate() if additive else []
+	var found_any_tile: bool = false
+	for x in range(min_x, max_x + 1):
+		for y in range(min_y, max_y + 1):
+			var grid_position := Vector2i(x, y)
+			if _terrain_map_data.call("get_tile_at_grid", grid_position) == null:
+				continue
+			found_any_tile = true
+			if not next_selected_grids.has(grid_position):
+				next_selected_grids.append(grid_position)
+	if not found_any_tile:
+		return false
+	_selected_grids = next_selected_grids
+	_selected_grid_position = Vector2i(_selected_grids[_selected_grids.size() - 1]) if not _selected_grids.is_empty() else Vector2i(-1, -1)
 	_refresh_selection_visual()
 	_refresh_property_panel()
 	_refresh_authoring_status_controls()
@@ -1078,18 +1244,18 @@ func _ensure_object_rotation_controls() -> void:
 	row.custom_minimum_size = Vector2(0.0, 28.0)
 	var label := Label.new()
 	label.name = "ObjectRotationLabel"
-	label.text = "Obj Rot"
+	label.text = "Drehung"
 	label.custom_minimum_size = Vector2(72.0, 0.0)
 	row.add_child(label)
 	var rotate_left := Button.new()
 	rotate_left.name = "ObjectRotateLeftButton"
-	rotate_left.text = "Rot -"
-	rotate_left.tooltip_text = "Rotate selected object left by 90 degrees."
+	rotate_left.text = "-90"
+	rotate_left.tooltip_text = "Dreht das ausgewaehlte Objekt oder Stations-Wandteil um 90 Grad nach links."
 	row.add_child(rotate_left)
 	var rotate_right := Button.new()
 	rotate_right.name = "ObjectRotateRightButton"
-	rotate_right.text = "Rot +"
-	rotate_right.tooltip_text = "Rotate selected object right by 90 degrees."
+	rotate_right.text = "+90"
+	rotate_right.tooltip_text = "Dreht das ausgewaehlte Objekt oder Stations-Wandteil um 90 Grad nach rechts."
 	row.add_child(rotate_right)
 	var value_label := Label.new()
 	value_label.name = "ObjectRotationValueLabel"
@@ -1101,6 +1267,24 @@ func _ensure_object_rotation_controls() -> void:
 	var insert_after := panel_parent.get_node_or_null("SurfaceRow")
 	if insert_after != null:
 		panel_parent.move_child(row, insert_after.get_index() + 1)
+
+
+func _ensure_editor_context_menu() -> PopupMenu:
+	if _editor_context_menu != null and is_instance_valid(_editor_context_menu):
+		return _editor_context_menu
+	_editor_context_menu = get_node_or_null("EditorContextMenu") as PopupMenu
+	if _editor_context_menu == null:
+		_editor_context_menu = PopupMenu.new()
+		_editor_context_menu.name = "EditorContextMenu"
+		add_child(_editor_context_menu)
+	_editor_context_menu.clear()
+	_editor_context_menu.add_item("Drehen links", CONTEXT_MENU_ROTATE_LEFT_ID)
+	_editor_context_menu.add_item("Drehen rechts", CONTEXT_MENU_ROTATE_RIGHT_ID)
+	_editor_context_menu.add_separator()
+	_editor_context_menu.add_item("Objekt entfernen", CONTEXT_MENU_ERASE_OBJECT_ID)
+	if not _editor_context_menu.id_pressed.is_connected(_on_editor_context_menu_id_pressed):
+		_editor_context_menu.id_pressed.connect(_on_editor_context_menu_id_pressed)
+	return _editor_context_menu
 
 
 func _apply_editor_control_panel_style() -> void:
@@ -1337,6 +1521,8 @@ func _refresh_property_panel() -> void:
 				type_label.text = "Typ: (custom)%s" % object_label
 			else:
 				type_label.text = "Typ: %s%s" % [_tile_catalog.get_display_name(matched_type_id), object_label]
+		var stack_info: Dictionary = _build_tile_layer_stack_info(tile_data)
+		type_label.tooltip_text = String(stack_info.get("help_text", ""))
 	walkable_checkbox.button_pressed = bool(tile_data.walkable)
 	blocks_los_checkbox.button_pressed = bool(tile_data.blocks_los)
 	cover_spinbox.value = int(tile_data.cover_value)
@@ -2803,6 +2989,7 @@ func get_map_editor_usability_snapshot(sync_from_controls: bool = true) -> Dicti
 		},
 		"toolbar": _build_toolbar_snapshot(),
 		"palette": _build_palette_snapshot(),
+		"context_menu": _build_context_menu_snapshot(),
 		"inspector": _build_inspector_snapshot(),
 		"map_name": _get_current_map_name(),
 		"map_path": _current_map_path,
@@ -2903,6 +3090,18 @@ func _build_palette_snapshot() -> Dictionary:
 		"preview_icon_count": preview_icon_count,
 		"all_visible_items_have_preview_icons": tile_type_list != null and preview_icon_count == tile_type_list.item_count,
 		"preview_icon_size": PALETTE_PREVIEW_ICON_SIZE,
+	}
+
+
+func _build_context_menu_snapshot() -> Dictionary:
+	var menu := _ensure_editor_context_menu()
+	return {
+		"activation": "right_mouse_release",
+		"drag_threshold_px": RIGHT_CONTEXT_DRAG_THRESHOLD_PX,
+		"area_selection_uses_right_drag": true,
+		"visible": menu != null and menu.visible,
+		"selected_tile_erasable": _selected_tile_has_erasable_object(),
+		"selected_tile_rotatable": _tile_has_rotatable_object(_get_selected_tile()),
 	}
 
 
@@ -3018,6 +3217,7 @@ func _build_selected_tile_context() -> Dictionary:
 		"grid_position": tile_data.grid_position,
 		"type_id": String(tile_data.type_id),
 		"object_type_id": String(tile_data.object_type_id),
+		"layer_stack": _build_tile_layer_stack_info(tile_data),
 		"walkable": bool(tile_data.walkable),
 		"blocks_los": bool(tile_data.blocks_los),
 		"cover_value": int(tile_data.cover_value),
@@ -3027,6 +3227,35 @@ func _build_selected_tile_context() -> Dictionary:
 		"object_rotatable": _tile_has_rotatable_object(tile_data),
 		"surface_type": String(tile_data.surface_type),
 		"edge_type": String(tile_data.edge_type),
+	}
+
+
+func _build_tile_layer_stack_info(tile_data) -> Dictionary:
+	if tile_data == null:
+		return {
+			"terrain_layer": "",
+			"structure_layer": "",
+			"object_layer": "",
+			"supports_object_on_structure": false,
+			"help_text": "Kein Tile ausgewaehlt.",
+		}
+	var type_id: String = String(tile_data.type_id).strip_edges()
+	var object_type_id: String = String(tile_data.object_type_id).strip_edges()
+	var type_is_structure: bool = _tile_catalog != null and _tile_catalog.has_method("is_structure_layer_type") and bool(_tile_catalog.call("is_structure_layer_type", type_id))
+	var type_is_object: bool = _tile_catalog != null and _tile_catalog.has_method("is_object_layer_type") and bool(_tile_catalog.call("is_object_layer_type", type_id))
+	var terrain_layer: String = String(tile_data.surface_type).strip_edges()
+	var structure_layer: String = type_id if type_is_structure else ""
+	var object_layer: String = object_type_id
+	if object_layer.is_empty() and type_is_object:
+		object_layer = type_id
+	var supports_stack: bool = not structure_layer.is_empty()
+	return {
+		"terrain_layer": terrain_layer,
+		"structure_layer": structure_layer,
+		"object_layer": object_layer,
+		"supports_object_on_structure": supports_stack,
+		"has_object_on_structure": supports_stack and not object_layer.is_empty(),
+		"help_text": "Layer: Boden/Surface bleibt unten, Structure liegt darueber, Object liegt oben. Fuer Satellitenschuessel auf Struktur: Struktur waehlen, dann ein Objekt-Asset pinseln; Eraser entfernt zuerst nur das Objekt.",
 	}
 
 
@@ -4084,7 +4313,13 @@ func _tile_has_rotatable_object(tile_data) -> bool:
 	var type_id: String = String(tile_data.type_id).strip_edges().to_lower() if tile_data.type_id is String else ""
 	if type_id.is_empty() or _tile_catalog == null or not _tile_catalog.has_method("is_object_layer_type"):
 		return false
-	return bool(_tile_catalog.call("is_object_layer_type", type_id))
+	if type_id == "station_floor_panel" or type_id == "modular_floor" or type_id == "modular_floor_big":
+		return true
+	if bool(_tile_catalog.call("is_object_layer_type", type_id)):
+		return true
+	if _tile_catalog.has_method("is_structure_layer_type"):
+		return bool(_tile_catalog.call("is_structure_layer_type", type_id)) and (type_id.begins_with("station_") or type_id.begins_with("modular_"))
+	return false
 
 
 func _get_tile_object_rotation_degrees(tile_data) -> float:

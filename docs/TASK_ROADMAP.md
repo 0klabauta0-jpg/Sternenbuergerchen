@@ -511,6 +511,20 @@ TASK_315 - Mission Grid Tile Selection Command Gate (implementiert)
 Phase 18ZC - FOB Fireteam Staging Migration
 TASK_316 - FOB Fireteam Staging Migration (implementiert)
 
+Phase 18ZD - Manual Playtest Followups Backfill
+TASK_317 - Manual Playtest Mission Fireteam FOB Payload and Bubbles (implementiert)
+TASK_318 - Manual Playtest Debrief Background and Main Menu Team Library (implementiert)
+TASK_319 - Manual Playtest FOB Second Dropship Assignment and Scale (implementiert)
+TASK_320 - Manual Playtest Dropship Cards Per-Craft Dispatch and Return (implementiert)
+TASK_321 - Manual Playtest Map Editor Station Floor Layering Undo (implementiert)
+TASK_322 - Manual Playtest Map Editor Asset Import Rotation Context Menu (implementiert im Arbeitsstand)
+TASK_323 - Manual Playtest Mission Command Visuals Fire Sector Dropships (implementiert im Arbeitsstand)
+TASK_324 - Manual Playtest Team Editor Character Overlay Usability (implementiert im Arbeitsstand)
+TASK_325 - Manual Playtest Documentation Backfill (implementiert)
+TASK_326 - Manual Playtest Multiplayer Setup Asset Catalog Floor Followup (implementiert im Arbeitsstand)
+TASK_327 - Manual Playtest Right Click Orders Tactics Dropship Visibility (implementiert im Arbeitsstand)
+TASK_328 - Manual Playtest Marker Help Roster UPnP Followup (implementiert im Arbeitsstand)
+
 Batch-Empfehlung
 
 Codex soll Tasks in kleinen Gruppen bearbeiten:

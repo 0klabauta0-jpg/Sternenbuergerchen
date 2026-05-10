@@ -237,7 +237,7 @@ func _populate_badge_row(badge_row: HBoxContainer) -> void:
 		texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		texture_rect.mouse_filter = Control.MOUSE_FILTER_STOP
-		texture_rect.tooltip_text = "%s: %s" % [String(badge.get("label", "Badge")), String(badge.get("reason", ""))]
+		NPC_RANK_BADGE_RESOLVER_SCRIPT.call("apply_badge_help_metadata", texture_rect, badge)
 		var badge_path: String = String(badge.get("path", "")).strip_edges()
 		if not badge_path.is_empty() and ResourceLoader.exists(badge_path):
 			texture_rect.texture = load(badge_path) as Texture2D
