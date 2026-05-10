@@ -289,6 +289,9 @@ var _unit_visual_loadout_count: int = 0
 var _unit_visual_loadout_error_count: int = 0
 var _enemy_animated_unit_model_count: int = 0
 var _unit_status_badge_count: int = 0
+var _drop_visual_static_signature: String = ""
+var _dropship_visual_nodes_by_id: Dictionary = {}
+var _dropship_approach_lines_by_id: Dictionary = {}
 var _dropship_texture_visible: bool = false
 var _dropship_model_visible: bool = false
 var _air_visual_count: int = 0
@@ -536,8 +539,15 @@ func set_fog_of_war_visual_state(fog_of_war_state: Dictionary) -> void:
 
 func set_mission_drop_visual_state(drop_payload: Dictionary) -> void:
 	_drop_payload_apply_count += 1
-	_drop_payload = _normalize_mission_drop_visual_payload(drop_payload)
-	_rebuild_drop_visuals()
+	var normalized_payload: Dictionary = _normalize_mission_drop_visual_payload(drop_payload)
+	var next_static_signature: String = _build_drop_visual_static_signature(normalized_payload)
+	var can_update_motion: bool = next_static_signature == _drop_visual_static_signature and _can_update_drop_visual_motion(normalized_payload)
+	_drop_payload = normalized_payload
+	if can_update_motion:
+		_update_drop_visual_motion()
+	else:
+		_drop_visual_static_signature = next_static_signature
+		_rebuild_drop_visuals()
 	_request_viewport_redraw()
 
 
@@ -904,6 +914,7 @@ func get_render_snapshot() -> Dictionary:
 		"dropship_visible": bool(_drop_payload.get("dropship_visible", false)),
 		"dropship_texture_visible": _dropship_texture_visible,
 		"dropship_model_visible": _dropship_model_visible,
+		"dropship_visual_count": _air_visual_count,
 		"flight_altitude_layer": String(_drop_payload.get("air_layer", AIR_LAYER_ID)),
 		"air_visual_count": _air_visual_count,
 		"fow_hidden_air_visual_count": _fow_hidden_air_visual_count,
@@ -2903,7 +2914,110 @@ func _normalize_mission_drop_visual_payload(drop_payload: Dictionary) -> Diction
 	payload["terrain_height_independent"] = true
 	payload["reveals_unknown_terrain"] = false
 	payload["fow_policy"] = "friendly_air_visible_lz_requires_visible_tile"
+	payload["dropship_visuals"] = _normalize_dropship_visual_entries(payload)
+	if not Array(payload.get("dropship_visuals", [])).is_empty():
+		payload["dropship_visible"] = true
 	return payload
+
+
+func _normalize_dropship_visual_entries(payload: Dictionary) -> Array:
+	var entries: Array = []
+	for entry_variant in Array(payload.get("dropship_visuals", [])):
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant).duplicate(true)
+		if entry.has("visible") and not entry.has("dropship_visible"):
+			entry["dropship_visible"] = bool(entry.get("visible", false))
+		if entry.has("position") and not entry.has("dropship_position"):
+			entry["dropship_position"] = entry.get("position")
+		if entry.has("target_position") and not entry.has("dropship_target_position"):
+			entry["dropship_target_position"] = entry.get("target_position")
+		if entry.has("has_lz") and not entry.has("has_lz_position"):
+			entry["has_lz_position"] = bool(entry.get("has_lz", false))
+		if not entry.has("team_id"):
+			entry["team_id"] = String(payload.get("team_id", AIR_LAYER_DEFAULT_TEAM_ID))
+		if not entry.has("air_layer"):
+			entry["air_layer"] = String(payload.get("air_layer", AIR_LAYER_ID))
+		if not entry.has("flight_altitude_clearance"):
+			entry["flight_altitude_clearance"] = float(payload.get("flight_altitude_clearance", AIR_LAYER_DEFAULT_CLEARANCE))
+		entry["flight_altitude_clearance"] = maxf(float(entry.get("flight_altitude_clearance", AIR_LAYER_DEFAULT_CLEARANCE)), AIR_LAYER_MIN_CLEARANCE)
+		entry["terrain_height_independent"] = true
+		if bool(entry.get("dropship_visible", false)) and typeof(entry.get("dropship_position", null)) == TYPE_VECTOR2:
+			entries.append(entry)
+	if entries.is_empty() and bool(payload.get("dropship_visible", false)) and typeof(payload.get("dropship_position", null)) == TYPE_VECTOR2:
+		var fallback_entry: Dictionary = payload.duplicate(true)
+		var fallback_id: String = String(fallback_entry.get("craft_id", "mission_dropship")).strip_edges()
+		if fallback_id.is_empty():
+			fallback_id = "mission_dropship"
+		fallback_entry["craft_id"] = fallback_id
+		entries.append(fallback_entry)
+	return entries
+
+
+func _build_drop_visual_static_signature(payload: Dictionary) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	parts.append("lz:%s:%s" % [str(bool(payload.get("has_lz_position", false))), _vector2_signature(payload.get("lz_position", null))])
+	parts.append("req:%s" % _vector2_signature(payload.get("requested_lz_position", payload.get("target_lz_position", null))))
+	parts.append("res:%s" % _vector2_signature(payload.get("resolved_lz_position", payload.get("actual_landing_position", null))))
+	var entries: Array = Array(payload.get("dropship_visuals", []))
+	for index in range(entries.size()):
+		var entry: Dictionary = Dictionary(entries[index])
+		parts.append("%s:%s:%s:%s:%s" % [
+			_get_dropship_visual_id(entry, index),
+			String(entry.get("state", "")).strip_edges().to_lower(),
+			_texture_signature(entry.get("dropship_texture", null)),
+			str(entry.has("lz_position") or entry.has("dropship_target_position")),
+			String(entry.get("team_id", AIR_LAYER_DEFAULT_TEAM_ID)).strip_edges(),
+		])
+	return "|".join(parts)
+
+
+func _vector2_signature(value: Variant) -> String:
+	if typeof(value) != TYPE_VECTOR2:
+		return "-"
+	var vector_value: Vector2 = Vector2(value)
+	return "%.2f,%.2f" % [vector_value.x, vector_value.y]
+
+
+func _texture_signature(value: Variant) -> String:
+	var texture := value as Texture2D
+	if texture == null:
+		return ""
+	return texture.resource_path
+
+
+func _can_update_drop_visual_motion(payload: Dictionary) -> bool:
+	if _drop_root == null:
+		return false
+	if _is_fog_of_war_visual_filter_active():
+		return false
+	var entries: Array = Array(payload.get("dropship_visuals", []))
+	if entries.is_empty():
+		return false
+	for index in range(entries.size()):
+		var visual_id: String = _get_dropship_visual_id(Dictionary(entries[index]), index)
+		if not _dropship_visual_nodes_by_id.has(visual_id):
+			return false
+		var node := _dropship_visual_nodes_by_id.get(visual_id, null) as Node3D
+		if node == null or not is_instance_valid(node):
+			return false
+	return true
+
+
+func _update_drop_visual_motion() -> void:
+	var entries: Array = Array(_drop_payload.get("dropship_visuals", []))
+	for index in range(entries.size()):
+		var entry: Dictionary = Dictionary(entries[index])
+		var visual_id: String = _get_dropship_visual_id(entry, index)
+		var node := _dropship_visual_nodes_by_id.get(visual_id, null) as Node3D
+		if node == null or not is_instance_valid(node) or typeof(entry.get("dropship_position", null)) != TYPE_VECTOR2:
+			continue
+		var world_position: Vector2 = Vector2(entry.get("dropship_position", Vector2.ZERO))
+		var extra_y_offset: float = float(node.get_meta("dropship_extra_y_offset", 0.0))
+		node.position = _world_to_air_layer_3d_position_for_payload(entry, world_position, extra_y_offset)
+		if String(node.get_meta("dropship_visual_mode", "")).strip_edges() != "texture":
+			node.rotation_degrees.y = _get_dropship_rotation_y_for_payload(entry, world_position)
+		_update_dropship_approach_line(entry, visual_id, world_position)
 
 
 func _rebuild_order_visuals() -> void:
@@ -3907,6 +4021,8 @@ func _rebuild_contact_visuals() -> void:
 
 func _rebuild_drop_visuals() -> void:
 	_clear_children(_drop_root)
+	_dropship_visual_nodes_by_id.clear()
+	_dropship_approach_lines_by_id.clear()
 	_dropship_texture_visible = false
 	_dropship_model_visible = false
 	_missing_dropship_model_count = 0
@@ -3945,14 +4061,18 @@ func _rebuild_drop_visuals() -> void:
 			if _add_world_tile_marker(_drop_root, resolved_lz_position, Color(1.0, 0.78, 0.28, 0.50), "ResolvedLZTile", 0.105, 0.82):
 				_resolved_lz_marker_count += 1
 
-	if bool(_drop_payload.get("dropship_visible", false)) and typeof(_drop_payload.get("dropship_position", null)) == TYPE_VECTOR2:
-		var ship_position: Vector2 = Vector2(_drop_payload.get("dropship_position", Vector2.ZERO))
-		if _air_layer_allows_air_visual(ship_position):
-			_add_dropship_proxy(ship_position)
-			if typeof(_drop_payload.get("lz_position", null)) == TYPE_VECTOR2:
-				var lz_line_position: Vector2 = Vector2(_drop_payload.get("lz_position", Vector2.ZERO))
-				if _air_layer_allows_surface_marker(lz_line_position):
-					_add_line3d(_drop_root, _world_to_air_layer_3d_position(ship_position), _world_to_surface_3d_position(lz_line_position, 0.52), Color(0.56, 1.0, 0.68, 0.86), "DropshipApproach")
+	var dropship_entries: Array = Array(_drop_payload.get("dropship_visuals", []))
+	for index in range(dropship_entries.size()):
+		var entry: Dictionary = Dictionary(dropship_entries[index])
+		if typeof(entry.get("dropship_position", null)) != TYPE_VECTOR2:
+			continue
+		var ship_position: Vector2 = Vector2(entry.get("dropship_position", Vector2.ZERO))
+		if _air_layer_allows_air_visual_for_payload(entry, ship_position):
+			var visual_id: String = _get_dropship_visual_id(entry, index)
+			var visual_node := _add_dropship_proxy(ship_position, entry, visual_id)
+			if visual_node != null:
+				_dropship_visual_nodes_by_id[visual_id] = visual_node
+			_add_dropship_approach_line(entry, visual_id, ship_position)
 		else:
 			_fow_hidden_air_visual_count += 1
 
@@ -3964,19 +4084,79 @@ func _air_layer_allows_surface_marker(world_position: Vector2) -> bool:
 
 
 func _air_layer_allows_air_visual(world_position: Vector2) -> bool:
+	return _air_layer_allows_air_visual_for_payload(_drop_payload, world_position)
+
+
+func _air_layer_allows_air_visual_for_payload(payload: Dictionary, world_position: Vector2) -> bool:
 	if not _is_fog_of_war_visual_filter_active():
 		return true
-	var team_id: String = String(_drop_payload.get("team_id", AIR_LAYER_DEFAULT_TEAM_ID)).strip_edges()
+	var team_id: String = String(payload.get("team_id", AIR_LAYER_DEFAULT_TEAM_ID)).strip_edges()
 	if _fog_of_war_team_id.is_empty() or team_id.is_empty() or team_id == _fog_of_war_team_id:
 		return true
 	return _fow_is_world_position_currently_visible(world_position)
 
 
 func _world_to_air_layer_3d_position(world_position: Vector2, extra_y_offset: float = 0.0) -> Vector3:
+	return _world_to_air_layer_3d_position_for_payload(_drop_payload, world_position, extra_y_offset)
+
+
+func _world_to_air_layer_3d_position_for_payload(payload: Dictionary, world_position: Vector2, extra_y_offset: float = 0.0) -> Vector3:
 	_dropship_surface_y = _get_world_surface_y(world_position)
-	_dropship_air_clearance = maxf(float(_drop_payload.get("flight_altitude_clearance", AIR_LAYER_DEFAULT_CLEARANCE)) + extra_y_offset, AIR_LAYER_MIN_CLEARANCE)
+	_dropship_air_clearance = maxf(float(payload.get("flight_altitude_clearance", AIR_LAYER_DEFAULT_CLEARANCE)) + extra_y_offset, AIR_LAYER_MIN_CLEARANCE)
 	_dropship_air_y = _dropship_surface_y + _dropship_air_clearance
 	return _world_to_3d_position(world_position, _dropship_air_y)
+
+
+func _get_dropship_visual_id(entry: Dictionary, index: int) -> String:
+	var visual_id: String = String(entry.get("craft_id", entry.get("asset_id", ""))).strip_edges()
+	if visual_id.is_empty():
+		visual_id = "dropship_%d" % index
+	return visual_id
+
+
+func _add_dropship_approach_line(entry: Dictionary, visual_id: String, ship_position: Vector2) -> void:
+	var target_position: Vector2
+	if typeof(entry.get("dropship_target_position", null)) == TYPE_VECTOR2:
+		target_position = Vector2(entry.get("dropship_target_position", Vector2.ZERO))
+	elif typeof(entry.get("lz_position", null)) == TYPE_VECTOR2:
+		target_position = Vector2(entry.get("lz_position", Vector2.ZERO))
+	else:
+		return
+	if ship_position.distance_squared_to(target_position) <= 4.0:
+		return
+	if not _air_layer_allows_surface_marker(target_position):
+		return
+	var line := _add_line3d(
+		_drop_root,
+		_world_to_air_layer_3d_position_for_payload(entry, ship_position),
+		_world_to_surface_3d_position(target_position, 0.52),
+		Color(0.56, 1.0, 0.68, 0.86),
+		"DropshipApproach_%s" % _sanitize_node_name(visual_id)
+	)
+	if line != null:
+		_dropship_approach_lines_by_id[visual_id] = line
+
+
+func _update_dropship_approach_line(entry: Dictionary, visual_id: String, ship_position: Vector2) -> void:
+	var line := _dropship_approach_lines_by_id.get(visual_id, null) as MeshInstance3D
+	if line == null or not is_instance_valid(line):
+		return
+	var target_position: Vector2
+	if typeof(entry.get("dropship_target_position", null)) == TYPE_VECTOR2:
+		target_position = Vector2(entry.get("dropship_target_position", Vector2.ZERO))
+	elif typeof(entry.get("lz_position", null)) == TYPE_VECTOR2:
+		target_position = Vector2(entry.get("lz_position", Vector2.ZERO))
+	else:
+		line.visible = false
+		return
+	line.visible = ship_position.distance_squared_to(target_position) > 4.0
+	if not line.visible:
+		return
+	line.mesh = _make_line_mesh(
+		_world_to_air_layer_3d_position_for_payload(entry, ship_position),
+		_world_to_surface_3d_position(target_position, 0.52),
+		Color(0.56, 1.0, 0.68, 0.86)
+	)
 
 
 func _rebuild_status_visuals() -> void:
@@ -4090,8 +4270,9 @@ func _add_label3d(parent: Node3D, text: String, position: Vector3, node_name: St
 	return label
 
 
-func _add_dropship_proxy(world_position: Vector2) -> void:
-	_dropship_rotation_y = _get_dropship_rotation_y(world_position)
+func _add_dropship_proxy(world_position: Vector2, visual_payload: Dictionary = {}, visual_id: String = "primary") -> Node3D:
+	var payload: Dictionary = visual_payload if not visual_payload.is_empty() else _drop_payload
+	_dropship_rotation_y = _get_dropship_rotation_y_for_payload(payload, world_position)
 	var model_scene := _get_asset_model_scene("fahrzeug_speeder_b_se")
 	if model_scene == null:
 		model_scene = _get_asset_model_scene_by_name(DROPSHIP_MODEL_NAME)
@@ -4100,54 +4281,64 @@ func _add_dropship_proxy(world_position: Vector2) -> void:
 		if model_instance != null:
 			_normalize_asset_model_instance(model_instance)
 			var craft_root := Node3D.new()
-			craft_root.name = "DropshipModel_%s" % DROPSHIP_MODEL_NAME
-			craft_root.position = _world_to_air_layer_3d_position(world_position, _get_asset_y_offset("fahrzeug_speeder_b_se"))
-			craft_root.set_meta("flight_altitude_layer", String(_drop_payload.get("air_layer", AIR_LAYER_ID)))
+			var extra_y_offset: float = _get_asset_y_offset("fahrzeug_speeder_b_se")
+			craft_root.name = "DropshipModel_%s" % _sanitize_node_name(visual_id)
+			craft_root.position = _world_to_air_layer_3d_position_for_payload(payload, world_position, extra_y_offset)
+			craft_root.set_meta("flight_altitude_layer", String(payload.get("air_layer", AIR_LAYER_ID)))
 			craft_root.set_meta("terrain_height_independent", true)
+			craft_root.set_meta("dropship_visual_mode", "model")
+			craft_root.set_meta("dropship_extra_y_offset", extra_y_offset)
 			craft_root.rotation_degrees.y = _dropship_rotation_y
 			craft_root.scale = Vector3.ONE * (_get_asset_model_scale("fahrzeug_speeder_b_se") if _has_model_mapping_for_type("fahrzeug_speeder_b_se") else DROPSHIP_MODEL_SCALE)
 			craft_root.add_child(model_instance)
 			_drop_root.add_child(craft_root)
 			_dropship_model_visible = true
 			_air_visual_count += 1
-			return
+			return craft_root
 
 	if _uses_strict_3d_asset_mapping():
 		_add_runtime_missing_asset_marker(
 			_drop_root,
-			_world_to_air_layer_3d_position(world_position),
-			"MissingAsset_dropship_model_%s" % _sanitize_node_name(DROPSHIP_MODEL_NAME)
+			_world_to_air_layer_3d_position_for_payload(payload, world_position),
+			"MissingAsset_dropship_model_%s" % _sanitize_node_name(visual_id)
 		)
 		_missing_dropship_model_count = 1
-		return
+		return null
 
-	var dropship_texture := _drop_payload.get("dropship_texture", null) as Texture2D
+	var dropship_texture := payload.get("dropship_texture", null) as Texture2D
 	if dropship_texture == null:
 		dropship_texture = DEFAULT_DROPSHIP_TEXTURE
 	var sprite := _add_texture_card(
 		_drop_root,
 		dropship_texture,
-		_world_to_air_layer_3d_position(world_position),
-		"DropshipTexture",
+		_world_to_air_layer_3d_position_for_payload(payload, world_position),
+		"DropshipTexture_%s" % _sanitize_node_name(visual_id),
 		DROPSHIP_TEXTURE_PIXEL_SIZE
 	)
 	if sprite != null:
-		sprite.set_meta("flight_altitude_layer", String(_drop_payload.get("air_layer", AIR_LAYER_ID)))
+		sprite.set_meta("flight_altitude_layer", String(payload.get("air_layer", AIR_LAYER_ID)))
 		sprite.set_meta("terrain_height_independent", true)
+		sprite.set_meta("dropship_visual_mode", "texture")
+		sprite.set_meta("dropship_extra_y_offset", 0.0)
 		_dropship_texture_visible = true
 		_air_visual_count += 1
-		return
+		return sprite
 
+	var proxy_root := Node3D.new()
+	proxy_root.name = "DropshipProxy_%s" % _sanitize_node_name(visual_id)
+	proxy_root.position = _world_to_air_layer_3d_position_for_payload(payload, world_position)
+	proxy_root.rotation_degrees.y = -_camera_yaw_degrees
+	proxy_root.set_meta("flight_altitude_layer", String(payload.get("air_layer", AIR_LAYER_ID)))
+	proxy_root.set_meta("terrain_height_independent", true)
+	proxy_root.set_meta("dropship_visual_mode", "proxy")
+	proxy_root.set_meta("dropship_extra_y_offset", 0.0)
+	_drop_root.add_child(proxy_root)
 	var body_mesh := _make_box_mesh(Vector3(2.9, 0.46, 1.25))
 	var body := MeshInstance3D.new()
 	body.name = "DropshipProxy"
 	body.mesh = body_mesh
 	body.material_override = _make_material(Color(0.95, 0.76, 0.32, 0.96))
-	body.position = _world_to_air_layer_3d_position(world_position)
-	body.set_meta("flight_altitude_layer", String(_drop_payload.get("air_layer", AIR_LAYER_ID)))
-	body.set_meta("terrain_height_independent", true)
-	body.rotation_degrees.y = -_camera_yaw_degrees
-	_drop_root.add_child(body)
+	proxy_root.add_child(body)
 	_air_visual_count += 1
 
 	var wing_mesh := _make_box_mesh(Vector3(1.05, 0.16, 2.45))
@@ -4155,17 +4346,21 @@ func _add_dropship_proxy(world_position: Vector2) -> void:
 	wing.name = "DropshipWing"
 	wing.mesh = wing_mesh
 	wing.material_override = _make_material(Color(0.72, 0.76, 0.78, 0.88))
-	wing.position = body.position + Vector3(0.0, -0.04, 0.0)
-	wing.rotation = body.rotation
-	_drop_root.add_child(wing)
+	wing.position = Vector3(0.0, -0.04, 0.0)
+	proxy_root.add_child(wing)
+	return proxy_root
 
 
 func _get_dropship_rotation_y(world_position: Vector2) -> float:
-	if typeof(_drop_payload.get("dropship_target_position", null)) == TYPE_VECTOR2:
-		var target_position: Vector2 = Vector2(_drop_payload.get("dropship_target_position", world_position))
+	return _get_dropship_rotation_y_for_payload(_drop_payload, world_position)
+
+
+func _get_dropship_rotation_y_for_payload(payload: Dictionary, world_position: Vector2) -> float:
+	if typeof(payload.get("dropship_target_position", null)) == TYPE_VECTOR2:
+		var target_position: Vector2 = Vector2(payload.get("dropship_target_position", world_position))
 		return _get_dropship_model_yaw(world_position, target_position, -_camera_yaw_degrees)
-	if typeof(_drop_payload.get("lz_position", null)) == TYPE_VECTOR2:
-		return _get_dropship_model_yaw(world_position, Vector2(_drop_payload.get("lz_position", Vector2.ZERO)), -_camera_yaw_degrees)
+	if typeof(payload.get("lz_position", null)) == TYPE_VECTOR2:
+		return _get_dropship_model_yaw(world_position, Vector2(payload.get("lz_position", Vector2.ZERO)), -_camera_yaw_degrees)
 	return wrapf(-_camera_yaw_degrees + DROPSHIP_MODEL_FORWARD_ROTATION_OFFSET_DEGREES, 0.0, 360.0)
 
 
@@ -5242,17 +5437,23 @@ func _add_fire_sector_outline3d(parent: Node3D, origin_world: Vector2, center_di
 	parent.add_child(instance)
 
 
-func _add_line3d(parent: Node3D, start_position: Vector3, end_position: Vector3, color: Color, node_name: String) -> void:
+func _add_line3d(parent: Node3D, start_position: Vector3, end_position: Vector3, color: Color, node_name: String) -> MeshInstance3D:
+	var mesh := _make_line_mesh(start_position, end_position, color)
+	var instance := MeshInstance3D.new()
+	instance.name = node_name
+	instance.mesh = mesh
+	parent.add_child(instance)
+	return instance
+
+
+func _make_line_mesh(start_position: Vector3, end_position: Vector3, color: Color) -> ImmediateMesh:
 	var material := _make_material(color, true)
 	var mesh := ImmediateMesh.new()
 	mesh.surface_begin(Mesh.PRIMITIVE_LINES, material)
 	mesh.surface_add_vertex(start_position)
 	mesh.surface_add_vertex(end_position)
 	mesh.surface_end()
-	var instance := MeshInstance3D.new()
-	instance.name = node_name
-	instance.mesh = mesh
-	parent.add_child(instance)
+	return mesh
 
 
 func _make_box_mesh(size: Vector3) -> BoxMesh:

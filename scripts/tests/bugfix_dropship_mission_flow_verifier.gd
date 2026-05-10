@@ -1225,6 +1225,8 @@ func _test_dropship_returns_to_fob_after_drop() -> void:
 	_assert(Array(bridged_drop_state.get("embarked_unit_ids", [])) == [], "Meta return-bridge no longer re-embarks the just-dropped fireteam during the return handoff")
 	_assert(Array(bridged_drop_state.get("deployed_unit_ids", [])) == Array(selected_unit_ids), "Meta return-bridge preserves the deployed fireteam after the live drop")
 	_assert(int(bridged_drop_state.get("mission_drop_passenger_count", -1)) == 0, "Meta return-bridge keeps the dropship passenger count at zero after the fireteam has disembarked")
+	var bridged_drop_card: Dictionary = _find_mission_drop_card(Array(bridged_drop_state.get("mission_drop_cards", [])), "dropship_test")
+	_assert(int(bridged_drop_card.get("passenger_count", -1)) == 0 and Array(bridged_drop_card.get("embarked_unit_ids", [])).is_empty(), "Mission #19 card clears the dropped fireteam payload while the empty dropship returns")
 	for _step in range(600):
 		tactical_controller.call("_update_drop_sequence", 0.2)
 		if String(tactical_controller.get("_drop_sequence_phase")).is_empty():
@@ -1380,6 +1382,16 @@ func _find_transport_craft_card(node: Node, craft_id: String) -> Control:
 		if found != null:
 			return found
 	return null
+
+
+func _find_mission_drop_card(cards: Array, craft_id: String) -> Dictionary:
+	for card_variant in cards:
+		if typeof(card_variant) != TYPE_DICTIONARY:
+			continue
+		var card: Dictionary = Dictionary(card_variant)
+		if String(card.get("craft_id", "")).strip_edges() == craft_id:
+			return card
+	return {}
 
 
 func _assert(condition: bool, message: String) -> void:

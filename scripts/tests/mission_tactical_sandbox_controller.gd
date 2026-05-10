@@ -128,6 +128,7 @@ const MISSION_DROPSHIP_PANEL_MARGIN_RIGHT: float = 16.0
 const MISSION_DROPSHIP_PANEL_MARGIN_TOP: float = 100.0
 const MISSION_DROPSHIP_PANEL_GAP_BELOW_IDENTITY: float = 10.0
 const MISSION_DROPSHIP_PANEL_STACK_GAP: float = 8.0
+const MISSION_DROPSHIP_HOLD_SPACING: float = 92.0
 const MISSION_DROPSHIP_TITLE_FONT_SIZE: int = 10
 const MISSION_DROPSHIP_SHIP_TEXTURE_SIZE: Vector2 = Vector2(72.0, 42.0)
 const MISSION_DROPSHIP_PILOT_CARD_SIZE: Vector2 = Vector2(136.0, 50.0)
@@ -3766,7 +3767,9 @@ func _write_current_mission_dropship_state_to_card(card: Dictionary) -> Dictiona
 		result["title_text"] = _mission_drop_title_text
 	if not _mission_drop_texture_path.is_empty():
 		result["texture_path"] = _mission_drop_texture_path
-	if not _mission_drop_state.is_empty():
+	if _is_drop_sequence_active():
+		result["state"] = _drop_sequence_phase
+	elif not _mission_drop_state.is_empty():
 		result["state"] = _mission_drop_state
 	if not _mission_drop_pilot_text.is_empty():
 		result["pilot_text"] = _mission_drop_pilot_text
@@ -4474,6 +4477,16 @@ func _build_mission_dropship_status_text(card: Dictionary = {}) -> String:
 		if not card_status_line.is_empty():
 			return card_status_line
 		match String(card.get("state", "")).strip_edges().to_lower():
+			DROP_SEQUENCE_INBOUND:
+				return "Inbound to LZ"
+			DROP_SEQUENCE_LANDED:
+				return "Landed at LZ"
+			DROP_SEQUENCE_UNLOADING:
+				return "Dropping %d" % maxi(int(card.get("passenger_count", 0)), 0)
+			DROP_SEQUENCE_OUTBOUND:
+				return "Leaving mission map"
+			DROP_SEQUENCE_COMPLETE:
+				return "Drop complete"
 			"waiting":
 				return "Holding on mission map"
 			"to_mission":
@@ -4898,16 +4911,24 @@ func _get_label_text(label_path: Variant) -> String:
 func _refresh_world_overlays() -> void:
 	var primary_has_live_drop_state: bool = not _mission_drop_state.is_empty()
 	var primary_has_live_drop_sequence: bool = not _drop_sequence_phase.is_empty()
-	var dropship_visible: bool = primary_has_live_drop_state or primary_has_live_drop_sequence
 	var dropship_position: Vector2 = _drop_sequence_position if primary_has_live_drop_sequence else _get_drop_staging_position()
+	var dropship_visuals: Array = _build_mission_dropship_visual_entries(primary_has_live_drop_state or primary_has_live_drop_sequence, dropship_position)
+	var dropship_visible: bool = primary_has_live_drop_state or primary_has_live_drop_sequence or not dropship_visuals.is_empty()
+	var primary_dropship_position: Vector2 = dropship_position
+	var primary_dropship_target: Vector2 = _get_primary_dropship_target_position(primary_dropship_position)
+	if not dropship_visuals.is_empty() and not (primary_has_live_drop_state or primary_has_live_drop_sequence):
+		var first_visual: Dictionary = Dictionary(dropship_visuals[0])
+		primary_dropship_position = Vector2(first_visual.get("dropship_position", primary_dropship_position))
+		primary_dropship_target = Vector2(first_visual.get("dropship_target_position", primary_dropship_target))
 	_publish_dropship_snapshot_context(
 		{
 			"visible": dropship_visible,
 			"state": _drop_sequence_phase if primary_has_live_drop_sequence else _mission_drop_state,
 			"has_lz": _has_lz_position,
 			"lz_position": _lz_position,
-			"position": dropship_position,
-			"target_position": _get_primary_dropship_target_position(dropship_position),
+			"position": primary_dropship_position,
+			"target_position": primary_dropship_target,
+			"dropship_visuals": dropship_visuals,
 			"progress": _build_mission_dropship_progress_value(),
 			"air_asset_status": get_air_asset_status_snapshot(),
 		}
@@ -4922,8 +4943,9 @@ func _refresh_world_overlays() -> void:
 				"has_lz_position": _has_lz_position,
 				"lz_position": _lz_position,
 				"dropship_visible": dropship_visible,
-				"dropship_position": dropship_position,
-				"dropship_target_position": _get_primary_dropship_target_position(dropship_position),
+				"dropship_position": primary_dropship_position,
+				"dropship_target_position": primary_dropship_target,
+				"dropship_visuals": dropship_visuals,
 				"dropship_texture": _get_mission_dropship_texture(),
 			}
 		):
@@ -4961,6 +4983,133 @@ func _refresh_world_overlays() -> void:
 					approach_line.add_point(Vector2.ZERO)
 					approach_line.add_point(line_delta)
 	_refresh_meta_transfer_route_overlay()
+
+
+func _build_mission_dropship_visual_entries(primary_visible: bool, primary_position: Vector2) -> Array:
+	var entries: Array = []
+	var seen_craft_ids: Dictionary = {}
+	var selected_craft_id: String = _mission_drop_craft_id.strip_edges()
+	var cards: Array = _get_mission_dropship_card_entries()
+	for index in range(cards.size()):
+		var card: Dictionary = Dictionary(cards[index])
+		var craft_id: String = String(card.get("craft_id", "")).strip_edges()
+		if craft_id.is_empty():
+			craft_id = "mission_drop_%d" % index
+		if seen_craft_ids.has(craft_id):
+			continue
+		var entry: Dictionary = _build_mission_dropship_visual_entry(card, index, primary_visible, primary_position, craft_id == selected_craft_id)
+		if entry.is_empty():
+			continue
+		seen_craft_ids[craft_id] = true
+		entries.append(entry)
+	if entries.is_empty() and primary_visible:
+		var target_position: Vector2 = _get_primary_dropship_target_position(primary_position)
+		entries.append(
+			{
+				"craft_id": selected_craft_id if not selected_craft_id.is_empty() else "mission_drop_sequence",
+				"display_name": _mission_drop_display_name if not _mission_drop_display_name.is_empty() else "Dropship",
+				"state": _drop_sequence_phase if not _drop_sequence_phase.is_empty() else _mission_drop_state,
+				"dropship_visible": true,
+				"dropship_position": primary_position,
+				"dropship_target_position": target_position,
+				"has_lz_position": _has_lz_position,
+				"lz_position": _lz_position,
+				"dropship_texture": _get_mission_dropship_texture(),
+				"team_id": FRIENDLY_TEAM_ID,
+				"selected": true,
+			}
+		)
+	return entries
+
+
+func _build_mission_dropship_visual_entry(card: Dictionary, index: int, primary_visible: bool, primary_position: Vector2, is_selected: bool) -> Dictionary:
+	var state: String = String(card.get("state", "")).strip_edges().to_lower()
+	if is_selected and _is_drop_sequence_active():
+		state = _drop_sequence_phase
+	if state.is_empty() and not (is_selected and primary_visible):
+		return {}
+	if not _is_mission_dropship_state_visible_on_map(state) and not (is_selected and primary_visible):
+		return {}
+	var craft_id: String = String(card.get("craft_id", "")).strip_edges()
+	if craft_id.is_empty():
+		craft_id = "mission_drop_%d" % index
+	var ship_position: Vector2 = primary_position if is_selected and _is_drop_sequence_active() else _get_mission_dropship_card_position(card, index, state)
+	var target_position: Vector2 = _get_mission_dropship_card_target_position(card, index, state, ship_position)
+	var has_lz: bool = bool(card.get("has_lz_position", false))
+	var lz_position: Vector2 = _coerce_vector2_value(card.get("lz_position", _lz_position if is_selected else Vector2.ZERO), _lz_position if is_selected else Vector2.ZERO)
+	return {
+		"craft_id": craft_id,
+		"display_name": String(card.get("display_name", "Dropship")).strip_edges(),
+		"state": state,
+		"dropship_visible": true,
+		"dropship_position": ship_position,
+		"dropship_target_position": target_position,
+		"has_lz_position": has_lz,
+		"lz_position": lz_position,
+		"dropship_texture": _get_mission_dropship_texture(card),
+		"team_id": FRIENDLY_TEAM_ID,
+		"selected": is_selected,
+	}
+
+
+func _is_mission_dropship_state_visible_on_map(state: String) -> bool:
+	match state.strip_edges().to_lower():
+		"to_mission", "waiting", "to_fob", DROP_SEQUENCE_INBOUND, DROP_SEQUENCE_LANDED, DROP_SEQUENCE_UNLOADING, DROP_SEQUENCE_COMPLETE, DROP_SEQUENCE_OUTBOUND:
+			return true
+		_:
+			return false
+
+
+func _get_mission_dropship_card_position(card: Dictionary, index: int, state: String) -> Vector2:
+	var hold_position: Vector2 = _get_mission_dropship_hold_position(index)
+	var has_lz: bool = bool(card.get("has_lz_position", false))
+	var lz_position: Vector2 = _coerce_vector2_value(card.get("lz_position", _lz_position), _lz_position)
+	var approach_angle: String = _sanitize_approach_angle_name(String(card.get("approach_angle", _get_approach_angle_name())))
+	var staging_position: Vector2 = _get_drop_staging_position_for_lz(lz_position if has_lz else hold_position, approach_angle)
+	var progress: float = clampf(float(card.get("progress", 100.0 if state == "waiting" else 0.0)) / 100.0, 0.0, 1.0)
+	match state.strip_edges().to_lower():
+		"to_mission":
+			return staging_position.lerp(hold_position, progress)
+		"to_fob":
+			return hold_position.lerp(staging_position, progress)
+		_:
+			return hold_position
+
+
+func _get_mission_dropship_card_target_position(card: Dictionary, index: int, state: String, ship_position: Vector2) -> Vector2:
+	var has_lz: bool = bool(card.get("has_lz_position", false))
+	var lz_position: Vector2 = _coerce_vector2_value(card.get("lz_position", _lz_position), _lz_position)
+	var approach_angle: String = _sanitize_approach_angle_name(String(card.get("approach_angle", _get_approach_angle_name())))
+	match state.strip_edges().to_lower():
+		"to_fob", DROP_SEQUENCE_OUTBOUND:
+			return _get_drop_staging_position_for_lz(lz_position if has_lz else _get_mission_dropship_hold_position(index), approach_angle)
+		DROP_SEQUENCE_INBOUND, DROP_SEQUENCE_LANDED, DROP_SEQUENCE_UNLOADING, DROP_SEQUENCE_COMPLETE:
+			return lz_position if has_lz else ship_position
+		_:
+			if has_lz:
+				return lz_position
+			return _get_mission_dropship_hold_position(index) + Vector2(96.0, 42.0)
+
+
+func _get_mission_dropship_hold_position(index: int) -> Vector2:
+	var map_bounds: Rect2 = _get_map_world_bounds()
+	if map_bounds.size.x <= 1.0 or map_bounds.size.y <= 1.0:
+		return _lz_position if _has_lz_position else Vector2.ZERO
+	var margin_x: float = minf(maxf(map_bounds.size.x * 0.12, 96.0), map_bounds.size.x * 0.35)
+	var margin_y: float = minf(maxf(map_bounds.size.y * 0.10, 72.0), map_bounds.size.y * 0.35)
+	var hold_x: float = map_bounds.position.x + map_bounds.size.x - margin_x
+	var hold_y: float = map_bounds.position.y + margin_y + (float(index) * MISSION_DROPSHIP_HOLD_SPACING)
+	hold_y = clampf(hold_y, map_bounds.position.y + margin_y, map_bounds.position.y + map_bounds.size.y - margin_y)
+	return Vector2(hold_x, hold_y)
+
+
+func _get_drop_staging_position_for_lz(lz_position: Vector2, approach_angle: String) -> Vector2:
+	var offset: Vector2 = Vector2(APPROACH_OFFSETS.get(_sanitize_approach_angle_name(approach_angle), Vector2(180.0, -112.0)))
+	if offset.length_squared() <= 0.001:
+		offset = Vector2(180.0, -112.0)
+	var map_bounds: Rect2 = _get_map_world_bounds()
+	var map_span: float = maxf(maxf(map_bounds.size.x, map_bounds.size.y) * DROP_OFFMAP_DISTANCE_MULTIPLIER, DROP_OFFMAP_MIN_DISTANCE)
+	return lz_position + offset.normalized() * map_span
 
 
 func _publish_dropship_snapshot_context(dropship_context: Dictionary) -> void:

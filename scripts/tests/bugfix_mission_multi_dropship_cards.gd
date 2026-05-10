@@ -68,6 +68,10 @@ func _test_multiple_mission_dropships_render_as_stacked_cards() -> void:
 	var panel := scene.get_node_or_null("TacticalUI/MissionDropshipPanel") as Control
 	_assert(panel != null and panel.visible, "Mission dropship panel is visible for mission_drop_cards")
 	_assert(panel != null and panel.get_child_count() == 2, "Two inbound dropships render as two separate right-side cards")
+	var primary_view := scene.get_node_or_null("Primary3DView")
+	if primary_view != null and primary_view.has_method("get_render_snapshot"):
+		var render_snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
+		_assert(int(render_snapshot.get("dropship_visual_count", 0)) >= 2, "Mission map renders every arrived/inbound dropship, not only the selected craft")
 	if panel != null and panel.get_child_count() >= 2:
 		var first_card := panel.get_child(0) as Control
 		var second_card := panel.get_child(1) as Control

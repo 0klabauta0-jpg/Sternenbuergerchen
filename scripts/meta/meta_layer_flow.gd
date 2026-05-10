@@ -1766,15 +1766,18 @@ func _merge_existing_mission_drop_card_planning_fields(drop_state: Dictionary) -
 		var card: Dictionary = Dictionary(card_variant).duplicate(true)
 		var craft_id: String = String(card.get("craft_id", "")).strip_edges()
 		var existing_card: Dictionary = Dictionary(existing_cards_by_craft.get(craft_id, {}))
+		var card_state: String = String(card.get("state", "")).strip_edges().to_lower()
+		var card_has_empty_return_payload: bool = card_state == "to_fob" and int(card.get("passenger_count", 0)) <= 0 and Array(card.get("embarked_unit_ids", [])).is_empty()
 		for planning_key in ["has_lz_position", "lz_position", "approach_angle", "drop_ship_requested", "drop_ship_staged"]:
 			if existing_card.has(planning_key):
 				card[planning_key] = existing_card[planning_key]
 			elif craft_id == selected_craft_id and _mission_planning_state.has(planning_key):
 				card[planning_key] = _mission_planning_state[planning_key]
-		for payload_key in ["embarked_unit_ids", "boarded_fireteam_ids", "queued_fireteam_ids"]:
-			if Array(card.get(payload_key, [])).is_empty() and existing_card.has(payload_key) and not Array(existing_card.get(payload_key, [])).is_empty():
-				card[payload_key] = Array(existing_card.get(payload_key, [])).duplicate()
-		if int(card.get("passenger_count", 0)) <= 0 and int(existing_card.get("passenger_count", 0)) > 0:
+		if not card_has_empty_return_payload:
+			for payload_key in ["embarked_unit_ids", "boarded_fireteam_ids", "queued_fireteam_ids"]:
+				if Array(card.get(payload_key, [])).is_empty() and existing_card.has(payload_key) and not Array(existing_card.get(payload_key, [])).is_empty():
+					card[payload_key] = Array(existing_card.get(payload_key, [])).duplicate()
+		if not card_has_empty_return_payload and int(card.get("passenger_count", 0)) <= 0 and int(existing_card.get("passenger_count", 0)) > 0:
 			card["passenger_count"] = int(existing_card.get("passenger_count", 0))
 		merged_cards.append(card)
 	result["mission_drop_cards"] = merged_cards
