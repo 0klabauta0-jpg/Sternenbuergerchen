@@ -1325,9 +1325,14 @@ func _add_tile_visual(tile_data) -> void:
 
 	var object_type_id: String = String(tile_data.object_type_id) if tile_data.object_type_id is String else ""
 	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
-	var visual_type_id: String = _resolve_tile_asset_type_id(object_type_id, type_id)
-	if not visual_type_id.is_empty() or bool(tile_data.blocks_los) or int(tile_data.object_height) > 0:
-		_add_object_visual(tile_data, top_y, visual_type_id)
+	var structure_visual_type_id: String = _resolve_structure_tile_asset_type_id(type_id)
+	if not structure_visual_type_id.is_empty():
+		_add_object_visual(tile_data, top_y, structure_visual_type_id)
+	var object_visual_type_id: String = _resolve_tile_asset_type_id(object_type_id, "" if not structure_visual_type_id.is_empty() else type_id)
+	if not object_visual_type_id.is_empty():
+		_add_object_visual(tile_data, top_y, object_visual_type_id)
+	elif structure_visual_type_id.is_empty() and (bool(tile_data.blocks_los) or int(tile_data.object_height) > 0):
+		_add_object_visual(tile_data, top_y, "")
 
 
 func _add_object_visual(tile_data, top_y: float, visual_type_id: String) -> void:
@@ -1376,6 +1381,10 @@ func _add_ground_model_visual(tile_data, top_y: float, visual_type_id: String = 
 	_normalize_asset_model_instance(model_instance)
 	var material_override_color: Color = _apply_ground_surface_material_override(model_instance, normalized_visual_type_id, tile_data)
 	var material_override_unshaded: bool = material_override_color != Color.TRANSPARENT and normalized_visual_type_id == "ground_flat"
+	var mapped_entry: Dictionary = _get_model_entry_for_type(normalized_visual_type_id)
+	if _is_space_station_model_entry(mapped_entry):
+		_space_station_model_count += 1
+		_space_station_textured_surface_count += _apply_space_station_colormap_recursive(model_instance)
 
 	var ground_root := Node3D.new()
 	ground_root.name = "Tile_%d_%d" % [tile_data.grid_position.x, tile_data.grid_position.y]
@@ -5079,6 +5088,23 @@ func _resolve_tile_asset_type_id(object_type_id: String, type_id: String) -> Str
 		return normalized_type
 	var entry: Dictionary = Dictionary(tile_catalog.call("get_type", normalized_type)) if tile_catalog.has_method("get_type") else {}
 	if not String(entry.get("texture_path", "")).strip_edges().is_empty():
+		return normalized_type
+	return ""
+
+
+func _resolve_structure_tile_asset_type_id(type_id: String) -> String:
+	var normalized_type: String = type_id.strip_edges().to_lower()
+	if normalized_type.is_empty() or normalized_type == "ground_flat":
+		return ""
+	var tile_catalog = _get_tile_catalog()
+	if tile_catalog != null and tile_catalog.has_method("is_structure_layer_type") and bool(tile_catalog.call("is_structure_layer_type", normalized_type)):
+		return normalized_type
+	for prefix in ["wall_", "rock_", "cliff_", "slope_"]:
+		if normalized_type.begins_with(prefix):
+			return normalized_type
+	var mapped_entry: Dictionary = _get_model_entry_for_type(normalized_type)
+	var layer_name: String = String(mapped_entry.get("layer", "")).strip_edges().to_lower()
+	if layer_name == "terrain_object" or layer_name == "structure":
 		return normalized_type
 	return ""
 

@@ -10,6 +10,14 @@
 
 ## Aktueller Startzustand
 
+### Manual Playtest - Map Editor Station Floor, Layering and Undo
+- Status: implementiert
+- Stand: `station_floor_panel` ist jetzt eine Terrain-/Surface-Variante statt ein Object-Layer-Prop. In der 3D-Ansicht wird es als top-anchored Boden gerendert; Station-Wall-Tiles nutzen darunter ebenfalls das Station-Floor-Panel, damit Station-Gebaeude einen passenden Boden behalten.
+- Stand: `station_wall` und `station_wall_door` liegen auf einer Structure-Schicht. Station-Props wie Med Bed, Computer oder Cargo koennen dadurch zusaetzlich auf demselben Tile in `object_type_id` liegen, ohne die Wand zu verdraengen. Der Eraser entfernt zuerst das Prop und erst im zweiten Pass die Struktur.
+- Stand: Der Map Editor hat einen 32-Schritt-Undo-Stack, textgrosse Preview-Icons in allen Palette-Gruppen, einen etwas klareren Panel-Skin und blockt Patrol-Waypoints ausserhalb echter Map-Tiles.
+- Risiken: Das Datenmodell bleibt bei Terrain/Structure/Object in zwei gespeicherten Type-Feldern; ein echtes drittes Floor-Feld gibt es noch nicht. Fuer Station-Waende wird der passende Floor deshalb ueber den 3D-Surface-Override erzeugt.
+- Lokale Pruefung: `bugfix_map_editor_station_floor_structure_undo.gd`, `task_229_map_editor_usability_authoring_pass.gd`, `task_295_map_editor_paint_toolbar_tools_polish.gd`, `task_296_map_editor_palette_taxonomy_space_station_assets.gd`, `task_298_editor_terrain_visual_playability_smoke.gd`, `editor_height_edge_surface_anchor_verifier.gd`, `task_253_nature_ground_surface_editor_palette_pass.gd`, `task_183_editor_hill_authoring_verifier.gd`, `task_254_nature_trees_rocks_vegetation_cover_props.gd`, `task_132_verifier.gd` und `git diff --check` laufen gruen.
+
 ### Manual Playtest - FOB Second Dropship Assignment and Scale
 - Status: implementiert
 - Stand: `#14 FLIGHTDECK` speichert die FOB-Boarding-/Staging-Queue jetzt pro Transport-Craft-ID. Ein Fireteam, das auf `Dropship 2` gedroppt wird, bleibt damit auf `Dropship 2` und rutscht nicht mehr automatisch in die Queue von `Dropship 1`.

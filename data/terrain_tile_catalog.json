@@ -482,25 +482,27 @@
 			"type_id": "station_wall",
 			"display_name": "Station Wall",
 			"palette_group": "space_station",
-			"placement_layer": "object",
-			"surface_type": "rock",
+			"placement_layer": "structure",
+			"surface_type": "road",
 			"walkable": false,
 			"blocks_los": true,
 			"cover_value": 60,
 			"height_level": 0,
-			"object_height": 2
+			"object_height": 2,
+			"preserve_hill_fields": true
 		},
 		{
 			"type_id": "station_wall_door",
 			"display_name": "Station Door Wall",
 			"palette_group": "space_station",
-			"placement_layer": "object",
-			"surface_type": "rock",
+			"placement_layer": "structure",
+			"surface_type": "road",
 			"walkable": false,
 			"blocks_los": true,
 			"cover_value": 55,
 			"height_level": 0,
-			"object_height": 2
+			"object_height": 2,
+			"preserve_hill_fields": true
 		},
 		{
 			"type_id": "station_computer",
@@ -554,13 +556,16 @@
 			"type_id": "station_floor_panel",
 			"display_name": "Station Floor Panel",
 			"palette_group": "space_station",
-			"placement_layer": "object",
+			"placement_layer": "terrain",
 			"surface_type": "road",
 			"walkable": true,
 			"blocks_los": false,
 			"cover_value": 0,
 			"height_level": 0,
-			"object_height": 0
+			"object_height": 0,
+			"edge_type": "none",
+			"preserve_hill_fields": true,
+			"visual_surface_variant": true
 		},
 		{
 			"type_id": "deko_barrel_ne",

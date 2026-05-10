@@ -155,7 +155,7 @@ func is_object_type(tile_data) -> bool:
 	if not object_type_id.is_empty():
 		return true
 	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
-	return type_id.begins_with("wall_") or type_id.begins_with("cliff_") or type_id.begins_with("slope_") or type_id.begins_with("rock_")
+	return _is_structure_type_id(type_id)
 
 
 func get_tile_object_type_id(tile_data) -> String:
@@ -311,12 +311,10 @@ func _get_edge_anchor_world_position(terrain_map_data, anchor_grid: Vector2i, fa
 func _build_wall_overlays(terrain_map_data, wall_container: Node2D) -> Dictionary:
 	var wall_sprites_by_grid: Dictionary = {}
 	for tile_data in terrain_map_data.call("get_tiles"):
-		if not is_object_type(tile_data):
+		var type_id: String = String(tile_data.type_id).strip_edges().to_lower() if tile_data.type_id is String else ""
+		if not _is_structure_type_id(type_id):
 			continue
 
-		var type_id: String = get_tile_object_type_id(tile_data)
-		if type_id.is_empty():
-			type_id = String(tile_data.type_id) if tile_data.type_id is String else ""
 		var texture: Texture2D = null
 		var pos_offset := Vector2.ZERO
 
@@ -378,7 +376,10 @@ func _build_wall_overlays(terrain_map_data, wall_container: Node2D) -> Dictionar
 			"rock_large":
 				texture = ROCK_LARGE_TEXTURE
 			_:
-				texture = WALL_TEXTURE_SW
+				if type_id.begins_with("station_wall"):
+					texture = WALL_TEXTURE_SW
+				else:
+					continue
 
 		if texture == null:
 			continue
@@ -410,3 +411,13 @@ func _build_object_overlays(terrain_map_data, object_container: Node2D) -> Dicti
 		object_sprites_by_grid[tile_data.grid_position] = [sprite]
 
 	return object_sprites_by_grid
+
+
+func _is_structure_type_id(type_id: String) -> bool:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty():
+		return false
+	var tile_catalog = _get_or_load_tile_catalog()
+	if tile_catalog != null and tile_catalog.has_method("is_structure_layer_type") and bool(tile_catalog.call("is_structure_layer_type", normalized_type_id)):
+		return true
+	return normalized_type_id.begins_with("wall_") or normalized_type_id.begins_with("cliff_") or normalized_type_id.begins_with("slope_") or normalized_type_id.begins_with("rock_")

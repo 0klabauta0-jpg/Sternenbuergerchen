@@ -133,6 +133,8 @@ const AUTHORING_TOOL_HEIGHT: String = "height"
 const AUTHORING_TOOL_MARKER: String = "marker"
 const AUTHORING_TOOL_PATROL: String = "patrol"
 const TOOL_BUTTON_SIZE: Vector2 = Vector2(34.0, 30.0)
+const MAX_UNDO_STACK_SIZE: int = 32
+const PALETTE_PREVIEW_ICON_SIZE: Vector2i = Vector2i(16, 16)
 const PALETTE_ITEM_FG_COLOR: Color = Color(0.9, 0.93, 0.9, 1.0)
 const PALETTE_SELECTED_BG_COLOR: Color = Color(1.0, 0.86, 0.22, 0.84)
 const PALETTE_SELECTED_FG_COLOR: Color = Color(0.08, 0.06, 0.02, 1.0)
@@ -167,6 +169,7 @@ var _dirty: bool = false
 var _is_refreshing_property_controls: bool = false
 var _is_refreshing_map_settings_controls: bool = false
 var _last_undo_state: Dictionary = {}
+var _undo_stack: Array[Dictionary] = []
 var _current_map_path: String = DEFAULT_MAP_PATH
 var _pending_dialog_action: String = ""
 var _height_tool_enabled: bool = false
@@ -191,6 +194,7 @@ var _scenario_feedback_text: String = ""
 var _terrain_3d_view = null
 var _3d_refresh_queued: bool = false
 var _active_palette_group_id: String = ""
+var _palette_preview_textures: Dictionary = {}
 var _inspector_section_collapsed: Dictionary = {
 	INSPECTOR_SECTION_MAP_SETTINGS: false,
 	INSPECTOR_SECTION_MARKERS: false,
@@ -208,6 +212,7 @@ func _ready() -> void:
 	_populate_edge_type_options()
 	_populate_brush_size_options()
 	_configure_property_height_spinbox()
+	_apply_editor_control_panel_style()
 	_populate_tile_palette()
 	_connect_ui_signals()
 	_add_height_tool_controls()
@@ -442,7 +447,7 @@ func _load_map(path: String) -> void:
 	_cliff_sprites_by_grid.clear()
 	_object_sprites_by_grid.clear()
 	_set_selected_grid_position(Vector2i(-1, -1))
-	_last_undo_state.clear()
+	_clear_undo_history()
 	_mark_dirty(false)
 	_rebuild_registry_from_map_data()
 	_rebuild_tile_sprites()
@@ -476,7 +481,7 @@ func _create_new_map(grid_size: Vector2i = DEFAULT_NEW_MAP_GRID_SIZE) -> void:
 	_cliff_sprites_by_grid.clear()
 	_object_sprites_by_grid.clear()
 	_set_selected_grid_position(Vector2i(-1, -1))
-	_last_undo_state.clear()
+	_clear_undo_history()
 	_mark_dirty(false)
 	_rebuild_registry_from_map_data()
 	_rebuild_tile_sprites()
@@ -651,8 +656,7 @@ func _apply_brush_at_world_position(world_position: Vector2) -> void:
 				continue
 
 			if not _selected_type_id.is_empty() and _tile_catalog != null and _tile_catalog.has_type(_selected_type_id):
-				if dx == 0 and dy == 0:
-					_store_undo_state(target_tile)
+				_store_undo_state(target_tile)
 				if _tile_catalog.apply_type_to_tile(target_tile, _selected_type_id):
 					any_changed = true
 					_refresh_tile_visual(target_tile)
@@ -742,25 +746,45 @@ func _erase_object_layer_from_tile(tile_data) -> bool:
 	var has_object_layer: bool = not object_type_id.is_empty()
 	if not has_object_layer and _tile_catalog != null and _tile_catalog.has_method("is_object_layer_type"):
 		has_object_layer = bool(_tile_catalog.call("is_object_layer_type", type_id))
+	var has_structure_layer: bool = _tile_catalog != null and _tile_catalog.has_method("is_structure_layer_type") and bool(_tile_catalog.call("is_structure_layer_type", type_id))
 	if not has_object_layer:
 		for prefix in ["wall_", "rock_", "cliff_", "slope_"]:
 			if type_id.begins_with(prefix):
-				has_object_layer = true
+				has_structure_layer = true
 				break
-	if not has_object_layer:
+	if not has_object_layer and not has_structure_layer:
 		return false
 
 	_store_undo_state(tile_data)
+	if has_object_layer and not object_type_id.is_empty():
+		tile_data.object_type_id = ""
+		_restore_tile_base_gameplay_fields(tile_data)
+		return true
+
 	tile_data.object_type_id = ""
-	if _tile_catalog != null and _tile_catalog.has_method("is_object_layer_type") and bool(_tile_catalog.call("is_object_layer_type", type_id)):
+	if (
+		(_tile_catalog != null and _tile_catalog.has_method("is_object_layer_type") and bool(_tile_catalog.call("is_object_layer_type", type_id)))
+		or has_structure_layer
+		or type_id.begins_with("wall_")
+		or type_id.begins_with("rock_")
+		or type_id.begins_with("cliff_")
+		or type_id.begins_with("slope_")
+	):
 		tile_data.type_id = "ground_flat"
-	elif type_id.begins_with("wall_") or type_id.begins_with("rock_") or type_id.begins_with("cliff_") or type_id.begins_with("slope_"):
-		tile_data.type_id = "ground_flat"
+	_restore_tile_base_gameplay_fields(tile_data)
+	return true
+
+
+func _restore_tile_base_gameplay_fields(tile_data) -> void:
+	if tile_data == null:
+		return
+	if _tile_catalog != null and _tile_catalog.has_method("apply_base_gameplay_fields_to_tile"):
+		_tile_catalog.call("apply_base_gameplay_fields_to_tile", tile_data)
+		return
 	tile_data.walkable = true
 	tile_data.blocks_los = false
 	tile_data.cover_value = 0
 	tile_data.object_height = 0
-	return true
 
 
 func _get_next_height_tool_level(current_height: int) -> int:
@@ -964,6 +988,33 @@ func _configure_tool_button(button: Button, label_text: String, tooltip: String)
 	button.text = label_text
 	button.custom_minimum_size = TOOL_BUTTON_SIZE
 	button.tooltip_text = tooltip
+
+
+func _apply_editor_control_panel_style() -> void:
+	_apply_panel_style(get_node_or_null("UI/TopBar") as PanelContainer, Color(0.06, 0.09, 0.11, 0.94), Color(0.32, 0.55, 0.62, 0.72))
+	_apply_panel_style(get_node_or_null("UI/PalettePanel") as PanelContainer, Color(0.055, 0.075, 0.085, 0.96), Color(0.28, 0.47, 0.52, 0.68))
+	_apply_panel_style(get_node_or_null("UI/PropertyPanel") as PanelContainer, Color(0.065, 0.075, 0.08, 0.96), Color(0.24, 0.39, 0.43, 0.62))
+	var tile_type_list := _get_tile_type_list()
+	if tile_type_list != null:
+		tile_type_list.fixed_icon_size = PALETTE_PREVIEW_ICON_SIZE
+		tile_type_list.icon_mode = ItemList.ICON_MODE_LEFT
+		tile_type_list.max_columns = 1
+		tile_type_list.add_theme_color_override("font_color", PALETTE_ITEM_FG_COLOR)
+		tile_type_list.add_theme_color_override("font_selected_color", PALETTE_SELECTED_FG_COLOR)
+	var palette_title := get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteTitle") as Label
+	if palette_title != null:
+		palette_title.add_theme_color_override("font_color", Color(0.82, 0.96, 1.0, 1.0))
+
+
+func _apply_panel_style(panel: PanelContainer, bg_color: Color, border_color: Color) -> void:
+	if panel == null:
+		return
+	var style := StyleBoxFlat.new()
+	style.bg_color = bg_color
+	style.border_color = border_color
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(6)
+	panel.add_theme_stylebox_override("panel", style)
 
 
 func _add_patrol_tool_controls() -> void:
@@ -2645,6 +2696,7 @@ func _build_toolbar_snapshot() -> Dictionary:
 func _build_palette_snapshot() -> Dictionary:
 	var visible_type_ids: PackedStringArray = PackedStringArray()
 	var selected_items: PackedInt32Array = PackedInt32Array()
+	var preview_icon_count: int = 0
 	var tile_type_list := _get_tile_type_list()
 	if tile_type_list != null:
 		selected_items = tile_type_list.get_selected_items()
@@ -2652,6 +2704,8 @@ func _build_palette_snapshot() -> Dictionary:
 			var type_id: String = String(tile_type_list.get_item_metadata(index)).strip_edges()
 			if not type_id.is_empty() and not type_id.begins_with("__group:"):
 				visible_type_ids.append(type_id)
+			if tile_type_list.get_item_icon(index) != null:
+				preview_icon_count += 1
 	var group_ids: PackedStringArray = PackedStringArray()
 	if _tile_catalog != null:
 		for group_variant in _tile_catalog.get_palette_groups():
@@ -2666,6 +2720,9 @@ func _build_palette_snapshot() -> Dictionary:
 		"selected_item_count": selected_items.size(),
 		"selected_item_index": int(selected_items[0]) if selected_items.size() > 0 else -1,
 		"filtered": not _active_palette_group_id.is_empty(),
+		"preview_icon_count": preview_icon_count,
+		"all_visible_items_have_preview_icons": tile_type_list != null and preview_icon_count == tile_type_list.item_count,
+		"preview_icon_size": PALETTE_PREVIEW_ICON_SIZE,
 	}
 
 
@@ -2714,8 +2771,10 @@ func build_multiplayer_map_manifest_preview(author: String = "") -> Dictionary:
 
 func get_authoring_action_contract_snapshot() -> Dictionary:
 	return {
-		"undo_redo_scope": "single_tile_patch_v1",
-		"undo_available": not _last_undo_state.is_empty(),
+		"undo_redo_scope": "tile_patch_stack_v2",
+		"undo_available": not _undo_stack.is_empty(),
+		"undo_depth": _undo_stack.size(),
+		"undo_limit": MAX_UNDO_STACK_SIZE,
 		"redo_available": false,
 		"tile_patch_fields": PackedStringArray([
 			"grid_position",
@@ -4106,21 +4165,28 @@ func _store_undo_state(tile_data) -> void:
 	if tile_data == null or not tile_data.has_method("to_dict"):
 		return
 
-	_last_undo_state = {
+	var undo_state: Dictionary = {
 		"grid_position": tile_data.grid_position,
 		"tile_dict": tile_data.call("to_dict"),
 	}
+	_undo_stack.append(undo_state)
+	while _undo_stack.size() > MAX_UNDO_STACK_SIZE:
+		_undo_stack.pop_front()
+	_last_undo_state = undo_state
 	_refresh_top_bar()
 
 
 func _undo_last_change() -> void:
-	if _last_undo_state.is_empty() or _terrain_map_data == null:
+	if _undo_stack.is_empty() or _terrain_map_data == null:
 		return
 
-	var grid_position: Vector2i = _last_undo_state.get("grid_position", Vector2i(-1, -1))
-	var tile_dict: Dictionary = _last_undo_state.get("tile_dict", {})
+	var undo_state: Dictionary = Dictionary(_undo_stack.pop_back())
+	_last_undo_state = Dictionary(_undo_stack[_undo_stack.size() - 1]) if not _undo_stack.is_empty() else {}
+	var grid_position: Vector2i = undo_state.get("grid_position", Vector2i(-1, -1))
+	var tile_dict: Dictionary = undo_state.get("tile_dict", {})
 	var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
 	if tile_data == null or tile_dict.is_empty():
+		_refresh_top_bar()
 		return
 
 	var restored_tile = TERRAIN_TILE_DATA_SCRIPT.call("from_dict", tile_dict)
@@ -4138,12 +4204,16 @@ func _undo_last_change() -> void:
 	tile_data.object_height = restored_tile.object_height
 
 	_set_selected_grid_position(grid_position)
-	_last_undo_state.clear()
 	_refresh_tile_visual(tile_data)
 	_mark_dirty(true)
 	_refresh_selection_visual()
 	_refresh_property_panel()
 	_refresh_top_bar()
+
+
+func _clear_undo_history() -> void:
+	_undo_stack.clear()
+	_last_undo_state.clear()
 
 
 func _refresh_top_bar() -> void:
@@ -4160,7 +4230,8 @@ func _refresh_top_bar() -> void:
 	if save_button != null:
 		save_button.disabled = _terrain_map_data == null or _current_map_path.is_empty()
 	if undo_button != null:
-		undo_button.disabled = _last_undo_state.is_empty()
+		undo_button.disabled = _undo_stack.is_empty()
+		undo_button.tooltip_text = "Undo last editor change (%d/%d)." % [_undo_stack.size(), MAX_UNDO_STACK_SIZE]
 	_update_height_topbar_state()
 	_update_patrol_topbar_state()
 	_refresh_authoring_status_controls()
@@ -4428,7 +4499,10 @@ func _find_patrol_waypoint_index_at(world_position: Vector2) -> int:
 
 
 func _add_patrol_waypoint(world_position: Vector2) -> void:
-	if not bool(MAP_EDITOR_PATROL_TOOL_SCRIPT.call("add_waypoint", _terrain_map_data, _patrol_spawn_id, world_position)):
+	var snapped_position = _snap_world_position_to_tile_center(world_position)
+	if snapped_position == null:
+		return
+	if not bool(MAP_EDITOR_PATROL_TOOL_SCRIPT.call("add_waypoint", _terrain_map_data, _patrol_spawn_id, Vector2(snapped_position))):
 		return
 	_mark_dirty(true)
 	_refresh_patrol_overlay()
@@ -4436,7 +4510,10 @@ func _add_patrol_waypoint(world_position: Vector2) -> void:
 
 
 func _move_patrol_waypoint(index: int, world_position: Vector2) -> void:
-	if not bool(MAP_EDITOR_PATROL_TOOL_SCRIPT.call("move_waypoint", _terrain_map_data, _patrol_spawn_id, index, world_position)):
+	var snapped_position = _snap_world_position_to_tile_center(world_position)
+	if snapped_position == null:
+		return
+	if not bool(MAP_EDITOR_PATROL_TOOL_SCRIPT.call("move_waypoint", _terrain_map_data, _patrol_spawn_id, index, Vector2(snapped_position))):
 		return
 	_mark_dirty(true)
 	_refresh_patrol_overlay()
@@ -4908,6 +4985,7 @@ func _populate_tile_palette() -> void:
 	if palette_groups_root != null:
 		palette_groups_root.visible = true
 		for child in palette_groups_root.get_children():
+			palette_groups_root.remove_child(child)
 			child.queue_free()
 		for group in _tile_catalog.get_palette_groups():
 			var group_dict: Dictionary = Dictionary(group)
@@ -4920,6 +4998,7 @@ func _populate_tile_palette() -> void:
 			group_button.toggle_mode = true
 			group_button.button_pressed = group_id == _active_palette_group_id
 			group_button.tooltip_text = "Filter palette group: %s" % group_button.text
+			_configure_palette_group_button(group_button, group_button.button_pressed)
 			group_button.pressed.connect(_on_palette_group_button_pressed.bind(group_id))
 			palette_groups_root.add_child(group_button)
 
@@ -4928,7 +5007,7 @@ func _populate_tile_palette() -> void:
 	for tile_type in visible_types:
 		var type_id := String(Dictionary(tile_type).get("type_id", ""))
 		var display_name := String(Dictionary(tile_type).get("display_name", type_id))
-		tile_type_list.add_item(display_name)
+		tile_type_list.add_item(display_name, _get_palette_preview_texture(type_id))
 		tile_type_list.set_item_metadata(tile_type_list.item_count - 1, type_id)
 		if not type_id.is_empty():
 			visible_type_ids.append(type_id)
@@ -4941,6 +5020,86 @@ func _on_palette_group_button_pressed(group_id: String) -> void:
 	_active_palette_group_id = group_id.strip_edges().to_lower()
 	_populate_tile_palette()
 	_refresh_authoring_status_controls()
+
+
+func _configure_palette_group_button(button: Button, selected: bool) -> void:
+	if button == null:
+		return
+	button.custom_minimum_size = Vector2(0.0, 28.0)
+	var normal_style := StyleBoxFlat.new()
+	normal_style.bg_color = Color(0.085, 0.12, 0.13, 0.92)
+	normal_style.border_color = Color(0.18, 0.32, 0.34, 0.72)
+	normal_style.set_border_width_all(1)
+	normal_style.set_corner_radius_all(4)
+	var hover_style := normal_style.duplicate() as StyleBoxFlat
+	if hover_style != null:
+		hover_style.bg_color = Color(0.12, 0.18, 0.19, 0.96)
+	var pressed_style := normal_style.duplicate() as StyleBoxFlat
+	if pressed_style != null:
+		pressed_style.bg_color = Color(0.78, 0.64, 0.16, 0.96)
+		pressed_style.border_color = Color(1.0, 0.82, 0.24, 1.0)
+	button.add_theme_stylebox_override("normal", pressed_style if selected and pressed_style != null else normal_style)
+	if hover_style != null:
+		button.add_theme_stylebox_override("hover", hover_style)
+	if pressed_style != null:
+		button.add_theme_stylebox_override("pressed", pressed_style)
+	button.add_theme_color_override("font_color", Color(0.86, 0.94, 0.95, 1.0))
+	button.add_theme_color_override("font_pressed_color", Color(0.08, 0.07, 0.03, 1.0))
+
+
+func _get_palette_preview_texture(type_id: String) -> Texture2D:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty():
+		return _get_generated_palette_preview_texture("default", Color(0.45, 0.52, 0.55, 1.0))
+	if _palette_preview_textures.has(normalized_type_id):
+		return _palette_preview_textures[normalized_type_id] as Texture2D
+	if _tile_catalog != null:
+		var catalog_texture: Texture2D = _tile_catalog.get_texture(normalized_type_id)
+		if catalog_texture != null:
+			_palette_preview_textures[normalized_type_id] = catalog_texture
+			return catalog_texture
+	var entry: Dictionary = Dictionary(_tile_catalog.call("get_type", normalized_type_id)) if _tile_catalog != null and _tile_catalog.has_method("get_type") else {}
+	var color: Color = _get_palette_preview_color(normalized_type_id, entry)
+	var generated_texture: Texture2D = _get_generated_palette_preview_texture(normalized_type_id, color)
+	_palette_preview_textures[normalized_type_id] = generated_texture
+	return generated_texture
+
+
+func _get_generated_palette_preview_texture(cache_key: String, color: Color) -> Texture2D:
+	var key: String = "__generated:%s" % cache_key.strip_edges().to_lower()
+	if _palette_preview_textures.has(key):
+		return _palette_preview_textures[key] as Texture2D
+	var image := Image.create(PALETTE_PREVIEW_ICON_SIZE.x, PALETTE_PREVIEW_ICON_SIZE.y, false, Image.FORMAT_RGBA8)
+	image.fill(color)
+	var edge_color: Color = color.lightened(0.32)
+	var shadow_color: Color = color.darkened(0.32)
+	for x in range(PALETTE_PREVIEW_ICON_SIZE.x):
+		image.set_pixel(x, 0, edge_color)
+		image.set_pixel(x, PALETTE_PREVIEW_ICON_SIZE.y - 1, shadow_color)
+	for y in range(PALETTE_PREVIEW_ICON_SIZE.y):
+		image.set_pixel(0, y, edge_color)
+		image.set_pixel(PALETTE_PREVIEW_ICON_SIZE.x - 1, y, shadow_color)
+	var texture := ImageTexture.create_from_image(image)
+	_palette_preview_textures[key] = texture
+	return texture
+
+
+func _get_palette_preview_color(type_id: String, entry: Dictionary) -> Color:
+	var palette_group: String = String(entry.get("palette_group", "")).strip_edges().to_lower()
+	var placement_layer: String = String(entry.get("placement_layer", "")).strip_edges().to_lower()
+	if bool(entry.get("visual_surface_variant", false)) or placement_layer == "terrain":
+		return Color(0.36, 0.48, 0.42, 1.0)
+	if palette_group == "space_station" or type_id.begins_with("station_"):
+		return Color(0.42, 0.68, 0.76, 1.0)
+	if palette_group == "nature_props":
+		return Color(0.32, 0.54, 0.32, 1.0)
+	if placement_layer == "structure" or placement_layer == "terrain_object" or type_id.begins_with("wall_"):
+		return Color(0.62, 0.58, 0.50, 1.0)
+	if palette_group == "technik":
+		return Color(0.45, 0.58, 0.78, 1.0)
+	if palette_group == "fahrzeuge":
+		return Color(0.62, 0.50, 0.34, 1.0)
+	return Color(0.48, 0.50, 0.54, 1.0)
 
 
 func _refresh_palette_selection_visual() -> void:
@@ -5244,7 +5403,10 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 		"rock_large":
 			texture = ROCK_LARGE_TEXTURE
 		_:
-			return
+			if type_id.begins_with("station_wall"):
+				texture = WALL_TEXTURE_SW
+			else:
+				return
 
 	if texture == null:
 		return

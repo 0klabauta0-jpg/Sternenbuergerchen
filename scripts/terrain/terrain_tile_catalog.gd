@@ -15,6 +15,10 @@ const OBJECT_LAYER_GROUPS: PackedStringArray = [
 	"crater",
 	"fahrzeuge",
 ]
+const STRUCTURE_LAYER_NAMES: PackedStringArray = [
+	"structure",
+	"terrain_object",
+]
 const HILL_PRESERVING_TYPE_PREFIXES: PackedStringArray = [
 	"wall_",
 	"rock_",
@@ -83,7 +87,7 @@ static func load_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCa
 			"type_id": type_id,
 			"display_name": String(entry.get("display_name", type_id)),
 			"palette_group": palette_group,
-			"placement_layer": String(entry.get("placement_layer", "object" if OBJECT_LAYER_GROUPS.has(palette_group) else "terrain")),
+			"placement_layer": String(entry.get("placement_layer", "object" if OBJECT_LAYER_GROUPS.has(palette_group) else "terrain")).strip_edges().to_lower(),
 			"texture_path": String(entry.get("texture_path", "")),
 			"surface_type": String(entry.get("surface_type", "ground")),
 			"walkable": bool(entry.get("walkable", true)),
@@ -164,6 +168,20 @@ func is_object_layer_type(type_id: String) -> bool:
 	return String(entry.get("placement_layer", "terrain")).strip_edges().to_lower() == "object"
 
 
+func is_structure_layer_type(type_id: String) -> bool:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty():
+		return false
+	var entry: Dictionary = _tile_types.get(normalized_type_id, {})
+	var placement_layer: String = String(entry.get("placement_layer", "terrain")).strip_edges().to_lower()
+	if STRUCTURE_LAYER_NAMES.has(placement_layer):
+		return true
+	for prefix in HILL_PRESERVING_TYPE_PREFIXES:
+		if normalized_type_id.begins_with(prefix):
+			return true
+	return false
+
+
 func preserves_hill_fields_when_applied(type_id: String) -> bool:
 	var normalized_type_id: String = type_id.strip_edges().to_lower()
 	if normalized_type_id.is_empty():
@@ -172,6 +190,8 @@ func preserves_hill_fields_when_applied(type_id: String) -> bool:
 		return true
 	var entry: Dictionary = _tile_types.get(normalized_type_id, {})
 	if bool(entry.get("preserve_hill_fields", false)) or bool(entry.get("visual_surface_variant", false)):
+		return true
+	if is_structure_layer_type(normalized_type_id):
 		return true
 	if is_object_layer_type(normalized_type_id):
 		return true
@@ -195,20 +215,17 @@ func apply_type_to_tile(tile_data, type_id: String) -> bool:
 		return true
 
 	if is_object_layer_type(type_id):
-		tile_data.object_type_id = type_id
-		tile_data.walkable = bool(entry.get("walkable", true))
-		tile_data.blocks_los = bool(entry.get("blocks_los", false))
-		tile_data.cover_value = int(entry.get("cover_value", 0))
-		tile_data.object_height = int(entry.get("object_height", 0))
+		_apply_object_layer_to_tile(tile_data, type_id)
+		return true
+
+	if is_structure_layer_type(type_id):
+		_apply_structure_layer_to_tile(tile_data, type_id)
 		return true
 
 	if preserves_hill_fields_when_applied(type_id):
 		tile_data.type_id = type_id
 		tile_data.object_type_id = ""
-		tile_data.walkable = bool(entry.get("walkable", true))
-		tile_data.blocks_los = bool(entry.get("blocks_los", false))
-		tile_data.cover_value = int(entry.get("cover_value", 0))
-		tile_data.object_height = int(entry.get("object_height", 0))
+		_apply_combined_gameplay_fields(tile_data)
 		return true
 
 	tile_data.type_id = type_id
@@ -231,10 +248,51 @@ func _apply_surface_brush_to_tile(tile_data, type_id: String, entry: Dictionary)
 	tile_data.type_id = type_id
 
 
+func _apply_object_layer_to_tile(tile_data, type_id: String) -> void:
+	tile_data.object_type_id = type_id
+	_apply_combined_gameplay_fields(tile_data)
+
+
+func _apply_structure_layer_to_tile(tile_data, type_id: String) -> void:
+	tile_data.type_id = type_id
+	_apply_combined_gameplay_fields(tile_data)
+
+
+func apply_base_gameplay_fields_to_tile(tile_data) -> void:
+	if tile_data == null:
+		return
+	_apply_combined_gameplay_fields(tile_data)
+
+
+func _apply_combined_gameplay_fields(tile_data) -> void:
+	if tile_data == null:
+		return
+	var base_entry: Dictionary = _get_gameplay_entry_for_type(String(tile_data.type_id) if tile_data.type_id is String else "")
+	var object_entry: Dictionary = _get_gameplay_entry_for_type(String(tile_data.object_type_id) if tile_data.object_type_id is String else "")
+	var has_object_entry: bool = not object_entry.is_empty()
+	var object_walkable: bool = bool(object_entry.get("walkable", true)) if has_object_entry else true
+	var object_blocks_los: bool = bool(object_entry.get("blocks_los", false)) if has_object_entry else false
+	var object_cover_value: int = int(object_entry.get("cover_value", 0)) if has_object_entry else 0
+	var object_height: int = int(object_entry.get("object_height", 0)) if has_object_entry else 0
+	tile_data.walkable = bool(base_entry.get("walkable", true)) and object_walkable
+	tile_data.blocks_los = bool(base_entry.get("blocks_los", false)) or object_blocks_los
+	tile_data.cover_value = maxi(int(base_entry.get("cover_value", 0)), object_cover_value)
+	tile_data.object_height = maxi(int(base_entry.get("object_height", 0)), object_height)
+
+
+func _get_gameplay_entry_for_type(type_id: String) -> Dictionary:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty():
+		return {}
+	return Dictionary(_tile_types.get(normalized_type_id, {}))
+
+
 func _is_legacy_object_type_id(type_id: String) -> bool:
 	var normalized_type_id: String = type_id.strip_edges().to_lower()
 	if normalized_type_id.is_empty():
 		return false
+	if is_structure_layer_type(normalized_type_id):
+		return true
 	for prefix in HILL_PRESERVING_TYPE_PREFIXES:
 		if normalized_type_id.begins_with(prefix):
 			return true

@@ -130,16 +130,16 @@ func _test_editor_palette_groups() -> void:
 	var tile_type_list := scene.get_node("UI/PalettePanel/Margin/VBox/TileTypeList") as ItemList
 	_assert(tile_type_list != null, "Map editor exposes the tile type palette list")
 	for group_id in REQUIRED_GROUPS:
-		var header_found: bool = false
+		scene.call("_on_palette_group_button_pressed", group_id)
+		await process_frame
+		var group_button := scene.get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteGroups/PaletteGroup_%s" % group_id) as Button
 		var sample_found: bool = false
 		for index in range(tile_type_list.item_count):
 			var metadata: String = String(tile_type_list.get_item_metadata(index))
-			if metadata == "__group:%s" % group_id:
-				header_found = true
 			if metadata == String(SAMPLE_TYPE_BY_GROUP.get(group_id, "")):
 				sample_found = true
-		_assert(header_found, "Map editor palette shows group header %s" % group_id)
-		_assert(sample_found, "Map editor palette contains sample asset for group %s" % group_id)
+		_assert(group_button != null, "Map editor palette shows filter button for group %s" % group_id)
+		_assert(sample_found, "Map editor filtered palette contains sample asset for group %s" % group_id)
 	scene.queue_free()
 	await process_frame
 
