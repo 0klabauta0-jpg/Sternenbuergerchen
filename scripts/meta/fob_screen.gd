@@ -175,13 +175,16 @@ func _ready() -> void:
 
 
 func _apply_drop_light_fixed_layout() -> void:
-	var target_viewport: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("TARGET_VIEWPORT")
+	var profile_id: String = _get_drop_light_profile_id()
+	var target_viewport: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_profile_viewport", profile_id)
 	custom_minimum_size = Vector2(float(target_viewport.x), float(target_viewport.y))
 	set_meta("drop_light_fixed_fullhd_layout", true)
+	set_meta("drop_light_fixed_layout", true)
 	set_meta("drop_light_screen", DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("SCREEN_FOB"))
+	set_meta("drop_light_layout_profile", profile_id)
 
-	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_fob_layout")
-	var base_spacing: int = int(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("BASE_SPACING"))
+	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_fob_layout", profile_id)
+	var base_spacing: int = int(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_base_spacing", profile_id))
 	_apply_fixed_control_contract("Panel", layout.get("viewport"))
 	_apply_fixed_control_contract("Panel/Margin/VBox/MissionPanel", layout.get("topbar"))
 	_apply_fixed_control_contract("Panel/Margin/VBox/ContentRow/AvailablePanel", layout.get("unassigned_pool"))
@@ -242,7 +245,11 @@ func _apply_drop_light_fixed_layout() -> void:
 
 
 func _enforce_drop_light_fixed_layout() -> void:
-	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_fob_layout")
+	var profile_id: String = _get_drop_light_profile_id()
+	var target_viewport: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_profile_viewport", profile_id)
+	custom_minimum_size = Vector2(float(target_viewport.x), float(target_viewport.y))
+	set_meta("drop_light_layout_profile", profile_id)
+	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_fob_layout", profile_id)
 	_apply_fixed_window_contract("Panel", layout.get("viewport"))
 	_apply_fixed_window_contract("Panel/Margin/VBox/MissionPanel", layout.get("topbar"))
 	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/AvailablePanel", layout.get("unassigned_pool"))
@@ -251,6 +258,7 @@ func _enforce_drop_light_fixed_layout() -> void:
 	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/DropshipPanel", layout.get("flightdeck"))
 	_apply_fixed_window_contract("Panel/Margin/VBox/DropLightBottomRow/BoardingStatusPanel", layout.get("boarding_status"))
 	_apply_fixed_window_contract("Panel/Margin/VBox/DropLightBottomRow/ActionsPanel", layout.get("actions"))
+	_refresh_drop_light_bottom_row_profile(layout)
 
 
 func _apply_fixed_window_contract(path: String, rect_variant: Variant) -> void:
@@ -274,6 +282,7 @@ func _apply_fixed_window_contract(path: String, rect_variant: Variant) -> void:
 	control.set_deferred("size", fixed_size)
 	control.set_meta("drop_light_rect", rect)
 	control.set_meta("drop_light_fixed_fullhd_layout", true)
+	control.set_meta("drop_light_fixed_layout", true)
 
 
 func _apply_drop_light_topbar_compaction() -> void:
@@ -314,13 +323,14 @@ func _apply_fixed_control_contract(path: String, rect_variant: Variant) -> void:
 	control.size_flags_stretch_ratio = float(maxi(rect.size.x, 1))
 	control.set_meta("drop_light_rect", rect)
 	control.set_meta("drop_light_fixed_fullhd_layout", true)
+	control.set_meta("drop_light_fixed_layout", true)
 
 
 func _apply_square_button_contract(path: String) -> void:
 	var button := get_node_or_null(path) as Button
 	if button == null:
 		return
-	var action_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("ACTION_BUTTON_SIZE")
+	var action_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_action_button_size", _get_drop_light_profile_id())
 	button.custom_minimum_size = Vector2(float(action_size.x), float(action_size.y))
 	button.set_meta("drop_light_square_action_button", true)
 
@@ -329,12 +339,15 @@ func _ensure_drop_light_bottom_row(layout: Dictionary) -> void:
 	var vbox := get_node_or_null("Panel/Margin/VBox") as VBoxContainer
 	if vbox == null or vbox.get_node_or_null("DropLightBottomRow") != null:
 		return
+	var profile_id: String = _get_drop_light_profile_id()
+	var base_spacing: int = int(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_base_spacing", profile_id))
 	var bottom_row := HBoxContainer.new()
 	bottom_row.name = "DropLightBottomRow"
 	bottom_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	bottom_row.add_theme_constant_override("separation", int(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("BASE_SPACING")) * 2)
+	bottom_row.add_theme_constant_override("separation", base_spacing * 2)
 	bottom_row.custom_minimum_size = Vector2(0.0, float((layout.get("boarding_status") as Rect2i).size.y))
 	bottom_row.set_meta("drop_light_fixed_fullhd_layout", true)
+	bottom_row.set_meta("drop_light_fixed_layout", true)
 	vbox.add_child(bottom_row)
 
 	var boarding_panel := _create_drop_light_bottom_panel("BoardingStatusPanel", "BOARDING STATUS", layout.get("boarding_status"))
@@ -344,8 +357,8 @@ func _ensure_drop_light_bottom_row(layout: Dictionary) -> void:
 	var actions_grid := GridContainer.new()
 	actions_grid.name = "ActionGrid"
 	actions_grid.columns = 6
-	actions_grid.add_theme_constant_override("h_separation", int(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("BASE_SPACING")))
-	actions_grid.add_theme_constant_override("v_separation", int(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("BASE_SPACING")))
+	actions_grid.add_theme_constant_override("h_separation", base_spacing)
+	actions_grid.add_theme_constant_override("v_separation", base_spacing)
 	var actions_vbox := actions_panel.get_node("Margin/VBox") as VBoxContainer
 	actions_vbox.add_child(actions_grid)
 	for button_data in [
@@ -359,7 +372,7 @@ func _ensure_drop_light_bottom_row(layout: Dictionary) -> void:
 		var action_button := Button.new()
 		action_button.name = String(button_data[0])
 		action_button.text = String(button_data[1])
-		action_button.add_theme_font_size_override("font_size", 8)
+		action_button.add_theme_font_size_override("font_size", 7 if profile_id == String(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("PROFILE_COMPACT_720")) else 8)
 		_style_drop_light_action_button(action_button)
 		actions_grid.add_child(action_button)
 	bottom_row.add_child(actions_panel)
@@ -372,6 +385,27 @@ func _ensure_drop_light_bottom_row(layout: Dictionary) -> void:
 		send_button.pressed.connect(_on_drop_light_send_action_pressed)
 
 
+func _refresh_drop_light_bottom_row_profile(layout: Dictionary) -> void:
+	var profile_id: String = _get_drop_light_profile_id()
+	var base_spacing: int = int(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_base_spacing", profile_id))
+	var bottom_row := get_node_or_null("Panel/Margin/VBox/DropLightBottomRow") as HBoxContainer
+	if bottom_row != null:
+		bottom_row.add_theme_constant_override("separation", base_spacing * 2)
+		if typeof(layout.get("boarding_status")) == TYPE_RECT2I:
+			bottom_row.custom_minimum_size = Vector2(0.0, float((layout.get("boarding_status") as Rect2i).size.y))
+	var actions_grid := get_node_or_null("Panel/Margin/VBox/DropLightBottomRow/ActionsPanel/Margin/VBox/ActionGrid") as GridContainer
+	if actions_grid == null:
+		return
+	actions_grid.add_theme_constant_override("h_separation", base_spacing)
+	actions_grid.add_theme_constant_override("v_separation", base_spacing)
+	for child in actions_grid.get_children():
+		var button := child as Button
+		if button == null:
+			continue
+		button.add_theme_font_size_override("font_size", 7 if profile_id == String(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("PROFILE_COMPACT_720")) else 8)
+		_style_drop_light_action_button(button)
+
+
 func _create_drop_light_bottom_panel(panel_name: String, title_text: String, rect_variant: Variant) -> PanelContainer:
 	var panel := PanelContainer.new()
 	panel.name = panel_name
@@ -382,10 +416,11 @@ func _create_drop_light_bottom_panel(panel_name: String, title_text: String, rec
 		panel.size_flags_stretch_ratio = float(maxi(rect.size.x, 1))
 		panel.set_meta("drop_light_rect", rect)
 	panel.set_meta("drop_light_fixed_fullhd_layout", true)
+	panel.set_meta("drop_light_fixed_layout", true)
 
 	var margin := MarginContainer.new()
 	margin.name = "Margin"
-	var margin_size: int = int(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("BASE_SPACING"))
+	var margin_size: int = int(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_base_spacing", _get_drop_light_profile_id()))
 	margin.add_theme_constant_override("margin_left", margin_size)
 	margin.add_theme_constant_override("margin_top", margin_size)
 	margin.add_theme_constant_override("margin_right", margin_size)
@@ -416,10 +451,20 @@ func _create_drop_light_bottom_panel(panel_name: String, title_text: String, rec
 
 
 func _style_drop_light_action_button(button: Button) -> void:
-	var action_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("ACTION_BUTTON_SIZE")
+	var action_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_action_button_size", _get_drop_light_profile_id())
 	button.custom_minimum_size = Vector2(float(action_size.x), float(action_size.y))
 	button.set_meta("drop_light_square_action_button", true)
 	META_UI_SKIN_SCRIPT.style_secondary_button(button)
+
+
+func _get_drop_light_profile_id() -> String:
+	var viewport_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("TARGET_VIEWPORT")
+	var viewport := get_viewport()
+	if viewport != null:
+		var visible_size: Vector2 = viewport.get_visible_rect().size
+		if visible_size.x > 0.0 and visible_size.y > 0.0:
+			viewport_size = Vector2i(roundi(visible_size.x), roundi(visible_size.y))
+	return String(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_profile_for_viewport", viewport_size))
 
 
 func _on_drop_light_board_action_pressed() -> void:

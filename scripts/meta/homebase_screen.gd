@@ -290,10 +290,13 @@ func _apply_help_id(node: Node, help_id: String) -> void:
 
 
 func _apply_drop_light_fixed_layout() -> void:
-	var target_viewport: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("TARGET_VIEWPORT")
+	var profile_id: String = _get_drop_light_profile_id()
+	var target_viewport: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_profile_viewport", profile_id)
 	custom_minimum_size = Vector2(float(target_viewport.x), float(target_viewport.y))
 	set_meta("drop_light_fixed_fullhd_layout", true)
+	set_meta("drop_light_fixed_layout", true)
 	set_meta("drop_light_screen", DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("SCREEN_HOMEBASE"))
+	set_meta("drop_light_layout_profile", profile_id)
 	_character_sheet_open = true
 	_ensure_drop_light_topbar()
 	_ensure_drop_light_flightdeck_stage()
@@ -302,13 +305,27 @@ func _apply_drop_light_fixed_layout() -> void:
 
 
 func _enforce_drop_light_fixed_layout() -> void:
-	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_homebase_layout")
+	var profile_id: String = _get_drop_light_profile_id()
+	var target_viewport: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_profile_viewport", profile_id)
+	custom_minimum_size = Vector2(float(target_viewport.x), float(target_viewport.y))
+	set_meta("drop_light_layout_profile", profile_id)
+	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_homebase_layout", profile_id)
 	_apply_fixed_window_contract("DropLightTopbar", layout.get("topbar"))
 	_apply_fixed_window_contract("Panel/Margin/VBox/MissionPanel", layout.get("mission_brief"))
 	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/RosterPanel", layout.get("roster"))
 	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/TeamPanel", layout.get("transfer_team"))
 	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/AircraftPanel", layout.get("flightdeck"))
 	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/InfoPanel", layout.get("character_sheet"))
+
+
+func _get_drop_light_profile_id() -> String:
+	var viewport_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("TARGET_VIEWPORT")
+	var viewport := get_viewport()
+	if viewport != null:
+		var visible_size: Vector2 = viewport.get_visible_rect().size
+		if visible_size.x > 0.0 and visible_size.y > 0.0:
+			viewport_size = Vector2i(roundi(visible_size.x), roundi(visible_size.y))
+	return String(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_profile_for_viewport", viewport_size))
 
 
 func _apply_fixed_window_contract(path: String, rect_variant: Variant) -> void:
@@ -326,6 +343,7 @@ func _apply_fixed_window_contract(path: String, rect_variant: Variant) -> void:
 	control.set_deferred("size", Vector2(float(rect.size.x), float(rect.size.y)))
 	control.set_meta("drop_light_rect", rect)
 	control.set_meta("drop_light_fixed_fullhd_layout", true)
+	control.set_meta("drop_light_fixed_layout", true)
 
 
 func _configure_flightdeck_option_button(selector: OptionButton) -> void:

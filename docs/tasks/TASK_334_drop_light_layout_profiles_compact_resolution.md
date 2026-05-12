@@ -3,7 +3,7 @@
 ## Ziel
 Der feste Drop-Light-FullHD-Vertrag bleibt erhalten, bekommt aber ein Profil-System fuer kleinere oder skalierte Viewports. Ziel ist bessere Lesbarkeit und Bedienbarkeit bei 1280x720 und UI-Skalierung, ohne die bestehende 1920x1080-Abnahme zu zerlegen.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT
 
 ## Voraussetzung
 - TASK_258 - Fixed Window Clipping Scrollbar Playability Audit
@@ -33,11 +33,11 @@ Der feste Drop-Light-FullHD-Vertrag bleibt erhalten, bekommt aber ein Profil-Sys
 - Kein Entfernen des FullHD-Vertrags.
 
 ## Akzeptanzkriterien
-- [ ] `full_hd` liefert dieselben Layoutrechtecke wie vor dem Task oder dokumentierte minimale Abweichungen.
-- [ ] Ein kompaktes Profil verhindert offensichtliches Button-/Text-Clipping bei 1280x720.
-- [ ] Homebase, FOB und Mission-HUD nutzen denselben Profilvertrag.
-- [ ] Playability-Layout-Gates bleiben gruen.
-- [ ] Manuelle Sichtcheck-Restpunkte sind dokumentiert.
+- [x] `full_hd` liefert dieselben Layoutrechtecke wie vor dem Task oder dokumentierte minimale Abweichungen.
+- [x] Ein kompaktes Profil verhindert offensichtliches Button-/Text-Clipping bei 1280x720.
+- [x] Homebase, FOB und Mission-HUD nutzen denselben Profilvertrag.
+- [x] Playability-Layout-Gates bleiben gruen.
+- [x] Manuelle Sichtcheck-Restpunkte sind dokumentiert.
 
 ## Erwartete Dateien
 - `scripts/meta/drop_light_layout_contract.gd`
@@ -50,10 +50,10 @@ Der feste Drop-Light-FullHD-Vertrag bleibt erhalten, bekommt aber ein Profil-Sys
 - `docs/IMPLEMENTATION_STATUS.md`
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_334_drop_light_layout_profiles_compact_resolution.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_258_fixed_window_clipping_scrollbar_playability_audit.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_312_dropship_command_matrix_lz_go_layout.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_334_drop_light_layout_profiles_compact_resolution.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_258_fixed_window_clipping_scrollbar_playability_audit.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_312_dropship_command_matrix_lz_go_layout.gd`
+- [x] `git diff --check`
 
 ## Risiken
 - Layoutprofile koennen schnell zu einer zweiten UI-Wahrheit werden. Deshalb muss der Contract zentral bleiben und FullHD weiter die Referenz sein.

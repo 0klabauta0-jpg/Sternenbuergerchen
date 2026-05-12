@@ -10,6 +10,14 @@
 
 ## Aktueller Startzustand
 
+### TASK_334 - Drop Light Layout Profiles Compact Resolution
+- Status: implementiert im Arbeitsstand
+- Stand: `DropLightLayoutContract` behaelt `full_hd` als unveraenderte 1920x1080-Referenz und fuehrt `compact_720` mit zentraler Profilauflosung, Viewport-, Spacing- und Button-Groessen-Helfern ein.
+- Stand: Homebase, FOB und Mission-HUD ermitteln ihr Drop-Light-Profil aus der sichtbaren Viewport-Groesse und wenden weiter ausschliesslich Contract-Rechtecke an. Die bestehenden FullHD-Metadaten bleiben fuer alte Gates erhalten; zusaetzlich wird `drop_light_layout_profile` gesetzt.
+- Stand: Der neue TASK_334-Verifier prueft FullHD-Pixelstabilitaet, kompakte Contract-Grenzen, angewendete 1280x720-Rechtecke, erreichbare kritische Buttons und interne ScrollContainer fuer Homebase, FOB und Mission HUD.
+- Risiken: `compact_720` ist bewusst ein zweites zentrales Profil, keine vollresponsive UI. Weitere optische Politur muss ueber den Contract laufen, damit keine screen-lokale Pixelwahrheit entsteht.
+- Lokale Pruefung: `task_334_drop_light_layout_profiles_compact_resolution.gd`, `task_258_fixed_window_clipping_scrollbar_playability_audit.gd`, `task_312_dropship_command_matrix_lz_go_layout.gd` und `git diff --check` laufen gruen.
+
 ### TASK_333 - Navigation Fallback Budget Contract Alignment
 - Status: implementiert im Arbeitsstand
 - Stand: `SimulationRoot.navigation_max_new_path_queries_per_tick` ist jetzt mit dem Performance-Budget-Contract auf `1` ausgerichtet. Szenen setzen keine eigenen Navigation-Budget-Overrides.

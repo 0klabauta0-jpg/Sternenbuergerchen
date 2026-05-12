@@ -6424,11 +6424,14 @@ func _serialize_meta_transfer_routes() -> Array:
 
 
 func _apply_drop_light_fixed_hud_layout() -> void:
+	var profile_id: String = _get_drop_light_profile_id()
 	var tactical_ui := get_node_or_null("../TacticalUI") as CanvasLayer
 	if tactical_ui != null:
 		tactical_ui.set_meta("drop_light_fixed_fullhd_layout", true)
+		tactical_ui.set_meta("drop_light_fixed_layout", true)
 		tactical_ui.set_meta("drop_light_screen", DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("SCREEN_MISSION_HUD"))
-	var target_viewport: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("TARGET_VIEWPORT")
+		tactical_ui.set_meta("drop_light_layout_profile", profile_id)
+	var target_viewport: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_profile_viewport", profile_id)
 	for path in [
 		"../TacticalUI/MissionTint",
 		"../TacticalUI/BottomDock",
@@ -6446,7 +6449,15 @@ func _apply_drop_light_fixed_hud_layout() -> void:
 
 
 func _enforce_drop_light_fixed_hud_layout() -> void:
-	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_mission_hud_layout")
+	var profile_id: String = _get_drop_light_profile_id()
+	var tactical_ui := get_node_or_null("../TacticalUI") as CanvasLayer
+	if tactical_ui != null:
+		tactical_ui.set_meta("drop_light_layout_profile", profile_id)
+	var target_viewport: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_profile_viewport", profile_id)
+	var tint := get_node_or_null("../TacticalUI/MissionTint") as Control
+	if tint != null:
+		tint.custom_minimum_size = Vector2(float(target_viewport.x), float(target_viewport.y))
+	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_mission_hud_layout", profile_id)
 	_apply_fixed_hud_window_contract("../TacticalUI/MissionIdentityPanel", layout.get("mission_identity"))
 	_apply_fixed_hud_window_contract("../TacticalUI/TopNavPanel", layout.get("top_nav"))
 	_apply_fixed_hud_window_contract(FIRETEAM_MINI_PANEL_PATH, layout.get("fireteam_mini"))
@@ -6481,6 +6492,17 @@ func _apply_fixed_hud_window_contract(path: String, rect_variant: Variant) -> vo
 	control.set_deferred("size", fixed_size)
 	control.set_meta("drop_light_rect", rect)
 	control.set_meta("drop_light_fixed_fullhd_layout", true)
+	control.set_meta("drop_light_fixed_layout", true)
+
+
+func _get_drop_light_profile_id() -> String:
+	var viewport_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("TARGET_VIEWPORT")
+	var viewport := get_viewport()
+	if viewport != null:
+		var visible_size: Vector2 = viewport.get_visible_rect().size
+		if visible_size.x > 0.0 and visible_size.y > 0.0:
+			viewport_size = Vector2i(roundi(visible_size.x), roundi(visible_size.y))
+	return String(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_profile_for_viewport", viewport_size))
 
 
 func _set_square_hud_button(path: String, size: Vector2i, font_size: int = 8) -> void:
@@ -6575,6 +6597,35 @@ func _apply_drop_light_hud_button_labels() -> void:
 		drop_button.text = _build_drop_light_drop_button_label()
 		drop_button.tooltip_text = "Call dropship"
 	_apply_command_button_markers()
+	_apply_drop_light_hud_button_size_contract()
+
+
+func _apply_drop_light_hud_button_size_contract() -> void:
+	var profile_id: String = _get_drop_light_profile_id()
+	var action_button_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_action_button_size", profile_id)
+	var small_button_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_small_action_button_size", profile_id)
+	for path in [
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/MoveButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/HoldButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/FlankButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton",
+		DELETE_ORDER_BUTTON_PATH,
+		SORT_COMMAND_BUTTON_PATH,
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/PlanCommandMatrixButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton",
+	]:
+		_set_square_hud_button(path, action_button_size, 8 if profile_id == String(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("PROFILE_FULL_HD")) else 7)
+	for path in [
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/NWButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/NEButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/SWButton",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/SEButton",
+	]:
+		_set_square_hud_button(path, small_button_size, 7)
 
 
 func _build_drop_light_drop_button_label() -> String:
@@ -6609,8 +6660,9 @@ func _build_drop_light_drop_button_label() -> String:
 
 
 func _apply_compact_mission_control_layout() -> void:
-	var action_button_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("ACTION_BUTTON_SIZE")
-	var small_button_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("SMALL_ACTION_BUTTON_SIZE")
+	var profile_id: String = _get_drop_light_profile_id()
+	var action_button_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_action_button_size", profile_id)
+	var small_button_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_small_action_button_size", profile_id)
 	var top_nav_panel := get_node_or_null("../TacticalUI/TopNavPanel") as Control
 	if top_nav_panel != null:
 		top_nav_panel.clip_contents = true
@@ -6750,7 +6802,7 @@ func _apply_command_grid_hierarchy_order(command_grid: GridContainer) -> void:
 func _ensure_command_grid_placeholder_buttons(command_grid: GridContainer) -> void:
 	if command_grid == null:
 		return
-	var action_button_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("ACTION_BUTTON_SIZE")
+	var action_button_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_action_button_size", _get_drop_light_profile_id())
 	for slot_index in range(7, 21):
 		if slot_index == 7:
 			_ensure_command_grid_action_button(command_grid, "DeleteOrderButton", "Del", "Delete selected waypoint or area order", Callable(self, "_on_delete_order_pressed"), slot_index)
@@ -6803,7 +6855,7 @@ func _ensure_command_grid_action_button(command_grid: GridContainer, button_name
 	button.set_meta("command_matrix_slot_id", "16.%d" % slot_index)
 	if callback.is_valid() and not button.pressed.is_connected(callback):
 		button.pressed.connect(callback)
-	_configure_square_hud_button(button, DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("ACTION_BUTTON_SIZE"))
+	_configure_square_hud_button(button, DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_action_button_size", _get_drop_light_profile_id()))
 	META_UI_SKIN_SCRIPT.style_tactical_button(button, false)
 	command_grid.move_child(button, slot_index - 1)
 
@@ -6836,7 +6888,7 @@ func _apply_compact_fireteam_info_text_contract() -> void:
 
 
 func _apply_fireteam_panel_action_button_contract() -> void:
-	var action_button_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("ACTION_BUTTON_SIZE")
+	var action_button_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_action_button_size", _get_drop_light_profile_id())
 	var fireteam_info_vbox := get_node_or_null(FIRETEAM_INFO_VBOX_PATH) as Node
 	if fireteam_info_vbox == null:
 		return
