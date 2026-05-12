@@ -16,6 +16,7 @@ const SNAPSHOT_KEYS: PackedStringArray = [
 	"mission_control_status_text",
 	"command_buttons",
 	"command_hierarchy",
+	"command_clarity",
 	"planned_waypoint_count",
 	"planned_area_order_count",
 	"multi_fireteam_plan_count",
@@ -91,6 +92,7 @@ func _default_value_for_key(key: String) -> Variant:
 		"selected_tile",
 		"command_buttons",
 		"command_hierarchy",
+		"command_clarity",
 		"air_asset_status",
 	]:
 		return {}

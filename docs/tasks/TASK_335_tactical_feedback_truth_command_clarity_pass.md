@@ -3,7 +3,7 @@
 ## Ziel
 Taktische Befehle sollen fuer den Spieler klarer werden, ohne dass UI-Skripte Gameplay-Zustand verwalten. Der Task schaerft Disabled-Reasons, Tooltips, Command-Matrix-Feedback und sichtbare Fehlerfaelle ueber die bestehende Snapshot-Wahrheit.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT
 
 ## Voraussetzung
 - TASK_331 - Mission Tactical Controller Adapter Split First Slice
@@ -32,11 +32,11 @@ Die UI besitzt bereits Mechanismen fuer Command-Feedback. Das Risiko liegt darin
 - Kein Redesign der kompletten Mission-HUD-Anordnung.
 
 ## Akzeptanzkriterien
-- [ ] Blockierte Kernaktionen haben konkrete Disabled-Reasons.
-- [ ] Command-Matrix und Statuszeile zeigen konsistente Snapshots.
-- [ ] Kein neues UI-Skript fuehrt eine zweite Selection- oder Command-Wahrheit.
-- [ ] Mission-Command-Visual- und UI-Feedback-Gates bleiben gruen.
-- [ ] Ein kurzer Report nennt verbleibende Playtest-Fragen.
+- [x] Blockierte Kernaktionen haben konkrete Disabled-Reasons.
+- [x] Command-Matrix und Statuszeile zeigen konsistente Snapshots.
+- [x] Kein neues UI-Skript fuehrt eine zweite Selection- oder Command-Wahrheit.
+- [x] Mission-Command-Visual- und UI-Feedback-Gates bleiben gruen.
+- [x] Ein kurzer Report nennt verbleibende Playtest-Fragen.
 
 ## Erwartete Dateien
 - `scripts/mission/**`
@@ -47,11 +47,11 @@ Die UI besitzt bereits Mechanismen fuer Command-Feedback. Das Risiko liegt darin
 - `docs/IMPLEMENTATION_STATUS.md`
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_335_tactical_feedback_truth_command_clarity_pass.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_286_ui_feedback_truth_regression_review.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_315_mission_grid_tile_selection_command_gate.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/bugfix_mission_right_click_order_flow.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_335_tactical_feedback_truth_command_clarity_pass.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_286_ui_feedback_truth_regression_review.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_315_mission_grid_tile_selection_command_gate.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/bugfix_mission_right_click_order_flow.gd`
+- [x] `git diff --check`
 
 ## Risiken
 - Mehr Feedback kann auch mehr Laerm bedeuten. Der Task muss Klarheit verbessern, nicht jede interne Regel im HUD erklaeren.

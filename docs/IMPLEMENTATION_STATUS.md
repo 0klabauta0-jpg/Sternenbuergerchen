@@ -10,6 +10,14 @@
 
 ## Aktueller Startzustand
 
+### TASK_335 - Tactical Feedback Truth Command Clarity Pass
+- Status: implementiert im Arbeitsstand
+- Stand: `MissionCommandHierarchyContract` liefert fuer blockierte Kernaktionen jetzt stabile Reason-Codes sowie kurze spielbare Texte, ohne die bisherigen Legacy-`disabled_reason`-Strings zu entfernen.
+- Stand: Mission-Buttons uebernehmen diese Reason-Codes in Metadaten und Tooltips. Der Feedback-Snapshot enthaelt zusaetzlich `command_clarity` als read-only Zusammenfassung aktiver und blockierter Actions.
+- Stand: Tile-Kommandos unterscheiden fehlende Auswahl und invalide gespeicherte Tile-Auswahl. Drop-/LZ-Feedback unterscheidet fehlende LZ, fehlendes Drop-Team, Cooldown, aktiven Drop und belegte Air Lane.
+- Risiken: Die kurzen Button-Labels (`Set LZ`, `Board`, `Air Busy`) sind bewusst knapp fuer das kompakte HUD; ein manueller Playtest sollte pruefen, ob diese Begriffe im Stress eindeutig genug sind.
+- Lokale Pruefung: `task_335_tactical_feedback_truth_command_clarity_pass.gd`, `task_286_ui_feedback_truth_regression_review.gd`, `task_315_mission_grid_tile_selection_command_gate.gd`, `bugfix_mission_right_click_order_flow.gd` und `git diff --check` laufen gruen.
+
 ### TASK_334 - Drop Light Layout Profiles Compact Resolution
 - Status: implementiert im Arbeitsstand
 - Stand: `DropLightLayoutContract` behaelt `full_hd` als unveraenderte 1920x1080-Referenz und fuehrt `compact_720` mit zentraler Profilauflosung, Viewport-, Spacing- und Button-Groessen-Helfern ein.

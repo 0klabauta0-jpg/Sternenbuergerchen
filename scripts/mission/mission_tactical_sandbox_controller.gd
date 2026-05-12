@@ -1403,6 +1403,20 @@ func _requires_selected_tile_for_command(command_type: String) -> bool:
 	return TILE_TARGET_COMMAND_TYPES.has(command_type.strip_edges().to_lower())
 
 
+func _is_selected_tile_valid_for_command() -> bool:
+	if not _has_selected_tile:
+		return false
+	if not _has_primary_grid_for_command_selection():
+		return true
+	var tile_context: Dictionary = _build_tile_context_from_grid_position(_selected_tile_grid_position)
+	if tile_context.is_empty():
+		return false
+	var world_variant = tile_context.get("world_position", null)
+	if typeof(world_variant) != TYPE_VECTOR2:
+		return false
+	return Vector2(world_variant).distance_to(_selected_tile_world_position) <= 1.0
+
+
 func _build_tile_context_from_screen_position(screen_position: Vector2) -> Dictionary:
 	if _has_primary_grid_for_command_selection():
 		var grid_variant = _primary_view_bridge.call("screen_to_grid_position", get_parent(), screen_position)
@@ -1514,6 +1528,7 @@ func _refresh_tile_selection_visuals() -> void:
 func _build_selected_tile_snapshot() -> Dictionary:
 	return {
 		"has_selected_tile": _has_selected_tile,
+		"is_valid": _is_selected_tile_valid_for_command(),
 		"grid_position": _selected_tile_grid_position,
 		"grid_x": _selected_tile_grid_position.x,
 		"grid_y": _selected_tile_grid_position.y,
@@ -1607,6 +1622,13 @@ func _issue_command(command_type: String, display_text: String) -> bool:
 	if requires_tile and not _has_selected_tile:
 		_last_command_text = "SELECT TILE FIRST"
 		_record_fireteamleader_feedback_for_selected_fireteams(command_type, "blocked", "no_tile")
+		_refresh_button_state()
+		_refresh_order_visuals()
+		_update_ui()
+		return false
+	if requires_tile and not _is_selected_tile_valid_for_command():
+		_last_command_text = "INVALID TILE SELECTED"
+		_record_fireteamleader_feedback_for_selected_fireteams(command_type, "blocked", "invalid_tile")
 		_refresh_button_state()
 		_refresh_order_visuals()
 		_update_ui()
@@ -1805,6 +1827,10 @@ func _on_call_dropship_pressed() -> void:
 		_last_command_text = "OBSERVER MODE"
 		_update_ui()
 		return
+	if _has_live_drop_sequence_for_craft(_mission_drop_craft_id):
+		_last_command_text = "DROP ALREADY ACTIVE"
+		_update_ui()
+		return
 	if not _is_mission_drop_available():
 		_last_command_text = "DROP SHIP NOT ON MISSION MAP"
 		_update_ui()
@@ -1813,8 +1839,16 @@ func _on_call_dropship_pressed() -> void:
 		_last_command_text = "DROP COOLDOWN %.1FS" % _drop_ship_cooldown_remaining
 		_update_ui()
 		return
+	if _is_drop_air_lane_blocked():
+		_last_command_text = "AIR LANE BUSY"
+		_update_ui()
+		return
 	if not _has_lz_position:
 		_last_command_text = "SET LZ BEFORE DROP CALL"
+		_update_ui()
+		return
+	if not _has_drop_team_available_for_selected_craft():
+		_last_command_text = "NO DROP TEAM AVAILABLE"
 		_update_ui()
 		return
 	_drop_ship_staged = true
@@ -1825,8 +1859,6 @@ func _on_call_dropship_pressed() -> void:
 			_last_command_text = "DROP INBOUND %s" % _get_approach_angle_name()
 		else:
 			_last_command_text = "DROP %s" % _get_approach_angle_name()
-	elif _has_live_drop_sequence_for_craft(_mission_drop_craft_id):
-		_last_command_text = "DROP ALREADY ACTIVE"
 	elif _try_start_drop_sequence():
 		_drop_ship_requested = true
 		_last_command_text = "DROP INBOUND %s" % _get_approach_angle_name()
@@ -4168,7 +4200,7 @@ func _build_strategic_status_text() -> String:
 		var selected_state: String = String(selected_card.get("state", "")).strip_edges().to_lower()
 		ship_text = "Dropship %s" % (selected_state if not selected_state.is_empty() else "aktiv")
 	elif _is_drop_sequence_active() and not _is_active_drop_sequence_for_craft(_mission_drop_craft_id):
-		ship_text = "Anderes Dropship aktiv"
+		ship_text = "Air Lane belegt"
 	elif _drop_sequence_phase == DROP_SEQUENCE_INBOUND:
 		ship_text = "Dropship inbound"
 	elif _drop_sequence_phase == DROP_SEQUENCE_LANDED:
@@ -4179,6 +4211,8 @@ func _build_strategic_status_text() -> String:
 		ship_text = "Dropship outbound"
 	elif _drop_sequence_phase == DROP_SEQUENCE_COMPLETE:
 		ship_text = "Fireteam entladen"
+	elif _is_mission_drop_available() and _has_lz_position and not _has_drop_team_available_for_selected_craft():
+		ship_text = "Kein Fireteam an Bord"
 	var time_text: String = _build_mission_time_limit_text()
 	var transfer_text: String = _build_meta_transfer_status_text()
 	if transfer_text.is_empty():
@@ -4251,6 +4285,26 @@ func _is_mission_drop_available() -> bool:
 	if _drop_ship_staged and _mission_drop_craft_id.is_empty():
 		return true
 	return _mission_drop_craft_id.is_empty() and not _embarked_unit_ids.is_empty() and _deployed_unit_ids.is_empty()
+
+
+func _is_drop_air_lane_blocked() -> bool:
+	if not _is_drop_sequence_active():
+		return false
+	var selected_craft_id: String = _mission_drop_craft_id.strip_edges()
+	if selected_craft_id.is_empty():
+		return true
+	return not _has_live_drop_sequence_for_craft(selected_craft_id)
+
+
+func _has_drop_team_available_for_selected_craft() -> bool:
+	for unit in _get_units_for_drop_operation():
+		if unit == null or not unit.has_method("get_unit_id"):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+		if unit_id.is_empty() or _deployed_unit_ids.has(unit_id):
+			continue
+		return true
+	return false
 
 
 func _load_portrait_texture(portrait_path: String) -> Texture2D:
@@ -5660,6 +5714,7 @@ func _snap_target_to_objective() -> void:
 
 
 func _refresh_button_state() -> void:
+	var selected_tile_valid: bool = _is_selected_tile_valid_for_command()
 	var command_buttons: Array = [
 		{"path": move_button_path, "command_type": "move"},
 		{"path": defend_button_path, "command_type": "defend"},
@@ -5674,7 +5729,7 @@ func _refresh_button_state() -> void:
 		if command_button == null:
 			continue
 		var needs_tile: bool = _requires_selected_tile_for_command(command_type) and _has_primary_grid_for_command_selection()
-		command_button.disabled = preview_mode or not _can_issue_local_commands() or _selected_fireteam_ids.is_empty() or (needs_tile and not _has_selected_tile)
+		command_button.disabled = preview_mode or not _can_issue_local_commands() or _selected_fireteam_ids.is_empty() or (needs_tile and (not _has_selected_tile or not selected_tile_valid))
 
 	for path in [
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton",
@@ -5707,7 +5762,7 @@ func _refresh_button_state() -> void:
 
 	var call_dropship_button := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton") as BaseButton
 	if call_dropship_button != null:
-		call_dropship_button.disabled = not _can_edit_planning() or not _is_mission_drop_available() or (not preview_mode and _drop_ship_cooldown_remaining > 0.0)
+		call_dropship_button.disabled = not _can_edit_planning() or _is_drop_air_lane_blocked() or not _is_mission_drop_available() or (not preview_mode and _drop_ship_cooldown_remaining > 0.0) or not _has_lz_position or not _has_drop_team_available_for_selected_craft()
 
 	var next_phase_button := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/NextPhaseButton") as BaseButton
 	if next_phase_button != null:
@@ -5756,6 +5811,9 @@ func _build_button_snapshot(button_path: NodePath) -> Dictionary:
 			"command_hierarchy_group_id": "",
 			"command_hierarchy_panel_role": "",
 			"command_hierarchy_disabled_reason": "missing button",
+			"command_hierarchy_disabled_reason_code": "missing_button",
+			"command_hierarchy_disabled_reason_text": "Not in this HUD slice.",
+			"command_hierarchy_disabled_reason_short": "Not present",
 			"command_hierarchy_requires_tile_selection": false,
 			"pressed_signal_connection_count": 0,
 		}
@@ -5776,6 +5834,9 @@ func _build_button_snapshot(button_path: NodePath) -> Dictionary:
 		"command_hierarchy_context": str(button.get_meta("command_hierarchy_context", "")),
 		"command_hierarchy_requires_tile_selection": bool(button.get_meta("command_hierarchy_requires_tile_selection", false)),
 		"command_hierarchy_disabled_reason": str(button.get_meta("command_hierarchy_disabled_reason", "")),
+		"command_hierarchy_disabled_reason_code": str(button.get_meta("command_hierarchy_disabled_reason_code", "")),
+		"command_hierarchy_disabled_reason_text": str(button.get_meta("command_hierarchy_disabled_reason_text", "")),
+		"command_hierarchy_disabled_reason_short": str(button.get_meta("command_hierarchy_disabled_reason_short", "")),
 		"global_rect": global_rect,
 		"pressed_signal_connection_count": button.pressed.get_connections().size(),
 	}
@@ -5822,12 +5883,19 @@ func _build_command_hierarchy_context() -> Dictionary:
 		"has_target": get_node_or_null(target_marker_path) != null,
 		"has_lz": _has_lz_position,
 		"has_selected_tile": _has_selected_tile,
+		"selected_tile_valid": _is_selected_tile_valid_for_command(),
 		"requires_tile_selection": _has_primary_grid_for_command_selection(),
 		"selected_tile_grid_position": _selected_tile_grid_position,
 		"selected_tile_world_position": _selected_tile_world_position,
 		"drop_available": _is_mission_drop_available(),
+		"drop_already_active": _has_live_drop_sequence_for_craft(_mission_drop_craft_id),
+		"drop_air_lane_blocked": _is_drop_air_lane_blocked(),
+		"drop_has_team": _has_drop_team_available_for_selected_craft(),
 		"drop_requested": _drop_ship_requested,
 		"drop_cooldown_remaining": _drop_ship_cooldown_remaining,
+		"has_selected_fireteam_orders_to_execute": _has_selected_fireteam_orders_to_execute(),
+		"can_return_selected_fireteams_to_plan": _can_return_selected_fireteams_to_plan(),
+		"has_deletable_order_focus": _has_deletable_order_focus(),
 		"target_placement_armed": _is_target_placement_armed,
 		"lz_placement_armed": _is_lz_placement_armed,
 	}
@@ -5878,7 +5946,8 @@ func _build_command_hierarchy_tooltip(action: Dictionary, button: Button, disabl
 	if bool(action.get("status_only", false)) and not status_source.is_empty():
 		parts.append("Source: %s" % status_source)
 	if not disabled_reason.is_empty():
-		parts.append(disabled_reason)
+		var disabled_text: String = String(button.get_meta("command_hierarchy_disabled_reason_text", "")).strip_edges()
+		parts.append(disabled_text if not disabled_text.is_empty() else disabled_reason)
 	return " | ".join(parts)
 
 
@@ -6631,6 +6700,12 @@ func _apply_drop_light_hud_button_size_contract() -> void:
 func _build_drop_light_drop_button_label() -> String:
 	if not preview_mode and _drop_ship_cooldown_remaining > 0.0 and not _is_drop_sequence_active():
 		return "Cooldown %ds" % int(ceil(_drop_ship_cooldown_remaining))
+	if _is_drop_air_lane_blocked():
+		return "Air Busy"
+	if not _has_lz_position:
+		return "Set LZ"
+	if _is_mission_drop_available() and not _has_drop_team_available_for_selected_craft():
+		return "Board"
 	if _has_live_drop_sequence_for_craft(_mission_drop_craft_id) and not _is_active_drop_sequence_for_craft(_mission_drop_craft_id):
 		var selected_card: Dictionary = _find_mission_dropship_card_entry(_mission_drop_craft_id)
 		match String(selected_card.get("state", "")).strip_edges().to_lower():
@@ -8859,6 +8934,7 @@ func _build_command_feedback_snapshot_context() -> Dictionary:
 	var fireteam_coordination: Array = get_fireteam_coordination_snapshot()
 	var air_asset_threats: Array = get_air_asset_threat_snapshot()
 	var npc_thought_bubbles: Array = get_npc_thought_bubble_snapshot()
+	var command_hierarchy: Dictionary = get_command_hierarchy_snapshot()
 	return {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
 		"selected_fireteam_label": _get_fireteam_name(),
@@ -8874,7 +8950,8 @@ func _build_command_feedback_snapshot_context() -> Dictionary:
 		"selected_fireteam_status_label_text": _get_label_text(FIRETEAM_STATUS_LABEL_PATH),
 		"mission_control_status_text": _get_label_text("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicStatusLabel"),
 		"command_buttons": _build_command_control_snapshot(),
-		"command_hierarchy": get_command_hierarchy_snapshot(),
+		"command_hierarchy": command_hierarchy,
+		"command_clarity": _build_command_clarity_snapshot(command_hierarchy),
 		"planned_waypoint_count": _count_selected_phase_waypoints(),
 		"planned_area_order_count": _count_selected_area_orders(),
 		"multi_fireteam_plan_count": _serialize_multi_fireteam_plans().size(),
@@ -8893,6 +8970,53 @@ func _build_command_feedback_snapshot_context() -> Dictionary:
 		"mission_control_tactical_communication_text": _build_mission_control_tactical_communication_text(),
 		"npc_thought_bubbles": npc_thought_bubbles,
 	}
+
+
+func _build_command_clarity_snapshot(command_hierarchy: Dictionary = {}) -> Dictionary:
+	var hierarchy: Dictionary = command_hierarchy if not command_hierarchy.is_empty() else get_command_hierarchy_snapshot()
+	var actions_by_id: Dictionary = Dictionary(hierarchy.get("actions_by_id", {}))
+	var blocked_reasons_by_action: Dictionary = {}
+	var active_action_ids: Array = []
+	for action_id_variant in actions_by_id.keys():
+		var action_id: String = String(action_id_variant)
+		var action: Dictionary = Dictionary(actions_by_id[action_id_variant])
+		if bool(action.get("disabled", false)):
+			blocked_reasons_by_action[action_id] = {
+				"code": String(action.get("disabled_reason_code", "")),
+				"text": String(action.get("disabled_reason_text", "")),
+				"short": String(action.get("disabled_reason_short", "")),
+				"legacy": String(action.get("disabled_reason", "")),
+			}
+			continue
+		active_action_ids.append(action_id)
+	active_action_ids.sort()
+	return {
+		"schema_version": 1,
+		"visual_only": true,
+		"ui_sets_gameplay_truth": false,
+		"selected_fireteam_count": _selected_fireteam_ids.size(),
+		"has_selected_tile": _has_selected_tile,
+		"selected_tile_valid": _is_selected_tile_valid_for_command(),
+		"has_lz": _has_lz_position,
+		"drop_available": _is_mission_drop_available(),
+		"drop_air_lane_blocked": _is_drop_air_lane_blocked(),
+		"drop_has_team": _has_drop_team_available_for_selected_craft(),
+		"has_selected_fireteam_orders_to_execute": _has_selected_fireteam_orders_to_execute(),
+		"active_action_ids": active_action_ids,
+		"blocked_reasons_by_action": blocked_reasons_by_action,
+		"primary_hint": _resolve_primary_command_clarity_hint(blocked_reasons_by_action),
+	}
+
+
+func _resolve_primary_command_clarity_hint(blocked_reasons_by_action: Dictionary) -> String:
+	for action_id in ["move", "take", "defend", "flank", "go_plan", "call_dropship", "set_lz"]:
+		if not blocked_reasons_by_action.has(action_id):
+			continue
+		var reason: Dictionary = Dictionary(blocked_reasons_by_action[action_id])
+		var text: String = String(reason.get("text", "")).strip_edges()
+		if not text.is_empty():
+			return text
+	return ""
 
 
 func get_active_ad_hoc_orders_snapshot() -> Array:
