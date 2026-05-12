@@ -63,6 +63,13 @@ const ENEMY_TACTICS_PUSH_STEP_DISTANCE: float = 144.0
 const ENEMY_TACTICS_PROBE_STEP_DISTANCE: float = 96.0
 const ENEMY_TACTICS_BOUND_STEP_DISTANCE: float = 128.0
 const ENEMY_TACTICS_COVER_SEARCH_RADIUS: float = 220.0
+const ENEMY_POSTURE_TRAVEL: String = "travel"
+const ENEMY_POSTURE_TACTICAL: String = "tactical"
+const ENEMY_POSTURE_ENGAGE: String = "engage"
+const ENEMY_POSTURE_OVERWATCH: String = "overwatch"
+const ENEMY_WEAPON_LOWERED: String = "lowered"
+const ENEMY_WEAPON_READY: String = "ready"
+const ENEMY_WEAPON_AIMED: String = "aimed"
 
 signal contact_established(attacker, target)
 signal combat_resolved(mission_result: Dictionary)
@@ -495,6 +502,7 @@ func _store_combat_attacker_facing(attacker, target) -> void:
 	attacker_node.set_meta("map_facing_angle", facing_angle)
 	if attacker.has_method("get_team_id") and String(attacker.call("get_team_id")) != friendly_team_id:
 		attacker_node.set_meta("enemy_facing_angle", facing_angle)
+		_apply_enemy_runtime_posture(attacker, ENEMY_POSTURE_ENGAGE, ENEMY_WEAPON_AIMED, "fire_event", _get_enemy_aim_move_speed_factor(attacker))
 
 
 func _ensure_audio_event_bus(create_if_missing: bool = true):
@@ -2699,6 +2707,7 @@ func _build_enemy_team_tactics_state(group_id: String, units: Array, tactics: Di
 	var visual_archetype_id: String = String(tactics.get("visual_archetype", profile.get("visual_archetype", ""))).strip_edges().to_lower()
 	var advance_style: String = String(ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("normalize_advance_style", tactics.get("advance_style", profile.get("advance_style", "hold")), String(profile.get("advance_style", "hold"))))
 	var cover_behavior: String = String(tactics.get("cover_behavior", profile.get("cover_behavior", ""))).strip_edges().to_lower()
+	var posture_config: Dictionary = _build_enemy_posture_config(tactics, profile)
 	var anchor_position: Vector2 = _resolve_enemy_security_anchor(fit_units)
 	var focus_position: Vector2 = _resolve_enemy_security_focus_position(fit_units, anchor_position)
 	var advance_direction: Vector2 = (focus_position - anchor_position).normalized() if not focus_position.is_equal_approx(anchor_position) else Vector2.RIGHT
@@ -2707,6 +2716,21 @@ func _build_enemy_team_tactics_state(group_id: String, units: Array, tactics: Di
 	var moving_unit_ids: PackedStringArray = _resolve_enemy_moving_unit_ids(advance_style, unit_ids)
 	var covering_unit_ids: PackedStringArray = _subtract_unit_ids(unit_ids, moving_unit_ids)
 	var target_positions_by_unit_id: Dictionary = _build_enemy_tactics_target_positions(fit_units, unit_ids, moving_unit_ids, advance_style, cover_behavior, anchor_position, focus_position, advance_direction)
+	var movement_posture_by_unit_id: Dictionary = {}
+	var weapon_posture_by_unit_id: Dictionary = {}
+	var posture_policy_by_unit_id: Dictionary = {}
+	var move_speed_factor_by_unit_id: Dictionary = {}
+	for unit in fit_units:
+		if unit == null or not unit.has_method("get_unit_id"):
+			continue
+		var posture_unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+		if posture_unit_id.is_empty():
+			continue
+		var posture: Dictionary = _resolve_enemy_posture_for_unit(unit, posture_config, focus_position, advance_style, moving_unit_ids.has(posture_unit_id))
+		movement_posture_by_unit_id[posture_unit_id] = String(posture.get("movement_posture", ENEMY_POSTURE_TACTICAL))
+		weapon_posture_by_unit_id[posture_unit_id] = String(posture.get("weapon_posture", ENEMY_WEAPON_READY))
+		posture_policy_by_unit_id[posture_unit_id] = String(posture.get("posture_policy_id", posture_config.get("movement_posture_policy", "")))
+		move_speed_factor_by_unit_id[posture_unit_id] = float(posture.get("move_speed_factor", _get_enemy_tactics_speed_factor(advance_style)))
 	for unit in fit_units:
 		if unit is Node and unit.has_method("get_unit_id"):
 			var unit_id: String = String(unit.call("get_unit_id"))
@@ -2714,6 +2738,9 @@ func _build_enemy_team_tactics_state(group_id: String, units: Array, tactics: Di
 			(unit as Node).set_meta("enemy_tactic_profile_id", profile_id)
 			(unit as Node).set_meta("enemy_advance_style", advance_style)
 			(unit as Node).set_meta("enemy_role", String(role_by_unit_id.get(unit_id, "")))
+			(unit as Node).set_meta("enemy_movement_posture", String(movement_posture_by_unit_id.get(unit_id, ENEMY_POSTURE_TACTICAL)))
+			(unit as Node).set_meta("enemy_weapon_posture", String(weapon_posture_by_unit_id.get(unit_id, ENEMY_WEAPON_READY)))
+			(unit as Node).set_meta("enemy_posture_policy_id", String(posture_policy_by_unit_id.get(unit_id, "")))
 			if not visual_archetype_id.is_empty():
 				(unit as Node).set_meta("enemy_visual_archetype_id", visual_archetype_id)
 	var state: Dictionary = {
@@ -2731,9 +2758,18 @@ func _build_enemy_team_tactics_state(group_id: String, units: Array, tactics: Di
 		"covering_unit_ids": covering_unit_ids,
 		"role_by_unit_id": role_by_unit_id,
 		"target_positions_by_unit_id": target_positions_by_unit_id,
+		"movement_posture_policy": String(posture_config.get("movement_posture_policy", "")),
+		"ready_distance_world": float(posture_config.get("ready_distance_world", 640.0)),
+		"travel_speed_factor": float(posture_config.get("travel_speed_factor", 0.55)),
+		"ready_speed_factor": float(posture_config.get("ready_speed_factor", 0.30)),
+		"aim_move_speed_factor": float(posture_config.get("aim_move_speed_factor", 0.18)),
+		"movement_posture_by_unit_id": movement_posture_by_unit_id,
+		"weapon_posture_by_unit_id": weapon_posture_by_unit_id,
+		"posture_policy_by_unit_id": posture_policy_by_unit_id,
+		"move_speed_factor_by_unit_id": move_speed_factor_by_unit_id,
 		"has_explicit_tactics": true,
 		"priority": _get_enemy_tactics_priority(advance_style),
-		"move_speed_factor": _get_enemy_tactics_speed_factor(advance_style),
+		"move_speed_factor": _get_enemy_group_move_speed_factor(move_speed_factor_by_unit_id, _get_enemy_tactics_speed_factor(advance_style)),
 	}
 	state["tactic_label"] = _build_enemy_team_tactics_label(state)
 	for unit in fit_units:
@@ -2977,6 +3013,147 @@ func _get_enemy_tactics_speed_factor(advance_style: String) -> float:
 			return enemy_advance_speed_factor * 0.5
 
 
+func _build_enemy_posture_config(tactics: Dictionary, profile: Dictionary) -> Dictionary:
+	var profile_policy: String = String(profile.get("movement_posture_policy", ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.MOVEMENT_POSTURE_POLICY_TRAVEL_UNTIL_THREAT))
+	return {
+		"movement_posture_policy": String(ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("normalize_movement_posture_policy", tactics.get("movement_posture_policy", tactics.get("posture_policy_id", profile_policy)), profile_policy)),
+		"ready_distance_world": _normalize_non_negative_float(tactics.get("ready_distance_world", profile.get("ready_distance_world", 640.0)), float(profile.get("ready_distance_world", 640.0))),
+		"travel_speed_factor": _normalize_non_negative_float(tactics.get("travel_speed_factor", profile.get("travel_speed_factor", 0.55)), float(profile.get("travel_speed_factor", 0.55))),
+		"ready_speed_factor": _normalize_non_negative_float(tactics.get("ready_speed_factor", profile.get("ready_speed_factor", 0.30)), float(profile.get("ready_speed_factor", 0.30))),
+		"aim_move_speed_factor": _normalize_non_negative_float(tactics.get("aim_move_speed_factor", profile.get("aim_move_speed_factor", 0.18)), float(profile.get("aim_move_speed_factor", 0.18))),
+	}
+
+
+func _normalize_non_negative_float(value: Variant, fallback: float) -> float:
+	if typeof(value) == TYPE_INT or typeof(value) == TYPE_FLOAT:
+		return maxf(float(value), 0.0)
+	if typeof(value) == TYPE_STRING or typeof(value) == TYPE_STRING_NAME:
+		var text: String = String(value).strip_edges()
+		if text.is_valid_float():
+			return maxf(text.to_float(), 0.0)
+	return maxf(fallback, 0.0)
+
+
+func _resolve_enemy_posture_for_unit(unit, posture_config: Dictionary, focus_position: Vector2, advance_style: String, is_moving: bool) -> Dictionary:
+	var policy_id: String = String(posture_config.get("movement_posture_policy", ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.MOVEMENT_POSTURE_POLICY_TRAVEL_UNTIL_THREAT)).strip_edges().to_lower()
+	var movement_posture: String = ENEMY_POSTURE_TACTICAL
+	var weapon_posture: String = ENEMY_WEAPON_READY
+	var should_ready: bool = _enemy_ready_triggered(unit, focus_position, float(posture_config.get("ready_distance_world", 640.0)))
+	match policy_id:
+		"overwatch":
+			movement_posture = ENEMY_POSTURE_OVERWATCH
+			weapon_posture = ENEMY_WEAPON_READY
+		"hold_ready":
+			movement_posture = ENEMY_POSTURE_TACTICAL if is_moving else ENEMY_POSTURE_OVERWATCH
+			weapon_posture = ENEMY_WEAPON_READY
+		"always_ready":
+			movement_posture = ENEMY_POSTURE_TACTICAL if is_moving else ENEMY_POSTURE_OVERWATCH
+			weapon_posture = ENEMY_WEAPON_READY
+		"aggressive_ready":
+			movement_posture = ENEMY_POSTURE_TACTICAL if is_moving else ENEMY_POSTURE_OVERWATCH
+			weapon_posture = ENEMY_WEAPON_READY
+		_:
+			if should_ready:
+				movement_posture = ENEMY_POSTURE_TACTICAL if is_moving else ENEMY_POSTURE_OVERWATCH
+				weapon_posture = ENEMY_WEAPON_READY
+			elif is_moving:
+				movement_posture = ENEMY_POSTURE_TRAVEL
+				weapon_posture = ENEMY_WEAPON_LOWERED
+			else:
+				movement_posture = ENEMY_POSTURE_TACTICAL
+				weapon_posture = ENEMY_WEAPON_READY
+	if advance_style == "hold" and movement_posture == ENEMY_POSTURE_TRAVEL:
+		movement_posture = ENEMY_POSTURE_OVERWATCH
+		weapon_posture = ENEMY_WEAPON_READY
+	return {
+		"movement_posture": movement_posture,
+		"weapon_posture": weapon_posture,
+		"posture_policy_id": policy_id,
+		"move_speed_factor": _get_enemy_posture_speed_factor(movement_posture, posture_config, advance_style),
+	}
+
+
+func _enemy_ready_triggered(unit, focus_position: Vector2, ready_distance_world: float) -> bool:
+	if unit == null or not (unit is Node2D):
+		return true
+	if ready_distance_world <= 0.0:
+		return true
+	var unit_position: Vector2 = (unit as Node2D).global_position
+	if not focus_position.is_equal_approx(Vector2.ZERO) and unit_position.distance_to(focus_position) <= ready_distance_world:
+		return true
+	var objective_position: Vector2 = _get_objective_position()
+	if not objective_position.is_equal_approx(Vector2.ZERO) and unit_position.distance_to(objective_position) <= ready_distance_world:
+		return true
+	for friendly in _get_units(friendly_unit_paths):
+		if friendly == null or not (friendly is Node2D) or not _can_target_receive_attack(friendly):
+			continue
+		if unit_position.distance_to((friendly as Node2D).global_position) <= ready_distance_world:
+			return true
+	return false
+
+
+func _get_enemy_posture_speed_factor(movement_posture: String, posture_config: Dictionary, advance_style: String) -> float:
+	match movement_posture:
+		"travel":
+			return maxf(float(posture_config.get("travel_speed_factor", 0.55)), 0.0)
+		"tactical":
+			return maxf(float(posture_config.get("ready_speed_factor", _get_enemy_tactics_speed_factor(advance_style))), 0.0)
+		"engage":
+			return maxf(float(posture_config.get("aim_move_speed_factor", 0.18)), 0.0)
+		"overwatch":
+			return 0.0
+		_:
+			return _get_enemy_tactics_speed_factor(advance_style)
+
+
+func _get_enemy_group_move_speed_factor(move_speed_factor_by_unit_id: Dictionary, fallback: float) -> float:
+	var highest_speed_factor: float = 0.0
+	for value_variant in move_speed_factor_by_unit_id.values():
+		if typeof(value_variant) == TYPE_INT or typeof(value_variant) == TYPE_FLOAT:
+			highest_speed_factor = maxf(highest_speed_factor, float(value_variant))
+	if highest_speed_factor > 0.0:
+		return highest_speed_factor
+	return fallback
+
+
+func _get_enemy_aim_move_speed_factor(unit) -> float:
+	if unit != null and unit.has_method("get_unit_id"):
+		var state: Dictionary = get_enemy_team_tactics_state_for_unit(String(unit.call("get_unit_id")))
+		if not state.is_empty():
+			return maxf(float(state.get("aim_move_speed_factor", 0.18)), 0.0)
+	return 0.18
+
+
+func _apply_enemy_runtime_posture(unit, movement_posture: String, weapon_posture: String, posture_policy_id: String, move_speed_factor: float = -1.0) -> bool:
+	if unit == null or not unit.has_method("get_runtime_status") or not unit.has_method("set_runtime_status"):
+		return false
+	var runtime_status = unit.call("get_runtime_status")
+	if runtime_status == null:
+		return false
+	var effective_speed_factor: float = move_speed_factor
+	if effective_speed_factor < 0.0 and runtime_status.has_method("get"):
+		effective_speed_factor = float(runtime_status.get("move_speed_factor"))
+	var effective_policy_id: String = posture_policy_id.strip_edges().to_lower()
+	if effective_policy_id.is_empty() and runtime_status.has_method("get"):
+		effective_policy_id = String(runtime_status.get("posture_policy_id")).strip_edges().to_lower()
+	return bool(unit.call(
+		"set_runtime_status",
+		String(runtime_status.get("status")) if runtime_status.has_method("get") else "assigned",
+		String(runtime_status.get("active_command_type")) if runtime_status.has_method("get") else "",
+		int(runtime_status.get("priority")) if runtime_status.has_method("get") else 0,
+		String(runtime_status.get("fire_status")) if runtime_status.has_method("get") else "fire_at_will",
+		String(runtime_status.get("source_command_type")) if runtime_status.has_method("get") else "",
+		effective_speed_factor,
+		float(runtime_status.get("cover_score")) if runtime_status.has_method("get") else 0.0,
+		float(runtime_status.get("attack_bonus")) if runtime_status.has_method("get") else 0.0,
+		int(runtime_status.get("phase")) if runtime_status.has_method("get") else -1,
+		runtime_status.get("target_position") if runtime_status.has_method("get") else null,
+		movement_posture,
+		weapon_posture,
+		effective_policy_id
+	))
+
+
 func _build_enemy_team_tactics_label(state: Dictionary) -> String:
 	var style: String = String(state.get("advance_style", "")).strip_edges().to_lower()
 	var prefix: String = "HOLD"
@@ -3007,16 +3184,21 @@ func _try_enqueue_enemy_team_tactics_move(simulation_root: Node, enemy) -> bool:
 		return false
 	var advance_style: String = String(state.get("advance_style", "hold"))
 	if advance_style == "hold":
+		_enqueue_enemy_posture_hold_command(simulation_root, enemy, state, unit_id)
 		return true
 	var moving_unit_ids: PackedStringArray = PackedStringArray(state.get("moving_unit_ids", PackedStringArray()))
 	if not moving_unit_ids.has(unit_id):
+		_enqueue_enemy_posture_hold_command(simulation_root, enemy, state, unit_id)
 		return true
 	var target_positions: Dictionary = Dictionary(state.get("target_positions_by_unit_id", {}))
 	if not target_positions.has(unit_id):
+		_enqueue_enemy_posture_hold_command(simulation_root, enemy, state, unit_id)
 		return true
 	var target_position: Vector2 = Vector2(target_positions.get(unit_id, (enemy as Node2D).global_position))
 	if (enemy as Node2D).global_position.distance_to(target_position) <= ENEMY_PATROL_WAYPOINT_REACHED_DISTANCE:
+		_enqueue_enemy_posture_hold_command(simulation_root, enemy, state, unit_id)
 		return true
+	var posture_fields: Dictionary = _build_enemy_posture_command_fields(state, unit_id)
 	simulation_root.call(
 		"enqueue_command",
 		{
@@ -3024,13 +3206,74 @@ func _try_enqueue_enemy_team_tactics_move(simulation_root: Node, enemy) -> bool:
 			"priority": int(state.get("priority", 8)),
 			"unit_id": unit_id,
 			"target_position": target_position,
-			"move_speed_factor": float(state.get("move_speed_factor", enemy_advance_speed_factor)),
+			"move_speed_factor": float(posture_fields.get("move_speed_factor", state.get("move_speed_factor", enemy_advance_speed_factor))),
+			"movement_posture": String(posture_fields.get("movement_posture", ENEMY_POSTURE_TACTICAL)),
+			"weapon_posture": String(posture_fields.get("weapon_posture", ENEMY_WEAPON_READY)),
+			"posture_policy_id": String(posture_fields.get("posture_policy_id", state.get("movement_posture_policy", ""))),
+			"source_command_type": "enemy_team_tactics",
 			"requeue_until_target": false,
 			"enemy_tactic_label": String(state.get("tactic_label", "")),
 			"enemy_advance_style": advance_style,
 		}
 	)
 	return true
+
+
+func _enqueue_enemy_posture_hold_command(simulation_root: Node, enemy, state: Dictionary, unit_id: String) -> void:
+	if simulation_root == null or enemy == null or unit_id.strip_edges().is_empty():
+		return
+	var posture_fields: Dictionary = _build_enemy_posture_command_fields(state, unit_id)
+	simulation_root.call(
+		"enqueue_command",
+		{
+			"command_type": "hold_position",
+			"priority": int(state.get("priority", 6)),
+			"unit_id": unit_id,
+			"move_speed_factor": float(posture_fields.get("move_speed_factor", 0.0)),
+			"movement_posture": String(posture_fields.get("movement_posture", ENEMY_POSTURE_OVERWATCH)),
+			"weapon_posture": String(posture_fields.get("weapon_posture", ENEMY_WEAPON_READY)),
+			"posture_policy_id": String(posture_fields.get("posture_policy_id", state.get("movement_posture_policy", ""))),
+			"source_command_type": "enemy_team_tactics",
+			"enemy_tactic_label": String(state.get("tactic_label", "")),
+			"enemy_advance_style": String(state.get("advance_style", "hold")),
+		}
+	)
+
+
+func _build_enemy_posture_command_fields(state: Dictionary, unit_id: String) -> Dictionary:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	var movement_by_unit_id: Dictionary = Dictionary(state.get("movement_posture_by_unit_id", {}))
+	var weapon_by_unit_id: Dictionary = Dictionary(state.get("weapon_posture_by_unit_id", {}))
+	var policy_by_unit_id: Dictionary = Dictionary(state.get("posture_policy_by_unit_id", {}))
+	var speed_by_unit_id: Dictionary = Dictionary(state.get("move_speed_factor_by_unit_id", {}))
+	return {
+		"movement_posture": String(movement_by_unit_id.get(normalized_unit_id, ENEMY_POSTURE_TACTICAL)),
+		"weapon_posture": String(weapon_by_unit_id.get(normalized_unit_id, ENEMY_WEAPON_READY)),
+		"posture_policy_id": String(policy_by_unit_id.get(normalized_unit_id, state.get("movement_posture_policy", ""))),
+		"move_speed_factor": float(speed_by_unit_id.get(normalized_unit_id, state.get("move_speed_factor", enemy_advance_speed_factor))),
+	}
+
+
+func _build_enemy_patrol_posture_command_fields(enemy) -> Dictionary:
+	var posture_config: Dictionary = {
+		"movement_posture_policy": ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.MOVEMENT_POSTURE_POLICY_TRAVEL_UNTIL_THREAT,
+		"ready_distance_world": 640.0,
+		"travel_speed_factor": 0.55,
+		"ready_speed_factor": 0.30,
+		"aim_move_speed_factor": 0.18,
+	}
+	return _resolve_enemy_posture_for_unit(enemy, posture_config, _get_objective_position(), "probe", true)
+
+
+func _build_enemy_fallback_posture_command_fields(enemy) -> Dictionary:
+	var posture_config: Dictionary = {
+		"movement_posture_policy": ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.MOVEMENT_POSTURE_POLICY_TRAVEL_UNTIL_THREAT,
+		"ready_distance_world": 640.0,
+		"travel_speed_factor": 0.55,
+		"ready_speed_factor": 0.30,
+		"aim_move_speed_factor": 0.18,
+	}
+	return _resolve_enemy_posture_for_unit(enemy, posture_config, _get_objective_position(), "push", true)
 
 
 func _advance_enemy_units(simulation_root: Node) -> void:
@@ -3054,6 +3297,7 @@ func _advance_enemy_units(simulation_root: Node) -> void:
 		if _enemy_should_hold_position(enemy):
 			continue
 
+		var posture_fields: Dictionary = _build_enemy_fallback_posture_command_fields(enemy)
 		simulation_root.call(
 			"enqueue_command",
 			{
@@ -3061,7 +3305,11 @@ func _advance_enemy_units(simulation_root: Node) -> void:
 				"priority": 8,
 				"unit_id": String(enemy.call("get_unit_id")),
 				"target_position": objective_position,
-				"move_speed_factor": enemy_advance_speed_factor,
+				"move_speed_factor": float(posture_fields.get("move_speed_factor", enemy_advance_speed_factor)),
+				"movement_posture": String(posture_fields.get("movement_posture", ENEMY_POSTURE_TACTICAL)),
+				"weapon_posture": String(posture_fields.get("weapon_posture", ENEMY_WEAPON_READY)),
+				"posture_policy_id": String(posture_fields.get("posture_policy_id", "travel_until_threat")),
+				"source_command_type": "enemy_advance",
 				"requeue_until_target": false,
 			}
 		)
@@ -3112,6 +3360,7 @@ func _try_enqueue_enemy_patrol_move(simulation_root: Node, enemy) -> bool:
 		waypoint_index = (waypoint_index + 1) % patrol_path.size()
 		_enemy_patrol_waypoint_index_by_unit_id[unit_id] = waypoint_index
 		target_position = _coerce_vector2(patrol_path[waypoint_index], target_position)
+	var posture_fields: Dictionary = _build_enemy_patrol_posture_command_fields(enemy)
 	simulation_root.call(
 		"enqueue_command",
 		{
@@ -3119,7 +3368,11 @@ func _try_enqueue_enemy_patrol_move(simulation_root: Node, enemy) -> bool:
 			"priority": 7,
 			"unit_id": unit_id,
 			"target_position": target_position,
-			"move_speed_factor": enemy_advance_speed_factor,
+			"move_speed_factor": float(posture_fields.get("move_speed_factor", enemy_advance_speed_factor)),
+			"movement_posture": String(posture_fields.get("movement_posture", ENEMY_POSTURE_TRAVEL)),
+			"weapon_posture": String(posture_fields.get("weapon_posture", ENEMY_WEAPON_LOWERED)),
+			"posture_policy_id": String(posture_fields.get("posture_policy_id", "travel_until_threat")),
+			"source_command_type": "enemy_patrol",
 			"requeue_until_target": false,
 		}
 	)
@@ -3224,6 +3477,10 @@ func _try_reposition_enemy_on_damage(unit, hit_context: Dictionary) -> void:
 			"unit_id": unit_id,
 			"target_position": reposition_target,
 			"move_speed_factor": enemy_reposition_move_speed_factor,
+			"movement_posture": ENEMY_POSTURE_TACTICAL,
+			"weapon_posture": ENEMY_WEAPON_READY,
+			"posture_policy_id": ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.MOVEMENT_POSTURE_POLICY_AGGRESSIVE_READY,
+			"source_command_type": "enemy_damage_reposition",
 			"requeue_until_target": true,
 		}
 	)

@@ -5,7 +5,7 @@ NPCs sollen ein klares Standardverhalten fuer Bewegung und Waffenhaltung bekomme
 
 Die Gameplay-Wahrheit liegt bei Simulation/Taktik. Die 3D-Ansicht darf diese Haltung nur darstellen.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Ausgangslage
 - `scripts/tests/mission_combat_loop_driver.gd` nutzt bereits `move_speed_factor`.
@@ -123,16 +123,24 @@ Erstelle einen Headless-Verifier fuer den Vertrag:
 - Kein finaler Balance-Pass fuer alle Geschwindigkeiten.
 - Keine UI-Steuerung fuer NPC-Posture in diesem Task.
 
+## Umsetzung
+- `EnemyTeamTacticsProfile` normalisiert `movement_posture_policy`, `ready_distance_world`, `travel_speed_factor`, `ready_speed_factor` und `aim_move_speed_factor` fuer bestehende Profile.
+- `UnitCommand` und `UnitRuntimeStatus` tragen `movement_posture`, `weapon_posture` und `posture_policy_id` als autoritativen Runtime-Vertrag.
+- `MissionCombatLoopDriver` leitet aus Taktikprofil, Threat-Distanz und Fire-Events Travel/Lowered, Tactical/Ready, Engage/Aimed und Overwatch/Ready ab.
+- `SimulationRoot` uebernimmt Move-/Hold-Kommandos in den Unit-Runtime-Status, bevor Bewegung ausgefuehrt wird.
+- `TerrainMap3DView` liest die Runtime-Posture nur fuer Snapshot und Weapon-Pose; Fire-Events duerfen Ready visuell zu Aimed uebersteuern.
+- `ground_mission01_default` setzt die Patrol-Fireteam-Policy auf `travel_until_threat` und die Defense-Fireteam-Policy auf `hold_ready`.
+
 ## Akzeptanzkriterien
-- [ ] NPC-Taktikprofile koennen eine Movement-Posture-Policy definieren.
-- [ ] Ohne explizite Policy gibt es konservative Defaults.
-- [ ] `move_speed_factor` wird aus Posture und Taktik abgeleitet, nicht nur aus `advance_style`.
-- [ ] Normale Patrouille nutzt Waffe unten und schnelleren Travel-Move.
-- [ ] Taktisches Vorruecken nutzt M-Position und langsamere Bewegung.
-- [ ] Aktives Schiessen nutzt Aimed-Posture, Facing zum Ziel und bleibt kompatibel mit TASK_344-Muzzle-/Aim-Visuals.
-- [ ] Verteidiger und Overwatch-Profile starten mit ready/overwatch statt Travel.
-- [ ] Render-Code liest Posture nur als Darstellung und setzt keine Gameplay-Wahrheit.
-- [ ] Headless-Verifier deckt Standardfaelle ab.
+- [x] NPC-Taktikprofile koennen eine Movement-Posture-Policy definieren.
+- [x] Ohne explizite Policy gibt es konservative Defaults.
+- [x] `move_speed_factor` wird aus Posture und Taktik abgeleitet, nicht nur aus `advance_style`.
+- [x] Normale Patrouille nutzt Waffe unten und schnelleren Travel-Move.
+- [x] Taktisches Vorruecken nutzt M-Position und langsamere Bewegung.
+- [x] Aktives Schiessen nutzt Aimed-Posture, Facing zum Ziel und bleibt kompatibel mit TASK_344-Muzzle-/Aim-Visuals.
+- [x] Verteidiger und Overwatch-Profile starten mit ready/overwatch statt Travel.
+- [x] Render-Code liest Posture nur als Darstellung und setzt keine Gameplay-Wahrheit.
+- [x] Headless-Verifier deckt Standardfaelle ab.
 
 ## Erwartete Dateien
 - `scripts/tactical/enemy_team_tactics_profile.gd`
@@ -147,11 +155,16 @@ Erstelle einen Headless-Verifier fuer den Vertrag:
 - `docs/TASK_ROADMAP.md`
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_345_npc_standard_movement_posture_policy.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_344_ground_mission_default_enemy_visuals.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_202_enemy_security_direction_and_los_patch.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_201_weapon_range_scale_and_tile_distance_patch.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --import`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_345_npc_standard_movement_posture_policy.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_344_ground_mission_default_enemy_visuals.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_202_enemy_security_direction_and_los_patch.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_201_weapon_range_scale_and_tile_distance_patch.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_204_enemy_tactics_multiplayer_authority_snapshot_patch.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_208_enemy_team_tactics_playability_smoke.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_200_enemy_team_tactics_contract_and_editor_config.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_233_portrait_identity_catalog_and_roster_presentation.gd`
+- [x] `git diff --check`
 
 ## Risiken / offene Punkte
 - Die konkreten Speed-Werte brauchen spaeter manuellen Playtest.

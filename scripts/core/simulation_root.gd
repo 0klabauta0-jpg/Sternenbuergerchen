@@ -944,6 +944,16 @@ func _build_unit_snapshot(unit) -> Dictionary:
 			var runtime_dict: Dictionary = runtime_status.call("to_dict")
 			snapshot["runtime_state"] = String(runtime_dict.get("status", ""))
 			snapshot["fire_mode"] = String(runtime_dict.get("fire_status", ""))
+			snapshot["active_command_type"] = String(runtime_dict.get("active_command_type", ""))
+			snapshot["source_command_type"] = String(runtime_dict.get("source_command_type", ""))
+			snapshot["move_speed_factor"] = float(runtime_dict.get("move_speed_factor", 1.0))
+			snapshot["movement_posture"] = String(runtime_dict.get("movement_posture", "idle"))
+			snapshot["weapon_posture"] = String(runtime_dict.get("weapon_posture", "lowered"))
+			snapshot["posture_policy_id"] = String(runtime_dict.get("posture_policy_id", ""))
+			if runtime_dict.has("target_position"):
+				snapshot["target_position"] = runtime_dict["target_position"]
+			if runtime_dict.has("phase"):
+				snapshot["phase"] = int(runtime_dict.get("phase", -1))
 
 	if unit.has_method("get_vital_status"):
 		var vital_status = unit.call("get_vital_status")
@@ -981,6 +991,9 @@ func _copy_enemy_meta_to_snapshot(unit: Node, snapshot: Dictionary) -> void:
 		"enemy_advance_style",
 		"enemy_role",
 		"enemy_tactic_label",
+		"enemy_movement_posture",
+		"enemy_weapon_posture",
+		"enemy_posture_policy_id",
 	]:
 		if unit.has_meta(string_key):
 			snapshot[string_key] = String(unit.get_meta(string_key, ""))
@@ -1204,6 +1217,8 @@ func _apply_command(cmd: Dictionary, delta: float) -> void:
 			_apply_move_command(cmd, delta)
 		"engage_area":
 			_apply_move_command(cmd, delta)
+		"hold_position":
+			_apply_unit_command_status(cmd)
 		_:
 			# TODO: Authoritative gameplay state commits belong here once systems exist.
 			pass
@@ -1341,6 +1356,8 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 	if _is_stale_tokenized_move_command(cmd, unit):
 		return
 
+	_apply_unit_command_status(cmd, unit)
+
 	if unit.has_method("set_target_position"):
 		unit.call("set_target_position", target_position)
 
@@ -1381,6 +1398,27 @@ func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 		unit.call("refresh_terrain_readability")
 	if bool(cmd.get("requeue_until_target", true)):
 		enqueue_command(cmd.duplicate(true))
+
+
+func _apply_unit_command_status(cmd: Dictionary, unit = null) -> void:
+	var target_unit = unit
+	if target_unit == null:
+		var unit_id: String = String(cmd.get("unit_id", "")).strip_edges()
+		if unit_id.is_empty():
+			return
+		var unit_registry = _get_unit_registry()
+		if unit_registry != null and unit_registry.has_method("get_unit"):
+			target_unit = unit_registry.call("get_unit", unit_id)
+		if target_unit == null:
+			target_unit = _resolve_known_unit(unit_id)
+	if target_unit == null or not target_unit.has_method("assign_unit_command"):
+		return
+
+	var command = UNIT_COMMAND_SCRIPT.call("from_dict", cmd)
+	if command == null or not command.has_method("is_valid") or not bool(command.call("is_valid")):
+		return
+
+	target_unit.call("assign_unit_command", command)
 
 
 func _apply_move_command_with_terrain(

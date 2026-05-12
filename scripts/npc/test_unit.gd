@@ -290,6 +290,18 @@ func get_move_speed_factor() -> float:
 	return float(_runtime_status.move_speed_factor)
 
 
+func get_movement_posture() -> String:
+	return String(_runtime_status.movement_posture)
+
+
+func get_weapon_posture() -> String:
+	return String(_runtime_status.weapon_posture)
+
+
+func get_posture_policy_id() -> String:
+	return String(_runtime_status.posture_policy_id)
+
+
 func get_cover_score() -> float:
 	return float(_runtime_status.cover_score)
 
@@ -659,7 +671,10 @@ func set_fireteam_id(next_fireteam_id: String) -> bool:
 		float(_runtime_status.cover_score),
 		float(_runtime_status.attack_bonus),
 		int(_runtime_status.phase),
-		_runtime_status.target_position
+		_runtime_status.target_position,
+		String(_runtime_status.movement_posture),
+		String(_runtime_status.weapon_posture),
+		String(_runtime_status.posture_policy_id)
 	)
 	if not bool(runtime_status.call("is_valid")):
 		return false
@@ -877,7 +892,10 @@ func set_target_position(target_position: Variant) -> bool:
 		float(_runtime_status.cover_score),
 		float(_runtime_status.attack_bonus),
 		int(_runtime_status.phase),
-		target_position
+		target_position,
+		String(_runtime_status.movement_posture),
+		String(_runtime_status.weapon_posture),
+		String(_runtime_status.posture_policy_id)
 	)
 
 
@@ -904,7 +922,10 @@ func assign_unit_command(command) -> bool:
 		float(command.get("cover_score")),
 		float(command.get("attack_bonus")),
 		int(command.get("phase")),
-		command.get("target_position")
+		command.get("target_position"),
+		String(command.get("movement_posture")),
+		String(command.get("weapon_posture")),
+		String(command.get("posture_policy_id"))
 	):
 		return false
 
@@ -923,7 +944,10 @@ func set_runtime_status(
 	cover_score: float = 0.0,
 	attack_bonus: float = 0.0,
 	phase: int = -1,
-	target_position: Variant = null
+	target_position: Variant = null,
+	movement_posture: String = "",
+	weapon_posture: String = "",
+	posture_policy_id: String = ""
 ) -> bool:
 	var runtime_status = _build_runtime_status(
 		status_name,
@@ -935,7 +959,10 @@ func set_runtime_status(
 		cover_score,
 		attack_bonus,
 		phase,
-		target_position
+		target_position,
+		movement_posture,
+		weapon_posture,
+		posture_policy_id
 	)
 	if not bool(runtime_status.call("is_valid")):
 		push_warning("TestUnit.set_runtime_status expects a valid UnitRuntimeStatus-compatible value.")
@@ -1006,7 +1033,10 @@ func _build_runtime_status(
 	cover_score: float = 0.0,
 	attack_bonus: float = 0.0,
 	phase: int = -1,
-	target_position: Variant = null
+	target_position: Variant = null,
+	movement_posture: String = "",
+	weapon_posture: String = "",
+	posture_policy_id: String = ""
 ):
 	var runtime_status = UNIT_RUNTIME_STATUS_SCRIPT.new()
 	runtime_status.status = status_name
@@ -1022,7 +1052,40 @@ func _build_runtime_status(
 	runtime_status.attack_bonus = attack_bonus
 	runtime_status.target_position = target_position
 	runtime_status.phase = phase
+	var posture_defaults: Dictionary = _get_default_runtime_postures(status_name)
+	runtime_status.movement_posture = UNIT_RUNTIME_STATUS_SCRIPT.call("normalize_movement_posture", movement_posture, String(posture_defaults.get("movement_posture", UNIT_RUNTIME_STATUS_SCRIPT.MOVEMENT_POSTURE_IDLE)))
+	runtime_status.weapon_posture = UNIT_RUNTIME_STATUS_SCRIPT.call("normalize_weapon_posture", weapon_posture, String(posture_defaults.get("weapon_posture", UNIT_RUNTIME_STATUS_SCRIPT.WEAPON_POSTURE_LOWERED)))
+	runtime_status.posture_policy_id = posture_policy_id.strip_edges().to_lower()
 	return runtime_status
+
+
+func _get_default_runtime_postures(status_name: String) -> Dictionary:
+	match status_name.strip_edges().to_lower():
+		"pending_move":
+			return {
+				"movement_posture": UNIT_RUNTIME_STATUS_SCRIPT.MOVEMENT_POSTURE_TRAVEL,
+				"weapon_posture": UNIT_RUNTIME_STATUS_SCRIPT.WEAPON_POSTURE_LOWERED,
+			}
+		"engaging":
+			return {
+				"movement_posture": UNIT_RUNTIME_STATUS_SCRIPT.MOVEMENT_POSTURE_ENGAGE,
+				"weapon_posture": UNIT_RUNTIME_STATUS_SCRIPT.WEAPON_POSTURE_AIMED,
+			}
+		"holding":
+			return {
+				"movement_posture": UNIT_RUNTIME_STATUS_SCRIPT.MOVEMENT_POSTURE_OVERWATCH,
+				"weapon_posture": UNIT_RUNTIME_STATUS_SCRIPT.WEAPON_POSTURE_READY,
+			}
+		"assigned":
+			return {
+				"movement_posture": UNIT_RUNTIME_STATUS_SCRIPT.MOVEMENT_POSTURE_TACTICAL,
+				"weapon_posture": UNIT_RUNTIME_STATUS_SCRIPT.WEAPON_POSTURE_READY,
+			}
+		_:
+			return {
+				"movement_posture": UNIT_RUNTIME_STATUS_SCRIPT.MOVEMENT_POSTURE_IDLE,
+				"weapon_posture": UNIT_RUNTIME_STATUS_SCRIPT.WEAPON_POSTURE_LOWERED,
+			}
 
 
 func _build_vital_status(state: String, health_points: int, bleedout_ticks: int):
@@ -1098,6 +1161,9 @@ func _build_remote_runtime_dict(snapshot: Dictionary) -> Dictionary:
 		"cover_score": float(snapshot.get("cover_score", _runtime_status.cover_score)),
 		"attack_bonus": float(snapshot.get("attack_bonus", _runtime_status.attack_bonus)),
 		"phase": int(snapshot.get("phase", _runtime_status.phase)),
+		"movement_posture": String(snapshot.get("movement_posture", _runtime_status.movement_posture)),
+		"weapon_posture": String(snapshot.get("weapon_posture", _runtime_status.weapon_posture)),
+		"posture_policy_id": String(snapshot.get("posture_policy_id", _runtime_status.posture_policy_id)),
 	}
 	return runtime_dict
 

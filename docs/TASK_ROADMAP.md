@@ -532,7 +532,7 @@ Phase 18ZF - Ground Mission Default Playability
 TASK_344 - Ground Mission Default Enemy Visuals (implementiert)
 
 Phase 18ZG - NPC Movement Posture Standard Behavior
-TASK_345 - NPC Standard Movement Posture Policy (geplant)
+TASK_345 - NPC Standard Movement Posture Policy (implementiert)
 
 Phase 18ZH - Homebase Direct Staging FOB Bypass
 TASK_346 - Homebase Direct Staging Character Popup (implementiert)

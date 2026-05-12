@@ -27,6 +27,11 @@ Jede normalisierte Konfiguration enthaelt:
 - `contact_behavior`
 - `weapon_profile`
 - `visual_archetype`
+- `movement_posture_policy`
+- `ready_distance_world`
+- `travel_speed_factor`
+- `ready_speed_factor`
+- `aim_move_speed_factor`
 
 Optionale Authoring-Felder:
 
@@ -39,6 +44,14 @@ Optionale Authoring-Felder:
 - `lz_threat_zone_id`
 - `communication_intensity`
 
+Posture-Policies ab TASK_345:
+
+- `travel_until_threat`: Patrouille/Marsch laeuft schneller mit gesenkter Waffe, wechselt nahe Threat/Objective auf Tactical/Ready.
+- `always_ready`: Team bleibt beim Vorruecken grundsaetzlich Tactical/Ready.
+- `hold_ready`: Verteidiger und haltende Teams starten Overwatch/Ready.
+- `aggressive_ready`: Push-Teams ruecken Ready vor, aber schneller als defensive Teams.
+- `overwatch`: Wachposten/Sniper bleiben stationaer Overwatch/Ready.
+
 ## Defaults
 
 - Karten bis einschliesslich 32x32 nutzen `guard_hold`.
@@ -48,6 +61,8 @@ Optionale Authoring-Felder:
 ## Runtime-Abstraktion
 
 - `advance_style` wird fuer die Runtime auf `hold`, `probe`, `push` oder `bounding` normalisiert.
+- `movement_posture_policy` leitet Runtime-Posture und Speed ab: `travel/lowered`, `tactical/ready`, `engage/aimed` oder `overwatch/ready`.
+- Die wirksame Bewegungsgeschwindigkeit kommt ab TASK_345 aus der Posture-Policy (`travel_speed_factor`, `ready_speed_factor`, `aim_move_speed_factor`) und nicht mehr nur aus `advance_style`.
 - `rush`/`aggressive_push` werden als `push` ausgefuehrt.
 - `bound_to_cover` und cover-orientierte Varianten werden als `bounding` ausgefuehrt.
 - `visual_archetype` referenziert ab TASK_206 stabile NPC-Faction-Archetypen, aktuell `enemy_space_suit_orange` fuer das Standard-Gegenteam.
