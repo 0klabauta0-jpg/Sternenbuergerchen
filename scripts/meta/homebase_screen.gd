@@ -10,6 +10,8 @@ const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.g
 const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_labels.gd")
 const DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/drop_light_layout_contract.gd")
 const HOMEBASE_TEAM_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/homebase_team_drop_panel.gd")
+const FOB_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/fob_drop_panel.gd")
+const FOB_FIRETEAM_CARD_SCRIPT: GDScript = preload("res://scripts/meta/fob_fireteam_card.gd")
 const PERSONNEL_EVENT_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/personnel_event_model.gd")
 const HOVER_SCROLL_BEHAVIOR_SCRIPT: GDScript = preload("res://scripts/ui/hover_scroll_behavior.gd")
 const FLIGHTDECK_PLATFORM_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/platform_large_NW.png")
@@ -21,8 +23,15 @@ const HOMEBASE_TRANSFER_GHOST_CARD_SIZE := Vector2(316.0, 74.0)
 const HOMEBASE_SHIPCARD_IMAGE_SIZE := Vector2(248.0, 164.0)
 const HOMEBASE_SHIPCARD_BUTTON_SIZE := Vector2(166.0, 114.0)
 const HOMEBASE_SHIPCARD_IMAGE_OFFSET := Vector2(-58.0, -36.0)
+const HOMEBASE_DEFAULT_FIRETEAM_ID := "ft1"
+const HOMEBASE_DEFAULT_LOADOUT_ID := "medium"
+const HOMEBASE_LOADOUT_OPTIONS := ["light", "medium", "heavy"]
+const HOMEBASE_PRIMARY_WEAPON_OPTIONS := ["rifle", "carbine", "smg", "dmr"]
+const HOMEBASE_SIDEARM_OPTIONS := ["pistol", "machine_pistol", "none"]
+const HOMEBASE_DIRECT_STAGING_DROP_KIND := "homebase_dropship"
 
 signal selection_changed(selected_unit_ids)
+signal fireteam_context_changed(selected_unit_ids, selected_fireteam_ids)
 signal team_confirmed(selected_unit_ids)
 signal mission_selection_changed(mission_id)
 signal mission_start_requested()
@@ -37,6 +46,11 @@ signal aircraft_remove_requested(craft_id)
 var _available_units: Array = []
 var _selected_unit_ids: PackedStringArray = []
 var _selected_fireteam_ids: PackedStringArray = []
+var _fireteam_definitions: Array = []
+var _focused_fireteam_id: String = HOMEBASE_DEFAULT_FIRETEAM_ID
+var _loadout_staged_fireteam_id: String = HOMEBASE_DEFAULT_FIRETEAM_ID
+var _homebase_dropship_staged_fireteam_ids: PackedStringArray = []
+var _member_loadout_by_unit_id: Dictionary = {}
 var _profiles_by_id: Dictionary = {}
 var _focused_unit_id: String = ""
 var _roster_cards_by_unit_id: Dictionary = {}
@@ -68,6 +82,8 @@ var _personnel_events: Array = []
 func _ready() -> void:
 	META_UI_SKIN_SCRIPT.apply_homebase(self)
 	_apply_drop_light_fixed_layout()
+	_ensure_homebase_direct_staging_panels()
+	_ensure_character_sheet_popup()
 	HOVER_SCROLL_BEHAVIOR_SCRIPT.call("install", self)
 	_apply_contextual_help_ids()
 	var mission_selector: OptionButton = get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/MissionSelector")
@@ -113,6 +129,7 @@ func _ready() -> void:
 	var team_drop_panel = _get_team_drop_panel()
 	if team_drop_panel != null and not team_drop_panel.unit_dropped.is_connected(_on_team_drop_panel_unit_dropped):
 		team_drop_panel.unit_dropped.connect(_on_team_drop_panel_unit_dropped)
+	_connect_homebase_direct_staging_signals()
 
 	_rebuild_profiles()
 	_rebuild_ui()
@@ -122,16 +139,23 @@ func setup_roster(available_units: Array, selected_unit_ids: PackedStringArray =
 	_available_units = available_units.duplicate(true)
 	_selected_unit_ids = _normalize_selected_unit_ids(selected_unit_ids)
 	_selected_fireteam_ids = _normalize_selected_fireteam_ids(_selected_fireteam_ids)
+	_sanitize_homebase_direct_staging_state()
 	_team_feedback_text = ""
 	if is_inside_tree():
 		_rebuild_profiles()
 		_rebuild_ui()
 
 
-func set_fireteam_context(selected_fireteam_ids: PackedStringArray = []) -> void:
+func set_fireteam_context(selected_fireteam_ids: PackedStringArray = [], fireteam_definitions: Array = []) -> void:
 	_selected_fireteam_ids = _normalize_selected_fireteam_ids(selected_fireteam_ids)
-	if is_inside_tree() and _character_sheet_open:
-		_update_character_sheet()
+	_fireteam_definitions = _normalize_fireteam_definitions(fireteam_definitions)
+	_sanitize_homebase_direct_staging_state()
+	if is_inside_tree():
+		_render_homebase_fireteams()
+		_update_homebase_loadout_panel()
+		_update_homebase_flightdeck_staging_panel()
+		if _character_sheet_open:
+			_update_character_sheet()
 
 
 func set_mission_context(mission_catalog: Array, selected_map_path: String, mission_name: String, mission_slot_count: int, selected_mission_id: String = "") -> void:
@@ -178,6 +202,7 @@ func set_transport_state(
 func set_selected_unit_ids(selected_unit_ids: PackedStringArray) -> void:
 	_selected_unit_ids = _normalize_selected_unit_ids(selected_unit_ids)
 	_selected_fireteam_ids = _normalize_selected_fireteam_ids(_selected_fireteam_ids)
+	_sanitize_homebase_direct_staging_state()
 	_team_feedback_text = ""
 	if is_inside_tree():
 		_rebuild_ui()
@@ -185,6 +210,10 @@ func set_selected_unit_ids(selected_unit_ids: PackedStringArray) -> void:
 
 func get_selected_unit_ids() -> PackedStringArray:
 	return _selected_unit_ids.duplicate()
+
+
+func get_selected_fireteam_ids() -> PackedStringArray:
+	return _selected_fireteam_ids.duplicate()
 
 
 func set_mission_launch_state(is_ready: bool, summary_text: String = "") -> void:
@@ -228,6 +257,74 @@ func get_aircraft_panel_snapshot() -> Dictionary:
 		"flightdeck_stage_visible": _node_is_visible("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/DropLightFlightdeckStage"),
 		"deck_activity_visible": _node_is_visible("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftTransfersScroll"),
 		"shipcards_are_primary_status": true,
+		"homebase_direct_staging_enabled": true,
+		"fireteams_panel_visible": _node_is_visible("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel"),
+		"loadout_panel_visible": _node_is_visible("Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel"),
+		"fixed_character_sheet_visible": _node_is_visible("Panel/Margin/VBox/ContentRow/InfoPanel"),
+		"character_popup_visible": _node_is_visible("CharacterSheetPopup"),
+		"staged_fireteam_ids": Array(_homebase_dropship_staged_fireteam_ids),
+	}
+
+
+func build_homebase_direct_drop_state() -> Dictionary:
+	_sanitize_homebase_direct_staging_state()
+	var payload_craft: Dictionary = _get_selected_aircraft_definition()
+	if payload_craft.is_empty():
+		var visible_aircraft_definitions: Array = _get_visible_homebase_aircraft_definitions()
+		if not visible_aircraft_definitions.is_empty():
+			payload_craft = Dictionary(visible_aircraft_definitions[0])
+	var payload_craft_id: String = String(payload_craft.get("craft_id", _selected_aircraft_id)).strip_edges()
+	if payload_craft_id.is_empty():
+		payload_craft_id = "homebase_dropship"
+	var payload_fireteam_ids: PackedStringArray = _filter_existing_fireteam_ids(_homebase_dropship_staged_fireteam_ids)
+	var payload_unit_ids: PackedStringArray = _build_unit_ids_for_fireteams(payload_fireteam_ids)
+	var craft_display_name: String = String(payload_craft.get("display_name", "Dropship")).strip_edges()
+	if craft_display_name.is_empty():
+		craft_display_name = "Dropship"
+	return {
+		"transport_craft_id": payload_craft_id,
+		"dropship_phase": "homebase_ready" if not payload_unit_ids.is_empty() else "waiting",
+		"queued_fireteam_ids": Array(payload_fireteam_ids),
+		"boarded_fireteam_ids": Array(payload_fireteam_ids),
+		"embarked_unit_ids": Array(payload_unit_ids),
+		"launch_ready_craft_id": payload_craft_id if not payload_unit_ids.is_empty() else "",
+		"drop_ship_staged": not payload_unit_ids.is_empty(),
+		"mission_drop_craft_id": payload_craft_id,
+		"mission_drop_display_name": craft_display_name,
+		"mission_drop_title_text": UI_BLOCK_LABELS_SCRIPT.prefixed_transport_title(craft_display_name),
+		"mission_drop_texture_path": String(payload_craft.get("texture_path", "")).strip_edges(),
+		"mission_drop_state": "waiting" if not payload_unit_ids.is_empty() else "",
+		"mission_drop_pilot_text": "Pilot: %s" % _build_display_name(_get_assigned_pilot_id(payload_craft_id)) if not _get_assigned_pilot_id(payload_craft_id).is_empty() else "Pilot: none",
+		"mission_drop_status_line": "Homebase direct staging",
+		"mission_drop_progress": 0.0,
+		"mission_drop_eta_seconds": 0,
+		"mission_drop_pilot_unit_id": _get_assigned_pilot_id(payload_craft_id),
+		"mission_drop_pilot_display_name": _build_display_name(_get_assigned_pilot_id(payload_craft_id)) if not _get_assigned_pilot_id(payload_craft_id).is_empty() else "",
+		"mission_drop_pilot_portrait_path": _get_profile_portrait_path(_get_assigned_pilot_id(payload_craft_id)),
+		"mission_drop_passenger_count": payload_unit_ids.size(),
+		"mission_drop_cards": _build_homebase_mission_drop_cards(payload_fireteam_ids, payload_unit_ids),
+		"selected_unit_ids": Array(_selected_unit_ids),
+		"selected_fireteam_ids": Array(_selected_fireteam_ids),
+		"fireteam_definitions": _get_fireteam_definitions_snapshot(),
+		"homebase_direct_staging": true,
+	}
+
+
+func get_homebase_direct_staging_snapshot() -> Dictionary:
+	var drop_state: Dictionary = build_homebase_direct_drop_state()
+	return {
+		"direct_staging_enabled": true,
+		"fireteams_panel_visible": _node_is_visible("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel"),
+		"loadout_panel_visible": _node_is_visible("Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel"),
+		"flightdeck_panel_visible": _node_is_visible("Panel/Margin/VBox/ContentRow/AircraftPanel"),
+		"fixed_character_sheet_visible": _node_is_visible("Panel/Margin/VBox/ContentRow/InfoPanel"),
+		"character_popup_visible": _node_is_visible("CharacterSheetPopup"),
+		"selected_unit_ids": Array(_selected_unit_ids),
+		"selected_fireteam_ids": Array(_selected_fireteam_ids),
+		"staged_fireteam_ids": Array(_homebase_dropship_staged_fireteam_ids),
+		"embarked_unit_ids": Array(PackedStringArray(Array(drop_state.get("embarked_unit_ids", [])))),
+		"drop_ship_staged": bool(drop_state.get("drop_ship_staged", false)),
+		"uses_fob_drop_panel_contract": bool(get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel").get_meta("homebase_uses_fob_drop_panel_contract", false)) if get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel") != null else false,
 	}
 
 
@@ -249,16 +346,22 @@ func _rebuild_profiles() -> void:
 
 
 func _rebuild_ui() -> void:
+	_ensure_homebase_direct_staging_panels()
+	_ensure_character_sheet_popup()
 	_ensure_focused_unit_id()
 	_ensure_selected_aircraft_id()
+	_sanitize_homebase_direct_staging_state()
 	_apply_block_labels()
 	_apply_homebase_compact_panel_policy()
 	_render_roster()
 	_render_staged_team()
+	_render_homebase_fireteams()
+	_update_homebase_loadout_panel()
 	_update_mission_info()
 	_update_team_summary()
 	_update_team_transfer_list()
 	_update_aircraft_panel()
+	_update_homebase_flightdeck_staging_panel()
 	_update_character_sheet()
 	_update_character_sheet_visibility()
 	_update_drop_light_flightdeck_stage()
@@ -276,6 +379,12 @@ func _apply_contextual_help_ids() -> void:
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamDropPanel"), "homebase.transfer_team")
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamDropPanel/DropMargin/DropVBox/SelectedTeamScroll"), "homebase.transfer_team")
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/ActiveTransfersScroll"), "homebase.transfer_team")
+	_apply_help_id(get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel"), "homebase.fireteams")
+	_apply_help_id(get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel/FireteamMargin/FireteamVBox/FireteamScroll"), "homebase.fireteams")
+	_apply_help_id(get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel"), "homebase.loadout")
+	_apply_help_id(get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutMemberScroll"), "homebase.loadout")
+	_apply_help_id(get_node_or_null("Panel/Margin/VBox/ContentRow/AircraftPanel"), "homebase.flightdeck")
+	_apply_help_id(get_node_or_null("CharacterSheetPopup"), "homebase.character_popup")
 
 
 func _apply_help_id(node: Node, help_id: String) -> void:
@@ -294,8 +403,10 @@ func _apply_drop_light_fixed_layout() -> void:
 	custom_minimum_size = Vector2(float(target_viewport.x), float(target_viewport.y))
 	set_meta("drop_light_fixed_fullhd_layout", true)
 	set_meta("drop_light_screen", DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("SCREEN_HOMEBASE"))
-	_character_sheet_open = true
+	_character_sheet_open = false
 	_ensure_drop_light_topbar()
+	_ensure_homebase_direct_staging_panels()
+	_ensure_character_sheet_popup()
 	_ensure_drop_light_flightdeck_stage()
 	_enforce_drop_light_fixed_layout()
 	call_deferred("_enforce_drop_light_fixed_layout")
@@ -306,9 +417,12 @@ func _enforce_drop_light_fixed_layout() -> void:
 	_apply_fixed_window_contract("DropLightTopbar", layout.get("topbar"))
 	_apply_fixed_window_contract("Panel/Margin/VBox/MissionPanel", layout.get("mission_brief"))
 	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/RosterPanel", layout.get("roster"))
-	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/TeamPanel", layout.get("transfer_team"))
+	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel", layout.get("fireteams"))
+	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel", layout.get("loadout"))
 	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/AircraftPanel", layout.get("flightdeck"))
-	_apply_fixed_window_contract("Panel/Margin/VBox/ContentRow/InfoPanel", layout.get("character_sheet"))
+	_disable_legacy_homebase_window("Panel/Margin/VBox/ContentRow/TeamPanel", "homebase_legacy_transfer_window_disabled")
+	_disable_legacy_homebase_window("Panel/Margin/VBox/ContentRow/InfoPanel", "homebase_legacy_character_sheet_window_disabled")
+	_apply_character_popup_rect()
 
 
 func _apply_fixed_window_contract(path: String, rect_variant: Variant) -> void:
@@ -355,6 +469,388 @@ func _set_object_property_if_available(target: Object, property_name: String, va
 			return
 
 
+func _ensure_homebase_direct_staging_panels() -> void:
+	var content_row := get_node_or_null("Panel/Margin/VBox/ContentRow") as HBoxContainer
+	if content_row == null:
+		return
+
+	var fireteam_panel := content_row.get_node_or_null("HomebaseFireteamPanel") as PanelContainer
+	if fireteam_panel == null:
+		fireteam_panel = _create_homebase_fireteam_panel()
+		content_row.add_child(fireteam_panel)
+
+	var loadout_panel := content_row.get_node_or_null("HomebaseLoadoutPanel") as PanelContainer
+	if loadout_panel == null:
+		loadout_panel = _create_homebase_loadout_panel()
+		content_row.add_child(loadout_panel)
+
+	var aircraft_panel := content_row.get_node_or_null("AircraftPanel")
+	if aircraft_panel != null:
+		content_row.move_child(fireteam_panel, mini(aircraft_panel.get_index(), content_row.get_child_count() - 1))
+		content_row.move_child(loadout_panel, mini(fireteam_panel.get_index() + 1, content_row.get_child_count() - 1))
+		content_row.move_child(aircraft_panel, mini(loadout_panel.get_index() + 1, content_row.get_child_count() - 1))
+
+	_ensure_homebase_flightdeck_staging_panel()
+	_connect_homebase_direct_staging_signals()
+
+
+func _create_homebase_fireteam_panel() -> PanelContainer:
+	var panel := PanelContainer.new()
+	panel.name = "HomebaseFireteamPanel"
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	panel.mouse_filter = Control.MOUSE_FILTER_PASS
+	panel.set_script(FOB_DROP_PANEL_SCRIPT)
+	panel.set("drop_kind", "fireteam_pool")
+	panel.set_meta("homebase_direct_staging_panel", true)
+	panel.set_meta("homebase_uses_fob_drop_panel_contract", true)
+	META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "thin_frame")
+
+	var margin := MarginContainer.new()
+	margin.name = "FireteamMargin"
+	margin.add_theme_constant_override("margin_left", 8)
+	margin.add_theme_constant_override("margin_top", 8)
+	margin.add_theme_constant_override("margin_right", 8)
+	margin.add_theme_constant_override("margin_bottom", 8)
+	panel.add_child(margin)
+
+	var vbox := VBoxContainer.new()
+	vbox.name = "FireteamVBox"
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	vbox.add_theme_constant_override("separation", 6)
+	margin.add_child(vbox)
+
+	var header_row := HBoxContainer.new()
+	header_row.name = "FireteamHeaderRow"
+	header_row.add_theme_constant_override("separation", 4)
+	vbox.add_child(header_row)
+
+	var header_label := Label.new()
+	header_label.name = "FireteamHeaderLabel"
+	header_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	META_UI_SKIN_SCRIPT.style_header_label(header_label, 12)
+	header_row.add_child(header_label)
+
+	var add_button := Button.new()
+	add_button.name = "AddFireteamButton"
+	add_button.text = "+"
+	add_button.custom_minimum_size = Vector2(30.0, 30.0)
+	META_UI_SKIN_SCRIPT.style_secondary_button(add_button)
+	header_row.add_child(add_button)
+
+	var remove_button := Button.new()
+	remove_button.name = "RemoveFireteamButton"
+	remove_button.text = "-"
+	remove_button.custom_minimum_size = Vector2(30.0, 30.0)
+	META_UI_SKIN_SCRIPT.style_secondary_button(remove_button)
+	header_row.add_child(remove_button)
+
+	var action_row := HBoxContainer.new()
+	action_row.name = "FireteamActionRow"
+	action_row.add_theme_constant_override("separation", 4)
+	vbox.add_child(action_row)
+
+	var assign_button := Button.new()
+	assign_button.name = "AssignFocusedUnitButton"
+	assign_button.text = "Assign"
+	assign_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	META_UI_SKIN_SCRIPT.style_secondary_button(assign_button)
+	action_row.add_child(assign_button)
+
+	var clear_button := Button.new()
+	clear_button.name = "ClearFocusedUnitButton"
+	clear_button.text = "Clear"
+	clear_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	META_UI_SKIN_SCRIPT.style_secondary_button(clear_button)
+	action_row.add_child(clear_button)
+
+	var summary_label := Label.new()
+	summary_label.name = "FireteamSummaryLabel"
+	summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	META_UI_SKIN_SCRIPT.style_body_label(summary_label, 9)
+	vbox.add_child(summary_label)
+
+	var scroll := ScrollContainer.new()
+	scroll.name = "FireteamScroll"
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	vbox.add_child(scroll)
+
+	var list := VBoxContainer.new()
+	list.name = "FireteamList"
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list.add_theme_constant_override("separation", 6)
+	scroll.add_child(list)
+	return panel
+
+
+func _create_homebase_loadout_panel() -> PanelContainer:
+	var panel := PanelContainer.new()
+	panel.name = "HomebaseLoadoutPanel"
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	panel.mouse_filter = Control.MOUSE_FILTER_PASS
+	panel.set_script(FOB_DROP_PANEL_SCRIPT)
+	panel.set("drop_kind", "loadout")
+	panel.set_meta("homebase_direct_staging_panel", true)
+	panel.set_meta("homebase_uses_fob_drop_panel_contract", true)
+	META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "thin_frame")
+
+	var margin := MarginContainer.new()
+	margin.name = "LoadoutMargin"
+	margin.add_theme_constant_override("margin_left", 8)
+	margin.add_theme_constant_override("margin_top", 8)
+	margin.add_theme_constant_override("margin_right", 8)
+	margin.add_theme_constant_override("margin_bottom", 8)
+	panel.add_child(margin)
+
+	var vbox := VBoxContainer.new()
+	vbox.name = "LoadoutVBox"
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	vbox.add_theme_constant_override("separation", 6)
+	margin.add_child(vbox)
+
+	var header_row := HBoxContainer.new()
+	header_row.name = "LoadoutHeaderRow"
+	header_row.add_theme_constant_override("separation", 4)
+	vbox.add_child(header_row)
+
+	var header_label := Label.new()
+	header_label.name = "LoadoutHeaderLabel"
+	header_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	META_UI_SKIN_SCRIPT.style_header_label(header_label, 12)
+	header_row.add_child(header_label)
+
+	var clear_button := Button.new()
+	clear_button.name = "ClearLoadoutButton"
+	clear_button.text = "Clear"
+	clear_button.custom_minimum_size = Vector2(56.0, 30.0)
+	META_UI_SKIN_SCRIPT.style_secondary_button(clear_button)
+	header_row.add_child(clear_button)
+
+	var status_label := Label.new()
+	status_label.name = "LoadoutStatusLabel"
+	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	META_UI_SKIN_SCRIPT.style_body_label(status_label, 9)
+	vbox.add_child(status_label)
+
+	var fireteam_list := HBoxContainer.new()
+	fireteam_list.name = "LoadoutFireteamList"
+	fireteam_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.add_child(fireteam_list)
+
+	var scroll := ScrollContainer.new()
+	scroll.name = "LoadoutMemberScroll"
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	vbox.add_child(scroll)
+
+	var member_list := VBoxContainer.new()
+	member_list.name = "LoadoutMemberList"
+	member_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	member_list.add_theme_constant_override("separation", 5)
+	scroll.add_child(member_list)
+	return panel
+
+
+func _ensure_homebase_flightdeck_staging_panel() -> void:
+	var aircraft_vbox := get_node_or_null("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox") as VBoxContainer
+	if aircraft_vbox == null or aircraft_vbox.get_node_or_null("DirectDropshipFireteamPanel") != null:
+		return
+	var panel := PanelContainer.new()
+	panel.name = "DirectDropshipFireteamPanel"
+	panel.custom_minimum_size = Vector2(0.0, 96.0)
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel.mouse_filter = Control.MOUSE_FILTER_PASS
+	panel.set_script(FOB_DROP_PANEL_SCRIPT)
+	panel.set("drop_kind", HOMEBASE_DIRECT_STAGING_DROP_KIND)
+	panel.set_meta("homebase_direct_dropship_staging_panel", true)
+	panel.set_meta("homebase_uses_fob_drop_panel_contract", true)
+	META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "thin_frame")
+
+	var margin := MarginContainer.new()
+	margin.name = "DirectDropshipMargin"
+	margin.add_theme_constant_override("margin_left", 6)
+	margin.add_theme_constant_override("margin_top", 6)
+	margin.add_theme_constant_override("margin_right", 6)
+	margin.add_theme_constant_override("margin_bottom", 6)
+	panel.add_child(margin)
+
+	var vbox := VBoxContainer.new()
+	vbox.name = "DirectDropshipVBox"
+	vbox.add_theme_constant_override("separation", 4)
+	margin.add_child(vbox)
+
+	var header_label := Label.new()
+	header_label.name = "DirectDropshipHeaderLabel"
+	header_label.text = "Direct Dropship Staging"
+	META_UI_SKIN_SCRIPT.style_header_label(header_label, 10)
+	vbox.add_child(header_label)
+
+	var list := VBoxContainer.new()
+	list.name = "DirectDropshipList"
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.add_child(list)
+
+	var insert_index := aircraft_vbox.get_child_count()
+	var shipcards_scroll := aircraft_vbox.get_node_or_null("ShipCardsScroll")
+	if shipcards_scroll != null:
+		insert_index = shipcards_scroll.get_index()
+	aircraft_vbox.add_child(panel)
+	aircraft_vbox.move_child(panel, insert_index)
+
+
+func _connect_homebase_direct_staging_signals() -> void:
+	var fireteam_panel := get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel")
+	if fireteam_panel != null:
+		if fireteam_panel.has_signal("fireteam_dropped") and not fireteam_panel.is_connected("fireteam_dropped", Callable(self, "_on_homebase_staging_fireteam_dropped")):
+			fireteam_panel.connect("fireteam_dropped", Callable(self, "_on_homebase_staging_fireteam_dropped"))
+		if fireteam_panel.has_signal("unit_dropped") and not fireteam_panel.is_connected("unit_dropped", Callable(self, "_on_homebase_direct_unit_dropped")):
+			fireteam_panel.connect("unit_dropped", Callable(self, "_on_homebase_direct_unit_dropped"))
+	var loadout_panel := get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel")
+	if loadout_panel != null:
+		if loadout_panel.has_signal("fireteam_dropped") and not loadout_panel.is_connected("fireteam_dropped", Callable(self, "_on_homebase_staging_fireteam_dropped")):
+			loadout_panel.connect("fireteam_dropped", Callable(self, "_on_homebase_staging_fireteam_dropped"))
+		if loadout_panel.has_signal("unit_dropped") and not loadout_panel.is_connected("unit_dropped", Callable(self, "_on_homebase_direct_unit_dropped")):
+			loadout_panel.connect("unit_dropped", Callable(self, "_on_homebase_direct_unit_dropped"))
+	var dropship_panel := get_node_or_null("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/DirectDropshipFireteamPanel")
+	if dropship_panel != null:
+		if dropship_panel.has_signal("fireteam_dropped") and not dropship_panel.is_connected("fireteam_dropped", Callable(self, "_on_homebase_staging_fireteam_dropped")):
+			dropship_panel.connect("fireteam_dropped", Callable(self, "_on_homebase_staging_fireteam_dropped"))
+		if dropship_panel.has_signal("unit_dropped") and not dropship_panel.is_connected("unit_dropped", Callable(self, "_on_homebase_direct_unit_dropped")):
+			dropship_panel.connect("unit_dropped", Callable(self, "_on_homebase_direct_unit_dropped"))
+	for button_path in [
+		"Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/AddFireteamButton",
+		"Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/RemoveFireteamButton",
+		"Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel/FireteamMargin/FireteamVBox/FireteamActionRow/AssignFocusedUnitButton",
+		"Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel/FireteamMargin/FireteamVBox/FireteamActionRow/ClearFocusedUnitButton",
+		"Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutHeaderRow/ClearLoadoutButton",
+	]:
+		var button := get_node_or_null(button_path) as Button
+		if button == null:
+			continue
+		match button.name:
+			"AddFireteamButton":
+				if not button.pressed.is_connected(_on_homebase_add_fireteam_pressed):
+					button.pressed.connect(_on_homebase_add_fireteam_pressed)
+			"RemoveFireteamButton":
+				if not button.pressed.is_connected(_on_homebase_remove_fireteam_pressed):
+					button.pressed.connect(_on_homebase_remove_fireteam_pressed)
+			"AssignFocusedUnitButton":
+				if not button.pressed.is_connected(_on_homebase_assign_focused_unit_pressed):
+					button.pressed.connect(_on_homebase_assign_focused_unit_pressed)
+			"ClearFocusedUnitButton":
+				if not button.pressed.is_connected(_on_homebase_clear_focused_unit_pressed):
+					button.pressed.connect(_on_homebase_clear_focused_unit_pressed)
+			"ClearLoadoutButton":
+				if not button.pressed.is_connected(_on_homebase_clear_loadout_pressed):
+					button.pressed.connect(_on_homebase_clear_loadout_pressed)
+
+
+func _ensure_character_sheet_popup() -> void:
+	if get_node_or_null("CharacterSheetPopup") != null:
+		return
+	var root := Control.new()
+	root.name = "CharacterSheetPopup"
+	root.visible = false
+	root.set_as_top_level(true)
+	root.z_as_relative = false
+	root.z_index = 120
+	root.mouse_filter = Control.MOUSE_FILTER_STOP
+	root.set_meta("homebase_character_sheet_popup", true)
+	root.set_meta("outside_numbered_window_grid", true)
+	add_child(root)
+
+	var panel := PanelContainer.new()
+	panel.name = "PopupPanel"
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "thin_frame")
+	root.add_child(panel)
+
+	var margin := MarginContainer.new()
+	margin.name = "PopupMargin"
+	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	margin.add_theme_constant_override("margin_left", 10)
+	margin.add_theme_constant_override("margin_top", 10)
+	margin.add_theme_constant_override("margin_right", 10)
+	margin.add_theme_constant_override("margin_bottom", 10)
+	panel.add_child(margin)
+
+	var vbox := VBoxContainer.new()
+	vbox.name = "PopupVBox"
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	vbox.add_theme_constant_override("separation", 8)
+	margin.add_child(vbox)
+
+	var header_row := HBoxContainer.new()
+	header_row.name = "PopupHeaderRow"
+	header_row.add_theme_constant_override("separation", 8)
+	vbox.add_child(header_row)
+
+	var header_label := Label.new()
+	header_label.name = "PopupHeaderLabel"
+	header_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	META_UI_SKIN_SCRIPT.style_header_label(header_label, 13)
+	header_row.add_child(header_label)
+
+	var close_button := Button.new()
+	close_button.name = "ClosePopupButton"
+	close_button.text = "Close"
+	close_button.custom_minimum_size = Vector2(72.0, 32.0)
+	META_UI_SKIN_SCRIPT.style_secondary_button(close_button)
+	if not close_button.pressed.is_connected(_on_close_sheet_button_pressed):
+		close_button.pressed.connect(_on_close_sheet_button_pressed)
+	header_row.add_child(close_button)
+
+	var scroll := ScrollContainer.new()
+	scroll.name = "PopupScroll"
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	vbox.add_child(scroll)
+
+	var content := VBoxContainer.new()
+	content.name = "GeneratedSheetContent"
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.add_theme_constant_override("separation", 6)
+	scroll.add_child(content)
+	_apply_character_popup_rect()
+
+
+func _apply_character_popup_rect() -> void:
+	var popup := get_node_or_null("CharacterSheetPopup") as Control
+	if popup == null:
+		return
+	popup.set_as_top_level(true)
+	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_homebase_layout")
+	var rect_variant: Variant = layout.get("character_popup")
+	if typeof(rect_variant) != TYPE_RECT2I:
+		return
+	var rect: Rect2i = rect_variant
+	popup.position = Vector2(float(rect.position.x), float(rect.position.y))
+	popup.size = Vector2(float(rect.size.x), float(rect.size.y))
+	popup.custom_minimum_size = Vector2(float(rect.size.x), float(rect.size.y))
+	popup.set_deferred("position", popup.position)
+	popup.set_deferred("size", popup.size)
+	popup.set_meta("homebase_character_popup_rect", rect)
+
+
+func _disable_legacy_homebase_window(path: String, meta_key: String) -> void:
+	var control := get_node_or_null(path) as Control
+	if control == null:
+		return
+	control.visible = false
+	control.custom_minimum_size = Vector2.ZERO
+	control.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	control.set_meta(meta_key, true)
+
+
 func _ensure_drop_light_topbar() -> void:
 	if get_node_or_null("DropLightTopbar") != null:
 		return
@@ -394,7 +890,7 @@ func _ensure_drop_light_topbar() -> void:
 	META_UI_SKIN_SCRIPT.style_header_label(title_label, 14)
 	row.add_child(title_label)
 
-	for badge_text in ["Roster", "Transfer", "Flightdeck", "Sheet"]:
+	for badge_text in ["Roster", "#10 Fireteams", "#13 Loadout", "Flightdeck"]:
 		var badge := Label.new()
 		badge.text = badge_text
 		badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -444,9 +940,12 @@ func _apply_block_labels() -> void:
 		"Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox/RosterHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_AVAILABLE_OPERATORS,
 		"Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamHeaderRow/TeamHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_TRANSFER_TEAM,
 		"Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/ActiveTransfersHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_INBOUND_TO_FOB,
+		"Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_FIRETEAMS,
+		"Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutHeaderRow/LoadoutHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_LOADOUT,
 		"Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_FLIGHT_DECK,
 		"Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftTransfersHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_DECK_ACTIVITY,
 		"Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/InfoHeaderRow/InfoHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_CHARACTER_SHEET,
+		"CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/PopupHeaderRow/PopupHeaderLabel": UI_BLOCK_LABELS_SCRIPT.HOMEBASE_CHARACTER_POPUP,
 	}
 	for path_variant in label_text_by_path.keys():
 		var label := get_node_or_null(String(path_variant)) as Label
@@ -456,6 +955,8 @@ func _apply_block_labels() -> void:
 
 func _apply_homebase_compact_panel_policy() -> void:
 	for path in [
+		"Panel/Margin/VBox/ContentRow/TeamPanel",
+		"Panel/Margin/VBox/ContentRow/InfoPanel",
 		"Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/ActiveTransfersHeaderLabel",
 		"Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/ActiveTransfersScroll",
 		"Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftTransfersHeaderLabel",
@@ -589,6 +1090,240 @@ func _render_staged_team() -> void:
 	_render_team_transfer_ghost_cards(selected_team_list)
 
 
+func _render_homebase_fireteams() -> void:
+	var fireteam_list := get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel/FireteamMargin/FireteamVBox/FireteamScroll/FireteamList") as VBoxContainer
+	var summary_label := get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel/FireteamMargin/FireteamVBox/FireteamSummaryLabel") as Label
+	if fireteam_list == null:
+		return
+	_clear_container(fireteam_list)
+	if summary_label != null:
+		summary_label.text = _build_homebase_fireteam_summary_text()
+
+	if _fireteam_definitions.is_empty():
+		fireteam_list.add_child(_build_empty_state_label("No fireteams available."))
+		return
+
+	for definition_variant in _fireteam_definitions:
+		if typeof(definition_variant) != TYPE_DICTIONARY:
+			continue
+		var definition: Dictionary = Dictionary(definition_variant)
+		var fireteam_id: String = _normalize_fireteam_id(String(definition.get("id", "")))
+		if fireteam_id.is_empty():
+			continue
+		var fireteam_card: FOBFireteamCard = _create_homebase_fireteam_card(fireteam_id, "fireteam_list")
+		if fireteam_card == null:
+			continue
+		fireteam_list.add_child(fireteam_card)
+		_render_homebase_fireteam_members(fireteam_card.get_member_host(), fireteam_id, String(definition.get("lead_unit_id", "")).strip_edges())
+
+
+func _create_homebase_fireteam_card(fireteam_id: String, source_context: String = "fireteam_list") -> FOBFireteamCard:
+	var definition: Dictionary = _get_fireteam_definition(fireteam_id)
+	if definition.is_empty():
+		return null
+	var card: FOBFireteamCard = FOB_FIRETEAM_CARD_SCRIPT.new()
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.setup_card(
+		fireteam_id,
+		String(definition.get("label", fireteam_id.to_upper())).strip_edges(),
+		fireteam_id == _focused_fireteam_id,
+		bool(definition.get("respawn_enabled", false)),
+		String(definition.get("loadout", HOMEBASE_DEFAULT_LOADOUT_ID)).strip_edges(),
+		"Lead: %s | Members: %s" % [
+			_build_display_name(String(definition.get("lead_unit_id", "")).strip_edges()),
+			_format_member_names(_build_fireteam_member_names(fireteam_id)),
+		],
+		source_context,
+		"Homebase direct staging"
+	)
+	if not card.card_pressed.is_connected(_on_homebase_fireteam_card_pressed):
+		card.card_pressed.connect(_on_homebase_fireteam_card_pressed)
+	if not card.rename_committed.is_connected(_on_homebase_fireteam_label_committed):
+		card.rename_committed.connect(_on_homebase_fireteam_label_committed)
+	if not card.unit_dropped.is_connected(_on_homebase_fireteam_card_unit_dropped):
+		card.unit_dropped.connect(_on_homebase_fireteam_card_unit_dropped)
+	card.set_meta("homebase_direct_fireteam_card", true)
+	return card
+
+
+func _render_homebase_fireteam_members(member_host: VBoxContainer, fireteam_id: String, lead_unit_id: String) -> void:
+	_clear_container(member_host)
+	for member_unit_id in _get_member_unit_ids_for_fireteam(fireteam_id):
+		var member_profile = _profiles_by_id.get(member_unit_id, null)
+		if member_profile == null:
+			continue
+		var member_card = NPC_COMPACT_CARD_SCENE.instantiate()
+		member_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		member_card.setup_from_profile(
+			member_profile,
+			{
+				"source_context": "homebase_fireteam",
+				"selected": member_unit_id == _focused_unit_id,
+				"disabled": false,
+				"drag_enabled": true,
+				"compact_mode": true,
+				"show_lead_indicator": true,
+				"is_lead": member_unit_id == lead_unit_id,
+			}
+		)
+		if not member_card.card_pressed.is_connected(_on_compact_card_pressed):
+			member_card.card_pressed.connect(_on_compact_card_pressed)
+		if not member_card.card_open_requested.is_connected(_on_compact_card_open_requested):
+			member_card.card_open_requested.connect(_on_compact_card_open_requested)
+		if member_card.has_signal("card_unit_dropped") and not member_card.card_unit_dropped.is_connected(_on_homebase_fireteam_card_unit_dropped.bind(fireteam_id)):
+			member_card.card_unit_dropped.connect(_on_homebase_fireteam_card_unit_dropped.bind(fireteam_id))
+		member_host.add_child(member_card)
+
+
+func _update_homebase_loadout_panel() -> void:
+	var fireteam_list := get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutFireteamList") as HBoxContainer
+	var member_list := get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutMemberScroll/LoadoutMemberList") as VBoxContainer
+	var status_label := get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutStatusLabel") as Label
+	if fireteam_list == null or member_list == null:
+		return
+	_clear_container(fireteam_list)
+	_clear_container(member_list)
+	var fireteam_id: String = _normalize_fireteam_id(_loadout_staged_fireteam_id)
+	var has_focus_fireteam: bool = not fireteam_id.is_empty() and not _get_fireteam_definition(fireteam_id).is_empty()
+	if status_label != null:
+		status_label.text = _build_homebase_loadout_status_text(fireteam_id, has_focus_fireteam)
+	if not has_focus_fireteam:
+		fireteam_list.add_child(_build_empty_state_label("Drop a fireteam here to edit its loadout."))
+		return
+	var card = _create_homebase_fireteam_card(fireteam_id, "loadout_staging")
+	if card != null:
+		fireteam_list.add_child(card)
+	var definition: Dictionary = _get_fireteam_definition(fireteam_id)
+	var lead_unit_id: String = String(definition.get("lead_unit_id", "")).strip_edges()
+	for member_unit_id in _get_member_unit_ids_for_fireteam(fireteam_id):
+		var row := _build_homebase_loadout_member_row(fireteam_id, member_unit_id, lead_unit_id)
+		if row != null:
+			member_list.add_child(row)
+
+
+func _build_homebase_loadout_member_row(fireteam_id: String, unit_id: String, lead_unit_id: String) -> Control:
+	var profile = _profiles_by_id.get(unit_id, null)
+	if profile == null:
+		return null
+	var row_panel := PanelContainer.new()
+	row_panel.name = "HomebaseLoadoutMemberRow_%s" % unit_id
+	row_panel.custom_minimum_size = Vector2(0.0, 72.0)
+	row_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row_panel.mouse_filter = Control.MOUSE_FILTER_PASS
+	row_panel.set_meta("compact_loadout_member_row", true)
+	row_panel.set_meta("homebase_direct_loadout_row", true)
+	row_panel.set_meta("fireteam_id", fireteam_id)
+	row_panel.set_meta("unit_id", unit_id)
+	META_UI_SKIN_SCRIPT.style_tactical_panel(row_panel, "thin_frame")
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 5)
+	margin.add_theme_constant_override("margin_top", 5)
+	margin.add_theme_constant_override("margin_right", 5)
+	margin.add_theme_constant_override("margin_bottom", 5)
+	row_panel.add_child(margin)
+
+	var row := HBoxContainer.new()
+	row.name = "LoadoutRow"
+	row.add_theme_constant_override("separation", 5)
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	margin.add_child(row)
+
+	var member_profile = profile.duplicate_profile() if profile.has_method("duplicate_profile") else profile
+	if member_profile != null:
+		member_profile.secondary_text = "Lead" if unit_id == lead_unit_id else "Member"
+	var member_card = NPC_COMPACT_CARD_SCENE.instantiate()
+	member_card.custom_minimum_size = Vector2(136.0, 54.0)
+	member_card.setup_from_profile(
+		member_profile,
+		{
+			"source_context": "homebase_loadout",
+			"selected": unit_id == _focused_unit_id,
+			"disabled": false,
+			"drag_enabled": false,
+			"compact_mode": true,
+			"fixed_size": true,
+			"fixed_card_size": Vector2(136.0, 54.0),
+			"show_lead_indicator": true,
+			"is_lead": unit_id == lead_unit_id,
+		}
+	)
+	if not member_card.card_pressed.is_connected(_on_compact_card_pressed):
+		member_card.card_pressed.connect(_on_compact_card_pressed)
+	if not member_card.card_open_requested.is_connected(_on_compact_card_open_requested):
+		member_card.card_open_requested.connect(_on_compact_card_open_requested)
+	row.add_child(member_card)
+
+	var controls := VBoxContainer.new()
+	controls.name = "LoadoutControls"
+	controls.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	controls.add_theme_constant_override("separation", 3)
+	row.add_child(controls)
+
+	var member_loadout: Dictionary = _get_member_loadout(unit_id)
+	controls.add_child(_build_homebase_loadout_option_row("Kit", HOMEBASE_LOADOUT_OPTIONS, String(member_loadout.get("kit", HOMEBASE_DEFAULT_LOADOUT_ID)), unit_id, "kit"))
+	controls.add_child(_build_homebase_loadout_option_row("Primary", HOMEBASE_PRIMARY_WEAPON_OPTIONS, String(member_loadout.get("primary", "rifle")), unit_id, "primary"))
+	controls.add_child(_build_homebase_loadout_option_row("Sidearm", HOMEBASE_SIDEARM_OPTIONS, String(member_loadout.get("sidearm", "pistol")), unit_id, "sidearm"))
+	return row_panel
+
+
+func _build_homebase_loadout_option_row(label_text: String, options: Array, current_value: String, unit_id: String, key: String) -> Control:
+	var row := HBoxContainer.new()
+	row.name = "%sRow" % key.capitalize()
+	row.add_theme_constant_override("separation", 4)
+	var label := Label.new()
+	label.text = label_text
+	label.custom_minimum_size = Vector2(48.0, 0.0)
+	label.add_theme_font_size_override("font_size", 9)
+	META_UI_SKIN_SCRIPT.style_body_label(label, 9)
+	row.add_child(label)
+	var selector := OptionButton.new()
+	selector.name = "%sSelector" % key.capitalize()
+	selector.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for option_variant in options:
+		var option_value: String = String(option_variant).strip_edges()
+		selector.add_item(option_value.capitalize())
+		selector.set_item_metadata(selector.item_count - 1, option_value)
+		if option_value == current_value:
+			selector.select(selector.item_count - 1)
+	_configure_flightdeck_option_button(selector)
+	if not selector.item_selected.is_connected(_on_homebase_loadout_option_selected.bind(unit_id, key, selector)):
+		selector.item_selected.connect(_on_homebase_loadout_option_selected.bind(unit_id, key, selector))
+	row.add_child(selector)
+	return row
+
+
+func _update_homebase_flightdeck_staging_panel() -> void:
+	var list := get_node_or_null("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/DirectDropshipFireteamPanel/DirectDropshipMargin/DirectDropshipVBox/DirectDropshipList") as VBoxContainer
+	if list == null:
+		return
+	_clear_container(list)
+	if _homebase_dropship_staged_fireteam_ids.is_empty():
+		list.add_child(_build_empty_state_label("Drop fireteam cards here to board the selected dropship."))
+		return
+	for fireteam_id in _filter_existing_fireteam_ids(_homebase_dropship_staged_fireteam_ids):
+		list.add_child(_build_homebase_dropship_fireteam_row(String(fireteam_id)))
+
+
+func _build_homebase_dropship_fireteam_row(fireteam_id: String) -> Control:
+	var row := HBoxContainer.new()
+	row.name = "DirectDropshipFireteam_%s" % fireteam_id
+	row.add_theme_constant_override("separation", 4)
+	var label := Label.new()
+	label.text = "%s | %d operators" % [_get_fireteam_label(fireteam_id), _get_member_unit_ids_for_fireteam(fireteam_id).size()]
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.add_theme_font_size_override("font_size", 9)
+	META_UI_SKIN_SCRIPT.style_body_label(label, 9)
+	row.add_child(label)
+	var remove_button := Button.new()
+	remove_button.text = "x"
+	remove_button.custom_minimum_size = Vector2(28.0, 24.0)
+	META_UI_SKIN_SCRIPT.style_secondary_button(remove_button)
+	remove_button.pressed.connect(_on_homebase_dropship_fireteam_remove_pressed.bind(fireteam_id))
+	row.add_child(remove_button)
+	return row
+
+
 func _render_team_transfer_ghost_cards(selected_team_list: VBoxContainer) -> void:
 	var rendered_unit_ids: Dictionary = {}
 	for entry_variant in _team_transfer_entries:
@@ -670,6 +1405,8 @@ func _update_team_summary() -> void:
 	var roster_panel: Control = get_node("Panel/Margin/VBox/ContentRow/RosterPanel")
 	var aircraft_panel: Control = get_node("Panel/Margin/VBox/ContentRow/AircraftPanel")
 	var info_panel: Control = get_node("Panel/Margin/VBox/ContentRow/InfoPanel")
+	var fireteam_panel := get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel") as Control
+	var loadout_panel := get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel") as Control
 	var mission_panel: Control = get_node("Panel/Margin/VBox/MissionPanel")
 	var team_drop_panel = _get_team_drop_panel()
 
@@ -682,6 +1419,10 @@ func _update_team_summary() -> void:
 	roster_panel.tooltip_text = _build_roster_tooltip_text()
 	aircraft_panel.tooltip_text = _build_aircraft_tooltip_text()
 	info_panel.tooltip_text = _build_character_sheet_tooltip_text()
+	if fireteam_panel != null:
+		fireteam_panel.tooltip_text = "FIRETEAMS\n\n- Drop operators on fireteam cards.\n- Drop fireteam cards to Loadout or Flightdeck."
+	if loadout_panel != null:
+		loadout_panel.tooltip_text = "LOADOUT\n\n- Drop a fireteam here.\n- Compact rows edit the staged member kit."
 	mission_panel.tooltip_text = _build_mission_tooltip_text()
 	if team_drop_panel != null:
 		team_drop_panel.tooltip_text = _build_team_hint_text()
@@ -701,12 +1442,13 @@ func _update_mission_info() -> void:
 	var staged_count: int = _selected_unit_ids.size()
 	var pilot_count: int = _mission_pilot_count_override if _mission_pilot_count_override >= 0 else _count_assigned_pilots()
 	var mission_slot_usage: int = _mission_slot_usage_override if _mission_slot_usage_override >= 0 else staged_count + pilot_count
-	start_mission_button.disabled = not _mission_launch_ready
+	var direct_payload_ready: bool = not _build_unit_ids_for_fireteams(_filter_existing_fireteam_ids(_homebase_dropship_staged_fireteam_ids)).is_empty()
+	start_mission_button.disabled = not (_mission_launch_ready or direct_payload_ready)
 	start_mission_button.text = "Start"
-	META_UI_SKIN_SCRIPT.style_transfer_button(start_mission_button, _mission_launch_ready)
+	META_UI_SKIN_SCRIPT.style_transfer_button(start_mission_button, _mission_launch_ready or direct_payload_ready)
 	mission_name_label.text = _selected_mission_name
 	mission_team_limit_label.text = "Mission slots: %d / %d" % [mini(mission_slot_usage, _selected_mission_slot_count), _selected_mission_slot_count]
-	var launch_text: String = _mission_launch_summary if not _mission_launch_summary.is_empty() else ("Dropship ready for launch" if _mission_launch_ready else "Dropship not launch-ready")
+	var launch_text: String = _mission_launch_summary if not _mission_launch_summary.is_empty() else ("Homebase dropship ready" if direct_payload_ready else ("Dropship ready for launch" if _mission_launch_ready else "Dropship not launch-ready"))
 	mission_transfer_label.text = "Map: %s | Transfer: %s | Pilots: %d | %s" % [_build_selected_mission_map_label(), _build_transfer_status_text(staged_count, team_capacity), pilot_count, launch_text]
 	mission_summary_label.text = _build_mission_summary_text(staged_count, team_capacity, pilot_count, mission_slot_usage)
 	if not _mission_launch_summary.is_empty():
@@ -914,9 +1656,12 @@ func _build_drop_light_craft_stage_text(craft_def: Dictionary) -> String:
 
 
 func _update_character_sheet() -> void:
+	var content_host := _get_character_sheet_content_host()
+	if content_host == null:
+		return
 	var profile = _profiles_by_id.get(_focused_unit_id, null)
 	CHARACTER_SHEET_VIEW_SCRIPT.render(
-		_get_character_sheet_content_host(),
+		content_host,
 		profile,
 		{
 			"status_text": _build_sheet_status_text(_focused_unit_id),
@@ -928,7 +1673,10 @@ func _update_character_sheet() -> void:
 
 
 func _get_character_sheet_content_host() -> VBoxContainer:
-	return get_node("Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/GeneratedSheetContent") as VBoxContainer
+	var popup_host := get_node_or_null("CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/PopupScroll/GeneratedSheetContent") as VBoxContainer
+	if popup_host != null:
+		return popup_host
+	return get_node_or_null("Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/GeneratedSheetContent") as VBoxContainer
 
 
 func _on_compact_card_pressed(unit_id: String, _profile, _source_context: String) -> void:
@@ -938,6 +1686,8 @@ func _on_compact_card_pressed(unit_id: String, _profile, _source_context: String
 	_update_team_summary()
 	if _character_sheet_open:
 		_update_character_sheet()
+	_render_homebase_fireteams()
+	_update_homebase_loadout_panel()
 	_refresh_card_highlights()
 
 
@@ -967,6 +1717,170 @@ func _on_staged_card_remove_requested(unit_id: String, _source_context: String) 
 func _on_team_drop_panel_unit_dropped(unit_id: String) -> void:
 	if _add_unit_to_team(unit_id):
 		selection_changed.emit(get_selected_unit_ids())
+
+
+func _on_homebase_fireteam_card_pressed(fireteam_id: String) -> void:
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	if normalized_fireteam_id.is_empty():
+		return
+	_focused_fireteam_id = normalized_fireteam_id
+	_loadout_staged_fireteam_id = normalized_fireteam_id
+	_render_homebase_fireteams()
+	_update_homebase_loadout_panel()
+
+
+func _on_homebase_fireteam_label_committed(fireteam_id: String, next_label: String) -> void:
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	if normalized_fireteam_id.is_empty():
+		return
+	var cleaned_label: String = next_label.strip_edges()
+	for definition_index in range(_fireteam_definitions.size()):
+		var definition: Dictionary = Dictionary(_fireteam_definitions[definition_index])
+		if _normalize_fireteam_id(String(definition.get("id", ""))) != normalized_fireteam_id:
+			continue
+		definition["label"] = cleaned_label if not cleaned_label.is_empty() else normalized_fireteam_id.to_upper()
+		_fireteam_definitions[definition_index] = definition
+		break
+	_emit_homebase_fireteam_context_changed()
+	_render_homebase_fireteams()
+	_update_homebase_loadout_panel()
+
+
+func _on_homebase_fireteam_card_unit_dropped(unit_id: String, fireteam_id: String) -> void:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	if normalized_unit_id.is_empty() or normalized_fireteam_id.is_empty():
+		return
+	if not _selected_unit_ids.has(normalized_unit_id):
+		if not _add_unit_to_team(normalized_unit_id):
+			return
+	_assign_unit_to_fireteam(normalized_unit_id, normalized_fireteam_id)
+	_focused_unit_id = normalized_unit_id
+	_focused_fireteam_id = normalized_fireteam_id
+	_loadout_staged_fireteam_id = normalized_fireteam_id
+	_emit_homebase_fireteam_context_changed()
+	_rebuild_ui()
+
+
+func _on_homebase_staging_fireteam_dropped(fireteam_id: String, drop_kind: String) -> void:
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	var normalized_drop_kind: String = drop_kind.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty() or _get_fireteam_definition(normalized_fireteam_id).is_empty():
+		return
+	_focused_fireteam_id = normalized_fireteam_id
+	if normalized_drop_kind == "loadout":
+		_loadout_staged_fireteam_id = normalized_fireteam_id
+	elif normalized_drop_kind == HOMEBASE_DIRECT_STAGING_DROP_KIND:
+		if not _homebase_dropship_staged_fireteam_ids.has(normalized_fireteam_id):
+			_homebase_dropship_staged_fireteam_ids.append(normalized_fireteam_id)
+	else:
+		_homebase_dropship_staged_fireteam_ids = _remove_fireteam_id_from_list(_homebase_dropship_staged_fireteam_ids, normalized_fireteam_id)
+	_emit_homebase_fireteam_context_changed()
+	_rebuild_ui()
+
+
+func _on_homebase_direct_unit_dropped(unit_id: String, drop_kind: String) -> void:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return
+	var fireteam_id: String = _get_selected_fireteam_id_for_unit(normalized_unit_id)
+	if fireteam_id.is_empty():
+		if not _selected_unit_ids.has(normalized_unit_id):
+			if not _add_unit_to_team(normalized_unit_id):
+				return
+		fireteam_id = _focused_fireteam_id
+		_assign_unit_to_fireteam(normalized_unit_id, fireteam_id)
+	if drop_kind.strip_edges().to_lower() == "loadout":
+		_loadout_staged_fireteam_id = fireteam_id
+	elif drop_kind.strip_edges().to_lower() == HOMEBASE_DIRECT_STAGING_DROP_KIND and not _homebase_dropship_staged_fireteam_ids.has(fireteam_id):
+		_homebase_dropship_staged_fireteam_ids.append(fireteam_id)
+	_emit_homebase_fireteam_context_changed()
+	_rebuild_ui()
+
+
+func _on_homebase_add_fireteam_pressed() -> void:
+	var next_index := 1
+	while not _get_fireteam_definition("ft%d" % next_index).is_empty():
+		next_index += 1
+	var fireteam_id := "ft%d" % next_index
+	_fireteam_definitions.append(
+		{
+			"id": fireteam_id,
+			"label": fireteam_id.to_upper(),
+			"lead_unit_id": "",
+			"loadout": HOMEBASE_DEFAULT_LOADOUT_ID,
+			"respawn_enabled": false,
+		}
+	)
+	_focused_fireteam_id = fireteam_id
+	_loadout_staged_fireteam_id = fireteam_id
+	_emit_homebase_fireteam_context_changed()
+	_rebuild_ui()
+
+
+func _on_homebase_remove_fireteam_pressed() -> void:
+	var fireteam_id: String = _normalize_fireteam_id(_focused_fireteam_id)
+	if fireteam_id.is_empty() or _fireteam_definitions.size() <= 1:
+		return
+	var next_definitions: Array = []
+	for definition_variant in _fireteam_definitions:
+		var definition: Dictionary = Dictionary(definition_variant)
+		if _normalize_fireteam_id(String(definition.get("id", ""))) == fireteam_id:
+			continue
+		next_definitions.append(definition)
+	_fireteam_definitions = next_definitions
+	for unit_index in range(_selected_fireteam_ids.size()):
+		if String(_selected_fireteam_ids[unit_index]).strip_edges().to_lower() == fireteam_id:
+			_selected_fireteam_ids[unit_index] = ""
+	_homebase_dropship_staged_fireteam_ids = _remove_fireteam_id_from_list(_homebase_dropship_staged_fireteam_ids, fireteam_id)
+	_focused_fireteam_id = _normalize_fireteam_id(String(Dictionary(_fireteam_definitions[0]).get("id", HOMEBASE_DEFAULT_FIRETEAM_ID))) if not _fireteam_definitions.is_empty() else HOMEBASE_DEFAULT_FIRETEAM_ID
+	_loadout_staged_fireteam_id = _focused_fireteam_id
+	_emit_homebase_fireteam_context_changed()
+	_rebuild_ui()
+
+
+func _on_homebase_assign_focused_unit_pressed() -> void:
+	if _focused_unit_id.is_empty():
+		return
+	if not _selected_unit_ids.has(_focused_unit_id):
+		if not _add_unit_to_team(_focused_unit_id):
+			return
+	_assign_unit_to_fireteam(_focused_unit_id, _focused_fireteam_id)
+	_emit_homebase_fireteam_context_changed()
+	_rebuild_ui()
+
+
+func _on_homebase_clear_focused_unit_pressed() -> void:
+	if _focused_unit_id.is_empty():
+		return
+	_assign_unit_to_fireteam(_focused_unit_id, "")
+	_emit_homebase_fireteam_context_changed()
+	_rebuild_ui()
+
+
+func _on_homebase_clear_loadout_pressed() -> void:
+	_loadout_staged_fireteam_id = ""
+	_update_homebase_loadout_panel()
+
+
+func _on_homebase_loadout_option_selected(index: int, unit_id: String, key: String, selector: OptionButton) -> void:
+	if selector == null or index < 0 or index >= selector.item_count:
+		return
+	var normalized_unit_id: String = unit_id.strip_edges()
+	var normalized_key: String = key.strip_edges()
+	if normalized_unit_id.is_empty() or normalized_key.is_empty():
+		return
+	var next_value: String = String(selector.get_item_metadata(index)).strip_edges()
+	var loadout: Dictionary = _get_member_loadout(normalized_unit_id)
+	loadout[normalized_key] = next_value
+	_member_loadout_by_unit_id[normalized_unit_id] = loadout
+	_update_homebase_loadout_panel()
+
+
+func _on_homebase_dropship_fireteam_remove_pressed(fireteam_id: String) -> void:
+	_homebase_dropship_staged_fireteam_ids = _remove_fireteam_id_from_list(_homebase_dropship_staged_fireteam_ids, fireteam_id)
+	_emit_homebase_fireteam_context_changed()
+	_rebuild_ui()
 
 
 func _on_roster_drop_panel_unit_dropped(unit_id: String) -> void:
@@ -1174,6 +2088,9 @@ func _add_unit_to_team(unit_id: String) -> bool:
 		return false
 
 	_selected_unit_ids.append(unit_id)
+	_selected_fireteam_ids = _normalize_selected_fireteam_ids(_selected_fireteam_ids)
+	if not _focused_fireteam_id.is_empty():
+		_assign_unit_to_fireteam(unit_id, _focused_fireteam_id)
 	_focused_unit_id = unit_id
 	_team_feedback_text = ""
 	_rebuild_ui()
@@ -1185,13 +2102,18 @@ func _remove_unit_from_team(unit_id: String) -> bool:
 		return false
 
 	var next_selection: PackedStringArray = []
+	var next_fireteam_ids: PackedStringArray = []
 	for selected_unit_id in _selected_unit_ids:
+		var selected_index: int = _selected_unit_ids.find(String(selected_unit_id))
 		if String(selected_unit_id) == unit_id:
 			continue
 
 		next_selection.append(String(selected_unit_id))
+		next_fireteam_ids.append(String(_selected_fireteam_ids[selected_index]).strip_edges() if selected_index >= 0 and selected_index < _selected_fireteam_ids.size() else "")
 
 	_selected_unit_ids = next_selection
+	_selected_fireteam_ids = _normalize_selected_fireteam_ids(next_fireteam_ids)
+	_sanitize_homebase_direct_staging_state()
 	if _focused_unit_id == unit_id:
 		_focused_unit_id = ""
 	_team_feedback_text = "%s removed from the transfer team." % _build_display_name(unit_id)
@@ -1267,6 +2189,284 @@ func _normalize_selected_fireteam_ids(selected_fireteam_ids: PackedStringArray) 
 	return normalized_fireteam_ids
 
 
+func _normalize_fireteam_definitions(fireteam_definitions: Array) -> Array:
+	var normalized_definitions: Array = []
+	var seen_ids: Dictionary = {}
+	for definition_variant in fireteam_definitions:
+		if typeof(definition_variant) != TYPE_DICTIONARY:
+			continue
+		var definition: Dictionary = Dictionary(definition_variant).duplicate(true)
+		var fireteam_id: String = _normalize_fireteam_id(String(definition.get("id", "")))
+		if fireteam_id.is_empty() or seen_ids.has(fireteam_id):
+			continue
+		seen_ids[fireteam_id] = true
+		definition["id"] = fireteam_id
+		definition["label"] = String(definition.get("label", fireteam_id.to_upper())).strip_edges()
+		definition["lead_unit_id"] = String(definition.get("lead_unit_id", "")).strip_edges()
+		definition["loadout"] = String(definition.get("loadout", HOMEBASE_DEFAULT_LOADOUT_ID)).strip_edges().to_lower()
+		definition["respawn_enabled"] = bool(definition.get("respawn_enabled", false))
+		normalized_definitions.append(definition)
+	return normalized_definitions
+
+
+func _sanitize_homebase_direct_staging_state() -> void:
+	_selected_fireteam_ids = _normalize_selected_fireteam_ids(_selected_fireteam_ids)
+	if _fireteam_definitions.is_empty():
+		_fireteam_definitions = _build_default_homebase_fireteam_definitions()
+
+	var known_fireteam_ids: Dictionary = {}
+	for definition_variant in _fireteam_definitions:
+		var definition: Dictionary = Dictionary(definition_variant)
+		var fireteam_id: String = _normalize_fireteam_id(String(definition.get("id", "")))
+		if fireteam_id.is_empty():
+			continue
+		known_fireteam_ids[fireteam_id] = true
+
+	for assigned_fireteam_id in _selected_fireteam_ids:
+		var fireteam_id: String = _normalize_fireteam_id(String(assigned_fireteam_id))
+		if fireteam_id.is_empty() or known_fireteam_ids.has(fireteam_id):
+			continue
+		_fireteam_definitions.append(
+			{
+				"id": fireteam_id,
+				"label": fireteam_id.to_upper(),
+				"lead_unit_id": "",
+				"loadout": HOMEBASE_DEFAULT_LOADOUT_ID,
+				"respawn_enabled": false,
+			}
+		)
+		known_fireteam_ids[fireteam_id] = true
+
+	_reconcile_homebase_fireteam_leads()
+	if _get_fireteam_definition(_focused_fireteam_id).is_empty():
+		_focused_fireteam_id = _get_first_fireteam_id()
+	if _get_fireteam_definition(_loadout_staged_fireteam_id).is_empty():
+		_loadout_staged_fireteam_id = _focused_fireteam_id
+	_homebase_dropship_staged_fireteam_ids = _filter_existing_fireteam_ids(_homebase_dropship_staged_fireteam_ids)
+
+
+func _build_default_homebase_fireteam_definitions() -> Array:
+	var lead_unit_id := ""
+	if not _selected_unit_ids.is_empty():
+		lead_unit_id = String(_selected_unit_ids[0]).strip_edges()
+	return [
+		{
+			"id": HOMEBASE_DEFAULT_FIRETEAM_ID,
+			"label": "ALPHA",
+			"lead_unit_id": lead_unit_id,
+			"loadout": HOMEBASE_DEFAULT_LOADOUT_ID,
+			"respawn_enabled": false,
+		}
+	]
+
+
+func _reconcile_homebase_fireteam_leads() -> void:
+	for definition_index in range(_fireteam_definitions.size()):
+		var definition: Dictionary = Dictionary(_fireteam_definitions[definition_index])
+		var fireteam_id: String = _normalize_fireteam_id(String(definition.get("id", "")))
+		if fireteam_id.is_empty():
+			continue
+		var member_ids: PackedStringArray = _get_member_unit_ids_for_fireteam(fireteam_id)
+		var lead_unit_id: String = String(definition.get("lead_unit_id", "")).strip_edges()
+		if lead_unit_id.is_empty() or not member_ids.has(lead_unit_id):
+			definition["lead_unit_id"] = String(member_ids[0]) if not member_ids.is_empty() else ""
+			_fireteam_definitions[definition_index] = definition
+
+
+func _normalize_fireteam_id(fireteam_id: String) -> String:
+	return fireteam_id.strip_edges().to_lower()
+
+
+func _get_first_fireteam_id() -> String:
+	for definition_variant in _fireteam_definitions:
+		var fireteam_id: String = _normalize_fireteam_id(String(Dictionary(definition_variant).get("id", "")))
+		if not fireteam_id.is_empty():
+			return fireteam_id
+	return HOMEBASE_DEFAULT_FIRETEAM_ID
+
+
+func _get_fireteam_definition(fireteam_id: String) -> Dictionary:
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	if normalized_fireteam_id.is_empty():
+		return {}
+	for definition_variant in _fireteam_definitions:
+		if typeof(definition_variant) != TYPE_DICTIONARY:
+			continue
+		var definition: Dictionary = Dictionary(definition_variant)
+		if _normalize_fireteam_id(String(definition.get("id", ""))) == normalized_fireteam_id:
+			return definition
+	return {}
+
+
+func _get_fireteam_label(fireteam_id: String) -> String:
+	var definition: Dictionary = _get_fireteam_definition(fireteam_id)
+	var label_text: String = String(definition.get("label", fireteam_id.to_upper())).strip_edges()
+	return label_text if not label_text.is_empty() else fireteam_id.to_upper()
+
+
+func _get_member_unit_ids_for_fireteam(fireteam_id: String) -> PackedStringArray:
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	var member_ids: PackedStringArray = []
+	if normalized_fireteam_id.is_empty():
+		return member_ids
+	for unit_index in range(_selected_unit_ids.size()):
+		if unit_index >= _selected_fireteam_ids.size():
+			continue
+		if _normalize_fireteam_id(String(_selected_fireteam_ids[unit_index])) == normalized_fireteam_id:
+			member_ids.append(String(_selected_unit_ids[unit_index]))
+	return member_ids
+
+
+func _build_fireteam_member_names(fireteam_id: String) -> PackedStringArray:
+	var names: PackedStringArray = []
+	for member_unit_id in _get_member_unit_ids_for_fireteam(fireteam_id):
+		names.append(_build_display_name(String(member_unit_id)))
+	return names
+
+
+func _format_member_names(member_names: PackedStringArray) -> String:
+	if member_names.is_empty():
+		return "none"
+	if member_names.size() <= 3:
+		return ", ".join(member_names)
+	var first_names: PackedStringArray = []
+	for name_index in range(3):
+		first_names.append(String(member_names[name_index]))
+	return "%s +%d" % [", ".join(first_names), member_names.size() - 3]
+
+
+func _assign_unit_to_fireteam(unit_id: String, fireteam_id: String) -> void:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	var unit_index: int = _selected_unit_ids.find(normalized_unit_id)
+	if unit_index < 0:
+		return
+	_selected_fireteam_ids = _normalize_selected_fireteam_ids(_selected_fireteam_ids)
+	if unit_index < _selected_fireteam_ids.size():
+		_selected_fireteam_ids[unit_index] = normalized_fireteam_id
+	_sanitize_homebase_direct_staging_state()
+
+
+func _emit_homebase_fireteam_context_changed() -> void:
+	fireteam_context_changed.emit(get_selected_unit_ids(), get_selected_fireteam_ids())
+
+
+func _remove_fireteam_id_from_list(source: PackedStringArray, fireteam_id: String) -> PackedStringArray:
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	var result: PackedStringArray = []
+	for source_fireteam_id in source:
+		var current_fireteam_id: String = _normalize_fireteam_id(String(source_fireteam_id))
+		if current_fireteam_id.is_empty() or current_fireteam_id == normalized_fireteam_id or result.has(current_fireteam_id):
+			continue
+		result.append(current_fireteam_id)
+	return result
+
+
+func _filter_existing_fireteam_ids(source: PackedStringArray) -> PackedStringArray:
+	var result: PackedStringArray = []
+	for fireteam_id_variant in source:
+		var fireteam_id: String = _normalize_fireteam_id(String(fireteam_id_variant))
+		if fireteam_id.is_empty() or result.has(fireteam_id) or _get_fireteam_definition(fireteam_id).is_empty():
+			continue
+		if _get_member_unit_ids_for_fireteam(fireteam_id).is_empty():
+			continue
+		result.append(fireteam_id)
+	return result
+
+
+func _build_unit_ids_for_fireteams(fireteam_ids: PackedStringArray) -> PackedStringArray:
+	var result: PackedStringArray = []
+	for fireteam_id in fireteam_ids:
+		for unit_id in _get_member_unit_ids_for_fireteam(String(fireteam_id)):
+			var normalized_unit_id: String = String(unit_id).strip_edges()
+			if normalized_unit_id.is_empty() or result.has(normalized_unit_id):
+				continue
+			result.append(normalized_unit_id)
+	return result
+
+
+func _get_fireteam_definitions_snapshot() -> Array:
+	var snapshot: Array = []
+	for definition_variant in _fireteam_definitions:
+		if typeof(definition_variant) == TYPE_DICTIONARY:
+			snapshot.append(Dictionary(definition_variant).duplicate(true))
+	return snapshot
+
+
+func _get_member_loadout(unit_id: String) -> Dictionary:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	var loadout: Dictionary = Dictionary(_member_loadout_by_unit_id.get(normalized_unit_id, {})).duplicate(true)
+	if not loadout.has("kit"):
+		loadout["kit"] = HOMEBASE_DEFAULT_LOADOUT_ID
+	if not loadout.has("primary"):
+		loadout["primary"] = "rifle"
+	if not loadout.has("sidearm"):
+		loadout["sidearm"] = "pistol"
+	return loadout
+
+
+func _get_profile_portrait_path(unit_id: String) -> String:
+	var profile = _profiles_by_id.get(unit_id, null)
+	if profile == null:
+		return ""
+	return String(profile.portrait_path)
+
+
+func _build_homebase_fireteam_summary_text() -> String:
+	var assigned_count := 0
+	for fireteam_id in _selected_fireteam_ids:
+		if not _normalize_fireteam_id(String(fireteam_id)).is_empty():
+			assigned_count += 1
+	return "%d staged | %d assigned | Drop operators onto cards, then drop fireteams to Loadout or Flightdeck." % [_selected_unit_ids.size(), assigned_count]
+
+
+func _build_homebase_loadout_status_text(fireteam_id: String, has_focus_fireteam: bool) -> String:
+	if not has_focus_fireteam:
+		return "Drop a fireteam card from #10 here."
+	var member_count: int = _get_member_unit_ids_for_fireteam(fireteam_id).size()
+	return "%s | %d operators | Compact Homebase loadout" % [_get_fireteam_label(fireteam_id), member_count]
+
+
+func _build_homebase_mission_drop_cards(payload_fireteam_ids: PackedStringArray, payload_unit_ids: PackedStringArray) -> Array:
+	var cards: Array = []
+	var visible_aircraft_definitions: Array = _get_visible_homebase_aircraft_definitions()
+	if visible_aircraft_definitions.is_empty():
+		cards.append(
+			{
+				"craft_id": "homebase_dropship",
+				"display_name": "Dropship",
+				"title_text": UI_BLOCK_LABELS_SCRIPT.prefixed_transport_title("Dropship"),
+				"texture_path": "",
+				"state": "waiting" if not payload_unit_ids.is_empty() else "",
+				"queued_fireteam_ids": Array(payload_fireteam_ids),
+				"boarded_fireteam_ids": Array(payload_fireteam_ids),
+				"embarked_unit_ids": Array(payload_unit_ids),
+				"passenger_count": payload_unit_ids.size(),
+			}
+		)
+		return cards
+	for craft_variant in visible_aircraft_definitions:
+		var craft_def: Dictionary = Dictionary(craft_variant)
+		var craft_id: String = String(craft_def.get("craft_id", "")).strip_edges()
+		if craft_id.is_empty():
+			continue
+		var is_selected: bool = craft_id == _selected_aircraft_id
+		cards.append(
+			{
+				"craft_id": craft_id,
+				"display_name": String(craft_def.get("display_name", craft_id)).strip_edges(),
+				"title_text": UI_BLOCK_LABELS_SCRIPT.prefixed_transport_title(String(craft_def.get("display_name", craft_id)).strip_edges()),
+				"texture_path": String(craft_def.get("texture_path", "")).strip_edges(),
+				"state": "waiting" if is_selected and not payload_unit_ids.is_empty() else "",
+				"queued_fireteam_ids": Array(payload_fireteam_ids if is_selected else PackedStringArray()),
+				"boarded_fireteam_ids": Array(payload_fireteam_ids if is_selected else PackedStringArray()),
+				"embarked_unit_ids": Array(payload_unit_ids if is_selected else PackedStringArray()),
+				"passenger_count": payload_unit_ids.size() if is_selected else 0,
+			}
+		)
+	return cards
+
+
 func _build_selected_names_text() -> String:
 	if _selected_unit_ids.is_empty():
 		return "No staged operators yet."
@@ -1308,8 +2508,16 @@ func _build_character_sheet_tooltip_text() -> String:
 
 
 func _update_character_sheet_visibility() -> void:
-	var info_panel: Control = get_node("Panel/Margin/VBox/ContentRow/InfoPanel")
-	info_panel.visible = _character_sheet_open
+	var info_panel := get_node_or_null("Panel/Margin/VBox/ContentRow/InfoPanel") as Control
+	if info_panel != null:
+		info_panel.visible = false
+		info_panel.set_meta("homebase_legacy_character_sheet_window_disabled", true)
+	var popup := get_node_or_null("CharacterSheetPopup") as Control
+	if popup == null:
+		return
+	_apply_character_popup_rect()
+	popup.visible = _character_sheet_open
+	popup.set_meta("character_sheet_popup_visible", _character_sheet_open)
 
 
 func _build_send_to_fob_tooltip() -> String:

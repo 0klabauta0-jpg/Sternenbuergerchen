@@ -45,15 +45,20 @@ func _test_homebase_fixed_window_positions() -> void:
 	_assert(_node_rect_matches_actual(screen.get_node("DropLightTopbar") as Control, layout.get("topbar")), "Homebase topbar uses the fixed contract position and size")
 	_assert(_node_rect_matches_actual(screen.get_node("Panel/Margin/VBox/MissionPanel") as Control, layout.get("mission_brief")), "#01 mission brief uses the fixed contract position and size")
 	_assert(_node_rect_matches_actual(screen.get_node("Panel/Margin/VBox/ContentRow/RosterPanel") as Control, layout.get("roster")), "#02 roster uses the fixed contract position and size")
-	_assert(_node_rect_matches_actual(screen.get_node("Panel/Margin/VBox/ContentRow/TeamPanel") as Control, layout.get("transfer_team")), "#03 transfer team uses the fixed contract position and size")
+	_assert(_node_rect_matches_actual(screen.get_node("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel") as Control, layout.get("fireteams")), "#10 fireteams uses the fixed contract position and size")
+	_assert(_node_rect_matches_actual(screen.get_node("Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel") as Control, layout.get("loadout")), "#13 loadout uses the fixed contract position and size")
 	_assert(_node_rect_matches_actual(screen.get_node("Panel/Margin/VBox/ContentRow/AircraftPanel") as Control, layout.get("flightdeck")), "#05 flightdeck uses the fixed contract position and size")
-	_assert(_node_rect_matches_actual(screen.get_node("Panel/Margin/VBox/ContentRow/InfoPanel") as Control, layout.get("character_sheet")), "#07 character sheet uses the fixed contract position and size")
 
 	var info_panel := screen.get_node("Panel/Margin/VBox/ContentRow/InfoPanel") as Control
-	_assert(info_panel.visible, "Homebase character sheet is visible as a fixed window")
+	var legacy_team_panel := screen.get_node("Panel/Margin/VBox/ContentRow/TeamPanel") as Control
+	var popup := screen.get_node("CharacterSheetPopup") as Control
+	_assert(not info_panel.visible and bool(info_panel.get_meta("homebase_legacy_character_sheet_window_disabled", false)), "Homebase character sheet is not visible as a fixed window")
+	_assert(not legacy_team_panel.visible and bool(legacy_team_panel.get_meta("homebase_legacy_transfer_window_disabled", false)), "Homebase legacy transfer panel is disabled for direct staging")
+	_assert(not popup.visible and _node_rect_matches_actual(popup, layout.get("character_popup")), "Character popup starts closed and keeps its floating rect")
 	_assert(screen.get_node("Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox/RosterScroll") is ScrollContainer, "Roster keeps long content in a targeted scroll area")
-	_assert(screen.get_node("Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamDropPanel/DropMargin/DropVBox/SelectedTeamScroll") is ScrollContainer, "Transfer team keeps staged content in a targeted scroll area")
-	_assert(screen.get_node("Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll") is ScrollContainer, "Character sheet keeps long content in a targeted scroll area")
+	_assert(screen.get_node("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel/FireteamMargin/FireteamVBox/FireteamScroll") is ScrollContainer, "Fireteams keeps long content in a targeted scroll area")
+	_assert(screen.get_node("Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutMemberScroll") is ScrollContainer, "Loadout keeps member content in a targeted scroll area")
+	_assert(screen.get_node("CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/PopupScroll") is ScrollContainer, "Character popup keeps long content in a targeted scroll area")
 
 	screen.queue_free()
 	await process_frame
@@ -169,9 +174,9 @@ func _test_homebase_transfer_ghost_cards_remain_in_team_panel() -> void:
 	var selected_team_list := screen.get_node("Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamDropPanel/DropMargin/DropVBox/SelectedTeamScroll/SelectedTeamList") as VBoxContainer
 	var ghost_cards: Array = _collect_cards_by_source_context(selected_team_list, "transfer_ghost")
 	var first_display_name: String = String(Dictionary(roster[0]).get("display_name", "")).strip_edges()
-	_assert(ghost_cards.size() == 2, "#03 keeps transferred operators visible as ghost cards")
-	_assert(_cards_have_visible_progress(ghost_cards, 50.0), "#03 transfer ghost cards show the shared transit progress")
-	_assert(_cards_contain_display_name(ghost_cards, first_display_name), "#03 ghost cards keep the real operator profile snapshot")
+	_assert(ghost_cards.size() == 2, "Legacy transfer panel keeps transferred operators as compatibility ghost cards")
+	_assert(_cards_have_visible_progress(ghost_cards, 50.0), "Legacy transfer ghost cards keep the shared transit progress")
+	_assert(_cards_contain_display_name(ghost_cards, first_display_name), "Legacy transfer ghost cards keep the real operator profile snapshot")
 
 	screen.queue_free()
 	await process_frame

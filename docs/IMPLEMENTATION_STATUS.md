@@ -27,10 +27,12 @@
 - Offene Punkte: Implementierung, Speed-Tuning, Schwellenwert fuer M-Position und Headless-Verifier.
 
 ### TASK_346 - Homebase Direct Staging Character Popup
-- Status: geplant
-- Stand: Der Task beschreibt den direkten Homebase-Staging-Flow als FOB-Bypass: `#10 FIRETEAMS`, `#13 LOADOUT` und das bestehende Homebase-Flightdeck sollen direkt in der Homebase verfuegbar sein.
-- Stand: Die dauerhaft sichtbare rechte Character-Sheet-Flache soll aus dem normalen Homebase-Layout verschwinden. Character Sheets oeffnen nur noch per Doppelklick auf NPC-/Operator-Karten als frei schwebendes Popup ausserhalb der nummerierten Fenster.
-- Offene Punkte: Implementierung, gemeinsamer Fireteam-/Loadout-/Dropship-Staging-Vertrag zwischen FOB und Homebase, FullHD-Sichtcheck.
+- Status: implementiert im Arbeitsstand
+- Stand: Das Homebase-Drop-Light-Layout hat kein dauerhaftes rechtes `character_sheet`-Fenster mehr. Der frei gewordene Bereich wird fuer `#10 FIRETEAMS`, `#13 LOADOUT` und ein breiteres Homebase-Flightdeck genutzt.
+- Stand: Homebase erzeugt direkte Fireteam-, Loadout- und Dropship-Staging-Panels ueber den bestehenden `FOBDropPanel`-/`FOBFireteamCard`-Vertrag. Fireteam-Zuweisungen bleiben im Meta-Flow erhalten und ein direktes Homebase-Payload kann als FOB-artiger Drop-State in die Missionsplanung laufen.
+- Stand: Character Sheets starten geschlossen und oeffnen per Doppelklick auf NPC-/Operator-Karten als frei schwebendes Popup ausserhalb der nummerierten Fenster. Oeffnen/Schliessen verschiebt die festen Fenster nicht.
+- Risiken: Das Homebase-Loadout ist ein kompakter Staging-Editor und noch kein vollstaendiges Redesign des FOB-Loadout-Fensters. Ein manueller FullHD-Sichtcheck bleibt sinnvoll, weil die neuen Homebase-Proportionen enger sind als das alte Character-Sheet-Layout.
+- Lokale Pruefung: `task_346_homebase_direct_staging_character_popup.gd`, `task_316_fob_fireteam_staging_migration.gd`, `task_314_fob_npc_pool_window_left_of_fireteams.gd`, `task_310_fob_flightdeck_fireteam_userology_smoke.gd`, `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd` und `git diff --check` laufen gruen.
 
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand

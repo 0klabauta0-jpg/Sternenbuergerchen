@@ -71,9 +71,11 @@ static func get_homebase_layout() -> Dictionary:
 		"topbar": Rect2i(0, 0, 1920, 64),
 		"mission_brief": Rect2i(24, 80, 1872, 112),
 		"roster": Rect2i(24, 200, 520, 856),
-		"transfer_team": Rect2i(560, 200, 424, 856),
-		"flightdeck": Rect2i(1000, 200, 520, 856),
-		"character_sheet": Rect2i(1536, 200, 360, 856),
+		"fireteams": Rect2i(560, 200, 320, 856),
+		"transfer_team": Rect2i(560, 200, 320, 856),
+		"loadout": Rect2i(896, 200, 384, 856),
+		"flightdeck": Rect2i(1296, 200, 600, 856),
+		"character_popup": Rect2i(1136, 144, 720, 840),
 	}
 
 

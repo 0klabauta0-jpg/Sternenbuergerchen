@@ -9,7 +9,7 @@ Wenn der FOB fuer den ersten Gameplay-Flow umgangen wird, soll die Homebase die 
 
 Die bisher rechts standardmaessig sichtbare Charakterkarte soll nicht mehr als normales festes Homebase-Fenster erscheinen. Der Charakterbogen wird nur noch per Doppelklick auf eine NPC-/Operator-Karte als frei schwebendes Popup-Fenster geoeffnet, ausserhalb der normalen nummerierten Fenster.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Ausgangslage
 - `scripts/meta/drop_light_layout_contract.gd` definiert fuer Homebase aktuell ein rechtes `character_sheet`-Fenster.
@@ -67,16 +67,16 @@ Die bisher rechts standardmaessig sichtbare Charakterkarte soll nicht mehr als n
 - Kein Character-Sheet-Redesign, ausser es ist fuer Popup-Tauglichkeit minimal noetig.
 
 ## Akzeptanzkriterien
-- [ ] Homebase zeigt kein dauerhaftes rechtes Character-Sheet-Fenster mehr.
-- [ ] Homebase zeigt `#10 FIRETEAMS`.
-- [ ] Homebase zeigt `#13 LOADOUT`.
-- [ ] Das bestehende Homebase-Flightdeck bleibt sichtbar und kann Fireteam-/Dropship-Staging aufnehmen.
-- [ ] Doppelklick auf NPC-/Operator-Karten oeffnet ein Character-Sheet-Popup.
-- [ ] Das Popup liegt ausserhalb der normalen nummerierten Fenster.
-- [ ] Das Popup kann geschlossen werden, ohne Layout oder Auswahlzustand zu verlieren.
-- [ ] Die festen Fenster bewegen sich nicht, wenn das Popup geoeffnet oder geschlossen wird.
-- [ ] Homebase-Staging nutzt bestehende Fireteam-, Loadout- und Dropship-State-Pfade.
-- [ ] Headless-Verifier prueft Layout, Popup-Verhalten und Staging-Vertrag.
+- [x] Homebase zeigt kein dauerhaftes rechtes Character-Sheet-Fenster mehr.
+- [x] Homebase zeigt `#10 FIRETEAMS`.
+- [x] Homebase zeigt `#13 LOADOUT`.
+- [x] Das bestehende Homebase-Flightdeck bleibt sichtbar und kann Fireteam-/Dropship-Staging aufnehmen.
+- [x] Doppelklick auf NPC-/Operator-Karten oeffnet ein Character-Sheet-Popup.
+- [x] Das Popup liegt ausserhalb der normalen nummerierten Fenster.
+- [x] Das Popup kann geschlossen werden, ohne Layout oder Auswahlzustand zu verlieren.
+- [x] Die festen Fenster bewegen sich nicht, wenn das Popup geoeffnet oder geschlossen wird.
+- [x] Homebase-Staging nutzt bestehende Fireteam-, Loadout- und Dropship-State-Pfade.
+- [x] Headless-Verifier prueft Layout, Popup-Verhalten und Staging-Vertrag.
 
 ## Erwartete Dateien
 - `scripts/meta/drop_light_layout_contract.gd`
@@ -92,12 +92,19 @@ Die bisher rechts standardmaessig sichtbare Charakterkarte soll nicht mehr als n
 - `docs/TASK_ROADMAP.md`
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_346_homebase_direct_staging_character_popup.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_316_fob_fireteam_staging_migration.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_314_fob_npc_pool_window_left_of_fireteams.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_310_fob_flightdeck_fireteam_userology_smoke.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_346_homebase_direct_staging_character_popup.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_316_fob_fireteam_staging_migration.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_314_fob_npc_pool_window_left_of_fireteams.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_310_fob_flightdeck_fireteam_userology_smoke.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd`
+- [x] `git diff --check`
+
+## Umgesetzt
+- `DropLightLayoutContract` entfernt das feste Homebase-`character_sheet` aus dem nummerierten Raster und reserviert den Bereich fuer `#10 FIRETEAMS`, `#13 LOADOUT` und das vergroesserte Flightdeck.
+- `HomebaseTestScreen` haengt direkte Fireteam-, Loadout- und Dropship-Staging-Panels ein und nutzt dafuer den bestehenden `FOBDropPanel`-/`FOBFireteamCard`-Vertrag.
+- Character Sheets werden standardmaessig geschlossen gehalten und per Doppelklick als frei schwebendes Popup geoeffnet.
+- `MetaLayerFlow` synchronisiert Homebase-Fireteam-Auswahl und kann einen direkten Homebase-Drop-State in die bestehende Missionsplanung uebernehmen.
+- `task_346_homebase_direct_staging_character_popup.gd` sichert Layout, Popup und Drop-State ab.
 
 ## Risiken / offene Punkte
 - Das Homebase-Fensterlayout muss neu ausbalanciert werden; FullHD-Sichtcheck bleibt wichtig.

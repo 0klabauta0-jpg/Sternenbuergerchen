@@ -88,6 +88,7 @@ var _available_team_units: Array = UNIT_ROSTER_PRESETS_SCRIPT.get_homebase_roste
 var _all_team_units: Array = UNIT_ROSTER_PRESETS_SCRIPT.get_homebase_roster()
 var _selected_unit_ids: PackedStringArray = []
 var _homebase_staged_unit_ids: PackedStringArray = []
+var _homebase_staged_fireteam_ids: PackedStringArray = []
 var _selected_fireteam_ids: PackedStringArray = []
 var _active_mission = null
 var _last_mission_result: Dictionary = {}
@@ -131,6 +132,8 @@ func _ready() -> void:
 
 	if not homebase_screen.selection_changed.is_connected(_on_homebase_selection_changed):
 		homebase_screen.selection_changed.connect(_on_homebase_selection_changed)
+	if homebase_screen.has_signal("fireteam_context_changed") and not homebase_screen.fireteam_context_changed.is_connected(_on_homebase_fireteam_context_changed):
+		homebase_screen.fireteam_context_changed.connect(_on_homebase_fireteam_context_changed)
 	if not homebase_screen.team_confirmed.is_connected(_on_homebase_team_confirmed):
 		homebase_screen.team_confirmed.connect(_on_homebase_team_confirmed)
 	if not homebase_screen.mission_start_requested.is_connected(_on_homebase_mission_start_requested):
@@ -269,6 +272,12 @@ func _on_map_nav_pressed() -> void:
 
 func _on_homebase_selection_changed(selected_unit_ids: PackedStringArray) -> void:
 	_homebase_staged_unit_ids = _sanitize_homebase_selection(selected_unit_ids)
+	_homebase_staged_fireteam_ids = _normalize_homebase_fireteam_selection(_homebase_staged_unit_ids, _homebase_staged_fireteam_ids)
+
+
+func _on_homebase_fireteam_context_changed(selected_unit_ids: PackedStringArray, selected_fireteam_ids: PackedStringArray) -> void:
+	_homebase_staged_unit_ids = _sanitize_homebase_selection(selected_unit_ids)
+	_homebase_staged_fireteam_ids = _normalize_homebase_fireteam_selection(_homebase_staged_unit_ids, selected_fireteam_ids)
 
 
 func _on_homebase_mission_selection_changed(mission_id: String) -> void:
@@ -293,6 +302,7 @@ func _on_homebase_team_confirmed(selected_unit_ids: PackedStringArray) -> void:
 	_pending_homebase_team_transfers.append(_build_homebase_team_transfer_entry(transferred_unit_ids))
 	_available_team_units = _remove_units_by_id(_available_team_units, transferred_unit_ids)
 	_homebase_staged_unit_ids = PackedStringArray()
+	_homebase_staged_fireteam_ids = PackedStringArray()
 	_refresh_homebase_screen()
 	_refresh_map_screen()
 	_ensure_transport_timer_state()
@@ -300,6 +310,7 @@ func _on_homebase_team_confirmed(selected_unit_ids: PackedStringArray) -> void:
 
 func _on_homebase_mission_start_requested() -> void:
 	var had_preview_deployed_payload: bool = _has_preview_deployed_mission_payload()
+	_sync_homebase_direct_staging_from_screen()
 	_sync_fob_dropship_state_into_mission_planning(not had_preview_deployed_payload)
 	if not _has_mission_start_payload():
 		return
@@ -1013,8 +1024,13 @@ func _refresh_homebase_screen() -> void:
 	var homebase_screen = _get_homebase_screen()
 	if homebase_screen == null:
 		return
+	var fob_screen = _get_fob_screen()
+	var fireteam_definitions: Array = []
+	if fob_screen != null and fob_screen.has_method("get_fireteam_definitions"):
+		fireteam_definitions = Array(fob_screen.call("get_fireteam_definitions")).duplicate(true)
 	homebase_screen.setup_roster(_available_team_units, _homebase_staged_unit_ids)
-	homebase_screen.set_fireteam_context(_build_unassigned_fireteam_selection(_homebase_staged_unit_ids))
+	_homebase_staged_fireteam_ids = _normalize_homebase_fireteam_selection(_homebase_staged_unit_ids, _homebase_staged_fireteam_ids)
+	homebase_screen.set_fireteam_context(_homebase_staged_fireteam_ids, fireteam_definitions)
 	var selected_mission: Dictionary = _get_selected_mission_definition()
 	homebase_screen.set_mission_context(
 		_mission_catalog,
@@ -1034,7 +1050,6 @@ func _refresh_homebase_screen() -> void:
 		_pending_homebase_cargo_loads
 	)
 	homebase_screen.set_mission_occupancy(_selected_unit_ids.size() + _count_assigned_aircraft_pilots(), _count_assigned_aircraft_pilots())
-	var fob_screen = _get_fob_screen()
 	if fob_screen != null and fob_screen.has_method("can_request_mission_start"):
 		var has_preview_deployed_payload: bool = _has_preview_deployed_mission_payload()
 		homebase_screen.set_mission_launch_state(
@@ -1410,6 +1425,16 @@ func _sanitize_homebase_selection(unit_ids: PackedStringArray) -> PackedStringAr
 	return _filter_available_homebase_unit_ids(unit_ids)
 
 
+func _normalize_homebase_fireteam_selection(unit_ids: PackedStringArray, fireteam_ids: PackedStringArray) -> PackedStringArray:
+	var normalized_fireteam_ids: PackedStringArray = []
+	for unit_index in range(unit_ids.size()):
+		var fireteam_id := ""
+		if unit_index < fireteam_ids.size():
+			fireteam_id = String(fireteam_ids[unit_index]).strip_edges().to_lower()
+		normalized_fireteam_ids.append(fireteam_id)
+	return normalized_fireteam_ids
+
+
 func _remove_unit_ids_from_list(source_ids: PackedStringArray, removed_ids: PackedStringArray) -> PackedStringArray:
 	var filtered_ids: PackedStringArray = []
 	for unit_id_variant in source_ids:
@@ -1731,9 +1756,27 @@ func _build_homebase_transfer_route_entries() -> Array:
 	return route_entries
 
 
+func _get_homebase_direct_drop_state() -> Dictionary:
+	var homebase_screen = _get_homebase_screen()
+	if homebase_screen == null or not homebase_screen.has_method("build_homebase_direct_drop_state"):
+		return {}
+	var drop_state: Dictionary = Dictionary(homebase_screen.call("build_homebase_direct_drop_state")).duplicate(true)
+	if not bool(drop_state.get("drop_ship_staged", false)):
+		return {}
+	var screen_unit_ids := PackedStringArray(Array(drop_state.get("selected_unit_ids", [])))
+	var screen_fireteam_ids := PackedStringArray(Array(drop_state.get("selected_fireteam_ids", [])))
+	_homebase_staged_unit_ids = _sanitize_homebase_selection(screen_unit_ids)
+	_homebase_staged_fireteam_ids = _normalize_homebase_fireteam_selection(_homebase_staged_unit_ids, screen_fireteam_ids)
+	if not _homebase_staged_unit_ids.is_empty():
+		_selected_unit_ids = _homebase_staged_unit_ids.duplicate()
+		_selected_fireteam_ids = _homebase_staged_fireteam_ids.duplicate()
+	return drop_state
+
+
 func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: bool = false) -> void:
+	var drop_state: Dictionary = _get_homebase_direct_drop_state()
 	var fob_screen = _get_fob_screen()
-	if fob_screen == null or not fob_screen.has_method("build_mission_drop_state"):
+	if drop_state.is_empty() and (fob_screen == null or not fob_screen.has_method("build_mission_drop_state")):
 		_mission_planning_state["embarked_unit_ids"] = []
 		_mission_planning_state["meta_transfer_routes"] = _build_homebase_transfer_route_entries()
 		_mission_planning_state["mission_drop_cards"] = []
@@ -1742,7 +1785,10 @@ func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: boo
 			_mission_planning_state["deployed_unit_positions"] = {}
 		return
 
-	var drop_state: Dictionary = _apply_selected_mission_drop_card_override(_merge_existing_mission_drop_card_planning_fields(Dictionary(fob_screen.call("build_mission_drop_state")).duplicate(true)))
+	if drop_state.is_empty():
+		drop_state = _apply_selected_mission_drop_card_override(_merge_existing_mission_drop_card_planning_fields(Dictionary(fob_screen.call("build_mission_drop_state")).duplicate(true)))
+	else:
+		drop_state = _apply_selected_mission_drop_card_override(_merge_existing_mission_drop_card_planning_fields(drop_state))
 	_mission_planning_state["embarked_unit_ids"] = Array(PackedStringArray(Array(drop_state.get("embarked_unit_ids", []))))
 	_mission_planning_state["drop_queued_fireteam_ids"] = Array(PackedStringArray(Array(drop_state.get("queued_fireteam_ids", []))))
 	_mission_planning_state["drop_ship_staged"] = bool(drop_state.get("drop_ship_staged", false))
@@ -1939,6 +1985,20 @@ func _sync_fob_transfer_selection_from_screen() -> void:
 		elif unit_index < _selected_fireteam_ids.size():
 			next_selected_fireteam_ids[unit_index] = String(_selected_fireteam_ids[unit_index]).strip_edges()
 	_selected_fireteam_ids = next_selected_fireteam_ids
+
+
+func _sync_homebase_direct_staging_from_screen() -> void:
+	var homebase_screen = _get_homebase_screen()
+	if homebase_screen == null or not homebase_screen.has_method("get_selected_unit_ids") or not homebase_screen.has_method("get_selected_fireteam_ids"):
+		return
+	var screen_unit_ids := PackedStringArray(homebase_screen.call("get_selected_unit_ids"))
+	var screen_fireteam_ids := PackedStringArray(homebase_screen.call("get_selected_fireteam_ids"))
+	_homebase_staged_unit_ids = _sanitize_homebase_selection(screen_unit_ids)
+	_homebase_staged_fireteam_ids = _normalize_homebase_fireteam_selection(_homebase_staged_unit_ids, screen_fireteam_ids)
+	if _homebase_staged_unit_ids.is_empty():
+		return
+	_selected_unit_ids = _homebase_staged_unit_ids.duplicate()
+	_selected_fireteam_ids = _homebase_staged_fireteam_ids.duplicate()
 
 
 func _begin_active_mission_timer() -> void:
