@@ -545,6 +545,9 @@ TASK_340 - Command Feedback Pure Snapshot (implementiert im Arbeitsstand)
 TASK_341 - Navigation Fallback Candidate Cap (implementiert im Arbeitsstand)
 TASK_342 - SimulationRoot Unknown Payload Audit (implementiert im Arbeitsstand)
 
+Phase 18ZH - Homebase Mission Prep Simplification
+TASK_343 - Homebase Direct Mission Prep FOB Bypass V1 (geplant)
+
 Batch-Empfehlung
 
 Codex soll Tasks in kleinen Gruppen bearbeiten:

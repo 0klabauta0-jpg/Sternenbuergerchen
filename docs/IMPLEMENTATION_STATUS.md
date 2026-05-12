@@ -51,6 +51,14 @@
 - Risiken: Die Diagnose ist absichtlich kompakt. Wenn kuenftige Commands wirklich von `SimulationRoot` mutiert werden sollen, muessen sie explizit aus der no-op-Liste in einen echten Handler wandern.
 - Lokale Pruefung: `task_342_simulation_root_unknown_payload_audit.gd`, `task_166_multiplayer_authority_command_contract_verifier.gd`, `task_284_gameplay_truth_architecture_boundary_audit.gd` und `git diff --check` laufen gruen.
 
+### TASK_343 - Homebase Direct Mission Prep FOB Bypass V1
+- Status: geplant
+- Stand: Der neue Folge-Task beschreibt den V1-Bypass fuer den Pflicht-FOB: Fireteam-Auswahl, Loadout, Flight Deck und Dropship-Boarding sollen direkt in der Homebase vorbereitet werden koennen.
+- Stand: Der FOB wird nicht geloescht, sondern fuer den Kernflow optional. Homebase und FOB muessen dieselben Fireteam-, Loadout-, Transport- und Dropship-Payload-Daten nutzen.
+- Offene Punkte: Umsetzung in kleinen Slices: Character-Sheet-Popup, Homebase-Prep-Flaeche, Dropship-Boarding aus Homebase, Mission-Handoff-Smoke.
+- Risiken: Kein doppelter Meta-State fuer Homebase/FOB; UI bleibt Staging/Anzeige und darf keine neue `SimulationRoot`-Wahrheit erzeugen.
+- Naechster Schritt: TASK_343 - Homebase Direct Mission Prep FOB Bypass V1.
+
 ### TASK_337 - Architecture Performance UX Followup Gate
 - Status: implementiert im Arbeitsstand
 - Stand: Der neue Abschluss-Verifier prueft die TASK_330-336-Artefakte, die dokumentierten Architekturgrenzen, produktive Mission-Pfade ausserhalb `scripts/tests`, UI-Feedback als read-only Snapshot sowie den Performance-Budget-Contract.
