@@ -151,6 +151,11 @@ func _normalize_unit_snapshots(value: Variant) -> Array:
 		_copy_string_if_present(entry, unit_snapshot, "tactical_stance")
 		_copy_string_if_present(entry, unit_snapshot, "fireteam_id")
 		_copy_string_if_present(entry, unit_snapshot, "active_weapon_id")
+		_copy_string_if_present(entry, unit_snapshot, "active_command_type")
+		_copy_string_if_present(entry, unit_snapshot, "source_command_type")
+		_copy_string_if_present(entry, unit_snapshot, "movement_posture")
+		_copy_string_if_present(entry, unit_snapshot, "weapon_posture")
+		_copy_string_if_present(entry, unit_snapshot, "posture_policy_id")
 		_copy_string_if_present(entry, unit_snapshot, "enemy_security_group_id")
 		_copy_string_if_present(entry, unit_snapshot, "enemy_security_mode")
 		_copy_string_if_present(entry, unit_snapshot, "enemy_tactics_group_id")
@@ -159,13 +164,18 @@ func _normalize_unit_snapshots(value: Variant) -> Array:
 		_copy_string_if_present(entry, unit_snapshot, "enemy_advance_style")
 		_copy_string_if_present(entry, unit_snapshot, "enemy_role")
 		_copy_string_if_present(entry, unit_snapshot, "enemy_tactic_label")
+		_copy_string_if_present(entry, unit_snapshot, "enemy_movement_posture")
+		_copy_string_if_present(entry, unit_snapshot, "enemy_weapon_posture")
+		_copy_string_if_present(entry, unit_snapshot, "enemy_posture_policy_id")
 		_copy_int_if_present(entry, unit_snapshot, "health")
 		_copy_int_if_present(entry, unit_snapshot, "bleedout_ticks")
 		_copy_int_if_present(entry, unit_snapshot, "tactical_stance_revision")
 		_copy_int_if_present(entry, unit_snapshot, "weapon_tile_range")
 		_copy_float_if_present(entry, unit_snapshot, "weapon_range_world")
+		_copy_float_if_present(entry, unit_snapshot, "move_speed_factor")
 		_copy_float_if_present(entry, unit_snapshot, "facing_angle")
 		_copy_float_if_present(entry, unit_snapshot, "enemy_facing_angle")
+		_copy_position_if_present(entry, unit_snapshot, "target_position")
 		result.append(unit_snapshot)
 	result.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return String(a.get("unit_id", "")) < String(b.get("unit_id", ""))
@@ -333,15 +343,24 @@ func _normalize_enemy_team_tactics(value: Variant) -> Array:
 		_copy_string_if_present(source, entry, "advance_style")
 		_copy_string_if_present(source, entry, "cover_behavior")
 		_copy_string_if_present(source, entry, "tactic_label")
+		_copy_string_if_present(source, entry, "movement_posture_policy")
 		_copy_position_if_present(source, entry, "anchor_position")
 		_copy_position_if_present(source, entry, "focus_position")
 		_copy_position_if_present(source, entry, "advance_direction")
 		_copy_int_if_present(source, entry, "priority")
 		_copy_float_if_present(source, entry, "move_speed_factor")
+		_copy_float_if_present(source, entry, "ready_distance_world")
+		_copy_float_if_present(source, entry, "travel_speed_factor")
+		_copy_float_if_present(source, entry, "ready_speed_factor")
+		_copy_float_if_present(source, entry, "aim_move_speed_factor")
 		entry["unit_ids"] = _normalize_string_array(source.get("unit_ids", []))
 		entry["moving_unit_ids"] = _normalize_string_array(source.get("moving_unit_ids", []))
 		entry["covering_unit_ids"] = _normalize_string_array(source.get("covering_unit_ids", []))
 		entry["role_by_unit_id"] = _normalize_string_dictionary(source.get("role_by_unit_id", {}))
+		entry["movement_posture_by_unit_id"] = _normalize_string_dictionary(source.get("movement_posture_by_unit_id", {}))
+		entry["weapon_posture_by_unit_id"] = _normalize_string_dictionary(source.get("weapon_posture_by_unit_id", {}))
+		entry["posture_policy_by_unit_id"] = _normalize_string_dictionary(source.get("posture_policy_by_unit_id", {}))
+		entry["move_speed_factor_by_unit_id"] = _normalize_float_dictionary(source.get("move_speed_factor_by_unit_id", {}))
 		entry["target_positions_by_unit_id"] = _normalize_position_dictionary(source.get("target_positions_by_unit_id", {}))
 		if not String(entry.get("security_group_id", "")).is_empty():
 			result.append(entry)
@@ -843,6 +862,21 @@ func _normalize_string_dictionary(value: Variant) -> Dictionary:
 		if key.is_empty():
 			continue
 		result[key] = String(source.get(key_variant, "")).strip_edges()
+	return result
+
+
+func _normalize_float_dictionary(value: Variant) -> Dictionary:
+	if typeof(value) != TYPE_DICTIONARY:
+		return {}
+	var result: Dictionary = {}
+	var source: Dictionary = Dictionary(value)
+	var keys: Array = source.keys()
+	keys.sort()
+	for key_variant in keys:
+		var key: String = String(key_variant).strip_edges()
+		if key.is_empty():
+			continue
+		result[key] = float(source.get(key_variant, 0.0))
 	return result
 
 

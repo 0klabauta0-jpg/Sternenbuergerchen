@@ -16,6 +16,11 @@ const ADVANCE_STYLE_HOLD: String = "hold"
 const ADVANCE_STYLE_PROBE: String = "probe"
 const ADVANCE_STYLE_PUSH: String = "push"
 const ADVANCE_STYLE_BOUNDING: String = "bounding"
+const MOVEMENT_POSTURE_POLICY_TRAVEL_UNTIL_THREAT: String = "travel_until_threat"
+const MOVEMENT_POSTURE_POLICY_ALWAYS_READY: String = "always_ready"
+const MOVEMENT_POSTURE_POLICY_HOLD_READY: String = "hold_ready"
+const MOVEMENT_POSTURE_POLICY_AGGRESSIVE_READY: String = "aggressive_ready"
+const MOVEMENT_POSTURE_POLICY_OVERWATCH: String = "overwatch"
 const HEAVY_WEAPON_NONE: String = "none"
 const HEAVY_WEAPON_ANTI_ARMOR: String = "anti_armor"
 const AIR_ASSET_RISK_NONE: String = "none"
@@ -55,6 +60,13 @@ const ADVANCE_STYLES: PackedStringArray = [
 	ADVANCE_STYLE_PUSH,
 	ADVANCE_STYLE_BOUNDING,
 ]
+const MOVEMENT_POSTURE_POLICIES: PackedStringArray = [
+	MOVEMENT_POSTURE_POLICY_TRAVEL_UNTIL_THREAT,
+	MOVEMENT_POSTURE_POLICY_ALWAYS_READY,
+	MOVEMENT_POSTURE_POLICY_HOLD_READY,
+	MOVEMENT_POSTURE_POLICY_AGGRESSIVE_READY,
+	MOVEMENT_POSTURE_POLICY_OVERWATCH,
+]
 const HEAVY_WEAPON_ROLES: PackedStringArray = [
 	HEAVY_WEAPON_NONE,
 	HEAVY_WEAPON_ANTI_ARMOR,
@@ -86,6 +98,11 @@ const PROFILE_DATA: Dictionary = {
 		"contact_behavior": "return_fire_hold",
 		"weapon_profile": "standard_close",
 		"visual_archetype": "enemy_space_suit_orange",
+		"movement_posture_policy": "hold_ready",
+		"ready_distance_world": 640.0,
+		"travel_speed_factor": 0.35,
+		"ready_speed_factor": 0.24,
+		"aim_move_speed_factor": 0.18,
 		"description": "Default holding team for small mission maps.",
 	},
 	"patrol_probe": {
@@ -100,6 +117,11 @@ const PROFILE_DATA: Dictionary = {
 		"contact_behavior": "pin_then_report",
 		"weapon_profile": "standard_close",
 		"visual_archetype": "enemy_space_suit_orange",
+		"movement_posture_policy": "travel_until_threat",
+		"ready_distance_world": 640.0,
+		"travel_speed_factor": 0.55,
+		"ready_speed_factor": 0.30,
+		"aim_move_speed_factor": 0.18,
 		"description": "Default moving contact team for larger mission maps.",
 	},
 	"aggressive_push": {
@@ -114,6 +136,11 @@ const PROFILE_DATA: Dictionary = {
 		"contact_behavior": "close_distance",
 		"weapon_profile": "assault_close",
 		"visual_archetype": "enemy_space_suit_orange",
+		"movement_posture_policy": "aggressive_ready",
+		"ready_distance_world": 760.0,
+		"travel_speed_factor": 0.45,
+		"ready_speed_factor": 0.36,
+		"aim_move_speed_factor": 0.20,
 		"description": "Pressure team for planned pushes.",
 	},
 	"defensive_cover": {
@@ -128,6 +155,11 @@ const PROFILE_DATA: Dictionary = {
 		"contact_behavior": "suppress_from_cover",
 		"weapon_profile": "defensive_mid",
 		"visual_archetype": "enemy_space_suit_orange",
+		"movement_posture_policy": "hold_ready",
+		"ready_distance_world": 640.0,
+		"travel_speed_factor": 0.35,
+		"ready_speed_factor": 0.24,
+		"aim_move_speed_factor": 0.18,
 		"description": "Cover-oriented team for choke points and objectives.",
 	},
 	"sniper_watch": {
@@ -142,6 +174,11 @@ const PROFILE_DATA: Dictionary = {
 		"contact_behavior": "prioritize_exposed_targets",
 		"weapon_profile": "marksman_long",
 		"visual_archetype": "enemy_space_suit_orange",
+		"movement_posture_policy": "overwatch",
+		"ready_distance_world": 900.0,
+		"travel_speed_factor": 0.20,
+		"ready_speed_factor": 0.18,
+		"aim_move_speed_factor": 0.12,
 		"description": "Long-lane watcher for later LOS and range work.",
 	},
 }
@@ -161,6 +198,10 @@ static func get_facing_options() -> PackedStringArray:
 
 static func get_advance_styles() -> PackedStringArray:
 	return ADVANCE_STYLES.duplicate()
+
+
+static func get_movement_posture_policies() -> PackedStringArray:
+	return MOVEMENT_POSTURE_POLICIES.duplicate()
 
 
 static func get_heavy_weapon_roles() -> PackedStringArray:
@@ -234,6 +275,25 @@ static func normalize_advance_style(value: Variant, fallback: String = ADVANCE_S
 			return fallback if ADVANCE_STYLES.has(fallback) else ADVANCE_STYLE_HOLD
 
 
+static func normalize_movement_posture_policy(value: Variant, fallback: String = MOVEMENT_POSTURE_POLICY_TRAVEL_UNTIL_THREAT) -> String:
+	var normalized_value: String = _normalize_key(value)
+	match normalized_value:
+		"", "default":
+			return fallback if MOVEMENT_POSTURE_POLICIES.has(fallback) else MOVEMENT_POSTURE_POLICY_TRAVEL_UNTIL_THREAT
+		"travel", "patrol", "patrol_ready", "travel_until_contact", "travel_until_threat":
+			return MOVEMENT_POSTURE_POLICY_TRAVEL_UNTIL_THREAT
+		"ready", "always_ready", "tactical", "tactical_ready":
+			return MOVEMENT_POSTURE_POLICY_ALWAYS_READY
+		"hold", "hold_ready", "defend", "defensive", "defensive_ready":
+			return MOVEMENT_POSTURE_POLICY_HOLD_READY
+		"push", "aggressive", "aggressive_ready", "assault":
+			return MOVEMENT_POSTURE_POLICY_AGGRESSIVE_READY
+		"watch", "overwatch", "sniper_watch":
+			return MOVEMENT_POSTURE_POLICY_OVERWATCH
+		_:
+			return fallback if MOVEMENT_POSTURE_POLICIES.has(fallback) else MOVEMENT_POSTURE_POLICY_TRAVEL_UNTIL_THREAT
+
+
 static func normalize_config(raw_config: Variant, grid_size: Vector2i = Vector2i.ZERO) -> Dictionary:
 	var source: Dictionary = Dictionary(raw_config) if typeof(raw_config) == TYPE_DICTIONARY else {}
 	var diagnostics: PackedStringArray = PackedStringArray()
@@ -281,6 +341,12 @@ static func normalize_config(raw_config: Variant, grid_size: Vector2i = Vector2i
 		diagnostics.append("weapon_not_anti_armor:%s" % (weapon_id if not weapon_id.is_empty() else "none"))
 	var air_asset_risk_profile: String = _normalize_list_value(source.get("air_asset_risk_profile", source.get("air_asset_risk", AIR_ASSET_RISK_NONE)), AIR_ASSET_RISK_PROFILES, AIR_ASSET_RISK_NONE)
 	var communication_intensity: String = _normalize_list_value(source.get("communication_intensity", COMMUNICATION_NORMAL), COMMUNICATION_INTENSITIES, COMMUNICATION_NORMAL)
+	var default_posture_policy: String = normalize_movement_posture_policy(profile.get("movement_posture_policy", MOVEMENT_POSTURE_POLICY_TRAVEL_UNTIL_THREAT))
+	var movement_posture_policy: String = normalize_movement_posture_policy(source.get("movement_posture_policy", source.get("posture_policy_id", default_posture_policy)), default_posture_policy)
+	var ready_distance_world: float = _normalize_float(source.get("ready_distance_world", profile.get("ready_distance_world", 640.0)), float(profile.get("ready_distance_world", 640.0)), 0.0)
+	var travel_speed_factor: float = _normalize_float(source.get("travel_speed_factor", profile.get("travel_speed_factor", 0.55)), float(profile.get("travel_speed_factor", 0.55)), 0.0)
+	var ready_speed_factor: float = _normalize_float(source.get("ready_speed_factor", profile.get("ready_speed_factor", 0.30)), float(profile.get("ready_speed_factor", 0.30)), 0.0)
+	var aim_move_speed_factor: float = _normalize_float(source.get("aim_move_speed_factor", profile.get("aim_move_speed_factor", 0.18)), float(profile.get("aim_move_speed_factor", 0.18)), 0.0)
 
 	var result: Dictionary = {
 		"profile_id": profile_id,
@@ -300,6 +366,11 @@ static func normalize_config(raw_config: Variant, grid_size: Vector2i = Vector2i
 		"air_asset_risk_profile": air_asset_risk_profile,
 		"lz_threat_zone_id": String(source.get("lz_threat_zone_id", source.get("lz_threat_marker_id", ""))).strip_edges(),
 		"communication_intensity": communication_intensity,
+		"movement_posture_policy": movement_posture_policy,
+		"ready_distance_world": ready_distance_world,
+		"travel_speed_factor": travel_speed_factor,
+		"ready_speed_factor": ready_speed_factor,
+		"aim_move_speed_factor": aim_move_speed_factor,
 		"diagnostics": diagnostics,
 	}
 	for optional_key in ["patrol_area_id", "hold_area_id"]:
@@ -329,6 +400,7 @@ static func validate_config(raw_config: Variant, grid_size: Vector2i = Vector2i.
 		"contact_behavior",
 		"weapon_profile",
 		"visual_archetype",
+		"movement_posture_policy",
 	]:
 		if String(normalized.get(required_key, "")).strip_edges().is_empty():
 			errors.append("missing_field:%s" % required_key)
@@ -353,3 +425,14 @@ static func _normalize_list_value(value: Variant, allowed_values: PackedStringAr
 	if allowed_values.has(normalized):
 		return normalized
 	return fallback
+
+
+static func _normalize_float(value: Variant, fallback: float, minimum: float = 0.0) -> float:
+	var result: float = fallback
+	if typeof(value) == TYPE_INT or typeof(value) == TYPE_FLOAT:
+		result = float(value)
+	elif typeof(value) == TYPE_STRING or typeof(value) == TYPE_STRING_NAME:
+		var text: String = String(value).strip_edges()
+		if text.is_valid_float():
+			result = text.to_float()
+	return maxf(result, minimum)

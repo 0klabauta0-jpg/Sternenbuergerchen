@@ -21,10 +21,15 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_344_ground_mission_default_enemy_visuals.gd`, `task_233_portrait_identity_catalog_and_roster_presentation.gd`, `task_205_weapon_fire_vfx_muzzle_flash_particles.gd`, `task_201_weapon_range_scale_and_tile_distance_patch.gd`, `task_186_mission_map_unit_presence_registry_audit.gd`, `task_202_enemy_security_direction_and_los_patch.gd` und `git diff --check` laufen gruen.
 
 ### TASK_345 - NPC Standard Movement Posture Policy
-- Status: geplant
-- Stand: Der Task spezifiziert einen expliziten Standardvertrag fuer NPC-Bewegung und Waffenhaltung: `travel/lowered`, `tactical/ready`, `engage/aimed` und `overwatch/ready`.
-- Stand: Bestehende `move_speed_factor`-, Enemy-Team-Tactics- und TASK_344-Aim-Pose-Pfade sollen weiterverwendet werden. Die Gameplay-Wahrheit bleibt in Simulation/Taktik; `TerrainMap3DView` liest die Posture nur fuer die Darstellung.
-- Offene Punkte: Implementierung, Speed-Tuning, Schwellenwert fuer M-Position und Headless-Verifier.
+- Status: implementiert im Arbeitsstand
+- Stand: Enemy-Team-Tactics-Profile tragen jetzt eine `movement_posture_policy` samt Ready-Distanz und Speed-Faktoren. Die Default-Policies decken `travel_until_threat`, `always_ready`, `hold_ready`, `aggressive_ready` und `overwatch` ab.
+- Stand: `UnitCommand` und `UnitRuntimeStatus` fuehren `movement_posture`, `weapon_posture` und `posture_policy_id`. `SimulationRoot` weist Move-/Hold-Kommandos autoritativ an Units zu, bevor Bewegung ausgefuehrt wird.
+- Stand: Der CombatLoop erzeugt fuer Patrouillen Travel/Lowered, nahe Threats Tactical/Ready, Defense Overwatch/Ready und Fire-Events Engage/Aimed inklusive Facing zum Ziel. `move_speed_factor` kommt dabei aus der Posture-Policy statt nur aus `advance_style`.
+- Stand: `TerrainMap3DView` liest die Runtime-Posture nur fuer Darstellung und Snapshot. Ready nutzt einen leichten Blaster-Ready-Offset, Fire-Events uebersteuern visuell auf Aimed und bleiben kompatibel mit TASK_344-Muzzle-/Aim-Visuals.
+- Stand: `ground_mission01_default` setzt die Patrol-Fireteam-Policy auf `travel_until_threat` und die Defense-Fireteam-Policy auf `hold_ready`.
+- Stand: Drei neue Portrait-PNGs aus `Assets/Char` sind importiert und als `char_portrait_040` bis `char_portrait_042` im Portrait-Katalog erfasst.
+- Risiken: Die Zahlen fuer Travel/Ready/Aim-Speed und `ready_distance_world = 640.0` sind V1-Spielgefuehlwerte und brauchen manuellen Mission-Playtest.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_345_npc_standard_movement_posture_policy.gd`, `task_344_ground_mission_default_enemy_visuals.gd`, `task_202_enemy_security_direction_and_los_patch.gd`, `task_201_weapon_range_scale_and_tile_distance_patch.gd`, `task_204_enemy_tactics_multiplayer_authority_snapshot_patch.gd`, `task_208_enemy_team_tactics_playability_smoke.gd`, `task_200_enemy_team_tactics_contract_and_editor_config.gd`, `task_233_portrait_identity_catalog_and_roster_presentation.gd` und `git diff --check` laufen gruen.
 
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand

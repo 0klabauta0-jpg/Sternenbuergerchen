@@ -127,6 +127,8 @@ const FOW_EXPLORED_DIM_COLOR: Color = Color(0.02, 0.04, 0.06, 0.62)
 const FOW_UNKNOWN_BLACK_COLOR: Color = Color(0.0, 0.0, 0.0, 1.0)
 const UNIT_AIM_POSE_WEAPON_PITCH_DEGREES: float = -14.0
 const UNIT_AIM_POSE_WEAPON_FORWARD_OFFSET: float = 0.035
+const UNIT_READY_POSE_WEAPON_PITCH_DEGREES: float = -7.0
+const UNIT_READY_POSE_WEAPON_FORWARD_OFFSET: float = 0.018
 const EDITOR_EMPTY_BACKGROUND_COLOR: Color = Color(0.12, 0.13, 0.12, 1.0)
 const EDITOR_LIGHT_ROTATION_DEGREES: Vector3 = Vector3(-58.0, -32.0, 0.0)
 const EDITOR_LIGHT_ENERGY: float = 1.18
@@ -4928,7 +4930,16 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 		proxy.set_meta("overwatch_shot_ready", bool(unit.get_meta("overwatch_shot_ready", false)) if unit != null and unit.has_meta("overwatch_shot_ready") else false)
 		proxy.set_meta("overwatch_cooldown_remaining_ticks", int(unit.get_meta("overwatch_cooldown_remaining_ticks", 0)) if unit != null and unit.has_meta("overwatch_cooldown_remaining_ticks") else 0)
 		var active_fire_event: Dictionary = _get_active_fire_event_for_unit(unit_id)
-		proxy.set_meta("unit_aim_pose_active", not active_fire_event.is_empty())
+		var runtime_posture: Dictionary = _get_unit_runtime_posture_snapshot(unit)
+		var displayed_weapon_posture: String = "aimed" if not active_fire_event.is_empty() else String(runtime_posture.get("weapon_posture", "lowered"))
+		var displayed_movement_posture: String = "engage" if not active_fire_event.is_empty() else String(runtime_posture.get("movement_posture", "idle"))
+		proxy.set_meta("unit_movement_posture", displayed_movement_posture)
+		proxy.set_meta("unit_weapon_posture", displayed_weapon_posture)
+		proxy.set_meta("unit_runtime_weapon_posture", String(runtime_posture.get("weapon_posture", "lowered")))
+		proxy.set_meta("unit_posture_policy_id", String(runtime_posture.get("posture_policy_id", "")))
+		proxy.set_meta("unit_posture_source", "fire_event" if not active_fire_event.is_empty() else "runtime")
+		proxy.set_meta("unit_aim_pose_active", displayed_weapon_posture == "aimed")
+		proxy.set_meta("unit_ready_pose_active", displayed_weapon_posture == "ready")
 		proxy.set_meta("unit_aim_pose_source_event_id", String(active_fire_event.get("event_id", "")))
 		proxy.set_meta("unit_aim_pose_target_unit_id", String(active_fire_event.get("target_unit_id", "")))
 		var unit_is_moving: bool = false
@@ -4957,9 +4968,9 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 				changed = true
 			proxy.rotation_degrees.y = next_rotation_y
 		proxy.set_meta("last_rotation_y", proxy.rotation_degrees.y)
-		if _update_unit_visual_animation(proxy, unit_is_moving, not active_fire_event.is_empty()):
+		if _update_unit_visual_animation(proxy, unit_is_moving, displayed_weapon_posture == "aimed"):
 			changed = true
-		if _update_unit_weapon_aim_pose(proxy, active_fire_event):
+		if _update_unit_weapon_aim_pose(proxy, active_fire_event, displayed_weapon_posture):
 			changed = true
 		if _update_unit_status_badge(proxy, unit):
 			unit_status_badge_count += 1
@@ -5077,6 +5088,47 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 	_fow_hidden_unit_proxy_count = fow_hidden_unit_proxy_count
 	if changed:
 		_request_viewport_redraw()
+
+
+func _get_unit_runtime_posture_snapshot(unit: Node) -> Dictionary:
+	var result: Dictionary = {
+		"movement_posture": "idle",
+		"weapon_posture": "lowered",
+		"posture_policy_id": "",
+	}
+	if unit == null or not unit.has_method("get_runtime_status"):
+		return result
+	var runtime_status = unit.call("get_runtime_status")
+	if runtime_status == null or not runtime_status.has_method("get"):
+		return result
+	result["movement_posture"] = _normalize_unit_movement_posture(String(runtime_status.get("movement_posture")))
+	result["weapon_posture"] = _normalize_unit_weapon_posture(String(runtime_status.get("weapon_posture")))
+	result["posture_policy_id"] = String(runtime_status.get("posture_policy_id")).strip_edges().to_lower()
+	return result
+
+
+func _normalize_unit_movement_posture(value: String) -> String:
+	match value.strip_edges().to_lower():
+		"travel", "walk", "move", "march":
+			return "travel"
+		"tactical", "ready", "m_position", "m-position":
+			return "tactical"
+		"engage", "engaging", "aim", "aimed":
+			return "engage"
+		"overwatch", "hold", "watch":
+			return "overwatch"
+		_:
+			return "idle"
+
+
+func _normalize_unit_weapon_posture(value: String) -> String:
+	match value.strip_edges().to_lower():
+		"ready", "ready_low", "ready-low", "m_position", "m-position":
+			return "ready"
+		"aim", "aimed", "firing", "shooting":
+			return "aimed"
+		_:
+			return "lowered"
 
 
 func _update_unit_status_badge(proxy: Node3D, unit: Node) -> bool:
@@ -5457,10 +5509,12 @@ func _update_unit_visual_animation(proxy: Node3D, is_moving: bool, is_firing: bo
 	return true
 
 
-func _update_unit_weapon_aim_pose(proxy: Node3D, active_fire_event: Dictionary) -> bool:
+func _update_unit_weapon_aim_pose(proxy: Node3D, active_fire_event: Dictionary, weapon_posture: String = "lowered") -> bool:
 	if proxy == null:
 		return false
-	var is_active: bool = not active_fire_event.is_empty()
+	var normalized_weapon_posture: String = _normalize_unit_weapon_posture("aimed" if not active_fire_event.is_empty() else weapon_posture)
+	var is_active: bool = normalized_weapon_posture == "aimed"
+	var is_ready: bool = normalized_weapon_posture == "ready"
 	var changed: bool = false
 	var weapon_node: Node3D = _find_unit_blaster_visual_node(proxy)
 	proxy.set_meta("unit_aim_pose_weapon_node_available", weapon_node != null)
@@ -5477,6 +5531,9 @@ func _update_unit_weapon_aim_pose(proxy: Node3D, active_fire_event: Dictionary) 
 	if is_active:
 		desired_rotation = base_rotation + Vector3(UNIT_AIM_POSE_WEAPON_PITCH_DEGREES, 0.0, 0.0)
 		desired_position = base_position + Vector3(0.0, 0.0, -UNIT_AIM_POSE_WEAPON_FORWARD_OFFSET)
+	elif is_ready:
+		desired_rotation = base_rotation + Vector3(UNIT_READY_POSE_WEAPON_PITCH_DEGREES, 0.0, 0.0)
+		desired_position = base_position + Vector3(0.0, 0.0, -UNIT_READY_POSE_WEAPON_FORWARD_OFFSET)
 	if weapon_node.rotation_degrees.distance_squared_to(desired_rotation) > 0.0001:
 		weapon_node.rotation_degrees = desired_rotation
 		changed = true
@@ -5485,6 +5542,12 @@ func _update_unit_weapon_aim_pose(proxy: Node3D, active_fire_event: Dictionary) 
 		changed = true
 	if bool(weapon_node.get_meta("unit_aim_pose_applied", false)) != is_active:
 		weapon_node.set_meta("unit_aim_pose_applied", is_active)
+		changed = true
+	if bool(weapon_node.get_meta("unit_ready_pose_applied", false)) != is_ready:
+		weapon_node.set_meta("unit_ready_pose_applied", is_ready)
+		changed = true
+	if String(weapon_node.get_meta("unit_weapon_posture_applied", "")) != normalized_weapon_posture:
+		weapon_node.set_meta("unit_weapon_posture_applied", normalized_weapon_posture)
 		changed = true
 	return changed
 
@@ -5827,6 +5890,12 @@ func _get_unit_proxy_state_by_id() -> Dictionary:
 			"unit_visual_archetype_id": String(proxy.get_meta("unit_visual_archetype_id", "")).strip_edges(),
 			"unit_visual_faction_id": String(proxy.get_meta("unit_visual_faction_id", "")).strip_edges(),
 			"unit_aim_pose_active": bool(proxy.get_meta("unit_aim_pose_active", false)),
+			"unit_ready_pose_active": bool(proxy.get_meta("unit_ready_pose_active", false)),
+			"unit_movement_posture": String(proxy.get_meta("unit_movement_posture", "")).strip_edges(),
+			"unit_weapon_posture": String(proxy.get_meta("unit_weapon_posture", "")).strip_edges(),
+			"unit_runtime_weapon_posture": String(proxy.get_meta("unit_runtime_weapon_posture", "")).strip_edges(),
+			"unit_posture_policy_id": String(proxy.get_meta("unit_posture_policy_id", "")).strip_edges(),
+			"unit_posture_source": String(proxy.get_meta("unit_posture_source", "")).strip_edges(),
 			"unit_aim_pose_weapon_node_available": bool(proxy.get_meta("unit_aim_pose_weapon_node_available", false)),
 			"unit_aim_pose_source_event_id": String(proxy.get_meta("unit_aim_pose_source_event_id", "")).strip_edges(),
 			"unit_aim_pose_target_unit_id": String(proxy.get_meta("unit_aim_pose_target_unit_id", "")).strip_edges(),
