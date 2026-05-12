@@ -72,9 +72,10 @@
 - Lokale Pruefung: `task_351_homebase_direct_payload_scope_contract.gd`, `task_350_homebase_loadout_contract_export.gd`, `task_348_homebase_fob_payload_state_isolation.gd`, `task_349_homebase_direct_staging_real_flightdeck_craft_gate.gd` und `git diff --check` laufen gruen.
 
 ### TASK_352 - Homebase Loadout Defaults Preserve Unit Profiles
-- Status: geplant
-- Stand: Review-Finding nach TASK_350. Harte Homebase-Defaults wie `rifle`/`none` koennen Preset-Waffen wie Medictool ueberschreiben, obwohl der Spieler nichts geaendert hat.
-- Naechster Schritt: Homebase-Member-Loadouts aus Unit-Profil/Preset/Selected-Config seed'en und Medictool-Preservation testen.
+- Status: implementiert
+- Stand: Homebase-Member-Loadouts werden jetzt mit Unit-spezifischen Defaults aus Roster-/Profil-Daten normalisiert. `unit_bravo` behaelt ohne Spieleraktion `smg` + `medictool` bis in `MissionSetup` und in den `LoadoutModifierResolver`.
+- Stand: Bewusste Homebase-Overrides gewinnen weiter vor Profilwerten; Fireteam-Lead- und Armor-Felder bleiben im Export erhalten.
+- Lokale Pruefung: `task_352_homebase_loadout_defaults_preserve_unit_profiles.gd`, `task_350_homebase_loadout_contract_export.gd`, `task_351_homebase_direct_payload_scope_contract.gd`, `medic_support_verifier.gd` und `git diff --check` laufen gruen.
 
 ### TASK_353 - Shared Loadout Contract Helper
 - Status: geplant

@@ -2501,12 +2501,17 @@ func _make_member_loadout(armor_id: String, weapon_1_id: String, weapon_2_id: St
 	}
 
 
-func _normalize_member_loadout(loadout_variant: Variant, default_armor_id: String = HOMEBASE_DEFAULT_LOADOUT_ID) -> Dictionary:
+func _normalize_member_loadout(
+	loadout_variant: Variant,
+	default_armor_id: String = HOMEBASE_DEFAULT_LOADOUT_ID,
+	default_weapon_1_id: String = HOMEBASE_DEFAULT_PRIMARY_WEAPON,
+	default_weapon_2_id: String = HOMEBASE_DEFAULT_SECONDARY_WEAPON
+) -> Dictionary:
 	var loadout: Dictionary = loadout_variant if typeof(loadout_variant) == TYPE_DICTIONARY else {}
 	return _make_member_loadout(
 		String(loadout.get("armor", loadout.get("kit", default_armor_id))),
-		String(loadout.get("weapon_1", loadout.get("primary", HOMEBASE_DEFAULT_PRIMARY_WEAPON))),
-		String(loadout.get("weapon_2", loadout.get("sidearm", HOMEBASE_DEFAULT_SECONDARY_WEAPON)))
+		String(loadout.get("weapon_1", loadout.get("primary", default_weapon_1_id))),
+		String(loadout.get("weapon_2", loadout.get("sidearm", default_weapon_2_id)))
 	)
 
 
@@ -2531,16 +2536,25 @@ func _sync_homebase_member_loadouts_into_fireteam_definitions() -> void:
 		if fireteam_id.is_empty():
 			continue
 		var default_armor_id: String = _normalize_loadout_id(String(definition.get("loadout", HOMEBASE_DEFAULT_LOADOUT_ID)))
-		var existing_member_loadouts: Dictionary = _normalize_member_loadout_dictionary(
-			definition.get("member_loadouts", {}) if typeof(definition.get("member_loadouts", {})) == TYPE_DICTIONARY else {},
-			default_armor_id
-		)
+		var existing_member_loadouts: Dictionary = definition.get("member_loadouts", {}) if typeof(definition.get("member_loadouts", {})) == TYPE_DICTIONARY else {}
 		var member_ids: PackedStringArray = _get_member_unit_ids_for_fireteam(fireteam_id)
 		var sanitized_member_loadouts: Dictionary = {}
 		for member_unit_id in member_ids:
 			var unit_id: String = String(member_unit_id).strip_edges()
-			var source_loadout: Dictionary = Dictionary(existing_member_loadouts.get(unit_id, existing_cache.get(unit_id, {})))
-			var normalized_loadout: Dictionary = _normalize_member_loadout(source_loadout, default_armor_id)
+			var profile_default_loadout: Dictionary = _get_profile_default_member_loadout(unit_id, default_armor_id)
+			var source_loadout: Dictionary = {}
+			if existing_member_loadouts.has(unit_id) and typeof(existing_member_loadouts.get(unit_id)) == TYPE_DICTIONARY:
+				source_loadout = Dictionary(existing_member_loadouts.get(unit_id, {}))
+			elif existing_cache.has(unit_id):
+				source_loadout = Dictionary(existing_cache.get(unit_id, {}))
+			else:
+				source_loadout = profile_default_loadout
+			var normalized_loadout: Dictionary = _normalize_member_loadout(
+				source_loadout,
+				String(profile_default_loadout.get("armor", default_armor_id)),
+				String(profile_default_loadout.get("weapon_1", HOMEBASE_DEFAULT_PRIMARY_WEAPON)),
+				String(profile_default_loadout.get("weapon_2", HOMEBASE_DEFAULT_SECONDARY_WEAPON))
+			)
 			sanitized_member_loadouts[unit_id] = normalized_loadout
 			next_cache[unit_id] = normalized_loadout
 		definition["loadout"] = default_armor_id
@@ -2609,7 +2623,13 @@ func _write_member_loadout_to_fireteam_definition(fireteam_id: String, unit_id: 
 		if _normalize_fireteam_id(String(definition.get("id", ""))) != normalized_fireteam_id:
 			continue
 		var member_loadouts: Dictionary = definition.get("member_loadouts", {}) if typeof(definition.get("member_loadouts", {})) == TYPE_DICTIONARY else {}
-		member_loadouts[normalized_unit_id] = _normalize_member_loadout(member_loadout, String(definition.get("loadout", HOMEBASE_DEFAULT_LOADOUT_ID)))
+		var default_loadout: Dictionary = _get_profile_default_member_loadout(normalized_unit_id, String(definition.get("loadout", HOMEBASE_DEFAULT_LOADOUT_ID)))
+		member_loadouts[normalized_unit_id] = _normalize_member_loadout(
+			member_loadout,
+			String(default_loadout.get("armor", HOMEBASE_DEFAULT_LOADOUT_ID)),
+			String(default_loadout.get("weapon_1", HOMEBASE_DEFAULT_PRIMARY_WEAPON)),
+			String(default_loadout.get("weapon_2", HOMEBASE_DEFAULT_SECONDARY_WEAPON))
+		)
 		definition["member_loadouts"] = member_loadouts
 		_fireteam_definitions[definition_index] = definition
 		return
@@ -2778,10 +2798,62 @@ func _get_member_loadout(unit_id: String) -> Dictionary:
 	var fireteam_id: String = _get_fireteam_id_for_unit(normalized_unit_id)
 	var definition: Dictionary = _get_fireteam_definition(fireteam_id)
 	var default_armor_id: String = String(definition.get("loadout", HOMEBASE_DEFAULT_LOADOUT_ID))
+	var profile_default_loadout: Dictionary = _get_profile_default_member_loadout(normalized_unit_id, default_armor_id)
 	var member_loadouts: Dictionary = definition.get("member_loadouts", {}) if typeof(definition.get("member_loadouts", {})) == TYPE_DICTIONARY else {}
 	if member_loadouts.has(normalized_unit_id):
-		return _normalize_member_loadout(member_loadouts.get(normalized_unit_id, {}), default_armor_id)
-	return _normalize_member_loadout(_member_loadout_by_unit_id.get(normalized_unit_id, {}), default_armor_id)
+		return _normalize_member_loadout(
+			member_loadouts.get(normalized_unit_id, {}),
+			String(profile_default_loadout.get("armor", default_armor_id)),
+			String(profile_default_loadout.get("weapon_1", HOMEBASE_DEFAULT_PRIMARY_WEAPON)),
+			String(profile_default_loadout.get("weapon_2", HOMEBASE_DEFAULT_SECONDARY_WEAPON))
+		)
+	if _member_loadout_by_unit_id.has(normalized_unit_id):
+		return _normalize_member_loadout(
+			_member_loadout_by_unit_id.get(normalized_unit_id, {}),
+			String(profile_default_loadout.get("armor", default_armor_id)),
+			String(profile_default_loadout.get("weapon_1", HOMEBASE_DEFAULT_PRIMARY_WEAPON)),
+			String(profile_default_loadout.get("weapon_2", HOMEBASE_DEFAULT_SECONDARY_WEAPON))
+		)
+	return profile_default_loadout
+
+
+func _get_profile_default_member_loadout(unit_id: String, default_armor_id: String = HOMEBASE_DEFAULT_LOADOUT_ID) -> Dictionary:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return _make_member_loadout(default_armor_id, HOMEBASE_DEFAULT_PRIMARY_WEAPON, HOMEBASE_DEFAULT_SECONDARY_WEAPON)
+
+	var unit_data: Dictionary = _get_available_unit_data(normalized_unit_id)
+	if not unit_data.is_empty():
+		var armor_id: String = String(unit_data.get("armor", unit_data.get("armor_id", default_armor_id)))
+		var weapon_1_id: String = HOMEBASE_DEFAULT_PRIMARY_WEAPON
+		if unit_data.has("weapon_1") or unit_data.has("weapon_1_id"):
+			weapon_1_id = String(unit_data.get("weapon_1_id", unit_data.get("weapon_1", weapon_1_id)))
+		var weapon_2_id: String = HOMEBASE_DEFAULT_SECONDARY_WEAPON
+		if unit_data.has("weapon_2") or unit_data.has("weapon_2_id"):
+			weapon_2_id = String(unit_data.get("weapon_2_id", unit_data.get("weapon_2", weapon_2_id)))
+		return _make_member_loadout(armor_id, weapon_1_id, weapon_2_id)
+
+	var profile = _profiles_by_id.get(normalized_unit_id, null)
+	if profile != null:
+		return _make_member_loadout(
+			String(profile.armor_id),
+			String(profile.weapon_1_id),
+			String(profile.weapon_2_id)
+		)
+	return _make_member_loadout(default_armor_id, HOMEBASE_DEFAULT_PRIMARY_WEAPON, HOMEBASE_DEFAULT_SECONDARY_WEAPON)
+
+
+func _get_available_unit_data(unit_id: String) -> Dictionary:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return {}
+	for unit_data_variant in _available_units:
+		if typeof(unit_data_variant) != TYPE_DICTIONARY:
+			continue
+		var unit_data: Dictionary = Dictionary(unit_data_variant)
+		if String(unit_data.get("unit_id", "")).strip_edges() == normalized_unit_id:
+			return unit_data.duplicate(true)
+	return {}
 
 
 func _get_profile_portrait_path(unit_id: String) -> String:
