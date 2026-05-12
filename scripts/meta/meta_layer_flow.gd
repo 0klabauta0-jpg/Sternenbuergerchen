@@ -1784,13 +1784,15 @@ func _get_homebase_direct_drop_state() -> Dictionary:
 	var drop_state: Dictionary = Dictionary(homebase_screen.call("build_homebase_direct_drop_state")).duplicate(true)
 	if not bool(drop_state.get("drop_ship_staged", false)):
 		return {}
-	var screen_unit_ids := PackedStringArray(Array(drop_state.get("selected_unit_ids", [])))
-	var screen_fireteam_ids := PackedStringArray(Array(drop_state.get("selected_fireteam_ids", [])))
-	_homebase_staged_unit_ids = _sanitize_homebase_selection(screen_unit_ids)
-	_homebase_staged_fireteam_ids = _normalize_homebase_fireteam_selection(_homebase_staged_unit_ids, screen_fireteam_ids)
-	if not _homebase_staged_unit_ids.is_empty():
-		_selected_unit_ids = _homebase_staged_unit_ids.duplicate()
-		_selected_fireteam_ids = _homebase_staged_fireteam_ids.duplicate()
+	var mission_unit_ids := PackedStringArray(Array(drop_state.get("selected_unit_ids", [])))
+	var mission_fireteam_ids := PackedStringArray(Array(drop_state.get("selected_fireteam_ids", [])))
+	var homebase_unit_ids := PackedStringArray(Array(drop_state.get("homebase_team_unit_ids", mission_unit_ids)))
+	var homebase_fireteam_ids := PackedStringArray(Array(drop_state.get("homebase_team_fireteam_ids", mission_fireteam_ids)))
+	_homebase_staged_unit_ids = _sanitize_homebase_selection(homebase_unit_ids)
+	_homebase_staged_fireteam_ids = _normalize_homebase_fireteam_selection(_homebase_staged_unit_ids, homebase_fireteam_ids)
+	if not mission_unit_ids.is_empty():
+		_selected_unit_ids = mission_unit_ids.duplicate()
+		_selected_fireteam_ids = _normalize_homebase_fireteam_selection(_selected_unit_ids, mission_fireteam_ids)
 	return drop_state
 
 

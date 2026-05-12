@@ -287,7 +287,9 @@ func build_homebase_direct_drop_state() -> Dictionary:
 		craft_display_name = "Dropship"
 	var assigned_pilot_id: String = _get_assigned_pilot_id(payload_craft_id)
 	var fireteam_definitions: Array = _get_fireteam_definitions_snapshot()
-	var member_loadouts: Dictionary = _build_homebase_member_loadouts(payload_fireteam_ids)
+	var selected_payload_fireteam_ids: PackedStringArray = boarded_fireteam_ids
+	var payload_fireteam_definitions: Array = _filter_fireteam_definitions_for_ids(fireteam_definitions, selected_payload_fireteam_ids)
+	var member_loadouts: Dictionary = _build_homebase_member_loadouts(selected_payload_fireteam_ids)
 	return {
 		"transport_craft_id": payload_craft_id,
 		"dropship_phase": "homebase_ready" if direct_ready else "waiting",
@@ -310,12 +312,16 @@ func build_homebase_direct_drop_state() -> Dictionary:
 		"mission_drop_pilot_portrait_path": _get_profile_portrait_path(assigned_pilot_id),
 		"mission_drop_passenger_count": embarked_unit_ids.size(),
 		"mission_drop_cards": _build_homebase_mission_drop_cards(payload_fireteam_ids, payload_unit_ids, payload_craft_id, direct_ready),
-		"selected_unit_ids": Array(_selected_unit_ids),
-		"selected_fireteam_ids": Array(_selected_fireteam_ids),
-		"selected_team_unit_configs": _build_homebase_selected_unit_configs(),
+		"selected_unit_ids": Array(embarked_unit_ids),
+		"selected_fireteam_ids": Array(_build_fireteam_ids_for_units(embarked_unit_ids)),
+		"selected_team_unit_configs": _build_homebase_unit_configs_for_unit_ids(embarked_unit_ids),
 		"fireteam_definitions": fireteam_definitions,
-		"selected_fireteam_definitions": fireteam_definitions.duplicate(true),
+		"selected_fireteam_definitions": payload_fireteam_definitions,
 		"member_loadouts": member_loadouts,
+		"homebase_team_unit_ids": Array(_selected_unit_ids),
+		"homebase_team_fireteam_ids": Array(_selected_fireteam_ids),
+		"homebase_team_unit_configs": _build_homebase_selected_unit_configs(),
+		"homebase_fireteam_definitions": fireteam_definitions.duplicate(true),
 		"homebase_direct_staging": true,
 		"homebase_direct_craft_ready": bool(craft_gate.get("can_stage", false)),
 		"homebase_direct_craft_block_reason": String(craft_gate.get("block_reason", "")).strip_edges(),
@@ -2681,6 +2687,25 @@ func _get_fireteam_definitions_snapshot() -> Array:
 	return snapshot
 
 
+func _filter_fireteam_definitions_for_ids(fireteam_definitions: Array, fireteam_ids: PackedStringArray) -> Array:
+	var fireteam_lookup: Dictionary = {}
+	for fireteam_id_variant in fireteam_ids:
+		var fireteam_id: String = _normalize_fireteam_id(String(fireteam_id_variant))
+		if not fireteam_id.is_empty():
+			fireteam_lookup[fireteam_id] = true
+
+	var result: Array = []
+	for definition_variant in fireteam_definitions:
+		if typeof(definition_variant) != TYPE_DICTIONARY:
+			continue
+		var definition: Dictionary = Dictionary(definition_variant).duplicate(true)
+		var fireteam_id: String = _normalize_fireteam_id(String(definition.get("id", "")))
+		if fireteam_id.is_empty() or not fireteam_lookup.has(fireteam_id):
+			continue
+		result.append(definition)
+	return result
+
+
 func _build_homebase_member_loadouts(fireteam_ids: PackedStringArray) -> Dictionary:
 	_sync_homebase_member_loadouts_into_fireteam_definitions()
 	var result: Dictionary = {}
@@ -2701,9 +2726,20 @@ func _build_homebase_member_loadouts(fireteam_ids: PackedStringArray) -> Diction
 	return result
 
 
+func _build_fireteam_ids_for_units(unit_ids: PackedStringArray) -> PackedStringArray:
+	var result: PackedStringArray = []
+	for unit_id_variant in unit_ids:
+		result.append(_get_fireteam_id_for_unit(String(unit_id_variant)))
+	return result
+
+
 func _build_homebase_selected_unit_configs() -> Array:
+	return _build_homebase_unit_configs_for_unit_ids(_selected_unit_ids)
+
+
+func _build_homebase_unit_configs_for_unit_ids(unit_ids: PackedStringArray) -> Array:
 	var selected_lookup: Dictionary = {}
-	for unit_id_variant in _selected_unit_ids:
+	for unit_id_variant in unit_ids:
 		var unit_id: String = String(unit_id_variant).strip_edges()
 		if not unit_id.is_empty():
 			selected_lookup[unit_id] = true

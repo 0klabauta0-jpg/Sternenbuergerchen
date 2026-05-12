@@ -3,7 +3,7 @@
 ## Ziel
 Homebase-Direct darf beim Missionsstart nur die Units und Fireteams in die Mission uebergeben, die wirklich im Homebase-Flightdeck-Dropship gestaged sind.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Problem
 `build_homebase_direct_drop_state()` baut zwar `payload_unit_ids` aus den Fireteams im Flightdeck, exportiert aber fuer `selected_unit_ids`, `selected_fireteam_ids` und `selected_team_unit_configs` weiterhin die komplette Homebase-Auswahl. `MetaLayerFlow` uebernimmt diese Liste und `MissionTestSetup` aktiviert Friendly-Slots anhand von `selected_team_unit_ids`.
@@ -22,11 +22,11 @@ TASK_346 bis TASK_350 haben Direct-Staging schrittweise an FOB-/Mission-Vertraeg
 - Bestehende FOB- und Homebase-Fallback-Pfade unveraendert lassen.
 
 ## Akzeptanzkriterien
-- [ ] Wenn zwei Fireteams in Homebase ausgewaehlt sind, aber nur eins im Flightdeck liegt, startet die Mission nur mit dem Flightdeck-Fireteam.
-- [ ] `embarked_unit_ids`, `selected_unit_ids`, `selected_team_unit_configs` und `member_loadouts` sind fuer Homebase-Direct konsistent.
-- [ ] Nicht-embarkte Homebase-Units bleiben in der Homebase-/Team-Auswahl nachvollziehbar, werden aber nicht als Missionsteilnehmer aktiviert.
-- [ ] FOB-Payload-Scope bleibt unveraendert.
-- [ ] Headless-Verifier deckt mindestens den Zwei-Fireteam-eins-im-Dropship-Fall ab.
+- [x] Wenn zwei Fireteams in Homebase ausgewaehlt sind, aber nur eins im Flightdeck liegt, startet die Mission nur mit dem Flightdeck-Fireteam.
+- [x] `embarked_unit_ids`, `selected_unit_ids`, `selected_team_unit_configs` und `member_loadouts` sind fuer Homebase-Direct konsistent.
+- [x] Nicht-embarkte Homebase-Units bleiben in der Homebase-/Team-Auswahl nachvollziehbar, werden aber nicht als Missionsteilnehmer aktiviert.
+- [x] FOB-Payload-Scope bleibt unveraendert.
+- [x] Headless-Verifier deckt mindestens den Zwei-Fireteam-eins-im-Dropship-Fall ab.
 
 ## Erwartete Dateien
 - `scripts/meta/homebase_screen.gd`
@@ -36,11 +36,17 @@ TASK_346 bis TASK_350 haben Direct-Staging schrittweise an FOB-/Mission-Vertraeg
 - ggf. `scripts/tests/task_350_homebase_loadout_contract_export.gd`
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_351_homebase_direct_payload_scope_contract.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_350_homebase_loadout_contract_export.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_348_homebase_fob_payload_state_isolation.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_351_homebase_direct_payload_scope_contract.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_350_homebase_loadout_contract_export.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_348_homebase_fob_payload_state_isolation.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_349_homebase_direct_staging_real_flightdeck_craft_gate.gd`
+- [x] `git diff --check`
 
 ## Risiken / offene Punkte
 - Einige UI-Snapshots koennten bisher `selected_unit_ids` als gesamte Homebase-Auswahl verstanden haben. Falls das noetig ist, muss dieser UI-Scope explizit als eigenes Feld erhalten bleiben.
 - Die Mission braucht weiter eine stabile Slot-Reihenfolge; Payload-Filterung darf Fireteam- und Unit-Indexing nicht auseinanderziehen.
+
+## Implementierungsnotiz
+- Homebase-Direct exportiert missionsrelevante `selected_*`-Felder jetzt payload-only.
+- Die volle Homebase-Auswahl bleibt separat ueber `homebase_team_unit_ids`, `homebase_team_fireteam_ids`, `homebase_team_unit_configs` und `homebase_fireteam_definitions` erhalten.
+- `MetaLayerFlow` nutzt fuer Missionsstart die payload-only Felder, behaelt aber den Homebase-Team-Kontext getrennt.

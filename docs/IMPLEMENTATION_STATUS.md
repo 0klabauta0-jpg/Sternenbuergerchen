@@ -65,9 +65,11 @@
 - Lokale Pruefung: `task_350_homebase_loadout_contract_export.gd`, `task_349_homebase_direct_staging_real_flightdeck_craft_gate.gd`, `task_348_homebase_fob_payload_state_isolation.gd`, `task_347_homebase_direct_staging_start_guard.gd`, `task_346_homebase_direct_staging_character_popup.gd`, `task_316_fob_fireteam_staging_migration.gd`, `bugfix_mission_fireteam_fob_payload_and_bubbles.gd`, `medic_support_verifier.gd` und `git diff --check` laufen gruen. `task_316` meldet beim Headless-Exit bestehende RID-Leak-Warnungen, aber keine Assertion-Fehler.
 
 ### TASK_351 - Homebase Direct Payload Scope Contract
-- Status: geplant
-- Stand: Review-Finding nach TASK_350. Homebase-Direct exportiert aktuell die ganze Homebase-Auswahl als `selected_unit_ids`, obwohl nur Flightdeck-Payload-Units in die Mission sollen.
-- Naechster Schritt: Direct-Drop-State und MetaLayerFlow auf payload-relevante Unit-/Fireteam-/Config-Felder begrenzen und Zwei-Fireteam-eins-im-Dropship testen.
+- Status: implementiert
+- Stand: Homebase-Direct exportiert die Missionsfelder `selected_unit_ids`, `selected_fireteam_ids`, `selected_team_unit_configs`, `selected_fireteam_definitions` und `member_loadouts` jetzt payload-only aus den wirklich im Flightdeck-Dropship gestagten Fireteams.
+- Stand: Die volle Homebase-Team-Auswahl bleibt separat fuer UI/Debug erhalten: `homebase_team_unit_ids`, `homebase_team_fireteam_ids`, `homebase_team_unit_configs` und `homebase_fireteam_definitions`.
+- Stand: `MetaLayerFlow` uebernimmt beim `homebase_direct`-Start nur die payload-only Auswahl fuer MissionSetup und Friendly-Paths, behaelt den Homebase-Team-Kontext aber getrennt.
+- Lokale Pruefung: `task_351_homebase_direct_payload_scope_contract.gd`, `task_350_homebase_loadout_contract_export.gd`, `task_348_homebase_fob_payload_state_isolation.gd`, `task_349_homebase_direct_staging_real_flightdeck_craft_gate.gd` und `git diff --check` laufen gruen.
 
 ### TASK_352 - Homebase Loadout Defaults Preserve Unit Profiles
 - Status: geplant
