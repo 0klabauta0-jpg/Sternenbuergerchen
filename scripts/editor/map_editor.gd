@@ -134,6 +134,7 @@ var _is_refreshing_property_controls: bool = false
 var _is_refreshing_map_settings_controls: bool = false
 var _last_undo_state: Dictionary = {}
 var _undo_stack: Array[Dictionary] = []
+var _active_undo_transaction: Dictionary = {}
 var _current_map_path: String = DEFAULT_MAP_PATH
 var _pending_dialog_action: String = ""
 var _height_tool_enabled: bool = false
@@ -332,17 +333,21 @@ func _unhandled_input(event: InputEvent) -> void:
 					_dragged_patrol_waypoint_index = -1
 				return
 			if not mouse_button_event.pressed:
+				if _is_painting:
+					commit_undo_transaction()
 				_is_painting = false
 				_last_painted_grid = Vector2i(-1, -1)
 				return
 			if _is_pointer_over_control():
 				return
 			if _height_tool_enabled:
+				begin_undo_transaction("height_stroke")
 				_is_painting = true
 				_last_painted_grid = Vector2i(-1, -1)
 				_apply_height_tool_at_world_position(world_position)
 				return
 			if _eraser_tool_enabled:
+				begin_undo_transaction("eraser_stroke")
 				_is_painting = true
 				_last_painted_grid = Vector2i(-1, -1)
 				_apply_eraser_at_world_position(world_position)
@@ -352,6 +357,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				_select_grid_with_selection_tool(grid_pos, mouse_button_event.ctrl_pressed)
 				return
 			if _is_brush_enabled() and _has_selected_type():
+				begin_undo_transaction("brush_stroke")
 				_is_painting = true
 				_last_painted_grid = Vector2i(-1, -1)
 				_apply_brush_at_world_position(world_position)
@@ -778,6 +784,7 @@ func _apply_brush_at_world_position(world_position: Vector2) -> void:
 	var radius: int = _get_brush_radius()
 	var any_changed: bool = false
 	var changed_grids: Array[Vector2i] = []
+	var owns_undo_transaction: bool = _ensure_undo_transaction("brush_stroke")
 
 	for dx in range(-radius, radius + 1):
 		for dy in range(-radius, radius + 1):
@@ -804,7 +811,11 @@ func _apply_brush_at_world_position(world_position: Vector2) -> void:
 
 	if any_changed:
 		_refresh_dirty_visual_neighborhoods(changed_grids)
+		if owns_undo_transaction:
+			commit_undo_transaction()
 		_mark_dirty(true)
+	elif owns_undo_transaction:
+		cancel_empty_undo_transaction()
 
 	_set_selected_grid_position(center_grid)
 	_refresh_selection_visual()
@@ -825,6 +836,7 @@ func _apply_height_tool_at_world_position(world_position: Vector2) -> void:
 	var radius: int = _get_brush_radius()
 	var any_changed: bool = false
 	var changed_grids: Array[Vector2i] = []
+	var owns_undo_transaction: bool = _ensure_undo_transaction("height_stroke")
 
 	for dx in range(-radius, radius + 1):
 		for dy in range(-radius, radius + 1):
@@ -840,7 +852,11 @@ func _apply_height_tool_at_world_position(world_position: Vector2) -> void:
 
 	if any_changed:
 		_refresh_reconciled_height_edges(changed_grids, _height_tool_edge_type)
+		if owns_undo_transaction:
+			commit_undo_transaction()
 		_mark_dirty(true)
+	elif owns_undo_transaction:
+		cancel_empty_undo_transaction()
 
 	_set_selected_grid_position(center_grid)
 	_refresh_selection_visual()
@@ -857,7 +873,10 @@ func _apply_eraser_at_world_position(world_position: Vector2) -> void:
 		return
 	_last_painted_grid = tile_data.grid_position
 
+	var owns_undo_transaction: bool = _ensure_undo_transaction("eraser_stroke")
 	if not _erase_object_layer_from_tile(tile_data):
+		if owns_undo_transaction:
+			cancel_empty_undo_transaction()
 		_set_selected_grid_position(tile_data.grid_position)
 		_refresh_selection_visual()
 		_refresh_property_panel()
@@ -867,6 +886,8 @@ func _apply_eraser_at_world_position(world_position: Vector2) -> void:
 	_refresh_tile_visual(tile_data)
 	_refresh_selection_visual()
 	_refresh_property_panel()
+	if owns_undo_transaction:
+		commit_undo_transaction()
 	_mark_dirty(true)
 	_hide_hover_preview()
 
@@ -3112,10 +3133,12 @@ func build_multiplayer_map_manifest_preview(author: String = "") -> Dictionary:
 
 func get_authoring_action_contract_snapshot() -> Dictionary:
 	return {
-		"undo_redo_scope": "tile_patch_stack_v2",
+		"undo_redo_scope": "tile_transaction_stack_v3",
+		"undo_transactional": true,
 		"undo_available": not _undo_stack.is_empty(),
 		"undo_depth": _undo_stack.size(),
 		"undo_limit": MAX_UNDO_STACK_SIZE,
+		"active_undo_transaction": not _active_undo_transaction.is_empty(),
 		"redo_available": false,
 		"tile_patch_fields": PackedStringArray([
 			"grid_position",
@@ -4294,9 +4317,12 @@ func _rotate_selected_object(delta_degrees: float) -> bool:
 	var tile_data = _get_selected_tile()
 	if not _tile_has_rotatable_object(tile_data):
 		return false
+	var owns_undo_transaction: bool = _ensure_undo_transaction("rotate_object")
 	_store_undo_state(tile_data)
 	tile_data.object_rotation_degrees = fposmod(float(tile_data.object_rotation_degrees) + delta_degrees, 360.0)
 	_refresh_tile_visual(tile_data)
+	if owns_undo_transaction:
+		commit_undo_transaction()
 	_mark_dirty(true)
 	_refresh_property_panel()
 	return true
@@ -4332,6 +4358,7 @@ func _apply_property_controls_to_selected_tile() -> void:
 	var any_changed: bool = false
 	var changed_grids: Array[Vector2i] = []
 	var dirty_visual_grids: Array[Vector2i] = []
+	var owns_undo_transaction: bool = _ensure_undo_transaction("property_tile_patch")
 
 	for dx in range(-radius, radius + 1):
 		for dy in range(-radius, radius + 1):
@@ -4349,12 +4376,16 @@ func _apply_property_controls_to_selected_tile() -> void:
 					_refresh_tile_visual(target_tile, false)
 
 	if not any_changed:
+		if owns_undo_transaction:
+			cancel_empty_undo_transaction()
 		return
 
 	if patch.has("height_level"):
 		_refresh_reconciled_height_edges(changed_grids, _get_selected_edge_type())
 	else:
 		_refresh_dirty_visual_neighborhoods(dirty_visual_grids)
+	if owns_undo_transaction:
+		commit_undo_transaction()
 
 	_mark_dirty(true)
 	_refresh_property_panel()
@@ -4639,19 +4670,139 @@ func _is_auto_cliff_visual_tile(tile_data) -> bool:
 	return type_id.begins_with("cliff_")
 
 
-func _store_undo_state(tile_data) -> void:
+func begin_undo_transaction(action_name: String) -> void:
+	if not _active_undo_transaction.is_empty():
+		commit_undo_transaction()
+	_active_undo_transaction = {
+		"transaction": true,
+		"action_name": action_name.strip_edges() if not action_name.strip_edges().is_empty() else "editor_change",
+		"tile_states": [],
+		"grid_lookup": {},
+	}
+
+
+func _ensure_undo_transaction(action_name: String) -> bool:
+	if _active_undo_transaction.is_empty():
+		begin_undo_transaction(action_name)
+		return true
+	return false
+
+
+func record_tile_before_change(tile_data) -> void:
 	if tile_data == null or not tile_data.has_method("to_dict"):
 		return
+	if _active_undo_transaction.is_empty():
+		var immediate_transaction: Dictionary = _build_undo_transaction("tile_change")
+		_append_tile_state_to_transaction(immediate_transaction, tile_data)
+		immediate_transaction.erase("grid_lookup")
+		_push_undo_entry(immediate_transaction)
+		return
+	_append_tile_state_to_transaction(_active_undo_transaction, tile_data)
 
-	var undo_state: Dictionary = {
-		"grid_position": tile_data.grid_position,
-		"tile_dict": tile_data.call("to_dict"),
+
+func commit_undo_transaction() -> void:
+	if _active_undo_transaction.is_empty():
+		return
+	var tile_states: Array = Array(_active_undo_transaction.get("tile_states", []))
+	if tile_states.is_empty():
+		cancel_empty_undo_transaction()
+		return
+	var undo_transaction: Dictionary = _active_undo_transaction.duplicate(true)
+	undo_transaction.erase("grid_lookup")
+	_push_undo_entry(undo_transaction)
+	_active_undo_transaction.clear()
+
+
+func cancel_empty_undo_transaction() -> void:
+	_active_undo_transaction.clear()
+	_refresh_top_bar()
+
+
+func _build_undo_transaction(action_name: String) -> Dictionary:
+	return {
+		"transaction": true,
+		"action_name": action_name.strip_edges() if not action_name.strip_edges().is_empty() else "editor_change",
+		"tile_states": [],
+		"grid_lookup": {},
 	}
+
+
+func _append_tile_state_to_transaction(transaction: Dictionary, tile_data) -> void:
+	if tile_data == null or not tile_data.has_method("to_dict"):
+		return
+	var grid_position: Vector2i = tile_data.grid_position
+	var grid_key: String = "%d,%d" % [grid_position.x, grid_position.y]
+	var grid_lookup: Dictionary = Dictionary(transaction.get("grid_lookup", {}))
+	if grid_lookup.has(grid_key):
+		return
+	var tile_states: Array = Array(transaction.get("tile_states", []))
+	tile_states.append({
+		"grid_position": grid_position,
+		"tile_dict": tile_data.call("to_dict"),
+	})
+	grid_lookup[grid_key] = true
+	transaction["tile_states"] = tile_states
+	transaction["grid_lookup"] = grid_lookup
+
+
+func _push_undo_entry(undo_state: Dictionary) -> void:
+	if undo_state.is_empty():
+		return
 	_undo_stack.append(undo_state)
 	while _undo_stack.size() > MAX_UNDO_STACK_SIZE:
 		_undo_stack.pop_front()
 	_last_undo_state = undo_state
 	_refresh_top_bar()
+
+
+func _store_undo_state(tile_data) -> void:
+	record_tile_before_change(tile_data)
+
+
+func _restore_tile_from_undo_state(undo_state: Dictionary) -> Array[Vector2i]:
+	var restored_grids: Array[Vector2i] = []
+	var tile_states: Array = Array(undo_state.get("tile_states", []))
+	if tile_states.is_empty() and undo_state.has("tile_dict"):
+		tile_states = [{
+			"grid_position": undo_state.get("grid_position", Vector2i(-1, -1)),
+			"tile_dict": undo_state.get("tile_dict", {}),
+		}]
+
+	for tile_state_variant in tile_states:
+		var tile_state: Dictionary = Dictionary(tile_state_variant)
+		var grid_position: Vector2i = tile_state.get("grid_position", Vector2i(-1, -1))
+		var tile_dict: Dictionary = Dictionary(tile_state.get("tile_dict", {}))
+		var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position) if _terrain_map_data != null else null
+		if tile_data == null or tile_dict.is_empty():
+			continue
+		var restored_tile = TERRAIN_TILE_DATA_SCRIPT.call("from_dict", tile_dict)
+		tile_data.tile_id = restored_tile.tile_id
+		tile_data.type_id = restored_tile.type_id
+		tile_data.object_type_id = restored_tile.object_type_id
+		tile_data.grid_position = restored_tile.grid_position
+		tile_data.world_position = restored_tile.world_position
+		tile_data.walkable = restored_tile.walkable
+		tile_data.blocks_los = restored_tile.blocks_los
+		tile_data.cover_value = restored_tile.cover_value
+		tile_data.height_level = restored_tile.height_level
+		tile_data.surface_type = restored_tile.surface_type
+		tile_data.edge_type = restored_tile.edge_type
+		tile_data.object_height = restored_tile.object_height
+		tile_data.object_rotation_degrees = restored_tile.object_rotation_degrees
+		restored_grids.append(grid_position)
+	return restored_grids
+
+
+func get_undo_debug_snapshot() -> Dictionary:
+	var top_entry: Dictionary = Dictionary(_undo_stack[_undo_stack.size() - 1]) if not _undo_stack.is_empty() else {}
+	return {
+		"undo_depth": _undo_stack.size(),
+		"active_transaction": not _active_undo_transaction.is_empty(),
+		"active_tile_state_count": Array(_active_undo_transaction.get("tile_states", [])).size() if not _active_undo_transaction.is_empty() else 0,
+		"top_action_name": String(top_entry.get("action_name", "")).strip_edges(),
+		"top_tile_state_count": Array(top_entry.get("tile_states", [])).size(),
+		"undo_limit": MAX_UNDO_STACK_SIZE,
+	}
 
 
 func _undo_last_change() -> void:
@@ -4660,30 +4811,18 @@ func _undo_last_change() -> void:
 
 	var undo_state: Dictionary = Dictionary(_undo_stack.pop_back())
 	_last_undo_state = Dictionary(_undo_stack[_undo_stack.size() - 1]) if not _undo_stack.is_empty() else {}
-	var grid_position: Vector2i = undo_state.get("grid_position", Vector2i(-1, -1))
-	var tile_dict: Dictionary = undo_state.get("tile_dict", {})
-	var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
-	if tile_data == null or tile_dict.is_empty():
+	var restored_grids: Array[Vector2i] = _restore_tile_from_undo_state(undo_state)
+	if restored_grids.is_empty():
 		_refresh_top_bar()
 		return
 
-	var restored_tile = TERRAIN_TILE_DATA_SCRIPT.call("from_dict", tile_dict)
-	tile_data.tile_id = restored_tile.tile_id
-	tile_data.type_id = restored_tile.type_id
-	tile_data.object_type_id = restored_tile.object_type_id
-	tile_data.grid_position = restored_tile.grid_position
-	tile_data.world_position = restored_tile.world_position
-	tile_data.walkable = restored_tile.walkable
-	tile_data.blocks_los = restored_tile.blocks_los
-	tile_data.cover_value = restored_tile.cover_value
-	tile_data.height_level = restored_tile.height_level
-	tile_data.surface_type = restored_tile.surface_type
-	tile_data.edge_type = restored_tile.edge_type
-	tile_data.object_height = restored_tile.object_height
-	tile_data.object_rotation_degrees = restored_tile.object_rotation_degrees
-
+	for grid_position in restored_grids:
+		var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
+		if tile_data != null:
+			_refresh_tile_visual(tile_data, false)
+	_refresh_dirty_visual_neighborhoods(restored_grids)
+	var grid_position: Vector2i = Vector2i(restored_grids[restored_grids.size() - 1])
 	_set_selected_grid_position(grid_position)
-	_refresh_tile_visual(tile_data)
 	_mark_dirty(true)
 	_refresh_selection_visual()
 	_refresh_property_panel()
@@ -4693,6 +4832,7 @@ func _undo_last_change() -> void:
 func _clear_undo_history() -> void:
 	_undo_stack.clear()
 	_last_undo_state.clear()
+	_active_undo_transaction.clear()
 
 
 func _refresh_top_bar() -> void:

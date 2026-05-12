@@ -114,9 +114,10 @@
 - Lokale Pruefung: `task_357_mapeditor_height_cliff_dirty_neighborhood_cache.gd`, `task_292_editor_hill_cliff_grid_depth_repair.gd`, `task_298_editor_terrain_visual_playability_smoke.gd`, `task_229_map_editor_usability_authoring_pass.gd` und `git diff --check` laufen gruen.
 
 ### TASK_358 - MapEditor Undo Stroke Transactions
-- Status: geplant
-- Stand: Review-Finding nach Korrektur. Die Undo-States sind aktuell keine kompletten Map-Snapshots, aber Brush-/Height-/Auto-Edge-Aenderungen landen zu kleinteilig im Undo-Stack.
-- Naechster Schritt: Undo-Transaktionen fuer zusammenhaengende Malgesten bauen, sodass ein Undo die sichtbare Spieleraktion zuruecknimmt.
+- Status: implementiert im Arbeitsstand
+- Stand: MapEditor-Undo nutzt explizite Transaktionen fuer Brush-, Height-, Eraser-, Rotate- und Property-Patch-Aktionen. Zusammenhaengende Tile-Aenderungen landen als ein Undo-Eintrag im Stack.
+- Stand: Height-Tools erfassen automatisch erzeugte Cliff-/Edge-/Lower-Neighbor-Aenderungen in derselben Transaktion. Empty-Transactions werden verworfen, und das Undo-Limit gilt auf Transaktionsebene.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_358_mapeditor_undo_stroke_transactions.gd`; `godot_console.exe --headless --path . --script scripts/tests/bugfix_map_editor_station_floor_structure_undo.gd`; `godot_console.exe --headless --path . --script scripts/tests/task_229_map_editor_usability_authoring_pass.gd`; `git diff --check`.
 
 ### TASK_359 - MapEditor Dirty UI Refresh Batching
 - Status: geplant
