@@ -43,12 +43,13 @@
 - Risiken: Ein sehr niedrig gesetztes Cap kann bei extrem sparse Walkability einen frueheren, aber sichtbaren Fallback waehlen; weitere Optimierung sollte ueber einen Terrain-/Navigation-Index laufen.
 - Lokale Pruefung: `task_341_navigation_fallback_candidate_cap.gd`, `task_333_navigation_fallback_budget_contract_alignment.gd`, `task_217_navigation_pathfinding_los_performance_pass.gd`, `task_222_performance_regression_gate_and_manual_profile_checklist.gd` und `git diff --check` laufen gruen.
 
-### TASK_342 - Deep Code Review Followup
-- Status: geplant
-- Stand: Der verbleibende Review-Folge-Task ist SimulationRoot-Unknown-Payload-Diagnose.
-- Offene Punkte: Umsetzung, lokale Gates und manuelle Sicht-/Spielgefuehlchecks folgen separat.
-- Risiken: Der Task darf nicht zu einem Sammelrefactor verschmelzen; die vorhandenen Architekturgrenzen bleiben erhalten: UI ist nicht die Wahrheit, `SimulationRoot` bleibt autoritativ, Hotpaths bleiben budgetiert.
-- Naechster Schritt: TASK_342 - SimulationRoot Unknown Payload Audit.
+### TASK_342 - SimulationRoot Unknown Payload Audit
+- Status: implementiert im Arbeitsstand
+- Stand: `SimulationRoot` meldet unbekannte Command- und Effect-Typen jetzt ueber `get_unknown_payload_debug_snapshot()` mit stabilen Countern, letzter Payload-Kategorie, Typ, Grund, Keys und kompaktem Herkunfts-Preview.
+- Stand: Unbekannte Payloads werden sichtbar ignoriert und warnen, ohne den Runtime-/Release-Flow hart abzubrechen. Bekannte no-op Command-Intents wie Dropship-, Breakout-, Air-Asset- oder Planungscommands werden nicht als Unknown-Payload gezaehlt.
+- Stand: Multiplayer-Rejects bleiben getrennte Contract-Rejects; sie werden nicht enqueued und erhoehen keine Unknown-Payload-Counter.
+- Risiken: Die Diagnose ist absichtlich kompakt. Wenn kuenftige Commands wirklich von `SimulationRoot` mutiert werden sollen, muessen sie explizit aus der no-op-Liste in einen echten Handler wandern.
+- Lokale Pruefung: `task_342_simulation_root_unknown_payload_audit.gd`, `task_166_multiplayer_authority_command_contract_verifier.gd`, `task_284_gameplay_truth_architecture_boundary_audit.gd` und `git diff --check` laufen gruen.
 
 ### TASK_337 - Architecture Performance UX Followup Gate
 - Status: implementiert im Arbeitsstand

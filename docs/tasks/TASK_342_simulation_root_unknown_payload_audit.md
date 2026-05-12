@@ -3,7 +3,7 @@
 ## Ziel
 Unbekannte Command- oder Effect-Payloads im `SimulationRoot` sollen nicht still ignoriert werden. Sie muessen diagnostisch sichtbar sein, ohne Release-Flow oder Negativtests durch harte Crashes zu zerbrechen.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Voraussetzung
 - TASK_003 - SimulationRoot
@@ -36,22 +36,23 @@ Die Review hat Default-Zweige in Command- und Effect-Verarbeitung gefunden, die 
 - Keine Multiplayer-Protokollmigration.
 
 ## Akzeptanzkriterien
-- [ ] Unbekannte Commands und Effects erhoehen stabile Diagnose-Counter.
-- [ ] Debug-Snapshot/Report zeigt mindestens Typ und Herkunftskategorie der letzten unbekannten Payload.
-- [ ] Bekannte Commands/Effects verhalten sich unveraendert.
-- [ ] Authority-/Multiplayer-Regressionen bleiben gruen.
+- [x] Unbekannte Commands und Effects erhoehen stabile Diagnose-Counter.
+- [x] Debug-Snapshot/Report zeigt mindestens Typ und Herkunftskategorie der letzten unbekannten Payload.
+- [x] Bekannte Commands/Effects verhalten sich unveraendert.
+- [x] Authority-/Multiplayer-Regressionen bleiben gruen.
 
 ## Erwartete Dateien
 - `scripts/core/simulation_root.gd`
-- optional `scripts/tests/task_342_simulation_root_unknown_payload_audit.gd`
+- `scripts/tests/task_342_simulation_root_unknown_payload_audit.gd`
+- `docs/reports/simulation_root_unknown_payload_audit.md`
 - `docs/tasks/TASK_342_simulation_root_unknown_payload_audit.md`
 - `docs/IMPLEMENTATION_STATUS.md`
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_342_simulation_root_unknown_payload_audit.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_166_multiplayer_authority_command_contract_verifier.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_284_gameplay_truth_architecture_boundary_audit.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_342_simulation_root_unknown_payload_audit.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_166_multiplayer_authority_command_contract_verifier.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_284_gameplay_truth_architecture_boundary_audit.gd`
+- [x] `git diff --check`
 
 ## Risiken
 - Zu laute Warnungen koennen bekannte Negativtests verrauschen. Die Diagnose muss deshalb stabil zaehlbar und bei erwarteten Rejects sauber getrennt sein.

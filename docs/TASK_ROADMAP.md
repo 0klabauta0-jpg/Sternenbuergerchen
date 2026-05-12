@@ -543,7 +543,7 @@ TASK_338 - Portrait Asset Intake Catalog Sync (implementiert im Arbeitsstand)
 TASK_339 - Mission UI Dirty Refresh Pass (implementiert im Arbeitsstand)
 TASK_340 - Command Feedback Pure Snapshot (implementiert im Arbeitsstand)
 TASK_341 - Navigation Fallback Candidate Cap (implementiert im Arbeitsstand)
-TASK_342 - SimulationRoot Unknown Payload Audit (geplant)
+TASK_342 - SimulationRoot Unknown Payload Audit (implementiert im Arbeitsstand)
 
 Batch-Empfehlung
 

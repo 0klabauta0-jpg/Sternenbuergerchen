@@ -23,6 +23,50 @@ const NAVIGATION_DEFAULT_MAX_NEW_PATH_QUERIES_PER_TICK: int = 1
 const NAVIGATION_FALLBACK_CANDIDATE_WARNING_THRESHOLD: int = 32
 const NAVIGATION_FALLBACK_MAX_CANDIDATES_PER_REQUEST: int = 32
 const NAVIGATION_FALLBACK_MAX_PATH_ATTEMPTS_PER_REQUEST: int = 1
+const SIMULATIONROOT_KNOWN_NOOP_COMMAND_TYPES: PackedStringArray = [
+	"hold_position",
+	"retreat",
+	"seek_cover",
+	"move",
+	"engage",
+	"take",
+	"defend",
+	"flank",
+	"set_lz",
+	"clear_lz",
+	"call_dropship",
+	"role_override",
+	"set_peer_role",
+	"set_peer_fireteams",
+	"breakout_confirm",
+	"breakout_abort",
+	"breakout_regroup",
+	"breakout_override",
+	"air_asset_guard_lz",
+	"air_asset_abort_approach",
+	"air_asset_hold",
+	"air_asset_request_status",
+	"commander_intent",
+	"area_order",
+	"ad_hoc_order",
+]
+const UNKNOWN_PAYLOAD_PREVIEW_KEYS: PackedStringArray = [
+	"command_type",
+	"type",
+	"effect_type",
+	"payload_kind",
+	"contract_category",
+	"source",
+	"source_context",
+	"origin",
+	"unit_id",
+	"team_id",
+	"fireteam_id",
+	"asset_id",
+	"peer_id",
+	"event_id",
+	"command_id",
+]
 
 const HIT_CHANCE_MIN: float = 0.05
 const HIT_CHANCE_MAX: float = 0.95
@@ -84,6 +128,9 @@ var _network_command_accept_count: int = 0
 var _network_command_reject_count: int = 0
 var _multiplayer_snapshot_context: Dictionary = {}
 var _air_asset_status_by_id: Dictionary = {}
+var _unknown_command_payload_count: int = 0
+var _unknown_effect_payload_count: int = 0
+var _last_unknown_payload_diagnostic: Dictionary = {}
 var _last_applied_snapshot_tick: int = -1
 var _snapshot_apply_count: int = 0
 var _snapshot_out_of_order_count: int = 0
@@ -172,6 +219,17 @@ func get_air_asset_status_snapshot(asset_id: String = "") -> Dictionary:
 			result[key] = Dictionary(_air_asset_status_by_id.get(key, {})).duplicate(true)
 		return result
 	return Dictionary(_air_asset_status_by_id.get(normalized_id, {})).duplicate(true)
+
+
+func get_unknown_payload_debug_snapshot() -> Dictionary:
+	return {
+		"unknown_command_count": _unknown_command_payload_count,
+		"unknown_effect_count": _unknown_effect_payload_count,
+		"unknown_total_count": _unknown_command_payload_count + _unknown_effect_payload_count,
+		"last_unknown_payload": _last_unknown_payload_diagnostic.duplicate(true),
+		"runtime_authority": "SimulationRoot",
+		"unknown_payloads_are_ignored_without_crash": true,
+	}
 
 
 func set_terrain_move_debug_enabled(enabled: bool) -> void:
@@ -274,6 +332,7 @@ func _record_runtime_tick_budget_debug_snapshot(delta: float, tick_started_usec:
 		"known_unit_count": _known_units_by_id.size(),
 		"navigation": get_navigation_debug_snapshot(),
 		"unit_minimum_spacing": get_unit_minimum_spacing_debug_snapshot(),
+		"unknown_payloads": get_unknown_payload_debug_snapshot(),
 		"hotpath_audit": {
 			"authority_root": "SimulationRoot",
 			"command_queue_scope": "drain_order_apply",
@@ -1230,14 +1289,16 @@ func _apply_command(cmd: Dictionary, delta: float) -> void:
 		push_warning("SimulationRoot received a negative physics delta while applying a command.")
 		return
 
-	match _extract_command_type(cmd):
+	var command_type: String = _extract_command_dispatch_type(cmd)
+	match command_type:
 		"move_to_position":
 			_apply_move_command(cmd, delta)
 		"engage_area":
 			_apply_move_command(cmd, delta)
 		_:
-			# TODO: Authoritative gameplay state commits belong here once systems exist.
-			pass
+			if _is_known_noop_command_type(command_type):
+				return
+			_record_unknown_payload(cmd, "command", command_type, "missing_command_type" if command_type.is_empty() else "unknown_command_type")
 
 
 func _apply_effect(effect: Dictionary, delta: float) -> void:
@@ -1249,7 +1310,8 @@ func _apply_effect(effect: Dictionary, delta: float) -> void:
 		push_warning("SimulationRoot received a negative physics delta while applying an effect.")
 		return
 
-	match _extract_effect_type(effect):
+	var effect_type: String = _extract_effect_type(effect).strip_edges().to_lower()
+	match effect_type:
 		"damage":
 			_apply_damage_effect(effect)
 		"heal":
@@ -1267,8 +1329,7 @@ func _apply_effect(effect: Dictionary, delta: float) -> void:
 		"apply_loadout_modifiers":
 			_apply_loadout_modifiers_effect(effect)
 		_:
-			# TODO: Deterministic effect commits belong here once systems exist.
-			pass
+			_record_unknown_payload(effect, "effect", effect_type, "missing_effect_type" if effect_type.is_empty() else "unknown_effect_type")
 
 
 func _drain_queue(queue: Array) -> Array:
@@ -1337,11 +1398,78 @@ func _extract_command_type(cmd: Dictionary) -> String:
 	return ""
 
 
+func _extract_command_dispatch_type(cmd: Dictionary) -> String:
+	var command_type: String = _extract_command_type(cmd).strip_edges().to_lower()
+	if not command_type.is_empty():
+		return command_type
+	if cmd.has("verb") and cmd.has("command_id"):
+		return "commander_intent"
+	if cmd.has("area_order_id"):
+		return "area_order"
+	if cmd.has("order_type"):
+		return "ad_hoc_order"
+	return ""
+
+
 func _extract_effect_type(effect: Dictionary) -> String:
 	if effect.has("effect_type"):
 		return String(effect["effect_type"])
 
 	return ""
+
+
+func _is_known_noop_command_type(command_type: String) -> bool:
+	return SIMULATIONROOT_KNOWN_NOOP_COMMAND_TYPES.has(command_type.strip_edges().to_lower())
+
+
+func _record_unknown_payload(payload: Dictionary, payload_category: String, payload_type: String, reason: String) -> void:
+	var normalized_category: String = payload_category.strip_edges().to_lower()
+	if normalized_category == "command":
+		_unknown_command_payload_count += 1
+	elif normalized_category == "effect":
+		_unknown_effect_payload_count += 1
+	else:
+		normalized_category = "payload"
+	_last_unknown_payload_diagnostic = _build_unknown_payload_diagnostic(payload, normalized_category, payload_type, reason)
+	var type_label: String = String(_last_unknown_payload_diagnostic.get("payload_type", "<missing>"))
+	push_warning("SimulationRoot ignored unknown %s payload type '%s'." % [normalized_category, type_label])
+
+
+func _build_unknown_payload_diagnostic(payload: Dictionary, payload_category: String, payload_type: String, reason: String) -> Dictionary:
+	var keys: Array = payload.keys()
+	keys.sort()
+	var normalized_type: String = payload_type.strip_edges().to_lower()
+	if normalized_type.is_empty():
+		normalized_type = "<missing>"
+	return {
+		"tick": tick_counter,
+		"payload_category": payload_category,
+		"payload_type": normalized_type,
+		"reason": reason,
+		"keys": keys,
+		"preview": _build_unknown_payload_preview(payload),
+		"runtime_authority": "SimulationRoot",
+		"handled": false,
+	}
+
+
+func _build_unknown_payload_preview(payload: Dictionary) -> Dictionary:
+	var preview: Dictionary = {}
+	for key in UNKNOWN_PAYLOAD_PREVIEW_KEYS:
+		if not payload.has(key):
+			continue
+		preview[key] = _compact_unknown_payload_value(payload[key])
+	return preview
+
+
+func _compact_unknown_payload_value(value: Variant) -> Variant:
+	match typeof(value):
+		TYPE_NIL, TYPE_BOOL, TYPE_INT, TYPE_FLOAT, TYPE_STRING, TYPE_VECTOR2, TYPE_VECTOR2I:
+			return value
+		TYPE_VECTOR3, TYPE_VECTOR3I:
+			return str(value)
+		_:
+			return "<%s>" % type_string(typeof(value))
 
 
 func _apply_move_command(cmd: Dictionary, delta: float) -> void:
