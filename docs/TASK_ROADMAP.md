@@ -534,6 +534,9 @@ TASK_344 - Ground Mission Default Enemy Visuals (implementiert)
 Phase 18ZG - NPC Movement Posture Standard Behavior
 TASK_345 - NPC Standard Movement Posture Policy (geplant)
 
+Phase 18ZH - Homebase Direct Staging FOB Bypass
+TASK_346 - Homebase Direct Staging Character Popup (geplant)
+
 Batch-Empfehlung
 
 Codex soll Tasks in kleinen Gruppen bearbeiten:

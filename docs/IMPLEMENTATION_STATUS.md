@@ -26,6 +26,12 @@
 - Stand: Bestehende `move_speed_factor`-, Enemy-Team-Tactics- und TASK_344-Aim-Pose-Pfade sollen weiterverwendet werden. Die Gameplay-Wahrheit bleibt in Simulation/Taktik; `TerrainMap3DView` liest die Posture nur fuer die Darstellung.
 - Offene Punkte: Implementierung, Speed-Tuning, Schwellenwert fuer M-Position und Headless-Verifier.
 
+### TASK_346 - Homebase Direct Staging Character Popup
+- Status: geplant
+- Stand: Der Task beschreibt den direkten Homebase-Staging-Flow als FOB-Bypass: `#10 FIRETEAMS`, `#13 LOADOUT` und das bestehende Homebase-Flightdeck sollen direkt in der Homebase verfuegbar sein.
+- Stand: Die dauerhaft sichtbare rechte Character-Sheet-Flache soll aus dem normalen Homebase-Layout verschwinden. Character Sheets oeffnen nur noch per Doppelklick auf NPC-/Operator-Karten als frei schwebendes Popup ausserhalb der nummerierten Fenster.
+- Offene Punkte: Implementierung, gemeinsamer Fireteam-/Loadout-/Dropship-Staging-Vertrag zwischen FOB und Homebase, FullHD-Sichtcheck.
+
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
 - Stand: Dropship-Visuals bauen ihre Dirty-Signatur wieder fehlerfrei, geplante LZs bleiben auch bei offmap/hidden Craft sichtbar, und Multi-Dropship-Payloads werden aus dem rohen Mission-Card-State statt aus stale Selected-Card-State uebernommen.
