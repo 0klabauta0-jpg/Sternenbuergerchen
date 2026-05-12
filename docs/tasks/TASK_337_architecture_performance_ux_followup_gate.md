@@ -3,7 +3,7 @@
 ## Ziel
 Die Follow-up-Serie aus Architektur-, Performance-, UI- und Spiellogik-Tasks soll mit einem gemeinsamen Gate abgeschlossen werden. Das Gate prueft, ob die kleinen Verbesserungen zusammen stabil bleiben und keine neue Architektur- oder UI-Wahrheitsdrift erzeugen.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT IM ARBEITSSTAND
 
 ## Voraussetzung
 - TASK_330 - Mission Runtime Scripts Productization Followup
@@ -38,11 +38,11 @@ Die Analysepunkte betreffen mehrere sensible Ebenen: Runtime-Pfade, Controller-G
 - Kein neuer Feature-Scope.
 
 ## Akzeptanzkriterien
-- [ ] Abschlussreport fuehrt Gates, Ergebnisse und offene manuelle Checks zusammen.
-- [ ] Architekturgrenzen aus `docs/ARCHITECTURE.md` und `docs/CODEX_RULES.md` werden explizit bestaetigt oder als Finding markiert.
-- [ ] Performance-Gates melden keine kritische Regression.
-- [ ] UI-Gates bestaetigen FullHD und Kompaktprofil-Grundbedienbarkeit.
-- [ ] Falls Findings entstehen, werden daraus kleine Folge-Tasks statt Sammelpatches.
+- [x] Abschlussreport fuehrt Gates, Ergebnisse und offene manuelle Checks zusammen.
+- [x] Architekturgrenzen aus `docs/ARCHITECTURE.md` und `docs/CODEX_RULES.md` werden explizit bestaetigt oder als Finding markiert.
+- [x] Performance-Gates melden keine kritische Regression.
+- [x] UI-Gates bestaetigen FullHD und Kompaktprofil-Grundbedienbarkeit.
+- [x] Falls Findings entstehen, werden daraus kleine Folge-Tasks statt Sammelpatches.
 
 ## Erwartete Dateien
 - `scripts/tests/task_337_architecture_performance_ux_followup_gate.gd`
@@ -53,14 +53,19 @@ Die Analysepunkte betreffen mehrere sensible Ebenen: Runtime-Pfade, Controller-G
 - `docs/IMPLEMENTATION_STATUS.md`
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_337_architecture_performance_ux_followup_gate.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_222_performance_regression_gate_and_manual_profile_checklist.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_282_tactical_overhaul_playability_performance_help_gate.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_286_ui_feedback_truth_regression_review.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_337_architecture_performance_ux_followup_gate.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_222_performance_regression_gate_and_manual_profile_checklist.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_282_tactical_overhaul_playability_performance_help_gate.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_286_ui_feedback_truth_regression_review.gd`
+- [x] `git diff --check`
 
 ## Risiken
 - Das Gate darf nicht zu einem Reparatur-Sammelmonster werden. Es soll Findings sichtbar machen und nur kleine offensichtliche Doku-/Testfehler im selben Task korrigieren.
+
+## Ergebnis
+- `scripts/tests/task_337_architecture_performance_ux_followup_gate.gd` prueft die TASK_330-336-Artefakte, Architekturgrenzen, Budget-/Report-Vertraege, FullHD-/1280x720-Profile und einen Live-Command-Feedback-Smoke.
+- `docs/reports/architecture_performance_ux_followup_gate.md` fuehrt Architektur, Performance, UI/UX, Serienstatus, Findings und manuelle Folgechecks zusammen.
+- `docs/manual_checks/architecture_performance_ux_followup_checklist.md` sammelt die offenen menschlichen Sicht-/Spielgefuehlchecks fuer FullHD, Kompaktprofil, Mission-Command-Flow, Dropship/LZ und zwei lokale Instanzen.
 
 ## Naechster Schritt
 Nach diesem Gate kann entschieden werden, ob die naechste Serie ein Balance-/Playtest-Pass oder ein weiterer Architektur-Slice wird.

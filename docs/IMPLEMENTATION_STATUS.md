@@ -10,6 +10,14 @@
 
 ## Aktueller Startzustand
 
+### TASK_337 - Architecture Performance UX Followup Gate
+- Status: implementiert im Arbeitsstand
+- Stand: Der neue Abschluss-Verifier prueft die TASK_330-336-Artefakte, die dokumentierten Architekturgrenzen, produktive Mission-Pfade ausserhalb `scripts/tests`, UI-Feedback als read-only Snapshot sowie den Performance-Budget-Contract.
+- Stand: Ein Live-Smoke instanziiert die Mission in FullHD und 1280x720, bestaetigt die Drop-Light-Profile und prueft Command-Feedback/Disabled-Reasons ohne neue `SimulationRoot`-Commands oder Effects zu enqueuen.
+- Stand: Report und manuelle Checkliste sammeln die offenen Sicht-/Spielgefuehlpunkte fuer FullHD, Kompaktprofil, Mission-Command-Flow, Dropship/LZ und zwei lokale Instanzen.
+- Risiken: TASK_337 ist ein Gate, kein Sammelreparaturtask. Echte optische Balance, Stress-Lesbarkeit und Internet-/UPnP-Erreichbarkeit bleiben manuelle Folgechecks.
+- Lokale Pruefung: `task_337_architecture_performance_ux_followup_gate.gd`, `task_222_performance_regression_gate_and_manual_profile_checklist.gd`, `task_282_tactical_overhaul_playability_performance_help_gate.gd`, `task_286_ui_feedback_truth_regression_review.gd` und `git diff --check` laufen gruen.
+
 ### TASK_336 - Combat Loop Tick Budget System Split
 - Status: implementiert im Arbeitsstand
 - Stand: `MissionCombatLoopDriver._on_tick_processed()` delegiert den autoritativen Combat-Tick jetzt an eine explizite Phasenliste mit stabiler Reihenfolge und sichtbaren Abhaengigkeiten.

@@ -536,7 +536,7 @@ TASK_333 - Navigation Fallback Budget Contract Alignment (implementiert im Arbei
 TASK_334 - Drop Light Layout Profiles Compact Resolution (implementiert im Arbeitsstand)
 TASK_335 - Tactical Feedback Truth Command Clarity Pass (implementiert im Arbeitsstand)
 TASK_336 - Combat Loop Tick Budget System Split (implementiert im Arbeitsstand)
-TASK_337 - Architecture Performance UX Followup Gate (offen)
+TASK_337 - Architecture Performance UX Followup Gate (implementiert im Arbeitsstand)
 
 Batch-Empfehlung
 
