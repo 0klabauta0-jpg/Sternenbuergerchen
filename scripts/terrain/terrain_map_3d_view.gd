@@ -305,6 +305,16 @@ var _unit_visual_loadout_count: int = 0
 var _unit_visual_loadout_error_count: int = 0
 var _enemy_animated_unit_model_count: int = 0
 var _unit_status_badge_count: int = 0
+var _unit_proxy_static_diagnostics_dirty: bool = true
+var _unit_proxy_static_diagnostic_refresh_count: int = 0
+var _unit_proxy_motion_sync_count: int = 0
+var _unit_proxy_visibility_sync_count: int = 0
+var _unit_proxy_status_badge_sync_count: int = 0
+var _unit_proxy_last_motion_changed_count: int = 0
+var _unit_proxy_last_visibility_changed_count: int = 0
+var _unit_proxy_last_status_badge_changed_count: int = 0
+var _unit_proxy_last_static_diagnostic_proxy_count: int = 0
+var _unit_proxy_last_sync_duration_usec: int = 0
 var _drop_visual_static_signature: String = ""
 var _dropship_visual_nodes_by_id: Dictionary = {}
 var _dropship_approach_lines_by_id: Dictionary = {}
@@ -385,6 +395,11 @@ var _mission_status_payload_apply_count: int = 0
 var _order_visual_signature: String = ""
 var _order_dynamic_visual_signature: String = ""
 var _last_dynamic_order_visual_refresh_msec: int = 0
+var _order_visual_rebuild_count: int = 0
+var _order_visual_signature_compact_count: int = 0
+var _order_visual_signature_full_fallback_count: int = 0
+var _order_dynamic_visual_refresh_count: int = 0
+var _order_dynamic_visual_rebuild_count: int = 0
 var _fire_sector_los_cache: Dictionary = {}
 var _fire_sector_los_cache_signature: String = ""
 
@@ -466,6 +481,7 @@ func render_map(terrain_map_data = null) -> void:
 	_missing_asset_mapping_count = 0
 	_missing_unit_model_count = 0
 	_missing_dropship_model_count = 0
+	_unit_proxy_static_diagnostics_dirty = true
 	_tile_grid_line_count = 0
 	_marker_count = 0
 	_compass_marker_count = 0
@@ -523,6 +539,7 @@ func set_unit_nodes(unit_nodes: Array) -> void:
 	for unit in unit_nodes:
 		if unit is Node:
 			_unit_nodes.append(unit)
+	_unit_proxy_static_diagnostics_dirty = true
 	_sync_unit_proxies(true)
 
 
@@ -572,8 +589,10 @@ func set_area_order_preview_payload(preview_payload: Dictionary) -> void:
 
 
 func _build_order_visual_signature(order_payload: Dictionary) -> String:
+	_order_visual_signature_compact_count += 1
 	var parts: PackedStringArray = PackedStringArray()
-	parts.append(var_to_str(order_payload))
+	parts.append("compact:v2")
+	_append_order_signature_dictionary(parts, "payload", order_payload, 0)
 	if bool(order_payload.get("fire_sector_overlay_enabled", false)):
 		var selected_fireteam_ids: PackedStringArray = _get_string_array_from_variant(order_payload.get("selected_fireteam_ids", PackedStringArray()))
 		var unit_parts: Array = []
@@ -603,6 +622,104 @@ func _build_order_visual_signature(order_payload: Dictionary) -> String:
 	return "\n".join(parts)
 
 
+func _append_order_signature_dictionary(parts: PackedStringArray, path: String, dictionary: Dictionary, depth: int) -> void:
+	var keys: PackedStringArray = PackedStringArray()
+	for key_variant in dictionary.keys():
+		keys.append(String(key_variant))
+	keys.sort()
+	parts.append("%s{keys:%d}" % [path, keys.size()])
+	for key in keys:
+		_append_order_signature_value(parts, "%s.%s" % [path, key], dictionary.get(key, null), depth + 1)
+
+
+func _append_order_signature_sequence(parts: PackedStringArray, path: String, values: Array, depth: int) -> void:
+	parts.append("%s[count:%d]" % [path, values.size()])
+	for index in range(values.size()):
+		_append_order_signature_value(parts, "%s[%d]" % [path, index], values[index], depth + 1)
+
+
+func _append_order_signature_value(parts: PackedStringArray, path: String, value, depth: int) -> void:
+	if depth > 10:
+		parts.append("%s<depth:%d:type:%d>" % [path, depth, typeof(value)])
+		return
+	match typeof(value):
+		TYPE_NIL:
+			parts.append("%s:null" % path)
+		TYPE_BOOL:
+			parts.append("%s:bool:%s" % [path, str(bool(value))])
+		TYPE_INT:
+			parts.append("%s:int:%d" % [path, int(value)])
+		TYPE_FLOAT:
+			parts.append("%s:float:%.4f" % [path, float(value)])
+		TYPE_STRING, TYPE_STRING_NAME, TYPE_NODE_PATH:
+			parts.append("%s:string:%s" % [path, String(value)])
+		TYPE_VECTOR2:
+			var vector2_value: Vector2 = Vector2(value)
+			parts.append("%s:v2:%.2f,%.2f" % [path, vector2_value.x, vector2_value.y])
+		TYPE_VECTOR2I:
+			var vector2i_value: Vector2i = Vector2i(value)
+			parts.append("%s:v2i:%d,%d" % [path, vector2i_value.x, vector2i_value.y])
+		TYPE_VECTOR3:
+			var vector3_value: Vector3 = Vector3(value)
+			parts.append("%s:v3:%.2f,%.2f,%.2f" % [path, vector3_value.x, vector3_value.y, vector3_value.z])
+		TYPE_VECTOR3I:
+			var vector3i_value: Vector3i = Vector3i(value)
+			parts.append("%s:v3i:%d,%d,%d" % [path, vector3i_value.x, vector3i_value.y, vector3i_value.z])
+		TYPE_VECTOR4:
+			var vector4_value: Vector4 = Vector4(value)
+			parts.append("%s:v4:%.2f,%.2f,%.2f,%.2f" % [path, vector4_value.x, vector4_value.y, vector4_value.z, vector4_value.w])
+		TYPE_VECTOR4I:
+			var vector4i_value: Vector4i = Vector4i(value)
+			parts.append("%s:v4i:%d,%d,%d,%d" % [path, vector4i_value.x, vector4i_value.y, vector4i_value.z, vector4i_value.w])
+		TYPE_COLOR:
+			var color_value: Color = Color(value)
+			parts.append("%s:color:%s" % [path, color_value.to_html(true)])
+		TYPE_DICTIONARY:
+			_append_order_signature_dictionary(parts, path, Dictionary(value), depth + 1)
+		TYPE_ARRAY:
+			_append_order_signature_sequence(parts, path, Array(value), depth + 1)
+		TYPE_PACKED_BYTE_ARRAY, TYPE_PACKED_INT32_ARRAY, TYPE_PACKED_INT64_ARRAY, TYPE_PACKED_FLOAT32_ARRAY, TYPE_PACKED_FLOAT64_ARRAY, TYPE_PACKED_STRING_ARRAY, TYPE_PACKED_VECTOR2_ARRAY, TYPE_PACKED_VECTOR3_ARRAY, TYPE_PACKED_COLOR_ARRAY, TYPE_PACKED_VECTOR4_ARRAY:
+			_append_order_signature_sequence(parts, path, _order_signature_sequence_from_variant(value), depth + 1)
+		_:
+			parts.append("%s:type:%d:%s" % [path, typeof(value), str(value)])
+
+
+func _order_signature_sequence_from_variant(value) -> Array:
+	var result: Array = []
+	match typeof(value):
+		TYPE_PACKED_BYTE_ARRAY:
+			for item in PackedByteArray(value):
+				result.append(item)
+		TYPE_PACKED_INT32_ARRAY:
+			for item in PackedInt32Array(value):
+				result.append(item)
+		TYPE_PACKED_INT64_ARRAY:
+			for item in PackedInt64Array(value):
+				result.append(item)
+		TYPE_PACKED_FLOAT32_ARRAY:
+			for item in PackedFloat32Array(value):
+				result.append(item)
+		TYPE_PACKED_FLOAT64_ARRAY:
+			for item in PackedFloat64Array(value):
+				result.append(item)
+		TYPE_PACKED_STRING_ARRAY:
+			for item in PackedStringArray(value):
+				result.append(item)
+		TYPE_PACKED_VECTOR2_ARRAY:
+			for item in PackedVector2Array(value):
+				result.append(item)
+		TYPE_PACKED_VECTOR3_ARRAY:
+			for item in PackedVector3Array(value):
+				result.append(item)
+		TYPE_PACKED_COLOR_ARRAY:
+			for item in PackedColorArray(value):
+				result.append(item)
+		TYPE_PACKED_VECTOR4_ARRAY:
+			for item in PackedVector4Array(value):
+				result.append(item)
+	return result
+
+
 func _refresh_dynamic_order_visuals_if_needed() -> void:
 	if _order_payload.is_empty() or _order_root == null:
 		return
@@ -613,10 +730,12 @@ func _refresh_dynamic_order_visuals_if_needed() -> void:
 	if now_msec - _last_dynamic_order_visual_refresh_msec < DYNAMIC_ORDER_VISUAL_REFRESH_INTERVAL_MSEC:
 		return
 	_last_dynamic_order_visual_refresh_msec = now_msec
+	_order_dynamic_visual_refresh_count += 1
 	var next_signature: String = _build_order_dynamic_visual_signature()
 	if next_signature == _order_dynamic_visual_signature:
 		return
 	_order_dynamic_visual_signature = next_signature
+	_order_dynamic_visual_rebuild_count += 1
 	_rebuild_order_visuals()
 	_request_viewport_redraw()
 
@@ -992,6 +1111,16 @@ func get_render_snapshot() -> Dictionary:
 		"missing_unit_model_ids": _get_unit_proxy_ids_with_meta("missing_unit_model"),
 		"unit_visual_error_ids": _get_unit_proxy_ids_with_meta("unit_visual_error"),
 		"unit_proxy_state_by_id": _get_unit_proxy_state_by_id(),
+		"unit_proxy_static_diagnostics_dirty": _unit_proxy_static_diagnostics_dirty,
+		"unit_proxy_static_diagnostic_refresh_count": _unit_proxy_static_diagnostic_refresh_count,
+		"unit_proxy_motion_sync_count": _unit_proxy_motion_sync_count,
+		"unit_proxy_visibility_sync_count": _unit_proxy_visibility_sync_count,
+		"unit_proxy_status_badge_sync_count": _unit_proxy_status_badge_sync_count,
+		"unit_proxy_last_motion_changed_count": _unit_proxy_last_motion_changed_count,
+		"unit_proxy_last_visibility_changed_count": _unit_proxy_last_visibility_changed_count,
+		"unit_proxy_last_status_badge_changed_count": _unit_proxy_last_status_badge_changed_count,
+		"unit_proxy_last_static_diagnostic_proxy_count": _unit_proxy_last_static_diagnostic_proxy_count,
+		"unit_proxy_last_sync_duration_usec": _unit_proxy_last_sync_duration_usec,
 		"area_order_count": _area_order_count,
 		"waypoint_visual_count": _waypoint_visual_count,
 		"area_order_tile_marker_count": _area_order_tile_marker_count,
@@ -1091,6 +1220,12 @@ func get_render_snapshot() -> Dictionary:
 		"map_render_duration_msec": _map_render_duration_msec,
 		"render_snapshot_request_count": _render_snapshot_request_count,
 		"order_payload_apply_count": _order_payload_apply_count,
+		"order_visual_signature_mode": "compact",
+		"order_visual_rebuild_count": _order_visual_rebuild_count,
+		"order_visual_signature_compact_count": _order_visual_signature_compact_count,
+		"order_visual_signature_full_fallback_count": _order_visual_signature_full_fallback_count,
+		"order_dynamic_visual_refresh_count": _order_dynamic_visual_refresh_count,
+		"order_dynamic_visual_rebuild_count": _order_dynamic_visual_rebuild_count,
 		"contact_payload_apply_count": _contact_payload_apply_count,
 		"drop_payload_apply_count": _drop_payload_apply_count,
 		"mission_status_payload_apply_count": _mission_status_payload_apply_count,
@@ -3228,6 +3363,7 @@ func _update_drop_visual_motion() -> void:
 
 
 func _rebuild_order_visuals() -> void:
+	_order_visual_rebuild_count += 1
 	_clear_children(_order_root)
 	_area_order_count = 0
 	_waypoint_visual_count = 0
@@ -4869,7 +5005,128 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 	_ensure_nodes()
 	if _unit_root == null:
 		return
+	var sync_started_at_usec: int = Time.get_ticks_usec()
 	var seen_ids: Dictionary = {}
+	var unit_status_badge_count: int = 0
+	var fow_hidden_unit_proxy_count: int = 0
+	var motion_changed_count: int = 0
+	var visibility_changed_count: int = 0
+	var status_badge_changed_count: int = 0
+	var changed: bool = false
+	if force_rebuild:
+		_unit_proxy_static_diagnostics_dirty = true
+	for unit in _unit_nodes:
+		if not is_instance_valid(unit):
+			continue
+		var unit_id: String = _get_unit_id(unit)
+		if unit_id.is_empty():
+			continue
+		seen_ids[unit_id] = true
+		var proxy := _unit_proxies_by_id.get(unit_id, null) as Node3D
+		var proxy_created: bool = false
+		if proxy == null or force_rebuild or not is_instance_valid(proxy):
+			if proxy != null and is_instance_valid(proxy):
+				proxy.queue_free()
+			proxy = _create_unit_proxy(unit)
+			proxy.name = "UnitProxy_%s" % unit_id
+			_unit_root.add_child(proxy)
+			_unit_proxies_by_id[unit_id] = proxy
+			proxy_created = true
+			_unit_proxy_static_diagnostics_dirty = true
+			changed = true
+		var base_visible: bool = _is_unit_base_world_visible(unit)
+		var fow_allowed: bool = _fow_allows_unit_proxy(unit)
+		if base_visible and not fow_allowed:
+			fow_hidden_unit_proxy_count += 1
+		var next_visible: bool = base_visible and fow_allowed
+		if proxy.visible != next_visible:
+			visibility_changed_count += 1
+			changed = true
+		proxy.visible = next_visible
+		if proxy_created or not proxy.has_meta("unit_id"):
+			proxy.set_meta("unit_id", unit_id)
+		if _set_proxy_meta_if_changed(proxy, "team_id", _get_unit_team_id(unit)):
+			_unit_proxy_static_diagnostics_dirty = true
+		_set_proxy_meta_if_changed(proxy, "vital_state", _get_unit_vital_state(unit))
+		_set_proxy_meta_if_changed(proxy, "overwatch_ready", bool(unit.get_meta("overwatch_ready", false)) if unit != null and unit.has_meta("overwatch_ready") else false)
+		_set_proxy_meta_if_changed(proxy, "overwatch_shot_ready", bool(unit.get_meta("overwatch_shot_ready", false)) if unit != null and unit.has_meta("overwatch_shot_ready") else false)
+		_set_proxy_meta_if_changed(proxy, "overwatch_cooldown_remaining_ticks", int(unit.get_meta("overwatch_cooldown_remaining_ticks", 0)) if unit != null and unit.has_meta("overwatch_cooldown_remaining_ticks") else 0)
+		var unit_is_moving: bool = false
+		var motion_changed: bool = false
+		if unit is Node2D:
+			var unit_world_position: Vector2 = (unit as Node2D).global_position
+			var next_position: Vector3 = _world_to_surface_3d_position(unit_world_position, 0.06)
+			var proxy_distance: float = proxy.position.distance_to(next_position)
+			unit_is_moving = proxy_distance > 0.01
+			_maybe_emit_unit_step_sfx(unit_id, unit_world_position, unit_is_moving, next_visible)
+			if proxy_distance > 0.0001:
+				motion_changed = true
+			if force_rebuild or delta <= 0.0 or proxy_distance >= UNIT_PROXY_SNAP_DISTANCE:
+				proxy.position = next_position
+			else:
+				proxy.position = proxy.position.lerp(next_position, clampf(delta * UNIT_PROXY_SMOOTH_SPEED, 0.0, 1.0))
+			var next_rotation_y: float = _get_unit_proxy_rotation_y(proxy, unit, unit_world_position)
+			if absf(wrapf(proxy.rotation_degrees.y - next_rotation_y, -180.0, 180.0)) > 0.01:
+				motion_changed = true
+			proxy.rotation_degrees.y = next_rotation_y
+			proxy.set_meta("last_world_position", unit_world_position)
+		else:
+			var next_rotation_y: float = proxy.rotation_degrees.y
+			if not proxy.has_meta("last_rotation_y"):
+				next_rotation_y = 0.0
+			if absf(wrapf(proxy.rotation_degrees.y - next_rotation_y, -180.0, 180.0)) > 0.01:
+				motion_changed = true
+			proxy.rotation_degrees.y = next_rotation_y
+		proxy.set_meta("last_rotation_y", proxy.rotation_degrees.y)
+		if motion_changed:
+			motion_changed_count += 1
+			changed = true
+		if _update_unit_visual_animation(proxy, unit_is_moving):
+			changed = true
+		if _update_unit_status_badge(proxy, unit):
+			status_badge_changed_count += 1
+			changed = true
+		if _is_unit_status_badge_visible(proxy):
+			unit_status_badge_count += 1
+	for unit_id_variant in _unit_proxies_by_id.keys():
+		var unit_id := String(unit_id_variant)
+		if seen_ids.has(unit_id):
+			continue
+		var proxy_to_remove := _unit_proxies_by_id[unit_id] as Node
+		if proxy_to_remove != null and is_instance_valid(proxy_to_remove):
+			proxy_to_remove.queue_free()
+		_unit_proxies_by_id.erase(unit_id)
+		_unit_proxy_static_diagnostics_dirty = true
+		changed = true
+	if _unit_status_badge_count != unit_status_badge_count:
+		changed = true
+	_unit_status_badge_count = unit_status_badge_count
+	if _fow_hidden_unit_proxy_count != fow_hidden_unit_proxy_count:
+		changed = true
+	_fow_hidden_unit_proxy_count = fow_hidden_unit_proxy_count
+	if _unit_proxy_static_diagnostics_dirty and _refresh_unit_proxy_static_diagnostic_counts():
+		changed = true
+	_unit_proxy_motion_sync_count += 1
+	_unit_proxy_visibility_sync_count += 1
+	_unit_proxy_status_badge_sync_count += 1
+	_unit_proxy_last_motion_changed_count = motion_changed_count
+	_unit_proxy_last_visibility_changed_count = visibility_changed_count
+	_unit_proxy_last_status_badge_changed_count = status_badge_changed_count
+	_unit_proxy_last_sync_duration_usec = maxi(Time.get_ticks_usec() - sync_started_at_usec, 0)
+	if changed:
+		_request_viewport_redraw()
+
+
+func _set_proxy_meta_if_changed(proxy: Node, meta_key: StringName, value) -> bool:
+	if proxy == null:
+		return false
+	if proxy.has_meta(meta_key) and proxy.get_meta(meta_key) == value:
+		return false
+	proxy.set_meta(meta_key, value)
+	return true
+
+
+func _refresh_unit_proxy_static_diagnostic_counts() -> bool:
 	var unit_texture_count: int = 0
 	var unit_model_count: int = 0
 	var animated_unit_model_count: int = 0
@@ -4889,77 +5146,18 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 	var unit_visual_loadout_count: int = 0
 	var unit_visual_loadout_error_count: int = 0
 	var enemy_animated_unit_model_count: int = 0
-	var unit_status_badge_count: int = 0
 	var missing_unit_model_count: int = 0
-	var fow_hidden_unit_proxy_count: int = 0
-	var changed: bool = false
-	for unit in _unit_nodes:
-		if not is_instance_valid(unit):
+	for proxy_variant in _unit_proxies_by_id.values():
+		var proxy := proxy_variant as Node3D
+		if proxy == null or not is_instance_valid(proxy):
 			continue
-		var unit_id: String = _get_unit_id(unit)
-		if unit_id.is_empty():
-			continue
-		seen_ids[unit_id] = true
-		var proxy := _unit_proxies_by_id.get(unit_id, null) as Node3D
-		if proxy == null or force_rebuild or not is_instance_valid(proxy):
-			if proxy != null and is_instance_valid(proxy):
-				proxy.queue_free()
-			proxy = _create_unit_proxy(unit)
-			proxy.name = "UnitProxy_%s" % unit_id
-			_unit_root.add_child(proxy)
-			_unit_proxies_by_id[unit_id] = proxy
-			changed = true
-		var base_visible: bool = _is_unit_base_world_visible(unit)
-		var fow_allowed: bool = _fow_allows_unit_proxy(unit)
-		if base_visible and not fow_allowed:
-			fow_hidden_unit_proxy_count += 1
-		var next_visible: bool = base_visible and fow_allowed
-		if proxy.visible != next_visible:
-			changed = true
-		proxy.visible = next_visible
-		proxy.set_meta("unit_id", unit_id)
-		proxy.set_meta("team_id", _get_unit_team_id(unit))
-		proxy.set_meta("vital_state", _get_unit_vital_state(unit))
-		proxy.set_meta("overwatch_ready", bool(unit.get_meta("overwatch_ready", false)) if unit != null and unit.has_meta("overwatch_ready") else false)
-		proxy.set_meta("overwatch_shot_ready", bool(unit.get_meta("overwatch_shot_ready", false)) if unit != null and unit.has_meta("overwatch_shot_ready") else false)
-		proxy.set_meta("overwatch_cooldown_remaining_ticks", int(unit.get_meta("overwatch_cooldown_remaining_ticks", 0)) if unit != null and unit.has_meta("overwatch_cooldown_remaining_ticks") else 0)
-		var unit_is_moving: bool = false
-		if unit is Node2D:
-			var unit_world_position: Vector2 = (unit as Node2D).global_position
-			var next_position: Vector3 = _world_to_surface_3d_position(unit_world_position, 0.06)
-			var proxy_distance: float = proxy.position.distance_to(next_position)
-			unit_is_moving = proxy_distance > 0.01
-			_maybe_emit_unit_step_sfx(unit_id, unit_world_position, unit_is_moving, next_visible)
-			if proxy_distance > 0.0001:
-				changed = true
-			if force_rebuild or delta <= 0.0 or proxy_distance >= UNIT_PROXY_SNAP_DISTANCE:
-				proxy.position = next_position
-			else:
-				proxy.position = proxy.position.lerp(next_position, clampf(delta * UNIT_PROXY_SMOOTH_SPEED, 0.0, 1.0))
-			var next_rotation_y: float = _get_unit_proxy_rotation_y(proxy, unit, unit_world_position)
-			if absf(wrapf(proxy.rotation_degrees.y - next_rotation_y, -180.0, 180.0)) > 0.01:
-				changed = true
-			proxy.rotation_degrees.y = next_rotation_y
-			proxy.set_meta("last_world_position", unit_world_position)
-		else:
-			var next_rotation_y: float = proxy.rotation_degrees.y
-			if not proxy.has_meta("last_rotation_y"):
-				next_rotation_y = 0.0
-			if absf(wrapf(proxy.rotation_degrees.y - next_rotation_y, -180.0, 180.0)) > 0.01:
-				changed = true
-			proxy.rotation_degrees.y = next_rotation_y
-		proxy.set_meta("last_rotation_y", proxy.rotation_degrees.y)
-		if _update_unit_visual_animation(proxy, unit_is_moving):
-			changed = true
-		if _update_unit_status_badge(proxy, unit):
-			unit_status_badge_count += 1
 		if bool(proxy.get_meta("uses_unit_texture", false)):
 			unit_texture_count += 1
 		if bool(proxy.get_meta("uses_kenney_model", false)):
 			unit_model_count += 1
 		if bool(proxy.get_meta("uses_animated_character_model", false)):
 			animated_unit_model_count += 1
-			if _get_unit_team_id(unit) != "team_alpha":
+			if String(proxy.get_meta("team_id", "")).strip_edges() != "team_alpha":
 				enemy_animated_unit_model_count += 1
 		if bool(proxy.get_meta("unit_visual_error", false)):
 			unit_visual_error_count += 1
@@ -4990,15 +5188,7 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 			unit_visual_loadout_error_count += 1
 		if bool(proxy.get_meta("missing_unit_model", false)):
 			missing_unit_model_count += 1
-	for unit_id_variant in _unit_proxies_by_id.keys():
-		var unit_id := String(unit_id_variant)
-		if seen_ids.has(unit_id):
-			continue
-		var proxy_to_remove := _unit_proxies_by_id[unit_id] as Node
-		if proxy_to_remove != null and is_instance_valid(proxy_to_remove):
-			proxy_to_remove.queue_free()
-		_unit_proxies_by_id.erase(unit_id)
-		changed = true
+	var changed: bool = false
 	if _unit_texture_count != unit_texture_count:
 		changed = true
 	_unit_texture_count = unit_texture_count
@@ -5056,17 +5246,20 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 	if _enemy_animated_unit_model_count != enemy_animated_unit_model_count:
 		changed = true
 	_enemy_animated_unit_model_count = enemy_animated_unit_model_count
-	if _unit_status_badge_count != unit_status_badge_count:
-		changed = true
-	_unit_status_badge_count = unit_status_badge_count
 	if _missing_unit_model_count != missing_unit_model_count:
 		changed = true
 	_missing_unit_model_count = missing_unit_model_count
-	if _fow_hidden_unit_proxy_count != fow_hidden_unit_proxy_count:
-		changed = true
-	_fow_hidden_unit_proxy_count = fow_hidden_unit_proxy_count
-	if changed:
-		_request_viewport_redraw()
+	_unit_proxy_static_diagnostic_refresh_count += 1
+	_unit_proxy_last_static_diagnostic_proxy_count = _unit_proxies_by_id.size()
+	_unit_proxy_static_diagnostics_dirty = false
+	return changed
+
+
+func _is_unit_status_badge_visible(proxy: Node3D) -> bool:
+	if proxy == null:
+		return false
+	var label := proxy.get_node_or_null("UnitStateBadge") as Label3D
+	return label != null and label.visible
 
 
 func _update_unit_status_badge(proxy: Node3D, unit: Node) -> bool:
@@ -5076,17 +5269,27 @@ func _update_unit_status_badge(proxy: Node3D, unit: Node) -> bool:
 	var badge_text: String = _get_unit_status_badge_text(unit)
 	if badge_text.is_empty() or not proxy.visible:
 		if label != null:
+			var was_visible: bool = label.visible
 			label.visible = false
+			return was_visible
 		return false
+	var badge_color: Color = _get_unit_status_badge_color(unit)
 	if label == null:
-		label = _add_label3d(proxy, badge_text, Vector3(0.0, 0.98, 0.0), "UnitStateBadge", _get_unit_status_badge_color(unit), 13)
+		label = _add_label3d(proxy, badge_text, Vector3(0.0, 0.98, 0.0), "UnitStateBadge", badge_color, 13)
 		label.pixel_size = 0.014
 		label.outline_size = 3
-	else:
+		return true
+	var changed: bool = false
+	if label.text != badge_text:
 		label.text = badge_text
-		label.modulate = _get_unit_status_badge_color(unit)
+		changed = true
+	if label.modulate != badge_color:
+		label.modulate = badge_color
+		changed = true
+	if not label.visible:
 		label.visible = true
-	return true
+		changed = true
+	return changed
 
 
 func _get_unit_status_badge_text(unit: Node) -> String:

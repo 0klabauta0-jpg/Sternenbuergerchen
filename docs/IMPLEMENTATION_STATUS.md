@@ -10,6 +10,15 @@
 
 ## Aktueller Startzustand
 
+### TASK_332 - Terrain Map Frame Budget Proxy Sync Pass
+- Status: implementiert im Arbeitsstand
+- Stand: `TerrainMap3DView` trennt den frame-live Proxy-Sync jetzt in Bewegung/Rotation, Sichtbarkeit, Status-Badges und schwere statische Diagnosezaehlungen. Asset-/Socket-/Loadout-/Missing-Model-Counter laufen nur noch bei Dirty-Zustand wie Force-Rebuild, Proxy-Erstellung/-Entfernung oder Team-Meta-Aenderung.
+- Stand: Status-Badges melden nur noch echte Text-/Farb-/Visibility-Aenderungen als Redraw-Grund; der sichtbare Badge-Count bleibt im Snapshot erhalten.
+- Stand: `set_order_visual_payload()` nutzt eine sortierte kompakte Signatur ohne `var_to_str(order_payload)`. Identische Payloads werden weiterhin verglichen, aber nicht erneut als Order-Visuals aufgebaut.
+- Stand: Der Render-Snapshot enthaelt lokale Profilpunkte fuer Proxy-Sync-Dauer, Dirty-Diagnose-Refreshes, Motion-/Visibility-/Badge-Syncs sowie Order-Signatur- und Dynamic-Refresh-Zaehler.
+- Risiken: Die Signatur bildet weiterhin alle relevanten Payload-Werte ab, aber kuenftige nicht-skalare Payload-Typen sollten bewusst in `_append_order_signature_value()` ergaenzt werden.
+- Lokale Pruefung: `task_332_terrain_map_frame_budget_proxy_sync_pass.gd`, `task_222_performance_regression_gate_and_manual_profile_checklist.gd`, `bugfix_mission_fire_sector_overlay.gd`, `task_313_dropship_arrival_visibility_feedback_smoke.gd` und `git diff --check` laufen gruen.
+
 ### TASK_331 - Mission Tactical Controller Adapter Split First Slice
 - Status: implementiert im Arbeitsstand
 - Stand: `MissionTacticalSandboxController.get_command_feedback_snapshot()` delegiert die finale Snapshot-Erzeugung jetzt an `scripts/mission/mission_command_feedback_snapshot_adapter.gd`.

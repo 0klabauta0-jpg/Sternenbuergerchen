@@ -3,7 +3,7 @@
 ## Ziel
 Die Mission-/Terrain-Ansicht soll weniger schwere Arbeit pro Frame erledigen. Der Task optimiert Proxy-Sync, Order-Visual-Signaturen und Debug-/Label-Updates, ohne sichtbares Verhalten oder taktische Wahrheit zu aendern.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT
 
 ## Voraussetzung
 - TASK_222 - Performance Regression Gate and Manual Profile Checklist
@@ -32,11 +32,11 @@ Die Mission-/Terrain-Ansicht soll weniger schwere Arbeit pro Frame erledigen. De
 - Kein Ersatz durch MultiMesh, ausser eine sehr kleine bestehende Instancing-Stelle ist offensichtlich und risikofrei.
 
 ## Akzeptanzkriterien
-- [ ] Ein Report nennt Vorher/Nachher-Hotspots und die veraenderten Update-Grenzen.
-- [ ] Proxy-Bewegung bleibt fluessig, aber schwere Counter-/Label-Syncs laufen nicht unnoetig jedes Frame.
-- [ ] Order-Visuals aktualisieren korrekt bei Auswahl, Plan, Dropship, Fire-Sector und Clear.
-- [ ] Performance-Gate meldet keine Regression.
-- [ ] Mission-Command-Visual-Smoke bleibt gruen.
+- [x] Ein Report nennt Vorher/Nachher-Hotspots und die veraenderten Update-Grenzen.
+- [x] Proxy-Bewegung bleibt fluessig, aber schwere Counter-/Label-Syncs laufen nicht unnoetig jedes Frame.
+- [x] Order-Visuals aktualisieren korrekt bei Auswahl, Plan, Dropship, Fire-Sector und Clear.
+- [x] Performance-Gate meldet keine Regression.
+- [x] Mission-Command-Visual-Smoke bleibt gruen.
 
 ## Erwartete Dateien
 - `scripts/terrain/terrain_map_3d_view.gd`
@@ -47,11 +47,11 @@ Die Mission-/Terrain-Ansicht soll weniger schwere Arbeit pro Frame erledigen. De
 - `docs/IMPLEMENTATION_STATUS.md`
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_332_terrain_map_frame_budget_proxy_sync_pass.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_222_performance_regression_gate_and_manual_profile_checklist.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/bugfix_mission_fire_sector_overlay.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_313_dropship_arrival_visibility_feedback_smoke.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_332_terrain_map_frame_budget_proxy_sync_pass.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_222_performance_regression_gate_and_manual_profile_checklist.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/bugfix_mission_fire_sector_overlay.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_313_dropship_arrival_visibility_feedback_smoke.gd`
+- [x] `git diff --check`
 
 ## Risiken
 - Signatur-Aenderungen koennen stale Visuals erzeugen. Deshalb muessen Auswahl-, Plan- und Dropship-Wechsel explizit im Test abgedeckt werden.

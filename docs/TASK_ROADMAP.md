@@ -531,7 +531,7 @@ TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass (implementiert im Ar
 Phase 18ZF - Architecture Performance UX Followups
 TASK_330 - Mission Runtime Scripts Productization Followup (implementiert im Arbeitsstand)
 TASK_331 - Mission Tactical Controller Adapter Split First Slice (implementiert im Arbeitsstand)
-TASK_332 - Terrain Map Frame Budget Proxy Sync Pass (offen)
+TASK_332 - Terrain Map Frame Budget Proxy Sync Pass (implementiert im Arbeitsstand)
 TASK_333 - Navigation Fallback Budget Contract Alignment (offen)
 TASK_334 - Drop Light Layout Profiles Compact Resolution (offen)
 TASK_335 - Tactical Feedback Truth Command Clarity Pass (offen)
