@@ -2,6 +2,7 @@ class_name TerrainTileCatalog
 extends RefCounted
 
 const DEFAULT_CATALOG_PATH: String = "res://data/terrain_tile_catalog.json"
+const TERRAIN_TEXTURE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_texture_catalog.gd")
 const OBJECT_LAYER_GROUPS: PackedStringArray = [
 	"nature_props",
 	"deko",
@@ -41,7 +42,7 @@ const SURFACE_BRUSH_TYPE_IDS: PackedStringArray = [
 
 var _tile_types: Dictionary = {}
 var _type_order: Array[String] = []
-var _type_textures: Dictionary = {}
+var _texture_paths_by_type: Dictionary = {}
 var _palette_groups: Array[Dictionary] = []
 
 
@@ -112,9 +113,9 @@ static func load_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCa
 		}
 		catalog._type_order.append(type_id)
 
-		var texture_path: String = String(entry.get("texture_path", ""))
-		if not texture_path.is_empty() and ResourceLoader.exists(texture_path):
-			catalog._type_textures[type_id] = load(texture_path) as Texture2D
+		var texture_path: String = String(entry.get("texture_path", "")).strip_edges()
+		if not texture_path.is_empty():
+			catalog._texture_paths_by_type[type_id] = texture_path
 
 	return catalog
 
@@ -210,7 +211,22 @@ func has_type(type_id: String) -> bool:
 
 
 func get_texture(type_id: String) -> Texture2D:
-	return _type_textures.get(type_id, null) as Texture2D
+	var texture_path: String = get_texture_path(type_id)
+	if texture_path.is_empty():
+		return null
+	return TERRAIN_TEXTURE_CATALOG_SCRIPT.call("get_texture", texture_path) as Texture2D
+
+
+func get_texture_path(type_id: String) -> String:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	return String(_texture_paths_by_type.get(normalized_type_id, "")).strip_edges()
+
+
+func is_texture_cached(type_id: String) -> bool:
+	var texture_path: String = get_texture_path(type_id)
+	if texture_path.is_empty():
+		return false
+	return bool(TERRAIN_TEXTURE_CATALOG_SCRIPT.call("is_cached", texture_path))
 
 
 func is_object_layer_type(type_id: String) -> bool:

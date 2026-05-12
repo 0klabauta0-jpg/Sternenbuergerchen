@@ -99,9 +99,12 @@
 - Lokale Pruefung: `task_355_homebase_direct_ux_payload_truth.gd`, `task_346_homebase_direct_staging_character_popup.gd`, `task_349_homebase_direct_staging_real_flightdeck_craft_gate.gd`, `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd` und `git diff --check` laufen gruen.
 
 ### TASK_356 - MapEditor Lazy Terrain Texture Catalog
-- Status: geplant
-- Stand: Review-Finding nach Sinnhaftigkeitscheck. Der Performance-Punkt ist sinnvoll, aber nicht nur als MapEditor-Preload-Thema: Terrain-Texturen werden aktuell in MapEditor, TerrainMapRenderer und TerrainTileCatalog verteilt/eager geladen.
-- Naechster Schritt: Lazy Terrain-Texture-Cache schneiden, Katalog-/Renderer-Zugriffe darauf umstellen und Terrain-Smokes gegen visuelle Regression laufen lassen.
+- Status: implementiert
+- Stand: `TerrainTextureCatalog` ist der zentrale Lazy-Cache fuer gemeinsame Terrain-, Cliff-, Wall-, Ramp- und Rock-Texture-Pfade. Der Cache laedt pro `res://`-Pfad erst bei Zugriff und zaehlt Cache-/Load-Zustand fuer Verifier.
+- Stand: `TerrainTileCatalog` speichert beim JSON-Katalogaufbau nur noch Texture-Pfade. `get_texture()` loest die Resource lazy ueber den gemeinsamen Cache auf; fehlende Pfade fallen auf `terrain_SW.png` zurueck.
+- Stand: `MapEditor` und `TerrainMapRenderer` halten keine eigenen Terrain-/Corridor-/Rock-Texture2D-Preloads mehr. Palette-Previews erzeugen beim Start generierte Icons und laden echte Thumbnails erst, wenn die Texture bereits genutzt/gecached ist.
+- Stand: Der 2.5D-Modulate-Pfad behandelt fehlende Texture-Pfade konsistent mit dem 2D-Renderer, damit Fallback-Tiles weiter sicher getinted werden.
+- Lokale Pruefung: `task_356_mapeditor_lazy_terrain_texture_catalog.gd`, `task_298_editor_terrain_visual_playability_smoke.gd`, `task_229_map_editor_usability_authoring_pass.gd`, `wall_direction_mapping_verifier.gd` und `git diff --check` laufen gruen.
 
 ### TASK_357 - MapEditor Height Cliff Dirty Neighborhood Cache
 - Status: geplant

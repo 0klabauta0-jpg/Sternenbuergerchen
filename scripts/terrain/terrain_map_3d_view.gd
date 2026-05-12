@@ -6773,7 +6773,12 @@ func _build_tile_modulate(tile_data) -> Color:
 	var tile_color := Color(1.0, 1.0, 1.0, 1.0)
 	var tile_catalog = _get_tile_catalog()
 	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
-	var has_catalog_texture: bool = not type_id.is_empty() and tile_catalog != null and tile_catalog.get_texture(type_id) != null
+	var has_catalog_texture: bool = false
+	if not type_id.is_empty() and tile_catalog != null:
+		var type_texture: Texture2D = tile_catalog.get_texture(type_id)
+		has_catalog_texture = type_texture != null
+		if tile_catalog.has_method("is_texture_cached"):
+			has_catalog_texture = bool(tile_catalog.call("is_texture_cached", type_id))
 
 	if not has_catalog_texture:
 		match String(tile_data.surface_type):

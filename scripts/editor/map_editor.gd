@@ -6,6 +6,7 @@ const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrai
 const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_catalog.gd")
 const TERRAIN_MAP_RENDERER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_renderer.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
+const TERRAIN_TEXTURE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_texture_catalog.gd")
 const MISSION_SCENARIO_DATA_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_data.gd")
 const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
 const MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_primary_view_adapter.gd")
@@ -14,48 +15,6 @@ const MAP_EDITOR_PATROL_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/ma
 const MAP_EDITOR_MARKER_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_marker_tool.gd")
 const MULTIPLAYER_MAP_MANIFEST_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_map_manifest.gd")
 const HOVER_SCROLL_BEHAVIOR_SCRIPT: GDScript = preload("res://scripts/ui/hover_scroll_behavior.gd")
-const TILE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_SW.png")
-const CLIFF_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_SE.png")
-const CLIFF_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_SW.png")
-const CLIFF_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_NE.png")
-const CLIFF_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCliff_NW.png")
-const CLIFF_CORNER_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_SE.png")
-const CLIFF_CORNER_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_SW.png")
-const CLIFF_CORNER_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_NE.png")
-const CLIFF_CORNER_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_sideCorner_NW.png")
-const RAMP_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_rampLarge_SE.png")
-const RAMP_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_rampLarge_SW.png")
-const RAMP_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_rampLarge_NE.png")
-const RAMP_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_rampLarge_NW.png")
-const SLOPE_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_side_SE.png")
-const SLOPE_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_side_SW.png")
-const SLOPE_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_side_NE.png")
-const SLOPE_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/terrain_side_NW.png")
-const WALL_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wall_SE.png")
-const WALL_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wall_SW.png")
-const WALL_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wall_NE.png")
-const WALL_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wall_NW.png")
-const WALL_CORNER_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_SE.png")
-const WALL_CORNER_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_SW.png")
-const WALL_CORNER_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_NE.png")
-const WALL_CORNER_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_wallCorner_NW.png")
-const ROCK_SMALL_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/rock_SW.png")
-const ROCK_LARGE_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/rock_largeB_SW.png")
-const CORRIDOR_STRAIGHT_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_SW.png")
-const CORRIDOR_STRAIGHT_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_SE.png")
-const CORRIDOR_CORNER_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_corner_SW.png")
-const CORRIDOR_CORNER_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_corner_SE.png")
-const CORRIDOR_CORNER_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_corner_NW.png")
-const CORRIDOR_CORNER_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_corner_NE.png")
-const CORRIDOR_END_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_end_SW.png")
-const CORRIDOR_END_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_end_SE.png")
-const CORRIDOR_END_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_end_NW.png")
-const CORRIDOR_END_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_end_NE.png")
-const CORRIDOR_SPLIT_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_split_SW.png")
-const CORRIDOR_SPLIT_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_split_SE.png")
-const CORRIDOR_SPLIT_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_split_NW.png")
-const CORRIDOR_SPLIT_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_split_NE.png")
-const CORRIDOR_CROSS: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/corridor_cross_SW.png")
 const DEFAULT_MAP_PATH: String = "res://maps/test_mission.json"
 const DEFAULT_NEW_MAP_PATH: String = "res://maps/new_map.json"
 const DEFAULT_NEW_MAP_NAME: String = "new_map"
@@ -5717,11 +5676,15 @@ func _get_palette_preview_texture(type_id: String) -> Texture2D:
 	if _palette_preview_textures.has(normalized_type_id):
 		return _palette_preview_textures[normalized_type_id] as Texture2D
 	if _tile_catalog != null:
-		var catalog_texture: Texture2D = _tile_catalog.get_texture(normalized_type_id)
-		if catalog_texture != null:
-			var thumbnail: Texture2D = _get_thumbnail_palette_preview_texture(catalog_texture, normalized_type_id)
-			_palette_preview_textures[normalized_type_id] = thumbnail
-			return thumbnail
+		var should_use_real_thumbnail: bool = normalized_type_id == _selected_type_id
+		if not should_use_real_thumbnail and _tile_catalog.has_method("is_texture_cached"):
+			should_use_real_thumbnail = bool(_tile_catalog.call("is_texture_cached", normalized_type_id))
+		if should_use_real_thumbnail:
+			var catalog_texture: Texture2D = _tile_catalog.get_texture(normalized_type_id)
+			if catalog_texture != null:
+				var thumbnail: Texture2D = _get_thumbnail_palette_preview_texture(catalog_texture, normalized_type_id)
+				_palette_preview_textures[normalized_type_id] = thumbnail
+				return thumbnail
 	var entry: Dictionary = Dictionary(_tile_catalog.call("get_type", normalized_type_id)) if _tile_catalog != null and _tile_catalog.has_method("get_type") else {}
 	var color: Color = _get_palette_preview_color(normalized_type_id, entry)
 	var generated_texture: Texture2D = _get_generated_palette_preview_texture(normalized_type_id, color, entry)
@@ -6027,9 +5990,17 @@ func _ensure_terrain_registry() -> void:
 
 func _resolve_tile_texture(tile_data) -> Texture2D:
 	if _terrain_renderer == null:
-		return TILE_TEXTURE
+		return _get_default_tile_texture()
 	_terrain_renderer.set_tile_catalog(_tile_catalog)
 	return _terrain_renderer.resolve_tile_texture(tile_data)
+
+
+func _get_default_tile_texture() -> Texture2D:
+	return TERRAIN_TEXTURE_CATALOG_SCRIPT.call("get_common_texture", "tile_default") as Texture2D
+
+
+func _get_common_texture(texture_key: String) -> Texture2D:
+	return TERRAIN_TEXTURE_CATALOG_SCRIPT.call("get_common_texture", texture_key) as Texture2D
 
 
 func _rebuild_all_cliff_overlays() -> void:
@@ -6086,10 +6057,10 @@ func _create_cliff_overlays_for_tile(tile_data) -> void:
 	# Note: Kenney names corners by inner curve direction, so we swap:
 	# SE↔NW and SW↔NE (same fix as wall corners)
 	var corner_map: Array = [
-		[Vector2i(1, 0), Vector2i(0, 1), CLIFF_CORNER_NE],
-		[Vector2i(1, 0), Vector2i(0, -1), CLIFF_CORNER_NW],
-		[Vector2i(-1, 0), Vector2i(0, 1), CLIFF_CORNER_SE],
-		[Vector2i(-1, 0), Vector2i(0, -1), CLIFF_CORNER_SW],
+		[Vector2i(1, 0), Vector2i(0, 1), _get_common_texture("cliff_corner_ne")],
+		[Vector2i(1, 0), Vector2i(0, -1), _get_common_texture("cliff_corner_nw")],
+		[Vector2i(-1, 0), Vector2i(0, 1), _get_common_texture("cliff_corner_se")],
+		[Vector2i(-1, 0), Vector2i(0, -1), _get_common_texture("cliff_corner_sw")],
 	]
 
 	var edges_consumed_by_corners: Array[Vector2i] = []
@@ -6116,17 +6087,17 @@ func _create_cliff_overlays_for_tile(tile_data) -> void:
 	var edge_texture_map: Dictionary
 	if is_slope:
 		edge_texture_map = {
-			Vector2i(1, 0): SLOPE_TEXTURE_SE,
-			Vector2i(-1, 0): SLOPE_TEXTURE_NW,
-			Vector2i(0, 1): SLOPE_TEXTURE_SW,
-			Vector2i(0, -1): SLOPE_TEXTURE_NE,
+			Vector2i(1, 0): _get_common_texture("slope_se"),
+			Vector2i(-1, 0): _get_common_texture("slope_nw"),
+			Vector2i(0, 1): _get_common_texture("slope_sw"),
+			Vector2i(0, -1): _get_common_texture("slope_ne"),
 		}
 	else:
 		edge_texture_map = {
-			Vector2i(1, 0): CLIFF_TEXTURE_SE,
-			Vector2i(-1, 0): CLIFF_TEXTURE_NW,
-			Vector2i(0, 1): CLIFF_TEXTURE_SW,
-			Vector2i(0, -1): CLIFF_TEXTURE_NE,
+			Vector2i(1, 0): _get_common_texture("cliff_se"),
+			Vector2i(-1, 0): _get_common_texture("cliff_nw"),
+			Vector2i(0, 1): _get_common_texture("cliff_sw"),
+			Vector2i(0, -1): _get_common_texture("cliff_ne"),
 		}
 
 	for edge_dir in cliff_edge_dirs:
@@ -6215,64 +6186,64 @@ func _create_wall_overlays_for_tile(tile_data) -> void:
 	# Use type_id to determine texture and offset directly
 	match type_id:
 		"wall_straight_se":
-			texture = WALL_TEXTURE_NE
+			texture = _get_common_texture("wall_ne")
 		"wall_straight_sw":
-			texture = WALL_TEXTURE_SE
+			texture = _get_common_texture("wall_se")
 		"wall_straight_ne":
-			texture = WALL_TEXTURE_NW
+			texture = _get_common_texture("wall_nw")
 		"wall_straight_nw":
-			texture = WALL_TEXTURE_SW
+			texture = _get_common_texture("wall_sw")
 		"wall_corner_se":
-			texture = WALL_CORNER_NW
+			texture = _get_common_texture("wall_corner_nw")
 		"wall_corner_sw":
-			texture = WALL_CORNER_NE
+			texture = _get_common_texture("wall_corner_ne")
 		"wall_corner_ne":
-			texture = WALL_CORNER_SW
+			texture = _get_common_texture("wall_corner_sw")
 		"wall_corner_nw":
-			texture = WALL_CORNER_SE
+			texture = _get_common_texture("wall_corner_se")
 		"cliff_straight_se":
-			texture = CLIFF_TEXTURE_SE
+			texture = _get_common_texture("cliff_se")
 			pos_offset = Vector2(33, 24)
 		"cliff_straight_sw":
-			texture = CLIFF_TEXTURE_SW
+			texture = _get_common_texture("cliff_sw")
 			pos_offset = Vector2(33, 56)
 		"cliff_straight_ne":
-			texture = CLIFF_TEXTURE_NE
+			texture = _get_common_texture("cliff_ne")
 			pos_offset = Vector2(-31, 23)
 		"cliff_straight_nw":
-			texture = CLIFF_TEXTURE_NW
+			texture = _get_common_texture("cliff_nw")
 			pos_offset = Vector2(-32, 56)
 		"cliff_corner_se":
-			texture = CLIFF_CORNER_NE
+			texture = _get_common_texture("cliff_corner_ne")
 			pos_offset = Vector2(-64, 40)
 		"cliff_corner_sw":
-			texture = CLIFF_CORNER_SE
+			texture = _get_common_texture("cliff_corner_se")
 			pos_offset = Vector2(1, 7)
 		"cliff_corner_ne":
-			texture = CLIFF_CORNER_NW
+			texture = _get_common_texture("cliff_corner_nw")
 			pos_offset = Vector2(0, 73)
 		"cliff_corner_nw":
-			texture = CLIFF_CORNER_SW
+			texture = _get_common_texture("cliff_corner_sw")
 			pos_offset = Vector2(65, 40)
 		"slope_se":
-			texture = RAMP_TEXTURE_SE
+			texture = _get_common_texture("ramp_se")
 			pos_offset = Vector2(0, 32)
 		"slope_sw":
-			texture = RAMP_TEXTURE_SW
+			texture = _get_common_texture("ramp_sw")
 			pos_offset = Vector2(0, 32)
 		"slope_ne":
-			texture = RAMP_TEXTURE_NE
+			texture = _get_common_texture("ramp_ne")
 			pos_offset = Vector2(0, 32)
 		"slope_nw":
-			texture = RAMP_TEXTURE_NW
+			texture = _get_common_texture("ramp_nw")
 			pos_offset = Vector2(0, 32)
 		"rock_small":
-			texture = ROCK_SMALL_TEXTURE
+			texture = _get_common_texture("rock_small")
 		"rock_large":
-			texture = ROCK_LARGE_TEXTURE
+			texture = _get_common_texture("rock_large")
 		_:
 			if type_id.begins_with("station_wall"):
-				texture = WALL_TEXTURE_SW
+				texture = _get_common_texture("wall_sw")
 			else:
 				return
 
@@ -6429,7 +6400,7 @@ func _update_hover_preview(world_position: Vector2) -> void:
 		_hide_hover_preview()
 		return
 
-	var preview_texture: Texture2D = TILE_TEXTURE
+	var preview_texture: Texture2D = _get_default_tile_texture()
 	if not _selected_type_id.is_empty() and _tile_catalog != null:
 		var type_texture: Texture2D = _tile_catalog.get_texture(_selected_type_id)
 		if type_texture != null:
