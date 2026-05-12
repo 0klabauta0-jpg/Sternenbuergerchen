@@ -91,6 +91,46 @@
 - Stand: Review-Finding nach TASK_350. Spieler muessen klar sehen koennen, welche Fireteams nur in Homebase/Loadout bearbeitet werden und welche wirklich im Flightdeck-Dropship sitzen.
 - Naechster Schritt: Dichte UI-Status-/Badge-Wahrheit fuer Homebase-Direct-Payload ergaenzen, ohne neue Gameplay-Wahrheit in UI-Callbacks zu schaffen.
 
+### TASK_356 - MapEditor Lazy Terrain Texture Catalog
+- Status: geplant
+- Stand: Review-Finding nach Sinnhaftigkeitscheck. Der Performance-Punkt ist sinnvoll, aber nicht nur als MapEditor-Preload-Thema: Terrain-Texturen werden aktuell in MapEditor, TerrainMapRenderer und TerrainTileCatalog verteilt/eager geladen.
+- Naechster Schritt: Lazy Terrain-Texture-Cache schneiden, Katalog-/Renderer-Zugriffe darauf umstellen und Terrain-Smokes gegen visuelle Regression laufen lassen.
+
+### TASK_357 - MapEditor Height Cliff Dirty Neighborhood Cache
+- Status: geplant
+- Stand: Review-Finding nach Korrektur. Der aktuelle Code macht keinen pauschalen Full-Map-O(N2)-Rescan, aber Hoehen-/Cliff-/Wall-Nachbarschaften koennen pro Brush-Stroke redundant invalidiert und berechnet werden.
+- Naechster Schritt: Dirty-Grid-Sets pro Paint-/Height-Operation sammeln, Nachbarschaften deduplizieren und Hill-/Cliff-Verifier laufen lassen.
+
+### TASK_358 - MapEditor Undo Stroke Transactions
+- Status: geplant
+- Stand: Review-Finding nach Korrektur. Die Undo-States sind aktuell keine kompletten Map-Snapshots, aber Brush-/Height-/Auto-Edge-Aenderungen landen zu kleinteilig im Undo-Stack.
+- Naechster Schritt: Undo-Transaktionen fuer zusammenhaengende Malgesten bauen, sodass ein Undo die sichtbare Spieleraktion zuruecknimmt.
+
+### TASK_359 - MapEditor Dirty UI Refresh Batching
+- Status: geplant
+- Stand: Review-Finding. Die 2.5D-Ansicht wird bereits per `_queue_3d_map_refresh()` coalesced, aber 2D-/Inspector-Refreshes laufen in mehreren Input-/Paint-Pfaden direkt.
+- Naechster Schritt: Dirty-Flag-Refresh-Queue fuer Selection, Properties, Hover und Tool-State einfuehren.
+
+### TASK_360 - MapEditor Mission Scenario Panel Extraction
+- Status: geplant
+- Stand: Review-Finding. Das Scenario-Authoring blieb nach TASK_163 bewusst im Editor-Skript; inzwischen ist es ein guter verhaltensneutraler Extraktionsschnitt.
+- Naechster Schritt: Mission-Scenario-Panel/Controller aus MapEditor herausziehen und Editor-to-Live-Verifier unveraendert gruen halten.
+
+### TASK_361 - NPCCompactCard Readonly Profile Reference Contract
+- Status: geplant
+- Stand: Review-Finding nach Korrektur. Nur Homebase auf Profilreferenzen umzustellen reicht nicht, weil `NPCCompactCard.setup_from_profile()` intern ebenfalls dupliziert.
+- Naechster Schritt: Expliziten Readonly-Referenzmodus fuer Anzeige-Karten einfuehren und Homebase-/FOB-Call-Sites vorsichtig darauf opt-in lassen.
+
+### TASK_362 - Homebase Aircraft State Manager Extraction
+- Status: geplant
+- Stand: Review-Finding. Aircraft-/Dropship-State, Pilotenzuordnung, Cargo, Flightdeck-Status und UI-Rendering sind in `HomebaseScreen.gd` vermischt.
+- Naechster Schritt: Reine Aircraft-State-/Validation-Logik in einen Manager extrahieren; UI-Shipcard-Rendering zunaechst in Homebase lassen.
+
+### TASK_363 - Homebase Roster Card Pool Incremental Refresh
+- Status: geplant
+- Stand: Review-Finding mit mittlerer Prioritaet. Bei 12 Units ist Card-Neuaufbau okay, aber groessere Roster und Direct-Staging-Kopien brauchen stabile Card-Keys und inkrementelle Updates.
+- Naechster Schritt: Homebase-Roster/Direct-Staging auf Card-Wiederverwendung oder inkrementelle Refresh-Helfer vorbereiten.
+
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
 - Stand: Dropship-Visuals bauen ihre Dirty-Signatur wieder fehlerfrei, geplante LZs bleiben auch bei offmap/hidden Craft sichtbar, und Multi-Dropship-Payloads werden aus dem rohen Mission-Card-State statt aus stale Selected-Card-State uebernommen.

@@ -550,6 +550,16 @@ TASK_353 - Shared Loadout Contract Helper (geplant)
 TASK_354 - Homebase Direct Loadout Regression Matrix (geplant)
 TASK_355 - Homebase Direct UX Payload Truth (geplant)
 
+Phase 18ZK - MapEditor and Homebase Performance Refactor Followups
+TASK_356 - MapEditor Lazy Terrain Texture Catalog (geplant)
+TASK_357 - MapEditor Height Cliff Dirty Neighborhood Cache (geplant)
+TASK_358 - MapEditor Undo Stroke Transactions (geplant)
+TASK_359 - MapEditor Dirty UI Refresh Batching (geplant)
+TASK_360 - MapEditor Mission Scenario Panel Extraction (geplant)
+TASK_361 - NPCCompactCard Readonly Profile Reference Contract (geplant)
+TASK_362 - Homebase Aircraft State Manager Extraction (geplant)
+TASK_363 - Homebase Roster Card Pool Incremental Refresh (geplant)
+
 Batch-Empfehlung
 
 Codex soll Tasks in kleinen Gruppen bearbeiten:
