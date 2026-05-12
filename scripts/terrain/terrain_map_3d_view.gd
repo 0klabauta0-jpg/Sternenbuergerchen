@@ -122,9 +122,11 @@ const AIR_LAYER_DEFAULT_CLEARANCE: float = 1.28
 const FOW_OVERLAY_HEIGHT: float = 0.032
 const FOW_OVERLAY_SURFACE_Y_OFFSET: float = 0.074
 const FOW_BLACKOUT_COVER_Y_OFFSET: float = 0.42
-const FOW_KNOWN_DIM_COLOR: Color = Color(0.02, 0.05, 0.06, 0.18)
-const FOW_EXPLORED_DIM_COLOR: Color = Color(0.02, 0.04, 0.06, 0.46)
+const FOW_KNOWN_DIM_COLOR: Color = Color(0.02, 0.05, 0.06, 0.28)
+const FOW_EXPLORED_DIM_COLOR: Color = Color(0.02, 0.04, 0.06, 0.62)
 const FOW_UNKNOWN_BLACK_COLOR: Color = Color(0.0, 0.0, 0.0, 1.0)
+const UNIT_AIM_POSE_WEAPON_PITCH_DEGREES: float = -14.0
+const UNIT_AIM_POSE_WEAPON_FORWARD_OFFSET: float = 0.035
 const EDITOR_EMPTY_BACKGROUND_COLOR: Color = Color(0.12, 0.13, 0.12, 1.0)
 const EDITOR_LIGHT_ROTATION_DEGREES: Vector3 = Vector3(-58.0, -32.0, 0.0)
 const EDITOR_LIGHT_ENERGY: float = 1.18
@@ -3847,6 +3849,8 @@ func _resolve_unit_aim_direction(unit: Node, unit_world_position: Vector2) -> Ve
 		return Vector2.RIGHT.rotated(float(unit.get_meta("facing_angle", 0.0))).normalized()
 	if unit != null and unit.has_meta("map_facing_angle"):
 		return Vector2.RIGHT.rotated(float(unit.get_meta("map_facing_angle", 0.0))).normalized()
+	if unit != null and unit.has_meta("enemy_facing_angle"):
+		return Vector2.RIGHT.rotated(float(unit.get_meta("enemy_facing_angle", 0.0))).normalized()
 	if proxy != null and is_instance_valid(proxy):
 		var proxy_direction: Vector2 = _get_world_direction_from_proxy_yaw(unit_world_position, float(proxy.rotation_degrees.y))
 		if proxy_direction.length_squared() > 0.0001:
@@ -4923,6 +4927,10 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 		proxy.set_meta("overwatch_ready", bool(unit.get_meta("overwatch_ready", false)) if unit != null and unit.has_meta("overwatch_ready") else false)
 		proxy.set_meta("overwatch_shot_ready", bool(unit.get_meta("overwatch_shot_ready", false)) if unit != null and unit.has_meta("overwatch_shot_ready") else false)
 		proxy.set_meta("overwatch_cooldown_remaining_ticks", int(unit.get_meta("overwatch_cooldown_remaining_ticks", 0)) if unit != null and unit.has_meta("overwatch_cooldown_remaining_ticks") else 0)
+		var active_fire_event: Dictionary = _get_active_fire_event_for_unit(unit_id)
+		proxy.set_meta("unit_aim_pose_active", not active_fire_event.is_empty())
+		proxy.set_meta("unit_aim_pose_source_event_id", String(active_fire_event.get("event_id", "")))
+		proxy.set_meta("unit_aim_pose_target_unit_id", String(active_fire_event.get("target_unit_id", "")))
 		var unit_is_moving: bool = false
 		if unit is Node2D:
 			var unit_world_position: Vector2 = (unit as Node2D).global_position
@@ -4936,7 +4944,7 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 				proxy.position = next_position
 			else:
 				proxy.position = proxy.position.lerp(next_position, clampf(delta * UNIT_PROXY_SMOOTH_SPEED, 0.0, 1.0))
-			var next_rotation_y: float = _get_unit_proxy_rotation_y(proxy, unit, unit_world_position)
+			var next_rotation_y: float = _get_unit_proxy_rotation_y(proxy, unit, unit_world_position, active_fire_event)
 			if absf(wrapf(proxy.rotation_degrees.y - next_rotation_y, -180.0, 180.0)) > 0.01:
 				changed = true
 			proxy.rotation_degrees.y = next_rotation_y
@@ -4949,7 +4957,9 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 				changed = true
 			proxy.rotation_degrees.y = next_rotation_y
 		proxy.set_meta("last_rotation_y", proxy.rotation_degrees.y)
-		if _update_unit_visual_animation(proxy, unit_is_moving):
+		if _update_unit_visual_animation(proxy, unit_is_moving, not active_fire_event.is_empty()):
+			changed = true
+		if _update_unit_weapon_aim_pose(proxy, active_fire_event):
 			changed = true
 		if _update_unit_status_badge(proxy, unit):
 			unit_status_badge_count += 1
@@ -5159,8 +5169,12 @@ func _get_unit_respawn_remaining_seconds(unit: Node) -> int:
 	return 0
 
 
-func _get_unit_proxy_rotation_y(proxy: Node3D, unit: Node, current_world_position: Vector2) -> float:
+func _get_unit_proxy_rotation_y(proxy: Node3D, unit: Node, current_world_position: Vector2, active_fire_event: Dictionary = {}) -> float:
 	var fallback_yaw: float = proxy.rotation_degrees.y if proxy != null else 0.0
+	if not active_fire_event.is_empty():
+		var fire_direction: Vector2 = _get_fire_event_direction_for_unit(active_fire_event, current_world_position)
+		if fire_direction.length_squared() > 0.0001:
+			return _get_world_direction_yaw(current_world_position, current_world_position + fire_direction, fallback_yaw)
 	var motion_or_target_direction: Vector2 = _resolve_unit_motion_or_target_direction(proxy, unit, current_world_position)
 	if motion_or_target_direction.length_squared() > 0.0001:
 		return _get_world_direction_yaw(current_world_position, current_world_position + motion_or_target_direction, fallback_yaw)
@@ -5170,6 +5184,9 @@ func _get_unit_proxy_rotation_y(proxy: Node3D, unit: Node, current_world_positio
 	if unit != null and unit.has_meta("map_facing_angle"):
 		var map_facing_angle: float = float(unit.get_meta("map_facing_angle", 0.0))
 		return _get_world_direction_yaw(current_world_position, current_world_position + Vector2.RIGHT.rotated(map_facing_angle), fallback_yaw)
+	if unit != null and unit.has_meta("enemy_facing_angle"):
+		var enemy_facing_angle: float = float(unit.get_meta("enemy_facing_angle", 0.0))
+		return _get_world_direction_yaw(current_world_position, current_world_position + Vector2.RIGHT.rotated(enemy_facing_angle), fallback_yaw)
 	var target_position: Variant = unit.call("get_target_position") if unit != null and unit.has_method("get_target_position") else null
 	if typeof(target_position) == TYPE_VECTOR2:
 		var target_world_position: Vector2 = Vector2(target_position)
@@ -5184,6 +5201,52 @@ func _get_unit_proxy_rotation_y(proxy: Node3D, unit: Node, current_world_positio
 				return _get_world_direction_yaw(previous_world_position, current_world_position, fallback_yaw)
 
 	return fallback_yaw
+
+
+func _get_active_fire_event_for_unit(unit_id: String) -> Dictionary:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty() or _order_payload.is_empty():
+		return {}
+	var fire_events: Array = Array(_order_payload.get("fire_event_dicts", []))
+	var index: int = fire_events.size() - 1
+	while index >= 0:
+		var fire_event_variant = fire_events[index]
+		index -= 1
+		if typeof(fire_event_variant) != TYPE_DICTIONARY:
+			continue
+		var fire_event: Dictionary = Dictionary(fire_event_variant)
+		if String(fire_event.get("attacker_unit_id", "")).strip_edges() != normalized_unit_id:
+			continue
+		if not _fow_allows_fire_event_visual(fire_event):
+			continue
+		return fire_event.duplicate(true)
+	return {}
+
+
+func _get_fire_event_direction_for_unit(fire_event: Dictionary, current_world_position: Vector2) -> Vector2:
+	var target_position: Vector2 = _get_vector2_from_variant(fire_event.get("target_position", current_world_position), current_world_position)
+	if current_world_position.distance_squared_to(target_position) > 0.0001:
+		return (target_position - current_world_position).normalized()
+	var attacker_position: Vector2 = _get_vector2_from_variant(fire_event.get("attacker_position", current_world_position), current_world_position)
+	if attacker_position.distance_squared_to(target_position) > 0.0001:
+		return (target_position - attacker_position).normalized()
+	return Vector2.ZERO
+
+
+func _get_vector2_from_variant(value: Variant, fallback: Vector2) -> Vector2:
+	if typeof(value) == TYPE_VECTOR2:
+		return Vector2(value)
+	if typeof(value) == TYPE_VECTOR2I:
+		var vector2i_value: Vector2i = value
+		return Vector2(vector2i_value.x, vector2i_value.y)
+	if typeof(value) == TYPE_ARRAY:
+		var values: Array = Array(value)
+		if values.size() >= 2:
+			return Vector2(float(values[0]), float(values[1]))
+	if typeof(value) == TYPE_DICTIONARY:
+		var dict: Dictionary = Dictionary(value)
+		return Vector2(float(dict.get("x", fallback.x)), float(dict.get("y", fallback.y)))
+	return fallback
 
 
 func _get_world_direction_yaw(from_world_position: Vector2, to_world_position: Vector2, fallback_yaw: float = 0.0) -> float:
@@ -5376,17 +5439,76 @@ func _find_best_animation(node: Node, preferred_animation_name: String = "") -> 
 	return null
 
 
-func _update_unit_visual_animation(proxy: Node3D, is_moving: bool) -> bool:
+func _update_unit_visual_animation(proxy: Node3D, is_moving: bool, is_firing: bool = false) -> bool:
 	var animation_player: AnimationPlayer = _find_unit_visual_animation_player(proxy)
 	if animation_player == null:
 		return false
 	var desired_animation: String = "walk" if is_moving else "idle"
+	if is_firing:
+		for candidate in ["shoot", "attack", "fire", "idle"]:
+			if animation_player.has_animation(candidate):
+				desired_animation = candidate
+				break
 	if not animation_player.has_animation(desired_animation):
 		return false
 	if animation_player.current_animation == desired_animation and animation_player.is_playing():
 		return false
 	animation_player.play(desired_animation)
 	return true
+
+
+func _update_unit_weapon_aim_pose(proxy: Node3D, active_fire_event: Dictionary) -> bool:
+	if proxy == null:
+		return false
+	var is_active: bool = not active_fire_event.is_empty()
+	var changed: bool = false
+	var weapon_node: Node3D = _find_unit_blaster_visual_node(proxy)
+	proxy.set_meta("unit_aim_pose_weapon_node_available", weapon_node != null)
+	if weapon_node == null:
+		return changed
+	if not weapon_node.has_meta("unit_aim_pose_base_rotation_degrees"):
+		weapon_node.set_meta("unit_aim_pose_base_rotation_degrees", weapon_node.rotation_degrees)
+	if not weapon_node.has_meta("unit_aim_pose_base_position"):
+		weapon_node.set_meta("unit_aim_pose_base_position", weapon_node.position)
+	var base_rotation: Vector3 = _get_vector3_meta(weapon_node, "unit_aim_pose_base_rotation_degrees", weapon_node.rotation_degrees)
+	var base_position: Vector3 = _get_vector3_meta(weapon_node, "unit_aim_pose_base_position", weapon_node.position)
+	var desired_rotation: Vector3 = base_rotation
+	var desired_position: Vector3 = base_position
+	if is_active:
+		desired_rotation = base_rotation + Vector3(UNIT_AIM_POSE_WEAPON_PITCH_DEGREES, 0.0, 0.0)
+		desired_position = base_position + Vector3(0.0, 0.0, -UNIT_AIM_POSE_WEAPON_FORWARD_OFFSET)
+	if weapon_node.rotation_degrees.distance_squared_to(desired_rotation) > 0.0001:
+		weapon_node.rotation_degrees = desired_rotation
+		changed = true
+	if weapon_node.position.distance_squared_to(desired_position) > 0.000001:
+		weapon_node.position = desired_position
+		changed = true
+	if bool(weapon_node.get_meta("unit_aim_pose_applied", false)) != is_active:
+		weapon_node.set_meta("unit_aim_pose_applied", is_active)
+		changed = true
+	return changed
+
+
+func _find_unit_blaster_visual_node(node: Node) -> Node3D:
+	if node == null:
+		return null
+	var node_3d := node as Node3D
+	if node_3d != null and String(node.name).begins_with("BlasterVisual_"):
+		return node_3d
+	for child in node.get_children():
+		var found: Node3D = _find_unit_blaster_visual_node(child)
+		if found != null:
+			return found
+	return null
+
+
+func _get_vector3_meta(node: Node, meta_name: String, fallback: Vector3) -> Vector3:
+	if node == null or not node.has_meta(meta_name):
+		return fallback
+	var value: Variant = node.get_meta(meta_name)
+	if typeof(value) == TYPE_VECTOR3:
+		return Vector3(value)
+	return fallback
 
 
 func _find_unit_visual_animation_player(node: Node) -> AnimationPlayer:
@@ -5704,6 +5826,10 @@ func _get_unit_proxy_state_by_id() -> Dictionary:
 			"uses_kenney_model": bool(proxy.get_meta("uses_kenney_model", false)),
 			"unit_visual_archetype_id": String(proxy.get_meta("unit_visual_archetype_id", "")).strip_edges(),
 			"unit_visual_faction_id": String(proxy.get_meta("unit_visual_faction_id", "")).strip_edges(),
+			"unit_aim_pose_active": bool(proxy.get_meta("unit_aim_pose_active", false)),
+			"unit_aim_pose_weapon_node_available": bool(proxy.get_meta("unit_aim_pose_weapon_node_available", false)),
+			"unit_aim_pose_source_event_id": String(proxy.get_meta("unit_aim_pose_source_event_id", "")).strip_edges(),
+			"unit_aim_pose_target_unit_id": String(proxy.get_meta("unit_aim_pose_target_unit_id", "")).strip_edges(),
 		}
 	return result
 

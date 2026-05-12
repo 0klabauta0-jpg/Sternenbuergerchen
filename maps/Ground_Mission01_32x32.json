@@ -22,6 +22,52 @@
 			"visual_archetype": "",
 			"weapon_id": "",
 			"weapon_profile": ""
+		},
+		"ground_objective_defense": {
+			"advance_style": "hold",
+			"air_asset_risk_profile": "none",
+			"allowed_weapon_roles": [
+				"rifle",
+				"smg",
+				"sidearm"
+			],
+			"anti_armor_threat": false,
+			"communication_intensity": "normal",
+			"contact_behavior": "return_fire_hold",
+			"cover_behavior": "prefer_near_cover",
+			"facing": "west",
+			"heavy_weapon_role": "none",
+			"lz_threat_zone_id": "",
+			"profile_id": "defensive_cover",
+			"security_mode": "cover_arc",
+			"sight_behavior": "watch_lane",
+			"stance": "defend",
+			"visual_archetype": "enemy_space_suit_orange",
+			"weapon_id": "",
+			"weapon_profile": "rifle"
+		},
+		"ground_patrol_team": {
+			"advance_style": "probe",
+			"air_asset_risk_profile": "none",
+			"allowed_weapon_roles": [
+				"rifle",
+				"smg",
+				"sidearm"
+			],
+			"anti_armor_threat": false,
+			"communication_intensity": "normal",
+			"contact_behavior": "investigate_contact",
+			"cover_behavior": "prefer_near_cover",
+			"facing": "west",
+			"heavy_weapon_role": "none",
+			"lz_threat_zone_id": "",
+			"profile_id": "patrol_probe",
+			"security_mode": "patrol",
+			"sight_behavior": "watch_lane",
+			"stance": "patrol",
+			"visual_archetype": "enemy_space_suit_orange",
+			"weapon_id": "",
+			"weapon_profile": "mixed_rifle_smg"
 		}
 	},
 	"grid_origin": {
@@ -48,6 +94,20 @@
 			"x": 768,
 			"y": 960
 		},
+		"spawn_alpha": {
+			"color": {
+				"a": 0.98,
+				"b": 1.0,
+				"g": 0.78,
+				"r": 0.38
+			},
+			"marker_type_id": "spawn_alpha",
+			"name": "Spawn Alpha",
+			"placement_context": "editor_only",
+			"symbol": "diamond",
+			"x": -768,
+			"y": 1344
+		},
 		"spawn_bravo": {
 			"color": {
 				"a": 0.98,
@@ -61,11 +121,56 @@
 			"symbol": "diamond",
 			"x": 1344,
 			"y": 992
+		},
+		"spawn_enemy_defense": {
+			"color": {
+				"a": 0.98,
+				"b": 0.08,
+				"g": 0.20,
+				"r": 1.0
+			},
+			"marker_type_id": "custom",
+			"name": "Enemy Defense Team",
+			"placement_context": "editor_only",
+			"symbol": "shield",
+			"x": 768,
+			"y": 896
+		},
+		"spawn_enemy_patrol": {
+			"color": {
+				"a": 0.98,
+				"b": 0.16,
+				"g": 0.44,
+				"r": 1.0
+			},
+			"marker_type_id": "custom",
+			"name": "Enemy Patrol Team",
+			"placement_context": "editor_only",
+			"symbol": "chevron",
+			"x": 1152,
+			"y": 768
 		}
 	},
 	"mission_slot_count": 30,
 	"patrol_paths": {
-
+		"ground_patrol_route": [
+			{
+				"x": 1152,
+				"y": 768
+			},
+			{
+				"x": 896,
+				"y": 832
+			},
+			{
+				"x": 1024,
+				"y": 1088
+			},
+			{
+				"x": 1344,
+				"y": 992
+			}
+		]
 	},
 	"tile_size": {
 		"half_height": 32,

@@ -10,19 +10,22 @@ const AIR_ASSET_RECOVERY_STATE_SCRIPT: GDScript = preload("res://scripts/meta/ai
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const GAME_SETTINGS_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/game_settings_contract.gd")
 const FRIENDLY_NODE_NAMES: PackedStringArray = ["UnitAlpha", "UnitBravo", "UnitCharlie", "UnitDelta", "UnitEcho", "UnitFoxtrot", "UnitGolf", "UnitHotel"]
-const DEFAULT_META_MAP_PATH: String = "res://maps/test_mission_32x32_slots8.json"
+const DEFAULT_META_MAP_PATH: String = "res://maps/Ground_Mission01_32x32.json"
+const DEFAULT_META_SCENARIO_PATH: String = "res://data/mission_scenarios/ground_mission01_default.json"
 const HOMEBASE_MISSION_CATALOG: Array = [
 	{
 		"mission_id": "fob_transfer",
 		"mission_name": "Operation: FOB Transfer",
-		"map_file_path": "res://maps/test_mission_32x32_slots8.json",
+		"map_file_path": DEFAULT_META_MAP_PATH,
+		"scenario_file_path": DEFAULT_META_SCENARIO_PATH,
 		"slot_count": 8,
 		"time_limit_seconds": 1200.0,
 	},
 	{
 		"mission_id": "grid_sweep",
 		"mission_name": "Operation: Grid Sweep",
-		"map_file_path": "res://maps/test_mission_32x32_slots8.json",
+		"map_file_path": DEFAULT_META_MAP_PATH,
+		"scenario_file_path": DEFAULT_META_SCENARIO_PATH,
 		"slot_count": 3,
 		"time_limit_seconds": 1200.0,
 	},
@@ -543,7 +546,9 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 			mission_setup.set("selected_fireteam_definitions", Array(fob_screen.call("get_fireteam_definitions")).duplicate(true))
 		if fob_screen != null and fob_screen.has_method("get_selected_unit_configs"):
 			mission_setup.set("selected_team_unit_configs", Array(fob_screen.call("get_selected_unit_configs")).duplicate(true))
-		mission_setup.set("map_file_path", String(_get_selected_mission_definition().get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges())
+		var selected_mission: Dictionary = _get_selected_mission_definition()
+		mission_setup.set("map_file_path", String(selected_mission.get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges())
+		mission_setup.set("scenario_file_path", String(selected_mission.get("scenario_file_path", "")).strip_edges())
 		mission_setup.set("defer_friendly_runtime_activation", _should_defer_friendly_runtime_activation())
 		mission_setup.set("allow_full_roster_when_selection_empty", false)
 		var gameplay_settings: Dictionary = Dictionary(GAME_SETTINGS_CONTRACT_SCRIPT.call("load_settings"))

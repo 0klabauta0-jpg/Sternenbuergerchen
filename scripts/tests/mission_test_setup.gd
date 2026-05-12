@@ -32,7 +32,7 @@ const FOW_DEFAULT_SIGHT_RANGE_WORLD: float = 640.0
 @export var respawn_manager_path: NodePath
 @export var enemy_wave_controller_path: NodePath
 @export var terrain_registry_path: NodePath
-@export var map_file_path: String = "res://maps/test_mission_32x32_slots8.json"
+@export var map_file_path: String = "res://maps/Ground_Mission01_32x32.json"
 @export var scenario_file_path: String = ""
 @export var defer_friendly_runtime_activation: bool = true
 @export var allow_full_roster_when_selection_empty: bool = true
@@ -73,6 +73,16 @@ func _ready() -> void:
 		return
 
 	_load_mission_scenario_if_available()
+	if _should_defer_runtime_enemy_slot_creation():
+		call_deferred("_finish_ready_after_scenario_loaded", runtime_leader, unit_registry, ftl_registry, simulation_root)
+		return
+	_finish_ready_after_scenario_loaded(runtime_leader, unit_registry, ftl_registry, simulation_root)
+
+
+func _finish_ready_after_scenario_loaded(runtime_leader: Node, unit_registry: Node, ftl_registry: Node, simulation_root: Node) -> void:
+	if _is_initialized:
+		return
+	var runtime_unit_paths: Array = _build_runtime_unit_paths()
 	var terrain_registry = _setup_terrain_registry()
 	_build_unit_loadout_modifiers()
 	var spawn_alpha_marker := _resolve_marker(spawn_alpha_path)
@@ -90,7 +100,7 @@ func _ready() -> void:
 	var enemy_spawn_index: int = 0
 	var enemy_units: Array = []
 	var visual_unit_nodes: Array = []
-	for unit_path in unit_paths:
+	for unit_path in runtime_unit_paths:
 		var unit = get_node_or_null(unit_path)
 		if unit == null or not unit.has_method("get_unit_id"):
 			continue
@@ -320,6 +330,76 @@ func _resolve_marker(node_path: NodePath) -> Marker2D:
 		return null
 
 	return get_node_or_null(node_path) as Marker2D
+
+
+func _should_defer_runtime_enemy_slot_creation() -> bool:
+	if _scenario_enemy_ids.is_empty():
+		return false
+	var existing_enemy_count: int = 0
+	for unit_path in unit_paths:
+		var unit = get_node_or_null(unit_path)
+		if unit == null or not unit.has_method("get_team_id"):
+			continue
+		if String(unit.call("get_team_id")) != team_id:
+			existing_enemy_count += 1
+	return _scenario_enemy_ids.size() > existing_enemy_count
+
+
+func _build_runtime_unit_paths() -> Array:
+	var result: Array = unit_paths.duplicate()
+	if _scenario_enemy_ids.is_empty():
+		return result
+	var existing_enemy_count: int = 0
+	var template_enemy: Node = null
+	for unit_path in result:
+		var unit = get_node_or_null(unit_path)
+		if unit == null or not unit.has_method("get_team_id"):
+			continue
+		if String(unit.call("get_team_id")) == team_id:
+			continue
+		existing_enemy_count += 1
+		if template_enemy == null:
+			template_enemy = unit
+	var missing_enemy_count: int = _scenario_enemy_ids.size() - existing_enemy_count
+	if missing_enemy_count <= 0 or template_enemy == null:
+		return result
+	var parent: Node = template_enemy.get_parent()
+	if parent == null:
+		return result
+	for index in range(missing_enemy_count):
+		var duplicate_enemy: Node = template_enemy.duplicate()
+		duplicate_enemy.name = _make_unique_child_name(parent, "ScenarioEnemySlot%02d" % (existing_enemy_count + index + 1))
+		parent.add_child(duplicate_enemy)
+		if duplicate_enemy.has_method("apply_identity_config"):
+			duplicate_enemy.call("apply_identity_config", {"team_id": String(template_enemy.call("get_team_id")) if template_enemy.has_method("get_team_id") else "team_bravo"})
+		var enemy_path: NodePath = get_path_to(duplicate_enemy)
+		result.append(enemy_path)
+		_append_combat_enemy_unit_path(enemy_path)
+	unit_paths = result.duplicate()
+	return result
+
+
+func _make_unique_child_name(parent: Node, base_name: String) -> String:
+	var normalized_base: String = base_name.strip_edges()
+	if normalized_base.is_empty():
+		normalized_base = "ScenarioEnemySlot"
+	var candidate: String = normalized_base
+	var suffix: int = 2
+	while parent.get_node_or_null(candidate) != null:
+		candidate = "%s_%02d" % [normalized_base, suffix]
+		suffix += 1
+	return candidate
+
+
+func _append_combat_enemy_unit_path(enemy_path: NodePath) -> void:
+	var combat_driver = get_node_or_null("../CombatLoopDriver")
+	if combat_driver == null:
+		return
+	var next_paths: Array = Array(combat_driver.get("enemy_unit_paths")).duplicate()
+	if next_paths.has(enemy_path):
+		return
+	next_paths.append(enemy_path)
+	combat_driver.set("enemy_unit_paths", next_paths)
 
 
 func _get_friendly_spawn_offset(index: int) -> Vector2:

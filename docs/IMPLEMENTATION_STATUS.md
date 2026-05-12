@@ -10,6 +10,16 @@
 
 ## Aktueller Startzustand
 
+### TASK_344 - Ground Mission Default Enemy Visuals
+- Status: implementiert im Arbeitsstand
+- Stand: `Ground_Mission01_32x32.json` ist die Standardkarte fuer den Meta-/Einzelspieler-Flow. Die Homebase-/FOB-Kontexte zeigen die Ground-Map, und die Standardmission uebergibt `ground_mission01_default` als Szenario an `MissionTestSetup`.
+- Stand: Das neue Szenario definiert zwei feindliche Fireteams zu je vier NPCs. `red_patrol_team` nutzt `patrol_probe` plus `ground_patrol_route`; `red_objective_defense` haelt den Objective-Bereich mit `defensive_cover`/`cover_arc`.
+- Stand: `MissionTestSetup` erweitert bei Szenarien mit mehr Enemy-IDs die vorhandenen Enemy-Templates zur Laufzeit und uebergibt die erzeugten Paths an den CombatLoop, ohne alte direkte Testszenen ohne Szenario pauschal umzubauen.
+- Stand: Fire-Events speichern das Angreifer-Facing. `TerrainMap3DView` priorisiert aktive Fire-Events fuer Proxy-Drehung, setzt eine kurze Blaster-Aim-Pose und nutzt weiter das kuratierte Kenney-Muzzle-Subset fuer Muzzle-Flash. Enemy-Security-Facing fliesst ebenfalls in die 2.5D-Ausrichtung ein.
+- Stand: Fog-of-War-Dim-Layer ist dunkler (`known` 0.28 Alpha, `explored` 0.62 Alpha). Neue Portrait-PNGs unter `Assets/Char` werden ueber Godot-Imports und Portrait-Inventar mitgezaehlt.
+- Risiken: Die Aim-Pose ist ein V1-Render-Pose-Offset am sichtbaren Blaster, kein vollstaendiger Schiessanimationsclip fuer Arme/Schulter. Finale optische Balance der Ground-Spawnpunkte und Fireteam-Verteilung bleibt ein manueller Playtest-Punkt.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_344_ground_mission_default_enemy_visuals.gd`, `task_233_portrait_identity_catalog_and_roster_presentation.gd`, `task_205_weapon_fire_vfx_muzzle_flash_particles.gd`, `task_201_weapon_range_scale_and_tile_distance_patch.gd`, `task_186_mission_map_unit_presence_registry_audit.gd`, `task_202_enemy_security_direction_and_los_patch.gd` und `git diff --check` laufen gruen.
+
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
 - Stand: Dropship-Visuals bauen ihre Dirty-Signatur wieder fehlerfrei, geplante LZs bleiben auch bei offmap/hidden Craft sichtbar, und Multi-Dropship-Payloads werden aus dem rohen Mission-Card-State statt aus stale Selected-Card-State uebernommen.

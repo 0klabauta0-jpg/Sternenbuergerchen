@@ -50,7 +50,7 @@ const WEAPON_LOADOUT_OPTIONS: Array = [
 	{"id": "none", "label": "None"},
 ]
 const DEFAULT_MISSION_NAME := "Operation: FOB Transfer"
-const DEFAULT_MISSION_MAP := "test_mission_32x32_slots8"
+const DEFAULT_MISSION_MAP := "Ground_Mission01_32x32"
 const DEFAULT_MISSION_SLOT_COUNT := 8
 const FOB_FIRETEAM_REFERENCE_CARD_WIDTH := 280.0
 const FOB_TRANSPORT_CARD_WIDTH := 440.0

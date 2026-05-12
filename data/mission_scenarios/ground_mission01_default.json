@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "scenario_id": "ground_mission01_default",
+  "display_name": "Ground Mission 01: Patrol and Defense",
+  "map_file_path": "res://maps/Ground_Mission01_32x32.json",
+  "time_limit_seconds": 1200.0,
+  "mission_slot_count_override": 8,
+  "objective": {
+    "marker_id": "objective_point",
+    "capture_radius": 96.0
+  },
+  "enemy_groups": [
+    {
+      "group_id": "red_patrol_team",
+      "display_name": "Red Patrol Fireteam",
+      "team_id": "team_bravo",
+      "spawn_marker_id": "spawn_enemy_patrol",
+      "enemy_ids": [
+        "ground_patrol_01",
+        "ground_patrol_02",
+        "ground_patrol_03",
+        "ground_patrol_04"
+      ],
+      "tactics": {
+        "profile_id": "patrol_probe",
+        "stance": "patrol",
+        "cover_behavior": "break_to_cover_on_contact",
+        "security_mode": "patrol",
+        "facing": "west",
+        "advance_style": "probe",
+        "allowed_weapon_roles": ["rifle", "smg", "sidearm"],
+        "sight_behavior": "scan_waypoints",
+        "contact_behavior": "pin_then_report",
+        "weapon_profile": "standard_close",
+        "visual_archetype": "enemy_space_suit_orange",
+        "heavy_weapon_role": "none",
+        "anti_armor_threat": false,
+        "air_asset_risk_profile": "none",
+        "communication_intensity": "normal"
+      }
+    },
+    {
+      "group_id": "red_objective_defense",
+      "display_name": "Red Objective Fireteam",
+      "team_id": "team_bravo",
+      "spawn_marker_id": "spawn_enemy_defense",
+      "enemy_ids": [
+        "ground_defense_01",
+        "ground_defense_02",
+        "ground_defense_03",
+        "ground_defense_04"
+      ],
+      "tactics": {
+        "profile_id": "defensive_cover",
+        "stance": "defend",
+        "cover_behavior": "hold_best_cover",
+        "security_mode": "cover_arc",
+        "facing": "west",
+        "advance_style": "hold",
+        "allowed_weapon_roles": ["rifle", "smg", "heavy"],
+        "sight_behavior": "cover_arc",
+        "contact_behavior": "suppress_from_cover",
+        "weapon_profile": "defensive_mid",
+        "visual_archetype": "enemy_space_suit_orange",
+        "heavy_weapon_role": "none",
+        "anti_armor_threat": false,
+        "air_asset_risk_profile": "none",
+        "communication_intensity": "normal"
+      }
+    }
+  ],
+  "wave_config": {
+    "wave_count": 1,
+    "units_per_wave": 8,
+    "first_wave_delay_seconds": 0.0,
+    "wave_delay_seconds": 120.0
+  },
+  "patrol_bindings": [
+    {
+      "binding_id": "red_patrol_team_route",
+      "target_id": "spawn_enemy_patrol",
+      "patrol_path_id": "ground_patrol_route",
+      "mode": "pre_contact"
+    }
+  ],
+  "tactical_authoring": {
+    "communication_intensity": "normal",
+    "fireteam_defaults": {
+      "advance_style": "bounding",
+      "security_mode": "360"
+    },
+    "air_asset_risk": {
+      "profile_id": "none",
+      "enemy_group_id": "",
+      "lz_threat_zone_id": "",
+      "warning_required_before_damage": true,
+      "loss_consequence": "replacement_recovery"
+    }
+  },
+  "notes": [
+    "Default single-player scenario for Ground_Mission01_32x32.",
+    "Patrol group uses the map patrol path; objective group holds the defended area."
+  ]
+}

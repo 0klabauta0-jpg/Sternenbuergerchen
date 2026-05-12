@@ -3,12 +3,13 @@
   "catalog_id": "portrait_identity_catalog_v1",
   "source_root": "res://Assets/Char/",
   "source_inventory": {
-    "scanned_png_count": 87,
+    "scanned_png_count": 95,
     "dimension_distribution": {
       "1024x1024": 9,
       "1184x864": 67,
       "1200x896": 1,
-      "1254x1254": 2,
+      "1254x1254": 7,
+      "1122x1402": 3,
       "1920x1920": 8
     },
     "large_png_count": 8,
@@ -53,6 +54,14 @@
     {"id": "char_portrait_027", "path": "res://Assets/Char/Use AI Image Apr 5, 2026, 23_37_39.png", "file_name": "Use AI Image Apr 5, 2026, 23_37_39.png", "width": 1184, "height": 864, "bytes": 1270191, "candidate": true, "duplicate_group": "", "tags": ["scout_sniper"], "diagnostics": []},
     {"id": "char_portrait_028", "path": "res://Assets/Char/Use AI Image Apr 5, 2026, 23_38_10.png", "file_name": "Use AI Image Apr 5, 2026, 23_38_10.png", "width": 1184, "height": 864, "bytes": 1254513, "candidate": true, "duplicate_group": "", "tags": ["shooter"], "diagnostics": []},
     {"id": "char_portrait_029", "path": "res://Assets/Char/Use AI Image Apr 5, 2026, 23_39_22.png", "file_name": "Use AI Image Apr 5, 2026, 23_39_22.png", "width": 1184, "height": 864, "bytes": 1290936, "candidate": true, "duplicate_group": "", "tags": ["leader"], "diagnostics": []},
-    {"id": "char_portrait_030", "path": "res://Assets/Char/Use AI Image Apr 5, 2026, 23_39_46.png", "file_name": "Use AI Image Apr 5, 2026, 23_39_46.png", "width": 1184, "height": 864, "bytes": 1380103, "candidate": true, "duplicate_group": "", "tags": ["medic"], "diagnostics": []}
+    {"id": "char_portrait_030", "path": "res://Assets/Char/Use AI Image Apr 5, 2026, 23_39_46.png", "file_name": "Use AI Image Apr 5, 2026, 23_39_46.png", "width": 1184, "height": 864, "bytes": 1380103, "candidate": true, "duplicate_group": "", "tags": ["medic"], "diagnostics": []},
+    {"id": "char_portrait_031", "path": "res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_27_17.png", "file_name": "ChatGPT Image 12. Mai 2026, 22_27_17.png", "width": 1254, "height": 1254, "bytes": 1836968, "candidate": true, "duplicate_group": "", "tags": ["leader"], "diagnostics": ["large_source_png_use_scaled_texture_rect"]},
+    {"id": "char_portrait_032", "path": "res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_29_51.png", "file_name": "ChatGPT Image 12. Mai 2026, 22_29_51.png", "width": 1254, "height": 1254, "bytes": 1669945, "candidate": true, "duplicate_group": "", "tags": ["medic"], "diagnostics": ["large_source_png_use_scaled_texture_rect"]},
+    {"id": "char_portrait_033", "path": "res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_31_45.png", "file_name": "ChatGPT Image 12. Mai 2026, 22_31_45.png", "width": 1254, "height": 1254, "bytes": 1712526, "candidate": true, "duplicate_group": "", "tags": ["engineer"], "diagnostics": ["large_source_png_use_scaled_texture_rect"]},
+    {"id": "char_portrait_034", "path": "res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_33_34.png", "file_name": "ChatGPT Image 12. Mai 2026, 22_33_34.png", "width": 1254, "height": 1254, "bytes": 1517078, "candidate": true, "duplicate_group": "", "tags": ["pilot"], "diagnostics": ["large_source_png_use_scaled_texture_rect"]},
+    {"id": "char_portrait_035", "path": "res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_35_32.png", "file_name": "ChatGPT Image 12. Mai 2026, 22_35_32.png", "width": 1254, "height": 1254, "bytes": 1657618, "candidate": true, "duplicate_group": "", "tags": ["heavy_support"], "diagnostics": ["large_source_png_use_scaled_texture_rect"]},
+    {"id": "char_portrait_036", "path": "res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_37_50.png", "file_name": "ChatGPT Image 12. Mai 2026, 22_37_50.png", "width": 1122, "height": 1402, "bytes": 1996292, "candidate": true, "duplicate_group": "", "tags": ["scout_sniper"], "diagnostics": ["large_source_png_use_scaled_texture_rect"]},
+    {"id": "char_portrait_037", "path": "res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_41_25.png", "file_name": "ChatGPT Image 12. Mai 2026, 22_41_25.png", "width": 1122, "height": 1402, "bytes": 1870745, "candidate": true, "duplicate_group": "", "tags": ["shooter"], "diagnostics": ["large_source_png_use_scaled_texture_rect"]},
+    {"id": "char_portrait_038", "path": "res://Assets/Char/ChatGPT Image 12. Mai 2026, 22_42_49.png", "file_name": "ChatGPT Image 12. Mai 2026, 22_42_49.png", "width": 1122, "height": 1402, "bytes": 2069311, "candidate": true, "duplicate_group": "", "tags": ["leader"], "diagnostics": ["large_source_png_use_scaled_texture_rect"]}
   ]
 }

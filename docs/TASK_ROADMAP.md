@@ -528,6 +528,9 @@ TASK_328 - Manual Playtest Marker Help Roster UPnP Followup (implementiert im Ar
 Phase 18ZE - Manual Playtest Stabilization and Docs Truth Fix
 TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass (implementiert im Arbeitsstand)
 
+Phase 18ZF - Ground Mission Default Playability
+TASK_344 - Ground Mission Default Enemy Visuals (implementiert)
+
 Batch-Empfehlung
 
 Codex soll Tasks in kleinen Gruppen bearbeiten:

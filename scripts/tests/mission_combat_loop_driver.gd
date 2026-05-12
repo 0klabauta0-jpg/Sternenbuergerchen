@@ -414,6 +414,8 @@ func _build_fire_event(
 ) -> Dictionary:
 	var sequence: int = _next_fire_event_sequence
 	var event_id: String = "fire_%08d_%04d_%s_%s" % [_current_tick, sequence, attacker_unit_id, target_unit_id]
+	var attacker_position: Vector2 = _get_unit_world_position(attacker)
+	var target_position: Vector2 = _get_unit_world_position(target)
 	return {
 		"event_id": event_id,
 		"event_type": "weapon_fire",
@@ -427,8 +429,9 @@ func _build_fire_event(
 		"weapon_id": weapon_id,
 		"weapon_tile_range": weapon_tile_range,
 		"weapon_range_world": weapon_range_world,
-		"attacker_position": _get_unit_world_position(attacker),
-		"target_position": _get_unit_world_position(target),
+		"attacker_position": attacker_position,
+		"target_position": target_position,
+		"attacker_facing_angle": _get_facing_angle_between_positions(attacker_position, target_position),
 	}
 
 
@@ -457,6 +460,27 @@ func _get_unit_world_position(unit) -> Vector2:
 	if unit is Node2D:
 		return (unit as Node2D).global_position
 	return Vector2.ZERO
+
+
+func _get_facing_angle_between_positions(from_position: Vector2, to_position: Vector2) -> float:
+	if from_position.distance_squared_to(to_position) <= 0.0001:
+		return 0.0
+	return (to_position - from_position).angle()
+
+
+func _store_combat_attacker_facing(attacker, target) -> void:
+	if attacker == null or target == null or not (attacker is Node):
+		return
+	var attacker_position: Vector2 = _get_unit_world_position(attacker)
+	var target_position: Vector2 = _get_unit_world_position(target)
+	if attacker_position.distance_squared_to(target_position) <= 0.0001:
+		return
+	var facing_angle: float = _get_facing_angle_between_positions(attacker_position, target_position)
+	var attacker_node: Node = attacker as Node
+	attacker_node.set_meta("facing_angle", facing_angle)
+	attacker_node.set_meta("map_facing_angle", facing_angle)
+	if attacker.has_method("get_team_id") and String(attacker.call("get_team_id")) != friendly_team_id:
+		attacker_node.set_meta("enemy_facing_angle", facing_angle)
 
 
 func _ensure_audio_event_bus(create_if_missing: bool = true):
@@ -801,6 +825,7 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 	var actual_target_id: String = String(decision.get("target_id", target_id))
 	var is_friendly_fire: bool = bool(decision.get("is_friendly_fire", false))
 
+	_store_combat_attacker_facing(attacker, actual_target)
 	contact_established.emit(attacker, actual_target)
 	if is_friendly_fire:
 		_set_event_text("%s verwechselt Ziel! -> %s" % [attacker_id, actual_target_id])
