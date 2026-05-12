@@ -2064,21 +2064,56 @@ func set_tactical_ui_visible(is_visible: bool) -> void:
 		overlay.visible = is_visible and _character_overlay_open
 
 
+func _build_command_feedback_text_payload() -> Dictionary:
+	var selected_fireteam_label: String = _get_fireteam_name()
+	var phase_name: String = _get_phase_name()
+	var target_text: String = _build_target_text()
+	var selected_order_text: String = _build_selected_waypoint_info_text()
+	var selected_multi_fireteam_plan_text: String = _build_selected_multi_fireteam_plan_info_text()
+	var mission_control_plan_text: String = _build_mission_control_multi_fireteam_plan_text()
+	var selected_status_text: String = _build_fireteam_status_text()
+	var mission_control_status_text: String = _build_strategic_status_text()
+	var command_feedback_text: String = _build_command_feedback_text(
+		selected_fireteam_label,
+		phase_name,
+		target_text,
+		selected_order_text,
+		_last_command_text
+	)
+	return {
+		"selected_fireteam_label": selected_fireteam_label,
+		"phase_name": phase_name,
+		"target_text": target_text,
+		"selected_order_text": selected_order_text,
+		"selected_multi_fireteam_plan_text": selected_multi_fireteam_plan_text,
+		"mission_control_plan_text": mission_control_plan_text,
+		"selected_status_text": selected_status_text,
+		"last_command_text": _last_command_text,
+		"command_feedback_text": command_feedback_text,
+		"selected_fireteam_status_label_text": selected_status_text,
+		"mission_control_status_text": mission_control_status_text,
+	}
+
+
+func _build_command_feedback_text(selected_fireteam_label: String, phase_name: String, target_text: String, selected_order_text: String, last_command_text: String) -> String:
+	if not _last_planning_state_issue.is_empty():
+		return "PLANUNG NICHT GELADEN\nAlte Planungsdaten erkannt.\nBitte Plan im aktuellen Phasensystem neu anlegen."
+	return "TEAM %s | PHASE %s\nTARGET %s\n%s\nLAST %s" % [
+		selected_fireteam_label,
+		phase_name,
+		target_text,
+		selected_order_text,
+		last_command_text,
+	]
+
+
 func _update_ui() -> void:
 	_apply_block_labels()
 	_sync_unit_tactical_stance_badges()
+	var command_feedback_payload: Dictionary = _build_command_feedback_text_payload()
 	var command_feedback_label := get_node_or_null(command_feedback_label_path) as Label
 	if command_feedback_label != null:
-		if not _last_planning_state_issue.is_empty():
-			command_feedback_label.text = "PLANUNG NICHT GELADEN\nAlte Planungsdaten erkannt.\nBitte Plan im aktuellen Phasensystem neu anlegen."
-		else:
-			command_feedback_label.text = "TEAM %s | PHASE %s\nTARGET %s\n%s\nLAST %s" % [
-				_get_fireteam_name(),
-				_get_phase_name(),
-				_build_target_text(),
-				_build_selected_waypoint_info_text(),
-				_last_command_text,
-			]
+		command_feedback_label.text = String(command_feedback_payload.get("command_feedback_text", ""))
 
 	var hotkey_legend_label := get_node_or_null(hotkey_legend_label_path) as Label
 	if hotkey_legend_label != null:
@@ -2089,7 +2124,7 @@ func _update_ui() -> void:
 
 	var fireteam_status_label := get_node_or_null(FIRETEAM_STATUS_LABEL_PATH) as Label
 	if fireteam_status_label != null:
-		fireteam_status_label.text = _build_fireteam_status_text()
+		fireteam_status_label.text = String(command_feedback_payload.get("selected_fireteam_status_label_text", ""))
 	_refresh_fireteam_status_panel()
 	_refresh_fireteam_phase_panel()
 	_refresh_mission_nav_timer_label()
@@ -2097,7 +2132,7 @@ func _update_ui() -> void:
 
 	var strategic_status_label := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicStatusLabel") as Label
 	if strategic_status_label != null:
-		strategic_status_label.text = _build_strategic_status_text()
+		strategic_status_label.text = String(command_feedback_payload.get("mission_control_status_text", ""))
 
 	var phase_status_label := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseStatusLabel") as Label
 	if phase_status_label != null:
@@ -5986,7 +6021,6 @@ func _get_target_position() -> Vector2:
 
 func _build_target_text() -> String:
 	var target_position: Vector2 = _get_target_position()
-	_last_target_position = target_position
 	return _format_world_position(target_position)
 
 
@@ -6279,13 +6313,6 @@ func _build_command_hierarchy_tooltip(action: Dictionary, button: Button, disabl
 		var disabled_text: String = String(button.get_meta("command_hierarchy_disabled_reason_text", "")).strip_edges()
 		parts.append(disabled_text if not disabled_text.is_empty() else disabled_reason)
 	return " | ".join(parts)
-
-
-func _get_label_text(label_path: Variant) -> String:
-	var label := get_node_or_null(NodePath(String(label_path))) as Label
-	if label == null:
-		return ""
-	return label.text
 
 
 func _refresh_world_overlays() -> void:
@@ -9265,20 +9292,22 @@ func _build_command_feedback_snapshot_context() -> Dictionary:
 	var air_asset_threats: Array = get_air_asset_threat_snapshot()
 	var npc_thought_bubbles: Array = get_npc_thought_bubble_snapshot()
 	var command_hierarchy: Dictionary = get_command_hierarchy_snapshot()
+	var command_feedback_payload: Dictionary = _build_command_feedback_text_payload()
 	return {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
-		"selected_fireteam_label": _get_fireteam_name(),
+		"selected_fireteam_label": String(command_feedback_payload.get("selected_fireteam_label", "")),
 		"selected_tile": _build_selected_tile_snapshot(),
-		"phase_name": _get_phase_name(),
-		"target_text": _build_target_text(),
-		"selected_order_text": _build_selected_waypoint_info_text(),
-		"selected_multi_fireteam_plan_text": _build_selected_multi_fireteam_plan_info_text(),
-		"mission_control_plan_text": _build_mission_control_multi_fireteam_plan_text(),
-		"selected_status_text": _build_fireteam_status_text(),
-		"last_command_text": _last_command_text,
-		"command_feedback_text": _get_label_text(command_feedback_label_path),
-		"selected_fireteam_status_label_text": _get_label_text(FIRETEAM_STATUS_LABEL_PATH),
-		"mission_control_status_text": _get_label_text("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicStatusLabel"),
+		"phase_name": String(command_feedback_payload.get("phase_name", "")),
+		"target_text": String(command_feedback_payload.get("target_text", "")),
+		"selected_order_text": String(command_feedback_payload.get("selected_order_text", "")),
+		"selected_multi_fireteam_plan_text": String(command_feedback_payload.get("selected_multi_fireteam_plan_text", "")),
+		"mission_control_plan_text": String(command_feedback_payload.get("mission_control_plan_text", "")),
+		"selected_status_text": String(command_feedback_payload.get("selected_status_text", "")),
+		"last_command_text": String(command_feedback_payload.get("last_command_text", "")),
+		"command_feedback_payload": command_feedback_payload,
+		"command_feedback_text": String(command_feedback_payload.get("command_feedback_text", "")),
+		"selected_fireteam_status_label_text": String(command_feedback_payload.get("selected_fireteam_status_label_text", "")),
+		"mission_control_status_text": String(command_feedback_payload.get("mission_control_status_text", "")),
 		"command_buttons": _build_command_control_snapshot(),
 		"command_hierarchy": command_hierarchy,
 		"command_clarity": _build_command_clarity_snapshot(command_hierarchy),

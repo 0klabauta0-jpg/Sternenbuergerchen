@@ -11,6 +11,7 @@ const SNAPSHOT_KEYS: PackedStringArray = [
 	"mission_control_plan_text",
 	"selected_status_text",
 	"last_command_text",
+	"command_feedback_payload",
 	"command_feedback_text",
 	"selected_fireteam_status_label_text",
 	"mission_control_status_text",
@@ -90,6 +91,7 @@ func _default_value_for_key(key: String) -> Variant:
 		return []
 	if key in [
 		"selected_tile",
+		"command_feedback_payload",
 		"command_buttons",
 		"command_hierarchy",
 		"command_clarity",

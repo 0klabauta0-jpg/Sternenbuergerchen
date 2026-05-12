@@ -27,12 +27,20 @@
 - Risiken: Signaturen duerfen bei zukuenftigen Card-Inhalten nicht grob bleiben; neue sichtbare Felder muessen bewusst in den jeweiligen Bucket aufgenommen werden.
 - Lokale Pruefung: `task_339_mission_ui_dirty_refresh_pass.gd`, `task_222_performance_regression_gate_and_manual_profile_checklist.gd`, `task_282_tactical_overhaul_playability_performance_help_gate.gd`, `task_286_ui_feedback_truth_regression_review.gd` und `git diff --check` laufen gruen.
 
-### TASK_340-TASK_342 - Deep Code Review Followups
+### TASK_340 - Command Feedback Pure Snapshot
+- Status: implementiert im Arbeitsstand
+- Stand: `MissionTacticalSandboxController._build_command_feedback_text_payload()` berechnet Command-Feedback-, Selected-Status- und Mission-Control-Status-Texte aus Controller-/Model-Zustand statt aus gerenderten Labels.
+- Stand: `_update_ui()` rendert dieselben Payload-Texte, die `_build_command_feedback_snapshot_context()` an den Adapter gibt. Stale `Label.text`-Werte werden vom Snapshot nicht mehr zurueckgelesen.
+- Stand: `MissionCommandFeedbackSnapshotAdapter` fuehrt `command_feedback_payload` als defensiv dupliziertes Snapshot-Feld, waehrend bestehende TASK_335-Reason-Codes erhalten bleiben.
+- Risiken: Button-Snapshots bleiben weiterhin UI-Control-Readbacks fuer sichtbare Button-Metadaten; dieser Task entfernt bewusst nur die gefundenen Label-Text-Readbacks.
+- Lokale Pruefung: `task_340_command_feedback_pure_snapshot.gd`, `task_286_ui_feedback_truth_regression_review.gd`, `task_335_tactical_feedback_truth_command_clarity_pass.gd` und `git diff --check` laufen gruen.
+
+### TASK_341-TASK_342 - Deep Code Review Followups
 - Status: geplant
-- Stand: Die verbleibenden Review-Folge-Tasks sind reiner Command-Feedback-Snapshot, Navigation-Fallback-Kandidatencap und SimulationRoot-Unknown-Payload-Diagnose.
+- Stand: Die verbleibenden Review-Folge-Tasks sind Navigation-Fallback-Kandidatencap und SimulationRoot-Unknown-Payload-Diagnose.
 - Offene Punkte: Umsetzung, lokale Gates und manuelle Sicht-/Spielgefuehlchecks folgen je Task separat.
 - Risiken: Die Tasks duerfen nicht zu einem Sammelrefactor verschmelzen; jeder Task behaelt die vorhandenen Architekturgrenzen: UI ist nicht die Wahrheit, `SimulationRoot` bleibt autoritativ, Hotpaths bleiben budgetiert.
-- Naechster Schritt: TASK_340 - Command Feedback Pure Snapshot.
+- Naechster Schritt: TASK_341 - Navigation Fallback Candidate Cap.
 
 ### TASK_337 - Architecture Performance UX Followup Gate
 - Status: implementiert im Arbeitsstand
