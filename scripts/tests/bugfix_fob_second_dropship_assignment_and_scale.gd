@@ -13,6 +13,7 @@ func _init() -> void:
 func _run_tests() -> void:
 	print("=== FOB Second Dropship Assignment and Scale Bugfix ===")
 	await _test_fireteams_stage_to_the_dropped_craft()
+	await _test_fireteam_membership_lookup_ignores_removed_definition()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	quit(1 if _failed > 0 else 0)
 
@@ -79,6 +80,7 @@ func _test_fireteams_stage_to_the_dropped_craft() -> void:
 	var tick_states: Dictionary = Dictionary(tick_snapshot.get("dropship_state_by_craft", {}))
 	var dropship_1_tick_state: Dictionary = Dictionary(tick_states.get("dropship_1", {}))
 	var dropship_2_tick_state: Dictionary = Dictionary(tick_states.get("dropship_2", {}))
+	_assert(String(tick_snapshot.get("selected_craft_id", "")) == "dropship_2", "Dropship timer keeps the selected craft stable while ticking every craft")
 	_assert(float(dropship_1_tick_state.get("boarding_seconds", 0.0)) < dropship_1_seconds_before_tick, "Dropship 1 boarding timer keeps ticking while Dropship 2 is selected")
 	_assert(float(dropship_2_tick_state.get("boarding_seconds", 0.0)) < dropship_2_seconds_before_tick, "Dropship 2 boarding timer ticks independently")
 	_assert(String(drop_state.get("transport_craft_id", "")) == "dropship_2", "Mission drop state points at the currently selected craft")
@@ -101,6 +103,35 @@ func _test_fireteams_stage_to_the_dropped_craft() -> void:
 
 	screen.queue_free()
 	await _wait_frames(2)
+
+func _test_fireteam_membership_lookup_ignores_removed_definition() -> void:
+	var screen: Control = FOB_TEST_SCENE.instantiate()
+	screen.visible = true
+	root.add_child(screen)
+	await _wait_frames(4)
+
+	screen.call("set_available_units", _build_units())
+	screen.call(
+		"configure_transfer",
+		PackedStringArray(["unit_a", "unit_e"]),
+		PackedStringArray(["ft1", "ft2"]),
+		[
+			{"id": "ft1", "label": "FT1", "lead_unit_id": "unit_a"},
+			{"id": "ft2", "label": "FT2", "lead_unit_id": "unit_e"},
+		]
+	)
+	await _wait_frames(2)
+
+	screen.set("_fireteam_definitions", [{"id": "ft1", "label": "FT1", "lead_unit_id": "unit_a"}])
+	screen.set("_selected_fireteam_ids", PackedStringArray(["ft1", "ft2"]))
+	var stale_members := PackedStringArray(screen.call("_get_member_unit_ids_for_fireteam", "ft2"))
+	var assignments: Dictionary = Dictionary(screen.call("_build_assignment_lookup"))
+	_assert(stale_members.is_empty(), "Deleted fireteam definitions do not keep stale parallel-array members")
+	_assert(String(assignments.get("unit_e", "")) == "", "Assignment lookup clears fireteam IDs without a live definition")
+
+	screen.queue_free()
+	await _wait_frames(2)
+
 
 
 func _build_units() -> Array:

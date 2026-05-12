@@ -829,14 +829,33 @@ func confirm_transport_remove_for_test() -> Dictionary:
 
 
 func _build_assignment_lookup() -> Dictionary:
+	return _build_validated_assignment_lookup()
+
+
+func _build_valid_fireteam_id_set() -> Dictionary:
+	var valid_ids: Dictionary = {}
+	for definition_variant in _fireteam_definitions:
+		if typeof(definition_variant) != TYPE_DICTIONARY:
+			continue
+		var fireteam_id: String = _normalize_fireteam_id(String((definition_variant as Dictionary).get("id", "")))
+		if fireteam_id.is_empty():
+			continue
+		valid_ids[fireteam_id] = true
+	return valid_ids
+
+
+func _build_validated_assignment_lookup() -> Dictionary:
 	var assignments: Dictionary = {}
+	var valid_fireteam_ids: Dictionary = _build_valid_fireteam_id_set()
 	for index in range(_selected_unit_ids.size()):
 		var unit_id: String = String(_selected_unit_ids[index]).strip_edges()
 		if unit_id.is_empty():
 			continue
 		var fireteam_id: String = ""
 		if index < _selected_fireteam_ids.size():
-			fireteam_id = String(_selected_fireteam_ids[index]).strip_edges().to_lower()
+			fireteam_id = _normalize_fireteam_id(String(_selected_fireteam_ids[index]))
+		if not fireteam_id.is_empty() and not valid_fireteam_ids.has(fireteam_id):
+			fireteam_id = ""
 		assignments[unit_id] = fireteam_id
 	return assignments
 
@@ -1773,37 +1792,129 @@ func _on_dropship_timer_timeout() -> void:
 	if known_craft_ids.is_empty():
 		_tick_selected_dropship_progress()
 	for craft_id in known_craft_ids:
-		var stored_state: Dictionary = _get_stored_dropship_state_for_craft(String(craft_id))
+		var normalized_craft_id: String = String(craft_id).strip_edges()
+		if normalized_craft_id.is_empty():
+			continue
+		var stored_state: Dictionary = _capture_current_dropship_state() if normalized_craft_id == selected_craft_id else _get_stored_dropship_state_for_craft(normalized_craft_id)
 		if not _is_dropship_craft_phase_ticking(String(stored_state.get("phase", "idle"))):
 			continue
-		_dropship_transport_craft_id = String(craft_id)
-		_apply_dropship_craft_state(stored_state)
-		_tick_selected_dropship_progress()
-		_save_current_dropship_state()
-	if not selected_craft_id.is_empty():
-		_dropship_transport_craft_id = selected_craft_id
-		_apply_dropship_craft_state(_get_stored_dropship_state_for_craft(selected_craft_id))
-	else:
-		_dropship_transport_craft_id = ""
+		var next_state: Dictionary = _tick_dropship_craft_progress_state(stored_state)
+		_dropship_state_by_craft[normalized_craft_id] = next_state
+		if normalized_craft_id == selected_craft_id:
+			_apply_dropship_craft_state(next_state)
 
 	_update_dropship_timer_state()
 	_refresh_dropship_status_ui()
 
 
 func _tick_selected_dropship_progress() -> void:
-	match _dropship_phase:
+	var next_state: Dictionary = _tick_dropship_craft_progress_state(_capture_current_dropship_state())
+	_apply_dropship_craft_state(next_state)
+
+
+func _tick_dropship_craft_progress_state(source_state: Dictionary) -> Dictionary:
+	var next_state: Dictionary = _coerce_dropship_craft_state(source_state)
+	match String(next_state.get("phase", "idle")).strip_edges():
 		"incoming":
-			_dropship_eta_seconds = maxf(_dropship_eta_seconds - 1.0, 0.0)
-			if _dropship_eta_seconds <= 0.0:
-				_dropship_eta_seconds = 0.0
-				_dropship_phase = "ready"
+			var eta_seconds: float = maxf(float(next_state.get("eta_seconds", 0.0)) - 1.0, 0.0)
+			next_state["eta_seconds"] = eta_seconds
+			if eta_seconds <= 0.0:
+				next_state["eta_seconds"] = 0.0
+				next_state["phase"] = "ready"
 		"boarding":
-			_boarding_seconds = maxf(_boarding_seconds - 1.0, 0.0)
-			if _boarding_seconds <= 0.0:
-				_complete_current_boarding_member()
-				_start_next_boarding_step()
+			var boarding_seconds: float = maxf(float(next_state.get("boarding_seconds", 0.0)) - 1.0, 0.0)
+			next_state["boarding_seconds"] = boarding_seconds
+			if boarding_seconds <= 0.0:
+				next_state = _complete_current_boarding_member_in_state(next_state)
+				next_state = _start_next_boarding_step_in_state(next_state)
 		_:
 			pass
+	return next_state
+
+
+func _complete_current_boarding_member_in_state(source_state: Dictionary) -> Dictionary:
+	var next_state: Dictionary = _coerce_dropship_craft_state(source_state)
+	var current_unit_id: String = String(next_state.get("current_boarding_unit_id", "")).strip_edges()
+	if current_unit_id.is_empty():
+		return next_state
+	var boarded_unit_ids: PackedStringArray = _copy_packed_string_array(next_state.get("boarded_unit_ids", PackedStringArray()))
+	if not boarded_unit_ids.has(current_unit_id):
+		boarded_unit_ids.append(current_unit_id)
+	next_state["boarded_unit_ids"] = boarded_unit_ids
+
+	var current_fireteam_id: String = _get_boarding_fireteam_id_for_state(next_state)
+	var boarded_fireteam_ids: PackedStringArray = _copy_packed_string_array(next_state.get("boarded_fireteam_ids", PackedStringArray()))
+	if not current_fireteam_id.is_empty() and _is_fireteam_fully_boarded_in_state(current_fireteam_id, next_state) and not boarded_fireteam_ids.has(current_fireteam_id):
+		boarded_fireteam_ids.append(current_fireteam_id)
+	next_state["boarded_fireteam_ids"] = boarded_fireteam_ids
+	next_state["boarding_member_index"] = int(next_state.get("boarding_member_index", 0)) + 1
+	next_state["current_boarding_unit_id"] = ""
+	return next_state
+
+
+func _start_next_boarding_step_in_state(source_state: Dictionary) -> Dictionary:
+	var next_state: Dictionary = _coerce_dropship_craft_state(source_state)
+	var boarding_order: PackedStringArray = _copy_packed_string_array(next_state.get("boarding_order", PackedStringArray()))
+	var boarding_index: int = int(next_state.get("boarding_index", 0))
+	var boarding_member_index: int = int(next_state.get("boarding_member_index", 0))
+	var boarded_unit_ids: PackedStringArray = _copy_packed_string_array(next_state.get("boarded_unit_ids", PackedStringArray()))
+	var boarded_fireteam_ids: PackedStringArray = _copy_packed_string_array(next_state.get("boarded_fireteam_ids", PackedStringArray()))
+
+	while boarding_index < boarding_order.size():
+		var candidate_fireteam_id: String = String(boarding_order[boarding_index])
+		var member_ids: PackedStringArray = _get_member_unit_ids_for_fireteam(candidate_fireteam_id)
+		if member_ids.is_empty():
+			boarding_index += 1
+			boarding_member_index = 0
+			continue
+		while boarding_member_index < member_ids.size():
+			var candidate_unit_id: String = String(member_ids[boarding_member_index])
+			if boarded_unit_ids.has(candidate_unit_id):
+				boarding_member_index += 1
+				continue
+			next_state["boarding_index"] = boarding_index
+			next_state["boarding_member_index"] = boarding_member_index
+			next_state["current_boarding_unit_id"] = candidate_unit_id
+			next_state["current_boarding_fireteam_id"] = candidate_fireteam_id
+			next_state["phase"] = "boarding"
+			next_state["boarding_seconds"] = DEFAULT_BOARDING_SECONDS
+			return next_state
+		next_state["boarding_index"] = boarding_index
+		next_state["boarding_member_index"] = boarding_member_index
+		if _is_fireteam_fully_boarded_in_state(candidate_fireteam_id, next_state) and not boarded_fireteam_ids.has(candidate_fireteam_id):
+			boarded_fireteam_ids.append(candidate_fireteam_id)
+			next_state["boarded_fireteam_ids"] = boarded_fireteam_ids
+		boarding_index += 1
+		boarding_member_index = 0
+
+	next_state["phase"] = "boarded"
+	next_state["boarding_seconds"] = 0.0
+	next_state["boarding_index"] = boarding_index
+	next_state["boarding_member_index"] = boarding_member_index
+	next_state["current_boarding_unit_id"] = ""
+	next_state["current_boarding_fireteam_id"] = ""
+	return next_state
+
+
+func _get_boarding_fireteam_id_for_state(state: Dictionary) -> String:
+	if String(state.get("phase", "idle")).strip_edges() != "boarding":
+		return ""
+	var boarding_order: PackedStringArray = _copy_packed_string_array(state.get("boarding_order", PackedStringArray()))
+	var boarding_index: int = int(state.get("boarding_index", 0))
+	if boarding_index < 0 or boarding_index >= boarding_order.size():
+		return String(state.get("current_boarding_fireteam_id", "")).strip_edges()
+	return String(boarding_order[boarding_index])
+
+
+func _is_fireteam_fully_boarded_in_state(fireteam_id: String, state: Dictionary) -> bool:
+	var member_ids: PackedStringArray = _get_member_unit_ids_for_fireteam(fireteam_id)
+	if member_ids.is_empty():
+		return false
+	var boarded_unit_ids: PackedStringArray = _copy_packed_string_array(state.get("boarded_unit_ids", PackedStringArray()))
+	for member_unit_id in member_ids:
+		if not boarded_unit_ids.has(String(member_unit_id)):
+			return false
+	return true
 
 
 func _start_next_boarding_step() -> void:
@@ -2849,14 +2960,18 @@ func _get_available_unit_data(unit_id: String) -> Dictionary:
 
 
 func _get_member_unit_ids_for_fireteam(fireteam_id: String) -> PackedStringArray:
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
 	var member_ids: PackedStringArray = []
-	for unit_index in range(_selected_unit_ids.size()):
-		var assigned_fireteam_id: String = ""
-		if unit_index < _selected_fireteam_ids.size():
-			assigned_fireteam_id = String(_selected_fireteam_ids[unit_index]).strip_edges().to_lower()
-		if assigned_fireteam_id != fireteam_id:
+	if normalized_fireteam_id.is_empty() or _find_fireteam_definition_index(normalized_fireteam_id) < 0:
+		return member_ids
+	var assignments: Dictionary = _build_assignment_lookup()
+	for unit_id_variant in _selected_unit_ids:
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty():
 			continue
-		member_ids.append(String(_selected_unit_ids[unit_index]))
+		if String(assignments.get(unit_id, "")) != normalized_fireteam_id:
+			continue
+		member_ids.append(unit_id)
 	return member_ids
 
 
@@ -2867,10 +2982,10 @@ func _format_member_names(member_names: PackedStringArray) -> String:
 
 
 func _get_selected_fireteam_id_for_unit(unit_id: String) -> String:
-	var unit_index: int = _selected_unit_ids.find(unit_id)
-	if unit_index < 0 or unit_index >= _selected_fireteam_ids.size():
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
 		return ""
-	return String(_selected_fireteam_ids[unit_index]).strip_edges().to_lower()
+	return String(_build_assignment_lookup().get(normalized_unit_id, ""))
 
 
 func _set_selected_fireteam_for_unit(unit_id: String, next_fireteam_id: String) -> void:
@@ -2968,7 +3083,8 @@ func _coerce_fireteam_definition(definition_variant) -> Dictionary:
 		bool(definition.get("respawn_enabled", false)),
 		String(definition.get("loadout", "medium")),
 		String(definition.get("lead_unit_id", "")),
-		definition.get("member_loadouts", {}) if typeof(definition.get("member_loadouts", {})) == TYPE_DICTIONARY else {}
+		definition.get("member_loadouts", {}) if typeof(definition.get("member_loadouts", {})) == TYPE_DICTIONARY else {},
+		_extract_member_unit_ids_from_definition(definition)
 	)
 
 
@@ -2978,7 +3094,8 @@ func _make_fireteam_definition(
 	respawn_enabled: bool = false,
 	loadout: String = "medium",
 	lead_unit_id: String = "",
-	member_loadouts: Dictionary = {}
+	member_loadouts: Dictionary = {},
+	member_unit_ids: PackedStringArray = PackedStringArray()
 ) -> Dictionary:
 	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
 	return {
@@ -2988,7 +3105,26 @@ func _make_fireteam_definition(
 		"loadout": _normalize_loadout_id(loadout),
 		"lead_unit_id": lead_unit_id.strip_edges(),
 		"member_loadouts": member_loadouts.duplicate(true),
+		"member_unit_ids": member_unit_ids.duplicate(),
 	}
+
+
+func _extract_member_unit_ids_from_definition(definition: Dictionary) -> PackedStringArray:
+	var member_ids: PackedStringArray = []
+	var source_variant = definition.get("member_unit_ids", definition.get("members", []))
+	if typeof(source_variant) != TYPE_ARRAY and typeof(source_variant) != TYPE_PACKED_STRING_ARRAY:
+		return member_ids
+	for member_variant in source_variant:
+		var member_unit_id: String = ""
+		if typeof(member_variant) == TYPE_DICTIONARY:
+			var member_data: Dictionary = member_variant
+			member_unit_id = String(member_data.get("unit_id", member_data.get("id", ""))).strip_edges()
+		else:
+			member_unit_id = String(member_variant).strip_edges()
+		if member_unit_id.is_empty() or member_ids.has(member_unit_id):
+			continue
+		member_ids.append(member_unit_id)
+	return member_ids
 
 
 func _normalize_fireteam_id(value: String) -> String:
@@ -3066,6 +3202,7 @@ func _sanitize_fireteam_state() -> void:
 		definition["loadout"] = default_armor_id
 		definition["lead_unit_id"] = lead_unit_id
 		definition["member_loadouts"] = sanitized_member_loadouts
+		definition["member_unit_ids"] = member_ids.duplicate()
 		sanitized_definitions.append(definition)
 
 	_fireteam_definitions = sanitized_definitions
