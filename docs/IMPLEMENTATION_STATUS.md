@@ -10,12 +10,21 @@
 
 ## Aktueller Startzustand
 
-### TASK_338-TASK_342 - Deep Code Review Followups
+### TASK_338 - Portrait Asset Intake Catalog Sync
+- Status: implementiert im Arbeitsstand
+- Stand: `Assets/Char` ist auf 118 PNGs und 118 Godot-Import-Sidecars synchronisiert; alle waehrend des Tasks sichtbaren neuen Portraits wurden mitgenommen.
+- Stand: `data/portrait_identity_catalog.json` und `docs/assets/portrait_identity_inventory.md` melden den echten Scan-Stand. Der Runtime-Katalog enthaelt jetzt 61 Kandidaten, inklusive `char_portrait_031` bis `char_portrait_061` fuer die May-12/12.-Mai-Portrait-Batch.
+- Stand: `task_338_portrait_asset_intake_catalog_sync.gd` prueft PNG-/Import-Sidecar-Gleichstand, Inventarzaehler und Katalogaufnahme der neuen Portrait-Batch.
+- Stand: Fuer den verpflichtenden TASK_247-Asset-Locality-Gate wurde die bestehende produktive `res://maps/new_map.json`-Referenz mit einem kleinen projektlokalen Placeholder aufgeloest.
+- Risiken: Die neuen Portraits sind technisch eingebunden, aber noch nicht manuell auf Stil, Ausschnitt und Lesbarkeit in Team-Editor/Character-Sheet kuratiert.
+- Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_338_portrait_asset_intake_catalog_sync.gd`, `task_233_portrait_identity_catalog_and_roster_presentation.gd`, `task_247_used_asset_project_locality_audit_gate.gd` und `git diff --check` laufen gruen.
+
+### TASK_339-TASK_342 - Deep Code Review Followups
 - Status: geplant
-- Stand: Aus der erneuten tiefen Code-Review wurden fuenf kleine Folge-Tasks angelegt: Portrait-Asset/Katalog-Sync, Mission-HUD Dirty-Refresh, reiner Command-Feedback-Snapshot, Navigation-Fallback-Kandidatencap und SimulationRoot-Unknown-Payload-Diagnose.
+- Stand: Die verbleibenden Review-Folge-Tasks sind Mission-HUD Dirty-Refresh, reiner Command-Feedback-Snapshot, Navigation-Fallback-Kandidatencap und SimulationRoot-Unknown-Payload-Diagnose.
 - Offene Punkte: Umsetzung, lokale Gates und manuelle Sicht-/Spielgefuehlchecks folgen je Task separat.
 - Risiken: Die Tasks duerfen nicht zu einem Sammelrefactor verschmelzen; jeder Task behaelt die vorhandenen Architekturgrenzen: UI ist nicht die Wahrheit, `SimulationRoot` bleibt autoritativ, Hotpaths bleiben budgetiert.
-- Naechster Schritt: TASK_338 als erster Follow-up, weil der aktuelle Portrait-Asset-Stand den bestehenden TASK_233-Katalog-Gate sichtbar brechen kann.
+- Naechster Schritt: TASK_339 - Mission UI Dirty Refresh Pass.
 
 ### TASK_337 - Architecture Performance UX Followup Gate
 - Status: implementiert im Arbeitsstand

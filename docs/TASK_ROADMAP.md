@@ -539,7 +539,7 @@ TASK_336 - Combat Loop Tick Budget System Split (implementiert im Arbeitsstand)
 TASK_337 - Architecture Performance UX Followup Gate (implementiert im Arbeitsstand)
 
 Phase 18ZG - Deep Code Review Followups
-TASK_338 - Portrait Asset Intake Catalog Sync (geplant)
+TASK_338 - Portrait Asset Intake Catalog Sync (implementiert im Arbeitsstand)
 TASK_339 - Mission UI Dirty Refresh Pass (geplant)
 TASK_340 - Command Feedback Pure Snapshot (geplant)
 TASK_341 - Navigation Fallback Candidate Cap (geplant)

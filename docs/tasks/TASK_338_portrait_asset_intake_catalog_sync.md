@@ -3,7 +3,7 @@
 ## Ziel
 Neu hinzugefuegte Portraits unter `Assets/Char` muessen vollstaendig ins Projekt uebernommen, importiert, inventarisiert und fuer Roster-/Team-UI sichtbar gemacht werden. Der Portrait-Katalog darf nicht hinter dem echten Asset-Stand zurueckfallen.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT IM ARBEITSSTAND
 
 ## Voraussetzung
 - TASK_233 - Portrait Identity Catalog and Roster Presentation
@@ -38,26 +38,34 @@ Die erneute Code-Review hat eine Drift im Portrait-Pfad gefunden: Der Katalog un
 - Keine Gameplay- oder Skill-Wirkung aus Portrait-Tags.
 
 ## Akzeptanzkriterien
-- [ ] Keine ungetrackten neuen Portrait-PNGs oder zugehoerigen `.png.import`-Dateien bleiben offen.
-- [ ] `scanned_png_count` und Inventar-Doku stimmen mit dem echten `Assets/Char/*.png`-Stand ueberein.
-- [ ] Neue verwertbare Portraits haben stabile Katalog-IDs und `res://`-Pfade.
-- [ ] Team-Editor/Start-Roster koennen neue Portrait-Kandidaten ueber den bestehenden Katalogpfad erreichen.
-- [ ] Der Katalog-Gate erkennt Drift kuenftig klar statt still weiterzulaufen.
+- [x] Keine ungetrackten neuen Portrait-PNGs oder zugehoerigen `.png.import`-Dateien bleiben offen.
+- [x] `scanned_png_count` und Inventar-Doku stimmen mit dem echten `Assets/Char/*.png`-Stand ueberein.
+- [x] Neue verwertbare Portraits haben stabile Katalog-IDs und `res://`-Pfade.
+- [x] Team-Editor/Start-Roster koennen neue Portrait-Kandidaten ueber den bestehenden Katalogpfad erreichen.
+- [x] Der Katalog-Gate erkennt Drift kuenftig klar statt still weiterzulaufen.
 
 ## Erwartete Dateien
 - `Assets/Char/*.png`
 - `Assets/Char/*.png.import`
 - `data/portrait_identity_catalog.json`
 - `docs/assets/portrait_identity_inventory.md`
-- optional `scripts/tests/task_338_portrait_asset_intake_catalog_sync.gd`
+- `maps/new_map.json`
+- `scripts/tests/task_338_portrait_asset_intake_catalog_sync.gd`
 - `docs/tasks/TASK_338_portrait_asset_intake_catalog_sync.md`
 - `docs/IMPLEMENTATION_STATUS.md`
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --import`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_233_portrait_identity_catalog_and_roster_presentation.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_247_used_asset_project_locality_audit_gate.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --import`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_338_portrait_asset_intake_catalog_sync.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_233_portrait_identity_catalog_and_roster_presentation.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_247_used_asset_project_locality_audit_gate.gd`
+- [x] `git diff --check`
+
+## Ergebnis
+- `Assets/Char` ist auf 118 PNGs und 118 `.png.import`-Dateien synchronisiert.
+- Der Portrait-Katalog fuehrt jetzt 61 Start-Roster-Kandidaten. Die neuen May-12/12.-Mai-Portraits liegen stabil als `char_portrait_031` bis `char_portrait_061` im Katalog.
+- Inventar und Katalog melden denselben echten PNG-Stand; der neue TASK_338-Verifier prueft zusaetzlich Import-Sidecars und die vollstaendige Katalogaufnahme der neuen Portrait-Batch.
+- Der Asset-Locality-Gate hatte eine bestehende produktive Referenz auf `res://maps/new_map.json` gefunden; der Task legt dafuer einen kleinen projektlokalen Default-Map-Placeholder an, statt die Gate-Regel zu schwaechen.
 
 ## Risiken
 - Neue Portraits koennen unterschiedliche Ausschnitte, Dateigroessen oder Stilrichtungen haben. Dieser Task synchronisiert den Katalog; finale visuelle Kuratierung bleibt ein eigener kleiner Art-/Crop-Task.

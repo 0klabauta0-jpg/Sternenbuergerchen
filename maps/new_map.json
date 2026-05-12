@@ -1,0 +1,140 @@
+{
+	"map_name": "new_map",
+	"mission_slot_count": 8,
+	"grid_size": {
+		"x": 2,
+		"y": 2
+	},
+	"tile_size": {
+		"half_width": 64,
+		"half_height": 32
+	},
+	"grid_origin": {
+		"x": 448,
+		"y": 157
+	},
+	"markers": {
+		"spawn_alpha": {
+			"marker_type_id": "spawn_alpha",
+			"name": "Spawn Alpha",
+			"placement_context": "editor_only",
+			"symbol": "diamond",
+			"color": {
+				"r": 0.38,
+				"g": 0.78,
+				"b": 1.0,
+				"a": 0.98
+			},
+			"x": 384,
+			"y": 221
+		},
+		"spawn_bravo": {
+			"marker_type_id": "spawn_bravo",
+			"name": "Spawn Bravo",
+			"placement_context": "editor_only",
+			"symbol": "diamond",
+			"color": {
+				"r": 1.0,
+				"g": 0.56,
+				"b": 0.42,
+				"a": 0.98
+			},
+			"x": 512,
+			"y": 221
+		},
+		"objective_point": {
+			"marker_type_id": "objective_point",
+			"name": "Objective",
+			"placement_context": "editor_only",
+			"symbol": "flag",
+			"color": {
+				"r": 1.0,
+				"g": 0.86,
+				"b": 0.24,
+				"a": 0.98
+			},
+			"x": 448,
+			"y": 285
+		}
+	},
+	"patrol_paths": {
+		"enemy_delta": [
+			{
+				"x": 512,
+				"y": 221
+			},
+			{
+				"x": 560,
+				"y": 245
+			}
+		],
+		"enemy_echo": [
+			{
+				"x": 512,
+				"y": 221
+			},
+			{
+				"x": 464,
+				"y": 245
+			}
+		]
+	},
+	"tiles": [
+		{
+			"grid_position": {
+				"x": 0,
+				"y": 0
+			},
+			"type_id": "ground_flat",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 0,
+			"object_height": 0,
+			"surface_type": "ground",
+			"edge_type": "cliff"
+		},
+		{
+			"grid_position": {
+				"x": 0,
+				"y": 1
+			},
+			"type_id": "ground_flat",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 0,
+			"object_height": 0,
+			"surface_type": "ground",
+			"edge_type": "cliff"
+		},
+		{
+			"grid_position": {
+				"x": 1,
+				"y": 0
+			},
+			"type_id": "ground_flat",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 0,
+			"object_height": 0,
+			"surface_type": "ground",
+			"edge_type": "cliff"
+		},
+		{
+			"grid_position": {
+				"x": 1,
+				"y": 1
+			},
+			"type_id": "ground_flat",
+			"walkable": true,
+			"blocks_los": false,
+			"cover_value": 0,
+			"height_level": 0,
+			"object_height": 0,
+			"surface_type": "ground",
+			"edge_type": "cliff"
+		}
+	]
+}
