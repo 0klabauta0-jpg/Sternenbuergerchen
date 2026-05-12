@@ -3,7 +3,7 @@
 ## Ziel
 Navigation-Budgets, Export-Defaults und Fallback-Pfade sollen zusammenpassen. Der Task verhindert stille Pathfinding-Spikes, besonders wenn Ziele nicht direkt erreichbar sind.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT
 
 ## Voraussetzung
 - TASK_217 - Navigation Pathfinding LOS Performance Pass
@@ -32,10 +32,10 @@ Der Performance-Budget-Contract fuehrt Navigation als budgetierten Bereich. Glei
 - Keine Aenderung an Terrain-Semantik.
 
 ## Akzeptanzkriterien
-- [ ] Navigation-Export-Defaults und Budget-Contract sind konsistent oder die Abweichung ist dokumentiert.
-- [ ] Unreachable-/Bad-Target-Faelle erzeugen keine unbudgetierten Mehrfachpfad-Spikes.
-- [ ] Fallback-Diagnose ist im Report sichtbar.
-- [ ] Navigation- und Performance-Gates bleiben gruen.
+- [x] Navigation-Export-Defaults und Budget-Contract sind konsistent oder die Abweichung ist dokumentiert.
+- [x] Unreachable-/Bad-Target-Faelle erzeugen keine unbudgetierten Mehrfachpfad-Spikes.
+- [x] Fallback-Diagnose ist im Report sichtbar.
+- [x] Navigation- und Performance-Gates bleiben gruen.
 
 ## Erwartete Dateien
 - `scripts/core/simulation_root.gd`
@@ -47,10 +47,10 @@ Der Performance-Budget-Contract fuehrt Navigation als budgetierten Bereich. Glei
 - `docs/IMPLEMENTATION_STATUS.md`
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_333_navigation_fallback_budget_contract_alignment.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_217_navigation_pathfinding_los_performance_pass.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_222_performance_regression_gate_and_manual_profile_checklist.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_333_navigation_fallback_budget_contract_alignment.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_217_navigation_pathfinding_los_performance_pass.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_222_performance_regression_gate_and_manual_profile_checklist.gd`
+- [x] `git diff --check`
 
 ## Risiken
 - Zu aggressive Budgetierung kann Units an schlechten Zielpunkten scheinbar nicht reagieren lassen. Tests muessen deshalb sowohl Budget als auch nachvollziehbares Feedback pruefen.

@@ -33,7 +33,10 @@
 		"navigation": {
 			"max_open_hpa_avg_query_usec": 200000,
 			"max_path_query_budget_per_tick": 1,
+			"max_fallback_path_attempts_per_request": 1,
+			"max_fallback_candidate_warning_threshold": 32,
 			"require_delay_diagnostics": true,
+			"require_fallback_diagnostics": true,
 			"require_los_and_cover_metrics": true
 		},
 		"simulation": {

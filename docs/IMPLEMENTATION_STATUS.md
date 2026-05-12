@@ -10,6 +10,15 @@
 
 ## Aktueller Startzustand
 
+### TASK_333 - Navigation Fallback Budget Contract Alignment
+- Status: implementiert im Arbeitsstand
+- Stand: `SimulationRoot.navigation_max_new_path_queries_per_tick` ist jetzt mit dem Performance-Budget-Contract auf `1` ausgerichtet. Szenen setzen keine eigenen Navigation-Budget-Overrides.
+- Stand: Der Bad-Target-Fallback nutzt per HPA-Abstract-Graph erreichbare Komponenten fuer die Fallback-Zielwahl und entfernt die versteckte per-candidate-A*-Schleife aus `_find_nearest_reachable_walkable_grid`.
+- Stand: Der Navigation-Debug-Snapshot meldet Fallback-Resolutionen, Kandidatenmenge, Fallback-Pfadversuche, Abbrueche, Kandidatenbudget-Warnungen und `last_fallback_diagnostic`.
+- Stand: `data/performance_budget_contract.json` enthaelt jetzt Fallback-Grenzen fuer maximal einen Fallback-Pfadversuch pro Request und eine Kandidaten-Warnschwelle von 32.
+- Risiken: Grosse zusammenhaengende Komponenten koennen weiterhin viele Kandidaten in einer guenstigen HPA-Komponenten-Auswahl betrachten; das wird jetzt als Warnung sichtbar und erzeugt keine versteckten Mehrfachpfadversuche.
+- Lokale Pruefung: `task_333_navigation_fallback_budget_contract_alignment.gd`, `task_217_navigation_pathfinding_los_performance_pass.gd`, `task_222_performance_regression_gate_and_manual_profile_checklist.gd` und `git diff --check` laufen gruen.
+
 ### TASK_332 - Terrain Map Frame Budget Proxy Sync Pass
 - Status: implementiert im Arbeitsstand
 - Stand: `TerrainMap3DView` trennt den frame-live Proxy-Sync jetzt in Bewegung/Rotation, Sichtbarkeit, Status-Badges und schwere statische Diagnosezaehlungen. Asset-/Socket-/Loadout-/Missing-Model-Counter laufen nur noch bei Dirty-Zustand wie Force-Rebuild, Proxy-Erstellung/-Entfernung oder Team-Meta-Aenderung.
