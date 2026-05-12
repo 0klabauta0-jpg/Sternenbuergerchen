@@ -531,6 +531,9 @@ TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass (implementiert im Ar
 Phase 18ZF - Ground Mission Default Playability
 TASK_344 - Ground Mission Default Enemy Visuals (implementiert)
 
+Phase 18ZG - NPC Movement Posture Standard Behavior
+TASK_345 - NPC Standard Movement Posture Policy (geplant)
+
 Batch-Empfehlung
 
 Codex soll Tasks in kleinen Gruppen bearbeiten:

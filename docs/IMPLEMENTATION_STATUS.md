@@ -20,6 +20,12 @@
 - Risiken: Die Aim-Pose ist ein V1-Render-Pose-Offset am sichtbaren Blaster, kein vollstaendiger Schiessanimationsclip fuer Arme/Schulter. Finale optische Balance der Ground-Spawnpunkte und Fireteam-Verteilung bleibt ein manueller Playtest-Punkt.
 - Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_344_ground_mission_default_enemy_visuals.gd`, `task_233_portrait_identity_catalog_and_roster_presentation.gd`, `task_205_weapon_fire_vfx_muzzle_flash_particles.gd`, `task_201_weapon_range_scale_and_tile_distance_patch.gd`, `task_186_mission_map_unit_presence_registry_audit.gd`, `task_202_enemy_security_direction_and_los_patch.gd` und `git diff --check` laufen gruen.
 
+### TASK_345 - NPC Standard Movement Posture Policy
+- Status: geplant
+- Stand: Der Task spezifiziert einen expliziten Standardvertrag fuer NPC-Bewegung und Waffenhaltung: `travel/lowered`, `tactical/ready`, `engage/aimed` und `overwatch/ready`.
+- Stand: Bestehende `move_speed_factor`-, Enemy-Team-Tactics- und TASK_344-Aim-Pose-Pfade sollen weiterverwendet werden. Die Gameplay-Wahrheit bleibt in Simulation/Taktik; `TerrainMap3DView` liest die Posture nur fuer die Darstellung.
+- Offene Punkte: Implementierung, Speed-Tuning, Schwellenwert fuer M-Position und Headless-Verifier.
+
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
 - Stand: Dropship-Visuals bauen ihre Dirty-Signatur wieder fehlerfrei, geplante LZs bleiben auch bei offmap/hidden Craft sichtbar, und Multi-Dropship-Payloads werden aus dem rohen Mission-Card-State statt aus stale Selected-Card-State uebernommen.
