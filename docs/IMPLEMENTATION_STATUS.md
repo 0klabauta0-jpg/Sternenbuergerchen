@@ -92,9 +92,11 @@
 - Lokale Pruefung: `task_354_homebase_direct_loadout_regression_matrix.gd`, `task_350_homebase_loadout_contract_export.gd`, `task_351_homebase_direct_payload_scope_contract.gd`, `task_352_homebase_loadout_defaults_preserve_unit_profiles.gd` und `git diff --check` laufen gruen.
 
 ### TASK_355 - Homebase Direct UX Payload Truth
-- Status: geplant
-- Stand: Review-Finding nach TASK_350. Spieler muessen klar sehen koennen, welche Fireteams nur in Homebase/Loadout bearbeitet werden und welche wirklich im Flightdeck-Dropship sitzen.
-- Naechster Schritt: Dichte UI-Status-/Badge-Wahrheit fuer Homebase-Direct-Payload ergaenzen, ohne neue Gameplay-Wahrheit in UI-Callbacks zu schaffen.
+- Status: implementiert
+- Stand: Homebase-Direct-Fireteam-Karten, Loadout-Status, Flightdeck-Status und Mission-Startbereich zeigen jetzt dieselbe Payload-Wahrheit: Homebase-only, Loadout editing, Boarded / Flightdeck oder blockierte Flightdeck-Queue.
+- Stand: Startbutton, Mission-Transferlabel, Aircraft-Snapshot und Direct-Staging-Snapshot tragen Payload-Operatorcount, Payload-Fireteamcount, Boarded/Blocked-Status und Blockgruende als Metadaten bzw. Snapshot-Felder.
+- Stand: Ein Fireteam zaehlt sichtbar erst als `Boarded / Flightdeck`, wenn ein echter Homebase-Dropship-Craft stagebar ist. Ohne Craft bleibt es als blockierte Queue mit Operatorcount und TASK_349-Blockertext sichtbar, aber nicht als embarked Payload.
+- Lokale Pruefung: `task_355_homebase_direct_ux_payload_truth.gd`, `task_346_homebase_direct_staging_character_popup.gd`, `task_349_homebase_direct_staging_real_flightdeck_craft_gate.gd`, `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd` und `git diff --check` laufen gruen.
 
 ### TASK_356 - MapEditor Lazy Terrain Texture Catalog
 - Status: geplant

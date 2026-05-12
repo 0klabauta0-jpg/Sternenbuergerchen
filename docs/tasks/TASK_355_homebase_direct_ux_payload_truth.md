@@ -3,7 +3,7 @@
 ## Ziel
 Die Homebase-UI soll klar unterscheiden, welche Fireteams nur im Homebase-Team/Loadout-Kontext liegen und welche wirklich im Flightdeck-Dropship fuer den Missionsstart sitzen.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Problem
 Nach dem FOB-Bypass liegen Fireteam-Auswahl, Loadout und Flightdeck direkt in der Homebase. Fuer Spieler kann aber unklar sein, ob ein Fireteam nur in `#10 FIRETEAMS` / `#13 LOADOUT` bearbeitet wird oder bereits im Dropship sitzt und beim Start wirklich mitfliegt.
@@ -22,11 +22,17 @@ Die Gameplay-Kette braucht einen harten Payload-Scope (TASK_351). Die UI sollte 
 - Keine neue Marketing-/Tutorial-Flache; kurze, dichte UI-Signale in vorhandenen Panels.
 
 ## Akzeptanzkriterien
-- [ ] Spieler kann auf einen Blick sehen, welche Fireteams im Dropship sitzen.
-- [ ] Startstatus nennt die wirkliche Payload-Anzahl, nicht nur die Homebase-Auswahl.
-- [ ] Blockertexte bleiben sichtbar und passend zu TASK_349.
-- [ ] UI-Snapshot-/Verifier prueft die relevanten Labels oder Metadaten.
-- [ ] Keine Ueberlappung/Clipping-Regression in Homebase-Drop-Light-Layout.
+- [x] Spieler kann auf einen Blick sehen, welche Fireteams im Dropship sitzen.
+- [x] Startstatus nennt die wirkliche Payload-Anzahl, nicht nur die Homebase-Auswahl.
+- [x] Blockertexte bleiben sichtbar und passend zu TASK_349.
+- [x] UI-Snapshot-/Verifier prueft die relevanten Labels oder Metadaten.
+- [x] Keine Ueberlappung/Clipping-Regression in Homebase-Drop-Light-Layout.
+
+## Umsetzung
+- `#10 FIRETEAMS`, `#13 LOADOUT`, Flightdeck-Zeilen und Mission-Startbereich lesen ihre Payload-Anzeige jetzt aus demselben Homebase-Direct-Craft-Gate und den wirklich gestagten Flightdeck-Fireteams.
+- Fireteam-Karten unterscheiden `Staged in Homebase`, `Loadout editing`, `Boarded / Flightdeck` und blockierte Flightdeck-Queues wie `Blocked: no dropship`.
+- Snapshots und UI-Nodes tragen Test-Metadaten fuer Payload-Operatorcount, Fireteamcount, Boarded/Blocked-Status und Blockgruende.
+- Der neue Verifier `task_355_homebase_direct_ux_payload_truth.gd` prueft Homebase-only, Loadout-only, boarded und blocked Payload-Zustaende.
 
 ## Erwartete Dateien
 - `scripts/meta/homebase_screen.gd`
@@ -36,11 +42,11 @@ Die Gameplay-Kette braucht einen harten Payload-Scope (TASK_351). Die UI sollte 
 - ggf. `scripts/tests/task_346_homebase_direct_staging_character_popup.gd`
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_355_homebase_direct_ux_payload_truth.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_346_homebase_direct_staging_character_popup.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_349_homebase_direct_staging_real_flightdeck_craft_gate.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_355_homebase_direct_ux_payload_truth.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_346_homebase_direct_staging_character_popup.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_349_homebase_direct_staging_real_flightdeck_craft_gate.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd`
+- [x] `git diff --check`
 
 ## Risiken / offene Punkte
 - Der Task soll UI-Wahrheit sichtbar machen, nicht neue Gameplay-Wahrheit in UI-Callbacks erzeugen.

@@ -243,6 +243,8 @@ func get_personnel_notification_snapshot() -> Dictionary:
 func get_aircraft_panel_snapshot() -> Dictionary:
 	var selected_craft: Dictionary = _get_selected_aircraft_definition()
 	var direct_craft_gate: Dictionary = _get_homebase_direct_staging_craft_gate()
+	var payload_fireteam_ids: PackedStringArray = _get_homebase_direct_payload_fireteam_ids()
+	var payload_operator_count: int = _build_unit_ids_for_fireteams(payload_fireteam_ids).size()
 	return {
 		"selected_aircraft_id": _selected_aircraft_id,
 		"visible_aircraft_definitions": _get_visible_homebase_aircraft_definitions(),
@@ -264,6 +266,9 @@ func get_aircraft_panel_snapshot() -> Dictionary:
 		"fixed_character_sheet_visible": _node_is_visible("Panel/Margin/VBox/ContentRow/InfoPanel"),
 		"character_popup_visible": _node_is_visible("CharacterSheetPopup"),
 		"staged_fireteam_ids": Array(_homebase_dropship_staged_fireteam_ids),
+		"payload_fireteam_ids": Array(payload_fireteam_ids),
+		"payload_operator_count": payload_operator_count,
+		"homebase_direct_payload_status_text": _build_homebase_direct_payload_status_text(direct_craft_gate, false),
 		"homebase_direct_craft_ready": bool(direct_craft_gate.get("can_stage", false)),
 		"homebase_direct_craft_block_reason": String(direct_craft_gate.get("block_reason", "")).strip_edges(),
 		"homebase_direct_craft_block_text": String(direct_craft_gate.get("block_text", "")).strip_edges(),
@@ -292,6 +297,8 @@ func build_homebase_direct_drop_state() -> Dictionary:
 		"transport_craft_id": payload_craft_id,
 		"dropship_phase": "homebase_ready" if direct_ready else "waiting",
 		"queued_fireteam_ids": Array(payload_fireteam_ids),
+		"queued_unit_ids": Array(payload_unit_ids),
+		"queued_passenger_count": payload_unit_ids.size(),
 		"boarded_fireteam_ids": Array(boarded_fireteam_ids),
 		"embarked_unit_ids": Array(embarked_unit_ids),
 		"launch_ready_craft_id": payload_craft_id if direct_ready else "",
@@ -321,6 +328,9 @@ func build_homebase_direct_drop_state() -> Dictionary:
 		"homebase_team_unit_configs": _build_homebase_selected_unit_configs(),
 		"homebase_fireteam_definitions": fireteam_definitions.duplicate(true),
 		"homebase_direct_staging": true,
+		"homebase_direct_payload_status_text": _build_homebase_direct_payload_status_text(craft_gate, false),
+		"homebase_direct_payload_operator_count": payload_unit_ids.size(),
+		"homebase_direct_payload_fireteam_count": payload_fireteam_ids.size(),
 		"homebase_direct_craft_ready": bool(craft_gate.get("can_stage", false)),
 		"homebase_direct_craft_block_reason": String(craft_gate.get("block_reason", "")).strip_edges(),
 		"homebase_direct_craft_block_text": String(craft_gate.get("block_text", "")).strip_edges(),
@@ -330,6 +340,8 @@ func build_homebase_direct_drop_state() -> Dictionary:
 func get_homebase_direct_staging_snapshot() -> Dictionary:
 	var drop_state: Dictionary = build_homebase_direct_drop_state()
 	var craft_gate: Dictionary = _get_homebase_direct_staging_craft_gate()
+	var payload_fireteam_ids: PackedStringArray = _get_homebase_direct_payload_fireteam_ids()
+	var payload_operator_count: int = _build_unit_ids_for_fireteams(payload_fireteam_ids).size()
 	return {
 		"direct_staging_enabled": true,
 		"fireteams_panel_visible": _node_is_visible("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel"),
@@ -340,6 +352,10 @@ func get_homebase_direct_staging_snapshot() -> Dictionary:
 		"selected_unit_ids": Array(_selected_unit_ids),
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
 		"staged_fireteam_ids": Array(_homebase_dropship_staged_fireteam_ids),
+		"payload_fireteam_ids": Array(payload_fireteam_ids),
+		"payload_operator_count": payload_operator_count,
+		"payload_status_text": _build_homebase_direct_payload_status_text(craft_gate, false),
+		"fireteam_payload_statuses": _build_homebase_fireteam_payload_status_snapshot(craft_gate),
 		"embarked_unit_ids": Array(PackedStringArray(Array(drop_state.get("embarked_unit_ids", [])))),
 		"drop_ship_staged": bool(drop_state.get("drop_ship_staged", false)),
 		"member_loadouts": Dictionary(drop_state.get("member_loadouts", {})).duplicate(true),
@@ -1193,6 +1209,7 @@ func _create_homebase_fireteam_card(fireteam_id: String, source_context: String 
 		source_context,
 		"Homebase direct staging"
 	)
+	_apply_homebase_fireteam_card_payload_truth(card, fireteam_id, source_context)
 	if not card.card_pressed.is_connected(_on_homebase_fireteam_card_pressed):
 		card.card_pressed.connect(_on_homebase_fireteam_card_pressed)
 	if not card.rename_committed.is_connected(_on_homebase_fireteam_label_committed):
@@ -1378,7 +1395,11 @@ func _update_homebase_flightdeck_staging_panel() -> void:
 	var status_label := _ensure_homebase_direct_staging_status_label(panel) if panel != null else null
 	var craft_gate: Dictionary = _get_homebase_direct_staging_craft_gate()
 	if status_label != null:
-		status_label.text = _build_homebase_direct_staging_status_text(craft_gate)
+		var status_text: String = _build_homebase_direct_staging_status_text(craft_gate)
+		status_label.text = status_text
+		status_label.set_meta("homebase_direct_payload_status_text", status_text)
+		status_label.set_meta("homebase_direct_payload_operator_count", _get_homebase_direct_payload_operator_count())
+		status_label.set_meta("homebase_direct_payload_fireteam_count", _get_homebase_direct_payload_fireteam_ids().size())
 		status_label.set_meta("homebase_direct_craft_block_reason", String(craft_gate.get("block_reason", "")).strip_edges())
 		status_label.set_meta("homebase_direct_craft_ready", bool(craft_gate.get("can_stage", false)))
 	_clear_container(list)
@@ -1393,11 +1414,23 @@ func _build_homebase_dropship_fireteam_row(fireteam_id: String) -> Control:
 	var row := HBoxContainer.new()
 	row.name = "DirectDropshipFireteam_%s" % fireteam_id
 	row.add_theme_constant_override("separation", 4)
+	var craft_gate: Dictionary = _get_homebase_direct_staging_craft_gate()
+	var status: Dictionary = _build_homebase_fireteam_payload_status(fireteam_id, "homebase_dropship", craft_gate)
+	row.set_meta("homebase_direct_payload_row", true)
+	row.set_meta("fireteam_id", fireteam_id)
+	row.set_meta("homebase_direct_payload_status", String(status.get("status", "")).strip_edges())
+	row.set_meta("homebase_direct_payload_operator_count", int(status.get("operator_count", 0)))
+	row.set_meta("homebase_direct_payload_boarded", bool(status.get("boarded", false)))
+	row.set_meta("homebase_direct_payload_block_reason", String(status.get("block_reason", "")).strip_edges())
 	var label := Label.new()
-	label.text = "%s | %d operators" % [_get_fireteam_label(fireteam_id), _get_member_unit_ids_for_fireteam(fireteam_id).size()]
+	label.text = "%s | %s" % [_get_fireteam_label(fireteam_id), String(status.get("visible_text", "")).strip_edges()]
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.add_theme_font_size_override("font_size", 9)
 	META_UI_SKIN_SCRIPT.style_body_label(label, 9)
+	label.set_meta("homebase_direct_payload_status", String(status.get("status", "")).strip_edges())
+	label.set_meta("homebase_direct_payload_operator_count", int(status.get("operator_count", 0)))
+	label.set_meta("homebase_direct_payload_boarded", bool(status.get("boarded", false)))
+	label.tooltip_text = String(status.get("tooltip_text", "")).strip_edges()
 	row.add_child(label)
 	var remove_button := Button.new()
 	remove_button.text = "x"
@@ -1526,18 +1559,34 @@ func _update_mission_info() -> void:
 	var staged_count: int = _selected_unit_ids.size()
 	var pilot_count: int = _mission_pilot_count_override if _mission_pilot_count_override >= 0 else _count_assigned_pilots()
 	var mission_slot_usage: int = _mission_slot_usage_override if _mission_slot_usage_override >= 0 else staged_count + pilot_count
+	var direct_craft_gate: Dictionary = _get_homebase_direct_staging_craft_gate()
+	var direct_payload_fireteam_count: int = _get_homebase_direct_payload_fireteam_ids().size()
+	var direct_payload_operator_count: int = _get_homebase_direct_payload_operator_count()
+	var direct_payload_status_text: String = _build_homebase_direct_payload_status_text(direct_craft_gate, false)
 	var direct_payload_ready: bool = _has_homebase_direct_launch_payload()
 	var can_start_mission: bool = can_request_mission_start()
 	start_mission_button.disabled = not can_start_mission
 	start_mission_button.text = "Start"
+	start_mission_button.set_meta("homebase_direct_payload_ready", direct_payload_ready)
+	start_mission_button.set_meta("homebase_direct_payload_operator_count", direct_payload_operator_count)
+	start_mission_button.set_meta("homebase_direct_payload_fireteam_count", direct_payload_fireteam_count)
+	start_mission_button.set_meta("homebase_direct_payload_status_text", direct_payload_status_text)
 	META_UI_SKIN_SCRIPT.style_transfer_button(start_mission_button, can_start_mission)
 	mission_name_label.text = _selected_mission_name
 	mission_team_limit_label.text = "Mission slots: %d / %d" % [mini(mission_slot_usage, _selected_mission_slot_count), _selected_mission_slot_count]
 	var launch_text: String = _mission_launch_summary if not _mission_launch_summary.is_empty() else ("Homebase dropship ready" if direct_payload_ready else ("Dropship ready for launch" if _mission_launch_ready else "Dropship not launch-ready"))
-	mission_transfer_label.text = "Map: %s | Transfer: %s | Pilots: %d | %s" % [_build_selected_mission_map_label(), _build_transfer_status_text(staged_count, team_capacity), pilot_count, launch_text]
+	mission_transfer_label.text = "Map: %s | Transfer: %s | Pilots: %d | %s | %s" % [_build_selected_mission_map_label(), _build_transfer_status_text(staged_count, team_capacity), pilot_count, launch_text, direct_payload_status_text]
+	mission_transfer_label.set_meta("homebase_direct_payload_ready", direct_payload_ready)
+	mission_transfer_label.set_meta("homebase_direct_payload_operator_count", direct_payload_operator_count)
+	mission_transfer_label.set_meta("homebase_direct_payload_fireteam_count", direct_payload_fireteam_count)
+	mission_transfer_label.set_meta("homebase_direct_payload_status_text", direct_payload_status_text)
 	mission_summary_label.text = _build_mission_summary_text(staged_count, team_capacity, pilot_count, mission_slot_usage)
 	if not _mission_launch_summary.is_empty():
 		mission_summary_label.text = "%s\n%s" % [mission_summary_label.text, _mission_launch_summary]
+	mission_summary_label.set_meta("homebase_direct_payload_ready", direct_payload_ready)
+	mission_summary_label.set_meta("homebase_direct_payload_operator_count", direct_payload_operator_count)
+	mission_summary_label.set_meta("homebase_direct_payload_fireteam_count", direct_payload_fireteam_count)
+	mission_summary_label.set_meta("homebase_direct_payload_status_text", direct_payload_status_text)
 	_update_personnel_notifications()
 
 
@@ -2854,22 +2903,170 @@ func _build_homebase_fireteam_summary_text() -> String:
 	return "%d staged | %d assigned | Drop operators onto cards, then drop fireteams to Loadout or Flightdeck." % [_selected_unit_ids.size(), assigned_count]
 
 
+func _get_homebase_direct_payload_fireteam_ids() -> PackedStringArray:
+	return _filter_existing_fireteam_ids(_homebase_dropship_staged_fireteam_ids)
+
+
+func _get_homebase_direct_payload_operator_count() -> int:
+	return _build_unit_ids_for_fireteams(_get_homebase_direct_payload_fireteam_ids()).size()
+
+
+func _build_homebase_fireteam_payload_status_snapshot(craft_gate: Dictionary) -> Array:
+	var snapshot: Array = []
+	for definition_variant in _fireteam_definitions:
+		if typeof(definition_variant) != TYPE_DICTIONARY:
+			continue
+		var definition: Dictionary = Dictionary(definition_variant)
+		var fireteam_id: String = _normalize_fireteam_id(String(definition.get("id", "")))
+		if fireteam_id.is_empty():
+			continue
+		snapshot.append(_build_homebase_fireteam_payload_status(fireteam_id, "fireteam_list", craft_gate))
+	return snapshot
+
+
+func _apply_homebase_fireteam_card_payload_truth(card: FOBFireteamCard, fireteam_id: String, source_context: String) -> void:
+	if card == null:
+		return
+	var craft_gate: Dictionary = _get_homebase_direct_staging_craft_gate()
+	var status: Dictionary = _build_homebase_fireteam_payload_status(fireteam_id, source_context, craft_gate)
+	var status_text: String = String(status.get("visible_text", "")).strip_edges()
+	var loadout_text: String = String(_get_fireteam_definition(fireteam_id).get("loadout", HOMEBASE_DEFAULT_LOADOUT_ID)).strip_edges().to_upper()
+	if loadout_text.is_empty():
+		loadout_text = HOMEBASE_DEFAULT_LOADOUT_ID.to_upper()
+	var stage_label := card.get_node_or_null("Margin/VBox/StageLabel") as Label
+	if stage_label != null:
+		stage_label.text = "Loadout: %s | %s" % [loadout_text, status_text]
+		stage_label.set_meta("homebase_direct_payload_status", String(status.get("status", "")).strip_edges())
+		stage_label.set_meta("homebase_direct_payload_operator_count", int(status.get("operator_count", 0)))
+		stage_label.set_meta("homebase_direct_payload_boarded", bool(status.get("boarded", false)))
+		stage_label.set_meta("homebase_direct_payload_block_reason", String(status.get("block_reason", "")).strip_edges())
+		stage_label.tooltip_text = String(status.get("tooltip_text", "")).strip_edges()
+	var teamfit_label := card.get_node_or_null("Margin/VBox/TeamfitLabel") as Label
+	if teamfit_label != null and source_context == "fireteam_list":
+		teamfit_label.text = String(status.get("detail_text", "")).strip_edges()
+		teamfit_label.visible = not teamfit_label.text.is_empty()
+		teamfit_label.set_meta("homebase_direct_payload_status", String(status.get("status", "")).strip_edges())
+		teamfit_label.set_meta("homebase_direct_payload_operator_count", int(status.get("operator_count", 0)))
+		teamfit_label.set_meta("homebase_direct_payload_boarded", bool(status.get("boarded", false)))
+		teamfit_label.tooltip_text = String(status.get("tooltip_text", "")).strip_edges()
+	card.set_meta("homebase_direct_payload_status", String(status.get("status", "")).strip_edges())
+	card.set_meta("homebase_direct_payload_text", status_text)
+	card.set_meta("homebase_direct_payload_operator_count", int(status.get("operator_count", 0)))
+	card.set_meta("homebase_direct_payload_fireteam_count", _get_homebase_direct_payload_fireteam_ids().size())
+	card.set_meta("homebase_direct_payload_boarded", bool(status.get("boarded", false)))
+	card.set_meta("homebase_direct_payload_queued", bool(status.get("queued", false)))
+	card.set_meta("homebase_direct_payload_block_reason", String(status.get("block_reason", "")).strip_edges())
+	card.tooltip_text = String(status.get("tooltip_text", "")).strip_edges()
+
+
+func _build_homebase_fireteam_payload_status(fireteam_id: String, source_context: String, craft_gate: Dictionary) -> Dictionary:
+	var normalized_id: String = _normalize_fireteam_id(fireteam_id)
+	var payload_fireteam_ids: PackedStringArray = _get_homebase_direct_payload_fireteam_ids()
+	var operator_count: int = _get_member_unit_ids_for_fireteam(normalized_id).size()
+	var is_queued: bool = payload_fireteam_ids.has(normalized_id)
+	var craft_ready: bool = bool(craft_gate.get("can_stage", false))
+	var block_reason: String = String(craft_gate.get("block_reason", "")).strip_edges()
+	var block_text: String = String(craft_gate.get("block_text", "")).strip_edges()
+	var loadout_editing: bool = _normalize_fireteam_id(_loadout_staged_fireteam_id) == normalized_id or source_context == "loadout_staging"
+	var status_id := "homebase"
+	var visible_text := "Staged in Homebase | not boarded"
+	var detail_text := "Not in launch payload"
+	var boarded := false
+	if is_queued and craft_ready:
+		status_id = "boarded"
+		boarded = true
+		visible_text = "Boarded / Flightdeck | %d operators" % operator_count
+		if loadout_editing:
+			visible_text = "Loadout editing | %s" % visible_text
+		detail_text = "True mission payload"
+	elif is_queued:
+		status_id = "blocked"
+		visible_text = "%s | %d operators queued" % [_build_homebase_direct_block_badge(block_reason), operator_count]
+		if loadout_editing:
+			visible_text = "Loadout editing | %s" % visible_text
+		detail_text = block_text if not block_text.is_empty() else _build_homebase_direct_block_badge(block_reason)
+	elif loadout_editing:
+		status_id = "loadout_editing"
+		visible_text = "Loadout editing | not boarded"
+		detail_text = "Kit edits only; not a launch payload"
+	var tooltip_text: String = detail_text
+	if block_text.is_empty():
+		block_text = String(craft_gate.get("block_text", "")).strip_edges()
+	if status_id == "blocked" and not block_text.is_empty():
+		tooltip_text = "%s\n%s" % [visible_text, block_text]
+	return {
+		"fireteam_id": normalized_id,
+		"status": status_id,
+		"visible_text": visible_text,
+		"detail_text": detail_text,
+		"tooltip_text": tooltip_text,
+		"operator_count": operator_count,
+		"payload_operator_count": _get_homebase_direct_payload_operator_count(),
+		"payload_fireteam_count": payload_fireteam_ids.size(),
+		"queued": is_queued,
+		"boarded": boarded,
+		"loadout_editing": loadout_editing,
+		"block_reason": block_reason,
+		"block_text": block_text,
+	}
+
+
+func _build_homebase_direct_block_badge(block_reason: String) -> String:
+	match block_reason.strip_edges():
+		"no_homebase_craft":
+			return "Blocked: no dropship"
+		"not_dropship":
+			return "Blocked: selected craft"
+		"air_asset_unavailable":
+			return "Blocked: unavailable craft"
+		"craft_in_transit", "craft_busy":
+			return "Blocked: busy craft"
+		"not_at_homebase":
+			return "Blocked: not at homebase"
+		_:
+			return "Blocked: craft gate"
+
+
+func _build_homebase_direct_payload_status_text(craft_gate: Dictionary, include_blocker_text: bool = true) -> String:
+	var payload_fireteam_ids: PackedStringArray = _get_homebase_direct_payload_fireteam_ids()
+	var payload_operator_count: int = _build_unit_ids_for_fireteams(payload_fireteam_ids).size()
+	var count_text: String = "Payload: %d ops / %d FT" % [payload_operator_count, payload_fireteam_ids.size()]
+	if payload_fireteam_ids.is_empty():
+		return "%s | no fireteam boarded" % count_text
+	if bool(craft_gate.get("can_stage", false)):
+		return "%s | Boarded / Flightdeck" % count_text
+	var block_reason: String = String(craft_gate.get("block_reason", "")).strip_edges()
+	var block_text: String = String(craft_gate.get("block_text", "")).strip_edges()
+	if include_blocker_text and not block_text.is_empty():
+		return "%s | %s | %s" % [count_text, _build_homebase_direct_block_badge(block_reason), block_text]
+	return "%s | %s" % [count_text, _build_homebase_direct_block_badge(block_reason)]
+
+
 func _build_homebase_loadout_status_text(fireteam_id: String, has_focus_fireteam: bool) -> String:
 	if not has_focus_fireteam:
 		return "Drop a fireteam card from #10 here."
 	var member_count: int = _get_member_unit_ids_for_fireteam(fireteam_id).size()
-	return "%s | %d operators | Compact Homebase loadout" % [_get_fireteam_label(fireteam_id), member_count]
+	var craft_gate: Dictionary = _get_homebase_direct_staging_craft_gate()
+	var payload_status: Dictionary = _build_homebase_fireteam_payload_status(fireteam_id, "loadout_staging", craft_gate)
+	return "%s | %d operators | %s" % [_get_fireteam_label(fireteam_id), member_count, String(payload_status.get("visible_text", "Compact Homebase loadout")).strip_edges()]
 
 
 func _build_homebase_direct_staging_status_text(craft_gate: Dictionary) -> String:
-	var payload_fireteam_count: int = _filter_existing_fireteam_ids(_homebase_dropship_staged_fireteam_ids).size()
-	if payload_fireteam_count <= 0:
-		return "Drop a fireteam card here to stage it for a Homebase dropship."
+	var payload_fireteam_ids: PackedStringArray = _get_homebase_direct_payload_fireteam_ids()
+	var payload_operator_count: int = _build_unit_ids_for_fireteams(payload_fireteam_ids).size()
+	var count_text: String = "Flightdeck payload: %d operators / %d fireteam(s)." % [payload_operator_count, payload_fireteam_ids.size()]
+	if payload_fireteam_ids.is_empty():
+		var empty_block_text: String = String(craft_gate.get("block_text", "")).strip_edges()
+		if not empty_block_text.is_empty():
+			return "%s %s" % [count_text, empty_block_text]
+		return "%s Drop a fireteam card here to board it." % count_text
 	if bool(craft_gate.get("can_stage", false)):
 		var craft_def: Dictionary = Dictionary(craft_gate.get("craft", {}))
 		var craft_name: String = String(craft_def.get("display_name", "Dropship")).strip_edges()
-		return "%s ready for %d staged fireteam(s)." % [craft_name, payload_fireteam_count]
-	return "Direct launch blocked: %s" % String(craft_gate.get("block_text", "Add a Homebase dropship to the Flightdeck.")).strip_edges()
+		return "%s %s ready. Boarded / Flightdeck." % [count_text, craft_name]
+	var block_reason: String = String(craft_gate.get("block_reason", "")).strip_edges()
+	var block_text: String = String(craft_gate.get("block_text", "Add a Homebase dropship to the Flightdeck.")).strip_edges()
+	return "%s %s. %s" % [count_text, _build_homebase_direct_block_badge(block_reason), block_text]
 
 
 func _build_homebase_mission_drop_cards(payload_fireteam_ids: PackedStringArray, payload_unit_ids: PackedStringArray, payload_craft_id: String = "", payload_ready: bool = false) -> Array:
