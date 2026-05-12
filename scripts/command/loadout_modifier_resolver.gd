@@ -2,6 +2,7 @@ class_name LoadoutModifierResolver
 extends RefCounted
 
 const UNIT_LOADOUT_MODIFIERS_SCRIPT: GDScript = preload("res://scripts/command/unit_loadout_modifiers.gd")
+const LOADOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/command/loadout_contract.gd")
 
 const SECONDARY_WEAPON_WEIGHT: float = 0.5
 
@@ -164,30 +165,8 @@ func _calculate_loadout_weight(armor_formula: Dictionary, primary_formula: Dicti
 
 
 func _normalize_weapon_id(weapon_id: String) -> String:
-	var normalized: String = weapon_id.strip_edges().to_lower()
-	match normalized:
-		"none", "no_weapon", "no-weapon", "no weapon", "unarmed", "keine_waffe", "keine-waffe", "keine waffe":
-			return "none"
-		"smg":
-			return "smg"
-		"rifle":
-			return "rifle"
-		"sniper", "sniper_rifle", "sniper-rifle", "sniper rifle", "scharfschuetzengewehr", "praezisionsgewehr":
-			return "sniper"
-		"rocket_launcher", "rocket", "rocketlauncher", "rocket-launcher", "rocket launcher", "panzerfaust", "raketenwerfer":
-			return "rocket_launcher"
-		"medictool", "medic_tool", "medic-tool":
-			return "medictool"
-		"special", "rail_gun", "sonderwaffe":
-			return "special"
-		_:
-			return "rifle"
+	return String(LOADOUT_CONTRACT_SCRIPT.call("normalize_balance_weapon_id", weapon_id, "rifle"))
 
 
 func _normalize_armor_id(armor_id: String) -> String:
-	var normalized: String = armor_id.strip_edges().to_lower()
-	match normalized:
-		"light", "medium", "heavy":
-			return normalized
-		_:
-			return "medium"
+	return String(LOADOUT_CONTRACT_SCRIPT.call("normalize_armor_id", armor_id, "medium"))

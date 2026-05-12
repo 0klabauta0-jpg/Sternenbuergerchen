@@ -9,6 +9,7 @@ const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_ros
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
 const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_labels.gd")
 const DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/drop_light_layout_contract.gd")
+const LOADOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/command/loadout_contract.gd")
 const HOMEBASE_TEAM_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/homebase_team_drop_panel.gd")
 const FOB_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/fob_drop_panel.gd")
 const FOB_FIRETEAM_CARD_SCRIPT: GDScript = preload("res://scripts/meta/fob_fireteam_card.gd")
@@ -25,11 +26,8 @@ const HOMEBASE_SHIPCARD_BUTTON_SIZE := Vector2(166.0, 114.0)
 const HOMEBASE_SHIPCARD_IMAGE_OFFSET := Vector2(-58.0, -36.0)
 const HOMEBASE_DEFAULT_FIRETEAM_ID := "ft1"
 const HOMEBASE_DEFAULT_LOADOUT_ID := "medium"
-const HOMEBASE_LOADOUT_OPTIONS := ["light", "medium", "heavy"]
 const HOMEBASE_DEFAULT_PRIMARY_WEAPON := "rifle"
 const HOMEBASE_DEFAULT_SECONDARY_WEAPON := "none"
-const HOMEBASE_PRIMARY_WEAPON_OPTIONS := ["smg", "rifle", "sniper", "rocket_launcher", "medictool"]
-const HOMEBASE_SECONDARY_WEAPON_OPTIONS := ["none", "smg", "rifle", "sniper", "rocket_launcher", "medictool"]
 const HOMEBASE_DIRECT_STAGING_DROP_KIND := "homebase_dropship"
 
 signal selection_changed(selected_unit_ids)
@@ -1320,9 +1318,9 @@ func _build_homebase_loadout_member_row(fireteam_id: String, unit_id: String, le
 	row.add_child(controls)
 
 	var member_loadout: Dictionary = _get_member_loadout(unit_id)
-	controls.add_child(_build_homebase_loadout_option_row("Armor", HOMEBASE_LOADOUT_OPTIONS, String(member_loadout.get("armor", HOMEBASE_DEFAULT_LOADOUT_ID)), unit_id, "armor"))
-	controls.add_child(_build_homebase_loadout_option_row("Primary", HOMEBASE_PRIMARY_WEAPON_OPTIONS, String(member_loadout.get("weapon_1", HOMEBASE_DEFAULT_PRIMARY_WEAPON)), unit_id, "weapon_1"))
-	controls.add_child(_build_homebase_loadout_option_row("Secondary", HOMEBASE_SECONDARY_WEAPON_OPTIONS, String(member_loadout.get("weapon_2", HOMEBASE_DEFAULT_SECONDARY_WEAPON)), unit_id, "weapon_2"))
+	controls.add_child(_build_homebase_loadout_option_row("Armor", _get_homebase_armor_options(), String(member_loadout.get("armor", HOMEBASE_DEFAULT_LOADOUT_ID)), unit_id, "armor"))
+	controls.add_child(_build_homebase_loadout_option_row("Primary", _get_homebase_primary_weapon_options(), String(member_loadout.get("weapon_1", HOMEBASE_DEFAULT_PRIMARY_WEAPON)), unit_id, "weapon_1"))
+	controls.add_child(_build_homebase_loadout_option_row("Secondary", _get_homebase_secondary_weapon_options(), String(member_loadout.get("weapon_2", HOMEBASE_DEFAULT_SECONDARY_WEAPON)), unit_id, "weapon_2"))
 	return row_panel
 
 
@@ -1356,21 +1354,20 @@ func _build_homebase_loadout_option_row(label_text: String, options: Array, curr
 func _build_homebase_loadout_option_label(option_value: String) -> String:
 	var normalized_value: String = option_value.strip_edges().to_lower()
 	if normalized_value == "light" or normalized_value == "medium" or normalized_value == "heavy":
-		return normalized_value.capitalize()
-	match _normalize_weapon_id(normalized_value):
-		"smg":
-			return "SMG"
-		"rifle":
-			return "Rifle"
-		"sniper":
-			return "Sniper"
-		"rocket_launcher":
-			return "Rocket"
-		"medictool":
-			return "Medictool"
-		"none":
-			return "None"
-	return _normalize_loadout_id(option_value).capitalize()
+		return String(LOADOUT_CONTRACT_SCRIPT.call("get_armor_label", normalized_value))
+	return String(LOADOUT_CONTRACT_SCRIPT.call("get_weapon_label", normalized_value))
+
+
+func _get_homebase_armor_options() -> Array:
+	return Array(LOADOUT_CONTRACT_SCRIPT.call("get_armor_ids"))
+
+
+func _get_homebase_primary_weapon_options() -> Array:
+	return Array(LOADOUT_CONTRACT_SCRIPT.call("get_homebase_primary_weapon_ids"))
+
+
+func _get_homebase_secondary_weapon_options() -> Array:
+	return Array(LOADOUT_CONTRACT_SCRIPT.call("get_homebase_secondary_weapon_ids"))
 
 
 func _update_homebase_flightdeck_staging_panel() -> void:
@@ -2467,38 +2464,23 @@ func _filter_existing_fireteam_ids(source: PackedStringArray) -> PackedStringArr
 
 
 func _normalize_loadout_id(value: String) -> String:
-	var normalized_value: String = value.strip_edges().to_lower()
-	if normalized_value == "standard":
-		return HOMEBASE_DEFAULT_LOADOUT_ID
-	if normalized_value == "light" or normalized_value == "medium" or normalized_value == "heavy":
-		return normalized_value
-	return HOMEBASE_DEFAULT_LOADOUT_ID
+	return String(LOADOUT_CONTRACT_SCRIPT.call("normalize_armor_id", value, HOMEBASE_DEFAULT_LOADOUT_ID))
 
 
 func _normalize_weapon_id(value: String, fallback: String = HOMEBASE_DEFAULT_PRIMARY_WEAPON) -> String:
-	var normalized_value: String = value.strip_edges().to_lower()
-	match normalized_value:
-		"smg", "maschinenpistole", "mp", "machine_pistol", "machine-pistol", "machine pistol", "pistol":
-			return "smg"
-		"rifle", "assault_rifle", "assault-rifle", "assault rifle", "sturmgewehr", "carbine", "dmr":
-			return "rifle"
-		"sniper", "sniper_rifle", "sniper-rifle", "sniper rifle", "scharfschuetzengewehr", "praezisionsgewehr":
-			return "sniper"
-		"rocket_launcher", "rocket", "rocketlauncher", "rocket-launcher", "rocket launcher", "panzerfaust", "raketenwerfer":
-			return "rocket_launcher"
-		"medic_tool", "medic-tool", "medic tool", "medictool":
-			return "medictool"
-		"none", "no_weapon", "no-weapon", "no weapon", "unarmed", "keine_waffe", "keine-waffe", "keine waffe":
-			return "none"
-	return fallback
+	return String(LOADOUT_CONTRACT_SCRIPT.call("normalize_weapon_id", value, fallback))
 
 
 func _make_member_loadout(armor_id: String, weapon_1_id: String, weapon_2_id: String) -> Dictionary:
-	return {
-		"armor": _normalize_loadout_id(armor_id),
-		"weapon_1": _normalize_weapon_id(weapon_1_id, HOMEBASE_DEFAULT_PRIMARY_WEAPON),
-		"weapon_2": _normalize_weapon_id(weapon_2_id, HOMEBASE_DEFAULT_SECONDARY_WEAPON),
-	}
+	return Dictionary(LOADOUT_CONTRACT_SCRIPT.call(
+		"make_member_loadout",
+		armor_id,
+		weapon_1_id,
+		weapon_2_id,
+		HOMEBASE_DEFAULT_LOADOUT_ID,
+		HOMEBASE_DEFAULT_PRIMARY_WEAPON,
+		HOMEBASE_DEFAULT_SECONDARY_WEAPON
+	))
 
 
 func _normalize_member_loadout(
@@ -2507,12 +2489,13 @@ func _normalize_member_loadout(
 	default_weapon_1_id: String = HOMEBASE_DEFAULT_PRIMARY_WEAPON,
 	default_weapon_2_id: String = HOMEBASE_DEFAULT_SECONDARY_WEAPON
 ) -> Dictionary:
-	var loadout: Dictionary = loadout_variant if typeof(loadout_variant) == TYPE_DICTIONARY else {}
-	return _make_member_loadout(
-		String(loadout.get("armor", loadout.get("kit", default_armor_id))),
-		String(loadout.get("weapon_1", loadout.get("primary", default_weapon_1_id))),
-		String(loadout.get("weapon_2", loadout.get("sidearm", default_weapon_2_id)))
-	)
+	return Dictionary(LOADOUT_CONTRACT_SCRIPT.call(
+		"normalize_member_loadout",
+		loadout_variant,
+		default_armor_id,
+		default_weapon_1_id,
+		default_weapon_2_id
+	))
 
 
 func _normalize_member_loadout_dictionary(member_loadouts: Dictionary, default_armor_id: String = HOMEBASE_DEFAULT_LOADOUT_ID) -> Dictionary:

@@ -164,6 +164,7 @@ func _loadout_dropdowns_use_contract_values(screen: Control) -> bool:
 		"smg": true,
 		"rifle": true,
 		"sniper": true,
+		"rail_gun": true,
 		"rocket_launcher": true,
 		"medictool": true,
 	}

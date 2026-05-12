@@ -546,7 +546,7 @@ TASK_350 - Homebase Loadout Contract Export (implementiert)
 Phase 18ZJ - Homebase Direct Review Followups
 TASK_351 - Homebase Direct Payload Scope Contract (implementiert)
 TASK_352 - Homebase Loadout Defaults Preserve Unit Profiles (implementiert)
-TASK_353 - Shared Loadout Contract Helper (geplant)
+TASK_353 - Shared Loadout Contract Helper (implementiert)
 TASK_354 - Homebase Direct Loadout Regression Matrix (geplant)
 TASK_355 - Homebase Direct UX Payload Truth (geplant)
 

@@ -14,6 +14,7 @@ const FOB_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/fob_drop_pan
 const FIRETEAM_COHESION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/fireteam_cohesion_resolver.gd")
 const META_USEROLOGY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/meta_userology_contract.gd")
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
+const LOADOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/command/loadout_contract.gd")
 const LOADOUT_MODIFIER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/command/loadout_modifier_resolver.gd")
 const NPC_RANK_BADGE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
 const HOVER_SCROLL_BEHAVIOR_SCRIPT: GDScript = preload("res://scripts/ui/hover_scroll_behavior.gd")
@@ -41,14 +42,6 @@ const DEFAULT_BOARDING_SECONDS := 6.0
 const DEFAULT_RESPAWN_ANCHOR_SECONDS := 6.0
 const DROPSHIP_NPC_CAPACITY := 6
 const DEFAULT_MEMBER_WEAPON := "smg"
-const WEAPON_LOADOUT_OPTIONS: Array = [
-	{"id": "smg", "label": "SMG"},
-	{"id": "rifle", "label": "Rifle"},
-	{"id": "sniper", "label": "Sniper"},
-	{"id": "rocket_launcher", "label": "Rocket"},
-	{"id": "medictool", "label": "Medictool"},
-	{"id": "none", "label": "None"},
-]
 const DEFAULT_MISSION_NAME := "Operation: FOB Transfer"
 const DEFAULT_MISSION_MAP := "Ground_Mission01_32x32"
 const DEFAULT_MISSION_SLOT_COUNT := 8
@@ -2873,12 +2866,7 @@ func _build_compact_loadout_select(control_name: String, min_width: float, help_
 
 func _populate_compact_armor_option_button(option_button: OptionButton, selected_armor_id: String) -> void:
 	option_button.clear()
-	var armor_options: Array = [
-		{"id": "light", "label": "L"},
-		{"id": "medium", "label": "M"},
-		{"id": "heavy", "label": "H"},
-	]
-	for option_variant in armor_options:
+	for option_variant in Array(LOADOUT_CONTRACT_SCRIPT.call("get_compact_armor_options")):
 		var option: Dictionary = Dictionary(option_variant)
 		var armor_id: String = String(option.get("id", "medium"))
 		option_button.add_item(String(option.get("label", armor_id.capitalize())))
@@ -2889,7 +2877,7 @@ func _populate_compact_armor_option_button(option_button: OptionButton, selected
 
 func _populate_compact_weapon_option_button(option_button: OptionButton, selected_weapon_id: String) -> void:
 	option_button.clear()
-	for option_variant in WEAPON_LOADOUT_OPTIONS:
+	for option_variant in _get_fob_weapon_options():
 		var option: Dictionary = Dictionary(option_variant)
 		var weapon_id: String = String(option.get("id", DEFAULT_MEMBER_WEAPON))
 		option_button.add_item(_build_compact_weapon_label(weapon_id))
@@ -2899,21 +2887,7 @@ func _populate_compact_weapon_option_button(option_button: OptionButton, selecte
 
 
 func _build_compact_weapon_label(weapon_id: String) -> String:
-	match _normalize_weapon_id(weapon_id):
-		"smg":
-			return "SMG"
-		"rifle":
-			return "Rifle"
-		"sniper":
-			return "Snip"
-		"rocket_launcher":
-			return "Rkt"
-		"medictool":
-			return "Med"
-		"none":
-			return "-"
-		_:
-			return "SMG"
+	return String(LOADOUT_CONTRACT_SCRIPT.call("get_compact_weapon_label", weapon_id))
 
 
 func _build_compact_weapon_preview(preview_name: String, weapon_id: String) -> TextureRect:
@@ -3302,39 +3276,23 @@ func _normalize_fireteam_id(value: String) -> String:
 
 
 func _normalize_loadout_id(value: String) -> String:
-	var normalized_value: String = value.strip_edges().to_lower()
-	if normalized_value == "standard":
-		return "medium"
-	if normalized_value == "light" or normalized_value == "medium" or normalized_value == "heavy":
-		return normalized_value
-	return "medium"
+	return String(LOADOUT_CONTRACT_SCRIPT.call("normalize_armor_id", value, "medium"))
 
 
 func _normalize_weapon_id(value: String) -> String:
-	var normalized_value: String = value.strip_edges().to_lower()
-	match normalized_value:
-		"smg", "maschinenpistole", "mp":
-			return "smg"
-		"rifle", "assault_rifle", "sturmgewehr":
-			return "rifle"
-		"sniper", "sniper_rifle", "sniper-rifle", "sniper rifle", "scharfschuetzengewehr", "praezisionsgewehr":
-			return "sniper"
-		"rocket_launcher", "rocket", "rocketlauncher", "rocket-launcher", "rocket launcher", "panzerfaust", "raketenwerfer":
-			return "rocket_launcher"
-		"medic_tool", "medic-tool", "medic tool", "medictool":
-			return "medictool"
-		"none", "no_weapon", "no-weapon", "no weapon", "unarmed", "keine_waffe", "keine-waffe", "keine waffe":
-			return "none"
-		_:
-			return DEFAULT_MEMBER_WEAPON
+	return String(LOADOUT_CONTRACT_SCRIPT.call("normalize_weapon_id", value, DEFAULT_MEMBER_WEAPON))
 
 
 func _make_member_loadout(armor_id: String, weapon_1_id: String, weapon_2_id: String) -> Dictionary:
-	return {
-		"armor": _normalize_loadout_id(armor_id),
-		"weapon_1": _normalize_weapon_id(weapon_1_id),
-		"weapon_2": _normalize_weapon_id(weapon_2_id),
-	}
+	return Dictionary(LOADOUT_CONTRACT_SCRIPT.call(
+		"make_member_loadout",
+		armor_id,
+		weapon_1_id,
+		weapon_2_id,
+		"medium",
+		DEFAULT_MEMBER_WEAPON,
+		DEFAULT_MEMBER_WEAPON
+	))
 
 
 func _sanitize_fireteam_state() -> void:
@@ -3414,15 +3372,15 @@ func _set_member_loadout(fireteam_id: String, unit_id: String, armor_id: String,
 
 func _populate_armor_option_button(option_button: OptionButton, selected_armor_id: String) -> void:
 	option_button.clear()
-	for armor_id in PackedStringArray(["light", "medium", "heavy"]):
-		option_button.add_item(armor_id.capitalize())
+	for armor_id in Array(LOADOUT_CONTRACT_SCRIPT.call("get_armor_ids")):
+		option_button.add_item(String(LOADOUT_CONTRACT_SCRIPT.call("get_armor_label", String(armor_id))))
 		if armor_id == _normalize_loadout_id(selected_armor_id):
 			option_button.select(option_button.item_count - 1)
 
 
 func _populate_weapon_option_button(option_button: OptionButton, selected_weapon_id: String) -> void:
 	option_button.clear()
-	for option in WEAPON_LOADOUT_OPTIONS:
+	for option in _get_fob_weapon_options():
 		var weapon_id: String = String(option["id"])
 		var option_label: String = _build_weapon_option_label(weapon_id, String(option["label"]))
 		var preview_texture := _get_weapon_preview_texture(weapon_id)
@@ -3444,21 +3402,11 @@ func _build_weapon_option_label(weapon_id: String, fallback_label: String = "") 
 
 
 func _build_weapon_label(weapon_id: String) -> String:
-	match _normalize_weapon_id(weapon_id):
-		"smg":
-			return "SMG"
-		"rifle":
-			return "Rifle"
-		"sniper":
-			return "Sniper"
-		"rocket_launcher":
-			return "Rocket"
-		"medictool":
-			return "Medictool"
-		"none":
-			return "None"
-		_:
-			return "SMG"
+	return String(LOADOUT_CONTRACT_SCRIPT.call("get_weapon_label", weapon_id))
+
+
+func _get_fob_weapon_options() -> Array:
+	return Array(LOADOUT_CONTRACT_SCRIPT.call("get_fob_weapon_options"))
 
 
 func _armor_id_from_index(index: int) -> String:
@@ -3474,8 +3422,9 @@ func _armor_id_from_index(index: int) -> String:
 
 
 func _weapon_id_from_index(index: int) -> String:
-	if index >= 0 and index < WEAPON_LOADOUT_OPTIONS.size():
-		return _normalize_weapon_id(String(Dictionary(WEAPON_LOADOUT_OPTIONS[index]).get("id", DEFAULT_MEMBER_WEAPON)))
+	var options: Array = _get_fob_weapon_options()
+	if index >= 0 and index < options.size():
+		return _normalize_weapon_id(String(Dictionary(options[index]).get("id", DEFAULT_MEMBER_WEAPON)))
 	return DEFAULT_MEMBER_WEAPON
 
 
@@ -3527,6 +3476,8 @@ func _get_weapon_preview_path(weapon_id: String) -> String:
 			return SMG_BLASTER_PREVIEW_PATH
 		"rifle":
 			return SMG_BLASTER_PREVIEW_PATH
+		"rail_gun":
+			return SMG_BLASTER_PREVIEW_PATH
 		"sniper":
 			return SNIPER_PREVIEW_PATH
 		"rocket_launcher":
@@ -3544,6 +3495,8 @@ func _get_weapon_preview_texture(weapon_id: String) -> Texture2D:
 		"smg":
 			return SMG_BLASTER_PREVIEW_TEXTURE
 		"rifle":
+			return SMG_BLASTER_PREVIEW_TEXTURE
+		"rail_gun":
 			return SMG_BLASTER_PREVIEW_TEXTURE
 		"sniper":
 			return SNIPER_PREVIEW_TEXTURE

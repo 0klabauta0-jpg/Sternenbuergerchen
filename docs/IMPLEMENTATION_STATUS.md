@@ -78,9 +78,11 @@
 - Lokale Pruefung: `task_352_homebase_loadout_defaults_preserve_unit_profiles.gd`, `task_350_homebase_loadout_contract_export.gd`, `task_351_homebase_direct_payload_scope_contract.gd`, `medic_support_verifier.gd` und `git diff --check` laufen gruen.
 
 ### TASK_353 - Shared Loadout Contract Helper
-- Status: geplant
-- Stand: Review-Finding nach TASK_350. FOB, Homebase, `WeaponData` und `LoadoutModifierResolver` pflegen aehnliche, aber abweichende Loadout-Normalisierung.
-- Naechster Schritt: Kleinen gemeinsamen Contract-Helper fuer Armor/Waffen/Labels/Defaults schneiden und FOB/Homebase darauf umstellen.
+- Status: implementiert
+- Stand: `scripts/command/loadout_contract.gd` ist der gemeinsame Loadout-Contract fuer Armor-/Weapon-Normalisierung, Member-Loadouts, UI-Optionen, Labels und Default-Strategien.
+- Stand: Homebase und FOB verwenden den Helper fuer `armor`, `weapon_1`, `weapon_2`; Homebase behaelt `medium/rifle/none` als Default-Strategie, FOB `medium/smg/smg`.
+- Stand: `special`, `sonderwaffe` und `support_lmg` normalisieren fuer UI/Export bewusst auf den kanonischen `WeaponData`-Wert `rail_gun`. `LoadoutModifierResolver` mappt `rail_gun` explizit weiter auf den bestehenden internen Balance-Formula-Key `special`.
+- Lokale Pruefung: `task_353_shared_loadout_contract_helper.gd`, `task_350_homebase_loadout_contract_export.gd`, `task_316_fob_fireteam_staging_migration.gd`, `medic_support_verifier.gd`, `task_107_verifier.gd` und `git diff --check` laufen gruen.
 
 ### TASK_354 - Homebase Direct Loadout Regression Matrix
 - Status: geplant
