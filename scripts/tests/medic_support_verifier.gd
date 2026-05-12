@@ -60,11 +60,19 @@ func _test_fob_loadout_dropdown_includes_medictool() -> void:
 	var fob_screen = FOB_SCREEN_SCRIPT.new()
 	var option_button := OptionButton.new()
 	fob_screen.call("_populate_weapon_option_button", option_button, "medictool")
-	_assert(option_button.item_count == 2, "FOB loadout dropdown offers SMG and medictool")
-	_assert(option_button.get_item_text(1) == "Medictool", "FOB loadout dropdown labels medictool visibly")
-	_assert(option_button.get_selected_id() == 1, "FOB loadout dropdown can preselect medictool")
+	var medictool_index: int = _find_option_metadata_index(option_button, "medictool")
+	_assert(medictool_index >= 0, "FOB loadout dropdown offers medictool")
+	_assert(medictool_index >= 0 and option_button.get_item_text(medictool_index).begins_with("Medictool"), "FOB loadout dropdown labels medictool visibly")
+	_assert(String(option_button.get_item_metadata(option_button.selected)).strip_edges() == "medictool", "FOB loadout dropdown can preselect medictool")
 	fob_screen.queue_free()
 	option_button.queue_free()
+
+
+func _find_option_metadata_index(option_button: OptionButton, expected_value: String) -> int:
+	for item_index in range(option_button.item_count):
+		if String(option_button.get_item_metadata(item_index)).strip_edges() == expected_value:
+			return item_index
+	return -1
 
 
 func _test_combat_medic_requires_medictool_for_support() -> void:

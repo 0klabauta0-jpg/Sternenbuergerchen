@@ -26,8 +26,10 @@ const HOMEBASE_SHIPCARD_IMAGE_OFFSET := Vector2(-58.0, -36.0)
 const HOMEBASE_DEFAULT_FIRETEAM_ID := "ft1"
 const HOMEBASE_DEFAULT_LOADOUT_ID := "medium"
 const HOMEBASE_LOADOUT_OPTIONS := ["light", "medium", "heavy"]
-const HOMEBASE_PRIMARY_WEAPON_OPTIONS := ["rifle", "carbine", "smg", "dmr"]
-const HOMEBASE_SIDEARM_OPTIONS := ["pistol", "machine_pistol", "none"]
+const HOMEBASE_DEFAULT_PRIMARY_WEAPON := "rifle"
+const HOMEBASE_DEFAULT_SECONDARY_WEAPON := "none"
+const HOMEBASE_PRIMARY_WEAPON_OPTIONS := ["smg", "rifle", "sniper", "rocket_launcher", "medictool"]
+const HOMEBASE_SECONDARY_WEAPON_OPTIONS := ["none", "smg", "rifle", "sniper", "rocket_launcher", "medictool"]
 const HOMEBASE_DIRECT_STAGING_DROP_KIND := "homebase_dropship"
 
 signal selection_changed(selected_unit_ids)
@@ -284,6 +286,8 @@ func build_homebase_direct_drop_state() -> Dictionary:
 	if craft_display_name.is_empty():
 		craft_display_name = "Dropship"
 	var assigned_pilot_id: String = _get_assigned_pilot_id(payload_craft_id)
+	var fireteam_definitions: Array = _get_fireteam_definitions_snapshot()
+	var member_loadouts: Dictionary = _build_homebase_member_loadouts(payload_fireteam_ids)
 	return {
 		"transport_craft_id": payload_craft_id,
 		"dropship_phase": "homebase_ready" if direct_ready else "waiting",
@@ -308,7 +312,10 @@ func build_homebase_direct_drop_state() -> Dictionary:
 		"mission_drop_cards": _build_homebase_mission_drop_cards(payload_fireteam_ids, payload_unit_ids, payload_craft_id, direct_ready),
 		"selected_unit_ids": Array(_selected_unit_ids),
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
-		"fireteam_definitions": _get_fireteam_definitions_snapshot(),
+		"selected_team_unit_configs": _build_homebase_selected_unit_configs(),
+		"fireteam_definitions": fireteam_definitions,
+		"selected_fireteam_definitions": fireteam_definitions.duplicate(true),
+		"member_loadouts": member_loadouts,
 		"homebase_direct_staging": true,
 		"homebase_direct_craft_ready": bool(craft_gate.get("can_stage", false)),
 		"homebase_direct_craft_block_reason": String(craft_gate.get("block_reason", "")).strip_edges(),
@@ -331,6 +338,7 @@ func get_homebase_direct_staging_snapshot() -> Dictionary:
 		"staged_fireteam_ids": Array(_homebase_dropship_staged_fireteam_ids),
 		"embarked_unit_ids": Array(PackedStringArray(Array(drop_state.get("embarked_unit_ids", [])))),
 		"drop_ship_staged": bool(drop_state.get("drop_ship_staged", false)),
+		"member_loadouts": Dictionary(drop_state.get("member_loadouts", {})).duplicate(true),
 		"transport_craft_id": String(drop_state.get("transport_craft_id", "")).strip_edges(),
 		"mission_drop_craft_id": String(drop_state.get("mission_drop_craft_id", "")).strip_edges(),
 		"homebase_direct_craft_ready": bool(craft_gate.get("can_stage", false)),
@@ -1306,9 +1314,9 @@ func _build_homebase_loadout_member_row(fireteam_id: String, unit_id: String, le
 	row.add_child(controls)
 
 	var member_loadout: Dictionary = _get_member_loadout(unit_id)
-	controls.add_child(_build_homebase_loadout_option_row("Kit", HOMEBASE_LOADOUT_OPTIONS, String(member_loadout.get("kit", HOMEBASE_DEFAULT_LOADOUT_ID)), unit_id, "kit"))
-	controls.add_child(_build_homebase_loadout_option_row("Primary", HOMEBASE_PRIMARY_WEAPON_OPTIONS, String(member_loadout.get("primary", "rifle")), unit_id, "primary"))
-	controls.add_child(_build_homebase_loadout_option_row("Sidearm", HOMEBASE_SIDEARM_OPTIONS, String(member_loadout.get("sidearm", "pistol")), unit_id, "sidearm"))
+	controls.add_child(_build_homebase_loadout_option_row("Armor", HOMEBASE_LOADOUT_OPTIONS, String(member_loadout.get("armor", HOMEBASE_DEFAULT_LOADOUT_ID)), unit_id, "armor"))
+	controls.add_child(_build_homebase_loadout_option_row("Primary", HOMEBASE_PRIMARY_WEAPON_OPTIONS, String(member_loadout.get("weapon_1", HOMEBASE_DEFAULT_PRIMARY_WEAPON)), unit_id, "weapon_1"))
+	controls.add_child(_build_homebase_loadout_option_row("Secondary", HOMEBASE_SECONDARY_WEAPON_OPTIONS, String(member_loadout.get("weapon_2", HOMEBASE_DEFAULT_SECONDARY_WEAPON)), unit_id, "weapon_2"))
 	return row_panel
 
 
@@ -1327,15 +1335,36 @@ func _build_homebase_loadout_option_row(label_text: String, options: Array, curr
 	selector.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for option_variant in options:
 		var option_value: String = String(option_variant).strip_edges()
-		selector.add_item(option_value.capitalize())
+		selector.add_item(_build_homebase_loadout_option_label(option_value))
 		selector.set_item_metadata(selector.item_count - 1, option_value)
 		if option_value == current_value:
 			selector.select(selector.item_count - 1)
 	_configure_flightdeck_option_button(selector)
+	selector.set_meta("compact_loadout_dropdown", true)
 	if not selector.item_selected.is_connected(_on_homebase_loadout_option_selected.bind(unit_id, key, selector)):
 		selector.item_selected.connect(_on_homebase_loadout_option_selected.bind(unit_id, key, selector))
 	row.add_child(selector)
 	return row
+
+
+func _build_homebase_loadout_option_label(option_value: String) -> String:
+	var normalized_value: String = option_value.strip_edges().to_lower()
+	if normalized_value == "light" or normalized_value == "medium" or normalized_value == "heavy":
+		return normalized_value.capitalize()
+	match _normalize_weapon_id(normalized_value):
+		"smg":
+			return "SMG"
+		"rifle":
+			return "Rifle"
+		"sniper":
+			return "Sniper"
+		"rocket_launcher":
+			return "Rocket"
+		"medictool":
+			return "Medictool"
+		"none":
+			return "None"
+	return _normalize_loadout_id(option_value).capitalize()
 
 
 func _update_homebase_flightdeck_staging_panel() -> void:
@@ -1924,9 +1953,7 @@ func _on_homebase_loadout_option_selected(index: int, unit_id: String, key: Stri
 	if normalized_unit_id.is_empty() or normalized_key.is_empty():
 		return
 	var next_value: String = String(selector.get_item_metadata(index)).strip_edges()
-	var loadout: Dictionary = _get_member_loadout(normalized_unit_id)
-	loadout[normalized_key] = next_value
-	_member_loadout_by_unit_id[normalized_unit_id] = loadout
+	_set_homebase_member_loadout_value(normalized_unit_id, normalized_key, next_value)
 	_update_homebase_loadout_panel()
 
 
@@ -2256,8 +2283,13 @@ func _normalize_fireteam_definitions(fireteam_definitions: Array) -> Array:
 		definition["id"] = fireteam_id
 		definition["label"] = String(definition.get("label", fireteam_id.to_upper())).strip_edges()
 		definition["lead_unit_id"] = String(definition.get("lead_unit_id", "")).strip_edges()
-		definition["loadout"] = String(definition.get("loadout", HOMEBASE_DEFAULT_LOADOUT_ID)).strip_edges().to_lower()
+		definition["loadout"] = _normalize_loadout_id(String(definition.get("loadout", HOMEBASE_DEFAULT_LOADOUT_ID)))
 		definition["respawn_enabled"] = bool(definition.get("respawn_enabled", false))
+		definition["member_loadouts"] = _normalize_member_loadout_dictionary(
+			definition.get("member_loadouts", {}) if typeof(definition.get("member_loadouts", {})) == TYPE_DICTIONARY else {},
+			String(definition.get("loadout", HOMEBASE_DEFAULT_LOADOUT_ID))
+		)
+		definition["member_unit_ids"] = PackedStringArray(Array(definition.get("member_unit_ids", [])))
 		normalized_definitions.append(definition)
 	return normalized_definitions
 
@@ -2296,6 +2328,7 @@ func _sanitize_homebase_direct_staging_state() -> void:
 	if _get_fireteam_definition(_loadout_staged_fireteam_id).is_empty():
 		_loadout_staged_fireteam_id = _focused_fireteam_id
 	_homebase_dropship_staged_fireteam_ids = _filter_existing_fireteam_ids(_homebase_dropship_staged_fireteam_ids)
+	_sync_homebase_member_loadouts_into_fireteam_definitions()
 
 
 func _build_default_homebase_fireteam_definitions() -> Array:
@@ -2427,6 +2460,155 @@ func _filter_existing_fireteam_ids(source: PackedStringArray) -> PackedStringArr
 	return result
 
 
+func _normalize_loadout_id(value: String) -> String:
+	var normalized_value: String = value.strip_edges().to_lower()
+	if normalized_value == "standard":
+		return HOMEBASE_DEFAULT_LOADOUT_ID
+	if normalized_value == "light" or normalized_value == "medium" or normalized_value == "heavy":
+		return normalized_value
+	return HOMEBASE_DEFAULT_LOADOUT_ID
+
+
+func _normalize_weapon_id(value: String, fallback: String = HOMEBASE_DEFAULT_PRIMARY_WEAPON) -> String:
+	var normalized_value: String = value.strip_edges().to_lower()
+	match normalized_value:
+		"smg", "maschinenpistole", "mp", "machine_pistol", "machine-pistol", "machine pistol", "pistol":
+			return "smg"
+		"rifle", "assault_rifle", "assault-rifle", "assault rifle", "sturmgewehr", "carbine", "dmr":
+			return "rifle"
+		"sniper", "sniper_rifle", "sniper-rifle", "sniper rifle", "scharfschuetzengewehr", "praezisionsgewehr":
+			return "sniper"
+		"rocket_launcher", "rocket", "rocketlauncher", "rocket-launcher", "rocket launcher", "panzerfaust", "raketenwerfer":
+			return "rocket_launcher"
+		"medic_tool", "medic-tool", "medic tool", "medictool":
+			return "medictool"
+		"none", "no_weapon", "no-weapon", "no weapon", "unarmed", "keine_waffe", "keine-waffe", "keine waffe":
+			return "none"
+	return fallback
+
+
+func _make_member_loadout(armor_id: String, weapon_1_id: String, weapon_2_id: String) -> Dictionary:
+	return {
+		"armor": _normalize_loadout_id(armor_id),
+		"weapon_1": _normalize_weapon_id(weapon_1_id, HOMEBASE_DEFAULT_PRIMARY_WEAPON),
+		"weapon_2": _normalize_weapon_id(weapon_2_id, HOMEBASE_DEFAULT_SECONDARY_WEAPON),
+	}
+
+
+func _normalize_member_loadout(loadout_variant: Variant, default_armor_id: String = HOMEBASE_DEFAULT_LOADOUT_ID) -> Dictionary:
+	var loadout: Dictionary = loadout_variant if typeof(loadout_variant) == TYPE_DICTIONARY else {}
+	return _make_member_loadout(
+		String(loadout.get("armor", loadout.get("kit", default_armor_id))),
+		String(loadout.get("weapon_1", loadout.get("primary", HOMEBASE_DEFAULT_PRIMARY_WEAPON))),
+		String(loadout.get("weapon_2", loadout.get("sidearm", HOMEBASE_DEFAULT_SECONDARY_WEAPON)))
+	)
+
+
+func _normalize_member_loadout_dictionary(member_loadouts: Dictionary, default_armor_id: String = HOMEBASE_DEFAULT_LOADOUT_ID) -> Dictionary:
+	var result: Dictionary = {}
+	for unit_id_variant in member_loadouts.keys():
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty():
+			continue
+		result[unit_id] = _normalize_member_loadout(member_loadouts.get(unit_id_variant, {}), default_armor_id)
+	return result
+
+
+func _sync_homebase_member_loadouts_into_fireteam_definitions() -> void:
+	var existing_cache: Dictionary = _normalize_member_loadout_dictionary(_member_loadout_by_unit_id)
+	var next_cache: Dictionary = {}
+	for definition_index in range(_fireteam_definitions.size()):
+		if typeof(_fireteam_definitions[definition_index]) != TYPE_DICTIONARY:
+			continue
+		var definition: Dictionary = Dictionary(_fireteam_definitions[definition_index]).duplicate(true)
+		var fireteam_id: String = _normalize_fireteam_id(String(definition.get("id", "")))
+		if fireteam_id.is_empty():
+			continue
+		var default_armor_id: String = _normalize_loadout_id(String(definition.get("loadout", HOMEBASE_DEFAULT_LOADOUT_ID)))
+		var existing_member_loadouts: Dictionary = _normalize_member_loadout_dictionary(
+			definition.get("member_loadouts", {}) if typeof(definition.get("member_loadouts", {})) == TYPE_DICTIONARY else {},
+			default_armor_id
+		)
+		var member_ids: PackedStringArray = _get_member_unit_ids_for_fireteam(fireteam_id)
+		var sanitized_member_loadouts: Dictionary = {}
+		for member_unit_id in member_ids:
+			var unit_id: String = String(member_unit_id).strip_edges()
+			var source_loadout: Dictionary = Dictionary(existing_member_loadouts.get(unit_id, existing_cache.get(unit_id, {})))
+			var normalized_loadout: Dictionary = _normalize_member_loadout(source_loadout, default_armor_id)
+			sanitized_member_loadouts[unit_id] = normalized_loadout
+			next_cache[unit_id] = normalized_loadout
+		definition["loadout"] = default_armor_id
+		definition["member_unit_ids"] = member_ids.duplicate()
+		definition["member_loadouts"] = sanitized_member_loadouts
+		_fireteam_definitions[definition_index] = definition
+	_member_loadout_by_unit_id = next_cache
+
+
+func _get_fireteam_id_for_unit(unit_id: String) -> String:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return ""
+	for unit_index in range(_selected_unit_ids.size()):
+		if String(_selected_unit_ids[unit_index]).strip_edges() != normalized_unit_id:
+			continue
+		if unit_index < _selected_fireteam_ids.size():
+			return _normalize_fireteam_id(String(_selected_fireteam_ids[unit_index]))
+	return ""
+
+
+func _set_homebase_member_loadout(fireteam_id: String, unit_id: String, armor_id: String, weapon_1_id: String, weapon_2_id: String) -> void:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	if normalized_unit_id.is_empty():
+		return
+	if normalized_fireteam_id.is_empty():
+		normalized_fireteam_id = _get_fireteam_id_for_unit(normalized_unit_id)
+	if normalized_fireteam_id.is_empty():
+		return
+	var member_loadout: Dictionary = _make_member_loadout(armor_id, weapon_1_id, weapon_2_id)
+	_member_loadout_by_unit_id[normalized_unit_id] = member_loadout
+	_write_member_loadout_to_fireteam_definition(normalized_fireteam_id, normalized_unit_id, member_loadout)
+	_sync_homebase_member_loadouts_into_fireteam_definitions()
+
+
+func _set_homebase_member_loadout_value(unit_id: String, key: String, value: String) -> void:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return
+	var member_loadout: Dictionary = _get_member_loadout(normalized_unit_id)
+	match key.strip_edges().to_lower():
+		"armor", "kit":
+			member_loadout["armor"] = _normalize_loadout_id(value)
+		"weapon_1", "primary":
+			member_loadout["weapon_1"] = _normalize_weapon_id(value, HOMEBASE_DEFAULT_PRIMARY_WEAPON)
+		"weapon_2", "sidearm", "secondary":
+			member_loadout["weapon_2"] = _normalize_weapon_id(value, HOMEBASE_DEFAULT_SECONDARY_WEAPON)
+		_:
+			return
+	var fireteam_id: String = _get_fireteam_id_for_unit(normalized_unit_id)
+	_member_loadout_by_unit_id[normalized_unit_id] = member_loadout
+	_write_member_loadout_to_fireteam_definition(fireteam_id, normalized_unit_id, member_loadout)
+	_sync_homebase_member_loadouts_into_fireteam_definitions()
+
+
+func _write_member_loadout_to_fireteam_definition(fireteam_id: String, unit_id: String, member_loadout: Dictionary) -> void:
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_fireteam_id.is_empty() or normalized_unit_id.is_empty():
+		return
+	for definition_index in range(_fireteam_definitions.size()):
+		if typeof(_fireteam_definitions[definition_index]) != TYPE_DICTIONARY:
+			continue
+		var definition: Dictionary = Dictionary(_fireteam_definitions[definition_index]).duplicate(true)
+		if _normalize_fireteam_id(String(definition.get("id", ""))) != normalized_fireteam_id:
+			continue
+		var member_loadouts: Dictionary = definition.get("member_loadouts", {}) if typeof(definition.get("member_loadouts", {})) == TYPE_DICTIONARY else {}
+		member_loadouts[normalized_unit_id] = _normalize_member_loadout(member_loadout, String(definition.get("loadout", HOMEBASE_DEFAULT_LOADOUT_ID)))
+		definition["member_loadouts"] = member_loadouts
+		_fireteam_definitions[definition_index] = definition
+		return
+
+
 func _get_homebase_direct_staging_craft_gate() -> Dictionary:
 	var craft_def: Dictionary = _get_selected_aircraft_definition()
 	var craft_id: String = String(craft_def.get("craft_id", "")).strip_edges()
@@ -2491,6 +2673,7 @@ func _build_unit_ids_for_fireteams(fireteam_ids: PackedStringArray) -> PackedStr
 
 
 func _get_fireteam_definitions_snapshot() -> Array:
+	_sync_homebase_member_loadouts_into_fireteam_definitions()
 	var snapshot: Array = []
 	for definition_variant in _fireteam_definitions:
 		if typeof(definition_variant) == TYPE_DICTIONARY:
@@ -2498,16 +2681,71 @@ func _get_fireteam_definitions_snapshot() -> Array:
 	return snapshot
 
 
+func _build_homebase_member_loadouts(fireteam_ids: PackedStringArray) -> Dictionary:
+	_sync_homebase_member_loadouts_into_fireteam_definitions()
+	var result: Dictionary = {}
+	for fireteam_id_variant in fireteam_ids:
+		var fireteam_id: String = _normalize_fireteam_id(String(fireteam_id_variant))
+		var definition: Dictionary = _get_fireteam_definition(fireteam_id)
+		if definition.is_empty():
+			continue
+		var lead_unit_id: String = String(definition.get("lead_unit_id", "")).strip_edges()
+		for member_unit_id in _get_member_unit_ids_for_fireteam(fireteam_id):
+			var unit_id: String = String(member_unit_id).strip_edges()
+			if unit_id.is_empty():
+				continue
+			var entry: Dictionary = _get_member_loadout(unit_id)
+			if not lead_unit_id.is_empty() and unit_id == lead_unit_id:
+				entry["is_fireteam_lead"] = true
+			result[unit_id] = entry
+	return result
+
+
+func _build_homebase_selected_unit_configs() -> Array:
+	var selected_lookup: Dictionary = {}
+	for unit_id_variant in _selected_unit_ids:
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if not unit_id.is_empty():
+			selected_lookup[unit_id] = true
+	var configs: Array = []
+	for unit_data_variant in _available_units:
+		if typeof(unit_data_variant) != TYPE_DICTIONARY:
+			continue
+		var unit_data: Dictionary = Dictionary(unit_data_variant).duplicate(true)
+		var unit_id: String = String(unit_data.get("unit_id", "")).strip_edges()
+		if unit_id.is_empty() or not selected_lookup.has(unit_id):
+			continue
+		unit_data["fireteam_id"] = _get_fireteam_id_for_unit(unit_id)
+		configs.append(unit_data)
+		selected_lookup.erase(unit_id)
+	for missing_unit_id in selected_lookup.keys():
+		configs.append(
+			{
+				"unit_id": String(missing_unit_id),
+				"display_name": String(missing_unit_id),
+				"team_id": "",
+				"fireteam_id": _get_fireteam_id_for_unit(String(missing_unit_id)),
+				"skill_accuracy": 0.5,
+				"skill_speed": 0.5,
+				"skill_leadership": 0.3,
+				"skill_toughness": 0.5,
+				"trait_ids": [],
+			}
+		)
+	return configs
+
+
 func _get_member_loadout(unit_id: String) -> Dictionary:
 	var normalized_unit_id: String = unit_id.strip_edges()
-	var loadout: Dictionary = Dictionary(_member_loadout_by_unit_id.get(normalized_unit_id, {})).duplicate(true)
-	if not loadout.has("kit"):
-		loadout["kit"] = HOMEBASE_DEFAULT_LOADOUT_ID
-	if not loadout.has("primary"):
-		loadout["primary"] = "rifle"
-	if not loadout.has("sidearm"):
-		loadout["sidearm"] = "pistol"
-	return loadout
+	if normalized_unit_id.is_empty():
+		return _make_member_loadout(HOMEBASE_DEFAULT_LOADOUT_ID, HOMEBASE_DEFAULT_PRIMARY_WEAPON, HOMEBASE_DEFAULT_SECONDARY_WEAPON)
+	var fireteam_id: String = _get_fireteam_id_for_unit(normalized_unit_id)
+	var definition: Dictionary = _get_fireteam_definition(fireteam_id)
+	var default_armor_id: String = String(definition.get("loadout", HOMEBASE_DEFAULT_LOADOUT_ID))
+	var member_loadouts: Dictionary = definition.get("member_loadouts", {}) if typeof(definition.get("member_loadouts", {})) == TYPE_DICTIONARY else {}
+	if member_loadouts.has(normalized_unit_id):
+		return _normalize_member_loadout(member_loadouts.get(normalized_unit_id, {}), default_armor_id)
+	return _normalize_member_loadout(_member_loadout_by_unit_id.get(normalized_unit_id, {}), default_armor_id)
 
 
 func _get_profile_portrait_path(unit_id: String) -> String:

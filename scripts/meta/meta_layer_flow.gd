@@ -558,11 +558,20 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 	if mission_setup != null:
 		mission_setup.set("selected_team_unit_ids", selected_unit_ids)
 		mission_setup.set("selected_team_fireteam_ids", selected_fireteam_ids)
-		var fob_screen: Node = get_node_or_null("FOBScreen")
-		if fob_screen != null and fob_screen.has_method("get_fireteam_definitions"):
-			mission_setup.set("selected_fireteam_definitions", Array(fob_screen.call("get_fireteam_definitions")).duplicate(true))
-		if fob_screen != null and fob_screen.has_method("get_selected_unit_configs"):
-			mission_setup.set("selected_team_unit_configs", Array(fob_screen.call("get_selected_unit_configs")).duplicate(true))
+		var planning_fireteam_definitions: Array = Array(_mission_planning_state.get("selected_fireteam_definitions", []))
+		if not planning_fireteam_definitions.is_empty():
+			mission_setup.set("selected_fireteam_definitions", planning_fireteam_definitions.duplicate(true))
+		else:
+			var fob_screen: Node = get_node_or_null("FOBScreen")
+			if fob_screen != null and fob_screen.has_method("get_fireteam_definitions"):
+				mission_setup.set("selected_fireteam_definitions", Array(fob_screen.call("get_fireteam_definitions")).duplicate(true))
+		var planning_unit_configs: Array = Array(_mission_planning_state.get("selected_team_unit_configs", []))
+		if not planning_unit_configs.is_empty():
+			mission_setup.set("selected_team_unit_configs", planning_unit_configs.duplicate(true))
+		else:
+			var fob_screen_for_configs: Node = get_node_or_null("FOBScreen")
+			if fob_screen_for_configs != null and fob_screen_for_configs.has_method("get_selected_unit_configs"):
+				mission_setup.set("selected_team_unit_configs", Array(fob_screen_for_configs.call("get_selected_unit_configs")).duplicate(true))
 		var selected_mission: Dictionary = _get_selected_mission_definition()
 		mission_setup.set("map_file_path", String(selected_mission.get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges())
 		mission_setup.set("scenario_file_path", String(selected_mission.get("scenario_file_path", "")).strip_edges())
@@ -571,9 +580,13 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 		var gameplay_settings: Dictionary = Dictionary(GAME_SETTINGS_CONTRACT_SCRIPT.call("load_settings"))
 		mission_setup.set("fog_of_war_mode", String(gameplay_settings.get("fog_of_war_mode", "known_terrain")))
 
-		var fob_loadouts: Dictionary = _build_fob_member_loadouts()
-		if not fob_loadouts.is_empty():
-			mission_setup.set("member_loadouts", fob_loadouts)
+		var planning_member_loadouts: Dictionary = Dictionary(_mission_planning_state.get("member_loadouts", {})).duplicate(true)
+		if not planning_member_loadouts.is_empty():
+			mission_setup.set("member_loadouts", planning_member_loadouts)
+		else:
+			var fob_loadouts: Dictionary = _build_fob_member_loadouts()
+			if not fob_loadouts.is_empty():
+				mission_setup.set("member_loadouts", fob_loadouts)
 
 	var tactical_controller = mission_instance.get_node_or_null("TacticalController")
 	if tactical_controller != null:
@@ -1697,9 +1710,11 @@ func _build_fob_member_loadouts() -> Dictionary:
 	var fob_screen = _get_fob_screen()
 	if fob_screen == null:
 		return {}
+	return _build_member_loadouts_from_fireteam_definitions(fob_screen.get_fireteam_definitions())
 
+
+func _build_member_loadouts_from_fireteam_definitions(definitions: Array) -> Dictionary:
 	var result: Dictionary = {}
-	var definitions: Array = fob_screen.get_fireteam_definitions()
 	for definition_variant in definitions:
 		if typeof(definition_variant) != TYPE_DICTIONARY:
 			continue
@@ -1806,6 +1821,9 @@ func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: boo
 		_mission_planning_state["meta_transfer_routes"] = _build_homebase_transfer_route_entries()
 		_mission_planning_state["mission_drop_cards"] = []
 		_mission_planning_state["mission_drop_source"] = ""
+		_mission_planning_state["selected_fireteam_definitions"] = []
+		_mission_planning_state["selected_team_unit_configs"] = []
+		_mission_planning_state["member_loadouts"] = {}
 		if clear_deployed_unit_ids:
 			_mission_planning_state["deployed_unit_ids"] = []
 			_mission_planning_state["deployed_unit_positions"] = {}
@@ -1834,12 +1852,37 @@ func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: boo
 	_mission_planning_state["mission_drop_passenger_count"] = int(drop_state.get("mission_drop_passenger_count", 0))
 	_mission_planning_state["mission_drop_cards"] = Array(drop_state.get("mission_drop_cards", [])).duplicate(true)
 	_mission_planning_state["meta_transfer_routes"] = _build_homebase_transfer_route_entries()
+	_sync_mission_setup_contract_fields(drop_state, applied_source, fob_screen)
 	if clear_deployed_unit_ids or not _mission_planning_state.has("deployed_unit_ids"):
 		_mission_planning_state["deployed_unit_ids"] = []
 	if clear_deployed_unit_ids:
 		_mission_planning_state["deployed_unit_positions"] = {}
 	if not _mission_planning_state.has("mission_drop_return_requested"):
 		_mission_planning_state["mission_drop_return_requested"] = false
+
+
+func _sync_mission_setup_contract_fields(drop_state: Dictionary, applied_source: String, fob_screen) -> void:
+	if applied_source == MISSION_DROP_SOURCE_HOMEBASE_DIRECT:
+		_mission_planning_state["selected_fireteam_definitions"] = Array(drop_state.get("selected_fireteam_definitions", drop_state.get("fireteam_definitions", []))).duplicate(true)
+		_mission_planning_state["selected_team_unit_configs"] = Array(drop_state.get("selected_team_unit_configs", [])).duplicate(true)
+		_mission_planning_state["member_loadouts"] = Dictionary(drop_state.get("member_loadouts", {})).duplicate(true)
+		return
+
+	if applied_source == MISSION_DROP_SOURCE_FOB:
+		var fireteam_definitions: Array = []
+		if fob_screen != null and fob_screen.has_method("get_fireteam_definitions"):
+			fireteam_definitions = Array(fob_screen.call("get_fireteam_definitions")).duplicate(true)
+		_mission_planning_state["selected_fireteam_definitions"] = fireteam_definitions
+		if fob_screen != null and fob_screen.has_method("get_selected_unit_configs"):
+			_mission_planning_state["selected_team_unit_configs"] = Array(fob_screen.call("get_selected_unit_configs")).duplicate(true)
+		else:
+			_mission_planning_state["selected_team_unit_configs"] = []
+		_mission_planning_state["member_loadouts"] = _build_member_loadouts_from_fireteam_definitions(fireteam_definitions)
+		return
+
+	_mission_planning_state["selected_fireteam_definitions"] = []
+	_mission_planning_state["selected_team_unit_configs"] = []
+	_mission_planning_state["member_loadouts"] = {}
 
 
 func _sync_fob_payload_selection_from_screen(fob_screen, drop_state: Dictionary) -> void:

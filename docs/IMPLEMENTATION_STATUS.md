@@ -57,9 +57,12 @@
 - Offener Balance-Punkt: Ob Direct-Staging auch einen zugewiesenen Piloten als harte Startbedingung braucht, bleibt als eigener Folgeentscheid sinnvoll.
 
 ### TASK_350 - Homebase Loadout Contract Export
-- Status: geplant
-- Stand: Review-Finding aus TASK_346. Homebase-Loadout-Auswahl lebt aktuell als `_member_loadout_by_unit_id` im UI und wird nicht in den Direct-Drop-/Mission-State exportiert.
-- Naechster Schritt: Bestehenden FOB-Loadout-Vertrag wiederverwenden oder kleinen gemeinsamen Contract-Helper extrahieren und die Exportkette testen.
+- Status: implementiert im Arbeitsstand
+- Stand: Homebase-Loadout nutzt jetzt denselben Member-Contract wie FOB (`armor`, `weapon_1`, `weapon_2`). Alte UI-Alias-Werte werden beim Lesen normalisiert, aber nicht mehr als Export-Wahrheit weitergereicht.
+- Stand: `build_homebase_direct_drop_state()` exportiert `member_loadouts`, `selected_fireteam_definitions` und `selected_team_unit_configs`. `MetaLayerFlow` bevorzugt diese Homebase-Direct-Felder beim Missionsstart und faellt fuer FOB weiter auf den bestehenden FOB-Contract zurueck.
+- Stand: Die Homebase-Loadout-Dropdowns verwenden nur FOB-/Mission-kompatible Werte; der Headless-Verifier prueft eine geaenderte Member-Auswahl bis in `MissionSetup`.
+- Risiken: Ein gemeinsamer Loadout-Contract-Helper ist noch nicht extrahiert; FOB und Homebase normalisieren vorerst lokal auf denselben Wertebereich.
+- Lokale Pruefung: `task_350_homebase_loadout_contract_export.gd`, `task_349_homebase_direct_staging_real_flightdeck_craft_gate.gd`, `task_348_homebase_fob_payload_state_isolation.gd`, `task_347_homebase_direct_staging_start_guard.gd`, `task_346_homebase_direct_staging_character_popup.gd`, `task_316_fob_fireteam_staging_migration.gd`, `bugfix_mission_fireteam_fob_payload_and_bubbles.gd`, `medic_support_verifier.gd` und `git diff --check` laufen gruen. `task_316` meldet beim Headless-Exit bestehende RID-Leak-Warnungen, aber keine Assertion-Fehler.
 
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
