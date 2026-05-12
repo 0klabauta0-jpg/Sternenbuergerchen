@@ -3,7 +3,7 @@
 ## Ziel
 Die Homebase-Direct-Loadout-Kette soll mit einer breiteren Headless-Testmatrix gegen echte Randfaelle abgesichert werden.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Problem
 `TASK_350` prueft den erfolgreichen Export eines bewusst gesetzten Loadouts, aber noch nicht die kritischen Randfaelle aus dem Review: echte UI-Dropdown-Auswahl, mehrere Fireteams mit nur einem Flightdeck-Payload, unveraenderte Profil-Defaults und Modifier-Aufloesung.
@@ -20,12 +20,18 @@ Der erste Verifier war bewusst fokussiert, um den Exportvertrag schnell zu schli
   - FOB-Fallback bleibt isoliert
 - Bestehende Task-350-Assertions behalten, aber nicht duplizierend aufblasen.
 
+## Umsetzung
+- `scripts/tests/task_354_homebase_direct_loadout_regression_matrix.gd` baut eine Homebase-Direct-Matrix mit zwei Fireteams, einem echten Flightdeck-Payload und einem separat editierten Nicht-Payload-Fireteam.
+- Mindestens eine Loadout-Aenderung laeuft ueber echte `OptionButton`-Metadata und das `item_selected`-Signal statt ueber den privaten Homebase-Setter.
+- Der Mission-Start prueft `MissionSetup.member_loadouts` und `MissionSetup.get_unit_loadout_modifiers_dict(...)` fuer UI-Override und Medic-Profil-Defaults.
+- Ein FOB-Start mit gleichzeitig vorhandenem Homebase-Direct-Payload stellt sicher, dass FOB-Fallback-Loadouts isoliert bleiben.
+
 ## Akzeptanzkriterien
-- [ ] Testmatrix faengt den Payload-Scope-Fehler aus TASK_351 ab.
-- [ ] Testmatrix faengt den Medictool-Default-Fehler aus TASK_352 ab.
-- [ ] Mindestens eine UI-nahe Dropdown-Aenderung wird ohne privaten Setter geprueft.
-- [ ] Loadout-Modifikatoren werden fuer Homebase-Direct mindestens stichprobenartig validiert.
-- [ ] Tests bleiben schnell genug fuer lokale Headless-Regressionslaeufe.
+- [x] Testmatrix faengt den Payload-Scope-Fehler aus TASK_351 ab.
+- [x] Testmatrix faengt den Medictool-Default-Fehler aus TASK_352 ab.
+- [x] Mindestens eine UI-nahe Dropdown-Aenderung wird ohne privaten Setter geprueft.
+- [x] Loadout-Modifikatoren werden fuer Homebase-Direct mindestens stichprobenartig validiert.
+- [x] Tests bleiben schnell genug fuer lokale Headless-Regressionslaeufe.
 
 ## Erwartete Dateien
 - `scripts/tests/task_354_homebase_direct_loadout_regression_matrix.gd`
@@ -33,12 +39,12 @@ Der erste Verifier war bewusst fokussiert, um den Exportvertrag schnell zu schli
 - ggf. kleine Test-Helper in bestehenden Testdateien, falls lokal etabliert
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_354_homebase_direct_loadout_regression_matrix.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_350_homebase_loadout_contract_export.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_351_homebase_direct_payload_scope_contract.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_352_homebase_loadout_defaults_preserve_unit_profiles.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_354_homebase_direct_loadout_regression_matrix.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_350_homebase_loadout_contract_export.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_351_homebase_direct_payload_scope_contract.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_352_homebase_loadout_defaults_preserve_unit_profiles.gd`
+- [x] `git diff --check`
 
 ## Risiken / offene Punkte
 - Die Tests sollen Verhalten absichern, nicht interne Private-Helper zementieren.
-- Falls TASK_351/352 vorher noch nicht implementiert sind, darf dieser Task als Test-first-Vorbereitung bewusst rot starten, muss aber am Ende gruen dokumentiert werden.
+- Kein Produktcode wurde fuer TASK_354 geaendert. Die Matrix bleibt ein Headless-Verhaltensgate; finale visuelle Dropdown-Balance ist weiter manueller UI-Sichtcheck.

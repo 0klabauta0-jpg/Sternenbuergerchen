@@ -85,9 +85,11 @@
 - Lokale Pruefung: `task_353_shared_loadout_contract_helper.gd`, `task_350_homebase_loadout_contract_export.gd`, `task_316_fob_fireteam_staging_migration.gd`, `medic_support_verifier.gd`, `task_107_verifier.gd` und `git diff --check` laufen gruen.
 
 ### TASK_354 - Homebase Direct Loadout Regression Matrix
-- Status: geplant
-- Stand: Review-Finding nach TASK_350. Die bestehende Task-350-Pruefung deckt den erfolgreichen Exportpfad ab, aber nicht Payload-Scope, unveraenderte Profil-Defaults, UI-Dropdown-Pfad und Modifier-Aufloesung.
-- Naechster Schritt: Breitere Headless-Matrix fuer Homebase-Direct-Loadout-Randfaelle bauen.
+- Status: implementiert
+- Stand: `task_354_homebase_direct_loadout_regression_matrix.gd` prueft Homebase-Direct mit zwei Fireteams, nur einem Flightdeck-Payload, separat editiertem Nicht-Payload-Fireteam und UI-naher `OptionButton`-Loadout-Auswahl.
+- Stand: Die Matrix sichert ab, dass `unit_bravo` ohne Spieleraktion `smg` + `medictool` bis `MissionSetup` und in `unit_loadout_modifiers_by_unit_id` behaelt, waehrend UI-Overrides fuer `unit_alpha` korrekt in Member-Loadouts und Modifier laufen.
+- Stand: Ein gleichzeitiger FOB-Start bleibt isoliert: FOB-Member-Loadouts erreichen `MissionSetup`, Homebase-Direct-Loadouts lecken dabei nicht in den FOB-Pfad.
+- Lokale Pruefung: `task_354_homebase_direct_loadout_regression_matrix.gd`, `task_350_homebase_loadout_contract_export.gd`, `task_351_homebase_direct_payload_scope_contract.gd`, `task_352_homebase_loadout_defaults_preserve_unit_profiles.gd` und `git diff --check` laufen gruen.
 
 ### TASK_355 - Homebase Direct UX Payload Truth
 - Status: geplant
