@@ -10,6 +10,14 @@
 
 ## Aktueller Startzustand
 
+### TASK_331 - Mission Tactical Controller Adapter Split First Slice
+- Status: implementiert im Arbeitsstand
+- Stand: `MissionTacticalSandboxController.get_command_feedback_snapshot()` delegiert die finale Snapshot-Erzeugung jetzt an `scripts/mission/mission_command_feedback_snapshot_adapter.gd`.
+- Stand: Der Controller sammelt nur den vorhandenen read-only Kontext in `_build_command_feedback_snapshot_context()`. Der Adapter baut daraus die stabile UI-Snapshot-Form, leitet Count-Felder aus Arrays ab und dupliziert Snapshot-Payloads defensiv.
+- Stand: Selection, Disabled-Reasons und Command-Hierarchy bleiben aus denselben bestehenden Quellen; es entsteht keine zweite UI-Selection- oder Gameplay-Wahrheit.
+- Risiken: Der Tactical Controller bleibt weiterhin gross. Dieser Slice entlastet nur den Command-Feedback-Snapshot-Pfad; Dropship, HUD-Sync und taktische Ausfuehrung bleiben Folge-Slices.
+- Lokale Pruefung: `task_331_mission_tactical_controller_adapter_split_first_slice.gd`, `task_286_ui_feedback_truth_regression_review.gd`, `task_315_mission_grid_tile_selection_command_gate.gd`, `bugfix_mission_right_click_order_flow.gd` und `git diff --check` laufen gruen.
+
 ### TASK_330 - Mission Runtime Scripts Productization Followup
 - Status: implementiert im Arbeitsstand
 - Stand: Die produktiv in `scenes/tests/mission_reactivity_test.tscn` verdrahteten Mission-Runtime- und View-Support-Skripte liegen jetzt unter `scripts/mission/`: Tactical Controller, Combat Loop Driver, Mission Setup, Command Flow Driver, Mission Camera Controller, Objective Status View, Respawn Overlay, Enemy Wave Controller und Phase Controller.

@@ -3,7 +3,7 @@
 ## Ziel
 Der grosse Mission-Tactical-Controller soll in einem ersten kleinen Schritt entlastet werden. Der Task extrahiert nur einen klar abgegrenzten Adapter fuer Auswahl- und Command-Feedback, damit UI-Panels weiter nur Snapshots lesen und keine zweite Gameplay-Wahrheit erzeugen.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT IM ARBEITSSTAND
 
 ## Voraussetzung
 - TASK_330 - Mission Runtime Scripts Productization Followup
@@ -32,11 +32,11 @@ Der Mission-Controller orchestriert aktuell Eingabe, Auswahl, Dropship-Flow, tak
 - Keine Aenderung an Commander-/FTL-/Unit-Semantik.
 
 ## Akzeptanzkriterien
-- [ ] Auswahl- und Command-Feedback sind aus dem grossen Controller in einen klar benannten Adapter/Helper ausgelagert oder sauber delegiert.
-- [ ] Snapshot-Felder bleiben kompatibel.
-- [ ] Disabled-Reasons bleiben spezifisch und kommen nicht aus UI-Duplikaten.
-- [ ] Bestehende Mission-Command- und UI-Feedback-Gates bleiben gruen.
-- [ ] Die neue Grenze ist im Task-Report kurz dokumentiert.
+- [x] Auswahl- und Command-Feedback sind aus dem grossen Controller in einen klar benannten Adapter/Helper ausgelagert oder sauber delegiert.
+- [x] Snapshot-Felder bleiben kompatibel.
+- [x] Disabled-Reasons bleiben spezifisch und kommen nicht aus UI-Duplikaten.
+- [x] Bestehende Mission-Command- und UI-Feedback-Gates bleiben gruen.
+- [x] Die neue Grenze ist im Task-Report kurz dokumentiert.
 
 ## Erwartete Dateien
 - `scripts/mission/**`
@@ -47,14 +47,19 @@ Der Mission-Controller orchestriert aktuell Eingabe, Auswahl, Dropship-Flow, tak
 - `docs/IMPLEMENTATION_STATUS.md`
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_331_mission_tactical_controller_adapter_split_first_slice.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_286_ui_feedback_truth_regression_review.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_315_mission_grid_tile_selection_command_gate.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/bugfix_mission_right_click_order_flow.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_331_mission_tactical_controller_adapter_split_first_slice.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_286_ui_feedback_truth_regression_review.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_315_mission_grid_tile_selection_command_gate.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/bugfix_mission_right_click_order_flow.gd`
+- [x] `git diff --check`
 
 ## Risiken
 - Dieser Task darf nicht zum Sammelrefactor werden. Wenn waehrend der Extraktion Dropship- oder Combat-Logik beruehrt werden muss, ist das ein neuer Task.
+
+## Ergebnis
+- `scripts/mission/mission_command_feedback_snapshot_adapter.gd` baut die finale Command-Feedback-Snapshot-Form.
+- `MissionTacticalSandboxController.get_command_feedback_snapshot()` delegiert an den Adapter und liefert nur noch den vorhandenen read-only Kontext.
+- `scripts/tests/task_331_mission_tactical_controller_adapter_split_first_slice.gd` prueft Adaptergrenze, Snapshot-Counts, Selection-Spiegelung und fehlende SimulationRoot-Seiteneffekte.
 
 ## Naechster Schritt
 Spaetere Slices koennen Dropship, HUD-Sync oder taktische Ausfuehrung separat aus dem Controller loesen.

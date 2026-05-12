@@ -20,6 +20,7 @@ const MISSION_DROPSHIP_EFFECT_ADAPTER_SCRIPT: GDScript = preload("res://scripts/
 const AIR_ASSET_STATUS_SCRIPT: GDScript = preload("res://scripts/mission/air_asset_status.gd")
 const AIR_ASSET_THREAT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/combat/air_asset_threat_resolver.gd")
 const MISSION_COMMAND_INPUT_GUARD_SCRIPT: GDScript = preload("res://scripts/mission/mission_command_input_guard.gd")
+const MISSION_COMMAND_FEEDBACK_SNAPSHOT_ADAPTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_command_feedback_snapshot_adapter.gd")
 const FIRETEAM_SELECTION_ADAPTER_SCRIPT: GDScript = preload("res://scripts/tactical/ui/fireteam_selection_adapter.gd")
 const COMMANDER_COMMAND_SCRIPT: GDScript = preload("res://scripts/command/commander_command.gd")
 const COMMANDER_INTENT_SCRIPT: GDScript = preload("res://scripts/command/commander_intent.gd")
@@ -194,6 +195,7 @@ var _tactical_ui_visible: bool = true
 var _primary_view_bridge = MISSION_PRIMARY_VIEW_BRIDGE_SCRIPT.new()
 var _dropship_effect_adapter = MISSION_DROPSHIP_EFFECT_ADAPTER_SCRIPT.new()
 var _command_input_guard = MISSION_COMMAND_INPUT_GUARD_SCRIPT.new()
+var _command_feedback_adapter = MISSION_COMMAND_FEEDBACK_SNAPSHOT_ADAPTER_SCRIPT.new()
 var _selection_adapter = FIRETEAM_SELECTION_ADAPTER_SCRIPT.new()
 
 var _current_fireteam_index: int = 0
@@ -8795,6 +8797,16 @@ func get_visualized_area_orders_snapshot() -> Array:
 
 
 func get_command_feedback_snapshot() -> Dictionary:
+	return Dictionary(_command_feedback_adapter.call("build_snapshot", _build_command_feedback_snapshot_context()))
+
+
+func _build_command_feedback_snapshot_context() -> Dictionary:
+	var fireteamleader_feedback_bubbles: Array = get_fireteamleader_feedback_bubble_snapshot()
+	var tactical_communication_events: Array = get_tactical_communication_event_snapshot()
+	var tactical_breakouts: Array = get_tactical_breakout_snapshot()
+	var fireteam_coordination: Array = get_fireteam_coordination_snapshot()
+	var air_asset_threats: Array = get_air_asset_threat_snapshot()
+	var npc_thought_bubbles: Array = get_npc_thought_bubble_snapshot()
 	return {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
 		"selected_fireteam_label": _get_fireteam_name(),
@@ -8819,21 +8831,15 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"active_area_defense": get_active_area_defense_snapshot(),
 		"active_area_attack": get_active_area_attack_snapshot(),
 		"fireteamleader_feedback_bubbles_enabled": fireteamleader_feedback_bubbles_enabled,
-		"fireteamleader_feedback_bubble_count": get_fireteamleader_feedback_bubble_snapshot().size(),
-		"fireteamleader_feedback_bubbles": get_fireteamleader_feedback_bubble_snapshot(),
-		"tactical_communication_event_count": get_tactical_communication_event_snapshot().size(),
-		"tactical_communication_events": get_tactical_communication_event_snapshot(),
-		"tactical_breakout_count": get_tactical_breakout_snapshot().size(),
-		"tactical_breakouts": get_tactical_breakout_snapshot(),
-		"fireteam_coordination_count": get_fireteam_coordination_snapshot().size(),
-		"fireteam_coordination": get_fireteam_coordination_snapshot(),
+		"fireteamleader_feedback_bubbles": fireteamleader_feedback_bubbles,
+		"tactical_communication_events": tactical_communication_events,
+		"tactical_breakouts": tactical_breakouts,
+		"fireteam_coordination": fireteam_coordination,
 		"air_asset_status": get_air_asset_status_snapshot(),
-		"air_asset_threat_count": get_air_asset_threat_snapshot().size(),
-		"air_asset_threats": get_air_asset_threat_snapshot(),
+		"air_asset_threats": air_asset_threats,
 		"selected_tactical_communication_text": _build_selected_tactical_communication_text(),
 		"mission_control_tactical_communication_text": _build_mission_control_tactical_communication_text(),
-		"npc_thought_bubble_count": get_npc_thought_bubble_snapshot().size(),
-		"npc_thought_bubbles": get_npc_thought_bubble_snapshot(),
+		"npc_thought_bubbles": npc_thought_bubbles,
 	}
 
 
