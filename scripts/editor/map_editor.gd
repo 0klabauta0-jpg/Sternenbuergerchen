@@ -5611,15 +5611,20 @@ func _populate_tile_palette() -> void:
 		return
 
 	var types_by_group: Dictionary = {}
+	var all_types: Array = []
 	for tile_type in _tile_catalog.get_all_types():
+		all_types.append(tile_type)
 		var palette_group: String = String(tile_type.get("palette_group", "default")).strip_edges().to_lower()
 		if palette_group.is_empty():
 			palette_group = "default"
 		var group_types: Array = Array(types_by_group.get(palette_group, []))
 		group_types.append(tile_type)
 		types_by_group[palette_group] = group_types
+	types_by_group["all"] = all_types
 
 	var available_group_ids: PackedStringArray = PackedStringArray()
+	if not all_types.is_empty():
+		available_group_ids.append("all")
 	for group in _tile_catalog.get_palette_groups():
 		var group_id: String = String(Dictionary(group).get("group_id", "")).strip_edges().to_lower()
 		if group_id.is_empty() or not types_by_group.has(group_id):
@@ -5635,6 +5640,16 @@ func _populate_tile_palette() -> void:
 		for child in palette_groups_root.get_children():
 			palette_groups_root.remove_child(child)
 			child.queue_free()
+		if available_group_ids.has("all"):
+			var all_button := Button.new()
+			all_button.name = "PaletteGroup_all"
+			all_button.text = "Alle"
+			all_button.toggle_mode = true
+			all_button.button_pressed = _active_palette_group_id == "all"
+			all_button.tooltip_text = "Alle Palette-Assets anzeigen."
+			_configure_palette_group_button(all_button, all_button.button_pressed)
+			all_button.pressed.connect(_on_palette_group_button_pressed.bind("all"))
+			palette_groups_root.add_child(all_button)
 		for group in _tile_catalog.get_palette_groups():
 			var group_dict: Dictionary = Dictionary(group)
 			var group_id: String = String(group_dict.get("group_id", "")).strip_edges().to_lower()

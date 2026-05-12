@@ -86,6 +86,7 @@ func _test_homebase_card_access_and_transfer(context: Dictionary) -> void:
 	await _wait_frames(2)
 	_assert(_labels_contain(_collect_label_texts(homebase), String(added_unit.get("display_name", added_unit_id))), "Homebase character sheet follows the roster card selection")
 	_assert(_labels_contain(_collect_label_texts(homebase), "Loc: Homebase / Roster"), "Homebase roster card sheet shows roster location")
+	_assert(homebase.find_child("MetricPlus_accuracy", true, false) == null, "Homebase runtime character sheet is read-only")
 
 	homebase.call("_on_team_drop_panel_unit_dropped", added_unit_id)
 	await _wait_frames(2)
@@ -141,6 +142,7 @@ func _test_fob_card_access_loadout_and_fireteam_switching(context: Dictionary) -
 	_assert(_control_visible(fob.get_node_or_null("CharacterOverlay") as Control), "FOB character overlay becomes visible")
 	_assert(_labels_contain(_collect_label_texts(fob), String(first_unit.get("display_name", first_unit_id))), "FOB overlay follows the selected fireteam member")
 	_assert(_labels_contain(_collect_label_texts(fob), "Assigned to FT1"), "FOB overlay shows initial fireteam assignment")
+	_assert(fob.find_child("MetricPlus_accuracy", true, false) == null, "FOB runtime character overlay is read-only")
 
 	fob.call("_on_fireteam_card_unit_dropped", first_unit_id, "ft2")
 	await _wait_frames(2)
@@ -185,6 +187,8 @@ func _test_mission_and_debrief_character_access(context: Dictionary) -> void:
 		await _wait_frames(2)
 		_assert(_control_visible(mission.get_node_or_null("TacticalUI/CharacterOverlay") as Control), "Mission character overlay becomes visible")
 		_assert(not mission_unit_id.is_empty() and _labels_contain(_collect_label_texts(mission), _mission_display_name(mission, mission_unit_id)), "Mission character overlay follows selected fireteam card identity")
+		_assert(mission.find_child("MetricPlus_accuracy", true, false) == null, "Mission runtime character overlay is read-only")
+		_assert(mission.get_node_or_null("TacticalUI/CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox/DevStatsPanel") == null, "Mission runtime character overlay hides dev stat sliders")
 		mission.queue_free()
 		await process_frame
 

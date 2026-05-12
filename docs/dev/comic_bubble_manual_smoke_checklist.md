@@ -4,7 +4,7 @@
 Kurzer Sichtcheck fuer TASK_214 nach den Headless-Verifiern. Der Check bewertet Lesbarkeit, Timing, Nervfaktor und Abschaltbarkeit der Comic-Bubbles in der Mission-Map.
 
 ## Vorbereitung
-- Godot 4.6.1/4.6.x starten.
+- Godot 4.6.2/4.6.x starten.
 - Mission-Testszene mit aktivem `TacticalController` und 2.5D-Primary-View oeffnen.
 - Eine Karte mit mindestens einem aktiven blauen Fireteam, Objective, Contact-Moeglichkeit und sichtbaren Friendly-Rollen nutzen.
 

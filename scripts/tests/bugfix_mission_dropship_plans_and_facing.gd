@@ -66,9 +66,10 @@ func _test_per_craft_lz_lines_render_without_inbound_ship_body() -> void:
 	await _wait_frames(8)
 
 	var render_snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
-	_assert(int(render_snapshot.get("dropship_visual_count", 0)) == 1, "Only the waiting in-map craft renders a Dropship body; inbound transfer craft stays body-hidden")
+	_assert(int(render_snapshot.get("dropship_visual_count", 0)) == 0, "Transfer and waiting dropships stay offscreen until a real drop run is active")
 	_assert(int(render_snapshot.get("dropship_approach_line_count", 0)) >= 2, "Both Dropships keep their own LZ approach lines visible")
-	_assert(int(render_snapshot.get("requested_lz_marker_count", 0)) >= 2, "Both Dropships keep their planned LZ tiles visible")
+	var visible_lz_marker_count: int = int(render_snapshot.get("requested_lz_marker_count", 0)) + int(render_snapshot.get("lz_tile_marker_count", 0))
+	_assert(visible_lz_marker_count >= 2, "Both Dropships keep their planned LZ tiles visible")
 
 	var entries_before: Array = Array(controller.call("_build_mission_dropship_visual_entries", false, Vector2.ZERO))
 	var second_before: Dictionary = _find_visual_entry(entries_before, "dropship_2")

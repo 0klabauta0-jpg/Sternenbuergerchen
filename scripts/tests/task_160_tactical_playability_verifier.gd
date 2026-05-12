@@ -41,7 +41,7 @@ func _test_live_tactical_loop_is_visible_in_2_5d() -> void:
 
 	_assert(_legacy_readability_overlays_are_hidden(scene), "2.5D mission suppresses legacy free-floating 2D readability overlays")
 	await _wait_frames(6)
-	_assert(_primary_dropship_visible(primary_view), "Waiting mission dropship is visible in the 2.5D primary view")
+	_assert(not _primary_dropship_visible(primary_view), "Waiting mission dropship stays offscreen until a live drop run starts")
 
 	var objective_position := _get_objective_position(simulation_root, Vector2(448.0, 285.0))
 	var lz_position := objective_position
@@ -134,7 +134,7 @@ func _stage_waiting_dropship(controller: Node) -> void:
 	planning_state["mission_drop_display_name"] = "TASK 160 Dropship"
 	planning_state["mission_drop_title_text"] = "TASK 160 Dropship"
 	planning_state["mission_drop_texture_path"] = "res://Assets/kenney_space-kit/Side/craft_speederB.png"
-	planning_state["mission_drop_status_line"] = "Holding on mission map"
+	planning_state["mission_drop_status_line"] = "Holding off-map"
 	planning_state["mission_drop_progress"] = 100.0
 	planning_state["mission_drop_passenger_count"] = 4
 	planning_state["selected_fireteam"] = "BLUE"

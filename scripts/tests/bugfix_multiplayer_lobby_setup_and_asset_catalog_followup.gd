@@ -78,17 +78,26 @@ func _test_imported_kit_assets_are_sorted_into_existing_palette_groups() -> void
 	_assert(String(floor_entry.get("palette_group", "")) == "space_station", "Station set floor is sorted into Space Station")
 	_assert(String(floor_entry.get("placement_layer", "")) == "terrain", "Station set floor paints as terrain")
 	_assert(bool(floor_entry.get("visual_surface_variant", false)), "Station set floor is a visual surface variant")
+	var modular_raised_entry: Dictionary = Dictionary(catalog.call("get_type", "modular_floor_raised"))
+	_assert(String(modular_raised_entry.get("placement_layer", "")) == "terrain", "Modular raised floor paints as terrain instead of a raised object")
+	_assert(bool(modular_raised_entry.get("visual_surface_variant", false)), "Modular raised floor is a visual surface variant")
 
 
 func _test_station_and_nature_floors_render_as_flush_ground_surfaces() -> void:
 	var catalog = TERRAIN_TILE_CATALOG_SCRIPT.call("load_from_file")
-	var map_data = TERRAIN_MAP_DATA_SCRIPT.call("create_empty", "bugfix_floor_flush_followup", Vector2i(3, 1), Vector2.ZERO)
+	var map_data = TERRAIN_MAP_DATA_SCRIPT.call("create_empty", "bugfix_floor_flush_followup", Vector2i(6, 1), Vector2.ZERO)
 	var station_tile = map_data.call("get_tile_at_grid", Vector2i(0, 0))
 	var nature_tile = map_data.call("get_tile_at_grid", Vector2i(1, 0))
 	var station_set_tile = map_data.call("get_tile_at_grid", Vector2i(2, 0))
+	var station_corner_tile = map_data.call("get_tile_at_grid", Vector2i(3, 0))
+	var station_detail_tile = map_data.call("get_tile_at_grid", Vector2i(4, 0))
+	var modular_raised_tile = map_data.call("get_tile_at_grid", Vector2i(5, 0))
 	_assert(catalog.call("apply_type_to_tile", station_tile, "station_floor_panel"), "Station floor can be painted")
 	_assert(catalog.call("apply_type_to_tile", nature_tile, "nature_ground_dirt"), "Nature ground can be painted")
 	_assert(catalog.call("apply_type_to_tile", station_set_tile, "station_set_floor_panel"), "Station-set floor can be painted")
+	_assert(catalog.call("apply_type_to_tile", station_corner_tile, "station_set_floor_corner"), "Station-set corner floor can be painted")
+	_assert(catalog.call("apply_type_to_tile", station_detail_tile, "station_set_floor_detail"), "Station-set detail floor can be painted")
+	_assert(catalog.call("apply_type_to_tile", modular_raised_tile, "modular_floor_raised"), "Modular raised floor can be painted")
 	var view: Node = TERRAIN_MAP_3D_VIEW_SCRIPT.new()
 	root.add_child(view)
 	view.call("configure_from_map", map_data)
@@ -99,6 +108,10 @@ func _test_station_and_nature_floors_render_as_flush_ground_surfaces() -> void:
 	_assert(_entry_top_is_not_above_surface(entries, "station_floor_panel"), "Station floor top is not above gameplay floor")
 	_assert(_entry_top_is_not_above_surface(entries, "nature_ground_dirt"), "Nature ground top is not above gameplay floor")
 	_assert(_entry_top_is_not_above_surface(entries, "station_set_floor_panel"), "Station-set floor top is not above gameplay floor")
+	_assert(_entry_top_is_not_above_surface(entries, "station_set_floor_corner"), "Station-set corner floor top is not above gameplay floor")
+	_assert(_entry_top_is_not_above_surface(entries, "station_set_floor_detail"), "Station-set detail floor top is not above gameplay floor")
+	_assert(_entry_top_is_not_above_surface(entries, "modular_floor_raised"), "Modular raised floor top is not above gameplay floor")
+	_assert(_entry_scale_matches(entries, "modular_floor_raised", 0.88), "Modular raised floor uses the modular floor footprint scale")
 	view.queue_free()
 	await _wait_frames(2)
 
@@ -109,6 +122,15 @@ func _entry_top_is_not_above_surface(entries: Array, model_key: String) -> bool:
 		if String(entry.get("model_key", "")) != model_key:
 			continue
 		return float(entry.get("visual_top_y", 999.0)) <= float(entry.get("surface_y", 0.0)) + 0.002
+	return false
+
+
+func _entry_scale_matches(entries: Array, model_key: String, expected_scale: float) -> bool:
+	for entry_variant in entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("model_key", "")) != model_key:
+			continue
+		return absf(float(entry.get("scale", -1.0)) - expected_scale) <= 0.002
 	return false
 
 

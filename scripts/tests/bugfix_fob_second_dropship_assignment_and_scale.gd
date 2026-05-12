@@ -14,6 +14,8 @@ func _run_tests() -> void:
 	print("=== FOB Second Dropship Assignment and Scale Bugfix ===")
 	await _test_fireteams_stage_to_the_dropped_craft()
 	await _test_fireteam_membership_lookup_ignores_removed_definition()
+	await _test_transport_cards_keep_progress_and_scroll_contract()
+	await _test_transport_pilot_dragdrop_pool_and_swap()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	quit(1 if _failed > 0 else 0)
 
@@ -104,6 +106,7 @@ func _test_fireteams_stage_to_the_dropped_craft() -> void:
 	screen.queue_free()
 	await _wait_frames(2)
 
+
 func _test_fireteam_membership_lookup_ignores_removed_definition() -> void:
 	var screen: Control = FOB_TEST_SCENE.instantiate()
 	screen.visible = true
@@ -133,6 +136,94 @@ func _test_fireteam_membership_lookup_ignores_removed_definition() -> void:
 	await _wait_frames(2)
 
 
+func _test_transport_cards_keep_progress_and_scroll_contract() -> void:
+	var screen: Control = FOB_TEST_SCENE.instantiate()
+	screen.visible = true
+	root.add_child(screen)
+	await _wait_frames(4)
+
+	screen.call("set_available_units", _build_units())
+	screen.call("configure_transfer", PackedStringArray(["unit_a"]), PackedStringArray([""]), [{"id": "ft1", "label": "FT1", "lead_unit_id": "unit_a"}])
+	screen.call("set_transport_craft_state", [
+		{
+			"craft_id": "dropship_1",
+			"display_name": "Dropship 1",
+			"visible_in_fob": true,
+			"is_boardable": true,
+			"pilot_unit_id": "pilot_old",
+			"pilot_display_name": "Old Pilot",
+			"transfer_progress": 100.0,
+		},
+		{
+			"craft_id": "dropship_2",
+			"display_name": "Dropship 2",
+			"visible_in_fob": true,
+			"is_in_transit": true,
+			"mission_transit_to_fob": true,
+			"pilot_unit_id": "",
+			"transfer_progress": 42.0,
+		},
+	])
+	await _wait_frames(4)
+
+	var first_card: Control = _find_craft_card(screen, "dropship_1")
+	var second_card: Control = _find_craft_card(screen, "dropship_2")
+	var first_progress: ProgressBar = null
+	var second_progress: ProgressBar = null
+	if first_card != null:
+		first_progress = first_card.get_node_or_null("MarginContainer/VBox/ProgressBar") as ProgressBar
+	if second_card != null:
+		second_progress = second_card.get_node_or_null("MarginContainer/VBox/ProgressBar") as ProgressBar
+	_assert(first_card != null and first_card.mouse_filter == Control.MOUSE_FILTER_PASS, "#14 selected transport cards pass wheel input to the scroll container")
+	_assert(first_progress != null and first_progress.visible and absf(first_progress.value - 100.0) <= 0.1, "#14 shows a live progress bar on docked ships")
+	_assert(second_progress != null and second_progress.visible and absf(second_progress.value - 42.0) <= 0.1, "#14 shows a live progress bar on returning ships without selecting them")
+
+	screen.queue_free()
+	await _wait_frames(2)
+
+
+func _test_transport_pilot_dragdrop_pool_and_swap() -> void:
+	var screen: Control = FOB_TEST_SCENE.instantiate()
+	screen.visible = true
+	root.add_child(screen)
+	await _wait_frames(4)
+
+	screen.call("set_available_units", _build_units())
+	screen.call("configure_transfer", PackedStringArray(["unit_a", "pilot_new"]), PackedStringArray(["", ""]), [{"id": "ft1", "label": "FT1", "lead_unit_id": "unit_a"}])
+	screen.call("set_transport_craft_state", [
+		{
+			"craft_id": "dropship_1",
+			"display_name": "Dropship 1",
+			"visible_in_fob": true,
+			"is_boardable": true,
+			"pilot_unit_id": "pilot_old",
+			"pilot_display_name": "Old Pilot",
+		},
+	])
+	await _wait_frames(4)
+
+	screen.call("_on_available_panel_unit_dropped", "pilot_old")
+	await _wait_frames(2)
+	var cleared_craft: Dictionary = Dictionary(screen.call("_get_transport_craft_state", "dropship_1"))
+	_assert(String(cleared_craft.get("pilot_unit_id", "")) == "", "Dragging an assigned pilot to the FOB pool clears the craft pilot slot")
+	_assert(PackedStringArray(screen.call("get_team")).has("pilot_old"), "Cleared pilot becomes available in the FOB PC pool")
+
+	screen.call("_on_transport_craft_card_unit_dropped", "pilot_new", "dropship|dropship_1")
+	await _wait_frames(2)
+	var assigned_craft: Dictionary = Dictionary(screen.call("_get_transport_craft_state", "dropship_1"))
+	_assert(String(assigned_craft.get("pilot_unit_id", "")) == "pilot_new", "Dropping an available PC onto a transport card assigns them as pilot")
+	_assert(not PackedStringArray(screen.call("get_team")).has("pilot_new"), "Assigned pilot leaves the normal PC pool")
+
+	screen.call("_on_transport_craft_card_unit_dropped", "pilot_old", "dropship|dropship_1")
+	await _wait_frames(2)
+	var swapped_craft: Dictionary = Dictionary(screen.call("_get_transport_craft_state", "dropship_1"))
+	var swapped_team := PackedStringArray(screen.call("get_team"))
+	_assert(String(swapped_craft.get("pilot_unit_id", "")) == "pilot_old", "Dropping another PC onto the craft swaps the pilot")
+	_assert(swapped_team.has("pilot_new") and not swapped_team.has("pilot_old"), "Previous pilot returns to the FOB pool after a swap")
+
+	screen.queue_free()
+	await _wait_frames(2)
+
 
 func _build_units() -> Array:
 	return [
@@ -144,6 +235,8 @@ func _build_units() -> Array:
 		{"unit_id": "unit_f", "display_name": "Faro"},
 		{"unit_id": "unit_g", "display_name": "Gina"},
 		{"unit_id": "unit_h", "display_name": "Hale"},
+		{"unit_id": "pilot_old", "display_name": "Old Pilot", "role_id": "dropship_pilot"},
+		{"unit_id": "pilot_new", "display_name": "New Pilot", "role_id": "dropship_pilot"},
 	]
 
 

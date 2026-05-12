@@ -2028,20 +2028,20 @@
 			"space_station_role": "full_set_asset"
 		},
 		"station_set_floor_corner": {
-			"layer": "object",
+			"layer": "terrain_surface",
 			"source_id": "space_station_kit",
 			"model_path": "res://Assets/curated/kenney/space_station/models_all/floor-corner.glb",
-			"scale": 0.9,
-			"y_offset": 0,
+			"scale": 0.84,
+			"y_offset": -0.04,
 			"rotation_degrees_offset": 0,
 			"space_station_role": "full_set_asset"
 		},
 		"station_set_floor_detail": {
-			"layer": "object",
+			"layer": "terrain_surface",
 			"source_id": "space_station_kit",
 			"model_path": "res://Assets/curated/kenney/space_station/models_all/floor-detail.glb",
-			"scale": 0.9,
-			"y_offset": 0,
+			"scale": 0.84,
+			"y_offset": -0.04,
 			"rotation_degrees_offset": 0,
 			"space_station_role": "full_set_asset"
 		},
@@ -2622,11 +2622,11 @@
 			"modular_space_role": "hangar_floor"
 		},
 		"modular_floor_raised": {
-			"layer": "object",
+			"layer": "terrain_surface",
 			"source_id": "modular_space_kit",
 			"model_path": "res://Assets/curated/kenney/modular_space/models/template-floor-layer-raised.glb",
-			"scale": 0.9,
-			"y_offset": 0,
+			"scale": 0.88,
+			"y_offset": -0.04,
 			"rotation_degrees_offset": 0,
 			"modular_space_role": "docking_pad"
 		},

@@ -227,7 +227,7 @@ static func generate_start_roster(seed: String = DEFAULT_SEED, roster_size: int 
 		profile_data["roster_role_category"] = role_category
 		profile_data["roster_seed_index"] = index
 		profile_data["player_profile_id"] = player_profile_id
-		profile_data["rank_badges"] = NPC_RANK_BADGE_RESOLVER_SCRIPT.call("get_badges_for_profile", profile_data)
+		profile_data["rank_badges"] = NPC_RANK_BADGE_RESOLVER_SCRIPT.call("get_badges_for_profile", profile_data, 1)
 		units.append(profile_data)
 	var relationship_pairs: Array = ROSTER_RELATIONSHIP_MODEL_SCRIPT.call("build_deterministic_start_relationships", units, normalized_seed)
 	units = ROSTER_RELATIONSHIP_MODEL_SCRIPT.call("apply_relationships_to_units", units, relationship_pairs, true)
@@ -321,7 +321,11 @@ static func normalize_team_editor(team_editor: Dictionary = {}, seed: String = D
 	var budget_max: int = maxi(int(team_editor.get("point_budget_max", TEAM_EDITOR_POINT_BUDGET_MAX)), 1)
 	budget_max = mini(budget_max, TEAM_EDITOR_POINT_BUDGET_MAX)
 	var source_allocations: Dictionary = Dictionary(team_editor.get("stat_allocations", TEAM_EDITOR_DEFAULT_ALLOCATIONS)).duplicate(true)
+	var source_locks: Dictionary = Dictionary(team_editor.get("stat_locks", {})).duplicate(true)
+	var source_metric_locks: Dictionary = Dictionary(team_editor.get("metric_locks", {})).duplicate(true)
 	var allocations: Dictionary = {}
+	var stat_locks: Dictionary = {}
+	var metric_locks: Dictionary = {}
 	var used: int = 0
 	var per_stat_minimum: int = budget_max
 	var per_stat_maximum: int = TEAM_EDITOR_STAT_MAX
@@ -339,9 +343,15 @@ static func normalize_team_editor(team_editor: Dictionary = {}, seed: String = D
 		var available_for_stat: int = clampi(budget_max - used, stat_min, stat_max)
 		var value: int = clampi(requested_value, stat_min, available_for_stat)
 		allocations[stat_id] = value
+		stat_locks[stat_id] = bool(source_locks.get(stat_id, false))
 		used += value
 	if allocations.is_empty():
 		per_stat_minimum = TEAM_EDITOR_STAT_MIN
+	for metric_lock_key_variant in source_metric_locks.keys():
+		var metric_lock_key: String = String(metric_lock_key_variant).strip_edges()
+		if metric_lock_key.is_empty() or not metric_lock_key.contains("|") or not metric_lock_key.contains("."):
+			continue
+		metric_locks[metric_lock_key] = bool(source_metric_locks.get(metric_lock_key_variant, false))
 	var emblem: Dictionary = _resolve_team_emblem(Dictionary(team_editor), seed, player_profile_id)
 	return {
 		"schema_version": TEAM_EDITOR_SCHEMA_VERSION,
@@ -350,6 +360,8 @@ static func normalize_team_editor(team_editor: Dictionary = {}, seed: String = D
 		"point_budget_used": used,
 		"point_budget_available": maxi(budget_max - used, 0),
 		"stat_allocations": allocations,
+		"stat_locks": stat_locks,
+		"metric_locks": metric_locks,
 		"stat_definitions": TEAM_EDITOR_STAT_DEFINITIONS.duplicate(true),
 		"emblem_id": String(emblem.get("id", "")),
 		"emblem_path": String(emblem.get("path", "")),
@@ -359,6 +371,7 @@ static func normalize_team_editor(team_editor: Dictionary = {}, seed: String = D
 			"max_per_stat": per_stat_maximum,
 			"total_cap": TEAM_EDITOR_POINT_BUDGET_MAX,
 			"rookie_tier": true,
+			"locks_supported": true,
 		},
 		"team_size_policy": build_team_size_policy(),
 		"design_note": "Startteams bleiben auf ein 30-Punkte-Rookie-Kontingent begrenzt.",

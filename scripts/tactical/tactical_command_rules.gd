@@ -77,7 +77,15 @@ static func from_dict(data: Dictionary) -> RefCounted:
 
 
 static func get_default_rules() -> Dictionary:
-	return from_dict({}).to_dict()
+	return {
+		"tempo": TEMPO_NORMAL,
+		"fire_rule": FIRE_RULE_RETURN,
+		"contact_response": CONTACT_REPORT,
+		"cover_priority": COVER_NORMAL,
+		"security_mode": SECURITY_FACING,
+		"normalized_from_conflict": false,
+		"warnings": PackedStringArray(),
+	}
 
 
 static func get_rule_catalog() -> Dictionary:

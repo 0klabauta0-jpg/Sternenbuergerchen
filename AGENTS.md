@@ -18,7 +18,7 @@ Aendere nur das, was fuer den aktuellen Task noetig ist.
 # 1. Projektkontext
 
 ## Engine
-- Godot 4.6.1
+- Godot 4.6.2
 
 ## Lokales Projekt
 - `C:\dev\SternenBuergerchen`

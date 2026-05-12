@@ -228,7 +228,7 @@ static func _refresh_pilot_content(card: PanelContainer, state: Dictionary) -> v
 				"source_context": String(state.get("pilot_source_context", "transport_craft_pilot")).strip_edges(),
 				"selected": bool(state.get("pilot_selected", false)),
 				"disabled": bool(state.get("pilot_disabled", false)),
-				"drag_enabled": false,
+				"drag_enabled": bool(state.get("pilot_drag_enabled", false)),
 				"compact_mode": true,
 			}
 		)
@@ -240,6 +240,9 @@ static func _refresh_pilot_content(card: PanelContainer, state: Dictionary) -> v
 		var card_open_requested: Callable = state.get("pilot_card_open_requested", Callable())
 		if card_open_requested.is_valid() and pilot_card.has_signal("card_open_requested") and not pilot_card.card_open_requested.is_connected(card_open_requested):
 			pilot_card.card_open_requested.connect(card_open_requested)
+		var card_unit_dropped: Callable = state.get("pilot_card_unit_dropped", Callable())
+		if card_unit_dropped.is_valid() and pilot_card.has_signal("card_unit_dropped") and not pilot_card.card_unit_dropped.is_connected(card_unit_dropped):
+			pilot_card.card_unit_dropped.connect(card_unit_dropped)
 		fallback_label.visible = false
 		return
 

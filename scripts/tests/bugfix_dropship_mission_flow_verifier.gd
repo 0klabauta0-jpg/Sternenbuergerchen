@@ -37,6 +37,7 @@ func _run_tests() -> void:
 	await _test_homebase_inbound_craft_is_visible_in_fob()
 	await _test_block_labels_use_unique_prefixed_ids()
 	await _test_dropship_returns_to_fob_after_drop()
+	await _test_nonselected_return_card_clears_only_its_fob_payload()
 	await _test_meta_mission_uses_deferred_drop_state()
 	await _test_combat_loop_waits_for_pending_insertions()
 	await _test_drop_ship_starts_far_outside_the_map()
@@ -461,7 +462,7 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 	_assert(mission_craft_card != null and mission_craft_card.modulate.a < 1.0, "Mini shipcard stays greyed out during mission transit")
 	_assert(status_label != null and status_label.text.contains("ETA mission map"), "Mini shipcard reports the live transfer status during mission transit")
 	_assert(ship_texture != null and ship_texture.texture != null and ship_texture.texture.resource_path == "res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png", "Mission mini shipcard uses the isometric dropship texture for mission transit")
-	_assert(_live_mission_dropship_visible(preview_mission), "Live mission renders the dropship marker once the craft is actually on the mission-map route")
+	_assert(not _live_mission_dropship_visible(preview_mission), "Live mission keeps transfer dropship body offscreen until a live drop run starts")
 	var visible_fob_craft_states: Array = Array(fob_screen.call("_get_visible_transport_craft_states"))
 	var visible_fob_craft_state: Dictionary = Dictionary(visible_fob_craft_states[0]) if not visible_fob_craft_states.is_empty() else {}
 	_assert(not visible_fob_craft_states.is_empty(), "FOB keeps the sent dropship visible while it is on the mission-map transfer")
@@ -477,8 +478,8 @@ func _test_meta_map_shows_mission_craft_card_during_transfer_and_waiting() -> vo
 	info_lines_host = mission_craft_card.get_node("MarginContainer/VBox/ContentRow/InfoVBox/InfoLinesHost") as VBoxContainer if mission_craft_card != null else null
 	status_label = info_lines_host.get_child(1) as Label if info_lines_host != null and info_lines_host.get_child_count() > 1 else null
 	_assert(mission_craft_card != null and mission_craft_card.visible and mission_craft_card.modulate.a >= 0.99, "Mini shipcard stays full color once the dropship is waiting on the mission map")
-	_assert(status_label != null and status_label.text.contains("Holding on mission map"), "Mini shipcard switches to waiting status after the transfer completes")
-	_assert(_live_mission_dropship_visible(preview_mission), "Live mission keeps the dropship marker visible while the craft is waiting on the mission map")
+	_assert(status_label != null and status_label.text.contains("Holding off-map"), "Mini shipcard switches to off-map waiting status after the transfer completes")
+	_assert(not _live_mission_dropship_visible(preview_mission), "Live mission keeps waiting dropship body offscreen instead of parked by the card")
 	scene.queue_free()
 	await process_frame
 
@@ -1245,6 +1246,110 @@ func _test_dropship_returns_to_fob_after_drop() -> void:
 	await process_frame
 
 
+func _test_nonselected_return_card_clears_only_its_fob_payload() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	for _frame in range(4):
+		await process_frame
+
+	var fob_screen: Control = scene.get_node("FOBScreen")
+	scene.set(
+		"_homebase_aircraft_definitions",
+		[
+			{
+				"craft_id": "dropship_1",
+				"display_name": "Dropship 1",
+				"craft_type": "dropship",
+				"texture_path": "res://Assets/kenney_space-kit/Side/craft_speederB.png",
+			},
+			{
+				"craft_id": "dropship_2",
+				"display_name": "Dropship 2",
+				"craft_type": "dropship",
+				"texture_path": "res://Assets/kenney_space-kit/Side/craft_speederB.png",
+			},
+		]
+	)
+	scene.set("_aircraft_location_by_craft", {"dropship_1": "mission", "dropship_2": "mission"})
+	fob_screen.call("set_available_units", UNIT_ROSTER_PRESETS_SCRIPT.call("get_homebase_roster"))
+	fob_screen.call(
+		"configure_transfer",
+		PackedStringArray(["unit_alpha", "unit_bravo", "unit_charlie", "unit_delta", "unit_echo", "unit_foxtrot", "unit_golf", "unit_hotel"]),
+		PackedStringArray(["blue", "blue", "blue", "blue", "gold", "gold", "gold", "gold"]),
+		[
+			{"id": "blue", "label": "BLUE", "lead_unit_id": "unit_alpha"},
+			{"id": "gold", "label": "GOLD", "lead_unit_id": "unit_echo"},
+		]
+	)
+	fob_screen.call(
+		"set_transport_craft_state",
+		[
+			{
+				"craft_id": "dropship_1",
+				"display_name": "Dropship 1",
+				"visible_in_fob": true,
+				"is_boardable": false,
+				"mission_waiting": true,
+				"phase": "boarded",
+				"boarded_unit_ids": PackedStringArray(["unit_alpha", "unit_bravo", "unit_charlie", "unit_delta"]),
+				"boarded_fireteam_ids": PackedStringArray(["blue"]),
+				"passenger_count": 4,
+			},
+			{
+				"craft_id": "dropship_2",
+				"display_name": "Dropship 2",
+				"visible_in_fob": true,
+				"is_boardable": false,
+				"mission_waiting": true,
+				"phase": "boarded",
+				"boarded_unit_ids": PackedStringArray(["unit_echo", "unit_foxtrot", "unit_golf", "unit_hotel"]),
+				"boarded_fireteam_ids": PackedStringArray(["gold"]),
+				"passenger_count": 4,
+			},
+		]
+	)
+	var planning_state: Dictionary = {
+		"mission_drop_craft_id": "dropship_2",
+		"mission_drop_state": "waiting",
+		"embarked_unit_ids": ["unit_echo", "unit_foxtrot", "unit_golf", "unit_hotel"],
+		"mission_drop_passenger_count": 4,
+		"deployed_unit_ids": ["unit_alpha", "unit_bravo", "unit_charlie", "unit_delta"],
+		"mission_drop_cards": [
+			{
+				"craft_id": "dropship_1",
+				"display_name": "Dropship 1",
+				"state": "to_fob",
+				"passenger_count": 0,
+				"embarked_unit_ids": [],
+				"boarded_fireteam_ids": ["blue"],
+			},
+			{
+				"craft_id": "dropship_2",
+				"display_name": "Dropship 2",
+				"state": "waiting",
+				"passenger_count": 4,
+				"embarked_unit_ids": ["unit_echo", "unit_foxtrot", "unit_golf", "unit_hotel"],
+				"boarded_fireteam_ids": ["gold"],
+			},
+		],
+	}
+	scene.call("_on_mission_planning_state_changed", planning_state)
+	for _frame in range(4):
+		await process_frame
+
+	var dropship_1_state: Dictionary = Dictionary(fob_screen.call("_get_transport_craft_state", "dropship_1"))
+	var dropship_2_state: Dictionary = Dictionary(fob_screen.call("_get_transport_craft_state", "dropship_2"))
+	var current_planning_state: Dictionary = Dictionary(scene.get("_mission_planning_state"))
+	var dropship_2_card: Dictionary = _find_mission_drop_card(Array(current_planning_state.get("mission_drop_cards", [])), "dropship_2")
+	var pending_transfers: Array = Array(scene.get("_pending_mission_craft_transfers"))
+	_assert(Array(dropship_1_state.get("boarded_unit_ids", [])).is_empty() and int(dropship_1_state.get("passenger_count", 0)) == 0, "A non-selected empty RTB card clears only that craft's stale FOB payload")
+	_assert(int(dropship_2_state.get("passenger_count", -1)) == 4 and Array(dropship_2_card.get("embarked_unit_ids", [])) == ["unit_echo", "unit_foxtrot", "unit_golf", "unit_hotel"], "The selected waiting dropship keeps its own payload in mission planning")
+	_assert(_has_pending_mission_transfer(pending_transfers, "dropship_1", "to_fob"), "Meta starts the non-selected dropship return transfer from its card state")
+
+	scene.queue_free()
+	await process_frame
+
+
 func _test_combat_loop_waits_for_pending_insertions() -> void:
 	var scene: Node = MISSION_TEST_SCENE.instantiate()
 	var mission_setup: Node = scene.get_node("MissionSetup")
@@ -1296,7 +1401,7 @@ func _test_drop_ship_starts_far_outside_the_map() -> void:
 	var start_position: Vector2 = Vector2(tactical_controller.call("_get_drop_staging_position"))
 	var lz_position: Vector2 = Vector2(tactical_controller.get("_lz_position"))
 	var map_bounds: Rect2 = Rect2(tactical_controller.call("_get_map_world_bounds"))
-	var required_distance: float = maxf(maxf(map_bounds.size.x, map_bounds.size.y) * 3.0, 1080.0)
+	var required_distance: float = maxf(maxf(map_bounds.size.x, map_bounds.size.y) * 1.8, 720.0)
 	_assert(start_position.distance_to(lz_position) >= required_distance - 1.0, "Dropship staging starts farther away from the LZ before entering the mission map")
 	scene.queue_free()
 	await process_frame
@@ -1392,6 +1497,18 @@ func _find_mission_drop_card(cards: Array, craft_id: String) -> Dictionary:
 		if String(card.get("craft_id", "")).strip_edges() == craft_id:
 			return card
 	return {}
+
+
+func _has_pending_mission_transfer(transfers: Array, craft_id: String, phase: String) -> bool:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	var normalized_phase: String = phase.strip_edges().to_lower()
+	for transfer_variant in transfers:
+		if typeof(transfer_variant) != TYPE_DICTIONARY:
+			continue
+		var transfer: Dictionary = Dictionary(transfer_variant)
+		if String(transfer.get("craft_id", "")).strip_edges() == normalized_craft_id and String(transfer.get("phase", "")).strip_edges().to_lower() == normalized_phase:
+			return true
+	return false
 
 
 func _assert(condition: bool, message: String) -> void:

@@ -7,7 +7,7 @@
 - Auswirkung:
 
 ## Bisher fest
-- Godot 4.6.1 wird verwendet
+- Godot 4.6.2 wird verwendet
 - Codex arbeitet lokal gegen `C:\dev\SternenBuergerchen`
 - Spieler ist Commander
 - direkte Steuerung nur bis FTL
@@ -31,5 +31,7 @@
 - Terrain-Daten (walkable, blocks_los, cover_value, height_level, surface_type) als leichtgewichtige RefCounted-Objekte in TerrainRegistry
 - Respawn-Timer-Staffelung: Rover 30s, FOB 150s, Homebase 270s
 - Host/Join ueber ENetMultiplayerPeer auf Port 7777 fuer V1; kein Matchmaking
+- Multiplayer V1 bleibt Godot High-Level Multiplayer/ENet Direct-IP mit optionalem UPnP; Node.js/WebSocket ist keine aktuelle Architekturvorgabe
+- `sternenbuerger-gdd.docx` ist Alt-GDD/Design-Inspiration und Migrationsquelle; bindend werden Inhalte erst nach Ueberfuehrung in Markdown-Docs/Tasks/Decisions
 - Terrain-Konfiguration als JSON-Datei unter `res://maps/`; kein Godot-Resource-Format, damit auch externe Tools die Daten lesen koennen
 - Map Editor als Runtime-Szene im Spiel, kein Godot-EditorPlugin; interner Workflow-Editor, nicht spielerseitig in V1

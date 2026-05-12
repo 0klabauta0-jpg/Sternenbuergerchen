@@ -69,6 +69,7 @@ func _test_direct_dev_mission_starts_with_active_fireteams_and_editor() -> void:
 
 	var controller = scene.get_node_or_null("TacticalController")
 	if controller != null and not friendly_id.is_empty():
+		controller.set("character_overlay_dev_editor_enabled", true)
 		controller.call("_open_character_overlay", friendly_id)
 		await process_frame
 	var dev_panel = scene.get_node_or_null("TacticalUI/CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox/DevStatsPanel")

@@ -41,6 +41,8 @@ var execution_fire_discipline: float = 0.65
 var contact_stability: float = 0.65
 var initiative: float = 0.5
 var execution_label: String = "STEADY"
+var execution_reason: String = ""
+var execution_hint: String = ""
 var metadata: Dictionary = {}
 
 
@@ -123,6 +125,8 @@ func to_dict() -> Dictionary:
 		"contact_stability": contact_stability,
 		"initiative": initiative,
 		"execution_label": execution_label,
+		"execution_reason": execution_reason,
+		"execution_hint": execution_hint,
 		"metadata": metadata.duplicate(true),
 	}
 
@@ -147,4 +151,6 @@ func _apply_dict(data: Dictionary) -> void:
 	execution_label = String(data.get("execution_label", "STEADY")).strip_edges().to_upper()
 	if execution_label.is_empty():
 		execution_label = "STEADY"
+	execution_reason = String(data.get("execution_reason", "")).strip_edges().to_lower()
+	execution_hint = String(data.get("execution_hint", "")).strip_edges()
 	metadata = Dictionary(data.get("metadata", {})).duplicate(true)

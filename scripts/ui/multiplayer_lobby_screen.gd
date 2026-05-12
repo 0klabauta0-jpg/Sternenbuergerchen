@@ -11,6 +11,7 @@ const PLAYER_ROSTER_STORE_SCRIPT: GDScript = preload("res://scripts/meta/player_
 const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_event_bus.gd")
 const BACKGROUND_IMAGE_CATALOG_SCRIPT: GDScript = preload("res://scripts/assets/background_image_catalog.gd")
 const LOBBY_BACKGROUND_ID: String = "multiplayer_lobby_hangar"
+const LOBBY_PANEL_SIZE: Vector2 = Vector2(720.0, 560.0)
 const TEAM_PLAY_MODE_COOP: String = "coop"
 const TEAM_PLAY_MODE_VERSUS: String = "versus"
 const CONNECTION_MODE_LAN: String = "lan"
@@ -67,10 +68,12 @@ func _ready() -> void:
 	_ensure_multiplayer_session()
 	_ensure_audio_event_bus()
 	_ensure_lobby_setup_controls()
+	_enforce_lobby_panel_geometry()
 	_configure_default_inputs()
 	_connect_ui_signals()
 	_apply_contextual_help_ids()
 	_refresh_from_session()
+	call_deferred("_enforce_lobby_panel_geometry")
 
 
 func host_game(port: int = -1) -> bool:
@@ -418,6 +421,32 @@ func _ensure_lobby_setup_controls() -> void:
 		_map_option = setup_panel.find_child("MapOptionButton", true, false) as OptionButton
 		_connection_mode_option = setup_panel.find_child("ConnectionModeOptionButton", true, false) as OptionButton
 		_network_hint_label = setup_panel.find_child("NetworkHintLabel", true, false) as Label
+
+
+func _enforce_lobby_panel_geometry() -> void:
+	var panel := get_node_or_null("Panel") as Control
+	if panel == null:
+		return
+	var viewport_size: Vector2 = get_viewport_rect().size
+	if viewport_size.x <= 1.0 or viewport_size.y <= 1.0:
+		viewport_size = Vector2(1280.0, 720.0)
+	var panel_size := Vector2(minf(LOBBY_PANEL_SIZE.x, viewport_size.x - 32.0), minf(LOBBY_PANEL_SIZE.y, viewport_size.y - 32.0))
+	var panel_position := Vector2(
+		floor((viewport_size.x - panel_size.x) * 0.5),
+		floor((viewport_size.y - panel_size.y) * 0.5)
+	)
+	panel.custom_minimum_size = Vector2.ZERO
+	panel.clip_contents = true
+	panel.anchor_left = 0.0
+	panel.anchor_top = 0.0
+	panel.anchor_right = 0.0
+	panel.anchor_bottom = 0.0
+	panel.offset_left = panel_position.x
+	panel.offset_top = panel_position.y
+	panel.offset_right = panel_position.x + panel_size.x
+	panel.offset_bottom = panel_position.y + panel_size.y
+	panel.position = panel_position
+	panel.size = panel_size
 
 
 func _add_setup_label(parent: Node, text: String, help_id: String) -> Label:

@@ -33,6 +33,8 @@ const ROCKET_LAUNCHER_PREVIEW_PATH := "res://Assets/used/npc/weapon_pack/preview
 
 signal mission_start_requested(selected_unit_ids, selected_fireteam_ids)
 signal transport_craft_mission_stage_requested(craft_id)
+signal transport_craft_pilot_assigned(craft_id, pilot_unit_id)
+signal transport_craft_pilot_cleared(craft_id)
 
 const DEFAULT_DROPSHIP_ETA_SECONDS := 18.0
 const DEFAULT_BOARDING_SECONDS := 6.0
@@ -1359,6 +1361,10 @@ func _update_character_overlay() -> void:
 	var overlay_options: Dictionary = {
 		"status_text": _build_overlay_status_text(_focused_unit_id),
 		"fireteam_text": CHARACTER_SHEET_FORMATTER_SCRIPT.format_fireteam_label(_build_fireteam_display_text(_get_selected_fireteam_id_for_unit(_focused_unit_id))),
+		"editable_metrics": false,
+		"two_column_layout": true,
+		"show_badge_progress": true,
+		"hide_loadout_dropdowns": true,
 	}
 	if profile != null:
 		overlay_options["loadout_text"] = _build_overlay_loadout_text(_focused_unit_id, profile)
@@ -1660,8 +1666,142 @@ func _on_clear_focused_unit_button_pressed() -> void:
 func _on_available_panel_unit_dropped(unit_id: String) -> void:
 	if unit_id.is_empty():
 		return
+	if _release_transport_craft_pilot_to_pool(unit_id):
+		return
 	_focused_unit_id = unit_id
 	_set_selected_fireteam_for_unit(unit_id, "")
+
+
+func _on_transport_craft_card_unit_dropped(unit_id: String, drop_kind: String) -> void:
+	var target_craft_id: String = _transport_craft_id_from_drop_kind(drop_kind)
+	if target_craft_id.is_empty():
+		return
+	_assign_transport_craft_pilot_from_pool(target_craft_id, unit_id)
+
+
+func _on_transport_craft_pilot_card_unit_dropped(unit_id: String, _source_context: String, craft_id: String) -> void:
+	_assign_transport_craft_pilot_from_pool(craft_id, unit_id)
+
+
+func _release_transport_craft_pilot_to_pool(unit_id: String) -> bool:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return false
+	var craft_state: Dictionary = _find_transport_craft_state_by_pilot(normalized_unit_id)
+	if craft_state.is_empty() or not _can_edit_transport_craft_pilot(craft_state):
+		return false
+	var craft_id: String = String(craft_state.get("craft_id", "")).strip_edges()
+	if craft_id.is_empty():
+		return false
+	_set_transport_craft_pilot_id(craft_id, "")
+	_append_unit_to_fob_pool(normalized_unit_id)
+	_focused_unit_id = normalized_unit_id
+	transport_craft_pilot_cleared.emit(craft_id)
+	_rebuild_profiles()
+	_refresh_ui_state()
+	return true
+
+
+func _assign_transport_craft_pilot_from_pool(craft_id: String, unit_id: String) -> bool:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_craft_id.is_empty() or normalized_unit_id.is_empty():
+		return false
+	var craft_state: Dictionary = _get_transport_craft_state(normalized_craft_id)
+	if craft_state.is_empty() or not _can_edit_transport_craft_pilot(craft_state):
+		return false
+	var current_pilot_id: String = String(craft_state.get("pilot_unit_id", "")).strip_edges()
+	if current_pilot_id == normalized_unit_id:
+		return true
+	var source_craft_state: Dictionary = _find_transport_craft_state_by_pilot(normalized_unit_id)
+	var source_craft_id: String = String(source_craft_state.get("craft_id", "")).strip_edges()
+	if not source_craft_id.is_empty() and source_craft_id != normalized_craft_id:
+		if not _can_edit_transport_craft_pilot(source_craft_state):
+			return false
+		_set_transport_craft_pilot_id(source_craft_id, "")
+	if not current_pilot_id.is_empty():
+		_append_unit_to_fob_pool(current_pilot_id)
+	_remove_unit_from_fob_pool(normalized_unit_id)
+	_set_transport_craft_pilot_id(normalized_craft_id, normalized_unit_id)
+	_focused_unit_id = normalized_unit_id
+	transport_craft_pilot_assigned.emit(normalized_craft_id, normalized_unit_id)
+	_rebuild_profiles()
+	_refresh_ui_state()
+	return true
+
+
+func _transport_craft_id_from_drop_kind(drop_kind: String) -> String:
+	var normalized_drop_kind: String = drop_kind.strip_edges()
+	if not normalized_drop_kind.begins_with("dropship|"):
+		return ""
+	return normalized_drop_kind.trim_prefix("dropship|").strip_edges()
+
+
+func _can_edit_transport_craft_pilot(craft_state: Dictionary) -> bool:
+	if craft_state.is_empty():
+		return false
+	if bool(craft_state.get("air_asset_unavailable", false)):
+		return false
+	if bool(craft_state.get("is_in_transit", false)):
+		return false
+	if bool(craft_state.get("mission_waiting", false)) or bool(craft_state.get("mission_transit_to_map", false)) or bool(craft_state.get("mission_transit_to_fob", false)):
+		return false
+	return bool(craft_state.get("visible_in_fob", false)) and bool(craft_state.get("is_boardable", false))
+
+
+func _set_transport_craft_pilot_id(craft_id: String, pilot_unit_id: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return
+	var normalized_pilot_id: String = pilot_unit_id.strip_edges()
+	for index in range(_transport_craft_states.size()):
+		if typeof(_transport_craft_states[index]) != TYPE_DICTIONARY:
+			continue
+		var craft_state: Dictionary = Dictionary(_transport_craft_states[index]).duplicate(true)
+		if String(craft_state.get("craft_id", "")).strip_edges() != normalized_craft_id:
+			continue
+		craft_state["pilot_unit_id"] = normalized_pilot_id
+		craft_state["pilot_display_name"] = _build_display_name(normalized_pilot_id) if not normalized_pilot_id.is_empty() else ""
+		craft_state["pilot_portrait_path"] = _build_unit_portrait_path(normalized_pilot_id)
+		_transport_craft_states[index] = craft_state
+		return
+
+
+func _append_unit_to_fob_pool(unit_id: String) -> void:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty() or _selected_unit_ids.has(normalized_unit_id):
+		return
+	_selected_unit_ids.append(normalized_unit_id)
+	_selected_fireteam_ids.append("")
+
+
+func _remove_unit_from_fob_pool(unit_id: String) -> void:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return
+	var next_unit_ids: PackedStringArray = []
+	var next_fireteam_ids: PackedStringArray = []
+	for unit_index in range(_selected_unit_ids.size()):
+		var current_unit_id: String = String(_selected_unit_ids[unit_index]).strip_edges()
+		if current_unit_id.is_empty() or current_unit_id == normalized_unit_id:
+			continue
+		next_unit_ids.append(current_unit_id)
+		next_fireteam_ids.append(String(_selected_fireteam_ids[unit_index]).strip_edges() if unit_index < _selected_fireteam_ids.size() else "")
+	_selected_unit_ids = next_unit_ids
+	_selected_fireteam_ids = next_fireteam_ids
+	_sanitize_fireteam_state()
+	_sanitize_staging_state()
+
+
+func _build_unit_portrait_path(unit_id: String) -> String:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return ""
+	var profile = _profiles_by_id.get(normalized_unit_id, null)
+	if profile != null:
+		return String(profile.portrait_path)
+	var unit_data: Dictionary = _get_available_unit_data(normalized_unit_id)
+	return String(unit_data.get("portrait_path", "")).strip_edges()
 
 
 func _on_set_respawn_button_pressed() -> void:
@@ -2606,9 +2746,34 @@ func _build_member_loadout_row(fireteam_id: String, member_unit_id: String, lead
 	content_row.add_theme_constant_override("separation", 6)
 	row_margin.add_child(content_row)
 
+	var member_card = NPC_COMPACT_CARD_SCENE.instantiate()
+	member_card.name = "LoadoutMemberCard_%s" % member_unit_id
+	member_card.custom_minimum_size = Vector2(132.0, 42.0)
+	member_card.setup_from_profile(
+		member_profile,
+		{
+			"source_context": "loadout_staging",
+			"selected": _focused_unit_id == member_unit_id,
+			"disabled": false,
+			"drag_enabled": false,
+			"compact_mode": true,
+			"fixed_size": true,
+			"fixed_card_size": Vector2(132.0, 42.0),
+			"is_lead": member_unit_id == lead_unit_id,
+			"show_lead_indicator": member_unit_id == lead_unit_id,
+		}
+	)
+	member_card.mouse_filter = Control.MOUSE_FILTER_STOP
+	if member_card.has_signal("card_pressed") and not member_card.card_pressed.is_connected(_on_operator_card_pressed):
+		member_card.card_pressed.connect(_on_operator_card_pressed)
+	if member_card.has_signal("card_open_requested") and not member_card.card_open_requested.is_connected(_on_operator_card_open_requested):
+		member_card.card_open_requested.connect(_on_operator_card_open_requested)
+	content_row.add_child(member_card)
+
 	var portrait := TextureRect.new()
 	portrait.name = "Portrait"
 	portrait.custom_minimum_size = Vector2(34.0, 34.0)
+	portrait.visible = false
 	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	portrait.texture = _load_portrait_texture(String(member_profile.portrait_path))
@@ -3611,6 +3776,17 @@ func _render_dropship_fireteam_cards(container: VBoxContainer) -> void:
 		if craft_card == null:
 			continue
 		container.add_child(craft_card)
+		_make_transport_card_scroll_friendly(craft_card)
+
+
+func _make_transport_card_scroll_friendly(root: Node) -> void:
+	if root == null:
+		return
+	var control := root as Control
+	if control != null and not (control is BaseButton):
+		control.mouse_filter = Control.MOUSE_FILTER_PASS
+	for child in root.get_children():
+		_make_transport_card_scroll_friendly(child)
 
 
 func _render_staging_fireteam_card(container: VBoxContainer, fireteam_id: String, empty_text: String, source_context: String, member_ids: PackedStringArray = [], lead_unit_id: String = "") -> void:
@@ -3679,19 +3855,22 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 	var is_in_transit: bool = bool(craft_state.get("is_in_transit", false))
 	var is_boardable: bool = bool(craft_state.get("is_boardable", false))
 	var can_stage_fireteams: bool = _can_stage_fireteam_into_craft(craft_state)
+	var can_edit_pilot: bool = _can_edit_transport_craft_pilot(craft_state)
 	var craft_card: PanelContainer = PanelContainer.new()
 	craft_card.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	craft_card.custom_minimum_size = Vector2(FOB_TRANSPORT_CARD_WIDTH, 0.0)
-	craft_card.mouse_filter = Control.MOUSE_FILTER_STOP
+	craft_card.mouse_filter = Control.MOUSE_FILTER_PASS
 	craft_card.set_meta("transport_craft_id", craft_id)
 	craft_card.set_meta("shared_transport_card_width", FOB_TRANSPORT_CARD_WIDTH)
 	craft_card.set_meta("shared_transport_card_half_width", true)
 	craft_card.set_meta("fob_ship_texture_size", Vector2(FOB_TRANSPORT_SHIP_TEXTURE_WIDTH, FOB_TRANSPORT_SHIP_TEXTURE_HEIGHT))
 	craft_card.gui_input.connect(_on_transport_craft_card_gui_input.bind(craft_id))
-	if can_stage_fireteams:
+	if can_stage_fireteams or can_edit_pilot:
 		craft_card.set_script(FOB_DROP_PANEL_SCRIPT)
 		craft_card.drop_kind = "dropship|%s" % craft_id
-		craft_card.fireteam_dropped.connect(_on_staging_fireteam_dropped)
+		if can_stage_fireteams:
+			craft_card.fireteam_dropped.connect(_on_staging_fireteam_dropped)
+		craft_card.unit_dropped.connect(_on_transport_craft_card_unit_dropped)
 	var is_waiting_on_mission: bool = bool(craft_state.get("mission_waiting", false))
 	var is_transit_to_mission: bool = bool(craft_state.get("mission_transit_to_map", false))
 	var is_transit_to_fob: bool = bool(craft_state.get("mission_transit_to_fob", false))
@@ -3719,13 +3898,15 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 			"pilot_source_context": "transport_craft_pilot",
 			"pilot_selected": pilot_unit_id == _focused_unit_id,
 			"pilot_disabled": is_in_transit,
+			"pilot_drag_enabled": can_edit_pilot,
+			"pilot_card_unit_dropped": Callable(self, "_on_transport_craft_pilot_card_unit_dropped").bind(craft_id),
 			"pilot_card_pressed": Callable(self, "_on_operator_card_pressed"),
 			"pilot_card_open_requested": Callable(self, "_on_operator_card_open_requested"),
 			"info_lines": [
 				_build_transport_craft_cargo_text(craft_state),
 				_build_transport_craft_status_line(craft_state),
 			],
-			"progress_visible": is_in_transit or is_air_asset_recovery,
+			"progress_visible": true,
 			"progress_value": _build_transport_craft_progress_value(craft_state),
 			"primary_action": {
 				"visible": true,
@@ -3813,7 +3994,7 @@ func _build_transport_craft_status_line(craft_state: Dictionary) -> String:
 		var label: String = "replacement pending" if meta_state == "destroyed_replacement_pending" else "repairing"
 		return "Status: %s | ETA %ds" % [label, eta_seconds]
 	if bool(craft_state.get("mission_waiting", false)):
-		return "Status: Holding on mission map | waiting for Drop"
+		return "Status: Holding off-map | waiting for Drop"
 	if bool(craft_state.get("mission_transit_to_map", false)):
 		return "Status: ETA mission map %ds" % int(craft_state.get("transfer_eta_seconds", 0))
 	if bool(craft_state.get("mission_transit_to_fob", false)):

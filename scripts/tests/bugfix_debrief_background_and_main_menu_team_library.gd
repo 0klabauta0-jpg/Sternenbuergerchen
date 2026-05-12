@@ -79,14 +79,17 @@ func _test_main_menu_lists_created_teams_and_deletes_archives() -> void:
 	_assert(int(initial_editor.get("card_count", 0)) == int(initial_editor.get("unit_count", 0)), "Team editor renders one NPC card per roster unit")
 	menu.call("set_team_editor_view_mode_for_tests", "six")
 	await process_frame
-	var six_view: Dictionary = Dictionary(menu.call("get_team_editor_snapshot"))
-	_assert(String(six_view.get("view_mode", "")) == "six" and int(six_view.get("card_count", 0)) == int(six_view.get("unit_count", 0)), "Team editor supports the six-card view mode")
+	var forced_sheet_view: Dictionary = Dictionary(menu.call("get_team_editor_snapshot"))
+	_assert(String(forced_sheet_view.get("view_mode", "")) == "sheet" and int(forced_sheet_view.get("card_count", 0)) == int(forced_sheet_view.get("unit_count", 0)), "Team editor ignores legacy card modes and stays on the sheet view")
+	_assert(menu.find_child("TeamEditorViewSixButton", true, false) == null and menu.find_child("TeamEditorViewNineButton", true, false) == null, "Team editor no longer exposes 6er/9er tabs")
 	menu.call("set_team_editor_view_mode_for_tests", "sheet")
 	await process_frame
 	var sheet_view: Dictionary = Dictionary(menu.call("get_team_editor_snapshot"))
 	_assert(String(sheet_view.get("view_mode", "")) == "sheet" and bool(sheet_view.get("sheet_visible", false)) and not String(sheet_view.get("selected_unit_id", "")).is_empty(), "Team editor supports a full character sheet view")
-	var blocked_plus: Dictionary = Dictionary(menu.call("adjust_team_editor_stat_for_tests", "tactics", 1))
-	_assert(bool(blocked_plus.get("ok", false)) and not bool(blocked_plus.get("changed", true)), "Full rookie budget blocks extra points")
+	var redistributed_plus: Dictionary = Dictionary(menu.call("adjust_team_editor_stat_for_tests", "tactics", 1))
+	await process_frame
+	var redistributed_snapshot: Dictionary = Dictionary(menu.call("get_team_editor_snapshot"))
+	_assert(bool(redistributed_plus.get("ok", false)) and bool(redistributed_plus.get("changed", false)) and int(redistributed_snapshot.get("budget_used", 0)) == 30, "Full rookie budget redistributes points instead of exceeding the cap")
 	var lowered_stat: Dictionary = Dictionary(menu.call("adjust_team_editor_stat_for_tests", "tactics", -1))
 	_assert(bool(lowered_stat.get("ok", false)) and bool(lowered_stat.get("changed", false)), "Team editor minus frees a point")
 	var raised_stat: Dictionary = Dictionary(menu.call("adjust_team_editor_stat_for_tests", "tactics", 1))
@@ -139,9 +142,10 @@ func _test_character_sheet_edit_controls_and_last_loadout_dropdowns() -> void:
 	await process_frame
 	var plus_button := host.find_child("MetricPlus_accuracy", true, false) as Button
 	var value_label := host.find_child("MetricValueLabel_accuracy", true, false) as Label
+	var minus_button := host.find_child("MetricMinus_accuracy", true, false) as Button
 	var old_accuracy: float = float(Dictionary(profile.skill_values).get("accuracy", 0.0))
 	_assert(plus_button != null and value_label != null, "Character sheet renders plus/minus metric controls")
-	_assert(value_label != null and value_label.horizontal_alignment == HORIZONTAL_ALIGNMENT_LEFT, "Metric value is left aligned inside the bar")
+	_assert(value_label != null and minus_button != null and value_label.get_parent() == minus_button.get_parent() and value_label.get_index() < minus_button.get_index(), "Metric value is shown left of the minus button")
 	if plus_button != null:
 		plus_button.emit_signal("pressed")
 		await process_frame

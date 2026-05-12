@@ -11,11 +11,13 @@ const CONFIRM_AFTER_LOS_TICKS: int = 2
 const MAX_RELAY_DELAY_SECONDS: float = 3.0
 
 var _entries_by_key: Dictionary = {}
+var _keys_by_fireteam: Dictionary = {}
 var _relay_queue_by_key: Dictionary = {}
 
 
 func reset_all() -> void:
 	_entries_by_key.clear()
+	_keys_by_fireteam.clear()
 	_relay_queue_by_key.clear()
 
 
@@ -31,12 +33,10 @@ func get_fireteam_contacts(fireteam_id: String) -> Array:
 	if normalized_fireteam_id.is_empty():
 		return []
 	var result: Array = []
-	var keys: Array = _entries_by_key.keys()
+	var keys: Array = Array(_keys_by_fireteam.get(normalized_fireteam_id, [])).duplicate()
 	keys.sort()
 	for key_variant in keys:
 		var entry: Dictionary = Dictionary(_entries_by_key.get(String(key_variant), {}))
-		if String(entry.get("fireteam_id", "")) != normalized_fireteam_id:
-			continue
 		var public_entry: Dictionary = _build_public_entry(entry)
 		if public_entry.is_empty():
 			continue
@@ -105,7 +105,7 @@ func _apply_observation(current_tick: int, observation: Dictionary, known_firete
 	entry["last_updated_tick"] = current_tick
 	entry["last_seen_tick"] = current_tick
 	entry["los_ticks"] = los_ticks
-	_entries_by_key[entry_key] = entry
+	_store_entry(entry_key, entry)
 	if next_state == STATE_CONFIRMED:
 		_schedule_confirmed_relays(current_tick, fireteam_id, enemy_unit_id, entry, known_fireteam_ids, leadership_by_fireteam)
 	var next_public: String = JSON.stringify(_build_public_entry(entry))
@@ -125,7 +125,7 @@ func _mark_stale_visual_contacts_lost(current_tick: int, observed_keys: Dictiona
 		entry["detection_state"] = STATE_LOST
 		entry["los_ticks"] = 0
 		entry["last_updated_tick"] = current_tick
-		_entries_by_key[key] = entry
+		_store_entry(key, entry)
 		changed = true
 	return changed
 
@@ -174,13 +174,44 @@ func _deliver_due_relays(current_tick: int) -> bool:
 		entry["detected_by"] = _merge_detected_by(Array(entry.get("detected_by", [])), Array(relay.get("detected_by", [])) + [receiver_fireteam_id])
 		entry["last_updated_tick"] = current_tick
 		entry["los_ticks"] = 0
-		_entries_by_key[entry_key] = entry
+		_store_entry(entry_key, entry)
 		var next_public: String = JSON.stringify(_build_public_entry(entry))
 		if previous_public != next_public:
 			changed = true
 	for relay_key in delivered_keys:
 		_relay_queue_by_key.erase(String(relay_key))
 	return changed
+
+
+func _store_entry(entry_key: String, entry: Dictionary) -> void:
+	if entry_key.is_empty():
+		return
+	var normalized_fireteam_id: String = String(entry.get("fireteam_id", "")).strip_edges().to_lower()
+	var previous_entry: Dictionary = Dictionary(_entries_by_key.get(entry_key, {}))
+	var previous_fireteam_id: String = String(previous_entry.get("fireteam_id", "")).strip_edges().to_lower()
+	if not previous_fireteam_id.is_empty() and previous_fireteam_id != normalized_fireteam_id:
+		_remove_fireteam_index_key(previous_fireteam_id, entry_key)
+	_entries_by_key[entry_key] = entry
+	if normalized_fireteam_id.is_empty():
+		return
+	var keys: Array = Array(_keys_by_fireteam.get(normalized_fireteam_id, []))
+	if not keys.has(entry_key):
+		keys.append(entry_key)
+		_keys_by_fireteam[normalized_fireteam_id] = keys
+
+
+func _remove_fireteam_index_key(fireteam_id: String, entry_key: String) -> void:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty() or not _keys_by_fireteam.has(normalized_fireteam_id):
+		return
+	var keys: Array = Array(_keys_by_fireteam.get(normalized_fireteam_id, []))
+	var index: int = keys.find(entry_key)
+	if index >= 0:
+		keys.remove_at(index)
+	if keys.is_empty():
+		_keys_by_fireteam.erase(normalized_fireteam_id)
+	else:
+		_keys_by_fireteam[normalized_fireteam_id] = keys
 
 
 func _build_relay_delay_ticks(source_leadership: float) -> int:

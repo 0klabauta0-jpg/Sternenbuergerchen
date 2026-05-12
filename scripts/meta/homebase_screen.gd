@@ -921,6 +921,8 @@ func _update_character_sheet() -> void:
 		{
 			"status_text": _build_sheet_status_text(_focused_unit_id),
 			"fireteam_text": _build_homebase_fireteam_text(_focused_unit_id),
+			"editable_metrics": false,
+			"hide_loadout_dropdowns": true,
 		}
 	)
 

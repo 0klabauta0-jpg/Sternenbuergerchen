@@ -86,7 +86,7 @@ func _test_profile_validity_roles_skills_and_badges() -> void:
 			if value > 0.70:
 				strong_count += 1
 		var badges: Array = Array(NPC_RANK_BADGE_RESOLVER_SCRIPT.call("get_badges_for_profile", profile))
-		_assert(badges.size() > 0 and badges.size() <= 3, "Generated profile has one to three rank badges")
+		_assert(badges.size() > 0 and badges.size() <= 1, "Generated profile starts with at most one rank badge")
 	_assert(weak_gap_count >= 6, "Roster keeps visible weak spots instead of perfect balance")
 	_assert(strong_count >= 6, "Roster has visible strengths for player choices")
 

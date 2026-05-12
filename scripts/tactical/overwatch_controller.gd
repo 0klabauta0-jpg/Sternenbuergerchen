@@ -17,6 +17,22 @@ func reset_all() -> void:
 	_member_ready_tick_by_unit_id.clear()
 
 
+func get_member_ready_snapshot(current_tick: int = -1) -> Dictionary:
+	var result: Dictionary = {}
+	for unit_id_variant in _member_ready_tick_by_unit_id.keys():
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty():
+			continue
+		var ready_tick: int = int(_member_ready_tick_by_unit_id.get(unit_id_variant, 0))
+		result[unit_id] = {
+			"unit_id": unit_id,
+			"ready_tick": ready_tick,
+			"ready": current_tick < 0 or ready_tick <= current_tick,
+			"cooldown_remaining_ticks": maxi(ready_tick - current_tick, 0) if current_tick >= 0 else 0,
+		}
+	return result
+
+
 func update(
 	simulation_root,
 	security_snapshot: Array,
@@ -42,6 +58,9 @@ func update(
 			continue
 		var unit_lookup: Dictionary = _build_unit_lookup(friendly_units)
 		var anchor_position: Vector2 = Vector2(security_state.get("anchor_position", Vector2.ZERO))
+		var enemy_candidates: Array = _filter_enemy_units_for_overwatch(anchor_position, enemy_units, base_contact_range)
+		if enemy_candidates.is_empty():
+			continue
 		for assignment_variant in Array(security_state.get("member_assignments", [])):
 			if typeof(assignment_variant) != TYPE_DICTIONARY:
 				continue
@@ -54,7 +73,7 @@ func update(
 			var member = unit_lookup.get(member_unit_id, null)
 			if not _can_member_overwatch(member):
 				continue
-			for enemy in enemy_units:
+			for enemy in enemy_candidates:
 				var shot_dict: Dictionary = _try_build_overwatch_shot(member, enemy, assignment, anchor_position, terrain_registry, base_contact_range)
 				if shot_dict.is_empty():
 					continue
@@ -124,6 +143,21 @@ func _build_unit_lookup(units: Array) -> Dictionary:
 			continue
 		lookup[String(unit.call("get_unit_id"))] = unit
 	return lookup
+
+
+func _filter_enemy_units_for_overwatch(anchor_position: Vector2, enemy_units: Array, base_contact_range: float) -> Array:
+	var max_distance: float = maxf(base_contact_range, 0.0)
+	if max_distance <= 0.0:
+		return enemy_units.duplicate()
+	var max_distance_sq: float = max_distance * max_distance
+	var result: Array = []
+	for enemy in enemy_units:
+		if enemy == null or not (enemy is Node2D):
+			continue
+		if anchor_position.distance_squared_to((enemy as Node2D).global_position) > max_distance_sq:
+			continue
+		result.append(enemy)
+	return result
 
 
 func _can_member_overwatch(unit) -> bool:

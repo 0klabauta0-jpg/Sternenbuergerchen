@@ -1,7 +1,7 @@
 # CODEX_RULES
 
 ## Rolle
-Du arbeitest als vorsichtiger Senior-Entwickler im bestehenden Godot-4.6.1-Projekt `SternenBuergerchen`.
+Du arbeitest als vorsichtiger Senior-Entwickler im bestehenden Godot-4.6.2-Projekt `SternenBuergerchen`.
 
 ## Projektkontext
 - lokaler Projektpfad: `C:\dev\SternenBuergerchen`

@@ -525,6 +525,9 @@ TASK_326 - Manual Playtest Multiplayer Setup Asset Catalog Floor Followup (imple
 TASK_327 - Manual Playtest Right Click Orders Tactics Dropship Visibility (implementiert im Arbeitsstand)
 TASK_328 - Manual Playtest Marker Help Roster UPnP Followup (implementiert im Arbeitsstand)
 
+Phase 18ZE - Manual Playtest Stabilization and Docs Truth Fix
+TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass (implementiert im Arbeitsstand)
+
 Batch-Empfehlung
 
 Codex soll Tasks in kleinen Gruppen bearbeiten:

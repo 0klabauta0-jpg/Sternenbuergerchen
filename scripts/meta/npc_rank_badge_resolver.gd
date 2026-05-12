@@ -3,6 +3,7 @@ extends RefCounted
 
 const RANK_PARTICLE_CATALOG_PATH: String = "res://data/rank_particle_asset_catalog.json"
 const MAX_PRIMARY_BADGES: int = 3
+const START_PROFILE_BADGE_CAP: int = 1
 const MIN_SCORE: float = 0.52
 
 const BADGE_DEFINITIONS: Dictionary = {
@@ -30,12 +31,12 @@ const BADGE_HELP_IDS: Dictionary = {
 }
 
 const BADGE_FORMULAS: Dictionary = {
-	"medic": "Sources: medic role text, medictool loadout or medic trait tag. Highest matching source wins the badge score.",
-	"leader": "Sources: fireteam lead flag, leader role text or Leadership. Leadership 0.68+ contributes 0.62 plus Leadership times 0.30.",
-	"heavy": "Sources: heavy weapon loadout or heavy/support role text. Heavy weapons are rail gun, rocket launcher and panzerfaust.",
-	"pilot": "Sources: pilot role text or best platform skill. Dropship, freighter, fighter and ground vehicle handling are checked.",
-	"engineer": "Sources: engineer/tech/repair role text, engineer function score or engineer trait tag.",
-	"shooter": "Sources: weapon loadout, shooter role text or Accuracy. Accuracy 0.68+ contributes 0.56 plus Accuracy times 0.34.",
+	"medic": "Threshold 0.52. Fit reads Discipline, Awareness, Recognition, Speech Quality, Order Fidelity, Contact Stability and small medic context hints.",
+	"leader": "Threshold 0.52. Fit reads Leadership, Speech Quality, Recognition, Discipline, Order Fidelity, Autonomy and a small FTL/context hint.",
+	"heavy": "Threshold 0.52. Fit reads Toughness, Contact Stability, Discipline, Accuracy, Order Fidelity and small heavy loadout/context hints.",
+	"pilot": "Threshold 0.52. Fit reads best platform value plus Awareness, Recognition, Discipline, Speech Quality, Initiative and Contact Stability.",
+	"engineer": "Threshold 0.52. Fit reads Discipline, Recognition, Awareness, Speech Quality, Order Fidelity, Autonomy, Contact Stability and tech context hints.",
+	"shooter": "Threshold 0.52. Fit reads Accuracy, Awareness, Recognition, Discipline, Order Fidelity, Contact Stability, Speed and weapon context.",
 	"enemy": "Source: profile team_id marks the unit as Team Bravo or enemy.",
 }
 
@@ -62,8 +63,10 @@ static func derive_badges(profile_or_data: Variant, max_count: int = MAX_PRIMARY
 		return float(a.get("score", 0.0)) > float(b.get("score", 0.0))
 	)
 
-	var result: Array = []
 	var limit: int = clampi(max_count, 0, MAX_PRIMARY_BADGES)
+	if _is_start_profile(data):
+		limit = mini(limit, START_PROFILE_BADGE_CAP)
+	var result: Array = []
 	for index in range(mini(limit, ordered.size())):
 		result.append(_hydrate_badge(Dictionary(ordered[index])))
 	return result
@@ -72,7 +75,7 @@ static func derive_badges(profile_or_data: Variant, max_count: int = MAX_PRIMARY
 static func get_badges_for_profile(profile_or_data: Variant, max_count: int = MAX_PRIMARY_BADGES) -> Array:
 	var data: Dictionary = _profile_to_dictionary(profile_or_data)
 	var existing: Array = Array(data.get("rank_badges", []))
-	if not existing.is_empty():
+	if not existing.is_empty() and not _has_dynamic_score_source(data):
 		var result: Array = []
 		var limit: int = clampi(max_count, 0, MAX_PRIMARY_BADGES)
 		for index in range(mini(limit, existing.size())):
@@ -80,6 +83,47 @@ static func get_badges_for_profile(profile_or_data: Variant, max_count: int = MA
 				result.append(_hydrate_badge(Dictionary(existing[index])))
 		return result
 	return derive_badges(data, max_count)
+
+
+static func get_badge_progress_for_profile(profile_or_data: Variant, max_count: int = 0, include_enemy: bool = false) -> Array:
+	var data: Dictionary = _profile_to_dictionary(profile_or_data)
+	var result: Array = []
+	for badge_key_variant in BADGE_DEFINITIONS.keys():
+		var badge_key: String = String(badge_key_variant).strip_edges().to_lower()
+		if badge_key == "enemy" and not include_enemy and _score_enemy(data) <= 0.0:
+			continue
+		var score: float = _score_for_badge(badge_key, data)
+		var candidate: Dictionary = _build_badge_candidate(badge_key, score, _reason_for(badge_key, data))
+		if candidate.is_empty():
+			continue
+		candidate["achieved"] = score >= MIN_SCORE
+		candidate["requirement_text"] = _requirement_for(badge_key, data, score)
+		result.append(_hydrate_badge(candidate))
+	result.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		if bool(a.get("achieved", false)) != bool(b.get("achieved", false)):
+			return bool(a.get("achieved", false))
+		if is_equal_approx(float(a.get("score", 0.0)), float(b.get("score", 0.0))):
+			return int(a.get("priority", 999)) < int(b.get("priority", 999))
+		return float(a.get("score", 0.0)) > float(b.get("score", 0.0))
+	)
+	_apply_start_profile_badge_cap(result, data)
+	if max_count <= 0 or result.size() <= max_count:
+		return result
+	return result.slice(0, max_count)
+
+
+static func get_next_badge_requirements(profile_or_data: Variant, max_count: int = MAX_PRIMARY_BADGES) -> Array:
+	var result: Array = []
+	for candidate_variant in get_badge_progress_for_profile(profile_or_data):
+		if typeof(candidate_variant) != TYPE_DICTIONARY:
+			continue
+		var candidate: Dictionary = Dictionary(candidate_variant)
+		if bool(candidate.get("achieved", false)):
+			continue
+		result.append(candidate)
+		if result.size() >= max_count:
+			break
+	return result
 
 
 static func get_badge_help_id(badge_key: String) -> String:
@@ -91,11 +135,14 @@ static func format_badge_tooltip(badge: Dictionary) -> String:
 	var label: String = String(badge.get("label", "Badge")).strip_edges()
 	var reason: String = String(badge.get("reason", "")).strip_edges()
 	var detail: String = String(badge.get("detail_text", badge.get("formula_text", ""))).strip_edges()
+	var requirement: String = String(badge.get("requirement_text", "")).strip_edges()
 	var score_text: String = "Score %.2f" % float(badge.get("score", 0.0))
 	var lines: PackedStringArray = PackedStringArray()
 	lines.append("%s: %s" % [_optional_text(label, "Badge"), score_text])
 	if not reason.is_empty():
 		lines.append(reason)
+	if not requirement.is_empty() and requirement != reason:
+		lines.append(requirement)
 	if not detail.is_empty():
 		lines.append(detail)
 	return "\n".join(lines)
@@ -118,10 +165,17 @@ static func get_badge_asset_path(badge_id: String) -> String:
 
 
 static func _add_candidate(candidates: Dictionary, badge_key: String, score: float, reason: String) -> void:
+	var candidate: Dictionary = _build_badge_candidate(badge_key, score, reason)
+	if candidate.is_empty():
+		return
+	candidates[badge_key] = candidate
+
+
+static func _build_badge_candidate(badge_key: String, score: float, reason: String) -> Dictionary:
 	var definition: Dictionary = Dictionary(BADGE_DEFINITIONS.get(badge_key, {}))
 	if definition.is_empty():
-		return
-	candidates[badge_key] = {
+		return {}
+	return {
 		"badge_key": badge_key,
 		"badge_id": String(definition.get("badge_id", "")),
 		"label": String(definition.get("label", badge_key.capitalize())),
@@ -131,6 +185,67 @@ static func _add_candidate(candidates: Dictionary, badge_key: String, score: flo
 		"help_id": get_badge_help_id(badge_key),
 		"detail_text": String(BADGE_FORMULAS.get(badge_key, "")),
 	}
+
+
+static func _score_for_badge(badge_key: String, data: Dictionary) -> float:
+	match badge_key:
+		"medic":
+			return _score_medic(data)
+		"leader":
+			return _score_leader(data)
+		"heavy":
+			return _score_heavy(data)
+		"pilot":
+			return _score_pilot(data)
+		"engineer":
+			return _score_engineer(data)
+		"shooter":
+			return _score_shooter(data)
+		"enemy":
+			return _score_enemy(data)
+		_:
+			return 0.0
+
+
+static func _apply_start_profile_badge_cap(result: Array, data: Dictionary) -> void:
+	if not _is_start_profile(data):
+		return
+	var achieved_count: int = 0
+	for index in range(result.size()):
+		if typeof(result[index]) != TYPE_DICTIONARY:
+			continue
+		var badge: Dictionary = Dictionary(result[index])
+		if not bool(badge.get("achieved", false)):
+			continue
+		achieved_count += 1
+		if achieved_count <= START_PROFILE_BADGE_CAP:
+			continue
+		badge["achieved"] = false
+		badge["requirement_text"] = "Start-Tradeoff: Zu Beginn ist nur der staerkste Rollenring aktiv; weitere Ringe brauchen klareren Fokus oder Entwicklung."
+		badge["reason"] = "%s Fit %.2f ist nah dran, bleibt wegen Start-Tradeoff aber offen." % [String(badge.get("label", "Badge")), float(badge.get("score", 0.0))]
+		result[index] = _hydrate_badge(badge)
+
+
+static func _requirement_for(badge_key: String, data: Dictionary, score: float) -> String:
+	if score >= MIN_SCORE:
+		return "Erreicht: %s" % _reason_for(badge_key, data)
+	match badge_key:
+		"leader":
+			return "Noetig: Fit %.2f/%.2f; Leadership %.2f, Speech %.2f, Order %.2f, Autonomy %.2f." % [score, MIN_SCORE, _score_value(data, "leadership"), _communication_value(data, "speech_quality"), _behavior_value(data, "order_fidelity"), _behavior_value(data, "autonomy")]
+		"pilot":
+			return "Noetig: Fit %.2f/%.2f; Plattform %.2f, Awareness %.2f, Discipline %.2f, Speech %.2f." % [score, MIN_SCORE, _best_platform_value(data), _score_value(data, "awareness"), _score_value(data, "discipline"), _communication_value(data, "speech_quality")]
+		"shooter":
+			return "Noetig: Fit %.2f/%.2f; Accuracy %.2f, Awareness %.2f, Recognition %.2f, Order %.2f." % [score, MIN_SCORE, _score_value(data, "accuracy"), _score_value(data, "awareness"), _score_value(data, "recognition"), _behavior_value(data, "order_fidelity")]
+		"medic":
+			return "Noetig: Fit %.2f/%.2f; Discipline %.2f, Recognition %.2f, Speech %.2f, Stability %.2f." % [score, MIN_SCORE, _score_value(data, "discipline"), _score_value(data, "recognition"), _communication_value(data, "speech_quality"), _behavior_value(data, "contact_stability")]
+		"heavy":
+			return "Noetig: Fit %.2f/%.2f; Toughness %.2f, Stability %.2f, Accuracy %.2f, Discipline %.2f." % [score, MIN_SCORE, _score_value(data, "toughness"), _behavior_value(data, "contact_stability"), _score_value(data, "accuracy"), _score_value(data, "discipline")]
+		"engineer":
+			return "Noetig: Fit %.2f/%.2f; Recognition %.2f, Discipline %.2f, Awareness %.2f, Order %.2f." % [score, MIN_SCORE, _score_value(data, "recognition"), _score_value(data, "discipline"), _score_value(data, "awareness"), _behavior_value(data, "order_fidelity")]
+		"enemy":
+			return "Noetig: Gegner-Teamkontext."
+		_:
+			return "Noetig: passender Rollen-, Trait- oder Skill-Kontext."
 
 
 static func _hydrate_badge(candidate: Dictionary) -> Dictionary:
@@ -147,83 +262,132 @@ static func _hydrate_badge(candidate: Dictionary) -> Dictionary:
 static func _score_medic(data: Dictionary) -> float:
 	var role_text: String = _role_text(data)
 	var weapons: PackedStringArray = _weapon_ids(data)
-	var score: float = 0.0
+	var score: float = clampf(
+		(_score_value(data, "discipline") * 0.20)
+		+ (_score_value(data, "awareness") * 0.15)
+		+ (_score_value(data, "recognition") * 0.15)
+		+ (_communication_value(data, "speech_quality") * 0.20)
+		+ (_behavior_value(data, "contact_stability") * 0.15)
+		+ (_behavior_value(data, "order_fidelity") * 0.15),
+		0.0,
+		1.0
+	)
 	if role_text.contains("medic") or role_text.contains("sanitaet") or role_text.contains("heal"):
-		score = maxf(score, 0.96)
+		score += 0.10
 	if weapons.has("medictool"):
-		score = maxf(score, 0.94)
+		score += 0.14
 	if _string_array_has_fragment(_string_array(data.get("trait_ids", [])), "medic"):
-		score = maxf(score, 0.86)
-	return score
+		score += 0.10
+	return clampf(score, 0.0, 1.0)
 
 
 static func _score_leader(data: Dictionary) -> float:
 	var role_text: String = _role_text(data)
-	var leadership: float = _score_value(data, "leadership")
-	var score: float = 0.0
+	var score: float = clampf(
+		(_score_value(data, "leadership") * 0.40)
+		+ (_communication_value(data, "speech_quality") * 0.22)
+		+ (_score_value(data, "recognition") * 0.10)
+		+ (_score_value(data, "discipline") * 0.08)
+		+ (_behavior_value(data, "order_fidelity") * 0.08)
+		+ (_behavior_value(data, "autonomy") * 0.12),
+		0.0,
+		1.0
+	)
 	if bool(data.get("is_fireteam_lead", false)):
-		score = maxf(score, 0.98)
+		score += 0.12
 	if role_text.contains("lead") or role_text.contains("leader") or role_text.contains("captain") or role_text.contains("commander"):
-		score = maxf(score, 0.92)
-	if leadership >= 0.68:
-		score = maxf(score, 0.62 + leadership * 0.30)
-	return score
+		score += 0.08
+	return clampf(score, 0.0, 1.0)
 
 
 static func _score_heavy(data: Dictionary) -> float:
 	var role_text: String = _role_text(data)
 	var weapons: PackedStringArray = _weapon_ids(data)
-	var score: float = 0.0
+	var score: float = clampf(
+		(_score_value(data, "toughness") * 0.28)
+		+ (_behavior_value(data, "contact_stability") * 0.22)
+		+ (_score_value(data, "discipline") * 0.14)
+		+ (_score_value(data, "accuracy") * 0.14)
+		+ (_behavior_value(data, "order_fidelity") * 0.10)
+		+ (_behavior_value(data, "autonomy") * 0.06)
+		+ (_communication_value(data, "speech_quality") * 0.06),
+		0.0,
+		1.0
+	)
 	for weapon_id in weapons:
 		if HEAVY_WEAPONS.has(weapon_id):
-			score = maxf(score, 0.95)
+			score += 0.24
 	if role_text.contains("heavy") or role_text.contains("support"):
-		score = maxf(score, 0.88)
-	return score
+		score += 0.10
+	if String(data.get("armor_id", data.get("armor", ""))).strip_edges().to_lower() == "heavy":
+		score += 0.06
+	return clampf(score, 0.0, 1.0)
 
 
 static func _score_pilot(data: Dictionary) -> float:
 	var role_text: String = _role_text(data)
-	var platform_values: Dictionary = Dictionary(data.get("platform_values", {}))
-	var best_platform: float = -1.0
-	for key in PILOT_KEYS:
-		best_platform = maxf(best_platform, float(platform_values.get(key, -1.0)))
-	var score: float = 0.0
+	var best_platform: float = _best_platform_value(data)
+	var score: float = clampf(
+		(best_platform * 0.35)
+		+ (_score_value(data, "awareness") * 0.14)
+		+ (_score_value(data, "recognition") * 0.12)
+		+ (_score_value(data, "discipline") * 0.12)
+		+ (_communication_value(data, "speech_quality") * 0.12)
+		+ (_behavior_value(data, "contact_stability") * 0.08)
+		+ (_behavior_value(data, "initiative") * 0.07),
+		0.0,
+		1.0
+	)
 	if role_text.contains("pilot"):
-		score = maxf(score, 0.94)
-	if best_platform >= 0.65:
-		score = maxf(score, 0.55 + best_platform * 0.38)
-	return score
+		score += 0.08
+	return clampf(score, 0.0, 1.0)
 
 
 static func _score_engineer(data: Dictionary) -> float:
 	var role_text: String = _role_text(data)
 	var function_scores: Dictionary = Dictionary(data.get("function_scores", {}))
-	var score: float = 0.0
+	var score: float = clampf(
+		(_score_value(data, "discipline") * 0.20)
+		+ (_score_value(data, "recognition") * 0.18)
+		+ (_score_value(data, "awareness") * 0.15)
+		+ (_communication_value(data, "speech_quality") * 0.12)
+		+ (_behavior_value(data, "order_fidelity") * 0.15)
+		+ (_behavior_value(data, "autonomy") * 0.10)
+		+ (_behavior_value(data, "contact_stability") * 0.10),
+		0.0,
+		1.0
+	)
 	if role_text.contains("engineer") or role_text.contains("tech") or role_text.contains("repair"):
-		score = maxf(score, 0.94)
+		score += 0.20
 	if float(function_scores.get("engineer", 0.0)) >= 0.60:
-		score = maxf(score, 0.84)
+		score += 0.12
 	if _string_array_has_fragment(_string_array(data.get("trait_ids", [])), "engineer"):
-		score = maxf(score, 0.84)
-	return score
+		score += 0.12
+	return clampf(score, 0.0, 1.0)
 
 
 static func _score_shooter(data: Dictionary) -> float:
 	var role_text: String = _role_text(data)
 	var weapons: PackedStringArray = _weapon_ids(data)
-	var accuracy: float = _score_value(data, "accuracy")
-	var score: float = 0.0
+	var score: float = clampf(
+		(_score_value(data, "accuracy") * 0.34)
+		+ (_score_value(data, "awareness") * 0.18)
+		+ (_score_value(data, "recognition") * 0.14)
+		+ (_score_value(data, "discipline") * 0.12)
+		+ (_behavior_value(data, "order_fidelity") * 0.10)
+		+ (_behavior_value(data, "contact_stability") * 0.06)
+		+ (_score_value(data, "speed") * 0.06),
+		0.0,
+		1.0
+	)
 	for weapon_id in weapons:
 		if SHOOTER_WEAPONS.has(weapon_id):
-			score = maxf(score, 0.76)
+			score += 0.18
 			if weapon_id == "sniper":
-				score = maxf(score, 0.90)
+				score += 0.04
 	if role_text.contains("rifle") or role_text.contains("shooter") or role_text.contains("marksman") or role_text.contains("overwatch"):
-		score = maxf(score, 0.84)
-	if accuracy >= 0.68:
-		score = maxf(score, 0.56 + accuracy * 0.34)
-	return score
+		score += 0.12
+	return clampf(score, 0.0, 1.0)
 
 
 static func _score_enemy(data: Dictionary) -> float:
@@ -236,17 +400,17 @@ static func _score_enemy(data: Dictionary) -> float:
 static func _reason_for(badge_key: String, data: Dictionary) -> String:
 	match badge_key:
 		"medic":
-			return "Medic score reads role/loadout text and medic trait tags."
+			return "Medic fit reads Discipline %.2f, Recognition %.2f, Speech %.2f and Stability %.2f." % [_score_value(data, "discipline"), _score_value(data, "recognition"), _communication_value(data, "speech_quality"), _behavior_value(data, "contact_stability")]
 		"leader":
-			return "Leader score reads fireteam lead flag, role text and Leadership %.2f." % _score_value(data, "leadership")
+			return "Leader fit reads Leadership %.2f, Speech %.2f, Order %.2f and Autonomy %.2f." % [_score_value(data, "leadership"), _communication_value(data, "speech_quality"), _behavior_value(data, "order_fidelity"), _behavior_value(data, "autonomy")]
 		"heavy":
-			return "Heavy score reads heavy weapon loadout and support role text."
+			return "Heavy fit reads Toughness %.2f, Stability %.2f, Accuracy %.2f and Discipline %.2f." % [_score_value(data, "toughness"), _behavior_value(data, "contact_stability"), _score_value(data, "accuracy"), _score_value(data, "discipline")]
 		"pilot":
-			return "Pilot score reads pilot role text and best platform skill %.2f." % _best_platform_value(data)
+			return "Pilot fit reads best platform %.2f, Awareness %.2f, Discipline %.2f and Speech %.2f." % [_best_platform_value(data), _score_value(data, "awareness"), _score_value(data, "discipline"), _communication_value(data, "speech_quality")]
 		"engineer":
-			return "Engineer score reads engineer role, function score and trait tags."
+			return "Engineer fit reads Recognition %.2f, Discipline %.2f, Awareness %.2f and Order %.2f." % [_score_value(data, "recognition"), _score_value(data, "discipline"), _score_value(data, "awareness"), _behavior_value(data, "order_fidelity")]
 		"shooter":
-			return "Shooter score reads weapon loadout, role text and Accuracy %.2f." % _score_value(data, "accuracy")
+			return "Shooter fit reads Accuracy %.2f, Awareness %.2f, Recognition %.2f and Order %.2f." % [_score_value(data, "accuracy"), _score_value(data, "awareness"), _score_value(data, "recognition"), _behavior_value(data, "order_fidelity")]
 		"enemy":
 			return "Enemy badge is set by team_id or faction context."
 		_:
@@ -277,12 +441,43 @@ static func _score_value(data: Dictionary, key: String) -> float:
 	return clampf(float(skill_values.get(key, data.get("skill_%s" % key, 0.0))), 0.0, 1.0)
 
 
+static func _communication_value(data: Dictionary, key: String) -> float:
+	var communication_values: Dictionary = Dictionary(data.get("communication_values", {}))
+	return clampf(float(communication_values.get(key, data.get(key, 0.0))), 0.0, 1.0)
+
+
+static func _behavior_value(data: Dictionary, key: String) -> float:
+	var behavior_axes: Dictionary = Dictionary(data.get("behavior_axes", {}))
+	return clampf(float(behavior_axes.get(key, data.get(key, 0.0))), 0.0, 1.0)
+
+
 static func _best_platform_value(data: Dictionary) -> float:
 	var platform_values: Dictionary = Dictionary(data.get("platform_values", {}))
 	var best_platform: float = -1.0
 	for key in PILOT_KEYS:
-		best_platform = maxf(best_platform, float(platform_values.get(key, -1.0)))
+		best_platform = maxf(best_platform, float(platform_values.get(key, data.get(key, -1.0))))
 	return maxf(best_platform, 0.0)
+
+
+static func _has_dynamic_score_source(data: Dictionary) -> bool:
+	for key in ["skill_values", "core_values", "communication_values", "platform_values", "behavior_axes", "function_scores"]:
+		if data.has(key) and typeof(data.get(key)) == TYPE_DICTIONARY and not Dictionary(data.get(key)).is_empty():
+			return true
+	for key in ["skill_accuracy", "skill_speed", "skill_leadership", "skill_toughness", "accuracy", "speed", "leadership", "toughness", "dropship_piloting", "freighter_piloting", "fighter_piloting"]:
+		if data.has(key):
+			return true
+	return false
+
+
+static func _is_start_profile(data: Dictionary) -> bool:
+	if not data.has("roster_seed_index"):
+		return false
+	if int(data.get("roster_seed_index", -1)) < 0:
+		return false
+	var progression: Dictionary = Dictionary(data.get("progression", {}))
+	var xp: int = int(progression.get("xp", progression.get("experience", data.get("xp", 0))))
+	var missions_completed: int = int(progression.get("missions_completed", progression.get("mission_count", data.get("missions_completed", 0))))
+	return xp <= 0 and missions_completed <= 0
 
 
 static func _badge_compact_lines(badge: Dictionary) -> PackedStringArray:
@@ -292,6 +487,9 @@ static func _badge_compact_lines(badge: Dictionary) -> PackedStringArray:
 	var reason: String = String(badge.get("reason", "")).strip_edges()
 	if not reason.is_empty():
 		lines.append(reason)
+	var requirement: String = String(badge.get("requirement_text", "")).strip_edges()
+	if not requirement.is_empty() and requirement != reason:
+		lines.append(requirement)
 	return lines
 
 
@@ -300,6 +498,9 @@ static func _badge_detail_lines(badge: Dictionary) -> PackedStringArray:
 	var detail: String = String(badge.get("detail_text", badge.get("formula_text", ""))).strip_edges()
 	if not detail.is_empty():
 		lines.append(detail)
+	var requirement: String = String(badge.get("requirement_text", "")).strip_edges()
+	if not requirement.is_empty():
+		lines.append(requirement)
 	return lines
 
 

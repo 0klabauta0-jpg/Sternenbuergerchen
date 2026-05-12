@@ -62,15 +62,18 @@ func _render_result() -> void:
 	var result_label: Label = get_node("Panel/Margin/VBox/ResultLabel")
 	var team_state_label: Label = get_node("Panel/Margin/VBox/TeamStateLabel")
 	var air_asset_label: Label = _ensure_air_asset_events_label()
+	var ftl_feedback_label: Label = _ensure_ftl_feedback_label()
 	var character_events_label: Label = _ensure_character_events_label()
 	var personnel_events_label: Label = _ensure_personnel_events_label()
 	_apply_help_id(character_events_label, "debrief.character_updates")
 	_apply_help_id(air_asset_label, "fob.flightdeck")
+	_apply_help_id(ftl_feedback_label, "character_sheet.ftl_tactical_impact")
 
 	if _mission_result.is_empty():
 		result_label.text = "Mission result: pending"
 		team_state_label.text = "Returned team state: unavailable"
 		air_asset_label.text = "Air asset: pending"
+		ftl_feedback_label.text = "FTL feedback: pending"
 		character_events_label.text = "Character updates: pending"
 		personnel_events_label.text = "Personnel updates: pending"
 		_apply_readability_style()
@@ -113,6 +116,12 @@ func _render_result() -> void:
 		air_asset_label.text = "Air asset: no loss reported"
 	else:
 		air_asset_label.text = String(AIR_ASSET_RECOVERY_STATE_SCRIPT.call("build_debrief_summary", recovery_state))
+
+	var ftl_feedback_lines: PackedStringArray = _build_ftl_feedback_lines(Array(_mission_result.get("fireteam_tactical_debrief", [])))
+	if ftl_feedback_lines.is_empty():
+		ftl_feedback_label.text = "FTL feedback: unavailable"
+	else:
+		ftl_feedback_label.text = "FTL feedback:\n%s" % "\n".join(ftl_feedback_lines)
 
 	var character_event_lines: PackedStringArray = []
 	for event_variant in Array(_mission_result.get("character_events", [])):
@@ -181,9 +190,31 @@ func _ensure_air_asset_events_label() -> Label:
 	return label
 
 
+func _ensure_ftl_feedback_label() -> Label:
+	var vbox := get_node("Panel/Margin/VBox") as VBoxContainer
+	var existing := vbox.get_node_or_null("FTLFeedbackLabel") as Label
+	if existing != null:
+		return existing
+	var label := Label.new()
+	label.name = "FTLFeedbackLabel"
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var character_label := vbox.get_node_or_null("CharacterEventsLabel")
+	var button_row := vbox.get_node_or_null("ButtonRow")
+	if character_label != null:
+		vbox.add_child(label)
+		vbox.move_child(label, character_label.get_index())
+	elif button_row != null:
+		vbox.add_child(label)
+		vbox.move_child(label, button_row.get_index())
+	else:
+		vbox.add_child(label)
+	return label
+
+
 func _apply_contextual_help_ids() -> void:
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/CharacterEventsLabel") as Control, "debrief.character_updates")
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/AirAssetEventsLabel") as Control, "fob.flightdeck")
+	_apply_help_id(get_node_or_null("Panel/Margin/VBox/FTLFeedbackLabel") as Control, "character_sheet.ftl_tactical_impact")
 
 
 func _apply_readability_style() -> void:
@@ -199,6 +230,7 @@ func _apply_readability_style() -> void:
 		"Panel/Margin/VBox/ResultLabel",
 		"Panel/Margin/VBox/TeamStateLabel",
 		"Panel/Margin/VBox/AirAssetEventsLabel",
+		"Panel/Margin/VBox/FTLFeedbackLabel",
 		"Panel/Margin/VBox/CharacterEventsLabel",
 		"Panel/Margin/VBox/PersonnelEventsLabel",
 	]:
@@ -223,6 +255,62 @@ func _apply_help_id(control: Control, help_id: String) -> void:
 		return
 	control.set_meta("help_id", normalized_id)
 	control.tooltip_text = ""
+
+
+func _build_ftl_feedback_lines(entries: Array) -> PackedStringArray:
+	var lines: PackedStringArray = PackedStringArray()
+	for entry_variant in entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var fireteam_id: String = String(entry.get("fireteam_id", "")).strip_edges().to_upper()
+		if fireteam_id.is_empty():
+			fireteam_id = "TEAM"
+		var reaction_delay: float = maxf(float(entry.get("reaction_delay_seconds", 0.0)), 0.0)
+		var plan_quality: float = clampf(float(entry.get("plan_quality", 0.5)), 0.0, 1.0)
+		var tempo_delta: int = int(round((clampf(float(entry.get("tempo_modifier", 1.0)), 0.0, 2.0) - 1.0) * 100.0))
+		var contact_count: int = maxi(int(entry.get("contact_report_count", 0)), 0)
+		var report_quality: float = clampf(float(entry.get("contact_report_quality", 0.5)), 0.0, 1.0)
+		var morale: float = clampf(float(entry.get("morale", 0.5)), 0.0, 1.0)
+		var frustration: float = clampf(float(entry.get("frustration", 0.0)), 0.0, 1.0)
+		lines.append("%s: Reaktion %.2fs | Plan %s | Tempo %+d%% | Kontakte %d (Meldung %s) | Moral %s" % [
+			fireteam_id,
+			reaction_delay,
+			_format_debrief_quality_bucket(plan_quality),
+			tempo_delta,
+			contact_count,
+			_format_contact_report_quality_bucket(report_quality),
+			_format_debrief_morale_bucket(morale, frustration),
+		])
+		if lines.size() >= 4:
+			break
+	return lines
+
+
+func _format_debrief_quality_bucket(value: float) -> String:
+	if value >= 0.66:
+		return "stark"
+	if value >= 0.42:
+		return "solide"
+	return "roh"
+
+
+func _format_contact_report_quality_bucket(value: float) -> String:
+	if value >= 0.70:
+		return "hoch"
+	if value >= 0.42:
+		return "mittel"
+	return "niedrig"
+
+
+func _format_debrief_morale_bucket(morale: float, frustration: float) -> String:
+	if morale < 0.35 or frustration >= 0.68:
+		return "kritisch"
+	if morale < 0.48 or frustration >= 0.46:
+		return "sinkt"
+	if morale >= 0.64 and frustration <= 0.28:
+		return "stabil"
+	return "ruhig"
 
 
 func _apply_background_texture() -> void:

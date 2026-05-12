@@ -11,6 +11,7 @@ Im Map-Editor standen manche Station-Floor-Panels zu hoch. Ausserdem sollten Med
 ## Umfang
 1. Station Floor als Terrain/Surface:
    - `station_floor_panel` ist Terrain-/Surface-Variante statt Object-Layer-Prop.
+   - Die nachgezogenen Station-Set-Floors `station_set_floor_corner` und `station_set_floor_detail` folgen derselben Bodenregel.
    - Station-Wand-Tiles bekommen darunter das passende Station-Floor-Panel.
 2. Visual Top Alignment:
    - Dicke Ground-Surface-Modelle nutzen ihren eigenen `surface_top_y_offset`.
@@ -32,6 +33,7 @@ Im Map-Editor standen manche Station-Floor-Panels zu hoch. Ausserdem sollten Med
 
 ## Akzeptanzkriterien
 - [x] Station-Floor-Panels verhalten sich wie Bodenpaint.
+- [x] Station-Set-Corner-/Detail-Floors verhalten sich ebenfalls wie Bodenpaint.
 - [x] Station-Waende behalten ihren passenden Boden.
 - [x] Props koennen auf Station-Strukturen liegen.
 - [x] Eraser entfernt Layer in nachvollziehbarer Reihenfolge.

@@ -5,7 +5,7 @@ SternenBuergerchen
 
 ## Lokale Projektbasis
 - Projektpfad: `C:\dev\SternenBuergerchen`
-- Engine: Godot 4.6.1
+- Engine: Godot 4.6.2
 - Codex läuft in VS / VS Code gegen das lokale Repo
 - Änderungen müssen lokal lauffähig sein und anschließend über Git nach GitHub gepusht werden
 

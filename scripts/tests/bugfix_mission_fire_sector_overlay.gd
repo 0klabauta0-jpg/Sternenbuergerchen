@@ -44,19 +44,21 @@ func _test_fire_sector_overlay_is_explicit_and_sector_based() -> void:
 	var disabled_snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 	_assert(not bool(disabled_snapshot.get("friendly_fire_sector_overlay_enabled", true)), "Friendly fire sector overlay defaults to explicit off-state")
 	_assert(int(disabled_snapshot.get("friendly_aim_visual_count", -1)) == 0, "No friendly fire range visuals are drawn while the overlay is off")
+	_assert(int(disabled_snapshot.get("selected_unit_marker_count", 0)) > 0, "Primary 3D view renders selected-unit markers at proxy positions")
+	_assert(_count_visible_legacy_selection_rings(controller, "blue") == 0, "Primary 3D mission suppresses legacy 2D selection rings")
 
 	controller.call("set_fire_sector_overlay_enabled", true)
 	await _wait_frames(6)
 	var enabled_snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 	var first_entry: Dictionary = _first_dictionary(Array(enabled_snapshot.get("friendly_aim_entries", [])))
 	_assert(bool(enabled_snapshot.get("friendly_fire_sector_overlay_enabled", false)), "Friendly fire sector overlay can be toggled on")
-	_assert(String(enabled_snapshot.get("friendly_fire_sector_visual_mode", "")) == "tile_aligned_los", "Friendly fire sectors use tile-aligned LOS visualization")
+	_assert(String(enabled_snapshot.get("friendly_fire_sector_visual_mode", "")) == "los_line_only", "Friendly fire overlay defaults to a cheap LOS line visualization")
 	_assert(int(enabled_snapshot.get("friendly_aim_visual_count", 0)) > 0, "Selected fireteam exposes fire sector visuals when enabled")
-	_assert(int(enabled_snapshot.get("friendly_fire_sector_tile_marker_count", 0)) > 0, "Friendly fire sector marks reachable tiles instead of drawing a free overlay")
-	_assert(String(enabled_snapshot.get("friendly_fire_sector_scan_mode", "")) == "range_bounded_los_cache", "Friendly fire sector scans only the weapon-radius tile window and reuses LOS blocker checks")
-	_assert(int(enabled_snapshot.get("friendly_fire_sector_los_line_count", 0)) <= int(enabled_snapshot.get("friendly_fire_sector_blocker_line_limit", 99)) * maxi(int(enabled_snapshot.get("friendly_aim_visual_count", 1)), 1), "Friendly fire sector keeps LOS blocker line sampling bounded")
-	_assert(String(first_entry.get("visual_shape", "")) == "tile_sector", "Friendly range readout is represented as a tile sector, not a full-screen command-like line")
-	_assert(bool(first_entry.get("tile_aligned", false)), "Friendly range entry records that the visualization is snapped to tiles")
+	_assert(int(enabled_snapshot.get("friendly_fire_sector_tile_marker_count", -1)) == 0, "LOS line mode avoids reachable-tile marker floods")
+	_assert(String(enabled_snapshot.get("friendly_fire_sector_scan_mode", "")) == "single_facing_los_line", "Friendly fire overlay performs one bounded facing LOS check per shown unit")
+	_assert(int(enabled_snapshot.get("friendly_fire_sector_los_line_count", 0)) <= maxi(int(enabled_snapshot.get("friendly_aim_visual_count", 1)), 1), "Friendly fire overlay keeps LOS line sampling to one line per unit")
+	_assert(String(first_entry.get("visual_shape", "")) == "los_line", "Friendly range readout is represented as a single sight line")
+	_assert(not bool(first_entry.get("tile_aligned", true)), "Friendly range entry records that the visualization is not a tile-sector fill")
 	_assert(float(first_entry.get("sector_angle_degrees", 0.0)) > 45.0 and float(first_entry.get("sector_angle_degrees", 180.0)) < 90.0, "Fire sector uses a narrow arc below ninety degrees")
 	_assert(first_entry.has("facing_tip_position"), "Friendly sector entries include a short facing tip for direction readability")
 	var unit_id: String = String(first_entry.get("unit_id", "")).strip_edges()
@@ -67,6 +69,20 @@ func _test_fire_sector_overlay_is_explicit_and_sector_based() -> void:
 	var facing_direction: Vector2 = (facing_tip_position - origin_position).normalized()
 	var proxy_direction: Vector2 = Vector2(primary_view.call("_get_world_direction_from_proxy_yaw", origin_position, float(proxy_state.get("rotation_y_degrees", 0.0))))
 	_assert(not proxy_state.is_empty() and facing_direction.dot(proxy_direction.normalized()) > 0.98, "Friendly sight sector follows the rendered NPC proxy rotation instead of drifting to the left")
+	var unit := _find_unit_by_id(scene, unit_id)
+	if unit != null:
+		(unit as Node).set_meta("facing_angle", PI)
+		if unit.has_method("set_target_position"):
+			unit.call("set_target_position", origin_position + Vector2(140.0, 0.0))
+		controller.call("_refresh_order_visuals")
+		await _wait_frames(6)
+		var target_snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
+		var target_entry: Dictionary = _first_dictionary(Array(target_snapshot.get("friendly_aim_entries", [])))
+		var target_origin: Vector2 = Vector2(target_entry.get("origin_position", origin_position))
+		var target_facing_tip: Vector2 = Vector2(target_entry.get("facing_tip_position", target_origin))
+		var expected_direction: Vector2 = (origin_position + Vector2(140.0, 0.0) - target_origin).normalized()
+		var target_facing_direction: Vector2 = (target_facing_tip - target_origin).normalized()
+		_assert(target_facing_direction.dot(expected_direction) > 0.94, "Friendly sight line prefers active target direction over stale facing metadata")
 
 	controller.call("set_fire_sector_overlay_enabled", false)
 	await _wait_frames(4)
@@ -110,6 +126,28 @@ func _first_dictionary(values: Array) -> Dictionary:
 		if typeof(value) == TYPE_DICTIONARY:
 			return Dictionary(value)
 	return {}
+
+
+func _find_unit_by_id(scene: Node, unit_id: String) -> Node:
+	if scene == null or unit_id.strip_edges().is_empty():
+		return null
+	for child in scene.get_children():
+		if child != null and child.has_method("get_unit_id") and String(child.call("get_unit_id")).strip_edges() == unit_id.strip_edges():
+			return child
+	return null
+
+
+func _count_visible_legacy_selection_rings(controller: Node, fireteam_id: String) -> int:
+	if controller == null:
+		return 0
+	var count: int = 0
+	for unit_variant in Array(controller.call("_get_fireteam_units", fireteam_id, true)):
+		if not (unit_variant is Node):
+			continue
+		var ring := (unit_variant as Node).get_node_or_null("SelectionRing") as CanvasItem
+		if ring != null and ring.visible:
+			count += 1
+	return count
 
 
 func _wait_frames(count: int) -> void:

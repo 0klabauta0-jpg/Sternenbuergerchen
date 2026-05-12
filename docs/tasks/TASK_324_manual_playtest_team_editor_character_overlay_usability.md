@@ -6,7 +6,7 @@ Team-Erstellung und Charakterbearbeitung sollen als eigenstaendige Editor-Ansich
 ## Status: IMPLEMENTIERT IM ARBEITSSTAND
 
 ## Kontext
-Im Startscreen verdeckte der Teambereich die Hauptbuttons. Gewuenscht war ein eigener Team-Editor wie der Map-Editor: leere Charakterkarten, Ansichten fuer 6er/9er/volle Charakterblaetter, Name/Portrait aenderbar, Punktebudget fuer Rookies und besser erklaerte abgeleitete Werte.
+Im Startscreen verdeckte der Teambereich die Hauptbuttons. Gewuenscht war ein eigener Team-Editor wie der Map-Editor: leere Charakterkarten, inzwischen nur noch die volle Blatt-Ansicht, Name/Portrait aenderbar, Punktebudget fuer Rookies und besser erklaerte abgeleitete Werte.
 
 ## Umfang
 1. Main Menu Einstieg:
@@ -17,8 +17,10 @@ Im Startscreen verdeckte der Teambereich die Hauptbuttons. Gewuenscht war ein ei
    - Bestehende Teams koennen per Auswahl/Doppelklick bearbeitet werden.
    - Teamname und Portrait/Icon koennen geaendert werden.
 3. Character Editor:
+   - Der Team-Editor bleibt auf der Blatt-Ansicht; alte 6er-/9er-Tabs sind entfernt.
    - Werte sind mit Plus/Minus-Bedienung aenderbar.
    - Abgeleitete Werte aktualisieren live.
+   - Wertsignale geben nur noch ein kleines Daten-Payload weiter, keine UI-/Budget-Row-Strukturen mit Rueckverweisen.
    - Punktebudget, Mindest-/Maximalwerte und Rookie-Grenze werden sichtbar gemacht.
    - Kurzbeschreibung wurde aus dem Fokus genommen; letzte Ausruestung wandert nach unten.
 4. Help:
@@ -36,6 +38,7 @@ Im Startscreen verdeckte der Teambereich die Hauptbuttons. Gewuenscht war ein ei
 - [x] Hauptmenue bleibt bedienbar, Team-Editor ist eigene Ansicht.
 - [x] Bestehende Teams koennen zur Bearbeitung geoeffnet werden.
 - [x] Name und Portrait koennen im Editor geaendert werden.
+- [x] Team-Editor zeigt nur noch die Blatt-Ansicht; 6er-/9er-Tabs sind weg.
 - [x] Abgeleitete Werte reagieren live auf Werteanpassungen.
 - [x] Punktebudget und Wertgrenzen sind sichtbar.
 - [x] Help-Popups sind fuer Werte/Rollen/Traits vorgesehen.

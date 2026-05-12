@@ -26,6 +26,8 @@
 		"nature_ground_grass_patch": "nature_ground_grass_patch",
 		"nature_ground_dirt_river_tile": "nature_ground_dirt_river_tile",
 		"station_floor_panel": "station_floor_panel",
+		"station_set_floor_corner": "station_set_floor_corner",
+		"station_set_floor_detail": "station_set_floor_detail",
 		"station_set_floor_panel_corner": "station_set_floor_panel_corner",
 		"station_set_floor_panel_end": "station_set_floor_panel_end",
 		"station_set_floor_panel_straight": "station_set_floor_panel_straight",
@@ -35,6 +37,7 @@
 		"station_wall_door": "station_floor_panel",
 		"modular_floor": "modular_floor",
 		"modular_floor_big": "modular_floor_big",
+		"modular_floor_raised": "modular_floor_raised",
 		"modular_wall": "modular_floor",
 		"modular_wall_corner": "modular_floor",
 		"modular_gate": "modular_floor",
@@ -91,6 +94,30 @@
 			"surface_roles": ["future_detail"],
 			"active_default": false,
 			"fallback_model_key": "ground_flat",
+			"visual_only": true
+		},
+		{
+			"visual_id": "station_set_floor_corner",
+			"source_id": "space_station_kit",
+			"source_asset_id": "station_set_floor_corner",
+			"model_key": "station_set_floor_corner",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/floor-corner.glb",
+			"theme": "station_floor",
+			"surface_roles": ["ground", "road"],
+			"active_default": false,
+			"fallback_model_key": "station_floor_panel",
+			"visual_only": true
+		},
+		{
+			"visual_id": "station_set_floor_detail",
+			"source_id": "space_station_kit",
+			"source_asset_id": "station_set_floor_detail",
+			"model_key": "station_set_floor_detail",
+			"model_path": "res://Assets/curated/kenney/space_station/models_all/floor-detail.glb",
+			"theme": "station_floor",
+			"surface_roles": ["ground", "road"],
+			"active_default": false,
+			"fallback_model_key": "station_floor_panel",
 			"visual_only": true
 		},
 		{
@@ -151,6 +178,18 @@
 			"surface_roles": ["ground", "road"],
 			"active_default": false,
 			"fallback_model_key": "station_floor_panel",
+			"visual_only": true
+		},
+		{
+			"visual_id": "modular_floor_raised",
+			"source_id": "modular_space_kit",
+			"source_asset_id": "modular_floor_raised",
+			"model_key": "modular_floor_raised",
+			"model_path": "res://Assets/curated/kenney/modular_space/models/template-floor-layer-raised.glb",
+			"theme": "modular_floor",
+			"surface_roles": ["road"],
+			"active_default": false,
+			"fallback_model_key": "modular_floor",
 			"visual_only": true
 		}
 	]

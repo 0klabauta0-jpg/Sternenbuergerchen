@@ -653,15 +653,16 @@
 			"display_name": "Modular Floor Raised",
 			"palette_group": "modular_space",
 			"texture_path": "res://Assets/curated/kenney/modular_space/previews/template-floor-layer-raised.png",
-			"placement_layer": "object",
+			"placement_layer": "terrain",
 			"surface_type": "road",
 			"walkable": true,
 			"blocks_los": false,
-			"cover_value": 15,
+			"cover_value": 0,
 			"height_level": 0,
 			"object_height": 0,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"visual_surface_variant": true
 		},
 		{
 			"type_id": "modular_wall",
@@ -4586,7 +4587,7 @@
 			"display_name": "Station Floor Corner",
 			"palette_group": "space_station_full",
 			"texture_path": "res://Assets/curated/kenney/space_station/previews_all/floor-corner.png",
-			"placement_layer": "object",
+			"placement_layer": "terrain",
 			"surface_type": "ground",
 			"walkable": true,
 			"blocks_los": false,
@@ -4594,14 +4595,15 @@
 			"height_level": 0,
 			"object_height": 0,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"visual_surface_variant": true
 		},
 		{
 			"type_id": "station_set_floor_detail",
 			"display_name": "Station Floor Detail",
 			"palette_group": "space_station_full",
 			"texture_path": "res://Assets/curated/kenney/space_station/previews_all/floor-detail.png",
-			"placement_layer": "object",
+			"placement_layer": "terrain",
 			"surface_type": "ground",
 			"walkable": true,
 			"blocks_los": false,
@@ -4609,7 +4611,8 @@
 			"height_level": 0,
 			"object_height": 0,
 			"edge_type": "none",
-			"preserve_hill_fields": true
+			"preserve_hill_fields": true,
+			"visual_surface_variant": true
 		},
 		{
 			"type_id": "station_set_floor_panel_corner",

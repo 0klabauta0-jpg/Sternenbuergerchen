@@ -128,6 +128,8 @@ func start_execution(
 		"contact_stability": float(execution_profile.get("contact_stability", 0.65)),
 		"initiative": float(execution_profile.get("initiative", 0.5)),
 		"execution_label": String(execution_profile.get("execution_label", "STEADY")),
+		"execution_reason": String(execution_profile.get("execution_reason", "")),
+		"execution_hint": String(execution_profile.get("execution_hint", "")),
 		"formation_scatter_factor": formation_scatter_factor,
 		"move_speed_multiplier": lerpf(0.84, 1.08, float(execution_profile.get("initiative", 0.5))),
 		"order_target_offset": resolved_target_position - target_position,
@@ -791,6 +793,8 @@ func _extract_execution_profile(behavior_profile) -> Dictionary:
 			"contact_stability": 0.65,
 			"initiative": 0.5,
 			"execution_label": "STEADY",
+			"execution_reason": "balanced_execution",
+			"execution_hint": "No single execution risk dominates this order.",
 		}
 	var source: Dictionary = {}
 	if typeof(behavior_profile) == TYPE_DICTIONARY:
@@ -805,6 +809,8 @@ func _extract_execution_profile(behavior_profile) -> Dictionary:
 		"contact_stability": clampf(float(source.get("contact_stability", 0.65)), 0.0, 1.0),
 		"initiative": clampf(float(source.get("initiative", 0.5)), 0.0, 1.0),
 		"execution_label": String(source.get("execution_label", "STEADY")).strip_edges().to_upper(),
+		"execution_reason": String(source.get("execution_reason", "")).strip_edges().to_lower(),
+		"execution_hint": String(source.get("execution_hint", "")).strip_edges(),
 	}
 
 
@@ -1071,6 +1077,8 @@ func _build_public_state(state: Dictionary) -> Dictionary:
 		"contact_stability": float(state.get("contact_stability", 0.65)),
 		"initiative": float(state.get("initiative", 0.5)),
 		"execution_label": String(state.get("execution_label", "STEADY")),
+		"execution_reason": String(state.get("execution_reason", "")),
+		"execution_hint": String(state.get("execution_hint", "")),
 		"formation_scatter_factor": float(state.get("formation_scatter_factor", 1.0)),
 		"move_speed_multiplier": float(state.get("move_speed_multiplier", 1.0)),
 	}

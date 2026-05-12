@@ -6,6 +6,7 @@ const UNIT_TRAIT_SCRIPT: GDScript = preload("res://scripts/npc/unit_trait.gd")
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
 const ROSTER_RELATIONSHIP_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/roster_relationship_model.gd")
 const FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_behavior_resolver.gd")
+const NPC_RANK_BADGE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
 const CORE_ORDER: Array = [
 	["accuracy", "Accuracy"],
 	["speed", "Speed"],
@@ -72,10 +73,10 @@ const VALUE_HELP_TEXTS: Dictionary = {
 	"behavior_axes.signature_control": "Signature Control entsteht aus Stealth, Discipline und geringer Speech Quantity.",
 	"behavior_axes.contact_stability": "Contact Stability entsteht aus Toughness, Discipline und Awareness und hilft unter Druck.",
 	"behavior_axes.autonomy": "Autonomy entsteht aus Recognition, Leadership und Discipline und beschreibt selbststaendiges Arbeiten.",
-	"platform_values.ground_vehicle_handling": "Ground Vehicle Handling beschreibt Bodenfahrzeug-Fit; fuer Rover- und Recon-Aufgaben.",
-	"platform_values.dropship_piloting": "Dropship Piloting beschreibt LZ-Anflug, Touchdown-Ruhe und Rueckflug-Fit.",
-	"platform_values.freighter_piloting": "Freighter Piloting beschreibt Cargo-, Transfer- und schwere Transport-Faehigkeit.",
-	"platform_values.fighter_piloting": "Fighter Piloting beschreibt Escort-, Interceptor- und Strike-Fit.",
+	"platform_values.ground_vehicle_handling": "Ground Vehicle Handling beschreibt Bodenfahrzeug-Fit aus Speed, Recognition, Awareness, Discipline und Verhalten.",
+	"platform_values.dropship_piloting": "Dropship Piloting beschreibt LZ-Anflug aus Awareness, Recognition, Discipline, Speech und Verhalten.",
+	"platform_values.freighter_piloting": "Freighter Piloting beschreibt Cargo- und Transportruhe aus Toughness, Recognition, Discipline, Speech und Verhalten.",
+	"platform_values.fighter_piloting": "Fighter Piloting beschreibt Escort- und Strike-Fit aus Speed, Accuracy, Awareness, Discipline und Verhalten.",
 }
 
 
@@ -243,11 +244,50 @@ static func build_loadout_text_from_member_loadout(member_loadout: Dictionary, f
 static func _build_role_loadout_rows(profile, options: Dictionary = {}) -> Array:
 	var loadout_text: String = String(options.get("loadout_text", "")).strip_edges()
 	return [
-		{"label": "Role", "value_text": _optional_text(String(profile.role_name), "Operator"), "help_id": "character_sheet.role"},
+		{"label": "Rollen-Fit", "value_text": _build_role_fit_text(profile), "help_id": "character_sheet.role", "detail_text": _build_role_fit_detail_text(profile)},
 		{"label": "Category", "value_text": _optional_text(String(profile.roster_role_category).replace("_", " "), "n/a"), "help_id": "character_sheet.role_category"},
 		{"label": "Fireteam", "value_text": _optional_text(String(options.get("fireteam_text", "")), _optional_text(String(profile.fireteam_id).to_upper(), "UNASSIGNED")), "help_id": "character_sheet.fireteam_assignment"},
 		{"label": "Loadout", "value_text": _optional_text(loadout_text, _optional_text(String(profile.loadout_summary), _build_profile_loadout_text(profile))), "help_id": "character_sheet.loadout_summary"},
 	]
+
+
+static func _build_role_fit_text(profile) -> String:
+	var progress: Array = Array(NPC_RANK_BADGE_RESOLVER_SCRIPT.call("get_badge_progress_for_profile", profile, 0, false))
+	var achieved_parts: PackedStringArray = PackedStringArray()
+	var next_parts: PackedStringArray = PackedStringArray()
+	for badge_variant in progress:
+		if typeof(badge_variant) != TYPE_DICTIONARY:
+			continue
+		var badge: Dictionary = Dictionary(badge_variant)
+		if String(badge.get("badge_key", "")).strip_edges() == "enemy":
+			continue
+		var part: String = "%s %.2f" % [String(badge.get("label", "Badge")), float(badge.get("score", 0.0))]
+		if bool(badge.get("achieved", false)):
+			achieved_parts.append(part)
+		elif next_parts.size() < 2:
+			next_parts.append(part)
+	if not achieved_parts.is_empty():
+		return " | ".join(achieved_parts)
+	if not next_parts.is_empty():
+		return "Noch offen; nahe dran: %s" % " | ".join(next_parts)
+	return "Noch kein Rollen-Fit"
+
+
+static func _build_role_fit_detail_text(profile) -> String:
+	var progress: Array = Array(NPC_RANK_BADGE_RESOLVER_SCRIPT.call("get_badge_progress_for_profile", profile, 0, false))
+	var lines: PackedStringArray = PackedStringArray()
+	lines.append("Rollenringe werden aus Kernwerten, Kommunikation, Verhaltensprofil, Plattformwerten und kleinem Loadout-Kontext abgeleitet.")
+	for badge_variant in progress:
+		if typeof(badge_variant) != TYPE_DICTIONARY:
+			continue
+		var badge: Dictionary = Dictionary(badge_variant)
+		if bool(badge.get("achieved", false)):
+			lines.append("%s erreicht: %.2f" % [String(badge.get("label", "Badge")), float(badge.get("score", 0.0))])
+		elif lines.size() < 4:
+			lines.append("%s fehlt: %s" % [String(badge.get("label", "Badge")), String(badge.get("requirement_text", ""))])
+	if profile != null and not String(profile.role_name).strip_edges().is_empty():
+		lines.append("Gespeicherter Starttext: %s" % String(profile.role_name).strip_edges())
+	return "\n".join(lines)
 
 
 static func _build_status_rows(profile, options: Dictionary = {}) -> Array:

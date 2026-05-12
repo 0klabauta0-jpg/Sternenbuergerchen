@@ -148,6 +148,8 @@ func _test_mission_debrief_progression_personnel_and_bubbles(context: Dictionary
 	var debrief_labels: PackedStringArray = _collect_label_texts(debrief)
 	_assert(_labels_contain(debrief_labels, "Character updates:"), "Debrief shows character updates")
 	_assert(_labels_contain(debrief_labels, "Personnel updates:"), "Debrief shows personnel updates")
+	_assert(_labels_contain(debrief_labels, "FTL feedback:"), "Debrief shows FTL tactical feedback")
+	_assert(_labels_contain(debrief_labels, "Reaktion"), "Debrief includes reaction timing feedback")
 	debrief.queue_free()
 	await process_frame
 
@@ -287,6 +289,18 @@ func _build_mission_result(roster: Dictionary, selected_unit_ids: PackedStringAr
 		"selected_fireteam_ids": selected_fireteam_ids,
 		"team_states": team_states,
 		"unit_events": unit_events,
+		"fireteam_tactical_debrief": [
+			{
+				"fireteam_id": String(selected_fireteam_ids[0]) if not selected_fireteam_ids.is_empty() else "blue",
+				"reaction_delay_seconds": 0.64,
+				"plan_quality": 0.48,
+				"tempo_modifier": 0.94,
+				"contact_report_quality": 0.36,
+				"contact_report_count": 3,
+				"morale": 0.42,
+				"frustration": 0.54,
+			},
+		],
 	}
 
 

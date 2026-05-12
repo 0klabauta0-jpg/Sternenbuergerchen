@@ -9,6 +9,7 @@ const CONTACT_TRACKER_SCRIPT: GDScript = preload("res://scripts/tactical/contact
 const FLANK_VULNERABILITY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/flank_vulnerability_resolver.gd")
 const MEDIC_SUPPORT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/medic_support_resolver.gd")
 const COMBAT_FIRE_DECISION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/combat_fire_decision_resolver.gd")
+const TACTICAL_COMMUNICATION_EVENT_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_communication_event.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const CHARACTER_GAMEPLAY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/character_gameplay_resolver.gd")
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
@@ -330,6 +331,12 @@ func get_fire_event_snapshot() -> Array:
 	return result
 
 
+func get_overwatch_member_ready_snapshot() -> Dictionary:
+	if _overwatch_controller == null or not _overwatch_controller.has_method("get_member_ready_snapshot"):
+		return {}
+	return Dictionary(_overwatch_controller.call("get_member_ready_snapshot", _current_tick)).duplicate(true)
+
+
 func get_audio_sfx_debug_snapshot() -> Dictionary:
 	var bus = _ensure_audio_event_bus(false)
 	if bus != null and bus.has_method("get_diagnostic_snapshot"):
@@ -361,6 +368,17 @@ func _record_fire_event_from_effect(effect: Dictionary, attacker, target, source
 		target,
 		source
 	)
+	if bool(effect.get("is_flank", false)):
+		event["is_flank"] = true
+		event["flank_fireteam_id"] = String(effect.get("flank_fireteam_id", ""))
+		event["flank_source_angle"] = float(effect.get("flank_source_angle", 0.0))
+		event["flank_direction_label"] = String(effect.get("flank_direction_label", ""))
+		event["flank_morale_state"] = String(effect.get("flank_morale_state", ""))
+	if bool(effect.get("is_friendly_fire", false)):
+		event["is_friendly_fire"] = true
+		event["friendly_fire_target_unit_id"] = String(effect.get("friendly_fire_target_unit_id", effect.get("unit_id", "")))
+		event["intended_target_unit_id"] = String(effect.get("intended_target_unit_id", ""))
+		event["misidentified_target_unit_id"] = String(effect.get("misidentified_target_unit_id", effect.get("unit_id", "")))
 	return _append_fire_event(event)
 
 
@@ -789,15 +807,25 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 	else:
 		_set_event_text("%s ENGAGE %s" % [attacker_id, actual_target_id])
 	var damage_effect: Dictionary = Dictionary(decision.get("effect", {})).duplicate(true)
+	if is_friendly_fire:
+		damage_effect["is_friendly_fire"] = true
+		damage_effect["friendly_fire_target_unit_id"] = actual_target_id
+		damage_effect["intended_target_unit_id"] = target_id
+		damage_effect["misidentified_target_unit_id"] = actual_target_id
 	var fire_event_id: String = _record_fire_event_from_effect(damage_effect, attacker, actual_target, "standard")
 	if not fire_event_id.is_empty():
 		damage_effect["fire_event_id"] = fire_event_id
 	simulation_root.call("enqueue_effect", damage_effect)
 	var flank_modifiers: Dictionary = Dictionary(decision.get("flank_modifiers", {}))
 	_maybe_publish_flank_event(flank_modifiers, attacker, actual_target)
-	if is_friendly_fire and attacker.has_method("show_event_text"):
-		attacker.call("show_event_text", "EIGENBESCHUSS!", MISIDENTIFICATION_EVENT_COLOR, 1.6)
+	if is_friendly_fire:
+		if attacker != null and attacker.has_method("show_event_text"):
+			attacker.call("show_event_text", "EIGENBESCHUSS!", MISIDENTIFICATION_EVENT_COLOR, 1.6)
+		if actual_target != null and actual_target.has_method("show_event_text"):
+			actual_target.call("show_event_text", "FRIENDLY FIRE", MISIDENTIFICATION_EVENT_COLOR, 1.8)
 		_broadcast_remote_event("%s verwechselt Ziel! -> %s" % [attacker_id, actual_target_id], attacker_id, MISIDENTIFICATION_EVENT_COLOR, 1.6, "EIGENBESCHUSS!")
+		_broadcast_remote_event("FRIENDLY FIRE %s" % actual_target_id, actual_target_id, MISIDENTIFICATION_EVENT_COLOR, 1.8, "FRIENDLY FIRE")
+		_record_friendly_fire_feedback(attacker, actual_target, attacker_id, target_id, actual_target_id)
 	_next_attack_tick = _current_tick + max(int(decision.get("weapon_ticks", 1)), 1)
 
 
@@ -1689,6 +1717,45 @@ func _maybe_publish_flank_event(flank_modifiers: Dictionary, attacker, target) -
 		event_router.call("notify_flank_vulnerability_triggered", fireteam_id, flank_modifiers)
 
 
+func _record_friendly_fire_feedback(attacker, target, attacker_id: String, intended_target_id: String, actual_target_id: String) -> void:
+	var tactical_controller = _get_tactical_controller()
+	if tactical_controller == null or not tactical_controller.has_method("record_tactical_communication_event"):
+		return
+	var fireteam_id: String = _get_unit_fireteam_id(attacker)
+	var context: Dictionary = {
+		"event_id": "friendly_fire:%s:%s:%d" % [attacker_id, actual_target_id, _current_tick],
+		"fireteam_id": fireteam_id,
+		"unit_id": actual_target_id,
+		"phase": 1,
+		"short_text": "FRIENDLY FIRE",
+		"detail_text": "%s misidentified %s and hit %s" % [attacker_id, intended_target_id, actual_target_id],
+		"map_label": "FRIENDLY FIRE",
+		"priority": TACTICAL_COMMUNICATION_EVENT_SCRIPT.PRIORITY_CRITICAL,
+		"duration_seconds": 3.2,
+		"feedback_action": "engage",
+		"feedback_state": "contact",
+		"anchor_position": _get_unit_world_position(attacker),
+		"target_position": _get_unit_world_position(target),
+		"metadata": {
+			"attacker_unit_id": attacker_id,
+			"intended_target_unit_id": intended_target_id,
+			"actual_target_unit_id": actual_target_id,
+		},
+	}
+	tactical_controller.call(
+		"record_tactical_communication_event",
+		TACTICAL_COMMUNICATION_EVENT_SCRIPT.EVENT_FRIENDLY_FIRE,
+		context,
+		{"now_msec": Time.get_ticks_msec(), "cooldown_msec": 250}
+	)
+
+
+func _get_unit_fireteam_id(unit) -> String:
+	if unit != null and unit.has_method("get_fireteam_id"):
+		return String(unit.call("get_fireteam_id")).strip_edges().to_lower()
+	return ""
+
+
 func _get_fireteam_contact_state(fireteam_id: String, enemy_unit_id: String) -> Dictionary:
 	if _contact_tracker == null or fireteam_id.strip_edges().is_empty() or enemy_unit_id.strip_edges().is_empty():
 		return {}
@@ -2143,7 +2210,7 @@ func _resolve_combat(result: String, winning_team_id: String, result_condition_o
 
 func _build_mission_result(result: String, winning_team_id: String) -> Dictionary:
 	var result_condition: String = _mission_result_condition_override if not _mission_result_condition_override.is_empty() else win_condition
-	return Dictionary(
+	var mission_result: Dictionary = Dictionary(
 		MISSION_COMBAT_AUTHORITY_CONTRACT_SCRIPT.call(
 			"build_mission_result",
 			result,
@@ -2155,6 +2222,37 @@ func _build_mission_result(result: String, winning_team_id: String) -> Dictionar
 			_build_team_states(friendly_unit_paths)
 		)
 	)
+	mission_result["fireteam_tactical_debrief"] = _build_fireteam_tactical_debrief_entries()
+	return mission_result
+
+
+func _build_fireteam_tactical_debrief_entries() -> Array:
+	var result: Array = []
+	var tactical_controller = _get_tactical_controller()
+	for fireteam_id_variant in _get_known_friendly_fireteam_ids():
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		var profile: Dictionary = {}
+		if tactical_controller != null and tactical_controller.has_method("get_active_behavior_profile"):
+			profile = Dictionary(tactical_controller.call("get_active_behavior_profile", fireteam_id)).duplicate(true)
+		var metadata: Dictionary = Dictionary(profile.get("metadata", {}))
+		var public_snapshot: Dictionary = Dictionary(metadata.get("ftl_public_snapshot", {}))
+		var skill_snapshot: Dictionary = Dictionary(metadata.get("ftl_tactical_skill", {}))
+		var contacts: Array = get_fireteam_contact_snapshot(fireteam_id)
+		if profile.is_empty() and public_snapshot.is_empty() and contacts.is_empty():
+			continue
+		result.append({
+			"fireteam_id": fireteam_id,
+			"reaction_delay_seconds": clampf(float(public_snapshot.get("reaction_delay_seconds", profile.get("reaction_delay_seconds", 0.35))), 0.0, 2.0),
+			"plan_quality": clampf(float(public_snapshot.get("plan_quality", skill_snapshot.get("plan_quality", 0.5))), 0.0, 1.0),
+			"tempo_modifier": clampf(float(public_snapshot.get("tempo_modifier", skill_snapshot.get("tempo_modifier", 1.0))), 0.0, 2.0),
+			"contact_report_quality": clampf(float(public_snapshot.get("contact_report_quality", skill_snapshot.get("contact_report_quality", 0.5))), 0.0, 1.0),
+			"contact_report_count": contacts.size(),
+			"morale": clampf(float(public_snapshot.get("morale", skill_snapshot.get("morale", 0.5))), 0.0, 1.0),
+			"frustration": clampf(float(public_snapshot.get("frustration", skill_snapshot.get("frustration", 0.0))), 0.0, 1.0),
+		})
+	return result
 
 
 func _get_enemy_team_id() -> String:

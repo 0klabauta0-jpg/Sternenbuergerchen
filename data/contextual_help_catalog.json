@@ -190,11 +190,12 @@
       "title": "Team Focus Points",
       "compact_lines": [
         "These are team focus points, not NPC skill points.",
-        "NPC values are changed on the character sheet."
+        "Raising one focus rebalances points from the other unlocked focuses."
       ],
       "detail_lines": [
         "The 30 point rookie cap keeps a created team from starting overpowered.",
-        "Focus values are stored with the team for generator and balancing rules."
+        "A five point increase lowers the five other unlocked focus values by one each when they can move.",
+        "NPC values are changed on the character sheet."
       ],
       "target_audience": "new_player",
       "manual_review": true
@@ -300,6 +301,24 @@
       ],
       "target_audience": "new_player",
       "manual_review": true
+    },
+    {
+      "help_id": "team_editor.stat.lock",
+      "screen_id": "team_editor",
+      "area_id": "stat.lock",
+      "status": "ready",
+      "title": "Focus Lock",
+      "compact_lines": [
+        "Locks one team focus value while you rebalance the others.",
+        "It affects editor input only, not mission simulation."
+      ],
+      "detail_lines": [
+        "Locked focus bars ignore mouse, plus/minus and slider changes until unlocked.",
+        "Locked rows are skipped when another focus pulls or returns points.",
+        "The lock is stored with the team editor data so the budget row stays predictable while editing."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
     },
     {
       "help_id": "settings.contextual_help_mode",
@@ -438,10 +457,46 @@
       "title": "Core Values",
       "compact_lines": [
         "Main 0.00 to 1.00 values used by character and mission systems.",
-        "Bars are display only and mirror profile skill values."
+        "In the team editor, bars can be dragged or changed with plus/minus."
       ],
       "detail_lines": [
-        "Core rows come from MetaUnitProfile skill_values and character-bundle derivation."
+        "Core rows come from MetaUnitProfile skill_values and character-bundle derivation.",
+        "Edits write back through the roster editor; mission runtime does not read UI state as truth."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.skill_group_budget",
+      "screen_id": "character_sheet",
+      "area_id": "skill_group_budget",
+      "status": "ready",
+      "title": "Group Budget",
+      "compact_lines": [
+        "Shows the point budget for one editable value group.",
+        "Raising one unlocked bar can pull points from other unlocked bars."
+      ],
+      "detail_lines": [
+        "One 0.05 step equals one editor point in the visible budget row.",
+        "Lowering a value frees points into the budget.",
+        "Locked bars keep their current value; if there are not enough movable points, the dragged bar snaps back to its maximum affordable value."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.value_lock",
+      "screen_id": "character_sheet",
+      "area_id": "value_lock",
+      "status": "ready",
+      "title": "Value Lock",
+      "compact_lines": [
+        "Locks this one character value during budget edits.",
+        "The visible value remains unchanged until unlocked."
+      ],
+      "detail_lines": [
+        "Use this before lowering or raising nearby values when you want this exact row preserved.",
+        "The lock is stored in the team editor data and does not create gameplay authority."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -678,11 +733,11 @@
       "status": "ready",
       "title": "Badges",
       "compact_lines": [
-        "Small badges summarize derived strengths, role hints or loadout identity.",
-        "They are visual summaries of existing profile data."
+        "Small badges summarize derived role fit from the current profile values.",
+        "Grey badges show reachable fits that are not strong enough yet."
       ],
       "detail_lines": [
-        "Badges are derived by NPCRankBadgeResolver from role, skills and loadout fields.",
+        "Badges are derived by NPCRankBadgeResolver from core values, communication, behavior, platform values and small loadout context.",
         "Hover a single badge for the exact score source and threshold formula."
       ],
       "target_audience": "returning_player",
@@ -695,12 +750,12 @@
       "status": "ready",
       "title": "Shooter Badge",
       "compact_lines": [
-        "Shooter comes from weapon loadout, role text or Accuracy.",
+        "Shooter comes mainly from Accuracy, Awareness, Recognition and weapon context.",
         "It explains fighting fit, not a locked class."
       ],
       "detail_lines": [
-        "Accuracy at 0.68 or higher contributes 0.56 plus Accuracy times 0.34.",
-        "Rifle, SMG and sniper loadouts can also create the badge."
+        "The current threshold is 0.52 and the score blends Accuracy, Awareness, Recognition, Discipline and Order Fidelity.",
+        "Rifle, SMG and sniper loadouts are context bonuses, not a separate class truth."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -712,12 +767,12 @@
       "status": "ready",
       "title": "Leader Badge",
       "compact_lines": [
-        "Leader comes from fireteam lead status, role text or Leadership.",
+        "Leader comes mainly from Leadership, Speech Quality, Order Fidelity and Autonomy.",
         "Use it when choosing Fireteam Leaders."
       ],
       "detail_lines": [
-        "Leadership at 0.68 or higher contributes 0.62 plus Leadership times 0.30.",
-        "The explicit fireteam lead flag gives the strongest score."
+        "The current threshold is 0.52 and the fireteam lead flag is only a small context bonus.",
+        "Raise Leadership, Speech Quality, Recognition, Discipline, Order Fidelity or Autonomy."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -729,12 +784,12 @@
       "status": "ready",
       "title": "Pilot Badge",
       "compact_lines": [
-        "Pilot comes from pilot role text or platform skills.",
+        "Pilot comes from platform value plus calm situational and communication values.",
         "Dropship, freighter, fighter and vehicle handling are checked."
       ],
       "detail_lines": [
-        "A platform skill at 0.65 or higher contributes 0.55 plus that skill times 0.38.",
-        "Pilot role text can still mark a known crew member."
+        "The current threshold is 0.52 and the best platform value is blended with Awareness and Discipline.",
+        "Speech Quality, Contact Stability and Initiative also matter for flight fit."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -746,11 +801,11 @@
       "status": "ready",
       "title": "Medic Badge",
       "compact_lines": [
-        "Medic comes from medic role text, medictool or trait tags.",
-        "It is a quick loadout and role hint."
+        "Medic comes from Discipline, Recognition, Speech Quality and Stability.",
+        "Medictool and old role text are only context bonuses."
       ],
       "detail_lines": [
-        "The badge checks role text first, then medictool loadout and medic trait tags."
+        "The current threshold is 0.52 and the score also reads Awareness, Order Fidelity and Contact Stability."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -762,11 +817,11 @@
       "status": "ready",
       "title": "Heavy Badge",
       "compact_lines": [
-        "Heavy comes from heavy weapons or support role text.",
+        "Heavy comes from Toughness, Contact Stability, Discipline and Accuracy.",
         "It marks heavier fighting equipment."
       ],
       "detail_lines": [
-        "Rail gun, rocket launcher and panzerfaust count as heavy weapons."
+        "The current threshold is 0.52; rail gun, rocket launcher, panzerfaust and heavy armor are context bonuses."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -778,11 +833,11 @@
       "status": "ready",
       "title": "Engineer Badge",
       "compact_lines": [
-        "Engineer comes from engineer role, function score or trait tags.",
+        "Engineer comes from Recognition, Discipline, Awareness and Order Fidelity.",
         "It marks technical or repair fit."
       ],
       "detail_lines": [
-        "Engineer role words, engineer function score above 0.60 and engineer trait tags can trigger it."
+        "The current threshold is 0.52; tech role words and engineer trait tags are only context bonuses."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -1259,11 +1314,12 @@
       "status": "ready",
       "title": "Platform Skills",
       "compact_lines": [
-        "Vehicle or platform skills appear only when relevant.",
+        "Vehicle and craft skills are derived from core values and behavior profile.",
         "They help choose pilots, drivers or craft crew."
       ],
       "detail_lines": [
-        "Platform rows come from profile platform_values and remain read-only here."
+        "Platform rows come from profile platform_values when explicitly edited; otherwise UnitProfileMath derives them from core values, communication and behavior axes.",
+        "Flightdeck assignment still reads saved roster data and does not accept UI-only truth."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -1518,11 +1574,11 @@
       "status": "ready",
       "title": "Ground Vehicle",
       "compact_lines": [
-        "Fit for operating ground vehicles when that role exists.",
-        "Hidden when the value is not relevant."
+        "Fit for operating ground vehicles.",
+        "Derived from speed, recognition, awareness, discipline and behavior axes."
       ],
       "detail_lines": [
-        "Ground vehicle handling is read from profile platform_values."
+        "Ground vehicle handling can be edited directly; without an override it derives from speed, recognition, awareness, discipline, initiative, stability and autonomy."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -1535,10 +1591,10 @@
       "title": "Dropship Piloting",
       "compact_lines": [
         "Fit for dropship pilot assignments.",
-        "Useful when choosing flightdeck crew."
+        "Derived from flight-relevant core, communication and behavior values."
       ],
       "detail_lines": [
-        "Dropship piloting is read from profile platform_values."
+        "Dropship piloting can be edited directly; without an override it derives from awareness, recognition, discipline, speed, speech quality, order fidelity, stability and autonomy."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -1551,10 +1607,10 @@
       "title": "Freighter Piloting",
       "compact_lines": [
         "Fit for freighter or cargo craft assignments.",
-        "Shown only when the profile has a relevant value."
+        "Derived from steady transport and route-control values."
       ],
       "detail_lines": [
-        "Freighter piloting is read from profile platform_values."
+        "Freighter piloting can be edited directly; without an override it derives from toughness, recognition, discipline, speech quality, order fidelity, stability and autonomy."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -1567,10 +1623,10 @@
       "title": "Fighter Piloting",
       "compact_lines": [
         "Fit for fighter craft assignments when those assets are used.",
-        "It is not a current ground combat stat."
+        "Derived from speed, accuracy, awareness and behavior axes."
       ],
       "detail_lines": [
-        "Fighter piloting is read from profile platform_values."
+        "Fighter piloting can be edited directly; without an override it derives from speed, accuracy, awareness, discipline, initiative, order fidelity, stability and autonomy."
       ],
       "target_audience": "advanced",
       "manual_review": false

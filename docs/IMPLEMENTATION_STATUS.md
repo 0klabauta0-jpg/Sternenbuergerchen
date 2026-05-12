@@ -10,6 +10,18 @@
 
 ## Aktueller Startzustand
 
+### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
+- Status: implementiert im Arbeitsstand
+- Stand: Dropship-Visuals bauen ihre Dirty-Signatur wieder fehlerfrei, geplante LZs bleiben auch bei offmap/hidden Craft sichtbar, und Multi-Dropship-Payloads werden aus dem rohen Mission-Card-State statt aus stale Selected-Card-State uebernommen.
+- Stand: Aktive Drop-Sequenzen sind an ihr Craft, ihre LZ, ihren Approach und ihre Payload-Fireteam-IDs gebunden. Mission Control kann waehrend Dropship 1 inbound ist Dropship 2 auswaehlen und dessen LZ/Approach bearbeiten; ein weiterer Drop wird bei belegter Air Lane sichtbar geblockt statt als versteckte Queue zu laufen.
+- Stand: Geplante LZs werden pro Dropship benannt (`LZ Dropship X`). Eine neu gesetzte LZ ersetzt nur die alte LZ desselben Dropships; aktive Deploy-/Presence-Effects verwenden weiter die Sequenz-LZ des ausfuehrenden Crafts.
+- Stand: Wartende Mission-Dropships bleiben offscreen; sie werden ueber Karte/Status/Plan-LZ gefuehrt, aber nicht mehr als wartendes Modell bei der Dropshipkarte oder an der Map-Kante geparkt.
+- Stand: RMB-Testziele werden nicht mehr doppelt auf Tile-Mitten verschoben, Feedback-Bubbles werden erst nach Visual-Tauglichkeit dedupliziert, und der FOB-Loadout zeigt kompakte Name/Portrait-Karten als Character-Sheet-Oeffner.
+- Stand: Multiplayer-Lobby bleibt in einem festen Panel mit internem Scrollbereich. Die Map-Editor-Palette behaelt Gruppierung und bietet zusaetzlich `Alle` als vollstaendige Langliste.
+- Stand: Godot 4.6.2 ist in AGENTS/Projektregeln/Decisions und Performance-Budget-Contract vereinheitlicht. `sternenbuerger-gdd.docx` ist als Alt-GDD/Inspiration und Migrationsquelle dokumentiert, nicht als bindende zweite Wahrheit.
+- Risiken: Manueller FullHD-Sichtcheck und echte UPnP-/Router-Erreichbarkeit bleiben ausserhalb der Headless-Gates. DOCX-Ideen duerfen erst nach Markdown-Migration bindend werden.
+- Lokale Pruefung: `task_258_fixed_window_clipping_scrollbar_playability_audit.gd`, `bugfix_multiplayer_lobby_setup_and_asset_catalog_followup.gd`, `task_259_character_card_roster_switching_playability.gd`, `bugfix_character_team_editor_usability_pass.gd`, `task_310_fob_flightdeck_fireteam_userology_smoke.gd`, `bugfix_mission_multi_dropship_cards.gd`, `bugfix_mission_dropship_plans_and_facing.gd`, `task_313_dropship_arrival_visibility_feedback_smoke.gd`, `task_279_lz_security_air_asset_tactical_playability_smoke.gd`, `bugfix_mission_right_click_order_flow.gd`, `bugfix_mission_fire_sector_overlay.gd`, `task_158_verifier.gd`, `task_160_tactical_playability_verifier.gd`, `task_186_mission_map_unit_presence_registry_audit.gd`, `task_192_mission_map_npc_behavior_playability_smoke.gd`, `task_250_asset_audio_background_playability_smoke.gd`, `task_286_ui_feedback_truth_regression_review.gd`, `bugfix_dropship_mission_flow_verifier.gd` und `task_222_performance_regression_gate_and_manual_profile_checklist.gd` laufen gruen.
+
 ### TASK_320 - Manual Playtest Dropship Cards Per-Craft Dispatch and Return
 - Status: implementiert
 - Stand: Homebase `#05 FLIGHT DECK` rendert Shipcards kompakter ohne horizontalen Scrollbalken. Das Dropship-Visual ist im kleineren Sichtfenster nach links/oben eingerueckt, damit transparente Asset-Raender weniger Leerraum erzeugen und die Pilotenkarte mehr Breite bekommt.
@@ -32,6 +44,7 @@
 - Status: implementiert
 - Stand: `#14 FLIGHTDECK` speichert die FOB-Boarding-/Staging-Queue jetzt pro Transport-Craft-ID. Ein Fireteam, das auf `Dropship 2` gedroppt wird, bleibt damit auf `Dropship 2` und rutscht nicht mehr automatisch in die Queue von `Dropship 1`.
 - Stand: Transport-Craft-Karten im FOB sind klickbar/selectable, behalten dedizierte Drop-Ziele wie `dropship|dropship_2` und rendern das Dropship-Bild groesser mit Covered-Crop gegen transparente Asset-Raender.
+- Stand: FOB-Transportkarten erlauben Pilot-Drag-and-Drop: ein Pilot kann in den PC-Pool zurueckgezogen, ein anderer PC auf die Shipcard gedroppt und der alte Pilot beim Swap automatisch in den Pool zurueckgelegt werden.
 - Risiken: Der Patch bleibt im FOB-UI-/Meta-Staging-State und macht keine SimulationRoot-Gameplay-Wahrheit daraus. Manueller Sichtcheck in FullHD bleibt fuer finale Proportionen der Shipcards sinnvoll.
 - Lokale Pruefung: `bugfix_fob_second_dropship_assignment_and_scale.gd`, `task_316_fob_fireteam_staging_migration.gd`, `task_308_compact_flightdeck_dropship_occupants_actions.gd`, `task_310_fob_flightdeck_fireteam_userology_smoke.gd`, `bugfix_dropship_mission_flow_verifier.gd` und `git diff --check` laufen gruen.
 
@@ -72,6 +85,7 @@
 - Status: implementiert im Arbeitsstand
 - Stand: Team-Erstellung und Teambearbeitung sind als eigene Editor-Ansicht dokumentiert, statt grosse Portrait-/Editorflaechen direkt in den Hauptscreen zu legen. Bestehende Teams koennen zur Bearbeitung geoeffnet werden.
 - Stand: Character-Overlay/Team-Editor erlauben Name-/Portrait-Anpassung, Plus-/Minus-Wertbearbeitung, Live-Aktualisierung abgeleiteter Werte, Punktebudget und Help-Popups fuer Werte, Traits, Rollen und Skills.
+- Stand: Die alten 6er-/9er-Tabs sind entfernt; der Team-Editor bleibt in der Blatt-Ansicht. Wertaenderungen senden nur noch kleine Daten-Payloads statt zyklischer UI-/Budget-Zeilen und loesen keinen sofortigen Full-Refresh im laufenden Signal mehr aus.
 - Stand: Kurzbeschreibung ist aus dem Vordergrund genommen; letzte Ausruestung wandert nach unten. Zusaetzliche Flug-/Pilotenwerte sind als fachlicher Bedarf fuer gute Dropshippiloten notiert.
 - Risiken: Punktebudget und Flugwerte sind noch Rookie-/Authoring-Vertraege, kein finales Progressionsbalancing. Teamgroesse und Multiplayer-Grenzen brauchen spaeter eigene Balance-Entscheidung.
 - Lokale Pruefung: `bugfix_character_team_editor_usability_pass.gd`, `task_235_character_sheet_roster_gameplay_expansion.gd`, `task_259_character_card_roster_switching_playability.gd`, `task_265_character_sheet_loadout_help_content_pass.gd` und `git diff --check` laufen gruen.
@@ -88,7 +102,7 @@
 - Stand: Die Multiplayer-Lobby hat jetzt Spielername, lokalen Roster, Spielerseite, Teammodus, Map-Auswahl und Verbindungsmodus. Die Session fuehrt `lobby_setup` in Snapshot und Start-Assignments mit.
 - Stand: Direct-IP-Internet wird nicht mehr als LAN-only beschrieben: Der Screen nennt UDP-Portfreigabe/Firewall/Router oder VPN als Voraussetzung; Relay/UPnP bleibt Folgearbeit.
 - Stand: Importierte Space-/Station-/Modular-/Factory-Assets werden im Editor dynamisch in vorhandene Palette-Gruppen einsortiert. Crater/Meteor/Rock landen bei Crater/Felsen, Walls/Doors/Gates bei Waende.
-- Stand: Nature-Boden rendert als flushes Ground-Surface-Visual statt als erhoehter Detail-Layer. Station-Set-Floor-Panel-Varianten sind Terrain-/Surface-Varianten und werden top-anchored gerendert; Modular-Space-Walls/Gates wurden auf Station-Wall-Scale gebracht.
+- Stand: Nature-Boden rendert als flushes Ground-Surface-Visual statt als erhoehter Detail-Layer. Station-Set-Floor-Panel-Varianten sowie `station_set_floor_corner`, `station_set_floor_detail` und `modular_floor_raised` sind Terrain-/Surface-Varianten und werden top-anchored gerendert; Terrain-Surface-Modelle respektieren jetzt ihre Mapping-Scale, damit Modular-Floors nicht mehr in der falschen Groesse erscheinen.
 - Risiken: Direct-IP funktioniert ueber Internet nur bei erreichbarem Host-UDP-Port oder VPN. Die Kit-Einsortierung ist namensbasiert und kann fuer einzelne Spezialassets noch manuell nachjustiert werden.
 - Lokale Pruefung: `bugfix_multiplayer_lobby_setup_and_asset_catalog_followup.gd`, `task_231_app_shell_game_setup_integration_and_open_items_review.gd`, `task_253_nature_ground_surface_editor_palette_pass.gd`, `task_255_nature_kit_hill_playability_visual_performance_smoke.gd`, `hill_mechanics_16x16_testmap_verifier.gd`, `bugfix_map_editor_station_floor_structure_undo.gd`, `task_266_command_mission_editor_settings_help_content_pass.gd` laufen gruen.
 

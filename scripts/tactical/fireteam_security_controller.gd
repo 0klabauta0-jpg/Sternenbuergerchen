@@ -170,6 +170,7 @@ func update_fireteam_state(
 		"main_threat_position": Vector2(threat_position) if typeof(threat_position) == TYPE_VECTOR2 else null,
 		"main_threat_distance": threat_distance,
 		"member_assignments": member_assignments,
+		"overwatch_unit_ids": _build_overwatch_unit_ids(member_assignments) if overwatch_ready else PackedStringArray(),
 		"security_radius_world": security_radius_world,
 		"security_radius_tiles": security_radius_tiles,
 		"overwatch_ready": overwatch_ready,
@@ -468,6 +469,7 @@ func _build_public_state(state: Dictionary) -> Dictionary:
 		"main_threat_position": state.get("main_threat_position", null),
 		"main_threat_distance": float(state.get("main_threat_distance", INF)),
 		"member_assignments": Array(state.get("member_assignments", [])).duplicate(true),
+		"overwatch_unit_ids": PackedStringArray(state.get("overwatch_unit_ids", PackedStringArray())),
 		"security_radius_world": float(state.get("security_radius_world", 0.0)),
 		"security_radius_tiles": int(state.get("security_radius_tiles", 0)),
 		"overwatch_ready": bool(state.get("overwatch_ready", false)),
@@ -476,3 +478,15 @@ func _build_public_state(state: Dictionary) -> Dictionary:
 		"area_center_position": state.get("area_center_position", null),
 		"area_status": String(state.get("area_status", "")),
 	}
+
+
+func _build_overwatch_unit_ids(member_assignments: Array) -> PackedStringArray:
+	var result: PackedStringArray = PackedStringArray()
+	for assignment_variant in member_assignments:
+		if typeof(assignment_variant) != TYPE_DICTIONARY:
+			continue
+		var unit_id: String = String(Dictionary(assignment_variant).get("unit_id", "")).strip_edges()
+		if unit_id.is_empty() or result.has(unit_id):
+			continue
+		result.append(unit_id)
+	return result

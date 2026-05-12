@@ -18,7 +18,9 @@ Im Playtest fehlte ein sichtbarer Spielername und eine klare Auswahl fuer eigene
    - Crater/Meteor/Rock landen in Crater/Felsen, Walls/Doors/Gates in Waende, Pipes/Rails/Fahrzeuge/Technik/Deko entsprechend in ihren Gruppen.
 3. Bodenhoehen:
    - Nature-Boden ist jetzt primaeres Ground-Surface-Visual statt aufgesetzter Detail-Layer.
-   - Station-Set-Floor-Panel-Varianten sind Terrain/Surface-Varianten und werden top-anchored gerendert.
+   - Station-Set-Floor-Panel-Varianten sowie `station_set_floor_corner` und `station_set_floor_detail` sind Terrain/Surface-Varianten und werden top-anchored gerendert.
+   - `modular_floor_raised` ist Terrain/Surface-Variante statt Object-Layer-Prop und sitzt auf Bodenniveau.
+   - Terrain-Surface-Modelle respektieren ihre Mapping-Scale, damit Modular-Floors in der erwarteten Groesse erscheinen.
    - Modular-Space-Walls/Gates nutzen die gleiche grobe Scale wie Station-Waende.
 
 ## Nicht-Ziele
@@ -31,7 +33,7 @@ Im Playtest fehlte ein sichtbarer Spielername und eine klare Auswahl fuer eigene
 - [x] Direct-IP-Hinweis nennt UDP-Portfreigabe/Router-Firewall/VPN.
 - [x] Session-Snapshot enthaelt `lobby_setup`.
 - [x] Importierte Kit-Assets erscheinen in vorhandenen Editor-Gruppen.
-- [x] Nature- und Station-Set-Floors rendern ohne erhoehten Detail-Layer.
+- [x] Nature-, Station-Set- und Modular-Raised-Floors rendern ohne erhoehten Detail-Layer.
 
 ## Erwartete Dateien
 - `scripts/ui/multiplayer_lobby_screen.gd`
@@ -57,4 +59,4 @@ Im Playtest fehlte ein sichtbarer Spielername und eine klare Auswahl fuer eigene
 ## Risiken
 - Internet-Multiplayer ist weiterhin Direct-IP. Fuer Spieler ohne Portfreigabe braucht es spaeter Relay, Matchmaking, STUN/TURN oder UPnP.
 - Die dynamische Asset-Einsortierung ist heuristisch nach Assetnamen; einzelne Kit-Objekte koennen noch manuell umsortiert werden.
-- Exakte optische Hoehe/Scale der Station-/Modular-Bauteile sollte weiter im Editor-Sichttest geprueft werden.
+- Exakte optische Balance der Station-/Modular-Bauteile sollte weiter im Editor-Sichttest geprueft werden; Bodenhoehe und Mapping-Scale sind headless abgesichert.

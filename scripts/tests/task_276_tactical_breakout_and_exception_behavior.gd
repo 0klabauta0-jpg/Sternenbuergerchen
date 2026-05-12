@@ -141,6 +141,9 @@ func _test_communication_and_return_to_plan() -> void:
 		"fireteam_id": "gold",
 		"sequence": "ammo",
 	}))
+	var request_event: Dictionary = Dictionary(BREAKOUT_RESOLVER_SCRIPT.call("build_communication_event", request_breakout, {"now_msec": 1300}))
+	_assert(str(request_event.get("event_type", "")) == "needs_orders", "Request-orders breakout emits a needs-orders communication type")
+	_assert(PackedStringArray(request_event.get("channels", PackedStringArray())).has("map_marker"), "Needs-orders communication reaches the persistent map marker channel")
 	var denied: Dictionary = Dictionary(BREAKOUT_RESOLVER_SCRIPT.call("mark_return_to_plan", request_breakout, {"reason": "ignored"}))
 	_assert(not bool(denied.get("resolved", false)) and str(denied.get("return_to_plan_denied_reason", "")).contains("commander"), "Request-orders breakout denies automatic return")
 
