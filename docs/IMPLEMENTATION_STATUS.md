@@ -64,6 +64,31 @@
 - Risiken: Ein gemeinsamer Loadout-Contract-Helper ist noch nicht extrahiert; FOB und Homebase normalisieren vorerst lokal auf denselben Wertebereich.
 - Lokale Pruefung: `task_350_homebase_loadout_contract_export.gd`, `task_349_homebase_direct_staging_real_flightdeck_craft_gate.gd`, `task_348_homebase_fob_payload_state_isolation.gd`, `task_347_homebase_direct_staging_start_guard.gd`, `task_346_homebase_direct_staging_character_popup.gd`, `task_316_fob_fireteam_staging_migration.gd`, `bugfix_mission_fireteam_fob_payload_and_bubbles.gd`, `medic_support_verifier.gd` und `git diff --check` laufen gruen. `task_316` meldet beim Headless-Exit bestehende RID-Leak-Warnungen, aber keine Assertion-Fehler.
 
+### TASK_351 - Homebase Direct Payload Scope Contract
+- Status: geplant
+- Stand: Review-Finding nach TASK_350. Homebase-Direct exportiert aktuell die ganze Homebase-Auswahl als `selected_unit_ids`, obwohl nur Flightdeck-Payload-Units in die Mission sollen.
+- Naechster Schritt: Direct-Drop-State und MetaLayerFlow auf payload-relevante Unit-/Fireteam-/Config-Felder begrenzen und Zwei-Fireteam-eins-im-Dropship testen.
+
+### TASK_352 - Homebase Loadout Defaults Preserve Unit Profiles
+- Status: geplant
+- Stand: Review-Finding nach TASK_350. Harte Homebase-Defaults wie `rifle`/`none` koennen Preset-Waffen wie Medictool ueberschreiben, obwohl der Spieler nichts geaendert hat.
+- Naechster Schritt: Homebase-Member-Loadouts aus Unit-Profil/Preset/Selected-Config seed'en und Medictool-Preservation testen.
+
+### TASK_353 - Shared Loadout Contract Helper
+- Status: geplant
+- Stand: Review-Finding nach TASK_350. FOB, Homebase, `WeaponData` und `LoadoutModifierResolver` pflegen aehnliche, aber abweichende Loadout-Normalisierung.
+- Naechster Schritt: Kleinen gemeinsamen Contract-Helper fuer Armor/Waffen/Labels/Defaults schneiden und FOB/Homebase darauf umstellen.
+
+### TASK_354 - Homebase Direct Loadout Regression Matrix
+- Status: geplant
+- Stand: Review-Finding nach TASK_350. Die bestehende Task-350-Pruefung deckt den erfolgreichen Exportpfad ab, aber nicht Payload-Scope, unveraenderte Profil-Defaults, UI-Dropdown-Pfad und Modifier-Aufloesung.
+- Naechster Schritt: Breitere Headless-Matrix fuer Homebase-Direct-Loadout-Randfaelle bauen.
+
+### TASK_355 - Homebase Direct UX Payload Truth
+- Status: geplant
+- Stand: Review-Finding nach TASK_350. Spieler muessen klar sehen koennen, welche Fireteams nur in Homebase/Loadout bearbeitet werden und welche wirklich im Flightdeck-Dropship sitzen.
+- Naechster Schritt: Dichte UI-Status-/Badge-Wahrheit fuer Homebase-Direct-Payload ergaenzen, ohne neue Gameplay-Wahrheit in UI-Callbacks zu schaffen.
+
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
 - Stand: Dropship-Visuals bauen ihre Dirty-Signatur wieder fehlerfrei, geplante LZs bleiben auch bei offmap/hidden Craft sichtbar, und Multi-Dropship-Payloads werden aus dem rohen Mission-Card-State statt aus stale Selected-Card-State uebernommen.

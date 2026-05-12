@@ -543,6 +543,13 @@ TASK_348 - Homebase FOB Payload State Isolation (implementiert)
 TASK_349 - Homebase Direct Staging Real Flightdeck Craft Gate (implementiert)
 TASK_350 - Homebase Loadout Contract Export (implementiert)
 
+Phase 18ZJ - Homebase Direct Review Followups
+TASK_351 - Homebase Direct Payload Scope Contract (geplant)
+TASK_352 - Homebase Loadout Defaults Preserve Unit Profiles (geplant)
+TASK_353 - Shared Loadout Contract Helper (geplant)
+TASK_354 - Homebase Direct Loadout Regression Matrix (geplant)
+TASK_355 - Homebase Direct UX Payload Truth (geplant)
+
 Batch-Empfehlung
 
 Codex soll Tasks in kleinen Gruppen bearbeiten:
