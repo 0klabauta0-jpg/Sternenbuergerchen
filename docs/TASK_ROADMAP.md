@@ -554,7 +554,7 @@ Phase 18ZK - MapEditor and Homebase Performance Refactor Followups
 TASK_356 - MapEditor Lazy Terrain Texture Catalog (implementiert)
 TASK_357 - MapEditor Height Cliff Dirty Neighborhood Cache (implementiert)
 TASK_358 - MapEditor Undo Stroke Transactions (implementiert)
-TASK_359 - MapEditor Dirty UI Refresh Batching (geplant)
+TASK_359 - MapEditor Dirty UI Refresh Batching (implementiert)
 TASK_360 - MapEditor Mission Scenario Panel Extraction (geplant)
 TASK_361 - NPCCompactCard Readonly Profile Reference Contract (geplant)
 TASK_362 - Homebase Aircraft State Manager Extraction (geplant)

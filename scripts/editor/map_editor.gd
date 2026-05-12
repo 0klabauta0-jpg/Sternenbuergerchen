@@ -105,6 +105,11 @@ const CONTEXT_MENU_ERASE_OBJECT_ID: int = 103
 const INSPECTOR_SECTION_MAP_SETTINGS: String = "map_settings"
 const INSPECTOR_SECTION_MARKERS: String = "markers"
 const INSPECTOR_SECTION_MISSION_SCENARIO: String = "mission_scenario"
+const EDITOR_UI_REFRESH_SELECTION: int = 1 << 0
+const EDITOR_UI_REFRESH_PROPERTIES: int = 1 << 1
+const EDITOR_UI_REFRESH_TOOL_STATE: int = 1 << 2
+const EDITOR_UI_REFRESH_HOVER: int = 1 << 3
+const EDITOR_UI_REFRESH_SCENARIO: int = 1 << 4
 
 @export var map_file_path: String = ""
 
@@ -158,6 +163,16 @@ var _is_refreshing_scenario_controls: bool = false
 var _scenario_feedback_text: String = ""
 var _terrain_3d_view = null
 var _3d_refresh_queued: bool = false
+var _editor_ui_refresh_pending_flags: int = 0
+var _editor_ui_refresh_queued: bool = false
+var _editor_ui_refresh_request_count: int = 0
+var _editor_ui_refresh_flush_count: int = 0
+var _editor_ui_refresh_flag_request_counts: Dictionary = {}
+var _last_editor_ui_refresh_requested_flags: int = 0
+var _last_editor_ui_refresh_flushed_flags: int = 0
+var _queued_hover_world_position: Vector2 = Vector2.ZERO
+var _queued_hover_has_world_position: bool = false
+var _queued_hover_hide: bool = false
 var _active_palette_group_id: String = ""
 var _palette_preview_textures: Dictionary = {}
 var _last_dirty_neighborhood_snapshot: Dictionary = {}
@@ -405,9 +420,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			_apply_brush_at_world_position(world_position)
 			return
 		if _is_brush_enabled() and not _is_pointer_over_control():
-			_update_hover_preview(world_position)
+			_queue_hover_preview_update(world_position)
 			return
-		_hide_hover_preview()
+		_queue_hover_preview_hide()
 
 
 func _handle_right_mouse_press(mouse_button_event: InputEventMouseButton) -> void:
@@ -509,8 +524,7 @@ func _erase_selected_tile_object() -> bool:
 	if tile_data == null or not _erase_object_layer_from_tile(tile_data):
 		return false
 	_refresh_tile_visual(tile_data)
-	_refresh_selection_visual()
-	_refresh_property_panel()
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES)
 	_mark_dirty(true)
 	return true
 
@@ -687,6 +701,92 @@ func _refresh_tile_visual(tile_data, refresh_dirty_neighborhood: bool = true) ->
 	_queue_3d_map_refresh()
 
 
+func _queue_editor_ui_refresh(flags: int) -> void:
+	if flags == 0:
+		return
+	_editor_ui_refresh_pending_flags = _editor_ui_refresh_pending_flags | flags
+	_last_editor_ui_refresh_requested_flags = flags
+	_editor_ui_refresh_request_count += 1
+	for flag_name in _get_editor_ui_refresh_flag_names(flags):
+		_editor_ui_refresh_flag_request_counts[flag_name] = int(_editor_ui_refresh_flag_request_counts.get(flag_name, 0)) + 1
+	if _editor_ui_refresh_queued:
+		return
+	_editor_ui_refresh_queued = true
+	call_deferred("_flush_editor_ui_refresh")
+
+
+func _queue_hover_preview_update(world_position: Vector2) -> void:
+	_queued_hover_world_position = world_position
+	_queued_hover_has_world_position = true
+	_queued_hover_hide = false
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_HOVER)
+
+
+func _queue_hover_preview_hide() -> void:
+	_queued_hover_has_world_position = false
+	_queued_hover_hide = true
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_HOVER)
+
+
+func _flush_editor_ui_refresh() -> void:
+	var flags: int = _editor_ui_refresh_pending_flags
+	_editor_ui_refresh_pending_flags = 0
+	_editor_ui_refresh_queued = false
+	if flags == 0:
+		return
+	_last_editor_ui_refresh_flushed_flags = flags
+	_editor_ui_refresh_flush_count += 1
+
+	if (flags & EDITOR_UI_REFRESH_HOVER) != 0:
+		if _queued_hover_hide or not _queued_hover_has_world_position:
+			_hide_hover_preview()
+		else:
+			_update_hover_preview(_queued_hover_world_position)
+		_queued_hover_hide = false
+		_queued_hover_has_world_position = false
+	if (flags & EDITOR_UI_REFRESH_SELECTION) != 0:
+		_refresh_selection_visual()
+	if (flags & EDITOR_UI_REFRESH_PROPERTIES) != 0:
+		_refresh_property_panel()
+	if (flags & EDITOR_UI_REFRESH_SCENARIO) != 0:
+		_refresh_mission_authoring_controls()
+	if (flags & EDITOR_UI_REFRESH_TOOL_STATE) != 0:
+		_refresh_top_bar()
+
+
+func _get_editor_ui_refresh_flag_names(flags: int) -> PackedStringArray:
+	var names: PackedStringArray = PackedStringArray()
+	if (flags & EDITOR_UI_REFRESH_SELECTION) != 0:
+		names.append("selection")
+	if (flags & EDITOR_UI_REFRESH_PROPERTIES) != 0:
+		names.append("properties")
+	if (flags & EDITOR_UI_REFRESH_TOOL_STATE) != 0:
+		names.append("tool_state")
+	if (flags & EDITOR_UI_REFRESH_HOVER) != 0:
+		names.append("hover")
+	if (flags & EDITOR_UI_REFRESH_SCENARIO) != 0:
+		names.append("scenario")
+	return names
+
+
+func get_editor_ui_refresh_debug_snapshot() -> Dictionary:
+	return {
+		"batched": true,
+		"queued": _editor_ui_refresh_queued,
+		"pending_flags": _editor_ui_refresh_pending_flags,
+		"pending_flag_names": _get_editor_ui_refresh_flag_names(_editor_ui_refresh_pending_flags),
+		"last_requested_flags": _last_editor_ui_refresh_requested_flags,
+		"last_requested_flag_names": _get_editor_ui_refresh_flag_names(_last_editor_ui_refresh_requested_flags),
+		"last_flushed_flags": _last_editor_ui_refresh_flushed_flags,
+		"last_flushed_flag_names": _get_editor_ui_refresh_flag_names(_last_editor_ui_refresh_flushed_flags),
+		"request_count": _editor_ui_refresh_request_count,
+		"flush_count": _editor_ui_refresh_flush_count,
+		"flag_request_counts": _editor_ui_refresh_flag_request_counts.duplicate(true),
+		"queued_hover_update": _queued_hover_has_world_position,
+		"queued_hover_hide": _queued_hover_hide,
+	}
+
+
 func _build_tile_modulate(tile_data) -> Color:
 	if _terrain_renderer == null:
 		return Color(1.0, 1.0, 1.0, 1.0)
@@ -700,8 +800,7 @@ func _select_tile_at_world_position(world_position: Vector2) -> void:
 		return
 
 	_set_selected_grid_position(tile_data.grid_position)
-	_refresh_selection_visual()
-	_refresh_property_panel()
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES)
 
 
 func _set_selected_grid_position(grid_position: Vector2i) -> void:
@@ -728,9 +827,7 @@ func _select_grid_with_selection_tool(grid_position: Vector2i, additive: bool = 
 		_selected_grid_position = Vector2i(-1, -1)
 	else:
 		_selected_grid_position = Vector2i(_selected_grids[_selected_grids.size() - 1])
-	_refresh_selection_visual()
-	_refresh_property_panel()
-	_refresh_authoring_status_controls()
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES | EDITOR_UI_REFRESH_TOOL_STATE)
 	return true
 
 
@@ -765,9 +862,7 @@ func _select_grid_area(start_grid_position: Vector2i, end_grid_position: Vector2
 		return false
 	_selected_grids = next_selected_grids
 	_selected_grid_position = Vector2i(_selected_grids[_selected_grids.size() - 1]) if not _selected_grids.is_empty() else Vector2i(-1, -1)
-	_refresh_selection_visual()
-	_refresh_property_panel()
-	_refresh_authoring_status_controls()
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES | EDITOR_UI_REFRESH_TOOL_STATE)
 	return true
 
 
@@ -818,9 +913,8 @@ func _apply_brush_at_world_position(world_position: Vector2) -> void:
 		cancel_empty_undo_transaction()
 
 	_set_selected_grid_position(center_grid)
-	_refresh_selection_visual()
-	_refresh_property_panel()
-	_hide_hover_preview()
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES)
+	_queue_hover_preview_hide()
 
 
 func _apply_height_tool_at_world_position(world_position: Vector2) -> void:
@@ -859,9 +953,8 @@ func _apply_height_tool_at_world_position(world_position: Vector2) -> void:
 		cancel_empty_undo_transaction()
 
 	_set_selected_grid_position(center_grid)
-	_refresh_selection_visual()
-	_refresh_property_panel()
-	_hide_hover_preview()
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES)
+	_queue_hover_preview_hide()
 
 
 func _apply_eraser_at_world_position(world_position: Vector2) -> void:
@@ -878,18 +971,17 @@ func _apply_eraser_at_world_position(world_position: Vector2) -> void:
 		if owns_undo_transaction:
 			cancel_empty_undo_transaction()
 		_set_selected_grid_position(tile_data.grid_position)
-		_refresh_selection_visual()
-		_refresh_property_panel()
+		_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES)
+		_queue_hover_preview_hide()
 		return
 
 	_set_selected_grid_position(tile_data.grid_position)
 	_refresh_tile_visual(tile_data)
-	_refresh_selection_visual()
-	_refresh_property_panel()
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES)
 	if owns_undo_transaction:
 		commit_undo_transaction()
 	_mark_dirty(true)
-	_hide_hover_preview()
+	_queue_hover_preview_hide()
 
 
 func _erase_object_layer_from_tile(tile_data) -> bool:
@@ -2711,7 +2803,7 @@ func _build_mission_scenario_info_text() -> String:
 
 func _mark_scenario_dirty(is_dirty: bool) -> void:
 	_scenario_dirty = is_dirty
-	_refresh_top_bar()
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_TOOL_STATE)
 	var panel := _get_mission_scenario_panel()
 	if panel == null:
 		return
@@ -2931,9 +3023,7 @@ func select_grid_for_authoring(grid_position: Vector2i) -> bool:
 	if tile_data == null:
 		return false
 	_set_selected_grid_position(grid_position)
-	_refresh_selection_visual()
-	_refresh_property_panel()
-	_refresh_authoring_status_controls()
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES | EDITOR_UI_REFRESH_TOOL_STATE)
 	return true
 
 
@@ -3140,6 +3230,8 @@ func get_authoring_action_contract_snapshot() -> Dictionary:
 		"undo_limit": MAX_UNDO_STACK_SIZE,
 		"active_undo_transaction": not _active_undo_transaction.is_empty(),
 		"redo_available": false,
+		"editor_ui_refresh_batched": true,
+		"editor_ui_refresh_flags": _get_editor_ui_refresh_flag_names(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES | EDITOR_UI_REFRESH_TOOL_STATE | EDITOR_UI_REFRESH_HOVER | EDITOR_UI_REFRESH_SCENARIO),
 		"tile_patch_fields": PackedStringArray([
 			"grid_position",
 			"walkable",
@@ -4022,7 +4114,7 @@ func _select_marker(marker_id: String) -> void:
 		var marker_position: Vector2 = _terrain_map_data.call("get_marker_position", normalized_marker_id, Vector2.ZERO)
 		if _terrain_registry != null:
 			_set_selected_grid_position(_terrain_registry.world_to_grid(marker_position))
-	_refresh_selection_visual()
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION)
 	_refresh_marker_overlay()
 	_refresh_marker_editor_controls()
 
@@ -4324,7 +4416,7 @@ func _rotate_selected_object(delta_degrees: float) -> bool:
 	if owns_undo_transaction:
 		commit_undo_transaction()
 	_mark_dirty(true)
-	_refresh_property_panel()
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_PROPERTIES)
 	return true
 
 
@@ -4388,7 +4480,7 @@ func _apply_property_controls_to_selected_tile() -> void:
 		commit_undo_transaction()
 
 	_mark_dirty(true)
-	_refresh_property_panel()
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_PROPERTIES)
 
 
 func _apply_tile_patch(tile_data, patch: Dictionary) -> bool:
@@ -4715,7 +4807,7 @@ func commit_undo_transaction() -> void:
 
 func cancel_empty_undo_transaction() -> void:
 	_active_undo_transaction.clear()
-	_refresh_top_bar()
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_TOOL_STATE)
 
 
 func _build_undo_transaction(action_name: String) -> Dictionary:
@@ -4752,7 +4844,7 @@ func _push_undo_entry(undo_state: Dictionary) -> void:
 	while _undo_stack.size() > MAX_UNDO_STACK_SIZE:
 		_undo_stack.pop_front()
 	_last_undo_state = undo_state
-	_refresh_top_bar()
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_TOOL_STATE)
 
 
 func _store_undo_state(tile_data) -> void:
@@ -4813,7 +4905,7 @@ func _undo_last_change() -> void:
 	_last_undo_state = Dictionary(_undo_stack[_undo_stack.size() - 1]) if not _undo_stack.is_empty() else {}
 	var restored_grids: Array[Vector2i] = _restore_tile_from_undo_state(undo_state)
 	if restored_grids.is_empty():
-		_refresh_top_bar()
+		_queue_editor_ui_refresh(EDITOR_UI_REFRESH_TOOL_STATE)
 		return
 
 	for grid_position in restored_grids:
@@ -4824,9 +4916,7 @@ func _undo_last_change() -> void:
 	var grid_position: Vector2i = Vector2i(restored_grids[restored_grids.size() - 1])
 	_set_selected_grid_position(grid_position)
 	_mark_dirty(true)
-	_refresh_selection_visual()
-	_refresh_property_panel()
-	_refresh_top_bar()
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES | EDITOR_UI_REFRESH_TOOL_STATE)
 
 
 func _clear_undo_history() -> void:
@@ -4863,7 +4953,7 @@ func _refresh_top_bar() -> void:
 
 func _mark_dirty(is_dirty: bool) -> void:
 	_dirty = is_dirty
-	_refresh_top_bar()
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_TOOL_STATE)
 
 
 func _adjust_camera_zoom(delta: float) -> void:
@@ -5130,7 +5220,7 @@ func _commit_map_name_editor_text(mark_dirty: bool = true) -> void:
 	if mark_dirty:
 		_mark_dirty(true)
 	else:
-		_refresh_top_bar()
+		_queue_editor_ui_refresh(EDITOR_UI_REFRESH_TOOL_STATE)
 
 
 func _on_map_name_text_submitted(_new_text: String) -> void:

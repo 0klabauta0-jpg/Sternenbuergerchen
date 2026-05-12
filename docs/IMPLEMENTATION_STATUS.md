@@ -120,9 +120,10 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_358_mapeditor_undo_stroke_transactions.gd`; `godot_console.exe --headless --path . --script scripts/tests/bugfix_map_editor_station_floor_structure_undo.gd`; `godot_console.exe --headless --path . --script scripts/tests/task_229_map_editor_usability_authoring_pass.gd`; `git diff --check`.
 
 ### TASK_359 - MapEditor Dirty UI Refresh Batching
-- Status: geplant
-- Stand: Review-Finding. Die 2.5D-Ansicht wird bereits per `_queue_3d_map_refresh()` coalesced, aber 2D-/Inspector-Refreshes laufen in mehreren Input-/Paint-Pfaden direkt.
-- Naechster Schritt: Dirty-Flag-Refresh-Queue fuer Selection, Properties, Hover und Tool-State einfuehren.
+- Status: implementiert im Arbeitsstand
+- Stand: MapEditor-UI-Refreshes fuer Selection, Properties, Tool-State, Hover und Scenario-Panel laufen ueber eine deferred Dirty-Queue mit Diagnose-Snapshot.
+- Stand: Paint-, Height-, Eraser-, Area-Selection-, Undo-/Dirty- und Hover-Motion-Pfade coalescen mehrere UI-Requests in einen Flush. Die bestehende 3D-Refresh-Queue bleibt separat.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_359_mapeditor_dirty_ui_refresh_batching.gd`; `godot_console.exe --headless --path . --script scripts/tests/task_295_map_editor_paint_toolbar_tools_polish.gd`; `godot_console.exe --headless --path . --script scripts/tests/task_298_editor_terrain_visual_playability_smoke.gd`; `godot_console.exe --headless --path . --script scripts/tests/task_229_map_editor_usability_authoring_pass.gd`; `git diff --check`.
 
 ### TASK_360 - MapEditor Mission Scenario Panel Extraction
 - Status: geplant
