@@ -34,6 +34,27 @@
 - Risiken: Das Homebase-Loadout ist ein kompakter Staging-Editor und noch kein vollstaendiges Redesign des FOB-Loadout-Fensters. Ein manueller FullHD-Sichtcheck bleibt sinnvoll, weil die neuen Homebase-Proportionen enger sind als das alte Character-Sheet-Layout.
 - Lokale Pruefung: `task_346_homebase_direct_staging_character_popup.gd`, `task_316_fob_fireteam_staging_migration.gd`, `task_314_fob_npc_pool_window_left_of_fireteams.gd`, `task_310_fob_flightdeck_fireteam_userology_smoke.gd`, `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd` und `git diff --check` laufen gruen.
 
+### TASK_347 - Homebase Direct Staging Start Guard
+- Status: implementiert im Arbeitsstand
+- Stand: `HomebaseTestScreen` nutzt `can_request_mission_start()` als gemeinsame Startbereitschaft fuer Button, Snapshot und `request_mission_start()`.
+- Stand: Direct-Homebase-Payloads emittieren jetzt `mission_start_requested`; leerer Homebase-State bleibt blockiert und der bestehende `_mission_launch_ready`-Pfad bleibt erhalten.
+- Lokale Pruefung: `task_347_homebase_direct_staging_start_guard.gd`, `task_346_homebase_direct_staging_character_popup.gd` und `git diff --check` laufen gruen.
+
+### TASK_348 - Homebase FOB Payload State Isolation
+- Status: geplant
+- Stand: Review-Finding aus TASK_346. Der gemeinsame Dropship-Sync bevorzugt aktuell Homebase-Direct-State und kann dadurch einen spaeteren FOB-Start mit altem Homebase-Payload ueberschreiben.
+- Naechster Schritt: Payload-Quelle explizit trennen (`homebase_direct` vs. `fob`) und Konfliktfall testen.
+
+### TASK_349 - Homebase Direct Staging Real Flightdeck Craft Gate
+- Status: geplant
+- Stand: Review-Finding aus TASK_346. Direct-Staging kann momentan einen synthetischen `homebase_dropship` exportieren, obwohl kein echtes Flightdeck-Craft vorhanden ist.
+- Naechster Schritt: Direct-Launch an ein echtes, boardbares Homebase-Craft koppeln und Blockertexte/Testfaelle fuer leer/busy/unavailable ergaenzen.
+
+### TASK_350 - Homebase Loadout Contract Export
+- Status: geplant
+- Stand: Review-Finding aus TASK_346. Homebase-Loadout-Auswahl lebt aktuell als `_member_loadout_by_unit_id` im UI und wird nicht in den Direct-Drop-/Mission-State exportiert.
+- Naechster Schritt: Bestehenden FOB-Loadout-Vertrag wiederverwenden oder kleinen gemeinsamen Contract-Helper extrahieren und die Exportkette testen.
+
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
 - Stand: Dropship-Visuals bauen ihre Dirty-Signatur wieder fehlerfrei, geplante LZs bleiben auch bei offmap/hidden Craft sichtbar, und Multi-Dropship-Payloads werden aus dem rohen Mission-Card-State statt aus stale Selected-Card-State uebernommen.

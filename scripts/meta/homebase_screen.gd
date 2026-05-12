@@ -324,12 +324,17 @@ func get_homebase_direct_staging_snapshot() -> Dictionary:
 		"staged_fireteam_ids": Array(_homebase_dropship_staged_fireteam_ids),
 		"embarked_unit_ids": Array(PackedStringArray(Array(drop_state.get("embarked_unit_ids", [])))),
 		"drop_ship_staged": bool(drop_state.get("drop_ship_staged", false)),
+		"can_request_mission_start": can_request_mission_start(),
 		"uses_fob_drop_panel_contract": bool(get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel").get_meta("homebase_uses_fob_drop_panel_contract", false)) if get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel") != null else false,
 	}
 
 
+func can_request_mission_start() -> bool:
+	return _mission_launch_ready or _has_homebase_direct_launch_payload()
+
+
 func request_mission_start() -> void:
-	if not _mission_launch_ready:
+	if not can_request_mission_start():
 		return
 	mission_start_requested.emit()
 
@@ -1442,10 +1447,11 @@ func _update_mission_info() -> void:
 	var staged_count: int = _selected_unit_ids.size()
 	var pilot_count: int = _mission_pilot_count_override if _mission_pilot_count_override >= 0 else _count_assigned_pilots()
 	var mission_slot_usage: int = _mission_slot_usage_override if _mission_slot_usage_override >= 0 else staged_count + pilot_count
-	var direct_payload_ready: bool = not _build_unit_ids_for_fireteams(_filter_existing_fireteam_ids(_homebase_dropship_staged_fireteam_ids)).is_empty()
-	start_mission_button.disabled = not (_mission_launch_ready or direct_payload_ready)
+	var direct_payload_ready: bool = _has_homebase_direct_launch_payload()
+	var can_start_mission: bool = can_request_mission_start()
+	start_mission_button.disabled = not can_start_mission
 	start_mission_button.text = "Start"
-	META_UI_SKIN_SCRIPT.style_transfer_button(start_mission_button, _mission_launch_ready or direct_payload_ready)
+	META_UI_SKIN_SCRIPT.style_transfer_button(start_mission_button, can_start_mission)
 	mission_name_label.text = _selected_mission_name
 	mission_team_limit_label.text = "Mission slots: %d / %d" % [mini(mission_slot_usage, _selected_mission_slot_count), _selected_mission_slot_count]
 	var launch_text: String = _mission_launch_summary if not _mission_launch_summary.is_empty() else ("Homebase dropship ready" if direct_payload_ready else ("Dropship ready for launch" if _mission_launch_ready else "Dropship not launch-ready"))
@@ -2372,6 +2378,10 @@ func _filter_existing_fireteam_ids(source: PackedStringArray) -> PackedStringArr
 			continue
 		result.append(fireteam_id)
 	return result
+
+
+func _has_homebase_direct_launch_payload() -> bool:
+	return not _build_unit_ids_for_fireteams(_filter_existing_fireteam_ids(_homebase_dropship_staged_fireteam_ids)).is_empty()
 
 
 func _build_unit_ids_for_fireteams(fireteam_ids: PackedStringArray) -> PackedStringArray:

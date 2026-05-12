@@ -537,6 +537,12 @@ TASK_345 - NPC Standard Movement Posture Policy (geplant)
 Phase 18ZH - Homebase Direct Staging FOB Bypass
 TASK_346 - Homebase Direct Staging Character Popup (implementiert)
 
+Phase 18ZI - Homebase Direct Staging Review Followups
+TASK_347 - Homebase Direct Staging Start Guard (implementiert)
+TASK_348 - Homebase FOB Payload State Isolation (geplant)
+TASK_349 - Homebase Direct Staging Real Flightdeck Craft Gate (geplant)
+TASK_350 - Homebase Loadout Contract Export (geplant)
+
 Batch-Empfehlung
 
 Codex soll Tasks in kleinen Gruppen bearbeiten:
