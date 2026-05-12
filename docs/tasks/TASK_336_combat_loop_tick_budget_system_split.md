@@ -3,7 +3,7 @@
 ## Ziel
 Der Combat-Loop-Tick soll besser budgetierbar und wartbarer werden. Der Task trennt die grossen Tick-Phasen in klar benannte Systeme oder eine explizite Phasenliste, ohne Kampfregeln fachlich neu zu balancen.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT
 
 ## Voraussetzung
 - TASK_218 - Simulation Combat AI Tick Budget Pass
@@ -32,10 +32,10 @@ Der Combat-Loop-Tick soll besser budgetierbar und wartbarer werden. Der Task tre
 - Kein Verschieben der Autoritaet aus `SimulationRoot`.
 
 ## Akzeptanzkriterien
-- [ ] Combat-Tick-Phasen sind klar benannt und im Code leichter isolierbar.
-- [ ] Ein Report zeigt Phase-Dauer, Hauptzaehler und offene Kandidaten fuer spaetere Budgetierung.
-- [ ] Bestehende taktische Smokes bleiben gruen.
-- [ ] Keine Snapshot- oder Multiplayer-Authority-Regression.
+- [x] Combat-Tick-Phasen sind klar benannt und im Code leichter isolierbar.
+- [x] Ein Report zeigt Phase-Dauer, Hauptzaehler und offene Kandidaten fuer spaetere Budgetierung.
+- [x] Bestehende taktische Smokes bleiben gruen.
+- [x] Keine Snapshot- oder Multiplayer-Authority-Regression.
 
 ## Erwartete Dateien
 - `scripts/mission/**` oder der aktuelle Combat-Loop-Driver-Pfad
@@ -46,10 +46,10 @@ Der Combat-Loop-Tick soll besser budgetierbar und wartbarer werden. Der Task tre
 - `docs/IMPLEMENTATION_STATUS.md`
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_336_combat_loop_tick_budget_system_split.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_218_simulation_combat_ai_tick_budget_pass.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_282_tactical_overhaul_playability_performance_help_gate.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_336_combat_loop_tick_budget_system_split.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_218_simulation_combat_ai_tick_budget_pass.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_282_tactical_overhaul_playability_performance_help_gate.gd`
+- [x] `git diff --check`
 
 ## Risiken
 - Reine Methoden-Extraktion kann trotzdem Reihenfolgefehler erzeugen. Deshalb muss der Task sehr kleine Schritte und einen Reihenfolge-Report erzwingen.

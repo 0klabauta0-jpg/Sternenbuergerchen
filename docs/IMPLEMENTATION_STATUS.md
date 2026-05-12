@@ -10,6 +10,14 @@
 
 ## Aktueller Startzustand
 
+### TASK_336 - Combat Loop Tick Budget System Split
+- Status: implementiert im Arbeitsstand
+- Stand: `MissionCombatLoopDriver._on_tick_processed()` delegiert den autoritativen Combat-Tick jetzt an eine explizite Phasenliste mit stabiler Reihenfolge und sichtbaren Abhaengigkeiten.
+- Stand: Der bestehende Debug-Snapshot behaelt `scopes_usec` fuer TASK_218-Kompatibilitaet und liefert zusaetzlich `phase_order`, `phase_catalog`, `phase_records` und `budget_candidate_phase_ids`.
+- Stand: Phase-Records melden Dauer, Skip-Status und Hauptzaehler fuer Contact Tracking, Enemy Security/Tactics, Overwatch, Queues, Combat Resolution und Snapshot-Kontext. Every-N-Kandidaten sind nur markiert, nicht aktiviert.
+- Risiken: Die Extraktion soll verhaltensgleich sein; spaetere echte Tick-Ausduennung braucht eigene Playtest- und Balance-Abnahme.
+- Lokale Pruefung: `task_336_combat_loop_tick_budget_system_split.gd`, `task_218_simulation_combat_ai_tick_budget_pass.gd`, `task_282_tactical_overhaul_playability_performance_help_gate.gd` und `git diff --check` laufen gruen.
+
 ### TASK_335 - Tactical Feedback Truth Command Clarity Pass
 - Status: implementiert im Arbeitsstand
 - Stand: `MissionCommandHierarchyContract` liefert fuer blockierte Kernaktionen jetzt stabile Reason-Codes sowie kurze spielbare Texte, ohne die bisherigen Legacy-`disabled_reason`-Strings zu entfernen.

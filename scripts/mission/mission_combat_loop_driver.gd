@@ -64,6 +64,99 @@ const ENEMY_TACTICS_PROBE_STEP_DISTANCE: float = 96.0
 const ENEMY_TACTICS_BOUND_STEP_DISTANCE: float = 128.0
 const ENEMY_TACTICS_COVER_SEARCH_RADIUS: float = 220.0
 
+const COMBAT_TICK_PHASE_BLEEDOUT_QUEUE: String = "bleedout_queue"
+const COMBAT_TICK_PHASE_LEADERSHIP: String = "leadership"
+const COMBAT_TICK_PHASE_DETECTION_TIMERS: String = "detection_timers"
+const COMBAT_TICK_PHASE_CONTACT_TRACKING: String = "contact_tracking"
+const COMBAT_TICK_PHASE_ENEMY_SECURITY: String = "enemy_security"
+const COMBAT_TICK_PHASE_ENEMY_TEAM_TACTICS: String = "enemy_team_tactics"
+const COMBAT_TICK_PHASE_FLANK_VULNERABILITY: String = "flank_vulnerability"
+const COMBAT_TICK_PHASE_COOLDOWNS: String = "cooldowns"
+const COMBAT_TICK_PHASE_MEDIC_SUPPORT: String = "medic_support"
+const COMBAT_TICK_PHASE_ENEMY_ADVANCE: String = "enemy_advance"
+const COMBAT_TICK_PHASE_FRIENDLY_STANDARD_BEHAVIOR: String = "friendly_standard_behavior"
+const COMBAT_TICK_PHASE_OVERWATCH_SECURITY: String = "overwatch_security"
+const COMBAT_TICK_PHASE_COMBAT_FIRE_DECISION: String = "combat_fire_decision"
+const COMBAT_TICK_PHASE_COMBAT_RESOLUTION: String = "combat_resolution"
+const COMBAT_TICK_PHASE_MULTIPLAYER_SNAPSHOT_CONTEXT: String = "multiplayer_snapshot_context"
+const COMBAT_TICK_PHASE_STATUS_UPDATE: String = "status_update"
+
+const COMBAT_TICK_PHASE_ORDER: Array = [
+	COMBAT_TICK_PHASE_BLEEDOUT_QUEUE,
+	COMBAT_TICK_PHASE_LEADERSHIP,
+	COMBAT_TICK_PHASE_DETECTION_TIMERS,
+	COMBAT_TICK_PHASE_CONTACT_TRACKING,
+	COMBAT_TICK_PHASE_ENEMY_SECURITY,
+	COMBAT_TICK_PHASE_ENEMY_TEAM_TACTICS,
+	COMBAT_TICK_PHASE_FLANK_VULNERABILITY,
+	COMBAT_TICK_PHASE_COOLDOWNS,
+	COMBAT_TICK_PHASE_MEDIC_SUPPORT,
+	COMBAT_TICK_PHASE_ENEMY_ADVANCE,
+	COMBAT_TICK_PHASE_FRIENDLY_STANDARD_BEHAVIOR,
+	COMBAT_TICK_PHASE_OVERWATCH_SECURITY,
+	COMBAT_TICK_PHASE_COMBAT_FIRE_DECISION,
+	COMBAT_TICK_PHASE_COMBAT_RESOLUTION,
+	COMBAT_TICK_PHASE_MULTIPLAYER_SNAPSHOT_CONTEXT,
+	COMBAT_TICK_PHASE_STATUS_UPDATE,
+]
+const COMBAT_TICK_PHASE_SCOPE_KEYS: Dictionary = {
+	COMBAT_TICK_PHASE_BLEEDOUT_QUEUE: "bleedout_queue_usec",
+	COMBAT_TICK_PHASE_LEADERSHIP: "leadership_usec",
+	COMBAT_TICK_PHASE_DETECTION_TIMERS: "detection_timers_usec",
+	COMBAT_TICK_PHASE_CONTACT_TRACKING: "contact_tracking_usec",
+	COMBAT_TICK_PHASE_ENEMY_SECURITY: "enemy_security_usec",
+	COMBAT_TICK_PHASE_ENEMY_TEAM_TACTICS: "enemy_team_tactics_usec",
+	COMBAT_TICK_PHASE_FLANK_VULNERABILITY: "flank_vulnerability_usec",
+	COMBAT_TICK_PHASE_COOLDOWNS: "cooldowns_usec",
+	COMBAT_TICK_PHASE_MEDIC_SUPPORT: "medic_support_usec",
+	COMBAT_TICK_PHASE_ENEMY_ADVANCE: "enemy_advance_usec",
+	COMBAT_TICK_PHASE_FRIENDLY_STANDARD_BEHAVIOR: "friendly_standard_behavior_usec",
+	COMBAT_TICK_PHASE_OVERWATCH_SECURITY: "overwatch_security_usec",
+	COMBAT_TICK_PHASE_COMBAT_FIRE_DECISION: "combat_fire_decision_usec",
+	COMBAT_TICK_PHASE_COMBAT_RESOLUTION: "combat_resolution_usec",
+	COMBAT_TICK_PHASE_MULTIPLAYER_SNAPSHOT_CONTEXT: "multiplayer_snapshot_context_usec",
+	COMBAT_TICK_PHASE_STATUS_UPDATE: "status_update_usec",
+}
+const COMBAT_TICK_PHASE_LABELS: Dictionary = {
+	COMBAT_TICK_PHASE_BLEEDOUT_QUEUE: "Queue bleedout effects",
+	COMBAT_TICK_PHASE_LEADERSHIP: "Refresh fireteam leadership",
+	COMBAT_TICK_PHASE_DETECTION_TIMERS: "Advance detection timers",
+	COMBAT_TICK_PHASE_CONTACT_TRACKING: "Update contact tracking",
+	COMBAT_TICK_PHASE_ENEMY_SECURITY: "Update enemy security",
+	COMBAT_TICK_PHASE_ENEMY_TEAM_TACTICS: "Update enemy team tactics",
+	COMBAT_TICK_PHASE_FLANK_VULNERABILITY: "Advance flank vulnerability",
+	COMBAT_TICK_PHASE_COOLDOWNS: "Advance combat cooldowns",
+	COMBAT_TICK_PHASE_MEDIC_SUPPORT: "Try medic support",
+	COMBAT_TICK_PHASE_ENEMY_ADVANCE: "Advance enemy units",
+	COMBAT_TICK_PHASE_FRIENDLY_STANDARD_BEHAVIOR: "Apply friendly standard behavior",
+	COMBAT_TICK_PHASE_OVERWATCH_SECURITY: "Resolve overwatch security",
+	COMBAT_TICK_PHASE_COMBAT_FIRE_DECISION: "Resolve combat fire decisions",
+	COMBAT_TICK_PHASE_COMBAT_RESOLUTION: "Update combat resolution",
+	COMBAT_TICK_PHASE_MULTIPLAYER_SNAPSHOT_CONTEXT: "Publish multiplayer snapshot context",
+	COMBAT_TICK_PHASE_STATUS_UPDATE: "Update status label",
+}
+const COMBAT_TICK_PHASE_DEPENDENCIES: Dictionary = {
+	COMBAT_TICK_PHASE_CONTACT_TRACKING: [COMBAT_TICK_PHASE_DETECTION_TIMERS],
+	COMBAT_TICK_PHASE_ENEMY_SECURITY: [COMBAT_TICK_PHASE_CONTACT_TRACKING],
+	COMBAT_TICK_PHASE_ENEMY_TEAM_TACTICS: [COMBAT_TICK_PHASE_ENEMY_SECURITY],
+	COMBAT_TICK_PHASE_FLANK_VULNERABILITY: [COMBAT_TICK_PHASE_CONTACT_TRACKING],
+	COMBAT_TICK_PHASE_MEDIC_SUPPORT: [COMBAT_TICK_PHASE_COOLDOWNS],
+	COMBAT_TICK_PHASE_ENEMY_ADVANCE: [COMBAT_TICK_PHASE_ENEMY_TEAM_TACTICS],
+	COMBAT_TICK_PHASE_FRIENDLY_STANDARD_BEHAVIOR: [COMBAT_TICK_PHASE_LEADERSHIP],
+	COMBAT_TICK_PHASE_OVERWATCH_SECURITY: [COMBAT_TICK_PHASE_CONTACT_TRACKING],
+	COMBAT_TICK_PHASE_COMBAT_FIRE_DECISION: [COMBAT_TICK_PHASE_OVERWATCH_SECURITY],
+	COMBAT_TICK_PHASE_COMBAT_RESOLUTION: [COMBAT_TICK_PHASE_COMBAT_FIRE_DECISION],
+	COMBAT_TICK_PHASE_MULTIPLAYER_SNAPSHOT_CONTEXT: [COMBAT_TICK_PHASE_COMBAT_RESOLUTION],
+	COMBAT_TICK_PHASE_STATUS_UPDATE: [COMBAT_TICK_PHASE_MULTIPLAYER_SNAPSHOT_CONTEXT],
+}
+const COMBAT_TICK_PHASE_BUDGET_CANDIDATE_NOTES: Dictionary = {
+	COMBAT_TICK_PHASE_ENEMY_SECURITY: "Review for every-N-ticks only after contact staleness is proven acceptable.",
+	COMBAT_TICK_PHASE_ENEMY_TEAM_TACTICS: "Review for every-N-ticks after enemy reaction cadence is playtested.",
+	COMBAT_TICK_PHASE_FLANK_VULNERABILITY: "Review for dirty/contact-change gating; not changed in TASK_336.",
+	COMBAT_TICK_PHASE_FRIENDLY_STANDARD_BEHAVIOR: "Review for dirty behavior-profile gating; not changed in TASK_336.",
+	COMBAT_TICK_PHASE_STATUS_UPDATE: "Low-risk UI label candidate, but kept per tick for unchanged feedback.",
+}
+
 signal contact_established(attacker, target)
 signal combat_resolved(mission_result: Dictionary)
 
@@ -212,6 +305,24 @@ func set_combat_tick_budget_debug_enabled(enabled: bool) -> void:
 
 func get_combat_tick_budget_debug_snapshot() -> Dictionary:
 	return _combat_tick_budget_debug_snapshot.duplicate(true)
+
+
+func get_combat_tick_phase_catalog() -> Array:
+	var catalog: Array = []
+	for phase_id_variant in COMBAT_TICK_PHASE_ORDER:
+		catalog.append(_build_combat_tick_phase_definition(String(phase_id_variant)))
+	return catalog
+
+
+func get_combat_tick_phase_inventory_snapshot() -> Dictionary:
+	return {
+		"schema_version": 1,
+		"phase_order": COMBAT_TICK_PHASE_ORDER.duplicate(),
+		"phase_catalog": get_combat_tick_phase_catalog(),
+		"budget_candidate_phase_ids": _get_combat_tick_budget_candidate_phase_ids(),
+		"authority_root": "SimulationRoot",
+		"rules_rebalanced": false,
+	}
 
 
 func get_combat_hotpath_audit_snapshot() -> Dictionary:
@@ -572,108 +683,206 @@ func _receive_remote_event(
 	_remote_event_bridge.call("apply_event_payload", self, payload)
 
 
+func _build_combat_tick_phase_definition(phase_id: String) -> Dictionary:
+	var budget_candidate_note: String = String(COMBAT_TICK_PHASE_BUDGET_CANDIDATE_NOTES.get(phase_id, ""))
+	return {
+		"phase_id": phase_id,
+		"order_index": COMBAT_TICK_PHASE_ORDER.find(phase_id),
+		"scope_key": _get_combat_tick_phase_scope_key(phase_id),
+		"label": String(COMBAT_TICK_PHASE_LABELS.get(phase_id, phase_id)),
+		"hard_dependencies": Array(COMBAT_TICK_PHASE_DEPENDENCIES.get(phase_id, [])).duplicate(),
+		"every_n_ticks_candidate": not budget_candidate_note.is_empty(),
+		"budget_candidate_note": budget_candidate_note,
+	}
+
+
+func _get_combat_tick_phase_scope_key(phase_id: String) -> String:
+	return String(COMBAT_TICK_PHASE_SCOPE_KEYS.get(phase_id, ""))
+
+
+func _get_combat_tick_budget_candidate_phase_ids() -> Array:
+	var result: Array = []
+	for phase_id_variant in COMBAT_TICK_PHASE_ORDER:
+		var phase_id: String = String(phase_id_variant)
+		if COMBAT_TICK_PHASE_BUDGET_CANDIDATE_NOTES.has(phase_id):
+			result.append(phase_id)
+	return result
+
+
+func _build_combat_tick_phase_record(phase_id: String, duration_usec: int, result: Dictionary, simulation_root: Node, skipped: bool, skip_reason: String) -> Dictionary:
+	var counters: Dictionary = _build_combat_tick_phase_counters(phase_id, simulation_root, result)
+	var record: Dictionary = _build_combat_tick_phase_definition(phase_id)
+	record["duration_usec"] = duration_usec
+	record["skipped"] = skipped
+	record["skip_reason"] = skip_reason
+	record["counters"] = counters
+	return record
+
+
+func _build_combat_tick_phase_counters(phase_id: String, simulation_root: Node, result: Dictionary) -> Dictionary:
+	var counters: Dictionary = {}
+	match phase_id:
+		COMBAT_TICK_PHASE_BLEEDOUT_QUEUE:
+			counters["queued_bleedout_count"] = _queued_bleedout_by_unit_id.size()
+			counters["effect_queue_after_phase"] = _get_effect_queue_size(simulation_root)
+		COMBAT_TICK_PHASE_LEADERSHIP:
+			counters["fireteam_count"] = _fireteam_members.size()
+			counters["acting_lead_count"] = _fireteam_acting_leads.size()
+		COMBAT_TICK_PHASE_DETECTION_TIMERS:
+			counters["detection_progress_count"] = _detection_progress.size()
+		COMBAT_TICK_PHASE_CONTACT_TRACKING:
+			counters["contact_count"] = get_contact_snapshot().size()
+		COMBAT_TICK_PHASE_ENEMY_SECURITY:
+			counters["enemy_security_group_count"] = _enemy_security_states_by_group_id.size()
+		COMBAT_TICK_PHASE_ENEMY_TEAM_TACTICS:
+			counters["enemy_team_tactics_group_count"] = _enemy_team_tactics_states_by_group_id.size()
+		COMBAT_TICK_PHASE_FLANK_VULNERABILITY:
+			counters["flank_state_count"] = _flank_vulnerability_resolver.call("get_state_snapshot", _current_tick).size() if _flank_vulnerability_resolver != null else 0
+		COMBAT_TICK_PHASE_COOLDOWNS:
+			counters["discipline_cooldown_count"] = _discipline_break_cooldown.size()
+			counters["misidentification_cooldown_count"] = _misidentification_cooldown.size()
+			counters["medic_support_cooldown_count"] = _medic_support_cooldown.size()
+		COMBAT_TICK_PHASE_MEDIC_SUPPORT:
+			counters["medic_move_ready_count"] = _medic_support_move_ready_tick.size()
+			counters["command_queue_after_phase"] = _get_command_queue_size(simulation_root)
+		COMBAT_TICK_PHASE_ENEMY_ADVANCE:
+			counters["active_enemy_unit_count"] = _get_active_enemy_units().size()
+			counters["command_queue_after_phase"] = _get_command_queue_size(simulation_root)
+		COMBAT_TICK_PHASE_FRIENDLY_STANDARD_BEHAVIOR:
+			counters["friendly_unit_count"] = _get_units(friendly_unit_paths).size()
+			counters["command_queue_after_phase"] = _get_command_queue_size(simulation_root)
+		COMBAT_TICK_PHASE_OVERWATCH_SECURITY:
+			counters["overwatch_shot_count"] = int(result.get("overwatch_shot_count", 0))
+			counters["command_queue_after_phase"] = _get_command_queue_size(simulation_root)
+		COMBAT_TICK_PHASE_COMBAT_FIRE_DECISION:
+			counters["recent_fire_event_count"] = _recent_fire_events.size()
+			counters["command_queue_after_phase"] = _get_command_queue_size(simulation_root)
+		COMBAT_TICK_PHASE_COMBAT_RESOLUTION:
+			counters["combat_finished"] = _combat_finished
+		COMBAT_TICK_PHASE_MULTIPLAYER_SNAPSHOT_CONTEXT:
+			counters["recent_fire_event_count"] = _recent_fire_events.size()
+		COMBAT_TICK_PHASE_STATUS_UPDATE:
+			counters["combat_finished"] = _combat_finished
+	return counters
+
+
+func _get_command_queue_size(simulation_root: Node) -> int:
+	if simulation_root == null:
+		return 0
+	var command_queue_variant: Variant = simulation_root.get("command_queue")
+	return (command_queue_variant as Array).size() if command_queue_variant is Array else 0
+
+
+func _get_effect_queue_size(simulation_root: Node) -> int:
+	if simulation_root == null:
+		return 0
+	var effect_queue_variant: Variant = simulation_root.get("effects_queue")
+	return (effect_queue_variant as Array).size() if effect_queue_variant is Array else 0
+
+
 func _on_tick_processed(tick: int) -> void:
 	_current_tick = tick
 	var simulation_root = get_node_or_null(simulation_root_path)
 	var profile_enabled: bool = combat_tick_budget_debug_enabled
 	var tick_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var profile_scopes: Dictionary = {}
-	var scope_started_usec: int = 0
+	var phase_records: Array = []
 	if _combat_finished:
 		_update_status_label("resolved")
+		_run_profiled_combat_tick_phase(COMBAT_TICK_PHASE_MULTIPLAYER_SNAPSHOT_CONTEXT, simulation_root, profile_enabled, profile_scopes, phase_records)
 		if profile_enabled:
-			scope_started_usec = Time.get_ticks_usec()
-		_publish_multiplayer_snapshot_context(simulation_root)
-		if profile_enabled:
-			profile_scopes["multiplayer_snapshot_context_usec"] = Time.get_ticks_usec() - scope_started_usec
-			_record_combat_tick_budget_debug_snapshot(tick, tick_started_usec, profile_scopes, simulation_root, "resolved")
+			_record_combat_tick_budget_debug_snapshot(tick, tick_started_usec, profile_scopes, phase_records, simulation_root, "resolved")
 		return
 
 	if simulation_root == null:
 		if profile_enabled:
-			_record_combat_tick_budget_debug_snapshot(tick, tick_started_usec, profile_scopes, simulation_root, "missing_simulation_root")
+			_record_combat_tick_budget_debug_snapshot(tick, tick_started_usec, profile_scopes, phase_records, simulation_root, "missing_simulation_root")
 		return
 
+	_run_core_combat_tick_phases(simulation_root, profile_enabled, profile_scopes, phase_records)
 	if profile_enabled:
-		scope_started_usec = Time.get_ticks_usec()
-	_queue_bleedout_for_downed_enemy(simulation_root)
-	_queue_bleedout_for_downed_friendly(simulation_root)
-	if profile_enabled:
-		profile_scopes["bleedout_queue_usec"] = Time.get_ticks_usec() - scope_started_usec
-		scope_started_usec = Time.get_ticks_usec()
-	_update_fireteam_leadership()
-	if profile_enabled:
-		profile_scopes["leadership_usec"] = Time.get_ticks_usec() - scope_started_usec
-		scope_started_usec = Time.get_ticks_usec()
-	_advance_detection_timers()
-	if profile_enabled:
-		profile_scopes["detection_timers_usec"] = Time.get_ticks_usec() - scope_started_usec
-		scope_started_usec = Time.get_ticks_usec()
-	_update_contact_tracking()
-	if profile_enabled:
-		profile_scopes["contact_tracking_usec"] = Time.get_ticks_usec() - scope_started_usec
-		scope_started_usec = Time.get_ticks_usec()
-	_update_enemy_security_state()
-	if profile_enabled:
-		profile_scopes["enemy_security_usec"] = Time.get_ticks_usec() - scope_started_usec
-		scope_started_usec = Time.get_ticks_usec()
-	_update_enemy_team_tactics_state()
-	if profile_enabled:
-		profile_scopes["enemy_team_tactics_usec"] = Time.get_ticks_usec() - scope_started_usec
-		scope_started_usec = Time.get_ticks_usec()
-	_advance_flank_vulnerability_state()
-	if profile_enabled:
-		profile_scopes["flank_vulnerability_usec"] = Time.get_ticks_usec() - scope_started_usec
-		scope_started_usec = Time.get_ticks_usec()
-	_advance_discipline_cooldowns()
-	_advance_misidentification_cooldowns()
-	_advance_medic_support_cooldowns()
-	if profile_enabled:
-		profile_scopes["cooldowns_usec"] = Time.get_ticks_usec() - scope_started_usec
-		scope_started_usec = Time.get_ticks_usec()
-	_try_enqueue_medic_support(simulation_root)
-	if profile_enabled:
-		profile_scopes["medic_support_usec"] = Time.get_ticks_usec() - scope_started_usec
-		scope_started_usec = Time.get_ticks_usec()
-	_advance_enemy_units(simulation_root)
-	if profile_enabled:
-		profile_scopes["enemy_advance_usec"] = Time.get_ticks_usec() - scope_started_usec
-		scope_started_usec = Time.get_ticks_usec()
-	_apply_friendly_standard_behavior(simulation_root)
-	if profile_enabled:
-		profile_scopes["friendly_standard_behavior_usec"] = Time.get_ticks_usec() - scope_started_usec
-		scope_started_usec = Time.get_ticks_usec()
-	var overwatch_shots: Array = _try_enqueue_overwatch(simulation_root)
-	if profile_enabled:
-		profile_scopes["overwatch_security_usec"] = Time.get_ticks_usec() - scope_started_usec
-	if overwatch_shots.is_empty():
-		if profile_enabled:
-			scope_started_usec = Time.get_ticks_usec()
-		_try_enqueue_attacks(simulation_root)
-		if profile_enabled:
-			profile_scopes["combat_fire_decision_usec"] = Time.get_ticks_usec() - scope_started_usec
-	elif profile_enabled:
-		profile_scopes["combat_fire_decision_usec"] = 0
-	if profile_enabled:
-		scope_started_usec = Time.get_ticks_usec()
-	_update_combat_resolution()
-	if profile_enabled:
-		profile_scopes["combat_resolution_usec"] = Time.get_ticks_usec() - scope_started_usec
-		scope_started_usec = Time.get_ticks_usec()
-	_publish_multiplayer_snapshot_context(simulation_root)
-	if profile_enabled:
-		profile_scopes["multiplayer_snapshot_context_usec"] = Time.get_ticks_usec() - scope_started_usec
-	if not _combat_finished:
-		if profile_enabled:
-			scope_started_usec = Time.get_ticks_usec()
-		_update_status_label("active")
-		if profile_enabled:
-			profile_scopes["status_update_usec"] = Time.get_ticks_usec() - scope_started_usec
-	if profile_enabled:
-		_record_combat_tick_budget_debug_snapshot(tick, tick_started_usec, profile_scopes, simulation_root, "active")
+		_record_combat_tick_budget_debug_snapshot(tick, tick_started_usec, profile_scopes, phase_records, simulation_root, "active")
 
 
-func _record_combat_tick_budget_debug_snapshot(tick: int, tick_started_usec: int, profile_scopes: Dictionary, simulation_root: Node, state: String) -> void:
+func _run_core_combat_tick_phases(simulation_root: Node, profile_enabled: bool, profile_scopes: Dictionary, phase_records: Array) -> void:
+	var overwatch_shot_count: int = 0
+	for phase_id_variant in COMBAT_TICK_PHASE_ORDER:
+		var phase_id: String = String(phase_id_variant)
+		if phase_id == COMBAT_TICK_PHASE_COMBAT_FIRE_DECISION and overwatch_shot_count > 0:
+			_record_skipped_combat_tick_phase(phase_id, "overwatch_fired", profile_enabled, profile_scopes, phase_records)
+			continue
+		if phase_id == COMBAT_TICK_PHASE_STATUS_UPDATE and _combat_finished:
+			_record_skipped_combat_tick_phase(phase_id, "combat_resolved", profile_enabled, profile_scopes, phase_records)
+			continue
+		var result: Dictionary = _run_profiled_combat_tick_phase(phase_id, simulation_root, profile_enabled, profile_scopes, phase_records)
+		if phase_id == COMBAT_TICK_PHASE_OVERWATCH_SECURITY:
+			overwatch_shot_count = int(result.get("overwatch_shot_count", 0))
+
+
+func _run_profiled_combat_tick_phase(phase_id: String, simulation_root: Node, profile_enabled: bool, profile_scopes: Dictionary, phase_records: Array) -> Dictionary:
+	var started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+	var result: Dictionary = _execute_combat_tick_phase(phase_id, simulation_root)
+	if not profile_enabled:
+		return result
+	var duration_usec: int = Time.get_ticks_usec() - started_usec
+	var scope_key: String = _get_combat_tick_phase_scope_key(phase_id)
+	if not scope_key.is_empty():
+		profile_scopes[scope_key] = duration_usec
+	phase_records.append(_build_combat_tick_phase_record(phase_id, duration_usec, result, simulation_root, false, ""))
+	return result
+
+
+func _record_skipped_combat_tick_phase(phase_id: String, skip_reason: String, profile_enabled: bool, profile_scopes: Dictionary, phase_records: Array) -> void:
+	if not profile_enabled:
+		return
+	var scope_key: String = _get_combat_tick_phase_scope_key(phase_id)
+	if not scope_key.is_empty():
+		profile_scopes[scope_key] = 0
+	phase_records.append(_build_combat_tick_phase_record(phase_id, 0, {}, null, true, skip_reason))
+
+
+func _execute_combat_tick_phase(phase_id: String, simulation_root: Node) -> Dictionary:
+	match phase_id:
+		COMBAT_TICK_PHASE_BLEEDOUT_QUEUE:
+			_queue_bleedout_for_downed_enemy(simulation_root)
+			_queue_bleedout_for_downed_friendly(simulation_root)
+		COMBAT_TICK_PHASE_LEADERSHIP:
+			_update_fireteam_leadership()
+		COMBAT_TICK_PHASE_DETECTION_TIMERS:
+			_advance_detection_timers()
+		COMBAT_TICK_PHASE_CONTACT_TRACKING:
+			_update_contact_tracking()
+		COMBAT_TICK_PHASE_ENEMY_SECURITY:
+			_update_enemy_security_state()
+		COMBAT_TICK_PHASE_ENEMY_TEAM_TACTICS:
+			_update_enemy_team_tactics_state()
+		COMBAT_TICK_PHASE_FLANK_VULNERABILITY:
+			_advance_flank_vulnerability_state()
+		COMBAT_TICK_PHASE_COOLDOWNS:
+			_advance_discipline_cooldowns()
+			_advance_misidentification_cooldowns()
+			_advance_medic_support_cooldowns()
+		COMBAT_TICK_PHASE_MEDIC_SUPPORT:
+			_try_enqueue_medic_support(simulation_root)
+		COMBAT_TICK_PHASE_ENEMY_ADVANCE:
+			_advance_enemy_units(simulation_root)
+		COMBAT_TICK_PHASE_FRIENDLY_STANDARD_BEHAVIOR:
+			_apply_friendly_standard_behavior(simulation_root)
+		COMBAT_TICK_PHASE_OVERWATCH_SECURITY:
+			var overwatch_shots: Array = _try_enqueue_overwatch(simulation_root)
+			return {"overwatch_shot_count": overwatch_shots.size()}
+		COMBAT_TICK_PHASE_COMBAT_FIRE_DECISION:
+			_try_enqueue_attacks(simulation_root)
+		COMBAT_TICK_PHASE_COMBAT_RESOLUTION:
+			_update_combat_resolution()
+		COMBAT_TICK_PHASE_MULTIPLAYER_SNAPSHOT_CONTEXT:
+			_publish_multiplayer_snapshot_context(simulation_root)
+		COMBAT_TICK_PHASE_STATUS_UPDATE:
+			_update_status_label("active")
+	return {}
+
+
+func _record_combat_tick_budget_debug_snapshot(tick: int, tick_started_usec: int, profile_scopes: Dictionary, phase_records: Array, simulation_root: Node, state: String) -> void:
 	var command_queue_after_tick: int = 0
 	var effect_queue_after_tick: int = 0
 	if simulation_root != null:
@@ -692,6 +901,10 @@ func _record_combat_tick_budget_debug_snapshot(tick: int, tick_started_usec: int
 		"state": state,
 		"total_tick_usec": Time.get_ticks_usec() - tick_started_usec,
 		"scopes_usec": profile_scopes.duplicate(true),
+		"phase_order": COMBAT_TICK_PHASE_ORDER.duplicate(),
+		"phase_records": phase_records.duplicate(true),
+		"phase_catalog": get_combat_tick_phase_catalog(),
+		"budget_candidate_phase_ids": _get_combat_tick_budget_candidate_phase_ids(),
 		"friendly_unit_count": friendly_units.size(),
 		"enemy_unit_count": enemy_units.size(),
 		"active_enemy_unit_count": active_enemy_units.size(),

@@ -535,7 +535,7 @@ TASK_332 - Terrain Map Frame Budget Proxy Sync Pass (implementiert im Arbeitssta
 TASK_333 - Navigation Fallback Budget Contract Alignment (implementiert im Arbeitsstand)
 TASK_334 - Drop Light Layout Profiles Compact Resolution (implementiert im Arbeitsstand)
 TASK_335 - Tactical Feedback Truth Command Clarity Pass (implementiert im Arbeitsstand)
-TASK_336 - Combat Loop Tick Budget System Split (offen)
+TASK_336 - Combat Loop Tick Budget System Split (implementiert im Arbeitsstand)
 TASK_337 - Architecture Performance UX Followup Gate (offen)
 
 Batch-Empfehlung
