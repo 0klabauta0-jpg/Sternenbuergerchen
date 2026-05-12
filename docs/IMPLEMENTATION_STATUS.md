@@ -107,9 +107,11 @@
 - Lokale Pruefung: `task_356_mapeditor_lazy_terrain_texture_catalog.gd`, `task_298_editor_terrain_visual_playability_smoke.gd`, `task_229_map_editor_usability_authoring_pass.gd`, `wall_direction_mapping_verifier.gd` und `git diff --check` laufen gruen.
 
 ### TASK_357 - MapEditor Height Cliff Dirty Neighborhood Cache
-- Status: geplant
-- Stand: Review-Finding nach Korrektur. Der aktuelle Code macht keinen pauschalen Full-Map-O(N2)-Rescan, aber Hoehen-/Cliff-/Wall-Nachbarschaften koennen pro Brush-Stroke redundant invalidiert und berechnet werden.
-- Naechster Schritt: Dirty-Grid-Sets pro Paint-/Height-Operation sammeln, Nachbarschaften deduplizieren und Hill-/Cliff-Verifier laufen lassen.
+- Status: implementiert
+- Stand: Brush-, Height- und Property-Operationen sammeln geaenderte Grid-Positionen und fuehren Cliff-/Wall-/Object-Overlay-Refreshes gesammelt und dedupliziert aus.
+- Stand: Height-Reconciliation refreshed die betroffenen Tile-Sprites erst nach Edge-/Lower-Cliff-Abgleich und aktualisiert danach eine stabile, sortierte Dirty-Nachbarschaft. Die Terrain-Wahrheit bleibt in `TerrainMapData`.
+- Stand: `get_dirty_neighborhood_debug_snapshot()` meldet Seed-Anzahl, Rohkandidaten, deduplizierte Cliff-/Wall-Kandidaten, Object-Kandidaten und Refresh-Zaehler fuer Verifier.
+- Lokale Pruefung: `task_357_mapeditor_height_cliff_dirty_neighborhood_cache.gd`, `task_292_editor_hill_cliff_grid_depth_repair.gd`, `task_298_editor_terrain_visual_playability_smoke.gd`, `task_229_map_editor_usability_authoring_pass.gd` und `git diff --check` laufen gruen.
 
 ### TASK_358 - MapEditor Undo Stroke Transactions
 - Status: geplant

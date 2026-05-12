@@ -159,6 +159,7 @@ var _terrain_3d_view = null
 var _3d_refresh_queued: bool = false
 var _active_palette_group_id: String = ""
 var _palette_preview_textures: Dictionary = {}
+var _last_dirty_neighborhood_snapshot: Dictionary = {}
 var _right_mouse_pressed: bool = false
 var _right_mouse_dragged: bool = false
 var _right_mouse_press_screen_position: Vector2 = Vector2.ZERO
@@ -661,7 +662,7 @@ func _rebuild_tile_sprites() -> void:
 	_set_legacy_2d_map_visible(false)
 
 
-func _refresh_tile_visual(tile_data) -> void:
+func _refresh_tile_visual(tile_data, refresh_dirty_neighborhood: bool = true) -> void:
 	if tile_data == null or not _tile_sprites_by_grid.has(tile_data.grid_position):
 		_queue_3d_map_refresh()
 		return
@@ -675,9 +676,8 @@ func _refresh_tile_visual(tile_data) -> void:
 	tile_sprite.texture = tile_texture
 	tile_sprite.position = tile_data.world_position - KENNEY_DIAMOND_CENTER
 	tile_sprite.modulate = _build_tile_modulate(tile_data)
-	_update_cliff_overlays_around(tile_data.grid_position)
-	_update_wall_overlays_around(tile_data.grid_position)
-	_update_object_overlay_at(tile_data.grid_position)
+	if refresh_dirty_neighborhood:
+		_refresh_dirty_visual_neighborhoods([tile_data.grid_position])
 	_queue_3d_map_refresh()
 
 
@@ -777,6 +777,7 @@ func _apply_brush_at_world_position(world_position: Vector2) -> void:
 	var center_grid: Vector2i = tile_data.grid_position
 	var radius: int = _get_brush_radius()
 	var any_changed: bool = false
+	var changed_grids: Array[Vector2i] = []
 
 	for dx in range(-radius, radius + 1):
 		for dy in range(-radius, radius + 1):
@@ -789,7 +790,8 @@ func _apply_brush_at_world_position(world_position: Vector2) -> void:
 				_store_undo_state(target_tile)
 				if _tile_catalog.apply_type_to_tile(target_tile, _selected_type_id):
 					any_changed = true
-					_refresh_tile_visual(target_tile)
+					changed_grids.append(target_grid)
+					_refresh_tile_visual(target_tile, false)
 			else:
 				var patch: Dictionary = {
 					"walkable": _get_walkable_checkbox().button_pressed,
@@ -797,9 +799,11 @@ func _apply_brush_at_world_position(world_position: Vector2) -> void:
 				}
 				if _apply_tile_patch(target_tile, patch):
 					any_changed = true
-					_refresh_tile_visual(target_tile)
+					changed_grids.append(target_grid)
+					_refresh_tile_visual(target_tile, false)
 
 	if any_changed:
+		_refresh_dirty_visual_neighborhoods(changed_grids)
 		_mark_dirty(true)
 
 	_set_selected_grid_position(center_grid)
@@ -833,7 +837,6 @@ func _apply_height_tool_at_world_position(world_position: Vector2) -> void:
 			if _apply_tile_patch(target_tile, patch):
 				any_changed = true
 				changed_grids.append(target_grid)
-				_refresh_tile_visual(target_tile)
 
 	if any_changed:
 		_refresh_reconciled_height_edges(changed_grids, _height_tool_edge_type)
@@ -4328,6 +4331,7 @@ func _apply_property_controls_to_selected_tile() -> void:
 	var radius: int = _get_brush_radius()
 	var any_changed: bool = false
 	var changed_grids: Array[Vector2i] = []
+	var dirty_visual_grids: Array[Vector2i] = []
 
 	for dx in range(-radius, radius + 1):
 		for dy in range(-radius, radius + 1):
@@ -4338,15 +4342,19 @@ func _apply_property_controls_to_selected_tile() -> void:
 
 			if _apply_tile_patch(target_tile, patch):
 				any_changed = true
+				dirty_visual_grids.append(target_grid)
 				if patch.has("height_level"):
 					changed_grids.append(target_grid)
-				_refresh_tile_visual(target_tile)
+				else:
+					_refresh_tile_visual(target_tile, false)
 
 	if not any_changed:
 		return
 
 	if patch.has("height_level"):
 		_refresh_reconciled_height_edges(changed_grids, _get_selected_edge_type())
+	else:
+		_refresh_dirty_visual_neighborhoods(dirty_visual_grids)
 
 	_mark_dirty(true)
 	_refresh_property_panel()
@@ -4429,10 +4437,12 @@ func _refresh_reconciled_height_edges(changed_grids: Array[Vector2i], preferred_
 	for changed_position in _reconcile_lower_neighbor_cliff_visuals_around(visual_seed_grids):
 		refresh_lookup[changed_position] = true
 
-	for grid_variant in refresh_lookup.keys():
-		var tile_data = _terrain_map_data.call("get_tile_at_grid", Vector2i(grid_variant)) if _terrain_map_data != null else null
+	var refresh_grids: Array[Vector2i] = _sort_grid_lookup_keys(refresh_lookup)
+	for grid_position in refresh_grids:
+		var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position) if _terrain_map_data != null else null
 		if tile_data != null:
-			_refresh_tile_visual(tile_data)
+			_refresh_tile_visual(tile_data, false)
+	_refresh_dirty_visual_neighborhoods(refresh_grids)
 
 
 func _reconcile_height_edges_around(grid_position: Vector2i, preferred_edge_type: String = "") -> Array[Vector2i]:
@@ -6003,6 +6013,88 @@ func _get_common_texture(texture_key: String) -> Texture2D:
 	return TERRAIN_TEXTURE_CATALOG_SCRIPT.call("get_common_texture", texture_key) as Texture2D
 
 
+func get_dirty_neighborhood_debug_snapshot() -> Dictionary:
+	return _last_dirty_neighborhood_snapshot.duplicate(true)
+
+
+func _refresh_dirty_visual_neighborhoods(seed_grids: Array[Vector2i]) -> void:
+	if seed_grids.is_empty():
+		_last_dirty_neighborhood_snapshot = {
+			"seed_count": 0,
+			"raw_neighborhood_candidate_count": 0,
+			"cliff_wall_candidate_count": 0,
+			"object_candidate_count": 0,
+			"duplicate_neighborhood_candidate_count": 0,
+			"cliff_refresh_count": 0,
+			"wall_refresh_count": 0,
+			"object_refresh_count": 0,
+		}
+		return
+
+	var seed_lookup: Dictionary = {}
+	var neighborhood_lookup: Dictionary = {}
+	var object_lookup: Dictionary = {}
+	var raw_neighborhood_candidate_count: int = 0
+	for seed_grid in seed_grids:
+		var seed := Vector2i(seed_grid)
+		seed_lookup[seed] = true
+		object_lookup[seed] = true
+		for candidate in _build_overlay_neighborhood_candidates(seed):
+			raw_neighborhood_candidate_count += 1
+			neighborhood_lookup[Vector2i(candidate)] = true
+
+	var neighborhood_grids: Array[Vector2i] = _sort_grid_lookup_keys(neighborhood_lookup)
+	var object_grids: Array[Vector2i] = _sort_grid_lookup_keys(object_lookup)
+	var cliff_refresh_count: int = 0
+	var wall_refresh_count: int = 0
+	var object_refresh_count: int = 0
+
+	for grid_position in neighborhood_grids:
+		if _refresh_cliff_overlay_at(grid_position):
+			cliff_refresh_count += 1
+	for grid_position in neighborhood_grids:
+		if _refresh_wall_overlay_at(grid_position):
+			wall_refresh_count += 1
+	for grid_position in object_grids:
+		if _refresh_object_overlay_at(grid_position):
+			object_refresh_count += 1
+
+	_last_dirty_neighborhood_snapshot = {
+		"seed_count": seed_lookup.size(),
+		"raw_neighborhood_candidate_count": raw_neighborhood_candidate_count,
+		"cliff_wall_candidate_count": neighborhood_grids.size(),
+		"object_candidate_count": object_grids.size(),
+		"duplicate_neighborhood_candidate_count": raw_neighborhood_candidate_count - neighborhood_grids.size(),
+		"cliff_refresh_count": cliff_refresh_count,
+		"wall_refresh_count": wall_refresh_count,
+		"object_refresh_count": object_refresh_count,
+	}
+
+
+func _build_overlay_neighborhood_candidates(seed_grid: Vector2i) -> Array[Vector2i]:
+	return [
+		seed_grid,
+		seed_grid + Vector2i(1, 0),
+		seed_grid + Vector2i(-1, 0),
+		seed_grid + Vector2i(0, 1),
+		seed_grid + Vector2i(0, -1),
+	]
+
+
+func _sort_grid_lookup_keys(lookup: Dictionary) -> Array[Vector2i]:
+	var result: Array[Vector2i] = []
+	for grid_variant in lookup.keys():
+		result.append(Vector2i(grid_variant))
+	result.sort_custom(Callable(self, "_compare_grid_positions"))
+	return result
+
+
+func _compare_grid_positions(a: Vector2i, b: Vector2i) -> bool:
+	if a.y == b.y:
+		return a.x < b.x
+	return a.y < b.y
+
+
 func _rebuild_all_cliff_overlays() -> void:
 	_clear_cliff_overlays()
 	if _terrain_map_data == null:
@@ -6014,17 +6106,21 @@ func _rebuild_all_cliff_overlays() -> void:
 
 
 func _update_cliff_overlays_around(grid_position: Vector2i) -> void:
-	var positions_to_update: Array[Vector2i] = [grid_position]
-	for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-		positions_to_update.append(grid_position + offset)
+	var positions_to_update: Array[Vector2i] = _build_overlay_neighborhood_candidates(grid_position)
 
 	for pos in positions_to_update:
-		_remove_cliff_overlays_at(pos)
-		if _terrain_map_data == null:
-			continue
-		var tile_data = _terrain_map_data.call("get_tile_at_grid", pos)
-		if tile_data != null and int(tile_data.height_level) > 0 and not _is_object_type(tile_data):
-			_create_cliff_overlays_for_tile(tile_data)
+		_refresh_cliff_overlay_at(pos)
+
+
+func _refresh_cliff_overlay_at(grid_position: Vector2i) -> bool:
+	_remove_cliff_overlays_at(grid_position)
+	if _terrain_map_data == null:
+		return false
+	var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
+	if tile_data != null and int(tile_data.height_level) > 0 and not _is_object_type(tile_data):
+		_create_cliff_overlays_for_tile(tile_data)
+		return true
+	return false
 
 
 func _create_cliff_overlays_for_tile(tile_data) -> void:
@@ -6156,17 +6252,21 @@ func _rebuild_all_wall_overlays() -> void:
 
 
 func _update_wall_overlays_around(grid_position: Vector2i) -> void:
-	var positions_to_update: Array[Vector2i] = [grid_position]
-	for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-		positions_to_update.append(grid_position + offset)
+	var positions_to_update: Array[Vector2i] = _build_overlay_neighborhood_candidates(grid_position)
 
 	for pos in positions_to_update:
-		_remove_wall_overlays_at(pos)
-		if _terrain_map_data == null:
-			continue
-		var tile_data = _terrain_map_data.call("get_tile_at_grid", pos)
-		if tile_data != null and _is_object_type(tile_data):
-			_create_wall_overlays_for_tile(tile_data)
+		_refresh_wall_overlay_at(pos)
+
+
+func _refresh_wall_overlay_at(grid_position: Vector2i) -> bool:
+	_remove_wall_overlays_at(grid_position)
+	if _terrain_map_data == null:
+		return false
+	var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
+	if tile_data != null and _is_object_type(tile_data):
+		_create_wall_overlays_for_tile(tile_data)
+		return true
+	return false
 
 
 func _create_wall_overlays_for_tile(tile_data) -> void:
@@ -6280,19 +6380,23 @@ func _clear_wall_overlays() -> void:
 	_wall_sprites_by_grid.clear()
 
 
-func _update_object_overlay_at(grid_position: Vector2i) -> void:
+func _update_object_overlay_at(grid_position: Vector2i) -> bool:
+	return _refresh_object_overlay_at(grid_position)
+
+
+func _refresh_object_overlay_at(grid_position: Vector2i) -> bool:
 	_remove_object_overlay_at(grid_position)
 	if _terrain_map_data == null or _terrain_renderer == null:
-		return
+		return false
 
 	var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
 	if tile_data == null:
-		return
+		return false
 
 	_terrain_renderer.set_tile_catalog(_tile_catalog)
 	var texture: Texture2D = _terrain_renderer.resolve_object_texture(tile_data)
 	if texture == null:
-		return
+		return false
 
 	var object_container := get_node_or_null("ObjectContainer") as Node2D
 	if object_container == null:
@@ -6309,6 +6413,7 @@ func _update_object_overlay_at(grid_position: Vector2i) -> void:
 	sprite.position = tile_data.world_position - KENNEY_DIAMOND_CENTER
 	object_container.add_child(sprite)
 	_object_sprites_by_grid[grid_position] = [sprite]
+	return true
 
 
 func _remove_object_overlay_at(grid_position: Vector2i) -> void:

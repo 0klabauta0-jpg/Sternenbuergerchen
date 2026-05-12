@@ -552,7 +552,7 @@ TASK_355 - Homebase Direct UX Payload Truth (implementiert)
 
 Phase 18ZK - MapEditor and Homebase Performance Refactor Followups
 TASK_356 - MapEditor Lazy Terrain Texture Catalog (implementiert)
-TASK_357 - MapEditor Height Cliff Dirty Neighborhood Cache (geplant)
+TASK_357 - MapEditor Height Cliff Dirty Neighborhood Cache (implementiert)
 TASK_358 - MapEditor Undo Stroke Transactions (geplant)
 TASK_359 - MapEditor Dirty UI Refresh Batching (geplant)
 TASK_360 - MapEditor Mission Scenario Panel Extraction (geplant)
