@@ -49,9 +49,12 @@
 - Hinweis: `task_316_fob_fireteam_staging_migration.gd` meldet beim Headless-Exit bestehende RID-Leak-Warnungen, aber alle Assertions laufen gruen.
 
 ### TASK_349 - Homebase Direct Staging Real Flightdeck Craft Gate
-- Status: geplant
-- Stand: Review-Finding aus TASK_346. Direct-Staging kann momentan einen synthetischen `homebase_dropship` exportieren, obwohl kein echtes Flightdeck-Craft vorhanden ist.
-- Naechster Schritt: Direct-Launch an ein echtes, boardbares Homebase-Craft koppeln und Blockertexte/Testfaelle fuer leer/busy/unavailable ergaenzen.
+- Status: implementiert im Arbeitsstand
+- Stand: Homebase-Direct-Staging ist jetzt an ein echtes ausgewaehltes Homebase-Dropship-Craft gekoppelt. Ohne geeignetes Craft bleibt `drop_ship_staged` false und der synthetische `homebase_dropship` wird nicht mehr als Mission-Drop-Craft exportiert.
+- Stand: Der Flightdeck-Dropbereich bleibt sichtbar und meldet Blocker fuer fehlendes Craft, Cargo-/nicht-Dropship-Craft, Transit, laufende Flightdeck-Arbeit und unavailable Air Assets.
+- Stand: Direct-Staging-Regressionen aus TASK_346 bis TASK_348 erzeugen nun explizit ein echtes Homebase-Dropship, wenn sie einen launch-ready Direct-Payload erwarten.
+- Lokale Pruefung: `task_349_homebase_direct_staging_real_flightdeck_craft_gate.gd`, `task_347_homebase_direct_staging_start_guard.gd`, `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd`, `task_346_homebase_direct_staging_character_popup.gd`, `task_348_homebase_fob_payload_state_isolation.gd` und `git diff --check` laufen gruen.
+- Offener Balance-Punkt: Ob Direct-Staging auch einen zugewiesenen Piloten als harte Startbedingung braucht, bleibt als eigener Folgeentscheid sinnvoll.
 
 ### TASK_350 - Homebase Loadout Contract Export
 - Status: geplant

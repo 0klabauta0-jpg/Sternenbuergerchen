@@ -3,6 +3,7 @@ extends SceneTree
 const HOMEBASE_TEST_SCENE: PackedScene = preload("res://scenes/meta/homebase_test_screen.tscn")
 const DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/drop_light_layout_contract.gd")
 const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
+const DROPSHIP_TEXTURE_PATH := "res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png"
 
 var _passed: int = 0
 var _failed: int = 0
@@ -73,6 +74,26 @@ func _test_fireteam_loadout_and_dropship_contract() -> void:
 				"respawn_enabled": false,
 			}
 		]
+	)
+	screen.call(
+		"set_transport_state",
+		[
+			{
+				"craft_id": "dropship_alpha",
+				"craft_type": "dropship",
+				"display_name": "Dropship",
+				"texture_path": DROPSHIP_TEXTURE_PATH,
+				"supports_cargo": false,
+				"cargo_options": [],
+			}
+		],
+		{"dropship_alpha": "unit_delta"},
+		[],
+		[],
+		{"dropship_alpha": "homebase"},
+		{},
+		{},
+		[]
 	)
 	await process_frame
 	await process_frame

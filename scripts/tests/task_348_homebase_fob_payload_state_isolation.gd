@@ -2,6 +2,7 @@ extends SceneTree
 
 const META_LAYER_TEST_SCENE: PackedScene = preload("res://scenes/meta/meta_layer_test.tscn")
 const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
+const DROPSHIP_TEXTURE_PATH := "res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png"
 
 var _passed: int = 0
 var _failed: int = 0
@@ -122,6 +123,26 @@ func _stage_homebase_direct_payload(scene: Node, unit_ids: PackedStringArray, fi
 		"set_fireteam_context",
 		_repeat_fireteam_ids(unit_ids.size(), fireteam_id),
 		[_build_fireteam_definition(fireteam_id, unit_ids)]
+	)
+	homebase_screen.call(
+		"set_transport_state",
+		[
+			{
+				"craft_id": "homebase_dropship_alpha",
+				"craft_type": "dropship",
+				"display_name": "Homebase Dropship",
+				"texture_path": DROPSHIP_TEXTURE_PATH,
+				"supports_cargo": false,
+				"cargo_options": [],
+			}
+		],
+		{"homebase_dropship_alpha": "unit_charlie"},
+		[],
+		[],
+		{"homebase_dropship_alpha": "homebase"},
+		{},
+		{},
+		[]
 	)
 	homebase_screen.call("_on_homebase_staging_fireteam_dropped", fireteam_id, "homebase_dropship")
 	await process_frame
