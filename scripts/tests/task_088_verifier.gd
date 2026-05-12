@@ -9,7 +9,7 @@ extends SceneTree
 ##   5. Units without fireteam get no bonus
 
 const TEST_UNIT_SCRIPT: GDScript = preload("res://scripts/npc/test_unit.gd")
-const COMBAT_LOOP_SCRIPT: GDScript = preload("res://scripts/tests/mission_combat_loop_driver.gd")
+const COMBAT_LOOP_SCRIPT: GDScript = preload("res://scripts/mission/mission_combat_loop_driver.gd")
 
 var _passed: int = 0
 var _failed: int = 0

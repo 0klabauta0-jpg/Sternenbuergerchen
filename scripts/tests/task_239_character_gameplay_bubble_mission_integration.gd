@@ -6,7 +6,7 @@ const FTL_RESOLVER_SCRIPT: GDScript = preload("res://scripts/ui/fireteamleader_f
 const NPC_THOUGHT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/ui/npc_thought_bubble_resolver.gd")
 const MULTIPLAYER_SNAPSHOT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_snapshot_contract.gd")
 const TEST_UNIT_SCRIPT: GDScript = preload("res://scripts/npc/test_unit.gd")
-const MISSION_COMBAT_LOOP_DRIVER_SCRIPT: GDScript = preload("res://scripts/tests/mission_combat_loop_driver.gd")
+const MISSION_COMBAT_LOOP_DRIVER_SCRIPT: GDScript = preload("res://scripts/mission/mission_combat_loop_driver.gd")
 
 var _passed: int = 0
 var _failed: int = 0

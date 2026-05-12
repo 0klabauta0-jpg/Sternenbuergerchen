@@ -12,7 +12,7 @@ extends SceneTree
 # 8. Detection complete returns true after timer reaches 0
 
 const TEST_UNIT_SCRIPT: GDScript = preload("res://scripts/npc/test_unit.gd")
-const COMBAT_DRIVER_SCRIPT: GDScript = preload("res://scripts/tests/mission_combat_loop_driver.gd")
+const COMBAT_DRIVER_SCRIPT: GDScript = preload("res://scripts/mission/mission_combat_loop_driver.gd")
 
 var _pass_count: int = 0
 var _fail_count: int = 0

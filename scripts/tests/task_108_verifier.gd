@@ -1,7 +1,7 @@
 extends SceneTree
 
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
-const ENEMY_WAVE_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/enemy_wave_controller.gd")
+const ENEMY_WAVE_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/mission/enemy_wave_controller.gd")
 
 var _passed: int = 0
 var _failed: int = 0

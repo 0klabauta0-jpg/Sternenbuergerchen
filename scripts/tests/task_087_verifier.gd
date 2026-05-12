@@ -243,7 +243,7 @@ func _attach_visual(unit: Node, texture_path: String) -> void:
 
 
 func _make_mission_test_setup() -> Node:
-	var SetupScript = preload("res://scripts/tests/mission_test_setup.gd")
+	var SetupScript = preload("res://scripts/mission/mission_test_setup.gd")
 	var setup = SetupScript.new()
 	root.add_child(setup)
 	return setup

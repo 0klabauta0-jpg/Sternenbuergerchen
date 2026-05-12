@@ -6,7 +6,7 @@ const UNIT_REGISTRY_SCRIPT: GDScript = preload("res://scripts/registries/unit_re
 const TERRAIN_REGISTRY_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_registry.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const TEST_UNIT_SCRIPT: GDScript = preload("res://scripts/npc/test_unit.gd")
-const MISSION_COMBAT_LOOP_DRIVER_SCRIPT: GDScript = preload("res://scripts/tests/mission_combat_loop_driver.gd")
+const MISSION_COMBAT_LOOP_DRIVER_SCRIPT: GDScript = preload("res://scripts/mission/mission_combat_loop_driver.gd")
 
 const DEFAULT_REPETITIONS: int = 3
 const TICKS_PER_RUN: int = 4

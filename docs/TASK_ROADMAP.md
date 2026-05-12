@@ -528,6 +528,16 @@ TASK_328 - Manual Playtest Marker Help Roster UPnP Followup (implementiert im Ar
 Phase 18ZE - Manual Playtest Stabilization and Docs Truth Fix
 TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass (implementiert im Arbeitsstand)
 
+Phase 18ZF - Architecture Performance UX Followups
+TASK_330 - Mission Runtime Scripts Productization Followup (implementiert im Arbeitsstand)
+TASK_331 - Mission Tactical Controller Adapter Split First Slice (offen)
+TASK_332 - Terrain Map Frame Budget Proxy Sync Pass (offen)
+TASK_333 - Navigation Fallback Budget Contract Alignment (offen)
+TASK_334 - Drop Light Layout Profiles Compact Resolution (offen)
+TASK_335 - Tactical Feedback Truth Command Clarity Pass (offen)
+TASK_336 - Combat Loop Tick Budget System Split (offen)
+TASK_337 - Architecture Performance UX Followup Gate (offen)
+
 Batch-Empfehlung
 
 Codex soll Tasks in kleinen Gruppen bearbeiten:

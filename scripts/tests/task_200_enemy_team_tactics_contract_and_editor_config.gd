@@ -3,7 +3,7 @@ extends SceneTree
 const PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const MISSION_SCENARIO_DATA_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_data.gd")
-const ENEMY_WAVE_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/enemy_wave_controller.gd")
+const ENEMY_WAVE_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/mission/enemy_wave_controller.gd")
 const TEST_UNIT_SCRIPT: GDScript = preload("res://scripts/npc/test_unit.gd")
 const MAP_EDITOR_SCENE: PackedScene = preload("res://scenes/editor/map_editor.tscn")
 const CONTRACT_DOC_PATH: String = "res://docs/dev/enemy_team_tactics_contract.md"

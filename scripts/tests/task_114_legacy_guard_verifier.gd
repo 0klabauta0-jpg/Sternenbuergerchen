@@ -1,8 +1,8 @@
 extends SceneTree
 
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
-const PHASE_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/phase_controller.gd")
-const TACTICAL_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/mission_tactical_sandbox_controller.gd")
+const PHASE_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/mission/phase_controller.gd")
+const TACTICAL_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/mission/mission_tactical_sandbox_controller.gd")
 const MAP_EDITOR_SCENE: PackedScene = preload("res://scenes/editor/map_editor.tscn")
 
 var _passed: int = 0

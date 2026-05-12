@@ -10,6 +10,14 @@
 
 ## Aktueller Startzustand
 
+### TASK_330 - Mission Runtime Scripts Productization Followup
+- Status: implementiert im Arbeitsstand
+- Stand: Die produktiv in `scenes/tests/mission_reactivity_test.tscn` verdrahteten Mission-Runtime- und View-Support-Skripte liegen jetzt unter `scripts/mission/`: Tactical Controller, Combat Loop Driver, Mission Setup, Command Flow Driver, Mission Camera Controller, Objective Status View, Respawn Overlay, Enemy Wave Controller und Phase Controller.
+- Stand: Die Mission-Szene und betroffene Verifier/Harnesses laden diese Skripte ueber `res://scripts/mission/...`; reine Tests, Preset-/Kalibrierungs-Harnesses und Verifier bleiben unter `scripts/tests`.
+- Stand: `docs/reports/mission_runtime_scripts_productization_followup.md` dokumentiert die verschobenen Dateien, verbleibende bewusste Testpfade und den Legacy-Hinweis zu `scripts/npc/test_unit.gd`.
+- Risiken: Der Task aendert nur Pfade und loest die Groesse von Tactical Controller und Combat Loop Driver nicht. Historische Review-/Task-Dokumente koennen weiter alte Pfade zitieren.
+- Lokale Pruefung: Der Pfad-RG-Check fuer alte `res://scripts/tests/...`-Referenzen in `scripts`, `scenes` und `tests` ist sauber. `task_282_tactical_overhaul_playability_performance_help_gate.gd`, `task_286_ui_feedback_truth_regression_review.gd` und `task_222_performance_regression_gate_and_manual_profile_checklist.gd` laufen gruen.
+
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
 - Stand: Dropship-Visuals bauen ihre Dirty-Signatur wieder fehlerfrei, geplante LZs bleiben auch bei offmap/hidden Craft sichtbar, und Multi-Dropship-Payloads werden aus dem rohen Mission-Card-State statt aus stale Selected-Card-State uebernommen.

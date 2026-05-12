@@ -7,7 +7,7 @@ const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain
 const TERRAIN_MAP_3D_VIEW_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_3d_view.gd")
 const SIMULATION_ROOT_SCRIPT: GDScript = preload("res://scripts/core/simulation_root.gd")
 const MULTIPLAYER_SNAPSHOT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_snapshot_contract.gd")
-const MISSION_COMBAT_LOOP_DRIVER_SCRIPT: GDScript = preload("res://scripts/tests/mission_combat_loop_driver.gd")
+const MISSION_COMBAT_LOOP_DRIVER_SCRIPT: GDScript = preload("res://scripts/mission/mission_combat_loop_driver.gd")
 
 const AUDIO_CATALOG_PATH: String = "res://data/audio_sfx_catalog.json"
 const BACKGROUND_CATALOG_PATH: String = "res://data/background_image_catalog.json"

@@ -2,7 +2,7 @@ extends SceneTree
 
 const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
 const COMMAND_HIERARCHY_CONTRACT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
-const TACTICAL_INPUT_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/mission_tactical_sandbox_controller.gd")
+const TACTICAL_INPUT_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/mission/mission_tactical_sandbox_controller.gd")
 
 const TASK_PATH: String = "res://docs/tasks/TASK_315_mission_grid_tile_selection_command_gate.md"
 const STATUS_PATH: String = "res://docs/IMPLEMENTATION_STATUS.md"

@@ -5,7 +5,7 @@ const UNIT_REGISTRY_SCRIPT: GDScript = preload("res://scripts/registries/unit_re
 const TERRAIN_REGISTRY_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_registry.gd")
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const TEST_UNIT_SCRIPT: GDScript = preload("res://scripts/npc/test_unit.gd")
-const ENEMY_WAVE_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tests/enemy_wave_controller.gd")
+const ENEMY_WAVE_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/mission/enemy_wave_controller.gd")
 
 const MIN_SPACING: float = 36.0
 
