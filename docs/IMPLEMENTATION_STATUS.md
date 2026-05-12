@@ -10,6 +10,13 @@
 
 ## Aktueller Startzustand
 
+### TASK_338-TASK_342 - Deep Code Review Followups
+- Status: geplant
+- Stand: Aus der erneuten tiefen Code-Review wurden fuenf kleine Folge-Tasks angelegt: Portrait-Asset/Katalog-Sync, Mission-HUD Dirty-Refresh, reiner Command-Feedback-Snapshot, Navigation-Fallback-Kandidatencap und SimulationRoot-Unknown-Payload-Diagnose.
+- Offene Punkte: Umsetzung, lokale Gates und manuelle Sicht-/Spielgefuehlchecks folgen je Task separat.
+- Risiken: Die Tasks duerfen nicht zu einem Sammelrefactor verschmelzen; jeder Task behaelt die vorhandenen Architekturgrenzen: UI ist nicht die Wahrheit, `SimulationRoot` bleibt autoritativ, Hotpaths bleiben budgetiert.
+- Naechster Schritt: TASK_338 als erster Follow-up, weil der aktuelle Portrait-Asset-Stand den bestehenden TASK_233-Katalog-Gate sichtbar brechen kann.
+
 ### TASK_337 - Architecture Performance UX Followup Gate
 - Status: implementiert im Arbeitsstand
 - Stand: Der neue Abschluss-Verifier prueft die TASK_330-336-Artefakte, die dokumentierten Architekturgrenzen, produktive Mission-Pfade ausserhalb `scripts/tests`, UI-Feedback als read-only Snapshot sowie den Performance-Budget-Contract.
