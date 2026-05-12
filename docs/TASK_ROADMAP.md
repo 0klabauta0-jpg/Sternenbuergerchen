@@ -542,7 +542,7 @@ Phase 18ZG - Deep Code Review Followups
 TASK_338 - Portrait Asset Intake Catalog Sync (implementiert im Arbeitsstand)
 TASK_339 - Mission UI Dirty Refresh Pass (implementiert im Arbeitsstand)
 TASK_340 - Command Feedback Pure Snapshot (implementiert im Arbeitsstand)
-TASK_341 - Navigation Fallback Candidate Cap (geplant)
+TASK_341 - Navigation Fallback Candidate Cap (implementiert im Arbeitsstand)
 TASK_342 - SimulationRoot Unknown Payload Audit (geplant)
 
 Batch-Empfehlung

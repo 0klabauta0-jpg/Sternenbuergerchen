@@ -7,6 +7,9 @@ var _tiles: Dictionary = {}
 var _grid_origin_world: Vector2 = Vector2.ZERO
 var _half_tile_width: float = 64.0
 var _half_tile_height: float = 32.0
+var _grid_bounds_valid: bool = false
+var _grid_min: Vector2i = Vector2i.ZERO
+var _grid_max: Vector2i = Vector2i.ZERO
 
 
 func configure_iso_grid(grid_origin_world: Vector2, half_tile_width: float, half_tile_height: float) -> void:
@@ -17,6 +20,9 @@ func configure_iso_grid(grid_origin_world: Vector2, half_tile_width: float, half
 
 func clear_tiles() -> void:
 	_tiles.clear()
+	_grid_bounds_valid = false
+	_grid_min = Vector2i.ZERO
+	_grid_max = Vector2i.ZERO
 
 
 func register_tile(tile_data) -> void:
@@ -25,6 +31,17 @@ func register_tile(tile_data) -> void:
 		return
 
 	_tiles[tile_data.grid_position] = tile_data
+	_include_grid_in_bounds(Vector2i(tile_data.grid_position))
+
+
+func _include_grid_in_bounds(grid_position: Vector2i) -> void:
+	if not _grid_bounds_valid:
+		_grid_bounds_valid = true
+		_grid_min = grid_position
+		_grid_max = grid_position
+		return
+	_grid_min = Vector2i(mini(_grid_min.x, grid_position.x), mini(_grid_min.y, grid_position.y))
+	_grid_max = Vector2i(maxi(_grid_max.x, grid_position.x), maxi(_grid_max.y, grid_position.y))
 
 
 func get_tile_at_grid(grid_pos: Vector2i):
@@ -71,6 +88,16 @@ func get_tile_at_world(world_pos: Vector2):
 
 func get_all_tiles() -> Array:
 	return _tiles.values()
+
+
+func get_tile_count() -> int:
+	return _tiles.size()
+
+
+func get_grid_bounds() -> Rect2i:
+	if not _grid_bounds_valid:
+		return Rect2i(Vector2i.ZERO, Vector2i.ZERO)
+	return Rect2i(_grid_min, (_grid_max - _grid_min) + Vector2i.ONE)
 
 
 func get_sorted_tiles() -> Array:

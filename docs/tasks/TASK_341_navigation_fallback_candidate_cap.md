@@ -3,7 +3,7 @@
 ## Ziel
 Der Navigation-Fallback fuer schlechte oder unerreichbare Zielpunkte soll nicht mehr alle Tiles einer grossen erreichbaren HPA-Komponente als Kandidaten durchsuchen. Die Kandidatensuche braucht eine harte, nachvollziehbare Obergrenze.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Voraussetzung
 - TASK_217 - Navigation Pathfinding LOS Performance Pass
@@ -35,24 +35,25 @@ TASK_333 hat die versteckte per-candidate-A*-Schleife entfernt und Budget-Diagno
 - Keine Balance-Aenderung an Bewegungsreichweiten.
 
 ## Akzeptanzkriterien
-- [ ] Bad-Target-Fallbacks betrachten maximal die vertraglich erlaubte Kandidatenzahl.
-- [ ] Grosse HPA-Komponenten verursachen keine unbounded Tile-Sammlung im Fallback-Hotpath.
-- [ ] Debug-/Report-Daten zeigen Cap-Treffer und ausgewaehlten Fallback nachvollziehbar.
-- [ ] Navigation- und Performance-Gates bleiben gruen.
+- [x] Bad-Target-Fallbacks betrachten maximal die vertraglich erlaubte Kandidatenzahl.
+- [x] Grosse HPA-Komponenten verursachen keine unbounded Tile-Sammlung im Fallback-Hotpath.
+- [x] Debug-/Report-Daten zeigen Cap-Treffer und ausgewaehlten Fallback nachvollziehbar.
+- [x] Navigation- und Performance-Gates bleiben gruen.
 
 ## Erwartete Dateien
 - `scripts/core/simulation_root.gd`
 - `data/performance_budget_contract.json`
-- optional `scripts/tests/task_341_navigation_fallback_candidate_cap.gd`
+- `scripts/tests/task_341_navigation_fallback_candidate_cap.gd`
+- `docs/reports/navigation_fallback_candidate_cap.md`
 - `docs/tasks/TASK_341_navigation_fallback_candidate_cap.md`
 - `docs/IMPLEMENTATION_STATUS.md`
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_341_navigation_fallback_candidate_cap.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_333_navigation_fallback_budget_contract_alignment.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_217_navigation_pathfinding_los_performance_pass.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_222_performance_regression_gate_and_manual_profile_checklist.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_341_navigation_fallback_candidate_cap.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_333_navigation_fallback_budget_contract_alignment.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_217_navigation_pathfinding_los_performance_pass.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_222_performance_regression_gate_and_manual_profile_checklist.gd`
+- [x] `git diff --check`
 
 ## Risiken
 - Ein zu kleines Cap kann Units bei schlechten Zielpunkten frueher blockieren. Der Task braucht deshalb Tests fuer "naher gueltiger Fallback wird gefunden" und "Cap wird sichtbar, aber nicht still".

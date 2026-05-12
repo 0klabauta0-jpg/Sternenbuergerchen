@@ -57,6 +57,7 @@ func _test_budget_contract_matches_export_defaults() -> void:
 	var simulation_root = SIMULATION_ROOT_SCRIPT.new()
 	_assert(int(navigation_budget.get("max_path_query_budget_per_tick", -1)) == int(simulation_root.navigation_max_new_path_queries_per_tick), "Navigation export default matches contract query budget")
 	_assert(int(navigation_budget.get("max_fallback_path_attempts_per_request", -1)) == int(simulation_root.navigation_fallback_max_path_attempts_per_request), "Fallback path-attempt default matches contract")
+	_assert(int(navigation_budget.get("max_fallback_candidates_per_request", -1)) == int(simulation_root.navigation_fallback_max_candidates_per_request), "Fallback candidate cap default matches contract")
 	_assert(int(navigation_budget.get("max_fallback_candidate_warning_threshold", -1)) == int(simulation_root.navigation_fallback_candidate_warning_threshold), "Fallback candidate warning threshold matches contract")
 	_assert(bool(navigation_budget.get("require_fallback_diagnostics", false)), "Budget contract requires fallback diagnostics")
 	simulation_root.free()
@@ -69,6 +70,7 @@ func _test_static_fallback_boundary() -> void:
 	var simulation_text: String = _read_text(SIMULATION_ROOT_PATH)
 	_assert(simulation_text.contains("NAVIGATION_DEFAULT_MAX_NEW_PATH_QUERIES_PER_TICK: int = 1"), "SimulationRoot declares the contract-aligned navigation default")
 	_assert(simulation_text.contains("navigation_fallback_max_path_attempts_per_request"), "SimulationRoot exposes fallback path-attempt budget")
+	_assert(simulation_text.contains("navigation_fallback_max_candidates_per_request"), "SimulationRoot exposes fallback candidate cap")
 	_assert(simulation_text.contains("last_fallback_diagnostic"), "Navigation debug snapshot exposes last fallback diagnostic")
 	_assert(not simulation_text.contains("_terrain_pathfinder.find_path(from_grid, candidate_grid"), "Fallback candidate search has no hidden per-candidate A* loop")
 
@@ -122,12 +124,18 @@ func _test_large_component_fallback_warns_without_multi_path_spike() -> void:
 	_assert(not path.is_empty(), "Large-component bad target still resolves to a reachable fallback")
 	_assert(int(snapshot.get("fallback_path_attempts_this_tick", 0)) == 1, "Large-component fallback still performs one path attempt")
 	_assert(int(snapshot.get("fallback_candidate_budget_exceeded_this_tick", 0)) == 1, "Large-component fallback surfaces a candidate budget warning")
+	_assert(int(snapshot.get("fallback_candidate_cap_hits_this_tick", 0)) == 1, "Large-component fallback surfaces a candidate cap hit")
 	_assert(bool(diagnostic.get("candidate_budget_exceeded", false)), "Fallback diagnostic marks candidate budget exceeded")
-	_assert(String(diagnostic.get("warning", "")) == "fallback_candidate_count_exceeded_budget", "Fallback diagnostic names the budget warning")
-	_assert(int(diagnostic.get("candidate_count", 0)) == 144, "Fallback diagnostic records the large component candidate count")
+	_assert(String(diagnostic.get("warning", "")) == "fallback_candidate_cap_reached", "Fallback diagnostic names the candidate cap warning")
+	_assert(int(diagnostic.get("candidate_count", 0)) <= int(diagnostic.get("candidate_limit", 0)), "Fallback diagnostic stays within the candidate cap")
+	_assert(int(diagnostic.get("candidate_count", 0)) == int(diagnostic.get("candidate_limit", -1)), "Large component fills the candidate cap")
+	_assert(bool(diagnostic.get("candidate_capped", false)), "Fallback diagnostic records candidate capping")
+	_assert(float(diagnostic.get("selected_distance_to_desired", -1.0)) >= 0.0, "Fallback diagnostic records selected distance")
 	_assert(int(snapshot.get("path_queries_this_tick", 0)) <= 2, "Large-component fallback has no hidden multi-query spike")
 	print("TASK_333 fallback sample: %s" % JSON.stringify({
 		"candidate_count": int(diagnostic.get("candidate_count", 0)),
+		"candidate_limit": int(diagnostic.get("candidate_limit", 0)),
+		"candidate_capped": bool(diagnostic.get("candidate_capped", false)),
 		"path_attempts": int(snapshot.get("fallback_path_attempts_this_tick", 0)),
 		"path_queries": int(snapshot.get("path_queries_this_tick", 0)),
 		"warning": String(diagnostic.get("warning", "")),
@@ -239,7 +247,7 @@ func _find_scene_navigation_budget_overrides(path: String) -> Array:
 			result.append_array(_find_scene_navigation_budget_overrides(child_path))
 		elif entry.ends_with(".tscn"):
 			var text: String = _read_text(child_path)
-			if text.contains("navigation_max_new_path_queries_per_tick") or text.contains("navigation_fallback_max_path_attempts_per_request") or text.contains("navigation_fallback_candidate_warning_threshold"):
+			if text.contains("navigation_max_new_path_queries_per_tick") or text.contains("navigation_fallback_max_path_attempts_per_request") or text.contains("navigation_fallback_max_candidates_per_request") or text.contains("navigation_fallback_candidate_warning_threshold"):
 				result.append(child_path)
 		entry = dir.get_next()
 	dir.list_dir_end()

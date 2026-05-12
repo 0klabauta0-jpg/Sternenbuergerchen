@@ -21,6 +21,7 @@ const CAPTURE_PROGRESS_PER_TICK: float = 0.01
 const HPA_NAVIGATION_CLUSTER_SIZE: int = 8
 const NAVIGATION_DEFAULT_MAX_NEW_PATH_QUERIES_PER_TICK: int = 1
 const NAVIGATION_FALLBACK_CANDIDATE_WARNING_THRESHOLD: int = 32
+const NAVIGATION_FALLBACK_MAX_CANDIDATES_PER_REQUEST: int = 32
 const NAVIGATION_FALLBACK_MAX_PATH_ATTEMPTS_PER_REQUEST: int = 1
 
 const HIT_CHANCE_MIN: float = 0.05
@@ -43,6 +44,7 @@ const HEIGHT_DISADVANTAGE_ACCURACY_PENALTY: float = 0.05
 @export var navigation_debug_enabled: bool = false
 @export_range(1, 128, 1) var navigation_debug_query_history_limit: int = 24
 @export_range(1, 4096, 1) var navigation_fallback_candidate_warning_threshold: int = NAVIGATION_FALLBACK_CANDIDATE_WARNING_THRESHOLD
+@export_range(1, 4096, 1) var navigation_fallback_max_candidates_per_request: int = NAVIGATION_FALLBACK_MAX_CANDIDATES_PER_REQUEST
 @export_range(0, 8, 1) var navigation_fallback_max_path_attempts_per_request: int = NAVIGATION_FALLBACK_MAX_PATH_ATTEMPTS_PER_REQUEST
 @export var navigation_cover_aware_enabled: bool = false
 @export_range(0.0, 8.0, 0.1) var navigation_default_exposure_weight: float = 0.8
@@ -112,6 +114,7 @@ var _navigation_fallback_candidate_count_this_tick: int = 0
 var _navigation_fallback_path_attempts_this_tick: int = 0
 var _navigation_fallback_aborted_this_tick: int = 0
 var _navigation_fallback_candidate_budget_exceeded_this_tick: int = 0
+var _navigation_fallback_candidate_cap_hits_this_tick: int = 0
 var _navigation_last_fallback_diagnostic: Dictionary = {}
 var _runtime_tick_budget_debug_snapshot: Dictionary = {}
 var _local_avoidance_resolver = LOCAL_AVOIDANCE_RESOLVER_SCRIPT.new()
@@ -200,6 +203,10 @@ func set_navigation_fallback_candidate_warning_threshold(limit: int) -> void:
 	navigation_fallback_candidate_warning_threshold = maxi(1, limit)
 
 
+func set_navigation_fallback_max_candidates_per_request(limit: int) -> void:
+	navigation_fallback_max_candidates_per_request = maxi(1, limit)
+
+
 func set_navigation_fallback_max_path_attempts_per_request(limit: int) -> void:
 	navigation_fallback_max_path_attempts_per_request = maxi(0, limit)
 
@@ -228,7 +235,9 @@ func get_navigation_debug_snapshot() -> Dictionary:
 		"fallback_path_attempts_this_tick": _navigation_fallback_path_attempts_this_tick,
 		"fallback_aborted_this_tick": _navigation_fallback_aborted_this_tick,
 		"fallback_candidate_budget_exceeded_this_tick": _navigation_fallback_candidate_budget_exceeded_this_tick,
+		"fallback_candidate_cap_hits_this_tick": _navigation_fallback_candidate_cap_hits_this_tick,
 		"fallback_candidate_warning_threshold": navigation_fallback_candidate_warning_threshold,
+		"fallback_max_candidates_per_request": navigation_fallback_max_candidates_per_request,
 		"fallback_max_path_attempts_per_request": navigation_fallback_max_path_attempts_per_request,
 		"last_fallback_diagnostic": _navigation_last_fallback_diagnostic.duplicate(true),
 		"delayed_this_tick": _navigation_delayed_this_tick,
@@ -1618,6 +1627,7 @@ func _begin_navigation_budget_tick() -> void:
 	_navigation_fallback_path_attempts_this_tick = 0
 	_navigation_fallback_aborted_this_tick = 0
 	_navigation_fallback_candidate_budget_exceeded_this_tick = 0
+	_navigation_fallback_candidate_cap_hits_this_tick = 0
 	_navigation_last_fallback_diagnostic.clear()
 
 
@@ -1726,7 +1736,12 @@ func _make_navigation_record(
 		"expanded_node_estimate": maxi(candidate_count, path.size()),
 		"fallback_or_delay_reason": reason,
 		"fallback_candidate_count": int(query_result.get("fallback_candidate_count", candidate_count)),
+		"fallback_candidate_limit": int(query_result.get("fallback_candidate_limit", 0)),
+		"fallback_candidate_capped": bool(query_result.get("fallback_candidate_capped", false)),
 		"fallback_candidate_budget_exceeded": bool(query_result.get("fallback_candidate_budget_exceeded", false)),
+		"fallback_candidate_search_reason": String(query_result.get("fallback_candidate_search_reason", "")),
+		"fallback_selected_distance_to_desired": float(query_result.get("fallback_selected_distance_to_desired", -1.0)),
+		"fallback_selected_distance_to_source": float(query_result.get("fallback_selected_distance_to_source", -1.0)),
 		"fallback_path_attempts": int(query_result.get("fallback_path_attempts", 0)),
 		"fallback_aborted_reason": String(query_result.get("fallback_aborted_reason", "")),
 		"fallback_resolution_reason": String(query_result.get("fallback_resolution_reason", "")),
@@ -2176,7 +2191,7 @@ func _find_navigation_grid_path(from_grid: Vector2i, to_grid: Vector2i, terrain_
 func _ensure_hpa_navigation_graph(terrain_registry):
 	if terrain_registry == null or not terrain_registry.has_method("get_all_tiles"):
 		return null
-	var tile_count: int = Array(terrain_registry.call("get_all_tiles")).size()
+	var tile_count: int = int(terrain_registry.call("get_tile_count")) if terrain_registry.has_method("get_tile_count") else Array(terrain_registry.call("get_all_tiles")).size()
 	if _hpa_navigation_graph != null and _hpa_navigation_registry == terrain_registry and _hpa_navigation_tile_count == tile_count:
 		return _hpa_navigation_graph
 	_hpa_navigation_graph = HPA_NAVIGATION_GRAPH_SCRIPT.new()
@@ -2220,29 +2235,7 @@ func _resolve_walkable_move_target(target_position: Vector2, terrain_registry) -
 
 
 func _find_hpa_reachable_walkable_grid(from_grid: Vector2i, desired_grid: Vector2i, terrain_registry) -> Variant:
-	var graph = _ensure_hpa_navigation_graph(terrain_registry)
-	if graph == null:
-		return null
-	var component_key: String = String(graph.call("get_component_key_for_grid", from_grid))
-	if component_key.is_empty():
-		return null
-	var candidates: Array = Array(graph.call("get_component_tiles", component_key))
-	candidates.sort_custom(func(a, b) -> bool:
-		var grid_a: Vector2i = Vector2i(a)
-		var grid_b: Vector2i = Vector2i(b)
-		var distance_a: float = _grid_distance_score(grid_a, desired_grid)
-		var distance_b: float = _grid_distance_score(grid_b, desired_grid)
-		if absf(distance_a - distance_b) > 0.001:
-			return distance_a < distance_b
-		var source_distance_a: float = _grid_distance_score(grid_a, from_grid)
-		var source_distance_b: float = _grid_distance_score(grid_b, from_grid)
-		if absf(source_distance_a - source_distance_b) > 0.001:
-			return source_distance_a < source_distance_b
-		if grid_a.x == grid_b.x:
-			return grid_a.y < grid_b.y
-		return grid_a.x < grid_b.x
-	)
-	return null if candidates.is_empty() else Vector2i(candidates[0])
+	return _resolve_navigation_fallback_grid(from_grid, desired_grid, terrain_registry).get("grid", null)
 
 
 func _find_nearest_reachable_walkable_grid(from_grid: Vector2i, desired_grid: Vector2i, terrain_registry) -> Variant:
@@ -2256,8 +2249,17 @@ func _resolve_navigation_fallback_grid(from_grid: Vector2i, desired_grid: Vector
 		"desired_grid": desired_grid,
 		"grid": null,
 		"candidate_count": 0,
+		"candidate_considered_count": 0,
+		"candidate_limit": _get_navigation_fallback_candidate_limit(),
 		"candidate_warning_threshold": maxi(navigation_fallback_candidate_warning_threshold, 1),
 		"candidate_budget_exceeded": false,
+		"candidate_cap_reached": false,
+		"candidate_capped": false,
+		"candidate_search_exhausted": false,
+		"candidate_search_reason": "",
+		"grid_probe_count": 0,
+		"selected_distance_to_desired": -1.0,
+		"selected_distance_to_source": -1.0,
 		"path_attempts": 0,
 		"used_hpa_component": false,
 		"reachability_verified": false,
@@ -2266,7 +2268,7 @@ func _resolve_navigation_fallback_grid(from_grid: Vector2i, desired_grid: Vector
 		"reason": "no_candidates",
 		"duration_usec": 0,
 	}
-	if terrain_registry == null or not terrain_registry.has_method("get_all_tiles"):
+	if terrain_registry == null or not terrain_registry.has_method("get_tile_at_grid") or not terrain_registry.has_method("is_walkable"):
 		diagnostic["aborted"] = true
 		diagnostic["abort_reason"] = "missing_terrain_registry"
 		diagnostic["duration_usec"] = Time.get_ticks_usec() - started_usec
@@ -2276,7 +2278,7 @@ func _resolve_navigation_fallback_grid(from_grid: Vector2i, desired_grid: Vector
 	if graph != null:
 		var component_key: String = String(graph.call("get_component_key_for_grid", from_grid))
 		if not component_key.is_empty():
-			var reachable_components: Dictionary = _collect_hpa_reachable_component_tiles(component_key, graph)
+			var reachable_components: Dictionary = _collect_hpa_reachable_component_tiles(component_key, graph, terrain_registry, from_grid, desired_grid, diagnostic)
 			diagnostic["reachable_component_count"] = int(reachable_components.get("component_count", 0))
 			var selected_grid: Variant = _select_nearest_fallback_grid(Array(reachable_components.get("tiles", [])), from_grid, desired_grid, diagnostic)
 			diagnostic["grid"] = selected_grid
@@ -2286,11 +2288,7 @@ func _resolve_navigation_fallback_grid(from_grid: Vector2i, desired_grid: Vector
 			_finalize_navigation_fallback_diagnostic(diagnostic, started_usec)
 			return diagnostic
 
-	var fallback_candidates: Array = []
-	for tile_data in Array(terrain_registry.call("get_all_tiles")):
-		if tile_data == null or not bool(tile_data.walkable):
-			continue
-		fallback_candidates.append(Vector2i(tile_data.grid_position))
+	var fallback_candidates: Array = _collect_limited_walkable_fallback_tiles(terrain_registry, from_grid, desired_grid, diagnostic)
 	var fallback_grid: Variant = _select_nearest_fallback_grid(fallback_candidates, from_grid, desired_grid, diagnostic)
 	diagnostic["grid"] = fallback_grid
 	diagnostic["used_hpa_component"] = false
@@ -2300,9 +2298,27 @@ func _resolve_navigation_fallback_grid(from_grid: Vector2i, desired_grid: Vector
 	return diagnostic
 
 
-func _collect_hpa_reachable_component_tiles(component_key: String, graph) -> Dictionary:
-	var tiles: Array = []
-	var seen_tiles: Dictionary = {}
+func _collect_hpa_reachable_component_tiles(component_key: String, graph, terrain_registry, from_grid: Vector2i, desired_grid: Vector2i, diagnostic: Dictionary) -> Dictionary:
+	var reachable_components: Dictionary = _collect_hpa_reachable_component_keys(component_key, graph)
+	var component_keys: Dictionary = Dictionary(reachable_components.get("component_keys", {}))
+	var candidate_limit: int = _get_navigation_fallback_candidate_limit()
+	var tiles: Array = _collect_near_navigation_fallback_candidates(
+		terrain_registry,
+		from_grid,
+		desired_grid,
+		candidate_limit,
+		diagnostic,
+		func(grid_position: Vector2i) -> bool:
+			var candidate_component: String = String(graph.call("get_component_key_for_grid", grid_position))
+			return not candidate_component.is_empty() and component_keys.has(candidate_component)
+	)
+	return {
+		"tiles": tiles,
+		"component_count": int(reachable_components.get("component_count", 0)),
+	}
+
+
+func _collect_hpa_reachable_component_keys(component_key: String, graph) -> Dictionary:
 	var visited_components: Dictionary = {}
 	var queue: Array = [component_key]
 	while not queue.is_empty():
@@ -2310,12 +2326,6 @@ func _collect_hpa_reachable_component_tiles(component_key: String, graph) -> Dic
 		if current_component.is_empty() or visited_components.has(current_component):
 			continue
 		visited_components[current_component] = true
-		for grid_variant in Array(graph.call("get_component_tiles", current_component)):
-			var grid_position: Vector2i = Vector2i(grid_variant)
-			if seen_tiles.has(grid_position):
-				continue
-			seen_tiles[grid_position] = true
-			tiles.append(grid_position)
 		var neighbors: Array = Array(graph.call("get_abstract_neighbors", current_component))
 		neighbors.sort()
 		for neighbor_variant in neighbors:
@@ -2323,9 +2333,142 @@ func _collect_hpa_reachable_component_tiles(component_key: String, graph) -> Dic
 			if not visited_components.has(neighbor_component):
 				queue.append(neighbor_component)
 	return {
-		"tiles": tiles,
+		"component_keys": visited_components,
 		"component_count": visited_components.size(),
 	}
+
+
+func _collect_limited_walkable_fallback_tiles(terrain_registry, from_grid: Vector2i, desired_grid: Vector2i, diagnostic: Dictionary) -> Array:
+	var candidate_limit: int = _get_navigation_fallback_candidate_limit()
+	return _collect_near_navigation_fallback_candidates(
+		terrain_registry,
+		from_grid,
+		desired_grid,
+		candidate_limit,
+		diagnostic,
+		func(grid_position: Vector2i) -> bool:
+			return bool(terrain_registry.call("is_walkable", grid_position))
+	)
+
+
+func _collect_near_navigation_fallback_candidates(
+	terrain_registry,
+	from_grid: Vector2i,
+	desired_grid: Vector2i,
+	candidate_limit: int,
+	diagnostic: Dictionary,
+	accept_candidate: Callable
+) -> Array:
+	var candidates: Array = []
+	var bounds: Rect2i = _get_navigation_registry_grid_bounds(terrain_registry)
+	diagnostic["candidate_limit"] = candidate_limit
+	diagnostic["candidate_search_bounds"] = bounds
+	if bounds.size.x <= 0 or bounds.size.y <= 0:
+		diagnostic["candidate_search_reason"] = "missing_grid_bounds"
+		return candidates
+
+	var search_origin: Vector2i = _clamp_grid_to_bounds(desired_grid, bounds)
+	diagnostic["candidate_search_origin"] = search_origin
+	var seen_grids: Dictionary = {}
+	var probe_count: int = 0
+	var max_radius: int = _get_max_navigation_bounds_radius(search_origin, bounds)
+	var cap_reached: bool = false
+	var search_exhausted: bool = true
+	for radius in range(max_radius + 1):
+		var ring_positions: Array = _build_navigation_fallback_ring_positions(search_origin, radius, bounds, from_grid, desired_grid)
+		for index in range(ring_positions.size()):
+			var grid_position: Vector2i = Vector2i(ring_positions[index])
+			if seen_grids.has(grid_position):
+				continue
+			seen_grids[grid_position] = true
+			probe_count += 1
+			if not bool(accept_candidate.call(grid_position)):
+				continue
+			candidates.append(grid_position)
+			if candidates.size() >= candidate_limit:
+				cap_reached = radius < max_radius or index < ring_positions.size() - 1
+				search_exhausted = not cap_reached
+				break
+		if candidates.size() >= candidate_limit:
+			break
+
+	diagnostic["grid_probe_count"] = probe_count
+	diagnostic["candidate_cap_reached"] = cap_reached
+	diagnostic["candidate_capped"] = cap_reached
+	diagnostic["candidate_search_exhausted"] = search_exhausted
+	if cap_reached:
+		diagnostic["candidate_search_reason"] = "candidate_limit_reached"
+	elif candidates.is_empty():
+		diagnostic["candidate_search_reason"] = "no_acceptable_candidates"
+	else:
+		diagnostic["candidate_search_reason"] = "grid_bounds_exhausted"
+	return candidates
+
+
+func _get_navigation_registry_grid_bounds(terrain_registry) -> Rect2i:
+	if terrain_registry != null and terrain_registry.has_method("get_grid_bounds"):
+		var raw_bounds: Variant = terrain_registry.call("get_grid_bounds")
+		if typeof(raw_bounds) == TYPE_RECT2I:
+			return Rect2i(raw_bounds)
+	return Rect2i(Vector2i.ZERO, Vector2i.ZERO)
+
+
+func _clamp_grid_to_bounds(grid_position: Vector2i, bounds: Rect2i) -> Vector2i:
+	return Vector2i(
+		clampi(grid_position.x, bounds.position.x, bounds.position.x + bounds.size.x - 1),
+		clampi(grid_position.y, bounds.position.y, bounds.position.y + bounds.size.y - 1)
+	)
+
+
+func _get_max_navigation_bounds_radius(origin: Vector2i, bounds: Rect2i) -> int:
+	var max_x: int = bounds.position.x + bounds.size.x - 1
+	var max_y: int = bounds.position.y + bounds.size.y - 1
+	return maxi(
+		maxi(abs(origin.x - bounds.position.x), abs(origin.x - max_x)),
+		maxi(abs(origin.y - bounds.position.y), abs(origin.y - max_y))
+	)
+
+
+func _build_navigation_fallback_ring_positions(origin: Vector2i, radius: int, bounds: Rect2i, from_grid: Vector2i, desired_grid: Vector2i) -> Array:
+	var result: Array = []
+	var seen: Dictionary = {}
+	if radius <= 0:
+		_append_navigation_fallback_ring_grid(result, seen, origin, bounds)
+	else:
+		var min_x: int = origin.x - radius
+		var max_x: int = origin.x + radius
+		var min_y: int = origin.y - radius
+		var max_y: int = origin.y + radius
+		for x in range(min_x, max_x + 1):
+			_append_navigation_fallback_ring_grid(result, seen, Vector2i(x, min_y), bounds)
+			_append_navigation_fallback_ring_grid(result, seen, Vector2i(x, max_y), bounds)
+		for y in range(min_y + 1, max_y):
+			_append_navigation_fallback_ring_grid(result, seen, Vector2i(min_x, y), bounds)
+			_append_navigation_fallback_ring_grid(result, seen, Vector2i(max_x, y), bounds)
+	result.sort_custom(func(a, b) -> bool:
+		return _fallback_grid_is_better(Vector2i(a), Vector2i(b), from_grid, desired_grid)
+	)
+	return result
+
+
+func _append_navigation_fallback_ring_grid(result: Array, seen: Dictionary, grid_position: Vector2i, bounds: Rect2i) -> void:
+	if seen.has(grid_position) or not _navigation_grid_in_bounds(grid_position, bounds):
+		return
+	seen[grid_position] = true
+	result.append(grid_position)
+
+
+func _navigation_grid_in_bounds(grid_position: Vector2i, bounds: Rect2i) -> bool:
+	return (
+		grid_position.x >= bounds.position.x
+		and grid_position.y >= bounds.position.y
+		and grid_position.x < bounds.position.x + bounds.size.x
+		and grid_position.y < bounds.position.y + bounds.size.y
+	)
+
+
+func _get_navigation_fallback_candidate_limit() -> int:
+	return maxi(1, navigation_fallback_max_candidates_per_request)
 
 
 func _select_nearest_fallback_grid(candidates: Array, from_grid: Vector2i, desired_grid: Vector2i, diagnostic: Dictionary) -> Variant:
@@ -2337,6 +2480,11 @@ func _select_nearest_fallback_grid(candidates: Array, from_grid: Vector2i, desir
 		if best_grid == null or _fallback_grid_is_better(candidate_grid, Vector2i(best_grid), from_grid, desired_grid):
 			best_grid = candidate_grid
 	diagnostic["candidate_count"] = candidate_count
+	diagnostic["candidate_considered_count"] = candidate_count
+	if typeof(best_grid) == TYPE_VECTOR2I:
+		var selected_grid: Vector2i = Vector2i(best_grid)
+		diagnostic["selected_distance_to_desired"] = _grid_distance_score(selected_grid, desired_grid)
+		diagnostic["selected_distance_to_source"] = _grid_distance_score(selected_grid, from_grid)
 	return best_grid
 
 
@@ -2357,9 +2505,12 @@ func _fallback_grid_is_better(candidate_grid: Vector2i, best_grid: Vector2i, fro
 func _finalize_navigation_fallback_diagnostic(diagnostic: Dictionary, started_usec: int) -> void:
 	var candidate_count: int = int(diagnostic.get("candidate_count", 0))
 	var threshold: int = maxi(int(diagnostic.get("candidate_warning_threshold", navigation_fallback_candidate_warning_threshold)), 1)
-	diagnostic["candidate_budget_exceeded"] = candidate_count > threshold
+	var cap_reached: bool = bool(diagnostic.get("candidate_cap_reached", false)) or bool(diagnostic.get("candidate_capped", false))
+	diagnostic["candidate_budget_exceeded"] = candidate_count > threshold or cap_reached
 	diagnostic["duration_usec"] = maxi(Time.get_ticks_usec() - started_usec, 0)
-	if bool(diagnostic.get("candidate_budget_exceeded", false)):
+	if cap_reached:
+		diagnostic["warning"] = "fallback_candidate_cap_reached"
+	elif bool(diagnostic.get("candidate_budget_exceeded", false)):
 		diagnostic["warning"] = "fallback_candidate_count_exceeded_budget"
 	elif not diagnostic.has("warning"):
 		diagnostic["warning"] = ""
@@ -2367,7 +2518,12 @@ func _finalize_navigation_fallback_diagnostic(diagnostic: Dictionary, started_us
 
 func _annotate_navigation_fallback_query(query: Dictionary, fallback_diagnostic: Dictionary) -> void:
 	query["fallback_candidate_count"] = int(fallback_diagnostic.get("candidate_count", 0))
+	query["fallback_candidate_limit"] = int(fallback_diagnostic.get("candidate_limit", 0))
+	query["fallback_candidate_capped"] = bool(fallback_diagnostic.get("candidate_capped", false))
 	query["fallback_candidate_budget_exceeded"] = bool(fallback_diagnostic.get("candidate_budget_exceeded", false))
+	query["fallback_candidate_search_reason"] = String(fallback_diagnostic.get("candidate_search_reason", ""))
+	query["fallback_selected_distance_to_desired"] = float(fallback_diagnostic.get("selected_distance_to_desired", -1.0))
+	query["fallback_selected_distance_to_source"] = float(fallback_diagnostic.get("selected_distance_to_source", -1.0))
 	query["fallback_path_attempts"] = int(fallback_diagnostic.get("path_attempts", 0))
 	query["fallback_aborted_reason"] = String(fallback_diagnostic.get("abort_reason", ""))
 	query["fallback_resolution_reason"] = String(fallback_diagnostic.get("reason", ""))
@@ -2380,6 +2536,8 @@ func _register_navigation_fallback_resolution(fallback_diagnostic: Dictionary) -
 		_navigation_fallback_aborted_this_tick += 1
 	if bool(fallback_diagnostic.get("candidate_budget_exceeded", false)):
 		_navigation_fallback_candidate_budget_exceeded_this_tick += 1
+	if bool(fallback_diagnostic.get("candidate_capped", false)):
+		_navigation_fallback_candidate_cap_hits_this_tick += 1
 	_navigation_last_fallback_diagnostic = fallback_diagnostic.duplicate(true)
 
 

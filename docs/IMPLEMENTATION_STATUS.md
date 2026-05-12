@@ -35,12 +35,20 @@
 - Risiken: Button-Snapshots bleiben weiterhin UI-Control-Readbacks fuer sichtbare Button-Metadaten; dieser Task entfernt bewusst nur die gefundenen Label-Text-Readbacks.
 - Lokale Pruefung: `task_340_command_feedback_pure_snapshot.gd`, `task_286_ui_feedback_truth_regression_review.gd`, `task_335_tactical_feedback_truth_command_clarity_pass.gd` und `git diff --check` laufen gruen.
 
-### TASK_341-TASK_342 - Deep Code Review Followups
+### TASK_341 - Navigation Fallback Candidate Cap
+- Status: implementiert im Arbeitsstand
+- Stand: Der Bad-Target-Fallback in `SimulationRoot` sammelt HPA-Kandidaten jetzt per begrenzter Ring-Suche nahe am Ziel und bewertet maximal `navigation_fallback_max_candidates_per_request` Kandidaten.
+- Stand: `TerrainRegistry` liefert `get_grid_bounds()` und `get_tile_count()`, damit Bounds und HPA-Cache-Invalidierung ohne wiederholte Tile-Array-Scans auskommen.
+- Stand: Der Debug-Snapshot meldet Cap-Treffer, betrachtete Kandidaten, Suchgrund sowie ausgewaehlte Distanzen; der Performance-Budget-Contract enthaelt das harte Kandidatenlimit.
+- Risiken: Ein sehr niedrig gesetztes Cap kann bei extrem sparse Walkability einen frueheren, aber sichtbaren Fallback waehlen; weitere Optimierung sollte ueber einen Terrain-/Navigation-Index laufen.
+- Lokale Pruefung: `task_341_navigation_fallback_candidate_cap.gd`, `task_333_navigation_fallback_budget_contract_alignment.gd`, `task_217_navigation_pathfinding_los_performance_pass.gd`, `task_222_performance_regression_gate_and_manual_profile_checklist.gd` und `git diff --check` laufen gruen.
+
+### TASK_342 - Deep Code Review Followup
 - Status: geplant
-- Stand: Die verbleibenden Review-Folge-Tasks sind Navigation-Fallback-Kandidatencap und SimulationRoot-Unknown-Payload-Diagnose.
-- Offene Punkte: Umsetzung, lokale Gates und manuelle Sicht-/Spielgefuehlchecks folgen je Task separat.
-- Risiken: Die Tasks duerfen nicht zu einem Sammelrefactor verschmelzen; jeder Task behaelt die vorhandenen Architekturgrenzen: UI ist nicht die Wahrheit, `SimulationRoot` bleibt autoritativ, Hotpaths bleiben budgetiert.
-- Naechster Schritt: TASK_341 - Navigation Fallback Candidate Cap.
+- Stand: Der verbleibende Review-Folge-Task ist SimulationRoot-Unknown-Payload-Diagnose.
+- Offene Punkte: Umsetzung, lokale Gates und manuelle Sicht-/Spielgefuehlchecks folgen separat.
+- Risiken: Der Task darf nicht zu einem Sammelrefactor verschmelzen; die vorhandenen Architekturgrenzen bleiben erhalten: UI ist nicht die Wahrheit, `SimulationRoot` bleibt autoritativ, Hotpaths bleiben budgetiert.
+- Naechster Schritt: TASK_342 - SimulationRoot Unknown Payload Audit.
 
 ### TASK_337 - Architecture Performance UX Followup Gate
 - Status: implementiert im Arbeitsstand
