@@ -73,6 +73,9 @@ const COMMAND_GRID_PATH: String = "../TacticalUI/BottomDock/BottomMargin/BottomR
 const DELETE_ORDER_BUTTON_PATH: String = COMMAND_GRID_PATH + "/DeleteOrderButton"
 const SORT_COMMAND_BUTTON_PATH: String = COMMAND_GRID_PATH + "/SortCommandMatrixButton"
 const CARD_REFRESH_INTERVAL_SECONDS: float = 0.35
+const MISSION_UI_DIRTY_BUCKET_SELECTED_FIRETEAM_CARDS: String = "selected_fireteam_cards"
+const MISSION_UI_DIRTY_BUCKET_FIRETEAM_MINI_CARDS: String = "fireteam_mini_cards"
+const MISSION_UI_DIRTY_BUCKET_DROPSHIP_PANEL: String = "mission_dropship_panel"
 const FIRETEAM_SECURITY_REFRESH_INTERVAL_SECONDS: float = 0.20
 const AREA_ORDER_PREVIEW_REFRESH_MSEC: int = 80
 const AREA_ORDER_PREVIEW_SIGNATURE_STEP: float = 8.0
@@ -246,6 +249,8 @@ var _air_asset_lz_secure_level: float = 0.0
 var _meta_transfer_routes: Array = []
 var _drop_ship_cooldown_remaining: float = 0.0
 var _card_refresh_time_remaining: float = 0.0
+var _mission_ui_dirty_refresh_signatures: Dictionary = {}
+var _mission_ui_dirty_refresh_stats: Dictionary = {}
 var _fireteam_security_refresh_time_remaining: float = 0.0
 var _drop_sequence_phase: String = ""
 var _drop_sequence_units: Array = []
@@ -2558,13 +2563,310 @@ func _on_return_to_plan_button_pressed() -> void:
 	return_selected_fireteams_to_plan()
 
 
+func get_mission_ui_dirty_refresh_snapshot() -> Dictionary:
+	return {
+		"selected_fireteam_cards_signature": _get_mission_ui_dirty_signature(MISSION_UI_DIRTY_BUCKET_SELECTED_FIRETEAM_CARDS),
+		"selected_fireteam_cards_rebuild_count": _get_mission_ui_dirty_refresh_count(MISSION_UI_DIRTY_BUCKET_SELECTED_FIRETEAM_CARDS, "rebuild"),
+		"selected_fireteam_cards_skip_count": _get_mission_ui_dirty_refresh_count(MISSION_UI_DIRTY_BUCKET_SELECTED_FIRETEAM_CARDS, "skip"),
+		"selected_fireteam_cards_signature_change_count": _get_mission_ui_dirty_refresh_count(MISSION_UI_DIRTY_BUCKET_SELECTED_FIRETEAM_CARDS, "signature_change"),
+		"selected_fireteam_cards_child_count": _get_child_count_for_path(FIRETEAM_SELECTED_CARDS_ROW_PATH),
+		"fireteam_mini_cards_signature": _get_mission_ui_dirty_signature(MISSION_UI_DIRTY_BUCKET_FIRETEAM_MINI_CARDS),
+		"fireteam_mini_cards_rebuild_count": _get_mission_ui_dirty_refresh_count(MISSION_UI_DIRTY_BUCKET_FIRETEAM_MINI_CARDS, "rebuild"),
+		"fireteam_mini_cards_skip_count": _get_mission_ui_dirty_refresh_count(MISSION_UI_DIRTY_BUCKET_FIRETEAM_MINI_CARDS, "skip"),
+		"fireteam_mini_cards_signature_change_count": _get_mission_ui_dirty_refresh_count(MISSION_UI_DIRTY_BUCKET_FIRETEAM_MINI_CARDS, "signature_change"),
+		"fireteam_mini_cards_child_count": _get_child_count_for_path(FIRETEAM_MINI_CARDS_VBOX_PATH),
+		"fireteam_mini_panel_visible": _is_control_path_visible(FIRETEAM_MINI_PANEL_PATH),
+		"mission_dropship_panel_signature": _get_mission_ui_dirty_signature(MISSION_UI_DIRTY_BUCKET_DROPSHIP_PANEL),
+		"mission_dropship_panel_rebuild_count": _get_mission_ui_dirty_refresh_count(MISSION_UI_DIRTY_BUCKET_DROPSHIP_PANEL, "rebuild"),
+		"mission_dropship_panel_skip_count": _get_mission_ui_dirty_refresh_count(MISSION_UI_DIRTY_BUCKET_DROPSHIP_PANEL, "skip"),
+		"mission_dropship_panel_signature_change_count": _get_mission_ui_dirty_refresh_count(MISSION_UI_DIRTY_BUCKET_DROPSHIP_PANEL, "signature_change"),
+		"mission_dropship_panel_child_count": _get_child_count_for_path("../TacticalUI/MissionDropshipPanel"),
+		"mission_dropship_panel_visible": _is_control_path_visible("../TacticalUI/MissionDropshipPanel"),
+	}
+
+
+func _get_mission_ui_dirty_signature(bucket: String) -> String:
+	return String(_mission_ui_dirty_refresh_signatures.get(bucket, ""))
+
+
+func _get_mission_ui_dirty_refresh_count(bucket: String, counter_id: String) -> int:
+	return int(_mission_ui_dirty_refresh_stats.get("%s_%s_count" % [bucket, counter_id], 0))
+
+
+func _record_mission_ui_dirty_rebuild(bucket: String, signature: String) -> void:
+	var previous_signature: String = _get_mission_ui_dirty_signature(bucket)
+	if previous_signature != signature:
+		var signature_change_key: String = "%s_signature_change_count" % bucket
+		_mission_ui_dirty_refresh_stats[signature_change_key] = int(_mission_ui_dirty_refresh_stats.get(signature_change_key, 0)) + 1
+	_mission_ui_dirty_refresh_signatures[bucket] = signature
+	var rebuild_key: String = "%s_rebuild_count" % bucket
+	_mission_ui_dirty_refresh_stats[rebuild_key] = int(_mission_ui_dirty_refresh_stats.get(rebuild_key, 0)) + 1
+
+
+func _record_mission_ui_dirty_skip(bucket: String) -> void:
+	var skip_key: String = "%s_skip_count" % bucket
+	_mission_ui_dirty_refresh_stats[skip_key] = int(_mission_ui_dirty_refresh_stats.get(skip_key, 0)) + 1
+
+
+func _get_child_count_for_path(path: String) -> int:
+	var node := get_node_or_null(path)
+	return node.get_child_count() if node != null else -1
+
+
+func _is_control_path_visible(path: String) -> bool:
+	var control := get_node_or_null(path) as Control
+	return bool(control.visible) if control != null else false
+
+
+func _mission_ui_signature_pair(key: String, value: Variant) -> String:
+	return "%s=%s" % [_mission_ui_signature_text(key), _mission_ui_signature_variant(value)]
+
+
+func _mission_ui_signature_text(value: Variant) -> String:
+	return String(value).replace("\\", "\\\\").replace("|", "\\p").replace(";", "\\s").replace("=", "\\e").replace("\n", "\\n")
+
+
+func _mission_ui_signature_variant(value: Variant) -> String:
+	match typeof(value):
+		TYPE_NIL:
+			return "null"
+		TYPE_BOOL:
+			return "1" if bool(value) else "0"
+		TYPE_INT:
+			return str(int(value))
+		TYPE_FLOAT:
+			return "%.4f" % float(value)
+		TYPE_STRING, TYPE_STRING_NAME, TYPE_NODE_PATH:
+			return _mission_ui_signature_text(value)
+		TYPE_VECTOR2:
+			return _mission_ui_signature_vector2(Vector2(value))
+		TYPE_VECTOR2I:
+			var vector2i_value := Vector2i(value)
+			return "%d,%d" % [vector2i_value.x, vector2i_value.y]
+		TYPE_COLOR:
+			var color_value := Color(value)
+			return "%.4f,%.4f,%.4f,%.4f" % [color_value.r, color_value.g, color_value.b, color_value.a]
+		TYPE_DICTIONARY:
+			var dict_value := Dictionary(value)
+			var key_texts := PackedStringArray()
+			var values_by_key_text: Dictionary = {}
+			for key_variant in dict_value.keys():
+				var key_text: String = String(key_variant)
+				key_texts.append(key_text)
+				values_by_key_text[key_text] = dict_value[key_variant]
+			key_texts.sort()
+			var dict_parts := PackedStringArray()
+			for key_text in key_texts:
+				dict_parts.append("%s:%s" % [_mission_ui_signature_text(key_text), _mission_ui_signature_variant(values_by_key_text.get(key_text))])
+			return "{%s}" % ",".join(dict_parts)
+		TYPE_ARRAY:
+			return _mission_ui_signature_array(Array(value))
+		TYPE_PACKED_STRING_ARRAY:
+			return _mission_ui_signature_array(Array(PackedStringArray(value)))
+		TYPE_PACKED_INT32_ARRAY:
+			return _mission_ui_signature_array(Array(PackedInt32Array(value)))
+		TYPE_PACKED_INT64_ARRAY:
+			return _mission_ui_signature_array(Array(PackedInt64Array(value)))
+		TYPE_PACKED_FLOAT32_ARRAY:
+			return _mission_ui_signature_array(Array(PackedFloat32Array(value)))
+		TYPE_PACKED_FLOAT64_ARRAY:
+			return _mission_ui_signature_array(Array(PackedFloat64Array(value)))
+		TYPE_PACKED_VECTOR2_ARRAY:
+			return _mission_ui_signature_array(Array(PackedVector2Array(value)))
+		_:
+			return _mission_ui_signature_text(value)
+
+
+func _mission_ui_signature_array(values: Array) -> String:
+	var parts := PackedStringArray()
+	for value in values:
+		parts.append(_mission_ui_signature_variant(value))
+	return "[%s]" % ",".join(parts)
+
+
+func _mission_ui_signature_vector2(value: Vector2) -> String:
+	return "%.2f,%.2f" % [value.x, value.y]
+
+
+func _read_mission_unit_string(unit: Node, method_name: String, property_name: String = "") -> String:
+	if unit == null:
+		return ""
+	if not method_name.is_empty() and unit.has_method(method_name):
+		return String(unit.call(method_name)).strip_edges()
+	if not property_name.is_empty():
+		var property_value: Variant = unit.get(property_name)
+		if property_value != null:
+			return String(property_value).strip_edges()
+	return ""
+
+
+func _build_mission_unit_card_signature(unit: Node, selected_cards_fireteam_id: String = "") -> String:
+	if unit == null:
+		return "unit=null"
+	var unit_id: String = _read_mission_unit_string(unit, "get_unit_id", "unit_id")
+	var in_drop_transit: bool = not unit_id.is_empty() and _embarked_unit_ids.has(unit_id) and not _deployed_unit_ids.has(unit_id)
+	var role_text: String = _build_live_fireteam_card_runtime_line(unit)
+	var secondary_text: String = _build_live_fireteam_card_detail_line(unit)
+	if preview_mode:
+		role_text = _build_preview_fireteam_card_loadout_summary(unit)
+		if role_text.is_empty():
+			role_text = _read_mission_unit_string(unit, "get_role_name", "role_name")
+		secondary_text = _build_unit_secondary_text(unit)
+	var parts := PackedStringArray()
+	parts.append(_mission_ui_signature_pair("unit_id", unit_id))
+	parts.append(_mission_ui_signature_pair("display_name", _read_mission_unit_string(unit, "get_display_name", "display_name")))
+	parts.append(_mission_ui_signature_pair("callsign", _read_mission_unit_string(unit, "get_callsign", "callsign")))
+	parts.append(_mission_ui_signature_pair("fireteam_id", _read_mission_unit_string(unit, "get_fireteam_id", "fireteam_id").to_lower()))
+	parts.append(_mission_ui_signature_pair("role_id", _read_mission_unit_string(unit, "get_role_id", "role_id")))
+	parts.append(_mission_ui_signature_pair("role_name", _read_mission_unit_string(unit, "get_role_name", "role_name")))
+	parts.append(_mission_ui_signature_pair("portrait_id", _read_mission_unit_string(unit, "get_portrait_id", "portrait_id")))
+	parts.append(_mission_ui_signature_pair("portrait_path", _read_mission_unit_string(unit, "get_portrait_path", "portrait_path")))
+	parts.append(_mission_ui_signature_pair("runtime_line", role_text))
+	parts.append(_mission_ui_signature_pair("secondary_text", secondary_text))
+	parts.append(_mission_ui_signature_pair("status_text", _build_tactical_character_status_text(unit)))
+	parts.append(_mission_ui_signature_pair("is_lead", _is_unit_current_fireteam_lead(unit)))
+	parts.append(_mission_ui_signature_pair("selected", _is_selected_member_card_unit(unit, selected_cards_fireteam_id)))
+	parts.append(_mission_ui_signature_pair("in_drop_transit", in_drop_transit))
+	parts.append(_mission_ui_signature_pair("embarked", _embarked_unit_ids.has(unit_id)))
+	parts.append(_mission_ui_signature_pair("deployed", _deployed_unit_ids.has(unit_id)))
+	parts.append(_mission_ui_signature_pair("visible", bool((unit as CanvasItem).visible) if unit is CanvasItem else unit.is_inside_tree()))
+	if unit.has_method("get_vital_state"):
+		parts.append(_mission_ui_signature_pair("vital_state", String(unit.call("get_vital_state")).strip_edges().to_lower()))
+	if unit.has_method("get_respawn_remaining_seconds"):
+		parts.append(_mission_ui_signature_pair("respawn_remaining", maxi(int(unit.call("get_respawn_remaining_seconds")), 0)))
+	if unit.has_method("get_fire_status"):
+		parts.append(_mission_ui_signature_pair("fire_status", String(unit.call("get_fire_status")).strip_edges().to_lower()))
+	if unit.has_method("get_effective_cover_score"):
+		parts.append(_mission_ui_signature_pair("cover_score", int(unit.call("get_effective_cover_score"))))
+	if unit.has_method("get_runtime_status"):
+		var runtime_status = unit.call("get_runtime_status")
+		if runtime_status != null:
+			var runtime_dict: Dictionary = {}
+			if runtime_status.has_method("to_dict"):
+				runtime_dict = Dictionary(runtime_status.call("to_dict"))
+			elif runtime_status.has_method("get"):
+				for key in ["status", "active_command_type", "source_command_type", "priority", "phase"]:
+					runtime_dict[key] = runtime_status.get(key)
+			for key in ["status", "active_command_type", "source_command_type", "priority", "phase"]:
+				if runtime_dict.has(key):
+					parts.append(_mission_ui_signature_pair("runtime_%s" % key, runtime_dict.get(key)))
+	return ";".join(parts)
+
+
+func _build_selected_fireteam_cards_signature(selected_cards_fireteam_id: String, units: Array) -> String:
+	var parts := PackedStringArray()
+	parts.append(_mission_ui_signature_pair("bucket", MISSION_UI_DIRTY_BUCKET_SELECTED_FIRETEAM_CARDS))
+	parts.append(_mission_ui_signature_pair("preview_mode", preview_mode))
+	parts.append(_mission_ui_signature_pair("phase_index", _current_phase_index))
+	parts.append(_mission_ui_signature_pair("selected_cards_fireteam_id", selected_cards_fireteam_id))
+	parts.append(_mission_ui_signature_pair("selected_fireteam_ids", Array(_selected_fireteam_ids)))
+	parts.append(_mission_ui_signature_pair("focused_fireteam_id", _focused_fireteam_id))
+	parts.append(_mission_ui_signature_pair("use_visible_units", _use_visible_units_for_fireteam_ui()))
+	var unit_signatures := PackedStringArray()
+	for unit in units:
+		unit_signatures.append(_build_mission_unit_card_signature(unit, selected_cards_fireteam_id))
+	parts.append(_mission_ui_signature_pair("units", Array(unit_signatures)))
+	return "|".join(parts)
+
+
+func _build_fireteam_mini_cards_signature(available_fireteam_ids: PackedStringArray, desired_panel_visible: bool) -> String:
+	var parts := PackedStringArray()
+	parts.append(_mission_ui_signature_pair("bucket", MISSION_UI_DIRTY_BUCKET_FIRETEAM_MINI_CARDS))
+	parts.append(_mission_ui_signature_pair("preview_mode", preview_mode))
+	parts.append(_mission_ui_signature_pair("phase_index", _current_phase_index))
+	parts.append(_mission_ui_signature_pair("tactical_ui_visible", _tactical_ui_visible))
+	parts.append(_mission_ui_signature_pair("desired_panel_visible", desired_panel_visible))
+	parts.append(_mission_ui_signature_pair("selected_fireteam_ids", Array(_selected_fireteam_ids)))
+	parts.append(_mission_ui_signature_pair("available_fireteam_ids", Array(available_fireteam_ids)))
+	for fireteam_id in available_fireteam_ids:
+		var normalized_fireteam_id: String = String(fireteam_id).strip_edges().to_lower()
+		var units: Array = _get_fireteam_units(normalized_fireteam_id, not _use_visible_units_for_fireteam_ui())
+		var lead = _resolve_fireteam_leader_for_behavior(normalized_fireteam_id)
+		var lead_name: String = String(lead.call("get_display_name")) if lead != null and lead.has_method("get_display_name") else "Kein Lead"
+		var profile_dict: Dictionary = get_active_behavior_profile(normalized_fireteam_id)
+		var public_snapshot: Dictionary = Dictionary(Dictionary(profile_dict.get("metadata", {})).get("ftl_public_snapshot", {}))
+		var contact_context: Dictionary = _build_fireteam_contact_badge_context(normalized_fireteam_id)
+		var coordination_context: Dictionary = _build_fireteam_coordination_badge_context(normalized_fireteam_id)
+		var unit_signatures := PackedStringArray()
+		for unit in units:
+			unit_signatures.append(_build_mission_unit_card_signature(unit, normalized_fireteam_id))
+		var card_parts := PackedStringArray()
+		card_parts.append(_mission_ui_signature_pair("fireteam_id", normalized_fireteam_id))
+		card_parts.append(_mission_ui_signature_pair("label", _get_fireteam_display_label(normalized_fireteam_id)))
+		card_parts.append(_mission_ui_signature_pair("selected", _selected_fireteam_ids.has(normalized_fireteam_id)))
+		card_parts.append(_mission_ui_signature_pair("runtime_inactive", not preview_mode and not _is_fireteam_runtime_active(normalized_fireteam_id)))
+		card_parts.append(_mission_ui_signature_pair("loadout_id", _get_mission_fireteam_loadout_id(normalized_fireteam_id)))
+		card_parts.append(_mission_ui_signature_pair("reference_summary", _build_mission_fireteam_reference_summary(normalized_fireteam_id, lead_name, units)))
+		card_parts.append(_mission_ui_signature_pair("lead_unit_id", _read_mission_unit_string(lead, "get_unit_id", "unit_id")))
+		card_parts.append(_mission_ui_signature_pair("lead_name", lead_name))
+		card_parts.append(_mission_ui_signature_pair("lead_portrait_id", _read_mission_unit_string(lead, "get_portrait_id", "portrait_id")))
+		card_parts.append(_mission_ui_signature_pair("lead_portrait_path", _read_mission_unit_string(lead, "get_portrait_path", "portrait_path")))
+		card_parts.append(_mission_ui_signature_pair("tactical_stance", get_requested_tactical_stance(normalized_fireteam_id)))
+		card_parts.append(_mission_ui_signature_pair("execution_label", String(profile_dict.get("execution_label", "")).strip_edges()))
+		card_parts.append(_mission_ui_signature_pair("execution_hint", String(profile_dict.get("execution_hint", "")).strip_edges()))
+		card_parts.append(_mission_ui_signature_pair("execution_reason", String(profile_dict.get("execution_reason", "")).strip_edges().to_lower()))
+		card_parts.append(_mission_ui_signature_pair("reaction_delay_seconds", float(profile_dict.get("reaction_delay_seconds", 0.0))))
+		card_parts.append(_mission_ui_signature_pair("ftl_public_snapshot", public_snapshot))
+		card_parts.append(_mission_ui_signature_pair("contact_context", contact_context))
+		card_parts.append(_mission_ui_signature_pair("coordination_context", coordination_context))
+		card_parts.append(_mission_ui_signature_pair("units", Array(unit_signatures)))
+		parts.append("card{%s}" % "|".join(card_parts))
+	return "|".join(parts)
+
+
+func _build_mission_dropship_panel_signature(card_entries: Array, show_panel: bool) -> String:
+	var parts := PackedStringArray()
+	parts.append(_mission_ui_signature_pair("bucket", MISSION_UI_DIRTY_BUCKET_DROPSHIP_PANEL))
+	parts.append(_mission_ui_signature_pair("show_panel", show_panel))
+	parts.append(_mission_ui_signature_pair("tactical_ui_visible", _tactical_ui_visible))
+	parts.append(_mission_ui_signature_pair("selected_craft_id", _mission_drop_craft_id.strip_edges()))
+	parts.append(_mission_ui_signature_pair("has_lz_position", _has_lz_position))
+	parts.append(_mission_ui_signature_pair("lz_position", _lz_position))
+	parts.append(_mission_ui_signature_pair("approach_angle", _get_approach_angle_name()))
+	parts.append(_mission_ui_signature_pair("drop_ship_requested", _drop_ship_requested))
+	parts.append(_mission_ui_signature_pair("drop_ship_staged", _drop_ship_staged))
+	parts.append(_mission_ui_signature_pair("drop_sequence_phase", _drop_sequence_phase))
+	parts.append(_mission_ui_signature_pair("drop_sequence_craft_id", _drop_sequence_craft_id))
+	parts.append(_mission_ui_signature_pair("mission_drop_state", _mission_drop_state))
+	parts.append(_mission_ui_signature_pair("mission_drop_return_requested", _mission_drop_return_requested))
+	parts.append(_mission_ui_signature_pair("air_asset_status", get_air_asset_status_snapshot()))
+	for card_variant in card_entries:
+		var card: Dictionary = Dictionary(card_variant)
+		var craft_id: String = String(card.get("craft_id", "")).strip_edges()
+		var card_parts := PackedStringArray()
+		card_parts.append(_mission_ui_signature_pair("craft_id", craft_id))
+		card_parts.append(_mission_ui_signature_pair("display_name", String(card.get("display_name", "")).strip_edges()))
+		card_parts.append(_mission_ui_signature_pair("title_text", _build_mission_dropship_title_text(card)))
+		card_parts.append(_mission_ui_signature_pair("texture_path", String(card.get("texture_path", "")).strip_edges()))
+		card_parts.append(_mission_ui_signature_pair("state", String(card.get("state", "")).strip_edges().to_lower()))
+		card_parts.append(_mission_ui_signature_pair("selected", not craft_id.is_empty() and craft_id == _mission_drop_craft_id.strip_edges()))
+		card_parts.append(_mission_ui_signature_pair("in_transit", _is_mission_dropship_card_in_transit(card)))
+		card_parts.append(_mission_ui_signature_pair("pilot_text", _build_mission_dropship_pilot_text(card)))
+		card_parts.append(_mission_ui_signature_pair("pilot_unit_id", String(card.get("pilot_unit_id", "")).strip_edges()))
+		card_parts.append(_mission_ui_signature_pair("pilot_display_name", String(card.get("pilot_display_name", "")).strip_edges()))
+		card_parts.append(_mission_ui_signature_pair("pilot_portrait_path", String(card.get("pilot_portrait_path", "")).strip_edges()))
+		card_parts.append(_mission_ui_signature_pair("passenger_text", _build_mission_dropship_passenger_text(card)))
+		card_parts.append(_mission_ui_signature_pair("status_text", _build_mission_dropship_status_text(card)))
+		card_parts.append(_mission_ui_signature_pair("progress_value", _build_mission_dropship_progress_value(card)))
+		card_parts.append(_mission_ui_signature_pair("can_return", _can_request_mission_dropship_return(card)))
+		card_parts.append(_mission_ui_signature_pair("passenger_count", maxi(int(card.get("passenger_count", 0)), 0)))
+		card_parts.append(_mission_ui_signature_pair("payload_unit_ids", _sanitize_drop_payload_ids(Array(card.get("embarked_unit_ids", [])))))
+		card_parts.append(_mission_ui_signature_pair("fireteam_ids", Array(_extract_mission_dropship_card_fireteam_ids(card))))
+		card_parts.append(_mission_ui_signature_pair("has_lz_position", bool(card.get("has_lz_position", false))))
+		card_parts.append(_mission_ui_signature_pair("lz_position", _coerce_vector2_value(card.get("lz_position", Vector2.ZERO), Vector2.ZERO)))
+		card_parts.append(_mission_ui_signature_pair("lz_label", String(card.get("lz_label", card.get("lz_name", ""))).strip_edges()))
+		card_parts.append(_mission_ui_signature_pair("approach_angle", String(card.get("approach_angle", _get_approach_angle_name())).strip_edges().to_upper()))
+		card_parts.append(_mission_ui_signature_pair("drop_ship_requested", bool(card.get("drop_ship_requested", false))))
+		card_parts.append(_mission_ui_signature_pair("drop_ship_staged", bool(card.get("drop_ship_staged", false))))
+		card_parts.append(_mission_ui_signature_pair("dropship_position", _coerce_vector2_value(card.get("dropship_position", Vector2.ZERO), Vector2.ZERO)))
+		parts.append("card{%s}" % "|".join(card_parts))
+	return "|".join(parts)
+
+
 func _refresh_selected_fireteam_cards() -> void:
 	var card_row := get_node_or_null(FIRETEAM_SELECTED_CARDS_ROW_PATH) as HBoxContainer
 	if card_row == null:
 		return
-
-	for child in card_row.get_children():
-		child.queue_free()
 
 	var selected_cards_fireteam_id: String = _get_selected_member_cards_fireteam_id()
 	var units: Array = []
@@ -2572,6 +2874,15 @@ func _refresh_selected_fireteam_cards() -> void:
 		units = _get_fireteam_units(selected_cards_fireteam_id, true)
 	else:
 		units = _get_selected_friendly_units(not _use_visible_units_for_fireteam_ui())
+	var signature: String = _build_selected_fireteam_cards_signature(selected_cards_fireteam_id, units)
+	if signature == _get_mission_ui_dirty_signature(MISSION_UI_DIRTY_BUCKET_SELECTED_FIRETEAM_CARDS) and card_row.get_child_count() > 0:
+		_record_mission_ui_dirty_skip(MISSION_UI_DIRTY_BUCKET_SELECTED_FIRETEAM_CARDS)
+		return
+	_record_mission_ui_dirty_rebuild(MISSION_UI_DIRTY_BUCKET_SELECTED_FIRETEAM_CARDS, signature)
+
+	for child in card_row.get_children():
+		child.queue_free()
+
 	card_row.set_meta("selected_member_cards_fireteam_id", selected_cards_fireteam_id)
 	if units.is_empty():
 		var empty_label := Label.new()
@@ -2616,13 +2927,23 @@ func _refresh_fireteam_mini_cards() -> void:
 		return
 
 	var fireteam_panel := get_node_or_null(FIRETEAM_MINI_PANEL_PATH) as Control
+	var available_fireteam_ids: PackedStringArray = _get_displayable_fireteam_ids()
+	var desired_panel_visible: bool = _tactical_ui_visible and not available_fireteam_ids.is_empty()
+	var signature: String = _build_fireteam_mini_cards_signature(available_fireteam_ids, desired_panel_visible)
+	if signature == _get_mission_ui_dirty_signature(MISSION_UI_DIRTY_BUCKET_FIRETEAM_MINI_CARDS):
+		var panel_visibility_stable: bool = fireteam_panel == null or bool(fireteam_panel.visible) == desired_panel_visible
+		var child_content_stable: bool = (available_fireteam_ids.is_empty() and card_host.get_child_count() == 0) or (not available_fireteam_ids.is_empty() and card_host.get_child_count() > 0)
+		if panel_visibility_stable and child_content_stable:
+			_record_mission_ui_dirty_skip(MISSION_UI_DIRTY_BUCKET_FIRETEAM_MINI_CARDS)
+			return
+	_record_mission_ui_dirty_rebuild(MISSION_UI_DIRTY_BUCKET_FIRETEAM_MINI_CARDS, signature)
+
 	for child in card_host.get_children():
 		card_host.remove_child(child)
 		child.queue_free()
 
-	var available_fireteam_ids: PackedStringArray = _get_displayable_fireteam_ids()
 	if fireteam_panel != null:
-		fireteam_panel.visible = not available_fireteam_ids.is_empty()
+		fireteam_panel.visible = desired_panel_visible
 	if available_fireteam_ids.is_empty():
 		return
 
@@ -4849,7 +5170,16 @@ func _refresh_mission_dropship_panel() -> void:
 	_enforce_mission_dropship_panel_geometry(panel)
 	var card_entries: Array = _get_mission_dropship_card_entries()
 	var show_panel: bool = _tactical_ui_visible and not card_entries.is_empty()
+	var signature: String = _build_mission_dropship_panel_signature(card_entries, show_panel)
+	if signature == _get_mission_ui_dirty_signature(MISSION_UI_DIRTY_BUCKET_DROPSHIP_PANEL):
+		var visibility_stable: bool = bool(panel.visible) == show_panel
+		var child_content_stable: bool = (show_panel and panel.get_child_count() > 0) or (not show_panel and panel.get_child_count() == 0)
+		if visibility_stable and child_content_stable:
+			_record_mission_ui_dirty_skip(MISSION_UI_DIRTY_BUCKET_DROPSHIP_PANEL)
+			return
+	_record_mission_ui_dirty_rebuild(MISSION_UI_DIRTY_BUCKET_DROPSHIP_PANEL, signature)
 	if not show_panel:
+		_clear_mission_dropship_panel_cards(panel)
 		panel.visible = false
 		return
 	panel.visible = false

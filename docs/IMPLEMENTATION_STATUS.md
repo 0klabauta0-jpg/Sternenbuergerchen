@@ -19,12 +19,20 @@
 - Risiken: Die neuen Portraits sind technisch eingebunden, aber noch nicht manuell auf Stil, Ausschnitt und Lesbarkeit in Team-Editor/Character-Sheet kuratiert.
 - Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_338_portrait_asset_intake_catalog_sync.gd`, `task_233_portrait_identity_catalog_and_roster_presentation.gd`, `task_247_used_asset_project_locality_audit_gate.gd` und `git diff --check` laufen gruen.
 
-### TASK_339-TASK_342 - Deep Code Review Followups
+### TASK_339 - Mission UI Dirty Refresh Pass
+- Status: implementiert im Arbeitsstand
+- Stand: `MissionTacticalSandboxController` berechnet Dirty-Signaturen fuer Selected-Fireteam-Karten, Fireteam-Mini-Cards und das Mission-Dropship-Panel. Identische Signaturen zaehlen Skips und lassen bestehende Nodes stehen, statt periodisch neu zu instanziieren.
+- Stand: Die Signaturen erfassen Auswahl, Team-Mitglieder, Portraitpfade, Runtime-/Vital-Texte, Mini-Card-Status, Dropship-Payload, LZ, Approach, Air-Asset-Status und Dropship-Card-Button-Zustand.
+- Stand: `get_mission_ui_dirty_refresh_snapshot()` liefert Rebuild-/Skip-/Signaturwechsel-Zaehler fuer Headless-Gates, ohne neue Gameplay-Wahrheit in die UI zu ziehen.
+- Risiken: Signaturen duerfen bei zukuenftigen Card-Inhalten nicht grob bleiben; neue sichtbare Felder muessen bewusst in den jeweiligen Bucket aufgenommen werden.
+- Lokale Pruefung: `task_339_mission_ui_dirty_refresh_pass.gd`, `task_222_performance_regression_gate_and_manual_profile_checklist.gd`, `task_282_tactical_overhaul_playability_performance_help_gate.gd`, `task_286_ui_feedback_truth_regression_review.gd` und `git diff --check` laufen gruen.
+
+### TASK_340-TASK_342 - Deep Code Review Followups
 - Status: geplant
-- Stand: Die verbleibenden Review-Folge-Tasks sind Mission-HUD Dirty-Refresh, reiner Command-Feedback-Snapshot, Navigation-Fallback-Kandidatencap und SimulationRoot-Unknown-Payload-Diagnose.
+- Stand: Die verbleibenden Review-Folge-Tasks sind reiner Command-Feedback-Snapshot, Navigation-Fallback-Kandidatencap und SimulationRoot-Unknown-Payload-Diagnose.
 - Offene Punkte: Umsetzung, lokale Gates und manuelle Sicht-/Spielgefuehlchecks folgen je Task separat.
 - Risiken: Die Tasks duerfen nicht zu einem Sammelrefactor verschmelzen; jeder Task behaelt die vorhandenen Architekturgrenzen: UI ist nicht die Wahrheit, `SimulationRoot` bleibt autoritativ, Hotpaths bleiben budgetiert.
-- Naechster Schritt: TASK_339 - Mission UI Dirty Refresh Pass.
+- Naechster Schritt: TASK_340 - Command Feedback Pure Snapshot.
 
 ### TASK_337 - Architecture Performance UX Followup Gate
 - Status: implementiert im Arbeitsstand

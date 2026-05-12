@@ -3,7 +3,7 @@
 ## Ziel
 Das Mission-HUD soll Fireteam-, Mini-Card- und Dropship-Panels nicht mehr in festen Intervallen komplett neu bauen, wenn sich der zugrunde liegende Zustand nicht geaendert hat. Updates sollen ueber Dirty-Signaturen oder kleine Diffs laufen.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Voraussetzung
 - TASK_219 - UI HUD Meta Comic Bubble Performance Pass
@@ -35,11 +35,11 @@ Die Review hat im Mission Controller einen regelmaessigen `CARD_REFRESH_INTERVAL
 - Kein grosser Controller-Split; nur der Refresh-Pfad wird beruhigt.
 
 ## Akzeptanzkriterien
-- [ ] Bei unveraendertem Mission-State werden Fireteam- und Dropship-Karten nicht periodisch komplett neu aufgebaut.
-- [ ] Relevante Zustandsaenderungen erzeugen weiterhin genau sichtbare UI-Updates.
-- [ ] Der Test weist mindestens einen Idle-Abschnitt nach, in dem Rebuild-Counter stabil bleiben.
-- [ ] Keine neuen `SimulationRoot`-Commands oder Effects entstehen durch UI-Refresh.
-- [ ] Performance-/Playability-Gates bleiben gruen.
+- [x] Bei unveraendertem Mission-State werden Fireteam- und Dropship-Karten nicht periodisch komplett neu aufgebaut.
+- [x] Relevante Zustandsaenderungen erzeugen weiterhin genau sichtbare UI-Updates.
+- [x] Der Test weist mindestens einen Idle-Abschnitt nach, in dem Rebuild-Counter stabil bleiben.
+- [x] Keine neuen `SimulationRoot`-Commands oder Effects entstehen durch UI-Refresh.
+- [x] Performance-/Playability-Gates bleiben gruen.
 
 ## Erwartete Dateien
 - `scripts/mission/mission_tactical_sandbox_controller.gd`
@@ -49,11 +49,17 @@ Die Review hat im Mission Controller einen regelmaessigen `CARD_REFRESH_INTERVAL
 - `docs/IMPLEMENTATION_STATUS.md`
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_339_mission_ui_dirty_refresh_pass.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_222_performance_regression_gate_and_manual_profile_checklist.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_282_tactical_overhaul_playability_performance_help_gate.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_286_ui_feedback_truth_regression_review.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_339_mission_ui_dirty_refresh_pass.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_222_performance_regression_gate_and_manual_profile_checklist.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_282_tactical_overhaul_playability_performance_help_gate.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_286_ui_feedback_truth_regression_review.gd`
+- [x] `git diff --check`
+
+## Umsetzung
+- `MissionTacticalSandboxController` fuehrt pro Refresh-Bucket stabile Dirty-Signaturen und Diagnosezaehler fuer Rebuilds, Skips und Signaturwechsel.
+- Selected-Fireteam-Karten, Fireteam-Mini-Cards und das Mission-Dropship-Panel werden bei unveraendertem Zustand uebersprungen; bestehende Nodes bleiben im Idle erhalten und vermeiden wiederholte Portrait-/Dropship-Texture-Lookups.
+- Die Signaturen decken Auswahl, Team-Mitglieder, Portraitpfade, Runtime-/Vital-Texte, Mini-Card-Status, Dropship-Payload, LZ, Approach, Air-Asset-Status und Card-Button-Zustand ab.
+- `get_mission_ui_dirty_refresh_snapshot()` stellt die Zaehler und Signaturen fuer Headless-Gates bereit, ohne Gameplay-State zu mutieren.
 
 ## Risiken
 - Zu grobe Signaturen koennen sichtbare Updates verschlucken; zu feine Signaturen bringen den alten Rebuild-Druck zurueck. Der Test muss deshalb sowohl Idle-Ruhe als auch echte Aenderungsfaelle abdecken.

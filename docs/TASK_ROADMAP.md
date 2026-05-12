@@ -540,7 +540,7 @@ TASK_337 - Architecture Performance UX Followup Gate (implementiert im Arbeitsst
 
 Phase 18ZG - Deep Code Review Followups
 TASK_338 - Portrait Asset Intake Catalog Sync (implementiert im Arbeitsstand)
-TASK_339 - Mission UI Dirty Refresh Pass (geplant)
+TASK_339 - Mission UI Dirty Refresh Pass (implementiert im Arbeitsstand)
 TASK_340 - Command Feedback Pure Snapshot (geplant)
 TASK_341 - Navigation Fallback Candidate Cap (geplant)
 TASK_342 - SimulationRoot Unknown Payload Audit (geplant)
