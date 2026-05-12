@@ -21,13 +21,18 @@ const BUTTON_PATH_FLANK: String = "../TacticalUI/BottomDock/BottomMargin/BottomR
 const BUTTON_PATH_TAKE: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton"
 const BUTTON_PATH_TARGET: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton"
 const BUTTON_PATH_CLEAR_TARGET: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton"
+const BUTTON_PATH_DELETE_ORDER: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/DeleteOrderButton"
+const BUTTON_PATH_SORT: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/SortCommandMatrixButton"
 const BUTTON_PATH_SET_LZ: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton"
 const BUTTON_PATH_CALL_DROPSHIP: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton"
-const BUTTON_PATH_GO_PLAN: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/NextPhaseButton"
+const BUTTON_PATH_GO_PLAN: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton"
+const BUTTON_PATH_RETURN_TO_PLAN: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/PlanCommandMatrixButton"
 const BUTTON_PATH_APPROACH_NW: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/NWButton"
 const BUTTON_PATH_APPROACH_NE: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/NEButton"
 const BUTTON_PATH_APPROACH_SW: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/SWButton"
 const BUTTON_PATH_APPROACH_SE: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/SEButton"
+
+static var _action_catalog_cache: Array = []
 
 
 static func get_group_order() -> PackedStringArray:
@@ -65,7 +70,8 @@ static func get_group_help_ids() -> Dictionary:
 
 
 static func get_action_catalog() -> Array:
-	return [
+	if _action_catalog_cache.is_empty():
+		_action_catalog_cache = [
 		_action("move", "Move", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.move", BUTTON_PATH_MOVE, {"requires_selection": true, "requires_tile_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
 		_action("take", "Take", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.take", BUTTON_PATH_TAKE, {"requires_selection": true, "requires_tile_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
 		_action("defend", "Defend", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.defend", BUTTON_PATH_HOLD, {"requires_selection": true, "requires_tile_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
@@ -75,17 +81,21 @@ static func get_action_catalog() -> Array:
 		_action("withdraw", "Withdraw", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.area_order", "", {"requires_selection": true, "future_task": "TASK_276 breakout behavior", "context": "breakout"}),
 		_action("flank", "Flank", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.flank", BUTTON_PATH_FLANK, {"requires_selection": true, "requires_tile_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
 		_action("clear_target", "Clear Target", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.clear_target", BUTTON_PATH_CLEAR_TARGET, {"requires_planning": true, "implemented": true, "context": "area"}),
+		_action("delete_order", "Delete", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.clear_target", BUTTON_PATH_DELETE_ORDER, {"requires_planning": true, "implemented": true, "context": "waypoint_or_area"}),
 
-		_action("tempo", "Tempo", GROUP_RULE, PANEL_FIRETEAM_DETAILS, "mission.rule.tempo", "", {"requires_selection": true, "status_only": true, "context": "single_or_multi"}),
-		_action("fire_rule", "Fire Rule", GROUP_RULE, PANEL_FIRETEAM_DETAILS, "mission.rule.fire_rule", "", {"requires_selection": true, "status_only": true, "context": "single_or_multi"}),
-		_action("contact_response", "Contact", GROUP_RULE, PANEL_FIRETEAM_DETAILS, "mission.rule.contact_response", "", {"requires_selection": true, "status_only": true, "context": "single_or_multi"}),
-		_action("cover_priority", "Cover", GROUP_RULE, PANEL_FIRETEAM_DETAILS, "mission.rule.cover_priority", "", {"requires_selection": true, "status_only": true, "context": "single_or_multi"}),
-		_action("security_mode", "Security", GROUP_RULE, PANEL_FIRETEAM_DETAILS, "mission.rule.security_mode", "", {"requires_selection": true, "status_only": true, "context": "single_or_multi"}),
+		_action("tactical_stance", "Stance", GROUP_RULE, PANEL_FIRETEAM_DETAILS, "mission.command.stance", "", {"requires_selection": true, "implemented": true, "context": "single_or_multi", "status_source": "TacticalStanceController", "tooltip_hint": "Direct C/N/A stance toggle on each fireteam card."}),
+		_action("tempo", "Tempo", GROUP_RULE, PANEL_FIRETEAM_DETAILS, "mission.rule.tempo", "", {"requires_selection": true, "status_only": true, "context": "single_or_multi", "status_source": "FTL profile and current command", "tooltip_hint": "Status value from FTL initiative, plan quality, and active order."}),
+		_action("fire_rule", "Fire Rule", GROUP_RULE, PANEL_FIRETEAM_DETAILS, "mission.rule.fire_rule", "", {"requires_selection": true, "status_only": true, "context": "single_or_multi", "status_source": "FTL profile and current command", "tooltip_hint": "Status value from FTL discipline, command type, and contact posture."}),
+		_action("contact_response", "Contact", GROUP_RULE, PANEL_FIRETEAM_DETAILS, "mission.rule.contact_response", "", {"requires_selection": true, "status_only": true, "context": "single_or_multi", "status_source": "FTL profile and current contacts", "tooltip_hint": "Status value from recognition, comms, and known contact state."}),
+		_action("cover_priority", "Cover", GROUP_RULE, PANEL_FIRETEAM_DETAILS, "mission.rule.cover_priority", "", {"requires_selection": true, "status_only": true, "context": "single_or_multi", "status_source": "FTL profile and tactical stance", "tooltip_hint": "Status value from toughness, stance, terrain, and command type."}),
+		_action("security_mode", "Security", GROUP_RULE, PANEL_FIRETEAM_DETAILS, "mission.rule.security_mode", "", {"requires_selection": true, "status_only": true, "context": "single_or_multi", "status_source": "FTL profile and area order", "tooltip_hint": "Status value from current order, overwatch, and contact risk."}),
 
 		_action("role_suggestion", "Roles", GROUP_PLAN, PANEL_MISSION_CONTROL, "mission.command.go_plan", "", {"requires_multi_selection": true, "status_only": true, "context": "multi_fireteam"}),
 		_action("swap_roles", "Swap", GROUP_PLAN, PANEL_MISSION_CONTROL, "mission.command.go_plan", "", {"requires_multi_selection": true, "future_task": "multi-plan edit UI", "context": "multi_fireteam"}),
 		_action("preview_plan", "Preview", GROUP_PLAN, PANEL_MISSION_CONTROL, "mission.command.go_plan", "", {"requires_multi_selection": true, "status_only": true, "context": "multi_fireteam"}),
-		_action("go_plan", "GO", GROUP_PLAN, PANEL_MISSION_CONTROL, "mission.command.go_plan", BUTTON_PATH_GO_PLAN, {"requires_selection": true, "requires_local_command": true, "requires_phase_planning": true, "implemented": true, "context": "single_or_multi"}),
+		_action("sort_fireteam", "Sort", GROUP_PLAN, PANEL_COMMAND_MATRIX, "mission.command.go_plan", BUTTON_PATH_SORT, {"requires_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi", "tooltip_hint": "Reorder the selected fireteam plan before issuing GO."}),
+		_action("go_plan", "GO", GROUP_PLAN, PANEL_COMMAND_MATRIX, "mission.command.go_plan", BUTTON_PATH_GO_PLAN, {"requires_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi", "tooltip_hint": "Execute the selected planned order."}),
+		_action("return_to_plan", "Plan", GROUP_PLAN, PANEL_COMMAND_MATRIX, "mission.command.go_plan", BUTTON_PATH_RETURN_TO_PLAN, {"requires_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi", "tooltip_hint": "Return selected fireteams to the planned route."}),
 
 		_action("set_lz", "LZ", GROUP_AIR_LZ, PANEL_MISSION_CONTROL, "mission.command.set_lz", BUTTON_PATH_SET_LZ, {"requires_planning": true, "implemented": true, "context": "mission"}),
 		_action("call_dropship", "Drop", GROUP_AIR_LZ, PANEL_MISSION_CONTROL, "mission.command.call_dropship", BUTTON_PATH_CALL_DROPSHIP, {"requires_planning": true, "requires_drop_available": true, "implemented": true, "context": "mission"}),
@@ -103,6 +113,7 @@ static func get_action_catalog() -> Array:
 		_action("abort", "Abort", GROUP_BREAKOUT, PANEL_MISSION_CONTROL, "mission.command.group.breakout", "", {"future_task": "TASK_276 tactical breakout behavior", "context": "breakout"}),
 		_action("regroup", "Regroup", GROUP_BREAKOUT, PANEL_MISSION_CONTROL, "mission.command.group.breakout", "", {"future_task": "TASK_276 tactical breakout behavior", "context": "breakout"}),
 	]
+	return _duplicate_action_catalog(_action_catalog_cache)
 
 
 static func build_hierarchy_snapshot(context: Dictionary, button_snapshots: Dictionary = {}) -> Dictionary:
@@ -194,6 +205,8 @@ static func build_dropship_command_matrix_layout_snapshot(context: Dictionary = 
 		"go_action_id": "call_dropship",
 		"go_button_panel_role": PANEL_COMMAND_MATRIX,
 		"go_button_source_action": "call_dropship",
+		"go_button_slot": "16.15",
+		"plan_button_slot": "16.20",
 		"legacy_window_17_go_removed": true,
 		"status_preview_panel_role": PANEL_FIRETEAM_DETAILS,
 		"lz_pick_panel_role": PANEL_COMMAND_MATRIX,
@@ -242,6 +255,8 @@ static func build_button_metadata(action: Dictionary, context: Dictionary, butto
 		"command_hierarchy_panel_role": str(action.get("panel_role", "")),
 		"command_hierarchy_help_id": str(action.get("help_id", "")),
 		"command_hierarchy_context": str(action.get("context", "")),
+		"command_hierarchy_tooltip_hint": str(action.get("tooltip_hint", "")),
+		"command_hierarchy_status_source": str(action.get("status_source", "")),
 		"command_hierarchy_requires_tile_selection": bool(action.get("requires_tile_selection", false)),
 		"command_hierarchy_disabled_reason": disabled_reason,
 		"visual_only": VISUAL_ONLY,
@@ -268,7 +283,18 @@ static func _action(action_id: String, label: String, group_id: String, panel_ro
 		"requires_phase_planning": bool(options.get("requires_phase_planning", false)),
 		"requires_drop_available": bool(options.get("requires_drop_available", false)),
 		"future_task": str(options.get("future_task", "")),
+		"tooltip_hint": str(options.get("tooltip_hint", "")),
+		"status_source": str(options.get("status_source", "")),
 	}
+	return result
+
+
+static func _duplicate_action_catalog(catalog: Array) -> Array:
+	var result: Array = []
+	for action_variant in catalog:
+		if typeof(action_variant) != TYPE_DICTIONARY:
+			continue
+		result.append(Dictionary(action_variant).duplicate(true))
 	return result
 
 

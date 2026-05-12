@@ -9,7 +9,7 @@ TASK_215 optimiert bewusst noch nichts. Auffaellige Werte werden nur markiert.
 
 ## Lokale Umgebung
 - Godot: `Godot Engine v4.6.2.stable.official.71f334935`
-- Projektziel laut AGENTS.md: Godot 4.6.1
+- Projektziel laut AGENTS.md: Godot 4.6.2
 - OS: Windows, lokale Entwicklerumgebung
 - Messart: Headless-Harness plus manueller Profiler-/Visual-Profiler-Folgecheck
 - Werte: lokal und maschinenabhaengig, keine globale Projektgarantie

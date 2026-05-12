@@ -27,18 +27,14 @@ const BOUNDING_MAX_STEP_DISTANCE: float = 176.0
 const CATERPILLAR_MIN_STEP_DISTANCE: float = 56.0
 const CATERPILLAR_MAX_STEP_DISTANCE: float = 104.0
 const READABILITY_MULTI_TILE_DISTANCE: float = 48.0
-const FORMATION_SLOT_LAYOUT := [
-	Vector2.ZERO,
-	Vector2(-0.85, 0.65),
-	Vector2(0.85, 0.65),
-	Vector2(-1.5, 1.3),
-	Vector2(1.5, 1.3),
-	Vector2(-2.15, 1.95),
-	Vector2(2.15, 1.95),
-	Vector2(0.0, 2.3),
-]
 const FORMATION_SLOT_SPACING: float = 64.0
-const FORMATION_MAX_DISTANCE_FROM_ANCHOR: float = 64.0 * 6.0
+const FORMATION_BUDDY_SLOT_SEPARATION: float = 0.44
+const FORMATION_BUDDY_PAIR_STEP: float = 0.72
+const FORMATION_BUDDY_PAIR_FORWARD_STEP: float = 0.18
+const FORMATION_TRAVEL_COMPACT_SLOT_SCALE: float = 0.46
+const FORMATION_MAX_DISTANCE_BASE_FACTOR: float = 1.0
+const FORMATION_MAX_DISTANCE_PAIR_FACTOR: float = 0.32
+const FORMATION_MAX_DISTANCE_CAP_FACTOR: float = 2.1
 
 var _execution_by_fireteam: Dictionary = {}
 var _execution_sequence: int = 0
@@ -132,6 +128,8 @@ func start_execution(
 		"contact_stability": float(execution_profile.get("contact_stability", 0.65)),
 		"initiative": float(execution_profile.get("initiative", 0.5)),
 		"execution_label": String(execution_profile.get("execution_label", "STEADY")),
+		"execution_reason": String(execution_profile.get("execution_reason", "")),
+		"execution_hint": String(execution_profile.get("execution_hint", "")),
 		"formation_scatter_factor": formation_scatter_factor,
 		"move_speed_multiplier": lerpf(0.84, 1.08, float(execution_profile.get("initiative", 0.5))),
 		"order_target_offset": resolved_target_position - target_position,
@@ -551,15 +549,43 @@ func _build_formation_targets(anchor_position: Vector2, member_records: Array, l
 	var lateral: Vector2 = forward.orthogonal()
 	for index in range(ordered_records.size()):
 		var record: Dictionary = ordered_records[index]
-		var slot_index: int = mini(index, FORMATION_SLOT_LAYOUT.size() - 1)
-		var slot: Vector2 = FORMATION_SLOT_LAYOUT[slot_index]
-		if not allow_trailing_slots:
-			slot.y = minf(slot.y, 0.0)
+		var slot: Vector2 = _build_buddy_formation_slot(index, ordered_records.size(), allow_trailing_slots)
 		var offset: Vector2 = ((lateral * slot.x) + (forward * slot.y)) * FORMATION_SLOT_SPACING * maxf(scatter_factor, 0.5)
-		if offset.length() > FORMATION_MAX_DISTANCE_FROM_ANCHOR:
-			offset = offset.normalized() * FORMATION_MAX_DISTANCE_FROM_ANCHOR
+		var max_distance: float = _get_formation_max_distance_from_anchor(ordered_records.size(), scatter_factor)
+		if offset.length() > max_distance:
+			offset = offset.normalized() * max_distance
 		targets[String(record.get("unit_id", ""))] = anchor_position + offset
 	return targets
+
+
+func _build_buddy_formation_slot(slot_index: int, member_count: int, allow_trailing_slots: bool) -> Vector2:
+	if slot_index <= 0 or member_count <= 1:
+		return Vector2.ZERO
+	if slot_index == 1:
+		var lead_buddy_slot := Vector2(-FORMATION_BUDDY_SLOT_SEPARATION, -FORMATION_BUDDY_PAIR_FORWARD_STEP)
+		return lead_buddy_slot if allow_trailing_slots else Vector2(lead_buddy_slot.x * FORMATION_TRAVEL_COMPACT_SLOT_SCALE, 0.0)
+	var pair_index: int = int(slot_index / 2)
+	var pair_member_count: int = mini(2, maxi(member_count - (pair_index * 2), 0))
+	var slot_in_pair: int = slot_index % 2
+	var side_order: int = pair_index - 1
+	var side_sign: float = 1.0 if side_order % 2 == 0 else -1.0
+	var side_ring: float = float(int(side_order / 2) + 1)
+	var pair_center_x: float = side_sign * (FORMATION_BUDDY_PAIR_STEP * side_ring)
+	var local_x: float = 0.0
+	if pair_member_count > 1:
+		local_x = (-0.5 if slot_in_pair == 0 else 0.5) * FORMATION_BUDDY_SLOT_SEPARATION
+	var slot := Vector2(pair_center_x + local_x, -FORMATION_BUDDY_PAIR_FORWARD_STEP * float(pair_index))
+	if not allow_trailing_slots:
+		slot.x *= FORMATION_TRAVEL_COMPACT_SLOT_SCALE
+		slot.y = 0.0
+	return slot
+
+
+func _get_formation_max_distance_from_anchor(member_count: int, scatter_factor: float) -> float:
+	var pair_count: int = maxi(ceili(float(member_count) / 2.0), 1)
+	var distance_factor: float = FORMATION_MAX_DISTANCE_BASE_FACTOR + (float(pair_count - 1) * FORMATION_MAX_DISTANCE_PAIR_FACTOR)
+	var cap: float = FORMATION_SLOT_SPACING * FORMATION_MAX_DISTANCE_CAP_FACTOR
+	return minf(FORMATION_SLOT_SPACING * distance_factor * maxf(scatter_factor, 0.5), cap)
 
 
 func _build_current_positions(member_records: Array) -> Dictionary:
@@ -767,6 +793,8 @@ func _extract_execution_profile(behavior_profile) -> Dictionary:
 			"contact_stability": 0.65,
 			"initiative": 0.5,
 			"execution_label": "STEADY",
+			"execution_reason": "balanced_execution",
+			"execution_hint": "No single execution risk dominates this order.",
 		}
 	var source: Dictionary = {}
 	if typeof(behavior_profile) == TYPE_DICTIONARY:
@@ -781,6 +809,8 @@ func _extract_execution_profile(behavior_profile) -> Dictionary:
 		"contact_stability": clampf(float(source.get("contact_stability", 0.65)), 0.0, 1.0),
 		"initiative": clampf(float(source.get("initiative", 0.5)), 0.0, 1.0),
 		"execution_label": String(source.get("execution_label", "STEADY")).strip_edges().to_upper(),
+		"execution_reason": String(source.get("execution_reason", "")).strip_edges().to_lower(),
+		"execution_hint": String(source.get("execution_hint", "")).strip_edges(),
 	}
 
 
@@ -1047,6 +1077,8 @@ func _build_public_state(state: Dictionary) -> Dictionary:
 		"contact_stability": float(state.get("contact_stability", 0.65)),
 		"initiative": float(state.get("initiative", 0.5)),
 		"execution_label": String(state.get("execution_label", "STEADY")),
+		"execution_reason": String(state.get("execution_reason", "")),
+		"execution_hint": String(state.get("execution_hint", "")),
 		"formation_scatter_factor": float(state.get("formation_scatter_factor", 1.0)),
 		"move_speed_multiplier": float(state.get("move_speed_multiplier", 1.0)),
 	}

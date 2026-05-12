@@ -68,8 +68,12 @@ func _test_contract_files_and_copy_catalog() -> void:
 		EVENT_SCRIPT.EVENT_OBJECTIVE_COMPLETE,
 		EVENT_SCRIPT.EVENT_AIR_ASSET_THREATENED,
 		EVENT_SCRIPT.EVENT_AIR_ASSET_DESTROYED,
+		EVENT_SCRIPT.EVENT_FRIENDLY_FIRE,
 	]:
-		_assert(events.has(event_type), "Copy catalog covers %s" % event_type)
+		if event_type == EVENT_SCRIPT.EVENT_FRIENDLY_FIRE:
+			_assert(String(EVENT_SCRIPT.call("normalize_event_type", "friendly_fire")) == EVENT_SCRIPT.EVENT_FRIENDLY_FIRE, "Friendly-fire event type normalizes without a gameplay system change")
+		else:
+			_assert(events.has(event_type), "Copy catalog covers %s" % event_type)
 
 
 func _test_event_snapshot_contract() -> void:
@@ -91,6 +95,28 @@ func _test_event_snapshot_contract() -> void:
 	_assert(PackedStringArray(event.get("channels", PackedStringArray())).has(EVENT_SCRIPT.CHANNEL_MAP_MARKER), "Event reaches map marker channel")
 	_assert(typeof(event.get("anchor_position", null)) == TYPE_VECTOR2, "Event snapshot carries visual anchor")
 	_assert(bool(event.get("visual_only", false)), "Event is marked visual-only")
+	var bounding_event: Dictionary = Dictionary(RESOLVER_SCRIPT.call("build_event", EVENT_SCRIPT.EVENT_BOUNDING_ROTATION, {
+		"fireteam_id": "gold",
+		"phase": 2,
+		"short_text": "BLUE: cover, GOLD vor!",
+		"detail_text": "Bounding rotation: BLUE secures, GOLD advances",
+		"map_label": "BOUND ROT",
+		"anchor_position": Vector2(300.0, 300.0),
+		"target_position": Vector2(420.0, 300.0),
+	}, {"now_msec": 1200}))
+	_assert(String(bounding_event.get("event_type", "")) == EVENT_SCRIPT.EVENT_BOUNDING_ROTATION, "Bounding rotation event has a stable event type")
+	_assert(PackedStringArray(bounding_event.get("channels", PackedStringArray())).has(EVENT_SCRIPT.CHANNEL_MAP_MARKER), "Bounding rotation reaches map marker channel")
+	var friendly_fire_event: Dictionary = Dictionary(RESOLVER_SCRIPT.call("build_event", EVENT_SCRIPT.EVENT_FRIENDLY_FIRE, {
+		"fireteam_id": "blue",
+		"unit_id": "blue_02",
+		"short_text": "FRIENDLY FIRE",
+		"detail_text": "blue_01 misidentified target and hit blue_02",
+		"map_label": "FRIENDLY FIRE",
+		"anchor_position": Vector2(280.0, 280.0),
+		"target_position": Vector2(300.0, 280.0),
+	}, {"now_msec": 1300}))
+	_assert(int(friendly_fire_event.get("priority", 0)) == EVENT_SCRIPT.PRIORITY_CRITICAL, "Friendly-fire communication is critical")
+	_assert(PackedStringArray(friendly_fire_event.get("channels", PackedStringArray())).has(EVENT_SCRIPT.CHANNEL_MAP_MARKER), "Friendly-fire communication reaches map marker channel")
 
 
 func _test_priority_and_cooldown_rules() -> void:
@@ -193,18 +219,60 @@ func _test_map_marker_visual_snapshot() -> void:
 		"objective_label": "Relay",
 		"communication_clarity": 0.78,
 	}, {"now_msec": 5000}))
+	var bounding_event: Dictionary = Dictionary(RESOLVER_SCRIPT.call("build_event", EVENT_SCRIPT.EVENT_BOUNDING_ROTATION, {
+		"fireteam_id": "gold",
+		"phase": 1,
+		"short_text": "BLUE: cover, GOLD vor!",
+		"detail_text": "Bounding rotation: BLUE secures, GOLD advances",
+		"map_label": "BOUND ROT",
+		"anchor_position": center_position + Vector2(-64.0, 0.0),
+		"target_position": center_position + Vector2(64.0, 0.0),
+	}, {"now_msec": 5050}))
 	var primary_view: Node = TERRAIN_MAP_3D_VIEW_SCRIPT.new()
 	root.add_child(primary_view)
 	primary_view.call("configure_from_map", map_data)
 	primary_view.call("set_order_visual_payload", {
 		"phase_index": 1,
-		"tactical_communication_event_dicts": [event],
+		"tactical_communication_event_dicts": [event, bounding_event],
+		"fire_event_dicts": [
+			{
+				"event_id": "task274_friendly_fire",
+				"event_type": "weapon_fire",
+				"source": "standard",
+				"attacker_unit_id": "blue_01",
+				"target_unit_id": "blue_02",
+				"weapon_id": "rifle",
+				"attacker_position": center_position + Vector2(-48.0, -48.0),
+				"target_position": center_position + Vector2(-12.0, -48.0),
+				"is_friendly_fire": true,
+				"friendly_fire_target_unit_id": "blue_02",
+			},
+		],
 	})
 	await _wait_frames(6)
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
-	_assert(int(snapshot.get("tactical_communication_event_visual_count", 0)) == 1, "3D map renders tactical communication marker")
+	_assert(int(snapshot.get("tactical_communication_event_visual_count", 0)) == 2, "3D map renders tactical communication markers")
 	var entries: Array = Array(snapshot.get("tactical_communication_event_entries", []))
 	_assert(not entries.is_empty() and String(Dictionary(entries[0]).get("event_type", "")) == EVENT_SCRIPT.EVENT_BREAKOUT_ADAPTATION, "3D map snapshot exposes communication event entry")
+	_assert(_has_bounding_highlight_line(entries), "3D map snapshot exposes bounding rotation highlight line")
+	var fire_entries: Array = Array(snapshot.get("weapon_fire_vfx_entries", []))
+	_assert(not fire_entries.is_empty() and bool(Dictionary(fire_entries[0]).get("is_friendly_fire", false)), "3D map exposes friendly-fire weapon feedback entries")
+	primary_view.call("set_contact_entries", [
+		{
+			"fireteam_id": "blue",
+			"unit_id": "enemy_recon_profile",
+			"team_id": "team_bravo",
+			"last_known_position": center_position + Vector2(0.0, 72.0),
+			"detection_state": "confirmed",
+			"enemy_profile_revealed": true,
+			"enemy_profile_id": "defensive_cover",
+			"enemy_profile_label": "Deckungssucher",
+		},
+	], PackedStringArray(["blue"]))
+	await _wait_frames(4)
+	var contact_snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
+	var contact_entries: Array = Array(contact_snapshot.get("contact_entries", []))
+	_assert(not contact_entries.is_empty() and String(Dictionary(contact_entries[0]).get("enemy_profile_label", "")) == "Deckungssucher", "Confirmed high-quality contact can expose a player-facing enemy profile label")
 	primary_view.queue_free()
 	await _wait_frames(2)
 
@@ -311,6 +379,16 @@ func _has_hud_fireteam_card_bubble(entries: Array) -> bool:
 			continue
 		var entry: Dictionary = Dictionary(entry_variant)
 		if String(entry.get("anchor_space", "")) == "hud" and String(entry.get("hud_anchor_source", "")) == "fireteam_mini_card" and typeof(entry.get("hud_anchor_position", null)) == TYPE_VECTOR2:
+			return true
+	return false
+
+
+func _has_bounding_highlight_line(entries: Array) -> bool:
+	for entry_variant in entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("event_type", "")) == EVENT_SCRIPT.EVENT_BOUNDING_ROTATION and bool(entry.get("has_highlight_line", false)):
 			return true
 	return false
 

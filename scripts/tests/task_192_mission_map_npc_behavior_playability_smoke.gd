@@ -42,7 +42,7 @@ func _test_integrated_mission_npc_behavior_smoke() -> void:
 		return
 
 	_assert(_legacy_readability_overlays_are_hidden(scene), "Mission starts with legacy readability overlays suppressed behind the 2.5D primary view")
-	_assert(_primary_dropship_visible(context["primary_view"]), "Waiting dropship is visible before insertion")
+	_assert(not _primary_dropship_visible(context["primary_view"]), "Waiting dropship stays offscreen before insertion")
 	await _audit_presence_phase(context, "initial enemy spawn", INITIAL_ACTIVE_ENEMY_IDS, [], SECOND_WAVE_ENEMY_IDS)
 
 	await _deploy_blue_fireteam(context)
@@ -219,7 +219,7 @@ func _stage_waiting_dropship(controller: Node) -> void:
 	planning_state["mission_drop_display_name"] = "TASK 192 Dropship"
 	planning_state["mission_drop_title_text"] = "TASK 192 Dropship"
 	planning_state["mission_drop_texture_path"] = "res://Assets/kenney_space-kit/Side/craft_speederB.png"
-	planning_state["mission_drop_status_line"] = "Holding on mission map"
+	planning_state["mission_drop_status_line"] = "Holding off-map"
 	planning_state["mission_drop_progress"] = 100.0
 	planning_state["mission_drop_passenger_count"] = BLUE_UNIT_IDS.size()
 	planning_state["selected_fireteam"] = "BLUE"

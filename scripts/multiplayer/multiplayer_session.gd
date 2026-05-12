@@ -28,6 +28,20 @@ const ALLOWED_CLIENT_ROLES: PackedStringArray = [
 	ROLE_FIRETEAM,
 	ROLE_SPECTATOR,
 ]
+const TEAM_PLAY_MODE_COOP: String = "coop"
+const TEAM_PLAY_MODE_VERSUS: String = "versus"
+const VALID_TEAM_PLAY_MODES: PackedStringArray = [
+	TEAM_PLAY_MODE_COOP,
+	TEAM_PLAY_MODE_VERSUS,
+]
+const CONNECTION_MODE_LAN: String = "lan"
+const CONNECTION_MODE_DIRECT_WAN: String = "direct_wan"
+const CONNECTION_MODE_UPNP: String = "upnp"
+const VALID_CONNECTION_MODES: PackedStringArray = [
+	CONNECTION_MODE_LAN,
+	CONNECTION_MODE_DIRECT_WAN,
+	CONNECTION_MODE_UPNP,
+]
 
 @export var max_players: int = DEFAULT_MAX_PLAYERS
 @export var default_port: int = DEFAULT_PORT
@@ -37,7 +51,7 @@ const ALLOWED_CLIENT_ROLES: PackedStringArray = [
 @export var client_role_id: String = ROLE_COMMANDER
 @export var host_fireteam_ids: PackedStringArray = PackedStringArray(["blue", "gold"])
 @export var client_fireteam_ids: PackedStringArray = PackedStringArray(["red"])
-@export var roster_mode: String = MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.ROSTER_MODE_HOST_ROSTER
+@export var roster_mode: String = MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.ROSTER_MODE_PLAYER_ROSTERS
 
 var _peers_by_id: Dictionary = {}
 var _connection_state: String = STATE_IDLE
@@ -51,6 +65,20 @@ var _map_transfer_state: Dictionary = {
 	"state": "none",
 	"requires_consent": false,
 	"can_start_client": true,
+}
+var _player_name: String = "Player"
+var _selected_roster_path: String = ""
+var _selected_team_slot: String = "team_alpha"
+var _team_play_mode: String = TEAM_PLAY_MODE_COOP
+var _selected_map_path: String = ""
+var _connection_mode: String = CONNECTION_MODE_LAN
+var _upnp_mapping: Dictionary = {
+	"enabled": false,
+	"attempted": false,
+	"mapped": false,
+	"external_address": "",
+	"port": 0,
+	"result": "not_requested",
 }
 
 
@@ -73,6 +101,7 @@ func start_host(port: int = DEFAULT_PORT) -> bool:
 		return false
 
 	multiplayer.multiplayer_peer = peer
+	_prepare_host_network_mode(port)
 	_configure_host_state()
 	_broadcast_snapshot()
 	return true
@@ -181,6 +210,8 @@ func get_session_snapshot() -> Dictionary:
 		"roster": MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.call("build_lobby_roster_mode_snapshot", roster_mode, _get_local_peer_id()),
 		"map_manifest": _host_map_manifest.duplicate(true),
 		"map_transfer": _map_transfer_state.duplicate(true),
+		"lobby_setup": get_lobby_setup_snapshot(),
+		"upnp": _upnp_mapping.duplicate(true),
 	}
 
 
@@ -191,6 +222,9 @@ func build_session_assignments() -> Dictionary:
 		"peer_fireteams": get_peer_fireteam_assignments(),
 		"peer_rosters": get_peer_roster_assignments(),
 		"roster_mode": MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.call("normalize_roster_mode", roster_mode),
+		"team_play_mode": _team_play_mode,
+		"selected_map_path": _selected_map_path,
+		"lobby_setup": get_lobby_setup_snapshot(),
 	}
 
 
@@ -210,6 +244,41 @@ func set_roster_mode(mode: String) -> bool:
 
 func get_roster_mode() -> String:
 	return String(MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.call("normalize_roster_mode", roster_mode))
+
+
+func set_lobby_player_setup(setup: Dictionary) -> bool:
+	if _mission_started:
+		return false
+	var previous_setup: Dictionary = get_lobby_setup_snapshot()
+	_player_name = _normalize_player_name(String(setup.get("player_name", _player_name)))
+	_selected_roster_path = String(setup.get("roster_path", _selected_roster_path)).strip_edges()
+	_selected_team_slot = _normalize_team_slot(String(setup.get("team_slot", _selected_team_slot)))
+	_team_play_mode = _normalize_team_play_mode(String(setup.get("team_play_mode", _team_play_mode)))
+	_selected_map_path = String(setup.get("map_path", _selected_map_path)).strip_edges()
+	_connection_mode = _normalize_connection_mode(String(setup.get("connection_mode", _connection_mode)))
+	var changed: bool = previous_setup != get_lobby_setup_snapshot()
+	if _peers_by_id.has(_get_local_peer_id()):
+		_apply_local_setup_to_peer(_get_local_peer_id())
+	if _connection_state == STATE_JOINED and not _is_authority_session() and _has_active_peer():
+		request_update_player_setup.rpc_id(HOST_PEER_ID, get_lobby_setup_snapshot())
+	if changed:
+		_emit_snapshot()
+		_broadcast_snapshot()
+	return true
+
+
+func get_lobby_setup_snapshot() -> Dictionary:
+	return {
+		"player_name": _player_name,
+		"roster_path": _selected_roster_path,
+		"team_slot": _selected_team_slot,
+		"team_play_mode": _team_play_mode,
+		"map_path": _selected_map_path,
+		"connection_mode": _connection_mode,
+		"direct_ip_policy": _get_direct_ip_policy_text(),
+		"uses_upnp": _connection_mode == CONNECTION_MODE_UPNP,
+		"upnp": _upnp_mapping.duplicate(true),
+	}
 
 
 func get_peer_team_assignments() -> Dictionary:
@@ -329,6 +398,26 @@ func reject_map_download(manifest: Dictionary) -> Dictionary:
 
 
 @rpc("any_peer", "reliable")
+func request_update_player_setup(setup: Dictionary) -> void:
+	if not _is_authority_session():
+		return
+	var peer_id: int = multiplayer.get_remote_sender_id()
+	if peer_id <= 0:
+		peer_id = HOST_PEER_ID
+	if not _peers_by_id.has(peer_id):
+		_upsert_peer(peer_id, peer_id == HOST_PEER_ID)
+	var peer_data: Dictionary = Dictionary(_peers_by_id.get(peer_id, {})).duplicate(true)
+	peer_data["display_name"] = _normalize_player_name(String(setup.get("player_name", peer_data.get("display_name", "Player"))))
+	peer_data["team_id"] = _normalize_team_slot(String(setup.get("team_slot", peer_data.get("team_id", client_team_id))))
+	peer_data["roster_entry_path"] = String(setup.get("roster_path", peer_data.get("roster_entry_path", ""))).strip_edges()
+	peer_data["connection_mode"] = _normalize_connection_mode(String(setup.get("connection_mode", CONNECTION_MODE_LAN)))
+	_peers_by_id[peer_id] = peer_data
+	_refresh_status_text()
+	_emit_snapshot()
+	_broadcast_snapshot()
+
+
+@rpc("any_peer", "reliable")
 func request_set_ready(ready: bool) -> void:
 	if not _is_authority_session():
 		return
@@ -403,6 +492,7 @@ func _on_peer_disconnected(peer_id: int) -> void:
 func _on_connected_to_server() -> void:
 	_connection_state = STATE_JOINED
 	_last_status_text = "Connected to host. Waiting for lobby state..."
+	request_update_player_setup.rpc_id(HOST_PEER_ID, get_lobby_setup_snapshot())
 	_emit_snapshot()
 
 
@@ -440,6 +530,8 @@ func _reset_session_state(emit_signal: bool = true) -> void:
 	_mission_started = false
 	_last_start_assignments.clear()
 	_host_map_manifest.clear()
+	_clear_upnp_mapping()
+	_reset_upnp_mapping_snapshot()
 	_map_transfer_state = {
 		"state": "none",
 		"requires_consent": false,
@@ -451,6 +543,7 @@ func _reset_session_state(emit_signal: bool = true) -> void:
 
 
 func _clear_multiplayer_peer() -> void:
+	_clear_upnp_mapping()
 	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
 	if peer == null:
 		return
@@ -466,12 +559,14 @@ func _upsert_peer(peer_id: int, is_host_peer: bool) -> void:
 	var role_id: String = ROLE_HOST if is_host_peer else _get_client_role_id()
 	existing["peer_id"] = peer_id
 	existing["is_host"] = is_host_peer
-	existing["team_id"] = host_team_id if is_host_peer else client_team_id
+	existing["team_id"] = _default_team_for_peer(is_host_peer)
 	existing["role_id"] = role_id
 	existing["fireteam_ids"] = _normalize_fireteam_ids(existing.get("fireteam_ids", fireteams))
 	existing["ready"] = bool(existing.get("ready", false))
 	existing = _apply_peer_roster_identity(peer_id, existing, is_host_peer)
 	_peers_by_id[peer_id] = existing
+	if peer_id == _get_local_peer_id() or (is_host_peer and _local_is_host):
+		_apply_local_setup_to_peer(peer_id)
 
 
 func _set_peer_ready(peer_id: int, ready: bool) -> void:
@@ -637,3 +732,121 @@ func _get_client_role_id() -> String:
 	if not ALLOWED_CLIENT_ROLES.has(normalized_role_id):
 		return ROLE_COMMANDER
 	return normalized_role_id
+
+
+func _apply_local_setup_to_peer(peer_id: int) -> void:
+	if not _peers_by_id.has(peer_id):
+		return
+	var peer_data: Dictionary = Dictionary(_peers_by_id.get(peer_id, {})).duplicate(true)
+	peer_data["display_name"] = _player_name
+	peer_data["team_id"] = _selected_team_slot
+	peer_data["roster_entry_path"] = _selected_roster_path
+	peer_data["team_play_mode"] = _team_play_mode
+	peer_data["selected_map_path"] = _selected_map_path
+	peer_data["connection_mode"] = _connection_mode
+	_peers_by_id[peer_id] = peer_data
+
+
+func _default_team_for_peer(is_host_peer: bool) -> String:
+	if is_host_peer:
+		return _selected_team_slot if not _selected_team_slot.is_empty() else host_team_id
+	if _team_play_mode == TEAM_PLAY_MODE_COOP:
+		return _selected_team_slot if not _selected_team_slot.is_empty() else host_team_id
+	return client_team_id
+
+
+func _normalize_player_name(value: String) -> String:
+	var normalized: String = value.strip_edges()
+	if normalized.is_empty():
+		return "Player"
+	return normalized.substr(0, 32)
+
+
+func _normalize_team_slot(value: String) -> String:
+	var normalized: String = value.strip_edges().to_lower()
+	match normalized:
+		"team_alpha", "alpha":
+			return "team_alpha"
+		"team_bravo", "bravo":
+			return "team_bravo"
+		_:
+			return "team_alpha"
+
+
+func _normalize_team_play_mode(value: String) -> String:
+	var normalized: String = value.strip_edges().to_lower()
+	if VALID_TEAM_PLAY_MODES.has(normalized):
+		return normalized
+	return TEAM_PLAY_MODE_COOP
+
+
+func _normalize_connection_mode(value: String) -> String:
+	var normalized: String = value.strip_edges().to_lower()
+	if VALID_CONNECTION_MODES.has(normalized):
+		return normalized
+	return CONNECTION_MODE_LAN
+
+
+func _get_direct_ip_policy_text() -> String:
+	if _connection_mode == CONNECTION_MODE_UPNP:
+		return "UPnP mode tries to open the host UDP port automatically. Players still need a router that allows UPnP, otherwise use manual forwarding or VPN."
+	if _connection_mode == CONNECTION_MODE_DIRECT_WAN:
+		return "Direct IP can work over the internet only when the host UDP port is reachable through firewall/router forwarding or VPN."
+	return "LAN mode expects both players on the same local network or VPN."
+
+
+func _prepare_host_network_mode(port: int) -> void:
+	if _connection_mode == CONNECTION_MODE_UPNP:
+		_try_open_upnp_port(port)
+	else:
+		_reset_upnp_mapping_snapshot(port)
+
+
+func _try_open_upnp_port(port: int) -> Dictionary:
+	_clear_upnp_mapping()
+	_upnp_mapping = {
+		"enabled": true,
+		"attempted": true,
+		"mapped": false,
+		"external_address": "",
+		"port": port,
+		"result": "discover_failed",
+	}
+	var upnp := UPNP.new()
+	var discover_result: int = upnp.discover()
+	if discover_result != UPNP.UPNP_RESULT_SUCCESS:
+		_upnp_mapping["result"] = "discover_failed:%d" % discover_result
+		return _upnp_mapping.duplicate(true)
+	var gateway := upnp.get_gateway()
+	if gateway == null or not gateway.is_valid_gateway():
+		_upnp_mapping["result"] = "gateway_invalid"
+		return _upnp_mapping.duplicate(true)
+	var mapping_result: int = upnp.add_port_mapping(port, port, "SternenBuergerchen Multiplayer", "UDP")
+	_upnp_mapping["result"] = "mapped" if mapping_result == UPNP.UPNP_RESULT_SUCCESS else "mapping_failed:%d" % mapping_result
+	_upnp_mapping["mapped"] = mapping_result == UPNP.UPNP_RESULT_SUCCESS
+	_upnp_mapping["external_address"] = upnp.query_external_address()
+	return _upnp_mapping.duplicate(true)
+
+
+func _clear_upnp_mapping() -> void:
+	if not bool(_upnp_mapping.get("mapped", false)):
+		return
+	var port: int = int(_upnp_mapping.get("port", 0))
+	if port <= 0:
+		return
+	var upnp := UPNP.new()
+	if upnp.discover() == UPNP.UPNP_RESULT_SUCCESS:
+		upnp.delete_port_mapping(port, "UDP")
+	_upnp_mapping["mapped"] = false
+	_upnp_mapping["result"] = "closed"
+
+
+func _reset_upnp_mapping_snapshot(port: int = 0) -> void:
+	_upnp_mapping = {
+		"enabled": false,
+		"attempted": false,
+		"mapped": false,
+		"external_address": "",
+		"port": port,
+		"result": "not_requested",
+	}

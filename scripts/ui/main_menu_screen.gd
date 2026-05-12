@@ -9,12 +9,30 @@ const GAME_SETTINGS_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/game_s
 const SETTINGS_SCREEN_SCRIPT: GDScript = preload("res://scripts/ui/settings_screen.gd")
 const CONTEXTUAL_HELP_SERVICE_SCRIPT: GDScript = preload("res://scripts/ui/contextual_help_service.gd")
 const CONTEXTUAL_HELP_POPUP_SCRIPT: GDScript = preload("res://scripts/ui/contextual_help_popup.gd")
+const HOVER_SCROLL_BEHAVIOR_SCRIPT: GDScript = preload("res://scripts/ui/hover_scroll_behavior.gd")
 const START_ROSTER_GENERATOR_SCRIPT: GDScript = preload("res://scripts/meta/start_roster_generator.gd")
 const PLAYER_ROSTER_STORE_SCRIPT: GDScript = preload("res://scripts/meta/player_roster_store.gd")
 const TEAM_NAME_GENERATOR_SCRIPT: GDScript = preload("res://scripts/meta/team_name_generator.gd")
+const PORTRAIT_IDENTITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/portrait_identity_catalog.gd")
+const META_UNIT_PROFILE_SCRIPT: GDScript = preload("res://scripts/meta/meta_unit_profile.gd")
+const CHARACTER_SHEET_VIEW_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_view.gd")
+const NPC_RANK_BADGE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/npc_rank_badge_resolver.gd")
+const UNIT_PROFILE_MATH_SCRIPT: GDScript = preload("res://scripts/npc/unit_profile_math.gd")
 const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_event_bus.gd")
 const BACKGROUND_IMAGE_CATALOG_SCRIPT: GDScript = preload("res://scripts/assets/background_image_catalog.gd")
 const BACKGROUND_ID: String = "main_menu_shell"
+const TEAM_EDITOR_POINT_DELTA: int = 1
+const TEAM_EDITOR_VIEW_SIX: String = "six"
+const TEAM_EDITOR_VIEW_NINE: String = "nine"
+const TEAM_EDITOR_VIEW_SHEET: String = "sheet"
+const TEAM_EDITOR_METRIC_POINTS_PER_VALUE: int = 20
+const TEAM_EDITOR_METRIC_GROUP_CONFIG: Dictionary = {
+	"progression": {"label": "Statuswerte", "help_id": "character_sheet.progression", "row_count": 2, "points_per_row": 10},
+	"skill_values": {"label": "Kernwerte", "help_id": "character_sheet.core_values", "row_count": 8, "points_per_row": 12},
+	"communication_values": {"label": "Kommunikation", "help_id": "character_sheet.communication", "row_count": 2, "points_per_row": 12},
+	"platform_values": {"label": "Plattform", "help_id": "character_sheet.platform_skills", "row_count": 4, "points_per_row": 10},
+	"behavior_axes": {"label": "Verhalten", "help_id": "character_sheet.behavior_profile", "row_count": 5, "points_per_row": 12},
+}
 
 @onready var _background: TextureRect = get_node("Background")
 @onready var _singleplayer_button: Button = get_node("MenuRail/MenuMargin/MenuVBox/MenuButtons/SingleplayerButton")
@@ -53,6 +71,44 @@ var _settings_reset_button: Button = null
 var _team_name_edit: LineEdit = null
 var _team_name_suggest_button: Button = null
 var _new_roster_button: Button = null
+var _team_editor_toggle_button: Button = null
+var _team_library_panel: PanelContainer = null
+var _team_library_list: VBoxContainer = null
+var _team_library_status_label: Label = null
+var _team_library_activate_button: Button = null
+var _team_library_edit_button: Button = null
+var _team_library_delete_button: Button = null
+var _team_library_entries: Array = []
+var _selected_roster_entry_path: String = ""
+var _team_editor_panel: PanelContainer = null
+var _team_editor_open: bool = false
+var _team_editor_roster_path: String = ""
+var _team_editor_roster: Dictionary = {}
+var _team_editor_view_mode: String = TEAM_EDITOR_VIEW_SHEET
+var _team_editor_selected_unit_id: String = ""
+var _team_editor_title_label: Label = null
+var _team_editor_name_edit: LineEdit = null
+var _team_editor_summary_label: Label = null
+var _team_editor_emblem_option: OptionButton = null
+var _team_editor_emblem_preview: TextureRect = null
+var _team_editor_budget_label: Label = null
+var _team_editor_stats_vbox: VBoxContainer = null
+var _team_editor_stat_rows: Dictionary = {}
+var _team_editor_metric_locks: Dictionary = {}
+var _team_editor_metric_group_budgets: Dictionary = {}
+var _team_editor_card_grid: GridContainer = null
+var _team_editor_cards_scroll: ScrollContainer = null
+var _team_editor_sheet_scroll: ScrollContainer = null
+var _team_editor_sheet_host: VBoxContainer = null
+var _team_editor_unit_name_edit: LineEdit = null
+var _team_editor_unit_portrait_preview: TextureRect = null
+var _team_editor_unit_portrait_option: OptionButton = null
+var _team_editor_view_buttons: Dictionary = {}
+var _team_editor_save_button: Button = null
+var _team_editor_close_button: Button = null
+var _team_editor_refresh_queued: bool = false
+var _team_editor_metric_save_queued: bool = false
+var _team_editor_metric_save_reason: String = ""
 var _start_roster: Dictionary = {}
 var _start_roster_seed: String = START_ROSTER_GENERATOR_SCRIPT.DEFAULT_SEED
 var _start_roster_size: int = START_ROSTER_GENERATOR_SCRIPT.DEFAULT_ROSTER_SIZE
@@ -81,6 +137,7 @@ func _ready() -> void:
 	_ensure_start_roster_button()
 	_ensure_contextual_help_ui()
 	ensure_start_roster_exists()
+	HOVER_SCROLL_BEHAVIOR_SCRIPT.call("install", self)
 	_refresh_settings_controls_from_current()
 	_configure_routes()
 	_connect_signals()
@@ -178,6 +235,203 @@ func get_start_roster_snapshot() -> Dictionary:
 	return summary
 
 
+func get_team_library_snapshot() -> Dictionary:
+	var selected_entry: Dictionary = _find_team_library_entry(_selected_roster_entry_path)
+	var active_entry: Dictionary = {}
+	for entry_variant in _team_library_entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		if bool(entry.get("active", false)):
+			active_entry = entry
+			break
+	return {
+		"visible": _team_library_panel != null and _team_library_panel.visible,
+		"entry_count": _team_library_entries.size(),
+		"entries": _team_library_entries.duplicate(true),
+		"selected_path": _selected_roster_entry_path,
+		"selected_team_name": String(selected_entry.get("team_name", "")),
+		"selected_is_active": bool(selected_entry.get("active", false)),
+		"active_path": String(active_entry.get("path", _start_roster_save_path)),
+		"active_team_name": String(active_entry.get("team_name", "")),
+		"activate_enabled": _team_library_activate_button != null and not _team_library_activate_button.disabled,
+		"edit_enabled": _team_library_edit_button != null and not _team_library_edit_button.disabled,
+		"delete_enabled": _team_library_delete_button != null and not _team_library_delete_button.disabled,
+	}
+
+
+func get_team_editor_snapshot() -> Dictionary:
+	var editor: Dictionary = _get_normalized_team_editor(false)
+	var roster: Dictionary = _get_team_editor_roster_source()
+	var units: Array = Array(roster.get("units", []))
+	var selected_unit: Dictionary = _find_team_editor_unit(roster, _team_editor_selected_unit_id)
+	var panel_rect: Rect2 = Rect2(_team_editor_panel.global_position, _team_editor_panel.size) if _team_editor_panel != null else Rect2()
+	return {
+		"visible": _team_editor_panel != null and _team_editor_panel.visible,
+		"toggle_visible": _team_editor_toggle_button != null and _team_editor_toggle_button.visible,
+		"toggle_text": _team_editor_toggle_button.text if _team_editor_toggle_button != null else "",
+		"window_mode": "fullscreen_team_editor",
+		"parent_is_root": _team_editor_panel != null and _team_editor_panel.get_parent() == self,
+		"view_mode": _team_editor_view_mode,
+		"panel_position": panel_rect.position,
+		"panel_size": panel_rect.size,
+		"team_name": String(roster.get("team_name", "")),
+		"edited_path": _team_editor_roster_path,
+		"unit_count": units.size(),
+		"card_count": _team_editor_card_grid.get_child_count() if _team_editor_card_grid != null else 0,
+		"sheet_visible": _team_editor_sheet_scroll != null and _team_editor_sheet_scroll.visible,
+		"selected_unit_id": _team_editor_selected_unit_id,
+		"budget_max": int(editor.get("point_budget_max", 0)),
+		"budget_used": int(editor.get("point_budget_used", 0)),
+		"budget_available": int(editor.get("point_budget_available", 0)),
+		"budget_explanation": "Team-Fokus fuer Generator/Balancing; einzelne NPC-Werte werden rechts separat editiert.",
+		"point_budget_policy": Dictionary(editor.get("point_budget_policy", {})).duplicate(true),
+		"team_size_policy": Dictionary(editor.get("team_size_policy", START_ROSTER_GENERATOR_SCRIPT.call("build_team_size_policy"))).duplicate(true),
+		"allocations": Dictionary(editor.get("stat_allocations", {})).duplicate(true),
+		"stat_locks": Dictionary(editor.get("stat_locks", {})).duplicate(true),
+		"metric_locks": Dictionary(editor.get("metric_locks", {})).duplicate(true),
+		"stat_definitions": Array(editor.get("stat_definitions", [])).duplicate(true),
+		"selected_metric_group_budgets": _build_team_editor_metric_group_budgets(selected_unit),
+		"selected_metric_locks": _get_team_editor_metric_locks_for_unit(_team_editor_selected_unit_id),
+		"emblem_id": String(editor.get("emblem_id", "")),
+		"emblem_path": String(editor.get("emblem_path", "")),
+		"emblem_option_count": _team_editor_emblem_option.item_count if _team_editor_emblem_option != null else 0,
+		"has_emblem_texture": _team_editor_emblem_preview != null and _team_editor_emblem_preview.texture != null,
+		"character_name_edit_visible": _team_editor_unit_name_edit != null and _team_editor_unit_name_edit.visible,
+		"character_portrait_option_count": _team_editor_unit_portrait_option.item_count if _team_editor_unit_portrait_option != null else 0,
+		"character_portrait_option_icon_count": _option_button_icon_count(_team_editor_unit_portrait_option),
+		"character_has_portrait_preview": _team_editor_unit_portrait_preview != null and _team_editor_unit_portrait_preview.texture != null,
+		"selected_unit_method_summary": String(selected_unit.get("method_summary_text", "")),
+		"selected_unit_function_summary": String(selected_unit.get("function_summary_text", "")),
+		"selected_unit_primary_specialty": String(selected_unit.get("primary_specialty", "")),
+		"short_description_section_visible": _team_editor_sheet_has_label_text("KURZBESCHREIBUNG:"),
+		"last_loadout_section_index": _team_editor_sheet_child_index_for_name("LastLoadoutDropdownSection"),
+	}
+
+
+func _team_editor_sheet_has_label_text(label_text: String) -> bool:
+	if _team_editor_sheet_host == null:
+		return false
+	return _node_tree_has_label_text(_team_editor_sheet_host, label_text)
+
+
+func _node_tree_has_label_text(node: Node, label_text: String) -> bool:
+	if node is Label and String((node as Label).text) == label_text:
+		return true
+	for child in node.get_children():
+		if _node_tree_has_label_text(child, label_text):
+			return true
+	return false
+
+
+func _team_editor_sheet_child_index_for_name(node_name: String) -> int:
+	if _team_editor_sheet_host == null:
+		return -1
+	var target := _team_editor_sheet_host.find_child(node_name, true, false)
+	if target == null:
+		return -1
+	var parent := target.get_parent()
+	if parent == null:
+		return -1
+	return target.get_index()
+
+
+func _option_button_icon_count(option_button: OptionButton) -> int:
+	if option_button == null:
+		return 0
+	var count: int = 0
+	for index in range(option_button.item_count):
+		if option_button.get_item_icon(index) != null:
+			count += 1
+	return count
+
+
+func select_team_library_entry_for_tests(entry_path: String) -> void:
+	_selected_roster_entry_path = entry_path.strip_edges()
+	_refresh_team_library()
+
+
+func activate_selected_team_entry_for_tests() -> Dictionary:
+	return _activate_selected_team_entry(false)
+
+
+func delete_selected_team_entry_for_tests() -> Dictionary:
+	return _delete_selected_team_entry(false)
+
+
+func adjust_team_editor_stat_for_tests(stat_id: String, delta: int) -> Dictionary:
+	return _adjust_team_editor_stat(stat_id, delta, false)
+
+
+func set_team_editor_stat_for_tests(stat_id: String, value: int) -> Dictionary:
+	return _set_team_editor_stat(stat_id, value, false)
+
+
+func set_team_editor_stat_lock_for_tests(stat_id: String, locked: bool) -> Dictionary:
+	return _set_team_editor_stat_lock(stat_id, locked, false)
+
+
+func set_team_editor_metric_lock_for_tests(unit_id: String, value_group: String, value_key: String, locked: bool) -> Dictionary:
+	var row_data: Dictionary = {
+		"value_group": value_group,
+		"value_key": value_key,
+	}
+	var result: Dictionary = _set_team_editor_metric_lock(unit_id, row_data, locked)
+	result["unit_id"] = unit_id
+	return result
+
+
+func set_team_editor_metric_group_budget_for_tests(unit_id: String, value_group: String, max_points: int) -> Dictionary:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	var normalized_group: String = value_group.strip_edges()
+	if normalized_unit_id.is_empty() or normalized_group.is_empty():
+		return {"ok": false, "reason": "missing_budget_key"}
+	var budget_key: String = "%s|%s" % [normalized_unit_id, normalized_group]
+	_team_editor_metric_group_budgets[budget_key] = maxi(max_points, 0)
+	_refresh_team_editor()
+	return {
+		"ok": true,
+		"budget_key": budget_key,
+		"max_points": int(_team_editor_metric_group_budgets.get(budget_key, 0)),
+	}
+
+
+func set_team_editor_emblem_for_tests(emblem_id: String) -> Dictionary:
+	return _set_team_editor_emblem(emblem_id, false)
+
+
+func set_team_editor_unit_name_for_tests(unit_id: String, display_name: String) -> Dictionary:
+	return _set_team_editor_unit_name(unit_id, display_name, false)
+
+
+func set_team_editor_unit_portrait_for_tests(unit_id: String, portrait_id: String) -> Dictionary:
+	var option: Dictionary = _find_portrait_option(portrait_id)
+	return _set_team_editor_unit_portrait(unit_id, String(option.get("id", portrait_id)), String(option.get("path", "")), false)
+
+
+func open_team_editor(entry_path: String = "") -> void:
+	_open_team_editor_for_path(entry_path)
+
+
+func close_team_editor() -> void:
+	_set_team_editor_open(false)
+
+
+func toggle_team_editor() -> void:
+	if _team_editor_open:
+		close_team_editor()
+	else:
+		open_team_editor()
+
+
+func set_team_editor_view_mode_for_tests(view_mode: String) -> void:
+	_set_team_editor_view_mode(view_mode)
+
+
+func open_selected_team_entry_for_tests(entry_path: String = "") -> void:
+	open_team_editor(entry_path)
+
+
 func ensure_start_roster_exists(seed: String = "", roster_size: int = -1) -> Dictionary:
 	if not seed.strip_edges().is_empty():
 		_start_roster_seed = seed.strip_edges()
@@ -185,12 +439,20 @@ func ensure_start_roster_exists(seed: String = "", roster_size: int = -1) -> Dic
 		_start_roster_size = clampi(roster_size, START_ROSTER_GENERATOR_SCRIPT.MIN_ROSTER_SIZE, START_ROSTER_GENERATOR_SCRIPT.MAX_ROSTER_SIZE)
 	var first_start: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("ensure_roster", _start_roster_seed, _start_roster_size, _start_roster_profile_id, _start_roster_save_path))
 	_start_roster = Dictionary(first_start.get("roster", {})).duplicate(true)
+	_normalize_start_team_editor(true)
 	_last_start_roster_created = bool(first_start.get("created", false))
 	_last_start_roster_loaded_from_save = bool(first_start.get("loaded", false))
 	_last_start_roster_store_result = first_start.duplicate(true)
 	_start_roster_reset_confirmation_pending = false
 	_refresh_start_roster_button()
 	_refresh_team_name_controls()
+	_selected_roster_entry_path = _start_roster_save_path
+	if _team_editor_open:
+		_team_editor_roster_path = _start_roster_save_path
+		_team_editor_roster = _start_roster.duplicate(true)
+		_team_editor_selected_unit_id = _resolve_team_editor_selected_unit_id("")
+	_refresh_team_library()
+	_refresh_team_editor()
 	_status_label.text = "Roster ready" if bool(Dictionary(first_start.get("summary", {})).get("valid", false)) else "Roster invalid"
 	return first_start
 
@@ -219,7 +481,10 @@ func set_start_roster_store_path_for_tests(save_path: String, profile_id: String
 	_start_roster_reset_confirmation_pending = false
 	_last_start_roster_store_result = {}
 	_last_start_roster_loaded_from_save = false
+	_selected_roster_entry_path = _start_roster_save_path
 	_start_roster.clear()
+	_refresh_team_library()
+	_refresh_team_editor()
 
 
 func request_new_start_roster() -> Dictionary:
@@ -239,12 +504,20 @@ func confirm_new_start_roster() -> Dictionary:
 	var next_seed: String = "%s_reset_%02d" % [_start_roster_seed, _start_roster_generation_index]
 	var reset_result: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("reset_roster", next_seed, _start_roster_size, _start_roster_profile_id, _start_roster_save_path, true))
 	_start_roster = Dictionary(reset_result.get("roster", {})).duplicate(true)
+	_normalize_start_team_editor(true)
 	_last_start_roster_created = true
 	_last_start_roster_loaded_from_save = false
 	_last_start_roster_store_result = reset_result.duplicate(true)
 	_start_roster_reset_confirmation_pending = false
 	_refresh_start_roster_button()
 	_refresh_team_name_controls()
+	_selected_roster_entry_path = _start_roster_save_path
+	if _team_editor_open:
+		_team_editor_roster_path = _start_roster_save_path
+		_team_editor_roster = _start_roster.duplicate(true)
+		_team_editor_selected_unit_id = _resolve_team_editor_selected_unit_id("")
+	_refresh_team_library()
+	_refresh_team_editor()
 	_status_label.text = "Neues Team bereit" if bool(reset_result.get("ok", false)) else "Roster save failed"
 	return {
 		"created": true,
@@ -264,8 +537,12 @@ func cancel_new_start_roster() -> void:
 func set_start_team_name(next_team_name: String) -> Dictionary:
 	var renamed: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("rename_team", _start_roster, next_team_name, _start_roster_profile_id, _start_roster_save_path))
 	_start_roster = Dictionary(renamed.get("roster", _start_roster)).duplicate(true)
+	_normalize_start_team_editor(false)
 	_last_start_roster_store_result = Dictionary(renamed.get("save", {})).duplicate(true)
 	_refresh_team_name_controls()
+	_selected_roster_entry_path = _start_roster_save_path
+	_refresh_team_library()
+	_refresh_team_editor()
 	_status_label.text = "Team name saved" if bool(renamed.get("ok", false)) else "Team name save failed"
 	return renamed
 
@@ -541,15 +818,461 @@ func _ensure_start_roster_button() -> void:
 		menu_buttons.add_child(_new_roster_button)
 	_new_roster_button.set_meta("roster_action", "new_start_roster")
 	_new_roster_button.set_meta("requires_confirmation", true)
+	_team_editor_toggle_button = menu_buttons.get_node_or_null("TeamEditorToggleButton") as Button
+	if _team_editor_toggle_button == null:
+		_team_editor_toggle_button = Button.new()
+		_team_editor_toggle_button.name = "TeamEditorToggleButton"
+		_team_editor_toggle_button.custom_minimum_size = Vector2(360.0, 48.0)
+		_team_editor_toggle_button.focus_mode = Control.FOCUS_ALL
+		menu_buttons.add_child(_team_editor_toggle_button)
+	_team_editor_toggle_button.set_meta("roster_action", "toggle_team_editor")
+	_team_editor_toggle_button.tooltip_text = "Eigenes Rookie-Team mit Bild und Startpunkten bearbeiten."
+	if not _team_editor_toggle_button.pressed.is_connected(_on_team_editor_toggle_pressed):
+		_team_editor_toggle_button.pressed.connect(_on_team_editor_toggle_pressed)
+	_ensure_team_library_panel(menu_buttons)
+	_ensure_team_editor_panel(menu_buttons)
 	_refresh_start_roster_button()
+	_refresh_team_editor_toggle()
 	_refresh_team_name_controls()
+	_refresh_team_library()
+	_refresh_team_editor()
+
+
+func _ensure_team_library_panel(menu_buttons: VBoxContainer) -> void:
+	_team_library_panel = menu_buttons.get_node_or_null("TeamLibraryPanel") as PanelContainer
+	if _team_library_panel == null:
+		_team_library_panel = PanelContainer.new()
+		_team_library_panel.name = "TeamLibraryPanel"
+		menu_buttons.add_child(_team_library_panel)
+	_team_library_panel.custom_minimum_size = Vector2(360.0, 154.0)
+	_team_library_panel.visible = not _team_editor_open
+	var margin := _team_library_panel.get_node_or_null("TeamLibraryMargin") as MarginContainer
+	if margin == null:
+		margin = MarginContainer.new()
+		margin.name = "TeamLibraryMargin"
+		margin.add_theme_constant_override("margin_left", 10)
+		margin.add_theme_constant_override("margin_top", 8)
+		margin.add_theme_constant_override("margin_right", 10)
+		margin.add_theme_constant_override("margin_bottom", 8)
+		_team_library_panel.add_child(margin)
+	var vbox := margin.get_node_or_null("TeamLibraryVBox") as VBoxContainer
+	if vbox == null:
+		vbox = VBoxContainer.new()
+		vbox.name = "TeamLibraryVBox"
+		vbox.add_theme_constant_override("separation", 6)
+		margin.add_child(vbox)
+	var header_row := vbox.get_node_or_null("TeamLibraryHeaderRow") as HBoxContainer
+	if header_row == null:
+		header_row = HBoxContainer.new()
+		header_row.name = "TeamLibraryHeaderRow"
+		header_row.add_theme_constant_override("separation", 8)
+		vbox.add_child(header_row)
+	var header_label := header_row.get_node_or_null("TeamLibraryHeaderLabel") as Label
+	if header_label == null:
+		header_label = Label.new()
+		header_label.name = "TeamLibraryHeaderLabel"
+		header_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		header_row.add_child(header_label)
+	header_label.text = "Erstellte Teams"
+	header_label.add_theme_font_size_override("font_size", 13)
+	_team_library_activate_button = header_row.get_node_or_null("TeamLibraryActivateButton") as Button
+	if _team_library_activate_button == null:
+		_team_library_activate_button = Button.new()
+		_team_library_activate_button.name = "TeamLibraryActivateButton"
+		_team_library_activate_button.text = "Aktiv"
+		_team_library_activate_button.custom_minimum_size = Vector2(72.0, 32.0)
+		header_row.add_child(_team_library_activate_button)
+	if not _team_library_activate_button.pressed.is_connected(_on_team_library_activate_pressed):
+		_team_library_activate_button.pressed.connect(_on_team_library_activate_pressed)
+	_team_library_edit_button = header_row.get_node_or_null("TeamLibraryEditButton") as Button
+	if _team_library_edit_button == null:
+		_team_library_edit_button = Button.new()
+		_team_library_edit_button.name = "TeamLibraryEditButton"
+		_team_library_edit_button.text = "Bearbeiten"
+		_team_library_edit_button.custom_minimum_size = Vector2(104.0, 32.0)
+		header_row.add_child(_team_library_edit_button)
+	if not _team_library_edit_button.pressed.is_connected(_on_team_library_edit_pressed):
+		_team_library_edit_button.pressed.connect(_on_team_library_edit_pressed)
+	_team_library_delete_button = header_row.get_node_or_null("TeamLibraryDeleteButton") as Button
+	if _team_library_delete_button == null:
+		_team_library_delete_button = Button.new()
+		_team_library_delete_button.name = "TeamLibraryDeleteButton"
+		_team_library_delete_button.text = "Loeschen"
+		_team_library_delete_button.custom_minimum_size = Vector2(82.0, 32.0)
+		header_row.add_child(_team_library_delete_button)
+	if not _team_library_delete_button.pressed.is_connected(_on_team_library_delete_pressed):
+		_team_library_delete_button.pressed.connect(_on_team_library_delete_pressed)
+	_team_library_status_label = vbox.get_node_or_null("TeamLibraryStatusLabel") as Label
+	if _team_library_status_label == null:
+		_team_library_status_label = Label.new()
+		_team_library_status_label.name = "TeamLibraryStatusLabel"
+		_team_library_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		vbox.add_child(_team_library_status_label)
+	_team_library_status_label.add_theme_font_size_override("font_size", 11)
+	var scroll := vbox.get_node_or_null("TeamLibraryScroll") as ScrollContainer
+	if scroll == null:
+		scroll = ScrollContainer.new()
+		scroll.name = "TeamLibraryScroll"
+		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		vbox.add_child(scroll)
+	scroll.custom_minimum_size = Vector2(340.0, 74.0)
+	_team_library_list = scroll.get_node_or_null("TeamLibraryList") as VBoxContainer
+	if _team_library_list == null:
+		_team_library_list = VBoxContainer.new()
+		_team_library_list.name = "TeamLibraryList"
+		_team_library_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_team_library_list.add_theme_constant_override("separation", 4)
+		scroll.add_child(_team_library_list)
+
+
+func _ensure_team_editor_panel(_menu_buttons: VBoxContainer) -> void:
+	_team_editor_panel = get_node_or_null("TeamEditorPanel") as PanelContainer
+	if _team_editor_panel == null:
+		_team_editor_panel = PanelContainer.new()
+		_team_editor_panel.name = "TeamEditorPanel"
+		add_child(_team_editor_panel)
+	_team_editor_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_team_editor_panel.offset_left = 56.0
+	_team_editor_panel.offset_top = 56.0
+	_team_editor_panel.offset_right = -56.0
+	_team_editor_panel.offset_bottom = -56.0
+	_team_editor_panel.z_index = 70
+	_team_editor_panel.set_meta("team_editor_window", true)
+	_team_editor_panel.custom_minimum_size = Vector2(1540.0, 860.0)
+	_team_editor_panel.visible = _team_editor_open
+	_team_editor_panel.mouse_filter = Control.MOUSE_FILTER_STOP if _team_editor_open else Control.MOUSE_FILTER_IGNORE
+	var margin := _team_editor_panel.get_node_or_null("TeamEditorMargin") as MarginContainer
+	if margin == null:
+		margin = MarginContainer.new()
+		margin.name = "TeamEditorMargin"
+		margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+		margin.add_theme_constant_override("margin_left", 22)
+		margin.add_theme_constant_override("margin_top", 18)
+		margin.add_theme_constant_override("margin_right", 22)
+		margin.add_theme_constant_override("margin_bottom", 18)
+		_team_editor_panel.add_child(margin)
+	var vbox := margin.get_node_or_null("TeamEditorVBox") as VBoxContainer
+	if vbox == null:
+		vbox = VBoxContainer.new()
+		vbox.name = "TeamEditorVBox"
+		vbox.add_theme_constant_override("separation", 14)
+		margin.add_child(vbox)
+
+	var header_row := vbox.get_node_or_null("TeamEditorHeaderRow") as HBoxContainer
+	if header_row == null:
+		header_row = HBoxContainer.new()
+		header_row.name = "TeamEditorHeaderRow"
+		header_row.add_theme_constant_override("separation", 12)
+		vbox.add_child(header_row)
+	_team_editor_title_label = header_row.get_node_or_null("TeamEditorHeaderLabel") as Label
+	if _team_editor_title_label == null:
+		_team_editor_title_label = Label.new()
+		_team_editor_title_label.name = "TeamEditorHeaderLabel"
+		_team_editor_title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		header_row.add_child(_team_editor_title_label)
+	_team_editor_title_label.text = "Team-Editor"
+	_team_editor_title_label.add_theme_font_size_override("font_size", 26)
+	_team_editor_title_label.tooltip_text = "Eigene Ansicht fuer Teamname, Team-Bild, Rookie-Punkte und NPC-Karten."
+
+	var view_row := header_row.get_node_or_null("TeamEditorViewModeRow") as HBoxContainer
+	if view_row == null:
+		view_row = HBoxContainer.new()
+		view_row.name = "TeamEditorViewModeRow"
+		view_row.add_theme_constant_override("separation", 8)
+		header_row.add_child(view_row)
+	_configure_team_editor_sheet_only_view_row(view_row)
+
+	_team_editor_save_button = header_row.get_node_or_null("TeamEditorSaveButton") as Button
+	if _team_editor_save_button == null:
+		_team_editor_save_button = Button.new()
+		_team_editor_save_button.name = "TeamEditorSaveButton"
+		_team_editor_save_button.text = "Speichern"
+		_team_editor_save_button.custom_minimum_size = Vector2(120.0, 44.0)
+		header_row.add_child(_team_editor_save_button)
+	_team_editor_save_button.tooltip_text = "Teamnamen, Icon und Punkte in diesem Roster-Save sichern."
+	if not _team_editor_save_button.pressed.is_connected(_on_team_editor_save_pressed):
+		_team_editor_save_button.pressed.connect(_on_team_editor_save_pressed)
+
+	_team_editor_close_button = header_row.get_node_or_null("TeamEditorCloseButton") as Button
+	if _team_editor_close_button == null:
+		_team_editor_close_button = Button.new()
+		_team_editor_close_button.name = "TeamEditorCloseButton"
+		_team_editor_close_button.text = "Schliessen"
+		_team_editor_close_button.custom_minimum_size = Vector2(120.0, 44.0)
+		header_row.add_child(_team_editor_close_button)
+	_team_editor_close_button.tooltip_text = "Zurueck zum Hauptmenue."
+	if not _team_editor_close_button.pressed.is_connected(_on_team_editor_close_pressed):
+		_team_editor_close_button.pressed.connect(_on_team_editor_close_pressed)
+
+	var body_row := vbox.get_node_or_null("TeamEditorBodyRow") as HBoxContainer
+	if body_row == null:
+		body_row = HBoxContainer.new()
+		body_row.name = "TeamEditorBodyRow"
+		body_row.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		body_row.add_theme_constant_override("separation", 16)
+		vbox.add_child(body_row)
+
+	var side_panel := body_row.get_node_or_null("TeamEditorSidePanel") as PanelContainer
+	if side_panel == null:
+		side_panel = PanelContainer.new()
+		side_panel.name = "TeamEditorSidePanel"
+		side_panel.custom_minimum_size = Vector2(380.0, 0.0)
+		body_row.add_child(side_panel)
+	var side_margin := side_panel.get_node_or_null("TeamEditorSideMargin") as MarginContainer
+	if side_margin == null:
+		side_margin = MarginContainer.new()
+		side_margin.name = "TeamEditorSideMargin"
+		side_margin.add_theme_constant_override("margin_left", 14)
+		side_margin.add_theme_constant_override("margin_top", 14)
+		side_margin.add_theme_constant_override("margin_right", 14)
+		side_margin.add_theme_constant_override("margin_bottom", 14)
+		side_panel.add_child(side_margin)
+	var side_vbox := side_margin.get_node_or_null("TeamEditorSideVBox") as VBoxContainer
+	if side_vbox == null:
+		side_vbox = VBoxContainer.new()
+		side_vbox.name = "TeamEditorSideVBox"
+		side_vbox.add_theme_constant_override("separation", 10)
+		side_margin.add_child(side_vbox)
+
+	var name_label := side_vbox.get_node_or_null("TeamEditorNameLabel") as Label
+	if name_label == null:
+		name_label = Label.new()
+		name_label.name = "TeamEditorNameLabel"
+		side_vbox.add_child(name_label)
+	name_label.text = "Teamname"
+	name_label.add_theme_font_size_override("font_size", 13)
+	name_label.tooltip_text = "Dieser Name gehoert zum lokalen Spieler-Roster und ist keine Missionswahrheit."
+	name_label.set_meta("help_id", "team_editor.team_name")
+	_team_editor_name_edit = side_vbox.get_node_or_null("TeamEditorNameEdit") as LineEdit
+	if _team_editor_name_edit == null:
+		_team_editor_name_edit = LineEdit.new()
+		_team_editor_name_edit.name = "TeamEditorNameEdit"
+		_team_editor_name_edit.custom_minimum_size = Vector2(338.0, 42.0)
+		side_vbox.add_child(_team_editor_name_edit)
+	_team_editor_name_edit.placeholder_text = "Teamname"
+	_team_editor_name_edit.tooltip_text = "Enter oder Fokusverlust speichert den Teamnamen."
+	_team_editor_name_edit.set_meta("help_id", "team_editor.team_name")
+	if not _team_editor_name_edit.text_submitted.is_connected(_on_team_editor_name_submitted):
+		_team_editor_name_edit.text_submitted.connect(_on_team_editor_name_submitted)
+	if not _team_editor_name_edit.focus_exited.is_connected(_on_team_editor_name_focus_exited):
+		_team_editor_name_edit.focus_exited.connect(_on_team_editor_name_focus_exited)
+
+	var emblem_row := side_vbox.get_node_or_null("TeamEditorEmblemRow") as HBoxContainer
+	if emblem_row == null:
+		emblem_row = HBoxContainer.new()
+		emblem_row.name = "TeamEditorEmblemRow"
+		emblem_row.add_theme_constant_override("separation", 8)
+		side_vbox.add_child(emblem_row)
+	_team_editor_emblem_preview = emblem_row.get_node_or_null("TeamEditorEmblemPreview") as TextureRect
+	if _team_editor_emblem_preview == null:
+		_team_editor_emblem_preview = TextureRect.new()
+		_team_editor_emblem_preview.name = "TeamEditorEmblemPreview"
+		emblem_row.add_child(_team_editor_emblem_preview)
+	_team_editor_emblem_preview.custom_minimum_size = Vector2(44.0, 44.0)
+	_team_editor_emblem_preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_team_editor_emblem_preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	_team_editor_emblem_preview.tooltip_text = "Team-Symbol aus bestehenden Projektbildern."
+	_team_editor_emblem_preview.set_meta("help_id", "team_editor.symbol")
+	_team_editor_emblem_option = emblem_row.get_node_or_null("TeamEditorEmblemOption") as OptionButton
+	if _team_editor_emblem_option == null:
+		_team_editor_emblem_option = OptionButton.new()
+		_team_editor_emblem_option.name = "TeamEditorEmblemOption"
+		_team_editor_emblem_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		emblem_row.add_child(_team_editor_emblem_option)
+	_team_editor_emblem_option.custom_minimum_size = Vector2(270.0, 42.0)
+	_team_editor_emblem_option.tooltip_text = "Team-Bild aus vorhandenen Portrait-Assets."
+	_team_editor_emblem_option.set_meta("help_id", "team_editor.symbol")
+	if not _team_editor_emblem_option.item_selected.is_connected(_on_team_editor_emblem_selected):
+		_team_editor_emblem_option.item_selected.connect(_on_team_editor_emblem_selected)
+	_team_editor_summary_label = side_vbox.get_node_or_null("TeamEditorSummaryLabel") as Label
+	if _team_editor_summary_label == null:
+		_team_editor_summary_label = Label.new()
+		_team_editor_summary_label.name = "TeamEditorSummaryLabel"
+		_team_editor_summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		side_vbox.add_child(_team_editor_summary_label)
+	_team_editor_summary_label.add_theme_font_size_override("font_size", 12)
+	_team_editor_summary_label.tooltip_text = "Zusammenfassung des geoeffneten Teams und des aktuellen Ansichtmodus."
+	_team_editor_summary_label.visible = false
+	_team_editor_budget_label = side_vbox.get_node_or_null("TeamEditorBudgetLabel") as Label
+	if _team_editor_budget_label == null:
+		_team_editor_budget_label = Label.new()
+		_team_editor_budget_label.name = "TeamEditorBudgetLabel"
+		side_vbox.add_child(_team_editor_budget_label)
+	_team_editor_budget_label.add_theme_font_size_override("font_size", 13)
+	_team_editor_budget_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_team_editor_budget_label.tooltip_text = "Team-Fokus: Generator-/Balancing-Vorgabe. Einzelne NPC-Werte werden rechts im Charakterblatt geaendert."
+	var scroll := side_vbox.get_node_or_null("TeamEditorStatsScroll") as ScrollContainer
+	if scroll == null:
+		scroll = ScrollContainer.new()
+		scroll.name = "TeamEditorStatsScroll"
+		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		side_vbox.add_child(scroll)
+	scroll.custom_minimum_size = Vector2(340.0, 230.0)
+	_team_editor_stats_vbox = scroll.get_node_or_null("TeamEditorStatsVBox") as VBoxContainer
+	if _team_editor_stats_vbox == null:
+		_team_editor_stats_vbox = VBoxContainer.new()
+		_team_editor_stats_vbox.name = "TeamEditorStatsVBox"
+		_team_editor_stats_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_team_editor_stats_vbox.add_theme_constant_override("separation", 4)
+		scroll.add_child(_team_editor_stats_vbox)
+
+	var content_panel := body_row.get_node_or_null("TeamEditorContentPanel") as PanelContainer
+	if content_panel == null:
+		content_panel = PanelContainer.new()
+		content_panel.name = "TeamEditorContentPanel"
+		content_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		content_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		body_row.add_child(content_panel)
+	var content_margin := content_panel.get_node_or_null("TeamEditorContentMargin") as MarginContainer
+	if content_margin == null:
+		content_margin = MarginContainer.new()
+		content_margin.name = "TeamEditorContentMargin"
+		content_margin.add_theme_constant_override("margin_left", 14)
+		content_margin.add_theme_constant_override("margin_top", 14)
+		content_margin.add_theme_constant_override("margin_right", 14)
+		content_margin.add_theme_constant_override("margin_bottom", 14)
+		content_panel.add_child(content_margin)
+	var content_row := content_margin.get_node_or_null("TeamEditorContentRow") as HBoxContainer
+	if content_row == null:
+		content_row = HBoxContainer.new()
+		content_row.name = "TeamEditorContentRow"
+		content_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		content_row.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		content_row.add_theme_constant_override("separation", 14)
+		content_margin.add_child(content_row)
+	_team_editor_cards_scroll = content_row.get_node_or_null("TeamEditorCardsScroll") as ScrollContainer
+	if _team_editor_cards_scroll == null:
+		_team_editor_cards_scroll = ScrollContainer.new()
+		_team_editor_cards_scroll.name = "TeamEditorCardsScroll"
+		_team_editor_cards_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		_team_editor_cards_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_team_editor_cards_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		content_row.add_child(_team_editor_cards_scroll)
+	_team_editor_card_grid = _team_editor_cards_scroll.get_node_or_null("TeamEditorCardGrid") as GridContainer
+	if _team_editor_card_grid == null:
+		_team_editor_card_grid = GridContainer.new()
+		_team_editor_card_grid.name = "TeamEditorCardGrid"
+		_team_editor_card_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_team_editor_card_grid.add_theme_constant_override("h_separation", 12)
+		_team_editor_card_grid.add_theme_constant_override("v_separation", 12)
+		_team_editor_cards_scroll.add_child(_team_editor_card_grid)
+	_team_editor_sheet_scroll = content_row.get_node_or_null("TeamEditorSheetScroll") as ScrollContainer
+	if _team_editor_sheet_scroll == null:
+		_team_editor_sheet_scroll = ScrollContainer.new()
+		_team_editor_sheet_scroll.name = "TeamEditorSheetScroll"
+		_team_editor_sheet_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		_team_editor_sheet_scroll.custom_minimum_size = Vector2(760.0, 0.0)
+		_team_editor_sheet_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_team_editor_sheet_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		content_row.add_child(_team_editor_sheet_scroll)
+	_team_editor_sheet_scroll.custom_minimum_size = Vector2(760.0, 0.0)
+	_team_editor_sheet_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_team_editor_sheet_host = _team_editor_sheet_scroll.get_node_or_null("TeamEditorSheetHost") as VBoxContainer
+	if _team_editor_sheet_host == null:
+		_team_editor_sheet_host = VBoxContainer.new()
+		_team_editor_sheet_host.name = "TeamEditorSheetHost"
+		_team_editor_sheet_host.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_team_editor_sheet_host.add_theme_constant_override("separation", 8)
+		_team_editor_sheet_scroll.add_child(_team_editor_sheet_host)
+	_team_editor_sheet_host.custom_minimum_size = Vector2(760.0, 0.0)
+
+
+func _configure_team_editor_sheet_only_view_row(view_row: HBoxContainer) -> void:
+	_team_editor_view_mode = TEAM_EDITOR_VIEW_SHEET
+	_team_editor_view_buttons.clear()
+	if view_row == null:
+		return
+	_clear_children(view_row)
+	view_row.visible = false
+	view_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
+func _ensure_team_editor_view_button(parent: HBoxContainer, view_mode: String, label: String, tooltip: String) -> void:
+	if parent == null:
+		return
+	var button_name: String = "TeamEditorView%sButton" % view_mode.capitalize()
+	var button := parent.get_node_or_null(button_name) as Button
+	if button == null:
+		button = Button.new()
+		button.name = button_name
+		button.toggle_mode = true
+		button.custom_minimum_size = Vector2(72.0, 44.0)
+		parent.add_child(button)
+	button.text = label
+	button.tooltip_text = tooltip
+	button.set_meta("team_editor_view_mode", view_mode)
+	button.set_pressed_no_signal(view_mode == _team_editor_view_mode)
+	_team_editor_view_buttons[view_mode] = button
+	var pressed_callable := Callable(self, "_on_team_editor_view_mode_pressed").bind(view_mode)
+	if not button.pressed.is_connected(pressed_callable):
+		button.pressed.connect(pressed_callable)
 
 
 func _refresh_start_roster_button() -> void:
 	if _new_roster_button == null:
 		return
 	_new_roster_button.text = "Team neu bestaetigen" if _start_roster_reset_confirmation_pending else "Neues Team generieren"
-	_new_roster_button.tooltip_text = "Ersetzt das Startteam erst nach Bestaetigung." if _start_roster_reset_confirmation_pending else "Startteam-Generator vorbereiten."
+	_new_roster_button.tooltip_text = "Ersetzt das Startteam erst nach Bestaetigung." if _start_roster_reset_confirmation_pending else "Automatisch ein neues Startteam generieren."
+
+
+func _refresh_team_editor_toggle() -> void:
+	if _team_editor_toggle_button == null:
+		return
+	_team_editor_toggle_button.text = "Team-Editor" if _team_editor_open else "Team selbst erstellen"
+	_team_editor_toggle_button.tooltip_text = "Geoeffnetes Team-Editor-Fenster anzeigen." if _team_editor_open else "Eigenes Rookie-Team im grossen Team-Editor bearbeiten."
+
+
+func _open_team_editor_for_path(entry_path: String = "") -> void:
+	var path: String = entry_path.strip_edges()
+	if path.is_empty():
+		path = _selected_roster_entry_path.strip_edges()
+	if path.is_empty():
+		path = _start_roster_save_path
+	var load_result: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("load_roster", _start_roster_profile_id, path))
+	var roster: Dictionary = Dictionary(load_result.get("roster", {})).duplicate(true)
+	if not bool(load_result.get("ok", false)) and path == _start_roster_save_path and not _start_roster.is_empty():
+		roster = _start_roster.duplicate(true)
+	if roster.is_empty():
+		_status_label.text = "Team fehlt"
+		_play_ui_sfx("warning", "team_editor_missing_roster")
+		return
+	_team_editor_roster_path = path
+	_team_editor_roster = roster.duplicate(true)
+	_normalize_team_editor_roster(true)
+	_selected_roster_entry_path = path
+	_team_editor_selected_unit_id = _resolve_team_editor_selected_unit_id(_team_editor_selected_unit_id)
+	_set_team_editor_open(true)
+	_refresh_team_library()
+	_refresh_team_editor()
+	_status_label.text = "Team-Editor"
+	_play_ui_sfx("click", "team_editor_open")
+
+
+func _set_team_editor_open(open: bool) -> void:
+	if not open and _team_editor_metric_save_queued:
+		_flush_team_editor_metric_save()
+	_team_editor_open = open
+	if _team_editor_panel != null:
+		_team_editor_panel.visible = _team_editor_open
+		_team_editor_panel.mouse_filter = Control.MOUSE_FILTER_STOP if _team_editor_open else Control.MOUSE_FILTER_IGNORE
+	if _team_library_panel != null:
+		_team_library_panel.visible = not _team_editor_open
+		_team_library_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE if _team_editor_open else Control.MOUSE_FILTER_STOP
+	_refresh_team_editor_toggle()
+	if not _team_editor_open:
+		_status_label.text = "Ready"
+
+
+func _set_team_editor_view_mode(view_mode: String) -> void:
+	var _ignored_view_mode: String = view_mode.strip_edges().to_lower()
+	_team_editor_view_mode = TEAM_EDITOR_VIEW_SHEET
+	for mode_variant in _team_editor_view_buttons.keys():
+		var mode: String = String(mode_variant)
+		var button := _team_editor_view_buttons.get(mode) as Button
+		if button != null:
+			button.set_pressed_no_signal(mode == _team_editor_view_mode)
+	_refresh_team_editor()
 
 
 func _refresh_team_name_controls() -> void:
@@ -560,6 +1283,1483 @@ func _refresh_team_name_controls() -> void:
 	_team_name_edit.tooltip_text = "Teamname fuer Roster/Homebase/FOB."
 	if _team_name_suggest_button != null:
 		_team_name_suggest_button.tooltip_text = "Neuen Teamnamen vorschlagen."
+
+
+func _refresh_team_library() -> void:
+	if _team_library_list == null:
+		return
+	var library: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("list_roster_entries", _start_roster_profile_id, _start_roster_save_path))
+	_team_library_entries = Array(library.get("entries", [])).duplicate(true)
+	var active_path: String = String(library.get("active_path", _start_roster_save_path))
+	if _selected_roster_entry_path.strip_edges().is_empty() or _find_team_library_entry(_selected_roster_entry_path).is_empty():
+		_selected_roster_entry_path = active_path
+	_clear_children(_team_library_list)
+	for entry_variant in _team_library_entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var row := Button.new()
+		row.name = "TeamLibraryEntryButton"
+		row.toggle_mode = true
+		row.focus_mode = Control.FOCUS_ALL
+		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.custom_minimum_size = Vector2(320.0, 30.0)
+		row.clip_text = true
+		row.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		row.text = _format_team_library_entry(entry)
+		row.tooltip_text = String(entry.get("path", ""))
+		row.set_meta("roster_entry_path", String(entry.get("path", "")))
+		row.set_meta("team_name", String(entry.get("team_name", "")))
+		row.set_meta("active_roster", bool(entry.get("active", false)))
+		row.set_meta("archived_roster", bool(entry.get("archived", false)))
+		row.set_pressed_no_signal(String(entry.get("path", "")) == _selected_roster_entry_path)
+		row.pressed.connect(_on_team_library_row_pressed.bind(String(entry.get("path", ""))))
+		var row_input_callable := Callable(self, "_on_team_library_row_gui_input").bind(String(entry.get("path", "")))
+		if not row.gui_input.is_connected(row_input_callable):
+			row.gui_input.connect(row_input_callable)
+		_team_library_list.add_child(row)
+	_refresh_team_library_status()
+
+
+func _refresh_team_library_status() -> void:
+	var selected_entry: Dictionary = _find_team_library_entry(_selected_roster_entry_path)
+	var selected_name: String = String(selected_entry.get("team_name", "")).strip_edges()
+	if selected_name.is_empty():
+		selected_name = "kein Team"
+	var selected_active: bool = bool(selected_entry.get("active", false))
+	if _team_library_status_label != null:
+		var prefix: String = "Ausgewaehlt"
+		if selected_active:
+			prefix = "Ausgewaehlt aktiv"
+		elif bool(selected_entry.get("archived", false)):
+			prefix = "Ausgewaehlt Archiv"
+		_team_library_status_label.text = "%s: %s | Bearbeiten oder Doppelklick oeffnet den Team-Editor." % [prefix, selected_name]
+	if _team_library_delete_button != null:
+		var can_delete: bool = not selected_entry.is_empty() and bool(selected_entry.get("can_delete", false)) and not selected_active
+		_team_library_delete_button.disabled = not can_delete
+		_team_library_delete_button.tooltip_text = "Archiv-Team loeschen." if can_delete else "Aktives Team bleibt geschuetzt."
+	if _team_library_activate_button != null:
+		var can_activate: bool = not selected_entry.is_empty() and not selected_active and bool(selected_entry.get("valid", false))
+		_team_library_activate_button.disabled = not can_activate
+		_team_library_activate_button.tooltip_text = "Archiv-Team als aktives Startteam verwenden." if can_activate else "Aktives Team ist bereits ausgewaehlt."
+	if _team_library_edit_button != null:
+		var can_edit: bool = not selected_entry.is_empty() and bool(selected_entry.get("valid", false))
+		_team_library_edit_button.disabled = not can_edit
+		_team_library_edit_button.tooltip_text = "Ausgewaehltes Team mit Name, Portraits, Karten und Rookie-Punkten bearbeiten." if can_edit else "Erst ein gueltiges Team auswaehlen."
+
+
+func _format_team_library_entry(entry: Dictionary) -> String:
+	var team_name: String = String(entry.get("team_name", "")).strip_edges()
+	if team_name.is_empty():
+		team_name = "Unbenanntes Team"
+	var marker: String = "AKTIV" if bool(entry.get("active", false)) else "ARCHIV"
+	var roster_size: int = int(entry.get("roster_size", 0))
+	return "%s  %s  (%d)" % [marker, team_name, roster_size]
+
+
+func _find_team_library_entry(entry_path: String) -> Dictionary:
+	var normalized_path: String = entry_path.strip_edges()
+	for entry_variant in _team_library_entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("path", "")) == normalized_path:
+			return entry
+	return {}
+
+
+func _delete_selected_team_entry(play_sound: bool = true) -> Dictionary:
+	var selected_entry: Dictionary = _find_team_library_entry(_selected_roster_entry_path)
+	if selected_entry.is_empty():
+		return {"ok": false, "reason": "missing_selection"}
+	var result: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("delete_roster_entry", _selected_roster_entry_path, _start_roster_profile_id, _start_roster_save_path))
+	if bool(result.get("ok", false)):
+		_selected_roster_entry_path = _start_roster_save_path
+		_status_label.text = "Team geloescht"
+		if play_sound:
+			_play_ui_sfx("confirm", "delete_roster_entry")
+	else:
+		_status_label.text = "Team bleibt aktiv" if String(result.get("reason", "")) == "active_roster_protected" else "Loeschen fehlgeschlagen"
+		if play_sound:
+			_play_ui_sfx("warning", "delete_roster_entry_failed")
+	_refresh_team_library()
+	return result
+
+
+func _activate_selected_team_entry(play_sound: bool = true) -> Dictionary:
+	var selected_entry: Dictionary = _find_team_library_entry(_selected_roster_entry_path)
+	if selected_entry.is_empty():
+		return {"ok": false, "reason": "missing_selection"}
+	var result: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("activate_roster_entry", _selected_roster_entry_path, _start_roster_profile_id, _start_roster_save_path))
+	if bool(result.get("ok", false)):
+		_start_roster = Dictionary(result.get("roster", {})).duplicate(true)
+		_normalize_start_team_editor(true)
+		_selected_roster_entry_path = _start_roster_save_path
+		_last_start_roster_store_result = Dictionary(result.get("save", result)).duplicate(true)
+		_refresh_team_name_controls()
+		_status_label.text = "Team aktiviert"
+		if play_sound:
+			_play_ui_sfx("confirm", "activate_roster_entry")
+	else:
+		_status_label.text = "Aktivieren fehlgeschlagen"
+		if play_sound:
+			_play_ui_sfx("warning", "activate_roster_entry_failed")
+	_refresh_team_library()
+	_refresh_team_editor()
+	return result
+
+
+func _get_normalized_team_editor(save_if_changed: bool) -> Dictionary:
+	if _team_editor_open and not _team_editor_roster.is_empty():
+		return _normalize_team_editor_roster(save_if_changed)
+	if _start_roster.is_empty():
+		return Dictionary(START_ROSTER_GENERATOR_SCRIPT.call("normalize_team_editor", {}, _start_roster_seed, _start_roster_profile_id))
+	return _normalize_start_team_editor(save_if_changed)
+
+
+func _get_team_editor_roster_source() -> Dictionary:
+	if _team_editor_open and not _team_editor_roster.is_empty():
+		return _team_editor_roster
+	return _start_roster
+
+
+func _editing_team_editor_roster() -> bool:
+	return _team_editor_open and not _team_editor_roster.is_empty()
+
+
+func _normalize_team_editor_roster(save_if_changed: bool) -> Dictionary:
+	var current_editor: Dictionary = Dictionary(_team_editor_roster.get("team_editor", {})).duplicate(true)
+	var normalized: Dictionary = Dictionary(START_ROSTER_GENERATOR_SCRIPT.call("normalize_team_editor", current_editor, String(_team_editor_roster.get("seed", _start_roster_seed)), _start_roster_profile_id))
+	if _team_editor_roster.is_empty():
+		return normalized
+	if current_editor != normalized:
+		_team_editor_roster["team_editor"] = normalized
+		if save_if_changed:
+			_save_team_editor_roster_state("team_editor_normalized")
+	return normalized
+
+
+func _normalize_start_team_editor(save_if_changed: bool) -> Dictionary:
+	var current_editor: Dictionary = Dictionary(_start_roster.get("team_editor", {})).duplicate(true)
+	var normalized: Dictionary = Dictionary(START_ROSTER_GENERATOR_SCRIPT.call("normalize_team_editor", current_editor, String(_start_roster.get("seed", _start_roster_seed)), _start_roster_profile_id))
+	if _start_roster.is_empty():
+		return normalized
+	if current_editor != normalized:
+		_start_roster["team_editor"] = normalized
+		if save_if_changed:
+			_save_start_roster_state("team_editor_normalized")
+	return normalized
+
+
+func _save_team_editor_roster_state(_reason: String, refresh_library: bool = true) -> Dictionary:
+	if _team_editor_roster.is_empty():
+		return {"ok": false, "reason": "missing_roster"}
+	var path: String = _team_editor_roster_path if not _team_editor_roster_path.strip_edges().is_empty() else _start_roster_save_path
+	var save_result: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("save_roster", _team_editor_roster, _start_roster_profile_id, path))
+	_last_start_roster_store_result = save_result.duplicate(true)
+	if bool(save_result.get("ok", false)) and path == _start_roster_save_path:
+		_start_roster = _team_editor_roster.duplicate(true)
+		_refresh_team_name_controls()
+	if refresh_library:
+		_refresh_team_library()
+	return save_result
+
+
+func _queue_team_editor_metric_save(save_reason: String) -> Dictionary:
+	_team_editor_metric_save_reason = save_reason.strip_edges() if not save_reason.strip_edges().is_empty() else "team_editor_unit_metric"
+	if not _team_editor_metric_save_queued:
+		_team_editor_metric_save_queued = true
+		if is_inside_tree():
+			get_tree().create_timer(0.12).timeout.connect(Callable(self, "_flush_team_editor_metric_save"))
+		else:
+			call_deferred("_flush_team_editor_metric_save")
+	return {
+		"ok": true,
+		"reason": "queued",
+		"deferred": true,
+	}
+
+
+func _flush_team_editor_metric_save() -> Dictionary:
+	if not _team_editor_metric_save_queued and _team_editor_metric_save_reason.strip_edges().is_empty():
+		return {}
+	_team_editor_metric_save_queued = false
+	var save_reason: String = _team_editor_metric_save_reason.strip_edges()
+	if save_reason.is_empty():
+		save_reason = "team_editor_unit_metric"
+	_team_editor_metric_save_reason = ""
+	var save_result: Dictionary = {}
+	if _editing_team_editor_roster():
+		save_result = _save_team_editor_roster_state(save_reason, false)
+	else:
+		save_result = _save_start_roster_state(save_reason)
+	_last_start_roster_store_result = save_result.duplicate(true)
+	return save_result
+
+
+func _refresh_team_editor() -> void:
+	_team_editor_refresh_queued = false
+	if _team_editor_panel == null or _team_editor_stats_vbox == null:
+		return
+	var roster: Dictionary = _get_team_editor_roster_source()
+	var editor: Dictionary = _get_normalized_team_editor(false)
+	var identity: Dictionary = Dictionary(TEAM_NAME_GENERATOR_SCRIPT.call("build_team_identity_snapshot", roster))
+	if _team_editor_title_label != null:
+		_team_editor_title_label.text = "Team-Editor | %s" % String(identity.get("team_name", "Team"))
+	if _team_editor_name_edit != null:
+		_team_editor_name_edit.text = String(identity.get("team_name", ""))
+	if _team_editor_summary_label != null:
+		_team_editor_summary_label.text = ""
+		_team_editor_summary_label.visible = false
+	_refresh_team_editor_emblems(editor)
+	_refresh_team_editor_focus_controls(editor)
+	_refresh_team_editor_view_buttons()
+	_refresh_team_editor_cards(roster)
+	_refresh_team_editor_sheet(roster)
+
+
+func _refresh_team_editor_focus_controls(editor: Dictionary = {}) -> void:
+	if _team_editor_stats_vbox == null:
+		return
+	var normalized_editor: Dictionary = editor if not editor.is_empty() else _get_normalized_team_editor(false)
+	var budget_used: int = int(normalized_editor.get("point_budget_used", 0))
+	var budget_max: int = int(normalized_editor.get("point_budget_max", 0))
+	var budget_available: int = int(normalized_editor.get("point_budget_available", 0))
+	if _team_editor_budget_label != null:
+		var policy: Dictionary = Dictionary(normalized_editor.get("point_budget_policy", {}))
+		_team_editor_budget_label.text = "Team-Fokus %d/%d | frei %d | NPC-Werte rechts separat | je Fokus %d-%d" % [
+			budget_used,
+			budget_max,
+			budget_available,
+			int(policy.get("min_per_stat", START_ROSTER_GENERATOR_SCRIPT.TEAM_EDITOR_STAT_MIN)),
+			int(policy.get("max_per_stat", START_ROSTER_GENERATOR_SCRIPT.TEAM_EDITOR_STAT_MAX)),
+		]
+	_clear_children(_team_editor_stats_vbox)
+	_team_editor_stat_rows.clear()
+	var allocations: Dictionary = Dictionary(normalized_editor.get("stat_allocations", {}))
+	var stat_locks: Dictionary = Dictionary(normalized_editor.get("stat_locks", {}))
+	for definition_variant in Array(normalized_editor.get("stat_definitions", [])):
+		if typeof(definition_variant) != TYPE_DICTIONARY:
+			continue
+		var definition: Dictionary = Dictionary(definition_variant)
+		var stat_id: String = String(definition.get("id", "")).strip_edges()
+		if stat_id.is_empty():
+			continue
+		var row := _build_team_editor_stat_row(normalized_editor, definition, int(allocations.get(stat_id, 0)), bool(stat_locks.get(stat_id, false)))
+		_team_editor_stats_vbox.add_child(row)
+	_connect_help_controls_in_tree(_team_editor_stats_vbox)
+
+
+func _queue_team_editor_refresh() -> void:
+	if _team_editor_refresh_queued:
+		return
+	_team_editor_refresh_queued = true
+	call_deferred("_refresh_team_editor")
+
+
+func _build_team_editor_summary_text(roster: Dictionary) -> String:
+	var units: Array = Array(roster.get("units", []))
+	var fireteams: Array = Array(roster.get("fireteam_suggestions", []))
+	var source_label: String = "Aktives Team" if _team_editor_roster_path == _start_roster_save_path else "Archiv-Team"
+	var view_label: String = "Charakterblatt"
+	var size_policy: Dictionary = Dictionary(roster.get("team_size_policy", START_ROSTER_GENERATOR_SCRIPT.call("build_team_size_policy")))
+	var multiplayer_cap: int = int(size_policy.get("multiplayer_side_cap", START_ROSTER_GENERATOR_SCRIPT.MULTIPLAYER_SIDE_CAP))
+	return "%s | %d NPCs | %d Fireteams | Ansicht: %s | Start %d-%d, MP max %d/Seite" % [
+		source_label,
+		units.size(),
+		fireteams.size(),
+		view_label,
+		START_ROSTER_GENERATOR_SCRIPT.MIN_ROSTER_SIZE,
+		START_ROSTER_GENERATOR_SCRIPT.MAX_ROSTER_SIZE,
+		multiplayer_cap,
+	]
+
+
+func _refresh_team_editor_view_buttons() -> void:
+	for mode_variant in _team_editor_view_buttons.keys():
+		var mode: String = String(mode_variant)
+		var button := _team_editor_view_buttons.get(mode) as Button
+		if button != null:
+			button.set_pressed_no_signal(mode == _team_editor_view_mode)
+
+
+func _refresh_team_editor_cards(roster: Dictionary) -> void:
+	if _team_editor_card_grid == null or _team_editor_cards_scroll == null:
+		return
+	_clear_children(_team_editor_card_grid)
+	_team_editor_selected_unit_id = _resolve_team_editor_selected_unit_id(_team_editor_selected_unit_id)
+	var units: Array = Array(roster.get("units", []))
+	var card_size: Vector2 = Vector2(326.0, 110.0)
+	_team_editor_card_grid.columns = 1
+	_team_editor_cards_scroll.custom_minimum_size = Vector2(352.0, 0.0)
+	_team_editor_cards_scroll.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	for unit_variant in units:
+		if typeof(unit_variant) != TYPE_DICTIONARY:
+			continue
+		var unit: Dictionary = Dictionary(unit_variant)
+		var card := _build_team_editor_unit_card(unit, card_size, true)
+		_team_editor_card_grid.add_child(card)
+		_connect_help_controls_in_tree(card)
+
+
+func _refresh_team_editor_sheet(roster: Dictionary) -> void:
+	if _team_editor_sheet_scroll == null or _team_editor_sheet_host == null:
+		return
+	_team_editor_sheet_scroll.visible = _team_editor_view_mode == TEAM_EDITOR_VIEW_SHEET
+	_clear_children(_team_editor_sheet_host)
+	_team_editor_unit_name_edit = null
+	_team_editor_unit_portrait_preview = null
+	_team_editor_unit_portrait_option = null
+	if _team_editor_view_mode != TEAM_EDITOR_VIEW_SHEET:
+		return
+	var unit: Dictionary = _find_team_editor_unit(roster, _team_editor_selected_unit_id)
+	if unit.is_empty():
+		var empty_label := Label.new()
+		empty_label.text = "Keine NPC-Karte ausgewaehlt."
+		empty_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_team_editor_sheet_host.add_child(empty_label)
+		return
+	var profile = META_UNIT_PROFILE_SCRIPT.new(unit)
+	_add_team_editor_character_edit_controls(_team_editor_sheet_host, unit)
+	_connect_help_controls_in_tree(_team_editor_sheet_host)
+	var unit_id: String = String(unit.get("unit_id", ""))
+	var render_options: Dictionary = {
+		"on_value_changed": Callable(self, "_on_team_editor_profile_metric_changed").bind(unit_id),
+		"on_metric_lock_changed": Callable(self, "_on_team_editor_profile_metric_lock_changed").bind(unit_id),
+		"metric_group_budgets": _build_team_editor_metric_group_budgets(unit),
+		"metric_locks": _get_team_editor_metric_locks_for_unit(unit_id),
+		"group_editable_metrics": true,
+		"two_column_layout": true,
+		"show_badge_progress": true,
+		"hide_short_description": true,
+		"move_last_loadout_to_bottom": true,
+		"show_all_platform_rows": true,
+	}
+	var sheet_body := VBoxContainer.new()
+	sheet_body.name = "TeamEditorCharacterSheetBody"
+	sheet_body.custom_minimum_size = Vector2(760.0, 0.0)
+	sheet_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_team_editor_sheet_host.add_child(sheet_body)
+	CHARACTER_SHEET_VIEW_SCRIPT.call("render", sheet_body, profile, render_options)
+	_connect_help_controls_in_tree(sheet_body)
+
+
+func _add_team_editor_character_edit_controls(host: VBoxContainer, unit: Dictionary) -> void:
+	if host == null:
+		return
+	var unit_id: String = String(unit.get("unit_id", "")).strip_edges()
+	var panel := PanelContainer.new()
+	panel.name = "TeamEditorCharacterEditPanel"
+	panel.set_meta("character_editor_controls", true)
+	panel.set_meta("help_id", "character_sheet.identity")
+	panel.tooltip_text = "Name und Portrait werden direkt im geoeffneten Roster gespeichert."
+	host.add_child(panel)
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 10)
+	margin.add_theme_constant_override("margin_top", 8)
+	margin.add_theme_constant_override("margin_right", 10)
+	margin.add_theme_constant_override("margin_bottom", 8)
+	panel.add_child(margin)
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 6)
+	margin.add_child(vbox)
+	var title := Label.new()
+	title.text = "Charakter bearbeiten"
+	title.add_theme_font_size_override("font_size", 13)
+	title.tooltip_text = "Alle sichtbaren Plus/Minus-Werte im Blatt speichern sofort im Roster."
+	title.set_meta("help_id", "character_sheet.identity")
+	vbox.add_child(title)
+	var name_row := HBoxContainer.new()
+	name_row.add_theme_constant_override("separation", 8)
+	vbox.add_child(name_row)
+	var name_label := Label.new()
+	name_label.text = "Name"
+	name_label.custom_minimum_size = Vector2(62.0, 0.0)
+	name_label.tooltip_text = "Anzeigename dieses NPCs im aktuellen Roster."
+	name_label.set_meta("help_id", "character_sheet.name")
+	name_row.add_child(name_label)
+	_team_editor_unit_name_edit = LineEdit.new()
+	_team_editor_unit_name_edit.name = "TeamEditorUnitNameEdit"
+	_team_editor_unit_name_edit.text = String(unit.get("display_name", ""))
+	_team_editor_unit_name_edit.placeholder_text = "Operator-Name"
+	_team_editor_unit_name_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_team_editor_unit_name_edit.tooltip_text = "Enter oder Fokusverlust speichert den Namen sofort."
+	_team_editor_unit_name_edit.set_meta("help_id", "character_sheet.name")
+	_team_editor_unit_name_edit.text_submitted.connect(_on_team_editor_unit_name_submitted.bind(unit_id))
+	_team_editor_unit_name_edit.focus_exited.connect(_on_team_editor_unit_name_focus_exited.bind(unit_id, _team_editor_unit_name_edit))
+	name_row.add_child(_team_editor_unit_name_edit)
+	var portrait_row := HBoxContainer.new()
+	portrait_row.add_theme_constant_override("separation", 8)
+	vbox.add_child(portrait_row)
+	_team_editor_unit_portrait_preview = TextureRect.new()
+	_team_editor_unit_portrait_preview.name = "TeamEditorUnitPortraitPreview"
+	_team_editor_unit_portrait_preview.custom_minimum_size = Vector2(42.0, 42.0)
+	_team_editor_unit_portrait_preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_team_editor_unit_portrait_preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	_team_editor_unit_portrait_preview.texture = PORTRAIT_IDENTITY_CATALOG_SCRIPT.call("load_texture", String(unit.get("portrait_id", "")), String(unit.get("portrait_path", ""))) as Texture2D
+	_team_editor_unit_portrait_preview.tooltip_text = "Aktuelles Portrait: %s" % String(unit.get("portrait_id", ""))
+	_team_editor_unit_portrait_preview.set_meta("help_id", "character_sheet.portrait")
+	portrait_row.add_child(_team_editor_unit_portrait_preview)
+	_team_editor_unit_portrait_option = OptionButton.new()
+	_team_editor_unit_portrait_option.name = "TeamEditorUnitPortraitOption"
+	_team_editor_unit_portrait_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_team_editor_unit_portrait_option.custom_minimum_size = Vector2(220.0, 34.0)
+	_team_editor_unit_portrait_option.tooltip_text = "Portrait aus dem vorhandenen Portrait-Katalog auswaehlen. Die Vorschau links aendert sich sofort."
+	_team_editor_unit_portrait_option.set_meta("help_id", "character_sheet.portrait")
+	_populate_team_editor_unit_portrait_options(_team_editor_unit_portrait_option, String(unit.get("portrait_id", "")), String(unit.get("portrait_path", "")))
+	_team_editor_unit_portrait_option.item_selected.connect(_on_team_editor_unit_portrait_selected.bind(unit_id, _team_editor_unit_portrait_option))
+	portrait_row.add_child(_team_editor_unit_portrait_option)
+	_connect_help_control(name_label, "character_sheet.name")
+	_connect_help_control(_team_editor_unit_name_edit, "character_sheet.name")
+	_connect_help_control(_team_editor_unit_portrait_preview, "character_sheet.portrait")
+	_connect_help_control(_team_editor_unit_portrait_option, "character_sheet.portrait")
+
+
+func _build_team_editor_unit_card(unit: Dictionary, card_size: Vector2, compact: bool) -> PanelContainer:
+	var unit_id: String = String(unit.get("unit_id", "")).strip_edges()
+	var card := PanelContainer.new()
+	card.name = "TeamEditorUnitCard_%s" % unit_id
+	card.custom_minimum_size = card_size
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.mouse_filter = Control.MOUSE_FILTER_STOP
+	card.tooltip_text = _build_team_editor_unit_tooltip(unit)
+	card.set_meta("team_editor_unit_card", true)
+	card.set_meta("unit_id", unit_id)
+	card.set_meta("help_id", "character_sheet.identity")
+	if unit_id == _team_editor_selected_unit_id:
+		card.self_modulate = Color(0.80, 1.0, 0.92, 1.0)
+	var input_callable := Callable(self, "_on_team_editor_unit_card_gui_input").bind(unit_id)
+	if not card.gui_input.is_connected(input_callable):
+		card.gui_input.connect(input_callable)
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 10)
+	margin.add_theme_constant_override("margin_top", 8)
+	margin.add_theme_constant_override("margin_right", 10)
+	margin.add_theme_constant_override("margin_bottom", 8)
+	card.add_child(margin)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	margin.add_child(row)
+	var portrait := TextureRect.new()
+	portrait.name = "TeamEditorUnitPortrait"
+	portrait.custom_minimum_size = Vector2(58.0, 58.0) if compact else Vector2(74.0, 74.0)
+	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	portrait.texture = PORTRAIT_IDENTITY_CATALOG_SCRIPT.call("load_texture", String(unit.get("portrait_id", "")), String(unit.get("portrait_path", ""))) as Texture2D
+	portrait.tooltip_text = "Portrait: %s" % String(unit.get("portrait_id", ""))
+	portrait.set_meta("help_id", "character_sheet.portrait")
+	row.add_child(portrait)
+	var info := VBoxContainer.new()
+	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info.add_theme_constant_override("separation", 4)
+	row.add_child(info)
+	var name_label := Label.new()
+	name_label.text = String(unit.get("display_name", "Unbenannter NPC"))
+	name_label.clip_text = true
+	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	name_label.add_theme_font_size_override("font_size", 14 if compact else 16)
+	name_label.tooltip_text = "Anzeigename dieses NPCs im aktuellen Roster."
+	name_label.set_meta("help_id", "character_sheet.name")
+	info.add_child(name_label)
+	var role_label := Label.new()
+	role_label.text = "%s | %s" % [_build_team_editor_role_fit_label(unit), String(unit.get("fireteam_id", "reserve")).to_upper()]
+	role_label.clip_text = true
+	role_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	role_label.add_theme_font_size_override("font_size", 11)
+	role_label.tooltip_text = _build_team_editor_role_fit_tooltip(unit)
+	role_label.set_meta("help_id", "character_sheet.role")
+	info.add_child(role_label)
+	_add_team_editor_badge_row(info, unit)
+	if compact:
+		var compact_stats := Label.new()
+		compact_stats.text = "A %.2f  S %.2f  L %.2f  T %.2f\nDS %.2f  FR %.2f  FG %.2f" % [
+			_unit_skill_value(unit, "accuracy"),
+			_unit_skill_value(unit, "speed"),
+			_unit_skill_value(unit, "leadership"),
+			_unit_skill_value(unit, "toughness"),
+			_unit_skill_value(unit, "dropship_piloting"),
+			_unit_skill_value(unit, "freighter_piloting"),
+			_unit_skill_value(unit, "fighter_piloting"),
+		]
+		compact_stats.add_theme_font_size_override("font_size", 10)
+		compact_stats.tooltip_text = "Accuracy, Speed, Leadership, Toughness sowie Dropship/Frachter/Fighter-Piloting."
+		compact_stats.set_meta("help_id", "character_sheet.core_values")
+		info.add_child(compact_stats)
+	else:
+		for stat_id in ["accuracy", "speed", "leadership", "toughness"]:
+			info.add_child(_build_team_editor_unit_stat_row(unit, stat_id))
+		var flight_stats := Label.new()
+		flight_stats.text = "Flug: DS %.2f | FR %.2f | FG %.2f" % [
+			_unit_skill_value(unit, "dropship_piloting"),
+			_unit_skill_value(unit, "freighter_piloting"),
+			_unit_skill_value(unit, "fighter_piloting"),
+		]
+		flight_stats.add_theme_font_size_override("font_size", 10)
+		flight_stats.tooltip_text = "Drei Plattformwerte fuer Dropship-, Frachter- und Fighter-Piloten."
+		flight_stats.set_meta("help_id", "character_sheet.platform_skills")
+		info.add_child(flight_stats)
+		var action_row := HBoxContainer.new()
+		action_row.name = "TeamEditorCardActionRow"
+		action_row.add_theme_constant_override("separation", 6)
+		info.add_child(action_row)
+		var open_sheet_button := Button.new()
+		open_sheet_button.name = "TeamEditorOpenSheet_%s" % unit_id
+		open_sheet_button.text = "Blatt"
+		open_sheet_button.custom_minimum_size = Vector2(68.0, 24.0)
+		open_sheet_button.tooltip_text = "Diesen NPC im voll editierbaren Charakterblatt oeffnen."
+		open_sheet_button.set_meta("help_id", "character_sheet.identity")
+		open_sheet_button.pressed.connect(_on_team_editor_unit_sheet_button_pressed.bind(unit_id))
+		action_row.add_child(open_sheet_button)
+	return card
+
+
+func _add_team_editor_badge_row(host: VBoxContainer, unit: Dictionary) -> void:
+	var badge_grid := GridContainer.new()
+	badge_grid.name = "TeamEditorBadgeGrid"
+	badge_grid.columns = 3
+	badge_grid.add_theme_constant_override("h_separation", 7)
+	badge_grid.add_theme_constant_override("v_separation", 3)
+	badge_grid.set_meta("help_id", "character_sheet.rank_badges")
+	host.add_child(badge_grid)
+	var profile = META_UNIT_PROFILE_SCRIPT.new(unit)
+	var progress: Array = Array(NPC_RANK_BADGE_RESOLVER_SCRIPT.call("get_badge_progress_for_profile", profile, 0, false))
+	for badge_variant in progress:
+		if typeof(badge_variant) != TYPE_DICTIONARY:
+			continue
+		var badge: Dictionary = Dictionary(badge_variant)
+		if String(badge.get("badge_key", "")).strip_edges() == "enemy":
+			continue
+		var badge_key: String = String(badge.get("badge_key", badge.get("badge_id", "unknown"))).strip_edges()
+		var badge_cell := VBoxContainer.new()
+		badge_cell.name = "TeamEditorBadgeCell_%s" % badge_key
+		badge_cell.custom_minimum_size = Vector2(46.0, 0.0)
+		badge_cell.add_theme_constant_override("separation", 1)
+		badge_cell.set_meta("help_id", "character_sheet.rank_badges")
+		NPC_RANK_BADGE_RESOLVER_SCRIPT.call("apply_badge_help_metadata", badge_cell, badge)
+		var icon_holder := CenterContainer.new()
+		icon_holder.name = "TeamEditorBadgeIconHolder_%s" % badge_key
+		badge_cell.add_child(icon_holder)
+		var badge_rect := TextureRect.new()
+		badge_rect.name = "TeamEditorRankBadge_%s" % badge_key
+		badge_rect.custom_minimum_size = Vector2(18.0, 18.0)
+		badge_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		badge_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		badge_rect.set_meta("rank_badge_progress_candidate", true)
+		NPC_RANK_BADGE_RESOLVER_SCRIPT.call("apply_badge_help_metadata", badge_rect, badge)
+		var path: String = String(badge.get("path", "")).strip_edges()
+		if not path.is_empty() and ResourceLoader.exists(path):
+			badge_rect.texture = load(path) as Texture2D
+		if not bool(badge.get("achieved", false)):
+			badge_rect.modulate = Color(0.42, 0.45, 0.48, 0.52)
+			badge_rect.set_meta("rank_badge_locked", true)
+		if badge_rect.texture == null:
+			badge_rect.modulate = Color(1.0, 0.45, 0.35, 0.95) if bool(badge.get("achieved", false)) else Color(0.50, 0.34, 0.32, 0.64)
+			badge_rect.set_meta("missing_rank_badge_asset", true)
+		icon_holder.add_child(badge_rect)
+		var badge_label := Label.new()
+		badge_label.name = "TeamEditorRankBadgeLabel_%s" % badge_key
+		badge_label.text = String(badge.get("label", "Badge")).strip_edges()
+		badge_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		badge_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		badge_label.max_lines_visible = 2
+		badge_label.custom_minimum_size = Vector2(46.0, 0.0)
+		badge_label.add_theme_font_size_override("font_size", 8)
+		badge_label.modulate = Color(0.78, 0.86, 0.90, 0.94) if bool(badge.get("achieved", false)) else Color(0.52, 0.58, 0.62, 0.72)
+		badge_label.set_meta("help_id", "character_sheet.rank_badges")
+		NPC_RANK_BADGE_RESOLVER_SCRIPT.call("apply_badge_help_metadata", badge_label, badge)
+		badge_cell.add_child(badge_label)
+		badge_grid.add_child(badge_cell)
+	if badge_grid.get_child_count() == 0:
+		var no_badge := Label.new()
+		no_badge.text = "Rookie"
+		no_badge.add_theme_font_size_override("font_size", 10)
+		no_badge.tooltip_text = "Noch keine starke abgeleitete Spezialisierung."
+		no_badge.set_meta("help_id", "character_sheet.rank_badges")
+		badge_grid.add_child(no_badge)
+
+
+func _build_team_editor_role_fit_label(unit: Dictionary) -> String:
+	var achieved_parts: PackedStringArray = PackedStringArray()
+	var next_parts: PackedStringArray = PackedStringArray()
+	var progress: Array = Array(NPC_RANK_BADGE_RESOLVER_SCRIPT.call("get_badge_progress_for_profile", META_UNIT_PROFILE_SCRIPT.new(unit), 0, false))
+	for badge_variant in progress:
+		if typeof(badge_variant) != TYPE_DICTIONARY:
+			continue
+		var badge: Dictionary = Dictionary(badge_variant)
+		if String(badge.get("badge_key", "")).strip_edges() == "enemy":
+			continue
+		var label: String = "%s %.2f" % [String(badge.get("label", "Badge")), float(badge.get("score", 0.0))]
+		if bool(badge.get("achieved", false)):
+			achieved_parts.append(label)
+		elif next_parts.size() < 1:
+			next_parts.append(label)
+	if not achieved_parts.is_empty():
+		return "Fit %s" % " / ".join(achieved_parts.slice(0, mini(2, achieved_parts.size())))
+	if not next_parts.is_empty():
+		return "Fit offen -> %s" % String(next_parts[0])
+	return "Fit offen"
+
+
+func _build_team_editor_role_fit_tooltip(unit: Dictionary) -> String:
+	var stored_role: String = String(unit.get("role_name", unit.get("role_id", ""))).strip_edges()
+	var progress: Array = Array(NPC_RANK_BADGE_RESOLVER_SCRIPT.call("get_badge_progress_for_profile", META_UNIT_PROFILE_SCRIPT.new(unit), 0, false))
+	var lines: PackedStringArray = PackedStringArray()
+	lines.append("Rollen-Fit aus Kernwerten, Kommunikation, Verhalten, Plattformwerten und Loadout-Kontext.")
+	if not stored_role.is_empty():
+		lines.append("Gespeicherter Starttext: %s" % stored_role)
+	for badge_variant in progress:
+		if typeof(badge_variant) != TYPE_DICTIONARY:
+			continue
+		var badge: Dictionary = Dictionary(badge_variant)
+		if String(badge.get("badge_key", "")).strip_edges() == "enemy":
+			continue
+		lines.append("%s %.2f - %s" % [
+			String(badge.get("label", "Badge")),
+			float(badge.get("score", 0.0)),
+			String(badge.get("requirement_text", "")),
+		])
+	return "\n".join(lines)
+
+
+func _build_team_editor_unit_stat_row(unit: Dictionary, stat_id: String) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	var help_id: String = _team_editor_unit_stat_help_id(stat_id)
+	row.set_meta("help_id", help_id)
+	row.tooltip_text = _team_editor_unit_stat_tooltip(stat_id)
+	var label := Label.new()
+	label.text = stat_id.substr(0, 1).to_upper()
+	label.custom_minimum_size = Vector2(14.0, 0.0)
+	label.add_theme_font_size_override("font_size", 10)
+	label.tooltip_text = _team_editor_unit_stat_tooltip(stat_id)
+	label.set_meta("help_id", help_id)
+	row.add_child(label)
+	var bar := ProgressBar.new()
+	bar.min_value = 0.0
+	bar.max_value = 1.0
+	bar.value = _unit_skill_value(unit, stat_id)
+	bar.show_percentage = false
+	bar.custom_minimum_size = Vector2(120.0, 12.0)
+	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bar.tooltip_text = label.tooltip_text
+	bar.set_meta("help_id", help_id)
+	row.add_child(bar)
+	var value_label := Label.new()
+	value_label.text = "%.2f" % _unit_skill_value(unit, stat_id)
+	value_label.custom_minimum_size = Vector2(38.0, 0.0)
+	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	value_label.add_theme_font_size_override("font_size", 10)
+	value_label.tooltip_text = label.tooltip_text
+	value_label.set_meta("help_id", help_id)
+	row.add_child(value_label)
+	return row
+
+
+func _build_team_editor_unit_tooltip(unit: Dictionary) -> String:
+	var traits: PackedStringArray = PackedStringArray(unit.get("trait_ids", PackedStringArray()))
+	var badges: Array = Array(NPC_RANK_BADGE_RESOLVER_SCRIPT.call("get_badges_for_profile", META_UNIT_PROFILE_SCRIPT.new(unit)))
+	var badge_parts: PackedStringArray = PackedStringArray()
+	for badge_variant in badges:
+		if typeof(badge_variant) == TYPE_DICTIONARY:
+			var badge: Dictionary = Dictionary(badge_variant)
+			badge_parts.append("%s (%s)" % [String(badge.get("label", "")), String(badge.get("reason", ""))])
+	return "%s\nRolle: %s\nLoadout: %s\nTraits: %s\nAbgeleitet: %s" % [
+		String(unit.get("display_name", "")),
+		String(unit.get("role_name", unit.get("role_id", ""))),
+		String(unit.get("loadout_summary", "")),
+		", ".join(traits),
+		", ".join(badge_parts),
+	]
+
+
+func _team_editor_unit_stat_tooltip(stat_id: String) -> String:
+	match stat_id:
+		"accuracy":
+			return "Accuracy: bestimmt Trefferchance und abgeleitete Shooter-/Meisterschuetze-Tendenz."
+		"speed":
+			return "Speed: beeinflusst Bewegung, Reaktionszeit und Scout-/Pilotengefuehl."
+		"leadership":
+			return "Leadership: wichtig fuer FTL, Befehlsruhe und Leader-Badges."
+		"toughness":
+			return "Toughness: haelt Druck, Verletzungen und Frustspitzen besser aus."
+		"dropship_piloting":
+			return "Dropship Piloting: wichtig fuer LZ-Anflug, Touchdown und Rueckflug."
+		"freighter_piloting":
+			return "Freighter Piloting: wichtig fuer schwere Transporte und Cargo-Routen."
+		"fighter_piloting":
+			return "Fighter Piloting: wichtig fuer Begleitschutz, Abfangen und Strike-Rollen."
+		_:
+			return stat_id.capitalize()
+
+
+func _team_editor_unit_stat_help_id(stat_id: String) -> String:
+	match stat_id:
+		"accuracy", "speed", "toughness", "awareness", "recognition", "stealth", "discipline", "leadership":
+			return "character_sheet.core.%s" % stat_id
+		"dropship_piloting", "freighter_piloting", "fighter_piloting", "ground_vehicle_handling":
+			return "character_sheet.platform.%s" % stat_id
+		"speech_quality", "speech_quantity":
+			return "character_sheet.%s" % stat_id
+		"initiative", "order_fidelity", "signature_control", "contact_stability", "autonomy":
+			return "character_sheet.%s" % stat_id
+		_:
+			return "character_sheet.core_values"
+
+
+func _unit_skill_value(unit: Dictionary, stat_id: String) -> float:
+	var values: Dictionary = Dictionary(unit.get("skill_values", {}))
+	if values.has(stat_id):
+		return clampf(float(values.get(stat_id, 0.0)), 0.0, 1.0)
+	var platform_values: Dictionary = Dictionary(unit.get("platform_values", {}))
+	if platform_values.has(stat_id):
+		return clampf(float(platform_values.get(stat_id, 0.0)), 0.0, 1.0)
+	var communication_values: Dictionary = Dictionary(unit.get("communication_values", {}))
+	if communication_values.has(stat_id):
+		return clampf(float(communication_values.get(stat_id, 0.0)), 0.0, 1.0)
+	var behavior_axes: Dictionary = Dictionary(unit.get("behavior_axes", {}))
+	if behavior_axes.has(stat_id):
+		return clampf(float(behavior_axes.get(stat_id, 0.0)), 0.0, 1.0)
+	return clampf(float(unit.get("skill_%s" % stat_id, 0.0)), 0.0, 1.0)
+
+
+func _build_team_editor_metric_group_budgets(unit: Dictionary) -> Dictionary:
+	if unit.is_empty():
+		return {}
+	var unit_id: String = String(unit.get("unit_id", "")).strip_edges()
+	if unit_id.is_empty():
+		return {}
+	var result: Dictionary = {}
+	for group_variant in TEAM_EDITOR_METRIC_GROUP_CONFIG.keys():
+		var group_id: String = String(group_variant)
+		var config: Dictionary = Dictionary(TEAM_EDITOR_METRIC_GROUP_CONFIG.get(group_id, {}))
+		var budget_key: String = "%s|%s" % [unit_id, group_id]
+		var used_points: int = _team_editor_metric_group_used_points(unit, group_id)
+		if not _team_editor_metric_group_budgets.has(budget_key):
+			var default_cap: int = int(config.get("row_count", 1)) * int(config.get("points_per_row", 12))
+			_team_editor_metric_group_budgets[budget_key] = maxi(default_cap, used_points + 2)
+		result[group_id] = {
+			"label": String(config.get("label", group_id.capitalize())),
+			"help_id": String(config.get("help_id", "character_sheet.skill_group_budget")),
+			"max_points": int(_team_editor_metric_group_budgets.get(budget_key, used_points)),
+			"points_per_value": TEAM_EDITOR_METRIC_POINTS_PER_VALUE,
+		}
+	return result
+
+
+func _team_editor_metric_group_used_points(unit: Dictionary, group_id: String) -> int:
+	var total: int = 0
+	var source: Dictionary = Dictionary(unit.get(group_id, {}))
+	for key in _team_editor_metric_group_keys(group_id):
+		total += roundi(clampf(float(source.get(key, 0.0)), 0.0, 1.0) * float(TEAM_EDITOR_METRIC_POINTS_PER_VALUE))
+	return total
+
+
+func _team_editor_metric_group_keys(group_id: String) -> PackedStringArray:
+	match group_id:
+		"progression":
+			return PackedStringArray(["morale", "frustration"])
+		"skill_values":
+			return PackedStringArray(["accuracy", "speed", "toughness", "awareness", "recognition", "stealth", "discipline", "leadership"])
+		"communication_values":
+			return PackedStringArray(["speech_quality", "speech_quantity"])
+		"platform_values":
+			return PackedStringArray(["ground_vehicle_handling", "dropship_piloting", "freighter_piloting", "fighter_piloting"])
+		"behavior_axes":
+			return PackedStringArray(["initiative", "order_fidelity", "signature_control", "contact_stability", "autonomy"])
+		_:
+			return PackedStringArray()
+
+
+func _get_team_editor_metric_locks_for_unit(unit_id: String) -> Dictionary:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return {}
+	var prefix: String = "%s|" % normalized_unit_id
+	var result: Dictionary = {}
+	var editor: Dictionary = _get_normalized_team_editor(false)
+	var persistent_locks: Dictionary = Dictionary(editor.get("metric_locks", {}))
+	for key_variant in persistent_locks.keys():
+		var full_key: String = String(key_variant)
+		if not full_key.begins_with(prefix):
+			continue
+		result[full_key.substr(prefix.length())] = bool(persistent_locks.get(full_key, false))
+	for key_variant in _team_editor_metric_locks.keys():
+		var session_key: String = String(key_variant)
+		if not session_key.begins_with(prefix):
+			continue
+		result[session_key.substr(prefix.length())] = bool(_team_editor_metric_locks.get(session_key, false))
+	return result
+
+
+func _team_editor_metric_lock_key(unit_id: String, row_data: Dictionary) -> String:
+	var value_group: String = String(row_data.get("value_group", "")).strip_edges()
+	var value_key: String = String(row_data.get("value_key", "")).strip_edges()
+	if value_group.is_empty() or value_key.is_empty():
+		return ""
+	return "%s|%s.%s" % [unit_id.strip_edges(), value_group, value_key]
+
+
+func _set_team_editor_metric_lock(unit_id: String, row_data: Dictionary, locked: bool) -> Dictionary:
+	var lock_key: String = _team_editor_metric_lock_key(unit_id, row_data)
+	if lock_key.is_empty():
+		return {"ok": false, "reason": "missing_lock_key"}
+	if locked:
+		_team_editor_metric_locks[lock_key] = true
+	else:
+		_team_editor_metric_locks.erase(lock_key)
+	var editor: Dictionary = _get_normalized_team_editor(false)
+	var metric_locks: Dictionary = Dictionary(editor.get("metric_locks", {})).duplicate(true)
+	if locked:
+		metric_locks[lock_key] = true
+	else:
+		metric_locks.erase(lock_key)
+	editor["metric_locks"] = metric_locks
+	var save_result: Dictionary = {}
+	if _editing_team_editor_roster():
+		_team_editor_roster["team_editor"] = START_ROSTER_GENERATOR_SCRIPT.call("normalize_team_editor", editor, String(_team_editor_roster.get("seed", _start_roster_seed)), _start_roster_profile_id)
+		save_result = _save_team_editor_roster_state("team_editor_metric_lock")
+	else:
+		_start_roster["team_editor"] = START_ROSTER_GENERATOR_SCRIPT.call("normalize_team_editor", editor, String(_start_roster.get("seed", _start_roster_seed)), _start_roster_profile_id)
+		save_result = _save_start_roster_state("team_editor_metric_lock")
+	_queue_team_editor_refresh()
+	return {
+		"ok": bool(save_result.get("ok", false)),
+		"lock_key": lock_key,
+		"locked": locked,
+		"save": save_result,
+	}
+
+
+func _resolve_team_editor_selected_unit_id(candidate_unit_id: String) -> String:
+	var candidate: String = candidate_unit_id.strip_edges()
+	for unit_variant in Array(_get_team_editor_roster_source().get("units", [])):
+		if typeof(unit_variant) != TYPE_DICTIONARY:
+			continue
+		var unit: Dictionary = Dictionary(unit_variant)
+		var unit_id: String = String(unit.get("unit_id", "")).strip_edges()
+		if unit_id == candidate:
+			return candidate
+	for unit_variant in Array(_get_team_editor_roster_source().get("units", [])):
+		if typeof(unit_variant) == TYPE_DICTIONARY:
+			return String(Dictionary(unit_variant).get("unit_id", "")).strip_edges()
+	return ""
+
+
+func _find_team_editor_unit(roster: Dictionary, unit_id: String) -> Dictionary:
+	var normalized_id: String = unit_id.strip_edges()
+	for unit_variant in Array(roster.get("units", [])):
+		if typeof(unit_variant) != TYPE_DICTIONARY:
+			continue
+		var unit: Dictionary = Dictionary(unit_variant)
+		if String(unit.get("unit_id", "")).strip_edges() == normalized_id:
+			return unit
+	return {}
+
+
+func _set_team_editor_unit_name(unit_id: String, next_name: String, play_sound: bool = true) -> Dictionary:
+	var normalized_name: String = next_name.strip_edges()
+	if normalized_name.is_empty():
+		return {"ok": false, "reason": "empty_name", "unit_id": unit_id}
+	return _update_team_editor_unit(unit_id, {"display_name": normalized_name}, "team_editor_unit_name", play_sound)
+
+
+func _set_team_editor_unit_portrait(unit_id: String, portrait_id: String, portrait_path: String, play_sound: bool = true) -> Dictionary:
+	var normalized_id: String = portrait_id.strip_edges()
+	var normalized_path: String = portrait_path.strip_edges()
+	if normalized_id.is_empty():
+		return {"ok": false, "reason": "empty_portrait", "unit_id": unit_id}
+	if normalized_path.is_empty():
+		normalized_path = String(PORTRAIT_IDENTITY_CATALOG_SCRIPT.call("resolve_path", normalized_id, ""))
+	return _update_team_editor_unit(unit_id, {"portrait_id": normalized_id, "portrait_path": normalized_path}, "team_editor_unit_portrait", play_sound)
+
+
+func _replace_team_editor_unit_from_profile(unit_id: String, profile, row_data: Dictionary = {}) -> Dictionary:
+	if profile == null or not profile.has_method("to_dict"):
+		return {"ok": false, "reason": "invalid_profile", "unit_id": unit_id}
+	var profile_data: Dictionary = Dictionary(profile.call("to_dict"))
+	profile_data = _rebuild_team_editor_profile_derived_values(profile_data, row_data)
+	return _update_team_editor_unit(unit_id, profile_data, "team_editor_unit_metric", false, true)
+
+
+func _rebuild_team_editor_profile_derived_values(profile_data: Dictionary, row_data: Dictionary = {}) -> Dictionary:
+	var result: Dictionary = profile_data.duplicate(true)
+	var edited_group: String = String(row_data.get("value_group", "")).strip_edges()
+	var original_behavior_axes: Dictionary = Dictionary(result.get("behavior_axes", {})).duplicate(true)
+	var math_input: Dictionary = result.duplicate(true)
+	for key_variant in Dictionary(result.get("skill_values", {})).keys():
+		var key: String = String(key_variant)
+		math_input[key] = float(Dictionary(result.get("skill_values", {})).get(key, 0.0))
+	for key_variant in Dictionary(result.get("communication_values", {})).keys():
+		var key: String = String(key_variant)
+		math_input[key] = float(Dictionary(result.get("communication_values", {})).get(key, 0.0))
+	if edited_group != "platform_values":
+		math_input.erase("platform_values")
+	else:
+		for key_variant in Dictionary(result.get("platform_values", {})).keys():
+			var key: String = String(key_variant)
+			math_input[key] = float(Dictionary(result.get("platform_values", {})).get(key, UNIT_PROFILE_MATH_SCRIPT.NOT_APPLICABLE))
+	var bundle: Dictionary = Dictionary(UNIT_PROFILE_MATH_SCRIPT.call("build_character_bundle", math_input))
+	result["role_id"] = String(bundle.get("role_id", result.get("role_id", "")))
+	result["skill_values"] = Dictionary(bundle.get("core_values", result.get("skill_values", {}))).duplicate(true)
+	result["communication_values"] = Dictionary(bundle.get("communication_values", result.get("communication_values", {}))).duplicate(true)
+	result["platform_values"] = Dictionary(bundle.get("platform_values", result.get("platform_values", {}))).duplicate(true)
+	result["behavior_axes"] = original_behavior_axes if edited_group == "behavior_axes" else Dictionary(bundle.get("behavior_axes", result.get("behavior_axes", {}))).duplicate(true)
+	result["method_scores"] = Dictionary(bundle.get("method_scores", result.get("method_scores", {}))).duplicate(true)
+	result["function_scores"] = Dictionary(bundle.get("function_scores", result.get("function_scores", {}))).duplicate(true)
+	result["method_summary_text"] = String(bundle.get("method_summary", result.get("method_summary_text", ""))).strip_edges()
+	result["function_summary_text"] = String(bundle.get("function_summary", result.get("function_summary_text", ""))).strip_edges()
+	var skills: Dictionary = Dictionary(result.get("skill_values", {}))
+	result["skill_summary_text"] = "A:%.1f S:%.1f L:%.1f T:%.1f" % [
+		float(skills.get("accuracy", 0.0)),
+		float(skills.get("speed", 0.0)),
+		float(skills.get("leadership", 0.0)),
+		float(skills.get("toughness", 0.0)),
+	]
+	result["primary_specialty"] = String(bundle.get("primary_specialty", result.get("primary_specialty", ""))).strip_edges()
+	result["secondary_specialty"] = String(bundle.get("secondary_specialty", result.get("secondary_specialty", ""))).strip_edges()
+	result["specialty_text"] = String(result.get("primary_specialty", result.get("specialty_text", ""))).strip_edges()
+	result["combat_effect_summary_text"] = String(bundle.get("combat_effect_summary", result.get("combat_effect_summary_text", ""))).strip_edges()
+	return result
+
+
+func _update_team_editor_unit(unit_id: String, patch: Dictionary, save_reason: String, play_sound: bool = true, replace_full_profile: bool = false) -> Dictionary:
+	var normalized_id: String = unit_id.strip_edges()
+	if normalized_id.is_empty():
+		return {"ok": false, "reason": "missing_unit_id"}
+	var target_roster: Dictionary = _get_team_editor_roster_source().duplicate(true)
+	var units: Array = Array(target_roster.get("units", [])).duplicate(true)
+	var changed: bool = false
+	for index in range(units.size()):
+		if typeof(units[index]) != TYPE_DICTIONARY:
+			continue
+		var unit: Dictionary = Dictionary(units[index]).duplicate(true)
+		if String(unit.get("unit_id", "")).strip_edges() != normalized_id:
+			continue
+		if replace_full_profile:
+			for key_variant in patch.keys():
+				unit[key_variant] = patch.get(key_variant)
+			unit["unit_id"] = normalized_id
+		else:
+			for key_variant in patch.keys():
+				unit[key_variant] = patch.get(key_variant)
+		unit["rank_badges"] = NPC_RANK_BADGE_RESOLVER_SCRIPT.call("get_badges_for_profile", META_UNIT_PROFILE_SCRIPT.new(unit))
+		units[index] = unit
+		changed = true
+		break
+	if not changed:
+		return {"ok": false, "reason": "unit_not_found", "unit_id": normalized_id}
+	target_roster["units"] = units
+	var save_result: Dictionary = {}
+	if _editing_team_editor_roster():
+		_team_editor_roster = target_roster
+		if _team_editor_roster_path == _start_roster_save_path:
+			_start_roster = target_roster.duplicate(true)
+		save_result = _queue_team_editor_metric_save(save_reason) if replace_full_profile else _save_team_editor_roster_state(save_reason)
+	else:
+		_start_roster = target_roster
+		save_result = _queue_team_editor_metric_save(save_reason) if replace_full_profile else _save_start_roster_state(save_reason)
+	if replace_full_profile:
+		pass
+	else:
+		_refresh_team_editor()
+	if play_sound:
+		_play_ui_sfx("confirm" if bool(save_result.get("ok", false)) else "warning", save_reason)
+	return {
+		"ok": bool(save_result.get("ok", false)),
+		"changed": changed,
+		"unit_id": normalized_id,
+		"save": save_result,
+	}
+
+
+func _refresh_team_editor_emblems(editor: Dictionary) -> void:
+	if _team_editor_emblem_option == null:
+		return
+	var selected_emblem_id: String = String(editor.get("emblem_id", "")).strip_edges()
+	_team_editor_emblem_option.clear()
+	var options: Array = _build_team_editor_emblem_options(editor)
+	for option_variant in options:
+		var option: Dictionary = Dictionary(option_variant)
+		var emblem_id: String = String(option.get("id", "")).strip_edges()
+		_team_editor_emblem_option.add_item(String(option.get("label", emblem_id)))
+		var item_index: int = _team_editor_emblem_option.item_count - 1
+		_team_editor_emblem_option.set_item_metadata(item_index, option)
+		if emblem_id == selected_emblem_id:
+			_team_editor_emblem_option.select(item_index)
+	if _team_editor_emblem_option.selected < 0 and _team_editor_emblem_option.item_count > 0:
+		_team_editor_emblem_option.select(0)
+	if _team_editor_emblem_preview != null:
+		_team_editor_emblem_preview.texture = _load_res_texture(String(editor.get("emblem_path", "")))
+		_team_editor_emblem_preview.modulate = Color(1.0, 1.0, 1.0, 1.0) if _team_editor_emblem_preview.texture != null else Color(0.38, 0.44, 0.48, 0.85)
+
+
+func _team_editor_stat_ids(editor: Dictionary) -> PackedStringArray:
+	var result := PackedStringArray()
+	for definition_variant in Array(editor.get("stat_definitions", [])):
+		if typeof(definition_variant) != TYPE_DICTIONARY:
+			continue
+		var definition: Dictionary = Dictionary(definition_variant)
+		var stat_id: String = String(definition.get("id", "")).strip_edges()
+		if not stat_id.is_empty():
+			result.append(stat_id)
+	return result
+
+
+func _team_editor_stat_min(editor: Dictionary, stat_id: String) -> int:
+	var definition: Dictionary = _get_team_editor_stat_definition(editor, stat_id)
+	return int(definition.get("min_value", START_ROSTER_GENERATOR_SCRIPT.TEAM_EDITOR_STAT_MIN))
+
+
+func _team_editor_stat_max(editor: Dictionary, stat_id: String) -> int:
+	var definition: Dictionary = _get_team_editor_stat_definition(editor, stat_id)
+	return int(definition.get("max_value", START_ROSTER_GENERATOR_SCRIPT.TEAM_EDITOR_STAT_MAX))
+
+
+func _team_editor_stat_total(editor: Dictionary, allocations: Dictionary) -> int:
+	var total: int = 0
+	for stat_id in _team_editor_stat_ids(editor):
+		total += int(allocations.get(stat_id, 0))
+	return total
+
+
+func _team_editor_stat_raise_capacity(editor: Dictionary, allocations: Dictionary, stat_locks: Dictionary, active_stat_id: String) -> int:
+	if bool(stat_locks.get(active_stat_id, false)):
+		return 0
+	var current_value: int = int(allocations.get(active_stat_id, 0))
+	var row_capacity: int = maxi(_team_editor_stat_max(editor, active_stat_id) - current_value, 0)
+	if row_capacity <= 0:
+		return 0
+	var budget_max: int = int(editor.get("point_budget_max", START_ROSTER_GENERATOR_SCRIPT.TEAM_EDITOR_POINT_BUDGET_MAX))
+	var free_points: int = maxi(budget_max - _team_editor_stat_total(editor, allocations), 0)
+	var movable_points: int = 0
+	for stat_id in _team_editor_stat_ids(editor):
+		if stat_id == active_stat_id or bool(stat_locks.get(stat_id, false)):
+			continue
+		movable_points += maxi(int(allocations.get(stat_id, 0)) - _team_editor_stat_min(editor, stat_id), 0)
+	return mini(row_capacity, free_points + movable_points)
+
+
+func _team_editor_focus_candidate_order(editor: Dictionary, allocations: Dictionary, stat_locks: Dictionary, active_stat_id: String, direction: int) -> Array:
+	var candidates: Array = []
+	var order: int = 0
+	for stat_id in _team_editor_stat_ids(editor):
+		if stat_id == active_stat_id or bool(stat_locks.get(stat_id, false)):
+			order += 1
+			continue
+		var value: int = int(allocations.get(stat_id, 0))
+		if direction < 0 and value <= _team_editor_stat_min(editor, stat_id):
+			order += 1
+			continue
+		if direction > 0 and value >= _team_editor_stat_max(editor, stat_id):
+			order += 1
+			continue
+		candidates.append({"id": stat_id, "value": value, "order": order})
+		order += 1
+	candidates.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var value_a: int = int(a.get("value", 0))
+		var value_b: int = int(b.get("value", 0))
+		if value_a == value_b:
+			return int(a.get("order", 0)) < int(b.get("order", 0))
+		return value_a > value_b if direction < 0 else value_a < value_b
+	)
+	return candidates
+
+
+func _redistribute_team_editor_focus_points(allocations: Dictionary, editor: Dictionary, stat_locks: Dictionary, active_stat_id: String, requested_points: int, direction: int) -> int:
+	var remaining_points: int = maxi(requested_points, 0)
+	while remaining_points > 0:
+		var changed_this_pass: bool = false
+		for candidate_variant in _team_editor_focus_candidate_order(editor, allocations, stat_locks, active_stat_id, direction):
+			if remaining_points <= 0:
+				break
+			var candidate: Dictionary = Dictionary(candidate_variant)
+			var stat_id: String = String(candidate.get("id", "")).strip_edges()
+			if stat_id.is_empty():
+				continue
+			var current_value: int = int(allocations.get(stat_id, 0))
+			if direction < 0:
+				if current_value <= _team_editor_stat_min(editor, stat_id):
+					continue
+				allocations[stat_id] = current_value - 1
+			else:
+				if current_value >= _team_editor_stat_max(editor, stat_id):
+					continue
+				allocations[stat_id] = current_value + 1
+			remaining_points -= 1
+			changed_this_pass = true
+		if not changed_this_pass:
+			break
+	return maxi(requested_points, 0) - remaining_points
+
+
+func _build_team_editor_focus_allocation_change(editor: Dictionary, allocations: Dictionary, stat_locks: Dictionary, stat_id: String, target_value: int) -> Dictionary:
+	var normalized_stat_id: String = stat_id.strip_edges()
+	var next_allocations: Dictionary = allocations.duplicate(true)
+	var current_value: int = int(next_allocations.get(normalized_stat_id, 0))
+	var stat_min: int = _team_editor_stat_min(editor, normalized_stat_id)
+	var stat_max: int = _team_editor_stat_max(editor, normalized_stat_id)
+	var requested_target: int = clampi(target_value, stat_min, stat_max)
+	var requested_delta: int = requested_target - current_value
+	var applied_delta: int = 0
+	var redistributed_points: int = 0
+	if requested_delta > 0:
+		var budget_max: int = int(editor.get("point_budget_max", START_ROSTER_GENERATOR_SCRIPT.TEAM_EDITOR_POINT_BUDGET_MAX))
+		var free_points: int = maxi(budget_max - _team_editor_stat_total(editor, next_allocations), 0)
+		var free_used: int = mini(requested_delta, free_points)
+		var points_to_take: int = requested_delta - free_used
+		redistributed_points = _redistribute_team_editor_focus_points(next_allocations, editor, stat_locks, normalized_stat_id, points_to_take, -1)
+		applied_delta = free_used + redistributed_points
+	elif requested_delta < 0:
+		applied_delta = requested_delta
+		redistributed_points = _redistribute_team_editor_focus_points(next_allocations, editor, stat_locks, normalized_stat_id, -requested_delta, 1)
+	next_allocations[normalized_stat_id] = current_value + applied_delta
+	return {
+		"allocations": next_allocations,
+		"value": int(next_allocations.get(normalized_stat_id, current_value)),
+		"changed": applied_delta != 0,
+		"requested_delta": requested_delta,
+		"applied_delta": applied_delta,
+		"redistributed_points": redistributed_points,
+	}
+
+
+func _build_team_editor_stat_row(editor: Dictionary, definition: Dictionary, value: int, locked: bool = false) -> Control:
+	var stat_id: String = String(definition.get("id", "")).strip_edges()
+	var stat_min: int = int(definition.get("min_value", START_ROSTER_GENERATOR_SCRIPT.TEAM_EDITOR_STAT_MIN))
+	var stat_max: int = int(definition.get("max_value", START_ROSTER_GENERATOR_SCRIPT.TEAM_EDITOR_STAT_MAX))
+	var allocations: Dictionary = Dictionary(editor.get("stat_allocations", {}))
+	var stat_locks: Dictionary = Dictionary(editor.get("stat_locks", {}))
+	var raise_capacity: int = _team_editor_stat_raise_capacity(editor, allocations, stat_locks, stat_id)
+	var description: String = String(definition.get("description", ""))
+	var effect_text: String = String(definition.get("effect_text", "")).strip_edges()
+	var help_id: String = String(definition.get("help_id", "team_editor.stat.%s" % stat_id)).strip_edges()
+	var lock_text: String = "Gesperrt: Wert bleibt unveraendert." if locked else "Entsperrt: Erhoehen zieht Punkte gleichmaessig aus anderen entsperrten Teamfokus-Werten."
+	var tooltip: String = "%s\nWirkung: %s\nBereich: %d-%d\n%s" % [description, effect_text, stat_min, stat_max, lock_text]
+	var outer := VBoxContainer.new()
+	outer.name = "TeamEditorStat_%s" % stat_id
+	outer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	outer.add_theme_constant_override("separation", 2)
+	outer.tooltip_text = tooltip
+	outer.set_meta("help_id", help_id)
+	var row := HBoxContainer.new()
+	row.name = "TeamEditorStatMain_%s" % stat_id
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_theme_constant_override("separation", 6)
+	row.tooltip_text = tooltip
+	row.set_meta("help_id", help_id)
+	outer.add_child(row)
+	var label := Label.new()
+	label.name = "TeamEditorStatLabel_%s" % stat_id
+	label.text = String(definition.get("label", stat_id.capitalize()))
+	label.custom_minimum_size = Vector2(90.0, 0.0)
+	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	label.clip_text = true
+	label.tooltip_text = tooltip
+	label.set_meta("help_id", help_id)
+	label.add_theme_font_size_override("font_size", 10)
+	row.add_child(label)
+	var minus_button := Button.new()
+	minus_button.name = "TeamEditorMinus_%s" % stat_id
+	minus_button.text = "-"
+	minus_button.custom_minimum_size = Vector2(24.0, 24.0)
+	minus_button.disabled = locked or value <= stat_min
+	minus_button.tooltip_text = "Punkt abziehen.\n%s" % tooltip
+	minus_button.set_meta("help_id", help_id)
+	minus_button.pressed.connect(_on_team_editor_stat_delta_pressed.bind(stat_id, -TEAM_EDITOR_POINT_DELTA))
+	row.add_child(minus_button)
+	var value_slider := HSlider.new()
+	value_slider.name = "TeamEditorValue_%s" % stat_id
+	value_slider.min_value = float(stat_min)
+	value_slider.max_value = float(stat_max)
+	value_slider.step = 1.0
+	value_slider.rounded = true
+	value_slider.value = float(value)
+	value_slider.editable = not locked
+	value_slider.custom_minimum_size = Vector2(54.0, 24.0)
+	value_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	value_slider.tooltip_text = tooltip
+	value_slider.set_meta("help_id", help_id)
+	value_slider.value_changed.connect(_on_team_editor_stat_slider_changed.bind(stat_id))
+	row.add_child(value_slider)
+	var value_label := Label.new()
+	value_label.name = "TeamEditorValueLabel_%s" % stat_id
+	value_label.text = "%02d/%02d" % [value, stat_max]
+	value_label.custom_minimum_size = Vector2(42.0, 0.0)
+	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	value_label.add_theme_font_size_override("font_size", 10)
+	value_label.tooltip_text = tooltip
+	value_label.set_meta("help_id", help_id)
+	row.add_child(value_label)
+	var plus_button := Button.new()
+	plus_button.name = "TeamEditorPlus_%s" % stat_id
+	plus_button.text = "+"
+	plus_button.custom_minimum_size = Vector2(24.0, 24.0)
+	plus_button.disabled = locked or value >= stat_max or raise_capacity <= 0
+	plus_button.tooltip_text = "Punkt vergeben.\n%s" % tooltip
+	plus_button.set_meta("help_id", help_id)
+	plus_button.pressed.connect(_on_team_editor_stat_delta_pressed.bind(stat_id, TEAM_EDITOR_POINT_DELTA))
+	row.add_child(plus_button)
+	var lock_button := Button.new()
+	lock_button.name = "TeamEditorLock_%s" % stat_id
+	lock_button.toggle_mode = true
+	lock_button.text = "L"
+	lock_button.custom_minimum_size = Vector2(24.0, 24.0)
+	lock_button.focus_mode = Control.FOCUS_ALL
+	lock_button.set_pressed_no_signal(locked)
+	lock_button.tooltip_text = "Diesen Teamfokus sperren, damit Budget-Aenderungen ihn nicht versehentlich veraendern."
+	lock_button.set_meta("help_id", "team_editor.stat.lock")
+	lock_button.toggled.connect(_on_team_editor_stat_lock_toggled.bind(stat_id))
+	row.add_child(lock_button)
+	if not effect_text.is_empty():
+		var effect_label := Label.new()
+		effect_label.name = "TeamEditorStatEffect_%s" % stat_id
+		effect_label.text = effect_text
+		effect_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		effect_label.modulate = Color(0.72, 0.82, 0.86, 0.92)
+		effect_label.add_theme_font_size_override("font_size", 9)
+		effect_label.tooltip_text = tooltip
+		effect_label.set_meta("help_id", help_id)
+		outer.add_child(effect_label)
+	_connect_help_controls_in_tree(outer)
+	_team_editor_stat_rows[stat_id] = {
+		"row": outer,
+		"minus": minus_button,
+		"plus": plus_button,
+		"value": value_label,
+		"bar": value_slider,
+		"lock": lock_button,
+	}
+	return outer
+
+
+func _adjust_team_editor_stat(stat_id: String, delta: int, play_sound: bool = true) -> Dictionary:
+	var editor: Dictionary = _get_normalized_team_editor(false)
+	var allocations: Dictionary = Dictionary(editor.get("stat_allocations", {})).duplicate(true)
+	var normalized_stat_id: String = stat_id.strip_edges()
+	if normalized_stat_id.is_empty() or not allocations.has(normalized_stat_id):
+		return {"ok": false, "reason": "unknown_stat", "stat_id": stat_id}
+	var current_value: int = int(allocations.get(normalized_stat_id, 0))
+	var target_value: int = current_value + delta
+	return _set_team_editor_stat(normalized_stat_id, target_value, play_sound)
+
+
+func _set_team_editor_stat(stat_id: String, target_value: int, play_sound: bool = true) -> Dictionary:
+	var editor: Dictionary = _get_normalized_team_editor(false)
+	var allocations: Dictionary = Dictionary(editor.get("stat_allocations", {})).duplicate(true)
+	var stat_locks: Dictionary = Dictionary(editor.get("stat_locks", {})).duplicate(true)
+	var normalized_stat_id: String = stat_id.strip_edges()
+	if normalized_stat_id.is_empty() or not allocations.has(normalized_stat_id):
+		return {"ok": false, "reason": "unknown_stat", "stat_id": stat_id}
+	var current_value: int = int(allocations.get(normalized_stat_id, 0))
+	if bool(stat_locks.get(normalized_stat_id, false)) and target_value != current_value:
+		if play_sound:
+			_play_ui_sfx("warning", "team_editor_stat_locked")
+		_refresh_team_editor_focus_controls(editor)
+		return {
+			"ok": false,
+			"changed": false,
+			"reason": "locked",
+			"stat_id": normalized_stat_id,
+			"value": current_value,
+		}
+	var change: Dictionary = _build_team_editor_focus_allocation_change(editor, allocations, stat_locks, normalized_stat_id, target_value)
+	var next_value: int = int(change.get("value", current_value))
+	allocations = Dictionary(change.get("allocations", allocations)).duplicate(true)
+	editor["stat_allocations"] = allocations
+	var save_result: Dictionary = {}
+	if _editing_team_editor_roster():
+		_team_editor_roster["team_editor"] = START_ROSTER_GENERATOR_SCRIPT.call("normalize_team_editor", editor, String(_team_editor_roster.get("seed", _start_roster_seed)), _start_roster_profile_id)
+		save_result = _save_team_editor_roster_state("team_editor_stat")
+	else:
+		_start_roster["team_editor"] = START_ROSTER_GENERATOR_SCRIPT.call("normalize_team_editor", editor, String(_start_roster.get("seed", _start_roster_seed)), _start_roster_profile_id)
+		save_result = _save_start_roster_state("team_editor_stat")
+	_refresh_team_editor_focus_controls()
+	if play_sound:
+		_play_ui_sfx("switch" if next_value != current_value else "warning", "team_editor_stat")
+	return {
+		"ok": bool(save_result.get("ok", false)),
+		"changed": next_value != current_value,
+		"stat_id": normalized_stat_id,
+		"value": next_value,
+		"requested_delta": int(change.get("requested_delta", 0)),
+		"applied_delta": int(change.get("applied_delta", 0)),
+		"redistributed_points": int(change.get("redistributed_points", 0)),
+		"save": save_result,
+	}
+
+
+func _set_team_editor_stat_lock(stat_id: String, locked: bool, play_sound: bool = true) -> Dictionary:
+	var editor: Dictionary = _get_normalized_team_editor(false)
+	var allocations: Dictionary = Dictionary(editor.get("stat_allocations", {}))
+	var normalized_stat_id: String = stat_id.strip_edges()
+	if normalized_stat_id.is_empty() or not allocations.has(normalized_stat_id):
+		return {"ok": false, "reason": "unknown_stat", "stat_id": stat_id}
+	var stat_locks: Dictionary = Dictionary(editor.get("stat_locks", {})).duplicate(true)
+	var previous_locked: bool = bool(stat_locks.get(normalized_stat_id, false))
+	stat_locks[normalized_stat_id] = locked
+	editor["stat_locks"] = stat_locks
+	var save_result: Dictionary = {}
+	if _editing_team_editor_roster():
+		_team_editor_roster["team_editor"] = START_ROSTER_GENERATOR_SCRIPT.call("normalize_team_editor", editor, String(_team_editor_roster.get("seed", _start_roster_seed)), _start_roster_profile_id)
+		save_result = _save_team_editor_roster_state("team_editor_stat_lock")
+	else:
+		_start_roster["team_editor"] = START_ROSTER_GENERATOR_SCRIPT.call("normalize_team_editor", editor, String(_start_roster.get("seed", _start_roster_seed)), _start_roster_profile_id)
+		save_result = _save_start_roster_state("team_editor_stat_lock")
+	_refresh_team_editor_focus_controls()
+	if play_sound:
+		_play_ui_sfx("switch" if previous_locked != locked else "warning", "team_editor_stat_lock")
+	return {
+		"ok": bool(save_result.get("ok", false)),
+		"changed": previous_locked != locked,
+		"stat_id": normalized_stat_id,
+		"locked": locked,
+		"save": save_result,
+	}
+
+
+func _get_team_editor_stat_definition(editor: Dictionary, stat_id: String) -> Dictionary:
+	for definition_variant in Array(editor.get("stat_definitions", [])):
+		if typeof(definition_variant) != TYPE_DICTIONARY:
+			continue
+		var definition: Dictionary = Dictionary(definition_variant)
+		if String(definition.get("id", "")).strip_edges() == stat_id.strip_edges():
+			return definition
+	return {
+		"id": stat_id,
+		"min_value": START_ROSTER_GENERATOR_SCRIPT.TEAM_EDITOR_STAT_MIN,
+		"max_value": START_ROSTER_GENERATOR_SCRIPT.TEAM_EDITOR_STAT_MAX,
+	}
+
+
+func _set_team_editor_emblem(emblem_id: String, play_sound: bool = true) -> Dictionary:
+	var normalized_id: String = emblem_id.strip_edges()
+	var options: Array = _build_team_editor_emblem_options(_get_normalized_team_editor(false))
+	for option_variant in options:
+		var option: Dictionary = Dictionary(option_variant)
+		if String(option.get("id", "")) != normalized_id:
+			continue
+		var editor: Dictionary = _get_normalized_team_editor(false)
+		editor["emblem_id"] = normalized_id
+		editor["emblem_path"] = String(option.get("path", ""))
+		var save_result: Dictionary = {}
+		if _editing_team_editor_roster():
+			_team_editor_roster["team_editor"] = START_ROSTER_GENERATOR_SCRIPT.call("normalize_team_editor", editor, String(_team_editor_roster.get("seed", _start_roster_seed)), _start_roster_profile_id)
+			save_result = _save_team_editor_roster_state("team_editor_emblem")
+		else:
+			_start_roster["team_editor"] = START_ROSTER_GENERATOR_SCRIPT.call("normalize_team_editor", editor, String(_start_roster.get("seed", _start_roster_seed)), _start_roster_profile_id)
+			save_result = _save_start_roster_state("team_editor_emblem")
+		_refresh_team_editor()
+		if play_sound:
+			_play_ui_sfx("switch", "team_editor_emblem")
+		return {"ok": bool(save_result.get("ok", false)), "emblem_id": normalized_id, "save": save_result}
+	return {"ok": false, "reason": "unknown_emblem", "emblem_id": emblem_id}
+
+
+func _save_start_roster_state(_reason: String) -> Dictionary:
+	if _start_roster.is_empty():
+		return {"ok": false, "reason": "missing_roster"}
+	var save_result: Dictionary = Dictionary(PLAYER_ROSTER_STORE_SCRIPT.call("save_roster", _start_roster, _start_roster_profile_id, _start_roster_save_path))
+	_last_start_roster_store_result = save_result.duplicate(true)
+	return save_result
+
+
+func _build_team_editor_emblem_options(editor: Dictionary) -> Array:
+	var result: Array = []
+	var seen_ids: Dictionary = {}
+	var current_id: String = String(editor.get("emblem_id", "")).strip_edges()
+	var current_path: String = String(editor.get("emblem_path", "")).strip_edges()
+	if not current_id.is_empty():
+		result.append({"id": current_id, "path": current_path, "label": _format_emblem_label(current_id)})
+		seen_ids[current_id] = true
+	for entry_variant in Array(PORTRAIT_IDENTITY_CATALOG_SCRIPT.call("get_candidate_entries")):
+		if result.size() >= 12:
+			break
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var entry_id: String = String(entry.get("id", "")).strip_edges()
+		if entry_id.is_empty() or seen_ids.has(entry_id):
+			continue
+		result.append({"id": entry_id, "path": String(entry.get("path", "")), "label": _format_emblem_label(entry_id)})
+		seen_ids[entry_id] = true
+	return result
+
+
+func _populate_team_editor_unit_portrait_options(option_button: OptionButton, current_id: String, current_path: String) -> void:
+	if option_button == null:
+		return
+	option_button.clear()
+	option_button.add_theme_constant_override("h_separation", 8)
+	option_button.add_theme_constant_override("icon_max_width", 30)
+	var popup := option_button.get_popup()
+	if popup != null:
+		popup.add_theme_constant_override("icon_max_width", 30)
+	var selected_index: int = -1
+	var options: Array = _build_portrait_options(current_id, current_path)
+	for option_variant in options:
+		var option: Dictionary = Dictionary(option_variant)
+		var portrait_id: String = String(option.get("id", "")).strip_edges()
+		var portrait_path: String = String(option.get("path", "")).strip_edges()
+		var icon: Texture2D = PORTRAIT_IDENTITY_CATALOG_SCRIPT.call("load_texture", portrait_id, portrait_path) as Texture2D
+		if icon != null:
+			option_button.add_icon_item(icon, String(option.get("label", portrait_id)))
+		else:
+			option_button.add_item(String(option.get("label", portrait_id)))
+		var item_index: int = option_button.item_count - 1
+		option_button.set_item_metadata(item_index, option)
+		if portrait_id == current_id.strip_edges():
+			selected_index = item_index
+	if selected_index < 0 and option_button.item_count > 0:
+		selected_index = 0
+	if selected_index >= 0:
+		option_button.select(selected_index)
+
+
+func _build_portrait_options(current_id: String = "", current_path: String = "") -> Array:
+	var result: Array = []
+	var seen_ids: Dictionary = {}
+	var normalized_current_id: String = current_id.strip_edges()
+	var normalized_current_path: String = current_path.strip_edges()
+	if not normalized_current_id.is_empty():
+		result.append({"id": normalized_current_id, "path": normalized_current_path, "label": _format_emblem_label(normalized_current_id)})
+		seen_ids[normalized_current_id] = true
+	for entry_variant in Array(PORTRAIT_IDENTITY_CATALOG_SCRIPT.call("get_candidate_entries")):
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var entry_id: String = String(entry.get("id", "")).strip_edges()
+		if entry_id.is_empty() or seen_ids.has(entry_id):
+			continue
+		result.append({"id": entry_id, "path": String(entry.get("path", "")), "label": _format_emblem_label(entry_id)})
+		seen_ids[entry_id] = true
+	return result
+
+
+func _find_portrait_option(portrait_id: String) -> Dictionary:
+	var normalized_id: String = portrait_id.strip_edges()
+	for option_variant in _build_portrait_options():
+		var option: Dictionary = Dictionary(option_variant)
+		if String(option.get("id", "")) == normalized_id:
+			return option
+	return {}
+
+
+func _format_emblem_label(emblem_id: String) -> String:
+	var normalized: String = emblem_id.replace("char_portrait_", "Portrait ").replace("_", " ")
+	return normalized.capitalize()
+
+
+func _load_res_texture(path: String) -> Texture2D:
+	var normalized_path: String = path.strip_edges()
+	if normalized_path.is_empty() or not ResourceLoader.exists(normalized_path):
+		return null
+	return load(normalized_path) as Texture2D
+
+
+func _clear_children(container: Node) -> void:
+	for child in container.get_children():
+		container.remove_child(child)
+		child.queue_free()
 
 
 func _ensure_contextual_help_ui() -> void:
@@ -599,6 +2799,20 @@ func _register_main_menu_help_ids() -> void:
 	_connect_help_control(_editor_button, "main_menu.primary_routes")
 	_connect_help_control(_settings_button, "main_menu.primary_routes")
 	_connect_help_control(_new_roster_button, "main_menu.primary_routes")
+	_connect_help_control(_team_editor_toggle_button, "main_menu.primary_routes")
+	_connect_help_control(_team_library_activate_button, "main_menu.primary_routes")
+	_connect_help_control(_team_library_edit_button, "main_menu.primary_routes")
+	_connect_help_control(_team_library_delete_button, "main_menu.primary_routes")
+	_connect_help_control(_team_editor_name_edit, "team_editor.team_name")
+	_connect_help_control(_team_editor_emblem_preview, "team_editor.symbol")
+	_connect_help_control(_team_editor_emblem_option, "team_editor.symbol")
+	_connect_help_control(_team_editor_budget_label, "team_editor.budget")
+	_connect_help_control(_team_editor_stats_vbox, "team_editor.budget")
+	_connect_help_control(_team_editor_unit_name_edit, "character_sheet.name")
+	_connect_help_control(_team_editor_unit_portrait_preview, "character_sheet.portrait")
+	_connect_help_control(_team_editor_unit_portrait_option, "character_sheet.portrait")
+	_connect_help_control(_team_editor_save_button, "main_menu.primary_routes")
+	_connect_help_control(_team_editor_close_button, "main_menu.primary_routes")
 	_connect_help_control(_global_help_button, "shell.global_help_button")
 	_connect_help_control(_display_section_label, "settings.display")
 	_connect_help_control(_resolution_option, "settings.display")
@@ -632,6 +2846,17 @@ func _connect_help_control(control: Control, help_id: String) -> void:
 		control.mouse_exited.connect(exit_callable)
 	if not control.focus_exited.is_connected(exit_callable):
 		control.focus_exited.connect(exit_callable)
+
+
+func _connect_help_controls_in_tree(root_node: Node) -> void:
+	if root_node == null:
+		return
+	if root_node is Control and root_node.has_meta("help_id"):
+		var help_id: String = String(root_node.get_meta("help_id", "")).strip_edges()
+		if not help_id.is_empty():
+			_connect_help_control(root_node as Control, help_id)
+	for child in root_node.get_children():
+		_connect_help_controls_in_tree(child)
 
 
 func _order_settings_nodes(action_row: HBoxContainer) -> void:
@@ -871,8 +3096,16 @@ func _hide_help_after_delay(token: int) -> void:
 		_contextual_help_popup.call("hide_help")
 
 
-func _help_hover_is_current(token: int, help_id: String, control: Control) -> bool:
-	return token == _help_hover_token and control != null and control == _active_help_control and help_id == _active_help_id and is_instance_valid(control)
+func _help_hover_is_current(token: int, help_id: String, control) -> bool:
+	if token != _help_hover_token or help_id != _active_help_id:
+		return false
+	if control == null or not is_instance_valid(control):
+		return false
+	if _active_help_control == null or not is_instance_valid(_active_help_control):
+		_active_help_control = null
+		_active_help_id = ""
+		return false
+	return control == _active_help_control
 
 
 func _show_contextual_help_for(help_id: String, control: Control, pinned: bool = false) -> void:
@@ -883,9 +3116,53 @@ func _show_contextual_help_for(help_id: String, control: Control, pinned: bool =
 	if String(payload.get("level", CONTEXTUAL_HELP_SERVICE_SCRIPT.LEVEL_NONE)) == CONTEXTUAL_HELP_SERVICE_SCRIPT.LEVEL_NONE or payload.is_empty():
 		_contextual_help_popup.call("hide_help")
 		return
+	payload = _merge_control_dynamic_help_payload(payload, control, String(payload.get("level", "")) == CONTEXTUAL_HELP_SERVICE_SCRIPT.LEVEL_DETAIL)
 	var target_rect: Rect2 = Rect2(control.global_position, control.size)
 	var viewport_size: Vector2 = get_viewport_rect().size
 	_contextual_help_popup.call("show_help", payload, target_rect, viewport_size, String(payload.get("level", "")) == CONTEXTUAL_HELP_SERVICE_SCRIPT.LEVEL_DETAIL)
+
+
+func _merge_control_dynamic_help_payload(payload: Dictionary, control: Control, include_detail: bool) -> Dictionary:
+	if control == null:
+		return payload
+	var result: Dictionary = payload.duplicate(true)
+	var control_help_id: String = String(control.get_meta("help_id", "")).strip_edges()
+	if String(result.get("help_id", "")).strip_edges().is_empty() and not control_help_id.is_empty():
+		result["help_id"] = control_help_id
+	var dynamic_title: String = String(control.get_meta("help_dynamic_title", "")).strip_edges()
+	if not dynamic_title.is_empty():
+		result["title"] = dynamic_title
+	var compact_lines: Array = Array(result.get("compact_lines", []))
+	for line in _string_array_from_meta(control.get_meta("help_compact_lines", [])):
+		if not compact_lines.has(line):
+			compact_lines.append(line)
+	result["compact_lines"] = compact_lines
+	if include_detail:
+		var detail_lines: Array = Array(result.get("detail_lines", []))
+		for line in _string_array_from_meta(control.get_meta("help_detail_lines", [])):
+			if not detail_lines.has(line):
+				detail_lines.append(line)
+		result["detail_lines"] = detail_lines
+	return result
+
+
+func _string_array_from_meta(value: Variant) -> PackedStringArray:
+	var result: PackedStringArray = PackedStringArray()
+	if value is PackedStringArray:
+		for entry in value:
+			var text: String = String(entry).strip_edges()
+			if not text.is_empty():
+				result.append(text)
+	elif value is Array:
+		for entry in Array(value):
+			var text: String = String(entry).strip_edges()
+			if not text.is_empty():
+				result.append(text)
+	elif typeof(value) == TYPE_STRING:
+		var text: String = String(value).strip_edges()
+		if not text.is_empty():
+			result.append(text)
+	return result
 
 
 func _mode_label(mode: String) -> String:
@@ -967,8 +3244,73 @@ func _on_new_roster_pressed() -> void:
 	_play_ui_sfx("confirm" if _start_roster_reset_confirmation_pending else "click", "new_roster")
 	if _start_roster_reset_confirmation_pending:
 		confirm_new_start_roster()
+		open_team_editor(_start_roster_save_path)
 	else:
-		request_new_start_roster()
+		var result: Dictionary = Dictionary(request_new_start_roster())
+		if bool(result.get("created", false)):
+			open_team_editor(_start_roster_save_path)
+
+
+func _on_team_editor_toggle_pressed() -> void:
+	toggle_team_editor()
+	_status_label.text = "Team-Editor" if _team_editor_open else "Ready"
+	_play_ui_sfx("switch", "team_editor_toggle")
+
+
+func _on_team_editor_close_pressed() -> void:
+	close_team_editor()
+	_play_ui_sfx("cancel", "team_editor_close")
+
+
+func _on_team_editor_save_pressed() -> void:
+	if _team_editor_metric_save_queued:
+		_flush_team_editor_metric_save()
+	var save_result: Dictionary = _save_team_editor_roster_state("team_editor_manual_save") if _editing_team_editor_roster() else _save_start_roster_state("team_editor_manual_save")
+	_status_label.text = "Team gespeichert" if bool(save_result.get("ok", false)) else "Team speichern fehlgeschlagen"
+	_play_ui_sfx("confirm" if bool(save_result.get("ok", false)) else "warning", "team_editor_save")
+
+
+func _on_team_editor_name_submitted(next_text: String) -> void:
+	_set_team_editor_team_name(next_text, true)
+
+
+func _on_team_editor_name_focus_exited() -> void:
+	if _team_editor_name_edit != null:
+		_set_team_editor_team_name(_team_editor_name_edit.text, false)
+
+
+func _set_team_editor_team_name(next_team_name: String, play_sound: bool = true) -> Dictionary:
+	if _editing_team_editor_roster():
+		_team_editor_roster = Dictionary(TEAM_NAME_GENERATOR_SCRIPT.call("apply_team_name", _team_editor_roster, next_team_name, String(_team_editor_roster.get("seed", "")), int(Dictionary(_team_editor_roster.get("team_identity", {})).get("name_generation_index", 0))))
+		var save_result: Dictionary = _save_team_editor_roster_state("team_editor_name")
+		_refresh_team_editor()
+		if play_sound:
+			_play_ui_sfx("confirm" if bool(save_result.get("ok", false)) else "warning", "team_editor_name")
+		return {"ok": bool(save_result.get("ok", false)), "roster": _team_editor_roster.duplicate(true), "save": save_result}
+	return set_start_team_name(next_team_name)
+
+
+func _on_team_editor_view_mode_pressed(view_mode: String) -> void:
+	_set_team_editor_view_mode(view_mode)
+	_play_ui_sfx("switch", "team_editor_view_mode")
+
+
+func _on_team_editor_unit_card_gui_input(event: InputEvent, unit_id: String) -> void:
+	var mouse_event := event as InputEventMouseButton
+	if mouse_event == null or not mouse_event.pressed or mouse_event.button_index != MOUSE_BUTTON_LEFT:
+		return
+	_team_editor_selected_unit_id = unit_id.strip_edges()
+	if mouse_event.double_click:
+		_set_team_editor_view_mode(TEAM_EDITOR_VIEW_SHEET)
+	else:
+		_refresh_team_editor()
+	_play_ui_sfx("switch", "team_editor_unit_select")
+
+
+func _on_team_editor_unit_sheet_button_pressed(unit_id: String) -> void:
+	_team_editor_selected_unit_id = unit_id.strip_edges()
+	_set_team_editor_view_mode(TEAM_EDITOR_VIEW_SHEET)
+	_play_ui_sfx("switch", "team_editor_unit_sheet")
 
 
 func _on_team_name_edit_submitted(next_text: String) -> void:
@@ -982,6 +3324,84 @@ func _on_team_name_edit_focus_exited() -> void:
 
 func _on_team_name_suggest_pressed() -> void:
 	request_start_team_name_suggestion()
+
+
+func _on_team_library_row_pressed(entry_path: String) -> void:
+	_selected_roster_entry_path = entry_path.strip_edges()
+	_refresh_team_library()
+	_play_ui_sfx("switch", "team_library_select")
+
+
+func _on_team_library_row_gui_input(event: InputEvent, entry_path: String) -> void:
+	var mouse_event := event as InputEventMouseButton
+	if mouse_event == null or not mouse_event.pressed or mouse_event.button_index != MOUSE_BUTTON_LEFT:
+		return
+	_selected_roster_entry_path = entry_path.strip_edges()
+	if mouse_event.double_click:
+		open_team_editor(entry_path)
+	else:
+		_refresh_team_library()
+
+
+func _on_team_library_activate_pressed() -> void:
+	_activate_selected_team_entry(true)
+
+
+func _on_team_library_edit_pressed() -> void:
+	var selected_entry: Dictionary = _find_team_library_entry(_selected_roster_entry_path)
+	if selected_entry.is_empty():
+		_play_ui_sfx("warning", "team_library_edit_missing")
+		return
+	open_team_editor(_selected_roster_entry_path)
+	_play_ui_sfx("switch", "team_library_edit")
+
+
+func _on_team_library_delete_pressed() -> void:
+	_delete_selected_team_entry(true)
+
+
+func _on_team_editor_emblem_selected(index: int) -> void:
+	if _team_editor_emblem_option == null or index < 0 or index >= _team_editor_emblem_option.item_count:
+		return
+	var option: Dictionary = Dictionary(_team_editor_emblem_option.get_item_metadata(index))
+	_set_team_editor_emblem(String(option.get("id", "")), true)
+
+
+func _on_team_editor_stat_delta_pressed(stat_id: String, delta: int) -> void:
+	_adjust_team_editor_stat(stat_id, delta, true)
+
+
+func _on_team_editor_stat_slider_changed(next_value: float, stat_id: String) -> void:
+	_set_team_editor_stat(stat_id, roundi(next_value), true)
+
+
+func _on_team_editor_stat_lock_toggled(locked: bool, stat_id: String) -> void:
+	_set_team_editor_stat_lock(stat_id, locked, true)
+
+
+func _on_team_editor_unit_name_submitted(next_text: String, unit_id: String) -> void:
+	_set_team_editor_unit_name(unit_id, next_text, true)
+
+
+func _on_team_editor_unit_name_focus_exited(unit_id: String, line_edit: LineEdit) -> void:
+	if line_edit == null:
+		return
+	_set_team_editor_unit_name(unit_id, line_edit.text, false)
+
+
+func _on_team_editor_unit_portrait_selected(index: int, unit_id: String, option_button: OptionButton) -> void:
+	if option_button == null or index < 0 or index >= option_button.item_count:
+		return
+	var option: Dictionary = Dictionary(option_button.get_item_metadata(index))
+	_set_team_editor_unit_portrait(unit_id, String(option.get("id", "")), String(option.get("path", "")), true)
+
+
+func _on_team_editor_profile_metric_changed(profile, row_data: Dictionary, _next_value: float, unit_id: String) -> void:
+	_replace_team_editor_unit_from_profile(unit_id, profile, row_data)
+
+
+func _on_team_editor_profile_metric_lock_changed(row_data: Dictionary, locked: bool, unit_id: String) -> void:
+	_set_team_editor_metric_lock(unit_id, row_data, locked)
 
 
 func _on_global_help_pressed() -> void:

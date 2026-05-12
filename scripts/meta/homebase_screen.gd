@@ -11,15 +11,16 @@ const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_la
 const DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/drop_light_layout_contract.gd")
 const HOMEBASE_TEAM_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/homebase_team_drop_panel.gd")
 const PERSONNEL_EVENT_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/personnel_event_model.gd")
+const HOVER_SCROLL_BEHAVIOR_SCRIPT: GDScript = preload("res://scripts/ui/hover_scroll_behavior.gd")
 const FLIGHTDECK_PLATFORM_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/platform_large_NW.png")
 const DROPSHIP_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
 const CARGO_CRAFT_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_cargoA_NE.png")
 const HOMEBASE_OPERATOR_CARD_SIZE := Vector2(316.0, 66.0)
 const HOMEBASE_STAGED_CARD_SIZE := Vector2(316.0, 66.0)
 const HOMEBASE_TRANSFER_GHOST_CARD_SIZE := Vector2(316.0, 74.0)
-const HOMEBASE_SHIPCARD_IMAGE_SIZE := Vector2(300.0, 210.0)
-const HOMEBASE_SHIPCARD_BUTTON_SIZE := Vector2(240.0, 168.0)
-const HOMEBASE_SHIPCARD_IMAGE_OFFSET := Vector2(-42.0, -48.0)
+const HOMEBASE_SHIPCARD_IMAGE_SIZE := Vector2(248.0, 164.0)
+const HOMEBASE_SHIPCARD_BUTTON_SIZE := Vector2(166.0, 114.0)
+const HOMEBASE_SHIPCARD_IMAGE_OFFSET := Vector2(-58.0, -36.0)
 
 signal selection_changed(selected_unit_ids)
 signal team_confirmed(selected_unit_ids)
@@ -67,6 +68,7 @@ var _personnel_events: Array = []
 func _ready() -> void:
 	META_UI_SKIN_SCRIPT.apply_homebase(self)
 	_apply_drop_light_fixed_layout()
+	HOVER_SCROLL_BEHAVIOR_SCRIPT.call("install", self)
 	_apply_contextual_help_ids()
 	var mission_selector: OptionButton = get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/MissionSelector")
 	var start_mission_button: Button = get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/StartMissionButton")
@@ -78,6 +80,9 @@ func _ready() -> void:
 	var aircraft_cargo_row: HBoxContainer = get_node("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftCargoRow")
 	var cargo_selector: OptionButton = get_node("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftCargoRow/CargoSelector")
 	var load_cargo_button: Button = get_node("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftCargoRow/LoadCargoButton")
+	_configure_flightdeck_option_button(mission_selector)
+	_configure_flightdeck_option_button(aircraft_selector)
+	_configure_flightdeck_option_button(cargo_selector)
 	if not confirm_button.pressed.is_connected(_on_confirm_button_pressed):
 		confirm_button.pressed.connect(_on_confirm_button_pressed)
 	if not mission_selector.item_selected.is_connected(_on_mission_selector_item_selected):
@@ -323,6 +328,33 @@ func _apply_fixed_window_contract(path: String, rect_variant: Variant) -> void:
 	control.set_meta("drop_light_fixed_fullhd_layout", true)
 
 
+func _configure_flightdeck_option_button(selector: OptionButton) -> void:
+	if selector == null:
+		return
+	selector.clip_text = true
+	selector.set_meta("homebase_flightdeck_dropdown_unclipped", true)
+	var popup := selector.get_popup()
+	if popup == null:
+		return
+	popup.set_meta("homebase_flightdeck_dropdown_unclipped", true)
+	popup.set_meta("homebase_dropdown_owner", selector.name)
+	if popup.has_method("set_as_top_level"):
+		popup.call("set_as_top_level", true)
+	_set_object_property_if_available(popup, "always_on_top", true)
+	_set_object_property_if_available(popup, "unresizable", false)
+	_set_object_property_if_available(popup, "max_size", Vector2i(420, 280))
+	_set_object_property_if_available(popup, "min_size", Vector2i(180, 0))
+
+
+func _set_object_property_if_available(target: Object, property_name: String, value: Variant) -> void:
+	if target == null:
+		return
+	for property_info in target.get_property_list():
+		if String(Dictionary(property_info).get("name", "")) == property_name:
+			target.set(property_name, value)
+			return
+
+
 func _ensure_drop_light_topbar() -> void:
 	if get_node_or_null("DropLightTopbar") != null:
 		return
@@ -441,8 +473,10 @@ func _apply_homebase_compact_panel_policy() -> void:
 	var shipcards_scroll := get_node_or_null("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/ShipCardsScroll") as ScrollContainer
 	if shipcards_scroll != null:
 		shipcards_scroll.custom_minimum_size = Vector2.ZERO
+		shipcards_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 		shipcards_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		shipcards_scroll.set_meta("homebase_primary_status_region", true)
+		shipcards_scroll.set_meta("homebase_shipcards_fit_without_horizontal_scroll", true)
 
 	var team_drop_panel := _get_team_drop_panel() as Control
 	if team_drop_panel != null:
@@ -887,6 +921,8 @@ func _update_character_sheet() -> void:
 		{
 			"status_text": _build_sheet_status_text(_focused_unit_id),
 			"fireteam_text": _build_homebase_fireteam_text(_focused_unit_id),
+			"editable_metrics": false,
+			"hide_loadout_dropdowns": true,
 		}
 	)
 
@@ -1334,6 +1370,7 @@ func _build_selected_mission_map_label() -> String:
 func _populate_mission_selector(selector: OptionButton) -> void:
 	if selector == null:
 		return
+	_configure_flightdeck_option_button(selector)
 	selector.clear()
 	var mission_catalog: Array = _mission_catalog if not _mission_catalog.is_empty() else [
 		{
@@ -1568,9 +1605,10 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 
 	var shipcard := PanelContainer.new()
 	shipcard.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	shipcard.custom_minimum_size = Vector2(0.0, 210.0 if cargo_capable else 184.0)
+	shipcard.custom_minimum_size = Vector2(0.0, 168.0 if cargo_capable else 144.0)
 	shipcard.add_theme_stylebox_override("panel", _build_shipcard_stylebox(is_selected, craft_busy or cargo_loading or air_asset_unavailable, craft_in_transit or air_asset_unavailable))
 	shipcard.modulate = Color(1.0, 1.0, 1.0, 0.56) if craft_in_transit or air_asset_unavailable else Color(1.0, 1.0, 1.0, 1.0)
+	shipcard.set_meta("homebase_shipcard_no_horizontal_overflow", true)
 
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 5)
@@ -1583,12 +1621,13 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	row.name = "ShipcardContentRow"
 	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	row.add_theme_constant_override("separation", 5)
+	row.add_theme_constant_override("separation", 4)
 	margin.add_child(row)
 
 	var ship_box := VBoxContainer.new()
 	ship_box.name = "ShipVisualBox"
-	ship_box.custom_minimum_size = Vector2(HOMEBASE_SHIPCARD_BUTTON_SIZE.x + 4.0, 0.0)
+	ship_box.custom_minimum_size = Vector2(HOMEBASE_SHIPCARD_BUTTON_SIZE.x + 2.0, 0.0)
+	ship_box.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	ship_box.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	ship_box.add_theme_constant_override("separation", 1)
 	row.add_child(ship_box)
@@ -1622,6 +1661,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	ship_texture.set_meta("homebase_shipcard_visual_anchor", "left_top")
 	ship_texture.set_meta("homebase_shipcard_visual_offset", HOMEBASE_SHIPCARD_IMAGE_OFFSET)
 	ship_texture.set_meta("homebase_shipcard_visual_enlarged", true)
+	ship_texture.set_meta("homebase_shipcard_visual_crop_compensates_transparency", true)
 	if ship_texture.texture != null:
 		ship_texture.modulate = Color(1.0, 1.0, 1.0, 0.46 if craft_in_transit or air_asset_unavailable else 1.0)
 	else:
@@ -1670,6 +1710,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 		cargo_dropdown.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		cargo_dropdown.custom_minimum_size = Vector2(0.0, 22.0)
 		cargo_dropdown.add_theme_font_size_override("font_size", 8)
+		_configure_flightdeck_option_button(cargo_dropdown)
 		var selected_cargo_index: int = -1
 		for cargo_option_variant in _get_cargo_options_for_craft(craft_def):
 			var cargo_option: Dictionary = Dictionary(cargo_option_variant)
@@ -1706,6 +1747,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	var actions := VBoxContainer.new()
 	actions.name = "ShipActionColumn"
 	actions.alignment = BoxContainer.ALIGNMENT_BEGIN
+	actions.custom_minimum_size = Vector2(44.0, 0.0)
 	actions.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	actions.add_theme_constant_override("separation", 3)
 	actions.set_meta("homebase_actions_top_aligned", true)
@@ -1713,7 +1755,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 
 	var send_button := Button.new()
 	send_button.text = "Send"
-	send_button.custom_minimum_size = Vector2(52.0, 22.0)
+	send_button.custom_minimum_size = Vector2(42.0, 22.0)
 	send_button.add_theme_font_size_override("font_size", 8)
 	send_button.disabled = air_asset_unavailable or assigned_pilot_id.is_empty() or not _can_send_craft(craft_def, craft_id)
 	META_UI_SKIN_SCRIPT.style_transfer_button(send_button, not send_button.disabled)
@@ -1722,7 +1764,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 
 	var clear_button := Button.new()
 	clear_button.text = "Clear"
-	clear_button.custom_minimum_size = Vector2(52.0, 20.0)
+	clear_button.custom_minimum_size = Vector2(42.0, 20.0)
 	clear_button.add_theme_font_size_override("font_size", 8)
 	clear_button.disabled = assigned_pilot_id.is_empty() or craft_in_transit or air_asset_unavailable
 	META_UI_SKIN_SCRIPT.style_secondary_button(clear_button)
@@ -1732,7 +1774,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	var remove_button := Button.new()
 	remove_button.text = "X"
 	remove_button.tooltip_text = "Remove this shipcard from the flight deck."
-	remove_button.custom_minimum_size = Vector2(52.0, 20.0)
+	remove_button.custom_minimum_size = Vector2(42.0, 20.0)
 	remove_button.add_theme_font_size_override("font_size", 8)
 	remove_button.disabled = not _can_remove_aircraft(craft_id)
 	META_UI_SKIN_SCRIPT.style_secondary_button(remove_button)
@@ -1849,15 +1891,16 @@ func _build_shipcard_stylebox(is_selected: bool, craft_busy: bool, craft_in_tran
 	var stylebox := StyleBoxFlat.new()
 	stylebox.bg_color = Color(0.12, 0.14, 0.17, 0.72) if craft_in_transit else Color(0.12, 0.14, 0.17, 1.0)
 	if is_selected:
-		stylebox.border_color = Color(0.52, 0.66, 0.76, 0.92)
+		stylebox.border_color = Color(0.40, 0.92, 0.56, 1.0)
 	elif craft_in_transit:
 		stylebox.border_color = Color(0.56, 0.58, 0.62, 0.82)
 	else:
 		stylebox.border_color = Color(0.55, 0.46, 0.22, 1.0) if craft_busy else Color(0.31, 0.36, 0.42, 1.0)
-	stylebox.border_width_left = 1
-	stylebox.border_width_top = 1
-	stylebox.border_width_right = 1
-	stylebox.border_width_bottom = 1
+	var border_width: int = 2 if is_selected else 1
+	stylebox.border_width_left = border_width
+	stylebox.border_width_top = border_width
+	stylebox.border_width_right = border_width
+	stylebox.border_width_bottom = border_width
 	stylebox.corner_radius_top_left = 8
 	stylebox.corner_radius_top_right = 8
 	stylebox.corner_radius_bottom_left = 8
@@ -1967,6 +2010,7 @@ func _can_remove_aircraft(craft_id: String) -> bool:
 func _populate_aircraft_selector(selector: OptionButton) -> void:
 	if selector == null:
 		return
+	_configure_flightdeck_option_button(selector)
 	var selected_type: String = "dropship"
 	if selector.item_count > 0 and selector.selected >= 0 and selector.selected < selector.item_count:
 		selected_type = String(selector.get_item_metadata(selector.selected)).strip_edges()

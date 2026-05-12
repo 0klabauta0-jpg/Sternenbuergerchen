@@ -33,6 +33,8 @@ const WORLD_EVENT_LABEL_ALLOWLIST: PackedStringArray = [
 	"FEUERSTOPP GEBROCHEN!",
 	"EIGENBESCHUSS!",
 	"SEC 360",
+	"TOUCHDOWN",
+	"AB",
 	"DOWN",
 	"BLEEDOUT",
 ]
@@ -100,6 +102,7 @@ var _contact_active: bool = false
 var _contact_target_id: String = ""
 var _is_tactical_selected: bool = false
 var _selection_ring: Line2D = null
+var _world_selection_ring_visible: bool = true
 var _weapon_visual: Sprite2D = null
 var _weapon_visual_direction: String = DEFAULT_WEAPON_VISUAL_DIRECTION
 var _respawn_manager = null
@@ -967,6 +970,11 @@ func set_tactical_selected(is_selected: bool) -> void:
 	_refresh_selection_ring()
 
 
+func set_world_selection_ring_visible(visible: bool) -> void:
+	_world_selection_ring_visible = visible
+	_refresh_selection_ring()
+
+
 func show_event_text(event_text: String, event_color: Color = Color(1.0, 0.95, 0.5, 1.0), duration_seconds: float = EVENT_DURATION_SECONDS) -> void:
 	var normalized_event_text: String = event_text.strip_edges()
 	if not _should_show_world_event_text(normalized_event_text):
@@ -1532,7 +1540,7 @@ func _refresh_selection_ring() -> void:
 	if _selection_ring == null:
 		return
 	_selection_ring.default_color = _build_fireteam_label_color().lightened(0.18)
-	_selection_ring.visible = _is_tactical_selected and is_visible_in_tree()
+	_selection_ring.visible = _world_selection_ring_visible and _is_tactical_selected and is_visible_in_tree()
 
 
 func _build_phase_label_text() -> String:
@@ -1570,6 +1578,10 @@ func _normalize_tactical_stance_id(value: String) -> String:
 			return normalized_value
 		_:
 			return "normal"
+
+
+func get_respawn_remaining_seconds() -> int:
+	return _get_respawn_remaining_seconds()
 
 
 func _get_respawn_remaining_seconds() -> int:

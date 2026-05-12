@@ -1,7 +1,7 @@
 # App Shell Full Flow Checklist
 
 ## Vorbereitung
-- Godot 4.6.1 starten.
+- Godot 4.6.2 starten.
 - Projekt `C:\dev\SternenBuergerchen` oeffnen.
 - Startszene muss das Hauptmenue sein.
 

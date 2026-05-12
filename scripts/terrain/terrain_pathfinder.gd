@@ -42,12 +42,14 @@ func find_path_with_options(from_grid: Vector2i, to_grid: Vector2i, registry, op
 		return result
 
 	var open_set: Array = [from_grid]
+	var in_open_set: Dictionary = {from_grid: true}
 	var came_from: Dictionary = {}
 	var g_score: Dictionary = {from_grid: 0.0}
 	var f_score: Dictionary = {from_grid: _estimate_cost(from_grid, to_grid)}
 
 	while not open_set.is_empty():
 		var current: Vector2i = _pop_lowest_f_score(open_set, f_score)
+		in_open_set.erase(current)
 		if current == to_grid:
 			return _reconstruct_path(came_from, current)
 
@@ -63,7 +65,8 @@ func find_path_with_options(from_grid: Vector2i, to_grid: Vector2i, registry, op
 			came_from[neighbor] = current
 			g_score[neighbor] = tentative_g_score
 			f_score[neighbor] = tentative_g_score + _estimate_cost(neighbor, to_grid)
-			if not open_set.has(neighbor):
+			if not in_open_set.has(neighbor):
+				in_open_set[neighbor] = true
 				open_set.append(neighbor)
 
 	return result

@@ -141,7 +141,7 @@ func _stage_waiting_dropship(controller: Node) -> void:
 	planning_state["mission_drop_display_name"] = "TASK 186 Dropship"
 	planning_state["mission_drop_title_text"] = "TASK 186 Dropship"
 	planning_state["mission_drop_texture_path"] = "res://Assets/kenney_space-kit/Side/craft_speederB.png"
-	planning_state["mission_drop_status_line"] = "Holding on mission map"
+	planning_state["mission_drop_status_line"] = "Holding off-map"
 	planning_state["mission_drop_progress"] = 100.0
 	planning_state["mission_drop_passenger_count"] = BLUE_UNIT_IDS.size()
 	planning_state["selected_fireteam"] = "BLUE"

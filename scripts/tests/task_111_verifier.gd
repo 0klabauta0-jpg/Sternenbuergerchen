@@ -27,6 +27,7 @@ func _run_tests() -> void:
 	_test_security_mode_override_keeps_post_drop_360()
 	await _test_directional_sector_shift_reacts_with_leadership_delay()
 	_test_overwatch_triggers_on_enemy_movement_inside_watched_sector()
+	_test_overwatch_prefilters_enemies_outside_contact_range()
 	_test_overwatch_stays_disabled_under_suppression_or_movement()
 	await _test_scene_exposes_security_snapshot_for_holding_fireteams()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
@@ -46,6 +47,7 @@ func _test_security_controller_assigns_360_sectors_for_high_leadership() -> void
 	_assert(String(state.get("security_mode", "")) == "360", "High-leadership hold fireteams default to 360 security")
 	_assert(Array(state.get("member_assignments", [])).size() == 3, "360 security builds one sector assignment per fit member")
 	_assert(bool(state.get("overwatch_ready", false)), "Holding fireteams become overwatch-ready when no movement is active")
+	_assert(PackedStringArray(state.get("overwatch_unit_ids", PackedStringArray())).size() == 3, "Security snapshot exposes overwatch unit ids for HUD badges")
 	_cleanup_units([leader, wing_a, wing_b])
 
 
@@ -111,9 +113,32 @@ func _test_overwatch_triggers_on_enemy_movement_inside_watched_sector() -> void:
 	enemy.global_position = Vector2(88.0, 0.0)
 	var shots: Array = overwatch_controller.update(simulation, [security_state], friendly_by_fireteam, [enemy], null, 180.0, 2)
 	_assert(shots.size() == 1, "Enemy movement into a watched sector triggers an overwatch shot")
+	if shots.size() == 1:
+		var attacker_id: String = String(Dictionary(shots[0]).get("attacker_unit_id", ""))
+		var ready_snapshot: Dictionary = Dictionary(overwatch_controller.call("get_member_ready_snapshot", 2))
+		var ready_state: Dictionary = Dictionary(ready_snapshot.get(attacker_id, {}))
+		_assert(not ready_state.is_empty(), "Overwatch exposes per-member ready state for UI feedback")
+		_assert(not bool(ready_state.get("ready", true)), "Fired overwatch member reports cooldown until the next ready tick")
 	_assert(simulation.effects.size() == 1, "Overwatch enqueues an authoritative damage effect")
 	if simulation.effects.size() == 1:
 		_assert(float(Dictionary(simulation.effects[0]).get("hit_chance", 0.0)) > 0.45, "Overwatch shots receive the configured hit chance bonus")
+	_cleanup_units([leader, wing, enemy])
+
+
+func _test_overwatch_prefilters_enemies_outside_contact_range() -> void:
+	var security_controller = FIRETEAM_SECURITY_CONTROLLER_SCRIPT.new()
+	var overwatch_controller = OVERWATCH_CONTROLLER_SCRIPT.new()
+	var simulation = SimulationStub.new()
+	var leader = _make_unit("ovw_far_lead", "blue", true, Vector2(0.0, 0.0), 0.52, 0.81, 0.84, ["steady"])
+	var wing = _make_unit("ovw_far_wing", "blue", false, Vector2(-14.0, 8.0), 0.46, 0.68, 0.3, [])
+	var enemy = _make_enemy("enemy_far_runner", Vector2(260.0, 0.0))
+	var security_state: Dictionary = security_controller.update_fireteam_state("blue", [leader, wing], leader, _build_behavior_profile("hold_position"), {}, {}, {}, [enemy])
+	var friendly_by_fireteam: Dictionary = {"blue": [leader, wing]}
+	overwatch_controller.update(simulation, [security_state], friendly_by_fireteam, [enemy], null, 180.0, 1)
+	enemy.global_position = Vector2(276.0, 0.0)
+	var shots: Array = overwatch_controller.update(simulation, [security_state], friendly_by_fireteam, [enemy], null, 180.0, 2)
+	_assert(shots.is_empty(), "Overwatch ignores moving enemies outside the contact-range prefilter")
+	_assert(simulation.effects.is_empty(), "Out-of-range overwatch candidates do not enqueue effects")
 	_cleanup_units([leader, wing, enemy])
 
 
@@ -139,12 +164,21 @@ func _test_scene_exposes_security_snapshot_for_holding_fireteams() -> void:
 	_assert(started, "Scene phase start succeeds for security integration")
 	_assert(snapshot.size() >= 1, "Mission tactical controller exposes active security states")
 	var has_overwatch_ready: bool = false
+	var has_overwatch_unit_ids: bool = false
 	for state_variant in snapshot:
 		var state: Dictionary = Dictionary(state_variant)
 		if bool(state.get("overwatch_ready", false)):
 			has_overwatch_ready = true
+			has_overwatch_unit_ids = not PackedStringArray(state.get("overwatch_unit_ids", PackedStringArray())).is_empty()
 			break
 	_assert(has_overwatch_ready, "At least one holding fireteam becomes overwatch-ready in the mission scene")
+	_assert(has_overwatch_unit_ids, "Mission security snapshot carries overwatch-ready unit ids")
+	var unit_meta_marked: bool = false
+	for child in scene.get_children():
+		if child is Node and bool((child as Node).get_meta("overwatch_ready", false)):
+			unit_meta_marked = true
+			break
+	_assert(unit_meta_marked, "Mission controller syncs overwatch state onto unit HUD metadata")
 	scene.queue_free()
 	await process_frame
 

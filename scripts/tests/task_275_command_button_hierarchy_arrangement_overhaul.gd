@@ -47,6 +47,7 @@ func _test_contract_catalog_and_snapshot() -> void:
 		"secure",
 		"recon",
 		"withdraw",
+		"delete_order",
 		"tempo",
 		"fire_rule",
 		"contact_response",
@@ -55,6 +56,7 @@ func _test_contract_catalog_and_snapshot() -> void:
 		"role_suggestion",
 		"swap_roles",
 		"preview_plan",
+		"sort_fireteam",
 		"go_plan",
 		"set_lz",
 		"call_dropship",
@@ -80,7 +82,8 @@ func _test_contract_catalog_and_snapshot() -> void:
 	var actions_by_id: Dictionary = Dictionary(snapshot.get("actions_by_id", {}))
 	_assert(Dictionary(actions_by_id.get("tempo", {})).get("panel_role", "") == "#17", "Rule actions live in #17")
 	_assert(Dictionary(actions_by_id.get("set_lz", {})).get("group_id", "") == "air_lz", "Set LZ is grouped as Air/LZ")
-	_assert(str(Dictionary(actions_by_id.get("go_plan", {})).get("disabled_reason", "")).contains("fixed HUD"), "GO exposes fixed HUD phase disabled reason")
+	_assert(Dictionary(actions_by_id.get("sort_fireteam", {})).get("panel_role", "") == "#16", "Sort lives in #16 for the fixed HUD command matrix")
+	_assert(Dictionary(actions_by_id.get("go_plan", {})).get("panel_role", "") == "#16", "GO lives in #16 for the fixed HUD command matrix")
 	_assert(str(Dictionary(actions_by_id.get("confirm", {})).get("disabled_reason", "")).contains("TASK_276"), "Breakout actions are reserved for TASK_276")
 
 
@@ -148,6 +151,8 @@ func _test_mission_scene_hierarchy() -> void:
 	_assert_button_metadata(controller, "take", str(CONTRACT_SCRIPT.get("BUTTON_PATH_TAKE")), "goal", "#16")
 	_assert_button_metadata(controller, "defend", str(CONTRACT_SCRIPT.get("BUTTON_PATH_HOLD")), "goal", "#16")
 	_assert_button_metadata(controller, "engage", str(CONTRACT_SCRIPT.get("BUTTON_PATH_TARGET")), "goal", "#16")
+	_assert_button_metadata(controller, "delete_order", str(CONTRACT_SCRIPT.get("BUTTON_PATH_DELETE_ORDER")), "goal", "#16")
+	_assert_button_metadata(controller, "sort_fireteam", str(CONTRACT_SCRIPT.get("BUTTON_PATH_SORT")), "plan", "#16")
 	_assert_button_metadata(controller, "set_lz", str(CONTRACT_SCRIPT.get("BUTTON_PATH_SET_LZ")), "air_lz", "#18")
 	_assert_button_metadata(controller, "call_dropship", str(CONTRACT_SCRIPT.get("BUTTON_PATH_CALL_DROPSHIP")), "air_lz", "#18")
 	_assert_button_metadata(controller, "approach_nw", str(CONTRACT_SCRIPT.get("BUTTON_PATH_APPROACH_NW")), "air_lz", "#18")
@@ -156,9 +161,11 @@ func _test_mission_scene_hierarchy() -> void:
 	_assert(command_grid != null and int(command_grid.columns) == 5, "#16 command grid uses five columns for the fixed 5x4 command matrix")
 	if command_grid != null:
 		var order: PackedStringArray = PackedStringArray(command_grid.get_meta("command_hierarchy_order", PackedStringArray()))
-		_assert(order.size() >= 6 and order[0] == "move" and order[1] == "take", "#16 command grid order starts with Move/Take goal pair")
+		_assert(order.size() >= 8 and order[0] == "move" and order[1] == "take" and order.has("delete_order") and order.has("sort_fireteam"), "#16 command grid order includes Move/Take plus Delete/Sort")
 		_assert(command_grid.get_child_count() >= 20, "#16 command grid exposes the full 5x4 slot frame")
-		_assert(int(command_grid.get_meta("command_placeholder_slots", 0)) >= 14, "#16 command grid keeps reserve slots marked for communication")
+		_assert(int(command_grid.get_meta("command_placeholder_slots", 0)) >= 10, "#16 command grid keeps reserve slots marked for communication")
+		var sort_button := command_grid.get_node_or_null("SortCommandMatrixButton") as Button
+		_assert(sort_button != null and sort_button.get_index() == 9, "Sort command occupies #16.10")
 
 	controller.call("_set_selected_fireteams", PackedStringArray(["blue"]), false)
 	await _wait_frames(3)

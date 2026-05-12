@@ -14,6 +14,20 @@ const OBJECT_LAYER_GROUPS: PackedStringArray = [
 	"rails",
 	"crater",
 	"fahrzeuge",
+	"space_kit_full",
+	"space_station_full",
+	"modular_space",
+	"factory",
+]
+const IMPORTED_KIT_GROUPS: PackedStringArray = [
+	"space_kit_full",
+	"space_station_full",
+	"modular_space",
+	"factory",
+]
+const STRUCTURE_LAYER_NAMES: PackedStringArray = [
+	"structure",
+	"terrain_object",
 ]
 const HILL_PRESERVING_TYPE_PREFIXES: PackedStringArray = [
 	"wall_",
@@ -74,7 +88,7 @@ static func load_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCa
 		if type_id.is_empty():
 			continue
 
-		var palette_group: String = _normalize_palette_group_id(String(entry.get("palette_group", "default")))
+		var palette_group: String = _resolve_palette_group_for_entry(entry)
 		if palette_group.is_empty():
 			palette_group = "default"
 		catalog._append_palette_group_if_missing(palette_group)
@@ -83,7 +97,7 @@ static func load_from_file(path: String = DEFAULT_CATALOG_PATH) -> TerrainTileCa
 			"type_id": type_id,
 			"display_name": String(entry.get("display_name", type_id)),
 			"palette_group": palette_group,
-			"placement_layer": String(entry.get("placement_layer", "object" if OBJECT_LAYER_GROUPS.has(palette_group) else "terrain")),
+			"placement_layer": String(entry.get("placement_layer", "object" if OBJECT_LAYER_GROUPS.has(palette_group) else "terrain")).strip_edges().to_lower(),
 			"texture_path": String(entry.get("texture_path", "")),
 			"surface_type": String(entry.get("surface_type", "ground")),
 			"walkable": bool(entry.get("walkable", true)),
@@ -113,6 +127,46 @@ static func _build_default_palette_group_label(group_id: String) -> String:
 	if group_id.is_empty():
 		return "Weitere"
 	return group_id.capitalize()
+
+
+static func _resolve_palette_group_for_entry(entry: Dictionary) -> String:
+	var raw_group: String = _normalize_palette_group_id(String(entry.get("palette_group", "default")))
+	if not IMPORTED_KIT_GROUPS.has(raw_group):
+		return raw_group
+	var type_id: String = String(entry.get("type_id", "")).strip_edges().to_lower()
+	var display_name: String = String(entry.get("display_name", "")).strip_edges().to_lower()
+	var searchable: String = "%s %s" % [type_id, display_name]
+	if searchable.contains("crater"):
+		return "crater"
+	if searchable.contains("meteor") or searchable.contains("asteroid") or searchable.contains("rock"):
+		return "felsen"
+	if searchable.contains("cliff") or searchable.contains("sidecliff"):
+		return "cliffs"
+	if searchable.contains("ramp") or searchable.contains("slope"):
+		return "rampen"
+	if searchable.contains("terrain") or searchable.contains("ground"):
+		return "terrain"
+	if searchable.contains("wall") or searchable.contains("door") or searchable.contains("gate"):
+		return "waende"
+	if searchable.contains("pipe"):
+		return "pipes"
+	if searchable.contains("rail") or searchable.contains("monorail"):
+		return "rails"
+	if searchable.contains("craft") or searchable.contains("vehicle") or searchable.contains("rover") or searchable.contains("speeder"):
+		return "fahrzeuge"
+	if raw_group == "factory" and searchable.contains("floor"):
+		return "plattformen"
+	if searchable.contains("floor") or searchable.contains("corridor") or searchable.contains("room"):
+		return "space_station"
+	if searchable.contains("platform") or searchable.contains("catwalk") or searchable.contains("conveyor"):
+		return "plattformen"
+	if searchable.contains("computer") or searchable.contains("console") or searchable.contains("display") or searchable.contains("generator") or searchable.contains("chimney") or searchable.contains("crane") or searchable.contains("tank"):
+		return "technik"
+	if searchable.contains("building") or searchable.contains("hangar") or searchable.contains("structure"):
+		return "gebaeude"
+	if searchable.contains("barrel") or searchable.contains("box") or searchable.contains("crate") or searchable.contains("container") or searchable.contains("bed") or searchable.contains("chair") or searchable.contains("table") or searchable.contains("banner"):
+		return "deko"
+	return "deko"
 
 
 func _append_palette_group_if_missing(group_id: String, display_name: String = "", collapsed: bool = false) -> void:
@@ -164,6 +218,20 @@ func is_object_layer_type(type_id: String) -> bool:
 	return String(entry.get("placement_layer", "terrain")).strip_edges().to_lower() == "object"
 
 
+func is_structure_layer_type(type_id: String) -> bool:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty():
+		return false
+	var entry: Dictionary = _tile_types.get(normalized_type_id, {})
+	var placement_layer: String = String(entry.get("placement_layer", "terrain")).strip_edges().to_lower()
+	if STRUCTURE_LAYER_NAMES.has(placement_layer):
+		return true
+	for prefix in HILL_PRESERVING_TYPE_PREFIXES:
+		if normalized_type_id.begins_with(prefix):
+			return true
+	return false
+
+
 func preserves_hill_fields_when_applied(type_id: String) -> bool:
 	var normalized_type_id: String = type_id.strip_edges().to_lower()
 	if normalized_type_id.is_empty():
@@ -172,6 +240,8 @@ func preserves_hill_fields_when_applied(type_id: String) -> bool:
 		return true
 	var entry: Dictionary = _tile_types.get(normalized_type_id, {})
 	if bool(entry.get("preserve_hill_fields", false)) or bool(entry.get("visual_surface_variant", false)):
+		return true
+	if is_structure_layer_type(normalized_type_id):
 		return true
 	if is_object_layer_type(normalized_type_id):
 		return true
@@ -195,20 +265,17 @@ func apply_type_to_tile(tile_data, type_id: String) -> bool:
 		return true
 
 	if is_object_layer_type(type_id):
-		tile_data.object_type_id = type_id
-		tile_data.walkable = bool(entry.get("walkable", true))
-		tile_data.blocks_los = bool(entry.get("blocks_los", false))
-		tile_data.cover_value = int(entry.get("cover_value", 0))
-		tile_data.object_height = int(entry.get("object_height", 0))
+		_apply_object_layer_to_tile(tile_data, type_id)
+		return true
+
+	if is_structure_layer_type(type_id):
+		_apply_structure_layer_to_tile(tile_data, type_id)
 		return true
 
 	if preserves_hill_fields_when_applied(type_id):
 		tile_data.type_id = type_id
 		tile_data.object_type_id = ""
-		tile_data.walkable = bool(entry.get("walkable", true))
-		tile_data.blocks_los = bool(entry.get("blocks_los", false))
-		tile_data.cover_value = int(entry.get("cover_value", 0))
-		tile_data.object_height = int(entry.get("object_height", 0))
+		_apply_combined_gameplay_fields(tile_data)
 		return true
 
 	tile_data.type_id = type_id
@@ -231,10 +298,51 @@ func _apply_surface_brush_to_tile(tile_data, type_id: String, entry: Dictionary)
 	tile_data.type_id = type_id
 
 
+func _apply_object_layer_to_tile(tile_data, type_id: String) -> void:
+	tile_data.object_type_id = type_id
+	_apply_combined_gameplay_fields(tile_data)
+
+
+func _apply_structure_layer_to_tile(tile_data, type_id: String) -> void:
+	tile_data.type_id = type_id
+	_apply_combined_gameplay_fields(tile_data)
+
+
+func apply_base_gameplay_fields_to_tile(tile_data) -> void:
+	if tile_data == null:
+		return
+	_apply_combined_gameplay_fields(tile_data)
+
+
+func _apply_combined_gameplay_fields(tile_data) -> void:
+	if tile_data == null:
+		return
+	var base_entry: Dictionary = _get_gameplay_entry_for_type(String(tile_data.type_id) if tile_data.type_id is String else "")
+	var object_entry: Dictionary = _get_gameplay_entry_for_type(String(tile_data.object_type_id) if tile_data.object_type_id is String else "")
+	var has_object_entry: bool = not object_entry.is_empty()
+	var object_walkable: bool = bool(object_entry.get("walkable", true)) if has_object_entry else true
+	var object_blocks_los: bool = bool(object_entry.get("blocks_los", false)) if has_object_entry else false
+	var object_cover_value: int = int(object_entry.get("cover_value", 0)) if has_object_entry else 0
+	var object_height: int = int(object_entry.get("object_height", 0)) if has_object_entry else 0
+	tile_data.walkable = bool(base_entry.get("walkable", true)) and object_walkable
+	tile_data.blocks_los = bool(base_entry.get("blocks_los", false)) or object_blocks_los
+	tile_data.cover_value = maxi(int(base_entry.get("cover_value", 0)), object_cover_value)
+	tile_data.object_height = maxi(int(base_entry.get("object_height", 0)), object_height)
+
+
+func _get_gameplay_entry_for_type(type_id: String) -> Dictionary:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty():
+		return {}
+	return Dictionary(_tile_types.get(normalized_type_id, {}))
+
+
 func _is_legacy_object_type_id(type_id: String) -> bool:
 	var normalized_type_id: String = type_id.strip_edges().to_lower()
 	if normalized_type_id.is_empty():
 		return false
+	if is_structure_layer_type(normalized_type_id):
+		return true
 	for prefix in HILL_PRESERVING_TYPE_PREFIXES:
 		if normalized_type_id.begins_with(prefix):
 			return true

@@ -29,7 +29,7 @@ Lies ausserdem die bestehenden Terrain-Dateien, die die Grundlage bilden:
 
 ## Projekt und Branch
 
-- Engine: Godot 4.6.1
+- Engine: Godot 4.6.2
 - Lokales Projekt: `C:\dev\SternenBuergerchen`
 - Arbeitsbasis: `batch/multiplayer-prototype-v1`
 
@@ -289,4 +289,4 @@ Fuer jeden abgeschlossenen Task dokumentiere kurz:
 - **Keine per-frame Vollscans** – die Editor-Szene ist kein Spiel-Loop
 - **Keine stillen Scope-Erweiterungen** – wenn ein Task "Nicht in diesem Task" auflistet, gilt das
 - **Kleine, kontrollierte Aenderungen** – lieber einen Task sauber als alle auf einmal
-- **Godot 4.6.1 GDScript** – keine C#, keine GDExtension, keine Plugins
+- **Godot 4.6.2 GDScript** – keine C#, keine GDExtension, keine Plugins

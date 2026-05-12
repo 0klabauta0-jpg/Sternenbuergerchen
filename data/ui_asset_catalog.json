@@ -27,6 +27,11 @@
 			"license": "Creative Commons Zero, CC0",
 			"project_root": "res://Assets/kenney_cursor-pixel-pack/",
 			"usage": "cursor_visual_states_only"
+		},
+		"kenney_tactical_icons_curated": {
+			"license": "Creative Commons Zero, CC0",
+			"project_root": "res://Assets/curated/kenney/tactical_icons/",
+			"usage": "mission_command_icons_and_pointer_candidates"
 		}
 	},
 	"assets": [
@@ -239,6 +244,34 @@
 			"category": "editor_tool",
 			"path": "res://Assets/kenney_cursor-pixel-pack/Tiles/tile_0009.png",
 			"usage": "patrol_tool_cursor"
+		},
+		{
+			"id": "command_attack_sword",
+			"source_id": "kenney_tactical_icons_curated",
+			"category": "mission_command_icon",
+			"path": "res://Assets/curated/kenney/tactical_icons/sword_attack.png",
+			"usage": "attack_command_icon_candidate"
+		},
+		{
+			"id": "command_move_prompt",
+			"source_id": "kenney_tactical_icons_curated",
+			"category": "mission_command_icon",
+			"path": "res://Assets/curated/kenney/tactical_icons/move_prompt.png",
+			"usage": "move_command_icon_candidate"
+		},
+		{
+			"id": "command_target_marker",
+			"source_id": "kenney_tactical_icons_curated",
+			"category": "mission_command_icon",
+			"path": "res://Assets/curated/kenney/tactical_icons/target_marker.png",
+			"usage": "target_command_icon_candidate"
+		},
+		{
+			"id": "cursor_pointer_triangle",
+			"source_id": "kenney_tactical_icons_curated",
+			"category": "cursor",
+			"path": "res://Assets/curated/kenney/tactical_icons/pointer_triangle.png",
+			"usage": "triangle_pointer_candidate"
 		}
 	]
 }

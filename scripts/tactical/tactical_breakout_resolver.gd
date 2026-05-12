@@ -35,12 +35,22 @@ const DEFAULT_ALLOWED_BREAKOUTS: PackedStringArray = [
 	BREAKOUT_REQUEST_ORDERS,
 ]
 
+static var _catalog_cache: Dictionary = {}
+static var _catalog_cache_loaded: bool = false
+
 
 static func get_catalog() -> Dictionary:
-	var catalog: Dictionary = _read_catalog_file()
-	if catalog.is_empty():
-		catalog = _fallback_catalog()
-	return catalog.duplicate(true)
+	if not _catalog_cache_loaded:
+		_catalog_cache = _read_catalog_file()
+		if _catalog_cache.is_empty():
+			_catalog_cache = _fallback_catalog()
+		_catalog_cache_loaded = true
+	return _catalog_cache.duplicate(true)
+
+
+static func clear_catalog_cache() -> void:
+	_catalog_cache.clear()
+	_catalog_cache_loaded = false
 
 
 static func get_trigger_catalog() -> Dictionary:

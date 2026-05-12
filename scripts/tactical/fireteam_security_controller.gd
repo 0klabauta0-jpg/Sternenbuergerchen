@@ -170,6 +170,7 @@ func update_fireteam_state(
 		"main_threat_position": Vector2(threat_position) if typeof(threat_position) == TYPE_VECTOR2 else null,
 		"main_threat_distance": threat_distance,
 		"member_assignments": member_assignments,
+		"overwatch_unit_ids": _build_overwatch_unit_ids(member_assignments) if overwatch_ready else PackedStringArray(),
 		"security_radius_world": security_radius_world,
 		"security_radius_tiles": security_radius_tiles,
 		"overwatch_ready": overwatch_ready,
@@ -341,9 +342,10 @@ func _build_member_assignments(fit_members: Array, security_mode: String, direct
 		var sector_width: float = TAU / float(fit_members.size())
 		for index in range(fit_members.size()):
 			var member: Dictionary = fit_members[index]
+			var center_angle: float = _resolve_360_member_angle(index, fit_members.size(), direction_angle, sector_width)
 			assignments.append({
 				"unit_id": String(member.get("unit_id", "")),
-				"center_angle": wrapf(direction_angle + (sector_width * float(index)), -PI, PI),
+				"center_angle": center_angle,
 				"arc_width": sector_width,
 				"security_radius_world": security_radius_world,
 			})
@@ -356,6 +358,19 @@ func _build_member_assignments(fit_members: Array, security_mode: String, direct
 			"security_radius_world": security_radius_world,
 		})
 	return assignments
+
+
+func _resolve_360_member_angle(index: int, member_count: int, direction_angle: float, sector_width: float) -> float:
+	if member_count <= 1:
+		return direction_angle
+	if index == 0:
+		return direction_angle
+	if index == member_count - 1 and member_count >= 4:
+		return wrapf(direction_angle + PI, -PI, PI)
+	var side_index: int = index - 1
+	var side_sign: float = -1.0 if side_index % 2 == 0 else 1.0
+	var side_ring: int = int(side_index / 2) + 1
+	return wrapf(direction_angle + (side_sign * minf(sector_width * float(side_ring), PI * 0.72)), -PI, PI)
 
 
 func _is_security_active(command_type: String, fit_members: Array) -> bool:
@@ -454,6 +469,7 @@ func _build_public_state(state: Dictionary) -> Dictionary:
 		"main_threat_position": state.get("main_threat_position", null),
 		"main_threat_distance": float(state.get("main_threat_distance", INF)),
 		"member_assignments": Array(state.get("member_assignments", [])).duplicate(true),
+		"overwatch_unit_ids": PackedStringArray(state.get("overwatch_unit_ids", PackedStringArray())),
 		"security_radius_world": float(state.get("security_radius_world", 0.0)),
 		"security_radius_tiles": int(state.get("security_radius_tiles", 0)),
 		"overwatch_ready": bool(state.get("overwatch_ready", false)),
@@ -462,3 +478,15 @@ func _build_public_state(state: Dictionary) -> Dictionary:
 		"area_center_position": state.get("area_center_position", null),
 		"area_status": String(state.get("area_status", "")),
 	}
+
+
+func _build_overwatch_unit_ids(member_assignments: Array) -> PackedStringArray:
+	var result: PackedStringArray = PackedStringArray()
+	for assignment_variant in member_assignments:
+		if typeof(assignment_variant) != TYPE_DICTIONARY:
+			continue
+		var unit_id: String = String(Dictionary(assignment_variant).get("unit_id", "")).strip_edges()
+		if unit_id.is_empty() or result.has(unit_id):
+			continue
+		result.append(unit_id)
+	return result

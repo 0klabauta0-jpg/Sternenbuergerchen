@@ -52,4 +52,4 @@ Gameplay-State, Kollisionslogik, Walkability, Combat, Terrain-Mapping und Multip
 | `station_structure_panel` | `res://Assets/curated/kenney/space_station/models/structure-panel.glb` | wall_panel | large structural panel | 1.0 |
 
 ## Katalog
-`data/space_setpiece_catalog.json` spiegelt die obigen IDs, Projektpfade, Kategorien und Scale-Hinweise fuer spaetere UI-/Editor-/Preview-Verwendung. Der Katalog ist Visual-only und enthaelt keine lokalen Quellpfade.
+`data/space_setpiece_catalog.json` spiegelt die obigen IDs, Projektpfade, Kategorien und Import-Scale-Hinweise fuer spaetere UI-/Editor-/Preview-Verwendung. Der Katalog ist Visual-only und enthaelt keine lokalen Quellpfade. Runtime-/Editor-Scale ist nicht aus diesem Inventar abzuleiten; dafuer ist `data/terrain_3d_asset_mapping.json` die verbindliche Quelle.

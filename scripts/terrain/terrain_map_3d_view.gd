@@ -147,6 +147,28 @@ const TILE_SELECTION_SURFACE_Y_OFFSET: float = 0.12
 const TILE_SELECTION_BORDER_WIDTH_FACTOR: float = 0.078
 const TILE_SELECTION_FILL_COLOR: Color = Color(0.05, 0.58, 1.0, 0.46)
 const TILE_SELECTION_BORDER_COLOR: Color = Color(0.78, 0.98, 1.0, 1.0)
+const FRIENDLY_AIM_LINE_COLOR: Color = Color(0.66, 1.0, 0.72, 0.82)
+const FRIENDLY_AIM_TIP_COLOR: Color = Color(0.78, 1.0, 0.84, 0.92)
+const FRIENDLY_FIRE_SECTOR_TILE_COLOR: Color = Color(0.52, 1.0, 0.58, 0.12)
+const FRIENDLY_FIRE_SECTOR_BLOCKER_COLOR: Color = Color(1.0, 0.84, 0.34, 0.32)
+const FRIENDLY_FIRE_SECTOR_BLOCKER_LINE_COLOR: Color = Color(0.95, 1.0, 0.62, 0.48)
+const FRIENDLY_FIRE_SECTOR_ANGLE_DEGREES: float = 70.0
+const FRIENDLY_FIRE_SECTOR_SEGMENTS: int = 10
+const FRIENDLY_FIRE_SECTOR_TILE_FILL: float = 0.82
+const FRIENDLY_FIRE_SECTOR_BLOCKER_TILE_FILL: float = 0.58
+const FRIENDLY_FIRE_SECTOR_SURFACE_OFFSET: float = 0.18
+const FRIENDLY_FIRE_SECTOR_BLOCKER_LINE_LIMIT: int = 4
+const FRIENDLY_FIRE_FACING_STEM_MIN_WORLD: float = 30.0
+const FRIENDLY_FIRE_FACING_STEM_MAX_WORLD: float = 88.0
+const FRIENDLY_AIM_DIRECTION_DEADZONE_RADIANS: float = 0.14
+const FRIENDLY_FIRE_SECTOR_VISUAL_MODE_LOS_LINE: String = "los_line_only"
+const FRIENDLY_FIRE_SECTOR_VISUAL_MODE_TILE_ALIGNED_LOS: String = "tile_aligned_los"
+const FRIENDLY_FIRE_SECTOR_SCAN_MODE_LOS_LINE: String = "single_facing_los_line"
+const FRIENDLY_FIRE_SECTOR_SCAN_MODE_TILE_CACHE: String = "range_bounded_los_cache"
+const SELECTED_UNIT_MARKER_COLOR: Color = Color(0.45, 0.78, 1.0, 0.34)
+const SELECTED_UNIT_MARKER_RADIUS: float = 0.32
+const SELECTED_UNIT_MARKER_HEIGHT: float = 0.035
+const DYNAMIC_ORDER_VISUAL_REFRESH_INTERVAL_MSEC: int = 90
 
 const LEGACY_MODEL_BY_TYPE: Dictionary = {
 	"wall_straight_se": "corridor_wall",
@@ -208,6 +230,7 @@ var _unit_nodes: Array = []
 var _unit_proxies_by_id: Dictionary = {}
 var _selected_grid_positions: Array = []
 var _order_payload: Dictionary = {}
+var _area_order_preview_payload: Dictionary = {}
 var _contact_entries: Array = []
 var _contact_selected_fireteam_ids: PackedStringArray = PackedStringArray()
 var _drop_payload: Dictionary = {}
@@ -218,6 +241,8 @@ var _fog_of_war_team_id: String = ""
 var _fog_of_war_state_signature: String = ""
 var _fow_visible_tile_ids: Dictionary = {}
 var _fow_explored_tile_ids: Dictionary = {}
+var _fow_visible_tile_grids: Dictionary = {}
+var _fow_explored_tile_grids: Dictionary = {}
 var _fow_visible_target_ids: Dictionary = {}
 var _fow_visible_event_ids: Dictionary = {}
 var _fow_last_known_contacts: Array = []
@@ -280,6 +305,9 @@ var _unit_visual_loadout_count: int = 0
 var _unit_visual_loadout_error_count: int = 0
 var _enemy_animated_unit_model_count: int = 0
 var _unit_status_badge_count: int = 0
+var _drop_visual_static_signature: String = ""
+var _dropship_visual_nodes_by_id: Dictionary = {}
+var _dropship_approach_lines_by_id: Dictionary = {}
 var _dropship_texture_visible: bool = false
 var _dropship_model_visible: bool = false
 var _air_visual_count: int = 0
@@ -300,6 +328,7 @@ var _waypoint_tile_marker_count: int = 0
 var _movement_style_visual_count: int = 0
 var _movement_bound_marker_count: int = 0
 var _movement_group_marker_count: int = 0
+var _movement_group_marker_entries: Array = []
 var _movement_style_entries: Array = []
 var _multi_fireteam_plan_visual_count: int = 0
 var _multi_fireteam_plan_entries: Array = []
@@ -307,6 +336,14 @@ var _enemy_security_visual_count: int = 0
 var _enemy_security_entries: Array = []
 var _enemy_tactics_visual_count: int = 0
 var _enemy_tactics_entries: Array = []
+var _friendly_aim_visual_count: int = 0
+var _friendly_aim_entries: Array = []
+var _friendly_aim_direction_by_unit_id: Dictionary = {}
+var _friendly_aim_tile_marker_count: int = 0
+var _friendly_aim_blocker_marker_count: int = 0
+var _friendly_aim_los_line_count: int = 0
+var _selected_unit_marker_count: int = 0
+var _selected_unit_marker_entries: Array = []
 var _weapon_fire_vfx_visual_count: int = 0
 var _weapon_fire_vfx_entries: Array = []
 var _weapon_fire_sfx_count: int = 0
@@ -345,6 +382,11 @@ var _order_payload_apply_count: int = 0
 var _contact_payload_apply_count: int = 0
 var _drop_payload_apply_count: int = 0
 var _mission_status_payload_apply_count: int = 0
+var _order_visual_signature: String = ""
+var _order_dynamic_visual_signature: String = ""
+var _last_dynamic_order_visual_refresh_msec: int = 0
+var _fire_sector_los_cache: Dictionary = {}
+var _fire_sector_los_cache_signature: String = ""
 
 
 func _ready() -> void:
@@ -359,12 +401,17 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_resize_subviewport()
 	_sync_unit_proxies(false, delta)
+	_refresh_dynamic_order_visuals_if_needed()
 	if _subviewport != null and _subviewport.render_target_update_mode == SubViewport.UPDATE_ALWAYS and Time.get_ticks_msec() > _continuous_redraw_until_msec:
 		_subviewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 
 func configure_from_map(terrain_map_data) -> void:
 	_terrain_map_data = terrain_map_data
+	_order_visual_signature = ""
+	_order_dynamic_visual_signature = ""
+	_fire_sector_los_cache.clear()
+	_fire_sector_los_cache_signature = ""
 	_read_map_transform()
 	render_map()
 
@@ -373,6 +420,10 @@ func render_map(terrain_map_data = null) -> void:
 	var render_started_at_msec: int = Time.get_ticks_msec()
 	if terrain_map_data != null:
 		_terrain_map_data = terrain_map_data
+		_order_visual_signature = ""
+		_order_dynamic_visual_signature = ""
+		_fire_sector_los_cache.clear()
+		_fire_sector_los_cache_signature = ""
 	_read_map_transform()
 	_ensure_nodes()
 	_clear_children(_map_root)
@@ -427,6 +478,13 @@ func render_map(terrain_map_data = null) -> void:
 	_enemy_security_entries.clear()
 	_enemy_tactics_visual_count = 0
 	_enemy_tactics_entries.clear()
+	_friendly_aim_visual_count = 0
+	_friendly_aim_entries.clear()
+	_friendly_aim_tile_marker_count = 0
+	_friendly_aim_blocker_marker_count = 0
+	_friendly_aim_los_line_count = 0
+	_selected_unit_marker_count = 0
+	_selected_unit_marker_entries.clear()
 	_weapon_fire_vfx_visual_count = 0
 	_weapon_fire_vfx_entries.clear()
 	_feedback_bubble_visual_count = 0
@@ -470,11 +528,22 @@ func set_unit_nodes(unit_nodes: Array) -> void:
 
 func set_selected_grid_positions(grid_positions: Array) -> void:
 	_selected_grid_positions.clear()
+	var seen: Dictionary = {}
 	for grid_variant in grid_positions:
+		var grid_position: Vector2i
 		if grid_variant is Vector2i:
-			_selected_grid_positions.append(Vector2i(grid_variant))
+			grid_position = Vector2i(grid_variant)
 		elif grid_variant is Vector2:
-			_selected_grid_positions.append(Vector2i(roundi(grid_variant.x), roundi(grid_variant.y)))
+			grid_position = Vector2i(roundi(grid_variant.x), roundi(grid_variant.y))
+		else:
+			continue
+		var grid_key: String = "%d,%d" % [grid_position.x, grid_position.y]
+		if seen.has(grid_key):
+			continue
+		if _terrain_map_data != null and _terrain_map_data.has_method("get_tile_at_grid") and _terrain_map_data.call("get_tile_at_grid", grid_position) == null:
+			continue
+		seen[grid_key] = true
+		_selected_grid_positions.append(grid_position)
 	_rebuild_selection_visuals()
 	_request_viewport_redraw()
 
@@ -485,9 +554,101 @@ func get_selected_grid_positions() -> Array:
 
 func set_order_visual_payload(order_payload: Dictionary) -> void:
 	_order_payload_apply_count += 1
+	var next_signature: String = _build_order_visual_signature(order_payload)
+	if next_signature == _order_visual_signature:
+		_order_payload = order_payload.duplicate(true)
+		return
+	_order_visual_signature = next_signature
 	_order_payload = order_payload.duplicate(true)
+	_order_dynamic_visual_signature = _build_order_dynamic_visual_signature()
 	_rebuild_order_visuals()
 	_request_viewport_redraw()
+
+
+func set_area_order_preview_payload(preview_payload: Dictionary) -> void:
+	_area_order_preview_payload = preview_payload.duplicate(true)
+	_rebuild_order_visuals()
+	_request_viewport_redraw()
+
+
+func _build_order_visual_signature(order_payload: Dictionary) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	parts.append(var_to_str(order_payload))
+	if bool(order_payload.get("fire_sector_overlay_enabled", false)):
+		var selected_fireteam_ids: PackedStringArray = _get_string_array_from_variant(order_payload.get("selected_fireteam_ids", PackedStringArray()))
+		var unit_parts: Array = []
+		for unit in _unit_nodes:
+			if unit == null or not (unit is Node2D):
+				continue
+			var fireteam_id: String = _get_unit_fireteam_id(unit)
+			if fireteam_id.is_empty() or not selected_fireteam_ids.has(fireteam_id):
+				continue
+			if not _is_unit_world_visible(unit):
+				continue
+			var weapon_id: String = _get_unit_active_attack_weapon_id(unit)
+			if weapon_id.is_empty():
+				continue
+			var unit_position: Vector2 = (unit as Node2D).global_position
+			var aim_direction: Vector2 = _resolve_unit_aim_direction(unit, unit_position)
+			var grid_position: Vector2i = _world_to_grid_position(unit_position)
+			unit_parts.append("%s:%d,%d:%s:%.2f" % [
+				_get_unit_id(unit),
+				grid_position.x,
+				grid_position.y,
+				weapon_id,
+				aim_direction.angle() if aim_direction.length_squared() > 0.0001 else 0.0,
+			])
+		unit_parts.sort()
+		parts.append("fire:%s" % "|".join(unit_parts))
+	return "\n".join(parts)
+
+
+func _refresh_dynamic_order_visuals_if_needed() -> void:
+	if _order_payload.is_empty() or _order_root == null:
+		return
+	var selected_fireteam_ids: PackedStringArray = _get_string_array_from_variant(_order_payload.get("selected_fireteam_ids", PackedStringArray()))
+	if selected_fireteam_ids.is_empty() and not bool(_order_payload.get("fire_sector_overlay_enabled", false)):
+		return
+	var now_msec: int = Time.get_ticks_msec()
+	if now_msec - _last_dynamic_order_visual_refresh_msec < DYNAMIC_ORDER_VISUAL_REFRESH_INTERVAL_MSEC:
+		return
+	_last_dynamic_order_visual_refresh_msec = now_msec
+	var next_signature: String = _build_order_dynamic_visual_signature()
+	if next_signature == _order_dynamic_visual_signature:
+		return
+	_order_dynamic_visual_signature = next_signature
+	_rebuild_order_visuals()
+	_request_viewport_redraw()
+
+
+func _build_order_dynamic_visual_signature() -> String:
+	var selected_fireteam_ids: PackedStringArray = _get_string_array_from_variant(_order_payload.get("selected_fireteam_ids", PackedStringArray()))
+	if selected_fireteam_ids.is_empty():
+		return ""
+	var parts: PackedStringArray = PackedStringArray()
+	parts.append("selected:%s" % ",".join(selected_fireteam_ids))
+	parts.append("fire:%s:%s" % [str(bool(_order_payload.get("fire_sector_overlay_enabled", false))), _get_fire_sector_visual_mode()])
+	for unit in _unit_nodes:
+		if unit == null or not (unit is Node2D):
+			continue
+		var fireteam_id: String = _get_unit_fireteam_id(unit)
+		if fireteam_id.is_empty() or not selected_fireteam_ids.has(fireteam_id):
+			continue
+		if not _is_unit_world_visible(unit):
+			continue
+		var unit_id: String = _get_unit_id(unit)
+		var unit_position: Vector2 = (unit as Node2D).global_position
+		var proxy := _unit_proxies_by_id.get(unit_id, null) as Node3D
+		var rotation_y: float = float(proxy.rotation_degrees.y) if proxy != null and is_instance_valid(proxy) else 0.0
+		parts.append("%s:%s:%.1f,%.1f:%.1f" % [
+			unit_id,
+			fireteam_id,
+			unit_position.x,
+			unit_position.y,
+			rotation_y,
+		])
+	parts.sort()
+	return "|".join(parts)
 
 
 func set_contact_entries(contact_entries: Array, selected_fireteam_ids: PackedStringArray = PackedStringArray()) -> void:
@@ -522,8 +683,15 @@ func set_fog_of_war_visual_state(fog_of_war_state: Dictionary) -> void:
 
 func set_mission_drop_visual_state(drop_payload: Dictionary) -> void:
 	_drop_payload_apply_count += 1
-	_drop_payload = _normalize_mission_drop_visual_payload(drop_payload)
-	_rebuild_drop_visuals()
+	var normalized_payload: Dictionary = _normalize_mission_drop_visual_payload(drop_payload)
+	var next_static_signature: String = _build_drop_visual_static_signature(normalized_payload)
+	var can_update_motion: bool = next_static_signature == _drop_visual_static_signature and _can_update_drop_visual_motion(normalized_payload)
+	_drop_payload = normalized_payload
+	if can_update_motion:
+		_update_drop_visual_motion()
+	else:
+		_drop_visual_static_signature = next_static_signature
+		_rebuild_drop_visuals()
 	_request_viewport_redraw()
 
 
@@ -833,6 +1001,7 @@ func get_render_snapshot() -> Dictionary:
 		"movement_style_visual_count": _movement_style_visual_count,
 		"movement_bound_marker_count": _movement_bound_marker_count,
 		"movement_group_marker_count": _movement_group_marker_count,
+		"movement_group_marker_entries": _movement_group_marker_entries.duplicate(true),
 		"movement_style_entries": _movement_style_entries.duplicate(true),
 		"multi_fireteam_plan_visual_count": _multi_fireteam_plan_visual_count,
 		"multi_fireteam_plan_entries": _multi_fireteam_plan_entries.duplicate(true),
@@ -840,6 +1009,19 @@ func get_render_snapshot() -> Dictionary:
 		"enemy_security_entries": _enemy_security_entries.duplicate(true),
 		"enemy_tactics_visual_count": _enemy_tactics_visual_count,
 		"enemy_tactics_entries": _enemy_tactics_entries.duplicate(true),
+		"friendly_aim_visual_count": _friendly_aim_visual_count,
+		"friendly_aim_entries": _friendly_aim_entries.duplicate(true),
+		"friendly_fire_sector_overlay_enabled": bool(_order_payload.get("fire_sector_overlay_enabled", false)),
+		"friendly_fire_sector_visual_mode": _get_fire_sector_visual_mode(),
+		"friendly_fire_sector_scan_mode": _get_fire_sector_scan_mode(),
+		"friendly_fire_sector_tile_marker_count": _friendly_aim_tile_marker_count,
+		"friendly_fire_sector_blocker_marker_count": _friendly_aim_blocker_marker_count,
+		"friendly_fire_sector_los_line_count": _friendly_aim_los_line_count,
+		"friendly_fire_sector_los_cache_size": _fire_sector_los_cache.size(),
+		"friendly_fire_sector_blocker_line_limit": FRIENDLY_FIRE_SECTOR_BLOCKER_LINE_LIMIT,
+		"friendly_fire_sector_angle_degrees": FRIENDLY_FIRE_SECTOR_ANGLE_DEGREES,
+		"selected_unit_marker_count": _selected_unit_marker_count,
+		"selected_unit_marker_entries": _selected_unit_marker_entries.duplicate(true),
 		"weapon_fire_vfx_visual_count": _weapon_fire_vfx_visual_count,
 		"weapon_fire_vfx_entries": _weapon_fire_vfx_entries.duplicate(true),
 		"weapon_fire_vfx_catalog_loaded": not _get_weapon_fire_vfx_catalog().is_empty(),
@@ -886,6 +1068,8 @@ func get_render_snapshot() -> Dictionary:
 		"dropship_visible": bool(_drop_payload.get("dropship_visible", false)),
 		"dropship_texture_visible": _dropship_texture_visible,
 		"dropship_model_visible": _dropship_model_visible,
+		"dropship_visual_count": _air_visual_count,
+		"dropship_approach_line_count": _dropship_approach_lines_by_id.size(),
 		"flight_altitude_layer": String(_drop_payload.get("air_layer", AIR_LAYER_ID)),
 		"air_visual_count": _air_visual_count,
 		"fow_hidden_air_visual_count": _fow_hidden_air_visual_count,
@@ -1070,9 +1254,10 @@ func _build_render_transparency_budget(render_budget_totals: Dictionary) -> Dict
 		"transparent_material_count": transparent_material_count,
 		"feedback_bubble_count": _feedback_bubble_visual_count,
 		"weapon_fire_vfx_count": _weapon_fire_vfx_visual_count,
+		"friendly_aim_visual_count": _friendly_aim_visual_count,
 		"surface_tint_count": _surface_tint_count,
 		"fog_of_war_overlay_count": _fow_overlay_tile_count,
-		"transparent_overlay_count": label_count + sprite_count + transparent_material_count + _feedback_bubble_visual_count + _weapon_fire_vfx_visual_count + _surface_tint_count + _fow_known_dim_tile_count + _fow_explored_tile_count,
+		"transparent_overlay_count": label_count + sprite_count + transparent_material_count + _feedback_bubble_visual_count + _weapon_fire_vfx_visual_count + _friendly_aim_visual_count + _surface_tint_count + _fow_known_dim_tile_count + _fow_explored_tile_count,
 		"budget_policy": "observe_and_keep_small_before_optimizing",
 	}
 
@@ -1325,13 +1510,18 @@ func _add_tile_visual(tile_data) -> void:
 
 	var object_type_id: String = String(tile_data.object_type_id) if tile_data.object_type_id is String else ""
 	var type_id: String = String(tile_data.type_id) if tile_data.type_id is String else ""
-	var visual_type_id: String = _resolve_tile_asset_type_id(object_type_id, type_id)
-	if not visual_type_id.is_empty() or bool(tile_data.blocks_los) or int(tile_data.object_height) > 0:
-		_add_object_visual(tile_data, top_y, visual_type_id)
+	var structure_visual_type_id: String = _resolve_structure_tile_asset_type_id(type_id)
+	if not structure_visual_type_id.is_empty():
+		_add_object_visual(tile_data, top_y, structure_visual_type_id, true)
+	var object_visual_type_id: String = _resolve_tile_asset_type_id(object_type_id, "" if not structure_visual_type_id.is_empty() else type_id)
+	if not object_visual_type_id.is_empty():
+		_add_object_visual(tile_data, top_y, object_visual_type_id, true)
+	elif structure_visual_type_id.is_empty() and (bool(tile_data.blocks_los) or int(tile_data.object_height) > 0):
+		_add_object_visual(tile_data, top_y, "")
 
 
-func _add_object_visual(tile_data, top_y: float, visual_type_id: String) -> void:
-	if not visual_type_id.is_empty() and _add_asset_model_visual(tile_data, top_y, visual_type_id):
+func _add_object_visual(tile_data, top_y: float, visual_type_id: String, apply_tile_rotation: bool = false) -> void:
+	if not visual_type_id.is_empty() and _add_asset_model_visual(tile_data, top_y, visual_type_id, apply_tile_rotation):
 		return
 	if _uses_strict_3d_asset_mapping():
 		_add_missing_asset_marker(tile_data, top_y, _get_missing_visual_type_id(tile_data, visual_type_id))
@@ -1376,22 +1566,35 @@ func _add_ground_model_visual(tile_data, top_y: float, visual_type_id: String = 
 	_normalize_asset_model_instance(model_instance)
 	var material_override_color: Color = _apply_ground_surface_material_override(model_instance, normalized_visual_type_id, tile_data)
 	var material_override_unshaded: bool = material_override_color != Color.TRANSPARENT and normalized_visual_type_id == "ground_flat"
+	var mapped_entry: Dictionary = _get_model_entry_for_type(normalized_visual_type_id)
+	if _is_space_station_model_entry(mapped_entry):
+		_space_station_model_count += 1
+		_space_station_textured_surface_count += _apply_space_station_colormap_recursive(model_instance)
 
 	var ground_root := Node3D.new()
 	ground_root.name = "Tile_%d_%d" % [tile_data.grid_position.x, tile_data.grid_position.y]
 	var model_height: float = _get_normalized_model_height(model_instance)
-	var model_scale: float = _get_3d_cell_size()
+	var model_scale: float = _get_ground_surface_model_scale(normalized_visual_type_id)
 	var visual_height: float = model_height * model_scale
-	var ground_y: float = top_y
+	var surface_top_y_offset: float = _get_ground_surface_top_y_offset(normalized_visual_type_id)
+	var visual_top_y: float = top_y + surface_top_y_offset
+	var ground_y: float = visual_top_y
 	if visual_height > 0.001:
-		ground_y = top_y - visual_height
+		ground_y = visual_top_y - visual_height
 	ground_root.position = _grid_to_3d_position(Vector2(tile_data.grid_position), ground_y)
-	ground_root.scale = Vector3.ONE * _get_3d_cell_size()
+	if _ground_surface_supports_tile_rotation(normalized_visual_type_id):
+		ground_root.rotation_degrees.y = _get_tile_object_rotation_degrees(tile_data)
+	ground_root.scale = Vector3.ONE * model_scale
 	ground_root.add_child(model_instance)
 	_map_root.add_child(ground_root)
 	_ground_mesh_count += 1
-	_register_ground_surface_visual(tile_data, normalized_visual_type_id, ground_y, top_y, visual_height, material_override_color, material_override_unshaded)
+	_register_ground_surface_visual(tile_data, normalized_visual_type_id, ground_y, top_y, visual_height, material_override_color, material_override_unshaded, surface_top_y_offset)
 	return true
+
+
+func _ground_surface_supports_tile_rotation(visual_type_id: String) -> bool:
+	var normalized_visual_type_id: String = visual_type_id.strip_edges().to_lower()
+	return normalized_visual_type_id == "station_floor_panel" or normalized_visual_type_id.begins_with("station_set_floor") or normalized_visual_type_id == "modular_floor" or normalized_visual_type_id == "modular_floor_big" or normalized_visual_type_id == "modular_floor_raised"
 
 
 func _resolve_ground_surface_model_key(tile_data) -> String:
@@ -1406,12 +1609,29 @@ func _resolve_ground_surface_model_key(tile_data) -> String:
 		var override_key: String = String(type_overrides.get(type_id, "")).strip_edges().to_lower()
 		if not override_key.is_empty():
 			return override_key
+	if _tile_should_use_station_floor_surface(tile_data):
+		return "station_floor_panel"
 	var surface_type: String = String(tile_data.surface_type).strip_edges().to_lower()
 	var surface_models: Dictionary = Dictionary(catalog.get("surface_model_by_surface", {}))
 	var model_key: String = String(surface_models.get(surface_type, "")).strip_edges().to_lower()
 	if model_key.is_empty():
 		model_key = String(surface_models.get(TERRAIN_TILE_DATA_SCRIPT.SURFACE_GROUND, "ground_flat")).strip_edges().to_lower()
 	return model_key if not model_key.is_empty() else "ground_flat"
+
+
+func _tile_should_use_station_floor_surface(tile_data) -> bool:
+	if tile_data == null:
+		return false
+	var type_id: String = String(tile_data.type_id).strip_edges().to_lower() if tile_data.type_id is String else ""
+	var object_type_id: String = String(tile_data.object_type_id).strip_edges().to_lower() if tile_data.object_type_id is String else ""
+	if type_id == "station_floor_panel" or type_id.begins_with("station_") or object_type_id.begins_with("station_"):
+		return true
+	if String(tile_data.surface_type).strip_edges().to_lower() != TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROAD:
+		return false
+	for prefix in ["wall_", "station_wall"]:
+		if type_id.begins_with(prefix):
+			return true
+	return false
 
 
 func _add_surface_detail_visual(tile_data, top_y: float) -> void:
@@ -1487,7 +1707,8 @@ func _register_ground_surface_visual(
 	top_y: float = 0.0,
 	visual_height: float = 0.0,
 	material_override_color: Color = Color.TRANSPARENT,
-	material_override_unshaded: bool = false
+	material_override_unshaded: bool = false,
+	surface_top_y_offset: float = 0.0
 ) -> void:
 	if tile_data == null:
 		return
@@ -1511,10 +1732,12 @@ func _register_ground_surface_visual(
 		"visual_id": String(visual_entry.get("visual_id", visual_type_id)),
 		"is_nature_kit": is_nature_kit,
 		"surface_y": top_y,
+		"surface_top_y_offset": surface_top_y_offset,
 		"world_y": ground_y,
 		"visual_bottom_y": ground_y,
 		"visual_top_y": ground_y + visual_height,
 		"visual_height": visual_height,
+		"scale": _get_ground_surface_model_scale(visual_type_id),
 		"has_material_override": material_override_color != Color.TRANSPARENT,
 		"material_override_color": material_override_color,
 		"material_override_unshaded": material_override_unshaded,
@@ -1605,6 +1828,8 @@ func _add_missing_asset_marker(tile_data, top_y: float, visual_type_id: String) 
 
 func _add_surface_tint_visual(tile_data, top_y: float) -> void:
 	if tile_data == null or _map_root == null or not _uses_strict_3d_asset_mapping():
+		return
+	if _tile_should_use_station_floor_surface(tile_data):
 		return
 	var surface_type: String = String(tile_data.surface_type).strip_edges().to_lower()
 	if surface_type == TERRAIN_TILE_DATA_SCRIPT.SURFACE_GROUND:
@@ -2164,7 +2389,7 @@ func _get_kenney_anchor_offset(texture: Texture2D, additional_offset: Vector2 = 
 	return (texture.get_size() * 0.5) - KENNEY_DIAMOND_CENTER + additional_offset
 
 
-func _add_asset_model_visual(tile_data, top_y: float, visual_type_id: String) -> bool:
+func _add_asset_model_visual(tile_data, top_y: float, visual_type_id: String, apply_tile_rotation: bool = false) -> bool:
 	var model_scene := _get_asset_model_scene(visual_type_id)
 	if model_scene == null or _map_root == null:
 		return false
@@ -2177,6 +2402,8 @@ func _add_asset_model_visual(tile_data, top_y: float, visual_type_id: String) ->
 	visual_root.name = "Asset_%s_%d_%d" % [visual_type_id, tile_data.grid_position.x, tile_data.grid_position.y]
 	visual_root.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + _get_asset_y_offset(visual_type_id)) + _get_asset_position_offset(visual_type_id)
 	visual_root.rotation_degrees.y = _get_asset_rotation_y(visual_type_id)
+	if apply_tile_rotation:
+		visual_root.rotation_degrees.y += _get_tile_object_rotation_degrees(tile_data)
 	visual_root.scale = Vector3.ONE * _get_asset_model_scale(visual_type_id)
 	visual_root.add_child(model_instance)
 	_map_root.add_child(visual_root)
@@ -2189,6 +2416,12 @@ func _add_asset_model_visual(tile_data, top_y: float, visual_type_id: String) ->
 	_asset_model_count += 1
 	_register_nature_prop_visual(tile_data, visual_type_id, visual_root)
 	return true
+
+
+func _get_tile_object_rotation_degrees(tile_data) -> float:
+	if tile_data == null:
+		return 0.0
+	return fposmod(float(tile_data.object_rotation_degrees), 360.0)
 
 
 func _register_nature_prop_visual(tile_data, visual_type_id: String, visual_root: Node3D) -> void:
@@ -2494,6 +2727,8 @@ func _apply_fog_of_war_visual_state(fog_of_war_state: Dictionary) -> void:
 	var current_visibility: Dictionary = Dictionary(fog_of_war_state.get("current_visibility", {}))
 	_fow_visible_tile_ids = _build_fow_lookup(PackedStringArray(terrain_knowledge.get("visible_tile_ids", PackedStringArray())))
 	_fow_explored_tile_ids = _build_fow_lookup(PackedStringArray(terrain_knowledge.get("explored_tile_ids", PackedStringArray())))
+	_fow_visible_tile_grids = _build_fow_grid_lookup(PackedStringArray(terrain_knowledge.get("visible_tile_ids", PackedStringArray())))
+	_fow_explored_tile_grids = _build_fow_grid_lookup(PackedStringArray(terrain_knowledge.get("explored_tile_ids", PackedStringArray())))
 	_fow_visible_target_ids = _build_fow_lookup(PackedStringArray(current_visibility.get("visible_target_ids", PackedStringArray())))
 	_fow_visible_event_ids = _build_fow_lookup(PackedStringArray(current_visibility.get("visible_event_ids", PackedStringArray())))
 	_fow_last_known_contacts = Array(fog_of_war_state.get("last_known_contacts", [])).duplicate(true)
@@ -2560,6 +2795,27 @@ func _build_fow_lookup(ids: PackedStringArray) -> Dictionary:
 		if not normalized_id.is_empty():
 			lookup[normalized_id] = true
 	return lookup
+
+
+func _build_fow_grid_lookup(ids: PackedStringArray) -> Dictionary:
+	var lookup: Dictionary = {}
+	for id in ids:
+		var grid_variant: Variant = _try_parse_fow_tile_grid(String(id))
+		if typeof(grid_variant) == TYPE_VECTOR2I:
+			lookup[Vector2i(grid_variant)] = true
+	return lookup
+
+
+func _try_parse_fow_tile_grid(tile_id: String) -> Variant:
+	var normalized_id: String = tile_id.strip_edges()
+	if not normalized_id.begins_with("tile_"):
+		return null
+	var parts: PackedStringArray = normalized_id.substr(5).split("_")
+	if parts.size() != 2:
+		return null
+	if not String(parts[0]).is_valid_int() or not String(parts[1]).is_valid_int():
+		return null
+	return Vector2i(int(parts[0]), int(parts[1]))
 
 
 func _join_fow_string_array(ids: PackedStringArray) -> String:
@@ -2638,24 +2894,25 @@ func _rebuild_fog_of_war_visuals() -> void:
 func _get_fow_tile_state(tile_data) -> String:
 	if not _is_fog_of_war_visual_filter_active():
 		return FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_VISIBLE
-	var tile_id: String = _get_tile_id_for_fow(tile_data)
+	var grid_position: Vector2i = Vector2i(tile_data.grid_position)
+	if _fow_visible_tile_grids.has(grid_position):
+		return FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_VISIBLE
+	var tile_id: String = _get_explicit_tile_id_for_fow(tile_data)
 	if not tile_id.is_empty() and _fow_visible_tile_ids.has(tile_id):
 		return FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_VISIBLE
 	if _fog_of_war_mode == FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_KNOWN_TERRAIN:
 		return FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_KNOWN
+	if _fow_explored_tile_grids.has(grid_position):
+		return FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_EXPLORED
 	if not tile_id.is_empty() and _fow_explored_tile_ids.has(tile_id):
 		return FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_EXPLORED
 	return FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_UNKNOWN
 
 
-func _get_tile_id_for_fow(tile_data) -> String:
+func _get_explicit_tile_id_for_fow(tile_data) -> String:
 	if tile_data == null:
 		return ""
-	var tile_id: String = String(tile_data.tile_id).strip_edges()
-	if not tile_id.is_empty():
-		return tile_id
-	var grid_position: Vector2i = tile_data.grid_position
-	return "tile_%d_%d" % [grid_position.x, grid_position.y]
+	return String(tile_data.tile_id).strip_edges()
 
 
 func _get_fow_surface_overlay_transform(tile_data) -> Transform3D:
@@ -2718,10 +2975,13 @@ func _fow_is_world_position_currently_visible(position_variant: Variant) -> bool
 		return false
 	if _terrain_map_data == null or not _terrain_map_data.has_method("get_tile_at_grid"):
 		return false
-	var tile_data = _terrain_map_data.call("get_tile_at_grid", _world_to_grid_position(Vector2(position_variant)))
+	var grid_position: Vector2i = _world_to_grid_position(Vector2(position_variant))
+	if _fow_visible_tile_grids.has(grid_position):
+		return true
+	var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
 	if tile_data == null:
 		return false
-	var tile_id: String = _get_tile_id_for_fow(tile_data)
+	var tile_id: String = _get_explicit_tile_id_for_fow(tile_data)
 	return not tile_id.is_empty() and _fow_visible_tile_ids.has(tile_id)
 
 
@@ -2848,7 +3108,123 @@ func _normalize_mission_drop_visual_payload(drop_payload: Dictionary) -> Diction
 	payload["terrain_height_independent"] = true
 	payload["reveals_unknown_terrain"] = false
 	payload["fow_policy"] = "friendly_air_visible_lz_requires_visible_tile"
+	payload["dropship_visuals"] = _normalize_dropship_visual_entries(payload)
+	if not Array(payload.get("dropship_visuals", [])).is_empty():
+		payload["dropship_visible"] = true
 	return payload
+
+
+func _normalize_dropship_visual_entries(payload: Dictionary) -> Array:
+	var entries: Array = []
+	for entry_variant in Array(payload.get("dropship_visuals", [])):
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant).duplicate(true)
+		if entry.has("visible") and not entry.has("dropship_visible"):
+			entry["dropship_visible"] = bool(entry.get("visible", false))
+		if entry.has("position") and not entry.has("dropship_position"):
+			entry["dropship_position"] = entry.get("position")
+		if entry.has("target_position") and not entry.has("dropship_target_position"):
+			entry["dropship_target_position"] = entry.get("target_position")
+		if entry.has("has_lz") and not entry.has("has_lz_position"):
+			entry["has_lz_position"] = bool(entry.get("has_lz", false))
+		if not entry.has("team_id"):
+			entry["team_id"] = String(payload.get("team_id", AIR_LAYER_DEFAULT_TEAM_ID))
+		if not entry.has("air_layer"):
+			entry["air_layer"] = String(payload.get("air_layer", AIR_LAYER_ID))
+		if not entry.has("flight_altitude_clearance"):
+			entry["flight_altitude_clearance"] = float(payload.get("flight_altitude_clearance", AIR_LAYER_DEFAULT_CLEARANCE))
+		entry["flight_altitude_clearance"] = maxf(float(entry.get("flight_altitude_clearance", AIR_LAYER_DEFAULT_CLEARANCE)), AIR_LAYER_MIN_CLEARANCE)
+		entry["terrain_height_independent"] = true
+		var has_line_or_lz: bool = bool(entry.get("has_lz_position", false)) or typeof(entry.get("lz_position", null)) == TYPE_VECTOR2 or typeof(entry.get("dropship_target_position", null)) == TYPE_VECTOR2
+		if typeof(entry.get("dropship_position", null)) == TYPE_VECTOR2 and (bool(entry.get("dropship_visible", false)) or has_line_or_lz):
+			entries.append(entry)
+	if entries.is_empty() and bool(payload.get("dropship_visible", false)) and typeof(payload.get("dropship_position", null)) == TYPE_VECTOR2:
+		var fallback_entry: Dictionary = payload.duplicate(true)
+		var fallback_id: String = String(fallback_entry.get("craft_id", "mission_dropship")).strip_edges()
+		if fallback_id.is_empty():
+			fallback_id = "mission_dropship"
+		fallback_entry["craft_id"] = fallback_id
+		entries.append(fallback_entry)
+	return entries
+
+
+func _build_drop_visual_static_signature(payload: Dictionary) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	parts.append("lz:%s:%s" % [str(bool(payload.get("has_lz_position", false))), _vector2_signature(payload.get("lz_position", null))])
+	parts.append("req:%s" % _vector2_signature(payload.get("requested_lz_position", payload.get("target_lz_position", null))))
+	parts.append("res:%s" % _vector2_signature(payload.get("resolved_lz_position", payload.get("actual_landing_position", null))))
+	var entries: Array = Array(payload.get("dropship_visuals", []))
+	for index in range(entries.size()):
+		var entry: Dictionary = Dictionary(entries[index])
+		parts.append("%s:%s:%s:%s:%s:%s" % [
+			_get_dropship_visual_id(entry, index),
+			String(entry.get("state", "")).strip_edges().to_lower(),
+			_texture_signature(entry.get("dropship_texture", null)),
+			str(bool(entry.get("dropship_visible", false))),
+			_vector2_signature(entry.get("approach_origin_position", entry.get("dropship_position", null))),
+			String(entry.get("team_id", AIR_LAYER_DEFAULT_TEAM_ID)).strip_edges(),
+		])
+		parts.append("lz:%s:%s:%s" % [
+			_vector2_signature(entry.get("lz_position", null)),
+			_vector2_signature(entry.get("dropship_target_position", null)),
+			String(entry.get("lz_label", entry.get("lz_name", ""))).strip_edges(),
+		])
+	return "|".join(parts)
+
+
+func _vector2_signature(value: Variant) -> String:
+	if typeof(value) != TYPE_VECTOR2:
+		return "-"
+	var vector_value: Vector2 = Vector2(value)
+	return "%.2f,%.2f" % [vector_value.x, vector_value.y]
+
+
+func _texture_signature(value: Variant) -> String:
+	var texture := value as Texture2D
+	if texture == null:
+		return ""
+	return texture.resource_path
+
+
+func _can_update_drop_visual_motion(payload: Dictionary) -> bool:
+	if _drop_root == null:
+		return false
+	if _is_fog_of_war_visual_filter_active():
+		return false
+	var entries: Array = Array(payload.get("dropship_visuals", []))
+	if entries.is_empty():
+		return false
+	for index in range(entries.size()):
+		var entry: Dictionary = Dictionary(entries[index])
+		var visual_id: String = _get_dropship_visual_id(entry, index)
+		if not bool(entry.get("dropship_visible", false)):
+			if not _dropship_approach_lines_by_id.has(visual_id):
+				return false
+			continue
+		if not _dropship_visual_nodes_by_id.has(visual_id):
+			return false
+		var node := _dropship_visual_nodes_by_id.get(visual_id, null) as Node3D
+		if node == null or not is_instance_valid(node):
+			return false
+	return true
+
+
+func _update_drop_visual_motion() -> void:
+	var entries: Array = Array(_drop_payload.get("dropship_visuals", []))
+	for index in range(entries.size()):
+		var entry: Dictionary = Dictionary(entries[index])
+		var visual_id: String = _get_dropship_visual_id(entry, index)
+		if typeof(entry.get("dropship_position", null)) != TYPE_VECTOR2:
+			continue
+		var world_position: Vector2 = Vector2(entry.get("dropship_position", Vector2.ZERO))
+		var node := _dropship_visual_nodes_by_id.get(visual_id, null) as Node3D
+		if node != null and is_instance_valid(node):
+			var extra_y_offset: float = float(node.get_meta("dropship_extra_y_offset", 0.0))
+			node.position = _world_to_air_layer_3d_position_for_payload(entry, world_position, extra_y_offset)
+			if String(node.get_meta("dropship_visual_mode", "")).strip_edges() != "texture":
+				node.rotation_degrees.y = _get_dropship_rotation_y_for_payload(entry, world_position)
+		_update_dropship_approach_line(entry, visual_id, world_position)
 
 
 func _rebuild_order_visuals() -> void:
@@ -2860,6 +3236,7 @@ func _rebuild_order_visuals() -> void:
 	_movement_style_visual_count = 0
 	_movement_bound_marker_count = 0
 	_movement_group_marker_count = 0
+	_movement_group_marker_entries.clear()
 	_movement_style_entries.clear()
 	_multi_fireteam_plan_visual_count = 0
 	_multi_fireteam_plan_entries.clear()
@@ -2867,6 +3244,11 @@ func _rebuild_order_visuals() -> void:
 	_enemy_security_entries.clear()
 	_enemy_tactics_visual_count = 0
 	_enemy_tactics_entries.clear()
+	_friendly_aim_visual_count = 0
+	_friendly_aim_entries.clear()
+	_friendly_aim_tile_marker_count = 0
+	_friendly_aim_blocker_marker_count = 0
+	_friendly_aim_los_line_count = 0
 	_weapon_fire_vfx_visual_count = 0
 	_weapon_fire_vfx_entries.clear()
 	_feedback_bubble_visual_count = 0
@@ -2874,7 +3256,10 @@ func _rebuild_order_visuals() -> void:
 	_tactical_communication_event_visual_count = 0
 	_tactical_communication_event_entries.clear()
 	_fow_hidden_order_visual_count = 0
-	if _order_root == null or _order_payload.is_empty():
+	if _order_root == null:
+		return
+	if _order_payload.is_empty():
+		_add_area_order_preview_visuals()
 		return
 	var phase_index: int = int(_order_payload.get("phase_index", 1))
 	var anchor_by_fireteam: Dictionary = {}
@@ -2887,10 +3272,14 @@ func _rebuild_order_visuals() -> void:
 			continue
 		anchor_by_fireteam[fireteam_id] = Vector2(anchor_dict.get("position", Vector2.ZERO))
 
+	_add_selected_fireteam_unit_markers()
+	_add_selected_fireteam_aim_visuals()
+
 	for area_variant in Array(_order_payload.get("area_order_dicts", [])):
 		if typeof(area_variant) != TYPE_DICTIONARY:
 			continue
 		_add_area_order_visual(Dictionary(area_variant))
+	_add_area_order_preview_visuals()
 
 	for plan_variant in Array(_order_payload.get("plan_dicts", [])):
 		if typeof(plan_variant) != TYPE_DICTIONARY:
@@ -2934,7 +3323,7 @@ func _rebuild_order_visuals() -> void:
 			continue
 		_add_weapon_fire_vfx_visual(fire_event)
 
-	for feedback_bubble_variant in Array(_order_payload.get("feedback_bubble_dicts", [])):
+	for feedback_bubble_variant in _select_feedback_bubbles_for_visuals(Array(_order_payload.get("feedback_bubble_dicts", []))):
 		if typeof(feedback_bubble_variant) != TYPE_DICTIONARY:
 			continue
 		var feedback_bubble: Dictionary = Dictionary(feedback_bubble_variant)
@@ -2953,6 +3342,71 @@ func _rebuild_order_visuals() -> void:
 		_add_tactical_communication_event_visual(communication_event)
 
 
+func _select_feedback_bubbles_for_visuals(feedback_bubbles: Array) -> Array:
+	var selected_by_anchor: Dictionary = {}
+	var ordered_keys: PackedStringArray = []
+	for bubble_variant in feedback_bubbles:
+		if typeof(bubble_variant) != TYPE_DICTIONARY:
+			continue
+		var bubble: Dictionary = Dictionary(bubble_variant)
+		if not _is_feedback_bubble_visual_candidate(bubble):
+			continue
+		var anchor_key: String = _build_feedback_bubble_anchor_key(bubble)
+		if anchor_key.is_empty():
+			anchor_key = "bubble:%d" % ordered_keys.size()
+		if not selected_by_anchor.has(anchor_key):
+			selected_by_anchor[anchor_key] = bubble
+			ordered_keys.append(anchor_key)
+			continue
+		var previous: Dictionary = Dictionary(selected_by_anchor.get(anchor_key, {}))
+		if _get_feedback_bubble_visual_priority(bubble) > _get_feedback_bubble_visual_priority(previous):
+			selected_by_anchor[anchor_key] = bubble
+	var selected: Array = []
+	for anchor_key in ordered_keys:
+		selected.append(Dictionary(selected_by_anchor.get(String(anchor_key), {})))
+	return selected
+
+
+func _is_feedback_bubble_visual_candidate(feedback_bubble: Dictionary) -> bool:
+	if String(feedback_bubble.get("display_type", "")).strip_edges() != "comic_bubble":
+		return false
+	if not bool(feedback_bubble.get("visual_only", false)):
+		return false
+	if String(feedback_bubble.get("anchor_space", "")).strip_edges().to_lower() == "hud":
+		return typeof(feedback_bubble.get("hud_anchor_position", null)) == TYPE_VECTOR2
+	return typeof(feedback_bubble.get("anchor_position", null)) == TYPE_VECTOR2
+
+
+func _build_feedback_bubble_anchor_key(feedback_bubble: Dictionary) -> String:
+	var anchor_space: String = String(feedback_bubble.get("anchor_space", "")).strip_edges().to_lower()
+	var fireteam_id: String = String(feedback_bubble.get("fireteam_id", "")).strip_edges().to_lower()
+	if not fireteam_id.is_empty():
+		return "%s:ft:%s" % [anchor_space, fireteam_id]
+	var unit_id: String = String(feedback_bubble.get("unit_id", "")).strip_edges()
+	if not unit_id.is_empty():
+		return "%s:unit:%s" % [anchor_space, unit_id]
+	if anchor_space == "hud" and typeof(feedback_bubble.get("hud_anchor_position", null)) == TYPE_VECTOR2:
+		var hud_anchor_position: Vector2 = Vector2(feedback_bubble.get("hud_anchor_position", Vector2.ZERO))
+		return "hud:pos:%d:%d" % [roundi(hud_anchor_position.x / 8.0), roundi(hud_anchor_position.y / 8.0)]
+	if typeof(feedback_bubble.get("anchor_position", null)) == TYPE_VECTOR2:
+		var anchor_position: Vector2 = Vector2(feedback_bubble.get("anchor_position", Vector2.ZERO))
+		return "world:pos:%d:%d" % [roundi(anchor_position.x / 8.0), roundi(anchor_position.y / 8.0)]
+	return ""
+
+
+func _get_feedback_bubble_visual_priority(feedback_bubble: Dictionary) -> int:
+	var source: String = String(feedback_bubble.get("source", "")).strip_edges().to_lower()
+	var purpose: String = String(feedback_bubble.get("purpose", "")).strip_edges().to_lower()
+	var category: String = String(feedback_bubble.get("category", "")).strip_edges().to_lower()
+	if purpose == "command_feedback" or source == "fireteamleader_command_feedback" or category == "ftl_command_feedback":
+		return 30
+	if source.find("fireteamleader") >= 0:
+		return 20
+	if purpose == "npc_thought" or category == "npc_thought_peek":
+		return 10
+	return 1
+
+
 func _add_area_order_visual(area_data: Dictionary) -> void:
 	var command_type: String = String(area_data.get("command_type", "")).strip_edges().to_lower()
 	var color: Color = _get_command_color(command_type)
@@ -2967,6 +3421,24 @@ func _add_area_order_visual(area_data: Dictionary) -> void:
 	_area_order_count += 1
 
 
+func _add_area_order_preview_visuals() -> void:
+	if _area_order_preview_payload.is_empty():
+		return
+	var tile_world_positions: Array = Array(_area_order_preview_payload.get("tile_world_positions", []))
+	var preview_color := Color(0.84, 0.94, 1.0, 0.48)
+	if tile_world_positions.is_empty():
+		var polygon: PackedVector2Array = PackedVector2Array(_area_order_preview_payload.get("world_polygon", PackedVector2Array()))
+		if polygon.size() < 2:
+			return
+		for index in range(polygon.size()):
+			var start_world: Vector2 = polygon[index]
+			var end_world: Vector2 = polygon[(index + 1) % polygon.size()]
+			_add_line3d(_order_root, _world_to_surface_3d_position(start_world, 0.72), _world_to_surface_3d_position(end_world, 0.72), preview_color, "AreaOrderPreviewEdge")
+		return
+	for world_variant in tile_world_positions:
+		_add_world_tile_marker(_order_root, Vector2(world_variant), preview_color, "AreaOrderPreviewTile", 0.065, 0.96)
+
+
 func _add_plan_visual(plan_data: Dictionary, phase_index: int, anchor_by_fireteam: Dictionary) -> void:
 	if int(plan_data.get("phase", -1)) != phase_index:
 		return
@@ -2976,6 +3448,9 @@ func _add_plan_visual(plan_data: Dictionary, phase_index: int, anchor_by_firetea
 		if typeof(waypoint_variant) != TYPE_DICTIONARY:
 			continue
 		var waypoint: Dictionary = Dictionary(waypoint_variant)
+		var waypoint_status: String = String(waypoint.get("status", "")).strip_edges().to_lower()
+		if waypoint_status == "completed" or waypoint_status == "cancelled":
+			continue
 		if typeof(waypoint.get("target_position", null)) != TYPE_VECTOR2:
 			continue
 		var target_position: Vector2 = Vector2(waypoint.get("target_position", Vector2.ZERO))
@@ -3013,12 +3488,30 @@ func _add_movement_group_markers(movement_state: Dictionary, origin_position: Ve
 	var covering_unit_ids: PackedStringArray = PackedStringArray(movement_state.get("covering_unit_ids", movement_state.get("current_covering_unit_ids", PackedStringArray())))
 	for unit_id in moving_unit_ids:
 		var marker_position: Vector2 = Vector2(target_positions.get(String(unit_id), target_position))
-		_add_marker3d(_order_root, marker_position, color.lightened(0.12), "AdvanceMoving_%s" % String(unit_id), 0.17, 0.14, 4)
-		_movement_group_marker_count += 1
+		if _add_snapped_movement_group_marker(marker_position, color.lightened(0.12), "AdvanceMoving_%s" % String(unit_id), String(unit_id), "moving", 0.48):
+			_movement_group_marker_count += 1
 	for cover_index in range(covering_unit_ids.size()):
 		var cover_position: Vector2 = origin_position + Vector2(8.0 * float(cover_index), 8.0)
-		_add_marker3d(_order_root, cover_position, Color(color.r, color.g, color.b, 0.46), "AdvanceCover_%s" % String(covering_unit_ids[cover_index]), 0.11, 0.09, 8)
-		_movement_group_marker_count += 1
+		if _add_snapped_movement_group_marker(cover_position, Color(color.r, color.g, color.b, 0.46), "AdvanceCover_%s" % String(covering_unit_ids[cover_index]), String(covering_unit_ids[cover_index]), "covering", 0.34):
+			_movement_group_marker_count += 1
+
+
+func _add_snapped_movement_group_marker(world_position: Vector2, color: Color, node_name: String, unit_id: String, role: String, fill: float) -> bool:
+	if _terrain_map_data == null or not _terrain_map_data.has_method("get_tile_at_grid"):
+		return false
+	var grid_position: Vector2i = _world_to_grid_position(world_position)
+	var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
+	if tile_data == null:
+		return false
+	if not _add_tile_marker(_order_root, grid_position, color, "%s_%d_%d" % [node_name, grid_position.x, grid_position.y], 0.05, fill):
+		return false
+	_movement_group_marker_entries.append({
+		"unit_id": unit_id,
+		"role": role,
+		"grid_position": grid_position,
+		"world_position": Vector2(tile_data.world_position) if typeof(tile_data.world_position) == TYPE_VECTOR2 else _grid_float_to_world(Vector2(grid_position)),
+	})
+	return true
 
 
 func _add_multi_fireteam_plan_visual(plan_data: Dictionary) -> void:
@@ -3174,6 +3667,222 @@ func _add_enemy_tactics_visual(tactics_state: Dictionary) -> void:
 	})
 
 
+func _add_selected_fireteam_unit_markers() -> void:
+	var selected_fireteam_ids: PackedStringArray = _get_string_array_from_variant(_order_payload.get("selected_fireteam_ids", PackedStringArray()))
+	if selected_fireteam_ids.is_empty():
+		return
+	for unit in _unit_nodes:
+		if unit == null or not (unit is Node2D):
+			continue
+		var fireteam_id: String = _get_unit_fireteam_id(unit)
+		if fireteam_id.is_empty() or not selected_fireteam_ids.has(fireteam_id):
+			continue
+		if not _is_unit_world_visible(unit):
+			continue
+		var unit_id: String = _get_unit_id(unit)
+		var unit_position: Vector2 = (unit as Node2D).global_position
+		_add_marker3d(
+			_order_root,
+			unit_position,
+			SELECTED_UNIT_MARKER_COLOR,
+			"SelectedUnit_%s" % _sanitize_node_name(unit_id),
+			SELECTED_UNIT_MARKER_RADIUS,
+			SELECTED_UNIT_MARKER_HEIGHT,
+			4
+		)
+		_selected_unit_marker_count += 1
+		_selected_unit_marker_entries.append({
+			"unit_id": unit_id,
+			"fireteam_id": fireteam_id,
+			"position": unit_position,
+			"grid_position": _world_to_grid_position(unit_position),
+			"visual_only": true,
+		})
+
+
+func _add_selected_fireteam_aim_visuals() -> void:
+	if not bool(_order_payload.get("fire_sector_overlay_enabled", false)):
+		_friendly_aim_direction_by_unit_id.clear()
+		return
+	var selected_fireteam_ids: PackedStringArray = _get_string_array_from_variant(_order_payload.get("selected_fireteam_ids", PackedStringArray()))
+	if selected_fireteam_ids.is_empty():
+		_friendly_aim_direction_by_unit_id.clear()
+		return
+	var visual_mode: String = _get_fire_sector_visual_mode()
+	var seen_unit_ids: Dictionary = {}
+	for unit in _unit_nodes:
+		if unit == null or not (unit is Node2D):
+			continue
+		var fireteam_id: String = _get_unit_fireteam_id(unit)
+		if fireteam_id.is_empty() or not selected_fireteam_ids.has(fireteam_id):
+			continue
+		if not _is_unit_world_visible(unit):
+			continue
+		var weapon_id: String = _get_unit_active_attack_weapon_id(unit)
+		if weapon_id.is_empty():
+			continue
+		var range_world: float = float(WEAPON_DATA_SCRIPT.call("get_effective_world_range", weapon_id, _terrain_map_data))
+		var range_tiles: int = maxi(int(WEAPON_DATA_SCRIPT.call("get_effective_tile_range", weapon_id)), 1)
+		if range_world <= 0.0:
+			continue
+		var unit_position: Vector2 = (unit as Node2D).global_position
+		var unit_id: String = _get_unit_id(unit)
+		var aim_direction: Vector2 = _resolve_unit_visible_aim_direction(unit, unit_position)
+		if aim_direction.length_squared() <= 0.0001:
+			continue
+		aim_direction = _stabilize_friendly_aim_direction(unit_id, aim_direction)
+		seen_unit_ids[unit_id] = true
+		var facing_length: float = clampf(range_world * 0.16, FRIENDLY_FIRE_FACING_STEM_MIN_WORLD, FRIENDLY_FIRE_FACING_STEM_MAX_WORLD)
+		var default_tip_position: Vector2 = unit_position + aim_direction * range_world
+		var default_facing_tip_position: Vector2 = unit_position + aim_direction * facing_length
+		var sector_report: Dictionary = {}
+		var visual_shape: String = "los_line"
+		var tile_aligned: bool = false
+		if visual_mode == FRIENDLY_FIRE_SECTOR_VISUAL_MODE_TILE_ALIGNED_LOS:
+			sector_report = _add_fire_sector_tile_visuals(_order_root, unit_position, aim_direction, range_world, range_tiles, deg_to_rad(FRIENDLY_FIRE_SECTOR_ANGLE_DEGREES), "FriendlyFireSector_%s" % unit_id)
+			_add_line3d(_order_root, _world_to_surface_3d_position(unit_position, 0.86), _world_to_surface_3d_position(default_facing_tip_position, 0.86), FRIENDLY_AIM_LINE_COLOR, "FriendlyFacingLine_%s" % unit_id)
+			_add_marker3d(_order_root, default_facing_tip_position, FRIENDLY_AIM_TIP_COLOR, "FriendlyFacingTip_%s" % unit_id, 0.075, 0.07, 10)
+			visual_shape = "tile_sector"
+			tile_aligned = true
+		else:
+			sector_report = _add_fire_sector_los_line_visuals(_order_root, unit_position, aim_direction, range_world, range_tiles, "FriendlySightLine_%s" % unit_id)
+			_add_marker3d(_order_root, Vector2(sector_report.get("tip_position", default_tip_position)), FRIENDLY_AIM_TIP_COLOR, "FriendlySightTip_%s" % unit_id, 0.075, 0.07, 10)
+		var tip_position: Vector2 = Vector2(sector_report.get("tip_position", default_tip_position))
+		var facing_tip_position: Vector2 = Vector2(sector_report.get("facing_tip_position", default_facing_tip_position))
+		_friendly_aim_visual_count += 1
+		_friendly_aim_entries.append({
+			"unit_id": unit_id,
+			"fireteam_id": fireteam_id,
+			"weapon_id": weapon_id,
+			"range_world": range_world,
+			"range_tiles": range_tiles,
+			"origin_position": unit_position,
+			"origin_grid": sector_report.get("origin_grid", _world_to_grid_position(unit_position)),
+			"tip_position": tip_position,
+			"facing_tip_position": facing_tip_position,
+			"visual_shape": visual_shape,
+			"tile_aligned": tile_aligned,
+			"visible_tile_count": int(sector_report.get("visible_tile_count", 0)),
+			"blocker_tile_count": int(sector_report.get("blocker_tile_count", 0)),
+			"los_line_count": int(sector_report.get("los_line_count", 0)),
+			"blocker_grids": Array(sector_report.get("blocker_grids", [])).duplicate(true),
+			"los_blocker_samples": Array(sector_report.get("los_blocker_samples", [])).duplicate(true),
+			"los_blocked": bool(sector_report.get("los_blocked", false)),
+			"sector_angle_degrees": FRIENDLY_FIRE_SECTOR_ANGLE_DEGREES,
+			"visual_only": true,
+		})
+	_prune_stabilized_friendly_aim_directions(seen_unit_ids)
+
+
+func _stabilize_friendly_aim_direction(unit_id: String, raw_direction: Vector2) -> Vector2:
+	var normalized_direction: Vector2 = raw_direction.normalized()
+	if unit_id.strip_edges().is_empty():
+		return normalized_direction
+	var previous_variant = _friendly_aim_direction_by_unit_id.get(unit_id, null)
+	if typeof(previous_variant) == TYPE_VECTOR2:
+		var previous_direction: Vector2 = Vector2(previous_variant)
+		if previous_direction.length_squared() > 0.0001:
+			var angle_delta: float = absf(wrapf(normalized_direction.angle() - previous_direction.normalized().angle(), -PI, PI))
+			if angle_delta < FRIENDLY_AIM_DIRECTION_DEADZONE_RADIANS:
+				return previous_direction.normalized()
+	_friendly_aim_direction_by_unit_id[unit_id] = normalized_direction
+	return normalized_direction
+
+
+func _prune_stabilized_friendly_aim_directions(seen_unit_ids: Dictionary) -> void:
+	for key_variant in _friendly_aim_direction_by_unit_id.keys():
+		var unit_id: String = String(key_variant)
+		if not seen_unit_ids.has(unit_id):
+			_friendly_aim_direction_by_unit_id.erase(unit_id)
+
+
+func _get_fire_sector_visual_mode() -> String:
+	var mode: String = String(_order_payload.get("fire_sector_visual_mode", FRIENDLY_FIRE_SECTOR_VISUAL_MODE_LOS_LINE)).strip_edges().to_lower()
+	if mode == FRIENDLY_FIRE_SECTOR_VISUAL_MODE_TILE_ALIGNED_LOS:
+		return mode
+	return FRIENDLY_FIRE_SECTOR_VISUAL_MODE_LOS_LINE
+
+
+func _get_fire_sector_scan_mode() -> String:
+	if _get_fire_sector_visual_mode() == FRIENDLY_FIRE_SECTOR_VISUAL_MODE_TILE_ALIGNED_LOS:
+		return FRIENDLY_FIRE_SECTOR_SCAN_MODE_TILE_CACHE
+	return FRIENDLY_FIRE_SECTOR_SCAN_MODE_LOS_LINE
+
+
+func _resolve_unit_visible_aim_direction(unit: Node, unit_world_position: Vector2) -> Vector2:
+	var proxy := _unit_proxies_by_id.get(_get_unit_id(unit), null) as Node3D
+	if proxy != null and is_instance_valid(proxy) and proxy.visible:
+		var proxy_direction: Vector2 = _get_world_direction_from_proxy_yaw(unit_world_position, float(proxy.rotation_degrees.y))
+		if proxy_direction.length_squared() > 0.0001:
+			return proxy_direction.normalized()
+	return _resolve_unit_aim_direction(unit, unit_world_position)
+
+
+func _get_unit_fireteam_id(unit: Node) -> String:
+	if unit != null and unit.has_method("get_fireteam_id"):
+		return String(unit.call("get_fireteam_id")).strip_edges().to_lower()
+	return ""
+
+
+func _get_unit_active_attack_weapon_id(unit: Node) -> String:
+	var candidates := PackedStringArray()
+	if unit != null and unit.has_method("get_active_weapon_id"):
+		candidates.append(String(unit.call("get_active_weapon_id")))
+	for weapon_id in _get_unit_visual_weapon_ids(unit):
+		if not candidates.has(String(weapon_id)):
+			candidates.append(String(weapon_id))
+	for candidate in candidates:
+		var normalized: String = String(WEAPON_DATA_SCRIPT.call("normalize_weapon_id", String(candidate))).strip_edges().to_lower()
+		if not normalized.is_empty() and bool(WEAPON_DATA_SCRIPT.call("is_attack_weapon_id", normalized)):
+			return normalized
+	return ""
+
+
+func _resolve_unit_aim_direction(unit: Node, unit_world_position: Vector2) -> Vector2:
+	var proxy := _unit_proxies_by_id.get(_get_unit_id(unit), null) as Node3D
+	var motion_or_target_direction: Vector2 = _resolve_unit_motion_or_target_direction(proxy, unit, unit_world_position)
+	if motion_or_target_direction.length_squared() > 0.0001:
+		return motion_or_target_direction
+	if unit != null and unit.has_meta("facing_angle"):
+		return Vector2.RIGHT.rotated(float(unit.get_meta("facing_angle", 0.0))).normalized()
+	if unit != null and unit.has_meta("map_facing_angle"):
+		return Vector2.RIGHT.rotated(float(unit.get_meta("map_facing_angle", 0.0))).normalized()
+	if proxy != null and is_instance_valid(proxy):
+		var proxy_direction: Vector2 = _get_world_direction_from_proxy_yaw(unit_world_position, float(proxy.rotation_degrees.y))
+		if proxy_direction.length_squared() > 0.0001:
+			return proxy_direction
+	var target_position_variant = unit.call("get_target_position") if unit != null and unit.has_method("get_target_position") else null
+	if typeof(target_position_variant) == TYPE_VECTOR2:
+		var target_position: Vector2 = Vector2(target_position_variant)
+		if unit_world_position.distance_squared_to(target_position) > 1.0:
+			return (target_position - unit_world_position).normalized()
+	return Vector2.RIGHT
+
+
+func _resolve_unit_motion_or_target_direction(proxy: Node3D, unit: Node, current_world_position: Vector2) -> Vector2:
+	if proxy != null and is_instance_valid(proxy) and proxy.has_meta("last_world_position"):
+		var previous_position: Variant = proxy.get_meta("last_world_position")
+		if typeof(previous_position) == TYPE_VECTOR2:
+			var previous_world_position: Vector2 = Vector2(previous_position)
+			if previous_world_position.distance_squared_to(current_world_position) > 0.25:
+				return (current_world_position - previous_world_position).normalized()
+	var target_position_variant = unit.call("get_target_position") if unit != null and unit.has_method("get_target_position") else null
+	if typeof(target_position_variant) == TYPE_VECTOR2:
+		var target_position: Vector2 = Vector2(target_position_variant)
+		if current_world_position.distance_squared_to(target_position) > 1.0:
+			return (target_position - current_world_position).normalized()
+	return Vector2.ZERO
+
+
+func _get_world_direction_from_proxy_yaw(unit_world_position: Vector2, yaw_degrees: float) -> Vector2:
+	var yaw_radians: float = deg_to_rad(yaw_degrees)
+	var grid_direction := Vector2(sin(yaw_radians), -cos(yaw_radians))
+	var world_tip: Vector2 = _grid_float_to_world(_world_to_grid_float(unit_world_position) + grid_direction)
+	if unit_world_position.distance_squared_to(world_tip) <= 0.001:
+		return Vector2.ZERO
+	return (world_tip - unit_world_position).normalized()
+
+
 func _ensure_audio_event_bus(create_if_missing: bool = true):
 	if _audio_event_bus != null and is_instance_valid(_audio_event_bus):
 		return _audio_event_bus
@@ -3248,9 +3957,16 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 	var barrel_offset: float = float(muzzle_entry.get("barrel_offset_world", 28.0))
 	var muzzle_position: Vector2 = attacker_position + direction.normalized() * barrel_offset
 	var pixel_size: float = float(muzzle_entry.get("pixel_size", 0.010))
-	var color: Color = Color(1.0, 0.78, 0.28, 0.82)
+	var is_friendly_fire: bool = bool(fire_event.get("is_friendly_fire", false))
+	var color: Color = Color(1.0, 0.32, 0.28, 0.9) if is_friendly_fire else Color(1.0, 0.78, 0.28, 0.82)
 	_add_texture_card(_order_root, texture, _world_to_surface_3d_position(muzzle_position, 0.92), "WeaponFireMuzzle_%s" % _sanitize_node_name(event_id), pixel_size, Vector2.ZERO, Color(1.0, 0.95, 0.62, 0.92))
 	_add_line3d(_order_root, _world_to_surface_3d_position(muzzle_position, 0.78), _world_to_surface_3d_position(target_position, 0.78), color, "WeaponFireTrace_%s" % _sanitize_node_name(event_id))
+	var flank_label: String = _build_flank_fire_vfx_label(fire_event)
+	if not flank_label.is_empty():
+		_add_label3d(_order_root, flank_label, _world_to_surface_3d_position(target_position + Vector2(0.0, -22.0), MOVEMENT_LABEL_HEIGHT + 0.82), "WeaponFireFlank_%s" % _sanitize_node_name(event_id), Color(1.0, 0.70, 0.24, 0.96), 12)
+	if is_friendly_fire:
+		_add_marker3d(_order_root, target_position, Color(1.0, 0.16, 0.14, 0.62), "WeaponFireFriendlyFlash_%s" % _sanitize_node_name(event_id), 0.18, 0.12, 8)
+		_add_label3d(_order_root, "FRIENDLY FIRE", _world_to_surface_3d_position(target_position + Vector2(0.0, -38.0), MOVEMENT_LABEL_HEIGHT + 0.94), "WeaponFireFriendlyLabel_%s" % _sanitize_node_name(event_id), Color(1.0, 0.24, 0.22, 0.98), 13)
 	var audio_result: Dictionary = _emit_weapon_fire_sfx_from_fire_event(fire_event, weapon_id, muzzle_position)
 	_weapon_fire_vfx_visual_count += 1
 	_weapon_fire_vfx_entries.append({
@@ -3264,7 +3980,20 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		"audio_played": bool(audio_result.get("played", false)),
 		"audio_reason": String(audio_result.get("reason", "")),
 		"source": String(fire_event.get("source", "")),
+		"is_flank": bool(fire_event.get("is_flank", false)),
+		"flank_direction_label": String(fire_event.get("flank_direction_label", "")),
+		"is_friendly_fire": is_friendly_fire,
+		"friendly_fire_target_unit_id": String(fire_event.get("friendly_fire_target_unit_id", "")),
 	})
+
+
+func _build_flank_fire_vfx_label(fire_event: Dictionary) -> String:
+	if not bool(fire_event.get("is_flank", false)):
+		return ""
+	var direction_label: String = String(fire_event.get("flank_direction_label", "")).strip_edges()
+	if direction_label.is_empty():
+		return "FLANK"
+	return "FLANK %s" % direction_label.to_upper()
 
 
 func _add_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
@@ -3341,13 +4070,12 @@ func _add_hud_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 	if bubble_id.is_empty() or text.is_empty():
 		return
 	var hud_anchor_position: Vector2 = Vector2(feedback_bubble.get("hud_anchor_position", Vector2.ZERO))
-	var bubble_size: Vector2 = _coerce_hud_bubble_size(feedback_bubble.get("max_size", Vector2i(168, 72)))
-	bubble_size.x = clampf(bubble_size.x, 120.0, 188.0)
-	bubble_size.y = clampf(bubble_size.y, 48.0, 76.0)
+	var bubble_size: Vector2 = _coerce_hud_bubble_size(feedback_bubble.get("max_size", Vector2i(148, 52)))
+	bubble_size = _build_compact_hud_bubble_size(text, bubble_size)
 	var viewport_size := Vector2(_get_viewport_size())
-	var bubble_position: Vector2 = hud_anchor_position + Vector2(12.0, -bubble_size.y * 0.52)
-	bubble_position.x = clampf(bubble_position.x, 0.0, maxf(viewport_size.x - bubble_size.x, 0.0))
-	bubble_position.y = clampf(bubble_position.y, 0.0, maxf(viewport_size.y - bubble_size.y, 0.0))
+	if viewport_size.x < bubble_size.x + 1.0 or viewport_size.y < bubble_size.y + 1.0:
+		viewport_size = Vector2(1280.0, 720.0)
+	var bubble_position: Vector2 = _resolve_hud_feedback_bubble_position(hud_anchor_position, bubble_size, viewport_size)
 
 	var bubble_root := Control.new()
 	bubble_root.name = "HudFeedbackBubble_%s_%d" % [_sanitize_node_name(bubble_id), _feedback_bubble_visual_count]
@@ -3358,23 +4086,23 @@ func _add_hud_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 	bubble_root.z_index = int(feedback_bubble.get("z_index", 76))
 	_feedback_bubble_hud_root.add_child(bubble_root)
 
-	var texture: Texture2D = _get_comic_bubble_texture(String(feedback_bubble.get("path", "")))
-	if texture != null:
-		var texture_rect := TextureRect.new()
-		texture_rect.name = "BubbleTexture"
-		texture_rect.texture = texture
-		texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		texture_rect.stretch_mode = TextureRect.STRETCH_SCALE
-		texture_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		texture_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
-		bubble_root.add_child(texture_rect)
-	else:
-		var fallback := PanelContainer.new()
-		fallback.name = "BubbleFallback"
-		fallback.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		fallback.set_anchors_preset(Control.PRESET_FULL_RECT)
-		fallback.add_theme_stylebox_override("panel", _build_hud_bubble_stylebox())
-		bubble_root.add_child(fallback)
+	var tail := Polygon2D.new()
+	tail.name = "BubbleTailLeft"
+	tail.polygon = PackedVector2Array([
+		Vector2(0.0, bubble_size.y * 0.54),
+		Vector2(11.0, bubble_size.y * 0.54 - 6.0),
+		Vector2(11.0, bubble_size.y * 0.54 + 6.0),
+	])
+	tail.color = Color(0.94, 0.97, 0.98, 0.96)
+	tail.position = Vector2(-8.0, 0.0)
+	bubble_root.add_child(tail)
+
+	var fallback := PanelContainer.new()
+	fallback.name = "BubbleFallback"
+	fallback.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fallback.set_anchors_preset(Control.PRESET_FULL_RECT)
+	fallback.add_theme_stylebox_override("panel", _build_hud_bubble_stylebox())
+	bubble_root.add_child(fallback)
 
 	var label := Label.new()
 	label.name = "BubbleText"
@@ -3384,9 +4112,9 @@ func _add_hud_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_FEEDBACK_BUBBLE_TEXT)
-	label.add_theme_font_size_override("font_size", 10)
-	label.position = Vector2(12.0, 10.0)
-	label.size = Vector2(maxf(bubble_size.x - 24.0, 1.0), maxf(bubble_size.y - 18.0, 1.0))
+	label.add_theme_font_size_override("font_size", 8 if text.length() <= 18 else 9)
+	label.position = Vector2(8.0, 6.0)
+	label.size = Vector2(maxf(bubble_size.x - 16.0, 1.0), maxf(bubble_size.y - 12.0, 1.0))
 	bubble_root.add_child(label)
 
 	var world_anchor: Vector2 = Vector2(feedback_bubble.get("anchor_position", Vector2.ZERO)) if typeof(feedback_bubble.get("anchor_position", null)) == TYPE_VECTOR2 else Vector2.ZERO
@@ -3413,6 +4141,9 @@ func _add_hud_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 		"hud_anchor_source": String(feedback_bubble.get("hud_anchor_source", "")).strip_edges(),
 		"hud_anchor_position": hud_anchor_position,
 		"hud_bubble_position": bubble_position,
+		"hud_bubble_size": bubble_size,
+		"hud_tail_side": "left",
+		"hud_tail_points_to_anchor": true,
 		"visual_only": true,
 	})
 
@@ -3427,6 +4158,57 @@ func _coerce_hud_bubble_size(value: Variant) -> Vector2:
 		var dict: Dictionary = Dictionary(value)
 		return Vector2(float(dict.get("x", 168.0)), float(dict.get("y", 72.0)))
 	return Vector2(168.0, 72.0)
+
+
+func _build_compact_hud_bubble_size(text: String, requested_size: Vector2) -> Vector2:
+	var trimmed_text: String = text.strip_edges()
+	var character_count: int = trimmed_text.length()
+	var line_count: int = maxi(trimmed_text.split("\n").size(), 1)
+	var target_width: float = 88.0 + float(mini(character_count, 28)) * 2.0
+	var target_height: float = 34.0 + float(maxi(line_count - 1, 0)) * 10.0
+	return Vector2(
+		clampf(minf(requested_size.x, target_width), 84.0, 148.0),
+		clampf(minf(requested_size.y, target_height), 34.0, 54.0)
+	)
+
+
+func _resolve_hud_feedback_bubble_position(hud_anchor_position: Vector2, bubble_size: Vector2, viewport_size: Vector2) -> Vector2:
+	var base_position: Vector2 = _clamp_hud_feedback_bubble_position(
+		hud_anchor_position + Vector2(10.0, -bubble_size.y * 0.52),
+		bubble_size,
+		viewport_size
+	)
+	var step: float = bubble_size.y + 4.0
+	for offset_y in [0.0, step, -step, step * 2.0, -step * 2.0]:
+		var candidate: Vector2 = _clamp_hud_feedback_bubble_position(base_position + Vector2(0.0, offset_y), bubble_size, viewport_size)
+		if not _hud_feedback_bubble_position_overlaps(candidate, bubble_size):
+			return candidate
+	return base_position
+
+
+func _clamp_hud_feedback_bubble_position(position: Vector2, bubble_size: Vector2, viewport_size: Vector2) -> Vector2:
+	return Vector2(
+		clampf(position.x, 0.0, maxf(viewport_size.x - bubble_size.x, 0.0)),
+		clampf(position.y, 0.0, maxf(viewport_size.y - bubble_size.y, 0.0))
+	)
+
+
+func _hud_feedback_bubble_position_overlaps(position: Vector2, bubble_size: Vector2) -> bool:
+	var candidate_rect := Rect2(position, bubble_size).grow(3.0)
+	for entry_variant in _feedback_bubble_entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("anchor_space", "")).strip_edges().to_lower() != "hud":
+			continue
+		if typeof(entry.get("hud_bubble_position", null)) != TYPE_VECTOR2:
+			continue
+		var existing_position: Vector2 = Vector2(entry.get("hud_bubble_position", Vector2.ZERO))
+		var existing_size: Vector2 = _coerce_hud_bubble_size(entry.get("hud_bubble_size", Vector2(148.0, 52.0)))
+		var existing_rect := Rect2(existing_position, existing_size).grow(3.0)
+		if candidate_rect.intersects(existing_rect):
+			return true
+	return false
 
 
 func _build_hud_bubble_stylebox() -> StyleBoxFlat:
@@ -3464,6 +4246,12 @@ func _add_tactical_communication_event_visual(communication_event: Dictionary) -
 	if label_text.is_empty():
 		label_text = String(communication_event.get("event_type", "")).strip_edges().to_upper()
 	_add_label3d(_order_root, label_text, _world_to_surface_3d_position(anchor_position, MOVEMENT_LABEL_HEIGHT + 0.38), "%s_Label" % marker_name, color.lightened(0.08), 11)
+	var target_variant = communication_event.get("target_position", null)
+	var has_highlight_line: bool = String(communication_event.get("event_type", "")).strip_edges().to_lower() == "bounding_rotation" and typeof(target_variant) == TYPE_VECTOR2
+	if has_highlight_line:
+		var target_position: Vector2 = Vector2(target_variant)
+		if anchor_position.distance_squared_to(target_position) > 4.0:
+			_add_line3d(_order_root, _world_to_surface_3d_position(anchor_position, 0.84), _world_to_surface_3d_position(target_position, 0.84), Color(color.r, color.g, color.b, 0.74), "%s_Line" % marker_name)
 	_tactical_communication_event_visual_count += 1
 	_tactical_communication_event_entries.append({
 		"event_id": event_id,
@@ -3475,6 +4263,8 @@ func _add_tactical_communication_event_visual(communication_event: Dictionary) -
 		"short_text": String(communication_event.get("short_text", "")),
 		"map_label": label_text,
 		"anchor_position": anchor_position,
+		"target_position": Vector2(target_variant) if typeof(target_variant) == TYPE_VECTOR2 else null,
+		"has_highlight_line": has_highlight_line,
 		"visual_only": true,
 	})
 
@@ -3615,6 +4405,9 @@ func _rebuild_contact_visuals() -> void:
 			continue
 		var detection_state: String = String(contact.get("detection_state", "unknown")).strip_edges().to_lower()
 		_add_marker3d(_contact_root, Vector2(position_variant), _get_contact_color(detection_state), "Contact_%s" % String(contact.get("unit_id", _contact_count)), 0.36, 0.48, 4)
+		var enemy_profile_label: String = String(contact.get("enemy_profile_label", "")).strip_edges()
+		if bool(contact.get("enemy_profile_revealed", false)) and not enemy_profile_label.is_empty():
+			_add_label3d(_contact_root, enemy_profile_label.to_upper(), _world_to_surface_3d_position(Vector2(position_variant) + Vector2(0.0, -24.0), MOVEMENT_LABEL_HEIGHT + 0.52), "ContactProfile_%s" % String(contact.get("unit_id", _contact_count)), Color(1.0, 0.76, 0.32, 0.95), 11)
 		if bool(contact.get("fow_last_known", false)):
 			_fow_allowed_contact_count += 1
 		_contact_visual_entries.append({
@@ -3623,12 +4416,17 @@ func _rebuild_contact_visuals() -> void:
 			"detection_state": detection_state,
 			"last_known_position": Vector2(position_variant),
 			"fow_last_known": bool(contact.get("fow_last_known", false)),
+			"enemy_profile_revealed": bool(contact.get("enemy_profile_revealed", false)),
+			"enemy_profile_id": String(contact.get("enemy_profile_id", "")),
+			"enemy_profile_label": enemy_profile_label,
 		})
 		_contact_count += 1
 
 
 func _rebuild_drop_visuals() -> void:
 	_clear_children(_drop_root)
+	_dropship_visual_nodes_by_id.clear()
+	_dropship_approach_lines_by_id.clear()
 	_dropship_texture_visible = false
 	_dropship_model_visible = false
 	_missing_dropship_model_count = 0
@@ -3667,14 +4465,33 @@ func _rebuild_drop_visuals() -> void:
 			if _add_world_tile_marker(_drop_root, resolved_lz_position, Color(1.0, 0.78, 0.28, 0.50), "ResolvedLZTile", 0.105, 0.82):
 				_resolved_lz_marker_count += 1
 
-	if bool(_drop_payload.get("dropship_visible", false)) and typeof(_drop_payload.get("dropship_position", null)) == TYPE_VECTOR2:
-		var ship_position: Vector2 = Vector2(_drop_payload.get("dropship_position", Vector2.ZERO))
-		if _air_layer_allows_air_visual(ship_position):
-			_add_dropship_proxy(ship_position)
-			if typeof(_drop_payload.get("lz_position", null)) == TYPE_VECTOR2:
-				var lz_line_position: Vector2 = Vector2(_drop_payload.get("lz_position", Vector2.ZERO))
-				if _air_layer_allows_surface_marker(lz_line_position):
-					_add_line3d(_drop_root, _world_to_air_layer_3d_position(ship_position), _world_to_surface_3d_position(lz_line_position, 0.52), Color(0.56, 1.0, 0.68, 0.86), "DropshipApproach")
+	var dropship_entries: Array = Array(_drop_payload.get("dropship_visuals", []))
+	for index in range(dropship_entries.size()):
+		var entry: Dictionary = Dictionary(dropship_entries[index])
+		if typeof(entry.get("dropship_position", null)) != TYPE_VECTOR2:
+			continue
+		var ship_position: Vector2 = Vector2(entry.get("dropship_position", Vector2.ZERO))
+		var visual_id: String = _get_dropship_visual_id(entry, index)
+		if bool(entry.get("has_lz_position", false)) and typeof(entry.get("lz_position", null)) == TYPE_VECTOR2:
+			var entry_lz_position: Vector2 = Vector2(entry.get("lz_position", Vector2.ZERO))
+			if _air_layer_allows_surface_marker(entry_lz_position):
+				var lz_color := Color(0.42, 0.72, 1.0, 0.46)
+				if bool(entry.get("selected", false)):
+					lz_color = Color(0.50, 1.0, 0.66, 0.54)
+				if _add_planned_lz_marker(entry_lz_position, lz_color, "DropshipLZ_%s" % _sanitize_node_name(visual_id)):
+					_requested_lz_marker_count += 1
+					var lz_label: String = String(entry.get("lz_label", entry.get("lz_name", ""))).strip_edges()
+					if not lz_label.is_empty():
+						_add_label3d(_drop_root, lz_label, _world_to_surface_3d_position(entry_lz_position, 0.56), "DropshipLZLabel_%s" % _sanitize_node_name(visual_id), lz_color.lightened(0.18), 11)
+			else:
+				_fow_hidden_air_visual_count += 1
+		_add_dropship_approach_line(entry, visual_id, ship_position)
+		if not bool(entry.get("dropship_visible", false)):
+			continue
+		if _air_layer_allows_air_visual_for_payload(entry, ship_position):
+			var visual_node := _add_dropship_proxy(ship_position, entry, visual_id)
+			if visual_node != null:
+				_dropship_visual_nodes_by_id[visual_id] = visual_node
 		else:
 			_fow_hidden_air_visual_count += 1
 
@@ -3685,20 +4502,92 @@ func _air_layer_allows_surface_marker(world_position: Vector2) -> bool:
 	return _fow_is_world_position_currently_visible(world_position)
 
 
+func _add_planned_lz_marker(world_position: Vector2, color: Color, node_name: String) -> bool:
+	return _add_world_tile_marker(_drop_root, world_position, color, node_name, 0.085, 0.94)
+
+
 func _air_layer_allows_air_visual(world_position: Vector2) -> bool:
+	return _air_layer_allows_air_visual_for_payload(_drop_payload, world_position)
+
+
+func _air_layer_allows_air_visual_for_payload(payload: Dictionary, world_position: Vector2) -> bool:
 	if not _is_fog_of_war_visual_filter_active():
 		return true
-	var team_id: String = String(_drop_payload.get("team_id", AIR_LAYER_DEFAULT_TEAM_ID)).strip_edges()
+	var team_id: String = String(payload.get("team_id", AIR_LAYER_DEFAULT_TEAM_ID)).strip_edges()
 	if _fog_of_war_team_id.is_empty() or team_id.is_empty() or team_id == _fog_of_war_team_id:
 		return true
 	return _fow_is_world_position_currently_visible(world_position)
 
 
 func _world_to_air_layer_3d_position(world_position: Vector2, extra_y_offset: float = 0.0) -> Vector3:
+	return _world_to_air_layer_3d_position_for_payload(_drop_payload, world_position, extra_y_offset)
+
+
+func _world_to_air_layer_3d_position_for_payload(payload: Dictionary, world_position: Vector2, extra_y_offset: float = 0.0) -> Vector3:
 	_dropship_surface_y = _get_world_surface_y(world_position)
-	_dropship_air_clearance = maxf(float(_drop_payload.get("flight_altitude_clearance", AIR_LAYER_DEFAULT_CLEARANCE)) + extra_y_offset, AIR_LAYER_MIN_CLEARANCE)
+	_dropship_air_clearance = maxf(float(payload.get("flight_altitude_clearance", AIR_LAYER_DEFAULT_CLEARANCE)) + extra_y_offset, AIR_LAYER_MIN_CLEARANCE)
 	_dropship_air_y = _dropship_surface_y + _dropship_air_clearance
 	return _world_to_3d_position(world_position, _dropship_air_y)
+
+
+func _get_dropship_visual_id(entry: Dictionary, index: int) -> String:
+	var visual_id: String = String(entry.get("craft_id", entry.get("asset_id", ""))).strip_edges()
+	if visual_id.is_empty():
+		visual_id = "dropship_%d" % index
+	return visual_id
+
+
+func _add_dropship_approach_line(entry: Dictionary, visual_id: String, ship_position: Vector2) -> void:
+	var target_position: Vector2
+	if typeof(entry.get("dropship_target_position", null)) == TYPE_VECTOR2:
+		target_position = Vector2(entry.get("dropship_target_position", Vector2.ZERO))
+	elif typeof(entry.get("lz_position", null)) == TYPE_VECTOR2:
+		target_position = Vector2(entry.get("lz_position", Vector2.ZERO))
+	else:
+		return
+	var line_origin: Vector2 = _get_dropship_approach_line_origin(entry, ship_position)
+	if line_origin.distance_squared_to(target_position) <= 4.0:
+		return
+	if not _air_layer_allows_surface_marker(target_position):
+		return
+	var line := _add_line3d(
+		_drop_root,
+		_world_to_air_layer_3d_position_for_payload(entry, line_origin),
+		_world_to_surface_3d_position(target_position, 0.52),
+		Color(0.56, 1.0, 0.68, 0.86),
+		"DropshipApproach_%s" % _sanitize_node_name(visual_id)
+	)
+	if line != null:
+		_dropship_approach_lines_by_id[visual_id] = line
+
+
+func _update_dropship_approach_line(entry: Dictionary, visual_id: String, ship_position: Vector2) -> void:
+	var line := _dropship_approach_lines_by_id.get(visual_id, null) as MeshInstance3D
+	if line == null or not is_instance_valid(line):
+		return
+	var target_position: Vector2
+	if typeof(entry.get("dropship_target_position", null)) == TYPE_VECTOR2:
+		target_position = Vector2(entry.get("dropship_target_position", Vector2.ZERO))
+	elif typeof(entry.get("lz_position", null)) == TYPE_VECTOR2:
+		target_position = Vector2(entry.get("lz_position", Vector2.ZERO))
+	else:
+		line.visible = false
+		return
+	var line_origin: Vector2 = _get_dropship_approach_line_origin(entry, ship_position)
+	line.visible = line_origin.distance_squared_to(target_position) > 4.0
+	if not line.visible:
+		return
+	line.mesh = _make_line_mesh(
+		_world_to_air_layer_3d_position_for_payload(entry, line_origin),
+		_world_to_surface_3d_position(target_position, 0.52),
+		Color(0.56, 1.0, 0.68, 0.86)
+	)
+
+
+func _get_dropship_approach_line_origin(entry: Dictionary, fallback_position: Vector2) -> Vector2:
+	if typeof(entry.get("approach_origin_position", null)) == TYPE_VECTOR2:
+		return Vector2(entry.get("approach_origin_position", fallback_position))
+	return fallback_position
 
 
 func _rebuild_status_visuals() -> void:
@@ -3812,8 +4701,9 @@ func _add_label3d(parent: Node3D, text: String, position: Vector3, node_name: St
 	return label
 
 
-func _add_dropship_proxy(world_position: Vector2) -> void:
-	_dropship_rotation_y = _get_dropship_rotation_y(world_position)
+func _add_dropship_proxy(world_position: Vector2, visual_payload: Dictionary = {}, visual_id: String = "primary") -> Node3D:
+	var payload: Dictionary = visual_payload if not visual_payload.is_empty() else _drop_payload
+	_dropship_rotation_y = _get_dropship_rotation_y_for_payload(payload, world_position)
 	var model_scene := _get_asset_model_scene("fahrzeug_speeder_b_se")
 	if model_scene == null:
 		model_scene = _get_asset_model_scene_by_name(DROPSHIP_MODEL_NAME)
@@ -3822,54 +4712,64 @@ func _add_dropship_proxy(world_position: Vector2) -> void:
 		if model_instance != null:
 			_normalize_asset_model_instance(model_instance)
 			var craft_root := Node3D.new()
-			craft_root.name = "DropshipModel_%s" % DROPSHIP_MODEL_NAME
-			craft_root.position = _world_to_air_layer_3d_position(world_position, _get_asset_y_offset("fahrzeug_speeder_b_se"))
-			craft_root.set_meta("flight_altitude_layer", String(_drop_payload.get("air_layer", AIR_LAYER_ID)))
+			var extra_y_offset: float = _get_asset_y_offset("fahrzeug_speeder_b_se")
+			craft_root.name = "DropshipModel_%s" % _sanitize_node_name(visual_id)
+			craft_root.position = _world_to_air_layer_3d_position_for_payload(payload, world_position, extra_y_offset)
+			craft_root.set_meta("flight_altitude_layer", String(payload.get("air_layer", AIR_LAYER_ID)))
 			craft_root.set_meta("terrain_height_independent", true)
+			craft_root.set_meta("dropship_visual_mode", "model")
+			craft_root.set_meta("dropship_extra_y_offset", extra_y_offset)
 			craft_root.rotation_degrees.y = _dropship_rotation_y
 			craft_root.scale = Vector3.ONE * (_get_asset_model_scale("fahrzeug_speeder_b_se") if _has_model_mapping_for_type("fahrzeug_speeder_b_se") else DROPSHIP_MODEL_SCALE)
 			craft_root.add_child(model_instance)
 			_drop_root.add_child(craft_root)
 			_dropship_model_visible = true
 			_air_visual_count += 1
-			return
+			return craft_root
 
 	if _uses_strict_3d_asset_mapping():
 		_add_runtime_missing_asset_marker(
 			_drop_root,
-			_world_to_air_layer_3d_position(world_position),
-			"MissingAsset_dropship_model_%s" % _sanitize_node_name(DROPSHIP_MODEL_NAME)
+			_world_to_air_layer_3d_position_for_payload(payload, world_position),
+			"MissingAsset_dropship_model_%s" % _sanitize_node_name(visual_id)
 		)
 		_missing_dropship_model_count = 1
-		return
+		return null
 
-	var dropship_texture := _drop_payload.get("dropship_texture", null) as Texture2D
+	var dropship_texture := payload.get("dropship_texture", null) as Texture2D
 	if dropship_texture == null:
 		dropship_texture = DEFAULT_DROPSHIP_TEXTURE
 	var sprite := _add_texture_card(
 		_drop_root,
 		dropship_texture,
-		_world_to_air_layer_3d_position(world_position),
-		"DropshipTexture",
+		_world_to_air_layer_3d_position_for_payload(payload, world_position),
+		"DropshipTexture_%s" % _sanitize_node_name(visual_id),
 		DROPSHIP_TEXTURE_PIXEL_SIZE
 	)
 	if sprite != null:
-		sprite.set_meta("flight_altitude_layer", String(_drop_payload.get("air_layer", AIR_LAYER_ID)))
+		sprite.set_meta("flight_altitude_layer", String(payload.get("air_layer", AIR_LAYER_ID)))
 		sprite.set_meta("terrain_height_independent", true)
+		sprite.set_meta("dropship_visual_mode", "texture")
+		sprite.set_meta("dropship_extra_y_offset", 0.0)
 		_dropship_texture_visible = true
 		_air_visual_count += 1
-		return
+		return sprite
 
+	var proxy_root := Node3D.new()
+	proxy_root.name = "DropshipProxy_%s" % _sanitize_node_name(visual_id)
+	proxy_root.position = _world_to_air_layer_3d_position_for_payload(payload, world_position)
+	proxy_root.rotation_degrees.y = -_camera_yaw_degrees
+	proxy_root.set_meta("flight_altitude_layer", String(payload.get("air_layer", AIR_LAYER_ID)))
+	proxy_root.set_meta("terrain_height_independent", true)
+	proxy_root.set_meta("dropship_visual_mode", "proxy")
+	proxy_root.set_meta("dropship_extra_y_offset", 0.0)
+	_drop_root.add_child(proxy_root)
 	var body_mesh := _make_box_mesh(Vector3(2.9, 0.46, 1.25))
 	var body := MeshInstance3D.new()
 	body.name = "DropshipProxy"
 	body.mesh = body_mesh
 	body.material_override = _make_material(Color(0.95, 0.76, 0.32, 0.96))
-	body.position = _world_to_air_layer_3d_position(world_position)
-	body.set_meta("flight_altitude_layer", String(_drop_payload.get("air_layer", AIR_LAYER_ID)))
-	body.set_meta("terrain_height_independent", true)
-	body.rotation_degrees.y = -_camera_yaw_degrees
-	_drop_root.add_child(body)
+	proxy_root.add_child(body)
 	_air_visual_count += 1
 
 	var wing_mesh := _make_box_mesh(Vector3(1.05, 0.16, 2.45))
@@ -3877,17 +4777,21 @@ func _add_dropship_proxy(world_position: Vector2) -> void:
 	wing.name = "DropshipWing"
 	wing.mesh = wing_mesh
 	wing.material_override = _make_material(Color(0.72, 0.76, 0.78, 0.88))
-	wing.position = body.position + Vector3(0.0, -0.04, 0.0)
-	wing.rotation = body.rotation
-	_drop_root.add_child(wing)
+	wing.position = Vector3(0.0, -0.04, 0.0)
+	proxy_root.add_child(wing)
+	return proxy_root
 
 
 func _get_dropship_rotation_y(world_position: Vector2) -> float:
-	if typeof(_drop_payload.get("dropship_target_position", null)) == TYPE_VECTOR2:
-		var target_position: Vector2 = Vector2(_drop_payload.get("dropship_target_position", world_position))
+	return _get_dropship_rotation_y_for_payload(_drop_payload, world_position)
+
+
+func _get_dropship_rotation_y_for_payload(payload: Dictionary, world_position: Vector2) -> float:
+	if typeof(payload.get("dropship_target_position", null)) == TYPE_VECTOR2:
+		var target_position: Vector2 = Vector2(payload.get("dropship_target_position", world_position))
 		return _get_dropship_model_yaw(world_position, target_position, -_camera_yaw_degrees)
-	if typeof(_drop_payload.get("lz_position", null)) == TYPE_VECTOR2:
-		return _get_dropship_model_yaw(world_position, Vector2(_drop_payload.get("lz_position", Vector2.ZERO)), -_camera_yaw_degrees)
+	if typeof(payload.get("lz_position", null)) == TYPE_VECTOR2:
+		return _get_dropship_model_yaw(world_position, Vector2(payload.get("lz_position", Vector2.ZERO)), -_camera_yaw_degrees)
 	return wrapf(-_camera_yaw_degrees + DROPSHIP_MODEL_FORWARD_ROTATION_OFFSET_DEGREES, 0.0, 360.0)
 
 
@@ -4016,6 +4920,9 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 		proxy.set_meta("unit_id", unit_id)
 		proxy.set_meta("team_id", _get_unit_team_id(unit))
 		proxy.set_meta("vital_state", _get_unit_vital_state(unit))
+		proxy.set_meta("overwatch_ready", bool(unit.get_meta("overwatch_ready", false)) if unit != null and unit.has_meta("overwatch_ready") else false)
+		proxy.set_meta("overwatch_shot_ready", bool(unit.get_meta("overwatch_shot_ready", false)) if unit != null and unit.has_meta("overwatch_shot_ready") else false)
+		proxy.set_meta("overwatch_cooldown_remaining_ticks", int(unit.get_meta("overwatch_cooldown_remaining_ticks", 0)) if unit != null and unit.has_meta("overwatch_cooldown_remaining_ticks") else 0)
 		var unit_is_moving: bool = false
 		if unit is Node2D:
 			var unit_world_position: Vector2 = (unit as Node2D).global_position
@@ -4189,9 +5096,14 @@ func _get_unit_status_badge_text(unit: Node) -> String:
 	if unit.has_method("get_vital_state"):
 		vital_state = String(unit.call("get_vital_state")).strip_edges().to_lower()
 	if not vital_state.is_empty() and vital_state != "fit":
+		if vital_state == "respawning":
+			var respawn_seconds: int = _get_unit_respawn_remaining_seconds(unit)
+			return "RESPAWN %ds" % respawn_seconds if respawn_seconds > 0 else "RESPAWN"
 		return vital_state.to_upper()
 	if unit.has_method("is_in_contact") and bool(unit.call("is_in_contact")):
 		return "CONTACT"
+	if bool(unit.get_meta("overwatch_ready", false)):
+		return "OVW"
 	var runtime_status = unit.call("get_runtime_status") if unit.has_method("get_runtime_status") else null
 	var status_text: String = ""
 	var source_command: String = ""
@@ -4222,16 +5134,42 @@ func _get_unit_status_badge_text(unit: Node) -> String:
 func _get_unit_status_badge_color(unit: Node) -> Color:
 	if unit != null and unit.has_method("get_team_id") and String(unit.call("get_team_id")).strip_edges() != "team_alpha":
 		return Color(1.0, 0.56, 0.46, 1.0)
+	var vital_state: String = String(unit.call("get_vital_state")).strip_edges().to_lower() if unit != null and unit.has_method("get_vital_state") else ""
+	match vital_state:
+		"down", "bleedout":
+			return Color(1.0, 0.42, 0.38, 1.0)
+		"respawning":
+			return Color(0.72, 0.9, 1.0, 1.0)
 	if unit != null and unit.has_method("is_in_contact") and bool(unit.call("is_in_contact")):
 		return Color(1.0, 0.78, 0.34, 1.0)
+	if unit != null and bool(unit.get_meta("overwatch_ready", false)):
+		if not bool(unit.get_meta("overwatch_shot_ready", true)):
+			return Color(0.48, 0.72, 0.78, 0.9)
+		return Color(0.46, 0.98, 0.92, 1.0)
 	return Color(0.62, 0.92, 1.0, 1.0)
+
+
+func _get_unit_respawn_remaining_seconds(unit: Node) -> int:
+	if unit == null:
+		return 0
+	if unit.has_method("get_respawn_remaining_seconds"):
+		return maxi(int(unit.call("get_respawn_remaining_seconds")), 0)
+	if unit.has_meta("respawn_remaining_seconds"):
+		return maxi(int(unit.get_meta("respawn_remaining_seconds", 0)), 0)
+	return 0
 
 
 func _get_unit_proxy_rotation_y(proxy: Node3D, unit: Node, current_world_position: Vector2) -> float:
 	var fallback_yaw: float = proxy.rotation_degrees.y if proxy != null else 0.0
+	var motion_or_target_direction: Vector2 = _resolve_unit_motion_or_target_direction(proxy, unit, current_world_position)
+	if motion_or_target_direction.length_squared() > 0.0001:
+		return _get_world_direction_yaw(current_world_position, current_world_position + motion_or_target_direction, fallback_yaw)
 	if unit != null and unit.has_meta("facing_angle"):
 		var facing_angle: float = float(unit.get_meta("facing_angle", 0.0))
 		return _get_world_direction_yaw(current_world_position, current_world_position + Vector2.RIGHT.rotated(facing_angle), fallback_yaw)
+	if unit != null and unit.has_meta("map_facing_angle"):
+		var map_facing_angle: float = float(unit.get_meta("map_facing_angle", 0.0))
+		return _get_world_direction_yaw(current_world_position, current_world_position + Vector2.RIGHT.rotated(map_facing_angle), fallback_yaw)
 	var target_position: Variant = unit.call("get_target_position") if unit != null and unit.has_method("get_target_position") else null
 	if typeof(target_position) == TYPE_VECTOR2:
 		var target_world_position: Vector2 = Vector2(target_position)
@@ -4757,6 +5695,7 @@ func _get_unit_proxy_state_by_id() -> Dictionary:
 			continue
 		result[unit_id] = {
 			"visible": proxy.visible,
+			"rotation_y_degrees": float(proxy.rotation_degrees.y),
 			"team_id": String(proxy.get_meta("team_id", "")).strip_edges(),
 			"vital_state": String(proxy.get_meta("vital_state", "")).strip_edges(),
 			"missing_unit_model": bool(proxy.get_meta("missing_unit_model", false)),
@@ -4906,17 +5845,331 @@ func _add_marker3d(parent: Node3D, world_position: Vector2, color: Color, node_n
 	parent.add_child(marker)
 
 
-func _add_line3d(parent: Node3D, start_position: Vector3, end_position: Vector3, color: Color, node_name: String) -> void:
+func _add_fire_sector_los_line_visuals(parent: Node3D, origin_world: Vector2, center_direction: Vector2, range_world: float, range_tiles: int, node_name: String) -> Dictionary:
+	var origin_grid: Vector2i = _world_to_grid_position(origin_world)
+	var direction: Vector2 = center_direction.normalized() if center_direction.length_squared() > 0.0001 else Vector2.RIGHT
+	var raw_tip_position: Vector2 = origin_world + direction * maxf(range_world, 0.0)
+	var facing_length: float = clampf(range_world * 0.16, FRIENDLY_FIRE_FACING_STEM_MIN_WORLD, FRIENDLY_FIRE_FACING_STEM_MAX_WORLD)
+	var report: Dictionary = {
+		"origin_grid": origin_grid,
+		"visible_tile_count": 0,
+		"blocker_tile_count": 0,
+		"los_line_count": 0,
+		"blocker_grids": [],
+		"los_blocker_samples": [],
+		"tip_position": raw_tip_position,
+		"facing_tip_position": origin_world + direction * facing_length,
+		"los_blocked": false,
+	}
+	if parent == null or center_direction.length_squared() <= 0.0001 or range_world <= 0.0:
+		return report
+
+	var target_grid: Vector2i = _resolve_fire_sector_los_target_grid(origin_grid, raw_tip_position, range_tiles)
+	var blocker_grid := Vector2i(2147483647, 2147483647)
+	if target_grid != Vector2i(2147483647, 2147483647) and target_grid != origin_grid:
+		blocker_grid = _find_fire_sector_los_blocker_grid_cached(origin_grid, target_grid)
+	if blocker_grid != Vector2i(2147483647, 2147483647):
+		var blocker_world: Vector2 = _get_tile_world_position_for_grid(blocker_grid, _grid_float_to_world(Vector2(blocker_grid)))
+		report["blocker_tile_count"] = 1
+		report["blocker_grids"] = [blocker_grid]
+		report["los_blocker_samples"] = [{
+			"blocker_grid": blocker_grid,
+			"blocker_position": blocker_world,
+			"line_grids": _build_grid_line(origin_grid, blocker_grid),
+		}]
+		report["tip_position"] = blocker_world
+		report["los_blocked"] = true
+
+	_add_line3d(
+		parent,
+		_world_to_surface_3d_position(origin_world, 0.86),
+		_world_to_surface_3d_position(Vector2(report.get("tip_position", raw_tip_position)), 0.86),
+		FRIENDLY_FIRE_SECTOR_BLOCKER_LINE_COLOR if bool(report.get("los_blocked", false)) else FRIENDLY_AIM_LINE_COLOR,
+		node_name
+	)
+	_friendly_aim_los_line_count += 1
+	report["los_line_count"] = 1
+	return report
+
+
+func _resolve_fire_sector_los_target_grid(origin_grid: Vector2i, raw_tip_position: Vector2, range_tiles: int) -> Vector2i:
+	var sentinel := Vector2i(2147483647, 2147483647)
+	if _terrain_map_data == null:
+		return sentinel
+	var raw_target_grid: Vector2i = _world_to_grid_position(raw_tip_position)
+	if _terrain_map_data.call("get_tile_at_grid", raw_target_grid) != null:
+		return raw_target_grid
+	var line_grids: Array = _build_grid_line(origin_grid, raw_target_grid)
+	var last_valid_grid: Vector2i = sentinel
+	var max_steps: int = maxi(range_tiles, 1)
+	for index in range(1, line_grids.size()):
+		if index > max_steps:
+			break
+		var grid_position: Vector2i = line_grids[index]
+		if _terrain_map_data.call("get_tile_at_grid", grid_position) == null:
+			continue
+		last_valid_grid = grid_position
+	return last_valid_grid
+
+
+func _get_tile_world_position_for_grid(grid_position: Vector2i, fallback_position: Vector2) -> Vector2:
+	if _terrain_map_data == null:
+		return fallback_position
+	var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
+	if tile_data == null:
+		return fallback_position
+	return Vector2(tile_data.world_position)
+
+
+func _add_fire_sector_tile_visuals(parent: Node3D, origin_world: Vector2, center_direction: Vector2, range_world: float, range_tiles: int, sector_angle_radians: float, node_name: String) -> Dictionary:
+	var origin_grid: Vector2i = _world_to_grid_position(origin_world)
+	var report: Dictionary = {
+		"origin_grid": origin_grid,
+		"visible_tile_count": 0,
+		"blocker_tile_count": 0,
+		"los_line_count": 0,
+		"blocker_grids": [],
+		"los_blocker_samples": [],
+	}
+	if parent == null or _terrain_map_data == null or center_direction.length_squared() <= 0.0001 or range_world <= 0.0:
+		return report
+
+	var direction: Vector2 = center_direction.normalized()
+	var half_angle: float = sector_angle_radians * 0.5
+	var range_padding: float = maxf(_half_tile_width, _half_tile_height)
+	var visible_grids: Array = []
+	var blocker_grids: Array = []
+	var blocker_lookup: Dictionary = {}
+	var blocker_samples: Array = []
+	var max_grid_range: int = maxi(range_tiles, 1)
+
+	for grid_x in range(origin_grid.x - max_grid_range, origin_grid.x + max_grid_range + 1):
+		for grid_y in range(origin_grid.y - max_grid_range, origin_grid.y + max_grid_range + 1):
+			var grid_position := Vector2i(grid_x, grid_y)
+			if grid_position == origin_grid:
+				continue
+			var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
+			if tile_data == null:
+				continue
+			var tile_world_position: Vector2 = Vector2(tile_data.world_position)
+			var to_tile: Vector2 = tile_world_position - origin_world
+			var tile_distance_world: float = to_tile.length()
+			if tile_distance_world <= 0.001 or tile_distance_world > range_world + range_padding:
+				continue
+			if _grid_distance_score(origin_grid, grid_position) > float(maxi(range_tiles, 0)) + 0.35:
+				continue
+			var angle_delta: float = absf(wrapf(to_tile.normalized().angle() - direction.angle(), -PI, PI))
+			if angle_delta > half_angle:
+				continue
+
+			var blocker_grid: Vector2i = _find_fire_sector_los_blocker_grid_cached(origin_grid, grid_position)
+			if blocker_grid != Vector2i(2147483647, 2147483647):
+				var blocker_key: String = "%d,%d" % [blocker_grid.x, blocker_grid.y]
+				if not blocker_lookup.has(blocker_key):
+					blocker_lookup[blocker_key] = true
+					blocker_grids.append(blocker_grid)
+					if blocker_samples.size() < FRIENDLY_FIRE_SECTOR_BLOCKER_LINE_LIMIT:
+						var blocker_world: Vector2 = _grid_float_to_world(Vector2(blocker_grid))
+						var blocker_tile = _terrain_map_data.call("get_tile_at_grid", blocker_grid)
+						if blocker_tile != null:
+							blocker_world = Vector2(blocker_tile.world_position)
+						_add_line3d(
+							parent,
+							_world_to_surface_3d_position(origin_world, 0.74),
+							_world_to_surface_3d_position(blocker_world, 0.74),
+							FRIENDLY_FIRE_SECTOR_BLOCKER_LINE_COLOR,
+							"%s_LOSBlock_%d_%d" % [node_name, blocker_grid.x, blocker_grid.y]
+						)
+						_friendly_aim_los_line_count += 1
+						blocker_samples.append({
+							"blocker_grid": blocker_grid,
+							"blocker_position": blocker_world,
+							"line_grids": _build_grid_line(origin_grid, blocker_grid),
+						})
+				continue
+			visible_grids.append(grid_position)
+
+	_add_tile_fill_batch(parent, visible_grids, FRIENDLY_FIRE_SECTOR_TILE_COLOR, "%s_Tiles" % node_name, FRIENDLY_FIRE_SECTOR_SURFACE_OFFSET, FRIENDLY_FIRE_SECTOR_TILE_FILL)
+	_add_tile_fill_batch(parent, blocker_grids, FRIENDLY_FIRE_SECTOR_BLOCKER_COLOR, "%s_Blockers" % node_name, FRIENDLY_FIRE_SECTOR_SURFACE_OFFSET + 0.018, FRIENDLY_FIRE_SECTOR_BLOCKER_TILE_FILL)
+	_friendly_aim_tile_marker_count += visible_grids.size()
+	_friendly_aim_blocker_marker_count += blocker_grids.size()
+	report["visible_tile_count"] = visible_grids.size()
+	report["blocker_tile_count"] = blocker_grids.size()
+	report["los_line_count"] = blocker_samples.size()
+	report["blocker_grids"] = blocker_grids.duplicate()
+	report["los_blocker_samples"] = blocker_samples.duplicate(true)
+	return report
+
+
+func _find_fire_sector_los_blocker_grid_cached(start_grid: Vector2i, end_grid: Vector2i) -> Vector2i:
+	var cache_key: String = "%d,%d>%d,%d" % [start_grid.x, start_grid.y, end_grid.x, end_grid.y]
+	if _fire_sector_los_cache.has(cache_key):
+		return Vector2i(_fire_sector_los_cache[cache_key])
+	var blocker_grid: Vector2i = _find_fire_sector_los_blocker_grid(start_grid, end_grid)
+	_fire_sector_los_cache[cache_key] = blocker_grid
+	return blocker_grid
+
+
+func _add_tile_fill_batch(parent: Node3D, grid_positions: Array, color: Color, node_name: String, surface_offset: float, fill: float) -> void:
+	if parent == null or grid_positions.is_empty():
+		return
+	var material := _make_unshaded_material(color, true)
+	var mesh := ImmediateMesh.new()
+	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, material)
+	var cell_size: float = _get_3d_cell_size()
+	var half_extent: float = cell_size * clampf(fill, 0.1, 1.0) * 0.5
+	for grid_variant in grid_positions:
+		var grid_position: Vector2i = grid_variant
+		var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position) if _terrain_map_data != null else null
+		if tile_data == null:
+			continue
+		var top_y: float = float(tile_data.height_level) * _get_3d_height_step()
+		var center: Vector3 = _grid_to_3d_position(Vector2(grid_position), top_y + surface_offset)
+		var north_west: Vector3 = center + Vector3(-half_extent, 0.0, -half_extent)
+		var north_east: Vector3 = center + Vector3(half_extent, 0.0, -half_extent)
+		var south_east: Vector3 = center + Vector3(half_extent, 0.0, half_extent)
+		var south_west: Vector3 = center + Vector3(-half_extent, 0.0, half_extent)
+		mesh.surface_add_vertex(north_west)
+		mesh.surface_add_vertex(north_east)
+		mesh.surface_add_vertex(south_east)
+		mesh.surface_add_vertex(north_west)
+		mesh.surface_add_vertex(south_east)
+		mesh.surface_add_vertex(south_west)
+	mesh.surface_end()
+	var instance := MeshInstance3D.new()
+	instance.name = node_name
+	instance.mesh = mesh
+	parent.add_child(instance)
+
+
+func _find_fire_sector_los_blocker_grid(start_grid: Vector2i, end_grid: Vector2i) -> Vector2i:
+	var sentinel := Vector2i(2147483647, 2147483647)
+	if _terrain_map_data == null:
+		return sentinel
+	var start_tile = _terrain_map_data.call("get_tile_at_grid", start_grid)
+	var end_tile = _terrain_map_data.call("get_tile_at_grid", end_grid)
+	if start_tile == null or end_tile == null:
+		return sentinel
+	var eye_height: float = float(start_tile.height_level) + 1.0
+	var target_height: float = float(end_tile.height_level) + 1.0
+	var line_grids: Array = _build_grid_line(start_grid, end_grid)
+	for index in range(1, line_grids.size()):
+		var grid_position: Vector2i = line_grids[index]
+		var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
+		if tile_data == null:
+			continue
+		var progress: float = float(index) / float(maxi(line_grids.size() - 1, 1))
+		var ray_height: float = lerpf(eye_height, target_height, progress)
+		var blocker_height: float = float(tile_data.height_level) + float(tile_data.object_height)
+		if bool(tile_data.blocks_los) and blocker_height >= ray_height - 0.05:
+			return grid_position
+	return sentinel
+
+
+func _build_grid_line(start_grid: Vector2i, end_grid: Vector2i) -> Array:
+	var cells: Array = []
+	var x0: int = start_grid.x
+	var y0: int = start_grid.y
+	var x1: int = end_grid.x
+	var y1: int = end_grid.y
+	var dx: int = absi(x1 - x0)
+	var dy: int = absi(y1 - y0)
+	var sx: int = 1 if x0 < x1 else -1
+	var sy: int = 1 if y0 < y1 else -1
+	var err: int = dx - dy
+	while true:
+		cells.append(Vector2i(x0, y0))
+		if x0 == x1 and y0 == y1:
+			break
+		var e2: int = err * 2
+		if e2 > -dy:
+			err -= dy
+			x0 += sx
+		if e2 < dx:
+			err += dx
+			y0 += sy
+	return cells
+
+
+func _grid_distance_score(start_grid: Vector2i, end_grid: Vector2i) -> float:
+	return float(maxi(absi(end_grid.x - start_grid.x), absi(end_grid.y - start_grid.y)))
+
+
+func _add_fire_sector3d(parent: Node3D, origin_world: Vector2, center_direction: Vector2, range_world: float, sector_angle_radians: float, color: Color, node_name: String) -> void:
+	if parent == null or center_direction.length_squared() <= 0.0001 or range_world <= 0.0:
+		return
+	var direction: Vector2 = center_direction.normalized()
+	var half_angle: float = sector_angle_radians * 0.5
+	var segment_count: int = maxi(FRIENDLY_FIRE_SECTOR_SEGMENTS, 2)
+	var material := _make_unshaded_material(color, true)
+	var mesh := ImmediateMesh.new()
+	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, material)
+	var origin_3d: Vector3 = _world_to_surface_3d_position(origin_world, 0.52)
+	for index in range(segment_count):
+		var start_ratio: float = float(index) / float(segment_count)
+		var end_ratio: float = float(index + 1) / float(segment_count)
+		var start_angle: float = lerpf(-half_angle, half_angle, start_ratio)
+		var end_angle: float = lerpf(-half_angle, half_angle, end_ratio)
+		var start_world: Vector2 = origin_world + direction.rotated(start_angle) * range_world
+		var end_world: Vector2 = origin_world + direction.rotated(end_angle) * range_world
+		mesh.surface_add_vertex(origin_3d)
+		mesh.surface_add_vertex(_world_to_surface_3d_position(start_world, 0.52))
+		mesh.surface_add_vertex(_world_to_surface_3d_position(end_world, 0.52))
+	mesh.surface_end()
+	var instance := MeshInstance3D.new()
+	instance.name = node_name
+	instance.mesh = mesh
+	parent.add_child(instance)
+
+
+func _add_fire_sector_outline3d(parent: Node3D, origin_world: Vector2, center_direction: Vector2, range_world: float, sector_angle_radians: float, color: Color, node_name: String) -> void:
+	if parent == null or center_direction.length_squared() <= 0.0001 or range_world <= 0.0:
+		return
+	var direction: Vector2 = center_direction.normalized()
+	var half_angle: float = sector_angle_radians * 0.5
+	var segment_count: int = maxi(FRIENDLY_FIRE_SECTOR_SEGMENTS, 2)
+	var material := _make_unshaded_material(color, true)
+	var mesh := ImmediateMesh.new()
+	mesh.surface_begin(Mesh.PRIMITIVE_LINES, material)
+	var origin_3d: Vector3 = _world_to_surface_3d_position(origin_world, 0.55)
+	var left_world: Vector2 = origin_world + direction.rotated(-half_angle) * range_world
+	var right_world: Vector2 = origin_world + direction.rotated(half_angle) * range_world
+	mesh.surface_add_vertex(origin_3d)
+	mesh.surface_add_vertex(_world_to_surface_3d_position(left_world, 0.55))
+	mesh.surface_add_vertex(origin_3d)
+	mesh.surface_add_vertex(_world_to_surface_3d_position(right_world, 0.55))
+	var previous_world: Vector2 = left_world
+	for index in range(1, segment_count + 1):
+		var ratio: float = float(index) / float(segment_count)
+		var angle: float = lerpf(-half_angle, half_angle, ratio)
+		var current_world: Vector2 = origin_world + direction.rotated(angle) * range_world
+		mesh.surface_add_vertex(_world_to_surface_3d_position(previous_world, 0.55))
+		mesh.surface_add_vertex(_world_to_surface_3d_position(current_world, 0.55))
+		previous_world = current_world
+	mesh.surface_end()
+	var instance := MeshInstance3D.new()
+	instance.name = node_name
+	instance.mesh = mesh
+	parent.add_child(instance)
+
+
+func _add_line3d(parent: Node3D, start_position: Vector3, end_position: Vector3, color: Color, node_name: String) -> MeshInstance3D:
+	var mesh := _make_line_mesh(start_position, end_position, color)
+	var instance := MeshInstance3D.new()
+	instance.name = node_name
+	instance.mesh = mesh
+	parent.add_child(instance)
+	return instance
+
+
+func _make_line_mesh(start_position: Vector3, end_position: Vector3, color: Color) -> ImmediateMesh:
 	var material := _make_material(color, true)
 	var mesh := ImmediateMesh.new()
 	mesh.surface_begin(Mesh.PRIMITIVE_LINES, material)
 	mesh.surface_add_vertex(start_position)
 	mesh.surface_add_vertex(end_position)
 	mesh.surface_end()
-	var instance := MeshInstance3D.new()
-	instance.name = node_name
-	instance.mesh = mesh
-	parent.add_child(instance)
+	return mesh
 
 
 func _make_box_mesh(size: Vector3) -> BoxMesh:
@@ -5039,6 +6292,23 @@ func _resolve_tile_asset_type_id(object_type_id: String, type_id: String) -> Str
 		return normalized_type
 	var entry: Dictionary = Dictionary(tile_catalog.call("get_type", normalized_type)) if tile_catalog.has_method("get_type") else {}
 	if not String(entry.get("texture_path", "")).strip_edges().is_empty():
+		return normalized_type
+	return ""
+
+
+func _resolve_structure_tile_asset_type_id(type_id: String) -> String:
+	var normalized_type: String = type_id.strip_edges().to_lower()
+	if normalized_type.is_empty() or normalized_type == "ground_flat":
+		return ""
+	var tile_catalog = _get_tile_catalog()
+	if tile_catalog != null and tile_catalog.has_method("is_structure_layer_type") and bool(tile_catalog.call("is_structure_layer_type", normalized_type)):
+		return normalized_type
+	for prefix in ["wall_", "rock_", "cliff_", "slope_"]:
+		if normalized_type.begins_with(prefix):
+			return normalized_type
+	var mapped_entry: Dictionary = _get_model_entry_for_type(normalized_type)
+	var layer_name: String = String(mapped_entry.get("layer", "")).strip_edges().to_lower()
+	if layer_name == "terrain_object" or layer_name == "structure":
 		return normalized_type
 	return ""
 
@@ -5291,6 +6561,13 @@ func _get_asset_model_scale(visual_type_id: String) -> float:
 	return _get_3d_cell_size()
 
 
+func _get_ground_surface_model_scale(visual_type_id: String) -> float:
+	var mapped_entry: Dictionary = _get_model_entry_for_type(visual_type_id)
+	if not mapped_entry.is_empty() and mapped_entry.has("scale"):
+		return float(mapped_entry.get("scale", _get_3d_cell_size()))
+	return _get_3d_cell_size()
+
+
 func _get_asset_texture_pixel_size(visual_type_id: String) -> float:
 	var normalized: String = visual_type_id.strip_edges().to_lower()
 	if normalized.begins_with("technik_satellite"):
@@ -5304,9 +6581,22 @@ func _get_asset_texture_pixel_size(visual_type_id: String) -> float:
 	return TEXTURE_CARD_PIXEL_SIZE
 
 
+func _get_ground_surface_top_y_offset(visual_type_id: String) -> float:
+	var mapped_entry: Dictionary = _get_model_entry_for_type(visual_type_id)
+	if mapped_entry.is_empty():
+		return 0.0
+	var layer: String = String(mapped_entry.get("layer", "")).strip_edges().to_lower()
+	if layer != "terrain_surface" and layer != "terrain":
+		return 0.0
+	return float(mapped_entry.get("y_offset", 0.0))
+
+
 func _get_asset_y_offset(visual_type_id: String) -> float:
 	var mapped_entry: Dictionary = _get_model_entry_for_type(visual_type_id)
 	if not mapped_entry.is_empty():
+		var layer: String = String(mapped_entry.get("layer", "")).strip_edges().to_lower()
+		if layer == "terrain_surface" or layer == "terrain":
+			return float(mapped_entry.get("y_offset", 0.0))
 		var grid: Dictionary = Dictionary(_get_terrain_3d_mapping().get("grid", {}))
 		return float(grid.get("object_y_offset", 0.04)) + float(mapped_entry.get("y_offset", 0.0))
 	var normalized: String = visual_type_id.strip_edges().to_lower()

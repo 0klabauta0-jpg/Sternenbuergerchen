@@ -9,6 +9,8 @@ var callsign: String = ""
 var role_id: String = ""
 var role_name: String = ""
 var roster_role_category: String = ""
+var roster_seed_index: int = -1
+var player_profile_id: String = ""
 var specialty_text: String = ""
 var primary_specialty: String = ""
 var secondary_specialty: String = ""
@@ -74,6 +76,8 @@ func to_dict() -> Dictionary:
 		"role_id": role_id,
 		"role_name": role_name,
 		"roster_role_category": roster_role_category,
+		"roster_seed_index": roster_seed_index,
+		"player_profile_id": player_profile_id,
 		"specialty_text": specialty_text,
 		"primary_specialty": primary_specialty,
 		"secondary_specialty": secondary_specialty,
@@ -130,6 +134,8 @@ func _apply_dict(data: Dictionary) -> void:
 	role_id = String(data.get("role_id", "")).strip_edges().to_lower()
 	role_name = String(data.get("role_name", "")).strip_edges()
 	roster_role_category = String(data.get("roster_role_category", "")).strip_edges().to_lower()
+	roster_seed_index = int(data.get("roster_seed_index", -1))
+	player_profile_id = String(data.get("player_profile_id", "")).strip_edges()
 	specialty_text = String(data.get("specialty_text", "")).strip_edges()
 	primary_specialty = String(data.get("primary_specialty", specialty_text)).strip_edges()
 	secondary_specialty = String(data.get("secondary_specialty", "")).strip_edges()

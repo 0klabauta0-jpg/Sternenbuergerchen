@@ -4,6 +4,8 @@ extends Control
 const PERSONNEL_EVENT_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/personnel_event_model.gd")
 const AIR_ASSET_RECOVERY_STATE_SCRIPT: GDScript = preload("res://scripts/meta/air_asset_recovery_state.gd")
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
+const BACKGROUND_IMAGE_CATALOG_SCRIPT: GDScript = preload("res://scripts/assets/background_image_catalog.gd")
+const BACKGROUND_ID: String = "debrief_desert_explosion_base"
 
 signal return_to_fob_requested()
 signal return_to_homebase_requested()
@@ -12,6 +14,7 @@ var _mission_result: Dictionary = {}
 
 
 func _ready() -> void:
+	_apply_background_texture()
 	var to_fob_button: Button = get_node("Panel/Margin/VBox/ButtonRow/ReturnToFOBButton")
 	var to_homebase_button: Button = get_node("Panel/Margin/VBox/ButtonRow/ReturnToHomebaseButton")
 	if not to_fob_button.pressed.is_connected(_on_return_to_fob_pressed):
@@ -34,19 +37,43 @@ func get_mission_result() -> Dictionary:
 	return _mission_result.duplicate(true)
 
 
+func get_background_catalog_snapshot() -> Dictionary:
+	var entry: Dictionary = Dictionary(BACKGROUND_IMAGE_CATALOG_SCRIPT.call("get_entry", BACKGROUND_ID))
+	var background := get_node_or_null("Background") as TextureRect
+	var shade := get_node_or_null("BackgroundShade") as ColorRect
+	var panel := get_node_or_null("Panel") as PanelContainer
+	var panel_style: StyleBoxFlat = null
+	if panel != null:
+		panel_style = panel.get_theme_stylebox("panel") as StyleBoxFlat
+	return {
+		"background_id": BACKGROUND_ID,
+		"path": String(entry.get("res_path", "")),
+		"entry": entry,
+		"uses_catalog": not entry.is_empty(),
+		"has_texture": background != null and background.texture != null,
+		"stretch_mode": int(background.stretch_mode) if background != null else -1,
+		"shade_alpha": shade.color.a if shade != null else 0.0,
+		"panel_alpha": panel_style.bg_color.a if panel_style != null else 0.0,
+		"visual_only": true,
+	}
+
+
 func _render_result() -> void:
 	var result_label: Label = get_node("Panel/Margin/VBox/ResultLabel")
 	var team_state_label: Label = get_node("Panel/Margin/VBox/TeamStateLabel")
 	var air_asset_label: Label = _ensure_air_asset_events_label()
+	var ftl_feedback_label: Label = _ensure_ftl_feedback_label()
 	var character_events_label: Label = _ensure_character_events_label()
 	var personnel_events_label: Label = _ensure_personnel_events_label()
 	_apply_help_id(character_events_label, "debrief.character_updates")
 	_apply_help_id(air_asset_label, "fob.flightdeck")
+	_apply_help_id(ftl_feedback_label, "character_sheet.ftl_tactical_impact")
 
 	if _mission_result.is_empty():
 		result_label.text = "Mission result: pending"
 		team_state_label.text = "Returned team state: unavailable"
 		air_asset_label.text = "Air asset: pending"
+		ftl_feedback_label.text = "FTL feedback: pending"
 		character_events_label.text = "Character updates: pending"
 		personnel_events_label.text = "Personnel updates: pending"
 		_apply_readability_style()
@@ -89,6 +116,12 @@ func _render_result() -> void:
 		air_asset_label.text = "Air asset: no loss reported"
 	else:
 		air_asset_label.text = String(AIR_ASSET_RECOVERY_STATE_SCRIPT.call("build_debrief_summary", recovery_state))
+
+	var ftl_feedback_lines: PackedStringArray = _build_ftl_feedback_lines(Array(_mission_result.get("fireteam_tactical_debrief", [])))
+	if ftl_feedback_lines.is_empty():
+		ftl_feedback_label.text = "FTL feedback: unavailable"
+	else:
+		ftl_feedback_label.text = "FTL feedback:\n%s" % "\n".join(ftl_feedback_lines)
 
 	var character_event_lines: PackedStringArray = []
 	for event_variant in Array(_mission_result.get("character_events", [])):
@@ -157,22 +190,47 @@ func _ensure_air_asset_events_label() -> Label:
 	return label
 
 
+func _ensure_ftl_feedback_label() -> Label:
+	var vbox := get_node("Panel/Margin/VBox") as VBoxContainer
+	var existing := vbox.get_node_or_null("FTLFeedbackLabel") as Label
+	if existing != null:
+		return existing
+	var label := Label.new()
+	label.name = "FTLFeedbackLabel"
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var character_label := vbox.get_node_or_null("CharacterEventsLabel")
+	var button_row := vbox.get_node_or_null("ButtonRow")
+	if character_label != null:
+		vbox.add_child(label)
+		vbox.move_child(label, character_label.get_index())
+	elif button_row != null:
+		vbox.add_child(label)
+		vbox.move_child(label, button_row.get_index())
+	else:
+		vbox.add_child(label)
+	return label
+
+
 func _apply_contextual_help_ids() -> void:
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/CharacterEventsLabel") as Control, "debrief.character_updates")
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/AirAssetEventsLabel") as Control, "fob.flightdeck")
+	_apply_help_id(get_node_or_null("Panel/Margin/VBox/FTLFeedbackLabel") as Control, "character_sheet.ftl_tactical_impact")
 
 
 func _apply_readability_style() -> void:
 	var panel := get_node_or_null("Panel") as PanelContainer
 	if panel != null:
 		META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "frame")
-		panel.set_meta("debrief_contrast_policy", "high_contrast_dark_panel")
+		_apply_debrief_panel_style(panel)
+		panel.set_meta("debrief_contrast_policy", "translucent_high_contrast_panel")
+		panel.set_meta("background_readability_policy", "dimmed_catalog_background")
 
 	META_UI_SKIN_SCRIPT.style_header_label(get_node_or_null("Panel/Margin/VBox/TitleLabel"), 18)
 	for path in [
 		"Panel/Margin/VBox/ResultLabel",
 		"Panel/Margin/VBox/TeamStateLabel",
 		"Panel/Margin/VBox/AirAssetEventsLabel",
+		"Panel/Margin/VBox/FTLFeedbackLabel",
 		"Panel/Margin/VBox/CharacterEventsLabel",
 		"Panel/Margin/VBox/PersonnelEventsLabel",
 	]:
@@ -197,6 +255,125 @@ func _apply_help_id(control: Control, help_id: String) -> void:
 		return
 	control.set_meta("help_id", normalized_id)
 	control.tooltip_text = ""
+
+
+func _build_ftl_feedback_lines(entries: Array) -> PackedStringArray:
+	var lines: PackedStringArray = PackedStringArray()
+	for entry_variant in entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var fireteam_id: String = String(entry.get("fireteam_id", "")).strip_edges().to_upper()
+		if fireteam_id.is_empty():
+			fireteam_id = "TEAM"
+		var reaction_delay: float = maxf(float(entry.get("reaction_delay_seconds", 0.0)), 0.0)
+		var plan_quality: float = clampf(float(entry.get("plan_quality", 0.5)), 0.0, 1.0)
+		var tempo_delta: int = int(round((clampf(float(entry.get("tempo_modifier", 1.0)), 0.0, 2.0) - 1.0) * 100.0))
+		var contact_count: int = maxi(int(entry.get("contact_report_count", 0)), 0)
+		var report_quality: float = clampf(float(entry.get("contact_report_quality", 0.5)), 0.0, 1.0)
+		var morale: float = clampf(float(entry.get("morale", 0.5)), 0.0, 1.0)
+		var frustration: float = clampf(float(entry.get("frustration", 0.0)), 0.0, 1.0)
+		lines.append("%s: Reaktion %.2fs | Plan %s | Tempo %+d%% | Kontakte %d (Meldung %s) | Moral %s" % [
+			fireteam_id,
+			reaction_delay,
+			_format_debrief_quality_bucket(plan_quality),
+			tempo_delta,
+			contact_count,
+			_format_contact_report_quality_bucket(report_quality),
+			_format_debrief_morale_bucket(morale, frustration),
+		])
+		if lines.size() >= 4:
+			break
+	return lines
+
+
+func _format_debrief_quality_bucket(value: float) -> String:
+	if value >= 0.66:
+		return "stark"
+	if value >= 0.42:
+		return "solide"
+	return "roh"
+
+
+func _format_contact_report_quality_bucket(value: float) -> String:
+	if value >= 0.70:
+		return "hoch"
+	if value >= 0.42:
+		return "mittel"
+	return "niedrig"
+
+
+func _format_debrief_morale_bucket(morale: float, frustration: float) -> String:
+	if morale < 0.35 or frustration >= 0.68:
+		return "kritisch"
+	if morale < 0.48 or frustration >= 0.46:
+		return "sinkt"
+	if morale >= 0.64 and frustration <= 0.28:
+		return "stabil"
+	return "ruhig"
+
+
+func _apply_background_texture() -> void:
+	var nodes: Dictionary = _ensure_background_nodes()
+	var background := nodes.get("background") as TextureRect
+	var shade := nodes.get("shade") as ColorRect
+	var result: Dictionary = Dictionary(BACKGROUND_IMAGE_CATALOG_SCRIPT.call("apply_to_texture_rect", background, BACKGROUND_ID))
+	var entry: Dictionary = Dictionary(result.get("entry", BACKGROUND_IMAGE_CATALOG_SCRIPT.call("get_entry", BACKGROUND_ID)))
+	if shade != null:
+		var dim_strength: float = clampf(float(entry.get("dim_strength", 0.62)), 0.0, 0.95)
+		shade.color = Color(0.015, 0.027, 0.033, dim_strength)
+		shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if background != null:
+		background.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		background.set_meta("background_id", BACKGROUND_ID)
+		background.set_meta("visual_only", true)
+
+
+func _ensure_background_nodes() -> Dictionary:
+	var background := get_node_or_null("Background") as TextureRect
+	if background == null:
+		background = TextureRect.new()
+		background.name = "Background"
+		add_child(background)
+		move_child(background, 0)
+	background.set_anchors_preset(Control.PRESET_FULL_RECT)
+	background.offset_left = 0.0
+	background.offset_top = 0.0
+	background.offset_right = 0.0
+	background.offset_bottom = 0.0
+	background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	background.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	var shade := get_node_or_null("BackgroundShade") as ColorRect
+	if shade == null:
+		shade = ColorRect.new()
+		shade.name = "BackgroundShade"
+		add_child(shade)
+		move_child(shade, min(1, get_child_count() - 1))
+	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	shade.offset_left = 0.0
+	shade.offset_top = 0.0
+	shade.offset_right = 0.0
+	shade.offset_bottom = 0.0
+	return {"background": background, "shade": shade}
+
+
+func _apply_debrief_panel_style(panel: PanelContainer) -> void:
+	var stylebox := StyleBoxFlat.new()
+	stylebox.bg_color = Color(0.145, 0.176, 0.200, 0.58)
+	stylebox.border_color = Color(0.302, 0.353, 0.388, 0.82)
+	stylebox.border_width_left = 1
+	stylebox.border_width_top = 1
+	stylebox.border_width_right = 1
+	stylebox.border_width_bottom = 1
+	stylebox.corner_radius_top_left = 6
+	stylebox.corner_radius_top_right = 6
+	stylebox.corner_radius_bottom_left = 6
+	stylebox.corner_radius_bottom_right = 6
+	stylebox.content_margin_left = 14
+	stylebox.content_margin_top = 12
+	stylebox.content_margin_right = 14
+	stylebox.content_margin_bottom = 12
+	panel.add_theme_stylebox_override("panel", stylebox)
 
 
 func _ensure_personnel_events_label() -> Label:

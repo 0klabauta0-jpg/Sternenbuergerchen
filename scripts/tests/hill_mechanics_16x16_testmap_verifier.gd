@@ -323,7 +323,8 @@ func _surface_visuals_are_top_anchored(entries: Array) -> bool:
 		var surface_y: float = float(entry.get("surface_y", 0.0))
 		var top_y: float = float(entry.get("visual_top_y", surface_y))
 		var bottom_y: float = float(entry.get("visual_bottom_y", surface_y))
-		if absf(top_y - surface_y) > 0.002:
+		var expected_top_y: float = surface_y + float(entry.get("surface_top_y_offset", 0.0))
+		if absf(top_y - expected_top_y) > 0.002:
 			return false
 		if bottom_y > surface_y + 0.001:
 			return false

@@ -3,6 +3,8 @@ extends RefCounted
 
 const DEFAULT_MAX_RANGE: float = 320.0
 
+var _los_step_buffer: Array[Vector2i] = []
+
 
 func has_line_of_sight_between_points(
 	source_position: Vector2,
@@ -59,7 +61,8 @@ func has_line_of_sight_with_terrain(
 	var target_grid: Vector2i = terrain_registry.call("world_to_grid", target_position)
 	var source_height: int = int(terrain_registry.call("get_height_at_world", source_position))
 	var target_height: int = int(terrain_registry.call("get_height_at_world", target_position))
-	for stepped_grid in _build_grid_line(source_grid, target_grid):
+	_build_grid_line_into(source_grid, target_grid, _los_step_buffer)
+	for stepped_grid in _los_step_buffer:
 		if stepped_grid == source_grid or stepped_grid == target_grid:
 			continue
 
@@ -76,11 +79,17 @@ func has_line_of_sight_with_terrain(
 
 func _build_grid_line(source_grid: Vector2i, target_grid: Vector2i) -> Array[Vector2i]:
 	var stepped_grids: Array[Vector2i] = []
+	_build_grid_line_into(source_grid, target_grid, stepped_grids)
+	return stepped_grids
+
+
+func _build_grid_line_into(source_grid: Vector2i, target_grid: Vector2i, out: Array[Vector2i]) -> void:
+	out.clear()
 	var delta: Vector2i = target_grid - source_grid
 	var step_count: int = maxi(abs(delta.x), abs(delta.y))
 	if step_count <= 0:
-		stepped_grids.append(source_grid)
-		return stepped_grids
+		out.append(source_grid)
+		return
 
 	var last_grid: Vector2i = Vector2i(2147483647, 2147483647)
 	for step_index in range(step_count + 1):
@@ -92,7 +101,5 @@ func _build_grid_line(source_grid: Vector2i, target_grid: Vector2i) -> Array[Vec
 		if stepped_grid == last_grid:
 			continue
 
-		stepped_grids.append(stepped_grid)
+		out.append(stepped_grid)
 		last_grid = stepped_grid
-
-	return stepped_grids

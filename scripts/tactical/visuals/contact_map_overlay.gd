@@ -51,6 +51,11 @@ func _draw() -> void:
 			_:
 				_draw_enemy_icon(position, fill_color)
 				draw_arc(position, ICON_RADIUS + 1.5, 0.0, TAU, 18, edge_color, 2.0)
+		var enemy_profile_label: String = String(contact.get("enemy_profile_label", "")).strip_edges()
+		if bool(contact.get("enemy_profile_revealed", false)) and not enemy_profile_label.is_empty():
+			var fallback_font: Font = ThemeDB.fallback_font
+			if fallback_font != null:
+				draw_string(fallback_font, position + Vector2(14.0, -10.0), enemy_profile_label.to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1.0, 10, Color(1.0, 0.82, 0.38, 0.95))
 
 
 func _draw_enemy_icon(position: Vector2, fill_color: Color) -> void:

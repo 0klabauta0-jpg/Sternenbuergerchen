@@ -22,8 +22,8 @@ var spawn_positions: Dictionary = {}
 var _pending_respawns: Dictionary = {}
 
 
-func get_respawn_time() -> float:
-	match respawn_type:
+func get_respawn_time(spawn_type: String = "") -> float:
+	match _normalize_respawn_type(spawn_type):
 		"fob":
 			return RESPAWN_TIME_FOB
 		"homebase":
@@ -57,6 +57,19 @@ func get_pending_respawns() -> Dictionary:
 	return pending_copy
 
 
+func get_pending_respawn_details() -> Dictionary:
+	var pending_copy: Dictionary = {}
+	for unit_id in _pending_respawns:
+		var entry: Dictionary = _pending_respawns[unit_id]
+		pending_copy[unit_id] = {
+			"time_remaining": float(entry.get("time_remaining", 0.0)),
+			"team_id": String(entry.get("team_id", "")),
+			"spawn_type": String(entry.get("spawn_type", _normalize_respawn_type(""))),
+			"respawn_time": float(entry.get("respawn_time", get_respawn_time(String(entry.get("spawn_type", ""))))),
+		}
+	return pending_copy
+
+
 func get_remaining_time(unit_id: String) -> float:
 	if unit_id.is_empty() or not _pending_respawns.has(unit_id):
 		return 0.0
@@ -65,7 +78,7 @@ func get_remaining_time(unit_id: String) -> float:
 	return maxf(float(entry.get("time_remaining", 0.0)), 0.0)
 
 
-func request_respawn(unit_id: String, team_id: String) -> bool:
+func request_respawn(unit_id: String, team_id: String, spawn_type: String = "") -> bool:
 	if unit_id.is_empty() or team_id.is_empty():
 		return false
 
@@ -79,10 +92,13 @@ func request_respawn(unit_id: String, team_id: String) -> bool:
 	if unit.has_method("begin_respawn"):
 		unit.call("begin_respawn")
 
-	var respawn_time: float = get_respawn_time()
+	var normalized_spawn_type: String = _normalize_respawn_type(spawn_type)
+	var respawn_time: float = get_respawn_time(normalized_spawn_type)
 	_pending_respawns[unit_id] = {
 		"time_remaining": respawn_time,
 		"team_id": team_id,
+		"spawn_type": normalized_spawn_type,
+		"respawn_time": respawn_time,
 	}
 	unit_respawn_started.emit(unit_id, respawn_time)
 	return true
@@ -134,6 +150,17 @@ func _resolve_unit(unit_id: String):
 		return null
 
 	return unit_registry.call("get_unit", unit_id)
+
+
+func _normalize_respawn_type(value: String) -> String:
+	var normalized: String = value.strip_edges().to_lower()
+	if normalized.is_empty():
+		normalized = respawn_type.strip_edges().to_lower()
+	match normalized:
+		"fob", "homebase":
+			return normalized
+		_:
+			return "rover"
 
 
 func _should_process_locally() -> bool:

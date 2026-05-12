@@ -15,6 +15,8 @@ const EVENT_OBJECTIVE_PROGRESS: String = "objective_progress"
 const EVENT_OBJECTIVE_COMPLETE: String = "objective_complete"
 const EVENT_AIR_ASSET_THREATENED: String = "air_asset_threatened"
 const EVENT_AIR_ASSET_DESTROYED: String = "air_asset_destroyed"
+const EVENT_BOUNDING_ROTATION: String = "bounding_rotation"
+const EVENT_FRIENDLY_FIRE: String = "friendly_fire"
 
 const CHANNEL_SELECTED_FIRETEAM: String = "selected_fireteam"
 const CHANNEL_MISSION_CONTROL: String = "mission_control"
@@ -156,6 +158,10 @@ static func normalize_event_type(value: String) -> String:
 			return EVENT_AIR_ASSET_THREATENED
 		"air_destroyed", "air_asset_destroyed":
 			return EVENT_AIR_ASSET_DESTROYED
+		"bounding", "bound_rotation", "bounding_rotation", "role_rotation":
+			return EVENT_BOUNDING_ROTATION
+		"friendly_fire", "blue_on_blue", "misidentification":
+			return EVENT_FRIENDLY_FIRE
 		_:
 			return EVENT_ORDER_RECEIVED if normalized.is_empty() else normalized
 
@@ -198,10 +204,12 @@ static func normalize_channel(value: String) -> String:
 
 static func default_channels_for_event_type(event_type: String) -> PackedStringArray:
 	match normalize_event_type(event_type):
-		EVENT_CONTACT_REPORT, EVENT_CANNOT_EXECUTE, EVENT_AIR_ASSET_THREATENED, EVENT_AIR_ASSET_DESTROYED:
+		EVENT_CONTACT_REPORT, EVENT_CANNOT_EXECUTE, EVENT_NEEDS_ORDERS, EVENT_AIR_ASSET_THREATENED, EVENT_AIR_ASSET_DESTROYED, EVENT_FRIENDLY_FIRE:
 			return PackedStringArray([CHANNEL_SELECTED_FIRETEAM, CHANNEL_MISSION_CONTROL, CHANNEL_MAP_MARKER, CHANNEL_FTL_BUBBLE, CHANNEL_AUDIO_BLIP])
 		EVENT_PLAN_ROLE_ASSIGNED, EVENT_PHASE_STARTED, EVENT_PHASE_COMPLETED, EVENT_BREAKOUT_ADAPTATION:
 			return PackedStringArray([CHANNEL_SELECTED_FIRETEAM, CHANNEL_MISSION_CONTROL, CHANNEL_MAP_MARKER, CHANNEL_FTL_BUBBLE])
+		EVENT_BOUNDING_ROTATION:
+			return PackedStringArray([CHANNEL_SELECTED_FIRETEAM, CHANNEL_MISSION_CONTROL, CHANNEL_MAP_MARKER, CHANNEL_FTL_BUBBLE, CHANNEL_AUDIO_BLIP])
 		EVENT_OBJECTIVE_PROGRESS, EVENT_OBJECTIVE_COMPLETE:
 			return PackedStringArray([CHANNEL_MISSION_CONTROL, CHANNEL_MAP_MARKER, CHANNEL_FTL_BUBBLE])
 		_:
@@ -210,11 +218,11 @@ static func default_channels_for_event_type(event_type: String) -> PackedStringA
 
 static func default_priority_for_event_type(event_type: String) -> int:
 	match normalize_event_type(event_type):
-		EVENT_AIR_ASSET_DESTROYED, EVENT_CANNOT_EXECUTE:
+		EVENT_AIR_ASSET_DESTROYED, EVENT_CANNOT_EXECUTE, EVENT_FRIENDLY_FIRE:
 			return PRIORITY_CRITICAL
-		EVENT_CONTACT_REPORT, EVENT_AIR_ASSET_THREATENED, EVENT_BREAKOUT_ADAPTATION:
+		EVENT_CONTACT_REPORT, EVENT_NEEDS_ORDERS, EVENT_AIR_ASSET_THREATENED, EVENT_BREAKOUT_ADAPTATION:
 			return PRIORITY_HIGH
-		EVENT_PLAN_ROLE_ASSIGNED, EVENT_PHASE_STARTED, EVENT_PHASE_COMPLETED, EVENT_OBJECTIVE_COMPLETE:
+		EVENT_PLAN_ROLE_ASSIGNED, EVENT_PHASE_STARTED, EVENT_PHASE_COMPLETED, EVENT_OBJECTIVE_COMPLETE, EVENT_BOUNDING_ROTATION:
 			return PRIORITY_NORMAL
 		_:
 			return PRIORITY_LOW
@@ -222,9 +230,9 @@ static func default_priority_for_event_type(event_type: String) -> int:
 
 static func default_duration_for_event_type(event_type: String) -> float:
 	match normalize_event_type(event_type):
-		EVENT_AIR_ASSET_DESTROYED, EVENT_CANNOT_EXECUTE:
+		EVENT_AIR_ASSET_DESTROYED, EVENT_CANNOT_EXECUTE, EVENT_FRIENDLY_FIRE:
 			return 3.2
-		EVENT_CONTACT_REPORT, EVENT_AIR_ASSET_THREATENED, EVENT_BREAKOUT_ADAPTATION:
+		EVENT_CONTACT_REPORT, EVENT_NEEDS_ORDERS, EVENT_AIR_ASSET_THREATENED, EVENT_BREAKOUT_ADAPTATION:
 			return 2.6
 		_:
 			return 2.0
@@ -232,7 +240,7 @@ static func default_duration_for_event_type(event_type: String) -> float:
 
 static func default_feedback_action_for_event_type(event_type: String) -> String:
 	match normalize_event_type(event_type):
-		EVENT_CONTACT_REPORT, EVENT_AIR_ASSET_THREATENED, EVENT_AIR_ASSET_DESTROYED:
+		EVENT_CONTACT_REPORT, EVENT_AIR_ASSET_THREATENED, EVENT_AIR_ASSET_DESTROYED, EVENT_FRIENDLY_FIRE:
 			return "engage"
 		EVENT_CANNOT_EXECUTE, EVENT_NEEDS_ORDERS:
 			return "move"
@@ -240,6 +248,8 @@ static func default_feedback_action_for_event_type(event_type: String) -> String
 			return "take"
 		EVENT_BREAKOUT_ADAPTATION:
 			return "flank"
+		EVENT_BOUNDING_ROTATION:
+			return "go"
 		EVENT_PHASE_STARTED:
 			return "go"
 		_:
@@ -250,12 +260,14 @@ static func default_feedback_state_for_event_type(event_type: String) -> String:
 	match normalize_event_type(event_type):
 		EVENT_CANNOT_EXECUTE, EVENT_NEEDS_ORDERS:
 			return "blocked"
-		EVENT_CONTACT_REPORT, EVENT_AIR_ASSET_THREATENED, EVENT_AIR_ASSET_DESTROYED:
+		EVENT_CONTACT_REPORT, EVENT_AIR_ASSET_THREATENED, EVENT_AIR_ASSET_DESTROYED, EVENT_FRIENDLY_FIRE:
 			return "contact"
 		EVENT_OBJECTIVE_COMPLETE, EVENT_PHASE_COMPLETED:
 			return "done"
 		EVENT_BREAKOUT_ADAPTATION:
 			return "running"
+		EVENT_BOUNDING_ROTATION:
+			return "cover"
 		_:
 			return "accepted"
 

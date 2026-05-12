@@ -150,7 +150,7 @@ func _same_directory(left_path: String, right_path: String) -> bool:
 
 
 func _contains_forbidden_local_path(text: String) -> bool:
-	for pattern in ["C:/Users/", "C:" + "\\Users" + "\\", "file:///C:/Users/", "%USERPROFILE%"]:
+	for pattern in ["C:" + "/" + "Users" + "/", "C:" + "\\Users" + "\\", "file:///" + "C:" + "/" + "Users" + "/", "%USERPROFILE%"]:
 		if text.contains(pattern):
 			return true
 	return false

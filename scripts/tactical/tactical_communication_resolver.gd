@@ -11,6 +11,9 @@ const CRITICAL_COOLDOWN_MSEC: int = 450
 const DEFAULT_MAX_EVENTS: int = 5
 const DEFAULT_MAX_PER_CHANNEL: int = 3
 
+static var _copy_catalog_cache: Dictionary = {}
+static var _copy_catalog_cache_loaded: bool = false
+
 var _last_emit_msec_by_key: Dictionary = {}
 
 
@@ -104,6 +107,11 @@ func resolve_events(raw_events: Array, options: Dictionary = {}) -> Array:
 
 func reset_cooldowns() -> void:
 	_last_emit_msec_by_key.clear()
+
+
+static func clear_copy_catalog_cache() -> void:
+	_copy_catalog_cache.clear()
+	_copy_catalog_cache_loaded = false
 
 
 static func build_events_for_multi_fireteam_plan(plan: Dictionary, options: Dictionary = {}) -> Array:
@@ -325,6 +333,9 @@ static func _copy_entry_for_type(event_type: String) -> Dictionary:
 
 
 static func _load_copy_catalog() -> Dictionary:
+	if _copy_catalog_cache_loaded:
+		return _copy_catalog_cache.duplicate(true)
+	_copy_catalog_cache_loaded = true
 	if not FileAccess.file_exists(COPY_CATALOG_PATH):
 		return {}
 	var file := FileAccess.open(COPY_CATALOG_PATH, FileAccess.READ)
@@ -333,7 +344,8 @@ static func _load_copy_catalog() -> Dictionary:
 	var text: String = file.get_as_text()
 	file.close()
 	var parsed = JSON.parse_string(text)
-	return Dictionary(parsed) if typeof(parsed) == TYPE_DICTIONARY else {}
+	_copy_catalog_cache = Dictionary(parsed) if typeof(parsed) == TYPE_DICTIONARY else {}
+	return _copy_catalog_cache.duplicate(true)
 
 
 static func _format_copy(template: String, context: Dictionary, skill_tier: String) -> String:

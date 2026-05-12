@@ -49,6 +49,7 @@ const MISSION_RESULT_KEYS: PackedStringArray = [
 	"objective_captured",
 	"duration_seconds",
 	"team_states",
+	"fireteam_tactical_debrief",
 ]
 
 const READ_ONLY_UI_EVENT_KEYS: PackedStringArray = [

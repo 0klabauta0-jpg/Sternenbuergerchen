@@ -10,6 +10,8 @@ const COMMAND_BUTTON_PATHS := [
 	"TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton",
 	"TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton",
 	"TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton",
+	"TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/DeleteOrderButton",
+	"TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/SortCommandMatrixButton",
 ]
 
 const APPROACH_BUTTON_PATHS := [
@@ -88,10 +90,20 @@ func _test_mission_hud_buttons_keep_existing_paths() -> void:
 
 	var command_grid := scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid") as GridContainer
 	_assert(command_grid != null and int(command_grid.columns) == 5, "#16 command matrix uses five equal command columns")
-	_assert(command_grid.get_child_count() >= 20 and int(command_grid.get_meta("command_placeholder_slots", 0)) >= 14, "#16 command matrix exposes reserved same-size command slots")
+	_assert(command_grid.get_child_count() >= 20 and int(command_grid.get_meta("command_placeholder_slots", 0)) >= 10, "#16 command matrix exposes reserved same-size command slots")
 	for slot_index in range(7, 21):
+		if [7, 10, 15, 20].has(slot_index):
+			continue
 		var slot := command_grid.get_node_or_null("CommandSlot%02d" % slot_index) as Button
 		_assert(slot != null and _button_is_square(slot) and bool(slot.get_meta("drop_light_command_placeholder", false)) and slot.disabled, "CommandSlot%02d is a disabled same-size reserve button" % slot_index)
+	var delete_button := command_grid.get_node_or_null("DeleteOrderButton") as Button
+	var sort_button := command_grid.get_node_or_null("SortCommandMatrixButton") as Button
+	var go_button := command_grid.get_node_or_null("GoCommandMatrixButton") as Button
+	var plan_button := command_grid.get_node_or_null("PlanCommandMatrixButton") as Button
+	_assert(delete_button != null and delete_button.get_index() == 6 and _button_is_square(delete_button) and delete_button.pressed.get_connections().size() > 0, "Del lives in #16.7 as an active command matrix button")
+	_assert(sort_button != null and sort_button.get_index() == 9 and _button_is_square(sort_button) and sort_button.pressed.get_connections().size() > 0, "Sort lives in #16.10 as an active command matrix button")
+	_assert(go_button != null and go_button.get_index() == 14 and _button_is_square(go_button) and go_button.pressed.get_connections().size() > 0, "GO lives in #16.15 as an active command matrix button")
+	_assert(plan_button != null and plan_button.get_index() == 19 and _button_is_square(plan_button) and plan_button.pressed.get_connections().size() > 0, "Plan lives in #16.20 as an active command matrix button")
 
 	for path in [
 		"TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton",

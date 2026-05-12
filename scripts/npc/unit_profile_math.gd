@@ -87,15 +87,15 @@ static func build_character_bundle(data: Dictionary) -> Dictionary:
 	var role_id: String = normalize_role_id(String(data.get("role_id", data.get("role_name", "security_guard"))))
 	var core_values: Dictionary = _build_core_values(data, role_id)
 	var communication_values: Dictionary = _build_communication_values(data, core_values, role_id)
-	var platform_values: Dictionary = _build_platform_values(data, core_values, role_id)
-	var mobility: float = _compute_mobility(core_values, platform_values, role_id)
 	var behavior_axes := {
-		"initiative": clampf((float(core_values.get("speed", 0.0)) * 0.40) + (float(core_values.get("awareness", 0.0)) * 0.30) + (float(core_values.get("leadership", 0.0)) * 0.30), 0.0, 1.0),
-		"order_fidelity": clampf((float(core_values.get("discipline", 0.0)) * 0.50) + (float(core_values.get("recognition", 0.0)) * 0.30) + (float(communication_values.get("speech_quality", 0.0)) * 0.20), 0.0, 1.0),
-		"signature_control": clampf((float(core_values.get("stealth", 0.0)) * 0.45) + (float(core_values.get("discipline", 0.0)) * 0.35) + ((1.0 - float(communication_values.get("speech_quantity", 0.0))) * 0.20), 0.0, 1.0),
-		"contact_stability": clampf((float(core_values.get("toughness", 0.0)) * 0.40) + (float(core_values.get("discipline", 0.0)) * 0.35) + (float(core_values.get("awareness", 0.0)) * 0.25), 0.0, 1.0),
-		"autonomy": clampf((float(core_values.get("recognition", 0.0)) * 0.35) + (float(core_values.get("leadership", 0.0)) * 0.35) + (float(core_values.get("discipline", 0.0)) * 0.30), 0.0, 1.0),
+		"initiative": _resolve_behavior_value(data, "initiative", clampf((float(core_values.get("speed", 0.0)) * 0.40) + (float(core_values.get("awareness", 0.0)) * 0.30) + (float(core_values.get("leadership", 0.0)) * 0.30), 0.0, 1.0)),
+		"order_fidelity": _resolve_behavior_value(data, "order_fidelity", clampf((float(core_values.get("discipline", 0.0)) * 0.50) + (float(core_values.get("recognition", 0.0)) * 0.30) + (float(communication_values.get("speech_quality", 0.0)) * 0.20), 0.0, 1.0)),
+		"signature_control": _resolve_behavior_value(data, "signature_control", clampf((float(core_values.get("stealth", 0.0)) * 0.45) + (float(core_values.get("discipline", 0.0)) * 0.35) + ((1.0 - float(communication_values.get("speech_quantity", 0.0))) * 0.20), 0.0, 1.0)),
+		"contact_stability": _resolve_behavior_value(data, "contact_stability", clampf((float(core_values.get("toughness", 0.0)) * 0.40) + (float(core_values.get("discipline", 0.0)) * 0.35) + (float(core_values.get("awareness", 0.0)) * 0.25), 0.0, 1.0)),
+		"autonomy": _resolve_behavior_value(data, "autonomy", clampf((float(core_values.get("recognition", 0.0)) * 0.35) + (float(core_values.get("leadership", 0.0)) * 0.35) + (float(core_values.get("discipline", 0.0)) * 0.30), 0.0, 1.0)),
 	}
+	var platform_values: Dictionary = _build_platform_values(data, core_values, communication_values, behavior_axes, role_id)
+	var mobility: float = _compute_mobility(core_values, platform_values, role_id)
 	var method_scores := {
 		"silent": clampf((float(core_values.get("stealth", 0.0)) * 0.40) + (float(core_values.get("discipline", 0.0)) * 0.30) + (float(core_values.get("awareness", 0.0)) * 0.20) + ((1.0 - float(communication_values.get("speech_quantity", 0.0))) * 0.10), 0.0, 1.0),
 		"rapid": clampf((float(core_values.get("speed", 0.0)) * 0.45) + (float(core_values.get("awareness", 0.0)) * 0.25) + (float(core_values.get("toughness", 0.0)) * 0.20) + (float(communication_values.get("speech_quality", 0.0)) * 0.10), 0.0, 1.0),
@@ -229,13 +229,27 @@ static func _build_communication_values(data: Dictionary, core_values: Dictionar
 	}
 
 
-static func _build_platform_values(data: Dictionary, core_values: Dictionary, role_id: String) -> Dictionary:
-	var base_ground: float = clampf((float(core_values.get("speed", 0.0)) * 0.35) + (float(core_values.get("recognition", 0.0)) * 0.25) + (float(core_values.get("awareness", 0.0)) * 0.20) + _role_bias(role_id, "ground_vehicle_handling"), 0.0, 1.0)
+static func _build_platform_values(data: Dictionary, core_values: Dictionary, communication_values: Dictionary, behavior_axes: Dictionary, role_id: String) -> Dictionary:
+	var speed: float = float(core_values.get("speed", 0.0))
+	var toughness: float = float(core_values.get("toughness", 0.0))
+	var accuracy: float = float(core_values.get("accuracy", 0.0))
+	var awareness: float = float(core_values.get("awareness", 0.0))
+	var recognition: float = float(core_values.get("recognition", 0.0))
+	var discipline: float = float(core_values.get("discipline", 0.0))
+	var speech_quality: float = float(communication_values.get("speech_quality", 0.0))
+	var initiative: float = float(behavior_axes.get("initiative", 0.0))
+	var order_fidelity: float = float(behavior_axes.get("order_fidelity", 0.0))
+	var contact_stability: float = float(behavior_axes.get("contact_stability", 0.0))
+	var autonomy: float = float(behavior_axes.get("autonomy", 0.0))
+	var base_ground: float = clampf((speed * 0.24) + (recognition * 0.18) + (awareness * 0.16) + (discipline * 0.12) + (initiative * 0.16) + (contact_stability * 0.08) + (autonomy * 0.06) + _role_bias(role_id, "ground_vehicle_handling"), 0.0, 1.0)
+	var base_dropship: float = clampf((awareness * 0.18) + (recognition * 0.16) + (discipline * 0.16) + (speed * 0.10) + (speech_quality * 0.12) + (order_fidelity * 0.12) + (contact_stability * 0.10) + (autonomy * 0.06) + _role_bias(role_id, "dropship_piloting"), 0.0, 1.0)
+	var base_freighter: float = clampf((toughness * 0.18) + (recognition * 0.18) + (discipline * 0.18) + (speech_quality * 0.12) + (order_fidelity * 0.14) + (contact_stability * 0.14) + (autonomy * 0.06) + _role_bias(role_id, "freighter_piloting"), 0.0, 1.0)
+	var base_fighter: float = clampf((speed * 0.18) + (accuracy * 0.16) + (awareness * 0.18) + (discipline * 0.12) + (initiative * 0.16) + (order_fidelity * 0.08) + (contact_stability * 0.06) + (autonomy * 0.06) + _role_bias(role_id, "fighter_piloting"), 0.0, 1.0)
 	return {
-		"ground_vehicle_handling": _resolve_platform_value(data, "ground_vehicle_handling", base_ground if role_id == "atv_recon_scout" else NOT_APPLICABLE),
-		"dropship_piloting": _resolve_platform_value(data, "dropship_piloting", 0.70 if role_id == "dropship_pilot" else NOT_APPLICABLE),
-		"freighter_piloting": _resolve_platform_value(data, "freighter_piloting", 0.70 if role_id == "freighter_pilot" else NOT_APPLICABLE),
-		"fighter_piloting": _resolve_platform_value(data, "fighter_piloting", 0.72 if role_id == "fighter_pilot" else NOT_APPLICABLE),
+		"ground_vehicle_handling": _resolve_platform_value(data, "ground_vehicle_handling", base_ground),
+		"dropship_piloting": _resolve_platform_value(data, "dropship_piloting", base_dropship),
+		"freighter_piloting": _resolve_platform_value(data, "freighter_piloting", base_freighter),
+		"fighter_piloting": _resolve_platform_value(data, "fighter_piloting", base_fighter),
 	}
 
 
@@ -315,8 +329,17 @@ static func _resolve_value(data: Dictionary, key: String, fallback: float) -> fl
 	return clampf(fallback, 0.0, 1.0)
 
 
+static func _resolve_behavior_value(data: Dictionary, key: String, fallback: float) -> float:
+	var behavior_axes: Dictionary = Dictionary(data.get("behavior_axes", {}))
+	var raw_value: Variant = behavior_axes.get(key, data.get(key, null))
+	if typeof(raw_value) == TYPE_INT or typeof(raw_value) == TYPE_FLOAT:
+		return clampf(float(raw_value), 0.0, 1.0)
+	return clampf(fallback, 0.0, 1.0)
+
+
 static func _resolve_platform_value(data: Dictionary, key: String, fallback: float) -> float:
-	var raw_value: Variant = data.get(key, null)
+	var platform_values: Dictionary = Dictionary(data.get("platform_values", {}))
+	var raw_value: Variant = platform_values.get(key, data.get(key, null))
 	if typeof(raw_value) == TYPE_INT or typeof(raw_value) == TYPE_FLOAT:
 		return clampf(float(raw_value), NOT_APPLICABLE, 1.0)
 	return fallback
@@ -366,18 +389,24 @@ static func _role_bias(role_id: String, key: String) -> float:
 					return 0.08
 				"speech_quality":
 					return 0.08
+				"dropship_piloting":
+					return 0.16
 		"freighter_pilot":
 			match key:
 				"recognition":
 					return 0.08
 				"discipline":
 					return 0.08
+				"freighter_piloting":
+					return 0.16
 		"fighter_pilot":
 			match key:
 				"awareness":
 					return 0.08
 				"speech_quantity":
 					return 0.04
+				"fighter_piloting":
+					return 0.16
 	return 0.0
 
 

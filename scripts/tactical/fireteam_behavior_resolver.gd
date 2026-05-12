@@ -12,6 +12,13 @@ const MIN_FAIR_PLAN_QUALITY: float = 0.22
 const MAX_FAIR_PLAN_QUALITY: float = 0.88
 const MIN_REACTION_DELAY_SECONDS: float = 0.08
 const MAX_REACTION_DELAY_SECONDS: float = 0.72
+const PROFILE_CACHE_LIMIT: int = 64
+const TEAM_TRAIT_ADJUSTMENT_CACHE_LIMIT: int = 64
+
+static var _profile_cache_by_key: Dictionary = {}
+static var _profile_cache_order: Array = []
+static var _team_trait_adjustments_cache_by_key: Dictionary = {}
+static var _team_trait_adjustments_cache_order: Array = []
 
 
 static func resolve_profile(
@@ -23,6 +30,11 @@ static func resolve_profile(
 	terrain_registry = null,
 	tactical_stance: String = FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL
 ):
+	var cache_key: String = _build_profile_cache_key(fireteam_id, units, preferred_leader, command_type, rough_target_position, terrain_registry, tactical_stance)
+	if not cache_key.is_empty() and _profile_cache_by_key.has(cache_key):
+		var cached_profile: Dictionary = Dictionary(_profile_cache_by_key.get(cache_key, {})).duplicate(true)
+		return FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.call("from_dict", cached_profile)
+
 	var profile = FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.new()
 	profile.fireteam_id = fireteam_id.strip_edges().to_lower()
 	var leader = _resolve_leader(units, preferred_leader)
@@ -32,6 +44,7 @@ static func resolve_profile(
 			"origin_command_type": command_type.strip_edges().to_lower(),
 			"tactical_stance": FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL,
 		}
+		_store_profile_cache(cache_key, profile)
 		return profile
 
 	var leadership: float = _read_skill_value(leader, "get_leadership_skill", 0.3)
@@ -60,10 +73,15 @@ static func resolve_profile(
 	profile.contact_stability = float(execution_profile.get("contact_stability", profile.contact_stability))
 	profile.initiative = float(execution_profile.get("initiative", profile.initiative))
 	profile.execution_label = String(execution_profile.get("execution_label", profile.execution_label))
+	profile.execution_reason = String(execution_profile.get("execution_reason", profile.execution_reason))
+	profile.execution_hint = String(execution_profile.get("execution_hint", profile.execution_hint))
 	var leader_tactical_data: Dictionary = _build_leader_tactical_data(leader, profile.fireteam_id)
 	var team_tactical_context: Dictionary = _build_team_tactical_context(units, leader, profile.fireteam_id, execution_profile)
 	var ftl_tactical_snapshot: Dictionary = build_leader_tactical_skill_snapshot(leader_tactical_data, team_tactical_context)
 	_apply_ftl_tactical_snapshot_to_profile(profile, ftl_tactical_snapshot)
+	execution_profile["execution_label"] = profile.execution_label
+	execution_profile["execution_reason"] = profile.execution_reason
+	execution_profile["execution_hint"] = profile.execution_hint
 
 	var resolved_target_position = null
 	if typeof(rough_target_position) == TYPE_VECTOR2:
@@ -87,7 +105,130 @@ static func resolve_profile(
 		"ftl_tactical_skill": ftl_tactical_snapshot.duplicate(true),
 		"ftl_public_snapshot": build_public_leader_tactical_snapshot(ftl_tactical_snapshot),
 	}
+	_store_profile_cache(cache_key, profile)
 	return profile
+
+
+static func clear_caches() -> void:
+	_profile_cache_by_key.clear()
+	_profile_cache_order.clear()
+	_team_trait_adjustments_cache_by_key.clear()
+	_team_trait_adjustments_cache_order.clear()
+
+
+static func _build_profile_cache_key(
+	fireteam_id: String,
+	units: Array,
+	preferred_leader,
+	command_type: String,
+	rough_target_position,
+	terrain_registry,
+	tactical_stance: String
+) -> String:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return ""
+	var parts: PackedStringArray = PackedStringArray()
+	parts.append(normalized_fireteam_id)
+	parts.append(command_type.strip_edges().to_lower())
+	parts.append(_normalize_tactical_stance(tactical_stance))
+	parts.append(_build_target_cache_fragment(rough_target_position))
+	parts.append(_build_object_cache_fragment(terrain_registry))
+	if preferred_leader != null:
+		parts.append("preferred:%s" % _build_unit_profile_cache_fragment(preferred_leader))
+	var unit_fragments: PackedStringArray = PackedStringArray()
+	for unit in units:
+		unit_fragments.append(_build_unit_profile_cache_fragment(unit))
+	unit_fragments.sort()
+	parts.append("units:%s" % "|".join(unit_fragments))
+	return "||".join(parts)
+
+
+static func _build_target_cache_fragment(value) -> String:
+	if typeof(value) == TYPE_VECTOR2:
+		var position: Vector2 = value
+		return "target:%.1f,%.1f" % [position.x, position.y]
+	return "target:null"
+
+
+static func _build_object_cache_fragment(value) -> String:
+	if value == null:
+		return "object:null"
+	if value is Object:
+		return "object:%d" % int(value.get_instance_id())
+	return "object:%s" % str(value)
+
+
+static func _build_unit_profile_cache_fragment(unit) -> String:
+	if unit == null:
+		return "null"
+	var progression: Dictionary = _read_dictionary_property(unit, "progression")
+	var fragments: PackedStringArray = PackedStringArray()
+	fragments.append(_read_string(unit, "get_unit_id"))
+	fragments.append(_read_string(unit, "get_fireteam_id"))
+	fragments.append(_read_string(unit, "get_vital_state") if unit.has_method("get_vital_state") else "fit")
+	fragments.append("lead:%s" % str(_read_bool_property(unit, "is_fireteam_lead")))
+	if unit is Node2D:
+		var unit_position: Vector2 = (unit as Node2D).global_position
+		fragments.append("position:%.1f,%.1f" % [unit_position.x, unit_position.y])
+	fragments.append("leadership:%.3f" % _read_skill_value(unit, "get_leadership_skill", 0.35))
+	fragments.append("toughness:%.3f" % _read_skill_value(unit, "get_toughness_skill", 0.50))
+	fragments.append("accuracy:%.3f" % _read_skill_value(unit, "get_accuracy_skill", 0.50))
+	fragments.append("speed:%.3f" % _read_skill_value(unit, "get_speed_skill", 0.50))
+	fragments.append("discipline:%.3f" % _read_skill_value(unit, "get_discipline", 0.50))
+	fragments.append("recognition:%.3f" % _read_skill_value(unit, "get_recognition", 0.50))
+	fragments.append("traits:%s" % "|".join(_read_normalized_trait_ids(unit)))
+	fragments.append("progression:%s" % _build_dictionary_cache_fragment(progression))
+	return ",".join(fragments)
+
+
+static func _read_bool_property(target, property_name: String) -> bool:
+	if target == null:
+		return false
+	for property_info in target.get_property_list():
+		if String(Dictionary(property_info).get("name", "")) == property_name:
+			return bool(target.get(property_name))
+	return false
+
+
+static func _build_dictionary_cache_fragment(data: Dictionary) -> String:
+	if data.is_empty():
+		return ""
+	var keys: Array = data.keys()
+	keys.sort()
+	var fragments: PackedStringArray = PackedStringArray()
+	for key_variant in keys:
+		var key: String = String(key_variant)
+		var value = data.get(key_variant)
+		if typeof(value) == TYPE_DICTIONARY:
+			fragments.append("%s={%s}" % [key, _build_dictionary_cache_fragment(Dictionary(value))])
+		elif typeof(value) == TYPE_ARRAY or typeof(value) == TYPE_PACKED_STRING_ARRAY:
+			var value_array: Array = Array(value)
+			var value_fragments: PackedStringArray = PackedStringArray()
+			for item in value_array:
+				if typeof(item) == TYPE_DICTIONARY:
+					value_fragments.append("{%s}" % _build_dictionary_cache_fragment(Dictionary(item)))
+				else:
+					value_fragments.append(str(item))
+			value_fragments.sort()
+			fragments.append("%s=[%s]" % [key, "|".join(value_fragments)])
+		else:
+			fragments.append("%s=%s" % [key, str(value)])
+	return ";".join(fragments)
+
+
+static func _store_profile_cache(cache_key: String, profile) -> void:
+	if cache_key.is_empty() or profile == null:
+		return
+	var profile_dict: Dictionary = profile.to_dict() if profile.has_method("to_dict") else {}
+	if profile_dict.is_empty():
+		return
+	if not _profile_cache_by_key.has(cache_key):
+		_profile_cache_order.append(cache_key)
+	_profile_cache_by_key[cache_key] = profile_dict.duplicate(true)
+	while _profile_cache_order.size() > PROFILE_CACHE_LIMIT:
+		var old_key: String = String(_profile_cache_order.pop_front())
+		_profile_cache_by_key.erase(old_key)
 
 
 static func build_leader_tactical_skill_snapshot(leader_data: Dictionary, team_context: Dictionary = {}) -> Dictionary:
@@ -146,6 +287,9 @@ static func build_leader_tactical_skill_snapshot(leader_data: Dictionary, team_c
 		"discipline": discipline,
 		"initiative": initiative,
 		"team_cohesion": team_cohesion,
+		"morale": morale,
+		"frustration": frustration,
+		"morale_modifier": morale_modifier,
 		"missions_led": missions_led,
 		"plan_quality": plan_quality,
 		"communication_clarity": communication_clarity,
@@ -175,6 +319,9 @@ static func build_skill_factors_from_snapshot(snapshot: Dictionary) -> Dictionar
 		"spacing_quality": clampf(float(snapshot.get("spacing_quality", 0.5)), 0.0, 1.0),
 		"contact_report_quality": clampf(float(snapshot.get("contact_report_quality", 0.5)), 0.0, 1.0),
 		"tempo_modifier": clampf(float(snapshot.get("tempo_modifier", 1.0)), 0.86, 1.14),
+		"morale": clampf(float(snapshot.get("morale", 0.5)), 0.0, 1.0),
+		"frustration": clampf(float(snapshot.get("frustration", 0.0)), 0.0, 1.0),
+		"morale_modifier": clampf(float(snapshot.get("morale_modifier", 0.0)), -0.2, 0.2),
 	}
 
 
@@ -192,6 +339,9 @@ static func build_public_leader_tactical_snapshot(snapshot: Dictionary) -> Dicti
 		"contact_report_quality": clampf(float(snapshot.get("contact_report_quality", 0.5)), 0.0, 1.0),
 		"reaction_delay_seconds": clampf(float(snapshot.get("reaction_delay_seconds", 0.35)), MIN_REACTION_DELAY_SECONDS, MAX_REACTION_DELAY_SECONDS),
 		"tempo_modifier": clampf(float(snapshot.get("tempo_modifier", 1.0)), 0.86, 1.14),
+		"morale": clampf(float(snapshot.get("morale", 0.5)), 0.0, 1.0),
+		"frustration": clampf(float(snapshot.get("frustration", 0.0)), 0.0, 1.0),
+		"morale_modifier": clampf(float(snapshot.get("morale_modifier", 0.0)), -0.2, 0.2),
 		"effect_label": String(snapshot.get("effect_label", "developing_ftl")).strip_edges().to_lower(),
 	}
 	return result
@@ -222,9 +372,14 @@ static func _apply_ftl_tactical_snapshot_to_profile(profile, snapshot: Dictionar
 	profile.contact_stability = clampf((profile.contact_stability * 0.70) + (breakout_judgement * 0.30), 0.0, 1.0)
 	profile.initiative = clampf((profile.initiative * 0.75) + (float(snapshot.get("initiative", profile.initiative)) * 0.25), 0.0, 1.0)
 	profile.cohesion_threshold = clampf(profile.cohesion_threshold * lerpf(1.08, 0.88, spacing_quality), 45.0, 190.0)
-	profile.execution_label = _derive_execution_label(profile.order_fidelity, profile.reaction_delay_seconds, profile.execution_cohesion, profile.execution_fire_discipline)
+	var feedback: Dictionary = _derive_execution_feedback(profile.order_fidelity, profile.reaction_delay_seconds, profile.execution_cohesion, profile.execution_fire_discipline)
+	profile.execution_label = String(feedback.get("label", profile.execution_label))
+	profile.execution_reason = String(feedback.get("reason", profile.execution_reason))
+	profile.execution_hint = String(feedback.get("hint", profile.execution_hint))
 	if communication_clarity < 0.34 and profile.execution_label == "STEADY":
 		profile.execution_label = "COMMS LOW"
+		profile.execution_reason = "communication_low"
+		profile.execution_hint = "FTL communication clarity is low."
 
 
 static func _build_leader_tactical_data(leader, fireteam_id: String) -> Dictionary:
@@ -409,6 +564,7 @@ static func _derive_execution_profile(units: Array, leader, leader_leadership: f
 	var initiative: float = clampf((leader_leadership * 0.36) + (average_speed * 0.30) + (average_accuracy * 0.18) + (average_discipline * 0.10) + (average_toughness * 0.06) + trait_initiative, 0.0, 1.0)
 	var reaction_quality: float = clampf((leader_leadership * 0.58) + (initiative * 0.42), 0.0, 1.0)
 	var reaction_delay_seconds: float = lerpf(0.85, 0.05, reaction_quality)
+	var feedback: Dictionary = _derive_execution_feedback(order_fidelity, reaction_delay_seconds, execution_cohesion, execution_fire_discipline)
 	return {
 		"order_fidelity": order_fidelity,
 		"reaction_delay_seconds": reaction_delay_seconds,
@@ -416,7 +572,9 @@ static func _derive_execution_profile(units: Array, leader, leader_leadership: f
 		"execution_fire_discipline": execution_fire_discipline,
 		"contact_stability": contact_stability,
 		"initiative": initiative,
-		"execution_label": _derive_execution_label(order_fidelity, reaction_delay_seconds, execution_cohesion, execution_fire_discipline),
+		"execution_label": String(feedback.get("label", "STEADY")),
+		"execution_reason": String(feedback.get("reason", "")),
+		"execution_hint": String(feedback.get("hint", "")),
 	}
 
 
@@ -443,6 +601,9 @@ static func _average_skill_value(units: Array, method_name: String, fallback: fl
 
 
 static func _derive_team_trait_adjustments(units: Array, leader_trait_mode: String) -> Dictionary:
+	var cache_key: String = _build_team_trait_adjustments_cache_key(units, leader_trait_mode)
+	if not cache_key.is_empty() and _team_trait_adjustments_cache_by_key.has(cache_key):
+		return Dictionary(_team_trait_adjustments_cache_by_key.get(cache_key, {})).duplicate(true)
 	var adjustments: Dictionary = {
 		"fidelity": 0.0,
 		"cohesion": 0.0,
@@ -487,19 +648,82 @@ static func _derive_team_trait_adjustments(units: Array, leader_trait_mode: Stri
 		adjustments["cohesion"] = float(adjustments["cohesion"]) - 0.035
 	for key in adjustments.keys():
 		adjustments[key] = clampf(float(adjustments[key]) / float(maxi(units.size(), 1)), -0.12, 0.12)
+	_store_team_trait_adjustments_cache(cache_key, adjustments)
 	return adjustments
 
 
+static func _build_team_trait_adjustments_cache_key(units: Array, leader_trait_mode: String) -> String:
+	if units.is_empty():
+		return ""
+	var unit_fragments: PackedStringArray = PackedStringArray()
+	for unit in units:
+		if unit == null:
+			continue
+		unit_fragments.append("%s:%s" % [_read_string(unit, "get_unit_id"), "|".join(_read_normalized_trait_ids(unit))])
+	unit_fragments.sort()
+	if unit_fragments.is_empty():
+		return ""
+	return "%s||%s" % [leader_trait_mode.strip_edges().to_lower(), "||".join(unit_fragments)]
+
+
+static func _store_team_trait_adjustments_cache(cache_key: String, adjustments: Dictionary) -> void:
+	if cache_key.is_empty():
+		return
+	if not _team_trait_adjustments_cache_by_key.has(cache_key):
+		_team_trait_adjustments_cache_order.append(cache_key)
+	_team_trait_adjustments_cache_by_key[cache_key] = adjustments.duplicate(true)
+	while _team_trait_adjustments_cache_order.size() > TEAM_TRAIT_ADJUSTMENT_CACHE_LIMIT:
+		var old_key: String = String(_team_trait_adjustments_cache_order.pop_front())
+		_team_trait_adjustments_cache_by_key.erase(old_key)
+
+
+static func _read_normalized_trait_ids(unit) -> PackedStringArray:
+	var result: PackedStringArray = PackedStringArray()
+	if unit == null or not unit.has_method("get_trait_ids"):
+		return result
+	for trait_id_variant in PackedStringArray(unit.call("get_trait_ids")):
+		var trait_id: String = String(trait_id_variant).strip_edges().to_lower()
+		if trait_id.is_empty():
+			continue
+		result.append(trait_id)
+	result.sort()
+	return result
+
+
 static func _derive_execution_label(order_fidelity: float, reaction_delay_seconds: float, execution_cohesion: float, execution_fire_discipline: float) -> String:
+	return String(_derive_execution_feedback(order_fidelity, reaction_delay_seconds, execution_cohesion, execution_fire_discipline).get("label", "STEADY"))
+
+
+static func _derive_execution_feedback(order_fidelity: float, reaction_delay_seconds: float, execution_cohesion: float, execution_fire_discipline: float) -> Dictionary:
 	if order_fidelity >= 0.74 and execution_cohesion >= 0.68 and reaction_delay_seconds <= 0.28:
-		return "CLEAN EXEC"
+		return {
+			"label": "CLEAN EXEC",
+			"reason": "high_execution_quality",
+			"hint": "Plan quality, cohesion, and reaction timing are strong.",
+		}
 	if execution_fire_discipline < 0.42:
-		return "LOW DISC"
+		return {
+			"label": "LOW DISC",
+			"reason": "fire_discipline_low",
+			"hint": "Fire discipline is low for this order.",
+		}
 	if execution_cohesion < 0.46:
-		return "SCATTER"
+		return {
+			"label": "SCATTER",
+			"reason": "cohesion_low",
+			"hint": "Team cohesion is low, so spacing may break open.",
+		}
 	if reaction_delay_seconds >= 0.52:
-		return "DELAY"
-	return "STEADY"
+		return {
+			"label": "DELAY",
+			"reason": "reaction_delay_high",
+			"hint": "FTL initiative and planning speed are slowing the order.",
+		}
+	return {
+		"label": "STEADY",
+		"reason": "balanced_execution",
+		"hint": "No single execution risk dominates this order.",
+	}
 
 
 static func _derive_advance_style(toughness: float, trait_mode: String) -> String:

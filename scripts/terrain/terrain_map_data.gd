@@ -201,6 +201,9 @@ func save_to_file(path: String) -> Error:
 		var object_type_id: String = String(tile_dict.get("object_type_id", "")).strip_edges()
 		if not object_type_id.is_empty():
 			serialized_tile["object_type_id"] = object_type_id
+		var object_rotation_degrees: float = float(tile_dict.get("object_rotation_degrees", 0.0))
+		if absf(object_rotation_degrees) > 0.001:
+			serialized_tile["object_rotation_degrees"] = object_rotation_degrees
 		json_root["tiles"].append(serialized_tile)
 
 	file.store_string(JSON.stringify(json_root, "\t") + "\n")

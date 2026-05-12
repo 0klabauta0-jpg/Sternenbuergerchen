@@ -7,6 +7,9 @@ const TERRAIN_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/terra
 const FALLBACK_SPACING: float = 42.0
 const ATTACK_APPROACH_STANDOFF: float = 64.0
 const ATTACK_APPROACH_MIN_RADIUS: float = 48.0
+const ATTACK_BUDDY_SPACING: float = 24.0
+const ATTACK_BUDDY_PAIR_SPACING: float = 46.0
+const ATTACK_BUDDY_ROW_SPACING: float = 24.0
 
 
 static func resolve_defend_area(area_order_data, units: Array, leader = null, terrain_registry = null) -> Dictionary:
@@ -234,18 +237,36 @@ static func _build_attack_assignments(members: Array, approach_position: Vector2
 	var lateral: Vector2 = attack_direction.orthogonal().normalized()
 	for member_index in range(members.size()):
 		var member: Dictionary = Dictionary(members[member_index])
-		var row_offset: float = 0.0 if member_index < 2 else FALLBACK_SPACING
-		var lateral_offset: float = 0.0
-		if members.size() > 1:
-			lateral_offset = (float(member_index) - (float(members.size() - 1) * 0.5)) * FALLBACK_SPACING
+		var buddy_slot: Dictionary = _build_attack_buddy_slot(member_index, members.size())
+		var lateral_offset: float = float(buddy_slot.get("lateral_offset", 0.0))
+		var row_offset: float = float(buddy_slot.get("row_offset", 0.0))
 		assignments.append({
 			"unit_id": String(member.get("unit_id", "")),
 			"target_position": approach_position + (lateral * lateral_offset) - (attack_direction * row_offset),
 			"tile_position": Vector2i.ZERO,
 			"cover_score": 0.0,
 			"is_leader": bool(member.get("is_leader", false)),
+			"buddy_pair_index": int(buddy_slot.get("buddy_pair_index", 0)),
+			"buddy_slot_index": int(buddy_slot.get("buddy_slot_index", 0)),
 		})
 	return assignments
+
+
+static func _build_attack_buddy_slot(member_index: int, member_count: int) -> Dictionary:
+	var pair_index: int = int(member_index / 2)
+	var pair_count: int = maxi(ceili(float(member_count) / 2.0), 1)
+	var pair_member_count: int = mini(2, maxi(member_count - (pair_index * 2), 0))
+	var buddy_slot_index: int = member_index % 2
+	var pair_center_lateral: float = (float(pair_index) - (float(pair_count - 1) * 0.5)) * ATTACK_BUDDY_PAIR_SPACING
+	var buddy_lateral: float = 0.0
+	if pair_member_count > 1:
+		buddy_lateral = (-0.5 if buddy_slot_index == 0 else 0.5) * ATTACK_BUDDY_SPACING
+	return {
+		"buddy_pair_index": pair_index,
+		"buddy_slot_index": buddy_slot_index,
+		"lateral_offset": pair_center_lateral + buddy_lateral,
+		"row_offset": float(pair_index) * ATTACK_BUDDY_ROW_SPACING,
+	}
 
 
 static func _build_area_context(area_order, center_position: Vector2, area_radius: float) -> Dictionary:

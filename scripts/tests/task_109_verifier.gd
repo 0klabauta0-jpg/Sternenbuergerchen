@@ -101,6 +101,16 @@ func _test_scene_panel_and_multiselect_application() -> void:
 	_assert(String(snapshot.get("gold", "")) == "aggressive", "Gold fireteam stores aggressive stance from multiselect")
 	var blue_unit = _find_friendly_unit(scene, "blue")
 	_assert(blue_unit != null and String(blue_unit.call("get_tactical_stance_badge_text")) == "A", "Blue operators show the shared aggressive stance directly on the unit badge")
+	await process_frame
+	var blue_mini_card := tactical_controller.get_node_or_null("../TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox/FireteamMiniCard_Blue")
+	var cautious_button := blue_mini_card.get_node_or_null("Margin/VBox/HeaderRow/StanceToggle/StanceCButton") if blue_mini_card != null else null
+	_assert(cautious_button != null and bool(cautious_button.get_meta("mission_fireteam_stance_button", false)), "Fireteam mini card exposes a direct tactical stance toggle")
+	tactical_controller.call("_on_fireteam_mini_stance_button_pressed", "blue", "cautious")
+	var direct_snapshot: Dictionary = Dictionary(tactical_controller.call("get_tactical_stances_snapshot"))
+	_assert(String(direct_snapshot.get("blue", "")) == "cautious", "Mini-card stance toggle can update one fireteam directly")
+	var hierarchy: Dictionary = Dictionary(tactical_controller.call("get_command_hierarchy_snapshot"))
+	var stance_action: Dictionary = Dictionary(Dictionary(hierarchy.get("actions_by_id", {})).get("tactical_stance", {}))
+	_assert(bool(stance_action.get("implemented", false)) and not bool(stance_action.get("status_only", true)), "Command hierarchy exposes tactical stance as a direct rule control")
 	scene.queue_free()
 	await process_frame
 

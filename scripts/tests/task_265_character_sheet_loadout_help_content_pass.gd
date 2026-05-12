@@ -13,11 +13,18 @@ const TASK_PATH: String = "res://docs/tasks/TASK_265_character_sheet_loadout_hel
 
 const REQUIRED_CATALOG_IDS: Array = [
 	"character_sheet.identity",
+	"character_sheet.name",
+	"character_sheet.portrait",
 	"character_sheet.role_loadout",
 	"character_sheet.role",
 	"character_sheet.fireteam_assignment",
 	"character_sheet.rank_badges",
 	"character_sheet.traits",
+	"character_sheet.trait.aggressive",
+	"character_sheet.trait.cautious",
+	"character_sheet.trait.steady",
+	"character_sheet.trait.reckless",
+	"character_sheet.trait.calm",
 	"character_sheet.status_recovery",
 	"character_sheet.status",
 	"character_sheet.recovery",
@@ -119,6 +126,11 @@ func _test_formatter_help_ids(catalog: Dictionary) -> void:
 			var help_id: String = String(row.get("help_id", ""))
 			_assert(not help_id.is_empty(), "%s row %s carries help_id" % [row_group, String(row.get("label", ""))])
 			_assert(catalog_ids.has(help_id), "Catalog contains formatter row help_id %s" % help_id)
+	for trait_row_variant in Array(model.get("trait_rows", [])):
+		var trait_row: Dictionary = Dictionary(trait_row_variant)
+		var trait_help_id: String = String(trait_row.get("help_id", ""))
+		_assert(not trait_help_id.is_empty(), "Trait row %s carries help_id" % String(trait_row.get("label", "")))
+		_assert(catalog_ids.has(trait_help_id), "Catalog contains trait help_id %s" % trait_help_id)
 	_assert(_rows_contain_help_id(Array(model.get("role_loadout_rows", [])), "Loadout", "character_sheet.loadout_summary"), "Loadout row uses loadout help_id")
 	_assert(_rows_contain_help_id(Array(model.get("status_rows", [])), "Morale", "character_sheet.morale"), "Morale row uses morale help_id")
 	_assert(_rows_contain_help_id(Array(model.get("status_rows", [])), "Frustration", "character_sheet.frustration"), "Frustration row uses frustration help_id")
@@ -134,7 +146,11 @@ func _test_character_sheet_rendered_help_ids(catalog: Dictionary) -> void:
 	var help_ids: PackedStringArray = _collect_help_ids(host)
 	for required_id in [
 		"character_sheet.identity",
+		"character_sheet.name",
+		"character_sheet.portrait",
 		"character_sheet.traits",
+		"character_sheet.trait.calm",
+		"character_sheet.trait.steady",
 		"character_sheet.role_loadout",
 		"character_sheet.loadout_summary",
 		"character_sheet.status_recovery",

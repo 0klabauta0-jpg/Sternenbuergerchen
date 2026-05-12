@@ -134,6 +134,193 @@
       "manual_review": true
     },
     {
+      "help_id": "team_editor.identity",
+      "screen_id": "team_editor",
+      "area_id": "identity",
+      "status": "draft",
+      "title": "Team Identity",
+      "compact_lines": [
+        "Name and emblem describe this saved team.",
+        "They do not change mission truth or NPC stats."
+      ],
+      "detail_lines": [
+        "Use this area to label the local roster before starting play.",
+        "Character names, portraits and values are edited on the selected NPC sheet."
+      ],
+      "target_audience": "new_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "team_editor.team_name",
+      "screen_id": "team_editor",
+      "area_id": "team_name",
+      "status": "ready",
+      "title": "Team Name",
+      "compact_lines": [
+        "Name of this saved rookie team.",
+        "Changing it does not alter NPC stats or mission state."
+      ],
+      "detail_lines": [
+        "The name is stored with the local roster save and is used for menu and staging readability."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "team_editor.symbol",
+      "screen_id": "team_editor",
+      "area_id": "symbol",
+      "status": "ready",
+      "title": "Team Symbol",
+      "compact_lines": [
+        "Small image used to recognize this team in menus.",
+        "It is visual identity, not a hidden bonus."
+      ],
+      "detail_lines": [
+        "The symbol is chosen from existing project images and saved with the roster editor data."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "team_editor.budget",
+      "screen_id": "team_editor",
+      "area_id": "budget",
+      "status": "draft",
+      "title": "Team Focus Points",
+      "compact_lines": [
+        "These are team focus points, not NPC skill points.",
+        "Raising one focus rebalances points from the other unlocked focuses."
+      ],
+      "detail_lines": [
+        "The 30 point rookie cap keeps a created team from starting overpowered.",
+        "A five point increase lowers the five other unlocked focus values by one each when they can move.",
+        "NPC values are changed on the character sheet."
+      ],
+      "target_audience": "new_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "team_editor.stat.tactics",
+      "screen_id": "team_editor",
+      "area_id": "stat.tactics",
+      "status": "draft",
+      "title": "Tactics Focus",
+      "compact_lines": [
+        "Tactics favors leaders and cleaner command execution.",
+        "It is a team focus, not one NPC value."
+      ],
+      "detail_lines": [
+        "This focus is meant to bias rookie generation toward coordination.",
+        "Edit Leadership directly on a character when you want a specific NPC changed."
+      ],
+      "target_audience": "new_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "team_editor.stat.medical",
+      "screen_id": "team_editor",
+      "area_id": "stat.medical",
+      "status": "draft",
+      "title": "Medical Focus",
+      "compact_lines": [
+        "Medical favors recovery, medics and safer casualty handling.",
+        "It does not spend points on one NPC."
+      ],
+      "detail_lines": [
+        "Use it as a team-level rookie identity and balancing knob.",
+        "Individual medic quality still comes from the character's visible values."
+      ],
+      "target_audience": "new_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "team_editor.stat.engineering",
+      "screen_id": "team_editor",
+      "area_id": "stat.engineering",
+      "status": "draft",
+      "title": "Engineering Focus",
+      "compact_lines": [
+        "Engineering favors repairs, doors, generators and objectives.",
+        "It shapes team identity before individual edits."
+      ],
+      "detail_lines": [
+        "This focus is for generator and balancing rules on the saved team.",
+        "A specific engineer still needs direct character values in the sheet."
+      ],
+      "target_audience": "new_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "team_editor.stat.piloting",
+      "screen_id": "team_editor",
+      "area_id": "stat.piloting",
+      "status": "draft",
+      "title": "Piloting Focus",
+      "compact_lines": [
+        "Piloting favors dropship, freighter and fighter skill.",
+        "Platform skills are visible in the character sheet."
+      ],
+      "detail_lines": [
+        "Good dropship pilots combine Dropship Piloting, Awareness and Discipline.",
+        "Freighter and Fighter Piloting are separate platform values."
+      ],
+      "target_audience": "new_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "team_editor.stat.discipline",
+      "screen_id": "team_editor",
+      "area_id": "stat.discipline",
+      "status": "draft",
+      "title": "Discipline Focus",
+      "compact_lines": [
+        "Discipline favors formation, pressure control and buddy behavior.",
+        "It is separate from per-NPC Discipline edits."
+      ],
+      "detail_lines": [
+        "Use this focus to keep a rookie team calmer in its overall identity.",
+        "The individual Discipline row still controls one character directly."
+      ],
+      "target_audience": "new_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "team_editor.stat.recon",
+      "screen_id": "team_editor",
+      "area_id": "stat.recon",
+      "status": "draft",
+      "title": "Recon Focus",
+      "compact_lines": [
+        "Recon favors awareness, recognition, stealth and scouts.",
+        "It is a saved team-level focus."
+      ],
+      "detail_lines": [
+        "This focus helps describe and later bias rookie team creation.",
+        "Use individual Awareness, Recognition and Stealth rows for one NPC."
+      ],
+      "target_audience": "new_player",
+      "manual_review": true
+    },
+    {
+      "help_id": "team_editor.stat.lock",
+      "screen_id": "team_editor",
+      "area_id": "stat.lock",
+      "status": "ready",
+      "title": "Focus Lock",
+      "compact_lines": [
+        "Locks one team focus value while you rebalance the others.",
+        "It affects editor input only, not mission simulation."
+      ],
+      "detail_lines": [
+        "Locked focus bars ignore mouse, plus/minus and slider changes until unlocked.",
+        "Locked rows are skipped when another focus pulls or returns points.",
+        "The lock is stored with the team editor data so the budget row stays predictable while editing."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
       "help_id": "settings.contextual_help_mode",
       "screen_id": "settings",
       "area_id": "contextual_help_mode",
@@ -270,10 +457,46 @@
       "title": "Core Values",
       "compact_lines": [
         "Main 0.00 to 1.00 values used by character and mission systems.",
-        "Bars are display only and mirror profile skill values."
+        "In the team editor, bars can be dragged or changed with plus/minus."
       ],
       "detail_lines": [
-        "Core rows come from MetaUnitProfile skill_values and character-bundle derivation."
+        "Core rows come from MetaUnitProfile skill_values and character-bundle derivation.",
+        "Edits write back through the roster editor; mission runtime does not read UI state as truth."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.skill_group_budget",
+      "screen_id": "character_sheet",
+      "area_id": "skill_group_budget",
+      "status": "ready",
+      "title": "Group Budget",
+      "compact_lines": [
+        "Shows the point budget for one editable value group.",
+        "Raising one unlocked bar can pull points from other unlocked bars."
+      ],
+      "detail_lines": [
+        "One 0.05 step equals one editor point in the visible budget row.",
+        "Lowering a value frees points into the budget.",
+        "Locked bars keep their current value; if there are not enough movable points, the dragged bar snaps back to its maximum affordable value."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.value_lock",
+      "screen_id": "character_sheet",
+      "area_id": "value_lock",
+      "status": "ready",
+      "title": "Value Lock",
+      "compact_lines": [
+        "Locks this one character value during budget edits.",
+        "The visible value remains unchanged until unlocked."
+      ],
+      "detail_lines": [
+        "Use this before lowering or raising nearby values when you want this exact row preserved.",
+        "The lock is stored in the team editor data and does not create gameplay authority."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -408,6 +631,38 @@
       "manual_review": false
     },
     {
+      "help_id": "character_sheet.name",
+      "screen_id": "character_sheet",
+      "area_id": "name",
+      "status": "ready",
+      "title": "Character Name",
+      "compact_lines": [
+        "Roster display name for this NPC.",
+        "Editing it changes identity text, not stats or role."
+      ],
+      "detail_lines": [
+        "The name stays attached to the same stable unit ID across Homebase, FOB and Mission views."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.portrait",
+      "screen_id": "character_sheet",
+      "area_id": "portrait",
+      "status": "ready",
+      "title": "Portrait",
+      "compact_lines": [
+        "Visual portrait used for this NPC's cards and sheets.",
+        "It helps recognition but does not affect gameplay values."
+      ],
+      "detail_lines": [
+        "Portrait changes use the existing portrait catalog and keep the same character record."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
       "help_id": "character_sheet.role_loadout",
       "screen_id": "character_sheet",
       "area_id": "role_loadout",
@@ -478,13 +733,129 @@
       "status": "ready",
       "title": "Badges",
       "compact_lines": [
-        "Small badges summarize derived strengths, role hints or loadout identity.",
-        "They are visual summaries of existing profile data."
+        "Small badges summarize derived role fit from the current profile values.",
+        "Grey badges show reachable fits that are not strong enough yet."
       ],
       "detail_lines": [
-        "Badges are derived by NPCRankBadgeResolver from role, skills and loadout fields."
+        "Badges are derived by NPCRankBadgeResolver from core values, communication, behavior, platform values and small loadout context.",
+        "Hover a single badge for the exact score source and threshold formula."
       ],
       "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.rank_badge.shooter",
+      "screen_id": "character_sheet",
+      "area_id": "rank_badge.shooter",
+      "status": "ready",
+      "title": "Shooter Badge",
+      "compact_lines": [
+        "Shooter comes mainly from Accuracy, Awareness, Recognition and weapon context.",
+        "It explains fighting fit, not a locked class."
+      ],
+      "detail_lines": [
+        "The current threshold is 0.52 and the score blends Accuracy, Awareness, Recognition, Discipline and Order Fidelity.",
+        "Rifle, SMG and sniper loadouts are context bonuses, not a separate class truth."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.rank_badge.leader",
+      "screen_id": "character_sheet",
+      "area_id": "rank_badge.leader",
+      "status": "ready",
+      "title": "Leader Badge",
+      "compact_lines": [
+        "Leader comes mainly from Leadership, Speech Quality, Order Fidelity and Autonomy.",
+        "Use it when choosing Fireteam Leaders."
+      ],
+      "detail_lines": [
+        "The current threshold is 0.52 and the fireteam lead flag is only a small context bonus.",
+        "Raise Leadership, Speech Quality, Recognition, Discipline, Order Fidelity or Autonomy."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.rank_badge.pilot",
+      "screen_id": "character_sheet",
+      "area_id": "rank_badge.pilot",
+      "status": "ready",
+      "title": "Pilot Badge",
+      "compact_lines": [
+        "Pilot comes from platform value plus calm situational and communication values.",
+        "Dropship, freighter, fighter and vehicle handling are checked."
+      ],
+      "detail_lines": [
+        "The current threshold is 0.52 and the best platform value is blended with Awareness and Discipline.",
+        "Speech Quality, Contact Stability and Initiative also matter for flight fit."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.rank_badge.medic",
+      "screen_id": "character_sheet",
+      "area_id": "rank_badge.medic",
+      "status": "ready",
+      "title": "Medic Badge",
+      "compact_lines": [
+        "Medic comes from Discipline, Recognition, Speech Quality and Stability.",
+        "Medictool and old role text are only context bonuses."
+      ],
+      "detail_lines": [
+        "The current threshold is 0.52 and the score also reads Awareness, Order Fidelity and Contact Stability."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.rank_badge.heavy",
+      "screen_id": "character_sheet",
+      "area_id": "rank_badge.heavy",
+      "status": "ready",
+      "title": "Heavy Badge",
+      "compact_lines": [
+        "Heavy comes from Toughness, Contact Stability, Discipline and Accuracy.",
+        "It marks heavier fighting equipment."
+      ],
+      "detail_lines": [
+        "The current threshold is 0.52; rail gun, rocket launcher, panzerfaust and heavy armor are context bonuses."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.rank_badge.engineer",
+      "screen_id": "character_sheet",
+      "area_id": "rank_badge.engineer",
+      "status": "ready",
+      "title": "Engineer Badge",
+      "compact_lines": [
+        "Engineer comes from Recognition, Discipline, Awareness and Order Fidelity.",
+        "It marks technical or repair fit."
+      ],
+      "detail_lines": [
+        "The current threshold is 0.52; tech role words and engineer trait tags are only context bonuses."
+      ],
+      "target_audience": "advanced",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.rank_badge.enemy",
+      "screen_id": "character_sheet",
+      "area_id": "rank_badge.enemy",
+      "status": "ready",
+      "title": "Enemy Badge",
+      "compact_lines": [
+        "Enemy comes from team or faction context.",
+        "It is a readability tag for opposing units."
+      ],
+      "detail_lines": [
+        "Team Bravo or enemy team_id can mark the unit as hostile."
+      ],
+      "target_audience": "advanced",
       "manual_review": false
     },
     {
@@ -499,6 +870,86 @@
       ],
       "detail_lines": [
         "Trait names come from UnitTrait data or stored trait tags on the profile."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.trait.aggressive",
+      "screen_id": "character_sheet",
+      "area_id": "trait.aggressive",
+      "status": "ready",
+      "title": "Trait: Aggressive",
+      "compact_lines": [
+        "Aggressive favors accuracy but reduces toughness.",
+        "Expect a more forceful combat tendency."
+      ],
+      "detail_lines": [
+        "Current UnitTrait modifiers: Accuracy +0.10 and Toughness -0.10 before derived summaries."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.trait.cautious",
+      "screen_id": "character_sheet",
+      "area_id": "trait.cautious",
+      "status": "ready",
+      "title": "Trait: Cautious",
+      "compact_lines": [
+        "Cautious trades speed and accuracy for toughness.",
+        "Good for safer, less reckless profiles."
+      ],
+      "detail_lines": [
+        "Current UnitTrait modifiers: Accuracy -0.05, Toughness +0.10 and Speed -0.10."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.trait.steady",
+      "screen_id": "character_sheet",
+      "area_id": "trait.steady",
+      "status": "ready",
+      "title": "Trait: Steady",
+      "compact_lines": [
+        "Steady gives a small accuracy and speed lift.",
+        "Useful for reliable generalists."
+      ],
+      "detail_lines": [
+        "Current UnitTrait modifiers: Accuracy +0.05 and Speed +0.05."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.trait.reckless",
+      "screen_id": "character_sheet",
+      "area_id": "trait.reckless",
+      "status": "ready",
+      "title": "Trait: Reckless",
+      "compact_lines": [
+        "Reckless boosts speed but lowers toughness.",
+        "Fast profiles can become harder to keep safe."
+      ],
+      "detail_lines": [
+        "Current UnitTrait modifiers: Speed +0.15 and Toughness -0.15."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "character_sheet.trait.calm",
+      "screen_id": "character_sheet",
+      "area_id": "trait.calm",
+      "status": "ready",
+      "title": "Trait: Calm",
+      "compact_lines": [
+        "Calm improves leadership and accuracy.",
+        "Strong candidate trait for future fireteam leads."
+      ],
+      "detail_lines": [
+        "Current UnitTrait modifiers: Leadership +0.15 and Accuracy +0.05."
       ],
       "target_audience": "new_player",
       "manual_review": false
@@ -863,11 +1314,12 @@
       "status": "ready",
       "title": "Platform Skills",
       "compact_lines": [
-        "Vehicle or platform skills appear only when relevant.",
+        "Vehicle and craft skills are derived from core values and behavior profile.",
         "They help choose pilots, drivers or craft crew."
       ],
       "detail_lines": [
-        "Platform rows come from profile platform_values and remain read-only here."
+        "Platform rows come from profile platform_values when explicitly edited; otherwise UnitProfileMath derives them from core values, communication and behavior axes.",
+        "Flightdeck assignment still reads saved roster data and does not accept UI-only truth."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -963,7 +1415,10 @@
         "Use it as assignment guidance, not a hard class lock."
       ],
       "detail_lines": [
-        "Function scores are built from profile function_scores and character-bundle derivation."
+        "Function scores are built from profile function_scores and character-bundle derivation.",
+        "Overwatch reads Accuracy, Awareness, Discipline and Recognition.",
+        "Coordinator reads Leadership, Speech Quality, Recognition and Discipline.",
+        "Pilot functions read platform skill plus awareness, discipline, recognition or communication."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -1119,11 +1574,11 @@
       "status": "ready",
       "title": "Ground Vehicle",
       "compact_lines": [
-        "Fit for operating ground vehicles when that role exists.",
-        "Hidden when the value is not relevant."
+        "Fit for operating ground vehicles.",
+        "Derived from speed, recognition, awareness, discipline and behavior axes."
       ],
       "detail_lines": [
-        "Ground vehicle handling is read from profile platform_values."
+        "Ground vehicle handling can be edited directly; without an override it derives from speed, recognition, awareness, discipline, initiative, stability and autonomy."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -1136,10 +1591,10 @@
       "title": "Dropship Piloting",
       "compact_lines": [
         "Fit for dropship pilot assignments.",
-        "Useful when choosing flightdeck crew."
+        "Derived from flight-relevant core, communication and behavior values."
       ],
       "detail_lines": [
-        "Dropship piloting is read from profile platform_values."
+        "Dropship piloting can be edited directly; without an override it derives from awareness, recognition, discipline, speed, speech quality, order fidelity, stability and autonomy."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -1152,10 +1607,10 @@
       "title": "Freighter Piloting",
       "compact_lines": [
         "Fit for freighter or cargo craft assignments.",
-        "Shown only when the profile has a relevant value."
+        "Derived from steady transport and route-control values."
       ],
       "detail_lines": [
-        "Freighter piloting is read from profile platform_values."
+        "Freighter piloting can be edited directly; without an override it derives from toughness, recognition, discipline, speech quality, order fidelity, stability and autonomy."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -1168,10 +1623,10 @@
       "title": "Fighter Piloting",
       "compact_lines": [
         "Fit for fighter craft assignments when those assets are used.",
-        "It is not a current ground combat stat."
+        "Derived from speed, accuracy, awareness and behavior axes."
       ],
       "detail_lines": [
-        "Fighter piloting is read from profile platform_values."
+        "Fighter piloting can be edited directly; without an override it derives from speed, accuracy, awareness, discipline, initiative, order fidelity, stability and autonomy."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -1606,6 +2061,104 @@
         "Ready state is lobby session data and must not mutate units, maps or combat state."
       ],
       "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "multiplayer.player_name",
+      "screen_id": "multiplayer",
+      "area_id": "player_setup",
+      "status": "ready",
+      "title": "Player Name",
+      "compact_lines": [
+        "Name shown for this peer in the lobby.",
+        "Stored as lobby setup only."
+      ],
+      "detail_lines": [
+        "It labels the peer assignment and does not create gameplay state."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "multiplayer.player_roster",
+      "screen_id": "multiplayer",
+      "area_id": "player_setup",
+      "status": "ready",
+      "title": "Player Roster",
+      "compact_lines": [
+        "Selects which saved roster you bring.",
+        "Default multiplayer mode uses each player's local roster."
+      ],
+      "detail_lines": [
+        "Only public roster preview data is shared.",
+        "Private progression and relationship data stay in the local player profile."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "multiplayer.player_team",
+      "screen_id": "multiplayer",
+      "area_id": "player_setup",
+      "status": "ready",
+      "title": "Player Side",
+      "compact_lines": [
+        "Chooses Alpha or Bravo for this peer.",
+        "Co-op keeps players together by default."
+      ],
+      "detail_lines": [
+        "The host snapshot records the side before mission start assignments are built."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "multiplayer.team_mode",
+      "screen_id": "multiplayer",
+      "area_id": "team_mode",
+      "status": "ready",
+      "title": "Team Mode",
+      "compact_lines": [
+        "Together means co-op on one side.",
+        "Versus allows opposing sides."
+      ],
+      "detail_lines": [
+        "This is lobby configuration and is passed into the mission start assignment."
+      ],
+      "target_audience": "new_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "multiplayer.map_select",
+      "screen_id": "multiplayer",
+      "area_id": "map_select",
+      "status": "ready",
+      "title": "Map Select",
+      "compact_lines": [
+        "Host chooses the map for this lobby.",
+        "Clients can consent to unknown maps."
+      ],
+      "detail_lines": [
+        "The map manifest contains id, hash and size so clients can detect mismatches."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "multiplayer.connection_mode",
+      "screen_id": "multiplayer",
+      "area_id": "connection",
+      "status": "ready",
+      "title": "Connection Mode",
+      "compact_lines": [
+        "LAN/VPN works inside reachable networks.",
+        "Direct Internet needs port forwarding or UPnP."
+      ],
+      "detail_lines": [
+        "UPnP mode tries to open the host UDP port automatically on supported routers.",
+        "Two routers without forwarding, UPnP or VPN usually need a future relay."
+      ],
+      "target_audience": "advanced",
       "manual_review": false
     },
     {

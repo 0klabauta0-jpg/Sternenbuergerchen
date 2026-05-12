@@ -45,6 +45,8 @@ static func build_command_matrix_state(context: Dictionary) -> Dictionary:
 	return {
 		"go_button_panel_role": "#16",
 		"go_button_group": "command_matrix",
+		"go_button_slot": "16.15",
+		"plan_button_slot": "16.20",
 		"legacy_window_17_go_removed": true,
 		"lz_pick_group": "target_selection_left",
 		"approach_style_options": PackedStringArray(["vorsichtig", "normal", "aggressiv"]),

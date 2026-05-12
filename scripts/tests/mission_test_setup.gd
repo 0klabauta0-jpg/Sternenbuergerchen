@@ -9,6 +9,12 @@ const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_ros
 const LOADOUT_MODIFIER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/command/loadout_modifier_resolver.gd")
 const MISSION_SCENARIO_DATA_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_data.gd")
 const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
+const FOG_OF_WAR_MODE_CONTRACT_SCRIPT: GDScript = preload("res://scripts/core/fog_of_war_mode_contract.gd")
+const FOG_OF_WAR_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/fog_of_war_system.gd")
+const LINE_OF_SIGHT_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/los_system.gd")
+
+const FOW_UPDATE_INTERVAL_SECONDS: float = 0.35
+const FOW_DEFAULT_SIGHT_RANGE_WORLD: float = 640.0
 
 @export var team_id: String = "team_alpha"
 @export var runtime_leader_path: NodePath
@@ -21,6 +27,7 @@ const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tacti
 @export var unit_paths: Array[NodePath] = []
 @export var selected_team_unit_ids: PackedStringArray = []
 @export var selected_team_fireteam_ids: PackedStringArray = []
+@export var selected_team_unit_configs: Array = []
 @export var selected_fireteam_definitions: Array = []
 @export var respawn_manager_path: NodePath
 @export var enemy_wave_controller_path: NodePath
@@ -30,6 +37,8 @@ const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tacti
 @export var defer_friendly_runtime_activation: bool = true
 @export var allow_full_roster_when_selection_empty: bool = true
 @export var use_2_5d_primary_view: bool = true
+@export var fog_of_war_mode: String = FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF
+@export var fog_of_war_sight_range_world: float = FOW_DEFAULT_SIGHT_RANGE_WORLD
 
 var member_loadouts: Dictionary = {}
 var unit_loadout_modifiers_by_unit_id: Dictionary = {}
@@ -40,6 +49,13 @@ var _loaded_terrain_map_data = null
 var _mission_scenario = null
 var _scenario_enemy_ids: PackedStringArray = PackedStringArray()
 var _scenario_tactical_authoring: Dictionary = {}
+var _fog_of_war_system = null
+var _fog_of_war_los_system = null
+var _fog_observer_unit_nodes: Array = []
+var _fog_unit_nodes: Array = []
+var _fog_terrain_registry = null
+var _fog_runtime_signature: String = ""
+var _fog_update_elapsed: float = 0.0
 
 
 func _ready() -> void:
@@ -160,7 +176,20 @@ func _ready() -> void:
 	_setup_respawn_manager(spawn_alpha_marker, spawn_bravo_marker)
 	_setup_enemy_waves(enemy_units)
 	_ensure_primary_3d_view(visual_unit_nodes)
+	_initialize_fog_of_war(visual_unit_nodes, terrain_registry)
 	_is_initialized = true
+
+
+func _process(delta: float) -> void:
+	if _fog_of_war_system == null or _terrain_3d_view == null:
+		return
+	if String(fog_of_war_mode).strip_edges().to_lower() == FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF:
+		return
+	_fog_update_elapsed += delta
+	if _fog_update_elapsed < FOW_UPDATE_INTERVAL_SECONDS:
+		return
+	_fog_update_elapsed = 0.0
+	_sync_fog_of_war_visual_state(false)
 
 
 func get_unit_loadout_modifiers_dict(unit_id: String) -> Dictionary:
@@ -708,6 +737,140 @@ func _configure_primary_3d_view(view: Node, unit_nodes: Array) -> void:
 		view.call("focus_world_position", objective_marker.global_position)
 
 
+func set_fog_of_war_mode(mode: String) -> void:
+	fog_of_war_mode = String(FOG_OF_WAR_MODE_CONTRACT_SCRIPT.call("normalize_mode", mode))
+	_sync_fog_of_war_visual_state(true)
+
+
+func get_fog_of_war_runtime_snapshot() -> Dictionary:
+	if _fog_of_war_system == null:
+		return {
+			"mode": FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF,
+			"active": false,
+		}
+	var snapshot: Dictionary = Dictionary(_fog_of_war_system.call("build_team_visual_state_snapshot", team_id, _fog_terrain_registry))
+	snapshot["active"] = String(snapshot.get("mode", FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF)) != FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF
+	snapshot["runtime_signature"] = _fog_runtime_signature
+	snapshot["observer_count"] = _get_active_fog_observers().size()
+	return snapshot
+
+
+func _initialize_fog_of_war(unit_nodes: Array, terrain_registry) -> void:
+	_fog_of_war_system = FOG_OF_WAR_SYSTEM_SCRIPT.new()
+	_fog_of_war_los_system = LINE_OF_SIGHT_SYSTEM_SCRIPT.new()
+	_fog_terrain_registry = terrain_registry
+	_fog_unit_nodes = unit_nodes.duplicate()
+	_fog_observer_unit_nodes.clear()
+	for unit in _fog_unit_nodes:
+		if unit != null and unit.has_method("get_team_id") and String(unit.call("get_team_id")).strip_edges() == team_id:
+			_fog_observer_unit_nodes.append(unit)
+	fog_of_war_mode = String(FOG_OF_WAR_MODE_CONTRACT_SCRIPT.call("normalize_mode", fog_of_war_mode))
+	_fog_of_war_system.call("set_mode_for_team", team_id, fog_of_war_mode)
+	call_deferred("_sync_fog_of_war_visual_state", true)
+
+
+func _sync_fog_of_war_visual_state(force: bool = false) -> void:
+	if _fog_of_war_system == null:
+		return
+	var view = _terrain_3d_view
+	if view == null or not is_instance_valid(view) or not view.is_inside_tree():
+		call_deferred("_sync_fog_of_war_visual_state", force)
+		return
+	var mode: String = String(FOG_OF_WAR_MODE_CONTRACT_SCRIPT.call("normalize_mode", fog_of_war_mode))
+	_fog_of_war_system.call("set_mode_for_team", team_id, mode)
+	if mode == FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF:
+		_fog_runtime_signature = "off"
+		if view.has_method("set_fog_of_war_state"):
+			view.call("set_fog_of_war_state", {"mode": mode, "team_id": team_id})
+		return
+	var next_signature: String = _build_fog_runtime_signature(mode)
+	if not force and next_signature == _fog_runtime_signature:
+		return
+	_fog_runtime_signature = next_signature
+	_fog_of_war_system.call(
+		"update_tile_visibility_for_team",
+		team_id,
+		_fog_observer_unit_nodes,
+		_fog_terrain_registry,
+		_fog_of_war_los_system,
+		fog_of_war_sight_range_world
+	)
+	_sync_fog_dynamic_target_visibility()
+	if view.has_method("set_fog_of_war_state"):
+		view.call("set_fog_of_war_state", _fog_of_war_system.call("build_team_visual_state_snapshot", team_id, _fog_terrain_registry))
+
+
+func _sync_fog_dynamic_target_visibility() -> void:
+	if _fog_of_war_system == null:
+		return
+	var observers: Array = _get_active_fog_observers()
+	for unit in _fog_unit_nodes:
+		if unit == null or not (unit is Node2D) or not unit.has_method("get_unit_id") or not unit.has_method("get_team_id"):
+			continue
+		if String(unit.call("get_team_id")).strip_edges() == team_id:
+			continue
+		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+		if unit_id.is_empty():
+			continue
+		var target_position: Vector2 = (unit as Node2D).global_position
+		var visible: bool = false
+		for observer_variant in observers:
+			var observer := observer_variant as Node2D
+			if observer == null:
+				continue
+			var has_line_of_sight: bool = _fog_of_war_los_system.call("has_line_of_sight_between_points", observer.global_position, target_position, fog_of_war_sight_range_world, _fog_terrain_registry) == true
+			if has_line_of_sight:
+				visible = true
+				break
+		_fog_of_war_system.call("set_visible", team_id, unit_id, visible)
+		if visible:
+			_fog_of_war_system.call("record_last_known_contact", team_id, {
+				"target_id": unit_id,
+				"team_id": String(unit.call("get_team_id")).strip_edges(),
+				"last_known_position": target_position,
+				"last_seen_tick": Time.get_ticks_msec(),
+			})
+
+
+func _get_active_fog_observers() -> Array:
+	var observers: Array = []
+	for observer in _fog_observer_unit_nodes:
+		if observer == null or not (observer is Node2D):
+			continue
+		if observer is CanvasItem and not (observer as CanvasItem).visible:
+			continue
+		if observer.has_method("get_vital_state") and ["down", "dead", "bleedout"].has(String(observer.call("get_vital_state")).strip_edges().to_lower()):
+			continue
+		observers.append(observer)
+	return observers
+
+
+func _build_fog_runtime_signature(mode: String) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	parts.append(mode)
+	parts.append(team_id)
+	for unit in _fog_unit_nodes:
+		if unit == null or not (unit is Node2D) or not unit.has_method("get_unit_id") or not unit.has_method("get_team_id"):
+			continue
+		var visible_text: String = "1" if not (unit is CanvasItem) or (unit as CanvasItem).visible else "0"
+		var grid_text: String = _get_fog_grid_signature((unit as Node2D).global_position)
+		parts.append("%s:%s:%s:%s" % [
+			String(unit.call("get_unit_id")).strip_edges(),
+			String(unit.call("get_team_id")).strip_edges(),
+			visible_text,
+			grid_text,
+		])
+	parts.sort()
+	return "|".join(parts)
+
+
+func _get_fog_grid_signature(world_position: Vector2) -> String:
+	if _fog_terrain_registry != null and _fog_terrain_registry.has_method("world_to_grid"):
+		var grid_position: Vector2i = _fog_terrain_registry.call("world_to_grid", world_position)
+		return "%d,%d" % [grid_position.x, grid_position.y]
+	return "%d,%d" % [roundi(world_position.x / 32.0), roundi(world_position.y / 32.0)]
+
+
 func _hide_legacy_2d_primary_visuals(unit_nodes: Array) -> void:
 	var mission_root := get_parent()
 	if mission_root == null:
@@ -734,6 +897,8 @@ func _hide_legacy_unit_visual_children(unit: Node) -> void:
 		return
 	if unit.has_method("set_world_debug_labels_visible"):
 		unit.call("set_world_debug_labels_visible", false)
+	if unit.has_method("set_world_selection_ring_visible"):
+		unit.call("set_world_selection_ring_visible", false)
 	unit.set("show_world_event_labels", false)
 	for child in unit.get_children():
 		if child is Sprite2D or child is Polygon2D or child is Line2D or child is Label:
@@ -746,6 +911,12 @@ func _apply_unit_identity_preset(unit, unit_id: String, unit_team_id: String) ->
 		return
 
 	var preset: Dictionary = UNIT_ROSTER_PRESETS_SCRIPT.get_preset(unit_id, unit_team_id)
+	var selected_config: Dictionary = _get_selected_unit_config(unit_id)
+	if not selected_config.is_empty():
+		preset.merge(selected_config, true)
+		preset["unit_id"] = unit_id
+		if not unit_team_id.strip_edges().is_empty():
+			preset["team_id"] = unit_team_id
 	if preset.is_empty():
 		return
 
@@ -755,15 +926,19 @@ func _apply_unit_identity_preset(unit, unit_id: String, unit_team_id: String) ->
 func _apply_fob_loadout_override(unit, unit_id: String, unit_team_id: String) -> void:
 	if unit_team_id != team_id:
 		return
-	if member_loadouts.is_empty():
-		return
 	if unit == null or not unit.has_method("apply_identity_config"):
 		return
+	var is_configured_lead: bool = _is_configured_fireteam_lead(unit_id)
+	if member_loadouts.is_empty():
+		unit.call("apply_identity_config", {"is_fireteam_lead": is_configured_lead})
+		return
 	if not member_loadouts.has(unit_id):
+		unit.call("apply_identity_config", {"is_fireteam_lead": is_configured_lead})
 		return
 
 	var loadout: Dictionary = member_loadouts[unit_id]
 	if typeof(loadout) != TYPE_DICTIONARY or loadout.is_empty():
+		unit.call("apply_identity_config", {"is_fireteam_lead": is_configured_lead})
 		return
 
 	var config: Dictionary = {}
@@ -773,8 +948,7 @@ func _apply_fob_loadout_override(unit, unit_id: String, unit_team_id: String) ->
 		config["weapon_2_id"] = String(loadout["weapon_2"])
 	if loadout.has("armor"):
 		config["armor"] = String(loadout["armor"])
-	if loadout.has("is_fireteam_lead"):
-		config["is_fireteam_lead"] = bool(loadout["is_fireteam_lead"])
+	config["is_fireteam_lead"] = bool(loadout.get("is_fireteam_lead", is_configured_lead))
 
 	if not config.is_empty():
 		unit.call("apply_identity_config", config)
@@ -784,13 +958,66 @@ func _get_fireteam_id_for_friendly_slot(slot_index: int, unit_id: String, unit_t
 	if unit_team_id != team_id:
 		return ""
 
-	if slot_index >= 0 and slot_index < selected_team_fireteam_ids.size():
+	var configured_fireteam_id: String = _get_definition_fireteam_id_for_unit(unit_id)
+	if not configured_fireteam_id.is_empty():
+		return configured_fireteam_id
+
+	if selected_team_fireteam_ids.size() == selected_team_unit_ids.size() and slot_index >= 0 and slot_index < selected_team_fireteam_ids.size():
 		var selected_fireteam_id: String = String(selected_team_fireteam_ids[slot_index]).strip_edges().to_lower()
 		if not selected_fireteam_id.is_empty():
 			return selected_fireteam_id
+	if selected_team_fireteam_ids.size() != selected_team_unit_ids.size() and slot_index >= 0 and slot_index < selected_team_fireteam_ids.size():
+		var fallback_selected_fireteam_id: String = String(selected_team_fireteam_ids[slot_index]).strip_edges().to_lower()
+		if not fallback_selected_fireteam_id.is_empty():
+			return fallback_selected_fireteam_id
 
 	var preset: Dictionary = UNIT_ROSTER_PRESETS_SCRIPT.get_preset(unit_id, unit_team_id)
 	return String(preset.get("fireteam_id", "")).strip_edges().to_lower()
+
+
+func _get_selected_unit_config(unit_id: String) -> Dictionary:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return {}
+	for config_variant in selected_team_unit_configs:
+		if typeof(config_variant) != TYPE_DICTIONARY:
+			continue
+		var config: Dictionary = Dictionary(config_variant)
+		if String(config.get("unit_id", "")).strip_edges() == normalized_unit_id:
+			return config.duplicate(true)
+	return {}
+
+
+func _get_definition_fireteam_id_for_unit(unit_id: String) -> String:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return ""
+	for definition_variant in selected_fireteam_definitions:
+		if typeof(definition_variant) != TYPE_DICTIONARY:
+			continue
+		var definition: Dictionary = Dictionary(definition_variant)
+		var fireteam_id: String = String(definition.get("id", "")).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		if String(definition.get("lead_unit_id", "")).strip_edges() == normalized_unit_id:
+			return fireteam_id
+		var member_loadouts = definition.get("member_loadouts", {})
+		if typeof(member_loadouts) == TYPE_DICTIONARY and Dictionary(member_loadouts).has(normalized_unit_id):
+			return fireteam_id
+	return ""
+
+
+func _is_configured_fireteam_lead(unit_id: String) -> bool:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return false
+	for definition_variant in selected_fireteam_definitions:
+		if typeof(definition_variant) != TYPE_DICTIONARY:
+			continue
+		var definition: Dictionary = Dictionary(definition_variant)
+		if String(definition.get("lead_unit_id", "")).strip_edges() == normalized_unit_id:
+			return true
+	return false
 
 
 func _get_tile_world_center(tile_sprite: Sprite2D) -> Vector2:

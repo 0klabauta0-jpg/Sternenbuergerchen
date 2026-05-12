@@ -74,6 +74,7 @@ const FORBIDDEN_STATE_KEYS: PackedStringArray = [
 	"drop_ship_requested",
 	"mission_drop_state",
 	"mission_drop_progress",
+	"mission_drop_cards",
 	"committed_plan_state",
 	"fireteam_plan_status",
 	"breakout_state",

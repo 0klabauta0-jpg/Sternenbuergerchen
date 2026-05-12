@@ -28,8 +28,8 @@ $scanRoots = @(
 )
 
 $markers = @(
-    "C:\Users\",
-    "C:/Users/",
+    ("C:" + [char]92 + "Users" + [char]92),
+    ("C:" + "/" + "Users" + "/"),
     "%USERPROFILE%",
     "file://",
     "Pictures\Sternen",

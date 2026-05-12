@@ -148,6 +148,7 @@ static func apply_card_state(card: PanelContainer, state: Dictionary) -> void:
 		float(state.get("ship_texture_width", 88.0)),
 		float(state.get("ship_texture_height", 52.0))
 	)
+	ship_texture.stretch_mode = int(state.get("ship_texture_stretch_mode", TextureRect.STRETCH_KEEP_ASPECT_CENTERED))
 	ship_texture.set_meta("transport_ship_texture_enlarged", ship_texture.custom_minimum_size.x > 88.0 or ship_texture.custom_minimum_size.y > 52.0)
 	ship_texture.modulate = Color(1.0, 1.0, 1.0, 0.52) if is_in_transit else Color(1.0, 1.0, 1.0, 1.0)
 
@@ -227,7 +228,7 @@ static func _refresh_pilot_content(card: PanelContainer, state: Dictionary) -> v
 				"source_context": String(state.get("pilot_source_context", "transport_craft_pilot")).strip_edges(),
 				"selected": bool(state.get("pilot_selected", false)),
 				"disabled": bool(state.get("pilot_disabled", false)),
-				"drag_enabled": false,
+				"drag_enabled": bool(state.get("pilot_drag_enabled", false)),
 				"compact_mode": true,
 			}
 		)
@@ -239,6 +240,9 @@ static func _refresh_pilot_content(card: PanelContainer, state: Dictionary) -> v
 		var card_open_requested: Callable = state.get("pilot_card_open_requested", Callable())
 		if card_open_requested.is_valid() and pilot_card.has_signal("card_open_requested") and not pilot_card.card_open_requested.is_connected(card_open_requested):
 			pilot_card.card_open_requested.connect(card_open_requested)
+		var card_unit_dropped: Callable = state.get("pilot_card_unit_dropped", Callable())
+		if card_unit_dropped.is_valid() and pilot_card.has_signal("card_unit_dropped") and not pilot_card.card_unit_dropped.is_connected(card_unit_dropped):
+			pilot_card.card_unit_dropped.connect(card_unit_dropped)
 		fallback_label.visible = false
 		return
 
@@ -269,17 +273,18 @@ static func _build_transport_craft_stylebox(is_selected: bool, is_in_transit: bo
 	var stylebox := StyleBoxFlat.new()
 	stylebox.bg_color = Color(0.11, 0.14, 0.17, 0.72) if is_in_transit else Color(0.11, 0.14, 0.17, 1.0)
 	if is_selected:
-		stylebox.border_color = Color(0.66, 0.73, 0.80, 0.96)
+		stylebox.border_color = Color(0.40, 0.92, 0.56, 1.0)
 	elif is_in_transit:
 		stylebox.border_color = Color(0.56, 0.59, 0.63, 0.82)
 	elif can_stage:
 		stylebox.border_color = Color(0.48, 0.63, 0.49, 1.0)
 	else:
 		stylebox.border_color = Color(0.31, 0.36, 0.42, 1.0)
-	stylebox.border_width_left = 1
-	stylebox.border_width_top = 1
-	stylebox.border_width_right = 1
-	stylebox.border_width_bottom = 1
+	var border_width: int = 2 if is_selected else 1
+	stylebox.border_width_left = border_width
+	stylebox.border_width_top = border_width
+	stylebox.border_width_right = border_width
+	stylebox.border_width_bottom = border_width
 	stylebox.corner_radius_top_left = 8
 	stylebox.corner_radius_top_right = 8
 	stylebox.corner_radius_bottom_left = 8

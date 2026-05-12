@@ -5,7 +5,8 @@
 		"modular_space_max_glb": 10,
 		"space_station_max_glb": 12,
 		"format": "glb_only",
-		"runtime_contract": "visual_only_no_gameplay_truth"
+		"runtime_contract": "visual_only_no_gameplay_truth",
+		"runtime_scale_authority": "res://data/terrain_3d_asset_mapping.json"
 	},
 	"sources": {
 		"modular_space_kit": {
