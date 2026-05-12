@@ -3,7 +3,7 @@
 ## Ziel
 Homebase-Direct-Staging und FOB-Dropship-Staging duerfen sich nicht gegenseitig ueberschreiben. Der FOB-Start muss immer den FOB-Payload verwenden; der Homebase-Start muss den Homebase-Payload verwenden.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Problem
 `MetaLayerFlow._sync_fob_dropship_state_into_mission_planning()` liest aktuell zuerst `_get_homebase_direct_drop_state()`. Dadurch kann ein alter Homebase-Direct-Payload einen spaeteren FOB-Missionsstart ueberschreiben.
@@ -19,11 +19,11 @@ Der Sync-Helper ist durch den Namen und alten Vertrag FOB-zentriert, bekommt abe
 - Regressionstest fuer: Homebase-Payload vorhanden, danach FOB-Payload starten.
 
 ## Akzeptanzkriterien
-- [ ] FOB-Missionsstart nutzt den FOB-Drop-State, auch wenn Homebase noch Direct-Staging enthaelt.
-- [ ] Homebase-Missionsstart nutzt den Homebase-Direct-Drop-State.
-- [ ] Mission-Planning-State enthaelt nach jedem Start nur die erwartete Payload-Quelle.
-- [ ] Bestehende Multi-Dropship-/FOB-Regressionen bleiben gruen.
-- [ ] Headless-Verifier deckt den Konfliktfall ab.
+- [x] FOB-Missionsstart nutzt den FOB-Drop-State, auch wenn Homebase noch Direct-Staging enthaelt.
+- [x] Homebase-Missionsstart nutzt den Homebase-Direct-Drop-State.
+- [x] Mission-Planning-State enthaelt nach jedem Start nur die erwartete Payload-Quelle.
+- [x] Bestehende Multi-Dropship-/FOB-Regressionen bleiben gruen.
+- [x] Headless-Verifier deckt den Konfliktfall ab.
 
 ## Erwartete Dateien
 - `scripts/meta/meta_layer_flow.gd`
@@ -31,12 +31,12 @@ Der Sync-Helper ist durch den Namen und alten Vertrag FOB-zentriert, bekommt abe
 - optional: `scripts/tests/task_346_homebase_direct_staging_character_popup.gd`
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_348_homebase_fob_payload_state_isolation.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_346_homebase_direct_staging_character_popup.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_316_fob_fireteam_staging_migration.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/bugfix_mission_multi_dropship_cards.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_348_homebase_fob_payload_state_isolation.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_346_homebase_direct_staging_character_popup.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_316_fob_fireteam_staging_migration.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/bugfix_mission_multi_dropship_cards.gd`
+- [x] `git diff --check`
 
 ## Risiken / offene Punkte
-- Die Quelle muss sauber durch den Meta-Flow gehen, ohne eine zweite Mission-Planning-Wahrheit zu erzeugen.
-- Preview-Map und Live-Start koennen unterschiedliche Sync-Zeitpunkte haben; beide muessen im Test abgedeckt werden.
+- Der alte Helper-Name bleibt aus Kompatibilitaetsgruenden erhalten, nimmt jetzt aber eine explizite Payload-Quelle entgegen.
+- `task_316_fob_fireteam_staging_migration.gd` laeuft fachlich gruen, meldet beim Headless-Exit aber bestehende Godot-RID-Leak-Warnungen.

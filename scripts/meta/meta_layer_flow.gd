@@ -71,6 +71,9 @@ const HOMEBASE_CARGO_LOAD_DURATION_SECONDS: float = 9.0
 const MISSION_DROPSHIP_TO_MAP_SECONDS: float = 18.0
 const MISSION_DROPSHIP_TO_FOB_SECONDS: float = 18.0
 const MISSION_PREVIEW_ENABLED: bool = false
+const MISSION_DROP_SOURCE_FOB := "fob"
+const MISSION_DROP_SOURCE_HOMEBASE_DIRECT := "homebase_direct"
+const MISSION_DROP_SOURCE_HOMEBASE_DIRECT_THEN_FOB := "homebase_direct_then_fob"
 const DEFAULT_MISSION_PLANNING_STATE: Dictionary = {
 	"has_lz_position": false,
 	"lz_position": Vector2.ZERO,
@@ -311,7 +314,10 @@ func _on_homebase_team_confirmed(selected_unit_ids: PackedStringArray) -> void:
 func _on_homebase_mission_start_requested() -> void:
 	var had_preview_deployed_payload: bool = _has_preview_deployed_mission_payload()
 	_sync_homebase_direct_staging_from_screen()
-	_sync_fob_dropship_state_into_mission_planning(not had_preview_deployed_payload)
+	_sync_fob_dropship_state_into_mission_planning(
+		not had_preview_deployed_payload,
+		MISSION_DROP_SOURCE_HOMEBASE_DIRECT_THEN_FOB
+	)
 	if not _has_mission_start_payload():
 		return
 	_begin_active_mission_timer()
@@ -449,7 +455,7 @@ func _on_fob_mission_start_requested(selected_unit_ids: PackedStringArray, selec
 	_selected_unit_ids = selected_unit_ids.duplicate()
 	_selected_fireteam_ids = selected_fireteam_ids.duplicate()
 	var had_preview_deployed_payload: bool = _has_preview_deployed_mission_payload()
-	_sync_fob_dropship_state_into_mission_planning(not had_preview_deployed_payload)
+	_sync_fob_dropship_state_into_mission_planning(not had_preview_deployed_payload, MISSION_DROP_SOURCE_FOB)
 	if not _has_mission_start_payload():
 		return
 	_begin_active_mission_timer()
@@ -464,7 +470,7 @@ func _on_fob_transport_craft_mission_stage_requested(craft_id: String) -> void:
 	var fob_screen = _get_fob_screen()
 	if fob_screen != null and fob_screen.has_method("mark_transport_craft_launch_ready"):
 		fob_screen.call("mark_transport_craft_launch_ready", normalized_craft_id)
-	_sync_fob_dropship_state_into_mission_planning()
+	_sync_fob_dropship_state_into_mission_planning(false, MISSION_DROP_SOURCE_FOB)
 	_refresh_fob_screen()
 	_refresh_homebase_screen()
 	_refresh_map_screen()
@@ -1619,7 +1625,7 @@ func _show_mission() -> void:
 
 
 func _start_or_show_live_mission_from_nav() -> void:
-	_sync_fob_dropship_state_into_mission_planning(false)
+	_sync_fob_dropship_state_into_mission_planning(false, MISSION_DROP_SOURCE_FOB)
 	if _active_mission == null:
 		if _active_mission_started_at_msec <= 0:
 			_begin_active_mission_timer()
@@ -1683,7 +1689,7 @@ func _refresh_map_screen() -> void:
 			_apply_planning_state_to_mission(_active_mission)
 		return
 	if _active_mission == null:
-		_sync_fob_dropship_state_into_mission_planning()
+		_sync_fob_dropship_state_into_mission_planning(false, MISSION_DROP_SOURCE_FOB)
 	_refresh_preview_mission_lifecycle()
 
 
@@ -1773,25 +1779,45 @@ func _get_homebase_direct_drop_state() -> Dictionary:
 	return drop_state
 
 
-func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: bool = false) -> void:
-	var drop_state: Dictionary = _get_homebase_direct_drop_state()
+func _get_fob_mission_drop_state(fob_screen) -> Dictionary:
+	if fob_screen == null or not fob_screen.has_method("build_mission_drop_state"):
+		return {}
+	return Dictionary(fob_screen.call("build_mission_drop_state")).duplicate(true)
+
+
+func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: bool = false, payload_source: String = MISSION_DROP_SOURCE_FOB) -> void:
+	var normalized_source: String = payload_source.strip_edges().to_lower()
+	if normalized_source.is_empty():
+		normalized_source = MISSION_DROP_SOURCE_FOB
+
+	var drop_state: Dictionary = {}
+	var applied_source: String = ""
 	var fob_screen = _get_fob_screen()
-	if drop_state.is_empty() and (fob_screen == null or not fob_screen.has_method("build_mission_drop_state")):
+	if normalized_source == MISSION_DROP_SOURCE_HOMEBASE_DIRECT or normalized_source == MISSION_DROP_SOURCE_HOMEBASE_DIRECT_THEN_FOB:
+		drop_state = _get_homebase_direct_drop_state()
+		if not drop_state.is_empty():
+			applied_source = MISSION_DROP_SOURCE_HOMEBASE_DIRECT
+	if drop_state.is_empty() and (normalized_source == MISSION_DROP_SOURCE_FOB or normalized_source == MISSION_DROP_SOURCE_HOMEBASE_DIRECT_THEN_FOB):
+		drop_state = _get_fob_mission_drop_state(fob_screen)
+		if not drop_state.is_empty():
+			applied_source = MISSION_DROP_SOURCE_FOB
+	if drop_state.is_empty():
 		_mission_planning_state["embarked_unit_ids"] = []
 		_mission_planning_state["meta_transfer_routes"] = _build_homebase_transfer_route_entries()
 		_mission_planning_state["mission_drop_cards"] = []
+		_mission_planning_state["mission_drop_source"] = ""
 		if clear_deployed_unit_ids:
 			_mission_planning_state["deployed_unit_ids"] = []
 			_mission_planning_state["deployed_unit_positions"] = {}
 		return
 
-	if drop_state.is_empty():
-		drop_state = _apply_selected_mission_drop_card_override(_merge_existing_mission_drop_card_planning_fields(Dictionary(fob_screen.call("build_mission_drop_state")).duplicate(true)))
-	else:
-		drop_state = _apply_selected_mission_drop_card_override(_merge_existing_mission_drop_card_planning_fields(drop_state))
+	if applied_source == MISSION_DROP_SOURCE_FOB:
+		_sync_fob_payload_selection_from_screen(fob_screen, drop_state)
+	drop_state = _apply_selected_mission_drop_card_override(_merge_existing_mission_drop_card_planning_fields(drop_state))
 	_mission_planning_state["embarked_unit_ids"] = Array(PackedStringArray(Array(drop_state.get("embarked_unit_ids", []))))
 	_mission_planning_state["drop_queued_fireteam_ids"] = Array(PackedStringArray(Array(drop_state.get("queued_fireteam_ids", []))))
 	_mission_planning_state["drop_ship_staged"] = bool(drop_state.get("drop_ship_staged", false))
+	_mission_planning_state["mission_drop_source"] = applied_source
 	_mission_planning_state["launch_ready_craft_id"] = String(drop_state.get("launch_ready_craft_id", "")).strip_edges()
 	_mission_planning_state["mission_drop_craft_id"] = String(drop_state.get("mission_drop_craft_id", "")).strip_edges()
 	_mission_planning_state["mission_drop_display_name"] = String(drop_state.get("mission_drop_display_name", "")).strip_edges()
@@ -1816,6 +1842,26 @@ func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: boo
 		_mission_planning_state["mission_drop_return_requested"] = false
 
 
+func _sync_fob_payload_selection_from_screen(fob_screen, drop_state: Dictionary) -> void:
+	var screen_unit_ids: PackedStringArray = []
+	var screen_fireteam_ids: PackedStringArray = []
+	if fob_screen != null and fob_screen.has_method("get_team"):
+		screen_unit_ids = PackedStringArray(fob_screen.call("get_team"))
+	if fob_screen != null and fob_screen.has_method("get_selected_fireteam_ids"):
+		screen_fireteam_ids = PackedStringArray(fob_screen.call("get_selected_fireteam_ids"))
+	if screen_unit_ids.is_empty():
+		screen_unit_ids = PackedStringArray(Array(drop_state.get("embarked_unit_ids", [])))
+	if screen_unit_ids.is_empty():
+		return
+
+	var next_fireteam_ids: PackedStringArray = _build_unassigned_fireteam_selection(screen_unit_ids)
+	for unit_index in range(screen_unit_ids.size()):
+		if unit_index < screen_fireteam_ids.size():
+			next_fireteam_ids[unit_index] = String(screen_fireteam_ids[unit_index]).strip_edges()
+	_selected_unit_ids = screen_unit_ids.duplicate()
+	_selected_fireteam_ids = next_fireteam_ids
+
+
 func _sync_mission_drop_transport_fields_from_fob() -> void:
 	var fob_screen = _get_fob_screen()
 	if fob_screen == null or not fob_screen.has_method("build_mission_drop_state"):
@@ -1823,6 +1869,7 @@ func _sync_mission_drop_transport_fields_from_fob() -> void:
 
 	var drop_state: Dictionary = _apply_selected_mission_drop_card_override(_merge_existing_mission_drop_card_planning_fields(Dictionary(fob_screen.call("build_mission_drop_state")).duplicate(true)))
 	_mission_planning_state["drop_ship_staged"] = bool(drop_state.get("drop_ship_staged", false))
+	_mission_planning_state["mission_drop_source"] = MISSION_DROP_SOURCE_FOB
 	_mission_planning_state["launch_ready_craft_id"] = String(drop_state.get("launch_ready_craft_id", "")).strip_edges()
 	_mission_planning_state["mission_drop_craft_id"] = String(drop_state.get("mission_drop_craft_id", "")).strip_edges()
 	_mission_planning_state["mission_drop_display_name"] = String(drop_state.get("mission_drop_display_name", "")).strip_edges()
@@ -2145,7 +2192,7 @@ func _on_mission_planning_state_changed(planning_state: Dictionary) -> void:
 		handled_mission_return = _apply_mission_drop_return_for_craft(mission_craft_id, returning_payload_unit_ids, returning_passenger_count, fob_screen) or handled_mission_return
 		_mission_planning_state["mission_drop_return_requested"] = false
 	if handled_mission_return:
-		_sync_fob_dropship_state_into_mission_planning()
+		_sync_fob_dropship_state_into_mission_planning(false, MISSION_DROP_SOURCE_FOB)
 	if _preview_mission != null:
 		_apply_planning_state_to_mission(_preview_mission)
 	if _active_mission != null:

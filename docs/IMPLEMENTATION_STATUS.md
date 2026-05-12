@@ -41,9 +41,12 @@
 - Lokale Pruefung: `task_347_homebase_direct_staging_start_guard.gd`, `task_346_homebase_direct_staging_character_popup.gd` und `git diff --check` laufen gruen.
 
 ### TASK_348 - Homebase FOB Payload State Isolation
-- Status: geplant
-- Stand: Review-Finding aus TASK_346. Der gemeinsame Dropship-Sync bevorzugt aktuell Homebase-Direct-State und kann dadurch einen spaeteren FOB-Start mit altem Homebase-Payload ueberschreiben.
-- Naechster Schritt: Payload-Quelle explizit trennen (`homebase_direct` vs. `fob`) und Konfliktfall testen.
+- Status: implementiert im Arbeitsstand
+- Stand: Der Mission-Drop-Sync im Meta-Flow nimmt jetzt eine explizite Payload-Quelle entgegen. FOB-/Map-/Return-Syncs lesen `fob`, Homebase-Start bevorzugt `homebase_direct` und faellt nur bewusst auf FOB zurueck, wenn kein Direct-Payload existiert.
+- Stand: Der Planning-State markiert die angewendete Quelle mit `mission_drop_source`, sodass Konfliktfaelle zwischen Homebase-Direct und FOB-Dropship nachvollziehbar bleiben.
+- Stand: Wenn Homebase einen bereits wartenden FOB-Payload startet, werden auch `_selected_unit_ids` und `_selected_fireteam_ids` aus dem FOB-Quellenpfad synchronisiert.
+- Lokale Pruefung: `task_348_homebase_fob_payload_state_isolation.gd`, `task_347_homebase_direct_staging_start_guard.gd`, `task_346_homebase_direct_staging_character_popup.gd`, `task_316_fob_fireteam_staging_migration.gd`, `bugfix_mission_multi_dropship_cards.gd` und `git diff --check` laufen gruen.
+- Hinweis: `task_316_fob_fireteam_staging_migration.gd` meldet beim Headless-Exit bestehende RID-Leak-Warnungen, aber alle Assertions laufen gruen.
 
 ### TASK_349 - Homebase Direct Staging Real Flightdeck Craft Gate
 - Status: geplant
