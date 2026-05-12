@@ -7,7 +7,14 @@ Ziel-Loop fuer V1:
 
 `Homebase -> Fireteams bauen -> Loadout setzen -> Dropship beladen -> Mission starten`
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
+
+## Umsetzung
+- Homebase zeigt einen direkten Mission-Prep-Block im Teamfenster: gestagte Operatoren bekommen FT1-Loadout-Zeilen mit Armor, Weapon 1 und Weapon 2.
+- Homebase-Dropship-Shipcards bieten `Board` fuer den direkten V1-Pfad. Der Board-Pfad sendet nur ein Staging-Signal; der eigentliche Meta-Handoff wird in `MetaLayerFlow` als Mission-Drop-Payload gebaut.
+- `MetaLayerFlow` haelt den direkten Homebase-Payload im gleichen Mission-Drop-Shape wie der FOB-Pfad (`embarked_unit_ids`, `queued_fireteam_ids`, `boarded_fireteam_ids`, `mission_drop_cards`, Member-Loadouts).
+- Der versteckte FOB-Screen bekommt die Homebase-Loadouts in seine Fireteam-Definitionen gemergt, damit MissionSetup weiter dieselbe Loadout-Form lesen kann.
+- Der Homebase-Charakterbogen kann per Doppelklick/Popup-Pfad dieselbe `CharacterSheetView` rendern; der alte rechte Fixed-Panel-Knoten bleibt aus Kompatibilitaetsgruenden fuer bestehende Layout-Gates erhalten.
 
 ## Voraussetzung
 - TASK_096 - Meta-Layer Recovery
@@ -58,12 +65,12 @@ Die Designueberlegung ist, den FOB fuer V1 nicht als Pflichtstation zu nutzen. D
 - Keine finale Art-Direction fuer alle Fenster; Ziel ist spielbare V1-Vereinfachung.
 
 ## Akzeptanzkriterien
-- [ ] Homebase bietet einen direkten Mission-Prep-Pfad mit Fireteam-Auswahl, Loadout und Flight Deck.
-- [ ] Dropship-Boarding aus der Homebase nutzt dieselben Transport-/Payload-Daten wie der bestehende FOB-Pfad.
-- [ ] Missionstart kann ohne Pflichtwechsel in den FOB vorbereitet werden.
-- [ ] Character Sheet oeffnet als Popup per Doppelklick und nutzt die bestehende Character-Sheet-View.
-- [ ] UI bleibt Anzeige/Staging und erzeugt keine neue SimulationRoot-Wahrheit.
-- [ ] Bestehende FOB- und Meta-Smokes bleiben gruen.
+- [x] Homebase bietet einen direkten Mission-Prep-Pfad mit Fireteam-Auswahl, Loadout und Flight Deck.
+- [x] Dropship-Boarding aus der Homebase nutzt dieselben Transport-/Payload-Daten wie der bestehende FOB-Pfad.
+- [x] Missionstart kann ohne Pflichtwechsel in den FOB vorbereitet werden.
+- [x] Character Sheet oeffnet als Popup per Doppelklick und nutzt die bestehende Character-Sheet-View.
+- [x] UI bleibt Anzeige/Staging und erzeugt keine neue SimulationRoot-Wahrheit.
+- [x] Bestehende FOB- und Meta-Smokes bleiben gruen.
 
 ## Erwartete Dateien
 - `scripts/meta/homebase_screen.gd`
@@ -76,12 +83,12 @@ Die Designueberlegung ist, den FOB fuer V1 nicht als Pflichtstation zu nutzen. D
 - `docs/IMPLEMENTATION_STATUS.md`
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_343_homebase_direct_mission_prep_fob_bypass_v1.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_306_meta_userology_playability_smoke.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_310_fob_flightdeck_fireteam_userology_smoke.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_316_fob_fireteam_staging_migration.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_337_architecture_performance_ux_followup_gate.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_343_homebase_direct_mission_prep_fob_bypass_v1.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_306_meta_userology_playability_smoke.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_310_fob_flightdeck_fireteam_userology_smoke.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_316_fob_fireteam_staging_migration.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_337_architecture_performance_ux_followup_gate.gd`
+- [x] `git diff --check`
 
 ## Risiken
 - Wenn Homebase und FOB eigene Kopien von Fireteam-, Loadout- oder Dropship-State halten, entsteht Architektur-Drift. Der Task muss deshalb gemeinsame Daten- und Component-Pfade bevorzugen.

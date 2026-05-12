@@ -52,12 +52,13 @@
 - Lokale Pruefung: `task_342_simulation_root_unknown_payload_audit.gd`, `task_166_multiplayer_authority_command_contract_verifier.gd`, `task_284_gameplay_truth_architecture_boundary_audit.gd` und `git diff --check` laufen gruen.
 
 ### TASK_343 - Homebase Direct Mission Prep FOB Bypass V1
-- Status: geplant
-- Stand: Der neue Folge-Task beschreibt den V1-Bypass fuer den Pflicht-FOB: Fireteam-Auswahl, Loadout, Flight Deck und Dropship-Boarding sollen direkt in der Homebase vorbereitet werden koennen.
-- Stand: Der FOB wird nicht geloescht, sondern fuer den Kernflow optional. Homebase und FOB muessen dieselben Fireteam-, Loadout-, Transport- und Dropship-Payload-Daten nutzen.
-- Offene Punkte: Umsetzung in kleinen Slices: Character-Sheet-Popup, Homebase-Prep-Flaeche, Dropship-Boarding aus Homebase, Mission-Handoff-Smoke.
-- Risiken: Kein doppelter Meta-State fuer Homebase/FOB; UI bleibt Staging/Anzeige und darf keine neue `SimulationRoot`-Wahrheit erzeugen.
-- Naechster Schritt: TASK_343 - Homebase Direct Mission Prep FOB Bypass V1.
+- Status: implementiert im Arbeitsstand
+- Stand: Homebase hat jetzt einen direkten Mission-Prep-Block im Teamfenster. Gestagte Operatoren werden fuer V1 als FT1 vorbereitet und koennen Armor, Weapon 1 und Weapon 2 setzen, bevor sie ins Dropship gehen.
+- Stand: Homebase-Dropship-Shipcards bieten `Board`. Der Board-Pfad erzeugt ueber `MetaLayerFlow` einen Mission-Drop-Payload im bestehenden FOB-/Mission-Shape mit `embarked_unit_ids`, `queued_fireteam_ids`, `boarded_fireteam_ids`, `mission_drop_cards` und Member-Loadouts.
+- Stand: Missionstart aus der Homebase wird ohne Pflichtwechsel in den FOB freigegeben, sobald ein direkter Homebase-Payload an Bord ist. Der versteckte FOB-Screen bekommt die gleichen Member-Loadouts in seine Fireteam-Definitionen gemergt, damit MissionSetup denselben Contract lesen kann.
+- Stand: Der Homebase-Charakterbogen kann als Popup per Doppelklick-Pfad oeffnen und rendert weiter ueber `CharacterSheetView`; das alte rechte Fixed-Panel bleibt fuer bestehende Layout-Gates kompatibel.
+- Risiken: Der V1-Slice gruppiert Homebase-Direct-Prep bewusst kompakt als FT1. Feinere Fireteam-Verteilung in der Homebase sollte als separater UX-Slice folgen, falls mehrere Fireteams vor Missionsstart benoetigt werden.
+- Lokale Pruefung: `task_343_homebase_direct_mission_prep_fob_bypass_v1.gd`, `task_306_meta_userology_playability_smoke.gd`, `task_310_fob_flightdeck_fireteam_userology_smoke.gd`, `task_316_fob_fireteam_staging_migration.gd`, `task_337_architecture_performance_ux_followup_gate.gd` und `git diff --check` laufen gruen.
 
 ### TASK_337 - Architecture Performance UX Followup Gate
 - Status: implementiert im Arbeitsstand

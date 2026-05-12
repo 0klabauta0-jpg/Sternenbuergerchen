@@ -67,6 +67,8 @@ const HOMEBASE_PILOT_TRANSFER_DURATION_SECONDS: float = 10.0
 const HOMEBASE_CARGO_LOAD_DURATION_SECONDS: float = 9.0
 const MISSION_DROPSHIP_TO_MAP_SECONDS: float = 18.0
 const MISSION_DROPSHIP_TO_FOB_SECONDS: float = 18.0
+const HOMEBASE_DIRECT_DROPSHIP_CAPACITY: int = 6
+const HOMEBASE_DIRECT_DEFAULT_WEAPON: String = "smg"
 const MISSION_PREVIEW_ENABLED: bool = false
 const DEFAULT_MISSION_PLANNING_STATE: Dictionary = {
 	"has_lz_position": false,
@@ -97,6 +99,9 @@ var _assigned_aircraft_pilot_by_craft: Dictionary = {}
 var _aircraft_location_by_craft: Dictionary = {}
 var _selected_aircraft_cargo_by_craft: Dictionary = {}
 var _loaded_aircraft_cargo_by_craft: Dictionary = {}
+var _homebase_direct_member_loadouts: Dictionary = {}
+var _homebase_direct_payload_by_craft: Dictionary = {}
+var _homebase_direct_launch_ready_craft_id: String = ""
 var _pending_homebase_team_transfers: Array = []
 var _pending_homebase_pilot_transfers: Array = []
 var _pending_homebase_cargo_loads: Array = []
@@ -134,6 +139,10 @@ func _ready() -> void:
 		homebase_screen.mission_start_requested.connect(_on_homebase_mission_start_requested)
 	if not homebase_screen.mission_selection_changed.is_connected(_on_homebase_mission_selection_changed):
 		homebase_screen.mission_selection_changed.connect(_on_homebase_mission_selection_changed)
+	if homebase_screen.has_signal("direct_mission_prep_loadout_changed") and not homebase_screen.direct_mission_prep_loadout_changed.is_connected(_on_homebase_direct_loadout_changed):
+		homebase_screen.direct_mission_prep_loadout_changed.connect(_on_homebase_direct_loadout_changed)
+	if homebase_screen.has_signal("direct_dropship_board_requested") and not homebase_screen.direct_dropship_board_requested.is_connected(_on_homebase_direct_dropship_board_requested):
+		homebase_screen.direct_dropship_board_requested.connect(_on_homebase_direct_dropship_board_requested)
 	if not homebase_screen.aircraft_add_requested.is_connected(_on_homebase_aircraft_add_requested):
 		homebase_screen.aircraft_add_requested.connect(_on_homebase_aircraft_add_requested)
 	if not homebase_screen.aircraft_remove_requested.is_connected(_on_homebase_aircraft_remove_requested):
@@ -195,6 +204,24 @@ func get_air_asset_recovery_snapshot() -> Dictionary:
 		var craft_id: String = String(craft_id_variant).strip_edges()
 		result[craft_id] = Dictionary(_air_asset_recovery_by_craft.get(craft_id, {})).duplicate(true)
 	return result
+
+
+func get_homebase_direct_mission_prep_snapshot() -> Dictionary:
+	var homebase_screen = _get_homebase_screen()
+	var homebase_snapshot: Dictionary = {}
+	if homebase_screen != null and homebase_screen.has_method("get_direct_mission_prep_snapshot"):
+		homebase_snapshot = Dictionary(homebase_screen.call("get_direct_mission_prep_snapshot")).duplicate(true)
+	return {
+		"enabled": true,
+		"homebase_snapshot": homebase_snapshot,
+		"launch_ready_craft_id": _homebase_direct_launch_ready_craft_id,
+		"payload_by_craft": _homebase_direct_payload_by_craft.duplicate(true),
+		"member_loadouts": _homebase_direct_member_loadouts.duplicate(true),
+		"mission_drop_state": _build_homebase_direct_mission_drop_state(),
+		"can_start_without_fob": _has_homebase_direct_mission_start_payload(),
+		"uses_fob_payload_contract": true,
+		"ui_sets_gameplay_truth": false,
+	}
 
 
 func load_air_asset_recovery_snapshot(snapshot: Dictionary) -> void:
@@ -266,6 +293,7 @@ func _on_map_nav_pressed() -> void:
 
 func _on_homebase_selection_changed(selected_unit_ids: PackedStringArray) -> void:
 	_homebase_staged_unit_ids = _sanitize_homebase_selection(selected_unit_ids)
+	_prune_homebase_direct_member_loadouts()
 
 
 func _on_homebase_mission_selection_changed(mission_id: String) -> void:
@@ -279,6 +307,68 @@ func _on_homebase_mission_selection_changed(mission_id: String) -> void:
 	_selected_mission_map_path = String(mission_definition.get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges()
 	_refresh_homebase_screen()
 	_refresh_fob_screen()
+	_refresh_map_screen()
+
+
+func _on_homebase_direct_loadout_changed(unit_id: String, member_loadout: Dictionary) -> void:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty() or not _is_known_roster_unit(normalized_unit_id):
+		return
+	_homebase_direct_member_loadouts[normalized_unit_id] = _normalize_homebase_direct_member_loadout(member_loadout)
+	_update_homebase_direct_payload_loadout(normalized_unit_id)
+	_refresh_fob_screen()
+	_refresh_homebase_screen()
+	_refresh_map_screen()
+
+
+func _on_homebase_direct_dropship_board_requested(
+	craft_id: String,
+	unit_ids: PackedStringArray,
+	fireteam_ids: PackedStringArray,
+	member_loadouts: Dictionary
+) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	var craft_definition: Dictionary = _find_homebase_aircraft_definition(normalized_craft_id)
+	if craft_definition.is_empty() or String(craft_definition.get("craft_type", "dropship")).strip_edges().to_lower() != "dropship":
+		return
+	if _is_homebase_direct_craft_blocked(normalized_craft_id):
+		return
+	var normalized_unit_ids: PackedStringArray = _filter_available_homebase_unit_ids(unit_ids)
+	if normalized_unit_ids.is_empty():
+		return
+	if normalized_unit_ids.size() > HOMEBASE_DIRECT_DROPSHIP_CAPACITY:
+		return
+	var normalized_fireteam_ids: PackedStringArray = _normalize_homebase_direct_fireteam_ids(normalized_unit_ids, fireteam_ids)
+	var normalized_member_loadouts: Dictionary = _sanitize_homebase_direct_member_loadouts(member_loadouts)
+	for unit_id_variant in normalized_unit_ids:
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty():
+			continue
+		var member_loadout: Dictionary = Dictionary(normalized_member_loadouts.get(unit_id, _homebase_direct_member_loadouts.get(unit_id, {})))
+		_homebase_direct_member_loadouts[unit_id] = _normalize_homebase_direct_member_loadout(member_loadout)
+
+	var payload_member_loadouts: Dictionary = _build_homebase_direct_member_loadouts_for_units(normalized_unit_ids)
+	_homebase_direct_payload_by_craft[normalized_craft_id] = {
+		"craft_id": normalized_craft_id,
+		"source": "homebase_direct_mission_prep",
+		"uses_fob_payload_contract": true,
+		"unit_ids": normalized_unit_ids.duplicate(),
+		"unit_profiles": _build_unit_subset_by_ids(normalized_unit_ids),
+		"embarked_unit_ids": Array(normalized_unit_ids),
+		"fireteam_ids": normalized_fireteam_ids.duplicate(),
+		"queued_fireteam_ids": Array(_unique_homebase_direct_fireteam_ids(normalized_fireteam_ids)),
+		"boarded_fireteam_ids": Array(_unique_homebase_direct_fireteam_ids(normalized_fireteam_ids)),
+		"member_loadouts": payload_member_loadouts,
+		"fireteam_definitions": _build_homebase_direct_fireteam_definitions(normalized_unit_ids, normalized_fireteam_ids, payload_member_loadouts),
+	}
+	_homebase_direct_launch_ready_craft_id = normalized_craft_id
+	_selected_unit_ids = normalized_unit_ids.duplicate()
+	_selected_fireteam_ids = normalized_fireteam_ids.duplicate()
+	_homebase_staged_unit_ids = PackedStringArray()
+	_available_team_units = _remove_units_by_id(_available_team_units, normalized_unit_ids)
+	_refresh_fob_screen()
+	_sync_fob_dropship_state_into_mission_planning(true)
+	_refresh_homebase_screen()
 	_refresh_map_screen()
 
 
@@ -326,6 +416,8 @@ func _on_homebase_aircraft_remove_requested(craft_id: String) -> void:
 		return
 	if _loaded_aircraft_cargo_by_craft.has(normalized_craft_id):
 		return
+	if _homebase_direct_payload_by_craft.has(normalized_craft_id):
+		return
 
 	var remaining_aircraft: Array = []
 	for craft_variant in _homebase_aircraft_definitions:
@@ -337,6 +429,7 @@ func _on_homebase_aircraft_remove_requested(craft_id: String) -> void:
 	_aircraft_location_by_craft.erase(normalized_craft_id)
 	_selected_aircraft_cargo_by_craft.erase(normalized_craft_id)
 	_loaded_aircraft_cargo_by_craft.erase(normalized_craft_id)
+	_clear_homebase_direct_payload_for_craft(normalized_craft_id)
 	_refresh_homebase_screen()
 
 
@@ -362,6 +455,8 @@ func _on_homebase_aircraft_pilot_assigned(craft_id: String, pilot_unit_id: Strin
 func _on_homebase_aircraft_pilot_cleared(craft_id: String) -> void:
 	var normalized_craft_id: String = craft_id.strip_edges()
 	if normalized_craft_id.is_empty():
+		return
+	if _homebase_direct_payload_by_craft.has(normalized_craft_id):
 		return
 	_assigned_aircraft_pilot_by_craft.erase(normalized_craft_id)
 	_refresh_homebase_screen()
@@ -416,6 +511,8 @@ func _on_homebase_aircraft_pilot_transfer_requested(craft_id: String, pilot_unit
 	if _has_active_homebase_pilot_transfer(normalized_craft_id):
 		return
 	if _has_active_homebase_cargo_load(normalized_craft_id):
+		return
+	if _homebase_direct_payload_by_craft.has(normalized_craft_id):
 		return
 	var selected_cargo_id: String = String(_selected_aircraft_cargo_by_craft.get(normalized_craft_id, "")).strip_edges()
 	var loaded_cargo_id: String = String(_loaded_aircraft_cargo_by_craft.get(normalized_craft_id, "")).strip_edges()
@@ -549,9 +646,9 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 		var gameplay_settings: Dictionary = Dictionary(GAME_SETTINGS_CONTRACT_SCRIPT.call("load_settings"))
 		mission_setup.set("fog_of_war_mode", String(gameplay_settings.get("fog_of_war_mode", "known_terrain")))
 
-		var fob_loadouts: Dictionary = _build_fob_member_loadouts()
-		if not fob_loadouts.is_empty():
-			mission_setup.set("member_loadouts", fob_loadouts)
+		var member_loadouts: Dictionary = _build_meta_member_loadouts()
+		if not member_loadouts.is_empty():
+			mission_setup.set("member_loadouts", member_loadouts)
 
 	var tactical_controller = mission_instance.get_node_or_null("TacticalController")
 	if tactical_controller != null:
@@ -1008,6 +1105,8 @@ func _refresh_homebase_screen() -> void:
 	var homebase_screen = _get_homebase_screen()
 	if homebase_screen == null:
 		return
+	if homebase_screen.has_method("set_direct_mission_prep_member_loadouts"):
+		homebase_screen.call("set_direct_mission_prep_member_loadouts", _homebase_direct_member_loadouts)
 	homebase_screen.setup_roster(_available_team_units, _homebase_staged_unit_ids)
 	homebase_screen.set_fireteam_context(_build_unassigned_fireteam_selection(_homebase_staged_unit_ids))
 	var selected_mission: Dictionary = _get_selected_mission_definition()
@@ -1026,18 +1125,20 @@ func _refresh_homebase_screen() -> void:
 		_aircraft_location_by_craft,
 		_selected_aircraft_cargo_by_craft,
 		_loaded_aircraft_cargo_by_craft,
-		_pending_homebase_cargo_loads
+		_pending_homebase_cargo_loads,
+		_build_homebase_direct_payload_snapshot_by_craft()
 	)
 	homebase_screen.set_mission_occupancy(_selected_unit_ids.size() + _count_assigned_aircraft_pilots(), _count_assigned_aircraft_pilots())
+	var direct_launch_ready: bool = _has_homebase_direct_mission_start_payload()
 	var fob_screen = _get_fob_screen()
 	if fob_screen != null and fob_screen.has_method("can_request_mission_start"):
 		var has_preview_deployed_payload: bool = _has_preview_deployed_mission_payload()
 		homebase_screen.set_mission_launch_state(
-			bool(fob_screen.call("can_request_mission_start")) or has_preview_deployed_payload,
-			"Fireteam already deployed on the mission map. Start live mission when ready." if has_preview_deployed_payload else String(fob_screen.call("get_mission_launch_summary"))
+			direct_launch_ready or bool(fob_screen.call("can_request_mission_start")) or has_preview_deployed_payload,
+			_build_homebase_direct_launch_summary() if direct_launch_ready else ("Fireteam already deployed on the mission map. Start live mission when ready." if has_preview_deployed_payload else String(fob_screen.call("get_mission_launch_summary")))
 		)
 	else:
-		homebase_screen.set_mission_launch_state(_has_preview_deployed_mission_payload(), "Fireteam already deployed on the mission map. Start live mission when ready.")
+		homebase_screen.set_mission_launch_state(direct_launch_ready or _has_preview_deployed_mission_payload(), _build_homebase_direct_launch_summary() if direct_launch_ready else "Fireteam already deployed on the mission map. Start live mission when ready.")
 	if homebase_screen.has_method("set_personnel_events"):
 		homebase_screen.call("set_personnel_events", Array(_last_mission_result.get("personnel_events", [])))
 
@@ -1079,6 +1180,7 @@ func _refresh_fob_screen() -> void:
 	_sync_fob_transfer_selection_from_screen()
 	var selected_mission: Dictionary = _get_selected_mission_definition()
 	var fireteam_definitions: Array = fob_screen.get_fireteam_definitions()
+	fireteam_definitions = _merge_homebase_direct_loadouts_into_fireteam_definitions(fireteam_definitions)
 	var transport_craft_states: Array = _build_transport_craft_states()
 	fob_screen.set_available_units(_build_fob_profile_unit_subset(transport_craft_states))
 	fob_screen.set_transport_craft_state(transport_craft_states)
@@ -1686,6 +1788,345 @@ func _build_fob_member_loadouts() -> Dictionary:
 	return result
 
 
+func _build_meta_member_loadouts() -> Dictionary:
+	var result: Dictionary = _build_fob_member_loadouts()
+	for unit_id_variant in _homebase_direct_member_loadouts.keys():
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty() or typeof(_homebase_direct_member_loadouts.get(unit_id_variant)) != TYPE_DICTIONARY:
+			continue
+		result[unit_id] = Dictionary(_homebase_direct_member_loadouts.get(unit_id_variant)).duplicate(true)
+	return result
+
+
+func _build_homebase_direct_payload_snapshot_by_craft() -> Dictionary:
+	var result: Dictionary = {}
+	for craft_id_variant in _homebase_direct_payload_by_craft.keys():
+		var craft_id: String = String(craft_id_variant).strip_edges()
+		if craft_id.is_empty() or typeof(_homebase_direct_payload_by_craft.get(craft_id_variant)) != TYPE_DICTIONARY:
+			continue
+		var payload: Dictionary = Dictionary(_homebase_direct_payload_by_craft.get(craft_id_variant)).duplicate(true)
+		if Array(payload.get("unit_ids", [])).is_empty():
+			continue
+		result[craft_id] = payload
+	return result
+
+
+func _has_homebase_direct_mission_start_payload() -> bool:
+	return _should_use_homebase_direct_drop_state(_build_homebase_direct_mission_drop_state())
+
+
+func _should_use_homebase_direct_drop_state(drop_state: Dictionary) -> bool:
+	if drop_state.is_empty():
+		return false
+	if not bool(drop_state.get("drop_ship_staged", false)):
+		return false
+	return not Array(drop_state.get("embarked_unit_ids", [])).is_empty()
+
+
+func _build_homebase_direct_launch_summary() -> String:
+	var drop_state: Dictionary = _build_homebase_direct_mission_drop_state()
+	var craft_name: String = String(drop_state.get("mission_drop_display_name", "Dropship")).strip_edges()
+	if craft_name.is_empty():
+		craft_name = "Dropship"
+	return "%s boarded in Homebase. Start live mission directly when ready." % craft_name
+
+
+func _build_homebase_direct_mission_drop_state() -> Dictionary:
+	var craft_id: String = _homebase_direct_launch_ready_craft_id.strip_edges()
+	if craft_id.is_empty() or typeof(_homebase_direct_payload_by_craft.get(craft_id)) != TYPE_DICTIONARY:
+		return {}
+	if _is_homebase_direct_craft_blocked(craft_id):
+		return {}
+	var payload: Dictionary = Dictionary(_homebase_direct_payload_by_craft.get(craft_id)).duplicate(true)
+	var unit_ids: PackedStringArray = _sanitize_homebase_direct_unit_ids(PackedStringArray(Array(payload.get("unit_ids", payload.get("embarked_unit_ids", [])))))
+	if unit_ids.is_empty():
+		return {}
+	var craft_definition: Dictionary = _find_homebase_aircraft_definition(craft_id)
+	var craft_name: String = String(craft_definition.get("display_name", craft_id)).strip_edges()
+	var pilot_unit_id: String = String(_assigned_aircraft_pilot_by_craft.get(craft_id, "")).strip_edges()
+	var fireteam_ids: PackedStringArray = _normalize_homebase_direct_fireteam_ids(unit_ids, PackedStringArray(Array(payload.get("fireteam_ids", []))))
+	var queued_fireteam_ids: PackedStringArray = _unique_homebase_direct_fireteam_ids(fireteam_ids)
+	var card: Dictionary = {
+		"craft_id": craft_id,
+		"display_name": craft_name,
+		"title_text": "#19 %s - HOMEBASE" % craft_name,
+		"texture_path": String(craft_definition.get("texture_path", "")).strip_edges(),
+		"state": "waiting",
+		"pilot_text": "Pilot: %s" % _resolve_unit_display_name(pilot_unit_id),
+		"status_line": "Status: staged in Homebase | direct mission prep | %d/%d NPC + pilot" % [unit_ids.size(), HOMEBASE_DIRECT_DROPSHIP_CAPACITY],
+		"progress": 100.0,
+		"eta_seconds": 0,
+		"pilot_unit_id": pilot_unit_id,
+		"pilot_display_name": _resolve_unit_display_name(pilot_unit_id),
+		"pilot_portrait_path": _resolve_unit_portrait_path(pilot_unit_id),
+		"passenger_count": unit_ids.size(),
+		"embarked_unit_ids": Array(unit_ids),
+		"boarded_fireteam_ids": Array(queued_fireteam_ids),
+		"queued_fireteam_ids": Array(queued_fireteam_ids),
+		"homebase_direct_payload": true,
+	}
+	return {
+		"transport_craft_id": craft_id,
+		"dropship_phase": "boarded",
+		"queued_fireteam_ids": Array(queued_fireteam_ids),
+		"boarded_fireteam_ids": Array(queued_fireteam_ids),
+		"embarked_unit_ids": Array(unit_ids),
+		"launch_ready_craft_id": craft_id,
+		"drop_ship_staged": true,
+		"mission_drop_craft_id": craft_id,
+		"mission_drop_display_name": craft_name,
+		"mission_drop_title_text": String(card.get("title_text", "")),
+		"mission_drop_texture_path": String(card.get("texture_path", "")),
+		"mission_drop_state": "waiting",
+		"mission_drop_pilot_text": String(card.get("pilot_text", "")),
+		"mission_drop_status_line": String(card.get("status_line", "")),
+		"mission_drop_progress": 100.0,
+		"mission_drop_eta_seconds": 0,
+		"mission_drop_pilot_unit_id": pilot_unit_id,
+		"mission_drop_pilot_display_name": _resolve_unit_display_name(pilot_unit_id),
+		"mission_drop_pilot_portrait_path": _resolve_unit_portrait_path(pilot_unit_id),
+		"mission_drop_passenger_count": unit_ids.size(),
+		"mission_drop_cards": [card],
+		"homebase_direct_payload": true,
+		"uses_fob_payload_contract": true,
+	}
+
+
+func _is_homebase_direct_craft_blocked(craft_id: String) -> bool:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return true
+	var craft_definition: Dictionary = _find_homebase_aircraft_definition(normalized_craft_id)
+	if craft_definition.is_empty():
+		return true
+	if String(craft_definition.get("craft_type", "dropship")).strip_edges().to_lower() != "dropship":
+		return true
+	if String(_aircraft_location_by_craft.get(normalized_craft_id, "homebase")).strip_edges().to_lower() != "homebase":
+		return true
+	if String(_assigned_aircraft_pilot_by_craft.get(normalized_craft_id, "")).strip_edges().is_empty():
+		return true
+	if _has_active_homebase_pilot_transfer(normalized_craft_id) or _has_active_homebase_cargo_load(normalized_craft_id):
+		return true
+	if _air_asset_recovery_by_craft.has(normalized_craft_id) and bool(AIR_ASSET_RECOVERY_STATE_SCRIPT.call("is_recovery_active", Dictionary(_air_asset_recovery_by_craft.get(normalized_craft_id, {})))):
+		return true
+	return false
+
+
+func _clear_homebase_direct_payload_for_craft(craft_id: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return
+	_homebase_direct_payload_by_craft.erase(normalized_craft_id)
+	if _homebase_direct_launch_ready_craft_id == normalized_craft_id:
+		_homebase_direct_launch_ready_craft_id = ""
+
+
+func _update_homebase_direct_payload_loadout(unit_id: String) -> void:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return
+	for craft_id_variant in _homebase_direct_payload_by_craft.keys():
+		var craft_id: String = String(craft_id_variant).strip_edges()
+		if craft_id.is_empty() or typeof(_homebase_direct_payload_by_craft.get(craft_id_variant)) != TYPE_DICTIONARY:
+			continue
+		var payload: Dictionary = Dictionary(_homebase_direct_payload_by_craft.get(craft_id_variant)).duplicate(true)
+		var unit_ids := PackedStringArray(Array(payload.get("unit_ids", [])))
+		if not unit_ids.has(normalized_unit_id):
+			continue
+		var member_loadouts: Dictionary = payload.get("member_loadouts", {}) if typeof(payload.get("member_loadouts", {})) == TYPE_DICTIONARY else {}
+		member_loadouts[normalized_unit_id] = Dictionary(_homebase_direct_member_loadouts.get(normalized_unit_id, {})).duplicate(true)
+		payload["member_loadouts"] = member_loadouts
+		_homebase_direct_payload_by_craft[craft_id] = payload
+
+
+func _prune_homebase_direct_member_loadouts() -> void:
+	var keep_unit_ids: Dictionary = {}
+	for unit_id_variant in _homebase_staged_unit_ids:
+		keep_unit_ids[String(unit_id_variant)] = true
+	for payload_variant in _homebase_direct_payload_by_craft.values():
+		if typeof(payload_variant) != TYPE_DICTIONARY:
+			continue
+		for unit_id_variant in Array(Dictionary(payload_variant).get("unit_ids", [])):
+			keep_unit_ids[String(unit_id_variant)] = true
+	var retained: Dictionary = {}
+	for unit_id_variant in _homebase_direct_member_loadouts.keys():
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty() or not keep_unit_ids.has(unit_id):
+			continue
+		retained[unit_id] = Dictionary(_homebase_direct_member_loadouts.get(unit_id_variant)).duplicate(true)
+	_homebase_direct_member_loadouts = retained
+
+
+func _merge_homebase_direct_loadouts_into_fireteam_definitions(source_definitions: Array) -> Array:
+	var result: Array = []
+	for definition_variant in source_definitions:
+		if typeof(definition_variant) == TYPE_DICTIONARY:
+			result.append(Dictionary(definition_variant).duplicate(true))
+	if _homebase_direct_member_loadouts.is_empty() and _homebase_direct_payload_by_craft.is_empty():
+		return result
+	var unit_ids: PackedStringArray = _selected_unit_ids.duplicate()
+	var fireteam_ids: PackedStringArray = _normalize_homebase_direct_fireteam_ids(unit_ids, _selected_fireteam_ids)
+	var direct_definitions: Array = _build_homebase_direct_fireteam_definitions(unit_ids, fireteam_ids, _build_homebase_direct_member_loadouts_for_units(unit_ids))
+	for direct_definition_variant in direct_definitions:
+		if typeof(direct_definition_variant) != TYPE_DICTIONARY:
+			continue
+		var direct_definition: Dictionary = Dictionary(direct_definition_variant)
+		var fireteam_id: String = String(direct_definition.get("id", "")).strip_edges().to_lower()
+		var replaced: bool = false
+		for index in range(result.size()):
+			if typeof(result[index]) != TYPE_DICTIONARY:
+				continue
+			var existing: Dictionary = Dictionary(result[index]).duplicate(true)
+			if String(existing.get("id", "")).strip_edges().to_lower() != fireteam_id:
+				continue
+			existing["member_loadouts"] = Dictionary(direct_definition.get("member_loadouts", {})).duplicate(true)
+			existing["member_unit_ids"] = PackedStringArray(Array(direct_definition.get("member_unit_ids", [])))
+			if String(existing.get("lead_unit_id", "")).strip_edges().is_empty():
+				existing["lead_unit_id"] = String(direct_definition.get("lead_unit_id", ""))
+			result[index] = existing
+			replaced = true
+			break
+		if not replaced:
+			result.append(direct_definition)
+	return result
+
+
+func _build_homebase_direct_fireteam_definitions(unit_ids: PackedStringArray, fireteam_ids: PackedStringArray, member_loadouts: Dictionary) -> Array:
+	var members_by_fireteam: Dictionary = {}
+	for unit_index in range(unit_ids.size()):
+		var unit_id: String = String(unit_ids[unit_index]).strip_edges()
+		if unit_id.is_empty():
+			continue
+		var fireteam_id: String = "ft1"
+		if unit_index < fireteam_ids.size():
+			fireteam_id = _normalize_homebase_direct_fireteam_id(String(fireteam_ids[unit_index]))
+		if fireteam_id.is_empty():
+			fireteam_id = "ft1"
+		var members: PackedStringArray = members_by_fireteam.get(fireteam_id, PackedStringArray())
+		if not members.has(unit_id):
+			members.append(unit_id)
+		members_by_fireteam[fireteam_id] = members
+	var definitions: Array = []
+	var fireteam_keys: Array = members_by_fireteam.keys()
+	fireteam_keys.sort()
+	for fireteam_id_variant in fireteam_keys:
+		var fireteam_id: String = String(fireteam_id_variant)
+		var members: PackedStringArray = members_by_fireteam.get(fireteam_id, PackedStringArray())
+		if members.is_empty():
+			continue
+		var fireteam_member_loadouts: Dictionary = {}
+		for unit_id_variant in members:
+			var unit_id: String = String(unit_id_variant)
+			fireteam_member_loadouts[unit_id] = Dictionary(member_loadouts.get(unit_id, _normalize_homebase_direct_member_loadout({}))).duplicate(true)
+		definitions.append({
+			"id": fireteam_id,
+			"label": fireteam_id.to_upper(),
+			"respawn_enabled": false,
+			"loadout": String(Dictionary(fireteam_member_loadouts.get(String(members[0]), {})).get("armor", "medium")),
+			"lead_unit_id": String(members[0]),
+			"member_unit_ids": members.duplicate(),
+			"member_loadouts": fireteam_member_loadouts,
+		})
+	return definitions
+
+
+func _sanitize_homebase_direct_unit_ids(unit_ids: PackedStringArray) -> PackedStringArray:
+	var sanitized: PackedStringArray = []
+	for unit_id_variant in unit_ids:
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty() or sanitized.has(unit_id) or not _is_known_roster_unit(unit_id):
+			continue
+		sanitized.append(unit_id)
+	return sanitized
+
+
+func _normalize_homebase_direct_fireteam_ids(unit_ids: PackedStringArray, fireteam_ids: PackedStringArray) -> PackedStringArray:
+	var normalized: PackedStringArray = []
+	for unit_index in range(unit_ids.size()):
+		var fireteam_id: String = ""
+		if unit_index < fireteam_ids.size():
+			fireteam_id = _normalize_homebase_direct_fireteam_id(String(fireteam_ids[unit_index]))
+		if fireteam_id.is_empty():
+			fireteam_id = "ft1"
+		normalized.append(fireteam_id)
+	return normalized
+
+
+func _normalize_homebase_direct_fireteam_id(value: String) -> String:
+	var normalized_value: String = value.strip_edges().to_lower()
+	if normalized_value.begins_with("ft") and normalized_value.length() > 2:
+		var suffix: String = normalized_value.substr(2)
+		if suffix.is_valid_int() and int(suffix) >= 1:
+			return "ft%d" % int(suffix)
+	return ""
+
+
+func _unique_homebase_direct_fireteam_ids(fireteam_ids: PackedStringArray) -> PackedStringArray:
+	var result: PackedStringArray = []
+	for fireteam_id_variant in fireteam_ids:
+		var fireteam_id: String = _normalize_homebase_direct_fireteam_id(String(fireteam_id_variant))
+		if fireteam_id.is_empty() or result.has(fireteam_id):
+			continue
+		result.append(fireteam_id)
+	return result
+
+
+func _build_homebase_direct_member_loadouts_for_units(unit_ids: PackedStringArray) -> Dictionary:
+	var result: Dictionary = {}
+	for unit_id_variant in unit_ids:
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty():
+			continue
+		result[unit_id] = _normalize_homebase_direct_member_loadout(Dictionary(_homebase_direct_member_loadouts.get(unit_id, {})))
+	return result
+
+
+func _sanitize_homebase_direct_member_loadouts(member_loadouts: Dictionary) -> Dictionary:
+	var result: Dictionary = {}
+	for unit_id_variant in member_loadouts.keys():
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty() or typeof(member_loadouts.get(unit_id_variant)) != TYPE_DICTIONARY:
+			continue
+		result[unit_id] = _normalize_homebase_direct_member_loadout(Dictionary(member_loadouts.get(unit_id_variant)))
+	return result
+
+
+func _normalize_homebase_direct_member_loadout(member_loadout: Dictionary) -> Dictionary:
+	return {
+		"armor": _normalize_homebase_direct_armor_id(String(member_loadout.get("armor", "medium"))),
+		"weapon_1": _normalize_homebase_direct_weapon_id(String(member_loadout.get("weapon_1", member_loadout.get("weapon", HOMEBASE_DIRECT_DEFAULT_WEAPON)))),
+		"weapon_2": _normalize_homebase_direct_weapon_id(String(member_loadout.get("weapon_2", HOMEBASE_DIRECT_DEFAULT_WEAPON))),
+	}
+
+
+func _normalize_homebase_direct_armor_id(value: String) -> String:
+	var normalized_value: String = value.strip_edges().to_lower()
+	if normalized_value == "standard":
+		return "medium"
+	if normalized_value == "light" or normalized_value == "medium" or normalized_value == "heavy":
+		return normalized_value
+	return "medium"
+
+
+func _normalize_homebase_direct_weapon_id(value: String) -> String:
+	var normalized_value: String = value.strip_edges().to_lower()
+	match normalized_value:
+		"smg", "maschinenpistole", "mp":
+			return "smg"
+		"rifle", "assault_rifle", "sturmgewehr":
+			return "rifle"
+		"sniper", "sniper_rifle", "sniper-rifle", "sniper rifle", "scharfschuetzengewehr", "praezisionsgewehr":
+			return "sniper"
+		"rocket_launcher", "rocket", "rocketlauncher", "rocket-launcher", "rocket launcher", "panzerfaust", "raketenwerfer":
+			return "rocket_launcher"
+		"medic_tool", "medic-tool", "medic tool", "medictool":
+			return "medictool"
+		"none", "no_weapon", "no-weapon", "no weapon", "unarmed", "keine_waffe", "keine-waffe", "keine waffe":
+			return "none"
+		_:
+			return HOMEBASE_DIRECT_DEFAULT_WEAPON
+
+
 func _build_homebase_transfer_route_entries() -> Array:
 	var route_entries: Array = []
 	for entry_variant in _pending_homebase_team_transfers:
@@ -1727,6 +2168,12 @@ func _build_homebase_transfer_route_entries() -> Array:
 
 
 func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: bool = false) -> void:
+	var direct_drop_state: Dictionary = _build_homebase_direct_mission_drop_state()
+	if _should_use_homebase_direct_drop_state(direct_drop_state):
+		var resolved_direct_state: Dictionary = _apply_selected_mission_drop_card_override(_merge_existing_mission_drop_card_planning_fields(direct_drop_state))
+		_apply_mission_drop_state_to_planning(resolved_direct_state, clear_deployed_unit_ids, true)
+		return
+
 	var fob_screen = _get_fob_screen()
 	if fob_screen == null or not fob_screen.has_method("build_mission_drop_state"):
 		_mission_planning_state["embarked_unit_ids"] = []
@@ -1738,39 +2185,28 @@ func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: boo
 		return
 
 	var drop_state: Dictionary = _apply_selected_mission_drop_card_override(_merge_existing_mission_drop_card_planning_fields(Dictionary(fob_screen.call("build_mission_drop_state")).duplicate(true)))
-	_mission_planning_state["embarked_unit_ids"] = Array(PackedStringArray(Array(drop_state.get("embarked_unit_ids", []))))
-	_mission_planning_state["drop_queued_fireteam_ids"] = Array(PackedStringArray(Array(drop_state.get("queued_fireteam_ids", []))))
-	_mission_planning_state["drop_ship_staged"] = bool(drop_state.get("drop_ship_staged", false))
-	_mission_planning_state["launch_ready_craft_id"] = String(drop_state.get("launch_ready_craft_id", "")).strip_edges()
-	_mission_planning_state["mission_drop_craft_id"] = String(drop_state.get("mission_drop_craft_id", "")).strip_edges()
-	_mission_planning_state["mission_drop_display_name"] = String(drop_state.get("mission_drop_display_name", "")).strip_edges()
-	_mission_planning_state["mission_drop_title_text"] = String(drop_state.get("mission_drop_title_text", "")).strip_edges()
-	_mission_planning_state["mission_drop_texture_path"] = String(drop_state.get("mission_drop_texture_path", "")).strip_edges()
-	_mission_planning_state["mission_drop_state"] = String(drop_state.get("mission_drop_state", "")).strip_edges()
-	_mission_planning_state["mission_drop_pilot_text"] = String(drop_state.get("mission_drop_pilot_text", "")).strip_edges()
-	_mission_planning_state["mission_drop_status_line"] = String(drop_state.get("mission_drop_status_line", "")).strip_edges()
-	_mission_planning_state["mission_drop_progress"] = float(drop_state.get("mission_drop_progress", 0.0))
-	_mission_planning_state["mission_drop_eta_seconds"] = int(drop_state.get("mission_drop_eta_seconds", 0))
-	_mission_planning_state["mission_drop_pilot_unit_id"] = String(drop_state.get("mission_drop_pilot_unit_id", "")).strip_edges()
-	_mission_planning_state["mission_drop_pilot_display_name"] = String(drop_state.get("mission_drop_pilot_display_name", "")).strip_edges()
-	_mission_planning_state["mission_drop_pilot_portrait_path"] = String(drop_state.get("mission_drop_pilot_portrait_path", "")).strip_edges()
-	_mission_planning_state["mission_drop_passenger_count"] = int(drop_state.get("mission_drop_passenger_count", 0))
-	_mission_planning_state["mission_drop_cards"] = Array(drop_state.get("mission_drop_cards", [])).duplicate(true)
-	_mission_planning_state["meta_transfer_routes"] = _build_homebase_transfer_route_entries()
-	if clear_deployed_unit_ids or not _mission_planning_state.has("deployed_unit_ids"):
-		_mission_planning_state["deployed_unit_ids"] = []
-	if clear_deployed_unit_ids:
-		_mission_planning_state["deployed_unit_positions"] = {}
-	if not _mission_planning_state.has("mission_drop_return_requested"):
-		_mission_planning_state["mission_drop_return_requested"] = false
+	_apply_mission_drop_state_to_planning(drop_state, clear_deployed_unit_ids, true)
 
 
 func _sync_mission_drop_transport_fields_from_fob() -> void:
+	var direct_drop_state: Dictionary = _build_homebase_direct_mission_drop_state()
+	if _should_use_homebase_direct_drop_state(direct_drop_state):
+		var resolved_direct_state: Dictionary = _apply_selected_mission_drop_card_override(_merge_existing_mission_drop_card_planning_fields(direct_drop_state))
+		_apply_mission_drop_state_to_planning(resolved_direct_state, false, false)
+		return
+
 	var fob_screen = _get_fob_screen()
 	if fob_screen == null or not fob_screen.has_method("build_mission_drop_state"):
 		return
 
 	var drop_state: Dictionary = _apply_selected_mission_drop_card_override(_merge_existing_mission_drop_card_planning_fields(Dictionary(fob_screen.call("build_mission_drop_state")).duplicate(true)))
+	_apply_mission_drop_state_to_planning(drop_state, false, false)
+
+
+func _apply_mission_drop_state_to_planning(drop_state: Dictionary, clear_deployed_unit_ids: bool, include_payload: bool) -> void:
+	if include_payload:
+		_mission_planning_state["embarked_unit_ids"] = Array(PackedStringArray(Array(drop_state.get("embarked_unit_ids", []))))
+		_mission_planning_state["drop_queued_fireteam_ids"] = Array(PackedStringArray(Array(drop_state.get("queued_fireteam_ids", []))))
 	_mission_planning_state["drop_ship_staged"] = bool(drop_state.get("drop_ship_staged", false))
 	_mission_planning_state["launch_ready_craft_id"] = String(drop_state.get("launch_ready_craft_id", "")).strip_edges()
 	_mission_planning_state["mission_drop_craft_id"] = String(drop_state.get("mission_drop_craft_id", "")).strip_edges()
@@ -1788,6 +2224,12 @@ func _sync_mission_drop_transport_fields_from_fob() -> void:
 	_mission_planning_state["mission_drop_passenger_count"] = int(drop_state.get("mission_drop_passenger_count", 0))
 	_mission_planning_state["mission_drop_cards"] = Array(drop_state.get("mission_drop_cards", [])).duplicate(true)
 	_mission_planning_state["meta_transfer_routes"] = _build_homebase_transfer_route_entries()
+	if include_payload and (clear_deployed_unit_ids or not _mission_planning_state.has("deployed_unit_ids")):
+		_mission_planning_state["deployed_unit_ids"] = []
+	if include_payload and clear_deployed_unit_ids:
+		_mission_planning_state["deployed_unit_positions"] = {}
+	if not _mission_planning_state.has("mission_drop_return_requested"):
+		_mission_planning_state["mission_drop_return_requested"] = false
 
 
 func _apply_selected_mission_drop_card_override(drop_state: Dictionary) -> Dictionary:

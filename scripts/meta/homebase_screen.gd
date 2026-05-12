@@ -21,11 +21,24 @@ const HOMEBASE_TRANSFER_GHOST_CARD_SIZE := Vector2(316.0, 74.0)
 const HOMEBASE_SHIPCARD_IMAGE_SIZE := Vector2(248.0, 164.0)
 const HOMEBASE_SHIPCARD_BUTTON_SIZE := Vector2(166.0, 114.0)
 const HOMEBASE_SHIPCARD_IMAGE_OFFSET := Vector2(-58.0, -36.0)
+const HOMEBASE_DIRECT_DROPSHIP_CAPACITY := 6
+const HOMEBASE_DIRECT_DEFAULT_WEAPON := "smg"
+const HOMEBASE_DIRECT_ARMOR_OPTIONS := ["light", "medium", "heavy"]
+const HOMEBASE_DIRECT_WEAPON_OPTIONS: Array = [
+	{"id": "smg", "label": "SMG"},
+	{"id": "rifle", "label": "Rifle"},
+	{"id": "sniper", "label": "Sniper"},
+	{"id": "rocket_launcher", "label": "Rocket"},
+	{"id": "medictool", "label": "Medictool"},
+	{"id": "none", "label": "None"},
+]
 
 signal selection_changed(selected_unit_ids)
 signal team_confirmed(selected_unit_ids)
 signal mission_selection_changed(mission_id)
 signal mission_start_requested()
+signal direct_mission_prep_loadout_changed(unit_id, member_loadout)
+signal direct_dropship_board_requested(craft_id, unit_ids, fireteam_ids, member_loadouts)
 signal aircraft_pilot_assigned(craft_id, pilot_unit_id)
 signal aircraft_pilot_cleared(craft_id)
 signal aircraft_pilot_transfer_requested(craft_id, pilot_unit_id)
@@ -58,11 +71,15 @@ var _assigned_pilot_by_craft: Dictionary = {}
 var _aircraft_location_by_craft: Dictionary = {}
 var _selected_cargo_by_craft: Dictionary = {}
 var _loaded_cargo_by_craft: Dictionary = {}
+var _direct_member_loadouts: Dictionary = {}
+var _direct_payload_by_craft: Dictionary = {}
 var _team_transfer_entries: Array = []
 var _pilot_transfer_entries: Array = []
 var _cargo_load_entries: Array = []
 var _selected_aircraft_id: String = ""
 var _personnel_events: Array = []
+var _character_sheet_popup_open: bool = false
+var _character_sheet_popup_unit_id: String = ""
 
 
 func _ready() -> void:
@@ -83,6 +100,8 @@ func _ready() -> void:
 	_configure_flightdeck_option_button(mission_selector)
 	_configure_flightdeck_option_button(aircraft_selector)
 	_configure_flightdeck_option_button(cargo_selector)
+	_ensure_direct_mission_prep_panel()
+	_ensure_character_sheet_popup()
 	if not confirm_button.pressed.is_connected(_on_confirm_button_pressed):
 		confirm_button.pressed.connect(_on_confirm_button_pressed)
 	if not mission_selector.item_selected.is_connected(_on_mission_selector_item_selected):
@@ -159,16 +178,19 @@ func set_transport_state(
 	aircraft_location_by_craft: Dictionary = {},
 	selected_cargo_by_craft: Dictionary = {},
 	loaded_cargo_by_craft: Dictionary = {},
-	cargo_load_entries: Array = []
+	cargo_load_entries: Array = [],
+	direct_payload_by_craft: Dictionary = {}
 ) -> void:
 	_aircraft_definitions = aircraft_definitions.duplicate(true)
 	_assigned_pilot_by_craft = assigned_pilot_by_craft.duplicate(true)
 	_aircraft_location_by_craft = aircraft_location_by_craft.duplicate(true)
 	_selected_cargo_by_craft = selected_cargo_by_craft.duplicate(true)
 	_loaded_cargo_by_craft = loaded_cargo_by_craft.duplicate(true)
+	_direct_payload_by_craft = _sanitize_direct_payload_by_craft(direct_payload_by_craft)
 	_team_transfer_entries = team_transfer_entries.duplicate(true)
 	_pilot_transfer_entries = pilot_transfer_entries.duplicate(true)
 	_cargo_load_entries = cargo_load_entries.duplicate(true)
+	_rebuild_profiles()
 	_selected_unit_ids = _normalize_selected_unit_ids(_selected_unit_ids)
 	_selected_fireteam_ids = _normalize_selected_fireteam_ids(_selected_fireteam_ids)
 	if is_inside_tree():
@@ -211,6 +233,79 @@ func get_personnel_notification_snapshot() -> Dictionary:
 	}
 
 
+func set_direct_mission_prep_member_loadouts(member_loadouts: Dictionary) -> void:
+	_direct_member_loadouts = _sanitize_direct_member_loadouts(member_loadouts)
+	if is_inside_tree():
+		_update_direct_mission_prep_panel()
+		_update_character_sheet()
+		_update_character_sheet_popup()
+
+
+func get_direct_mission_prep_snapshot() -> Dictionary:
+	var selected_craft: Dictionary = _get_selected_aircraft_definition()
+	var selected_craft_id: String = String(selected_craft.get("craft_id", _selected_aircraft_id)).strip_edges()
+	return {
+		"enabled": true,
+		"homebase_direct_mission_prep": true,
+		"fob_bypass_available": true,
+		"ui_sets_gameplay_truth": false,
+		"uses_shared_mission_drop_payload_contract": true,
+		"staged_unit_ids": Array(_selected_unit_ids),
+		"selected_fireteam_ids": Array(_build_direct_fireteam_selection(_selected_unit_ids)),
+		"loadout_visible": _node_is_visible("Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/DirectMissionPrepPanel"),
+		"loadout_entries": _build_direct_loadout_entries(_selected_unit_ids),
+		"flightdeck_visible": _node_is_visible("Panel/Margin/VBox/ContentRow/AircraftPanel"),
+		"selected_craft_id": selected_craft_id,
+		"selected_craft_can_board": _can_board_direct_mission_payload(selected_craft, selected_craft_id) if not selected_craft.is_empty() else false,
+		"boardable_craft_ids": Array(_get_direct_boardable_craft_ids()),
+		"direct_payload_by_craft": _direct_payload_by_craft.duplicate(true),
+		"mission_launch_ready": _mission_launch_ready,
+		"character_sheet_popup_available": get_node_or_null("CharacterSheetPopup") != null,
+		"character_sheet_popup": get_character_sheet_popup_snapshot(),
+	}
+
+
+func get_character_sheet_popup_snapshot() -> Dictionary:
+	var popup := get_node_or_null("CharacterSheetPopup") as Control
+	var content_host := _get_character_sheet_popup_content_host()
+	return {
+		"available": popup != null,
+		"open": popup != null and popup.visible,
+		"unit_id": _character_sheet_popup_unit_id,
+		"uses_existing_character_sheet_view": true,
+		"content_child_count": content_host.get_child_count() if content_host != null else 0,
+	}
+
+
+func open_character_sheet_popup_for_unit(unit_id: String) -> void:
+	_open_character_sheet_popup(unit_id)
+
+
+func close_character_sheet_popup() -> void:
+	_character_sheet_popup_open = false
+	_update_character_sheet_popup_visibility()
+
+
+func set_direct_member_loadout_for_test(unit_id: String, armor_id: String, weapon_1_id: String, weapon_2_id: String) -> void:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return
+	var member_loadout: Dictionary = _make_direct_member_loadout(armor_id, weapon_1_id, weapon_2_id)
+	_direct_member_loadouts[normalized_unit_id] = member_loadout
+	direct_mission_prep_loadout_changed.emit(normalized_unit_id, member_loadout.duplicate(true))
+	if is_inside_tree():
+		_update_direct_mission_prep_panel()
+		_update_character_sheet()
+		_update_character_sheet_popup()
+
+
+func request_direct_dropship_board_for_test(craft_id: String = "") -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		normalized_craft_id = _selected_aircraft_id
+	_request_direct_dropship_board(normalized_craft_id)
+
+
 func get_aircraft_panel_snapshot() -> Dictionary:
 	var selected_craft: Dictionary = _get_selected_aircraft_definition()
 	return {
@@ -228,6 +323,8 @@ func get_aircraft_panel_snapshot() -> Dictionary:
 		"flightdeck_stage_visible": _node_is_visible("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/DropLightFlightdeckStage"),
 		"deck_activity_visible": _node_is_visible("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftTransfersScroll"),
 		"shipcards_are_primary_status": true,
+		"direct_payload_by_craft": _direct_payload_by_craft.duplicate(true),
+		"direct_boarding_uses_mission_drop_payload_contract": true,
 	}
 
 
@@ -245,7 +342,41 @@ func confirm_selection() -> void:
 
 
 func _rebuild_profiles() -> void:
-	_profiles_by_id = META_UNIT_PROFILE_BUILDER_SCRIPT.build_profiles_by_unit_id(_available_units)
+	_profiles_by_id = META_UNIT_PROFILE_BUILDER_SCRIPT.build_profiles_by_unit_id(_build_homebase_profile_source_units())
+
+
+func _build_homebase_profile_source_units() -> Array:
+	var result: Array = []
+	var seen_unit_ids: Dictionary = {}
+	for unit_variant in _available_units:
+		if typeof(unit_variant) != TYPE_DICTIONARY:
+			continue
+		var unit_data: Dictionary = Dictionary(unit_variant).duplicate(true)
+		var unit_id: String = String(unit_data.get("unit_id", "")).strip_edges()
+		if unit_id.is_empty() or seen_unit_ids.has(unit_id):
+			continue
+		result.append(unit_data)
+		seen_unit_ids[unit_id] = true
+	for payload_variant in _direct_payload_by_craft.values():
+		if typeof(payload_variant) != TYPE_DICTIONARY:
+			continue
+		var payload: Dictionary = Dictionary(payload_variant)
+		for unit_profile_variant in Array(payload.get("unit_profiles", [])):
+			if typeof(unit_profile_variant) != TYPE_DICTIONARY:
+				continue
+			var unit_profile: Dictionary = Dictionary(unit_profile_variant).duplicate(true)
+			var unit_id: String = String(unit_profile.get("unit_id", "")).strip_edges()
+			if unit_id.is_empty() or seen_unit_ids.has(unit_id):
+				continue
+			result.append(unit_profile)
+			seen_unit_ids[unit_id] = true
+		for unit_id_variant in Array(payload.get("unit_ids", payload.get("embarked_unit_ids", []))):
+			var unit_id: String = String(unit_id_variant).strip_edges()
+			if unit_id.is_empty() or seen_unit_ids.has(unit_id):
+				continue
+			result.append({"unit_id": unit_id, "display_name": unit_id.replace("_", " ").capitalize(), "role_name": "Operator"})
+			seen_unit_ids[unit_id] = true
+	return result
 
 
 func _rebuild_ui() -> void:
@@ -253,14 +384,18 @@ func _rebuild_ui() -> void:
 	_ensure_selected_aircraft_id()
 	_apply_block_labels()
 	_apply_homebase_compact_panel_policy()
+	_ensure_direct_mission_prep_panel()
+	_ensure_character_sheet_popup()
 	_render_roster()
 	_render_staged_team()
 	_update_mission_info()
 	_update_team_summary()
+	_update_direct_mission_prep_panel()
 	_update_team_transfer_list()
 	_update_aircraft_panel()
 	_update_character_sheet()
 	_update_character_sheet_visibility()
+	_update_character_sheet_popup()
 	_update_drop_light_flightdeck_stage()
 	_apply_mission_brief_contrast_policy()
 	_apply_contextual_help_ids()
@@ -273,6 +408,7 @@ func _apply_contextual_help_ids() -> void:
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox/RosterScroll"), "homebase.roster")
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/ContentRow/TeamPanel"), "homebase.transfer_team")
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamHeaderRow/TeamHeaderLabel"), "homebase.transfer_team")
+	_apply_help_id(get_node_or_null("Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/DirectMissionPrepPanel"), "homebase.direct_mission_prep")
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamDropPanel"), "homebase.transfer_team")
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamDropPanel/DropMargin/DropVBox/SelectedTeamScroll"), "homebase.transfer_team")
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/ActiveTransfersScroll"), "homebase.transfer_team")
@@ -454,6 +590,137 @@ func _ensure_drop_light_flightdeck_stage() -> void:
 		insert_index = shipcards_scroll.get_index()
 	aircraft_vbox.add_child(stage_panel)
 	aircraft_vbox.move_child(stage_panel, insert_index)
+
+
+func _ensure_direct_mission_prep_panel() -> void:
+	var team_vbox := get_node_or_null("Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox") as VBoxContainer
+	if team_vbox == null or team_vbox.get_node_or_null("DirectMissionPrepPanel") != null:
+		return
+
+	var panel := PanelContainer.new()
+	panel.name = "DirectMissionPrepPanel"
+	panel.custom_minimum_size = Vector2(0.0, 156.0)
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	panel.set_meta("homebase_direct_mission_prep_panel", true)
+	panel.set_meta("uses_shared_mission_drop_payload_contract", true)
+	META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "thin_frame")
+
+	var margin := MarginContainer.new()
+	margin.name = "Margin"
+	margin.add_theme_constant_override("margin_left", 6)
+	margin.add_theme_constant_override("margin_top", 6)
+	margin.add_theme_constant_override("margin_right", 6)
+	margin.add_theme_constant_override("margin_bottom", 6)
+	panel.add_child(margin)
+
+	var vbox := VBoxContainer.new()
+	vbox.name = "VBox"
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.add_theme_constant_override("separation", 3)
+	margin.add_child(vbox)
+
+	var header := Label.new()
+	header.name = "DirectPrepHeaderLabel"
+	header.text = "Direct Mission Prep"
+	header.add_theme_font_size_override("font_size", 10)
+	META_UI_SKIN_SCRIPT.style_header_label(header, 10)
+	vbox.add_child(header)
+
+	var status_label := Label.new()
+	status_label.name = "DirectPrepStatusLabel"
+	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	status_label.add_theme_font_size_override("font_size", 8)
+	META_UI_SKIN_SCRIPT.style_body_label(status_label, 8)
+	vbox.add_child(status_label)
+
+	var scroll := ScrollContainer.new()
+	scroll.name = "DirectLoadoutScroll"
+	scroll.custom_minimum_size = Vector2(0.0, 92.0)
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	vbox.add_child(scroll)
+
+	var loadout_list := VBoxContainer.new()
+	loadout_list.name = "DirectLoadoutList"
+	loadout_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	loadout_list.add_theme_constant_override("separation", 3)
+	scroll.add_child(loadout_list)
+
+	var insert_index: int = team_vbox.get_child_count()
+	var team_hint := team_vbox.get_node_or_null("TeamHintLabel")
+	if team_hint != null:
+		insert_index = team_hint.get_index()
+	team_vbox.add_child(panel)
+	team_vbox.move_child(panel, insert_index)
+
+
+func _ensure_character_sheet_popup() -> void:
+	if get_node_or_null("CharacterSheetPopup") != null:
+		return
+	var popup := PanelContainer.new()
+	popup.name = "CharacterSheetPopup"
+	popup.visible = false
+	popup.set_as_top_level(true)
+	popup.position = Vector2(584.0, 128.0)
+	popup.size = Vector2(760.0, 820.0)
+	popup.custom_minimum_size = popup.size
+	popup.z_index = 80
+	popup.set_meta("homebase_character_sheet_popup", true)
+	popup.set_meta("uses_existing_character_sheet_view", true)
+	META_UI_SKIN_SCRIPT.style_tactical_panel(popup, "header")
+	add_child(popup)
+
+	var margin := MarginContainer.new()
+	margin.name = "Margin"
+	margin.add_theme_constant_override("margin_left", 10)
+	margin.add_theme_constant_override("margin_top", 10)
+	margin.add_theme_constant_override("margin_right", 10)
+	margin.add_theme_constant_override("margin_bottom", 10)
+	popup.add_child(margin)
+
+	var vbox := VBoxContainer.new()
+	vbox.name = "VBox"
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	vbox.add_theme_constant_override("separation", 6)
+	margin.add_child(vbox)
+
+	var header_row := HBoxContainer.new()
+	header_row.name = "HeaderRow"
+	header_row.add_theme_constant_override("separation", 8)
+	vbox.add_child(header_row)
+
+	var header_label := Label.new()
+	header_label.name = "PopupHeaderLabel"
+	header_label.text = "Character Sheet"
+	header_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header_label.add_theme_font_size_override("font_size", 13)
+	META_UI_SKIN_SCRIPT.style_header_label(header_label, 13)
+	header_row.add_child(header_label)
+
+	var close_button := Button.new()
+	close_button.name = "ClosePopupButton"
+	close_button.text = "Close"
+	close_button.custom_minimum_size = Vector2(72.0, 24.0)
+	close_button.add_theme_font_size_override("font_size", 9)
+	META_UI_SKIN_SCRIPT.style_secondary_button(close_button)
+	close_button.pressed.connect(close_character_sheet_popup)
+	header_row.add_child(close_button)
+
+	var scroll := ScrollContainer.new()
+	scroll.name = "PopupScroll"
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	vbox.add_child(scroll)
+
+	var content := VBoxContainer.new()
+	content.name = "GeneratedPopupSheetContent"
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.add_theme_constant_override("separation", 8)
+	scroll.add_child(content)
 
 
 func _apply_block_labels() -> void:
@@ -706,6 +973,104 @@ func _update_team_summary() -> void:
 		team_drop_panel.set_drop_enabled(_selected_unit_ids.size() < _get_team_capacity())
 
 
+func _update_direct_mission_prep_panel() -> void:
+	_ensure_direct_mission_prep_panel()
+	var status_label := get_node_or_null("Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/DirectMissionPrepPanel/Margin/VBox/DirectPrepStatusLabel") as Label
+	var loadout_list := get_node_or_null("Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/DirectMissionPrepPanel/Margin/VBox/DirectLoadoutScroll/DirectLoadoutList") as VBoxContainer
+	if status_label == null or loadout_list == null:
+		return
+	_clear_container(loadout_list)
+	if _selected_unit_ids.is_empty():
+		status_label.text = "Stage operators here to prep FT1 loadout before boarding a Homebase dropship."
+		loadout_list.add_child(_build_empty_state_label("No direct mission team staged."))
+		return
+	status_label.text = "FT1 direct prep: %d operator(s), editable loadout, then Board on a dropship card." % _selected_unit_ids.size()
+	for unit_id_variant in _selected_unit_ids:
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty():
+			continue
+		loadout_list.add_child(_build_direct_loadout_row(unit_id))
+
+
+func _build_direct_loadout_row(unit_id: String) -> Control:
+	var row_panel := PanelContainer.new()
+	row_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row_panel.custom_minimum_size = Vector2(0.0, 38.0)
+	row_panel.set_meta("homebase_direct_loadout_row", true)
+	row_panel.set_meta("unit_id", unit_id)
+	var stylebox := StyleBoxFlat.new()
+	stylebox.bg_color = Color(0.10, 0.13, 0.15, 0.92)
+	stylebox.border_color = Color(0.28, 0.34, 0.40, 1.0)
+	stylebox.border_width_left = 1
+	stylebox.border_width_top = 1
+	stylebox.border_width_right = 1
+	stylebox.border_width_bottom = 1
+	stylebox.corner_radius_top_left = 6
+	stylebox.corner_radius_top_right = 6
+	stylebox.corner_radius_bottom_left = 6
+	stylebox.corner_radius_bottom_right = 6
+	row_panel.add_theme_stylebox_override("panel", stylebox)
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 5)
+	margin.add_theme_constant_override("margin_top", 4)
+	margin.add_theme_constant_override("margin_right", 5)
+	margin.add_theme_constant_override("margin_bottom", 4)
+	row_panel.add_child(margin)
+
+	var row := HBoxContainer.new()
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_theme_constant_override("separation", 4)
+	margin.add_child(row)
+
+	var name_label := Label.new()
+	name_label.text = _build_display_name(unit_id)
+	name_label.clip_text = true
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_label.custom_minimum_size = Vector2(74.0, 0.0)
+	name_label.add_theme_font_size_override("font_size", 8)
+	META_UI_SKIN_SCRIPT.style_body_label(name_label, 8)
+	row.add_child(name_label)
+
+	var ft_label := Label.new()
+	ft_label.text = "FT1"
+	ft_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ft_label.custom_minimum_size = Vector2(28.0, 0.0)
+	ft_label.add_theme_font_size_override("font_size", 8)
+	META_UI_SKIN_SCRIPT.style_body_label(ft_label, 8)
+	row.add_child(ft_label)
+
+	var member_loadout: Dictionary = _get_direct_member_loadout(unit_id)
+	var armor_select := _build_direct_loadout_select("ArmorSelect", 54.0)
+	_populate_direct_armor_option_button(armor_select, String(member_loadout.get("armor", "medium")))
+	armor_select.item_selected.connect(_on_direct_loadout_option_selected.bind(unit_id, "armor", armor_select))
+	row.add_child(armor_select)
+
+	var weapon_1_select := _build_direct_loadout_select("Weapon1Select", 58.0)
+	_populate_direct_weapon_option_button(weapon_1_select, String(member_loadout.get("weapon_1", HOMEBASE_DIRECT_DEFAULT_WEAPON)))
+	weapon_1_select.item_selected.connect(_on_direct_loadout_option_selected.bind(unit_id, "weapon_1", weapon_1_select))
+	row.add_child(weapon_1_select)
+
+	var weapon_2_select := _build_direct_loadout_select("Weapon2Select", 58.0)
+	_populate_direct_weapon_option_button(weapon_2_select, String(member_loadout.get("weapon_2", HOMEBASE_DIRECT_DEFAULT_WEAPON)))
+	weapon_2_select.item_selected.connect(_on_direct_loadout_option_selected.bind(unit_id, "weapon_2", weapon_2_select))
+	row.add_child(weapon_2_select)
+	return row_panel
+
+
+func _build_direct_loadout_select(control_name: String, min_width: float) -> OptionButton:
+	var option_button := OptionButton.new()
+	option_button.name = control_name
+	option_button.custom_minimum_size = Vector2(min_width, 22.0)
+	option_button.add_theme_font_size_override("font_size", 8)
+	option_button.clip_text = true
+	option_button.set_meta("compact_loadout_dropdown", true)
+	option_button.set_meta("homebase_direct_loadout_dropdown", true)
+	_configure_flightdeck_option_button(option_button)
+	META_UI_SKIN_SCRIPT.style_secondary_button(option_button)
+	return option_button
+
+
 func _update_mission_info() -> void:
 	var mission_selector: OptionButton = get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/MissionSelector")
 	var start_mission_button: Button = get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/StartMissionButton")
@@ -925,6 +1290,9 @@ func _build_drop_light_craft_stage_text(craft_def: Dictionary) -> String:
 		return "%s\n%s\n%s ETA %ds" % [craft_name, pilot_text, action, int(craft_def.get("air_asset_recovery_eta_seconds", 0))]
 	if _is_craft_in_transit(craft_id):
 		return "%s\n%s\nETA %s" % [craft_name, pilot_text, _build_transfer_eta_text(_find_transfer_entry_for_craft(craft_id))]
+	var direct_payload_count: int = _get_direct_payload_unit_ids(craft_id).size()
+	if direct_payload_count > 0:
+		return "%s\n%s\nMission payload %d/%d" % [craft_name, pilot_text, direct_payload_count, HOMEBASE_DIRECT_DROPSHIP_CAPACITY]
 	var cargo_text: String = _build_cargo_display_name(craft_def, _get_loaded_cargo_id(craft_id))
 	if not cargo_text.is_empty():
 		return "%s\n%s\n%s" % [craft_name, pilot_text, cargo_text]
@@ -933,20 +1301,66 @@ func _build_drop_light_craft_stage_text(craft_def: Dictionary) -> String:
 
 func _update_character_sheet() -> void:
 	var profile = _profiles_by_id.get(_focused_unit_id, null)
+	var options: Dictionary = {
+		"status_text": _build_sheet_status_text(_focused_unit_id),
+		"fireteam_text": _build_homebase_fireteam_text(_focused_unit_id),
+		"editable_metrics": false,
+		"hide_loadout_dropdowns": true,
+	}
+	if _direct_member_loadouts.has(_focused_unit_id):
+		options["loadout_text"] = _build_direct_loadout_text(_focused_unit_id)
 	CHARACTER_SHEET_VIEW_SCRIPT.render(
 		_get_character_sheet_content_host(),
 		profile,
-		{
-			"status_text": _build_sheet_status_text(_focused_unit_id),
-			"fireteam_text": _build_homebase_fireteam_text(_focused_unit_id),
-			"editable_metrics": false,
-			"hide_loadout_dropdowns": true,
-		}
+		options
 	)
 
 
 func _get_character_sheet_content_host() -> VBoxContainer:
 	return get_node("Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/GeneratedSheetContent") as VBoxContainer
+
+
+func _update_character_sheet_popup() -> void:
+	if not _character_sheet_popup_open:
+		_update_character_sheet_popup_visibility()
+		return
+	var content_host := _get_character_sheet_popup_content_host()
+	if content_host == null:
+		return
+	var profile = _profiles_by_id.get(_character_sheet_popup_unit_id, null)
+	var options: Dictionary = {
+		"status_text": _build_sheet_status_text(_character_sheet_popup_unit_id),
+		"fireteam_text": _build_homebase_fireteam_text(_character_sheet_popup_unit_id),
+		"editable_metrics": false,
+		"two_column_layout": true,
+		"show_badge_progress": true,
+		"hide_loadout_dropdowns": true,
+	}
+	if _direct_member_loadouts.has(_character_sheet_popup_unit_id):
+		options["loadout_text"] = _build_direct_loadout_text(_character_sheet_popup_unit_id)
+	CHARACTER_SHEET_VIEW_SCRIPT.render(content_host, profile, options)
+	_update_character_sheet_popup_visibility()
+
+
+func _get_character_sheet_popup_content_host() -> VBoxContainer:
+	return get_node_or_null("CharacterSheetPopup/Margin/VBox/PopupScroll/GeneratedPopupSheetContent") as VBoxContainer
+
+
+func _update_character_sheet_popup_visibility() -> void:
+	var popup := get_node_or_null("CharacterSheetPopup") as Control
+	if popup == null:
+		return
+	popup.visible = _character_sheet_popup_open
+
+
+func _open_character_sheet_popup(unit_id: String) -> void:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return
+	_ensure_character_sheet_popup()
+	_character_sheet_popup_unit_id = normalized_unit_id
+	_character_sheet_popup_open = true
+	_update_character_sheet_popup()
 
 
 func _on_compact_card_pressed(unit_id: String, _profile, _source_context: String) -> void:
@@ -967,6 +1381,7 @@ func _on_compact_card_open_requested(unit_id: String, _profile, _source_context:
 	_update_team_summary()
 	_update_character_sheet()
 	_update_character_sheet_visibility()
+	_open_character_sheet_popup(unit_id)
 	_refresh_card_highlights()
 
 
@@ -1093,10 +1508,34 @@ func _on_load_cargo_button_pressed() -> void:
 	aircraft_cargo_load_requested.emit(craft_id, cargo_id)
 
 
+func _on_direct_loadout_option_selected(index: int, unit_id: String, field_id: String, option_button: OptionButton) -> void:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	var normalized_field_id: String = field_id.strip_edges().to_lower()
+	if normalized_unit_id.is_empty() or option_button == null or index < 0 or index >= option_button.item_count:
+		return
+	var selected_id: String = String(option_button.get_item_metadata(index)).strip_edges()
+	var member_loadout: Dictionary = _get_direct_member_loadout(normalized_unit_id)
+	match normalized_field_id:
+		"armor":
+			member_loadout["armor"] = _normalize_direct_armor_id(selected_id)
+		"weapon_1", "weapon_2":
+			member_loadout[normalized_field_id] = _normalize_direct_weapon_id(selected_id)
+		_:
+			return
+	_direct_member_loadouts[normalized_unit_id] = member_loadout
+	direct_mission_prep_loadout_changed.emit(normalized_unit_id, member_loadout.duplicate(true))
+	_update_character_sheet()
+	_update_character_sheet_popup()
+
+
 func _on_clear_pilot_button_pressed(craft_id: String) -> void:
 	var normalized_craft_id: String = craft_id.strip_edges()
 	_selected_aircraft_id = normalized_craft_id
 	if normalized_craft_id.is_empty() or not _assigned_pilot_by_craft.has(normalized_craft_id):
+		return
+	if _has_direct_payload_for_craft(normalized_craft_id):
+		_aircraft_feedback_text = "Unload the direct mission payload before clearing this pilot."
+		_update_aircraft_panel()
 		return
 	var pilot_id: String = String(_assigned_pilot_by_craft.get(normalized_craft_id, "")).strip_edges()
 	_assigned_pilot_by_craft.erase(normalized_craft_id)
@@ -1118,6 +1557,10 @@ func _on_send_pilot_button_pressed(craft_id: String) -> void:
 		" with %s" % cargo_text if not cargo_text.is_empty() else "",
 	]
 	aircraft_pilot_transfer_requested.emit(normalized_craft_id, pilot_id)
+
+
+func _on_shipcard_board_direct_pressed(craft_id: String) -> void:
+	_request_direct_dropship_board(craft_id)
 
 
 func _on_shipcard_select_requested(craft_id: String) -> void:
@@ -1417,6 +1860,10 @@ func _populate_mission_selector(selector: OptionButton) -> void:
 
 
 func _build_sheet_status_text(unit_id: String) -> String:
+	var direct_craft_id: String = _find_direct_payload_craft_for_unit(unit_id)
+	if not direct_craft_id.is_empty():
+		return "Loc: Homebase / Dropship | Status: boarded for direct mission on %s" % _build_craft_display_name(direct_craft_id)
+
 	var assigned_craft_id: String = _find_assigned_craft_for_unit(unit_id)
 	if not assigned_craft_id.is_empty():
 		return "Loc: Homebase / Flight Deck | Status: assigned pilot for %s" % _build_craft_display_name(assigned_craft_id)
@@ -1432,6 +1879,8 @@ func _build_sheet_status_text(unit_id: String) -> String:
 
 
 func _build_homebase_fireteam_text(unit_id: String) -> String:
+	if not _find_direct_payload_craft_for_unit(unit_id).is_empty():
+		return CHARACTER_SHEET_FORMATTER_SCRIPT.format_fireteam_label("ft1")
 	return CHARACTER_SHEET_FORMATTER_SCRIPT.format_fireteam_label(_get_selected_fireteam_id_for_unit(unit_id))
 
 
@@ -1443,6 +1892,10 @@ func _get_selected_fireteam_id_for_unit(unit_id: String) -> String:
 
 
 func _build_homebase_location_text(unit_id: String) -> String:
+	var direct_craft_id: String = _find_direct_payload_craft_for_unit(unit_id)
+	if not direct_craft_id.is_empty():
+		return "Loc: Homebase / Dropship / %s" % _build_craft_display_name(direct_craft_id)
+
 	var assigned_craft_id: String = _find_assigned_craft_for_unit(unit_id)
 	if not assigned_craft_id.is_empty():
 		return "Loc: Homebase / Flight Deck / %s" % _build_craft_display_name(assigned_craft_id)
@@ -1497,6 +1950,7 @@ func _build_aircraft_status_text(craft_def: Dictionary, craft_name: String, assi
 	if not _aircraft_feedback_text.is_empty():
 		return _aircraft_feedback_text
 	var craft_id: String = String(craft_def.get("craft_id", "")).strip_edges()
+	var direct_payload_count: int = _get_direct_payload_unit_ids(craft_id).size()
 	if bool(craft_def.get("air_asset_unavailable", false)):
 		var meta_state: String = String(craft_def.get("air_asset_meta_status", "")).strip_edges()
 		var label: String = "replacement pending" if meta_state == "destroyed_replacement_pending" else "repairing"
@@ -1507,6 +1961,8 @@ func _build_aircraft_status_text(craft_def: Dictionary, craft_name: String, assi
 		return "%s is currently loading %s at Homebase." % [craft_name, _build_cargo_display_name(craft_def, _get_selected_cargo_id(craft_id))]
 	if craft_busy:
 		return "%s is currently inbound to FOB." % craft_name
+	if direct_payload_count > 0:
+		return "%s mission-ready at Homebase with %d operator(s) aboard." % [craft_name, direct_payload_count]
 	var loaded_cargo_id: String = _get_loaded_cargo_id(craft_id)
 	if not loaded_cargo_id.is_empty():
 		return "%s ready with %s onboard." % [craft_name, _build_cargo_display_name(craft_def, loaded_cargo_id)]
@@ -1617,13 +2073,14 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	var air_asset_unavailable: bool = bool(craft_def.get("air_asset_unavailable", false))
 	var cargo_capable: bool = _craft_supports_cargo(craft_def)
 	var is_selected: bool = craft_id == _selected_aircraft_id
+	var has_direct_payload: bool = _has_direct_payload_for_craft(craft_id)
 
 	var loaded_cargo_id: String = _get_loaded_cargo_id(craft_id)
 	var selected_cargo_id: String = loaded_cargo_id if not loaded_cargo_id.is_empty() else _get_selected_cargo_id(craft_id)
 
 	var shipcard := PanelContainer.new()
 	shipcard.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	shipcard.custom_minimum_size = Vector2(0.0, 168.0 if cargo_capable else 144.0)
+	shipcard.custom_minimum_size = Vector2(0.0, 206.0 if has_direct_payload else (168.0 if cargo_capable else 144.0))
 	shipcard.add_theme_stylebox_override("panel", _build_shipcard_stylebox(is_selected, craft_busy or cargo_loading or air_asset_unavailable, craft_in_transit or air_asset_unavailable))
 	shipcard.modulate = Color(1.0, 1.0, 1.0, 0.56) if craft_in_transit or air_asset_unavailable else Color(1.0, 1.0, 1.0, 1.0)
 	shipcard.set_meta("homebase_shipcard_no_horizontal_overflow", true)
@@ -1718,6 +2175,10 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	pilot_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	content_vbox.add_child(pilot_panel)
 
+	var direct_payload_panel := _build_direct_payload_panel(craft_id)
+	if direct_payload_panel != null:
+		content_vbox.add_child(direct_payload_panel)
+
 	if cargo_capable:
 		var cargo_row := HBoxContainer.new()
 		cargo_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -1765,26 +2226,36 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	var actions := VBoxContainer.new()
 	actions.name = "ShipActionColumn"
 	actions.alignment = BoxContainer.ALIGNMENT_BEGIN
-	actions.custom_minimum_size = Vector2(44.0, 0.0)
+	actions.custom_minimum_size = Vector2(48.0, 0.0)
 	actions.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	actions.add_theme_constant_override("separation", 3)
 	actions.set_meta("homebase_actions_top_aligned", true)
 	row.add_child(actions)
 
+	var board_button := Button.new()
+	board_button.text = "Board"
+	board_button.custom_minimum_size = Vector2(46.0, 22.0)
+	board_button.add_theme_font_size_override("font_size", 8)
+	board_button.disabled = not _can_board_direct_mission_payload(craft_def, craft_id)
+	board_button.tooltip_text = _build_direct_board_button_tooltip(craft_def, craft_id)
+	META_UI_SKIN_SCRIPT.style_transfer_button(board_button, not board_button.disabled)
+	board_button.pressed.connect(_on_shipcard_board_direct_pressed.bind(craft_id))
+	actions.add_child(board_button)
+
 	var send_button := Button.new()
 	send_button.text = "Send"
-	send_button.custom_minimum_size = Vector2(42.0, 22.0)
+	send_button.custom_minimum_size = Vector2(46.0, 22.0)
 	send_button.add_theme_font_size_override("font_size", 8)
-	send_button.disabled = air_asset_unavailable or assigned_pilot_id.is_empty() or not _can_send_craft(craft_def, craft_id)
+	send_button.disabled = air_asset_unavailable or assigned_pilot_id.is_empty() or has_direct_payload or not _can_send_craft(craft_def, craft_id)
 	META_UI_SKIN_SCRIPT.style_transfer_button(send_button, not send_button.disabled)
 	send_button.pressed.connect(_on_send_pilot_button_pressed.bind(craft_id))
 	actions.add_child(send_button)
 
 	var clear_button := Button.new()
 	clear_button.text = "Clear"
-	clear_button.custom_minimum_size = Vector2(42.0, 20.0)
+	clear_button.custom_minimum_size = Vector2(46.0, 20.0)
 	clear_button.add_theme_font_size_override("font_size", 8)
-	clear_button.disabled = assigned_pilot_id.is_empty() or craft_in_transit or air_asset_unavailable
+	clear_button.disabled = assigned_pilot_id.is_empty() or craft_in_transit or air_asset_unavailable or has_direct_payload
 	META_UI_SKIN_SCRIPT.style_secondary_button(clear_button)
 	clear_button.pressed.connect(_on_clear_pilot_button_pressed.bind(craft_id))
 	actions.add_child(clear_button)
@@ -1792,7 +2263,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	var remove_button := Button.new()
 	remove_button.text = "X"
 	remove_button.tooltip_text = "Remove this shipcard from the flight deck."
-	remove_button.custom_minimum_size = Vector2(42.0, 20.0)
+	remove_button.custom_minimum_size = Vector2(46.0, 20.0)
 	remove_button.add_theme_font_size_override("font_size", 8)
 	remove_button.disabled = not _can_remove_aircraft(craft_id)
 	META_UI_SKIN_SCRIPT.style_secondary_button(remove_button)
@@ -1895,6 +2366,57 @@ func _build_assigned_pilot_row(unit_id: String, craft_name: String, craft_busy: 
 	if craft_in_transit:
 		card.modulate = Color(1.0, 1.0, 1.0, 0.56)
 	return card
+
+
+func _build_direct_payload_panel(craft_id: String) -> Control:
+	var unit_ids: PackedStringArray = _get_direct_payload_unit_ids(craft_id)
+	if unit_ids.is_empty():
+		return null
+	var panel := PanelContainer.new()
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel.set_meta("homebase_direct_payload_panel", true)
+	panel.set_meta("craft_id", craft_id)
+	var stylebox := StyleBoxFlat.new()
+	stylebox.bg_color = Color(0.09, 0.15, 0.12, 0.90)
+	stylebox.border_color = Color(0.36, 0.64, 0.43, 1.0)
+	stylebox.border_width_left = 1
+	stylebox.border_width_top = 1
+	stylebox.border_width_right = 1
+	stylebox.border_width_bottom = 1
+	stylebox.corner_radius_top_left = 6
+	stylebox.corner_radius_top_right = 6
+	stylebox.corner_radius_bottom_left = 6
+	stylebox.corner_radius_bottom_right = 6
+	panel.add_theme_stylebox_override("panel", stylebox)
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 6)
+	margin.add_theme_constant_override("margin_top", 5)
+	margin.add_theme_constant_override("margin_right", 6)
+	margin.add_theme_constant_override("margin_bottom", 5)
+	panel.add_child(margin)
+
+	var vbox := VBoxContainer.new()
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.add_theme_constant_override("separation", 3)
+	margin.add_child(vbox)
+
+	var label := Label.new()
+	label.text = "Mission payload | %d/%d NPC" % [unit_ids.size(), HOMEBASE_DIRECT_DROPSHIP_CAPACITY]
+	label.add_theme_font_size_override("font_size", 8)
+	META_UI_SKIN_SCRIPT.style_body_label(label, 8)
+	vbox.add_child(label)
+
+	var names: PackedStringArray = []
+	for unit_id_variant in unit_ids:
+		names.append(_build_display_name(String(unit_id_variant)))
+	var names_label := Label.new()
+	names_label.text = ", ".join(names)
+	names_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	names_label.add_theme_font_size_override("font_size", 8)
+	META_UI_SKIN_SCRIPT.style_body_label(names_label, 8)
+	vbox.add_child(names_label)
+	return panel
 
 
 func _build_empty_state_label(text: String) -> Label:
@@ -2022,6 +2544,8 @@ func _can_remove_aircraft(craft_id: String) -> bool:
 		return false
 	if not _get_loaded_cargo_id(craft_id).is_empty():
 		return false
+	if _has_direct_payload_for_craft(craft_id):
+		return false
 	return true
 
 
@@ -2103,7 +2627,7 @@ func _is_unit_assigned_to_aircraft(unit_id: String) -> bool:
 	for pilot_id_variant in _assigned_pilot_by_craft.values():
 		if String(pilot_id_variant).strip_edges() == unit_id:
 			return true
-	return false
+	return _is_unit_in_direct_payload(unit_id)
 
 
 func _find_assigned_craft_for_unit(unit_id: String) -> String:
@@ -2193,12 +2717,265 @@ func _can_send_craft(craft_def: Dictionary, craft_id: String) -> bool:
 		return false
 	if _has_active_pilot_transfer_for_craft(craft_id) or _has_active_cargo_load_for_craft(craft_id):
 		return false
+	if _has_direct_payload_for_craft(craft_id):
+		return false
 	if _craft_supports_cargo(craft_def):
 		var selected_cargo_id: String = _get_selected_cargo_id(craft_id)
 		var loaded_cargo_id: String = _get_loaded_cargo_id(craft_id)
 		if not selected_cargo_id.is_empty() and loaded_cargo_id.is_empty():
 			return false
 	return true
+
+
+func _request_direct_dropship_board(craft_id: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	var craft_def: Dictionary = _get_aircraft_definition_by_id(normalized_craft_id)
+	if normalized_craft_id.is_empty() or not _can_board_direct_mission_payload(craft_def, normalized_craft_id):
+		_aircraft_feedback_text = _build_direct_board_block_text(craft_def, normalized_craft_id)
+		_update_aircraft_panel()
+		return
+	var fireteam_ids: PackedStringArray = _build_direct_fireteam_selection(_selected_unit_ids)
+	var member_loadouts: Dictionary = _build_direct_member_loadouts_for_unit_ids(_selected_unit_ids)
+	_selected_aircraft_id = normalized_craft_id
+	_aircraft_feedback_text = "%d operator(s) boarded %s for direct mission prep." % [_selected_unit_ids.size(), _build_craft_display_name(normalized_craft_id)]
+	direct_dropship_board_requested.emit(normalized_craft_id, _selected_unit_ids.duplicate(), fireteam_ids, member_loadouts)
+
+
+func _can_board_direct_mission_payload(craft_def: Dictionary, craft_id: String) -> bool:
+	if craft_def.is_empty() or craft_id.strip_edges().is_empty():
+		return false
+	if bool(craft_def.get("air_asset_unavailable", false)):
+		return false
+	if String(craft_def.get("craft_type", "dropship")).strip_edges().to_lower() != "dropship":
+		return false
+	if _get_aircraft_location(craft_id) != "homebase":
+		return false
+	if _has_direct_payload_for_craft(craft_id):
+		return false
+	if _selected_unit_ids.is_empty() or _selected_unit_ids.size() > HOMEBASE_DIRECT_DROPSHIP_CAPACITY:
+		return false
+	if _get_assigned_pilot_id(craft_id).is_empty():
+		return false
+	if _has_active_pilot_transfer_for_craft(craft_id) or _has_active_cargo_load_for_craft(craft_id) or _is_craft_in_transit(craft_id):
+		return false
+	return true
+
+
+func _build_direct_board_button_tooltip(craft_def: Dictionary, craft_id: String) -> String:
+	if _can_board_direct_mission_payload(craft_def, craft_id):
+		return "BOARD\n\nLoads the currently staged FT1 team into this Homebase dropship for direct mission start."
+	return "BOARD\n\n%s" % _build_direct_board_block_text(craft_def, craft_id)
+
+
+func _build_direct_board_block_text(craft_def: Dictionary, craft_id: String) -> String:
+	if craft_def.is_empty() or craft_id.strip_edges().is_empty():
+		return "Select a dropship first."
+	if String(craft_def.get("craft_type", "dropship")).strip_edges().to_lower() != "dropship":
+		return "Only dropships can carry the direct mission team."
+	if bool(craft_def.get("air_asset_unavailable", false)):
+		return "This air asset is unavailable."
+	if _get_aircraft_location(craft_id) != "homebase":
+		return "This craft is not on the Homebase flight deck."
+	if _has_direct_payload_for_craft(craft_id):
+		return "This dropship already has a direct mission payload."
+	if _selected_unit_ids.is_empty():
+		return "Stage operators in the center prep window first."
+	if _selected_unit_ids.size() > HOMEBASE_DIRECT_DROPSHIP_CAPACITY:
+		return "The direct dropship capacity is %d NPC." % HOMEBASE_DIRECT_DROPSHIP_CAPACITY
+	if _get_assigned_pilot_id(craft_id).is_empty():
+		return "Assign a pilot to this dropship first."
+	if _has_active_pilot_transfer_for_craft(craft_id) or _has_active_cargo_load_for_craft(craft_id) or _is_craft_in_transit(craft_id):
+		return "This craft is busy."
+	return "Direct boarding is currently blocked."
+
+
+func _get_direct_boardable_craft_ids() -> PackedStringArray:
+	var craft_ids: PackedStringArray = []
+	for craft_variant in _get_visible_homebase_aircraft_definitions():
+		var craft_def: Dictionary = Dictionary(craft_variant)
+		var craft_id: String = String(craft_def.get("craft_id", "")).strip_edges()
+		if _can_board_direct_mission_payload(craft_def, craft_id):
+			craft_ids.append(craft_id)
+	return craft_ids
+
+
+func _build_direct_fireteam_selection(unit_ids: PackedStringArray) -> PackedStringArray:
+	var result: PackedStringArray = []
+	for _unit_id in unit_ids:
+		result.append("ft1")
+	return result
+
+
+func _build_direct_loadout_entries(unit_ids: PackedStringArray) -> Array:
+	var entries: Array = []
+	for unit_id_variant in unit_ids:
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty():
+			continue
+		var member_loadout: Dictionary = _get_direct_member_loadout(unit_id)
+		entries.append({
+			"unit_id": unit_id,
+			"display_name": _build_display_name(unit_id),
+			"fireteam_id": "ft1",
+			"member_loadout": member_loadout,
+			"loadout_text": _build_direct_loadout_text(unit_id),
+		})
+	return entries
+
+
+func _build_direct_member_loadouts_for_unit_ids(unit_ids: PackedStringArray) -> Dictionary:
+	var result: Dictionary = {}
+	for unit_id_variant in unit_ids:
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty():
+			continue
+		result[unit_id] = _get_direct_member_loadout(unit_id)
+	return result
+
+
+func _get_direct_member_loadout(unit_id: String) -> Dictionary:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	var existing: Dictionary = {}
+	if _direct_member_loadouts.has(normalized_unit_id) and typeof(_direct_member_loadouts.get(normalized_unit_id)) == TYPE_DICTIONARY:
+		existing = Dictionary(_direct_member_loadouts.get(normalized_unit_id))
+	return _make_direct_member_loadout(
+		String(existing.get("armor", "medium")),
+		String(existing.get("weapon_1", existing.get("weapon", HOMEBASE_DIRECT_DEFAULT_WEAPON))),
+		String(existing.get("weapon_2", HOMEBASE_DIRECT_DEFAULT_WEAPON))
+	)
+
+
+func _make_direct_member_loadout(armor_id: String, weapon_1_id: String, weapon_2_id: String) -> Dictionary:
+	return {
+		"armor": _normalize_direct_armor_id(armor_id),
+		"weapon_1": _normalize_direct_weapon_id(weapon_1_id),
+		"weapon_2": _normalize_direct_weapon_id(weapon_2_id),
+	}
+
+
+func _sanitize_direct_member_loadouts(member_loadouts: Dictionary) -> Dictionary:
+	var sanitized: Dictionary = {}
+	for unit_id_variant in member_loadouts.keys():
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty() or typeof(member_loadouts.get(unit_id_variant)) != TYPE_DICTIONARY:
+			continue
+		var member_loadout: Dictionary = Dictionary(member_loadouts.get(unit_id_variant))
+		sanitized[unit_id] = _make_direct_member_loadout(
+			String(member_loadout.get("armor", "medium")),
+			String(member_loadout.get("weapon_1", member_loadout.get("weapon", HOMEBASE_DIRECT_DEFAULT_WEAPON))),
+			String(member_loadout.get("weapon_2", HOMEBASE_DIRECT_DEFAULT_WEAPON))
+		)
+	return sanitized
+
+
+func _sanitize_direct_payload_by_craft(payload_by_craft: Dictionary) -> Dictionary:
+	var sanitized: Dictionary = {}
+	for craft_id_variant in payload_by_craft.keys():
+		var craft_id: String = String(craft_id_variant).strip_edges()
+		if craft_id.is_empty() or typeof(payload_by_craft.get(craft_id_variant)) != TYPE_DICTIONARY:
+			continue
+		var payload: Dictionary = Dictionary(payload_by_craft.get(craft_id_variant)).duplicate(true)
+		var unit_ids: PackedStringArray = []
+		for unit_id_variant in Array(payload.get("unit_ids", payload.get("embarked_unit_ids", []))):
+			var unit_id: String = String(unit_id_variant).strip_edges()
+			if unit_id.is_empty() or unit_ids.has(unit_id):
+				continue
+			unit_ids.append(unit_id)
+		if unit_ids.is_empty():
+			continue
+		payload["craft_id"] = craft_id
+		payload["unit_ids"] = unit_ids
+		payload["embarked_unit_ids"] = Array(unit_ids)
+		sanitized[craft_id] = payload
+	return sanitized
+
+
+func _populate_direct_armor_option_button(option_button: OptionButton, selected_armor_id: String) -> void:
+	option_button.clear()
+	var normalized_selected_id: String = _normalize_direct_armor_id(selected_armor_id)
+	for armor_id in HOMEBASE_DIRECT_ARMOR_OPTIONS:
+		option_button.add_item(String(armor_id).capitalize())
+		option_button.set_item_metadata(option_button.item_count - 1, String(armor_id))
+		if String(armor_id) == normalized_selected_id:
+			option_button.select(option_button.item_count - 1)
+
+
+func _populate_direct_weapon_option_button(option_button: OptionButton, selected_weapon_id: String) -> void:
+	option_button.clear()
+	var normalized_selected_id: String = _normalize_direct_weapon_id(selected_weapon_id)
+	for option_variant in HOMEBASE_DIRECT_WEAPON_OPTIONS:
+		var option: Dictionary = Dictionary(option_variant)
+		var weapon_id: String = String(option.get("id", HOMEBASE_DIRECT_DEFAULT_WEAPON)).strip_edges()
+		option_button.add_item(String(option.get("label", weapon_id)).strip_edges())
+		option_button.set_item_metadata(option_button.item_count - 1, weapon_id)
+		if weapon_id == normalized_selected_id:
+			option_button.select(option_button.item_count - 1)
+
+
+func _normalize_direct_armor_id(value: String) -> String:
+	var normalized_value: String = value.strip_edges().to_lower()
+	if normalized_value == "standard":
+		return "medium"
+	if HOMEBASE_DIRECT_ARMOR_OPTIONS.has(normalized_value):
+		return normalized_value
+	return "medium"
+
+
+func _normalize_direct_weapon_id(value: String) -> String:
+	var normalized_value: String = value.strip_edges().to_lower()
+	match normalized_value:
+		"smg", "maschinenpistole", "mp":
+			return "smg"
+		"rifle", "assault_rifle", "sturmgewehr":
+			return "rifle"
+		"sniper", "sniper_rifle", "sniper-rifle", "sniper rifle", "scharfschuetzengewehr", "praezisionsgewehr":
+			return "sniper"
+		"rocket_launcher", "rocket", "rocketlauncher", "rocket-launcher", "rocket launcher", "panzerfaust", "raketenwerfer":
+			return "rocket_launcher"
+		"medic_tool", "medic-tool", "medic tool", "medictool":
+			return "medictool"
+		"none", "no_weapon", "no-weapon", "no weapon", "unarmed", "keine_waffe", "keine-waffe", "keine waffe":
+			return "none"
+		_:
+			return HOMEBASE_DIRECT_DEFAULT_WEAPON
+
+
+func _build_direct_loadout_text(unit_id: String) -> String:
+	var member_loadout: Dictionary = _get_direct_member_loadout(unit_id)
+	return CHARACTER_SHEET_FORMATTER_SCRIPT.build_loadout_text_from_member_loadout(member_loadout, "standard kit")
+
+
+func _has_direct_payload_for_craft(craft_id: String) -> bool:
+	return not _get_direct_payload_unit_ids(craft_id).is_empty()
+
+
+func _get_direct_payload_unit_ids(craft_id: String) -> PackedStringArray:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	var unit_ids: PackedStringArray = []
+	if normalized_craft_id.is_empty() or typeof(_direct_payload_by_craft.get(normalized_craft_id)) != TYPE_DICTIONARY:
+		return unit_ids
+	var payload: Dictionary = Dictionary(_direct_payload_by_craft.get(normalized_craft_id))
+	for unit_id_variant in Array(payload.get("unit_ids", payload.get("embarked_unit_ids", []))):
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty() or unit_ids.has(unit_id):
+			continue
+		unit_ids.append(unit_id)
+	return unit_ids
+
+
+func _is_unit_in_direct_payload(unit_id: String) -> bool:
+	return not _find_direct_payload_craft_for_unit(unit_id).is_empty()
+
+
+func _find_direct_payload_craft_for_unit(unit_id: String) -> String:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return ""
+	for craft_id_variant in _direct_payload_by_craft.keys():
+		var craft_id: String = String(craft_id_variant).strip_edges()
+		if _get_direct_payload_unit_ids(craft_id).has(normalized_unit_id):
+			return craft_id
+	return ""
 
 
 func _find_transfer_entry_for_unit(unit_id: String) -> Dictionary:
