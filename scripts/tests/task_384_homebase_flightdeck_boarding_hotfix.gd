@@ -50,7 +50,9 @@ func _test_compact_shipcards_and_sequential_boarding() -> void:
 	_assert(payload_card != null and not _card_contains_loadout_editor(payload_card), "Dropship fireteam card omits loadout editing UI and loadout text")
 	_assert(_find_fireteam_panel_card(screen, "ft1") == null, "The moved fireteam card no longer remains in #10 during boarding")
 
-	screen.call("_debug_advance_homebase_direct_boarding", 4.6)
+	var first_boarding_seconds: float = float(screen.call("_debug_get_homebase_member_boarding_seconds", "unit_alpha"))
+	var second_boarding_seconds: float = float(screen.call("_debug_get_homebase_member_boarding_seconds", "unit_bravo"))
+	screen.call("_debug_advance_homebase_direct_boarding", first_boarding_seconds + 0.05)
 	await process_frame
 	await process_frame
 
@@ -62,7 +64,7 @@ func _test_compact_shipcards_and_sequential_boarding() -> void:
 	_assert(_member_progress(payload_card, "unit_bravo") < 100.0, "Second operator is still queued/boarding after the first interval")
 	_assert(send_button != null and send_button.disabled, "Mission Send stays disabled until the last operator is boarded")
 
-	screen.call("_debug_advance_homebase_direct_boarding", 4.6)
+	screen.call("_debug_advance_homebase_direct_boarding", second_boarding_seconds + 0.05)
 	await process_frame
 	await process_frame
 

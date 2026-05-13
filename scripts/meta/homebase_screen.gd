@@ -27,7 +27,9 @@ const HOMEBASE_SHIPCARD_IMAGE_SIZE := Vector2(128.0, 84.0)
 const HOMEBASE_SHIPCARD_BUTTON_SIZE := Vector2(94.0, 62.0)
 const HOMEBASE_SHIPCARD_IMAGE_OFFSET := Vector2(-28.0, -18.0)
 const HOMEBASE_FIRETEAM_INLINE_LOADOUT_SELECTOR_SIZE := Vector2(70.0, 20.0)
-const HOMEBASE_DIRECT_BOARDING_SECONDS_PER_OPERATOR := 4.5
+const HOMEBASE_DIRECT_AVERAGE_BOARDING_SECONDS_PER_OPERATOR := 4.0
+const HOMEBASE_DIRECT_MIN_BOARDING_SECONDS_PER_OPERATOR := 2.6
+const HOMEBASE_DIRECT_MAX_BOARDING_SECONDS_PER_OPERATOR := 5.4
 const HOMEBASE_DIRECT_BOARDING_UI_REFRESH_SECONDS := 0.25
 const HOMEBASE_DEFAULT_FIRETEAM_ID := "ft1"
 const HOMEBASE_DEFAULT_LOADOUT_ID := "medium"
@@ -3351,10 +3353,9 @@ func _advance_homebase_direct_boarding(delta_seconds: float) -> bool:
 	var craft_id: String = _get_homebase_direct_payload_craft_id()
 	for fireteam_id in _get_homebase_direct_payload_fireteam_ids():
 		var normalized_fireteam_id: String = _normalize_fireteam_id(String(fireteam_id))
-		var member_count: int = _get_member_unit_ids_for_fireteam(normalized_fireteam_id).size()
-		if normalized_fireteam_id.is_empty() or member_count <= 0:
+		var total_seconds: float = _get_homebase_fireteam_boarding_total_seconds(normalized_fireteam_id)
+		if normalized_fireteam_id.is_empty() or total_seconds <= 0.0:
 			continue
-		var total_seconds: float = float(member_count) * HOMEBASE_DIRECT_BOARDING_SECONDS_PER_OPERATOR
 		var state: Dictionary = _ensure_homebase_direct_boarding_state(normalized_fireteam_id, craft_id)
 		var elapsed_seconds: float = clampf(float(state.get("elapsed_seconds", 0.0)), 0.0, total_seconds)
 		if elapsed_seconds >= total_seconds:
@@ -3406,16 +3407,91 @@ func _get_homebase_boarding_elapsed_seconds(fireteam_id: String) -> float:
 	return maxf(float(state.get("elapsed_seconds", 0.0)), 0.0)
 
 
+func _debug_get_homebase_member_boarding_seconds(unit_id: String) -> float:
+	return _get_homebase_member_boarding_seconds(unit_id)
+
+
+func _debug_get_homebase_fireteam_boarding_total_seconds(fireteam_id: String) -> float:
+	return _get_homebase_fireteam_boarding_total_seconds(fireteam_id)
+
+
+func _get_homebase_fireteam_boarding_total_seconds(fireteam_id: String) -> float:
+	var total_seconds: float = 0.0
+	for member_unit_id in _get_member_unit_ids_for_fireteam(fireteam_id):
+		total_seconds += _get_homebase_member_boarding_seconds(String(member_unit_id))
+	return total_seconds
+
+
+func _get_homebase_member_boarding_start_seconds(fireteam_id: String, unit_id: String) -> float:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	var accumulated_seconds: float = 0.0
+	for member_unit_id in _get_member_unit_ids_for_fireteam(fireteam_id):
+		var current_unit_id: String = String(member_unit_id).strip_edges()
+		if current_unit_id == normalized_unit_id:
+			return accumulated_seconds
+		accumulated_seconds += _get_homebase_member_boarding_seconds(current_unit_id)
+	return 0.0
+
+
+func _get_homebase_member_boarding_seconds(unit_id: String) -> float:
+	var speed: float = _get_homebase_unit_boarding_value(unit_id, "speed", "skill_speed", 0.5)
+	var discipline: float = _get_homebase_unit_boarding_value(unit_id, "discipline", "discipline", 0.5)
+	var boarding_quality: float = clampf((speed * 0.55) + (discipline * 0.45), 0.0, 1.0)
+	var skill_multiplier: float = lerpf(1.35, 0.65, boarding_quality)
+	return clampf(
+		HOMEBASE_DIRECT_AVERAGE_BOARDING_SECONDS_PER_OPERATOR * skill_multiplier,
+		HOMEBASE_DIRECT_MIN_BOARDING_SECONDS_PER_OPERATOR,
+		HOMEBASE_DIRECT_MAX_BOARDING_SECONDS_PER_OPERATOR
+	)
+
+
+func _get_homebase_unit_boarding_value(unit_id: String, skill_key: String, unit_data_key: String, fallback: float) -> float:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	var normalized_skill_key: String = skill_key.strip_edges().to_lower()
+	var profile = _profiles_by_id.get(normalized_unit_id, null)
+	if profile != null:
+		var skill_values: Dictionary = {}
+		if profile.skill_values != null:
+			skill_values = Dictionary(profile.skill_values)
+		if skill_values.has(normalized_skill_key):
+			return clampf(float(skill_values.get(normalized_skill_key, fallback)), 0.0, 1.0)
+		if normalized_skill_key == "discipline":
+			var behavior_axes: Dictionary = {}
+			if profile.behavior_axes != null:
+				behavior_axes = Dictionary(profile.behavior_axes)
+			if behavior_axes.has("order_fidelity"):
+				return clampf(float(behavior_axes.get("order_fidelity", fallback)), 0.0, 1.0)
+
+	var unit_data: Dictionary = _get_available_unit_data(normalized_unit_id)
+	if unit_data.has(normalized_skill_key):
+		return clampf(float(unit_data.get(normalized_skill_key, fallback)), 0.0, 1.0)
+	if unit_data.has(unit_data_key):
+		return clampf(float(unit_data.get(unit_data_key, fallback)), 0.0, 1.0)
+	if normalized_skill_key == "discipline" and (unit_data.has("skill_leadership") or unit_data.has("skill_toughness")):
+		var leadership: float = float(unit_data.get("skill_leadership", fallback))
+		var toughness: float = float(unit_data.get("skill_toughness", fallback))
+		return clampf((leadership * 0.55) + (toughness * 0.45), 0.0, 1.0)
+	return clampf(fallback, 0.0, 1.0)
+
+
 func _get_homebase_boarded_member_count(fireteam_id: String) -> int:
-	var member_count: int = _get_member_unit_ids_for_fireteam(fireteam_id).size()
-	if member_count <= 0:
+	var member_ids: PackedStringArray = _get_member_unit_ids_for_fireteam(fireteam_id)
+	if member_ids.is_empty():
 		return 0
-	return clampi(int(floor(_get_homebase_boarding_elapsed_seconds(fireteam_id) / HOMEBASE_DIRECT_BOARDING_SECONDS_PER_OPERATOR)), 0, member_count)
+	var elapsed_seconds: float = _get_homebase_boarding_elapsed_seconds(fireteam_id)
+	var completed_count: int = 0
+	var accumulated_seconds: float = 0.0
+	for member_unit_id in member_ids:
+		accumulated_seconds += _get_homebase_member_boarding_seconds(String(member_unit_id))
+		if elapsed_seconds + 0.001 < accumulated_seconds:
+			break
+		completed_count += 1
+	return clampi(completed_count, 0, member_ids.size())
 
 
 func _is_homebase_fireteam_boarding_complete(fireteam_id: String) -> bool:
-	var member_count: int = _get_member_unit_ids_for_fireteam(fireteam_id).size()
-	return member_count > 0 and _get_homebase_boarded_member_count(fireteam_id) >= member_count
+	var total_seconds: float = _get_homebase_fireteam_boarding_total_seconds(fireteam_id)
+	return total_seconds > 0.0 and _get_homebase_boarding_elapsed_seconds(fireteam_id) + 0.001 >= total_seconds
 
 
 func _are_homebase_payload_fireteams_boarded(payload_fireteam_ids: PackedStringArray) -> bool:
@@ -3431,8 +3507,13 @@ func _get_homebase_active_boarding_unit_id(fireteam_id: String) -> String:
 	var member_ids: PackedStringArray = _get_member_unit_ids_for_fireteam(fireteam_id)
 	if member_ids.is_empty() or _is_homebase_fireteam_boarding_complete(fireteam_id):
 		return ""
-	var active_index: int = clampi(_get_homebase_boarded_member_count(fireteam_id), 0, member_ids.size() - 1)
-	return String(member_ids[active_index])
+	var elapsed_seconds: float = _get_homebase_boarding_elapsed_seconds(fireteam_id)
+	var accumulated_seconds: float = 0.0
+	for member_unit_id in member_ids:
+		accumulated_seconds += _get_homebase_member_boarding_seconds(String(member_unit_id))
+		if elapsed_seconds < accumulated_seconds:
+			return String(member_unit_id)
+	return ""
 
 
 func _build_homebase_boarding_progress_value(fireteam_id: String, craft_gate: Dictionary) -> float:
@@ -3441,10 +3522,9 @@ func _build_homebase_boarding_progress_value(fireteam_id: String, craft_gate: Di
 		return 0.0
 	if not bool(craft_gate.get("can_stage", false)):
 		return 0.0
-	var member_count: int = _get_member_unit_ids_for_fireteam(normalized_fireteam_id).size()
-	if member_count <= 0:
+	var total_seconds: float = _get_homebase_fireteam_boarding_total_seconds(normalized_fireteam_id)
+	if total_seconds <= 0.0:
 		return 0.0
-	var total_seconds: float = float(member_count) * HOMEBASE_DIRECT_BOARDING_SECONDS_PER_OPERATOR
 	return clampf((_get_homebase_boarding_elapsed_seconds(normalized_fireteam_id) / total_seconds) * 100.0, 0.0, 100.0)
 
 
@@ -3461,8 +3541,11 @@ func _build_homebase_member_boarding_progress_value(fireteam_id: String, unit_id
 	if member_index < 0:
 		return 0.0
 	var elapsed_seconds: float = _get_homebase_boarding_elapsed_seconds(fireteam_id)
-	var member_start: float = float(member_index) * HOMEBASE_DIRECT_BOARDING_SECONDS_PER_OPERATOR
-	return clampf(((elapsed_seconds - member_start) / HOMEBASE_DIRECT_BOARDING_SECONDS_PER_OPERATOR) * 100.0, 0.0, 100.0)
+	var member_start: float = _get_homebase_member_boarding_start_seconds(fireteam_id, normalized_unit_id)
+	var member_duration: float = _get_homebase_member_boarding_seconds(normalized_unit_id)
+	if member_duration <= 0.0:
+		return 0.0
+	return clampf(((elapsed_seconds - member_start) / member_duration) * 100.0, 0.0, 100.0)
 
 
 func _build_homebase_boarding_progress_text(fireteam_id: String, craft_gate: Dictionary) -> String:

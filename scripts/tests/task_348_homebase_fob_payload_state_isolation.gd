@@ -18,6 +18,7 @@ func _run_tests() -> void:
 	await _test_fob_start_uses_fob_payload_when_homebase_direct_exists()
 	await _test_homebase_start_uses_homebase_direct_payload()
 	await _test_homebase_start_falls_back_to_fob_payload_without_direct_staging()
+	await _test_homebase_start_does_not_fall_back_when_direct_payload_is_queued()
 
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	if _failed > 0:
@@ -98,9 +99,29 @@ func _test_homebase_start_falls_back_to_fob_payload_without_direct_staging() -> 
 	await process_frame
 	var planning_state: Dictionary = Dictionary(scene.get("_mission_planning_state"))
 
-	_assert(String(planning_state.get("mission_drop_source", "")).strip_edges() == "fob", "Homebase launch-ready fallback records FOB as payload source")
+	_assert(String(planning_state.get("mission_drop_source", "")).strip_edges() == "fob", "Homebase launch-ready fallback records FOB as payload source when no Direct payload exists")
 	_assert(_ids_equal(planning_state.get("embarked_unit_ids", []), fob_unit_ids), "Homebase fallback keeps FOB embarked units")
 	_assert(_ids_equal(scene.get("_selected_unit_ids"), fob_unit_ids), "Homebase fallback starts the mission with FOB-selected units")
+
+	scene.queue_free()
+	await process_frame
+
+
+func _test_homebase_start_does_not_fall_back_when_direct_payload_is_queued() -> void:
+	var scene: Node = await _build_meta_scene()
+	var homebase_unit_ids := PackedStringArray(["unit_alpha", "unit_bravo"])
+	var fob_unit_ids := PackedStringArray(["unit_echo", "unit_foxtrot"])
+	await _stage_homebase_direct_payload(scene, homebase_unit_ids, "ft_home", 0.0)
+	await _stage_fob_waiting_payload(scene, fob_unit_ids, "ft_fob", "dropship_fob")
+	await process_frame
+
+	scene.call("_on_homebase_mission_start_requested")
+	await process_frame
+	var planning_state: Dictionary = Dictionary(scene.get("_mission_planning_state"))
+
+	_assert(String(planning_state.get("mission_drop_source", "")).strip_edges().is_empty(), "Queued but unboarded Homebase Direct payload blocks FOB fallback")
+	_assert(not _contains_any_id(planning_state.get("embarked_unit_ids", []), fob_unit_ids), "Queued Homebase Direct payload does not import FOB embarked units")
+	_assert(scene.call("get_active_mission") == null, "Queued Homebase Direct payload does not start a FOB mission")
 
 	scene.queue_free()
 	await process_frame
@@ -115,7 +136,7 @@ func _build_meta_scene() -> Node:
 	return scene
 
 
-func _stage_homebase_direct_payload(scene: Node, unit_ids: PackedStringArray, fireteam_id: String) -> void:
+func _stage_homebase_direct_payload(scene: Node, unit_ids: PackedStringArray, fireteam_id: String, boarding_delta_seconds: float = 9.2) -> void:
 	var homebase_screen: Control = scene.get_node("HomebaseScreen") as Control
 	var roster: Array = UNIT_ROSTER_PRESETS_SCRIPT.call("get_homebase_roster")
 	homebase_screen.call("setup_roster", roster, unit_ids)
@@ -145,7 +166,8 @@ func _stage_homebase_direct_payload(scene: Node, unit_ids: PackedStringArray, fi
 		[]
 	)
 	homebase_screen.call("_on_homebase_staging_fireteam_dropped", fireteam_id, "homebase_dropship")
-	homebase_screen.call("_debug_advance_homebase_direct_boarding", 9.2)
+	if boarding_delta_seconds > 0.0:
+		homebase_screen.call("_debug_advance_homebase_direct_boarding", boarding_delta_seconds)
 	await process_frame
 	await process_frame
 

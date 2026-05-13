@@ -326,10 +326,18 @@
 
 ### TASK_384 - Homebase Flightdeck Boarding Hotfix
 - Status: implementiert
-- Stand: Homebase-Direct-Boarding laeuft jetzt automatisch und sequentiell mit 4.5 Sekunden pro Operator. Direct-Mission-Start und Drop-State werden erst launch-ready, wenn alle Payload-Operator geboardet sind.
+- Stand: Homebase-Direct-Boarding laeuft automatisch und sequentiell. Direct-Mission-Start und Drop-State werden erst launch-ready, wenn alle Payload-Operator geboardet sind.
 - Stand: Dropship-Payload-Fireteam-Karten zeigen Mini-Portraets, Boarding-/Member-Fortschritt und Boarded-Counts, aber keine Loadout-Editor-Controls und keine Loadout-Statuszeile.
 - Stand: Homebase-Shipcards sind kompakter, in Zweier-Reihen gerendert und zeigen Payload-/Boarded-Counts im oberen Shipcard-Bereich.
 - Lokale Pruefung: `task_384_homebase_flightdeck_boarding_hotfix.gd`, `task_383_homebase_flightdeck_fireteam_card_single_owner.gd`, `task_382_homebase_direct_mission_flightdeck_display.gd`, `task_381_homebase_fireteam_loadout_flightdeck_polish.gd`, `task_355_homebase_direct_ux_payload_truth.gd`, `task_354_homebase_direct_loadout_regression_matrix.gd`, `task_350_homebase_loadout_contract_export.gd`, `task_351_homebase_direct_payload_scope_contract.gd`, `task_352_homebase_loadout_defaults_preserve_unit_profiles.gd`, `task_349_homebase_direct_staging_real_flightdeck_craft_gate.gd`, `task_348_homebase_fob_payload_state_isolation.gd`, `task_347_homebase_direct_staging_start_guard.gd`, `task_346_homebase_direct_staging_character_popup.gd`, `task_362_homebase_aircraft_state_manager_extraction.gd`, `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd`, `task_258_fixed_window_clipping_scrollbar_playability_audit.gd` und `git diff --check` laufen gruen.
+
+### TASK_385 - Homebase Direct Return Isolation
+- Status: implementiert
+- Stand: Homebase-Direct-Return-Events werden anhand `mission_drop_source = homebase_direct` als `to_homebase`-Transfer behandelt. Das Dropship bleibt waehrend des Rueckflugs mission-side und wird nach Abschluss wieder in der Homebase sichtbar, ohne eine FOB-Transportkarte zu erzeugen.
+- Stand: FOB-Refreshs werden waehrend aktiver Homebase-Direct-Missionen isoliert. Direct-Payload-Fireteams werden dadurch nicht in FOB `#10 FIRETEAMS` gespiegelt, und Direct-Returns rufen kein `clear_mission_boarded_payload()` auf der FOB auf.
+- Stand: Homebase-Start faellt weiterhin auf den alten FOB-Launch-Ready-Pfad zurueck, wenn kein Direct-Payload existiert. Ein vorhandener, aber noch nicht fertig geboardeter Direct-Payload blockiert diesen Fallback.
+- Stand: Homebase-Direct-Boardingdauer wird pro Operator aus Speed und Discipline berechnet. Durchschnittliche Werte ergeben ca. 4 Sekunden, bessere Werte kuerzen und schlechtere Werte verlaengern das sequentielle Boarding.
+- Lokale Pruefung: `task_385_homebase_direct_return_isolation.gd`, `task_348_homebase_fob_payload_state_isolation.gd`, `task_384_homebase_flightdeck_boarding_hotfix.gd`, `task_383_homebase_flightdeck_fireteam_card_single_owner.gd`, `task_382_homebase_direct_mission_flightdeck_display.gd`, `task_381_homebase_fireteam_loadout_flightdeck_polish.gd`, `task_362_homebase_aircraft_state_manager_extraction.gd`, `bugfix_dropship_mission_flow_verifier.gd`, `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd`, `task_258_fixed_window_clipping_scrollbar_playability_audit.gd` und `git diff --check` laufen gruen.
 
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
