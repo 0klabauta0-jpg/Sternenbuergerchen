@@ -46,7 +46,9 @@ func _test_homebase_fixed_window_positions() -> void:
 	_assert(_node_rect_matches_actual(screen.get_node("Panel/Margin/VBox/MissionPanel") as Control, layout.get("mission_brief")), "#01 mission brief uses the fixed contract position and size")
 	_assert(_node_rect_matches_actual(screen.get_node("Panel/Margin/VBox/ContentRow/RosterPanel") as Control, layout.get("roster")), "#02 roster uses the fixed contract position and size")
 	_assert(_node_rect_matches_actual(screen.get_node("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel") as Control, layout.get("fireteams")), "#10 fireteams uses the fixed contract position and size")
-	_assert(_node_rect_matches_actual(screen.get_node("Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel") as Control, layout.get("loadout")), "#13 loadout uses the fixed contract position and size")
+	var loadout_panel := screen.get_node("Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel") as Control
+	_assert(not layout.has("loadout"), "Homebase fixed layout removes the retired #13 loadout window")
+	_assert(not loadout_panel.visible and bool(loadout_panel.get_meta("homebase_loadout_window_retired", false)), "#13 loadout is retired because #10 owns inline loadout controls")
 	_assert(_node_rect_matches_actual(screen.get_node("Panel/Margin/VBox/ContentRow/AircraftPanel") as Control, layout.get("flightdeck")), "#05 flightdeck uses the fixed contract position and size")
 
 	var info_panel := screen.get_node("Panel/Margin/VBox/ContentRow/InfoPanel") as Control
@@ -57,7 +59,6 @@ func _test_homebase_fixed_window_positions() -> void:
 	_assert(not popup.visible and _node_rect_matches_actual(popup, layout.get("character_popup")), "Character popup starts closed and keeps its floating rect")
 	_assert(screen.get_node("Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox/RosterScroll") is ScrollContainer, "Roster keeps long content in a targeted scroll area")
 	_assert(screen.get_node("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel/FireteamMargin/FireteamVBox/FireteamScroll") is ScrollContainer, "Fireteams keeps long content in a targeted scroll area")
-	_assert(screen.get_node("Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutMemberScroll") is ScrollContainer, "Loadout keeps member content in a targeted scroll area")
 	_assert(screen.get_node("CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/PopupScroll") is ScrollContainer, "Character popup keeps long content in a targeted scroll area")
 
 	screen.queue_free()

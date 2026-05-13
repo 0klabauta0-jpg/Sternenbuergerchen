@@ -11,6 +11,8 @@ Die bisher rechts standardmaessig sichtbare Charakterkarte soll nicht mehr als n
 
 ## Status: IMPLEMENTIERT
 
+Hinweis: TASK_382 hat das hier eingefuehrte sichtbare Homebase-`#13 LOADOUT` wieder als sichtbares Fenster entfernt, weil TASK_381 die Loadout-Dropdowns direkt in `#10 FIRETEAMS` integriert hat.
+
 ## Ausgangslage
 - `scripts/meta/drop_light_layout_contract.gd` definiert fuer Homebase aktuell ein rechtes `character_sheet`-Fenster.
 - `scripts/meta/homebase_screen.gd` rendert dieses Fenster als `InfoPanel` und nutzt `CharacterSheetView` darin.

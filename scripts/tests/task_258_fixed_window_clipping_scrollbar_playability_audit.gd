@@ -97,13 +97,13 @@ func _test_homebase_fixed_windows_and_long_roster_scrolls() -> void:
 	_assert(_node_rect_matches_actual(homebase.get_node("Panel/Margin/VBox/MissionPanel") as Control, layout.get("mission_brief")), "Homebase mission brief remains fixed")
 	_assert(_node_rect_matches_actual(homebase.get_node("Panel/Margin/VBox/ContentRow/RosterPanel") as Control, layout.get("roster")), "Homebase roster window remains fixed")
 	_assert(_node_rect_matches_actual(homebase.get_node("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel") as Control, layout.get("fireteams")), "Homebase direct fireteams window remains fixed")
-	_assert(_node_rect_matches_actual(homebase.get_node("Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel") as Control, layout.get("loadout")), "Homebase direct loadout window remains fixed")
+	var loadout_panel := homebase.get_node("Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel") as Control
+	_assert(not layout.has("loadout") and not loadout_panel.visible, "Homebase retired loadout window no longer consumes fixed-window space")
 	_assert(_node_rect_matches_actual(homebase.get_node("Panel/Margin/VBox/ContentRow/AircraftPanel") as Control, layout.get("flightdeck")), "Homebase flightdeck window remains fixed")
 	var fixed_info_panel := homebase.get_node("Panel/Margin/VBox/ContentRow/InfoPanel") as Control
 	_assert(not layout.has("character_sheet") and fixed_info_panel != null and not fixed_info_panel.visible, "Homebase fixed character sheet stays hidden")
 	_assert(_scroll_container_is_usable(homebase, "Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox/RosterScroll", true), "Homebase roster has a usable ScrollContainer")
 	_assert(_scroll_container_is_usable(homebase, "Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel/FireteamMargin/FireteamVBox/FireteamScroll", true), "Homebase direct fireteams have a usable ScrollContainer")
-	_assert(_scroll_container_is_usable(homebase, "Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutMemberScroll", true), "Homebase direct loadout has a usable ScrollContainer")
 	_assert(_scroll_container_is_usable(homebase, "Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/ShipCardsScroll", true), "Homebase shipcards have a usable ScrollContainer")
 	_assert(_scroll_container_is_usable(homebase, "Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll", false), "Homebase hidden character sheet keeps scroll content for popup reuse")
 	var active_transfers_scroll := homebase.get_node_or_null("Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/ActiveTransfersScroll") as ScrollContainer

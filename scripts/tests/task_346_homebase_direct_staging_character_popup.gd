@@ -43,13 +43,14 @@ func _test_direct_staging_layout_contract() -> void:
 	var popup := screen.get_node("CharacterSheetPopup") as Control
 
 	_assert(not layout.has("character_sheet"), "Homebase layout no longer exposes a fixed character_sheet rect")
+	_assert(not layout.has("loadout"), "Homebase layout no longer exposes a fixed #13 LOADOUT rect")
 	_assert(_node_rect_matches_actual(fireteam_panel, layout.get("fireteams")), "Homebase shows #10 FIRETEAMS in the fixed layout")
-	_assert(_node_rect_matches_actual(loadout_panel, layout.get("loadout")), "Homebase shows #13 LOADOUT in the fixed layout")
+	_assert(not loadout_panel.visible and bool(loadout_panel.get_meta("homebase_loadout_window_retired", false)), "Homebase retires the visible #13 LOADOUT window")
 	_assert(_node_rect_matches_actual(aircraft_panel, layout.get("flightdeck")), "Homebase keeps Flightdeck as fixed staging target")
 	_assert(not info_panel.visible, "Fixed right character sheet starts hidden")
 	_assert(not popup.visible and bool(popup.get_meta("outside_numbered_window_grid", false)), "Character popup starts closed outside the numbered window grid")
 	_assert(bool(fireteam_panel.get_meta("homebase_uses_fob_drop_panel_contract", false)), "Homebase Fireteams reuses the FOB drop panel contract")
-	_assert(bool(loadout_panel.get_meta("homebase_uses_fob_drop_panel_contract", false)), "Homebase Loadout reuses the FOB drop panel contract")
+	_assert(bool(loadout_panel.get_meta("homebase_loadout_controls_moved_to_fireteams", false)), "Homebase Loadout controls have moved into Fireteams")
 
 	screen.queue_free()
 	await process_frame
@@ -99,9 +100,8 @@ func _test_fireteam_loadout_and_dropship_contract() -> void:
 	await process_frame
 
 	var fireteam_list := screen.get_node("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel/FireteamMargin/FireteamVBox/FireteamScroll/FireteamList") as VBoxContainer
-	var loadout_member_list := screen.get_node("Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutMemberScroll/LoadoutMemberList") as VBoxContainer
 	_assert(_contains_meta(fireteam_list, "homebase_direct_fireteam_card"), "#10 renders direct fireteam cards")
-	_assert(_count_nodes_with_meta(loadout_member_list, "homebase_direct_loadout_row") == 3, "#13 renders compact loadout rows for the staged fireteam")
+	_assert(_count_nodes_with_meta(fireteam_list, "homebase_fireteam_inline_loadout_row") == 3, "#10 renders compact loadout rows for the staged fireteam")
 
 	screen.call("_on_homebase_staging_fireteam_dropped", "ft1", "homebase_dropship")
 	await process_frame
@@ -131,7 +131,6 @@ func _test_character_popup_contract() -> void:
 	var loadout_panel := screen.get_node("Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel") as Control
 	var aircraft_panel := screen.get_node("Panel/Margin/VBox/ContentRow/AircraftPanel") as Control
 	var fireteam_rect_before := Rect2(fireteam_panel.global_position, fireteam_panel.size)
-	var loadout_rect_before := Rect2(loadout_panel.global_position, loadout_panel.size)
 	var aircraft_rect_before := Rect2(aircraft_panel.global_position, aircraft_panel.size)
 
 	screen.call("_on_compact_card_open_requested", "unit_alpha", null, "roster")
@@ -143,7 +142,7 @@ func _test_character_popup_contract() -> void:
 	_assert(popup.visible, "Double-click/open request shows the character sheet popup")
 	_assert(not info_panel.visible, "Opening the popup does not re-enable the fixed InfoPanel")
 	_assert(_rect_matches_snapshot(fireteam_panel, fireteam_rect_before), "Popup does not move #10 FIRETEAMS")
-	_assert(_rect_matches_snapshot(loadout_panel, loadout_rect_before), "Popup does not move #13 LOADOUT")
+	_assert(not loadout_panel.visible, "Popup does not re-enable retired #13 LOADOUT")
 	_assert(_rect_matches_snapshot(aircraft_panel, aircraft_rect_before), "Popup does not move Flightdeck")
 
 	screen.call("_on_close_sheet_button_pressed")

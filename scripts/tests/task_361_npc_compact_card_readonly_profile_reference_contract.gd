@@ -204,9 +204,9 @@ func _test_homebase_display_cards_opt_into_readonly_references() -> void:
 	_assert(int(by_context.get("roster", 0)) > 0, "Homebase roster cards render")
 	_assert(int(by_context.get("staged", 0)) > 0, "Homebase staged cards render")
 	_assert(int(by_context.get("homebase_fireteam", 0)) > 0, "Homebase #10 fireteam member cards render")
-	_assert(int(by_context.get("homebase_loadout", 0)) > 0, "Homebase #13 loadout member cards render")
+	_assert(int(by_context.get("homebase_loadout", 0)) == 0, "Homebase retired #13 loadout no longer renders hidden member cards")
 	_assert(int(by_context.get("aircraft_shipcard", 0)) > 0, "Homebase Flightdeck pilot card renders")
-	_assert(_all_contexts_are_readonly(screen, ["roster", "staged", "homebase_fireteam", "homebase_loadout", "aircraft_shipcard"]), "Homebase display card contexts opt into readonly references")
+	_assert(_all_contexts_are_readonly(screen, ["roster", "staged", "homebase_fireteam", "aircraft_shipcard"]), "Homebase display card contexts opt into readonly references")
 
 	screen.queue_free()
 	await process_frame

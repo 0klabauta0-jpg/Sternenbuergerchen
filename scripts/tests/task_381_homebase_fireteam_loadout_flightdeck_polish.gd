@@ -17,7 +17,7 @@ func _init() -> void:
 func _run_tests() -> void:
 	print("=== TASK_381 Homebase Fireteam Loadout Flightdeck Polish Verifier ===")
 	await _test_fireteam_cards_embed_compact_loadout_dropdowns()
-	await _test_inline_loadout_updates_detail_loadout_and_export()
+	await _test_inline_loadout_updates_export()
 	await _test_shipcards_accept_fireteam_drag_payloads()
 	await _test_character_popup_uses_two_column_sheet()
 	_test_contextual_help_popup_widths_are_compact()
@@ -42,7 +42,7 @@ func _test_fireteam_cards_embed_compact_loadout_dropdowns() -> void:
 	await process_frame
 
 
-func _test_inline_loadout_updates_detail_loadout_and_export() -> void:
+func _test_inline_loadout_updates_export() -> void:
 	var screen: Control = await _build_screen()
 	var fireteam_list := _fireteam_list(screen)
 	var inline_primary := _find_loadout_selector(fireteam_list, "unit_alpha", "weapon_1") as OptionButton
@@ -56,12 +56,9 @@ func _test_inline_loadout_updates_detail_loadout_and_export() -> void:
 	screen.call("_on_homebase_staging_fireteam_dropped", "ft1", "homebase_dropship")
 	await process_frame
 	await process_frame
-	var detail_list := screen.get_node("Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutMemberScroll/LoadoutMemberList") as VBoxContainer
-	var detail_primary := _find_loadout_selector(detail_list, "unit_alpha", "weapon_1") as OptionButton
 	var snapshot: Dictionary = Dictionary(screen.call("get_homebase_direct_staging_snapshot"))
 	var member_loadouts: Dictionary = Dictionary(snapshot.get("member_loadouts", {}))
 	var alpha_loadout: Dictionary = Dictionary(member_loadouts.get("unit_alpha", {}))
-	_assert(detail_primary != null and String(detail_primary.get_item_metadata(detail_primary.selected)) == "sniper", "#13 detail loadout mirrors the #10 inline change")
 	_assert(String(alpha_loadout.get("weapon_1", "")).strip_edges() == "sniper", "Homebase export uses the changed inline loadout")
 
 	screen.queue_free()

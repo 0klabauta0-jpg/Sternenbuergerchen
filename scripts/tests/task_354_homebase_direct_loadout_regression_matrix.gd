@@ -202,37 +202,26 @@ func _select_homebase_loadout_option(screen: Control, unit_id: String, key: Stri
 
 
 func _find_homebase_loadout_selector(screen: Control, unit_id: String, key: String) -> OptionButton:
-	var list := screen.get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutMemberScroll/LoadoutMemberList") as VBoxContainer
-	if list == null:
+	var fireteam_panel := screen.get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel") as Control
+	if fireteam_panel == null:
 		return null
-	for child in list.get_children():
-		if String(child.get_meta("unit_id", "")).strip_edges() != unit_id:
+	for node in _collect_nodes(fireteam_panel):
+		if not (node is OptionButton):
 			continue
-		var selectors: Array[OptionButton] = _collect_option_buttons(child)
-		var selector_index: int = _selector_index_for_key(key)
-		if selector_index >= 0 and selector_index < selectors.size():
-			return selectors[selector_index]
+		var selector := node as OptionButton
+		if String(selector.get_meta("homebase_loadout_unit_id", "")).strip_edges() == unit_id \
+			and String(selector.get_meta("homebase_loadout_key", "")).strip_edges() == key:
+			return selector
 	return null
 
 
-func _selector_index_for_key(key: String) -> int:
-	match key.strip_edges().to_lower():
-		"armor", "kit":
-			return 0
-		"weapon_1", "primary":
-			return 1
-		"weapon_2", "secondary", "sidearm":
-			return 2
-		_:
-			return -1
-
-
-func _collect_option_buttons(root_node: Node) -> Array[OptionButton]:
-	var result: Array[OptionButton] = []
-	if root_node is OptionButton:
-		result.append(root_node as OptionButton)
+func _collect_nodes(root_node: Node) -> Array:
+	var result: Array = []
+	if root_node == null:
+		return result
+	result.append(root_node)
 	for child in root_node.get_children():
-		result.append_array(_collect_option_buttons(child))
+		result.append_array(_collect_nodes(child))
 	return result
 
 

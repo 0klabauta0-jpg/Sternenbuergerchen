@@ -153,7 +153,7 @@ func _unit_config_has_fireteam(unit_configs: Array, unit_id: String, fireteam_id
 
 
 func _loadout_dropdowns_use_contract_values(screen: Control) -> bool:
-	var root_node := screen.get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutMemberScroll/LoadoutMemberList")
+	var root_node := screen.get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel")
 	if root_node == null:
 		return false
 	var allowed_values := {

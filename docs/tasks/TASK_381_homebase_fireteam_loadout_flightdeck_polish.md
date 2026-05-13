@@ -6,7 +6,7 @@ Homebase Direct Staging soll im Manual Test runder laufen: Fireteam-Mitglieder b
 ## Status: IMPLEMENTIERT
 
 ## Sinnhaftigkeitscheck
-Der Wunsch ist sinnvoll, weil #10 FIRETEAMS bereits die operative Zuordnung ist. Die wichtigsten Loadout-Entscheidungen dort zu editieren reduziert Panelwechsel, ohne #13 LOADOUT als Detailansicht zu entfernen. Shipcard-Drops nutzen weiterhin denselben Homebase-Direct-Staging-State und fuehren keine zweite Boarding-Wahrheit ein.
+Der Wunsch ist sinnvoll, weil #10 FIRETEAMS bereits die operative Zuordnung ist. Die wichtigsten Loadout-Entscheidungen dort zu editieren reduziert Panelwechsel. TASK_382 hat danach #13 LOADOUT in der Homebase als sichtbares Fenster entfernt; Shipcard-Drops nutzen weiterhin denselben Homebase-Direct-Staging-State und fuehren keine zweite Boarding-Wahrheit ein.
 
 ## Problem
 - #13 LOADOUT enthaelt die Waffen-Dropdowns, #10 FIRETEAMS aber nicht.

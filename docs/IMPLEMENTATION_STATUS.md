@@ -310,6 +310,14 @@
 - Lokale Pruefung: `task_381_homebase_fireteam_loadout_flightdeck_polish.gd`, `task_346_homebase_direct_staging_character_popup.gd`, `task_355_homebase_direct_ux_payload_truth.gd`, `task_354_homebase_direct_loadout_regression_matrix.gd`, `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd`, `task_263_contextual_help_popup_ux_contract.gd`, `task_267_contextual_help_coverage_layout_verifier.gd` und `git diff --check` laufen gruen.
 - Offene Folgearbeit: Manueller Sichtcheck fuer die neue Dichte in #10 FIRETEAMS bleibt sinnvoll.
 
+### TASK_382 - Homebase Direct Mission Flightdeck Display
+- Status: implementiert
+- Stand: Homebase #13 LOADOUT ist als sichtbares Fixed-Layout-Fenster entfernt; der Legacy-Node bleibt versteckt fuer Kompatibilitaet. Der frei gewordene Platz geht an #10 FIRETEAMS und #05 FLIGHTDECK.
+- Stand: Homebase-Direct-Payloads merken sich die konkrete Dropship-Craft-ID. Ein auf eine Shipcard gedropptes Fireteam wird direkt auf dieser Dropship-Karte als Payload-Zeile mit Operatorcount angezeigt.
+- Stand: Shipcards haben eine `Mission`-Checkbox. Aktiv startet `Send` den bestehenden Homebase-Direct-Missionsstart, inaktiv bleibt `Send` der historische FOB-Transferpfad.
+- Lokale Pruefung: `task_382_homebase_direct_mission_flightdeck_display.gd`, `task_381_homebase_fireteam_loadout_flightdeck_polish.gd`, `task_354_homebase_direct_loadout_regression_matrix.gd`, `task_346_homebase_direct_staging_character_popup.gd`, `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd`, `task_258_fixed_window_clipping_scrollbar_playability_audit.gd` und `git diff --check` laufen gruen.
+- Offene Folgearbeit: Multi-Dropship-Payloads in der Homebase brauchen spaeter einen echten per-Craft-Payload-Store, falls mehrere Homebase-Dropships gleichzeitig beladen werden sollen.
+
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
 - Stand: Dropship-Visuals bauen ihre Dirty-Signatur wieder fehlerfrei, geplante LZs bleiben auch bei offmap/hidden Craft sichtbar, und Multi-Dropship-Payloads werden aus dem rohen Mission-Card-State statt aus stale Selected-Card-State uebernommen.
