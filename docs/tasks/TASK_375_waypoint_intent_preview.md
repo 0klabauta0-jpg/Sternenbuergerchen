@@ -3,7 +3,7 @@
 ## Ziel
 Geplante, noch nicht ausgefuehrte Waypoints sollen vor dem GO sichtbar machen, wohin der FTL voraussichtlich laeuft und wie lang/risikoreich der Weg ungefaehr ist.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Sinnhaftigkeitscheck
 Der Review-Punkt ist sinnvoll, weil Commander-Intent vor Ausfuehrung besser lesbar wird. Das Projekt hat mit `FireteamOrderVisualizer` und Area-Order-Preview bereits passende Visual-Grundlagen.
@@ -22,23 +22,28 @@ Bestehende Preview-Flaechen zeigen Area-/Order-Markierungen, aber keine kompakte
 - Keine Pathfinding- oder Movement-Entscheidung im Visualizer treffen.
 
 ## Akzeptanzkriterien
-- [ ] Pending Waypoints zeigen Ghost-Pfad und Richtung.
-- [ ] ETA/Distanz wird fuer einfache Waypoint-Ketten angezeigt.
-- [ ] Unbekannte Risiken werden nicht als erfundene Moralstrafe dargestellt.
-- [ ] Preview verschwindet nach Commit/Cancel korrekt.
-- [ ] Headless-Test prueft Preview-Snapshot und keine SimulationRoot-Mutation.
+- [x] Pending Waypoints zeigen Ghost-Pfad und Richtung.
+- [x] ETA/Distanz wird fuer einfache Waypoint-Ketten angezeigt.
+- [x] Unbekannte Risiken werden nicht als erfundene Moralstrafe dargestellt.
+- [x] Preview verschwindet nach Commit/Cancel korrekt.
+- [x] Headless-Test prueft Preview-Snapshot und keine SimulationRoot-Mutation.
+
+## Umsetzung
+- `WaypointIntentPreviewResolver` baut read-only Preview-Eintraege aus bestehenden Order-Plans, Fireteam-Ankern und Speed-Schaetzungen der Fireteam-Mitglieder.
+- `mission_tactical_sandbox_controller.gd` veroeffentlicht die Preview im Command-Feedback und reicht denselben Payload an `FireteamOrderVisualizer` und Primary3D-Order-Payloads weiter.
+- `FireteamOrderVisualizer` zeichnet nur den fertigen Payload als Ghost-Pfad, Ghost-FTL-Position, Richtung und kompakte ETA/Distanz-Label. Er trifft keine Pathfinding- oder Movement-Entscheidung.
+- Risiko bleibt `unknown`, solange keine echten Moral-/Fatigue-Daten fuer diesen Preview-Kontext existieren.
 
 ## Erwartete Dateien
 - `scripts/tactical/visuals/fireteam_order_visualizer.gd`
 - `scripts/tests/mission_tactical_sandbox_controller.gd`
-- ggf. `scripts/tactical/waypoint_intent_preview_resolver.gd`
+- `scripts/tactical/waypoint_intent_preview_resolver.gd`
 - `scripts/tests/task_375_waypoint_intent_preview.gd`
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_375_waypoint_intent_preview.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_315_mission_grid_tile_selection_command_gate.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_375_waypoint_intent_preview.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_315_mission_grid_tile_selection_command_gate.gd`
+- [x] `git diff --check`
 
 ## Risiken / offene Punkte
 - ETA kann irrefuehrend sein, wenn Kampfkontakt oder FTL-Ausbrueche eingreifen. Der Task soll diese Zahl klar als Planungsestimate behandeln.
-

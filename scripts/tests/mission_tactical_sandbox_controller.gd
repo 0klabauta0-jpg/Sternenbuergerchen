@@ -31,6 +31,7 @@ const MULTI_FIRETEAM_PLAN_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tac
 const FIRETEAM_ORDER_VISUALIZER_SCRIPT: GDScript = preload("res://scripts/tactical/visuals/fireteam_order_visualizer.gd")
 const AD_HOC_ORDER_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/ad_hoc_order_controller.gd")
 const AD_HOC_ORDER_SCRIPT: GDScript = preload("res://scripts/command/ad_hoc_order.gd")
+const WAYPOINT_INTENT_PREVIEW_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/waypoint_intent_preview_resolver.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
@@ -325,6 +326,7 @@ var _tracked_health_by_unit_id: Dictionary = {}
 var _coordination_manager = null
 var _fireteam_movement_controller = null
 var _fireteam_security_controller = null
+var _waypoint_intent_preview_resolver = WAYPOINT_INTENT_PREVIEW_RESOLVER_SCRIPT.new()
 var _comic_bubble_runtime_gate = null
 var _active_coordination_by_id: Dictionary = {}
 var _leader_initiated_flank_ready_at_msec_by_fireteam: Dictionary = {}
@@ -4395,9 +4397,29 @@ func _build_fireteam_waypoint_info_text(fireteam_id: String) -> String:
 	var movement_text: String = _build_waypoint_movement_description(get_fireteam_movement_state(normalized_fireteam_id))
 	var target_text: String = _format_world_position(Vector2(waypoint.target_position)) if typeof(waypoint.target_position) == TYPE_VECTOR2 else "--"
 	var text: String = "WP %d/%d %s | %s | Ziel %s" % [waypoint_index + 1, plan.waypoints.size(), command_text, status_text, target_text]
+	var intent_preview_text: String = _build_waypoint_intent_preview_text(normalized_fireteam_id)
+	if not intent_preview_text.is_empty():
+		text = "%s | %s" % [text, intent_preview_text]
 	if not movement_text.is_empty():
 		text = "%s | %s" % [text, movement_text]
 	return text
+
+
+func _build_waypoint_intent_preview_text(fireteam_id: String) -> String:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return ""
+	for entry_variant in _build_waypoint_intent_preview_entries():
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("fireteam_id", "")).strip_edges().to_lower() != normalized_fireteam_id:
+			continue
+		return "Dist %dm | ETA~%ds" % [
+			int(round(float(entry.get("distance_world", 0.0)))),
+			maxi(int(ceil(float(entry.get("eta_seconds_estimate", 0.0)))), 0),
+		]
+	return ""
 
 
 func _build_fireteam_area_defense_info_text(fireteam_id: String) -> String:
@@ -9347,6 +9369,23 @@ func get_visualized_waypoints_snapshot() -> Array:
 	return Array(visualizer.call("get_visible_waypoints"))
 
 
+func get_waypoint_intent_preview_snapshot() -> Array:
+	return _build_waypoint_intent_preview_entries()
+
+
+func get_waypoint_intent_preview_contract_snapshot() -> Dictionary:
+	var entries: Array = get_waypoint_intent_preview_snapshot()
+	return {
+		"entry_count": entries.size(),
+		"entries": entries,
+		"source": "WaypointIntentPreviewResolver",
+		"eta_state": "estimated",
+		"risk_policy": "unknown_until_morale_or_fatigue_data_exists",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
 func get_visualized_area_orders_snapshot() -> Array:
 	var visualizer := get_node_or_null("../FireteamOrderVisualizer")
 	if visualizer == null or not visualizer.has_method("get_visible_area_orders"):
@@ -9586,6 +9625,9 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"multi_fireteam_plan_count": _serialize_multi_fireteam_plans().size(),
 		"visualized_waypoint_count": get_visualized_waypoints_snapshot().size(),
 		"visualized_area_order_count": get_visualized_area_orders_snapshot().size(),
+		"waypoint_intent_preview_count": get_waypoint_intent_preview_snapshot().size(),
+		"waypoint_intent_preview": get_waypoint_intent_preview_snapshot(),
+		"waypoint_intent_preview_contract": get_waypoint_intent_preview_contract_snapshot(),
 		"fire_sector_overlay": get_fire_sector_overlay_snapshot(),
 		"los_debug_overlay": get_los_debug_overlay_snapshot(),
 		"cover_effectiveness_readout": cover_effectiveness_readout,
@@ -9777,6 +9819,8 @@ func _refresh_order_visuals() -> void:
 	if visualizer.has_method("set_fireteam_anchor_dicts"):
 		visualizer.call("set_fireteam_anchor_dicts", _build_fireteam_anchor_visualization_entries())
 	visualizer.call("set_plan_dicts", _serialize_order_plans())
+	if visualizer.has_method("set_waypoint_intent_preview_entries"):
+		visualizer.call("set_waypoint_intent_preview_entries", _build_waypoint_intent_preview_entries())
 	if visualizer.has_method("set_area_order_dicts"):
 		visualizer.call("set_area_order_dicts", _serialize_area_orders())
 	visualizer.call("set_ad_hoc_order_dicts", _build_ad_hoc_visualization_entries())
@@ -9817,6 +9861,7 @@ func _sync_primary_3d_order_visuals() -> void:
 			"los_debug_sample_limit": 24,
 			"fireteam_anchors": _build_fireteam_anchor_visualization_entries(),
 			"plan_dicts": _serialize_order_plans(),
+			"waypoint_intent_preview_entries": _build_waypoint_intent_preview_entries(),
 			"area_order_dicts": _serialize_area_orders(),
 			"multi_fireteam_plan_dicts": _serialize_multi_fireteam_plans(),
 			"ad_hoc_order_dicts": _build_ad_hoc_visualization_entries(),
@@ -10201,6 +10246,41 @@ func _build_fireteam_anchor_visualization_entries() -> Array:
 			entry.merge(heading_entry, true)
 		entries.append(entry)
 	return entries
+
+
+func _build_waypoint_intent_preview_entries() -> Array:
+	if _waypoint_intent_preview_resolver == null:
+		return []
+	return Array(
+		_waypoint_intent_preview_resolver.call(
+			"build_preview_entries",
+			_serialize_order_plans(),
+			_build_fireteam_anchor_visualization_entries(),
+			{
+				"phase_index": _get_live_order_phase_index(),
+				"selected_fireteam_ids": _selected_fireteam_ids,
+				"speed_world_per_second_by_fireteam": _build_waypoint_preview_speed_by_fireteam(),
+			}
+		)
+	).duplicate(true)
+
+
+func _build_waypoint_preview_speed_by_fireteam() -> Dictionary:
+	var result: Dictionary = {}
+	for fireteam_id_variant in _get_available_fireteam_ids():
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		var speed_total: float = 0.0
+		var unit_count: int = 0
+		for unit in _get_fireteam_units(fireteam_id, true):
+			if unit == null:
+				continue
+			speed_total += _read_multi_fireteam_unit_skill(unit, "get_speed_skill", "skill_speed", 0.5)
+			unit_count += 1
+		var average_speed: float = speed_total / float(unit_count) if unit_count > 0 else 0.5
+		result[fireteam_id] = 88.0 + (clampf(average_speed, 0.0, 1.0) * 56.0)
+	return result
 
 
 func _resolve_fireteam_heading_entry(fireteam_id: String, anchor_position: Vector2) -> Dictionary:

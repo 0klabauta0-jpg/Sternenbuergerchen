@@ -35,6 +35,7 @@ var _movement_state_dicts: Array = []
 var _fireteam_anchor_positions: Dictionary = {}
 var _fireteam_orientation_entries: Array = []
 var _area_order_preview_payload: Dictionary = {}
+var _waypoint_intent_preview_entries: Array = []
 
 
 func set_phase_index(phase_index: int) -> void:
@@ -65,6 +66,15 @@ func set_area_order_dicts(area_order_dicts: Array) -> void:
 
 func set_area_order_preview_payload(preview_payload: Dictionary) -> void:
 	_area_order_preview_payload = preview_payload.duplicate(true)
+	queue_redraw()
+
+
+func set_waypoint_intent_preview_entries(entries: Array) -> void:
+	_waypoint_intent_preview_entries = []
+	for entry_variant in entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		_waypoint_intent_preview_entries.append(Dictionary(entry_variant).duplicate(true))
 	queue_redraw()
 
 
@@ -151,6 +161,13 @@ func get_fireteam_orientation_entries() -> Array:
 	return result
 
 
+func get_waypoint_intent_preview_snapshot() -> Array:
+	var result: Array = []
+	for entry in _waypoint_intent_preview_entries:
+		result.append(Dictionary(entry).duplicate(true))
+	return result
+
+
 func get_security_overlay_snapshot() -> Dictionary:
 	var entries: Array = _build_security_overlay_entries()
 	var visible_entries: Array = []
@@ -213,6 +230,7 @@ func _draw() -> void:
 	_draw_area_orders()
 	_draw_area_order_preview()
 	_draw_fireteam_orientation_indicators()
+	_draw_waypoint_intent_previews()
 	for plan_dict in _plan_dicts:
 		var plan = FIRETEAM_ORDER_PLAN_SCRIPT.call("from_dict", plan_dict)
 		if plan == null or not plan.is_valid() or int(plan.phase) != _phase_index:
@@ -330,6 +348,35 @@ func _draw_area_order_preview() -> void:
 	var preview_edge := Color(0.84, 0.94, 1.0, 0.72)
 	for tile_world_position_variant in tile_world_positions:
 		_draw_iso_tile(Vector2(tile_world_position_variant), preview_fill, preview_edge)
+
+
+func _draw_waypoint_intent_previews() -> void:
+	for entry_variant in _waypoint_intent_preview_entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var points: Array = Array(entry.get("ghost_path_points", []))
+		if points.size() < 2:
+			continue
+		var fireteam_id: String = String(entry.get("fireteam_id", "")).strip_edges().to_lower()
+		var base_color: Color = _get_fireteam_color(fireteam_id)
+		var preview_color: Color = Color(base_color.r, base_color.g, base_color.b, 0.42)
+		for index in range(1, points.size()):
+			_draw_dashed_line(Vector2(points[index - 1]), Vector2(points[index]), preview_color, 2.0)
+		var ghost_position: Vector2 = Vector2(entry.get("ghost_ftl_position", points[points.size() - 1]))
+		_draw_iso_marker_base(ghost_position, Color(preview_color.r, preview_color.g, preview_color.b, 0.18), preview_color.lightened(0.18), 0.58)
+		var heading_direction: Vector2 = Vector2(entry.get("heading_direction", Vector2.ZERO))
+		if heading_direction.length_squared() > 0.0001:
+			var arrow_start: Vector2 = Vector2(points[0])
+			var arrow_tip: Vector2 = arrow_start + heading_direction.normalized() * 24.0
+			draw_line(arrow_start, arrow_tip, preview_color.lightened(0.25), 2.0, true)
+		var fallback_font: Font = ThemeDB.fallback_font
+		if fallback_font == null:
+			continue
+		var eta_seconds: int = maxi(int(ceil(float(entry.get("eta_seconds_estimate", 0.0)))), 0)
+		var distance_text: String = "%dm" % int(round(float(entry.get("distance_world", 0.0))))
+		var label_text: String = "ETA~%ds %s" % [eta_seconds, distance_text]
+		draw_string(fallback_font, ghost_position + Vector2(14.0, -16.0), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 11, preview_color.lightened(0.32))
 
 
 func _draw_area_order_label(center_position: Vector2, command_type: String, label_color: Color) -> void:
