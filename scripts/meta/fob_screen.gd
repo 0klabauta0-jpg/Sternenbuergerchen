@@ -1089,6 +1089,7 @@ func _render_available_operators() -> void:
 			profile,
 			{
 				"source_context": "fob_available",
+				"copy_profile": false,
 				"selected": unit_id == _focused_unit_id,
 				"disabled": is_in_transit,
 				"drag_enabled": not is_in_transit,
@@ -1166,6 +1167,7 @@ func _render_fireteam_rows() -> void:
 				member_profile,
 				{
 					"source_context": "fob_fireteam",
+					"copy_profile": false,
 					"selected": member_unit_id == _focused_unit_id,
 					"disabled": false,
 					"drag_enabled": true,
@@ -2746,6 +2748,7 @@ func _build_member_loadout_row(fireteam_id: String, member_unit_id: String, lead
 		member_profile,
 		{
 			"source_context": "loadout_staging",
+			"copy_profile": false,
 			"selected": _focused_unit_id == member_unit_id,
 			"disabled": false,
 			"drag_enabled": false,

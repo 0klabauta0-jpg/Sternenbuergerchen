@@ -23,6 +23,9 @@ const COMPACT_HBOX_SEPARATION := 6.0
 const CARD_Z_INDEX := 24
 
 var _profile = null
+var _uses_readonly_profile_reference: bool = false
+var _secondary_text_override: String = ""
+var _has_secondary_text_override: bool = false
 var _source_context: String = "roster"
 var _is_selected: bool = false
 var _is_disabled: bool = false
@@ -52,12 +55,23 @@ func _ready() -> void:
 
 
 func setup_from_profile(profile, options: Dictionary = {}) -> void:
+	var copy_profile: bool = bool(options.get("copy_profile", true))
 	if typeof(profile) == TYPE_OBJECT and profile != null and profile.has_method("duplicate_profile"):
-		_profile = profile.duplicate_profile()
+		_profile = profile.duplicate_profile() if copy_profile else profile
+		_uses_readonly_profile_reference = not copy_profile
 	elif typeof(profile) == TYPE_DICTIONARY:
 		_profile = META_UNIT_PROFILE_SCRIPT.new(profile)
+		_uses_readonly_profile_reference = false
 	else:
 		_profile = META_UNIT_PROFILE_SCRIPT.new()
+		_uses_readonly_profile_reference = false
+
+	if options.has("secondary_text_override"):
+		_secondary_text_override = String(options.get("secondary_text_override", "")).strip_edges()
+		_has_secondary_text_override = true
+	else:
+		_secondary_text_override = ""
+		_has_secondary_text_override = false
 
 	_source_context = String(options.get("source_context", _source_context)).strip_edges()
 	if _source_context.is_empty():
@@ -113,6 +127,21 @@ func get_profile():
 	return _profile.duplicate_profile()
 
 
+func get_profile_reference_for_readonly_display():
+	return _profile
+
+
+func get_profile_reference_contract_snapshot() -> Dictionary:
+	return {
+		"unit_id": get_unit_id(),
+		"source_context": _source_context,
+		"uses_readonly_profile_reference": _uses_readonly_profile_reference,
+		"external_get_profile_returns_copy": true,
+		"has_reference_getter": true,
+		"secondary_text_override": _secondary_text_override if _has_secondary_text_override else "",
+	}
+
+
 func get_source_context() -> String:
 	return _source_context
 
@@ -135,6 +164,7 @@ func get_card_userology_snapshot() -> Dictionary:
 		"badge_tooltips_available": _badge_tooltips_available(badge_row),
 		"compact_remove_action": remove_button != null and remove_button.visible,
 		"fixed_size": _fixed_size,
+		"uses_readonly_profile_reference": _uses_readonly_profile_reference,
 	}
 
 
@@ -176,11 +206,11 @@ func _get_drag_data(_at_position: Vector2):
 			live_text_width = COMPACT_TEXT_MIN_WIDTH
 		preview_text_width = live_text_width
 
-	var preview := NPCCompactCard.new()
-	preview.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	preview.setup_from_profile(
-		get_profile(),
-		{
+	var viewport := get_viewport()
+	if viewport != null and viewport.gui_is_dragging():
+		var preview := NPCCompactCard.new()
+		preview.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+		var preview_options := {
 			"source_context": _source_context,
 			"selected": _is_selected,
 			"disabled": false,
@@ -192,15 +222,20 @@ func _get_drag_data(_at_position: Vector2):
 			"drag_preview_size": preview_size,
 			"drag_preview_text_width": preview_text_width,
 		}
-	)
-	preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	preview.custom_minimum_size = preview_size
-	preview.size = preview.custom_minimum_size
-	preview.z_index = int(META_USEROLOGY_CONTRACT_SCRIPT.get("DRAG_PREVIEW_Z_INDEX"))
-	preview.set_meta("global_drag_layer", true)
-	preview.set_meta("above_windows", true)
-	preview.modulate = Color(1.0, 1.0, 1.0, 0.92)
-	set_drag_preview(preview)
+		if _has_secondary_text_override:
+			preview_options["secondary_text_override"] = _secondary_text_override
+		preview.setup_from_profile(
+			get_profile(),
+			preview_options
+		)
+		preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		preview.custom_minimum_size = preview_size
+		preview.size = preview.custom_minimum_size
+		preview.z_index = int(META_USEROLOGY_CONTRACT_SCRIPT.get("DRAG_PREVIEW_Z_INDEX"))
+		preview.set_meta("global_drag_layer", true)
+		preview.set_meta("above_windows", true)
+		preview.modulate = Color(1.0, 1.0, 1.0, 0.92)
+		set_drag_preview(preview)
 
 	return {
 		"type": "homebase_unit_card",
@@ -423,6 +458,9 @@ func _build_primary_data_text() -> String:
 
 
 func _build_secondary_data_text() -> String:
+	if _has_secondary_text_override:
+		return _secondary_text_override
+
 	var secondary_text: String = String(_profile.secondary_text).strip_edges()
 	if not secondary_text.is_empty():
 		return secondary_text

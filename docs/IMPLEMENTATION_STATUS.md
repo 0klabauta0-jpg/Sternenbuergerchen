@@ -133,9 +133,11 @@
 - Hinweis: `task_158_verifier.gd` wurde ausgefuehrt und endet mit Exitcode 0, meldet aber 15 bestehende Assertion-Fails. Der erste Fail tritt vor dem Editor-Load beim generischen `lz`-Key-Check von `MissionScenarioData.to_dict()` auf.
 
 ### TASK_361 - NPCCompactCard Readonly Profile Reference Contract
-- Status: geplant
-- Stand: Review-Finding nach Korrektur. Nur Homebase auf Profilreferenzen umzustellen reicht nicht, weil `NPCCompactCard.setup_from_profile()` intern ebenfalls dupliziert.
-- Naechster Schritt: Expliziten Readonly-Referenzmodus fuer Anzeige-Karten einfuehren und Homebase-/FOB-Call-Sites vorsichtig darauf opt-in lassen.
+- Status: implementiert
+- Stand: `NPCCompactCard.setup_from_profile()` hat jetzt einen kompatiblen Copy-Default und einen expliziten Readonly-Anzeigemodus ueber `copy_profile = false`.
+- Ergebnis: Homebase, FOB und Transport-Craft-Pilotkarten nutzen fuer reine Anzeige Profilreferenzen. Kontexttexte werden ueber `secondary_text_override` dargestellt, ohne Profilkopien zu mutieren.
+- Vertrag: `get_profile()` bleibt copy-safe fuer Signale, Doubleclick-Character-Sheet und externe Verbraucher; `get_profile_reference_for_readonly_display()` ist der klare Diagnose-/Anzeigegetter.
+- Lokale Pruefung: `task_361_npc_compact_card_readonly_profile_reference_contract.gd`, `task_346_homebase_direct_staging_character_popup.gd`, `task_316_fob_fireteam_staging_migration.gd`, `task_301_npc_card_drag_zorder_badges_tooltips.gd`, `task_233_portrait_identity_catalog_and_roster_presentation.gd` und `git diff --check` laufen gruen.
 
 ### TASK_362 - Homebase Aircraft State Manager Extraction
 - Status: geplant

@@ -1096,16 +1096,17 @@ func _render_roster() -> void:
 		var profile = _profiles_by_id.get(unit_id, null)
 		if profile == null:
 			continue
-		var card_profile = profile.duplicate_profile()
-		card_profile.secondary_text = _build_roster_card_secondary_text(unit_id, card_profile)
+		var secondary_text: String = _build_roster_card_secondary_text(unit_id, profile)
 		var transit_entry: Dictionary = _find_transfer_entry_for_unit(unit_id)
 		var is_in_transit: bool = not transit_entry.is_empty()
 
 		var card = NPC_COMPACT_CARD_SCENE.instantiate()
 		card.setup_from_profile(
-			card_profile,
+			profile,
 			{
 				"source_context": "roster",
+				"copy_profile": false,
+				"secondary_text_override": secondary_text,
 				"selected": _is_roster_card_highlighted(unit_id),
 				"disabled": is_in_transit,
 				"drag_enabled": not is_in_transit and not _selected_unit_ids.has(unit_id),
@@ -1134,14 +1135,15 @@ func _render_staged_team() -> void:
 		var profile = _profiles_by_id.get(unit_id, null)
 		if profile == null:
 			continue
-		var card_profile = profile.duplicate_profile()
-		card_profile.secondary_text = _build_roster_card_secondary_text(unit_id, card_profile)
+		var secondary_text: String = _build_roster_card_secondary_text(unit_id, profile)
 
 		var card = NPC_COMPACT_CARD_SCENE.instantiate()
 		card.setup_from_profile(
-			card_profile,
+			profile,
 			{
 				"source_context": "staged",
+				"copy_profile": false,
+				"secondary_text_override": secondary_text,
 				"selected": unit_id == _focused_unit_id,
 				"disabled": false,
 				"drag_enabled": false,
@@ -1232,6 +1234,7 @@ func _render_homebase_fireteam_members(member_host: VBoxContainer, fireteam_id: 
 			member_profile,
 			{
 				"source_context": "homebase_fireteam",
+				"copy_profile": false,
 				"selected": member_unit_id == _focused_unit_id,
 				"disabled": false,
 				"drag_enabled": true,
@@ -1303,15 +1306,15 @@ func _build_homebase_loadout_member_row(fireteam_id: String, unit_id: String, le
 	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	margin.add_child(row)
 
-	var member_profile = profile.duplicate_profile() if profile.has_method("duplicate_profile") else profile
-	if member_profile != null:
-		member_profile.secondary_text = "Lead" if unit_id == lead_unit_id else "Member"
+	var member_secondary_text: String = "Lead" if unit_id == lead_unit_id else "Member"
 	var member_card = NPC_COMPACT_CARD_SCENE.instantiate()
 	member_card.custom_minimum_size = Vector2(136.0, 54.0)
 	member_card.setup_from_profile(
-		member_profile,
+		profile,
 		{
 			"source_context": "homebase_loadout",
+			"copy_profile": false,
+			"secondary_text_override": member_secondary_text,
 			"selected": unit_id == _focused_unit_id,
 			"disabled": false,
 			"drag_enabled": false,
@@ -1454,16 +1457,17 @@ func _render_team_transfer_ghost_cards(selected_team_list: VBoxContainer) -> voi
 			if profile == null:
 				continue
 
-			var card_profile = profile.duplicate_profile()
-			card_profile.secondary_text = _build_transfer_ghost_secondary_text(entry)
+			var secondary_text: String = _build_transfer_ghost_secondary_text(entry)
 
 			var card = NPC_COMPACT_CARD_SCENE.instantiate()
 			card.set_meta("homebase_transfer_ghost_card", true)
 			card.set_meta("transfer_id", String(entry.get("transfer_id", "")).strip_edges())
 			card.setup_from_profile(
-				card_profile,
+				profile,
 				{
 					"source_context": "transfer_ghost",
+					"copy_profile": false,
+					"secondary_text_override": secondary_text,
 					"selected": false,
 					"disabled": true,
 					"drag_enabled": false,
@@ -3694,13 +3698,14 @@ func _build_assigned_pilot_row(unit_id: String, craft_name: String, craft_busy: 
 	if profile == null:
 		return _build_empty_state_label("Pilot profile unavailable.")
 
-	var card_profile = profile.duplicate_profile()
-	card_profile.secondary_text = "Inbound to FOB / %s" % craft_name if craft_in_transit else "Assigned to %s" % craft_name
+	var secondary_text: String = "Inbound to FOB / %s" % craft_name if craft_in_transit else "Assigned to %s" % craft_name
 	var card = NPC_COMPACT_CARD_SCENE.instantiate()
 	card.setup_from_profile(
-		card_profile,
+		profile,
 		{
 			"source_context": "aircraft_shipcard",
+			"copy_profile": false,
+			"secondary_text_override": secondary_text,
 			"selected": unit_id == _focused_unit_id,
 			"disabled": craft_in_transit,
 			"drag_enabled": not craft_busy,

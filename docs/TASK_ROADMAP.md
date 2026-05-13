@@ -556,7 +556,7 @@ TASK_357 - MapEditor Height Cliff Dirty Neighborhood Cache (implementiert)
 TASK_358 - MapEditor Undo Stroke Transactions (implementiert)
 TASK_359 - MapEditor Dirty UI Refresh Batching (implementiert)
 TASK_360 - MapEditor Mission Scenario Panel Extraction (implementiert)
-TASK_361 - NPCCompactCard Readonly Profile Reference Contract (geplant)
+TASK_361 - NPCCompactCard Readonly Profile Reference Contract (implementiert)
 TASK_362 - Homebase Aircraft State Manager Extraction (geplant)
 TASK_363 - Homebase Roster Card Pool Incremental Refresh (geplant)
 

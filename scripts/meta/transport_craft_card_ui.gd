@@ -226,6 +226,7 @@ static func _refresh_pilot_content(card: PanelContainer, state: Dictionary) -> v
 			pilot_profile,
 			{
 				"source_context": String(state.get("pilot_source_context", "transport_craft_pilot")).strip_edges(),
+				"copy_profile": false,
 				"selected": bool(state.get("pilot_selected", false)),
 				"disabled": bool(state.get("pilot_disabled", false)),
 				"drag_enabled": bool(state.get("pilot_drag_enabled", false)),
