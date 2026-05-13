@@ -11,6 +11,7 @@ const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_la
 const DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/drop_light_layout_contract.gd")
 const LOADOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/command/loadout_contract.gd")
 const AIRCRAFT_MANAGER_SCRIPT: GDScript = preload("res://scripts/meta/aircraft_manager.gd")
+const HOMEBASE_CARD_POOL_SCRIPT: GDScript = preload("res://scripts/meta/homebase_card_pool.gd")
 const HOMEBASE_TEAM_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/homebase_team_drop_panel.gd")
 const FOB_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/fob_drop_panel.gd")
 const FOB_FIRETEAM_CARD_SCRIPT: GDScript = preload("res://scripts/meta/fob_fireteam_card.gd")
@@ -54,6 +55,8 @@ var _profiles_by_id: Dictionary = {}
 var _focused_unit_id: String = ""
 var _roster_cards_by_unit_id: Dictionary = {}
 var _staged_cards_by_unit_id: Dictionary = {}
+var _roster_card_pool = HOMEBASE_CARD_POOL_SCRIPT.new()
+var _staged_card_pool = HOMEBASE_CARD_POOL_SCRIPT.new()
 var _team_feedback_text: String = ""
 var _character_sheet_open: bool = false
 var _aircraft_feedback_text: String = ""
@@ -1081,8 +1084,8 @@ func _apply_mission_brief_contrast_policy() -> void:
 
 func _render_roster() -> void:
 	var roster_list: VBoxContainer = get_node("Panel/Margin/VBox/ContentRow/RosterPanel/RosterMargin/RosterVBox/RosterScroll/RosterList")
-	_clear_container(roster_list)
 	_roster_cards_by_unit_id.clear()
+	var card_specs: Array = []
 
 	for unit_data in _available_units:
 		var unit_id: String = String(unit_data.get("unit_id", "")).strip_edges()
@@ -1099,36 +1102,30 @@ func _render_roster() -> void:
 		var secondary_text: String = _build_roster_card_secondary_text(unit_id, profile)
 		var transit_entry: Dictionary = _find_transfer_entry_for_unit(unit_id)
 		var is_in_transit: bool = not transit_entry.is_empty()
-
-		var card = NPC_COMPACT_CARD_SCENE.instantiate()
-		card.setup_from_profile(
-			profile,
+		card_specs.append(
 			{
-				"source_context": "roster",
-				"copy_profile": false,
-				"secondary_text_override": secondary_text,
-				"selected": _is_roster_card_highlighted(unit_id),
-				"disabled": is_in_transit,
-				"drag_enabled": not is_in_transit and not _selected_unit_ids.has(unit_id),
-				"compact_mode": true,
-				"show_progress": is_in_transit,
+				"key": _build_homebase_card_pool_key("roster", unit_id),
+				"unit_id": unit_id,
+				"profile": profile,
+				"secondary_text": secondary_text,
+				"is_in_transit": is_in_transit,
 				"progress_value": _build_transfer_progress_value(transit_entry) if is_in_transit else 0.0,
-				"fixed_size": true,
-				"fixed_card_size": HOMEBASE_OPERATOR_CARD_SIZE,
 			}
 		)
-		if not card.card_pressed.is_connected(_on_compact_card_pressed):
-			card.card_pressed.connect(_on_compact_card_pressed)
-		if not card.card_open_requested.is_connected(_on_compact_card_open_requested):
-			card.card_open_requested.connect(_on_compact_card_open_requested)
-		roster_list.add_child(card)
-		_roster_cards_by_unit_id[unit_id] = card
+
+	_roster_card_pool.reconcile(
+		roster_list,
+		card_specs,
+		Callable(self, "_create_homebase_pool_card"),
+		Callable(self, "_configure_roster_pool_card")
+	)
 
 
 func _render_staged_team() -> void:
 	var selected_team_list: VBoxContainer = get_node("Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamDropPanel/DropMargin/DropVBox/SelectedTeamScroll/SelectedTeamList")
-	_clear_container(selected_team_list)
+	_clear_homebase_transfer_ghost_cards(selected_team_list)
 	_staged_cards_by_unit_id.clear()
+	var card_specs: Array = []
 
 	for unit_id_variant in _selected_unit_ids:
 		var unit_id: String = String(unit_id_variant)
@@ -1136,33 +1133,115 @@ func _render_staged_team() -> void:
 		if profile == null:
 			continue
 		var secondary_text: String = _build_roster_card_secondary_text(unit_id, profile)
-
-		var card = NPC_COMPACT_CARD_SCENE.instantiate()
-		card.setup_from_profile(
-			profile,
+		card_specs.append(
 			{
-				"source_context": "staged",
-				"copy_profile": false,
-				"secondary_text_override": secondary_text,
-				"selected": unit_id == _focused_unit_id,
-				"disabled": false,
-				"drag_enabled": false,
-				"compact_mode": true,
-				"show_remove_action": true,
-				"fixed_size": true,
-				"fixed_card_size": HOMEBASE_STAGED_CARD_SIZE,
+				"key": _build_homebase_card_pool_key("staged", unit_id),
+				"unit_id": unit_id,
+				"profile": profile,
+				"secondary_text": secondary_text,
 			}
 		)
-		if not card.card_pressed.is_connected(_on_compact_card_pressed):
-			card.card_pressed.connect(_on_compact_card_pressed)
-		if not card.card_open_requested.is_connected(_on_compact_card_open_requested):
-			card.card_open_requested.connect(_on_compact_card_open_requested)
-		if card.has_signal("remove_requested") and not card.remove_requested.is_connected(_on_staged_card_remove_requested):
-			card.remove_requested.connect(_on_staged_card_remove_requested)
-		selected_team_list.add_child(card)
-		_staged_cards_by_unit_id[unit_id] = card
+
+	_staged_card_pool.reconcile(
+		selected_team_list,
+		card_specs,
+		Callable(self, "_create_homebase_pool_card"),
+		Callable(self, "_configure_staged_pool_card")
+	)
 
 	_render_team_transfer_ghost_cards(selected_team_list)
+
+
+func get_homebase_card_pool_snapshot() -> Dictionary:
+	return {
+		"roster": _roster_card_pool.get_snapshot(),
+		"staged": _staged_card_pool.get_snapshot(),
+		"roster_dictionary_count": _roster_cards_by_unit_id.size(),
+		"staged_dictionary_count": _staged_cards_by_unit_id.size(),
+	}
+
+
+func _build_homebase_card_pool_key(context: String, unit_id: String, fireteam_id: String = "") -> String:
+	var parts: PackedStringArray = PackedStringArray([context.strip_edges().to_lower(), unit_id.strip_edges()])
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	if not normalized_fireteam_id.is_empty():
+		parts.append(normalized_fireteam_id)
+	return "|".join(parts)
+
+
+func _create_homebase_pool_card(_spec: Dictionary):
+	var card = NPC_COMPACT_CARD_SCENE.instantiate()
+	card.set_meta("homebase_card_pool_managed", true)
+	return card
+
+
+func _configure_roster_pool_card(card, spec: Dictionary) -> void:
+	if card == null:
+		return
+	var unit_id: String = String(spec.get("unit_id", "")).strip_edges()
+	var profile = spec.get("profile", null)
+	var is_in_transit: bool = bool(spec.get("is_in_transit", false))
+	card.setup_from_profile(
+		profile,
+		{
+			"source_context": "roster",
+			"copy_profile": false,
+			"secondary_text_override": String(spec.get("secondary_text", "")).strip_edges(),
+			"selected": _is_roster_card_highlighted(unit_id),
+			"disabled": is_in_transit,
+			"drag_enabled": not is_in_transit and not _selected_unit_ids.has(unit_id),
+			"compact_mode": true,
+			"show_progress": is_in_transit,
+			"progress_value": float(spec.get("progress_value", 0.0)),
+			"fixed_size": true,
+			"fixed_card_size": HOMEBASE_OPERATOR_CARD_SIZE,
+		}
+	)
+	if not card.card_pressed.is_connected(_on_compact_card_pressed):
+		card.card_pressed.connect(_on_compact_card_pressed)
+	if not card.card_open_requested.is_connected(_on_compact_card_open_requested):
+		card.card_open_requested.connect(_on_compact_card_open_requested)
+	card.set_meta("homebase_roster_pool_unit_id", unit_id)
+	_roster_cards_by_unit_id[unit_id] = card
+
+
+func _configure_staged_pool_card(card, spec: Dictionary) -> void:
+	if card == null:
+		return
+	var unit_id: String = String(spec.get("unit_id", "")).strip_edges()
+	var profile = spec.get("profile", null)
+	card.setup_from_profile(
+		profile,
+		{
+			"source_context": "staged",
+			"copy_profile": false,
+			"secondary_text_override": String(spec.get("secondary_text", "")).strip_edges(),
+			"selected": unit_id == _focused_unit_id,
+			"disabled": false,
+			"drag_enabled": false,
+			"compact_mode": true,
+			"show_remove_action": true,
+			"fixed_size": true,
+			"fixed_card_size": HOMEBASE_STAGED_CARD_SIZE,
+		}
+	)
+	if not card.card_pressed.is_connected(_on_compact_card_pressed):
+		card.card_pressed.connect(_on_compact_card_pressed)
+	if not card.card_open_requested.is_connected(_on_compact_card_open_requested):
+		card.card_open_requested.connect(_on_compact_card_open_requested)
+	if card.has_signal("remove_requested") and not card.remove_requested.is_connected(_on_staged_card_remove_requested):
+		card.remove_requested.connect(_on_staged_card_remove_requested)
+	card.set_meta("homebase_staged_pool_unit_id", unit_id)
+	_staged_cards_by_unit_id[unit_id] = card
+
+
+func _clear_homebase_transfer_ghost_cards(container: Node) -> void:
+	if container == null:
+		return
+	for child in container.get_children():
+		if bool(child.get_meta("homebase_transfer_ghost_card", false)):
+			container.remove_child(child)
+			child.queue_free()
 
 
 func _render_homebase_fireteams() -> void:

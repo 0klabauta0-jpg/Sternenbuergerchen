@@ -148,9 +148,12 @@
 - Hinweis: Der erste Lauf von `bugfix_dropship_mission_flow_verifier.gd` lief ueber 180 Sekunden und wurde mit hoeherem Timeout wiederholt. Der erfolgreiche Lauf meldet nur bestehende Headless-RID-/ObjectDB-Warnungen am Exit.
 
 ### TASK_363 - Homebase Roster Card Pool Incremental Refresh
-- Status: geplant
-- Stand: Review-Finding mit mittlerer Prioritaet. Bei 12 Units ist Card-Neuaufbau okay, aber groessere Roster und Direct-Staging-Kopien brauchen stabile Card-Keys und inkrementelle Updates.
-- Naechster Schritt: Homebase-Roster/Direct-Staging auf Card-Wiederverwendung oder inkrementelle Refresh-Helfer vorbereiten.
+- Status: implementiert
+- Stand: `scripts/meta/homebase_card_pool.gd` fuehrt einen kleinen Card-Pool fuer Homebase-NPC-Karten ein. Der Pool reconciled stabile Keys gegen einen Container, haelt vorhandene Nodes, reordered sie nach Bedarf und retired entfernte Karten sauber.
+- Stand: `HomebaseScreen.gd` nutzt den Pool fuer Roster-Karten (`roster|unit_id`) und gestagte Teamkarten (`staged|unit_id`). Transfer-Ghost-Karten bleiben bewusst ausserhalb des Pools und werden separat aufgebaut.
+- Stand: `get_homebase_card_pool_snapshot()` meldet aktive Keys, Create-/Reuse-/Retire-Zaehler und Dictionary-Counts. Der Verifier simuliert 60 Roster-Units, Selection-Aenderungen, Profil-/Badge-Refresh und Doppelklick-Popup auf wiederverwendeten Staging-Karten.
+- Lokale Pruefung: `task_363_homebase_roster_card_pool_incremental_refresh.gd`, `task_361_npc_compact_card_readonly_profile_reference_contract.gd`, `task_346_homebase_direct_staging_character_popup.gd`, `task_355_homebase_direct_ux_payload_truth.gd`, `task_362_homebase_aircraft_state_manager_extraction.gd` und `git diff --check` laufen gruen.
+- Offene Folgearbeit: Fireteam- und Loadout-Memberkarten sind noch nicht gepoolt; dieser Task deckt den risikoarmen ersten Homebase-Roster/Staging-Schnitt ab.
 
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
