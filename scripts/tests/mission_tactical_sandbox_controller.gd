@@ -43,6 +43,7 @@ const FIRETEAMLEADER_FEEDBACK_BUBBLE_RESOLVER_SCRIPT: GDScript = preload("res://
 const TACTICAL_COMMUNICATION_EVENT_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_communication_event.gd")
 const TACTICAL_COMMUNICATION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_communication_resolver.gd")
 const TACTICAL_EVENT_LOG_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_event_log.gd")
+const FTL_READINESS_SNAPSHOT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/tactical/ftl_readiness_snapshot_contract.gd")
 const TACTICAL_BREAKOUT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_breakout_resolver.gd")
 const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
 const COMIC_BUBBLE_SETTINGS_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_settings.gd")
@@ -7114,6 +7115,41 @@ func get_tactical_event_log_contract_snapshot() -> Dictionary:
 	return Dictionary(_tactical_event_log.call("get_contract_snapshot"))
 
 
+func get_ftl_readiness_snapshot() -> Array:
+	var entries: Array = []
+	for fireteam_id_variant in _get_available_fireteam_ids():
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		entries.append(_build_ftl_readiness_snapshot_for_fireteam(fireteam_id))
+	return entries
+
+
+func get_ftl_readiness_contract_snapshot() -> Dictionary:
+	return {
+		"schema_version": FTL_READINESS_SNAPSHOT_CONTRACT_SCRIPT.SCHEMA_VERSION,
+		"value_ranges": FTL_READINESS_SNAPSHOT_CONTRACT_SCRIPT.call("get_value_ranges"),
+		"read_only": true,
+		"contains_node_reference": false,
+	}
+
+
+func _build_ftl_readiness_snapshot_for_fireteam(fireteam_id: String) -> Dictionary:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return {}
+	var leader = _resolve_fireteam_leader_for_behavior(normalized_fireteam_id)
+	var profile_dict: Dictionary = get_active_behavior_profile(normalized_fireteam_id)
+	var assignment_dict: Dictionary = _find_multi_fireteam_assignment_for_fireteam(normalized_fireteam_id)
+	return Dictionary(FTL_READINESS_SNAPSHOT_CONTRACT_SCRIPT.call(
+		"build_snapshot",
+		normalized_fireteam_id,
+		leader,
+		profile_dict,
+		assignment_dict
+	))
+
+
 func get_tactical_breakout_snapshot() -> Array:
 	return _tactical_breakout_records.duplicate(true)
 
@@ -8877,6 +8913,9 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"tactical_event_log_count": get_tactical_event_log_snapshot().size(),
 		"tactical_event_log": get_tactical_event_log_snapshot(),
 		"tactical_event_log_contract": get_tactical_event_log_contract_snapshot(),
+		"ftl_readiness_count": get_ftl_readiness_snapshot().size(),
+		"ftl_readiness": get_ftl_readiness_snapshot(),
+		"ftl_readiness_contract": get_ftl_readiness_contract_snapshot(),
 		"tactical_breakout_count": get_tactical_breakout_snapshot().size(),
 		"tactical_breakouts": get_tactical_breakout_snapshot(),
 		"fireteam_coordination_count": get_fireteam_coordination_snapshot().size(),

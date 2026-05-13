@@ -180,9 +180,17 @@
 - Lokale Pruefung: `task_366_tactical_event_log_hud_panel.gd`, `task_258_fixed_window_clipping_scrollbar_playability_audit.gd`, `task_365_tactical_event_log_data_layer.gd` und `git diff --check` laufen gruen.
 - Offene Folgearbeit: Manuelle Sichtpruefung der Lesbarkeit im echten Gefecht bleibt sinnvoll, sobald weitere HUD-Widgets aus TASK_367+ dazukommen.
 
-### TASK_367-TASK_380 - Mission Visualization Review Followups
+### TASK_367 - FTL Public Readiness Snapshot Contract
+- Status: implementiert
+- Stand: `scripts/tactical/ftl_readiness_snapshot_contract.gd` normalisiert bestehende `ftl_public_snapshot`-/Profilwerte zu einem kleinen HUD-Snapshot mit Fireteam-ID, Leader-Name, Reaction Delay, Morale, Plan Quality, Execution Label, Availability-Flags und dokumentierten Wertebereichen.
+- Stand: Fehlende Leader-/FTL-Daten werden explizit als unavailable markiert. Fehlende Metriken bleiben `null`; es werden keine 0.5-Fallbackwerte als Wahrheit ausgegeben.
+- Stand: `mission_tactical_sandbox_controller.gd` exposes `get_ftl_readiness_snapshot()` und spiegelt `ftl_readiness`, `ftl_readiness_count` und `ftl_readiness_contract` im Command-Feedback-Snapshot. Der Pfad ist read-only und erzeugt keine `SimulationRoot` Commands oder Effects.
+- Lokale Pruefung: `task_367_ftl_public_readiness_snapshot_contract.gd`, `task_273_fireteam_leader_skill_tactical_progression.gd` und `git diff --check` laufen gruen.
+- Offene Folgearbeit: TASK_368 kann daraus die kompakte Readiness-Gauge bauen.
+
+### TASK_368-TASK_380 - Mission Visualization Review Followups
 - Status: geplant
-- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Sinnvolle Follow-ups sind als getrennte Tasks 367 bis 380 noch offen.
+- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Sinnvolle Follow-ups sind als getrennte Tasks 368 bis 380 noch offen.
 - Stand: Die Review-Snippets werden nicht ungeprueft uebernommen. Fireteam-Orientation, Event-Log, FTL-Gauge, Fireteam-Status, Member-Zeile, Fire-Sector, LOS, Cover, Countdown, Waypoint-Preview, Command-Validation, Contact-Heatmap und MapEditor-Debuglayer sind jeweils als eigene kleine Slices geschnitten.
 - Stand: Architekturgrenze bleibt: UI liest nur Snapshots. `SimulationRoot`, bestehende Resolver, `TacticalCommunicationEvent`, `FireteamBehaviorResolver`, `FireteamOrderVisualizer`, FoW und Terrain-Daten bleiben die Wahrheit.
 - Offene Punkte: Implementierung der einzelnen Tasks, genaue HUD-Platzierung fuer Event-Log/Statuskarten und manuelle Sichtpruefung nach den ersten Visual-Slices.

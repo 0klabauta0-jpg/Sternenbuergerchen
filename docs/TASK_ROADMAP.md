@@ -564,7 +564,7 @@ Phase 18ZL - Mission Visualization Review Followups
 TASK_364 - Mission Fireteam Orientation Indicators (implementiert)
 TASK_365 - Tactical Event Log Data Layer (implementiert)
 TASK_366 - Tactical Event Log HUD Panel (implementiert)
-TASK_367 - FTL Public Readiness Snapshot Contract (geplant)
+TASK_367 - FTL Public Readiness Snapshot Contract (implementiert)
 TASK_368 - FTL Readiness Gauge (geplant)
 TASK_369 - Fireteam Status Card Enhancement (geplant)
 TASK_370 - Fireteam Member Health Status Row (geplant)
