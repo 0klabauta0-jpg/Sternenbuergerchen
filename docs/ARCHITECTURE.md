@@ -14,6 +14,14 @@ Simulation, Darstellung und UI strikt trennen.
 - Navigation ueber A*-Pfadsuche auf dem Iso-Grid (walkable, Hoehenunterschied, Surface-Kosten); Geradlinien-Fallback ohne TerrainRegistry
 - Datenbasiertes Combat statt Physik-Ballistik
 
+## Wahrheitsquellen und Grenzen
+- `SimulationRoot` ist die autoritative Mutationsstelle fuer Gameplay-State.
+- Runtime-Komponenten wie `RuntimeLeader`, CombatLoop, Navigation und Taktikcontroller besitzen nur ihren klaren Laufzeitbereich.
+- Registries wie `UnitRegistry`, `FTLRegistry` und `TerrainRegistry` sind Lookup- und Index-Schichten. Sie ersetzen breite SceneTree-Suchen, sollen aber keine versteckte zweite Gameplay-Autoritaet werden.
+- Contract-/Data-Helper normalisieren Werte fuer mehrere Schichten. Wenn UI und Simulation denselben Wert brauchen, zuerst einen gemeinsamen Contract/Snapshot suchen oder schaffen.
+- UI, HUD, Editor und 2.5D/3D-Visuals sind Leseschichten. Sie duerfen Commands ausloesen und Feedback zeigen, aber keinen dauerhaften Parallel-State fuer Mission, Units, Fireteams, Loadouts, Transport oder Combat fuehren.
+- Performance-Hotpaths nutzen Dirty-Flags, Batch-Updates, Caches oder `UpdateManager`; sichtbare Progressanzeigen duerfen getaktet werden, ohne Simulation-State zu verlangsamen.
+
 ## Kernbausteine
 ### SimulationRoot
 - einzige autoritative Stelle für Gameplay-State-Änderungen

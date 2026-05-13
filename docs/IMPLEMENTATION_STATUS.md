@@ -3,10 +3,22 @@
 ## Template
 ### Bereich
 - Status:
+- Relevante Docs/Contracts:
 - Stand:
 - Offene Punkte:
 - Risiken:
+- Lokale Pruefung:
 - Naechster Schritt:
+
+### TASK_400 - Agent Rules Doc Refresh
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `AGENTS.md`, `docs/CODEX_RULES.md`, `docs/ARCHITECTURE.md`, `docs/CODEX_TASK_PROMPT_TEMPLATE.md`
+- Stand: Die Arbeitsregeln trennen jetzt klar zwischen Arbeitsanweisungen und Feature-Contracts. `AGENTS.md` betont Wahrheit/Besitz, Registry-Lookups, relevante Docs vor Taskstart, Task-Hygiene und Hotpath-Regeln.
+- Stand: `docs/CODEX_RULES.md` beschreibt explizit Wahrheitsquellen, Registry-Grenzen, Doku-Hygiene und die Pflicht, relevante Contracts/Reviews/QA-Dokumente bei Tasks zu lesen.
+- Stand: Die Task-Prompt-Vorlage fordert nun `AGENTS.md`, Roadmap, Implementation Status und relevante Contracts/Reviews/Performance-Dokumente an und erinnert an Simulation-/Registry-/UI-Grenzen.
+- Risiken: Diese Doku-Aenderung erzwingt keine automatische Tool-Pruefung. Die Regeln wirken nur, wenn neue Tasks sie tatsaechlich lesen und relevante Contracts in Taskdateien nennen.
+- Lokale Pruefung: `git diff --check` laeuft gruen.
+- Naechster Schritt: Bei den naechsten neuen Tasks die Sektion `Relevante Contracts / Dokumente` konsequent ausfuellen.
 
 ## Aktueller Startzustand
 

@@ -26,11 +26,22 @@ Vor jedem Task:
 ```bash
 git checkout integration/core-foundation
 git checkout -b task/<task-name>
+```
 
 Bei Batch-Arbeit:
 
+```bash
 git checkout integration/core-foundation
 git checkout -b batch/<batch-name>
+```
+
+## Task-Hygiene
+- Nicht-triviale Aenderungen brauchen eine konkrete Task-Datei unter `docs/tasks/`.
+- Task-Dateien nennen relevante Contracts und Dokumente explizit.
+- Review-Befunde werden vor dem Task gegen den aktuellen Code geprueft.
+- Gameplay-Wahrheit bleibt bei Simulation/Runtime/Contracts/Registries; UI-Tasks duerfen keine zweite Wahrheit einfuehren.
+- Hotpath-Tasks muessen SceneTree-Vollscans und per-frame Komplett-Rebuilds vermeiden.
+
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
 TASK_001 RuntimeLeader
@@ -599,6 +610,7 @@ TASK_396 - Mission Dropship LZ Drop Hotfix (implementiert)
 TASK_397 - Mission Dropship UX Hotfix (implementiert)
 TASK_398 - Mission Dropship Outbound Command Hotfix (implementiert)
 TASK_399 - Dropship Flow Contract Performance Pass (implementiert)
+TASK_400 - Agent Rules Doc Refresh (implementiert)
 
 Batch-Empfehlung
 
