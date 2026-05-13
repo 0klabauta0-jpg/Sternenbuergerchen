@@ -234,7 +234,7 @@ TASK_096 – Meta-Layer Recovery: Missionskarte, Dropship-LZ und Character-Sheet
 Phase 17H – Taktisches Kampfsystem
 TASK_097 – Datenmodelle, engage und Ad-hoc-Vertraege (implementiert)
 TASK_098 – TacticalInputController und Fireteam-Auswahl (implementiert)
-TASK_099 – Wegpunktplanung, Kontextmenue und Order-Visualisierung
+TASK_099 – Wegpunktplanung, Kontextmenue und Order-Visualisierung (implementiert)
 TASK_100 – PhaseController und globale Plan-Ausfuehrung
 TASK_101 – FireteamBehaviorResolver, geplantes Flankieren und Standardverhalten
 TASK_102 – AdHocOrderController und Gefechts-Sofortbefehle

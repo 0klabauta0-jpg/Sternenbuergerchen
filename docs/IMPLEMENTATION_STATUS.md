@@ -2389,6 +2389,7 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Stand: Der `TacticalInputController` haelt jetzt pro Fireteam und Phase echte `FireteamOrderPlan`-Daten auf Basis der Task-97-Modelle. Rechtsklick setzt Wegpunkte fuer alle aktuell ausgewaehlten Fireteams, ein kontextsensitives Kurzmenue erlaubt direkt `move`, `defend`, `engage`, `flank` und `take`, und Wegpunkte koennen nachtraeglich per Drag verschoben oder per Delete entfernt werden. Ein schlanker `FireteamOrderVisualizer` rendert die Plaene rein lesend als Linien und Symbolmarker in der Missionsszene; beim Planen werden keine Commands an SimulationRoot oder Flow-Driver gesendet.
 - Offene Punkte: keine Phasen-Ausfuehrung, keine Ad-hoc-Orders, keine Pathfinding-Auswertung entlang der Wegpunkte und keine ausgebaute Kontextmenue-/Polish-Schicht ueber den kurzen Missions-Testpfad hinaus.
 - Risiken: Die Planungsdaten liegen bewusst lokal im bestehenden Mission-Planning-State-Bridge-Pfad; spaetere globale Plan-Ausfuehrung muss diese Daten explizit konsumieren, statt wieder direkte Sofort-Commands aus dem Input-Controller abzuleiten. Die Visualisierung ist absichtlich rein lesend und darf spaeter nicht zum versteckten Gameplay-Treiber werden.
+- Lokale Pruefung: `task_099_verifier.gd` und `git diff --check` laufen gruen.
 - Naechster Schritt: Task 100 kann auf diesem Slice aufsetzen, um einen globalen Phase-Controller und die tatsaechliche Plan-Ausfuehrung einzufuehren.
 
 ### TASK_100 – PhaseController und globale Plan-Ausfuehrung

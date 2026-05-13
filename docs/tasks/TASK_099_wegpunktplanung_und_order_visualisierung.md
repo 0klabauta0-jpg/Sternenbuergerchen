@@ -3,7 +3,7 @@
 ## Ziel
 Ausgewaehlte Fireteams koennen pro Phase beliebig viele Wegpunkte mit Befehlstypen planen, spaeter editieren und als zusammenhaengende Linien mit Symbolen auf der Karte sehen, ohne die Befehle sofort auszufuehren.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT
 
 ## Pflicht vor Beginn
 - Lies [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md)
@@ -56,3 +56,11 @@ Ausgewaehlte Fireteams koennen pro Phase beliebig viele Wegpunkte mit Befehlstyp
 - Wegpunkte sind verschiebbar und loeschbar.
 - Geplante Orders werden sichtbar als Linie mit Symbolen dargestellt.
 - Beim Planen werden keine Befehle sofort ausgefuehrt.
+
+## Umsetzung
+- Der `TacticalInputController` haelt pro Fireteam und Phase `FireteamOrderPlan`-Daten.
+- Rechtsklick-/Kontextmenue-Pfade erzeugen, aendern, verschieben und loeschen Wegpunkte ohne sofortige Simulation-Commands.
+- `FireteamOrderVisualizer` rendert die geplanten Orders rein lesend und blendet abgeschlossene Wegpunkte aus, ohne Planindizes zu verlieren.
+
+## Lokale Pruefung
+- `godot_console.exe --headless --path . --script scripts/tests/task_099_verifier.gd`
