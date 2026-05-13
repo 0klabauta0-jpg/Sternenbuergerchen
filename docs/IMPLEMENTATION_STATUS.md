@@ -2369,6 +2369,13 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Der Supportpfad bleibt bewusst auf Combat-Medics und das konkrete `medictool` begrenzt. Falls spaeter weitere Support-Rollen oder Verbrauchsregeln hinzukommen, sollten sie diesen kleinen Pfad explizit erweitern statt eine zweite Utility-Wahrheit aufzubauen.
 - Naechster Schritt: Falls gewuenscht, spaeter eigenstaendige Folge-Tasks fuer Verbrauchslogik, Revive-Animation oder weitere Support-Rollen schneiden.
 
+### TASK_097 - Datenmodelle, engage und Ad-hoc-Vertraege
+- Status: implementiert
+- Stand: Die taktische Planungsschicht besitzt die leichten Dictionary-kompatiblen Modelle `FireteamWaypoint`, `FireteamOrderPlan`, `FireteamBehaviorProfile`, `PhaseState`, `AdHocOrder` und `UnitLoadoutModifiers`. `engage` ist im geplanten Commander-/Waypoint-Vertrag enthalten und wird in `engage_in_area` uebersetzt. Ad-hoc-Befehle bleiben ein getrennter Laufzeitvertrag mit standardmaessigem `resume_plan_after`.
+- Offene Punkte: keine innerhalb dieses Datenmodell-Slices; Ausfuehrung, UI-Planung und Ad-hoc-Controller bleiben Folgeaufgaben.
+- Risiken: Die Modelle sind bewusst reine Datentraeger. Spaetere Logik muss sie ueber die bestehenden Commander-/FTL-/SimulationRoot-Pfade konsumieren, statt Gameplay-Wahrheit in UI oder Visualisierung abzulegen.
+- Lokale Pruefung: `task_097_verifier.gd` und `git diff --check` laufen gruen.
+
 ### TASK_099 – Wegpunktplanung und Order-Visualisierung
 - Status: implementiert
 - Stand: Der `TacticalInputController` haelt jetzt pro Fireteam und Phase echte `FireteamOrderPlan`-Daten auf Basis der Task-97-Modelle. Rechtsklick setzt Wegpunkte fuer alle aktuell ausgewaehlten Fireteams, ein kontextsensitives Kurzmenue erlaubt direkt `move`, `defend`, `engage`, `flank` und `take`, und Wegpunkte koennen nachtraeglich per Drag verschoben oder per Delete entfernt werden. Ein schlanker `FireteamOrderVisualizer` rendert die Plaene rein lesend als Linien und Symbolmarker in der Missionsszene; beim Planen werden keine Commands an SimulationRoot oder Flow-Driver gesendet.

@@ -3,7 +3,7 @@
 ## Ziel
 Die neue Taktikschicht bekommt alle benoetigten Dictionary-kompatiblen Datenmodelle fuer Planung, globale Phasen, Ad-hoc-Eingriffe und Loadout-Modifikatoren. Gleichzeitig wird `engage` als regulärer geplanter Befehl wieder in den Befehlsvertrag aufgenommen.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT
 
 ## Pflicht vor Beginn
 - Lies [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md)
@@ -66,3 +66,11 @@ Die neue Taktikschicht bekommt alle benoetigten Dictionary-kompatiblen Datenmode
 - `engage` ist im Planungsvertrag wieder enthalten.
 - Ad-hoc-Befehle haben einen klaren eigenen Laufzeitvertrag.
 - Kein bestehender Kernbaustein wird strukturell ersetzt.
+
+## Umsetzung
+- `FireteamWaypoint`, `FireteamOrderPlan`, `FireteamBehaviorProfile`, `PhaseState`, `AdHocOrder` und `UnitLoadoutModifiers` existieren als leichte `RefCounted`-Datentraeger mit Dictionary-Roundtrip.
+- `CommanderCommand`, `CommandToFTLTaskTranslator` und `FireteamWaypoint` fuehren `engage` als gueltigen geplanten Befehl.
+- `AdHocOrder` dokumentiert den getrennten Laufzeitvertrag fuer `flank`, `disengage`, `fall_back`, `focus_fire` und `hold_till_last_man`; `resume_plan_after` bleibt standardmaessig `true`.
+
+## Lokale Pruefung
+- `godot_console.exe --headless --path . --script scripts/tests/task_097_verifier.gd`
