@@ -3,7 +3,7 @@
 ## Ziel
 Der MapEditor soll beim Hover oder Auswaehlen eines Patrol-Spawns die komplette Patrol-Route sichtbar hervorheben.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Sinnhaftigkeitscheck
 Der Review-Punkt ist sinnvoll und gut begrenzt. Der Editor hat bereits `MapEditorPatrolTool` und ausgelagerte Scenario-Panel-Pfade; die Preview sollte diese Daten lesen und nicht neue Patrol-Datenhaltung einfuehren.
@@ -22,11 +22,11 @@ Der Patrol-Tooling-Pfad kann Punkte setzen/bearbeiten, aber Hover-/Binding-Konte
 - 2D- und falls vorhanden Primary-View-Refresh sauber dirty/batched halten.
 
 ## Akzeptanzkriterien
-- [ ] Hover auf Patrol-ID hebt komplette Route hervor.
-- [ ] Direction/Waypoint-Reihenfolge ist lesbar.
-- [ ] Mehrere Routen koennen nacheinander ohne stale Preview angezeigt werden.
-- [ ] Dirty-UI-Batching aus TASK_359 wird respektiert.
-- [ ] Headless-Test prueft Preview-Snapshot fuer mindestens zwei Routen.
+- [x] Hover auf Patrol-ID hebt komplette Route hervor.
+- [x] Direction/Waypoint-Reihenfolge ist lesbar.
+- [x] Mehrere Routen koennen nacheinander ohne stale Preview angezeigt werden.
+- [x] Dirty-UI-Batching aus TASK_359 wird respektiert.
+- [x] Headless-Test prueft Preview-Snapshot fuer mindestens zwei Routen.
 
 ## Erwartete Dateien
 - `scripts/editor/map_editor.gd`
@@ -35,10 +35,9 @@ Der Patrol-Tooling-Pfad kann Punkte setzen/bearbeiten, aber Hover-/Binding-Konte
 - `scripts/tests/task_378_mapeditor_patrol_route_preview.gd`
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_378_mapeditor_patrol_route_preview.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_360_mapeditor_mission_scenario_panel_extraction.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_378_mapeditor_patrol_route_preview.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_360_mapeditor_mission_scenario_panel_extraction.gd`
+- [x] `git diff --check`
 
 ## Risiken / offene Punkte
 - Vorschau darf nicht mit dem Patrol-Editiermodus kollidieren. Hover-Preview und aktives Dragging muessen klar getrennt sein.
-

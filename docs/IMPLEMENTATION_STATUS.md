@@ -272,10 +272,17 @@
 - Lokale Pruefung: `task_377_contact_density_heat_map_layer.gd`, `task_286_ui_feedback_truth_regression_review.gd` und `git diff --check` laufen gruen.
 - Offene Folgearbeit: Manueller Sichtcheck fuer Lesbarkeit/Overload bleibt offen; der Layer bleibt default aus.
 
-### TASK_378-TASK_380 - Mission Visualization Review Followups
+### TASK_378 - MapEditor Patrol Route Preview
+- Status: implementiert
+- Stand: `MapEditorPatrolPreview` loest Patrol-Preview-Referenzen read-only aus `TerrainMapData.get_patrol_path()` und Scenario-Patrol-Bindings auf. Direkte Patrol-IDs, Binding-IDs und Target-/Spawn-IDs fuehren auf denselben Preview-Vertrag.
+- Stand: `MapEditor` hebt die aktive Patrol-Route im 2D-Overlay mit staerkerer Linie, Waypoint-Nummern und Richtungspfeilen hervor. Hover-Wechsel laufen ueber die Dirty-UI-Batching-Queue und ersetzen stale Preview-Routen.
+- Stand: Die Primary-3D-View erhaelt nur die aktive Preview-Path-ID und zeichnet die zugehoerigen Patrol-Segmente in Preview-Farbe. Der Preview-Snapshot markiert `visual_only` und setzt keine Editor- oder Gameplay-Wahrheit.
+- Lokale Pruefung: `task_378_mapeditor_patrol_route_preview.gd`, `task_360_mapeditor_mission_scenario_panel_extraction.gd` und `git diff --check` laufen gruen.
+- Offene Folgearbeit: Manueller Editor-Sichtcheck fuer genaue Pfeil-/Label-Lesbarkeit bleibt sinnvoll, besonders bei langen oder eng gekreuzten Patrol-Routen.
+
+### TASK_379-TASK_380 - Mission Visualization Review Followups
 - Status: geplant
-- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Sinnvolle offene Follow-ups sind als getrennte Tasks 378 bis 380 angelegt.
-- Stand: Die Review-Snippets werden nicht ungeprueft uebernommen. MapEditor-Debuglayer bleiben als eigene kleine Slices offen.
+- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Nach TASK_378 bleiben die MapEditor-Debuglayer als getrennte Tasks 379 bis 380 offen.
 - Stand: Architekturgrenze bleibt: UI liest nur Snapshots. `SimulationRoot`, bestehende Resolver, `TacticalCommunicationEvent`, `FireteamBehaviorResolver`, `FireteamOrderVisualizer`, FoW und Terrain-Daten bleiben die Wahrheit.
 - Offene Punkte: Implementierung der einzelnen Tasks und manuelle Sichtpruefung nach weiteren Visual-Slices.
 - Risiken: Visual-Dichte kann Mission-HUD und FoW schnell ueberladen. Die Tasks markieren Debug-/optional-Layer getrennt von permanenten Spieleranzeigen.

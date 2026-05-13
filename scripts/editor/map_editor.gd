@@ -12,6 +12,7 @@ const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tacti
 const MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_primary_view_adapter.gd")
 const MAP_EDITOR_HEIGHT_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_height_tool.gd")
 const MAP_EDITOR_PATROL_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_patrol_tool.gd")
+const MAP_EDITOR_PATROL_PREVIEW_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_patrol_preview.gd")
 const MAP_EDITOR_MARKER_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_marker_tool.gd")
 const MAP_EDITOR_MISSION_SCENARIO_PANEL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_mission_scenario_panel.gd")
 const MULTIPLAYER_MAP_MANIFEST_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_map_manifest.gd")
@@ -41,6 +42,7 @@ const CAMERA_PAN_SPEED: float = 800.0
 const PATROL_OVERLAY_NAME: String = "PatrolOverlay"
 const PATROL_SPAWN_IDS: PackedStringArray = ["enemy_delta", "enemy_echo", "enemy_alpha", "enemy_bravo"]
 const PATROL_PICK_RADIUS: float = 28.0
+const PATROL_SEGMENT_PICK_RADIUS: float = 18.0
 const MARKER_OVERLAY_NAME: String = "MarkerOverlay"
 const MARKER_PICK_RADIUS: float = 26.0
 const MARKER_DRAG_THRESHOLD: float = 4.0
@@ -111,6 +113,7 @@ const EDITOR_UI_REFRESH_PROPERTIES: int = 1 << 1
 const EDITOR_UI_REFRESH_TOOL_STATE: int = 1 << 2
 const EDITOR_UI_REFRESH_HOVER: int = 1 << 3
 const EDITOR_UI_REFRESH_SCENARIO: int = 1 << 4
+const EDITOR_UI_REFRESH_PATROL_PREVIEW: int = 1 << 5
 
 @export var map_file_path: String = ""
 
@@ -175,6 +178,11 @@ var _last_editor_ui_refresh_flushed_flags: int = 0
 var _queued_hover_world_position: Vector2 = Vector2.ZERO
 var _queued_hover_has_world_position: bool = false
 var _queued_hover_hide: bool = false
+var _patrol_preview_path_id: String = ""
+var _last_patrol_preview_snapshot: Dictionary = {}
+var _queued_patrol_preview_world_position: Vector2 = Vector2.ZERO
+var _queued_patrol_preview_has_world_position: bool = false
+var _queued_patrol_preview_hide: bool = false
 var _active_palette_group_id: String = ""
 var _palette_preview_textures: Dictionary = {}
 var _last_dirty_neighborhood_snapshot: Dictionary = {}
@@ -421,9 +429,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		if _is_painting and _is_brush_enabled() and _has_selected_type():
 			_apply_brush_at_world_position(world_position)
 			return
+		if _patrol_tool_enabled and not _is_pointer_over_control():
+			_queue_hover_preview_hide()
+			_queue_patrol_route_preview_update(world_position)
+			return
 		if _is_brush_enabled() and not _is_pointer_over_control():
+			_queue_patrol_route_preview_hide()
 			_queue_hover_preview_update(world_position)
 			return
+		_queue_patrol_route_preview_hide()
 		_queue_hover_preview_hide()
 
 
@@ -562,6 +576,7 @@ func _load_map(path: String) -> void:
 	_cliff_sprites_by_grid.clear()
 	_object_sprites_by_grid.clear()
 	_set_selected_grid_position(Vector2i(-1, -1))
+	_clear_patrol_route_preview(false)
 	_clear_undo_history()
 	_mark_dirty(false)
 	_rebuild_registry_from_map_data()
@@ -596,6 +611,7 @@ func _create_new_map(grid_size: Vector2i = DEFAULT_NEW_MAP_GRID_SIZE) -> void:
 	_cliff_sprites_by_grid.clear()
 	_object_sprites_by_grid.clear()
 	_set_selected_grid_position(Vector2i(-1, -1))
+	_clear_patrol_route_preview(false)
 	_clear_undo_history()
 	_mark_dirty(false)
 	_rebuild_registry_from_map_data()
@@ -730,6 +746,19 @@ func _queue_hover_preview_hide() -> void:
 	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_HOVER)
 
 
+func _queue_patrol_route_preview_update(world_position: Vector2) -> void:
+	_queued_patrol_preview_world_position = world_position
+	_queued_patrol_preview_has_world_position = true
+	_queued_patrol_preview_hide = false
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_PATROL_PREVIEW)
+
+
+func _queue_patrol_route_preview_hide() -> void:
+	_queued_patrol_preview_has_world_position = false
+	_queued_patrol_preview_hide = true
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_PATROL_PREVIEW)
+
+
 func _flush_editor_ui_refresh() -> void:
 	var flags: int = _editor_ui_refresh_pending_flags
 	_editor_ui_refresh_pending_flags = 0
@@ -746,6 +775,13 @@ func _flush_editor_ui_refresh() -> void:
 			_update_hover_preview(_queued_hover_world_position)
 		_queued_hover_hide = false
 		_queued_hover_has_world_position = false
+	if (flags & EDITOR_UI_REFRESH_PATROL_PREVIEW) != 0:
+		if _queued_patrol_preview_hide or not _queued_patrol_preview_has_world_position:
+			_restore_selected_patrol_route_preview()
+		else:
+			_update_patrol_route_preview_at_world_position(_queued_patrol_preview_world_position)
+		_queued_patrol_preview_hide = false
+		_queued_patrol_preview_has_world_position = false
 	if (flags & EDITOR_UI_REFRESH_SELECTION) != 0:
 		_refresh_selection_visual()
 	if (flags & EDITOR_UI_REFRESH_PROPERTIES) != 0:
@@ -768,6 +804,8 @@ func _get_editor_ui_refresh_flag_names(flags: int) -> PackedStringArray:
 		names.append("hover")
 	if (flags & EDITOR_UI_REFRESH_SCENARIO) != 0:
 		names.append("scenario")
+	if (flags & EDITOR_UI_REFRESH_PATROL_PREVIEW) != 0:
+		names.append("patrol_preview")
 	return names
 
 
@@ -786,6 +824,9 @@ func get_editor_ui_refresh_debug_snapshot() -> Dictionary:
 		"flag_request_counts": _editor_ui_refresh_flag_request_counts.duplicate(true),
 		"queued_hover_update": _queued_hover_has_world_position,
 		"queued_hover_hide": _queued_hover_hide,
+		"queued_patrol_preview_update": _queued_patrol_preview_has_world_position,
+		"queued_patrol_preview_hide": _queued_patrol_preview_hide,
+		"patrol_route_preview": get_patrol_route_preview_snapshot(),
 	}
 
 
@@ -1444,6 +1485,7 @@ func _on_selection_tool_toggled(pressed: bool) -> void:
 		var patrol_button := get_node_or_null("UI/TopBar/Margin/HBox/PatrolButton") as Button
 		if patrol_button != null and patrol_button.button_pressed:
 			patrol_button.button_pressed = false
+		_clear_patrol_route_preview(true)
 		_is_painting = false
 		_last_painted_grid = Vector2i(-1, -1)
 		_hide_hover_preview()
@@ -1470,6 +1512,7 @@ func _on_brush_tool_toggled(pressed: bool) -> void:
 		var patrol_button := get_node_or_null("UI/TopBar/Margin/HBox/PatrolButton") as Button
 		if patrol_button != null and patrol_button.button_pressed:
 			patrol_button.button_pressed = false
+		_clear_patrol_route_preview(true)
 	else:
 		_is_painting = false
 		_last_painted_grid = Vector2i(-1, -1)
@@ -1497,6 +1540,7 @@ func _on_eraser_tool_toggled(pressed: bool) -> void:
 		var patrol_button := get_node_or_null("UI/TopBar/Margin/HBox/PatrolButton") as Button
 		if patrol_button != null and patrol_button.button_pressed:
 			patrol_button.button_pressed = false
+		_clear_patrol_route_preview(true)
 	else:
 		_is_painting = false
 		_last_painted_grid = Vector2i(-1, -1)
@@ -1521,6 +1565,9 @@ func _on_patrol_tool_toggled(pressed: bool) -> void:
 		var select_button := get_node_or_null("UI/TopBar/Margin/HBox/SelectButton") as Button
 		if select_button != null and select_button.button_pressed:
 			select_button.button_pressed = false
+		preview_patrol_route_for_reference(_patrol_spawn_id, "selected_spawn")
+	else:
+		_clear_patrol_route_preview(true)
 	_update_patrol_topbar_state()
 	_refresh_patrol_overlay()
 	_refresh_authoring_status_controls()
@@ -1531,6 +1578,7 @@ func _on_patrol_spawn_selected(index: int) -> void:
 	if spawn_selector == null or index < 0 or index >= spawn_selector.item_count:
 		return
 	_patrol_spawn_id = String(spawn_selector.get_item_metadata(index)).strip_edges()
+	preview_patrol_route_for_reference(_patrol_spawn_id, "selected_spawn")
 	_refresh_patrol_overlay()
 	_refresh_authoring_status_controls()
 
@@ -2675,6 +2723,10 @@ func set_authoring_tool(tool_id: String) -> bool:
 		select_button.button_pressed = _selection_tool_enabled
 	_is_painting = false
 	_last_painted_grid = Vector2i(-1, -1)
+	if _patrol_tool_enabled:
+		preview_patrol_route_for_reference(_patrol_spawn_id, "selected_spawn")
+	else:
+		_clear_patrol_route_preview(true)
 	_update_height_topbar_state()
 	_update_patrol_topbar_state()
 	_refresh_authoring_status_controls()
@@ -2721,6 +2773,7 @@ func get_map_editor_usability_snapshot(sync_from_controls: bool = true) -> Dicti
 			"spawn_id": _patrol_spawn_id,
 			"waypoint_count": _get_patrol_waypoint_count(_patrol_spawn_id),
 		},
+		"patrol_route_preview": get_patrol_route_preview_snapshot(),
 		"eraser_tool": {
 			"enabled": _eraser_tool_enabled,
 			"scope": "object_layer_only",
@@ -2896,7 +2949,8 @@ func get_authoring_action_contract_snapshot() -> Dictionary:
 		"active_undo_transaction": not _active_undo_transaction.is_empty(),
 		"redo_available": false,
 		"editor_ui_refresh_batched": true,
-		"editor_ui_refresh_flags": _get_editor_ui_refresh_flag_names(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES | EDITOR_UI_REFRESH_TOOL_STATE | EDITOR_UI_REFRESH_HOVER | EDITOR_UI_REFRESH_SCENARIO),
+		"editor_ui_refresh_flags": _get_editor_ui_refresh_flag_names(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES | EDITOR_UI_REFRESH_TOOL_STATE | EDITOR_UI_REFRESH_HOVER | EDITOR_UI_REFRESH_SCENARIO | EDITOR_UI_REFRESH_PATROL_PREVIEW),
+		"patrol_route_preview_visual_only": true,
 		"tile_patch_fields": PackedStringArray([
 			"grid_position",
 			"walkable",
@@ -3597,6 +3651,7 @@ func _on_height_tool_toggled(pressed: bool) -> void:
 		_is_painting = false
 		_last_painted_grid = Vector2i(-1, -1)
 		_hide_hover_preview()
+		_clear_patrol_route_preview(true)
 		_refresh_patrol_overlay()
 		_refresh_marker_editor_controls()
 	_update_height_topbar_state()
@@ -3637,6 +3692,7 @@ func _on_marker_tool_toggled(pressed: bool) -> void:
 	_selection_tool_enabled = false
 	_eraser_tool_enabled = false
 	_patrol_tool_enabled = false
+	_clear_patrol_route_preview(true)
 	var select_button := get_node_or_null("UI/TopBar/Margin/HBox/SelectButton") as Button
 	if select_button != null:
 		select_button.button_pressed = false
@@ -4900,6 +4956,59 @@ func _ensure_patrol_overlay() -> void:
 	add_child(overlay)
 
 
+func preview_patrol_route_for_reference(reference_id: String, source_type: String = "selection") -> bool:
+	var snapshot: Dictionary = Dictionary(MAP_EDITOR_PATROL_PREVIEW_SCRIPT.call("build_preview_snapshot_for_reference", _terrain_map_data, _mission_scenario, reference_id, source_type))
+	return _set_patrol_route_preview_from_snapshot(snapshot, true)
+
+
+func get_patrol_route_preview_snapshot() -> Dictionary:
+	if _last_patrol_preview_snapshot.is_empty():
+		return Dictionary(MAP_EDITOR_PATROL_PREVIEW_SCRIPT.call("build_preview_snapshot", _terrain_map_data, "", "", ""))
+	return _last_patrol_preview_snapshot.duplicate(true)
+
+
+func _set_patrol_route_preview_from_snapshot(snapshot: Dictionary, queue_visual_refresh: bool = true) -> bool:
+	var is_active: bool = bool(snapshot.get("active", false))
+	var next_path_id: String = String(snapshot.get("patrol_path_id", "")).strip_edges() if is_active else ""
+	if next_path_id == _patrol_preview_path_id and _last_patrol_preview_snapshot == snapshot:
+		return is_active
+	_patrol_preview_path_id = next_path_id
+	_last_patrol_preview_snapshot = snapshot.duplicate(true)
+	if queue_visual_refresh:
+		_refresh_patrol_overlay()
+	return is_active
+
+
+func _clear_patrol_route_preview(queue_visual_refresh: bool = true) -> void:
+	_patrol_preview_path_id = ""
+	_last_patrol_preview_snapshot = Dictionary(MAP_EDITOR_PATROL_PREVIEW_SCRIPT.call("build_preview_snapshot", _terrain_map_data, "", "", ""))
+	if queue_visual_refresh:
+		_refresh_patrol_overlay()
+
+
+func _restore_selected_patrol_route_preview() -> void:
+	if _patrol_tool_enabled and not _patrol_spawn_id.strip_edges().is_empty():
+		if preview_patrol_route_for_reference(_patrol_spawn_id, "selected_spawn"):
+			return
+	_clear_patrol_route_preview(true)
+
+
+func _update_patrol_route_preview_at_world_position(world_position: Vector2) -> void:
+	var hit: Dictionary = Dictionary(MAP_EDITOR_PATROL_PREVIEW_SCRIPT.call("find_route_reference_near_world_position", _terrain_map_data, world_position, PATROL_PICK_RADIUS, PATROL_SEGMENT_PICK_RADIUS))
+	if hit.is_empty():
+		_restore_selected_patrol_route_preview()
+		return
+	var snapshot: Dictionary = Dictionary(MAP_EDITOR_PATROL_PREVIEW_SCRIPT.call(
+		"build_preview_snapshot",
+		_terrain_map_data,
+		String(hit.get("patrol_path_id", "")),
+		String(hit.get("source_id", "")),
+		String(hit.get("source_type", "hover"))
+	))
+	if not _set_patrol_route_preview_from_snapshot(snapshot, true):
+		_restore_selected_patrol_route_preview()
+
+
 func _refresh_patrol_overlay() -> void:
 	var overlay := get_node_or_null(PATROL_OVERLAY_NAME) as Node2D
 	if overlay == null or _terrain_map_data == null:
@@ -4908,25 +5017,36 @@ func _refresh_patrol_overlay() -> void:
 	for child in overlay.get_children():
 		child.queue_free()
 	var patrol_paths: Dictionary = Dictionary(_terrain_map_data.call("get_patrol_paths"))
-	for spawn_id_variant in patrol_paths.keys():
+	var path_ids: Array = patrol_paths.keys()
+	path_ids.sort()
+	for spawn_id_variant in path_ids:
 		var spawn_id: String = String(spawn_id_variant).strip_edges()
 		if spawn_id.is_empty():
 			continue
 		var is_active_spawn: bool = spawn_id == _patrol_spawn_id
-		var base_color: Color = Color(0.25, 0.9, 0.35, 0.9) if is_active_spawn else Color(0.25, 0.75, 0.3, 0.5)
+		var is_preview: bool = spawn_id == _patrol_preview_path_id
+		var base_color: Color = Color(0.25, 0.75, 0.3, 0.5)
+		if is_preview:
+			base_color = Color(1.0, 0.82, 0.18, 0.96)
+		elif is_active_spawn:
+			base_color = Color(0.25, 0.9, 0.35, 0.9)
 		var path_points: Array = Array(_terrain_map_data.call("get_patrol_path", spawn_id))
 		if path_points.size() >= 2:
 			var line := Line2D.new()
-			line.width = 2.0
+			line.width = 4.0 if is_preview else 2.0
 			line.default_color = base_color
+			line.z_index = 4 if is_preview else 0
 			for point_variant in path_points:
 				line.add_point(Vector2(point_variant))
 			overlay.add_child(line)
+			if is_preview:
+				_add_patrol_route_direction_arrows(overlay, path_points, base_color)
 		for waypoint_index in range(path_points.size()):
 			var waypoint_position: Vector2 = Vector2(path_points[waypoint_index])
 			var marker := Line2D.new()
-			marker.width = 2.0
+			marker.width = 3.0 if is_preview else 2.0
 			marker.default_color = base_color
+			marker.z_index = 5 if is_preview else 1
 			marker.add_point(waypoint_position + Vector2(-5.0, 0.0))
 			marker.add_point(waypoint_position + Vector2(5.0, 0.0))
 			marker.add_point(waypoint_position + Vector2(0.0, 0.0))
@@ -4935,11 +5055,40 @@ func _refresh_patrol_overlay() -> void:
 			overlay.add_child(marker)
 			var label := Label.new()
 			label.position = waypoint_position + Vector2(6.0, -12.0)
-			label.text = "%s:%d" % [spawn_id, waypoint_index + 1]
+			label.text = "%d" % [waypoint_index + 1] if is_preview else "%s:%d" % [spawn_id, waypoint_index + 1]
 			label.modulate = base_color
-			label.add_theme_font_size_override("font_size", 10)
+			label.z_index = 6 if is_preview else 2
+			label.add_theme_font_size_override("font_size", 13 if is_preview else 10)
 			overlay.add_child(label)
+	_sync_patrol_preview_to_primary_view()
 	_queue_3d_map_refresh()
+
+
+func _add_patrol_route_direction_arrows(overlay: Node2D, path_points: Array, color: Color) -> void:
+	if overlay == null:
+		return
+	for segment_index in range(1, path_points.size()):
+		var start_position: Vector2 = Vector2(path_points[segment_index - 1])
+		var end_position: Vector2 = Vector2(path_points[segment_index])
+		var direction: Vector2 = end_position - start_position
+		if direction.length_squared() <= 0.001:
+			continue
+		direction = direction.normalized()
+		var tip: Vector2 = start_position.lerp(end_position, 0.62)
+		var back: Vector2 = tip - direction * 12.0
+		var side: Vector2 = direction.rotated(PI * 0.5) * 5.0
+		var arrow := Polygon2D.new()
+		arrow.polygon = PackedVector2Array([tip, back + side, back - side])
+		arrow.color = color
+		arrow.z_index = 7
+		overlay.add_child(arrow)
+
+
+func _sync_patrol_preview_to_primary_view() -> void:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view == null or not primary_3d_view.has_method("set_editor_patrol_preview_path_id"):
+		return
+	primary_3d_view.call("set_editor_patrol_preview_path_id", _patrol_preview_path_id)
 
 
 func _refresh_patrol_spawn_selector() -> void:
@@ -5220,6 +5369,8 @@ func _refresh_3d_map_view() -> void:
 	var primary_3d_view = _get_primary_3d_view()
 	if primary_3d_view == null:
 		return
+	if primary_3d_view.has_method("set_editor_patrol_preview_path_id"):
+		primary_3d_view.call("set_editor_patrol_preview_path_id", _patrol_preview_path_id)
 	MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT.call("refresh_map_view", primary_3d_view, _terrain_map_data, _selected_grids, _selected_grid_position)
 	_set_legacy_2d_map_visible(false)
 

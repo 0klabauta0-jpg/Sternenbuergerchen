@@ -339,6 +339,8 @@ var _map_render_duration_msec: int = 0
 var _marker_count: int = 0
 var _compass_marker_count: int = 0
 var _patrol_segment_count: int = 0
+var _patrol_preview_segment_count: int = 0
+var _editor_patrol_preview_path_id: String = ""
 var _area_order_count: int = 0
 var _waypoint_visual_count: int = 0
 var _area_order_tile_marker_count: int = 0
@@ -512,6 +514,7 @@ func render_map(terrain_map_data = null) -> void:
 	_marker_count = 0
 	_compass_marker_count = 0
 	_patrol_segment_count = 0
+	_patrol_preview_segment_count = 0
 	_movement_style_visual_count = 0
 	_movement_bound_marker_count = 0
 	_movement_group_marker_count = 0
@@ -1021,6 +1024,16 @@ func set_editor_shadow_readability_enabled(enabled: bool) -> void:
 	_request_viewport_redraw()
 
 
+func set_editor_patrol_preview_path_id(path_id: String) -> void:
+	var normalized_path_id: String = path_id.strip_edges()
+	if normalized_path_id == _editor_patrol_preview_path_id:
+		return
+	_editor_patrol_preview_path_id = normalized_path_id
+	if _patrol_root != null and _terrain_map_data != null:
+		_rebuild_patrol_visuals()
+	_request_viewport_redraw()
+
+
 func get_render_snapshot() -> Dictionary:
 	_render_snapshot_request_count += 1
 	var render_budget_by_category: Dictionary = _build_render_budget_by_category()
@@ -1086,6 +1099,8 @@ func get_render_snapshot() -> Dictionary:
 		"marker_count": _marker_count,
 		"compass_marker_count": _compass_marker_count,
 		"patrol_segment_count": _patrol_segment_count,
+		"editor_patrol_preview_path_id": _editor_patrol_preview_path_id,
+		"editor_patrol_preview_segment_count": _patrol_preview_segment_count,
 		"selected_grid_count": _selected_grid_positions.size(),
 		"selected_grid_positions": _selected_grid_positions.duplicate(),
 		"unit_proxy_count": _unit_proxies_by_id.size(),
@@ -2745,17 +2760,22 @@ func _get_compass_marker_letter(marker_id: String, marker_record: Dictionary = {
 func _rebuild_patrol_visuals() -> void:
 	_clear_children(_patrol_root)
 	_patrol_segment_count = 0
+	_patrol_preview_segment_count = 0
 	if _terrain_map_data == null or _patrol_root == null:
 		return
 	var patrol_paths: Dictionary = Dictionary(_terrain_map_data.call("get_patrol_paths"))
 	for spawn_id_variant in patrol_paths.keys():
-		var path_points: Array = Array(_terrain_map_data.call("get_patrol_path", String(spawn_id_variant)))
+		var path_id: String = String(spawn_id_variant).strip_edges()
+		var path_points: Array = Array(_terrain_map_data.call("get_patrol_path", path_id))
 		if path_points.size() < 2:
 			continue
-		var color := Color(0.25, 0.92, 0.4, 0.82)
+		var is_preview: bool = path_id == _editor_patrol_preview_path_id
+		var color := Color(1.0, 0.82, 0.18, 0.96) if is_preview else Color(0.25, 0.92, 0.4, 0.82)
 		for index in range(1, path_points.size()):
-			_add_line3d(_patrol_root, _world_to_surface_3d_position(Vector2(path_points[index - 1]), 0.28), _world_to_surface_3d_position(Vector2(path_points[index]), 0.28), color, "Patrol_%s_%d" % [String(spawn_id_variant), index])
+			_add_line3d(_patrol_root, _world_to_surface_3d_position(Vector2(path_points[index - 1]), 0.28), _world_to_surface_3d_position(Vector2(path_points[index]), 0.28), color, "Patrol_%s_%d" % [path_id, index])
 			_patrol_segment_count += 1
+			if is_preview:
+				_patrol_preview_segment_count += 1
 
 
 func _rebuild_selection_visuals() -> void:
