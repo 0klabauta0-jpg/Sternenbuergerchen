@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3]
+[gd_scene load_steps=22 format=3]
 
 [ext_resource type="Script" path="res://scripts/core/simulation_root.gd" id="1_simulation"]
 [ext_resource type="Script" path="res://scripts/core/event_router.gd" id="2_router"]
@@ -22,6 +22,7 @@
 [ext_resource type="Texture2D" path="res://Assets/kenney_space-kit/Side/craft_speederB.png" id="20_dropship"]
 [ext_resource type="Script" path="res://scripts/tests/phase_controller.gd" id="21_phase_controller"]
 [ext_resource type="Script" path="res://scripts/tests/mission_map_camera_controller.gd" id="22_camera"]
+[ext_resource type="Script" path="res://scripts/ui/tactical_event_log_panel.gd" id="23_event_log"]
 
 [node name="MissionReactivityTest" type="Node2D"]
 
@@ -393,6 +394,14 @@ vertical_scroll_mode = 1
 [node name="MiniCardsVBox" type="VBoxContainer" parent="TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll"]
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
+
+[node name="TacticalEventLogPanel" type="PanelContainer" parent="TacticalUI"]
+offset_left = 16.0
+offset_top = 244.0
+offset_right = 316.0
+offset_bottom = 430.0
+script = ExtResource("23_event_log")
+max_visible_events = 8
 
 [node name="BottomDock" type="Control" parent="TacticalUI"]
 anchors_preset = 12

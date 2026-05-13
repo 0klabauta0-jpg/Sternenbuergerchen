@@ -171,9 +171,18 @@
 - Lokale Pruefung: `task_365_tactical_event_log_data_layer.gd`, `task_274_tactical_communication_feedback_layer.gd` und `git diff --check` laufen gruen.
 - Offene Folgearbeit: TASK_366 kann darauf ein HUD-Panel bauen; der Log selbst rendert bewusst nichts.
 
-### TASK_366-TASK_380 - Mission Visualization Review Followups
+### TASK_366 - Tactical Event Log HUD Panel
+- Status: implementiert
+- Stand: `scripts/ui/tactical_event_log_panel.gd` zeigt TASK_365-Eintraege newest-first als kompaktes Mission-HUD-Panel mit ScrollContainer, Zeitlabel, kurzer Meldung und dezenter Severity-Farbe fuer `critical`, `warning`, `tactical` und `info`.
+- Stand: `mission_reactivity_test.tscn` haengt das Panel links unter die Fireteam-Miniuebersicht. Dieser Platz kollidiert nicht mit #16 Command Matrix, #17 Selected Fireteam, #18 Mission Control oder dem rechten Dropship-Stack.
+- Stand: `mission_tactical_sandbox_controller.gd` speist das Panel aus dem bestehenden Command-Feedback-Snapshot. Der Selected-Fireteam-Filter liest nur `selected_fireteam_ids` und erzeugt keine SimulationRoot-Commands oder neue Gameplay-Wahrheit.
+- Stand: `task_258_fixed_window_clipping_scrollbar_playability_audit.gd` wurde auf den aktuellen Homebase-Direct-Vertrag nachgezogen und prueft nun auch das Mission-Event-Log als fixed, scrollbares HUD-Fenster.
+- Lokale Pruefung: `task_366_tactical_event_log_hud_panel.gd`, `task_258_fixed_window_clipping_scrollbar_playability_audit.gd`, `task_365_tactical_event_log_data_layer.gd` und `git diff --check` laufen gruen.
+- Offene Folgearbeit: Manuelle Sichtpruefung der Lesbarkeit im echten Gefecht bleibt sinnvoll, sobald weitere HUD-Widgets aus TASK_367+ dazukommen.
+
+### TASK_367-TASK_380 - Mission Visualization Review Followups
 - Status: geplant
-- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Sinnvolle Follow-ups sind als getrennte Tasks 366 bis 380 noch offen.
+- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Sinnvolle Follow-ups sind als getrennte Tasks 367 bis 380 noch offen.
 - Stand: Die Review-Snippets werden nicht ungeprueft uebernommen. Fireteam-Orientation, Event-Log, FTL-Gauge, Fireteam-Status, Member-Zeile, Fire-Sector, LOS, Cover, Countdown, Waypoint-Preview, Command-Validation, Contact-Heatmap und MapEditor-Debuglayer sind jeweils als eigene kleine Slices geschnitten.
 - Stand: Architekturgrenze bleibt: UI liest nur Snapshots. `SimulationRoot`, bestehende Resolver, `TacticalCommunicationEvent`, `FireteamBehaviorResolver`, `FireteamOrderVisualizer`, FoW und Terrain-Daten bleiben die Wahrheit.
 - Offene Punkte: Implementierung der einzelnen Tasks, genaue HUD-Platzierung fuer Event-Log/Statuskarten und manuelle Sichtpruefung nach den ersten Visual-Slices.

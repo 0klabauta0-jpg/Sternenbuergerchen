@@ -69,6 +69,7 @@ const FIRETEAM_SELECTED_CARDS_ROW_PATH: String = "../TacticalUI/BottomDock/Botto
 const FIRETEAM_MINI_PANEL_PATH: String = "../TacticalUI/FireteamMiniPanel"
 const FIRETEAM_MINI_HEADER_LABEL_PATH: String = "../TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniHeaderLabel"
 const FIRETEAM_MINI_CARDS_VBOX_PATH: String = "../TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox"
+const TACTICAL_EVENT_LOG_PANEL_PATH: String = "../TacticalUI/TacticalEventLogPanel"
 const COMMAND_GRID_PATH: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid"
 const DELETE_ORDER_BUTTON_PATH: String = COMMAND_GRID_PATH + "/DeleteOrderButton"
 const SORT_COMMAND_BUTTON_PATH: String = COMMAND_GRID_PATH + "/SortCommandMatrixButton"
@@ -2032,6 +2033,7 @@ func set_tactical_ui_visible(is_visible: bool) -> void:
 		"../TacticalUI/MissionDropshipPanel",
 		"../TacticalUI/TopNavPanel",
 		FIRETEAM_MINI_PANEL_PATH,
+		TACTICAL_EVENT_LOG_PANEL_PATH,
 		"../TacticalUI/BottomDock",
 	]:
 		var canvas_item := get_node_or_null(path) as CanvasItem
@@ -2072,6 +2074,7 @@ func _update_ui() -> void:
 	_refresh_fireteam_phase_panel()
 	_refresh_mission_nav_timer_label()
 	_refresh_mission_dropship_panel()
+	_refresh_tactical_event_log_panel()
 
 	var strategic_status_label := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicStatusLabel") as Label
 	if strategic_status_label != null:
@@ -2113,6 +2116,13 @@ func _update_ui() -> void:
 					call_dropship_button.text = "Drop"
 
 	_apply_compact_mission_control_layout()
+
+
+func _refresh_tactical_event_log_panel() -> void:
+	var panel := get_node_or_null(TACTICAL_EVENT_LOG_PANEL_PATH) as Control
+	if panel == null or not panel.has_method("set_feedback_snapshot"):
+		return
+	panel.call("set_feedback_snapshot", get_command_feedback_snapshot())
 	_refresh_mission_control_craft_summary()
 	_refresh_dynamic_button_styles()
 	_apply_drop_light_hud_button_labels()
