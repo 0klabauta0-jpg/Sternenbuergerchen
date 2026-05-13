@@ -597,6 +597,7 @@ TASK_394 - Per Craft Shipcard Commands (implementiert)
 TASK_395 - Manual Dropship Parallel Flow Stabilization (implementiert)
 TASK_396 - Mission Dropship LZ Drop Hotfix (implementiert)
 TASK_397 - Mission Dropship UX Hotfix (implementiert)
+TASK_398 - Mission Dropship Outbound Command Hotfix (implementiert)
 
 Batch-Empfehlung
 

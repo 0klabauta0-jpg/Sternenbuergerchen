@@ -441,6 +441,15 @@
 - Risiken: Die finale Proportion der rechten Dropshipkarten und des gruenen Streifens bleibt ein manueller FullHD-Sichtcheck.
 - Lokale Pruefung: `task_397_mission_dropship_ux_hotfix.gd`, `task_396_mission_dropship_lz_drop_hotfix.gd`, `task_395_manual_dropship_parallel_flow.gd`, `task_394_per_craft_shipcard_commands.gd` und `git diff --check` laufen gruen.
 
+### TASK_398 - Mission Dropship Outbound Command Hotfix
+- Status: implementiert im Arbeitsstand
+- Stand: `outbound` ist wieder eine aktive Map-Flugphase: die Dropshipkarte bleibt nicht grau, solange das Schiff sichtbar zum Exit-/Approach-Rand fliegt. Erst danach wechselt die Karte in `to_fob` oder bei Homebase-Direct in `to_homebase`.
+- Stand: Der automatische Meta-Return wird nicht mehr beim Start der Outbound-Phase angefordert, sondern erst ueber den Transit-Card-State nach dem sichtbaren Abflug. Damit bleibt das Schiff waehrend des Abflugs als Missionsobjekt erhalten.
+- Stand: Dropship-Command-Buttons koennen direkt aus unselektierten Karten gedrueckt werden; der Card-Selection-Handler ignoriert echte Command-Button-Hitboxes.
+- Stand: Approach-Buttons sind etwas groesser und nutzen dieselbe Schriftgroesse wie LZ/Drop. Embarked Fireteams werden links nicht mehr als normale Ground-Fireteam-/Memberkarten dupliziert, solange sie noch im Dropship sitzen.
+- Risiken: Air-Asset-Abschuss selbst bleibt ein separater Combat-/Gameplay-Task; dieser Task stellt nur die korrekte aktive Outbound-UI-Phase sicher.
+- Lokale Pruefung: `task_398_mission_dropship_outbound_command_hotfix.gd`, `task_397_mission_dropship_ux_hotfix.gd`, `task_396_mission_dropship_lz_drop_hotfix.gd`, `task_395_manual_dropship_parallel_flow.gd`, `task_394_per_craft_shipcard_commands.gd` und `git diff --check` laufen gruen.
+
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
 - Stand: Dropship-Visuals bauen ihre Dirty-Signatur wieder fehlerfrei, geplante LZs bleiben auch bei offmap/hidden Craft sichtbar, und Multi-Dropship-Payloads werden aus dem rohen Mission-Card-State statt aus stale Selected-Card-State uebernommen.

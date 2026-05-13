@@ -167,7 +167,7 @@ func _approach_grid_has_compact_buttons(grid: GridContainer) -> bool:
 		var button := child as Button
 		if button == null or not bool(button.get_meta("mission_dropship_card_command_button", false)):
 			return false
-		if button.custom_minimum_size.x > 22.0 or button.custom_minimum_size.y > 14.0:
+		if button.custom_minimum_size.x > 25.0 or button.custom_minimum_size.y > 16.0:
 			return false
 	return true
 
