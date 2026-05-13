@@ -214,7 +214,13 @@ func _stage_text(card: Control) -> String:
 	if card == null:
 		return ""
 	var label := card.get_node_or_null("Margin/VBox/StageLabel") as Label
-	return label.text if label != null else ""
+	if label != null and label.visible and not label.text.strip_edges().is_empty():
+		return label.text
+	for node in _collect_nodes(card):
+		var payload_label := node as Label
+		if payload_label != null and bool(payload_label.get_meta("homebase_shipcard_payload_progress_label", false)):
+			return payload_label.text
+	return ""
 
 
 func _direct_status_label(screen: Control) -> Label:

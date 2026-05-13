@@ -10,6 +10,7 @@ const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.g
 const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_labels.gd")
 const DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/drop_light_layout_contract.gd")
 const LOADOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/command/loadout_contract.gd")
+const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
 const AIRCRAFT_MANAGER_SCRIPT: GDScript = preload("res://scripts/meta/aircraft_manager.gd")
 const HOMEBASE_CARD_POOL_SCRIPT: GDScript = preload("res://scripts/meta/homebase_card_pool.gd")
 const HOMEBASE_TEAM_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/homebase_team_drop_panel.gd")
@@ -27,6 +28,7 @@ const HOMEBASE_SHIPCARD_IMAGE_SIZE := Vector2(128.0, 84.0)
 const HOMEBASE_SHIPCARD_BUTTON_SIZE := Vector2(94.0, 62.0)
 const HOMEBASE_SHIPCARD_IMAGE_OFFSET := Vector2(-28.0, -18.0)
 const HOMEBASE_FIRETEAM_INLINE_LOADOUT_SELECTOR_SIZE := Vector2(70.0, 20.0)
+const HOMEBASE_LOADOUT_DROPDOWN_ICON_MAX_SIZE := Vector2i(18, 14)
 const HOMEBASE_DIRECT_AVERAGE_BOARDING_SECONDS_PER_OPERATOR := 4.0
 const HOMEBASE_DIRECT_MIN_BOARDING_SECONDS_PER_OPERATOR := 2.6
 const HOMEBASE_DIRECT_MAX_BOARDING_SECONDS_PER_OPERATOR := 5.4
@@ -63,7 +65,9 @@ var _homebase_dropship_payload_craft_id: String = ""
 var _homebase_dispatch_target_by_craft: Dictionary = {}
 var _homebase_direct_boarding_state_by_fireteam_id: Dictionary = {}
 var _homebase_direct_boarding_refresh_seconds: float = 0.0
+var _homebase_direct_boarding_force_refresh: bool = false
 var _member_loadout_by_unit_id: Dictionary = {}
+var _homebase_loadout_preview_texture_cache: Dictionary = {}
 var _profiles_by_id: Dictionary = {}
 var _focused_unit_id: String = ""
 var _roster_cards_by_unit_id: Dictionary = {}
@@ -145,7 +149,12 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	if not _advance_homebase_direct_boarding(delta):
+	var boarding_advanced: bool = _advance_homebase_direct_boarding(delta)
+	if not boarding_advanced and not _homebase_direct_boarding_force_refresh:
+		return
+	if _homebase_direct_boarding_force_refresh:
+		_homebase_direct_boarding_refresh_seconds = 0.0
+		_refresh_homebase_direct_boarding_ui()
 		return
 	_homebase_direct_boarding_refresh_seconds += maxf(delta, 0.0)
 	if _homebase_direct_boarding_refresh_seconds < HOMEBASE_DIRECT_BOARDING_UI_REFRESH_SECONDS:
@@ -761,6 +770,19 @@ func _retire_homebase_loadout_panel(panel_override: Control = null) -> void:
 	panel.set_meta("homebase_loadout_controls_moved_to_fireteams", true)
 
 
+func _retire_homebase_direct_staging_panel(panel: Control) -> void:
+	if panel == null:
+		return
+	panel.visible = false
+	panel.custom_minimum_size = Vector2.ZERO
+	panel.size = Vector2.ZERO
+	panel.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	panel.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.set_meta("homebase_direct_staging_folded_into_shipcards", true)
+	panel.set_meta("homebase_direct_staging_visible_in_shipcards", true)
+
+
 func _ensure_homebase_flightdeck_staging_panel() -> void:
 	var aircraft_vbox := get_node_or_null("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox") as VBoxContainer
 	if aircraft_vbox == null:
@@ -768,6 +790,7 @@ func _ensure_homebase_flightdeck_staging_panel() -> void:
 	var existing_panel := aircraft_vbox.get_node_or_null("DirectDropshipFireteamPanel") as PanelContainer
 	if existing_panel != null:
 		_ensure_homebase_direct_staging_status_label(existing_panel)
+		_retire_homebase_direct_staging_panel(existing_panel)
 		return
 	var panel := PanelContainer.new()
 	panel.name = "DirectDropshipFireteamPanel"
@@ -816,6 +839,7 @@ func _ensure_homebase_flightdeck_staging_panel() -> void:
 		insert_index = shipcards_scroll.get_index()
 	aircraft_vbox.add_child(panel)
 	aircraft_vbox.move_child(panel, insert_index)
+	_retire_homebase_direct_staging_panel(panel)
 
 
 func _ensure_homebase_direct_staging_status_label(panel: PanelContainer) -> Label:
@@ -1095,6 +1119,7 @@ func _apply_homebase_compact_panel_policy() -> void:
 		"Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftTransfersHeaderLabel",
 		"Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftTransfersScroll",
 		"Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/DropLightFlightdeckStage",
+		"Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/DirectDropshipFireteamPanel",
 	]:
 		var control := get_node_or_null(path) as Control
 		if control == null:
@@ -1106,6 +1131,9 @@ func _apply_homebase_compact_panel_policy() -> void:
 		if path == "Panel/Margin/VBox/ContentRow/HomebaseLoadoutPanel":
 			control.set_meta("homebase_loadout_window_retired", true)
 			control.set_meta("homebase_loadout_controls_moved_to_fireteams", true)
+		if path == "Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/DirectDropshipFireteamPanel":
+			control.set_meta("homebase_direct_staging_folded_into_shipcards", true)
+			control.set_meta("homebase_direct_staging_visible_in_shipcards", true)
 
 	var shipcards_scroll := get_node_or_null("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/ShipCardsScroll") as ScrollContainer
 	if shipcards_scroll != null:
@@ -1518,8 +1546,7 @@ func _build_homebase_loadout_option_row(label_text: String, options: Array, curr
 	selector.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	for option_variant in options:
 		var option_value: String = String(option_variant).strip_edges()
-		selector.add_item(_build_homebase_loadout_option_label(option_value))
-		selector.set_item_metadata(selector.item_count - 1, option_value)
+		_add_homebase_loadout_option(selector, option_value, false)
 		if option_value == current_value:
 			selector.select(selector.item_count - 1)
 	_configure_flightdeck_option_button(selector)
@@ -1569,8 +1596,7 @@ func _build_homebase_inline_loadout_selector_pair(label_text: String, options: A
 	_set_object_property_if_available(selector, "fit_to_longest_item", false)
 	for option_variant in options:
 		var option_value: String = String(option_variant).strip_edges()
-		selector.add_item(_build_homebase_compact_loadout_option_label(option_value))
-		selector.set_item_metadata(selector.item_count - 1, option_value)
+		_add_homebase_loadout_option(selector, option_value, true)
 		if option_value == current_value:
 			selector.select(selector.item_count - 1)
 	_configure_flightdeck_option_button(selector)
@@ -1582,6 +1608,64 @@ func _build_homebase_inline_loadout_selector_pair(label_text: String, options: A
 		selector.item_selected.connect(_on_homebase_loadout_option_selected.bind(unit_id, key, selector))
 	pair.add_child(selector)
 	return pair
+
+
+func _add_homebase_loadout_option(selector: OptionButton, option_value: String, compact: bool) -> void:
+	if selector == null:
+		return
+	var normalized_value: String = option_value.strip_edges().to_lower()
+	var label_text: String = _build_homebase_compact_loadout_option_label(normalized_value) if compact else _build_homebase_loadout_option_label(normalized_value)
+	var icon: Texture2D = _get_homebase_loadout_preview_icon(normalized_value)
+	if icon != null:
+		selector.add_icon_item(icon, label_text)
+		selector.set_meta("homebase_loadout_preview_icon_count", int(selector.get_meta("homebase_loadout_preview_icon_count", 0)) + 1)
+	else:
+		selector.add_item(label_text)
+	var item_index: int = selector.item_count - 1
+	selector.set_item_metadata(item_index, normalized_value)
+	selector.set_meta("homebase_loadout_preview_icon_max_width", HOMEBASE_LOADOUT_DROPDOWN_ICON_MAX_SIZE.x)
+	selector.set_meta("homebase_loadout_preview_icon_max_height", HOMEBASE_LOADOUT_DROPDOWN_ICON_MAX_SIZE.y)
+	if selector.has_method("set_item_icon_max_width"):
+		selector.call("set_item_icon_max_width", item_index, HOMEBASE_LOADOUT_DROPDOWN_ICON_MAX_SIZE.x)
+	var popup := selector.get_popup()
+	if popup != null and popup.has_method("set_item_icon_max_width"):
+		popup.call("set_item_icon_max_width", item_index, HOMEBASE_LOADOUT_DROPDOWN_ICON_MAX_SIZE.x)
+
+
+func _get_homebase_loadout_preview_icon(option_value: String) -> Texture2D:
+	var normalized_value: String = option_value.strip_edges().to_lower()
+	if normalized_value.is_empty() or _get_homebase_armor_options().has(normalized_value):
+		return null
+	if _homebase_loadout_preview_texture_cache.has(normalized_value):
+		return _homebase_loadout_preview_texture_cache.get(normalized_value, null) as Texture2D
+	var preview_path: String = String(WEAPON_DATA_SCRIPT.call("get_preview_path", normalized_value)).strip_edges()
+	if preview_path.is_empty() or not ResourceLoader.exists(preview_path):
+		_homebase_loadout_preview_texture_cache[normalized_value] = null
+		return null
+	var source_texture := load(preview_path) as Texture2D
+	var preview_texture: Texture2D = _build_homebase_scaled_preview_texture(source_texture)
+	_homebase_loadout_preview_texture_cache[normalized_value] = preview_texture
+	return preview_texture
+
+
+func _build_homebase_scaled_preview_texture(source_texture: Texture2D) -> Texture2D:
+	if source_texture == null:
+		return null
+	var image: Image = source_texture.get_image()
+	if image == null or image.is_empty():
+		return source_texture
+	var width: int = maxi(image.get_width(), 1)
+	var height: int = maxi(image.get_height(), 1)
+	var ratio: float = minf(
+		float(HOMEBASE_LOADOUT_DROPDOWN_ICON_MAX_SIZE.x) / float(width),
+		float(HOMEBASE_LOADOUT_DROPDOWN_ICON_MAX_SIZE.y) / float(height)
+	)
+	if ratio >= 1.0:
+		return source_texture
+	var scaled_width: int = maxi(1, int(roundf(float(width) * ratio)))
+	var scaled_height: int = maxi(1, int(roundf(float(height) * ratio)))
+	image.resize(scaled_width, scaled_height, Image.INTERPOLATE_LANCZOS)
+	return ImageTexture.create_from_image(image)
 
 
 func _build_homebase_loadout_option_label(option_value: String) -> String:
@@ -1661,8 +1745,31 @@ func _build_homebase_dropship_fireteam_card(fireteam_id: String, craft_id: Strin
 	card.set_meta("homebase_direct_payload_boarded", bool(status.get("boarded", false)))
 	card.set_meta("homebase_direct_payload_block_reason", String(status.get("block_reason", "")).strip_edges())
 	card.set_meta("homebase_direct_payload_boarding_progress", _build_homebase_boarding_progress_value(normalized_fireteam_id, craft_gate))
+	_apply_homebase_dropship_payload_card_presentation(card)
 	_render_homebase_dropship_member_progress_rows(card.get_member_host(), normalized_fireteam_id, craft_gate)
 	return card
+
+
+func _apply_homebase_dropship_payload_card_presentation(card: FOBFireteamCard) -> void:
+	if card == null:
+		return
+	for label_path in [
+		"Margin/VBox/StageLabel",
+		"Margin/VBox/MemberLabel",
+		"Margin/VBox/TeamfitLabel",
+		"Margin/VBox/DropHintLabel",
+	]:
+		var label := card.get_node_or_null(label_path) as Label
+		if label == null:
+			continue
+		label.text = ""
+		label.visible = false
+		label.set_meta("homebase_shipcard_payload_aux_label_hidden", true)
+	var title_edit := card.get_node_or_null("Margin/VBox/HeaderRow/TitleEdit") as LineEdit
+	if title_edit != null:
+		title_edit.add_theme_font_size_override("font_size", 10)
+		title_edit.custom_minimum_size = Vector2(0.0, 20.0)
+	card.set_meta("homebase_shipcard_payload_debug_labels_hidden", true)
 
 
 func _render_homebase_dropship_member_progress_rows(container: VBoxContainer, fireteam_id: String, craft_gate: Dictionary) -> void:
@@ -2238,11 +2345,10 @@ func _on_homebase_staging_fireteam_dropped(fireteam_id: String, drop_kind: Strin
 		if not _homebase_dropship_staged_fireteam_ids.has(normalized_fireteam_id):
 			_homebase_dropship_staged_fireteam_ids.append(normalized_fireteam_id)
 		_ensure_homebase_direct_boarding_state(normalized_fireteam_id, _get_homebase_direct_payload_craft_id())
+	elif normalized_drop_kind == "fireteam_pool":
+		_remove_homebase_direct_payload_fireteam(normalized_fireteam_id)
 	else:
-		_homebase_dropship_staged_fireteam_ids = _remove_fireteam_id_from_list(_homebase_dropship_staged_fireteam_ids, normalized_fireteam_id)
-		_homebase_direct_boarding_state_by_fireteam_id.erase(normalized_fireteam_id)
-		if _homebase_dropship_staged_fireteam_ids.is_empty():
-			_homebase_dropship_payload_craft_id = ""
+		_remove_homebase_direct_payload_fireteam(normalized_fireteam_id)
 	_emit_homebase_fireteam_context_changed()
 	_rebuild_ui()
 
@@ -2360,12 +2466,19 @@ func _on_homebase_loadout_option_selected(index: int, unit_id: String, key: Stri
 
 
 func _on_homebase_dropship_fireteam_remove_pressed(fireteam_id: String) -> void:
-	_homebase_dropship_staged_fireteam_ids = _remove_fireteam_id_from_list(_homebase_dropship_staged_fireteam_ids, fireteam_id)
-	_homebase_direct_boarding_state_by_fireteam_id.erase(fireteam_id)
-	if _homebase_dropship_staged_fireteam_ids.is_empty():
-		_homebase_dropship_payload_craft_id = ""
+	_remove_homebase_direct_payload_fireteam(fireteam_id)
 	_emit_homebase_fireteam_context_changed()
 	_rebuild_ui()
+
+
+func _remove_homebase_direct_payload_fireteam(fireteam_id: String) -> void:
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	if normalized_fireteam_id.is_empty():
+		return
+	_homebase_dropship_staged_fireteam_ids = _remove_fireteam_id_from_list(_homebase_dropship_staged_fireteam_ids, normalized_fireteam_id)
+	_homebase_direct_boarding_state_by_fireteam_id.erase(normalized_fireteam_id)
+	if _homebase_dropship_staged_fireteam_ids.is_empty():
+		_homebase_dropship_payload_craft_id = ""
 
 
 func _on_roster_drop_panel_unit_dropped(unit_id: String) -> void:
@@ -3322,6 +3435,7 @@ func _is_homebase_fireteam_in_flightdeck_payload(fireteam_id: String) -> bool:
 func _refresh_homebase_direct_boarding_ui() -> void:
 	if not is_inside_tree():
 		return
+	_homebase_direct_boarding_force_refresh = false
 	_update_mission_info()
 	_update_aircraft_panel()
 	_update_homebase_flightdeck_staging_panel()
@@ -3353,7 +3467,10 @@ func _advance_homebase_direct_boarding(delta_seconds: float) -> bool:
 		var elapsed_seconds: float = clampf(float(state.get("elapsed_seconds", 0.0)), 0.0, total_seconds)
 		if elapsed_seconds >= total_seconds:
 			continue
-		state["elapsed_seconds"] = minf(elapsed_seconds + delta, total_seconds)
+		var next_elapsed_seconds: float = minf(elapsed_seconds + delta, total_seconds)
+		if next_elapsed_seconds + 0.001 >= total_seconds:
+			_homebase_direct_boarding_force_refresh = true
+		state["elapsed_seconds"] = next_elapsed_seconds
 		state["craft_id"] = craft_id
 		_homebase_direct_boarding_state_by_fireteam_id[normalized_fireteam_id] = state
 		changed = true
@@ -4212,34 +4329,12 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	mission_toggle.disabled = craft_in_transit or air_asset_unavailable
 	mission_toggle.custom_minimum_size = Vector2(64.0, 20.0)
 	mission_toggle.add_theme_font_size_override("font_size", 8)
-	mission_toggle.tooltip_text = "Checked: Send launches this dropship straight to the selected mission. Off: Send to FOB."
+	mission_toggle.tooltip_text = "Checked: direct mission payload. Off: FOB transfer target."
 	mission_toggle.set_meta("homebase_shipcard_dispatch_toggle", true)
 	mission_toggle.set_meta("craft_id", craft_id)
 	mission_toggle.set_meta("dispatch_target", dispatch_target)
 	mission_toggle.toggled.connect(_on_shipcard_dispatch_target_toggled.bind(craft_id))
 	actions.add_child(mission_toggle)
-
-	var send_button := Button.new()
-	send_button.text = "Mission" if dispatch_target == HOMEBASE_DISPATCH_TARGET_MISSION else "FOB"
-	send_button.custom_minimum_size = Vector2(54.0, 22.0)
-	send_button.add_theme_font_size_override("font_size", 8)
-	send_button.disabled = air_asset_unavailable or not _can_dispatch_shipcard(craft_def, craft_id, assigned_pilot_id)
-	send_button.tooltip_text = "Launch straight to Mission." if dispatch_target == HOMEBASE_DISPATCH_TARGET_MISSION else "Send craft and pilot to FOB."
-	send_button.set_meta("homebase_shipcard_send_target", dispatch_target)
-	send_button.set_meta("homebase_shipcard_payload_ready", _has_homebase_direct_launch_payload_for_craft(craft_id))
-	send_button.set_meta("craft_id", craft_id)
-	META_UI_SKIN_SCRIPT.style_transfer_button(send_button, not send_button.disabled)
-	send_button.pressed.connect(_on_send_pilot_button_pressed.bind(craft_id))
-	actions.add_child(send_button)
-
-	var clear_button := Button.new()
-	clear_button.text = "Clear"
-	clear_button.custom_minimum_size = Vector2(38.0, 20.0)
-	clear_button.add_theme_font_size_override("font_size", 8)
-	clear_button.disabled = assigned_pilot_id.is_empty() or craft_in_transit or air_asset_unavailable
-	META_UI_SKIN_SCRIPT.style_secondary_button(clear_button)
-	clear_button.pressed.connect(_on_clear_pilot_button_pressed.bind(craft_id))
-	actions.add_child(clear_button)
 
 	var remove_button := Button.new()
 	remove_button.text = "X"

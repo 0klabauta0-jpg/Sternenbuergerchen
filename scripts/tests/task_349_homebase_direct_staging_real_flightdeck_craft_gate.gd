@@ -44,7 +44,7 @@ func _test_no_flightdeck_craft_blocks_direct_launch() -> void:
 	_assert(String(snapshot.get("homebase_direct_craft_block_reason", "")).strip_edges() == "no_homebase_craft", "Snapshot reports missing Homebase craft")
 	_assert(not bool(screen.call("can_request_mission_start")), "Start guard blocks staged fireteams without a real craft")
 	_assert(_mission_start_signal_count == 0, "request_mission_start does not emit without a real craft")
-	_assert(_direct_staging_panel_visible(screen), "Direct Flightdeck drop area remains visible while blocked")
+	_assert(_direct_staging_panel_folded(screen), "Direct Flightdeck staging is folded into shipcards while blocked")
 	_assert(_direct_status_contains(screen, "Add a dropship"), "Direct Flightdeck status explains the missing craft")
 
 	screen.queue_free()
@@ -163,7 +163,7 @@ func _assert_blocked_craft_case(
 	_assert(not bool(drop_state.get("drop_ship_staged", true)), message)
 	_assert(String(snapshot.get("homebase_direct_craft_block_reason", "")).strip_edges() == expected_reason, "%s reports %s" % [message, expected_reason])
 	_assert(not bool(screen.call("can_request_mission_start")), "%s keeps the start guard blocked" % message)
-	_assert(_direct_staging_panel_visible(screen), "%s keeps the Direct drop area visible" % message)
+	_assert(_direct_staging_panel_folded(screen), "%s keeps Direct staging folded into shipcards" % message)
 
 	screen.queue_free()
 	await process_frame
@@ -223,9 +223,11 @@ func _build_cargo_definition(craft_id: String) -> Dictionary:
 	}
 
 
-func _direct_staging_panel_visible(screen: Control) -> bool:
+func _direct_staging_panel_folded(screen: Control) -> bool:
 	var panel := screen.get_node_or_null("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/DirectDropshipFireteamPanel") as Control
-	return panel != null and panel.visible
+	return panel != null \
+		and not panel.visible \
+		and bool(panel.get_meta("homebase_direct_staging_folded_into_shipcards", false))
 
 
 func _direct_status_contains(screen: Control, text: String) -> bool:

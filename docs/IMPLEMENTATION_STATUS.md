@@ -345,6 +345,16 @@
 - Stand: Bestehende Boarding-/Payload-Metadaten bleiben erhalten; die Payload-Karte zeigt weiterhin genau ein Mini-Portraet pro Operator.
 - Lokale Pruefung: `task_386_homebase_flightdeck_member_portraits.gd`, `task_384_homebase_flightdeck_boarding_hotfix.gd`, `task_383_homebase_flightdeck_fireteam_card_single_owner.gd`, `task_382_homebase_direct_mission_flightdeck_display.gd`, `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd`, `task_258_fixed_window_clipping_scrollbar_playability_audit.gd` und `git diff --check` laufen gruen.
 
+### TASK_387 - Homebase Flightdeck Payload Polish
+- Status: implementiert im Arbeitsstand
+- Stand: Homebase-Direct-Boarding erzwingt jetzt einen letzten UI-Refresh, wenn der letzte Operator exakt am Ende des Boarding-Intervals fertig wird.
+- Stand: Dropship-Payload-Fireteamkarten bleiben Drag-Quellen und koennen zurueck auf `#10 FIRETEAMS` gedroppt werden; das entfernt sie aus dem Dropship und stellt die Fireteam-Karte wieder in `#10` dar.
+- Stand: Homebase-Inline-Loadout-Dropdowns nutzen kleine gecachte Waffen-/Kit-Preview-Icons aus `WeaponData`, begrenzt auf die kompakte Dropdown-Groesse. Die Icons sind reine UI-Preview und aendern den Loadout-Contract nicht.
+- Stand: Dropship-Payload-Karten blenden Editor-/Debug-Labels wie Lead/Members/Loadout/Kit-/Launch-Payload aus. Die sichtbaren Shipcard-Top-Aktionen `Send` und `Clear` sind entfernt; Destination-Toggle, Pilot, Payload und Shipcard-Remove bleiben erhalten.
+- Stand: Das separate `DirectDropshipFireteamPanel` bleibt als Compatibility-/Status-Knoten bestehen, ist aber sichtbar eingeklappt; Direct-Staging wird auf den jeweiligen Dropship-Karten dargestellt.
+- Risiken: Der sichtbare lokale Shipcard-Send-Button ist entfernt. Der Homebase-Direct-Startpfad bleibt ueber den globalen Mission-Start verfuegbar; ein spaeterer expliziter pro-Dropship-Startbutton waere ein eigener UX-Entscheid.
+- Lokale Pruefung: `task_387_homebase_flightdeck_payload_polish.gd`, `task_386_homebase_flightdeck_member_portraits.gd`, `task_384_homebase_flightdeck_boarding_hotfix.gd`, `task_383_homebase_flightdeck_fireteam_card_single_owner.gd`, `task_382_homebase_direct_mission_flightdeck_display.gd`, `task_381_homebase_fireteam_loadout_flightdeck_polish.gd`, `task_347_homebase_direct_staging_start_guard.gd`, `task_346_homebase_direct_staging_character_popup.gd`, `task_349_homebase_direct_staging_real_flightdeck_craft_gate.gd`, `task_355_homebase_direct_ux_payload_truth.gd`, `task_354_homebase_direct_loadout_regression_matrix.gd`, `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd`, `task_258_fixed_window_clipping_scrollbar_playability_audit.gd` und `git diff --check` laufen gruen.
+
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
 - Stand: Dropship-Visuals bauen ihre Dirty-Signatur wieder fehlerfrei, geplante LZs bleiben auch bei offmap/hidden Craft sichtbar, und Multi-Dropship-Payloads werden aus dem rohen Mission-Card-State statt aus stale Selected-Card-State uebernommen.

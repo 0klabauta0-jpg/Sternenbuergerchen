@@ -110,7 +110,7 @@ func _test_fireteam_loadout_and_dropship_contract() -> void:
 
 	var dropship_panel := screen.get_node("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/DirectDropshipFireteamPanel") as Control
 	var snapshot: Dictionary = Dictionary(screen.call("get_homebase_direct_staging_snapshot"))
-	_assert(dropship_panel.visible and bool(dropship_panel.get_meta("homebase_uses_fob_drop_panel_contract", false)), "Flightdeck exposes a direct dropship fireteam drop target")
+	_assert(not dropship_panel.visible and bool(dropship_panel.get_meta("homebase_direct_staging_folded_into_shipcards", false)), "Flightdeck folds direct dropship staging into shipcards")
 	_assert(bool(snapshot.get("drop_ship_staged", false)), "Homebase direct staging exports a FOB-like drop_ship_staged state")
 	_assert(Array(snapshot.get("embarked_unit_ids", [])).size() == 3, "Homebase direct drop state exports embarked unit ids")
 
