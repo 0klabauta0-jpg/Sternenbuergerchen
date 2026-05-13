@@ -401,8 +401,8 @@
 - Status: implementiert im Arbeitsstand
 - Stand: Homebase-Direct exportiert Drop-State jetzt craft-spezifisch. Ein zweiter `Send` aktualisiert die aktive Mission, statt sie zu ersetzen, und bestehende Direct-`mission_drop_cards` werden pro Craft erhalten und gemerged.
 - Stand: Direct-Transit-ETA und Fortschritt werden fuer alle aktiven Homebase-Direct-Dropships synchronisiert. Fireteam-Payloadkarten im Dropship aktualisieren sich sichtbar, wenn Operatoren aus `Available Operators` direkt auf die bereits geboardete Fireteamkarte gelegt werden.
-- Stand: Mission-LZ-Marker sind groesser, verschwinden nach Touchdown/Deboarding und zeigen vorher einen breiten, halbtransparenten Anflugvektor von der aktuellen Dropship-Position zur LZ. Friendly-Payload-Lookups finden verschachtelte Unit-Nodes fuer Direct-Drops zuverlaessig.
-- Risiken: Der Anflugvektor ist eine breite transparente Linie; eine gestrichelte Shader-/Materialvariante bleibt optionaler Visual-Polish.
+- Stand: Mission-LZ-Marker sind groesser, verschwinden nach Touchdown/Deboarding und zeigen vorher einen breiten, halbtransparenten Anflugvektor. TASK_395 wandelt diesen Vektor in eine Pfeilform aus dem geplanten Approach-Ursprung zur LZ um. Friendly-Payload-Lookups finden verschachtelte Unit-Nodes fuer Direct-Drops zuverlaessig.
+- Risiken: Der Anflugvektor ist ein breiter transparenter Pfeil; eine gestrichelte Shader-/Materialvariante bleibt optionaler Visual-Polish.
 - Lokale Pruefung: `task_393_direct_dropship_independence_lz_vector.gd`, `task_392_parallel_boarding_transit_feedback.gd`, `task_390_homebase_direct_mission_transit_cards.gd`, `task_388_homebase_fireteam_roster_shipcard_polish.gd`, `task_385_homebase_direct_return_isolation.gd`, `bugfix_mission_multi_dropship_cards.gd`, `bugfix_mission_dropship_plans_and_facing.gd` und `git diff --check` laufen gruen.
 
 ### TASK_394 - Per Craft Shipcard Commands
@@ -413,6 +413,15 @@
 - Stand: Die alten `#18 Mission Control`-Dropship-Controls bleiben als versteckter Kompatibilitaetspfad im Szenenbaum, sind aber nicht mehr die sichtbare Spielersteuerung. Mini-Fireteam-Stance-Toggles nutzen einen eigenen Meta-Key, damit der HUD-Layout-Contract weiterhin die grossen Stance-Buttons prueft.
 - Risiken: Eine neue Nutzung des freigeraeumten `#18`-Fensters bleibt ein Folge-Polish. Die versteckten Legacy-Buttons sollten erst entfernt werden, wenn alte Command-/Help-Contracts umgezogen sind.
 - Lokale Pruefung: `task_394_per_craft_shipcard_commands.gd`, `task_393_direct_dropship_independence_lz_vector.gd`, `task_392_parallel_boarding_transit_feedback.gd`, `bugfix_mission_multi_dropship_cards.gd`, `task_390_homebase_direct_mission_transit_cards.gd`, `task_180_mission_drop_light_fixed_hud_layout_verifier.gd` und `git diff --check` laufen gruen.
+
+### TASK_395 - Manual Dropship Parallel Flow Stabilization
+- Status: implementiert im Arbeitsstand
+- Stand: Homebase-Boarding simuliert weiter, aber Flightdeck-/Shipcard-Rebuilds werden waehrend eines aktiven GUI-Drags aufgeschoben. Dadurch bleibt das Dropship-2-Dropziel stabil, waehrend Dropship 1 noch boardet.
+- Stand: Homebase-Direct-`Send` aktiviert den `TransportTimer` sofort nach dem Anlegen des craft-spezifischen `to_mission`-Transfers. Homebase- und Mission-Karten koennen dadurch ohne Mission-Map-Navigationsklick weiter Progress anzeigen.
+- Stand: Mission-Dropshipkarten seed-en LZ-Scalar-Felder bei mehreren Karten nur noch aus echten positiven LZ-Daten. Eine neue Alpha-LZ loescht Beta-LZ/Approach nicht mehr, und Alpha/Beta koennen parallel inbound gehen.
+- Stand: Der 3D-Anflugvektor wird als breite Pfeilform aus dem geplanten Approach-Ursprung zur LZ gerendert. Render-Snapshots melden `dropship_approach_vector_shape = wide_arrow` und `dropship_approach_arrow_count`.
+- Risiken: Der Drag-Refresh-Guard verzögert nur die visuelle Rebuild-Aktualisierung waehrend des Drags; Boarding-State laeuft weiter. Die finale Pfeilbreite/-Form bleibt ein manueller FullHD-Sichtcheck.
+- Lokale Pruefung: `task_395_manual_dropship_parallel_flow.gd`, `task_394_per_craft_shipcard_commands.gd`, `task_393_direct_dropship_independence_lz_vector.gd`, `task_392_parallel_boarding_transit_feedback.gd`, `task_390_homebase_direct_mission_transit_cards.gd` und `git diff --check` laufen gruen.
 
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand

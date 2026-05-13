@@ -756,9 +756,11 @@ func set_planning_state(planning_state: Dictionary) -> void:
 			if not selected_drop_card.is_empty():
 				selected_drop_card = selected_drop_card.duplicate(true)
 				var planning_has_lz_position: bool = bool(planning_state.get("has_lz_position", false))
-				if planning_state.has("has_lz_position") and (planning_has_lz_position or not selected_drop_card.has("has_lz_position")):
+				var has_multiple_drop_cards: bool = _mission_drop_cards.size() > 1
+				var should_seed_lz_from_scalar: bool = not has_multiple_drop_cards or planning_has_lz_position
+				if planning_state.has("has_lz_position") and should_seed_lz_from_scalar:
 					selected_drop_card["has_lz_position"] = bool(planning_state.get("has_lz_position", false))
-				if planning_state.has("lz_position") and (planning_has_lz_position or not selected_drop_card.has("lz_position")):
+				if planning_state.has("lz_position") and should_seed_lz_from_scalar:
 					selected_drop_card["lz_position"] = planning_state["lz_position"]
 				if planning_state.has("approach_angle") and (planning_has_lz_position or not selected_drop_card.has("approach_angle")):
 					selected_drop_card["approach_angle"] = planning_state["approach_angle"]
@@ -6869,6 +6871,7 @@ func _build_mission_dropship_visual_entries(primary_visible: bool, primary_posit
 				"lz_position": _lz_position,
 				"lz_label": _build_mission_dropship_lz_name(selected_craft_id, _mission_drop_display_name),
 				"dropship_texture": _get_mission_dropship_texture(),
+				"approach_vector_shape": "wide_arrow",
 				"team_id": FRIENDLY_TEAM_ID,
 				"selected": true,
 			}
@@ -6914,8 +6917,10 @@ func _build_mission_dropship_visual_entry(card: Dictionary, index: int, primary_
 		"dropship_position": ship_position,
 		"dropship_target_position": target_position,
 		"approach_origin_position": approach_origin_position,
-		"approach_vector_origin_position": ship_position,
+		"approach_vector_origin_position": approach_origin_position,
 		"approach_vector_target_position": lz_position if has_lz else target_position,
+		"approach_vector_shape": "wide_arrow",
+		"approach_angle": _sanitize_approach_angle_name(String(card.get("approach_angle", _get_approach_angle_name()))),
 		"show_approach_vector": show_lz_marker,
 		"has_lz_position": has_lz,
 		"show_lz_marker": show_lz_marker,

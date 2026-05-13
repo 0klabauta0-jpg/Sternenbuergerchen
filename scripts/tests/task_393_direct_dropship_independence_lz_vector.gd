@@ -142,9 +142,9 @@ func _test_lz_marker_and_approach_vector_hide_after_touchdown() -> void:
 	var alpha_before: Dictionary = _find_visual_entry(entries_before, "dropship_alpha")
 	var snapshot_before: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 	_assert(bool(alpha_before.get("show_lz_marker", false)), "Waiting Dropship exposes its planned LZ marker")
-	_assert(Vector2(alpha_before.get("approach_vector_origin_position", Vector2.ZERO)).distance_to(Vector2(alpha_before.get("dropship_position", Vector2.ZERO))) < 0.01, "Approach vector starts at the current Dropship position")
+	_assert(Vector2(alpha_before.get("approach_vector_origin_position", Vector2.ZERO)).distance_to(Vector2(alpha_before.get("approach_origin_position", Vector2.ZERO))) < 0.01, "Approach vector starts at the planned approach origin")
 	_assert(int(snapshot_before.get("requested_lz_marker_count", 0)) >= 1 and float(snapshot_before.get("dropship_lz_marker_fill", 0.0)) > 1.0, "Planned LZ marker is visible and larger than one compact marker")
-	_assert(int(snapshot_before.get("dropship_approach_line_count", 0)) >= 1 and float(snapshot_before.get("dropship_approach_line_width_factor", 0.0)) >= 0.2, "Approach vector is rendered as a wide translucent line")
+	_assert(int(snapshot_before.get("dropship_approach_line_count", 0)) >= 1 and int(snapshot_before.get("dropship_approach_arrow_count", 0)) >= 1 and String(snapshot_before.get("dropship_approach_vector_shape", "")) == "wide_arrow", "Approach vector is rendered as a wide directional arrow")
 
 	controller.call("_on_call_dropship_pressed")
 	for _step in range(520):

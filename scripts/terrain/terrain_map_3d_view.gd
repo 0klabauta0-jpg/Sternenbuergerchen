@@ -330,6 +330,7 @@ var _unit_status_badge_count: int = 0
 var _drop_visual_static_signature: String = ""
 var _dropship_visual_nodes_by_id: Dictionary = {}
 var _dropship_approach_lines_by_id: Dictionary = {}
+var _dropship_approach_arrow_count: int = 0
 var _dropship_texture_visible: bool = false
 var _dropship_model_visible: bool = false
 var _air_visual_count: int = 0
@@ -1193,6 +1194,7 @@ func get_render_snapshot() -> Dictionary:
 		"resolved_lz_marker_count": _resolved_lz_marker_count,
 		"dropship_lz_marker_fill": DROPSHIP_LZ_MARKER_FILL,
 		"dropship_approach_line_width_factor": DROPSHIP_APPROACH_LINE_WIDTH_FACTOR,
+		"dropship_approach_vector_shape": "wide_arrow",
 		"requested_lz_position": _drop_payload.get("requested_lz_position", _drop_payload.get("target_lz_position", _drop_payload.get("lz_position", null))),
 		"resolved_lz_position": _drop_payload.get("resolved_lz_position", _drop_payload.get("actual_landing_position", null)),
 		"tile_grid_line_count": _tile_grid_line_count,
@@ -1220,6 +1222,7 @@ func get_render_snapshot() -> Dictionary:
 		"dropship_model_visible": _dropship_model_visible,
 		"dropship_visual_count": _air_visual_count,
 		"dropship_approach_line_count": _dropship_approach_lines_by_id.size(),
+		"dropship_approach_arrow_count": _dropship_approach_arrow_count,
 		"flight_altitude_layer": String(_drop_payload.get("air_layer", AIR_LAYER_ID)),
 		"air_visual_count": _air_visual_count,
 		"fow_hidden_air_visual_count": _fow_hidden_air_visual_count,
@@ -3321,7 +3324,7 @@ func _build_drop_visual_static_signature(payload: Dictionary) -> String:
 	var entries: Array = Array(payload.get("dropship_visuals", []))
 	for index in range(entries.size()):
 		var entry: Dictionary = Dictionary(entries[index])
-		parts.append("%s:%s:%s:%s:%s:%s:%s:%s:%s:%s" % [
+		parts.append("%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s" % [
 			_get_dropship_visual_id(entry, index),
 			String(entry.get("state", "")).strip_edges().to_lower(),
 			_texture_signature(entry.get("dropship_texture", null)),
@@ -3331,6 +3334,7 @@ func _build_drop_visual_static_signature(payload: Dictionary) -> String:
 			_vector2_signature(entry.get("approach_vector_target_position", entry.get("dropship_target_position", null))),
 			str(bool(entry.get("show_lz_marker", bool(entry.get("has_lz_position", false))))),
 			str(bool(entry.get("show_approach_vector", true))),
+			String(entry.get("approach_vector_shape", "wide_arrow")).strip_edges(),
 			String(entry.get("team_id", AIR_LAYER_DEFAULT_TEAM_ID)).strip_edges(),
 		])
 		parts.append("lz:%s:%s:%s" % [
@@ -4987,6 +4991,7 @@ func _rebuild_drop_visuals() -> void:
 	_clear_children(_drop_root)
 	_dropship_visual_nodes_by_id.clear()
 	_dropship_approach_lines_by_id.clear()
+	_dropship_approach_arrow_count = 0
 	_dropship_texture_visible = false
 	_dropship_model_visible = false
 	_missing_dropship_model_count = 0
@@ -5116,16 +5121,19 @@ func _add_dropship_approach_line(entry: Dictionary, visual_id: String, ship_posi
 		return
 	if not _air_layer_allows_surface_marker(target_position):
 		return
-	var line := _add_wide_line3d(
+	var line := _add_dropship_approach_vector3d(
 		_drop_root,
 		_world_to_air_layer_3d_position_for_payload(entry, line_origin),
 		_world_to_surface_3d_position(target_position, 0.52),
 		Color(0.56, 1.0, 0.68, 0.34),
 		"DropshipApproach_%s" % _sanitize_node_name(visual_id),
-		maxf(_get_3d_cell_size() * DROPSHIP_APPROACH_LINE_WIDTH_FACTOR, 0.08)
+		maxf(_get_3d_cell_size() * DROPSHIP_APPROACH_LINE_WIDTH_FACTOR, 0.08),
+		entry
 	)
 	if line != null:
 		_dropship_approach_lines_by_id[visual_id] = line
+		if String(entry.get("approach_vector_shape", "wide_arrow")).strip_edges().to_lower() == "wide_arrow":
+			_dropship_approach_arrow_count += 1
 
 
 func _update_dropship_approach_line(entry: Dictionary, visual_id: String, ship_position: Vector2) -> void:
@@ -5149,11 +5157,12 @@ func _update_dropship_approach_line(entry: Dictionary, visual_id: String, ship_p
 	line.visible = line_origin.distance_squared_to(target_position) > 4.0
 	if not line.visible:
 		return
-	line.mesh = _make_wide_line_mesh(
+	line.mesh = _make_dropship_approach_vector_mesh(
 		_world_to_air_layer_3d_position_for_payload(entry, line_origin),
 		_world_to_surface_3d_position(target_position, 0.52),
 		Color(0.56, 1.0, 0.68, 0.34),
-		maxf(_get_3d_cell_size() * DROPSHIP_APPROACH_LINE_WIDTH_FACTOR, 0.08)
+		maxf(_get_3d_cell_size() * DROPSHIP_APPROACH_LINE_WIDTH_FACTOR, 0.08),
+		entry
 	)
 
 
@@ -6940,6 +6949,16 @@ func _add_wide_line3d(parent: Node3D, start_position: Vector3, end_position: Vec
 	return instance
 
 
+func _add_dropship_approach_vector3d(parent: Node3D, start_position: Vector3, end_position: Vector3, color: Color, node_name: String, line_width: float, entry: Dictionary) -> MeshInstance3D:
+	var mesh := _make_dropship_approach_vector_mesh(start_position, end_position, color, line_width, entry)
+	var instance := MeshInstance3D.new()
+	instance.name = node_name
+	instance.mesh = mesh
+	instance.set_meta("dropship_approach_vector_shape", String(entry.get("approach_vector_shape", "wide_arrow")).strip_edges().to_lower())
+	parent.add_child(instance)
+	return instance
+
+
 func _make_line_mesh(start_position: Vector3, end_position: Vector3, color: Color) -> ImmediateMesh:
 	var material := _make_material(color, true)
 	var mesh := ImmediateMesh.new()
@@ -6968,6 +6987,46 @@ func _make_wide_line_mesh(start_position: Vector3, end_position: Vector3, color:
 	mesh.surface_add_vertex(start_position - side)
 	mesh.surface_add_vertex(end_position + side)
 	mesh.surface_add_vertex(end_position - side)
+	mesh.surface_end()
+	return mesh
+
+
+func _make_dropship_approach_vector_mesh(start_position: Vector3, end_position: Vector3, color: Color, line_width: float, entry: Dictionary) -> ImmediateMesh:
+	var shape: String = String(entry.get("approach_vector_shape", "wide_arrow")).strip_edges().to_lower()
+	if shape == "wide_arrow":
+		return _make_wide_arrow_mesh(start_position, end_position, color, line_width)
+	return _make_wide_line_mesh(start_position, end_position, color, line_width)
+
+
+func _make_wide_arrow_mesh(start_position: Vector3, end_position: Vector3, color: Color, line_width: float) -> ImmediateMesh:
+	var material := _make_material(color, true)
+	var mesh := ImmediateMesh.new()
+	var direction: Vector3 = end_position - start_position
+	var length: float = direction.length()
+	if length <= 0.0001:
+		return mesh
+	direction /= length
+	var side := Vector3(-direction.z, 0.0, direction.x)
+	if side.length_squared() <= 0.0001:
+		side = Vector3.RIGHT
+	side = side.normalized()
+	var shaft_half_width: float = maxf(line_width, 0.01) * 0.5
+	var head_half_width: float = shaft_half_width * 2.25
+	var head_length: float = clampf(maxf(line_width * 3.35, 0.16), shaft_half_width * 1.5, length * 0.48)
+	var head_base: Vector3 = end_position - direction * head_length
+	var shaft_side: Vector3 = side * shaft_half_width
+	var head_side: Vector3 = side * head_half_width
+	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, material)
+	if start_position.distance_squared_to(head_base) > 0.0001:
+		mesh.surface_add_vertex(start_position - shaft_side)
+		mesh.surface_add_vertex(start_position + shaft_side)
+		mesh.surface_add_vertex(head_base + shaft_side)
+		mesh.surface_add_vertex(start_position - shaft_side)
+		mesh.surface_add_vertex(head_base + shaft_side)
+		mesh.surface_add_vertex(head_base - shaft_side)
+	mesh.surface_add_vertex(head_base - head_side)
+	mesh.surface_add_vertex(head_base + head_side)
+	mesh.surface_add_vertex(end_position)
 	mesh.surface_end()
 	return mesh
 

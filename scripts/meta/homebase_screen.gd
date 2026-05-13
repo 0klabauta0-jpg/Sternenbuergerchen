@@ -86,6 +86,7 @@ var _homebase_dispatch_target_by_craft: Dictionary = {}
 var _homebase_direct_boarding_state_by_fireteam_id: Dictionary = {}
 var _homebase_direct_boarding_refresh_seconds: float = 0.0
 var _homebase_direct_boarding_force_refresh: bool = false
+var _homebase_direct_boarding_refresh_deferred_for_drag: bool = false
 var _pending_homebase_direct_mission_craft_id: String = ""
 var _member_loadout_by_unit_id: Dictionary = {}
 var _homebase_loadout_preview_texture_cache: Dictionary = {}
@@ -437,6 +438,7 @@ func get_homebase_direct_staging_snapshot() -> Dictionary:
 		"payload_operator_count": payload_operator_count,
 		"boarded_operator_count": _get_homebase_direct_boarded_operator_count(),
 		"boarding_progress_ratio": _get_homebase_direct_boarding_progress_ratio(),
+		"boarding_refresh_deferred_for_drag": _homebase_direct_boarding_refresh_deferred_for_drag,
 		"homebase_dispatch_target": _get_homebase_dispatch_target(payload_craft_id),
 		"payload_status_text": _build_homebase_direct_payload_status_text(craft_gate, false),
 		"fireteam_payload_statuses": _build_homebase_fireteam_payload_status_snapshot(craft_gate),
@@ -3952,10 +3954,22 @@ func _is_homebase_fireteam_in_flightdeck_payload(fireteam_id: String) -> bool:
 func _refresh_homebase_direct_boarding_ui() -> void:
 	if not is_inside_tree():
 		return
+	if _is_homebase_gui_drag_active():
+		_homebase_direct_boarding_refresh_deferred_for_drag = true
+		_homebase_direct_boarding_force_refresh = true
+		return
+	_homebase_direct_boarding_refresh_deferred_for_drag = false
 	_homebase_direct_boarding_force_refresh = false
 	_update_mission_info()
 	_update_aircraft_panel()
 	_update_homebase_flightdeck_staging_panel()
+
+
+func _is_homebase_gui_drag_active() -> bool:
+	if bool(get_meta("debug_gui_drag_in_progress", false)):
+		return true
+	var viewport := get_viewport()
+	return viewport != null and viewport.gui_is_dragging()
 
 
 func _debug_advance_homebase_direct_boarding(delta_seconds: float) -> void:

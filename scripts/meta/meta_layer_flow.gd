@@ -328,6 +328,7 @@ func _on_homebase_mission_start_requested() -> void:
 		_begin_homebase_direct_mission_transfer_from_planning()
 		_sync_homebase_direct_mission_drop_transport_fields()
 		_refresh_homebase_screen()
+		_ensure_transport_timer_state()
 	_begin_active_mission_timer()
 	var keep_homebase_visible: bool = not requested_direct_craft_id.is_empty() and _current_meta_view == "homebase"
 	_start_or_update_active_mission()
