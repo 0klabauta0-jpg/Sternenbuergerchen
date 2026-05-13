@@ -13,6 +13,7 @@ const MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT: GDScript = preload("res://scripts/
 const MAP_EDITOR_HEIGHT_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_height_tool.gd")
 const MAP_EDITOR_PATROL_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_patrol_tool.gd")
 const MAP_EDITOR_PATROL_PREVIEW_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_patrol_preview.gd")
+const MAP_EDITOR_TILE_PROPERTY_OVERLAY_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_tile_property_overlay.gd")
 const MAP_EDITOR_MARKER_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_marker_tool.gd")
 const MAP_EDITOR_MISSION_SCENARIO_PANEL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_mission_scenario_panel.gd")
 const MULTIPLAYER_MAP_MANIFEST_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_map_manifest.gd")
@@ -40,6 +41,7 @@ const MAX_CAMERA_ZOOM: float = 3.0
 const CAMERA_ZOOM_STEP: float = 0.05
 const CAMERA_PAN_SPEED: float = 800.0
 const PATROL_OVERLAY_NAME: String = "PatrolOverlay"
+const TILE_PROPERTY_OVERLAY_NAME: String = "TilePropertyOverlay"
 const PATROL_SPAWN_IDS: PackedStringArray = ["enemy_delta", "enemy_echo", "enemy_alpha", "enemy_bravo"]
 const PATROL_PICK_RADIUS: float = 28.0
 const PATROL_SEGMENT_PICK_RADIUS: float = 18.0
@@ -53,6 +55,7 @@ const PRIMARY_VIEW_LEGACY_VISIBILITY_NODES: PackedStringArray = [
 	"WallContainer",
 	"ObjectContainer",
 	"GridOverlay",
+	TILE_PROPERTY_OVERLAY_NAME,
 	"SelectionOutline",
 	PATROL_OVERLAY_NAME,
 	MARKER_OVERLAY_NAME,
@@ -63,6 +66,7 @@ const PRIMARY_VIEW_LEGACY_CLEAR_NODES: PackedStringArray = [
 	"WallContainer",
 	"ObjectContainer",
 	"GridOverlay",
+	TILE_PROPERTY_OVERLAY_NAME,
 	"SelectionOutline",
 	PATROL_OVERLAY_NAME,
 	MARKER_OVERLAY_NAME,
@@ -183,6 +187,12 @@ var _last_patrol_preview_snapshot: Dictionary = {}
 var _queued_patrol_preview_world_position: Vector2 = Vector2.ZERO
 var _queued_patrol_preview_has_world_position: bool = false
 var _queued_patrol_preview_hide: bool = false
+var _tile_property_overlay_enabled: bool = false
+var _tile_property_overlay_cells_by_grid: Dictionary = {}
+var _tile_property_overlay_rebuild_count: int = 0
+var _tile_property_overlay_dirty_refresh_count: int = 0
+var _tile_property_overlay_skipped_disabled_count: int = 0
+var _tile_property_overlay_last_dirty_grid_count: int = 0
 var _active_palette_group_id: String = ""
 var _palette_preview_textures: Dictionary = {}
 var _last_dirty_neighborhood_snapshot: Dictionary = {}
@@ -221,6 +231,7 @@ func _ready() -> void:
 	_add_selection_tool_button()
 	_add_eraser_tool_button()
 	_add_patrol_tool_controls()
+	_add_tile_property_overlay_controls()
 	_arrange_topbar_authoring_tools()
 	_ensure_marker_editor_controls()
 	_ensure_mission_authoring_controls()
@@ -229,6 +240,7 @@ func _ready() -> void:
 	HOVER_SCROLL_BEHAVIOR_SCRIPT.call("install", self)
 	_apply_contextual_help_ids()
 	_ensure_patrol_overlay()
+	_ensure_tile_property_overlay()
 	_ensure_marker_overlay()
 	_ensure_3d_primary_view()
 	_load_map(map_file_path if not map_file_path.is_empty() else DEFAULT_MAP_PATH)
@@ -586,6 +598,7 @@ func _load_map(path: String) -> void:
 	_refresh_property_panel()
 	_refresh_top_bar()
 	_refresh_patrol_overlay()
+	_rebuild_tile_property_overlay()
 	_refresh_marker_overlay()
 	_refresh_marker_editor_controls()
 	if _current_scenario_path.is_empty() and not _scenario_dirty:
@@ -621,6 +634,7 @@ func _create_new_map(grid_size: Vector2i = DEFAULT_NEW_MAP_GRID_SIZE) -> void:
 	_refresh_property_panel()
 	_refresh_top_bar()
 	_refresh_patrol_overlay()
+	_rebuild_tile_property_overlay()
 	_refresh_marker_overlay()
 	_refresh_marker_editor_controls()
 	if _current_scenario_path.is_empty() and not _scenario_dirty:
@@ -686,6 +700,7 @@ func _rebuild_tile_sprites() -> void:
 		_wall_sprites_by_grid.clear()
 		_object_sprites_by_grid.clear()
 		_clear_legacy_2d_map_children()
+		_rebuild_tile_property_overlay()
 		_refresh_3d_map_view()
 		_set_legacy_2d_map_visible(false)
 		return
@@ -696,17 +711,21 @@ func _rebuild_tile_sprites() -> void:
 	_wall_sprites_by_grid = render_state.get("walls", {})
 	_object_sprites_by_grid = render_state.get("objects", {})
 	_rebuild_grid_overlay()
+	_rebuild_tile_property_overlay()
 	_refresh_3d_map_view()
 	_set_legacy_2d_map_visible(false)
 
 
 func _refresh_tile_visual(tile_data, refresh_dirty_neighborhood: bool = true) -> void:
 	if tile_data == null or not _tile_sprites_by_grid.has(tile_data.grid_position):
+		if tile_data != null:
+			_refresh_tile_property_overlay_for_grids([tile_data.grid_position])
 		_queue_3d_map_refresh()
 		return
 
 	var tile_sprite := _tile_sprites_by_grid[tile_data.grid_position] as Sprite2D
 	if tile_sprite == null:
+		_refresh_tile_property_overlay_for_grids([tile_data.grid_position])
 		_queue_3d_map_refresh()
 		return
 
@@ -716,6 +735,8 @@ func _refresh_tile_visual(tile_data, refresh_dirty_neighborhood: bool = true) ->
 	tile_sprite.modulate = _build_tile_modulate(tile_data)
 	if refresh_dirty_neighborhood:
 		_refresh_dirty_visual_neighborhoods([tile_data.grid_position])
+	else:
+		_refresh_tile_property_overlay_for_grids([tile_data.grid_position])
 	_queue_3d_map_refresh()
 
 
@@ -1300,6 +1321,7 @@ func _arrange_topbar_authoring_tools() -> void:
 		"PatrolButton",
 		"PatrolSpawnOption",
 		"ClearPatrolButton",
+		"TilePropertyOverlayButton",
 	]:
 		var node := button_row.get_node_or_null(node_name) as Control
 		if node == null:
@@ -1466,6 +1488,21 @@ func _add_patrol_tool_controls() -> void:
 	_arrange_topbar_authoring_tools()
 
 
+func _add_tile_property_overlay_controls() -> void:
+	var button_row := get_node_or_null("UI/TopBar/Margin/HBox") as HBoxContainer
+	if button_row == null:
+		return
+	var overlay_button := button_row.get_node_or_null("TilePropertyOverlayButton") as Button
+	if overlay_button == null:
+		overlay_button = Button.new()
+		overlay_button.name = "TilePropertyOverlayButton"
+		overlay_button.toggle_mode = true
+		overlay_button.toggled.connect(_on_tile_property_overlay_toggled)
+		button_row.add_child(overlay_button)
+	_configure_tool_button(overlay_button, "DBG", "Tile property overlay: blue walkable, red blocked, purple LOS, green cover, amber height.")
+	overlay_button.button_pressed = _tile_property_overlay_enabled
+
+
 func _on_selection_tool_toggled(pressed: bool) -> void:
 	_selection_tool_enabled = pressed
 	if pressed:
@@ -1581,6 +1618,10 @@ func _on_patrol_spawn_selected(index: int) -> void:
 	preview_patrol_route_for_reference(_patrol_spawn_id, "selected_spawn")
 	_refresh_patrol_overlay()
 	_refresh_authoring_status_controls()
+
+
+func _on_tile_property_overlay_toggled(pressed: bool) -> void:
+	set_tile_property_overlay_enabled(pressed)
 
 
 func _on_clear_patrol_pressed() -> void:
@@ -2774,6 +2815,7 @@ func get_map_editor_usability_snapshot(sync_from_controls: bool = true) -> Dicti
 			"waypoint_count": _get_patrol_waypoint_count(_patrol_spawn_id),
 		},
 		"patrol_route_preview": get_patrol_route_preview_snapshot(),
+		"tile_property_overlay": get_tile_property_overlay_debug_snapshot(),
 		"eraser_tool": {
 			"enabled": _eraser_tool_enabled,
 			"scope": "object_layer_only",
@@ -2951,6 +2993,7 @@ func get_authoring_action_contract_snapshot() -> Dictionary:
 		"editor_ui_refresh_batched": true,
 		"editor_ui_refresh_flags": _get_editor_ui_refresh_flag_names(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES | EDITOR_UI_REFRESH_TOOL_STATE | EDITOR_UI_REFRESH_HOVER | EDITOR_UI_REFRESH_SCENARIO | EDITOR_UI_REFRESH_PATROL_PREVIEW),
 		"patrol_route_preview_visual_only": true,
+		"tile_property_overlay_visual_only": true,
 		"tile_patch_fields": PackedStringArray([
 			"grid_position",
 			"walkable",
@@ -4946,6 +4989,140 @@ func _on_map_name_focus_exited() -> void:
 	_refresh_map_settings_panel()
 
 
+func set_tile_property_overlay_enabled(enabled: bool) -> bool:
+	if _tile_property_overlay_enabled == enabled:
+		return true
+	_tile_property_overlay_enabled = enabled
+	var overlay_button := get_node_or_null("UI/TopBar/Margin/HBox/TilePropertyOverlayButton") as Button
+	if overlay_button != null and overlay_button.button_pressed != enabled:
+		overlay_button.button_pressed = enabled
+	if enabled:
+		_rebuild_tile_property_overlay()
+	else:
+		_clear_tile_property_overlay()
+	_refresh_authoring_status_controls()
+	return true
+
+
+func is_tile_property_overlay_enabled() -> bool:
+	return _tile_property_overlay_enabled
+
+
+func get_tile_property_overlay_debug_snapshot() -> Dictionary:
+	var snapshot: Dictionary = Dictionary(MAP_EDITOR_TILE_PROPERTY_OVERLAY_SCRIPT.call("build_overlay_snapshot", _terrain_map_data, _tile_property_overlay_enabled))
+	snapshot["drawn_cell_count"] = _tile_property_overlay_cells_by_grid.size()
+	snapshot["rebuild_count"] = _tile_property_overlay_rebuild_count
+	snapshot["dirty_refresh_count"] = _tile_property_overlay_dirty_refresh_count
+	snapshot["skipped_disabled_count"] = _tile_property_overlay_skipped_disabled_count
+	snapshot["last_dirty_grid_count"] = _tile_property_overlay_last_dirty_grid_count
+	snapshot["batched_with_dirty_neighborhood"] = true
+	return snapshot
+
+
+func _ensure_tile_property_overlay() -> void:
+	var existing_overlay := get_node_or_null(TILE_PROPERTY_OVERLAY_NAME) as Node2D
+	if existing_overlay != null:
+		return
+	var overlay := Node2D.new()
+	overlay.name = TILE_PROPERTY_OVERLAY_NAME
+	overlay.z_index = 31
+	add_child(overlay)
+
+
+func _rebuild_tile_property_overlay() -> void:
+	_ensure_tile_property_overlay()
+	var overlay := get_node_or_null(TILE_PROPERTY_OVERLAY_NAME) as Node2D
+	if overlay == null:
+		return
+	for child in overlay.get_children():
+		child.queue_free()
+	_tile_property_overlay_cells_by_grid.clear()
+	_tile_property_overlay_last_dirty_grid_count = 0
+	if not _tile_property_overlay_enabled:
+		_tile_property_overlay_skipped_disabled_count += 1
+		return
+	if _terrain_map_data == null:
+		return
+	for tile_data in Array(_terrain_map_data.call("get_tiles")):
+		_refresh_tile_property_overlay_cell(tile_data)
+	_tile_property_overlay_rebuild_count += 1
+
+
+func _clear_tile_property_overlay() -> void:
+	var overlay := get_node_or_null(TILE_PROPERTY_OVERLAY_NAME) as Node2D
+	if overlay != null:
+		for child in overlay.get_children():
+			child.queue_free()
+	_tile_property_overlay_cells_by_grid.clear()
+	_tile_property_overlay_last_dirty_grid_count = 0
+
+
+func _refresh_tile_property_overlay_for_grids(grids: Array[Vector2i]) -> void:
+	if grids.is_empty():
+		return
+	if not _tile_property_overlay_enabled:
+		_tile_property_overlay_skipped_disabled_count += 1
+		return
+	_ensure_tile_property_overlay()
+	_tile_property_overlay_last_dirty_grid_count = grids.size()
+	for grid_position in grids:
+		var tile_data = _terrain_map_data.call("get_tile_at_grid", Vector2i(grid_position)) if _terrain_map_data != null else null
+		_refresh_tile_property_overlay_cell(tile_data, Vector2i(grid_position))
+	_tile_property_overlay_dirty_refresh_count += 1
+
+
+func _refresh_tile_property_overlay_cell(tile_data, fallback_grid: Vector2i = Vector2i(-1, -1)) -> void:
+	var grid_position: Vector2i = Vector2i(tile_data.grid_position) if tile_data != null else fallback_grid
+	if grid_position == Vector2i(-1, -1):
+		return
+	var previous_node: Node = _tile_property_overlay_cells_by_grid.get(grid_position, null)
+	if previous_node != null and is_instance_valid(previous_node):
+		if previous_node.get_parent() != null:
+			previous_node.get_parent().remove_child(previous_node)
+		previous_node.queue_free()
+	_tile_property_overlay_cells_by_grid.erase(grid_position)
+	if tile_data == null:
+		return
+	var overlay := get_node_or_null(TILE_PROPERTY_OVERLAY_NAME) as Node2D
+	if overlay == null:
+		return
+	var entry: Dictionary = Dictionary(MAP_EDITOR_TILE_PROPERTY_OVERLAY_SCRIPT.call("build_tile_entry", tile_data))
+	if entry.is_empty():
+		return
+	var tile_size: Dictionary = _terrain_map_data.call("get_tile_size")
+	var half_width: float = float(tile_size.get("half_width", DEFAULT_HALF_TILE_WIDTH))
+	var half_height: float = float(tile_size.get("half_height", DEFAULT_HALF_TILE_HEIGHT))
+	var center: Vector2 = Vector2(entry.get("world_position", tile_data.world_position))
+	var cell_root := Node2D.new()
+	cell_root.name = "TileProperty_%d_%d" % [grid_position.x, grid_position.y]
+	cell_root.set_meta("grid_position", grid_position)
+	cell_root.set_meta("color_role", String(entry.get("color_role", "")))
+	var diamond := Polygon2D.new()
+	diamond.name = "Fill"
+	diamond.polygon = PackedVector2Array([
+		center + Vector2(0.0, -half_height),
+		center + Vector2(half_width, 0.0),
+		center + Vector2(0.0, half_height),
+		center + Vector2(-half_width, 0.0),
+	])
+	diamond.color = Color(entry.get("color", Color(1.0, 1.0, 1.0, 0.1)))
+	cell_root.add_child(diamond)
+	var label_text: String = String(entry.get("label", ""))
+	if not label_text.is_empty():
+		var label := Label.new()
+		label.name = "Label"
+		label.text = label_text
+		label.position = center + Vector2(-half_width * 0.34, -8.0)
+		label.size = Vector2(half_width * 0.68, 16.0)
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.add_theme_font_size_override("font_size", 9)
+		label.add_theme_color_override("font_color", Color(0.95, 0.98, 1.0, 0.86))
+		cell_root.add_child(label)
+	overlay.add_child(cell_root)
+	_tile_property_overlay_cells_by_grid[grid_position] = cell_root
+
+
 func _ensure_patrol_overlay() -> void:
 	var existing_overlay := get_node_or_null(PATROL_OVERLAY_NAME) as Node2D
 	if existing_overlay != null:
@@ -6097,6 +6274,7 @@ func _refresh_dirty_visual_neighborhoods(seed_grids: Array[Vector2i]) -> void:
 		if _refresh_object_overlay_at(grid_position):
 			object_refresh_count += 1
 
+	_refresh_tile_property_overlay_for_grids(_sort_grid_lookup_keys(seed_lookup))
 	_last_dirty_neighborhood_snapshot = {
 		"seed_count": seed_lookup.size(),
 		"raw_neighborhood_candidate_count": raw_neighborhood_candidate_count,

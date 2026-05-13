@@ -280,11 +280,19 @@
 - Lokale Pruefung: `task_378_mapeditor_patrol_route_preview.gd`, `task_360_mapeditor_mission_scenario_panel_extraction.gd` und `git diff --check` laufen gruen.
 - Offene Folgearbeit: Manueller Editor-Sichtcheck fuer genaue Pfeil-/Label-Lesbarkeit bleibt sinnvoll, besonders bei langen oder eng gekreuzten Patrol-Routen.
 
-### TASK_379-TASK_380 - Mission Visualization Review Followups
+### TASK_379 - MapEditor Tile Property Grid Overlay
+- Status: implementiert
+- Stand: `MapEditorTilePropertyOverlay` berechnet die Tile-Property-Farben und kompakten Labels read-only aus bestehenden Tile-Daten. Rollen sind `walkable`, `blocked`, `los_block`, `cover` und `height`.
+- Stand: `MapEditor` hat einen `DBG`-Toggle in der Topbar. Aktiv zeichnet er ein 2D-Debug-Overlay mit farbigen Diamond-Zellen und kurzen Labels fuer nicht-default Properties; inaktiv bleiben Draw-Zellen leer.
+- Stand: Tile-Aenderungen aktualisieren das Overlay ueber die bestehenden Dirty-/Tile-Refresh-Pfade pro betroffenem Grid. Der Debug-Snapshot meldet aktive/inaktive Zaehler, Farbroles, Rebuilds und Dirty-Refreshes.
+- Lokale Pruefung: `task_379_mapeditor_tile_property_grid_overlay.gd`, `task_298_editor_terrain_visual_playability_smoke.gd` und `git diff --check` laufen gruen.
+- Offene Folgearbeit: Manueller Sichtcheck fuer Farb-/Label-Dichte auf grossen 64x64-Maps bleibt sinnvoll.
+
+### TASK_380 - Mission Visualization Review Followups
 - Status: geplant
-- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Nach TASK_378 bleiben die MapEditor-Debuglayer als getrennte Tasks 379 bis 380 offen.
+- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Nach TASK_379 bleibt der Terrain-Adjacency-Solver-Indikator als getrennter Task 380 offen.
 - Stand: Architekturgrenze bleibt: UI liest nur Snapshots. `SimulationRoot`, bestehende Resolver, `TacticalCommunicationEvent`, `FireteamBehaviorResolver`, `FireteamOrderVisualizer`, FoW und Terrain-Daten bleiben die Wahrheit.
-- Offene Punkte: Implementierung der einzelnen Tasks und manuelle Sichtpruefung nach weiteren Visual-Slices.
+- Offene Punkte: Implementierung von TASK_380 und manuelle Sichtpruefung nach weiteren Visual-Slices.
 - Risiken: Visual-Dichte kann Mission-HUD und FoW schnell ueberladen. Die Tasks markieren Debug-/optional-Layer getrennt von permanenten Spieleranzeigen.
 
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass

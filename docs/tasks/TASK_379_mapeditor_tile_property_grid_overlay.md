@@ -3,7 +3,7 @@
 ## Ziel
 Der MapEditor soll einen Debug-Overlay erhalten, der Tile-Eigenschaften wie Walkability, LOS-Block, Cover und Height sichtbar macht.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Sinnhaftigkeitscheck
 Der Review-Punkt ist sinnvoll fuer Authoring und QA, aber als Debug-/Editor-Overlay, nicht als normale Missionsanzeige. Viele Daten liegen bereits in TerrainMapData/TerrainRegistry.
@@ -22,11 +22,11 @@ Die Tile-Properties werden im Inspector angezeigt, aber nicht direkt auf der Kar
 - Keine Terrain-Daten aus Overlay heraus aendern.
 
 ## Akzeptanzkriterien
-- [ ] Toggle zeigt Tile-Eigenschaften auf der Karte.
-- [ ] Overlay aktualisiert sich nach Paint/Height/Property-Aenderung.
-- [ ] Ausgeschaltetes Overlay verursacht keine zusaetzlichen Draw-/Refresh-Kosten.
-- [ ] Headless-Test prueft Snapshot-Zaehler fuer aktiv/inaktiv und Property-Farben.
-- [ ] Existing Editor-Playability-Smoke bleibt gruen.
+- [x] Toggle zeigt Tile-Eigenschaften auf der Karte.
+- [x] Overlay aktualisiert sich nach Paint/Height/Property-Aenderung.
+- [x] Ausgeschaltetes Overlay verursacht keine zusaetzlichen Draw-/Refresh-Kosten.
+- [x] Headless-Test prueft Snapshot-Zaehler fuer aktiv/inaktiv und Property-Farben.
+- [x] Existing Editor-Playability-Smoke bleibt gruen.
 
 ## Erwartete Dateien
 - `scripts/editor/map_editor.gd`
@@ -35,10 +35,9 @@ Die Tile-Properties werden im Inspector angezeigt, aber nicht direkt auf der Kar
 - `scripts/tests/task_379_mapeditor_tile_property_grid_overlay.gd`
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_379_mapeditor_tile_property_grid_overlay.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_298_editor_terrain_visual_playability_smoke.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_379_mapeditor_tile_property_grid_overlay.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_298_editor_terrain_visual_playability_smoke.gd`
+- [x] `git diff --check`
 
 ## Risiken / offene Punkte
 - Zu viele Farben koennen Authoring erschweren. Der Task soll klare Layer-Modi oder reduzierte Palette pruefen.
-

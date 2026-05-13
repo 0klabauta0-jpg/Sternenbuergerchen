@@ -576,7 +576,7 @@ TASK_375 - Waypoint Intent Preview (implementiert)
 TASK_376 - Command Validation Bubble (implementiert)
 TASK_377 - Contact Density Heat Map Layer (implementiert)
 TASK_378 - MapEditor Patrol Route Preview (implementiert)
-TASK_379 - MapEditor Tile Property Grid Overlay (geplant)
+TASK_379 - MapEditor Tile Property Grid Overlay (implementiert)
 TASK_380 - Terrain Adjacency Solver Indicator (geplant)
 
 Batch-Empfehlung
