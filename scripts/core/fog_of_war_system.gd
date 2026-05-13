@@ -327,6 +327,45 @@ func filter_dynamic_entries_for_team(team_id: String, entries: Array, id_key: St
 	}
 
 
+func filter_contact_density_sources_for_team(team_id: String, contact_entries: Array, id_key: String = "unit_id") -> Dictionary:
+	var filtered: Dictionary = filter_dynamic_entries_for_team(team_id, contact_entries, id_key)
+	var source_entries: Array = Array(filtered.get("visible_entries", [])).duplicate(true)
+	var seen_target_ids: Dictionary = {}
+	for entry_variant in source_entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var target_id: String = String(entry.get("target_id", entry.get(id_key, ""))).strip_edges()
+		if not target_id.is_empty():
+			seen_target_ids[target_id] = true
+	var last_known_source_count: int = 0
+	for contact_variant in Array(Dictionary(_last_known_contacts_by_team.get(team_id, {})).values()):
+		if typeof(contact_variant) != TYPE_DICTIONARY:
+			continue
+		var contact: Dictionary = Dictionary(contact_variant).duplicate(true)
+		var target_id: String = String(contact.get("target_id", contact.get(id_key, ""))).strip_edges()
+		if target_id.is_empty() or seen_target_ids.has(target_id):
+			continue
+		if not contact.has("last_known_position"):
+			continue
+		contact["fow_last_known"] = true
+		contact["detection_state"] = String(contact.get("detection_state", "lost")).strip_edges().to_lower()
+		source_entries.append(contact)
+		seen_target_ids[target_id] = true
+		last_known_source_count += 1
+	return {
+		"team_id": team_id,
+		"mode": get_mode_for_team(team_id),
+		"source_entries": source_entries,
+		"source_count": source_entries.size(),
+		"current_source_count": int(filtered.get("visible_count", 0)),
+		"last_known_source_count": last_known_source_count,
+		"hidden_count": int(filtered.get("hidden_count", 0)),
+		"hidden_ids_included": false,
+		"fow_policy": "visible_targets_plus_recorded_last_known_only",
+	}
+
+
 func update_visibility_from_los(
 	team_id: String,
 	observer: Node2D,

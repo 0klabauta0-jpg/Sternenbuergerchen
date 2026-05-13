@@ -209,6 +209,7 @@ var _selected_fireteam_ids: PackedStringArray = []
 var _focused_fireteam_id: String = ""
 var _fire_sector_overlay_enabled: bool = false
 var _los_debug_overlay_enabled: bool = false
+var _contact_density_heatmap_enabled: bool = false
 var _fireteamleader_feedback_bubbles: Array = []
 var _fireteamleader_feedback_sequence: int = 0
 var _tactical_communication_resolver = null
@@ -591,6 +592,23 @@ func set_los_debug_overlay_enabled(enabled: bool) -> void:
 
 func _toggle_los_debug_overlay() -> void:
 	set_los_debug_overlay_enabled(not _los_debug_overlay_enabled)
+
+
+func is_contact_density_heatmap_enabled() -> bool:
+	return _contact_density_heatmap_enabled
+
+
+func set_contact_density_heatmap_enabled(enabled: bool) -> void:
+	if _contact_density_heatmap_enabled == enabled:
+		return
+	_contact_density_heatmap_enabled = enabled
+	_last_command_text = "CONTACT HEAT ON" if _contact_density_heatmap_enabled else "CONTACT HEAT OFF"
+	_refresh_order_visuals()
+	_update_ui()
+
+
+func _toggle_contact_density_heatmap() -> void:
+	set_contact_density_heatmap_enabled(not _contact_density_heatmap_enabled)
 
 
 func issue_move() -> bool:
@@ -9472,6 +9490,24 @@ func get_los_debug_overlay_snapshot() -> Dictionary:
 	}
 
 
+func get_contact_density_heatmap_snapshot() -> Dictionary:
+	var primary_snapshot: Dictionary = {}
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null and primary_3d_view.has_method("get_render_snapshot"):
+		var render_snapshot: Dictionary = Dictionary(primary_3d_view.call("get_render_snapshot"))
+		primary_snapshot = Dictionary(render_snapshot.get("contact_density_heatmap", {}))
+	return {
+		"enabled": _contact_density_heatmap_enabled,
+		"selected_fireteam_ids": Array(_selected_fireteam_ids),
+		"primary_3d": primary_snapshot,
+		"heat_cell_count": int(primary_snapshot.get("heat_cell_count", 0)),
+		"source_contact_count": int(primary_snapshot.get("source_contact_count", 0)),
+		"fow_hidden_count": int(primary_snapshot.get("fow_hidden_count", 0)),
+		"contact_visibility_policy": "current_or_last_known_contacts_after_visual_fow_filter",
+		"read_only": true,
+	}
+
+
 func get_cover_effectiveness_readout_snapshot() -> Dictionary:
 	var fireteam_id: String = _get_cover_readout_fireteam_id()
 	var selected_tile_readout: Dictionary = _build_selected_tile_cover_effectiveness_readout()
@@ -9659,6 +9695,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"waypoint_intent_preview_contract": get_waypoint_intent_preview_contract_snapshot(),
 		"fire_sector_overlay": get_fire_sector_overlay_snapshot(),
 		"los_debug_overlay": get_los_debug_overlay_snapshot(),
+		"contact_density_heatmap": get_contact_density_heatmap_snapshot(),
 		"cover_effectiveness_readout": cover_effectiveness_readout,
 		"cover_effectiveness_text": String(cover_effectiveness_readout.get("readout_text", "")),
 		"fireteam_orientation_count": get_fireteam_orientation_snapshot().size(),
@@ -9888,6 +9925,7 @@ func _sync_primary_3d_order_visuals() -> void:
 			"fire_sector_visual_mode": "los_line_only",
 			"los_debug_overlay_enabled": _los_debug_overlay_enabled,
 			"los_debug_sample_limit": 24,
+			"contact_density_heatmap_enabled": _contact_density_heatmap_enabled,
 			"fireteam_anchors": _build_fireteam_anchor_visualization_entries(),
 			"plan_dicts": _serialize_order_plans(),
 			"waypoint_intent_preview_entries": _build_waypoint_intent_preview_entries(),

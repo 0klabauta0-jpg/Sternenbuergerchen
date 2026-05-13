@@ -3,7 +3,7 @@
 ## Ziel
 Eine optionale Contact-Density-Heatmap soll Regionen mit vielen bekannten oder zuletzt bekannten Kontakten auf der Uebersichtskarte sichtbar machen.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Sinnhaftigkeitscheck
 Der Review-Punkt ist als spaeterer Awareness-Layer sinnvoll, aber niedriger priorisiert. Wegen Fog of War darf die Heatmap nur bekannte, sichtbare oder freigegebene Last-Known-Kontakte verwenden.
@@ -22,11 +22,17 @@ Contact-Tracker und FoW speichern Contact-Informationen, aggregieren sie aber ni
 - Snapshot-Zaehler fuer Heat-Zellen und Quellen.
 
 ## Akzeptanzkriterien
-- [ ] Heatmap zeigt nur erlaubte Contact-Quellen.
-- [ ] Aggregation ist bounded und aktualisiert nicht in jedem Frame.
-- [ ] Toggle schaltet den Layer ohne Kontakt-State-Mutation.
-- [ ] Mindestens zwei Contact-Cluster werden im Verifier unterscheidbar.
-- [ ] Keine unsichtbaren Feinde werden durch Heatmap enttarnt.
+- [x] Heatmap zeigt nur erlaubte Contact-Quellen.
+- [x] Aggregation ist bounded und aktualisiert nicht in jedem Frame.
+- [x] Toggle schaltet den Layer ohne Kontakt-State-Mutation.
+- [x] Mindestens zwei Contact-Cluster werden im Verifier unterscheidbar.
+- [x] Keine unsichtbaren Feinde werden durch Heatmap enttarnt.
+
+## Umsetzung
+- `ContactDensityOverlay` aggregiert erlaubte Contact-Snapshots in bounded Heat-Zellen. Kontakte werden pro Target dedupliziert und nach World-Cell gebucketed.
+- `FogOfWarSystem.filter_contact_density_sources_for_team()` liefert nur sichtbare aktuelle Kontakte plus aufgezeichnete Last-Known-Kontakte und gibt versteckte Kontakte nur als Count aus.
+- `TerrainMap3DView` zeichnet den optionalen Heatmap-Layer in einem separaten Root, nutzt ein Update-Intervall statt Frame-Rebuilds und exportiert Source-/Hidden-/Heat-Cell-Zaehler im Render-Snapshot.
+- `MissionTacticalSandboxController` reicht einen read-only Toggle an die Primary3D-Order-Payload weiter und meldet den Heatmap-Snapshot im Command-Feedback.
 
 ## Erwartete Dateien
 - `scripts/core/fog_of_war_system.gd`
@@ -35,10 +41,10 @@ Contact-Tracker und FoW speichern Contact-Informationen, aggregieren sie aber ni
 - `scripts/tests/task_377_contact_density_heat_map_layer.gd`
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_377_contact_density_heat_map_layer.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_286_ui_feedback_truth_regression_review.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_377_contact_density_heat_map_layer.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_286_ui_feedback_truth_regression_review.gd`
+- [x] `git diff --check`
 
 ## Risiken / offene Punkte
 - Die Heatmap kann taktische Spannung aus FoW nehmen. Default sollte aus oder nur fuer passende Intel-Modi sichtbar sein.
-
+- Manueller Sichtcheck bleibt offen, weil Headless nur Snapshot, Toggle, Bounding und FoW-Sanitization bewertet.

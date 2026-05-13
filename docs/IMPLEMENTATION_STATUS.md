@@ -263,10 +263,19 @@
 - Lokale Pruefung: `task_376_command_validation_bubble.gd`, `task_315_mission_grid_tile_selection_command_gate.gd`, `task_286_ui_feedback_truth_regression_review.gd` und `git diff --check` laufen gruen.
 - Offene Folgearbeit: Finale optische Position/Lesbarkeit der HUD-Bubbles bleibt ein manueller Mission-HUD-Sichtcheck.
 
-### TASK_377-TASK_380 - Mission Visualization Review Followups
+### TASK_377 - Contact Density Heat Map Layer
+- Status: implementiert
+- Stand: `ContactDensityOverlay` aggregiert erlaubte Contact-Snapshots bounded in Heat-Zellen. Kontakte werden pro Target dedupliziert und nach World-Cell gebucketed.
+- Stand: `FogOfWarSystem.filter_contact_density_sources_for_team()` liefert nur sichtbare aktuelle Kontakte plus aufgezeichnete Last-Known-Kontakte und gibt versteckte Kontakte nur als Count aus.
+- Stand: `TerrainMap3DView` zeichnet den optionalen Heatmap-Layer in einem separaten Root, nutzt ein Update-Intervall statt Frame-Rebuilds und exportiert Heat-Cell-, Source-, Last-Known- und FoW-Hidden-Zaehler im Render-Snapshot.
+- Stand: `mission_tactical_sandbox_controller.gd` reicht den read-only Toggle an die Primary3D-Order-Payload weiter und meldet den Heatmap-Snapshot im Command-Feedback.
+- Lokale Pruefung: `task_377_contact_density_heat_map_layer.gd`, `task_286_ui_feedback_truth_regression_review.gd` und `git diff --check` laufen gruen.
+- Offene Folgearbeit: Manueller Sichtcheck fuer Lesbarkeit/Overload bleibt offen; der Layer bleibt default aus.
+
+### TASK_378-TASK_380 - Mission Visualization Review Followups
 - Status: geplant
-- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Sinnvolle offene Follow-ups sind als getrennte Tasks 377 bis 380 angelegt.
-- Stand: Die Review-Snippets werden nicht ungeprueft uebernommen. Contact-Heatmap und MapEditor-Debuglayer bleiben als eigene kleine Slices offen.
+- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Sinnvolle offene Follow-ups sind als getrennte Tasks 378 bis 380 angelegt.
+- Stand: Die Review-Snippets werden nicht ungeprueft uebernommen. MapEditor-Debuglayer bleiben als eigene kleine Slices offen.
 - Stand: Architekturgrenze bleibt: UI liest nur Snapshots. `SimulationRoot`, bestehende Resolver, `TacticalCommunicationEvent`, `FireteamBehaviorResolver`, `FireteamOrderVisualizer`, FoW und Terrain-Daten bleiben die Wahrheit.
 - Offene Punkte: Implementierung der einzelnen Tasks und manuelle Sichtpruefung nach weiteren Visual-Slices.
 - Risiken: Visual-Dichte kann Mission-HUD und FoW schnell ueberladen. Die Tasks markieren Debug-/optional-Layer getrennt von permanenten Spieleranzeigen.

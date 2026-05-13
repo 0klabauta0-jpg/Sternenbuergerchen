@@ -7,6 +7,7 @@ const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd"
 const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
 const FOG_OF_WAR_MODE_CONTRACT_SCRIPT: GDScript = preload("res://scripts/core/fog_of_war_mode_contract.gd")
 const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_event_bus.gd")
+const CONTACT_DENSITY_OVERLAY_SCRIPT: GDScript = preload("res://scripts/tactical/visuals/contact_density_overlay.gd")
 
 const VIEWPORT_CONTAINER_NAME: String = "ViewportContainer"
 const VIEWPORT_NAME: String = "SubViewport"
@@ -19,6 +20,7 @@ const SELECTION_ROOT_NAME: String = "SelectionRoot3D"
 const UNIT_ROOT_NAME: String = "UnitRoot3D"
 const ORDER_ROOT_NAME: String = "OrderRoot3D"
 const CONTACT_ROOT_NAME: String = "ContactRoot3D"
+const CONTACT_DENSITY_ROOT_NAME: String = "ContactDensityRoot3D"
 const DROP_ROOT_NAME: String = "DropRoot3D"
 const STATUS_ROOT_NAME: String = "StatusRoot3D"
 const FEEDBACK_BUBBLE_HUD_ROOT_NAME: String = "FeedbackBubbleHudRoot"
@@ -38,6 +40,11 @@ const RENDER_MONITOR_NAMES: PackedStringArray = [
 	"PIPELINE_COMPILATIONS_DRAW",
 	"PIPELINE_COMPILATIONS_SPECIALIZATION",
 ]
+const CONTACT_DENSITY_UPDATE_INTERVAL_MSEC: int = 250
+const CONTACT_DENSITY_CELL_SIZE_WORLD: float = 128.0
+const CONTACT_DENSITY_MAX_SOURCE_CONTACTS: int = 96
+const CONTACT_DENSITY_MAX_HEAT_CELLS: int = 48
+
 
 const TERRAIN_3D_MAPPING_PATH: String = "res://data/terrain_3d_asset_mapping.json"
 const TERRAIN_SURFACE_VISUAL_THEME_CATALOG_PATH: String = "res://data/terrain_surface_visual_theme_catalog.json"
@@ -217,6 +224,7 @@ var _selection_root: Node3D = null
 var _unit_root: Node3D = null
 var _order_root: Node3D = null
 var _contact_root: Node3D = null
+var _contact_density_root: Node3D = null
 var _drop_root: Node3D = null
 var _status_root: Node3D = null
 var _camera: Camera3D = null
@@ -396,6 +404,17 @@ var _resolved_lz_marker_count: int = 0
 var _tile_grid_line_count: int = 0
 var _contact_count: int = 0
 var _contact_visual_entries: Array = []
+var _contact_density_overlay_enabled: bool = false
+var _contact_density_overlay = CONTACT_DENSITY_OVERLAY_SCRIPT.new()
+var _contact_density_entries: Array = []
+var _contact_density_source_count: int = 0
+var _contact_density_current_source_count: int = 0
+var _contact_density_last_known_source_count: int = 0
+var _contact_density_fow_hidden_count: int = 0
+var _contact_density_rebuild_count: int = 0
+var _contact_density_skipped_interval_count: int = 0
+var _contact_density_last_rebuild_msec: int = 0
+var _contact_density_last_signature: String = ""
 var _objective_status_visible: bool = false
 var _mission_result_visible: bool = false
 var _continuous_redraw_until_msec: int = 0
@@ -455,6 +474,7 @@ func render_map(terrain_map_data = null) -> void:
 	_clear_children(_selection_root)
 	_clear_children(_order_root)
 	_clear_children(_contact_root)
+	_clear_children(_contact_density_root)
 	_clear_children(_drop_root)
 	_clear_children(_feedback_bubble_hud_root)
 	_render_tile_by_grid.clear()
@@ -583,6 +603,10 @@ func set_order_visual_payload(order_payload: Dictionary) -> void:
 		return
 	_order_visual_signature = next_signature
 	_order_payload = order_payload.duplicate(true)
+	if _order_payload.has("contact_density_heatmap_enabled"):
+		var contact_density_enabled: bool = bool(_order_payload.get("contact_density_heatmap_enabled", false))
+		if contact_density_enabled != _contact_density_overlay_enabled:
+			_set_contact_density_heatmap_enabled_internal(contact_density_enabled, true)
 	_order_dynamic_visual_signature = _build_order_dynamic_visual_signature()
 	_rebuild_order_visuals()
 	_request_viewport_redraw()
@@ -699,10 +723,44 @@ func set_contact_entries(contact_entries: Array, selected_fireteam_ids: PackedSt
 			_contact_entries.append(Dictionary(entry_variant).duplicate(true))
 	_contact_selected_fireteam_ids = selected_fireteam_ids.duplicate()
 	_rebuild_contact_visuals()
+	_rebuild_contact_density_heatmap(false)
 	if bool(_order_payload.get("los_debug_overlay_enabled", false)):
 		_order_dynamic_visual_signature = _build_order_dynamic_visual_signature()
 		_rebuild_order_visuals()
 	_request_viewport_redraw()
+
+
+func set_contact_density_heatmap_enabled(enabled: bool) -> void:
+	if _set_contact_density_heatmap_enabled_internal(enabled, true):
+		_request_viewport_redraw()
+
+
+func get_contact_density_heatmap_snapshot() -> Dictionary:
+	return {
+		"enabled": _contact_density_overlay_enabled,
+		"heat_cell_count": _contact_density_entries.size(),
+		"heat_cells": _contact_density_entries.duplicate(true),
+		"source_contact_count": _contact_density_source_count,
+		"current_source_count": _contact_density_current_source_count,
+		"last_known_source_count": _contact_density_last_known_source_count,
+		"fow_hidden_count": _contact_density_fow_hidden_count,
+		"rebuild_count": _contact_density_rebuild_count,
+		"skipped_interval_count": _contact_density_skipped_interval_count,
+		"last_rebuild_msec": _contact_density_last_rebuild_msec,
+		"update_interval_msec": CONTACT_DENSITY_UPDATE_INTERVAL_MSEC,
+		"cell_size_world": CONTACT_DENSITY_CELL_SIZE_WORLD,
+		"visual_only": true,
+		"ui_sets_gameplay_truth": false,
+		"fow_policy": "current_or_last_known_contacts_after_visual_fow_filter",
+	}
+
+
+func _set_contact_density_heatmap_enabled_internal(enabled: bool, force_rebuild: bool = false) -> bool:
+	if _contact_density_overlay_enabled == enabled and not force_rebuild:
+		return false
+	_contact_density_overlay_enabled = enabled
+	_rebuild_contact_density_heatmap(true)
+	return true
 
 
 func set_fog_of_war_state(fog_of_war_state: Dictionary) -> void:
@@ -715,6 +773,7 @@ func set_fog_of_war_state(fog_of_war_state: Dictionary) -> void:
 	_rebuild_fog_of_war_visuals()
 	_rebuild_order_visuals()
 	_rebuild_contact_visuals()
+	_rebuild_contact_density_heatmap(true)
 	_rebuild_drop_visuals()
 	_sync_unit_proxies(true)
 	_request_viewport_redraw()
@@ -1118,6 +1177,17 @@ func get_render_snapshot() -> Dictionary:
 		"tile_grid_line_count": _tile_grid_line_count,
 		"contact_count": _contact_count,
 		"contact_entries": _get_contact_visual_entries(),
+		"contact_density_heatmap": get_contact_density_heatmap_snapshot(),
+		"contact_density_heatmap_enabled": _contact_density_overlay_enabled,
+		"contact_density_heat_cell_count": _contact_density_entries.size(),
+		"contact_density_heat_cells": _contact_density_entries.duplicate(true),
+		"contact_density_source_contact_count": _contact_density_source_count,
+		"contact_density_current_source_count": _contact_density_current_source_count,
+		"contact_density_last_known_source_count": _contact_density_last_known_source_count,
+		"contact_density_fow_hidden_count": _contact_density_fow_hidden_count,
+		"contact_density_rebuild_count": _contact_density_rebuild_count,
+		"contact_density_update_interval_msec": CONTACT_DENSITY_UPDATE_INTERVAL_MSEC,
+		"contact_density_skipped_interval_count": _contact_density_skipped_interval_count,
 		"objective_status_visible": _objective_status_visible,
 		"objective_capture_progress": float(_mission_status_payload.get("objective_capture_progress", 0.0)),
 		"mission_result_visible": _mission_result_visible,
@@ -1404,6 +1474,7 @@ func _ensure_nodes() -> void:
 	_selection_root = _ensure_node3d(_world_root, SELECTION_ROOT_NAME)
 	_unit_root = _ensure_node3d(_world_root, UNIT_ROOT_NAME)
 	_order_root = _ensure_node3d(_world_root, ORDER_ROOT_NAME)
+	_contact_density_root = _ensure_node3d(_world_root, CONTACT_DENSITY_ROOT_NAME)
 	_contact_root = _ensure_node3d(_world_root, CONTACT_ROOT_NAME)
 	_drop_root = _ensure_node3d(_world_root, DROP_ROOT_NAME)
 	_status_root = _ensure_node3d(_world_root, STATUS_ROOT_NAME)
@@ -4667,6 +4738,139 @@ func _get_movement_bound_marker_fill(style: String) -> float:
 			return 0.9
 
 
+func _rebuild_contact_density_heatmap(force_rebuild: bool = false) -> void:
+	if _contact_density_root == null:
+		return
+	if not _contact_density_overlay_enabled:
+		_reset_contact_density_heatmap(true)
+		return
+	var source_snapshot: Dictionary = _build_contact_density_allowed_source_snapshot()
+	var signature: String = _build_contact_density_source_signature(source_snapshot)
+	var now_msec: int = Time.get_ticks_msec()
+	var source_count: int = int(source_snapshot.get("current_source_count", 0)) + int(source_snapshot.get("last_known_source_count", 0))
+	var first_non_empty_source: bool = _contact_density_entries.is_empty() and source_count > 0
+	var source_cleared: bool = _contact_density_source_count > 0 and source_count == 0
+	if not force_rebuild and signature == _contact_density_last_signature:
+		return
+	if not force_rebuild and not first_non_empty_source and not source_cleared and _contact_density_last_rebuild_msec > 0 and now_msec - _contact_density_last_rebuild_msec < CONTACT_DENSITY_UPDATE_INTERVAL_MSEC:
+		_contact_density_skipped_interval_count += 1
+		return
+	var heat_snapshot: Dictionary = Dictionary(_contact_density_overlay.call("build_heat_cells", Array(source_snapshot.get("source_entries", [])), {
+		"enabled": _contact_density_overlay_enabled,
+		"cell_size_world": CONTACT_DENSITY_CELL_SIZE_WORLD,
+		"max_source_contacts": CONTACT_DENSITY_MAX_SOURCE_CONTACTS,
+		"max_heat_cells": CONTACT_DENSITY_MAX_HEAT_CELLS,
+	}))
+	_contact_density_last_signature = signature
+	_contact_density_last_rebuild_msec = now_msec
+	_contact_density_rebuild_count += 1
+	_contact_density_source_count = int(heat_snapshot.get("source_contact_count", 0))
+	_contact_density_current_source_count = int(source_snapshot.get("current_source_count", 0))
+	_contact_density_last_known_source_count = int(source_snapshot.get("last_known_source_count", 0))
+	_contact_density_fow_hidden_count = int(source_snapshot.get("fow_hidden_count", 0))
+	_contact_density_entries = Array(heat_snapshot.get("heat_cells", [])).duplicate(true)
+	_clear_children(_contact_density_root)
+	for cell_variant in _contact_density_entries:
+		if typeof(cell_variant) == TYPE_DICTIONARY:
+			_add_contact_density_cell_visual(Dictionary(cell_variant))
+
+
+func _reset_contact_density_heatmap(clear_visual: bool = false) -> void:
+	_contact_density_entries.clear()
+	_contact_density_source_count = 0
+	_contact_density_current_source_count = 0
+	_contact_density_last_known_source_count = 0
+	_contact_density_fow_hidden_count = 0
+	_contact_density_last_signature = ""
+	if clear_visual:
+		_clear_children(_contact_density_root)
+
+
+func _build_contact_density_allowed_source_snapshot() -> Dictionary:
+	var selected_lookup: Dictionary = _build_contact_selected_fireteam_lookup()
+	var source_entries: Array = []
+	var current_source_count: int = 0
+	var last_known_source_count: int = 0
+	var fow_hidden_count: int = 0
+	for contact_variant in _build_contact_source_entries_with_last_known():
+		if typeof(contact_variant) != TYPE_DICTIONARY:
+			continue
+		var contact: Dictionary = Dictionary(contact_variant).duplicate(true)
+		var fireteam_id: String = String(contact.get("fireteam_id", "")).strip_edges().to_lower()
+		if not selected_lookup.is_empty() and not selected_lookup.has(fireteam_id):
+			continue
+		if not _fow_allows_contact_visual(contact):
+			fow_hidden_count += 1
+			continue
+		var position_variant = contact.get("last_known_position", contact.get("position", null))
+		if typeof(position_variant) != TYPE_VECTOR2:
+			continue
+		contact["last_known_position"] = Vector2(position_variant)
+		contact["grid_position"] = _world_to_grid_position(Vector2(position_variant))
+		contact["visual_only"] = true
+		contact["ui_sets_gameplay_truth"] = false
+		if bool(contact.get("fow_last_known", false)):
+			last_known_source_count += 1
+		else:
+			current_source_count += 1
+		source_entries.append(contact)
+	return {
+		"source_entries": source_entries,
+		"current_source_count": current_source_count,
+		"last_known_source_count": last_known_source_count,
+		"fow_hidden_count": fow_hidden_count,
+		"selected_fireteam_ids": Array(_contact_selected_fireteam_ids),
+		"fow_policy": "current_or_last_known_contacts_after_visual_fow_filter",
+	}
+
+
+func _build_contact_density_source_signature(source_snapshot: Dictionary) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	parts.append("enabled:%s" % str(_contact_density_overlay_enabled))
+	parts.append("fow:%s:%s" % [_fog_of_war_mode, _fog_of_war_team_id])
+	parts.append("selected:%s" % ",".join(_contact_selected_fireteam_ids))
+	parts.append("hidden:%d" % int(source_snapshot.get("fow_hidden_count", 0)))
+	var contact_parts: PackedStringArray = PackedStringArray()
+	for contact_variant in Array(source_snapshot.get("source_entries", [])):
+		if typeof(contact_variant) != TYPE_DICTIONARY:
+			continue
+		var contact: Dictionary = Dictionary(contact_variant)
+		var position: Vector2 = Vector2(contact.get("last_known_position", Vector2.ZERO))
+		contact_parts.append("%s:%s:%s:%.1f,%.1f:%s" % [
+			String(contact.get("target_id", contact.get("unit_id", ""))).strip_edges(),
+			String(contact.get("fireteam_id", "")).strip_edges().to_lower(),
+			String(contact.get("detection_state", "")).strip_edges().to_lower(),
+			position.x,
+			position.y,
+			str(bool(contact.get("fow_last_known", false))),
+		])
+	contact_parts.sort()
+	parts.append("contacts:%s" % "|".join(contact_parts))
+	return "\n".join(parts)
+
+
+func _add_contact_density_cell_visual(cell: Dictionary) -> void:
+	var center_variant = cell.get("center_position", null)
+	if typeof(center_variant) != TYPE_VECTOR2:
+		return
+	var center_position: Vector2 = Vector2(center_variant)
+	var intensity: float = clampf(float(cell.get("intensity", 0.0)), 0.0, 1.0)
+	var contact_count: int = maxi(int(cell.get("contact_count", 0)), 0)
+	if contact_count <= 0:
+		return
+	var grid_position: Vector2i = _world_to_grid_position(center_position)
+	var color: Color = _get_contact_density_heat_color(intensity, contact_count)
+	if _add_tile_marker(_contact_density_root, grid_position, color, "ContactDensity_%s" % _sanitize_node_name(String(cell.get("cell_key", ""))), 0.026, clampf(0.56 + intensity * 0.36, 0.56, 0.94)):
+		if contact_count >= 2:
+			_add_label3d(_contact_density_root, "HOT %d" % contact_count, _world_to_surface_3d_position(center_position, 0.46), "ContactDensityLabel_%s" % _sanitize_node_name(String(cell.get("cell_key", ""))), color.lightened(0.22), 10)
+
+
+func _get_contact_density_heat_color(intensity: float, contact_count: int) -> Color:
+	var clamped_intensity: float = clampf(intensity, 0.0, 1.0)
+	var alpha: float = clampf(0.16 + clamped_intensity * 0.34 + minf(float(contact_count), 4.0) * 0.025, 0.18, 0.58)
+	return Color(1.0, 0.30 + clamped_intensity * 0.32, 0.08, alpha)
+
+
 func _rebuild_contact_visuals() -> void:
 	_clear_children(_contact_root)
 	_contact_count = 0
@@ -4675,28 +4879,8 @@ func _rebuild_contact_visuals() -> void:
 	_fow_allowed_contact_count = 0
 	if _contact_root == null:
 		return
-	var selected_lookup: Dictionary = {}
-	for fireteam_id_variant in _contact_selected_fireteam_ids:
-		selected_lookup[String(fireteam_id_variant).strip_edges().to_lower()] = true
-	var contact_source_entries: Array = _contact_entries.duplicate(true)
-	var current_contact_ids: Dictionary = {}
-	for current_variant in _contact_entries:
-		if typeof(current_variant) != TYPE_DICTIONARY:
-			continue
-		var current_contact: Dictionary = Dictionary(current_variant)
-		var current_id: String = String(current_contact.get("target_id", current_contact.get("unit_id", ""))).strip_edges()
-		if not current_id.is_empty():
-			current_contact_ids[current_id] = true
-	if _is_fog_of_war_visual_filter_active():
-		for last_known_variant in _fow_last_known_contacts:
-			if typeof(last_known_variant) != TYPE_DICTIONARY:
-				continue
-			var last_known_contact: Dictionary = Dictionary(last_known_variant)
-			var last_known_id: String = String(last_known_contact.get("target_id", last_known_contact.get("unit_id", ""))).strip_edges()
-			if last_known_id.is_empty() or current_contact_ids.has(last_known_id):
-				continue
-			contact_source_entries.append(last_known_contact)
-	for contact_variant in contact_source_entries:
+	var selected_lookup: Dictionary = _build_contact_selected_fireteam_lookup()
+	for contact_variant in _build_contact_source_entries_with_last_known():
 		if typeof(contact_variant) != TYPE_DICTIONARY:
 			continue
 		var contact: Dictionary = Dictionary(contact_variant)
@@ -4727,6 +4911,37 @@ func _rebuild_contact_visuals() -> void:
 			"enemy_profile_label": enemy_profile_label,
 		})
 		_contact_count += 1
+
+
+func _build_contact_selected_fireteam_lookup() -> Dictionary:
+	var selected_lookup: Dictionary = {}
+	for fireteam_id_variant in _contact_selected_fireteam_ids:
+		selected_lookup[String(fireteam_id_variant).strip_edges().to_lower()] = true
+	return selected_lookup
+
+
+func _build_contact_source_entries_with_last_known() -> Array:
+	var contact_source_entries: Array = _contact_entries.duplicate(true)
+	var current_contact_ids: Dictionary = {}
+	for current_variant in _contact_entries:
+		if typeof(current_variant) != TYPE_DICTIONARY:
+			continue
+		var current_contact: Dictionary = Dictionary(current_variant)
+		var current_id: String = String(current_contact.get("target_id", current_contact.get("unit_id", ""))).strip_edges()
+		if not current_id.is_empty():
+			current_contact_ids[current_id] = true
+	if _is_fog_of_war_visual_filter_active():
+		for last_known_variant in _fow_last_known_contacts:
+			if typeof(last_known_variant) != TYPE_DICTIONARY:
+				continue
+			var last_known_contact: Dictionary = Dictionary(last_known_variant).duplicate(true)
+			var last_known_id: String = String(last_known_contact.get("target_id", last_known_contact.get("unit_id", ""))).strip_edges()
+			if last_known_id.is_empty() or current_contact_ids.has(last_known_id):
+				continue
+			last_known_contact["fow_last_known"] = true
+			last_known_contact["detection_state"] = String(last_known_contact.get("detection_state", "lost")).strip_edges().to_lower()
+			contact_source_entries.append(last_known_contact)
+	return contact_source_entries
 
 
 func _rebuild_drop_visuals() -> void:
