@@ -214,9 +214,17 @@
 - Lokale Pruefung: `task_370_fireteam_member_health_status_row.gd`, `task_369_fireteam_status_card_enhancement.gd`, `task_368_ftl_readiness_gauge.gd`, `task_258_fixed_window_clipping_scrollbar_playability_audit.gd`, `task_286_ui_feedback_truth_regression_review.gd` und `git diff --check` laufen gruen.
 - Offene Folgearbeit: Manuelle Sichtpruefung der Farblesbarkeit bleibt sinnvoll, wenn weitere HUD-Layer aus TASK_371+ dazukommen.
 
-### TASK_371-TASK_380 - Mission Visualization Review Followups
+### TASK_371 - Fire Sector Security Arc Overlay Toggle
+- Status: implementiert
+- Stand: `FireteamOrderVisualizer` zeichnet Security-/Fire-Sektoren nur noch bei aktivem Overlay-Toggle und liefert `get_security_overlay_snapshot()` mit sichtbaren Entries, Selection-Filter, 360-/Sector-/Overwatch-Counts und Contact/FoW-Policy.
+- Stand: `mission_tactical_sandbox_controller.gd` synchronisiert `_fire_sector_overlay_enabled` in den 2D-Visualizer, spiegelt den Fire-Sector-Overlay-Snapshot im Command-Feedback und reicht den bestehenden 3D-LOS-Line-Modus weiter an `Primary3DView`.
+- Stand: 360-Sektoren werden im Visualizer als Kreis statt als volles TAU-Polygon gezeichnet, damit Godot keine Polygon-Triangulation-Warnungen ausgibt.
+- Lokale Pruefung: `task_371_fire_sector_security_arc_overlay_toggle.gd`, `bugfix_mission_fire_sector_overlay.gd`, `task_286_ui_feedback_truth_regression_review.gd` und `git diff --check` laufen gruen.
+- Offene Folgearbeit: Enemy-In-Sector-Hervorhebung bleibt an Contact/FoW-Sichtbarkeit gebunden und sollte erst mit den Contact-/LOS-Layern aus TASK_372+ weiter vertieft werden.
+
+### TASK_372-TASK_380 - Mission Visualization Review Followups
 - Status: geplant
-- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Sinnvolle Follow-ups sind als getrennte Tasks 371 bis 380 noch offen.
+- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Sinnvolle Follow-ups sind als getrennte Tasks 372 bis 380 noch offen.
 - Stand: Die Review-Snippets werden nicht ungeprueft uebernommen. Fireteam-Orientation, Event-Log, FTL-Gauge, Fireteam-Status, Member-Zeile, Fire-Sector, LOS, Cover, Countdown, Waypoint-Preview, Command-Validation, Contact-Heatmap und MapEditor-Debuglayer sind jeweils als eigene kleine Slices geschnitten.
 - Stand: Architekturgrenze bleibt: UI liest nur Snapshots. `SimulationRoot`, bestehende Resolver, `TacticalCommunicationEvent`, `FireteamBehaviorResolver`, `FireteamOrderVisualizer`, FoW und Terrain-Daten bleiben die Wahrheit.
 - Offene Punkte: Implementierung der einzelnen Tasks, genaue HUD-Platzierung fuer Event-Log/Statuskarten und manuelle Sichtpruefung nach den ersten Visual-Slices.

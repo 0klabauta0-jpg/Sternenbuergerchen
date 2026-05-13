@@ -30,6 +30,7 @@ var _visible_waypoints: Array = []
 var _visible_area_orders: Array = []
 var _ad_hoc_order_dicts: Array = []
 var _security_dicts: Array = []
+var _security_overlay_enabled: bool = false
 var _movement_state_dicts: Array = []
 var _fireteam_anchor_positions: Dictionary = {}
 var _fireteam_orientation_entries: Array = []
@@ -109,6 +110,17 @@ func set_security_dicts(security_dicts: Array) -> void:
 	queue_redraw()
 
 
+func set_security_overlay_enabled(enabled: bool) -> void:
+	if _security_overlay_enabled == enabled:
+		return
+	_security_overlay_enabled = enabled
+	queue_redraw()
+
+
+func is_security_overlay_enabled() -> bool:
+	return _security_overlay_enabled
+
+
 func set_movement_state_dicts(movement_state_dicts: Array) -> void:
 	_movement_state_dicts = []
 	for movement_variant in movement_state_dicts:
@@ -137,6 +149,41 @@ func get_fireteam_orientation_entries() -> Array:
 	for entry in _fireteam_orientation_entries:
 		result.append(Dictionary(entry).duplicate(true))
 	return result
+
+
+func get_security_overlay_snapshot() -> Dictionary:
+	var entries: Array = _build_security_overlay_entries()
+	var visible_entries: Array = []
+	var hidden_by_selection_count: int = 0
+	var mode_counts: Dictionary = {
+		"360": 0,
+		"sector": 0,
+		"overwatch_ready": 0,
+	}
+	for entry_variant in entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		if bool(entry.get("visible", false)):
+			visible_entries.append(entry.duplicate(true))
+			var mode: String = String(entry.get("security_mode", "")).strip_edges().to_lower()
+			if mode == "360":
+				mode_counts["360"] = int(mode_counts.get("360", 0)) + 1
+			else:
+				mode_counts["sector"] = int(mode_counts.get("sector", 0)) + 1
+			if bool(entry.get("overwatch_ready", false)):
+				mode_counts["overwatch_ready"] = int(mode_counts.get("overwatch_ready", 0)) + 1
+		elif bool(entry.get("hidden_by_selection", false)):
+			hidden_by_selection_count += 1
+	return {
+		"enabled": _security_overlay_enabled,
+		"selected_fireteam_ids": Array(_selected_fireteam_ids),
+		"source_security_count": _security_dicts.size(),
+		"visible_security_count": visible_entries.size(),
+		"hidden_by_selection_count": hidden_by_selection_count,
+		"mode_counts": mode_counts,
+		"entries": visible_entries,
+		"contact_visibility_policy": "enemy_highlights_require_contact_or_fow_visibility",
+		"read_only": true,
+	}
 
 
 func get_waypoint_hit(screen_position: Vector2, canvas_transform: Transform2D) -> Dictionary:
@@ -173,7 +220,8 @@ func _draw() -> void:
 		_draw_plan(plan)
 	_draw_movement_states()
 	_draw_ad_hoc_orders()
-	_draw_security_states()
+	if _security_overlay_enabled:
+		_draw_security_states()
 
 
 func _draw_plan(plan) -> void:
@@ -356,6 +404,35 @@ func _draw_ad_hoc_orders() -> void:
 			draw_string(fallback_font, target_position + Vector2(14.0, -8.0), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 12, Color(0.95, 0.95, 0.95, 0.92))
 
 
+func _build_security_overlay_entries() -> Array:
+	var result: Array = []
+	for security_variant in _security_dicts:
+		if typeof(security_variant) != TYPE_DICTIONARY:
+			continue
+		var security_dict: Dictionary = Dictionary(security_variant)
+		var fireteam_id: String = String(security_dict.get("fireteam_id", "")).strip_edges().to_lower()
+		if fireteam_id.is_empty() or not bool(security_dict.get("is_active", false)):
+			continue
+		var selected: bool = _selected_fireteam_ids.is_empty() or _selected_fireteam_ids.has(fireteam_id)
+		var assignments: Array = Array(security_dict.get("member_assignments", []))
+		var security_mode: String = String(security_dict.get("security_mode", "")).strip_edges().to_lower()
+		if security_mode.is_empty():
+			security_mode = "sector" if not assignments.is_empty() else "unknown"
+		result.append({
+			"fireteam_id": fireteam_id,
+			"security_mode": security_mode,
+			"anchor_position": Vector2(security_dict.get("anchor_position", Vector2.ZERO)),
+			"assignment_count": assignments.size(),
+			"overwatch_ready": bool(security_dict.get("overwatch_ready", false)),
+			"overwatch_unit_ids": PackedStringArray(security_dict.get("overwatch_unit_ids", PackedStringArray())),
+			"visible": _security_overlay_enabled and selected,
+			"hidden_by_selection": _security_overlay_enabled and not selected,
+			"reduced_by_selection": false,
+			"contact_visibility_policy": "friendly_sector_only_enemy_highlight_requires_contact",
+		})
+	return result
+
+
 func _draw_security_states() -> void:
 	for security_dict in _security_dicts:
 		var fireteam_id: String = String(security_dict.get("fireteam_id", "")).strip_edges().to_lower()
@@ -455,6 +532,10 @@ func _build_movement_map_label(movement_state: Dictionary) -> String:
 
 
 func _draw_sector(origin: Vector2, center_angle: float, arc_width: float, radius: float, fill_color: Color) -> void:
+	if arc_width >= TAU - 0.001:
+		draw_circle(origin, radius, fill_color)
+		draw_arc(origin, radius, 0.0, TAU, 48, fill_color.lightened(0.18), 2.0)
+		return
 	var points: PackedVector2Array = [origin]
 	var start_angle: float = center_angle - (arc_width * 0.5)
 	var steps: int = maxi(int(ceil(arc_width / (PI / 12.0))), 2)

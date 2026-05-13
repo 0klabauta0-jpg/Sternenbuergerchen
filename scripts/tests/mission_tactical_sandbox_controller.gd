@@ -9333,6 +9333,32 @@ func get_visualized_area_orders_snapshot() -> Array:
 	return Array(visualizer.call("get_visible_area_orders"))
 
 
+func get_fire_sector_overlay_snapshot() -> Dictionary:
+	var visualizer := get_node_or_null("../FireteamOrderVisualizer")
+	var visualizer_snapshot: Dictionary = {}
+	if visualizer != null and visualizer.has_method("get_security_overlay_snapshot"):
+		visualizer_snapshot = Dictionary(visualizer.call("get_security_overlay_snapshot"))
+	var primary_snapshot: Dictionary = {}
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null and primary_3d_view.has_method("get_render_snapshot"):
+		var render_snapshot: Dictionary = Dictionary(primary_3d_view.call("get_render_snapshot"))
+		primary_snapshot = {
+			"enabled": bool(render_snapshot.get("friendly_fire_sector_overlay_enabled", false)),
+			"visual_count": int(render_snapshot.get("friendly_aim_visual_count", 0)),
+			"visual_mode": String(render_snapshot.get("friendly_fire_sector_visual_mode", "")),
+			"scan_mode": String(render_snapshot.get("friendly_fire_sector_scan_mode", "")),
+			"los_line_count": int(render_snapshot.get("friendly_fire_sector_los_line_count", 0)),
+		}
+	return {
+		"enabled": _fire_sector_overlay_enabled,
+		"selected_fireteam_ids": Array(_selected_fireteam_ids),
+		"visualizer": visualizer_snapshot,
+		"primary_3d": primary_snapshot,
+		"contact_visibility_policy": "enemy_highlights_require_contact_or_fow_visibility",
+		"read_only": true,
+	}
+
+
 func get_command_feedback_snapshot() -> Dictionary:
 	return {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -9355,6 +9381,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"multi_fireteam_plan_count": _serialize_multi_fireteam_plans().size(),
 		"visualized_waypoint_count": get_visualized_waypoints_snapshot().size(),
 		"visualized_area_order_count": get_visualized_area_orders_snapshot().size(),
+		"fire_sector_overlay": get_fire_sector_overlay_snapshot(),
 		"fireteam_orientation_count": get_fireteam_orientation_snapshot().size(),
 		"fireteam_orientations": get_fireteam_orientation_snapshot(),
 		"active_area_defense": get_active_area_defense_snapshot(),
@@ -9545,6 +9572,8 @@ func _refresh_order_visuals() -> void:
 	if visualizer.has_method("set_area_order_dicts"):
 		visualizer.call("set_area_order_dicts", _serialize_area_orders())
 	visualizer.call("set_ad_hoc_order_dicts", _build_ad_hoc_visualization_entries())
+	if visualizer.has_method("set_security_overlay_enabled"):
+		visualizer.call("set_security_overlay_enabled", _fire_sector_overlay_enabled)
 	visualizer.call("set_security_dicts", get_fireteam_security_snapshot())
 	if visualizer.has_method("set_movement_state_dicts"):
 		visualizer.call("set_movement_state_dicts", get_fireteam_movement_snapshot())
