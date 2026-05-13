@@ -582,6 +582,7 @@ TASK_380 - Terrain Adjacency Solver Indicator (implementiert)
 Phase 18ZM - Homebase Manual Test UX Polish
 TASK_381 - Homebase Fireteam Loadout Flightdeck Polish (implementiert)
 TASK_382 - Homebase Direct Mission Flightdeck Display (implementiert)
+TASK_383 - Homebase Flightdeck Fireteam Card Single Owner (implementiert)
 
 Batch-Empfehlung
 

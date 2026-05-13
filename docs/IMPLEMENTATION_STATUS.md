@@ -318,6 +318,12 @@
 - Lokale Pruefung: `task_382_homebase_direct_mission_flightdeck_display.gd`, `task_381_homebase_fireteam_loadout_flightdeck_polish.gd`, `task_354_homebase_direct_loadout_regression_matrix.gd`, `task_346_homebase_direct_staging_character_popup.gd`, `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd`, `task_258_fixed_window_clipping_scrollbar_playability_audit.gd` und `git diff --check` laufen gruen.
 - Offene Folgearbeit: Multi-Dropship-Payloads in der Homebase brauchen spaeter einen echten per-Craft-Payload-Store, falls mehrere Homebase-Dropships gleichzeitig beladen werden sollen.
 
+### TASK_383 - Homebase Flightdeck Fireteam Card Single Owner
+- Status: implementiert
+- Stand: Homebase-Fireteams, die in den Direct-Flightdeck-Payload gezogen wurden, verschwinden aus `#10 FIRETEAMS`. Entfernen aus dem Dropship bringt die Karte wieder in `#10` zurueck.
+- Stand: Dropship-Shipcards rendern Payload-Fireteams wieder als kompakte Fireteam-Karte statt nur als Textzeile. Die Karte zeigt Boarding-/Payload-Status, Member-Zeilen und Progressbars; der bestehende Homebase-Direct-Staging-State bleibt die einzige Datenwahrheit.
+- Lokale Pruefung: `task_383_homebase_flightdeck_fireteam_card_single_owner.gd`, `task_382_homebase_direct_mission_flightdeck_display.gd`, `task_381_homebase_fireteam_loadout_flightdeck_polish.gd`, `task_355_homebase_direct_ux_payload_truth.gd` und `git diff --check` laufen gruen.
+
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
 - Stand: Dropship-Visuals bauen ihre Dirty-Signatur wieder fehlerfrei, geplante LZs bleiben auch bei offmap/hidden Craft sichtbar, und Multi-Dropship-Payloads werden aus dem rohen Mission-Card-State statt aus stale Selected-Card-State uebernommen.

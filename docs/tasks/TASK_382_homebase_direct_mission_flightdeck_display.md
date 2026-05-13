@@ -25,6 +25,8 @@ Der Wunsch ist sinnvoll, weil #10 FIRETEAMS seit TASK_381 die Loadout-Bearbeitun
 - Homebase-Layout gibt den Platz von #13 an #10 FIRETEAMS und #05 FLIGHTDECK.
 - Shipcards bekommen eine `Mission`-Checkbox: aktiv = Send startet Mission, aus = Send bleibt FOB-Transfer.
 
+Hinweis: TASK_383 ersetzt die Payload-Zeile durch eine kompakte Fireteam-Karte mit Boarding-/Member-Fortschritt und sorgt dafuer, dass die geboardete Karte nicht mehr parallel in `#10 FIRETEAMS` steht.
+
 ## Akzeptanzkriterien
 - [x] Ein auf eine Dropship-Shipcard gedropptes Fireteam erscheint auf derselben Shipcard.
 - [x] `payload_craft_id` zeigt auf die gedroppte Shipcard.

@@ -50,8 +50,9 @@ func _test_fireteam_cards_distinguish_homebase_loadout_and_payload() -> void:
 	await process_frame
 	await process_frame
 
-	var ft1_card := _find_fireteam_card(screen, "ft1")
+	var ft1_card := _find_payload_fireteam_card(screen, "ft1")
 	ft2_card = _find_fireteam_card(screen, "ft2")
+	_assert(_find_fireteam_card(screen, "ft1") == null, "Boarded fireteam card leaves #10 and lives on the Flightdeck")
 	_assert(String(ft1_card.get_meta("homebase_direct_payload_status", "")).strip_edges() == "boarded", "Boarded fireteam card marks the Flightdeck payload")
 	_assert(bool(ft1_card.get_meta("homebase_direct_payload_boarded", false)), "Boarded fireteam card exposes payload truth metadata")
 	_assert(_stage_text(ft1_card).contains("Boarded / Flightdeck"), "Boarded fireteam card uses the Flightdeck badge")
@@ -97,7 +98,7 @@ func _test_blocked_payload_keeps_blocker_and_operator_truth() -> void:
 
 	var snapshot: Dictionary = Dictionary(screen.call("get_homebase_direct_staging_snapshot"))
 	var direct_status_label := _direct_status_label(screen)
-	var ft1_card := _find_fireteam_card(screen, "ft1")
+	var ft1_card := _find_payload_fireteam_card(screen, "ft1")
 
 	_assert(String(snapshot.get("homebase_direct_craft_block_reason", "")).strip_edges() == "no_homebase_craft", "Blocked snapshot preserves the missing-craft reason")
 	_assert(not bool(snapshot.get("drop_ship_staged", true)), "Blocked Flightdeck queue is not exported as boarded payload")
@@ -105,6 +106,7 @@ func _test_blocked_payload_keeps_blocker_and_operator_truth() -> void:
 	_assert(Array(snapshot.get("embarked_unit_ids", [])).is_empty(), "Blocked Flightdeck queue has no embarked units")
 	_assert(direct_status_label != null and direct_status_label.text.contains("2 operators / 1 fireteam"), "Blocked Flightdeck status keeps operator count visible")
 	_assert(direct_status_label != null and direct_status_label.text.contains("Add a dropship"), "Blocked Flightdeck status keeps the blocker text visible")
+	_assert(_find_fireteam_card(screen, "ft1") == null, "Blocked Flightdeck queue also removes the card from #10")
 	_assert(String(ft1_card.get_meta("homebase_direct_payload_status", "")).strip_edges() == "blocked", "Blocked fireteam card does not report boarded")
 	_assert(not bool(ft1_card.get_meta("homebase_direct_payload_boarded", true)), "Blocked fireteam metadata stays unboarded")
 	_assert(_stage_text(ft1_card).contains("Blocked: no dropship"), "Blocked fireteam card shows the no-dropship badge")
@@ -175,6 +177,28 @@ func _find_fireteam_card(screen: Control, fireteam_id: String) -> Control:
 		if child.has_method("get_fireteam_id") and String(child.call("get_fireteam_id")).strip_edges() == fireteam_id:
 			return child as Control
 	return null
+
+
+func _find_payload_fireteam_card(screen: Control, fireteam_id: String) -> Control:
+	var aircraft_panel := screen.get_node_or_null("Panel/Margin/VBox/ContentRow/AircraftPanel") as Control
+	if aircraft_panel == null:
+		return null
+	for node in _collect_nodes(aircraft_panel):
+		if node is Control \
+			and bool((node as Control).get_meta("homebase_shipcard_payload_fireteam_card", false)) \
+			and String((node as Control).get_meta("fireteam_id", "")).strip_edges() == fireteam_id:
+			return node as Control
+	return null
+
+
+func _collect_nodes(root_node: Node) -> Array:
+	var nodes: Array = []
+	if root_node == null:
+		return nodes
+	nodes.append(root_node)
+	for child in root_node.get_children():
+		nodes.append_array(_collect_nodes(child))
+	return nodes
 
 
 func _stage_text(card: Control) -> String:

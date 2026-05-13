@@ -1291,6 +1291,7 @@ func _render_homebase_fireteams() -> void:
 		fireteam_list.add_child(_build_empty_state_label("No fireteams available."))
 		return
 
+	var rendered_fireteam_count := 0
 	for definition_variant in _fireteam_definitions:
 		if typeof(definition_variant) != TYPE_DICTIONARY:
 			continue
@@ -1298,11 +1299,16 @@ func _render_homebase_fireteams() -> void:
 		var fireteam_id: String = _normalize_fireteam_id(String(definition.get("id", "")))
 		if fireteam_id.is_empty():
 			continue
+		if _is_homebase_fireteam_in_flightdeck_payload(fireteam_id):
+			continue
 		var fireteam_card: FOBFireteamCard = _create_homebase_fireteam_card(fireteam_id, "fireteam_list")
 		if fireteam_card == null:
 			continue
 		fireteam_list.add_child(fireteam_card)
+		rendered_fireteam_count += 1
 		_render_homebase_fireteam_members(fireteam_card.get_member_host(), fireteam_id, String(definition.get("lead_unit_id", "")).strip_edges())
+	if rendered_fireteam_count == 0:
+		fireteam_list.add_child(_build_empty_state_label("All fireteam cards are currently on the Flightdeck payload."))
 
 
 func _create_homebase_fireteam_card(fireteam_id: String, source_context: String = "fireteam_list") -> FOBFireteamCard:
@@ -1597,39 +1603,99 @@ func _update_homebase_flightdeck_staging_panel() -> void:
 	if _homebase_dropship_staged_fireteam_ids.is_empty():
 		list.add_child(_build_empty_state_label("Drop fireteam cards here to board the selected dropship."))
 		return
+	if not _get_homebase_direct_payload_craft_id().is_empty():
+		list.add_child(_build_empty_state_label("Payload fireteam cards are shown on the assigned dropship card."))
+		return
 	for fireteam_id in _filter_existing_fireteam_ids(_homebase_dropship_staged_fireteam_ids):
-		list.add_child(_build_homebase_dropship_fireteam_row(String(fireteam_id)))
+		var fireteam_card := _build_homebase_dropship_fireteam_card(String(fireteam_id), _get_homebase_direct_payload_craft_id(), "homebase_dropship_staging")
+		if fireteam_card != null:
+			list.add_child(fireteam_card)
 
 
-func _build_homebase_dropship_fireteam_row(fireteam_id: String) -> Control:
-	var row := HBoxContainer.new()
-	row.name = "DirectDropshipFireteam_%s" % fireteam_id
-	row.add_theme_constant_override("separation", 4)
-	var craft_gate: Dictionary = _get_homebase_direct_staging_craft_gate()
-	var status: Dictionary = _build_homebase_fireteam_payload_status(fireteam_id, "homebase_dropship", craft_gate)
-	row.set_meta("homebase_direct_payload_row", true)
-	row.set_meta("fireteam_id", fireteam_id)
-	row.set_meta("homebase_direct_payload_status", String(status.get("status", "")).strip_edges())
-	row.set_meta("homebase_direct_payload_operator_count", int(status.get("operator_count", 0)))
-	row.set_meta("homebase_direct_payload_boarded", bool(status.get("boarded", false)))
-	row.set_meta("homebase_direct_payload_block_reason", String(status.get("block_reason", "")).strip_edges())
-	var label := Label.new()
-	label.text = "%s | %s" % [_get_fireteam_label(fireteam_id), String(status.get("visible_text", "")).strip_edges()]
-	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	label.add_theme_font_size_override("font_size", 9)
-	META_UI_SKIN_SCRIPT.style_body_label(label, 9)
-	label.set_meta("homebase_direct_payload_status", String(status.get("status", "")).strip_edges())
-	label.set_meta("homebase_direct_payload_operator_count", int(status.get("operator_count", 0)))
-	label.set_meta("homebase_direct_payload_boarded", bool(status.get("boarded", false)))
-	label.tooltip_text = String(status.get("tooltip_text", "")).strip_edges()
-	row.add_child(label)
-	var remove_button := Button.new()
-	remove_button.text = "x"
-	remove_button.custom_minimum_size = Vector2(28.0, 24.0)
-	META_UI_SKIN_SCRIPT.style_secondary_button(remove_button)
-	remove_button.pressed.connect(_on_homebase_dropship_fireteam_remove_pressed.bind(fireteam_id))
-	row.add_child(remove_button)
-	return row
+func _build_homebase_dropship_fireteam_card(fireteam_id: String, craft_id: String, source_context: String = "dropship_wait") -> Control:
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	if normalized_fireteam_id.is_empty():
+		return null
+	var card: FOBFireteamCard = _create_homebase_fireteam_card(normalized_fireteam_id, source_context)
+	if card == null:
+		return null
+	card.custom_minimum_size = Vector2(280.0, card.custom_minimum_size.y)
+	card.set_meta("homebase_shipcard_payload_row", true)
+	card.set_meta("homebase_shipcard_payload_fireteam_card", true)
+	card.set_meta("craft_id", craft_id.strip_edges())
+	card.set_meta("fireteam_id", normalized_fireteam_id)
+	card.set_meta("homebase_fireteam_single_visual_owner", "flightdeck")
+	var craft_gate: Dictionary = _get_homebase_direct_staging_craft_gate() if craft_id.strip_edges().is_empty() else _build_homebase_direct_staging_craft_gate_for_craft(craft_id)
+	var status: Dictionary = _build_homebase_fireteam_payload_status(normalized_fireteam_id, HOMEBASE_DIRECT_STAGING_DROP_KIND, craft_gate)
+	card.set_meta("homebase_direct_payload_status", String(status.get("status", "")).strip_edges())
+	card.set_meta("homebase_direct_payload_operator_count", int(status.get("operator_count", 0)))
+	card.set_meta("homebase_direct_payload_boarded", bool(status.get("boarded", false)))
+	card.set_meta("homebase_direct_payload_block_reason", String(status.get("block_reason", "")).strip_edges())
+	card.set_meta("homebase_direct_payload_boarding_progress", _build_homebase_boarding_progress_value(normalized_fireteam_id, craft_gate))
+	_render_homebase_dropship_member_progress_rows(card.get_member_host(), normalized_fireteam_id, craft_gate)
+	return card
+
+
+func _render_homebase_dropship_member_progress_rows(container: VBoxContainer, fireteam_id: String, craft_gate: Dictionary) -> void:
+	if container == null:
+		return
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	var member_ids: PackedStringArray = _get_member_unit_ids_for_fireteam(normalized_fireteam_id)
+	var status_label := Label.new()
+	status_label.name = "HomebaseBoardingStatusLabel_%s" % normalized_fireteam_id
+	status_label.text = _build_homebase_boarding_progress_text(normalized_fireteam_id, craft_gate)
+	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	status_label.add_theme_font_size_override("font_size", 8)
+	status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	status_label.set_meta("homebase_shipcard_payload_progress_label", true)
+	status_label.set_meta("fireteam_id", normalized_fireteam_id)
+	status_label.set_meta("homebase_direct_payload_boarding_progress", _build_homebase_boarding_progress_value(normalized_fireteam_id, craft_gate))
+	META_UI_SKIN_SCRIPT.style_body_label(status_label, 8)
+	container.add_child(status_label)
+
+	for member_unit_id in member_ids:
+		var member_row := HBoxContainer.new()
+		member_row.name = "HomebaseBoardingMember_%s" % member_unit_id
+		member_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		member_row.add_theme_constant_override("separation", 4)
+		member_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		member_row.set_meta("homebase_shipcard_payload_member_row", true)
+		member_row.set_meta("fireteam_id", normalized_fireteam_id)
+		member_row.set_meta("unit_id", member_unit_id)
+		container.add_child(member_row)
+
+		var name_label := Label.new()
+		name_label.text = _build_display_name(member_unit_id)
+		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		name_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		name_label.clip_text = true
+		name_label.add_theme_font_size_override("font_size", 8)
+		name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		META_UI_SKIN_SCRIPT.style_body_label(name_label, 8)
+		member_row.add_child(name_label)
+
+		var state_label := Label.new()
+		state_label.text = _build_homebase_member_boarding_status_text(normalized_fireteam_id, member_unit_id, craft_gate)
+		state_label.custom_minimum_size = Vector2(54.0, 0.0)
+		state_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		state_label.add_theme_font_size_override("font_size", 8)
+		state_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		META_UI_SKIN_SCRIPT.style_body_label(state_label, 8)
+		member_row.add_child(state_label)
+
+		var progress_bar := ProgressBar.new()
+		progress_bar.name = "HomebaseBoardingProgress_%s" % member_unit_id
+		progress_bar.min_value = 0.0
+		progress_bar.max_value = 100.0
+		progress_bar.value = _build_homebase_member_boarding_progress_value(normalized_fireteam_id, member_unit_id, craft_gate)
+		progress_bar.show_percentage = false
+		progress_bar.custom_minimum_size = Vector2(0.0, 7.0)
+		progress_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		progress_bar.set_meta("homebase_shipcard_payload_member_progress", true)
+		progress_bar.set_meta("fireteam_id", normalized_fireteam_id)
+		progress_bar.set_meta("unit_id", member_unit_id)
+		progress_bar.set_meta("homebase_direct_payload_boarding_progress", progress_bar.value)
+		container.add_child(progress_bar)
 
 
 func _render_team_transfer_ghost_cards(selected_team_list: VBoxContainer) -> void:
@@ -3154,6 +3220,42 @@ func _get_homebase_direct_payload_operator_count() -> int:
 	return _build_unit_ids_for_fireteams(_get_homebase_direct_payload_fireteam_ids()).size()
 
 
+func _is_homebase_fireteam_in_flightdeck_payload(fireteam_id: String) -> bool:
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	return not normalized_fireteam_id.is_empty() and _get_homebase_direct_payload_fireteam_ids().has(normalized_fireteam_id)
+
+
+func _build_homebase_boarding_progress_value(fireteam_id: String, craft_gate: Dictionary) -> float:
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	if normalized_fireteam_id.is_empty() or not _is_homebase_fireteam_in_flightdeck_payload(normalized_fireteam_id):
+		return 0.0
+	if bool(craft_gate.get("can_stage", false)):
+		return 100.0
+	return 0.0
+
+
+func _build_homebase_member_boarding_progress_value(fireteam_id: String, unit_id: String, craft_gate: Dictionary) -> float:
+	if unit_id.strip_edges().is_empty():
+		return 0.0
+	return _build_homebase_boarding_progress_value(fireteam_id, craft_gate)
+
+
+func _build_homebase_boarding_progress_text(fireteam_id: String, craft_gate: Dictionary) -> String:
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	var total_members: int = _get_member_unit_ids_for_fireteam(normalized_fireteam_id).size()
+	var boarded_members: int = total_members if _build_homebase_boarding_progress_value(normalized_fireteam_id, craft_gate) >= 100.0 else 0
+	if bool(craft_gate.get("can_stage", false)):
+		return "Boarding: %d/%d boarded | Flightdeck payload" % [boarded_members, total_members]
+	var block_reason: String = String(craft_gate.get("block_reason", "")).strip_edges()
+	return "Boarding: queued | %d/%d boarded | %s" % [boarded_members, total_members, _build_homebase_direct_block_badge(block_reason)]
+
+
+func _build_homebase_member_boarding_status_text(fireteam_id: String, unit_id: String, craft_gate: Dictionary) -> String:
+	if _build_homebase_member_boarding_progress_value(fireteam_id, unit_id, craft_gate) >= 100.0:
+		return "Boarded"
+	return "Queued"
+
+
 func _build_homebase_fireteam_payload_status_snapshot(craft_gate: Dictionary) -> Array:
 	var snapshot: Array = []
 	for definition_variant in _fireteam_definitions:
@@ -3895,32 +3997,25 @@ func _build_shipcard_direct_payload_panel(craft_id: String) -> Control:
 	vbox.add_child(header)
 
 	for fireteam_id in payload_fireteam_ids:
-		var row := HBoxContainer.new()
-		row.name = "ShipcardPayload_%s" % fireteam_id
-		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_theme_constant_override("separation", 3)
-		row.set_meta("homebase_shipcard_payload_row", true)
-		row.set_meta("craft_id", craft_id)
-		row.set_meta("fireteam_id", String(fireteam_id))
-		var status: Dictionary = _build_homebase_fireteam_payload_status(String(fireteam_id), HOMEBASE_DIRECT_STAGING_DROP_KIND, craft_gate)
-		row.set_meta("homebase_direct_payload_status", String(status.get("status", "")).strip_edges())
-		row.set_meta("homebase_direct_payload_operator_count", int(status.get("operator_count", 0)))
-		var label := Label.new()
-		label.text = "%s | %d op" % [_get_fireteam_label(String(fireteam_id)), int(status.get("operator_count", 0))]
-		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		label.autowrap_mode = TextServer.AUTOWRAP_OFF
-		label.clip_text = true
-		label.add_theme_font_size_override("font_size", 8)
-		META_UI_SKIN_SCRIPT.style_body_label(label, 8)
-		row.add_child(label)
+		var fireteam_card := _build_homebase_dropship_fireteam_card(String(fireteam_id), craft_id, "dropship_wait")
+		if fireteam_card == null:
+			continue
 		var remove_button := Button.new()
+		remove_button.name = "ShipcardPayloadRemove_%s" % fireteam_id
 		remove_button.text = "x"
 		remove_button.custom_minimum_size = Vector2(22.0, 18.0)
 		remove_button.add_theme_font_size_override("font_size", 8)
+		remove_button.set_meta("homebase_shipcard_payload_remove_button", true)
+		remove_button.set_meta("craft_id", craft_id)
+		remove_button.set_meta("fireteam_id", String(fireteam_id))
 		META_UI_SKIN_SCRIPT.style_secondary_button(remove_button)
 		remove_button.pressed.connect(_on_homebase_dropship_fireteam_remove_pressed.bind(String(fireteam_id)))
-		row.add_child(remove_button)
-		vbox.add_child(row)
+		var header_row := fireteam_card.get_node_or_null("Margin/VBox/HeaderRow") as HBoxContainer
+		if header_row != null:
+			header_row.add_child(remove_button)
+		else:
+			fireteam_card.add_child(remove_button)
+		vbox.add_child(fireteam_card)
 	return panel
 
 
