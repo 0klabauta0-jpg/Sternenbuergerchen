@@ -2376,6 +2376,14 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 - Risiken: Die Modelle sind bewusst reine Datentraeger. Spaetere Logik muss sie ueber die bestehenden Commander-/FTL-/SimulationRoot-Pfade konsumieren, statt Gameplay-Wahrheit in UI oder Visualisierung abzulegen.
 - Lokale Pruefung: `task_097_verifier.gd` und `git diff --check` laufen gruen.
 
+### TASK_098 - TacticalInputController und Fireteam-Auswahl
+- Status: implementiert
+- Stand: Der Missions-`TacticalInputController` haelt Fireteam-Auswahl als lokalen Planungszustand, unterstuetzt Linksklick, `STRG`+Linksklick, Lasso und Leeren der Auswahl. `FireteamSelectionAdapter` kapselt die Selection-Regeln; Units bekommen nur sichtbares `set_tactical_selected`-Feedback.
+- Stand: Der `task_098_verifier.gd` prueft den aktuellen `Primary3DView`-Screen-/World-Pfad, damit die Auswahltests nicht mehr am alten Canvas-Projektionspfad haengen.
+- Offene Punkte: keine innerhalb dieses Auswahl-Slices; Wegpunktplanung und Kontextmenue bleiben TASK_099.
+- Risiken: Lasso-Auswahl bleibt reine UI-/Planungsschicht. Spaetere Gameplay-Systeme muessen weiter Commands/Effects verwenden und duerfen Selection nicht als Simulation-Wahrheit behandeln.
+- Lokale Pruefung: `task_098_verifier.gd` und `git diff --check` laufen gruen.
+
 ### TASK_099 – Wegpunktplanung und Order-Visualisierung
 - Status: implementiert
 - Stand: Der `TacticalInputController` haelt jetzt pro Fireteam und Phase echte `FireteamOrderPlan`-Daten auf Basis der Task-97-Modelle. Rechtsklick setzt Wegpunkte fuer alle aktuell ausgewaehlten Fireteams, ein kontextsensitives Kurzmenue erlaubt direkt `move`, `defend`, `engage`, `flank` und `take`, und Wegpunkte koennen nachtraeglich per Drag verschoben oder per Delete entfernt werden. Ein schlanker `FireteamOrderVisualizer` rendert die Plaene rein lesend als Linien und Symbolmarker in der Missionsszene; beim Planen werden keine Commands an SimulationRoot oder Flow-Driver gesendet.

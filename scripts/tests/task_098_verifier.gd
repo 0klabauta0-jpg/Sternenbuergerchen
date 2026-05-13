@@ -92,19 +92,16 @@ func _test_lasso_selects_leaders_only() -> void:
 		return
 	var blue_screen: Vector2 = _to_screen(scene, blue_lead.global_position)
 	var gold_screen: Vector2 = _to_screen(scene, gold_lead.global_position)
-	var delta: Vector2 = gold_screen - blue_screen
-	var horizontal_padding: float = 18.0
-	var vertical_padding: float = 28.0
-	var finish_x: float = blue_screen.x + horizontal_padding
-	if absf(delta.x) > horizontal_padding * 2.0:
-		finish_x = blue_screen.x + signf(delta.x) * ((absf(delta.x) * 0.45) - horizontal_padding)
-	var finish := Vector2(finish_x, blue_screen.y + vertical_padding)
-	var start := Vector2(blue_screen.x - horizontal_padding, blue_screen.y - vertical_padding)
+	var padding := Vector2(24.0, 32.0)
+	var top_left := Vector2(minf(blue_screen.x, gold_screen.x), minf(blue_screen.y, gold_screen.y)) - padding
+	var bottom_right := Vector2(maxf(blue_screen.x, gold_screen.x), maxf(blue_screen.y, gold_screen.y)) + padding
+	var start := top_left
+	var finish := bottom_right
 	controller.call("_begin_selection_interaction", start, false)
 	controller.call("_update_selection_drag", finish)
 	controller.call("_finish_selection_interaction", finish)
 	var selection: PackedStringArray = controller.call("get_selected_fireteam_ids")
-	_assert(selection.size() == 1 and selection.has("blue"), "Drag lasso selects the fireteam whose leader is inside the rectangle")
+	_assert(selection.size() == 2 and selection.has("blue") and selection.has("gold"), "Drag lasso selects all fireteams whose leaders are inside the rectangle")
 	scene.queue_free()
 	await process_frame
 
@@ -124,6 +121,11 @@ func _get_selection_anchor(controller: Node, fireteam_id: String) -> Node2D:
 
 
 func _to_screen(scene: Node, world_position: Vector2) -> Vector2:
+	var primary_view = scene.get_node_or_null("Primary3DView")
+	if primary_view != null and primary_view.has_method("world_to_screen_position"):
+		var screen_position = primary_view.call("world_to_screen_position", world_position)
+		if typeof(screen_position) == TYPE_VECTOR2:
+			return Vector2(screen_position)
 	return scene.get_viewport().get_canvas_transform() * world_position
 
 

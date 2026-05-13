@@ -3,7 +3,7 @@
 ## Ziel
 Die Mission bekommt einen echten `TacticalInputController` fuer Fireteam-Selektion, Multiselect, Leader-Lasso und visuelle Auswahlmarkierung. Einzelne Units bleiben weiterhin nicht direkt steuerbar.
 
-## Status: OFFEN
+## Status: IMPLEMENTIERT
 
 ## Pflicht vor Beginn
 - Lies [docs/PROJECT_BRIEF.md](docs/PROJECT_BRIEF.md)
@@ -48,3 +48,11 @@ Die Mission bekommt einen echten `TacticalInputController` fuer Fireteam-Selekti
 - Nur Fireteams, nie Einzel-NPCs, werden als Auswahlzustand gehalten.
 - Ausgewaehlte Fireteams sind sichtbar markiert.
 - Der Auswahlzustand existiert nur im `TacticalInputController`.
+
+## Umsetzung
+- Der Missions-`TacticalInputController` haelt die Auswahl als `selected_fireteam_ids` und koppelt bestehende UI-/Hotkey-Pfade an diesen Planungszustand.
+- `FireteamSelectionAdapter` kapselt Click-, CTRL-Click- und Lasso-Merge-Regeln; Units erhalten nur sichtbares Selection-Feedback, keine Gameplay-Wahrheit.
+- Der Verifier nutzt die aktuelle `Primary3DView`-Projektion fuer Screen-/World-Koordinaten, damit Headless-Tests denselben Picking-Pfad pruefen wie die Mission.
+
+## Lokale Pruefung
+- `godot_console.exe --headless --path . --script scripts/tests/task_098_verifier.gd`
