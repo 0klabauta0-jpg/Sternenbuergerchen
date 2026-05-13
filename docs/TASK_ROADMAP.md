@@ -592,6 +592,7 @@ TASK_389 - Homebase Card Wide Drop Targets (implementiert)
 TASK_390 - Homebase Direct Mission Transit Cards (implementiert)
 TASK_391 - Global Escape Menu and Button SFX (implementiert)
 TASK_392 - Parallel Boarding Transit Feedback (implementiert)
+TASK_393 - Direct Dropship Independence LZ Vector (implementiert)
 
 Batch-Empfehlung
 

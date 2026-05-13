@@ -3891,13 +3891,19 @@ func _find_friendly_unit_by_id(unit_id: String) -> Node:
 	var mission_root: Node = get_parent()
 	if mission_root == null:
 		return null
-	for child in mission_root.get_children():
-		if not child.has_method("get_team_id") or not child.has_method("get_unit_id"):
-			continue
-		if String(child.call("get_team_id")).strip_edges() != FRIENDLY_TEAM_ID:
-			continue
-		if String(child.call("get_unit_id")).strip_edges() == normalized_unit_id:
-			return child
+	return _find_friendly_unit_by_id_recursive(mission_root, normalized_unit_id)
+
+
+func _find_friendly_unit_by_id_recursive(root_node: Node, unit_id: String) -> Node:
+	if root_node == null:
+		return null
+	if root_node.has_method("get_team_id") and root_node.has_method("get_unit_id"):
+		if String(root_node.call("get_team_id")).strip_edges() == FRIENDLY_TEAM_ID and String(root_node.call("get_unit_id")).strip_edges() == unit_id:
+			return root_node
+	for child in root_node.get_children():
+		var found: Node = _find_friendly_unit_by_id_recursive(child, unit_id)
+		if found != null:
+			return found
 	return null
 
 
@@ -6602,6 +6608,7 @@ func _refresh_world_overlays() -> void:
 			"visible": dropship_visible,
 			"state": _drop_sequence_phase if primary_has_live_drop_sequence else _mission_drop_state,
 			"has_lz": _has_lz_position,
+			"show_lz_marker": _has_lz_position and _should_show_lz_marker_for_state(_drop_sequence_phase if primary_has_live_drop_sequence else _mission_drop_state),
 			"lz_position": _lz_position,
 			"position": primary_dropship_position,
 			"target_position": primary_dropship_target,
@@ -6618,6 +6625,7 @@ func _refresh_world_overlays() -> void:
 			get_parent(),
 			{
 				"has_lz_position": _has_lz_position,
+				"show_lz_marker": _has_lz_position and _should_show_lz_marker_for_state(_drop_sequence_phase if primary_has_live_drop_sequence else _mission_drop_state),
 				"lz_position": _lz_position,
 				"lz_label": _build_mission_dropship_lz_name(_mission_drop_craft_id, _mission_drop_display_name) if _has_lz_position else "",
 				"dropship_visible": dropship_visible,
@@ -6631,9 +6639,10 @@ func _refresh_world_overlays() -> void:
 			return
 
 	var lz_marker := get_node_or_null("../LZMarker") as Node2D
+	var show_primary_lz_marker: bool = _has_lz_position and _should_show_lz_marker_for_state(_drop_sequence_phase if primary_has_live_drop_sequence else _mission_drop_state)
 	if lz_marker != null:
-		lz_marker.visible = _has_lz_position
-		if _has_lz_position:
+		lz_marker.visible = show_primary_lz_marker
+		if show_primary_lz_marker:
 			lz_marker.global_position = _lz_position
 
 	var dropship_marker := get_node_or_null("../DropshipPlanMarker") as Node2D
@@ -6658,8 +6667,8 @@ func _refresh_world_overlays() -> void:
 			var approach_line := dropship_marker.get_node_or_null("ApproachLine") as Line2D
 			if approach_line != null:
 				approach_line.clear_points()
-				var line_delta: Vector2 = _lz_position - dropship_marker.global_position if _has_lz_position else Vector2.ZERO
-				if _has_lz_position and line_delta.length_squared() > 4.0:
+				var line_delta: Vector2 = _lz_position - dropship_marker.global_position if show_primary_lz_marker else Vector2.ZERO
+				if show_primary_lz_marker and line_delta.length_squared() > 4.0:
 					approach_line.add_point(Vector2.ZERO)
 					approach_line.add_point(line_delta)
 	_refresh_meta_transfer_route_overlay()
@@ -6693,6 +6702,7 @@ func _build_mission_dropship_visual_entries(primary_visible: bool, primary_posit
 				"dropship_position": primary_position,
 				"dropship_target_position": target_position,
 				"has_lz_position": _has_lz_position,
+				"show_lz_marker": _has_lz_position and _should_show_lz_marker_for_state(_drop_sequence_phase if not _drop_sequence_phase.is_empty() else _mission_drop_state),
 				"lz_position": _lz_position,
 				"lz_label": _build_mission_dropship_lz_name(selected_craft_id, _mission_drop_display_name),
 				"dropship_texture": _get_mission_dropship_texture(),
@@ -6732,6 +6742,7 @@ func _build_mission_dropship_visual_entry(card: Dictionary, index: int, primary_
 	if not body_visible and not has_lz:
 		return {}
 	var approach_origin_position: Vector2 = _get_mission_dropship_approach_origin_position(card, index, state, ship_position, has_lz, lz_position, is_selected)
+	var show_lz_marker: bool = has_lz and bool(card.get("show_lz_marker", _should_show_lz_marker_for_state(state)))
 	return {
 		"craft_id": craft_id,
 		"display_name": display_name,
@@ -6740,7 +6751,11 @@ func _build_mission_dropship_visual_entry(card: Dictionary, index: int, primary_
 		"dropship_position": ship_position,
 		"dropship_target_position": target_position,
 		"approach_origin_position": approach_origin_position,
+		"approach_vector_origin_position": ship_position,
+		"approach_vector_target_position": lz_position if has_lz else target_position,
+		"show_approach_vector": show_lz_marker,
 		"has_lz_position": has_lz,
+		"show_lz_marker": show_lz_marker,
 		"lz_position": lz_position,
 		"lz_label": lz_label,
 		"dropship_texture": _get_mission_dropship_texture(card),
@@ -6755,6 +6770,14 @@ func _should_show_mission_dropship_body_for_state(state: String) -> bool:
 			return true
 		_:
 			return false
+
+
+func _should_show_lz_marker_for_state(state: String) -> bool:
+	match state.strip_edges().to_lower():
+		DROP_SEQUENCE_LANDED, DROP_SEQUENCE_UNLOADING, DROP_SEQUENCE_COMPLETE, DROP_SEQUENCE_OUTBOUND, "to_fob", "to_homebase":
+			return false
+		_:
+			return true
 
 
 func _is_mission_dropship_state_visible_on_map(state: String) -> bool:

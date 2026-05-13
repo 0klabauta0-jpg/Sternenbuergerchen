@@ -339,10 +339,17 @@ func get_aircraft_manager_contract_snapshot() -> Dictionary:
 
 
 func build_homebase_direct_drop_state() -> Dictionary:
+	return build_homebase_direct_drop_state_for_craft(_get_homebase_direct_payload_craft_id())
+
+
+func build_homebase_direct_drop_state_for_craft(craft_id: String) -> Dictionary:
 	_sanitize_homebase_direct_staging_state()
-	var payload_fireteam_ids: PackedStringArray = _get_homebase_direct_payload_fireteam_ids()
+	var requested_craft_id: String = craft_id.strip_edges()
+	if requested_craft_id.is_empty():
+		requested_craft_id = _get_homebase_direct_payload_craft_id()
+	var payload_fireteam_ids: PackedStringArray = _get_homebase_direct_payload_fireteam_ids_for_craft(requested_craft_id) if not requested_craft_id.is_empty() else _get_homebase_direct_payload_fireteam_ids()
 	var payload_unit_ids: PackedStringArray = _build_unit_ids_for_fireteams(payload_fireteam_ids)
-	var craft_gate: Dictionary = _get_homebase_direct_staging_craft_gate()
+	var craft_gate: Dictionary = _build_homebase_direct_staging_craft_gate_for_craft(requested_craft_id) if not requested_craft_id.is_empty() else _get_homebase_direct_staging_craft_gate()
 	var payload_craft: Dictionary = Dictionary(craft_gate.get("craft", {}))
 	var payload_craft_id: String = String(payload_craft.get("craft_id", "")).strip_edges()
 	var dispatch_target: String = _get_homebase_dispatch_target(payload_craft_id)
@@ -397,8 +404,8 @@ func build_homebase_direct_drop_state() -> Dictionary:
 		"homebase_dispatch_target": dispatch_target,
 		"homebase_direct_payload_status_text": _build_homebase_direct_payload_status_text(craft_gate, false),
 		"homebase_direct_payload_operator_count": payload_unit_ids.size(),
-		"homebase_direct_boarded_operator_count": _get_homebase_direct_boarded_operator_count(),
-		"homebase_direct_boarding_progress_ratio": _get_homebase_direct_boarding_progress_ratio(),
+		"homebase_direct_boarded_operator_count": _get_homebase_direct_boarded_operator_count_for_fireteams(payload_fireteam_ids),
+		"homebase_direct_boarding_progress_ratio": _get_homebase_direct_boarding_progress_ratio_for_craft(payload_craft_id) if not payload_craft_id.is_empty() else _get_homebase_direct_boarding_progress_ratio(),
 		"homebase_direct_payload_fireteam_count": payload_fireteam_ids.size(),
 		"homebase_direct_boarding_complete": boarding_complete,
 		"homebase_direct_craft_ready": bool(craft_gate.get("can_stage", false)),
@@ -4367,13 +4374,20 @@ func _build_homebase_mission_drop_cards(payload_fireteam_ids: PackedStringArray,
 		if craft_id.is_empty():
 			continue
 		var is_payload_craft: bool = craft_id == payload_craft_id
+		var assigned_pilot_id: String = _get_assigned_pilot_id(craft_id)
+		var pilot_display_name: String = _build_display_name(assigned_pilot_id) if not assigned_pilot_id.is_empty() else ""
 		cards.append(
 			{
 				"craft_id": craft_id,
 				"display_name": String(craft_def.get("display_name", craft_id)).strip_edges(),
 				"title_text": UI_BLOCK_LABELS_SCRIPT.prefixed_transport_title(String(craft_def.get("display_name", craft_id)).strip_edges()),
 				"texture_path": String(craft_def.get("texture_path", "")).strip_edges(),
+				"payload_source": "homebase_direct",
 				"state": "waiting" if is_payload_craft and payload_ready else "",
+				"pilot_text": "Pilot: %s" % pilot_display_name if not pilot_display_name.is_empty() else "Pilot: none",
+				"pilot_unit_id": assigned_pilot_id,
+				"pilot_display_name": pilot_display_name,
+				"pilot_portrait_path": _get_profile_portrait_path(assigned_pilot_id),
 				"queued_fireteam_ids": Array(payload_fireteam_ids if is_payload_craft else PackedStringArray()),
 				"boarded_fireteam_ids": Array(payload_fireteam_ids if is_payload_craft and payload_ready else PackedStringArray()),
 				"embarked_unit_ids": Array(payload_unit_ids if is_payload_craft and payload_ready else PackedStringArray()),

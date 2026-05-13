@@ -158,6 +158,8 @@ const TILE_SELECTION_SURFACE_Y_OFFSET: float = 0.12
 const TILE_SELECTION_BORDER_WIDTH_FACTOR: float = 0.078
 const TILE_SELECTION_FILL_COLOR: Color = Color(0.05, 0.58, 1.0, 0.46)
 const TILE_SELECTION_BORDER_COLOR: Color = Color(0.78, 0.98, 1.0, 1.0)
+const DROPSHIP_LZ_MARKER_FILL: float = 1.18
+const DROPSHIP_APPROACH_LINE_WIDTH_FACTOR: float = 0.24
 const FRIENDLY_AIM_LINE_COLOR: Color = Color(0.66, 1.0, 0.72, 0.82)
 const FRIENDLY_AIM_TIP_COLOR: Color = Color(0.78, 1.0, 0.84, 0.92)
 const FIRETEAM_ORIENTATION_LINE_COLOR: Color = Color(0.9, 0.98, 1.0, 0.88)
@@ -1189,6 +1191,8 @@ func get_render_snapshot() -> Dictionary:
 		"resolved_lz_marker_visible": _resolved_lz_marker_count > 0,
 		"requested_lz_marker_count": _requested_lz_marker_count,
 		"resolved_lz_marker_count": _resolved_lz_marker_count,
+		"dropship_lz_marker_fill": DROPSHIP_LZ_MARKER_FILL,
+		"dropship_approach_line_width_factor": DROPSHIP_APPROACH_LINE_WIDTH_FACTOR,
 		"requested_lz_position": _drop_payload.get("requested_lz_position", _drop_payload.get("target_lz_position", _drop_payload.get("lz_position", null))),
 		"resolved_lz_position": _drop_payload.get("resolved_lz_position", _drop_payload.get("actual_landing_position", null)),
 		"tile_grid_line_count": _tile_grid_line_count,
@@ -1210,6 +1214,7 @@ func get_render_snapshot() -> Dictionary:
 		"mission_result_visible": _mission_result_visible,
 		"mission_result": String(_mission_status_payload.get("result", "")),
 		"has_lz": bool(_drop_payload.get("has_lz_position", false)),
+		"show_lz_marker": bool(_drop_payload.get("show_lz_marker", bool(_drop_payload.get("has_lz_position", false)))),
 		"dropship_visible": bool(_drop_payload.get("dropship_visible", false)),
 		"dropship_texture_visible": _dropship_texture_visible,
 		"dropship_model_visible": _dropship_model_visible,
@@ -3251,6 +3256,8 @@ func _normalize_mission_drop_visual_payload(drop_payload: Dictionary) -> Diction
 		payload["dropship_target_position"] = payload.get("target_position")
 	if payload.has("has_lz") and not payload.has("has_lz_position"):
 		payload["has_lz_position"] = bool(payload.get("has_lz", false))
+	if not payload.has("show_lz_marker"):
+		payload["show_lz_marker"] = bool(payload.get("has_lz_position", false))
 	if not payload.has("air_layer"):
 		payload["air_layer"] = AIR_LAYER_ID
 	if not payload.has("team_id"):
@@ -3279,6 +3286,10 @@ func _normalize_dropship_visual_entries(payload: Dictionary) -> Array:
 			entry["dropship_target_position"] = entry.get("target_position")
 		if entry.has("has_lz") and not entry.has("has_lz_position"):
 			entry["has_lz_position"] = bool(entry.get("has_lz", false))
+		if not entry.has("show_lz_marker"):
+			entry["show_lz_marker"] = bool(entry.get("has_lz_position", false))
+		if not entry.has("show_approach_vector"):
+			entry["show_approach_vector"] = bool(entry.get("show_lz_marker", true))
 		if not entry.has("team_id"):
 			entry["team_id"] = String(payload.get("team_id", AIR_LAYER_DEFAULT_TEAM_ID))
 		if not entry.has("air_layer"):
@@ -3303,17 +3314,23 @@ func _normalize_dropship_visual_entries(payload: Dictionary) -> Array:
 func _build_drop_visual_static_signature(payload: Dictionary) -> String:
 	var parts: PackedStringArray = PackedStringArray()
 	parts.append("lz:%s:%s" % [str(bool(payload.get("has_lz_position", false))), _vector2_signature(payload.get("lz_position", null))])
+	var payload_show_lz_marker: bool = bool(payload.get("show_lz_marker", bool(payload.get("has_lz_position", false))))
+	parts.append("show_lz:%s" % str(payload_show_lz_marker))
 	parts.append("req:%s" % _vector2_signature(payload.get("requested_lz_position", payload.get("target_lz_position", null))))
 	parts.append("res:%s" % _vector2_signature(payload.get("resolved_lz_position", payload.get("actual_landing_position", null))))
 	var entries: Array = Array(payload.get("dropship_visuals", []))
 	for index in range(entries.size()):
 		var entry: Dictionary = Dictionary(entries[index])
-		parts.append("%s:%s:%s:%s:%s:%s" % [
+		parts.append("%s:%s:%s:%s:%s:%s:%s:%s:%s:%s" % [
 			_get_dropship_visual_id(entry, index),
 			String(entry.get("state", "")).strip_edges().to_lower(),
 			_texture_signature(entry.get("dropship_texture", null)),
 			str(bool(entry.get("dropship_visible", false))),
 			_vector2_signature(entry.get("approach_origin_position", entry.get("dropship_position", null))),
+			_vector2_signature(entry.get("approach_vector_origin_position", entry.get("dropship_position", null))),
+			_vector2_signature(entry.get("approach_vector_target_position", entry.get("dropship_target_position", null))),
+			str(bool(entry.get("show_lz_marker", bool(entry.get("has_lz_position", false))))),
+			str(bool(entry.get("show_approach_vector", true))),
 			String(entry.get("team_id", AIR_LAYER_DEFAULT_TEAM_ID)).strip_edges(),
 		])
 		parts.append("lz:%s:%s:%s" % [
@@ -4985,10 +5002,11 @@ func _rebuild_drop_visuals() -> void:
 	_dropship_rotation_y = 0.0
 	if _drop_root == null or _drop_payload.is_empty():
 		return
-	if bool(_drop_payload.get("has_lz_position", false)) and typeof(_drop_payload.get("lz_position", null)) == TYPE_VECTOR2:
+	var show_primary_lz_marker: bool = bool(_drop_payload.get("show_lz_marker", bool(_drop_payload.get("has_lz_position", false))))
+	if show_primary_lz_marker and bool(_drop_payload.get("has_lz_position", false)) and typeof(_drop_payload.get("lz_position", null)) == TYPE_VECTOR2:
 		var lz_position: Vector2 = Vector2(_drop_payload.get("lz_position", Vector2.ZERO))
 		if _air_layer_allows_surface_marker(lz_position):
-			if _add_world_tile_marker(_drop_root, lz_position, Color(0.38, 1.0, 0.62, 0.44), "LZTile", 0.055, 0.96):
+			if _add_world_tile_marker(_drop_root, lz_position, Color(0.38, 1.0, 0.62, 0.44), "LZTile", 0.075, DROPSHIP_LZ_MARKER_FILL):
 				_lz_tile_marker_count += 1
 		else:
 			_fow_hidden_air_visual_count += 1
@@ -5015,7 +5033,8 @@ func _rebuild_drop_visuals() -> void:
 			continue
 		var ship_position: Vector2 = Vector2(entry.get("dropship_position", Vector2.ZERO))
 		var visual_id: String = _get_dropship_visual_id(entry, index)
-		if bool(entry.get("has_lz_position", false)) and typeof(entry.get("lz_position", null)) == TYPE_VECTOR2:
+		var show_entry_lz_marker: bool = bool(entry.get("show_lz_marker", bool(entry.get("has_lz_position", false))))
+		if show_entry_lz_marker and bool(entry.get("has_lz_position", false)) and typeof(entry.get("lz_position", null)) == TYPE_VECTOR2:
 			var entry_lz_position: Vector2 = Vector2(entry.get("lz_position", Vector2.ZERO))
 			if _air_layer_allows_surface_marker(entry_lz_position):
 				var lz_color := Color(0.42, 0.72, 1.0, 0.46)
@@ -5046,7 +5065,7 @@ func _air_layer_allows_surface_marker(world_position: Vector2) -> bool:
 
 
 func _add_planned_lz_marker(world_position: Vector2, color: Color, node_name: String) -> bool:
-	return _add_world_tile_marker(_drop_root, world_position, color, node_name, 0.085, 0.94)
+	return _add_world_tile_marker(_drop_root, world_position, color, node_name, 0.12, DROPSHIP_LZ_MARKER_FILL)
 
 
 func _air_layer_allows_air_visual(world_position: Vector2) -> bool:
@@ -5081,24 +5100,29 @@ func _get_dropship_visual_id(entry: Dictionary, index: int) -> String:
 
 
 func _add_dropship_approach_line(entry: Dictionary, visual_id: String, ship_position: Vector2) -> void:
+	if not bool(entry.get("show_approach_vector", true)):
+		return
 	var target_position: Vector2
-	if typeof(entry.get("dropship_target_position", null)) == TYPE_VECTOR2:
+	if typeof(entry.get("approach_vector_target_position", null)) == TYPE_VECTOR2:
+		target_position = Vector2(entry.get("approach_vector_target_position", Vector2.ZERO))
+	elif typeof(entry.get("dropship_target_position", null)) == TYPE_VECTOR2:
 		target_position = Vector2(entry.get("dropship_target_position", Vector2.ZERO))
 	elif typeof(entry.get("lz_position", null)) == TYPE_VECTOR2:
 		target_position = Vector2(entry.get("lz_position", Vector2.ZERO))
 	else:
 		return
-	var line_origin: Vector2 = _get_dropship_approach_line_origin(entry, ship_position)
+	var line_origin: Vector2 = _get_dropship_approach_vector_origin(entry, ship_position)
 	if line_origin.distance_squared_to(target_position) <= 4.0:
 		return
 	if not _air_layer_allows_surface_marker(target_position):
 		return
-	var line := _add_line3d(
+	var line := _add_wide_line3d(
 		_drop_root,
 		_world_to_air_layer_3d_position_for_payload(entry, line_origin),
 		_world_to_surface_3d_position(target_position, 0.52),
-		Color(0.56, 1.0, 0.68, 0.86),
-		"DropshipApproach_%s" % _sanitize_node_name(visual_id)
+		Color(0.56, 1.0, 0.68, 0.34),
+		"DropshipApproach_%s" % _sanitize_node_name(visual_id),
+		maxf(_get_3d_cell_size() * DROPSHIP_APPROACH_LINE_WIDTH_FACTOR, 0.08)
 	)
 	if line != null:
 		_dropship_approach_lines_by_id[visual_id] = line
@@ -5108,23 +5132,35 @@ func _update_dropship_approach_line(entry: Dictionary, visual_id: String, ship_p
 	var line := _dropship_approach_lines_by_id.get(visual_id, null) as MeshInstance3D
 	if line == null or not is_instance_valid(line):
 		return
+	if not bool(entry.get("show_approach_vector", true)):
+		line.visible = false
+		return
 	var target_position: Vector2
-	if typeof(entry.get("dropship_target_position", null)) == TYPE_VECTOR2:
+	if typeof(entry.get("approach_vector_target_position", null)) == TYPE_VECTOR2:
+		target_position = Vector2(entry.get("approach_vector_target_position", Vector2.ZERO))
+	elif typeof(entry.get("dropship_target_position", null)) == TYPE_VECTOR2:
 		target_position = Vector2(entry.get("dropship_target_position", Vector2.ZERO))
 	elif typeof(entry.get("lz_position", null)) == TYPE_VECTOR2:
 		target_position = Vector2(entry.get("lz_position", Vector2.ZERO))
 	else:
 		line.visible = false
 		return
-	var line_origin: Vector2 = _get_dropship_approach_line_origin(entry, ship_position)
+	var line_origin: Vector2 = _get_dropship_approach_vector_origin(entry, ship_position)
 	line.visible = line_origin.distance_squared_to(target_position) > 4.0
 	if not line.visible:
 		return
-	line.mesh = _make_line_mesh(
+	line.mesh = _make_wide_line_mesh(
 		_world_to_air_layer_3d_position_for_payload(entry, line_origin),
 		_world_to_surface_3d_position(target_position, 0.52),
-		Color(0.56, 1.0, 0.68, 0.86)
+		Color(0.56, 1.0, 0.68, 0.34),
+		maxf(_get_3d_cell_size() * DROPSHIP_APPROACH_LINE_WIDTH_FACTOR, 0.08)
 	)
+
+
+func _get_dropship_approach_vector_origin(entry: Dictionary, fallback_position: Vector2) -> Vector2:
+	if typeof(entry.get("approach_vector_origin_position", null)) == TYPE_VECTOR2:
+		return Vector2(entry.get("approach_vector_origin_position", fallback_position))
+	return fallback_position
 
 
 func _get_dropship_approach_line_origin(entry: Dictionary, fallback_position: Vector2) -> Vector2:
@@ -6551,9 +6587,10 @@ func _add_tile_marker(parent: Node3D, grid_position: Vector2i, color: Color, nod
 	if tile_data == null:
 		return false
 	var cell_size: float = _get_3d_cell_size()
+	var marker_fill: float = clampf(fill, 0.1, 1.4)
 	var marker := MeshInstance3D.new()
 	marker.name = node_name
-	marker.mesh = _make_box_mesh(Vector3(cell_size * clampf(fill, 0.1, 1.0), maxf(height, 0.01), cell_size * clampf(fill, 0.1, 1.0)))
+	marker.mesh = _make_box_mesh(Vector3(cell_size * marker_fill, maxf(height, 0.01), cell_size * marker_fill))
 	marker.material_override = _make_material(color, true)
 	var top_y: float = float(tile_data.height_level) * _get_3d_height_step()
 	marker.position = _grid_to_3d_position(Vector2(grid_position), top_y + 0.014 + (height * 0.5))
@@ -6894,12 +6931,43 @@ func _add_line3d(parent: Node3D, start_position: Vector3, end_position: Vector3,
 	return instance
 
 
+func _add_wide_line3d(parent: Node3D, start_position: Vector3, end_position: Vector3, color: Color, node_name: String, line_width: float) -> MeshInstance3D:
+	var mesh := _make_wide_line_mesh(start_position, end_position, color, line_width)
+	var instance := MeshInstance3D.new()
+	instance.name = node_name
+	instance.mesh = mesh
+	parent.add_child(instance)
+	return instance
+
+
 func _make_line_mesh(start_position: Vector3, end_position: Vector3, color: Color) -> ImmediateMesh:
 	var material := _make_material(color, true)
 	var mesh := ImmediateMesh.new()
 	mesh.surface_begin(Mesh.PRIMITIVE_LINES, material)
 	mesh.surface_add_vertex(start_position)
 	mesh.surface_add_vertex(end_position)
+	mesh.surface_end()
+	return mesh
+
+
+func _make_wide_line_mesh(start_position: Vector3, end_position: Vector3, color: Color, line_width: float) -> ImmediateMesh:
+	var material := _make_material(color, true)
+	var mesh := ImmediateMesh.new()
+	var direction: Vector3 = end_position - start_position
+	if direction.length_squared() <= 0.0001:
+		return mesh
+	direction = direction.normalized()
+	var side := Vector3(-direction.z, 0.0, direction.x)
+	if side.length_squared() <= 0.0001:
+		side = Vector3.RIGHT
+	side = side.normalized() * (maxf(line_width, 0.01) * 0.5)
+	mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLES, material)
+	mesh.surface_add_vertex(start_position - side)
+	mesh.surface_add_vertex(start_position + side)
+	mesh.surface_add_vertex(end_position + side)
+	mesh.surface_add_vertex(start_position - side)
+	mesh.surface_add_vertex(end_position + side)
+	mesh.surface_add_vertex(end_position - side)
 	mesh.surface_end()
 	return mesh
 
