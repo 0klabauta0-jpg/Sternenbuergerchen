@@ -205,9 +205,18 @@
 - Lokale Pruefung: `task_369_fireteam_status_card_enhancement.gd`, `task_258_fixed_window_clipping_scrollbar_playability_audit.gd`, `task_286_ui_feedback_truth_regression_review.gd`, `task_368_ftl_readiness_gauge.gd` und `git diff --check` laufen gruen.
 - Offene Folgearbeit: Manuelle HUD-Lesbarkeit bleibt mit TASK_370+ zu pruefen, sobald Member-Health-Zeilen oder weitere Debuglayer sichtbar werden.
 
-### TASK_370-TASK_380 - Mission Visualization Review Followups
+### TASK_370 - Fireteam Member Health Status Row
+- Status: implementiert
+- Stand: `scripts/ui/fireteam_member_status_row.gd` stellt eine feste Chip-Zeile fuer Fireteam-Member-Status dar. Sie visualisiert `fit`, `wounded`, `down`, `suppressed`, `busy` und neutrale/unbekannte Daten ohne neue Asset-Imports.
+- Stand: `mission_tactical_sandbox_controller.gd` baut den Member-Row-Snapshot aus vorhandenen Unit-Vital-, Health-, Runtime- und Fireteam-Suppression-Daten. Die Row selbst bleibt read-only und erzeugt keine Loadout-, Rollen- oder Gameplay-Wahrheit.
+- Stand: Die Row wird unten in der Mission-Fireteam-Mini-Card verankert, ohne in deren VBox-Layout Hoehe zu addieren. Dadurch bleiben TASK_368/TASK_369-Kompaktheit und FullHD-Layout-Audit gruen.
+- Stand: `get_command_feedback_snapshot()` spiegelt `fireteam_member_status_rows` und `fireteam_member_status_row_count`; Card-Metadaten enthalten denselben Row-Snapshot.
+- Lokale Pruefung: `task_370_fireteam_member_health_status_row.gd`, `task_369_fireteam_status_card_enhancement.gd`, `task_368_ftl_readiness_gauge.gd`, `task_258_fixed_window_clipping_scrollbar_playability_audit.gd`, `task_286_ui_feedback_truth_regression_review.gd` und `git diff --check` laufen gruen.
+- Offene Folgearbeit: Manuelle Sichtpruefung der Farblesbarkeit bleibt sinnvoll, wenn weitere HUD-Layer aus TASK_371+ dazukommen.
+
+### TASK_371-TASK_380 - Mission Visualization Review Followups
 - Status: geplant
-- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Sinnvolle Follow-ups sind als getrennte Tasks 370 bis 380 noch offen.
+- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Sinnvolle Follow-ups sind als getrennte Tasks 371 bis 380 noch offen.
 - Stand: Die Review-Snippets werden nicht ungeprueft uebernommen. Fireteam-Orientation, Event-Log, FTL-Gauge, Fireteam-Status, Member-Zeile, Fire-Sector, LOS, Cover, Countdown, Waypoint-Preview, Command-Validation, Contact-Heatmap und MapEditor-Debuglayer sind jeweils als eigene kleine Slices geschnitten.
 - Stand: Architekturgrenze bleibt: UI liest nur Snapshots. `SimulationRoot`, bestehende Resolver, `TacticalCommunicationEvent`, `FireteamBehaviorResolver`, `FireteamOrderVisualizer`, FoW und Terrain-Daten bleiben die Wahrheit.
 - Offene Punkte: Implementierung der einzelnen Tasks, genaue HUD-Platzierung fuer Event-Log/Statuskarten und manuelle Sichtpruefung nach den ersten Visual-Slices.

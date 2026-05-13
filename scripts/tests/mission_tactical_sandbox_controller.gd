@@ -51,6 +51,7 @@ const COMIC_BUBBLE_RUNTIME_GATE_SCRIPT: GDScript = preload("res://scripts/ui/com
 const NPC_THOUGHT_BUBBLE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/ui/npc_thought_bubble_resolver.gd")
 const HOVER_SCROLL_BEHAVIOR_SCRIPT: GDScript = preload("res://scripts/ui/hover_scroll_behavior.gd")
 const FTL_READINESS_GAUGE_SCRIPT: GDScript = preload("res://scripts/ui/ftl_readiness_gauge.gd")
+const FIRETEAM_MEMBER_STATUS_ROW_SCRIPT: GDScript = preload("res://scripts/ui/fireteam_member_status_row.gd")
 const DROPSHIP_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NE.png")
 const DROPSHIP_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NW.png")
 const DROPSHIP_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
@@ -2765,6 +2766,7 @@ func _apply_fireteam_mini_card_status_context(card: Control, fireteam_id: String
 	card.set_meta("mission_fireteam_status_card_snapshot", status_snapshot.duplicate(true))
 	card.set_meta("mission_fireteam_status_selected", bool(status_snapshot.get("selected", false)))
 	_apply_fireteam_mini_status_summary(card, status_snapshot)
+	_apply_fireteam_member_status_row(card, normalized_fireteam_id, units)
 	_apply_fireteam_mini_contact_badge(card, contact_context)
 	_apply_fireteam_mini_ftl_quality_indicator(card, profile_dict, normalized_fireteam_id)
 	_apply_fireteam_mini_morale_indicator(card, profile_dict)
@@ -2785,6 +2787,27 @@ func _apply_fireteam_mini_status_summary(card: Control, status_snapshot: Diction
 		member_label.visible = not member_label.text.is_empty()
 		member_label.tooltip_text = String(status_snapshot.get("tooltip_text", ""))
 		member_label.set_meta("mission_fireteam_status_primary", true)
+
+
+func _apply_fireteam_member_status_row(card: Control, fireteam_id: String, units: Array = []) -> void:
+	var row := card.get_node_or_null("FireteamMemberStatusRow") as Control
+	if row == null:
+		row = FIRETEAM_MEMBER_STATUS_ROW_SCRIPT.new()
+		row.name = "FireteamMemberStatusRow"
+		card.add_child(row)
+	row.anchor_left = 0.0
+	row.anchor_right = 0.0
+	row.anchor_top = 1.0
+	row.anchor_bottom = 1.0
+	row.offset_left = 6.0
+	row.offset_right = 6.0 + FIRETEAM_MEMBER_STATUS_ROW_SCRIPT.DEFAULT_SIZE.x
+	row.offset_top = -FIRETEAM_MEMBER_STATUS_ROW_SCRIPT.DEFAULT_SIZE.y - 4.0
+	row.offset_bottom = -4.0
+	var snapshot: Dictionary = _build_fireteam_member_status_row_entry(fireteam_id, _get_fireteam_units(fireteam_id, true))
+	row.call("set_member_snapshot", snapshot)
+	row.set_meta("mission_fireteam_member_status_row", true)
+	row.set_meta("mission_fireteam_member_status_snapshot", Dictionary(row.call("get_row_snapshot")).duplicate(true))
+	card.set_meta("mission_fireteam_member_status_host", true)
 
 
 func _apply_fireteam_mini_contact_badge(card: Control, contact_context: Dictionary) -> void:
@@ -3206,6 +3229,96 @@ func get_fireteam_status_card_snapshot() -> Array:
 	return result
 
 
+func get_fireteam_member_status_row_snapshot() -> Array:
+	var result: Array = []
+	for fireteam_id_variant in _get_displayable_fireteam_ids():
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		result.append(_build_fireteam_member_status_row_entry(
+			fireteam_id,
+			_get_fireteam_units(fireteam_id, true)
+		))
+	return result
+
+
+func _build_fireteam_member_status_row_entry(fireteam_id: String, units: Array = []) -> Dictionary:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	var resolved_units: Array = units.duplicate()
+	if resolved_units.is_empty():
+		resolved_units = _get_fireteam_units(normalized_fireteam_id, true)
+	var suppression_state: Dictionary = Dictionary(_suppression_state_by_fireteam.get(normalized_fireteam_id, {}))
+	var is_suppressed: bool = bool(suppression_state.get("is_suppressed", false)) or bool(suppression_state.get("is_heavily_suppressed", false))
+	var members: Array = []
+	for unit in resolved_units:
+		members.append(_build_fireteam_member_status_entry(unit, is_suppressed))
+	return {
+		"fireteam_id": normalized_fireteam_id,
+		"members": members,
+		"member_count": members.size(),
+		"counts": _count_fireteam_member_statuses(members),
+		"read_only": true,
+	}
+
+
+func _build_fireteam_member_status_entry(unit: Node, fireteam_suppressed: bool) -> Dictionary:
+	if unit == null:
+		return {
+			"unit_id": "",
+			"display_name": "Unknown",
+			"status": "unknown",
+			"vital_state": "unknown",
+			"health_ratio": 0.0,
+			"is_suppressed": false,
+			"is_busy": false,
+			"read_only": true,
+		}
+	var unit_id: String = String(unit.call("get_unit_id")).strip_edges() if unit.has_method("get_unit_id") else ""
+	var display_name: String = String(unit.call("get_display_name")).strip_edges() if unit.has_method("get_display_name") else unit_id
+	var vital_state: String = String(unit.call("get_vital_state")).strip_edges().to_lower() if unit.has_method("get_vital_state") else "fit"
+	var health_points: int = _get_unit_health_points(unit)
+	var max_health_points: int = _get_unit_max_health_points(unit)
+	var health_ratio: float = 1.0
+	if health_points >= 0 and max_health_points > 0:
+		health_ratio = clampf(float(health_points) / float(max_health_points), 0.0, 1.0)
+	var is_busy: bool = _is_fireteam_member_busy(unit)
+	var status: String = _resolve_fireteam_member_status(vital_state, health_ratio, fireteam_suppressed, is_busy)
+	return {
+		"unit_id": unit_id,
+		"display_name": display_name,
+		"status": status,
+		"label": _fireteam_member_status_label(status),
+		"vital_state": vital_state,
+		"health_points": health_points,
+		"max_health_points": max_health_points,
+		"health_ratio": health_ratio,
+		"is_suppressed": fireteam_suppressed,
+		"is_busy": is_busy,
+		"role_label": _build_fireteam_member_role_label(unit),
+		"read_only": true,
+	}
+
+
+func _count_fireteam_member_statuses(members: Array) -> Dictionary:
+	var counts: Dictionary = {
+		"fit": 0,
+		"wounded": 0,
+		"down": 0,
+		"suppressed": 0,
+		"busy": 0,
+		"unknown": 0,
+	}
+	for member_variant in members:
+		if typeof(member_variant) != TYPE_DICTIONARY:
+			counts["unknown"] = int(counts.get("unknown", 0)) + 1
+			continue
+		var status: String = String(Dictionary(member_variant).get("status", "unknown")).strip_edges().to_lower()
+		if not counts.has(status):
+			status = "unknown"
+		counts[status] = int(counts.get(status, 0)) + 1
+	return counts
+
+
 func _build_fireteam_status_card_entry(fireteam_id: String, units: Array = [], profile_dict: Dictionary = {}, contact_context: Dictionary = {}) -> Dictionary:
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	var resolved_units: Array = units.duplicate()
@@ -3213,6 +3326,7 @@ func _build_fireteam_status_card_entry(fireteam_id: String, units: Array = [], p
 		resolved_units = _get_fireteam_units(normalized_fireteam_id, true)
 	var resolved_profile: Dictionary = profile_dict.duplicate(true) if not profile_dict.is_empty() else get_active_behavior_profile(normalized_fireteam_id)
 	var resolved_contact: Dictionary = contact_context.duplicate(true) if not contact_context.is_empty() else _build_fireteam_contact_badge_context(normalized_fireteam_id)
+	var member_status: Dictionary = _build_fireteam_member_status_row_entry(normalized_fireteam_id, _get_fireteam_units(normalized_fireteam_id, true))
 	var readiness_snapshot: Dictionary = _build_ftl_readiness_snapshot_for_fireteam(normalized_fireteam_id)
 	var readiness_context: Dictionary = _build_fireteam_status_readiness_context(readiness_snapshot)
 	var health_context: Dictionary = _build_fireteam_health_status_context(resolved_units)
@@ -3265,6 +3379,7 @@ func _build_fireteam_status_card_entry(fireteam_id: String, units: Array = [], p
 		"advance_style": String(resolved_profile.get("advance_style", movement_state.get("effective_style", ""))).strip_edges().to_lower(),
 		"position": position_context.duplicate(true),
 		"health": health_context.duplicate(true),
+		"member_status": member_status.duplicate(true),
 		"member_count": resolved_units.size(),
 		"loadout_id": loadout_id.to_lower(),
 		"read_only": true,
@@ -3388,6 +3503,7 @@ func _build_fireteam_position_status_context(fireteam_id: String) -> Dictionary:
 func _build_fireteam_health_status_context(units: Array) -> Dictionary:
 	var total_count: int = units.size()
 	var fit_count: int = 0
+	var wounded_count: int = 0
 	var down_count: int = 0
 	var bleedout_count: int = 0
 	var respawn_count: int = 0
@@ -3403,9 +3519,16 @@ func _build_fireteam_health_status_context(units: Array) -> Dictionary:
 			"respawning":
 				respawn_count += 1
 			_:
-				fit_count += 1
+				var health_points: int = _get_unit_health_points(unit)
+				var max_health_points: int = _get_unit_max_health_points(unit)
+				if health_points >= 0 and max_health_points > 0 and health_points < max_health_points:
+					wounded_count += 1
+				else:
+					fit_count += 1
 	var text: String = "HP %d/%d" % [fit_count, total_count]
 	var details: PackedStringArray = PackedStringArray([text])
+	if wounded_count > 0:
+		details.append("WOUND %d" % wounded_count)
 	if down_count > 0:
 		details.append("DOWN %d" % down_count)
 	if bleedout_count > 0:
@@ -3415,12 +3538,78 @@ func _build_fireteam_health_status_context(units: Array) -> Dictionary:
 	return {
 		"total_count": total_count,
 		"fit_count": fit_count,
+		"wounded_count": wounded_count,
 		"down_count": down_count,
 		"bleedout_count": bleedout_count,
 		"respawn_count": respawn_count,
 		"text": text,
 		"detail_text": " | ".join(details),
 	}
+
+
+func _get_unit_max_health_points(unit: Node) -> int:
+	if unit == null:
+		return -1
+	if unit.has_method("get_max_health_points"):
+		return int(unit.call("get_max_health_points"))
+	var exported_max_health = unit.get("max_health_points")
+	if typeof(exported_max_health) == TYPE_INT or typeof(exported_max_health) == TYPE_FLOAT:
+		return int(exported_max_health)
+	return -1
+
+
+func _is_fireteam_member_busy(unit: Node) -> bool:
+	if unit == null or not unit.has_method("get_runtime_status"):
+		return false
+	var runtime_status = unit.call("get_runtime_status")
+	if runtime_status == null or not runtime_status.has_method("get"):
+		return false
+	var status_name: String = String(runtime_status.get("status")).strip_edges().to_lower()
+	var active_command_type: String = String(runtime_status.get("active_command_type")).strip_edges().to_lower()
+	if not active_command_type.is_empty():
+		return true
+	return not status_name.is_empty() and status_name != "idle"
+
+
+func _resolve_fireteam_member_status(vital_state: String, health_ratio: float, is_suppressed: bool, is_busy: bool) -> String:
+	match vital_state.strip_edges().to_lower():
+		"down", "bleedout", "respawning":
+			return "down"
+	if health_ratio < 0.999:
+		return "wounded"
+	if is_suppressed:
+		return "suppressed"
+	if is_busy:
+		return "busy"
+	return "fit"
+
+
+func _fireteam_member_status_label(status: String) -> String:
+	match status.strip_edges().to_lower():
+		"fit":
+			return "F"
+		"wounded":
+			return "W"
+		"down":
+			return "D"
+		"suppressed":
+			return "S"
+		"busy":
+			return "B"
+		_:
+			return "?"
+
+
+func _build_fireteam_member_role_label(unit: Node) -> String:
+	if unit == null:
+		return ""
+	if _is_unit_current_fireteam_lead(unit):
+		return "FTL"
+	if unit.has_method("get_role_name"):
+		var role_name: String = String(unit.call("get_role_name")).strip_edges()
+		if not role_name.is_empty():
+			return role_name
+	return ""
 
 
 func _build_fireteam_card_profile(unit: Node):
@@ -9183,6 +9372,8 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"ftl_readiness_contract": get_ftl_readiness_contract_snapshot(),
 		"fireteam_status_card_count": get_fireteam_status_card_snapshot().size(),
 		"fireteam_status_cards": get_fireteam_status_card_snapshot(),
+		"fireteam_member_status_row_count": get_fireteam_member_status_row_snapshot().size(),
+		"fireteam_member_status_rows": get_fireteam_member_status_row_snapshot(),
 		"tactical_breakout_count": get_tactical_breakout_snapshot().size(),
 		"tactical_breakouts": get_tactical_breakout_snapshot(),
 		"fireteam_coordination_count": get_fireteam_coordination_snapshot().size(),
