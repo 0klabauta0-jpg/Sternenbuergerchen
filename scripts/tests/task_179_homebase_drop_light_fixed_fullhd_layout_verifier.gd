@@ -129,7 +129,8 @@ func _test_homebase_flightdeck_shipcards_are_primary_status_region() -> void:
 	_assert(not _contains_button(pad_stage), "Flightdeck visual stage introduces no unbound action buttons")
 	_assert(_contains_texture_path(shipcards_list, DROPSHIP_TEXTURE_PATH), "Homebase shipcards keep using project dropship assets")
 	_assert(_contains_texture_path(shipcards_list, CARGO_TEXTURE_PATH), "Homebase shipcards keep using project cargo craft assets")
-	_assert(_max_texture_min_size(shipcards_list, DROPSHIP_TEXTURE_PATH).x >= 248.0 and _max_texture_min_size(shipcards_list, DROPSHIP_TEXTURE_PATH).y >= 164.0, "Homebase dropship image uses a cropped top-left shipcard size")
+	_assert(bool(shipcards_list.get_meta("homebase_shipcards_two_column_layout", false)), "Homebase shipcards use the compact two-column row layout")
+	_assert(_max_texture_min_size(shipcards_list, DROPSHIP_TEXTURE_PATH).x <= 160.0 and _max_texture_min_size(shipcards_list, DROPSHIP_TEXTURE_PATH).y <= 100.0, "Homebase dropship image uses a compact top-left shipcard size")
 	_assert(_shipcard_visuals_are_top_left_anchored(shipcards_list), "Homebase shipcard visuals use a shifted top-left deck anchor")
 	_assert(_shipcard_actions_top_aligned(shipcards_list), "Homebase shipcard action buttons are top-aligned")
 	var aircraft_selector := screen.get_node("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftSelectorRow/AircraftSelector") as OptionButton
@@ -264,12 +265,14 @@ func _shipcard_visuals_are_top_left_anchored(root_node: Node) -> bool:
 func _shipcard_actions_top_aligned(root_node: Node) -> bool:
 	var checked_count := 0
 	for node in _collect_nodes(root_node):
-		var action_column := node as VBoxContainer
+		var action_column := node as BoxContainer
 		if action_column == null or action_column.name != "ShipActionColumn":
 			continue
 		if action_column.alignment != BoxContainer.ALIGNMENT_BEGIN:
 			return false
 		if not bool(action_column.get_meta("homebase_actions_top_aligned", false)):
+			return false
+		if not bool(action_column.get_meta("homebase_shipcard_actions_top_lane", false)):
 			return false
 		checked_count += 1
 	return checked_count > 0

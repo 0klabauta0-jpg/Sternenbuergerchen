@@ -66,6 +66,9 @@ func _test_real_homebase_dropship_exports_direct_payload() -> void:
 	)
 	await process_frame
 	await process_frame
+	screen.call("_debug_advance_homebase_direct_boarding", 9.2)
+	await process_frame
+	await process_frame
 
 	var drop_state: Dictionary = Dictionary(screen.call("build_homebase_direct_drop_state"))
 	var snapshot: Dictionary = Dictionary(screen.call("get_homebase_direct_staging_snapshot"))

@@ -56,6 +56,9 @@ func _test_inline_loadout_updates_export() -> void:
 	screen.call("_on_homebase_staging_fireteam_dropped", "ft1", "homebase_dropship")
 	await process_frame
 	await process_frame
+	screen.call("_debug_advance_homebase_direct_boarding", 13.8)
+	await process_frame
+	await process_frame
 	var snapshot: Dictionary = Dictionary(screen.call("get_homebase_direct_staging_snapshot"))
 	var member_loadouts: Dictionary = Dictionary(snapshot.get("member_loadouts", {}))
 	var alpha_loadout: Dictionary = Dictionary(member_loadouts.get("unit_alpha", {}))

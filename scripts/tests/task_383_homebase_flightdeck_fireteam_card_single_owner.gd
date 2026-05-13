@@ -41,8 +41,14 @@ func _test_fireteam_card_moves_from_fireteam_panel_to_dropship() -> void:
 	_assert(_find_fireteam_panel_card(screen, "ft2") != null, "Non-boarded fireteam remains visible in #10")
 	_assert(payload_card != null, "Dropship renders the moved fireteam card")
 	_assert(payload_card != null and String(payload_card.get_meta("homebase_fireteam_single_visual_owner", "")).strip_edges() == "flightdeck", "Moved fireteam card declares Flightdeck as visual owner")
-	_assert(payload_card != null and float(payload_card.get_meta("homebase_direct_payload_boarding_progress", 0.0)) >= 100.0, "Dropship fireteam card exposes completed boarding progress")
+	_assert(payload_card != null and float(payload_card.get_meta("homebase_direct_payload_boarding_progress", 100.0)) < 100.0, "Dropship fireteam card starts with active boarding progress")
 	_assert(_count_payload_member_rows(payload_card) == 2, "Dropship fireteam card keeps one progress row per member")
+
+	screen.call("_debug_advance_homebase_direct_boarding", 9.2)
+	await process_frame
+	await process_frame
+	payload_card = _find_payload_fireteam_card(screen, "ft1")
+	_assert(payload_card != null and float(payload_card.get_meta("homebase_direct_payload_boarding_progress", 0.0)) >= 100.0, "Dropship fireteam card exposes completed boarding progress")
 	_assert(_all_payload_member_progress_complete(payload_card), "Dropship member progress bars show boarded state")
 
 	screen.queue_free()

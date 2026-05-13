@@ -12,6 +12,8 @@ Das ist sinnvoll, weil Task 382 die Payload direkt auf der Shipcard sichtbar gem
 - Entfernen des Payloads bewegt die Karte wieder zurueck nach `#10`.
 - Die Datenwahrheit bleibt der bestehende Homebase-Direct-Staging-State; die UI erzeugt keine zweite Fireteam- oder Boarding-Wahrheit.
 
+Hinweis: TASK_384 erweitert diesen Zustand um zeitbasiertes, sequentielles Boarding pro Operator, Mini-Portraets auf der Dropship-Payload-Karte und kompakte zweispaltige Shipcards.
+
 ## Akzeptanz
 - Vor dem Dropship-Drop ist die Fireteam-Karte in `#10` sichtbar.
 - Nach dem Dropship-Drop ist dieselbe Fireteam-Visual-Wahrheit nur noch am Flightdeck sichtbar.

@@ -53,9 +53,15 @@ func _test_fireteam_cards_distinguish_homebase_loadout_and_payload() -> void:
 	var ft1_card := _find_payload_fireteam_card(screen, "ft1")
 	ft2_card = _find_fireteam_card(screen, "ft2")
 	_assert(_find_fireteam_card(screen, "ft1") == null, "Boarded fireteam card leaves #10 and lives on the Flightdeck")
-	_assert(String(ft1_card.get_meta("homebase_direct_payload_status", "")).strip_edges() == "boarded", "Boarded fireteam card marks the Flightdeck payload")
-	_assert(bool(ft1_card.get_meta("homebase_direct_payload_boarded", false)), "Boarded fireteam card exposes payload truth metadata")
-	_assert(_stage_text(ft1_card).contains("Boarded / Flightdeck"), "Boarded fireteam card uses the Flightdeck badge")
+	_assert(String(ft1_card.get_meta("homebase_direct_payload_status", "")).strip_edges() == "boarding", "Flightdeck fireteam card starts in active boarding state")
+	_assert(not bool(ft1_card.get_meta("homebase_direct_payload_boarded", true)), "Flightdeck fireteam is not fully boarded immediately")
+	_assert(_stage_text(ft1_card).contains("Flight Deck"), "Flightdeck fireteam card names its current location")
+	screen.call("_debug_advance_homebase_direct_boarding", 9.2)
+	await process_frame
+	await process_frame
+	ft1_card = _find_payload_fireteam_card(screen, "ft1")
+	_assert(String(ft1_card.get_meta("homebase_direct_payload_status", "")).strip_edges() == "boarded", "Completed boarding marks the Flightdeck payload")
+	_assert(bool(ft1_card.get_meta("homebase_direct_payload_boarded", false)), "Completed fireteam card exposes payload truth metadata")
 	_assert(String(ft2_card.get_meta("homebase_direct_payload_status", "")).strip_edges() == "loadout_editing", "Editing fireteam remains outside payload after another fireteam boards")
 	_assert(not bool(ft2_card.get_meta("homebase_direct_payload_boarded", true)), "Editing fireteam metadata stays unboarded")
 
@@ -66,6 +72,9 @@ func _test_fireteam_cards_distinguish_homebase_loadout_and_payload() -> void:
 func _test_start_and_flightdeck_report_true_payload_count() -> void:
 	var screen: Control = await _build_screen_with_two_fireteams(true)
 	screen.call("_on_homebase_staging_fireteam_dropped", "ft1", "homebase_dropship")
+	await process_frame
+	await process_frame
+	screen.call("_debug_advance_homebase_direct_boarding", 9.2)
 	await process_frame
 	await process_frame
 

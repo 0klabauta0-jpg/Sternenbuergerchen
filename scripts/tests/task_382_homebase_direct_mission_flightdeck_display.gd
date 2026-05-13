@@ -47,6 +47,9 @@ func _test_shipcard_shows_dropped_fireteam_and_dispatches_to_mission() -> void:
 	_drop_fireteam_on_shipcard(screen, "ft1", "dropship_alpha")
 	await process_frame
 	await process_frame
+	screen.call("_debug_advance_homebase_direct_boarding", 9.2)
+	await process_frame
+	await process_frame
 
 	var payload_panel := _find_shipcard_payload_panel(screen, "dropship_alpha")
 	var payload_rows: Array = _find_shipcard_payload_rows(screen, "dropship_alpha")
@@ -75,6 +78,8 @@ func _test_shipcard_shows_dropped_fireteam_and_dispatches_to_mission() -> void:
 func _test_shipcard_fob_toggle_keeps_legacy_transfer_send() -> void:
 	var screen: Control = await _build_screen()
 	_drop_fireteam_on_shipcard(screen, "ft1", "dropship_alpha")
+	await process_frame
+	screen.call("_debug_advance_homebase_direct_boarding", 9.2)
 	await process_frame
 	screen.call("_on_shipcard_dispatch_target_toggled", false, "dropship_alpha")
 	await process_frame

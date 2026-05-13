@@ -124,6 +124,7 @@ func _configure_homebase_with_unboarded_fireteam(screen: Control) -> void:
 		[]
 	)
 	screen.call("_on_homebase_staging_fireteam_dropped", "ft_drop", "homebase_dropship")
+	screen.call("_debug_advance_homebase_direct_boarding", 9.2)
 
 
 func _build_fireteam_definition(fireteam_id: String, unit_ids: PackedStringArray) -> Dictionary:

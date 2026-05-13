@@ -129,6 +129,7 @@ func _configure_homebase_direct_staging(screen: Control) -> void:
 		[]
 	)
 	screen.call("_on_homebase_staging_fireteam_dropped", "ft1", "homebase_dropship")
+	screen.call("_debug_advance_homebase_direct_boarding", 9.2)
 
 
 func _build_fireteam_definition(fireteam_id: String, unit_ids: PackedStringArray) -> Dictionary:

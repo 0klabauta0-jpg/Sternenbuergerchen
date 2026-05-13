@@ -142,6 +142,7 @@ func _test_homebase_delegates_aircraft_state_to_manager() -> void:
 	)
 	screen.call("_on_aircraft_pilot_drop_panel_unit_dropped", "unit_charlie", "dropship_alpha")
 	screen.call("_on_homebase_staging_fireteam_dropped", "ft1", "homebase_dropship")
+	screen.call("_debug_advance_homebase_direct_boarding", 9.2)
 	await process_frame
 	await process_frame
 

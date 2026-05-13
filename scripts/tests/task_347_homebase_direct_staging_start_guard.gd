@@ -126,6 +126,7 @@ func _build_screen_with_fireteam_payload() -> Control:
 		[]
 	)
 	screen.call("_on_homebase_staging_fireteam_dropped", "ft1", "homebase_dropship")
+	screen.call("_debug_advance_homebase_direct_boarding", 9.2)
 	return screen
 
 

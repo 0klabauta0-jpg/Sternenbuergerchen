@@ -145,6 +145,7 @@ func _stage_homebase_direct_payload(scene: Node, unit_ids: PackedStringArray, fi
 		[]
 	)
 	homebase_screen.call("_on_homebase_staging_fireteam_dropped", fireteam_id, "homebase_dropship")
+	homebase_screen.call("_debug_advance_homebase_direct_boarding", 9.2)
 	await process_frame
 	await process_frame
 

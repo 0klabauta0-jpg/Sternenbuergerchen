@@ -583,6 +583,7 @@ Phase 18ZM - Homebase Manual Test UX Polish
 TASK_381 - Homebase Fireteam Loadout Flightdeck Polish (implementiert)
 TASK_382 - Homebase Direct Mission Flightdeck Display (implementiert)
 TASK_383 - Homebase Flightdeck Fireteam Card Single Owner (implementiert)
+TASK_384 - Homebase Flightdeck Boarding Hotfix (implementiert)
 
 Batch-Empfehlung
 

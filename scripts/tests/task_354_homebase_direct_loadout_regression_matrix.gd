@@ -167,6 +167,8 @@ func _configure_homebase_matrix(screen: Control) -> void:
 
 	screen.call("_on_homebase_staging_fireteam_dropped", "ft_drop", "homebase_dropship")
 	await process_frame
+	screen.call("_debug_advance_homebase_direct_boarding", 9.2)
+	await process_frame
 	await process_frame
 
 

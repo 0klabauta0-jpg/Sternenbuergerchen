@@ -104,6 +104,7 @@ func _test_fireteam_loadout_and_dropship_contract() -> void:
 	_assert(_count_nodes_with_meta(fireteam_list, "homebase_fireteam_inline_loadout_row") == 3, "#10 renders compact loadout rows for the staged fireteam")
 
 	screen.call("_on_homebase_staging_fireteam_dropped", "ft1", "homebase_dropship")
+	screen.call("_debug_advance_homebase_direct_boarding", 13.8)
 	await process_frame
 	await process_frame
 
