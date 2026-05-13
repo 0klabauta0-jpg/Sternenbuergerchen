@@ -155,6 +155,14 @@
 - Lokale Pruefung: `task_363_homebase_roster_card_pool_incremental_refresh.gd`, `task_361_npc_compact_card_readonly_profile_reference_contract.gd`, `task_346_homebase_direct_staging_character_popup.gd`, `task_355_homebase_direct_ux_payload_truth.gd`, `task_362_homebase_aircraft_state_manager_extraction.gd` und `git diff --check` laufen gruen.
 - Offene Folgearbeit: Fireteam- und Loadout-Memberkarten sind noch nicht gepoolt; dieser Task deckt den risikoarmen ersten Homebase-Roster/Staging-Schnitt ab.
 
+### TASK_364-TASK_380 - Mission Visualization Review Followups
+- Status: geplant
+- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Sinnvolle Follow-ups sind als getrennte Tasks 364 bis 380 angelegt.
+- Stand: Die Review-Snippets werden nicht ungeprueft uebernommen. Fireteam-Orientation, Event-Log, FTL-Gauge, Fireteam-Status, Member-Zeile, Fire-Sector, LOS, Cover, Countdown, Waypoint-Preview, Command-Validation, Contact-Heatmap und MapEditor-Debuglayer sind jeweils als eigene kleine Slices geschnitten.
+- Stand: Architekturgrenze bleibt: UI liest nur Snapshots. `SimulationRoot`, bestehende Resolver, `TacticalCommunicationEvent`, `FireteamBehaviorResolver`, `FireteamOrderVisualizer`, FoW und Terrain-Daten bleiben die Wahrheit.
+- Offene Punkte: Implementierung der einzelnen Tasks, genaue HUD-Platzierung fuer Event-Log/Statuskarten und manuelle Sichtpruefung nach den ersten Visual-Slices.
+- Risiken: Visual-Dichte kann Mission-HUD und FoW schnell ueberladen. Die Tasks markieren Debug-/optional-Layer getrennt von permanenten Spieleranzeigen.
+
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
 - Stand: Dropship-Visuals bauen ihre Dirty-Signatur wieder fehlerfrei, geplante LZs bleiben auch bei offmap/hidden Craft sichtbar, und Multi-Dropship-Payloads werden aus dem rohen Mission-Card-State statt aus stale Selected-Card-State uebernommen.

@@ -560,6 +560,25 @@ TASK_361 - NPCCompactCard Readonly Profile Reference Contract (implementiert)
 TASK_362 - Homebase Aircraft State Manager Extraction (implementiert)
 TASK_363 - Homebase Roster Card Pool Incremental Refresh (implementiert)
 
+Phase 18ZL - Mission Visualization Review Followups
+TASK_364 - Mission Fireteam Orientation Indicators (geplant)
+TASK_365 - Tactical Event Log Data Layer (geplant)
+TASK_366 - Tactical Event Log HUD Panel (geplant)
+TASK_367 - FTL Public Readiness Snapshot Contract (geplant)
+TASK_368 - FTL Readiness Gauge (geplant)
+TASK_369 - Fireteam Status Card Enhancement (geplant)
+TASK_370 - Fireteam Member Health Status Row (geplant)
+TASK_371 - Fire Sector Security Arc Overlay Toggle (geplant)
+TASK_372 - Mission LOS Debug Overlay Toggle (geplant)
+TASK_373 - Cover Effectiveness Readout (geplant)
+TASK_374 - Objective Countdown Indicator (geplant)
+TASK_375 - Waypoint Intent Preview (geplant)
+TASK_376 - Command Validation Bubble (geplant)
+TASK_377 - Contact Density Heat Map Layer (geplant)
+TASK_378 - MapEditor Patrol Route Preview (geplant)
+TASK_379 - MapEditor Tile Property Grid Overlay (geplant)
+TASK_380 - Terrain Adjacency Solver Indicator (geplant)
+
 Batch-Empfehlung
 
 Codex soll Tasks in kleinen Gruppen bearbeiten:
