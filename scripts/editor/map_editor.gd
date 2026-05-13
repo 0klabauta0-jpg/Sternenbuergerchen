@@ -14,6 +14,7 @@ const MAP_EDITOR_HEIGHT_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/ma
 const MAP_EDITOR_PATROL_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_patrol_tool.gd")
 const MAP_EDITOR_PATROL_PREVIEW_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_patrol_preview.gd")
 const MAP_EDITOR_TILE_PROPERTY_OVERLAY_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_tile_property_overlay.gd")
+const MAP_EDITOR_ADJACENCY_DEBUG_OVERLAY_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_adjacency_debug_overlay.gd")
 const MAP_EDITOR_MARKER_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_marker_tool.gd")
 const MAP_EDITOR_MISSION_SCENARIO_PANEL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_mission_scenario_panel.gd")
 const MULTIPLAYER_MAP_MANIFEST_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_map_manifest.gd")
@@ -42,6 +43,7 @@ const CAMERA_ZOOM_STEP: float = 0.05
 const CAMERA_PAN_SPEED: float = 800.0
 const PATROL_OVERLAY_NAME: String = "PatrolOverlay"
 const TILE_PROPERTY_OVERLAY_NAME: String = "TilePropertyOverlay"
+const ADJACENCY_DEBUG_OVERLAY_NAME: String = "AdjacencyDebugOverlay"
 const PATROL_SPAWN_IDS: PackedStringArray = ["enemy_delta", "enemy_echo", "enemy_alpha", "enemy_bravo"]
 const PATROL_PICK_RADIUS: float = 28.0
 const PATROL_SEGMENT_PICK_RADIUS: float = 18.0
@@ -56,6 +58,7 @@ const PRIMARY_VIEW_LEGACY_VISIBILITY_NODES: PackedStringArray = [
 	"ObjectContainer",
 	"GridOverlay",
 	TILE_PROPERTY_OVERLAY_NAME,
+	ADJACENCY_DEBUG_OVERLAY_NAME,
 	"SelectionOutline",
 	PATROL_OVERLAY_NAME,
 	MARKER_OVERLAY_NAME,
@@ -67,6 +70,7 @@ const PRIMARY_VIEW_LEGACY_CLEAR_NODES: PackedStringArray = [
 	"ObjectContainer",
 	"GridOverlay",
 	TILE_PROPERTY_OVERLAY_NAME,
+	ADJACENCY_DEBUG_OVERLAY_NAME,
 	"SelectionOutline",
 	PATROL_OVERLAY_NAME,
 	MARKER_OVERLAY_NAME,
@@ -193,6 +197,10 @@ var _tile_property_overlay_rebuild_count: int = 0
 var _tile_property_overlay_dirty_refresh_count: int = 0
 var _tile_property_overlay_skipped_disabled_count: int = 0
 var _tile_property_overlay_last_dirty_grid_count: int = 0
+var _adjacency_debug_overlay_enabled: bool = false
+var _adjacency_debug_overlay_rebuild_count: int = 0
+var _adjacency_debug_overlay_skipped_disabled_count: int = 0
+var _adjacency_debug_overlay_drawn_entries_by_grid: Dictionary = {}
 var _active_palette_group_id: String = ""
 var _palette_preview_textures: Dictionary = {}
 var _last_dirty_neighborhood_snapshot: Dictionary = {}
@@ -232,6 +240,7 @@ func _ready() -> void:
 	_add_eraser_tool_button()
 	_add_patrol_tool_controls()
 	_add_tile_property_overlay_controls()
+	_add_adjacency_debug_overlay_controls()
 	_arrange_topbar_authoring_tools()
 	_ensure_marker_editor_controls()
 	_ensure_mission_authoring_controls()
@@ -241,6 +250,7 @@ func _ready() -> void:
 	_apply_contextual_help_ids()
 	_ensure_patrol_overlay()
 	_ensure_tile_property_overlay()
+	_ensure_adjacency_debug_overlay()
 	_ensure_marker_overlay()
 	_ensure_3d_primary_view()
 	_load_map(map_file_path if not map_file_path.is_empty() else DEFAULT_MAP_PATH)
@@ -599,6 +609,7 @@ func _load_map(path: String) -> void:
 	_refresh_top_bar()
 	_refresh_patrol_overlay()
 	_rebuild_tile_property_overlay()
+	_clear_adjacency_debug_overlay()
 	_refresh_marker_overlay()
 	_refresh_marker_editor_controls()
 	if _current_scenario_path.is_empty() and not _scenario_dirty:
@@ -635,6 +646,7 @@ func _create_new_map(grid_size: Vector2i = DEFAULT_NEW_MAP_GRID_SIZE) -> void:
 	_refresh_top_bar()
 	_refresh_patrol_overlay()
 	_rebuild_tile_property_overlay()
+	_clear_adjacency_debug_overlay()
 	_refresh_marker_overlay()
 	_refresh_marker_editor_controls()
 	if _current_scenario_path.is_empty() and not _scenario_dirty:
@@ -701,6 +713,7 @@ func _rebuild_tile_sprites() -> void:
 		_object_sprites_by_grid.clear()
 		_clear_legacy_2d_map_children()
 		_rebuild_tile_property_overlay()
+		_refresh_adjacency_debug_overlay_from_snapshot()
 		_refresh_3d_map_view()
 		_set_legacy_2d_map_visible(false)
 		return
@@ -712,6 +725,7 @@ func _rebuild_tile_sprites() -> void:
 	_object_sprites_by_grid = render_state.get("objects", {})
 	_rebuild_grid_overlay()
 	_rebuild_tile_property_overlay()
+	_refresh_adjacency_debug_overlay_from_snapshot()
 	_refresh_3d_map_view()
 	_set_legacy_2d_map_visible(false)
 
@@ -1322,6 +1336,7 @@ func _arrange_topbar_authoring_tools() -> void:
 		"PatrolSpawnOption",
 		"ClearPatrolButton",
 		"TilePropertyOverlayButton",
+		"AdjacencyDebugOverlayButton",
 	]:
 		var node := button_row.get_node_or_null(node_name) as Control
 		if node == null:
@@ -1503,6 +1518,21 @@ func _add_tile_property_overlay_controls() -> void:
 	overlay_button.button_pressed = _tile_property_overlay_enabled
 
 
+func _add_adjacency_debug_overlay_controls() -> void:
+	var button_row := get_node_or_null("UI/TopBar/Margin/HBox") as HBoxContainer
+	if button_row == null:
+		return
+	var overlay_button := button_row.get_node_or_null("AdjacencyDebugOverlayButton") as Button
+	if overlay_button == null:
+		overlay_button = Button.new()
+		overlay_button.name = "AdjacencyDebugOverlayButton"
+		overlay_button.toggle_mode = true
+		overlay_button.toggled.connect(_on_adjacency_debug_overlay_toggled)
+		button_row.add_child(overlay_button)
+	_configure_tool_button(overlay_button, "ADJ", "Adjacency solver debug: yellow seeds, cyan recomputed neighbors, orange object candidates.")
+	overlay_button.button_pressed = _adjacency_debug_overlay_enabled
+
+
 func _on_selection_tool_toggled(pressed: bool) -> void:
 	_selection_tool_enabled = pressed
 	if pressed:
@@ -1622,6 +1652,10 @@ func _on_patrol_spawn_selected(index: int) -> void:
 
 func _on_tile_property_overlay_toggled(pressed: bool) -> void:
 	set_tile_property_overlay_enabled(pressed)
+
+
+func _on_adjacency_debug_overlay_toggled(pressed: bool) -> void:
+	set_adjacency_debug_overlay_enabled(pressed)
 
 
 func _on_clear_patrol_pressed() -> void:
@@ -2816,6 +2850,7 @@ func get_map_editor_usability_snapshot(sync_from_controls: bool = true) -> Dicti
 		},
 		"patrol_route_preview": get_patrol_route_preview_snapshot(),
 		"tile_property_overlay": get_tile_property_overlay_debug_snapshot(),
+		"adjacency_debug_overlay": get_adjacency_debug_overlay_snapshot(),
 		"eraser_tool": {
 			"enabled": _eraser_tool_enabled,
 			"scope": "object_layer_only",
@@ -2994,6 +3029,7 @@ func get_authoring_action_contract_snapshot() -> Dictionary:
 		"editor_ui_refresh_flags": _get_editor_ui_refresh_flag_names(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES | EDITOR_UI_REFRESH_TOOL_STATE | EDITOR_UI_REFRESH_HOVER | EDITOR_UI_REFRESH_SCENARIO | EDITOR_UI_REFRESH_PATROL_PREVIEW),
 		"patrol_route_preview_visual_only": true,
 		"tile_property_overlay_visual_only": true,
+		"adjacency_debug_overlay_visual_only": true,
 		"tile_patch_fields": PackedStringArray([
 			"grid_position",
 			"walkable",
@@ -5123,6 +5159,122 @@ func _refresh_tile_property_overlay_cell(tile_data, fallback_grid: Vector2i = Ve
 	_tile_property_overlay_cells_by_grid[grid_position] = cell_root
 
 
+func set_adjacency_debug_overlay_enabled(enabled: bool) -> bool:
+	if _adjacency_debug_overlay_enabled == enabled:
+		return true
+	_adjacency_debug_overlay_enabled = enabled
+	var overlay_button := get_node_or_null("UI/TopBar/Margin/HBox/AdjacencyDebugOverlayButton") as Button
+	if overlay_button != null and overlay_button.button_pressed != enabled:
+		overlay_button.button_pressed = enabled
+	if enabled:
+		_refresh_adjacency_debug_overlay_from_snapshot()
+	else:
+		_clear_adjacency_debug_overlay()
+	_refresh_authoring_status_controls()
+	return true
+
+
+func is_adjacency_debug_overlay_enabled() -> bool:
+	return _adjacency_debug_overlay_enabled
+
+
+func get_adjacency_debug_overlay_snapshot() -> Dictionary:
+	var snapshot: Dictionary = Dictionary(MAP_EDITOR_ADJACENCY_DEBUG_OVERLAY_SCRIPT.call("build_overlay_snapshot", _last_dirty_neighborhood_snapshot, _adjacency_debug_overlay_enabled, _adjacency_debug_overlay_drawn_entries_by_grid.size()))
+	snapshot["rebuild_count"] = _adjacency_debug_overlay_rebuild_count
+	snapshot["skipped_disabled_count"] = _adjacency_debug_overlay_skipped_disabled_count
+	return snapshot
+
+
+func _ensure_adjacency_debug_overlay() -> void:
+	var existing_overlay := get_node_or_null(ADJACENCY_DEBUG_OVERLAY_NAME) as Node2D
+	if existing_overlay != null:
+		return
+	var overlay := Node2D.new()
+	overlay.name = ADJACENCY_DEBUG_OVERLAY_NAME
+	overlay.z_index = 33
+	add_child(overlay)
+
+
+func _clear_adjacency_debug_overlay() -> void:
+	var overlay := get_node_or_null(ADJACENCY_DEBUG_OVERLAY_NAME) as Node2D
+	if overlay != null:
+		for child in overlay.get_children():
+			child.queue_free()
+	_adjacency_debug_overlay_drawn_entries_by_grid.clear()
+
+
+func _refresh_adjacency_debug_overlay_from_snapshot() -> void:
+	if not _adjacency_debug_overlay_enabled:
+		_adjacency_debug_overlay_skipped_disabled_count += 1
+		return
+	_ensure_adjacency_debug_overlay()
+	var overlay := get_node_or_null(ADJACENCY_DEBUG_OVERLAY_NAME) as Node2D
+	if overlay == null:
+		return
+	for child in overlay.get_children():
+		child.queue_free()
+	_adjacency_debug_overlay_drawn_entries_by_grid.clear()
+	var entries: Array = Array(MAP_EDITOR_ADJACENCY_DEBUG_OVERLAY_SCRIPT.call("build_entries_from_snapshot", _last_dirty_neighborhood_snapshot))
+	for entry_variant in entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		var grid_position := Vector2i(entry.get("grid_position", Vector2i(-1, -1)))
+		if grid_position == Vector2i(-1, -1):
+			continue
+		var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position) if _terrain_map_data != null else null
+		if tile_data == null:
+			continue
+		_add_adjacency_debug_entry_visual(overlay, tile_data, entry)
+	_adjacency_debug_overlay_rebuild_count += 1
+
+
+func _add_adjacency_debug_entry_visual(overlay: Node2D, tile_data, entry: Dictionary) -> void:
+	if overlay == null or tile_data == null:
+		return
+	var tile_size: Dictionary = _terrain_map_data.call("get_tile_size")
+	var half_width: float = float(tile_size.get("half_width", DEFAULT_HALF_TILE_WIDTH))
+	var half_height: float = float(tile_size.get("half_height", DEFAULT_HALF_TILE_HEIGHT))
+	var center: Vector2 = tile_data.world_position
+	var grid_position := Vector2i(entry.get("grid_position", tile_data.grid_position))
+	var role: String = String(entry.get("role", ""))
+	var color: Color = Color(entry.get("color", Color(1.0, 1.0, 1.0, 0.35)))
+	var root := Node2D.new()
+	root.name = "Adjacency_%s_%d_%d" % [role, grid_position.x, grid_position.y]
+	root.set_meta("grid_position", grid_position)
+	root.set_meta("role", role)
+	var fill := Polygon2D.new()
+	fill.name = "Fill"
+	fill.polygon = PackedVector2Array([
+		center + Vector2(0.0, -half_height),
+		center + Vector2(half_width, 0.0),
+		center + Vector2(0.0, half_height),
+		center + Vector2(-half_width, 0.0),
+	])
+	fill.color = color
+	root.add_child(fill)
+	var outline := Line2D.new()
+	outline.name = "Outline"
+	outline.closed = true
+	outline.width = 3.0 if role == "seed" else 2.0
+	outline.default_color = Color(color.r, color.g, color.b, minf(color.a + 0.34, 0.95))
+	outline.add_point(center + Vector2(0.0, -half_height))
+	outline.add_point(center + Vector2(half_width, 0.0))
+	outline.add_point(center + Vector2(0.0, half_height))
+	outline.add_point(center + Vector2(-half_width, 0.0))
+	root.add_child(outline)
+	var label := Label.new()
+	label.name = "Label"
+	label.text = String(entry.get("label", ""))
+	label.position = center + Vector2(-10.0, -10.0)
+	label.size = Vector2(20.0, 20.0)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 11)
+	label.add_theme_color_override("font_color", Color(0.98, 1.0, 1.0, 0.92))
+	root.add_child(label)
+	overlay.add_child(root)
+	_adjacency_debug_overlay_drawn_entries_by_grid["%s:%s" % [role, str(grid_position)]] = root
+
+
 func _ensure_patrol_overlay() -> void:
 	var existing_overlay := get_node_or_null(PATROL_OVERLAY_NAME) as Node2D
 	if existing_overlay != null:
@@ -6236,6 +6388,9 @@ func _refresh_dirty_visual_neighborhoods(seed_grids: Array[Vector2i]) -> void:
 	if seed_grids.is_empty():
 		_last_dirty_neighborhood_snapshot = {
 			"seed_count": 0,
+			"seed_grids": [],
+			"neighborhood_grids": [],
+			"object_grids": [],
 			"raw_neighborhood_candidate_count": 0,
 			"cliff_wall_candidate_count": 0,
 			"object_candidate_count": 0,
@@ -6244,6 +6399,7 @@ func _refresh_dirty_visual_neighborhoods(seed_grids: Array[Vector2i]) -> void:
 			"wall_refresh_count": 0,
 			"object_refresh_count": 0,
 		}
+		_refresh_adjacency_debug_overlay_from_snapshot()
 		return
 
 	var seed_lookup: Dictionary = {}
@@ -6277,6 +6433,9 @@ func _refresh_dirty_visual_neighborhoods(seed_grids: Array[Vector2i]) -> void:
 	_refresh_tile_property_overlay_for_grids(_sort_grid_lookup_keys(seed_lookup))
 	_last_dirty_neighborhood_snapshot = {
 		"seed_count": seed_lookup.size(),
+		"seed_grids": _sort_grid_lookup_keys(seed_lookup),
+		"neighborhood_grids": neighborhood_grids,
+		"object_grids": object_grids,
 		"raw_neighborhood_candidate_count": raw_neighborhood_candidate_count,
 		"cliff_wall_candidate_count": neighborhood_grids.size(),
 		"object_candidate_count": object_grids.size(),
@@ -6285,6 +6444,7 @@ func _refresh_dirty_visual_neighborhoods(seed_grids: Array[Vector2i]) -> void:
 		"wall_refresh_count": wall_refresh_count,
 		"object_refresh_count": object_refresh_count,
 	}
+	_refresh_adjacency_debug_overlay_from_snapshot()
 
 
 func _build_overlay_neighborhood_candidates(seed_grid: Vector2i) -> Array[Vector2i]:

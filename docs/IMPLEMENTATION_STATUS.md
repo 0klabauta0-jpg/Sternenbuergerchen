@@ -288,12 +288,13 @@
 - Lokale Pruefung: `task_379_mapeditor_tile_property_grid_overlay.gd`, `task_298_editor_terrain_visual_playability_smoke.gd` und `git diff --check` laufen gruen.
 - Offene Folgearbeit: Manueller Sichtcheck fuer Farb-/Label-Dichte auf grossen 64x64-Maps bleibt sinnvoll.
 
-### TASK_380 - Mission Visualization Review Followups
-- Status: geplant
-- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Nach TASK_379 bleibt der Terrain-Adjacency-Solver-Indikator als getrennter Task 380 offen.
-- Stand: Architekturgrenze bleibt: UI liest nur Snapshots. `SimulationRoot`, bestehende Resolver, `TacticalCommunicationEvent`, `FireteamBehaviorResolver`, `FireteamOrderVisualizer`, FoW und Terrain-Daten bleiben die Wahrheit.
-- Offene Punkte: Implementierung von TASK_380 und manuelle Sichtpruefung nach weiteren Visual-Slices.
-- Risiken: Visual-Dichte kann Mission-HUD und FoW schnell ueberladen. Die Tasks markieren Debug-/optional-Layer getrennt von permanenten Spieleranzeigen.
+### TASK_380 - Terrain Adjacency Solver Indicator
+- Status: implementiert
+- Stand: Der Dirty-Neighborhood-Snapshot aus TASK_357 enthaelt jetzt neben Counts auch Seed-, Neighborhood- und Object-Gridlisten. Diese Daten bleiben reine Diagnose und veraendern den Solver nicht.
+- Stand: `MapEditorAdjacencyDebugOverlay` baut daraus visuelle Rollen fuer Seed-, Neighbor- und Object-Kandidaten. `MapEditor` zeigt sie per `ADJ`-Toggle als gelb/cyan/orange Debug-Overlay und leert den Layer bei ausgeschaltetem Toggle.
+- Stand: Der Overlay-Snapshot spiegelt die bestehenden Dirty-Neighborhood-Counts, meldet Draw-/Role-Zaehler und bleibt `visual_only`.
+- Lokale Pruefung: `task_380_terrain_adjacency_solver_indicator.gd`, `task_357_mapeditor_height_cliff_dirty_neighborhood_cache.gd` und `git diff --check` laufen gruen.
+- Offene Folgearbeit: Manueller Editor-Sichtcheck fuer Ueberlagerung mit TASK_379-Property-Overlay und Patrol-Preview bleibt sinnvoll.
 
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
