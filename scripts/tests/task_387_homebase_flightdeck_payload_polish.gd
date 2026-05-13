@@ -117,7 +117,7 @@ func _test_shipcard_payload_is_clean_and_staging_is_folded() -> void:
 		"Top Operator Cards",
 	]
 	_assert(payload_card != null and not _visible_text_contains_any(payload_card, forbidden_texts), "Dropship payload card hides editor/debug labels")
-	_assert(shipcard != null and _button_with_text(shipcard, "Mission") == null and _button_with_text(shipcard, "FOB") == null, "Dropship shipcard has no local Send button")
+	_assert(shipcard != null and _button_with_text(shipcard, "Send") != null and _button_with_text(shipcard, "Mission") == null and _button_with_text(shipcard, "FOB") == null, "Dropship shipcard keeps one compact local Send button")
 	_assert(shipcard != null and _button_with_text(shipcard, "Clear") == null, "Dropship shipcard has no local Clear button")
 	_assert(direct_panel != null and not direct_panel.visible and bool(direct_panel.get_meta("homebase_direct_staging_folded_into_shipcards", false)), "Separate Direct Dropship Staging panel is folded into shipcards")
 	_assert(_find_shipcard_payload_panel(screen, "dropship_alpha") != null, "Dropship card owns the Direct payload panel")

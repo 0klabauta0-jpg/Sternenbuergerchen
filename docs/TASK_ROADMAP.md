@@ -587,6 +587,7 @@ TASK_384 - Homebase Flightdeck Boarding Hotfix (implementiert)
 TASK_385 - Homebase Direct Return Isolation (implementiert)
 TASK_386 - Homebase Flightdeck Member Portraits (implementiert)
 TASK_387 - Homebase Flightdeck Payload Polish (implementiert)
+TASK_388 - Homebase Fireteam Roster Shipcard Polish (implementiert)
 
 Batch-Empfehlung
 

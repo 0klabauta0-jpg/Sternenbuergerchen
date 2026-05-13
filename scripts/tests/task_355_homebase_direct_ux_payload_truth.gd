@@ -34,8 +34,8 @@ func _test_fireteam_cards_distinguish_homebase_loadout_and_payload() -> void:
 	var ft2_card := _find_fireteam_card(screen, "ft2")
 	_assert(ft2_card != null, "#10 renders the second fireteam card")
 	_assert(String(ft2_card.get_meta("homebase_direct_payload_status", "")).strip_edges() == "homebase", "Unboarded fireteam stays marked as Homebase staged")
-	_assert(_stage_text(ft2_card).contains("Staged in Homebase"), "Homebase-only card labels staged state")
-	_assert(_stage_text(ft2_card).contains("not boarded"), "Homebase-only card labels that it is not payload")
+	_assert(bool(ft2_card.get_meta("homebase_fireteam_clean_presentation", false)), "Homebase-only fireteam card hides visible staging/debug labels")
+	_assert(_stage_text(ft2_card).is_empty(), "Homebase-only fireteam card keeps payload truth in metadata instead of visible status text")
 
 	screen.call("_on_homebase_staging_fireteam_dropped", "ft2", "loadout")
 	await process_frame
@@ -43,8 +43,8 @@ func _test_fireteam_cards_distinguish_homebase_loadout_and_payload() -> void:
 
 	ft2_card = _find_fireteam_card(screen, "ft2")
 	_assert(String(ft2_card.get_meta("homebase_direct_payload_status", "")).strip_edges() == "loadout_editing", "Loadout target marks the fireteam as editing only")
-	_assert(_stage_text(ft2_card).contains("Loadout editing"), "Loadout fireteam card shows editing state")
-	_assert(_stage_text(ft2_card).contains("not boarded"), "Loadout editing does not masquerade as launch payload")
+	_assert(bool(ft2_card.get_meta("homebase_fireteam_clean_presentation", false)), "Loadout fireteam card keeps the clean #10 presentation")
+	_assert(_stage_text(ft2_card).is_empty(), "Loadout editing state is not rendered as visible card clutter")
 
 	screen.call("_on_homebase_staging_fireteam_dropped", "ft1", "homebase_dropship")
 	await process_frame

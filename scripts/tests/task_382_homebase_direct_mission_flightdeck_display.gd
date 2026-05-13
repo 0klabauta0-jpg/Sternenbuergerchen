@@ -60,17 +60,17 @@ func _test_shipcard_shows_dropped_fireteam_and_dispatches_to_mission() -> void:
 	_assert(payload_rows.size() == 1 and String((payload_rows[0] as Control).get_meta("fireteam_id", "")) == "ft1", "Shipcard payload row identifies the boarded fireteam")
 	_assert(String(snapshot.get("payload_craft_id", "")).strip_edges() == "dropship_alpha", "Direct payload is bound to the dropship card that received the drop")
 	_assert(toggle != null and toggle.button_pressed, "Shipcard destination checkbox defaults to straight-to-Mission after boarding")
-	_assert(send_button == null, "Shipcard no longer renders a local Send button")
+	_assert(send_button != null and not send_button.disabled and String(send_button.get_meta("homebase_shipcard_send_target", "")).strip_edges() == "mission", "Shipcard renders an enabled local Send button for direct Mission launch")
 	_assert(bool(snapshot.get("can_request_mission_start", false)), "Global mission start remains available after the Direct payload boards")
 
 	var events := {"mission": 0, "transfer": 0}
 	screen.mission_start_requested.connect(func(): events["mission"] = int(events["mission"]) + 1)
 	screen.aircraft_pilot_transfer_requested.connect(func(_craft_id, _pilot_id): events["transfer"] = int(events["transfer"]) + 1)
-	screen.call("request_mission_start")
+	send_button.pressed.emit()
 	await process_frame
 
-	_assert(int(events["mission"]) == 1, "Global mission start emits mission_start_requested for the Direct payload")
-	_assert(int(events["transfer"]) == 0, "Global mission start does not send the craft to FOB")
+	_assert(int(events["mission"]) == 1, "Shipcard Send emits mission_start_requested for the Direct payload")
+	_assert(int(events["transfer"]) == 0, "Mission-target Shipcard Send does not send the craft to FOB")
 
 	screen.queue_free()
 	await process_frame
@@ -89,12 +89,12 @@ func _test_shipcard_fob_toggle_keeps_legacy_transfer_send() -> void:
 	var toggle := _find_shipcard_dispatch_toggle(screen, "dropship_alpha")
 	var send_button := _find_shipcard_send_button(screen, "dropship_alpha")
 	_assert(toggle != null and not toggle.button_pressed, "Turning off the checkbox selects FOB dispatch")
-	_assert(send_button == null, "FOB dispatch target does not render the removed Shipcard Send button")
+	_assert(send_button != null and not send_button.disabled and String(send_button.get_meta("homebase_shipcard_send_target", "")).strip_edges() == "fob", "FOB dispatch target keeps the local Shipcard Send button")
 
 	var events := {"mission": 0, "transfer": 0}
 	screen.mission_start_requested.connect(func(): events["mission"] = int(events["mission"]) + 1)
 	screen.aircraft_pilot_transfer_requested.connect(func(_craft_id, _pilot_id): events["transfer"] = int(events["transfer"]) + 1)
-	screen.call("_on_send_pilot_button_pressed", "dropship_alpha")
+	send_button.pressed.emit()
 	await process_frame
 
 	_assert(int(events["mission"]) == 0, "FOB-target Send does not start the mission")
