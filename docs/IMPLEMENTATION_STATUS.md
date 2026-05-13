@@ -222,9 +222,17 @@
 - Lokale Pruefung: `task_371_fire_sector_security_arc_overlay_toggle.gd`, `bugfix_mission_fire_sector_overlay.gd`, `task_286_ui_feedback_truth_regression_review.gd` und `git diff --check` laufen gruen.
 - Offene Folgearbeit: Enemy-In-Sector-Hervorhebung bleibt an Contact/FoW-Sichtbarkeit gebunden und sollte erst mit den Contact-/LOS-Layern aus TASK_372+ weiter vertieft werden.
 
-### TASK_372-TASK_380 - Mission Visualization Review Followups
+### TASK_372 - Mission LOS Debug Overlay Toggle
+- Status: implementiert
+- Stand: `TerrainMap3DView` zeichnet bei aktivem `los_debug_overlay_enabled` begrenzte LOS-Debug-Linien zwischen ausgewaehlten Friendly-Units und bekannten Contact-/Last-Known-Eintraegen. Das Overlay nutzt den bestehenden Grid-LOS-Blockerpfad der Fire-Sector-Visuals und erzeugt keine Gameplay-Kommandos.
+- Stand: Render-Snapshots melden `mission_los_debug_line_count`, Clear-/Blocked-Zaehler, Blocker-Marker, Source-/Contact-Counter, Sample-Limit, bounded Skips und FoW-hidden Contacts. Eintraege tragen `line_state`, `blocker_grid` und `fow_last_known`.
+- Stand: `mission_tactical_sandbox_controller.gd` stellt `set_los_debug_overlay_enabled()`, Hotkey `L`, Command-Feedback und Primary3D-Payload bereit. Das Overlay bleibt standardmaessig aus und liest nur Contact/FoW/Terrain-Snapshots.
+- Lokale Pruefung: `task_372_mission_los_debug_overlay_toggle.gd`, `task_202_enemy_security_direction_and_los_patch.gd` und `git diff --check` laufen gruen.
+- Offene Folgearbeit: Spieler-permanente LOS-Hinweise brauchen eigenes Design/FoW-Balancing; dieser Slice bleibt Debug-/Optional-Layer.
+
+### TASK_373-TASK_380 - Mission Visualization Review Followups
 - Status: geplant
-- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Sinnvolle Follow-ups sind als getrennte Tasks 372 bis 380 noch offen.
+- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Sinnvolle offene Follow-ups sind als getrennte Tasks 373 bis 380 angelegt.
 - Stand: Die Review-Snippets werden nicht ungeprueft uebernommen. Fireteam-Orientation, Event-Log, FTL-Gauge, Fireteam-Status, Member-Zeile, Fire-Sector, LOS, Cover, Countdown, Waypoint-Preview, Command-Validation, Contact-Heatmap und MapEditor-Debuglayer sind jeweils als eigene kleine Slices geschnitten.
 - Stand: Architekturgrenze bleibt: UI liest nur Snapshots. `SimulationRoot`, bestehende Resolver, `TacticalCommunicationEvent`, `FireteamBehaviorResolver`, `FireteamOrderVisualizer`, FoW und Terrain-Daten bleiben die Wahrheit.
 - Offene Punkte: Implementierung der einzelnen Tasks, genaue HUD-Platzierung fuer Event-Log/Statuskarten und manuelle Sichtpruefung nach den ersten Visual-Slices.

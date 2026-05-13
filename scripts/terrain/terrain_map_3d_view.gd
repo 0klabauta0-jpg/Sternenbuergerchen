@@ -174,6 +174,11 @@ const SELECTED_UNIT_MARKER_COLOR: Color = Color(0.45, 0.78, 1.0, 0.34)
 const SELECTED_UNIT_MARKER_RADIUS: float = 0.32
 const SELECTED_UNIT_MARKER_HEIGHT: float = 0.035
 const DYNAMIC_ORDER_VISUAL_REFRESH_INTERVAL_MSEC: int = 90
+const MISSION_LOS_DEBUG_SAMPLE_LIMIT: int = 24
+const MISSION_LOS_DEBUG_CLEAR_LINE_COLOR: Color = Color(0.38, 1.0, 0.68, 0.76)
+const MISSION_LOS_DEBUG_BLOCKED_LINE_COLOR: Color = Color(1.0, 0.32, 0.22, 0.82)
+const MISSION_LOS_DEBUG_BLOCKER_MARKER_COLOR: Color = Color(1.0, 0.72, 0.24, 0.46)
+const MISSION_LOS_DEBUG_CONTACT_MARKER_COLOR: Color = Color(0.72, 0.9, 1.0, 0.42)
 
 const LEGACY_MODEL_BY_TYPE: Dictionary = {
 	"wall_straight_se": "corridor_wall",
@@ -349,6 +354,16 @@ var _friendly_aim_direction_by_unit_id: Dictionary = {}
 var _friendly_aim_tile_marker_count: int = 0
 var _friendly_aim_blocker_marker_count: int = 0
 var _friendly_aim_los_line_count: int = 0
+var _mission_los_debug_line_count: int = 0
+var _mission_los_debug_clear_line_count: int = 0
+var _mission_los_debug_blocked_line_count: int = 0
+var _mission_los_debug_blocker_marker_count: int = 0
+var _mission_los_debug_sampled_pair_count: int = 0
+var _mission_los_debug_bounded_skipped_count: int = 0
+var _mission_los_debug_fow_hidden_contact_count: int = 0
+var _mission_los_debug_source_unit_count: int = 0
+var _mission_los_debug_contact_candidate_count: int = 0
+var _mission_los_debug_entries: Array = []
 var _selected_unit_marker_count: int = 0
 var _selected_unit_marker_entries: Array = []
 var _weapon_fire_vfx_visual_count: int = 0
@@ -490,6 +505,7 @@ func render_map(terrain_map_data = null) -> void:
 	_friendly_aim_tile_marker_count = 0
 	_friendly_aim_blocker_marker_count = 0
 	_friendly_aim_los_line_count = 0
+	_reset_mission_los_debug_counters()
 	_selected_unit_marker_count = 0
 	_selected_unit_marker_entries.clear()
 	_weapon_fire_vfx_visual_count = 0
@@ -607,6 +623,22 @@ func _build_order_visual_signature(order_payload: Dictionary) -> String:
 			])
 		unit_parts.sort()
 		parts.append("fire:%s" % "|".join(unit_parts))
+	if bool(order_payload.get("los_debug_overlay_enabled", false)):
+		var los_selected_fireteam_ids: PackedStringArray = _get_string_array_from_variant(order_payload.get("selected_fireteam_ids", PackedStringArray()))
+		var debug_unit_parts: Array = []
+		for unit in _unit_nodes:
+			if unit == null or not (unit is Node2D):
+				continue
+			var fireteam_id: String = _get_unit_fireteam_id(unit)
+			if fireteam_id.is_empty() or not los_selected_fireteam_ids.has(fireteam_id):
+				continue
+			if not _is_unit_world_visible(unit):
+				continue
+			var unit_position: Vector2 = (unit as Node2D).global_position
+			var grid_position: Vector2i = _world_to_grid_position(unit_position)
+			debug_unit_parts.append("%s:%d,%d" % [_get_unit_id(unit), grid_position.x, grid_position.y])
+		debug_unit_parts.sort()
+		parts.append("los_debug:%s:%d" % ["|".join(debug_unit_parts), _contact_payload_apply_count])
 	return "\n".join(parts)
 
 
@@ -614,7 +646,7 @@ func _refresh_dynamic_order_visuals_if_needed() -> void:
 	if _order_payload.is_empty() or _order_root == null:
 		return
 	var selected_fireteam_ids: PackedStringArray = _get_string_array_from_variant(_order_payload.get("selected_fireteam_ids", PackedStringArray()))
-	if selected_fireteam_ids.is_empty() and not bool(_order_payload.get("fire_sector_overlay_enabled", false)):
+	if selected_fireteam_ids.is_empty() and not bool(_order_payload.get("fire_sector_overlay_enabled", false)) and not bool(_order_payload.get("los_debug_overlay_enabled", false)):
 		return
 	var now_msec: int = Time.get_ticks_msec()
 	if now_msec - _last_dynamic_order_visual_refresh_msec < DYNAMIC_ORDER_VISUAL_REFRESH_INTERVAL_MSEC:
@@ -635,6 +667,7 @@ func _build_order_dynamic_visual_signature() -> String:
 	var parts: PackedStringArray = PackedStringArray()
 	parts.append("selected:%s" % ",".join(selected_fireteam_ids))
 	parts.append("fire:%s:%s" % [str(bool(_order_payload.get("fire_sector_overlay_enabled", false))), _get_fire_sector_visual_mode()])
+	parts.append("los_debug:%s:%d" % [str(bool(_order_payload.get("los_debug_overlay_enabled", false))), _contact_payload_apply_count])
 	for unit in _unit_nodes:
 		if unit == null or not (unit is Node2D):
 			continue
@@ -666,6 +699,9 @@ func set_contact_entries(contact_entries: Array, selected_fireteam_ids: PackedSt
 			_contact_entries.append(Dictionary(entry_variant).duplicate(true))
 	_contact_selected_fireteam_ids = selected_fireteam_ids.duplicate()
 	_rebuild_contact_visuals()
+	if bool(_order_payload.get("los_debug_overlay_enabled", false)):
+		_order_dynamic_visual_signature = _build_order_dynamic_visual_signature()
+		_rebuild_order_visuals()
 	_request_viewport_redraw()
 
 
@@ -1029,6 +1065,19 @@ func get_render_snapshot() -> Dictionary:
 		"friendly_fire_sector_los_cache_size": _fire_sector_los_cache.size(),
 		"friendly_fire_sector_blocker_line_limit": FRIENDLY_FIRE_SECTOR_BLOCKER_LINE_LIMIT,
 		"friendly_fire_sector_angle_degrees": FRIENDLY_FIRE_SECTOR_ANGLE_DEGREES,
+		"mission_los_debug_overlay_enabled": bool(_order_payload.get("los_debug_overlay_enabled", false)),
+		"mission_los_debug_line_count": _mission_los_debug_line_count,
+		"mission_los_debug_clear_line_count": _mission_los_debug_clear_line_count,
+		"mission_los_debug_blocked_line_count": _mission_los_debug_blocked_line_count,
+		"mission_los_debug_blocker_marker_count": _mission_los_debug_blocker_marker_count,
+		"mission_los_debug_sampled_pair_count": _mission_los_debug_sampled_pair_count,
+		"mission_los_debug_sample_limit": _get_mission_los_debug_sample_limit(),
+		"mission_los_debug_bounded_skipped_count": _mission_los_debug_bounded_skipped_count,
+		"mission_los_debug_fow_hidden_contact_count": _mission_los_debug_fow_hidden_contact_count,
+		"mission_los_debug_source_unit_count": _mission_los_debug_source_unit_count,
+		"mission_los_debug_contact_candidate_count": _mission_los_debug_contact_candidate_count,
+		"mission_los_debug_entries": _mission_los_debug_entries.duplicate(true),
+		"mission_los_debug_contact_visibility_policy": "selected_fireteams_known_contacts_fow_last_known_only",
 		"selected_unit_marker_count": _selected_unit_marker_count,
 		"selected_unit_marker_entries": _selected_unit_marker_entries.duplicate(true),
 		"weapon_fire_vfx_visual_count": _weapon_fire_vfx_visual_count,
@@ -3260,6 +3309,7 @@ func _rebuild_order_visuals() -> void:
 	_friendly_aim_tile_marker_count = 0
 	_friendly_aim_blocker_marker_count = 0
 	_friendly_aim_los_line_count = 0
+	_reset_mission_los_debug_counters()
 	_weapon_fire_vfx_visual_count = 0
 	_weapon_fire_vfx_entries.clear()
 	_feedback_bubble_visual_count = 0
@@ -3286,6 +3336,7 @@ func _rebuild_order_visuals() -> void:
 
 	_add_selected_fireteam_unit_markers()
 	_add_selected_fireteam_aim_visuals()
+	_add_mission_los_debug_visuals()
 	_add_fireteam_orientation_visuals(fireteam_anchor_entries)
 
 	for area_variant in Array(_order_payload.get("area_order_dicts", [])):
@@ -3822,6 +3873,199 @@ func _add_selected_fireteam_aim_visuals() -> void:
 			"visual_only": true,
 		})
 	_prune_stabilized_friendly_aim_directions(seen_unit_ids)
+
+
+func _reset_mission_los_debug_counters() -> void:
+	_mission_los_debug_line_count = 0
+	_mission_los_debug_clear_line_count = 0
+	_mission_los_debug_blocked_line_count = 0
+	_mission_los_debug_blocker_marker_count = 0
+	_mission_los_debug_sampled_pair_count = 0
+	_mission_los_debug_bounded_skipped_count = 0
+	_mission_los_debug_fow_hidden_contact_count = 0
+	_mission_los_debug_source_unit_count = 0
+	_mission_los_debug_contact_candidate_count = 0
+	_mission_los_debug_entries.clear()
+
+
+func _add_mission_los_debug_visuals() -> void:
+	if not bool(_order_payload.get("los_debug_overlay_enabled", false)):
+		return
+	var selected_fireteam_ids: PackedStringArray = _get_string_array_from_variant(_order_payload.get("selected_fireteam_ids", PackedStringArray()))
+	var source_units: Array = _get_mission_los_debug_source_units(selected_fireteam_ids)
+	_mission_los_debug_source_unit_count = source_units.size()
+	if source_units.is_empty():
+		return
+	var contact_candidates: Array = _get_mission_los_debug_contact_candidates(selected_fireteam_ids)
+	_mission_los_debug_contact_candidate_count = contact_candidates.size()
+	if contact_candidates.is_empty():
+		return
+	var sample_limit: int = _get_mission_los_debug_sample_limit()
+	var possible_pair_count: int = source_units.size() * contact_candidates.size()
+	for unit_variant in source_units:
+		if _mission_los_debug_sampled_pair_count >= sample_limit:
+			break
+		var source_unit := unit_variant as Node
+		if source_unit == null:
+			continue
+		for contact_variant in contact_candidates:
+			if _mission_los_debug_sampled_pair_count >= sample_limit:
+				break
+			if typeof(contact_variant) != TYPE_DICTIONARY:
+				continue
+			var contact: Dictionary = Dictionary(contact_variant)
+			var entry: Dictionary = _add_mission_los_debug_pair_visual(source_unit, contact, _mission_los_debug_sampled_pair_count)
+			if entry.is_empty():
+				continue
+			_mission_los_debug_sampled_pair_count += 1
+			_mission_los_debug_entries.append(entry)
+	_mission_los_debug_bounded_skipped_count = maxi(possible_pair_count - _mission_los_debug_sampled_pair_count, 0)
+
+
+func _get_mission_los_debug_source_units(selected_fireteam_ids: PackedStringArray) -> Array:
+	var result: Array = []
+	var debug_unit_ids: PackedStringArray = _get_string_array_from_variant(_order_payload.get("los_debug_unit_ids", PackedStringArray()))
+	var hovered_unit_id: String = String(_order_payload.get("los_debug_hovered_unit_id", "")).strip_edges()
+	if not hovered_unit_id.is_empty() and not debug_unit_ids.has(hovered_unit_id):
+		debug_unit_ids.append(hovered_unit_id)
+	var use_unit_filter: bool = not debug_unit_ids.is_empty()
+	for unit in _unit_nodes:
+		if unit == null or not (unit is Node2D):
+			continue
+		if not _is_unit_world_visible(unit):
+			continue
+		var unit_id: String = _get_unit_id(unit)
+		if use_unit_filter:
+			if debug_unit_ids.has(unit_id):
+				result.append(unit)
+			continue
+		var fireteam_id: String = _get_unit_fireteam_id(unit)
+		if fireteam_id.is_empty() or not selected_fireteam_ids.has(fireteam_id):
+			continue
+		result.append(unit)
+	return result
+
+
+func _get_mission_los_debug_contact_candidates(selected_fireteam_ids: PackedStringArray) -> Array:
+	var candidates: Array = []
+	var selected_lookup: Dictionary = {}
+	for fireteam_id_variant in selected_fireteam_ids:
+		selected_lookup[String(fireteam_id_variant).strip_edges().to_lower()] = true
+	var contact_source_entries: Array = _contact_entries.duplicate(true)
+	var current_contact_ids: Dictionary = {}
+	for current_variant in _contact_entries:
+		if typeof(current_variant) != TYPE_DICTIONARY:
+			continue
+		var current_contact: Dictionary = Dictionary(current_variant)
+		var current_id: String = String(current_contact.get("target_id", current_contact.get("unit_id", ""))).strip_edges()
+		if not current_id.is_empty():
+			current_contact_ids[current_id] = true
+	if _is_fog_of_war_visual_filter_active():
+		for last_known_variant in _fow_last_known_contacts:
+			if typeof(last_known_variant) != TYPE_DICTIONARY:
+				continue
+			var last_known_contact: Dictionary = Dictionary(last_known_variant)
+			var last_known_id: String = String(last_known_contact.get("target_id", last_known_contact.get("unit_id", ""))).strip_edges()
+			if last_known_id.is_empty() or current_contact_ids.has(last_known_id):
+				continue
+			contact_source_entries.append(last_known_contact)
+
+	var seen_contact_keys: Dictionary = {}
+	for contact_variant in contact_source_entries:
+		if typeof(contact_variant) != TYPE_DICTIONARY:
+			continue
+		var contact: Dictionary = Dictionary(contact_variant)
+		var fireteam_id: String = String(contact.get("fireteam_id", "")).strip_edges().to_lower()
+		if not selected_lookup.is_empty() and (fireteam_id.is_empty() or not selected_lookup.has(fireteam_id)):
+			continue
+		if not _fow_allows_contact_visual(contact):
+			_mission_los_debug_fow_hidden_contact_count += 1
+			continue
+		var position_variant: Variant = contact.get("last_known_position", contact.get("position", null))
+		if typeof(position_variant) != TYPE_VECTOR2:
+			continue
+		var target_id: String = String(contact.get("target_id", contact.get("unit_id", ""))).strip_edges()
+		if target_id.is_empty():
+			continue
+		var position: Vector2 = Vector2(position_variant)
+		var contact_key: String = "%s:%d,%d" % [target_id, roundi(position.x), roundi(position.y)]
+		if seen_contact_keys.has(contact_key):
+			continue
+		seen_contact_keys[contact_key] = true
+		candidates.append(contact.duplicate(true))
+	return candidates
+
+
+func _add_mission_los_debug_pair_visual(source_unit: Node, contact: Dictionary, sample_index: int) -> Dictionary:
+	if _order_root == null or _terrain_map_data == null or not (source_unit is Node2D):
+		return {}
+	var origin_position: Vector2 = (source_unit as Node2D).global_position
+	var target_position: Vector2 = Vector2(contact.get("last_known_position", contact.get("position", Vector2.ZERO)))
+	var origin_grid: Vector2i = _world_to_grid_position(origin_position)
+	var target_grid: Vector2i = _world_to_grid_position(target_position)
+	if _terrain_map_data.call("get_tile_at_grid", origin_grid) == null or _terrain_map_data.call("get_tile_at_grid", target_grid) == null:
+		return {}
+	var blocker_grid: Vector2i = _find_fire_sector_los_blocker_grid_cached(origin_grid, target_grid)
+	var sentinel := Vector2i(2147483647, 2147483647)
+	var blocked: bool = blocker_grid != sentinel
+	var line_tip_position: Vector2 = target_position
+	var blocker_position: Variant = null
+	if blocked:
+		line_tip_position = _get_tile_world_position_for_grid(blocker_grid, _grid_float_to_world(Vector2(blocker_grid)))
+		blocker_position = line_tip_position
+		if _add_world_tile_marker(
+			_order_root,
+			line_tip_position,
+			MISSION_LOS_DEBUG_BLOCKER_MARKER_COLOR,
+			"MissionLOSDebugBlocker_%d_%d_%d" % [blocker_grid.x, blocker_grid.y, sample_index],
+			0.125,
+			0.54
+		):
+			_mission_los_debug_blocker_marker_count += 1
+	var source_unit_id: String = _get_unit_id(source_unit)
+	var target_id: String = String(contact.get("target_id", contact.get("unit_id", ""))).strip_edges()
+	_add_line3d(
+		_order_root,
+		_world_to_surface_3d_position(origin_position, 0.98),
+		_world_to_surface_3d_position(line_tip_position, 0.98),
+		MISSION_LOS_DEBUG_BLOCKED_LINE_COLOR if blocked else MISSION_LOS_DEBUG_CLEAR_LINE_COLOR,
+		"MissionLOSDebug_%s_%s_%d" % [_sanitize_node_name(source_unit_id), _sanitize_node_name(target_id), sample_index]
+	)
+	_add_marker3d(
+		_order_root,
+		target_position,
+		MISSION_LOS_DEBUG_CONTACT_MARKER_COLOR,
+		"MissionLOSDebugContact_%s_%d" % [_sanitize_node_name(target_id), sample_index],
+		0.075,
+		0.045,
+		8
+	)
+	_mission_los_debug_line_count += 1
+	if blocked:
+		_mission_los_debug_blocked_line_count += 1
+	else:
+		_mission_los_debug_clear_line_count += 1
+	return {
+		"source_unit_id": source_unit_id,
+		"source_fireteam_id": _get_unit_fireteam_id(source_unit),
+		"target_id": target_id,
+		"detection_state": String(contact.get("detection_state", "unknown")).strip_edges().to_lower(),
+		"origin_position": origin_position,
+		"target_position": target_position,
+		"origin_grid": origin_grid,
+		"target_grid": target_grid,
+		"line_state": "blocked" if blocked else "clear",
+		"blocked": blocked,
+		"blocker_grid": blocker_grid if blocked else Vector2i(-1, -1),
+		"blocker_position": blocker_position,
+		"fow_last_known": bool(contact.get("fow_last_known", false)),
+		"sample_index": sample_index,
+		"visual_only": true,
+	}
+
+
+func _get_mission_los_debug_sample_limit() -> int:
+	return clampi(int(_order_payload.get("los_debug_sample_limit", MISSION_LOS_DEBUG_SAMPLE_LIMIT)), 1, 64)
 
 
 func _stabilize_friendly_aim_direction(unit_id: String, raw_direction: Vector2) -> Vector2:

@@ -59,7 +59,7 @@ const DROPSHIP_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Is
 
 const ALL_FIRETEAM_LABEL: String = "ALL"
 const APPROACH_ANGLES: PackedStringArray = ["NW", "NE", "SW", "SE"]
-const HOTKEY_LEGEND: String = "LMB Select/Center | Doubleclick Center | RMB Order | RMB Drag Area | Shift+RMB Append | CTRL+LMB Add | DEL/Del Button Order | T Sort | G GO"
+const HOTKEY_LEGEND: String = "LMB Select/Center | Doubleclick Center | RMB Order | RMB Drag Area | Shift+RMB Append | CTRL+LMB Add | C Fire Arc | L LOS | DEL Order | T Sort | G GO"
 const LIVE_ORDER_PHASE_INDEX: int = 1
 const PHASE_PLANNING_ENABLED: bool = false
 const FRIENDLY_TEAM_ID: String = "team_alpha"
@@ -207,6 +207,7 @@ var _current_approach_index: int = 0
 var _selected_fireteam_ids: PackedStringArray = []
 var _focused_fireteam_id: String = ""
 var _fire_sector_overlay_enabled: bool = false
+var _los_debug_overlay_enabled: bool = false
 var _fireteamleader_feedback_bubbles: Array = []
 var _fireteamleader_feedback_sequence: int = 0
 var _tactical_communication_resolver = null
@@ -518,6 +519,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_C:
 			_toggle_fire_sector_overlay()
 			get_viewport().set_input_as_handled()
+		KEY_L:
+			_toggle_los_debug_overlay()
+			get_viewport().set_input_as_handled()
 		KEY_T:
 			_on_sort_fireteam_pressed()
 			get_viewport().set_input_as_handled()
@@ -568,6 +572,23 @@ func set_fire_sector_overlay_enabled(enabled: bool) -> void:
 
 func _toggle_fire_sector_overlay() -> void:
 	set_fire_sector_overlay_enabled(not _fire_sector_overlay_enabled)
+
+
+func is_los_debug_overlay_enabled() -> bool:
+	return _los_debug_overlay_enabled
+
+
+func set_los_debug_overlay_enabled(enabled: bool) -> void:
+	if _los_debug_overlay_enabled == enabled:
+		return
+	_los_debug_overlay_enabled = enabled
+	_last_command_text = "LOS DEBUG ON" if _los_debug_overlay_enabled else "LOS DEBUG OFF"
+	_refresh_order_visuals()
+	_update_ui()
+
+
+func _toggle_los_debug_overlay() -> void:
+	set_los_debug_overlay_enabled(not _los_debug_overlay_enabled)
 
 
 func issue_move() -> bool:
@@ -9359,6 +9380,30 @@ func get_fire_sector_overlay_snapshot() -> Dictionary:
 	}
 
 
+func get_los_debug_overlay_snapshot() -> Dictionary:
+	var primary_snapshot: Dictionary = {}
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null and primary_3d_view.has_method("get_render_snapshot"):
+		var render_snapshot: Dictionary = Dictionary(primary_3d_view.call("get_render_snapshot"))
+		primary_snapshot = {
+			"enabled": bool(render_snapshot.get("mission_los_debug_overlay_enabled", false)),
+			"line_count": int(render_snapshot.get("mission_los_debug_line_count", 0)),
+			"clear_line_count": int(render_snapshot.get("mission_los_debug_clear_line_count", 0)),
+			"blocked_line_count": int(render_snapshot.get("mission_los_debug_blocked_line_count", 0)),
+			"sample_limit": int(render_snapshot.get("mission_los_debug_sample_limit", 0)),
+			"bounded_skipped_count": int(render_snapshot.get("mission_los_debug_bounded_skipped_count", 0)),
+			"fow_hidden_contact_count": int(render_snapshot.get("mission_los_debug_fow_hidden_contact_count", 0)),
+			"contact_visibility_policy": String(render_snapshot.get("mission_los_debug_contact_visibility_policy", "")),
+		}
+	return {
+		"enabled": _los_debug_overlay_enabled,
+		"selected_fireteam_ids": Array(_selected_fireteam_ids),
+		"primary_3d": primary_snapshot,
+		"contact_visibility_policy": "selected_fireteams_known_contacts_fow_last_known_only",
+		"read_only": true,
+	}
+
+
 func get_command_feedback_snapshot() -> Dictionary:
 	return {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -9382,6 +9427,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"visualized_waypoint_count": get_visualized_waypoints_snapshot().size(),
 		"visualized_area_order_count": get_visualized_area_orders_snapshot().size(),
 		"fire_sector_overlay": get_fire_sector_overlay_snapshot(),
+		"los_debug_overlay": get_los_debug_overlay_snapshot(),
 		"fireteam_orientation_count": get_fireteam_orientation_snapshot().size(),
 		"fireteam_orientations": get_fireteam_orientation_snapshot(),
 		"active_area_defense": get_active_area_defense_snapshot(),
@@ -9605,6 +9651,8 @@ func _sync_primary_3d_order_visuals() -> void:
 			"selected_fireteam_ids": _selected_fireteam_ids,
 			"fire_sector_overlay_enabled": _fire_sector_overlay_enabled,
 			"fire_sector_visual_mode": "los_line_only",
+			"los_debug_overlay_enabled": _los_debug_overlay_enabled,
+			"los_debug_sample_limit": 24,
 			"fireteam_anchors": _build_fireteam_anchor_visualization_entries(),
 			"plan_dicts": _serialize_order_plans(),
 			"area_order_dicts": _serialize_area_orders(),
