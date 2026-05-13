@@ -228,6 +228,7 @@ var _has_selected_tile: bool = false
 var _selected_tile_grid_position: Vector2i = Vector2i.ZERO
 var _selected_tile_world_position: Vector2 = Vector2.ZERO
 var _is_lz_placement_armed: bool = false
+var _lz_placement_craft_id: String = ""
 var _is_target_placement_armed: bool = false
 var _drop_ship_requested: bool = false
 var _drop_ship_staged: bool = false
@@ -1624,6 +1625,9 @@ func try_place_target_from_screen_position(screen_position: Vector2) -> bool:
 
 
 func _place_lz_from_screen_position(screen_position: Vector2) -> bool:
+	var armed_craft_id: String = _lz_placement_craft_id.strip_edges()
+	if not armed_craft_id.is_empty() and armed_craft_id != _mission_drop_craft_id.strip_edges():
+		_select_mission_dropship_craft(armed_craft_id, false)
 	var tile_context: Dictionary = _build_tile_context_from_screen_position(screen_position)
 	if _has_primary_grid_for_command_selection() and tile_context.is_empty():
 		_last_command_text = "NO TILE UNDER CURSOR"
@@ -1634,6 +1638,7 @@ func _place_lz_from_screen_position(screen_position: Vector2) -> bool:
 		_set_selected_tile_context(tile_context, "", false, false)
 	_has_lz_position = true
 	_is_lz_placement_armed = false
+	_lz_placement_craft_id = ""
 	var lz_label: String = _build_mission_dropship_lz_name(_mission_drop_craft_id, _mission_drop_display_name)
 	_last_command_text = "%s SET %s @ %s" % [lz_label, _get_approach_angle_name(), _format_world_position(_lz_position)]
 	_store_selected_mission_dropship_plan()
@@ -1860,11 +1865,16 @@ func _on_set_lz_pressed() -> void:
 		_update_ui()
 		return
 	_is_lz_placement_armed = not _is_lz_placement_armed
+	_lz_placement_craft_id = _mission_drop_craft_id.strip_edges() if _is_lz_placement_armed else ""
 	_last_command_text = "CLICK MAP FOR LZ TILE" if _is_lz_placement_armed else "LZ PLACEMENT CANCELLED"
 	_update_ui()
 
 
 func _on_call_dropship_pressed() -> void:
+	_request_selected_mission_dropship_drop(false)
+
+
+func _request_selected_mission_dropship_drop(ignore_global_cooldown: bool = false) -> void:
 	if not _can_edit_planning():
 		_last_command_text = "OBSERVER MODE"
 		_update_ui()
@@ -1873,7 +1883,7 @@ func _on_call_dropship_pressed() -> void:
 		_last_command_text = "DROP SHIP NOT ON MISSION MAP"
 		_update_ui()
 		return
-	if not preview_mode and _drop_ship_cooldown_remaining > 0.0:
+	if not ignore_global_cooldown and not preview_mode and _drop_ship_cooldown_remaining > 0.0:
 		_last_command_text = "DROP COOLDOWN %.1FS" % _drop_ship_cooldown_remaining
 		_update_ui()
 		return
@@ -1885,13 +1895,13 @@ func _on_call_dropship_pressed() -> void:
 	_mission_drop_return_requested = false
 	if preview_mode:
 		_drop_ship_requested = true
-		if _try_start_drop_sequence():
+		if _try_start_drop_sequence(ignore_global_cooldown):
 			_last_command_text = "DROP INBOUND %s" % _get_approach_angle_name()
 		else:
 			_last_command_text = "DROP %s" % _get_approach_angle_name()
 	elif _has_live_drop_sequence_for_craft(_mission_drop_craft_id):
 		_last_command_text = "DROP ALREADY ACTIVE"
-	elif _try_start_drop_sequence():
+	elif _try_start_drop_sequence(ignore_global_cooldown):
 		_drop_ship_requested = true
 		_last_command_text = "DROP INBOUND %s" % _get_approach_angle_name()
 	else:
@@ -3008,7 +3018,9 @@ func _apply_fireteam_mini_stance_toggle(card: Control, fireteam_id: String) -> v
 		button.button_pressed = current_stance == String(stance_id)
 		button.set_meta("mission_fireteam_stance_button", true)
 		button.set_meta("fireteam_id", normalized_fireteam_id)
-		button.set_meta("tactical_stance_id", String(stance_id))
+		button.set_meta("mission_fireteam_stance_id", String(stance_id))
+		if button.has_meta("tactical_stance_id"):
+			button.remove_meta("tactical_stance_id")
 		META_UI_SKIN_SCRIPT.style_tactical_button(button, button.button_pressed)
 		var press_callable := Callable(self, "_on_fireteam_mini_stance_button_pressed").bind(normalized_fireteam_id, String(stance_id))
 		if not button.pressed.is_connected(press_callable):
@@ -5445,6 +5457,7 @@ func _populate_mission_dropship_passenger_content(card_panel: PanelContainer, ca
 		return
 	var payload_ids: Array = _sanitize_drop_payload_ids(Array(card.get("embarked_unit_ids", [])))
 	host.set_meta("mission_dropship_passenger_content", true)
+	_append_mission_dropship_card_command_row(host, card)
 	var feedback_text: String = _get_mission_dropship_card_feedback_text(card)
 	if not feedback_text.is_empty():
 		var feedback_label := Label.new()
@@ -5476,6 +5489,71 @@ func _populate_mission_dropship_passenger_content(card_panel: PanelContainer, ca
 		var fireteam_card := _build_mission_dropship_fireteam_payload_card(fireteam_id, group_ids, card)
 		if fireteam_card != null:
 			host.add_child(fireteam_card)
+
+
+func _append_mission_dropship_card_command_row(host: VBoxContainer, card: Dictionary) -> void:
+	if host == null:
+		return
+	var craft_id: String = String(card.get("craft_id", "")).strip_edges()
+	if craft_id.is_empty():
+		return
+	var row := HBoxContainer.new()
+	row.name = "MissionDropshipCardCommandRow"
+	row.add_theme_constant_override("separation", 2)
+	row.set_meta("mission_dropship_card_command_row", true)
+	row.set_meta("mission_dropship_craft_id", craft_id)
+	host.add_child(row)
+
+	var lz_button := _build_mission_dropship_card_command_button(
+		"LZ",
+		"Set landing zone for this dropship.",
+		not _can_request_mission_dropship_card_lz(card),
+		Callable(self, "_on_mission_dropship_card_set_lz_pressed").bind(craft_id),
+		craft_id,
+		"set_lz"
+	)
+	row.add_child(lz_button)
+	for approach_angle in APPROACH_ANGLES:
+		row.add_child(
+			_build_mission_dropship_card_command_button(
+				String(approach_angle),
+				"Set %s approach for this dropship." % String(approach_angle),
+				not _can_request_mission_dropship_card_lz(card),
+				Callable(self, "_on_mission_dropship_card_approach_pressed").bind(craft_id, String(approach_angle)),
+				craft_id,
+				"approach_%s" % String(approach_angle).to_lower()
+			)
+		)
+	var drop_button := _build_mission_dropship_card_command_button(
+		_build_mission_dropship_card_drop_button_label(card),
+		"Drop this dropship payload at its own LZ.",
+		not _can_request_mission_dropship_card_drop(card),
+		Callable(self, "_on_mission_dropship_card_drop_pressed").bind(craft_id),
+		craft_id,
+		"drop"
+	)
+	row.add_child(drop_button)
+
+
+func _build_mission_dropship_card_command_button(text: String, tooltip_text: String, disabled: bool, callback: Callable, craft_id: String, action_id: String) -> Button:
+	var button := Button.new()
+	button.name = "MissionDropshipCardCommand_%s_%s" % [_sanitize_node_name(craft_id), _sanitize_node_name(action_id)]
+	button.text = text
+	button.tooltip_text = tooltip_text
+	button.disabled = disabled
+	button.custom_minimum_size = Vector2(27.0, 18.0)
+	button.add_theme_font_size_override("font_size", 7)
+	button.set_meta("mission_dropship_card_command_button", true)
+	button.set_meta("mission_dropship_craft_id", craft_id)
+	button.set_meta("mission_dropship_card_command", action_id)
+	button.mouse_filter = Control.MOUSE_FILTER_STOP
+	if callback.is_valid() and not button.pressed.is_connected(callback):
+		button.pressed.connect(callback)
+	if not disabled and action_id == "drop":
+		META_UI_SKIN_SCRIPT.style_transfer_button(button, true)
+	else:
+		META_UI_SKIN_SCRIPT.style_secondary_button(button)
+	return button
 
 
 func _group_payload_unit_ids_by_fireteam(payload_ids: Array) -> Dictionary:
@@ -5685,6 +5763,42 @@ func _can_request_mission_dropship_return(card: Dictionary) -> bool:
 	return String(card.get("state", "")).strip_edges().to_lower() == "waiting"
 
 
+func _can_request_mission_dropship_card_lz(card: Dictionary) -> bool:
+	var craft_id: String = String(card.get("craft_id", "")).strip_edges()
+	if craft_id.is_empty() or _is_mission_dropship_card_in_transit(card):
+		return false
+	if _has_live_drop_sequence_for_craft(craft_id):
+		return false
+	return String(card.get("state", "")).strip_edges().to_lower() == "waiting"
+
+
+func _can_request_mission_dropship_card_drop(card: Dictionary) -> bool:
+	if not _can_request_mission_dropship_card_lz(card):
+		return false
+	if not bool(card.get("has_lz_position", false)):
+		return false
+	if Array(card.get("embarked_unit_ids", [])).is_empty() and int(card.get("passenger_count", 0)) <= 0:
+		return false
+	return true
+
+
+func _build_mission_dropship_card_drop_button_label(card: Dictionary) -> String:
+	var state: String = String(card.get("state", "")).strip_edges().to_lower()
+	match state:
+		DROP_SEQUENCE_INBOUND:
+			return "In"
+		DROP_SEQUENCE_LANDED:
+			return "TD"
+		DROP_SEQUENCE_UNLOADING:
+			return "Out"
+		DROP_SEQUENCE_OUTBOUND:
+			return "RTB"
+		DROP_SEQUENCE_COMPLETE:
+			return "Done"
+		_:
+			return "Drop"
+
+
 func _restore_mission_dropship_action_button_mouse_filters(card_panel: PanelContainer) -> void:
 	if card_panel == null:
 		return
@@ -5696,6 +5810,20 @@ func _restore_mission_dropship_action_button_mouse_filters(card_panel: PanelCont
 		if button == null or not button.visible:
 			continue
 		button.mouse_filter = Control.MOUSE_FILTER_STOP
+	for node in _collect_node_tree(card_panel):
+		var command_button := node as Button
+		if command_button != null and bool(command_button.get_meta("mission_dropship_card_command_button", false)):
+			command_button.mouse_filter = Control.MOUSE_FILTER_STOP
+
+
+func _collect_node_tree(root_node: Node) -> Array:
+	var result: Array = []
+	if root_node == null:
+		return result
+	result.append(root_node)
+	for child in root_node.get_children():
+		result.append_array(_collect_node_tree(child))
+	return result
 
 
 func _ensure_mission_control_craft_summary() -> PanelContainer:
@@ -5796,6 +5924,41 @@ func _on_mission_dropship_card_gui_input(event: InputEvent, craft_id: String) ->
 		if key_event.pressed and (key_event.keycode == KEY_ENTER or key_event.keycode == KEY_SPACE):
 			if _select_mission_dropship_craft(craft_id, true):
 				get_viewport().set_input_as_handled()
+
+
+func _on_mission_dropship_card_set_lz_pressed(craft_id: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return
+	if not _select_mission_dropship_craft(normalized_craft_id, false):
+		return
+	if not _can_edit_planning():
+		_last_command_text = "OBSERVER MODE"
+		_update_ui()
+		return
+	_is_lz_placement_armed = true
+	_lz_placement_craft_id = normalized_craft_id
+	_last_command_text = "CLICK MAP FOR LZ TILE: %s" % _mission_drop_display_name
+	_refresh_button_state()
+	_update_ui()
+
+
+func _on_mission_dropship_card_approach_pressed(craft_id: String, angle_name: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return
+	if not _select_mission_dropship_craft(normalized_craft_id, false):
+		return
+	_select_approach_angle(angle_name)
+
+
+func _on_mission_dropship_card_drop_pressed(craft_id: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return
+	if not _select_mission_dropship_craft(normalized_craft_id, false):
+		return
+	_request_selected_mission_dropship_drop(true)
 
 
 func _on_mission_dropship_return_pressed(craft_id: String) -> void:
@@ -7445,7 +7608,22 @@ func _apply_compact_mission_control_layout() -> void:
 		fireteam_mini_panel.clip_contents = false
 		_apply_fireteam_mini_overlay_style()
 	_apply_fireteam_panel_action_button_contract()
+	_apply_card_bound_mission_control_layout()
 	_enforce_drop_light_fixed_hud_layout()
+
+
+func _apply_card_bound_mission_control_layout() -> void:
+	for path in [
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicStatusLabel",
+	]:
+		var control := get_node_or_null(path) as Control
+		if control == null:
+			continue
+		control.visible = false
+		control.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		control.set_meta("mission_control_card_bound_hidden", true)
 
 
 func _apply_command_grid_hierarchy_order(command_grid: GridContainer) -> void:
@@ -13389,7 +13567,7 @@ func _maybe_bootstrap_live_drop() -> void:
 		_live_drop_bootstrap_consumed = true
 
 
-func _try_start_drop_sequence() -> bool:
+func _try_start_drop_sequence(ignore_global_cooldown: bool = false) -> bool:
 	if _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND:
 		_handoff_active_drop_sequence_to_card()
 	if _has_live_drop_sequence_for_craft(_mission_drop_craft_id):
@@ -13398,7 +13576,7 @@ func _try_start_drop_sequence() -> bool:
 		_store_primary_drop_sequence_as_parallel()
 	if not _has_lz_position:
 		return false
-	if not preview_mode and _drop_ship_cooldown_remaining > 0.0:
+	if not ignore_global_cooldown and not preview_mode and _drop_ship_cooldown_remaining > 0.0:
 		return false
 	if not preview_mode and _live_drop_bootstrap_consumed and _drop_sequence_phase == DROP_SEQUENCE_COMPLETE:
 		return false

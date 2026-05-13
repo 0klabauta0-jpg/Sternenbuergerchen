@@ -405,6 +405,15 @@
 - Risiken: Der Anflugvektor ist eine breite transparente Linie; eine gestrichelte Shader-/Materialvariante bleibt optionaler Visual-Polish.
 - Lokale Pruefung: `task_393_direct_dropship_independence_lz_vector.gd`, `task_392_parallel_boarding_transit_feedback.gd`, `task_390_homebase_direct_mission_transit_cards.gd`, `task_388_homebase_fireteam_roster_shipcard_polish.gd`, `task_385_homebase_direct_return_isolation.gd`, `bugfix_mission_multi_dropship_cards.gd`, `bugfix_mission_dropship_plans_and_facing.gd` und `git diff --check` laufen gruen.
 
+### TASK_394 - Per Craft Shipcard Commands
+- Status: implementiert im Arbeitsstand
+- Stand: Homebase-Shipcard-`Send` uebergibt jetzt ein craft-spezifisches Direct-Craft an `MetaLayerFlow`. Der erste Send startet bzw. aktualisiert die aktive Mission im Hintergrund und laesst die Homebase sichtbar, damit andere Dropships sofort weiter boarden oder senden koennen.
+- Stand: Direct-`to_mission`-Transfers bleiben pro Craft getrennt: Homebase-Shipcards bleiben waehrend des Flugs grau mit eigenem Fortschritt, Mission-`mission_drop_cards` behalten eigene ETA/Progress/Payloads, und ein zweiter Send ersetzt den ersten nicht.
+- Stand: Mission-Dropshipkarten besitzen eigene kleine `LZ`-, `NW/NE/SW/SE`- und `Drop`-Buttons. LZ-Arming speichert das Ziel-Craft bis zum Map-Klick; Card-`Drop` startet nur dieses Craft und blockiert andere wartende Dropships nicht ueber einen globalen Cooldown.
+- Stand: Die alten `#18 Mission Control`-Dropship-Controls bleiben als versteckter Kompatibilitaetspfad im Szenenbaum, sind aber nicht mehr die sichtbare Spielersteuerung. Mini-Fireteam-Stance-Toggles nutzen einen eigenen Meta-Key, damit der HUD-Layout-Contract weiterhin die grossen Stance-Buttons prueft.
+- Risiken: Eine neue Nutzung des freigeraeumten `#18`-Fensters bleibt ein Folge-Polish. Die versteckten Legacy-Buttons sollten erst entfernt werden, wenn alte Command-/Help-Contracts umgezogen sind.
+- Lokale Pruefung: `task_394_per_craft_shipcard_commands.gd`, `task_393_direct_dropship_independence_lz_vector.gd`, `task_392_parallel_boarding_transit_feedback.gd`, `bugfix_mission_multi_dropship_cards.gd`, `task_390_homebase_direct_mission_transit_cards.gd`, `task_180_mission_drop_light_fixed_hud_layout_verifier.gd` und `git diff --check` laufen gruen.
+
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
 - Stand: Dropship-Visuals bauen ihre Dirty-Signatur wieder fehlerfrei, geplante LZs bleiben auch bei offmap/hidden Craft sichtbar, und Multi-Dropship-Payloads werden aus dem rohen Mission-Card-State statt aus stale Selected-Card-State uebernommen.

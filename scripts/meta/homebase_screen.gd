@@ -86,6 +86,7 @@ var _homebase_dispatch_target_by_craft: Dictionary = {}
 var _homebase_direct_boarding_state_by_fireteam_id: Dictionary = {}
 var _homebase_direct_boarding_refresh_seconds: float = 0.0
 var _homebase_direct_boarding_force_refresh: bool = false
+var _pending_homebase_direct_mission_craft_id: String = ""
 var _member_loadout_by_unit_id: Dictionary = {}
 var _homebase_loadout_preview_texture_cache: Dictionary = {}
 var _roster_sort_mode: String = HOMEBASE_ROSTER_SORT_NAME_ASC
@@ -452,14 +453,25 @@ func get_homebase_direct_staging_snapshot() -> Dictionary:
 	}
 
 
-func can_request_mission_start() -> bool:
+func can_request_mission_start(craft_id: String = "") -> bool:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if not normalized_craft_id.is_empty():
+		return _mission_launch_ready or _has_homebase_direct_launch_payload_for_craft(normalized_craft_id)
 	return _mission_launch_ready or _has_homebase_direct_launch_payload()
 
 
-func request_mission_start() -> void:
-	if not can_request_mission_start():
+func request_mission_start(craft_id: String = "") -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if not can_request_mission_start(normalized_craft_id):
 		return
+	_pending_homebase_direct_mission_craft_id = normalized_craft_id
 	mission_start_requested.emit()
+
+
+func consume_homebase_direct_mission_craft_id() -> String:
+	var craft_id: String = _pending_homebase_direct_mission_craft_id.strip_edges()
+	_pending_homebase_direct_mission_craft_id = ""
+	return craft_id
 
 
 func confirm_selection() -> void:
@@ -2913,7 +2925,7 @@ func _on_send_pilot_button_pressed(craft_id: String) -> void:
 			_build_display_name(pilot_id),
 			_build_unit_ids_for_fireteams(_get_homebase_direct_payload_fireteam_ids_for_craft(normalized_craft_id)).size(),
 		]
-		request_mission_start()
+		request_mission_start(normalized_craft_id)
 		return
 	var cargo_text: String = _build_cargo_display_name(craft_def, _get_loaded_cargo_id(normalized_craft_id))
 	_aircraft_feedback_text = "%s launched toward FOB%s." % [

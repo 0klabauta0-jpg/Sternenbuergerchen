@@ -314,11 +314,13 @@ func _on_homebase_team_confirmed(selected_unit_ids: PackedStringArray) -> void:
 
 func _on_homebase_mission_start_requested() -> void:
 	var had_preview_deployed_payload: bool = _has_preview_deployed_mission_payload()
+	var requested_direct_craft_id: String = _consume_homebase_direct_mission_craft_id()
 	_sync_homebase_direct_staging_from_screen()
-	var payload_source: String = MISSION_DROP_SOURCE_HOMEBASE_DIRECT if _has_homebase_direct_payload_from_screen() else MISSION_DROP_SOURCE_HOMEBASE_DIRECT_THEN_FOB
+	var payload_source: String = MISSION_DROP_SOURCE_HOMEBASE_DIRECT if _has_homebase_direct_payload_from_screen(requested_direct_craft_id) else MISSION_DROP_SOURCE_HOMEBASE_DIRECT_THEN_FOB
 	_sync_fob_dropship_state_into_mission_planning(
 		not had_preview_deployed_payload,
-		payload_source
+		payload_source,
+		requested_direct_craft_id
 	)
 	if not _has_mission_start_payload():
 		return
@@ -327,7 +329,10 @@ func _on_homebase_mission_start_requested() -> void:
 		_sync_homebase_direct_mission_drop_transport_fields()
 		_refresh_homebase_screen()
 	_begin_active_mission_timer()
+	var keep_homebase_visible: bool = not requested_direct_craft_id.is_empty() and _current_meta_view == "homebase"
 	_start_or_update_active_mission()
+	if keep_homebase_visible:
+		_show_homebase()
 
 
 func _on_homebase_aircraft_add_requested(base_craft_type: String) -> void:
@@ -1846,8 +1851,15 @@ func _peek_homebase_direct_drop_state(craft_id: String = "") -> Dictionary:
 	return Dictionary(homebase_screen.call("build_homebase_direct_drop_state")).duplicate(true)
 
 
-func _has_homebase_direct_payload_from_screen() -> bool:
-	var drop_state: Dictionary = _peek_homebase_direct_drop_state()
+func _consume_homebase_direct_mission_craft_id() -> String:
+	var homebase_screen = _get_homebase_screen()
+	if homebase_screen == null or not homebase_screen.has_method("consume_homebase_direct_mission_craft_id"):
+		return ""
+	return String(homebase_screen.call("consume_homebase_direct_mission_craft_id")).strip_edges()
+
+
+func _has_homebase_direct_payload_from_screen(craft_id: String = "") -> bool:
+	var drop_state: Dictionary = _peek_homebase_direct_drop_state(craft_id)
 	if drop_state.is_empty():
 		return false
 	if int(drop_state.get("homebase_direct_payload_operator_count", 0)) > 0:
@@ -1863,7 +1875,7 @@ func _get_fob_mission_drop_state(fob_screen) -> Dictionary:
 	return Dictionary(fob_screen.call("build_mission_drop_state")).duplicate(true)
 
 
-func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: bool = false, payload_source: String = MISSION_DROP_SOURCE_FOB) -> void:
+func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: bool = false, payload_source: String = MISSION_DROP_SOURCE_FOB, direct_craft_id: String = "") -> void:
 	var normalized_source: String = payload_source.strip_edges().to_lower()
 	if normalized_source.is_empty():
 		normalized_source = MISSION_DROP_SOURCE_FOB
@@ -1872,7 +1884,7 @@ func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: boo
 	var applied_source: String = ""
 	var fob_screen = _get_fob_screen()
 	if normalized_source == MISSION_DROP_SOURCE_HOMEBASE_DIRECT or normalized_source == MISSION_DROP_SOURCE_HOMEBASE_DIRECT_THEN_FOB:
-		drop_state = _get_homebase_direct_drop_state()
+		drop_state = _get_homebase_direct_drop_state(direct_craft_id)
 		if not drop_state.is_empty():
 			applied_source = MISSION_DROP_SOURCE_HOMEBASE_DIRECT
 	if drop_state.is_empty() and (normalized_source == MISSION_DROP_SOURCE_FOB or normalized_source == MISSION_DROP_SOURCE_HOMEBASE_DIRECT_THEN_FOB):
