@@ -163,9 +163,17 @@
 - Lokale Pruefung: `task_364_mission_fireteam_orientation_indicators.gd`, `task_286_ui_feedback_truth_regression_review.gd` und `git diff --check` laufen gruen.
 - Offene Folgearbeit: Manuelle Sichtpruefung im echten HUD bleibt sinnvoll, sobald weitere Visual-Slices Event-Log, Readiness und Debug-Layer ergaenzen.
 
-### TASK_365-TASK_380 - Mission Visualization Review Followups
+### TASK_365 - Tactical Event Log Data Layer
+- Status: implementiert
+- Stand: `scripts/tactical/tactical_event_log.gd` ist ein read-only `RefCounted`-History-Adapter fuer bestehende `TacticalCommunicationEvent`-Snapshots. Er normalisiert Event-ID, Event-Typ, Kategorie, Severity, Zeit, Fireteam, Text, Channels und optionale Positionsanker.
+- Stand: Die History ist bounded (`DEFAULT_MAX_ENTRIES = 100`), dedupliziert stabile Event-IDs und kann newest-first oder oldest-first abgefragt werden.
+- Stand: `mission_tactical_sandbox_controller.gd` speist den Adapter aus dem bestehenden Tactical-Communication-Pfad und exposed `tactical_event_log`, `tactical_event_log_count` und `tactical_event_log_contract` im Command-Feedback-Snapshot.
+- Lokale Pruefung: `task_365_tactical_event_log_data_layer.gd`, `task_274_tactical_communication_feedback_layer.gd` und `git diff --check` laufen gruen.
+- Offene Folgearbeit: TASK_366 kann darauf ein HUD-Panel bauen; der Log selbst rendert bewusst nichts.
+
+### TASK_366-TASK_380 - Mission Visualization Review Followups
 - Status: geplant
-- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Sinnvolle Follow-ups sind als getrennte Tasks 365 bis 380 noch offen.
+- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Sinnvolle Follow-ups sind als getrennte Tasks 366 bis 380 noch offen.
 - Stand: Die Review-Snippets werden nicht ungeprueft uebernommen. Fireteam-Orientation, Event-Log, FTL-Gauge, Fireteam-Status, Member-Zeile, Fire-Sector, LOS, Cover, Countdown, Waypoint-Preview, Command-Validation, Contact-Heatmap und MapEditor-Debuglayer sind jeweils als eigene kleine Slices geschnitten.
 - Stand: Architekturgrenze bleibt: UI liest nur Snapshots. `SimulationRoot`, bestehende Resolver, `TacticalCommunicationEvent`, `FireteamBehaviorResolver`, `FireteamOrderVisualizer`, FoW und Terrain-Daten bleiben die Wahrheit.
 - Offene Punkte: Implementierung der einzelnen Tasks, genaue HUD-Platzierung fuer Event-Log/Statuskarten und manuelle Sichtpruefung nach den ersten Visual-Slices.

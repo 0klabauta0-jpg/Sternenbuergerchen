@@ -42,6 +42,7 @@ const CONTACT_MAP_OVERLAY_SCRIPT: GDScript = preload("res://scripts/tactical/vis
 const FIRETEAMLEADER_FEEDBACK_BUBBLE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/ui/fireteamleader_feedback_bubble_resolver.gd")
 const TACTICAL_COMMUNICATION_EVENT_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_communication_event.gd")
 const TACTICAL_COMMUNICATION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_communication_resolver.gd")
+const TACTICAL_EVENT_LOG_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_event_log.gd")
 const TACTICAL_BREAKOUT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_breakout_resolver.gd")
 const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
 const COMIC_BUBBLE_SETTINGS_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_settings.gd")
@@ -206,6 +207,7 @@ var _fireteamleader_feedback_bubbles: Array = []
 var _fireteamleader_feedback_sequence: int = 0
 var _tactical_communication_resolver = null
 var _tactical_communication_events: Array = []
+var _tactical_event_log = null
 var _tactical_breakout_resolver = null
 var _tactical_breakout_records: Array = []
 var _npc_thought_bubbles: Array = []
@@ -7088,6 +7090,20 @@ func get_tactical_communication_event_snapshot() -> Array:
 	return _tactical_communication_events.duplicate(true)
 
 
+func get_tactical_event_log_snapshot(options: Dictionary = {}) -> Array:
+	_ensure_tactical_event_log()
+	if _tactical_event_log == null:
+		return []
+	return Array(_tactical_event_log.call("get_snapshot", options))
+
+
+func get_tactical_event_log_contract_snapshot() -> Dictionary:
+	_ensure_tactical_event_log()
+	if _tactical_event_log == null:
+		return {}
+	return Dictionary(_tactical_event_log.call("get_contract_snapshot"))
+
+
 func get_tactical_breakout_snapshot() -> Array:
 	return _tactical_breakout_records.duplicate(true)
 
@@ -7487,6 +7503,7 @@ func _store_tactical_communication_event(event: Dictionary) -> void:
 	while retained_events.size() > 10:
 		retained_events.pop_front()
 	_tactical_communication_events = retained_events
+	_store_tactical_event_log_entries([event])
 	_maybe_store_tactical_communication_bubble(event)
 
 
@@ -7528,6 +7545,13 @@ func _build_selected_tactical_communication_text() -> String:
 
 func _build_mission_control_tactical_communication_text() -> String:
 	return String(TACTICAL_COMMUNICATION_RESOLVER_SCRIPT.call("build_mission_control_text", _tactical_communication_events, 2)).strip_edges()
+
+
+func _store_tactical_event_log_entries(events: Array) -> void:
+	_ensure_tactical_event_log()
+	if _tactical_event_log == null:
+		return
+	_tactical_event_log.call("ingest_tactical_communication_events", events)
 
 
 func record_fireteamleader_feedback_bubble_for_unit(
@@ -8840,6 +8864,9 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"fireteamleader_feedback_bubbles": get_fireteamleader_feedback_bubble_snapshot(),
 		"tactical_communication_event_count": get_tactical_communication_event_snapshot().size(),
 		"tactical_communication_events": get_tactical_communication_event_snapshot(),
+		"tactical_event_log_count": get_tactical_event_log_snapshot().size(),
+		"tactical_event_log": get_tactical_event_log_snapshot(),
+		"tactical_event_log_contract": get_tactical_event_log_contract_snapshot(),
 		"tactical_breakout_count": get_tactical_breakout_snapshot().size(),
 		"tactical_breakouts": get_tactical_breakout_snapshot(),
 		"fireteam_coordination_count": get_fireteam_coordination_snapshot().size(),
@@ -8911,6 +8938,12 @@ func _ensure_tactical_communication_resolver() -> void:
 	if _tactical_communication_resolver != null:
 		return
 	_tactical_communication_resolver = TACTICAL_COMMUNICATION_RESOLVER_SCRIPT.new()
+
+
+func _ensure_tactical_event_log() -> void:
+	if _tactical_event_log != null:
+		return
+	_tactical_event_log = TACTICAL_EVENT_LOG_SCRIPT.new()
 
 
 func _ensure_tactical_breakout_resolver() -> void:

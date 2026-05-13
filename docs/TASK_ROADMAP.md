@@ -562,7 +562,7 @@ TASK_363 - Homebase Roster Card Pool Incremental Refresh (implementiert)
 
 Phase 18ZL - Mission Visualization Review Followups
 TASK_364 - Mission Fireteam Orientation Indicators (implementiert)
-TASK_365 - Tactical Event Log Data Layer (geplant)
+TASK_365 - Tactical Event Log Data Layer (implementiert)
 TASK_366 - Tactical Event Log HUD Panel (geplant)
 TASK_367 - FTL Public Readiness Snapshot Contract (geplant)
 TASK_368 - FTL Readiness Gauge (geplant)
