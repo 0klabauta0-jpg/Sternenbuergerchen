@@ -1670,27 +1670,6 @@ func _render_homebase_dropship_member_progress_rows(container: VBoxContainer, fi
 		return
 	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
 	var member_ids: PackedStringArray = _get_member_unit_ids_for_fireteam(normalized_fireteam_id)
-	var portrait_row := HBoxContainer.new()
-	portrait_row.name = "HomebaseBoardingPortraitStrip_%s" % normalized_fireteam_id
-	portrait_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	portrait_row.add_theme_constant_override("separation", 3)
-	portrait_row.set_meta("homebase_shipcard_payload_portrait_strip", true)
-	portrait_row.set_meta("fireteam_id", normalized_fireteam_id)
-	container.add_child(portrait_row)
-	for member_unit_id in member_ids:
-		var member_profile = _profiles_by_id.get(member_unit_id, null)
-		var portrait := TextureRect.new()
-		portrait.name = "PayloadPortrait_%s" % member_unit_id
-		portrait.custom_minimum_size = Vector2(22.0, 22.0)
-		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-		portrait.texture = _load_portrait_texture(String(member_profile.portrait_path)) if member_profile != null else null
-		portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		portrait.set_meta("homebase_shipcard_payload_mini_portrait", true)
-		portrait.set_meta("fireteam_id", normalized_fireteam_id)
-		portrait.set_meta("unit_id", member_unit_id)
-		portrait_row.add_child(portrait)
-
 	var status_label := Label.new()
 	status_label.name = "HomebaseBoardingStatusLabel_%s" % normalized_fireteam_id
 	status_label.text = _build_homebase_boarding_progress_text(normalized_fireteam_id, craft_gate)
@@ -1713,6 +1692,20 @@ func _render_homebase_dropship_member_progress_rows(container: VBoxContainer, fi
 		member_row.set_meta("fireteam_id", normalized_fireteam_id)
 		member_row.set_meta("unit_id", member_unit_id)
 		container.add_child(member_row)
+
+		var member_profile = _profiles_by_id.get(member_unit_id, null)
+		var portrait := TextureRect.new()
+		portrait.name = "PayloadMemberPortrait_%s" % member_unit_id
+		portrait.custom_minimum_size = Vector2(18.0, 18.0)
+		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		portrait.texture = _load_portrait_texture(String(member_profile.portrait_path)) if member_profile != null else null
+		portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		portrait.set_meta("homebase_shipcard_payload_mini_portrait", true)
+		portrait.set_meta("homebase_shipcard_payload_member_portrait", true)
+		portrait.set_meta("fireteam_id", normalized_fireteam_id)
+		portrait.set_meta("unit_id", member_unit_id)
+		member_row.add_child(portrait)
 
 		var name_label := Label.new()
 		name_label.text = _build_display_name(member_unit_id)

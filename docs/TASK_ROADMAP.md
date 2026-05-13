@@ -585,6 +585,7 @@ TASK_382 - Homebase Direct Mission Flightdeck Display (implementiert)
 TASK_383 - Homebase Flightdeck Fireteam Card Single Owner (implementiert)
 TASK_384 - Homebase Flightdeck Boarding Hotfix (implementiert)
 TASK_385 - Homebase Direct Return Isolation (implementiert)
+TASK_386 - Homebase Flightdeck Member Portraits (implementiert)
 
 Batch-Empfehlung
 

@@ -339,6 +339,12 @@
 - Stand: Homebase-Direct-Boardingdauer wird pro Operator aus Speed und Discipline berechnet. Durchschnittliche Werte ergeben ca. 4 Sekunden, bessere Werte kuerzen und schlechtere Werte verlaengern das sequentielle Boarding.
 - Lokale Pruefung: `task_385_homebase_direct_return_isolation.gd`, `task_348_homebase_fob_payload_state_isolation.gd`, `task_384_homebase_flightdeck_boarding_hotfix.gd`, `task_383_homebase_flightdeck_fireteam_card_single_owner.gd`, `task_382_homebase_direct_mission_flightdeck_display.gd`, `task_381_homebase_fireteam_loadout_flightdeck_polish.gd`, `task_362_homebase_aircraft_state_manager_extraction.gd`, `bugfix_dropship_mission_flow_verifier.gd`, `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd`, `task_258_fixed_window_clipping_scrollbar_playability_audit.gd` und `git diff --check` laufen gruen.
 
+### TASK_386 - Homebase Flightdeck Member Portraits
+- Status: implementiert
+- Stand: Die Dropship-Payload-Fireteamkarte im Homebase-Flightdeck rendert Mini-Portraets jetzt direkt in jeder Operator-Zeile links neben dem Namen. Die separate Portrait-Leiste ueber den Namen wurde entfernt, wodurch die Karte etwas kompakter bleibt.
+- Stand: Bestehende Boarding-/Payload-Metadaten bleiben erhalten; die Payload-Karte zeigt weiterhin genau ein Mini-Portraet pro Operator.
+- Lokale Pruefung: `task_386_homebase_flightdeck_member_portraits.gd`, `task_384_homebase_flightdeck_boarding_hotfix.gd`, `task_383_homebase_flightdeck_fireteam_card_single_owner.gd`, `task_382_homebase_direct_mission_flightdeck_display.gd`, `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd`, `task_258_fixed_window_clipping_scrollbar_playability_audit.gd` und `git diff --check` laufen gruen.
+
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
 - Stand: Dropship-Visuals bauen ihre Dirty-Signatur wieder fehlerfrei, geplante LZs bleiben auch bei offmap/hidden Craft sichtbar, und Multi-Dropship-Payloads werden aus dem rohen Mission-Card-State statt aus stale Selected-Card-State uebernommen.
