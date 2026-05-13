@@ -56,6 +56,7 @@ var _fog_unit_nodes: Array = []
 var _fog_terrain_registry = null
 var _fog_runtime_signature: String = ""
 var _fog_update_elapsed: float = 0.0
+var _friendly_unit_slot_paths: Array[NodePath] = []
 
 
 func _ready() -> void:
@@ -112,6 +113,8 @@ func _finish_ready_after_scenario_loaded(runtime_leader: Node, unit_registry: No
 			unit_team_id = String(unit.call("get_team_id"))
 
 		if unit_team_id == team_id:
+			if not _friendly_unit_slot_paths.has(unit_path):
+				_friendly_unit_slot_paths.append(unit_path)
 			friendly_assignment_slot_index = friendly_slot_index
 			if not _is_friendly_slot_enabled(friendly_slot_index):
 				_deactivate_unused_friendly_slot(unit, friendly_slot_index)
@@ -208,6 +211,82 @@ func get_unit_loadout_modifiers_dict(unit_id: String) -> Dictionary:
 	if normalized_unit_id.is_empty():
 		return {}
 	return Dictionary(unit_loadout_modifiers_by_unit_id.get(normalized_unit_id, {})).duplicate(true)
+
+
+func apply_runtime_selection_contract() -> void:
+	if not _is_initialized:
+		return
+	var runtime_leader = get_node_or_null(runtime_leader_path)
+	var unit_registry = get_node_or_null(unit_registry_path)
+	var simulation_root = get_node_or_null("../SimulationRoot")
+	if runtime_leader == null or unit_registry == null or simulation_root == null:
+		return
+	_build_unit_loadout_modifiers()
+	var friendly_paths: Array = _friendly_unit_slot_paths.duplicate()
+	if friendly_paths.is_empty():
+		friendly_paths = _build_current_friendly_unit_slot_paths()
+	var terrain_registry = get_node_or_null(terrain_registry_path)
+	var first_unit: Node = null
+	var friendly_spawn_index: int = 0
+	for slot_index in range(friendly_paths.size()):
+		var unit_path: NodePath = friendly_paths[slot_index]
+		var unit = get_node_or_null(unit_path)
+		if unit == null or not unit.has_method("get_unit_id") or not unit.has_method("apply_identity_config"):
+			continue
+		if not _is_friendly_slot_enabled(slot_index):
+			var previous_unit_id: String = String(unit.call("get_unit_id")).strip_edges() if unit.has_method("get_unit_id") else ""
+			if not previous_unit_id.is_empty() and unit_registry.has_method("unregister_unit") and unit_registry.has_method("has_unit") and bool(unit_registry.call("has_unit", previous_unit_id)):
+				unit_registry.call("unregister_unit", previous_unit_id)
+			_deactivate_unused_friendly_slot(unit, slot_index)
+			if unit is CanvasItem:
+				(unit as CanvasItem).visible = false
+			continue
+		var fallback_unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+		var unit_id: String = _get_selected_unit_id_for_friendly_slot(slot_index, fallback_unit_id)
+		_apply_unit_identity_preset(unit, unit_id, team_id)
+		_apply_fob_loadout_override(unit, unit_id, team_id)
+		if unit.has_method("set_fireteam_id"):
+			unit.call("set_fireteam_id", _get_fireteam_id_for_friendly_slot(slot_index, unit_id, team_id))
+		if unit.has_method("set_respawn_manager"):
+			var respawn_manager = get_node_or_null(respawn_manager_path)
+			if respawn_manager != null:
+				unit.call("set_respawn_manager", respawn_manager)
+		if terrain_registry != null and unit.has_method("set_terrain_registry"):
+			unit.call("set_terrain_registry", terrain_registry)
+		if simulation_root.has_method("register_known_unit"):
+			simulation_root.call("register_known_unit", unit_id, unit)
+		var unit_registered: bool = unit_registry.has_method("has_unit") and bool(unit_registry.call("has_unit", unit_id))
+		if unit is Node2D and not unit_registered:
+			var spawn_alpha_marker := _resolve_marker(spawn_alpha_path)
+			if spawn_alpha_marker != null:
+				(unit as Node2D).global_position = spawn_alpha_marker.global_position + _get_friendly_spawn_offset(friendly_spawn_index)
+			friendly_spawn_index += 1
+		if unit is CanvasItem and not (defer_friendly_runtime_activation and unit_registered):
+			(unit as CanvasItem).visible = not defer_friendly_runtime_activation
+		if not defer_friendly_runtime_activation:
+			if not unit_registered:
+				unit_registry.call("register_unit", unit_id, unit)
+			runtime_leader.call("add_unit_member", unit)
+			_enqueue_initial_loadout_effect(simulation_root, unit_id)
+			if first_unit == null:
+				first_unit = unit
+	if first_unit != null and not defer_friendly_runtime_activation:
+		runtime_leader.call("assign", first_unit)
+		var ftl_registry = get_node_or_null(ftl_registry_path)
+		if ftl_registry != null and ftl_registry.has_method("has_ftl") and ftl_registry.has_method("register_ftl") and not bool(ftl_registry.call("has_ftl", team_id)):
+			ftl_registry.call("register_ftl", team_id, runtime_leader)
+
+
+func _build_current_friendly_unit_slot_paths() -> Array:
+	var result: Array = []
+	for unit_path in unit_paths:
+		var unit = get_node_or_null(unit_path)
+		if unit == null or not unit.has_method("get_team_id"):
+			continue
+		var unit_team_id: String = String(unit.call("get_team_id")).strip_edges()
+		if unit_team_id == team_id or unit_team_id == "team_unused":
+			result.append(unit_path)
+	return result
 
 
 func get_expected_unit_presence_snapshot() -> Dictionary:

@@ -1641,7 +1641,7 @@ func _place_lz_from_screen_position(screen_position: Vector2) -> bool:
 	_has_lz_position = true
 	_is_lz_placement_armed = false
 	_lz_placement_craft_id = ""
-	var lz_label: String = _build_mission_dropship_lz_name(_mission_drop_craft_id, _mission_drop_display_name)
+	var lz_label: String = _build_mission_dropship_lz_name(_mission_drop_craft_id, _mission_drop_display_name, _get_mission_dropship_card_order_number(_mission_drop_craft_id))
 	_last_command_text = "%s SET %s @ %s" % [lz_label, _get_approach_angle_name(), _format_world_position(_lz_position)]
 	_store_selected_mission_dropship_plan()
 	_refresh_button_state()
@@ -4929,13 +4929,33 @@ func _coerce_vector2_value(value: Variant, fallback: Vector2 = Vector2.ZERO) -> 
 	return fallback
 
 
-func _build_mission_dropship_lz_name(craft_id: String = "", display_name: String = "") -> String:
+func _build_mission_dropship_lz_name(craft_id: String = "", display_name: String = "", lz_number: int = -1) -> String:
 	var label: String = display_name.strip_edges()
 	if label.is_empty():
 		label = craft_id.strip_edges().replace("_", " ")
 	if label.is_empty():
 		label = "Dropship"
+	if lz_number > 0:
+		return "LZ%d %s" % [lz_number, label]
 	return "LZ %s" % label
+
+
+func _get_mission_dropship_card_order_number(craft_id: String, cards: Array = []) -> int:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return -1
+	var source_cards: Array = cards if not cards.is_empty() else _mission_drop_cards
+	var order_number: int = 1
+	for card_variant in source_cards:
+		if typeof(card_variant) != TYPE_DICTIONARY:
+			continue
+		var card: Dictionary = Dictionary(card_variant)
+		var card_craft_id: String = String(card.get("craft_id", "")).strip_edges()
+		if card_craft_id == normalized_craft_id:
+			return order_number
+		if not card_craft_id.is_empty():
+			order_number += 1
+	return -1
 
 
 func _build_mission_drop_cards_snapshot() -> Array:
@@ -5027,7 +5047,7 @@ func _build_drop_sequence_card_fields(sequence: Dictionary) -> Dictionary:
 		fireteam_ids = _build_fireteam_ids_for_drop_units(units)
 	var lz_position: Vector2 = _coerce_vector2_value(sequence.get("lz_position", Vector2.ZERO), Vector2.ZERO)
 	var approach_angle: String = _sanitize_approach_angle_name(String(sequence.get("approach_angle", "NW")))
-	var lz_label: String = _build_mission_dropship_lz_name(craft_id, display_name)
+	var lz_label: String = _build_mission_dropship_lz_name(craft_id, display_name, _get_mission_dropship_card_order_number(craft_id))
 	var position: Vector2 = _coerce_vector2_value(sequence.get("position", Vector2.ZERO), Vector2.ZERO)
 	return {
 		"craft_id": craft_id,
@@ -5110,7 +5130,7 @@ func _write_current_mission_dropship_state_to_card(card: Dictionary) -> Dictiona
 	result["has_lz_position"] = _has_lz_position
 	result["lz_position"] = _lz_position
 	if _has_lz_position:
-		var lz_label: String = _build_mission_dropship_lz_name(String(result.get("craft_id", "")), String(result.get("display_name", "")))
+		var lz_label: String = _build_mission_dropship_lz_name(String(result.get("craft_id", "")), String(result.get("display_name", "")), _get_mission_dropship_card_order_number(String(result.get("craft_id", ""))))
 		result["lz_label"] = lz_label
 		result["lz_name"] = lz_label
 	else:
@@ -5508,13 +5528,14 @@ func _append_mission_dropship_card_command_row(host: VBoxContainer, card: Dictio
 
 	var lz_button := _build_mission_dropship_card_command_button(
 		"LZ",
-		"Set landing zone for this dropship.",
+		_build_mission_dropship_card_lz_tooltip(card),
 		not _can_request_mission_dropship_card_lz(card),
 		Callable(self, "_on_mission_dropship_card_set_lz_pressed").bind(craft_id),
 		craft_id,
 		"set_lz"
 	)
 	row.add_child(lz_button)
+	var active_approach_angle: String = _sanitize_approach_angle_name(String(card.get("approach_angle", _get_approach_angle_name())))
 	for approach_angle in APPROACH_ANGLES:
 		row.add_child(
 			_build_mission_dropship_card_command_button(
@@ -5523,12 +5544,13 @@ func _append_mission_dropship_card_command_row(host: VBoxContainer, card: Dictio
 				not _can_request_mission_dropship_card_lz(card),
 				Callable(self, "_on_mission_dropship_card_approach_pressed").bind(craft_id, String(approach_angle)),
 				craft_id,
-				"approach_%s" % String(approach_angle).to_lower()
+				"approach_%s" % String(approach_angle).to_lower(),
+				String(approach_angle) == active_approach_angle
 			)
 		)
 	var drop_button := _build_mission_dropship_card_command_button(
 		_build_mission_dropship_card_drop_button_label(card),
-		"Drop this dropship payload at its own LZ.",
+		_build_mission_dropship_card_drop_tooltip(card),
 		not _can_request_mission_dropship_card_drop(card),
 		Callable(self, "_on_mission_dropship_card_drop_pressed").bind(craft_id),
 		craft_id,
@@ -5537,7 +5559,7 @@ func _append_mission_dropship_card_command_row(host: VBoxContainer, card: Dictio
 	row.add_child(drop_button)
 
 
-func _build_mission_dropship_card_command_button(text: String, tooltip_text: String, disabled: bool, callback: Callable, craft_id: String, action_id: String) -> Button:
+func _build_mission_dropship_card_command_button(text: String, tooltip_text: String, disabled: bool, callback: Callable, craft_id: String, action_id: String, active: bool = false) -> Button:
 	var button := Button.new()
 	button.name = "MissionDropshipCardCommand_%s_%s" % [_sanitize_node_name(craft_id), _sanitize_node_name(action_id)]
 	button.text = text
@@ -5548,14 +5570,39 @@ func _build_mission_dropship_card_command_button(text: String, tooltip_text: Str
 	button.set_meta("mission_dropship_card_command_button", true)
 	button.set_meta("mission_dropship_craft_id", craft_id)
 	button.set_meta("mission_dropship_card_command", action_id)
+	button.set_meta("mission_dropship_card_command_active", active)
 	button.mouse_filter = Control.MOUSE_FILTER_STOP
 	if callback.is_valid() and not button.pressed.is_connected(callback):
 		button.pressed.connect(callback)
 	if not disabled and action_id == "drop":
 		META_UI_SKIN_SCRIPT.style_transfer_button(button, true)
+	elif active:
+		META_UI_SKIN_SCRIPT.style_tactical_button(button, true)
 	else:
 		META_UI_SKIN_SCRIPT.style_secondary_button(button)
 	return button
+
+
+func _build_mission_dropship_card_lz_tooltip(card: Dictionary) -> String:
+	var state: String = String(card.get("state", "")).strip_edges().to_lower()
+	if _is_mission_dropship_card_in_transit(card):
+		return "Landing zone locked while this dropship is in transit."
+	if state != "waiting":
+		return "Landing zone can be changed while the dropship is waiting on the mission map."
+	return "Set landing zone for this dropship."
+
+
+func _build_mission_dropship_card_drop_tooltip(card: Dictionary) -> String:
+	if not bool(card.get("has_embarked_payload", false)) or Array(card.get("embarked_unit_ids", [])).is_empty():
+		return "Drop blocked: no payload in this dropship."
+	if not bool(card.get("has_lz_position", false)):
+		return "Drop blocked: set this dropship's LZ first."
+	if _is_mission_dropship_card_in_transit(card):
+		return "Drop blocked while this dropship is in transit."
+	var state: String = String(card.get("state", "")).strip_edges().to_lower()
+	if state != "waiting":
+		return "Drop blocked until this dropship is waiting on the mission map."
+	return "Drop this dropship payload at its own LZ."
 
 
 func _group_payload_unit_ids_by_fireteam(payload_ids: Array) -> Dictionary:
@@ -6007,7 +6054,7 @@ func _is_mission_dropship_card_in_transit(card: Dictionary) -> bool:
 
 func _should_show_mission_dropship_card_progress(card: Dictionary) -> bool:
 	var state: String = String(card.get("state", "")).strip_edges().to_lower()
-	return state == "to_mission" or state == "to_fob" or state == "to_homebase" or state == DROP_SEQUENCE_UNLOADING or state == DROP_SEQUENCE_OUTBOUND
+	return state == "to_mission" or state == "to_fob" or state == "to_homebase" or state == DROP_SEQUENCE_INBOUND or state == DROP_SEQUENCE_LANDED or state == DROP_SEQUENCE_UNLOADING or state == DROP_SEQUENCE_OUTBOUND
 
 
 func _get_mission_dropship_card_feedback_text(card: Dictionary) -> String:
@@ -6792,7 +6839,7 @@ func _refresh_world_overlays() -> void:
 				"has_lz_position": _has_lz_position,
 				"show_lz_marker": _has_lz_position and _should_show_lz_marker_for_state(_drop_sequence_phase if primary_has_live_drop_sequence else _mission_drop_state),
 				"lz_position": _lz_position,
-				"lz_label": _build_mission_dropship_lz_name(_mission_drop_craft_id, _mission_drop_display_name) if _has_lz_position else "",
+				"lz_label": _build_mission_dropship_lz_name(_mission_drop_craft_id, _mission_drop_display_name, _get_mission_dropship_card_order_number(_mission_drop_craft_id)) if _has_lz_position else "",
 				"dropship_visible": dropship_visible,
 				"dropship_position": primary_dropship_position,
 				"dropship_target_position": primary_dropship_target,
@@ -6869,7 +6916,7 @@ func _build_mission_dropship_visual_entries(primary_visible: bool, primary_posit
 				"has_lz_position": _has_lz_position,
 				"show_lz_marker": _has_lz_position and _should_show_lz_marker_for_state(_drop_sequence_phase if not _drop_sequence_phase.is_empty() else _mission_drop_state),
 				"lz_position": _lz_position,
-				"lz_label": _build_mission_dropship_lz_name(selected_craft_id, _mission_drop_display_name),
+				"lz_label": _build_mission_dropship_lz_name(selected_craft_id, _mission_drop_display_name, _get_mission_dropship_card_order_number(selected_craft_id)),
 				"dropship_texture": _get_mission_dropship_texture(),
 				"approach_vector_shape": "wide_arrow",
 				"team_id": FRIENDLY_TEAM_ID,
@@ -6903,7 +6950,9 @@ func _build_mission_dropship_visual_entry(card: Dictionary, index: int, primary_
 	var lz_position: Vector2 = _coerce_vector2_value(card.get("lz_position", _lz_position if is_selected else Vector2.ZERO), _lz_position if is_selected else Vector2.ZERO)
 	var lz_label: String = String(card.get("lz_label", card.get("lz_name", ""))).strip_edges()
 	if lz_label.is_empty() and has_lz:
-		lz_label = _build_mission_dropship_lz_name(craft_id, display_name)
+		lz_label = _build_mission_dropship_lz_name(craft_id, display_name, index + 1)
+	elif has_lz:
+		lz_label = _build_mission_dropship_lz_name(craft_id, display_name, index + 1)
 	var body_visible: bool = _should_show_mission_dropship_body_for_state(state) and _is_mission_dropship_position_inside_player_area(ship_position)
 	if not body_visible and not has_lz:
 		return {}

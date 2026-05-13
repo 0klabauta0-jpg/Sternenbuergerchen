@@ -595,6 +595,7 @@ TASK_392 - Parallel Boarding Transit Feedback (implementiert)
 TASK_393 - Direct Dropship Independence LZ Vector (implementiert)
 TASK_394 - Per Craft Shipcard Commands (implementiert)
 TASK_395 - Manual Dropship Parallel Flow Stabilization (implementiert)
+TASK_396 - Mission Dropship LZ Drop Hotfix (implementiert)
 
 Batch-Empfehlung
 

@@ -367,6 +367,13 @@ func build_homebase_direct_drop_state_for_craft(craft_id: String) -> Dictionary:
 	var selected_payload_fireteam_ids: PackedStringArray = boarded_fireteam_ids
 	var payload_fireteam_definitions: Array = _filter_fireteam_definitions_for_ids(fireteam_definitions, selected_payload_fireteam_ids)
 	var member_loadouts: Dictionary = _build_homebase_member_loadouts(selected_payload_fireteam_ids)
+	var mission_setup_payload_fireteam_ids: PackedStringArray = _get_homebase_direct_ready_payload_fireteam_ids()
+	if mission_setup_payload_fireteam_ids.is_empty() and direct_ready:
+		mission_setup_payload_fireteam_ids = selected_payload_fireteam_ids.duplicate()
+	var mission_setup_unit_ids: PackedStringArray = _build_unit_ids_for_fireteams(mission_setup_payload_fireteam_ids)
+	var mission_setup_fireteam_ids: PackedStringArray = _build_fireteam_ids_for_units(mission_setup_unit_ids)
+	var mission_setup_fireteam_definitions: Array = _filter_fireteam_definitions_for_ids(fireteam_definitions, mission_setup_payload_fireteam_ids)
+	var mission_setup_member_loadouts: Dictionary = _build_homebase_member_loadouts(mission_setup_payload_fireteam_ids)
 	return {
 		"transport_craft_id": payload_craft_id,
 		"dropship_phase": "homebase_ready" if direct_ready else "waiting",
@@ -397,6 +404,11 @@ func build_homebase_direct_drop_state_for_craft(craft_id: String) -> Dictionary:
 		"fireteam_definitions": fireteam_definitions,
 		"selected_fireteam_definitions": payload_fireteam_definitions,
 		"member_loadouts": member_loadouts,
+		"mission_setup_unit_ids": Array(mission_setup_unit_ids),
+		"mission_setup_fireteam_ids": Array(mission_setup_fireteam_ids),
+		"mission_setup_team_unit_configs": _build_homebase_unit_configs_for_unit_ids(mission_setup_unit_ids),
+		"mission_setup_fireteam_definitions": mission_setup_fireteam_definitions,
+		"mission_setup_member_loadouts": mission_setup_member_loadouts,
 		"homebase_team_unit_ids": Array(_selected_unit_ids),
 		"homebase_team_fireteam_ids": Array(_selected_fireteam_ids),
 		"homebase_team_unit_configs": _build_homebase_selected_unit_configs(),
@@ -3857,6 +3869,26 @@ func _get_homebase_direct_all_payload_fireteam_ids() -> PackedStringArray:
 	var result: PackedStringArray = []
 	for craft_id in _get_homebase_direct_payload_craft_keys():
 		for fireteam_id in _get_homebase_direct_payload_fireteam_ids_for_craft(String(craft_id)):
+			var normalized_fireteam_id: String = _normalize_fireteam_id(String(fireteam_id))
+			if normalized_fireteam_id.is_empty() or result.has(normalized_fireteam_id):
+				continue
+			result.append(normalized_fireteam_id)
+	return result
+
+
+func _get_homebase_direct_ready_payload_fireteam_ids() -> PackedStringArray:
+	var result: PackedStringArray = []
+	for craft_id in _get_homebase_direct_payload_craft_keys():
+		var normalized_craft_id: String = String(craft_id).strip_edges()
+		if normalized_craft_id.is_empty():
+			continue
+		var payload_fireteam_ids: PackedStringArray = _get_homebase_direct_payload_fireteam_ids_for_craft(normalized_craft_id)
+		if payload_fireteam_ids.is_empty():
+			continue
+		var craft_gate: Dictionary = _build_homebase_direct_staging_craft_gate_for_craft(normalized_craft_id)
+		if not bool(craft_gate.get("can_stage", false)) or not _are_homebase_payload_fireteams_boarded(payload_fireteam_ids):
+			continue
+		for fireteam_id in payload_fireteam_ids:
 			var normalized_fireteam_id: String = _normalize_fireteam_id(String(fireteam_id))
 			if normalized_fireteam_id.is_empty() or result.has(normalized_fireteam_id):
 				continue

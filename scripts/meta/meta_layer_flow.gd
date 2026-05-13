@@ -562,6 +562,7 @@ func _start_mission() -> void:
 func _start_or_update_active_mission() -> void:
 	if _active_mission != null:
 		_release_preview_mission()
+		_configure_mission_instance(_active_mission, _selected_unit_ids, _selected_fireteam_ids, false)
 		_apply_planning_state_to_mission(_active_mission)
 		_show_mission()
 		return
@@ -608,6 +609,8 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 			var fob_loadouts: Dictionary = _build_fob_member_loadouts()
 			if not fob_loadouts.is_empty():
 				mission_setup.set("member_loadouts", fob_loadouts)
+		if mission_setup.has_method("apply_runtime_selection_contract"):
+			mission_setup.call("apply_runtime_selection_contract")
 
 	var tactical_controller = mission_instance.get_node_or_null("TacticalController")
 	if tactical_controller != null:
@@ -1832,11 +1835,16 @@ func _get_homebase_direct_drop_state(craft_id: String = "") -> Dictionary:
 		return {}
 	var mission_unit_ids := PackedStringArray(Array(drop_state.get("selected_unit_ids", [])))
 	var mission_fireteam_ids := PackedStringArray(Array(drop_state.get("selected_fireteam_ids", [])))
+	var mission_setup_unit_ids := PackedStringArray(Array(drop_state.get("mission_setup_unit_ids", mission_unit_ids)))
+	var mission_setup_fireteam_ids := PackedStringArray(Array(drop_state.get("mission_setup_fireteam_ids", mission_fireteam_ids)))
 	var homebase_unit_ids := PackedStringArray(Array(drop_state.get("homebase_team_unit_ids", mission_unit_ids)))
 	var homebase_fireteam_ids := PackedStringArray(Array(drop_state.get("homebase_team_fireteam_ids", mission_fireteam_ids)))
 	_homebase_staged_unit_ids = _sanitize_homebase_selection(homebase_unit_ids)
 	_homebase_staged_fireteam_ids = _normalize_homebase_fireteam_selection(_homebase_staged_unit_ids, homebase_fireteam_ids)
-	if not mission_unit_ids.is_empty():
+	if not mission_setup_unit_ids.is_empty():
+		_selected_unit_ids = mission_setup_unit_ids.duplicate()
+		_selected_fireteam_ids = _normalize_homebase_fireteam_selection(_selected_unit_ids, mission_setup_fireteam_ids)
+	elif not mission_unit_ids.is_empty():
 		_selected_unit_ids = mission_unit_ids.duplicate()
 		_selected_fireteam_ids = _normalize_homebase_fireteam_selection(_selected_unit_ids, mission_fireteam_ids)
 	return drop_state
@@ -1908,6 +1916,8 @@ func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: boo
 	if applied_source == MISSION_DROP_SOURCE_FOB:
 		_sync_fob_payload_selection_from_screen(fob_screen, drop_state)
 	drop_state = _merge_existing_mission_drop_card_planning_fields(drop_state)
+	if applied_source == MISSION_DROP_SOURCE_HOMEBASE_DIRECT:
+		drop_state = _apply_homebase_direct_setup_selection_from_drop_cards(drop_state)
 	if applied_source != MISSION_DROP_SOURCE_HOMEBASE_DIRECT:
 		drop_state = _apply_selected_mission_drop_card_override(drop_state)
 	_mission_planning_state["embarked_unit_ids"] = Array(PackedStringArray(Array(drop_state.get("embarked_unit_ids", []))))
@@ -1941,9 +1951,26 @@ func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: boo
 
 func _sync_mission_setup_contract_fields(drop_state: Dictionary, applied_source: String, fob_screen) -> void:
 	if applied_source == MISSION_DROP_SOURCE_HOMEBASE_DIRECT:
-		_mission_planning_state["selected_fireteam_definitions"] = Array(drop_state.get("selected_fireteam_definitions", drop_state.get("fireteam_definitions", []))).duplicate(true)
-		_mission_planning_state["selected_team_unit_configs"] = Array(drop_state.get("selected_team_unit_configs", [])).duplicate(true)
-		_mission_planning_state["member_loadouts"] = Dictionary(drop_state.get("member_loadouts", {})).duplicate(true)
+		var setup_unit_ids := PackedStringArray(Array(drop_state.get("mission_setup_unit_ids", drop_state.get("selected_unit_ids", []))))
+		var setup_fireteam_ids := PackedStringArray(Array(drop_state.get("mission_setup_fireteam_ids", drop_state.get("selected_fireteam_ids", []))))
+		var setup_definitions: Array = Array(drop_state.get("mission_setup_fireteam_definitions", drop_state.get("selected_fireteam_definitions", drop_state.get("fireteam_definitions", [])))).duplicate(true)
+		if setup_unit_ids.size() > Array(drop_state.get("selected_unit_ids", [])).size():
+			var full_homebase_definitions: Array = Array(drop_state.get("homebase_fireteam_definitions", drop_state.get("fireteam_definitions", []))).duplicate(true)
+			if not full_homebase_definitions.is_empty():
+				setup_definitions = _filter_fireteam_definitions_by_ids(full_homebase_definitions, setup_fireteam_ids)
+		var setup_configs: Array = Array(drop_state.get("mission_setup_team_unit_configs", drop_state.get("selected_team_unit_configs", []))).duplicate(true)
+		if _count_matching_unit_configs(setup_configs, setup_unit_ids) < setup_unit_ids.size():
+			var full_homebase_configs: Array = Array(drop_state.get("homebase_team_unit_configs", [])).duplicate(true)
+			if not full_homebase_configs.is_empty():
+				setup_configs = _filter_unit_configs_by_ids(full_homebase_configs, setup_unit_ids)
+		var setup_member_loadouts: Dictionary = Dictionary(_mission_planning_state.get("member_loadouts", {})).duplicate(true)
+		for loadout_key in Dictionary(drop_state.get("member_loadouts", {})).keys():
+			setup_member_loadouts[loadout_key] = Dictionary(drop_state.get("member_loadouts", {})).get(loadout_key)
+		for loadout_key in Dictionary(drop_state.get("mission_setup_member_loadouts", {})).keys():
+			setup_member_loadouts[loadout_key] = Dictionary(drop_state.get("mission_setup_member_loadouts", {})).get(loadout_key)
+		_mission_planning_state["selected_fireteam_definitions"] = setup_definitions
+		_mission_planning_state["selected_team_unit_configs"] = setup_configs
+		_mission_planning_state["member_loadouts"] = setup_member_loadouts
 		return
 
 	if applied_source == MISSION_DROP_SOURCE_FOB:
@@ -1961,6 +1988,122 @@ func _sync_mission_setup_contract_fields(drop_state: Dictionary, applied_source:
 	_mission_planning_state["selected_fireteam_definitions"] = []
 	_mission_planning_state["selected_team_unit_configs"] = []
 	_mission_planning_state["member_loadouts"] = {}
+
+
+func _apply_homebase_direct_setup_selection_from_drop_cards(drop_state: Dictionary) -> Dictionary:
+	var result: Dictionary = drop_state.duplicate(true)
+	var setup_unit_ids: PackedStringArray = []
+	var setup_fireteam_ids: PackedStringArray = []
+	var seen_unit_ids: Dictionary = {}
+	_append_homebase_direct_setup_selection(
+		setup_unit_ids,
+		setup_fireteam_ids,
+		seen_unit_ids,
+		Array(result.get("mission_setup_unit_ids", result.get("selected_unit_ids", []))),
+		Array(result.get("mission_setup_fireteam_ids", result.get("selected_fireteam_ids", [])))
+	)
+	for card_variant in Array(result.get("mission_drop_cards", [])):
+		if typeof(card_variant) != TYPE_DICTIONARY:
+			continue
+		var card: Dictionary = Dictionary(card_variant)
+		var state: String = String(card.get("state", "")).strip_edges().to_lower()
+		if state == "to_fob" or state == "to_homebase":
+			continue
+		var card_unit_ids: Array = Array(card.get("embarked_unit_ids", []))
+		if card_unit_ids.is_empty():
+			continue
+		var card_fireteam_ids: Array = _build_homebase_direct_card_fireteam_selection(card, card_unit_ids)
+		_append_homebase_direct_setup_selection(setup_unit_ids, setup_fireteam_ids, seen_unit_ids, card_unit_ids, card_fireteam_ids)
+	if setup_unit_ids.is_empty():
+		return result
+	result["mission_setup_unit_ids"] = Array(setup_unit_ids)
+	result["mission_setup_fireteam_ids"] = Array(setup_fireteam_ids)
+	_selected_unit_ids = setup_unit_ids.duplicate()
+	_selected_fireteam_ids = _normalize_homebase_fireteam_selection(_selected_unit_ids, setup_fireteam_ids)
+	return result
+
+
+func _append_homebase_direct_setup_selection(target_unit_ids: PackedStringArray, target_fireteam_ids: PackedStringArray, seen_unit_ids: Dictionary, unit_ids: Array, fireteam_ids: Array) -> void:
+	for unit_index in range(unit_ids.size()):
+		var unit_id: String = String(unit_ids[unit_index]).strip_edges()
+		if unit_id.is_empty() or seen_unit_ids.has(unit_id):
+			continue
+		var fireteam_id: String = ""
+		if unit_index < fireteam_ids.size():
+			fireteam_id = String(fireteam_ids[unit_index]).strip_edges().to_lower()
+		seen_unit_ids[unit_id] = true
+		target_unit_ids.append(unit_id)
+		target_fireteam_ids.append(fireteam_id)
+
+
+func _build_homebase_direct_card_fireteam_selection(card: Dictionary, unit_ids: Array) -> Array:
+	var card_fireteam_ids: Array = Array(card.get("boarded_fireteam_ids", card.get("queued_fireteam_ids", [])))
+	if card_fireteam_ids.size() == 1:
+		var repeated: Array = []
+		for _unit_id in unit_ids:
+			repeated.append(String(card_fireteam_ids[0]).strip_edges().to_lower())
+		return repeated
+	if card_fireteam_ids.size() >= unit_ids.size():
+		var paired: Array = []
+		for unit_index in range(unit_ids.size()):
+			paired.append(String(card_fireteam_ids[unit_index]).strip_edges().to_lower())
+		return paired
+	var fallback := _build_unassigned_fireteam_selection(PackedStringArray(unit_ids))
+	return Array(fallback)
+
+
+func _filter_fireteam_definitions_by_ids(definitions: Array, fireteam_ids: PackedStringArray) -> Array:
+	var lookup: Dictionary = {}
+	for fireteam_id_variant in fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if not fireteam_id.is_empty():
+			lookup[fireteam_id] = true
+	if lookup.is_empty():
+		return []
+	var result: Array = []
+	for definition_variant in definitions:
+		if typeof(definition_variant) != TYPE_DICTIONARY:
+			continue
+		var definition: Dictionary = Dictionary(definition_variant).duplicate(true)
+		var fireteam_id: String = String(definition.get("id", "")).strip_edges().to_lower()
+		if fireteam_id.is_empty() or not lookup.has(fireteam_id):
+			continue
+		result.append(definition)
+	return result
+
+
+func _filter_unit_configs_by_ids(configs: Array, unit_ids: PackedStringArray) -> Array:
+	var lookup: Dictionary = {}
+	for unit_id_variant in unit_ids:
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if not unit_id.is_empty():
+			lookup[unit_id] = true
+	var result: Array = []
+	for config_variant in configs:
+		if typeof(config_variant) != TYPE_DICTIONARY:
+			continue
+		var config: Dictionary = Dictionary(config_variant).duplicate(true)
+		var unit_id: String = String(config.get("unit_id", "")).strip_edges()
+		if unit_id.is_empty() or not lookup.has(unit_id):
+			continue
+		result.append(config)
+	return result
+
+
+func _count_matching_unit_configs(configs: Array, unit_ids: PackedStringArray) -> int:
+	var lookup: Dictionary = {}
+	for unit_id_variant in unit_ids:
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if not unit_id.is_empty():
+			lookup[unit_id] = true
+	var count: int = 0
+	for config_variant in configs:
+		if typeof(config_variant) != TYPE_DICTIONARY:
+			continue
+		var unit_id: String = String(Dictionary(config_variant).get("unit_id", "")).strip_edges()
+		if lookup.has(unit_id):
+			count += 1
+	return count
 
 
 func _sync_fob_payload_selection_from_screen(fob_screen, drop_state: Dictionary) -> void:

@@ -331,6 +331,7 @@ var _drop_visual_static_signature: String = ""
 var _dropship_visual_nodes_by_id: Dictionary = {}
 var _dropship_approach_lines_by_id: Dictionary = {}
 var _dropship_approach_arrow_count: int = 0
+var _dropship_lz_label_count: int = 0
 var _dropship_texture_visible: bool = false
 var _dropship_model_visible: bool = false
 var _air_visual_count: int = 0
@@ -1192,6 +1193,7 @@ func get_render_snapshot() -> Dictionary:
 		"resolved_lz_marker_visible": _resolved_lz_marker_count > 0,
 		"requested_lz_marker_count": _requested_lz_marker_count,
 		"resolved_lz_marker_count": _resolved_lz_marker_count,
+		"dropship_lz_label_count": _dropship_lz_label_count,
 		"dropship_lz_marker_fill": DROPSHIP_LZ_MARKER_FILL,
 		"dropship_approach_line_width_factor": DROPSHIP_APPROACH_LINE_WIDTH_FACTOR,
 		"dropship_approach_vector_shape": "wide_arrow",
@@ -4992,6 +4994,7 @@ func _rebuild_drop_visuals() -> void:
 	_dropship_visual_nodes_by_id.clear()
 	_dropship_approach_lines_by_id.clear()
 	_dropship_approach_arrow_count = 0
+	_dropship_lz_label_count = 0
 	_dropship_texture_visible = false
 	_dropship_model_visible = false
 	_missing_dropship_model_count = 0
@@ -5049,7 +5052,8 @@ func _rebuild_drop_visuals() -> void:
 					_requested_lz_marker_count += 1
 					var lz_label: String = String(entry.get("lz_label", entry.get("lz_name", ""))).strip_edges()
 					if not lz_label.is_empty():
-						_add_label3d(_drop_root, lz_label, _world_to_surface_3d_position(entry_lz_position, 0.56), "DropshipLZLabel_%s" % _sanitize_node_name(visual_id), lz_color.lightened(0.18), 11)
+						_add_label3d(_drop_root, lz_label, _world_to_surface_3d_position(entry_lz_position, 0.62), "DropshipLZLabel_%s" % _sanitize_node_name(visual_id), lz_color.lightened(0.18), 13)
+						_dropship_lz_label_count += 1
 			else:
 				_fow_hidden_air_visual_count += 1
 		_add_dropship_approach_line(entry, visual_id, ship_position)
@@ -5065,6 +5069,9 @@ func _rebuild_drop_visuals() -> void:
 
 func _air_layer_allows_surface_marker(world_position: Vector2) -> bool:
 	if not _is_fog_of_war_visual_filter_active():
+		return true
+	var team_id: String = String(_drop_payload.get("team_id", AIR_LAYER_DEFAULT_TEAM_ID)).strip_edges()
+	if _fog_of_war_team_id.is_empty() or team_id.is_empty() or team_id == _fog_of_war_team_id:
 		return true
 	return _fow_is_world_position_currently_visible(world_position)
 

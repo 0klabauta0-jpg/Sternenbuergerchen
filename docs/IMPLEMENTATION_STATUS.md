@@ -423,6 +423,15 @@
 - Risiken: Der Drag-Refresh-Guard verzögert nur die visuelle Rebuild-Aktualisierung waehrend des Drags; Boarding-State laeuft weiter. Die finale Pfeilbreite/-Form bleibt ein manueller FullHD-Sichtcheck.
 - Lokale Pruefung: `task_395_manual_dropship_parallel_flow.gd`, `task_394_per_craft_shipcard_commands.gd`, `task_393_direct_dropship_independence_lz_vector.gd`, `task_392_parallel_boarding_transit_feedback.gd`, `task_390_homebase_direct_mission_transit_cards.gd` und `git diff --check` laufen gruen.
 
+### TASK_396 - Mission Dropship LZ Drop Hotfix
+- Status: implementiert im Arbeitsstand
+- Stand: Homebase-Direct-MissionSetup wird bei spaeter gesendeten Dropships aus dem neuen Payload plus bestehenden Mission-Drop-Karten zusammengezogen. Dadurch bleiben bereits gestartete Payloads erhalten und Beta-/Folge-Dropships finden ihre Friendly-Units in der aktiven Mission.
+- Stand: `MissionTestSetup` kann den Friendly-Slot-Vertrag nach Missionsstart nachziehen, ohne die UI zur Gameplay-Wahrheit zu machen. Die eigentliche Sichtbarkeit/Runtime-Aktivierung bleibt beim bestehenden Drop-/Presence-Pfad.
+- Stand: Mission-Dropshipkarten zeigen Fortschritt auch fuer `inbound` und `landed`, markieren aktive Approach-Buttons und liefern blockierende Tooltips fuer LZ/Drop. LZ-Labels werden als kurze `LZ1`/`LZ2`-Labels exportiert.
+- Stand: Friendly Dropship-LZ-Planmarker bleiben auch bei aktivem Fog-of-War sichtbar; eigene geplante LZs sind Spielerbefehle und duerfen nicht durch die Sichtfilterung verschwinden.
+- Risiken: Die finale Label-Groesse und Pfeil-/Marker-Lesbarkeit bleiben ein manueller FullHD-Sichtcheck. Der Runtime-Selection-Refresh ist bewusst auf Friendly-Slots und Direct-Payloads begrenzt.
+- Lokale Pruefung: `task_396_mission_dropship_lz_drop_hotfix.gd`, `task_395_manual_dropship_parallel_flow.gd`, `task_394_per_craft_shipcard_commands.gd`, `task_393_direct_dropship_independence_lz_vector.gd`, `task_351_homebase_direct_payload_scope_contract.gd` und `git diff --check` laufen gruen.
+
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
 - Stand: Dropship-Visuals bauen ihre Dirty-Signatur wieder fehlerfrei, geplante LZs bleiben auch bei offmap/hidden Craft sichtbar, und Multi-Dropship-Payloads werden aus dem rohen Mission-Card-State statt aus stale Selected-Card-State uebernommen.
