@@ -1711,6 +1711,69 @@ func resolve_flank_attack_with_state(fireteam_id: String, attacker, target, secu
 	return result
 
 
+func build_cover_effectiveness_readout(attacker_unit_id: String, target_unit_id: String, contact_state: String = "") -> Dictionary:
+	var attacker = _resolve_unit_by_id(attacker_unit_id.strip_edges())
+	var target = _resolve_unit_by_id(target_unit_id.strip_edges())
+	return build_cover_effectiveness_readout_for_units(attacker, target, contact_state)
+
+
+func build_cover_effectiveness_readout_for_units(attacker, target, contact_state: String = "") -> Dictionary:
+	var normalized_contact_state: String = contact_state.strip_edges().to_lower()
+	return Dictionary(
+		COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call(
+			"build_cover_effectiveness_readout",
+			attacker,
+			target,
+			_build_fire_decision_context(
+				{
+					"contact_state": normalized_contact_state,
+					"respect_contact_state": not normalized_contact_state.is_empty(),
+					"resolve_flank_attack_preview": Callable(self, "resolve_flank_attack_preview"),
+				}
+			)
+		)
+	).duplicate(true)
+
+
+func build_cover_effectiveness_readout_for_contact(fireteam_id: String, target_unit_id: String) -> Dictionary:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	var normalized_target_id: String = target_unit_id.strip_edges()
+	var contact_state: Dictionary = _get_fireteam_contact_state(normalized_fireteam_id, normalized_target_id)
+	var attacker = _resolve_fireteam_readout_attacker(normalized_fireteam_id)
+	var target = _resolve_unit_by_id(normalized_target_id)
+	var readout: Dictionary = build_cover_effectiveness_readout_for_units(attacker, target, String(contact_state.get("detection_state", "")))
+	readout["fireteam_id"] = normalized_fireteam_id
+	readout["contact_unit_id"] = normalized_target_id
+	return readout
+
+
+func resolve_flank_attack_preview(attacker, target) -> Dictionary:
+	if attacker == null or target == null or _flank_vulnerability_resolver == null:
+		return {}
+	if target.has_method("get_team_id") and String(target.call("get_team_id")) != friendly_team_id:
+		var enemy_security_state: Dictionary = get_enemy_security_state_for_unit(String(target.call("get_unit_id")) if target.has_method("get_unit_id") else "")
+		var enemy_group_id: String = String(enemy_security_state.get("security_group_id", "")).strip_edges().to_lower()
+		if enemy_group_id.is_empty():
+			return {}
+		return resolve_flank_attack_preview_with_state(enemy_group_id, attacker, target, enemy_security_state)
+	if not target.has_method("get_fireteam_id"):
+		return {}
+	var tactical_controller = _get_tactical_controller()
+	if tactical_controller == null or not tactical_controller.has_method("get_fireteam_security_state"):
+		return {}
+	var defending_fireteam_id: String = String(target.call("get_fireteam_id")).strip_edges().to_lower()
+	if defending_fireteam_id.is_empty():
+		return {}
+	var security_state: Dictionary = Dictionary(tactical_controller.call("get_fireteam_security_state", defending_fireteam_id)).duplicate(true)
+	return resolve_flank_attack_preview_with_state(defending_fireteam_id, attacker, target, security_state)
+
+
+func resolve_flank_attack_preview_with_state(fireteam_id: String, attacker, target, security_state: Dictionary) -> Dictionary:
+	if _flank_vulnerability_resolver == null or fireteam_id.strip_edges().is_empty():
+		return {}
+	return Dictionary(_flank_vulnerability_resolver.call("preview_attack", fireteam_id, attacker, target, security_state, _current_tick)).duplicate(true)
+
+
 func _maybe_publish_flank_event(flank_modifiers: Dictionary, attacker, target) -> void:
 	if flank_modifiers.is_empty() or not (bool(flank_modifiers.get("triggered_now", false)) or bool(flank_modifiers.get("morale_triggered_now", false))):
 		return
@@ -3153,6 +3216,27 @@ func _resolve_unit_by_id(unit_id: String):
 		return null
 
 	return unit_registry.call("get_unit", unit_id)
+
+
+func _resolve_fireteam_readout_attacker(fireteam_id: String):
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return null
+	var acting_lead_id: String = String(_fireteam_acting_leads.get(normalized_fireteam_id, "")).strip_edges()
+	if not acting_lead_id.is_empty():
+		var acting_lead = _resolve_unit_by_id(acting_lead_id)
+		if acting_lead != null:
+			return acting_lead
+	for member_id_variant in Array(_fireteam_members.get(normalized_fireteam_id, [])):
+		var member = _resolve_unit_by_id(String(member_id_variant).strip_edges())
+		if member != null:
+			return member
+	for friendly in _get_units(friendly_unit_paths):
+		if friendly == null or not friendly.has_method("get_fireteam_id"):
+			continue
+		if String(friendly.call("get_fireteam_id")).strip_edges().to_lower() == normalized_fireteam_id:
+			return friendly
+	return null
 
 
 func _get_enemy_wave_controller():

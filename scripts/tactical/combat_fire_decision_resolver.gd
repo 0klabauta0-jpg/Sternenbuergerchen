@@ -126,6 +126,61 @@ static func build_damage_effect(contact_pair: Dictionary, context: Dictionary) -
 	}
 
 
+static func build_cover_effectiveness_readout(attacker, target, context: Dictionary = {}) -> Dictionary:
+	var contact_state: String = String(context.get("contact_state", "")).strip_edges().to_lower()
+	if bool(context.get("respect_contact_state", not contact_state.is_empty())) and not _contact_state_allows_detail(contact_state):
+		return _build_unknown_cover_readout("contact_not_visible", contact_state)
+	if attacker == null:
+		return _build_unknown_cover_readout("missing_attacker", contact_state)
+	if target == null:
+		return _build_unknown_cover_readout("missing_target", contact_state)
+	var active_weapon_id: String = get_unit_active_weapon_id(attacker)
+	if active_weapon_id.is_empty():
+		return _build_unknown_cover_readout("no_attack_weapon", contact_state)
+
+	var weapon_range_world: float = _get_weapon_attack_range(attacker, target, context)
+	var distance_world: float = _get_node_distance(attacker, target)
+	var range_state: String = _resolve_range_state(distance_world, weapon_range_world)
+	var los_state: String = _resolve_los_state(attacker, target, context)
+	var raw_cover_score: int = _get_target_cover_score(target, context)
+	var raw_cover_state: String = _resolve_cover_state(raw_cover_score)
+	var flank_preview: Dictionary = _call_flank_preview(context, attacker, target)
+	var has_flank_preview: bool = context.get("resolve_flank_attack_preview", Callable()).is_valid()
+	var is_flank: bool = bool(flank_preview.get("is_flank", false))
+	var effective_cover_score: int = raw_cover_score
+	if is_flank and flank_preview.has("target_cover_override"):
+		effective_cover_score = int(round(float(flank_preview.get("target_cover_override", raw_cover_score))))
+	var effective_cover_state: String = _resolve_cover_state(effective_cover_score)
+	var combat_attackable: bool = is_target_attackable(attacker, target, context)
+	return {
+		"readout_state": "known",
+		"source": "CombatFireDecisionResolver",
+		"combat_truth_source": "weapon_data_los_system_terrain_registry_flank_preview",
+		"read_only": true,
+		"ui_may_execute_commands": false,
+		"attacker_unit_id": _get_unit_id(attacker),
+		"target_unit_id": _get_unit_id(target),
+		"contact_state": contact_state,
+		"weapon_id": active_weapon_id,
+		"weapon_range_world": weapon_range_world,
+		"distance_world": distance_world,
+		"range_state": range_state,
+		"los_state": los_state,
+		"raw_cover_score": raw_cover_score,
+		"raw_cover_state": raw_cover_state,
+		"effective_cover_score": effective_cover_score,
+		"effective_cover_state": effective_cover_state,
+		"cover_state": effective_cover_state,
+		"flank_state": "flank" if is_flank else ("not_flank" if has_flank_preview else "unknown"),
+		"flank_relevant": is_flank,
+		"flank_direction_label": String(flank_preview.get("direction_label", "")),
+		"flank_hit_chance_bonus": float(flank_preview.get("hit_chance_bonus", 0.0)) if is_flank else 0.0,
+		"target_cover_override": flank_preview.get("target_cover_override", null) if is_flank else null,
+		"combat_attackable": combat_attackable,
+		"attack_quality_label": _resolve_attack_quality_label(combat_attackable, range_state, los_state, effective_cover_state, is_flank),
+	}
+
+
 static func can_enemy_attack(unit) -> bool:
 	if unit == null:
 		return false
@@ -295,3 +350,102 @@ static func _call_flank_resolver(context: Dictionary, attacker, target) -> Dicti
 	if not resolve_flank_attack.is_valid():
 		return {}
 	return Dictionary(resolve_flank_attack.call(attacker, target)).duplicate(true)
+
+
+static func _call_flank_preview(context: Dictionary, attacker, target) -> Dictionary:
+	var resolve_flank_attack_preview: Callable = context.get("resolve_flank_attack_preview", Callable())
+	if not resolve_flank_attack_preview.is_valid():
+		return {}
+	return Dictionary(resolve_flank_attack_preview.call(attacker, target)).duplicate(true)
+
+
+static func _contact_state_allows_detail(contact_state: String) -> bool:
+	var normalized_state: String = contact_state.strip_edges().to_lower()
+	return normalized_state.is_empty() or normalized_state == "spotted" or normalized_state == "confirmed"
+
+
+static func _build_unknown_cover_readout(reason: String, contact_state: String = "") -> Dictionary:
+	return {
+		"readout_state": "unknown",
+		"reason": reason,
+		"source": "CombatFireDecisionResolver",
+		"combat_truth_source": "hidden_or_missing_input",
+		"read_only": true,
+		"ui_may_execute_commands": false,
+		"contact_state": contact_state,
+		"range_state": "unknown",
+		"los_state": "unknown",
+		"cover_state": "unknown",
+		"raw_cover_state": "unknown",
+		"effective_cover_state": "unknown",
+		"flank_state": "unknown",
+		"flank_relevant": false,
+		"combat_attackable": false,
+		"attack_quality_label": "unknown",
+	}
+
+
+static func _get_node_distance(attacker, target) -> float:
+	if attacker is Node2D and target is Node2D:
+		return (attacker as Node2D).global_position.distance_to((target as Node2D).global_position)
+	return -1.0
+
+
+static func _resolve_range_state(distance_world: float, weapon_range_world: float) -> String:
+	if distance_world < 0.0 or weapon_range_world <= 0.0:
+		return "unknown"
+	return "in_range" if distance_world <= weapon_range_world else "out_of_range"
+
+
+static func _resolve_los_state(attacker, target, context: Dictionary) -> String:
+	if not (attacker is Node2D) or not (target is Node2D):
+		return "unknown"
+	var los_system = context.get("los_system", null)
+	if los_system == null or not los_system.has_method("has_line_of_sight_between_nodes"):
+		return "unknown"
+	var terrain_registry = context.get("terrain_registry", null)
+	return "clear" if bool(los_system.call("has_line_of_sight_between_nodes", attacker, target, -1.0, terrain_registry)) else "blocked"
+
+
+static func _get_target_cover_score(target, context: Dictionary) -> int:
+	if target != null and target.has_method("get_effective_cover_score"):
+		return clampi(int(target.call("get_effective_cover_score")), 0, 100)
+	if target is Node2D:
+		var terrain_registry = context.get("terrain_registry", null)
+		if terrain_registry != null and terrain_registry.has_method("get_cover_at_world"):
+			return clampi(int(terrain_registry.call("get_cover_at_world", (target as Node2D).global_position)), 0, 100)
+	return -1
+
+
+static func _resolve_cover_state(cover_score: int) -> String:
+	if cover_score < 0:
+		return "unknown"
+	if cover_score >= 70:
+		return "full_cover"
+	if cover_score >= 35:
+		return "partial_cover"
+	if cover_score > 0:
+		return "light_cover"
+	return "no_cover"
+
+
+static func _resolve_attack_quality_label(combat_attackable: bool, range_state: String, los_state: String, cover_state: String, is_flank: bool) -> String:
+	if range_state == "out_of_range":
+		return "out_of_range"
+	if los_state == "blocked":
+		return "no_los"
+	if not combat_attackable:
+		return "not_attackable"
+	if is_flank:
+		return "flank_opportunity"
+	if cover_state == "full_cover":
+		return "hard_cover"
+	if cover_state == "partial_cover" or cover_state == "light_cover":
+		return "covered"
+	return "open"
+
+
+static func _get_unit_id(unit) -> String:
+	if unit != null and unit.has_method("get_unit_id"):
+		return String(unit.call("get_unit_id")).strip_edges()
+	return ""

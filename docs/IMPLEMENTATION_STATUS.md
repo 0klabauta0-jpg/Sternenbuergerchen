@@ -230,12 +230,20 @@
 - Lokale Pruefung: `task_372_mission_los_debug_overlay_toggle.gd`, `task_202_enemy_security_direction_and_los_patch.gd` und `git diff --check` laufen gruen.
 - Offene Folgearbeit: Spieler-permanente LOS-Hinweise brauchen eigenes Design/FoW-Balancing; dieser Slice bleibt Debug-/Optional-Layer.
 
-### TASK_373-TASK_380 - Mission Visualization Review Followups
+### TASK_373 - Cover Effectiveness Readout
+- Status: implementiert
+- Stand: `CombatFireDecisionResolver.build_cover_effectiveness_readout()` liefert einen read-only Diagnose-Snapshot fuer Cover, Range, LOS, Flank-Preview und qualitative Angriffsguete, ohne eine zweite UI-Trefferformel einzufuehren.
+- Stand: `FlankVulnerabilityResolver.preview_attack()` stellt Flank-Bonus, Cover-Override und Richtung bereit, ohne den laufenden Flank-State zu mutieren.
+- Stand: `MissionCombatLoopDriver` und `mission_tactical_sandbox_controller.gd` veroeffentlichen Contact-/Tile-Readouts im Command-Feedback. Unsichtbare Contacts bleiben auf `unknown/contact_not_visible`; Selected-Tile-Werte sind als terrain-only `estimated` markiert.
+- Lokale Pruefung: `task_373_cover_effectiveness_readout.gd`, `task_286_ui_feedback_truth_regression_review.gd` und `git diff --check` laufen gruen.
+- Offene Folgearbeit: Eine sichtbare HUD-Komponente kann auf diesem Snapshot aufbauen; dieser Task etabliert zuerst den Wahrheitspfad und die FoW-Sanitization.
+
+### TASK_374-TASK_380 - Mission Visualization Review Followups
 - Status: geplant
-- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Sinnvolle offene Follow-ups sind als getrennte Tasks 373 bis 380 angelegt.
-- Stand: Die Review-Snippets werden nicht ungeprueft uebernommen. Fireteam-Orientation, Event-Log, FTL-Gauge, Fireteam-Status, Member-Zeile, Fire-Sector, LOS, Cover, Countdown, Waypoint-Preview, Command-Validation, Contact-Heatmap und MapEditor-Debuglayer sind jeweils als eigene kleine Slices geschnitten.
+- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Sinnvolle offene Follow-ups sind als getrennte Tasks 374 bis 380 angelegt.
+- Stand: Die Review-Snippets werden nicht ungeprueft uebernommen. Countdown, Waypoint-Preview, Command-Validation, Contact-Heatmap und MapEditor-Debuglayer bleiben als eigene kleine Slices offen.
 - Stand: Architekturgrenze bleibt: UI liest nur Snapshots. `SimulationRoot`, bestehende Resolver, `TacticalCommunicationEvent`, `FireteamBehaviorResolver`, `FireteamOrderVisualizer`, FoW und Terrain-Daten bleiben die Wahrheit.
-- Offene Punkte: Implementierung der einzelnen Tasks, genaue HUD-Platzierung fuer Event-Log/Statuskarten und manuelle Sichtpruefung nach den ersten Visual-Slices.
+- Offene Punkte: Implementierung der einzelnen Tasks und manuelle Sichtpruefung nach weiteren Visual-Slices.
 - Risiken: Visual-Dichte kann Mission-HUD und FoW schnell ueberladen. Die Tasks markieren Debug-/optional-Layer getrennt von permanenten Spieleranzeigen.
 
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass

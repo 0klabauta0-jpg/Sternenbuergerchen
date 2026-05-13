@@ -9404,7 +9404,167 @@ func get_los_debug_overlay_snapshot() -> Dictionary:
 	}
 
 
+func get_cover_effectiveness_readout_snapshot() -> Dictionary:
+	var fireteam_id: String = _get_cover_readout_fireteam_id()
+	var selected_tile_readout: Dictionary = _build_selected_tile_cover_effectiveness_readout()
+	var contact_readouts: Array = _build_contact_cover_effectiveness_readouts(fireteam_id)
+	var primary_readout: Dictionary = selected_tile_readout
+	if not contact_readouts.is_empty():
+		primary_readout = Dictionary(contact_readouts[0]).duplicate(true)
+	return {
+		"readout_state": String(primary_readout.get("readout_state", "unknown")),
+		"primary": primary_readout,
+		"selected_tile": selected_tile_readout,
+		"contacts": contact_readouts,
+		"readout_text": _format_cover_effectiveness_readout_text(primary_readout),
+		"combat_truth_source": String(primary_readout.get("combat_truth_source", "")),
+		"selected_fireteam_id": fireteam_id,
+		"read_only": true,
+		"ui_may_execute_commands": false,
+	}
+
+
+func _get_cover_readout_fireteam_id() -> String:
+	if not _selected_fireteam_ids.is_empty():
+		return String(_selected_fireteam_ids[0]).strip_edges().to_lower()
+	var selected_fireteam_id: String = _get_selected_fireteam_id()
+	return selected_fireteam_id.strip_edges().to_lower()
+
+
+func _build_selected_tile_cover_effectiveness_readout() -> Dictionary:
+	if not _has_selected_tile:
+		return _build_unknown_cover_effectiveness_readout("no_selected_tile", "", "selected_tile")
+	var cover_score: int = clampi(int(round(_estimate_cover_score_at_world_position(_selected_tile_world_position))), 0, 100)
+	return {
+		"readout_type": "selected_tile",
+		"readout_state": "estimated",
+		"source": "TerrainRegistry",
+		"combat_truth_source": "terrain_snapshot_only",
+		"read_only": true,
+		"ui_may_execute_commands": false,
+		"grid_position": _selected_tile_grid_position,
+		"grid_text": _format_grid_position(_selected_tile_grid_position),
+		"world_position": _selected_tile_world_position,
+		"raw_cover_score": cover_score,
+		"raw_cover_state": _resolve_cover_effectiveness_state(cover_score),
+		"effective_cover_score": cover_score,
+		"effective_cover_state": _resolve_cover_effectiveness_state(cover_score),
+		"cover_state": _resolve_cover_effectiveness_state(cover_score),
+		"range_state": "unknown",
+		"los_state": "unknown",
+		"flank_state": "unknown",
+		"flank_relevant": false,
+		"attack_quality_label": "terrain_only",
+	}
+
+
+func _build_contact_cover_effectiveness_readouts(fireteam_id: String) -> Array:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return []
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver == null or not combat_driver.has_method("build_cover_effectiveness_readout_for_contact"):
+		return []
+	var result: Array = []
+	for contact_variant in get_fireteam_contact_snapshot(normalized_fireteam_id):
+		if typeof(contact_variant) != TYPE_DICTIONARY:
+			continue
+		var contact: Dictionary = Dictionary(contact_variant)
+		var detection_state: String = String(contact.get("detection_state", "")).strip_edges().to_lower()
+		var target_unit_id: String = String(contact.get("unit_id", contact.get("target_id", ""))).strip_edges()
+		var readout: Dictionary = {}
+		if _contact_state_allows_cover_effectiveness_detail(detection_state):
+			readout = Dictionary(combat_driver.call("build_cover_effectiveness_readout_for_contact", normalized_fireteam_id, target_unit_id)).duplicate(true)
+			readout["contact_unit_id"] = target_unit_id
+		else:
+			readout = _build_unknown_cover_effectiveness_readout("contact_not_visible", detection_state, "contact")
+		readout["readout_type"] = "contact"
+		readout["fireteam_id"] = normalized_fireteam_id
+		readout["contact_state"] = detection_state
+		result.append(readout)
+		if result.size() >= 3:
+			break
+	return result
+
+
+func _build_unknown_cover_effectiveness_readout(reason: String, contact_state: String = "", readout_type: String = "unknown") -> Dictionary:
+	return {
+		"readout_type": readout_type,
+		"readout_state": "unknown",
+		"reason": reason,
+		"source": "TacticalInputController",
+		"combat_truth_source": "hidden_or_missing_input",
+		"read_only": true,
+		"ui_may_execute_commands": false,
+		"contact_state": contact_state,
+		"range_state": "unknown",
+		"los_state": "unknown",
+		"cover_state": "unknown",
+		"raw_cover_state": "unknown",
+		"effective_cover_state": "unknown",
+		"flank_state": "unknown",
+		"flank_relevant": false,
+		"combat_attackable": false,
+		"attack_quality_label": "unknown",
+	}
+
+
+func _contact_state_allows_cover_effectiveness_detail(contact_state: String) -> bool:
+	var normalized_state: String = contact_state.strip_edges().to_lower()
+	return normalized_state == "spotted" or normalized_state == "confirmed"
+
+
+func _resolve_cover_effectiveness_state(cover_score: int) -> String:
+	if cover_score < 0:
+		return "unknown"
+	if cover_score >= 70:
+		return "full_cover"
+	if cover_score >= 35:
+		return "partial_cover"
+	if cover_score > 0:
+		return "light_cover"
+	return "no_cover"
+
+
+func _format_cover_effectiveness_readout_text(readout: Dictionary) -> String:
+	if readout.is_empty():
+		return "COV ? | RNG ? | LOS ? | FLK ?"
+	return "COV %s | RNG %s | LOS %s | FLK %s" % [
+		_compact_cover_effectiveness_label(String(readout.get("cover_state", "unknown"))),
+		_compact_cover_effectiveness_label(String(readout.get("range_state", "unknown"))),
+		_compact_cover_effectiveness_label(String(readout.get("los_state", "unknown"))),
+		_compact_cover_effectiveness_label(String(readout.get("flank_state", "unknown"))),
+	]
+
+
+func _compact_cover_effectiveness_label(value: String) -> String:
+	match value.strip_edges().to_lower():
+		"full_cover":
+			return "FULL"
+		"partial_cover":
+			return "PART"
+		"light_cover":
+			return "LIGHT"
+		"no_cover":
+			return "OPEN"
+		"in_range":
+			return "IN"
+		"out_of_range":
+			return "OUT"
+		"clear":
+			return "CLR"
+		"blocked":
+			return "BLOCK"
+		"flank":
+			return "YES"
+		"not_flank":
+			return "NO"
+		_:
+			return "?"
+
+
 func get_command_feedback_snapshot() -> Dictionary:
+	var cover_effectiveness_readout: Dictionary = get_cover_effectiveness_readout_snapshot()
 	return {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
 		"selected_fireteam_label": _get_fireteam_name(),
@@ -9428,6 +9588,8 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"visualized_area_order_count": get_visualized_area_orders_snapshot().size(),
 		"fire_sector_overlay": get_fire_sector_overlay_snapshot(),
 		"los_debug_overlay": get_los_debug_overlay_snapshot(),
+		"cover_effectiveness_readout": cover_effectiveness_readout,
+		"cover_effectiveness_text": String(cover_effectiveness_readout.get("readout_text", "")),
 		"fireteam_orientation_count": get_fireteam_orientation_snapshot().size(),
 		"fireteam_orientations": get_fireteam_orientation_snapshot(),
 		"active_area_defense": get_active_area_defense_snapshot(),
