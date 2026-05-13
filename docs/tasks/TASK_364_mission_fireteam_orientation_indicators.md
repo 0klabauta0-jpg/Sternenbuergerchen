@@ -3,7 +3,7 @@
 ## Ziel
 Fireteams sollen in der Mission auf der Mini-/Uebersichtsansicht oder auf den bestehenden Mission-Map-Markern eine kleine Richtungsanzeige bekommen, damit FTL-Facing und Bewegungsrichtung auf einen Blick lesbar sind.
 
-## Status: GEPLANT
+## Status: IMPLEMENTIERT
 
 ## Sinnhaftigkeitscheck
 Der Review-Punkt ist sinnvoll, aber im aktuellen Projekt gibt es eher `FireteamMiniPanel`, Fireteam-Karten und Map-Visuals als eine isolierte klassische Mini-Map-Komponente. Der Task soll deshalb an die bestehende Missionsuebersicht andocken und keine zweite Kartenwahrheit einfuehren.
@@ -22,11 +22,17 @@ Die aktuellen HUD-/Map-Snapshots transportieren Fireteam-Anker und Auswahlzustan
 - Keine SimulationRoot-Commands, keine Bewegungsentscheidung und keine neue Fireteam-State-Quelle im UI.
 
 ## Akzeptanzkriterien
-- [ ] Fireteam-Marker zeigen eine Richtung, wenn ein valides Facing bekannt ist.
-- [ ] Auswahl, Teamfarbe und bestehende Marker bleiben lesbar; der Pfeil verdeckt keine Kartenlabels.
-- [ ] Snapshot/Verifier prueft mindestens zwei Fireteams mit unterschiedlichen Richtungen.
-- [ ] Wenn kein Facing bekannt ist, bleibt die Anzeige stabil und erzeugt keine Nullvektor-Artefakte.
-- [ ] UI-Refresh erzeugt keine SimulationRoot-Commands oder Effects.
+- [x] Fireteam-Marker zeigen eine Richtung, wenn ein valides Facing bekannt ist.
+- [x] Auswahl, Teamfarbe und bestehende Marker bleiben lesbar; der Pfeil verdeckt keine Kartenlabels.
+- [x] Snapshot/Verifier prueft mindestens zwei Fireteams mit unterschiedlichen Richtungen.
+- [x] Wenn kein Facing bekannt ist, bleibt die Anzeige stabil und erzeugt keine Nullvektor-Artefakte.
+- [x] UI-Refresh erzeugt keine SimulationRoot-Commands oder Effects.
+
+## Umsetzung
+- `mission_tactical_sandbox_controller.gd` liefert einen read-only `get_fireteam_orientation_snapshot()` und erweitert die Fireteam-Anker um `heading_direction`, `heading_angle` und `heading_source`.
+- `fireteam_order_visualizer.gd` rendert die Richtungsanzeige direkt an den bestehenden 2D-Fireteam-Markern und filtert fehlende oder leere Heading-Vektoren.
+- `terrain_map_3d_view.gd` spiegelt dieselben Orientation-Snapshots im Primary-3D-Renderpfad und meldet `fireteam_orientation_visual_count` fuer Verifier.
+- Der neue Verifier prueft Blue/Gold mit unterschiedlichen Richtungen, Invalid-Heading-Filter und dass reine Visual-Refreshes keine `SimulationRoot` Commands oder Effects erzeugen.
 
 ## Erwartete Dateien
 - `scripts/tests/mission_tactical_sandbox_controller.gd`
@@ -35,11 +41,10 @@ Die aktuellen HUD-/Map-Snapshots transportieren Fireteam-Anker und Auswahlzustan
 - `scripts/tests/task_364_mission_fireteam_orientation_indicators.gd`
 
 ## Lokale Pruefung
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_364_mission_fireteam_orientation_indicators.gd`
-- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_286_ui_feedback_truth_regression_review.gd`
-- [ ] `git diff --check`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_364_mission_fireteam_orientation_indicators.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_286_ui_feedback_truth_regression_review.gd`
+- [x] `git diff --check`
 
 ## Risiken / offene Punkte
-- Es muss vorher geklaert werden, ob die Anzeige auf der linken Fireteam-Uebersicht, im 2.5D-Map-Overlay oder in beiden sitzt.
-- Facing darf nicht aus Sprite-Rotation geraten werden, wenn ein autoritativerer Bewegungs-/Security-Snapshot verfuegbar ist.
-
+- Die Anzeige sitzt jetzt in den bestehenden 2D-/3D-Order-Visuals, nicht in einer separaten Mini-Map-Komponente.
+- Heading-Prioritaet ist bewusst Snapshot-basiert: Fireteam-Facing-Metadaten, aktive Movement-/Security-Signale und geplante Zielpunkte bleiben lesende Inputs; UI schreibt keinen Gameplay-Zustand.

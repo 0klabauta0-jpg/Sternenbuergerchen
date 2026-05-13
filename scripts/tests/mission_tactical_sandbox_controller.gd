@@ -1290,6 +1290,21 @@ func get_fireteam_movement_snapshot() -> Array:
 	return Array(_fireteam_movement_controller.call("get_state_snapshot")).duplicate(true)
 
 
+func get_fireteam_orientation_snapshot() -> Array:
+	var entries: Array = []
+	for anchor_variant in _build_fireteam_anchor_visualization_entries():
+		if typeof(anchor_variant) != TYPE_DICTIONARY:
+			continue
+		var anchor_entry: Dictionary = Dictionary(anchor_variant).duplicate(true)
+		if typeof(anchor_entry.get("heading_direction", null)) != TYPE_VECTOR2:
+			continue
+		var heading_direction: Vector2 = Vector2(anchor_entry.get("heading_direction", Vector2.ZERO))
+		if heading_direction.length_squared() <= 0.0001:
+			continue
+		entries.append(anchor_entry)
+	return entries
+
+
 func get_active_area_defense_snapshot() -> Array:
 	var result: Array = []
 	var fireteam_ids: Array = _area_defense_execution_by_fireteam.keys()
@@ -8816,6 +8831,8 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"multi_fireteam_plan_count": _serialize_multi_fireteam_plans().size(),
 		"visualized_waypoint_count": get_visualized_waypoints_snapshot().size(),
 		"visualized_area_order_count": get_visualized_area_orders_snapshot().size(),
+		"fireteam_orientation_count": get_fireteam_orientation_snapshot().size(),
+		"fireteam_orientations": get_fireteam_orientation_snapshot(),
 		"active_area_defense": get_active_area_defense_snapshot(),
 		"active_area_attack": get_active_area_attack_snapshot(),
 		"fireteamleader_feedback_bubbles_enabled": fireteamleader_feedback_bubbles_enabled,
@@ -9396,11 +9413,108 @@ func _build_fireteam_anchor_visualization_entries() -> Array:
 		var anchor_position: Variant = _resolve_fireteam_visual_anchor_position(fireteam_id)
 		if typeof(anchor_position) != TYPE_VECTOR2:
 			continue
-		entries.append({
+		var entry: Dictionary = {
 			"fireteam_id": fireteam_id,
 			"position": Vector2(anchor_position),
-		})
+		}
+		var heading_entry: Dictionary = _resolve_fireteam_heading_entry(fireteam_id, Vector2(anchor_position))
+		if not heading_entry.is_empty():
+			entry.merge(heading_entry, true)
+		entries.append(entry)
 	return entries
+
+
+func _resolve_fireteam_heading_entry(fireteam_id: String, anchor_position: Vector2) -> Dictionary:
+	var movement_heading: Dictionary = _resolve_fireteam_movement_heading(fireteam_id)
+	if not movement_heading.is_empty():
+		return movement_heading
+	var security_heading: Dictionary = _resolve_fireteam_security_heading(fireteam_id)
+	if not security_heading.is_empty():
+		return security_heading
+	var facing_heading: Dictionary = _resolve_fireteam_unit_facing_heading(fireteam_id)
+	if not facing_heading.is_empty():
+		return facing_heading
+	var target_heading: Dictionary = _resolve_fireteam_target_heading(fireteam_id, anchor_position)
+	if not target_heading.is_empty():
+		return target_heading
+	return {}
+
+
+func _resolve_fireteam_movement_heading(fireteam_id: String) -> Dictionary:
+	var movement_state: Dictionary = get_fireteam_movement_state(fireteam_id)
+	if movement_state.is_empty():
+		return {}
+	var origin_position: Vector2 = _coerce_vector2_value(movement_state.get("current_anchor_origin_position", movement_state.get("progress_anchor_position", movement_state.get("bound_origin_position", Vector2.ZERO))), Vector2.ZERO)
+	var target_position: Vector2 = _coerce_vector2_value(movement_state.get("current_anchor_target_position", movement_state.get("bound_target_position", movement_state.get("final_target_position", origin_position))), origin_position)
+	var direction: Vector2 = target_position - origin_position
+	if direction.length_squared() <= 0.0001:
+		direction = _coerce_vector2_value(movement_state.get("final_target_position", target_position), target_position) - origin_position
+	return _build_heading_entry(direction, "movement")
+
+
+func _resolve_fireteam_security_heading(fireteam_id: String) -> Dictionary:
+	var security_state: Dictionary = get_fireteam_security_state(fireteam_id)
+	if security_state.is_empty():
+		return {}
+	if not bool(security_state.get("is_active", false)) and typeof(security_state.get("main_threat_position", null)) != TYPE_VECTOR2:
+		return {}
+	var direction: Vector2 = Vector2.RIGHT.rotated(float(security_state.get("direction_angle", 0.0)))
+	return _build_heading_entry(direction, "security")
+
+
+func _resolve_fireteam_unit_facing_heading(fireteam_id: String) -> Dictionary:
+	var leader = _resolve_fireteam_leader_for_behavior(fireteam_id)
+	var leader_heading: Dictionary = _resolve_unit_facing_heading(leader)
+	if not leader_heading.is_empty():
+		return leader_heading
+	for unit in _get_fireteam_units(fireteam_id, true):
+		var unit_heading: Dictionary = _resolve_unit_facing_heading(unit)
+		if not unit_heading.is_empty():
+			return unit_heading
+	return {}
+
+
+func _resolve_unit_facing_heading(unit) -> Dictionary:
+	if unit == null or not (unit is Node):
+		return {}
+	for meta_key in ["facing_angle", "map_facing_angle"]:
+		if (unit as Node).has_meta(meta_key):
+			return _build_heading_entry(Vector2.RIGHT.rotated(float((unit as Node).get_meta(meta_key, 0.0))), "unit_facing")
+	return {}
+
+
+func _resolve_fireteam_target_heading(fireteam_id: String, anchor_position: Vector2) -> Dictionary:
+	var plan = _order_plans_by_key.get(_build_order_plan_key(fireteam_id, _get_live_order_phase_index()), null)
+	if plan != null:
+		for waypoint in plan.waypoints:
+			if waypoint == null:
+				continue
+			var waypoint_status: String = String(waypoint.status)
+			if waypoint_status == FIRETEAM_WAYPOINT_SCRIPT.STATUS_COMPLETED or waypoint_status == FIRETEAM_WAYPOINT_SCRIPT.STATUS_CANCELLED:
+				continue
+			if typeof(waypoint.target_position) == TYPE_VECTOR2:
+				return _build_heading_entry(Vector2(waypoint.target_position) - anchor_position, "planned_target")
+	for area_order in _area_orders_by_id.values():
+		if area_order == null:
+			continue
+		if String(area_order.fireteam_id).strip_edges().to_lower() != fireteam_id:
+			continue
+		if String(area_order.status) == AREA_ORDER_SCRIPT.STATUS_COMPLETED or String(area_order.status) == AREA_ORDER_SCRIPT.STATUS_CANCELLED:
+			continue
+		if typeof(area_order.center_position) == TYPE_VECTOR2:
+			return _build_heading_entry(Vector2(area_order.center_position) - anchor_position, "planned_area")
+	return {}
+
+
+func _build_heading_entry(direction: Vector2, source: String) -> Dictionary:
+	if direction.length_squared() <= 0.0001:
+		return {}
+	var normalized_direction: Vector2 = direction.normalized()
+	return {
+		"heading_direction": normalized_direction,
+		"heading_angle": normalized_direction.angle(),
+		"heading_source": source,
+	}
 
 
 func _resolve_fireteam_visual_anchor_position(fireteam_id: String) -> Variant:

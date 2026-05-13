@@ -151,6 +151,9 @@ const TILE_SELECTION_FILL_COLOR: Color = Color(0.05, 0.58, 1.0, 0.46)
 const TILE_SELECTION_BORDER_COLOR: Color = Color(0.78, 0.98, 1.0, 1.0)
 const FRIENDLY_AIM_LINE_COLOR: Color = Color(0.66, 1.0, 0.72, 0.82)
 const FRIENDLY_AIM_TIP_COLOR: Color = Color(0.78, 1.0, 0.84, 0.92)
+const FIRETEAM_ORIENTATION_LINE_COLOR: Color = Color(0.9, 0.98, 1.0, 0.88)
+const FIRETEAM_ORIENTATION_TIP_COLOR: Color = Color(1.0, 1.0, 1.0, 0.82)
+const FIRETEAM_ORIENTATION_LINE_LENGTH_WORLD: float = 58.0
 const FRIENDLY_FIRE_SECTOR_TILE_COLOR: Color = Color(0.52, 1.0, 0.58, 0.12)
 const FRIENDLY_FIRE_SECTOR_BLOCKER_COLOR: Color = Color(1.0, 0.84, 0.34, 0.32)
 const FRIENDLY_FIRE_SECTOR_BLOCKER_LINE_COLOR: Color = Color(0.95, 1.0, 0.62, 0.48)
@@ -332,6 +335,8 @@ var _movement_bound_marker_count: int = 0
 var _movement_group_marker_count: int = 0
 var _movement_group_marker_entries: Array = []
 var _movement_style_entries: Array = []
+var _fireteam_orientation_visual_count: int = 0
+var _fireteam_orientation_entries: Array = []
 var _multi_fireteam_plan_visual_count: int = 0
 var _multi_fireteam_plan_entries: Array = []
 var _enemy_security_visual_count: int = 0
@@ -1005,6 +1010,8 @@ func get_render_snapshot() -> Dictionary:
 		"movement_group_marker_count": _movement_group_marker_count,
 		"movement_group_marker_entries": _movement_group_marker_entries.duplicate(true),
 		"movement_style_entries": _movement_style_entries.duplicate(true),
+		"fireteam_orientation_visual_count": _fireteam_orientation_visual_count,
+		"fireteam_orientation_entries": _fireteam_orientation_entries.duplicate(true),
 		"multi_fireteam_plan_visual_count": _multi_fireteam_plan_visual_count,
 		"multi_fireteam_plan_entries": _multi_fireteam_plan_entries.duplicate(true),
 		"enemy_security_visual_count": _enemy_security_visual_count,
@@ -3240,6 +3247,8 @@ func _rebuild_order_visuals() -> void:
 	_movement_group_marker_count = 0
 	_movement_group_marker_entries.clear()
 	_movement_style_entries.clear()
+	_fireteam_orientation_visual_count = 0
+	_fireteam_orientation_entries.clear()
 	_multi_fireteam_plan_visual_count = 0
 	_multi_fireteam_plan_entries.clear()
 	_enemy_security_visual_count = 0
@@ -3265,7 +3274,8 @@ func _rebuild_order_visuals() -> void:
 		return
 	var phase_index: int = int(_order_payload.get("phase_index", 1))
 	var anchor_by_fireteam: Dictionary = {}
-	for anchor_variant in Array(_order_payload.get("fireteam_anchors", [])):
+	var fireteam_anchor_entries: Array = Array(_order_payload.get("fireteam_anchors", []))
+	for anchor_variant in fireteam_anchor_entries:
 		if typeof(anchor_variant) != TYPE_DICTIONARY:
 			continue
 		var anchor_dict: Dictionary = Dictionary(anchor_variant)
@@ -3276,6 +3286,7 @@ func _rebuild_order_visuals() -> void:
 
 	_add_selected_fireteam_unit_markers()
 	_add_selected_fireteam_aim_visuals()
+	_add_fireteam_orientation_visuals(fireteam_anchor_entries)
 
 	for area_variant in Array(_order_payload.get("area_order_dicts", [])):
 		if typeof(area_variant) != TYPE_DICTIONARY:
@@ -3482,6 +3493,43 @@ func _add_movement_state_visual(movement_state: Dictionary) -> void:
 	if not label_text.is_empty():
 		_add_label3d(_order_root, label_text, _world_to_surface_3d_position(target_position, MOVEMENT_LABEL_HEIGHT), "AdvanceLabel_%s_%s" % [style, fireteam_id], color.lightened(0.08), 13)
 	_movement_style_entries.append(_build_movement_style_entry(movement_state, label_text))
+
+
+func _add_fireteam_orientation_visuals(anchor_entries: Array) -> void:
+	for anchor_variant in anchor_entries:
+		if typeof(anchor_variant) != TYPE_DICTIONARY:
+			continue
+		var anchor_dict: Dictionary = Dictionary(anchor_variant)
+		var fireteam_id: String = String(anchor_dict.get("fireteam_id", "")).strip_edges().to_lower()
+		if fireteam_id.is_empty() or typeof(anchor_dict.get("position", null)) != TYPE_VECTOR2:
+			continue
+		var heading_variant: Variant = anchor_dict.get("heading_direction", null)
+		if typeof(heading_variant) != TYPE_VECTOR2:
+			continue
+		var direction: Vector2 = Vector2(heading_variant)
+		if direction.length_squared() <= 0.0001:
+			continue
+		direction = direction.normalized()
+		var origin_position: Vector2 = Vector2(anchor_dict.get("position", Vector2.ZERO))
+		var tip_position: Vector2 = origin_position + direction * FIRETEAM_ORIENTATION_LINE_LENGTH_WORLD
+		var line_color: Color = FIRETEAM_ORIENTATION_LINE_COLOR.lerp(_get_fireteam_color(fireteam_id), 0.22)
+		_add_line3d(
+			_order_root,
+			_world_to_surface_3d_position(origin_position, 0.76),
+			_world_to_surface_3d_position(tip_position, 0.76),
+			line_color,
+			"FireteamOrientation_%s" % fireteam_id
+		)
+		_add_marker3d(_order_root, tip_position, FIRETEAM_ORIENTATION_TIP_COLOR, "FireteamOrientationTip_%s" % fireteam_id, 0.10, 0.035, 4)
+		_fireteam_orientation_visual_count += 1
+		_fireteam_orientation_entries.append({
+			"fireteam_id": fireteam_id,
+			"position": origin_position,
+			"heading_direction": direction,
+			"heading_angle": float(anchor_dict.get("heading_angle", direction.angle())),
+			"heading_source": String(anchor_dict.get("heading_source", "")),
+			"tip_position": tip_position,
+		})
 
 
 func _add_movement_group_markers(movement_state: Dictionary, origin_position: Vector2, target_position: Vector2, color: Color) -> void:
@@ -4341,6 +4389,16 @@ func _get_weapon_fire_vfx_catalog() -> Dictionary:
 	if typeof(parsed) == TYPE_DICTIONARY:
 		_weapon_fire_vfx_catalog = Dictionary(parsed)
 	return _weapon_fire_vfx_catalog
+
+
+func _get_fireteam_color(fireteam_id: String) -> Color:
+	match fireteam_id.strip_edges().to_lower():
+		"blue", "ft1":
+			return Color(0.42, 0.76, 1.0, 0.95)
+		"gold", "ft2":
+			return Color(1.0, 0.86, 0.3, 0.95)
+		_:
+			return Color(0.88, 0.88, 0.88, 0.85)
 
 
 func _get_movement_style_color(style: String) -> Color:

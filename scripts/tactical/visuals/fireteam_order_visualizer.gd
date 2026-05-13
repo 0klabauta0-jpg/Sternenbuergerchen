@@ -18,6 +18,9 @@ const OFFENSIVE_ORDER_LINE_COLOR: Color = Color(1.0, 0.28, 0.22, 0.95)
 const MOVEMENT_RUSH_COLOR: Color = Color(0.32, 0.72, 1.0, 0.9)
 const MOVEMENT_BOUNDING_COLOR: Color = Color(1.0, 0.78, 0.24, 0.92)
 const MOVEMENT_CATERPILLAR_COLOR: Color = Color(0.48, 0.96, 0.62, 0.92)
+const FIRETEAM_ORIENTATION_ARROW_LENGTH: float = 28.0
+const FIRETEAM_ORIENTATION_ARROW_HEAD_LENGTH: float = 8.0
+const FIRETEAM_ORIENTATION_ARROW_HEAD_WIDTH: float = 5.0
 
 var _phase_index: int = 0
 var _selected_fireteam_ids: PackedStringArray = []
@@ -29,6 +32,7 @@ var _ad_hoc_order_dicts: Array = []
 var _security_dicts: Array = []
 var _movement_state_dicts: Array = []
 var _fireteam_anchor_positions: Dictionary = {}
+var _fireteam_orientation_entries: Array = []
 var _area_order_preview_payload: Dictionary = {}
 
 
@@ -65,6 +69,7 @@ func set_area_order_preview_payload(preview_payload: Dictionary) -> void:
 
 func set_fireteam_anchor_dicts(anchor_dicts: Array) -> void:
 	_fireteam_anchor_positions.clear()
+	_fireteam_orientation_entries.clear()
 	for anchor_variant in anchor_dicts:
 		if typeof(anchor_variant) != TYPE_DICTIONARY:
 			continue
@@ -72,7 +77,17 @@ func set_fireteam_anchor_dicts(anchor_dicts: Array) -> void:
 		var fireteam_id: String = String(anchor_dict.get("fireteam_id", "")).strip_edges().to_lower()
 		if fireteam_id.is_empty() or typeof(anchor_dict.get("position", null)) != TYPE_VECTOR2:
 			continue
-		_fireteam_anchor_positions[fireteam_id] = Vector2(anchor_dict.get("position", Vector2.ZERO))
+		var position: Vector2 = Vector2(anchor_dict.get("position", Vector2.ZERO))
+		_fireteam_anchor_positions[fireteam_id] = position
+		var heading_direction: Variant = anchor_dict.get("heading_direction", null)
+		if typeof(heading_direction) == TYPE_VECTOR2 and Vector2(heading_direction).length_squared() > 0.0001:
+			_fireteam_orientation_entries.append({
+				"fireteam_id": fireteam_id,
+				"position": position,
+				"heading_direction": Vector2(heading_direction).normalized(),
+				"heading_angle": float(anchor_dict.get("heading_angle", Vector2(heading_direction).angle())),
+				"heading_source": String(anchor_dict.get("heading_source", "")),
+			})
 	queue_redraw()
 
 
@@ -117,6 +132,13 @@ func get_visible_area_orders() -> Array:
 	return result
 
 
+func get_fireteam_orientation_entries() -> Array:
+	var result: Array = []
+	for entry in _fireteam_orientation_entries:
+		result.append(Dictionary(entry).duplicate(true))
+	return result
+
+
 func get_waypoint_hit(screen_position: Vector2, canvas_transform: Transform2D) -> Dictionary:
 	for waypoint_data in _visible_waypoints:
 		var marker_screen_position: Vector2 = canvas_transform * Vector2(waypoint_data.get("position", Vector2.ZERO))
@@ -143,6 +165,7 @@ func get_area_order_hit(screen_position: Vector2, canvas_transform: Transform2D)
 func _draw() -> void:
 	_draw_area_orders()
 	_draw_area_order_preview()
+	_draw_fireteam_orientation_indicators()
 	for plan_dict in _plan_dicts:
 		var plan = FIRETEAM_ORDER_PLAN_SCRIPT.call("from_dict", plan_dict)
 		if plan == null or not plan.is_valid() or int(plan.phase) != _phase_index:
@@ -224,6 +247,29 @@ func _draw_area_orders() -> void:
 				draw_line(polygon[index], polygon[(index + 1) % polygon.size()], edge_color, 2.0, true)
 		_draw_iso_marker_base(center_position, Color(edge_color.r, edge_color.g, edge_color.b, 0.18 * draw_alpha), edge_color, 0.8)
 		_draw_area_order_label(center_position, command_type, edge_color)
+
+
+func _draw_fireteam_orientation_indicators() -> void:
+	for entry_variant in _fireteam_orientation_entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var fireteam_id: String = String(entry.get("fireteam_id", "")).strip_edges().to_lower()
+		if not _selected_fireteam_ids.is_empty() and not _selected_fireteam_ids.has(fireteam_id):
+			continue
+		var position: Vector2 = Vector2(entry.get("position", Vector2.ZERO))
+		var direction: Vector2 = Vector2(entry.get("heading_direction", Vector2.ZERO))
+		if direction.length_squared() <= 0.0001:
+			continue
+		direction = direction.normalized()
+		var base_color: Color = _get_fireteam_color(fireteam_id)
+		var arrow_color: Color = Color(0.96, 0.98, 1.0, 0.96).lerp(base_color, 0.28)
+		var arrow_tip: Vector2 = position + direction * FIRETEAM_ORIENTATION_ARROW_LENGTH
+		var arrow_base: Vector2 = arrow_tip - direction * FIRETEAM_ORIENTATION_ARROW_HEAD_LENGTH
+		var lateral: Vector2 = direction.orthogonal() * FIRETEAM_ORIENTATION_ARROW_HEAD_WIDTH
+		draw_line(position, arrow_tip, arrow_color, 2.4, true)
+		draw_colored_polygon(PackedVector2Array([arrow_tip, arrow_base + lateral, arrow_base - lateral]), arrow_color)
+		_draw_iso_marker_base(position, Color(base_color.r, base_color.g, base_color.b, 0.18), base_color, 0.46)
 
 
 func _draw_area_order_preview() -> void:

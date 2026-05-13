@@ -155,9 +155,17 @@
 - Lokale Pruefung: `task_363_homebase_roster_card_pool_incremental_refresh.gd`, `task_361_npc_compact_card_readonly_profile_reference_contract.gd`, `task_346_homebase_direct_staging_character_popup.gd`, `task_355_homebase_direct_ux_payload_truth.gd`, `task_362_homebase_aircraft_state_manager_extraction.gd` und `git diff --check` laufen gruen.
 - Offene Folgearbeit: Fireteam- und Loadout-Memberkarten sind noch nicht gepoolt; dieser Task deckt den risikoarmen ersten Homebase-Roster/Staging-Schnitt ab.
 
-### TASK_364-TASK_380 - Mission Visualization Review Followups
+### TASK_364 - Mission Fireteam Orientation Indicators
+- Status: implementiert
+- Stand: `mission_tactical_sandbox_controller.gd` liefert einen read-only Orientation-Snapshot pro Fireteam und erweitert bestehende Fireteam-Anker um `heading_direction`, `heading_angle` und `heading_source`.
+- Stand: `fireteam_order_visualizer.gd` zeichnet kompakte Richtungspfeile an vorhandenen 2D-Fireteam-Markern. `terrain_map_3d_view.gd` nutzt denselben Payload fuer Primary-3D-Order-Visuals und meldet `fireteam_orientation_visual_count` fuer Verifier.
+- Stand: Invalid-Headings werden in 2D und 3D gefiltert; der Visual-Refresh erzeugt keine `SimulationRoot` Commands oder Effects.
+- Lokale Pruefung: `task_364_mission_fireteam_orientation_indicators.gd`, `task_286_ui_feedback_truth_regression_review.gd` und `git diff --check` laufen gruen.
+- Offene Folgearbeit: Manuelle Sichtpruefung im echten HUD bleibt sinnvoll, sobald weitere Visual-Slices Event-Log, Readiness und Debug-Layer ergaenzen.
+
+### TASK_365-TASK_380 - Mission Visualization Review Followups
 - Status: geplant
-- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Sinnvolle Follow-ups sind als getrennte Tasks 364 bis 380 angelegt.
+- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Sinnvolle Follow-ups sind als getrennte Tasks 365 bis 380 noch offen.
 - Stand: Die Review-Snippets werden nicht ungeprueft uebernommen. Fireteam-Orientation, Event-Log, FTL-Gauge, Fireteam-Status, Member-Zeile, Fire-Sector, LOS, Cover, Countdown, Waypoint-Preview, Command-Validation, Contact-Heatmap und MapEditor-Debuglayer sind jeweils als eigene kleine Slices geschnitten.
 - Stand: Architekturgrenze bleibt: UI liest nur Snapshots. `SimulationRoot`, bestehende Resolver, `TacticalCommunicationEvent`, `FireteamBehaviorResolver`, `FireteamOrderVisualizer`, FoW und Terrain-Daten bleiben die Wahrheit.
 - Offene Punkte: Implementierung der einzelnen Tasks, genaue HUD-Platzierung fuer Event-Log/Statuskarten und manuelle Sichtpruefung nach den ersten Visual-Slices.
