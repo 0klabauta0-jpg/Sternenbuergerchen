@@ -2645,7 +2645,7 @@ func _refresh_fireteam_mini_cards() -> void:
 			_build_mission_fireteam_reference_summary(normalized_fireteam_id, lead_name, units),
 			"mission_mini"
 		)
-		_apply_fireteam_mini_card_status_context(card, normalized_fireteam_id)
+		_apply_fireteam_mini_card_status_context(card, normalized_fireteam_id, units)
 		_apply_fireteam_mini_card_leader_portrait(card, lead)
 		card.set_meta("mission_fireteam_mini_card", true)
 		card.set_meta("fob_fireteam_reference_card", true)
@@ -2734,13 +2734,14 @@ func _apply_fireteam_mini_card_leader_portrait(card: Control, lead) -> void:
 	portrait_rect.set_meta("mission_fireteam_leader_portrait", true)
 
 
-func _apply_fireteam_mini_card_status_context(card: Control, fireteam_id: String) -> void:
+func _apply_fireteam_mini_card_status_context(card: Control, fireteam_id: String, units: Array = []) -> void:
 	if card == null:
 		return
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	var profile_dict: Dictionary = get_active_behavior_profile(normalized_fireteam_id)
 	var contact_context: Dictionary = _build_fireteam_contact_badge_context(normalized_fireteam_id)
 	var coordination_context: Dictionary = _build_fireteam_coordination_badge_context(normalized_fireteam_id)
+	var status_snapshot: Dictionary = _build_fireteam_status_card_entry(normalized_fireteam_id, units, profile_dict, contact_context)
 	var tooltip_parts: PackedStringArray = PackedStringArray()
 	var execution_text: String = _build_execution_quality_tooltip_text(profile_dict)
 	if not execution_text.is_empty():
@@ -2761,11 +2762,29 @@ func _apply_fireteam_mini_card_status_context(card: Control, fireteam_id: String
 	card.set_meta("execution_reason", String(profile_dict.get("execution_reason", "")).strip_edges().to_lower())
 	card.set_meta("contact_state", String(contact_context.get("state", "")).strip_edges().to_lower())
 	card.set_meta("tactical_stance", get_requested_tactical_stance(normalized_fireteam_id))
+	card.set_meta("mission_fireteam_status_card_snapshot", status_snapshot.duplicate(true))
+	card.set_meta("mission_fireteam_status_selected", bool(status_snapshot.get("selected", false)))
+	_apply_fireteam_mini_status_summary(card, status_snapshot)
 	_apply_fireteam_mini_contact_badge(card, contact_context)
 	_apply_fireteam_mini_ftl_quality_indicator(card, profile_dict, normalized_fireteam_id)
 	_apply_fireteam_mini_morale_indicator(card, profile_dict)
 	_apply_fireteam_mini_coordination_badge(card, coordination_context)
 	_apply_fireteam_mini_stance_toggle(card, normalized_fireteam_id)
+
+
+func _apply_fireteam_mini_status_summary(card: Control, status_snapshot: Dictionary) -> void:
+	var stage_label := card.get_node_or_null("Margin/VBox/StageLabel") as Label
+	var member_label := card.get_node_or_null("Margin/VBox/MemberLabel") as Label
+	if stage_label != null:
+		stage_label.text = String(status_snapshot.get("secondary_text", "")).strip_edges()
+		stage_label.visible = not stage_label.text.is_empty()
+		stage_label.tooltip_text = String(status_snapshot.get("tooltip_text", ""))
+		stage_label.set_meta("mission_fireteam_status_secondary", true)
+	if member_label != null:
+		member_label.text = String(status_snapshot.get("primary_text", "")).strip_edges()
+		member_label.visible = not member_label.text.is_empty()
+		member_label.tooltip_text = String(status_snapshot.get("tooltip_text", ""))
+		member_label.set_meta("mission_fireteam_status_primary", true)
 
 
 func _apply_fireteam_mini_contact_badge(card: Control, contact_context: Dictionary) -> void:
@@ -3170,6 +3189,238 @@ func _build_mission_fireteam_reference_summary(fireteam_id: String, lead_name: S
 	if info_text.is_empty():
 		return "Lead %s" % lead_name
 	return "Lead %s | %s" % [lead_name, info_text]
+
+
+func get_fireteam_status_card_snapshot() -> Array:
+	var result: Array = []
+	for fireteam_id_variant in _get_displayable_fireteam_ids():
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		result.append(_build_fireteam_status_card_entry(
+			fireteam_id,
+			_get_fireteam_units(fireteam_id, not _use_visible_units_for_fireteam_ui()),
+			get_active_behavior_profile(fireteam_id),
+			_build_fireteam_contact_badge_context(fireteam_id)
+		))
+	return result
+
+
+func _build_fireteam_status_card_entry(fireteam_id: String, units: Array = [], profile_dict: Dictionary = {}, contact_context: Dictionary = {}) -> Dictionary:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	var resolved_units: Array = units.duplicate()
+	if resolved_units.is_empty():
+		resolved_units = _get_fireteam_units(normalized_fireteam_id, true)
+	var resolved_profile: Dictionary = profile_dict.duplicate(true) if not profile_dict.is_empty() else get_active_behavior_profile(normalized_fireteam_id)
+	var resolved_contact: Dictionary = contact_context.duplicate(true) if not contact_context.is_empty() else _build_fireteam_contact_badge_context(normalized_fireteam_id)
+	var readiness_snapshot: Dictionary = _build_ftl_readiness_snapshot_for_fireteam(normalized_fireteam_id)
+	var readiness_context: Dictionary = _build_fireteam_status_readiness_context(readiness_snapshot)
+	var health_context: Dictionary = _build_fireteam_health_status_context(resolved_units)
+	var movement_state: Dictionary = get_fireteam_movement_state(normalized_fireteam_id)
+	var movement_text: String = _compact_fireteam_movement_text(movement_state, resolved_profile)
+	var position_context: Dictionary = _build_fireteam_position_status_context(normalized_fireteam_id)
+	var execution_text: String = _format_execution_quality_text(resolved_profile)
+	var contact_count: int = maxi(int(resolved_contact.get("count", 0)), 0)
+	var contact_state: String = String(resolved_contact.get("state", "clear")).strip_edges().to_lower()
+	if contact_state.is_empty():
+		contact_state = "clear"
+	var contact_text: String = _format_fireteam_status_contact_text(contact_state, contact_count)
+	var loadout_id: String = _get_mission_fireteam_loadout_id(normalized_fireteam_id).strip_edges().to_upper()
+	var primary_text: String = "EX %s | RDY %s | %s | %s" % [
+		execution_text,
+		String(readiness_context.get("label", "N/A")),
+		contact_text,
+		String(health_context.get("text", "HP 0/0")),
+	]
+	var secondary_parts: PackedStringArray = PackedStringArray()
+	secondary_parts.append("LD %s" % (loadout_id if not loadout_id.is_empty() else "MEDIUM"))
+	secondary_parts.append("MV %s" % movement_text)
+	secondary_parts.append("POS %s" % String(position_context.get("text", "--")))
+	var secondary_text: String = " | ".join(secondary_parts)
+	var tooltip_parts: PackedStringArray = PackedStringArray()
+	tooltip_parts.append("Execution: %s" % execution_text)
+	tooltip_parts.append("Readiness: %s" % String(readiness_context.get("label", "N/A")))
+	tooltip_parts.append("Contact: %s" % contact_text)
+	tooltip_parts.append("Health: %s" % String(health_context.get("detail_text", health_context.get("text", ""))))
+	tooltip_parts.append("Move: %s" % movement_text)
+	tooltip_parts.append("Position: %s" % String(position_context.get("text", "--")))
+	return {
+		"fireteam_id": normalized_fireteam_id,
+		"selected": _selected_fireteam_ids.has(normalized_fireteam_id),
+		"primary_text": primary_text,
+		"secondary_text": secondary_text,
+		"tooltip_text": "\n".join(tooltip_parts),
+		"execution_text": execution_text,
+		"execution_label": String(resolved_profile.get("execution_label", "STEADY")).strip_edges().to_upper(),
+		"readiness_state": String(readiness_context.get("state", "unavailable")),
+		"readiness_label": String(readiness_context.get("label", "N/A")),
+		"readiness_score": float(readiness_context.get("score", -1.0)),
+		"reaction_delay_seconds": readiness_context.get("reaction_delay_seconds", null),
+		"reaction_delay_seconds_available": bool(readiness_context.get("reaction_delay_seconds_available", false)),
+		"contact_state": contact_state,
+		"contact_count": contact_count,
+		"contact_text": contact_text,
+		"movement_text": movement_text,
+		"movement_state": movement_state.duplicate(true),
+		"advance_style": String(resolved_profile.get("advance_style", movement_state.get("effective_style", ""))).strip_edges().to_lower(),
+		"position": position_context.duplicate(true),
+		"health": health_context.duplicate(true),
+		"member_count": resolved_units.size(),
+		"loadout_id": loadout_id.to_lower(),
+		"read_only": true,
+	}
+
+
+func _build_fireteam_status_readiness_context(readiness_snapshot: Dictionary) -> Dictionary:
+	var plan_available: bool = bool(readiness_snapshot.get("plan_quality_available", readiness_snapshot.has("plan_quality") and readiness_snapshot.get("plan_quality") != null))
+	var morale_available: bool = bool(readiness_snapshot.get("morale_available", readiness_snapshot.has("morale") and readiness_snapshot.get("morale") != null))
+	var reaction_available: bool = bool(readiness_snapshot.get("reaction_delay_seconds_available", readiness_snapshot.has("reaction_delay_seconds") and readiness_snapshot.get("reaction_delay_seconds") != null))
+	var value_ranges: Dictionary = Dictionary(readiness_snapshot.get("value_ranges", {}))
+	var reaction_range: Dictionary = Dictionary(value_ranges.get("reaction_delay_seconds", {}))
+	var min_reaction_delay: float = maxf(float(reaction_range.get("min", 0.05)), 0.001)
+	var max_reaction_delay: float = maxf(float(reaction_range.get("max", 0.85)), min_reaction_delay + 0.001)
+	var plan_quality: float = clampf(float(readiness_snapshot.get("plan_quality", 0.0)) if plan_available else 0.0, 0.0, 1.0)
+	var morale: float = clampf(float(readiness_snapshot.get("morale", 0.0)) if morale_available else 0.0, 0.0, 1.0)
+	var reaction_delay: float = clampf(float(readiness_snapshot.get("reaction_delay_seconds", max_reaction_delay)) if reaction_available else max_reaction_delay, min_reaction_delay, max_reaction_delay)
+	var reaction_ratio: float = 1.0 - clampf((reaction_delay - min_reaction_delay) / (max_reaction_delay - min_reaction_delay), 0.0, 1.0)
+	var total: float = 0.0
+	var weight: float = 0.0
+	if plan_available:
+		total += plan_quality * 0.42
+		weight += 0.42
+	if morale_available:
+		total += morale * 0.28
+		weight += 0.28
+	if reaction_available:
+		total += reaction_ratio * 0.30
+		weight += 0.30
+	var score: float = -1.0 if weight <= 0.0 else clampf(total / weight, 0.0, 1.0)
+	var state: String = _format_fireteam_status_readiness_state(score, plan_available, morale_available, reaction_available)
+	return {
+		"state": state,
+		"label": _format_fireteam_status_readiness_label(state),
+		"score": score,
+		"reaction_delay_seconds": reaction_delay if reaction_available else null,
+		"reaction_delay_seconds_available": reaction_available,
+	}
+
+
+func _format_fireteam_status_readiness_state(score: float, plan_available: bool, morale_available: bool, reaction_available: bool) -> String:
+	if not plan_available and not morale_available and not reaction_available:
+		return "unavailable"
+	if score >= 0.70:
+		return "high"
+	if score <= 0.38:
+		return "low"
+	return "medium"
+
+
+func _format_fireteam_status_readiness_label(state: String) -> String:
+	match state.strip_edges().to_lower():
+		"high":
+			return "HIGH"
+		"medium":
+			return "MED"
+		"low":
+			return "LOW"
+		_:
+			return "N/A"
+
+
+func _format_fireteam_status_contact_text(contact_state: String, contact_count: int) -> String:
+	var count: int = maxi(contact_count, 0)
+	if count <= 0:
+		return "C0"
+	match contact_state.strip_edges().to_lower():
+		"confirmed":
+			return "C%d CONF" % count
+		"spotted":
+			return "C%d SPOT" % count
+		"suspected":
+			return "C%d SUS" % count
+		"lost":
+			return "C%d LOST" % count
+		_:
+			return "C%d" % count
+
+
+func _compact_fireteam_movement_text(movement_state: Dictionary, profile_dict: Dictionary) -> String:
+	var movement_text: String = _format_movement_state_text(movement_state)
+	if not movement_text.is_empty() and movement_text != "-":
+		return movement_text
+	var advance_style: String = String(profile_dict.get("advance_style", movement_state.get("effective_style", ""))).strip_edges().to_lower()
+	if advance_style.is_empty():
+		return "-"
+	var compact_label: String = _get_movement_style_short_label(advance_style)
+	return compact_label if compact_label != "-" else advance_style.substr(0, mini(4, advance_style.length())).to_upper()
+
+
+func _build_fireteam_position_status_context(fireteam_id: String) -> Dictionary:
+	var anchor := _get_selection_anchor_for_fireteam(fireteam_id)
+	if anchor == null:
+		return {
+			"has_position": false,
+			"has_grid": false,
+			"text": "--",
+			"world_position": Vector2.ZERO,
+			"grid_position": Vector2i.ZERO,
+		}
+	var world_position: Vector2 = anchor.global_position
+	var grid_variant = _primary_view_bridge.call("world_to_grid_position", get_parent(), world_position)
+	if typeof(grid_variant) == TYPE_VECTOR2I:
+		var grid_position := Vector2i(grid_variant)
+		return {
+			"has_position": true,
+			"has_grid": true,
+			"text": _format_grid_position(grid_position),
+			"world_position": world_position,
+			"grid_position": grid_position,
+		}
+	return {
+		"has_position": true,
+		"has_grid": false,
+		"text": _format_world_position(world_position),
+		"world_position": world_position,
+		"grid_position": Vector2i.ZERO,
+	}
+
+
+func _build_fireteam_health_status_context(units: Array) -> Dictionary:
+	var total_count: int = units.size()
+	var fit_count: int = 0
+	var down_count: int = 0
+	var bleedout_count: int = 0
+	var respawn_count: int = 0
+	for unit in units:
+		if unit == null:
+			continue
+		var vital_state: String = String(unit.call("get_vital_state")).strip_edges().to_lower() if unit.has_method("get_vital_state") else "fit"
+		match vital_state:
+			"down":
+				down_count += 1
+			"bleedout":
+				bleedout_count += 1
+			"respawning":
+				respawn_count += 1
+			_:
+				fit_count += 1
+	var text: String = "HP %d/%d" % [fit_count, total_count]
+	var details: PackedStringArray = PackedStringArray([text])
+	if down_count > 0:
+		details.append("DOWN %d" % down_count)
+	if bleedout_count > 0:
+		details.append("BLEED %d" % bleedout_count)
+	if respawn_count > 0:
+		details.append("RESPAWN %d" % respawn_count)
+	return {
+		"total_count": total_count,
+		"fit_count": fit_count,
+		"down_count": down_count,
+		"bleedout_count": bleedout_count,
+		"respawn_count": respawn_count,
+		"text": text,
+		"detail_text": " | ".join(details),
+	}
 
 
 func _build_fireteam_card_profile(unit: Node):
@@ -8930,6 +9181,8 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"ftl_readiness_count": get_ftl_readiness_snapshot().size(),
 		"ftl_readiness": get_ftl_readiness_snapshot(),
 		"ftl_readiness_contract": get_ftl_readiness_contract_snapshot(),
+		"fireteam_status_card_count": get_fireteam_status_card_snapshot().size(),
+		"fireteam_status_cards": get_fireteam_status_card_snapshot(),
 		"tactical_breakout_count": get_tactical_breakout_snapshot().size(),
 		"tactical_breakouts": get_tactical_breakout_snapshot(),
 		"fireteam_coordination_count": get_fireteam_coordination_snapshot().size(),
