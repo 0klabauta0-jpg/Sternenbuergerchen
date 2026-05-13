@@ -126,9 +126,11 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_359_mapeditor_dirty_ui_refresh_batching.gd`; `godot_console.exe --headless --path . --script scripts/tests/task_295_map_editor_paint_toolbar_tools_polish.gd`; `godot_console.exe --headless --path . --script scripts/tests/task_298_editor_terrain_visual_playability_smoke.gd`; `godot_console.exe --headless --path . --script scripts/tests/task_229_map_editor_usability_authoring_pass.gd`; `git diff --check`.
 
 ### TASK_360 - MapEditor Mission Scenario Panel Extraction
-- Status: geplant
-- Stand: Review-Finding. Das Scenario-Authoring blieb nach TASK_163 bewusst im Editor-Skript; inzwischen ist es ein guter verhaltensneutraler Extraktionsschnitt.
-- Naechster Schritt: Mission-Scenario-Panel/Controller aus MapEditor herausziehen und Editor-to-Live-Verifier unveraendert gruen halten.
+- Status: implementiert im Arbeitsstand
+- Stand: `MapEditorMissionScenarioPanel` uebernimmt Aufbau, Signalverbindungen, Refresh, Sync und Control-Lookups der Mission-Scenario-Authoring-UI. `MapEditor.gd` delegiert diese Pfade und bleibt Koordinator fuer Map-Daten, ScenarioData-Besitz, Save/Load, Dirty-State, Validierung und Live-Test.
+- Stand: Der neue Verifier prueft Controller-Ownership, bestehende Node-Pfade, UI-Sync, JSON-Save-Vertrag und Live-Test-Szenenpfad.
+- Lokale Pruefung: `task_360_mapeditor_mission_scenario_panel_extraction.gd`, `task_280_tactical_profile_editor_scenario_authoring.gd`, `task_298_editor_terrain_visual_playability_smoke.gd`, `task_229_map_editor_usability_authoring_pass.gd` und `git diff --check` laufen gruen.
+- Hinweis: `task_158_verifier.gd` wurde ausgefuehrt und endet mit Exitcode 0, meldet aber 15 bestehende Assertion-Fails. Der erste Fail tritt vor dem Editor-Load beim generischen `lz`-Key-Check von `MissionScenarioData.to_dict()` auf.
 
 ### TASK_361 - NPCCompactCard Readonly Profile Reference Contract
 - Status: geplant

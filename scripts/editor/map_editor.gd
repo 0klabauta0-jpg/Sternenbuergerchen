@@ -13,6 +13,7 @@ const MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT: GDScript = preload("res://scripts/
 const MAP_EDITOR_HEIGHT_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_height_tool.gd")
 const MAP_EDITOR_PATROL_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_patrol_tool.gd")
 const MAP_EDITOR_MARKER_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_marker_tool.gd")
+const MAP_EDITOR_MISSION_SCENARIO_PANEL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_mission_scenario_panel.gd")
 const MULTIPLAYER_MAP_MANIFEST_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_map_manifest.gd")
 const HOVER_SCROLL_BEHAVIOR_SCRIPT: GDScript = preload("res://scripts/ui/hover_scroll_behavior.gd")
 const DEFAULT_MAP_PATH: String = "res://maps/test_mission.json"
@@ -161,6 +162,7 @@ var _current_scenario_path: String = ""
 var _scenario_dirty: bool = false
 var _is_refreshing_scenario_controls: bool = false
 var _scenario_feedback_text: String = ""
+var _mission_scenario_panel_controller = null
 var _terrain_3d_view = null
 var _3d_refresh_queued: bool = false
 var _editor_ui_refresh_pending_flags: int = 0
@@ -1781,134 +1783,15 @@ func _ensure_marker_editor_controls() -> void:
 	_refresh_marker_editor_controls()
 
 
+func _ensure_mission_scenario_panel_controller():
+	if _mission_scenario_panel_controller == null:
+		_mission_scenario_panel_controller = MAP_EDITOR_MISSION_SCENARIO_PANEL_SCRIPT.new()
+		_mission_scenario_panel_controller.call("setup", self)
+	return _mission_scenario_panel_controller
+
+
 func _ensure_mission_authoring_controls() -> void:
-	var panel_parent := get_node_or_null("UI/PropertyPanel/Margin/VBox") as VBoxContainer
-	var ui_root := get_node_or_null("UI") as CanvasLayer
-	if panel_parent == null or ui_root == null:
-		return
-
-	var scenario_panel := panel_parent.get_node_or_null("MissionScenarioPanel") as VBoxContainer
-	if scenario_panel == null:
-		var separator := HSeparator.new()
-		separator.name = "MissionScenarioSeparator"
-		panel_parent.add_child(separator)
-
-		scenario_panel = VBoxContainer.new()
-		scenario_panel.name = "MissionScenarioPanel"
-		scenario_panel.add_theme_constant_override("separation", 5)
-		panel_parent.add_child(scenario_panel)
-		var marker_panel := panel_parent.get_node_or_null("MarkerEditorPanel") as VBoxContainer
-		if marker_panel != null:
-			panel_parent.move_child(separator, marker_panel.get_index())
-			panel_parent.move_child(scenario_panel, marker_panel.get_index())
-
-		var title_label := Label.new()
-		title_label.name = "ScenarioTitleLabel"
-		title_label.text = "Mission Scenario"
-		scenario_panel.add_child(title_label)
-
-		var toolbar := HBoxContainer.new()
-		toolbar.name = "ScenarioToolbarRow"
-		toolbar.add_theme_constant_override("separation", 4)
-		scenario_panel.add_child(toolbar)
-
-		var load_button := Button.new()
-		load_button.name = "ScenarioLoadButton"
-		load_button.text = "Load"
-		toolbar.add_child(load_button)
-
-		var save_button := Button.new()
-		save_button.name = "ScenarioSaveButton"
-		save_button.text = "Save"
-		toolbar.add_child(save_button)
-
-		var save_as_button := Button.new()
-		save_as_button.name = "ScenarioSaveAsButton"
-		save_as_button.text = "Save As"
-		toolbar.add_child(save_as_button)
-
-		var live_test_button := Button.new()
-		live_test_button.name = "ScenarioLiveTestButton"
-		live_test_button.text = "Live Test"
-		toolbar.add_child(live_test_button)
-
-		var path_label := Label.new()
-		path_label.name = "ScenarioPathLabel"
-		path_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		scenario_panel.add_child(path_label)
-
-		var map_label := Label.new()
-		map_label.name = "ScenarioMapLabel"
-		map_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		scenario_panel.add_child(map_label)
-
-		_add_scenario_line_edit_row(scenario_panel, "ScenarioIdRow", "ID:", "ScenarioIdLineEdit")
-		_add_scenario_line_edit_row(scenario_panel, "ScenarioNameRow", "Name:", "ScenarioNameLineEdit")
-		_add_scenario_option_row(scenario_panel, "ScenarioObjectiveRow", "Obj:", "ScenarioObjectiveOption", "ScenarioObjectiveTileButton", "Use Tile")
-		_add_scenario_spinbox_row(scenario_panel, "ScenarioCaptureRadiusRow", "Radius:", "ScenarioCaptureRadiusSpinBox", 1.0, 1000.0, 1.0)
-		_add_scenario_spinbox_row(scenario_panel, "ScenarioTimeLimitRow", "Time:", "ScenarioTimeLimitSpinBox", 0.0, 7200.0, 30.0)
-		_add_scenario_line_edit_row(scenario_panel, "ScenarioEnemyIdsRow", "Enemies:", "ScenarioEnemyIdsLineEdit")
-		_add_scenario_option_row(scenario_panel, "ScenarioSpawnRow", "Spawn:", "ScenarioSpawnOption", "ScenarioSpawnTileButton", "Use Tile")
-		_add_scenario_select_row(scenario_panel, "ScenarioEnemyTacticProfileRow", "Tactic:", "ScenarioEnemyTacticProfileOption")
-		_add_scenario_select_row(scenario_panel, "ScenarioEnemySecurityModeRow", "Security:", "ScenarioEnemySecurityModeOption")
-		_add_scenario_select_row(scenario_panel, "ScenarioEnemyFacingRow", "Facing:", "ScenarioEnemyFacingOption")
-		_add_scenario_select_row(scenario_panel, "ScenarioEnemyHeavyRoleRow", "Heavy:", "ScenarioEnemyHeavyRoleOption")
-		_add_scenario_select_row(scenario_panel, "ScenarioEnemyATWeaponRow", "AT Wpn:", "ScenarioEnemyATWeaponOption")
-		_add_scenario_select_row(scenario_panel, "ScenarioAirAssetRiskRow", "AirRisk:", "ScenarioAirAssetRiskOption")
-		_add_scenario_select_row(scenario_panel, "ScenarioLZThreatZoneRow", "LZ Risk:", "ScenarioLZThreatZoneOption")
-		_add_scenario_select_row(scenario_panel, "ScenarioCommIntensityRow", "Comms:", "ScenarioCommIntensityOption")
-		_add_scenario_spinbox_row(scenario_panel, "ScenarioWaveCountRow", "Waves:", "ScenarioWaveCountSpinBox", 0.0, 20.0, 1.0)
-		_add_scenario_spinbox_row(scenario_panel, "ScenarioUnitsPerWaveRow", "Per Wave:", "ScenarioUnitsPerWaveSpinBox", 1.0, 20.0, 1.0)
-		_add_scenario_spinbox_row(scenario_panel, "ScenarioFirstWaveDelayRow", "First:", "ScenarioFirstWaveDelaySpinBox", 0.0, 900.0, 1.0)
-		_add_scenario_spinbox_row(scenario_panel, "ScenarioWaveDelayRow", "Delay:", "ScenarioWaveDelaySpinBox", 0.0, 1800.0, 1.0)
-
-		var patrol_row := HBoxContainer.new()
-		patrol_row.name = "ScenarioPatrolBindingsRow"
-		patrol_row.add_theme_constant_override("separation", 4)
-		scenario_panel.add_child(patrol_row)
-		var patrol_label := Label.new()
-		patrol_label.text = "Patrol:"
-		patrol_row.add_child(patrol_label)
-		var patrol_line_edit := LineEdit.new()
-		patrol_line_edit.name = "ScenarioPatrolBindingsLineEdit"
-		patrol_line_edit.placeholder_text = "enemy_delta:enemy_delta"
-		patrol_line_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		patrol_row.add_child(patrol_line_edit)
-		var auto_bind_button := Button.new()
-		auto_bind_button.name = "ScenarioAutoBindButton"
-		auto_bind_button.text = "Auto"
-		patrol_row.add_child(auto_bind_button)
-
-		var info_label := Label.new()
-		info_label.name = "ScenarioInfoLabel"
-		info_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		scenario_panel.add_child(info_label)
-
-	var load_dialog := ui_root.get_node_or_null("ScenarioLoadDialog") as FileDialog
-	if load_dialog == null:
-		load_dialog = FileDialog.new()
-		load_dialog.name = "ScenarioLoadDialog"
-		load_dialog.title = "Load Mission Scenario"
-		load_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
-		load_dialog.access = FileDialog.ACCESS_RESOURCES
-		load_dialog.current_dir = DEFAULT_SCENARIO_DIR
-		load_dialog.filters = PackedStringArray(["*.json ; JSON mission scenario"])
-		ui_root.add_child(load_dialog)
-
-	var save_dialog := ui_root.get_node_or_null("ScenarioSaveAsDialog") as FileDialog
-	if save_dialog == null:
-		save_dialog = FileDialog.new()
-		save_dialog.name = "ScenarioSaveAsDialog"
-		save_dialog.title = "Save Mission Scenario"
-		save_dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
-		save_dialog.access = FileDialog.ACCESS_RESOURCES
-		save_dialog.current_dir = DEFAULT_SCENARIO_DIR
-		save_dialog.filters = PackedStringArray(["*.json ; JSON mission scenario"])
-		ui_root.add_child(save_dialog)
-
-	_connect_mission_authoring_signals()
-	_apply_contextual_help_ids()
-	_refresh_mission_authoring_controls()
+	_ensure_mission_scenario_panel_controller().call("ensure_controls")
 
 
 func _ensure_authoring_status_controls() -> void:
@@ -2214,126 +2097,11 @@ func _add_scenario_spinbox_row(parent: VBoxContainer, row_name: String, label_te
 
 
 func _connect_mission_authoring_signals() -> void:
-	var load_button := _get_scenario_button("ScenarioLoadButton")
-	var save_button := _get_scenario_button("ScenarioSaveButton")
-	var save_as_button := _get_scenario_button("ScenarioSaveAsButton")
-	var live_test_button := _get_scenario_button("ScenarioLiveTestButton")
-	var objective_tile_button := _get_scenario_button("ScenarioObjectiveTileButton")
-	var spawn_tile_button := _get_scenario_button("ScenarioSpawnTileButton")
-	var auto_bind_button := _get_scenario_button("ScenarioAutoBindButton")
-	if load_button != null and not load_button.pressed.is_connected(_on_mission_scenario_load_pressed):
-		load_button.pressed.connect(_on_mission_scenario_load_pressed)
-	if save_button != null and not save_button.pressed.is_connected(_on_mission_scenario_save_pressed):
-		save_button.pressed.connect(_on_mission_scenario_save_pressed)
-	if save_as_button != null and not save_as_button.pressed.is_connected(_on_mission_scenario_save_as_pressed):
-		save_as_button.pressed.connect(_on_mission_scenario_save_as_pressed)
-	if live_test_button != null and not live_test_button.pressed.is_connected(_on_mission_scenario_live_test_pressed):
-		live_test_button.pressed.connect(_on_mission_scenario_live_test_pressed)
-	if objective_tile_button != null and not objective_tile_button.pressed.is_connected(_on_mission_scenario_use_objective_tile_pressed):
-		objective_tile_button.pressed.connect(_on_mission_scenario_use_objective_tile_pressed)
-	if spawn_tile_button != null and not spawn_tile_button.pressed.is_connected(_on_mission_scenario_use_spawn_tile_pressed):
-		spawn_tile_button.pressed.connect(_on_mission_scenario_use_spawn_tile_pressed)
-	if auto_bind_button != null and not auto_bind_button.pressed.is_connected(_on_mission_scenario_auto_bind_pressed):
-		auto_bind_button.pressed.connect(_on_mission_scenario_auto_bind_pressed)
-
-	for line_edit in [
-		_get_scenario_line_edit("ScenarioIdLineEdit"),
-		_get_scenario_line_edit("ScenarioNameLineEdit"),
-		_get_scenario_line_edit("ScenarioEnemyIdsLineEdit"),
-		_get_scenario_line_edit("ScenarioPatrolBindingsLineEdit"),
-	]:
-		if line_edit != null and not line_edit.text_changed.is_connected(_on_mission_scenario_text_changed):
-			line_edit.text_changed.connect(_on_mission_scenario_text_changed)
-
-	for spinbox in [
-		_get_scenario_spinbox("ScenarioCaptureRadiusSpinBox"),
-		_get_scenario_spinbox("ScenarioTimeLimitSpinBox"),
-		_get_scenario_spinbox("ScenarioWaveCountSpinBox"),
-		_get_scenario_spinbox("ScenarioUnitsPerWaveSpinBox"),
-		_get_scenario_spinbox("ScenarioFirstWaveDelaySpinBox"),
-		_get_scenario_spinbox("ScenarioWaveDelaySpinBox"),
-	]:
-		if spinbox != null and not spinbox.value_changed.is_connected(_on_mission_scenario_value_changed):
-			spinbox.value_changed.connect(_on_mission_scenario_value_changed)
-
-	for option_button in [
-		_get_scenario_option_button("ScenarioObjectiveOption"),
-		_get_scenario_option_button("ScenarioSpawnOption"),
-		_get_scenario_option_button("ScenarioEnemyTacticProfileOption"),
-		_get_scenario_option_button("ScenarioEnemySecurityModeOption"),
-		_get_scenario_option_button("ScenarioEnemyFacingOption"),
-		_get_scenario_option_button("ScenarioEnemyHeavyRoleOption"),
-		_get_scenario_option_button("ScenarioEnemyATWeaponOption"),
-		_get_scenario_option_button("ScenarioAirAssetRiskOption"),
-		_get_scenario_option_button("ScenarioLZThreatZoneOption"),
-		_get_scenario_option_button("ScenarioCommIntensityOption"),
-	]:
-		if option_button != null and not option_button.item_selected.is_connected(_on_mission_scenario_option_selected):
-			option_button.item_selected.connect(_on_mission_scenario_option_selected)
-
-	var load_dialog := get_node_or_null("UI/ScenarioLoadDialog") as FileDialog
-	if load_dialog != null and not load_dialog.file_selected.is_connected(_on_mission_scenario_load_file_selected):
-		load_dialog.file_selected.connect(_on_mission_scenario_load_file_selected)
-	var save_dialog := get_node_or_null("UI/ScenarioSaveAsDialog") as FileDialog
-	if save_dialog != null and not save_dialog.file_selected.is_connected(_on_mission_scenario_save_as_file_selected):
-		save_dialog.file_selected.connect(_on_mission_scenario_save_as_file_selected)
+	_ensure_mission_scenario_panel_controller().call("connect_signals")
 
 
 func _refresh_mission_authoring_controls() -> void:
-	var panel := _get_mission_scenario_panel()
-	if panel == null:
-		return
-	var scenario = _ensure_mission_scenario()
-	if scenario == null:
-		return
-
-	_is_refreshing_scenario_controls = true
-	_refresh_scenario_marker_options()
-	_refresh_enemy_tactics_options()
-
-	var path_label := panel.get_node_or_null("ScenarioPathLabel") as Label
-	var map_label := panel.get_node_or_null("ScenarioMapLabel") as Label
-	var id_line_edit := _get_scenario_line_edit("ScenarioIdLineEdit")
-	var name_line_edit := _get_scenario_line_edit("ScenarioNameLineEdit")
-	var enemy_ids_line_edit := _get_scenario_line_edit("ScenarioEnemyIdsLineEdit")
-	var patrol_line_edit := _get_scenario_line_edit("ScenarioPatrolBindingsLineEdit")
-	var radius_spinbox := _get_scenario_spinbox("ScenarioCaptureRadiusSpinBox")
-	var time_spinbox := _get_scenario_spinbox("ScenarioTimeLimitSpinBox")
-	var wave_count_spinbox := _get_scenario_spinbox("ScenarioWaveCountSpinBox")
-	var units_per_wave_spinbox := _get_scenario_spinbox("ScenarioUnitsPerWaveSpinBox")
-	var first_wave_delay_spinbox := _get_scenario_spinbox("ScenarioFirstWaveDelaySpinBox")
-	var wave_delay_spinbox := _get_scenario_spinbox("ScenarioWaveDelaySpinBox")
-	var info_label := panel.get_node_or_null("ScenarioInfoLabel") as Label
-	if path_label != null:
-		path_label.text = "Scenario: %s%s" % [_current_scenario_path if not _current_scenario_path.is_empty() else "(new)", " *" if _scenario_dirty else ""]
-	if map_label != null:
-		map_label.text = "Map: %s" % (_current_map_path if not _current_map_path.is_empty() else "(unsaved)")
-	if id_line_edit != null:
-		id_line_edit.text = String(scenario.get("scenario_id"))
-	if name_line_edit != null:
-		name_line_edit.text = String(scenario.get("display_name"))
-	if enemy_ids_line_edit != null:
-		enemy_ids_line_edit.text = ", ".join(scenario.call("get_enemy_ids"))
-	if patrol_line_edit != null:
-		patrol_line_edit.text = _format_patrol_bindings_text(Array(scenario.get("patrol_bindings")))
-	if radius_spinbox != null:
-		radius_spinbox.value = float(Dictionary(scenario.get("objective")).get("capture_radius", 80.0))
-	if time_spinbox != null:
-		time_spinbox.value = maxf(float(scenario.get("time_limit_seconds")), 0.0)
-	var wave_config: Dictionary = Dictionary(scenario.get("wave_config"))
-	if wave_count_spinbox != null:
-		wave_count_spinbox.value = int(wave_config.get("wave_count", 1))
-	if units_per_wave_spinbox != null:
-		units_per_wave_spinbox.value = int(wave_config.get("units_per_wave", 2))
-	if first_wave_delay_spinbox != null:
-		first_wave_delay_spinbox.value = float(wave_config.get("first_wave_delay_seconds", 0.0))
-	if wave_delay_spinbox != null:
-		wave_delay_spinbox.value = float(wave_config.get("wave_delay_seconds", 90.0))
-	if info_label != null:
-		info_label.text = _build_mission_scenario_info_text()
-	_is_refreshing_scenario_controls = false
-	_refresh_top_bar()
-	_apply_inspector_section_visibility()
+	_ensure_mission_scenario_panel_controller().call("refresh")
 
 
 func _ensure_mission_scenario():
@@ -2542,110 +2310,7 @@ func _populate_scenario_marker_option(option_button: OptionButton, selected_mark
 
 
 func _sync_mission_scenario_from_controls() -> void:
-	var scenario = _ensure_mission_scenario()
-	if scenario == null:
-		return
-	var id_line_edit := _get_scenario_line_edit("ScenarioIdLineEdit")
-	var name_line_edit := _get_scenario_line_edit("ScenarioNameLineEdit")
-	var enemy_ids_line_edit := _get_scenario_line_edit("ScenarioEnemyIdsLineEdit")
-	var patrol_line_edit := _get_scenario_line_edit("ScenarioPatrolBindingsLineEdit")
-	var radius_spinbox := _get_scenario_spinbox("ScenarioCaptureRadiusSpinBox")
-	var time_spinbox := _get_scenario_spinbox("ScenarioTimeLimitSpinBox")
-	var wave_count_spinbox := _get_scenario_spinbox("ScenarioWaveCountSpinBox")
-	var units_per_wave_spinbox := _get_scenario_spinbox("ScenarioUnitsPerWaveSpinBox")
-	var first_wave_delay_spinbox := _get_scenario_spinbox("ScenarioFirstWaveDelaySpinBox")
-	var wave_delay_spinbox := _get_scenario_spinbox("ScenarioWaveDelaySpinBox")
-
-	var scenario_id: String = id_line_edit.text.strip_edges() if id_line_edit != null else String(scenario.get("scenario_id")).strip_edges()
-	if scenario_id.is_empty():
-		scenario_id = _build_default_scenario_id()
-	var display_name: String = name_line_edit.text.strip_edges() if name_line_edit != null else String(scenario.get("display_name")).strip_edges()
-	if display_name.is_empty():
-		display_name = scenario_id.capitalize()
-	scenario.set("scenario_id", scenario_id)
-	scenario.set("display_name", display_name)
-	scenario.set("map_file_path", _current_map_path if not _current_map_path.is_empty() else DEFAULT_MAP_PATH)
-	scenario.set("mission_slot_count_override", _get_current_map_mission_slot_count())
-	if time_spinbox != null:
-		scenario.set("time_limit_seconds", maxf(float(time_spinbox.value), 0.0))
-
-	var objective: Dictionary = Dictionary(scenario.get("objective")).duplicate(true)
-	objective["capture_radius"] = maxf(float(radius_spinbox.value if radius_spinbox != null else objective.get("capture_radius", 80.0)), 1.0)
-	var objective_selection: String = _get_selected_option_metadata("ScenarioObjectiveOption")
-	if objective_selection == SCENARIO_POSITION_META:
-		objective.erase("marker_id")
-		objective["position"] = _get_selected_or_existing_position(objective, _get_selected_or_map_center_position(Vector2.ZERO))
-	elif not objective_selection.is_empty():
-		objective["marker_id"] = objective_selection
-		objective.erase("position")
-	scenario.set("objective", objective)
-
-	var enemy_ids: PackedStringArray = _parse_string_list(enemy_ids_line_edit.text if enemy_ids_line_edit != null else "")
-	if enemy_ids.is_empty():
-		enemy_ids = PackedStringArray(["enemy_delta", "enemy_echo"])
-	var groups: Array = Array(scenario.get("enemy_groups")).duplicate(true)
-	var group: Dictionary = _get_primary_enemy_group().duplicate(true)
-	if group.is_empty():
-		group = {
-			"group_id": "red_test_group",
-			"display_name": "Test Contacts",
-			"team_id": "team_bravo",
-		}
-	group["enemy_ids"] = Array(enemy_ids)
-	group["team_id"] = String(group.get("team_id", "team_bravo")).strip_edges()
-	if String(group.get("group_id", "")).strip_edges().is_empty():
-		group["group_id"] = "red_test_group"
-	var spawn_selection: String = _get_selected_option_metadata("ScenarioSpawnOption")
-	if spawn_selection == SCENARIO_POSITION_META:
-		group.erase("spawn_marker_id")
-		group["spawn_position"] = _get_selected_or_existing_position(group, _get_selected_or_map_center_position(Vector2.ZERO), "spawn_position")
-	elif not spawn_selection.is_empty():
-		group["spawn_marker_id"] = spawn_selection
-		group.erase("spawn_position")
-	var tactic_input: Dictionary = Dictionary(group.get("tactics", {})).duplicate(true)
-	var tactic_profile_id: String = _get_selected_option_metadata("ScenarioEnemyTacticProfileOption")
-	var security_mode: String = _get_selected_option_metadata("ScenarioEnemySecurityModeOption")
-	var facing: String = _get_selected_option_metadata("ScenarioEnemyFacingOption")
-	var heavy_weapon_role: String = _get_selected_option_metadata("ScenarioEnemyHeavyRoleOption")
-	var at_weapon_id: String = _get_selected_option_metadata("ScenarioEnemyATWeaponOption")
-	var air_asset_risk_profile: String = _get_selected_option_metadata("ScenarioAirAssetRiskOption")
-	var lz_threat_zone_id: String = _get_selected_option_metadata("ScenarioLZThreatZoneOption")
-	var communication_intensity: String = _get_selected_option_metadata("ScenarioCommIntensityOption")
-	if not tactic_profile_id.is_empty():
-		tactic_input["profile_id"] = tactic_profile_id
-	if not security_mode.is_empty():
-		tactic_input["security_mode"] = security_mode
-	if not facing.is_empty():
-		tactic_input["facing"] = facing
-	if not heavy_weapon_role.is_empty():
-		tactic_input["heavy_weapon_role"] = heavy_weapon_role
-	if at_weapon_id == "none":
-		tactic_input["weapon_id"] = ""
-	elif not at_weapon_id.is_empty():
-		tactic_input["weapon_id"] = at_weapon_id
-	if not air_asset_risk_profile.is_empty():
-		tactic_input["air_asset_risk_profile"] = air_asset_risk_profile
-	tactic_input["lz_threat_zone_id"] = lz_threat_zone_id
-	if not communication_intensity.is_empty():
-		tactic_input["communication_intensity"] = communication_intensity
-	group["tactics"] = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("serialize_config", tactic_input, _get_current_grid_size())
-	if groups.is_empty():
-		groups.append(group)
-	else:
-		groups[0] = group
-	scenario.set("enemy_groups", groups)
-	_apply_tactical_authoring_from_controls(scenario, group)
-
-	scenario.set(
-		"wave_config",
-		{
-			"wave_count": maxi(int(wave_count_spinbox.value if wave_count_spinbox != null else 1), 0),
-			"units_per_wave": maxi(int(units_per_wave_spinbox.value if units_per_wave_spinbox != null else 2), 1),
-			"first_wave_delay_seconds": maxf(float(first_wave_delay_spinbox.value if first_wave_delay_spinbox != null else 0.0), 0.0),
-			"wave_delay_seconds": maxf(float(wave_delay_spinbox.value if wave_delay_spinbox != null else 90.0), 0.0),
-		}
-	)
-	scenario.set("patrol_bindings", _parse_patrol_bindings_text(patrol_line_edit.text if patrol_line_edit != null else ""))
+	_ensure_mission_scenario_panel_controller().call("sync_from_controls")
 
 
 func _apply_tactical_authoring_from_controls(scenario, group: Dictionary) -> void:
@@ -3679,35 +3344,27 @@ func _on_mission_scenario_save_as_file_selected(path: String) -> void:
 
 
 func _get_mission_scenario_panel() -> VBoxContainer:
-	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MissionScenarioPanel") as VBoxContainer
+	return _ensure_mission_scenario_panel_controller().call("get_panel") as VBoxContainer
 
 
 func _get_scenario_button(button_name: String) -> Button:
-	var panel := _get_mission_scenario_panel()
-	if panel == null:
-		return null
-	return panel.find_child(button_name, true, false) as Button
+	return _ensure_mission_scenario_panel_controller().call("get_button", button_name) as Button
 
 
 func _get_scenario_line_edit(line_edit_name: String) -> LineEdit:
-	var panel := _get_mission_scenario_panel()
-	if panel == null:
-		return null
-	return panel.find_child(line_edit_name, true, false) as LineEdit
+	return _ensure_mission_scenario_panel_controller().call("get_line_edit", line_edit_name) as LineEdit
 
 
 func _get_scenario_spinbox(spinbox_name: String) -> SpinBox:
-	var panel := _get_mission_scenario_panel()
-	if panel == null:
-		return null
-	return panel.find_child(spinbox_name, true, false) as SpinBox
+	return _ensure_mission_scenario_panel_controller().call("get_spinbox", spinbox_name) as SpinBox
 
 
 func _get_scenario_option_button(option_name: String) -> OptionButton:
-	var panel := _get_mission_scenario_panel()
-	if panel == null:
-		return null
-	return panel.find_child(option_name, true, false) as OptionButton
+	return _ensure_mission_scenario_panel_controller().call("get_option_button", option_name) as OptionButton
+
+
+func get_mission_scenario_panel_debug_snapshot() -> Dictionary:
+	return Dictionary(_ensure_mission_scenario_panel_controller().call("get_debug_snapshot"))
 
 
 func _hide_legacy_marker_rows() -> void:

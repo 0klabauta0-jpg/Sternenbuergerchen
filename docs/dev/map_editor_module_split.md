@@ -12,9 +12,11 @@ TASK_163 ist ein verhaltensneutraler Schnitt am internen Map-Editor. Der Editor 
   - kapselt Patrol-Waypoint-Finden, Hinzufuegen, Verschieben und Entfernen auf `TerrainMapData`.
 - `map_editor_marker_tool.gd`
   - kapselt Marker-Hit-Test, Belegungspruefung und Suche nach freier Marker-Position.
+- `map_editor_mission_scenario_panel.gd`
+  - kapselt Aufbau, Signalverbindungen, Refresh und UI-Sync des Mission-Scenario-Authoring-Panels. Der MapEditor bleibt Koordinator fuer Terrain-/Scenario-Daten, Save/Load, Dirty-State und Live-Test-Erzeugung.
 
 ## Bewusst im Editor geblieben
-- Scenario-Panel und Live-Test-Start bleiben vorerst im Editor-Skript, weil sie direkt an `MissionScenarioData` und bestehende Editor-to-Live-Verifier gekoppelt sind.
+- Live-Test-Start und ScenarioData-Besitz bleiben im Editor-Skript, weil sie direkt an Map-/Dirty-State und bestehende Editor-to-Live-Verifier gekoppelt sind. Das Scenario-Panel selbst ist in `map_editor_mission_scenario_panel.gd` ausgelagert.
 - File-Dialog-/Save-Load-Fluss bleibt vorerst im Editor-Skript, weil Dialogpfade und Dirty-State eng mit UI-Signalen verbunden sind.
 - Terrain-Brush-Painting bleibt im Editor-Skript, nutzt aber die bestehende `TerrainTileCatalog`-/`TerrainMapData`-Pipeline unveraendert.
 
