@@ -608,16 +608,13 @@ func _test_preview_drop_button_stays_drop_without_live_sequence() -> void:
 	tactical_controller.call("set_planning_state", planning_state)
 	tactical_controller.call("_on_call_dropship_pressed")
 	var start_position: Vector2 = Vector2(tactical_controller.get("_drop_sequence_position")) if tactical_controller != null else Vector2.ZERO
-	for _step in range(120):
-		tactical_controller.call("_update_drop_sequence", 0.2)
-		if String(tactical_controller.get("_drop_sequence_phase")) != "inbound":
-			break
+	_advance_drop_sequence_until_phase(tactical_controller, "outbound", 220)
 	await process_frame
 	var preview_drop_state: Dictionary = Dictionary(tactical_controller.call("get_planning_state")) if tactical_controller != null else {}
 
 	_assert(tactical_controller != null and not bool(tactical_controller.get("preview_mode")), "Mission nav uses the live mission controller immediately")
 	_assert(not bool(tactical_controller.get("_drop_sequence_visual_only")), "Live drop commits the real boarded fireteam instead of staying visual-only")
-	_assert(String(tactical_controller.get("_drop_sequence_phase")) == "outbound", "Live drop transitions into the return leg after the fireteam is dropped at the LZ")
+	_assert(String(tactical_controller.get("_drop_sequence_phase")) == "outbound", "Live drop transitions into the return leg after timed Deboarding at the LZ")
 	_assert(start_position.distance_to(Vector2(tactical_controller.get("_drop_sequence_position"))) > 0.1, "Live dropship visibly advances toward the LZ after pressing Drop")
 	_assert(call_button != null and call_button.text == "Outbound", "Live drop button reflects the return leg once the drop has been completed")
 	_assert(_live_mission_dropship_visible(preview_mission), "Live mission keeps the dropship marker visible while the return flight is active")
@@ -683,10 +680,7 @@ func _test_homebase_start_accepts_preview_deployed_fireteam() -> void:
 	planning_state["lz_position"] = Vector2(320.0, 180.0)
 	preview_tactical_controller.call("set_planning_state", planning_state)
 	preview_tactical_controller.call("_on_call_dropship_pressed")
-	for _step in range(120):
-		preview_tactical_controller.call("_update_drop_sequence", 0.2)
-		if String(preview_tactical_controller.get("_drop_sequence_phase")) != "inbound":
-			break
+	_advance_drop_sequence_until_phase(preview_tactical_controller, "outbound", 220)
 	await process_frame
 
 	var preview_drop_state: Dictionary = Dictionary(scene.get("_mission_planning_state"))
@@ -1204,22 +1198,19 @@ func _test_dropship_returns_to_fob_after_drop() -> void:
 	tactical_controller.call("set_planning_state", mission_state)
 	tactical_controller.call("_on_call_dropship_pressed")
 	_assert(String(tactical_controller.get("_drop_sequence_phase")) == "inbound", "Live mission drop button immediately starts the inbound dropship sequence")
-	for _step in range(120):
-		tactical_controller.call("_update_drop_sequence", 0.2)
-		if String(tactical_controller.get("_drop_sequence_phase")) != "inbound":
-			break
+	_advance_drop_sequence_until_phase(tactical_controller, "outbound", 220)
 	for _frame in range(2):
 		await process_frame
 	var mid_drop_state: Dictionary = Dictionary(tactical_controller.call("get_planning_state"))
 	var visible_friendly_unit_ids: Array = _collect_visible_friendly_unit_ids(active_mission)
 	var fireteam_cards_host := active_mission.get_node("TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox") as VBoxContainer
 	var fireteam_panel := active_mission.get_node("TacticalUI/FireteamMiniPanel") as Control
-	_assert(String(tactical_controller.get("_drop_sequence_phase")) == "outbound", "Live dropship goes straight into the outbound return once it reaches the LZ")
-	_assert(Array(mid_drop_state.get("embarked_unit_ids", [])) == [], "All boarded passengers are removed from the embarked set as soon as the dropship lands")
-	_assert(Array(mid_drop_state.get("deployed_unit_ids", [])) == Array(selected_unit_ids), "The boarded FOB fireteam deploys immediately at the LZ when the dropship arrives")
+	_assert(String(tactical_controller.get("_drop_sequence_phase")) == "outbound", "Live dropship enters outbound return after timed Deboarding")
+	_assert(Array(mid_drop_state.get("embarked_unit_ids", [])) == [], "All boarded passengers are removed from the embarked set after Deboarding completes")
+	_assert(Array(mid_drop_state.get("deployed_unit_ids", [])) == Array(selected_unit_ids), "The boarded FOB fireteam deploys at the LZ after Deboarding completes")
 	_assert(visible_friendly_unit_ids == _to_sorted_string_array(selected_unit_ids), "Live drop keeps only the selected operators visible and does not resurrect hidden spare slots")
 	_assert(fireteam_panel != null and fireteam_panel.visible and fireteam_cards_host != null and fireteam_cards_host.get_child_count() == 1, "Mission map starts showing the staged fireteam mini-card once the dropped team is actually on the map")
-	_assert(int(mid_drop_state.get("mission_drop_passenger_count", -1)) == 0, "Mission dropship passenger count falls to zero immediately after the live drop")
+	_assert(int(mid_drop_state.get("mission_drop_passenger_count", -1)) == 0, "Mission dropship passenger count falls to zero after timed Deboarding")
 	for _frame in range(4):
 		await process_frame
 	var bridged_drop_state: Dictionary = Dictionary(tactical_controller.call("get_planning_state"))
@@ -1509,6 +1500,16 @@ func _has_pending_mission_transfer(transfers: Array, craft_id: String, phase: St
 		if String(transfer.get("craft_id", "")).strip_edges() == normalized_craft_id and String(transfer.get("phase", "")).strip_edges().to_lower() == normalized_phase:
 			return true
 	return false
+
+
+func _advance_drop_sequence_until_phase(tactical_controller: Node, expected_phase: String, max_steps: int, delta_seconds: float = 0.2) -> void:
+	if tactical_controller == null:
+		return
+	var normalized_phase: String = expected_phase.strip_edges().to_lower()
+	for _step in range(max_steps):
+		tactical_controller.call("_update_drop_sequence", delta_seconds)
+		if String(tactical_controller.get("_drop_sequence_phase")).strip_edges().to_lower() == normalized_phase:
+			return
 
 
 func _assert(condition: bool, message: String) -> void:

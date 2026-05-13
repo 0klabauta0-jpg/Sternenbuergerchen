@@ -325,6 +325,7 @@ func _on_homebase_mission_start_requested() -> void:
 	if payload_source == MISSION_DROP_SOURCE_HOMEBASE_DIRECT:
 		_begin_homebase_direct_mission_transfer_from_planning()
 		_sync_homebase_direct_mission_drop_transport_fields()
+		_refresh_homebase_screen()
 	_begin_active_mission_timer()
 	_start_mission()
 
@@ -1105,16 +1106,7 @@ func _refresh_homebase_screen() -> void:
 
 
 func _build_homebase_aircraft_definitions_with_recovery() -> Array:
-	var definitions: Array = []
-	for craft_variant in _homebase_aircraft_definitions:
-		if typeof(craft_variant) != TYPE_DICTIONARY:
-			continue
-		var craft_def: Dictionary = Dictionary(craft_variant).duplicate(true)
-		var craft_id: String = String(craft_def.get("craft_id", "")).strip_edges()
-		if _air_asset_recovery_by_craft.has(craft_id):
-			craft_def.merge(Dictionary(AIR_ASSET_RECOVERY_STATE_SCRIPT.call("build_transport_patch", Dictionary(_air_asset_recovery_by_craft.get(craft_id, {})))), true)
-		definitions.append(craft_def)
-	return definitions
+	return _build_transport_craft_states()
 
 
 func _load_persistent_player_roster() -> void:

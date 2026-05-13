@@ -4855,6 +4855,7 @@ func _sanitize_mission_dropship_card(card: Dictionary) -> Dictionary:
 		"embarked_unit_ids": _sanitize_drop_payload_ids(Array(card.get("embarked_unit_ids", []))),
 		"boarded_fireteam_ids": _sanitize_drop_payload_ids(Array(card.get("boarded_fireteam_ids", []))),
 		"queued_fireteam_ids": _sanitize_drop_payload_ids(Array(card.get("queued_fireteam_ids", []))),
+		"card_feedback_text": String(card.get("card_feedback_text", "")).strip_edges(),
 		"has_embarked_payload": has_embarked_payload,
 	}
 	if card.has("has_lz_position"):
@@ -5026,6 +5027,7 @@ func _build_drop_sequence_card_fields(sequence: Dictionary) -> Dictionary:
 		"drop_ship_staged": true,
 		"drop_sequence_position": position,
 		"dropship_position": position,
+		"card_feedback_text": String(sequence.get("card_feedback_text", "")).strip_edges(),
 	}
 
 
@@ -5360,6 +5362,8 @@ func _refresh_mission_dropship_panel() -> void:
 		card_panel.set_meta("mission_dropship_card", true)
 		card_panel.set_meta("mission_dropship_craft_id", craft_id)
 		card_panel.set_meta("mission_dropship_selected", is_selected)
+		card_panel.set_meta("mission_dropship_card_inaccessible", is_transit)
+		card_panel.set_meta("mission_dropship_card_accessible", not is_transit)
 		card_panel.tooltip_text = "Select %s for Mission Control" % String(card.get("display_name", "Dropship")).strip_edges()
 		if not card_panel.gui_input.is_connected(_on_mission_dropship_card_gui_input.bind(craft_id)):
 			card_panel.gui_input.connect(_on_mission_dropship_card_gui_input.bind(craft_id))
@@ -5401,7 +5405,7 @@ func _refresh_mission_dropship_panel() -> void:
 				],
 				"info_line_font_size": MISSION_DROPSHIP_INFO_FONT_SIZE,
 				"progress_bar_height": 4.0,
-				"progress_visible": is_transit,
+				"progress_visible": _should_show_mission_dropship_card_progress(card),
 				"progress_value": _build_mission_dropship_progress_value(card),
 				"primary_action": {
 					"visible": _can_request_mission_dropship_return(card),
@@ -5435,7 +5439,23 @@ func _populate_mission_dropship_passenger_content(card_panel: PanelContainer, ca
 		return
 	var payload_ids: Array = _sanitize_drop_payload_ids(Array(card.get("embarked_unit_ids", [])))
 	host.set_meta("mission_dropship_passenger_content", true)
+	var feedback_text: String = _get_mission_dropship_card_feedback_text(card)
+	if not feedback_text.is_empty():
+		var feedback_label := Label.new()
+		feedback_label.name = "MissionDropshipCardFeedbackLabel"
+		feedback_label.text = feedback_text
+		feedback_label.add_theme_font_size_override("font_size", 9)
+		feedback_label.set_meta("mission_dropship_card_feedback_text", feedback_text)
+		META_UI_SKIN_SCRIPT.style_body_label(feedback_label, 9)
+		host.add_child(feedback_label)
 	if payload_ids.is_empty():
+		if feedback_text == "Trupp ab":
+			for fireteam_id_variant in _sanitize_drop_payload_ids(Array(card.get("boarded_fireteam_ids", []))):
+				var deployed_fireteam_card := _build_mission_dropship_fireteam_payload_card(String(fireteam_id_variant), [], card)
+				if deployed_fireteam_card != null:
+					host.add_child(deployed_fireteam_card)
+			if host.get_child_count() > 1:
+				return
 		var empty_label := Label.new()
 		empty_label.name = "PassengerEmptyLabel"
 		empty_label.text = "Passengers: none"
@@ -5447,27 +5467,9 @@ func _populate_mission_dropship_passenger_content(card_panel: PanelContainer, ca
 	for fireteam_id_variant in grouped_payload.keys():
 		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
 		var group_ids: Array = Array(grouped_payload.get(fireteam_id, []))
-		var group_label := Label.new()
-		group_label.name = "PassengerGroup_%s" % _sanitize_node_name(fireteam_id)
-		group_label.text = "%s | %d passengers" % [_get_fireteam_display_label(fireteam_id), group_ids.size()]
-		group_label.add_theme_font_size_override("font_size", 8)
-		group_label.clip_text = true
-		group_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		META_UI_SKIN_SCRIPT.style_body_label(group_label, 8)
-		host.add_child(group_label)
-
-		var grid := GridContainer.new()
-		grid.name = "PassengerGrid_%s" % _sanitize_node_name(fireteam_id)
-		grid.columns = 2
-		grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		grid.add_theme_constant_override("h_separation", 4)
-		grid.add_theme_constant_override("v_separation", 2)
-		host.add_child(grid)
-		for unit_id_variant in group_ids:
-			var unit_id: String = String(unit_id_variant).strip_edges()
-			var chip := _build_mission_dropship_passenger_chip(unit_id)
-			if chip != null:
-				grid.add_child(chip)
+		var fireteam_card := _build_mission_dropship_fireteam_payload_card(fireteam_id, group_ids, card)
+		if fireteam_card != null:
+			host.add_child(fireteam_card)
 
 
 func _group_payload_unit_ids_by_fireteam(payload_ids: Array) -> Dictionary:
@@ -5486,6 +5488,135 @@ func _group_payload_unit_ids_by_fireteam(payload_ids: Array) -> Dictionary:
 			grouped_payload[fireteam_id] = []
 		grouped_payload[fireteam_id].append(unit_id)
 	return grouped_payload
+
+
+func _build_mission_dropship_fireteam_payload_card(fireteam_id: String, group_ids: Array, card: Dictionary) -> Control:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		normalized_fireteam_id = "unassigned"
+	var panel := PanelContainer.new()
+	panel.name = "PassengerGroup_%s" % _sanitize_node_name(normalized_fireteam_id)
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.set_meta("mission_dropship_fireteam_payload_card", true)
+	panel.set_meta("mission_dropship_fireteam_id", normalized_fireteam_id)
+	panel.set_meta("mission_dropship_payload_unit_ids", _sanitize_drop_payload_ids(group_ids))
+	panel.set_meta("mission_dropship_deboard_progress", _build_mission_dropship_fireteam_deboard_progress_value(card, group_ids))
+	META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "thin_frame")
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 4)
+	margin.add_theme_constant_override("margin_top", 3)
+	margin.add_theme_constant_override("margin_right", 4)
+	margin.add_theme_constant_override("margin_bottom", 3)
+	panel.add_child(margin)
+
+	var vbox := VBoxContainer.new()
+	vbox.name = "PassengerFireteamVBox"
+	vbox.add_theme_constant_override("separation", 2)
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	margin.add_child(vbox)
+
+	var header := Label.new()
+	header.name = "PassengerGroupLabel"
+	if group_ids.is_empty() and _get_mission_dropship_card_feedback_text(card) == "Trupp ab":
+		header.text = "%s | deployed" % _get_fireteam_display_label(normalized_fireteam_id)
+	else:
+		header.text = "%s | %d passengers" % [_get_fireteam_display_label(normalized_fireteam_id), group_ids.size()]
+	header.add_theme_font_size_override("font_size", 8)
+	header.clip_text = true
+	header.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	META_UI_SKIN_SCRIPT.style_body_label(header, 8)
+	vbox.add_child(header)
+
+	var portrait_row := HBoxContainer.new()
+	portrait_row.name = "PassengerPortraitRow"
+	portrait_row.add_theme_constant_override("separation", 2)
+	portrait_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	portrait_row.set_meta("mission_dropship_payload_portrait_row", true)
+	vbox.add_child(portrait_row)
+	for unit_id_variant in group_ids:
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		var chip := _build_mission_dropship_passenger_portrait_chip(unit_id)
+		if chip != null:
+			portrait_row.add_child(chip)
+
+	var progress_value: float = _build_mission_dropship_fireteam_deboard_progress_value(card, group_ids)
+	var state: String = String(card.get("state", "")).strip_edges().to_lower()
+	if state == DROP_SEQUENCE_UNLOADING or progress_value >= 100.0:
+		var progress_bar := ProgressBar.new()
+		progress_bar.name = "PassengerDeboardProgress"
+		progress_bar.min_value = 0.0
+		progress_bar.max_value = 100.0
+		progress_bar.value = progress_value
+		progress_bar.show_percentage = false
+		progress_bar.custom_minimum_size = Vector2(0.0, 5.0)
+		progress_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		progress_bar.set_meta("mission_dropship_deboard_progress", progress_value)
+		vbox.add_child(progress_bar)
+
+	var feedback_text: String = _get_mission_dropship_card_feedback_text(card)
+	if feedback_text == "Trupp ab":
+		var feedback_label := Label.new()
+		feedback_label.name = "PassengerFireteamFeedbackLabel"
+		feedback_label.text = feedback_text
+		feedback_label.add_theme_font_size_override("font_size", 8)
+		feedback_label.set_meta("mission_dropship_fireteam_feedback_text", feedback_text)
+		META_UI_SKIN_SCRIPT.style_body_label(feedback_label, 8)
+		vbox.add_child(feedback_label)
+	return panel
+
+
+func _build_mission_dropship_passenger_portrait_chip(unit_id: String) -> Control:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return null
+	var unit := _find_friendly_unit_by_id(normalized_unit_id)
+	var display_name: String = normalized_unit_id
+	var portrait_path: String = ""
+	if unit != null:
+		if unit.has_method("get_display_name"):
+			display_name = String(unit.call("get_display_name")).strip_edges()
+		if unit.has_method("get_portrait_path"):
+			portrait_path = String(unit.call("get_portrait_path")).strip_edges()
+	if display_name.is_empty():
+		display_name = normalized_unit_id
+	var chip := VBoxContainer.new()
+	chip.name = "PassengerPortrait_%s" % _sanitize_node_name(normalized_unit_id)
+	chip.custom_minimum_size = Vector2(34.0, 42.0)
+	chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	chip.set_meta("mission_dropship_passenger_unit_id", normalized_unit_id)
+	chip.set_meta("mission_dropship_passenger_portrait_chip", true)
+
+	var portrait_rect := TextureRect.new()
+	portrait_rect.name = "PassengerPortraitRect"
+	portrait_rect.custom_minimum_size = Vector2(30.0, 30.0)
+	portrait_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	portrait_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	portrait_rect.texture = _load_portrait_texture(portrait_path)
+	portrait_rect.modulate = Color(1.0, 1.0, 1.0, 1.0) if portrait_rect.texture != null else Color(0.35, 0.37, 0.42, 1.0)
+	portrait_rect.set_meta("mission_dropship_passenger_portrait", true)
+	chip.add_child(portrait_rect)
+
+	var name_label := Label.new()
+	name_label.name = "PassengerPortraitName"
+	name_label.text = display_name
+	name_label.clip_text = true
+	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_label.add_theme_font_size_override("font_size", 7)
+	META_UI_SKIN_SCRIPT.style_body_label(name_label, 7)
+	chip.add_child(name_label)
+	return chip
+
+
+func _build_mission_dropship_fireteam_deboard_progress_value(card: Dictionary, group_ids: Array) -> float:
+	var state: String = String(card.get("state", "")).strip_edges().to_lower()
+	if state == DROP_SEQUENCE_UNLOADING:
+		return clampf(float(card.get("progress", 0.0)), 0.0, 100.0)
+	if state == DROP_SEQUENCE_COMPLETE or state == DROP_SEQUENCE_OUTBOUND or state == "to_fob" or state == "to_homebase":
+		return 100.0 if group_ids.is_empty() else clampf(float(card.get("progress", 100.0)), 0.0, 100.0)
+	return 0.0
 
 
 func _build_mission_dropship_passenger_chip(unit_id: String) -> Control:
@@ -5700,14 +5831,23 @@ func _sanitize_node_name(value: String) -> String:
 
 func _is_mission_dropship_card_in_transit(card: Dictionary) -> bool:
 	var state: String = String(card.get("state", "")).strip_edges().to_lower()
-	return state == "to_mission" or state == "to_fob" or state == DROP_SEQUENCE_INBOUND or state == DROP_SEQUENCE_OUTBOUND
+	return state == "to_mission" or state == "to_fob" or state == "to_homebase" or state == DROP_SEQUENCE_OUTBOUND
+
+
+func _should_show_mission_dropship_card_progress(card: Dictionary) -> bool:
+	var state: String = String(card.get("state", "")).strip_edges().to_lower()
+	return state == "to_mission" or state == "to_fob" or state == "to_homebase" or state == DROP_SEQUENCE_UNLOADING or state == DROP_SEQUENCE_OUTBOUND
+
+
+func _get_mission_dropship_card_feedback_text(card: Dictionary) -> String:
+	return String(card.get("card_feedback_text", "")).strip_edges()
 
 
 func _refresh_legacy_mission_dropship_panel() -> void:
 	var panel := get_node_or_null("../TacticalUI/MissionDropshipPanel") as PanelContainer
 	if panel == null:
 		return
-	var is_transit: bool = _mission_drop_state == "to_mission" or _mission_drop_state == "to_fob" or _drop_sequence_phase == DROP_SEQUENCE_INBOUND or _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND
+	var is_transit: bool = _mission_drop_state == "to_mission" or _mission_drop_state == "to_fob" or _mission_drop_state == "to_homebase" or _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND
 	var ship_texture := _get_mission_dropship_texture()
 	TRANSPORT_CRAFT_CARD_UI_SCRIPT.apply_card_state(
 		panel,
@@ -5745,7 +5885,7 @@ func _refresh_legacy_mission_dropship_panel() -> void:
 			],
 			"info_line_font_size": MISSION_DROPSHIP_INFO_FONT_SIZE,
 			"progress_bar_height": 4.0,
-			"progress_visible": is_transit,
+			"progress_visible": is_transit or _drop_sequence_phase == DROP_SEQUENCE_UNLOADING,
 			"progress_value": _build_mission_dropship_progress_value(),
 			"primary_action": {
 				"visible": false,
@@ -5888,6 +6028,8 @@ func _build_active_drop_sequence_progress_value() -> float:
 			var covered_return_distance: float = total_return_distance - _drop_sequence_position.distance_to(exit_position)
 			return clampf((covered_return_distance / total_return_distance) * 100.0, 0.0, 100.0)
 		return 0.0
+	if _drop_sequence_phase == DROP_SEQUENCE_UNLOADING:
+		return _build_drop_unload_progress_value(_drop_sequence_unit_index, _drop_sequence_units.size(), _drop_sequence_timer)
 	return _mission_drop_progress
 
 
@@ -5910,7 +6052,16 @@ func _build_drop_sequence_progress_value(sequence: Dictionary) -> float:
 			var covered_return_distance: float = total_return_distance - position.distance_to(exit_position)
 			return clampf((covered_return_distance / total_return_distance) * 100.0, 0.0, 100.0)
 		return 0.0
+	if phase == DROP_SEQUENCE_UNLOADING:
+		return _build_drop_unload_progress_value(int(sequence.get("unit_index", 0)), Array(sequence.get("units", [])).size(), float(sequence.get("timer", 0.0)))
 	return clampf(float(sequence.get("progress", _mission_drop_progress)), 0.0, 100.0)
+
+
+func _build_drop_unload_progress_value(unit_index: int, unit_count: int, timer_seconds: float) -> float:
+	if unit_count <= 0:
+		return 100.0
+	var active_fraction: float = clampf(timer_seconds / maxf(DROP_UNLOAD_INTERVAL_SECONDS, 0.001), 0.0, 1.0)
+	return clampf(((float(unit_index) + active_fraction) / float(unit_count)) * 100.0, 0.0, 100.0)
 
 
 func _build_mission_dropship_pilot_profile(card: Dictionary = {}):
@@ -13313,24 +13464,36 @@ func _update_primary_drop_sequence(delta: float) -> void:
 			_store_active_drop_sequence_card()
 			if _drop_sequence_position.distance_to(_drop_sequence_lz_position) <= 2.0:
 				_drop_sequence_position = _drop_sequence_lz_position
-				if _drop_sequence_visual_only:
-					_drop_sequence_phase = DROP_SEQUENCE_LANDED
-					_drop_sequence_timer = 0.0
-					_last_command_text = "DROPSHIP LANDED"
-					_update_ui()
-				else:
-					_complete_drop_sequence_deployment()
-					_begin_drop_sequence_outbound()
+				_drop_sequence_phase = DROP_SEQUENCE_LANDED
+				_drop_sequence_timer = 0.0
+				_last_command_text = "DROPSHIP LANDED" if _drop_sequence_visual_only else "TOUCHDOWN %s" % _drop_sequence_fireteam_name
+				if not _drop_sequence_visual_only:
+					_set_mission_dropship_card_feedback(_drop_sequence_craft_id, "Touchdown")
+				_store_active_drop_sequence_card()
+				_update_ui()
 			_refresh_world_overlays()
 		DROP_SEQUENCE_LANDED:
 			if _drop_sequence_visual_only:
 				_refresh_world_overlays()
 				return
-			_complete_drop_sequence_deployment()
-			_begin_drop_sequence_outbound()
+			_drop_sequence_timer += delta
+			if _drop_sequence_timer >= DROP_LANDING_HOLD_SECONDS:
+				_drop_sequence_phase = DROP_SEQUENCE_UNLOADING
+				_drop_sequence_timer = 0.0
+				_mission_drop_progress = _build_active_drop_sequence_progress_value()
+				_store_active_drop_sequence_card()
+				_update_ui()
 		DROP_SEQUENCE_UNLOADING:
-			_complete_drop_sequence_deployment()
-			_begin_drop_sequence_outbound()
+			if _advance_primary_drop_sequence_unloading(delta):
+				_drop_sequence_phase = DROP_SEQUENCE_COMPLETE
+				_drop_sequence_timer = 0.0
+				_mission_drop_progress = 100.0
+				_last_command_text = "Trupp ab"
+				_set_mission_dropship_card_feedback(_drop_sequence_craft_id, "Trupp ab")
+				_store_active_drop_sequence_card()
+				_store_selected_mission_dropship_plan()
+				_emit_planning_state_changed()
+				_update_ui()
 		DROP_SEQUENCE_COMPLETE:
 			_begin_drop_sequence_outbound()
 		DROP_SEQUENCE_OUTBOUND:
@@ -13414,22 +13577,30 @@ func _update_drop_sequence_dict(sequence: Dictionary, delta: float) -> bool:
 			sequence["position"] = position
 			if position.distance_to(lz_position) <= 2.0:
 				sequence["position"] = lz_position
-				if bool(sequence.get("visual_only", false)):
-					sequence["phase"] = DROP_SEQUENCE_LANDED
-					sequence["timer"] = 0.0
-				else:
-					_complete_drop_sequence_deployment_for_sequence(sequence)
-					_begin_drop_sequence_outbound_for_sequence(sequence)
+				sequence["phase"] = DROP_SEQUENCE_LANDED
+				sequence["timer"] = 0.0
+				if not bool(sequence.get("visual_only", false)):
+					sequence["card_feedback_text"] = "Touchdown"
+					_set_mission_dropship_card_feedback(String(sequence.get("craft_id", "")).strip_edges(), "Touchdown")
+					_last_command_text = "TOUCHDOWN %s" % String(sequence.get("fireteam_name", "ALL")).strip_edges()
 			return true
 		DROP_SEQUENCE_LANDED:
 			if bool(sequence.get("visual_only", false)):
 				return false
-			_complete_drop_sequence_deployment_for_sequence(sequence)
-			_begin_drop_sequence_outbound_for_sequence(sequence)
+			sequence["timer"] = float(sequence.get("timer", 0.0)) + delta
+			if float(sequence.get("timer", 0.0)) >= DROP_LANDING_HOLD_SECONDS:
+				sequence["phase"] = DROP_SEQUENCE_UNLOADING
+				sequence["timer"] = 0.0
+				sequence["progress"] = _build_drop_sequence_progress_value(sequence)
 			return true
 		DROP_SEQUENCE_UNLOADING:
-			_complete_drop_sequence_deployment_for_sequence(sequence)
-			_begin_drop_sequence_outbound_for_sequence(sequence)
+			if _advance_drop_sequence_unloading_for_sequence(sequence, delta):
+				sequence["phase"] = DROP_SEQUENCE_COMPLETE
+				sequence["timer"] = 0.0
+				sequence["progress"] = 100.0
+				sequence["card_feedback_text"] = "Trupp ab"
+				_set_mission_dropship_card_feedback(String(sequence.get("craft_id", "")).strip_edges(), "Trupp ab")
+				_last_command_text = "Trupp ab"
 			return true
 		DROP_SEQUENCE_COMPLETE:
 			_begin_drop_sequence_outbound_for_sequence(sequence)
@@ -13449,15 +13620,57 @@ func _update_drop_sequence_dict(sequence: Dictionary, delta: float) -> bool:
 			return false
 
 
+func _advance_primary_drop_sequence_unloading(delta: float) -> bool:
+	if _drop_sequence_units.is_empty():
+		return true
+	_drop_sequence_timer += maxf(delta, 0.0)
+	while _drop_sequence_timer >= DROP_UNLOAD_INTERVAL_SECONDS and _drop_sequence_unit_index < _drop_sequence_units.size():
+		_drop_sequence_timer -= DROP_UNLOAD_INTERVAL_SECONDS
+		_deploy_next_embarked_unit()
+	if _is_active_drop_sequence_for_craft(_mission_drop_craft_id):
+		_mission_drop_passenger_count = _embarked_unit_ids.size()
+		_mission_drop_progress = _build_active_drop_sequence_progress_value()
+	_store_active_drop_sequence_card()
+	_store_selected_mission_dropship_plan()
+	_emit_planning_state_changed()
+	_update_ui()
+	_refresh_world_overlays()
+	return _drop_sequence_unit_index >= _drop_sequence_units.size()
+
+
+func _advance_drop_sequence_unloading_for_sequence(sequence: Dictionary, delta: float) -> bool:
+	var units: Array = Array(sequence.get("units", []))
+	if units.is_empty():
+		return true
+	sequence["timer"] = float(sequence.get("timer", 0.0)) + maxf(delta, 0.0)
+	while float(sequence.get("timer", 0.0)) >= DROP_UNLOAD_INTERVAL_SECONDS and int(sequence.get("unit_index", 0)) < units.size():
+		sequence["timer"] = float(sequence.get("timer", 0.0)) - DROP_UNLOAD_INTERVAL_SECONDS
+		_deploy_next_embarked_unit_for_sequence(sequence)
+	sequence["progress"] = _build_drop_sequence_progress_value(sequence)
+	return int(sequence.get("unit_index", 0)) >= units.size()
+
+
+func _set_mission_dropship_card_feedback(craft_id: String, feedback_text: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return
+	_update_mission_dropship_card_fields(
+		normalized_craft_id,
+		{
+			"card_feedback_text": feedback_text.strip_edges(),
+		}
+	)
+
+
 func _complete_drop_sequence_deployment_for_sequence(sequence: Dictionary) -> void:
 	if bool(sequence.get("visual_only", false)):
 		return
 	if String(sequence.get("phase", "")).strip_edges().to_lower() != DROP_SEQUENCE_UNLOADING:
 		sequence["phase"] = DROP_SEQUENCE_UNLOADING
+		sequence["timer"] = 0.0
+		sequence["card_feedback_text"] = "Touchdown"
 		_last_command_text = "TOUCHDOWN %s" % String(sequence.get("fireteam_name", "ALL")).strip_edges()
-		_show_drop_team_event_text_for_sequence(sequence, "TOUCHDOWN", Color(0.58, 0.84, 1.0, 1.0), 1.4)
-	while int(sequence.get("unit_index", 0)) < Array(sequence.get("units", [])).size():
-		_deploy_next_embarked_unit_for_sequence(sequence)
+		_set_mission_dropship_card_feedback(String(sequence.get("craft_id", "")).strip_edges(), "Touchdown")
 	sequence["position"] = _coerce_vector2_value(sequence.get("lz_position", Vector2.ZERO), Vector2.ZERO)
 
 
@@ -13554,11 +13767,10 @@ func _complete_drop_sequence_deployment() -> void:
 		return
 	if _drop_sequence_phase != DROP_SEQUENCE_UNLOADING:
 		_drop_sequence_phase = DROP_SEQUENCE_UNLOADING
+		_drop_sequence_timer = 0.0
 		_last_command_text = "TOUCHDOWN %s" % _drop_sequence_fireteam_name
-		_show_drop_team_event_text("TOUCHDOWN", Color(0.58, 0.84, 1.0, 1.0), 1.4)
+		_set_mission_dropship_card_feedback(_drop_sequence_craft_id, "Touchdown")
 		_update_ui()
-	while _drop_sequence_unit_index < _drop_sequence_units.size():
-		_deploy_next_embarked_unit()
 	if _is_active_drop_sequence_for_craft(_mission_drop_craft_id):
 		_mission_drop_passenger_count = _embarked_unit_ids.size()
 	_drop_sequence_position = _drop_sequence_lz_position
@@ -13703,6 +13915,7 @@ func _capture_active_drop_sequence() -> Dictionary:
 		"lz_position": _drop_sequence_lz_position,
 		"approach_angle": _drop_sequence_approach_angle,
 		"embarked_unit_ids": _drop_sequence_embarked_unit_ids.duplicate(true),
+		"card_feedback_text": _get_mission_dropship_card_feedback_text(_find_raw_mission_dropship_card_entry(_drop_sequence_craft_id)),
 	}
 
 

@@ -388,6 +388,15 @@
 - Risiken: Der Save/Load-Slice wird zunaechst nur ein Szenenpfad-Shell-Slot, kein vollstaendiges SimulationRoot-/Mission-State-Savegame.
 - Lokale Pruefung: `task_391_global_escape_menu_button_sfx.gd`, `task_244_combat_movement_ui_sfx_integration_verifier.gd`, `task_226_main_menu_settings_shell_display_audio_input_gameplay.gd` laufen gruen.
 
+### TASK_392 - Parallel Boarding Transit Feedback
+- Status: implementiert im Arbeitsstand
+- Stand: Homebase-Direct-Boarding bleibt pro Dropship parallel. Fireteam 1 kann in Dropship 1 weiter boarden, waehrend Fireteam 2 sofort in Dropship 2 startet; beide Payload-Karten bleiben in ihrer jeweiligen Shipcard.
+- Stand: Homebase-Shipcards erhalten den vollstaendigen Meta-Transport-Craft-State. Direct-to-Mission-Dropships bleiben waehrend `to_mission` im Flightdeck sichtbar, ausgegraut und mit Fortschrittsbalken; nach Ankunft verschwinden sie aus Homebase und sind in der Mission wieder vollfarbig.
+- Stand: Mission-Dropshipkarten unterscheiden jetzt unbedienbaren Transfer von Map-Aktivitaet. `to_mission`/Return-Transit bleibt grau, LZ-Inbound und Deboarding auf der Map bleiben zugaenglich. Embarked Fireteams werden als kompakte Payload-Karten mit Mini-Portraits gerendert.
+- Stand: Deboarding nutzt den bestehenden `DROP_UNLOAD_INTERVAL_SECONDS`-Takt, zeigt Progress und meldet `Touchdown`/`Trupp ab` als Card-Feedback statt Touchdown-Bubbles auf noch versteckten Units.
+- Risiken: Deboarding-Timing ist ein V1-Wert; spaetere Speed-/Disziplin- oder Dropship-Typ-Varianten sollten als eigener Balancing-Task folgen.
+- Lokale Pruefung: `task_392_parallel_boarding_transit_feedback.gd`, `task_390_homebase_direct_mission_transit_cards.gd`, `task_388_homebase_fireteam_roster_shipcard_polish.gd`, `task_385_homebase_direct_return_isolation.gd`, `bugfix_dropship_mission_flow_verifier.gd` und `git diff --check` laufen gruen. `bugfix_dropship_mission_flow_verifier.gd` meldet bekannte Godot-RID-Leak-Warnungen am Prozessende, aber 116/116 Checks sind gruen.
+
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
 - Stand: Dropship-Visuals bauen ihre Dirty-Signatur wieder fehlerfrei, geplante LZs bleiben auch bei offmap/hidden Craft sichtbar, und Multi-Dropship-Payloads werden aus dem rohen Mission-Card-State statt aus stale Selected-Card-State uebernommen.

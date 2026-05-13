@@ -117,10 +117,17 @@ func get_visible_homebase_aircraft_definitions() -> Array:
 
 
 func get_aircraft_location(craft_id: String) -> String:
+	var craft_def: Dictionary = get_aircraft_definition_by_id(craft_id)
+	var definition_location: String = String(craft_def.get("location", "")).strip_edges().to_lower()
+	if not definition_location.is_empty():
+		return definition_location
 	return String(_aircraft_location_by_craft.get(craft_id, "homebase")).strip_edges().to_lower()
 
 
 func is_craft_visible_in_homebase(craft_id: String) -> bool:
+	var craft_def: Dictionary = get_aircraft_definition_by_id(craft_id)
+	if craft_def.has("visible_in_homebase"):
+		return bool(craft_def.get("visible_in_homebase", false))
 	var craft_location: String = get_aircraft_location(craft_id)
 	if craft_location == "homebase":
 		return true
@@ -130,6 +137,11 @@ func is_craft_visible_in_homebase(craft_id: String) -> bool:
 
 
 func is_craft_in_transit(craft_id: String) -> bool:
+	var craft_def: Dictionary = get_aircraft_definition_by_id(craft_id)
+	if bool(craft_def.get("mission_transit_to_map", false)) or bool(craft_def.get("mission_transit_to_fob", false)) or bool(craft_def.get("mission_transit_to_homebase", false)):
+		return true
+	if craft_def.has("is_in_transit"):
+		return bool(craft_def.get("is_in_transit", false))
 	return get_aircraft_location(craft_id) == "transit" or has_active_pilot_transfer_for_craft(craft_id)
 
 
@@ -186,7 +198,37 @@ func find_transfer_entry_for_craft(craft_id: String) -> Dictionary:
 		var entry: Dictionary = Dictionary(entry_variant)
 		if String(entry.get("craft_id", "")).strip_edges() == normalized_craft_id:
 			return entry
-	return {}
+	return _build_definition_transfer_entry_for_craft(normalized_craft_id)
+
+
+func _build_definition_transfer_entry_for_craft(craft_id: String) -> Dictionary:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return {}
+	var craft_def: Dictionary = get_aircraft_definition_by_id(normalized_craft_id)
+	if craft_def.is_empty():
+		return {}
+	var has_transfer_fields: bool = craft_def.has("transfer_progress") or craft_def.has("transfer_eta_seconds")
+	if not bool(craft_def.get("is_in_transit", false)) and not bool(craft_def.get("mission_transit_to_map", false)) and not bool(craft_def.get("mission_transit_to_fob", false)) and not bool(craft_def.get("mission_transit_to_homebase", false)) and not has_transfer_fields:
+		return {}
+	var progress_value: float = clampf(float(craft_def.get("transfer_progress", 0.0)), 0.0, 100.0)
+	var eta_seconds: int = maxi(int(craft_def.get("transfer_eta_seconds", 0)), 0)
+	var duration_seconds: float = maxf(float(craft_def.get("transfer_duration_seconds", 100.0)), 1.0)
+	if eta_seconds > 0 and progress_value < 100.0:
+		var remaining_ratio: float = maxf(1.0 - (progress_value / 100.0), 0.001)
+		duration_seconds = maxf(float(eta_seconds) / remaining_ratio, 1.0)
+	var elapsed_seconds: float = clampf(duration_seconds * (progress_value / 100.0), 0.0, duration_seconds)
+	if eta_seconds > 0:
+		elapsed_seconds = clampf(duration_seconds - float(eta_seconds), 0.0, duration_seconds)
+	return {
+		"transfer_id": "craft_state_%s" % normalized_craft_id,
+		"craft_id": normalized_craft_id,
+		"phase": String(craft_def.get("mission_phase", "")).strip_edges().to_lower(),
+		"elapsed_seconds": elapsed_seconds,
+		"duration_seconds": duration_seconds,
+		"transfer_progress": progress_value,
+		"transfer_eta_seconds": eta_seconds,
+	}
 
 
 func find_pilot_transfer_entry_for_unit(unit_id: String) -> Dictionary:
@@ -404,6 +446,12 @@ func build_aircraft_status_text(
 		var label: String = "replacement pending" if meta_state == "destroyed_replacement_pending" else "repairing"
 		return "%s %s. ETA %ds. Pilot state: %s." % [craft_name, label, int(craft_def.get("air_asset_recovery_eta_seconds", 0)), String(craft_def.get("pilot_recovery_state", "pilot_safe_homebase"))]
 	if is_craft_in_transit(craft_id):
+		if bool(craft_def.get("mission_transit_to_map", false)):
+			return "%s is currently inbound to the mission map." % craft_name
+		if bool(craft_def.get("mission_transit_to_homebase", false)):
+			return "%s is currently returning to Homebase." % craft_name
+		if bool(craft_def.get("mission_transit_to_fob", false)):
+			return "%s is currently returning to FOB." % craft_name
 		return "%s is currently in transit between Homebase and FOB." % craft_name
 	if has_active_cargo_load_for_craft(craft_id):
 		return "%s is currently loading %s at Homebase." % [craft_name, build_cargo_display_name(craft_def, get_selected_cargo_id(craft_id))]

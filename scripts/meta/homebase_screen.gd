@@ -4687,10 +4687,14 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	var selected_cargo_id: String = loaded_cargo_id if not loaded_cargo_id.is_empty() else _get_selected_cargo_id(craft_id)
 
 	var shipcard := PanelContainer.new()
+	shipcard.name = "Shipcard_%s" % craft_id
 	shipcard.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	shipcard.custom_minimum_size = Vector2(HOMEBASE_SHIPCARD_COMPACT_WIDTH, 0.0)
 	shipcard.add_theme_stylebox_override("panel", _build_shipcard_stylebox(is_selected, craft_busy or cargo_loading or air_asset_unavailable, craft_in_transit or air_asset_unavailable))
 	shipcard.modulate = Color(1.0, 1.0, 1.0, 0.56) if craft_in_transit or air_asset_unavailable else Color(1.0, 1.0, 1.0, 1.0)
+	shipcard.set_meta("homebase_shipcard", true)
+	shipcard.set_meta("craft_id", craft_id)
+	shipcard.set_meta("homebase_shipcard_in_transit", craft_in_transit)
 	shipcard.set_meta("homebase_shipcard_no_horizontal_overflow", true)
 	shipcard.set_meta("homebase_shipcard_half_width", true)
 	shipcard.set_meta("homebase_shipcard_compact_width", HOMEBASE_SHIPCARD_COMPACT_WIDTH)
@@ -4885,11 +4889,11 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 
 func _build_homebase_shipcard_payload_summary(craft_id: String, craft_in_transit: bool, air_asset_unavailable: bool) -> String:
 	var normalized_craft_id: String = craft_id.strip_edges()
+	var craft_def: Dictionary = _get_aircraft_definition_by_id(normalized_craft_id)
 	if air_asset_unavailable:
-		var craft_def: Dictionary = _get_aircraft_definition_by_id(normalized_craft_id)
 		return "Recovery ETA: %ds" % int(craft_def.get("air_asset_recovery_eta_seconds", 0))
 	if craft_in_transit:
-		return "ETA FOB: %s" % _build_transfer_eta_text(_find_transfer_entry_for_craft(normalized_craft_id))
+		return "%s: ETA %s" % [_build_shipcard_transfer_label(craft_def), _build_transfer_eta_text(_find_transfer_entry_for_craft(normalized_craft_id))]
 	var payload_fireteam_ids: PackedStringArray = _get_homebase_direct_payload_fireteam_ids_for_craft(normalized_craft_id)
 	if payload_fireteam_ids.is_empty():
 		return "Payload: empty"
@@ -5016,7 +5020,7 @@ func _build_shipcard_direct_payload_panel(craft_id: String) -> Control:
 
 func _build_shipcard_progress_block(craft_id: String, cargo_loading: bool, craft_in_transit: bool) -> Control:
 	var entry: Dictionary = _find_transfer_entry_for_craft(craft_id)
-	var label_text := "Inbound to FOB"
+	var label_text: String = _build_shipcard_transfer_label(_get_aircraft_definition_by_id(craft_id))
 	if entry.is_empty() and cargo_loading:
 		entry = _find_cargo_load_entry_for_craft(craft_id)
 		label_text = "Cargo loading"
@@ -5026,6 +5030,9 @@ func _build_shipcard_progress_block(craft_id: String, cargo_loading: bool, craft
 	var vbox := VBoxContainer.new()
 	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	vbox.add_theme_constant_override("separation", 2)
+	vbox.set_meta("homebase_shipcard_progress_block", true)
+	vbox.set_meta("craft_id", craft_id)
+	vbox.set_meta("homebase_shipcard_progress_label", label_text)
 
 	var label := Label.new()
 	label.text = "%s | ETA %s" % [label_text, _build_transfer_eta_text(entry)]
@@ -5042,8 +5049,21 @@ func _build_shipcard_progress_block(craft_id: String, cargo_loading: bool, craft
 	progress_bar.show_percentage = false
 	progress_bar.custom_minimum_size = Vector2(0.0, 8.0)
 	progress_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	progress_bar.set_meta("homebase_shipcard_transfer_progress", true)
+	progress_bar.set_meta("craft_id", craft_id)
 	vbox.add_child(progress_bar)
 	return vbox
+
+
+func _build_shipcard_transfer_label(craft_def: Dictionary) -> String:
+	var mission_phase: String = String(craft_def.get("mission_phase", "")).strip_edges().to_lower()
+	if bool(craft_def.get("mission_transit_to_map", false)) or mission_phase == "to_mission":
+		return "To Mission"
+	if bool(craft_def.get("mission_transit_to_homebase", false)) or mission_phase == "to_homebase":
+		return "Returning Homebase"
+	if bool(craft_def.get("mission_transit_to_fob", false)) or mission_phase == "to_fob":
+		return "Returning FOB"
+	return "Inbound to FOB"
 
 
 func _build_shipcard_pilot_panel(craft_id: String, craft_name: String, assigned_pilot_id: String, craft_busy: bool, craft_in_transit: bool = false) -> PanelContainer:
