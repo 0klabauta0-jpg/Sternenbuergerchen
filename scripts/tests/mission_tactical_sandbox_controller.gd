@@ -50,6 +50,7 @@ const COMIC_BUBBLE_SETTINGS_SCRIPT: GDScript = preload("res://scripts/ui/comic_b
 const COMIC_BUBBLE_RUNTIME_GATE_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_runtime_gate.gd")
 const NPC_THOUGHT_BUBBLE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/ui/npc_thought_bubble_resolver.gd")
 const HOVER_SCROLL_BEHAVIOR_SCRIPT: GDScript = preload("res://scripts/ui/hover_scroll_behavior.gd")
+const FTL_READINESS_GAUGE_SCRIPT: GDScript = preload("res://scripts/ui/ftl_readiness_gauge.gd")
 const DROPSHIP_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NE.png")
 const DROPSHIP_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NW.png")
 const DROPSHIP_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
@@ -2761,7 +2762,7 @@ func _apply_fireteam_mini_card_status_context(card: Control, fireteam_id: String
 	card.set_meta("contact_state", String(contact_context.get("state", "")).strip_edges().to_lower())
 	card.set_meta("tactical_stance", get_requested_tactical_stance(normalized_fireteam_id))
 	_apply_fireteam_mini_contact_badge(card, contact_context)
-	_apply_fireteam_mini_ftl_quality_indicator(card, profile_dict)
+	_apply_fireteam_mini_ftl_quality_indicator(card, profile_dict, normalized_fireteam_id)
 	_apply_fireteam_mini_morale_indicator(card, profile_dict)
 	_apply_fireteam_mini_coordination_badge(card, coordination_context)
 	_apply_fireteam_mini_stance_toggle(card, normalized_fireteam_id)
@@ -2788,11 +2789,24 @@ func _apply_fireteam_mini_contact_badge(card: Control, contact_context: Dictiona
 	badge.set_meta("mission_fireteam_contact_badge", true)
 
 
-func _apply_fireteam_mini_ftl_quality_indicator(card: Control, profile_dict: Dictionary) -> void:
+func _apply_fireteam_mini_ftl_quality_indicator(card: Control, profile_dict: Dictionary, fireteam_id: String = "") -> void:
 	var header_row := card.get_node_or_null("Margin/VBox/HeaderRow") as HBoxContainer
 	if header_row == null:
 		return
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		normalized_fireteam_id = String(profile_dict.get("fireteam_id", "")).strip_edges().to_lower()
 	var public_snapshot: Dictionary = Dictionary(Dictionary(profile_dict.get("metadata", {})).get("ftl_public_snapshot", {}))
+	var gauge := header_row.get_node_or_null("FTLReadinessGauge") as Control
+	if gauge == null:
+		gauge = FTL_READINESS_GAUGE_SCRIPT.new()
+		gauge.name = "FTLReadinessGauge"
+		header_row.add_child(gauge)
+		header_row.move_child(gauge, 0)
+	var readiness_snapshot: Dictionary = _build_ftl_readiness_snapshot_for_fireteam(normalized_fireteam_id) if not normalized_fireteam_id.is_empty() else Dictionary(FTL_READINESS_SNAPSHOT_CONTRACT_SCRIPT.call("build_snapshot", normalized_fireteam_id, null, profile_dict, {}))
+	gauge.call("set_snapshot", readiness_snapshot)
+	gauge.set_meta("mission_fireteam_ftl_readiness_gauge", true)
+	gauge.set_meta("mission_fireteam_ftl_readiness_state", String(Dictionary(gauge.call("get_gauge_snapshot")).get("display_state", "")))
 	if public_snapshot.is_empty():
 		return
 	var plan_dot := header_row.get_node_or_null("FTLPlanQualityDot") as ColorRect
