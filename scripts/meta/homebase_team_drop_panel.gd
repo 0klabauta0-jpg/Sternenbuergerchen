@@ -2,6 +2,7 @@ class_name HomebaseTeamDropPanel
 extends PanelContainer
 
 signal unit_dropped(unit_id)
+signal fireteam_dropped(fireteam_id, target_id)
 
 var _drop_enabled: bool = true
 
@@ -20,18 +21,33 @@ func _can_drop_data(_at_position: Vector2, data: Variant) -> bool:
 		return false
 
 	var drag_data: Dictionary = data
-	return String(drag_data.get("type", "")).strip_edges() == "homebase_unit_card" and not String(drag_data.get("unit_id", "")).strip_edges().is_empty()
+	var drag_type: String = String(drag_data.get("type", "")).strip_edges()
+	if drag_type == "homebase_unit_card":
+		return not String(drag_data.get("unit_id", "")).strip_edges().is_empty()
+	if drag_type != "fob_fireteam_card":
+		return false
+	if not bool(get_meta("homebase_fireteam_drop_target", false)) or not bool(get_meta("homebase_fireteam_drop_enabled", false)):
+		return false
+	return not String(get_meta("homebase_fireteam_drop_target_id", "")).strip_edges().is_empty() \
+		and not String(drag_data.get("fireteam_id", "")).strip_edges().is_empty()
 
 
 func _drop_data(_at_position: Vector2, data: Variant) -> void:
 	if not _can_drop_data(_at_position, data):
 		return
 
-	var unit_id: String = String(data.get("unit_id", "")).strip_edges()
-	if unit_id.is_empty():
-		return
+	var drag_type: String = String(data.get("type", "")).strip_edges()
+	if drag_type == "homebase_unit_card":
+		var unit_id: String = String(data.get("unit_id", "")).strip_edges()
+		if unit_id.is_empty():
+			return
+		unit_dropped.emit(unit_id)
+	elif drag_type == "fob_fireteam_card":
+		fireteam_dropped.emit(
+			String(data.get("fireteam_id", "")).strip_edges(),
+			String(get_meta("homebase_fireteam_drop_target_id", "")).strip_edges()
+		)
 
-	unit_dropped.emit(unit_id)
 
 
 func _refresh_visuals() -> void:

@@ -364,6 +364,14 @@
 - Risiken: `Tutor Score` ist ein UI-Ranking aus bestehenden Profilwerten, bis ein eigener Tutor-Wert existiert. Der lokale Shipcard-Send nutzt weiter den bestehenden Homebase-Direct-Startpfad und fuehrt keine zweite Missionswahrheit ein.
 - Lokale Pruefung: `task_388_homebase_fireteam_roster_shipcard_polish.gd`, `task_387_homebase_flightdeck_payload_polish.gd`, `task_386_homebase_flightdeck_member_portraits.gd`, `task_384_homebase_flightdeck_boarding_hotfix.gd`, `task_383_homebase_flightdeck_fireteam_card_single_owner.gd`, `task_382_homebase_direct_mission_flightdeck_display.gd`, `task_381_homebase_fireteam_loadout_flightdeck_polish.gd`, `task_355_homebase_direct_ux_payload_truth.gd`, `task_354_homebase_direct_loadout_regression_matrix.gd`, `task_349_homebase_direct_staging_real_flightdeck_craft_gate.gd`, `task_347_homebase_direct_staging_start_guard.gd`, `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd`, `task_258_fixed_window_clipping_scrollbar_playability_audit.gd` und `git diff --check` laufen gruen.
 
+### TASK_389 - Homebase Card Wide Drop Targets
+- Status: implementiert im Arbeitsstand
+- Stand: `#10 FIRETEAMS` besitzt jetzt explizite Operator-Drop-Zonen fuer Fireteam-Header und Member-Bloecke. Header-Drops fuegen den Operator hinzu und setzen ihn als Lead; Member-Drops fuegen hinzu bzw. verschieben in dasselbe Fireteam.
+- Stand: Das bisherige Member-Card-Drop-Signal wird mit eigener Signatur behandelt, sodass Drops auf vorhandene NPC-Karten nicht mehr am alten Zwei-Parameter-Handler haengen.
+- Stand: Homebase-Dropship-Shipcards markieren Root, Titel-/Statusflaechen und bestehende Pilot-/Payload-Zonen als Fireteam-Drop-Ziele. Drops auf diese Flaechen nutzen weiter den bestehenden Direct-Payload-/Boarding-State.
+- Risiken: Header-Drop ist bewusst Lead-Setzen; falls spaeter getrennte Add-/Lead-Zielzonen gewuenscht sind, braucht das eine sichtbare Zielmarkierung. Die breiteren Drop-Zonen bleiben UI-Eingabe und fuehren keine zweite Gameplay-Wahrheit ein.
+- Lokale Pruefung: `task_389_homebase_card_wide_drop_targets.gd`, `task_388_homebase_fireteam_roster_shipcard_polish.gd`, `task_387_homebase_flightdeck_payload_polish.gd`, `task_384_homebase_flightdeck_boarding_hotfix.gd`, `task_383_homebase_flightdeck_fireteam_card_single_owner.gd`, `task_381_homebase_fireteam_loadout_flightdeck_polish.gd` und `git diff --check` laufen gruen.
+
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
 - Stand: Dropship-Visuals bauen ihre Dirty-Signatur wieder fehlerfrei, geplante LZs bleiben auch bei offmap/hidden Craft sichtbar, und Multi-Dropship-Payloads werden aus dem rohen Mission-Card-State statt aus stale Selected-Card-State uebernommen.

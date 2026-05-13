@@ -4,6 +4,7 @@ extends PanelContainer
 signal card_pressed(fireteam_id)
 signal rename_committed(fireteam_id, next_label)
 signal unit_dropped(unit_id, fireteam_id)
+signal fireteam_dropped(fireteam_id, target_id)
 
 const META_USEROLOGY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/meta_userology_contract.gd")
 
@@ -228,13 +229,29 @@ func _apply_density(
 func _can_drop_data(_at_position: Vector2, data) -> bool:
 	if typeof(data) != TYPE_DICTIONARY:
 		return false
-	return String(data.get("type", "")).strip_edges() == "homebase_unit_card" and not _fireteam_id.is_empty()
+	var drag_type: String = String(data.get("type", "")).strip_edges()
+	if drag_type == "homebase_unit_card":
+		return not _fireteam_id.is_empty()
+	if drag_type != "fob_fireteam_card":
+		return false
+	if not bool(get_meta("homebase_fireteam_drop_target", false)) or not bool(get_meta("homebase_fireteam_drop_enabled", false)):
+		return false
+	var target_id: String = String(get_meta("homebase_fireteam_drop_target_id", "")).strip_edges()
+	var dropped_fireteam_id: String = String(data.get("fireteam_id", "")).strip_edges()
+	return not target_id.is_empty() and not dropped_fireteam_id.is_empty() and dropped_fireteam_id != _fireteam_id
 
 
 func _drop_data(_at_position: Vector2, data) -> void:
 	if not _can_drop_data(_at_position, data):
 		return
-	unit_dropped.emit(String(data.get("unit_id", "")).strip_edges(), _fireteam_id)
+	var drag_type: String = String(data.get("type", "")).strip_edges()
+	if drag_type == "homebase_unit_card":
+		unit_dropped.emit(String(data.get("unit_id", "")).strip_edges(), _fireteam_id)
+	elif drag_type == "fob_fireteam_card":
+		fireteam_dropped.emit(
+			String(data.get("fireteam_id", "")).strip_edges(),
+			String(get_meta("homebase_fireteam_drop_target_id", "")).strip_edges()
+		)
 
 
 func _ensure_ui() -> void:

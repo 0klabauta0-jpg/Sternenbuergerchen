@@ -17,6 +17,7 @@ const HOMEBASE_TEAM_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/ho
 const FOB_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/fob_drop_panel.gd")
 const FOB_FIRETEAM_CARD_SCRIPT: GDScript = preload("res://scripts/meta/fob_fireteam_card.gd")
 const HOMEBASE_FIRETEAM_DROP_TARGET_SCRIPT: GDScript = preload("res://scripts/meta/homebase_fireteam_drop_target.gd")
+const HOMEBASE_UNIT_DROP_TARGET_SCRIPT: GDScript = preload("res://scripts/meta/homebase_unit_drop_target.gd")
 const PERSONNEL_EVENT_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/personnel_event_model.gd")
 const HOVER_SCROLL_BEHAVIOR_SCRIPT: GDScript = preload("res://scripts/ui/hover_scroll_behavior.gd")
 const FLIGHTDECK_PLATFORM_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/platform_large_NW.png")
@@ -1613,8 +1614,29 @@ func _create_homebase_fireteam_card(fireteam_id: String, source_context: String 
 		card.rename_committed.connect(_on_homebase_fireteam_label_committed)
 	if not card.unit_dropped.is_connected(_on_homebase_fireteam_card_unit_dropped):
 		card.unit_dropped.connect(_on_homebase_fireteam_card_unit_dropped)
+	if source_context == "fireteam_list":
+		_configure_homebase_fireteam_header_unit_drop_targets(card, fireteam_id)
 	card.set_meta("homebase_direct_fireteam_card", true)
 	return card
+
+
+func _configure_homebase_fireteam_header_unit_drop_targets(card: FOBFireteamCard, fireteam_id: String) -> void:
+	if card == null:
+		return
+	for path in ["Margin/VBox/HeaderRow", "Margin/VBox/HeaderRow/TitleEdit"]:
+		var target := card.get_node_or_null(path) as Control
+		_configure_homebase_fireteam_unit_drop_target(target, fireteam_id, "lead")
+
+
+func _configure_homebase_fireteam_unit_drop_target(control: Control, fireteam_id: String, drop_zone: String, anchor_unit_id: String = "", enabled: bool = true) -> void:
+	if control == null or _normalize_fireteam_id(fireteam_id).is_empty():
+		return
+	control.set_script(HOMEBASE_UNIT_DROP_TARGET_SCRIPT)
+	if control.has_method("setup_drop_target"):
+		control.call("setup_drop_target", fireteam_id, drop_zone, anchor_unit_id, enabled)
+	var callback := Callable(self, "_on_homebase_fireteam_unit_drop_target_dropped")
+	if control.has_signal("unit_dropped") and not control.is_connected("unit_dropped", callback):
+		control.connect("unit_dropped", callback)
 
 
 func _render_homebase_fireteam_members(member_host: VBoxContainer, fireteam_id: String, lead_unit_id: String) -> void:
@@ -1630,6 +1652,7 @@ func _render_homebase_fireteam_members(member_host: VBoxContainer, fireteam_id: 
 		member_block.set_meta("homebase_fireteam_inline_loadout_block", true)
 		member_block.set_meta("fireteam_id", fireteam_id)
 		member_block.set_meta("unit_id", member_unit_id)
+		_configure_homebase_fireteam_unit_drop_target(member_block, fireteam_id, "member", member_unit_id)
 		var member_card = NPC_COMPACT_CARD_SCENE.instantiate()
 		member_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		member_card.setup_from_profile(
@@ -1649,8 +1672,9 @@ func _render_homebase_fireteam_members(member_host: VBoxContainer, fireteam_id: 
 			member_card.card_pressed.connect(_on_compact_card_pressed)
 		if not member_card.card_open_requested.is_connected(_on_compact_card_open_requested):
 			member_card.card_open_requested.connect(_on_compact_card_open_requested)
-		if member_card.has_signal("card_unit_dropped") and not member_card.card_unit_dropped.is_connected(_on_homebase_fireteam_card_unit_dropped.bind(fireteam_id)):
-			member_card.card_unit_dropped.connect(_on_homebase_fireteam_card_unit_dropped.bind(fireteam_id))
+		var member_drop_callback := Callable(self, "_on_homebase_fireteam_member_card_unit_dropped").bind(fireteam_id, member_unit_id)
+		if member_card.has_signal("card_unit_dropped") and not member_card.card_unit_dropped.is_connected(member_drop_callback):
+			member_card.card_unit_dropped.connect(member_drop_callback)
 		member_block.add_child(member_card)
 		member_block.add_child(_build_homebase_fireteam_inline_loadout_row(fireteam_id, member_unit_id))
 		member_host.add_child(member_block)
@@ -2551,6 +2575,18 @@ func _on_homebase_fireteam_label_committed(fireteam_id: String, next_label: Stri
 
 
 func _on_homebase_fireteam_card_unit_dropped(unit_id: String, fireteam_id: String) -> void:
+	_handle_homebase_fireteam_unit_dropped(unit_id, fireteam_id)
+
+
+func _on_homebase_fireteam_member_card_unit_dropped(unit_id: String, _source_context: String, fireteam_id: String, anchor_unit_id: String) -> void:
+	_handle_homebase_fireteam_unit_dropped(unit_id, fireteam_id, false, anchor_unit_id)
+
+
+func _on_homebase_fireteam_unit_drop_target_dropped(unit_id: String, fireteam_id: String, drop_zone: String, anchor_unit_id: String) -> void:
+	_handle_homebase_fireteam_unit_dropped(unit_id, fireteam_id, drop_zone.strip_edges().to_lower() == "lead", anchor_unit_id)
+
+
+func _handle_homebase_fireteam_unit_dropped(unit_id: String, fireteam_id: String, make_lead: bool = false, anchor_unit_id: String = "") -> void:
 	var normalized_unit_id: String = unit_id.strip_edges()
 	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
 	if normalized_unit_id.is_empty() or normalized_fireteam_id.is_empty():
@@ -2559,6 +2595,11 @@ func _on_homebase_fireteam_card_unit_dropped(unit_id: String, fireteam_id: Strin
 		if not _add_unit_to_team(normalized_unit_id):
 			return
 	_assign_unit_to_fireteam(normalized_unit_id, normalized_fireteam_id)
+	if not anchor_unit_id.strip_edges().is_empty():
+		_move_selected_unit_next_to_anchor(normalized_unit_id, anchor_unit_id)
+	if make_lead:
+		_set_homebase_fireteam_lead(normalized_fireteam_id, normalized_unit_id)
+	_reconcile_homebase_fireteam_leads()
 	_focused_unit_id = normalized_unit_id
 	_focused_fireteam_id = normalized_fireteam_id
 	_loadout_staged_fireteam_id = normalized_fireteam_id
@@ -3225,6 +3266,20 @@ func _reconcile_homebase_fireteam_leads() -> void:
 			_fireteam_definitions[definition_index] = definition
 
 
+func _set_homebase_fireteam_lead(fireteam_id: String, unit_id: String) -> void:
+	var normalized_fireteam_id: String = _normalize_fireteam_id(fireteam_id)
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_fireteam_id.is_empty() or normalized_unit_id.is_empty():
+		return
+	for definition_index in range(_fireteam_definitions.size()):
+		var definition: Dictionary = Dictionary(_fireteam_definitions[definition_index])
+		if _normalize_fireteam_id(String(definition.get("id", ""))) != normalized_fireteam_id:
+			continue
+		definition["lead_unit_id"] = normalized_unit_id
+		_fireteam_definitions[definition_index] = definition
+		return
+
+
 func _normalize_fireteam_id(fireteam_id: String) -> String:
 	return fireteam_id.strip_edges().to_lower()
 
@@ -3296,6 +3351,51 @@ func _assign_unit_to_fireteam(unit_id: String, fireteam_id: String) -> void:
 	_selected_fireteam_ids = _normalize_selected_fireteam_ids(_selected_fireteam_ids)
 	if unit_index < _selected_fireteam_ids.size():
 		_selected_fireteam_ids[unit_index] = normalized_fireteam_id
+	_sanitize_homebase_direct_staging_state()
+
+
+func _move_selected_unit_next_to_anchor(unit_id: String, anchor_unit_id: String) -> void:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	var normalized_anchor_unit_id: String = anchor_unit_id.strip_edges()
+	if normalized_unit_id.is_empty() or normalized_anchor_unit_id.is_empty() or normalized_unit_id == normalized_anchor_unit_id:
+		return
+	var pairs: Array = []
+	for unit_index in range(_selected_unit_ids.size()):
+		var current_fireteam_id := ""
+		if unit_index < _selected_fireteam_ids.size():
+			current_fireteam_id = String(_selected_fireteam_ids[unit_index]).strip_edges()
+		pairs.append({
+			"unit_id": String(_selected_unit_ids[unit_index]).strip_edges(),
+			"fireteam_id": current_fireteam_id,
+		})
+	var moving_index := -1
+	var anchor_index := -1
+	for pair_index in range(pairs.size()):
+		var pair: Dictionary = Dictionary(pairs[pair_index])
+		if String(pair.get("unit_id", "")) == normalized_unit_id:
+			moving_index = pair_index
+		if String(pair.get("unit_id", "")) == normalized_anchor_unit_id:
+			anchor_index = pair_index
+	if moving_index < 0 or anchor_index < 0 or moving_index == anchor_index:
+		return
+	var moving_pair: Dictionary = Dictionary(pairs[moving_index])
+	pairs.remove_at(moving_index)
+	if moving_index < anchor_index:
+		anchor_index -= 1
+	var insert_index: int = anchor_index + 1
+	if insert_index < 0:
+		insert_index = 0
+	if insert_index > pairs.size():
+		insert_index = pairs.size()
+	pairs.insert(insert_index, moving_pair)
+	var next_unit_ids: PackedStringArray = []
+	var next_fireteam_ids: PackedStringArray = []
+	for pair_variant in pairs:
+		var pair: Dictionary = Dictionary(pair_variant)
+		next_unit_ids.append(String(pair.get("unit_id", "")).strip_edges())
+		next_fireteam_ids.append(_normalize_fireteam_id(String(pair.get("fireteam_id", ""))))
+	_selected_unit_ids = next_unit_ids
+	_selected_fireteam_ids = _normalize_selected_fireteam_ids(next_fireteam_ids)
 	_sanitize_homebase_direct_staging_state()
 
 
@@ -4779,6 +4879,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	if payload_panel != null:
 		card_vbox.add_child(payload_panel)
 
+	_configure_homebase_shipcard_wide_fireteam_drop_targets(shipcard, craft_id, not craft_in_transit and not air_asset_unavailable)
 	return shipcard
 
 
@@ -4805,9 +4906,44 @@ func _configure_homebase_shipcard_fireteam_drop_target(control: Control, craft_i
 	control.set_script(HOMEBASE_FIRETEAM_DROP_TARGET_SCRIPT)
 	if control.has_method("setup_drop_target"):
 		control.call("setup_drop_target", craft_id, enabled)
+	_connect_homebase_shipcard_fireteam_drop_target(control)
+
+
+func _configure_existing_homebase_shipcard_fireteam_drop_target(control: Control, craft_id: String, enabled: bool) -> void:
+	if control == null or craft_id.strip_edges().is_empty():
+		return
+	control.set_meta("homebase_fireteam_drop_target", true)
+	control.set_meta("homebase_fireteam_drop_target_id", craft_id.strip_edges())
+	control.set_meta("homebase_fireteam_drop_enabled", enabled)
+	_connect_homebase_shipcard_fireteam_drop_target(control)
+
+
+func _connect_homebase_shipcard_fireteam_drop_target(control: Control) -> void:
+	if control == null:
+		return
 	var callback := Callable(self, "_on_homebase_shipcard_fireteam_dropped")
 	if control.has_signal("fireteam_dropped") and not control.is_connected("fireteam_dropped", callback):
 		control.connect("fireteam_dropped", callback)
+
+
+func _configure_homebase_shipcard_wide_fireteam_drop_targets(root_node: Node, craft_id: String, enabled: bool) -> void:
+	if root_node == null or craft_id.strip_edges().is_empty():
+		return
+	var should_descend := true
+	var control := root_node as Control
+	if control != null:
+		var existing_script: Variant = control.get_script()
+		if existing_script == null or existing_script == HOMEBASE_FIRETEAM_DROP_TARGET_SCRIPT:
+			_configure_homebase_shipcard_fireteam_drop_target(control, craft_id, enabled)
+		elif control.has_signal("fireteam_dropped"):
+			_configure_existing_homebase_shipcard_fireteam_drop_target(control, craft_id, enabled)
+			should_descend = false
+		else:
+			should_descend = false
+	if not should_descend:
+		return
+	for child in root_node.get_children():
+		_configure_homebase_shipcard_wide_fireteam_drop_targets(child, craft_id, enabled)
 
 
 func _build_shipcard_direct_payload_panel(craft_id: String) -> Control:
@@ -4912,8 +5048,11 @@ func _build_shipcard_progress_block(craft_id: String, cargo_loading: bool, craft
 
 func _build_shipcard_pilot_panel(craft_id: String, craft_name: String, assigned_pilot_id: String, craft_busy: bool, craft_in_transit: bool = false) -> PanelContainer:
 	var drop_panel := PanelContainer.new()
+	drop_panel.name = "ShipcardPilotPanel"
 	drop_panel.custom_minimum_size = Vector2(0.0, 52.0)
 	drop_panel.mouse_filter = Control.MOUSE_FILTER_PASS
+	drop_panel.set_meta("homebase_shipcard_pilot_panel", true)
+	drop_panel.set_meta("craft_id", craft_id.strip_edges())
 	drop_panel.set_script(HOMEBASE_TEAM_DROP_PANEL_SCRIPT)
 	if drop_panel.has_method("set_drop_enabled"):
 		drop_panel.call("set_drop_enabled", not craft_busy and not craft_in_transit)
