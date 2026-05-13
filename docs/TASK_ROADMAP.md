@@ -579,6 +579,9 @@ TASK_378 - MapEditor Patrol Route Preview (implementiert)
 TASK_379 - MapEditor Tile Property Grid Overlay (implementiert)
 TASK_380 - Terrain Adjacency Solver Indicator (implementiert)
 
+Phase 18ZM - Homebase Manual Test UX Polish
+TASK_381 - Homebase Fireteam Loadout Flightdeck Polish (implementiert)
+
 Batch-Empfehlung
 
 Codex soll Tasks in kleinen Gruppen bearbeiten:

@@ -15,6 +15,7 @@ const HOMEBASE_CARD_POOL_SCRIPT: GDScript = preload("res://scripts/meta/homebase
 const HOMEBASE_TEAM_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/homebase_team_drop_panel.gd")
 const FOB_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/fob_drop_panel.gd")
 const FOB_FIRETEAM_CARD_SCRIPT: GDScript = preload("res://scripts/meta/fob_fireteam_card.gd")
+const HOMEBASE_FIRETEAM_DROP_TARGET_SCRIPT: GDScript = preload("res://scripts/meta/homebase_fireteam_drop_target.gd")
 const PERSONNEL_EVENT_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/personnel_event_model.gd")
 const HOVER_SCROLL_BEHAVIOR_SCRIPT: GDScript = preload("res://scripts/ui/hover_scroll_behavior.gd")
 const FLIGHTDECK_PLATFORM_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/platform_large_NW.png")
@@ -24,6 +25,7 @@ const HOMEBASE_TRANSFER_GHOST_CARD_SIZE := Vector2(316.0, 74.0)
 const HOMEBASE_SHIPCARD_IMAGE_SIZE := Vector2(248.0, 164.0)
 const HOMEBASE_SHIPCARD_BUTTON_SIZE := Vector2(166.0, 114.0)
 const HOMEBASE_SHIPCARD_IMAGE_OFFSET := Vector2(-58.0, -36.0)
+const HOMEBASE_FIRETEAM_INLINE_LOADOUT_SELECTOR_SIZE := Vector2(70.0, 20.0)
 const HOMEBASE_DEFAULT_FIRETEAM_ID := "ft1"
 const HOMEBASE_DEFAULT_LOADOUT_ID := "medium"
 const HOMEBASE_DEFAULT_PRIMARY_WEAPON := "rifle"
@@ -1307,6 +1309,13 @@ func _render_homebase_fireteam_members(member_host: VBoxContainer, fireteam_id: 
 		var member_profile = _profiles_by_id.get(member_unit_id, null)
 		if member_profile == null:
 			continue
+		var member_block := VBoxContainer.new()
+		member_block.name = "HomebaseFireteamMemberBlock_%s" % member_unit_id
+		member_block.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		member_block.add_theme_constant_override("separation", 2)
+		member_block.set_meta("homebase_fireteam_inline_loadout_block", true)
+		member_block.set_meta("fireteam_id", fireteam_id)
+		member_block.set_meta("unit_id", member_unit_id)
 		var member_card = NPC_COMPACT_CARD_SCENE.instantiate()
 		member_card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		member_card.setup_from_profile(
@@ -1328,7 +1337,9 @@ func _render_homebase_fireteam_members(member_host: VBoxContainer, fireteam_id: 
 			member_card.card_open_requested.connect(_on_compact_card_open_requested)
 		if member_card.has_signal("card_unit_dropped") and not member_card.card_unit_dropped.is_connected(_on_homebase_fireteam_card_unit_dropped.bind(fireteam_id)):
 			member_card.card_unit_dropped.connect(_on_homebase_fireteam_card_unit_dropped.bind(fireteam_id))
-		member_host.add_child(member_card)
+		member_block.add_child(member_card)
+		member_block.add_child(_build_homebase_fireteam_inline_loadout_row(fireteam_id, member_unit_id))
+		member_host.add_child(member_block)
 
 
 func _update_homebase_loadout_panel() -> void:
@@ -1444,10 +1455,64 @@ func _build_homebase_loadout_option_row(label_text: String, options: Array, curr
 			selector.select(selector.item_count - 1)
 	_configure_flightdeck_option_button(selector)
 	selector.set_meta("compact_loadout_dropdown", true)
+	selector.set_meta("homebase_loadout_unit_id", unit_id)
+	selector.set_meta("homebase_loadout_key", key)
 	if not selector.item_selected.is_connected(_on_homebase_loadout_option_selected.bind(unit_id, key, selector)):
 		selector.item_selected.connect(_on_homebase_loadout_option_selected.bind(unit_id, key, selector))
 	row.add_child(selector)
 	return row
+
+
+func _build_homebase_fireteam_inline_loadout_row(fireteam_id: String, unit_id: String) -> Control:
+	var member_loadout: Dictionary = _get_member_loadout(unit_id)
+	var row := HBoxContainer.new()
+	row.name = "InlineLoadoutRow_%s" % unit_id
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_theme_constant_override("separation", 3)
+	row.set_meta("homebase_fireteam_inline_loadout_row", true)
+	row.set_meta("fireteam_id", fireteam_id)
+	row.set_meta("unit_id", unit_id)
+	row.add_child(_build_homebase_inline_loadout_selector_pair("A", _get_homebase_armor_options(), String(member_loadout.get("armor", HOMEBASE_DEFAULT_LOADOUT_ID)), unit_id, "armor"))
+	row.add_child(_build_homebase_inline_loadout_selector_pair("P", _get_homebase_primary_weapon_options(), String(member_loadout.get("weapon_1", HOMEBASE_DEFAULT_PRIMARY_WEAPON)), unit_id, "weapon_1"))
+	row.add_child(_build_homebase_inline_loadout_selector_pair("S", _get_homebase_secondary_weapon_options(), String(member_loadout.get("weapon_2", HOMEBASE_DEFAULT_SECONDARY_WEAPON)), unit_id, "weapon_2"))
+	return row
+
+
+func _build_homebase_inline_loadout_selector_pair(label_text: String, options: Array, current_value: String, unit_id: String, key: String) -> Control:
+	var pair := HBoxContainer.new()
+	pair.name = "%sInlinePair" % key.capitalize()
+	pair.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pair.add_theme_constant_override("separation", 2)
+	var label := Label.new()
+	label.text = label_text
+	label.custom_minimum_size = Vector2(10.0, 0.0)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 8)
+	META_UI_SKIN_SCRIPT.style_body_label(label, 8)
+	pair.add_child(label)
+
+	var selector := OptionButton.new()
+	selector.name = "%sInlineSelector" % key.capitalize()
+	selector.custom_minimum_size = HOMEBASE_FIRETEAM_INLINE_LOADOUT_SELECTOR_SIZE
+	selector.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	selector.add_theme_font_size_override("font_size", 8)
+	selector.clip_text = true
+	_set_object_property_if_available(selector, "fit_to_longest_item", false)
+	for option_variant in options:
+		var option_value: String = String(option_variant).strip_edges()
+		selector.add_item(_build_homebase_compact_loadout_option_label(option_value))
+		selector.set_item_metadata(selector.item_count - 1, option_value)
+		if option_value == current_value:
+			selector.select(selector.item_count - 1)
+	_configure_flightdeck_option_button(selector)
+	selector.set_meta("compact_loadout_dropdown", true)
+	selector.set_meta("homebase_fireteam_inline_loadout_dropdown", true)
+	selector.set_meta("homebase_loadout_unit_id", unit_id)
+	selector.set_meta("homebase_loadout_key", key)
+	if not selector.item_selected.is_connected(_on_homebase_loadout_option_selected.bind(unit_id, key, selector)):
+		selector.item_selected.connect(_on_homebase_loadout_option_selected.bind(unit_id, key, selector))
+	pair.add_child(selector)
+	return pair
 
 
 func _build_homebase_loadout_option_label(option_value: String) -> String:
@@ -1455,6 +1520,13 @@ func _build_homebase_loadout_option_label(option_value: String) -> String:
 	if normalized_value == "light" or normalized_value == "medium" or normalized_value == "heavy":
 		return String(LOADOUT_CONTRACT_SCRIPT.call("get_armor_label", normalized_value))
 	return String(LOADOUT_CONTRACT_SCRIPT.call("get_weapon_label", normalized_value))
+
+
+func _build_homebase_compact_loadout_option_label(option_value: String) -> String:
+	var normalized_value: String = option_value.strip_edges().to_lower()
+	if _get_homebase_armor_options().has(normalized_value):
+		return String(LOADOUT_CONTRACT_SCRIPT.call("get_compact_armor_label", normalized_value))
+	return String(LOADOUT_CONTRACT_SCRIPT.call("get_compact_weapon_label", normalized_value))
 
 
 func _get_homebase_armor_options() -> Array:
@@ -1884,6 +1956,8 @@ func _update_character_sheet() -> void:
 			"status_text": _build_sheet_status_text(_focused_unit_id),
 			"fireteam_text": _build_homebase_fireteam_text(_focused_unit_id),
 			"editable_metrics": false,
+			"two_column_layout": true,
+			"show_badge_progress": true,
 			"hide_loadout_dropdowns": true,
 		}
 	)
@@ -1996,6 +2070,14 @@ func _on_homebase_staging_fireteam_dropped(fireteam_id: String, drop_kind: Strin
 	_rebuild_ui()
 
 
+func _on_homebase_shipcard_fireteam_dropped(fireteam_id: String, craft_id: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return
+	_set_selected_aircraft_id(normalized_craft_id)
+	_on_homebase_staging_fireteam_dropped(fireteam_id, HOMEBASE_DIRECT_STAGING_DROP_KIND)
+
+
 func _on_homebase_direct_unit_dropped(unit_id: String, drop_kind: String) -> void:
 	var normalized_unit_id: String = unit_id.strip_edges()
 	if normalized_unit_id.is_empty():
@@ -2089,6 +2171,7 @@ func _on_homebase_loadout_option_selected(index: int, unit_id: String, key: Stri
 		return
 	var next_value: String = String(selector.get_item_metadata(index)).strip_edges()
 	_set_homebase_member_loadout_value(normalized_unit_id, normalized_key, next_value)
+	_render_homebase_fireteams()
 	_update_homebase_loadout_panel()
 
 
@@ -3447,6 +3530,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	shipcard.add_theme_stylebox_override("panel", _build_shipcard_stylebox(is_selected, craft_busy or cargo_loading or air_asset_unavailable, craft_in_transit or air_asset_unavailable))
 	shipcard.modulate = Color(1.0, 1.0, 1.0, 0.56) if craft_in_transit or air_asset_unavailable else Color(1.0, 1.0, 1.0, 1.0)
 	shipcard.set_meta("homebase_shipcard_no_horizontal_overflow", true)
+	_configure_homebase_shipcard_fireteam_drop_target(shipcard, craft_id, not craft_in_transit and not air_asset_unavailable)
 
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 5)
@@ -3485,6 +3569,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	ship_button.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	ship_button.clip_contents = true
 	ship_button.pressed.connect(_on_shipcard_select_requested.bind(craft_id))
+	_configure_homebase_shipcard_fireteam_drop_target(ship_button, craft_id, not craft_in_transit and not air_asset_unavailable)
 	ship_box.add_child(ship_button)
 
 	var ship_texture := TextureRect.new()
@@ -3620,6 +3705,17 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	actions.add_child(remove_button)
 
 	return shipcard
+
+
+func _configure_homebase_shipcard_fireteam_drop_target(control: Control, craft_id: String, enabled: bool) -> void:
+	if control == null or craft_id.strip_edges().is_empty():
+		return
+	control.set_script(HOMEBASE_FIRETEAM_DROP_TARGET_SCRIPT)
+	if control.has_method("setup_drop_target"):
+		control.call("setup_drop_target", craft_id, enabled)
+	var callback := Callable(self, "_on_homebase_shipcard_fireteam_dropped")
+	if control.has_signal("fireteam_dropped") and not control.is_connected("fireteam_dropped", callback):
+		control.connect("fireteam_dropped", callback)
 
 
 func _build_shipcard_progress_block(craft_id: String, cargo_loading: bool, craft_in_transit: bool) -> Control:

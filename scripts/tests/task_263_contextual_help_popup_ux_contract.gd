@@ -83,7 +83,7 @@ func _test_contract_doc(contract_text: String) -> void:
 	_assert(not contract_text.is_empty(), "Contextual help UX contract exists")
 	for section in REQUIRED_DOC_SECTIONS:
 		_assert(contract_text.contains("## %s" % section), "Contract has %s section" % section)
-	for token in ["0.45s", "3.5s", "360 px", "460 px", "45%", "`off`", "`compact`", "`expanded`", "`shell.global_help_button`"]:
+	for token in ["0.45s", "3.5s", "220 px", "260 px", "45%", "`off`", "`compact`", "`expanded`", "`shell.global_help_button`"]:
 		_assert(contract_text.contains(token), "Contract names %s" % token)
 	_assert(contract_text.contains("must never become gameplay truth"), "Contract forbids help as gameplay truth")
 	_assert(contract_text.contains("Controls reference a stable `help_id`"), "Contract requires stable help_id references")
@@ -100,8 +100,8 @@ func _test_catalog_shape(catalog: Dictionary) -> void:
 	_assert(bool(runtime_contract.get("controls_reference_help_id", false)), "Catalog requires help_id references")
 	_assert(float(runtime_contract.get("compact_delay_seconds", 0.0)) == 0.45, "Catalog compact delay matches contract")
 	_assert(float(runtime_contract.get("detail_delay_seconds", 0.0)) == 3.5, "Catalog detail delay matches contract")
-	_assert(int(runtime_contract.get("compact_max_width_px", 0)) == 360, "Catalog compact width matches contract")
-	_assert(int(runtime_contract.get("detail_max_width_px", 0)) == 460, "Catalog detail width matches contract")
+	_assert(int(runtime_contract.get("compact_max_width_px", 0)) == 220, "Catalog compact width matches contract")
+	_assert(int(runtime_contract.get("detail_max_width_px", 0)) == 260, "Catalog detail width matches contract")
 	_assert(float(runtime_contract.get("max_viewport_height_ratio", 0.0)) == 0.45, "Catalog viewport height rule matches contract")
 	_assert(_array_contains_all(Array(catalog.get("help_levels", [])), REQUIRED_HELP_LEVELS), "Catalog includes help levels")
 	_assert(_array_contains_all(Array(catalog.get("settings_modes", [])), REQUIRED_SETTINGS_MODES), "Catalog includes settings modes")

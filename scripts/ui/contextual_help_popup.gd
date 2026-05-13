@@ -7,7 +7,8 @@ const EDGE_MARGIN: float = 16.0
 const TARGET_GAP: float = 8.0
 const COMPACT_HEIGHT_HINT: float = 140.0
 const DETAIL_HEIGHT_HINT: float = 260.0
-const WORD_WRAP_LIMIT: int = 7
+const MIN_POPUP_WIDTH: float = 180.0
+const WORD_WRAP_LIMIT: int = 5
 
 var _title_label: Label = null
 var _compact_label: Label = null
@@ -82,7 +83,7 @@ func get_diagnostic_snapshot() -> Dictionary:
 static func calculate_popup_rect(target_rect: Rect2, viewport_size: Vector2, detail: bool = false, preferred_size: Vector2 = Vector2.ZERO) -> Rect2:
 	var max_width: float = float(SERVICE_SCRIPT.DEFAULT_DETAIL_MAX_WIDTH_PX if detail else SERVICE_SCRIPT.DEFAULT_COMPACT_MAX_WIDTH_PX)
 	var width: float = preferred_size.x if preferred_size.x > 0.0 else max_width
-	width = clampf(width, 220.0, minf(max_width, maxf(220.0, viewport_size.x - EDGE_MARGIN * 2.0)))
+	width = clampf(width, MIN_POPUP_WIDTH, minf(max_width, maxf(MIN_POPUP_WIDTH, viewport_size.x - EDGE_MARGIN * 2.0)))
 	var height_hint: float = preferred_size.y if preferred_size.y > 0.0 else (DETAIL_HEIGHT_HINT if detail else COMPACT_HEIGHT_HINT)
 	var max_height: float = maxf(96.0, viewport_size.y * SERVICE_SCRIPT.DEFAULT_MAX_VIEWPORT_HEIGHT_RATIO)
 	var height: float = clampf(height_hint, 96.0, max_height)

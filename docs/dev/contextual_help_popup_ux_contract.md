@@ -30,8 +30,8 @@ Keyboard and controller focus use the same compact delay when focus is stable. T
 Help popups are fixed overlay UI. They must not resize, shift or replace the fixed Drop Light windows.
 
 Rules:
-- Compact popup width is at most `360 px`.
-- Detail popup width is at most `460 px`.
+- Compact popup width is at most `220 px`.
+- Detail popup width is at most `260 px`.
 - Popup height is at most `45%` of the viewport.
 - Popup stays fully inside the viewport with at least `16 px` margin.
 - Popup chooses the side with the most free space and should avoid covering the target control.

@@ -119,8 +119,11 @@ func _get_drag_data(_at_position: Vector2):
 	var preview := PanelContainer.new()
 	preview.z_as_relative = false
 	preview.z_index = int(META_USEROLOGY_CONTRACT_SCRIPT.get("DRAG_PREVIEW_Z_INDEX"))
+	preview.custom_minimum_size = Vector2(188.0, 40.0)
+	preview.size = preview.custom_minimum_size
 	preview.set_meta("global_drag_layer", true)
 	preview.set_meta("above_windows", true)
+	preview.set_meta("fireteam_drag_preview_fixed_width", true)
 	var stylebox := StyleBoxFlat.new()
 	stylebox.bg_color = Color(0.18, 0.20, 0.25, 0.95)
 	stylebox.border_color = Color(0.64, 0.69, 0.76, 1.0)
@@ -141,6 +144,10 @@ func _get_drag_data(_at_position: Vector2):
 	preview.add_child(margin)
 	var label := Label.new()
 	label.text = "Fireteam %s" % _fireteam_id.to_upper()
+	label.custom_minimum_size = Vector2(164.0, 20.0)
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	label.clip_text = true
 	margin.add_child(label)
 	set_drag_preview(preview)
 

@@ -7,8 +7,8 @@
     "controls_reference_help_id": true,
     "compact_delay_seconds": 0.45,
     "detail_delay_seconds": 3.5,
-    "compact_max_width_px": 360,
-    "detail_max_width_px": 460,
+    "compact_max_width_px": 220,
+    "detail_max_width_px": 260,
     "max_viewport_height_ratio": 0.45
   },
   "help_levels": [
@@ -399,6 +399,70 @@
       ],
       "target_audience": "returning_player",
       "manual_review": true
+    },
+    {
+      "help_id": "homebase.fireteams",
+      "screen_id": "homebase",
+      "area_id": "fireteams",
+      "status": "ready",
+      "title": "Fireteams",
+      "compact_lines": [
+        "Builds Homebase fireteams and shows each member loadout inline.",
+        "These controls edit staging data, not simulation runtime truth."
+      ],
+      "detail_lines": [
+        "Member dropdowns write the same loadout state used by #13 and mission export."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "homebase.loadout",
+      "screen_id": "homebase",
+      "area_id": "loadout",
+      "status": "ready",
+      "title": "Loadout",
+      "compact_lines": [
+        "Detail editor for the focused fireteam loadout.",
+        "The same armor and weapon choices also appear compactly in #10."
+      ],
+      "detail_lines": [
+        "The panel shares member loadout state with Homebase fireteam cards and export payloads."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "homebase.flightdeck",
+      "screen_id": "homebase",
+      "area_id": "flightdeck",
+      "status": "ready",
+      "title": "Flightdeck",
+      "compact_lines": [
+        "Boards fireteams onto the selected dropship from Homebase.",
+        "Shipcards accept fireteam drops when their craft can stage."
+      ],
+      "detail_lines": [
+        "Boarding uses the existing direct staging payload and does not create a second dropship state."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
+    },
+    {
+      "help_id": "homebase.character_popup",
+      "screen_id": "homebase",
+      "area_id": "character_popup",
+      "status": "ready",
+      "title": "Character Popup",
+      "compact_lines": [
+        "Opens the focused character sheet outside the numbered windows.",
+        "Use it for inspection while keeping #10, #13 and Flightdeck visible."
+      ],
+      "detail_lines": [
+        "The popup renders the shared two-column sheet and remains read-only in Homebase."
+      ],
+      "target_audience": "returning_player",
+      "manual_review": false
     },
     {
       "help_id": "fob.fireteams",
@@ -1318,7 +1382,7 @@
         "They help choose pilots, drivers or craft crew."
       ],
       "detail_lines": [
-        "Platform rows come from profile platform_values when explicitly edited; otherwise UnitProfileMath derives them from core values, communication and behavior axes.",
+        "Platform rows read explicit platform_values; otherwise UnitProfileMath derives them from core, communication and behavior values.",
         "Flightdeck assignment still reads saved roster data and does not accept UI-only truth."
       ],
       "target_audience": "returning_player",
@@ -1578,7 +1642,7 @@
         "Derived from speed, recognition, awareness, discipline and behavior axes."
       ],
       "detail_lines": [
-        "Ground vehicle handling can be edited directly; without an override it derives from speed, recognition, awareness, discipline, initiative, stability and autonomy."
+        "Without override, ground vehicle handling derives from speed, recognition, awareness, discipline, initiative, stability and autonomy."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -1594,7 +1658,8 @@
         "Derived from flight-relevant core, communication and behavior values."
       ],
       "detail_lines": [
-        "Dropship piloting can be edited directly; without an override it derives from awareness, recognition, discipline, speed, speech quality, order fidelity, stability and autonomy."
+        "Without override, dropship piloting derives from awareness, recognition, discipline, speed, speech quality and order fidelity.",
+        "Stability and autonomy also affect the derived value."
       ],
       "target_audience": "returning_player",
       "manual_review": false
@@ -1610,7 +1675,8 @@
         "Derived from steady transport and route-control values."
       ],
       "detail_lines": [
-        "Freighter piloting can be edited directly; without an override it derives from toughness, recognition, discipline, speech quality, order fidelity, stability and autonomy."
+        "Without override, freighter piloting derives from toughness, recognition, discipline, speech quality and order fidelity.",
+        "Stability and autonomy also affect the derived value."
       ],
       "target_audience": "advanced",
       "manual_review": false
@@ -1626,7 +1692,8 @@
         "Derived from speed, accuracy, awareness and behavior axes."
       ],
       "detail_lines": [
-        "Fighter piloting can be edited directly; without an override it derives from speed, accuracy, awareness, discipline, initiative, order fidelity, stability and autonomy."
+        "Without override, fighter piloting derives from speed, accuracy, awareness, discipline, initiative and order fidelity.",
+        "Stability and autonomy also affect the derived value."
       ],
       "target_audience": "advanced",
       "manual_review": false

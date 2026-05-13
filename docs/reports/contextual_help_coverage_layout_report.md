@@ -17,7 +17,7 @@ TASK_267 turns the contextual help system into a regression gate. The automated 
 
 ## Layout and Timing
 - Each catalog entry is rendered through `ContextualHelpPopup` in compact and detail form against top-left, top-right, bottom-left, bottom-right and center targets.
-- Popups must remain in the viewport, respect 360 px compact width, 460 px detail width and the 45 percent viewport-height limit.
+- Popups must remain in the viewport, respect 220 px compact width, 260 px detail width and the 45 percent viewport-height limit.
 - When normal space exists, the popup must sit beside the target instead of covering it.
 - Off mode suppresses help; compact mode never auto-expands detail; expanded mode reaches detail after the long-hover delay; pinned/global help paths are tested.
 - The global help button is pressed in the Main Menu and must visibly open `shell.global_help_button`.

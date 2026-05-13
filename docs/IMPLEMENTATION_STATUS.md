@@ -301,6 +301,15 @@
 - Lokale Pruefung: `task_380_terrain_adjacency_solver_indicator.gd`, `task_357_mapeditor_height_cliff_dirty_neighborhood_cache.gd` und `git diff --check` laufen gruen.
 - Offene Folgearbeit: Manueller Editor-Sichtcheck fuer Ueberlagerung mit TASK_379-Property-Overlay und Patrol-Preview bleibt sinnvoll.
 
+### TASK_381 - Homebase Fireteam Loadout Flightdeck Polish
+- Status: implementiert
+- Stand: #10 FIRETEAMS rendert pro Fireteam-Mitglied kompakte Armor-/Primary-/Secondary-Dropdowns. Diese schreiben in denselben Member-Loadout-State wie #13 LOADOUT und aktualisieren beide Panels.
+- Stand: Flightdeck-Shipcards sind Fireteam-Drop-Ziele fuer Homebase Direct Staging. Ein Drop auf eine Shipcard waehlt das Ziel-Craft und nutzt den bestehenden Dropship-Payload-State.
+- Stand: Homebase-Character-Popup rendert das Character Sheet zweispaltig wie der Editor/FOB-Overlay-Pfad; die feste rechte Character-Karte bleibt deaktiviert.
+- Stand: Kontext-Hilfe-Popups sind schmaler (220 px compact, 260 px detail), und die Fireteam-Drag-Preview hat eine feste Mindestbreite gegen Ein-Buchstabe-Zeilen.
+- Lokale Pruefung: `task_381_homebase_fireteam_loadout_flightdeck_polish.gd`, `task_346_homebase_direct_staging_character_popup.gd`, `task_355_homebase_direct_ux_payload_truth.gd`, `task_354_homebase_direct_loadout_regression_matrix.gd`, `task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd`, `task_263_contextual_help_popup_ux_contract.gd`, `task_267_contextual_help_coverage_layout_verifier.gd` und `git diff --check` laufen gruen.
+- Offene Folgearbeit: Manueller Sichtcheck fuer die neue Dichte in #10 FIRETEAMS bleibt sinnvoll.
+
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
 - Stand: Dropship-Visuals bauen ihre Dirty-Signatur wieder fehlerfrei, geplante LZs bleiben auch bei offmap/hidden Craft sichtbar, und Multi-Dropship-Payloads werden aus dem rohen Mission-Card-State statt aus stale Selected-Card-State uebernommen.
