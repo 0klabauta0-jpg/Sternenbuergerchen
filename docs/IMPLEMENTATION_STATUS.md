@@ -140,9 +140,12 @@
 - Lokale Pruefung: `task_361_npc_compact_card_readonly_profile_reference_contract.gd`, `task_346_homebase_direct_staging_character_popup.gd`, `task_316_fob_fireteam_staging_migration.gd`, `task_301_npc_card_drag_zorder_badges_tooltips.gd`, `task_233_portrait_identity_catalog_and_roster_presentation.gd` und `git diff --check` laufen gruen.
 
 ### TASK_362 - Homebase Aircraft State Manager Extraction
-- Status: geplant
-- Stand: Review-Finding. Aircraft-/Dropship-State, Pilotenzuordnung, Cargo, Flightdeck-Status und UI-Rendering sind in `HomebaseScreen.gd` vermischt.
-- Naechster Schritt: Reine Aircraft-State-/Validation-Logik in einen Manager extrahieren; UI-Shipcard-Rendering zunaechst in Homebase lassen.
+- Status: implementiert
+- Stand: `scripts/meta/aircraft_manager.gd` besitzt jetzt den Homebase-Aircraft-State fuer Definitions, ausgewaehltes Craft, Pilotenzuordnung, Craft-Location, Cargo-Auswahl/-Load, Pilotentransfers und Cargo-Load-Activity.
+- Stand: `HomebaseScreen.gd` rendert Shipcards und Panels weiter selbst, delegiert aber State-Lookups, Pilot-/Cargo-Mutationen, Remove-/Send-/Load-Validation und Homebase-Direct-Craft-Gates an den Manager.
+- Vertrag: Der Manager ist ein reiner `RefCounted` ohne UI-Rendering-Ownership, SimulationRoot-Commands oder neue Mission-Wahrheit. `get_aircraft_manager_contract_snapshot()` und `aircraft_manager_contract` im Panel-Snapshot sichern die Grenze ab.
+- Lokale Pruefung: `task_362_homebase_aircraft_state_manager_extraction.gd`, `task_349_homebase_direct_staging_real_flightdeck_craft_gate.gd`, `task_346_homebase_direct_staging_character_popup.gd`, `bugfix_dropship_mission_flow_verifier.gd`, `task_355_homebase_direct_ux_payload_truth.gd`, `task_354_homebase_direct_loadout_regression_matrix.gd` und `git diff --check` laufen gruen.
+- Hinweis: Der erste Lauf von `bugfix_dropship_mission_flow_verifier.gd` lief ueber 180 Sekunden und wurde mit hoeherem Timeout wiederholt. Der erfolgreiche Lauf meldet nur bestehende Headless-RID-/ObjectDB-Warnungen am Exit.
 
 ### TASK_363 - Homebase Roster Card Pool Incremental Refresh
 - Status: geplant

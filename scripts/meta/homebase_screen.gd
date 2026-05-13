@@ -10,14 +10,13 @@ const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.g
 const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_labels.gd")
 const DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/drop_light_layout_contract.gd")
 const LOADOUT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/command/loadout_contract.gd")
+const AIRCRAFT_MANAGER_SCRIPT: GDScript = preload("res://scripts/meta/aircraft_manager.gd")
 const HOMEBASE_TEAM_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/homebase_team_drop_panel.gd")
 const FOB_DROP_PANEL_SCRIPT: GDScript = preload("res://scripts/meta/fob_drop_panel.gd")
 const FOB_FIRETEAM_CARD_SCRIPT: GDScript = preload("res://scripts/meta/fob_fireteam_card.gd")
 const PERSONNEL_EVENT_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/personnel_event_model.gd")
 const HOVER_SCROLL_BEHAVIOR_SCRIPT: GDScript = preload("res://scripts/ui/hover_scroll_behavior.gd")
 const FLIGHTDECK_PLATFORM_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/platform_large_NW.png")
-const DROPSHIP_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
-const CARGO_CRAFT_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_cargoA_NE.png")
 const HOMEBASE_OPERATOR_CARD_SIZE := Vector2(316.0, 66.0)
 const HOMEBASE_STAGED_CARD_SIZE := Vector2(316.0, 66.0)
 const HOMEBASE_TRANSFER_GHOST_CARD_SIZE := Vector2(316.0, 74.0)
@@ -67,15 +66,8 @@ var _mission_launch_ready: bool = false
 var _mission_launch_summary: String = ""
 var _mission_slot_usage_override: int = -1
 var _mission_pilot_count_override: int = -1
-var _aircraft_definitions: Array = []
-var _assigned_pilot_by_craft: Dictionary = {}
-var _aircraft_location_by_craft: Dictionary = {}
-var _selected_cargo_by_craft: Dictionary = {}
-var _loaded_cargo_by_craft: Dictionary = {}
+var _aircraft_manager = AIRCRAFT_MANAGER_SCRIPT.new()
 var _team_transfer_entries: Array = []
-var _pilot_transfer_entries: Array = []
-var _cargo_load_entries: Array = []
-var _selected_aircraft_id: String = ""
 var _personnel_events: Array = []
 
 
@@ -185,14 +177,16 @@ func set_transport_state(
 	loaded_cargo_by_craft: Dictionary = {},
 	cargo_load_entries: Array = []
 ) -> void:
-	_aircraft_definitions = aircraft_definitions.duplicate(true)
-	_assigned_pilot_by_craft = assigned_pilot_by_craft.duplicate(true)
-	_aircraft_location_by_craft = aircraft_location_by_craft.duplicate(true)
-	_selected_cargo_by_craft = selected_cargo_by_craft.duplicate(true)
-	_loaded_cargo_by_craft = loaded_cargo_by_craft.duplicate(true)
 	_team_transfer_entries = team_transfer_entries.duplicate(true)
-	_pilot_transfer_entries = pilot_transfer_entries.duplicate(true)
-	_cargo_load_entries = cargo_load_entries.duplicate(true)
+	_aircraft_manager.set_transport_state(
+		aircraft_definitions,
+		assigned_pilot_by_craft,
+		pilot_transfer_entries,
+		aircraft_location_by_craft,
+		selected_cargo_by_craft,
+		loaded_cargo_by_craft,
+		cargo_load_entries
+	)
 	_selected_unit_ids = _normalize_selected_unit_ids(_selected_unit_ids)
 	_selected_fireteam_ids = _normalize_selected_fireteam_ids(_selected_fireteam_ids)
 	if is_inside_tree():
@@ -245,18 +239,20 @@ func get_aircraft_panel_snapshot() -> Dictionary:
 	var direct_craft_gate: Dictionary = _get_homebase_direct_staging_craft_gate()
 	var payload_fireteam_ids: PackedStringArray = _get_homebase_direct_payload_fireteam_ids()
 	var payload_operator_count: int = _build_unit_ids_for_fireteams(payload_fireteam_ids).size()
+	var selected_aircraft_id: String = _get_selected_aircraft_id()
 	return {
-		"selected_aircraft_id": _selected_aircraft_id,
+		"selected_aircraft_id": selected_aircraft_id,
 		"visible_aircraft_definitions": _get_visible_homebase_aircraft_definitions(),
 		"selected_status_text": _build_aircraft_status_text(
 			selected_craft,
-			String(selected_craft.get("display_name", _selected_aircraft_id)).strip_edges(),
-			_get_assigned_pilot_id(_selected_aircraft_id),
-			_has_active_pilot_transfer_for_craft(_selected_aircraft_id) or _is_craft_in_transit(_selected_aircraft_id),
-			_has_active_cargo_load_for_craft(_selected_aircraft_id)
+			String(selected_craft.get("display_name", selected_aircraft_id)).strip_edges(),
+			_get_assigned_pilot_id(selected_aircraft_id),
+			_has_active_pilot_transfer_for_craft(selected_aircraft_id) or _is_craft_in_transit(selected_aircraft_id),
+			_has_active_cargo_load_for_craft(selected_aircraft_id)
 		) if not selected_craft.is_empty() else "",
-		"can_send_selected": _can_send_craft(selected_craft, _selected_aircraft_id) if not selected_craft.is_empty() else false,
+		"can_send_selected": _can_send_craft(selected_craft, selected_aircraft_id) if not selected_craft.is_empty() else false,
 		"can_remove_selected": _can_remove_selected_aircraft(),
+		"aircraft_manager_contract": _aircraft_manager.get_contract_snapshot(),
 		"flightdeck_stage_visible": _node_is_visible("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/DropLightFlightdeckStage"),
 		"deck_activity_visible": _node_is_visible("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftTransfersScroll"),
 		"shipcards_are_primary_status": true,
@@ -273,6 +269,10 @@ func get_aircraft_panel_snapshot() -> Dictionary:
 		"homebase_direct_craft_block_reason": String(direct_craft_gate.get("block_reason", "")).strip_edges(),
 		"homebase_direct_craft_block_text": String(direct_craft_gate.get("block_text", "")).strip_edges(),
 	}
+
+
+func get_aircraft_manager_contract_snapshot() -> Dictionary:
+	return _aircraft_manager.get_contract_snapshot()
 
 
 func build_homebase_direct_drop_state() -> Dictionary:
@@ -2025,8 +2025,8 @@ func _on_roster_drop_panel_unit_dropped(unit_id: String) -> void:
 		return
 	var assigned_craft_id: String = _find_assigned_craft_for_unit(normalized_unit_id)
 	if not assigned_craft_id.is_empty():
-		_assigned_pilot_by_craft.erase(assigned_craft_id)
-		_selected_aircraft_id = assigned_craft_id
+		_aircraft_manager.clear_assigned_pilot(assigned_craft_id)
+		_set_selected_aircraft_id(assigned_craft_id)
 		_aircraft_feedback_text = "%s returned to roster from %s." % [_build_display_name(normalized_unit_id), _build_craft_display_name(assigned_craft_id)]
 		_rebuild_ui()
 		aircraft_pilot_cleared.emit(assigned_craft_id)
@@ -2045,14 +2045,12 @@ func _on_aircraft_pilot_drop_panel_unit_dropped(unit_id: String, craft_id: Strin
 		return
 	var previous_craft_id: String = _find_assigned_craft_for_unit(unit_id)
 	if previous_craft_id == normalized_craft_id:
-		_selected_aircraft_id = normalized_craft_id
+		_set_selected_aircraft_id(normalized_craft_id)
 		_update_aircraft_panel()
 		return
-	if not previous_craft_id.is_empty():
-		_assigned_pilot_by_craft.erase(previous_craft_id)
 
-	_selected_aircraft_id = normalized_craft_id
-	_assigned_pilot_by_craft[normalized_craft_id] = unit_id
+	_set_selected_aircraft_id(normalized_craft_id)
+	_aircraft_manager.assign_pilot(normalized_craft_id, unit_id)
 	_aircraft_feedback_text = "%s assigned to %s." % [_build_display_name(unit_id), _build_craft_display_name(normalized_craft_id)]
 	_rebuild_ui()
 	aircraft_pilot_assigned.emit(normalized_craft_id, unit_id)
@@ -2089,14 +2087,14 @@ func _on_aircraft_selector_item_selected(index: int) -> void:
 
 
 func _on_cargo_selector_item_selected(index: int) -> void:
-	var craft_id: String = _selected_aircraft_id.strip_edges()
+	var craft_id: String = _get_selected_aircraft_id()
 	if craft_id.is_empty():
 		return
 	var cargo_selector: OptionButton = get_node("Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftCargoRow/CargoSelector")
 	if index < 0 or index >= cargo_selector.item_count:
 		return
 	var cargo_id: String = String(cargo_selector.get_item_metadata(index)).strip_edges()
-	_selected_cargo_by_craft[craft_id] = cargo_id
+	_aircraft_manager.set_selected_cargo_id(craft_id, cargo_id)
 	_aircraft_feedback_text = ""
 	_update_aircraft_panel()
 	aircraft_cargo_selected.emit(craft_id, cargo_id)
@@ -2108,7 +2106,7 @@ func _on_add_aircraft_button_pressed() -> void:
 
 
 func _on_remove_aircraft_button_pressed() -> void:
-	var craft_id: String = _selected_aircraft_id.strip_edges()
+	var craft_id: String = _get_selected_aircraft_id()
 	if craft_id.is_empty() or not _can_remove_selected_aircraft():
 		return
 	_aircraft_feedback_text = ""
@@ -2117,7 +2115,7 @@ func _on_remove_aircraft_button_pressed() -> void:
 
 func _on_load_cargo_button_pressed() -> void:
 	var craft_def: Dictionary = _get_selected_aircraft_definition()
-	var craft_id: String = _selected_aircraft_id.strip_edges()
+	var craft_id: String = _get_selected_aircraft_id()
 	var cargo_id: String = _get_selected_cargo_id(craft_id)
 	if craft_id.is_empty() or cargo_id.is_empty() or not _can_load_selected_cargo(craft_def, craft_id):
 		return
@@ -2127,11 +2125,10 @@ func _on_load_cargo_button_pressed() -> void:
 
 func _on_clear_pilot_button_pressed(craft_id: String) -> void:
 	var normalized_craft_id: String = craft_id.strip_edges()
-	_selected_aircraft_id = normalized_craft_id
-	if normalized_craft_id.is_empty() or not _assigned_pilot_by_craft.has(normalized_craft_id):
+	_set_selected_aircraft_id(normalized_craft_id)
+	if normalized_craft_id.is_empty() or _get_assigned_pilot_id(normalized_craft_id).is_empty():
 		return
-	var pilot_id: String = String(_assigned_pilot_by_craft.get(normalized_craft_id, "")).strip_edges()
-	_assigned_pilot_by_craft.erase(normalized_craft_id)
+	var pilot_id: String = _aircraft_manager.clear_assigned_pilot(normalized_craft_id)
 	_aircraft_feedback_text = "%s removed from %s." % [_build_display_name(pilot_id), _build_craft_display_name(normalized_craft_id)]
 	_rebuild_ui()
 	aircraft_pilot_cleared.emit(normalized_craft_id)
@@ -2139,7 +2136,7 @@ func _on_clear_pilot_button_pressed(craft_id: String) -> void:
 
 func _on_send_pilot_button_pressed(craft_id: String) -> void:
 	var normalized_craft_id: String = craft_id.strip_edges()
-	_selected_aircraft_id = normalized_craft_id
+	_set_selected_aircraft_id(normalized_craft_id)
 	var pilot_id: String = _get_assigned_pilot_id(normalized_craft_id)
 	var craft_def: Dictionary = _get_aircraft_definition_by_id(normalized_craft_id)
 	if normalized_craft_id.is_empty() or pilot_id.is_empty() or not _can_send_craft(craft_def, normalized_craft_id):
@@ -2156,7 +2153,7 @@ func _on_shipcard_select_requested(craft_id: String) -> void:
 	var normalized_craft_id: String = craft_id.strip_edges()
 	if normalized_craft_id.is_empty():
 		return
-	_selected_aircraft_id = normalized_craft_id
+	_set_selected_aircraft_id(normalized_craft_id)
 	_update_aircraft_panel()
 
 
@@ -2167,11 +2164,8 @@ func _on_shipcard_cargo_selected(index: int, craft_id: String, cargo_selector: O
 	if index < 0 or index >= cargo_selector.item_count:
 		return
 	var cargo_id: String = String(cargo_selector.get_item_metadata(index)).strip_edges()
-	_selected_aircraft_id = normalized_craft_id
-	if cargo_id.is_empty():
-		_selected_cargo_by_craft.erase(normalized_craft_id)
-	else:
-		_selected_cargo_by_craft[normalized_craft_id] = cargo_id
+	_set_selected_aircraft_id(normalized_craft_id)
+	_aircraft_manager.set_selected_cargo_id(normalized_craft_id, cargo_id)
 	_aircraft_feedback_text = ""
 	_update_aircraft_panel()
 	aircraft_cargo_selected.emit(normalized_craft_id, cargo_id)
@@ -2183,7 +2177,7 @@ func _on_shipcard_load_cargo_pressed(craft_id: String) -> void:
 	var cargo_id: String = _get_selected_cargo_id(normalized_craft_id)
 	if normalized_craft_id.is_empty() or cargo_id.is_empty() or not _can_load_selected_cargo(craft_def, normalized_craft_id):
 		return
-	_selected_aircraft_id = normalized_craft_id
+	_set_selected_aircraft_id(normalized_craft_id)
 	_aircraft_feedback_text = "%s loading started for %s." % [_build_cargo_display_name(craft_def, cargo_id), _build_craft_display_name(normalized_craft_id)]
 	aircraft_cargo_load_requested.emit(normalized_craft_id, cargo_id)
 
@@ -2192,7 +2186,7 @@ func _on_shipcard_remove_requested(craft_id: String) -> void:
 	var normalized_craft_id: String = craft_id.strip_edges()
 	if normalized_craft_id.is_empty() or not _can_remove_aircraft(normalized_craft_id):
 		return
-	_selected_aircraft_id = normalized_craft_id
+	_set_selected_aircraft_id(normalized_craft_id)
 	_aircraft_feedback_text = ""
 	aircraft_remove_requested.emit(normalized_craft_id)
 
@@ -2672,50 +2666,15 @@ func _write_member_loadout_to_fireteam_definition(fireteam_id: String, unit_id: 
 
 
 func _get_homebase_direct_staging_craft_gate() -> Dictionary:
-	var craft_def: Dictionary = _get_selected_aircraft_definition()
-	var craft_id: String = String(craft_def.get("craft_id", "")).strip_edges()
-	var block_reason: String = _get_homebase_direct_staging_craft_block_reason(craft_def, craft_id)
-	return {
-		"craft": craft_def,
-		"can_stage": block_reason.is_empty(),
-		"block_reason": block_reason,
-		"block_text": _build_homebase_direct_staging_block_text(block_reason, craft_def, craft_id),
-	}
+	return _aircraft_manager.build_homebase_direct_staging_craft_gate()
 
 
 func _get_homebase_direct_staging_craft_block_reason(craft_def: Dictionary, craft_id: String) -> String:
-	if craft_def.is_empty() or craft_id.is_empty():
-		return "no_homebase_craft"
-	if String(craft_def.get("craft_type", "dropship")).strip_edges() != "dropship":
-		return "not_dropship"
-	if bool(craft_def.get("air_asset_unavailable", false)):
-		return "air_asset_unavailable"
-	if _has_active_pilot_transfer_for_craft(craft_id) or _is_craft_in_transit(craft_id):
-		return "craft_in_transit"
-	if _has_active_cargo_load_for_craft(craft_id):
-		return "craft_busy"
-	if _get_aircraft_location(craft_id) != "homebase":
-		return "not_at_homebase"
-	return ""
+	return _aircraft_manager.get_homebase_direct_staging_craft_block_reason(craft_def, craft_id)
 
 
 func _build_homebase_direct_staging_block_text(block_reason: String, craft_def: Dictionary, craft_id: String) -> String:
-	match block_reason:
-		"":
-			return ""
-		"no_homebase_craft":
-			return "Add a dropship shipcard to the Homebase Flightdeck."
-		"not_dropship":
-			return "%s cannot board fireteams. Select a dropship." % String(craft_def.get("display_name", craft_id)).strip_edges()
-		"air_asset_unavailable":
-			return "%s is unavailable for recovery." % String(craft_def.get("display_name", craft_id)).strip_edges()
-		"craft_in_transit":
-			return "%s is already in transit." % String(craft_def.get("display_name", craft_id)).strip_edges()
-		"craft_busy":
-			return "%s is busy on the Flightdeck." % String(craft_def.get("display_name", craft_id)).strip_edges()
-		"not_at_homebase":
-			return "%s is not parked at Homebase." % String(craft_def.get("display_name", craft_id)).strip_edges()
-	return "Selected craft cannot stage a direct mission payload."
+	return _aircraft_manager.build_homebase_direct_staging_block_text(block_reason, craft_def, craft_id)
 
 
 func _has_homebase_direct_launch_payload() -> bool:
@@ -3161,7 +3120,8 @@ func _build_send_to_fob_tooltip() -> String:
 
 
 func _build_transfer_status_text(staged_count: int, team_capacity: int) -> String:
-	var transfer_count: int = _team_transfer_entries.size() + _pilot_transfer_entries.size() + _cargo_load_entries.size()
+	var aircraft_snapshot: Dictionary = _aircraft_manager.get_contract_snapshot()
+	var transfer_count: int = _team_transfer_entries.size() + int(aircraft_snapshot.get("pilot_transfer_count", 0)) + int(aircraft_snapshot.get("cargo_load_count", 0))
 	if transfer_count > 0:
 		if staged_count > 0:
 			return "%d staged, %d inbound" % [staged_count, transfer_count]
@@ -3179,7 +3139,9 @@ func _build_transfer_status_text(staged_count: int, team_capacity: int) -> Strin
 func _build_mission_summary_text(staged_count: int, team_capacity: int, pilot_count: int, mission_slot_usage: int = -1) -> String:
 	if mission_slot_usage < 0:
 		mission_slot_usage = staged_count + pilot_count
-	if not _team_transfer_entries.is_empty() or not _pilot_transfer_entries.is_empty() or not _cargo_load_entries.is_empty():
+	var aircraft_snapshot: Dictionary = _aircraft_manager.get_contract_snapshot()
+	var has_aircraft_activity: bool = int(aircraft_snapshot.get("pilot_transfer_count", 0)) > 0 or int(aircraft_snapshot.get("cargo_load_count", 0)) > 0
+	if not _team_transfer_entries.is_empty() or has_aircraft_activity:
 		return "%s on %s is active. Mission occupancy is currently %d / %d including pilots, and confirmed transfers stay visible in Homebase until arrival." % [_selected_mission_name, _build_selected_mission_map_label(), mini(mission_slot_usage, _selected_mission_slot_count), _selected_mission_slot_count]
 
 	if staged_count <= 0:
@@ -3192,13 +3154,7 @@ func _build_mission_summary_text(staged_count: int, team_capacity: int, pilot_co
 
 
 func _count_assigned_pilots() -> int:
-	var unique_pilot_ids: Dictionary = {}
-	for pilot_id_variant in _assigned_pilot_by_craft.values():
-		var pilot_id: String = String(pilot_id_variant).strip_edges()
-		if pilot_id.is_empty():
-			continue
-		unique_pilot_ids[pilot_id] = true
-	return unique_pilot_ids.size()
+	return _aircraft_manager.count_assigned_pilots()
 
 
 func _build_selected_mission_map_label() -> String:
@@ -3291,55 +3247,17 @@ func _build_roster_card_secondary_text(unit_id: String, profile) -> String:
 
 
 func _build_default_aircraft_definitions() -> Array:
-	return [
-		{
-			"craft_id": "dropship_template",
-			"craft_type": "dropship",
-			"display_name": "Dropship",
-			"summary": "Single-pilot shuttle for the FOB corridor.",
-			"texture": DROPSHIP_TEXTURE,
-			"supports_cargo": false,
-			"cargo_options": [],
-		},
-		{
-			"craft_id": "craft_cargoB_template",
-			"craft_type": "craft_cargoB",
-			"display_name": "Frachter",
-			"summary": "Cargo freighter for Rover-sized payloads.",
-			"texture": CARGO_CRAFT_TEXTURE,
-			"supports_cargo": true,
-			"cargo_options": [
-				{"cargo_id": "", "display_name": "No Cargo"},
-				{"cargo_id": "rover", "display_name": "Rover"},
-			],
-		}
-	]
+	return _aircraft_manager.build_default_aircraft_definitions()
 
 
 func _build_aircraft_status_text(craft_def: Dictionary, craft_name: String, assigned_pilot_id: String, craft_busy: bool, cargo_loading: bool) -> String:
-	if not _aircraft_feedback_text.is_empty():
-		return _aircraft_feedback_text
-	var craft_id: String = String(craft_def.get("craft_id", "")).strip_edges()
-	if bool(craft_def.get("air_asset_unavailable", false)):
-		var meta_state: String = String(craft_def.get("air_asset_meta_status", "")).strip_edges()
-		var label: String = "replacement pending" if meta_state == "destroyed_replacement_pending" else "repairing"
-		return "%s %s. ETA %ds. Pilot state: %s." % [craft_name, label, int(craft_def.get("air_asset_recovery_eta_seconds", 0)), String(craft_def.get("pilot_recovery_state", "pilot_safe_homebase"))]
-	if _is_craft_in_transit(craft_id):
-		return "%s is currently in transit between Homebase and FOB." % craft_name
-	if cargo_loading:
-		return "%s is currently loading %s at Homebase." % [craft_name, _build_cargo_display_name(craft_def, _get_selected_cargo_id(craft_id))]
-	if craft_busy:
-		return "%s is currently inbound to FOB." % craft_name
-	var loaded_cargo_id: String = _get_loaded_cargo_id(craft_id)
-	if not loaded_cargo_id.is_empty():
-		return "%s ready with %s onboard." % [craft_name, _build_cargo_display_name(craft_def, loaded_cargo_id)]
-	if not assigned_pilot_id.is_empty():
-		return "%s ready. Pilot %s can launch the ship immediately." % [craft_name, _build_display_name(assigned_pilot_id)]
-	if _craft_supports_cargo(craft_def):
-		var selected_cargo_id: String = _get_selected_cargo_id(craft_id)
-		if not selected_cargo_id.is_empty():
-			return "%s idle at Homebase. Selected cargo: %s." % [craft_name, _build_cargo_display_name(craft_def, selected_cargo_id)]
-	return "%s idle at Homebase. Assign a pilot to start a solo transfer." % craft_name
+	return _aircraft_manager.build_aircraft_status_text(
+		craft_def,
+		craft_name,
+		assigned_pilot_id,
+		_build_display_name(assigned_pilot_id) if not assigned_pilot_id.is_empty() else "",
+		_aircraft_feedback_text
+	)
 
 
 func _build_team_transfer_title(entry: Dictionary) -> String:
@@ -3439,7 +3357,7 @@ func _build_shipcard(craft_def: Dictionary) -> Control:
 	var cargo_loading: bool = _has_active_cargo_load_for_craft(craft_id)
 	var air_asset_unavailable: bool = bool(craft_def.get("air_asset_unavailable", false))
 	var cargo_capable: bool = _craft_supports_cargo(craft_def)
-	var is_selected: bool = craft_id == _selected_aircraft_id
+	var is_selected: bool = craft_id == _get_selected_aircraft_id()
 
 	var loaded_cargo_id: String = _get_loaded_cargo_id(craft_id)
 	var selected_cargo_id: String = loaded_cargo_id if not loaded_cargo_id.is_empty() else _get_selected_cargo_id(craft_id)
@@ -3778,21 +3696,19 @@ func _build_transfer_eta_text(entry: Dictionary) -> String:
 
 
 func _get_visible_pilot_transfer_entries(craft_id: String) -> Array:
-	var entries: Array = []
-	for entry_variant in _pilot_transfer_entries:
-		var entry: Dictionary = Dictionary(entry_variant)
-		if String(entry.get("craft_id", "")).strip_edges() != craft_id:
-			continue
-		entries.append(entry)
-	return entries
+	return _aircraft_manager.get_visible_pilot_transfer_entries(craft_id)
 
 
 func _get_selected_aircraft_definition() -> Dictionary:
-	for entry_variant in _get_visible_homebase_aircraft_definitions():
-		var entry: Dictionary = Dictionary(entry_variant)
-		if String(entry.get("craft_id", "")).strip_edges() == _selected_aircraft_id:
-			return entry
-	return {}
+	return _aircraft_manager.get_selected_aircraft_definition()
+
+
+func _get_selected_aircraft_id() -> String:
+	return _aircraft_manager.get_selected_aircraft_id()
+
+
+func _set_selected_aircraft_id(craft_id: String) -> void:
+	_aircraft_manager.set_selected_aircraft_id(craft_id)
 
 
 func _get_selected_aircraft_base_type() -> String:
@@ -3805,48 +3721,19 @@ func _get_selected_aircraft_base_type() -> String:
 
 
 func _get_aircraft_definition_by_id(craft_id: String) -> Dictionary:
-	for entry_variant in _aircraft_definitions:
-		var entry: Dictionary = Dictionary(entry_variant)
-		if String(entry.get("craft_id", "")).strip_edges() == craft_id:
-			return entry
-	return {}
+	return _aircraft_manager.get_aircraft_definition_by_id(craft_id)
 
 
 func _ensure_selected_aircraft_id() -> void:
-	var visible_aircraft_definitions: Array = _get_visible_homebase_aircraft_definitions()
-	if not _selected_aircraft_id.is_empty():
-		for entry_variant in visible_aircraft_definitions:
-			var entry: Dictionary = Dictionary(entry_variant)
-			if String(entry.get("craft_id", "")).strip_edges() == _selected_aircraft_id:
-				return
-	if visible_aircraft_definitions.is_empty():
-		_selected_aircraft_id = ""
-		return
-	_selected_aircraft_id = String(Dictionary(visible_aircraft_definitions[0]).get("craft_id", "")).strip_edges()
+	_aircraft_manager.ensure_selected_aircraft_id()
 
 
 func _can_remove_selected_aircraft() -> bool:
-	return _can_remove_aircraft(_selected_aircraft_id)
+	return _aircraft_manager.can_remove_selected_aircraft()
 
 
 func _can_remove_aircraft(craft_id: String) -> bool:
-	var normalized_craft_id: String = craft_id.strip_edges()
-	if normalized_craft_id.is_empty():
-		return false
-	var craft_def: Dictionary = _get_aircraft_definition_by_id(normalized_craft_id)
-	if craft_def.is_empty() or _get_aircraft_location(normalized_craft_id) != "homebase":
-		return false
-	if bool(craft_def.get("air_asset_unavailable", false)):
-		return false
-	if not _get_assigned_pilot_id(craft_id).is_empty():
-		return false
-	if _has_active_pilot_transfer_for_craft(craft_id):
-		return false
-	if _has_active_cargo_load_for_craft(craft_id):
-		return false
-	if not _get_loaded_cargo_id(craft_id).is_empty():
-		return false
-	return true
+	return _aircraft_manager.can_remove_aircraft(craft_id)
 
 
 func _populate_aircraft_selector(selector: OptionButton) -> void:
@@ -3872,24 +3759,19 @@ func _populate_aircraft_selector(selector: OptionButton) -> void:
 
 
 func _get_assigned_pilot_id(craft_id: String) -> String:
-	return String(_assigned_pilot_by_craft.get(craft_id, "")).strip_edges()
+	return _aircraft_manager.get_assigned_pilot_id(craft_id)
 
 
 func _get_selected_cargo_id(craft_id: String) -> String:
-	return String(_selected_cargo_by_craft.get(craft_id, "")).strip_edges()
+	return _aircraft_manager.get_selected_cargo_id(craft_id)
 
 
 func _get_loaded_cargo_id(craft_id: String) -> String:
-	return String(_loaded_cargo_by_craft.get(craft_id, "")).strip_edges()
+	return _aircraft_manager.get_loaded_cargo_id(craft_id)
 
 
 func _build_craft_display_name(craft_id: String) -> String:
-	for entry_variant in _aircraft_definitions:
-		var entry: Dictionary = Dictionary(entry_variant)
-		if String(entry.get("craft_id", "")).strip_edges() != craft_id:
-			continue
-		return String(entry.get("display_name", craft_id)).strip_edges()
-	return craft_id
+	return _aircraft_manager.build_craft_display_name(craft_id)
 
 
 func _get_aircraft_texture(craft_def: Dictionary) -> Texture2D:
@@ -3904,125 +3786,63 @@ func _get_aircraft_texture(craft_def: Dictionary) -> Texture2D:
 
 
 func _craft_supports_cargo(craft_def: Dictionary) -> bool:
-	return bool(craft_def.get("supports_cargo", false))
+	return _aircraft_manager.craft_supports_cargo(craft_def)
 
 
 func _get_cargo_options_for_craft(craft_def: Dictionary) -> Array:
-	return Array(craft_def.get("cargo_options", []))
+	return _aircraft_manager.get_cargo_options_for_craft(craft_def)
 
 
 func _build_cargo_display_name(craft_def: Dictionary, cargo_id: String) -> String:
-	var normalized_cargo_id: String = cargo_id.strip_edges()
-	if normalized_cargo_id.is_empty():
-		return ""
-	for cargo_option_variant in _get_cargo_options_for_craft(craft_def):
-		var cargo_option: Dictionary = Dictionary(cargo_option_variant)
-		if String(cargo_option.get("cargo_id", "")).strip_edges() != normalized_cargo_id:
-			continue
-		return String(cargo_option.get("display_name", normalized_cargo_id)).strip_edges()
-	return normalized_cargo_id.capitalize()
+	return _aircraft_manager.build_cargo_display_name(craft_def, cargo_id)
 
 
 func _is_unit_assigned_to_aircraft(unit_id: String) -> bool:
-	for pilot_id_variant in _assigned_pilot_by_craft.values():
-		if String(pilot_id_variant).strip_edges() == unit_id:
-			return true
-	return false
+	return _aircraft_manager.is_unit_assigned_to_aircraft(unit_id)
 
 
 func _find_assigned_craft_for_unit(unit_id: String) -> String:
-	for craft_id_variant in _assigned_pilot_by_craft.keys():
-		var craft_id: String = String(craft_id_variant).strip_edges()
-		if String(_assigned_pilot_by_craft.get(craft_id, "")).strip_edges() == unit_id:
-			return craft_id
-	return ""
+	return _aircraft_manager.find_assigned_craft_for_unit(unit_id)
 
 
 func _get_visible_homebase_aircraft_definitions() -> Array:
-	var visible_definitions: Array = []
-	for entry_variant in _aircraft_definitions:
-		var entry: Dictionary = Dictionary(entry_variant)
-		var craft_id: String = String(entry.get("craft_id", "")).strip_edges()
-		if craft_id.is_empty() or not _is_craft_visible_in_homebase(craft_id):
-			continue
-		visible_definitions.append(entry)
-	return visible_definitions
+	return _aircraft_manager.get_visible_homebase_aircraft_definitions()
 
 
 func _get_aircraft_location(craft_id: String) -> String:
-	return String(_aircraft_location_by_craft.get(craft_id, "homebase")).strip_edges().to_lower()
+	return _aircraft_manager.get_aircraft_location(craft_id)
 
 
 func _is_craft_visible_in_homebase(craft_id: String) -> bool:
-	var craft_location: String = _get_aircraft_location(craft_id)
-	if craft_location == "homebase":
-		return true
-	if craft_location == "transit" and _has_active_pilot_transfer_for_craft(craft_id):
-		return true
-	return false
+	return _aircraft_manager.is_craft_visible_in_homebase(craft_id)
 
 
 func _is_craft_in_transit(craft_id: String) -> bool:
-	return _get_aircraft_location(craft_id) == "transit" or _has_active_pilot_transfer_for_craft(craft_id)
+	return _aircraft_manager.is_craft_in_transit(craft_id)
 
 
 func _has_active_pilot_transfer_for_craft(craft_id: String) -> bool:
-	for entry_variant in _pilot_transfer_entries:
-		var entry: Dictionary = Dictionary(entry_variant)
-		if String(entry.get("craft_id", "")).strip_edges() == craft_id:
-			return true
-	return false
+	return _aircraft_manager.has_active_pilot_transfer_for_craft(craft_id)
 
 
 func _has_active_cargo_load_for_craft(craft_id: String) -> bool:
-	for entry_variant in _cargo_load_entries:
-		var entry: Dictionary = Dictionary(entry_variant)
-		if String(entry.get("craft_id", "")).strip_edges() == craft_id:
-			return true
-	return false
+	return _aircraft_manager.has_active_cargo_load_for_craft(craft_id)
 
 
 func _get_visible_cargo_load_entries(craft_id: String) -> Array:
-	var entries: Array = []
-	for entry_variant in _cargo_load_entries:
-		var entry: Dictionary = Dictionary(entry_variant)
-		if String(entry.get("craft_id", "")).strip_edges() != craft_id:
-			continue
-		entries.append(entry)
-	return entries
+	return _aircraft_manager.get_visible_cargo_load_entries(craft_id)
 
 
 func _find_cargo_load_entry_for_craft(craft_id: String) -> Dictionary:
-	for entry_variant in _cargo_load_entries:
-		var entry: Dictionary = Dictionary(entry_variant)
-		if String(entry.get("craft_id", "")).strip_edges() == craft_id:
-			return entry
-	return {}
+	return _aircraft_manager.find_cargo_load_entry_for_craft(craft_id)
 
 
 func _can_load_selected_cargo(craft_def: Dictionary, craft_id: String) -> bool:
-	if craft_def.is_empty() or not _craft_supports_cargo(craft_def):
-		return false
-	if bool(craft_def.get("air_asset_unavailable", false)):
-		return false
-	if _has_active_cargo_load_for_craft(craft_id) or _has_active_pilot_transfer_for_craft(craft_id):
-		return false
-	if not _get_loaded_cargo_id(craft_id).is_empty():
-		return false
-	return not _get_selected_cargo_id(craft_id).is_empty()
+	return _aircraft_manager.can_load_selected_cargo(craft_def, craft_id)
 
 
 func _can_send_craft(craft_def: Dictionary, craft_id: String) -> bool:
-	if bool(craft_def.get("air_asset_unavailable", false)):
-		return false
-	if _has_active_pilot_transfer_for_craft(craft_id) or _has_active_cargo_load_for_craft(craft_id):
-		return false
-	if _craft_supports_cargo(craft_def):
-		var selected_cargo_id: String = _get_selected_cargo_id(craft_id)
-		var loaded_cargo_id: String = _get_loaded_cargo_id(craft_id)
-		if not selected_cargo_id.is_empty() and loaded_cargo_id.is_empty():
-			return false
-	return true
+	return _aircraft_manager.can_send_craft(craft_def, craft_id)
 
 
 func _find_transfer_entry_for_unit(unit_id: String) -> Dictionary:
@@ -4032,19 +3852,11 @@ func _find_transfer_entry_for_unit(unit_id: String) -> Dictionary:
 		for entry_unit_id_variant in unit_ids:
 			if String(entry_unit_id_variant).strip_edges() == unit_id:
 				return entry
-	for entry_variant in _pilot_transfer_entries:
-		var entry: Dictionary = Dictionary(entry_variant)
-		if String(entry.get("pilot_unit_id", "")).strip_edges() == unit_id:
-			return entry
-	return {}
+	return _aircraft_manager.find_pilot_transfer_entry_for_unit(unit_id)
 
 
 func _find_transfer_entry_for_craft(craft_id: String) -> Dictionary:
-	for entry_variant in _pilot_transfer_entries:
-		var entry: Dictionary = Dictionary(entry_variant)
-		if String(entry.get("craft_id", "")).strip_edges() == craft_id:
-			return entry
-	return {}
+	return _aircraft_manager.find_transfer_entry_for_craft(craft_id)
 
 
 func _build_skill_block_text(profile) -> String:
