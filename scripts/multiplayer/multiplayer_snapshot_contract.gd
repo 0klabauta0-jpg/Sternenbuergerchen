@@ -213,7 +213,42 @@ func _normalize_objective(value: Variant) -> Dictionary:
 		objective["position"] = position
 	if source.has("capture_radius"):
 		objective["capture_radius"] = maxf(float(source.get("capture_radius", 0.0)), 0.0)
+	if source.has("timer_state") or source.has("countdown_seconds"):
+		var timer_source: String = String(source.get("timer_source", source.get("source", ""))).strip_edges()
+		var timer_state: String = _normalize_timer_state(String(source.get("timer_state", "none")))
+		if not timer_source.is_empty() and timer_state != "none":
+			var countdown_seconds: float = maxf(float(source.get("countdown_seconds", 0.0)), 0.0)
+			objective["countdown_seconds"] = countdown_seconds
+			objective["countdown_total_seconds"] = maxf(float(source.get("countdown_total_seconds", countdown_seconds)), countdown_seconds)
+			objective["timer_state"] = timer_state
+			objective["timer_source"] = timer_source
+			objective["source"] = timer_source
+			objective["timer_label"] = String(source.get("timer_label", "")).strip_edges()
+			objective["urgency"] = _normalize_timer_urgency(String(source.get("urgency", "")), countdown_seconds, float(objective.get("countdown_total_seconds", countdown_seconds)), timer_state)
+			objective["visible"] = true
 	return objective
+
+
+func _normalize_timer_state(value: String) -> String:
+	match value.strip_edges().to_lower():
+		"active", "paused", "expired":
+			return value.strip_edges().to_lower()
+		_:
+			return "none"
+
+
+func _normalize_timer_urgency(value: String, countdown_seconds: float, total_seconds: float, timer_state: String) -> String:
+	match value.strip_edges().to_lower():
+		"normal", "warning", "critical", "expired":
+			return value.strip_edges().to_lower()
+		_:
+			if timer_state == "expired" or countdown_seconds <= 0.0:
+				return "expired"
+			if countdown_seconds <= 10.0:
+				return "critical"
+			if countdown_seconds <= 30.0 or (total_seconds > 0.0 and countdown_seconds / total_seconds <= 0.25):
+				return "warning"
+			return "normal"
 
 
 func _normalize_dropship(value: Variant) -> Dictionary:

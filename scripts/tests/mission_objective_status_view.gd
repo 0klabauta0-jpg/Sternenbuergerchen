@@ -60,6 +60,7 @@ func _refresh() -> void:
 	if owner_text.is_empty():
 		owner_text = "neutral"
 
+	var countdown_snapshot: Dictionary = _get_countdown_snapshot(objective_status)
 	var progress_percent: int = int(round(clampf(float(objective_status.capture_progress), 0.0, 1.0) * 100.0))
 	var capture_text: String = "CAP %d%%" % progress_percent
 	if bool(objective_status.call("is_contested")):
@@ -67,8 +68,27 @@ func _refresh() -> void:
 	elif not String(objective_status.capturing_team_id).is_empty() and owner_text != String(objective_status.capturing_team_id):
 		capture_text = "%s -> %s" % [capture_text, String(objective_status.capturing_team_id)]
 
-	_status_label.text = "OBJ %s\n%s" % [owner_text, capture_text]
-	_status_label.modulate = _build_status_color(objective_status)
+	var header_text: String = "OBJ %s" % owner_text
+	if not countdown_snapshot.is_empty():
+		header_text = "%s | %s" % [header_text, _format_countdown_text(countdown_snapshot)]
+	_status_label.text = "%s\n%s" % [header_text, capture_text]
+	_status_label.modulate = _build_status_color(objective_status, countdown_snapshot)
+
+
+func get_objective_status_view_snapshot() -> Dictionary:
+	var label := get_node_or_null(LABEL_NAME) as Label
+	var objective_status = _get_objective_status()
+	var countdown_snapshot: Dictionary = _get_countdown_snapshot(objective_status)
+	return {
+		"visible": label != null and label.visible,
+		"text": label.text if label != null else "",
+		"line_count": label.text.split("\n").size() if label != null else 0,
+		"countdown_visible": not countdown_snapshot.is_empty(),
+		"countdown": countdown_snapshot,
+		"urgency": String(countdown_snapshot.get("urgency", "")),
+		"fixed_layout": true,
+		"label_font_size": int(label.get_theme_font_size("font_size")) if label != null else 0,
+	}
 
 
 func _ensure_label() -> void:
@@ -103,7 +123,31 @@ func _get_objective_status():
 	return simulation_root.call("get_objective_status")
 
 
-func _build_status_color(objective_status) -> Color:
+func _get_countdown_snapshot(objective_status) -> Dictionary:
+	if objective_status == null or not objective_status.has_method("get_countdown_snapshot"):
+		return {}
+	return Dictionary(objective_status.call("get_countdown_snapshot")).duplicate(true)
+
+
+func _format_countdown_text(countdown_snapshot: Dictionary) -> String:
+	var seconds: int = maxi(int(ceil(float(countdown_snapshot.get("countdown_seconds", 0.0)))), 0)
+	var minutes: int = int(seconds / 60)
+	var remainder: int = seconds % 60
+	var label: String = String(countdown_snapshot.get("timer_label", "")).strip_edges().to_upper()
+	if label.is_empty():
+		label = "TIME"
+	return "%s %02d:%02d" % [label, minutes, remainder]
+
+
+func _build_status_color(objective_status, countdown_snapshot: Dictionary = {}) -> Color:
+	if not countdown_snapshot.is_empty():
+		match String(countdown_snapshot.get("urgency", "")).strip_edges().to_lower():
+			"expired", "critical":
+				return Color(1.0, 0.45, 0.38, 1.0)
+			"warning":
+				return Color(1.0, 0.82, 0.38, 1.0)
+			_:
+				return Color(0.68, 1.0, 0.72, 1.0)
 	if bool(objective_status.call("is_contested")):
 		return Color(1.0, 0.78, 0.35, 1.0)
 

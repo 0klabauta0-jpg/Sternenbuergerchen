@@ -238,10 +238,19 @@
 - Lokale Pruefung: `task_373_cover_effectiveness_readout.gd`, `task_286_ui_feedback_truth_regression_review.gd` und `git diff --check` laufen gruen.
 - Offene Folgearbeit: Eine sichtbare HUD-Komponente kann auf diesem Snapshot aufbauen; dieser Task etabliert zuerst den Wahrheitspfad und die FoW-Sanitization.
 
-### TASK_374-TASK_380 - Mission Visualization Review Followups
+### TASK_374 - Objective Countdown Indicator
+- Status: implementiert
+- Stand: `ObjectiveStatus` besitzt jetzt einen optionalen Countdown-Vertrag mit Seconds, Gesamtzeit, State, Source, Label, Urgency und Sichtbarkeit.
+- Stand: `MissionCombatLoopDriver` schreibt vorhandene `mission_time_limit_seconds` und Objective-Defense-Hold-Timer in diesen Vertrag. Szenarien ohne Timer bleiben ohne Countdown.
+- Stand: `SimulationRoot` und `MultiplayerSnapshotContract` replizieren die Timer-Felder im Objective-Snapshot; Clients wenden sie wieder auf `ObjectiveStatus` an.
+- Stand: `MissionObjectiveStatusView` zeigt den Timer nur bei gueltiger Quelle kompakt in der bestehenden zweizeiligen HUD-Anzeige und liefert einen testbaren View-Snapshot.
+- Lokale Pruefung: `task_374_objective_countdown_indicator.gd`, `task_279_lz_security_air_asset_tactical_playability_smoke.gd` und `git diff --check` laufen gruen.
+- Offene Folgearbeit: Weitere Szenario-Timer wie Exfil-Fenster koennen denselben Vertrag nutzen, muessen aber als eigene Objective-/Scenario-Quelle modelliert werden.
+
+### TASK_375-TASK_380 - Mission Visualization Review Followups
 - Status: geplant
-- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Sinnvolle offene Follow-ups sind als getrennte Tasks 374 bis 380 angelegt.
-- Stand: Die Review-Snippets werden nicht ungeprueft uebernommen. Countdown, Waypoint-Preview, Command-Validation, Contact-Heatmap und MapEditor-Debuglayer bleiben als eigene kleine Slices offen.
+- Stand: Die beiden HTML-Reviews `visualization_improvements.html` und `visualization_details.html` wurden gegen den aktuellen Code geprueft. Sinnvolle offene Follow-ups sind als getrennte Tasks 375 bis 380 angelegt.
+- Stand: Die Review-Snippets werden nicht ungeprueft uebernommen. Waypoint-Preview, Command-Validation, Contact-Heatmap und MapEditor-Debuglayer bleiben als eigene kleine Slices offen.
 - Stand: Architekturgrenze bleibt: UI liest nur Snapshots. `SimulationRoot`, bestehende Resolver, `TacticalCommunicationEvent`, `FireteamBehaviorResolver`, `FireteamOrderVisualizer`, FoW und Terrain-Daten bleiben die Wahrheit.
 - Offene Punkte: Implementierung der einzelnen Tasks und manuelle Sichtpruefung nach weiteren Visual-Slices.
 - Risiken: Visual-Dichte kann Mission-HUD und FoW schnell ueberladen. Die Tasks markieren Debug-/optional-Layer getrennt von permanenten Spieleranzeigen.

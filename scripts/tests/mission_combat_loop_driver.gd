@@ -162,6 +162,9 @@ func _ready() -> void:
 	else:
 		_mission_started_at_msec = Time.get_ticks_msec()
 
+	if _runs_local_authority:
+		_sync_objective_countdown_state()
+
 	if _runs_local_authority and not simulation_root.tick_processed.is_connected(_on_tick_processed):
 		simulation_root.tick_processed.connect(_on_tick_processed)
 
@@ -185,6 +188,8 @@ func get_mission_result() -> Dictionary:
 
 
 func get_playability_snapshot() -> Dictionary:
+	if _runs_local_authority:
+		_sync_objective_countdown_state()
 	var base_snapshot: Dictionary = {
 		"combat_state": "resolved" if _combat_finished else "active",
 		"win_condition_type": win_condition,
@@ -198,6 +203,15 @@ func get_playability_snapshot() -> Dictionary:
 		"last_event_text": _last_event_text,
 	}
 	return Dictionary(MISSION_COMBAT_AUTHORITY_CONTRACT_SCRIPT.call("build_playability_snapshot", base_snapshot, _get_objective_status(), _mission_result))
+
+
+func get_objective_countdown_snapshot() -> Dictionary:
+	if _runs_local_authority:
+		_sync_objective_countdown_state()
+	var objective_status = _get_objective_status()
+	if objective_status == null or not objective_status.has_method("get_countdown_snapshot"):
+		return {}
+	return Dictionary(objective_status.call("get_countdown_snapshot")).duplicate(true)
 
 
 func get_authority_contract_snapshot() -> Dictionary:
@@ -605,6 +619,7 @@ func _on_tick_processed(tick: int) -> void:
 	var scope_started_usec: int = 0
 	if _combat_finished:
 		_update_status_label("resolved")
+		_sync_objective_countdown_state()
 		if profile_enabled:
 			scope_started_usec = Time.get_ticks_usec()
 		_publish_multiplayer_snapshot_context(simulation_root)
@@ -680,6 +695,7 @@ func _on_tick_processed(tick: int) -> void:
 		profile_scopes["combat_fire_decision_usec"] = 0
 	if profile_enabled:
 		scope_started_usec = Time.get_ticks_usec()
+	_sync_objective_countdown_state()
 	_update_combat_resolution()
 	if profile_enabled:
 		profile_scopes["combat_resolution_usec"] = Time.get_ticks_usec() - scope_started_usec
@@ -2364,6 +2380,57 @@ func get_remaining_time_limit_seconds() -> float:
 	if mission_time_limit_seconds <= 0.0 or _mission_started_at_msec == 0:
 		return -1.0
 	return maxf(mission_time_limit_seconds - _get_duration_seconds(), 0.0)
+
+
+func _sync_objective_countdown_state() -> void:
+	var objective_status = _get_objective_status()
+	if objective_status == null or not objective_status.has_method("set_countdown") or not objective_status.has_method("clear_countdown"):
+		return
+	var countdown: Dictionary = _build_objective_countdown_source()
+	if countdown.is_empty():
+		objective_status.call("clear_countdown")
+		return
+	objective_status.call(
+		"set_countdown",
+		float(countdown.get("countdown_seconds", 0.0)),
+		String(countdown.get("timer_state", "none")),
+		String(countdown.get("timer_source", "")),
+		float(countdown.get("countdown_total_seconds", countdown.get("countdown_seconds", 0.0))),
+		String(countdown.get("timer_label", ""))
+	)
+
+
+func _build_objective_countdown_source() -> Dictionary:
+	if win_condition == WIN_CONDITION_OBJECTIVE_DEFENSE and objective_defense_hold_seconds > 0.0:
+		_update_objective_hold_tracking()
+		var hold_elapsed_seconds: float = _get_objective_defense_elapsed_seconds()
+		var hold_remaining_seconds: float = maxf(objective_defense_hold_seconds - hold_elapsed_seconds, 0.0)
+		var is_holding_objective: bool = _is_objective_captured_by_friendly()
+		return {
+			"countdown_seconds": hold_remaining_seconds,
+			"countdown_total_seconds": objective_defense_hold_seconds,
+			"timer_state": "expired" if is_holding_objective and hold_remaining_seconds <= 0.0 else ("active" if is_holding_objective else "paused"),
+			"timer_source": "objective_defense_hold",
+			"timer_label": "HOLD",
+		}
+	if mission_time_limit_seconds > 0.0:
+		var time_remaining_seconds: float = get_remaining_time_limit_seconds()
+		if time_remaining_seconds < 0.0:
+			return {
+				"countdown_seconds": mission_time_limit_seconds,
+				"countdown_total_seconds": mission_time_limit_seconds,
+				"timer_state": "paused",
+				"timer_source": "mission_time_limit",
+				"timer_label": "TIME",
+			}
+		return {
+			"countdown_seconds": time_remaining_seconds,
+			"countdown_total_seconds": mission_time_limit_seconds,
+			"timer_state": "expired" if time_remaining_seconds <= 0.0 else "active",
+			"timer_source": "mission_time_limit",
+			"timer_label": "TIME",
+		}
+	return {}
 
 
 func _get_objective_status():

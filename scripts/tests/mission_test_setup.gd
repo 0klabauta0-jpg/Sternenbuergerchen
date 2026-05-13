@@ -182,6 +182,7 @@ func _finish_ready_after_scenario_loaded(runtime_leader: Node, unit_registry: No
 	if not defer_friendly_runtime_activation:
 		ftl_registry.call("register_ftl", team_id, runtime_leader)
 	_setup_objective_status(simulation_root, objective_marker)
+	_apply_scenario_timer_to_combat_driver()
 
 	_setup_respawn_manager(spawn_alpha_marker, spawn_bravo_marker)
 	_setup_enemy_waves(enemy_units)
@@ -453,6 +454,18 @@ func _setup_objective_status(simulation_root: Node, objective_marker: Marker2D) 
 	objective_status.position = _get_scenario_objective_position(objective_marker.global_position)
 	objective_status.capture_radius = maxf(float(objective_dict.get("capture_radius", 80.0)), 1.0)
 	simulation_root.call("set_objective_status", objective_status)
+
+
+func _apply_scenario_timer_to_combat_driver() -> void:
+	if _mission_scenario == null:
+		return
+	var combat_driver = get_node_or_null("../CombatLoopDriver")
+	if combat_driver == null:
+		return
+	var scenario_time_limit: float = maxf(float(_mission_scenario.get("time_limit_seconds")), 0.0)
+	if scenario_time_limit <= 0.0:
+		return
+	combat_driver.set("mission_time_limit_seconds", scenario_time_limit)
 
 
 func _setup_enemy_waves(enemy_units: Array) -> void:

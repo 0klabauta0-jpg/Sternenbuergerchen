@@ -854,16 +854,9 @@ func _build_air_asset_status_snapshots(context_statuses: Variant = []) -> Array:
 func _build_objective_snapshot() -> Dictionary:
 	if not _is_valid_objective_status(_objective_status):
 		return {}
-
-	return {
-		"objective_id": _objective_status.objective_id,
-		"position": _objective_status.position,
-		"capture_radius": _objective_status.capture_radius,
-		"owning_team_id": _objective_status.owning_team_id,
-		"capture_progress": _objective_status.capture_progress,
-		"capturing_team_id": _objective_status.capturing_team_id,
-		"contested": _objective_status.is_contested(),
-	}
+	if _objective_status.has_method("to_dict"):
+		return Dictionary(_objective_status.call("to_dict")).duplicate(true)
+	return {}
 
 
 func _build_all_vital_state_snapshots() -> Array:
@@ -1143,6 +1136,19 @@ func _apply_remote_objective_state(objective_dict: Dictionary) -> void:
 	_objective_status.capture_progress = clampf(_extract_float(objective_dict.get("capture_progress", _objective_status.capture_progress), _objective_status.capture_progress), 0.0, 1.0)
 	_objective_status.capturing_team_id = String(objective_dict.get("capturing_team_id", _objective_status.capturing_team_id))
 	_objective_status.set_contested(bool(objective_dict.get("contested", _objective_status.is_contested())))
+	if objective_dict.has("timer_state") or objective_dict.has("countdown_seconds"):
+		var timer_source: String = String(objective_dict.get("timer_source", objective_dict.get("source", ""))).strip_edges()
+		var timer_state: String = String(objective_dict.get("timer_state", "none")).strip_edges().to_lower()
+		if timer_source.is_empty() or timer_state == "none":
+			_objective_status.clear_countdown()
+		else:
+			_objective_status.set_countdown(
+				_extract_float(objective_dict.get("countdown_seconds", 0.0), 0.0),
+				timer_state,
+				timer_source,
+				_extract_float(objective_dict.get("countdown_total_seconds", objective_dict.get("countdown_seconds", 0.0)), 0.0),
+				String(objective_dict.get("timer_label", ""))
+			)
 
 
 func _apply_remote_snapshot_fallback(unit, unit_snapshot: Dictionary) -> void:
