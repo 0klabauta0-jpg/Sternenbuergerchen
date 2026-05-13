@@ -432,6 +432,15 @@
 - Risiken: Die finale Label-Groesse und Pfeil-/Marker-Lesbarkeit bleiben ein manueller FullHD-Sichtcheck. Der Runtime-Selection-Refresh ist bewusst auf Friendly-Slots und Direct-Payloads begrenzt.
 - Lokale Pruefung: `task_396_mission_dropship_lz_drop_hotfix.gd`, `task_395_manual_dropship_parallel_flow.gd`, `task_394_per_craft_shipcard_commands.gd`, `task_393_direct_dropship_independence_lz_vector.gd`, `task_351_homebase_direct_payload_scope_contract.gd` und `git diff --check` laufen gruen.
 
+### TASK_397 - Mission Dropship UX Hotfix
+- Status: implementiert im Arbeitsstand
+- Stand: Mission-Dropshipkarten rendern die `NW`/`NE`/`SW`/`SE`-Approach-Buttons wieder als kompaktes 2x2-Feld, damit die Kartenseite weniger sperrig wirkt.
+- Stand: Der Anflugvektor ist wieder klarer als gruener Streifen/Pfeil lesbar: breiter, deckender und mit kleinerem Pfeilkopf statt einem kaum sichtbaren Linienrest.
+- Stand: Ein zweites Dropship kann seinen Drop starten, waehrend das erste bereits im Deboarding ist; der Test sichert Alpha `unloading` plus Beta `inbound` als getrennte Live-Sequenzen ab.
+- Stand: Legacy-2D-Unit-CanvasItems werden in der Primary-2.5D-Ansicht nach Runtime-Selection-Refresh und Drop-Presence-Updates erneut ausgeblendet, damit alte Kenney-NPC-Sprites nicht mitzoomen.
+- Risiken: Die finale Proportion der rechten Dropshipkarten und des gruenen Streifens bleibt ein manueller FullHD-Sichtcheck.
+- Lokale Pruefung: `task_397_mission_dropship_ux_hotfix.gd`, `task_396_mission_dropship_lz_drop_hotfix.gd`, `task_395_manual_dropship_parallel_flow.gd`, `task_394_per_craft_shipcard_commands.gd` und `git diff --check` laufen gruen.
+
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
 - Stand: Dropship-Visuals bauen ihre Dirty-Signatur wieder fehlerfrei, geplante LZs bleiben auch bei offmap/hidden Craft sichtbar, und Multi-Dropship-Payloads werden aus dem rohen Mission-Card-State statt aus stale Selected-Card-State uebernommen.

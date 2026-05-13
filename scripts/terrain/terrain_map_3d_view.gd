@@ -159,7 +159,8 @@ const TILE_SELECTION_BORDER_WIDTH_FACTOR: float = 0.078
 const TILE_SELECTION_FILL_COLOR: Color = Color(0.05, 0.58, 1.0, 0.46)
 const TILE_SELECTION_BORDER_COLOR: Color = Color(0.78, 0.98, 1.0, 1.0)
 const DROPSHIP_LZ_MARKER_FILL: float = 1.18
-const DROPSHIP_APPROACH_LINE_WIDTH_FACTOR: float = 0.24
+const DROPSHIP_APPROACH_LINE_WIDTH_FACTOR: float = 0.34
+const DROPSHIP_APPROACH_VECTOR_COLOR: Color = Color(0.42, 1.0, 0.52, 0.62)
 const FRIENDLY_AIM_LINE_COLOR: Color = Color(0.66, 1.0, 0.72, 0.82)
 const FRIENDLY_AIM_TIP_COLOR: Color = Color(0.78, 1.0, 0.84, 0.92)
 const FIRETEAM_ORIENTATION_LINE_COLOR: Color = Color(0.9, 0.98, 1.0, 0.88)
@@ -5132,7 +5133,7 @@ func _add_dropship_approach_line(entry: Dictionary, visual_id: String, ship_posi
 		_drop_root,
 		_world_to_air_layer_3d_position_for_payload(entry, line_origin),
 		_world_to_surface_3d_position(target_position, 0.52),
-		Color(0.56, 1.0, 0.68, 0.34),
+		DROPSHIP_APPROACH_VECTOR_COLOR,
 		"DropshipApproach_%s" % _sanitize_node_name(visual_id),
 		maxf(_get_3d_cell_size() * DROPSHIP_APPROACH_LINE_WIDTH_FACTOR, 0.08),
 		entry
@@ -5167,7 +5168,7 @@ func _update_dropship_approach_line(entry: Dictionary, visual_id: String, ship_p
 	line.mesh = _make_dropship_approach_vector_mesh(
 		_world_to_air_layer_3d_position_for_payload(entry, line_origin),
 		_world_to_surface_3d_position(target_position, 0.52),
-		Color(0.56, 1.0, 0.68, 0.34),
+		DROPSHIP_APPROACH_VECTOR_COLOR,
 		maxf(_get_3d_cell_size() * DROPSHIP_APPROACH_LINE_WIDTH_FACTOR, 0.08),
 		entry
 	)
@@ -7018,8 +7019,8 @@ func _make_wide_arrow_mesh(start_position: Vector3, end_position: Vector3, color
 		side = Vector3.RIGHT
 	side = side.normalized()
 	var shaft_half_width: float = maxf(line_width, 0.01) * 0.5
-	var head_half_width: float = shaft_half_width * 2.25
-	var head_length: float = clampf(maxf(line_width * 3.35, 0.16), shaft_half_width * 1.5, length * 0.48)
+	var head_half_width: float = shaft_half_width * 1.45
+	var head_length: float = clampf(maxf(line_width * 2.0, 0.14), shaft_half_width * 1.25, length * 0.32)
 	var head_base: Vector3 = end_position - direction * head_length
 	var shaft_side: Vector3 = side * shaft_half_width
 	var head_side: Vector3 = side * head_half_width

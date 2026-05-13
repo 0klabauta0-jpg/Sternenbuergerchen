@@ -245,6 +245,8 @@ func apply_runtime_selection_contract() -> void:
 		var unit_id: String = _get_selected_unit_id_for_friendly_slot(slot_index, fallback_unit_id)
 		_apply_unit_identity_preset(unit, unit_id, team_id)
 		_apply_fob_loadout_override(unit, unit_id, team_id)
+		if use_2_5d_primary_view:
+			_hide_legacy_unit_visual_children(unit)
 		if unit.has_method("set_fireteam_id"):
 			unit.call("set_fireteam_id", _get_fireteam_id_for_friendly_slot(slot_index, unit_id, team_id))
 		if unit.has_method("set_respawn_manager"):
@@ -1073,8 +1075,16 @@ func _hide_legacy_unit_visual_children(unit: Node) -> void:
 		unit.call("set_world_selection_ring_visible", false)
 	unit.set("show_world_event_labels", false)
 	for child in unit.get_children():
-		if child is Sprite2D or child is Polygon2D or child is Line2D or child is Label:
-			(child as CanvasItem).visible = false
+		_hide_legacy_unit_visual_descendant(child)
+
+
+func _hide_legacy_unit_visual_descendant(node: Node) -> void:
+	if node == null:
+		return
+	if node is CanvasItem:
+		(node as CanvasItem).visible = false
+	for child in node.get_children():
+		_hide_legacy_unit_visual_descendant(child)
 
 
 

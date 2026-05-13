@@ -145,6 +145,10 @@ const MISSION_DROPSHIP_PILOT_CARD_SIZE: Vector2 = Vector2(136.0, 50.0)
 const MISSION_DROPSHIP_CONTENT_HEIGHT: float = 50.0
 const MISSION_DROPSHIP_INFO_FONT_SIZE: int = 8
 const MISSION_DROPSHIP_PROGRESS_HEIGHT: float = 6.0
+const MISSION_DROPSHIP_COMMAND_BUTTON_SIZE: Vector2 = Vector2(27.0, 30.0)
+const MISSION_DROPSHIP_APPROACH_BUTTON_SIZE: Vector2 = Vector2(22.0, 14.0)
+const MISSION_DROPSHIP_COMMAND_BUTTON_FONT_SIZE: int = 7
+const MISSION_DROPSHIP_APPROACH_BUTTON_FONT_SIZE: int = 6
 const META_TRANSFER_ROUTE_COLOR: Color = Color(0.92, 0.74, 0.22, 0.72)
 const META_TRANSFER_ROUTE_TEAM_COLOR: Color = Color(0.45, 0.92, 0.64, 0.96)
 const META_TRANSFER_ROUTE_PILOT_COLOR: Color = Color(0.96, 0.84, 0.38, 0.98)
@@ -5536,8 +5540,16 @@ func _append_mission_dropship_card_command_row(host: VBoxContainer, card: Dictio
 	)
 	row.add_child(lz_button)
 	var active_approach_angle: String = _sanitize_approach_angle_name(String(card.get("approach_angle", _get_approach_angle_name())))
+	var approach_grid := GridContainer.new()
+	approach_grid.name = "MissionDropshipApproachGrid_%s" % _sanitize_node_name(craft_id)
+	approach_grid.columns = 2
+	approach_grid.add_theme_constant_override("h_separation", 1)
+	approach_grid.add_theme_constant_override("v_separation", 1)
+	approach_grid.set_meta("mission_dropship_card_approach_grid", true)
+	approach_grid.set_meta("mission_dropship_craft_id", craft_id)
+	row.add_child(approach_grid)
 	for approach_angle in APPROACH_ANGLES:
-		row.add_child(
+		approach_grid.add_child(
 			_build_mission_dropship_card_command_button(
 				String(approach_angle),
 				"Set %s approach for this dropship." % String(approach_angle),
@@ -5565,8 +5577,9 @@ func _build_mission_dropship_card_command_button(text: String, tooltip_text: Str
 	button.text = text
 	button.tooltip_text = tooltip_text
 	button.disabled = disabled
-	button.custom_minimum_size = Vector2(27.0, 18.0)
-	button.add_theme_font_size_override("font_size", 7)
+	var is_approach_button: bool = action_id.begins_with("approach_")
+	button.custom_minimum_size = MISSION_DROPSHIP_APPROACH_BUTTON_SIZE if is_approach_button else MISSION_DROPSHIP_COMMAND_BUTTON_SIZE
+	button.add_theme_font_size_override("font_size", MISSION_DROPSHIP_APPROACH_BUTTON_FONT_SIZE if is_approach_button else MISSION_DROPSHIP_COMMAND_BUTTON_FONT_SIZE)
 	button.set_meta("mission_dropship_card_command_button", true)
 	button.set_meta("mission_dropship_craft_id", craft_id)
 	button.set_meta("mission_dropship_card_command", action_id)
@@ -7124,6 +7137,38 @@ func _sync_primary_3d_mission_status_visuals() -> void:
 
 func _suppress_legacy_2d_readability_overlays() -> void:
 	_primary_view_bridge.call("suppress_legacy_readability_overlays", get_parent())
+	_suppress_primary_view_legacy_unit_visuals()
+
+
+func _suppress_primary_view_legacy_unit_visuals() -> void:
+	if _get_primary_3d_view() == null:
+		return
+	var units: Array = []
+	units.append_array(_get_all_friendly_units(true))
+	units.append_array(_get_all_enemy_units(true))
+	for unit in units:
+		_suppress_legacy_unit_visual_children(unit)
+
+
+func _suppress_legacy_unit_visual_children(unit: Node) -> void:
+	if unit == null:
+		return
+	if unit.has_method("set_world_debug_labels_visible"):
+		unit.call("set_world_debug_labels_visible", false)
+	if unit.has_method("set_world_selection_ring_visible"):
+		unit.call("set_world_selection_ring_visible", false)
+	unit.set("show_world_event_labels", false)
+	for child in unit.get_children():
+		_suppress_legacy_unit_visual_descendant(child)
+
+
+func _suppress_legacy_unit_visual_descendant(node: Node) -> void:
+	if node == null:
+		return
+	if node is CanvasItem:
+		(node as CanvasItem).visible = false
+	for child in node.get_children():
+		_suppress_legacy_unit_visual_descendant(child)
 
 
 func _ensure_meta_transfer_route_overlay() -> Node2D:
@@ -14556,6 +14601,7 @@ func _apply_drop_presence_state_to_units() -> void:
 				deployed_index += 1
 			else:
 				_enqueue_dropship_presence_effect(unit, unit_id, desired_visible)
+	_suppress_primary_view_legacy_unit_visuals()
 
 
 func _is_unit_runtime_registered(unit_id: String) -> bool:
