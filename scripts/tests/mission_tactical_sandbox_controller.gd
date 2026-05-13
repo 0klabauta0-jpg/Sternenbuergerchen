@@ -149,6 +149,7 @@ const MISSION_DROPSHIP_COMMAND_BUTTON_SIZE: Vector2 = Vector2(28.0, 33.0)
 const MISSION_DROPSHIP_APPROACH_BUTTON_SIZE: Vector2 = Vector2(25.0, 16.0)
 const MISSION_DROPSHIP_COMMAND_BUTTON_FONT_SIZE: int = 7
 const MISSION_DROPSHIP_APPROACH_BUTTON_FONT_SIZE: int = MISSION_DROPSHIP_COMMAND_BUTTON_FONT_SIZE
+const MISSION_DROPSHIP_RUNTIME_UI_REFRESH_SECONDS: float = 0.12
 const META_TRANSFER_ROUTE_COLOR: Color = Color(0.92, 0.74, 0.22, 0.72)
 const META_TRANSFER_ROUTE_TEAM_COLOR: Color = Color(0.45, 0.92, 0.64, 0.96)
 const META_TRANSFER_ROUTE_PILOT_COLOR: Color = Color(0.96, 0.84, 0.38, 0.98)
@@ -279,6 +280,11 @@ var _deployed_unit_positions: Dictionary = {}
 var _runtime_activation_pending_fireteam_ids: Dictionary = {}
 var _post_drop_security_pending_fireteam_ids: Dictionary = {}
 var _fireteam_runtime_ui_refresh_frames_remaining: int = 0
+var _mission_dropship_runtime_ui_refresh_remaining: float = 0.0
+var _mission_dropship_runtime_feedback_flush_count: int = 0
+var _mission_dropship_runtime_planning_emit_count: int = 0
+var _legacy_unit_visual_suppression_count: int = 0
+var _primary_view_legacy_unit_visuals_suppressed_once: bool = false
 var _live_drop_bootstrap_consumed: bool = false
 var _character_overlay_open: bool = false
 var _character_overlay_unit_id: String = ""
@@ -431,6 +437,43 @@ func _process(delta: float) -> void:
 		return
 	_card_refresh_time_remaining = CARD_REFRESH_INTERVAL_SECONDS
 	_update_ui()
+
+
+func _advance_mission_dropship_runtime_feedback_timer(delta: float) -> void:
+	if _mission_dropship_runtime_ui_refresh_remaining <= 0.0:
+		return
+	_mission_dropship_runtime_ui_refresh_remaining = maxf(_mission_dropship_runtime_ui_refresh_remaining - maxf(delta, 0.0), 0.0)
+
+
+func _flush_mission_dropship_runtime_feedback(force: bool = false, refresh_world_when_deferred: bool = true) -> bool:
+	if not force and _mission_dropship_runtime_ui_refresh_remaining > 0.0:
+		if refresh_world_when_deferred:
+			_refresh_world_overlays()
+		return false
+	_mission_dropship_runtime_ui_refresh_remaining = MISSION_DROPSHIP_RUNTIME_UI_REFRESH_SECONDS
+	_store_selected_mission_dropship_plan()
+	_mission_dropship_runtime_planning_emit_count += 1
+	_emit_planning_state_changed()
+	_mission_dropship_runtime_feedback_flush_count += 1
+	_update_ui()
+	return true
+
+
+func _debug_reset_mission_dropship_runtime_performance_counters() -> void:
+	_mission_dropship_runtime_ui_refresh_remaining = 0.0
+	_mission_dropship_runtime_feedback_flush_count = 0
+	_mission_dropship_runtime_planning_emit_count = 0
+	_legacy_unit_visual_suppression_count = 0
+
+
+func get_mission_dropship_runtime_performance_snapshot() -> Dictionary:
+	return {
+		"runtime_feedback_flush_count": _mission_dropship_runtime_feedback_flush_count,
+		"runtime_planning_emit_count": _mission_dropship_runtime_planning_emit_count,
+		"legacy_unit_visual_suppression_count": _legacy_unit_visual_suppression_count,
+		"runtime_ui_refresh_remaining": _mission_dropship_runtime_ui_refresh_remaining,
+		"legacy_unit_visual_suppressed_once": _primary_view_legacy_unit_visuals_suppressed_once,
+	}
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -2194,7 +2237,7 @@ func _refresh_tactical_event_log_panel() -> void:
 	_enforce_drop_light_fixed_hud_layout()
 	_refresh_world_overlays()
 	_sync_primary_3d_mission_status_visuals()
-	_suppress_legacy_2d_readability_overlays()
+	_suppress_legacy_2d_readability_overlays(true)
 	_refresh_ad_hoc_panel_visibility()
 	_refresh_selected_fireteam_cards()
 	_refresh_fireteam_mini_cards()
@@ -7214,19 +7257,23 @@ func _sync_primary_3d_mission_status_visuals() -> void:
 	_primary_view_bridge.call("sync_mission_status_payload", get_parent(), payload)
 
 
-func _suppress_legacy_2d_readability_overlays() -> void:
+func _suppress_legacy_2d_readability_overlays(use_cached_unit_suppression: bool = false) -> void:
 	_primary_view_bridge.call("suppress_legacy_readability_overlays", get_parent())
+	if use_cached_unit_suppression and _primary_view_legacy_unit_visuals_suppressed_once:
+		return
 	_suppress_primary_view_legacy_unit_visuals()
 
 
 func _suppress_primary_view_legacy_unit_visuals() -> void:
 	if _get_primary_3d_view() == null:
 		return
+	_legacy_unit_visual_suppression_count += 1
 	var units: Array = []
 	units.append_array(_get_all_friendly_units(true))
 	units.append_array(_get_all_enemy_units(true))
 	for unit in units:
 		_suppress_legacy_unit_visual_children(unit)
+	_primary_view_legacy_unit_visuals_suppressed_once = true
 
 
 func _suppress_legacy_unit_visual_children(unit: Node) -> void:
@@ -13832,6 +13879,7 @@ func _embark_units_for_drop(units: Array) -> void:
 
 
 func _update_drop_sequence(delta: float) -> void:
+	_advance_mission_dropship_runtime_feedback_timer(delta)
 	_update_primary_drop_sequence(delta)
 	_update_parallel_drop_sequences(delta)
 
@@ -13920,6 +13968,7 @@ func _update_parallel_drop_sequences(delta: float) -> void:
 		return
 	var completed_craft_ids: Array = []
 	var changed: bool = false
+	var force_feedback_flush: bool = false
 	for craft_id_variant in _parallel_drop_sequences_by_craft.keys():
 		var craft_id: String = String(craft_id_variant).strip_edges()
 		if craft_id.is_empty():
@@ -13933,8 +13982,14 @@ func _update_parallel_drop_sequences(delta: float) -> void:
 		if not _is_drop_sequence_dict_active(sequence):
 			completed_craft_ids.append(craft_id_variant)
 			continue
+		var previous_phase: String = String(sequence.get("phase", "")).strip_edges().to_lower()
+		var previous_unit_index: int = int(sequence.get("unit_index", 0))
 		if _update_drop_sequence_dict(sequence, delta):
 			changed = true
+			var next_phase: String = String(sequence.get("phase", "")).strip_edges().to_lower()
+			var next_unit_index: int = int(sequence.get("unit_index", 0))
+			if next_phase != previous_phase or next_unit_index != previous_unit_index:
+				force_feedback_flush = true
 		if _is_drop_sequence_dict_active(sequence):
 			_parallel_drop_sequences_by_craft[craft_id] = sequence
 			_update_mission_dropship_card_fields(craft_id, _build_drop_sequence_card_fields(sequence))
@@ -13943,10 +13998,7 @@ func _update_parallel_drop_sequences(delta: float) -> void:
 	for completed_craft_id in completed_craft_ids:
 		_parallel_drop_sequences_by_craft.erase(completed_craft_id)
 	if changed:
-		_store_selected_mission_dropship_plan()
-		_emit_planning_state_changed()
-		_update_ui()
-		_refresh_world_overlays()
+		_flush_mission_dropship_runtime_feedback(force_feedback_flush, true)
 
 
 func _update_drop_sequence_dict(sequence: Dictionary, delta: float) -> bool:
@@ -14006,17 +14058,18 @@ func _advance_primary_drop_sequence_unloading(delta: float) -> bool:
 	if _drop_sequence_units.is_empty():
 		return true
 	_drop_sequence_timer += maxf(delta, 0.0)
+	var previous_unit_index: int = _drop_sequence_unit_index
 	while _drop_sequence_timer >= DROP_UNLOAD_INTERVAL_SECONDS and _drop_sequence_unit_index < _drop_sequence_units.size():
 		_drop_sequence_timer -= DROP_UNLOAD_INTERVAL_SECONDS
 		_deploy_next_embarked_unit()
+	var deployed_this_tick: bool = _drop_sequence_unit_index != previous_unit_index
 	if _is_active_drop_sequence_for_craft(_mission_drop_craft_id):
 		_mission_drop_passenger_count = _embarked_unit_ids.size()
 		_mission_drop_progress = _build_active_drop_sequence_progress_value()
 	_store_active_drop_sequence_card()
-	_store_selected_mission_dropship_plan()
-	_emit_planning_state_changed()
-	_update_ui()
-	_refresh_world_overlays()
+	var did_flush_feedback: bool = _flush_mission_dropship_runtime_feedback(deployed_this_tick, false)
+	if deployed_this_tick and not did_flush_feedback:
+		_refresh_world_overlays()
 	return _drop_sequence_unit_index >= _drop_sequence_units.size()
 
 

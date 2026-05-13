@@ -450,6 +450,15 @@
 - Risiken: Air-Asset-Abschuss selbst bleibt ein separater Combat-/Gameplay-Task; dieser Task stellt nur die korrekte aktive Outbound-UI-Phase sicher.
 - Lokale Pruefung: `task_398_mission_dropship_outbound_command_hotfix.gd`, `task_397_mission_dropship_ux_hotfix.gd`, `task_396_mission_dropship_lz_drop_hotfix.gd`, `task_395_manual_dropship_parallel_flow.gd`, `task_394_per_craft_shipcard_commands.gd` und `git diff --check` laufen gruen.
 
+### TASK_399 - Dropship Flow Contract Performance Pass
+- Status: implementiert im Arbeitsstand
+- Stand: `docs/dev/homebase_direct_dropship_flow_contract.md` haelt den gewuenschten Homebase-Direct-Dropship-Ablauf als Contract fest: FOB umgehen, Fireteamkarten mit einzelner Wahrheit, paralleles Boarding/Send/Drop, per-Craft-LZ/Approach und aktive Outbound-Map-Phase.
+- Stand: Mission-Dropship-Runtime-Feedback nutzt jetzt einen kurzen Throttle, damit Unloading- und Parallel-Drop-Sequenzen nicht mehr bei jedem Simulationsschritt komplette HUD-Rebuilds und Planning-State-Emits erzwingen.
+- Stand: Parallele Dropships aktualisieren weiterhin ihre Card- und World-Overlay-Daten pro Bewegungsschritt, flushen teures UI-/Planning-Feedback aber nur getaktet oder bei wichtigen Phasen-/Unit-Wechseln.
+- Stand: Die rekursive Legacy-2D-Unit-Suppression wird im normalen HUD-Refresh gecacht. Explizite Suppression und Drop-Presence-Updates koennen alte Sprite-Kinder weiter ausblenden.
+- Risiken: Falls die Vorschau weiter schwer wirkt, braucht es danach einen echten Godot-Profiler-Task. Mission-Dropship-Card-Pooling bleibt separat.
+- Lokale Pruefung: `task_399_dropship_flow_contract_performance_pass.gd`, `task_398_mission_dropship_outbound_command_hotfix.gd`, `task_397_mission_dropship_ux_hotfix.gd`, `task_396_mission_dropship_lz_drop_hotfix.gd`, `task_395_manual_dropship_parallel_flow.gd`, `task_394_per_craft_shipcard_commands.gd` und `git diff --check` laufen gruen.
+
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
 - Stand: Dropship-Visuals bauen ihre Dirty-Signatur wieder fehlerfrei, geplante LZs bleiben auch bei offmap/hidden Craft sichtbar, und Multi-Dropship-Payloads werden aus dem rohen Mission-Card-State statt aus stale Selected-Card-State uebernommen.
