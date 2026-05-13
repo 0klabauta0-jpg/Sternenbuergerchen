@@ -23,6 +23,10 @@ const SKILL_TIER_LOW: String = "low"
 const SKILL_TIER_HIGH: String = "high"
 const SKILL_TIER_NEUTRAL: String = "neutral"
 
+const VALIDATION_SOURCE_DEFAULT: String = "controller_feedback"
+const VALIDATION_TEXT_SOURCE: String = "command_validation"
+const VALIDATION_PRIORITY: int = 120
+
 
 static func get_default_settings() -> Dictionary:
 	return {
@@ -58,6 +62,7 @@ static func build_command_feedback(
 		return {}
 	var action: String = _normalize_action(feedback_action)
 	var state: String = _normalize_state(feedback_state, action)
+	var validation_feedback: Dictionary = _resolve_validation_feedback(state, action, context)
 	var character_context: Dictionary = Dictionary(CHARACTER_GAMEPLAY_RESOLVER_SCRIPT.call("resolve_ftl_context", leader, Array(context.get("fireteam_units", [])), context))
 	var skill_tier: String = String(character_context.get("skill_tier", "")).strip_edges()
 	if skill_tier.is_empty():
@@ -66,7 +71,19 @@ static func build_command_feedback(
 	var text_context: Dictionary = context.duplicate(true)
 	text_context["skill_tier"] = skill_tier
 	text_context["character_gameplay_context"] = character_context
-	var text_payload: Dictionary = Dictionary(COMMS_LINES_RESOLVER_SCRIPT.call("resolve_feedback_text_payload", action, state, leader, text_context))
+	var text_payload: Dictionary = {}
+	if not validation_feedback.is_empty():
+		text_payload = {
+			"ok": true,
+			"text": String(validation_feedback.get("message", "")),
+			"text_source": VALIDATION_TEXT_SOURCE,
+			"text_key": "command_validation.%s" % String(validation_feedback.get("validation_key", "")),
+			"trigger": "command_validation",
+			"quality_level": -1,
+			"delay_seconds": 0.0,
+		}
+	else:
+		text_payload = Dictionary(COMMS_LINES_RESOLVER_SCRIPT.call("resolve_feedback_text_payload", action, state, leader, text_context))
 	if not bool(text_payload.get("ok", false)):
 		text_payload = Dictionary(COMIC_BUBBLE_TEXT_RESOLVER_SCRIPT.call(
 			"resolve_ftl_text_payload",
@@ -114,7 +131,19 @@ static func build_command_feedback(
 	payload["ftl_clarity_label"] = String(character_context.get("ftl_clarity_label", ""))
 	payload["communication_modifier"] = float(modifiers.get("communication_modifier", 0.0))
 	payload["coordination_modifier"] = float(modifiers.get("coordination_modifier", 0.0))
+	if not validation_feedback.is_empty():
+		payload["validation_key"] = String(validation_feedback.get("validation_key", ""))
+		payload["validation_detail"] = String(validation_feedback.get("validation_detail", ""))
+		payload["validation_source"] = String(validation_feedback.get("validation_source", VALIDATION_SOURCE_DEFAULT))
+		payload["validation_message"] = String(validation_feedback.get("message", ""))
+		payload["priority"] = maxi(int(payload.get("priority", 0)), int(validation_feedback.get("priority", VALIDATION_PRIORITY)))
 	return payload
+
+
+static func resolve_validation_feedback(feedback_action: String, feedback_state: String, context: Dictionary = {}) -> Dictionary:
+	var action: String = _normalize_action(feedback_action)
+	var state: String = _normalize_state(feedback_state, action)
+	return _resolve_validation_feedback(state, action, context)
 
 
 static func resolve_skill_tier(leader) -> String:
@@ -227,6 +256,97 @@ static func _resolve_duration_seconds(state: String, skill_tier: String) -> floa
 	if state == STATE_CONTACT:
 		return 2.0
 	return 1.7 if skill_tier == SKILL_TIER_HIGH else 1.9
+
+
+static func _resolve_validation_feedback(state: String, action: String, context: Dictionary) -> Dictionary:
+	if state != STATE_BLOCKED:
+		return {}
+	var raw_key: String = String(context.get("validation_key", "")).strip_edges()
+	if raw_key.is_empty():
+		raw_key = String(context.get("validation_detail", "")).strip_edges()
+	if raw_key.is_empty():
+		raw_key = String(context.get("detail", "")).strip_edges()
+	if raw_key.is_empty():
+		raw_key = String(context.get("blocked_reason", context.get("reason", ""))).strip_edges()
+	var validation_key: String = _normalize_validation_key(raw_key)
+	if validation_key.is_empty():
+		return {}
+	var message: String = String(context.get("validation_message", "")).strip_edges()
+	if message.is_empty():
+		message = _validation_message_for_key(validation_key, action)
+	return {
+		"validation_key": validation_key,
+		"validation_detail": raw_key,
+		"validation_source": String(context.get("validation_source", VALIDATION_SOURCE_DEFAULT)).strip_edges(),
+		"message": message,
+		"priority": VALIDATION_PRIORITY,
+	}
+
+
+static func _normalize_validation_key(raw_key: String) -> String:
+	var key: String = raw_key.strip_edges().to_lower()
+	if key.is_empty():
+		return ""
+	key = key.replace("-", "_").replace(" ", "_")
+	match key:
+		"no_tile", "select_tile", "select_a_map_tile", "map_tile", "map_tile_required", "requires_tile_selection", "tile_required":
+			return "select_tile_first"
+		"select_tile_first":
+			return "select_tile_first"
+		"observer", "observer_mode", "host_controls_mission_commands", "host_controls_mission_command", "remote_client":
+			return "observer_mode"
+		"inactive", "wait_for_insertion", "insertion_pending", "not_inserted":
+			return "wait_for_insertion"
+		"failed", "blocked", "blocked_route", "route_blocked", "path_blocked", "cannot_reach":
+			return "blocked_route"
+		"no_los", "line_of_sight_blocked", "los_blocked":
+			return "no_los"
+		"too_far", "out_of_range", "range_blocked":
+			return "too_far"
+		"no_orders", "needs_orders":
+			return "no_orders"
+		"no_contact", "ad_hoc_no_contact":
+			return "no_contact"
+		"no_fireteam", "select_fireteam", "select_fireteam_first", "select_one_or_more_fireteams":
+			return "select_fireteam_first"
+		"no_lz", "set_lz_before_drop_call", "set_lz_first":
+			return "set_lz_first"
+		"drop_cooldown", "dropship_cooldown":
+			return "drop_cooldown"
+		"dropship_unavailable", "drop_ship_not_on_mission_map", "drop_unavailable", "no_drop_team_available":
+			return "dropship_unavailable"
+		_:
+			return key
+
+
+static func _validation_message_for_key(validation_key: String, action: String) -> String:
+	match validation_key:
+		"select_tile_first":
+			return "Select tile\nfirst"
+		"observer_mode":
+			return "Host controls"
+		"wait_for_insertion":
+			return "Wait insertion"
+		"blocked_route":
+			return "Blocked route"
+		"no_los":
+			return "No LOS"
+		"too_far":
+			return "Too far"
+		"no_orders":
+			return "No orders"
+		"no_contact":
+			return "No contact"
+		"select_fireteam_first":
+			return "Select fireteam"
+		"set_lz_first":
+			return "Set LZ first"
+		"drop_cooldown":
+			return "Drop cooldown"
+		"dropship_unavailable":
+			return "Dropship unavailable"
+		_:
+			return "%s blocked" % action.capitalize()
 
 
 static func _resolve_unit_id(leader, fallback: String = "") -> String:

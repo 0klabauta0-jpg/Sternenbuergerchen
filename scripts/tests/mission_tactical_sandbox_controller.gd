@@ -8228,7 +8228,7 @@ func _store_fireteamleader_feedback_bubble(payload: Dictionary) -> void:
 	var settings: Dictionary = get_fireteamleader_feedback_bubble_settings()
 	var max_total: int = maxi(int(settings.get("max_active_bubbles_total", 4)), 1)
 	while retained_bubbles.size() > max_total:
-		retained_bubbles.pop_front()
+		retained_bubbles.remove_at(_find_lowest_priority_fireteamleader_feedback_index(retained_bubbles))
 	_fireteamleader_feedback_bubbles = retained_bubbles
 
 
@@ -8280,6 +8280,35 @@ func _build_fireteamleader_feedback_identity(payload: Dictionary) -> String:
 	if not fireteam_id.is_empty():
 		return "fireteam:%s" % fireteam_id
 	return "bubble:%s" % String(payload.get("feedback_sequence", payload.get("bubble_id", ""))).strip_edges()
+
+
+func _find_lowest_priority_fireteamleader_feedback_index(bubbles: Array) -> int:
+	var lowest_index: int = 0
+	var lowest_priority: int = 999999
+	for index in range(bubbles.size()):
+		var payload: Dictionary = Dictionary(bubbles[index]) if typeof(bubbles[index]) == TYPE_DICTIONARY else {}
+		var priority: int = _get_fireteamleader_feedback_priority(payload)
+		if priority < lowest_priority:
+			lowest_priority = priority
+			lowest_index = index
+	return lowest_index
+
+
+func _get_fireteamleader_feedback_priority(payload: Dictionary) -> int:
+	if payload.has("priority"):
+		return int(payload.get("priority", 0))
+	var state: String = String(payload.get("feedback_state", "")).strip_edges().to_lower()
+	if state == "blocked" and not String(payload.get("validation_key", "")).strip_edges().is_empty():
+		return 120
+	match state:
+		"blocked", "contact":
+			return 100
+		"done", "cover":
+			return 80
+		"running":
+			return 50
+		_:
+			return 20
 
 
 func _update_npc_thought_peek_visuals() -> void:

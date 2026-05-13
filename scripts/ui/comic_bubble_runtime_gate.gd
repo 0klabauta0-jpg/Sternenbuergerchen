@@ -144,7 +144,11 @@ func _build_cooldown_key(payload: Dictionary, category: String) -> String:
 	var identity: String = unit_id if not unit_id.is_empty() else fireteam_id
 	if identity.is_empty():
 		identity = String(payload.get("bubble_id", "global")).strip_edges()
-	return "%s:%s:%s" % [category, identity, String(payload.get("feedback_action", payload.get("purpose", ""))).strip_edges()]
+	var validation_key: String = String(payload.get("validation_key", "")).strip_edges().to_lower()
+	var action_key: String = String(payload.get("feedback_action", payload.get("purpose", ""))).strip_edges()
+	if not validation_key.is_empty():
+		action_key = "%s:%s" % [action_key, validation_key]
+	return "%s:%s:%s" % [category, identity, action_key]
 
 
 func _resolve_category(payload: Dictionary, fallback_category: String = "") -> String:
@@ -166,6 +170,8 @@ func _payload_priority(payload: Dictionary) -> int:
 	if payload.has("priority"):
 		return int(payload.get("priority", 0))
 	var state: String = String(payload.get("feedback_state", "")).strip_edges().to_lower()
+	if state == "blocked" and not String(payload.get("validation_key", "")).strip_edges().is_empty():
+		return 120
 	match state:
 		"blocked", "contact":
 			return 100
