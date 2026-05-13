@@ -322,6 +322,9 @@ func _on_homebase_mission_start_requested() -> void:
 	)
 	if not _has_mission_start_payload():
 		return
+	if payload_source == MISSION_DROP_SOURCE_HOMEBASE_DIRECT:
+		_begin_homebase_direct_mission_transfer_from_planning()
+		_sync_homebase_direct_mission_drop_transport_fields()
 	_begin_active_mission_timer()
 	_start_mission()
 
@@ -917,7 +920,9 @@ func _on_homebase_transport_timer_timeout() -> void:
 		fob_changed = true
 
 	_refresh_fob_screen()
-	if not _is_homebase_direct_mission_drop_source():
+	if _is_homebase_direct_mission_drop_source():
+		_sync_homebase_direct_mission_drop_transport_fields()
+	else:
 		_sync_mission_drop_transport_fields_from_fob()
 	_refresh_homebase_screen()
 	_refresh_map_screen()
@@ -967,11 +972,14 @@ func _complete_homebase_cargo_load(entry: Dictionary) -> void:
 	_selected_aircraft_cargo_by_craft[craft_id] = cargo_id
 
 
-func _begin_mission_craft_transfer(craft_id: String, phase: String, duration_seconds: float) -> void:
+func _begin_mission_craft_transfer(craft_id: String, phase: String, duration_seconds: float, payload_source: String = MISSION_DROP_SOURCE_FOB) -> void:
 	var normalized_craft_id: String = craft_id.strip_edges()
 	var normalized_phase: String = phase.strip_edges().to_lower()
 	if normalized_craft_id.is_empty() or normalized_phase.is_empty():
 		return
+	var normalized_source: String = payload_source.strip_edges().to_lower()
+	if normalized_source.is_empty():
+		normalized_source = MISSION_DROP_SOURCE_FOB
 	var next_transfers: Array = []
 	for entry_variant in _pending_mission_craft_transfers:
 		var entry: Dictionary = Dictionary(entry_variant).duplicate(true)
@@ -980,10 +988,10 @@ func _begin_mission_craft_transfer(craft_id: String, phase: String, duration_sec
 		next_transfers.append(entry)
 	_pending_mission_craft_transfers = next_transfers
 	if normalized_phase == "to_mission":
-		_aircraft_location_by_craft[normalized_craft_id] = "fob"
+		_aircraft_location_by_craft[normalized_craft_id] = "homebase" if normalized_source == MISSION_DROP_SOURCE_HOMEBASE_DIRECT else "fob"
 	elif normalized_phase == "to_fob" or normalized_phase == "to_homebase":
 		_aircraft_location_by_craft[normalized_craft_id] = "mission"
-	_pending_mission_craft_transfers.append(_build_mission_craft_transfer_entry(normalized_craft_id, normalized_phase, duration_seconds))
+	_pending_mission_craft_transfers.append(_build_mission_craft_transfer_entry(normalized_craft_id, normalized_phase, duration_seconds, normalized_source))
 
 
 func _complete_mission_craft_transfer(entry: Dictionary) -> void:
@@ -1194,12 +1202,16 @@ func _build_homebase_pilot_transfer_entry(craft_id: String, pilot_unit_id: Strin
 	}
 
 
-func _build_mission_craft_transfer_entry(craft_id: String, phase: String, duration_seconds: float) -> Dictionary:
+func _build_mission_craft_transfer_entry(craft_id: String, phase: String, duration_seconds: float, payload_source: String = MISSION_DROP_SOURCE_FOB) -> Dictionary:
 	_transfer_sequence += 1
+	var normalized_source: String = payload_source.strip_edges().to_lower()
+	if normalized_source.is_empty():
+		normalized_source = MISSION_DROP_SOURCE_FOB
 	return {
 		"transfer_id": "mission_craft_%d" % _transfer_sequence,
 		"craft_id": craft_id,
 		"phase": phase,
+		"payload_source": normalized_source,
 		"elapsed_seconds": 0.0,
 		"duration_seconds": maxf(duration_seconds, 1.0),
 	}
@@ -1285,6 +1297,8 @@ func _build_transport_craft_states() -> Array:
 		var cargo_id: String = String(_loaded_aircraft_cargo_by_craft.get(craft_id, _selected_aircraft_cargo_by_craft.get(craft_id, ""))).strip_edges()
 		var pilot_transfer_entry: Dictionary = _find_pending_homebase_pilot_transfer(craft_id)
 		var mission_transfer_entry: Dictionary = _find_pending_mission_craft_transfer(craft_id)
+		var mission_transfer_source: String = String(mission_transfer_entry.get("payload_source", "")).strip_edges().to_lower()
+		var is_homebase_direct_mission_transfer: bool = mission_transfer_source == MISSION_DROP_SOURCE_HOMEBASE_DIRECT
 		var craft_location: String = String(_aircraft_location_by_craft.get(craft_id, "homebase")).strip_edges().to_lower()
 		var is_in_transit: bool = not pilot_transfer_entry.is_empty() or craft_location == "transit"
 		var mission_phase: String = ""
@@ -1347,8 +1361,8 @@ func _build_transport_craft_states() -> Array:
 			"summary": String(craft_def.get("summary", "")).strip_edges(),
 			"texture_path": String(craft_def.get("texture_path", "")).strip_edges(),
 			"location": craft_location,
-			"visible_in_homebase": craft_location == "homebase" or recovery_active,
-			"visible_in_fob": craft_location == "fob" or recovery_active or mission_phase == "to_mission" or (craft_location == "transit" and not pilot_transfer_entry.is_empty()),
+			"visible_in_homebase": craft_location == "homebase" or recovery_active or (mission_phase == "to_mission" and is_homebase_direct_mission_transfer),
+			"visible_in_fob": craft_location == "fob" or recovery_active or (mission_phase == "to_mission" and not is_homebase_direct_mission_transfer) or (craft_location == "transit" and not pilot_transfer_entry.is_empty()),
 			"is_in_transit": is_in_transit,
 			"pilot_unit_id": pilot_unit_id,
 			"pilot_display_name": _resolve_unit_display_name(pilot_unit_id),
@@ -1950,6 +1964,21 @@ func _sync_fob_payload_selection_from_screen(fob_screen, drop_state: Dictionary)
 	_selected_fireteam_ids = next_fireteam_ids
 
 
+func _begin_homebase_direct_mission_transfer_from_planning() -> void:
+	if not _is_homebase_direct_mission_drop_source():
+		return
+	var craft_id: String = String(_mission_planning_state.get("mission_drop_craft_id", "")).strip_edges()
+	if craft_id.is_empty():
+		return
+	var existing_transfer: Dictionary = _find_pending_mission_craft_transfer(craft_id)
+	if not existing_transfer.is_empty():
+		var existing_phase: String = String(existing_transfer.get("phase", "")).strip_edges().to_lower()
+		var existing_source: String = String(existing_transfer.get("payload_source", "")).strip_edges().to_lower()
+		if existing_phase == "to_mission" and existing_source == MISSION_DROP_SOURCE_HOMEBASE_DIRECT:
+			return
+	_begin_mission_craft_transfer(craft_id, "to_mission", MISSION_DROPSHIP_TO_MAP_SECONDS, MISSION_DROP_SOURCE_HOMEBASE_DIRECT)
+
+
 func _sync_mission_drop_transport_fields_from_fob() -> void:
 	if _is_homebase_direct_mission_drop_source():
 		return
@@ -1976,6 +2005,106 @@ func _sync_mission_drop_transport_fields_from_fob() -> void:
 	_mission_planning_state["mission_drop_passenger_count"] = int(drop_state.get("mission_drop_passenger_count", 0))
 	_mission_planning_state["mission_drop_cards"] = Array(drop_state.get("mission_drop_cards", [])).duplicate(true)
 	_mission_planning_state["meta_transfer_routes"] = _build_homebase_transfer_route_entries()
+
+
+func _sync_homebase_direct_mission_drop_transport_fields() -> void:
+	if not _is_homebase_direct_mission_drop_source():
+		return
+	var craft_id: String = String(_mission_planning_state.get("mission_drop_craft_id", "")).strip_edges()
+	if craft_id.is_empty():
+		return
+
+	var transfer_entry: Dictionary = _find_pending_mission_craft_transfer(craft_id)
+	var next_state: String = String(_mission_planning_state.get("mission_drop_state", "")).strip_edges().to_lower()
+	var next_progress: float = clampf(float(_mission_planning_state.get("mission_drop_progress", 0.0)), 0.0, 100.0)
+	var next_eta_seconds: int = maxi(int(_mission_planning_state.get("mission_drop_eta_seconds", 0)), 0)
+	if not transfer_entry.is_empty():
+		next_state = String(transfer_entry.get("phase", next_state)).strip_edges().to_lower()
+		var default_duration: float = _get_mission_craft_transfer_default_duration(next_state)
+		var duration_seconds: float = maxf(float(transfer_entry.get("duration_seconds", default_duration)), 1.0)
+		var elapsed_seconds: float = clampf(float(transfer_entry.get("elapsed_seconds", 0.0)), 0.0, duration_seconds)
+		next_progress = clampf((elapsed_seconds / duration_seconds) * 100.0, 0.0, 100.0)
+		next_eta_seconds = maxi(int(ceil(duration_seconds - elapsed_seconds)), 0)
+	elif next_state == "to_mission" and String(_aircraft_location_by_craft.get(craft_id, "")).strip_edges().to_lower() == "mission":
+		next_state = "waiting"
+		next_progress = 100.0
+		next_eta_seconds = 0
+
+	var embarked_unit_ids: Array = Array(PackedStringArray(Array(_mission_planning_state.get("embarked_unit_ids", []))))
+	var passenger_count: int = int(_mission_planning_state.get("mission_drop_passenger_count", 0))
+	if passenger_count <= 0 and not embarked_unit_ids.is_empty():
+		passenger_count = embarked_unit_ids.size()
+
+	_mission_planning_state["drop_ship_staged"] = true
+	_mission_planning_state["mission_drop_state"] = next_state
+	_mission_planning_state["mission_drop_progress"] = next_progress
+	_mission_planning_state["mission_drop_eta_seconds"] = next_eta_seconds
+	_mission_planning_state["mission_drop_passenger_count"] = passenger_count
+	_mission_planning_state["mission_drop_cards"] = _sync_homebase_direct_mission_drop_card_fields(
+		Array(_mission_planning_state.get("mission_drop_cards", [])).duplicate(true),
+		craft_id,
+		next_state,
+		next_progress,
+		next_eta_seconds,
+		passenger_count,
+		embarked_unit_ids
+	)
+	_mission_planning_state["meta_transfer_routes"] = _build_homebase_transfer_route_entries()
+
+
+func _sync_homebase_direct_mission_drop_card_fields(cards: Array, craft_id: String, next_state: String, progress_value: float, eta_seconds: int, passenger_count: int, embarked_unit_ids: Array) -> Array:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return cards
+	var updated_cards: Array = []
+	var did_update: bool = false
+	for card_variant in cards:
+		if typeof(card_variant) != TYPE_DICTIONARY:
+			continue
+		var card: Dictionary = Dictionary(card_variant).duplicate(true)
+		if String(card.get("craft_id", "")).strip_edges() == normalized_craft_id:
+			card["state"] = next_state
+			card["progress"] = progress_value
+			card["eta_seconds"] = eta_seconds
+			card["passenger_count"] = passenger_count
+			if not embarked_unit_ids.is_empty():
+				card["embarked_unit_ids"] = embarked_unit_ids.duplicate()
+				if Array(card.get("boarded_fireteam_ids", [])).is_empty():
+					card["boarded_fireteam_ids"] = Array(_mission_planning_state.get("drop_queued_fireteam_ids", [])).duplicate()
+				if Array(card.get("queued_fireteam_ids", [])).is_empty():
+					card["queued_fireteam_ids"] = Array(_mission_planning_state.get("drop_queued_fireteam_ids", [])).duplicate()
+			elif passenger_count <= 0:
+				card["embarked_unit_ids"] = []
+			did_update = true
+		updated_cards.append(card)
+	if not did_update:
+		updated_cards.append(_build_homebase_direct_mission_drop_card_snapshot(normalized_craft_id, next_state, progress_value, eta_seconds, passenger_count, embarked_unit_ids))
+	return updated_cards
+
+
+func _build_homebase_direct_mission_drop_card_snapshot(craft_id: String, next_state: String, progress_value: float, eta_seconds: int, passenger_count: int, embarked_unit_ids: Array) -> Dictionary:
+	var display_name: String = String(_mission_planning_state.get("mission_drop_display_name", "Dropship")).strip_edges()
+	if display_name.is_empty():
+		display_name = "Dropship"
+	var queued_fireteam_ids: Array = Array(_mission_planning_state.get("drop_queued_fireteam_ids", [])).duplicate()
+	return {
+		"craft_id": craft_id,
+		"display_name": display_name,
+		"title_text": String(_mission_planning_state.get("mission_drop_title_text", display_name)).strip_edges(),
+		"texture_path": String(_mission_planning_state.get("mission_drop_texture_path", "")).strip_edges(),
+		"state": next_state,
+		"pilot_text": String(_mission_planning_state.get("mission_drop_pilot_text", "")).strip_edges(),
+		"status_line": String(_mission_planning_state.get("mission_drop_status_line", "")).strip_edges(),
+		"progress": progress_value,
+		"eta_seconds": eta_seconds,
+		"pilot_unit_id": String(_mission_planning_state.get("mission_drop_pilot_unit_id", "")).strip_edges(),
+		"pilot_display_name": String(_mission_planning_state.get("mission_drop_pilot_display_name", "")).strip_edges(),
+		"pilot_portrait_path": String(_mission_planning_state.get("mission_drop_pilot_portrait_path", "")).strip_edges(),
+		"passenger_count": passenger_count,
+		"embarked_unit_ids": embarked_unit_ids.duplicate(),
+		"boarded_fireteam_ids": queued_fireteam_ids.duplicate(),
+		"queued_fireteam_ids": queued_fireteam_ids.duplicate(),
+	}
 
 
 func _apply_selected_mission_drop_card_override(drop_state: Dictionary) -> Dictionary:
@@ -2291,8 +2420,11 @@ func _on_mission_planning_state_changed(planning_state: Dictionary) -> void:
 		var returning_passenger_count: int = int(_mission_planning_state.get("mission_drop_passenger_count", returning_payload_unit_ids.size()))
 		handled_mission_return = _apply_mission_drop_return_for_craft(mission_craft_id, returning_payload_unit_ids, returning_passenger_count, fob_screen, _get_mission_drop_source()) or handled_mission_return
 		_mission_planning_state["mission_drop_return_requested"] = false
-	if handled_mission_return and not _is_homebase_direct_mission_drop_source():
-		_sync_fob_dropship_state_into_mission_planning(false, MISSION_DROP_SOURCE_FOB)
+	if handled_mission_return:
+		if _is_homebase_direct_mission_drop_source():
+			_sync_homebase_direct_mission_drop_transport_fields()
+		else:
+			_sync_fob_dropship_state_into_mission_planning(false, MISSION_DROP_SOURCE_FOB)
 	if _preview_mission != null:
 		_apply_planning_state_to_mission(_preview_mission)
 	if _active_mission != null:
@@ -2337,7 +2469,7 @@ func _apply_mission_drop_return_for_craft(craft_id: String, returning_payload_un
 	if _find_pending_mission_craft_transfer(normalized_craft_id).is_empty():
 		var return_phase: String = "to_homebase" if returns_to_homebase else "to_fob"
 		var return_duration: float = MISSION_DROPSHIP_TO_HOMEBASE_SECONDS if returns_to_homebase else MISSION_DROPSHIP_TO_FOB_SECONDS
-		_begin_mission_craft_transfer(normalized_craft_id, return_phase, return_duration)
+		_begin_mission_craft_transfer(normalized_craft_id, return_phase, return_duration, payload_source)
 		changed = true
 	return changed
 

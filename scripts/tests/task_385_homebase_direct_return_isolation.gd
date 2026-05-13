@@ -48,6 +48,12 @@ func _test_homebase_direct_return_routes_to_homebase_without_fob_state() -> void
 	_assert(bool(fob_screen.get_meta("homebase_direct_bypass_active", false)), "FOB refresh is explicitly bypassed during Homebase Direct missions")
 	_assert(not _contains_any_id(fob_screen.call("get_team"), homebase_unit_ids), "Homebase Direct payload does not appear in FOB #10")
 
+	for _index in range(30):
+		scene.call("_on_homebase_transport_timer_timeout")
+	await process_frame
+	planning_state = Dictionary(scene.get("_mission_planning_state")).duplicate(true)
+	_assert(String(planning_state.get("mission_drop_state", "")).strip_edges() == "waiting", "Homebase Direct ingress reaches mission waiting state before a return can be requested")
+
 	var return_state: Dictionary = planning_state.duplicate(true)
 	return_state["mission_drop_cards"] = [
 		{

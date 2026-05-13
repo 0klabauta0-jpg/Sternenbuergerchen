@@ -372,6 +372,14 @@
 - Risiken: Header-Drop ist bewusst Lead-Setzen; falls spaeter getrennte Add-/Lead-Zielzonen gewuenscht sind, braucht das eine sichtbare Zielmarkierung. Die breiteren Drop-Zonen bleiben UI-Eingabe und fuehren keine zweite Gameplay-Wahrheit ein.
 - Lokale Pruefung: `task_389_homebase_card_wide_drop_targets.gd`, `task_388_homebase_fireteam_roster_shipcard_polish.gd`, `task_387_homebase_flightdeck_payload_polish.gd`, `task_384_homebase_flightdeck_boarding_hotfix.gd`, `task_383_homebase_flightdeck_fireteam_card_single_owner.gd`, `task_381_homebase_fireteam_loadout_flightdeck_polish.gd` und `git diff --check` laufen gruen.
 
+### TASK_390 - Homebase Direct Mission Transit Cards
+- Status: implementiert im Arbeitsstand
+- Stand: Homebase-Direct-`Send` erzeugt jetzt einen source-getaggten `to_mission`-Transfer, statt die Mission sofort auf `waiting` zu setzen. Der Mission-Planning-State und die `mission_drop_cards` bekommen waehrend des Timers Fortschritt/ETA und werden in die laufende Mission gespiegelt.
+- Stand: Die Mission-Dropship-Karte bleibt waehrend des Direct-Anflugs ausgegraut, zeigt den Fortschrittsbalken und listet die geboardeten Fireteam-Passagiere. Nach Ankunft wechselt sie auf `waiting`; der Payload bleibt bis zum echten LZ-Drop embarked und wird erst danach als aktive Infanterie sichtbar.
+- Stand: `mission_drop_source` ist jetzt Teil des Tactical-Planning-Roundtrips, damit Direct-Returns auch aus echten Mission-Events heraus nach Homebase statt in die FOB gehen. Source-getaggte Direct-Transfers bleiben aus FOB-Transportkarten heraus.
+- Risiken: Homebase-Shipcards bekommen in diesem Slice noch keine eigene Mission-Transit-Progressanzeige; die Fensternummern-Kollision um Eventlog/Dropship bleibt ein separater Benennungs-/Layout-Task.
+- Lokale Pruefung: `task_390_homebase_direct_mission_transit_cards.gd`, `task_385_homebase_direct_return_isolation.gd`, `bugfix_dropship_mission_flow_verifier.gd` laufen gruen. `bugfix_dropship_mission_flow_verifier.gd` meldet am Prozessende bekannte Godot-RID-Leak-Warnungen, aber 116/116 Checks sind gruen.
+
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
 - Stand: Dropship-Visuals bauen ihre Dirty-Signatur wieder fehlerfrei, geplante LZs bleiben auch bei offmap/hidden Craft sichtbar, und Multi-Dropship-Payloads werden aus dem rohen Mission-Card-State statt aus stale Selected-Card-State uebernommen.

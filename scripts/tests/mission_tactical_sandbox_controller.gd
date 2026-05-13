@@ -231,6 +231,7 @@ var _is_lz_placement_armed: bool = false
 var _is_target_placement_armed: bool = false
 var _drop_ship_requested: bool = false
 var _drop_ship_staged: bool = false
+var _mission_drop_source: String = ""
 var _mission_drop_craft_id: String = ""
 var _mission_drop_display_name: String = ""
 var _mission_drop_title_text: String = ""
@@ -719,6 +720,8 @@ func set_planning_state(planning_state: Dictionary) -> void:
 		_drop_ship_staged = bool(planning_state.get("drop_ship_staged", false))
 	if planning_state.has("mission_drop_craft_id"):
 		_mission_drop_craft_id = String(planning_state.get("mission_drop_craft_id", "")).strip_edges()
+	if planning_state.has("mission_drop_source"):
+		_mission_drop_source = String(planning_state.get("mission_drop_source", "")).strip_edges().to_lower()
 	if planning_state.has("mission_drop_display_name"):
 		_mission_drop_display_name = String(planning_state.get("mission_drop_display_name", "")).strip_edges()
 	if planning_state.has("mission_drop_title_text"):
@@ -864,6 +867,7 @@ func get_planning_state() -> Dictionary:
 		"approach_angle": _get_approach_angle_name(),
 		"drop_ship_requested": _drop_ship_requested,
 		"drop_ship_staged": _drop_ship_staged,
+		"mission_drop_source": _mission_drop_source,
 		"mission_drop_craft_id": _mission_drop_craft_id,
 		"mission_drop_display_name": _mission_drop_display_name,
 		"mission_drop_title_text": _mission_drop_title_text,
