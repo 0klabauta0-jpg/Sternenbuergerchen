@@ -21,6 +21,7 @@ const UNIT_PROFILE_MATH_SCRIPT: GDScript = preload("res://scripts/npc/unit_profi
 const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_event_bus.gd")
 const BACKGROUND_IMAGE_CATALOG_SCRIPT: GDScript = preload("res://scripts/assets/background_image_catalog.gd")
 const BACKGROUND_ID: String = "main_menu_shell"
+const GLOBAL_ESCAPE_MENU_NODE_PATH: String = "/root/GlobalEscapeMenu"
 const TEAM_EDITOR_POINT_DELTA: int = 1
 const TEAM_EDITOR_VIEW_SIX: String = "six"
 const TEAM_EDITOR_VIEW_NINE: String = "nine"
@@ -71,6 +72,8 @@ var _settings_reset_button: Button = null
 var _team_name_edit: LineEdit = null
 var _team_name_suggest_button: Button = null
 var _new_roster_button: Button = null
+var _mission_save_button: Button = null
+var _mission_load_button: Button = null
 var _team_editor_toggle_button: Button = null
 var _team_library_panel: PanelContainer = null
 var _team_library_list: VBoxContainer = null
@@ -135,6 +138,7 @@ func _ready() -> void:
 	_ensure_audio_event_bus()
 	_ensure_settings_screen_nodes()
 	_ensure_start_roster_button()
+	_ensure_mission_save_load_buttons()
 	_ensure_contextual_help_ui()
 	ensure_start_roster_exists()
 	HOVER_SCROLL_BEHAVIOR_SCRIPT.call("install", self)
@@ -165,6 +169,8 @@ func get_route_snapshot() -> Dictionary:
 		"multiplayer": MULTIPLAYER_SCENE_PATH,
 		"editor": EDITOR_SCENE_PATH,
 		"settings": "local_settings_panel",
+		"mission_save": "global_shell_slot",
+		"mission_load": "global_shell_slot",
 		"multiplayer_lobby": true,
 	}
 
@@ -205,6 +211,8 @@ func get_settings_ui_snapshot() -> Dictionary:
 		"apply_button_visible": _settings_apply_button != null and _settings_apply_button.visible,
 		"reset_button_visible": _settings_reset_button != null and _settings_reset_button.visible,
 		"cancel_button_visible": _settings_back_button != null and _settings_back_button.visible,
+		"mission_save_button_visible": _mission_save_button != null and _mission_save_button.visible,
+		"mission_load_button_visible": _mission_load_button != null and _mission_load_button.visible,
 	}
 
 
@@ -695,6 +703,10 @@ func _connect_signals() -> void:
 	_settings_button.pressed.connect(open_settings_panel)
 	if _new_roster_button != null and not _new_roster_button.pressed.is_connected(_on_new_roster_pressed):
 		_new_roster_button.pressed.connect(_on_new_roster_pressed)
+	if _mission_save_button != null and not _mission_save_button.pressed.is_connected(_on_mission_save_pressed):
+		_mission_save_button.pressed.connect(_on_mission_save_pressed)
+	if _mission_load_button != null and not _mission_load_button.pressed.is_connected(_on_mission_load_pressed):
+		_mission_load_button.pressed.connect(_on_mission_load_pressed)
 	_settings_back_button.pressed.connect(cancel_settings_changes)
 	_master_volume_slider.value_changed.connect(_on_master_volume_changed)
 	_fullscreen_check.toggled.connect(_on_fullscreen_toggled)
@@ -836,6 +848,55 @@ func _ensure_start_roster_button() -> void:
 	_refresh_team_name_controls()
 	_refresh_team_library()
 	_refresh_team_editor()
+
+
+func _ensure_mission_save_load_buttons() -> void:
+	var menu_buttons := get_node_or_null("MenuRail/MenuMargin/MenuVBox/MenuButtons") as VBoxContainer
+	if menu_buttons == null:
+		return
+	var row := menu_buttons.get_node_or_null("MissionSlotRow") as HBoxContainer
+	if row == null:
+		row = HBoxContainer.new()
+		row.name = "MissionSlotRow"
+		row.add_theme_constant_override("separation", 8)
+		menu_buttons.add_child(row)
+		var reference := menu_buttons.get_node_or_null("NewRosterButton")
+		if reference != null:
+			menu_buttons.move_child(row, reference.get_index())
+	_mission_save_button = row.get_node_or_null("MissionSaveButton") as Button
+	if _mission_save_button == null:
+		_mission_save_button = Button.new()
+		_mission_save_button.name = "MissionSaveButton"
+		_mission_save_button.text = "Mission speichern"
+		_mission_save_button.custom_minimum_size = Vector2(176.0, 42.0)
+		_mission_save_button.focus_mode = Control.FOCUS_ALL
+		row.add_child(_mission_save_button)
+	_mission_load_button = row.get_node_or_null("MissionLoadButton") as Button
+	if _mission_load_button == null:
+		_mission_load_button = Button.new()
+		_mission_load_button.name = "MissionLoadButton"
+		_mission_load_button.text = "Mission laden"
+		_mission_load_button.custom_minimum_size = Vector2(176.0, 42.0)
+		_mission_load_button.focus_mode = Control.FOCUS_ALL
+		row.add_child(_mission_load_button)
+	_refresh_mission_save_load_buttons()
+
+
+func _refresh_mission_save_load_buttons() -> void:
+	var shell = _get_global_escape_shell()
+	var has_shell: bool = shell != null
+	var has_save_slot: bool = false
+	if has_shell:
+		var slot: Dictionary = Dictionary(shell.call("get_save_slot_snapshot"))
+		has_save_slot = bool(slot.get("exists", false))
+	if _mission_save_button != null:
+		_mission_save_button.visible = true
+		_mission_save_button.disabled = not has_shell
+		_mission_save_button.tooltip_text = "Speichert den aktuellen Mission-Shell-Slot." if has_shell else "Globales Shell-Menue ist nicht bereit."
+	if _mission_load_button != null:
+		_mission_load_button.visible = true
+		_mission_load_button.disabled = not has_shell or not has_save_slot
+		_mission_load_button.tooltip_text = "Laedt den gespeicherten Mission-Shell-Slot." if has_save_slot else "Noch kein Mission-Shell-Slot vorhanden."
 
 
 func _ensure_team_library_panel(menu_buttons: VBoxContainer) -> void:
@@ -3223,6 +3284,39 @@ func _play_ui_sfx(action_type: String, action_id: String) -> void:
 		"dedupe_key": "main_menu:%s" % action_id,
 		"dedupe_window_msec": 40,
 	})
+
+
+func _get_global_escape_shell():
+	return get_node_or_null(GLOBAL_ESCAPE_MENU_NODE_PATH)
+
+
+func _on_mission_save_pressed() -> void:
+	var shell = _get_global_escape_shell()
+	if shell == null or not shell.has_method("save_current_mission_slot"):
+		_status_label.text = "Mission save unavailable"
+		_play_ui_sfx("warning", "mission_save_unavailable")
+		return
+	var result: Dictionary = Dictionary(shell.call("save_current_mission_slot"))
+	var ok: bool = bool(result.get("ok", false))
+	_status_label.text = "Mission gespeichert" if ok else "Keine laufende Mission"
+	_play_ui_sfx("confirm" if ok else "warning", "mission_save")
+	_refresh_mission_save_load_buttons()
+
+
+func _on_mission_load_pressed() -> void:
+	var shell = _get_global_escape_shell()
+	if shell == null or not shell.has_method("load_mission_slot"):
+		_status_label.text = "Mission load unavailable"
+		_play_ui_sfx("warning", "mission_load_unavailable")
+		return
+	var result: Dictionary = Dictionary(shell.call("load_mission_slot"))
+	if bool(result.get("ok", false)):
+		_status_label.text = "Mission laden"
+		_play_ui_sfx("confirm", "mission_load")
+	else:
+		_status_label.text = "Keine Mission gespeichert"
+		_play_ui_sfx("warning", "mission_load_missing")
+	_refresh_mission_save_load_buttons()
 
 
 func _on_singleplayer_pressed() -> void:

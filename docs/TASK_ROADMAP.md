@@ -590,6 +590,7 @@ TASK_387 - Homebase Flightdeck Payload Polish (implementiert)
 TASK_388 - Homebase Fireteam Roster Shipcard Polish (implementiert)
 TASK_389 - Homebase Card Wide Drop Targets (implementiert)
 TASK_390 - Homebase Direct Mission Transit Cards (implementiert)
+TASK_391 - Global Escape Menu and Button SFX (implementiert)
 
 Batch-Empfehlung
 

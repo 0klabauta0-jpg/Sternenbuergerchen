@@ -380,6 +380,14 @@
 - Risiken: Homebase-Shipcards bekommen in diesem Slice noch keine eigene Mission-Transit-Progressanzeige; die Fensternummern-Kollision um Eventlog/Dropship bleibt ein separater Benennungs-/Layout-Task.
 - Lokale Pruefung: `task_390_homebase_direct_mission_transit_cards.gd`, `task_385_homebase_direct_return_isolation.gd`, `bugfix_dropship_mission_flow_verifier.gd` laufen gruen. `bugfix_dropship_mission_flow_verifier.gd` meldet am Prozessende bekannte Godot-RID-Leak-Warnungen, aber 116/116 Checks sind gruen.
 
+### TASK_391 - Global Escape Menu and Button SFX
+- Status: implementiert im Arbeitsstand
+- Stand: `GlobalEscapeMenu` ist als Autoload registriert und faengt Escape global per `_input` ab. Das Shell-Menue bietet Weiter, Einstellungen, Mission speichern/laden, Hauptmenue und Spiel beenden.
+- Stand: Buttons ausserhalb der bereits manuell vertonten Hauptmenue-/Lobby-Screens bekommen automatisch denselben UI-Klicksound ueber den bestehenden `AudioEventBus`; dynamisch erzeugte Buttons werden ueber `node_added` nachverdrahtet.
+- Stand: Das Escape-Menue speichert Einstellungen ueber `GameSettingsContract` und aktualisiert den AudioEventBus. Das Hauptmenue zeigt Mission speichern/laden und nutzt denselben Shell-Slot.
+- Risiken: Der Save/Load-Slice wird zunaechst nur ein Szenenpfad-Shell-Slot, kein vollstaendiges SimulationRoot-/Mission-State-Savegame.
+- Lokale Pruefung: `task_391_global_escape_menu_button_sfx.gd`, `task_244_combat_movement_ui_sfx_integration_verifier.gd`, `task_226_main_menu_settings_shell_display_audio_input_gameplay.gd` laufen gruen.
+
 ### TASK_329 - Manual Playtest Stabilization GDD Godot Fix Pass
 - Status: implementiert im Arbeitsstand
 - Stand: Dropship-Visuals bauen ihre Dirty-Signatur wieder fehlerfrei, geplante LZs bleiben auch bei offmap/hidden Craft sichtbar, und Multi-Dropship-Payloads werden aus dem rohen Mission-Card-State statt aus stale Selected-Card-State uebernommen.
