@@ -129,6 +129,7 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 	var alpha_animation_player := _find_unit_visual_animation_player(alpha_proxy_node)
 	var alpha_walk_animation: Animation = alpha_animation_player.get_animation("walk") if alpha_animation_player != null and alpha_animation_player.has_animation("walk") else null
 	_assert(alpha_walk_animation != null and not _animation_has_rotation_track_suffix(alpha_walk_animation, ":HipsCtrl"), "Walk animation leaves proxy/model-root facing as the only heading owner")
+	_assert(alpha_walk_animation != null and not _animation_has_rotation_track_suffix(alpha_walk_animation, ":Hips"), "Walk animation strips the body-root Hips rotation that can turn the model's back into facing")
 
 	var orientation_entries: Array = Array(snapshot.get("fireteam_orientation_entries", []))
 	var aim_orientation: Dictionary = _find_entry(orientation_entries, "fireteam_id", "aim")
