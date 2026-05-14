@@ -187,6 +187,7 @@ const FRIENDLY_FIRE_SECTOR_SCAN_MODE_TILE_CACHE: String = "range_bounded_los_cac
 const SELECTED_UNIT_MARKER_COLOR: Color = Color(0.45, 0.78, 1.0, 0.34)
 const SELECTED_UNIT_MARKER_RADIUS: float = 0.32
 const SELECTED_UNIT_MARKER_HEIGHT: float = 0.035
+const SELECTED_UNIT_MARKER_SURFACE_OFFSET: float = 0.014
 const DYNAMIC_ORDER_VISUAL_REFRESH_INTERVAL_MSEC: int = 90
 const MISSION_LOS_DEBUG_SAMPLE_LIMIT: int = 24
 const MISSION_LOS_DEBUG_CLEAR_LINE_COLOR: Color = Color(0.38, 1.0, 0.68, 0.76)
@@ -3910,7 +3911,8 @@ func _add_selected_fireteam_unit_markers() -> void:
 			"SelectedUnit_%s" % _sanitize_node_name(unit_id),
 			SELECTED_UNIT_MARKER_RADIUS,
 			SELECTED_UNIT_MARKER_HEIGHT,
-			4
+			4,
+			SELECTED_UNIT_MARKER_SURFACE_OFFSET
 		)
 		_selected_unit_marker_count += 1
 		_selected_unit_marker_entries.append({
@@ -3918,6 +3920,7 @@ func _add_selected_fireteam_unit_markers() -> void:
 			"fireteam_id": fireteam_id,
 			"position": unit_position,
 			"grid_position": _world_to_grid_position(unit_position),
+			"surface_offset": SELECTED_UNIT_MARKER_SURFACE_OFFSET,
 			"visual_only": true,
 		})
 
@@ -4281,9 +4284,6 @@ func _build_unit_fire_line_anchor(unit: Node, unit_world_position: Vector2, aim_
 
 func _resolve_unit_aim_direction(unit: Node, unit_world_position: Vector2) -> Vector2:
 	var proxy := _unit_proxies_by_id.get(_get_unit_id(unit), null) as Node3D
-	var motion_or_target_direction: Vector2 = _resolve_unit_motion_or_target_direction(proxy, unit, unit_world_position)
-	if motion_or_target_direction.length_squared() > 0.0001:
-		return motion_or_target_direction
 	var explicit_facing_direction: Vector2 = _resolve_unit_explicit_facing_direction(unit)
 	if explicit_facing_direction.length_squared() > 0.0001:
 		return explicit_facing_direction
@@ -4291,6 +4291,9 @@ func _resolve_unit_aim_direction(unit: Node, unit_world_position: Vector2) -> Ve
 		var proxy_direction: Vector2 = _get_world_direction_from_proxy_yaw(unit_world_position, float(proxy.rotation_degrees.y))
 		if proxy_direction.length_squared() > 0.0001:
 			return proxy_direction
+	var motion_or_target_direction: Vector2 = _resolve_unit_motion_or_target_direction(proxy, unit, unit_world_position)
+	if motion_or_target_direction.length_squared() > 0.0001:
+		return motion_or_target_direction
 	var target_position_variant = unit.call("get_target_position") if unit != null and unit.has_method("get_target_position") else null
 	if typeof(target_position_variant) == TYPE_VECTOR2:
 		var target_position: Vector2 = Vector2(target_position_variant)
@@ -6699,7 +6702,7 @@ func _add_tile_marker(parent: Node3D, grid_position: Vector2i, color: Color, nod
 	return true
 
 
-func _add_marker3d(parent: Node3D, world_position: Vector2, color: Color, node_name: String, radius: float, height: float, radial_segments: int = 12) -> void:
+func _add_marker3d(parent: Node3D, world_position: Vector2, color: Color, node_name: String, radius: float, height: float, radial_segments: int = 12, surface_offset: float = 0.28) -> void:
 	var mesh := CylinderMesh.new()
 	mesh.top_radius = radius
 	mesh.bottom_radius = radius
@@ -6709,7 +6712,7 @@ func _add_marker3d(parent: Node3D, world_position: Vector2, color: Color, node_n
 	marker.name = node_name
 	marker.mesh = mesh
 	marker.material_override = _make_material(color)
-	marker.position = _world_to_surface_3d_position(world_position, 0.28 + height * 0.5)
+	marker.position = _world_to_surface_3d_position(world_position, surface_offset + height * 0.5)
 	if radial_segments == 4:
 		marker.rotation_degrees.y = 45.0
 	parent.add_child(marker)

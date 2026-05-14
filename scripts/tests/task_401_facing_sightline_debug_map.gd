@@ -85,6 +85,9 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 	_assert(_compass_label_text(primary_view, "corner_south") == "Sued", "South compass label renders as Sued")
 	_assert(_compass_label_text(primary_view, "corner_west") == "West", "West compass label renders as West")
 
+	var selected_marker_entry: Dictionary = _find_entry(Array(snapshot.get("selected_unit_marker_entries", [])), "unit_id", "unit_alpha")
+	_assert(not selected_marker_entry.is_empty() and float(selected_marker_entry.get("surface_offset", 999.0)) <= 0.02, "Selected NPC marker sits at foot/ground height")
+
 	var visible_unit_ids: Array = Array(snapshot.get("visible_unit_proxy_ids", []))
 	_assert(visible_unit_ids.has("unit_alpha") and visible_unit_ids.has("unit_bravo"), "Primary3DView renders both fixture NPC proxies")
 	var proxy_state_by_id: Dictionary = Dictionary(snapshot.get("unit_proxy_state_by_id", {}))
@@ -112,10 +115,10 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 	_assert(String(aim_fire_entry.get("visual_shape", "")) == "los_line", "Weapon/shot line uses the existing LOS-line visual shape")
 	_assert(String(aim_fire_entry.get("line_origin_anchor", "")) == "weapon_visual", "Weapon/shot line starts at the raised weapon visual anchor")
 	var weapon_direction: Vector2 = (Vector2(aim_fire_entry.get("tip_position", Vector2.ZERO)) - Vector2(aim_fire_entry.get("origin_position", Vector2.ZERO))).normalized()
-	_assert(weapon_direction.dot(Vector2.RIGHT) > 0.90, "Weapon/shot line points east toward the authored target")
+	_assert(weapon_direction.dot(Vector2.UP) > 0.90, "Weapon/shot line follows the north-facing sightline instead of the authored target")
 	_assert(bool(alpha_proxy.get("unit_aim_pose_weapon_node_available", false)), "Weapon-ready NPC exposes an attached weapon visual")
 	_assert(bool(alpha_proxy.get("unit_aim_pose_yaw_active", false)), "Weapon-ready NPC applies the existing aim direction to the weapon pose")
-	_assert(absf(float(alpha_proxy.get("unit_aim_pose_yaw_delta_degrees", 0.0))) >= 20.0, "Weapon-ready NPC visibly offsets the raised weapon toward the shot line")
+	_assert(absf(float(alpha_proxy.get("unit_aim_pose_yaw_delta_degrees", 0.0))) <= 1.0, "Weapon-ready NPC binds weapon yaw to the same facing direction as the sightline")
 	var alpha_weapon_anchor_distance: float = float(alpha_proxy.get("unit_weapon_anchor_distance_3d", 999.0))
 	_assert(alpha_weapon_anchor_distance >= 0.0 and alpha_weapon_anchor_distance <= 0.52, "Weapon-ready NPC keeps the weapon root on the hand anchor (distance %.3f)" % alpha_weapon_anchor_distance)
 	_assert(_find_entry(Array(snapshot.get("friendly_aim_entries", [])), "unit_id", "unit_bravo").is_empty(), "Lowered looking NPC has no selected weapon/shot line in the fixture")

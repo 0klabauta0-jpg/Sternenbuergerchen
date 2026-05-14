@@ -80,9 +80,9 @@ func _test_fire_sector_overlay_is_explicit_and_sector_based() -> void:
 		var target_entry: Dictionary = _first_dictionary(Array(target_snapshot.get("friendly_aim_entries", [])))
 		var target_origin: Vector2 = Vector2(target_entry.get("origin_position", origin_position))
 		var target_facing_tip: Vector2 = Vector2(target_entry.get("facing_tip_position", target_origin))
-		var expected_direction: Vector2 = (origin_position + Vector2(140.0, 0.0) - target_origin).normalized()
+		var expected_direction: Vector2 = Vector2.LEFT
 		var target_facing_direction: Vector2 = (target_facing_tip - target_origin).normalized()
-		_assert(target_facing_direction.dot(expected_direction) > 0.94, "Friendly sight line prefers active target direction over stale facing metadata")
+		_assert(target_facing_direction.dot(expected_direction) > 0.94, "Friendly sight line stays bound to explicit facing instead of drifting to target metadata")
 
 	controller.call("set_fire_sector_overlay_enabled", false)
 	await _wait_frames(4)

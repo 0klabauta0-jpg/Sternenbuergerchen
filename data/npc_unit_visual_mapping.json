@@ -36,6 +36,7 @@
 			"fallback_anchor": [0.22, 0.84, 0.10],
 			"offset": [0.0, 0.0, 0.0],
 			"visual_offset": [0.0, 0.153, 0.050],
+			"visual_rotation_degrees": [0.0, 180.0, 0.0],
 			"rotation_degrees": [90.0, 90.0, 180.0],
 			"scale": 0.014,
 			"texture_path": "res://Assets/used/npc/blaster_kit/models/Textures/colormap.png"
@@ -229,6 +230,7 @@
 				"fallback_anchor": [0.22, 0.84, 0.10],
 				"offset": [0.0, 0.0, 0.0],
 				"visual_offset": [0.0, 0.105, 0.020],
+				"visual_rotation_degrees": [0.0, 180.0, 0.0],
 				"rotation_degrees": [90.0, 90.0, 180.0],
 				"scale": 0.010
 			}

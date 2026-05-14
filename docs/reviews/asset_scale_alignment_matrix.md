@@ -20,11 +20,11 @@ Diese Matrix sammelt die sichtbaren Groessen-, Socket-, Offset- und Crop-Vertrae
 | Enemy Space Suit Orange | Unit proxy root, HeadSocket, RightHandSocket, BackSocket | 0.22 | Y 0 | gleicher Default-Socket-Vertrag | Headless pruefbar | Manuell: orange/weiss lesbar trennen |
 | Astro Helmet | HeadSocket | max 0.010 | [0, 0, 0] | Offset [0, 0, 0], Visual [0, 0.55, 0] | Headless pruefbar | Manuell: Helm sitzt auf Kopf, nicht im Boden |
 | Military Helmet | HeadSocket | max 0.010 | [0, 0, 0] | gleicher Helm-Vertrag | Headless pruefbar | Manuell: kleine CharacterSmall-Variante pruefen |
-| Standard Rifle / blaster-a | RightHandSocket | 0.014 | [90, 90, 180] | Visual [0, 0.153, 0.050] | Headless pruefbar | Manuell: Lauf nach unten, Griff an Hand |
-| Compact Blaster / blaster-f | RightHandSocket | 0.014 | [90, 90, 180] | Default-Blaster-Offset | Headless pruefbar | Manuell: kleiner Gegner bleibt lesbar |
-| Medictool Blaster / blaster-b | RightHandSocket | 0.014 | [90, 90, 180] | Default-Blaster-Offset | Headless pruefbar | Manuell: als Support-Werkzeug nicht zu gross |
-| Heavy Blaster / blaster-p | RightHandSocket | 0.014 | [90, 90, 180] | Default-Blaster-Offset | Headless pruefbar | Manuell: Heavy darf nicht Helm/Koerper verdecken |
-| Sniper Rifle | RightHandSocket | 0.010 | [90, 90, 180] | Visual [0, 0.105, 0.020] | Headless pruefbar | Manuell: langer Lauf sichtbar vor Hand |
+| Standard Rifle / blaster-a | RightHandSocket | 0.014 | [90, 90, 180], Visual Y 180 | Visual [0, 0.153, 0.050] | Headless pruefbar | Manuell: Lauf nach unten, Griff an Hand |
+| Compact Blaster / blaster-f | RightHandSocket | 0.014 | [90, 90, 180], Visual Y 180 | Default-Blaster-Offset | Headless pruefbar | Manuell: kleiner Gegner bleibt lesbar |
+| Medictool Blaster / blaster-b | RightHandSocket | 0.014 | [90, 90, 180], Visual Y 180 | Default-Blaster-Offset | Headless pruefbar | Manuell: als Support-Werkzeug nicht zu gross |
+| Heavy Blaster / blaster-p | RightHandSocket | 0.014 | [90, 90, 180], Visual Y 180 | Default-Blaster-Offset | Headless pruefbar | Manuell: Heavy darf nicht Helm/Koerper verdecken |
+| Sniper Rifle | RightHandSocket | 0.010 | [90, 90, 180], Visual Y 180 | Visual [0, 0.105, 0.020] | Headless pruefbar | Manuell: langer Lauf sichtbar vor Hand |
 | Rocket Launcher | BackSocket | 0.008 | [0, 90, 0] | Visual [0, 0.120, -0.030] | Headless pruefbar | Manuell: Rueckenmontage ohne Bodenkontakt |
 
 ## Weapon VFX und Audio
