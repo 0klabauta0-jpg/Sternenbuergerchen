@@ -637,6 +637,9 @@ func set_area_order_preview_payload(preview_payload: Dictionary) -> void:
 func _build_order_visual_signature(order_payload: Dictionary) -> String:
 	var parts: PackedStringArray = PackedStringArray()
 	parts.append(var_to_str(order_payload))
+	var orientation_fireteam_ids: PackedStringArray = _get_valid_fireteam_orientation_payload_ids(order_payload)
+	if not orientation_fireteam_ids.is_empty():
+		parts.append("orientation:%s" % _build_live_fireteam_orientation_signature(orientation_fireteam_ids))
 	if bool(order_payload.get("fire_sector_overlay_enabled", false)):
 		var selected_fireteam_ids: PackedStringArray = _get_string_array_from_variant(order_payload.get("selected_fireteam_ids", PackedStringArray()))
 		var unit_parts: Array = []
@@ -686,7 +689,13 @@ func _refresh_dynamic_order_visuals_if_needed() -> void:
 	if _order_payload.is_empty() or _order_root == null:
 		return
 	var selected_fireteam_ids: PackedStringArray = _get_string_array_from_variant(_order_payload.get("selected_fireteam_ids", PackedStringArray()))
-	if selected_fireteam_ids.is_empty() and not bool(_order_payload.get("fire_sector_overlay_enabled", false)) and not bool(_order_payload.get("los_debug_overlay_enabled", false)):
+	var orientation_fireteam_ids: PackedStringArray = _get_valid_fireteam_orientation_payload_ids(_order_payload)
+	if (
+		selected_fireteam_ids.is_empty()
+		and orientation_fireteam_ids.is_empty()
+		and not bool(_order_payload.get("fire_sector_overlay_enabled", false))
+		and not bool(_order_payload.get("los_debug_overlay_enabled", false))
+	):
 		return
 	var now_msec: int = Time.get_ticks_msec()
 	if now_msec - _last_dynamic_order_visual_refresh_msec < DYNAMIC_ORDER_VISUAL_REFRESH_INTERVAL_MSEC:
@@ -702,32 +711,76 @@ func _refresh_dynamic_order_visuals_if_needed() -> void:
 
 func _build_order_dynamic_visual_signature() -> String:
 	var selected_fireteam_ids: PackedStringArray = _get_string_array_from_variant(_order_payload.get("selected_fireteam_ids", PackedStringArray()))
-	if selected_fireteam_ids.is_empty():
+	var orientation_fireteam_ids: PackedStringArray = _get_valid_fireteam_orientation_payload_ids(_order_payload)
+	if selected_fireteam_ids.is_empty() and orientation_fireteam_ids.is_empty():
 		return ""
 	var parts: PackedStringArray = PackedStringArray()
-	parts.append("selected:%s" % ",".join(selected_fireteam_ids))
-	parts.append("fire:%s:%s" % [str(bool(_order_payload.get("fire_sector_overlay_enabled", false))), _get_fire_sector_visual_mode()])
-	parts.append("los_debug:%s:%d" % [str(bool(_order_payload.get("los_debug_overlay_enabled", false))), _contact_payload_apply_count])
-	for unit in _unit_nodes:
-		if unit == null or not (unit is Node2D):
-			continue
-		var fireteam_id: String = _get_unit_fireteam_id(unit)
-		if fireteam_id.is_empty() or not selected_fireteam_ids.has(fireteam_id):
-			continue
-		if not _is_unit_world_visible(unit):
-			continue
-		var unit_id: String = _get_unit_id(unit)
-		var unit_position: Vector2 = (unit as Node2D).global_position
-		var proxy := _unit_proxies_by_id.get(unit_id, null) as Node3D
-		var rotation_y: float = float(proxy.rotation_degrees.y) if proxy != null and is_instance_valid(proxy) else 0.0
-		parts.append("%s:%s:%.1f,%.1f:%.1f" % [
-			unit_id,
-			fireteam_id,
-			unit_position.x,
-			unit_position.y,
-			rotation_y,
-		])
+	if not selected_fireteam_ids.is_empty():
+		parts.append("selected:%s" % ",".join(selected_fireteam_ids))
+		parts.append("fire:%s:%s" % [str(bool(_order_payload.get("fire_sector_overlay_enabled", false))), _get_fire_sector_visual_mode()])
+		parts.append("los_debug:%s:%d" % [str(bool(_order_payload.get("los_debug_overlay_enabled", false))), _contact_payload_apply_count])
+		for unit in _unit_nodes:
+			if unit == null or not (unit is Node2D):
+				continue
+			var fireteam_id: String = _get_unit_fireteam_id(unit)
+			if fireteam_id.is_empty() or not selected_fireteam_ids.has(fireteam_id):
+				continue
+			if not _is_unit_world_visible(unit):
+				continue
+			var unit_id: String = _get_unit_id(unit)
+			var unit_position: Vector2 = (unit as Node2D).global_position
+			var proxy := _unit_proxies_by_id.get(unit_id, null) as Node3D
+			var rotation_y: float = float(proxy.rotation_degrees.y) if proxy != null and is_instance_valid(proxy) else 0.0
+			parts.append("%s:%s:%.1f,%.1f:%.1f" % [
+				unit_id,
+				fireteam_id,
+				unit_position.x,
+				unit_position.y,
+				rotation_y,
+			])
+	if not orientation_fireteam_ids.is_empty():
+		parts.append("orientation:%s" % _build_live_fireteam_orientation_signature(orientation_fireteam_ids))
 	parts.sort()
+	return "|".join(parts)
+
+
+func _get_valid_fireteam_orientation_payload_ids(order_payload: Dictionary) -> PackedStringArray:
+	var result: PackedStringArray = PackedStringArray()
+	var seen: Dictionary = {}
+	for anchor_variant in Array(order_payload.get("fireteam_anchors", [])):
+		if typeof(anchor_variant) != TYPE_DICTIONARY:
+			continue
+		var anchor_dict: Dictionary = Dictionary(anchor_variant)
+		var fireteam_id: String = String(anchor_dict.get("fireteam_id", "")).strip_edges().to_lower()
+		if fireteam_id.is_empty() or seen.has(fireteam_id):
+			continue
+		if typeof(anchor_dict.get("position", null)) != TYPE_VECTOR2:
+			continue
+		if _get_fireteam_orientation_payload_direction(anchor_dict).length_squared() <= 0.0001:
+			continue
+		seen[fireteam_id] = true
+		result.append(fireteam_id)
+	result.sort()
+	return result
+
+
+func _build_live_fireteam_orientation_signature(fireteam_ids: PackedStringArray) -> String:
+	var normalized_ids: PackedStringArray = fireteam_ids.duplicate()
+	normalized_ids.sort()
+	var parts: PackedStringArray = PackedStringArray()
+	for fireteam_id in normalized_ids:
+		var live_state: Dictionary = _resolve_live_fireteam_orientation_state(String(fireteam_id))
+		if live_state.is_empty():
+			parts.append("%s:none" % String(fireteam_id))
+			continue
+		var position: Vector2 = Vector2(live_state.get("position", Vector2.ZERO))
+		var direction: Vector2 = Vector2(live_state.get("heading_direction", Vector2.ZERO))
+		parts.append("%s:%.1f,%.1f:%.4f" % [
+			String(fireteam_id),
+			position.x,
+			position.y,
+			direction.angle() if direction.length_squared() > 0.0001 else 0.0,
+		])
 	return "|".join(parts)
 
 
@@ -3677,21 +3730,20 @@ func _add_movement_state_visual(movement_state: Dictionary) -> void:
 
 
 func _add_fireteam_orientation_visuals(anchor_entries: Array) -> void:
+	var rendered_fireteams: Dictionary = {}
 	for anchor_variant in anchor_entries:
 		if typeof(anchor_variant) != TYPE_DICTIONARY:
 			continue
 		var anchor_dict: Dictionary = Dictionary(anchor_variant)
 		var fireteam_id: String = String(anchor_dict.get("fireteam_id", "")).strip_edges().to_lower()
-		if fireteam_id.is_empty() or typeof(anchor_dict.get("position", null)) != TYPE_VECTOR2:
+		if fireteam_id.is_empty() or rendered_fireteams.has(fireteam_id):
 			continue
-		var heading_variant: Variant = anchor_dict.get("heading_direction", null)
-		if typeof(heading_variant) != TYPE_VECTOR2:
+		var orientation_entry: Dictionary = _resolve_fireteam_orientation_visual_entry(fireteam_id, anchor_dict)
+		if orientation_entry.is_empty():
 			continue
-		var direction: Vector2 = Vector2(heading_variant)
-		if direction.length_squared() <= 0.0001:
-			continue
-		direction = direction.normalized()
-		var origin_position: Vector2 = Vector2(anchor_dict.get("position", Vector2.ZERO))
+		rendered_fireteams[fireteam_id] = true
+		var direction: Vector2 = Vector2(orientation_entry.get("heading_direction", Vector2.ZERO)).normalized()
+		var origin_position: Vector2 = Vector2(orientation_entry.get("position", Vector2.ZERO))
 		var tip_position: Vector2 = origin_position + direction * FIRETEAM_ORIENTATION_LINE_LENGTH_WORLD
 		var line_color: Color = FIRETEAM_ORIENTATION_LINE_COLOR.lerp(_get_fireteam_color(fireteam_id), 0.22)
 		_add_line3d(
@@ -3707,10 +3759,86 @@ func _add_fireteam_orientation_visuals(anchor_entries: Array) -> void:
 			"fireteam_id": fireteam_id,
 			"position": origin_position,
 			"heading_direction": direction,
-			"heading_angle": float(anchor_dict.get("heading_angle", direction.angle())),
-			"heading_source": String(anchor_dict.get("heading_source", "")),
+			"heading_angle": float(orientation_entry.get("heading_angle", direction.angle())),
+			"heading_source": String(orientation_entry.get("heading_source", "")),
 			"tip_position": tip_position,
 		})
+
+
+func _resolve_fireteam_orientation_visual_entry(fireteam_id: String, anchor_dict: Dictionary) -> Dictionary:
+	if fireteam_id.strip_edges().is_empty() or typeof(anchor_dict.get("position", null)) != TYPE_VECTOR2:
+		return {}
+	var direction: Vector2 = _get_fireteam_orientation_payload_direction(anchor_dict)
+	if direction.length_squared() <= 0.0001:
+		return {}
+	var origin_position: Vector2 = Vector2(anchor_dict.get("position", Vector2.ZERO))
+	var heading_source: String = String(anchor_dict.get("heading_source", ""))
+	var live_state: Dictionary = _resolve_live_fireteam_orientation_state(fireteam_id)
+	if typeof(live_state.get("position", null)) == TYPE_VECTOR2:
+		origin_position = Vector2(live_state.get("position", origin_position))
+	if typeof(live_state.get("heading_direction", null)) == TYPE_VECTOR2:
+		var live_direction: Vector2 = Vector2(live_state.get("heading_direction", Vector2.ZERO))
+		if live_direction.length_squared() > 0.0001:
+			direction = live_direction.normalized()
+			heading_source = String(live_state.get("heading_source", "unit_facing_live"))
+	return {
+		"position": origin_position,
+		"heading_direction": direction.normalized(),
+		"heading_angle": direction.angle(),
+		"heading_source": heading_source,
+	}
+
+
+func _get_fireteam_orientation_payload_direction(anchor_dict: Dictionary) -> Vector2:
+	var heading_variant: Variant = anchor_dict.get("heading_direction", null)
+	if typeof(heading_variant) != TYPE_VECTOR2:
+		return Vector2.ZERO
+	var direction: Vector2 = Vector2(heading_variant)
+	if direction.length_squared() <= 0.0001:
+		return Vector2.ZERO
+	return direction.normalized()
+
+
+func _resolve_live_fireteam_orientation_state(fireteam_id: String) -> Dictionary:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return {}
+	var position_sum: Vector2 = Vector2.ZERO
+	var visible_unit_count: int = 0
+	var direction: Vector2 = Vector2.ZERO
+	var heading_source: String = ""
+	for unit in _unit_nodes:
+		if unit == null or not (unit is Node2D):
+			continue
+		if _get_unit_fireteam_id(unit) != normalized_fireteam_id:
+			continue
+		if not _is_unit_world_visible(unit):
+			continue
+		var unit_position: Vector2 = (unit as Node2D).global_position
+		position_sum += unit_position
+		visible_unit_count += 1
+		if direction.length_squared() > 0.0001:
+			continue
+		var explicit_direction: Vector2 = _resolve_unit_explicit_facing_direction(unit)
+		if explicit_direction.length_squared() > 0.0001:
+			direction = explicit_direction.normalized()
+			heading_source = "unit_facing_live"
+			continue
+		var proxy := _unit_proxies_by_id.get(_get_unit_id(unit), null) as Node3D
+		var motion_direction: Vector2 = _resolve_unit_motion_or_target_direction(proxy, unit, unit_position)
+		if motion_direction.length_squared() > 0.0001:
+			direction = motion_direction.normalized()
+			heading_source = "unit_motion_live"
+	if visible_unit_count <= 0:
+		return {}
+	var result: Dictionary = {
+		"position": position_sum / float(visible_unit_count),
+	}
+	if direction.length_squared() > 0.0001:
+		result["heading_direction"] = direction.normalized()
+		result["heading_angle"] = direction.angle()
+		result["heading_source"] = heading_source
+	return result
 
 
 func _add_movement_group_markers(movement_state: Dictionary, origin_position: Vector2, target_position: Vector2, color: Color) -> void:

@@ -154,6 +154,7 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 	var alpha_weapon_anchor_distance: float = float(alpha_proxy.get("unit_weapon_anchor_distance_3d", 999.0))
 	_assert(alpha_weapon_anchor_distance >= 0.0 and alpha_weapon_anchor_distance <= 0.52, "Weapon-ready NPC keeps the weapon root on the hand anchor (distance %.3f)" % alpha_weapon_anchor_distance)
 	_assert(_find_entry(Array(snapshot.get("friendly_aim_entries", [])), "unit_id", "unit_bravo").is_empty(), "Lowered looking NPC has no selected weapon/shot line in the fixture")
+	await _assert_live_facing_updates_primary_view_visuals(controller, primary_view, unit_alpha as Node2D)
 
 	controller.call("_set_selected_fireteams", PackedStringArray(["look"]), false)
 	controller.call("_refresh_order_visuals")
@@ -174,6 +175,58 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 
 	scene.queue_free()
 	await _wait_frames(2)
+
+
+func _assert_live_facing_updates_primary_view_visuals(controller: Node, primary_view: Node, unit_alpha: Node2D) -> void:
+	if controller == null or primary_view == null or unit_alpha == null:
+		_assert(false, "Primary3DView live facing verifier receives controller, view and unit")
+		return
+	var original_position: Vector2 = unit_alpha.global_position
+	var original_facing: float = float(unit_alpha.get_meta("facing_angle", 0.0)) if unit_alpha.has_meta("facing_angle") else 0.0
+	var had_original_facing: bool = unit_alpha.has_meta("facing_angle")
+	var original_map_facing: float = float(unit_alpha.get_meta("map_facing_angle", 0.0)) if unit_alpha.has_meta("map_facing_angle") else 0.0
+	var had_original_map_facing: bool = unit_alpha.has_meta("map_facing_angle")
+	var original_target: Variant = unit_alpha.call("get_target_position") if unit_alpha.has_method("get_target_position") else null
+
+	unit_alpha.global_position = original_position + Vector2(96.0, 0.0)
+	unit_alpha.set_meta("facing_angle", Vector2.RIGHT.angle())
+	if unit_alpha.has_method("set_target_position"):
+		unit_alpha.call("set_target_position", unit_alpha.global_position)
+	primary_view.call("_sync_unit_proxies", true)
+	await create_timer(0.14).timeout
+	await _wait_frames(4)
+
+	var live_snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
+	var live_orientation: Dictionary = _find_entry(Array(live_snapshot.get("fireteam_orientation_entries", [])), "fireteam_id", "aim")
+	_assert(
+		not live_orientation.is_empty() and Vector2(live_orientation.get("heading_direction", Vector2.ZERO)).dot(Vector2.RIGHT) > 0.98,
+		"Primary3DView orientation visual uses current live unit facing while order payload is stale"
+	)
+	_assert(
+		String(live_orientation.get("heading_source", "")) == "unit_facing_live",
+		"Primary3DView render snapshot marks live unit facing as orientation source"
+	)
+	var live_fire_entry: Dictionary = _find_entry(Array(live_snapshot.get("friendly_aim_entries", [])), "unit_id", "unit_alpha")
+	var live_weapon_direction: Vector2 = (Vector2(live_fire_entry.get("tip_position", Vector2.ZERO)) - Vector2(live_fire_entry.get("origin_position", Vector2.ZERO))).normalized()
+	_assert(
+		not live_fire_entry.is_empty() and live_weapon_direction.dot(Vector2.RIGHT) > 0.90,
+		"Weapon/shot line follows live facing during movement instead of stale anchor payload"
+	)
+
+	unit_alpha.global_position = original_position
+	if had_original_facing:
+		unit_alpha.set_meta("facing_angle", original_facing)
+	elif unit_alpha.has_meta("facing_angle"):
+		unit_alpha.remove_meta("facing_angle")
+	if had_original_map_facing:
+		unit_alpha.set_meta("map_facing_angle", original_map_facing)
+	elif unit_alpha.has_meta("map_facing_angle"):
+		unit_alpha.remove_meta("map_facing_angle")
+	if unit_alpha.has_method("set_target_position"):
+		unit_alpha.call("set_target_position", original_target)
+	primary_view.call("_sync_unit_proxies", true)
+	controller.call("_refresh_order_visuals")
+	await _wait_frames(4)
 
 
 func _compass_label_text(primary_view: Node, marker_id: String) -> String:

@@ -21,6 +21,7 @@ Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie,
 - Fireteam-Mini-Karten ueber dem read-only Tactical-Event-Log halten, damit auch die untere Karte direkt klickbar bleibt.
 - Primary3DView-Proxy-/Weapon-Pose nutzt explizites Facing und Runtime-Movement-Facing vor Fire-Event-/Target-Fallbacks.
 - Der importierte Walk-Clip darf keine eigene Heading-Control-Rotation ueber die Runtime-Facing-Achse legen.
+- Primary3DView-Fireteam-Orientation liest bei gueltigem vorhandenen Anchor-Payload die aktuelle Unit-Position und das aktuelle Unit-Facing live aus den registrierten Unit-Nodes, damit Bewegung keine stale Sichtlinie zeichnet.
 - Headless-Verifier fuer Map, Szene, Compass-Marker, Posture und Render-Snapshot.
 
 ## Nicht-Ziele
@@ -58,6 +59,7 @@ Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie,
 - [x] Die untere Fireteam-Mini-Karte bleibt vor dem Event-Log klickbar.
 - [x] Modell- und Weapon-Pose priorisieren Facing-/Movement-Richtung vor alten Fire-Event-/Target-Fallbacks.
 - [x] Die Walk-Animation entfernt die importierte `HipsCtrl`-Heading-Rotation, damit das Modell beim Gehen der Lauf-/Facing-Richtung nicht den Ruecken zudreht.
+- [x] Primary3DView rendert Fireteam-Orientation bei Bewegung aus aktueller Unit-Position und aktuellem Unit-Facing statt aus stale Anchor-Richtung.
 - [x] Fireteam-Orientation/Facing und Fire-Sector/Weapon-Linie laufen ueber die bestehenden Primary3DView-Snapshots.
 - [x] Die sichtbaren Debug-Visuals erzeugen keine SimulationRoot-Commands oder -Effects.
 
