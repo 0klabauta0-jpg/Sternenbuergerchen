@@ -21,6 +21,7 @@ Dieser Contract verankert den bestehenden Weg fuer Unit-Facing, Sichtlinie, Waff
 
 ## Waffenanker
 - Das Waffen-Root bleibt am Socket (`RightHandSocket` oder Loadout-Socket). Aim-/Ready-Pose darf Rotation/Pitch und Child-Yaw setzen, aber den Root nicht vom Socket weg verschieben.
+- Die sichtbare Aim-/Anschlag-Pose kommt aus dem vorhandenen importierten `0_Targeting Pose`-Clip und wird im Primary3DView nur auf Oberkoerper-/Arm-Bones gelegt. Idle/Walk bleiben Basisanimationen; die Unit-Animation laeuft im bestehenden Visualpfad kontrolliert, damit die Aim-Pose nicht wieder von der Laufanimation ueberschrieben wird.
 - Asset-Pivot-Korrekturen gehoeren in die bestehende Attachment-Visual-Schicht (`visual_offset`, `visual_rotation_degrees`) und nicht in Runtime-Posture-Offsets.
 - Die sichtbare Fire-Sector-/Weapon-Linie darf am sichtbaren Weapon-Visual beginnen, aber nicht durch einen verschobenen Gameplay-Anker eine zweite Schussrichtung erzeugen.
 
@@ -29,6 +30,6 @@ Dieser Contract verankert den bestehenden Weg fuer Unit-Facing, Sichtlinie, Waff
 - Enemy-Proxies laufen durch denselben Primary3DView-Unit-Proxy-Pfad wie Friendly-Proxies; es gibt keine separate Gegner-Modellrotation.
 
 ## Regressionen
-- `task_401_facing_sightline_debug_map.gd` prueft Friendly-Facing, Move-Commands, Skeleton-Forward, Weapon-/Shot-Linie und Waffenroot am Socket.
-- `task_344_ground_mission_default_enemy_visuals.gd` prueft Enemy-Fire-Events gegen sichtbares Skeleton-Facing und Waffenroot am Socket.
+- `task_401_facing_sightline_debug_map.gd` prueft Friendly-Facing, Move-Commands, Skeleton-Forward, Weapon-/Shot-Linie, Waffenroot am Socket und die angelegte Oberkoerper-/Waffenhand-Pose.
+- `task_344_ground_mission_default_enemy_visuals.gd` prueft Enemy-Fire-Events gegen sichtbares Skeleton-Facing, Waffenroot am Socket und die angelegte Oberkoerper-/Waffenhand-Pose.
 - `task_364_mission_fireteam_orientation_indicators.gd`, `bugfix_mission_fire_sector_overlay.gd`, `task_371_fire_sector_security_arc_overlay_toggle.gd` und `task_372_mission_los_debug_overlay_toggle.gd` sichern die bestehenden Overlay-Pfade.

@@ -27,7 +27,7 @@ func _apply_fixture() -> void:
 
 	_place_fixture_units(aimed_unit, look_unit)
 	_configure_aimed_unit(aimed_unit)
-	_configure_look_unit(look_unit)
+	_configure_south_aimed_unit(look_unit)
 
 	if controller.has_method("_set_selected_fireteams"):
 		controller.call("_set_selected_fireteams", PackedStringArray([AIM_FIRETEAM_ID]), false)
@@ -89,24 +89,28 @@ func _configure_aimed_unit(unit: Node) -> void:
 		unit.call("set_target_position", weapon_target)
 
 
-func _configure_look_unit(unit: Node) -> void:
+func _configure_south_aimed_unit(unit: Node) -> void:
 	if unit == null:
 		return
 	unit.set_meta("facing_angle", deg_to_rad(90.0))
+	var origin: Vector2 = (unit as Node2D).global_position if unit is Node2D else Vector2.ZERO
+	var weapon_target: Vector2 = origin + Vector2(0.0, 384.0)
 	if unit.has_method("set_runtime_status"):
 		unit.call(
 			"set_runtime_status",
-			"idle",
-			"",
-			0,
+			"engaging",
+			"engage",
+			2,
 			"fire_at_will",
 			"facing_sightline_debug_fixture",
 			1.0,
 			0.0,
 			0.0,
 			1,
-			null,
-			"idle",
-			"lowered",
-			"debug_lowered"
+			weapon_target,
+			"engage",
+			"aimed",
+			"debug_aimed_south"
 		)
+	elif unit.has_method("set_target_position"):
+		unit.call("set_target_position", weapon_target)

@@ -73,10 +73,10 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 	var alpha_status: Dictionary = Dictionary(unit_alpha.call("get_runtime_status").call("to_dict"))
 	var bravo_status: Dictionary = Dictionary(unit_bravo.call("get_runtime_status").call("to_dict"))
 	_assert(String(unit_alpha.call("get_fireteam_id")) == "aim" and String(unit_bravo.call("get_fireteam_id")) == "look", "NPCs use the fixture fireteam IDs")
-	_assert(String(alpha_status.get("weapon_posture", "")) == "aimed", "Weapon-ready NPC uses existing runtime weapon_posture=aimed")
-	_assert(String(bravo_status.get("weapon_posture", "")) == "lowered", "Looking NPC uses existing runtime weapon_posture=lowered")
-	_assert(String(alpha_status.get("movement_posture", "")) == "engage", "Weapon-ready NPC uses engage posture")
-	_assert(String(bravo_status.get("movement_posture", "")) == "idle", "Looking NPC stays idle with weapon lowered")
+	_assert(String(alpha_status.get("weapon_posture", "")) == "aimed", "North NPC uses existing runtime weapon_posture=aimed")
+	_assert(String(bravo_status.get("weapon_posture", "")) == "aimed", "South NPC uses existing runtime weapon_posture=aimed")
+	_assert(String(alpha_status.get("movement_posture", "")) == "engage", "North NPC uses engage posture")
+	_assert(String(bravo_status.get("movement_posture", "")) == "engage", "South NPC uses engage posture")
 	_assert((unit_alpha as Node2D).global_position.distance_to((unit_bravo as Node2D).global_position) >= 200.0, "Fixture NPCs stand far enough apart for manual sightline checks")
 
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
@@ -121,10 +121,10 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 	var proxy_state_by_id: Dictionary = Dictionary(snapshot.get("unit_proxy_state_by_id", {}))
 	var alpha_proxy: Dictionary = Dictionary(proxy_state_by_id.get("unit_alpha", {}))
 	var bravo_proxy: Dictionary = Dictionary(proxy_state_by_id.get("unit_bravo", {}))
-	_assert(String(alpha_proxy.get("unit_weapon_posture", "")) == "aimed", "Rendered weapon NPC exposes aimed proxy posture")
-	_assert(String(bravo_proxy.get("unit_weapon_posture", "")) == "lowered", "Rendered looking NPC exposes lowered proxy posture")
+	_assert(String(alpha_proxy.get("unit_weapon_posture", "")) == "aimed", "Rendered north NPC exposes aimed proxy posture")
+	_assert(String(bravo_proxy.get("unit_weapon_posture", "")) == "aimed", "Rendered south NPC exposes aimed proxy posture")
 	_assert(absf(float(alpha_proxy.get("unit_model_root_rotation_y_degrees", 0.0)) - 270.0) < 0.1, "Aimed NPC model root corrects the imported character forward axis")
-	_assert(absf(float(bravo_proxy.get("unit_model_root_rotation_y_degrees", 0.0)) - 270.0) < 0.1, "Lowered NPC model root corrects the imported character forward axis")
+	_assert(absf(float(bravo_proxy.get("unit_model_root_rotation_y_degrees", 0.0)) - 270.0) < 0.1, "South aimed NPC model root corrects the imported character forward axis")
 	_assert(int(snapshot.get("unit_animation_heading_sanitized_track_count", 0)) >= 2, "Walk animations strip imported heading-control rotation tracks for live NPC proxies")
 	var alpha_proxy_node := _find_proxy_node_by_unit_id(primary_view, "unit_alpha") as Node3D
 	var alpha_animation_player := _find_unit_visual_animation_player(alpha_proxy_node)
@@ -139,7 +139,7 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 	var look_orientation: Dictionary = _find_entry(orientation_entries, "fireteam_id", "look")
 	_assert(int(snapshot.get("fireteam_orientation_visual_count", 0)) >= 2, "Existing orientation overlay draws Facing/Sichtlinie arrows for both NPCs")
 	_assert(not aim_orientation.is_empty() and Vector2(aim_orientation.get("heading_direction", Vector2.ZERO)).dot(Vector2.UP) > 0.98, "Aimed NPC facing/sightline arrow points north from facing metadata")
-	_assert(not look_orientation.is_empty() and Vector2(look_orientation.get("heading_direction", Vector2.ZERO)).dot(Vector2.DOWN) > 0.98, "Lowered NPC facing/sightline arrow points south from facing metadata")
+	_assert(not look_orientation.is_empty() and Vector2(look_orientation.get("heading_direction", Vector2.ZERO)).dot(Vector2.DOWN) > 0.98, "South aimed NPC facing/sightline arrow points south from facing metadata")
 
 	var fire_sector: Dictionary = Dictionary(controller.call("get_fire_sector_overlay_snapshot"))
 	_assert(bool(fire_sector.get("enabled", false)), "Fixture enables the existing fire-sector overlay automatically")
@@ -147,19 +147,22 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 	_assert(bool(snapshot.get("friendly_fire_sector_overlay_enabled", false)), "Primary3DView receives the fire-sector overlay toggle")
 	_assert(int(snapshot.get("friendly_fire_sector_los_line_count", 0)) >= 1, "Existing fire-sector LOS path draws the visible weapon/shot line")
 	var aim_fire_entry: Dictionary = _find_entry(Array(snapshot.get("friendly_aim_entries", [])), "unit_id", "unit_alpha")
-	_assert(not aim_fire_entry.is_empty(), "Weapon-ready NPC owns the visible weapon/shot line entry")
+	_assert(not aim_fire_entry.is_empty(), "North aimed NPC owns the visible weapon/shot line entry")
 	_assert(String(aim_fire_entry.get("visual_shape", "")) == "los_line", "Weapon/shot line uses the existing LOS-line visual shape")
 	_assert(String(aim_fire_entry.get("line_origin_anchor", "")) == "weapon_visual", "Weapon/shot line starts at the raised weapon visual anchor")
 	var weapon_direction: Vector2 = (Vector2(aim_fire_entry.get("tip_position", Vector2.ZERO)) - Vector2(aim_fire_entry.get("origin_position", Vector2.ZERO))).normalized()
 	_assert(weapon_direction.dot(Vector2.UP) > 0.90, "Weapon/shot line follows the north-facing sightline instead of the authored target")
-	_assert(bool(alpha_proxy.get("unit_aim_pose_weapon_node_available", false)), "Weapon-ready NPC exposes an attached weapon visual")
-	_assert(bool(alpha_proxy.get("unit_aim_pose_yaw_active", false)), "Weapon-ready NPC applies the existing aim direction to the weapon pose")
-	_assert(absf(float(alpha_proxy.get("unit_aim_pose_yaw_delta_degrees", 0.0))) <= 1.0, "Weapon-ready NPC binds weapon yaw to the same facing direction as the sightline")
+	_assert(bool(alpha_proxy.get("unit_aim_pose_weapon_node_available", false)), "North aimed NPC exposes an attached weapon visual")
+	_assert(bool(alpha_proxy.get("unit_aim_pose_yaw_active", false)), "North aimed NPC applies the existing aim direction to the weapon pose")
+	_assert(absf(float(alpha_proxy.get("unit_aim_pose_yaw_delta_degrees", 0.0))) <= 1.0, "North aimed NPC binds weapon yaw to the same facing direction as the sightline")
+	_assert(bool(alpha_proxy.get("unit_weapon_upper_body_pose_active", false)), "North aimed NPC applies the existing targeting upper-body pose")
+	_assert(int(alpha_proxy.get("unit_weapon_upper_body_pose_bone_count", 0)) >= 8, "North aimed NPC drives enough upper-body bones for a visible weapon-up pose")
 	var alpha_weapon_anchor_distance: float = float(alpha_proxy.get("unit_weapon_anchor_distance_3d", 999.0))
-	_assert(alpha_weapon_anchor_distance >= 0.0 and alpha_weapon_anchor_distance <= 0.52, "Weapon-ready NPC keeps the weapon root on the hand anchor (distance %.3f)" % alpha_weapon_anchor_distance)
+	_assert(alpha_weapon_anchor_distance >= 0.0 and alpha_weapon_anchor_distance <= 0.52, "North aimed NPC keeps the weapon root on the hand anchor (distance %.3f)" % alpha_weapon_anchor_distance)
 	alpha_proxy_node = _find_proxy_node_by_unit_id(primary_view, "unit_alpha") as Node3D
-	_assert_weapon_root_stays_on_socket(alpha_proxy_node, "Weapon-ready NPC keeps the weapon root position on the hand socket while aimed")
-	_assert(_find_entry(Array(snapshot.get("friendly_aim_entries", [])), "unit_id", "unit_bravo").is_empty(), "Lowered looking NPC has no selected weapon/shot line in the fixture")
+	_assert_weapon_root_stays_on_socket(alpha_proxy_node, "North aimed NPC keeps the weapon root position on the hand socket while aimed")
+	_assert_aim_pose_raises_weapon_hand(alpha_proxy_node, "North aimed NPC raises the weapon hand above the chest")
+	_assert(_find_entry(Array(snapshot.get("friendly_aim_entries", [])), "unit_id", "unit_bravo").is_empty(), "Unselected south aimed NPC has no selected weapon/shot line in the fixture")
 	await _assert_live_facing_updates_primary_view_visuals(controller, primary_view, unit_alpha as Node2D)
 
 	controller.call("_set_selected_fireteams", PackedStringArray(["look"]), false)
@@ -167,10 +170,14 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 	await _wait_frames(6)
 	var look_selected_snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 	var look_fire_entry: Dictionary = _find_entry(Array(look_selected_snapshot.get("friendly_aim_entries", [])), "unit_id", "unit_bravo")
-	_assert(not look_fire_entry.is_empty(), "Selecting the lowered NPC uses the existing fire-sector path")
+	_assert(not look_fire_entry.is_empty(), "Selecting the south aimed NPC uses the existing fire-sector path")
+	var look_proxy_state: Dictionary = Dictionary(Dictionary(look_selected_snapshot.get("unit_proxy_state_by_id", {})).get("unit_bravo", {}))
+	_assert(bool(look_proxy_state.get("unit_weapon_upper_body_pose_active", false)), "South aimed NPC applies the existing targeting upper-body pose")
 	var look_weapon_direction: Vector2 = (Vector2(look_fire_entry.get("tip_position", Vector2.ZERO)) - Vector2(look_fire_entry.get("origin_position", Vector2.ZERO))).normalized()
-	_assert(look_weapon_direction.dot(Vector2.DOWN) > 0.90, "Selected lowered NPC weapon/target line overlaps its south-facing sightline")
+	_assert(look_weapon_direction.dot(Vector2.DOWN) > 0.90, "Selected south aimed NPC weapon/target line overlaps its south-facing sightline")
+	_assert(String(look_fire_entry.get("line_origin_anchor", "")) == "weapon_visual", "South aimed NPC weapon/shot line starts at the raised weapon visual anchor")
 	_assert(_find_entry(Array(look_selected_snapshot.get("friendly_aim_entries", [])), "unit_id", "unit_alpha").is_empty(), "Switching selection removes the upper NPC weapon/shot line")
+	_assert_aim_pose_raises_weapon_hand(_find_proxy_node_by_unit_id(primary_view, "unit_bravo") as Node3D, "South aimed NPC raises the weapon hand above the chest")
 	await _assert_moving_units_keep_model_forward_on_live_lines(simulation_root, controller, primary_view, unit_alpha as Node2D, unit_bravo as Node2D)
 
 	var command_count_before: int = simulation_root.command_queue.size()
@@ -265,6 +272,9 @@ func _enqueue_debug_move_command(simulation_root: Node, unit: Node2D, target_pos
 	command.move_speed_factor = 1.0
 	command.priority = 99
 	command.source_command_type = "task_401_movement_facing_verifier"
+	command.movement_posture = "engage"
+	command.weapon_posture = "aimed"
+	command.posture_policy_id = "debug_aimed"
 	command.phase = 1
 	unit.call("assign_unit_command", command)
 	simulation_root.call("enqueue_command", command.to_dict())
@@ -290,6 +300,7 @@ func _assert_moving_unit_forward_sample(primary_view: Node, snapshot: Dictionary
 			aim_direction.dot(heading_direction.normalized()) > 0.90,
 			"%s moving weapon/shot line follows the same live heading at frame %d" % [unit_id, frame_index]
 		)
+		_assert_aim_pose_raises_weapon_hand(proxy, "%s moving aimed pose keeps the weapon hand raised at frame %d" % [unit_id, frame_index])
 
 
 func _assert_unit_model_forward_matches_runtime_facing(primary_view: Node, unit: Node2D, unit_id: String) -> void:
@@ -361,6 +372,21 @@ func _assert_weapon_root_stays_on_socket(proxy: Node3D, message: String) -> void
 		return
 	var base_position: Vector3 = _get_vector3_meta(weapon_node, "unit_aim_pose_base_position", weapon_node.position)
 	_assert(weapon_node.position.distance_to(base_position) <= 0.002, "%s (offset %.4f)" % [message, weapon_node.position.distance_to(base_position)])
+
+
+func _assert_aim_pose_raises_weapon_hand(proxy: Node3D, message: String) -> void:
+	var skeleton := _find_skeleton3d(proxy)
+	if skeleton == null:
+		_assert(false, "%s has a Skeleton3D" % message)
+		return
+	var right_hand_index: int = skeleton.find_bone("RightHand")
+	var chest_index: int = skeleton.find_bone("Chest")
+	if right_hand_index < 0 or chest_index < 0:
+		_assert(false, "%s has RightHand and Chest bones" % message)
+		return
+	var right_hand: Vector3 = skeleton.get_bone_global_pose(right_hand_index).origin
+	var chest: Vector3 = skeleton.get_bone_global_pose(chest_index).origin
+	_assert(right_hand.z > chest.z + 0.001, "%s (hand %.4f, chest %.4f)" % [message, right_hand.z, chest.z])
 
 
 func _find_unit_blaster_visual_node(node: Node) -> Node3D:

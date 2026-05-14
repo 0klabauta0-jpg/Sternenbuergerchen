@@ -134,6 +134,27 @@ const FOW_EXPLORED_DIM_COLOR: Color = Color(0.02, 0.04, 0.06, 0.62)
 const FOW_UNKNOWN_BLACK_COLOR: Color = Color(0.0, 0.0, 0.0, 1.0)
 const UNIT_AIM_POSE_WEAPON_PITCH_DEGREES: float = -30.0
 const UNIT_READY_POSE_WEAPON_PITCH_DEGREES: float = -14.0
+const UNIT_AIM_POSE_ANIMATION_NAME: String = "targeting_pose"
+const UNIT_AIM_POSE_SOURCE_TOKEN: String = "targeting pose"
+const UNIT_AIM_POSE_UPPER_BODY_BONES: PackedStringArray = [
+	"Spine",
+	"Chest",
+	"UpperChest",
+	"LeftArm",
+	"RightArm",
+	"LeftForeArm",
+	"RightForeArm",
+	"LeftHand",
+	"RightHand",
+	"LeftHandThumb1",
+	"RightHandThumb1",
+	"LeftHandThumb2",
+	"RightHandThumb2",
+	"LeftHandIndex2",
+	"RightHandIndex2",
+	"LeftHandIndex3",
+	"RightHandIndex3",
+]
 const UNIT_LOCOMOTION_HEADING_ANIMATION_NAMES: PackedStringArray = ["walk"]
 const UNIT_LOCOMOTION_HEADING_CONTROL_BONES: PackedStringArray = ["HipsCtrl", "Hips"]
 const EDITOR_EMPTY_BACKGROUND_COLOR: Color = Color(0.12, 0.13, 0.12, 1.0)
@@ -5740,7 +5761,7 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 				changed = true
 			proxy.rotation_degrees.y = next_rotation_y
 		proxy.set_meta("last_rotation_y", proxy.rotation_degrees.y)
-		if _update_unit_visual_animation(proxy, unit_is_moving, displayed_weapon_posture == "aimed"):
+		if _update_unit_visual_animation(proxy, unit_is_moving, not active_fire_event.is_empty(), delta):
 			changed = true
 		if _update_unit_weapon_aim_pose(proxy, active_fire_event, displayed_weapon_posture, weapon_pose_direction):
 			changed = true
@@ -6189,6 +6210,7 @@ func _setup_unit_visual_animation(proxy_root: Node3D, model_root: Node3D, model_
 		return true
 	var animation_player := AnimationPlayer.new()
 	animation_player.name = "UnitVisualAnimationPlayer"
+	animation_player.set("callback_mode_process", AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL)
 	var library := AnimationLibrary.new()
 	var expected_count: int = 0
 	var imported_count: int = 0
@@ -6210,6 +6232,13 @@ func _setup_unit_visual_animation(proxy_root: Node3D, model_root: Node3D, model_
 		animation_player.set_meta("source_animation_%s" % animation_name, String(duplicated.get_meta("source_animation_name", "")))
 		library.add_animation(animation_name, duplicated)
 		imported_count += 1
+	var targeting_animation: Animation = _load_unit_targeting_pose_animation(animation_paths)
+	if targeting_animation != null:
+		var targeting_duplicate := targeting_animation.duplicate(true) as Animation
+		if targeting_duplicate != null:
+			targeting_duplicate.loop_mode = Animation.LOOP_NONE
+			library.add_animation(UNIT_AIM_POSE_ANIMATION_NAME, targeting_duplicate)
+			proxy_root.set_meta("unit_weapon_upper_body_pose_animation_available", true)
 	if imported_count > 0:
 		proxy_root.set_meta("unit_animation_heading_sanitized_track_count", heading_sanitized_track_count)
 		animation_player.set_meta("unit_animation_heading_sanitized_track_count", heading_sanitized_track_count)
@@ -6229,6 +6258,31 @@ func _setup_unit_visual_animation(proxy_root: Node3D, model_root: Node3D, model_
 	return true
 
 
+func _load_unit_targeting_pose_animation(animation_paths: Dictionary) -> Animation:
+	for animation_path_variant in animation_paths.values():
+		var animation_path: String = String(animation_path_variant).strip_edges()
+		if animation_path.is_empty():
+			continue
+		var animation: Animation = _load_targeting_pose_animation_from_scene(animation_path)
+		if animation != null:
+			return animation
+	return null
+
+
+func _load_targeting_pose_animation_from_scene(animation_scene_path: String) -> Animation:
+	if not ResourceLoader.exists(animation_scene_path):
+		return null
+	var animation_scene := _get_asset_model_scene_by_path(animation_scene_path)
+	if animation_scene == null:
+		return null
+	var animation_root := animation_scene.instantiate()
+	if animation_root == null:
+		return null
+	var animation: Animation = _find_targeting_pose_animation(animation_root)
+	animation_root.free()
+	return animation
+
+
 func _load_animation_from_scene(animation_scene_path: String, preferred_animation_name: String = "") -> Animation:
 	if not ResourceLoader.exists(animation_scene_path):
 		return null
@@ -6241,6 +6295,25 @@ func _load_animation_from_scene(animation_scene_path: String, preferred_animatio
 	var animation: Animation = _find_best_animation(animation_root, preferred_animation_name)
 	animation_root.free()
 	return animation
+
+
+func _find_targeting_pose_animation(node: Node) -> Animation:
+	var animation_player := node as AnimationPlayer
+	if animation_player != null:
+		for animation_name in animation_player.get_animation_list():
+			var name_text: String = String(animation_name)
+			var normalized_name: String = name_text.strip_edges().to_lower()
+			if normalized_name.find(UNIT_AIM_POSE_SOURCE_TOKEN) < 0:
+				continue
+			var animation := animation_player.get_animation(name_text)
+			if animation != null:
+				animation.set_meta("source_animation_name", name_text)
+				return animation
+	for child in node.get_children():
+		var child_animation: Animation = _find_targeting_pose_animation(child)
+		if child_animation != null:
+			return child_animation
+	return null
 
 
 func _find_best_animation(node: Node, preferred_animation_name: String = "") -> Animation:
@@ -6301,7 +6374,7 @@ func _is_unit_locomotion_heading_control_track(track_path: String) -> bool:
 	return false
 
 
-func _update_unit_visual_animation(proxy: Node3D, is_moving: bool, is_firing: bool = false) -> bool:
+func _update_unit_visual_animation(proxy: Node3D, is_moving: bool, is_firing: bool = false, delta: float = -1.0) -> bool:
 	var animation_player: AnimationPlayer = _find_unit_visual_animation_player(proxy)
 	if animation_player == null:
 		return false
@@ -6313,10 +6386,12 @@ func _update_unit_visual_animation(proxy: Node3D, is_moving: bool, is_firing: bo
 				break
 	if not animation_player.has_animation(desired_animation):
 		return false
-	if animation_player.current_animation == desired_animation and animation_player.is_playing():
-		return false
-	animation_player.play(desired_animation)
-	return true
+	var changed: bool = false
+	if animation_player.current_animation != desired_animation or not animation_player.is_playing():
+		animation_player.play(desired_animation)
+		changed = true
+	animation_player.advance(maxf(delta, 0.0))
+	return changed
 
 
 func _update_unit_weapon_aim_pose(proxy: Node3D, active_fire_event: Dictionary, weapon_posture: String = "lowered", aim_direction: Vector2 = Vector2.ZERO) -> bool:
@@ -6339,6 +6414,8 @@ func _update_unit_weapon_aim_pose(proxy: Node3D, active_fire_event: Dictionary, 
 		changed = true
 	if bool(proxy.get_meta("unit_aim_pose_yaw_active", false)) != has_aim_yaw:
 		proxy.set_meta("unit_aim_pose_yaw_active", has_aim_yaw)
+		changed = true
+	if _update_unit_weapon_upper_body_pose(proxy, normalized_weapon_posture):
 		changed = true
 	if weapon_node == null:
 		return changed
@@ -6372,6 +6449,130 @@ func _update_unit_weapon_aim_pose(proxy: Node3D, active_fire_event: Dictionary, 
 	if _update_unit_weapon_child_aim_yaw(weapon_node, aim_yaw_delta_degrees, has_aim_yaw):
 		changed = true
 	return changed
+
+
+func _update_unit_weapon_upper_body_pose(proxy: Node3D, weapon_posture: String) -> bool:
+	if proxy == null:
+		return false
+	var normalized_weapon_posture: String = _normalize_unit_weapon_posture(weapon_posture)
+	var should_apply_pose: bool = normalized_weapon_posture == "aimed"
+	var skeleton: Skeleton3D = _find_first_skeleton(proxy)
+	var animation_player: AnimationPlayer = _find_unit_visual_animation_player(proxy)
+	var pose_animation: Animation = animation_player.get_animation(UNIT_AIM_POSE_ANIMATION_NAME) if animation_player != null and animation_player.has_animation(UNIT_AIM_POSE_ANIMATION_NAME) else null
+	var changed: bool = false
+	if skeleton == null or animation_player == null or pose_animation == null:
+		changed = _reset_unit_weapon_upper_body_pose(proxy, skeleton) or changed
+		changed = _set_proxy_bool_meta(proxy, "unit_weapon_upper_body_pose_animation_available", false) or changed
+		changed = _set_proxy_int_meta(proxy, "unit_weapon_upper_body_pose_bone_count", 0) or changed
+		changed = _set_proxy_string_meta(proxy, "unit_weapon_upper_body_pose_source_animation", "") or changed
+		return changed
+	changed = _set_proxy_bool_meta(proxy, "unit_weapon_upper_body_pose_animation_available", true) or changed
+	if not should_apply_pose:
+		changed = _reset_unit_weapon_upper_body_pose(proxy, skeleton) or changed
+		changed = _set_proxy_int_meta(proxy, "unit_weapon_upper_body_pose_bone_count", 0) or changed
+		changed = _set_proxy_string_meta(proxy, "unit_weapon_upper_body_pose_source_animation", String(pose_animation.get_meta("source_animation_name", UNIT_AIM_POSE_ANIMATION_NAME))) or changed
+		return changed
+	var applied_count: int = _apply_unit_weapon_upper_body_pose_from_animation(skeleton, pose_animation)
+	changed = _set_proxy_bool_meta(proxy, "unit_weapon_upper_body_pose_active", applied_count > 0) or changed
+	changed = _set_proxy_int_meta(proxy, "unit_weapon_upper_body_pose_bone_count", applied_count) or changed
+	changed = _set_proxy_string_meta(proxy, "unit_weapon_upper_body_pose_source_animation", String(pose_animation.get_meta("source_animation_name", UNIT_AIM_POSE_ANIMATION_NAME))) or changed
+	return changed
+
+
+func _apply_unit_weapon_upper_body_pose_from_animation(skeleton: Skeleton3D, pose_animation: Animation) -> int:
+	if skeleton == null or pose_animation == null:
+		return 0
+	var pose_rotations: Dictionary = _get_unit_weapon_upper_body_pose_rotations(pose_animation)
+	var applied_count: int = 0
+	for bone_name_variant in pose_rotations.keys():
+		var bone_name: String = String(bone_name_variant)
+		var bone_index: int = skeleton.find_bone(bone_name)
+		if bone_index < 0:
+			continue
+		var rotation_value: Variant = pose_rotations.get(bone_name_variant)
+		if typeof(rotation_value) != TYPE_QUATERNION:
+			continue
+		skeleton.set_bone_pose_rotation(bone_index, Quaternion(rotation_value))
+		applied_count += 1
+	if applied_count > 0 and skeleton.has_method("force_update_all_bone_transforms"):
+		skeleton.call("force_update_all_bone_transforms")
+	return applied_count
+
+
+func _get_unit_weapon_upper_body_pose_rotations(pose_animation: Animation) -> Dictionary:
+	if pose_animation == null:
+		return {}
+	if pose_animation.has_meta("unit_weapon_upper_body_pose_rotations"):
+		var cached_value: Variant = pose_animation.get_meta("unit_weapon_upper_body_pose_rotations")
+		if typeof(cached_value) == TYPE_DICTIONARY:
+			return Dictionary(cached_value)
+	var pose_rotations: Dictionary = {}
+	for track_index in range(pose_animation.get_track_count()):
+		if pose_animation.track_get_type(track_index) != Animation.TYPE_ROTATION_3D:
+			continue
+		if pose_animation.track_get_key_count(track_index) <= 0:
+			continue
+		var bone_name: String = _get_bone_name_from_animation_track_path(String(pose_animation.track_get_path(track_index)))
+		if not UNIT_AIM_POSE_UPPER_BODY_BONES.has(bone_name):
+			continue
+		var key_value: Variant = pose_animation.track_get_key_value(track_index, 0)
+		if typeof(key_value) != TYPE_QUATERNION:
+			continue
+		pose_rotations[bone_name] = Quaternion(key_value)
+	pose_animation.set_meta("unit_weapon_upper_body_pose_rotations", pose_rotations)
+	return pose_rotations
+
+
+func _reset_unit_weapon_upper_body_pose(proxy: Node3D, skeleton: Skeleton3D) -> bool:
+	var changed: bool = false
+	var was_active: bool = bool(proxy.get_meta("unit_weapon_upper_body_pose_active", false)) if proxy != null else false
+	if skeleton != null and was_active:
+		for bone_name in UNIT_AIM_POSE_UPPER_BODY_BONES:
+			var bone_index: int = skeleton.find_bone(String(bone_name))
+			if bone_index < 0:
+				continue
+			if skeleton.has_method("reset_bone_pose"):
+				skeleton.call("reset_bone_pose", bone_index)
+		if skeleton.has_method("force_update_all_bone_transforms"):
+			skeleton.call("force_update_all_bone_transforms")
+		changed = true
+	if proxy != null:
+		changed = _set_proxy_bool_meta(proxy, "unit_weapon_upper_body_pose_active", false) or changed
+	return changed
+
+
+func _get_bone_name_from_animation_track_path(track_path: String) -> String:
+	var separator_index: int = track_path.rfind(":")
+	if separator_index < 0:
+		return track_path.get_file().strip_edges()
+	return track_path.substr(separator_index + 1).strip_edges()
+
+
+func _set_proxy_bool_meta(proxy: Node, meta_name: String, value: bool) -> bool:
+	if proxy == null:
+		return false
+	if bool(proxy.get_meta(meta_name, false)) == value:
+		return false
+	proxy.set_meta(meta_name, value)
+	return true
+
+
+func _set_proxy_int_meta(proxy: Node, meta_name: String, value: int) -> bool:
+	if proxy == null:
+		return false
+	if int(proxy.get_meta(meta_name, 0)) == value:
+		return false
+	proxy.set_meta(meta_name, value)
+	return true
+
+
+func _set_proxy_string_meta(proxy: Node, meta_name: String, value: String) -> bool:
+	if proxy == null:
+		return false
+	if String(proxy.get_meta(meta_name, "")) == value:
+		return false
+	proxy.set_meta(meta_name, value)
+	return true
 
 
 func _update_unit_weapon_child_aim_yaw(weapon_node: Node3D, aim_yaw_delta_degrees: float, apply_aim_yaw: bool) -> bool:
@@ -6745,6 +6946,10 @@ func _get_unit_proxy_state_by_id() -> Dictionary:
 			"unit_aim_pose_yaw_delta_degrees": float(proxy.get_meta("unit_aim_pose_yaw_delta_degrees", 0.0)),
 			"unit_aim_pose_source_event_id": String(proxy.get_meta("unit_aim_pose_source_event_id", "")).strip_edges(),
 			"unit_aim_pose_target_unit_id": String(proxy.get_meta("unit_aim_pose_target_unit_id", "")).strip_edges(),
+			"unit_weapon_upper_body_pose_active": bool(proxy.get_meta("unit_weapon_upper_body_pose_active", false)),
+			"unit_weapon_upper_body_pose_animation_available": bool(proxy.get_meta("unit_weapon_upper_body_pose_animation_available", false)),
+			"unit_weapon_upper_body_pose_bone_count": int(proxy.get_meta("unit_weapon_upper_body_pose_bone_count", 0)),
+			"unit_weapon_upper_body_pose_source_animation": String(proxy.get_meta("unit_weapon_upper_body_pose_source_animation", "")).strip_edges(),
 		}
 	return result
 

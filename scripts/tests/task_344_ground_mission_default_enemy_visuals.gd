@@ -126,12 +126,15 @@ func _test_fire_event_drives_facing_aim_pose_and_muzzle_vfx() -> void:
 	_assert(int(snapshot.get("weapon_fire_vfx_visual_count", 0)) == 1, "Fire event creates one muzzle flash VFX")
 	_assert(bool(attacker_state.get("unit_aim_pose_active", false)), "Attacker proxy enters aim pose while firing")
 	_assert(bool(attacker_state.get("unit_aim_pose_weapon_node_available", false)), "Aim pose has a blaster visual node to pose")
+	_assert(bool(attacker_state.get("unit_weapon_upper_body_pose_active", false)), "Aim pose applies the existing targeting upper-body pose")
+	_assert(int(attacker_state.get("unit_weapon_upper_body_pose_bone_count", 0)) >= 8, "Aim pose drives enough upper-body bones for a visible raised weapon")
 	_assert(String(attacker_state.get("unit_aim_pose_source_event_id", "")) == "task_344_fire", "Aim pose is tied to the fire event id")
 	var attacker_proxy := _find_proxy_node_by_unit_id(primary_view, "task_344_attacker") as Node3D
 	var attacker_forward: Vector2 = _get_unit_model_forward_xz(attacker_proxy)
 	var target_forward: Vector2 = _world_direction_to_3d_xz(primary_view, attacker.global_position, target.global_position - attacker.global_position)
 	_assert(attacker_forward.dot(target_forward) > 0.96, "Attacker proxy faces the fire target")
 	_assert_weapon_root_stays_on_socket(attacker_proxy, "Enemy attacker keeps the weapon root on the hand socket while aimed")
+	_assert_aim_pose_raises_weapon_hand(attacker_proxy, "Enemy attacker raises the weapon hand above the chest while aimed")
 	primary_view.queue_free()
 	attacker.queue_free()
 	target.queue_free()
@@ -171,6 +174,21 @@ func _assert_weapon_root_stays_on_socket(proxy: Node3D, message: String) -> void
 		return
 	var base_position: Vector3 = _get_vector3_meta(weapon_node, "unit_aim_pose_base_position", weapon_node.position)
 	_assert(weapon_node.position.distance_to(base_position) <= 0.002, "%s (offset %.4f)" % [message, weapon_node.position.distance_to(base_position)])
+
+
+func _assert_aim_pose_raises_weapon_hand(proxy: Node3D, message: String) -> void:
+	var skeleton := _find_skeleton3d(proxy)
+	if skeleton == null:
+		_assert(false, "%s has a Skeleton3D" % message)
+		return
+	var right_hand_index: int = skeleton.find_bone("RightHand")
+	var chest_index: int = skeleton.find_bone("Chest")
+	if right_hand_index < 0 or chest_index < 0:
+		_assert(false, "%s has RightHand and Chest bones" % message)
+		return
+	var right_hand: Vector3 = skeleton.get_bone_global_pose(right_hand_index).origin
+	var chest: Vector3 = skeleton.get_bone_global_pose(chest_index).origin
+	_assert(right_hand.z > chest.z + 0.001, "%s (hand %.4f, chest %.4f)" % [message, right_hand.z, chest.z])
 
 
 func _find_unit_blaster_visual_node(node: Node) -> Node3D:

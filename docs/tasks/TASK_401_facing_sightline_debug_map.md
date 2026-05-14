@@ -6,11 +6,11 @@
 Facing, Sichtlinie und Waffen-/Schussrichtung sollen auf einer kleinen Mission-Map sofort sichtbar pruefbar sein, ohne dass zuerst ein Overlay angeklickt oder eine Unit manuell selektiert werden muss.
 
 ## Sinnhaftigkeit / Ursache
-Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie, Unit-Facing und Weapon-Posture existieren bereits. Fuer manuelle Sichtchecks fehlt aber eine kleine, eindeutige Fixture, in der ein NPC mit Waffe im Anschlag und ein NPC mit gesenkter Waffe direkt auseinandergezogen sichtbar sind. Die Playtests zeigten zusaetzlich, dass die importierten Character-Modelle visuell 180 Grad zur Proxy-/Facing-Rotation verdreht standen, der Aim-Yaw die sichtbare Waffe aus dem Handanker ziehen konnte, die Fire-Sector-Linie besser an die Blick-/Facing-Richtung statt an eine separate Target-Position gebunden wird und Map-NPC-Klicks nicht die Kamera neu zentrieren duerfen.
+Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie, Unit-Facing und Weapon-Posture existieren bereits. Fuer manuelle Sichtchecks fehlt aber eine kleine, eindeutige Fixture, in der NPCs mit Waffe im Anschlag direkt auseinandergezogen sichtbar sind. Die Playtests zeigten zusaetzlich, dass die importierten Character-Modelle visuell 180 Grad zur Proxy-/Facing-Rotation verdreht standen, der Aim-Yaw die sichtbare Waffe aus dem Handanker ziehen konnte, die Fire-Sector-Linie besser an die Blick-/Facing-Richtung statt an eine separate Target-Position gebunden wird und Map-NPC-Klicks nicht die Kamera neu zentrieren duerfen.
 
 ## Umfang
 - 12x12-Testmap mit Compass-Markern an den Kartenecken.
-- Zwei Friendly-NPCs in der Kartenmitte als Debug-Fireteam-Fixture.
+- Zwei Friendly-NPCs in der Kartenmitte als Debug-Fireteam-Fixture, beide mit `weapon_posture = aimed`.
 - Bestehende TacticalController-/Primary3DView-Overlays beim Szenenstart aktivieren.
 - Vorhandene Unit-Metadaten und Runtime-Posture nutzen, statt neue LOS- oder Facing-Logik einzufuehren.
 - Bestehende NPC-Visual-Mapping-Rotation so korrigieren, dass das Modell selbst mit der Proxy-/Facing-Richtung uebereinstimmt.
@@ -24,6 +24,7 @@ Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie,
 - Primary3DView-Fireteam-Orientation liest bei gueltigem vorhandenen Anchor-Payload die aktuelle Unit-Position und das aktuelle Unit-Facing live aus den registrierten Unit-Nodes, damit Bewegung keine stale Sichtlinie zeichnet.
 - Die Unit-Proxy-Yaw-Uebersetzung muss die echte importierte Character-Forward-Achse fuer Nord/Sued/Ost/West und Iso-Diagonalen abbilden; Dropship-/andere World-Yaw-Pfade bleiben davon getrennt.
 - Der Waffenroot bleibt bei Aim-/Ready-Posture am Socket; sichtbare Anschlag-/Ready-Pose darf den Root nicht aus dem Handanker heraus verschieben.
+- Die sichtbare Anschlag-Pose nutzt den vorhandenen importierten `0_Targeting Pose`-Clip als Oberkoerper-/Arm-Pose im bestehenden Unit-AnimationPlayer-Pfad; Idle/Walk bleiben Basisanimationen.
 - Der Unit-Facing-Visualpfad wird als Contract dokumentiert, damit Friendly-, Enemy-, Plan- und Fire-Event-Pfade nicht wieder auseinanderlaufen.
 - Headless-Verifier fuer Map, Szene, Compass-Marker, Posture und Render-Snapshot.
 
@@ -51,7 +52,7 @@ Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie,
 ## Akzeptanzkriterien
 - [x] Die neue 12x12-Map laedt mit genau den Compass-Labels Nord/Ost/Sued/West.
 - [x] Die Debug-Szene zeigt zwei Friendly-NPCs in der Kartenmitte.
-- [x] Ein NPC steht mit `weapon_posture = aimed`, ein NPC mit `weapon_posture = lowered`.
+- [x] Beide Debug-NPCs stehen mit `weapon_posture = aimed`.
 - [x] Der obere NPC faced nach Nord, der untere nach Sued; die Modelle nutzen denselben vorhandenen Proxy-/Visual-Mapping-Pfad.
 - [x] Die NPCs stehen weit genug auseinander, damit Facing- und Schusslinien manuell lesbar sind.
 - [x] Die Waffen-/Schusslinie beginnt am sichtbaren Waffenvisual, wenn die Waffe im Anschlag ist.
@@ -66,6 +67,7 @@ Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie,
 - [x] Primary3DView rendert Fireteam-Orientation bei Bewegung aus aktueller Unit-Position und aktuellem Unit-Facing statt aus stale Anchor-Richtung.
 - [x] Unit-Proxy-Yaw nutzt eine model-forward-kalibrierte Grid-zu-3D-Formel; Skeleton-Forward, Facing/Sichtlinie und Weapon-/Shot-Linie stimmen auch bei echten Move-Commands ueberein.
 - [x] Aim-/Ready-Pose laesst den Waffenroot am Socket; Friendly- und Enemy-Tests pruefen, dass die Waffe nicht beim Loslaufen oder Feuern aus dem Handanker verschoben wird.
+- [x] Aim-Pose hebt die Waffenhand ueber die Brust, nutzt dazu den vorhandenen `0_Targeting Pose`-Clip und bleibt waehrend aimed Bewegung/Firing aktiv.
 - [x] `docs/dev/unit_facing_visual_contract.md` dokumentiert den gemeinsamen Friendly-/Enemy-/Plan-/Fire-Event-Pfad.
 - [x] Fireteam-Orientation/Facing und Fire-Sector/Weapon-Linie laufen ueber die bestehenden Primary3DView-Snapshots.
 - [x] Die sichtbaren Debug-Visuals erzeugen keine SimulationRoot-Commands oder -Effects.
