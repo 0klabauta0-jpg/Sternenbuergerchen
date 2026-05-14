@@ -132,10 +132,10 @@ const FOW_BLACKOUT_COVER_Y_OFFSET: float = 0.42
 const FOW_KNOWN_DIM_COLOR: Color = Color(0.02, 0.05, 0.06, 0.28)
 const FOW_EXPLORED_DIM_COLOR: Color = Color(0.02, 0.04, 0.06, 0.62)
 const FOW_UNKNOWN_BLACK_COLOR: Color = Color(0.0, 0.0, 0.0, 1.0)
-const UNIT_AIM_POSE_WEAPON_PITCH_DEGREES: float = -14.0
-const UNIT_AIM_POSE_WEAPON_FORWARD_OFFSET: float = 0.035
-const UNIT_READY_POSE_WEAPON_PITCH_DEGREES: float = -7.0
-const UNIT_READY_POSE_WEAPON_FORWARD_OFFSET: float = 0.018
+const UNIT_AIM_POSE_WEAPON_PITCH_DEGREES: float = -30.0
+const UNIT_AIM_POSE_WEAPON_FORWARD_OFFSET: float = 0.075
+const UNIT_READY_POSE_WEAPON_PITCH_DEGREES: float = -14.0
+const UNIT_READY_POSE_WEAPON_FORWARD_OFFSET: float = 0.036
 const EDITOR_EMPTY_BACKGROUND_COLOR: Color = Color(0.12, 0.13, 0.12, 1.0)
 const EDITOR_LIGHT_ROTATION_DEGREES: Vector3 = Vector3(-58.0, -32.0, 0.0)
 const EDITOR_LIGHT_ENERGY: float = 1.18
@@ -163,6 +163,8 @@ const DROPSHIP_APPROACH_LINE_WIDTH_FACTOR: float = 0.34
 const DROPSHIP_APPROACH_VECTOR_COLOR: Color = Color(0.42, 1.0, 0.52, 0.62)
 const FRIENDLY_AIM_LINE_COLOR: Color = Color(0.66, 1.0, 0.72, 0.82)
 const FRIENDLY_AIM_TIP_COLOR: Color = Color(0.78, 1.0, 0.84, 0.92)
+const FRIENDLY_AIM_LINE_HEIGHT: float = 0.58
+const FRIENDLY_FIRE_LINE_BARREL_OFFSET_WORLD: float = 28.0
 const FIRETEAM_ORIENTATION_LINE_COLOR: Color = Color(0.9, 0.98, 1.0, 0.88)
 const FIRETEAM_ORIENTATION_TIP_COLOR: Color = Color(1.0, 1.0, 1.0, 0.82)
 const FIRETEAM_ORIENTATION_LINE_LENGTH_WORLD: float = 58.0
@@ -3952,6 +3954,7 @@ func _add_selected_fireteam_aim_visuals() -> void:
 			continue
 		aim_direction = _stabilize_friendly_aim_direction(unit_id, aim_direction)
 		seen_unit_ids[unit_id] = true
+		var line_anchor: Dictionary = _build_unit_fire_line_anchor(unit, unit_position, aim_direction)
 		var facing_length: float = clampf(range_world * 0.16, FRIENDLY_FIRE_FACING_STEM_MIN_WORLD, FRIENDLY_FIRE_FACING_STEM_MAX_WORLD)
 		var default_tip_position: Vector2 = unit_position + aim_direction * range_world
 		var default_facing_tip_position: Vector2 = unit_position + aim_direction * facing_length
@@ -3960,12 +3963,13 @@ func _add_selected_fireteam_aim_visuals() -> void:
 		var tile_aligned: bool = false
 		if visual_mode == FRIENDLY_FIRE_SECTOR_VISUAL_MODE_TILE_ALIGNED_LOS:
 			sector_report = _add_fire_sector_tile_visuals(_order_root, unit_position, aim_direction, range_world, range_tiles, deg_to_rad(FRIENDLY_FIRE_SECTOR_ANGLE_DEGREES), "FriendlyFireSector_%s" % unit_id)
-			_add_line3d(_order_root, _world_to_surface_3d_position(unit_position, 0.86), _world_to_surface_3d_position(default_facing_tip_position, 0.86), FRIENDLY_AIM_LINE_COLOR, "FriendlyFacingLine_%s" % unit_id)
+			var facing_line_origin: Vector3 = Vector3(line_anchor.get("origin_3d", _world_to_surface_3d_position(unit_position, FRIENDLY_AIM_LINE_HEIGHT)))
+			_add_line3d(_order_root, facing_line_origin, _world_to_3d_position(default_facing_tip_position, facing_line_origin.y), FRIENDLY_AIM_LINE_COLOR, "FriendlyFacingLine_%s" % unit_id)
 			_add_marker3d(_order_root, default_facing_tip_position, FRIENDLY_AIM_TIP_COLOR, "FriendlyFacingTip_%s" % unit_id, 0.075, 0.07, 10)
 			visual_shape = "tile_sector"
 			tile_aligned = true
 		else:
-			sector_report = _add_fire_sector_los_line_visuals(_order_root, unit_position, aim_direction, range_world, range_tiles, "FriendlySightLine_%s" % unit_id)
+			sector_report = _add_fire_sector_los_line_visuals(_order_root, unit_position, aim_direction, range_world, range_tiles, "FriendlySightLine_%s" % unit_id, line_anchor)
 			_add_marker3d(_order_root, Vector2(sector_report.get("tip_position", default_tip_position)), FRIENDLY_AIM_TIP_COLOR, "FriendlySightTip_%s" % unit_id, 0.075, 0.07, 10)
 		var tip_position: Vector2 = Vector2(sector_report.get("tip_position", default_tip_position))
 		var facing_tip_position: Vector2 = Vector2(sector_report.get("facing_tip_position", default_facing_tip_position))
@@ -3978,6 +3982,8 @@ func _add_selected_fireteam_aim_visuals() -> void:
 			"range_tiles": range_tiles,
 			"origin_position": unit_position,
 			"origin_grid": sector_report.get("origin_grid", _world_to_grid_position(unit_position)),
+			"line_origin_position": sector_report.get("line_origin_position", Vector2(line_anchor.get("origin_world", unit_position))),
+			"line_origin_anchor": String(sector_report.get("line_origin_anchor", line_anchor.get("anchor", "unit_center"))),
 			"tip_position": tip_position,
 			"facing_tip_position": facing_tip_position,
 			"visual_shape": visual_shape,
@@ -4223,12 +4229,15 @@ func _get_fire_sector_scan_mode() -> String:
 
 
 func _resolve_unit_visible_aim_direction(unit: Node, unit_world_position: Vector2) -> Vector2:
+	var aim_direction: Vector2 = _resolve_unit_aim_direction(unit, unit_world_position)
+	if aim_direction.length_squared() > 0.0001:
+		return aim_direction.normalized()
 	var proxy := _unit_proxies_by_id.get(_get_unit_id(unit), null) as Node3D
 	if proxy != null and is_instance_valid(proxy) and proxy.visible:
 		var proxy_direction: Vector2 = _get_world_direction_from_proxy_yaw(unit_world_position, float(proxy.rotation_degrees.y))
 		if proxy_direction.length_squared() > 0.0001:
 			return proxy_direction.normalized()
-	return _resolve_unit_aim_direction(unit, unit_world_position)
+	return Vector2.RIGHT
 
 
 func _get_unit_fireteam_id(unit: Node) -> String:
@@ -4251,17 +4260,33 @@ func _get_unit_active_attack_weapon_id(unit: Node) -> String:
 	return ""
 
 
+func _build_unit_fire_line_anchor(unit: Node, unit_world_position: Vector2, aim_direction: Vector2) -> Dictionary:
+	var direction: Vector2 = aim_direction.normalized() if aim_direction.length_squared() > 0.0001 else Vector2.RIGHT
+	var anchor_world: Vector2 = unit_world_position + direction * FRIENDLY_FIRE_LINE_BARREL_OFFSET_WORLD
+	var anchor_3d: Vector3 = _world_to_surface_3d_position(anchor_world, FRIENDLY_AIM_LINE_HEIGHT)
+	var anchor_name: String = "barrel_offset"
+	var proxy := _unit_proxies_by_id.get(_get_unit_id(unit), null) as Node3D
+	if proxy != null and is_instance_valid(proxy) and proxy.visible:
+		var weapon_node: Node3D = _find_unit_blaster_visual_node(proxy)
+		var weapon_posture: String = _normalize_unit_weapon_posture(String(proxy.get_meta("unit_weapon_posture", "")))
+		if weapon_node != null and is_instance_valid(weapon_node) and weapon_posture != "lowered":
+			anchor_3d = weapon_node.global_position
+			anchor_name = "weapon_visual"
+	return {
+		"origin_world": anchor_world,
+		"origin_3d": anchor_3d,
+		"anchor": anchor_name,
+	}
+
+
 func _resolve_unit_aim_direction(unit: Node, unit_world_position: Vector2) -> Vector2:
 	var proxy := _unit_proxies_by_id.get(_get_unit_id(unit), null) as Node3D
 	var motion_or_target_direction: Vector2 = _resolve_unit_motion_or_target_direction(proxy, unit, unit_world_position)
 	if motion_or_target_direction.length_squared() > 0.0001:
 		return motion_or_target_direction
-	if unit != null and unit.has_meta("facing_angle"):
-		return Vector2.RIGHT.rotated(float(unit.get_meta("facing_angle", 0.0))).normalized()
-	if unit != null and unit.has_meta("map_facing_angle"):
-		return Vector2.RIGHT.rotated(float(unit.get_meta("map_facing_angle", 0.0))).normalized()
-	if unit != null and unit.has_meta("enemy_facing_angle"):
-		return Vector2.RIGHT.rotated(float(unit.get_meta("enemy_facing_angle", 0.0))).normalized()
+	var explicit_facing_direction: Vector2 = _resolve_unit_explicit_facing_direction(unit)
+	if explicit_facing_direction.length_squared() > 0.0001:
+		return explicit_facing_direction
 	if proxy != null and is_instance_valid(proxy):
 		var proxy_direction: Vector2 = _get_world_direction_from_proxy_yaw(unit_world_position, float(proxy.rotation_degrees.y))
 		if proxy_direction.length_squared() > 0.0001:
@@ -4272,6 +4297,15 @@ func _resolve_unit_aim_direction(unit: Node, unit_world_position: Vector2) -> Ve
 		if unit_world_position.distance_squared_to(target_position) > 1.0:
 			return (target_position - unit_world_position).normalized()
 	return Vector2.RIGHT
+
+
+func _resolve_unit_explicit_facing_direction(unit: Node) -> Vector2:
+	if unit == null:
+		return Vector2.ZERO
+	for meta_key in ["facing_angle", "map_facing_angle", "enemy_facing_angle"]:
+		if unit.has_meta(meta_key):
+			return Vector2.RIGHT.rotated(float(unit.get_meta(meta_key, 0.0))).normalized()
+	return Vector2.ZERO
 
 
 func _resolve_unit_motion_or_target_direction(proxy: Node3D, unit: Node, current_world_position: Vector2) -> Vector2:
@@ -5535,8 +5569,13 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 		proxy.set_meta("unit_aim_pose_source_event_id", String(active_fire_event.get("event_id", "")))
 		proxy.set_meta("unit_aim_pose_target_unit_id", String(active_fire_event.get("target_unit_id", "")))
 		var unit_is_moving: bool = false
+		var weapon_pose_direction: Vector2 = Vector2.ZERO
 		if unit is Node2D:
 			var unit_world_position: Vector2 = (unit as Node2D).global_position
+			if not active_fire_event.is_empty():
+				weapon_pose_direction = _get_fire_event_direction_for_unit(active_fire_event, unit_world_position)
+			if weapon_pose_direction.length_squared() <= 0.0001:
+				weapon_pose_direction = _resolve_unit_aim_direction(unit, unit_world_position)
 			var next_position: Vector3 = _world_to_surface_3d_position(unit_world_position, 0.06)
 			var proxy_distance: float = proxy.position.distance_to(next_position)
 			unit_is_moving = proxy_distance > 0.01
@@ -5562,7 +5601,7 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 		proxy.set_meta("last_rotation_y", proxy.rotation_degrees.y)
 		if _update_unit_visual_animation(proxy, unit_is_moving, displayed_weapon_posture == "aimed"):
 			changed = true
-		if _update_unit_weapon_aim_pose(proxy, active_fire_event, displayed_weapon_posture):
+		if _update_unit_weapon_aim_pose(proxy, active_fire_event, displayed_weapon_posture, weapon_pose_direction):
 			changed = true
 		if _update_unit_status_badge(proxy, unit):
 			unit_status_badge_count += 1
@@ -5819,18 +5858,12 @@ func _get_unit_proxy_rotation_y(proxy: Node3D, unit: Node, current_world_positio
 		var fire_direction: Vector2 = _get_fire_event_direction_for_unit(active_fire_event, current_world_position)
 		if fire_direction.length_squared() > 0.0001:
 			return _get_world_direction_yaw(current_world_position, current_world_position + fire_direction, fallback_yaw)
+	var explicit_facing_direction: Vector2 = _resolve_unit_explicit_facing_direction(unit)
+	if explicit_facing_direction.length_squared() > 0.0001:
+		return _get_world_direction_yaw(current_world_position, current_world_position + explicit_facing_direction, fallback_yaw)
 	var motion_or_target_direction: Vector2 = _resolve_unit_motion_or_target_direction(proxy, unit, current_world_position)
 	if motion_or_target_direction.length_squared() > 0.0001:
 		return _get_world_direction_yaw(current_world_position, current_world_position + motion_or_target_direction, fallback_yaw)
-	if unit != null and unit.has_meta("facing_angle"):
-		var facing_angle: float = float(unit.get_meta("facing_angle", 0.0))
-		return _get_world_direction_yaw(current_world_position, current_world_position + Vector2.RIGHT.rotated(facing_angle), fallback_yaw)
-	if unit != null and unit.has_meta("map_facing_angle"):
-		var map_facing_angle: float = float(unit.get_meta("map_facing_angle", 0.0))
-		return _get_world_direction_yaw(current_world_position, current_world_position + Vector2.RIGHT.rotated(map_facing_angle), fallback_yaw)
-	if unit != null and unit.has_meta("enemy_facing_angle"):
-		var enemy_facing_angle: float = float(unit.get_meta("enemy_facing_angle", 0.0))
-		return _get_world_direction_yaw(current_world_position, current_world_position + Vector2.RIGHT.rotated(enemy_facing_angle), fallback_yaw)
 	var target_position: Variant = unit.call("get_target_position") if unit != null and unit.has_method("get_target_position") else null
 	if typeof(target_position) == TYPE_VECTOR2:
 		var target_world_position: Vector2 = Vector2(target_position)
@@ -5912,6 +5945,7 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 			model_root.name = "UnitModel_%s" % _get_unit_visual_name(unit, unit_visual_entry)
 			model_root.scale = Vector3.ONE * _get_unit_model_scale(unit_visual_entry)
 			model_root.rotation_degrees.y = _get_unit_model_root_rotation_y(unit_visual_entry)
+			root.set_meta("unit_model_root_rotation_y_degrees", model_root.rotation_degrees.y)
 			var material_applied: bool = _apply_unit_visual_material(model_instance, unit_visual_entry)
 			if not material_applied and _unit_visual_entry_has_skin(unit_visual_entry):
 				_add_runtime_missing_asset_marker(
@@ -6101,7 +6135,7 @@ func _update_unit_visual_animation(proxy: Node3D, is_moving: bool, is_firing: bo
 	return true
 
 
-func _update_unit_weapon_aim_pose(proxy: Node3D, active_fire_event: Dictionary, weapon_posture: String = "lowered") -> bool:
+func _update_unit_weapon_aim_pose(proxy: Node3D, active_fire_event: Dictionary, weapon_posture: String = "lowered", aim_direction: Vector2 = Vector2.ZERO) -> bool:
 	if proxy == null:
 		return false
 	var normalized_weapon_posture: String = _normalize_unit_weapon_posture("aimed" if not active_fire_event.is_empty() else weapon_posture)
@@ -6110,6 +6144,18 @@ func _update_unit_weapon_aim_pose(proxy: Node3D, active_fire_event: Dictionary, 
 	var changed: bool = false
 	var weapon_node: Node3D = _find_unit_blaster_visual_node(proxy)
 	proxy.set_meta("unit_aim_pose_weapon_node_available", weapon_node != null)
+	var aim_yaw_delta_degrees: float = 0.0
+	var has_aim_yaw: bool = false
+	if (is_active or is_ready) and aim_direction.length_squared() > 0.0001:
+		var aim_yaw_degrees: float = _get_world_direction_yaw(Vector2.ZERO, aim_direction.normalized(), proxy.rotation_degrees.y)
+		aim_yaw_delta_degrees = wrapf(aim_yaw_degrees - proxy.rotation_degrees.y, -180.0, 180.0)
+		has_aim_yaw = true
+	if absf(float(proxy.get_meta("unit_aim_pose_yaw_delta_degrees", 0.0)) - aim_yaw_delta_degrees) > 0.01:
+		proxy.set_meta("unit_aim_pose_yaw_delta_degrees", aim_yaw_delta_degrees)
+		changed = true
+	if bool(proxy.get_meta("unit_aim_pose_yaw_active", false)) != has_aim_yaw:
+		proxy.set_meta("unit_aim_pose_yaw_active", has_aim_yaw)
+		changed = true
 	if weapon_node == null:
 		return changed
 	if not weapon_node.has_meta("unit_aim_pose_base_rotation_degrees"):
@@ -6121,10 +6167,10 @@ func _update_unit_weapon_aim_pose(proxy: Node3D, active_fire_event: Dictionary, 
 	var desired_rotation: Vector3 = base_rotation
 	var desired_position: Vector3 = base_position
 	if is_active:
-		desired_rotation = base_rotation + Vector3(UNIT_AIM_POSE_WEAPON_PITCH_DEGREES, 0.0, 0.0)
+		desired_rotation = base_rotation + Vector3(UNIT_AIM_POSE_WEAPON_PITCH_DEGREES, aim_yaw_delta_degrees, 0.0)
 		desired_position = base_position + Vector3(0.0, 0.0, -UNIT_AIM_POSE_WEAPON_FORWARD_OFFSET)
 	elif is_ready:
-		desired_rotation = base_rotation + Vector3(UNIT_READY_POSE_WEAPON_PITCH_DEGREES, 0.0, 0.0)
+		desired_rotation = base_rotation + Vector3(UNIT_READY_POSE_WEAPON_PITCH_DEGREES, aim_yaw_delta_degrees, 0.0)
 		desired_position = base_position + Vector3(0.0, 0.0, -UNIT_READY_POSE_WEAPON_FORWARD_OFFSET)
 	if weapon_node.rotation_degrees.distance_squared_to(desired_rotation) > 0.0001:
 		weapon_node.rotation_degrees = desired_rotation
@@ -6481,6 +6527,7 @@ func _get_unit_proxy_state_by_id() -> Dictionary:
 			"uses_kenney_model": bool(proxy.get_meta("uses_kenney_model", false)),
 			"unit_visual_archetype_id": String(proxy.get_meta("unit_visual_archetype_id", "")).strip_edges(),
 			"unit_visual_faction_id": String(proxy.get_meta("unit_visual_faction_id", "")).strip_edges(),
+			"unit_model_root_rotation_y_degrees": float(proxy.get_meta("unit_model_root_rotation_y_degrees", 0.0)),
 			"unit_aim_pose_active": bool(proxy.get_meta("unit_aim_pose_active", false)),
 			"unit_ready_pose_active": bool(proxy.get_meta("unit_ready_pose_active", false)),
 			"unit_movement_posture": String(proxy.get_meta("unit_movement_posture", "")).strip_edges(),
@@ -6489,6 +6536,8 @@ func _get_unit_proxy_state_by_id() -> Dictionary:
 			"unit_posture_policy_id": String(proxy.get_meta("unit_posture_policy_id", "")).strip_edges(),
 			"unit_posture_source": String(proxy.get_meta("unit_posture_source", "")).strip_edges(),
 			"unit_aim_pose_weapon_node_available": bool(proxy.get_meta("unit_aim_pose_weapon_node_available", false)),
+			"unit_aim_pose_yaw_active": bool(proxy.get_meta("unit_aim_pose_yaw_active", false)),
+			"unit_aim_pose_yaw_delta_degrees": float(proxy.get_meta("unit_aim_pose_yaw_delta_degrees", 0.0)),
 			"unit_aim_pose_source_event_id": String(proxy.get_meta("unit_aim_pose_source_event_id", "")).strip_edges(),
 			"unit_aim_pose_target_unit_id": String(proxy.get_meta("unit_aim_pose_target_unit_id", "")).strip_edges(),
 		}
@@ -6633,13 +6682,16 @@ func _add_marker3d(parent: Node3D, world_position: Vector2, color: Color, node_n
 	parent.add_child(marker)
 
 
-func _add_fire_sector_los_line_visuals(parent: Node3D, origin_world: Vector2, center_direction: Vector2, range_world: float, range_tiles: int, node_name: String) -> Dictionary:
+func _add_fire_sector_los_line_visuals(parent: Node3D, origin_world: Vector2, center_direction: Vector2, range_world: float, range_tiles: int, node_name: String, line_anchor: Dictionary = {}) -> Dictionary:
 	var origin_grid: Vector2i = _world_to_grid_position(origin_world)
 	var direction: Vector2 = center_direction.normalized() if center_direction.length_squared() > 0.0001 else Vector2.RIGHT
 	var raw_tip_position: Vector2 = origin_world + direction * maxf(range_world, 0.0)
 	var facing_length: float = clampf(range_world * 0.16, FRIENDLY_FIRE_FACING_STEM_MIN_WORLD, FRIENDLY_FIRE_FACING_STEM_MAX_WORLD)
+	var line_origin_world: Vector2 = Vector2(line_anchor.get("origin_world", origin_world))
 	var report: Dictionary = {
 		"origin_grid": origin_grid,
+		"line_origin_position": line_origin_world,
+		"line_origin_anchor": String(line_anchor.get("anchor", "unit_center")),
 		"visible_tile_count": 0,
 		"blocker_tile_count": 0,
 		"los_line_count": 0,
@@ -6668,10 +6720,13 @@ func _add_fire_sector_los_line_visuals(parent: Node3D, origin_world: Vector2, ce
 		report["tip_position"] = blocker_world
 		report["los_blocked"] = true
 
+	var line_origin_3d_variant: Variant = line_anchor.get("origin_3d", null)
+	var line_origin_3d: Vector3 = Vector3(line_origin_3d_variant) if typeof(line_origin_3d_variant) == TYPE_VECTOR3 else _world_to_surface_3d_position(line_origin_world, FRIENDLY_AIM_LINE_HEIGHT)
+	var line_tip_3d: Vector3 = _world_to_3d_position(Vector2(report.get("tip_position", raw_tip_position)), line_origin_3d.y)
 	_add_line3d(
 		parent,
-		_world_to_surface_3d_position(origin_world, 0.86),
-		_world_to_surface_3d_position(Vector2(report.get("tip_position", raw_tip_position)), 0.86),
+		line_origin_3d,
+		line_tip_3d,
 		FRIENDLY_FIRE_SECTOR_BLOCKER_LINE_COLOR if bool(report.get("los_blocked", false)) else FRIENDLY_AIM_LINE_COLOR,
 		node_name
 	)

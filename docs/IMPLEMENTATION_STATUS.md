@@ -16,8 +16,11 @@
 - Stand: `maps/facing_sightline_debug_12x12.json` und `data/mission_scenarios/facing_sightline_debug_12x12.json` liefern eine kleine 12x12-Mission-Fixture mit sichtbaren Nord/Ost/Sued/West-Kompassmarkern und zwei Friendly-NPC-Slots in der Kartenmitte.
 - Stand: `scenes/tests/facing_sightline_debug_map.tscn` nutzt die vorhandene Mission-Testszene, `MissionTestSetup`, `TacticalController`, `SimulationRoot` und `Primary3DView`; `facing_sightline_debug_fixture_setup.gd` setzt nur bestehende Unit-Facing-Metadaten und Runtime-Posture (`aimed`/`lowered`) und aktiviert die vorhandenen Overlays.
 - Stand: `TerrainMap3DView` rendert Corner-Kompassmarker jetzt optional mit den authored Full-Text-Labels statt nur N/E/S/W, bleibt dabei aber im bestehenden Marker-Visualpfad.
+- Stand: Nach Playtest-Korrektur stehen die Debug-NPCs weiter auseinander; der obere NPC faced nach Nord, der untere nach Sued. Die Fire-Sector-/Weapon-Linie nutzt bei angelegter Waffe den sichtbaren Waffenanker und die bestehende Weapon-Posture bekommt die bestehende Aim-Richtung als sichtbaren Yaw-Offset.
+- Stand: `data/npc_unit_visual_mapping.json` korrigiert die importierte Character-Forward-Achse auf `rotation_degrees_y = 90.0`, damit das Modell selbst mit der vorhandenen Proxy-/Facing-Rotation uebereinstimmt.
 - Risiken: Der Headless-Verifier prueft Datenfluss, Render-Snapshot und Labeltexte; die finale optische Pfeil-/Label-Lesbarkeit im echten Godot-Fenster bleibt ein kurzer manueller Sichtcheck.
-- Lokale Pruefung: `task_401_facing_sightline_debug_map.gd`, `task_364_mission_fireteam_orientation_indicators.gd`, `bugfix_mission_fire_sector_overlay.gd`, `task_371_fire_sector_security_arc_overlay_toggle.gd`, `task_372_mission_los_debug_overlay_toggle.gd` laufen gruen.
+- Lokale Pruefung: `task_401_facing_sightline_debug_map.gd`, `task_171_npc_model_replacement_verifier.gd`, `task_364_mission_fireteam_orientation_indicators.gd`, `bugfix_mission_fire_sector_overlay.gd`, `task_371_fire_sector_security_arc_overlay_toggle.gd`, `task_372_mission_los_debug_overlay_toggle.gd` laufen gruen.
+- Offener Hinweis: `task_246_visual_scale_alignment_asset_pass_verifier.gd` faellt weiterhin an zwei Multiplayer-Lobby-Panel-Abmessungen; kein Bezug zu NPC-Facing, Weapon-Posture oder Fire-Sector-Visuals.
 
 ### TASK_400 - Agent Rules Doc Refresh
 - Status: implementiert im Arbeitsstand
