@@ -3,6 +3,7 @@ extends SceneTree
 const DEBUG_SCENE: PackedScene = preload("res://scenes/tests/facing_sightline_debug_map.tscn")
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const MISSION_SCENARIO_DATA_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_data.gd")
+const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 
 const MAP_PATH: String = "res://maps/facing_sightline_debug_12x12.json"
 const SCENARIO_PATH: String = "res://data/mission_scenarios/facing_sightline_debug_12x12.json"
@@ -130,6 +131,8 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 	var alpha_walk_animation: Animation = alpha_animation_player.get_animation("walk") if alpha_animation_player != null and alpha_animation_player.has_animation("walk") else null
 	_assert(alpha_walk_animation != null and not _animation_has_rotation_track_suffix(alpha_walk_animation, ":HipsCtrl"), "Walk animation leaves proxy/model-root facing as the only heading owner")
 	_assert(alpha_walk_animation != null and not _animation_has_rotation_track_suffix(alpha_walk_animation, ":Hips"), "Walk animation strips the body-root Hips rotation that can turn the model's back into facing")
+	await _assert_unit_model_forward_matches_runtime_facing(primary_view, unit_alpha as Node2D, "unit_alpha")
+	await _assert_unit_model_forward_matches_runtime_facing(primary_view, unit_bravo as Node2D, "unit_bravo")
 
 	var orientation_entries: Array = Array(snapshot.get("fireteam_orientation_entries", []))
 	var aim_orientation: Dictionary = _find_entry(orientation_entries, "fireteam_id", "aim")
@@ -166,6 +169,7 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 	var look_weapon_direction: Vector2 = (Vector2(look_fire_entry.get("tip_position", Vector2.ZERO)) - Vector2(look_fire_entry.get("origin_position", Vector2.ZERO))).normalized()
 	_assert(look_weapon_direction.dot(Vector2.DOWN) > 0.90, "Selected lowered NPC weapon/target line overlaps its south-facing sightline")
 	_assert(_find_entry(Array(look_selected_snapshot.get("friendly_aim_entries", [])), "unit_id", "unit_alpha").is_empty(), "Switching selection removes the upper NPC weapon/shot line")
+	await _assert_moving_units_keep_model_forward_on_live_lines(simulation_root, controller, primary_view, unit_alpha as Node2D, unit_bravo as Node2D)
 
 	var command_count_before: int = simulation_root.command_queue.size()
 	var effect_count_before: int = simulation_root.effects_queue.size()
@@ -230,6 +234,134 @@ func _assert_live_facing_updates_primary_view_visuals(controller: Node, primary_
 	await _wait_frames(4)
 
 
+func _assert_moving_units_keep_model_forward_on_live_lines(simulation_root: Node, controller: Node, primary_view: Node, unit_alpha: Node2D, unit_bravo: Node2D) -> void:
+	if simulation_root == null or controller == null or primary_view == null or unit_alpha == null or unit_bravo == null:
+		_assert(false, "Movement-facing verifier receives simulation, controller, view and units")
+		return
+	controller.call("_set_selected_fireteams", PackedStringArray(["aim", "look"]), false)
+	controller.call("_refresh_order_visuals")
+	await _wait_frames(4)
+	_enqueue_debug_move_command(simulation_root, unit_alpha, unit_alpha.global_position + Vector2(96.0, -192.0))
+	_enqueue_debug_move_command(simulation_root, unit_bravo, unit_bravo.global_position + Vector2(192.0, -96.0))
+	for frame_index in range(92):
+		await physics_frame
+		await process_frame
+		if frame_index in [4, 24, 64]:
+			controller.call("_refresh_order_visuals")
+			await _wait_frames(2)
+			var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
+			_assert_moving_unit_forward_sample(primary_view, snapshot, unit_alpha, "unit_alpha", frame_index)
+			_assert_moving_unit_forward_sample(primary_view, snapshot, unit_bravo, "unit_bravo", frame_index)
+
+
+func _enqueue_debug_move_command(simulation_root: Node, unit: Node2D, target_position: Vector2) -> void:
+	var command = UNIT_COMMAND_SCRIPT.new()
+	command.command_type = UNIT_COMMAND_SCRIPT.TYPE_MOVE_TO_POSITION
+	command.unit_id = String(unit.call("get_unit_id"))
+	command.team_id = String(unit.call("get_team_id"))
+	command.target_position = target_position
+	command.move_speed_factor = 1.0
+	command.priority = 99
+	command.source_command_type = "task_401_movement_facing_verifier"
+	command.phase = 1
+	unit.call("assign_unit_command", command)
+	simulation_root.call("enqueue_command", command.to_dict())
+
+
+func _assert_moving_unit_forward_sample(primary_view: Node, snapshot: Dictionary, unit: Node2D, unit_id: String, frame_index: int) -> void:
+	var proxy := _find_proxy_node_by_unit_id(primary_view, unit_id) as Node3D
+	var model_forward: Vector2 = _get_unit_model_forward_xz(proxy)
+	var fireteam_id: String = String(unit.call("get_fireteam_id"))
+	var orientation: Dictionary = _find_entry(Array(snapshot.get("fireteam_orientation_entries", [])), "fireteam_id", fireteam_id)
+	var heading_direction: Vector2 = Vector2(orientation.get("heading_direction", Vector2.ZERO))
+	var expected_forward: Vector2 = _world_direction_to_3d_xz(primary_view, unit.global_position, heading_direction)
+	var forward_dot: float = model_forward.dot(expected_forward) if model_forward.length_squared() > 0.0001 and expected_forward.length_squared() > 0.0001 else -1.0
+	_assert(
+		forward_dot > 0.92,
+		"%s moving model forward follows live Facing/Sichtlinie at frame %d (dot %.3f)" % [unit_id, frame_index, forward_dot]
+	)
+	var aim_entry: Dictionary = _find_entry(Array(snapshot.get("friendly_aim_entries", [])), "unit_id", unit_id)
+	if not aim_entry.is_empty():
+		var aim_direction: Vector2 = (Vector2(aim_entry.get("tip_position", Vector2.ZERO)) - Vector2(aim_entry.get("origin_position", Vector2.ZERO))).normalized()
+		_assert(
+			aim_direction.dot(heading_direction.normalized()) > 0.90,
+			"%s moving weapon/shot line follows the same live heading at frame %d" % [unit_id, frame_index]
+		)
+
+
+func _assert_unit_model_forward_matches_runtime_facing(primary_view: Node, unit: Node2D, unit_id: String) -> void:
+	if primary_view == null or unit == null:
+		_assert(false, "Model-forward verifier receives Primary3DView and unit")
+		return
+	var original_facing: float = float(unit.get_meta("facing_angle", 0.0)) if unit.has_meta("facing_angle") else 0.0
+	var had_original_facing: bool = unit.has_meta("facing_angle")
+	var original_map_facing: float = float(unit.get_meta("map_facing_angle", 0.0)) if unit.has_meta("map_facing_angle") else 0.0
+	var had_original_map_facing: bool = unit.has_meta("map_facing_angle")
+	var original_target: Variant = unit.call("get_target_position") if unit.has_method("get_target_position") else null
+	var directions: Array[Vector2] = [
+		Vector2.UP,
+		Vector2.DOWN,
+		Vector2.RIGHT,
+		Vector2.LEFT,
+		Vector2(0.894427, -0.447214),
+		Vector2(-0.894427, -0.447214),
+		Vector2(0.894427, 0.447214),
+		Vector2(-0.894427, 0.447214),
+	]
+	for direction in directions:
+		var normalized_direction: Vector2 = direction.normalized()
+		unit.set_meta("facing_angle", normalized_direction.angle())
+		unit.set_meta("map_facing_angle", normalized_direction.angle())
+		if unit.has_method("set_target_position"):
+			unit.call("set_target_position", unit.global_position)
+		primary_view.call("_sync_unit_proxies", true)
+		await _wait_frames(3)
+		var proxy := _find_proxy_node_by_unit_id(primary_view, unit_id) as Node3D
+		var model_forward: Vector2 = _get_unit_model_forward_xz(proxy)
+		var expected_forward: Vector2 = _world_direction_to_3d_xz(primary_view, unit.global_position, normalized_direction)
+		var forward_dot: float = model_forward.dot(expected_forward) if model_forward.length_squared() > 0.0001 and expected_forward.length_squared() > 0.0001 else -1.0
+		_assert(
+			forward_dot > 0.96,
+			"%s model forward matches runtime facing %s (dot %.3f)" % [unit_id, str(normalized_direction), forward_dot]
+		)
+	if had_original_facing:
+		unit.set_meta("facing_angle", original_facing)
+	elif unit.has_meta("facing_angle"):
+		unit.remove_meta("facing_angle")
+	if had_original_map_facing:
+		unit.set_meta("map_facing_angle", original_map_facing)
+	elif unit.has_meta("map_facing_angle"):
+		unit.remove_meta("map_facing_angle")
+	if unit.has_method("set_target_position"):
+		unit.call("set_target_position", original_target)
+	primary_view.call("_sync_unit_proxies", true)
+	await _wait_frames(3)
+
+
+func _get_unit_model_forward_xz(proxy: Node3D) -> Vector2:
+	if proxy == null:
+		return Vector2.ZERO
+	var skeleton := _find_skeleton3d(proxy)
+	if skeleton == null:
+		return Vector2.ZERO
+	var hips_bone: int = skeleton.find_bone("Hips")
+	if hips_bone < 0:
+		return Vector2.ZERO
+	var hips_global: Transform3D = skeleton.global_transform * skeleton.get_bone_global_pose(hips_bone)
+	var forward := Vector2(hips_global.basis.z.x, hips_global.basis.z.z)
+	return forward.normalized() if forward.length_squared() > 0.0001 else Vector2.ZERO
+
+
+func _world_direction_to_3d_xz(primary_view: Node, origin_world: Vector2, direction: Vector2) -> Vector2:
+	if primary_view == null or direction.length_squared() <= 0.0001:
+		return Vector2.ZERO
+	var origin_3d: Vector3 = Vector3(primary_view.call("_world_to_surface_3d_position", origin_world, 0.0))
+	var tip_3d: Vector3 = Vector3(primary_view.call("_world_to_surface_3d_position", origin_world + direction.normalized(), 0.0))
+	var delta: Vector3 = tip_3d - origin_3d
+	var forward := Vector2(delta.x, delta.z)
+	return forward.normalized() if forward.length_squared() > 0.0001 else Vector2.ZERO
+
+
 func _compass_label_text(primary_view: Node, marker_id: String) -> String:
 	if primary_view == null:
 		return ""
@@ -268,6 +400,18 @@ func _find_proxy_node_by_unit_id(node: Node, unit_id: String) -> Node:
 		return node
 	for child in node.get_children():
 		var found := _find_proxy_node_by_unit_id(child, unit_id)
+		if found != null:
+			return found
+	return null
+
+
+func _find_skeleton3d(node: Node) -> Skeleton3D:
+	if node == null:
+		return null
+	if node is Skeleton3D:
+		return node as Skeleton3D
+	for child in node.get_children():
+		var found: Skeleton3D = _find_skeleton3d(child)
 		if found != null:
 			return found
 	return null

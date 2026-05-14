@@ -4464,7 +4464,7 @@ func _resolve_unit_motion_or_target_direction(proxy: Node3D, unit: Node, current
 
 func _get_world_direction_from_proxy_yaw(unit_world_position: Vector2, yaw_degrees: float) -> Vector2:
 	var yaw_radians: float = deg_to_rad(yaw_degrees)
-	var grid_direction := Vector2(sin(yaw_radians), -cos(yaw_radians))
+	var grid_direction := Vector2(-cos(yaw_radians), sin(yaw_radians))
 	var world_tip: Vector2 = _grid_float_to_world(_world_to_grid_float(unit_world_position) + grid_direction)
 	if unit_world_position.distance_squared_to(world_tip) <= 0.001:
 		return Vector2.ZERO
@@ -6003,26 +6003,26 @@ func _get_unit_proxy_rotation_y(proxy: Node3D, unit: Node, current_world_positio
 	var fallback_yaw: float = proxy.rotation_degrees.y if proxy != null else 0.0
 	var explicit_facing_direction: Vector2 = _resolve_unit_explicit_facing_direction(unit)
 	if explicit_facing_direction.length_squared() > 0.0001:
-		return _get_world_direction_yaw(current_world_position, current_world_position + explicit_facing_direction, fallback_yaw)
+		return _get_unit_world_direction_yaw(current_world_position, current_world_position + explicit_facing_direction, fallback_yaw)
 	var motion_or_target_direction: Vector2 = _resolve_unit_motion_or_target_direction(proxy, unit, current_world_position)
 	if motion_or_target_direction.length_squared() > 0.0001:
-		return _get_world_direction_yaw(current_world_position, current_world_position + motion_or_target_direction, fallback_yaw)
+		return _get_unit_world_direction_yaw(current_world_position, current_world_position + motion_or_target_direction, fallback_yaw)
 	if not active_fire_event.is_empty():
 		var fire_direction: Vector2 = _get_fire_event_direction_for_unit(active_fire_event, current_world_position)
 		if fire_direction.length_squared() > 0.0001:
-			return _get_world_direction_yaw(current_world_position, current_world_position + fire_direction, fallback_yaw)
+			return _get_unit_world_direction_yaw(current_world_position, current_world_position + fire_direction, fallback_yaw)
 	var target_position: Variant = unit.call("get_target_position") if unit != null and unit.has_method("get_target_position") else null
 	if typeof(target_position) == TYPE_VECTOR2:
 		var target_world_position: Vector2 = Vector2(target_position)
 		if current_world_position.distance_squared_to(target_world_position) > 0.25:
-			return _get_world_direction_yaw(current_world_position, target_world_position, fallback_yaw)
+			return _get_unit_world_direction_yaw(current_world_position, target_world_position, fallback_yaw)
 
 	if proxy != null and proxy.has_meta("last_world_position"):
 		var previous_position: Variant = proxy.get_meta("last_world_position")
 		if typeof(previous_position) == TYPE_VECTOR2:
 			var previous_world_position: Vector2 = Vector2(previous_position)
 			if previous_world_position.distance_squared_to(current_world_position) > 0.01:
-				return _get_world_direction_yaw(previous_world_position, current_world_position, fallback_yaw)
+				return _get_unit_world_direction_yaw(previous_world_position, current_world_position, fallback_yaw)
 
 	return fallback_yaw
 
@@ -6078,6 +6078,13 @@ func _get_world_direction_yaw(from_world_position: Vector2, to_world_position: V
 	if delta_grid.length_squared() <= 0.0001:
 		return fallback_yaw
 	return wrapf(rad_to_deg(atan2(delta_grid.x, -delta_grid.y)), 0.0, 360.0)
+
+
+func _get_unit_world_direction_yaw(from_world_position: Vector2, to_world_position: Vector2, fallback_yaw: float = 0.0) -> float:
+	var delta_grid: Vector2 = _world_to_grid_float(to_world_position) - _world_to_grid_float(from_world_position)
+	if delta_grid.length_squared() <= 0.0001:
+		return fallback_yaw
+	return wrapf(rad_to_deg(atan2(delta_grid.y, -delta_grid.x)), 0.0, 360.0)
 
 
 func _create_unit_proxy(unit: Node) -> Node3D:
@@ -6326,7 +6333,7 @@ func _update_unit_weapon_aim_pose(proxy: Node3D, active_fire_event: Dictionary, 
 	var aim_yaw_delta_degrees: float = 0.0
 	var has_aim_yaw: bool = false
 	if (is_active or is_ready) and aim_direction.length_squared() > 0.0001:
-		var aim_yaw_degrees: float = _get_world_direction_yaw(Vector2.ZERO, aim_direction.normalized(), proxy.rotation_degrees.y)
+		var aim_yaw_degrees: float = _get_unit_world_direction_yaw(Vector2.ZERO, aim_direction.normalized(), proxy.rotation_degrees.y)
 		aim_yaw_delta_degrees = wrapf(aim_yaw_degrees - proxy.rotation_degrees.y, -180.0, 180.0)
 		has_aim_yaw = true
 	if absf(float(proxy.get_meta("unit_aim_pose_yaw_delta_degrees", 0.0)) - aim_yaw_delta_degrees) > 0.01:

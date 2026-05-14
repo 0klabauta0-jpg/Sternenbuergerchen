@@ -127,7 +127,10 @@ func _test_fire_event_drives_facing_aim_pose_and_muzzle_vfx() -> void:
 	_assert(bool(attacker_state.get("unit_aim_pose_active", false)), "Attacker proxy enters aim pose while firing")
 	_assert(bool(attacker_state.get("unit_aim_pose_weapon_node_available", false)), "Aim pose has a blaster visual node to pose")
 	_assert(String(attacker_state.get("unit_aim_pose_source_event_id", "")) == "task_344_fire", "Aim pose is tied to the fire event id")
-	_assert(absf(wrapf(float(attacker_state.get("rotation_y_degrees", 0.0)) - 45.0, -180.0, 180.0)) < 1.0, "Attacker proxy faces the fire target")
+	var attacker_proxy := _find_proxy_node_by_unit_id(primary_view, "task_344_attacker") as Node3D
+	var attacker_forward: Vector2 = _get_unit_model_forward_xz(attacker_proxy)
+	var target_forward: Vector2 = _world_direction_to_3d_xz(primary_view, attacker.global_position, target.global_position - attacker.global_position)
+	_assert(attacker_forward.dot(target_forward) > 0.96, "Attacker proxy faces the fire target")
 	primary_view.queue_free()
 	attacker.queue_free()
 	target.queue_free()
@@ -158,6 +161,54 @@ func _make_unit(unit_id: String, team_id: String, position_value: Vector2) -> No
 	unit.weapon_2_id = "rifle"
 	unit.global_position = position_value
 	return unit
+
+
+func _get_unit_model_forward_xz(proxy: Node3D) -> Vector2:
+	if proxy == null:
+		return Vector2.ZERO
+	var skeleton := _find_skeleton3d(proxy)
+	if skeleton == null:
+		return Vector2.ZERO
+	var hips_bone: int = skeleton.find_bone("Hips")
+	if hips_bone < 0:
+		return Vector2.ZERO
+	var hips_global: Transform3D = skeleton.global_transform * skeleton.get_bone_global_pose(hips_bone)
+	var forward := Vector2(hips_global.basis.z.x, hips_global.basis.z.z)
+	return forward.normalized() if forward.length_squared() > 0.0001 else Vector2.ZERO
+
+
+func _world_direction_to_3d_xz(primary_view: Node, origin_world: Vector2, direction: Vector2) -> Vector2:
+	if primary_view == null or direction.length_squared() <= 0.0001:
+		return Vector2.ZERO
+	var origin_3d: Vector3 = Vector3(primary_view.call("_world_to_surface_3d_position", origin_world, 0.0))
+	var tip_3d: Vector3 = Vector3(primary_view.call("_world_to_surface_3d_position", origin_world + direction.normalized(), 0.0))
+	var delta: Vector3 = tip_3d - origin_3d
+	var forward := Vector2(delta.x, delta.z)
+	return forward.normalized() if forward.length_squared() > 0.0001 else Vector2.ZERO
+
+
+func _find_proxy_node_by_unit_id(node: Node, unit_id: String) -> Node:
+	if node == null:
+		return null
+	if String(node.get_meta("unit_id", "")).strip_edges().to_lower() == unit_id.strip_edges().to_lower():
+		return node
+	for child in node.get_children():
+		var found := _find_proxy_node_by_unit_id(child, unit_id)
+		if found != null:
+			return found
+	return null
+
+
+func _find_skeleton3d(node: Node) -> Skeleton3D:
+	if node == null:
+		return null
+	if node is Skeleton3D:
+		return node as Skeleton3D
+	for child in node.get_children():
+		var found: Skeleton3D = _find_skeleton3d(child)
+		if found != null:
+			return found
+	return null
 
 
 func _wait_frames(count: int) -> void:

@@ -22,6 +22,7 @@ Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie,
 - Primary3DView-Proxy-/Weapon-Pose nutzt explizites Facing und Runtime-Movement-Facing vor Fire-Event-/Target-Fallbacks.
 - Der importierte Walk-Clip darf keine eigene Heading-Control-/Body-Root-Rotation ueber die Runtime-Facing-Achse legen.
 - Primary3DView-Fireteam-Orientation liest bei gueltigem vorhandenen Anchor-Payload die aktuelle Unit-Position und das aktuelle Unit-Facing live aus den registrierten Unit-Nodes, damit Bewegung keine stale Sichtlinie zeichnet.
+- Die Unit-Proxy-Yaw-Uebersetzung muss die echte importierte Character-Forward-Achse fuer Nord/Sued/Ost/West und Iso-Diagonalen abbilden; Dropship-/andere World-Yaw-Pfade bleiben davon getrennt.
 - Headless-Verifier fuer Map, Szene, Compass-Marker, Posture und Render-Snapshot.
 
 ## Nicht-Ziele
@@ -60,6 +61,7 @@ Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie,
 - [x] Modell- und Weapon-Pose priorisieren Facing-/Movement-Richtung vor alten Fire-Event-/Target-Fallbacks.
 - [x] Die Walk-Animation entfernt die importierten `HipsCtrl`- und `Hips`-Heading-Rotationen, damit das Modell beim Gehen der Lauf-/Facing-Richtung nicht den Ruecken zudreht.
 - [x] Primary3DView rendert Fireteam-Orientation bei Bewegung aus aktueller Unit-Position und aktuellem Unit-Facing statt aus stale Anchor-Richtung.
+- [x] Unit-Proxy-Yaw nutzt eine model-forward-kalibrierte Grid-zu-3D-Formel; Skeleton-Forward, Facing/Sichtlinie und Weapon-/Shot-Linie stimmen auch bei echten Move-Commands ueberein.
 - [x] Fireteam-Orientation/Facing und Fire-Sector/Weapon-Linie laufen ueber die bestehenden Primary3DView-Snapshots.
 - [x] Die sichtbaren Debug-Visuals erzeugen keine SimulationRoot-Commands oder -Effects.
 
