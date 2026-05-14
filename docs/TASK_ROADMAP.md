@@ -612,6 +612,9 @@ TASK_398 - Mission Dropship Outbound Command Hotfix (implementiert)
 TASK_399 - Dropship Flow Contract Performance Pass (implementiert)
 TASK_400 - Agent Rules Doc Refresh (implementiert)
 
+Phase 18ZN - Facing Sightline Debug Fixture
+TASK_401 - Facing Sightline Debug Map (implementiert)
+
 Batch-Empfehlung
 
 Codex soll Tasks in kleinen Gruppen bearbeiten:

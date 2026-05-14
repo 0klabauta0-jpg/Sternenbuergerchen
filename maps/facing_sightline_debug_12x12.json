@@ -1,0 +1,2140 @@
+﻿{
+    "map_name":  "facing_sightline_debug_12x12",
+    "mission_slot_count":  2,
+    "grid_size":  {
+                      "x":  12,
+                      "y":  12
+                  },
+    "tile_size":  {
+                      "half_width":  64,
+                      "half_height":  32
+                  },
+    "grid_origin":  {
+                        "x":  704,
+                        "y":  96
+                    },
+    "markers":  {
+                    "corner_north":  {
+                                         "marker_type_id":  "recon_note",
+                                         "name":  "Nord",
+                                         "placement_context":  "editor_only",
+                                         "symbol":  "chevron",
+                                         "color":  {
+                                                       "r":  0.98,
+                                                       "g":  0.96,
+                                                       "b":  0.9,
+                                                       "a":  0.98
+                                                   },
+                                         "x":  704,
+                                         "y":  0
+                                     },
+                    "corner_east":  {
+                                        "marker_type_id":  "recon_note",
+                                        "name":  "Ost",
+                                        "placement_context":  "editor_only",
+                                        "symbol":  "chevron",
+                                        "color":  {
+                                                      "r":  0.98,
+                                                      "g":  0.96,
+                                                      "b":  0.9,
+                                                      "a":  0.98
+                                                  },
+                                        "x":  1504,
+                                        "y":  448
+                                    },
+                    "corner_south":  {
+                                         "marker_type_id":  "recon_note",
+                                         "name":  "Sued",
+                                         "placement_context":  "editor_only",
+                                         "symbol":  "chevron",
+                                         "color":  {
+                                                       "r":  0.98,
+                                                       "g":  0.96,
+                                                       "b":  0.9,
+                                                       "a":  0.98
+                                                   },
+                                         "x":  704,
+                                         "y":  896
+                                     },
+                    "corner_west":  {
+                                        "marker_type_id":  "recon_note",
+                                        "name":  "West",
+                                        "placement_context":  "editor_only",
+                                        "symbol":  "chevron",
+                                        "color":  {
+                                                      "r":  0.98,
+                                                      "g":  0.96,
+                                                      "b":  0.9,
+                                                      "a":  0.98
+                                                  },
+                                        "x":  -96,
+                                        "y":  448
+                                    },
+                    "spawn_alpha":  {
+                                        "marker_type_id":  "spawn_alpha",
+                                        "name":  "Facing Debug NPCs",
+                                        "placement_context":  "editor_only",
+                                        "symbol":  "diamond",
+                                        "color":  {
+                                                      "r":  0.38,
+                                                      "g":  0.78,
+                                                      "b":  1,
+                                                      "a":  0.98
+                                                  },
+                                        "x":  704,
+                                        "y":  416
+                                    },
+                    "spawn_bravo":  {
+                                        "marker_type_id":  "spawn_bravo",
+                                        "name":  "Unused Enemy Spawn",
+                                        "placement_context":  "editor_only",
+                                        "symbol":  "diamond",
+                                        "color":  {
+                                                      "r":  0.969,
+                                                      "g":  0.015,
+                                                      "b":  0.015,
+                                                      "a":  0.98
+                                                  },
+                                        "x":  704,
+                                        "y":  736
+                                    },
+                    "objective_point":  {
+                                            "marker_type_id":  "objective_point",
+                                            "name":  "Facing Debug Center",
+                                            "placement_context":  "editor_only",
+                                            "symbol":  "flag",
+                                            "color":  {
+                                                          "r":  1,
+                                                          "g":  0.86,
+                                                          "b":  0.24,
+                                                          "a":  0.98
+                                                      },
+                                            "x":  704,
+                                            "y":  416
+                                        }
+                },
+    "patrol_paths":  {
+
+                     },
+    "enemy_team_configs":  {
+
+                           },
+    "tiles":  [
+                  {
+                      "grid_position":  {
+                                            "x":  0,
+                                            "y":  0
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  0,
+                                            "y":  1
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  0,
+                                            "y":  2
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  0,
+                                            "y":  3
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  0,
+                                            "y":  4
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  0,
+                                            "y":  5
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  0,
+                                            "y":  6
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  0,
+                                            "y":  7
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  0,
+                                            "y":  8
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  0,
+                                            "y":  9
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  0,
+                                            "y":  10
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  0,
+                                            "y":  11
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  1,
+                                            "y":  0
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  1,
+                                            "y":  1
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  1,
+                                            "y":  2
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  1,
+                                            "y":  3
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  1,
+                                            "y":  4
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  1,
+                                            "y":  5
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  1,
+                                            "y":  6
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  1,
+                                            "y":  7
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  1,
+                                            "y":  8
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  1,
+                                            "y":  9
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  1,
+                                            "y":  10
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  1,
+                                            "y":  11
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  2,
+                                            "y":  0
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  2,
+                                            "y":  1
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  2,
+                                            "y":  2
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  2,
+                                            "y":  3
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  2,
+                                            "y":  4
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  2,
+                                            "y":  5
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  2,
+                                            "y":  6
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  2,
+                                            "y":  7
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  2,
+                                            "y":  8
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  2,
+                                            "y":  9
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  2,
+                                            "y":  10
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  2,
+                                            "y":  11
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  3,
+                                            "y":  0
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  3,
+                                            "y":  1
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  3,
+                                            "y":  2
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  3,
+                                            "y":  3
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  3,
+                                            "y":  4
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  3,
+                                            "y":  5
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  3,
+                                            "y":  6
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  3,
+                                            "y":  7
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  3,
+                                            "y":  8
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  3,
+                                            "y":  9
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  3,
+                                            "y":  10
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  3,
+                                            "y":  11
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  4,
+                                            "y":  0
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  4,
+                                            "y":  1
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  4,
+                                            "y":  2
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  4,
+                                            "y":  3
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  4,
+                                            "y":  4
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  4,
+                                            "y":  5
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  4,
+                                            "y":  6
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  4,
+                                            "y":  7
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  4,
+                                            "y":  8
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  4,
+                                            "y":  9
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  4,
+                                            "y":  10
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  4,
+                                            "y":  11
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  5,
+                                            "y":  0
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  5,
+                                            "y":  1
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  5,
+                                            "y":  2
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  5,
+                                            "y":  3
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  5,
+                                            "y":  4
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  5,
+                                            "y":  5
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  5,
+                                            "y":  6
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  5,
+                                            "y":  7
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  5,
+                                            "y":  8
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  5,
+                                            "y":  9
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  5,
+                                            "y":  10
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  5,
+                                            "y":  11
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  6,
+                                            "y":  0
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  6,
+                                            "y":  1
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  6,
+                                            "y":  2
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  6,
+                                            "y":  3
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  6,
+                                            "y":  4
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  6,
+                                            "y":  5
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  6,
+                                            "y":  6
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  6,
+                                            "y":  7
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  6,
+                                            "y":  8
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  6,
+                                            "y":  9
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  6,
+                                            "y":  10
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  6,
+                                            "y":  11
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  7,
+                                            "y":  0
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  7,
+                                            "y":  1
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  7,
+                                            "y":  2
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  7,
+                                            "y":  3
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  7,
+                                            "y":  4
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  7,
+                                            "y":  5
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  7,
+                                            "y":  6
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  7,
+                                            "y":  7
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  7,
+                                            "y":  8
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  7,
+                                            "y":  9
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  7,
+                                            "y":  10
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  7,
+                                            "y":  11
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  8,
+                                            "y":  0
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  8,
+                                            "y":  1
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  8,
+                                            "y":  2
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  8,
+                                            "y":  3
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  8,
+                                            "y":  4
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  8,
+                                            "y":  5
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  8,
+                                            "y":  6
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  8,
+                                            "y":  7
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  8,
+                                            "y":  8
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  8,
+                                            "y":  9
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  8,
+                                            "y":  10
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  8,
+                                            "y":  11
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  9,
+                                            "y":  0
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  9,
+                                            "y":  1
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  9,
+                                            "y":  2
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  9,
+                                            "y":  3
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  9,
+                                            "y":  4
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  9,
+                                            "y":  5
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  9,
+                                            "y":  6
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  9,
+                                            "y":  7
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  9,
+                                            "y":  8
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  9,
+                                            "y":  9
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  9,
+                                            "y":  10
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  9,
+                                            "y":  11
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  10,
+                                            "y":  0
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  10,
+                                            "y":  1
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  10,
+                                            "y":  2
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  10,
+                                            "y":  3
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  10,
+                                            "y":  4
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  10,
+                                            "y":  5
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  10,
+                                            "y":  6
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  10,
+                                            "y":  7
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  10,
+                                            "y":  8
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  10,
+                                            "y":  9
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  10,
+                                            "y":  10
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  10,
+                                            "y":  11
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  11,
+                                            "y":  0
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  11,
+                                            "y":  1
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  11,
+                                            "y":  2
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  11,
+                                            "y":  3
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  11,
+                                            "y":  4
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  11,
+                                            "y":  5
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  11,
+                                            "y":  6
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  11,
+                                            "y":  7
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  11,
+                                            "y":  8
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  11,
+                                            "y":  9
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  11,
+                                            "y":  10
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  },
+                  {
+                      "grid_position":  {
+                                            "x":  11,
+                                            "y":  11
+                                        },
+                      "type_id":  "ground_flat",
+                      "walkable":  true,
+                      "blocks_los":  false,
+                      "cover_value":  0,
+                      "height_level":  0,
+                      "object_height":  0,
+                      "surface_type":  "ground",
+                      "edge_type":  "cliff"
+                  }
+              ]
+}

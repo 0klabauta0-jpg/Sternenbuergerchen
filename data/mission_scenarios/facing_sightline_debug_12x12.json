@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "scenario_id": "facing_sightline_debug_12x12",
+  "display_name": "Facing Sightline Debug 12x12",
+  "map_file_path": "res://maps/facing_sightline_debug_12x12.json",
+  "time_limit_seconds": 600.0,
+  "mission_slot_count_override": 2,
+  "objective": {
+    "marker_id": "objective_point",
+    "capture_radius": 64.0
+  },
+  "enemy_groups": [
+    {
+      "group_id": "debug_unused_enemy_anchor",
+      "display_name": "Unused Debug Enemy Anchor",
+      "team_id": "team_bravo",
+      "spawn_marker_id": "spawn_bravo",
+      "enemy_ids": [
+        "debug_unused_enemy"
+      ],
+      "tactics": {
+        "profile_id": "guard_hold",
+        "stance": "hold",
+        "cover_behavior": "prefer_near_cover",
+        "security_mode": "directional",
+        "facing": "west",
+        "advance_style": "hold",
+        "allowed_weapon_roles": ["rifle", "smg", "sidearm"],
+        "sight_behavior": "watch_lane",
+        "contact_behavior": "return_fire_hold",
+        "weapon_profile": "rifle",
+        "visual_archetype": "enemy_space_suit_orange",
+        "movement_posture_policy": "hold_ready",
+        "ready_distance_world": 640.0,
+        "travel_speed_factor": 0.35,
+        "ready_speed_factor": 0.24,
+        "aim_move_speed_factor": 0.18,
+        "heavy_weapon_role": "none",
+        "anti_armor_threat": false,
+        "air_asset_risk_profile": "none",
+        "communication_intensity": "normal"
+      }
+    }
+  ],
+  "wave_config": {
+    "wave_count": 0,
+    "units_per_wave": 1,
+    "first_wave_delay_seconds": 0.0,
+    "wave_delay_seconds": 120.0
+  },
+  "tactical_authoring": {
+    "communication_intensity": "normal",
+    "fireteam_defaults": {
+      "advance_style": "hold",
+      "security_mode": "facing"
+    },
+    "air_asset_risk": {
+      "profile_id": "none",
+      "enemy_group_id": "",
+      "lz_threat_zone_id": "",
+      "warning_required_before_damage": true,
+      "loss_consequence": "replacement_recovery"
+    }
+  },
+  "notes": [
+    "Small manual debug fixture for facing, sightline and weapon direction.",
+    "The scene fixture uses existing controller toggles and UnitRuntimeStatus posture values."
+  ]
+}

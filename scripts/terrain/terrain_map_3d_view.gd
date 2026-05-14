@@ -2737,7 +2737,8 @@ func _rebuild_marker_visuals() -> void:
 		var color: Color = Color(marker_record.get("color", Color(0.9, 0.9, 0.9, 1.0)))
 		var compass_letter: String = _get_compass_marker_letter(marker_id, marker_record)
 		if not compass_letter.is_empty():
-			_add_label3d(_marker_root, compass_letter, _world_to_3d_position(world_position, 0.62), "CompassMarker_%s" % String(marker_id), Color(0.98, 0.96, 0.9, 1.0), 30)
+			var compass_font_size: int = 24 if compass_letter.length() > 1 else 30
+			_add_label3d(_marker_root, compass_letter, _world_to_3d_position(world_position, 0.62), "CompassMarker_%s" % String(marker_id), Color(0.98, 0.96, 0.9, 1.0), compass_font_size)
 			_marker_count += 1
 			_compass_marker_count += 1
 			continue
@@ -2757,17 +2758,18 @@ func _rebuild_marker_visuals() -> void:
 
 
 func _get_compass_marker_letter(marker_id: String, marker_record: Dictionary = {}) -> String:
+	var marker_name: String = String(marker_record.get("name", "")).strip_edges()
+	var normalized_marker_name: String = marker_name.to_upper()
 	match marker_id.strip_edges().to_lower():
 		"corner_north":
-			return "N"
+			return marker_name if ["N", "NORD", "NORTH"].has(normalized_marker_name) else "N"
 		"corner_east":
-			return "E"
+			return marker_name if ["E", "OST", "EAST"].has(normalized_marker_name) else "E"
 		"corner_south":
-			return "S"
+			return marker_name if ["S", "SUED", "SUD", "SOUTH"].has(normalized_marker_name) else "S"
 		"corner_west":
-			return "W"
-	var marker_name: String = String(marker_record.get("name", "")).strip_edges().to_upper()
-	return marker_name if ["N", "E", "S", "W"].has(marker_name) and marker_id.begins_with("compass_") else ""
+			return marker_name if ["W", "WEST"].has(normalized_marker_name) else "W"
+	return marker_name if ["N", "E", "S", "W", "NORD", "OST", "SUED", "SUD", "WEST"].has(normalized_marker_name) and marker_id.begins_with("compass_") else ""
 
 
 func _rebuild_patrol_visuals() -> void:

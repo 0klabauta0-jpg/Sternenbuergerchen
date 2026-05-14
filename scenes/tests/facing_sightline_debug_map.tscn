@@ -1,0 +1,63 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/tests/mission_reactivity_test.tscn" id="1_base"]
+[ext_resource type="Script" path="res://scripts/tests/facing_sightline_debug_fixture_setup.gd" id="2_fixture"]
+
+[node name="FacingSightlineDebugMap" instance=ExtResource("1_base")]
+
+[node name="UnitAlpha" parent="." index="6"]
+display_name = "NPC Weapon Ready"
+callsign = "WEAPON"
+fireteam_id = "aim"
+is_fireteam_lead = true
+weapon_1_id = "rifle"
+weapon_2_id = "none"
+
+[node name="UnitBravo" parent="." index="7"]
+display_name = "NPC Looking"
+callsign = "FACING"
+fireteam_id = "look"
+is_fireteam_lead = true
+weapon_1_id = "rifle"
+weapon_2_id = "none"
+
+[node name="UnitCharlie" parent="." index="8"]
+visible = false
+
+[node name="UnitDelta" parent="." index="9"]
+visible = false
+
+[node name="UnitEcho" parent="." index="10"]
+visible = false
+
+[node name="UnitFoxtrot" parent="." index="11"]
+visible = false
+
+[node name="UnitGolf" parent="." index="12"]
+visible = false
+
+[node name="UnitHotel" parent="." index="13"]
+visible = false
+
+[node name="EnemyDelta" parent="." index="14"]
+visible = false
+
+[node name="EnemyEcho" parent="." index="15"]
+visible = false
+
+[node name="MissionSetup" parent="." index="16"]
+map_file_path = "res://maps/facing_sightline_debug_12x12.json"
+scenario_file_path = "res://data/mission_scenarios/facing_sightline_debug_12x12.json"
+unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo")])
+selected_team_unit_ids = PackedStringArray("unit_alpha", "unit_bravo")
+selected_team_fireteam_ids = PackedStringArray("aim", "look")
+defer_friendly_runtime_activation = false
+allow_full_roster_when_selection_empty = false
+
+[node name="CombatLoopDriver" parent="." index="19"]
+contact_range = 0.0
+friendly_unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo")])
+enemy_unit_paths = Array[NodePath]([])
+
+[node name="FacingSightlineDebugFixture" type="Node" parent="." index="24"]
+script = ExtResource("2_fixture")

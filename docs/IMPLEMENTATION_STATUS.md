@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_401 - Facing Sightline Debug Map
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_401_facing_sightline_debug_map.md`, `docs/tasks/TASK_364_mission_fireteam_orientation_indicators.md`, `docs/tasks/TASK_371_fire_sector_security_arc_overlay_toggle.md`, `docs/tasks/TASK_372_mission_los_debug_overlay_toggle.md`
+- Stand: `maps/facing_sightline_debug_12x12.json` und `data/mission_scenarios/facing_sightline_debug_12x12.json` liefern eine kleine 12x12-Mission-Fixture mit sichtbaren Nord/Ost/Sued/West-Kompassmarkern und zwei Friendly-NPC-Slots in der Kartenmitte.
+- Stand: `scenes/tests/facing_sightline_debug_map.tscn` nutzt die vorhandene Mission-Testszene, `MissionTestSetup`, `TacticalController`, `SimulationRoot` und `Primary3DView`; `facing_sightline_debug_fixture_setup.gd` setzt nur bestehende Unit-Facing-Metadaten und Runtime-Posture (`aimed`/`lowered`) und aktiviert die vorhandenen Overlays.
+- Stand: `TerrainMap3DView` rendert Corner-Kompassmarker jetzt optional mit den authored Full-Text-Labels statt nur N/E/S/W, bleibt dabei aber im bestehenden Marker-Visualpfad.
+- Risiken: Der Headless-Verifier prueft Datenfluss, Render-Snapshot und Labeltexte; die finale optische Pfeil-/Label-Lesbarkeit im echten Godot-Fenster bleibt ein kurzer manueller Sichtcheck.
+- Lokale Pruefung: `task_401_facing_sightline_debug_map.gd`, `task_364_mission_fireteam_orientation_indicators.gd`, `bugfix_mission_fire_sector_overlay.gd`, `task_371_fire_sector_security_arc_overlay_toggle.gd`, `task_372_mission_los_debug_overlay_toggle.gd` laufen gruen.
+
 ### TASK_400 - Agent Rules Doc Refresh
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `AGENTS.md`, `docs/CODEX_RULES.md`, `docs/ARCHITECTURE.md`, `docs/CODEX_TASK_PROMPT_TEMPLATE.md`
