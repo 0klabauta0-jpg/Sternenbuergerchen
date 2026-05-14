@@ -18,6 +18,61 @@
 		"rock": "ground_flat",
 		"road": "ground_flat"
 	},
+	"themes": {
+		"space_default_v1": {
+			"description": "Compatibility pack: all gameplay surfaces keep the Space Kit ground base.",
+			"visual_only": true,
+			"surface_model_by_surface": {
+				"ground": "ground_flat",
+				"sand": "ground_flat",
+				"rock": "ground_flat",
+				"road": "ground_flat"
+			},
+			"tile_type_overrides": {}
+		},
+		"nature_classic_dirt_v1": {
+			"description": "Nature Kit dirt terrain pack; surface_type remains the gameplay truth and tints keep sand/rock/road readable.",
+			"visual_only": true,
+			"surface_model_by_surface": {
+				"ground": "nature_ground_dirt",
+				"sand": "nature_ground_dirt",
+				"rock": "nature_ground_dirt",
+				"road": "nature_ground_dirt"
+			},
+			"tile_type_overrides": {
+				"ground_flat": ""
+			}
+		},
+		"ground_mission_mixed_v1": {
+			"description": "Large Ground Mission pack: Nature ground outside, Space/Station/Modular floor types for authored roads and objective pads.",
+			"recommended_for": ["ground_mission", "large_map_128"],
+			"visual_only": true,
+			"surface_model_by_surface": {
+				"ground": "nature_ground_dirt",
+				"sand": "nature_ground_dirt",
+				"rock": "nature_ground_dirt",
+				"road": "ground_flat"
+			},
+			"tile_type_overrides": {
+				"ground_flat": "",
+				"nature_ground_dirt": "nature_ground_dirt",
+				"nature_ground_sand_dirt": "nature_ground_dirt",
+				"nature_ground_rock_dirt": "nature_ground_dirt",
+				"nature_ground_grass_patch": "nature_ground_grass_patch",
+				"modular_floor": "modular_floor",
+				"modular_floor_big": "modular_floor_big",
+				"modular_floor_raised": "modular_floor_raised",
+				"station_floor_panel": "station_floor_panel",
+				"station_set_floor_corner": "station_set_floor_corner",
+				"station_set_floor_detail": "station_set_floor_detail",
+				"station_set_floor_panel_corner": "station_set_floor_panel_corner",
+				"station_set_floor_panel_end": "station_set_floor_panel_end",
+				"station_set_floor_panel_straight": "station_set_floor_panel_straight",
+				"station_set_floor_panel": "station_set_floor_panel",
+				"station_set_floor": "station_set_floor"
+			}
+		}
+	},
 	"tile_type_overrides": {
 		"ground_flat": "ground_flat",
 		"nature_ground_dirt": "nature_ground_dirt",

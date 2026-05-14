@@ -317,7 +317,8 @@ func _editor_grid_material_is_depth_tested(primary_view: Node) -> bool:
 func _is_project_loadable(path: String) -> bool:
 	var normalized_path: String = path.strip_edges()
 	var allowed_root: bool = normalized_path.begins_with("res://Assets/used/terrain/nature_kit_classic/") \
-		or normalized_path.begins_with("res://Assets/curated/kenney/space_station/")
+		or normalized_path.begins_with("res://Assets/curated/kenney/space_station/") \
+		or normalized_path.begins_with("res://Assets/curated/kenney/modular_space/")
 	return allowed_root \
 		and not normalized_path.contains("C:/") \
 		and not normalized_path.contains("C:" + "\\") \

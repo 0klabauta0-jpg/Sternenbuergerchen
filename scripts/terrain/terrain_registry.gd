@@ -4,6 +4,11 @@ extends Node
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 
 var _tiles: Dictionary = {}
+var _tile_id_lookup: Dictionary = {}
+var _sorted_tiles_cache: Array = []
+var _sorted_tiles_cache_dirty: bool = true
+var _revision: int = 0
+var _dirty_grid_lookup: Dictionary = {}
 var _grid_origin_world: Vector2 = Vector2.ZERO
 var _half_tile_width: float = 64.0
 var _half_tile_height: float = 32.0
@@ -17,6 +22,11 @@ func configure_iso_grid(grid_origin_world: Vector2, half_tile_width: float, half
 
 func clear_tiles() -> void:
 	_tiles.clear()
+	_tile_id_lookup.clear()
+	_sorted_tiles_cache.clear()
+	_sorted_tiles_cache_dirty = true
+	_dirty_grid_lookup.clear()
+	_bump_revision()
 
 
 func register_tile(tile_data) -> void:
@@ -24,7 +34,43 @@ func register_tile(tile_data) -> void:
 		push_warning("TerrainRegistry.register_tile expects a valid TerrainTileData.")
 		return
 
-	_tiles[tile_data.grid_position] = tile_data
+	var grid_position: Vector2i = Vector2i(tile_data.grid_position)
+	if _tiles.has(grid_position):
+		_remove_tile_id_index(_tiles[grid_position])
+	_tiles[grid_position] = tile_data
+	_index_tile_id(tile_data)
+	_sorted_tiles_cache_dirty = true
+	_mark_dirty_grid(grid_position)
+	_bump_revision()
+
+
+func notify_tile_data_changed(changed_grids: Array = []) -> void:
+	_rebuild_tile_id_lookup()
+	_sorted_tiles_cache_dirty = true
+	if changed_grids.is_empty():
+		for grid_variant in _tiles.keys():
+			_mark_dirty_grid(Vector2i(grid_variant))
+	else:
+		for grid_variant in changed_grids:
+			if typeof(grid_variant) == TYPE_VECTOR2I:
+				_mark_dirty_grid(Vector2i(grid_variant))
+			elif typeof(grid_variant) == TYPE_VECTOR2:
+				_mark_dirty_grid(Vector2i(roundi(Vector2(grid_variant).x), roundi(Vector2(grid_variant).y)))
+	_bump_revision()
+
+
+func get_revision() -> int:
+	return _revision
+
+
+func get_dirty_grid_positions() -> Array:
+	var grids: Array = _dirty_grid_lookup.keys()
+	grids.sort_custom(_is_grid_before)
+	return grids
+
+
+func clear_dirty_grid_positions() -> void:
+	_dirty_grid_lookup.clear()
 
 
 func get_tile_at_grid(grid_pos: Vector2i):
@@ -35,11 +81,19 @@ func get_tile_at_grid(grid_pos: Vector2i):
 
 
 func get_tile_by_id(tile_id: String):
-	var normalized_id: String = tile_id.strip_edges()
+	var normalized_id: String = _normalize_tile_id(tile_id)
 	if normalized_id.is_empty():
 		return null
+
+	var indexed_tile = _tile_id_lookup.get(normalized_id, null)
+	if indexed_tile != null:
+		if _normalize_tile_id(String(indexed_tile.tile_id)) == normalized_id:
+			return indexed_tile
+		_tile_id_lookup.erase(normalized_id)
+
 	for tile_data in _tiles.values():
-		if String(tile_data.tile_id) == normalized_id:
+		if _normalize_tile_id(String(tile_data.tile_id)) == normalized_id:
+			_tile_id_lookup[normalized_id] = tile_data
 			return tile_data
 	return null
 
@@ -74,15 +128,13 @@ func get_all_tiles() -> Array:
 
 
 func get_sorted_tiles() -> Array:
-	var tiles: Array = _tiles.values()
-	tiles.sort_custom(func(a, b) -> bool:
-		var grid_a: Vector2i = a.grid_position
-		var grid_b: Vector2i = b.grid_position
-		if grid_a.x == grid_b.x:
-			return grid_a.y < grid_b.y
-		return grid_a.x < grid_b.x
-	)
-	return tiles
+	if _sorted_tiles_cache_dirty:
+		_sorted_tiles_cache = _tiles.values()
+		_sorted_tiles_cache.sort_custom(func(a, b) -> bool:
+			return _is_grid_before(Vector2i(a.grid_position), Vector2i(b.grid_position))
+		)
+		_sorted_tiles_cache_dirty = false
+	return _sorted_tiles_cache.duplicate()
 
 
 func is_walkable(grid_pos: Vector2i) -> bool:
@@ -96,27 +148,16 @@ func is_walkable(grid_pos: Vector2i) -> bool:
 func get_nearest_walkable_grid(world_pos: Vector2) -> Variant:
 	var nearest_grid: Variant = null
 	var nearest_distance: float = INF
-	var tiles: Array = _tiles.values()
-	tiles.sort_custom(func(a, b) -> bool:
-		var distance_a: float = world_pos.distance_squared_to(a.world_position)
-		var distance_b: float = world_pos.distance_squared_to(b.world_position)
-		if absf(distance_a - distance_b) > 0.001:
-			return distance_a < distance_b
-		var grid_a: Vector2i = a.grid_position
-		var grid_b: Vector2i = b.grid_position
-		if grid_a.x == grid_b.x:
-			return grid_a.y < grid_b.y
-		return grid_a.x < grid_b.x
-	)
-	for tile_data in tiles:
+	for tile_data in _tiles.values():
 		if not bool(tile_data.walkable):
 			continue
 		var distance_to_tile: float = world_pos.distance_squared_to(tile_data.world_position)
-		if distance_to_tile >= nearest_distance:
+		var grid_position: Vector2i = Vector2i(tile_data.grid_position)
+		if not _is_nearest_candidate_better(distance_to_tile, grid_position, nearest_distance, nearest_grid):
 			continue
 
 		nearest_distance = distance_to_tile
-		nearest_grid = tile_data.grid_position
+		nearest_grid = grid_position
 
 	return nearest_grid
 
@@ -229,3 +270,56 @@ func grid_to_world(grid_pos: Vector2i) -> Vector2:
 		_grid_origin_world.x + (float(grid_pos.x - grid_pos.y) * _half_tile_width),
 		_grid_origin_world.y + (float(grid_pos.x + grid_pos.y) * _half_tile_height)
 	)
+
+
+func _index_tile_id(tile_data) -> void:
+	if tile_data == null:
+		return
+	var normalized_id: String = _normalize_tile_id(String(tile_data.tile_id))
+	if normalized_id.is_empty():
+		return
+	_tile_id_lookup[normalized_id] = tile_data
+
+
+func _remove_tile_id_index(tile_data) -> void:
+	if tile_data == null:
+		return
+	var normalized_id: String = _normalize_tile_id(String(tile_data.tile_id))
+	if normalized_id.is_empty():
+		return
+	if _tile_id_lookup.get(normalized_id, null) == tile_data:
+		_tile_id_lookup.erase(normalized_id)
+
+
+func _rebuild_tile_id_lookup() -> void:
+	_tile_id_lookup.clear()
+	for tile_data in _tiles.values():
+		_index_tile_id(tile_data)
+
+
+func _bump_revision() -> void:
+	_revision += 1
+
+
+func _mark_dirty_grid(grid_position: Vector2i) -> void:
+	_dirty_grid_lookup[grid_position] = true
+
+
+func _normalize_tile_id(value: String) -> String:
+	return value.strip_edges()
+
+
+func _is_grid_before(a: Vector2i, b: Vector2i) -> bool:
+	if a.x == b.x:
+		return a.y < b.y
+	return a.x < b.x
+
+
+func _is_nearest_candidate_better(distance_to_tile: float, grid_position: Vector2i, nearest_distance: float, nearest_grid: Variant) -> bool:
+	if typeof(nearest_grid) != TYPE_VECTOR2I:
+		return true
+	if distance_to_tile < nearest_distance - 0.001:
+		return true
+	if absf(distance_to_tile - nearest_distance) <= 0.001:
+		return _is_grid_before(grid_position, Vector2i(nearest_grid))
+	return false

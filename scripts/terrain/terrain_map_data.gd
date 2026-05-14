@@ -7,6 +7,7 @@ const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/ter
 const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
 
 var _map_name: String = ""
+var _terrain_visual_theme_id: String = ""
 var _mission_slot_count: int = 3
 var _grid_size: Vector2i = Vector2i.ZERO
 var _tile_half_width: float = 64.0
@@ -36,6 +37,7 @@ static func load_from_file(path: String) -> TerrainMapData:
 
 	var root_dict: Dictionary = parsed_json
 	terrain_map_data._map_name = String(root_dict.get("map_name", path.get_file().get_basename()))
+	terrain_map_data._terrain_visual_theme_id = _normalize_optional_id(String(root_dict.get("terrain_visual_theme_id", root_dict.get("surface_visual_theme_id", ""))))
 	terrain_map_data._mission_slot_count = maxi(int(root_dict.get("mission_slot_count", 3)), 1)
 	terrain_map_data._grid_size = _coerce_vector2i(root_dict.get("grid_size", Vector2i.ZERO))
 
@@ -180,6 +182,8 @@ func save_to_file(path: String) -> Error:
 		"enemy_team_configs": _serialize_enemy_team_configs(),
 		"tiles": [],
 	}
+	if not _terrain_visual_theme_id.is_empty():
+		json_root["terrain_visual_theme_id"] = _terrain_visual_theme_id
 
 	for tile_data in _get_sorted_tiles():
 		var tile_dict: Dictionary = tile_data.call("to_dict")
@@ -239,6 +243,14 @@ func get_map_name() -> String:
 
 func set_map_name(map_name: String) -> void:
 	_map_name = map_name.strip_edges()
+
+
+func get_terrain_visual_theme_id() -> String:
+	return _terrain_visual_theme_id
+
+
+func set_terrain_visual_theme_id(theme_id: String) -> void:
+	_terrain_visual_theme_id = _normalize_optional_id(theme_id)
 
 
 func get_mission_slot_count() -> int:
@@ -497,6 +509,10 @@ static func _coerce_vector2i(value: Variant) -> Vector2i:
 		return Vector2i(int(value_dict.get("x", 0)), int(value_dict.get("y", 0)))
 
 	return Vector2i.ZERO
+
+
+static func _normalize_optional_id(value: String) -> String:
+	return value.strip_edges().to_lower()
 
 
 static func _coerce_vector2(value: Variant) -> Vector2:

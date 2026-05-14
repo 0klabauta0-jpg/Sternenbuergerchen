@@ -172,8 +172,8 @@ func _test_runtime_visuals() -> void:
 	_assert(int(snapshot.get("missing_map_asset_mapping_count", 0)) == 0, "Nature prop fixture has no missing mappings")
 	_assert(int(snapshot.get("selected_grid_count", 0)) == 1 and int(snapshot.get("waypoint_tile_marker_count", 0)) >= 1, "Selection and waypoint overlays remain visible")
 	for prop_id in REQUIRED_PROPS:
-		var node := _find_map_node(primary_view, "Asset_%s_" % prop_id) as Node3D
-		_assert(node != null and node.position.y >= _expected_min_prop_y(map_data, prop_id), "Prop anchors on terrain top: %s" % prop_id)
+		var entry: Dictionary = _find_prop_entry(entries, String(prop_id))
+		_assert(not entry.is_empty() and float(entry.get("world_y", -INF)) >= _expected_min_prop_y(map_data, String(prop_id)), "Prop anchors on terrain top: %s" % prop_id)
 	primary_view.queue_free()
 	await _wait_frames(2)
 
@@ -242,6 +242,14 @@ func _entries_cover_props(entries: Array, required_props: Array) -> bool:
 		if not found:
 			return false
 	return true
+
+
+func _find_prop_entry(entries: Array, prop_id: String) -> Dictionary:
+	for entry_variant in entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("visual_type_id", "")) == prop_id:
+			return entry
+	return {}
 
 
 func _role_count(snapshot: Dictionary, role: String) -> int:

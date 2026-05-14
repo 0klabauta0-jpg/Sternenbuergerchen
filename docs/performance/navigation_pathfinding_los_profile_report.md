@@ -26,6 +26,25 @@ Jede Path-Batch-Variante liefert:
 
 Die Budgets sind absichtlich breit. Der TASK_217-Verifier prueft nur, dass Median/P95/P99 strukturell vorhanden sind und die HPA-P99-Werte unter einem sehr toleranten lokalen Startbudget bleiben.
 
+## HPA-Build-Diagnose
+Die Profilkarten melden zusaetzlich `hpa_graph_build_stats`:
+
+- `built`
+- `cluster_size`
+- `tile_count`
+- `cluster_count`
+- `component_count`
+- `portal_count`
+- `elapsed_usec`
+- `incremental` fuer Full- vs. Dirty-Cluster-Rebuilds
+- `dirty_grid_count`, `dirty_cluster_count` und `rebuilt_cluster_count`, wenn ein inkrementeller Rebuild laeuft
+
+Fuer 64x64-Karten mit 8x8-Clustern erwartet der Harness 4096 Tiles und 64 Cluster. Der `SimulationRoot` spiegelt dieselben Runtime-Werte in `get_navigation_debug_snapshot()["hpa_navigation"]` und ergaenzt `build_count`, `cache_hit_count` und `registry_revision`. Damit ist sichtbar, ob eine grosse Karte wirklich HPA neu baut oder nur den Runtime-Graphen aus dem Cache nutzt.
+
+Seit TASK_412 trackt `TerrainRegistry` Dirty-Grids, und `SimulationRoot` kann bei gleicher Registry und gleicher Tile-Anzahl den bestehenden HPA-Graphen ueber `rebuild_dirty_clusters_from_registry()` reparieren. Die Runtime-Diagnose markiert diesen Pfad mit `runtime_rebuild_mode = incremental`.
+
+Der Map-Editor besitzt aktuell keinen eigenen HPA-Full-Rebuild-Pfad. Editor-Painting veraendert Terrain-/Visualdaten; HPA-Build-Kosten werden deshalb im Runtime- und Benchmark-Pfad gemessen, nicht in einem Editor-HPA-Loop.
+
 ## LOS und Cover
 `TerrainPathfinder` zaehlt ueber optionale `options["diagnostics"]`:
 
@@ -55,6 +74,7 @@ TASK_131-Avoidance-Szenarien bleiben erhalten und werden von TASK_217 weiter mit
 - 32x32- und 64x64-Matrix vorhanden.
 - Terrain-A* und HPA loesen die Profilqueries.
 - Median/P95/P99 existieren.
+- HPA-Build-Stats fuer grosse Karten sind sichtbar.
 - LOS-/Cover-Zaehler sind in den Cover-/Engpass-Szenarien aktiv.
 - Cache-Diagnose ist sichtbar.
 - Query-Flood wird per Tick gestaffelt.

@@ -486,7 +486,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mouse_button_event := event as InputEventMouseButton
 		if mouse_button_event.button_index == MOUSE_BUTTON_RIGHT and mouse_button_event.pressed:
-			if _is_pointer_over_control() or _is_lz_placement_armed or _is_target_placement_armed:
+			if _is_pointer_over_control(mouse_button_event.position) or _is_lz_placement_armed or _is_target_placement_armed:
 				return
 			if _begin_right_order_context_interaction(mouse_button_event.position, mouse_button_event.shift_pressed):
 				get_viewport().set_input_as_handled()
@@ -498,12 +498,30 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 
 		if mouse_button_event.button_index == MOUSE_BUTTON_LEFT and mouse_button_event.pressed:
-			if _is_pointer_over_control():
-				return
-
 			if mouse_button_event.shift_pressed:
+				if _is_pointer_over_control(mouse_button_event.position):
+					return
 				if _begin_area_order_interaction(mouse_button_event.position):
 					get_viewport().set_input_as_handled()
+				return
+
+			if _is_lz_placement_armed:
+				if _is_pointer_over_control(mouse_button_event.position):
+					return
+				if _place_lz_from_screen_position(mouse_button_event.position):
+					get_viewport().set_input_as_handled()
+				return
+
+			if _is_target_placement_armed:
+				if _is_pointer_over_control(mouse_button_event.position):
+					return
+				if try_place_target_from_screen_position(mouse_button_event.position):
+					_is_target_placement_armed = false
+					_update_ui()
+					get_viewport().set_input_as_handled()
+				return
+
+			if _is_pointer_over_control(mouse_button_event.position):
 				return
 
 			if _try_begin_waypoint_drag(mouse_button_event.position):
@@ -512,18 +530,6 @@ func _unhandled_input(event: InputEvent) -> void:
 
 			if mouse_button_event.double_click:
 				if _try_select_fireteam_from_map_click(mouse_button_event.position, mouse_button_event.ctrl_pressed):
-					get_viewport().set_input_as_handled()
-				return
-
-			if _is_lz_placement_armed:
-				if _place_lz_from_screen_position(mouse_button_event.position):
-					get_viewport().set_input_as_handled()
-				return
-
-			if _is_target_placement_armed:
-				if try_place_target_from_screen_position(mouse_button_event.position):
-					_is_target_placement_armed = false
-					_update_ui()
 					get_viewport().set_input_as_handled()
 				return
 
@@ -6644,8 +6650,18 @@ func _set_command_hierarchy_panel_meta(path: Variant, panel_role: String, group_
 	node.set_meta("command_hierarchy_group_help_ids", group_help_ids)
 
 
-func _is_pointer_over_control() -> bool:
-	return get_viewport().gui_get_hovered_control() != null
+func _is_pointer_over_control(screen_position: Vector2 = Vector2(INF, INF)) -> bool:
+	var hovered_control := get_viewport().gui_get_hovered_control()
+	if hovered_control == null:
+		return false
+	if screen_position.x == INF or screen_position.y == INF:
+		return true
+	var control := hovered_control as Control
+	while control != null:
+		if control.visible and control.mouse_filter != Control.MOUSE_FILTER_IGNORE and control.get_global_rect().has_point(screen_position):
+			return true
+		control = control.get_parent() as Control
+	return false
 
 
 func _get_target_position() -> Vector2:

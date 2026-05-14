@@ -112,6 +112,35 @@ const KENNEY_MODEL_ROOT: String = "res://Assets/kenney_space-kit/Models/GLTF for
 const KENNEY_AUTHORING_OFFSET_X: float = 2.0
 const KENNEY_AUTHORING_OFFSET_Z: float = 1.5
 const KENNEY_OFFSET_EPSILON: float = 0.01
+const GROUND_MULTIMESH_CHUNK_SIZE: int = 8
+const VISUAL_STREAMING_TILE_THRESHOLD: int = 4096
+const VISUAL_STREAMING_MIN_CHUNK_RADIUS: int = 2
+const VISUAL_STREAMING_MAX_CHUNK_RADIUS: int = 5
+const VISUAL_STREAMING_CAMERA_CHUNK_DIVISOR: float = 1.6
+const GROUND_MULTIMESH_MODEL_KEYS: PackedStringArray = [
+	"ground_flat",
+	"nature_ground_dirt",
+	"nature_ground_grass_patch",
+	"nature_ground_dirt_river_tile",
+	"station_floor_panel",
+	"station_set_floor_corner",
+	"station_set_floor_detail",
+	"station_set_floor_panel_corner",
+	"station_set_floor_panel_end",
+	"station_set_floor_panel_straight",
+	"station_set_floor_panel",
+	"station_set_floor",
+	"modular_floor",
+	"modular_floor_big",
+	"modular_floor_raised",
+]
+const STATIC_PROP_MULTIMESH_MODEL_KEYS: PackedStringArray = [
+	"nature_tree_blocker",
+	"nature_rock_cover",
+	"nature_bush_cover",
+	"nature_cactus_cover",
+	"nature_deco_logs",
+]
 const FRIENDLY_UNIT_MODEL_NAME: String = "astronautA"
 const ENEMY_UNIT_MODEL_NAME: String = "astronautB"
 const DROPSHIP_MODEL_NAME: String = "craft_speederB"
@@ -292,12 +321,16 @@ var _terrain_map_data = null
 var _tile_catalog = null
 var _terrain_3d_mapping: Dictionary = {}
 var _terrain_surface_visual_theme_catalog: Dictionary = {}
+var _active_terrain_visual_theme_id: String = ""
 var _npc_unit_visual_mapping: Dictionary = {}
 var _weapon_fire_vfx_catalog: Dictionary = {}
 var _editor_light_shadows_enabled: bool = EDITOR_LIGHT_SHADOW_ENABLED_DEFAULT
 var _weapon_fire_vfx_texture_cache: Dictionary = {}
 var _comic_bubble_texture_cache: Dictionary = {}
 var _model_scene_cache: Dictionary = {}
+var _ground_batch_source_cache: Dictionary = {}
+var _height_edge_batch_source_cache: Dictionary = {}
+var _static_prop_batch_source_cache: Dictionary = {}
 var _box_mesh_cache: Dictionary = {}
 var _material_cache: Dictionary = {}
 var _space_kit_terrain_top_color: Color = Color.TRANSPARENT
@@ -331,11 +364,28 @@ var _focus_grid_position: Vector2 = Vector2.ZERO
 var _camera_size: float = CAMERA_DEFAULT_SIZE
 var _camera_yaw_degrees: float = 45.0
 var _camera_pitch_degrees: float = 58.0
+var _map_total_tile_count: int = 0
 var _map_tile_count: int = 0
+var _visual_streaming_active: bool = false
+var _visual_streaming_active_chunks: Dictionary = {}
+var _visual_streaming_active_chunk_key: String = ""
+var _visual_streaming_chunk_radius: int = 0
+var _visual_streaming_refresh_queued: bool = false
+var _visual_streaming_refresh_count: int = 0
+var _visual_streaming_skipped_tile_count: int = 0
+var _is_rendering_map: bool = false
 var _ground_mesh_count: int = 0
+var _ground_individual_model_count: int = 0
+var _ground_multimesh_instance_count: int = 0
+var _ground_multimesh_tile_count: int = 0
+var _ground_batch_requests: Dictionary = {}
 var _tile_texture_count: int = 0
 var _height_edge_texture_count: int = 0
 var _height_edge_model_count: int = 0
+var _height_edge_individual_model_count: int = 0
+var _height_edge_multimesh_instance_count: int = 0
+var _height_edge_multimesh_model_count: int = 0
+var _height_edge_batch_requests: Dictionary = {}
 var _slope_edge_model_count: int = 0
 var _cliff_edge_model_count: int = 0
 var _nature_cliff_edge_model_count: int = 0
@@ -345,6 +395,10 @@ var _height_edge_visual_entries: Array = []
 var _height_edge_authoring_conflict_count: int = 0
 var _surface_tint_count: int = 0
 var _elevated_surface_tint_count: int = 0
+var _surface_tint_multimesh_instance_count: int = 0
+var _surface_tint_batched_tile_count: int = 0
+var _surface_tint_batch_requests: Dictionary = {}
+var _surface_tint_visual_entries: Array = []
 var _nature_surface_ground_model_count: int = 0
 var _nature_surface_detail_model_count: int = 0
 var _nature_surface_theme_counts: Dictionary = {}
@@ -352,6 +406,10 @@ var _surface_visual_entries: Array = []
 var _surface_detail_visual_entries: Array = []
 var _asset_texture_count: int = 0
 var _asset_model_count: int = 0
+var _static_prop_individual_model_count: int = 0
+var _static_prop_multimesh_instance_count: int = 0
+var _static_prop_multimesh_model_count: int = 0
+var _static_prop_batch_requests: Dictionary = {}
 var _space_station_model_count: int = 0
 var _space_station_textured_surface_count: int = 0
 var _nature_prop_model_count: int = 0
@@ -522,6 +580,8 @@ func configure_from_map(terrain_map_data) -> void:
 
 func render_map(terrain_map_data = null) -> void:
 	var render_started_at_msec: int = Time.get_ticks_msec()
+	_is_rendering_map = true
+	_visual_streaming_refresh_queued = false
 	if terrain_map_data != null:
 		_terrain_map_data = terrain_map_data
 		_order_visual_signature = ""
@@ -541,11 +601,25 @@ func render_map(terrain_map_data = null) -> void:
 	_clear_children(_drop_root)
 	_clear_children(_feedback_bubble_hud_root)
 	_render_tile_by_grid.clear()
+	_map_total_tile_count = 0
 	_map_tile_count = 0
+	_visual_streaming_active = false
+	_visual_streaming_active_chunks.clear()
+	_visual_streaming_active_chunk_key = ""
+	_visual_streaming_chunk_radius = 0
+	_visual_streaming_skipped_tile_count = 0
 	_ground_mesh_count = 0
+	_ground_individual_model_count = 0
+	_ground_multimesh_instance_count = 0
+	_ground_multimesh_tile_count = 0
+	_ground_batch_requests.clear()
 	_tile_texture_count = 0
 	_height_edge_texture_count = 0
 	_height_edge_model_count = 0
+	_height_edge_individual_model_count = 0
+	_height_edge_multimesh_instance_count = 0
+	_height_edge_multimesh_model_count = 0
+	_height_edge_batch_requests.clear()
 	_slope_edge_model_count = 0
 	_cliff_edge_model_count = 0
 	_nature_cliff_edge_model_count = 0
@@ -555,6 +629,10 @@ func render_map(terrain_map_data = null) -> void:
 	_height_edge_authoring_conflict_count = 0
 	_surface_tint_count = 0
 	_elevated_surface_tint_count = 0
+	_surface_tint_multimesh_instance_count = 0
+	_surface_tint_batched_tile_count = 0
+	_surface_tint_batch_requests.clear()
+	_surface_tint_visual_entries.clear()
 	_nature_surface_ground_model_count = 0
 	_nature_surface_detail_model_count = 0
 	_nature_surface_theme_counts.clear()
@@ -562,6 +640,10 @@ func render_map(terrain_map_data = null) -> void:
 	_surface_detail_visual_entries.clear()
 	_asset_texture_count = 0
 	_asset_model_count = 0
+	_static_prop_individual_model_count = 0
+	_static_prop_multimesh_instance_count = 0
+	_static_prop_multimesh_model_count = 0
+	_static_prop_batch_requests.clear()
 	_space_station_model_count = 0
 	_space_station_textured_surface_count = 0
 	_nature_prop_model_count = 0
@@ -602,17 +684,25 @@ func render_map(terrain_map_data = null) -> void:
 	_reset_fow_overlay_counters(false)
 	if _terrain_map_data == null:
 		_map_render_duration_msec = Time.get_ticks_msec() - render_started_at_msec
+		_is_rendering_map = false
 		return
 
 	var tiles: Array = Array(_terrain_map_data.call("get_tiles"))
+	_map_total_tile_count = tiles.size()
+	var render_tiles: Array = _select_tiles_for_visual_render(tiles)
+	_visual_streaming_skipped_tile_count = maxi(_map_total_tile_count - render_tiles.size(), 0)
 	for tile_data in tiles:
 		if tile_data != null:
 			_render_tile_by_grid[tile_data.grid_position] = tile_data
-	for tile_data in tiles:
+	for tile_data in render_tiles:
 		_add_tile_visual(tile_data)
-	_add_tile_grid_lines(tiles)
-	for tile_data in tiles:
+	_flush_ground_model_batches()
+	_flush_surface_tint_batches()
+	_flush_static_prop_model_batches()
+	_add_tile_grid_lines(render_tiles)
+	for tile_data in render_tiles:
 		_add_height_edge_visuals(tile_data)
+	_flush_height_edge_model_batches()
 	_rebuild_fog_of_war_visuals()
 	_rebuild_marker_visuals()
 	_rebuild_patrol_visuals()
@@ -623,6 +713,7 @@ func render_map(terrain_map_data = null) -> void:
 	_sync_unit_proxies()
 	_update_camera_transform()
 	_map_render_duration_msec = Time.get_ticks_msec() - render_started_at_msec
+	_is_rendering_map = false
 
 
 func set_unit_nodes(unit_nodes: Array) -> void:
@@ -1159,12 +1250,28 @@ func get_render_snapshot() -> Dictionary:
 	var render_monitor_snapshot: Dictionary = _build_render_monitor_snapshot()
 	return {
 		"tile_count": _map_tile_count,
+		"total_tile_count": _map_total_tile_count,
+		"rendered_tile_count": _map_tile_count,
+		"visual_streaming_active": _visual_streaming_active,
+		"visual_streaming_tile_threshold": VISUAL_STREAMING_TILE_THRESHOLD,
+		"visual_streaming_chunk_size": GROUND_MULTIMESH_CHUNK_SIZE,
+		"visual_streaming_chunk_radius": _visual_streaming_chunk_radius,
+		"visual_streaming_active_chunk_count": _visual_streaming_active_chunks.size(),
+		"visual_streaming_skipped_tile_count": _visual_streaming_skipped_tile_count,
+		"visual_streaming_refresh_count": _visual_streaming_refresh_count,
+		"visual_streaming_active_chunks": _get_visual_streaming_active_chunk_entries(),
 		"editor_visual_recovery": _build_editor_visual_recovery_snapshot(),
 		"editor_light": _build_editor_light_snapshot(),
 		"ground_mesh_count": _ground_mesh_count,
+		"ground_individual_model_count": _ground_individual_model_count,
+		"ground_multimesh_instance_count": _ground_multimesh_instance_count,
+		"ground_multimesh_tile_count": _ground_multimesh_tile_count,
 		"tile_texture_count": _tile_texture_count,
 		"height_edge_texture_count": _height_edge_texture_count,
 		"height_edge_model_count": _height_edge_model_count,
+		"height_edge_individual_model_count": _height_edge_individual_model_count,
+		"height_edge_multimesh_instance_count": _height_edge_multimesh_instance_count,
+		"height_edge_multimesh_model_count": _height_edge_multimesh_model_count,
 		"slope_edge_model_count": _slope_edge_model_count,
 		"cliff_edge_model_count": _cliff_edge_model_count,
 		"nature_cliff_edge_model_count": _nature_cliff_edge_model_count,
@@ -1174,6 +1281,9 @@ func get_render_snapshot() -> Dictionary:
 		"height_edge_authoring_conflict_count": _height_edge_authoring_conflict_count,
 		"surface_tint_count": _surface_tint_count,
 		"elevated_surface_tint_count": _elevated_surface_tint_count,
+		"surface_tint_multimesh_instance_count": _surface_tint_multimesh_instance_count,
+		"surface_tint_batched_tile_count": _surface_tint_batched_tile_count,
+		"surface_tint_visual_entries": _surface_tint_visual_entries.duplicate(true),
 		"nature_surface_ground_model_count": _nature_surface_ground_model_count,
 		"nature_surface_detail_model_count": _nature_surface_detail_model_count,
 		"nature_surface_theme_counts": _nature_surface_theme_counts.duplicate(true),
@@ -1181,8 +1291,14 @@ func get_render_snapshot() -> Dictionary:
 		"surface_detail_visual_entries": _surface_detail_visual_entries.duplicate(true),
 		"surface_detail_visual_count": _surface_detail_visual_entries.size(),
 		"surface_visual_theme_catalog_loaded": not _get_terrain_surface_visual_theme_catalog().is_empty(),
+		"terrain_visual_theme_id": _active_terrain_visual_theme_id,
+		"terrain_visual_theme_active": not _active_terrain_visual_theme_id.is_empty(),
+		"terrain_visual_theme_available_count": Dictionary(_get_terrain_surface_visual_theme_catalog().get("themes", {})).size(),
 		"asset_texture_count": _asset_texture_count,
 		"asset_model_count": _asset_model_count,
+		"static_prop_individual_model_count": _static_prop_individual_model_count,
+		"static_prop_multimesh_instance_count": _static_prop_multimesh_instance_count,
+		"static_prop_multimesh_model_count": _static_prop_multimesh_model_count,
 		"space_station_model_count": _space_station_model_count,
 		"space_station_textured_surface_count": _space_station_textured_surface_count,
 		"nature_prop_model_count": _nature_prop_model_count,
@@ -1383,6 +1499,26 @@ func _build_editor_visual_recovery_snapshot() -> Dictionary:
 	}
 
 
+func _get_visual_streaming_active_chunk_entries() -> Array:
+	var chunk_ids: Array = _visual_streaming_active_chunks.keys()
+	chunk_ids.sort_custom(func(a, b) -> bool:
+		var chunk_a: Vector2i = Vector2i(a)
+		var chunk_b: Vector2i = Vector2i(b)
+		if chunk_a.x == chunk_b.x:
+			return chunk_a.y < chunk_b.y
+		return chunk_a.x < chunk_b.x
+	)
+	var entries: Array = []
+	for chunk_variant in chunk_ids:
+		var chunk_position: Vector2i = Vector2i(chunk_variant)
+		entries.append({
+			"chunk_position": chunk_position,
+			"min_grid": Vector2i(chunk_position.x * GROUND_MULTIMESH_CHUNK_SIZE, chunk_position.y * GROUND_MULTIMESH_CHUNK_SIZE),
+			"max_grid": Vector2i((chunk_position.x + 1) * GROUND_MULTIMESH_CHUNK_SIZE - 1, (chunk_position.y + 1) * GROUND_MULTIMESH_CHUNK_SIZE - 1),
+		})
+	return entries
+
+
 func _build_editor_light_snapshot() -> Dictionary:
 	var light: DirectionalLight3D = null
 	if _world_root != null:
@@ -1459,6 +1595,7 @@ func _accumulate_node_budget(node: Node, counts: Dictionary, material_keys: Dict
 		_accumulate_mesh_materials(node as MeshInstance3D, counts, material_keys)
 	if node is MultiMeshInstance3D:
 		counts["multimesh_instance_count"] = int(counts.get("multimesh_instance_count", 0)) + 1
+		_accumulate_multimesh_materials(node as MultiMeshInstance3D, counts, material_keys)
 	if node is Sprite3D:
 		counts["sprite3d_count"] = int(counts.get("sprite3d_count", 0)) + 1
 	if node is Label3D:
@@ -1476,6 +1613,17 @@ func _accumulate_mesh_materials(mesh_instance: MeshInstance3D, counts: Dictionar
 		return
 	for surface_index in range(mesh.get_surface_count()):
 		_register_budget_material(mesh.surface_get_material(surface_index), counts, material_keys)
+
+
+func _accumulate_multimesh_materials(multimesh_instance: MultiMeshInstance3D, counts: Dictionary, material_keys: Dictionary) -> void:
+	if multimesh_instance == null:
+		return
+	_register_budget_material(multimesh_instance.material_override, counts, material_keys)
+	var multimesh: MultiMesh = multimesh_instance.multimesh
+	if multimesh == null or multimesh.mesh == null:
+		return
+	for surface_index in range(multimesh.mesh.get_surface_count()):
+		_register_budget_material(multimesh.mesh.surface_get_material(surface_index), counts, material_keys)
 
 
 func _register_budget_material(material: Material, counts: Dictionary, material_keys: Dictionary) -> void:
@@ -1719,14 +1867,22 @@ func _screen_to_viewport_position(screen_position: Vector2) -> Vector2:
 
 func _read_map_transform() -> void:
 	if _terrain_map_data == null:
+		_active_terrain_visual_theme_id = ""
 		return
 	_grid_size = _terrain_map_data.call("get_grid_size")
 	_grid_origin_world = _terrain_map_data.call("get_grid_origin")
+	_active_terrain_visual_theme_id = _read_terrain_visual_theme_id(_terrain_map_data)
 	var tile_size: Dictionary = Dictionary(_terrain_map_data.call("get_tile_size"))
 	_half_tile_width = maxf(float(tile_size.get("half_width", DEFAULT_HALF_TILE_WIDTH)), 0.001)
 	_half_tile_height = maxf(float(tile_size.get("half_height", DEFAULT_HALF_TILE_HEIGHT)), 0.001)
 	if _focus_grid_position == Vector2.ZERO:
 		focus_map_center()
+
+
+func _read_terrain_visual_theme_id(terrain_map_data) -> String:
+	if terrain_map_data == null or not terrain_map_data.has_method("get_terrain_visual_theme_id"):
+		return ""
+	return String(terrain_map_data.call("get_terrain_visual_theme_id")).strip_edges().to_lower()
 
 
 func _update_camera_transform() -> void:
@@ -1743,6 +1899,7 @@ func _update_camera_transform() -> void:
 	_camera.global_position = focus_3d + camera_offset
 	_camera.look_at(focus_3d, Vector3.UP)
 	_request_viewport_redraw()
+	_queue_visual_streaming_refresh_if_needed()
 
 
 func _clamp_focus_to_map() -> void:
@@ -1750,6 +1907,90 @@ func _clamp_focus_to_map() -> void:
 		return
 	_focus_grid_position.x = clampf(_focus_grid_position.x, -2.0, float(_grid_size.x) + 2.0)
 	_focus_grid_position.y = clampf(_focus_grid_position.y, -2.0, float(_grid_size.y) + 2.0)
+
+
+func _select_tiles_for_visual_render(tiles: Array) -> Array:
+	_visual_streaming_active = tiles.size() > VISUAL_STREAMING_TILE_THRESHOLD
+	if not _visual_streaming_active:
+		_visual_streaming_active_chunk_key = "full"
+		_visual_streaming_active_chunks.clear()
+		_visual_streaming_chunk_radius = 0
+		return tiles
+	_visual_streaming_active_chunks = _build_active_visual_chunk_lookup()
+	_visual_streaming_active_chunk_key = _build_visual_chunk_key(_visual_streaming_active_chunks)
+	var render_tiles: Array = []
+	for tile_data in tiles:
+		if tile_data == null:
+			continue
+		var chunk_position: Vector2i = _get_ground_batch_chunk_position(Vector2i(tile_data.grid_position))
+		if _visual_streaming_active_chunks.has(chunk_position):
+			render_tiles.append(tile_data)
+	return render_tiles
+
+
+func _queue_visual_streaming_refresh_if_needed() -> void:
+	if _is_rendering_map or not _visual_streaming_active or _terrain_map_data == null:
+		return
+	var next_chunks: Dictionary = _build_active_visual_chunk_lookup()
+	var next_key: String = _build_visual_chunk_key(next_chunks)
+	if next_key == _visual_streaming_active_chunk_key:
+		return
+	if _visual_streaming_refresh_queued:
+		return
+	_visual_streaming_refresh_queued = true
+	call_deferred("_refresh_visual_streaming_chunks")
+
+
+func _refresh_visual_streaming_chunks() -> void:
+	_visual_streaming_refresh_queued = false
+	if not _visual_streaming_active or _terrain_map_data == null:
+		return
+	_visual_streaming_refresh_count += 1
+	render_map()
+
+
+func _build_active_visual_chunk_lookup() -> Dictionary:
+	var result: Dictionary = {}
+	_visual_streaming_chunk_radius = _get_visual_streaming_chunk_radius()
+	var focus_grid := Vector2i(roundi(_focus_grid_position.x), roundi(_focus_grid_position.y))
+	var focus_chunk: Vector2i = _get_ground_batch_chunk_position(focus_grid)
+	for chunk_x in range(focus_chunk.x - _visual_streaming_chunk_radius, focus_chunk.x + _visual_streaming_chunk_radius + 1):
+		for chunk_y in range(focus_chunk.y - _visual_streaming_chunk_radius, focus_chunk.y + _visual_streaming_chunk_radius + 1):
+			var chunk_position := Vector2i(chunk_x, chunk_y)
+			if _visual_chunk_overlaps_map(chunk_position):
+				result[chunk_position] = true
+	return result
+
+
+func _get_visual_streaming_chunk_radius() -> int:
+	var camera_chunks: int = ceili(_camera_size / (float(GROUND_MULTIMESH_CHUNK_SIZE) * VISUAL_STREAMING_CAMERA_CHUNK_DIVISOR)) + 1
+	return clampi(camera_chunks, VISUAL_STREAMING_MIN_CHUNK_RADIUS, VISUAL_STREAMING_MAX_CHUNK_RADIUS)
+
+
+func _visual_chunk_overlaps_map(chunk_position: Vector2i) -> bool:
+	if _grid_size == Vector2i.ZERO:
+		return true
+	var min_grid := Vector2i(chunk_position.x * GROUND_MULTIMESH_CHUNK_SIZE, chunk_position.y * GROUND_MULTIMESH_CHUNK_SIZE)
+	var max_grid := min_grid + Vector2i(GROUND_MULTIMESH_CHUNK_SIZE - 1, GROUND_MULTIMESH_CHUNK_SIZE - 1)
+	return max_grid.x >= 0 and max_grid.y >= 0 and min_grid.x < _grid_size.x and min_grid.y < _grid_size.y
+
+
+func _build_visual_chunk_key(chunk_lookup: Dictionary) -> String:
+	if chunk_lookup.is_empty():
+		return ""
+	var chunk_ids: Array = chunk_lookup.keys()
+	chunk_ids.sort_custom(func(a, b) -> bool:
+		var chunk_a: Vector2i = Vector2i(a)
+		var chunk_b: Vector2i = Vector2i(b)
+		if chunk_a.x == chunk_b.x:
+			return chunk_a.y < chunk_b.y
+		return chunk_a.x < chunk_b.x
+	)
+	var parts := PackedStringArray()
+	for chunk_variant in chunk_ids:
+		var chunk_position: Vector2i = Vector2i(chunk_variant)
+		parts.append("%d,%d" % [chunk_position.x, chunk_position.y])
+	return "|".join(parts)
 
 
 func _add_tile_visual(tile_data) -> void:
@@ -1762,7 +2003,7 @@ func _add_tile_visual(tile_data) -> void:
 	var cell_size: float = _get_3d_cell_size()
 	if _uses_strict_3d_asset_mapping():
 		var ground_visual_type_id: String = _resolve_ground_surface_model_key(tile_data)
-		if not _add_ground_model_visual(tile_data, top_y, ground_visual_type_id):
+		if not _queue_ground_model_batch(tile_data, top_y, ground_visual_type_id) and not _add_ground_model_visual(tile_data, top_y, ground_visual_type_id):
 			_add_missing_asset_marker(tile_data, top_y, ground_visual_type_id)
 	else:
 		var tile_mesh := _make_box_mesh(Vector3(cell_size * tile_fill, tile_thickness, cell_size * tile_fill))
@@ -1773,6 +2014,7 @@ func _add_tile_visual(tile_data) -> void:
 		tile_instance.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y - (tile_thickness * 0.5))
 		_map_root.add_child(tile_instance)
 		_ground_mesh_count += 1
+		_ground_individual_model_count += 1
 	_add_surface_tint_visual(tile_data, top_y)
 	_add_surface_detail_visual(tile_data, top_y)
 	_map_tile_count += 1
@@ -1857,13 +2099,202 @@ func _add_ground_model_visual(tile_data, top_y: float, visual_type_id: String = 
 	ground_root.add_child(model_instance)
 	_map_root.add_child(ground_root)
 	_ground_mesh_count += 1
+	_ground_individual_model_count += 1
 	_register_ground_surface_visual(tile_data, normalized_visual_type_id, ground_y, top_y, visual_height, material_override_color, material_override_unshaded, surface_top_y_offset)
 	return true
+
+
+func _queue_ground_model_batch(tile_data, top_y: float, visual_type_id: String = "ground_flat") -> bool:
+	if tile_data == null or _map_root == null:
+		return false
+	var normalized_visual_type_id: String = visual_type_id.strip_edges().to_lower()
+	if normalized_visual_type_id.is_empty():
+		normalized_visual_type_id = "ground_flat"
+	if not _ground_model_supports_multimesh(normalized_visual_type_id):
+		return false
+	var material_override_color: Color = _get_ground_surface_model_override_color(normalized_visual_type_id, tile_data)
+	var material_override_unshaded: bool = material_override_color != Color.TRANSPARENT and normalized_visual_type_id == "ground_flat"
+	var source_key: String = _build_ground_batch_source_key(normalized_visual_type_id, material_override_color, material_override_unshaded)
+	var source: Dictionary = _get_ground_batch_source(normalized_visual_type_id, material_override_color, material_override_unshaded, source_key)
+	if source.is_empty():
+		return false
+	var mapped_entry: Dictionary = _get_model_entry_for_type(normalized_visual_type_id)
+	if _is_space_station_model_entry(mapped_entry):
+		_space_station_model_count += 1
+		_space_station_textured_surface_count += maxi(int(source.get("surface_count", 0)), 1)
+
+	var model_scale: float = _get_ground_surface_model_scale(normalized_visual_type_id)
+	var visual_height: float = float(source.get("model_height", 0.0)) * model_scale
+	var surface_top_y_offset: float = _get_ground_surface_top_y_offset(normalized_visual_type_id)
+	var visual_top_y: float = top_y + surface_top_y_offset
+	var ground_y: float = visual_top_y
+	if visual_height > 0.001:
+		ground_y = visual_top_y - visual_height
+	var rotation_y: float = 0.0
+	if _ground_surface_supports_tile_rotation(normalized_visual_type_id):
+		rotation_y = _get_tile_object_rotation_degrees(tile_data)
+	var root_basis: Basis = Basis.IDENTITY.rotated(Vector3.UP, deg_to_rad(rotation_y)).scaled(Vector3.ONE * model_scale)
+	var root_transform := Transform3D(root_basis, _grid_to_3d_position(Vector2(tile_data.grid_position), ground_y))
+	var mesh_transform: Transform3D = Transform3D(source.get("mesh_transform", Transform3D.IDENTITY))
+	var instance_transform: Transform3D = root_transform * mesh_transform
+	var chunk_position: Vector2i = _get_ground_batch_chunk_position(tile_data.grid_position)
+	var batch_key: String = "%s|rot:%0.3f|chunk:%d,%d" % [
+		source_key,
+		rotation_y,
+		chunk_position.x,
+		chunk_position.y,
+	]
+	var batch: Dictionary = Dictionary(_ground_batch_requests.get(batch_key, {}))
+	if batch.is_empty():
+		batch = {
+			"visual_type_id": normalized_visual_type_id,
+			"source": source,
+			"transforms": [],
+			"chunk_position": chunk_position,
+		}
+	var transforms: Array = Array(batch.get("transforms", []))
+	transforms.append(instance_transform)
+	batch["transforms"] = transforms
+	_ground_batch_requests[batch_key] = batch
+
+	_ground_mesh_count += 1
+	_ground_multimesh_tile_count += 1
+	_register_ground_surface_visual(tile_data, normalized_visual_type_id, ground_y, top_y, visual_height, material_override_color, material_override_unshaded, surface_top_y_offset)
+	return true
+
+
+func _flush_ground_model_batches() -> void:
+	if _map_root == null:
+		_ground_batch_requests.clear()
+		return
+	if _ground_batch_requests.is_empty():
+		return
+	var batch_keys: Array = _ground_batch_requests.keys()
+	batch_keys.sort()
+	var batch_index: int = 0
+	for batch_key in batch_keys:
+		var batch: Dictionary = Dictionary(_ground_batch_requests.get(batch_key, {}))
+		var transforms: Array = Array(batch.get("transforms", []))
+		if transforms.is_empty():
+			continue
+		var source: Dictionary = Dictionary(batch.get("source", {}))
+		var mesh := source.get("mesh", null) as Mesh
+		if mesh == null:
+			continue
+		var multimesh := MultiMesh.new()
+		multimesh.transform_format = MultiMesh.TRANSFORM_3D
+		multimesh.mesh = mesh
+		multimesh.instance_count = transforms.size()
+		for index in range(transforms.size()):
+			multimesh.set_instance_transform(index, Transform3D(transforms[index]))
+		var instance := MultiMeshInstance3D.new()
+		instance.name = "GroundBatch_%s_%03d" % [String(batch.get("visual_type_id", "ground")), batch_index]
+		instance.multimesh = multimesh
+		var material_override := source.get("material_override", null) as Material
+		if material_override != null:
+			instance.material_override = material_override
+		_map_root.add_child(instance)
+		_ground_multimesh_instance_count += 1
+		batch_index += 1
+	_ground_batch_requests.clear()
+
+
+func _ground_model_supports_multimesh(visual_type_id: String) -> bool:
+	return GROUND_MULTIMESH_MODEL_KEYS.has(visual_type_id.strip_edges().to_lower())
+
+
+func _get_ground_batch_source(visual_type_id: String, material_override_color: Color, material_override_unshaded: bool, source_key: String) -> Dictionary:
+	if _ground_batch_source_cache.has(source_key):
+		return Dictionary(_ground_batch_source_cache.get(source_key, {}))
+	var model_scene := _get_asset_model_scene(visual_type_id)
+	if model_scene == null:
+		_ground_batch_source_cache[source_key] = {}
+		return {}
+	var model_instance := model_scene.instantiate() as Node3D
+	if model_instance == null:
+		_ground_batch_source_cache[source_key] = {}
+		return {}
+	_normalize_asset_model_instance(model_instance)
+	var material_override: Material = null
+	if material_override_color != Color.TRANSPARENT:
+		material_override = _make_unshaded_material(material_override_color) if material_override_unshaded else _make_material(material_override_color)
+		_apply_material_override_recursive(model_instance, material_override)
+	elif _is_space_station_model_entry(_get_model_entry_for_type(visual_type_id)):
+		material_override = _make_space_station_colormap_material()
+	var mesh_entries: Array = []
+	_collect_ground_batch_mesh_entries(model_instance, Transform3D.IDENTITY, mesh_entries)
+	if mesh_entries.size() != 1:
+		model_instance.free()
+		_ground_batch_source_cache[source_key] = {}
+		return {}
+	var mesh_entry: Dictionary = Dictionary(mesh_entries[0])
+	var mesh := mesh_entry.get("mesh", null) as Mesh
+	if mesh == null:
+		model_instance.free()
+		_ground_batch_source_cache[source_key] = {}
+		return {}
+	if material_override == null:
+		material_override = mesh_entry.get("material_override", null) as Material
+	var source: Dictionary = {
+		"mesh": mesh,
+		"mesh_transform": Transform3D(mesh_entry.get("transform", Transform3D.IDENTITY)),
+		"material_override": material_override,
+		"model_height": _get_normalized_model_height(model_instance),
+		"surface_count": mesh.get_surface_count(),
+	}
+	model_instance.free()
+	_ground_batch_source_cache[source_key] = source
+	return source
+
+
+func _collect_ground_batch_mesh_entries(node: Node, parent_transform: Transform3D, entries: Array) -> void:
+	var current_transform := parent_transform
+	var node_3d := node as Node3D
+	if node_3d != null:
+		current_transform = parent_transform * node_3d.transform
+	var mesh_instance := node as MeshInstance3D
+	if mesh_instance != null and mesh_instance.mesh != null:
+		entries.append({
+			"mesh": mesh_instance.mesh,
+			"transform": current_transform,
+			"material_override": mesh_instance.material_override,
+		})
+	for child in node.get_children():
+		_collect_ground_batch_mesh_entries(child, current_transform, entries)
+
+
+func _build_ground_batch_source_key(visual_type_id: String, material_override_color: Color, material_override_unshaded: bool) -> String:
+	var color_key: String = "none"
+	if material_override_color != Color.TRANSPARENT:
+		color_key = material_override_color.to_html(true)
+	return "%s|mat:%s|unshaded:%s" % [visual_type_id.strip_edges().to_lower(), color_key, str(material_override_unshaded)]
+
+
+func _get_ground_batch_chunk_position(grid_position: Vector2i) -> Vector2i:
+	return Vector2i(
+		floori(float(grid_position.x) / float(GROUND_MULTIMESH_CHUNK_SIZE)),
+		floori(float(grid_position.y) / float(GROUND_MULTIMESH_CHUNK_SIZE))
+	)
 
 
 func _ground_surface_supports_tile_rotation(visual_type_id: String) -> bool:
 	var normalized_visual_type_id: String = visual_type_id.strip_edges().to_lower()
 	return normalized_visual_type_id == "station_floor_panel" or normalized_visual_type_id.begins_with("station_set_floor") or normalized_visual_type_id == "modular_floor" or normalized_visual_type_id == "modular_floor_big" or normalized_visual_type_id == "modular_floor_raised"
+
+
+func _get_surface_theme_dictionary_field(field_name: String) -> Dictionary:
+	var catalog: Dictionary = _get_terrain_surface_visual_theme_catalog()
+	var result: Dictionary = Dictionary(catalog.get(field_name, {})).duplicate(true)
+	if _active_terrain_visual_theme_id.is_empty():
+		return result
+	var themes: Dictionary = Dictionary(catalog.get("themes", {}))
+	var theme_config: Dictionary = Dictionary(themes.get(_active_terrain_visual_theme_id, {}))
+	if theme_config.is_empty():
+		return result
+	var theme_values: Dictionary = Dictionary(theme_config.get(field_name, {}))
+	for key_variant in theme_values.keys():
+		result[key_variant] = theme_values.get(key_variant)
+	return result
 
 
 func _resolve_ground_surface_model_key(tile_data) -> String:
@@ -1873,7 +2304,7 @@ func _resolve_ground_surface_model_key(tile_data) -> String:
 	if catalog.is_empty():
 		return "ground_flat"
 	var type_id: String = String(tile_data.type_id).strip_edges().to_lower() if tile_data.type_id is String else ""
-	var type_overrides: Dictionary = Dictionary(catalog.get("tile_type_overrides", {}))
+	var type_overrides: Dictionary = _get_surface_theme_dictionary_field("tile_type_overrides")
 	if not type_id.is_empty() and type_overrides.has(type_id):
 		var override_key: String = String(type_overrides.get(type_id, "")).strip_edges().to_lower()
 		if not override_key.is_empty():
@@ -1881,7 +2312,7 @@ func _resolve_ground_surface_model_key(tile_data) -> String:
 	if _tile_should_use_station_floor_surface(tile_data):
 		return "station_floor_panel"
 	var surface_type: String = String(tile_data.surface_type).strip_edges().to_lower()
-	var surface_models: Dictionary = Dictionary(catalog.get("surface_model_by_surface", {}))
+	var surface_models: Dictionary = _get_surface_theme_dictionary_field("surface_model_by_surface")
 	var model_key: String = String(surface_models.get(surface_type, "")).strip_edges().to_lower()
 	if model_key.is_empty():
 		model_key = String(surface_models.get(TERRAIN_TILE_DATA_SCRIPT.SURFACE_GROUND, "ground_flat")).strip_edges().to_lower()
@@ -1934,8 +2365,7 @@ func _resolve_surface_detail_model_key(tile_data) -> String:
 	var type_id: String = String(tile_data.type_id).strip_edges().to_lower() if tile_data.type_id is String else ""
 	if type_id.is_empty():
 		return ""
-	var catalog: Dictionary = _get_terrain_surface_visual_theme_catalog()
-	var detail_by_type: Dictionary = Dictionary(catalog.get("surface_detail_by_tile_type", {}))
+	var detail_by_type: Dictionary = _get_surface_theme_dictionary_field("surface_detail_by_tile_type")
 	return String(detail_by_type.get(type_id, "")).strip_edges().to_lower()
 
 
@@ -2113,6 +2543,8 @@ func _add_surface_tint_visual(tile_data, top_y: float) -> void:
 			tint_color = Color(0.54, 0.50, 0.42, 0.32)
 		_:
 			return
+	if _queue_surface_tint_batch(tile_data, top_y, surface_type, tint_color):
+		return
 	var cell_size: float = _get_3d_cell_size()
 	var tint := MeshInstance3D.new()
 	tint.name = "SurfaceTint_%s_%d_%d" % [surface_type, tile_data.grid_position.x, tile_data.grid_position.y]
@@ -2121,8 +2553,90 @@ func _add_surface_tint_visual(tile_data, top_y: float) -> void:
 	tint.position = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + 0.018)
 	_map_root.add_child(tint)
 	_surface_tint_count += 1
+	_register_surface_tint_visual(tile_data, surface_type, tint.position.y, top_y, false)
 	if int(tile_data.height_level) > 0:
 		_elevated_surface_tint_count += 1
+
+
+func _queue_surface_tint_batch(tile_data, top_y: float, surface_type: String, tint_color: Color) -> bool:
+	if tile_data == null or _map_root == null or tint_color == Color.TRANSPARENT:
+		return false
+	var chunk_position: Vector2i = _get_ground_batch_chunk_position(tile_data.grid_position)
+	var batch_key: String = "%s|%s|chunk:%d,%d" % [
+		surface_type.strip_edges().to_lower(),
+		tint_color.to_html(true),
+		chunk_position.x,
+		chunk_position.y,
+	]
+	var cell_size: float = _get_3d_cell_size()
+	var batch: Dictionary = Dictionary(_surface_tint_batch_requests.get(batch_key, {}))
+	if batch.is_empty():
+		batch = {
+			"surface_type": surface_type.strip_edges().to_lower(),
+			"mesh": _make_box_mesh(Vector3(cell_size * 0.82, 0.012, cell_size * 0.82)),
+			"material": _make_material(tint_color, true),
+			"transforms": [],
+			"chunk_position": chunk_position,
+		}
+	var transforms: Array = Array(batch.get("transforms", []))
+	var tint_position: Vector3 = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + 0.018)
+	transforms.append(Transform3D(Basis.IDENTITY, tint_position))
+	batch["transforms"] = transforms
+	_surface_tint_batch_requests[batch_key] = batch
+	_surface_tint_count += 1
+	_surface_tint_batched_tile_count += 1
+	_register_surface_tint_visual(tile_data, surface_type, tint_position.y, top_y, true)
+	if int(tile_data.height_level) > 0:
+		_elevated_surface_tint_count += 1
+	return true
+
+
+func _register_surface_tint_visual(tile_data, surface_type: String, world_y: float, top_y: float, batched: bool) -> void:
+	if tile_data == null:
+		return
+	_surface_tint_visual_entries.append({
+		"grid_position": tile_data.grid_position,
+		"type_id": String(tile_data.type_id),
+		"surface_type": surface_type,
+		"height_level": int(tile_data.height_level),
+		"surface_y": top_y,
+		"world_y": world_y,
+		"batched": batched,
+	})
+
+
+func _flush_surface_tint_batches() -> void:
+	if _map_root == null:
+		_surface_tint_batch_requests.clear()
+		return
+	if _surface_tint_batch_requests.is_empty():
+		return
+	var batch_keys: Array = _surface_tint_batch_requests.keys()
+	batch_keys.sort()
+	var batch_index: int = 0
+	for batch_key in batch_keys:
+		var batch: Dictionary = Dictionary(_surface_tint_batch_requests.get(batch_key, {}))
+		var transforms: Array = Array(batch.get("transforms", []))
+		if transforms.is_empty():
+			continue
+		var mesh := batch.get("mesh", null) as Mesh
+		var material := batch.get("material", null) as Material
+		if mesh == null or material == null:
+			continue
+		var multimesh := MultiMesh.new()
+		multimesh.transform_format = MultiMesh.TRANSFORM_3D
+		multimesh.mesh = mesh
+		multimesh.instance_count = transforms.size()
+		for index in range(transforms.size()):
+			multimesh.set_instance_transform(index, Transform3D(transforms[index]))
+		var instance := MultiMeshInstance3D.new()
+		instance.name = "SurfaceTintBatch_%s_%03d" % [String(batch.get("surface_type", "surface")), batch_index]
+		instance.multimesh = multimesh
+		instance.material_override = material
+		_map_root.add_child(instance)
+		_surface_tint_multimesh_instance_count += 1
+		batch_index += 1
+	_surface_tint_batch_requests.clear()
 
 
 func _add_tile_grid_lines(tiles: Array) -> void:
@@ -2275,11 +2789,13 @@ func _add_height_edge_model_visuals(tile_data) -> void:
 func _add_height_edge_model(tile_data, top_y: float, visual_type_id: String, node_name: String, edge_dirs: Array = []) -> bool:
 	if String(tile_data.edge_type) == TERRAIN_TILE_DATA_SCRIPT.EDGE_CLIFF and _has_explicit_cliff_visual_at_height_edge_anchor(tile_data, edge_dirs):
 		return false
+	var mapped_entry: Dictionary = _get_model_entry_for_type(visual_type_id)
+	if _queue_height_edge_model_batch(tile_data, top_y, visual_type_id, node_name, edge_dirs, mapped_entry):
+		return true
 	var model_scene := _get_asset_model_scene(visual_type_id)
 	if model_scene == null or _map_root == null:
 		_add_missing_asset_marker(tile_data, top_y, visual_type_id)
 		return false
-	var mapped_entry: Dictionary = _get_model_entry_for_type(visual_type_id)
 	var model_instance := model_scene.instantiate() as Node3D
 	if model_instance == null:
 		_add_missing_asset_marker(tile_data, top_y, visual_type_id)
@@ -2297,8 +2813,124 @@ func _add_height_edge_model(tile_data, top_y: float, visual_type_id: String, nod
 	visual_root.scale = Vector3(model_scale, edge_span / model_height, model_scale)
 	visual_root.add_child(model_instance)
 	_map_root.add_child(visual_root)
+	_register_height_edge_model_visual(tile_data, visual_type_id, visual_root.name, edge_dirs, edge_base_y, top_y, edge_span, mapped_entry, false)
+	return true
+
+
+func _queue_height_edge_model_batch(tile_data, top_y: float, visual_type_id: String, node_name: String, edge_dirs: Array, mapped_entry: Dictionary) -> bool:
+	if tile_data == null or _map_root == null:
+		return false
+	var source_key: String = visual_type_id.strip_edges().to_lower()
+	if source_key.is_empty():
+		return false
+	var source: Dictionary = _get_height_edge_batch_source(source_key)
+	if source.is_empty():
+		return false
+	var edge_base_y: float = _get_height_edge_base_y(tile_data, edge_dirs)
+	var edge_span: float = maxf(top_y - edge_base_y, _get_3d_height_step())
+	var model_height: float = maxf(float(source.get("model_height", 1.0)), 0.001)
+	var model_scale: float = _get_asset_model_scale(visual_type_id)
+	var anchor_grid_position: Vector2 = _get_height_edge_anchor_grid_position(tile_data, edge_dirs)
+	var root_basis: Basis = Basis.IDENTITY.rotated(Vector3.UP, deg_to_rad(_get_asset_rotation_y(visual_type_id))).scaled(Vector3(model_scale, edge_span / model_height, model_scale))
+	var root_transform := Transform3D(root_basis, _grid_to_3d_position(anchor_grid_position, edge_base_y + _get_height_edge_asset_y_offset(visual_type_id)) + _get_asset_position_offset(visual_type_id))
+	var mesh_transform: Transform3D = Transform3D(source.get("mesh_transform", Transform3D.IDENTITY))
+	var instance_transform: Transform3D = root_transform * mesh_transform
+	var chunk_position: Vector2i = _get_ground_batch_chunk_position(Vector2i(roundi(anchor_grid_position.x), roundi(anchor_grid_position.y)))
+	var batch_key: String = "%s|chunk:%d,%d" % [source_key, chunk_position.x, chunk_position.y]
+	var batch: Dictionary = Dictionary(_height_edge_batch_requests.get(batch_key, {}))
+	if batch.is_empty():
+		batch = {
+			"visual_type_id": source_key,
+			"source": source,
+			"transforms": [],
+			"chunk_position": chunk_position,
+		}
+	var transforms: Array = Array(batch.get("transforms", []))
+	transforms.append(instance_transform)
+	batch["transforms"] = transforms
+	_height_edge_batch_requests[batch_key] = batch
+	_register_height_edge_model_visual(tile_data, visual_type_id, "%s_%s" % [node_name, visual_type_id], edge_dirs, edge_base_y, top_y, edge_span, mapped_entry, true)
+	return true
+
+
+func _flush_height_edge_model_batches() -> void:
+	if _map_root == null:
+		_height_edge_batch_requests.clear()
+		return
+	if _height_edge_batch_requests.is_empty():
+		return
+	var batch_keys: Array = _height_edge_batch_requests.keys()
+	batch_keys.sort()
+	var batch_index: int = 0
+	for batch_key in batch_keys:
+		var batch: Dictionary = Dictionary(_height_edge_batch_requests.get(batch_key, {}))
+		var transforms: Array = Array(batch.get("transforms", []))
+		if transforms.is_empty():
+			continue
+		var source: Dictionary = Dictionary(batch.get("source", {}))
+		var mesh := source.get("mesh", null) as Mesh
+		if mesh == null:
+			continue
+		var multimesh := MultiMesh.new()
+		multimesh.transform_format = MultiMesh.TRANSFORM_3D
+		multimesh.mesh = mesh
+		multimesh.instance_count = transforms.size()
+		for index in range(transforms.size()):
+			multimesh.set_instance_transform(index, Transform3D(transforms[index]))
+		var instance := MultiMeshInstance3D.new()
+		instance.name = "HeightEdgeBatch_%s_%03d" % [String(batch.get("visual_type_id", "edge")), batch_index]
+		instance.multimesh = multimesh
+		var material_override := source.get("material_override", null) as Material
+		if material_override != null:
+			instance.material_override = material_override
+		_map_root.add_child(instance)
+		_height_edge_multimesh_instance_count += 1
+		batch_index += 1
+	_height_edge_batch_requests.clear()
+
+
+func _get_height_edge_batch_source(visual_type_id: String) -> Dictionary:
+	if _height_edge_batch_source_cache.has(visual_type_id):
+		return Dictionary(_height_edge_batch_source_cache.get(visual_type_id, {}))
+	var model_scene := _get_asset_model_scene(visual_type_id)
+	if model_scene == null:
+		_height_edge_batch_source_cache[visual_type_id] = {}
+		return {}
+	var model_instance := model_scene.instantiate() as Node3D
+	if model_instance == null:
+		_height_edge_batch_source_cache[visual_type_id] = {}
+		return {}
+	_normalize_asset_model_instance(model_instance)
+	var mesh_entries: Array = []
+	_collect_ground_batch_mesh_entries(model_instance, Transform3D.IDENTITY, mesh_entries)
+	if mesh_entries.size() != 1:
+		model_instance.free()
+		_height_edge_batch_source_cache[visual_type_id] = {}
+		return {}
+	var mesh_entry: Dictionary = Dictionary(mesh_entries[0])
+	var mesh := mesh_entry.get("mesh", null) as Mesh
+	if mesh == null:
+		model_instance.free()
+		_height_edge_batch_source_cache[visual_type_id] = {}
+		return {}
+	var source: Dictionary = {
+		"mesh": mesh,
+		"mesh_transform": Transform3D(mesh_entry.get("transform", Transform3D.IDENTITY)),
+		"material_override": mesh_entry.get("material_override", null),
+		"model_height": _get_normalized_model_height(model_instance),
+	}
+	model_instance.free()
+	_height_edge_batch_source_cache[visual_type_id] = source
+	return source
+
+
+func _register_height_edge_model_visual(tile_data, visual_type_id: String, node_name: String, edge_dirs: Array, edge_base_y: float, top_y: float, edge_span: float, mapped_entry: Dictionary, batched: bool) -> void:
 	_asset_model_count += 1
 	_height_edge_model_count += 1
+	if batched:
+		_height_edge_multimesh_model_count += 1
+	else:
+		_height_edge_individual_model_count += 1
 	var is_slope_edge: bool = String(tile_data.edge_type) == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE
 	var is_nature_kit: bool = _is_nature_kit_model_entry(mapped_entry)
 	if String(tile_data.edge_type) == TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE:
@@ -2314,8 +2946,9 @@ func _add_height_edge_model(tile_data, top_y: float, visual_type_id: String, nod
 			_nature_slope_step_model_count += 1
 		else:
 			_nature_cliff_edge_model_count += 1
+	var anchor_grid_position: Vector2 = _get_height_edge_anchor_grid_position(tile_data, edge_dirs)
 	_height_edge_visual_entries.append({
-		"node_name": visual_root.name,
+		"node_name": node_name,
 		"visual_type_id": visual_type_id,
 		"edge_type": String(tile_data.edge_type),
 		"surface_type": String(tile_data.surface_type),
@@ -2330,8 +2963,8 @@ func _add_height_edge_model(tile_data, top_y: float, visual_type_id: String, nod
 		"nature_theme": String(mapped_entry.get("nature_theme", "")),
 		"edge_role": String(mapped_entry.get("edge_role", "")),
 		"is_nature_kit": is_nature_kit,
+		"batched": batched,
 	})
-	return true
 
 
 func _has_explicit_cliff_visual_at_height_edge_anchor(tile_data, edge_dirs: Array) -> bool:
@@ -2658,7 +3291,137 @@ func _get_kenney_anchor_offset(texture: Texture2D, additional_offset: Vector2 = 
 	return (texture.get_size() * 0.5) - KENNEY_DIAMOND_CENTER + additional_offset
 
 
+func _queue_static_prop_model_batch(tile_data, top_y: float, visual_type_id: String, apply_tile_rotation: bool = false) -> bool:
+	if tile_data == null or _map_root == null:
+		return false
+	var normalized_visual_type_id: String = visual_type_id.strip_edges().to_lower()
+	if not _static_prop_model_supports_multimesh(normalized_visual_type_id):
+		return false
+	var source: Dictionary = _get_static_prop_batch_source(normalized_visual_type_id)
+	if source.is_empty():
+		return false
+	var model_scale: float = _get_asset_model_scale(normalized_visual_type_id)
+	var rotation_y: float = _get_asset_rotation_y(normalized_visual_type_id)
+	if apply_tile_rotation:
+		rotation_y += _get_tile_object_rotation_degrees(tile_data)
+	var prop_position: Vector3 = _grid_to_3d_position(Vector2(tile_data.grid_position), top_y + _get_asset_y_offset(normalized_visual_type_id)) + _get_asset_position_offset(normalized_visual_type_id)
+	var root_basis: Basis = Basis.IDENTITY.rotated(Vector3.UP, deg_to_rad(rotation_y)).scaled(Vector3.ONE * model_scale)
+	var root_transform := Transform3D(root_basis, prop_position)
+	var mesh_transform: Transform3D = Transform3D(source.get("mesh_transform", Transform3D.IDENTITY))
+	var instance_transform: Transform3D = root_transform * mesh_transform
+	var chunk_position: Vector2i = _get_ground_batch_chunk_position(tile_data.grid_position)
+	var batch_key: String = "%s|rot:%0.3f|chunk:%d,%d" % [
+		normalized_visual_type_id,
+		fposmod(rotation_y, 360.0),
+		chunk_position.x,
+		chunk_position.y,
+	]
+	var batch: Dictionary = Dictionary(_static_prop_batch_requests.get(batch_key, {}))
+	if batch.is_empty():
+		batch = {
+			"visual_type_id": normalized_visual_type_id,
+			"source": source,
+			"transforms": [],
+			"chunk_position": chunk_position,
+		}
+	var transforms: Array = Array(batch.get("transforms", []))
+	transforms.append(instance_transform)
+	batch["transforms"] = transforms
+	_static_prop_batch_requests[batch_key] = batch
+
+	_asset_model_count += 1
+	_static_prop_multimesh_model_count += 1
+	_register_nature_prop_visual(
+		tile_data,
+		normalized_visual_type_id,
+		null,
+		true,
+		prop_position.y,
+		Vector3.ONE * model_scale,
+		"Asset_%s_%d_%d" % [normalized_visual_type_id, tile_data.grid_position.x, tile_data.grid_position.y]
+	)
+	return true
+
+
+func _flush_static_prop_model_batches() -> void:
+	if _map_root == null:
+		_static_prop_batch_requests.clear()
+		return
+	if _static_prop_batch_requests.is_empty():
+		return
+	var batch_keys: Array = _static_prop_batch_requests.keys()
+	batch_keys.sort()
+	var batch_index: int = 0
+	for batch_key in batch_keys:
+		var batch: Dictionary = Dictionary(_static_prop_batch_requests.get(batch_key, {}))
+		var transforms: Array = Array(batch.get("transforms", []))
+		if transforms.is_empty():
+			continue
+		var source: Dictionary = Dictionary(batch.get("source", {}))
+		var mesh := source.get("mesh", null) as Mesh
+		if mesh == null:
+			continue
+		var multimesh := MultiMesh.new()
+		multimesh.transform_format = MultiMesh.TRANSFORM_3D
+		multimesh.mesh = mesh
+		multimesh.instance_count = transforms.size()
+		for index in range(transforms.size()):
+			multimesh.set_instance_transform(index, Transform3D(transforms[index]))
+		var instance := MultiMeshInstance3D.new()
+		instance.name = "StaticPropBatch_%s_%03d" % [String(batch.get("visual_type_id", "prop")), batch_index]
+		instance.multimesh = multimesh
+		var material_override := source.get("material_override", null) as Material
+		if material_override != null:
+			instance.material_override = material_override
+		_map_root.add_child(instance)
+		_static_prop_multimesh_instance_count += 1
+		batch_index += 1
+	_static_prop_batch_requests.clear()
+
+
+func _get_static_prop_batch_source(visual_type_id: String) -> Dictionary:
+	var normalized_visual_type_id: String = visual_type_id.strip_edges().to_lower()
+	if _static_prop_batch_source_cache.has(normalized_visual_type_id):
+		return Dictionary(_static_prop_batch_source_cache.get(normalized_visual_type_id, {}))
+	var model_scene := _get_asset_model_scene(normalized_visual_type_id)
+	if model_scene == null:
+		_static_prop_batch_source_cache[normalized_visual_type_id] = {}
+		return {}
+	var model_instance := model_scene.instantiate() as Node3D
+	if model_instance == null:
+		_static_prop_batch_source_cache[normalized_visual_type_id] = {}
+		return {}
+	_normalize_asset_model_instance(model_instance)
+	var mesh_entries: Array = []
+	_collect_ground_batch_mesh_entries(model_instance, Transform3D.IDENTITY, mesh_entries)
+	if mesh_entries.size() != 1:
+		model_instance.free()
+		_static_prop_batch_source_cache[normalized_visual_type_id] = {}
+		return {}
+	var mesh_entry: Dictionary = Dictionary(mesh_entries[0])
+	var mesh := mesh_entry.get("mesh", null) as Mesh
+	if mesh == null:
+		model_instance.free()
+		_static_prop_batch_source_cache[normalized_visual_type_id] = {}
+		return {}
+	var source: Dictionary = {
+		"mesh": mesh,
+		"mesh_transform": Transform3D(mesh_entry.get("transform", Transform3D.IDENTITY)),
+		"material_override": mesh_entry.get("material_override", null),
+		"surface_count": mesh.get_surface_count(),
+	}
+	model_instance.free()
+	_static_prop_batch_source_cache[normalized_visual_type_id] = source
+	return source
+
+
+func _static_prop_model_supports_multimesh(visual_type_id: String) -> bool:
+	return STATIC_PROP_MULTIMESH_MODEL_KEYS.has(visual_type_id.strip_edges().to_lower())
+
+
 func _add_asset_model_visual(tile_data, top_y: float, visual_type_id: String, apply_tile_rotation: bool = false) -> bool:
+	if _queue_static_prop_model_batch(tile_data, top_y, visual_type_id, apply_tile_rotation):
+		return true
 	var model_scene := _get_asset_model_scene(visual_type_id)
 	if model_scene == null or _map_root == null:
 		return false
@@ -2683,6 +3446,8 @@ func _add_asset_model_visual(tile_data, top_y: float, visual_type_id: String, ap
 	if not _has_model_mapping_for_type(visual_type_id):
 		_apply_map_asset_material_override(model_instance, visual_type_id)
 	_asset_model_count += 1
+	if _static_prop_model_supports_multimesh(visual_type_id):
+		_static_prop_individual_model_count += 1
 	_register_nature_prop_visual(tile_data, visual_type_id, visual_root)
 	return true
 
@@ -2693,7 +3458,15 @@ func _get_tile_object_rotation_degrees(tile_data) -> float:
 	return fposmod(float(tile_data.object_rotation_degrees), 360.0)
 
 
-func _register_nature_prop_visual(tile_data, visual_type_id: String, visual_root: Node3D) -> void:
+func _register_nature_prop_visual(
+	tile_data,
+	visual_type_id: String,
+	visual_root: Node3D = null,
+	batched: bool = false,
+	world_y_override: float = 0.0,
+	visual_scale_override: Vector3 = Vector3.ZERO,
+	node_name_override: String = ""
+) -> void:
 	if tile_data == null:
 		return
 	var mapped_entry: Dictionary = _get_model_entry_for_type(visual_type_id)
@@ -2704,10 +3477,12 @@ func _register_nature_prop_visual(tile_data, visual_type_id: String, visual_root
 		prop_role = "nature_prop"
 	_nature_prop_model_count += 1
 	_nature_prop_role_counts[prop_role] = int(_nature_prop_role_counts.get(prop_role, 0)) + 1
-	var visual_scale: Vector3 = visual_root.scale if visual_root != null else Vector3.ZERO
+	var visual_scale: Vector3 = visual_root.scale if visual_root != null else visual_scale_override
+	var node_name: String = String(visual_root.name) if visual_root != null else node_name_override
+	var world_y: float = visual_root.position.y if visual_root != null else world_y_override
 	var surface_y: float = float(tile_data.height_level) * _get_3d_height_step()
 	_nature_prop_visual_entries.append({
-		"node_name": String(visual_root.name) if visual_root != null else "",
+		"node_name": node_name,
 		"visual_type_id": visual_type_id,
 		"object_type_id": String(tile_data.object_type_id),
 		"type_id": String(tile_data.type_id),
@@ -2724,8 +3499,9 @@ func _register_nature_prop_visual(tile_data, visual_type_id: String, visual_root
 		"scale": visual_scale.x,
 		"y_offset": _get_asset_y_offset(visual_type_id),
 		"surface_y": surface_y,
-		"world_y": visual_root.position.y if visual_root != null else surface_y,
+		"world_y": world_y,
 		"position_offset": _get_asset_position_offset(visual_type_id),
+		"batched": batched,
 	})
 
 
@@ -3134,8 +3910,9 @@ func _rebuild_fog_of_war_visuals() -> void:
 	_fow_tile_total_count = 0
 	if _fow_root == null or _terrain_map_data == null:
 		return
-	var tiles: Array = Array(_terrain_map_data.call("get_tiles"))
-	_fow_tile_total_count = tiles.size()
+	var all_tiles: Array = Array(_terrain_map_data.call("get_tiles"))
+	var tiles: Array = _select_tiles_for_visual_overlay(all_tiles)
+	_fow_tile_total_count = all_tiles.size()
 	if not _is_fog_of_war_visual_filter_active():
 		_fow_visible_tile_count = tiles.size()
 		return
@@ -3165,6 +3942,19 @@ func _rebuild_fog_of_war_visuals() -> void:
 	_add_fow_overlay_multimesh("FoWExploredOverlay", explored_transforms, FOW_EXPLORED_DIM_COLOR, true)
 	_add_fow_overlay_multimesh("FoWUnknownBlackoutOverlay", unknown_transforms, FOW_UNKNOWN_BLACK_COLOR, false)
 	_fow_overlay_rebuild_count += 1
+
+
+func _select_tiles_for_visual_overlay(all_tiles: Array) -> Array:
+	if not _visual_streaming_active:
+		return all_tiles
+	var result: Array = []
+	for tile_data in all_tiles:
+		if tile_data == null:
+			continue
+		var chunk_position: Vector2i = _get_ground_batch_chunk_position(Vector2i(tile_data.grid_position))
+		if _visual_streaming_active_chunks.has(chunk_position):
+			result.append(tile_data)
+	return result
 
 
 func _get_fow_tile_state(tile_data) -> String:

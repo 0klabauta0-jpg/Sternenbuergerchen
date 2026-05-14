@@ -43,6 +43,7 @@ func _run_open_field_queries() -> Dictionary:
 	]
 	var result: Dictionary = {
 		"map": "18x8_open",
+		"hpa_graph_build_stats": _get_hpa_graph_build_stats(graph),
 		"terrain_a_star": _run_path_batch(registry, graph, queries, {}, {}, false),
 		"hpa": _run_path_batch(registry, graph, queries, {}, {}, true),
 	}
@@ -66,6 +67,7 @@ func _run_corridor_queries() -> Dictionary:
 	]
 	var result: Dictionary = {
 		"map": "18x7_bottleneck_corridor",
+		"hpa_graph_build_stats": _get_hpa_graph_build_stats(graph),
 		"terrain_a_star": _run_path_batch(registry, graph, queries, {}, {}, false),
 		"hpa": _run_path_batch(registry, graph, queries, {}, {}, true),
 	}
@@ -84,6 +86,7 @@ func _run_cover_exposure_queries() -> Dictionary:
 	var cover_options: Dictionary = _make_cover_options([Vector2i(4, 1)], 4.0, 2.0)
 	var result: Dictionary = {
 		"map": "cover_exposure_strip",
+		"hpa_graph_build_stats": _get_hpa_graph_build_stats(graph),
 		"hpa_plain": _run_path_batch(registry, graph, queries, {}, metric_options, true),
 		"hpa_cover_aware": _run_path_batch(registry, graph, queries, cover_options, metric_options, true),
 	}
@@ -97,6 +100,7 @@ func _run_profile_query_scenario(scenario_name: String, registry, queries: Array
 	var result: Dictionary = {
 		"map": scenario_name,
 		"grid_size": _registry_size_hint(registry),
+		"hpa_graph_build_stats": _get_hpa_graph_build_stats(graph),
 		"terrain_a_star": _run_path_batch(registry, graph, queries, path_options, scoring_options, false),
 		"hpa": _run_path_batch(registry, graph, queries, path_options, scoring_options, true),
 	}
@@ -364,6 +368,7 @@ func _build_summary(scenarios: Dictionary) -> Dictionary:
 		"has_query_percentiles": _scenario_has_query_stats(scenarios.get("open_64x64_queries", {})) and _scenario_has_query_stats(scenarios.get("chokepoint_cover_64x64_queries", {})),
 		"has_los_cover_diagnostics": _los_cover_probe_is_populated(Dictionary(scenarios.get("los_cover_probe", {}))),
 		"has_cache_diagnostics": _scenario_has_cache_diagnostics(scenarios.get("open_64x64_queries", {})),
+		"has_hpa_build_stats": _scenario_has_hpa_build_stats(scenarios.get("open_64x64_queries", {})) and _scenario_has_hpa_build_stats(scenarios.get("chokepoint_cover_64x64_queries", {})),
 		"has_query_flood_staggering": scenarios.has("query_flood_staggering"),
 	}
 
@@ -393,6 +398,16 @@ func _scenario_has_cache_diagnostics(scenario_variant: Variant) -> bool:
 		if value.has("cache_diagnostics") and typeof(value.get("cache_diagnostics", {})) == TYPE_DICTIONARY:
 			return true
 	return false
+
+
+func _scenario_has_hpa_build_stats(scenario_variant: Variant) -> bool:
+	if typeof(scenario_variant) != TYPE_DICTIONARY:
+		return false
+	var stats: Dictionary = Dictionary(Dictionary(scenario_variant).get("hpa_graph_build_stats", {}))
+	return bool(stats.get("built", false)) \
+		and int(stats.get("tile_count", 0)) > 0 \
+		and int(stats.get("cluster_count", 0)) > 0 \
+		and int(stats.get("elapsed_usec", -1)) >= 0
 
 
 func _los_cover_probe_is_populated(probe: Dictionary) -> bool:
@@ -545,6 +560,12 @@ func _build_cache_diagnostics(query_count: int) -> Dictionary:
 		"invalidation_count": 0,
 		"diagnostic": "no_path_cache_layer_in_navigation_harness",
 	}
+
+
+func _get_hpa_graph_build_stats(graph) -> Dictionary:
+	if graph != null and graph.has_method("get_last_build_stats"):
+		return Dictionary(graph.call("get_last_build_stats")).duplicate(true)
+	return {}
 
 
 func _make_cover_options(hazard_grids: Array, exposure_weight: float, cover_weight: float) -> Dictionary:

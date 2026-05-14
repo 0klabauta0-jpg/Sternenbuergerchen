@@ -70,9 +70,11 @@ func _test_3d_hill_edges_surfaces_and_anchors() -> void:
 	_assert(int(snapshot.get("area_order_tile_marker_count", 0)) == 1, "Area marker snaps to a terrain tile")
 	_assert(int(snapshot.get("selected_grid_count", 0)) == 1, "Selection state is mirrored into 3D view")
 
-	var slope_edge := _find_map_node(primary_view, "HeightEdge_1_2_-1_0_slope_nw") as Node3D
-	var cliff_edge := _find_map_node(primary_view, "HeightEdge_3_2_1_0_cliff_straight_se") as Node3D
-	var surface_tint := _find_map_node(primary_view, "SurfaceTint_sand_1_2") as Node3D
+	var height_edge_entries: Array = Array(snapshot.get("height_edge_visual_entries", []))
+	var surface_tint_entries: Array = Array(snapshot.get("surface_tint_visual_entries", []))
+	var slope_edge: Dictionary = _find_height_edge_entry(height_edge_entries, "slope_nw", Vector2i(1, 2), Vector2(0, 2))
+	var cliff_edge: Dictionary = _find_height_edge_entry(height_edge_entries, "cliff_straight_se", Vector2i(3, 2), Vector2(4, 2))
+	var surface_tint: Dictionary = _find_surface_tint_entry(surface_tint_entries, "sand", Vector2i(1, 2))
 	var wall_node := _find_map_node(primary_view, "Asset_wall_straight_se_2_2") as Node3D
 	var rock_node := _find_map_node(primary_view, "Asset_rock_large_2_1") as Node3D
 	var selection_node := _find_scene_node(primary_view, "Selection_2_2") as Node3D
@@ -81,11 +83,11 @@ func _test_3d_hill_edges_surfaces_and_anchors() -> void:
 	var waypoint_node := _find_scene_node(primary_view, "WaypointTile_2_2") as Node3D
 	var area_node := _find_scene_node(primary_view, "AreaOrderTile_hill_area_2_2") as Node3D
 
-	_assert(slope_edge != null and _node_has_mesh(slope_edge), "Slope edge uses a 3D slope model")
-	_assert(cliff_edge != null and _node_has_mesh(cliff_edge), "Cliff edge uses a 3D cliff model")
-	_assert(slope_edge != null and _node_is_at_grid(slope_edge, Vector2(0, 2)), "Slope edge visual is anchored on the lower neighbor tile")
-	_assert(cliff_edge != null and _node_is_at_grid(cliff_edge, Vector2(4, 2)), "Cliff edge visual is anchored on the lower neighbor tile")
-	_assert(surface_tint != null and surface_tint.position.y > _top_y(2), "Sand surface tint sits on the elevated top surface")
+	_assert(not slope_edge.is_empty() and not String(slope_edge.get("model_path", "")).is_empty(), "Slope edge uses a 3D slope model")
+	_assert(not cliff_edge.is_empty() and not String(cliff_edge.get("model_path", "")).is_empty(), "Cliff edge uses a 3D cliff model")
+	_assert(not slope_edge.is_empty(), "Slope edge visual is anchored on the lower neighbor tile")
+	_assert(not cliff_edge.is_empty(), "Cliff edge visual is anchored on the lower neighbor tile")
+	_assert(not surface_tint.is_empty() and float(surface_tint.get("world_y", 0.0)) > _top_y(2), "Sand surface tint sits on the elevated top surface")
 	_assert(_edge_nodes_for_grid(primary_view, Vector2i(2, 2)).is_empty(), "Plateau interior with edge none has no false height edge models")
 	_assert(wall_node != null and wall_node.position.y >= _top_y(2), "Wall on hill is anchored on the hilltop")
 	_assert(rock_node != null and rock_node.position.y >= _top_y(2), "Rock on hill is anchored on the hilltop")
@@ -186,6 +188,27 @@ func _find_map_node(primary_view: Node, node_name: String) -> Node:
 	if map_root == null:
 		return null
 	return map_root.get_node_or_null(node_name)
+
+
+func _find_height_edge_entry(entries: Array, visual_type_id: String, grid_position: Vector2i, anchor_grid_position: Vector2) -> Dictionary:
+	for entry_variant in entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("visual_type_id", "")) != visual_type_id:
+			continue
+		if Vector2i(entry.get("grid_position", Vector2i.ZERO)) != grid_position:
+			continue
+		var anchor_variant = entry.get("anchor_grid_position", Vector2.ZERO)
+		if typeof(anchor_variant) == TYPE_VECTOR2 and Vector2(anchor_variant).distance_squared_to(anchor_grid_position) <= 0.0001:
+			return entry
+	return {}
+
+
+func _find_surface_tint_entry(entries: Array, surface_type: String, grid_position: Vector2i) -> Dictionary:
+	for entry_variant in entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("surface_type", "")) == surface_type and Vector2i(entry.get("grid_position", Vector2i.ZERO)) == grid_position:
+			return entry
+	return {}
 
 
 func _find_scene_node(root_node: Node, node_name: String) -> Node:

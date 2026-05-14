@@ -1,0 +1,171 @@
+{
+	"display_name": "Ground Mission 02: Relay Ridge",
+	"enemy_groups": [
+		{
+			"display_name": "Red Patrol Fireteam",
+			"enemy_ids": [
+				"gm02_patrol_01",
+				"gm02_patrol_02",
+				"gm02_patrol_03",
+				"gm02_patrol_04"
+			],
+			"group_id": "red_patrol_team",
+			"spawn_marker_id": "spawn_enemy_patrol",
+			"tactics": {
+				"advance_style": "probe",
+				"aim_move_speed_factor": 0.18,
+				"air_asset_risk_profile": "none",
+				"allowed_weapon_roles": [
+					"rifle",
+					"smg",
+					"shotgun"
+				],
+				"anti_armor_threat": false,
+				"communication_intensity": "normal",
+				"contact_behavior": "pin_then_report",
+				"cover_behavior": "break_to_cover_on_contact",
+				"facing": "west",
+				"heavy_weapon_role": "none",
+				"lz_threat_zone_id": "",
+				"movement_posture_policy": "travel_until_threat",
+				"profile_id": "patrol_probe",
+				"ready_distance_world": 760.0,
+				"ready_speed_factor": 0.3,
+				"security_mode": "patrol",
+				"sight_behavior": "scan_waypoints",
+				"stance": "patrol",
+				"travel_speed_factor": 0.55,
+				"visual_archetype": "enemy_space_suit_orange",
+				"weapon_id": "",
+				"weapon_profile": "standard_close"
+			},
+			"team_id": "team_bravo"
+		},
+		{
+			"display_name": "Red Objective Fireteam",
+			"enemy_ids": [
+				"gm02_defense_01",
+				"gm02_defense_02",
+				"gm02_defense_03",
+				"gm02_defense_04"
+			],
+			"group_id": "red_objective_defense",
+			"spawn_marker_id": "spawn_enemy_defense",
+			"tactics": {
+				"advance_style": "hold",
+				"aim_move_speed_factor": 0.18,
+				"air_asset_risk_profile": "none",
+				"allowed_weapon_roles": [
+					"rifle",
+					"smg",
+					"heavy"
+				],
+				"anti_armor_threat": false,
+				"communication_intensity": "normal",
+				"contact_behavior": "suppress_from_cover",
+				"cover_behavior": "hold_best_cover",
+				"facing": "west",
+				"heavy_weapon_role": "none",
+				"lz_threat_zone_id": "",
+				"movement_posture_policy": "hold_ready",
+				"profile_id": "defensive_cover",
+				"ready_distance_world": 760.0,
+				"ready_speed_factor": 0.24,
+				"security_mode": "cover_arc",
+				"sight_behavior": "cover_arc",
+				"stance": "defend",
+				"travel_speed_factor": 0.35,
+				"visual_archetype": "enemy_space_suit_orange",
+				"weapon_id": "",
+				"weapon_profile": "defensive_mid"
+			},
+			"team_id": "team_bravo"
+		},
+		{
+			"display_name": "Red Air Defense Team",
+			"enemy_ids": [
+				"gm02_airdef_01",
+				"gm02_airdef_02",
+				"gm02_airdef_03",
+				"gm02_airdef_04"
+			],
+			"group_id": "red_air_defense",
+			"spawn_marker_id": "spawn_enemy_air_defense",
+			"tactics": {
+				"advance_style": "hold",
+				"aim_move_speed_factor": 0.12,
+				"air_asset_risk_profile": "watch_warning",
+				"allowed_weapon_roles": [
+					"marksman",
+					"rifle"
+				],
+				"anti_armor_threat": true,
+				"communication_intensity": "normal",
+				"contact_behavior": "prioritize_exposed_targets",
+				"cover_behavior": "hold_high_cover",
+				"facing": "south_west",
+				"heavy_weapon_role": "anti_armor",
+				"lz_threat_zone_id": "objective_ridge_aa",
+				"movement_posture_policy": "hold_ready",
+				"profile_id": "sniper_watch",
+				"ready_distance_world": 840.0,
+				"ready_speed_factor": 0.2,
+				"security_mode": "overwatch",
+				"sight_behavior": "long_lane",
+				"stance": "overwatch",
+				"travel_speed_factor": 0.3,
+				"visual_archetype": "enemy_space_suit_orange",
+				"weapon_id": "rocket_launcher",
+				"weapon_profile": "anti_armor"
+			},
+			"team_id": "team_bravo"
+		}
+	],
+	"map_file_path": "res://maps/Ground_Mission02_128x128.json",
+	"mission_slot_count_override": 12,
+	"notes": [
+		"128x128 Ground Mission variant derived from Ground_Mission01_32x32 authoring shape.",
+		"Uses terrain_visual_theme_id ground_mission_mixed_v1 for visual-only Nature/Station/Modular ground variety."
+	],
+	"objective": {
+		"capture_radius": 128.0,
+		"marker_id": "objective_point"
+	},
+	"patrol_bindings": [
+		{
+			"binding_id": "red_patrol_team_route",
+			"mode": "pre_contact",
+			"patrol_path_id": "ground_patrol_route",
+			"target_id": "spawn_enemy_patrol"
+		},
+		{
+			"binding_id": "red_air_defense_probe_route",
+			"mode": "pre_contact",
+			"patrol_path_id": "outer_probe_route",
+			"target_id": "spawn_enemy_air_defense"
+		}
+	],
+	"scenario_id": "ground_mission02_128x128",
+	"tactical_authoring": {
+		"air_asset_risk": {
+			"enemy_group_id": "red_air_defense",
+			"loss_consequence": "replacement_recovery",
+			"lz_threat_zone_id": "objective_ridge_aa",
+			"profile_id": "watch_warning",
+			"warning_required_before_damage": true
+		},
+		"communication_intensity": "normal",
+		"fireteam_defaults": {
+			"advance_style": "bounding",
+			"security_mode": "360"
+		}
+	},
+	"time_limit_seconds": 1800.0,
+	"version": 1,
+	"wave_config": {
+		"first_wave_delay_seconds": 0.0,
+		"units_per_wave": 12,
+		"wave_count": 1,
+		"wave_delay_seconds": 150.0
+	}
+}

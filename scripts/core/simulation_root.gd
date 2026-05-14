@@ -93,6 +93,10 @@ var _hpa_navigation_graph = null
 var _hpa_pathfinder = HPA_PATHFINDER_SCRIPT.new()
 var _hpa_navigation_registry = null
 var _hpa_navigation_tile_count: int = -1
+var _hpa_navigation_registry_revision: int = -1
+var _hpa_navigation_build_count: int = 0
+var _hpa_navigation_cache_hit_count: int = 0
+var _hpa_navigation_last_build_stats: Dictionary = {}
 var _navigation_new_path_queries_this_tick: int = 0
 var _navigation_path_queries_this_tick: int = 0
 var _navigation_delayed_this_tick: int = 0
@@ -209,6 +213,19 @@ func get_navigation_debug_snapshot() -> Dictionary:
 		"last_queries": _duplicate_dictionary_array(_navigation_last_tick_queries),
 		"most_expensive_query": _navigation_most_expensive_query.duplicate(true),
 		"last_path_metrics": _navigation_last_path_metrics.duplicate(true),
+		"hpa_navigation": _get_hpa_navigation_debug_snapshot(),
+	}
+
+
+func _get_hpa_navigation_debug_snapshot() -> Dictionary:
+	return {
+		"has_graph": _hpa_navigation_graph != null,
+		"cluster_size": HPA_NAVIGATION_CLUSTER_SIZE,
+		"tile_count": _hpa_navigation_tile_count,
+		"registry_revision": _hpa_navigation_registry_revision,
+		"build_count": _hpa_navigation_build_count,
+		"cache_hit_count": _hpa_navigation_cache_hit_count,
+		"last_build_stats": _hpa_navigation_last_build_stats.duplicate(true),
 	}
 
 
@@ -2168,17 +2185,74 @@ func _ensure_hpa_navigation_graph(terrain_registry):
 	if terrain_registry == null or not terrain_registry.has_method("get_all_tiles"):
 		return null
 	var tile_count: int = Array(terrain_registry.call("get_all_tiles")).size()
-	if _hpa_navigation_graph != null and _hpa_navigation_registry == terrain_registry and _hpa_navigation_tile_count == tile_count:
+	var registry_revision: int = _get_terrain_registry_revision(terrain_registry)
+	if (
+		_hpa_navigation_graph != null
+		and _hpa_navigation_registry == terrain_registry
+		and _hpa_navigation_tile_count == tile_count
+		and _hpa_navigation_registry_revision == registry_revision
+	):
+		_hpa_navigation_cache_hit_count += 1
 		return _hpa_navigation_graph
+	var dirty_grids: Array = _get_terrain_registry_dirty_grids(terrain_registry)
+	if (
+		_hpa_navigation_graph != null
+		and _hpa_navigation_registry == terrain_registry
+		and _hpa_navigation_tile_count == tile_count
+		and not dirty_grids.is_empty()
+		and _hpa_navigation_graph.has_method("rebuild_dirty_clusters_from_registry")
+	):
+		var incremental_built: bool = bool(_hpa_navigation_graph.call("rebuild_dirty_clusters_from_registry", terrain_registry, dirty_grids, HPA_NAVIGATION_CLUSTER_SIZE))
+		_hpa_navigation_build_count += 1
+		_hpa_navigation_last_build_stats = _get_hpa_graph_build_stats(_hpa_navigation_graph)
+		_hpa_navigation_last_build_stats["registry_revision"] = registry_revision
+		_hpa_navigation_last_build_stats["runtime_build_count"] = _hpa_navigation_build_count
+		_hpa_navigation_last_build_stats["runtime_rebuild_mode"] = "incremental"
+		if incremental_built:
+			_hpa_navigation_registry_revision = registry_revision
+			_clear_terrain_registry_dirty_grids(terrain_registry)
+			return _hpa_navigation_graph
 	_hpa_navigation_graph = HPA_NAVIGATION_GRAPH_SCRIPT.new()
-	if not bool(_hpa_navigation_graph.call("build_from_registry", terrain_registry, HPA_NAVIGATION_CLUSTER_SIZE)):
+	var built: bool = bool(_hpa_navigation_graph.call("build_from_registry", terrain_registry, HPA_NAVIGATION_CLUSTER_SIZE))
+	_hpa_navigation_build_count += 1
+	_hpa_navigation_last_build_stats = _get_hpa_graph_build_stats(_hpa_navigation_graph)
+	_hpa_navigation_last_build_stats["registry_revision"] = registry_revision
+	_hpa_navigation_last_build_stats["runtime_build_count"] = _hpa_navigation_build_count
+	_hpa_navigation_last_build_stats["runtime_rebuild_mode"] = "full"
+	if not built:
 		_hpa_navigation_graph = null
 		_hpa_navigation_registry = null
 		_hpa_navigation_tile_count = -1
+		_hpa_navigation_registry_revision = -1
 		return null
 	_hpa_navigation_registry = terrain_registry
 	_hpa_navigation_tile_count = tile_count
+	_hpa_navigation_registry_revision = registry_revision
+	_clear_terrain_registry_dirty_grids(terrain_registry)
 	return _hpa_navigation_graph
+
+
+func _get_terrain_registry_revision(terrain_registry) -> int:
+	if terrain_registry != null and terrain_registry.has_method("get_revision"):
+		return int(terrain_registry.call("get_revision"))
+	return -1
+
+
+func _get_terrain_registry_dirty_grids(terrain_registry) -> Array:
+	if terrain_registry != null and terrain_registry.has_method("get_dirty_grid_positions"):
+		return Array(terrain_registry.call("get_dirty_grid_positions"))
+	return []
+
+
+func _clear_terrain_registry_dirty_grids(terrain_registry) -> void:
+	if terrain_registry != null and terrain_registry.has_method("clear_dirty_grid_positions"):
+		terrain_registry.call("clear_dirty_grid_positions")
+
+
+func _get_hpa_graph_build_stats(graph) -> Dictionary:
+	if graph != null and graph.has_method("get_last_build_stats"):
+		return Dictionary(graph.call("get_last_build_stats")).duplicate(true)
+	return {}
 
 
 func _resolve_walkable_move_target(target_position: Vector2, terrain_registry) -> Dictionary:

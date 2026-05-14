@@ -48,7 +48,7 @@ func _test_live_mission_render_budget_snapshot() -> void:
 	_assert(_has_category_budget(snapshot, "unit"), "Live snapshot contains unit category budget")
 	_assert(_has_category_budget(snapshot, "order"), "Live snapshot contains order/overlay category budget")
 	_assert(_render_totals_are_non_empty(snapshot), "Live snapshot has non-empty render totals")
-	_assert(int(Dictionary(snapshot.get("render_budget_totals", {})).get("mesh_instance_count", 0)) >= int(snapshot.get("ground_mesh_count", 0)), "Live mesh totals cover terrain meshes")
+	_assert(_ground_visuals_are_accounted_for(snapshot), "Live render budget accounts for batched terrain ground")
 	_assert(_transparency_budget_covers_overlays(snapshot), "Live transparency budget covers labels, VFX and bubbles")
 	_assert(_draw_budget_has_monitor_keys(snapshot), "Live draw budget exposes render monitor keys")
 	_assert(_pipeline_snapshot_has_monitor_keys(snapshot), "Live pipeline snapshot exposes compilation monitor keys")
@@ -68,7 +68,7 @@ func _test_render_spike_budget_snapshot() -> void:
 	_assert(primary_view != null and primary_view.has_method("get_render_snapshot"), "Render spike exposes Primary3DView render snapshot")
 	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot")) if primary_view != null else {}
 	_assert(_has_category_budget(snapshot, "map"), "Render spike snapshot contains map category budget")
-	_assert(int(Dictionary(Dictionary(snapshot.get("render_budget_by_category", {})).get("map", {})).get("mesh_instance_count", 0)) >= int(snapshot.get("ground_mesh_count", 0)), "Render spike map category covers terrain meshes")
+	_assert(_ground_visuals_are_accounted_for(snapshot), "Render spike map budget accounts for batched terrain ground")
 	_assert(int(Dictionary(snapshot.get("render_budget_totals", {})).get("material_count", 0)) > 0, "Render spike exposes material count")
 	_assert(_draw_budget_has_monitor_keys(snapshot), "Render spike draw budget exposes monitor keys")
 	_assert(_pipeline_snapshot_has_monitor_keys(snapshot), "Render spike pipeline snapshot exposes monitor keys")
@@ -129,6 +129,22 @@ func _has_category_budget(snapshot: Dictionary, category_id: String) -> bool:
 func _render_totals_are_non_empty(snapshot: Dictionary) -> bool:
 	var totals: Dictionary = Dictionary(snapshot.get("render_budget_totals", {}))
 	return int(totals.get("category_count", 0)) >= 8 and int(totals.get("node_count", 0)) > 0 and int(totals.get("mesh_instance_count", 0)) > 0
+
+
+func _ground_visuals_are_accounted_for(snapshot: Dictionary) -> bool:
+	var ground_count: int = int(snapshot.get("ground_mesh_count", 0))
+	if ground_count <= 0:
+		return false
+	var individual_count: int = int(snapshot.get("ground_individual_model_count", ground_count))
+	var multimesh_tile_count: int = int(snapshot.get("ground_multimesh_tile_count", 0))
+	if individual_count + multimesh_tile_count != ground_count:
+		return false
+	var map_budget: Dictionary = Dictionary(Dictionary(snapshot.get("render_budget_by_category", {})).get("map", {}))
+	if int(map_budget.get("mesh_instance_count", 0)) < individual_count:
+		return false
+	if multimesh_tile_count > 0 and int(map_budget.get("multimesh_instance_count", 0)) < int(snapshot.get("ground_multimesh_instance_count", 0)):
+		return false
+	return true
 
 
 func _transparency_budget_covers_overlays(snapshot: Dictionary) -> bool:

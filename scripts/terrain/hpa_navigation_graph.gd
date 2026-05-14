@@ -13,6 +13,7 @@ var _portals: Array = []
 var _portal_ids_seen: Dictionary = {}
 var _portals_by_cluster: Dictionary = {}
 var _abstract_neighbors_by_component: Dictionary = {}
+var _last_build_stats: Dictionary = {}
 var _pathfinder = TERRAIN_PATHFINDER_SCRIPT.new()
 
 
@@ -24,11 +25,14 @@ func clear() -> void:
 	_portal_ids_seen.clear()
 	_portals_by_cluster.clear()
 	_abstract_neighbors_by_component.clear()
+	_last_build_stats.clear()
 
 
 func build_from_registry(registry, next_cluster_size: int = DEFAULT_CLUSTER_SIZE) -> bool:
+	var started_usec: int = Time.get_ticks_usec()
 	clear()
 	if registry == null or not registry.has_method("get_all_tiles") or not registry.has_method("get_tile_at_grid"):
+		_store_build_stats(false, maxi(next_cluster_size, 1), 0, Time.get_ticks_usec() - started_usec, {"incremental": false})
 		return false
 
 	cluster_size = maxi(next_cluster_size, 1)
@@ -54,7 +58,54 @@ func build_from_registry(registry, next_cluster_size: int = DEFAULT_CLUSTER_SIZE
 		_build_cluster_components(Vector2i(cluster_id_variant), registry)
 
 	_build_portals(registry)
-	return not _clusters_by_id.is_empty()
+	var built: bool = not _clusters_by_id.is_empty()
+	_store_build_stats(built, cluster_size, tiles.size(), Time.get_ticks_usec() - started_usec, {"incremental": false})
+	return built
+
+
+func rebuild_dirty_clusters_from_registry(registry, dirty_grids: Array, next_cluster_size: int = -1) -> bool:
+	var started_usec: int = Time.get_ticks_usec()
+	if registry == null or not registry.has_method("get_all_tiles") or not registry.has_method("get_tile_at_grid"):
+		_store_build_stats(false, cluster_size, 0, Time.get_ticks_usec() - started_usec, {
+			"incremental": true,
+			"fallback_reason": "invalid_registry",
+		})
+		return false
+
+	var effective_cluster_size: int = cluster_size
+	if next_cluster_size > 0:
+		effective_cluster_size = maxi(next_cluster_size, 1)
+	if _clusters_by_id.is_empty() or effective_cluster_size != cluster_size:
+		return build_from_registry(registry, effective_cluster_size)
+
+	var tiles: Array = Array(registry.call("get_all_tiles"))
+	var dirty_cluster_lookup: Dictionary = _collect_dirty_cluster_lookup(dirty_grids)
+	if dirty_cluster_lookup.is_empty():
+		_store_build_stats(true, cluster_size, tiles.size(), Time.get_ticks_usec() - started_usec, {
+			"incremental": true,
+			"dirty_grid_count": 0,
+			"dirty_cluster_count": 0,
+			"rebuilt_cluster_count": 0,
+		})
+		return true
+
+	var rebuild_cluster_lookup: Dictionary = _expand_dirty_cluster_lookup_for_portals(dirty_cluster_lookup)
+	_rebuild_clusters_from_registry(registry, rebuild_cluster_lookup)
+	_remove_portals_touching_clusters(rebuild_cluster_lookup)
+	_build_portals_for_clusters(registry, rebuild_cluster_lookup.keys())
+	_portals.sort_custom(_sort_portals)
+	_sort_portal_buckets()
+	_store_build_stats(true, cluster_size, tiles.size(), Time.get_ticks_usec() - started_usec, {
+		"incremental": true,
+		"dirty_grid_count": dirty_grids.size(),
+		"dirty_cluster_count": dirty_cluster_lookup.size(),
+		"rebuilt_cluster_count": rebuild_cluster_lookup.size(),
+	})
+	return true
+
+
+func get_last_build_stats() -> Dictionary:
+	return _last_build_stats.duplicate(true)
 
 
 func get_cluster_id_for_grid(grid_position: Vector2i) -> Vector2i:
@@ -209,6 +260,12 @@ func _collect_component_tiles(start_grid: Vector2i, cluster_id: Vector2i, walkab
 
 func _build_portals(registry) -> void:
 	var cluster_ids: Array = get_cluster_ids()
+	_build_portals_for_clusters(registry, cluster_ids)
+	_portals.sort_custom(_sort_portals)
+	_sort_portal_buckets()
+
+
+func _build_portals_for_clusters(registry, cluster_ids: Array) -> void:
 	var directions: Array = _pathfinder.call("get_neighbor_directions")
 	for cluster_id_variant in cluster_ids:
 		var cluster_id: Vector2i = Vector2i(cluster_id_variant)
@@ -260,7 +317,6 @@ func _add_portal(from_grid: Vector2i, to_grid: Vector2i, from_cluster_id: Vector
 		"min_cover": float(cover_values[1]),
 	}
 	_portals.append(portal)
-	_portals.sort_custom(_sort_portals)
 	_append_unique_to_array(_portals_by_cluster, canonical_from_cluster, portal)
 	_append_unique_to_array(_portals_by_cluster, canonical_to_cluster, portal)
 	_append_unique_to_cluster_neighbors(canonical_from_cluster, canonical_to_cluster)
@@ -298,6 +354,154 @@ func _append_unique_string_neighbor(component_key: String, neighbor_component_ke
 	_abstract_neighbors_by_component[component_key] = neighbors
 
 
+func _sort_portal_buckets() -> void:
+	for cluster_id in _portals_by_cluster.keys():
+		var portals: Array = Array(_portals_by_cluster.get(cluster_id, []))
+		portals.sort_custom(_sort_portals)
+		_portals_by_cluster[cluster_id] = portals
+
+
+func _collect_dirty_cluster_lookup(dirty_grids: Array) -> Dictionary:
+	var result: Dictionary = {}
+	for grid_variant in dirty_grids:
+		var grid_position: Variant = _coerce_grid_position(grid_variant)
+		if typeof(grid_position) != TYPE_VECTOR2I:
+			continue
+		var cluster_id: Vector2i = get_cluster_id_for_grid(Vector2i(grid_position))
+		result[cluster_id] = true
+	return result
+
+
+func _expand_dirty_cluster_lookup_for_portals(dirty_cluster_lookup: Dictionary) -> Dictionary:
+	var result: Dictionary = {}
+	for cluster_variant in dirty_cluster_lookup.keys():
+		var cluster_id: Vector2i = Vector2i(cluster_variant)
+		if _clusters_by_id.has(cluster_id):
+			result[cluster_id] = true
+		for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
+			var neighbor_cluster_id: Vector2i = cluster_id + offset
+			if _clusters_by_id.has(neighbor_cluster_id):
+				result[neighbor_cluster_id] = true
+		for neighbor_variant in get_neighbor_cluster_ids(cluster_id):
+			var neighbor_id: Vector2i = Vector2i(neighbor_variant)
+			if _clusters_by_id.has(neighbor_id):
+				result[neighbor_id] = true
+	return result
+
+
+func _rebuild_clusters_from_registry(registry, rebuild_cluster_lookup: Dictionary) -> void:
+	if rebuild_cluster_lookup.is_empty():
+		return
+	var tiles_by_cluster: Dictionary = {}
+	for cluster_id in rebuild_cluster_lookup.keys():
+		tiles_by_cluster[Vector2i(cluster_id)] = []
+	for tile_data in Array(registry.call("get_all_tiles")):
+		if tile_data == null:
+			continue
+		var grid_position: Vector2i = Vector2i(tile_data.grid_position)
+		var cluster_id: Vector2i = get_cluster_id_for_grid(grid_position)
+		if not rebuild_cluster_lookup.has(cluster_id):
+			continue
+		var cluster_tiles: Array = Array(tiles_by_cluster.get(cluster_id, []))
+		cluster_tiles.append(tile_data)
+		tiles_by_cluster[cluster_id] = cluster_tiles
+
+	for cluster_variant in rebuild_cluster_lookup.keys():
+		var cluster_id: Vector2i = Vector2i(cluster_variant)
+		_remove_cluster_component_indices(cluster_id)
+		var cluster_tiles: Array = Array(tiles_by_cluster.get(cluster_id, []))
+		if cluster_tiles.is_empty():
+			_clusters_by_id.erase(cluster_id)
+			continue
+		cluster_tiles.sort_custom(_sort_tiles_by_grid)
+		var cluster: Dictionary = {
+			"cluster_id": cluster_id,
+			"min_grid": Vector2i(cluster_id.x * cluster_size, cluster_id.y * cluster_size),
+			"max_grid": Vector2i(cluster_id.x * cluster_size, cluster_id.y * cluster_size),
+			"tile_positions": [],
+			"walkable_tiles": [],
+			"components": [],
+			"component_by_grid": {},
+			"neighbor_cluster_ids": [],
+		}
+		for tile_data in cluster_tiles:
+			var grid_position: Vector2i = Vector2i(tile_data.grid_position)
+			var tile_positions: Array = Array(cluster.get("tile_positions", []))
+			tile_positions.append(grid_position)
+			cluster["tile_positions"] = tile_positions
+			_update_cluster_bounds(cluster, grid_position)
+			if bool(tile_data.walkable):
+				var walkable_tiles: Array = Array(cluster.get("walkable_tiles", []))
+				walkable_tiles.append(grid_position)
+				cluster["walkable_tiles"] = walkable_tiles
+		_clusters_by_id[cluster_id] = cluster
+		_build_cluster_components(cluster_id, registry)
+
+
+func _remove_cluster_component_indices(cluster_id: Vector2i) -> void:
+	var cluster: Dictionary = Dictionary(_clusters_by_id.get(cluster_id, {}))
+	if cluster.is_empty():
+		return
+	var component_by_grid: Dictionary = Dictionary(cluster.get("component_by_grid", {}))
+	for grid_variant in component_by_grid.keys():
+		_component_key_by_grid.erase(Vector2i(grid_variant))
+	for component_variant in Array(cluster.get("components", [])):
+		var component: Dictionary = Dictionary(component_variant)
+		var component_key: String = String(component.get("component_key", ""))
+		if not component_key.is_empty():
+			_component_tiles_by_key.erase(component_key)
+
+
+func _remove_portals_touching_clusters(cluster_lookup: Dictionary) -> void:
+	if cluster_lookup.is_empty():
+		return
+	var retained_portals: Array = []
+	for portal_variant in _portals:
+		var portal: Dictionary = Dictionary(portal_variant)
+		var from_cluster: Vector2i = Vector2i(portal.get("from_cluster", Vector2i.ZERO))
+		var to_cluster: Vector2i = Vector2i(portal.get("to_cluster", Vector2i.ZERO))
+		if cluster_lookup.has(from_cluster) or cluster_lookup.has(to_cluster):
+			continue
+		retained_portals.append(portal)
+	_portals = retained_portals
+	_reindex_portals()
+
+
+func _reindex_portals() -> void:
+	_portal_ids_seen.clear()
+	_portals_by_cluster.clear()
+	_abstract_neighbors_by_component.clear()
+	for cluster_variant in _clusters_by_id.keys():
+		var cluster_id: Vector2i = Vector2i(cluster_variant)
+		var cluster: Dictionary = Dictionary(_clusters_by_id.get(cluster_id, {}))
+		cluster["neighbor_cluster_ids"] = []
+		_clusters_by_id[cluster_id] = cluster
+	for portal_variant in _portals:
+		var portal: Dictionary = Dictionary(portal_variant)
+		var portal_id: String = String(portal.get("portal_id", ""))
+		if not portal_id.is_empty():
+			_portal_ids_seen[portal_id] = true
+		var from_cluster: Vector2i = Vector2i(portal.get("from_cluster", Vector2i.ZERO))
+		var to_cluster: Vector2i = Vector2i(portal.get("to_cluster", Vector2i.ZERO))
+		var from_component: String = String(portal.get("from_component", ""))
+		var to_component: String = String(portal.get("to_component", ""))
+		_append_unique_to_array(_portals_by_cluster, from_cluster, portal)
+		_append_unique_to_array(_portals_by_cluster, to_cluster, portal)
+		_append_unique_to_cluster_neighbors(from_cluster, to_cluster)
+		_append_unique_to_cluster_neighbors(to_cluster, from_cluster)
+		_append_unique_string_neighbor(from_component, to_component)
+		_append_unique_string_neighbor(to_component, from_component)
+
+
+func _coerce_grid_position(value: Variant) -> Variant:
+	if typeof(value) == TYPE_VECTOR2I:
+		return Vector2i(value)
+	if typeof(value) == TYPE_VECTOR2:
+		var vector_value: Vector2 = Vector2(value)
+		return Vector2i(roundi(vector_value.x), roundi(vector_value.y))
+	return null
+
+
 func _build_component_key(cluster_id: Vector2i, component_index: int) -> String:
 	return "%d,%d:%d" % [cluster_id.x, cluster_id.y, component_index]
 
@@ -319,6 +523,20 @@ func _get_tile_cover_score(grid_position: Vector2i, registry) -> float:
 	if tile_data == null:
 		return 0.0
 	return clampf(float(tile_data.cover_value) / 100.0, 0.0, 1.0)
+
+
+func _store_build_stats(built: bool, stats_cluster_size: int, tile_count: int, elapsed_usec: int, extra_stats: Dictionary = {}) -> void:
+	_last_build_stats = {
+		"built": built,
+		"cluster_size": stats_cluster_size,
+		"tile_count": tile_count,
+		"cluster_count": _clusters_by_id.size(),
+		"component_count": get_component_count(),
+		"portal_count": _portals.size(),
+		"elapsed_usec": maxi(elapsed_usec, 0),
+	}
+	for key in extra_stats.keys():
+		_last_build_stats[key] = extra_stats[key]
 
 
 func _sort_tiles_by_grid(a, b) -> bool:
