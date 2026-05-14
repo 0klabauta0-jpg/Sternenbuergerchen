@@ -136,6 +136,8 @@ const UNIT_AIM_POSE_WEAPON_PITCH_DEGREES: float = -30.0
 const UNIT_AIM_POSE_WEAPON_FORWARD_OFFSET: float = 0.026
 const UNIT_READY_POSE_WEAPON_PITCH_DEGREES: float = -14.0
 const UNIT_READY_POSE_WEAPON_FORWARD_OFFSET: float = 0.014
+const UNIT_LOCOMOTION_HEADING_ANIMATION_NAMES: PackedStringArray = ["walk"]
+const UNIT_LOCOMOTION_HEADING_CONTROL_BONES: PackedStringArray = ["HipsCtrl"]
 const EDITOR_EMPTY_BACKGROUND_COLOR: Color = Color(0.12, 0.13, 0.12, 1.0)
 const EDITOR_LIGHT_ROTATION_DEGREES: Vector3 = Vector3(-58.0, -32.0, 0.0)
 const EDITOR_LIGHT_ENERGY: float = 1.18
@@ -325,6 +327,7 @@ var _unit_socket_fallback_count: int = 0
 var _unit_head_socket_count: int = 0
 var _unit_right_hand_socket_count: int = 0
 var _unit_animation_retarget_fallback_count: int = 0
+var _unit_animation_heading_sanitized_track_count: int = 0
 var _unit_blaster_attachment_count: int = 0
 var _unit_blaster_error_count: int = 0
 var _unit_visual_loadout_count: int = 0
@@ -1103,6 +1106,7 @@ func get_render_snapshot() -> Dictionary:
 		"unit_head_socket_count": _unit_head_socket_count,
 		"unit_right_hand_socket_count": _unit_right_hand_socket_count,
 		"unit_animation_retarget_fallback_count": _unit_animation_retarget_fallback_count,
+		"unit_animation_heading_sanitized_track_count": _unit_animation_heading_sanitized_track_count,
 		"unit_blaster_attachment_count": _unit_blaster_attachment_count,
 		"unit_blaster_error_count": _unit_blaster_error_count,
 		"unit_visual_loadout_count": _unit_visual_loadout_count,
@@ -5523,6 +5527,7 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 	var unit_head_socket_count: int = 0
 	var unit_right_hand_socket_count: int = 0
 	var unit_animation_retarget_fallback_count: int = 0
+	var unit_animation_heading_sanitized_track_count: int = 0
 	var unit_blaster_attachment_count: int = 0
 	var unit_blaster_error_count: int = 0
 	var unit_visual_loadout_count: int = 0
@@ -5642,6 +5647,7 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 		if bool(proxy.get_meta("unit_right_hand_socket_available", false)):
 			unit_right_hand_socket_count += 1
 		unit_animation_retarget_fallback_count += int(proxy.get_meta("unit_animation_retarget_fallback_count", 0))
+		unit_animation_heading_sanitized_track_count += int(proxy.get_meta("unit_animation_heading_sanitized_track_count", 0))
 		if bool(proxy.get_meta("unit_blaster_attachment_available", false)):
 			unit_blaster_attachment_count += 1
 		if bool(proxy.get_meta("unit_blaster_error", false)):
@@ -5703,6 +5709,9 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 	if _unit_animation_retarget_fallback_count != unit_animation_retarget_fallback_count:
 		changed = true
 	_unit_animation_retarget_fallback_count = unit_animation_retarget_fallback_count
+	if _unit_animation_heading_sanitized_track_count != unit_animation_heading_sanitized_track_count:
+		changed = true
+	_unit_animation_heading_sanitized_track_count = unit_animation_heading_sanitized_track_count
 	if _unit_blaster_attachment_count != unit_blaster_attachment_count:
 		changed = true
 	_unit_blaster_attachment_count = unit_blaster_attachment_count
@@ -6042,6 +6051,7 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 
 func _setup_unit_visual_animation(proxy_root: Node3D, model_root: Node3D, model_instance: Node3D, unit_visual_entry: Dictionary) -> bool:
 	var animation_paths: Dictionary = _get_unit_animation_paths(unit_visual_entry)
+	proxy_root.set_meta("unit_animation_heading_sanitized_track_count", 0)
 	if animation_paths.is_empty():
 		return true
 	var animation_player := AnimationPlayer.new()
@@ -6049,6 +6059,7 @@ func _setup_unit_visual_animation(proxy_root: Node3D, model_root: Node3D, model_
 	var library := AnimationLibrary.new()
 	var expected_count: int = 0
 	var imported_count: int = 0
+	var heading_sanitized_track_count: int = 0
 	for animation_name_variant in animation_paths.keys():
 		var animation_name: String = String(animation_name_variant).strip_edges().to_lower()
 		var animation_path: String = String(animation_paths[animation_name_variant]).strip_edges()
@@ -6062,10 +6073,13 @@ func _setup_unit_visual_animation(proxy_root: Node3D, model_root: Node3D, model_
 		if duplicated == null:
 			continue
 		duplicated.loop_mode = Animation.LOOP_LINEAR
+		heading_sanitized_track_count += _sanitize_unit_locomotion_heading_tracks(duplicated, animation_name)
 		animation_player.set_meta("source_animation_%s" % animation_name, String(duplicated.get_meta("source_animation_name", "")))
 		library.add_animation(animation_name, duplicated)
 		imported_count += 1
 	if imported_count > 0:
+		proxy_root.set_meta("unit_animation_heading_sanitized_track_count", heading_sanitized_track_count)
+		animation_player.set_meta("unit_animation_heading_sanitized_track_count", heading_sanitized_track_count)
 		animation_player.add_animation_library("", library)
 		model_root.add_child(animation_player)
 		animation_player.root_node = animation_player.get_path_to(model_instance)
@@ -6125,6 +6139,33 @@ func _find_best_animation(node: Node, preferred_animation_name: String = "") -> 
 		if child_animation != null:
 			return child_animation
 	return null
+
+
+func _sanitize_unit_locomotion_heading_tracks(animation: Animation, animation_name: String) -> int:
+	if animation == null:
+		return 0
+	var normalized_animation_name: String = animation_name.strip_edges().to_lower()
+	if not UNIT_LOCOMOTION_HEADING_ANIMATION_NAMES.has(normalized_animation_name):
+		return 0
+	var removed_count: int = 0
+	for track_index in range(animation.get_track_count() - 1, -1, -1):
+		if animation.track_get_type(track_index) != Animation.TYPE_ROTATION_3D:
+			continue
+		var track_path: String = String(animation.track_get_path(track_index))
+		if not _is_unit_locomotion_heading_control_track(track_path):
+			continue
+		animation.remove_track(track_index)
+		removed_count += 1
+	if removed_count > 0:
+		animation.set_meta("unit_animation_heading_sanitized_track_count", removed_count)
+	return removed_count
+
+
+func _is_unit_locomotion_heading_control_track(track_path: String) -> bool:
+	for bone_name in UNIT_LOCOMOTION_HEADING_CONTROL_BONES:
+		if track_path.ends_with(":%s" % String(bone_name)):
+			return true
+	return false
 
 
 func _update_unit_visual_animation(proxy: Node3D, is_moving: bool, is_firing: bool = false) -> bool:
@@ -6559,6 +6600,7 @@ func _get_unit_proxy_state_by_id() -> Dictionary:
 			"unit_visual_archetype_id": String(proxy.get_meta("unit_visual_archetype_id", "")).strip_edges(),
 			"unit_visual_faction_id": String(proxy.get_meta("unit_visual_faction_id", "")).strip_edges(),
 			"unit_model_root_rotation_y_degrees": float(proxy.get_meta("unit_model_root_rotation_y_degrees", 0.0)),
+			"unit_animation_heading_sanitized_track_count": int(proxy.get_meta("unit_animation_heading_sanitized_track_count", 0)),
 			"unit_weapon_anchor_distance_3d": _get_unit_weapon_anchor_distance_3d(proxy),
 			"unit_aim_pose_active": bool(proxy.get_meta("unit_aim_pose_active", false)),
 			"unit_ready_pose_active": bool(proxy.get_meta("unit_ready_pose_active", false)),

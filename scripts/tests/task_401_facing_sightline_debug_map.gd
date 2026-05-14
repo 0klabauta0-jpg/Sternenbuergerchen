@@ -124,6 +124,11 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 	_assert(String(bravo_proxy.get("unit_weapon_posture", "")) == "lowered", "Rendered looking NPC exposes lowered proxy posture")
 	_assert(absf(float(alpha_proxy.get("unit_model_root_rotation_y_degrees", 0.0)) - 270.0) < 0.1, "Aimed NPC model root corrects the imported character forward axis")
 	_assert(absf(float(bravo_proxy.get("unit_model_root_rotation_y_degrees", 0.0)) - 270.0) < 0.1, "Lowered NPC model root corrects the imported character forward axis")
+	_assert(int(snapshot.get("unit_animation_heading_sanitized_track_count", 0)) >= 2, "Walk animations strip imported heading-control rotation tracks for live NPC proxies")
+	var alpha_proxy_node := _find_proxy_node_by_unit_id(primary_view, "unit_alpha") as Node3D
+	var alpha_animation_player := _find_unit_visual_animation_player(alpha_proxy_node)
+	var alpha_walk_animation: Animation = alpha_animation_player.get_animation("walk") if alpha_animation_player != null and alpha_animation_player.has_animation("walk") else null
+	_assert(alpha_walk_animation != null and not _animation_has_rotation_track_suffix(alpha_walk_animation, ":HipsCtrl"), "Walk animation leaves proxy/model-root facing as the only heading owner")
 
 	var orientation_entries: Array = Array(snapshot.get("fireteam_orientation_entries", []))
 	var aim_orientation: Dictionary = _find_entry(orientation_entries, "fireteam_id", "aim")
@@ -188,6 +193,39 @@ func _find_entry(entries: Array, key: String, value: String) -> Dictionary:
 		if String(entry.get(key, "")).strip_edges().to_lower() == value.strip_edges().to_lower():
 			return entry
 	return {}
+
+
+func _find_unit_visual_animation_player(node: Node) -> AnimationPlayer:
+	if node == null:
+		return null
+	if node is AnimationPlayer and String(node.name) == "UnitVisualAnimationPlayer":
+		return node as AnimationPlayer
+	for child in node.get_children():
+		var found: AnimationPlayer = _find_unit_visual_animation_player(child)
+		if found != null:
+			return found
+	return null
+
+
+func _find_proxy_node_by_unit_id(node: Node, unit_id: String) -> Node:
+	if node == null:
+		return null
+	if String(node.get_meta("unit_id", "")).strip_edges().to_lower() == unit_id.strip_edges().to_lower():
+		return node
+	for child in node.get_children():
+		var found := _find_proxy_node_by_unit_id(child, unit_id)
+		if found != null:
+			return found
+	return null
+
+
+func _animation_has_rotation_track_suffix(animation: Animation, suffix: String) -> bool:
+	if animation == null:
+		return false
+	for track_index in range(animation.get_track_count()):
+		if animation.track_get_type(track_index) == Animation.TYPE_ROTATION_3D and String(animation.track_get_path(track_index)).ends_with(suffix):
+			return true
+	return false
 
 
 func _wait_for_node(parent: Node, path: NodePath, frame_limit: int) -> Node:

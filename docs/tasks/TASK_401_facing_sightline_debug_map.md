@@ -20,6 +20,7 @@ Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie,
 - Map-NPC-Klicks als reine Auswahl behandeln; nur die bestehende Fireteam-Karte im linken HUD darf den Primary-View-Fokus zentrieren.
 - Fireteam-Mini-Karten ueber dem read-only Tactical-Event-Log halten, damit auch die untere Karte direkt klickbar bleibt.
 - Primary3DView-Proxy-/Weapon-Pose nutzt explizites Facing und Runtime-Movement-Facing vor Fire-Event-/Target-Fallbacks.
+- Der importierte Walk-Clip darf keine eigene Heading-Control-Rotation ueber die Runtime-Facing-Achse legen.
 - Headless-Verifier fuer Map, Szene, Compass-Marker, Posture und Render-Snapshot.
 
 ## Nicht-Ziele
@@ -56,6 +57,7 @@ Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie,
 - [x] Ein Klick auf die bestehende linke Fireteam-Karte bleibt der explizite Pfad zum Zentrieren der Kamera.
 - [x] Die untere Fireteam-Mini-Karte bleibt vor dem Event-Log klickbar.
 - [x] Modell- und Weapon-Pose priorisieren Facing-/Movement-Richtung vor alten Fire-Event-/Target-Fallbacks.
+- [x] Die Walk-Animation entfernt die importierte `HipsCtrl`-Heading-Rotation, damit das Modell beim Gehen der Lauf-/Facing-Richtung nicht den Ruecken zudreht.
 - [x] Fireteam-Orientation/Facing und Fire-Sector/Weapon-Linie laufen ueber die bestehenden Primary3DView-Snapshots.
 - [x] Die sichtbaren Debug-Visuals erzeugen keine SimulationRoot-Commands oder -Effects.
 
