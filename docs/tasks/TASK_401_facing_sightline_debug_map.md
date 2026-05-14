@@ -23,6 +23,8 @@ Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie,
 - Der importierte Walk-Clip darf keine eigene Heading-Control-/Body-Root-Rotation ueber die Runtime-Facing-Achse legen.
 - Primary3DView-Fireteam-Orientation liest bei gueltigem vorhandenen Anchor-Payload die aktuelle Unit-Position und das aktuelle Unit-Facing live aus den registrierten Unit-Nodes, damit Bewegung keine stale Sichtlinie zeichnet.
 - Die Unit-Proxy-Yaw-Uebersetzung muss die echte importierte Character-Forward-Achse fuer Nord/Sued/Ost/West und Iso-Diagonalen abbilden; Dropship-/andere World-Yaw-Pfade bleiben davon getrennt.
+- Der Waffenroot bleibt bei Aim-/Ready-Posture am Socket; sichtbare Anschlag-/Ready-Pose darf den Root nicht aus dem Handanker heraus verschieben.
+- Der Unit-Facing-Visualpfad wird als Contract dokumentiert, damit Friendly-, Enemy-, Plan- und Fire-Event-Pfade nicht wieder auseinanderlaufen.
 - Headless-Verifier fuer Map, Szene, Compass-Marker, Posture und Render-Snapshot.
 
 ## Nicht-Ziele
@@ -41,6 +43,7 @@ Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie,
 - `docs/dev/enemy_team_tactics_contract.md`
 - `docs/dev/combat_loop_authority_contract.md`
 - `docs/dev/fog_of_war_modes_contract.md`
+- `docs/dev/unit_facing_visual_contract.md`
 - `docs/tasks/TASK_364_mission_fireteam_orientation_indicators.md`
 - `docs/tasks/TASK_371_fire_sector_security_arc_overlay_toggle.md`
 - `docs/tasks/TASK_372_mission_los_debug_overlay_toggle.md`
@@ -62,17 +65,21 @@ Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie,
 - [x] Die Walk-Animation entfernt die importierten `HipsCtrl`- und `Hips`-Heading-Rotationen, damit das Modell beim Gehen der Lauf-/Facing-Richtung nicht den Ruecken zudreht.
 - [x] Primary3DView rendert Fireteam-Orientation bei Bewegung aus aktueller Unit-Position und aktuellem Unit-Facing statt aus stale Anchor-Richtung.
 - [x] Unit-Proxy-Yaw nutzt eine model-forward-kalibrierte Grid-zu-3D-Formel; Skeleton-Forward, Facing/Sichtlinie und Weapon-/Shot-Linie stimmen auch bei echten Move-Commands ueberein.
+- [x] Aim-/Ready-Pose laesst den Waffenroot am Socket; Friendly- und Enemy-Tests pruefen, dass die Waffe nicht beim Loslaufen oder Feuern aus dem Handanker verschoben wird.
+- [x] `docs/dev/unit_facing_visual_contract.md` dokumentiert den gemeinsamen Friendly-/Enemy-/Plan-/Fire-Event-Pfad.
 - [x] Fireteam-Orientation/Facing und Fire-Sector/Weapon-Linie laufen ueber die bestehenden Primary3DView-Snapshots.
 - [x] Die sichtbaren Debug-Visuals erzeugen keine SimulationRoot-Commands oder -Effects.
 
 ## Betroffene Dateien
 - `data/npc_unit_visual_mapping.json`
+- `docs/dev/unit_facing_visual_contract.md`
 - `maps/facing_sightline_debug_12x12.json`
 - `data/mission_scenarios/facing_sightline_debug_12x12.json`
 - `scenes/tests/facing_sightline_debug_map.tscn`
 - `scripts/terrain/terrain_map_3d_view.gd`
 - `scripts/tests/mission_tactical_sandbox_controller.gd`
 - `scripts/tests/facing_sightline_debug_fixture_setup.gd`
+- `scripts/tests/task_344_ground_mission_default_enemy_visuals.gd`
 - `scripts/tests/task_401_facing_sightline_debug_map.gd`
 
 ## Lokale Pruefung
@@ -80,8 +87,11 @@ Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie,
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_171_npc_model_replacement_verifier.gd`
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_190_weapon_visual_loadout_expansion_and_scale.gd`
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_344_ground_mission_default_enemy_visuals.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_345_npc_standard_movement_posture_policy.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_202_enemy_security_direction_and_los_patch.gd`
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_364_mission_fireteam_orientation_indicators.gd`
 - [x] `godot_console.exe --headless --path . --script scripts/tests/bugfix_mission_fire_sector_overlay.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/bugfix_mission_right_click_order_flow.gd`
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_371_fire_sector_security_arc_overlay_toggle.gd`
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_372_mission_los_debug_overlay_toggle.gd`
 - [x] `git diff --check`

@@ -157,6 +157,8 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 	_assert(absf(float(alpha_proxy.get("unit_aim_pose_yaw_delta_degrees", 0.0))) <= 1.0, "Weapon-ready NPC binds weapon yaw to the same facing direction as the sightline")
 	var alpha_weapon_anchor_distance: float = float(alpha_proxy.get("unit_weapon_anchor_distance_3d", 999.0))
 	_assert(alpha_weapon_anchor_distance >= 0.0 and alpha_weapon_anchor_distance <= 0.52, "Weapon-ready NPC keeps the weapon root on the hand anchor (distance %.3f)" % alpha_weapon_anchor_distance)
+	alpha_proxy_node = _find_proxy_node_by_unit_id(primary_view, "unit_alpha") as Node3D
+	_assert_weapon_root_stays_on_socket(alpha_proxy_node, "Weapon-ready NPC keeps the weapon root position on the hand socket while aimed")
 	_assert(_find_entry(Array(snapshot.get("friendly_aim_entries", [])), "unit_id", "unit_bravo").is_empty(), "Lowered looking NPC has no selected weapon/shot line in the fixture")
 	await _assert_live_facing_updates_primary_view_visuals(controller, primary_view, unit_alpha as Node2D)
 
@@ -280,6 +282,7 @@ func _assert_moving_unit_forward_sample(primary_view: Node, snapshot: Dictionary
 		forward_dot > 0.92,
 		"%s moving model forward follows live Facing/Sichtlinie at frame %d (dot %.3f)" % [unit_id, frame_index, forward_dot]
 	)
+	_assert_weapon_root_stays_on_socket(proxy, "%s moving weapon root stays on the hand socket at frame %d" % [unit_id, frame_index])
 	var aim_entry: Dictionary = _find_entry(Array(snapshot.get("friendly_aim_entries", [])), "unit_id", unit_id)
 	if not aim_entry.is_empty():
 		var aim_direction: Vector2 = (Vector2(aim_entry.get("tip_position", Vector2.ZERO)) - Vector2(aim_entry.get("origin_position", Vector2.ZERO))).normalized()
@@ -350,6 +353,36 @@ func _get_unit_model_forward_xz(proxy: Node3D) -> Vector2:
 	var hips_global: Transform3D = skeleton.global_transform * skeleton.get_bone_global_pose(hips_bone)
 	var forward := Vector2(hips_global.basis.z.x, hips_global.basis.z.z)
 	return forward.normalized() if forward.length_squared() > 0.0001 else Vector2.ZERO
+
+
+func _assert_weapon_root_stays_on_socket(proxy: Node3D, message: String) -> void:
+	var weapon_node: Node3D = _find_unit_blaster_visual_node(proxy)
+	if weapon_node == null:
+		return
+	var base_position: Vector3 = _get_vector3_meta(weapon_node, "unit_aim_pose_base_position", weapon_node.position)
+	_assert(weapon_node.position.distance_to(base_position) <= 0.002, "%s (offset %.4f)" % [message, weapon_node.position.distance_to(base_position)])
+
+
+func _find_unit_blaster_visual_node(node: Node) -> Node3D:
+	if node == null:
+		return null
+	var node_3d := node as Node3D
+	if node_3d != null and String(node.name).begins_with("BlasterVisual_"):
+		return node_3d
+	for child in node.get_children():
+		var found: Node3D = _find_unit_blaster_visual_node(child)
+		if found != null:
+			return found
+	return null
+
+
+func _get_vector3_meta(node: Node, meta_name: String, fallback: Vector3) -> Vector3:
+	if node == null or not node.has_meta(meta_name):
+		return fallback
+	var value: Variant = node.get_meta(meta_name)
+	if typeof(value) == TYPE_VECTOR3:
+		return Vector3(value)
+	return fallback
 
 
 func _world_direction_to_3d_xz(primary_view: Node, origin_world: Vector2, direction: Vector2) -> Vector2:

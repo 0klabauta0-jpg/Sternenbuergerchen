@@ -131,6 +131,7 @@ func _test_fire_event_drives_facing_aim_pose_and_muzzle_vfx() -> void:
 	var attacker_forward: Vector2 = _get_unit_model_forward_xz(attacker_proxy)
 	var target_forward: Vector2 = _world_direction_to_3d_xz(primary_view, attacker.global_position, target.global_position - attacker.global_position)
 	_assert(attacker_forward.dot(target_forward) > 0.96, "Attacker proxy faces the fire target")
+	_assert_weapon_root_stays_on_socket(attacker_proxy, "Enemy attacker keeps the weapon root on the hand socket while aimed")
 	primary_view.queue_free()
 	attacker.queue_free()
 	target.queue_free()
@@ -161,6 +162,37 @@ func _make_unit(unit_id: String, team_id: String, position_value: Vector2) -> No
 	unit.weapon_2_id = "rifle"
 	unit.global_position = position_value
 	return unit
+
+
+func _assert_weapon_root_stays_on_socket(proxy: Node3D, message: String) -> void:
+	var weapon_node: Node3D = _find_unit_blaster_visual_node(proxy)
+	if weapon_node == null:
+		_assert(false, "%s has a weapon visual" % message)
+		return
+	var base_position: Vector3 = _get_vector3_meta(weapon_node, "unit_aim_pose_base_position", weapon_node.position)
+	_assert(weapon_node.position.distance_to(base_position) <= 0.002, "%s (offset %.4f)" % [message, weapon_node.position.distance_to(base_position)])
+
+
+func _find_unit_blaster_visual_node(node: Node) -> Node3D:
+	if node == null:
+		return null
+	var node_3d := node as Node3D
+	if node_3d != null and String(node.name).begins_with("BlasterVisual_"):
+		return node_3d
+	for child in node.get_children():
+		var found: Node3D = _find_unit_blaster_visual_node(child)
+		if found != null:
+			return found
+	return null
+
+
+func _get_vector3_meta(node: Node, meta_name: String, fallback: Vector3) -> Vector3:
+	if node == null or not node.has_meta(meta_name):
+		return fallback
+	var value: Variant = node.get_meta(meta_name)
+	if typeof(value) == TYPE_VECTOR3:
+		return Vector3(value)
+	return fallback
 
 
 func _get_unit_model_forward_xz(proxy: Node3D) -> Vector2:

@@ -133,9 +133,7 @@ const FOW_KNOWN_DIM_COLOR: Color = Color(0.02, 0.05, 0.06, 0.28)
 const FOW_EXPLORED_DIM_COLOR: Color = Color(0.02, 0.04, 0.06, 0.62)
 const FOW_UNKNOWN_BLACK_COLOR: Color = Color(0.0, 0.0, 0.0, 1.0)
 const UNIT_AIM_POSE_WEAPON_PITCH_DEGREES: float = -30.0
-const UNIT_AIM_POSE_WEAPON_FORWARD_OFFSET: float = 0.026
 const UNIT_READY_POSE_WEAPON_PITCH_DEGREES: float = -14.0
-const UNIT_READY_POSE_WEAPON_FORWARD_OFFSET: float = 0.014
 const UNIT_LOCOMOTION_HEADING_ANIMATION_NAMES: PackedStringArray = ["walk"]
 const UNIT_LOCOMOTION_HEADING_CONTROL_BONES: PackedStringArray = ["HipsCtrl", "Hips"]
 const EDITOR_EMPTY_BACKGROUND_COLOR: Color = Color(0.12, 0.13, 0.12, 1.0)
@@ -6354,10 +6352,8 @@ func _update_unit_weapon_aim_pose(proxy: Node3D, active_fire_event: Dictionary, 
 	var desired_position: Vector3 = base_position
 	if is_active:
 		desired_rotation = base_rotation + Vector3(UNIT_AIM_POSE_WEAPON_PITCH_DEGREES, 0.0, 0.0)
-		desired_position = base_position + Vector3(0.0, 0.0, -UNIT_AIM_POSE_WEAPON_FORWARD_OFFSET)
 	elif is_ready:
 		desired_rotation = base_rotation + Vector3(UNIT_READY_POSE_WEAPON_PITCH_DEGREES, 0.0, 0.0)
-		desired_position = base_position + Vector3(0.0, 0.0, -UNIT_READY_POSE_WEAPON_FORWARD_OFFSET)
 	if weapon_node.rotation_degrees.distance_squared_to(desired_rotation) > 0.0001:
 		weapon_node.rotation_degrees = desired_rotation
 		changed = true
