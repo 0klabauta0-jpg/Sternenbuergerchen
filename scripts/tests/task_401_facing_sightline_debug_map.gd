@@ -6,6 +6,7 @@ const MISSION_SCENARIO_DATA_SCRIPT: GDScript = preload("res://scripts/mission/mi
 
 const MAP_PATH: String = "res://maps/facing_sightline_debug_12x12.json"
 const SCENARIO_PATH: String = "res://data/mission_scenarios/facing_sightline_debug_12x12.json"
+const MINI_CARDS_PATH: String = "TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox"
 
 var _passed: int = 0
 var _failed: int = 0
@@ -87,6 +88,32 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 
 	var selected_marker_entry: Dictionary = _find_entry(Array(snapshot.get("selected_unit_marker_entries", [])), "unit_id", "unit_alpha")
 	_assert(not selected_marker_entry.is_empty() and float(selected_marker_entry.get("surface_offset", 999.0)) <= 0.02, "Selected NPC marker sits at foot/ground height")
+
+	primary_view.call("pan_camera", Vector2(1.0, 0.0), 1.0)
+	await _wait_frames(2)
+	var focus_after_manual_pan: Vector2 = Vector2(primary_view.call("get_camera_focus_grid_position"))
+	controller.call("_apply_unit_click_selection", unit_bravo, false)
+	await _wait_frames(4)
+	var focus_after_map_unit_select: Vector2 = Vector2(primary_view.call("get_camera_focus_grid_position"))
+	_assert(focus_after_map_unit_select.distance_to(focus_after_manual_pan) <= 0.001, "Map NPC selection keeps the 3D camera focus unchanged")
+	var mini_panel := scene.get_node_or_null("TacticalUI/FireteamMiniPanel") as Control
+	var event_log_panel := scene.get_node_or_null("TacticalUI/TacticalEventLogPanel") as Control
+	var look_mini_card := scene.get_node_or_null("%s/FireteamMiniCard_Look" % MINI_CARDS_PATH) as Control
+	_assert(look_mini_card != null and look_mini_card.mouse_filter == Control.MOUSE_FILTER_STOP, "Lower Fireteam mini card keeps a direct click target")
+	_assert(mini_panel != null and event_log_panel != null and mini_panel.z_index > event_log_panel.z_index, "Fireteam mini cards stay above the read-only event-log window")
+	if look_mini_card != null:
+		var card_click := InputEventMouseButton.new()
+		card_click.button_index = MOUSE_BUTTON_LEFT
+		card_click.pressed = false
+		look_mini_card.call("_gui_input", card_click)
+		await _wait_frames(4)
+		var focus_after_card_click: Vector2 = Vector2(primary_view.call("get_camera_focus_grid_position"))
+		_assert(focus_after_card_click.distance_to(focus_after_map_unit_select) > 0.01, "Left Fireteam card click is the path that recenters the 3D camera")
+		_assert(Array(controller.call("get_selected_fireteam_ids")).has("look"), "Left Fireteam card click keeps the lower NPC Fireteam selected")
+	controller.call("_set_selected_fireteams", PackedStringArray(["aim"]), false)
+	controller.call("_refresh_order_visuals")
+	await _wait_frames(4)
+	snapshot = Dictionary(primary_view.call("get_render_snapshot"))
 
 	var visible_unit_ids: Array = Array(snapshot.get("visible_unit_proxy_ids", []))
 	_assert(visible_unit_ids.has("unit_alpha") and visible_unit_ids.has("unit_bravo"), "Primary3DView renders both fixture NPC proxies")

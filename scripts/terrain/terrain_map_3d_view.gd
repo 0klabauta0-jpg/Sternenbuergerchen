@@ -878,6 +878,10 @@ func get_camera_size() -> float:
 	return _camera_size
 
 
+func get_camera_focus_grid_position() -> Vector2:
+	return _focus_grid_position
+
+
 func screen_to_world_position(screen_position: Vector2):
 	_ensure_nodes()
 	if _camera == null or _subviewport == null:
@@ -4287,10 +4291,6 @@ func _resolve_unit_aim_direction(unit: Node, unit_world_position: Vector2) -> Ve
 	var explicit_facing_direction: Vector2 = _resolve_unit_explicit_facing_direction(unit)
 	if explicit_facing_direction.length_squared() > 0.0001:
 		return explicit_facing_direction
-	if proxy != null and is_instance_valid(proxy):
-		var proxy_direction: Vector2 = _get_world_direction_from_proxy_yaw(unit_world_position, float(proxy.rotation_degrees.y))
-		if proxy_direction.length_squared() > 0.0001:
-			return proxy_direction
 	var motion_or_target_direction: Vector2 = _resolve_unit_motion_or_target_direction(proxy, unit, unit_world_position)
 	if motion_or_target_direction.length_squared() > 0.0001:
 		return motion_or_target_direction
@@ -4299,6 +4299,10 @@ func _resolve_unit_aim_direction(unit: Node, unit_world_position: Vector2) -> Ve
 		var target_position: Vector2 = Vector2(target_position_variant)
 		if unit_world_position.distance_squared_to(target_position) > 1.0:
 			return (target_position - unit_world_position).normalized()
+	if proxy != null and is_instance_valid(proxy):
+		var proxy_direction: Vector2 = _get_world_direction_from_proxy_yaw(unit_world_position, float(proxy.rotation_degrees.y))
+		if proxy_direction.length_squared() > 0.0001:
+			return proxy_direction
 	return Vector2.RIGHT
 
 
@@ -5575,7 +5579,10 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 		var weapon_pose_direction: Vector2 = Vector2.ZERO
 		if unit is Node2D:
 			var unit_world_position: Vector2 = (unit as Node2D).global_position
-			if not active_fire_event.is_empty():
+			weapon_pose_direction = _resolve_unit_explicit_facing_direction(unit)
+			if weapon_pose_direction.length_squared() <= 0.0001:
+				weapon_pose_direction = _resolve_unit_motion_or_target_direction(proxy, unit, unit_world_position)
+			if weapon_pose_direction.length_squared() <= 0.0001 and not active_fire_event.is_empty():
 				weapon_pose_direction = _get_fire_event_direction_for_unit(active_fire_event, unit_world_position)
 			if weapon_pose_direction.length_squared() <= 0.0001:
 				weapon_pose_direction = _resolve_unit_aim_direction(unit, unit_world_position)
@@ -5857,16 +5864,16 @@ func _get_unit_respawn_remaining_seconds(unit: Node) -> int:
 
 func _get_unit_proxy_rotation_y(proxy: Node3D, unit: Node, current_world_position: Vector2, active_fire_event: Dictionary = {}) -> float:
 	var fallback_yaw: float = proxy.rotation_degrees.y if proxy != null else 0.0
-	if not active_fire_event.is_empty():
-		var fire_direction: Vector2 = _get_fire_event_direction_for_unit(active_fire_event, current_world_position)
-		if fire_direction.length_squared() > 0.0001:
-			return _get_world_direction_yaw(current_world_position, current_world_position + fire_direction, fallback_yaw)
 	var explicit_facing_direction: Vector2 = _resolve_unit_explicit_facing_direction(unit)
 	if explicit_facing_direction.length_squared() > 0.0001:
 		return _get_world_direction_yaw(current_world_position, current_world_position + explicit_facing_direction, fallback_yaw)
 	var motion_or_target_direction: Vector2 = _resolve_unit_motion_or_target_direction(proxy, unit, current_world_position)
 	if motion_or_target_direction.length_squared() > 0.0001:
 		return _get_world_direction_yaw(current_world_position, current_world_position + motion_or_target_direction, fallback_yaw)
+	if not active_fire_event.is_empty():
+		var fire_direction: Vector2 = _get_fire_event_direction_for_unit(active_fire_event, current_world_position)
+		if fire_direction.length_squared() > 0.0001:
+			return _get_world_direction_yaw(current_world_position, current_world_position + fire_direction, fallback_yaw)
 	var target_position: Variant = unit.call("get_target_position") if unit != null and unit.has_method("get_target_position") else null
 	if typeof(target_position) == TYPE_VECTOR2:
 		var target_world_position: Vector2 = Vector2(target_position)

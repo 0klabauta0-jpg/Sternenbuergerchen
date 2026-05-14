@@ -6,7 +6,7 @@
 Facing, Sichtlinie und Waffen-/Schussrichtung sollen auf einer kleinen Mission-Map sofort sichtbar pruefbar sein, ohne dass zuerst ein Overlay angeklickt oder eine Unit manuell selektiert werden muss.
 
 ## Sinnhaftigkeit / Ursache
-Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie, Unit-Facing und Weapon-Posture existieren bereits. Fuer manuelle Sichtchecks fehlt aber eine kleine, eindeutige Fixture, in der ein NPC mit Waffe im Anschlag und ein NPC mit gesenkter Waffe direkt auseinandergezogen sichtbar sind. Die Playtests zeigten zusaetzlich, dass die importierten Character-Modelle visuell 180 Grad zur Proxy-/Facing-Rotation verdreht standen, der Aim-Yaw die sichtbare Waffe aus dem Handanker ziehen konnte und die Fire-Sector-Linie besser an die Blick-/Facing-Richtung statt an eine separate Target-Position gebunden wird.
+Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie, Unit-Facing und Weapon-Posture existieren bereits. Fuer manuelle Sichtchecks fehlt aber eine kleine, eindeutige Fixture, in der ein NPC mit Waffe im Anschlag und ein NPC mit gesenkter Waffe direkt auseinandergezogen sichtbar sind. Die Playtests zeigten zusaetzlich, dass die importierten Character-Modelle visuell 180 Grad zur Proxy-/Facing-Rotation verdreht standen, der Aim-Yaw die sichtbare Waffe aus dem Handanker ziehen konnte, die Fire-Sector-Linie besser an die Blick-/Facing-Richtung statt an eine separate Target-Position gebunden wird und Map-NPC-Klicks nicht die Kamera neu zentrieren duerfen.
 
 ## Umfang
 - 12x12-Testmap mit Compass-Markern an den Kartenecken.
@@ -17,6 +17,9 @@ Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie,
 - Bestehende Weapon-Posture-Visuals so nutzen, dass die Schusslinie am sichtbaren Waffenvisual beginnt, wenn die Waffe nicht gesenkt ist, ohne den Handanker sichtbar vom NPC wegzuziehen.
 - Fire-Sector-/Weapon-Linie im sichtbaren Overlay an Facing/Blickrichtung binden, nicht an separate Target-Positionen.
 - Auswahlanzeige fuer selektierte NPCs auf Boden-/Fusshoehe absenken.
+- Map-NPC-Klicks als reine Auswahl behandeln; nur die bestehende Fireteam-Karte im linken HUD darf den Primary-View-Fokus zentrieren.
+- Fireteam-Mini-Karten ueber dem read-only Tactical-Event-Log halten, damit auch die untere Karte direkt klickbar bleibt.
+- Primary3DView-Proxy-/Weapon-Pose nutzt explizites Facing und Runtime-Movement-Facing vor Fire-Event-/Target-Fallbacks.
 - Headless-Verifier fuer Map, Szene, Compass-Marker, Posture und Render-Snapshot.
 
 ## Nicht-Ziele
@@ -49,6 +52,10 @@ Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie,
 - [x] Die sichtbare Waffe bleibt am Handanker; Aim-Yaw dreht nur das Weapon-Child-Visual, nicht den ganzen Root-Anker aus der Unit heraus.
 - [x] Die Waffen-/Schusslinie folgt der Facing-/Blickrichtung statt einer separaten Target-Position.
 - [x] Der blaue Selected-Unit-Marker liegt an den Fuessen auf Bodenniveau.
+- [x] Ein Map-Klick auf einen NPC selektiert nur und laesst den Primary-View-Fokus unveraendert.
+- [x] Ein Klick auf die bestehende linke Fireteam-Karte bleibt der explizite Pfad zum Zentrieren der Kamera.
+- [x] Die untere Fireteam-Mini-Karte bleibt vor dem Event-Log klickbar.
+- [x] Modell- und Weapon-Pose priorisieren Facing-/Movement-Richtung vor alten Fire-Event-/Target-Fallbacks.
 - [x] Fireteam-Orientation/Facing und Fire-Sector/Weapon-Linie laufen ueber die bestehenden Primary3DView-Snapshots.
 - [x] Die sichtbaren Debug-Visuals erzeugen keine SimulationRoot-Commands oder -Effects.
 
@@ -58,6 +65,7 @@ Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie,
 - `data/mission_scenarios/facing_sightline_debug_12x12.json`
 - `scenes/tests/facing_sightline_debug_map.tscn`
 - `scripts/terrain/terrain_map_3d_view.gd`
+- `scripts/tests/mission_tactical_sandbox_controller.gd`
 - `scripts/tests/facing_sightline_debug_fixture_setup.gd`
 - `scripts/tests/task_401_facing_sightline_debug_map.gd`
 
@@ -65,6 +73,7 @@ Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie,
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_401_facing_sightline_debug_map.gd`
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_171_npc_model_replacement_verifier.gd`
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_190_weapon_visual_loadout_expansion_and_scale.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_344_ground_mission_default_enemy_visuals.gd`
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_364_mission_fireteam_orientation_indicators.gd`
 - [x] `godot_console.exe --headless --path . --script scripts/tests/bugfix_mission_fire_sector_overlay.gd`
 - [x] `godot_console.exe --headless --path . --script scripts/tests/task_371_fire_sector_security_arc_overlay_toggle.gd`

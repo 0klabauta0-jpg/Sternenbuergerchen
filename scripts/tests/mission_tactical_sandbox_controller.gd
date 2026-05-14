@@ -60,7 +60,7 @@ const DROPSHIP_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Is
 
 const ALL_FIRETEAM_LABEL: String = "ALL"
 const APPROACH_ANGLES: PackedStringArray = ["NW", "NE", "SW", "SE"]
-const HOTKEY_LEGEND: String = "LMB Select/Center | Doubleclick Center | RMB Order | RMB Drag Area | Shift+RMB Append | CTRL+LMB Add | C Fire Arc | L LOS | DEL Order | T Sort | G GO"
+const HOTKEY_LEGEND: String = "LMB Select | Fireteam Card Center | RMB Order | RMB Drag Area | Shift+RMB Append | CTRL+LMB Add | C Fire Arc | L LOS | DEL Order | T Sort | G GO"
 const LIVE_ORDER_PHASE_INDEX: int = 1
 const PHASE_PLANNING_ENABLED: bool = false
 const FRIENDLY_TEAM_ID: String = "team_alpha"
@@ -74,6 +74,9 @@ const FIRETEAM_MINI_PANEL_PATH: String = "../TacticalUI/FireteamMiniPanel"
 const FIRETEAM_MINI_HEADER_LABEL_PATH: String = "../TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniHeaderLabel"
 const FIRETEAM_MINI_CARDS_VBOX_PATH: String = "../TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox"
 const TACTICAL_EVENT_LOG_PANEL_PATH: String = "../TacticalUI/TacticalEventLogPanel"
+const FIRETEAM_MINI_PANEL_Z_INDEX: int = 38
+const FIRETEAM_MINI_CARD_Z_INDEX: int = 42
+const TACTICAL_EVENT_LOG_Z_INDEX: int = 8
 const COMMAND_GRID_PATH: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid"
 const DELETE_ORDER_BUTTON_PATH: String = COMMAND_GRID_PATH + "/DeleteOrderButton"
 const SORT_COMMAND_BUTTON_PATH: String = COMMAND_GRID_PATH + "/SortCommandMatrixButton"
@@ -508,7 +511,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				return
 
 			if mouse_button_event.double_click:
-				if _try_center_fireteam_from_map_click(mouse_button_event.position, mouse_button_event.ctrl_pressed):
+				if _try_select_fireteam_from_map_click(mouse_button_event.position, mouse_button_event.ctrl_pressed):
 					get_viewport().set_input_as_handled()
 				return
 
@@ -2797,6 +2800,9 @@ func _refresh_fireteam_mini_cards() -> void:
 		if not card.card_pressed.is_connected(_on_fireteam_mini_reference_card_pressed):
 			card.card_pressed.connect(_on_fireteam_mini_reference_card_pressed)
 		card_host.add_child(card)
+		card.z_as_relative = false
+		card.z_index = FIRETEAM_MINI_CARD_Z_INDEX
+		card.set_meta("mission_fireteam_mini_card_z_index", FIRETEAM_MINI_CARD_Z_INDEX)
 
 
 func _on_fireteam_mini_card_gui_input(event: InputEvent, fireteam_id: String) -> void:
@@ -8088,7 +8094,14 @@ func _apply_fireteam_mini_overlay_style() -> void:
 	panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel.clip_contents = false
+	panel.z_as_relative = false
+	panel.z_index = FIRETEAM_MINI_PANEL_Z_INDEX
 	panel.set_meta("mission_fireteam_mini_backgroundless", true)
+	panel.set_meta("mission_fireteam_mini_panel_z_index", FIRETEAM_MINI_PANEL_Z_INDEX)
+	var event_log_panel := get_node_or_null(TACTICAL_EVENT_LOG_PANEL_PATH) as Control
+	if event_log_panel != null:
+		event_log_panel.z_as_relative = false
+		event_log_panel.z_index = TACTICAL_EVENT_LOG_Z_INDEX
 	for path in [
 		"../TacticalUI/FireteamMiniPanel/MiniMargin",
 		"../TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox",
@@ -9090,21 +9103,14 @@ func _apply_unit_click_selection(unit: Node, ctrl_pressed: bool) -> void:
 	if fireteam_id.is_empty():
 		return
 	_set_selected_fireteams(PackedStringArray(_selection_adapter.call("build_unit_click_selection", _selected_fireteam_ids, fireteam_id, ctrl_pressed)))
-	_focus_primary_view_on_selected_fireteams()
 
 
-func _try_center_fireteam_from_map_click(screen_position: Vector2, ctrl_pressed: bool) -> bool:
+func _try_select_fireteam_from_map_click(screen_position: Vector2, ctrl_pressed: bool) -> bool:
 	var unit = _find_selectable_unit_at_screen_position(screen_position)
-	if unit != null:
-		_apply_unit_click_selection(unit, ctrl_pressed)
-		_last_command_text = "CENTER %s" % _get_fireteam_name().to_upper()
-		_update_ui()
-		return true
-	if _selected_fireteam_ids.is_empty():
+	if unit == null:
 		return false
-	if not _focus_primary_view_on_selected_fireteams():
-		return false
-	_last_command_text = "CENTER %s" % _get_fireteam_name().to_upper()
+	_apply_unit_click_selection(unit, ctrl_pressed)
+	_last_command_text = "SELECT %s" % _get_fireteam_name().to_upper()
 	_update_ui()
 	return true
 
