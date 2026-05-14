@@ -155,13 +155,15 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 	_assert(bool(alpha_proxy.get("unit_aim_pose_weapon_node_available", false)), "North aimed NPC exposes an attached weapon visual")
 	_assert(bool(alpha_proxy.get("unit_aim_pose_yaw_active", false)), "North aimed NPC applies the existing aim direction to the weapon pose")
 	_assert(absf(float(alpha_proxy.get("unit_aim_pose_yaw_delta_degrees", 0.0))) <= 1.0, "North aimed NPC binds weapon yaw to the same facing direction as the sightline")
-	_assert(bool(alpha_proxy.get("unit_weapon_upper_body_pose_active", false)), "North aimed NPC applies the existing targeting upper-body pose")
+	_assert(bool(alpha_proxy.get("unit_weapon_upper_body_pose_active", false)), "North aimed NPC applies the imported shoot aiming upper-body pose")
 	_assert(int(alpha_proxy.get("unit_weapon_upper_body_pose_bone_count", 0)) >= 8, "North aimed NPC drives enough upper-body bones for a visible weapon-up pose")
+	_assert(String(alpha_proxy.get("unit_weapon_upper_body_pose_source_animation", "")) == "shoot", "North aimed NPC takes the aim pose from the imported shoot animation")
 	var alpha_weapon_anchor_distance: float = float(alpha_proxy.get("unit_weapon_anchor_distance_3d", 999.0))
 	_assert(alpha_weapon_anchor_distance >= 0.0 and alpha_weapon_anchor_distance <= 0.52, "North aimed NPC keeps the weapon root on the hand anchor (distance %.3f)" % alpha_weapon_anchor_distance)
 	alpha_proxy_node = _find_proxy_node_by_unit_id(primary_view, "unit_alpha") as Node3D
 	_assert_weapon_root_stays_on_socket(alpha_proxy_node, "North aimed NPC keeps the weapon root position on the hand socket while aimed")
-	_assert_aim_pose_raises_weapon_hand(alpha_proxy_node, "North aimed NPC raises the weapon hand above the chest")
+	_assert_aim_pose_uses_imported_shoot_grip(alpha_proxy_node, "North aimed NPC uses the imported shoot grip")
+	await _assert_camera_rotation_keeps_imported_aim_pose(primary_view, "unit_alpha")
 	_assert(_find_entry(Array(snapshot.get("friendly_aim_entries", [])), "unit_id", "unit_bravo").is_empty(), "Unselected south aimed NPC has no selected weapon/shot line in the fixture")
 	await _assert_live_facing_updates_primary_view_visuals(controller, primary_view, unit_alpha as Node2D)
 
@@ -172,12 +174,13 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 	var look_fire_entry: Dictionary = _find_entry(Array(look_selected_snapshot.get("friendly_aim_entries", [])), "unit_id", "unit_bravo")
 	_assert(not look_fire_entry.is_empty(), "Selecting the south aimed NPC uses the existing fire-sector path")
 	var look_proxy_state: Dictionary = Dictionary(Dictionary(look_selected_snapshot.get("unit_proxy_state_by_id", {})).get("unit_bravo", {}))
-	_assert(bool(look_proxy_state.get("unit_weapon_upper_body_pose_active", false)), "South aimed NPC applies the existing targeting upper-body pose")
+	_assert(bool(look_proxy_state.get("unit_weapon_upper_body_pose_active", false)), "South aimed NPC applies the imported shoot aiming upper-body pose")
+	_assert(String(look_proxy_state.get("unit_weapon_upper_body_pose_source_animation", "")) == "shoot", "South aimed NPC takes the aim pose from the imported shoot animation")
 	var look_weapon_direction: Vector2 = (Vector2(look_fire_entry.get("tip_position", Vector2.ZERO)) - Vector2(look_fire_entry.get("origin_position", Vector2.ZERO))).normalized()
 	_assert(look_weapon_direction.dot(Vector2.DOWN) > 0.90, "Selected south aimed NPC weapon/target line overlaps its south-facing sightline")
 	_assert(String(look_fire_entry.get("line_origin_anchor", "")) == "weapon_visual", "South aimed NPC weapon/shot line starts at the raised weapon visual anchor")
 	_assert(_find_entry(Array(look_selected_snapshot.get("friendly_aim_entries", [])), "unit_id", "unit_alpha").is_empty(), "Switching selection removes the upper NPC weapon/shot line")
-	_assert_aim_pose_raises_weapon_hand(_find_proxy_node_by_unit_id(primary_view, "unit_bravo") as Node3D, "South aimed NPC raises the weapon hand above the chest")
+	_assert_aim_pose_uses_imported_shoot_grip(_find_proxy_node_by_unit_id(primary_view, "unit_bravo") as Node3D, "South aimed NPC uses the imported shoot grip")
 	await _assert_moving_units_keep_model_forward_on_live_lines(simulation_root, controller, primary_view, unit_alpha as Node2D, unit_bravo as Node2D)
 
 	var command_count_before: int = simulation_root.command_queue.size()
@@ -263,6 +266,23 @@ func _assert_moving_units_keep_model_forward_on_live_lines(simulation_root: Node
 			_assert_moving_unit_forward_sample(primary_view, snapshot, unit_bravo, "unit_bravo", frame_index)
 
 
+func _assert_camera_rotation_keeps_imported_aim_pose(primary_view: Node, unit_id: String) -> void:
+	if primary_view == null:
+		_assert(false, "Camera-rotation aim verifier receives Primary3DView")
+		return
+	for step_index in range(48):
+		primary_view.call("rotate_camera", 9.0 if step_index % 2 == 0 else -7.0)
+		await process_frame
+		if step_index % 12 == 0:
+			await _wait_frames(1)
+	var snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
+	var proxy_state: Dictionary = Dictionary(Dictionary(snapshot.get("unit_proxy_state_by_id", {})).get(unit_id, {}))
+	_assert(String(proxy_state.get("unit_weapon_posture", "")) == "aimed", "%s remains in aimed weapon posture after Q/E camera rotation" % unit_id)
+	_assert(bool(proxy_state.get("unit_weapon_upper_body_pose_active", false)), "%s keeps the imported shoot upper-body pose after Q/E camera rotation" % unit_id)
+	_assert(String(proxy_state.get("unit_weapon_upper_body_pose_source_animation", "")) == "shoot", "%s camera rotation does not fall back to idle/manual pose" % unit_id)
+	_assert_aim_pose_uses_imported_shoot_grip(_find_proxy_node_by_unit_id(primary_view, unit_id) as Node3D, "%s keeps the shoot aim pose after camera rotation" % unit_id)
+
+
 func _enqueue_debug_move_command(simulation_root: Node, unit: Node2D, target_position: Vector2) -> void:
 	var command = UNIT_COMMAND_SCRIPT.new()
 	command.command_type = UNIT_COMMAND_SCRIPT.TYPE_MOVE_TO_POSITION
@@ -300,7 +320,7 @@ func _assert_moving_unit_forward_sample(primary_view: Node, snapshot: Dictionary
 			aim_direction.dot(heading_direction.normalized()) > 0.90,
 			"%s moving weapon/shot line follows the same live heading at frame %d" % [unit_id, frame_index]
 		)
-		_assert_aim_pose_raises_weapon_hand(proxy, "%s moving aimed pose keeps the weapon hand raised at frame %d" % [unit_id, frame_index])
+		_assert_aim_pose_uses_imported_shoot_grip(proxy, "%s moving aimed pose keeps the imported shoot grip at frame %d" % [unit_id, frame_index])
 
 
 func _assert_unit_model_forward_matches_runtime_facing(primary_view: Node, unit: Node2D, unit_id: String) -> void:
@@ -374,19 +394,21 @@ func _assert_weapon_root_stays_on_socket(proxy: Node3D, message: String) -> void
 	_assert(weapon_node.position.distance_to(base_position) <= 0.002, "%s (offset %.4f)" % [message, weapon_node.position.distance_to(base_position)])
 
 
-func _assert_aim_pose_raises_weapon_hand(proxy: Node3D, message: String) -> void:
+func _assert_aim_pose_uses_imported_shoot_grip(proxy: Node3D, message: String) -> void:
 	var skeleton := _find_skeleton3d(proxy)
 	if skeleton == null:
 		_assert(false, "%s has a Skeleton3D" % message)
 		return
 	var right_hand_index: int = skeleton.find_bone("RightHand")
+	var left_hand_index: int = skeleton.find_bone("LeftHand")
 	var chest_index: int = skeleton.find_bone("Chest")
-	if right_hand_index < 0 or chest_index < 0:
-		_assert(false, "%s has RightHand and Chest bones" % message)
+	if right_hand_index < 0 or left_hand_index < 0 or chest_index < 0:
+		_assert(false, "%s has RightHand, LeftHand and Chest bones" % message)
 		return
 	var right_hand: Vector3 = skeleton.get_bone_global_pose(right_hand_index).origin
-	var chest: Vector3 = skeleton.get_bone_global_pose(chest_index).origin
-	_assert(right_hand.z > chest.z + 0.001, "%s (hand %.4f, chest %.4f)" % [message, right_hand.z, chest.z])
+	var left_hand: Vector3 = skeleton.get_bone_global_pose(left_hand_index).origin
+	var hand_spread: float = absf(right_hand.x - left_hand.x)
+	_assert(hand_spread <= 0.035, "%s keeps hands near the weapon instead of a T-pose (spread %.4f)" % [message, hand_spread])
 
 
 func _find_unit_blaster_visual_node(node: Node) -> Node3D:

@@ -272,7 +272,9 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root) -> 
 				String(state.get("command_type", "")),
 				int(state.get("phase", -1)),
 				record.get("unit", null),
-				_build_stage_command_token(state, unit_id)
+				_build_stage_command_token(state, unit_id),
+				_resolve_stage_movement_posture(state, style, true),
+				_resolve_stage_weapon_posture(state, style, true)
 			):
 				issued_count += 1
 			continue
@@ -295,7 +297,9 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root) -> 
 			String(state.get("command_type", "")),
 			int(state.get("phase", -1)),
 			record.get("unit", null),
-			_build_stage_command_token(state, unit_id)
+			_build_stage_command_token(state, unit_id),
+			_resolve_stage_movement_posture(state, style, false),
+			_resolve_stage_weapon_posture(state, style, false)
 		):
 			issued_count += 1
 	state["current_anchor_origin_position"] = anchor_origin_position
@@ -405,7 +409,9 @@ func _reissue_current_stage(state: Dictionary, member_records: Array, simulation
 				String(state.get("command_type", "")),
 				int(state.get("phase", -1)),
 				record.get("unit", null),
-				_build_stage_command_token(state, unit_id)
+				_build_stage_command_token(state, unit_id),
+				_resolve_stage_movement_posture(state, style, true),
+				_resolve_stage_weapon_posture(state, style, true)
 			)
 			continue
 		if not moving_unit_ids.has(unit_id) or not current_target_positions.has(unit_id):
@@ -424,7 +430,9 @@ func _reissue_current_stage(state: Dictionary, member_records: Array, simulation
 			String(state.get("command_type", "")),
 			int(state.get("phase", -1)),
 			record.get("unit", null),
-			_build_stage_command_token(state, unit_id)
+			_build_stage_command_token(state, unit_id),
+			_resolve_stage_movement_posture(state, style, false),
+			_resolve_stage_weapon_posture(state, style, false)
 		)
 	state["current_target_positions"] = current_target_positions
 
@@ -597,8 +605,23 @@ func _build_current_positions(member_records: Array) -> Dictionary:
 	return positions
 
 
-func _avoid_backward_move_target(_state: Dictionary, _current_position: Vector2, target_position: Vector2) -> Vector2:
-	return target_position
+func _avoid_backward_move_target(state: Dictionary, current_position: Vector2, target_position: Vector2) -> Vector2:
+	var origin_position: Vector2 = Vector2(state.get("current_anchor_origin_position", state.get("origin_anchor_position", current_position)))
+	var anchor_target_position: Vector2 = Vector2(state.get("current_anchor_target_position", state.get("final_target_position", target_position)))
+	var travel_direction: Vector2 = anchor_target_position - origin_position
+	if travel_direction.length_squared() <= 0.001:
+		return target_position
+	var forward: Vector2 = travel_direction.normalized()
+	var target_delta: Vector2 = target_position - origin_position
+	var current_progress: float = forward.dot(current_position - origin_position)
+	var target_progress: float = forward.dot(target_delta)
+	var final_progress: float = forward.dot(anchor_target_position - origin_position)
+	if current_progress > final_progress + POSITION_REACHED_RADIUS:
+		return target_position
+	if target_progress + POSITION_REACHED_RADIUS >= current_progress:
+		return target_position
+	var lateral_offset: Vector2 = target_delta - (forward * target_progress)
+	return origin_position + (forward * current_progress) + lateral_offset
 
 
 func _build_move_speed_factor(
@@ -701,7 +724,9 @@ func _enqueue_unit_command(
 	source_command_type: String,
 	phase_index: int,
 	unit = null,
-	command_token: String = ""
+	command_token: String = "",
+	movement_posture: String = "",
+	weapon_posture: String = ""
 ) -> bool:
 	if simulation_root == null:
 		return false
@@ -717,6 +742,8 @@ func _enqueue_unit_command(
 	command.source_command_type = source_command_type
 	command.phase = phase_index
 	command.command_token = command_token
+	command.movement_posture = UNIT_COMMAND_SCRIPT.call("normalize_movement_posture", movement_posture, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_IDLE)
+	command.weapon_posture = UNIT_COMMAND_SCRIPT.call("normalize_weapon_posture", weapon_posture, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_LOWERED)
 	if command_type == UNIT_COMMAND_SCRIPT.TYPE_MOVE_TO_POSITION:
 		command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_HOLD_FIRE
 	else:
@@ -729,6 +756,30 @@ func _enqueue_unit_command(
 	command_dict["requeue_until_target"] = command_type != UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION
 	simulation_root.call("enqueue_command", command_dict)
 	return true
+
+
+func _resolve_stage_movement_posture(state: Dictionary, style: String, is_covering: bool) -> String:
+	if is_covering:
+		return UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_OVERWATCH
+	var normalized_command_type: String = String(state.get("command_type", "")).strip_edges().to_lower()
+	match style:
+		ADVANCE_STYLE_CATERPILLAR:
+			return UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_CROUCH_WALK
+		ADVANCE_STYLE_BOUNDING:
+			return UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE
+		_:
+			if normalized_command_type == "move":
+				return UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_TRAVEL
+			return UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE
+
+
+func _resolve_stage_weapon_posture(state: Dictionary, style: String, is_covering: bool) -> String:
+	if is_covering:
+		return UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED
+	var normalized_command_type: String = String(state.get("command_type", "")).strip_edges().to_lower()
+	if style == ADVANCE_STYLE_RUSH and normalized_command_type == "move":
+		return UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_LOWERED
+	return UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED
 
 
 func _next_execution_id(fireteam_id: String) -> String:

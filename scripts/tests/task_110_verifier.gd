@@ -501,6 +501,11 @@ func _test_live_fireteam_go_moves_lead_and_members_without_snapback() -> void:
 	await physics_frame
 	var initial_movement_state: Dictionary = Dictionary(controller.call("get_fireteam_movement_state", "ft1"))
 	_assert(String(initial_movement_state.get("effective_style", "")) == "rush", "Live GO treats a normal Move order as group travel")
+	var route_origin: Vector2 = Vector2(initial_movement_state.get("origin_anchor_position", lead_start))
+	var route_target: Vector2 = Vector2(initial_movement_state.get("final_target_position", route_origin))
+	var start_route_progress: Dictionary = {}
+	for unit_id_variant in positions_before.keys():
+		start_route_progress[unit_id_variant] = _compute_route_progress(Vector2(positions_before.get(unit_id_variant)), route_origin, route_target)
 	for _frame in range(260):
 		await process_frame
 		await physics_frame
@@ -508,7 +513,10 @@ func _test_live_fireteam_go_moves_lead_and_members_without_snapback() -> void:
 			if not (unit is Node2D) or not unit.has_method("get_unit_id"):
 				continue
 			var unit_id: String = String(unit.call("get_unit_id"))
-			var moved_distance: float = (unit as Node2D).global_position.distance_to(Vector2(positions_before.get(unit_id, (unit as Node2D).global_position)))
+			var moved_distance: float = maxf(
+				0.0,
+				_compute_route_progress((unit as Node2D).global_position, route_origin, route_target) - float(start_route_progress.get(unit_id, 0.0))
+			)
 			max_member_progress[unit_id] = maxf(float(max_member_progress.get(unit_id, 0.0)), moved_distance)
 	var lead_moved_distance: float = lead.global_position.distance_to(lead_start) if lead != null else 0.0
 	var moved_member_count: int = 0
@@ -521,7 +529,10 @@ func _test_live_fireteam_go_moves_lead_and_members_without_snapback() -> void:
 			continue
 		var unit_id: String = String(unit.call("get_unit_id"))
 		var max_progress: float = float(max_member_progress.get(unit_id, 0.0))
-		var final_progress: float = (unit as Node2D).global_position.distance_to(Vector2(positions_before.get(unit_id, (unit as Node2D).global_position)))
+		var final_progress: float = maxf(
+			0.0,
+			_compute_route_progress((unit as Node2D).global_position, route_origin, route_target) - float(start_route_progress.get(unit_id, 0.0))
+		)
 		if max_progress > 8.0 and final_progress + 48.0 < max_progress:
 			all_members_kept_most_progress = false
 			break
@@ -734,6 +745,14 @@ func _compute_target_spread(target_positions: Dictionary) -> float:
 		for position_b in positions:
 			max_distance = maxf(max_distance, Vector2(position_a).distance_to(Vector2(position_b)))
 	return max_distance
+
+
+func _compute_route_progress(position: Vector2, route_origin: Vector2, route_target: Vector2) -> float:
+	var route_delta: Vector2 = route_target - route_origin
+	var route_length: float = route_delta.length()
+	if route_length <= 0.001:
+		return 0.0
+	return clampf(route_delta.normalized().dot(position - route_origin), 0.0, route_length)
 
 
 func _cleanup_units(units: Array) -> void:

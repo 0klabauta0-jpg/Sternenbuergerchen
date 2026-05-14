@@ -24,7 +24,7 @@ Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie,
 - Primary3DView-Fireteam-Orientation liest bei gueltigem vorhandenen Anchor-Payload die aktuelle Unit-Position und das aktuelle Unit-Facing live aus den registrierten Unit-Nodes, damit Bewegung keine stale Sichtlinie zeichnet.
 - Die Unit-Proxy-Yaw-Uebersetzung muss die echte importierte Character-Forward-Achse fuer Nord/Sued/Ost/West und Iso-Diagonalen abbilden; Dropship-/andere World-Yaw-Pfade bleiben davon getrennt.
 - Der Waffenroot bleibt bei Aim-/Ready-Posture am Socket; sichtbare Anschlag-/Ready-Pose darf den Root nicht aus dem Handanker heraus verschieben.
-- Die sichtbare Anschlag-Pose nutzt den vorhandenen importierten `0_Targeting Pose`-Clip als Oberkoerper-/Arm-Pose im bestehenden Unit-AnimationPlayer-Pfad; Idle/Walk bleiben Basisanimationen.
+- Die sichtbare Anschlag-Pose uebernimmt die importierte `shoot.fbx` im bestehenden Unit-AnimationPlayer-/Skeleton-Pfad; Idle/Walk bleiben Basisanimationen. Der importierte `0_Targeting Pose`-Clip wird dafuer nicht verwendet, weil er im Playtest als T-/A-Pose sichtbar wurde.
 - Der Unit-Facing-Visualpfad wird als Contract dokumentiert, damit Friendly-, Enemy-, Plan- und Fire-Event-Pfade nicht wieder auseinanderlaufen.
 - Headless-Verifier fuer Map, Szene, Compass-Marker, Posture und Render-Snapshot.
 
@@ -67,7 +67,7 @@ Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie,
 - [x] Primary3DView rendert Fireteam-Orientation bei Bewegung aus aktueller Unit-Position und aktuellem Unit-Facing statt aus stale Anchor-Richtung.
 - [x] Unit-Proxy-Yaw nutzt eine model-forward-kalibrierte Grid-zu-3D-Formel; Skeleton-Forward, Facing/Sichtlinie und Weapon-/Shot-Linie stimmen auch bei echten Move-Commands ueberein.
 - [x] Aim-/Ready-Pose laesst den Waffenroot am Socket; Friendly- und Enemy-Tests pruefen, dass die Waffe nicht beim Loslaufen oder Feuern aus dem Handanker verschoben wird.
-- [x] Aim-Pose hebt die Waffenhand ueber die Brust, nutzt dazu den vorhandenen `0_Targeting Pose`-Clip und bleibt waehrend aimed Bewegung/Firing aktiv.
+- [x] Aim-Pose uebernimmt die Oberkoerper-/Arm-Rotationen aus `shoot.fbx`, haelt die Haende im Waffenanschlag statt in T-Pose und bleibt waehrend aimed Bewegung/Firing sowie Q/E-Kamerarotation aktiv.
 - [x] `docs/dev/unit_facing_visual_contract.md` dokumentiert den gemeinsamen Friendly-/Enemy-/Plan-/Fire-Event-Pfad.
 - [x] Fireteam-Orientation/Facing und Fire-Sector/Weapon-Linie laufen ueber die bestehenden Primary3DView-Snapshots.
 - [x] Die sichtbaren Debug-Visuals erzeugen keine SimulationRoot-Commands oder -Effects.

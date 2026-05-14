@@ -132,14 +132,17 @@ const FOW_BLACKOUT_COVER_Y_OFFSET: float = 0.42
 const FOW_KNOWN_DIM_COLOR: Color = Color(0.02, 0.05, 0.06, 0.28)
 const FOW_EXPLORED_DIM_COLOR: Color = Color(0.02, 0.04, 0.06, 0.62)
 const FOW_UNKNOWN_BLACK_COLOR: Color = Color(0.0, 0.0, 0.0, 1.0)
-const UNIT_AIM_POSE_WEAPON_PITCH_DEGREES: float = -30.0
+const UNIT_AIM_POSE_WEAPON_PITCH_DEGREES: float = 0.0
 const UNIT_READY_POSE_WEAPON_PITCH_DEGREES: float = -14.0
-const UNIT_AIM_POSE_ANIMATION_NAME: String = "targeting_pose"
-const UNIT_AIM_POSE_SOURCE_TOKEN: String = "targeting pose"
+const UNIT_AIM_POSE_ANIMATION_NAME: String = "shoot"
+const UNIT_COMBAT_POSE_SCOPE_IMPORTED_CLIP: String = "imported_clip"
+const UNIT_COMBAT_POSE_SCOPE_SHOOT_UPPER_BODY: String = "shoot_upper_body"
 const UNIT_AIM_POSE_UPPER_BODY_BONES: PackedStringArray = [
 	"Spine",
 	"Chest",
 	"UpperChest",
+	"LeftShoulder",
+	"RightShoulder",
 	"LeftArm",
 	"RightArm",
 	"LeftForeArm",
@@ -155,7 +158,33 @@ const UNIT_AIM_POSE_UPPER_BODY_BONES: PackedStringArray = [
 	"LeftHandIndex3",
 	"RightHandIndex3",
 ]
-const UNIT_LOCOMOTION_HEADING_ANIMATION_NAMES: PackedStringArray = ["walk"]
+const UNIT_SHOOT_UPPER_BODY_BONE_HINTS: PackedStringArray = [
+	"spine",
+	"chest",
+	"neck",
+	"head",
+	"shoulder",
+	"arm",
+	"forearm",
+	"hand",
+	"thumb",
+	"index",
+	"middle",
+	"ring",
+	"pinky",
+]
+const UNIT_LOCOMOTION_HEADING_ANIMATION_NAMES: PackedStringArray = [
+	"walk",
+	"run",
+	"crouchwalk",
+	"shoot",
+	"standshoot",
+	"walkshoot",
+	"runshoot",
+	"crouchshoot",
+	"crouchwalkshoot",
+	"crouchrunshoot",
+]
 const UNIT_LOCOMOTION_HEADING_CONTROL_BONES: PackedStringArray = ["HipsCtrl", "Hips"]
 const EDITOR_EMPTY_BACKGROUND_COLOR: Color = Color(0.12, 0.13, 0.12, 1.0)
 const EDITOR_LIGHT_ROTATION_DEGREES: Vector3 = Vector3(-58.0, -32.0, 0.0)
@@ -5761,7 +5790,7 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 				changed = true
 			proxy.rotation_degrees.y = next_rotation_y
 		proxy.set_meta("last_rotation_y", proxy.rotation_degrees.y)
-		if _update_unit_visual_animation(proxy, unit_is_moving, not active_fire_event.is_empty(), delta):
+		if _update_unit_visual_animation(proxy, unit_is_moving, not active_fire_event.is_empty(), delta, displayed_weapon_posture, displayed_movement_posture):
 			changed = true
 		if _update_unit_weapon_aim_pose(proxy, active_fire_event, displayed_weapon_posture, weapon_pose_direction):
 			changed = true
@@ -5914,6 +5943,12 @@ func _normalize_unit_movement_posture(value: String) -> String:
 			return "engage"
 		"overwatch", "hold", "watch":
 			return "overwatch"
+		"crouch", "crouched", "duck":
+			return "crouch"
+		"crouch_walk", "crouch-walk", "crouchwalk", "duck_walk", "duck-walk":
+			return "crouch_walk"
+		"crouch_run", "crouch-run", "crouchrun", "duck_run", "duck-run":
+			return "crouch_run"
 		_:
 			return "idle"
 
@@ -6206,6 +6241,10 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 func _setup_unit_visual_animation(proxy_root: Node3D, model_root: Node3D, model_instance: Node3D, unit_visual_entry: Dictionary) -> bool:
 	var animation_paths: Dictionary = _get_unit_animation_paths(unit_visual_entry)
 	proxy_root.set_meta("unit_animation_heading_sanitized_track_count", 0)
+	proxy_root.set_meta("unit_animation_raw_imported_count", 0)
+	proxy_root.set_meta("unit_animation_combat_case_imported_count", 0)
+	proxy_root.set_meta("unit_animation_combat_case_expected_count", 0)
+	proxy_root.set_meta("unit_animation_shoot_pose_track_override_count", 0)
 	if animation_paths.is_empty():
 		return true
 	var animation_player := AnimationPlayer.new()
@@ -6216,7 +6255,7 @@ func _setup_unit_visual_animation(proxy_root: Node3D, model_root: Node3D, model_
 	var imported_count: int = 0
 	var heading_sanitized_track_count: int = 0
 	for animation_name_variant in animation_paths.keys():
-		var animation_name: String = String(animation_name_variant).strip_edges().to_lower()
+		var animation_name: String = String(animation_name_variant).strip_edges()
 		var animation_path: String = String(animation_paths[animation_name_variant]).strip_edges()
 		if animation_name.is_empty() or animation_path.is_empty():
 			continue
@@ -6229,19 +6268,26 @@ func _setup_unit_visual_animation(proxy_root: Node3D, model_root: Node3D, model_
 			continue
 		duplicated.loop_mode = Animation.LOOP_LINEAR
 		heading_sanitized_track_count += _sanitize_unit_locomotion_heading_tracks(duplicated, animation_name)
+		duplicated.set_meta("unit_animation_catalog_name", animation_name)
 		animation_player.set_meta("source_animation_%s" % animation_name, String(duplicated.get_meta("source_animation_name", "")))
 		library.add_animation(animation_name, duplicated)
 		imported_count += 1
-	var targeting_animation: Animation = _load_unit_targeting_pose_animation(animation_paths)
-	if targeting_animation != null:
-		var targeting_duplicate := targeting_animation.duplicate(true) as Animation
-		if targeting_duplicate != null:
-			targeting_duplicate.loop_mode = Animation.LOOP_NONE
-			library.add_animation(UNIT_AIM_POSE_ANIMATION_NAME, targeting_duplicate)
-			proxy_root.set_meta("unit_weapon_upper_body_pose_animation_available", true)
+	var combat_case_result: Dictionary = _add_unit_visual_combat_animation_cases(library, unit_visual_entry)
+	var combat_case_expected_count: int = int(combat_case_result.get("expected_count", 0))
+	var combat_case_imported_count: int = int(combat_case_result.get("imported_count", 0))
+	var shoot_pose_track_override_count: int = int(combat_case_result.get("shoot_pose_track_override_count", 0))
+	heading_sanitized_track_count += int(combat_case_result.get("heading_sanitized_track_count", 0))
 	if imported_count > 0:
 		proxy_root.set_meta("unit_animation_heading_sanitized_track_count", heading_sanitized_track_count)
+		proxy_root.set_meta("unit_animation_raw_imported_count", imported_count)
+		proxy_root.set_meta("unit_animation_combat_case_imported_count", combat_case_imported_count)
+		proxy_root.set_meta("unit_animation_combat_case_expected_count", combat_case_expected_count)
+		proxy_root.set_meta("unit_animation_shoot_pose_track_override_count", shoot_pose_track_override_count)
 		animation_player.set_meta("unit_animation_heading_sanitized_track_count", heading_sanitized_track_count)
+		animation_player.set_meta("unit_animation_raw_imported_count", imported_count)
+		animation_player.set_meta("unit_animation_combat_case_imported_count", combat_case_imported_count)
+		animation_player.set_meta("unit_animation_combat_case_expected_count", combat_case_expected_count)
+		animation_player.set_meta("unit_animation_shoot_pose_track_override_count", shoot_pose_track_override_count)
 		animation_player.add_animation_library("", library)
 		model_root.add_child(animation_player)
 		animation_player.root_node = animation_player.get_path_to(model_instance)
@@ -6258,31 +6304,6 @@ func _setup_unit_visual_animation(proxy_root: Node3D, model_root: Node3D, model_
 	return true
 
 
-func _load_unit_targeting_pose_animation(animation_paths: Dictionary) -> Animation:
-	for animation_path_variant in animation_paths.values():
-		var animation_path: String = String(animation_path_variant).strip_edges()
-		if animation_path.is_empty():
-			continue
-		var animation: Animation = _load_targeting_pose_animation_from_scene(animation_path)
-		if animation != null:
-			return animation
-	return null
-
-
-func _load_targeting_pose_animation_from_scene(animation_scene_path: String) -> Animation:
-	if not ResourceLoader.exists(animation_scene_path):
-		return null
-	var animation_scene := _get_asset_model_scene_by_path(animation_scene_path)
-	if animation_scene == null:
-		return null
-	var animation_root := animation_scene.instantiate()
-	if animation_root == null:
-		return null
-	var animation: Animation = _find_targeting_pose_animation(animation_root)
-	animation_root.free()
-	return animation
-
-
 func _load_animation_from_scene(animation_scene_path: String, preferred_animation_name: String = "") -> Animation:
 	if not ResourceLoader.exists(animation_scene_path):
 		return null
@@ -6295,25 +6316,6 @@ func _load_animation_from_scene(animation_scene_path: String, preferred_animatio
 	var animation: Animation = _find_best_animation(animation_root, preferred_animation_name)
 	animation_root.free()
 	return animation
-
-
-func _find_targeting_pose_animation(node: Node) -> Animation:
-	var animation_player := node as AnimationPlayer
-	if animation_player != null:
-		for animation_name in animation_player.get_animation_list():
-			var name_text: String = String(animation_name)
-			var normalized_name: String = name_text.strip_edges().to_lower()
-			if normalized_name.find(UNIT_AIM_POSE_SOURCE_TOKEN) < 0:
-				continue
-			var animation := animation_player.get_animation(name_text)
-			if animation != null:
-				animation.set_meta("source_animation_name", name_text)
-				return animation
-	for child in node.get_children():
-		var child_animation: Animation = _find_targeting_pose_animation(child)
-		if child_animation != null:
-			return child_animation
-	return null
 
 
 func _find_best_animation(node: Node, preferred_animation_name: String = "") -> Animation:
@@ -6347,6 +6349,111 @@ func _find_best_animation(node: Node, preferred_animation_name: String = "") -> 
 	return null
 
 
+func _add_unit_visual_combat_animation_cases(library: AnimationLibrary, unit_visual_entry: Dictionary) -> Dictionary:
+	var result: Dictionary = {
+		"expected_count": 0,
+		"imported_count": 0,
+		"heading_sanitized_track_count": 0,
+		"shoot_pose_track_override_count": 0,
+	}
+	if library == null:
+		return result
+	var combat_cases: Dictionary = _get_unit_animation_combat_cases(unit_visual_entry)
+	if combat_cases.is_empty():
+		return result
+	result["expected_count"] = combat_cases.size()
+	for case_name_variant in combat_cases.keys():
+		var case_name: String = String(case_name_variant).strip_edges()
+		var case_entry: Dictionary = Dictionary(combat_cases.get(case_name_variant, {}))
+		var base_animation_name: String = String(case_entry.get("base_animation", "")).strip_edges()
+		if case_name.is_empty() or base_animation_name.is_empty():
+			continue
+		if not library.has_animation(base_animation_name):
+			continue
+		var base_animation: Animation = library.get_animation(base_animation_name)
+		if base_animation == null:
+			continue
+		var duplicated := base_animation.duplicate(true) as Animation
+		if duplicated == null:
+			continue
+		duplicated.loop_mode = Animation.LOOP_LINEAR
+		var upper_body_pose_name: String = String(case_entry.get("upper_body_pose_animation", "")).strip_edges()
+		var pose_scope: String = String(case_entry.get("pose_track_scope", "")).strip_edges().to_lower()
+		var override_count: int = 0
+		if not upper_body_pose_name.is_empty() and library.has_animation(upper_body_pose_name):
+			var pose_animation: Animation = library.get_animation(upper_body_pose_name)
+			override_count = _override_unit_animation_pose_tracks(duplicated, pose_animation, pose_scope, upper_body_pose_name)
+		result["shoot_pose_track_override_count"] = int(result.get("shoot_pose_track_override_count", 0)) + override_count
+		result["heading_sanitized_track_count"] = int(result.get("heading_sanitized_track_count", 0)) + _sanitize_unit_locomotion_heading_tracks(duplicated, case_name)
+		duplicated.set_meta("unit_animation_catalog_name", case_name)
+		duplicated.set_meta("unit_animation_base_name", base_animation_name)
+		duplicated.set_meta("unit_animation_pose_source", upper_body_pose_name)
+		duplicated.set_meta("unit_animation_pose_scope", pose_scope if not pose_scope.is_empty() else UNIT_COMBAT_POSE_SCOPE_IMPORTED_CLIP)
+		duplicated.set_meta("unit_animation_pose_track_override_count", override_count)
+		library.add_animation(case_name, duplicated)
+		result["imported_count"] = int(result.get("imported_count", 0)) + 1
+	return result
+
+
+func _override_unit_animation_pose_tracks(base_animation: Animation, pose_animation: Animation, pose_track_scope: String, pose_source_name: String) -> int:
+	if base_animation == null or pose_animation == null:
+		return 0
+	var normalized_scope: String = pose_track_scope.strip_edges().to_lower()
+	if normalized_scope.is_empty() or normalized_scope == UNIT_COMBAT_POSE_SCOPE_IMPORTED_CLIP:
+		return 0
+	var target_length: float = maxf(base_animation.length, 0.001)
+	var source_length: float = maxf(pose_animation.length, 0.001)
+	for track_index in range(base_animation.get_track_count() - 1, -1, -1):
+		if base_animation.track_get_type(track_index) != Animation.TYPE_ROTATION_3D:
+			continue
+		var base_bone_name: String = _get_bone_name_from_animation_track_path(String(base_animation.track_get_path(track_index)))
+		if not _matches_unit_animation_pose_scope(base_bone_name, normalized_scope):
+			continue
+		base_animation.remove_track(track_index)
+	var override_count: int = 0
+	for track_index in range(pose_animation.get_track_count()):
+		if pose_animation.track_get_type(track_index) != Animation.TYPE_ROTATION_3D:
+			continue
+		var pose_track_path: String = String(pose_animation.track_get_path(track_index))
+		var pose_bone_name: String = _get_bone_name_from_animation_track_path(pose_track_path)
+		if not _matches_unit_animation_pose_scope(pose_bone_name, normalized_scope):
+			continue
+		if pose_animation.track_get_key_count(track_index) <= 0:
+			continue
+		var new_track_index: int = base_animation.add_track(Animation.TYPE_ROTATION_3D)
+		base_animation.track_set_path(new_track_index, NodePath(pose_track_path))
+		base_animation.track_set_interpolation_type(new_track_index, pose_animation.track_get_interpolation_type(track_index))
+		for key_index in range(pose_animation.track_get_key_count(track_index)):
+			var key_time: float = pose_animation.track_get_key_time(track_index, key_index)
+			var key_value: Variant = pose_animation.track_get_key_value(track_index, key_index)
+			if typeof(key_value) != TYPE_QUATERNION:
+				continue
+			var mapped_key_time: float = clampf(key_time / source_length * target_length, 0.0, target_length)
+			base_animation.track_insert_key(new_track_index, mapped_key_time, Quaternion(key_value))
+		override_count += 1
+	base_animation.set_meta("unit_animation_pose_track_override_count", override_count)
+	base_animation.set_meta("unit_animation_pose_scope", normalized_scope)
+	base_animation.set_meta("unit_animation_pose_source", pose_source_name)
+	return override_count
+
+
+func _matches_unit_animation_pose_scope(bone_name: String, pose_track_scope: String) -> bool:
+	var normalized_scope: String = pose_track_scope.strip_edges().to_lower()
+	if normalized_scope == UNIT_COMBAT_POSE_SCOPE_SHOOT_UPPER_BODY:
+		return _bone_name_matches_any_hint(bone_name, UNIT_SHOOT_UPPER_BODY_BONE_HINTS)
+	return false
+
+
+func _bone_name_matches_any_hint(bone_name: String, hints: PackedStringArray) -> bool:
+	var normalized_name: String = bone_name.strip_edges().to_lower()
+	if normalized_name.is_empty():
+		return false
+	for hint in hints:
+		if normalized_name.find(String(hint)) >= 0:
+			return true
+	return false
+
+
 func _sanitize_unit_locomotion_heading_tracks(animation: Animation, animation_name: String) -> int:
 	if animation == null:
 		return 0
@@ -6374,24 +6481,64 @@ func _is_unit_locomotion_heading_control_track(track_path: String) -> bool:
 	return false
 
 
-func _update_unit_visual_animation(proxy: Node3D, is_moving: bool, is_firing: bool = false, delta: float = -1.0) -> bool:
+func _update_unit_visual_animation(proxy: Node3D, is_moving: bool, is_firing: bool = false, delta: float = -1.0, weapon_posture: String = "", movement_posture: String = "") -> bool:
 	var animation_player: AnimationPlayer = _find_unit_visual_animation_player(proxy)
 	if animation_player == null:
 		return false
-	var desired_animation: String = "walk" if is_moving else "idle"
-	if is_firing:
-		for candidate in ["shoot", "attack", "fire", "idle"]:
-			if animation_player.has_animation(candidate):
-				desired_animation = candidate
-				break
+	var normalized_weapon_posture: String = _normalize_unit_weapon_posture(weapon_posture)
+	var normalized_movement_posture: String = _normalize_unit_movement_posture(movement_posture)
+	var desired_animation: String = _resolve_unit_visual_animation_name(animation_player, is_moving, is_firing, normalized_weapon_posture, normalized_movement_posture)
 	if not animation_player.has_animation(desired_animation):
+		proxy.set_meta("unit_visual_animation_name", "")
 		return false
 	var changed: bool = false
 	if animation_player.current_animation != desired_animation or not animation_player.is_playing():
 		animation_player.play(desired_animation)
 		changed = true
+	if String(proxy.get_meta("unit_visual_animation_name", "")) != desired_animation:
+		proxy.set_meta("unit_visual_animation_name", desired_animation)
+		changed = true
 	animation_player.advance(maxf(delta, 0.0))
 	return changed
+
+
+func _resolve_unit_visual_animation_name(animation_player: AnimationPlayer, is_moving: bool, is_firing: bool, weapon_posture: String, movement_posture: String) -> String:
+	if animation_player == null:
+		return ""
+	var normalized_weapon_posture: String = _normalize_unit_weapon_posture(weapon_posture)
+	var normalized_movement_posture: String = _normalize_unit_movement_posture(movement_posture)
+	var should_hold_aim: bool = is_firing or normalized_weapon_posture == "aimed"
+	var candidates: PackedStringArray = []
+	if normalized_movement_posture == "crouch":
+		candidates = ["crouchShoot", "crouchIdle", "crouch", "shoot", "idle"] if should_hold_aim else ["crouchIdle", "crouch", "idle"]
+	elif normalized_movement_posture == "crouch_walk":
+		if should_hold_aim:
+			candidates = ["crouchWalkShoot", "crouchShoot", "crouchWalk", "walkShoot", "walk"]
+		else:
+			candidates = ["crouchWalk", "crouchIdle", "walk", "idle"] if is_moving else ["crouchIdle", "crouch", "idle"]
+	elif normalized_movement_posture == "crouch_run":
+		if should_hold_aim:
+			candidates = ["crouchRunShoot", "crouchWalkShoot", "crouchShoot", "runShoot", "crouchWalk", "run"]
+		else:
+			candidates = ["crouchWalk", "run", "walk", "idle"] if is_moving else ["crouchIdle", "crouch", "idle"]
+	elif should_hold_aim:
+		if is_moving and normalized_movement_posture == "travel":
+			candidates = ["runShoot", "walkShoot", "shoot", "run", "walk"]
+		elif is_moving:
+			candidates = ["walkShoot", "runShoot", "shoot", "walk", "run"]
+		else:
+			candidates = ["standShoot", "shoot", "idle"]
+	elif is_moving and normalized_movement_posture == "travel":
+		candidates = ["run", "walk", "idle"]
+	elif is_moving:
+		candidates = ["walk", "run", "idle"]
+	else:
+		candidates = ["idle", "walk"]
+	for candidate in candidates:
+		if animation_player.has_animation(candidate):
+			return candidate
+	var animation_list: PackedStringArray = animation_player.get_animation_list()
+	return String(animation_list[0]) if animation_list.size() > 0 else ""
 
 
 func _update_unit_weapon_aim_pose(proxy: Node3D, active_fire_event: Dictionary, weapon_posture: String = "lowered", aim_direction: Vector2 = Vector2.ZERO) -> bool:
@@ -6458,7 +6605,7 @@ func _update_unit_weapon_upper_body_pose(proxy: Node3D, weapon_posture: String) 
 	var should_apply_pose: bool = normalized_weapon_posture == "aimed"
 	var skeleton: Skeleton3D = _find_first_skeleton(proxy)
 	var animation_player: AnimationPlayer = _find_unit_visual_animation_player(proxy)
-	var pose_animation: Animation = animation_player.get_animation(UNIT_AIM_POSE_ANIMATION_NAME) if animation_player != null and animation_player.has_animation(UNIT_AIM_POSE_ANIMATION_NAME) else null
+	var pose_animation: Animation = _get_unit_weapon_upper_body_pose_animation(animation_player)
 	var changed: bool = false
 	if skeleton == null or animation_player == null or pose_animation == null:
 		changed = _reset_unit_weapon_upper_body_pose(proxy, skeleton) or changed
@@ -6470,13 +6617,25 @@ func _update_unit_weapon_upper_body_pose(proxy: Node3D, weapon_posture: String) 
 	if not should_apply_pose:
 		changed = _reset_unit_weapon_upper_body_pose(proxy, skeleton) or changed
 		changed = _set_proxy_int_meta(proxy, "unit_weapon_upper_body_pose_bone_count", 0) or changed
-		changed = _set_proxy_string_meta(proxy, "unit_weapon_upper_body_pose_source_animation", String(pose_animation.get_meta("source_animation_name", UNIT_AIM_POSE_ANIMATION_NAME))) or changed
+		changed = _set_proxy_string_meta(proxy, "unit_weapon_upper_body_pose_source_animation", _get_unit_weapon_upper_body_pose_source_name(pose_animation)) or changed
 		return changed
 	var applied_count: int = _apply_unit_weapon_upper_body_pose_from_animation(skeleton, pose_animation)
 	changed = _set_proxy_bool_meta(proxy, "unit_weapon_upper_body_pose_active", applied_count > 0) or changed
 	changed = _set_proxy_int_meta(proxy, "unit_weapon_upper_body_pose_bone_count", applied_count) or changed
-	changed = _set_proxy_string_meta(proxy, "unit_weapon_upper_body_pose_source_animation", String(pose_animation.get_meta("source_animation_name", UNIT_AIM_POSE_ANIMATION_NAME))) or changed
+	changed = _set_proxy_string_meta(proxy, "unit_weapon_upper_body_pose_source_animation", _get_unit_weapon_upper_body_pose_source_name(pose_animation)) or changed
 	return changed
+
+
+func _get_unit_weapon_upper_body_pose_animation(animation_player: AnimationPlayer) -> Animation:
+	if animation_player == null or not animation_player.has_animation(UNIT_AIM_POSE_ANIMATION_NAME):
+		return null
+	return animation_player.get_animation(UNIT_AIM_POSE_ANIMATION_NAME)
+
+
+func _get_unit_weapon_upper_body_pose_source_name(pose_animation: Animation) -> String:
+	if pose_animation == null:
+		return ""
+	return String(pose_animation.get_meta("unit_animation_catalog_name", UNIT_AIM_POSE_ANIMATION_NAME)).strip_edges()
 
 
 func _apply_unit_weapon_upper_body_pose_from_animation(skeleton: Skeleton3D, pose_animation: Animation) -> int:
@@ -6932,6 +7091,11 @@ func _get_unit_proxy_state_by_id() -> Dictionary:
 			"unit_visual_archetype_id": String(proxy.get_meta("unit_visual_archetype_id", "")).strip_edges(),
 			"unit_visual_faction_id": String(proxy.get_meta("unit_visual_faction_id", "")).strip_edges(),
 			"unit_model_root_rotation_y_degrees": float(proxy.get_meta("unit_model_root_rotation_y_degrees", 0.0)),
+			"unit_visual_animation_name": String(proxy.get_meta("unit_visual_animation_name", "")).strip_edges(),
+			"unit_animation_raw_imported_count": int(proxy.get_meta("unit_animation_raw_imported_count", 0)),
+			"unit_animation_combat_case_imported_count": int(proxy.get_meta("unit_animation_combat_case_imported_count", 0)),
+			"unit_animation_combat_case_expected_count": int(proxy.get_meta("unit_animation_combat_case_expected_count", 0)),
+			"unit_animation_shoot_pose_track_override_count": int(proxy.get_meta("unit_animation_shoot_pose_track_override_count", 0)),
 			"unit_animation_heading_sanitized_track_count": int(proxy.get_meta("unit_animation_heading_sanitized_track_count", 0)),
 			"unit_weapon_anchor_distance_3d": _get_unit_weapon_anchor_distance_3d(proxy),
 			"unit_aim_pose_active": bool(proxy.get_meta("unit_aim_pose_active", false)),
@@ -8289,12 +8453,48 @@ func _get_unit_model_root_rotation_y(unit_visual_entry: Dictionary) -> float:
 
 
 func _get_unit_animation_paths(unit_visual_entry: Dictionary) -> Dictionary:
-	if unit_visual_entry.has("animation_paths"):
-		return Dictionary(unit_visual_entry.get("animation_paths", {}))
+	var result: Dictionary = {}
+	var mapping: Dictionary = _get_npc_unit_visual_mapping()
+	_merge_unit_animation_path_entries(result, Dictionary(mapping.get("animation_paths", {})))
+	_merge_unit_animation_path_entries(result, Dictionary(mapping.get("animation_showcase_paths", {})))
 	var defaults: Dictionary = Dictionary(_get_npc_unit_visual_mapping().get("defaults", {}))
 	if defaults.has("animation_paths"):
-		return Dictionary(defaults.get("animation_paths", {}))
-	return Dictionary(_get_npc_unit_visual_mapping().get("animation_paths", {}))
+		_merge_unit_animation_path_entries(result, Dictionary(defaults.get("animation_paths", {})))
+	if unit_visual_entry.has("animation_paths"):
+		_merge_unit_animation_path_entries(result, Dictionary(unit_visual_entry.get("animation_paths", {})))
+	return result
+
+
+func _merge_unit_animation_path_entries(target: Dictionary, source: Dictionary) -> void:
+	for key_variant in source.keys():
+		var animation_name: String = String(key_variant).strip_edges()
+		var animation_path: String = String(source.get(key_variant, "")).strip_edges()
+		if animation_name.is_empty() or animation_path.is_empty():
+			continue
+		target[animation_name] = animation_path
+
+
+func _get_unit_animation_combat_cases(unit_visual_entry: Dictionary) -> Dictionary:
+	var result: Dictionary = {}
+	var mapping: Dictionary = _get_npc_unit_visual_mapping()
+	_merge_unit_animation_combat_case_entries(result, Dictionary(mapping.get("animation_combat_cases", {})))
+	var defaults: Dictionary = Dictionary(mapping.get("defaults", {}))
+	if defaults.has("animation_combat_cases"):
+		_merge_unit_animation_combat_case_entries(result, Dictionary(defaults.get("animation_combat_cases", {})))
+	if unit_visual_entry.has("animation_combat_cases"):
+		_merge_unit_animation_combat_case_entries(result, Dictionary(unit_visual_entry.get("animation_combat_cases", {})))
+	return result
+
+
+func _merge_unit_animation_combat_case_entries(target: Dictionary, source: Dictionary) -> void:
+	for key_variant in source.keys():
+		var case_name: String = String(key_variant).strip_edges()
+		if case_name.is_empty():
+			continue
+		var case_entry: Dictionary = Dictionary(source.get(key_variant, {}))
+		if case_entry.is_empty():
+			continue
+		target[case_name] = case_entry
 
 
 func _get_unit_helmet_path(unit_visual_entry: Dictionary) -> String:

@@ -14,6 +14,9 @@ const MOVEMENT_POSTURE_TRAVEL: String = "travel"
 const MOVEMENT_POSTURE_TACTICAL: String = "tactical"
 const MOVEMENT_POSTURE_ENGAGE: String = "engage"
 const MOVEMENT_POSTURE_OVERWATCH: String = "overwatch"
+const MOVEMENT_POSTURE_CROUCH: String = "crouch"
+const MOVEMENT_POSTURE_CROUCH_WALK: String = "crouch_walk"
+const MOVEMENT_POSTURE_CROUCH_RUN: String = "crouch_run"
 const WEAPON_POSTURE_LOWERED: String = "lowered"
 const WEAPON_POSTURE_READY: String = "ready"
 const WEAPON_POSTURE_AIMED: String = "aimed"
@@ -35,6 +38,9 @@ const ALLOWED_MOVEMENT_POSTURES: PackedStringArray = [
 	MOVEMENT_POSTURE_TACTICAL,
 	MOVEMENT_POSTURE_ENGAGE,
 	MOVEMENT_POSTURE_OVERWATCH,
+	MOVEMENT_POSTURE_CROUCH,
+	MOVEMENT_POSTURE_CROUCH_WALK,
+	MOVEMENT_POSTURE_CROUCH_RUN,
 ]
 const ALLOWED_WEAPON_POSTURES: PackedStringArray = [
 	WEAPON_POSTURE_LOWERED,
@@ -203,6 +209,12 @@ static func normalize_movement_posture(value: Variant, fallback: String = MOVEME
 			return MOVEMENT_POSTURE_ENGAGE
 		"watch", "hold", "overwatch":
 			return MOVEMENT_POSTURE_OVERWATCH
+		"crouch", "crouched", "duck":
+			return MOVEMENT_POSTURE_CROUCH
+		"crouch_walk", "crouch-walk", "crouchwalk", "duck_walk", "duck-walk":
+			return MOVEMENT_POSTURE_CROUCH_WALK
+		"crouch_run", "crouch-run", "crouchrun", "duck_run", "duck-run":
+			return MOVEMENT_POSTURE_CROUCH_RUN
 		_:
 			return fallback if ALLOWED_MOVEMENT_POSTURES.has(fallback) else MOVEMENT_POSTURE_IDLE
 

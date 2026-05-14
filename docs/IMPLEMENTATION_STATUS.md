@@ -10,6 +10,41 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_403 - Runtime-NPC-Animationen und Kampf-Cases
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_403_runtime_animation_combat_cases.md`, `docs/dev/unit_facing_visual_contract.md`, `data/npc_unit_visual_mapping.json`
+- Stand: `TerrainMap3DView` laedt fuer Runtime-Unit-Proxies die importierten Animated-Characters-Rohclips aus dem Visual-Mapping und baut die sechs `animation_combat_cases` in denselben `UnitVisualAnimationPlayer`.
+- Stand: `walkShoot`, `runShoot`, `crouchShoot`, `crouchWalkShoot` und `crouchRunShoot` uebernehmen weiterhin importierte `shoot.fbx`-Oberkoerper-/Arm-Rotationstracks auf importierte Basisclips. `aimed` ist damit eine gehaltene Anschlag-/Shoot-Pose ohne automatisch erzeugtes Fire-Event.
+- Stand: `UnitCommand` und `UnitRuntimeStatus` akzeptieren jetzt `crouch`, `crouch_walk` und `crouch_run`, damit spaetere Taktiken diese Clips autoritativ ueber Runtime-Postures anfordern koennen.
+- Stand: `TerrainMap3DView` waehlt aus `movement_posture`, `weapon_posture` und Movement-State die passende Animation: stationary aim nutzt `standShoot`, engage aim beim Gehen `walkShoot`, travel aim `runShoot`, Crouch-Varianten die entsprechenden Crouch-Shoot-Cases.
+- Risiken: `crouchRunShoot` bleibt bewusst `crouchWalk` plus `shoot`-Oberkoerper, weil das Asset-Bundle keinen dedizierten Crouch-Run-Clip liefert. Wann Taktiken Walk/Run/Crouch nutzen, bleibt ein eigener Gameplay-Task.
+- Lokale Pruefung: `task_403_runtime_animation_combat_cases.gd`, `task_401_facing_sightline_debug_map.gd`, `task_402_npc_animation_showcase_map.gd`, `task_345_npc_standard_movement_posture_policy.gd`, `task_344_ground_mission_default_enemy_visuals.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Wegfindung, Taktik und Fireteam-Verhalten koennen jetzt Postures statt Visual-Sonderlogik setzen.
+
+### TASK_404 - Fireteam Movement Posture Bridge
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_404_fireteam_movement_posture_bridge.md`, `docs/dev/commander_fireteam_delegation_contract.md`, `docs/dev/unit_facing_visual_contract.md`, `docs/tasks/TASK_110_fireteammovementcontroller_und_bewegungsmuster.md`
+- Stand: `FireteamMovementController` setzt auf seinen bestehenden `UnitCommand`s jetzt explizite Runtime-Postures. Die Autoritaet bleibt beim Command-/SimulationRoot-Pfad; UI und Visuals erzeugen keine Unit-Wahrheit.
+- Stand: Rush-Move wird als `travel/lowered` ausgegeben und kann im Runtime-Visualpfad als schneller Lauf gelesen werden. Bounding-Mover werden als `engage/aimed`, Bounding-Deckung als `overwatch/aimed` ausgegeben.
+- Stand: Caterpillar-Mover nutzen `crouch_walk/aimed`, damit das vorsichtige Einzelvorruecken sichtbar von normalem Walk/Run getrennt ist; Deckungsmitglieder bleiben `overwatch/aimed`.
+- Stand: Der Live-GO-Snapback-Guard im `FireteamMovementController` verhindert Rueckwaerts-Reissue-Ziele innerhalb eines aktiven Bounds, ohne Ziele hinter den finalen Anchor zu verschieben. Der TASK_110-Verifier misst diesen Fortschritt jetzt entlang der geplanten Fireteam-Route statt per Luftlinie, damit Terrain-Umwege nicht als Snapback gewertet werden.
+- Risiken: Die genaue Gameplay-Balance fuer Crouch/Walk/Run bleibt spaeteren Taktikregeln ueberlassen. Dieser Task verbindet nur bestehende Fireteam-Muster mit den neuen Runtime-Animationen.
+- Lokale Pruefung: `task_404_fireteam_movement_posture_bridge.gd`, `task_110_verifier.gd`, `task_403_runtime_animation_combat_cases.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Fireteam-Wegfindung und Taktik koennen jetzt auf sichtbare Posture-Zustaende aufsetzen.
+
+### TASK_402 - NPC Animation Showcase Map
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_402_npc_animation_showcase_map.md`, `docs/dev/unit_facing_visual_contract.md`, `data/npc_unit_visual_mapping.json`
+- Stand: `scenes/tests/npc_animation_showcase_map.tscn` ist ein beschrifteter Visual-Pruefstand fuer alle 17 importierten Animated-Characters-Clips.
+- Stand: `scripts/tests/npc_animation_showcase_map.gd` baut je Animation einen CharacterMedium-NPC, legt die Astro-Skin auf, laedt den jeweiligen FBX-Clip in einen lokalen `ShowcaseAnimationPlayer` und spielt ihn geloopt ab.
+- Stand: `data/npc_unit_visual_mapping.json` listet die 17 importierten Rohclips unter `animation_showcase_paths`; seit TASK_403 laedt der Runtime-Visualpfad diese Clips ebenfalls fuer Unit-Proxies, damit Showcase und Spiel dieselbe Asset-Basis verwenden.
+- Stand: `animation_combat_cases` verankert die sichtbaren Kampf-Kombinationen `standShoot`, `walkShoot`, `runShoot`, `crouchShoot`, `crouchWalkShoot` und `crouchRunShoot`. Diese Cases verwenden importierte Basisclips und, wo noetig, fallweise importierte `shoot`-Posespuren statt handgebauter Zielposen.
+- Stand: `walkShoot`, `runShoot` und die Crouch-Shoot-Cases uebernehmen den importierten `shoot`-Oberkoerper auf ihre jeweiligen Basisbewegungen. Der rechte-Waffenarm-only-Mix fuer Crouch wurde verworfen, weil der Arm im Sichtcheck nach hinten kippte.
+- Stand: Der Showcase zeigt damit 23 beschriftete Prueffaelle: 17 Rohclips plus sechs Combat-Cases. `crouchRunShoot` ist bewusst als `crouchWalk` plus `shoot`-Oberkoerper dokumentiert, weil das Asset-Bundle keinen eigenen `crouchRun`-Clip liefert.
+- Risiken: Die Szene ist ein Visual-/Asset-Pruefstand und erzeugt keine Gameplay-Kommandos. Welche Clips spaeter echte Runtime-Postures, Gesten oder Kampfhandlungen treiben, bleibt ein separater Design-/Runtime-Schnitt.
+- Lokale Pruefung: `task_402_npc_animation_showcase_map.gd` laeuft gruen.
+- Naechster Schritt: Manueller Sichtcheck in Godot: `res://scenes/tests/npc_animation_showcase_map.tscn` oeffnen und die 23 Labels/Clips optisch bewerten.
+
 ### TASK_401 - Facing Sightline Debug Map
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_401_facing_sightline_debug_map.md`, `docs/dev/unit_facing_visual_contract.md`, `docs/tasks/TASK_364_mission_fireteam_orientation_indicators.md`, `docs/tasks/TASK_371_fire_sector_security_arc_overlay_toggle.md`, `docs/tasks/TASK_372_mission_los_debug_overlay_toggle.md`
@@ -23,7 +58,7 @@
 - Stand: Proxy- und Weapon-Pose priorisieren explizites Facing sowie Runtime-Movement-/Target-Facing vor Fire-Event-/Target-Fallbacks. Dadurch bleibt die Standrichtung nach Movement wieder an der autoritativen Unit-Facing-Metadatenquelle.
 - Stand: Die Runtime-Animationseinbindung entfernt beim `walk`-Clip die importierten `HipsCtrl`- und `Hips`-Heading-Rotationsspuren. Damit bleibt Proxy-/Model-Root-Facing der einzige Richtungsanker fuer laufende NPCs; Waffen-/Socket-Follow bleibt im bestehenden Visualpfad.
 - Stand: Unit-Proxies nutzen eine eigene model-forward-kalibrierte Grid-zu-3D-Yaw-Uebersetzung statt der allgemeinen World-Yaw-Formel. Damit stimmen Skeleton-Forward, Facing/Sichtlinie und Weapon-/Shot-Linie auch fuer Ost/West und Iso-Diagonalen waehrend echter Move-Commands ueberein.
-- Stand: Aim-/Ready-Posture verschiebt den Waffenroot nicht mehr aus dem Socket. Die Anschlag-/Ready-Darstellung bleibt im vorhandenen Rotations-/Child-Yaw-Pfad, damit SMG, Medic-Tool und Enemy-Waffen beim Loslaufen und Feuern am Handanker bleiben. Fuer `weapon_posture = aimed` legt `TerrainMap3DView` zusaetzlich den vorhandenen importierten `0_Targeting Pose`-Clip auf Oberkoerper-/Arm-Bones, sodass die Waffenhand sichtbar ueber die Brust kommt, waehrend Idle/Walk Basisanimationen bleiben.
+- Stand: Aim-/Ready-Posture verschiebt den Waffenroot nicht mehr aus dem Socket. Die Anschlag-/Ready-Darstellung bleibt im vorhandenen Rotations-/Child-Yaw-Pfad, damit SMG, Medic-Tool und Enemy-Waffen beim Loslaufen und Feuern am Handanker bleiben. Fuer `weapon_posture = aimed` uebernimmt `TerrainMap3DView` die Oberkoerper-/Arm-Bone-Rotationen aus der importierten `shoot.fbx`; Idle/Walk bleiben Basisanimationen.
 - Stand: Die 3D-Fireteam-Orientation bleibt im bestehenden Anchor-Payload-Pfad, liest bei gueltigem Anchor aber aktuelle Unit-Position und aktuelles Unit-Facing live aus `_unit_nodes`; der Dynamic-Refresh-Signature-Pfad beobachtet diese Live-Daten auch fuer nicht selektierte Fireteams.
 - Stand: `data/npc_unit_visual_mapping.json` korrigiert die importierte Character-Forward-Achse auf `rotation_degrees_y = 270.0`, damit das Modell selbst mit der vorhandenen Proxy-/Facing-Rotation uebereinstimmt.
 - Stand: `docs/dev/unit_facing_visual_contract.md` dokumentiert den verbindlichen Friendly-/Enemy-/Plan-/Fire-Event-Pfad: Runtime-Facing bleibt Unit-Wahrheit, Primary3DView liest live, Unit-Yaw ist model-forward-kalibriert und Waffenroots bleiben am Socket.
@@ -49,9 +84,9 @@
 - Stand: `Ground_Mission01_32x32.json` ist die Standardkarte fuer den Meta-/Einzelspieler-Flow. Die Homebase-/FOB-Kontexte zeigen die Ground-Map, und die Standardmission uebergibt `ground_mission01_default` als Szenario an `MissionTestSetup`.
 - Stand: Das neue Szenario definiert zwei feindliche Fireteams zu je vier NPCs. `red_patrol_team` nutzt `patrol_probe` plus `ground_patrol_route`; `red_objective_defense` haelt den Objective-Bereich mit `defensive_cover`/`cover_arc`.
 - Stand: `MissionTestSetup` erweitert bei Szenarien mit mehr Enemy-IDs die vorhandenen Enemy-Templates zur Laufzeit und uebergibt die erzeugten Paths an den CombatLoop, ohne alte direkte Testszenen ohne Szenario pauschal umzubauen.
-- Stand: Fire-Events speichern das Angreifer-Facing. `TerrainMap3DView` nutzt aktive Fire-Events fuer Proxy-Drehung, wenn keine explizite Facing-/Movement-Richtung vorliegt, setzt eine kurze Blaster-Aim-Pose und nutzt weiter das kuratierte Kenney-Muzzle-Subset fuer Muzzle-Flash. Enemy-Security-Facing fliesst ebenfalls in die 2.5D-Ausrichtung ein.
+- Stand: Fire-Events speichern das Angreifer-Facing. `TerrainMap3DView` nutzt aktive Fire-Events fuer Proxy-Drehung, wenn keine explizite Facing-/Movement-Richtung vorliegt, uebernimmt fuer Aimed die Oberkoerper-/Arm-Rotationen aus `shoot.fbx` und nutzt weiter das kuratierte Kenney-Muzzle-Subset fuer Muzzle-Flash. Enemy-Security-Facing fliesst ebenfalls in die 2.5D-Ausrichtung ein.
 - Stand: Fog-of-War-Dim-Layer ist dunkler (`known` 0.28 Alpha, `explored` 0.62 Alpha). Neue Portrait-PNGs unter `Assets/Char` werden ueber Godot-Imports und Portrait-Inventar mitgezaehlt.
-- Risiken: Die Aim-Pose ist ein V1-Render-Pose-Offset am sichtbaren Blaster, kein vollstaendiger Schiessanimationsclip fuer Arme/Schulter. Finale optische Balance der Ground-Spawnpunkte und Fireteam-Verteilung bleibt ein manueller Playtest-Punkt.
+- Risiken: Finale optische Balance der Ground-Spawnpunkte, Fireteam-Verteilung und Waffenlesbarkeit bleibt ein manueller Playtest-Punkt.
 - Lokale Pruefung: `godot_console.exe --headless --path . --import`, `task_344_ground_mission_default_enemy_visuals.gd`, `task_233_portrait_identity_catalog_and_roster_presentation.gd`, `task_205_weapon_fire_vfx_muzzle_flash_particles.gd`, `task_201_weapon_range_scale_and_tile_distance_patch.gd`, `task_186_mission_map_unit_presence_registry_audit.gd`, `task_202_enemy_security_direction_and_los_patch.gd` und `git diff --check` laufen gruen.
 
 ### TASK_345 - NPC Standard Movement Posture Policy

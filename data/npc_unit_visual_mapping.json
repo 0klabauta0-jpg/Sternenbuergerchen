@@ -16,7 +16,8 @@
 		"blaster_path": "res://Assets/used/npc/blaster_kit/models/blaster-a.glb",
 		"animation_paths": {
 			"idle": "res://Assets/used/npc/animated_characters/animations/idle.fbx",
-			"walk": "res://Assets/used/npc/animated_characters/animations/walk.fbx"
+			"walk": "res://Assets/used/npc/animated_characters/animations/walk.fbx",
+			"shoot": "res://Assets/used/npc/animated_characters/animations/shoot.fbx"
 		},
 		"helmet_attachment": {
 			"socket_name": "HeadSocket",
@@ -263,12 +264,84 @@
 	},
 	"animation_paths": {
 		"idle": "res://Assets/used/npc/animated_characters/animations/idle.fbx",
-		"walk": "res://Assets/used/npc/animated_characters/animations/walk.fbx"
+		"walk": "res://Assets/used/npc/animated_characters/animations/walk.fbx",
+		"shoot": "res://Assets/used/npc/animated_characters/animations/shoot.fbx"
 	},
 	"animation_probe_paths": [
 		"res://Assets/used/npc/animated_characters/animations/idle.fbx",
-		"res://Assets/used/npc/animated_characters/animations/walk.fbx"
+		"res://Assets/used/npc/animated_characters/animations/walk.fbx",
+		"res://Assets/used/npc/animated_characters/animations/shoot.fbx"
 	],
+	"animation_showcase_paths": {
+		"attack": "res://Assets/used/npc/animated_characters/animations/attack.fbx",
+		"crouch": "res://Assets/used/npc/animated_characters/animations/crouch.fbx",
+		"crouchIdle": "res://Assets/used/npc/animated_characters/animations/crouchIdle.fbx",
+		"crouchWalk": "res://Assets/used/npc/animated_characters/animations/crouchWalk.fbx",
+		"death": "res://Assets/used/npc/animated_characters/animations/death.fbx",
+		"idle": "res://Assets/used/npc/animated_characters/animations/idle.fbx",
+		"interactGround": "res://Assets/used/npc/animated_characters/animations/interactGround.fbx",
+		"interactStanding": "res://Assets/used/npc/animated_characters/animations/interactStanding.fbx",
+		"jump": "res://Assets/used/npc/animated_characters/animations/jump.fbx",
+		"kick": "res://Assets/used/npc/animated_characters/animations/kick.fbx",
+		"punch": "res://Assets/used/npc/animated_characters/animations/punch.fbx",
+		"racingIdle": "res://Assets/used/npc/animated_characters/animations/racingIdle.fbx",
+		"racingLeft": "res://Assets/used/npc/animated_characters/animations/racingLeft.fbx",
+		"racingRight": "res://Assets/used/npc/animated_characters/animations/racingRight.fbx",
+		"run": "res://Assets/used/npc/animated_characters/animations/run.fbx",
+		"shoot": "res://Assets/used/npc/animated_characters/animations/shoot.fbx",
+		"walk": "res://Assets/used/npc/animated_characters/animations/walk.fbx"
+	},
+	"animation_combat_cases": {
+		"standShoot": {
+			"base_animation": "shoot",
+			"upper_body_pose_animation": "",
+			"pose_track_scope": "imported_clip",
+			"stance": "standing",
+			"motion": "stationary",
+			"source": "imported_clip"
+		},
+		"walkShoot": {
+			"base_animation": "walk",
+			"upper_body_pose_animation": "shoot",
+			"pose_track_scope": "shoot_upper_body",
+			"stance": "standing",
+			"motion": "walk",
+			"source": "imported_base_plus_imported_shoot_upper_body"
+		},
+		"runShoot": {
+			"base_animation": "run",
+			"upper_body_pose_animation": "shoot",
+			"pose_track_scope": "shoot_upper_body",
+			"stance": "standing",
+			"motion": "run",
+			"source": "imported_base_plus_imported_shoot_upper_body"
+		},
+		"crouchShoot": {
+			"base_animation": "crouchIdle",
+			"upper_body_pose_animation": "shoot",
+			"pose_track_scope": "shoot_upper_body",
+			"stance": "crouched",
+			"motion": "stationary",
+			"source": "imported_crouch_base_plus_imported_shoot_upper_body"
+		},
+		"crouchWalkShoot": {
+			"base_animation": "crouchWalk",
+			"upper_body_pose_animation": "shoot",
+			"pose_track_scope": "shoot_upper_body",
+			"stance": "crouched",
+			"motion": "walk",
+			"source": "imported_crouch_base_plus_imported_shoot_upper_body"
+		},
+		"crouchRunShoot": {
+			"base_animation": "crouchWalk",
+			"upper_body_pose_animation": "shoot",
+			"pose_track_scope": "shoot_upper_body",
+			"stance": "crouched",
+			"motion": "run",
+			"source": "imported_crouch_base_plus_imported_shoot_upper_body",
+			"note": "Animated Characters Bundle has no dedicated crouchRun clip; this case keeps the crouched movement base explicit."
+		}
+	},
 	"helmet_paths": [
 		"res://Assets/used/npc/animated_characters/accessories/astroHelmet.fbx",
 		"res://Assets/used/npc/animated_characters/accessories/militaryHelmet.fbx"
