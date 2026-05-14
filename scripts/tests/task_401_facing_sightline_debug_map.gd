@@ -92,8 +92,8 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 	var bravo_proxy: Dictionary = Dictionary(proxy_state_by_id.get("unit_bravo", {}))
 	_assert(String(alpha_proxy.get("unit_weapon_posture", "")) == "aimed", "Rendered weapon NPC exposes aimed proxy posture")
 	_assert(String(bravo_proxy.get("unit_weapon_posture", "")) == "lowered", "Rendered looking NPC exposes lowered proxy posture")
-	_assert(absf(float(alpha_proxy.get("unit_model_root_rotation_y_degrees", 0.0)) - 90.0) < 0.1, "Aimed NPC model root corrects the imported character forward axis")
-	_assert(absf(float(bravo_proxy.get("unit_model_root_rotation_y_degrees", 0.0)) - 90.0) < 0.1, "Lowered NPC model root corrects the imported character forward axis")
+	_assert(absf(float(alpha_proxy.get("unit_model_root_rotation_y_degrees", 0.0)) - 270.0) < 0.1, "Aimed NPC model root corrects the imported character forward axis")
+	_assert(absf(float(bravo_proxy.get("unit_model_root_rotation_y_degrees", 0.0)) - 270.0) < 0.1, "Lowered NPC model root corrects the imported character forward axis")
 
 	var orientation_entries: Array = Array(snapshot.get("fireteam_orientation_entries", []))
 	var aim_orientation: Dictionary = _find_entry(orientation_entries, "fireteam_id", "aim")
@@ -116,6 +116,8 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 	_assert(bool(alpha_proxy.get("unit_aim_pose_weapon_node_available", false)), "Weapon-ready NPC exposes an attached weapon visual")
 	_assert(bool(alpha_proxy.get("unit_aim_pose_yaw_active", false)), "Weapon-ready NPC applies the existing aim direction to the weapon pose")
 	_assert(absf(float(alpha_proxy.get("unit_aim_pose_yaw_delta_degrees", 0.0))) >= 20.0, "Weapon-ready NPC visibly offsets the raised weapon toward the shot line")
+	var alpha_weapon_anchor_distance: float = float(alpha_proxy.get("unit_weapon_anchor_distance_3d", 999.0))
+	_assert(alpha_weapon_anchor_distance >= 0.0 and alpha_weapon_anchor_distance <= 0.52, "Weapon-ready NPC keeps the weapon root on the hand anchor (distance %.3f)" % alpha_weapon_anchor_distance)
 	_assert(_find_entry(Array(snapshot.get("friendly_aim_entries", [])), "unit_id", "unit_bravo").is_empty(), "Lowered looking NPC has no selected weapon/shot line in the fixture")
 
 	controller.call("_set_selected_fireteams", PackedStringArray(["look"]), false)

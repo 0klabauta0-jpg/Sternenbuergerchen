@@ -9,7 +9,7 @@
 	},
 	"defaults": {
 		"scale": 0.22,
-		"rotation_degrees_y": 90.0,
+		"rotation_degrees_y": 270.0,
 		"visual_loadout_id": "standard_rifle",
 		"friendly_visual_archetype_id": "friendly_space_suit_white",
 		"enemy_visual_archetype_id": "enemy_space_suit_orange",
@@ -76,7 +76,7 @@
 			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroMaleA.png",
 			"visual_loadout_id": "standard_rifle",
 			"scale": 0.22,
-			"rotation_degrees_y": 90.0
+			"rotation_degrees_y": 270.0
 		},
 		"team_bravo": {
 			"visual_id": "enemy_space_suit_orange_small",
@@ -86,7 +86,7 @@
 			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroFemaleB.png",
 			"visual_loadout_id": "compact_blaster",
 			"scale": 0.22,
-			"rotation_degrees_y": 90.0
+			"rotation_degrees_y": 270.0
 		},
 		"default": {
 			"visual_id": "animated_character_medium_astro_male_a",
@@ -96,7 +96,7 @@
 			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroMaleA.png",
 			"visual_loadout_id": "standard_rifle",
 			"scale": 0.22,
-			"rotation_degrees_y": 90.0
+			"rotation_degrees_y": 270.0
 		}
 	},
 	"unit_ids": {
@@ -108,7 +108,7 @@
 			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroFemaleB.png",
 			"visual_loadout_id": "compact_blaster",
 			"scale": 0.22,
-			"rotation_degrees_y": 90.0
+			"rotation_degrees_y": 270.0
 		},
 		"enemy_echo": {
 			"visual_id": "enemy_echo_space_suit_orange_medium",
@@ -118,7 +118,7 @@
 			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroMaleB.png",
 			"visual_loadout_id": "heavy_blaster",
 			"scale": 0.22,
-			"rotation_degrees_y": 90.0
+			"rotation_degrees_y": 270.0
 		}
 	},
 	"visual_archetypes": {

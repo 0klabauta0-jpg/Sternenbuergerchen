@@ -133,9 +133,9 @@ const FOW_KNOWN_DIM_COLOR: Color = Color(0.02, 0.05, 0.06, 0.28)
 const FOW_EXPLORED_DIM_COLOR: Color = Color(0.02, 0.04, 0.06, 0.62)
 const FOW_UNKNOWN_BLACK_COLOR: Color = Color(0.0, 0.0, 0.0, 1.0)
 const UNIT_AIM_POSE_WEAPON_PITCH_DEGREES: float = -30.0
-const UNIT_AIM_POSE_WEAPON_FORWARD_OFFSET: float = 0.075
+const UNIT_AIM_POSE_WEAPON_FORWARD_OFFSET: float = 0.026
 const UNIT_READY_POSE_WEAPON_PITCH_DEGREES: float = -14.0
-const UNIT_READY_POSE_WEAPON_FORWARD_OFFSET: float = 0.036
+const UNIT_READY_POSE_WEAPON_FORWARD_OFFSET: float = 0.014
 const EDITOR_EMPTY_BACKGROUND_COLOR: Color = Color(0.12, 0.13, 0.12, 1.0)
 const EDITOR_LIGHT_ROTATION_DEGREES: Vector3 = Vector3(-58.0, -32.0, 0.0)
 const EDITOR_LIGHT_ENERGY: float = 1.18
@@ -6167,10 +6167,10 @@ func _update_unit_weapon_aim_pose(proxy: Node3D, active_fire_event: Dictionary, 
 	var desired_rotation: Vector3 = base_rotation
 	var desired_position: Vector3 = base_position
 	if is_active:
-		desired_rotation = base_rotation + Vector3(UNIT_AIM_POSE_WEAPON_PITCH_DEGREES, aim_yaw_delta_degrees, 0.0)
+		desired_rotation = base_rotation + Vector3(UNIT_AIM_POSE_WEAPON_PITCH_DEGREES, 0.0, 0.0)
 		desired_position = base_position + Vector3(0.0, 0.0, -UNIT_AIM_POSE_WEAPON_FORWARD_OFFSET)
 	elif is_ready:
-		desired_rotation = base_rotation + Vector3(UNIT_READY_POSE_WEAPON_PITCH_DEGREES, aim_yaw_delta_degrees, 0.0)
+		desired_rotation = base_rotation + Vector3(UNIT_READY_POSE_WEAPON_PITCH_DEGREES, 0.0, 0.0)
 		desired_position = base_position + Vector3(0.0, 0.0, -UNIT_READY_POSE_WEAPON_FORWARD_OFFSET)
 	if weapon_node.rotation_degrees.distance_squared_to(desired_rotation) > 0.0001:
 		weapon_node.rotation_degrees = desired_rotation
@@ -6187,6 +6187,27 @@ func _update_unit_weapon_aim_pose(proxy: Node3D, active_fire_event: Dictionary, 
 	if String(weapon_node.get_meta("unit_weapon_posture_applied", "")) != normalized_weapon_posture:
 		weapon_node.set_meta("unit_weapon_posture_applied", normalized_weapon_posture)
 		changed = true
+	if _update_unit_weapon_child_aim_yaw(weapon_node, aim_yaw_delta_degrees, has_aim_yaw):
+		changed = true
+	return changed
+
+
+func _update_unit_weapon_child_aim_yaw(weapon_node: Node3D, aim_yaw_delta_degrees: float, apply_aim_yaw: bool) -> bool:
+	if weapon_node == null:
+		return false
+	var changed: bool = false
+	var desired_yaw_delta: float = aim_yaw_delta_degrees if apply_aim_yaw else 0.0
+	for child in weapon_node.get_children():
+		var child_3d := child as Node3D
+		if child_3d == null:
+			continue
+		if not child_3d.has_meta("unit_aim_pose_base_rotation_degrees"):
+			child_3d.set_meta("unit_aim_pose_base_rotation_degrees", child_3d.rotation_degrees)
+		var base_rotation: Vector3 = _get_vector3_meta(child_3d, "unit_aim_pose_base_rotation_degrees", child_3d.rotation_degrees)
+		var desired_rotation: Vector3 = base_rotation + Vector3(0.0, desired_yaw_delta, 0.0)
+		if child_3d.rotation_degrees.distance_squared_to(desired_rotation) > 0.0001:
+			child_3d.rotation_degrees = desired_rotation
+			changed = true
 	return changed
 
 
@@ -6528,6 +6549,7 @@ func _get_unit_proxy_state_by_id() -> Dictionary:
 			"unit_visual_archetype_id": String(proxy.get_meta("unit_visual_archetype_id", "")).strip_edges(),
 			"unit_visual_faction_id": String(proxy.get_meta("unit_visual_faction_id", "")).strip_edges(),
 			"unit_model_root_rotation_y_degrees": float(proxy.get_meta("unit_model_root_rotation_y_degrees", 0.0)),
+			"unit_weapon_anchor_distance_3d": _get_unit_weapon_anchor_distance_3d(proxy),
 			"unit_aim_pose_active": bool(proxy.get_meta("unit_aim_pose_active", false)),
 			"unit_ready_pose_active": bool(proxy.get_meta("unit_ready_pose_active", false)),
 			"unit_movement_posture": String(proxy.get_meta("unit_movement_posture", "")).strip_edges(),
@@ -6542,6 +6564,17 @@ func _get_unit_proxy_state_by_id() -> Dictionary:
 			"unit_aim_pose_target_unit_id": String(proxy.get_meta("unit_aim_pose_target_unit_id", "")).strip_edges(),
 		}
 	return result
+
+
+func _get_unit_weapon_anchor_distance_3d(proxy: Node3D) -> float:
+	if proxy == null or not is_instance_valid(proxy):
+		return -1.0
+	var weapon_node: Node3D = _find_unit_blaster_visual_node(proxy)
+	if weapon_node == null or not is_instance_valid(weapon_node):
+		return -1.0
+	var proxy_position: Vector3 = proxy.global_position
+	var weapon_position: Vector3 = weapon_node.global_position
+	return Vector2(weapon_position.x - proxy_position.x, weapon_position.z - proxy_position.z).length()
 
 
 func _apply_unit_helmet_transform(helmet_instance: Node3D, attachment_entry: Dictionary, model_instance: Node3D) -> void:

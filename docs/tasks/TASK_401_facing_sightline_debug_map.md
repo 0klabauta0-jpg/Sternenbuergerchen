@@ -6,7 +6,7 @@
 Facing, Sichtlinie und Waffen-/Schussrichtung sollen auf einer kleinen Mission-Map sofort sichtbar pruefbar sein, ohne dass zuerst ein Overlay angeklickt oder eine Unit manuell selektiert werden muss.
 
 ## Sinnhaftigkeit / Ursache
-Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie, Unit-Facing und Weapon-Posture existieren bereits. Fuer manuelle Sichtchecks fehlt aber eine kleine, eindeutige Fixture, in der ein NPC mit Waffe im Anschlag und ein NPC mit gesenkter Waffe direkt auseinandergezogen sichtbar sind. Der erste Playtest zeigte zusaetzlich, dass die importierten Character-Modelle visuell um 90 Grad neben der Proxy-/Facing-Rotation standen.
+Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie, Unit-Facing und Weapon-Posture existieren bereits. Fuer manuelle Sichtchecks fehlt aber eine kleine, eindeutige Fixture, in der ein NPC mit Waffe im Anschlag und ein NPC mit gesenkter Waffe direkt auseinandergezogen sichtbar sind. Die Playtests zeigten zusaetzlich, dass die importierten Character-Modelle visuell 180 Grad zur Proxy-/Facing-Rotation verdreht standen und der Aim-Yaw die sichtbare Waffe aus dem Handanker ziehen konnte.
 
 ## Umfang
 - 12x12-Testmap mit Compass-Markern an den Kartenecken.
@@ -14,7 +14,7 @@ Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie,
 - Bestehende TacticalController-/Primary3DView-Overlays beim Szenenstart aktivieren.
 - Vorhandene Unit-Metadaten und Runtime-Posture nutzen, statt neue LOS- oder Facing-Logik einzufuehren.
 - Bestehende NPC-Visual-Mapping-Rotation so korrigieren, dass das Modell selbst mit der Proxy-/Facing-Richtung uebereinstimmt.
-- Bestehende Weapon-Posture-Visuals so nutzen, dass die Schusslinie am sichtbaren Waffenvisual beginnt, wenn die Waffe nicht gesenkt ist.
+- Bestehende Weapon-Posture-Visuals so nutzen, dass die Schusslinie am sichtbaren Waffenvisual beginnt, wenn die Waffe nicht gesenkt ist, ohne den Handanker sichtbar vom NPC wegzuziehen.
 - Headless-Verifier fuer Map, Szene, Compass-Marker, Posture und Render-Snapshot.
 
 ## Nicht-Ziele
@@ -44,6 +44,7 @@ Die bestehenden Visual-Systeme fuer Fireteam-Orientation, Fire-Sector/LOS-Linie,
 - [x] Der obere NPC faced nach Nord, der untere nach Sued; die Modelle nutzen denselben vorhandenen Proxy-/Visual-Mapping-Pfad.
 - [x] Die NPCs stehen weit genug auseinander, damit Facing- und Schusslinien manuell lesbar sind.
 - [x] Die Waffen-/Schusslinie beginnt am sichtbaren Waffenvisual, wenn die Waffe im Anschlag ist.
+- [x] Die sichtbare Waffe bleibt am Handanker; Aim-Yaw dreht nur das Weapon-Child-Visual, nicht den ganzen Root-Anker aus der Unit heraus.
 - [x] Fireteam-Orientation/Facing und Fire-Sector/Weapon-Linie laufen ueber die bestehenden Primary3DView-Snapshots.
 - [x] Die sichtbaren Debug-Visuals erzeugen keine SimulationRoot-Commands oder -Effects.
 
