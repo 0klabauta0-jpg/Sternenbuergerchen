@@ -787,11 +787,13 @@ static func _apply_tactical_stance_to_advance_style(base_style: String, tactical
 
 
 static func _apply_command_to_advance_style(base_style: String, command_type: String, tactical_stance: String) -> String:
-	if command_type != "move":
-		return base_style
-	if tactical_stance == FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
-		return base_style
-	return FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.ADVANCE_STYLE_RUSH
+	match command_type:
+		"move", "engage", "take", "defend", "hold", "hold_position":
+			# Move is the direct all-members travel order; the same baseline now applies to Engage/Take/Defend.
+			# C/N/A changes posture, speed, sight and combat modifiers, not bound grouping.
+			return FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.ADVANCE_STYLE_RUSH
+		_:
+			return base_style
 
 
 static func _apply_tactical_stance_to_cover_priority(base_cover_priority: float, tactical_stance: String, trait_mode: String) -> float:

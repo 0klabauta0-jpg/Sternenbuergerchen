@@ -1,0 +1,87 @@
+{
+	"display_name": "Operation: Fireteam Command Drill",
+	"enemy_groups": [
+		{
+			"display_name": "Red Drill Fireteam",
+			"enemy_ids": [
+				"enemy_delta",
+				"enemy_echo",
+				"enemy_foxtrot",
+				"enemy_golf"
+			],
+			"group_id": "red_drill_fireteam",
+			"notes": [
+				"One visible hostile fireteam for Move, Defend, Take and Engage drills."
+			],
+			"spawn_marker_id": "spawn_enemy_drill",
+			"tactics": {
+				"advance_style": "bounding",
+				"aim_move_speed_factor": 0.18,
+				"air_asset_risk_profile": "none",
+				"allowed_weapon_roles": [
+					"rifle",
+					"smg",
+					"heavy"
+				],
+				"anti_armor_threat": false,
+				"communication_intensity": "normal",
+				"contact_behavior": "suppress_from_cover",
+				"cover_behavior": "hold_best_cover",
+				"facing": "south_west",
+				"heavy_weapon_role": "none",
+				"lz_threat_zone_id": "",
+				"movement_posture_policy": "hold_ready",
+				"profile_id": "defensive_cover",
+				"ready_distance_world": 640.0,
+				"ready_speed_factor": 0.24,
+				"security_mode": "cover_arc",
+				"sight_behavior": "cover_arc",
+				"stance": "defend",
+				"travel_speed_factor": 0.35,
+				"visual_archetype": "enemy_space_suit_orange",
+				"weapon_id": "",
+				"weapon_profile": "defensive_mid"
+			},
+			"team_id": "team_red"
+		}
+	],
+	"map_file_path": "res://maps/fireteam_command_drill_24x24.json",
+	"mission_slot_count_override": 4,
+	"notes": [
+		"Generated drill scenario for focused fireteam behavior playtests."
+	],
+	"objective": {
+		"capture_radius": 96.0,
+		"marker_id": "objective_point"
+	},
+	"patrol_bindings": [
+		{
+			"mode": "pre_contact",
+			"patrol_path_id": "enemy_drill_watch_route",
+			"target_id": "enemy_delta"
+		}
+	],
+	"scenario_id": "fireteam_command_drill",
+	"tactical_authoring": {
+		"air_asset_risk": {
+			"enemy_group_id": "",
+			"loss_consequence": "replacement_recovery",
+			"lz_threat_zone_id": "",
+			"profile_id": "none",
+			"warning_required_before_damage": true
+		},
+		"communication_intensity": "normal",
+		"fireteam_defaults": {
+			"advance_style": "bounding",
+			"security_mode": "360"
+		}
+	},
+	"time_limit_seconds": 0.0,
+	"version": 1,
+	"wave_config": {
+		"first_wave_delay_seconds": 0.0,
+		"units_per_wave": 1,
+		"wave_count": 0,
+		"wave_delay_seconds": 0.0
+	}
+}

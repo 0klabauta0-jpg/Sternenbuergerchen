@@ -503,13 +503,17 @@ func _get_friendly_spawn_offset(index: int) -> Vector2:
 
 func _get_enemy_spawn_offset(index: int) -> Vector2:
 	var offsets: Array[Vector2] = [
-		Vector2(-18.0, -10.0),
-		Vector2(18.0, 10.0),
+		Vector2(-48.0, -24.0),
+		Vector2(-16.0, 8.0),
+		Vector2(16.0, -8.0),
+		Vector2(48.0, 24.0),
+		Vector2(-72.0, 28.0),
+		Vector2(72.0, -28.0),
 	]
 	if index >= 0 and index < offsets.size():
 		return offsets[index]
 
-	return Vector2(18.0 * float(index), 0.0)
+	return Vector2(32.0 * float(index), 0.0)
 
 
 func _setup_respawn_manager(spawn_alpha: Marker2D, spawn_bravo: Marker2D) -> void:
@@ -992,7 +996,8 @@ func _sync_fog_dynamic_target_visibility() -> void:
 			var observer := observer_variant as Node2D
 			if observer == null:
 				continue
-			var has_line_of_sight: bool = _fog_of_war_los_system.call("has_line_of_sight_between_points", observer.global_position, target_position, fog_of_war_sight_range_world, _fog_terrain_registry) == true
+			var effective_sight_range_world: float = _get_effective_fog_sight_range_world(observer)
+			var has_line_of_sight: bool = _fog_of_war_los_system.call("has_line_of_sight_between_points", observer.global_position, target_position, effective_sight_range_world, _fog_terrain_registry) == true
 			if has_line_of_sight:
 				visible = true
 				break
@@ -1019,6 +1024,19 @@ func _get_active_fog_observers() -> Array:
 	return observers
 
 
+func _get_effective_fog_sight_range_world(observer: Node) -> float:
+	if fog_of_war_sight_range_world < 0.0:
+		return fog_of_war_sight_range_world
+	var sight_range_factor: float = 1.0
+	if observer != null and observer.has_method("get_sight_range_factor"):
+		sight_range_factor = float(observer.call("get_sight_range_factor"))
+	elif observer != null and observer.has_method("get_runtime_status"):
+		var runtime_status = observer.call("get_runtime_status")
+		if runtime_status != null and runtime_status.has_method("to_dict"):
+			sight_range_factor = float(Dictionary(runtime_status.call("to_dict")).get("sight_range_factor", 1.0))
+	return fog_of_war_sight_range_world * maxf(sight_range_factor, 0.0)
+
+
 func _build_fog_runtime_signature(mode: String) -> String:
 	var parts: PackedStringArray = PackedStringArray()
 	parts.append(mode)
@@ -1028,14 +1046,28 @@ func _build_fog_runtime_signature(mode: String) -> String:
 			continue
 		var visible_text: String = "1" if not (unit is CanvasItem) or (unit as CanvasItem).visible else "0"
 		var grid_text: String = _get_fog_grid_signature((unit as Node2D).global_position)
-		parts.append("%s:%s:%s:%s" % [
+		var sight_text: String = "%.3f" % _get_fog_unit_sight_range_factor(unit)
+		parts.append("%s:%s:%s:%s:%s" % [
 			String(unit.call("get_unit_id")).strip_edges(),
 			String(unit.call("get_team_id")).strip_edges(),
 			visible_text,
 			grid_text,
+			sight_text,
 		])
 	parts.sort()
 	return "|".join(parts)
+
+
+func _get_fog_unit_sight_range_factor(unit: Node) -> float:
+	if unit == null:
+		return 1.0
+	if unit.has_method("get_sight_range_factor"):
+		return maxf(float(unit.call("get_sight_range_factor")), 0.0)
+	if unit.has_method("get_runtime_status"):
+		var runtime_status = unit.call("get_runtime_status")
+		if runtime_status != null and runtime_status.has_method("to_dict"):
+			return maxf(float(Dictionary(runtime_status.call("to_dict")).get("sight_range_factor", 1.0)), 0.0)
+	return 1.0
 
 
 func _get_fog_grid_signature(world_position: Vector2) -> String:

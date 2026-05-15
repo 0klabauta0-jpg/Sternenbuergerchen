@@ -6,6 +6,8 @@ const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd"
 const SECURITY_MODE_360: String = "360"
 const SECURITY_MODE_DIRECTIONAL: String = "directional"
 const DIRECTIONAL_ARC_WIDTH: float = PI * 0.7
+const DEFENSE_SCAN_HALF_ANGLE: float = 0.13962634
+const DEFENSE_SCAN_CYCLE_MSEC: int = 2600
 const MIN_SHIFT_DELAY_MSEC: int = 250
 const MAX_SHIFT_DELAY_MSEC: int = 1200
 
@@ -156,7 +158,8 @@ func update_fireteam_state(
 		pending_ready_at_msec = 0
 		if typeof(threat_position) == TYPE_VECTOR2:
 			direction_angle = (Vector2(threat_position) - anchor_position).angle()
-	var member_assignments: Array = _build_member_assignments(fit_members, mode, direction_angle, security_radius_world)
+	var member_assignments: Array = _build_member_assignments(fit_members, mode, direction_angle, security_radius_world, now_msec)
+	var defense_ready: bool = _is_defense_ready(command_type, movement_state, suppression_state, ad_hoc_order, fit_members)
 	var overwatch_ready: bool = _is_overwatch_ready(command_type, movement_state, suppression_state, ad_hoc_order, fit_members)
 	var state: Dictionary = {
 		"fireteam_id": normalized_fireteam_id,
@@ -173,6 +176,7 @@ func update_fireteam_state(
 		"overwatch_unit_ids": _build_overwatch_unit_ids(member_assignments) if overwatch_ready else PackedStringArray(),
 		"security_radius_world": security_radius_world,
 		"security_radius_tiles": security_radius_tiles,
+		"defense_ready": defense_ready,
 		"overwatch_ready": overwatch_ready,
 		"is_active": _is_security_active(command_type, fit_members),
 		"area_order_id": String(area_context.get("area_order_id", "")),
@@ -334,7 +338,7 @@ func _normalize_security_mode(value: Variant) -> String:
 			return ""
 
 
-func _build_member_assignments(fit_members: Array, security_mode: String, direction_angle: float, security_radius_world: float = 0.0) -> Array:
+func _build_member_assignments(fit_members: Array, security_mode: String, direction_angle: float, security_radius_world: float = 0.0, now_msec: int = 0) -> Array:
 	var assignments: Array = []
 	if fit_members.is_empty():
 		return assignments
@@ -342,18 +346,29 @@ func _build_member_assignments(fit_members: Array, security_mode: String, direct
 		var sector_width: float = TAU / float(fit_members.size())
 		for index in range(fit_members.size()):
 			var member: Dictionary = fit_members[index]
-			var center_angle: float = _resolve_360_member_angle(index, fit_members.size(), direction_angle, sector_width)
+			var base_angle: float = _resolve_360_member_angle(index, fit_members.size(), direction_angle, sector_width)
+			var scan_offset: float = _build_defense_scan_offset(index, now_msec)
 			assignments.append({
 				"unit_id": String(member.get("unit_id", "")),
-				"center_angle": center_angle,
+				"base_angle": base_angle,
+				"scan_offset_angle": scan_offset,
+				"center_angle": wrapf(base_angle + scan_offset, -PI, PI),
 				"arc_width": sector_width,
 				"security_radius_world": security_radius_world,
 			})
 		return assignments
-	for member in fit_members:
+	var member_count: int = fit_members.size()
+	var max_spread: float = DIRECTIONAL_ARC_WIDTH * 0.34
+	for index in range(member_count):
+		var member: Dictionary = fit_members[index]
+		var spread_t: float = 0.5 if member_count <= 1 else float(index) / float(member_count - 1)
+		var base_angle: float = wrapf(direction_angle + lerpf(-max_spread, max_spread, spread_t), -PI, PI)
+		var scan_offset: float = _build_defense_scan_offset(index, now_msec)
 		assignments.append({
 			"unit_id": String(member.get("unit_id", "")),
-			"center_angle": direction_angle,
+			"base_angle": base_angle,
+			"scan_offset_angle": scan_offset,
+			"center_angle": wrapf(base_angle + scan_offset, -PI, PI),
 			"arc_width": DIRECTIONAL_ARC_WIDTH,
 			"security_radius_world": security_radius_world,
 		})
@@ -363,27 +378,30 @@ func _build_member_assignments(fit_members: Array, security_mode: String, direct
 func _resolve_360_member_angle(index: int, member_count: int, direction_angle: float, sector_width: float) -> float:
 	if member_count <= 1:
 		return direction_angle
-	if index == 0:
-		return direction_angle
-	if index == member_count - 1 and member_count >= 4:
-		return wrapf(direction_angle + PI, -PI, PI)
-	var side_index: int = index - 1
-	var side_sign: float = -1.0 if side_index % 2 == 0 else 1.0
-	var side_ring: int = int(side_index / 2) + 1
-	return wrapf(direction_angle + (side_sign * minf(sector_width * float(side_ring), PI * 0.72)), -PI, PI)
+	var cardinal_angles: Array[float] = [-PI * 0.5, 0.0, PI * 0.5, PI]
+	if index < cardinal_angles.size():
+		return float(cardinal_angles[index])
+	return wrapf(direction_angle + (sector_width * float(index)), -PI, PI)
+
+
+func _build_defense_scan_offset(index: int, now_msec: int) -> float:
+	if DEFENSE_SCAN_CYCLE_MSEC <= 0:
+		return 0.0
+	var phase: float = fposmod(float(now_msec + (index * 419)), float(DEFENSE_SCAN_CYCLE_MSEC)) / float(DEFENSE_SCAN_CYCLE_MSEC)
+	return sin(phase * TAU) * DEFENSE_SCAN_HALF_ANGLE
 
 
 func _is_security_active(command_type: String, fit_members: Array) -> bool:
 	if fit_members.is_empty():
 		return false
 	match command_type:
-		"defend", "defend_area", "take", "hold_position":
+		"defend", "defend_area", "take", "engage", "hold_position":
 			return true
 		_:
 			return false
 
 
-func _is_overwatch_ready(command_type: String, movement_state: Dictionary, suppression_state: Dictionary, ad_hoc_order: Dictionary, fit_members: Array) -> bool:
+func _is_defense_ready(command_type: String, movement_state: Dictionary, suppression_state: Dictionary, ad_hoc_order: Dictionary, fit_members: Array) -> bool:
 	if not _is_security_active(command_type, fit_members):
 		return false
 	if not movement_state.is_empty():
@@ -394,6 +412,10 @@ func _is_overwatch_ready(command_type: String, movement_state: Dictionary, suppr
 	return ad_hoc_type != "disengage" and ad_hoc_type != "fall_back"
 
 
+func _is_overwatch_ready(_command_type: String, _movement_state: Dictionary, _suppression_state: Dictionary, _ad_hoc_order: Dictionary, _fit_members: Array) -> bool:
+	return false
+
+
 func _extract_command_type(behavior_profile_dict: Dictionary, area_context: Dictionary = {}) -> String:
 	var area_command_type: String = String(area_context.get("command_type", "")).strip_edges().to_lower()
 	if not area_command_type.is_empty():
@@ -401,9 +423,7 @@ func _extract_command_type(behavior_profile_dict: Dictionary, area_context: Dict
 	var metadata: Dictionary = Dictionary(behavior_profile_dict.get("metadata", {}))
 	var command_type: String = String(metadata.get("origin_command_type", "")).strip_edges().to_lower()
 	if command_type.is_empty():
-		command_type = "hold_position"
-	if command_type == "defend":
-		return "hold_position"
+		command_type = "defend"
 	return command_type
 
 
@@ -472,6 +492,7 @@ func _build_public_state(state: Dictionary) -> Dictionary:
 		"overwatch_unit_ids": PackedStringArray(state.get("overwatch_unit_ids", PackedStringArray())),
 		"security_radius_world": float(state.get("security_radius_world", 0.0)),
 		"security_radius_tiles": int(state.get("security_radius_tiles", 0)),
+		"defense_ready": bool(state.get("defense_ready", false)),
 		"overwatch_ready": bool(state.get("overwatch_ready", false)),
 		"is_active": bool(state.get("is_active", false)),
 		"area_order_id": String(state.get("area_order_id", "")),

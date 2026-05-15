@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fireteam Command Drill - Entscheidungsleitfaden</title>
+  <style>
+    :root {
+      --bg: #101418;
+      --panel: #172028;
+      --panel-2: #202a32;
+      --text: #edf4f7;
+      --muted: #aab8bf;
+      --line: #34424b;
+      --blue: #62b7ff;
+      --green: #7ad98b;
+      --gold: #f2c85b;
+      --red: #f06f64;
+      --violet: #bda3ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 22px 44px;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      font-size: clamp(30px, 5vw, 54px);
+      line-height: 1.05;
+      max-width: 860px;
+    }
+
+    h2 {
+      margin-top: 34px;
+      margin-bottom: 14px;
+      font-size: 23px;
+    }
+
+    h3 {
+      margin-bottom: 8px;
+      font-size: 17px;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    code {
+      color: #dff3ff;
+      background: #0b1115;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: 0.92em;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+      gap: 24px;
+      align-items: stretch;
+      min-height: 420px;
+      padding-top: 10px;
+    }
+
+    .hero-copy {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 18px;
+      min-width: 0;
+    }
+
+    .hero-copy .meta {
+      color: var(--green);
+      text-transform: uppercase;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .map-panel {
+      position: relative;
+      min-height: 390px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(135deg, rgba(98, 183, 255, 0.12), transparent 34%),
+        linear-gradient(315deg, rgba(122, 217, 139, 0.10), transparent 38%),
+        var(--panel);
+      overflow: hidden;
+    }
+
+    .map-grid {
+      position: absolute;
+      inset: 28px;
+      border: 1px solid rgba(237, 244, 247, 0.16);
+      background-image:
+        linear-gradient(rgba(237, 244, 247, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(237, 244, 247, 0.08) 1px, transparent 1px);
+      background-size: 8.333% 8.333%;
+    }
+
+    .lane {
+      position: absolute;
+      height: 9px;
+      border-radius: 999px;
+      transform-origin: left center;
+      background: rgba(242, 200, 91, 0.78);
+      box-shadow: 0 0 18px rgba(242, 200, 91, 0.28);
+    }
+
+    .lane.main { left: 18%; top: 72%; width: 54%; transform: rotate(-24deg); }
+    .lane.north { left: 43%; top: 57%; width: 24%; transform: rotate(-64deg); background: rgba(189, 163, 255, 0.8); }
+    .lane.south { left: 39%; top: 62%; width: 28%; transform: rotate(42deg); background: rgba(122, 217, 139, 0.72); }
+
+    .cover {
+      position: absolute;
+      width: 42px;
+      height: 22px;
+      border: 1px solid rgba(237, 244, 247, 0.28);
+      background: rgba(52, 66, 75, 0.88);
+      transform: rotate(-26deg);
+    }
+
+    .cover.c1 { left: 50%; top: 43%; }
+    .cover.c2 { left: 58%; top: 43%; }
+    .cover.c3 { left: 50%; top: 62%; }
+    .cover.c4 { left: 59%; top: 62%; }
+    .cover.c5 { left: 75%; top: 48%; }
+    .cover.c6 { left: 78%; top: 65%; }
+
+    .marker {
+      position: absolute;
+      min-width: 76px;
+      padding: 6px 8px;
+      border: 1px solid rgba(237, 244, 247, 0.24);
+      background: rgba(12, 17, 21, 0.86);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .marker::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -7px;
+      width: 10px;
+      height: 10px;
+      margin-left: -5px;
+      transform: rotate(45deg);
+      background: inherit;
+      border-right: 1px solid rgba(237, 244, 247, 0.24);
+      border-bottom: 1px solid rgba(237, 244, 247, 0.24);
+    }
+
+    .m-spawn { left: 10%; top: 73%; color: var(--blue); }
+    .m-move { left: 29%; top: 61%; color: var(--gold); }
+    .m-defend { left: 42%; top: 52%; color: var(--green); }
+    .m-contact { left: 58%; top: 47%; color: var(--red); }
+    .m-objective { left: 72%; top: 54%; color: var(--gold); }
+    .m-enemy { left: 78%; top: 34%; color: var(--red); }
+    .m-north { left: 41%; top: 22%; color: var(--violet); }
+    .m-south { left: 31%; top: 82%; color: var(--green); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .card, .note {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 16px;
+      min-width: 0;
+    }
+
+    .note {
+      border-left: 4px solid var(--blue);
+    }
+
+    .note strong {
+      color: var(--text);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border: 1px solid var(--line);
+    }
+
+    th, td {
+      padding: 12px 13px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th {
+      color: var(--text);
+      background: var(--panel-2);
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+
+    td {
+      color: var(--muted);
+    }
+
+    .tag {
+      display: inline-block;
+      margin-bottom: 8px;
+      padding: 3px 7px;
+      border-radius: 4px;
+      background: #0b1115;
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .tag.green { color: var(--green); }
+    .tag.gold { color: var(--gold); }
+    .tag.red { color: var(--red); }
+    .tag.violet { color: var(--violet); }
+
+    ol {
+      margin: 0;
+      padding-left: 22px;
+      color: var(--muted);
+    }
+
+    li {
+      margin: 7px 0;
+    }
+
+    @media (max-width: 900px) {
+      .hero, .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .map-panel {
+        min-height: 360px;
+      }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <div class="hero-copy">
+      <div class="meta">TASK_416 | Fireteam Command Drill</div>
+      <h1>Eine kleine Karte zum Pruefen von Fireteam-Bewegung und Befehlsentscheidungen</h1>
+      <p>
+        Die Drill-Karte ist bewusst eng geschnitten: ein Friendly-Fireteam <code>drill</code>, ein gegnerisches Fireteam, eine offene Move-Lane, zwei Flank-Alternativen, eine Defend-Zone, eine Contact-Line und ein Objective.
+      </p>
+      <p>
+        Dateien: <code>res://maps/fireteam_command_drill_24x24.json</code>, <code>res://data/mission_scenarios/fireteam_command_drill_24x24.json</code> und <code>res://scenes/tests/fireteam_command_drill_map.tscn</code>.
+      </p>
+    </div>
+    <div class="map-panel" aria-label="Schematische Karte Fireteam Command Drill">
+      <div class="map-grid"></div>
+      <div class="lane main"></div>
+      <div class="lane north"></div>
+      <div class="lane south"></div>
+      <div class="cover c1"></div>
+      <div class="cover c2"></div>
+      <div class="cover c3"></div>
+      <div class="cover c4"></div>
+      <div class="cover c5"></div>
+      <div class="cover c6"></div>
+      <div class="marker m-spawn">DRILL Spawn</div>
+      <div class="marker m-move">Move Lane</div>
+      <div class="marker m-defend">Defend</div>
+      <div class="marker m-contact">Contact</div>
+      <div class="marker m-objective">Objective</div>
+      <div class="marker m-enemy">Enemy FT</div>
+      <div class="marker m-north">Flank N</div>
+      <div class="marker m-south">Flank S</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Was Die Karte Trennt</h2>
+    <div class="grid">
+      <article class="card">
+        <span class="tag">Move</span>
+        <h3>Offene Lane</h3>
+        <p>Von <code>spawn_alpha</code> nach <code>drill_move_lane</code> ist die Strecke lesbar und offen. Das ist der schnelle Basischeck fuer Move/Rush und Formation.</p>
+      </article>
+      <article class="card">
+        <span class="tag green">Defend</span>
+        <h3>Rally Area</h3>
+        <p><code>drill_defend_area</code> liegt vor der Contact-Line. Hier pruefst du Halten, Security, Overwatch und ob das Fireteam sinnvoll zur Ruhe kommt.</p>
+      </article>
+      <article class="card">
+        <span class="tag red">Contact</span>
+        <h3>Gegnerlinie</h3>
+        <p>Das gegnerische Fireteam startet bei <code>spawn_enemy_drill</code> mit Cover am Objective. Das zeigt, ob Take/Engage und Flankieren andere Entscheidungen erzeugen als reines Move.</p>
+      </article>
+    </div>
+  </section>
+
+  <section>
+    <h2>Manueller Ablauf</h2>
+    <ol>
+      <li>Szene <code>res://scenes/tests/fireteam_command_drill_map.tscn</code> starten oder im Meta-Flow <code>Operation: Fireteam Command Drill</code> waehlen.</li>
+      <li>Fireteam <code>DRILL</code> selektieren und einen Move-Waypoint auf <code>drill_move_lane</code> setzen. Mit GO sollte der schnelle offene Pfad sichtbar werden.</li>
+      <li>Tactical Stance auf vorsichtig schalten und einen Move-Waypoint auf <code>drill_flank_north</code> oder <code>drill_flank_south</code> setzen. Das soll Richtung Caterpillar/Creep lesbar werden.</li>
+      <li>Eine Defend-Area um <code>drill_defend_area</code> ziehen. Erwartung: Halten/Security statt Objective-Push.</li>
+      <li>Flank oder Take/Engage auf das Objective setzen. Erwartung: Das Fireteam betrachtet Contact-Line und Objective-Cover anders als bei Move.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Waypoint-Abarbeitung</h2>
+    <div class="note">
+      <p>
+        Erreicht das Fireteam einen Waypoint und ist der dortige Befehl ausgefuehrt, wird dieser Waypoint aus dem aktiven Plan entfernt. Der naechste ausfuehrbare Waypoint rueckt dadurch auf den neuen Index und kann direkt aktiviert werden. Leere Plaene gelten als abgeschlossen und verschwinden aus den Order-Visuals.
+      </p>
+      <p>
+        Defend/Hold behalt die bestehende GO-Freigabe: Beim Freigeben wird der gehaltene Waypoint geloescht und danach entweder der Folge-Waypoint gestartet oder der Plan abgeschlossen.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Entscheidungstabelle</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Spielerinput</th>
+          <th>Fuehrt typischerweise zu</th>
+          <th>Warum</th>
+          <th>Alternative</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>Move</code> auf offene Lane, Stance normal/aggressiv</td>
+          <td><code>rush</code>, <code>movement_posture = travel</code>, <code>weapon_posture = lowered</code></td>
+          <td><code>FireteamBehaviorResolver</code> erzwingt fuer Move ohne vorsichtige Stance den schnellen Advance Style. <code>FireteamMovementController</code> schickt alle fitten Member auf Formationstargets.</td>
+          <td>Vorsichtige Stance setzen, wenn die gleiche Bewegung gedeckter laufen soll.</td>
+        </tr>
+        <tr>
+          <td><code>Move</code> mit vorsichtiger Stance oder sehr defensivem Profil</td>
+          <td><code>creep</code> wird im Movement zu <code>caterpillar</code>, bewegende Member nutzen <code>crouch_walk</code>/<code>aimed</code></td>
+          <td>Die Stance verschiebt den Advance Style vorsichtiger. Der Movement-Controller normalisiert <code>creep</code> zu Caterpillar.</td>
+          <td>Normal/aggressiv zurueckstellen, wenn der Check schneller und weniger gedeckt laufen soll.</td>
+        </tr>
+        <tr>
+          <td><code>Take</code> oder <code>Engage</code> auf Objective/Enemy-Cover</td>
+          <td><code>engage_area</code> UnitCommands, Waffen eher <code>aimed</code>, Fire at will</td>
+          <td><code>FireteamMovementController._map_waypoint_command_to_unit_command()</code> mappt Take/Engage auf Area-Engage statt reines Move.</td>
+          <td>Vorher Defend/Rally setzen, wenn das Fireteam erst sichern und nicht direkt ins Objective laufen soll.</td>
+        </tr>
+        <tr>
+          <td><code>Defend Area</code> um Rally-Marker</td>
+          <td>Halten, Security-Snapshot, Overwatch-/Sector-Visuals</td>
+          <td>Die AreaOrder bleibt Mission-Tactical-State und laesst Security/Movement-Snapshots entstehen, ohne Unit-Wahrheit in der UI zu speichern.</td>
+          <td>Take Area, wenn die Zone als Objective genommen statt gehalten werden soll.</td>
+        </tr>
+        <tr>
+          <td><code>Flank</code> ueber Nord- oder Suedroute</td>
+          <td>Seitlicher Zielpfad, typischerweise gedeckter als die offene Lane</td>
+          <td>Der Befehl traegt andere Intent-/Fire-Discipline-Signale; der Zielpunkt liegt auf einer bewusst markierten Alternative zur Contact-Line.</td>
+          <td>Move/Rush ueber Mitte, wenn du pruefen willst, ob Kontakt den direkten Ansatz sichtbar riskanter macht.</td>
+        </tr>
+        <tr>
+          <td>Kontakt, Suppression oder blockierter Pfad waehrend GO</td>
+          <td>Feedback/Bubbles, Status-Snapshots, moegliche Breakout- oder Return-to-Plan-Situation</td>
+          <td>Kontakt- und Breakout-Systeme duerfen den Plan markieren oder Anpassung anfordern; dauerhafte Runtime-Mutation bleibt trotzdem bei <code>SimulationRoot</code>.</td>
+          <td>Defend/Hold, neue Flank-Route oder Take abbrechen und neu planen.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Worauf Beim Checken Achten</h2>
+    <div class="grid">
+      <article class="card">
+        <span class="tag gold">Posture</span>
+        <h3>Koerperhaltung</h3>
+        <p>Rush sollte schneller und weniger zielend wirken. Bounding und Caterpillar sollen sichtbar mehr Aim-/Overwatch-Posture zeigen.</p>
+      </article>
+      <article class="card">
+        <span class="tag violet">Formation</span>
+        <h3>Gruppenlogik</h3>
+        <p>Bounding soll bewegende und deckende Member trennen. Caterpillar soll kleine Schritte und mehr Sicherung zeigen.</p>
+      </article>
+      <article class="card">
+        <span class="tag green">Autoritaet</span>
+        <h3>Wahrheitspfad</h3>
+        <p>Die Karte speichert nur Terrain, Marker und Szenario-Setup. Live-Befehle bleiben <code>MissionTacticalSandboxController -> SimulationRoot</code>.</p>
+      </article>
+    </div>
+  </section>
+
+  <section>
+    <h2>Headless-Pruefpunkte</h2>
+    <div class="note">
+      <p>
+        Der Verifier <code>scripts/tests/task_416_fireteam_command_drill_map.gd</code> prueft Map-Groesse, Marker, Szenario-Validierung, genau ein Enemy-Fireteam, die Drill-Testszene und die HTML-Entscheidungsmatrix. Er ersetzt keinen manuellen Sichtcheck, aber er verhindert, dass die Drill-Fixture still aus dem Format faellt.
+      </p>
+    </div>
+  </section>
+</main>
+</body>
+</html>

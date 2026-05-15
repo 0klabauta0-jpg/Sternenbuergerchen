@@ -9,6 +9,7 @@ const CONTACT_TRACKER_SCRIPT: GDScript = preload("res://scripts/tactical/contact
 const FLANK_VULNERABILITY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/flank_vulnerability_resolver.gd")
 const MEDIC_SUPPORT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/medic_support_resolver.gd")
 const COMBAT_FIRE_DECISION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/combat_fire_decision_resolver.gd")
+const ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_limbo_behavior_adapter.gd")
 const TACTICAL_COMMUNICATION_EVENT_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_communication_event.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const CHARACTER_GAMEPLAY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/character_gameplay_resolver.gd")
@@ -88,6 +89,11 @@ signal combat_resolved(mission_result: Dictionary)
 @export var enemy_reposition_min_distance: float = 30.0
 @export var enemy_reposition_max_distance: float = 60.0
 @export var enemy_reposition_move_speed_factor: float = 0.45
+@export var enemy_limbo_behavior_smoke_enabled: bool = true
+@export var enemy_limbo_cover_cooldown_seconds: float = 2.0
+@export var enemy_limbo_cover_min_cover_score: int = 20
+@export var enemy_limbo_cover_search_radius: float = 160.0
+@export var enemy_limbo_cover_min_distance: float = 16.0
 @export var win_condition: String = WIN_CONDITION_ELIMINATION
 @export var objective_defense_hold_seconds: float = 8.0
 @export var mission_time_limit_seconds: float = 0.0
@@ -129,6 +135,7 @@ var _misidentification_cooldown: Dictionary = {}
 var _medic_support_cooldown: Dictionary = {}
 var _medic_support_move_ready_tick: Dictionary = {}
 var _friendly_cover_ready_at_msec: Dictionary = {}
+var _enemy_limbo_cover_ready_at_msec: Dictionary = {}
 var _overlays_visible: bool = true
 var _enemy_patrol_paths_by_unit_id: Dictionary = {}
 var _enemy_patrol_waypoint_index_by_unit_id: Dictionary = {}
@@ -141,6 +148,7 @@ var _combat_tick_budget_debug_snapshot: Dictionary = {}
 var _overwatch_controller = OVERWATCH_CONTROLLER_SCRIPT.new()
 var _contact_tracker = CONTACT_TRACKER_SCRIPT.new()
 var _flank_vulnerability_resolver = FLANK_VULNERABILITY_RESOLVER_SCRIPT.new()
+var _enemy_limbo_behavior_adapter = ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.new()
 var _remote_event_bridge = MISSION_COMBAT_REMOTE_EVENT_BRIDGE_SCRIPT.new()
 var _audio_event_bus = null
 
@@ -341,6 +349,15 @@ func get_enemy_team_tactics_state_for_unit(unit_id: String) -> Dictionary:
 		if PackedStringArray(state.get("unit_ids", PackedStringArray())).has(normalized_unit_id):
 			return state
 	return {}
+
+
+func get_enemy_limbo_behavior_snapshot() -> Dictionary:
+	if _enemy_limbo_behavior_adapter == null or not _enemy_limbo_behavior_adapter.has_method("get_behavior_tree_snapshot"):
+		return {}
+	var snapshot: Dictionary = Dictionary(_enemy_limbo_behavior_adapter.call("get_behavior_tree_snapshot")).duplicate(true)
+	snapshot["enabled"] = enemy_limbo_behavior_smoke_enabled
+	snapshot["cover_cooldown_count"] = _enemy_limbo_cover_ready_at_msec.size()
+	return snapshot
 
 
 func get_fire_event_snapshot() -> Array:
@@ -3150,7 +3167,8 @@ func _apply_enemy_runtime_posture(unit, movement_posture: String, weapon_posture
 		runtime_status.get("target_position") if runtime_status.has_method("get") else null,
 		movement_posture,
 		weapon_posture,
-		effective_policy_id
+		effective_policy_id,
+		float(runtime_status.get("sight_range_factor")) if runtime_status.has_method("get") else 1.0
 	))
 
 
@@ -3291,6 +3309,9 @@ func _advance_enemy_units(simulation_root: Node) -> void:
 		if _try_enqueue_enemy_team_tactics_move(simulation_root, enemy):
 			continue
 
+		if _try_enqueue_enemy_limbo_behavior(simulation_root, enemy):
+			continue
+
 		if _try_enqueue_enemy_patrol_move(simulation_root, enemy):
 			continue
 
@@ -3377,6 +3398,147 @@ func _try_enqueue_enemy_patrol_move(simulation_root: Node, enemy) -> bool:
 		}
 	)
 	return true
+
+
+func _try_enqueue_enemy_limbo_behavior(simulation_root: Node, enemy) -> bool:
+	if not enemy_limbo_behavior_smoke_enabled:
+		return false
+	if simulation_root == null or enemy == null or not (enemy is Node2D) or not enemy.has_method("get_unit_id"):
+		return false
+	if _enemy_limbo_behavior_adapter == null or not _enemy_limbo_behavior_adapter.has_method("evaluate"):
+		return false
+	var unit_id: String = String(enemy.call("get_unit_id")).strip_edges()
+	if unit_id.is_empty():
+		return false
+	var has_contact: bool = _enemy_should_hold_position(enemy)
+	var context: Dictionary = {
+		"unit_id": unit_id,
+		"has_contact": has_contact,
+		"has_patrol": _enemy_limbo_has_patrol(unit_id),
+		"should_seek_cover": _enemy_limbo_should_seek_cover(enemy, has_contact, unit_id),
+		"seek_cover_action": Callable(self, "_try_enqueue_enemy_limbo_cover_move").bind(simulation_root, enemy),
+		"contact_hold_action": Callable(self, "_try_enqueue_enemy_limbo_contact_hold").bind(simulation_root, enemy),
+		"patrol_action": Callable(self, "_try_enqueue_enemy_patrol_move").bind(simulation_root, enemy),
+	}
+	var result: Dictionary = Dictionary(_enemy_limbo_behavior_adapter.call("evaluate", enemy, context, self, 1.0 / float(Engine.physics_ticks_per_second)))
+	if not bool(result.get("handled", false)):
+		return false
+	(enemy as Node).set_meta("enemy_limbo_behavior_action", String(result.get("selected_action", "")))
+	(enemy as Node).set_meta("enemy_limbo_behavior_source", String(result.get("source", "")))
+	return true
+
+
+func _enemy_limbo_has_patrol(unit_id: String) -> bool:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return false
+	return _enemy_patrol_paths_by_unit_id.has(normalized_unit_id) and not bool(_enemy_patrol_contact_locked.get(normalized_unit_id, false))
+
+
+func _enemy_limbo_should_seek_cover(enemy, has_contact: bool, unit_id: String) -> bool:
+	if not has_contact or enemy == null or not (enemy is Node2D):
+		return false
+	var now_msec: int = Time.get_ticks_msec()
+	if int(_enemy_limbo_cover_ready_at_msec.get(unit_id, 0)) > now_msec:
+		return false
+	if _get_enemy_limbo_cover_score(enemy) >= enemy_limbo_cover_min_cover_score:
+		return false
+	var terrain_registry = _get_terrain_registry()
+	return terrain_registry != null and terrain_registry.has_method("get_walkable_cover_tiles_in_radius")
+
+
+func _try_enqueue_enemy_limbo_cover_move(simulation_root: Node, enemy) -> bool:
+	if simulation_root == null or enemy == null or not (enemy is Node2D) or not enemy.has_method("get_unit_id"):
+		return false
+	var unit_id: String = String(enemy.call("get_unit_id")).strip_edges()
+	if unit_id.is_empty():
+		return false
+	var cover_target: Vector2 = _build_enemy_limbo_cover_target(enemy)
+	if cover_target == Vector2.INF:
+		return false
+	simulation_root.call(
+		"enqueue_command",
+		{
+			"command_type": "move_to_position",
+			"priority": 11,
+			"unit_id": unit_id,
+			"target_position": cover_target,
+			"move_speed_factor": enemy_reposition_move_speed_factor,
+			"movement_posture": ENEMY_POSTURE_TACTICAL,
+			"weapon_posture": ENEMY_WEAPON_READY,
+			"posture_policy_id": "aggressive_ready",
+			"source_command_type": "enemy_limbo_cover",
+			"requeue_until_target": false,
+			"enemy_bt_action": ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.ACTION_SEEK_COVER,
+		}
+	)
+	_enemy_limbo_cover_ready_at_msec[unit_id] = Time.get_ticks_msec() + int(enemy_limbo_cover_cooldown_seconds * 1000.0)
+	if _enemy_patrol_paths_by_unit_id.has(unit_id):
+		_enemy_patrol_contact_locked[unit_id] = true
+	return true
+
+
+func _try_enqueue_enemy_limbo_contact_hold(simulation_root: Node, enemy) -> bool:
+	if simulation_root == null or enemy == null or not enemy.has_method("get_unit_id"):
+		return false
+	var unit_id: String = String(enemy.call("get_unit_id")).strip_edges()
+	if unit_id.is_empty() or not _enemy_should_hold_position(enemy):
+		return false
+	simulation_root.call(
+		"enqueue_command",
+		{
+			"command_type": "hold_position",
+			"priority": 9,
+			"unit_id": unit_id,
+			"move_speed_factor": 0.0,
+			"movement_posture": ENEMY_POSTURE_OVERWATCH,
+			"weapon_posture": ENEMY_WEAPON_READY,
+			"posture_policy_id": "overwatch",
+			"source_command_type": "enemy_limbo_contact_hold",
+			"enemy_bt_action": ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.ACTION_CONTACT_HOLD,
+		}
+	)
+	if _enemy_patrol_paths_by_unit_id.has(unit_id):
+		_enemy_patrol_contact_locked[unit_id] = true
+	return true
+
+
+func _build_enemy_limbo_cover_target(enemy) -> Vector2:
+	var terrain_registry = _get_terrain_registry()
+	if terrain_registry == null or not terrain_registry.has_method("get_walkable_cover_tiles_in_radius"):
+		return Vector2.INF
+	if enemy == null or not (enemy is Node2D):
+		return Vector2.INF
+	var enemy_node: Node2D = enemy
+	var min_dist_sq: float = enemy_limbo_cover_min_distance * enemy_limbo_cover_min_distance
+	var best_position: Vector2 = Vector2.INF
+	var best_score: float = -INF
+	for tile in terrain_registry.call("get_walkable_cover_tiles_in_radius", enemy_node.global_position, enemy_limbo_cover_search_radius):
+		if tile == null:
+			continue
+		var tile_position: Vector2 = Vector2(tile.world_position)
+		var distance_sq: float = enemy_node.global_position.distance_squared_to(tile_position)
+		if distance_sq < min_dist_sq:
+			continue
+		var cover_score: float = clampf(float(tile.cover_value) / 100.0, 0.0, 1.0)
+		var score: float = (cover_score * 1.2) - (sqrt(distance_sq) * 0.015)
+		if score <= best_score:
+			continue
+		best_score = score
+		best_position = tile_position
+	return best_position
+
+
+func _get_enemy_limbo_cover_score(enemy) -> int:
+	if enemy == null:
+		return 0
+	if enemy.has_method("get_effective_cover_score"):
+		return int(enemy.call("get_effective_cover_score"))
+	if enemy is Node2D:
+		var terrain_registry = _get_terrain_registry()
+		if terrain_registry != null and terrain_registry.has_method("get_cover_at_world"):
+			return int(terrain_registry.call("get_cover_at_world", (enemy as Node2D).global_position))
+	return 0
 
 
 func _enemy_should_hold_position(enemy) -> bool:

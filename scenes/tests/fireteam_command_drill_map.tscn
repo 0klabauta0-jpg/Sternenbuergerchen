@@ -1,0 +1,50 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/tests/mission_reactivity_test.tscn" id="1_base"]
+
+[node name="FireteamCommandDrillMap" instance=ExtResource("1_base")]
+
+[node name="UnitAlpha" parent="." index="6"]
+display_name = "Drill Lead"
+callsign = "DRILL-1"
+fireteam_id = "drill"
+is_fireteam_lead = true
+weapon_1_id = "rifle"
+weapon_2_id = "none"
+
+[node name="UnitBravo" parent="." index="7"]
+display_name = "Drill Rifle"
+callsign = "DRILL-2"
+fireteam_id = "drill"
+is_fireteam_lead = false
+weapon_1_id = "rifle"
+weapon_2_id = "none"
+
+[node name="UnitCharlie" parent="." index="8"]
+display_name = "Drill Scout"
+callsign = "DRILL-3"
+fireteam_id = "drill"
+is_fireteam_lead = false
+weapon_1_id = "smg"
+weapon_2_id = "none"
+
+[node name="UnitDelta" parent="." index="9"]
+display_name = "Drill Support"
+callsign = "DRILL-4"
+fireteam_id = "drill"
+is_fireteam_lead = false
+weapon_1_id = "rifle"
+weapon_2_id = "none"
+
+[node name="MissionSetup" parent="." index="16"]
+map_file_path = "res://maps/fireteam_command_drill_24x24.json"
+scenario_file_path = "res://data/mission_scenarios/fireteam_command_drill_24x24.json"
+selected_team_unit_ids = PackedStringArray("unit_alpha", "unit_bravo", "unit_charlie", "unit_delta")
+selected_team_fireteam_ids = PackedStringArray("drill", "drill", "drill", "drill")
+defer_friendly_runtime_activation = false
+allow_full_roster_when_selection_empty = false
+
+[node name="CombatLoopDriver" parent="." index="19"]
+contact_range = 360.0
+friendly_unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie"), NodePath("../UnitDelta")])
+enemy_unit_paths = Array[NodePath]([NodePath("../EnemyDelta"), NodePath("../EnemyEcho")])

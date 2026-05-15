@@ -507,12 +507,25 @@ func _draw_security_states() -> void:
 		if fallback_font != null and security_mode == "360":
 			var radius_tiles: int = int(security_dict.get("security_radius_tiles", 0))
 			var radius_text: String = " R%d" % radius_tiles if radius_tiles > 0 else ""
-			var overwatch_suffix := " +OVW" if bool(security_dict.get("overwatch_ready", false)) else ""
-			draw_string(fallback_font, anchor_position + Vector2(12.0, -10.0), "SEC 360%s%s" % [radius_text, overwatch_suffix], HORIZONTAL_ALIGNMENT_LEFT, -1.0, 11, Color(0.95, 0.98, 1.0, 0.95))
-		if bool(security_dict.get("overwatch_ready", false)):
-			_draw_iso_marker_base(anchor_position, Color(0.95, 0.98, 1.0, 0.45), Color(0.95, 0.98, 1.0, 0.9), 0.55)
-			if fallback_font != null and security_mode != "360":
-				draw_string(fallback_font, anchor_position + Vector2(12.0, -10.0), "OVW", HORIZONTAL_ALIGNMENT_LEFT, -1.0, 11, Color(0.95, 0.98, 1.0, 0.95))
+			draw_string(fallback_font, anchor_position + Vector2(12.0, -10.0), "DEF 360%s" % radius_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 11, Color(0.95, 0.98, 1.0, 0.95))
+		elif fallback_font != null:
+			var direction := Vector2.RIGHT.rotated(float(security_dict.get("direction_angle", 0.0)))
+			draw_string(fallback_font, anchor_position + Vector2(12.0, -10.0), "DEF %s" % _format_compass_direction_label(direction), HORIZONTAL_ALIGNMENT_LEFT, -1.0, 11, Color(0.95, 0.98, 1.0, 0.95))
+
+
+func _format_compass_direction_label(direction: Vector2) -> String:
+	if direction.length_squared() <= 0.0001:
+		return "HERE"
+	var abs_x: float = absf(direction.x)
+	var abs_y: float = absf(direction.y)
+	var horizontal: String = "E" if direction.x >= 0.0 else "W"
+	var vertical: String = "S" if direction.y >= 0.0 else "N"
+	var dominant_threshold: float = 0.42
+	if abs_x <= abs_y * dominant_threshold:
+		return vertical
+	if abs_y <= abs_x * dominant_threshold:
+		return horizontal
+	return "%s%s" % [vertical, horizontal]
 
 
 func _draw_movement_states() -> void:
