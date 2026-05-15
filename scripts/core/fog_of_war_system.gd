@@ -441,14 +441,33 @@ func _observer_can_see_tile(observer: Node2D, tile_data, terrain_registry, los_s
 	if observer == null or tile_data == null:
 		return false
 	var target_position: Vector2 = tile_data.world_position
-	if sight_range_world >= 0.0 and observer.global_position.distance_to(target_position) > sight_range_world:
+	var effective_sight_range_world: float = _get_observer_sight_range_world(observer, sight_range_world)
+	if effective_sight_range_world >= 0.0 and observer.global_position.distance_to(target_position) > effective_sight_range_world:
 		return false
 	if los_system != null:
 		if los_system.has_method("has_line_of_sight_between_points"):
-			return bool(los_system.call("has_line_of_sight_between_points", observer.global_position, target_position, sight_range_world, terrain_registry))
+			return bool(los_system.call("has_line_of_sight_between_points", observer.global_position, target_position, effective_sight_range_world, terrain_registry))
 		if los_system.has_method("has_line_of_sight_with_terrain"):
-			return bool(los_system.call("has_line_of_sight_with_terrain", observer.global_position, target_position, terrain_registry, sight_range_world))
+			return bool(los_system.call("has_line_of_sight_with_terrain", observer.global_position, target_position, terrain_registry, effective_sight_range_world))
 	return true
+
+
+func _get_observer_sight_range_world(observer: Node2D, base_sight_range_world: float) -> float:
+	if base_sight_range_world < 0.0:
+		return base_sight_range_world
+	return base_sight_range_world * _get_observer_sight_range_factor(observer)
+
+
+func _get_observer_sight_range_factor(observer: Node) -> float:
+	if observer == null:
+		return 1.0
+	if observer.has_method("get_sight_range_factor"):
+		return maxf(float(observer.call("get_sight_range_factor")), 0.0)
+	if observer.has_method("get_runtime_status"):
+		var runtime_status = observer.call("get_runtime_status")
+		if runtime_status != null and runtime_status.has_method("to_dict"):
+			return maxf(float(Dictionary(runtime_status.call("to_dict")).get("sight_range_factor", 1.0)), 0.0)
+	return 1.0
 
 
 func _tile_id_for_tile(tile_data) -> String:

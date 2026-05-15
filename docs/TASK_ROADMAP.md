@@ -42,6 +42,29 @@ git checkout -b batch/<batch-name>
 - Gameplay-Wahrheit bleibt bei Simulation/Runtime/Contracts/Registries; UI-Tasks duerfen keine zweite Wahrheit einfuehren.
 - Hotpath-Tasks muessen SceneTree-Vollscans und per-frame Komplett-Rebuilds vermeiden.
 
+## Aktueller Fireteam-Arbeitsblock
+- TASK_414 - Fireteam Overview HTML
+- TASK_415 - Fireteam Runtime Execution Path Switch
+- TASK_416 - Fireteam Command Drill Map
+- TASK_417 - Fireteam Waypoint Completion Cleanup
+- TASK_418 - Fireteam Mini Card Suppression Explainer
+- TASK_419 - GO Recovery Action And NPC Speed
+- TASK_420 - Waypoint Completion Area Followup Hotfix
+- TASK_421 - Move Stance Posture Speed Sight
+- TASK_422 - GO Continue Fireteam HUD Cleanup
+- TASK_423 - Normal Move Parallel Spacing
+- TASK_424 - Fireteam Drill Enemy Visibility Grounding
+- TASK_425 - Live Move Stance Update
+- TASK_426 - Cautious Move Parallel Aim
+- TASK_427 - Fireteam Decision Feedback Aim Pose
+- TASK_428 - Fireteam Behavior Control List
+- TASK_429 - Fireteam Behavior Modes Runtime
+- TASK_430 - Fireteam Task Corruption Repair
+- TASK_431 - Fireteam Aim Pose And Card UI Hotfix
+- TASK_432 - Fireteam Muzzle Flash And Baseline Attack Movement
+- TASK_433 - Install Third Party Godot Plugins
+- TASK_434 - LimboAI Enemy Behavior Adapter Smoke
+
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
 TASK_001 RuntimeLeader

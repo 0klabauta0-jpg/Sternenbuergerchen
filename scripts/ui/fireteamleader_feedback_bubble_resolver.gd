@@ -83,6 +83,20 @@ static func build_command_feedback(
 			"delay_seconds": 0.0,
 		}
 	else:
+		var explicit_feedback_text: String = String(text_context.get("feedback_text", "")).strip_edges()
+		if explicit_feedback_text.is_empty():
+			explicit_feedback_text = String(text_context.get("order_summary_text", "")).strip_edges()
+		if not explicit_feedback_text.is_empty():
+			text_payload = {
+				"ok": true,
+				"text": explicit_feedback_text,
+				"text_source": "command_context",
+				"text_key": "command_context.%s.%s" % [action, state],
+				"trigger": String(text_context.get("comms_trigger", "order_confirmed")),
+				"quality_level": int(text_context.get("communication_quality_level", -1)),
+				"delay_seconds": 0.0,
+			}
+	if text_payload.is_empty():
 		text_payload = Dictionary(COMMS_LINES_RESOLVER_SCRIPT.call("resolve_feedback_text_payload", action, state, leader, text_context))
 	if not bool(text_payload.get("ok", false)):
 		text_payload = Dictionary(COMIC_BUBBLE_TEXT_RESOLVER_SCRIPT.call(

@@ -3,7 +3,7 @@ extends Node
 
 signal tick_processed(tick: int)
 
-const MOVE_SPEED_PER_SECOND: float = 120.0
+const MOVE_SPEED_PER_SECOND: float = 80.0
 const DAMAGE_MODEL_SCRIPT: GDScript = preload("res://scripts/core/damage_model.gd")
 const OBJECTIVE_STATUS_SCRIPT: GDScript = preload("res://scripts/core/objective_status.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
@@ -964,6 +964,7 @@ func _build_unit_snapshot(unit) -> Dictionary:
 			snapshot["active_command_type"] = String(runtime_dict.get("active_command_type", ""))
 			snapshot["source_command_type"] = String(runtime_dict.get("source_command_type", ""))
 			snapshot["move_speed_factor"] = float(runtime_dict.get("move_speed_factor", 1.0))
+			snapshot["sight_range_factor"] = float(runtime_dict.get("sight_range_factor", 1.0))
 			snapshot["movement_posture"] = String(runtime_dict.get("movement_posture", "idle"))
 			snapshot["weapon_posture"] = String(runtime_dict.get("weapon_posture", "lowered"))
 			snapshot["posture_policy_id"] = String(runtime_dict.get("posture_policy_id", ""))

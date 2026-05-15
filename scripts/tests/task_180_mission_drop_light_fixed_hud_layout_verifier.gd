@@ -99,11 +99,13 @@ func _test_mission_hud_buttons_keep_existing_paths() -> void:
 	var delete_button := command_grid.get_node_or_null("DeleteOrderButton") as Button
 	var sort_button := command_grid.get_node_or_null("SortCommandMatrixButton") as Button
 	var go_button := command_grid.get_node_or_null("GoCommandMatrixButton") as Button
+	var waypoint_erase_button := command_grid.get_node_or_null("WaypointEraseButton") as Button
 	var plan_button := command_grid.get_node_or_null("PlanCommandMatrixButton") as Button
 	_assert(delete_button != null and delete_button.get_index() == 6 and _button_is_square(delete_button) and delete_button.pressed.get_connections().size() > 0, "Del lives in #16.7 as an active command matrix button")
 	_assert(sort_button != null and sort_button.get_index() == 9 and _button_is_square(sort_button) and sort_button.pressed.get_connections().size() > 0, "Sort lives in #16.10 as an active command matrix button")
 	_assert(go_button != null and go_button.get_index() == 14 and _button_is_square(go_button) and go_button.pressed.get_connections().size() > 0, "GO lives in #16.15 as an active command matrix button")
-	_assert(plan_button != null and plan_button.get_index() == 19 and _button_is_square(plan_button) and plan_button.pressed.get_connections().size() > 0, "Plan lives in #16.20 as an active command matrix button")
+	_assert(waypoint_erase_button != null and waypoint_erase_button.get_index() == 19 and _button_is_square(waypoint_erase_button) and waypoint_erase_button.pressed.get_connections().size() > 0, "WP- lives in #16.20 as an active command matrix button")
+	_assert(plan_button == null, "Plan is no longer a visible command matrix button")
 
 	for path in [
 		"TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton",

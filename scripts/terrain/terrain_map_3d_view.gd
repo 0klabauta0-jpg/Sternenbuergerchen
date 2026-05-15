@@ -164,6 +164,7 @@ const FOW_UNKNOWN_BLACK_COLOR: Color = Color(0.0, 0.0, 0.0, 1.0)
 const UNIT_AIM_POSE_WEAPON_PITCH_DEGREES: float = 0.0
 const UNIT_READY_POSE_WEAPON_PITCH_DEGREES: float = -14.0
 const UNIT_AIM_POSE_ANIMATION_NAME: String = "shoot"
+const UNIT_AIM_POSE_HOLD_SAMPLE_RATIO: float = 0.42
 const UNIT_COMBAT_POSE_SCOPE_IMPORTED_CLIP: String = "imported_clip"
 const UNIT_COMBAT_POSE_SCOPE_SHOOT_UPPER_BODY: String = "shoot_upper_body"
 const UNIT_AIM_POSE_UPPER_BODY_BONES: PackedStringArray = [
@@ -263,6 +264,10 @@ const FRIENDLY_FIRE_SECTOR_VISUAL_MODE_LOS_LINE: String = "los_line_only"
 const FRIENDLY_FIRE_SECTOR_VISUAL_MODE_TILE_ALIGNED_LOS: String = "tile_aligned_los"
 const FRIENDLY_FIRE_SECTOR_SCAN_MODE_LOS_LINE: String = "single_facing_los_line"
 const FRIENDLY_FIRE_SECTOR_SCAN_MODE_TILE_CACHE: String = "range_bounded_los_cache"
+const WEAPON_FIRE_MUZZLE_MIN_PIXEL_SIZE: float = 0.026
+const WEAPON_FIRE_MUZZLE_BLOOM_RADIUS: float = 0.16
+const WEAPON_FIRE_MUZZLE_BLOOM_HEIGHT: float = 0.08
+const WEAPON_FIRE_MUZZLE_BLOOM_COLOR: Color = Color(1.0, 0.82, 0.20, 0.78)
 const SELECTED_UNIT_MARKER_COLOR: Color = Color(0.45, 0.78, 1.0, 0.34)
 const SELECTED_UNIT_MARKER_RADIUS: float = 0.32
 const SELECTED_UNIT_MARKER_HEIGHT: float = 0.035
@@ -5382,10 +5387,12 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		return
 	var barrel_offset: float = float(muzzle_entry.get("barrel_offset_world", 28.0))
 	var muzzle_position: Vector2 = attacker_position + direction.normalized() * barrel_offset
-	var pixel_size: float = float(muzzle_entry.get("pixel_size", 0.010))
+	var catalog_pixel_size: float = float(muzzle_entry.get("pixel_size", 0.010))
+	var pixel_size: float = maxf(catalog_pixel_size, WEAPON_FIRE_MUZZLE_MIN_PIXEL_SIZE)
 	var is_friendly_fire: bool = bool(fire_event.get("is_friendly_fire", false))
 	var color: Color = Color(1.0, 0.32, 0.28, 0.9) if is_friendly_fire else Color(1.0, 0.78, 0.28, 0.82)
 	_add_texture_card(_order_root, texture, _world_to_surface_3d_position(muzzle_position, 0.92), "WeaponFireMuzzle_%s" % _sanitize_node_name(event_id), pixel_size, Vector2.ZERO, Color(1.0, 0.95, 0.62, 0.92))
+	_add_marker3d(_order_root, muzzle_position, WEAPON_FIRE_MUZZLE_BLOOM_COLOR, "WeaponFireMuzzleBloom_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_MUZZLE_BLOOM_RADIUS, WEAPON_FIRE_MUZZLE_BLOOM_HEIGHT, 16, 0.84)
 	_add_line3d(_order_root, _world_to_surface_3d_position(muzzle_position, 0.78), _world_to_surface_3d_position(target_position, 0.78), color, "WeaponFireTrace_%s" % _sanitize_node_name(event_id))
 	var flank_label: String = _build_flank_fire_vfx_label(fire_event)
 	if not flank_label.is_empty():
@@ -5402,6 +5409,10 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		"attacker_unit_id": String(fire_event.get("attacker_unit_id", "")),
 		"target_unit_id": String(fire_event.get("target_unit_id", "")),
 		"muzzle_position": muzzle_position,
+		"muzzle_flash_visible": true,
+		"muzzle_bloom_visible": true,
+		"muzzle_catalog_pixel_size": catalog_pixel_size,
+		"muzzle_flash_pixel_size": pixel_size,
 		"audio_event_id": String(audio_result.get("event_id", "")),
 		"audio_played": bool(audio_result.get("played", false)),
 		"audio_reason": String(audio_result.get("reason", "")),
@@ -6541,6 +6552,7 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 		proxy.set_meta("unit_weapon_posture", displayed_weapon_posture)
 		proxy.set_meta("unit_runtime_weapon_posture", String(runtime_posture.get("weapon_posture", "lowered")))
 		proxy.set_meta("unit_posture_policy_id", String(runtime_posture.get("posture_policy_id", "")))
+		proxy.set_meta("unit_sight_range_factor", float(runtime_posture.get("sight_range_factor", 1.0)))
 		proxy.set_meta("unit_posture_source", "fire_event" if not active_fire_event.is_empty() else "runtime")
 		proxy.set_meta("unit_aim_pose_active", displayed_weapon_posture == "aimed")
 		proxy.set_meta("unit_ready_pose_active", displayed_weapon_posture == "ready")
@@ -6711,6 +6723,7 @@ func _get_unit_runtime_posture_snapshot(unit: Node) -> Dictionary:
 		"movement_posture": "idle",
 		"weapon_posture": "lowered",
 		"posture_policy_id": "",
+		"sight_range_factor": 1.0,
 	}
 	if unit == null or not unit.has_method("get_runtime_status"):
 		return result
@@ -6720,6 +6733,7 @@ func _get_unit_runtime_posture_snapshot(unit: Node) -> Dictionary:
 	result["movement_posture"] = _normalize_unit_movement_posture(String(runtime_status.get("movement_posture")))
 	result["weapon_posture"] = _normalize_unit_weapon_posture(String(runtime_status.get("weapon_posture")))
 	result["posture_policy_id"] = String(runtime_status.get("posture_policy_id")).strip_edges().to_lower()
+	result["sight_range_factor"] = maxf(float(runtime_status.get("sight_range_factor")), 0.0)
 	return result
 
 
@@ -6727,6 +6741,8 @@ func _normalize_unit_movement_posture(value: String) -> String:
 	match value.strip_edges().to_lower():
 		"travel", "walk", "move", "march":
 			return "travel"
+		"run", "sprint", "fast":
+			return "run"
 		"tactical", "ready", "m_position", "m-position":
 			return "tactical"
 		"engage", "engaging", "aim", "aimed":
@@ -6787,7 +6803,7 @@ func _get_unit_status_badge_text(unit: Node) -> String:
 	if unit.has_method("is_in_contact") and bool(unit.call("is_in_contact")):
 		return "CONTACT"
 	if bool(unit.get_meta("overwatch_ready", false)):
-		return "OVW"
+		return "DEF"
 	var runtime_status = unit.call("get_runtime_status") if unit.has_method("get_runtime_status") else null
 	var status_text: String = ""
 	var source_command: String = ""
@@ -6797,7 +6813,7 @@ func _get_unit_status_badge_text(unit: Node) -> String:
 	if source_command == "take":
 		return "TAKE"
 	if source_command == "defend":
-		return "DEFEND"
+		return "DEF"
 	if source_command == "flank":
 		return "FLANK"
 	match status_text:
@@ -7022,9 +7038,10 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 	base_mesh.height = UNIT_BASE_HEIGHT
 	base_mesh.radial_segments = 16
 	base.mesh = base_mesh
-	base.material_override = _make_material(Color(0.05, 0.08, 0.1, 0.72), true)
+	base.material_override = _make_material(_get_unit_base_color(unit), true)
 	base.position.y = -0.02
 	root.add_child(base)
+	root.set_meta("unit_team_base_visible", true)
 	return root
 
 
@@ -7193,6 +7210,8 @@ func _override_unit_animation_pose_tracks(base_animation: Animation, pose_animat
 		return 0
 	var target_length: float = maxf(base_animation.length, 0.001)
 	var source_length: float = maxf(pose_animation.length, 0.001)
+	var use_static_hold_pose: bool = normalized_scope == UNIT_COMBAT_POSE_SCOPE_SHOOT_UPPER_BODY
+	var hold_pose_rotations: Dictionary = _get_unit_weapon_upper_body_pose_rotations(pose_animation) if use_static_hold_pose else {}
 	for track_index in range(base_animation.get_track_count() - 1, -1, -1):
 		if base_animation.track_get_type(track_index) != Animation.TYPE_ROTATION_3D:
 			continue
@@ -7213,6 +7232,15 @@ func _override_unit_animation_pose_tracks(base_animation: Animation, pose_animat
 		var new_track_index: int = base_animation.add_track(Animation.TYPE_ROTATION_3D)
 		base_animation.track_set_path(new_track_index, NodePath(pose_track_path))
 		base_animation.track_set_interpolation_type(new_track_index, pose_animation.track_get_interpolation_type(track_index))
+		if use_static_hold_pose and hold_pose_rotations.has(pose_bone_name):
+			var hold_value: Variant = hold_pose_rotations.get(pose_bone_name)
+			if typeof(hold_value) != TYPE_QUATERNION:
+				base_animation.remove_track(new_track_index)
+				continue
+			base_animation.track_insert_key(new_track_index, 0.0, Quaternion(hold_value))
+			base_animation.track_insert_key(new_track_index, target_length, Quaternion(hold_value))
+			override_count += 1
+			continue
 		for key_index in range(pose_animation.track_get_key_count(track_index)):
 			var key_time: float = pose_animation.track_get_key_time(track_index, key_index)
 			var key_value: Variant = pose_animation.track_get_key_value(track_index, key_index)
@@ -7224,6 +7252,10 @@ func _override_unit_animation_pose_tracks(base_animation: Animation, pose_animat
 	base_animation.set_meta("unit_animation_pose_track_override_count", override_count)
 	base_animation.set_meta("unit_animation_pose_scope", normalized_scope)
 	base_animation.set_meta("unit_animation_pose_source", pose_source_name)
+	base_animation.set_meta("unit_animation_pose_static_hold", use_static_hold_pose)
+	if use_static_hold_pose:
+		base_animation.set_meta("unit_animation_pose_hold_sample_ratio", UNIT_AIM_POSE_HOLD_SAMPLE_RATIO)
+		base_animation.set_meta("unit_animation_pose_hold_sample_time", _get_unit_weapon_upper_body_pose_sample_time(pose_animation))
 	return override_count
 
 
@@ -7312,12 +7344,16 @@ func _resolve_unit_visual_animation_name(animation_player: AnimationPlayer, is_m
 		else:
 			candidates = ["crouchWalk", "run", "walk", "idle"] if is_moving else ["crouchIdle", "crouch", "idle"]
 	elif should_hold_aim:
-		if is_moving and normalized_movement_posture == "travel":
+		if is_moving and normalized_movement_posture == "run":
+			candidates = ["runShoot", "walkShoot", "shoot", "run", "walk"]
+		elif is_moving and normalized_movement_posture == "travel":
 			candidates = ["runShoot", "walkShoot", "shoot", "run", "walk"]
 		elif is_moving:
 			candidates = ["walkShoot", "runShoot", "shoot", "walk", "run"]
 		else:
 			candidates = ["standShoot", "shoot", "idle"]
+	elif is_moving and normalized_movement_posture == "run":
+		candidates = ["run", "walk", "idle"]
 	elif is_moving and normalized_movement_posture == "travel":
 		candidates = ["run", "walk", "idle"]
 	elif is_moving:
@@ -7456,6 +7492,7 @@ func _get_unit_weapon_upper_body_pose_rotations(pose_animation: Animation) -> Di
 		if typeof(cached_value) == TYPE_DICTIONARY:
 			return Dictionary(cached_value)
 	var pose_rotations: Dictionary = {}
+	var sample_time: float = _get_unit_weapon_upper_body_pose_sample_time(pose_animation)
 	for track_index in range(pose_animation.get_track_count()):
 		if pose_animation.track_get_type(track_index) != Animation.TYPE_ROTATION_3D:
 			continue
@@ -7464,12 +7501,37 @@ func _get_unit_weapon_upper_body_pose_rotations(pose_animation: Animation) -> Di
 		var bone_name: String = _get_bone_name_from_animation_track_path(String(pose_animation.track_get_path(track_index)))
 		if not UNIT_AIM_POSE_UPPER_BODY_BONES.has(bone_name):
 			continue
-		var key_value: Variant = pose_animation.track_get_key_value(track_index, 0)
+		var key_value: Variant = _get_rotation_track_value_near_time(pose_animation, track_index, sample_time)
 		if typeof(key_value) != TYPE_QUATERNION:
 			continue
 		pose_rotations[bone_name] = Quaternion(key_value)
 	pose_animation.set_meta("unit_weapon_upper_body_pose_rotations", pose_rotations)
+	pose_animation.set_meta("unit_weapon_upper_body_pose_sample_ratio", UNIT_AIM_POSE_HOLD_SAMPLE_RATIO)
+	pose_animation.set_meta("unit_weapon_upper_body_pose_sample_time", sample_time)
 	return pose_rotations
+
+
+func _get_unit_weapon_upper_body_pose_sample_time(pose_animation: Animation) -> float:
+	if pose_animation == null:
+		return 0.0
+	return clampf(maxf(pose_animation.length, 0.0) * UNIT_AIM_POSE_HOLD_SAMPLE_RATIO, 0.0, maxf(pose_animation.length, 0.0))
+
+
+func _get_rotation_track_value_near_time(animation: Animation, track_index: int, sample_time: float) -> Variant:
+	if animation == null:
+		return null
+	var key_count: int = animation.track_get_key_count(track_index)
+	if key_count <= 0:
+		return null
+	var best_key_index: int = 0
+	var best_distance: float = INF
+	for key_index in range(key_count):
+		var key_time: float = animation.track_get_key_time(track_index, key_index)
+		var distance: float = absf(key_time - sample_time)
+		if distance < best_distance:
+			best_distance = distance
+			best_key_index = key_index
+	return animation.track_get_key_value(track_index, best_key_index)
 
 
 func _reset_unit_weapon_upper_body_pose(proxy: Node3D, skeleton: Skeleton3D) -> bool:
@@ -7878,6 +7940,8 @@ func _get_unit_proxy_state_by_id() -> Dictionary:
 			"unit_visual_error": bool(proxy.get_meta("unit_visual_error", false)),
 			"uses_unit_texture": bool(proxy.get_meta("uses_unit_texture", false)),
 			"uses_kenney_model": bool(proxy.get_meta("uses_kenney_model", false)),
+			"uses_animated_character_model": bool(proxy.get_meta("uses_animated_character_model", false)),
+			"unit_team_base_visible": bool(proxy.get_meta("unit_team_base_visible", false)),
 			"unit_visual_archetype_id": String(proxy.get_meta("unit_visual_archetype_id", "")).strip_edges(),
 			"unit_visual_faction_id": String(proxy.get_meta("unit_visual_faction_id", "")).strip_edges(),
 			"unit_model_root_rotation_y_degrees": float(proxy.get_meta("unit_model_root_rotation_y_degrees", 0.0)),
@@ -7894,6 +7958,7 @@ func _get_unit_proxy_state_by_id() -> Dictionary:
 			"unit_weapon_posture": String(proxy.get_meta("unit_weapon_posture", "")).strip_edges(),
 			"unit_runtime_weapon_posture": String(proxy.get_meta("unit_runtime_weapon_posture", "")).strip_edges(),
 			"unit_posture_policy_id": String(proxy.get_meta("unit_posture_policy_id", "")).strip_edges(),
+			"unit_sight_range_factor": float(proxy.get_meta("unit_sight_range_factor", 1.0)),
 			"unit_posture_source": String(proxy.get_meta("unit_posture_source", "")).strip_edges(),
 			"unit_aim_pose_weapon_node_available": bool(proxy.get_meta("unit_aim_pose_weapon_node_available", false)),
 			"unit_aim_pose_yaw_active": bool(proxy.get_meta("unit_aim_pose_yaw_active", false)),
@@ -9418,6 +9483,12 @@ func _get_unit_color(unit: Node) -> Color:
 	if _get_unit_team_id(unit) == "team_alpha":
 		return Color(0.32, 0.74, 1.0, 1.0)
 	return Color(1.0, 0.34, 0.26, 1.0)
+
+
+func _get_unit_base_color(unit: Node) -> Color:
+	var color: Color = _get_unit_color(unit)
+	var alpha: float = 0.38 if _get_unit_team_id(unit) == "team_alpha" else 0.58
+	return Color(color.r, color.g, color.b, alpha)
 
 
 func _get_unit_visual_texture(unit: Node) -> Texture2D:

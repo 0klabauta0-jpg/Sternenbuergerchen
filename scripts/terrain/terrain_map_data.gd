@@ -30,7 +30,15 @@ static func load_from_file(path: String) -> TerrainMapData:
 		push_warning("TerrainMapData could not open map file for reading: %s" % path)
 		return terrain_map_data
 
-	var parsed_json: Variant = JSON.parse_string(file.get_as_text())
+	var file_text: String = file.get_as_text()
+	if file_text.strip_edges().is_empty():
+		push_warning("TerrainMapData found an empty map file: %s" % path)
+		return terrain_map_data
+	if _contains_nul_codepoint(file_text):
+		push_warning("TerrainMapData found NUL bytes in map file: %s" % path)
+		return terrain_map_data
+
+	var parsed_json: Variant = JSON.parse_string(file_text)
 	if typeof(parsed_json) != TYPE_DICTIONARY:
 		push_warning("TerrainMapData expected a Dictionary JSON root in: %s" % path)
 		return terrain_map_data
@@ -211,6 +219,7 @@ func save_to_file(path: String) -> Error:
 		json_root["tiles"].append(serialized_tile)
 
 	file.store_string(JSON.stringify(json_root, "\t") + "\n")
+	file.flush()
 	return OK
 
 
@@ -527,6 +536,13 @@ static func _coerce_vector2(value: Variant) -> Vector2:
 		return Vector2(float(value_dict.get("x", 0.0)), float(value_dict.get("y", 0.0)))
 
 	return Vector2.ZERO
+
+
+static func _contains_nul_codepoint(text: String) -> bool:
+	for index in range(text.length()):
+		if text.unicode_at(index) == 0:
+			return true
+	return false
 
 
 static func _coerce_marker_dictionary(value: Variant) -> Dictionary:

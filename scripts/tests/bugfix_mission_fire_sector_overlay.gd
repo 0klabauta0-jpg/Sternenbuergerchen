@@ -3,7 +3,6 @@ extends SceneTree
 const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
 const FIRETEAM_INFO_VBOX_PATH: String = "TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox"
 const GO_BUTTON_PATH: String = "TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton"
-const PLAN_BUTTON_PATH: String = "TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/PlanCommandMatrixButton"
 
 var _passed: int = 0
 var _failed: int = 0
@@ -108,15 +107,13 @@ func _test_direct_mode_hides_legacy_phase_controls() -> void:
 	controller.call("_refresh_fireteam_status_panel")
 	controller.call("_refresh_button_state")
 	var phase_panel := scene.get_node_or_null("%s/FireteamPhasePanel" % FIRETEAM_INFO_VBOX_PATH) as Control
-	var return_button := scene.get_node_or_null("%s/FireteamStatusPanel/MarginContainer/HBoxContainer/ReturnToPlanButton" % FIRETEAM_INFO_VBOX_PATH) as Button
-	var suppression_progress := scene.get_node_or_null("%s/FireteamStatusPanel/MarginContainer/HBoxContainer/SuppressionProgressLine" % FIRETEAM_INFO_VBOX_PATH) as Control
+	var status_panel := scene.get_node_or_null("%s/FireteamStatusPanel" % FIRETEAM_INFO_VBOX_PATH) as Control
 	var go_button := scene.get_node_or_null(GO_BUTTON_PATH) as Button
-	var plan_button := scene.get_node_or_null(PLAN_BUTTON_PATH) as Button
+	var plan_button := scene.get_node_or_null("TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/PlanCommandMatrixButton") as Button
 	_assert(phase_panel != null and not phase_panel.visible, "#17 hides the parked legacy phase panel in direct order mode")
-	_assert(return_button != null and not return_button.visible, "#17 hides the inert Plan return button until it can actually return to a plan")
-	_assert(suppression_progress != null and suppression_progress.tooltip_text.contains("SUPP"), "Suppression readout explains the SUPP abbreviation")
+	_assert(status_panel == null, "#17 no longer creates the old Ready/Plan/SUPP status panel")
 	_assert(go_button != null and go_button.disabled, "GO in #16 is disabled when no selected fireteam order can execute")
-	_assert(plan_button != null and plan_button.disabled, "Plan in #16 is disabled when no return-to-plan action is available")
+	_assert(plan_button == null, "Plan in #16 is no longer a visible return-to-plan action")
 	scene.queue_free()
 	await _wait_frames(2)
 

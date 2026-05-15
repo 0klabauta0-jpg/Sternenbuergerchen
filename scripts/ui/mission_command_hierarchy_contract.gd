@@ -22,6 +22,7 @@ const BUTTON_PATH_TAKE: String = "../TacticalUI/BottomDock/BottomMargin/BottomRo
 const BUTTON_PATH_TARGET: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton"
 const BUTTON_PATH_CLEAR_TARGET: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton"
 const BUTTON_PATH_DELETE_ORDER: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/DeleteOrderButton"
+const BUTTON_PATH_WAYPOINT_ERASE: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/WaypointEraseButton"
 const BUTTON_PATH_SORT: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/SortCommandMatrixButton"
 const BUTTON_PATH_SET_LZ: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton"
 const BUTTON_PATH_CALL_DROPSHIP: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton"
@@ -82,6 +83,7 @@ static func get_action_catalog() -> Array:
 		_action("flank", "Flank", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.flank", BUTTON_PATH_FLANK, {"requires_selection": true, "requires_tile_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
 		_action("clear_target", "Clear Target", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.clear_target", BUTTON_PATH_CLEAR_TARGET, {"requires_planning": true, "implemented": true, "context": "area"}),
 		_action("delete_order", "Delete", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.clear_target", BUTTON_PATH_DELETE_ORDER, {"requires_planning": true, "implemented": true, "context": "waypoint_or_area"}),
+		_action("waypoint_erase", "WP-", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.clear_target", BUTTON_PATH_WAYPOINT_ERASE, {"requires_planning": true, "implemented": true, "context": "waypoint_or_area", "tooltip_hint": "Deletes the selected waypoint or area order from the command matrix."}),
 
 		_action("tactical_stance", "Stance", GROUP_RULE, PANEL_FIRETEAM_DETAILS, "mission.command.stance", "", {"requires_selection": true, "implemented": true, "context": "single_or_multi", "status_source": "TacticalStanceController", "tooltip_hint": "Direct C/N/A stance toggle on each fireteam card."}),
 		_action("tempo", "Tempo", GROUP_RULE, PANEL_FIRETEAM_DETAILS, "mission.rule.tempo", "", {"requires_selection": true, "status_only": true, "context": "single_or_multi", "status_source": "FTL profile and current command", "tooltip_hint": "Status value from FTL initiative, plan quality, and active order."}),
@@ -95,7 +97,7 @@ static func get_action_catalog() -> Array:
 		_action("preview_plan", "Preview", GROUP_PLAN, PANEL_MISSION_CONTROL, "mission.command.go_plan", "", {"requires_multi_selection": true, "status_only": true, "context": "multi_fireteam"}),
 		_action("sort_fireteam", "Sort", GROUP_PLAN, PANEL_COMMAND_MATRIX, "mission.command.go_plan", BUTTON_PATH_SORT, {"requires_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi", "tooltip_hint": "Reorder the selected fireteam plan before issuing GO."}),
 		_action("go_plan", "GO", GROUP_PLAN, PANEL_COMMAND_MATRIX, "mission.command.go_plan", BUTTON_PATH_GO_PLAN, {"requires_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi", "tooltip_hint": "Execute the selected planned order."}),
-		_action("return_to_plan", "Plan", GROUP_PLAN, PANEL_COMMAND_MATRIX, "mission.command.go_plan", BUTTON_PATH_RETURN_TO_PLAN, {"requires_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi", "tooltip_hint": "Return selected fireteams to the planned route."}),
+		_action("return_to_plan", "Plan", GROUP_PLAN, PANEL_COMMAND_MATRIX, "mission.command.go_plan", "", {"requires_selection": true, "requires_local_command": true, "implemented": false, "hidden": true, "context": "single_or_multi", "tooltip_hint": "Internal recovery path; visible continuation is handled by GO."}),
 
 		_action("set_lz", "LZ", GROUP_AIR_LZ, PANEL_MISSION_CONTROL, "mission.command.set_lz", BUTTON_PATH_SET_LZ, {"requires_planning": true, "implemented": true, "context": "mission"}),
 		_action("call_dropship", "Drop", GROUP_AIR_LZ, PANEL_MISSION_CONTROL, "mission.command.call_dropship", BUTTON_PATH_CALL_DROPSHIP, {"requires_planning": true, "requires_drop_available": true, "implemented": true, "context": "mission"}),
@@ -206,7 +208,8 @@ static func build_dropship_command_matrix_layout_snapshot(context: Dictionary = 
 		"go_button_panel_role": PANEL_COMMAND_MATRIX,
 		"go_button_source_action": "call_dropship",
 		"go_button_slot": "16.15",
-		"plan_button_slot": "16.20",
+		"waypoint_erase_button_slot": "16.20",
+		"return_to_plan_button_hidden": true,
 		"legacy_window_17_go_removed": true,
 		"status_preview_panel_role": PANEL_FIRETEAM_DETAILS,
 		"lz_pick_panel_role": PANEL_COMMAND_MATRIX,

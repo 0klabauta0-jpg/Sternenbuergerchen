@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fireteam Ueberblick - SternenBuergerchen</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101318;
+      --panel: #181d24;
+      --panel-2: #1f2630;
+      --text: #edf1f7;
+      --muted: #aab4c2;
+      --line: #334052;
+      --blue: #62a8ff;
+      --green: #5ed08e;
+      --amber: #f0bd5d;
+      --red: #ef766f;
+      --code: #d7e8ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    header {
+      padding: 34px 42px 24px;
+      border-bottom: 1px solid var(--line);
+      background: #141922;
+    }
+
+    main {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 30px 28px 56px;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      font-size: 34px;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 23px;
+      margin: 30px 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h3 {
+      font-size: 17px;
+      margin-bottom: 9px;
+      color: var(--code);
+    }
+
+    p {
+      margin: 0 0 12px;
+    }
+
+    code {
+      color: var(--code);
+      background: rgba(98, 168, 255, 0.10);
+      border: 1px solid rgba(98, 168, 255, 0.20);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.94em;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      max-width: 920px;
+      font-size: 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(120px, 1fr));
+      gap: 10px;
+      align-items: stretch;
+      margin: 16px 0;
+    }
+
+    .step {
+      min-height: 110px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      position: relative;
+    }
+
+    .step::after {
+      content: ">";
+      position: absolute;
+      right: -10px;
+      top: 42%;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .step:last-child::after {
+      content: "";
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #081018;
+    }
+
+    .tag.meta { background: var(--amber); }
+    .tag.ui { background: var(--blue); }
+    .tag.tactic { background: var(--green); }
+    .tag.runtime { background: var(--red); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 24px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th,
+    td {
+      vertical-align: top;
+      text-align: left;
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    th {
+      background: #202835;
+      color: #ffffff;
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    ul {
+      margin: 8px 0 0 18px;
+      padding: 0;
+    }
+
+    li {
+      margin-bottom: 7px;
+    }
+
+    .note {
+      border-left: 4px solid var(--amber);
+      background: rgba(240, 189, 93, 0.10);
+      padding: 12px 14px;
+      margin: 14px 0 20px;
+    }
+
+    .good {
+      border-left-color: var(--green);
+      background: rgba(94, 208, 142, 0.10);
+    }
+
+    .warn {
+      border-left-color: var(--red);
+      background: rgba(239, 118, 111, 0.10);
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 920px) {
+      header {
+        padding: 28px 22px 20px;
+      }
+
+      main {
+        padding: 22px 16px 42px;
+      }
+
+      .flow {
+        grid-template-columns: 1fr;
+      }
+
+      .step::after {
+        content: "v";
+        right: 14px;
+        top: auto;
+        bottom: -16px;
+      }
+
+      .step:last-child::after {
+        content: "";
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Fireteam Ueberblick</h1>
+    <p class="subtitle">
+      Bestandsaufnahme fuer den Branch <code>task/fireteam</code>. Diese Datei erklaert, wie Fireteams aktuell durch Homebase, FOB, Mission und Runtime laufen, und wo welche Information abgefragt wird.
+    </p>
+  </header>
+
+  <main>
+    <section>
+      <h2>Kernaussage</h2>
+      <div class="note good">
+        <p>
+          Ein Fireteam ist aktuell kein einzelnes zentrales Runtime-Objekt. Es ist ein Datenverbund aus Fireteam-ID, Unit-Zuordnung, Fireteam-Definition, Loadout, Transport-/Payload-Status, Mission-Auswahl, taktischem Plan und Runtime-UnitCommands.
+        </p>
+        <p>
+          Die Gameplay-Mutation gehoert weiter zu <code>SimulationRoot</code> und den Runtime-Komponenten. UI-Schichten lesen Snapshots, stellen Karten dar und stossen Commands an.
+        </p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Grobe Schichten</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>1. Meta-Staging</h3>
+          <p>Homebase und FOB verwalten Teamzusammenstellung, Fireteam-Karten, Loadout und Dropship-Payloads.</p>
+          <p class="small"><code>scripts/meta/homebase_screen.gd</code>, <code>scripts/meta/fob_screen.gd</code></p>
+        </article>
+        <article class="card">
+          <h3>2. Mission-HUD</h3>
+          <p>Der Mission-Controller liest Fireteam-IDs, Unit-Nodes, Auswahl, Kartenstatus, Kontakte und Plan-Snapshots.</p>
+          <p class="small"><code>scripts/tests/mission_tactical_sandbox_controller.gd</code></p>
+        </article>
+        <article class="card">
+          <h3>3. Taktik-Resolver</h3>
+          <p>Resolver bauen aus Commander-Absicht, FTL-Qualitaet, Units, Terrain/Kontakten und Planstatus konkrete Ausfuehrungsdaten.</p>
+          <p class="small"><code>scripts/tactical/*fireteam*.gd</code></p>
+        </article>
+        <article class="card">
+          <h3>4. Runtime</h3>
+          <p><code>SimulationRoot</code> verarbeitet UnitCommands, loest Units ueber <code>UnitRegistry</code> auf und schreibt Runtime-Status.</p>
+          <p class="small"><code>scripts/core/simulation_root.gd</code>, <code>scripts/registries/unit_registry.gd</code></p>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>Befehlsfluss</h2>
+      <div class="flow">
+        <div class="step">
+          <span class="tag ui">UI</span>
+          <h3>Auswahl</h3>
+          <p>Spieler waehlt Fireteam oder mehrere Fireteams.</p>
+          <p><code>_selected_fireteam_ids</code></p>
+        </div>
+        <div class="step">
+          <span class="tag ui">Intent</span>
+          <h3>Command</h3>
+          <p>Button, Tile-Click, Waypoint oder AreaOrder erzeugt einen Fireteam-Kontext.</p>
+        </div>
+        <div class="step">
+          <span class="tag tactic">Plan</span>
+          <h3>FTL-Auslegung</h3>
+          <p>Behavior- und Plan-Resolver bestimmen Bewegung, Security, Cover, Reaktion und Qualitaet.</p>
+        </div>
+        <div class="step">
+          <span class="tag tactic">Execute</span>
+          <h3>UnitCommands</h3>
+          <p>Movement/Security-Controller erzeugen konkrete UnitCommands pro Mitglied.</p>
+        </div>
+        <div class="step">
+          <span class="tag runtime">Truth</span>
+          <h3>SimulationRoot</h3>
+          <p>Kommandos werden priorisiert, Units ueber Registry gesucht und Runtime-State angewandt.</p>
+        </div>
+        <div class="step">
+          <span class="tag ui">Feedback</span>
+          <h3>Snapshots</h3>
+          <p>HUD, Karten, Overlays und Bubbles lesen Status-Snapshots.</p>
+        </div>
+      </div>
+
+      <div class="note">
+        <p>
+          Seit <code>TASK_415</code> gilt der Mission-Tactical-Pfad ueber <code>MissionTacticalSandboxController</code>, taktische Resolver, <code>FireteamMovementController</code> und <code>SimulationRoot.enqueue_command()</code> als offizieller sichtbarer Fireteam-Ausfuehrungspfad. Der aeltere <code>RuntimeLeader -> FTLTask -> UnitCommand</code>-Pfad bleibt Compatibility-/Adapter- und Basistest-Pfad.
+        </p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Entscheidung TASK_415</h2>
+      <div class="note">
+        <p>
+          <strong>B ist der offizielle sichtbare Mission-Fireteam-Ausfuehrungspfad.</strong> Neue Fireteam-Gameplay-Slices sollen an Auswahl, Waypoints, AreaOrders, Phasen, taktische Resolver, <code>FireteamMovementController</code>, <code>FireteamSecurityController</code> und <code>SimulationRoot</code> andocken. <code>RuntimeLeader</code> und <code>FTLTask</code> bleiben erhalten, duerfen aber keine zweite sichtbare Fireteam-Wahrheit neben diesem Pfad aufbauen.
+        </p>
+      </div>
+      <div class="grid">
+        <article class="card">
+          <h3>Aktiver Pfad</h3>
+          <p><code>mission_tactical</code>: sichtbare Mission-Ausfuehrung, Fireteam-Mini-Cards, Map-Overlays, Rush/Bounding/Caterpillar, Postures und aktive Waypoint-/AreaOrder-Phasen.</p>
+        </article>
+        <article class="card">
+          <h3>Legacy-Policy</h3>
+          <p><code>compatibility_adapter_only</code>: alte FTLTask-Verifier, Adapter und Migrationsreferenz bleiben erlaubt, aber nicht als neuer alleiniger Gameplay-Ausfuehrungspfad.</p>
+        </article>
+        <article class="card">
+          <h3>Pruefpunkt</h3>
+          <p><code>get_fireteam_runtime_execution_path_snapshot()</code> meldet <code>active_path_id</code>, <code>legacy_policy</code>, Runtime-Autoritaet und read-only UI-/Snapshot-Grenzen.</p>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>Informationsquellen</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Information</th>
+            <th>Primaere Quelle</th>
+            <th>Abfrage / Verarbeitung</th>
+            <th>Hinweis</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Welche Units gehoeren zu welchem Fireteam?</td>
+            <td><code>_selected_unit_ids</code> plus parallel gespeicherte <code>_selected_fireteam_ids</code> in Homebase/FOB.</td>
+            <td><code>_build_assignment_lookup()</code>, <code>_get_member_unit_ids_for_fireteam()</code>, <code>_get_fireteam_units()</code></td>
+            <td>Meta speichert Zuordnung fuer Staging. Mission liest live Unit-Nodes mit <code>get_fireteam_id()</code>.</td>
+          </tr>
+          <tr>
+            <td>Fireteam-Definition</td>
+            <td><code>_fireteam_definitions</code></td>
+            <td><code>_normalize_fireteam_definitions()</code>, <code>_get_fireteam_definition()</code>, <code>_get_fireteam_definitions_snapshot()</code></td>
+            <td>Enthaelt ID, Label, Lead, Loadout, Respawn-Flag und Member-Loadouts.</td>
+          </tr>
+          <tr>
+            <td>Lead / FTL</td>
+            <td><code>lead_unit_id</code> in Definition oder live Unit mit <code>is_fireteam_lead</code>.</td>
+            <td><code>_resolve_fireteam_leader_for_behavior()</code>, <code>FireteamBehaviorResolver._resolve_leader()</code></td>
+            <td>Fallback ist beste fit Unit nach Leadership oder Selection-Anchor.</td>
+          </tr>
+          <tr>
+            <td>Loadout pro Member</td>
+            <td><code>member_loadouts</code> in Fireteam-Definition.</td>
+            <td><code>_get_member_loadout()</code>, <code>_build_homebase_member_loadouts()</code>, <code>SimulationRoot._apply_loadout_modifiers_effect()</code></td>
+            <td>Loadout wird als Datenpaket weitergereicht; Combat/Runtime-Wirkung bleibt Effekt/Runtime-Sache.</td>
+          </tr>
+          <tr>
+            <td>Dropship-Payload</td>
+            <td>Homebase/FOB per Craft: staged, boarding, boarded, payload Fireteam IDs.</td>
+            <td><code>_get_homebase_direct_payload_fireteam_ids_for_craft()</code>, <code>_get_visible_transport_craft_fireteam_ids()</code></td>
+            <td>Embarked Fireteams sollen nicht zugleich als aktive Ground-Fireteamkarte erscheinen.</td>
+          </tr>
+          <tr>
+            <td>Mission-verfuegbare Fireteams</td>
+            <td><code>MissionSetup.selected_team_fireteam_ids</code> plus live Friendly Units.</td>
+            <td><code>_get_available_fireteam_ids()</code>, <code>_get_displayable_fireteam_ids()</code></td>
+            <td>Bei deferred activation werden nur sichtbare/deployed Fireteams angezeigt.</td>
+          </tr>
+          <tr>
+            <td>Aktive Fireteam-Auswahl</td>
+            <td><code>MissionTacticalSandboxController._selected_fireteam_ids</code></td>
+            <td><code>_set_selected_fireteams()</code>, <code>FireteamSelectionAdapter</code>, Mini-Card Klicks</td>
+            <td>Auswahl ist UI-/Planungszustand, keine Gameplay-Wahrheit.</td>
+          </tr>
+          <tr>
+            <td>FTL-Qualitaet / Readiness</td>
+            <td>Behavior-Profil-Metadaten oder Plan-Assignment-Public-Snapshot.</td>
+            <td><code>FTLReadinessSnapshotContract.build_snapshot()</code>, <code>_build_fireteam_status_card_entry()</code></td>
+            <td>Read-only Anzeige: Plan Quality, Morale, Reaction Delay, Execution Label.</td>
+          </tr>
+          <tr>
+            <td>Bewegungsstatus</td>
+            <td><code>FireteamMovementController._execution_by_fireteam</code></td>
+            <td><code>get_fireteam_movement_state()</code>, <code>get_fireteam_movement_snapshot()</code></td>
+            <td>Liefert Stil, Bounds, bewegende/deckende Units, Zielpositionen und Kartenlabel.</td>
+          </tr>
+          <tr>
+            <td>Security / Overwatch</td>
+            <td><code>FireteamSecurityController._state_by_fireteam</code></td>
+            <td><code>get_fireteam_security_snapshot()</code>, <code>update_fireteam_state()</code></td>
+            <td>Berechnet 360 oder Sektor aus Leader, Profil, Bewegung, Suppression, Ad-hoc und Threat Inputs.</td>
+          </tr>
+          <tr>
+            <td>Runtime-Unit-State</td>
+            <td>Unit-Nodes und <code>UnitRuntimeStatus</code></td>
+            <td><code>SimulationRoot._apply_unit_command_status()</code>, <code>TestUnit.assign_unit_command()</code></td>
+            <td>Hier landen Movement-/Weapon-Postures, Fire Status, Target und Source Command.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Wichtige Code-Orte</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Datei</th>
+            <th>Rolle</th>
+            <th>Wichtige Funktionen</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>scripts/meta/homebase_screen.gd</code></td>
+            <td>Homebase-Direct Fireteam-Staging, Loadout, Flightdeck-Payload.</td>
+            <td><code>set_fireteam_context()</code> ca. 200, <code>_render_homebase_fireteams()</code> ca. 1591, <code>_on_homebase_staging_fireteam_dropped()</code> ca. 2643, <code>_build_homebase_member_loadouts()</code> ca. 3702.</td>
+          </tr>
+          <tr>
+            <td><code>scripts/meta/fob_screen.gd</code></td>
+            <td>FOB-Staging, Respawn-Anchor, Loadout-Staging, Dropship-Queue.</td>
+            <td><code>configure_transfer()</code> ca. 453, <code>_build_assignment_lookup()</code> ca. 826, <code>_on_staging_fireteam_dropped()</code> ca. 1856, <code>_sanitize_fireteam_state()</code> ca. 3301.</td>
+          </tr>
+          <tr>
+            <td><code>scripts/meta/fob_fireteam_card.gd</code></td>
+            <td>Gemeinsame Fireteam-Karte fuer Homebase, FOB und Mission-Mini-Cards.</td>
+            <td><code>setup_card()</code>, Drag-Payload <code>type = fob_fireteam_card</code>, Drop-Signale <code>unit_dropped</code> und <code>fireteam_dropped</code>.</td>
+          </tr>
+          <tr>
+            <td><code>scripts/tests/mission_tactical_sandbox_controller.gd</code></td>
+            <td>Mission-Auswahl, Command-Matrix, Fireteam-Mini-Cards, Snapshots und Execution-Glue.</td>
+            <td><code>_issue_command()</code> ca. 1710, <code>_refresh_fireteam_mini_cards()</code> ca. 2756, <code>_build_fireteam_status_card_entry()</code> ca. 3476, <code>_get_fireteam_units()</code> ca. 9390, <code>_issue_waypoint_for_fireteam()</code> ca. 12524.</td>
+          </tr>
+          <tr>
+            <td><code>scripts/tactical/fireteam_behavior_resolver.gd</code></td>
+            <td>FTL-/Team-Profil, Advance Style, Execution Quality, Public FTL Snapshot.</td>
+            <td><code>resolve_profile()</code>, <code>build_leader_tactical_skill_snapshot()</code>, <code>build_public_leader_tactical_snapshot()</code>.</td>
+          </tr>
+          <tr>
+            <td><code>scripts/tactical/fireteam_movement_controller.gd</code></td>
+            <td>Aktuelle sichtbare Fireteam-Bewegung: Rush, Bounding, Caterpillar, Formation und Postures.</td>
+            <td><code>start_execution()</code>, <code>update_execution()</code>, <code>_enqueue_unit_command()</code>, <code>_build_public_state()</code>.</td>
+          </tr>
+          <tr>
+            <td><code>scripts/tactical/fireteam_runtime_execution_path_contract.gd</code></td>
+            <td>Maschinenlesbarer Contract fuer die TASK_415-Pfadentscheidung.</td>
+            <td><code>build_snapshot()</code>, <code>validate_snapshot()</code>, <code>is_valid_snapshot()</code>.</td>
+          </tr>
+          <tr>
+            <td><code>scripts/tactical/fireteam_security_controller.gd</code></td>
+            <td>Security-/Overwatch-Zustand pro Fireteam.</td>
+            <td><code>update_fireteam_state()</code>, <code>get_state_snapshot()</code>, <code>_build_member_assignments()</code>.</td>
+          </tr>
+          <tr>
+            <td><code>scripts/tactical/multi_fireteam_plan_resolver.gd</code></td>
+            <td>Rollenplan fuer mehrere Fireteams.</td>
+            <td><code>resolve_area_plan()</code>, <code>confirm_plan()</code>, <code>swap_roles()</code>, <code>_build_assignment()</code>.</td>
+          </tr>
+          <tr>
+            <td><code>scripts/core/simulation_root.gd</code></td>
+            <td>Autoritative Runtime-Mutation fuer Commands, Effects, Movement, Damage, Heal, Respawn, Loadout.</td>
+            <td><code>enqueue_command()</code> ca. 129, <code>_apply_command()</code> ca. 1223, <code>_apply_move_command()</code> ca. 1348, <code>_apply_unit_command_status()</code> ca. 1420.</td>
+          </tr>
+          <tr>
+            <td><code>scripts/ftl/runtime_leader.gd</code></td>
+            <td>Legacy/Grundlagen-FTL: nimmt FTLTasks an, setzt FTLRuntimeStatus und baut UnitCommands.</td>
+            <td><code>assign_ftl_task()</code>, <code>process_current_ftl_task()</code>, <code>assign_current_ftl_task_to_all_units()</code>, <code>_build_unit_command_from_ftl_task()</code>.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Zwei Command-Pfade</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>A. Legacy / Compatibility-FTL</h3>
+          <p>
+            <code>MissionCommandFlowDriver</code> baut einen <code>CommanderCommand</code>, der <code>RuntimeLeader.command()</code> ausloest. Danach routet <code>EventRouter.squad_command</code> zum Translator. <code>CommandToFTLTaskTranslator</code> erzeugt einen <code>FTLTask</code>. <code>RuntimeLeader</code> verarbeitet den Task, setzt <code>FTLRuntimeStatus</code>, weist einem Unit eine <code>UnitCommand</code> zu und enqueued sie in <code>SimulationRoot</code>.
+          </p>
+          <p class="small">Weiter erlaubt fuer Basis-Tests, Adapter und Migrationsreferenz. Nicht mehr als neuer alleiniger sichtbarer Fireteam-Gameplay-Pfad erweitern.</p>
+        </article>
+        <article class="card">
+          <h3>B. Offizieller Mission-Tactical-Pfad</h3>
+          <p>
+            <code>MissionTacticalSandboxController</code> verwaltet Auswahl, Waypoints, AreaOrders und aktive Phasen. Bei GO ruft er <code>_activate_next_waypoint_for_plan()</code> und <code>_issue_waypoint_for_fireteam()</code> auf. Dort erzeugt <code>FireteamMovementController.start_execution()</code> pro Mitglied <code>UnitCommand</code>-Dictionaries und schiebt sie in <code>SimulationRoot.enqueue_command()</code>.
+          </p>
+          <p class="small">Seit TASK_415 der aktive sichtbare Pfad fuer Rush/Bounding/Caterpillar, Postures, Fireteam-Mini-Cards, Waypoint-/AreaOrder-Phasen und Map-Overlays.</p>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>Mission-HUD Snapshots</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Snapshot</th>
+            <th>Quelle</th>
+            <th>Wofuer genutzt</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>get_fireteam_status_card_snapshot()</code></td>
+            <td><code>_build_fireteam_status_card_entry()</code></td>
+            <td>Mini-Card-Status: Execution, Readiness, Kontakt, Gesundheit, Bewegung, Position, Loadout.</td>
+          </tr>
+          <tr>
+            <td><code>get_fireteam_member_status_row_snapshot()</code></td>
+            <td><code>_build_fireteam_member_status_row_entry()</code></td>
+            <td>Mitgliederstatus: fit/wounded/down/suppressed/busy, HP, Rolle.</td>
+          </tr>
+          <tr>
+            <td><code>get_fireteam_movement_snapshot()</code></td>
+            <td><code>FireteamMovementController.get_state_snapshot()</code></td>
+            <td>Kartenlabel und Bewegungsvisuals fuer Bounds, Gruppen und Zielpositionen.</td>
+          </tr>
+          <tr>
+            <td><code>get_fireteam_security_snapshot()</code></td>
+            <td><code>FireteamSecurityController.update_fireteam_state()</code></td>
+            <td>Fire-Sector/Overwatch-Overlay und #17 Security-Text.</td>
+          </tr>
+          <tr>
+            <td><code>get_multi_fireteam_plan_snapshot()</code></td>
+            <td><code>MultiFireteamPlanResolver</code> und serialisierte Planliste</td>
+            <td>Rollen wie Lead, Support, Security, Reserve, Recon; #17/#18 Plantexte und Map-Rollenlabel.</td>
+          </tr>
+          <tr>
+            <td><code>get_command_feedback_snapshot()</code></td>
+            <td>Mission-Controller als Headless-Pruefpunkt</td>
+            <td>Auswahl, #16/#17/#18-Texte, Waypoints, AreaOrders, Feedback-Bubbles.</td>
+          </tr>
+          <tr>
+            <td><code>get_fireteam_runtime_execution_path_snapshot()</code></td>
+            <td><code>FireteamRuntimeExecutionPathContract</code> plus Mission-Controller-Zaehler</td>
+            <td>Offizieller Pfadmarker: <code>mission_tactical</code>, Legacy-Policy, Runtime-Autoritaet und read-only Snapshot-Grenzen.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Runtime-Daten</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Datenstruktur</th>
+            <th>Enthaelt</th>
+            <th>Wichtig fuer Fireteam</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>UnitCommand</code></td>
+            <td><code>command_type</code>, <code>unit_id</code>, <code>team_id</code>, <code>target_position</code>, <code>fire_status</code>, <code>move_speed_factor</code>, <code>cover_score</code>, <code>attack_bonus</code>, <code>phase</code>, <code>movement_posture</code>, <code>weapon_posture</code>, <code>command_token</code></td>
+            <td>Konkreter Runtime-Auftrag pro Unit. Fireteam-Logik endet hier in einzelnen Unit-Kommandos.</td>
+          </tr>
+          <tr>
+            <td><code>UnitRuntimeStatus</code></td>
+            <td>Team, Fireteam, Vital-/Runtime-State, Postures und weitere Unit-Daten.</td>
+            <td>Anzeige und Animation koennen lesen, welches Fireteam/Verhalten gerade aktiv ist.</td>
+          </tr>
+          <tr>
+            <td><code>FTLTask</code></td>
+            <td><code>seek_cover</code>, <code>move_to_area</code>, <code>engage_in_area</code>, <code>hold_position</code>, <code>retreat</code></td>
+            <td>Legacy-/Compatibility-Zwischenschicht zwischen CommanderCommand und UnitCommand; nicht mehr Primaerpfad fuer sichtbares Fireteam-Gameplay.</td>
+          </tr>
+          <tr>
+            <td><code>FireteamExecutionPlan</code></td>
+            <td>Plan-ID, Command-ID, Fireteam-ID, Movement Style, Security Mode, Cover, Route Bias, FTL Skill Factors.</td>
+            <td>Aktueller Contract fuer Commander -> FTL -> UnitAction. UI darf ihn anzeigen, aber nicht als Unit-Wahrheit behandeln.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Bekannte Watchpoints</h2>
+      <div class="note warn">
+        <ul>
+          <li><strong>Fireteam-ID vs Team-ID:</strong> <code>FTLRegistry</code> ist aktuell nach <code>team_id</code> benannt/registriert, waehrend viele Mission-Pfade Fireteam-IDs wie <code>ft1</code>, <code>blue</code> oder <code>gold</code> nutzen. Das ist historisch gewachsen und sollte bei neuen Runtime-FTL-Arbeiten bewusst geklaert werden.</li>
+          <li><strong>Mission-HUD scannt Friendly-Children:</strong> <code>_get_all_friendly_units()</code> sammelt Friendly Unit-Nodes unter dem Mission-Root. Das ist fuer HUD/Controller-Snapshots okay zu beobachten, aber Runtime-Hotpaths sollen weiter Registries nutzen.</li>
+          <li><strong>Pfadentscheidung TASK_415:</strong> Neue sichtbare Fireteam-Arbeit gehoert an den Mission-Tactical-Pfad. <code>RuntimeLeader</code>/<code>FTLTask</code> bleibt Compatibility-/Adapter-Pfad, nicht zweite Gameplay-Wahrheit.</li>
+          <li><strong>UI-Truth-Grenze:</strong> Fireteam-Karten speichern Anzeigen, Drag-Ziele und Metadaten. Dauerhafte Gameplay-Wirkung darf daraus nicht direkt entstehen.</li>
+          <li><strong>Embarked vs Ground:</strong> Fireteams im Dropship duerfen nicht gleichzeitig als aktive Bodentrupps im Mission-HUD dupliziert werden.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h2>Praktische Lesereihenfolge</h2>
+      <ol>
+        <li>Start mit <code>docs/dev/fireteam_runtime_execution_path_contract.md</code>: TASK_415-Entscheidung, aktiver Pfad und Legacy-Policy.</li>
+        <li>Dann <code>docs/dev/commander_fireteam_delegation_contract.md</code>: Grundregel Commander -> FTL -> UnitAction -> SimulationRoot.</li>
+        <li>Dann <code>scripts/meta/homebase_screen.gd</code> und <code>scripts/meta/fob_screen.gd</code>: Wie Fireteam-Zuordnung, Lead, Loadout und Payload entstehen.</li>
+        <li>Dann <code>scripts/tests/mission_tactical_sandbox_controller.gd</code>: Wie Mission-Auswahl, Mini-Cards, GO, Waypoints und Snapshots verbunden sind.</li>
+        <li>Dann <code>scripts/tactical/fireteam_behavior_resolver.gd</code>, <code>fireteam_movement_controller.gd</code>, <code>fireteam_security_controller.gd</code>: Wie aus dem Fireteam-Kontext Verhalten wird.</li>
+        <li>Zum Schluss <code>scripts/core/simulation_root.gd</code> und <code>scripts/npc/unit_command.gd</code>: Wo die konkrete Runtime-Wirkung ankommt.</li>
+      </ol>
+    </section>
+  </main>
+</body>
+</html>

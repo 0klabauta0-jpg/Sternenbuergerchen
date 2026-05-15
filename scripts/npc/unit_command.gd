@@ -16,6 +16,7 @@ const MOVEMENT_POSTURE_OVERWATCH: String = "overwatch"
 const MOVEMENT_POSTURE_CROUCH: String = "crouch"
 const MOVEMENT_POSTURE_CROUCH_WALK: String = "crouch_walk"
 const MOVEMENT_POSTURE_CROUCH_RUN: String = "crouch_run"
+const MOVEMENT_POSTURE_RUN: String = "run"
 const WEAPON_POSTURE_LOWERED: String = "lowered"
 const WEAPON_POSTURE_READY: String = "ready"
 const WEAPON_POSTURE_AIMED: String = "aimed"
@@ -39,6 +40,7 @@ const ALLOWED_MOVEMENT_POSTURES: PackedStringArray = [
 	MOVEMENT_POSTURE_CROUCH,
 	MOVEMENT_POSTURE_CROUCH_WALK,
 	MOVEMENT_POSTURE_CROUCH_RUN,
+	MOVEMENT_POSTURE_RUN,
 ]
 const ALLOWED_WEAPON_POSTURES: PackedStringArray = [
 	WEAPON_POSTURE_LOWERED,
@@ -53,6 +55,7 @@ var team_id: String = ""
 var fire_status: String = FIRE_STATUS_FIRE_AT_WILL
 var source_command_type: String = ""
 var move_speed_factor: float = 1.0
+var sight_range_factor: float = 1.0
 var cover_score: float = 0.0
 var attack_bonus: float = 0.0
 var target_position: Variant = null
@@ -103,6 +106,9 @@ func is_valid() -> bool:
 	if move_speed_factor < 0.0:
 		return false
 
+	if sight_range_factor < 0.0:
+		return false
+
 	if not _has_valid_target_position():
 		return false
 
@@ -118,6 +124,7 @@ func to_dict() -> Dictionary:
 		"fire_status": fire_status,
 		"source_command_type": source_command_type,
 		"move_speed_factor": move_speed_factor,
+		"sight_range_factor": sight_range_factor,
 		"cover_score": cover_score,
 		"attack_bonus": attack_bonus,
 		"movement_posture": movement_posture,
@@ -169,6 +176,11 @@ func _apply_dict(data: Dictionary) -> void:
 		if typeof(raw_move_speed_factor) == TYPE_INT or typeof(raw_move_speed_factor) == TYPE_FLOAT:
 			move_speed_factor = float(raw_move_speed_factor)
 
+	if data.has("sight_range_factor"):
+		var raw_sight_range_factor: Variant = data["sight_range_factor"]
+		if typeof(raw_sight_range_factor) == TYPE_INT or typeof(raw_sight_range_factor) == TYPE_FLOAT:
+			sight_range_factor = float(raw_sight_range_factor)
+
 	if data.has("cover_score"):
 		var raw_cover_score: Variant = data["cover_score"]
 		if typeof(raw_cover_score) == TYPE_INT or typeof(raw_cover_score) == TYPE_FLOAT:
@@ -213,6 +225,8 @@ static func normalize_movement_posture(value: Variant, fallback: String = MOVEME
 			return fallback if ALLOWED_MOVEMENT_POSTURES.has(fallback) else MOVEMENT_POSTURE_IDLE
 		"walk", "march", "move", "travel":
 			return MOVEMENT_POSTURE_TRAVEL
+		"run", "sprint", "fast":
+			return MOVEMENT_POSTURE_RUN
 		"m_position", "m-position", "ready", "tactical":
 			return MOVEMENT_POSTURE_TACTICAL
 		"aim", "aimed", "engage", "engaging":

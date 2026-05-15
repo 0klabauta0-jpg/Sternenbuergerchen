@@ -290,6 +290,10 @@ func get_move_speed_factor() -> float:
 	return float(_runtime_status.move_speed_factor)
 
 
+func get_sight_range_factor() -> float:
+	return float(_runtime_status.sight_range_factor)
+
+
 func get_movement_posture() -> String:
 	return String(_runtime_status.movement_posture)
 
@@ -674,7 +678,8 @@ func set_fireteam_id(next_fireteam_id: String) -> bool:
 		_runtime_status.target_position,
 		String(_runtime_status.movement_posture),
 		String(_runtime_status.weapon_posture),
-		String(_runtime_status.posture_policy_id)
+		String(_runtime_status.posture_policy_id),
+		float(_runtime_status.sight_range_factor)
 	)
 	if not bool(runtime_status.call("is_valid")):
 		return false
@@ -895,7 +900,8 @@ func set_target_position(target_position: Variant) -> bool:
 		target_position,
 		String(_runtime_status.movement_posture),
 		String(_runtime_status.weapon_posture),
-		String(_runtime_status.posture_policy_id)
+		String(_runtime_status.posture_policy_id),
+		float(_runtime_status.sight_range_factor)
 	)
 
 
@@ -925,7 +931,8 @@ func assign_unit_command(command) -> bool:
 		command.get("target_position"),
 		String(command.get("movement_posture")),
 		String(command.get("weapon_posture")),
-		String(command.get("posture_policy_id"))
+		String(command.get("posture_policy_id")),
+		float(command.get("sight_range_factor"))
 	):
 		return false
 
@@ -947,7 +954,8 @@ func set_runtime_status(
 	target_position: Variant = null,
 	movement_posture: String = "",
 	weapon_posture: String = "",
-	posture_policy_id: String = ""
+	posture_policy_id: String = "",
+	sight_range_factor: float = 1.0
 ) -> bool:
 	var runtime_status = _build_runtime_status(
 		status_name,
@@ -962,7 +970,8 @@ func set_runtime_status(
 		target_position,
 		movement_posture,
 		weapon_posture,
-		posture_policy_id
+		posture_policy_id,
+		sight_range_factor
 	)
 	if not bool(runtime_status.call("is_valid")):
 		push_warning("TestUnit.set_runtime_status expects a valid UnitRuntimeStatus-compatible value.")
@@ -1036,7 +1045,8 @@ func _build_runtime_status(
 	target_position: Variant = null,
 	movement_posture: String = "",
 	weapon_posture: String = "",
-	posture_policy_id: String = ""
+	posture_policy_id: String = "",
+	sight_range_factor: float = 1.0
 ):
 	var runtime_status = UNIT_RUNTIME_STATUS_SCRIPT.new()
 	runtime_status.status = status_name
@@ -1048,6 +1058,7 @@ func _build_runtime_status(
 	runtime_status.fire_status = fire_status
 	runtime_status.source_command_type = source_command_type
 	runtime_status.move_speed_factor = move_speed_factor
+	runtime_status.sight_range_factor = maxf(sight_range_factor, 0.0)
 	runtime_status.cover_score = cover_score
 	runtime_status.attack_bonus = attack_bonus
 	runtime_status.target_position = target_position
@@ -1158,6 +1169,7 @@ func _build_remote_runtime_dict(snapshot: Dictionary) -> Dictionary:
 		"fire_status": String(snapshot.get("fire_mode", _runtime_status.fire_status)),
 		"source_command_type": String(snapshot.get("source_command_type", _runtime_status.source_command_type)),
 		"move_speed_factor": float(snapshot.get("move_speed_factor", _runtime_status.move_speed_factor)),
+		"sight_range_factor": float(snapshot.get("sight_range_factor", _runtime_status.sight_range_factor)),
 		"cover_score": float(snapshot.get("cover_score", _runtime_status.cover_score)),
 		"attack_bonus": float(snapshot.get("attack_bonus", _runtime_status.attack_bonus)),
 		"phase": int(snapshot.get("phase", _runtime_status.phase)),

@@ -10,6 +10,218 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_434 - LimboAI Enemy Behavior Adapter Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_434_limboai_enemy_behavior_adapter_smoke.md`, `docs/tasks/TASK_433_install_third_party_godot_plugins.md`, `docs/dev/enemy_team_tactics_contract.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `AGENTS.md`, `docs/PROJECT_BRIEF.md`, `docs/ARCHITECTURE.md`, `docs/CODEX_RULES.md`, `docs/TASK_ROADMAP.md`
+- Stand: `EnemyLimboBehaviorAdapter` baut einen programmgesteuerten LimboAI-BehaviorTree mit Selector/Sequence-Zweigen fuer `seek_cover`, `contact_hold` und `patrol`.
+- Stand: `MissionCombatLoopDriver` ruft den Adapter nur nach expliziten Enemy-Team-Tactics und vor altem Patrol/Fallback auf; Aktionen enqueueen weiter normale Dictionaries ueber `SimulationRoot.enqueue_command()`.
+- Stand: Cover-Suche nutzt die bestehende `TerrainRegistry.get_walkable_cover_tiles_in_radius()`-Datenquelle mit Cooldown und schreibt keine eigene Enemy-Wahrheit.
+- Risiken: Der BT ist bewusst ein Smoke-Slice, noch kein editorbares BehaviorTree-Asset und kein vollstaendiges Enemy-AI-Authoring.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_434_limboai_enemy_behavior_adapter_smoke.gd`, `godot_console.exe --headless --path . --quit` und `git diff --check`.
+- Naechster Schritt: Den BT-Slice im Godot-Fenster sichtbar gegen eine kleine Patrol/Kontakt/Cover-Szene pruefen und danach entscheiden, ob die naechste Iteration auf `.tres`-Trees oder weitere Blackboard-Daten geht.
+
+### TASK_433 - Install Third Party Godot Plugins
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_433_install_third_party_godot_plugins.md`, `AGENTS.md`, `docs/PROJECT_BRIEF.md`, `docs/ARCHITECTURE.md`, `docs/CODEX_RULES.md`, `docs/TASK_ROADMAP.md`
+- Stand: `Terrain3D` liegt als Release `v1.0.1` unter `addons/terrain_3d/` und ist als EditorPlugin aktiviert.
+- Stand: `LimboAI` liegt als Release `v1.7.0` / `gdextension-4.6` unter `addons/limboai/`; die GDExtension wird ueber `addons/limboai/bin/limboai.gdextension` geladen.
+- Stand: `netfox` liegt als aktuelle Repo-Version `1.43.4` unter `addons/netfox/` und `addons/netfox.internals/`; die stabile Release-Version `v1.35.3` wurde verworfen, weil sie im Godot-4.6.2-Headless-Import nicht sauber kompiliert.
+- Stand: `godot-open-rts` ist unter `addons/godot_open_rts_reference/` nur als per `.gdignore` deaktiviertes Referenzpaket eingebunden, weil upstream ein Godot-4.3-Beispielprojekt ohne `plugin.cfg` ist.
+- Risiken: Die Plugins sind installiert, aber nicht fachlich in Terrain-, AI-, RTS- oder Multiplayer-Gameplay integriert. netfox fuegt eigene Autoloads hinzu; jede Gameplay-Nutzung braucht einen separaten Architektur-/Authority-Task.
+- Lokale Pruefung: `godot_console.exe --version`, `godot_console.exe --headless --path . --import`, `godot_console.exe --headless --path . --quit` und fokussiertes `git diff --check` laufen erfolgreich. Der Import meldet nur, dass das `godot-open-rts`-Referenzprojekt wegen eigenem `project.godot` ignoriert wird; der Headless-Start zeigt eine netfox-Debugzeile.
+- Naechster Schritt: Vor echter Nutzung je Plugin einen kleinen Integrations-Task schneiden, damit keine zweite Terrain-, KI-, RTS- oder Multiplayer-Wahrheit neben den bestehenden Runtime-Vertraegen entsteht.
+
+### TASK_432 - Fireteam Muzzle Flash And Baseline Attack Movement
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_432_fireteam_muzzle_flash_and_baseline_attack_movement.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/tasks/TASK_429_fireteam_behavior_modes_runtime.md`, `docs/tasks/TASK_431_fireteam_aim_pose_and_card_ui_hotfix.md`
+- Stand: Muzzle-Flash-Visuals werden aus bestehenden Fire-Events groesser geclamped und erhalten einen sichtbaren Bloom-Marker, ohne Combat-Wahrheit in die Visualschicht zu verschieben.
+- Stand: `Move`, `Engage`, `Take`, `Defend` und `Hold` laufen im sichtbaren Mission-Tactical-Pfad als direkte Baseline-Gruppenbewegung; Ziel-Fidelity-Offsets bleiben nur fuer explizites `flank`.
+- Stand: Autonome Leader-Flanks sind fuer diese Basisrunde deaktiviert. `Engage Area` bleibt Kampf ohne Besitzpflicht, waehrend `Take Area` weiterhin besetzt und sichert.
+- Stand: Enemy-Spawn-Offsets der Drill-Szene verteilen vier Gegner lesbarer; Legacy-2D-Auswahlringe werden nach Auswahlwechseln erneut unterdrueckt.
+- Risiken: Flank ist damit bewusst ausgeklammert und muss spaeter als explizit koordinierter Befehl neu aufgebaut werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_432_fireteam_muzzle_flash_and_baseline_attack_movement.gd`, relevante TASK_205/TASK_424/TASK_426/TASK_429/TASK_431-Regressionen und `git diff --check`.
+- Naechster Schritt: Im Godot-Fenster `Engage Area -> GO -> Take Area` und Feuerkontakt sichtpruefen; danach Flank separat kontrolliert designen.
+
+### TASK_431 - Fireteam Aim Pose And Card UI Hotfix
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_431_fireteam_aim_pose_and_card_ui_hotfix.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_426_cautious_move_parallel_aim.md`, `docs/tasks/TASK_427_fireteam_decision_feedback_aim_pose.md`
+- Stand: Aim-Hold nutzt nicht mehr den ersten Shoot-Key, sondern einen mittleren Sample-Key; Upper-Body-Shoot-Overlays werden als statische Hold-Pose gebacken.
+- Stand: Fireteam-Mini-Cards werden wiederverwendet, damit C/N/A-Buttons beim Refresh nicht flackern. Loadout-Text und runder FTL-Gauge sind aus der Mini-Card entfernt; Readiness und Member-Portraits sitzen unten.
+- Stand: FTL-Befehlssprechblasen ersetzen einander; #16.20 ist als `WP-`-Alias fuer Wegpunkt-/Order-Loeschen belegt.
+- Risiken: Der Aim-Sample bleibt ein Workaround, bis eigene Aim-Idle-Clips vorhanden sind.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_431_fireteam_aim_pose_and_card_ui_hotfix.gd`, `scripts/tests/task_422_go_continue_fireteam_hud_cleanup.gd`, `scripts/tests/task_427_fireteam_decision_feedback_aim_pose.gd`, `scripts/tests/task_403_runtime_animation_combat_cases.gd` und `git diff --check`.
+- Naechster Schritt: Im Godot-Fenster `C -> Move -> GO` sichtpruefen: Waffen bleiben oben, C/N/A klickt ohne Flackern, und nur eine Bubble bleibt stehen.
+
+### TASK_430 - Fireteam Task Corruption Repair
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_430_fireteam_task_corruption_repair.md`, `docs/tasks/TASK_429_fireteam_behavior_modes_runtime.md`, `docs/dev/fireteam_behavior_modes_contract.md`
+- Stand: NUL-korrupte TASK_429-Dateien wurden wiederhergestellt: Security-Controller, Drill-Generator, Scenario, Reports, Contract und Verifier.
+- Stand: `MissionScenarioData` und `TerrainMapData` erkennen leere/NUL-Dateien vor `JSON.parse_string()` und flushen nach dem Speichern.
+- Stand: Der Drill-Generator validiert Map und Scenario direkt nach dem Schreiben; der Mission-Controller fragt fehlende Controller-Methoden defensiv ab.
+- Risiken: Ein harter Rechnerabbruch kann weiterhin jede Datei treffen; ein spaeterer Atomic-Write-Pass waere robuster als nur Flush.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tools/generate_fireteam_command_drill_24x24.gd`, `scripts/tests/task_429_fireteam_behavior_modes_runtime.gd`, `scripts/tests/task_424_fireteam_drill_enemy_visibility_grounding.gd`, `scripts/tests/task_427_fireteam_decision_feedback_aim_pose.gd`, `scripts/tests/task_416_fireteam_command_drill_map.gd` und `git diff --check`.
+- Naechster Schritt: Im Godot-Fenster die Drillmap einmal laden und pruefen, dass kein JSON-/Security-Stacktrace mehr erscheint.
+
+### TASK_429 - Fireteam Behavior Modes Runtime
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_429_fireteam_behavior_modes_runtime.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/fireteam_behavior_control_checklist.html`
+- Stand: `FireteamMovementController` stellt gemeinsame C/N/A-Modifikatoren fuer `Move`, `Engage`, `Take` und `Defend` bereit. Runtime-Commands tragen Speed-, Sicht-, Cover-, Attack- und Posture-Werte plus `behavior_*`-Diagnose.
+- Stand: Abgeschlossene Waypoints werden entfernt; ohne Folgeauftrag startet automatisch `Defend`. `defend` blockiert nicht mehr als dauerhaft wartender Waypoint.
+- Stand: Sichtbare Security nutzt `DEF 360` oder `DEF <Richtung>`. 360-Defense verteilt Mitglieder auf eigene Hauptsektoren und scannt leicht links/rechts.
+- Stand: Mission-Tactical-Befehle `move`, `defend`, `take` und `engage` fallen bei Startfehlern nicht still in alte Flow-Driver-Ausfuehrung zurueck, sondern melden `BEHAVIOR ERROR`.
+- Stand: Die Drillmap setzt Busch-Cover als Ground-Tiles und stabilisiert Prop-Rotationen, damit keine schiefen Objekt-Buesche oder Bodengaps entstehen.
+- Risiken: Die Werte sind erste Runtime-Konstanten; spaetere Charakterbogen-/Skill-Paesse muessen explizit entscheiden, wie sie diese Faktoren skalieren.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tools/generate_fireteam_command_drill_24x24.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_429_fireteam_behavior_modes_runtime.gd`, relevante TASK_421/TASK_424/TASK_425/TASK_426/TASK_427-Regressionen und `git diff --check`.
+- Naechster Schritt: Im Godot-Fenster Move/Engage/Take/Defend mit C/N/A auf der Drillmap durchklicken und danach Charakterbogen-Werte einzeln pruefen.
+
+### TASK_428 - Fireteam Behavior Control List
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_428_fireteam_behavior_control_list.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_421_move_stance_posture_speed_sight.md`, `docs/tasks/TASK_423_normal_move_parallel_spacing.md`, `docs/tasks/TASK_427_fireteam_decision_feedback_aim_pose.md`
+- Stand: `docs/reports/fireteam_behavior_control_checklist.html` fasst als Review-Grundlage zusammen, wie `Engage`, `Take` und `Defend` in C/N/A funktionieren sollen.
+- Stand: Die Liste trennt `Take` als Besitz/Kontrolle, `Engage` als Kampf ohne Besitzpflicht und `Defend` als outward Defense von Punkt/Area.
+- Stand: `Flank` bleibt bewusst ausgeklammert; sichtbare Basis-Security wird als `DEF 360`/`DEF Richtung` statt `OVW` beschrieben.
+- Stand: Buddy-Team-Bildung, Abstandsprinzipien, Tile-vs-Area-Unterschiede und offene Reviewfragen sind dokumentiert.
+- Risiken: Die Prozentwerte wurden in TASK_429 als erste Runtime-Konstanten umgesetzt und muessen bei weiterem Balancing bewusst angepasst werden.
+- Lokale Pruefung: `git diff --check`.
+- Naechster Schritt: Liste im Browser gegenlesen und danach zuerst einen kleinen Contract-/Implementierungs-Task fuer `Defend` ableiten.
+
+### TASK_427 - Fireteam Decision Feedback Aim Pose
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_427_fireteam_decision_feedback_aim_pose.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_421_move_stance_posture_speed_sight.md`, `docs/tasks/TASK_425_live_move_stance_update.md`, `docs/tasks/TASK_426_cautious_move_parallel_aim.md`
+- Stand: `#17` und `get_command_feedback_snapshot()` zeigen einen kompakten Entscheidungsreadout wie `MOVE NE 5F C Aim`, inklusive Richtung, Distanz, Tile/Area-Kontext und Haltung.
+- Stand: GO-/FTL-Bubbles koennen den tatsaechlich aktiven Folgeauftrag anzeigen, statt nur eine generische Bestaetigung auszugeben.
+- Stand: Die neue HTML-Referenz `docs/reports/fireteam_command_decision_reference.html` erklaert Move/Defend/Take/Engage, C/N/A, Tile-vs-Area und OVW.
+- Risiken: Die Readouts sind bewusst Feedback-/UI-Schicht und duerfen keine Gameplay-Wahrheit duplizieren oder mutieren.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_427_fireteam_decision_feedback_aim_pose.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_426_cautious_move_parallel_aim.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_425_live_move_stance_update.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_403_runtime_animation_combat_cases.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Im Godot-Fenster `C -> Move -> GO` sichtpruefen; falls die Pose trotz aktivem Render-Snapshot zu dezent wirkt, als naechsten UI-/Visual-Polish den Aim-Kontrast erhoehen.
+
+### TASK_426 - Cautious Move Parallel Aim
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_426_cautious_move_parallel_aim.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_421_move_stance_posture_speed_sight.md`, `docs/tasks/TASK_423_normal_move_parallel_spacing.md`, `docs/tasks/TASK_425_live_move_stance_update.md`
+- Stand: `FireteamBehaviorResolver` mappt `Move` jetzt immer auf direkten Gruppen-Travel (`rush`); `cautious` bleibt Haltung und steuert Aim/Speed/Sicht, aber erzeugt keine Hold-/Deckungsgruppe mehr.
+- Stand: Explizite `bounding`-/`creep`-Profile im `FireteamMovementController` bleiben moeglich; die Aenderung betrifft den sichtbaren `Move`-Resolverpfad.
+- Risiken: Aeltere Smokes, die `cautious Move` als Shortcut fuer Bounding/Caterpillar benutzt haben, sind fachlich ueberholt und brauchen spaeter einen expliziten Advance-Style-Bedienpfad.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_426_cautious_move_parallel_aim.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_421_move_stance_posture_speed_sight.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_425_live_move_stance_update.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_109_verifier.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_423_normal_move_parallel_spacing.gd` und `git diff --check` laufen gruen. Zusaetzlich ausgefuehrt: `scripts/tests/task_101_verifier.gd` faellt weiterhin auf einer alten `cohesion_threshold`-Erwartung im Flank-Fall, nicht im Move-/Cautious-Pfad.
+- Naechster Schritt: Im Godot-Fenster `C -> Move -> GO` pruefen: alle vier laufen, keine `HOLD`-Labels, Waffen sichtbar im Aim.
+
+### TASK_425 - Live Move Stance Update
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_425_live_move_stance_update.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_421_move_stance_posture_speed_sight.md`, `docs/tasks/TASK_423_normal_move_parallel_spacing.md`, `docs/tasks/TASK_424_fireteam_drill_enemy_visibility_grounding.md`
+- Stand: `FireteamMovementController.update_tactical_stance()` schreibt C/N/A live in aktive `Move`-Executions und reissued den aktuellen Stage mit neuer Command-Revision.
+- Stand: Command-Tokens enthalten jetzt `command_revision`, sodass alte requeue-Move-Commands nach einer Live-Haltungsumstellung stale werden und die neue Haltung nicht mehr ueberschreiben.
+- Stand: Die Mission-UI ruft beim C/N/A-Wechsel fuer aktive Move-Executions den Runtime-Controller auf; `cautious` hebt die Waffe in Aim, `normal` setzt Travel/lowered, `aggressive` Run/lowered.
+- Risiken: Die Live-Umstellung aendert nur Haltung/Speed/Sicht des aktiven Move-Stages; Advance-Style-Wechsel bleibt eine separate Befehlsentscheidung.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_425_live_move_stance_update.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_421_move_stance_posture_speed_sight.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_422_go_continue_fireteam_hud_cleanup.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_109_verifier.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_423_normal_move_parallel_spacing.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: `Move` starten, waehrend des Laufens C/N/A klicken und im Godot-Fenster Waffenhaltung sowie Geschwindigkeit sichtbar pruefen.
+
+### TASK_424 - Fireteam Drill Enemy Visibility Grounding
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_424_fireteam_drill_enemy_visibility_grounding.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_416_fireteam_command_drill_map.md`, `docs/tasks/TASK_423_normal_move_parallel_spacing.md`
+- Stand: Die Drill-Map nutzt Busch-Cover jetzt als `nature_ground_grass_patch`-Ground-Tiles mit Cover-Wert; `nature_deco_logs` bleiben auf sauberen Ground-Tiles. Dadurch entstehen keine separaten Busch-Object-Props mit Rotationsluecken mehr.
+- Stand: Die Objective-Flaeche nutzt keine `station_set_floor_panel`-Tiles mehr; gameplay-seitig bleibt die komplette Drill-Karte auf `height_level == 0`.
+- Stand: Enemy-Proxies werden im Render-Snapshot pro Unit mit `uses_animated_character_model` und farbiger `unit_team_base_visible`-Diagnose gemeldet; die sichtbare Team-Basis macht gegnerische NPCs im Playtest besser lesbar.
+- Risiken: Die Korrektur verbessert die Drill-Map und Unit-Lesbarkeit, ohne Terrain-Asset-Bedeutungen fuer andere Karten umzudeuten.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tools/generate_fireteam_command_drill_24x24.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_424_fireteam_drill_enemy_visibility_grounding.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_416_fireteam_command_drill_map.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Im Godot-Fenster kurz sichtpruefen, ob die roten Enemy-Basen und flache Objective-Flaeche so lesbar sind.
+
+### TASK_423 - Normal Move Parallel Spacing
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_423_normal_move_parallel_spacing.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_404_fireteam_movement_posture_bridge.md`, `docs/tasks/TASK_421_move_stance_posture_speed_sight.md`, `docs/tasks/TASK_422_go_continue_fireteam_hud_cleanup.md`
+- Stand: Normales `Move` erzeugt weiterhin fuer alle fitten Mitglieder parallele Rush-/Travel-Commands im selben Stage.
+- Stand: Die kompakte Move-Formation nutzt jetzt stabile seitliche Zielslots mit Mindestabstand, statt mehrere Mitglieder auf praktisch denselben Zielpunkt zu ziehen.
+- Stand: Die Completion-Pruefung nutzt die bereits ausgegebenen Stage-Ziele, damit die finale Formation nicht aus der aktuellen Leader-Position neu driftet.
+- Risiken: Die Formation ist funktional breiter, aber noch kein finaler visueller Formation-Polish.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_423_normal_move_parallel_spacing.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_421_move_stance_posture_speed_sight.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_404_fireteam_movement_posture_bridge.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Im Godot-Fenster ein Vierer-Fireteam mit normalem `Move` auf der Drill-Karte beobachten; alle vier sollten gleichzeitig anlaufen und nicht am Zielpunkt ineinander schieben.
+
+### TASK_422 - GO Continue Fireteam HUD Cleanup
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_422_go_continue_fireteam_hud_cleanup.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_418_fireteam_mini_card_suppression_explainer.md`, `docs/tasks/TASK_419_go_next_action_and_npc_speed.md`, `docs/tasks/TASK_420_waypoint_completion_area_followup_hotfix.md`
+- Stand: `GO` erkennt einen erreichten aktiven Move-Wegpunkt als Fortsetzung, entfernt ihn aus dem Plan und aktiviert den naechsten Wegpunkt.
+- Stand: Der sichtbare `PlanCommandMatrixButton` wird entfernt; Slot `16.20` bleibt Reserve. Der `#17`-Ready/Plan/SUPP-Statusblock wird nicht mehr erzeugt, waehrend C/N/A und Member-Karten erhalten bleiben.
+- Stand: Die Fireteam-Mini-Karte rendert Suppression zusaetzlich als sichtbaren `MiniSuppressionBar` direkt in der Karte.
+- Risiken: Der interne Return-to-Plan-Pfad bleibt fuer Ad-hoc/Suppression erhalten, ist aber bewusst nicht mehr als dauerhafter Button sichtbar.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_422_go_continue_fireteam_hud_cleanup.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_420_waypoint_completion_area_followup_hotfix.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_418_fireteam_mini_card_suppression_explainer.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_419_go_next_action_and_npc_speed.gd`, `godot_console.exe --headless --path . --script scripts/tests/bugfix_mission_fire_sector_overlay.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Im Godot-Fenster `Move -> Move` per GO und die Mini-Karten-SUPP-Bar bei Kontakt einmal sichtbar pruefen.
+
+### TASK_421 - Move Stance Posture Speed Sight
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_421_move_stance_posture_speed_sight.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_404_fireteam_movement_posture_bridge.md`, `docs/tasks/TASK_419_go_next_action_and_npc_speed.md`, `docs/tasks/TASK_420_waypoint_completion_area_followup_hotfix.md`
+- Stand: `FireteamMovementController` setzt fuer `Move` jetzt die C/N/A-Haltung auf Command-Ebene: cautious = `aimed`, Speed x0.65, Sicht x1.2; normal = `travel`/`lowered`, Speed x1.0, Sicht x1.0; aggressive = `run`/`lowered`, Speed x1.2, Sicht x0.65.
+- Stand: `UnitCommand`, `UnitRuntimeStatus`, `TestUnit`, `SimulationRoot`-Snapshots und `TerrainMap3DView` geben `sight_range_factor` weiter. Fog-of-War nutzt den Faktor pro Observer fuer Tile- und Dynamic-Target-Sichtbarkeit.
+- Risiken: `run` ist ein Runtime-/Diagnose-Posture und faellt visuell auf vorhandene Run-/Walk-Clips zurueck, falls fuer ein Asset kein eigener Run-Clip existiert. Waffen-/Combat-Reichweiten bleiben unveraendert.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_421_move_stance_posture_speed_sight.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_404_fireteam_movement_posture_bridge.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_420_waypoint_completion_area_followup_hotfix.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_419_go_next_action_and_npc_speed.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Im Godot-Fenster die Drill-Karte mit Move cautious/normal/aggressive einmal sichtbar durchspielen und auf FOW-/Kontaktwirkung achten.
+
+### TASK_420 - Waypoint Completion Area Followup Hotfix
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_420_waypoint_completion_area_followup_hotfix.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_417_fireteam_waypoint_completion_cleanup.md`, `docs/tasks/TASK_419_go_next_action_and_npc_speed.md`
+- Stand: Der letzte abgeschlossene Waypoint entfernt jetzt auch den leeren Plan-Eintrag aus `_order_plans_by_key`.
+- Stand: Wenn nach dem letzten Waypoint eine AreaOrder wartet, startet der Controller zuerst Defend-/Attack-AreaOrder und faellt erst danach auf Default-Hold zurueck.
+- Risiken: Die gemischte Reihenfolge bleibt weiterhin implizit: Waypoints werden zuerst abgearbeitet, anschliessend pending AreaOrders. Eine explizite gemischte Queue bleibt ein separater UI-/Datenmodell-Task.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_420_waypoint_completion_area_followup_hotfix.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_417_fireteam_waypoint_completion_cleanup.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_419_go_next_action_and_npc_speed.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Im Godot-Fenster `Move -> Move` und `Move -> Defend Area` auf der Drill-Karte einmal sichtbar durchspielen.
+
+### TASK_419 - GO Recovery Action And NPC Speed
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_419_go_next_action_and_npc_speed.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/tasks/TASK_417_fireteam_waypoint_completion_cleanup.md`, `docs/tasks/TASK_418_fireteam_mini_card_suppression_explainer.md`
+- Stand: `GO` erkennt jetzt Recovery-Kontexte aus Ad-hoc-Ausfuehrung, Suppression-Interrupt und unterbrochenem Plan und ruft Return-to-Plan ohne sichtbaren `Plan`-Button auf.
+- Stand: Gepinnte oder suppressed Fireteams werden nicht zwangsweise per GO in den Plan zurueckgeschoben; der Command-Text meldet `PINNED`.
+- Stand: `SimulationRoot.MOVE_SPEED_PER_SECOND` liegt bei `80.0` statt `120.0`, sodass normale NPC-Move-Commands ein Drittel langsamer laufen. Fireteam-Stil-Multiplikatoren bleiben unveraendert.
+- Risiken: Der `Plan`-Button bleibt vorerst als Fallback sichtbar. Ein manueller Godot-Fenster-Check sollte bestaetigen, dass GO-Recovery, Mini-Karte und Wegpunkt-Loeschung im Playtest zusammen rund wirken.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_419_go_next_action_and_npc_speed.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_418_fireteam_mini_card_suppression_explainer.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_417_fireteam_waypoint_completion_cleanup.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Im echten Godot-Fenster ein Fireteam unterbrechen, GO druecken und pruefen, dass Recovery nur bei nicht gepinntem Team startet.
+
+### TASK_418 - Fireteam Mini Card Suppression Explainer
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_418_fireteam_mini_card_suppression_explainer.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/tasks/TASK_416_fireteam_command_drill_map.md`, `docs/tasks/TASK_417_fireteam_waypoint_completion_cleanup.md`
+- Stand: Die Fireteam-Mini-Karte oben links zeigt Suppression jetzt als kompaktes `SUPP xx%` in der Statuszeile und als kleinen Balken direkt auf der Karte.
+- Stand: `get_fireteam_status_card_snapshot()` meldet Suppression-Wert, Schwelle, Prozent, Status und read-only Kontext. Die Anzeige liest `_suppression_state_by_fireteam` und erzeugt keine neue Gameplay-Wahrheit.
+- Stand: `docs/reports/fireteam_mini_card_explainer.html` zeigt ein schematisches Abbild der Fireteam-Mini-Karte und erklaert Member-Chips, FTL-Readiness, Stance, SUPP, GO und den aktuellen `Plan`-Button als Return-/Recovery-Funktion.
+- Risiken: Die Mini-Karte bleibt bewusst kompakt. Ein manueller Godot-Fenster-Check bleibt sinnvoll, um Clipping bei mehreren Fireteams zu pruefen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_418_fireteam_mini_card_suppression_explainer.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_369_fireteam_status_card_enhancement.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_417_fireteam_waypoint_completion_cleanup.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Im echten Godot-Fenster die Mini-Karte mit Kontakt/Suppression pruefen; danach entscheiden, ob `Plan` als sichtbarer Button in `Return` umbenannt oder nur bei Recovery sichtbar wird.
+
+### TASK_417 - Fireteam Waypoint Completion Cleanup
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_417_fireteam_waypoint_completion_cleanup.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_415_fireteam_runtime_execution_path_switch.md`, `docs/tasks/TASK_416_fireteam_command_drill_map.md`
+- Stand: Der Mission-Tactical-Pfad entfernt einen erreichten und ausgefuehrten Waypoint jetzt aus `FireteamOrderPlan.waypoints`, statt ihn nur als `completed` im Plan stehen zu lassen.
+- Stand: Die Folgeaktivierung nutzt nach dem Entfernen den verschobenen Waypoint-Index. Leere Plaene werden abgeschlossen und nicht mehr in Order-Visuals serialisiert.
+- Stand: Die bestehende Defend-/Hold-Freigabe per GO bleibt erhalten; beim Freigeben wird der gehaltene Waypoint entfernt, bevor der naechste Waypoint startet oder der Plan abgeschlossen wird.
+- Risiken: Der Headless-Verifier prueft Planliste, Indexverschiebung und Snapshot-Serialisierung. Ein manueller Godot-Fenster-Check bleibt sinnvoll, um Marker, Linien und Command-Bubbles visuell zu bestaetigen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_417_fireteam_waypoint_completion_cleanup.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_416_fireteam_command_drill_map.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_415_fireteam_runtime_path_switch.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Im echten Godot-Fenster auf der Drill-Karte zwei Move-Waypoints setzen und pruefen, dass der erste Marker beim Abschluss verschwindet und der zweite sofort weiterlaeuft.
+
+### TASK_416 - Fireteam Command Drill Map
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_416_fireteam_command_drill_map.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/dev/commander_fireteam_delegation_contract.md`, `docs/dev/multi_fireteam_plan_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_404_fireteam_movement_posture_bridge.md`, `docs/tasks/TASK_415_fireteam_runtime_execution_path_switch.md`
+- Stand: `maps/fireteam_command_drill_24x24.json` ist eine kleine 24x24-Drill-Karte mit Spawn, offener Move-Lane, Defend-/Rally-Area, Contact-Line, Nord-/Sued-Flank-Alternativen, Objective und einer gegnerischen Fireteam-Position.
+- Stand: `data/mission_scenarios/fireteam_command_drill_24x24.json` validiert mit genau einem gegnerischen Fireteam zu vier Units. `scenes/tests/fireteam_command_drill_map.tscn` startet dazu ein Friendly-Fireteam `drill` mit vier Mitgliedern.
+- Stand: `docs/reports/fireteam_command_drill_decision_guide.html` erklaert, wann Move/Rush, Bounding, Caterpillar, Defend, Flank und Take/Engage zu welchen Entscheidungen fuehren und welche Alternativen zum Testen sinnvoll sind.
+- Stand: Der Meta-Missionskatalog enthaelt `Operation: Fireteam Command Drill` mit vier Slots und dem neuen Szenario.
+- Risiken: Die Fixture ist ein reproduzierbarer Drill- und Sichtcheck, kein Balancing-Nachweis. Gegnerverhalten bleibt bewusst beim bestehenden Enemy-Team-Tactics-Pfad.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tools/generate_fireteam_command_drill_24x24.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_416_fireteam_command_drill_map.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_415_fireteam_runtime_path_switch.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Im echten Godot-Fenster die Szene starten und Move normal/aggressiv, Move vorsichtig, Defend Area, Flank Nord/Sued und Take Objective einmal visuell durchspielen.
+
+### TASK_415 - Fireteam Runtime Execution Path Switch
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_415_fireteam_runtime_execution_path_switch.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/dev/commander_fireteam_delegation_contract.md`, `docs/dev/multi_fireteam_plan_contract.md`, `docs/dev/fireteam_leader_tactical_progression.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_404_fireteam_movement_posture_bridge.md`, `docs/tasks/TASK_414_fireteam_overview_html.md`
+- Stand: Der sichtbare Fireteam-Ausfuehrungspfad ist jetzt als Mission-Tactical-Pfad festgelegt: `MissionTacticalSandboxController` verwaltet Auswahl, Waypoints, AreaOrders und Phasen; taktische Resolver liefern Profil/Plan; `FireteamMovementController` erzeugt pro Mitglied `UnitCommand`-Dictionaries; `SimulationRoot.enqueue_command()` bleibt die autoritative Queue.
+- Stand: `FireteamRuntimeExecutionPathContract` liefert den maschinenlesbaren Contract mit `active_path_id = mission_tactical`, `legacy_policy = compatibility_adapter_only`, `runtime_authority = SimulationRoot`, `ui_sets_unit_truth = false` und `snapshots_are_truth = false`.
+- Stand: `MissionTacticalSandboxController.get_fireteam_runtime_execution_path_snapshot()` ist der neue Headless-Pruefpunkt fuer den aktiven Pfad und meldet zusaetzlich Auswahl-, Plan-, AreaOrder- und Execution-Zaehler.
+- Risiken: `MissionTacticalSandboxController` liegt historisch noch unter `scripts/tests`. Fuer groesseren Runtime-Ausbau bleibt die Extraktion in einen Produktionspfad offen; `RuntimeLeader`/`FTLTask` wird nicht geloescht, sondern vorerst auf Compatibility/Adapter/Basistests begrenzt.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_415_fireteam_runtime_path_switch.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_404_fireteam_movement_posture_bridge.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Naechste Fireteam-Gameplay-Slices direkt am Mission-Tactical-Pfad anhaengen und erst vor groesserem Ausbau den Controller aus `scripts/tests` herausziehen.
+
+### TASK_414 - Fireteam Overview HTML
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_414_fireteam_overview_html.md`, `docs/dev/commander_fireteam_delegation_contract.md`, `docs/dev/multi_fireteam_plan_contract.md`, `docs/dev/fireteam_leader_tactical_progression.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_404_fireteam_movement_posture_bridge.md`
+- Stand: `docs/reports/fireteam_overview.html` dokumentiert den aktuellen Fireteam-Datenfluss ueber Meta-Staging, Mission-HUD, taktische Resolver und Runtime. Die Uebersicht trennt den Legacy-`RuntimeLeader`/`FTLTask`-Pfad vom aktuellen Mission-Tactical-Pfad ueber `FireteamMovementController` und `SimulationRoot`.
+- Stand: Die HTML nennt konkrete Informationsquellen fuer Fireteam-Zuordnung, Definitionen, Lead/FTL, Loadout, Dropship-Payload, Mission-Auswahl, Readiness, Bewegung, Security und Runtime-Unit-State.
+- Risiken: Die Datei ist eine Bestandsaufnahme, kein neuer Contract. Auffaellig bleiben Fireteam-ID/Team-ID-Ueberlagerungen in alten FTL-Pfaden und Mission-HUD-Abfragen ueber Friendly-Node-Sammlungen.
+- Lokale Pruefung: `Get-Item docs/reports/fireteam_overview.html`, `Select-String -Path docs/reports/fireteam_overview.html -Pattern "<!doctype html>","Fireteam Ueberblick","Informationsquellen"` und `git diff --check` laufen gruen.
+- Naechster Schritt: Beim eigentlichen Fireteam-Refactor zuerst entscheiden, ob der sichtbare Mission-Pfad staerker an `RuntimeLeader`/`FTLRegistry` angebunden oder bewusst als taktischer Controller-Pfad dokumentiert bleibt.
+
 ### TASK_413 - Terrain Theme Packs und Ground Mission 128
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_413_terrain_theme_packs_ground_mission_variant.md`, `docs/dev/terrain_height_hill_rules.md`, `docs/dev/nature_terrain_prop_rules.md`, `docs/tasks/TASK_412_large_map_streaming_and_incremental_hpa.md`, `docs/performance/large_map_scale_profile_report.md`

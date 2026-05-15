@@ -34,6 +34,9 @@ Simulation, Darstellung und UI strikt trennen.
 - kommuniziert über Signale / Router
 - keine direkten UI-Abhängigkeiten
 
+- Seit TASK_415 ist der sichtbare Mission-Fireteam-Ausfuehrungspfad der Mission-Tactical-Pfad ueber `MissionTacticalSandboxController`, taktische Resolver, `FireteamMovementController` und `SimulationRoot.enqueue_command()`.
+- `RuntimeLeader`/`FTLTask` bleibt fuer Compatibility, Adapter und Basistests erhalten, darf aber keine zweite sichtbare Fireteam-Gameplay-Wahrheit neben dem Mission-Tactical-Pfad werden.
+
 ### EventRouter
 - entkoppelt Systeme
 - sammelt wichtige Gameplay-Signale

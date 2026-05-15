@@ -30,6 +30,14 @@ const HOMEBASE_MISSION_CATALOG: Array = [
 		"time_limit_seconds": 1200.0,
 	},
 	{
+		"mission_id": "fireteam_command_drill",
+		"mission_name": "Operation: Fireteam Command Drill",
+		"map_file_path": "res://maps/fireteam_command_drill_24x24.json",
+		"scenario_file_path": "res://data/mission_scenarios/fireteam_command_drill_24x24.json",
+		"slot_count": 4,
+		"time_limit_seconds": 900.0,
+	},
+	{
 		"mission_id": "frontier_probe",
 		"mission_name": "Operation: Frontier Probe",
 		"map_file_path": "res://maps/new_map.json",

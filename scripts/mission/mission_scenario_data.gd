@@ -76,7 +76,15 @@ static func load_from_file(path: String):
 		scenario._load_issues.append("Scenario file could not be opened: %s" % path)
 		return scenario
 
-	var parsed_json: Variant = JSON.parse_string(file.get_as_text())
+	var file_text: String = file.get_as_text()
+	if file_text.strip_edges().is_empty():
+		scenario._load_issues.append("Scenario file is empty: %s" % path)
+		return scenario
+	if _contains_nul_codepoint(file_text):
+		scenario._load_issues.append("Scenario file contains NUL bytes and was not parsed: %s" % path)
+		return scenario
+
+	var parsed_json: Variant = JSON.parse_string(file_text)
 	if typeof(parsed_json) != TYPE_DICTIONARY:
 		scenario._load_issues.append("Scenario file is not a JSON object: %s" % path)
 		return scenario
@@ -100,8 +108,17 @@ func save_to_file(path: String) -> Error:
 	if file == null:
 		return FileAccess.get_open_error()
 
-	file.store_string(JSON.stringify(to_dict(), "\t") + "\n")
+	var json_text: String = JSON.stringify(to_dict(), "\t") + "\n"
+	file.store_string(json_text)
+	file.flush()
 	return OK
+
+
+static func _contains_nul_codepoint(text: String) -> bool:
+	for index in range(text.length()):
+		if text.unicode_at(index) == 0:
+			return true
+	return false
 
 
 func to_dict() -> Dictionary:
