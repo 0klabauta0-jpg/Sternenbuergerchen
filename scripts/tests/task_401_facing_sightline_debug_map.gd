@@ -149,7 +149,8 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 	var aim_fire_entry: Dictionary = _find_entry(Array(snapshot.get("friendly_aim_entries", [])), "unit_id", "unit_alpha")
 	_assert(not aim_fire_entry.is_empty(), "North aimed NPC owns the visible weapon/shot line entry")
 	_assert(String(aim_fire_entry.get("visual_shape", "")) == "los_line", "Weapon/shot line uses the existing LOS-line visual shape")
-	_assert(String(aim_fire_entry.get("line_origin_anchor", "")) == "weapon_visual", "Weapon/shot line starts at the raised weapon visual anchor")
+	_assert(_is_head_sight_anchor(String(aim_fire_entry.get("line_origin_anchor", ""))), "Sight/fire line starts at the head sight anchor")
+	_assert(int(aim_fire_entry.get("range_tiles", 0)) == int(aim_fire_entry.get("weapon_range_tiles", -1)), "Sight/fire line uses the weapon tile range instead of an arbitrary length")
 	var weapon_direction: Vector2 = (Vector2(aim_fire_entry.get("tip_position", Vector2.ZERO)) - Vector2(aim_fire_entry.get("origin_position", Vector2.ZERO))).normalized()
 	_assert(weapon_direction.dot(Vector2.UP) > 0.90, "Weapon/shot line follows the north-facing sightline instead of the authored target")
 	_assert(bool(alpha_proxy.get("unit_aim_pose_weapon_node_available", false)), "North aimed NPC exposes an attached weapon visual")
@@ -178,7 +179,7 @@ func _test_scene_uses_existing_facing_and_fireline_visuals() -> void:
 	_assert(String(look_proxy_state.get("unit_weapon_upper_body_pose_source_animation", "")) == "shoot", "South aimed NPC takes the aim pose from the imported shoot animation")
 	var look_weapon_direction: Vector2 = (Vector2(look_fire_entry.get("tip_position", Vector2.ZERO)) - Vector2(look_fire_entry.get("origin_position", Vector2.ZERO))).normalized()
 	_assert(look_weapon_direction.dot(Vector2.DOWN) > 0.90, "Selected south aimed NPC weapon/target line overlaps its south-facing sightline")
-	_assert(String(look_fire_entry.get("line_origin_anchor", "")) == "weapon_visual", "South aimed NPC weapon/shot line starts at the raised weapon visual anchor")
+	_assert(_is_head_sight_anchor(String(look_fire_entry.get("line_origin_anchor", ""))), "South aimed NPC sight/fire line starts at the head sight anchor")
 	_assert(_find_entry(Array(look_selected_snapshot.get("friendly_aim_entries", [])), "unit_id", "unit_alpha").is_empty(), "Switching selection removes the upper NPC weapon/shot line")
 	_assert_aim_pose_uses_imported_shoot_grip(_find_proxy_node_by_unit_id(primary_view, "unit_bravo") as Node3D, "South aimed NPC uses the imported shoot grip")
 	await _assert_moving_units_keep_model_forward_on_live_lines(simulation_root, controller, primary_view, unit_alpha as Node2D, unit_bravo as Node2D)
@@ -460,6 +461,11 @@ func _find_entry(entries: Array, key: String, value: String) -> Dictionary:
 		if String(entry.get(key, "")).strip_edges().to_lower() == value.strip_edges().to_lower():
 			return entry
 	return {}
+
+
+func _is_head_sight_anchor(anchor_name: String) -> bool:
+	var normalized_anchor: String = anchor_name.strip_edges().to_lower()
+	return normalized_anchor == "head_visual" or normalized_anchor == "unit_head_fallback"
 
 
 func _find_unit_visual_animation_player(node: Node) -> AnimationPlayer:

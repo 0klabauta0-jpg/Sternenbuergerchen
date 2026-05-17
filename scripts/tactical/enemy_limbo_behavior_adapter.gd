@@ -13,6 +13,11 @@ const VAR_SEEK_COVER_ACTION: StringName = &"seek_cover_action"
 const VAR_CONTACT_HOLD_ACTION: StringName = &"contact_hold_action"
 const VAR_PATROL_ACTION: StringName = &"patrol_action"
 
+const REASON_SEEK_COVER: String = "contact_visible_cover_needed"
+const REASON_CONTACT_HOLD: String = "contact_visible_hold_fire_lane"
+const REASON_PATROL: String = "no_contact_patrol_available"
+const REASON_NO_BRANCH: String = "no_limbo_branch_available"
+
 var _behavior_tree: BehaviorTree = null
 
 
@@ -81,10 +86,15 @@ func evaluate(enemy: Node, context: Dictionary, instance_owner: Node, delta: flo
 	return {
 		"handled": status == BTTask.SUCCESS and not selected_action.is_empty(),
 		"selected_action": selected_action,
+		"reason": _build_decision_reason(selected_action, context, status),
 		"status": status,
 		"status_text": _status_to_text(status),
 		"source": "limboai_behavior_tree",
 		"unit_id": String(context.get("unit_id", "")),
+		"has_contact": bool(context.get("has_contact", false)),
+		"has_patrol": bool(context.get("has_patrol", false)),
+		"should_seek_cover": bool(context.get("should_seek_cover", false)),
+		"cover_score": int(context.get("cover_score", 0)),
 	}
 
 
@@ -96,6 +106,14 @@ func get_behavior_tree_snapshot() -> Dictionary:
 			ACTION_SEEK_COVER,
 			ACTION_CONTACT_HOLD,
 			ACTION_PATROL,
+		]),
+		"diagnostic_fields": PackedStringArray([
+			"selected_action",
+			"reason",
+			"has_contact",
+			"has_patrol",
+			"should_seek_cover",
+			"cover_score",
 		]),
 		"uses_limboai": ClassDB.class_exists("BehaviorTree") and ClassDB.class_exists("BTAction"),
 	}
@@ -141,6 +159,22 @@ func _build_result(handled: bool, selected_action: String, reason: String) -> Di
 		"source": "limboai_behavior_tree",
 		"reason": reason,
 	}
+
+
+func _build_decision_reason(selected_action: String, context: Dictionary, status: int) -> String:
+	match selected_action:
+		ACTION_SEEK_COVER:
+			return REASON_SEEK_COVER
+		ACTION_CONTACT_HOLD:
+			return REASON_CONTACT_HOLD
+		ACTION_PATROL:
+			return REASON_PATROL
+	if status == BTTask.FAILURE:
+		if not bool(context.get("has_contact", false)) and not bool(context.get("has_patrol", false)):
+			return "no_contact_no_patrol"
+		if bool(context.get("has_contact", false)) and not bool(context.get("should_seek_cover", false)):
+			return "contact_visible_action_failed"
+	return REASON_NO_BRANCH
 
 
 func _status_to_text(status: int) -> String:

@@ -105,6 +105,17 @@ Bei manuellen Playtest-Erkenntnissen gilt:
 - Danach erst Code aendern.
 - Bestehende funktionierende Bedienlogik durch Regressionstests absichern.
 
+## HTML-Arbeitsreports
+
+Wenn Codex eine neue HTML-Datei unter `docs/reports/` erstellt oder einen bestehenden Report groesser umbaut, soll sie als interaktive Workbench nach `docs/dev/html_report_workbench_contract.md` aufgebaut werden, ausser der User verlangt ausdruecklich eine rein statische Seite.
+
+Solche Reports sollen:
+- einen klaren Uebersichts-, Test-/Entscheidungs- und Notizbereich haben
+- lokale Bedienfelder fuer Playtest-Status, Entscheidungen, Parameter und Kommentare anbieten
+- einen sichtbaren Button `JSON exportieren` enthalten
+- den Export lokal per `file://` ohne Server und ohne externe Abhaengigkeiten erzeugen
+- aus `docs/reports/_html_workbench_template.html` abgeleitet werden, wenn keine passendere bestehende Workbench als Vorlage dient
+
 ---
 
 # 5. Performance- und Hotpath-Regeln

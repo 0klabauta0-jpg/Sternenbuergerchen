@@ -32,6 +32,7 @@ const EVENT_DEFAULT_DURATION: float = 1.2
 const LEADERSHIP_BONUS_FACTOR: float = 0.15
 const LEADERSHIP_EVENT_COLOR: Color = Color(0.6, 0.85, 1.0, 1.0)
 const MAX_DETECTION_DELAY_TICKS: int = 15
+const CONTACT_INITIATIVE_BASELINE_SECONDS: float = 2.0
 const DETECTION_EVENT_COLOR: Color = Color(0.85, 0.85, 0.55, 1.0)
 const STEALTH_RANGE_REDUCTION_FACTOR: float = 0.5
 const SPOTTED_CONTACT_HIT_CHANCE_MALUS: float = -0.15
@@ -136,6 +137,7 @@ var _medic_support_cooldown: Dictionary = {}
 var _medic_support_move_ready_tick: Dictionary = {}
 var _friendly_cover_ready_at_msec: Dictionary = {}
 var _enemy_limbo_cover_ready_at_msec: Dictionary = {}
+var _enemy_limbo_behavior_decisions: Dictionary = {}
 var _overlays_visible: bool = true
 var _enemy_patrol_paths_by_unit_id: Dictionary = {}
 var _enemy_patrol_waypoint_index_by_unit_id: Dictionary = {}
@@ -357,7 +359,22 @@ func get_enemy_limbo_behavior_snapshot() -> Dictionary:
 	var snapshot: Dictionary = Dictionary(_enemy_limbo_behavior_adapter.call("get_behavior_tree_snapshot")).duplicate(true)
 	snapshot["enabled"] = enemy_limbo_behavior_smoke_enabled
 	snapshot["cover_cooldown_count"] = _enemy_limbo_cover_ready_at_msec.size()
+	snapshot["decision_count"] = _enemy_limbo_behavior_decisions.size()
+	snapshot["decisions"] = _build_enemy_limbo_behavior_decision_snapshot()
 	return snapshot
+
+
+func _build_enemy_limbo_behavior_decision_snapshot() -> Array:
+	var result: Array = []
+	var unit_ids: PackedStringArray = PackedStringArray()
+	for unit_id_variant in _enemy_limbo_behavior_decisions.keys():
+		unit_ids.append(String(unit_id_variant))
+	unit_ids.sort()
+	for unit_id in unit_ids:
+		var entry: Dictionary = Dictionary(_enemy_limbo_behavior_decisions.get(unit_id, {})).duplicate(true)
+		if not entry.is_empty():
+			result.append(entry)
+	return result
 
 
 func get_fire_event_snapshot() -> Array:
@@ -881,6 +898,7 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 	var fire_event_id: String = _record_fire_event_from_effect(damage_effect, attacker, actual_target, "standard")
 	if not fire_event_id.is_empty():
 		damage_effect["fire_event_id"] = fire_event_id
+		_refresh_tactical_combat_visuals()
 	simulation_root.call("enqueue_effect", damage_effect)
 	var flank_modifiers: Dictionary = Dictionary(decision.get("flank_modifiers", {}))
 	_maybe_publish_flank_event(flank_modifiers, attacker, actual_target)
@@ -893,6 +911,16 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 		_broadcast_remote_event("FRIENDLY FIRE %s" % actual_target_id, actual_target_id, MISIDENTIFICATION_EVENT_COLOR, 1.8, "FRIENDLY FIRE")
 		_record_friendly_fire_feedback(attacker, actual_target, attacker_id, target_id, actual_target_id)
 	_next_attack_tick = _current_tick + max(int(decision.get("weapon_ticks", 1)), 1)
+
+
+func _refresh_tactical_combat_visuals() -> void:
+	var tactical_controller = _get_tactical_controller()
+	if tactical_controller == null:
+		return
+	if tactical_controller.has_method("_sync_primary_3d_order_visuals"):
+		tactical_controller.call("_sync_primary_3d_order_visuals")
+	if tactical_controller.has_method("refresh_contact_overlay"):
+		tactical_controller.call("refresh_contact_overlay")
 
 
 func _update_combat_resolution() -> void:
@@ -1341,7 +1369,20 @@ func _get_detection_delay_ticks(unit) -> int:
 	if unit != null and unit.has_method("get_awareness"):
 		unit_awareness = clampf(float(unit.call("get_awareness")), 0.0, 1.0)
 
-	return int(round((1.0 - unit_awareness) * float(MAX_DETECTION_DELAY_TICKS)))
+	var base_delay: int = int(round((1.0 - unit_awareness) * float(MAX_DETECTION_DELAY_TICKS)))
+	return maxi(base_delay + _get_contact_initiative_delay_delta_ticks(unit), 0)
+
+
+func _get_contact_initiative_delay_delta_ticks(unit) -> int:
+	if unit == null or not unit.has_method("get_current_unit_command"):
+		return 0
+	var command = unit.call("get_current_unit_command")
+	if command == null or not command.has_method("get"):
+		return 0
+	var raw_seconds: Variant = command.get("contact_initiative_seconds")
+	if typeof(raw_seconds) != TYPE_INT and typeof(raw_seconds) != TYPE_FLOAT:
+		return 0
+	return int(round((float(raw_seconds) / CONTACT_INITIATIVE_BASELINE_SECONDS) * float(MAX_DETECTION_DELAY_TICKS)))
 
 
 func _make_detection_key(attacker_id: String, target_id: String) -> String:
@@ -1504,7 +1545,22 @@ func _has_valid_los(attacker, target) -> bool:
 	if not target.has_method("get_vital_state") or String(target.call("get_vital_state")) != "fit":
 		return false
 
-	return _los_system.has_line_of_sight_between_nodes(attacker, target, _get_effective_range(target), _get_terrain_registry())
+	var los_range: float = _get_effective_range(target)
+	if _uses_weapon_range_for_contact_detection(attacker):
+		los_range = maxf(los_range, _get_weapon_attack_range(attacker, target))
+	return _los_system.has_line_of_sight_between_nodes(attacker, target, los_range, _get_terrain_registry())
+
+
+func _uses_weapon_range_for_contact_detection(attacker) -> bool:
+	if attacker == null:
+		return false
+	if attacker.has_method("get_source_command_type") and String(attacker.call("get_source_command_type")).strip_edges().to_lower() == "engage":
+		return true
+	if attacker.has_method("get_current_unit_command"):
+		var command = attacker.call("get_current_unit_command")
+		if command != null and command.has_method("get"):
+			return String(command.get("source_command_type")).strip_edges().to_lower() == "engage"
+	return false
 
 
 func _update_contact_tracking() -> void:
@@ -2052,6 +2108,7 @@ func _set_contact_visuals(attacker, target) -> void:
 		return
 
 	if _contact_line != null:
+		_contact_line.default_color = Color(1.0, 0.18, 0.12, 0.92)
 		_contact_line.clear_points()
 		_contact_line.add_point(attacker.position)
 		_contact_line.add_point(target.position)
@@ -3306,10 +3363,10 @@ func _advance_enemy_units(simulation_root: Node) -> void:
 		if String(enemy.call("get_vital_state")) != "fit":
 			continue
 
-		if _try_enqueue_enemy_team_tactics_move(simulation_root, enemy):
+		if _try_enqueue_enemy_limbo_behavior(simulation_root, enemy):
 			continue
 
-		if _try_enqueue_enemy_limbo_behavior(simulation_root, enemy):
+		if _try_enqueue_enemy_team_tactics_move(simulation_root, enemy):
 			continue
 
 		if _try_enqueue_enemy_patrol_move(simulation_root, enemy):
@@ -3411,21 +3468,49 @@ func _try_enqueue_enemy_limbo_behavior(simulation_root: Node, enemy) -> bool:
 	if unit_id.is_empty():
 		return false
 	var has_contact: bool = _enemy_should_hold_position(enemy)
+	var cover_score: int = _get_enemy_limbo_cover_score(enemy)
 	var context: Dictionary = {
 		"unit_id": unit_id,
 		"has_contact": has_contact,
 		"has_patrol": _enemy_limbo_has_patrol(unit_id),
 		"should_seek_cover": _enemy_limbo_should_seek_cover(enemy, has_contact, unit_id),
+		"cover_score": cover_score,
+		"cover_min_score": enemy_limbo_cover_min_cover_score,
 		"seek_cover_action": Callable(self, "_try_enqueue_enemy_limbo_cover_move").bind(simulation_root, enemy),
 		"contact_hold_action": Callable(self, "_try_enqueue_enemy_limbo_contact_hold").bind(simulation_root, enemy),
 		"patrol_action": Callable(self, "_try_enqueue_enemy_patrol_move").bind(simulation_root, enemy),
 	}
 	var result: Dictionary = Dictionary(_enemy_limbo_behavior_adapter.call("evaluate", enemy, context, self, 1.0 / float(Engine.physics_ticks_per_second)))
+	_record_enemy_limbo_behavior_decision(unit_id, enemy, context, result)
 	if not bool(result.get("handled", false)):
 		return false
 	(enemy as Node).set_meta("enemy_limbo_behavior_action", String(result.get("selected_action", "")))
 	(enemy as Node).set_meta("enemy_limbo_behavior_source", String(result.get("source", "")))
+	(enemy as Node).set_meta("enemy_limbo_behavior_reason", String(result.get("reason", "")))
 	return true
+
+
+func _record_enemy_limbo_behavior_decision(unit_id: String, enemy, context: Dictionary, result: Dictionary) -> void:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return
+	var entry: Dictionary = {
+		"unit_id": normalized_unit_id,
+		"handled": bool(result.get("handled", false)),
+		"selected_action": String(result.get("selected_action", "")),
+		"reason": String(result.get("reason", "")),
+		"status_text": String(result.get("status_text", "")),
+		"source": String(result.get("source", "limboai_behavior_tree")),
+		"has_contact": bool(context.get("has_contact", false)),
+		"has_patrol": bool(context.get("has_patrol", false)),
+		"should_seek_cover": bool(context.get("should_seek_cover", false)),
+		"cover_score": int(context.get("cover_score", 0)),
+		"cover_min_score": int(context.get("cover_min_score", enemy_limbo_cover_min_cover_score)),
+		"last_updated_tick": _current_tick,
+	}
+	if enemy is Node2D:
+		entry["position"] = (enemy as Node2D).global_position
+	_enemy_limbo_behavior_decisions[normalized_unit_id] = entry
 
 
 func _enemy_limbo_has_patrol(unit_id: String) -> bool:
@@ -3464,12 +3549,14 @@ func _try_enqueue_enemy_limbo_cover_move(simulation_root: Node, enemy) -> bool:
 			"unit_id": unit_id,
 			"target_position": cover_target,
 			"move_speed_factor": enemy_reposition_move_speed_factor,
+			"fire_status": "fire_at_will",
 			"movement_posture": ENEMY_POSTURE_TACTICAL,
 			"weapon_posture": ENEMY_WEAPON_READY,
 			"posture_policy_id": "aggressive_ready",
 			"source_command_type": "enemy_limbo_cover",
 			"requeue_until_target": false,
 			"enemy_bt_action": ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.ACTION_SEEK_COVER,
+			"enemy_bt_reason": ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.REASON_SEEK_COVER,
 		}
 	)
 	_enemy_limbo_cover_ready_at_msec[unit_id] = Time.get_ticks_msec() + int(enemy_limbo_cover_cooldown_seconds * 1000.0)
@@ -3491,11 +3578,13 @@ func _try_enqueue_enemy_limbo_contact_hold(simulation_root: Node, enemy) -> bool
 			"priority": 9,
 			"unit_id": unit_id,
 			"move_speed_factor": 0.0,
+			"fire_status": "fire_at_will",
 			"movement_posture": ENEMY_POSTURE_OVERWATCH,
 			"weapon_posture": ENEMY_WEAPON_READY,
 			"posture_policy_id": "overwatch",
 			"source_command_type": "enemy_limbo_contact_hold",
 			"enemy_bt_action": ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.ACTION_CONTACT_HOLD,
+			"enemy_bt_reason": ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.REASON_CONTACT_HOLD,
 		}
 	)
 	if _enemy_patrol_paths_by_unit_id.has(unit_id):
@@ -3838,9 +3927,11 @@ func _try_enqueue_overwatch(simulation_root: Node) -> Array:
 		var shot: Dictionary = Dictionary(shot_variant)
 		var attacker = _resolve_unit_by_id(String(shot.get("attacker_unit_id", "")))
 		var target = _resolve_unit_by_id(String(shot.get("target_unit_id", "")))
-		_record_fire_event_from_shot(shot, attacker, target, "overwatch")
+		var fire_event_id: String = _record_fire_event_from_shot(shot, attacker, target, "overwatch")
 		if attacker != null and target != null:
 			_set_contact_visuals(attacker, target)
+		if not fire_event_id.is_empty():
+			_refresh_tactical_combat_visuals()
 		var event_text: String = "OVERWATCH %s -> %s" % [String(shot.get("attacker_unit_id", "")), String(shot.get("target_unit_id", ""))]
 		_set_event_text(event_text)
 		if attacker != null and attacker.has_method("show_event_text"):
@@ -3942,6 +4033,7 @@ func _build_wave_status_text() -> String:
 
 
 func _on_enemy_wave_started(wave_number: int) -> void:
+	_initialize_enemy_patrol_paths()
 	if wave_number <= 1:
 		_set_event_text("ENEMY WAVE %d" % wave_number)
 		_broadcast_remote_event("ENEMY WAVE %d" % wave_number)

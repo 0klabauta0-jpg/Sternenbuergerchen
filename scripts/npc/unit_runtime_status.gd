@@ -67,6 +67,7 @@ var phase: int = -1
 var movement_posture: String = MOVEMENT_POSTURE_IDLE
 var weapon_posture: String = WEAPON_POSTURE_LOWERED
 var posture_policy_id: String = ""
+var aim_readiness_percent: float = 0.0
 
 
 func _init(data: Dictionary = {}) -> void:
@@ -110,6 +111,9 @@ func is_valid() -> bool:
 	if sight_range_factor < 0.0:
 		return false
 
+	if aim_readiness_percent < 0.0:
+		return false
+
 	return _has_valid_target_position()
 
 
@@ -129,6 +133,7 @@ func to_dict() -> Dictionary:
 		"movement_posture": movement_posture,
 		"weapon_posture": weapon_posture,
 		"posture_policy_id": posture_policy_id,
+		"aim_readiness_percent": aim_readiness_percent,
 	}
 
 	if target_position != null:
@@ -206,6 +211,11 @@ func _apply_dict(data: Dictionary) -> void:
 
 	if data.has("posture_policy_id"):
 		posture_policy_id = String(data["posture_policy_id"]).strip_edges().to_lower()
+
+	if data.has("aim_readiness_percent"):
+		var raw_aim_readiness_percent: Variant = data["aim_readiness_percent"]
+		if typeof(raw_aim_readiness_percent) == TYPE_INT or typeof(raw_aim_readiness_percent) == TYPE_FLOAT:
+			aim_readiness_percent = clampf(float(raw_aim_readiness_percent), 0.0, 100.0)
 
 
 static func normalize_movement_posture(value: Variant, fallback: String = MOVEMENT_POSTURE_IDLE) -> String:

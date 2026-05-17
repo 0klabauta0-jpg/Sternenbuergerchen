@@ -10,6 +10,7 @@ const META_USEROLOGY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/meta/met
 
 const REFERENCE_CARD_MIN_SIZE := Vector2(280.0, 74.0)
 const CARD_Z_INDEX := 24
+const SELECTED_BORDER_COLOR := Color("f2c94c")
 
 var _fireteam_id: String = ""
 var _is_selected: bool = false
@@ -324,7 +325,7 @@ func _apply_visual_state() -> void:
 	stylebox.corner_radius_bottom_right = 6
 	if _is_selected:
 		stylebox.bg_color = Color(0.20, 0.23, 0.28, 1.0)
-		stylebox.border_color = Color(0.64, 0.69, 0.76, 1.0)
+		stylebox.border_color = SELECTED_BORDER_COLOR
 	else:
 		stylebox.bg_color = Color(0.14, 0.16, 0.19, 1.0)
 		stylebox.border_color = Color(0.36, 0.40, 0.46, 1.0)

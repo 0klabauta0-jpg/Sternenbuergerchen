@@ -64,6 +64,28 @@ git checkout -b batch/<batch-name>
 - TASK_432 - Fireteam Muzzle Flash And Baseline Attack Movement
 - TASK_433 - Install Third Party Godot Plugins
 - TASK_434 - LimboAI Enemy Behavior Adapter Smoke
+- TASK_435 - Fireteam Manual Visual Regression Pass
+- TASK_436 - Fireteam Sight Security Visuals
+- TASK_437 - Fireteam Selection Patrol Contact Pass
+- TASK_438 - Fireteam Contact Visibility Attack Visuals
+- TASK_439 - Fireteam Runtime Map Flow Limbo Review
+- TASK_440 - Enemy Limbo Contact Diagnostics
+- TASK_441 - Fireteam Map Tool Drill Rebuild
+- TASK_442 - Fireteam Engage Behavior Control
+- TASK_443 - Fireteam Take Behavior Control
+- TASK_444 - Fireteam Behavior Playtest Workbench HTML
+- TASK_445 - HTML Report Workbench Standard
+- TASK_446 - Fireteam Workbench Spacing Runtime Pass
+- TASK_447 - Fireteam Contact Initiative Rules
+- TASK_448 - Fireteam Workbench Profile Clarity
+- TASK_449 - Fireteam Distance CNA Workbench Rules
+- TASK_450 - Fireteam Stance Command Preset Workbench
+- TASK_451 - Fireteam Workbench Runtime Import
+- TASK_452 - Fireteam Runtime Baseline Visual Contact Pass
+- TASK_453 - Fireteam Terrain LOS Sequence Direction Audit
+- TASK_454 - Terrain Truth Visual Audit
+- TASK_455 - Terrain Truth Editor Overlay Visibility
+- TASK_456 - Wall Segment LOS And Tile Truth Inspector
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

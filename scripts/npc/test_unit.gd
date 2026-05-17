@@ -679,7 +679,8 @@ func set_fireteam_id(next_fireteam_id: String) -> bool:
 		String(_runtime_status.movement_posture),
 		String(_runtime_status.weapon_posture),
 		String(_runtime_status.posture_policy_id),
-		float(_runtime_status.sight_range_factor)
+		float(_runtime_status.sight_range_factor),
+		float(_runtime_status.aim_readiness_percent)
 	)
 	if not bool(runtime_status.call("is_valid")):
 		return false
@@ -932,7 +933,8 @@ func assign_unit_command(command) -> bool:
 		String(command.get("movement_posture")),
 		String(command.get("weapon_posture")),
 		String(command.get("posture_policy_id")),
-		float(command.get("sight_range_factor"))
+		float(command.get("sight_range_factor")),
+		float(command.get("aim_readiness_percent"))
 	):
 		return false
 
@@ -955,7 +957,8 @@ func set_runtime_status(
 	movement_posture: String = "",
 	weapon_posture: String = "",
 	posture_policy_id: String = "",
-	sight_range_factor: float = 1.0
+	sight_range_factor: float = 1.0,
+	aim_readiness_percent: float = 0.0
 ) -> bool:
 	var runtime_status = _build_runtime_status(
 		status_name,
@@ -971,7 +974,8 @@ func set_runtime_status(
 		movement_posture,
 		weapon_posture,
 		posture_policy_id,
-		sight_range_factor
+		sight_range_factor,
+		aim_readiness_percent
 	)
 	if not bool(runtime_status.call("is_valid")):
 		push_warning("TestUnit.set_runtime_status expects a valid UnitRuntimeStatus-compatible value.")
@@ -1046,7 +1050,8 @@ func _build_runtime_status(
 	movement_posture: String = "",
 	weapon_posture: String = "",
 	posture_policy_id: String = "",
-	sight_range_factor: float = 1.0
+	sight_range_factor: float = 1.0,
+	aim_readiness_percent: float = 0.0
 ):
 	var runtime_status = UNIT_RUNTIME_STATUS_SCRIPT.new()
 	runtime_status.status = status_name
@@ -1067,6 +1072,7 @@ func _build_runtime_status(
 	runtime_status.movement_posture = UNIT_RUNTIME_STATUS_SCRIPT.call("normalize_movement_posture", movement_posture, String(posture_defaults.get("movement_posture", UNIT_RUNTIME_STATUS_SCRIPT.MOVEMENT_POSTURE_IDLE)))
 	runtime_status.weapon_posture = UNIT_RUNTIME_STATUS_SCRIPT.call("normalize_weapon_posture", weapon_posture, String(posture_defaults.get("weapon_posture", UNIT_RUNTIME_STATUS_SCRIPT.WEAPON_POSTURE_LOWERED)))
 	runtime_status.posture_policy_id = posture_policy_id.strip_edges().to_lower()
+	runtime_status.aim_readiness_percent = clampf(aim_readiness_percent, 0.0, 100.0)
 	return runtime_status
 
 

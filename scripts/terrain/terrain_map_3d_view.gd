@@ -8,6 +8,7 @@ const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui
 const FOG_OF_WAR_MODE_CONTRACT_SCRIPT: GDScript = preload("res://scripts/core/fog_of_war_mode_contract.gd")
 const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_event_bus.gd")
 const CONTACT_DENSITY_OVERLAY_SCRIPT: GDScript = preload("res://scripts/tactical/visuals/contact_density_overlay.gd")
+const TERRAIN_TRUTH_AUDIT_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_truth_audit.gd")
 
 const VIEWPORT_CONTAINER_NAME: String = "ViewportContainer"
 const VIEWPORT_NAME: String = "SubViewport"
@@ -243,8 +244,11 @@ const DROPSHIP_APPROACH_LINE_WIDTH_FACTOR: float = 0.34
 const DROPSHIP_APPROACH_VECTOR_COLOR: Color = Color(0.42, 1.0, 0.52, 0.62)
 const FRIENDLY_AIM_LINE_COLOR: Color = Color(0.66, 1.0, 0.72, 0.82)
 const FRIENDLY_AIM_TIP_COLOR: Color = Color(0.78, 1.0, 0.84, 0.92)
+const FRIENDLY_CONTACT_LINE_COLOR: Color = Color(1.0, 0.18, 0.12, 0.9)
+const FRIENDLY_CONTACT_TIP_COLOR: Color = Color(1.0, 0.38, 0.22, 0.96)
 const FRIENDLY_AIM_LINE_HEIGHT: float = 0.58
 const FRIENDLY_FIRE_LINE_BARREL_OFFSET_WORLD: float = 28.0
+const FRIENDLY_FIRE_SECTOR_LINE_WIDTH: float = 0.035
 const FIRETEAM_ORIENTATION_LINE_COLOR: Color = Color(0.9, 0.98, 1.0, 0.88)
 const FIRETEAM_ORIENTATION_TIP_COLOR: Color = Color(1.0, 1.0, 1.0, 0.82)
 const FIRETEAM_ORIENTATION_LINE_LENGTH_WORLD: float = 58.0
@@ -264,14 +268,17 @@ const FRIENDLY_FIRE_SECTOR_VISUAL_MODE_LOS_LINE: String = "los_line_only"
 const FRIENDLY_FIRE_SECTOR_VISUAL_MODE_TILE_ALIGNED_LOS: String = "tile_aligned_los"
 const FRIENDLY_FIRE_SECTOR_SCAN_MODE_LOS_LINE: String = "single_facing_los_line"
 const FRIENDLY_FIRE_SECTOR_SCAN_MODE_TILE_CACHE: String = "range_bounded_los_cache"
-const WEAPON_FIRE_MUZZLE_MIN_PIXEL_SIZE: float = 0.026
-const WEAPON_FIRE_MUZZLE_BLOOM_RADIUS: float = 0.16
+const WEAPON_FIRE_MUZZLE_MIN_PIXEL_SIZE: float = 0.044
+const WEAPON_FIRE_MUZZLE_BLOOM_RADIUS: float = 0.24
 const WEAPON_FIRE_MUZZLE_BLOOM_HEIGHT: float = 0.08
 const WEAPON_FIRE_MUZZLE_BLOOM_COLOR: Color = Color(1.0, 0.82, 0.20, 0.78)
-const SELECTED_UNIT_MARKER_COLOR: Color = Color(0.45, 0.78, 1.0, 0.34)
+const WEAPON_FIRE_CONTACT_TRACE_COLOR: Color = Color(1.0, 0.16, 0.10, 0.88)
+const WEAPON_FIRE_FRIENDLY_TRACE_COLOR: Color = Color(1.0, 0.05, 0.04, 0.94)
+const WEAPON_FIRE_TRACE_WIDTH: float = 0.06
+const SELECTED_UNIT_MARKER_COLOR: Color = Color(1.0, 0.84, 0.20, 0.50)
 const SELECTED_UNIT_MARKER_RADIUS: float = 0.32
-const SELECTED_UNIT_MARKER_HEIGHT: float = 0.035
-const SELECTED_UNIT_MARKER_SURFACE_OFFSET: float = 0.014
+const SELECTED_UNIT_MARKER_HEIGHT: float = 0.018
+const SELECTED_UNIT_MARKER_SURFACE_OFFSET: float = 0.006
 const DYNAMIC_ORDER_VISUAL_REFRESH_INTERVAL_MSEC: int = 90
 const MISSION_LOS_DEBUG_SAMPLE_LIMIT: int = 24
 const MISSION_LOS_DEBUG_CLEAR_LINE_COLOR: Color = Color(0.38, 1.0, 0.68, 0.76)
@@ -937,7 +944,7 @@ func set_contact_entries(contact_entries: Array, selected_fireteam_ids: PackedSt
 	_contact_selected_fireteam_ids = selected_fireteam_ids.duplicate()
 	_rebuild_contact_visuals()
 	_rebuild_contact_density_heatmap(false)
-	if bool(_order_payload.get("los_debug_overlay_enabled", false)):
+	if bool(_order_payload.get("los_debug_overlay_enabled", false)) or bool(_order_payload.get("fire_sector_overlay_enabled", false)):
 		_order_dynamic_visual_signature = _build_order_dynamic_visual_signature()
 		_rebuild_order_visuals()
 	_request_viewport_redraw()
@@ -4900,6 +4907,9 @@ func _add_selected_fireteam_unit_markers() -> void:
 			"position": unit_position,
 			"grid_position": _world_to_grid_position(unit_position),
 			"surface_offset": SELECTED_UNIT_MARKER_SURFACE_OFFSET,
+			"height": SELECTED_UNIT_MARKER_HEIGHT,
+			"radius": SELECTED_UNIT_MARKER_RADIUS,
+			"color": SELECTED_UNIT_MARKER_COLOR,
 			"visual_only": true,
 		})
 
@@ -4925,8 +4935,9 @@ func _add_selected_fireteam_aim_visuals() -> void:
 		var weapon_id: String = _get_unit_active_attack_weapon_id(unit)
 		if weapon_id.is_empty():
 			continue
-		var range_world: float = float(WEAPON_DATA_SCRIPT.call("get_effective_world_range", weapon_id, _terrain_map_data))
 		var range_tiles: int = maxi(int(WEAPON_DATA_SCRIPT.call("get_effective_tile_range", weapon_id)), 1)
+		var weapon_range_world: float = float(WEAPON_DATA_SCRIPT.call("get_effective_world_range", weapon_id, _terrain_map_data))
+		var range_world: float = weapon_range_world
 		if range_world <= 0.0:
 			continue
 		var unit_position: Vector2 = (unit as Node2D).global_position
@@ -4937,6 +4948,12 @@ func _add_selected_fireteam_aim_visuals() -> void:
 		aim_direction = _stabilize_friendly_aim_direction(unit_id, aim_direction)
 		seen_unit_ids[unit_id] = true
 		var line_anchor: Dictionary = _build_unit_fire_line_anchor(unit, unit_position, aim_direction)
+		var contact_visual_active: bool = _unit_or_fireteam_has_visible_contact(unit, fireteam_id)
+		var line_color: Color = FRIENDLY_CONTACT_LINE_COLOR if contact_visual_active else FRIENDLY_AIM_LINE_COLOR
+		var tip_color: Color = FRIENDLY_CONTACT_TIP_COLOR if contact_visual_active else FRIENDLY_AIM_TIP_COLOR
+		line_anchor["line_color"] = line_color
+		line_anchor["tip_color"] = tip_color
+		line_anchor["contact_visual_active"] = contact_visual_active
 		var facing_length: float = clampf(range_world * 0.16, FRIENDLY_FIRE_FACING_STEM_MIN_WORLD, FRIENDLY_FIRE_FACING_STEM_MAX_WORLD)
 		var default_tip_position: Vector2 = unit_position + aim_direction * range_world
 		var default_facing_tip_position: Vector2 = unit_position + aim_direction * facing_length
@@ -4946,13 +4963,13 @@ func _add_selected_fireteam_aim_visuals() -> void:
 		if visual_mode == FRIENDLY_FIRE_SECTOR_VISUAL_MODE_TILE_ALIGNED_LOS:
 			sector_report = _add_fire_sector_tile_visuals(_order_root, unit_position, aim_direction, range_world, range_tiles, deg_to_rad(FRIENDLY_FIRE_SECTOR_ANGLE_DEGREES), "FriendlyFireSector_%s" % unit_id)
 			var facing_line_origin: Vector3 = Vector3(line_anchor.get("origin_3d", _world_to_surface_3d_position(unit_position, FRIENDLY_AIM_LINE_HEIGHT)))
-			_add_line3d(_order_root, facing_line_origin, _world_to_3d_position(default_facing_tip_position, facing_line_origin.y), FRIENDLY_AIM_LINE_COLOR, "FriendlyFacingLine_%s" % unit_id)
-			_add_marker3d(_order_root, default_facing_tip_position, FRIENDLY_AIM_TIP_COLOR, "FriendlyFacingTip_%s" % unit_id, 0.075, 0.07, 10)
+			_add_wide_line3d(_order_root, facing_line_origin, _world_to_3d_position(default_facing_tip_position, facing_line_origin.y), line_color, "FriendlyFacingLine_%s" % unit_id, FRIENDLY_FIRE_SECTOR_LINE_WIDTH)
+			_add_marker3d(_order_root, default_facing_tip_position, tip_color, "FriendlyFacingTip_%s" % unit_id, 0.075, 0.07, 10)
 			visual_shape = "tile_sector"
 			tile_aligned = true
 		else:
 			sector_report = _add_fire_sector_los_line_visuals(_order_root, unit_position, aim_direction, range_world, range_tiles, "FriendlySightLine_%s" % unit_id, line_anchor)
-			_add_marker3d(_order_root, Vector2(sector_report.get("tip_position", default_tip_position)), FRIENDLY_AIM_TIP_COLOR, "FriendlySightTip_%s" % unit_id, 0.075, 0.07, 10)
+			_add_marker3d(_order_root, Vector2(sector_report.get("tip_position", default_tip_position)), tip_color, "FriendlySightTip_%s" % unit_id, 0.075, 0.07, 10)
 		var tip_position: Vector2 = Vector2(sector_report.get("tip_position", default_tip_position))
 		var facing_tip_position: Vector2 = Vector2(sector_report.get("facing_tip_position", default_facing_tip_position))
 		_friendly_aim_visual_count += 1
@@ -4960,12 +4977,18 @@ func _add_selected_fireteam_aim_visuals() -> void:
 			"unit_id": unit_id,
 			"fireteam_id": fireteam_id,
 			"weapon_id": weapon_id,
+			"weapon_range_world": weapon_range_world,
+			"weapon_range_tiles": range_tiles,
 			"range_world": range_world,
 			"range_tiles": range_tiles,
+			"visual_range_limited": false,
 			"origin_position": unit_position,
 			"origin_grid": sector_report.get("origin_grid", _world_to_grid_position(unit_position)),
 			"line_origin_position": sector_report.get("line_origin_position", Vector2(line_anchor.get("origin_world", unit_position))),
 			"line_origin_anchor": String(sector_report.get("line_origin_anchor", line_anchor.get("anchor", "unit_center"))),
+			"line_color": Color(sector_report.get("line_color", line_color)),
+			"tip_color": tip_color,
+			"contact_visual_active": contact_visual_active,
 			"tip_position": tip_position,
 			"facing_tip_position": facing_tip_position,
 			"visual_shape": visual_shape,
@@ -4980,6 +5003,25 @@ func _add_selected_fireteam_aim_visuals() -> void:
 			"visual_only": true,
 		})
 	_prune_stabilized_friendly_aim_directions(seen_unit_ids)
+
+
+func _unit_or_fireteam_has_visible_contact(unit: Node, fireteam_id: String) -> bool:
+	if unit != null and unit.has_method("is_in_contact") and bool(unit.call("is_in_contact")):
+		return true
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return false
+	for contact_variant in _contact_entries:
+		if typeof(contact_variant) != TYPE_DICTIONARY:
+			continue
+		var contact: Dictionary = Dictionary(contact_variant)
+		var contact_fireteam_id: String = String(contact.get("fireteam_id", "")).strip_edges().to_lower()
+		if contact_fireteam_id != normalized_fireteam_id:
+			continue
+		var detection_state: String = String(contact.get("detection_state", "")).strip_edges().to_lower()
+		if detection_state == "spotted" or detection_state == "confirmed":
+			return true
+	return false
 
 
 func _reset_mission_los_debug_counters() -> void:
@@ -5244,16 +5286,21 @@ func _get_unit_active_attack_weapon_id(unit: Node) -> String:
 
 func _build_unit_fire_line_anchor(unit: Node, unit_world_position: Vector2, aim_direction: Vector2) -> Dictionary:
 	var direction: Vector2 = aim_direction.normalized() if aim_direction.length_squared() > 0.0001 else Vector2.RIGHT
-	var anchor_world: Vector2 = unit_world_position + direction * FRIENDLY_FIRE_LINE_BARREL_OFFSET_WORLD
+	var anchor_world: Vector2 = unit_world_position
 	var anchor_3d: Vector3 = _world_to_surface_3d_position(anchor_world, FRIENDLY_AIM_LINE_HEIGHT)
-	var anchor_name: String = "barrel_offset"
+	var anchor_name: String = "unit_head_fallback"
 	var proxy := _unit_proxies_by_id.get(_get_unit_id(unit), null) as Node3D
 	if proxy != null and is_instance_valid(proxy) and proxy.visible:
+		proxy.set_meta("unit_fire_line_weapon_anchor_available", false)
+		var head_socket: Node3D = _find_unit_visual_socket(proxy, "HeadSocket")
+		if head_socket != null and is_instance_valid(head_socket):
+			anchor_3d = head_socket.global_position
+			anchor_name = "head_visual"
 		var weapon_node: Node3D = _find_unit_blaster_visual_node(proxy)
 		var weapon_posture: String = _normalize_unit_weapon_posture(String(proxy.get_meta("unit_weapon_posture", "")))
 		if weapon_node != null and is_instance_valid(weapon_node) and weapon_posture != "lowered":
-			anchor_3d = weapon_node.global_position
-			anchor_name = "weapon_visual"
+			proxy.set_meta("unit_fire_line_weapon_anchor_available", true)
+			proxy.set_meta("unit_fire_line_weapon_anchor_position", weapon_node.global_position)
 	return {
 		"origin_world": anchor_world,
 		"origin_3d": anchor_3d,
@@ -5284,7 +5331,7 @@ func _resolve_unit_aim_direction(unit: Node, unit_world_position: Vector2) -> Ve
 func _resolve_unit_explicit_facing_direction(unit: Node) -> Vector2:
 	if unit == null:
 		return Vector2.ZERO
-	for meta_key in ["facing_angle", "map_facing_angle", "enemy_facing_angle"]:
+	for meta_key in ["security_facing_angle", "facing_angle", "map_facing_angle", "enemy_facing_angle"]:
 		if unit.has_meta(meta_key):
 			return Vector2.RIGHT.rotated(float(unit.get_meta(meta_key, 0.0))).normalized()
 	return Vector2.ZERO
@@ -5390,10 +5437,10 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 	var catalog_pixel_size: float = float(muzzle_entry.get("pixel_size", 0.010))
 	var pixel_size: float = maxf(catalog_pixel_size, WEAPON_FIRE_MUZZLE_MIN_PIXEL_SIZE)
 	var is_friendly_fire: bool = bool(fire_event.get("is_friendly_fire", false))
-	var color: Color = Color(1.0, 0.32, 0.28, 0.9) if is_friendly_fire else Color(1.0, 0.78, 0.28, 0.82)
+	var trace_color: Color = WEAPON_FIRE_FRIENDLY_TRACE_COLOR if is_friendly_fire else WEAPON_FIRE_CONTACT_TRACE_COLOR
 	_add_texture_card(_order_root, texture, _world_to_surface_3d_position(muzzle_position, 0.92), "WeaponFireMuzzle_%s" % _sanitize_node_name(event_id), pixel_size, Vector2.ZERO, Color(1.0, 0.95, 0.62, 0.92))
 	_add_marker3d(_order_root, muzzle_position, WEAPON_FIRE_MUZZLE_BLOOM_COLOR, "WeaponFireMuzzleBloom_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_MUZZLE_BLOOM_RADIUS, WEAPON_FIRE_MUZZLE_BLOOM_HEIGHT, 16, 0.84)
-	_add_line3d(_order_root, _world_to_surface_3d_position(muzzle_position, 0.78), _world_to_surface_3d_position(target_position, 0.78), color, "WeaponFireTrace_%s" % _sanitize_node_name(event_id))
+	_add_wide_line3d(_order_root, _world_to_surface_3d_position(muzzle_position, 0.78), _world_to_surface_3d_position(target_position, 0.78), trace_color, "WeaponFireTrace_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_TRACE_WIDTH)
 	var flank_label: String = _build_flank_fire_vfx_label(fire_event)
 	if not flank_label.is_empty():
 		_add_label3d(_order_root, flank_label, _world_to_surface_3d_position(target_position + Vector2(0.0, -22.0), MOVEMENT_LABEL_HEIGHT + 0.82), "WeaponFireFlank_%s" % _sanitize_node_name(event_id), Color(1.0, 0.70, 0.24, 0.96), 12)
@@ -5413,6 +5460,9 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		"muzzle_bloom_visible": true,
 		"muzzle_catalog_pixel_size": catalog_pixel_size,
 		"muzzle_flash_pixel_size": pixel_size,
+		"trace_visible": true,
+		"trace_width": WEAPON_FIRE_TRACE_WIDTH,
+		"trace_color": trace_color,
 		"audio_event_id": String(audio_result.get("event_id", "")),
 		"audio_played": bool(audio_result.get("played", false)),
 		"audio_reason": String(audio_result.get("reason", "")),
@@ -5506,9 +5556,10 @@ func _add_hud_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 	var text: String = String(feedback_bubble.get("text", "")).strip_edges()
 	if bubble_id.is_empty() or text.is_empty():
 		return
+	var display_text: String = _wrap_hud_feedback_bubble_text(text)
 	var hud_anchor_position: Vector2 = Vector2(feedback_bubble.get("hud_anchor_position", Vector2.ZERO))
 	var bubble_size: Vector2 = _coerce_hud_bubble_size(feedback_bubble.get("max_size", Vector2i(148, 52)))
-	bubble_size = _build_compact_hud_bubble_size(text, bubble_size)
+	bubble_size = _build_compact_hud_bubble_size(display_text, bubble_size)
 	var viewport_size := Vector2(_get_viewport_size())
 	if viewport_size.x < bubble_size.x + 1.0 or viewport_size.y < bubble_size.y + 1.0:
 		viewport_size = Vector2(1280.0, 720.0)
@@ -5543,13 +5594,13 @@ func _add_hud_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 
 	var label := Label.new()
 	label.name = "BubbleText"
-	label.text = text
+	label.text = display_text
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
 	label.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_FEEDBACK_BUBBLE_TEXT)
-	label.add_theme_font_size_override("font_size", 8 if text.length() <= 18 else 9)
+	label.add_theme_font_size_override("font_size", 8)
 	label.position = Vector2(8.0, 6.0)
 	label.size = Vector2(maxf(bubble_size.x - 16.0, 1.0), maxf(bubble_size.y - 12.0, 1.0))
 	bubble_root.add_child(label)
@@ -5579,6 +5630,8 @@ func _add_hud_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 		"hud_anchor_position": hud_anchor_position,
 		"hud_bubble_position": bubble_position,
 		"hud_bubble_size": bubble_size,
+		"hud_text_alignment": "top_left",
+		"wrapped_text": display_text,
 		"hud_tail_side": "left",
 		"hud_tail_points_to_anchor": true,
 		"visual_only": true,
@@ -5601,12 +5654,40 @@ func _build_compact_hud_bubble_size(text: String, requested_size: Vector2) -> Ve
 	var trimmed_text: String = text.strip_edges()
 	var character_count: int = trimmed_text.length()
 	var line_count: int = maxi(trimmed_text.split("\n").size(), 1)
-	var target_width: float = 88.0 + float(mini(character_count, 28)) * 2.0
-	var target_height: float = 34.0 + float(maxi(line_count - 1, 0)) * 10.0
+	var longest_line: int = 0
+	for line in trimmed_text.split("\n"):
+		longest_line = maxi(longest_line, String(line).length())
+	var target_width: float = 92.0 + float(mini(longest_line, 20)) * 2.2
+	var target_height: float = 36.0 + float(maxi(line_count - 1, 0)) * 10.0
 	return Vector2(
-		clampf(minf(requested_size.x, target_width), 84.0, 148.0),
-		clampf(minf(requested_size.y, target_height), 34.0, 54.0)
+		clampf(minf(maxf(requested_size.x, 112.0), target_width), 96.0, 162.0),
+		clampf(minf(maxf(requested_size.y, 42.0), target_height), 38.0, 72.0)
 	)
+
+
+func _wrap_hud_feedback_bubble_text(text: String) -> String:
+	var wrapped_lines: PackedStringArray = PackedStringArray()
+	for raw_line in text.strip_edges().split("\n"):
+		var words: PackedStringArray = PackedStringArray()
+		for raw_word in String(raw_line).split(" ", false):
+			var word: String = String(raw_word).strip_edges()
+			if not word.is_empty():
+				words.append(word)
+		var current_words: PackedStringArray = PackedStringArray()
+		var current_length: int = 0
+		for word in words:
+			var next_length: int = current_length + String(word).length() + (1 if current_words.size() > 0 else 0)
+			if current_words.size() >= 4 or (current_words.size() >= 2 and next_length > 22):
+				wrapped_lines.append(" ".join(current_words))
+				current_words = PackedStringArray()
+				current_length = 0
+			current_words.append(word)
+			current_length += String(word).length() + (1 if current_words.size() > 1 else 0)
+		if not current_words.is_empty():
+			wrapped_lines.append(" ".join(current_words))
+	if wrapped_lines.is_empty():
+		return text.strip_edges()
+	return "\n".join(wrapped_lines)
 
 
 func _resolve_hud_feedback_bubble_position(hud_anchor_position: Vector2, bubble_size: Vector2, viewport_size: Vector2) -> Vector2:
@@ -6522,7 +6603,10 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 			continue
 		seen_ids[unit_id] = true
 		var proxy := _unit_proxies_by_id.get(unit_id, null) as Node3D
-		if proxy == null or force_rebuild or not is_instance_valid(proxy):
+		var unit_visual_signature: String = _build_unit_visual_signature(unit)
+		var proxy_visual_signature: String = String(proxy.get_meta("unit_visual_signature", "")) if proxy != null and is_instance_valid(proxy) else ""
+		var visual_signature_changed: bool = not proxy_visual_signature.is_empty() and proxy_visual_signature != unit_visual_signature
+		if proxy == null or force_rebuild or not is_instance_valid(proxy) or visual_signature_changed:
 			if proxy != null and is_instance_valid(proxy):
 				proxy.queue_free()
 			proxy = _create_unit_proxy(unit)
@@ -6530,6 +6614,7 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 			_unit_root.add_child(proxy)
 			_unit_proxies_by_id[unit_id] = proxy
 			changed = true
+		proxy.set_meta("unit_visual_signature", unit_visual_signature)
 		var base_visible: bool = _is_unit_base_world_visible(unit)
 		var fow_allowed: bool = _fow_allows_unit_proxy(unit)
 		if base_visible and not fow_allowed:
@@ -6544,15 +6629,21 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 		proxy.set_meta("overwatch_ready", bool(unit.get_meta("overwatch_ready", false)) if unit != null and unit.has_meta("overwatch_ready") else false)
 		proxy.set_meta("overwatch_shot_ready", bool(unit.get_meta("overwatch_shot_ready", false)) if unit != null and unit.has_meta("overwatch_shot_ready") else false)
 		proxy.set_meta("overwatch_cooldown_remaining_ticks", int(unit.get_meta("overwatch_cooldown_remaining_ticks", 0)) if unit != null and unit.has_meta("overwatch_cooldown_remaining_ticks") else 0)
+		proxy.set_meta("unit_security_facing_active", bool(unit.get_meta("security_facing_active", false)) if unit != null and unit.has_meta("security_facing_active") else false)
+		proxy.set_meta("unit_security_facing_angle", float(unit.get_meta("security_facing_angle", 0.0)) if unit != null and unit.has_meta("security_facing_angle") else 0.0)
+		proxy.set_meta("unit_security_coverage_role", String(unit.get_meta("security_coverage_role", "")) if unit != null and unit.has_meta("security_coverage_role") else "")
 		var active_fire_event: Dictionary = _get_active_fire_event_for_unit(unit_id)
 		var runtime_posture: Dictionary = _get_unit_runtime_posture_snapshot(unit)
-		var displayed_weapon_posture: String = "aimed" if not active_fire_event.is_empty() else String(runtime_posture.get("weapon_posture", "lowered"))
+		var runtime_aim_readiness_percent: float = float(runtime_posture.get("aim_readiness_percent", 0.0))
+		var displayed_weapon_posture: String = _resolve_displayed_weapon_posture_from_readiness(active_fire_event, String(runtime_posture.get("weapon_posture", "lowered")), runtime_aim_readiness_percent)
 		var displayed_movement_posture: String = "engage" if not active_fire_event.is_empty() else String(runtime_posture.get("movement_posture", "idle"))
 		proxy.set_meta("unit_movement_posture", displayed_movement_posture)
 		proxy.set_meta("unit_weapon_posture", displayed_weapon_posture)
 		proxy.set_meta("unit_runtime_weapon_posture", String(runtime_posture.get("weapon_posture", "lowered")))
 		proxy.set_meta("unit_posture_policy_id", String(runtime_posture.get("posture_policy_id", "")))
 		proxy.set_meta("unit_sight_range_factor", float(runtime_posture.get("sight_range_factor", 1.0)))
+		proxy.set_meta("unit_aim_readiness_percent", runtime_aim_readiness_percent)
+		proxy.set_meta("unit_aim_readiness_visible_override", active_fire_event.is_empty() and displayed_weapon_posture != String(runtime_posture.get("weapon_posture", "lowered")))
 		proxy.set_meta("unit_posture_source", "fire_event" if not active_fire_event.is_empty() else "runtime")
 		proxy.set_meta("unit_aim_pose_active", displayed_weapon_posture == "aimed")
 		proxy.set_meta("unit_ready_pose_active", displayed_weapon_posture == "ready")
@@ -6724,6 +6815,7 @@ func _get_unit_runtime_posture_snapshot(unit: Node) -> Dictionary:
 		"weapon_posture": "lowered",
 		"posture_policy_id": "",
 		"sight_range_factor": 1.0,
+		"aim_readiness_percent": 0.0,
 	}
 	if unit == null or not unit.has_method("get_runtime_status"):
 		return result
@@ -6734,7 +6826,37 @@ func _get_unit_runtime_posture_snapshot(unit: Node) -> Dictionary:
 	result["weapon_posture"] = _normalize_unit_weapon_posture(String(runtime_status.get("weapon_posture")))
 	result["posture_policy_id"] = String(runtime_status.get("posture_policy_id")).strip_edges().to_lower()
 	result["sight_range_factor"] = maxf(float(runtime_status.get("sight_range_factor")), 0.0)
+	result["aim_readiness_percent"] = clampf(float(runtime_status.get("aim_readiness_percent")), 0.0, 100.0)
 	return result
+
+
+func _resolve_displayed_weapon_posture_from_readiness(active_fire_event: Dictionary, weapon_posture: String, aim_readiness_percent: float) -> String:
+	if not active_fire_event.is_empty():
+		return "aimed"
+	var normalized_weapon_posture: String = _normalize_unit_weapon_posture(weapon_posture)
+	var normalized_readiness: float = clampf(aim_readiness_percent, 0.0, 100.0)
+	if normalized_weapon_posture == "lowered" and normalized_readiness >= 70.0:
+		return "aimed"
+	if normalized_weapon_posture == "lowered" and normalized_readiness >= 50.0:
+		return "ready"
+	return normalized_weapon_posture
+
+
+func _build_unit_visual_signature(unit: Node) -> String:
+	var unit_visual_entry: Dictionary = _get_unit_visual_entry(unit)
+	var parts: PackedStringArray = PackedStringArray()
+	parts.append(_get_unit_id(unit))
+	parts.append(_get_unit_team_id(unit))
+	parts.append(String(unit_visual_entry.get("visual_id", "")))
+	parts.append(String(unit_visual_entry.get("model_path", "")))
+	parts.append(String(unit_visual_entry.get("skin_path", "")))
+	parts.append(String(unit_visual_entry.get("resolved_visual_archetype_id", unit_visual_entry.get("visual_archetype_id", ""))))
+	parts.append(String(unit_visual_entry.get("resolved_visual_loadout_id", unit_visual_entry.get("visual_loadout_id", ""))))
+	parts.append("%.4f" % float(unit_visual_entry.get("scale", 0.0)))
+	parts.append("%.2f" % float(unit_visual_entry.get("rotation_degrees_y", 0.0)))
+	for weapon_id in _get_unit_visual_weapon_ids(unit):
+		parts.append("weapon:%s" % String(weapon_id))
+	return "|".join(parts)
 
 
 func _normalize_unit_movement_posture(value: String) -> String:
@@ -6810,6 +6932,10 @@ func _get_unit_status_badge_text(unit: Node) -> String:
 	if runtime_status != null:
 		status_text = String(runtime_status.get("status")).strip_edges().to_lower() if runtime_status.has_method("get") else ""
 		source_command = String(runtime_status.get("source_command_type")).strip_edges().to_lower() if runtime_status.has_method("get") else ""
+	if source_command == "move":
+		return "MOVE"
+	if source_command == "engage":
+		return "ENGAGE"
 	if source_command == "take":
 		return "TAKE"
 	if source_command == "defend":
@@ -7001,8 +7127,12 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 					root.set_meta("unit_visual_error", true)
 			root.add_child(model_root)
 			root.set_meta("uses_kenney_model", true)
+			root.set_meta("unit_body_visual_visible", true)
+			root.set_meta("unit_body_visual_kind", "animated_model")
 			if not unit_visual_entry.is_empty():
 				root.set_meta("uses_animated_character_model", true)
+				if _get_unit_team_id(unit) != "team_alpha":
+					_add_unit_body_readability_core(root, unit)
 
 	if not bool(root.get_meta("uses_kenney_model", false)) and _uses_strict_3d_asset_mapping():
 		_add_runtime_missing_asset_marker(
@@ -7019,6 +7149,8 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 			var unit_card := _add_texture_card(root, unit_texture, Vector3(0.0, 0.34, 0.0), "UnitTexture", UNIT_TEXTURE_PIXEL_SIZE)
 			if unit_card != null:
 				root.set_meta("uses_unit_texture", true)
+				root.set_meta("unit_body_visual_visible", true)
+				root.set_meta("unit_body_visual_kind", "texture_card")
 				var weapon_texture := _get_unit_weapon_visual_texture(unit)
 				if weapon_texture != null:
 					_add_texture_card(root, weapon_texture, Vector3(0.0, 0.36, 0.0), "UnitWeaponTexture", UNIT_TEXTURE_PIXEL_SIZE, _get_unit_weapon_visual_offset(unit))
@@ -7031,6 +7163,8 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 		body.mesh = mesh
 		body.material_override = _make_material(_get_unit_color(unit))
 		root.add_child(body)
+		root.set_meta("unit_body_visual_visible", true)
+		root.set_meta("unit_body_visual_kind", "fallback_capsule")
 	var base := MeshInstance3D.new()
 	var base_mesh := CylinderMesh.new()
 	base_mesh.top_radius = UNIT_BASE_RADIUS
@@ -7043,6 +7177,23 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 	root.add_child(base)
 	root.set_meta("unit_team_base_visible", true)
 	return root
+
+
+func _add_unit_body_readability_core(root: Node3D, unit: Node) -> void:
+	if root == null:
+		return
+	var body := MeshInstance3D.new()
+	var mesh := CapsuleMesh.new()
+	mesh.radius = UNIT_FALLBACK_BODY_RADIUS * 0.46
+	mesh.height = UNIT_FALLBACK_BODY_HEIGHT * 0.72
+	body.name = "UnitBodyReadabilityCore"
+	body.mesh = mesh
+	var color: Color = _get_unit_color(unit)
+	body.material_override = _make_material(Color(color.r, color.g, color.b, 0.62), true)
+	body.position = Vector3(0.0, 0.38, 0.0)
+	root.add_child(body)
+	root.set_meta("unit_body_readability_core_visible", true)
+	root.set_meta("unit_body_visual_visible", true)
 
 
 func _setup_unit_visual_animation(proxy_root: Node3D, model_root: Node3D, model_instance: Node3D, unit_visual_entry: Dictionary) -> bool:
@@ -7931,6 +8082,8 @@ func _get_unit_proxy_state_by_id() -> Dictionary:
 		var proxy := _unit_proxies_by_id.get(unit_id_variant, null) as Node3D
 		if proxy == null or not is_instance_valid(proxy):
 			continue
+		var badge := proxy.get_node_or_null("UnitStateBadge") as Label3D
+		var badge_visible: bool = badge != null and badge.visible
 		result[unit_id] = {
 			"visible": proxy.visible,
 			"rotation_y_degrees": float(proxy.rotation_degrees.y),
@@ -7942,6 +8095,10 @@ func _get_unit_proxy_state_by_id() -> Dictionary:
 			"uses_kenney_model": bool(proxy.get_meta("uses_kenney_model", false)),
 			"uses_animated_character_model": bool(proxy.get_meta("uses_animated_character_model", false)),
 			"unit_team_base_visible": bool(proxy.get_meta("unit_team_base_visible", false)),
+			"unit_body_visual_visible": bool(proxy.get_meta("unit_body_visual_visible", false)),
+			"unit_body_visual_kind": String(proxy.get_meta("unit_body_visual_kind", "")).strip_edges(),
+			"unit_body_readability_core_visible": bool(proxy.get_meta("unit_body_readability_core_visible", false)),
+			"unit_visual_signature": String(proxy.get_meta("unit_visual_signature", "")).strip_edges(),
 			"unit_visual_archetype_id": String(proxy.get_meta("unit_visual_archetype_id", "")).strip_edges(),
 			"unit_visual_faction_id": String(proxy.get_meta("unit_visual_faction_id", "")).strip_edges(),
 			"unit_model_root_rotation_y_degrees": float(proxy.get_meta("unit_model_root_rotation_y_degrees", 0.0)),
@@ -7960,6 +8117,9 @@ func _get_unit_proxy_state_by_id() -> Dictionary:
 			"unit_posture_policy_id": String(proxy.get_meta("unit_posture_policy_id", "")).strip_edges(),
 			"unit_sight_range_factor": float(proxy.get_meta("unit_sight_range_factor", 1.0)),
 			"unit_posture_source": String(proxy.get_meta("unit_posture_source", "")).strip_edges(),
+			"unit_security_facing_active": bool(proxy.get_meta("unit_security_facing_active", false)),
+			"unit_security_facing_angle": float(proxy.get_meta("unit_security_facing_angle", 0.0)),
+			"unit_security_coverage_role": String(proxy.get_meta("unit_security_coverage_role", "")).strip_edges(),
 			"unit_aim_pose_weapon_node_available": bool(proxy.get_meta("unit_aim_pose_weapon_node_available", false)),
 			"unit_aim_pose_yaw_active": bool(proxy.get_meta("unit_aim_pose_yaw_active", false)),
 			"unit_aim_pose_yaw_delta_degrees": float(proxy.get_meta("unit_aim_pose_yaw_delta_degrees", 0.0)),
@@ -7969,6 +8129,8 @@ func _get_unit_proxy_state_by_id() -> Dictionary:
 			"unit_weapon_upper_body_pose_animation_available": bool(proxy.get_meta("unit_weapon_upper_body_pose_animation_available", false)),
 			"unit_weapon_upper_body_pose_bone_count": int(proxy.get_meta("unit_weapon_upper_body_pose_bone_count", 0)),
 			"unit_weapon_upper_body_pose_source_animation": String(proxy.get_meta("unit_weapon_upper_body_pose_source_animation", "")).strip_edges(),
+			"unit_status_badge_visible": badge_visible,
+			"unit_status_badge_text": badge.text if badge_visible else "",
 		}
 	return result
 
@@ -8128,10 +8290,13 @@ func _add_fire_sector_los_line_visuals(parent: Node3D, origin_world: Vector2, ce
 	var raw_tip_position: Vector2 = origin_world + direction * maxf(range_world, 0.0)
 	var facing_length: float = clampf(range_world * 0.16, FRIENDLY_FIRE_FACING_STEM_MIN_WORLD, FRIENDLY_FIRE_FACING_STEM_MAX_WORLD)
 	var line_origin_world: Vector2 = Vector2(line_anchor.get("origin_world", origin_world))
+	var requested_line_color: Color = Color(line_anchor.get("line_color", FRIENDLY_AIM_LINE_COLOR))
 	var report: Dictionary = {
 		"origin_grid": origin_grid,
 		"line_origin_position": line_origin_world,
 		"line_origin_anchor": String(line_anchor.get("anchor", "unit_center")),
+		"line_color": requested_line_color,
+		"contact_visual_active": bool(line_anchor.get("contact_visual_active", false)),
 		"visible_tile_count": 0,
 		"blocker_tile_count": 0,
 		"los_line_count": 0,
@@ -8163,12 +8328,13 @@ func _add_fire_sector_los_line_visuals(parent: Node3D, origin_world: Vector2, ce
 	var line_origin_3d_variant: Variant = line_anchor.get("origin_3d", null)
 	var line_origin_3d: Vector3 = Vector3(line_origin_3d_variant) if typeof(line_origin_3d_variant) == TYPE_VECTOR3 else _world_to_surface_3d_position(line_origin_world, FRIENDLY_AIM_LINE_HEIGHT)
 	var line_tip_3d: Vector3 = _world_to_3d_position(Vector2(report.get("tip_position", raw_tip_position)), line_origin_3d.y)
-	_add_line3d(
+	_add_wide_line3d(
 		parent,
 		line_origin_3d,
 		line_tip_3d,
-		FRIENDLY_FIRE_SECTOR_BLOCKER_LINE_COLOR if bool(report.get("los_blocked", false)) else FRIENDLY_AIM_LINE_COLOR,
-		node_name
+		FRIENDLY_FIRE_SECTOR_BLOCKER_LINE_COLOR if bool(report.get("los_blocked", false)) else requested_line_color,
+		node_name,
+		FRIENDLY_FIRE_SECTOR_LINE_WIDTH
 	)
 	_friendly_aim_los_line_count += 1
 	report["los_line_count"] = 1
@@ -8345,8 +8511,23 @@ func _find_fire_sector_los_blocker_grid(start_grid: Vector2i, end_grid: Vector2i
 		var ray_height: float = lerpf(eye_height, target_height, progress)
 		var blocker_height: float = float(tile_data.height_level) + float(tile_data.object_height)
 		if bool(tile_data.blocks_los) and blocker_height >= ray_height - 0.05:
+			if _tile_uses_wall_segment_los(tile_data):
+				var crosses_segment: bool = bool(TERRAIN_TRUTH_AUDIT_SCRIPT.call(
+					"does_tile_wall_block_los",
+					tile_data,
+					Vector2(float(start_grid.x), float(start_grid.y)),
+					Vector2(float(end_grid.x), float(end_grid.y))
+				))
+				if not crosses_segment:
+					continue
 			return grid_position
 	return sentinel
+
+
+func _tile_uses_wall_segment_los(tile_data) -> bool:
+	if tile_data == null:
+		return false
+	return bool(TERRAIN_TRUTH_AUDIT_SCRIPT.call("is_wall_type_id", String(tile_data.type_id))) or bool(TERRAIN_TRUTH_AUDIT_SCRIPT.call("is_wall_type_id", String(tile_data.object_type_id)))
 
 
 func _build_grid_line(start_grid: Vector2i, end_grid: Vector2i) -> Array:

@@ -1,0 +1,429 @@
+{
+  "exportedAt": "2026-05-15T16:17:10.645Z",
+  "project": "InselKrieg 1",
+  "notes": "",
+  "decisions": {
+    "vision_manual": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "vision_wusel": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "vision_scale": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "start_mode": {
+      "status": "ok",
+      "note": "Landungsboot",
+      "choice": "Landungsboot"
+    },
+    "start_buildings": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "start_goal": {
+      "status": "change",
+      "note": "gebäude brauchen holz und stein",
+      "choice": ""
+    },
+    "start_feedback": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "map_visual": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "map_logic": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "map_cells": {
+      "status": "change",
+      "note": "und mehr, wasserroute und flugzone soll über weg findung funktionieren",
+      "choice": ""
+    },
+    "map_editor": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "res_people": {
+      "status": "change",
+      "note": "und brauchen nahrung",
+      "choice": ""
+    },
+    "res_housing": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "res_food": {
+      "status": "change",
+      "note": "militär verbraucht sprit (infantrie verbraucht keinen sprit), munition und verpflegung(nahrung)",
+      "choice": ""
+    },
+    "res_wood": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "res_ore": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "res_energy": {
+      "status": "change",
+      "note": "und panzer schiffe und flugzeuge verbrauchen auch energie, frühe form kann auch holz sein",
+      "choice": ""
+    },
+    "res_supply": {
+      "status": "change",
+      "note": "sprit, munition und verpflegung sollen getrennt sein",
+      "choice": ""
+    },
+    "res_ammo": {
+      "status": "change",
+      "note": "siehe oben",
+      "choice": ""
+    },
+    "b_core": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "b_house": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "b_farm": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "b_fishing": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "b_lumber": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "b_mine": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "b_factory": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "b_academy": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "log_fish": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "log_small_transport": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "log_harbor_ui": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "log_supply": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "m_infantry": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "m_navy": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "m_pilots": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "m_ship_cost": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "ui_resource": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "ui_build": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "ui_select": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "ui_questions": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "tool_godot": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "tool_terrain3d": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "tool_kenney": {
+      "status": "change",
+      "note": "Figuren sollen hier raus kommen C:\\Users\\bjoer\\Pictures\\Kenney Game Assets All-in-1 3.4.0\\3D assets\\Animated Characters Bundle",
+      "choice": ""
+    },
+    "tool_netfox": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "tool_limbo": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "tool_openrts": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "phase_1": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "phase_2": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "phase_3": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "phase_4": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "phase_5": {
+      "status": "ok",
+      "note": "",
+      "choice": ""
+    },
+    "q_start": {
+      "status": "change",
+      "note": "Landungsboot",
+      "choice": "Landungsboot"
+    },
+    "q_food_order": {
+      "status": "change",
+      "note": "fischerei",
+      "choice": "Fischerei zuerst"
+    },
+    "q_grid_size": {
+      "status": "change",
+      "note": "Mittlere Zellen",
+      "choice": ""
+    },
+    "q_people_hard": {
+      "status": "change",
+      "note": "Mittel",
+      "choice": ""
+    },
+    "q_supply_start": {
+      "status": "change",
+      "note": "Ab Infanterie, man kann ja am anfang eine miliz haben die schlechter ist  als der standardsoldat",
+      "choice": ""
+    },
+    "q_visual_style": {
+      "status": "change",
+      "note": "Mischung",
+      "choice": ""
+    }
+  },
+  "roadmap": [
+    {
+      "id": "road_start_island",
+      "lane": "now",
+      "title": "Startinsel neu",
+      "detail": "Terrain/Heightmap plus Logikzellen fuer Bauplaetze.",
+      "tags": [
+        "map",
+        "tech"
+      ]
+    },
+    {
+      "id": "road_core_loop",
+      "lane": "now",
+      "title": "Wohnhaus + Bauernhof + Holz",
+      "detail": "Menschen, Nahrung, Holz als erster Loop.",
+      "tags": [
+        "economy"
+      ]
+    },
+    {
+      "id": "road_fishing",
+      "lane": "now",
+      "title": "Fischerhafen + Boot",
+      "detail": "Erster Hafenbetrieb mit sichtbarer Nahrungslieferung.",
+      "tags": [
+        "economy",
+        "map"
+      ]
+    },
+    {
+      "id": "road_ui_reasons",
+      "lane": "now",
+      "title": "Warum-UI",
+      "detail": "Sperrgruende, Input/Output, Arbeiter, Fehlmengen.",
+      "tags": [
+        "ui"
+      ]
+    },
+    {
+      "id": "road_editor_logic",
+      "lane": "next",
+      "title": "Logikkarten-Editor",
+      "detail": "Bauplatztypen und Ressourcen auf Inseln malen.",
+      "tags": [
+        "map",
+        "tech"
+      ]
+    },
+    {
+      "id": "road_transport",
+      "lane": "next",
+      "title": "Transportboote",
+      "detail": "Kurze sichtbare Routen zwischen Hafen und Lager.",
+      "tags": [
+        "economy"
+      ]
+    },
+    {
+      "id": "road_industry",
+      "lane": "later",
+      "title": "Industrie",
+      "detail": "Erz, Kohle, Energie, Fabrik, Versorgungsgueter.",
+      "tags": [
+        "economy"
+      ]
+    },
+    {
+      "id": "road_academy",
+      "lane": "later",
+      "title": "Akademien",
+      "detail": "Ausbildung macht Menschen wertvoll.",
+      "tags": [
+        "military"
+      ]
+    },
+    {
+      "id": "road_netfox",
+      "lane": "parking",
+      "title": "Netfox richtig anbinden",
+      "detail": "Wenn Command-Schicht und Simulation stabil sind.",
+      "tags": [
+        "tech"
+      ]
+    },
+    {
+      "id": "road_limbo",
+      "lane": "parking",
+      "title": "LimboAI-Kommandanten",
+      "detail": "Spaeter Gegner- und Bereichs-KI.",
+      "tags": [
+        "tech",
+        "military"
+      ]
+    }
+  ],
+  "chapters": [
+    {
+      "id": "vision",
+      "title": "1. Leitbild"
+    },
+    {
+      "id": "first_minute",
+      "title": "2. Erste Spielminute"
+    },
+    {
+      "id": "map_architecture",
+      "title": "3. Karte und Architektur"
+    },
+    {
+      "id": "resources",
+      "title": "4. Ressourcenordnung"
+    },
+    {
+      "id": "buildings",
+      "title": "5. Gebaeude und Produktionsketten"
+    },
+    {
+      "id": "logistics",
+      "title": "6. Hafen, Boote und Logistik"
+    },
+    {
+      "id": "military",
+      "title": "7. Militaer und Versorgung"
+    },
+    {
+      "id": "ui",
+      "title": "8. UI und Spielererklaerung"
+    },
+    {
+      "id": "tools",
+      "title": "9. Tools und Plugins"
+    },
+    {
+      "id": "phases",
+      "title": "10. Entwicklungsphasen"
+    },
+    {
+      "id": "open_questions",
+      "title": "11. Offene Kernfragen"
+    }
+  ]
+}

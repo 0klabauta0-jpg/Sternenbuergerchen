@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fireteam Map-Tool Drill Rebuild</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101417;
+      --panel: #182028;
+      --panel-2: #202b35;
+      --line: #415466;
+      --text: #e8f0f7;
+      --muted: #aebbc7;
+      --cyan: #65d7e8;
+      --yellow: #f2c94c;
+      --green: #70e0a1;
+      --red: #ff7a66;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.45;
+    }
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    h1, h2, h3 { margin: 0; letter-spacing: 0; }
+    h1 { font-size: 30px; }
+    h2 { font-size: 19px; margin-bottom: 12px; }
+    h3 { font-size: 15px; color: var(--cyan); margin-bottom: 6px; }
+    p { margin: 8px 0; color: var(--muted); }
+    code {
+      background: #0b1014;
+      border: 1px solid #2b3944;
+      border-radius: 4px;
+      padding: 1px 5px;
+      color: #d9f8ff;
+    }
+    .hero {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #17212a, #11181f);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .metric {
+      background: var(--panel);
+      border: 1px solid #324352;
+      padding: 10px;
+      min-height: 82px;
+    }
+    .metric strong {
+      display: block;
+      color: var(--text);
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 18px 0 12px;
+    }
+    .tab {
+      appearance: none;
+      border: 1px solid #506477;
+      background: #121920;
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .tab[aria-selected="true"] {
+      border-color: var(--yellow);
+      color: #100f08;
+      background: var(--yellow);
+    }
+    .section {
+      display: none;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .section.active { display: block; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .box {
+      background: var(--panel-2);
+      border: 1px solid #354858;
+      padding: 12px;
+    }
+    ul { margin: 8px 0 0; padding-left: 18px; color: var(--muted); }
+    li { margin: 5px 0; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid #354858;
+      padding: 8px;
+      vertical-align: top;
+      text-align: left;
+    }
+    th { background: #121920; color: var(--cyan); }
+    .ok { color: var(--green); font-weight: 700; }
+    .watch { color: var(--yellow); font-weight: 700; }
+    .risk { color: var(--red); font-weight: 700; }
+    .map {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / .62;
+      background:
+        linear-gradient(135deg, transparent 48%, #263844 49%, #263844 51%, transparent 52%),
+        linear-gradient(45deg, transparent 48%, #263844 49%, #263844 51%, transparent 52%),
+        #6d6a4e;
+      background-size: 54px 54px;
+      overflow: hidden;
+      border: 1px solid #354858;
+    }
+    .road {
+      position: absolute;
+      background: rgba(236, 145, 118, .55);
+      transform: skewY(-26deg) rotate(-2deg);
+      border: 2px solid rgba(255, 130, 82, .65);
+    }
+    .road.a { left: 10%; top: 48%; width: 42%; height: 23%; }
+    .road.b { left: 43%; top: 40%; width: 30%; height: 18%; }
+    .marker {
+      position: absolute;
+      min-width: 86px;
+      padding: 6px 8px;
+      background: rgba(7, 12, 16, .86);
+      border: 1px solid #61778a;
+      color: var(--text);
+      font-size: 12px;
+    }
+    .marker::before {
+      content: "";
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      margin-right: 6px;
+      background: var(--cyan);
+    }
+    .friendly { left: 14%; top: 70%; }
+    .enemy { right: 14%; top: 28%; }
+    .objective { left: 51%; top: 50%; }
+    .route {
+      position: absolute;
+      border-top: 3px solid rgba(112, 224, 161, .85);
+      transform-origin: left center;
+    }
+    .route.r1 { right: 17%; top: 32%; width: 120px; transform: rotate(22deg); }
+    .route.r2 { right: 10%; top: 37%; width: 130px; transform: rotate(-18deg); }
+    @media (max-width: 800px) {
+      main { padding: 14px; }
+      .summary, .grid { grid-template-columns: 1fr; }
+      h1 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <h1>Fireteam Map-Tool Drill Rebuild</h1>
+      <p>Stand: TASK_441. Die aktuelle 24x24-Drillmap bleibt die Playtest-Karte, wird aber jetzt explizit durch den MapEditor-Authoring-Pfad geprueft. Wichtig: Das Tool sieht alle vier Gegner, ihre Patrol-Routen und die Objektlayer-Buesche.</p>
+      <div class="summary">
+        <div class="metric"><strong>24 x 24</strong><span>flache Drillmap, keine ungewollten Hoehen oder Edge-Luecken</span></div>
+        <div class="metric"><strong>4 Gegner</strong><span><code>enemy_delta</code>, <code>enemy_echo</code>, <code>enemy_foxtrot</code>, <code>enemy_golf</code></span></div>
+        <div class="metric"><strong>4 Patrols</strong><span>je Gegner mindestens drei Waypoints, im Tool per Gegner-ID auswaehlbar</span></div>
+        <div class="metric"><strong>Baseline</strong><span>Engage, Take und Defend existieren, muessen aber staerker kontrolliert werden</span></div>
+      </div>
+    </section>
+
+    <nav class="tabs" aria-label="Ansichten">
+      <button class="tab" aria-selected="true" data-tab="map">Map-Tool</button>
+      <button class="tab" aria-selected="false" data-tab="commands">Engage / Take / Defend</button>
+      <button class="tab" aria-selected="false" data-tab="next">Naechste Kontrolle</button>
+    </nav>
+
+    <section id="map" class="section active">
+      <h2>Was das Tool jetzt sehen soll</h2>
+      <div class="grid">
+        <div class="box">
+          <h3>Authoring-Pfad</h3>
+          <p><code>MapEditor</code> laedt <code>maps/fireteam_command_drill_24x24.json</code> und danach <code>data/mission_scenarios/fireteam_command_drill_24x24.json</code>. Die Authoring-Validation prueft Map, Marker, Patrols und Scenario.</p>
+          <ul>
+            <li><span class="ok">OK:</span> Buesche sind <code>object_type_id = nature_bush_cover</code> auf <code>ground_flat</code>.</li>
+            <li><span class="ok">OK:</span> alle Tiles bleiben <code>height_level = 0</code> und <code>edge_type = none</code>.</li>
+            <li><span class="ok">OK:</span> Patrol-Auswahl nutzt Enemy-IDs und Route-IDs statt nur alter Platzhalter.</li>
+          </ul>
+        </div>
+        <div class="box">
+          <h3>Drill-Skizze</h3>
+          <div class="map" role="img" aria-label="Schematische Drillmap">
+            <div class="road a"></div>
+            <div class="road b"></div>
+            <div class="route r1"></div>
+            <div class="route r2"></div>
+            <div class="marker friendly">Friendly Spawn</div>
+            <div class="marker objective">Objective / Take</div>
+            <div class="marker enemy">Red Fireteam</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="commands" class="section">
+      <h2>Haben wir Engage, Take und Defend?</h2>
+      <p>Kurz: ja, als Baseline. Aber ich wuerde sie noch nicht als final kontrolliert betrachten. Sie laufen im sichtbaren Mission-Tactical-Pfad, aber Tile-vs-Area, Kontaktregeln und Abschlussbedingungen brauchen jetzt eine saubere Testmatrix.</p>
+      <table>
+        <thead>
+          <tr><th>Befehl</th><th>Was aktuell da ist</th><th>Was noch staerker kontrolliert werden muss</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Engage</strong></td>
+            <td>Bekaempft Kontakt oder Area ohne Besitzpflicht. C/N/A-Werte sind im Contract gesetzt, Waffe ist grundsaetzlich aimed.</td>
+            <td><span class="watch">Kontrolle:</span> Feind erkennen, roten Fire-Line-Status, Muzzle Flash, Schussfreigabe, kein heimliches Flankieren, Area-Approach ohne Einzelgaenger.</td>
+          </tr>
+          <tr>
+            <td><strong>Take</strong></td>
+            <td>Geht in Punkt oder Area, soll dort als Kontrollpraesenz bleiben und danach sichern.</td>
+            <td><span class="watch">Kontrolle:</span> Besitz-/Contested-Regel, Verteilung innerhalb der Area, Abschlussbedingung und automatischer Defend-Fallback nach erfolgreichem Take.</td>
+          </tr>
+          <tr>
+            <td><strong>Defend</strong></td>
+            <td>Haelt Punkt oder Area nach aussen. 360 und Directional Defense verteilen die vier Mitglieder sichtbar auf Richtungen/Sektoren.</td>
+            <td><span class="watch">Kontrolle:</span> ContactConfirm/ThreatLevel, wann geschossen wird, Head-Sichtlinie, Waffenreichweite, Security-Balken und klare FTL-Bubble.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="next" class="section">
+      <h2>Vorgeschlagener naechster Schritt</h2>
+      <div class="grid">
+        <div class="box">
+          <h3>Runtime-Matrix</h3>
+          <ul>
+            <li>Pro Befehl: <code>Engage</code>, <code>Take</code>, <code>Defend</code>.</li>
+            <li>Pro Modus: <code>C</code>, <code>N</code>, <code>A</code>.</li>
+            <li>Pro Zieltyp: einzelnes Tile und Area.</li>
+            <li>Pro Lage: kein Kontakt, sichtbarer Kontakt, blockierter LOS.</li>
+          </ul>
+        </div>
+        <div class="box">
+          <h3>Warum das wichtig ist</h3>
+          <p>Wir haben die Befehle schon im System, aber die naechsten Fehler sitzen wahrscheinlich nicht mehr in den Buttons, sondern in der Entscheidungsfolge: Zielauswahl, Route, Formation, Kontakt-Gate, Schussfreigabe, Abschluss und Auto-Defend. Diese Punkte sollten jetzt bewusst einzeln aufleuchten, statt irgendwo als Legacy-Fallback weiterzulaufen.</p>
+          <p><span class="risk">Offen:</span> Enemy-AI, Blocker/Pathfinding und Limbo bleiben separat. Das Map-Tool hilft beim Authoring, ersetzt aber keine Kampfentscheidung.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script>
+    const tabs = Array.from(document.querySelectorAll(".tab"));
+    const sections = Array.from(document.querySelectorAll(".section"));
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const id = tab.dataset.tab;
+        tabs.forEach((entry) => entry.setAttribute("aria-selected", entry === tab ? "true" : "false"));
+        sections.forEach((section) => section.classList.toggle("active", section.id === id));
+      });
+    });
+  </script>
+</body>
+</html>

@@ -88,6 +88,9 @@ static func build_damage_effect(contact_pair: Dictionary, context: Dictionary) -
 	var weapon_tile_range: int = WEAPON_DATA_SCRIPT.get_effective_tile_range(active_weapon_id)
 	var weapon_range_world: float = _get_weapon_attack_range(attacker, actual_target, context)
 	var weapon_hit_chance: float = WEAPON_DATA_SCRIPT.get_base_hit_chance(active_weapon_id)
+	var team_target_support_percent: float = _get_team_target_support_percent(attacker)
+	if absf(team_target_support_percent) > 0.001:
+		weapon_hit_chance = clampf(weapon_hit_chance + (team_target_support_percent / 100.0), 0.02, 0.98)
 	var friendly_team_id: String = String(context.get("friendly_team_id", ""))
 	var contact_state: String = String(contact_pair.get("contact_state", "")).strip_edges().to_lower()
 	if _get_team_id(attacker) == friendly_team_id and contact_state == "spotted":
@@ -108,6 +111,7 @@ static func build_damage_effect(contact_pair: Dictionary, context: Dictionary) -
 			"weapon_range_world": weapon_range_world,
 			"damage": WEAPON_DATA_SCRIPT.get_damage_per_hit(active_weapon_id),
 			"hit_chance": weapon_hit_chance,
+			"team_target_support_percent": team_target_support_percent,
 			"damage_multiplier": float(context.get("base_damage_multiplier", 1.0)) * float(flank_modifiers.get("damage_multiplier", 1.0)),
 			"target_cover_override": flank_modifiers.get("target_cover_override", null),
 			"is_flank": bool(flank_modifiers.get("is_flank", false)),
@@ -237,7 +241,7 @@ static func is_target_attackable(attacker, target, context: Dictionary) -> bool:
 	var los_system = context.get("los_system", null)
 	if los_system == null or not los_system.has_method("has_line_of_sight_between_nodes"):
 		return false
-	var effective_attack_range: float = _get_weapon_attack_range(attacker, target, context)
+	var effective_attack_range: float = _get_effective_attack_range(attacker, target, context)
 	return bool(los_system.call("has_line_of_sight_between_nodes", attacker, target, effective_attack_range, context.get("terrain_registry", null)))
 
 
@@ -256,15 +260,24 @@ static func is_engage_ready(unit) -> bool:
 			var command_type: String = String(command.get("command_type"))
 			if command_type == "engage_area" or command_type == "hold_position":
 				return true
-			return command_type == "move_to_position" and String(command.get("source_command_type")) == "flank"
+			return command_type == "move_to_position" and _move_command_can_engage(command)
 	if unit.has_method("get_runtime_status"):
 		var runtime_status = unit.call("get_runtime_status")
 		if runtime_status != null and runtime_status.has_method("get"):
 			var status_name: String = String(runtime_status.get("status"))
 			if status_name == "engaging" or status_name == "holding":
 				return true
-			return status_name == "pending_move" and String(runtime_status.get("source_command_type")) == "flank"
+			return status_name == "pending_move" and _move_command_can_engage(runtime_status)
 	return false
+
+
+static func _move_command_can_engage(command_state) -> bool:
+	if command_state == null or not command_state.has_method("get"):
+		return false
+	if String(command_state.get("fire_status")) != "fire_at_will":
+		return false
+	var source_command_type: String = String(command_state.get("source_command_type")).strip_edges().to_lower()
+	return ["move", "engage", "take", "defend", "flank"].has(source_command_type)
 
 
 static func get_unit_active_weapon_id(unit) -> String:
@@ -286,6 +299,38 @@ static func _get_weapon_attack_range(attacker, target, context: Dictionary) -> f
 	if effective_range.is_valid():
 		return maxf(float(effective_range.call(target)), 0.0)
 	return maxf(float(context.get("contact_range", 0.0)), 0.0)
+
+
+static func _get_effective_attack_range(attacker, target, context: Dictionary) -> float:
+	var weapon_range: float = _get_weapon_attack_range(attacker, target, context)
+	var range_factor: float = _get_engagement_range_factor(attacker)
+	if range_factor <= 0.0:
+		return weapon_range
+	return weapon_range * range_factor
+
+
+static func _get_engagement_range_factor(unit) -> float:
+	if unit == null or not unit.has_method("get_current_unit_command"):
+		return 1.0
+	var command = unit.call("get_current_unit_command")
+	if command == null or not command.has_method("get"):
+		return 1.0
+	var raw_factor: Variant = command.get("engagement_range_factor")
+	if typeof(raw_factor) != TYPE_INT and typeof(raw_factor) != TYPE_FLOAT:
+		return 1.0
+	return clampf(float(raw_factor), 0.0, 1.0)
+
+
+static func _get_team_target_support_percent(unit) -> float:
+	if unit == null or not unit.has_method("get_current_unit_command"):
+		return 0.0
+	var command = unit.call("get_current_unit_command")
+	if command == null or not command.has_method("get"):
+		return 0.0
+	var raw_support: Variant = command.get("team_target_support_percent")
+	if typeof(raw_support) != TYPE_INT and typeof(raw_support) != TYPE_FLOAT:
+		return 0.0
+	return clampf(float(raw_support), -12.0, 22.0)
 
 
 static func _get_team_id(unit) -> String:

@@ -24,6 +24,25 @@ const MOVE_STANCE_CAUTIOUS_SIGHT_FACTOR: float = 1.2
 const MOVE_STANCE_NORMAL_SIGHT_FACTOR: float = 1.0
 const MOVE_STANCE_AGGRESSIVE_SIGHT_FACTOR: float = 0.65
 const BEHAVIOR_STANCE_POLICY_ID: String = "fireteam_behavior"
+const WORKBENCH_RUNTIME_SOURCE_ID: String = "fireteam_formation_tuning_2026-05-17T08-46-56-746Z_05"
+const STANCE_CAUTIOUS_SPEED_MULTIPLIER: float = 0.35
+const STANCE_NORMAL_SPEED_MULTIPLIER: float = 0.65
+const STANCE_AGGRESSIVE_SPEED_MULTIPLIER: float = 1.0
+const STANCE_CAUTIOUS_SIGHT_FACTOR: float = 1.0
+const STANCE_NORMAL_SIGHT_FACTOR: float = 0.8
+const STANCE_AGGRESSIVE_SIGHT_FACTOR: float = 0.5
+const STANCE_CAUTIOUS_COVER_PRIORITY_PERCENT: float = 75.0
+const STANCE_NORMAL_COVER_PRIORITY_PERCENT: float = 45.0
+const STANCE_AGGRESSIVE_COVER_PRIORITY_PERCENT: float = 20.0
+const STANCE_CAUTIOUS_AIM_READINESS_PERCENT: float = 75.0
+const STANCE_NORMAL_AIM_READINESS_PERCENT: float = 30.0
+const STANCE_AGGRESSIVE_AIM_READINESS_PERCENT: float = 35.0
+const STANCE_CAUTIOUS_CONTACT_INITIATIVE_SECONDS: float = -0.3
+const STANCE_NORMAL_CONTACT_INITIATIVE_SECONDS: float = 0.3
+const STANCE_AGGRESSIVE_CONTACT_INITIATIVE_SECONDS: float = 0.0
+const STANCE_CAUTIOUS_TEAM_TARGET_SUPPORT_PERCENT: float = 5.0
+const STANCE_NORMAL_TEAM_TARGET_SUPPORT_PERCENT: float = 0.0
+const STANCE_AGGRESSIVE_TEAM_TARGET_SUPPORT_PERCENT: float = -3.0
 const DEFEND_STANCE_CAUTIOUS_SPEED_MULTIPLIER: float = 0.8
 const DEFEND_STANCE_NORMAL_SPEED_MULTIPLIER: float = 1.0
 const DEFEND_STANCE_AGGRESSIVE_SPEED_MULTIPLIER: float = 1.1
@@ -48,6 +67,18 @@ const TAKE_STANCE_AGGRESSIVE_COVER_BONUS: float = -12.0
 const TAKE_STANCE_CAUTIOUS_ATTACK_BONUS: float = 0.0
 const TAKE_STANCE_NORMAL_ATTACK_BONUS: float = 0.0
 const TAKE_STANCE_AGGRESSIVE_ATTACK_BONUS: float = 0.06
+const TAKE_DOCTRINE_ID: String = "take_control_v1"
+const TAKE_TARGET_POLICY_OPTIMAL_RANGE_AREA_CONTROL: String = "optimal_range_area_control"
+const TAKE_CAUTIOUS_ADVANCE_MODE: String = "cautious_buddy_entry"
+const TAKE_NORMAL_ADVANCE_MODE: String = "normal_bounding_clear"
+const TAKE_AGGRESSIVE_ADVANCE_MODE: String = "aggressive_assault_line"
+const TAKE_CAUTIOUS_ENGAGEMENT_RANGE_FACTOR: float = 0.6
+const TAKE_NORMAL_ENGAGEMENT_RANGE_FACTOR: float = 0.7
+const TAKE_AGGRESSIVE_ENGAGEMENT_RANGE_FACTOR: float = 0.85
+const TAKE_CAUTIOUS_STEP_MULTIPLIER: float = 0.78
+const TAKE_CAUTIOUS_FORMATION_SCATTER_FACTOR: float = 0.82
+const TAKE_NORMAL_FORMATION_SCATTER_FACTOR: float = 0.96
+const TAKE_AGGRESSIVE_FORMATION_SCATTER_FACTOR: float = 1.08
 const ENGAGE_STANCE_CAUTIOUS_SPEED_MULTIPLIER: float = 0.75
 const ENGAGE_STANCE_NORMAL_SPEED_MULTIPLIER: float = 1.0
 const ENGAGE_STANCE_AGGRESSIVE_SPEED_MULTIPLIER: float = 1.15
@@ -60,6 +91,15 @@ const ENGAGE_STANCE_AGGRESSIVE_COVER_BONUS: float = -8.0
 const ENGAGE_STANCE_CAUTIOUS_ATTACK_BONUS: float = 0.02
 const ENGAGE_STANCE_NORMAL_ATTACK_BONUS: float = 0.0
 const ENGAGE_STANCE_AGGRESSIVE_ATTACK_BONUS: float = 0.08
+const ENGAGE_DOCTRINE_ID: String = "engage_control_v1"
+const ENGAGE_TARGET_POLICY_WEAPON_RANGE_AREA_PRIORITY: String = "weapon_range_area_priority"
+const ENGAGE_CAUTIOUS_ADVANCE_MODE: String = "cautious_buddy_bounds"
+const ENGAGE_NORMAL_ADVANCE_MODE: String = "normal_bounding"
+const ENGAGE_AGGRESSIVE_ADVANCE_MODE: String = "aggressive_fireline"
+const ENGAGE_CAUTIOUS_STEP_MULTIPLIER: float = 0.72
+const ENGAGE_CAUTIOUS_FORMATION_SCATTER_FACTOR: float = 0.82
+const ENGAGE_NORMAL_FORMATION_SCATTER_FACTOR: float = 0.95
+const ENGAGE_AGGRESSIVE_FORMATION_SCATTER_FACTOR: float = 1.05
 const BOUNDING_MIN_SPEED_FACTOR: float = 0.52
 const BOUNDING_MAX_SPEED_FACTOR: float = 0.92
 const CATERPILLAR_MIN_SPEED_FACTOR: float = 0.38
@@ -75,12 +115,21 @@ const READABILITY_MULTI_TILE_DISTANCE: float = 48.0
 const FORMATION_SLOT_SPACING: float = 64.0
 const FORMATION_BUDDY_SLOT_SEPARATION: float = 0.44
 const FORMATION_BUDDY_PAIR_STEP: float = 0.72
-const FORMATION_BUDDY_PAIR_FORWARD_STEP: float = 0.18
-const FORMATION_TRAVEL_COMPACT_SLOT_SCALE: float = 0.46
-const MOVE_TRAVEL_MIN_TARGET_SPACING: float = 40.0
+const FORMATION_BUDDY_PAIR_FORWARD_STEP: float = 0.65
+const FORMATION_TRAVEL_COMPACT_SLOT_SCALE: float = 0.72
+const MOVE_TRAVEL_MIN_TARGET_SPACING: float = 56.0
+const MOVE_CAUTIOUS_PARALLEL_TARGET_SPACING: float = 80.0
+const MOVE_NORMAL_PARALLEL_TARGET_SPACING: float = 80.0
+const MOVE_AGGRESSIVE_PARALLEL_TARGET_SPACING: float = 112.0
+const ENGAGE_CAUTIOUS_FORMATION_SLOT_SPACING: float = 92.0
+const ENGAGE_NORMAL_FORMATION_SLOT_SPACING: float = 80.0
+const ENGAGE_AGGRESSIVE_PARALLEL_TARGET_SPACING: float = 121.0
+const TAKE_CAUTIOUS_FORMATION_SLOT_SPACING: float = 88.0
+const TAKE_NORMAL_FORMATION_SLOT_SPACING: float = 82.0
+const TAKE_AGGRESSIVE_PARALLEL_TARGET_SPACING: float = 104.0
 const FORMATION_MAX_DISTANCE_BASE_FACTOR: float = 1.0
-const FORMATION_MAX_DISTANCE_PAIR_FACTOR: float = 0.32
-const FORMATION_MAX_DISTANCE_CAP_FACTOR: float = 2.1
+const FORMATION_MAX_DISTANCE_PAIR_FACTOR: float = 0.75
+const FORMATION_MAX_DISTANCE_CAP_FACTOR: float = 2.8
 
 var _execution_by_fireteam: Dictionary = {}
 var _execution_sequence: int = 0
@@ -138,13 +187,12 @@ func start_execution(
 		return {"started": false}
 	var normalized_command_type: String = command_type.strip_edges().to_lower()
 	var raw_style: String = _extract_advance_style(behavior_profile)
-	var effective_style: String = _resolve_effective_style(raw_style, units, member_records)
-	if _uses_baseline_direct_team_movement(normalized_command_type):
-		effective_style = ADVANCE_STYLE_RUSH
+	var tactical_stance: String = _extract_tactical_stance(behavior_profile)
+	var doctrine_style: String = _resolve_command_advance_style(normalized_command_type, raw_style, tactical_stance)
+	var effective_style: String = _resolve_effective_style(doctrine_style, units, member_records)
 	var cover_priority: float = _extract_cover_priority(behavior_profile)
 	var cohesion_threshold: float = _extract_cohesion_threshold(behavior_profile)
 	var execution_profile: Dictionary = _extract_execution_profile(behavior_profile)
-	var tactical_stance: String = _extract_tactical_stance(behavior_profile)
 	var leader_unit_id: String = _extract_leader_unit_id(leader, member_records)
 	var origin_anchor: Vector2 = _resolve_origin_anchor(member_records, leader)
 	var resolved_target_position: Vector2 = target_position
@@ -156,14 +204,18 @@ func start_execution(
 			float(execution_profile.get("order_fidelity", 0.65))
 		)
 	var formation_scatter_factor: float = lerpf(1.36, 0.88, float(execution_profile.get("execution_cohesion", 0.65)))
+	formation_scatter_factor = _resolve_command_formation_scatter_factor(normalized_command_type, tactical_stance, formation_scatter_factor)
 	if _uses_baseline_direct_team_movement(normalized_command_type):
 		formation_scatter_factor = minf(formation_scatter_factor, MOVE_MAX_FORMATION_SCATTER_FACTOR)
+	var formation_preset_key: String = _resolve_workbench_formation_preset_key(normalized_command_type, tactical_stance)
+	var formation_preset: Dictionary = _get_workbench_formation_preset(normalized_command_type, tactical_stance)
 	var state: Dictionary = {
 		"fireteam_id": normalized_fireteam_id,
 		"execution_id": _next_execution_id(normalized_fireteam_id),
 		"phase": phase_index,
 		"command_type": normalized_command_type,
 		"raw_style": raw_style,
+		"doctrine_style": doctrine_style,
 		"effective_style": effective_style,
 		"tactical_stance": tactical_stance,
 		"leader_unit_id": leader_unit_id,
@@ -183,6 +235,11 @@ func start_execution(
 		"execution_reason": String(execution_profile.get("execution_reason", "")),
 		"execution_hint": String(execution_profile.get("execution_hint", "")),
 		"formation_scatter_factor": formation_scatter_factor,
+		"formation_slot_spacing_world": _resolve_command_formation_slot_spacing(normalized_command_type, tactical_stance),
+		"formation_parallel_spacing_world": _resolve_command_parallel_spacing(normalized_command_type, tactical_stance),
+		"formation_preset_key": formation_preset_key,
+		"formation_slot_source": WORKBENCH_RUNTIME_SOURCE_ID if not formation_preset.is_empty() else "runtime_fallback",
+		"formation_leader_slot": String(formation_preset.get("leader_slot", "")),
 		"move_speed_multiplier": lerpf(0.84, 1.08, float(execution_profile.get("initiative", 0.5))),
 		"order_target_offset": resolved_target_position - target_position,
 		"stage_index": 0,
@@ -198,7 +255,7 @@ func start_execution(
 		"movement_sequence": PackedStringArray(),
 		"group_cycle": [],
 		"next_group_index": 0,
-		"simplified_due_to_losses": (not _uses_baseline_direct_team_movement(normalized_command_type)) and effective_style != _normalize_advance_style(raw_style),
+		"simplified_due_to_losses": (not _uses_baseline_direct_team_movement(normalized_command_type)) and effective_style != doctrine_style,
 	}
 	match effective_style:
 		ADVANCE_STYLE_RUSH:
@@ -330,7 +387,8 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root) -> 
 		member_records,
 		String(state.get("leader_unit_id", "")),
 		stage_scatter_factor,
-		not _uses_baseline_direct_team_movement(String(state.get("command_type", "")))
+		_allow_trailing_slots_for_state(state),
+		state
 	)
 	var current_positions: Dictionary = _build_current_positions(member_records)
 	var issued_count: int = 0
@@ -428,6 +486,17 @@ func _resolve_stage_formation_scatter_factor(state: Dictionary, next_anchor_targ
 	return minf(scatter_factor, BASELINE_DIRECT_FORMATION_SCATTER_FACTOR)
 
 
+func _allow_trailing_slots_for_state(state: Dictionary) -> bool:
+	var command_type: String = String(state.get("command_type", "")).strip_edges().to_lower()
+	if command_type == "move":
+		return not _uses_baseline_direct_team_movement(command_type)
+	if command_type == "engage":
+		return _normalize_tactical_stance(String(state.get("tactical_stance", ""))) != FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE
+	if command_type == "take":
+		return _normalize_tactical_stance(String(state.get("tactical_stance", ""))) != FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE
+	return true
+
+
 func _are_current_targets_reached(state: Dictionary, member_records: Array) -> bool:
 	var moving_unit_ids: PackedStringArray = PackedStringArray(state.get("current_moving_unit_ids", PackedStringArray()))
 	if moving_unit_ids.is_empty():
@@ -472,7 +541,8 @@ func _resolve_completion_targets(state: Dictionary, member_records: Array, final
 		member_records,
 		String(state.get("leader_unit_id", "")),
 		float(state.get("formation_scatter_factor", 1.0)),
-		String(state.get("command_type", "")) != "move"
+		_allow_trailing_slots_for_state(state),
+		state
 	)
 
 
@@ -639,17 +709,13 @@ func _compute_next_anchor_target(state: Dictionary, _member_records: Array) -> V
 	if direction.length() <= ANCHOR_REACHED_RADIUS:
 		return final_target_position
 	var cohesion_threshold: float = maxf(float(state.get("cohesion_threshold", 100.0)), 1.0)
-	var step_distance: float = direction.length()
-	if style == ADVANCE_STYLE_CATERPILLAR:
-		step_distance = clampf(cohesion_threshold * 0.62, CATERPILLAR_MIN_STEP_DISTANCE, CATERPILLAR_MAX_STEP_DISTANCE)
-	else:
-		step_distance = clampf(cohesion_threshold * 1.12, BOUNDING_MIN_STEP_DISTANCE, BOUNDING_MAX_STEP_DISTANCE)
+	var step_distance: float = _resolve_non_rush_step_distance(state, cohesion_threshold, direction.length())
 	if direction.length() <= step_distance:
 		return final_target_position
 	return current_anchor_position + direction.normalized() * step_distance
 
 
-func _build_formation_targets(anchor_position: Vector2, member_records: Array, leader_unit_id: String, scatter_factor: float = 1.0, allow_trailing_slots: bool = true) -> Dictionary:
+func _build_formation_targets(anchor_position: Vector2, member_records: Array, leader_unit_id: String, scatter_factor: float = 1.0, allow_trailing_slots: bool = true, state: Dictionary = {}) -> Dictionary:
 	var targets: Dictionary = {}
 	var ordered_records: Array = member_records.duplicate()
 	ordered_records.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
@@ -667,68 +733,106 @@ func _build_formation_targets(anchor_position: Vector2, member_records: Array, l
 			if not direction.is_zero_approx():
 				forward = direction.normalized()
 	var lateral: Vector2 = forward.orthogonal()
+	var workbench_targets: Dictionary = _build_workbench_formation_targets(anchor_position, member_records, leader_unit_id, lateral, forward, state)
+	if not workbench_targets.is_empty():
+		return workbench_targets
+	var slot_spacing: float = _resolve_formation_slot_spacing(state)
 	for index in range(ordered_records.size()):
 		var record: Dictionary = ordered_records[index]
 		var slot: Vector2 = _build_buddy_formation_slot(index, ordered_records.size(), allow_trailing_slots)
-		var offset: Vector2 = ((lateral * slot.x) + (forward * slot.y)) * FORMATION_SLOT_SPACING * maxf(scatter_factor, 0.5)
-		var max_distance: float = _get_formation_max_distance_from_anchor(ordered_records.size(), scatter_factor)
+		var offset: Vector2 = ((lateral * slot.x) + (forward * slot.y)) * slot_spacing * maxf(scatter_factor, 0.5)
+		var max_distance: float = _get_formation_max_distance_from_anchor(ordered_records.size(), scatter_factor, slot_spacing)
 		if offset.length() > max_distance:
 			offset = offset.normalized() * max_distance
 		targets[String(record.get("unit_id", ""))] = anchor_position + offset
 	if not allow_trailing_slots:
-		_apply_parallel_travel_spacing(targets, ordered_records, anchor_position, lateral, scatter_factor)
+		_apply_parallel_travel_spacing(targets, ordered_records, anchor_position, lateral, scatter_factor, state)
 	return targets
 
 
-func _apply_parallel_travel_spacing(targets: Dictionary, ordered_records: Array, anchor_position: Vector2, lateral: Vector2, scatter_factor: float) -> void:
+func _build_workbench_formation_targets(anchor_position: Vector2, member_records: Array, leader_unit_id: String, lateral: Vector2, forward: Vector2, state: Dictionary) -> Dictionary:
+	var preset: Dictionary = _get_workbench_formation_preset(String(state.get("command_type", "")), String(state.get("tactical_stance", "")))
+	if preset.is_empty():
+		return {}
+	var slots_by_unit_id: Dictionary = Dictionary(preset.get("slots_by_unit_id", {}))
+	if slots_by_unit_id.is_empty():
+		return {}
+	var slot_by_record_id: Dictionary = _assign_workbench_slot_keys(member_records, leader_unit_id, String(preset.get("leader_slot", "auto")))
+	var targets: Dictionary = {}
+	for record in member_records:
+		var unit_id: String = String(record.get("unit_id", ""))
+		var slot_key: String = String(slot_by_record_id.get(unit_id, ""))
+		if slot_key.is_empty() or not slots_by_unit_id.has(slot_key):
+			return {}
+		var slot: Dictionary = Dictionary(slots_by_unit_id.get(slot_key, {}))
+		var offset: Vector2 = lateral * float(slot.get("lateral", 0.0)) + forward * float(slot.get("forward", 0.0))
+		targets[unit_id] = anchor_position + offset
+	return targets
+
+
+func _assign_workbench_slot_keys(member_records: Array, leader_unit_id: String, leader_slot: String) -> Dictionary:
+	var member_count: int = member_records.size()
+	if member_count <= 0:
+		return {}
+	var slot_keys: Array = []
+	for index in range(member_count):
+		slot_keys.append("unit_%d" % [index + 1])
+	var normalized_leader_slot: String = leader_slot.strip_edges().to_lower()
+	if not slot_keys.has(normalized_leader_slot):
+		normalized_leader_slot = ""
+	var assignments: Dictionary = {}
+	var remaining_slots: Array = slot_keys.duplicate()
+	var remaining_records: Array = []
+	for record in member_records:
+		var unit_id: String = String(Dictionary(record).get("unit_id", ""))
+		if unit_id.is_empty():
+			continue
+		if not normalized_leader_slot.is_empty() and unit_id == leader_unit_id:
+			assignments[unit_id] = normalized_leader_slot
+			remaining_slots.erase(normalized_leader_slot)
+			continue
+		remaining_records.append(record)
+	for index in range(mini(remaining_records.size(), remaining_slots.size())):
+		var record: Dictionary = Dictionary(remaining_records[index])
+		assignments[String(record.get("unit_id", ""))] = String(remaining_slots[index])
+	return assignments
+
+
+func _apply_parallel_travel_spacing(targets: Dictionary, ordered_records: Array, anchor_position: Vector2, lateral: Vector2, scatter_factor: float, state: Dictionary = {}) -> void:
 	if ordered_records.size() <= 1:
 		return
 	var safe_lateral: Vector2 = lateral.normalized() if not lateral.is_zero_approx() else Vector2.RIGHT
 	var compact_spacing: float = FORMATION_SLOT_SPACING * FORMATION_BUDDY_SLOT_SEPARATION * FORMATION_TRAVEL_COMPACT_SLOT_SCALE * maxf(scatter_factor, 0.5)
-	var spacing: float = maxf(compact_spacing, MOVE_TRAVEL_MIN_TARGET_SPACING)
+	var spacing: float = maxf(maxf(compact_spacing, MOVE_TRAVEL_MIN_TARGET_SPACING), _resolve_parallel_travel_spacing(state))
 	for index in range(ordered_records.size()):
 		var unit_id: String = String(Dictionary(ordered_records[index]).get("unit_id", ""))
 		if unit_id.is_empty():
 			continue
-		targets[unit_id] = anchor_position + safe_lateral * _build_parallel_travel_slot(index) * spacing
+		targets[unit_id] = anchor_position + safe_lateral * _build_parallel_travel_slot(index, ordered_records.size()) * spacing
 
 
-func _build_parallel_travel_slot(slot_index: int) -> float:
-	if slot_index <= 0:
+func _build_parallel_travel_slot(slot_index: int, member_count: int) -> float:
+	if member_count <= 1:
 		return 0.0
-	var ring: int = int((slot_index + 1) / 2)
-	var side: float = -1.0 if slot_index % 2 == 1 else 1.0
-	return side * float(ring)
+	return float(slot_index) - ((float(member_count) - 1.0) * 0.5)
 
 
 func _build_buddy_formation_slot(slot_index: int, member_count: int, allow_trailing_slots: bool) -> Vector2:
 	if slot_index <= 0 or member_count <= 1:
-		return Vector2.ZERO
-	if slot_index == 1:
-		var lead_buddy_slot := Vector2(-FORMATION_BUDDY_SLOT_SEPARATION, -FORMATION_BUDDY_PAIR_FORWARD_STEP)
-		return lead_buddy_slot if allow_trailing_slots else Vector2(lead_buddy_slot.x * FORMATION_TRAVEL_COMPACT_SLOT_SCALE, 0.0)
+		return Vector2.ZERO if member_count <= 1 else Vector2(_build_parallel_travel_slot(slot_index, member_count), 0.0)
 	var pair_index: int = int(slot_index / 2)
-	var pair_member_count: int = mini(2, maxi(member_count - (pair_index * 2), 0))
-	var slot_in_pair: int = slot_index % 2
-	var side_order: int = pair_index - 1
-	var side_sign: float = 1.0 if side_order % 2 == 0 else -1.0
-	var side_ring: float = float(int(side_order / 2) + 1)
-	var pair_center_x: float = side_sign * (FORMATION_BUDDY_PAIR_STEP * side_ring)
-	var local_x: float = 0.0
-	if pair_member_count > 1:
-		local_x = (-0.5 if slot_in_pair == 0 else 0.5) * FORMATION_BUDDY_SLOT_SEPARATION
-	var slot := Vector2(pair_center_x + local_x, -FORMATION_BUDDY_PAIR_FORWARD_STEP * float(pair_index))
+	var slot := Vector2(_build_parallel_travel_slot(slot_index, member_count), -FORMATION_BUDDY_PAIR_FORWARD_STEP * float(pair_index))
 	if not allow_trailing_slots:
 		slot.x *= FORMATION_TRAVEL_COMPACT_SLOT_SCALE
 		slot.y = 0.0
 	return slot
 
 
-func _get_formation_max_distance_from_anchor(member_count: int, scatter_factor: float) -> float:
+func _get_formation_max_distance_from_anchor(member_count: int, scatter_factor: float, slot_spacing: float = FORMATION_SLOT_SPACING) -> float:
 	var pair_count: int = maxi(ceili(float(member_count) / 2.0), 1)
 	var distance_factor: float = FORMATION_MAX_DISTANCE_BASE_FACTOR + (float(pair_count - 1) * FORMATION_MAX_DISTANCE_PAIR_FACTOR)
-	var cap: float = FORMATION_SLOT_SPACING * FORMATION_MAX_DISTANCE_CAP_FACTOR
-	return minf(FORMATION_SLOT_SPACING * distance_factor * maxf(scatter_factor, 0.5), cap)
+	var cap: float = slot_spacing * FORMATION_MAX_DISTANCE_CAP_FACTOR
+	return minf(slot_spacing * distance_factor * maxf(scatter_factor, 0.5), cap)
 
 
 func _build_current_positions(member_records: Array) -> Dictionary:
@@ -818,6 +922,173 @@ func _resolve_effective_style(raw_style: String, units: Array, member_records: A
 	return ADVANCE_STYLE_RUSH
 
 
+func _resolve_command_advance_style(command_type: String, raw_style: String, tactical_stance: String) -> String:
+	var normalized_command_type: String = command_type.strip_edges().to_lower()
+	if normalized_command_type == "engage":
+		return _resolve_engage_advance_style(tactical_stance)
+	if normalized_command_type == "take":
+		return _resolve_take_advance_style(tactical_stance)
+	if _uses_baseline_direct_team_movement(normalized_command_type):
+		return ADVANCE_STYLE_RUSH
+	return _normalize_advance_style(raw_style)
+
+
+func _resolve_engage_advance_style(tactical_stance: String) -> String:
+	match _normalize_tactical_stance(tactical_stance):
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
+			return ADVANCE_STYLE_RUSH
+		_:
+			return ADVANCE_STYLE_BOUNDING
+
+
+func _resolve_take_advance_style(tactical_stance: String) -> String:
+	match _normalize_tactical_stance(tactical_stance):
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
+			return ADVANCE_STYLE_RUSH
+		_:
+			return ADVANCE_STYLE_BOUNDING
+
+
+func _resolve_command_formation_scatter_factor(command_type: String, tactical_stance: String, fallback: float) -> float:
+	var normalized_command_type: String = command_type.strip_edges().to_lower()
+	var normalized_stance: String = _normalize_tactical_stance(tactical_stance)
+	if normalized_command_type == "engage":
+		match normalized_stance:
+			FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
+				return minf(fallback, ENGAGE_CAUTIOUS_FORMATION_SCATTER_FACTOR)
+			FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
+				return maxf(fallback, ENGAGE_AGGRESSIVE_FORMATION_SCATTER_FACTOR)
+			_:
+				return minf(fallback, ENGAGE_NORMAL_FORMATION_SCATTER_FACTOR)
+	if normalized_command_type == "take":
+		match normalized_stance:
+			FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
+				return minf(fallback, TAKE_CAUTIOUS_FORMATION_SCATTER_FACTOR)
+			FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
+				return maxf(fallback, TAKE_AGGRESSIVE_FORMATION_SCATTER_FACTOR)
+			_:
+				return minf(fallback, TAKE_NORMAL_FORMATION_SCATTER_FACTOR)
+	return fallback
+
+
+static func _resolve_workbench_formation_preset_key(command_type: String, tactical_stance: String) -> String:
+	var normalized_command_type: String = normalize_behavior_command_type(command_type)
+	var normalized_stance: String = normalize_tactical_stance(tactical_stance)
+	return "%s:%s" % [normalized_command_type, normalized_stance]
+
+
+static func _get_workbench_formation_preset(command_type: String, tactical_stance: String) -> Dictionary:
+	var preset_key: String = _resolve_workbench_formation_preset_key(command_type, tactical_stance)
+	match preset_key:
+		"move:cautious":
+			return _build_workbench_formation_preset("move", "cautious", "pair_line", "auto", 80.0, 60.0, 163.0, 216.0, {"unit_1": {"lateral": 47.0, "forward": 173.0}, "unit_2": {"lateral": 54.0, "forward": 93.0}, "unit_3": {"lateral": -33.0, "forward": 3.0}, "unit_4": {"lateral": 14.0, "forward": -63.0}})
+		"move:normal":
+			return _build_workbench_formation_preset("move", "normal", "pair_line", "auto", 117.0, 48.0, 162.0, 216.0, {"unit_1": {"lateral": 43.0, "forward": 118.0}, "unit_2": {"lateral": -39.0, "forward": 24.0}, "unit_3": {"lateral": 21.0, "forward": -43.0}, "unit_4": {"lateral": -32.0, "forward": -138.0}})
+		"move:aggressive":
+			return _build_workbench_formation_preset("move", "aggressive", "pair_line", "auto", 117.0, 48.0, 162.0, 216.0, {"unit_1": {"lateral": 43.0, "forward": 118.0}, "unit_2": {"lateral": -39.0, "forward": 24.0}, "unit_3": {"lateral": 21.0, "forward": -43.0}, "unit_4": {"lateral": -32.0, "forward": -138.0}})
+		"engage:cautious":
+			return _build_workbench_formation_preset("engage", "cautious", "staggered_pairs", "unit_3", 74.0, 74.0, 72.0, 216.0, {"unit_1": {"lateral": 31.0, "forward": 76.0}, "unit_2": {"lateral": 64.0, "forward": 13.0}, "unit_3": {"lateral": -9.0, "forward": 6.0}, "unit_4": {"lateral": -43.0, "forward": -62.0}})
+		"engage:normal":
+			return _build_workbench_formation_preset("engage", "normal", "staggered_pairs", "unit_4", 139.0, 258.0, 30.0, 216.0, {"unit_1": {"lateral": 169.0, "forward": 102.0}, "unit_2": {"lateral": 98.0, "forward": -24.0}, "unit_3": {"lateral": -167.0, "forward": 61.0}, "unit_4": {"lateral": -82.0, "forward": -42.0}})
+		"engage:aggressive":
+			return _build_workbench_formation_preset("engage", "aggressive", "staggered_pairs", "unit_4", 93.0, 179.0, 20.0, 248.0, {"unit_1": {"lateral": 118.0, "forward": 12.0}, "unit_2": {"lateral": 26.0, "forward": 27.0}, "unit_3": {"lateral": -61.0, "forward": 36.0}, "unit_4": {"lateral": -154.0, "forward": 43.0}})
+		"take:aggressive":
+			return _build_workbench_formation_preset("take", "aggressive", "staggered_pairs", "unit_4", 70.0, 139.0, 20.0, 216.0, {"unit_1": {"lateral": 79.0, "forward": 15.0}, "unit_2": {"lateral": 24.0, "forward": 24.0}, "unit_3": {"lateral": -45.0, "forward": 36.0}, "unit_4": {"lateral": -130.0, "forward": 42.0}})
+		"take:cautious":
+			return _build_workbench_formation_preset("take", "cautious", "cautious_entry_pairs", "unit_3", 78.0, 82.0, 76.0, 216.0, {"unit_1": {"lateral": 36.0, "forward": 88.0}, "unit_2": {"lateral": 76.0, "forward": 26.0}, "unit_3": {"lateral": -12.0, "forward": 8.0}, "unit_4": {"lateral": -50.0, "forward": -70.0}})
+		"take:normal":
+			return _build_workbench_formation_preset("take", "normal", "bounding_clear_pairs", "unit_4", 110.0, 170.0, 36.0, 216.0, {"unit_1": {"lateral": 118.0, "forward": 86.0}, "unit_2": {"lateral": 56.0, "forward": -14.0}, "unit_3": {"lateral": -96.0, "forward": 48.0}, "unit_4": {"lateral": -42.0, "forward": -36.0}})
+		"defend:cautious":
+			return _build_workbench_formation_preset("defend", "cautious", "defend_360_close", "auto", 72.0, 72.0, 0.0, 196.0, {"unit_1": {"lateral": 0.0, "forward": 52.0}, "unit_2": {"lateral": 58.0, "forward": 0.0}, "unit_3": {"lateral": 0.0, "forward": -52.0}, "unit_4": {"lateral": -58.0, "forward": 0.0}})
+		"defend:normal":
+			return _build_workbench_formation_preset("defend", "normal", "defend_360_balanced", "auto", 84.0, 84.0, 0.0, 216.0, {"unit_1": {"lateral": 0.0, "forward": 64.0}, "unit_2": {"lateral": 74.0, "forward": 0.0}, "unit_3": {"lateral": 0.0, "forward": -64.0}, "unit_4": {"lateral": -74.0, "forward": 0.0}})
+		"defend:aggressive":
+			return _build_workbench_formation_preset("defend", "aggressive", "defend_forward_flanks", "auto", 90.0, 96.0, 0.0, 224.0, {"unit_1": {"lateral": 24.0, "forward": 78.0}, "unit_2": {"lateral": 86.0, "forward": 18.0}, "unit_3": {"lateral": -24.0, "forward": -58.0}, "unit_4": {"lateral": -86.0, "forward": 18.0}})
+		_:
+			return {}
+
+
+static func _build_workbench_formation_preset(command_type: String, tactical_stance: String, formation_mode: String, leader_slot: String, buddy_spacing_world: float, buddy_pair_spacing_world: float, row_offset_world: float, cohesion_radius_world: float, slots_by_unit_id: Dictionary) -> Dictionary:
+	return {
+		"source": WORKBENCH_RUNTIME_SOURCE_ID,
+		"command": command_type,
+		"stance": tactical_stance,
+		"formation_mode": formation_mode,
+		"leader_slot": leader_slot,
+		"buddy_spacing_world": buddy_spacing_world,
+		"buddy_pair_spacing_world": buddy_pair_spacing_world,
+		"row_offset_world": row_offset_world,
+		"cohesion_radius_world": cohesion_radius_world,
+		"slots_by_unit_id": slots_by_unit_id,
+	}
+
+
+func _resolve_command_formation_slot_spacing(command_type: String, tactical_stance: String) -> float:
+	var normalized_command_type: String = command_type.strip_edges().to_lower()
+	var normalized_stance: String = _normalize_tactical_stance(tactical_stance)
+	var workbench_preset: Dictionary = _get_workbench_formation_preset(normalized_command_type, normalized_stance)
+	if not workbench_preset.is_empty():
+		return float(workbench_preset.get("buddy_spacing_world", FORMATION_SLOT_SPACING))
+	if normalized_command_type == "engage":
+		match normalized_stance:
+			FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
+				return ENGAGE_CAUTIOUS_FORMATION_SLOT_SPACING
+			FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
+				return ENGAGE_AGGRESSIVE_PARALLEL_TARGET_SPACING
+			_:
+				return ENGAGE_NORMAL_FORMATION_SLOT_SPACING
+	if normalized_command_type == "take":
+		match normalized_stance:
+			FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
+				return TAKE_CAUTIOUS_FORMATION_SLOT_SPACING
+			FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
+				return TAKE_AGGRESSIVE_PARALLEL_TARGET_SPACING
+			_:
+				return TAKE_NORMAL_FORMATION_SLOT_SPACING
+	return FORMATION_SLOT_SPACING
+
+
+func _resolve_command_parallel_spacing(command_type: String, tactical_stance: String) -> float:
+	var normalized_command_type: String = command_type.strip_edges().to_lower()
+	var normalized_stance: String = _normalize_tactical_stance(tactical_stance)
+	var workbench_preset: Dictionary = _get_workbench_formation_preset(normalized_command_type, normalized_stance)
+	if not workbench_preset.is_empty():
+		return float(workbench_preset.get("buddy_spacing_world", 0.0))
+	if normalized_command_type == "move":
+		match normalized_stance:
+			FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
+				return MOVE_CAUTIOUS_PARALLEL_TARGET_SPACING
+			FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
+				return MOVE_AGGRESSIVE_PARALLEL_TARGET_SPACING
+			_:
+				return MOVE_NORMAL_PARALLEL_TARGET_SPACING
+	if normalized_command_type == "engage" and normalized_stance == FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
+		return ENGAGE_AGGRESSIVE_PARALLEL_TARGET_SPACING
+	if normalized_command_type == "take" and normalized_stance == FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
+		return TAKE_AGGRESSIVE_PARALLEL_TARGET_SPACING
+	return 0.0
+
+
+func _resolve_formation_slot_spacing(state: Dictionary) -> float:
+	var stored_spacing: float = float(state.get("formation_slot_spacing_world", 0.0))
+	if stored_spacing > 0.0:
+		return stored_spacing
+	return _resolve_command_formation_slot_spacing(
+		String(state.get("command_type", "")),
+		String(state.get("tactical_stance", FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL))
+	)
+
+
+func _resolve_parallel_travel_spacing(state: Dictionary) -> float:
+	var stored_spacing: float = float(state.get("formation_parallel_spacing_world", 0.0))
+	if stored_spacing > 0.0:
+		return stored_spacing
+	return _resolve_command_parallel_spacing(
+		String(state.get("command_type", "")),
+		String(state.get("tactical_stance", FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL))
+	)
+
+
 func _normalize_advance_style(value: String) -> String:
 	var normalized_value: String = value.strip_edges().to_lower()
 	if normalized_value == ADVANCE_STYLE_CREEP:
@@ -831,7 +1102,7 @@ func _normalize_advance_style(value: String) -> String:
 
 func _uses_baseline_direct_team_movement(command_type: String) -> bool:
 	match command_type.strip_edges().to_lower():
-		"move", "engage", "take", "defend", "hold", "hold_position":
+		"move", "defend", "hold", "hold_position":
 			return true
 		_:
 			return false
@@ -896,10 +1167,12 @@ func _enqueue_unit_command(
 	command.weapon_posture = UNIT_COMMAND_SCRIPT.call("normalize_weapon_posture", weapon_posture, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_LOWERED)
 	command.posture_policy_id = posture_policy_id.strip_edges().to_lower()
 	command.sight_range_factor = maxf(sight_range_factor, 0.0)
-	if command_type == UNIT_COMMAND_SCRIPT.TYPE_MOVE_TO_POSITION:
-		command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_HOLD_FIRE
-	else:
-		command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL
+	command.engagement_range_policy = String(behavior_modifiers.get("engagement_range_policy", "")).strip_edges().to_lower()
+	command.engagement_range_factor = maxf(float(behavior_modifiers.get("engagement_range_factor", 1.0)), 0.0)
+	command.contact_initiative_seconds = float(behavior_modifiers.get("contact_initiative_seconds", 0.0))
+	command.aim_readiness_percent = float(behavior_modifiers.get("aim_readiness_percent", 0.0))
+	command.team_target_support_percent = float(behavior_modifiers.get("team_target_support_percent", 0.0))
+	command.fire_status = _resolve_unit_command_fire_status(command.command_type, command.source_command_type, command.weapon_posture)
 	if not bool(command.call("is_valid")):
 		return false
 	if unit != null and unit.has_method("assign_unit_command"):
@@ -909,6 +1182,19 @@ func _enqueue_unit_command(
 	command_dict["requeue_until_target"] = command_type != UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION
 	simulation_root.call("enqueue_command", command_dict)
 	return true
+
+
+func _resolve_unit_command_fire_status(command_type: String, source_command_type: String, weapon_posture: String) -> String:
+	var normalized_command_type: String = command_type.strip_edges().to_lower()
+	var normalized_source: String = source_command_type.strip_edges().to_lower()
+	var normalized_weapon_posture: String = weapon_posture.strip_edges().to_lower()
+	if normalized_command_type == UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION or normalized_command_type == UNIT_COMMAND_SCRIPT.TYPE_ENGAGE_AREA:
+		return UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL
+	if normalized_command_type != UNIT_COMMAND_SCRIPT.TYPE_MOVE_TO_POSITION:
+		return UNIT_COMMAND_SCRIPT.FIRE_STATUS_HOLD_FIRE
+	if ["move", "engage", "take", "defend", "flank"].has(normalized_source):
+		return UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL
+	return UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL if normalized_weapon_posture != UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_LOWERED else UNIT_COMMAND_SCRIPT.FIRE_STATUS_HOLD_FIRE
 
 
 func _resolve_stage_movement_posture(state: Dictionary, style: String, is_covering: bool) -> String:
@@ -985,6 +1271,26 @@ func _append_behavior_modifier_fields(command_dict: Dictionary, behavior_modifie
 	command_dict["behavior_attack_bonus"] = float(behavior_modifiers.get("attack_bonus", 0.0))
 	command_dict["behavior_movement_posture"] = String(behavior_modifiers.get("movement_posture", ""))
 	command_dict["behavior_weapon_posture"] = String(behavior_modifiers.get("weapon_posture", ""))
+	command_dict["behavior_cover_priority_percent"] = float(behavior_modifiers.get("cover_priority_percent", 0.0))
+	command_dict["behavior_aim_readiness_percent"] = float(behavior_modifiers.get("aim_readiness_percent", 0.0))
+	command_dict["contact_initiative_seconds"] = float(behavior_modifiers.get("contact_initiative_seconds", 0.0))
+	command_dict["team_target_support_percent"] = float(behavior_modifiers.get("team_target_support_percent", 0.0))
+	var behavior_command_type: String = String(behavior_modifiers.get("command_type", "")).strip_edges().to_lower()
+	if behavior_modifiers.has("engagement_range_policy"):
+		command_dict["engagement_range_policy"] = String(behavior_modifiers.get("engagement_range_policy", ""))
+		command_dict["engagement_range_factor"] = float(behavior_modifiers.get("engagement_range_factor", 1.0))
+	if behavior_command_type == "engage":
+		command_dict["engage_doctrine_id"] = String(behavior_modifiers.get("engage_doctrine_id", ENGAGE_DOCTRINE_ID))
+		command_dict["engage_advance_mode"] = String(behavior_modifiers.get("engage_advance_mode", ""))
+		command_dict["engage_target_policy"] = String(behavior_modifiers.get("engage_target_policy", ENGAGE_TARGET_POLICY_WEAPON_RANGE_AREA_PRIORITY))
+		command_dict["engage_buddy_teams"] = bool(behavior_modifiers.get("engage_buddy_teams", true))
+		command_dict["engage_fire_on_weapon_range"] = bool(behavior_modifiers.get("engage_fire_on_weapon_range", true))
+	if behavior_command_type == "take":
+		command_dict["take_doctrine_id"] = String(behavior_modifiers.get("take_doctrine_id", TAKE_DOCTRINE_ID))
+		command_dict["take_advance_mode"] = String(behavior_modifiers.get("take_advance_mode", ""))
+		command_dict["take_target_policy"] = String(behavior_modifiers.get("take_target_policy", TAKE_TARGET_POLICY_OPTIMAL_RANGE_AREA_CONTROL))
+		command_dict["take_buddy_teams"] = bool(behavior_modifiers.get("take_buddy_teams", true))
+		command_dict["take_area_control_required"] = bool(behavior_modifiers.get("take_area_control_required", true))
 
 
 static func get_behavior_stance_modifiers(command_type: String, tactical_stance: String) -> Dictionary:
@@ -1047,21 +1353,55 @@ static func _build_defend_stance_modifiers(tactical_stance: String) -> Dictionar
 static func _build_take_stance_modifiers(tactical_stance: String) -> Dictionary:
 	match tactical_stance:
 		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
-			return _build_stance_modifier_dict("take", tactical_stance, TAKE_STANCE_CAUTIOUS_SPEED_MULTIPLIER, TAKE_STANCE_CAUTIOUS_SIGHT_FACTOR, TAKE_STANCE_CAUTIOUS_COVER_BONUS, TAKE_STANCE_CAUTIOUS_ATTACK_BONUS, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID)
+			return _with_take_doctrine_fields(_build_stance_modifier_dict("take", tactical_stance, TAKE_STANCE_CAUTIOUS_SPEED_MULTIPLIER, TAKE_STANCE_CAUTIOUS_SIGHT_FACTOR, TAKE_STANCE_CAUTIOUS_COVER_BONUS, TAKE_STANCE_CAUTIOUS_ATTACK_BONUS, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID), tactical_stance)
 		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
-			return _build_stance_modifier_dict("take", tactical_stance, TAKE_STANCE_AGGRESSIVE_SPEED_MULTIPLIER, TAKE_STANCE_AGGRESSIVE_SIGHT_FACTOR, TAKE_STANCE_AGGRESSIVE_COVER_BONUS, TAKE_STANCE_AGGRESSIVE_ATTACK_BONUS, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_RUN, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID)
+			return _with_take_doctrine_fields(_build_stance_modifier_dict("take", tactical_stance, TAKE_STANCE_AGGRESSIVE_SPEED_MULTIPLIER, TAKE_STANCE_AGGRESSIVE_SIGHT_FACTOR, TAKE_STANCE_AGGRESSIVE_COVER_BONUS, TAKE_STANCE_AGGRESSIVE_ATTACK_BONUS, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_RUN, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID), tactical_stance)
 		_:
-			return _build_stance_modifier_dict("take", FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL, TAKE_STANCE_NORMAL_SPEED_MULTIPLIER, TAKE_STANCE_NORMAL_SIGHT_FACTOR, TAKE_STANCE_NORMAL_COVER_BONUS, TAKE_STANCE_NORMAL_ATTACK_BONUS, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_TRAVEL, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_READY, BEHAVIOR_STANCE_POLICY_ID)
+			return _with_take_doctrine_fields(_build_stance_modifier_dict("take", FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL, TAKE_STANCE_NORMAL_SPEED_MULTIPLIER, TAKE_STANCE_NORMAL_SIGHT_FACTOR, TAKE_STANCE_NORMAL_COVER_BONUS, TAKE_STANCE_NORMAL_ATTACK_BONUS, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID), FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL)
+
+
+static func _with_take_doctrine_fields(modifiers: Dictionary, tactical_stance: String) -> Dictionary:
+	modifiers["take_doctrine_id"] = TAKE_DOCTRINE_ID
+	modifiers["take_target_policy"] = TAKE_TARGET_POLICY_OPTIMAL_RANGE_AREA_CONTROL
+	modifiers["take_buddy_teams"] = true
+	modifiers["take_area_control_required"] = true
+	modifiers["engagement_range_policy"] = TAKE_TARGET_POLICY_OPTIMAL_RANGE_AREA_CONTROL
+	match tactical_stance:
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
+			modifiers["take_advance_mode"] = TAKE_CAUTIOUS_ADVANCE_MODE
+			modifiers["engagement_range_factor"] = TAKE_CAUTIOUS_ENGAGEMENT_RANGE_FACTOR
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
+			modifiers["take_advance_mode"] = TAKE_AGGRESSIVE_ADVANCE_MODE
+			modifiers["engagement_range_factor"] = TAKE_AGGRESSIVE_ENGAGEMENT_RANGE_FACTOR
+		_:
+			modifiers["take_advance_mode"] = TAKE_NORMAL_ADVANCE_MODE
+			modifiers["engagement_range_factor"] = TAKE_NORMAL_ENGAGEMENT_RANGE_FACTOR
+	return modifiers
 
 
 static func _build_engage_stance_modifiers(tactical_stance: String) -> Dictionary:
 	match tactical_stance:
 		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
-			return _build_stance_modifier_dict("engage", tactical_stance, ENGAGE_STANCE_CAUTIOUS_SPEED_MULTIPLIER, ENGAGE_STANCE_CAUTIOUS_SIGHT_FACTOR, ENGAGE_STANCE_CAUTIOUS_COVER_BONUS, ENGAGE_STANCE_CAUTIOUS_ATTACK_BONUS, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID)
+			return _with_engage_doctrine_fields(_build_stance_modifier_dict("engage", tactical_stance, ENGAGE_STANCE_CAUTIOUS_SPEED_MULTIPLIER, ENGAGE_STANCE_CAUTIOUS_SIGHT_FACTOR, ENGAGE_STANCE_CAUTIOUS_COVER_BONUS, ENGAGE_STANCE_CAUTIOUS_ATTACK_BONUS, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID), tactical_stance)
 		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
-			return _build_stance_modifier_dict("engage", tactical_stance, ENGAGE_STANCE_AGGRESSIVE_SPEED_MULTIPLIER, ENGAGE_STANCE_AGGRESSIVE_SIGHT_FACTOR, ENGAGE_STANCE_AGGRESSIVE_COVER_BONUS, ENGAGE_STANCE_AGGRESSIVE_ATTACK_BONUS, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_RUN, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID)
+			return _with_engage_doctrine_fields(_build_stance_modifier_dict("engage", tactical_stance, ENGAGE_STANCE_AGGRESSIVE_SPEED_MULTIPLIER, ENGAGE_STANCE_AGGRESSIVE_SIGHT_FACTOR, ENGAGE_STANCE_AGGRESSIVE_COVER_BONUS, ENGAGE_STANCE_AGGRESSIVE_ATTACK_BONUS, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_RUN, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID), tactical_stance)
 		_:
-			return _build_stance_modifier_dict("engage", FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL, ENGAGE_STANCE_NORMAL_SPEED_MULTIPLIER, ENGAGE_STANCE_NORMAL_SIGHT_FACTOR, ENGAGE_STANCE_NORMAL_COVER_BONUS, ENGAGE_STANCE_NORMAL_ATTACK_BONUS, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID)
+			return _with_engage_doctrine_fields(_build_stance_modifier_dict("engage", FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL, ENGAGE_STANCE_NORMAL_SPEED_MULTIPLIER, ENGAGE_STANCE_NORMAL_SIGHT_FACTOR, ENGAGE_STANCE_NORMAL_COVER_BONUS, ENGAGE_STANCE_NORMAL_ATTACK_BONUS, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID), FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL)
+
+
+static func _with_engage_doctrine_fields(modifiers: Dictionary, tactical_stance: String) -> Dictionary:
+	modifiers["engage_doctrine_id"] = ENGAGE_DOCTRINE_ID
+	modifiers["engage_target_policy"] = ENGAGE_TARGET_POLICY_WEAPON_RANGE_AREA_PRIORITY
+	modifiers["engage_buddy_teams"] = true
+	modifiers["engage_fire_on_weapon_range"] = true
+	match tactical_stance:
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
+			modifiers["engage_advance_mode"] = ENGAGE_CAUTIOUS_ADVANCE_MODE
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
+			modifiers["engage_advance_mode"] = ENGAGE_AGGRESSIVE_ADVANCE_MODE
+		_:
+			modifiers["engage_advance_mode"] = ENGAGE_NORMAL_ADVANCE_MODE
+	return modifiers
 
 
 static func _build_stance_modifier_dict(
@@ -1075,17 +1415,54 @@ static func _build_stance_modifier_dict(
 	weapon_posture: String,
 	posture_policy_id: String
 ) -> Dictionary:
+	var stance_profile: Dictionary = _get_workbench_stance_profile(tactical_stance)
+	var team_target_support_percent: float = float(stance_profile.get("team_target_support_percent", 0.0))
 	return {
 		"command_type": command_type,
 		"tactical_stance": tactical_stance,
-		"speed_multiplier": speed_multiplier,
-		"sight_range_factor": sight_range_factor,
-		"cover_score_bonus": cover_score_bonus,
-		"attack_bonus": attack_bonus,
+		"speed_multiplier": float(stance_profile.get("speed_multiplier", speed_multiplier)),
+		"sight_range_factor": float(stance_profile.get("sight_range_factor", sight_range_factor)),
+		"cover_score_bonus": float(stance_profile.get("cover_priority_percent", cover_score_bonus)),
+		"attack_bonus": team_target_support_percent / 100.0,
 		"movement_posture": movement_posture,
 		"weapon_posture": weapon_posture,
 		"posture_policy_id": posture_policy_id,
+		"cover_priority_percent": float(stance_profile.get("cover_priority_percent", cover_score_bonus)),
+		"aim_readiness_percent": float(stance_profile.get("aim_readiness_percent", 0.0)),
+		"contact_initiative_seconds": float(stance_profile.get("contact_initiative_seconds", 0.0)),
+		"team_target_support_percent": team_target_support_percent,
 	}
+
+
+static func _get_workbench_stance_profile(tactical_stance: String) -> Dictionary:
+	match normalize_tactical_stance(tactical_stance):
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
+			return {
+				"speed_multiplier": STANCE_CAUTIOUS_SPEED_MULTIPLIER,
+				"sight_range_factor": STANCE_CAUTIOUS_SIGHT_FACTOR,
+				"cover_priority_percent": STANCE_CAUTIOUS_COVER_PRIORITY_PERCENT,
+				"aim_readiness_percent": STANCE_CAUTIOUS_AIM_READINESS_PERCENT,
+				"contact_initiative_seconds": STANCE_CAUTIOUS_CONTACT_INITIATIVE_SECONDS,
+				"team_target_support_percent": STANCE_CAUTIOUS_TEAM_TARGET_SUPPORT_PERCENT,
+			}
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
+			return {
+				"speed_multiplier": STANCE_AGGRESSIVE_SPEED_MULTIPLIER,
+				"sight_range_factor": STANCE_AGGRESSIVE_SIGHT_FACTOR,
+				"cover_priority_percent": STANCE_AGGRESSIVE_COVER_PRIORITY_PERCENT,
+				"aim_readiness_percent": STANCE_AGGRESSIVE_AIM_READINESS_PERCENT,
+				"contact_initiative_seconds": STANCE_AGGRESSIVE_CONTACT_INITIATIVE_SECONDS,
+				"team_target_support_percent": STANCE_AGGRESSIVE_TEAM_TARGET_SUPPORT_PERCENT,
+			}
+		_:
+			return {
+				"speed_multiplier": STANCE_NORMAL_SPEED_MULTIPLIER,
+				"sight_range_factor": STANCE_NORMAL_SIGHT_FACTOR,
+				"cover_priority_percent": STANCE_NORMAL_COVER_PRIORITY_PERCENT,
+				"aim_readiness_percent": STANCE_NORMAL_AIM_READINESS_PERCENT,
+				"contact_initiative_seconds": STANCE_NORMAL_CONTACT_INITIATIVE_SECONDS,
+				"team_target_support_percent": STANCE_NORMAL_TEAM_TARGET_SUPPORT_PERCENT,
+			}
 
 
 func _resolve_move_stance_movement_posture(state: Dictionary) -> String:
@@ -1343,13 +1720,26 @@ func _estimate_bound_count(state: Dictionary) -> int:
 func _estimate_step_distance(state: Dictionary) -> float:
 	var style: String = String(state.get("effective_style", ADVANCE_STYLE_RUSH)).strip_edges().to_lower()
 	var cohesion_threshold: float = maxf(float(state.get("cohesion_threshold", 100.0)), 1.0)
-	if style == ADVANCE_STYLE_CATERPILLAR:
-		return clampf(cohesion_threshold * 0.62, CATERPILLAR_MIN_STEP_DISTANCE, CATERPILLAR_MAX_STEP_DISTANCE)
-	if style == ADVANCE_STYLE_BOUNDING:
-		return clampf(cohesion_threshold * 1.12, BOUNDING_MIN_STEP_DISTANCE, BOUNDING_MAX_STEP_DISTANCE)
+	if style == ADVANCE_STYLE_CATERPILLAR or style == ADVANCE_STYLE_BOUNDING:
+		return _resolve_non_rush_step_distance(state, cohesion_threshold, INF)
 	var origin_anchor_position: Vector2 = Vector2(state.get("origin_anchor_position", state.get("progress_anchor_position", Vector2.ZERO)))
 	var final_target_position: Vector2 = Vector2(state.get("final_target_position", origin_anchor_position))
 	return maxf(origin_anchor_position.distance_to(final_target_position), 1.0)
+
+
+func _resolve_non_rush_step_distance(state: Dictionary, cohesion_threshold: float, fallback_distance: float) -> float:
+	var style: String = String(state.get("effective_style", ADVANCE_STYLE_RUSH)).strip_edges().to_lower()
+	if style == ADVANCE_STYLE_CATERPILLAR:
+		return clampf(cohesion_threshold * 0.62, CATERPILLAR_MIN_STEP_DISTANCE, CATERPILLAR_MAX_STEP_DISTANCE)
+	if style == ADVANCE_STYLE_BOUNDING:
+		var command_type: String = String(state.get("command_type", "")).strip_edges().to_lower()
+		var tactical_stance: String = _normalize_tactical_stance(String(state.get("tactical_stance", "")))
+		if command_type == "engage" and tactical_stance == FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
+			return clampf(cohesion_threshold * ENGAGE_CAUTIOUS_STEP_MULTIPLIER, CATERPILLAR_MIN_STEP_DISTANCE, CATERPILLAR_MAX_STEP_DISTANCE)
+		if command_type == "take" and tactical_stance == FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
+			return clampf(cohesion_threshold * TAKE_CAUTIOUS_STEP_MULTIPLIER, CATERPILLAR_MIN_STEP_DISTANCE, CATERPILLAR_MAX_STEP_DISTANCE)
+		return clampf(cohesion_threshold * 1.12, BOUNDING_MIN_STEP_DISTANCE, BOUNDING_MAX_STEP_DISTANCE)
+	return maxf(fallback_distance, 1.0)
 
 
 func _get_readability_style_code(style: String) -> String:
@@ -1425,6 +1815,7 @@ func _build_public_state(state: Dictionary) -> Dictionary:
 		"phase": int(state.get("phase", -1)),
 		"command_type": String(state.get("command_type", "")),
 		"raw_style": String(state.get("raw_style", "")),
+		"doctrine_style": String(state.get("doctrine_style", "")),
 		"effective_style": String(state.get("effective_style", "")),
 		"advance_style": String(readability.get("advance_style", "")),
 		"tactical_stance": String(state.get("tactical_stance", FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL)),
@@ -1472,5 +1863,40 @@ func _build_public_state(state: Dictionary) -> Dictionary:
 		"execution_reason": String(state.get("execution_reason", "")),
 		"execution_hint": String(state.get("execution_hint", "")),
 		"formation_scatter_factor": float(state.get("formation_scatter_factor", 1.0)),
+		"formation_slot_spacing_world": _resolve_formation_slot_spacing(state),
+		"formation_parallel_spacing_world": _resolve_parallel_travel_spacing(state),
+		"formation_preset_key": String(state.get("formation_preset_key", "")),
+		"formation_slot_source": String(state.get("formation_slot_source", "runtime_fallback")),
+		"formation_leader_slot": String(state.get("formation_leader_slot", "")),
 		"move_speed_multiplier": float(state.get("move_speed_multiplier", 1.0)),
+		"engage_doctrine": _build_engage_doctrine_snapshot(state),
+		"take_doctrine": _build_take_doctrine_snapshot(state),
+	}
+
+
+func _build_engage_doctrine_snapshot(state: Dictionary) -> Dictionary:
+	if String(state.get("command_type", "")).strip_edges().to_lower() != "engage":
+		return {}
+	var modifiers: Dictionary = _resolve_stage_behavior_modifiers(state)
+	return {
+		"doctrine_id": String(modifiers.get("engage_doctrine_id", ENGAGE_DOCTRINE_ID)),
+		"advance_mode": String(modifiers.get("engage_advance_mode", "")),
+		"target_policy": String(modifiers.get("engage_target_policy", ENGAGE_TARGET_POLICY_WEAPON_RANGE_AREA_PRIORITY)),
+		"buddy_teams": bool(modifiers.get("engage_buddy_teams", true)),
+		"fire_on_weapon_range": bool(modifiers.get("engage_fire_on_weapon_range", true)),
+	}
+
+
+func _build_take_doctrine_snapshot(state: Dictionary) -> Dictionary:
+	if String(state.get("command_type", "")).strip_edges().to_lower() != "take":
+		return {}
+	var modifiers: Dictionary = _resolve_stage_behavior_modifiers(state)
+	return {
+		"doctrine_id": String(modifiers.get("take_doctrine_id", TAKE_DOCTRINE_ID)),
+		"advance_mode": String(modifiers.get("take_advance_mode", "")),
+		"target_policy": String(modifiers.get("take_target_policy", TAKE_TARGET_POLICY_OPTIMAL_RANGE_AREA_CONTROL)),
+		"buddy_teams": bool(modifiers.get("take_buddy_teams", true)),
+		"area_control_required": bool(modifiers.get("take_area_control_required", true)),
+		"engagement_range_policy": String(modifiers.get("engagement_range_policy", "")),
+		"engagement_range_factor": float(modifiers.get("engagement_range_factor", 1.0)),
 	}

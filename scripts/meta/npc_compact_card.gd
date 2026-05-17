@@ -21,6 +21,7 @@ const COMPACT_REMOVE_BUTTON_SIZE := 18.0
 const COMPACT_MARGIN_WIDTH := 8.0
 const COMPACT_HBOX_SEPARATION := 6.0
 const CARD_Z_INDEX := 24
+const SELECTED_BORDER_COLOR := Color("f2c94c")
 
 var _profile = null
 var _uses_readonly_profile_reference: bool = false
@@ -624,7 +625,7 @@ func _apply_state_visuals(name_label: Label, data_a_label: Label, data_b_label: 
 		detail_color = Color("5b646c")
 	elif _is_selected:
 		stylebox.bg_color = Color("0c1114")
-		stylebox.border_color = Color("63d1d2")
+		stylebox.border_color = SELECTED_BORDER_COLOR
 	else:
 		stylebox.bg_color = Color("151c21")
 		stylebox.border_color = Color("4d5a63")

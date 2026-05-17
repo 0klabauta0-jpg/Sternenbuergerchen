@@ -1,0 +1,2812 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fireteam Formation Tuning Workbench</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #10161a;
+      --panel: #182129;
+      --panel-2: #202b35;
+      --line: #3b4d5c;
+      --text: #eef6fa;
+      --muted: #9fb0bb;
+      --accent: #ffd34d;
+      --cyan: #55d6dc;
+      --green: #70db9d;
+      --red: #ff7b72;
+      --blue: #54a6ff;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.45; }
+    header { padding: 26px clamp(18px, 4vw, 52px) 18px; border-bottom: 1px solid var(--line); background: #141d24; }
+    main { width: min(1500px, calc(100vw - 28px)); margin: 0 auto; padding: 18px 0 48px; }
+    h1, h2, h3 { margin: 0; line-height: 1.15; letter-spacing: 0; }
+    h1 { font-size: clamp(28px, 3vw, 42px); }
+    h2 { font-size: 21px; }
+    h3 { font-size: 15px; color: var(--cyan); }
+    p { margin: 8px 0 0; color: var(--muted); }
+    button, input, select, textarea { font: inherit; }
+    button { border: 1px solid var(--line); background: #dce5ef; color: #10161a; border-radius: 6px; min-height: 38px; padding: 8px 12px; cursor: pointer; }
+    button.secondary { background: transparent; color: var(--text); }
+    button.choice.active { border-color: var(--accent); background: var(--accent); color: #16120a; }
+    select, input, textarea, [contenteditable="true"] {
+      width: 100%;
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #0d1318;
+      color: var(--text);
+      padding: 8px 10px;
+    }
+    input[type="range"] { padding: 0; accent-color: var(--cyan); }
+    textarea { min-height: 108px; resize: vertical; }
+    [contenteditable="true"]:empty::before { content: attr(data-placeholder); color: #74848e; }
+    .meta-row, .button-row, .toolbar, .range-row, .status-line { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .meta-row { margin-top: 14px; }
+    .pill { border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; color: var(--muted); background: rgba(255,255,255,0.03); font-size: 13px; }
+    .pill.good { color: var(--green); border-color: rgba(112,219,157,0.5); }
+    .pill.warn { color: var(--accent); border-color: rgba(255,211,77,0.55); }
+    .tabbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .tab-button { background: transparent; color: var(--text); border-color: var(--line); min-width: 120px; }
+    .tab-button.active { background: var(--accent); color: #16120a; border-color: var(--accent); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    main.layout.tab-panel.active { display: grid; }
+    .layout { display: grid; grid-template-columns: minmax(520px, 1fr) minmax(640px, 0.7fr); gap: 14px; align-items: start; }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+    .stack { display: grid; gap: 12px; }
+    .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .control-grid.single { grid-template-columns: 1fr; }
+    .control-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .range-row { display: grid; grid-template-columns: 112px 1fr 58px; gap: 9px; align-items: center; }
+    .range-row output { color: var(--cyan); text-align: right; font-variant-numeric: tabular-nums; }
+    .board-wrap { position: sticky; top: 10px; }
+    svg { display: block; width: 100%; height: auto; border-radius: 8px; background: #74725a; border: 1px solid var(--line); touch-action: none; }
+    .grid-line { stroke: rgba(5, 17, 22, 0.78); stroke-width: 1.4; }
+    .move-line { stroke: var(--blue); stroke-width: 3; stroke-linecap: round; opacity: 0.75; }
+    .formation-line { stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 7 7; opacity: 0.9; }
+    .range-ring { fill: none; stroke: rgba(84, 166, 255, 0.5); stroke-width: 2; stroke-dasharray: 8 8; pointer-events: none; }
+    .cohesion-ring { fill: rgba(112, 219, 157, 0.08); stroke: rgba(112, 219, 157, 0.42); stroke-width: 2; stroke-dasharray: 4 8; pointer-events: none; }
+    .fire-sector { fill: rgba(255, 211, 77, 0.16); stroke: rgba(255, 211, 77, 0.55); stroke-width: 1.4; pointer-events: none; }
+    .buddy-link { stroke: rgba(112, 219, 157, 0.95); stroke-width: 4; stroke-linecap: round; opacity: 0.9; pointer-events: none; }
+    .pair-center-link { stroke: rgba(255, 211, 77, 0.7); stroke-width: 2; stroke-dasharray: 6 7; pointer-events: none; }
+    .pair-label { fill: #eafff1; font-size: 12px; font-weight: 700; text-anchor: middle; paint-order: stroke; stroke: #0a1419; stroke-width: 3; pointer-events: none; }
+    .unit-base { fill: rgba(84,166,255,0.9); stroke: #b9e8ff; stroke-width: 2; }
+    .unit-body { fill: #edf5f8; stroke: #23313a; stroke-width: 2; }
+    .unit-leader .unit-base { fill: rgba(255, 211, 77, 0.92); stroke: #fff4b8; }
+    .unit-label { fill: #071016; font-size: 12px; font-weight: 700; text-anchor: middle; pointer-events: none; }
+    .unit-name { fill: #d9f6ff; font-size: 13px; font-weight: 700; text-anchor: middle; paint-order: stroke; stroke: #0a1419; stroke-width: 3; pointer-events: none; }
+    .leader-star { fill: var(--accent); stroke: #1b1608; stroke-width: 2; font-size: 24px; font-weight: 900; text-anchor: middle; pointer-events: none; }
+    .drag-handle { cursor: grab; }
+    .drag-handle:active { cursor: grabbing; }
+    .unit.drag-handle:hover .unit-body { stroke: var(--accent); stroke-width: 3; }
+    .rotate-handle { fill: var(--accent); stroke: #1b1608; stroke-width: 2; cursor: alias; }
+    .rotate-line { stroke: var(--accent); stroke-width: 2; stroke-dasharray: 4 5; pointer-events: none; }
+    .ring-label { fill: #d9f6ff; font-size: 12px; font-weight: 700; paint-order: stroke; stroke: #0a1419; stroke-width: 3; pointer-events: none; }
+    .target { fill: rgba(255,123,114,0.9); stroke: #ffd1cc; stroke-width: 2; }
+    .anchor { fill: rgba(112,219,157,0.95); stroke: #d4ffe2; stroke-width: 2; }
+    .metric-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .metric { background: #0d1318; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 9px; }
+    .metric strong { display: block; font-size: 18px; color: var(--text); font-variant-numeric: tabular-nums; }
+    .metric span { color: var(--muted); font-size: 12px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .legend span { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); font-size: 12px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .checkline { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; padding: 7px 0; color: var(--text); }
+    .checkline input { width: auto; min-height: auto; margin-top: 4px; }
+    .buddy-summary { display: grid; gap: 8px; }
+    .buddy-card { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center; background: #0d1318; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 9px; }
+    .buddy-card strong { color: var(--text); }
+    .buddy-card span { color: var(--muted); font-size: 12px; }
+    .buddy-token { display: inline-flex; min-width: 44px; justify-content: center; border-radius: 999px; padding: 4px 8px; background: rgba(112,219,157,0.18); color: var(--green); border: 1px solid rgba(112,219,157,0.42); font-weight: 700; font-size: 12px; }
+    .help-text { margin: 0; color: var(--muted); font-size: 12px; }
+    .section-note { color: var(--muted); font-size: 12px; margin: 0; }
+    .help-grid { display: grid; gap: 7px; padding: 10px; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; background: #0d1318; }
+    .help-grid strong { color: var(--text); }
+    .override-summary { display: grid; gap: 6px; color: var(--muted); font-size: 12px; background: #0d1318; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 9px; }
+    .override-summary strong { color: var(--text); }
+    .profile-summary { display: grid; gap: 8px; color: var(--muted); font-size: 12px; background: #0d1318; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 9px; }
+    .profile-summary strong { color: var(--text); }
+    .profile-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .profile-tags span { border: 1px solid rgba(255,255,255,0.12); border-radius: 999px; padding: 3px 8px; color: var(--text); background: rgba(255,255,255,0.04); font-variant-numeric: tabular-nums; }
+    .distance-editor { border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; background: #0d1318; padding: 10px; }
+    .distance-editor summary { cursor: pointer; color: var(--text); font-weight: 700; }
+    .distance-editor summary::marker { color: var(--accent); }
+    .distance-profile-editor { display: grid; gap: 10px; margin-top: 10px; }
+    .stance-profile-editor { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .distance-profile-card { display: grid; gap: 8px; border: 1px solid rgba(255,255,255,0.09); border-radius: 6px; background: #111920; padding: 10px; }
+    .distance-profile-card h3 { color: var(--text); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: baseline; }
+    .distance-profile-card small { color: var(--muted); font-weight: 400; }
+    .distance-profile-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+    .distance-profile-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) max-content;
+      grid-template-areas:
+        "label value"
+        "range range";
+      gap: 4px 10px;
+      align-items: center;
+      min-width: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .distance-profile-row span { grid-area: label; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .distance-profile-row input { grid-area: range; width: 100%; min-width: 0; }
+    .distance-profile-row output { grid-area: value; min-width: 58px; color: var(--cyan); text-align: right; font-variant-numeric: tabular-nums; }
+    .preview-main { width: min(1500px, calc(100vw - 28px)); margin: 0 auto; padding: 18px 0 48px; }
+    .preview-intro { margin-bottom: 14px; }
+    .preview-matrix { display: grid; gap: 14px; }
+    .preview-row { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+    .preview-row-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: baseline; margin-bottom: 10px; }
+    .preview-row-head p { margin: 0; font-size: 12px; }
+    .preview-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .preview-card { background: #0d1318; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; min-width: 0; }
+    .preview-card h3 { color: var(--text); display: flex; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+    .stance-pill { border-radius: 999px; padding: 2px 8px; color: #10161a; background: var(--cyan); font-size: 11px; }
+    .stance-pill.cautious { background: var(--green); }
+    .stance-pill.normal { background: #dce5ef; }
+    .stance-pill.aggressive { background: var(--red); }
+    .preview-svg { width: 100%; height: auto; background: #74725a; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; }
+    .preview-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; margin-top: 8px; color: var(--muted); font-size: 11px; }
+    .preview-stats strong { color: var(--text); font-weight: 700; }
+    .preview-note { margin-top: 8px; font-size: 12px; min-height: 34px; }
+    .toolbar { position: sticky; bottom: 0; z-index: 5; justify-content: space-between; background: rgba(16,22,26,0.94); border-top: 1px solid var(--line); padding: 12px clamp(18px, 4vw, 52px); backdrop-filter: blur(8px); }
+    .toolbar textarea { min-height: 76px; max-height: 180px; flex: 1 1 560px; font-family: Consolas, "Courier New", monospace; font-size: 12px; }
+    .export-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .export-status { color: var(--muted); font-size: 12px; }
+    .export-status[data-tone="good"] { color: var(--green); }
+    .export-status[data-tone="warn"] { color: var(--accent); }
+    @media (max-width: 1060px) {
+      .layout { grid-template-columns: 1fr; }
+      .preview-cards { grid-template-columns: 1fr; }
+      .board-wrap { position: static; }
+      .toolbar { position: static; }
+      .control-grid.three { grid-template-columns: 1fr; }
+      .stance-profile-editor { grid-template-columns: 1fr; }
+      .distance-profile-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body data-report-id="fireteam_formation_tuning" data-report-schema="sternenbuergerchen.html_workbench.v1">
+  <header>
+    <h1>Fireteam Formation Tuning Workbench</h1>
+    <p>Lege Grundformation, Buddy-Teams und Sicherungsbild fest. Reichweite, Sicht und FOV sind als abgeleitete Runtime-Diagnose sichtbar, damit Formation und Gameplay-Werte nicht durcheinanderlaufen.</p>
+    <div class="meta-row">
+      <span class="pill good">TASK_445</span>
+      <span class="pill">kein Runtime-State</span>
+      <span class="pill warn">Modell zum Abstimmen</span>
+    </div>
+    <nav class="tabbar" role="tablist" aria-label="Workbench Ansichten">
+      <button class="tab-button active" type="button" role="tab" aria-selected="true" data-tab-target="editor">Editor</button>
+      <button class="tab-button" type="button" role="tab" aria-selected="false" data-tab-target="matrix">C/N/A Matrix</button>
+    </nav>
+  </header>
+
+  <main class="layout tab-panel active" data-tab-panel="editor">
+    <section class="card board-wrap">
+      <h2>Grundformation & Sicherungsbild</h2>
+      <p>Gruenen Teamanker, roten Zielpunkt oder einzelne Teammember ziehen. Ein freier Klick auf die Karte setzt kein neues Ziel. Die kleinen gelben Griffe setzen die Blick-/Waffenrichtung des Sicherungsbilds.</p>
+      <svg id="board" viewBox="0 0 960 650" role="img" aria-label="Fireteam formation board">
+        <defs>
+          <pattern id="tileGridPattern" width="48" height="48" patternUnits="userSpaceOnUse">
+            <path id="tileGridPath" d="M 48 0 L 0 0 0 48" fill="none" class="grid-line"></path>
+          </pattern>
+          <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,6 L9,3 z" fill="#54a6ff"></path>
+          </marker>
+        </defs>
+        <rect x="0" y="0" width="960" height="650" fill="url(#tileGridPattern)"></rect>
+        <g id="sectorLayer"></g>
+        <circle id="cohesionRing" class="cohesion-ring" cx="260" cy="360" r="160"></circle>
+        <circle id="rangeRing" class="range-ring" cx="480" cy="325" r="180"></circle>
+        <text id="cohesionRingLabel" class="ring-label" x="260" y="190">Cohesion</text>
+        <text id="rangeRingLabel" class="ring-label" x="580" y="200">Waffenreichweite</text>
+        <line id="moveLine" class="move-line" x1="260" y1="360" x2="700" y2="260" marker-end="url(#arrow)"></line>
+        <line id="formationLine" class="formation-line" x1="260" y1="360" x2="700" y2="260"></line>
+        <g id="pairLinkLayer"></g>
+        <g id="unitLayer"></g>
+        <g id="anchorHandle" class="drag-handle" data-drag="anchor">
+          <circle class="anchor" cx="260" cy="360" r="14"></circle>
+          <text class="unit-name" x="260" y="392">Team</text>
+        </g>
+        <g id="targetHandle" class="drag-handle" data-drag="target">
+          <circle class="target" cx="700" cy="260" r="15"></circle>
+          <text class="unit-name" x="700" y="292">Ziel</text>
+        </g>
+      </svg>
+      <div class="legend">
+        <span><i class="dot" style="background: var(--accent);"></i>Leader</span>
+        <span><i class="dot" style="background: var(--blue);"></i>Member</span>
+        <span><i class="dot" style="background: var(--green);"></i>Buddy-Link</span>
+        <span><i class="dot" style="background: var(--blue);"></i>Waffenreichweite</span>
+        <span><i class="dot" style="background: var(--green);"></i>Cohesion-Radius</span>
+        <span><i class="dot" style="background: var(--green);"></i>Teamanker</span>
+        <span><i class="dot" style="background: var(--red);"></i>Ziel</span>
+      </div>
+    </section>
+
+    <aside class="stack">
+      <section class="card stack">
+        <h2>Command</h2>
+        <div class="control-grid single">
+          <label>Command
+            <select id="commandSelect" data-export-key="formation.command">
+              <option value="move">Move</option>
+              <option value="engage">Engage</option>
+              <option value="take">Take</option>
+              <option value="defend">Defend</option>
+            </select>
+          </label>
+        </div>
+        <div>
+          <h3>Stance</h3>
+          <div class="button-row" data-choice-group="formation.stance">
+            <button class="choice active" type="button" data-choice-value="cautious">C</button>
+            <button class="choice" type="button" data-choice-value="normal">N</button>
+            <button class="choice" type="button" data-choice-value="aggressive">A</button>
+          </div>
+        </div>
+        <div id="profilePresetSummary" class="profile-summary">Profil noch nicht berechnet.</div>
+        <details class="distance-editor" open>
+          <summary>Stance-Grundwerte C/N/A bearbeiten</summary>
+          <p class="help-text">Diese Werte sind globale Haltungs-Boni und -Mali. Sie gelten fuer Move, Engage, Take und Defend gleich, solange `C/N/A-Profilwerte automatisch setzen` aktiv ist.</p>
+          <div id="stanceProfileEditor" class="distance-profile-editor stance-profile-editor"></div>
+          <div class="button-row">
+            <button id="resetStanceProfileButton" class="secondary" type="button">Stance-Grundwerte zuruecksetzen</button>
+          </div>
+        </details>
+        <details class="distance-editor">
+          <summary>Charakterbogen-Hooks vormerken</summary>
+          <div class="help-grid">
+            <label class="checkline"><input type="checkbox" checked data-character-hook="speed" data-export-key="character_hooks.speed_scales_stance_speed"> `Speed` skaliert Stance-Speed</label>
+            <label class="checkline"><input type="checkbox" checked data-character-hook="awareness_recognition" data-export-key="character_hooks.awareness_recognition_scale_sight_contact"> `Awareness`/`Recognition` skalieren Sicht und Kontaktbestaetigung</label>
+            <label class="checkline"><input type="checkbox" checked data-character-hook="initiative" data-export-key="character_hooks.initiative_scales_contact_time"> `Initiative` skaliert Zeit bis erster sinnvoller Schuss</label>
+            <label class="checkline"><input type="checkbox" checked data-character-hook="leadership_speech" data-export-key="character_hooks.leadership_speech_scale_team_support"> `Leadership`/`Speech Quality` skalieren Team-Zielhilfe</label>
+            <label class="checkline"><input type="checkbox" checked data-character-hook="accuracy" data-export-key="character_hooks.accuracy_scales_target_support"> `Accuracy` nutzt Zielhilfe spaeter im Aim-/Hit-Teil</label>
+            <label class="checkline"><input type="checkbox" checked data-character-hook="contact_stability" data-export-key="character_hooks.contact_stability_scales_under_fire"> `Contact Stability` stabilisiert Reaktion unter Feuer</label>
+          </div>
+        </details>
+        <label class="checkline"><input id="autoPreset" type="checkbox" checked data-export-key="formation.auto_profile_preset"> C/N/A-Profilwerte automatisch setzen</label>
+        <label class="checkline"><input id="formationPreset" type="checkbox" data-export-key="formation.command_can_set_layout"> Bei Command-Wechsel Formation/Sicherung-Preset laden</label>
+        <button id="applyCommandLayoutButton" class="secondary" type="button">Preset-Formation jetzt laden</button>
+        <div class="help-grid">
+          <p class="help-text"><strong>C/N/A-Profilwerte</strong> sind globale Haltung: Speed, Sicht, FOV, Deckung und Kontakt-Initiative. Das ist getrennt von Formation und Sicherungsbild.</p>
+          <p class="help-text"><strong>Preset laden</strong> heisst hier nur: statische Startformation und Sicherung fuer Command + C/N/A laden. Zeitablaeufe wie raupenartig/ueberschlagend gehoeren nicht in diese Standbild-Workbench.</p>
+          <p class="help-text"><strong>Automatisch laden</strong> ist nur Komfort in dieser Workbench. Runtime-Wahrheit entsteht erst, wenn ein exportierter Kandidat bewusst uebernommen wird.</p>
+        </div>
+      </section>
+
+      <section class="card stack">
+        <h2>Sicherung</h2>
+        <label>Sicherungsbild
+          <select id="securitySelect" data-export-key="formation.security">
+            <option value="forward_flanks">Front + Flanken</option>
+            <option value="wide_forward">Breite Front</option>
+            <option value="all_round">Rundumsicherung 360</option>
+            <option value="left_right">Flanken links/rechts</option>
+          </select>
+        </label>
+        <p class="help-text">Sicherung ist die Blick-/Waffenverteilung des Teams, nicht der eigentliche Befehl. Die gelben Griffe setzen konkrete Blickrichtungen; FOV unten bestimmt die Breite je Person.</p>
+        <div class="button-row">
+          <button id="saveSecurityOverrideButton" class="secondary" type="button">Sicherung fuer aktuelles Command/CNA speichern</button>
+          <button id="clearSecurityOverrideButton" class="secondary" type="button">Sicherung fuer aktuelles Command/CNA loeschen</button>
+        </div>
+        <div id="securityOverrideSummary" class="override-summary">Keine gespeicherte Sicherung fuer dieses Command/CNA.</div>
+        <p class="help-text">Default kommt aus dem aktuellen Preset. Speichern legt nur fuer genau diese Kombination, z.B. ENGAGE N, eine exportierte Sonderregel ab.</p>
+      </section>
+
+      <section class="card stack">
+        <h2>Grundformation</h2>
+        <p class="section-note">Hier entsteht die eigentliche Formation: wer ist Buddy mit wem, wie breit stehen die Paare, und ob eine zweite Reihe entsteht.</p>
+        <label>Formationsname
+          <input id="formationName" type="text" value="fireteam_base_candidate" data-export-key="formation.candidate_name">
+        </label>
+        <label>Gespeicherte Formation
+          <select id="formationLibrarySelect" data-export-key="formation.selected_saved_candidate">
+            <option value="">keine gespeicherte Formation</option>
+          </select>
+        </label>
+        <div class="button-row">
+          <button id="saveFormationLibraryButton" class="secondary" type="button">Als benannte Formation speichern</button>
+          <button id="loadFormationLibraryButton" class="secondary" type="button">Benannte Formation laden</button>
+          <button id="deleteFormationLibraryButton" class="secondary" type="button">Benannte Formation loeschen</button>
+        </div>
+        <label class="checkline"><input id="formationOverrideEnabled" type="checkbox" checked data-export-key="formation.use_saved_override"> Gespeicherte Command/CNA-Formation automatisch anwenden</label>
+        <div class="button-row">
+          <button id="saveFormationOverrideButton" class="secondary" type="button">Formation fuer aktuelles Command/CNA speichern</button>
+          <button id="clearFormationOverrideButton" class="secondary" type="button">Formation fuer aktuelles Command/CNA loeschen</button>
+        </div>
+        <div id="formationOverrideSummary" class="override-summary">Keine gespeicherte Formation fuer dieses Command/CNA.</div>
+        <label>Teamgroesse
+          <select id="teamSizeSelect" data-export-key="formation.team_size">
+            <option value="2">2</option>
+            <option value="4" selected>4</option>
+            <option value="6">6</option>
+            <option value="8">8</option>
+          </select>
+        </label>
+        <div class="control-grid">
+          <label>Buddyteams
+            <select id="pairingSelect" data-export-key="formation.pairing">
+              <option value="sequential_pairs">fix: 1+2 / 3+4 / 5+6 / 7+8</option>
+            </select>
+          </label>
+          <label>Formations-Preset
+            <select id="formationModeSelect" data-export-key="formation.mode">
+              <option value="pair_line">Buddy-Paare nebeneinander</option>
+              <option value="staggered_pairs">Versetzte Buddy-Paare (Standbild)</option>
+              <option value="wedge">Keil / Leader vorne</option>
+              <option value="column_reference">Gaensemarsch-Referenz</option>
+            </select>
+          </label>
+          <label class="checkline"><input id="useBuddyTeams" type="checkbox" checked data-export-key="formation.use_buddy_teams"> Buddyteams nutzen</label>
+          <label>Leader-Position
+            <select id="leaderSlotSelect" data-export-key="formation.leader_slot">
+              <option value="auto">aus Formation</option>
+              <option value="unit_1">Position 1</option>
+              <option value="unit_2">Position 2</option>
+              <option value="unit_3">Position 3</option>
+              <option value="unit_4">Position 4</option>
+              <option value="unit_5">Position 5</option>
+              <option value="unit_6">Position 6</option>
+              <option value="unit_7">Position 7</option>
+              <option value="unit_8">Position 8</option>
+            </select>
+          </label>
+        </div>
+        <label class="range-row" title="Abstand innerhalb eines Buddy-Teams, also zwischen genau zwei Teammembern.">Buddy
+          <input id="buddyRange" type="range" min="20" max="200" value="46" data-export-key="parameters.buddy_spacing_world">
+          <output id="buddyOut">46</output>
+        </label>
+        <label class="range-row" title="Abstand zwischen den beiden Buddy-Team-Mittelpunkten.">Team-Abst.
+          <input id="pairRange" type="range" min="48" max="600" value="104" data-export-key="parameters.buddy_pair_spacing_world">
+          <output id="pairOut">104</output>
+        </label>
+        <label class="range-row" title="Versatz in Marschrichtung zwischen erster und zweiter Reihe.">Reihe
+          <input id="rowRange" type="range" min="0" max="900" value="0" data-export-key="parameters.row_offset_world">
+          <output id="rowOut">0</output>
+        </label>
+        <label class="range-row" title="Cohesion-Radius: Wie weit die Formation vom Teamanker auseinanderlaufen darf, bevor sie als zu locker gilt.">Cohesion
+          <input id="cohesionRange" type="range" min="80" max="900" value="170" data-export-key="parameters.cohesion_radius_world">
+          <output id="cohesionOut">170</output>
+        </label>
+        <div id="buddySummary" class="buddy-summary"></div>
+        <div class="help-grid">
+          <p class="help-text"><strong>Export</strong> schreibt die konkrete Stellung als Kandidat. Runtime-Default wird sie erst, wenn wir die JSON bewusst in Code/Contract uebernehmen.</p>
+          <p class="help-text"><strong>Positionen</strong> sind bewusst 1-8 nummeriert. Welche konkrete NPC-Karte spaeter auf Position 2, 3 oder 7 liegt, ist ein separater Runtime-/Roster-Schritt.</p>
+          <p class="help-text"><strong>Benannte Formation</strong> ist deine kleine Bibliothek in dieser Workbench-JSON. Laden setzt die Mannequins auf diesen Kandidaten.</p>
+          <p class="help-text"><strong>Command/CNA speichern</strong> weist die aktuelle Stellung genau der Kombination aus Command und Haltung zu, z.B. TAKE C.</p>
+          <p class="help-text"><strong>Buddyteams</strong> sind fest 1+2, 3+4, 5+6, 7+8. Ob diese Paare vorn/hinten, nebeneinander oder versetzt laufen, kommt aus Formation und Reihenabstand.</p>
+          <p class="help-text"><strong>Manuelle Formation</strong> bleibt aktiv: `Buddy`, `Teamabstand` und `Reihe` schieben die gezogene Form weiter, statt auf das Preset zurueckzuspringen.</p>
+          <p class="help-text"><strong>Preset-Formation</strong> ist nur eine Startform. Sie ueberschreibt deine manuelle Formation nur, wenn du sie aktiv laedst.</p>
+          <p class="help-text"><strong>Leader-Position</strong> markiert genau diese Positionsnummer als FTL. Das tauscht keine Slots; das Sternchen wandert auf die gewaehlte Position.</p>
+          <p class="help-text"><strong>Nicht hier drin:</strong> raupenartiges oder ueberschlagendes Vorgehen. Das sind zeitabhaengige Sequenzen: erst deckt A, dann bewegt B, danach Rollenwechsel. Diese Workbench speichert nur Standbild und Blickrichtung.</p>
+          <p class="help-text"><strong>Area-Regeln</strong> schneiden wir spaeter. Diese Seite bleibt gerade Formation + Sicherungsbild.</p>
+        </div>
+      </section>
+
+      <section class="card stack">
+        <h2>Abgeleitete Werte</h2>
+        <p class="section-note">Command + C/N/A setzen diese Werte als Arbeitsprofil. Sicht und FOV sind gekoppelt: breiteres FOV senkt Reichweite, hoehere Sicht schmalert FOV.</p>
+        <div class="control-grid">
+          <label>Waffe
+            <select id="weaponSelect" data-export-key="profile.weapon_id">
+              <option value="smg">SMG</option>
+              <option value="rifle" selected>Rifle</option>
+              <option value="sniper">Sniper</option>
+              <option value="rail_gun">Rail Gun</option>
+              <option value="rocket_launcher">Rocket</option>
+              <option value="medictool">Medictool</option>
+            </select>
+          </label>
+          <label>Basis-Sicht (Meter)
+            <input id="baseSightRange" type="number" min="20" max="200" step="5" value="100" data-export-key="profile.base_sight_meters">
+          </label>
+        </div>
+        <label class="range-row" title="Groesse eines Raster-Tiles in dieser Workbench. Aendert sichtbar das Raster und skaliert die Waffenreichweiten-Vorschau.">Tile-Gr.
+          <input id="tileRange" type="range" min="24" max="96" value="48" data-export-key="parameters.tile_size_world">
+          <output id="tileOut">48</output>
+        </label>
+        <label class="range-row">Speed %
+          <input id="speedRange" type="range" min="35" max="140" value="65" data-export-key="parameters.speed_percent">
+          <output id="speedOut">65</output>
+        </label>
+        <label class="range-row" title="Sicht-Prozent aus dem Verhaltensprofil. Wenn du diesen Regler aenderst, wird FOV automatisch gegenlaeufig angepasst.">Sicht %
+          <input id="sightRange" type="range" min="45" max="140" value="120" data-export-key="parameters.sight_percent">
+          <output id="sightOut">120</output>
+        </label>
+        <label class="range-row" title="Aus der gewaehlten Waffe abgeleitete Board-Reichweite. Nicht frei gedreht, sondern WeaponData-Vorschau.">Waffen-RW
+          <input id="weaponRange" type="range" min="0" max="4000" value="1200" disabled data-export-key="parameters.weapon_range_world">
+          <output id="weaponOut">320</output>
+        </label>
+        <label class="range-row" title="Field of View: breiteres Sichtfeld sieht mehr Winkel, aber kuerzer. Wenn du diesen Regler aenderst, wird Sicht-% automatisch gegenlaeufig angepasst.">FOV
+          <input id="arcRange" type="range" min="10" max="90" value="76" data-export-key="parameters.security_arc_degrees">
+          <output id="arcOut">76</output>
+        </label>
+        <label class="range-row">Deckung
+          <input id="coverRange" type="range" min="0" max="100" value="55" data-export-key="parameters.cover_priority_percent">
+          <output id="coverOut">55</output>
+        </label>
+        <div class="help-grid">
+          <p class="help-text"><strong>Grundformation</strong> kommt aus den Mannequin-Positionen, Buddy-Paaren und Facing-Griffen.</p>
+          <p class="help-text"><strong>Waffen-RW</strong> kommt aus WeaponData-Tiles. Meter unten sind Design-Diagnose: Tiles x 1,5m.</p>
+          <p class="help-text"><strong>Basis-Sicht</strong> ist Meter, nicht Tiles. 100m entsprechen bei 1,5m pro Tile etwa 67 Tiles.</p>
+          <p class="help-text"><strong>FOV/Sicht</strong> sind gekoppelt. C tendiert zu schmalerem, tieferem Blick; A zu breiterem, kuerzerem Blick.</p>
+        </div>
+      </section>
+
+      <section class="card stack">
+        <h2>Kontakt-Initiative</h2>
+        <p class="section-note">Arbeitsmodell fuer die Zeit vom sichtbaren/suspekten Kontakt bis zum ersten koordinierten Schuss. Das ist nicht die Waffen-Feuerrate.</p>
+        <div class="metric-grid">
+          <div class="metric"><strong id="initiativeMetric">0.0s</strong><span>bis erster Schuss</span></div>
+          <div class="metric"><strong id="contactDistanceMetric">0T</strong><span>Kontakt-Entfernung</span></div>
+          <div class="metric"><strong id="contactWindowMetric">-</strong><span>FOV / Target</span></div>
+          <div class="metric"><strong id="buddyEffectMetric">0.00s</strong><span>Buddy-Effekt</span></div>
+          <div class="metric"><strong id="targetingMetric">0%</strong><span>Team-Zielhilfe</span></div>
+        </div>
+        <p id="contactInitiativeText">Kontakt-Initiative bereit.</p>
+        <div class="help-grid">
+          <p class="help-text"><strong>Kontakt-Initiative</strong> = erkennen, bestaetigen, Waffe/Aim ausrichten und Teamfeuer freigeben.</p>
+          <p class="help-text"><strong>FOV + Richtung</strong>: Ziel im engen Blick-/Waffensektor ist schneller. Ziel ausserhalb des Sektors kostet Scan- und Drehzeit.</p>
+          <p class="help-text"><strong>Entfernung + Sicht</strong>: Nahe/klare Kontakte werden schneller bestaetigt; Rand der Sicht oder Rand der Waffenreichweite wird langsamer.</p>
+          <p class="help-text"><strong>Buddyteams</strong>: feste Zweierteams geben einen Kommunikationsbonus. Lose Wolke ist flexibler, aber der erste koordinierte Team-Schuss dauert laenger.</p>
+        </div>
+        <details class="distance-editor">
+          <summary>Distanz-C/N/A-Regeln bearbeiten</summary>
+          <p class="help-text">Diese Distanzwerte gelten fuer Move, Engage, Take und Defend identisch. Command setzt die Absicht; C/N/A setzt, wie Naehe, optimale Feuerdistanz und Randbereich bewertet werden.</p>
+          <div id="distanceProfileEditor" class="distance-profile-editor"></div>
+          <div class="button-row">
+            <button id="resetDistanceProfileButton" class="secondary" type="button">Distanz-C/N/A zuruecksetzen</button>
+          </div>
+        </details>
+      </section>
+
+      <section class="card stack">
+        <h2>Messwerte</h2>
+        <div class="metric-grid">
+          <div class="metric"><strong id="minSpacingMetric">0</strong><span>min. Abstand</span></div>
+          <div class="metric"><strong id="maxTileMetric">0</strong><span>max. Einheiten/Tile</span></div>
+          <div class="metric"><strong id="widthMetric">0</strong><span>Formationsbreite</span></div>
+          <div class="metric"><strong id="depthMetric">0</strong><span>Formationstiefe</span></div>
+          <div class="metric"><strong id="pairSpacingMetric">0</strong><span>Buddy-Team-Abstand</span></div>
+          <div class="metric"><strong id="cohesionMetric">0</strong><span>Cohesion-Auslastung</span></div>
+          <div class="metric"><strong id="weaponMetric">0</strong><span>Waffe / Range</span></div>
+          <div class="metric"><strong id="sightMetric">0</strong><span>Sicht m / Tiles</span></div>
+          <div class="metric"><strong id="fovMetric">0</strong><span>FOV-Profil</span></div>
+          <div class="metric"><strong id="focusMetric">0</strong><span>FOV-Fokus</span></div>
+        </div>
+        <p id="readingText">Bereit.</p>
+      </section>
+
+      <section class="card stack">
+        <h2>Notizen fuer Codex</h2>
+        <div contenteditable="true" data-note-key="formation.notes" data-placeholder="Was wirkt gut, was wirkt falsch, welche Werte soll Codex uebernehmen?"></div>
+        <label class="checkline"><input type="checkbox" data-export-key="checks.move_less_single_file"> Move wirkt weniger Gaensemarsch</label>
+        <label class="checkline"><input type="checkbox" data-export-key="checks.buddy_pair_spacing_ok"> Maximal ein Buddy-Team pro Tile wirkt plausibel</label>
+        <label class="checkline"><input type="checkbox" data-export-key="checks.security_forward_ok"> Beim Vorruecken schauen mind. zwei nach vorn</label>
+      </section>
+    </aside>
+  </main>
+
+  <main class="preview-main tab-panel" data-tab-panel="matrix">
+    <section class="card preview-intro">
+      <h2>C/N/A Vergleichsmatrix</h2>
+      <p>Diese Ansicht zeigt die Presets als kleine Bilder: Move, Engage, Take und Defend jeweils in Cautious, Normal und Aggressive. Sie ist bewusst kompakt, damit Formation, Sicherungsbild und Profilwerte nebeneinander verglichen werden koennen.</p>
+    </section>
+    <section id="previewMatrix" class="preview-matrix" aria-label="Command stance preview matrix"></section>
+  </main>
+
+  <footer class="toolbar">
+    <div class="export-actions">
+      <button id="exportJsonButton" type="button">JSON exportieren</button>
+      <button id="chooseExportFolderButton" class="secondary" type="button">Reports-Ordner verbinden</button>
+      <button id="copyJsonButton" class="secondary" type="button">JSON kopieren</button>
+      <button id="resetButton" class="secondary" type="button">Zuruecksetzen</button>
+      <label class="secondary" style="display: inline-flex; gap: 8px; align-items: center;">
+        JSON importieren
+        <input id="importJsonInput" type="file" accept="application/json,.json" style="width: 180px;">
+      </label>
+      <span id="exportStatus" class="export-status">Export: Speichern/Export merkt diesen Stand lokal als Workbench-Standard fuer den naechsten Reload.</span>
+    </div>
+    <textarea id="jsonOutput" readonly placeholder="Export erscheint hier..."></textarea>
+  </footer>
+
+  <script>
+    (function () {
+      const schema = document.body.dataset.reportSchema;
+      const reportId = document.body.dataset.reportId;
+      const localDefaultStorageKey = `${reportId}.local_default.v1`;
+      const board = document.getElementById("board");
+      const tileGridPattern = document.getElementById("tileGridPattern");
+      const tileGridPath = document.getElementById("tileGridPath");
+      const unitLayer = document.getElementById("unitLayer");
+      const sectorLayer = document.getElementById("sectorLayer");
+      const pairLinkLayer = document.getElementById("pairLinkLayer");
+      const cohesionRing = document.getElementById("cohesionRing");
+      const rangeRing = document.getElementById("rangeRing");
+      const cohesionRingLabel = document.getElementById("cohesionRingLabel");
+      const rangeRingLabel = document.getElementById("rangeRingLabel");
+      const moveLine = document.getElementById("moveLine");
+      const formationLine = document.getElementById("formationLine");
+      const anchorHandle = document.getElementById("anchorHandle");
+      const targetHandle = document.getElementById("targetHandle");
+      const output = document.getElementById("jsonOutput");
+      const exportStatus = document.getElementById("exportStatus");
+      const previewMatrix = document.getElementById("previewMatrix");
+      let exportDirectoryHandle = null;
+      let exportSequence = 0;
+      let isRestoringLocalDefault = false;
+      const controls = {
+        command: document.getElementById("commandSelect"),
+        security: document.getElementById("securitySelect"),
+        teamSize: document.getElementById("teamSizeSelect"),
+        formationLibrary: document.getElementById("formationLibrarySelect"),
+        pairing: document.getElementById("pairingSelect"),
+        formationMode: document.getElementById("formationModeSelect"),
+        leaderSlot: document.getElementById("leaderSlotSelect"),
+        useBuddyTeams: document.getElementById("useBuddyTeams"),
+        formationOverrideEnabled: document.getElementById("formationOverrideEnabled"),
+        autoPreset: document.getElementById("autoPreset"),
+        formationPreset: document.getElementById("formationPreset"),
+        weaponSelect: document.getElementById("weaponSelect"),
+        baseSight: document.getElementById("baseSightRange"),
+        speed: document.getElementById("speedRange"),
+        sight: document.getElementById("sightRange"),
+        buddy: document.getElementById("buddyRange"),
+        pair: document.getElementById("pairRange"),
+        row: document.getElementById("rowRange"),
+        tile: document.getElementById("tileRange"),
+        weapon: document.getElementById("weaponRange"),
+        arc: document.getElementById("arcRange"),
+        cohesion: document.getElementById("cohesionRange"),
+        cover: document.getElementById("coverRange")
+      };
+      const outs = {
+        speed: document.getElementById("speedOut"),
+        sight: document.getElementById("sightOut"),
+        buddy: document.getElementById("buddyOut"),
+        pair: document.getElementById("pairOut"),
+        row: document.getElementById("rowOut"),
+        tile: document.getElementById("tileOut"),
+        weapon: document.getElementById("weaponOut"),
+        arc: document.getElementById("arcOut"),
+        cohesion: document.getElementById("cohesionOut"),
+        cover: document.getElementById("coverOut")
+      };
+      const state = {
+        anchor: { x: 260, y: 360 },
+        target: { x: 700, y: 260 },
+        dragging: null,
+        manualLayout: false,
+        manualPositions: {},
+        manualAngles: {},
+        formationLibrary: {},
+        formationOverrides: {},
+        securityOverrides: {},
+        stanceProfiles: {},
+        distanceProfiles: {},
+        isApplyingFormationOverride: false,
+        isInferringControls: false,
+        units: []
+      };
+      const members = [
+        { id: "unit_1", label: "1", name: "Position 1", leader: true },
+        { id: "unit_2", label: "2", name: "Position 2" },
+        { id: "unit_3", label: "3", name: "Position 3" },
+        { id: "unit_4", label: "4", name: "Position 4" },
+        { id: "unit_5", label: "5", name: "Position 5" },
+        { id: "unit_6", label: "6", name: "Position 6" },
+        { id: "unit_7", label: "7", name: "Position 7" },
+        { id: "unit_8", label: "8", name: "Position 8" }
+      ];
+      const memberById = Object.fromEntries(members.map((member) => [member.id, member]));
+      const weaponCatalog = {
+        smg: { label: "SMG", tiles: 10, legacyMeters: 140, role: "short" },
+        rifle: { label: "Rifle", tiles: 25, legacyMeters: 180, role: "medium" },
+        sniper: { label: "Sniper", tiles: 40, legacyMeters: 260, role: "long" },
+        rail_gun: { label: "Rail Gun", tiles: 20, legacyMeters: 260, role: "heavy" },
+        rocket_launcher: { label: "Rocket", tiles: 20, legacyMeters: 220, role: "heavy" },
+        medictool: { label: "Medictool", tiles: 1, legacyMeters: 0, role: "support" }
+      };
+      const DESIGN_METERS_PER_TILE = 1.5;
+      const memberOrder = members.map((member) => member.id);
+      const commandOrder = ["move", "engage", "take", "defend"];
+      const stanceOrder = ["cautious", "normal", "aggressive"];
+      const commandLabels = {
+        move: "Move",
+        engage: "Engage",
+        take: "Take",
+        defend: "Defend"
+      };
+      const stanceLabels = {
+        cautious: "C",
+        normal: "N",
+        aggressive: "A"
+      };
+      const stanceFullLabels = {
+        cautious: "C - vorsichtig",
+        normal: "N - normal",
+        aggressive: "A - aggressiv"
+      };
+      const stanceFieldDefinitions = [
+        { key: "speed_percent", label: "Speed", min: 35, max: 140, step: 1, suffix: "%" },
+        { key: "sight_percent", label: "Sicht", min: 45, max: 140, step: 1, suffix: "%" },
+        { key: "cover_priority_percent", label: "Deckung", min: 0, max: 100, step: 1, suffix: "%" },
+        { key: "aim_readiness_percent", label: "Aim-Bereitschaft", min: 0, max: 100, step: 1, suffix: "%" },
+        { key: "contact_seconds", label: "Kontaktzeit", min: -1, max: 1, step: 0.05, suffix: "s" },
+        { key: "target_support_percent", label: "Zielhilfe", min: -10, max: 10, step: 1, suffix: "%" }
+      ];
+      const defaultStanceProfileByStance = {
+        cautious: {
+          speed_percent: 35,
+          sight_percent: 100,
+          cover_priority_percent: 75,
+          aim_readiness_percent: 75,
+          contact_seconds: -0.3,
+          target_support_percent: 5
+        },
+        normal: {
+          speed_percent: 65,
+          sight_percent: 80,
+          cover_priority_percent: 45,
+          aim_readiness_percent: 30,
+          contact_seconds: 0.3,
+          target_support_percent: 0
+        },
+        aggressive: {
+          speed_percent: 100,
+          sight_percent: 50,
+          cover_priority_percent: 20,
+          aim_readiness_percent: 35,
+          contact_seconds: 0,
+          target_support_percent: -3
+        }
+      };
+      const legacyResetStanceProfileByStance = {
+        cautious: {
+          speed_percent: 65,
+          sight_percent: 120,
+          cover_priority_percent: 75,
+          aim_readiness_percent: 100,
+          contact_seconds: -0.15,
+          target_support_percent: 3
+        },
+        normal: {
+          speed_percent: 100,
+          sight_percent: 100,
+          cover_priority_percent: 45,
+          aim_readiness_percent: 55,
+          contact_seconds: 0,
+          target_support_percent: 0
+        },
+        aggressive: {
+          speed_percent: 120,
+          sight_percent: 75,
+          cover_priority_percent: 20,
+          aim_readiness_percent: 35,
+          contact_seconds: 0.15,
+          target_support_percent: -2
+        }
+      };
+      const distanceFieldDefinitions = [
+        { key: "close_max_percent", label: "Nah bis % RW", min: 0, max: 50, step: 1, suffix: "%" },
+        { key: "optimal_min_percent", label: "Optimal min % RW", min: 0, max: 95, step: 1, suffix: "%" },
+        { key: "optimal_max_percent", label: "Optimal max % RW", min: 5, max: 100, step: 1, suffix: "%" },
+        { key: "clear_sight_max_percent", label: "klare Sicht bis %", min: 20, max: 100, step: 1, suffix: "%" },
+        { key: "good_seconds", label: "Optimal Zeit", min: -1, max: 0.5, step: 0.05, suffix: "s" },
+        { key: "good_target_percent", label: "Optimal Zielhilfe", min: -10, max: 15, step: 1, suffix: "%" },
+        { key: "close_seconds", label: "Nah Zeit", min: -0.5, max: 1, step: 0.05, suffix: "s" },
+        { key: "close_target_percent", label: "Nah Zielhilfe", min: -10, max: 10, step: 1, suffix: "%" },
+        { key: "edge_seconds", label: "Rand Zeit", min: 0, max: 1.5, step: 0.05, suffix: "s" },
+        { key: "edge_target_percent", label: "Rand Zielhilfe", min: -15, max: 5, step: 1, suffix: "%" },
+        { key: "outside_weapon_seconds", label: "ausser Waffe Zeit", min: 0, max: 2, step: 0.05, suffix: "s" },
+        { key: "outside_weapon_target_percent", label: "ausser Waffe Zielhilfe", min: -20, max: 0, step: 1, suffix: "%" },
+        { key: "outside_sight_seconds", label: "ausser Sicht Zeit", min: 0, max: 2, step: 0.05, suffix: "s" },
+        { key: "outside_sight_target_percent", label: "ausser Sicht Zielhilfe", min: -20, max: 0, step: 1, suffix: "%" }
+      ];
+      const defaultDistanceProfileByStance = {
+        cautious: {
+          close_max_percent: 20,
+          optimal_min_percent: 40,
+          optimal_max_percent: 75,
+          clear_sight_max_percent: 70,
+          good_seconds: -0.35,
+          good_target_percent: 6,
+          close_seconds: 0.15,
+          close_target_percent: -2,
+          edge_seconds: 0.45,
+          edge_target_percent: -3,
+          outside_weapon_seconds: 0.85,
+          outside_weapon_target_percent: -6,
+          outside_sight_seconds: 0.95,
+          outside_sight_target_percent: -8
+        },
+        normal: {
+          close_max_percent: 20,
+          optimal_min_percent: 35,
+          optimal_max_percent: 75,
+          clear_sight_max_percent: 70,
+          good_seconds: -0.25,
+          good_target_percent: 4,
+          close_seconds: 0.10,
+          close_target_percent: -2,
+          edge_seconds: 0.35,
+          edge_target_percent: -3,
+          outside_weapon_seconds: 0.80,
+          outside_weapon_target_percent: -6,
+          outside_sight_seconds: 0.95,
+          outside_sight_target_percent: -8
+        },
+        aggressive: {
+          close_max_percent: 15,
+          optimal_min_percent: 25,
+          optimal_max_percent: 85,
+          clear_sight_max_percent: 80,
+          good_seconds: -0.15,
+          good_target_percent: 2,
+          close_seconds: 0.00,
+          close_target_percent: -1,
+          edge_seconds: 0.25,
+          edge_target_percent: -4,
+          outside_weapon_seconds: 0.70,
+          outside_weapon_target_percent: -7,
+          outside_sight_seconds: 0.90,
+          outside_sight_target_percent: -9
+        }
+      };
+      const defaultFormationOverrides = {"move:cautious":{"source":"command_stance_formation","saved_at":"2026-05-16T22:29:48.397Z","candidate_name":"fireteam_base_candidate","team_size":4,"use_buddy_teams":true,"pairing":"sequential_pairs","formation_mode":"pair_line","leader_slot":"auto","buddy_spacing_world":80,"buddy_pair_spacing_world":60,"row_offset_world":163,"cohesion_radius_world":216,"slots_by_unit_id":{"unit_1":{"lateral":47,"forward":173},"unit_2":{"lateral":54,"forward":93},"unit_3":{"lateral":-33,"forward":3},"unit_4":{"lateral":14,"forward":-63}},"command":"move","stance":"cautious","source_library_key":""},"move:normal":{"source":"command_stance_formation","saved_at":"2026-05-16T22:32:34.157Z","candidate_name":"fireteam_base_candidate","team_size":4,"use_buddy_teams":true,"pairing":"sequential_pairs","formation_mode":"pair_line","leader_slot":"auto","buddy_spacing_world":117,"buddy_pair_spacing_world":48,"row_offset_world":162,"cohesion_radius_world":216,"slots_by_unit_id":{"unit_1":{"lateral":43,"forward":118},"unit_2":{"lateral":-39,"forward":24},"unit_3":{"lateral":21,"forward":-43},"unit_4":{"lateral":-32,"forward":-138}},"command":"move","stance":"normal","source_library_key":""},"move:aggressive":{"source":"command_stance_formation","saved_at":"2026-05-16T22:33:49.565Z","candidate_name":"fireteam_base_candidate","team_size":4,"use_buddy_teams":true,"pairing":"sequential_pairs","formation_mode":"pair_line","leader_slot":"auto","buddy_spacing_world":117,"buddy_pair_spacing_world":48,"row_offset_world":162,"cohesion_radius_world":216,"slots_by_unit_id":{"unit_1":{"lateral":43,"forward":118},"unit_2":{"lateral":-39,"forward":24},"unit_3":{"lateral":21,"forward":-43},"unit_4":{"lateral":-32,"forward":-138}},"command":"move","stance":"aggressive","source_library_key":""},"engage:cautious":{"source":"command_stance_formation","saved_at":"2026-05-16T22:37:15.914Z","candidate_name":"fireteam_base_candidate","team_size":4,"use_buddy_teams":true,"pairing":"sequential_pairs","formation_mode":"staggered_pairs","leader_slot":"unit_3","buddy_spacing_world":63,"buddy_pair_spacing_world":85,"row_offset_world":31,"cohesion_radius_world":216,"slots_by_unit_id":{"unit_1":{"lateral":8,"forward":104},"unit_2":{"lateral":62,"forward":56},"unit_3":{"lateral":-32,"forward":69},"unit_4":{"lateral":-69,"forward":29}},"command":"engage","stance":"cautious","source_library_key":""},"engage:normal":{"source":"command_stance_formation","saved_at":"2026-05-16T22:39:10.460Z","candidate_name":"fireteam_base_candidate","team_size":4,"use_buddy_teams":true,"pairing":"sequential_pairs","formation_mode":"staggered_pairs","leader_slot":"unit_4","buddy_spacing_world":139,"buddy_pair_spacing_world":258,"row_offset_world":30,"cohesion_radius_world":216,"slots_by_unit_id":{"unit_1":{"lateral":169,"forward":102},"unit_2":{"lateral":98,"forward":-24},"unit_3":{"lateral":-167,"forward":61},"unit_4":{"lateral":-82,"forward":-42}},"command":"engage","stance":"normal","source_library_key":""}};
+      const latestSavedFormationOverrides = {"engage:aggressive":{"source":"command_stance_formation","saved_at":"2026-05-17T08:44:20.932Z","candidate_name":"fireteam_base_candidate","team_size":4,"use_buddy_teams":true,"pairing":"sequential_pairs","formation_mode":"staggered_pairs","leader_slot":"unit_4","buddy_spacing_world":93,"buddy_pair_spacing_world":179,"row_offset_world":20,"cohesion_radius_world":248,"slots_by_unit_id":{"unit_1":{"lateral":118,"forward":12},"unit_2":{"lateral":26,"forward":27},"unit_3":{"lateral":-61,"forward":36},"unit_4":{"lateral":-154,"forward":43}},"command":"engage","stance":"aggressive","source_library_key":""},"engage:cautious":{"source":"command_stance_formation","saved_at":"2026-05-17T08:46:54.409Z","candidate_name":"fireteam_base_candidate","team_size":4,"use_buddy_teams":true,"pairing":"sequential_pairs","formation_mode":"staggered_pairs","leader_slot":"unit_3","buddy_spacing_world":74,"buddy_pair_spacing_world":74,"row_offset_world":72,"cohesion_radius_world":216,"slots_by_unit_id":{"unit_1":{"lateral":31,"forward":76},"unit_2":{"lateral":64,"forward":13},"unit_3":{"lateral":-9,"forward":6},"unit_4":{"lateral":-43,"forward":-62}},"command":"engage","stance":"cautious","source_library_key":""},"engage:normal":{"source":"command_stance_formation","saved_at":"2026-05-16T22:39:10.460Z","candidate_name":"fireteam_base_candidate","team_size":4,"use_buddy_teams":true,"pairing":"sequential_pairs","formation_mode":"staggered_pairs","leader_slot":"unit_4","buddy_spacing_world":139,"buddy_pair_spacing_world":258,"row_offset_world":30,"cohesion_radius_world":216,"slots_by_unit_id":{"unit_1":{"lateral":169,"forward":102},"unit_2":{"lateral":98,"forward":-24},"unit_3":{"lateral":-167,"forward":61},"unit_4":{"lateral":-82,"forward":-42}},"command":"engage","stance":"normal","source_library_key":""},"move:aggressive":{"source":"command_stance_formation","saved_at":"2026-05-16T22:33:49.565Z","candidate_name":"fireteam_base_candidate","team_size":4,"use_buddy_teams":true,"pairing":"sequential_pairs","formation_mode":"pair_line","leader_slot":"auto","buddy_spacing_world":117,"buddy_pair_spacing_world":48,"row_offset_world":162,"cohesion_radius_world":216,"slots_by_unit_id":{"unit_1":{"lateral":43,"forward":118},"unit_2":{"lateral":-39,"forward":24},"unit_3":{"lateral":21,"forward":-43},"unit_4":{"lateral":-32,"forward":-138}},"command":"move","stance":"aggressive","source_library_key":""},"move:cautious":{"source":"command_stance_formation","saved_at":"2026-05-16T22:29:48.397Z","candidate_name":"fireteam_base_candidate","team_size":4,"use_buddy_teams":true,"pairing":"sequential_pairs","formation_mode":"pair_line","leader_slot":"auto","buddy_spacing_world":80,"buddy_pair_spacing_world":60,"row_offset_world":163,"cohesion_radius_world":216,"slots_by_unit_id":{"unit_1":{"lateral":47,"forward":173},"unit_2":{"lateral":54,"forward":93},"unit_3":{"lateral":-33,"forward":3},"unit_4":{"lateral":14,"forward":-63}},"command":"move","stance":"cautious","source_library_key":""},"move:normal":{"source":"command_stance_formation","saved_at":"2026-05-16T22:32:34.157Z","candidate_name":"fireteam_base_candidate","team_size":4,"use_buddy_teams":true,"pairing":"sequential_pairs","formation_mode":"pair_line","leader_slot":"auto","buddy_spacing_world":117,"buddy_pair_spacing_world":48,"row_offset_world":162,"cohesion_radius_world":216,"slots_by_unit_id":{"unit_1":{"lateral":43,"forward":118},"unit_2":{"lateral":-39,"forward":24},"unit_3":{"lateral":21,"forward":-43},"unit_4":{"lateral":-32,"forward":-138}},"command":"move","stance":"normal","source_library_key":""},"take:aggressive":{"source":"command_stance_formation","saved_at":"2026-05-17T08:42:36.443Z","candidate_name":"fireteam_base_candidate","team_size":4,"use_buddy_teams":true,"pairing":"sequential_pairs","formation_mode":"staggered_pairs","leader_slot":"unit_4","buddy_spacing_world":70,"buddy_pair_spacing_world":139,"row_offset_world":20,"cohesion_radius_world":216,"slots_by_unit_id":{"unit_1":{"lateral":79,"forward":15},"unit_2":{"lateral":24,"forward":24},"unit_3":{"lateral":-45,"forward":36},"unit_4":{"lateral":-130,"forward":42}},"command":"take","stance":"aggressive","source_library_key":""}};
+      const defaultSecurityOverrides = {"engage:aggressive":{"command":"engage","stance":"aggressive","team_size":4,"security_source":"manual_drag_handles","security_label":"wide_forward","unit_facings":[{"id":"unit_1","label":"1","facing_degrees":-43},{"id":"unit_2","label":"2","facing_degrees":-23},{"id":"unit_3","label":"3","facing_degrees":-3},{"id":"unit_4","label":"4","facing_degrees":17}],"facings_by_unit_id":{"unit_1":-43,"unit_2":-23,"unit_3":-3,"unit_4":17}},"engage:cautious":{"command":"engage","stance":"cautious","team_size":4,"security_source":"manual_drag_handles","security_label":"forward_flanks","unit_facings":[{"id":"unit_1","label":"1","facing_degrees":2},{"id":"unit_2","label":"2","facing_degrees":29},{"id":"unit_3","label":"3","facing_degrees":-18},{"id":"unit_4","label":"4","facing_degrees":-28}],"facings_by_unit_id":{"unit_1":2,"unit_2":29,"unit_3":-18,"unit_4":-28}},"engage:normal":{"command":"engage","stance":"normal","team_size":4,"security_source":"manual_drag_handles","security_label":"forward_flanks","unit_facings":[{"id":"unit_1","label":"1","facing_degrees":-2},{"id":"unit_2","label":"2","facing_degrees":47},{"id":"unit_3","label":"3","facing_degrees":-52},{"id":"unit_4","label":"4","facing_degrees":-7}],"facings_by_unit_id":{"unit_1":-2,"unit_2":47,"unit_3":-52,"unit_4":-7}},"take:aggressive":{"command":"take","stance":"aggressive","team_size":4,"security_source":"manual_drag_handles","security_label":"wide_forward","unit_facings":[{"id":"unit_1","label":"1","facing_degrees":-43},{"id":"unit_2","label":"2","facing_degrees":-23},{"id":"unit_3","label":"3","facing_degrees":-3},{"id":"unit_4","label":"4","facing_degrees":17}],"facings_by_unit_id":{"unit_1":-43,"unit_2":-23,"unit_3":-3,"unit_4":17}}};
+      Object.assign(defaultFormationOverrides, latestSavedFormationOverrides);
+      const commandNotes = {
+        move: "Bewegen mit Sicherung in Marschrichtung. Ziel: Strecke sauber als Team abarbeiten.",
+        engage: "Feinde auf dem Weg und im Zielgebiet bekaempfen. Wirkung frueh, Bewegung nach Kontakt.",
+        take: "Engage plus Zielgebiet kontrollieren. Ziel: Area besitzen, clearen und danach halten koennen.",
+        defend: "Aus aktueller Position oder Zielpunkt sichern. Ziel: Raum nach aussen verteidigen."
+      };
+      const presets = {
+        move: {
+          cautious: { speed: 65, sight: 120, fov: 44, buddy: 46, pair: 104, row: 0, security: "forward_flanks", formationMode: "pair_line", cover: 40 },
+          normal: { speed: 100, sight: 100, fov: 60, buddy: 52, pair: 112, row: 0, security: "forward_flanks", formationMode: "pair_line", cover: 25 },
+          aggressive: { speed: 120, sight: 65, fov: 89, buddy: 58, pair: 124, row: 0, security: "wide_forward", formationMode: "pair_line", cover: 10 }
+        },
+        engage: {
+          cautious: { speed: 75, sight: 115, fov: 48, buddy: 40, pair: 104, row: 64, security: "forward_flanks", formationMode: "staggered_pairs", cover: 75 },
+          normal: { speed: 100, sight: 100, fov: 60, buddy: 46, pair: 112, row: 56, security: "forward_flanks", formationMode: "staggered_pairs", cover: 50 },
+          aggressive: { speed: 115, sight: 80, fov: 76, buddy: 58, pair: 128, row: 0, security: "wide_forward", formationMode: "pair_line", cover: 20 }
+        },
+        take: {
+          cautious: { speed: 70, sight: 115, fov: 48, buddy: 38, pair: 96, row: 64, security: "forward_flanks", formationMode: "staggered_pairs", cover: 80 },
+          normal: { speed: 100, sight: 100, fov: 60, buddy: 46, pair: 104, row: 52, security: "forward_flanks", formationMode: "staggered_pairs", cover: 55 },
+          aggressive: { speed: 120, sight: 75, fov: 81, buddy: 56, pair: 124, row: 0, security: "wide_forward", formationMode: "pair_line", cover: 18 }
+        },
+        defend: {
+          cautious: { speed: 80, sight: 120, fov: 44, buddy: 48, pair: 112, row: 52, security: "all_round", formationMode: "wedge", cover: 85 },
+          normal: { speed: 100, sight: 100, fov: 60, buddy: 48, pair: 112, row: 52, security: "all_round", formationMode: "wedge", cover: 65 },
+          aggressive: { speed: 110, sight: 85, fov: 72, buddy: 54, pair: 120, row: 40, security: "forward_flanks", formationMode: "pair_line", cover: 35 }
+        }
+      };
+
+      function cloneStanceProfiles(source = defaultStanceProfileByStance) {
+        return JSON.parse(JSON.stringify(source));
+      }
+      function normalizeStanceProfiles(source) {
+        const profiles = cloneStanceProfiles();
+        if (!source || typeof source !== "object") return profiles;
+        stanceOrder.forEach((stance) => {
+          if (!source[stance] || typeof source[stance] !== "object") return;
+          stanceFieldDefinitions.forEach((field) => {
+            const value = Number(source[stance][field.key]);
+            if (Number.isFinite(value)) profiles[stance][field.key] = value;
+          });
+        });
+        return profiles;
+      }
+      function stanceProfilesEqual(source, expected) {
+        if (!source || !expected) return false;
+        return stanceOrder.every((stance) => {
+          const sourceProfile = source[stance] || {};
+          const expectedProfile = expected[stance] || {};
+          return stanceFieldDefinitions.every((field) => {
+            return Number(sourceProfile[field.key]) === Number(expectedProfile[field.key]);
+          });
+        });
+      }
+      function stanceProfileFor(stance = activeStance()) {
+        return state.stanceProfiles[stance] || defaultStanceProfileByStance[stance] || defaultStanceProfileByStance.normal;
+      }
+      function activeStanceProfile() {
+        return stanceProfileFor(activeStance());
+      }
+      function cloneDistanceProfiles(source = defaultDistanceProfileByStance) {
+        return JSON.parse(JSON.stringify(source));
+      }
+      function cloneFormationOverrides(source = defaultFormationOverrides) {
+        return JSON.parse(JSON.stringify(source || {}));
+      }
+      function cloneSecurityOverrides(source = defaultSecurityOverrides) {
+        return JSON.parse(JSON.stringify(source || {}));
+      }
+      function normalizeDistanceProfiles(source) {
+        const profiles = cloneDistanceProfiles();
+        if (!source || typeof source !== "object") return profiles;
+        stanceOrder.forEach((stance) => {
+          if (!source[stance] || typeof source[stance] !== "object") return;
+          distanceFieldDefinitions.forEach((field) => {
+            const value = Number(source[stance][field.key]);
+            if (Number.isFinite(value)) profiles[stance][field.key] = value;
+          });
+        });
+        return profiles;
+      }
+      function activeDistanceProfile() {
+        return state.distanceProfiles[activeStance()] || defaultDistanceProfileByStance[activeStance()] || defaultDistanceProfileByStance.normal;
+      }
+      function formatDistanceFieldValue(value, suffix) {
+        const number = Number(value);
+        if (!Number.isFinite(number)) return `0${suffix}`;
+        if (suffix === "s") return `${number >= 0 ? "+" : ""}${number.toFixed(2)}s`;
+        return `${number}${suffix}`;
+      }
+      function profilePercentToRatio(profile, key) {
+        return Number(profile[key] || 0) / 100;
+      }
+      function resolveDistanceModifier(distanceTiles, sightTiles, weaponRatio, sightRatio) {
+        const stance = activeStance();
+        const profile = activeDistanceProfile();
+        if (distanceTiles > sightTiles) {
+          return {
+            seconds: Number(profile.outside_sight_seconds || 0),
+            targeting: Number(profile.outside_sight_target_percent || 0),
+            label: "ausser Sicht",
+            stance,
+            profile: { ...profile }
+          };
+        }
+        if (weaponRatio > 1) {
+          return {
+            seconds: Number(profile.outside_weapon_seconds || 0),
+            targeting: Number(profile.outside_weapon_target_percent || 0),
+            label: "ausser Waffen-RW",
+            stance,
+            profile: { ...profile }
+          };
+        }
+        if (weaponRatio < profilePercentToRatio(profile, "close_max_percent")) {
+          return {
+            seconds: Number(profile.close_seconds || 0),
+            targeting: Number(profile.close_target_percent || 0),
+            label: "sehr nah",
+            stance,
+            profile: { ...profile }
+          };
+        }
+        if (
+          weaponRatio >= profilePercentToRatio(profile, "optimal_min_percent")
+          && weaponRatio <= profilePercentToRatio(profile, "optimal_max_percent")
+          && sightRatio <= profilePercentToRatio(profile, "clear_sight_max_percent")
+        ) {
+          return {
+            seconds: Number(profile.good_seconds || 0),
+            targeting: Number(profile.good_target_percent || 0),
+            label: "gute Feuerdistanz",
+            stance,
+            profile: { ...profile }
+          };
+        }
+        return {
+          seconds: Number(profile.edge_seconds || 0),
+          targeting: Number(profile.edge_target_percent || 0),
+          label: "Randbereich",
+          stance,
+          profile: { ...profile }
+        };
+      }
+      function activeStance() {
+        const active = document.querySelector('[data-choice-group="formation.stance"] .choice.active');
+        return active ? active.dataset.choiceValue : "cautious";
+      }
+      function readNumber(input) { return Number(input.value); }
+      function vector(from, to) {
+        const dx = to.x - from.x;
+        const dy = to.y - from.y;
+        const length = Math.hypot(dx, dy) || 1;
+        return { x: dx / length, y: dy / length, length };
+      }
+      function perp(dir) { return { x: -dir.y, y: dir.x }; }
+      function dot(a, b) { return (a.x * b.x) + (a.y * b.y); }
+      function add(a, b) { return { x: a.x + b.x, y: a.y + b.y }; }
+      function scale(v, s) { return { x: v.x * s, y: v.y * s }; }
+      function pointToString(p) { return `${Math.round(p.x)},${Math.round(p.y)}`; }
+      function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
+      function degToRad(value) { return Number(value) * Math.PI / 180; }
+      function radToDeg(value) { return Number(value) * 180 / Math.PI; }
+      function normalizeDegrees(value) {
+        let result = Number(value) % 360;
+        if (result < 0) result += 360;
+        return result;
+      }
+      function smallestAngleDifferenceDegrees(a, b) {
+        const diff = Math.abs(normalizeDegrees(a) - normalizeDegrees(b));
+        return Math.min(diff, 360 - diff);
+      }
+      function clampPoint(p) {
+        return {
+          x: Math.max(32, Math.min(928, p.x)),
+          y: Math.max(32, Math.min(618, p.y))
+        };
+      }
+      function activeTeamSize() {
+        return clamp(readNumber(controls.teamSize), 2, 8);
+      }
+      function activeMembers() {
+        return members.slice(0, activeTeamSize());
+      }
+      function pairSequential(ids) {
+        const pairs = [];
+        for (let index = 0; index < ids.length; index += 2) {
+          if (ids[index + 1]) pairs.push([ids[index], ids[index + 1]]);
+        }
+        return pairs;
+      }
+      function activePairs() {
+        if (!controls.useBuddyTeams.checked) return [];
+        const ids = activeMembers().map((member) => member.id);
+        if (controls.pairing.value === "cross_pairs") {
+          const pairs = [];
+          for (let index = 0; index < ids.length; index += 4) {
+            const chunk = ids.slice(index, index + 4);
+            if (chunk.length === 4) {
+              pairs.push([chunk[0], chunk[2]], [chunk[1], chunk[3]]);
+            } else {
+              pairs.push(...pairSequential(chunk));
+            }
+          }
+          return pairs;
+        }
+        if (controls.pairing.value === "outside_inside_pairs") {
+          const pairs = [];
+          let left = 0;
+          let right = ids.length - 1;
+          while (left < right) {
+            pairs.push([ids[left], ids[right]]);
+            left += 1;
+            right -= 1;
+          }
+          return pairs;
+        }
+        return pairSequential(ids);
+      }
+      function memberLabel(unitId) {
+        const member = memberById[unitId];
+        return member ? member.label : unitId;
+      }
+      function leaderUnitId() {
+        const selectedId = controls.leaderSlot.value;
+        if (selectedId && selectedId !== "auto" && activeMembers().some((member) => member.id === selectedId)) {
+          return selectedId;
+        }
+        const first = activeMembers()[0];
+        return first ? first.id : "unit_1";
+      }
+      function setRangeValue(input, value) {
+        input.value = String(Math.round(clamp(value, Number(input.min), Number(input.max))));
+      }
+      function selectedWeapon() {
+        return weaponCatalog[controls.weaponSelect.value] || weaponCatalog.rifle;
+      }
+      function fovFromSightPercent(sightPercent) {
+        return clamp(60 - ((Number(sightPercent) - 100) * 0.82), 10, 90);
+      }
+      function sightPercentFromFov(fov) {
+        return clamp(100 + ((60 - Number(fov)) / 0.82), Number(controls.sight.min), Number(controls.sight.max));
+      }
+      function syncFovFromSight() {
+        setRangeValue(controls.arc, fovFromSightPercent(readNumber(controls.sight)));
+      }
+      function syncSightFromFov() {
+        setRangeValue(controls.sight, sightPercentFromFov(readNumber(controls.arc)));
+      }
+      function derivedWeaponBoardRange() {
+        return selectedWeapon().tiles * readNumber(controls.tile);
+      }
+      function derivedWeaponDesignMeters() {
+        return selectedWeapon().tiles * DESIGN_METERS_PER_TILE;
+      }
+      function derivedSightMeters() {
+        return readNumber(controls.baseSight) * (readNumber(controls.sight) / 100);
+      }
+      function fovFocusFactor(fov) {
+        return 1 + ((90 - clamp(Number(fov), 10, 90)) / 80) * 0.25;
+      }
+      function derivedFocusedSightMeters() {
+        return derivedSightMeters() * fovFocusFactor(readNumber(controls.arc));
+      }
+      function derivedRawSightTiles() {
+        return derivedSightMeters() / DESIGN_METERS_PER_TILE;
+      }
+      function derivedSightTiles() {
+        return derivedFocusedSightMeters() / DESIGN_METERS_PER_TILE;
+      }
+      function derivedSightBoardRange() {
+        return derivedSightTiles() * readNumber(controls.tile);
+      }
+      function derivedEffectivePreviewRange() {
+        return Math.min(derivedWeaponBoardRange(), derivedSightBoardRange());
+      }
+      function unitContactWindows() {
+        const fov = readNumber(controls.arc);
+        const halfFov = fov * 0.5;
+        return state.units.map((unit) => {
+          const dx = state.target.x - unit.x;
+          const dy = state.target.y - unit.y;
+          const distance = Math.hypot(dx, dy) || 1;
+          const targetAngle = normalizeDegrees(radToDeg(Math.atan2(dy, dx)));
+          const facingAngle = normalizeDegrees(radToDeg(unit.angle));
+          const angleOffset = smallestAngleDifferenceDegrees(targetAngle, facingAngle);
+          return {
+            unit_id: unit.id,
+            label: unit.label,
+            distance_world: distance,
+            distance_tiles: distance / Math.max(readNumber(controls.tile), 1),
+            facing_degrees: facingAngle,
+            target_degrees: targetAngle,
+            angle_offset_degrees: angleOffset,
+            target_in_fov: angleOffset <= halfFov
+          };
+        });
+      }
+      function bestContactWindow() {
+        const windows = unitContactWindows();
+        if (!windows.length) return {};
+        return windows.slice().sort((a, b) => {
+          if (a.target_in_fov !== b.target_in_fov) return a.target_in_fov ? -1 : 1;
+          if (a.angle_offset_degrees !== b.angle_offset_degrees) return a.angle_offset_degrees - b.angle_offset_degrees;
+          return a.distance_world - b.distance_world;
+        })[0];
+      }
+      function contactInitiativeModifiers(best) {
+        const fov = readNumber(controls.arc);
+        const weapon = selectedWeapon();
+        const distanceTiles = Number(best.distance_tiles || 0);
+        const sightTiles = derivedSightTiles();
+        const inFov = Boolean(best.target_in_fov);
+        const weaponRatio = weapon.tiles > 0 ? distanceTiles / weapon.tiles : 999;
+        const sightRatio = sightTiles > 0 ? distanceTiles / sightTiles : 999;
+        const movementTable = {
+          move: { cautious: 0.05, normal: 0.25, aggressive: 0.45 },
+          engage: { cautious: 0.10, normal: 0.00, aggressive: 0.20 },
+          take: { cautious: 0.20, normal: 0.25, aggressive: 0.40 },
+          defend: { cautious: -0.30, normal: -0.15, aggressive: 0.00 }
+        };
+        const movementModifier = Number((movementTable[controls.command.value] || movementTable.move)[activeStance()] || 0);
+        const stanceProfile = activeStanceProfile();
+        const stanceReactionModifier = Number(stanceProfile.contact_seconds || 0);
+        const stanceTargeting = Number(stanceProfile.target_support_percent || 0);
+        let fovModifier = 0.05;
+        let fovTargeting = 0;
+        let fovLabel = `${Math.round(Number(best.angle_offset_degrees || 0))}deg im Sektor`;
+        if (inFov) {
+          if (fov <= 30) {
+            fovModifier = -0.35;
+            fovTargeting = 4;
+          } else if (fov <= 60) {
+            fovModifier = -0.15;
+            fovTargeting = 2;
+          }
+        } else {
+          fovModifier = 0.75 + Math.min(Number(best.angle_offset_degrees || 0) / 180, 0.35);
+          fovTargeting = -6;
+          fovLabel = `${Math.round(Number(best.angle_offset_degrees || 0))}deg ausserhalb`;
+        }
+        const distanceResult = resolveDistanceModifier(distanceTiles, sightTiles, weaponRatio, sightRatio);
+        const distanceModifier = distanceResult.seconds;
+        const distanceTargeting = distanceResult.targeting;
+        const distanceLabel = distanceResult.label;
+        let buddyModifier = 0.55;
+        let buddyTargeting = -4;
+        let pairedConfirm = false;
+        if (controls.useBuddyTeams.checked) {
+          buddyModifier = -0.35;
+          buddyTargeting = 8;
+          const windowsByUnit = Object.fromEntries(unitContactWindows().map((entry) => [entry.unit_id, entry]));
+          pairedConfirm = activePairs().some((pair) => pair.every((unitId) => Boolean(windowsByUnit[unitId] && windowsByUnit[unitId].target_in_fov)));
+          if (pairedConfirm) {
+            buddyModifier -= 0.15;
+            buddyTargeting += 5;
+          }
+        }
+        const commandTargeting = { move: 0, engage: 4, take: 2, defend: 2 }[controls.command.value] || 0;
+        return {
+          base_seconds: 2.0,
+          movement_seconds: movementModifier,
+          stance_profile_seconds: stanceReactionModifier,
+          fov_seconds: fovModifier,
+          distance_seconds: distanceModifier,
+          buddy_seconds: buddyModifier,
+          fov_label: fovLabel,
+          distance_label: distanceLabel,
+          distance_profile_stance: distanceResult.stance,
+          distance_profile_values: distanceResult.profile,
+          paired_confirm: pairedConfirm,
+          target_support_percent: clamp(buddyTargeting + fovTargeting + distanceTargeting + commandTargeting + stanceTargeting, -12, 22)
+        };
+      }
+      function calculateContactInitiative() {
+        const best = bestContactWindow();
+        const modifiers = contactInitiativeModifiers(best);
+        const total = clamp(
+          modifiers.base_seconds
+          + modifiers.movement_seconds
+          + modifiers.stance_profile_seconds
+          + modifiers.fov_seconds
+          + modifiers.distance_seconds
+          + modifiers.buddy_seconds,
+          0.35,
+          5.0
+        );
+        return {
+          seconds: Number(total.toFixed(2)),
+          best_window: best,
+          modifiers,
+          distance_tiles: Number(Number(best.distance_tiles || 0).toFixed(1)),
+          target_support_percent: modifiers.target_support_percent,
+          interpretation: total <= 1.2 ? "schnelle Feuerfreigabe" : (total <= 2.4 ? "normale Kontaktreaktion" : "verzoegerte Zielaufnahme")
+        };
+      }
+      function updateDerivedValues() {
+        setRangeValue(controls.weapon, derivedWeaponBoardRange());
+        setRangeValue(controls.arc, readNumber(controls.arc));
+      }
+      function clampToBoardLabel(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+      }
+      function controlResetsLayout(control) {
+        if (state.isApplyingFormationOverride) return false;
+        if (control === controls.command) return controls.formationPreset.checked;
+        return [
+          controls.teamSize,
+          controls.useBuddyTeams,
+          controls.pairing,
+          controls.formationMode,
+          controls.buddy,
+          controls.pair,
+          controls.row
+        ].includes(control);
+      }
+      function applyPreset() {
+        const command = controls.command.value;
+        const stance = activeStance();
+        const preset = presets[command][stance];
+        if (controls.autoPreset.checked) {
+          const stanceProfile = stanceProfileFor(stance);
+          controls.speed.value = stanceProfile.speed_percent;
+          controls.sight.value = stanceProfile.sight_percent;
+          controls.arc.value = Math.round(fovFromSightPercent(stanceProfile.sight_percent));
+          controls.cover.value = stanceProfile.cover_priority_percent;
+        }
+        if (controls.formationPreset.checked) applyCommandLayoutPreset();
+      }
+      function applyCommandLayoutPreset() {
+        const command = controls.command.value;
+        const stance = activeStance();
+        const preset = presets[command][stance];
+        controls.buddy.value = preset.buddy;
+        controls.pair.value = preset.pair;
+        controls.row.value = preset.row;
+        controls.security.value = preset.security;
+        controls.formationMode.value = preset.formationMode;
+        state.manualLayout = false;
+        state.manualPositions = {};
+      }
+      function reorderLeaderSlot(slots, preference) {
+        return slots;
+      }
+      function applyLeaderSlot(slots) {
+        return reorderLeaderSlot(slots, controls.leaderSlot.value);
+      }
+      function assignPairToCenter(slots, pairIds, center, buddy) {
+        if (!pairIds || pairIds.length < 2) return;
+        slots[pairIds[0]] = { lateral: center.lateral - (buddy * 0.5), forward: center.forward };
+        slots[pairIds[1]] = { lateral: center.lateral + (buddy * 0.5), forward: center.forward };
+      }
+      function buildLooseSlots(spacing, row, buddySpacing) {
+        const slots = {};
+        const active = activeMembers();
+        const columns = Math.ceil(active.length / 2);
+        const baseBuddy = buddySpacing !== undefined ? buddySpacing : readNumber(controls.buddy);
+        const lateralSpacing = Math.max(spacing * 0.72, baseBuddy);
+        const forwardSpacing = row > 0 ? row : baseBuddy * 1.15;
+        active.forEach((member, index) => {
+          const column = index % columns;
+          const line = Math.floor(index / columns);
+          const lateral = (column - ((columns - 1) * 0.5)) * lateralSpacing + (line * lateralSpacing * 0.18);
+          const forward = -line * forwardSpacing;
+          slots[member.id] = { lateral, forward };
+        });
+        return applyLeaderSlot(slots);
+      }
+      function buildPairCenters(pairCount, pairSpacing, row, mode) {
+        const centers = [];
+        const centerOffset = (pairCount - 1) * 0.5;
+        for (let index = 0; index < pairCount; index += 1) {
+          let lateral = (index - centerOffset) * pairSpacing;
+          let forward = 0;
+          if (mode === "staggered_pairs") {
+            forward = index % 2 === 0 ? 0 : -row;
+          } else if (mode === "pair_line") {
+            forward = index % 2 === 0 ? 0 : -row * 0.2;
+          } else if (mode === "wedge") {
+            const rank = Math.floor(index / 2);
+            lateral = index === 0 ? 0 : ((index % 2 === 0 ? 1 : -1) * (pairSpacing * (rank + 0.55)));
+            forward = row * 0.35 - (rank * row);
+          }
+          centers.push({ lateral, forward });
+        }
+        return centers;
+      }
+      function buildSlots() {
+        const command = controls.command.value;
+        const buddy = readNumber(controls.buddy);
+        const pair = readNumber(controls.pair);
+        const row = readNumber(controls.row);
+        const pairs = activePairs();
+        const mode = controls.formationMode.value;
+        const slots = {};
+        if (command === "defend" && controls.security.value === "all_round") {
+          const active = activeMembers();
+          const radius = Math.max(pair * 0.45, buddy * 1.1);
+          active.forEach((member, index) => {
+            const angle = -Math.PI / 2 + (index * Math.PI * 2 / active.length);
+            slots[member.id] = { lateral: Math.cos(angle) * radius, forward: Math.sin(angle) * radius };
+          });
+          return applyLeaderSlot(slots);
+        }
+        if (!controls.useBuddyTeams.checked) {
+          return buildLooseSlots(pair, row, buddy);
+        }
+        if (mode === "column_reference") {
+          const step = row > 0 ? row : buddy;
+          activeMembers().forEach((member, index) => {
+            slots[member.id] = { lateral: 0, forward: -step * index };
+          });
+          return applyLeaderSlot(slots);
+        }
+        const centers = buildPairCenters(pairs.length, pair, row, mode);
+        pairs.forEach((pairIds, index) => {
+          assignPairToCenter(slots, pairIds, centers[index], buddy);
+        });
+        return applyLeaderSlot(slots);
+      }
+      function securityAngles(dir) {
+        const base = Math.atan2(dir.y, dir.x);
+        const count = activeMembers().length;
+        const spread = (start, end) => {
+          if (count <= 1) return [base];
+          return Array.from({ length: count }, (_item, index) => base + start + ((end - start) * (index / (count - 1))));
+        };
+        switch (controls.security.value) {
+          case "all_round":
+            return Array.from({ length: count }, (_item, index) => base - Math.PI / 2 + (index * Math.PI * 2 / count));
+          case "left_right":
+            return spread(-Math.PI / 2, Math.PI / 2);
+          case "wide_forward":
+            return spread(-0.52, 0.52);
+          default:
+            if (count === 2) return [base - 0.14, base + 0.14];
+            if (count === 4) return [base - 0.14, base + 0.14, base - 1.05, base + 1.05];
+            if (count === 6) return [base - 0.22, base, base + 0.22, base - 1.05, base + 1.05, base + Math.PI];
+            return [base - 0.32, base - 0.1, base + 0.1, base + 0.32, base - 1.05, base + 1.05, base + Math.PI - 0.35, base + Math.PI + 0.35];
+        }
+      }
+      function sectorPath(center, angle, range, arc) {
+        const a0 = angle - arc / 2;
+        const a1 = angle + arc / 2;
+        const p0 = { x: center.x + Math.cos(a0) * range, y: center.y + Math.sin(a0) * range };
+        const p1 = { x: center.x + Math.cos(a1) * range, y: center.y + Math.sin(a1) * range };
+        const largeArc = arc > Math.PI ? 1 : 0;
+        return `M ${center.x} ${center.y} L ${p0.x} ${p0.y} A ${range} ${range} 0 ${largeArc} 1 ${p1.x} ${p1.y} Z`;
+      }
+      function securityOverrideKey(command, stance) {
+        return `${command || controls.command.value}:${stance || activeStance()}`;
+      }
+      function currentSecurityOverride() {
+        return state.securityOverrides[securityOverrideKey()] || null;
+      }
+      function overrideAngleFor(unitId) {
+        const override = currentSecurityOverride();
+        if (!override || !override.facings_by_unit_id) return undefined;
+        if (override.team_size !== activeTeamSize()) return undefined;
+        return override.facings_by_unit_id[unitId];
+      }
+      function computeUnits() {
+        const dir = vector(state.anchor, state.target);
+        const side = perp(dir);
+        const slots = buildSlots();
+        const angles = securityAngles(dir);
+        const range = derivedEffectivePreviewRange();
+        const leaderId = leaderUnitId();
+        state.units = activeMembers().map((member, index) => {
+          const slot = slots[member.id] || { lateral: 0, forward: 0 };
+          const generatedPosition = add(add(state.anchor, scale(side, slot.lateral)), scale(dir, slot.forward));
+          const manualPosition = state.manualPositions[member.id];
+          const position = state.manualLayout && manualPosition ? manualPosition : generatedPosition;
+          const savedOverrideAngle = overrideAngleFor(member.id);
+          const angle = state.manualAngles[member.id] !== undefined
+            ? Number(state.manualAngles[member.id])
+            : savedOverrideAngle !== undefined ? degToRad(Number(savedOverrideAngle)) : angles[index];
+          return { ...member, leader: member.id === leaderId, x: position.x, y: position.y, angle, range, slot };
+        });
+      }
+      function renderHandles() {
+        anchorHandle.querySelector("circle").setAttribute("cx", state.anchor.x);
+        anchorHandle.querySelector("circle").setAttribute("cy", state.anchor.y);
+        anchorHandle.querySelector("text").setAttribute("x", state.anchor.x);
+        anchorHandle.querySelector("text").setAttribute("y", state.anchor.y + 32);
+        targetHandle.querySelector("circle").setAttribute("cx", state.target.x);
+        targetHandle.querySelector("circle").setAttribute("cy", state.target.y);
+        targetHandle.querySelector("text").setAttribute("x", state.target.x);
+        targetHandle.querySelector("text").setAttribute("y", state.target.y + 32);
+        moveLine.setAttribute("x1", state.anchor.x);
+        moveLine.setAttribute("y1", state.anchor.y);
+        moveLine.setAttribute("x2", state.target.x);
+        moveLine.setAttribute("y2", state.target.y);
+        formationLine.setAttribute("x1", state.anchor.x);
+        formationLine.setAttribute("y1", state.anchor.y);
+        formationLine.setAttribute("x2", state.target.x);
+        formationLine.setAttribute("y2", state.target.y);
+      }
+      function renderUnits() {
+        unitLayer.innerHTML = "";
+        sectorLayer.innerHTML = "";
+        pairLinkLayer.innerHTML = "";
+        const arc = degToRad(readNumber(controls.arc));
+        for (const unit of state.units) {
+          const sector = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          sector.setAttribute("class", "fire-sector");
+          sector.setAttribute("d", sectorPath(unit, unit.angle, Math.min(unit.range, 520), arc));
+          sectorLayer.appendChild(sector);
+        }
+        const unitById = Object.fromEntries(state.units.map((unit) => [unit.id, unit]));
+        const centers = [];
+        activePairs().forEach((pairIds, index) => {
+          const a = unitById[pairIds[0]];
+          const b = unitById[pairIds[1]];
+          if (!a || !b) return;
+          const center = { x: (a.x + b.x) * 0.5, y: (a.y + b.y) * 0.5 };
+          centers.push(center);
+          const link = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          link.setAttribute("class", "buddy-link");
+          link.setAttribute("x1", a.x);
+          link.setAttribute("y1", a.y);
+          link.setAttribute("x2", b.x);
+          link.setAttribute("y2", b.y);
+          pairLinkLayer.appendChild(link);
+          const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          label.setAttribute("class", "pair-label");
+          label.setAttribute("x", center.x);
+          label.setAttribute("y", center.y + 34);
+          label.textContent = `BT${index + 1}`;
+          pairLinkLayer.appendChild(label);
+        });
+        if (centers.length === 2) {
+          const centerLink = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          centerLink.setAttribute("class", "pair-center-link");
+          centerLink.setAttribute("x1", centers[0].x);
+          centerLink.setAttribute("y1", centers[0].y);
+          centerLink.setAttribute("x2", centers[1].x);
+          centerLink.setAttribute("y2", centers[1].y);
+          pairLinkLayer.appendChild(centerLink);
+        }
+        for (const unit of state.units) {
+          const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+          group.setAttribute("class", unit.leader ? "unit unit-leader drag-handle" : "unit drag-handle");
+          group.setAttribute("data-drag", "unit");
+          group.setAttribute("data-unit-id", unit.id);
+          const base = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
+          base.setAttribute("class", "unit-base");
+          base.setAttribute("cx", unit.x);
+          base.setAttribute("cy", unit.y + 13);
+          base.setAttribute("rx", 20);
+          base.setAttribute("ry", 10);
+          const body = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          body.setAttribute("class", "unit-body");
+          body.setAttribute("cx", unit.x);
+          body.setAttribute("cy", unit.y);
+          body.setAttribute("r", 13);
+          const barrel = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          barrel.setAttribute("x1", unit.x + Math.cos(unit.angle) * 8);
+          barrel.setAttribute("y1", unit.y + Math.sin(unit.angle) * 8);
+          barrel.setAttribute("x2", unit.x + Math.cos(unit.angle) * 25);
+          barrel.setAttribute("y2", unit.y + Math.sin(unit.angle) * 25);
+          barrel.setAttribute("stroke", "#34236f");
+          barrel.setAttribute("stroke-width", "5");
+          barrel.setAttribute("stroke-linecap", "round");
+          const rotateLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          rotateLine.setAttribute("class", "rotate-line");
+          rotateLine.setAttribute("x1", unit.x + Math.cos(unit.angle) * 24);
+          rotateLine.setAttribute("y1", unit.y + Math.sin(unit.angle) * 24);
+          rotateLine.setAttribute("x2", unit.x + Math.cos(unit.angle) * 46);
+          rotateLine.setAttribute("y2", unit.y + Math.sin(unit.angle) * 46);
+          const rotateHandle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          rotateHandle.setAttribute("class", "rotate-handle");
+          rotateHandle.setAttribute("cx", unit.x + Math.cos(unit.angle) * 50);
+          rotateHandle.setAttribute("cy", unit.y + Math.sin(unit.angle) * 50);
+          rotateHandle.setAttribute("r", 6);
+          rotateHandle.setAttribute("data-drag", "facing");
+          rotateHandle.setAttribute("data-unit-id", unit.id);
+          const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          label.setAttribute("class", "unit-label");
+          label.setAttribute("x", unit.x);
+          label.setAttribute("y", unit.y + 4);
+          label.textContent = unit.label;
+          const name = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          name.setAttribute("class", "unit-name");
+          name.setAttribute("x", unit.x);
+          name.setAttribute("y", unit.y - 22);
+          name.textContent = unit.name;
+          group.append(base, body, barrel, rotateLine, rotateHandle, label, name);
+          if (unit.leader) {
+            const star = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            star.setAttribute("class", "leader-star");
+            star.setAttribute("x", unit.x);
+            star.setAttribute("y", unit.y - 38);
+            star.textContent = "*";
+            group.appendChild(star);
+          }
+          unitLayer.appendChild(group);
+        }
+      }
+      function decomposePosition(position) {
+        const dir = vector(state.anchor, state.target);
+        const side = perp(dir);
+        const delta = { x: position.x - state.anchor.x, y: position.y - state.anchor.y };
+        return {
+          lateral: dot(delta, side),
+          forward: dot(delta, dir)
+        };
+      }
+      function computePairStats() {
+        if (!controls.useBuddyTeams.checked) return [];
+        const unitById = Object.fromEntries(state.units.map((unit) => [unit.id, unit]));
+        return activePairs().map((pairIds) => {
+          const a = unitById[pairIds[0]];
+          const b = unitById[pairIds[1]];
+          if (!a || !b) return {};
+          const ca = decomposePosition(a);
+          const cb = decomposePosition(b);
+          return {
+            unit_ids: pairIds.slice(),
+            buddySpacing: Math.hypot(a.x - b.x, a.y - b.y),
+            centerLateral: (ca.lateral + cb.lateral) * 0.5,
+            centerForward: (ca.forward + cb.forward) * 0.5
+          };
+        });
+      }
+      function currentProfileText(command, stance) {
+        if (stance === "cautious") {
+          return "vorsichtig: langsamer, Waffe oben, bessere Zielaufnahme, Deckung wichtiger";
+        }
+        if (stance === "aggressive") {
+          return "aggressiv: schneller Druck nach vorn, weniger Sichttiefe, Deckung nachrangiger";
+        }
+        return "normal: Standardtempo, mittlere Sicht, mittlere Deckungsdisziplin";
+      }
+      function updateProfilePresetSummary() {
+        const summary = document.getElementById("profilePresetSummary");
+        if (!summary) return;
+        const command = controls.command.value;
+        const stance = activeStance();
+        const stanceProfile = activeStanceProfile();
+        const mode = controls.autoPreset.checked ? "Auto-Profil aktiv" : "Auto-Profil aus, Werte manuell";
+        summary.innerHTML = `
+          <strong>${commandLabels[command]} ${stanceLabels[stance]} - ${mode}</strong>
+          <span>${currentProfileText(command, stance)}</span>
+          <span class="profile-tags">
+            <span>Speed ${controls.speed.value}%</span>
+            <span>Sicht ${controls.sight.value}%</span>
+            <span>FOV ${controls.arc.value} deg</span>
+            <span>Deckung ${controls.cover.value}%</span>
+            <span>Global ${stanceProfile.speed_percent}/${stanceProfile.sight_percent}/${Math.round(fovFromSightPercent(stanceProfile.sight_percent))}/${stanceProfile.cover_priority_percent}</span>
+          </span>
+        `;
+      }
+      function commandStanceLabel(command = controls.command.value, stance = activeStance()) {
+        return `${commandLabels[command] || command} ${stanceLabels[stance] || stance}`;
+      }
+      function updateCommandStanceButtonLabels() {
+        const label = commandStanceLabel();
+        const saveFormation = document.getElementById("saveFormationOverrideButton");
+        const clearFormation = document.getElementById("clearFormationOverrideButton");
+        const saveSecurity = document.getElementById("saveSecurityOverrideButton");
+        const clearSecurity = document.getElementById("clearSecurityOverrideButton");
+        if (saveFormation) saveFormation.textContent = `Formation fuer ${label} speichern`;
+        if (clearFormation) clearFormation.textContent = `Formation fuer ${label} loeschen`;
+        if (saveSecurity) saveSecurity.textContent = `Sicherung fuer ${label} speichern`;
+        if (clearSecurity) clearSecurity.textContent = `Sicherung fuer ${label} loeschen`;
+      }
+      function renderStanceProfileEditor() {
+        const root = document.getElementById("stanceProfileEditor");
+        if (!root) return;
+        root.innerHTML = "";
+        stanceOrder.forEach((stance) => {
+          const profile = stanceProfileFor(stance);
+          const card = document.createElement("section");
+          card.className = "distance-profile-card";
+          const title = document.createElement("h3");
+          title.innerHTML = `<span>${stanceFullLabels[stance]}</span><small>globale Haltung, kein Command</small>`;
+          card.appendChild(title);
+          const grid = document.createElement("div");
+          grid.className = "distance-profile-grid";
+          stanceFieldDefinitions.forEach((field) => {
+            const row = document.createElement("label");
+            row.className = "distance-profile-row";
+            row.title = "Globaler C/N/A-Grundwert. Command-Presets duerfen Formation/Sicherung setzen, aber diese Haltung nicht heimlich veraendern.";
+            const text = document.createElement("span");
+            text.textContent = field.label;
+            const input = document.createElement("input");
+            input.type = "range";
+            input.min = String(field.min);
+            input.max = String(field.max);
+            input.step = String(field.step);
+            input.value = String(profile[field.key]);
+            input.dataset.stanceProfile = stance;
+            input.dataset.stanceKey = field.key;
+            const out = document.createElement("output");
+            out.dataset.stanceOutput = `${stance}.${field.key}`;
+            out.value = formatDistanceFieldValue(profile[field.key], field.suffix);
+            out.textContent = out.value;
+            row.append(text, input, out);
+            grid.appendChild(row);
+          });
+          card.appendChild(grid);
+          root.appendChild(card);
+        });
+      }
+      function syncStanceProfileOutput(stance, key) {
+        const field = stanceFieldDefinitions.find((item) => item.key === key);
+        const out = document.querySelector(`[data-stance-output="${stance}.${key}"]`);
+        if (!field || !out) return;
+        out.value = formatDistanceFieldValue(state.stanceProfiles[stance][key], field.suffix);
+        out.textContent = out.value;
+      }
+      function renderDistanceProfileEditor() {
+        const root = document.getElementById("distanceProfileEditor");
+        if (!root) return;
+        root.innerHTML = "";
+        stanceOrder.forEach((stance) => {
+          const profile = state.distanceProfiles[stance] || defaultDistanceProfileByStance[stance];
+          const card = document.createElement("section");
+          card.className = "distance-profile-card";
+          const title = document.createElement("h3");
+          title.innerHTML = `<span>${stanceFullLabels[stance]}</span><small>gilt fuer alle Commands</small>`;
+          card.appendChild(title);
+          const grid = document.createElement("div");
+          grid.className = "distance-profile-grid";
+          distanceFieldDefinitions.forEach((field) => {
+            const row = document.createElement("label");
+            row.className = "distance-profile-row";
+            row.title = "Gemeinsame Distanzregel fuer diese Haltung, nicht command-spezifisch.";
+            const text = document.createElement("span");
+            text.textContent = field.label;
+            const input = document.createElement("input");
+            input.type = "range";
+            input.min = String(field.min);
+            input.max = String(field.max);
+            input.step = String(field.step);
+            input.value = String(profile[field.key]);
+            input.dataset.distanceStance = stance;
+            input.dataset.distanceKey = field.key;
+            const out = document.createElement("output");
+            out.dataset.distanceOutput = `${stance}.${field.key}`;
+            out.value = formatDistanceFieldValue(profile[field.key], field.suffix);
+            out.textContent = out.value;
+            row.append(text, input, out);
+            grid.appendChild(row);
+          });
+          card.appendChild(grid);
+          root.appendChild(card);
+        });
+      }
+      function syncDistanceProfileOutput(stance, key) {
+        const field = distanceFieldDefinitions.find((item) => item.key === key);
+        const out = document.querySelector(`[data-distance-output="${stance}.${key}"]`);
+        if (!field || !out) return;
+        out.value = formatDistanceFieldValue(state.distanceProfiles[stance][key], field.suffix);
+        out.textContent = out.value;
+      }
+      function updateMetrics() {
+        const tile = readNumber(controls.tile);
+        let minSpacing = Infinity;
+        let minX = Infinity;
+        let minY = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
+        const buckets = {};
+        for (let i = 0; i < state.units.length; i += 1) {
+          const a = state.units[i];
+          minX = Math.min(minX, a.x);
+          minY = Math.min(minY, a.y);
+          maxX = Math.max(maxX, a.x);
+          maxY = Math.max(maxY, a.y);
+          const key = `${Math.round(a.x / tile)}:${Math.round(a.y / tile)}`;
+          buckets[key] = (buckets[key] || 0) + 1;
+          for (let j = i + 1; j < state.units.length; j += 1) {
+            const b = state.units[j];
+            minSpacing = Math.min(minSpacing, Math.hypot(a.x - b.x, a.y - b.y));
+          }
+        }
+        const maxPerTile = Math.max(...Object.values(buckets));
+        const pairStats = computePairStats();
+        const pairSpacing = pairStats.length >= 2 ? Math.abs(Number(pairStats[1].centerLateral || 0) - Number(pairStats[0].centerLateral || 0)) : 0;
+        const cohesionLoad = Math.round(clamp((Math.max(maxX - minX, maxY - minY) / Math.max(readNumber(controls.cohesion), 1)) * 100, 0, 999));
+        document.getElementById("minSpacingMetric").textContent = `${Math.round(minSpacing)} / ${(minSpacing / tile).toFixed(1)}T`;
+        document.getElementById("maxTileMetric").textContent = String(maxPerTile);
+        document.getElementById("widthMetric").textContent = `${Math.round(maxX - minX)}`;
+        document.getElementById("depthMetric").textContent = `${Math.round(maxY - minY)}`;
+        document.getElementById("pairSpacingMetric").textContent = `${Math.round(pairSpacing)}`;
+        document.getElementById("cohesionMetric").textContent = `${cohesionLoad}%`;
+        const weapon = selectedWeapon();
+        document.getElementById("weaponMetric").textContent = `${weapon.label} ${weapon.tiles}T / ~${Math.round(derivedWeaponDesignMeters())}m`;
+        document.getElementById("sightMetric").textContent = `${Math.round(derivedFocusedSightMeters())}m / ${Math.round(derivedSightTiles())}T`;
+        document.getElementById("fovMetric").textContent = `${controls.arc.value} deg`;
+        document.getElementById("focusMetric").textContent = `x${fovFocusFactor(readNumber(controls.arc)).toFixed(2)}`;
+        const initiative = calculateContactInitiative();
+        document.getElementById("initiativeMetric").textContent = `${initiative.seconds.toFixed(2)}s`;
+        document.getElementById("contactDistanceMetric").textContent = `${initiative.distance_tiles.toFixed(1)}T`;
+        document.getElementById("contactWindowMetric").textContent = initiative.modifiers.fov_label;
+        document.getElementById("buddyEffectMetric").textContent = `${initiative.modifiers.buddy_seconds >= 0 ? "+" : ""}${initiative.modifiers.buddy_seconds.toFixed(2)}s`;
+        document.getElementById("targetingMetric").textContent = `${initiative.target_support_percent >= 0 ? "+" : ""}${initiative.target_support_percent}%`;
+        const command = controls.command.value.toUpperCase();
+        const stance = activeStance().slice(0, 1).toUpperCase();
+        const warning = maxPerTile > 2 ? "Warnung: mehr als ein Buddy-Team auf einem Tile." : "Tile-Belegung passt zur Buddy-Team-Regel.";
+        document.getElementById("contactInitiativeText").textContent = `${initiative.interpretation}: Distanz ${stanceLabels[initiative.modifiers.distance_profile_stance]} (${initiative.modifiers.distance_label}), ${initiative.modifiers.fov_label}, Team-Zielhilfe ${initiative.target_support_percent >= 0 ? "+" : ""}${initiative.target_support_percent}%.`;
+        document.getElementById("readingText").textContent = `${command} ${stance}: Speed ${controls.speed.value}%, Sicht ${controls.sight.value}%, FOV ${controls.arc.value} deg, Fokus x${fovFocusFactor(readNumber(controls.arc)).toFixed(2)}, ${weapon.label} ${weapon.tiles}T, Kontakt-Initiative ${initiative.seconds.toFixed(2)}s. ${warning}`;
+      }
+      function updateOutputs() {
+        outs.speed.value = controls.speed.value;
+        outs.sight.value = controls.sight.value;
+        outs.buddy.value = controls.buddy.value;
+        outs.pair.value = controls.pair.value;
+        outs.row.value = controls.row.value;
+        outs.tile.value = controls.tile.value;
+        outs.weapon.value = controls.weapon.value;
+        outs.arc.value = controls.arc.value;
+        outs.cohesion.value = controls.cohesion.value;
+        outs.cover.value = controls.cover.value;
+      }
+      function renderBuddySummary() {
+        const summary = document.getElementById("buddySummary");
+        const pairStats = computePairStats();
+        summary.innerHTML = "";
+        if (!controls.useBuddyTeams.checked) {
+          const card = document.createElement("div");
+          card.className = "buddy-card";
+          const token = document.createElement("span");
+          token.className = "buddy-token";
+          token.textContent = "Wolke";
+          const body = document.createElement("div");
+          body.innerHTML = "<strong>Lose Formation</strong><span>Keine festen Buddyteams; Abstaende kommen aus Team-Abst. und Reihe.</span>";
+          card.append(token, body);
+          summary.appendChild(card);
+          return;
+        }
+        activePairs().forEach((pairIds, index) => {
+          const card = document.createElement("div");
+          card.className = "buddy-card";
+          const token = document.createElement("span");
+          token.className = "buddy-token";
+          token.textContent = `BT${index + 1}`;
+          const body = document.createElement("div");
+          const stat = pairStats[index] || {};
+          body.innerHTML = `<strong>${pairIds.map(memberLabel).join(" + ")}</strong><span>Abstand ${Math.round(stat.buddySpacing || 0)} | Center ${Math.round(stat.centerLateral || 0)} lateral | Reihe ${Math.round(stat.centerForward || 0)}</span>`;
+          card.append(token, body);
+          summary.appendChild(card);
+        });
+      }
+      function updateGridVisuals() {
+        const tile = readNumber(controls.tile);
+        tileGridPattern.setAttribute("width", tile);
+        tileGridPattern.setAttribute("height", tile);
+        tileGridPath.setAttribute("d", `M ${tile} 0 L 0 0 0 ${tile}`);
+      }
+      function buildPreviewSlots(command, preset, pairs) {
+        const buddy = preset.buddy * 0.62;
+        const pair = preset.pair * 0.62;
+        const row = preset.row * 0.62;
+        const mode = preset.formationMode;
+        const slots = {};
+        if (command === "defend" && preset.security === "all_round") {
+          const active = activeMembers();
+          const radius = Math.max(pair * 0.45, buddy * 1.1);
+          active.forEach((member, index) => {
+            const angle = -Math.PI / 2 + (index * Math.PI * 2 / active.length);
+            slots[member.id] = { lateral: Math.cos(angle) * radius, forward: Math.sin(angle) * radius };
+          });
+          return reorderLeaderSlot(slots, controls.leaderSlot.value);
+        }
+        if (!controls.useBuddyTeams.checked) {
+          return buildLooseSlots(pair, row, buddy);
+        }
+        if (mode === "column_reference") {
+          const step = row > 0 ? row : buddy;
+          activeMembers().forEach((member, index) => {
+            slots[member.id] = { lateral: 0, forward: -step * index };
+          });
+          return reorderLeaderSlot(slots, controls.leaderSlot.value);
+        }
+        const centers = buildPairCenters(pairs.length, pair, row, mode);
+        pairs.forEach((pairIds, pairIndex) => {
+          assignPairToCenter(slots, pairIds, centers[pairIndex], buddy);
+        });
+        return reorderLeaderSlot(slots, controls.leaderSlot.value);
+      }
+      function previewSecurityAngles(security, dir) {
+        const base = Math.atan2(dir.y, dir.x);
+        switch (security) {
+          case "all_round":
+            return [base - Math.PI / 2, base, base + Math.PI / 2, base + Math.PI];
+          case "left_right":
+            return [base - Math.PI / 2, base - Math.PI / 3, base + Math.PI / 3, base + Math.PI / 2];
+          case "wide_forward":
+            return [base - 0.42, base - 0.14, base + 0.14, base + 0.42];
+          default:
+            return [base - 0.14, base + 0.14, base - 1.05, base + 1.05];
+        }
+      }
+      function renderPreviewSvg(command, stance, preset) {
+        const stanceProfile = stanceProfileFor(stance);
+        const presetFov = fovFromSightPercent(stanceProfile.sight_percent);
+        const pairs = activePairs();
+        const anchor = { x: 132, y: 122 };
+        const target = { x: 258, y: 76 };
+        const dir = vector(anchor, target);
+        const side = perp(dir);
+        const slots = buildPreviewSlots(command, preset, pairs);
+        const angles = previewSecurityAngles(preset.security, dir);
+        const override = state.securityOverrides[securityOverrideKey(command, stance)];
+        const overrideFacings = override && override.team_size === activeTeamSize() ? override.facings_by_unit_id || {} : {};
+        const previewTile = 12;
+        const weapon = selectedWeapon();
+        const sightTiles = ((readNumber(controls.baseSight) * (stanceProfile.sight_percent / 100)) * fovFocusFactor(presetFov)) / DESIGN_METERS_PER_TILE;
+        const range = Math.min(weapon.tiles * previewTile, sightTiles * previewTile, 134);
+        const arc = degToRad(presetFov);
+        const leaderId = leaderUnitId();
+        const units = activeMembers().map((member, index) => {
+          const slot = slots[member.id] || { lateral: 0, forward: 0 };
+          const position = add(add(anchor, scale(side, slot.lateral)), scale(dir, slot.forward));
+          const angle = overrideFacings[member.id] !== undefined ? degToRad(Number(overrideFacings[member.id])) : angles[index];
+          return { ...member, leader: member.id === leaderId, x: position.x, y: position.y, angle, range };
+        });
+        const unitById = Object.fromEntries(units.map((unit) => [unit.id, unit]));
+        const grid = [];
+        for (let value = 0; value <= 300; value += 24) {
+          grid.push(`<line x1="${value}" y1="0" x2="${value}" y2="190" stroke="rgba(5,17,22,0.42)" stroke-width="1"/>`);
+          grid.push(`<line x1="0" y1="${value}" x2="300" y2="${value}" stroke="rgba(5,17,22,0.42)" stroke-width="1"/>`);
+        }
+        const sectors = units.map((unit) => `<path d="${sectorPath(unit, unit.angle, unit.range, arc)}" fill="rgba(255,211,77,0.16)" stroke="rgba(255,211,77,0.5)" stroke-width="1"/>`).join("");
+        const links = pairs.map((pairIds) => {
+          const a = unitById[pairIds[0]];
+          const b = unitById[pairIds[1]];
+          if (!a || !b) return "";
+          return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="rgba(112,219,157,0.95)" stroke-width="3" stroke-linecap="round"/>`;
+        }).join("");
+        const unitsMarkup = units.map((unit) => {
+          const star = unit.leader ? `<text x="${unit.x}" y="${unit.y - 26}" fill="#ffd34d" stroke="#1b1608" stroke-width="2" paint-order="stroke" text-anchor="middle" font-size="18" font-weight="900">*</text>` : "";
+          return `
+            <g>
+              <ellipse cx="${unit.x}" cy="${unit.y + 10}" rx="14" ry="7" fill="${unit.leader ? "rgba(255,211,77,0.92)" : "rgba(84,166,255,0.9)"}" stroke="#b9e8ff" stroke-width="1.5"/>
+              <circle cx="${unit.x}" cy="${unit.y}" r="9" fill="#edf5f8" stroke="#23313a" stroke-width="1.5"/>
+              <line x1="${unit.x + Math.cos(unit.angle) * 6}" y1="${unit.y + Math.sin(unit.angle) * 6}" x2="${unit.x + Math.cos(unit.angle) * 21}" y2="${unit.y + Math.sin(unit.angle) * 21}" stroke="#34236f" stroke-width="4" stroke-linecap="round"/>
+              <text x="${unit.x}" y="${unit.y + 4}" fill="#071016" text-anchor="middle" font-size="9" font-weight="700">${unit.label}</text>
+              ${star}
+            </g>
+          `;
+        }).join("");
+        return `
+          <svg class="preview-svg" viewBox="0 0 300 190" role="img" aria-label="${commandLabels[command]} ${stanceLabels[stance]} preview">
+            <rect x="0" y="0" width="300" height="190" fill="#74725a"/>
+            ${grid.join("")}
+            ${sectors}
+            <line x1="${anchor.x}" y1="${anchor.y}" x2="${target.x}" y2="${target.y}" stroke="#54a6ff" stroke-width="2.5" stroke-linecap="round" opacity="0.85"/>
+            <circle cx="${anchor.x}" cy="${anchor.y}" r="6" fill="#70db9d" stroke="#d4ffe2" stroke-width="1.5"/>
+            <circle cx="${target.x}" cy="${target.y}" r="7" fill="#ff7b72" stroke="#ffd1cc" stroke-width="1.5"/>
+            ${links}
+            ${unitsMarkup}
+          </svg>
+        `;
+      }
+      function renderPreviewMatrix() {
+        if (!previewMatrix) return;
+        const weapon = selectedWeapon();
+        previewMatrix.innerHTML = commandOrder.map((command) => {
+          const cards = stanceOrder.map((stance) => {
+            const preset = presets[command][stance];
+            const stanceProfile = stanceProfileFor(stance);
+            const presetFov = fovFromSightPercent(stanceProfile.sight_percent);
+            return `
+              <article class="preview-card">
+                <h3>${commandLabels[command]} <span class="stance-pill ${stance}">${stanceLabels[stance]}</span></h3>
+                ${renderPreviewSvg(command, stance, preset)}
+                <div class="preview-stats">
+                  <span><strong>Speed</strong> ${stanceProfile.speed_percent}%</span>
+                  <span><strong>Sicht</strong> ${stanceProfile.sight_percent}%</span>
+                  <span><strong>FOV</strong> ${Math.round(presetFov)} deg</span>
+                  <span><strong>Fokus</strong> x${fovFocusFactor(presetFov).toFixed(2)}</span>
+                  <span><strong>Cover</strong> ${stanceProfile.cover_priority_percent}%</span>
+                  <span><strong>Buddy</strong> ${preset.buddy}</span>
+                  <span><strong>RW</strong> ${weapon.tiles}T</span>
+                </div>
+                <p class="preview-note">${preset.formationMode} | ${preset.security} | Standbild, keine Ablaufsequenz | Leader ${controls.leaderSlot.value}</p>
+              </article>
+            `;
+          }).join("");
+          return `
+            <article class="preview-row">
+              <div class="preview-row-head">
+                <h2>${commandLabels[command]}</h2>
+                <p>${commandNotes[command]}</p>
+              </div>
+              <div class="preview-cards">${cards}</div>
+            </article>
+          `;
+        }).join("");
+      }
+      function updateAll() {
+        updateDerivedValues();
+        updateOutputs();
+        computeUnits();
+        updateGridVisuals();
+        renderHandles();
+        cohesionRing.setAttribute("cx", state.anchor.x);
+        cohesionRing.setAttribute("cy", state.anchor.y);
+        cohesionRing.setAttribute("r", readNumber(controls.cohesion));
+        cohesionRingLabel.setAttribute("x", clampToBoardLabel(state.anchor.x + 10, 12, 900));
+        cohesionRingLabel.setAttribute("y", clampToBoardLabel(state.anchor.y - readNumber(controls.cohesion) - 10, 24, 620));
+        cohesionRingLabel.textContent = `Cohesion ${controls.cohesion.value}`;
+        rangeRing.setAttribute("cx", state.anchor.x);
+        rangeRing.setAttribute("cy", state.anchor.y);
+        rangeRing.setAttribute("r", readNumber(controls.weapon));
+        rangeRingLabel.setAttribute("x", clampToBoardLabel(state.anchor.x + Math.min(readNumber(controls.weapon), 420), 12, 900));
+        rangeRingLabel.setAttribute("y", clampToBoardLabel(state.anchor.y - 12, 24, 620));
+        const weapon = selectedWeapon();
+        rangeRingLabel.textContent = `${weapon.label} ${weapon.tiles}T/~${Math.round(derivedWeaponDesignMeters())}m`;
+        renderUnits();
+        renderBuddySummary();
+        updateFormationLibrarySelect();
+        updateProfilePresetSummary();
+        updateCommandStanceButtonLabels();
+        updateMetrics();
+        updateFormationOverrideSummary();
+        updateSecurityOverrideSummary();
+        renderPreviewMatrix();
+      }
+      function svgPoint(event) {
+        const point = board.createSVGPoint();
+        point.x = event.clientX;
+        point.y = event.clientY;
+        const transformed = point.matrixTransform(board.getScreenCTM().inverse());
+        return clampPoint({ x: transformed.x, y: transformed.y });
+      }
+      function captureManualPositions() {
+        state.manualPositions = {};
+        state.units.forEach((unit) => {
+          state.manualPositions[unit.id] = { x: unit.x, y: unit.y };
+        });
+        state.manualLayout = true;
+      }
+      function inferControlsFromManualPositions() {
+        computeUnits();
+        const stats = computePairStats();
+        if (stats.length < 1) return;
+        const buddy = stats.reduce((sum, item) => sum + Number(item.buddySpacing || 0), 0) / stats.length;
+        const pair = stats.length >= 2 ? Math.abs(Number(stats[1].centerLateral || 0) - Number(stats[0].centerLateral || 0)) : readNumber(controls.pair);
+        const row = stats.length >= 2 ? Math.abs(Number(stats[1].centerForward || 0) - Number(stats[0].centerForward || 0)) : readNumber(controls.row);
+        state.isInferringControls = true;
+        controls.formationPreset.checked = false;
+        setRangeValue(controls.buddy, buddy);
+        setRangeValue(controls.pair, pair);
+        setRangeValue(controls.row, row);
+        state.isInferringControls = false;
+      }
+      function manualSpacingControls() {
+        return [controls.buddy, controls.pair, controls.row];
+      }
+      function pointFromSlot(slot) {
+        const dir = vector(state.anchor, state.target);
+        const side = perp(dir);
+        return clampPoint(add(add(state.anchor, scale(side, Number(slot.lateral || 0))), scale(dir, Number(slot.forward || 0))));
+      }
+      function manualSlotsFromCurrentPositions() {
+        computeUnits();
+        const unitById = Object.fromEntries(state.units.map((unit) => [unit.id, unit]));
+        const slots = {};
+        activeMembers().forEach((member) => {
+          const position = state.manualPositions[member.id] || unitById[member.id] || state.anchor;
+          slots[member.id] = decomposePosition(position);
+        });
+        return slots;
+      }
+      function commitManualSlots(slots) {
+        activeMembers().forEach((member) => {
+          if (!slots[member.id]) return;
+          state.manualPositions[member.id] = pointFromSlot(slots[member.id]);
+        });
+        state.manualLayout = true;
+      }
+      function pairEntriesFromSlots(slots) {
+        return activePairs().map((pairIds, index) => {
+          const a = slots[pairIds[0]];
+          const b = slots[pairIds[1]];
+          if (!a || !b) return null;
+          return {
+            index,
+            pairIds,
+            center: {
+              lateral: (Number(a.lateral || 0) + Number(b.lateral || 0)) * 0.5,
+              forward: (Number(a.forward || 0) + Number(b.forward || 0)) * 0.5
+            }
+          };
+        }).filter(Boolean);
+      }
+      function averageAdjacentSpacing(entries, axis) {
+        if (entries.length < 2) return 0;
+        let total = 0;
+        for (let index = 1; index < entries.length; index += 1) {
+          total += Math.abs(Number(entries[index].center[axis] || 0) - Number(entries[index - 1].center[axis] || 0));
+        }
+        return total / (entries.length - 1);
+      }
+      function applyManualBuddySpacing(slots, newSpacing) {
+        activePairs().forEach((pairIds) => {
+          const a = slots[pairIds[0]];
+          const b = slots[pairIds[1]];
+          if (!a || !b) return;
+          const center = {
+            lateral: (Number(a.lateral || 0) + Number(b.lateral || 0)) * 0.5,
+            forward: (Number(a.forward || 0) + Number(b.forward || 0)) * 0.5
+          };
+          const delta = {
+            lateral: Number(b.lateral || 0) - Number(a.lateral || 0),
+            forward: Number(b.forward || 0) - Number(a.forward || 0)
+          };
+          const length = Math.hypot(delta.lateral, delta.forward) || 1;
+          const half = Number(newSpacing || 0) * 0.5;
+          const axis = { lateral: delta.lateral / length, forward: delta.forward / length };
+          slots[pairIds[0]] = { lateral: center.lateral - (axis.lateral * half), forward: center.forward - (axis.forward * half) };
+          slots[pairIds[1]] = { lateral: center.lateral + (axis.lateral * half), forward: center.forward + (axis.forward * half) };
+        });
+      }
+      function applyManualPairCenterSpacing(slots, axis, newSpacing) {
+        const entries = pairEntriesFromSlots(slots);
+        if (entries.length < 2) return;
+        const mean = entries.reduce((sum, entry) => sum + Number(entry.center[axis] || 0), 0) / entries.length;
+        const oldSpacing = averageAdjacentSpacing(entries, axis);
+        entries.forEach((entry) => {
+          let desired = entry.center[axis];
+          if (oldSpacing > 0.01) {
+            desired = mean + ((Number(entry.center[axis] || 0) - mean) * (Number(newSpacing || 0) / oldSpacing));
+          } else {
+            const centerOffset = (entries.length - 1) * 0.5;
+            const direction = axis === "forward" ? -1 : 1;
+            desired = mean + ((entry.index - centerOffset) * Number(newSpacing || 0) * direction);
+          }
+          const delta = desired - Number(entry.center[axis] || 0);
+          entry.pairIds.forEach((unitId) => {
+            if (!slots[unitId]) return;
+            slots[unitId] = { ...slots[unitId], [axis]: Number(slots[unitId][axis] || 0) + delta };
+          });
+        });
+      }
+      function applyManualSpacingControl(control) {
+        if (!state.manualLayout || state.isInferringControls || !manualSpacingControls().includes(control)) return false;
+        if (!controls.useBuddyTeams.checked) return false;
+        const slots = manualSlotsFromCurrentPositions();
+        if (control === controls.buddy) {
+          applyManualBuddySpacing(slots, readNumber(controls.buddy));
+        } else if (control === controls.pair) {
+          applyManualPairCenterSpacing(slots, "lateral", readNumber(controls.pair));
+        } else if (control === controls.row) {
+          applyManualPairCenterSpacing(slots, "forward", readNumber(controls.row));
+        }
+        controls.formationPreset.checked = false;
+        commitManualSlots(slots);
+        return true;
+      }
+      function moveManualUnit(unitId, point) {
+        if (!state.manualLayout) captureManualPositions();
+        state.manualPositions[unitId] = clampPoint(point);
+        inferControlsFromManualPositions();
+      }
+      function rotateManualUnit(unitId, point) {
+        computeUnits();
+        const unit = state.units.find((entry) => entry.id === unitId);
+        if (!unit) return;
+        state.manualAngles[unitId] = Math.atan2(point.y - unit.y, point.x - unit.x);
+      }
+      function formationOverrideKey(command, stance) {
+        return `${command || controls.command.value}:${stance || activeStance()}`;
+      }
+      function currentFormationOverride() {
+        return state.formationOverrides[formationOverrideKey()] || null;
+      }
+      function unitSlotsFromCurrentFormation() {
+        computeUnits();
+        const slotsByUnitId = {};
+        state.units.forEach((unit) => {
+          const slot = decomposePosition(unit);
+          slotsByUnitId[unit.id] = {
+            lateral: Math.round(slot.lateral),
+            forward: Math.round(slot.forward)
+          };
+        });
+        return slotsByUnitId;
+      }
+      function formationLibraryKeyFromName(name) {
+        const normalized = String(name || "formation").trim().toLowerCase()
+          .replace(/[^a-z0-9_-]+/g, "_")
+          .replace(/^_+|_+$/g, "");
+        return normalized || "formation";
+      }
+      function buildCurrentFormationRecord(source) {
+        return {
+          source: source || "workbench_manual_candidate",
+          saved_at: new Date().toISOString(),
+          candidate_name: document.getElementById("formationName").value.trim() || "fireteam_base_candidate",
+          team_size: activeTeamSize(),
+          use_buddy_teams: controls.useBuddyTeams.checked,
+          pairing: controls.pairing.value,
+          formation_mode: controls.formationMode.value,
+          leader_slot: controls.leaderSlot.value,
+          buddy_spacing_world: readNumber(controls.buddy),
+          buddy_pair_spacing_world: readNumber(controls.pair),
+          row_offset_world: readNumber(controls.row),
+          cohesion_radius_world: readNumber(controls.cohesion),
+          slots_by_unit_id: unitSlotsFromCurrentFormation()
+        };
+      }
+      function applyFormationRecord(record) {
+        if (!record) return;
+        state.isApplyingFormationOverride = true;
+        controls.teamSize.value = String(record.team_size || controls.teamSize.value);
+        controls.useBuddyTeams.checked = Boolean(record.use_buddy_teams);
+        controls.pairing.value = "sequential_pairs";
+        controls.formationMode.value = record.formation_mode || controls.formationMode.value;
+        controls.leaderSlot.value = record.leader_slot || "auto";
+        setRangeValue(controls.buddy, Number(record.buddy_spacing_world || controls.buddy.value));
+        setRangeValue(controls.pair, Number(record.buddy_pair_spacing_world || controls.pair.value));
+        setRangeValue(controls.row, Number(record.row_offset_world || controls.row.value));
+        setRangeValue(controls.cohesion, Number(record.cohesion_radius_world || controls.cohesion.value));
+        if (record.candidate_name) document.getElementById("formationName").value = String(record.candidate_name);
+        state.manualPositions = {};
+        const slotsByUnitId = record.slots_by_unit_id || {};
+        const dir = vector(state.anchor, state.target);
+        const side = perp(dir);
+        Object.keys(slotsByUnitId).forEach((unitId) => {
+          const slot = slotsByUnitId[unitId] || {};
+          state.manualPositions[unitId] = clampPoint(add(add(state.anchor, scale(side, Number(slot.lateral || 0))), scale(dir, Number(slot.forward || 0))));
+        });
+        state.manualLayout = Object.keys(state.manualPositions).length > 0;
+        state.manualAngles = {};
+        state.isApplyingFormationOverride = false;
+      }
+      function updateFormationLibrarySelect() {
+        const select = controls.formationLibrary;
+        if (!select) return;
+        const current = select.value;
+        const keys = Object.keys(state.formationLibrary).sort((a, b) => {
+          const aName = String(state.formationLibrary[a].candidate_name || a);
+          const bName = String(state.formationLibrary[b].candidate_name || b);
+          return aName.localeCompare(bName);
+        });
+        select.innerHTML = '<option value="">keine gespeicherte Formation</option>';
+        keys.forEach((key) => {
+          const option = document.createElement("option");
+          const record = state.formationLibrary[key] || {};
+          option.value = key;
+          option.textContent = `${record.candidate_name || key} (${record.team_size || "?"} Pos.)`;
+          select.appendChild(option);
+        });
+        if (current && state.formationLibrary[current]) select.value = current;
+      }
+      function saveFormationLibraryCandidate() {
+        const record = buildCurrentFormationRecord("named_formation_library");
+        const key = formationLibraryKeyFromName(record.candidate_name);
+        state.formationLibrary[key] = record;
+        updateFormationLibrarySelect();
+        controls.formationLibrary.value = key;
+      }
+      function loadFormationLibraryCandidate() {
+        const key = controls.formationLibrary.value;
+        if (!key || !state.formationLibrary[key]) return;
+        applyFormationRecord(state.formationLibrary[key]);
+      }
+      function deleteFormationLibraryCandidate() {
+        const key = controls.formationLibrary.value;
+        if (!key || !state.formationLibrary[key]) return;
+        delete state.formationLibrary[key];
+        controls.formationLibrary.value = "";
+      }
+      function saveFormationOverride() {
+        const command = controls.command.value;
+        const stance = activeStance();
+        state.formationOverrides[formationOverrideKey(command, stance)] = {
+          ...buildCurrentFormationRecord("command_stance_formation"),
+          command,
+          stance,
+          source_library_key: controls.formationLibrary.value || ""
+        };
+        controls.formationOverrideEnabled.checked = true;
+      }
+      function applyFormationOverride(override) {
+        applyFormationRecord(override);
+      }
+      function maybeApplyFormationOverride() {
+        if (!controls.formationOverrideEnabled.checked) return;
+        const override = currentFormationOverride();
+        if (override) applyFormationOverride(override);
+      }
+      function clearFormationOverride() {
+        delete state.formationOverrides[formationOverrideKey()];
+        state.manualLayout = false;
+        state.manualPositions = {};
+      }
+      function updateFormationOverrideSummary() {
+        const summary = document.getElementById("formationOverrideSummary");
+        const override = currentFormationOverride();
+        if (!summary) return;
+        if (!override) {
+          summary.textContent = `Keine gespeicherte Command/CNA-Formation fuer ${controls.command.value.toUpperCase()} ${activeStance().slice(0, 1).toUpperCase()}. Aktuell ist nur die sichtbare Kandidaten-Formation aktiv.`;
+          return;
+        }
+        const enabled = controls.formationOverrideEnabled.checked ? "wird automatisch angewendet" : "gespeichert, aber nicht automatisch angewendet";
+        const buddyMode = override.use_buddy_teams ? "Buddyteams" : "lose Wolke";
+        summary.innerHTML = `<strong>${override.command.toUpperCase()} ${override.stance.slice(0, 1).toUpperCase()} Command/CNA-Formation (${enabled})</strong><span>${override.candidate_name || "unnamed"} | ${override.team_size} Positionen | ${buddyMode} | ${override.formation_mode} | Leader ${override.leader_slot}</span>`;
+      }
+      function saveSecurityOverride() {
+        computeUnits();
+        const command = controls.command.value;
+        const stance = activeStance();
+        const facingsByUnitId = {};
+        const unitFacings = state.units.map((unit) => {
+          const facing = Math.round(unit.angle * 180 / Math.PI);
+          facingsByUnitId[unit.id] = facing;
+          return { id: unit.id, label: unit.label, facing_degrees: facing };
+        });
+        state.securityOverrides[securityOverrideKey(command, stance)] = {
+          command,
+          stance,
+          team_size: activeTeamSize(),
+          security_source: "manual_drag_handles",
+          security_label: controls.security.value,
+          unit_facings: unitFacings,
+          facings_by_unit_id: facingsByUnitId
+        };
+        state.manualAngles = {};
+      }
+      function clearSecurityOverride() {
+        delete state.securityOverrides[securityOverrideKey()];
+        state.manualAngles = {};
+      }
+      function updateSecurityOverrideSummary() {
+        const summary = document.getElementById("securityOverrideSummary");
+        const override = currentSecurityOverride();
+        if (!summary) return;
+        if (!override) {
+          summary.textContent = `Keine gespeicherte Command/CNA-Sicherung fuer ${controls.command.value.toUpperCase()} ${activeStance().slice(0, 1).toUpperCase()}. Aktuell gilt das Preset oder deine noch ungespeicherte Griff-Stellung.`;
+          return;
+        }
+        const facings = (override.unit_facings || []).map((entry) => `${entry.label}:${entry.facing_degrees}deg`).join(" | ");
+        const sizeHint = override.team_size === activeTeamSize() ? `${override.team_size} Positionen` : `gespeichert fuer ${override.team_size}, aktuell ${activeTeamSize()}`;
+        summary.innerHTML = `<strong>${override.command.toUpperCase()} ${override.stance.slice(0, 1).toUpperCase()} Command/CNA-Sicherung</strong><span>${sizeHint} | ${facings}</span>`;
+      }
+      function setPath(target, path, value) {
+        const parts = String(path || "").split(".").filter(Boolean);
+        if (!parts.length) return;
+        let cursor = target;
+        for (let index = 0; index < parts.length - 1; index += 1) {
+          const part = parts[index];
+          if (!cursor[part] || typeof cursor[part] !== "object") cursor[part] = {};
+          cursor = cursor[part];
+        }
+        cursor[parts[parts.length - 1]] = value;
+      }
+      function getPath(source, path) {
+        const parts = String(path || "").split(".").filter(Boolean);
+        let cursor = source;
+        for (const part of parts) {
+          if (!cursor || typeof cursor !== "object" || !(part in cursor)) return undefined;
+          cursor = cursor[part];
+        }
+        return cursor;
+      }
+      function readControlValue(element) {
+        if (element.type === "checkbox") return element.checked;
+        if (element.type === "radio") return element.checked ? element.value : undefined;
+        if (element.type === "range" || element.type === "number") return Number(element.value);
+        return element.value;
+      }
+      function setExportStatus(message, tone) {
+        if (!exportStatus) return;
+        exportStatus.textContent = message;
+        exportStatus.dataset.tone = tone || "";
+      }
+      function buildExportFilename(exportedAt) {
+        exportSequence += 1;
+        const stamp = String(exportedAt || new Date().toISOString()).replace(/[:.]/g, "-");
+        return `${reportId}_${stamp}_${String(exportSequence).padStart(2, "0")}.json`;
+      }
+      function supportsFolderExport() {
+        return typeof window.showDirectoryPicker === "function";
+      }
+      async function requestExportFolder() {
+        if (!supportsFolderExport()) {
+          setExportStatus("Ordner-Export nicht verfuegbar: Browser-Download bleibt aktiv.", "warn");
+          return null;
+        }
+        try {
+          setExportStatus("Bitte den docs/reports-Ordner auswaehlen. Danach schreibt Export neue JSON-Dateien dort hinein.", "warn");
+          const handle = await window.showDirectoryPicker({
+            id: "sternenbuergerchen-reports",
+            mode: "readwrite"
+          });
+          exportDirectoryHandle = handle;
+          setExportStatus(`Export-Ordner verbunden: ${handle.name}. Export legt neue JSON-Dateien dort ab.`, "good");
+          return handle;
+        } catch (error) {
+          if (error && error.name === "AbortError") {
+            setExportStatus("Ordner-Auswahl abgebrochen: Browser-Download bleibt aktiv.", "warn");
+          } else {
+            setExportStatus(`Ordner-Auswahl fehlgeschlagen: ${error && error.message ? error.message : error}`, "warn");
+          }
+          return null;
+        }
+      }
+      async function hasWritePermission(handle) {
+        if (!handle) return false;
+        if (typeof handle.queryPermission !== "function" || typeof handle.requestPermission !== "function") return true;
+        const options = { mode: "readwrite" };
+        if (await handle.queryPermission(options) === "granted") return true;
+        return await handle.requestPermission(options) === "granted";
+      }
+      async function writeToExportFolder(text, fileName, promptForFolder) {
+        if (!exportDirectoryHandle && promptForFolder) await requestExportFolder();
+        if (!exportDirectoryHandle) return false;
+        if (!(await hasWritePermission(exportDirectoryHandle))) {
+          setExportStatus("Keine Schreibfreigabe fuer den Export-Ordner: Browser-Download bleibt aktiv.", "warn");
+          return false;
+        }
+        try {
+          const fileHandle = await exportDirectoryHandle.getFileHandle(fileName, { create: true });
+          const writable = await fileHandle.createWritable();
+          await writable.write(text);
+          await writable.close();
+          setExportStatus(`Gespeichert: ${exportDirectoryHandle.name}/${fileName}`, "good");
+          return true;
+        } catch (error) {
+          setExportStatus(`Ordner-Export fehlgeschlagen: ${error && error.message ? error.message : error}`, "warn");
+          return false;
+        }
+      }
+      function downloadExport(text, fileName) {
+        const blob = new Blob([text], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        setExportStatus(`Download gestartet: ${fileName}`, "good");
+      }
+      function readCharacterHookLocks() {
+        const locks = {};
+        document.querySelectorAll("[data-character-hook]").forEach((element) => {
+          locks[element.dataset.characterHook] = Boolean(element.checked);
+        });
+        return locks;
+      }
+      function buildComputed() {
+        const tile = readNumber(controls.tile);
+        const weapon = selectedWeapon();
+        const contactInitiative = calculateContactInitiative();
+        return {
+          anchor: { x: Math.round(state.anchor.x), y: Math.round(state.anchor.y) },
+          target: { x: Math.round(state.target.x), y: Math.round(state.target.y) },
+          direction: pointToString(vector(state.anchor, state.target)),
+          manual_layout: state.manualLayout,
+          formation_candidate: {
+            export_meaning: "playtest_candidate_not_runtime_default",
+            command_sets_profile: controls.autoPreset.checked,
+            command_sets_layout: controls.formationPreset.checked,
+            command: controls.command.value,
+            stance: activeStance(),
+            candidate_name: document.getElementById("formationName").value,
+            team_size: activeTeamSize(),
+            use_saved_override: controls.formationOverrideEnabled.checked,
+            use_buddy_teams: controls.useBuddyTeams.checked,
+            formation_mode: controls.formationMode.value,
+            security: controls.security.value,
+            leader_slot: controls.leaderSlot.value,
+            needs_runtime_import: true
+          },
+          formation_library: state.formationLibrary,
+          formation_overrides: state.formationOverrides,
+          security_overrides: state.securityOverrides,
+          command_stance_preset_overrides: {
+            meaning: "static_formation_and_security_only_no_temporal_sequence",
+            formation: state.formationOverrides,
+            security: state.securityOverrides
+          },
+          stance_profile_by_stance: cloneStanceProfiles(state.stanceProfiles),
+          active_stance_profile: {
+            stance: activeStance(),
+            values: { ...activeStanceProfile() },
+            applies_to_commands: commandOrder.slice()
+          },
+          distance_profile_by_stance: cloneDistanceProfiles(state.distanceProfiles),
+          active_distance_profile: {
+            stance: activeStance(),
+            values: { ...activeDistanceProfile() },
+            applies_to_commands: commandOrder.slice()
+          },
+          character_sheet_hook_locks: readCharacterHookLocks(),
+          buddy_pairs: activePairs().map((pair, index) => ({
+            pair_id: `buddy_team_${index + 1}`,
+            unit_ids: pair.slice(),
+            labels: pair.map(memberLabel)
+          })),
+          members: state.units.map((unit) => ({
+            id: unit.id,
+            label: unit.label,
+            leader: Boolean(unit.leader),
+            position: { x: Math.round(unit.x), y: Math.round(unit.y) },
+            tile: { x: Math.round(unit.x / tile), y: Math.round(unit.y / tile) },
+            facing_degrees: Math.round(unit.angle * 180 / Math.PI),
+            slot: {
+              lateral: Math.round(Number(unit.slot && unit.slot.lateral || 0)),
+              forward: Math.round(Number(unit.slot && unit.slot.forward || 0))
+            }
+          })),
+          derived_runtime_view: {
+            weapon_id: controls.weaponSelect.value,
+            weapon_label: weapon.label,
+            weapon_effective_tile_range: weapon.tiles,
+            weapon_range_meters_estimate: Number(derivedWeaponDesignMeters().toFixed(1)),
+            weapon_data_legacy_range_meters: Number(weapon.legacyMeters || 0),
+            weapon_range_board_units: readNumber(controls.weapon),
+            base_sight_meters: readNumber(controls.baseSight),
+            sight_factor_percent: readNumber(controls.sight),
+            raw_sight_range_meters: Math.round(derivedSightMeters()),
+            raw_sight_range_tiles_estimate: Number(derivedRawSightTiles().toFixed(1)),
+            fov_focus_factor: Number(fovFocusFactor(readNumber(controls.arc)).toFixed(3)),
+            fov_adjusted_sight_range_meters: Math.round(derivedFocusedSightMeters()),
+            sight_range_tiles_estimate: Number(derivedSightTiles().toFixed(1)),
+            meters_per_tile_estimate: DESIGN_METERS_PER_TILE,
+            fov_degrees: readNumber(controls.arc),
+            sight_fov_coupling: "locked_inverse_workbench_model",
+            fov_source: "global_stance_profile_or_manual_override",
+            temporal_sequence_scope: "not_represented_in_this_static_formation_workbench",
+            character_sheet_hook_locks: readCharacterHookLocks(),
+            effective_preview_range_board_units: Math.round(derivedEffectivePreviewRange()),
+            contact_initiative_model: {
+              source: "workbench_diagnostic_not_runtime_truth",
+              seconds_to_first_coordinated_shot: contactInitiative.seconds,
+              target_support_percent: contactInitiative.target_support_percent,
+              interpretation: contactInitiative.interpretation,
+              best_window: contactInitiative.best_window,
+              modifiers: contactInitiative.modifiers
+            }
+          },
+          metrics: {
+            min_spacing_world: Math.round(minPairDistance()),
+            min_spacing_tiles: Number((minPairDistance() / tile).toFixed(2)),
+            buddy_pair_spacing_world: Math.round(Math.abs(Number(computePairStats()[1] && computePairStats()[1].centerLateral || 0) - Number(computePairStats()[0] && computePairStats()[0].centerLateral || 0))),
+            formation_width_world: Math.round(formationBounds().width),
+            formation_depth_world: Math.round(formationBounds().depth),
+            max_units_per_tile: maxUnitsPerTile(),
+            cohesion_radius_world: readNumber(controls.cohesion),
+            cover_priority_percent: readNumber(controls.cover),
+            contact_initiative_seconds: contactInitiative.seconds,
+            team_target_support_percent: contactInitiative.target_support_percent
+          }
+        };
+      }
+      function minPairDistance() {
+        let minSpacing = Infinity;
+        for (let i = 0; i < state.units.length; i += 1) {
+          for (let j = i + 1; j < state.units.length; j += 1) {
+            const a = state.units[i];
+            const b = state.units[j];
+            minSpacing = Math.min(minSpacing, Math.hypot(a.x - b.x, a.y - b.y));
+          }
+        }
+        return minSpacing;
+      }
+      function formationBounds() {
+        const xs = state.units.map((unit) => unit.x);
+        const ys = state.units.map((unit) => unit.y);
+        return {
+          width: Math.max(...xs) - Math.min(...xs),
+          depth: Math.max(...ys) - Math.min(...ys)
+        };
+      }
+      function maxUnitsPerTile() {
+        const tile = readNumber(controls.tile);
+        const buckets = {};
+        state.units.forEach((unit) => {
+          const key = `${Math.round(unit.x / tile)}:${Math.round(unit.y / tile)}`;
+          buckets[key] = (buckets[key] || 0) + 1;
+        });
+        return Math.max(...Object.values(buckets));
+      }
+      function buildExport() {
+        const payload = {
+          schema,
+          report_id: reportId,
+          title: document.title,
+          exported_at: new Date().toISOString(),
+          controls: {},
+          notes: {},
+          active_choices: {},
+          computed: buildComputed(),
+          metadata: { url: window.location.href, user_agent: navigator.userAgent }
+        };
+        document.querySelectorAll("[data-export-key]").forEach((element) => {
+          const value = readControlValue(element);
+          if (value !== undefined) setPath(payload.controls, element.dataset.exportKey, value);
+        });
+        document.querySelectorAll("[data-note-key]").forEach((element) => {
+          setPath(payload.notes, element.dataset.noteKey, element.innerText.trim());
+        });
+        document.querySelectorAll("[data-choice-group]").forEach((group) => {
+          const active = group.querySelector(".choice.active[data-choice-value]");
+          if (active) setPath(payload.active_choices, group.dataset.choiceGroup, active.dataset.choiceValue);
+        });
+        return payload;
+      }
+      function persistLocalDefault(payload) {
+        if (isRestoringLocalDefault) return false;
+        try {
+          const exportPayload = payload || buildExport();
+          localStorage.setItem(localDefaultStorageKey, JSON.stringify({
+            saved_at: new Date().toISOString(),
+            payload: exportPayload
+          }));
+          return true;
+        } catch (_error) {
+          return false;
+        }
+      }
+      function clearLocalDefault() {
+        try {
+          localStorage.removeItem(localDefaultStorageKey);
+          return true;
+        } catch (_error) {
+          return false;
+        }
+      }
+      function restoreLocalDefault() {
+        let record = null;
+        try {
+          record = JSON.parse(localStorage.getItem(localDefaultStorageKey) || "null");
+        } catch (_error) {
+          return false;
+        }
+        if (!record || !record.payload || record.payload.schema !== schema || record.payload.report_id !== reportId) return false;
+        let payload = record.payload;
+        let migratedStanceProfile = false;
+        if (stanceProfilesEqual(payload.computed?.stance_profile_by_stance, legacyResetStanceProfileByStance)) {
+          payload = JSON.parse(JSON.stringify(payload));
+          if (!payload.computed) payload.computed = {};
+          payload.computed.stance_profile_by_stance = cloneStanceProfiles();
+          migratedStanceProfile = true;
+        }
+        isRestoringLocalDefault = true;
+        applyImport(payload, { persist: false, writeOutput: false });
+        isRestoringLocalDefault = false;
+        if (migratedStanceProfile) persistLocalDefault(buildExport());
+        const savedAt = record.saved_at ? new Date(record.saved_at).toLocaleString("de-DE") : "unbekannt";
+        const migratedText = migratedStanceProfile ? " C/N/A-Stance-Werte wurden aus dem letzten Tuning-Export wiederhergestellt." : "";
+        setExportStatus(`Lokaler Workbench-Standard geladen (${savedAt}).${migratedText} JSON exportieren aktualisiert ihn wieder.`, "good");
+        return true;
+      }
+      async function writeExport(download) {
+        const payload = buildExport();
+        const text = JSON.stringify(payload, null, 2);
+        persistLocalDefault(payload);
+        output.value = text;
+        if (download) {
+          const fileName = buildExportFilename(payload.exported_at);
+          const savedToFolder = await writeToExportFolder(text, fileName, true);
+          if (!savedToFolder) downloadExport(text, fileName);
+        }
+        return text;
+      }
+      function applyImport(payload, options = {}) {
+        if (!payload || typeof payload !== "object") return;
+        document.querySelectorAll("[data-export-key]").forEach((element) => {
+          const value = getPath(payload.controls || {}, element.dataset.exportKey);
+          if (value === undefined) return;
+          if (element.type === "checkbox") element.checked = Boolean(value);
+          else element.value = value;
+        });
+        document.querySelectorAll("[data-note-key]").forEach((element) => {
+          const value = getPath(payload.notes || {}, element.dataset.noteKey);
+          if (value !== undefined) element.innerText = String(value);
+        });
+        document.querySelectorAll("[data-choice-group]").forEach((group) => {
+          const value = getPath(payload.active_choices || {}, group.dataset.choiceGroup);
+          if (value === undefined) return;
+          group.querySelectorAll(".choice").forEach((button) => {
+            button.classList.toggle("active", button.dataset.choiceValue === String(value));
+          });
+        });
+        if (payload.computed && payload.computed.anchor) state.anchor = clampPoint(payload.computed.anchor);
+        if (payload.computed && payload.computed.target) state.target = clampPoint(payload.computed.target);
+        if (payload.computed && payload.computed.formation_library && typeof payload.computed.formation_library === "object") {
+          state.formationLibrary = payload.computed.formation_library;
+        }
+        if (payload.computed && payload.computed.formation_overrides && typeof payload.computed.formation_overrides === "object") {
+          state.formationOverrides = payload.computed.formation_overrides;
+        }
+        if (payload.computed && payload.computed.security_overrides && typeof payload.computed.security_overrides === "object") {
+          state.securityOverrides = payload.computed.security_overrides;
+        }
+        if (payload.computed && payload.computed.stance_profile_by_stance && typeof payload.computed.stance_profile_by_stance === "object") {
+          state.stanceProfiles = normalizeStanceProfiles(payload.computed.stance_profile_by_stance);
+          renderStanceProfileEditor();
+        }
+        if (payload.computed && payload.computed.distance_profile_by_stance && typeof payload.computed.distance_profile_by_stance === "object") {
+          state.distanceProfiles = normalizeDistanceProfiles(payload.computed.distance_profile_by_stance);
+          renderDistanceProfileEditor();
+        }
+        if (controls.autoPreset.checked) applyPreset();
+        if (payload.computed && Array.isArray(payload.computed.members)) {
+          state.manualPositions = {};
+          state.manualAngles = {};
+          payload.computed.members.forEach((member) => {
+            if (member && member.id && member.position) {
+              state.manualPositions[String(member.id)] = clampPoint(member.position);
+            }
+            if (member && member.id && member.facing_degrees !== undefined) {
+              state.manualAngles[String(member.id)] = degToRad(Number(member.facing_degrees));
+            }
+          });
+          state.manualLayout = Object.keys(state.manualPositions).length === activeMembers().length;
+        }
+        syncFovFromSight();
+        updateAll();
+        if (options.writeOutput !== false) writeExport(false);
+        else if (options.persist !== false) persistLocalDefault(buildExport());
+      }
+
+      document.querySelectorAll("[data-tab-target]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const target = button.dataset.tabTarget;
+          document.querySelectorAll("[data-tab-target]").forEach((tab) => {
+            const active = tab === button;
+            tab.classList.toggle("active", active);
+            tab.setAttribute("aria-selected", active ? "true" : "false");
+          });
+          document.querySelectorAll("[data-tab-panel]").forEach((panel) => {
+            panel.classList.toggle("active", panel.dataset.tabPanel === target);
+          });
+        });
+      });
+      document.getElementById("stanceProfileEditor").addEventListener("input", (event) => {
+        const input = event.target.closest("[data-stance-profile][data-stance-key]");
+        if (!input) return;
+        const stance = input.dataset.stanceProfile;
+        const key = input.dataset.stanceKey;
+        if (!state.stanceProfiles[stance]) state.stanceProfiles[stance] = {};
+        state.stanceProfiles[stance][key] = Number(input.value);
+        syncStanceProfileOutput(stance, key);
+        if (controls.autoPreset.checked && stance === activeStance()) applyPreset();
+        updateAll();
+        persistLocalDefault();
+      });
+      document.getElementById("distanceProfileEditor").addEventListener("input", (event) => {
+        const input = event.target.closest("[data-distance-stance][data-distance-key]");
+        if (!input) return;
+        const stance = input.dataset.distanceStance;
+        const key = input.dataset.distanceKey;
+        if (!state.distanceProfiles[stance]) state.distanceProfiles[stance] = {};
+        state.distanceProfiles[stance][key] = Number(input.value);
+        syncDistanceProfileOutput(stance, key);
+        updateAll();
+        persistLocalDefault();
+      });
+
+      board.addEventListener("pointerdown", (event) => {
+        const handle = event.target.closest("[data-drag]");
+        if (!handle) {
+          return;
+        }
+        const kind = handle.dataset.drag;
+        state.dragging = { kind, unitId: handle.dataset.unitId || "" };
+        if (kind === "unit" && !state.manualLayout) captureManualPositions();
+        board.setPointerCapture(event.pointerId);
+      });
+      board.addEventListener("pointermove", (event) => {
+        if (!state.dragging) return;
+        const point = svgPoint(event);
+        if (state.dragging.kind === "unit") {
+          moveManualUnit(state.dragging.unitId, point);
+        } else if (state.dragging.kind === "facing") {
+          rotateManualUnit(state.dragging.unitId, point);
+        } else {
+          state[state.dragging.kind] = point;
+          state.manualLayout = false;
+          state.manualPositions = {};
+        }
+        updateAll();
+      });
+      board.addEventListener("pointerup", (event) => {
+        state.dragging = null;
+        if (board.hasPointerCapture(event.pointerId)) board.releasePointerCapture(event.pointerId);
+      });
+      board.addEventListener("pointercancel", () => { state.dragging = null; });
+
+      document.querySelectorAll('[data-choice-group="formation.stance"] .choice').forEach((button) => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll('[data-choice-group="formation.stance"] .choice').forEach((item) => item.classList.remove("active"));
+          button.classList.add("active");
+          state.manualAngles = {};
+          applyPreset();
+          maybeApplyFormationOverride();
+          updateAll();
+        });
+      });
+      Object.values(controls).forEach((control) => {
+        control.addEventListener("input", () => {
+          if ([controls.speed, controls.sight, controls.arc, controls.cover].includes(control)) controls.autoPreset.checked = false;
+          if (control === controls.sight) syncFovFromSight();
+          if (control === controls.arc) syncSightFromFov();
+          const manualSpacingApplied = applyManualSpacingControl(control);
+          if (!manualSpacingApplied && !state.isInferringControls && controlResetsLayout(control)) {
+            state.manualLayout = false;
+            state.manualPositions = {};
+          }
+          if (control === controls.command || control === controls.teamSize) state.manualAngles = {};
+          if (control === controls.command || control === controls.autoPreset || control === controls.formationPreset) applyPreset();
+          if (control === controls.command || control === controls.formationOverrideEnabled) maybeApplyFormationOverride();
+          updateAll();
+        });
+        control.addEventListener("change", () => {
+          if ([controls.speed, controls.sight, controls.arc, controls.cover].includes(control)) controls.autoPreset.checked = false;
+          if (control === controls.sight) syncFovFromSight();
+          if (control === controls.arc) syncSightFromFov();
+          const manualSpacingApplied = applyManualSpacingControl(control);
+          if (!manualSpacingApplied && !state.isInferringControls && controlResetsLayout(control)) {
+            state.manualLayout = false;
+            state.manualPositions = {};
+          }
+          if (control === controls.command || control === controls.teamSize) state.manualAngles = {};
+          if (control === controls.command || control === controls.autoPreset || control === controls.formationPreset) applyPreset();
+          if (control === controls.command || control === controls.formationOverrideEnabled) maybeApplyFormationOverride();
+          updateAll();
+        });
+      });
+      document.getElementById("applyCommandLayoutButton").addEventListener("click", () => {
+        applyCommandLayoutPreset();
+        updateAll();
+      });
+      document.getElementById("saveFormationLibraryButton").addEventListener("click", () => {
+        saveFormationLibraryCandidate();
+        updateAll();
+        persistLocalDefault();
+      });
+      document.getElementById("loadFormationLibraryButton").addEventListener("click", () => {
+        loadFormationLibraryCandidate();
+        updateAll();
+      });
+      document.getElementById("deleteFormationLibraryButton").addEventListener("click", () => {
+        deleteFormationLibraryCandidate();
+        updateAll();
+        persistLocalDefault();
+      });
+      document.getElementById("saveFormationOverrideButton").addEventListener("click", () => {
+        saveFormationOverride();
+        updateAll();
+        persistLocalDefault();
+      });
+      document.getElementById("clearFormationOverrideButton").addEventListener("click", () => {
+        clearFormationOverride();
+        updateAll();
+        persistLocalDefault();
+      });
+      document.getElementById("saveSecurityOverrideButton").addEventListener("click", () => {
+        saveSecurityOverride();
+        updateAll();
+        persistLocalDefault();
+      });
+      document.getElementById("clearSecurityOverrideButton").addEventListener("click", () => {
+        clearSecurityOverride();
+        updateAll();
+        persistLocalDefault();
+      });
+      document.getElementById("resetStanceProfileButton").addEventListener("click", () => {
+        state.stanceProfiles = cloneStanceProfiles();
+        renderStanceProfileEditor();
+        applyPreset();
+        updateAll();
+        persistLocalDefault();
+      });
+      document.getElementById("resetDistanceProfileButton").addEventListener("click", () => {
+        state.distanceProfiles = cloneDistanceProfiles();
+        renderDistanceProfileEditor();
+        updateAll();
+        persistLocalDefault();
+      });
+      document.getElementById("exportJsonButton").addEventListener("click", async () => {
+        await writeExport(true);
+      });
+      document.getElementById("chooseExportFolderButton").addEventListener("click", async () => {
+        await requestExportFolder();
+      });
+      document.getElementById("copyJsonButton").addEventListener("click", async () => {
+        const text = await writeExport(false);
+        try { await navigator.clipboard.writeText(text); }
+        catch (_error) { output.focus(); output.select(); }
+      });
+      document.getElementById("resetButton").addEventListener("click", () => {
+        state.anchor = { x: 260, y: 360 };
+        state.target = { x: 700, y: 260 };
+        state.manualLayout = false;
+        state.manualPositions = {};
+        state.manualAngles = {};
+        state.formationLibrary = {};
+        state.formationOverrides = cloneFormationOverrides();
+        state.securityOverrides = cloneSecurityOverrides();
+        state.stanceProfiles = cloneStanceProfiles();
+        renderStanceProfileEditor();
+        state.distanceProfiles = cloneDistanceProfiles();
+        renderDistanceProfileEditor();
+        document.querySelectorAll('[data-choice-group="formation.stance"] .choice').forEach((item) => item.classList.remove("active"));
+        document.querySelector('[data-choice-group="formation.stance"] .choice[data-choice-value="cautious"]').classList.add("active");
+        controls.command.value = "move";
+        controls.teamSize.value = "4";
+        controls.autoPreset.checked = true;
+        controls.formationPreset.checked = false;
+        controls.formationOverrideEnabled.checked = true;
+        controls.formationLibrary.value = "";
+        controls.useBuddyTeams.checked = true;
+        controls.leaderSlot.value = "auto";
+        controls.buddy.value = "46";
+        controls.pair.value = "104";
+        controls.row.value = "0";
+        controls.security.value = "forward_flanks";
+        controls.formationMode.value = "pair_line";
+        applyPreset();
+        maybeApplyFormationOverride();
+        updateAll();
+        clearLocalDefault();
+        setExportStatus("Lokaler Workbench-Standard geloescht. Nach Reload startet wieder der eingebaute Default.", "warn");
+      });
+      document.getElementById("importJsonInput").addEventListener("change", async (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        applyImport(JSON.parse(await file.text()));
+      });
+      state.stanceProfiles = cloneStanceProfiles();
+      state.distanceProfiles = cloneDistanceProfiles();
+      state.formationOverrides = cloneFormationOverrides();
+      state.securityOverrides = cloneSecurityOverrides();
+      renderStanceProfileEditor();
+      renderDistanceProfileEditor();
+      applyPreset();
+      if (!restoreLocalDefault()) {
+        maybeApplyFormationOverride();
+        updateAll();
+      }
+    })();
+  </script>
+</body>
+</html>

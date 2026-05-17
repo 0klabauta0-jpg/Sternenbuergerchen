@@ -1,0 +1,939 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fireteam Runtime Map Flow + Limbo Review</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101418;
+      --panel: #182027;
+      --panel2: #202a33;
+      --panel3: #26323d;
+      --ink: #e8eef6;
+      --muted: #acb8c6;
+      --dim: #7e8b99;
+      --line: #3a4958;
+      --cyan: #56d7e4;
+      --yellow: #f1d46a;
+      --green: #72df9b;
+      --red: #ff7c6f;
+      --code: #0c1116;
+      --shadow: rgba(0, 0, 0, 0.32);
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 20% 0%, rgba(86, 215, 228, 0.08), transparent 32rem), var(--bg);
+      color: var(--ink);
+      line-height: 1.45;
+    }
+
+    a { color: var(--cyan); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    code {
+      background: var(--code);
+      border: 1px solid #22303b;
+      border-radius: 5px;
+      padding: 0.08rem 0.28rem;
+      color: #d9f8ff;
+      font-size: 0.92em;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid var(--line);
+      background: rgba(16, 20, 24, 0.95);
+      box-shadow: 0 10px 28px var(--shadow);
+    }
+
+    .header-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 1rem 1.25rem 0.9rem;
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    .title-row {
+      display: flex;
+      gap: 1rem;
+      justify-content: space-between;
+      align-items: end;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.35rem, 2.2vw, 2.2rem);
+      letter-spacing: 0;
+      line-height: 1.05;
+    }
+
+    .subtitle {
+      margin: 0.35rem 0 0;
+      color: var(--muted);
+      max-width: 78rem;
+    }
+
+    .meta {
+      color: var(--dim);
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(14rem, 1fr) auto;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    input[type="search"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #0c1116;
+      color: var(--ink);
+      border-radius: 7px;
+      padding: 0.65rem 0.8rem;
+      font-size: 0.95rem;
+    }
+
+    .chips {
+      display: flex;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button.chip {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      border-radius: 7px;
+      padding: 0.55rem 0.75rem;
+      cursor: pointer;
+      min-width: 4.5rem;
+    }
+
+    button.chip.active {
+      border-color: var(--cyan);
+      box-shadow: inset 0 0 0 1px rgba(86, 215, 228, 0.4);
+    }
+
+    main {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 1.25rem;
+    }
+
+    section { margin: 0 0 1.25rem; }
+
+    .section-title {
+      display: flex;
+      gap: 0.75rem;
+      align-items: baseline;
+      margin: 0 0 0.65rem;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.15rem;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 0.25rem 0 0.45rem;
+      font-size: 1rem;
+      letter-spacing: 0;
+    }
+
+    .count, .dim {
+      color: var(--dim);
+      font-size: 0.9rem;
+    }
+
+    .muted { color: var(--muted); }
+
+    .card, details {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent 8rem), var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 10px 22px var(--shadow);
+    }
+
+    .card { padding: 1rem; }
+
+    .truth {
+      border-color: rgba(86, 215, 228, 0.8);
+      background: linear-gradient(120deg, rgba(86, 215, 228, 0.11), rgba(114, 223, 155, 0.05)), var(--panel);
+    }
+
+    .warning {
+      border-color: rgba(255, 124, 111, 0.65);
+      background: linear-gradient(120deg, rgba(255, 124, 111, 0.09), rgba(241, 212, 106, 0.05)), var(--panel);
+    }
+
+    .recommendation {
+      border-color: rgba(241, 212, 106, 0.8);
+      background: linear-gradient(120deg, rgba(241, 212, 106, 0.12), rgba(86, 215, 228, 0.05)), var(--panel);
+    }
+
+    .grid { display: grid; gap: 1rem; }
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .label {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.13rem 0.45rem;
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin-right: 0.25rem;
+      margin-bottom: 0.25rem;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .label.good { color: #bdf4cf; border-color: rgba(114, 223, 155, 0.55); }
+    .label.warn { color: #ffe5a5; border-color: rgba(241, 212, 106, 0.55); }
+    .label.hot { color: #ffd1cc; border-color: rgba(255, 124, 111, 0.55); }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(9rem, 1fr));
+      gap: 0.65rem;
+      align-items: stretch;
+    }
+
+    .flow-step {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel2);
+      padding: 0.85rem;
+      min-height: 9.25rem;
+      position: relative;
+    }
+
+    .flow-step::after {
+      content: ">";
+      position: absolute;
+      right: -0.55rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--cyan);
+      font-weight: 800;
+    }
+
+    .flow-step:last-child::after { content: ""; }
+    .step-no { color: var(--cyan); font-weight: 800; font-size: 0.82rem; }
+
+    .function-card {
+      display: grid;
+      grid-template-columns: minmax(14rem, 0.8fr) minmax(18rem, 1.2fr);
+      gap: 0.8rem;
+      padding: 0.95rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .mini-title {
+      color: var(--yellow);
+      font-weight: 700;
+      font-size: 0.86rem;
+      margin: 0.35rem 0 0.12rem;
+    }
+
+    .route {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .route code { white-space: nowrap; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 0.65rem 0.75rem;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th {
+      background: var(--panel3);
+      color: #f4f8fb;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    ul, ol {
+      margin: 0.55rem 0 0;
+      padding-left: 1.15rem;
+    }
+
+    li { margin: 0.28rem 0; }
+
+    details { overflow: hidden; }
+
+    summary {
+      cursor: pointer;
+      padding: 0.9rem 1rem;
+      background: rgba(255,255,255,0.03);
+      font-weight: 700;
+      list-style-position: inside;
+    }
+
+    details .content { padding: 0 1rem 1rem; }
+
+    .hidden { display: none !important; }
+
+    footer {
+      color: var(--dim);
+      margin: 2rem 0 1rem;
+      border-top: 1px solid var(--line);
+      padding-top: 1rem;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 1180px) {
+      .flow { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .flow-step::after { display: none; }
+      .grid.three { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 850px) {
+      .grid.two, .function-card, .controls { grid-template-columns: 1fr; }
+      .chips { justify-content: flex-start; }
+      .flow { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="title-row">
+        <div>
+          <h1>Fireteam Runtime Map Flow + Limbo Review</h1>
+          <p class="subtitle">Welche Funktion greift worauf zu, wann erwarten wir was auf der Karte, welche Fragen sind offen, und wo ist LimboAI fuer Gegner sinnvoll.</p>
+        </div>
+        <div class="meta">Task 439 | Fireteam Playtest Baseline</div>
+      </div>
+      <div class="controls">
+        <input id="search" type="search" placeholder="Suche: GO, SimulationRoot, muzzle, Limbo, Defend, Kontakt ...">
+        <nav class="chips" aria-label="Filter">
+          <button class="chip active" data-filter="all">Alle</button>
+          <button class="chip" data-filter="flow">Pfad</button>
+          <button class="chip" data-filter="command">Befehle</button>
+          <button class="chip" data-filter="contact">Kontakt</button>
+          <button class="chip" data-filter="visual">Visuals</button>
+          <button class="chip" data-filter="limbo">Limbo</button>
+          <button class="chip" data-filter="questions">Fragen</button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="card truth searchable" data-tags="flow command visual simulationroot wahrheit">
+      <p><strong>Der kurze Wahrheitssatz:</strong> Die UI ist nicht die Gameplay-Wahrheit. Auf der Karte passiert sichtbar etwas, wenn der Mission-/Combat-Pfad aus Auswahl, Befehl und Kontakt einen <code>UnitCommand</code> oder Effekt erzeugt, diesen ueber <code>SimulationRoot</code> laufen laesst und <code>TerrainMap3DView</code> anschliessend die Snapshots/VFX zeichnet.</p>
+      <div class="route">
+        <code>Input</code><span>-></span><code>MissionTacticalSandboxController</code><span>-></span><code>FireteamMovementController</code><span>-></span><code>SimulationRoot.enqueue_command()</code><span>-></span><code>MissionCombatLoopDriver</code><span>-></span><code>TerrainMap3DView</code>
+      </div>
+    </section>
+
+    <section class="searchable" data-tags="questions answers decisions user snapshot">
+      <div class="section-title">
+        <h2>Antworten und Arbeitsannahmen</h2>
+        <span class="count">Stand 2026-05-15</span>
+      </div>
+      <div class="grid two">
+        <div class="card">
+          <h3>Entschieden oder als Richtung gesetzt</h3>
+          <ul>
+            <li><code>MissionTacticalSandboxController</code> soll mittelfristig aus <code>scripts/tests</code> in einen Produktionspfad wandern.</li>
+            <li>Skills beeinflussen Kontaktreaktion, Flanking, Mut und Fehler erstmal noch gar nicht. Zuerst wird die normale Baseline festgezurrt.</li>
+            <li>Ein einzelnes Fireteam-Mitglied darf nur spaeter fuer Flanking groessere Boegen laufen. Normalfall: zwei Leute zusammen; Solo nur, wenn das Team auf drei geschrumpft ist.</li>
+            <li>Sicherungsrichtungen sollen sehr sichtbar werden: Linien plus Sektor/Kreis/U-Form, je nach Sicherungsart.</li>
+            <li>Schusslinien enden an der maximalen Waffenreichweite.</li>
+            <li>Sichtlinien werden durch Sichtweite und blockierende Assets/Terrain begrenzt. Als erster Plausibilitaetswert: 100 m Sicht.</li>
+          </ul>
+        </div>
+        <div class="card warning">
+          <h3>Noch offen</h3>
+          <ul>
+            <li>Endgueltige Gegner-Angriffsbewegung: <code>EnemyTeamTacticsProfile</code>, LimboAI oder CombatLoop-Helfer ist noch nicht entschieden.</li>
+            <li>Debugdaten in #17/#18: sicher rein sollen Sichtkontakt und Gruende fuer Flankieren, Zielen und Schiessen. Dauerhaft vs Dev-Modus klaeren wir spaeter.</li>
+            <li>Defend-Feuer: ob sofort geschossen wird oder erst nach ContactConfirm/ThreatLevel haengt davon ab, wie wir diese Begriffe definieren.</li>
+            <li>ContactConfirm und ThreatLevel brauchen einen eigenen kleinen Contract: Welche Sensor-/LOS-/Zeit-/Skill-Werte fuehren von suspected zu spotted zu confirmed?</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card" style="margin-top: 1rem;">
+        <h3>Sichtweitenrechnung</h3>
+        <p>Wenn ein Tile 1,5 m darstellt, entsprechen 100 m Sichtweite rund <code>100 / 1.5 = 66.7</code> Tiles, also als Startwert <code>67 Tiles</code>. Mit den aktuellen Move-Modifikatoren waere Cautious bei gleicher Basis etwa <code>80 Tiles</code> (+20%) und Aggressive etwa <code>44 Tiles</code> (-35%). Das ist nur die Reichweite der Wahrnehmung; LOS wird zusaetzlich durch Gebaeude, grosse Objekte, Hoehen und spaeter Vegetation/FoW blockiert.</p>
+      </div>
+    </section>
+
+    <section class="searchable" data-tags="flow path go simulationroot terrain">
+      <div class="section-title">
+        <h2>Aktiver Pfad bis zur Karte</h2>
+        <span class="count">vom Klick bis zum sichtbaren Ergebnis</span>
+      </div>
+      <div class="flow">
+        <div class="flow-step">
+          <div class="step-no">01</div>
+          <h3>Auswahl und Absicht</h3>
+          <p class="dim">#16, #17, Map-Klicks und C/N/A setzen den beabsichtigten Befehl.</p>
+          <code>MissionTacticalSandboxController</code>
+        </div>
+        <div class="flow-step">
+          <div class="step-no">02</div>
+          <h3>GO aktiviert</h3>
+          <p class="dim">GO zieht den naechsten Wegpunkt oder die naechste Area-Order in die aktive Ausfuehrung.</p>
+          <code>_on_go_phase_pressed()</code>
+        </div>
+        <div class="flow-step">
+          <div class="step-no">03</div>
+          <h3>Fireteam wird aufgeteilt</h3>
+          <p class="dim">Pro Mitglied entsteht ein Zielslot mit Haltung, Tempo, Sicht- und Kampfparametern.</p>
+          <code>FireteamMovementController.start_execution()</code>
+        </div>
+        <div class="flow-step">
+          <div class="step-no">04</div>
+          <h3>Autoritativer Command</h3>
+          <p class="dim">Der eigentliche State-Wechsel darf ueber die Simulation laufen.</p>
+          <code>SimulationRoot.enqueue_command()</code>
+        </div>
+        <div class="flow-step">
+          <div class="step-no">05</div>
+          <h3>Kontakt und Feuer</h3>
+          <p class="dim">Combat Loop prueft Sicht, Reichweite, Fire-at-will, Ziel und Effekte.</p>
+          <code>MissionCombatLoopDriver</code>
+        </div>
+        <div class="flow-step">
+          <div class="step-no">06</div>
+          <h3>3D-Visual</h3>
+          <p class="dim">Karte zeichnet Proxies, Auswahl, Sichtlinien, rote Kontaktlinien und Muzzle Flash.</p>
+          <code>TerrainMap3DView</code>
+        </div>
+      </div>
+    </section>
+
+    <section class="searchable" data-tags="flow functions controller command contact visual">
+      <div class="section-title">
+        <h2>Funktionskarten</h2>
+        <span class="count" id="visible-count">0 sichtbar</span>
+      </div>
+
+      <article class="card function-card searchable" data-tags="flow command selection go waypoint area mission">
+        <div>
+          <h3>MissionTacticalSandboxController</h3>
+          <span class="label good">aktiver Playtest-Pfad</span>
+          <span class="label">Input</span>
+          <span class="label">Mission UI</span>
+          <p class="dim">Datei: <a href="../../scripts/tests/mission_tactical_sandbox_controller.gd">scripts/tests/mission_tactical_sandbox_controller.gd</a></p>
+        </div>
+        <div>
+          <p class="mini-title">Liest</p>
+          <p>Auswahl, Wegpunkte, Area-Orders, aktueller Befehl, C/N/A, Fireteam- und Unit-Snapshots.</p>
+          <p class="mini-title">Ruft / schreibt</p>
+          <p><code>_on_go_phase_pressed()</code>, <code>_activate_next_waypoint_for_plan()</code>, <code>_activate_next_attack_area_order()</code>, <code>_issue_waypoint_for_fireteam()</code>, <code>refresh_contact_overlay()</code>, <code>_sync_primary_3d_order_visuals()</code>.</p>
+          <p class="mini-title">Sichtbares Ergebnis</p>
+          <p>Wegpunkt/Area wird aktiv, Fireteam-Karte bekommt Status, Sprechblase bekommt Befehlstext, 3D-View bekommt Order-/Kontaktvisuals.</p>
+        </div>
+      </article>
+
+      <article class="card function-card searchable" data-tags="command move defend take engage posture speed sight">
+        <div>
+          <h3>FireteamMovementController</h3>
+          <span class="label good">UnitCommand-Erzeuger</span>
+          <span class="label">Move</span>
+          <span class="label">Take</span>
+          <span class="label">Engage</span>
+          <p class="dim">Datei: <a href="../../scripts/tactical/fireteam_movement_controller.gd">scripts/tactical/fireteam_movement_controller.gd</a></p>
+        </div>
+        <div>
+          <p class="mini-title">Liest</p>
+          <p>Fireteam-Mitglieder, Zielposition oder Area, Stance <code>C/N/A</code>, Befehlstyp, Unitskills, Weapon-/Movement-Posture.</p>
+          <p class="mini-title">Ruft / schreibt</p>
+          <p><code>start_execution()</code> baut pro Mitglied ein Command-Dictionary. <code>_resolve_stage_movement_posture()</code>, <code>_resolve_stage_weapon_posture()</code> und <code>_resolve_stage_behavior_modifiers()</code> setzen Geschwindigkeit, Sicht, Cover, Attacke und Waffenhaltung.</p>
+          <p class="mini-title">Sichtbares Ergebnis</p>
+          <p>Alle Mitglieder sollen gleichzeitig laufen, nicht im Gaensemarsch haengen bleiben, bei C die Waffe im Aim tragen und bei Kontakt schiessen duerfen, wenn die Feuerregeln passen.</p>
+        </div>
+      </article>
+
+      <article class="card function-card searchable" data-tags="defend security sector facing overwatch direction">
+        <div>
+          <h3>FireteamSecurityController</h3>
+          <span class="label">Defend</span>
+          <span class="label">Sicherung</span>
+          <span class="label">Sektoren</span>
+          <p class="dim">Datei: <a href="../../scripts/tactical/fireteam_security_controller.gd">scripts/tactical/fireteam_security_controller.gd</a></p>
+        </div>
+        <div>
+          <p class="mini-title">Liest</p>
+          <p>Befehlstyp, Zielrichtung, Marschrichtung, Fireteam-Mitglieder, Security-Mode.</p>
+          <p class="mini-title">Ruft / schreibt</p>
+          <p><code>update_fireteam_state()</code>, <code>_resolve_security_mode_override()</code>, <code>_extract_command_type()</code>, <code>_extract_security_direction_angle()</code>.</p>
+          <p class="mini-title">Sichtbares Ergebnis</p>
+          <p>Defend soll keine alte OVW-Wahrheit sein, sondern eine klare Sicherung: 360, Front, Flanken oder gerichteter Sektor. Mitglieder decken abgestimmte Winkel statt alle denselben Punkt.</p>
+        </div>
+      </article>
+
+      <article class="card function-card searchable" data-tags="contact combat fire muzzle enemy damage resolver">
+        <div>
+          <h3>MissionCombatLoopDriver</h3>
+          <span class="label hot">Kontakt-Hotspot</span>
+          <span class="label">Feuer</span>
+          <span class="label">Gegner</span>
+          <p class="dim">Datei: <a href="../../scripts/tests/mission_combat_loop_driver.gd">scripts/tests/mission_combat_loop_driver.gd</a></p>
+        </div>
+        <div>
+          <p class="mini-title">Liest</p>
+          <p>Runtime-Units, Fireteam-Snapshots, ContactTracker, Enemy-Team-State, Waffenreichweite, LOS und Fire-at-will.</p>
+          <p class="mini-title">Ruft / schreibt</p>
+          <p><code>_update_contact_tracking()</code>, <code>_try_enqueue_attacks()</code>, <code>_record_fire_event_from_effect()</code>, <code>_refresh_tactical_combat_visuals()</code>, <code>_try_enqueue_enemy_limbo_behavior()</code>.</p>
+          <p class="mini-title">Sichtbares Ergebnis</p>
+          <p>Rote Schuss-/Kontaktlinie, Muzzle Flash, Schadenseffekt, gegnerische Patrouille oder Gegner-Hold. Wenn hier kein Event entsteht, kann die 3D-View keinen echten Muzzle Flash zeigen.</p>
+        </div>
+      </article>
+
+      <article class="card function-card searchable" data-tags="contact resolver los range weapon target">
+        <div>
+          <h3>CombatFireDecisionResolver</h3>
+          <span class="label">LOS</span>
+          <span class="label">Range</span>
+          <span class="label">Target</span>
+          <p class="dim">Datei: <a href="../../scripts/tactical/combat_fire_decision_resolver.gd">scripts/tactical/combat_fire_decision_resolver.gd</a></p>
+        </div>
+        <div>
+          <p class="mini-title">Liest</p>
+          <p>Angreifer, Ziel, Team-Zugehoerigkeit, Waffenstatus, Reichweite, Sichtlinie und Bereitschaft zum Feuern.</p>
+          <p class="mini-title">Ruft / schreibt</p>
+          <p><code>find_first_contact_pair()</code> sucht ein valides Paar. <code>build_damage_effect()</code> erzeugt den Effekt, der spaeter als Feuerereignis sichtbar wird.</p>
+          <p class="mini-title">Sichtbares Ergebnis</p>
+          <p>Nur wenn der Resolver ein gueltiges Paar findet, sind Schuss, rote Linie und Muzzle Flash erwartbar.</p>
+        </div>
+      </article>
+
+      <article class="card function-card searchable" data-tags="visual terrain map sightline muzzle selection contact">
+        <div>
+          <h3>TerrainMap3DView</h3>
+          <span class="label good">Visualisierung</span>
+          <span class="label">Karte</span>
+          <span class="label">VFX</span>
+          <p class="dim">Datei: <a href="../../scripts/terrain/terrain_map_3d_view.gd">scripts/terrain/terrain_map_3d_view.gd</a></p>
+        </div>
+        <div>
+          <p class="mini-title">Liest</p>
+          <p>Unit-Proxies, Order-Visuals, Fire-Sector, Contact-Entries, Fire-Event-Snapshot, Selection-State und Terrain-Mapping.</p>
+          <p class="mini-title">Ruft / schreibt</p>
+          <p><code>set_contact_entries()</code>, <code>_sync_unit_proxies()</code>, <code>_add_selected_fireteam_aim_visuals()</code>, <code>_add_weapon_fire_vfx_visual()</code>, <code>_add_fire_sector_los_line_visuals()</code>.</p>
+          <p class="mini-title">Sichtbares Ergebnis</p>
+          <p>Gelbe Auswahl, sichtbare Einheiten, Sichtlinien am Kopf/Weapon-Aim, begrenzte Waffenreichweite, rote Kontakt-/Schusslinien und Muzzle Flash.</p>
+        </div>
+      </article>
+
+      <article class="card function-card searchable" data-tags="limbo enemy behavior adapter behavior tree blackboard">
+        <div>
+          <h3>EnemyLimboBehaviorAdapter</h3>
+          <span class="label warn">Entscheidungsadapter</span>
+          <span class="label">LimboAI</span>
+          <span class="label">Enemy</span>
+          <p class="dim">Datei: <a href="../../scripts/tactical/enemy_limbo_behavior_adapter.gd">scripts/tactical/enemy_limbo_behavior_adapter.gd</a></p>
+        </div>
+        <div>
+          <p class="mini-title">Liest</p>
+          <p>Enemy, Kontext, sichtbaren Kontakt, Cover-Kandidaten, Patrol-Kontext und Blackboard-Werte.</p>
+          <p class="mini-title">Ruft / schreibt</p>
+          <p><code>evaluate()</code> waehlt aus Prioritaeten wie Cover, Contact-Hold und Patrol eine Aktion. Die Aktion darf nur eine Entscheidung liefern, keine zweite Unit-Wahrheit mutieren.</p>
+          <p class="mini-title">Sichtbares Ergebnis</p>
+          <p>Im Idealfall steht in Debug/Status: welcher Limbo-Zweig lief und warum. Die tatsaechliche Bewegung oder Feuerwirkung muss weiter ueber Commands/Effekte zur Simulation gehen.</p>
+        </div>
+      </article>
+    </section>
+
+    <section class="searchable" data-tags="command expected move defend take engage c n a">
+      <div class="section-title">
+        <h2>Erwartetes Verhalten</h2>
+        <span class="count">Baseline, die wir gerade stabilisieren</span>
+      </div>
+      <div class="grid two">
+        <div class="card">
+          <h3>C/N/A bei Move</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Modus</th>
+                <th>Erwartung</th>
+                <th>Bonus / Malus</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>C</code> Cautious</td>
+                <td>Waffe im Aim, vorsichtig vorgehen, Sicherung in Marschrichtung plus links/rechts.</td>
+                <td>Speed -35%, Sicht +20%.</td>
+              </tr>
+              <tr>
+                <td><code>N</code> Normal</td>
+                <td>Walk, Waffe unten, direkter Teamweg ohne unnoetigen Gaensemarsch.</td>
+                <td>Speed +/-0%, Sicht +/-0%.</td>
+              </tr>
+              <tr>
+                <td><code>A</code> Aggressive</td>
+                <td>Run, Waffe unten, schnelleres Schliessen der Distanz.</td>
+                <td>Speed +20%, Sicht -35%.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h3>Waypoint und Abschluss</h3>
+          <ul>
+            <li>Wenn ein Wegpunkt erreicht und der Befehl ausgefuehrt wurde, wird dieser Wegpunkt geloescht.</li>
+            <li>GO arbeitet danach den naechsten Wegpunkt oder die naechste Area-Order ab.</li>
+            <li>Wenn nichts mehr offen ist, geht das Team automatisch in <code>Defend</code>, statt einfach unsichtbar stehen zu bleiben.</li>
+            <li>Der alte sichtbare Plan-Button ist kein Primaerpfad mehr; GO ist der sichtbare Ausloeser.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="grid two" style="margin-top: 1rem;">
+        <div class="card">
+          <h3>Take vs Engage vs Defend</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Befehl</th>
+                <th>Ziel</th>
+                <th>Kontaktverhalten</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>Take</code></td>
+                <td>Punkt oder Area kontrollieren und mit eigenen Leuten besetzen.</td>
+                <td>Bei Kontakt weiter auf Kontrolle hinarbeiten, Deckung suchen, schiessen wenn moeglich.</td>
+              </tr>
+              <tr>
+                <td><code>Engage</code></td>
+                <td>Gegner oder Gegner-Area angreifen, nicht primaer besitzen.</td>
+                <td>Ziel erkennen, in Reichweite/LOS bringen, feuern, simple Angriffslinie statt fruehes Fancy-Flanking.</td>
+              </tr>
+              <tr>
+                <td><code>Defend</code></td>
+                <td>Von Punkt/Area aus nach aussen sichern.</td>
+                <td>Winkel abstimmen: 360, Front, Flanke links/rechts oder gerichteter Sektor.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h3>Ein Tile vs Area</h3>
+          <ul>
+            <li>Ein Tile ist ein konkreter Zielpunkt: Team bildet Slots um diesen Punkt, danach Defend.</li>
+            <li>Eine Area ist ein Raum: Team verteilt sich in sinnvoller Breite, ohne dass einzelne Mitglieder weit allein laufen.</li>
+            <li>Take-Area heisst: Raum belegen und kontrollieren.</li>
+            <li>Engage-Area heisst: Gegner im Raum suchen/angreifen, aber aktuell noch ohne komplexes Flanking als Baseline.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="searchable" data-tags="contact muzzle red line attack enemy reasons">
+      <div class="section-title">
+        <h2>Warum wird geschossen oder nicht?</h2>
+        <span class="count">Kontaktkette</span>
+      </div>
+      <div class="grid three">
+        <div class="card">
+          <h3>Schuss ist erwartbar, wenn...</h3>
+          <ul>
+            <li>Gegner als Kontakt erkannt ist.</li>
+            <li>Angreifer eine nutzbare Waffe hat.</li>
+            <li>Ziel in Waffenreichweite liegt.</li>
+            <li>LOS frei oder nach Regel ausreichend ist.</li>
+            <li>Fire-at-will nicht durch Befehl/Haltung blockiert ist.</li>
+            <li>Combat Loop ein Feuerereignis erzeugt.</li>
+          </ul>
+        </div>
+        <div class="card warning">
+          <h3>Kein Muzzle Flash bedeutet meistens...</h3>
+          <ul>
+            <li>Es gab keinen echten Fire-Event-Snapshot.</li>
+            <li>Resolver hat kein gueltiges Kontaktpaar gefunden.</li>
+            <li>Kontakt ist nur als Marker sichtbar, aber nicht als Angriffsziel freigegeben.</li>
+            <li>Waffe, Reichweite, LOS oder Fire-at-will blockieren den Schuss.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Debug-Satz fuer #17/#18</h3>
+          <p>Statt "Verstanden, setze Befehl um" sollte der Leader sagen, was passiert und warum:</p>
+          <p><code>ENGAGE Ost 12F | Kontakt sichtbar | AR in Reichweite | 2/4 feuern</code></p>
+          <p><code>MOVE Nordost 14F | C Aim | keine Kontakte | 4 Slots</code></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="searchable" data-tags="limbo plugin ai enemy behavior pros cons recommendation">
+      <div class="section-title">
+        <h2>LimboAI Review</h2>
+        <span class="count">Sollten wir das Plugin fuer Einheiten nutzen?</span>
+      </div>
+      <div class="card recommendation">
+        <p><strong>Aktuelle Empfehlung nach erneutem Blick:</strong> Ich wuerde LimboAI ernster nehmen als nur "kleiner Zusatz", aber trotzdem nicht sofort alles umwerfen. Der beste naechste Schritt ist ein Hybrid-Prototyp: Gegnerentscheidungen in LimboAI, aber alle Bewegung, LOS, Schaden und Visual-Events weiter ueber unsere bestehenden autoritativen Systeme. Danach entscheiden wir mit einem echten Vergleich, ob ein groesserer Umstieg lohnt.</p>
+      </div>
+      <div class="grid three" style="margin-top: 1rem;">
+        <div class="card">
+          <h3>Vorteile fuer dieses Projekt</h3>
+          <ul>
+            <li>Gegnerlogik wird lesbarer: Kontakt -> Deckung -> Halten -> Patrouille.</li>
+            <li>Prioritaeten lassen sich besser debuggen als grosse If/Else-Bloecke.</li>
+            <li>Blackboard/Status kann erklaeren, warum ein NPC etwas macht.</li>
+            <li>Editor-BehaviorTrees koennen spaeter Design/Balance schneller machen.</li>
+            <li>Passt gut zu Gegnern, die patrouillieren, Kontakt aufnehmen, Deckung suchen und einfache Rollen ausfuehren.</li>
+          </ul>
+        </div>
+        <div class="card warning">
+          <h3>Nachteile / Risiken</h3>
+          <ul>
+            <li>Gefahr einer zweiten Gameplay-Wahrheit neben SimulationRoot, ContactTracker und EnemyTeamTacticsProfile.</li>
+            <li>Plugin-Abhaengigkeit und GDExtension-/Editor-/Export-Risiko.</li>
+            <li>Wenn Limbo direkt bewegt oder Schaden setzt, wird Debugging noch schwerer.</li>
+            <li>Determinismus und Multiplayer-Autoritaet werden schwieriger, falls BehaviorTrees clientseitig Wahrheit erzeugen.</li>
+            <li>Fuer Low-Level-Bewegung, LOS, Treffer und VFX ist Limbo das falsche Werkzeug.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Warum nicht sofort als Hauptsystem?</h3>
+          <p>Die Basis war noch instabil: Move, Defend, Waffenhaltung, Gegner-Sichtbarkeit, Kontaktlinien und Muzzle Flash mussten erst getrennt sichtbar werden. Haetten wir Limbo vorher zum Hauptpfad gemacht, waere unklar gewesen, ob ein Fehler aus Command-Erzeugung, Simulation, LOS, VFX oder BehaviorTree kommt.</p>
+          <p>Jetzt ist der sinnvolle Einsatz kleiner: Limbo entscheidet Gegnerabsichten, alle echten Mutationen laufen weiter ueber Commands/Effekte.</p>
+        </div>
+      </div>
+
+      <div class="grid two" style="margin-top: 1rem;">
+        <div class="card">
+          <h3>Klaerung: "Code-generiert" vs Editor-Tree</h3>
+          <p>LimboAI generiert nicht automatisch fertigen Gameplay-Code, den man dann kopiert. Es stellt BehaviorTree-/StateMachine-Klassen, Blackboard, Editor, Debugger und Custom-Task-Basen bereit. Wir schreiben die Tasks selbst, z.B. <code>BTAction</code> oder <code>BTCondition</code>, und koennen Trees entweder im Code zusammenbauen oder als <code>.tres</code>-BehaviorTree im Editor pflegen.</p>
+          <p>Unser aktueller Adapter ist code-generiert: <code>EnemyLimboBehaviorAdapter</code> baut einen <code>BTSelector</code> mit <code>seek_cover</code>, <code>contact_hold</code> und <code>patrol</code>. Das ist gut fuer Tests. Spaeter waere besser: Custom Tasks als echte Dateien, BehaviorTree als Resource, aber weiterhin mit unserem Command-Ausgang.</p>
+        </div>
+        <div class="card">
+          <h3>Blocker- und Wegfindung</h3>
+          <p>LimboAI loest Blocker-Findung nicht von selbst. Es kann entscheiden, dass ein NPC ausweichen, Deckung suchen oder neu planen soll. Den tatsaechlichen Weg um Hindernisse, die Formation, Tile-Kollisionen, Deckungsdaten und Reichweiten muessen weiterhin <code>TerrainRegistry</code>, Pathing/Slot-Logik und <code>SimulationRoot</code> liefern.</p>
+          <p>Der Vorteil waere also nicht "Limbo findet automatisch bessere Wege", sondern: Limbo macht sichtbar, <em>wann</em> neu geplant wird und <em>warum</em> eine Aktion gewaehlt wurde.</p>
+        </div>
+      </div>
+
+      <details class="searchable" data-tags="limbo migration full switch hybrid options">
+        <summary>Umstiegsoptionen: Wie weit gehen wir mit Limbo?</summary>
+        <div class="content">
+          <table>
+            <thead>
+              <tr>
+                <th>Option</th>
+                <th>Was passiert</th>
+                <th>Bewertung</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>A: Aktueller Pfad bleibt allein</td>
+                <td>Mission/Combat-Controller wachsen weiter, Limbo bleibt Smoke.</td>
+                <td>Wenig Umbau, aber Risiko von immer mehr Spezialfaellen im Code.</td>
+              </tr>
+              <tr>
+                <td>B: Hybrid fuer Gegner</td>
+                <td>Limbo entscheidet Enemy-Intent; bestehende Systeme fuehren Bewegung, LOS, Schaden und VFX aus.</td>
+                <td><span class="label good">Empfohlen fuer den naechsten Slice</span> Gute Balance aus Nutzen und Risiko.</td>
+              </tr>
+              <tr>
+                <td>C: Limbo als taktischer Brain-Layer fuer alle</td>
+                <td>Auch Fireteam-Entscheidungen werden BehaviorTrees/HSMs, GO erzeugt nur noch Kontext/Intent.</td>
+                <td>Kann langfristig sauber sein, braucht aber starke Adapter, Debug-Snapshots und Migrationsplan.</td>
+              </tr>
+              <tr>
+                <td>D: Komplettumstieg inklusive Low-Level</td>
+                <td>Limbo uebernimmt auch Bewegung, Treffer, Sicht und Visual-Events.</td>
+                <td><span class="label hot">Nicht sinnvoll</span> Widerspricht der Autoritaetsarchitektur und loest Pathing/LOS nicht automatisch.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details class="searchable" data-tags="limbo use boundaries matrix">
+        <summary>Entscheidungsmatrix: Wo Limbo nutzen?</summary>
+        <div class="content">
+          <table>
+            <thead>
+              <tr>
+                <th>Bereich</th>
+                <th>Entscheidung</th>
+                <th>Grund</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Enemy High-Level AI</td>
+                <td><span class="label good">Nutzen</span></td>
+                <td>Patrouille, Kontakt-Hold, Deckung, Rueckzug und Zielwahl sind gute BehaviorTree-Aufgaben.</td>
+              </tr>
+              <tr>
+                <td>Player Fireteam GO-Pfad</td>
+                <td><span class="label warn">Noch nicht</span></td>
+                <td>Der sichtbare Befehlspfad muss stabil und nachvollziehbar bleiben.</td>
+              </tr>
+              <tr>
+                <td>Movement-Slots und Formation</td>
+                <td><span class="label warn">Nur als Absicht</span></td>
+                <td>Limbo kann "advance/hold/cover" waehlen, aber Slot- und Pathing-Logik bleibt in taktischen Controllern.</td>
+              </tr>
+              <tr>
+                <td>Schaden, LOS, Muzzle Flash</td>
+                <td><span class="label hot">Nicht nutzen</span></td>
+                <td>Das sind Simulation, Resolver und Visual-Event-Themen.</td>
+              </tr>
+              <tr>
+                <td>Debug-Erklaerung</td>
+                <td><span class="label good">Nutzen</span></td>
+                <td><code>selected_action</code>, <code>reason</code> und Blackboard-Werte koennen direkt in #18 sichtbar werden.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+    <section class="searchable" data-tags="questions unclear open next steps plan">
+      <div class="section-title">
+        <h2>Restliche offene Fragen</h2>
+        <span class="count">nach deinem Antwortdurchlauf</span>
+      </div>
+      <div class="grid two">
+        <div class="card">
+          <h3>Architekturfragen</h3>
+          <ul>
+            <li>Wie schneiden wir den Produktionspfad aus <code>MissionTacticalSandboxController</code>, ohne den aktuellen Playtest-Pfad zu zerlegen?</li>
+            <li>Wo lebt die endgueltige Gegner-Angriffsbewegung: <code>EnemyTeamTacticsProfile</code>, LimboAI oder CombatLoop-Helfer?</li>
+            <li>Wann lohnt der Wechsel von code-gebautem Limbo-Tree zu editorbaren <code>.tres</code>-Trees?</li>
+            <li>Welche Debugdaten aus #17/#18 werden spaeter normales UI und welche bleiben Dev-Overlay?</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Gameplayfragen</h3>
+          <ul>
+            <li>Welche Regeln definieren <code>suspected</code>, <code>spotted</code>, <code>confirmed</code> und <code>lost</code> fuer Kontakte?</li>
+            <li>Was bedeutet ThreatLevel konkret: Entfernung, Waffe, Blickrichtung, Schaden, Anzahl Gegner, Deckung oder Mischung?</li>
+            <li>Welche Assets blockieren Sicht hart, welche nur teilweise, und wie sichtbar wird das im Debug?</li>
+            <li>Wann darf Defend bei <code>spotted</code> bereits feuern, und wann erst bei <code>confirmed</code>?</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="searchable" data-tags="next steps limbo verifier baseline">
+      <div class="section-title">
+        <h2>Vorgeschlagener naechster Ablauf</h2>
+        <span class="count">kleine, pruefbare Schritte</span>
+      </div>
+      <div class="card">
+        <ol>
+          <li><strong>Baseline festnageln:</strong> vier Gegner sichtbar, Buesche auf Bodentiles, Auswahl gelb, Sicht-/Schusslinien begrenzt.</li>
+          <li><strong>Kontakt-Slice reparieren:</strong> wenn Gegner in LOS/Reichweite ist, muss #17/#18 sagen, warum geschossen oder nicht geschossen wird.</li>
+          <li><strong>Muzzle-Event pruefen:</strong> Feuerereignis im Combat Loop erzeugen, in <code>TerrainMap3DView</code> als kurzer Muzzle Flash/Trace anzeigen.</li>
+          <li><strong>Limbo-Vergleichsslice bauen:</strong> Enemy-Intent <code>contact_hold</code>, <code>seek_cover</code>, <code>patrol</code> mit Debuggrund ausgeben, aber keine Direktmutation erlauben.</li>
+          <li><strong>Verifier bauen:</strong> Headless-Test fuer 4 Gegner, rote Kontaktlinie, Fire-Event, Limbo-Action-Reason und keine Direktmutation durch Limbo.</li>
+          <li><strong>Dann entscheiden:</strong> Wenn Hybrid klarer und stabiler ist, naechsten Schritt Richtung Limbo-Brain-Layer planen; wenn nicht, beim bestehenden Controller-Pfad bleiben und nur Debug/Contracts schaerfen.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="searchable" data-tags="sources limbo official docs">
+      <div class="section-title">
+        <h2>Nachgeschlagene Quellen</h2>
+        <span class="count">LimboAI, lokal und offiziell</span>
+      </div>
+      <div class="card">
+        <ul>
+          <li>Lokale Plugin-Version: <code>addons/limboai/version.txt</code> meldet <code>v1.7.0</code>.</li>
+          <li>Lokale Plugin-README: <code>addons/limboai/README.md</code> beschreibt Behavior Trees, HSM, Blackboard, Visual Debugger, GDScript Custom Tasks und Godot-4.6-Support.</li>
+          <li>Offizielle LimboAI-Doku: <a href="https://limboai.readthedocs.io/en/stable/">limboai.readthedocs.io/en/stable</a>.</li>
+          <li>Offizielle GitHub-Seite: <a href="https://github.com/limbonaut/limboai">github.com/limbonaut/limboai</a>.</li>
+          <li>GDExtension-Hinweis: <a href="https://limboai.readthedocs.io/en/stable/getting-started/getting-limboai.html">Getting LimboAI</a> nennt GDExtension als bequemer, aber etwas limitierter als Modul-Build.</li>
+        </ul>
+      </div>
+    </section>
+
+    <footer>
+      Quellen im Repo: fireteam runtime execution contract, behavior modes contract, mission command feedback contract, enemy team tactics contract und aktueller Fireteam-Playtestcode. Diese HTML ist eine Debug- und Entscheidungsreferenz, keine neue Gameplay-Wahrheit.
+    </footer>
+  </main>
+
+  <script>
+    const searchInput = document.getElementById("search");
+    const chips = Array.from(document.querySelectorAll(".chip"));
+    const searchable = Array.from(document.querySelectorAll(".searchable"));
+    const visibleCount = document.getElementById("visible-count");
+    let activeFilter = "all";
+
+    function matchesFilter(node) {
+      if (activeFilter === "all") {
+        return true;
+      }
+      return (node.dataset.tags || "").toLowerCase().split(/\s+/).includes(activeFilter);
+    }
+
+    function matchesSearch(node) {
+      const query = searchInput.value.trim().toLowerCase();
+      if (!query) {
+        return true;
+      }
+      return node.innerText.toLowerCase().includes(query) || (node.dataset.tags || "").toLowerCase().includes(query);
+    }
+
+    function applyFilters() {
+      let visibleCards = 0;
+      searchable.forEach((node) => {
+        const visible = matchesFilter(node) && matchesSearch(node);
+        node.classList.toggle("hidden", !visible);
+        if (visible && node.classList.contains("function-card")) {
+          visibleCards += 1;
+        }
+      });
+      visibleCount.textContent = visibleCards + " sichtbar";
+    }
+
+    chips.forEach((chip) => {
+      chip.addEventListener("click", () => {
+        activeFilter = chip.dataset.filter;
+        chips.forEach((item) => item.classList.toggle("active", item === chip));
+        applyFilters();
+      });
+    });
+
+    searchInput.addEventListener("input", applyFilters);
+    applyFilters();
+  </script>
+</body>
+</html>

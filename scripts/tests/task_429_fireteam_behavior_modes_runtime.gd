@@ -67,18 +67,18 @@ func _run_tests() -> void:
 
 
 func _test_behavior_modifier_table() -> void:
-	_assert_modifier("move", "cautious", 0.65, 1.2, 0.0, 0.0, "engage", "aimed")
-	_assert_modifier("move", "normal", 1.0, 1.0, 0.0, 0.0, "travel", "lowered")
-	_assert_modifier("move", "aggressive", 1.2, 0.65, 0.0, 0.0, "run", "lowered")
-	_assert_modifier("defend", "cautious", 0.8, 1.2, 15.0, -0.03, "engage", "aimed")
-	_assert_modifier("defend", "normal", 1.0, 1.0, 0.0, 0.0, "tactical", "ready")
-	_assert_modifier("defend", "aggressive", 1.1, 0.85, -10.0, 0.04, "engage", "aimed")
-	_assert_modifier("take", "cautious", 0.7, 1.15, 10.0, 0.0, "engage", "aimed")
-	_assert_modifier("take", "normal", 1.0, 1.0, 0.0, 0.0, "travel", "ready")
-	_assert_modifier("take", "aggressive", 1.2, 0.75, -12.0, 0.06, "run", "aimed")
-	_assert_modifier("engage", "cautious", 0.75, 1.15, 10.0, 0.02, "engage", "aimed")
-	_assert_modifier("engage", "normal", 1.0, 1.0, 0.0, 0.0, "engage", "aimed")
-	_assert_modifier("engage", "aggressive", 1.15, 0.8, -8.0, 0.08, "run", "aimed")
+	_assert_modifier("move", "cautious", 0.35, 1.0, 75.0, 0.05, "engage", "aimed")
+	_assert_modifier("move", "normal", 0.65, 0.8, 45.0, 0.0, "travel", "lowered")
+	_assert_modifier("move", "aggressive", 1.0, 0.5, 20.0, -0.03, "run", "lowered")
+	_assert_modifier("defend", "cautious", 0.35, 1.0, 75.0, 0.05, "engage", "aimed")
+	_assert_modifier("defend", "normal", 0.65, 0.8, 45.0, 0.0, "tactical", "ready")
+	_assert_modifier("defend", "aggressive", 1.0, 0.5, 20.0, -0.03, "engage", "aimed")
+	_assert_modifier("take", "cautious", 0.35, 1.0, 75.0, 0.05, "engage", "aimed")
+	_assert_modifier("take", "normal", 0.65, 0.8, 45.0, 0.0, "engage", "aimed")
+	_assert_modifier("take", "aggressive", 1.0, 0.5, 20.0, -0.03, "run", "aimed")
+	_assert_modifier("engage", "cautious", 0.35, 1.0, 75.0, 0.05, "engage", "aimed")
+	_assert_modifier("engage", "normal", 0.65, 0.8, 45.0, 0.0, "engage", "aimed")
+	_assert_modifier("engage", "aggressive", 1.0, 0.5, 20.0, -0.03, "run", "aimed")
 
 
 func _test_security_controller_defense_distribution() -> void:

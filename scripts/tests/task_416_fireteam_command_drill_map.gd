@@ -91,7 +91,7 @@ func _test_scenario_authoring() -> void:
 		_assert(String(group.get("group_id", "")) == "red_drill_fireteam", "Enemy group id documents the red drill fireteam")
 		_assert(Array(group.get("enemy_ids", [])).size() == 4, "Enemy drill fireteam has four members")
 		var tactics: Dictionary = Dictionary(group.get("tactics", {}))
-		_assert(String(tactics.get("profile_id", "")) == "defensive_cover", "Enemy drill fireteam uses defensive cover tactics")
+		_assert(String(tactics.get("profile_id", "")) == "patrol_probe", "Enemy drill fireteam uses the patrol probe tactics needed by the drill map")
 	_assert(scenario.call("references_terrain_without_duplication"), "Scenario references terrain without duplicating map data")
 
 

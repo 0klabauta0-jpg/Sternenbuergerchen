@@ -66,6 +66,11 @@ var phase: int = -1
 var movement_posture: String = MOVEMENT_POSTURE_IDLE
 var weapon_posture: String = WEAPON_POSTURE_LOWERED
 var posture_policy_id: String = ""
+var engagement_range_policy: String = ""
+var engagement_range_factor: float = 1.0
+var contact_initiative_seconds: float = 0.0
+var aim_readiness_percent: float = 0.0
+var team_target_support_percent: float = 0.0
 
 
 func _init(data: Dictionary = {}) -> void:
@@ -109,6 +114,9 @@ func is_valid() -> bool:
 	if sight_range_factor < 0.0:
 		return false
 
+	if engagement_range_factor < 0.0:
+		return false
+
 	if not _has_valid_target_position():
 		return false
 
@@ -130,7 +138,14 @@ func to_dict() -> Dictionary:
 		"movement_posture": movement_posture,
 		"weapon_posture": weapon_posture,
 		"posture_policy_id": posture_policy_id,
+		"engagement_range_factor": engagement_range_factor,
+		"contact_initiative_seconds": contact_initiative_seconds,
+		"aim_readiness_percent": aim_readiness_percent,
+		"team_target_support_percent": team_target_support_percent,
 	}
+
+	if not engagement_range_policy.is_empty():
+		data["engagement_range_policy"] = engagement_range_policy
 
 	if target_position != null:
 		data["target_position"] = target_position
@@ -216,6 +231,29 @@ func _apply_dict(data: Dictionary) -> void:
 
 	if data.has("posture_policy_id"):
 		posture_policy_id = String(data["posture_policy_id"]).strip_edges().to_lower()
+
+	if data.has("engagement_range_policy"):
+		engagement_range_policy = String(data["engagement_range_policy"]).strip_edges().to_lower()
+
+	if data.has("engagement_range_factor"):
+		var raw_engagement_range_factor: Variant = data["engagement_range_factor"]
+		if typeof(raw_engagement_range_factor) == TYPE_INT or typeof(raw_engagement_range_factor) == TYPE_FLOAT:
+			engagement_range_factor = float(raw_engagement_range_factor)
+
+	if data.has("contact_initiative_seconds"):
+		var raw_contact_initiative_seconds: Variant = data["contact_initiative_seconds"]
+		if typeof(raw_contact_initiative_seconds) == TYPE_INT or typeof(raw_contact_initiative_seconds) == TYPE_FLOAT:
+			contact_initiative_seconds = float(raw_contact_initiative_seconds)
+
+	if data.has("aim_readiness_percent"):
+		var raw_aim_readiness_percent: Variant = data["aim_readiness_percent"]
+		if typeof(raw_aim_readiness_percent) == TYPE_INT or typeof(raw_aim_readiness_percent) == TYPE_FLOAT:
+			aim_readiness_percent = float(raw_aim_readiness_percent)
+
+	if data.has("team_target_support_percent"):
+		var raw_team_target_support_percent: Variant = data["team_target_support_percent"]
+		if typeof(raw_team_target_support_percent) == TYPE_INT or typeof(raw_team_target_support_percent) == TYPE_FLOAT:
+			team_target_support_percent = float(raw_team_target_support_percent)
 
 
 static func normalize_movement_posture(value: Variant, fallback: String = MOVEMENT_POSTURE_IDLE) -> String:
