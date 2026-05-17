@@ -88,6 +88,7 @@ git checkout -b batch/<batch-name>
 - TASK_456 - Wall Segment LOS And Tile Truth Inspector
 - TASK_457 - Fireteam Contact Engage Runtime Pass
 - TASK_458 - Fireteam Contact Decision Diagnostics
+- TASK_459 - Fireteam Engage Orientation Enemy Proxy Fix
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

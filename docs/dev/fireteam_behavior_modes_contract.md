@@ -119,6 +119,14 @@ TASK_458 macht die letzte Combat-Entscheidung sichtbar, ohne neue Gameplay-Wahrh
 - Fuer `no_contact_pair` wird ein erster Kandidat mit Blockgrund dokumentiert, damit im Playtest sichtbar wird, ob eher Bereitschaft, LOS, Range oder Zielzustand blockiert.
 - Mission Control darf daraus nur Text bauen, z.B. `CONTACT FIRE`, `CONTACT WAIT` oder `NO FIRE <Grund>`.
 
+### TASK_459 Engage-Orientation/Enemy-Proxies
+
+TASK_459 legt fuer die 3D-Lesbarkeit fest:
+
+- Aktive Fire-Events und bestaetigte/spotted Kontakte gewinnen fuer Aim-/Facing-Visuals vor altem Security-Facing, Move-Ziel oder Area-Ziel.
+- Defense-/Security-Facing bleibt nur dann sichtbar fuehrend, wenn kein aktiver Kontakt/Fire-Event fuer die Unit vorliegt.
+- Hostile Units muessen mindestens einen sichtbaren Body-/Readability-Core zeigen. Der Core ist ein Debug-/Lesbarkeitsfallback, keine neue Gameplay-Wahrheit.
+
 ## Kontakt-Initiative V0
 
 `Kontakt-Initiative` beschreibt die Zeit vom ersten sichtbaren oder suspekten Kontakt bis zum ersten koordinierten Schuss. Sie ersetzt nicht die Waffen-Feuerrate und nicht die harte Combat-Wahrheit. Ein Schuss bleibt nur moeglich, wenn LOS, Waffenreichweite, Vital-State, Fire-Status und Kontaktstatus passen.

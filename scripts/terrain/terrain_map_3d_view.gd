@@ -5310,6 +5310,14 @@ func _build_unit_fire_line_anchor(unit: Node, unit_world_position: Vector2, aim_
 
 func _resolve_unit_aim_direction(unit: Node, unit_world_position: Vector2) -> Vector2:
 	var proxy := _unit_proxies_by_id.get(_get_unit_id(unit), null) as Node3D
+	var active_fire_event: Dictionary = _get_active_fire_event_for_unit(_get_unit_id(unit))
+	if not active_fire_event.is_empty():
+		var fire_direction: Vector2 = _get_fire_event_direction_for_unit(active_fire_event, unit_world_position)
+		if fire_direction.length_squared() > 0.0001:
+			return fire_direction
+	var contact_direction: Vector2 = _resolve_unit_visible_contact_direction(unit, unit_world_position)
+	if contact_direction.length_squared() > 0.0001:
+		return contact_direction
 	var explicit_facing_direction: Vector2 = _resolve_unit_explicit_facing_direction(unit)
 	if explicit_facing_direction.length_squared() > 0.0001:
 		return explicit_facing_direction
@@ -5335,6 +5343,35 @@ func _resolve_unit_explicit_facing_direction(unit: Node) -> Vector2:
 		if unit.has_meta(meta_key):
 			return Vector2.RIGHT.rotated(float(unit.get_meta(meta_key, 0.0))).normalized()
 	return Vector2.ZERO
+
+
+func _resolve_unit_visible_contact_direction(unit: Node, current_world_position: Vector2) -> Vector2:
+	var fireteam_id: String = _get_unit_fireteam_id(unit)
+	if fireteam_id.is_empty():
+		return Vector2.ZERO
+	var best_position: Vector2 = Vector2.ZERO
+	var best_distance_squared: float = INF
+	for contact_variant in _contact_entries:
+		if typeof(contact_variant) != TYPE_DICTIONARY:
+			continue
+		var contact: Dictionary = Dictionary(contact_variant)
+		if String(contact.get("fireteam_id", "")).strip_edges().to_lower() != fireteam_id:
+			continue
+		var detection_state: String = String(contact.get("detection_state", "")).strip_edges().to_lower()
+		if detection_state != "spotted" and detection_state != "confirmed":
+			continue
+		var position_variant: Variant = contact.get("last_known_position", contact.get("position", null))
+		if typeof(position_variant) != TYPE_VECTOR2:
+			continue
+		var contact_position: Vector2 = Vector2(position_variant)
+		var distance_squared: float = current_world_position.distance_squared_to(contact_position)
+		if distance_squared <= 0.0001 or distance_squared >= best_distance_squared:
+			continue
+		best_distance_squared = distance_squared
+		best_position = contact_position
+	if best_distance_squared == INF:
+		return Vector2.ZERO
+	return (best_position - current_world_position).normalized()
 
 
 func _resolve_unit_motion_or_target_direction(proxy: Node3D, unit: Node, current_world_position: Vector2) -> Vector2:
@@ -6653,11 +6690,14 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 		var weapon_pose_direction: Vector2 = Vector2.ZERO
 		if unit is Node2D:
 			var unit_world_position: Vector2 = (unit as Node2D).global_position
-			weapon_pose_direction = _resolve_unit_explicit_facing_direction(unit)
+			if not active_fire_event.is_empty():
+				weapon_pose_direction = _get_fire_event_direction_for_unit(active_fire_event, unit_world_position)
+			if weapon_pose_direction.length_squared() <= 0.0001:
+				weapon_pose_direction = _resolve_unit_visible_contact_direction(unit, unit_world_position)
+			if weapon_pose_direction.length_squared() <= 0.0001:
+				weapon_pose_direction = _resolve_unit_explicit_facing_direction(unit)
 			if weapon_pose_direction.length_squared() <= 0.0001:
 				weapon_pose_direction = _resolve_unit_motion_or_target_direction(proxy, unit, unit_world_position)
-			if weapon_pose_direction.length_squared() <= 0.0001 and not active_fire_event.is_empty():
-				weapon_pose_direction = _get_fire_event_direction_for_unit(active_fire_event, unit_world_position)
 			if weapon_pose_direction.length_squared() <= 0.0001:
 				weapon_pose_direction = _resolve_unit_aim_direction(unit, unit_world_position)
 			var next_position: Vector3 = _world_to_surface_3d_position(unit_world_position, 0.06)
@@ -6987,16 +7027,19 @@ func _get_unit_respawn_remaining_seconds(unit: Node) -> int:
 
 func _get_unit_proxy_rotation_y(proxy: Node3D, unit: Node, current_world_position: Vector2, active_fire_event: Dictionary = {}) -> float:
 	var fallback_yaw: float = proxy.rotation_degrees.y if proxy != null else 0.0
+	if not active_fire_event.is_empty():
+		var fire_direction: Vector2 = _get_fire_event_direction_for_unit(active_fire_event, current_world_position)
+		if fire_direction.length_squared() > 0.0001:
+			return _get_unit_world_direction_yaw(current_world_position, current_world_position + fire_direction, fallback_yaw)
+	var contact_direction: Vector2 = _resolve_unit_visible_contact_direction(unit, current_world_position)
+	if contact_direction.length_squared() > 0.0001:
+		return _get_unit_world_direction_yaw(current_world_position, current_world_position + contact_direction, fallback_yaw)
 	var explicit_facing_direction: Vector2 = _resolve_unit_explicit_facing_direction(unit)
 	if explicit_facing_direction.length_squared() > 0.0001:
 		return _get_unit_world_direction_yaw(current_world_position, current_world_position + explicit_facing_direction, fallback_yaw)
 	var motion_or_target_direction: Vector2 = _resolve_unit_motion_or_target_direction(proxy, unit, current_world_position)
 	if motion_or_target_direction.length_squared() > 0.0001:
 		return _get_unit_world_direction_yaw(current_world_position, current_world_position + motion_or_target_direction, fallback_yaw)
-	if not active_fire_event.is_empty():
-		var fire_direction: Vector2 = _get_fire_event_direction_for_unit(active_fire_event, current_world_position)
-		if fire_direction.length_squared() > 0.0001:
-			return _get_unit_world_direction_yaw(current_world_position, current_world_position + fire_direction, fallback_yaw)
 	var target_position: Variant = unit.call("get_target_position") if unit != null and unit.has_method("get_target_position") else null
 	if typeof(target_position) == TYPE_VECTOR2:
 		var target_world_position: Vector2 = Vector2(target_position)
@@ -7165,6 +7208,10 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 		root.add_child(body)
 		root.set_meta("unit_body_visual_visible", true)
 		root.set_meta("unit_body_visual_kind", "fallback_capsule")
+	if _get_unit_team_id(unit) != "team_alpha" and root.get_node_or_null("UnitBodyReadabilityCore") == null:
+		_add_unit_body_readability_core(root, unit)
+		if String(root.get_meta("unit_body_visual_kind", "")).strip_edges().is_empty():
+			root.set_meta("unit_body_visual_kind", "hostile_readability_core")
 	var base := MeshInstance3D.new()
 	var base_mesh := CylinderMesh.new()
 	base_mesh.top_radius = UNIT_BASE_RADIUS
