@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_464 - Fireteam Contact Scan Fire Feedback Readability
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_464_fireteam_contact_scan_fire_feedback_readability.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_458_fireteam_contact_decision_diagnostics.md`, `docs/tasks/TASK_459_fireteam_engage_orientation_enemy_proxy_fix.md`, `docs/tasks/TASK_463_fireteam_auto_defend_guard_enemy_model_visibility.md`
+- Stand: Der Combat-Loop behandelt Canvas-/FOW-Sichtbarkeit nicht mehr als Gameplay-Zielwahrheit. Registrierte, fitte Gegner bleiben aktive Ziele, auch wenn ihre 2D-Canvas-Darstellung lokal unsichtbar ist.
+- Stand: Security-Facing mit aktivem Scan gewinnt im 3D-Facing gegen alte statische `facing_angle`/`map_facing_angle`-Metadaten; der Defend-Sweep ist sichtbar breiter.
+- Stand: Hostile Team-Bases sind flacher, tiefer und transparenter und werden im Render-Snapshot mit Radius/Hoehe/Alpha/Y dokumentiert.
+- Stand: #17 Unit-Karten zeigen ausgeschriebene Runtime-Infos: Command, Feuerstatus, Haltung, Weapon-/Movement-Posture und Aim-Bereitschaft.
+- Risiken/offen: Der Slice behebt Zielfilter, Scan-Lesbarkeit und Kartenfeedback. Wenn im Fenster weiter nicht geschossen wird, muss die nun sichtbare Contact-Diagnose konkret nach LOS/Range/Cooldown/Engage-Ready ausgewertet werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_464_fireteam_contact_scan_fire_feedback_readability.gd`, TASK_458/TASK_459/TASK_463 und `git diff --check`.
+- Naechster Schritt: Im Drill `Engage A/N/C` zwischen die rechte Gegnergruppe laufen lassen und #17/#18 gegen `Feuer frei`, Aim-Up, rote Fire-Linie und Muzzleflash pruefen.
+
 ### TASK_463 - Fireteam Auto Defend Guard And Enemy Model Visibility
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_463_fireteam_auto_defend_guard_enemy_model_visibility.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_462_fireteam_auto_defend_completion_release.md`, `docs/tasks/TASK_461_fireteam_engage_visual_stuck_hotfix.md`

@@ -3836,9 +3836,6 @@ func _get_active_enemy_units() -> Array:
 			if not bool(unit_registry.call("has_unit", String(enemy.call("get_unit_id")))):
 				continue
 
-		if enemy is CanvasItem and not (enemy as CanvasItem).visible:
-			continue
-
 		active_units.append(enemy)
 
 	return active_units

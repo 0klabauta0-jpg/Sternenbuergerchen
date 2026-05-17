@@ -169,6 +169,16 @@ TASK_463 schraenkt den TASK_462-Abschluss bewusst ein:
 - Default-`DEF 360` haelt die aktuellen Unit-Positionen und richtet die sichtbaren Map-Facing-Winkel vom Teamzentrum nach aussen aus. Die Security-Snapshot-Rollen duerfen weiter 360-Abdeckung beschreiben; sie verschieben keine Units.
 - Die Drillmap muss vier Enemy-Unit-Proxies als sichtbare Animated-Character-Modelle zeigen. Rote Marker, Labels oder Readability-Cores duerfen helfen, ersetzen aber nicht das eigentliche NPC-Modell.
 
+### TASK_464 Contact-/Scan-/Feedback-Lesbarkeit
+
+TASK_464 trennt sichtbare UI-/FOW-Darstellung enger von Runtime-Combat-Wahrheit:
+
+- Registrierte, fitte Gegner bleiben im Combat-Loop aktive Ziele, auch wenn ihre Canvas-Darstellung fuer lokale 2D-/FOW-Zwecke unsichtbar ist.
+- Security-Facing mit `security_facing_active` darf im 3D-View den sichtbaren Scan gegen alte statische Facing-Metadaten fuehren, solange kein FireEvent oder bestaetigter Kontakt die Aim-Richtung uebernimmt.
+- `DEF 360` und andere Security-Zustaende nutzen einen sichtbaren links/rechts-Sweep, damit Playtester erkennen koennen, ob ein Team wirklich sucht oder nur eingefroren wirkt.
+- Rote Enemy-Bases sind Unter-Fuss-Markierungen. Sie duerfen Identifikation helfen, aber Modell, Waffe und Pose nicht ueberdecken.
+- #17-Karten sollen im Dev-/Playtest-Kontext lesbare Begriffe zeigen: Command, Feuerstatus, C/N/A-Haltung, Weapon-Posture, Movement-Posture und Aim-Bereitschaft.
+
 ## Kontakt-Initiative V0
 
 `Kontakt-Initiative` beschreibt die Zeit vom ersten sichtbaren oder suspekten Kontakt bis zum ersten koordinierten Schuss. Sie ersetzt nicht die Waffen-Feuerrate und nicht die harte Combat-Wahrheit. Ein Schuss bleibt nur moeglich, wenn LOS, Waffenreichweite, Vital-State, Fire-Status und Kontaktstatus passen.

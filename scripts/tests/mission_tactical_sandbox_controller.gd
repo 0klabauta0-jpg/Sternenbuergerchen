@@ -4171,9 +4171,12 @@ func _build_live_fireteam_card_runtime_line(unit: Node) -> String:
 			command_label = status_name.to_upper()
 		if command_label.is_empty():
 			command_label = "IDLE"
-		parts.append(command_label)
+		parts.append(_format_unit_command_label(command_label))
 		if unit.has_method("get_fire_status"):
-			parts.append(_format_unit_fire_status_short(String(unit.call("get_fire_status"))))
+			parts.append(_format_unit_fire_status_text(String(unit.call("get_fire_status"))))
+		var stance_label: String = _build_unit_tactical_stance_long_label(unit)
+		if not stance_label.is_empty():
+			parts.append(stance_label)
 		if phase_index >= 0:
 			parts.append(COMMANDER_COMMAND_SCRIPT.get_phase_short_name(phase_index))
 	if unit.has_method("get_effective_cover_score"):
@@ -4185,6 +4188,9 @@ func _build_live_fireteam_card_detail_line(unit: Node) -> String:
 	if unit == null:
 		return "No unit data"
 	var detail_parts: PackedStringArray = []
+	var posture_text: String = _build_unit_posture_readability_text(unit)
+	if not posture_text.is_empty():
+		detail_parts.append(posture_text)
 	if unit.has_method("get_skill_summary_text"):
 		detail_parts.append(String(unit.call("get_skill_summary_text")))
 	var trait_text: String = String(unit.call("get_trait_summary_text")).strip_edges() if unit.has_method("get_trait_summary_text") else ""
@@ -4203,6 +4209,106 @@ func _format_unit_fire_status_short(fire_status: String) -> String:
 			return "SEC"
 		_:
 			return fire_status.strip_edges().to_upper()
+
+
+func _format_unit_command_label(command_label: String) -> String:
+	match command_label.strip_edges().to_lower():
+		"move", "move_to_position", "pending_move":
+			return "Move"
+		"engage", "engage_area", "engaging":
+			return "Engage"
+		"take":
+			return "Take"
+		"defend", "defend_area", "hold_position", "holding":
+			return "Defend"
+		"idle":
+			return "Idle"
+		_:
+			return command_label.strip_edges().capitalize()
+
+
+func _format_unit_fire_status_text(fire_status: String) -> String:
+	match fire_status.strip_edges().to_lower():
+		"hold_fire":
+			return "Feuer halten"
+		"fire_at_will":
+			return "Feuer frei"
+		"semi_disciplined":
+			return "Feuer gehemmt"
+		_:
+			return fire_status.strip_edges()
+
+
+func _build_unit_tactical_stance_long_label(unit: Node) -> String:
+	if unit == null:
+		return ""
+	var stance_id: String = ""
+	if unit.has_method("get_tactical_stance_indicator_id"):
+		stance_id = String(unit.call("get_tactical_stance_indicator_id"))
+	match stance_id.strip_edges().to_lower():
+		"cautious":
+			return "vorsichtig"
+		"aggressive":
+			return "aggressiv"
+		"normal":
+			return "normal"
+		_:
+			return ""
+
+
+func _build_unit_posture_readability_text(unit: Node) -> String:
+	if unit == null:
+		return ""
+	var parts: PackedStringArray = []
+	if unit.has_method("get_weapon_posture"):
+		parts.append(_format_unit_weapon_posture_text(String(unit.call("get_weapon_posture"))))
+	if unit.has_method("get_movement_posture"):
+		parts.append(_format_unit_movement_posture_text(String(unit.call("get_movement_posture"))))
+	var aim_readiness: float = _get_unit_aim_readiness_percent(unit)
+	if aim_readiness > 0.01:
+		parts.append("Aim %d%%" % int(round(aim_readiness)))
+	return " | ".join(parts)
+
+
+func _format_unit_weapon_posture_text(weapon_posture: String) -> String:
+	match weapon_posture.strip_edges().to_lower():
+		"aimed":
+			return "Aim up"
+		"ready":
+			return "Waffe bereit"
+		"lowered":
+			return "Waffe unten"
+		_:
+			return weapon_posture.strip_edges()
+
+
+func _format_unit_movement_posture_text(movement_posture: String) -> String:
+	match movement_posture.strip_edges().to_lower():
+		"engage":
+			return "Bewegung: Kampf"
+		"travel":
+			return "Bewegung: Walk"
+		"run":
+			return "Bewegung: Run"
+		"tactical":
+			return "Bewegung: taktisch"
+		"overwatch":
+			return "Bewegung: sichern"
+		"crouch", "crouch_walk", "crouch_run":
+			return "Bewegung: geduckt"
+		"idle":
+			return "Bewegung: idle"
+		_:
+			return movement_posture.strip_edges()
+
+
+func _get_unit_aim_readiness_percent(unit: Node) -> float:
+	if unit == null or not unit.has_method("get_runtime_status"):
+		return 0.0
+	var runtime_status = unit.call("get_runtime_status")
+	if runtime_status == null or not runtime_status.has_method("get"):
+		return 0.0
+	return clampf(float(runtime_status.get("aim_readiness_percent")), 0.0, 100.0)
 
 
 func _build_fireteam_group_status_text(fireteam_id: String, units: Array) -> String:

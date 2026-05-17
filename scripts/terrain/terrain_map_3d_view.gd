@@ -154,6 +154,10 @@ const HOSTILE_READABILITY_BODY_ALPHA: float = 0.90
 const HOSTILE_READABILITY_BODY_HEIGHT_OFFSET: float = 0.47
 const UNIT_BASE_RADIUS: float = 0.27
 const UNIT_BASE_HEIGHT: float = 0.034
+const HOSTILE_UNIT_BASE_RADIUS_FACTOR: float = 0.62
+const HOSTILE_UNIT_BASE_HEIGHT_FACTOR: float = 0.46
+const HOSTILE_UNIT_BASE_ALPHA: float = 0.34
+const HOSTILE_UNIT_BASE_Y: float = -0.045
 const DROPSHIP_MODEL_SCALE: float = 1.48
 const DROPSHIP_MODEL_FORWARD_ROTATION_OFFSET_DEGREES: float = 180.0
 const AIR_LAYER_ID: String = "mission_air"
@@ -5343,7 +5347,9 @@ func _resolve_unit_aim_direction(unit: Node, unit_world_position: Vector2) -> Ve
 func _resolve_unit_explicit_facing_direction(unit: Node) -> Vector2:
 	if unit == null:
 		return Vector2.ZERO
-	for meta_key in ["facing_angle", "map_facing_angle", "enemy_facing_angle", "security_facing_angle"]:
+	if bool(unit.get_meta("security_facing_active", false)) and unit.has_meta("security_facing_angle"):
+		return Vector2.RIGHT.rotated(float(unit.get_meta("security_facing_angle", 0.0))).normalized()
+	for meta_key in ["facing_angle", "map_facing_angle", "enemy_facing_angle"]:
 		if unit.has_meta(meta_key):
 			return Vector2.RIGHT.rotated(float(unit.get_meta(meta_key, 0.0))).normalized()
 	return Vector2.ZERO
@@ -7221,15 +7227,25 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 			root.set_meta("unit_body_visual_kind", "hostile_readability_core")
 	var base := MeshInstance3D.new()
 	var base_mesh := CylinderMesh.new()
-	base_mesh.top_radius = UNIT_BASE_RADIUS
-	base_mesh.bottom_radius = UNIT_BASE_RADIUS
-	base_mesh.height = UNIT_BASE_HEIGHT
+	var is_hostile_base: bool = _get_unit_team_id(unit) != "team_alpha"
+	var base_radius: float = UNIT_BASE_RADIUS * (HOSTILE_UNIT_BASE_RADIUS_FACTOR if is_hostile_base else 1.0)
+	var base_height: float = UNIT_BASE_HEIGHT * (HOSTILE_UNIT_BASE_HEIGHT_FACTOR if is_hostile_base else 1.0)
+	var base_color: Color = _get_unit_base_color(unit)
+	if is_hostile_base:
+		base_color = Color(base_color.r, base_color.g, base_color.b, HOSTILE_UNIT_BASE_ALPHA)
+	base_mesh.top_radius = base_radius
+	base_mesh.bottom_radius = base_radius
+	base_mesh.height = base_height
 	base_mesh.radial_segments = 16
 	base.mesh = base_mesh
-	base.material_override = _make_material(_get_unit_base_color(unit), true)
-	base.position.y = -0.02
+	base.material_override = _make_material(base_color, true)
+	base.position.y = HOSTILE_UNIT_BASE_Y if is_hostile_base else -0.02
 	root.add_child(base)
 	root.set_meta("unit_team_base_visible", true)
+	root.set_meta("unit_team_base_radius", base_radius)
+	root.set_meta("unit_team_base_height", base_height)
+	root.set_meta("unit_team_base_alpha", base_color.a)
+	root.set_meta("unit_team_base_y", base.position.y)
 	return root
 
 
@@ -8156,6 +8172,10 @@ func _get_unit_proxy_state_by_id() -> Dictionary:
 			"uses_kenney_model": bool(proxy.get_meta("uses_kenney_model", false)),
 			"uses_animated_character_model": bool(proxy.get_meta("uses_animated_character_model", false)),
 			"unit_team_base_visible": bool(proxy.get_meta("unit_team_base_visible", false)),
+			"unit_team_base_radius": float(proxy.get_meta("unit_team_base_radius", 0.0)),
+			"unit_team_base_height": float(proxy.get_meta("unit_team_base_height", 0.0)),
+			"unit_team_base_alpha": float(proxy.get_meta("unit_team_base_alpha", 0.0)),
+			"unit_team_base_y": float(proxy.get_meta("unit_team_base_y", 0.0)),
 			"unit_body_visual_visible": bool(proxy.get_meta("unit_body_visual_visible", false)),
 			"unit_body_visual_kind": String(proxy.get_meta("unit_body_visual_kind", "")).strip_edges(),
 			"unit_body_readability_core_visible": bool(proxy.get_meta("unit_body_readability_core_visible", false)),
