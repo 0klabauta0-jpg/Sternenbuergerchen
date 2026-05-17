@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_461 - Fireteam Engage Visual Stuck Hotfix
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_461_fireteam_engage_visual_stuck_hotfix.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_459_fireteam_engage_orientation_enemy_proxy_fix.md`, `docs/tasks/TASK_460_fireteam_movement_avoidance_stability.md`
+- Stand: Fireteam-Movement-Zielslots werden vor dem Enqueue auf walkable Terrain-Ziele normalisiert. Der MovementController nutzt dieselben Zielpositionen fuer Completion, damit ein blockierter Originalslot Engage/Take nicht dauerhaft aktiv haelt.
+- Stand: Aim-/Facing-Visuals priorisieren aktiven Kontakt und Bewegungs-/Zielrichtung vor altem Security-Facing. Security bleibt Fallback, wenn keine aktuelle Bewegung, kein Ziel und kein Kontakt anliegt.
+- Stand: Hostile Proxies bekommen einen staerkeren Body-Readability-Core mit groesserem Radius und hoeherer Opazitaet, damit Gegner im Drillfenster nicht nur als `IDLE`/Base lesbar sind.
+- Stand: Weapon-Fire-VFX erzeugt Bloom und Trace auch dann, wenn die Muzzle-Textur fehlt; fehlende Textur wird im VFX-Snapshot markiert.
+- Risiken/offen: Dieser Slice stabilisiert sichtbare Engage-Haenger und Fire-Lesbarkeit, ersetzt aber keine spaetere Engstellen-/Sequenzdiagnose und keine finale Enemy-Art.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_461_fireteam_engage_visual_stuck_hotfix.gd`, TASK_438/TASK_459/TASK_460 und `git diff --check`.
+- Naechster Schritt: Im Drill erneut `Engage A/N/C` gegen die rechte Gegnergruppe testen: Gegnerkoerper, rote Fire-/Trace-Linien, Muzzle/Bloom und GO-Fortsetzung nach einem Engage-Haenger pruefen.
+
 ### TASK_460 - Fireteam Movement Avoidance Stability
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_460_fireteam_movement_avoidance_stability.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_459_fireteam_engage_orientation_enemy_proxy_fix.md`, `docs/tasks/TASK_446_fireteam_workbench_spacing_runtime_pass.md`

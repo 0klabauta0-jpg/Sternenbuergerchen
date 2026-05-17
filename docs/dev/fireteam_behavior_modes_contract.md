@@ -139,6 +139,16 @@ TASK_460 bindet den vorhandenen Local-Avoidance-Pfad an die Fireteam-Bewegungsco
 
 Das ist keine neue Pathfinding-Architektur. Wenn Einheiten danach weiter haengen, wird der Befund getrennt nach Terrain-Pfad, Zielslot, Sequenzfortschritt oder Kontakt-/Facing-Regel geschnitten.
 
+### TASK_461 Engage-Visual/Stuck-Hotfix
+
+TASK_461 stabilisiert die sichtbare Engage-Runtime nach dem manuellen Drill-Befund:
+
+- Fireteam-Movement-Zielslots werden gegen `TerrainRegistry.resolve_walkable_target()` normalisiert, bevor die UnitCommands an `SimulationRoot` gehen.
+- Der MovementController nutzt diese normalisierten Zielslots auch fuer seine Completion-Pruefung. Damit wartet ein Engage-/Take-Wegpunkt nicht mehr auf eine blockierte Originalposition, waehrend die Runtime bereits zur walkable Ersatzposition bewegt hat.
+- Aktive Bewegung/Zielrichtung gewinnt fuer Aim-/Facing-Visuals vor altem Security-Facing, solange kein FireEvent oder bestaetigter Kontakt vorliegt.
+- Hostile Units muessen im 3D-View-Fenster einen gut sichtbaren Readability-Core zeigen. Dieser Core bleibt ein Visual-Fallback, keine Gameplay-Wahrheit.
+- Weapon-Fire-VFX darf nicht komplett verschwinden, wenn die Muzzle-Textur fehlt. Bloom und Trace bleiben sichtbar; der Snapshot markiert `muzzle_texture_missing`.
+
 ## Kontakt-Initiative V0
 
 `Kontakt-Initiative` beschreibt die Zeit vom ersten sichtbaren oder suspekten Kontakt bis zum ersten koordinierten Schuss. Sie ersetzt nicht die Waffen-Feuerrate und nicht die harte Combat-Wahrheit. Ein Schuss bleibt nur moeglich, wenn LOS, Waffenreichweite, Vital-State, Fire-Status und Kontaktstatus passen.

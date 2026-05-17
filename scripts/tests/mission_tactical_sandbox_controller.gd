@@ -12672,7 +12672,8 @@ func _apply_live_tactical_stance_to_fireteam(fireteam_id: String) -> bool:
 			get_requested_tactical_stance(normalized_fireteam_id),
 			_get_fireteam_units(normalized_fireteam_id, true),
 			_resolve_fireteam_leader_for_behavior(normalized_fireteam_id),
-			simulation_root
+			simulation_root,
+			_get_terrain_registry()
 		)
 	)
 	return bool(result.get("updated", false))
@@ -13437,7 +13438,8 @@ func _issue_waypoint_for_fireteam(fireteam_id: String, waypoint, phase_index: in
 				behavior_profile,
 				_get_fireteam_units(fireteam_id, true),
 				_resolve_fireteam_leader_for_behavior(fireteam_id),
-				simulation_root
+				simulation_root,
+				_get_terrain_registry()
 			)
 		)
 		if bool(movement_result.get("started", false)):
@@ -13541,7 +13543,8 @@ func _update_fireteam_movement_execution(fireteam_id: String) -> Dictionary:
 			fireteam_id,
 			_get_fireteam_units(fireteam_id, true),
 			_resolve_fireteam_leader_for_behavior(fireteam_id),
-			get_node_or_null("../SimulationRoot")
+			get_node_or_null("../SimulationRoot"),
+			_get_terrain_registry()
 		)
 	)
 	var bound_data: Dictionary = Dictionary(result.get("bound_complete", {})).duplicate(true)
@@ -13858,6 +13861,7 @@ func _update_active_phase_execution(delta: float) -> void:
 		var waypoint = plan.waypoints[waypoint_index]
 		var anchor := _get_selection_anchor_for_fireteam(String(fireteam_id))
 		var resolved_target_position: Vector2 = Vector2(execution_state.get("resolved_target_position", waypoint.target_position))
+		var command_type: String = String(waypoint.command_type).strip_edges().to_lower()
 		_ensure_fireteam_movement_controller()
 		var had_movement_execution: bool = _fireteam_movement_controller != null and bool(_fireteam_movement_controller.call("has_active_execution", String(fireteam_id)))
 		var movement_result: Dictionary = _update_fireteam_movement_execution(String(fireteam_id))
@@ -13867,7 +13871,8 @@ func _update_active_phase_execution(delta: float) -> void:
 			continue
 		var movement_finished: bool = bool(movement_result.get("finished", false))
 		var anchor_reached_target: bool = anchor.global_position.distance_to(resolved_target_position) <= PHASE_WAYPOINT_COMPLETE_RADIUS
-		if had_movement_execution and not movement_finished:
+		var anchor_can_release_combat_move: bool = anchor_reached_target and (command_type == FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_ENGAGE or command_type == FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_TAKE)
+		if had_movement_execution and not movement_finished and not anchor_can_release_combat_move:
 			continue
 		if not had_movement_execution and not anchor_reached_target:
 			continue

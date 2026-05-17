@@ -177,7 +177,8 @@ func start_execution(
 	behavior_profile,
 	units: Array,
 	leader,
-	simulation_root
+	simulation_root,
+	terrain_registry = null
 ) -> Dictionary:
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty() or simulation_root == null:
@@ -268,7 +269,7 @@ func start_execution(
 			state.merge(_build_caterpillar_groups(member_records, leader_unit_id, _leader_pushes_first(member_records, leader_unit_id)), true)
 		_:
 			state["movement_sequence"] = _packed_unit_ids(member_records)
-	var issue_result: Dictionary = _issue_stage(state, member_records, simulation_root)
+	var issue_result: Dictionary = _issue_stage(state, member_records, simulation_root, terrain_registry)
 	if not bool(issue_result.get("started", false)):
 		_execution_by_fireteam.erase(normalized_fireteam_id)
 		return issue_result
@@ -278,7 +279,7 @@ func start_execution(
 	return issue_result
 
 
-func update_execution(fireteam_id: String, units: Array, leader, simulation_root) -> Dictionary:
+func update_execution(fireteam_id: String, units: Array, leader, simulation_root, terrain_registry = null) -> Dictionary:
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty():
 		return {}
@@ -309,18 +310,18 @@ func update_execution(fireteam_id: String, units: Array, leader, simulation_root
 				"movement_state": {},
 			}
 		state["stage_index"] = int(state.get("stage_index", 0)) + 1
-		var issue_result: Dictionary = _issue_stage(state, member_records, simulation_root)
+		var issue_result: Dictionary = _issue_stage(state, member_records, simulation_root, terrain_registry)
 		_execution_by_fireteam[normalized_fireteam_id] = state
 		bound_event["reason"] = BOUND_COMPLETE_REASON_STAGE
 		issue_result["bound_complete"] = bound_event
 		issue_result["movement_state"] = _build_public_state(state)
 		return issue_result
-	_reissue_current_stage(state, member_records, simulation_root)
+	_reissue_current_stage(state, member_records, simulation_root, terrain_registry)
 	_execution_by_fireteam[normalized_fireteam_id] = state
 	return {"movement_state": _build_public_state(state)}
 
 
-func update_tactical_stance(fireteam_id: String, tactical_stance: String, units: Array, leader, simulation_root) -> Dictionary:
+func update_tactical_stance(fireteam_id: String, tactical_stance: String, units: Array, leader, simulation_root, terrain_registry = null) -> Dictionary:
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty():
 		return {"updated": false, "reason": "empty_fireteam_id"}
@@ -337,7 +338,7 @@ func update_tactical_stance(fireteam_id: String, tactical_stance: String, units:
 	var previous_stance: String = _normalize_tactical_stance(String(state.get("tactical_stance", "")))
 	state["tactical_stance"] = normalized_stance
 	state["command_revision"] = int(state.get("command_revision", 0)) + 1
-	_reissue_current_stage(state, member_records, simulation_root)
+	_reissue_current_stage(state, member_records, simulation_root, terrain_registry)
 	_execution_by_fireteam[normalized_fireteam_id] = state
 	return {
 		"updated": true,
@@ -347,7 +348,7 @@ func update_tactical_stance(fireteam_id: String, tactical_stance: String, units:
 	}
 
 
-func _issue_stage(state: Dictionary, member_records: Array, simulation_root) -> Dictionary:
+func _issue_stage(state: Dictionary, member_records: Array, simulation_root, terrain_registry = null) -> Dictionary:
 	var style: String = String(state.get("effective_style", ADVANCE_STYLE_RUSH))
 	var moving_unit_ids: PackedStringArray = PackedStringArray()
 	var covering_unit_ids: PackedStringArray = PackedStringArray()
@@ -394,6 +395,7 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root) -> 
 	)
 	var current_positions: Dictionary = _build_current_positions(member_records)
 	var issued_count: int = 0
+	var walkable_adjustment_count: int = 0
 	for record in member_records:
 		var unit_id: String = String(record.get("unit_id", ""))
 		if unit_id.is_empty():
@@ -425,6 +427,10 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root) -> 
 			continue
 		var move_target: Vector2 = Vector2(formation_targets.get(unit_id, next_anchor_target))
 		move_target = _avoid_backward_move_target(state, Vector2(current_positions.get(unit_id, move_target)), move_target)
+		var walkable_target: Vector2 = _resolve_walkable_stage_target(move_target, terrain_registry)
+		if walkable_target.distance_squared_to(move_target) > 0.25:
+			walkable_adjustment_count += 1
+		move_target = walkable_target
 		formation_targets[unit_id] = move_target
 		var move_speed_factor: float = _build_move_speed_factor(style, String(state.get("command_type", "")), member_records, moving_unit_ids, current_positions, float(state.get("cohesion_threshold", 100.0)), float(record.get("speed", 0.5)), float(state.get("move_speed_multiplier", 1.0)))
 		move_speed_factor *= _resolve_behavior_command_speed_multiplier(state)
@@ -454,6 +460,7 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root) -> 
 	state["current_target_positions"] = formation_targets
 	state["current_moving_unit_ids"] = moving_unit_ids
 	state["current_covering_unit_ids"] = covering_unit_ids
+	state["current_walkable_target_adjustment_count"] = walkable_adjustment_count
 	state["group_count_for_anchor"] = group_count
 	state["groups_issued_for_anchor"] = int(state.get("groups_issued_for_anchor", 0)) + 1
 	if style == ADVANCE_STYLE_RUSH or int(state.get("groups_issued_for_anchor", 0)) >= group_count:
@@ -558,7 +565,16 @@ func _target_positions_cover_member_records(target_positions: Dictionary, member
 	return true
 
 
-func _reissue_current_stage(state: Dictionary, member_records: Array, simulation_root) -> void:
+func _resolve_walkable_stage_target(target_position: Vector2, terrain_registry) -> Vector2:
+	if terrain_registry == null or not terrain_registry.has_method("resolve_walkable_target"):
+		return target_position
+	var resolution: Dictionary = Dictionary(terrain_registry.call("resolve_walkable_target", target_position)).duplicate(true)
+	if typeof(resolution.get("replacement_position", null)) != TYPE_VECTOR2:
+		return target_position
+	return Vector2(resolution.get("replacement_position", target_position))
+
+
+func _reissue_current_stage(state: Dictionary, member_records: Array, simulation_root, terrain_registry = null) -> void:
 	if simulation_root == null:
 		return
 	var moving_unit_ids: PackedStringArray = PackedStringArray(state.get("current_moving_unit_ids", PackedStringArray()))
@@ -568,6 +584,7 @@ func _reissue_current_stage(state: Dictionary, member_records: Array, simulation
 	var current_target_positions: Dictionary = Dictionary(state.get("current_target_positions", {}))
 	var current_positions: Dictionary = _build_current_positions(member_records)
 	var style: String = String(state.get("effective_style", ADVANCE_STYLE_RUSH))
+	var walkable_adjustment_count: int = 0
 	for record in member_records:
 		var unit_id: String = String(record.get("unit_id", ""))
 		if unit_id.is_empty():
@@ -596,6 +613,10 @@ func _reissue_current_stage(state: Dictionary, member_records: Array, simulation
 		if not moving_unit_ids.has(unit_id) or not current_target_positions.has(unit_id):
 			continue
 		var move_target: Vector2 = _avoid_backward_move_target(state, Vector2(current_positions.get(unit_id, current_target_positions.get(unit_id))), Vector2(current_target_positions.get(unit_id)))
+		var walkable_target: Vector2 = _resolve_walkable_stage_target(move_target, terrain_registry)
+		if walkable_target.distance_squared_to(move_target) > 0.25:
+			walkable_adjustment_count += 1
+		move_target = walkable_target
 		current_target_positions[unit_id] = move_target
 		var move_speed_factor: float = _build_move_speed_factor(style, String(state.get("command_type", "")), member_records, moving_unit_ids, current_positions, float(state.get("cohesion_threshold", 100.0)), float(record.get("speed", 0.5)), float(state.get("move_speed_multiplier", 1.0)))
 		move_speed_factor *= _resolve_behavior_command_speed_multiplier(state)
@@ -619,6 +640,7 @@ func _reissue_current_stage(state: Dictionary, member_records: Array, simulation
 			_resolve_stage_behavior_modifiers(state)
 		)
 	state["current_target_positions"] = current_target_positions
+	state["current_walkable_target_adjustment_count"] = walkable_adjustment_count
 
 
 func _build_member_records(units: Array, leader) -> Array:
@@ -1856,6 +1878,7 @@ func _build_public_state(state: Dictionary) -> Dictionary:
 		"final_target_position": Vector2(state.get("final_target_position", Vector2.ZERO)),
 		"order_target_offset": Vector2(state.get("order_target_offset", Vector2.ZERO)),
 		"current_target_positions": Dictionary(state.get("current_target_positions", {})).duplicate(true),
+		"current_walkable_target_adjustment_count": int(state.get("current_walkable_target_adjustment_count", 0)),
 		"current_moving_unit_ids": moving_unit_ids,
 		"current_covering_unit_ids": covering_unit_ids,
 		"moving_unit_ids": moving_unit_ids,

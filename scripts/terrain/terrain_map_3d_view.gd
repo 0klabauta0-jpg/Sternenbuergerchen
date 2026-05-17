@@ -148,6 +148,10 @@ const DROPSHIP_MODEL_NAME: String = "craft_speederB"
 const UNIT_MODEL_SCALE: float = 0.66
 const UNIT_FALLBACK_BODY_RADIUS: float = 0.18
 const UNIT_FALLBACK_BODY_HEIGHT: float = 0.585
+const HOSTILE_READABILITY_BODY_RADIUS_FACTOR: float = 0.92
+const HOSTILE_READABILITY_BODY_HEIGHT_FACTOR: float = 1.05
+const HOSTILE_READABILITY_BODY_ALPHA: float = 0.90
+const HOSTILE_READABILITY_BODY_HEIGHT_OFFSET: float = 0.47
 const UNIT_BASE_RADIUS: float = 0.27
 const UNIT_BASE_HEIGHT: float = 0.034
 const DROPSHIP_MODEL_SCALE: float = 1.48
@@ -5318,12 +5322,12 @@ func _resolve_unit_aim_direction(unit: Node, unit_world_position: Vector2) -> Ve
 	var contact_direction: Vector2 = _resolve_unit_visible_contact_direction(unit, unit_world_position)
 	if contact_direction.length_squared() > 0.0001:
 		return contact_direction
-	var explicit_facing_direction: Vector2 = _resolve_unit_explicit_facing_direction(unit)
-	if explicit_facing_direction.length_squared() > 0.0001:
-		return explicit_facing_direction
 	var motion_or_target_direction: Vector2 = _resolve_unit_motion_or_target_direction(proxy, unit, unit_world_position)
 	if motion_or_target_direction.length_squared() > 0.0001:
 		return motion_or_target_direction
+	var explicit_facing_direction: Vector2 = _resolve_unit_explicit_facing_direction(unit)
+	if explicit_facing_direction.length_squared() > 0.0001:
+		return explicit_facing_direction
 	var target_position_variant = unit.call("get_target_position") if unit != null and unit.has_method("get_target_position") else null
 	if typeof(target_position_variant) == TYPE_VECTOR2:
 		var target_position: Vector2 = Vector2(target_position_variant)
@@ -5339,7 +5343,7 @@ func _resolve_unit_aim_direction(unit: Node, unit_world_position: Vector2) -> Ve
 func _resolve_unit_explicit_facing_direction(unit: Node) -> Vector2:
 	if unit == null:
 		return Vector2.ZERO
-	for meta_key in ["security_facing_angle", "facing_angle", "map_facing_angle", "enemy_facing_angle"]:
+	for meta_key in ["facing_angle", "map_facing_angle", "enemy_facing_angle", "security_facing_angle"]:
 		if unit.has_meta(meta_key):
 			return Vector2.RIGHT.rotated(float(unit.get_meta(meta_key, 0.0))).normalized()
 	return Vector2.ZERO
@@ -5467,15 +5471,15 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 	var weapon_id: String = WEAPON_DATA_SCRIPT.call("normalize_weapon_id", String(fire_event.get("weapon_id", "rifle")))
 	var muzzle_entry: Dictionary = _get_weapon_fire_vfx_entry(weapon_id)
 	var texture: Texture2D = _get_weapon_fire_vfx_texture(String(muzzle_entry.get("path", "")))
-	if texture == null:
-		return
 	var barrel_offset: float = float(muzzle_entry.get("barrel_offset_world", 28.0))
 	var muzzle_position: Vector2 = attacker_position + direction.normalized() * barrel_offset
 	var catalog_pixel_size: float = float(muzzle_entry.get("pixel_size", 0.010))
 	var pixel_size: float = maxf(catalog_pixel_size, WEAPON_FIRE_MUZZLE_MIN_PIXEL_SIZE)
 	var is_friendly_fire: bool = bool(fire_event.get("is_friendly_fire", false))
 	var trace_color: Color = WEAPON_FIRE_FRIENDLY_TRACE_COLOR if is_friendly_fire else WEAPON_FIRE_CONTACT_TRACE_COLOR
-	_add_texture_card(_order_root, texture, _world_to_surface_3d_position(muzzle_position, 0.92), "WeaponFireMuzzle_%s" % _sanitize_node_name(event_id), pixel_size, Vector2.ZERO, Color(1.0, 0.95, 0.62, 0.92))
+	var muzzle_texture_visible: bool = texture != null
+	if muzzle_texture_visible:
+		_add_texture_card(_order_root, texture, _world_to_surface_3d_position(muzzle_position, 0.92), "WeaponFireMuzzle_%s" % _sanitize_node_name(event_id), pixel_size, Vector2.ZERO, Color(1.0, 0.95, 0.62, 0.92))
 	_add_marker3d(_order_root, muzzle_position, WEAPON_FIRE_MUZZLE_BLOOM_COLOR, "WeaponFireMuzzleBloom_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_MUZZLE_BLOOM_RADIUS, WEAPON_FIRE_MUZZLE_BLOOM_HEIGHT, 16, 0.84)
 	_add_wide_line3d(_order_root, _world_to_surface_3d_position(muzzle_position, 0.78), _world_to_surface_3d_position(target_position, 0.78), trace_color, "WeaponFireTrace_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_TRACE_WIDTH)
 	var flank_label: String = _build_flank_fire_vfx_label(fire_event)
@@ -5493,7 +5497,8 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		"attacker_unit_id": String(fire_event.get("attacker_unit_id", "")),
 		"target_unit_id": String(fire_event.get("target_unit_id", "")),
 		"muzzle_position": muzzle_position,
-		"muzzle_flash_visible": true,
+		"muzzle_flash_visible": muzzle_texture_visible,
+		"muzzle_texture_missing": not muzzle_texture_visible,
 		"muzzle_bloom_visible": true,
 		"muzzle_catalog_pixel_size": catalog_pixel_size,
 		"muzzle_flash_pixel_size": pixel_size,
@@ -6695,9 +6700,9 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 			if weapon_pose_direction.length_squared() <= 0.0001:
 				weapon_pose_direction = _resolve_unit_visible_contact_direction(unit, unit_world_position)
 			if weapon_pose_direction.length_squared() <= 0.0001:
-				weapon_pose_direction = _resolve_unit_explicit_facing_direction(unit)
-			if weapon_pose_direction.length_squared() <= 0.0001:
 				weapon_pose_direction = _resolve_unit_motion_or_target_direction(proxy, unit, unit_world_position)
+			if weapon_pose_direction.length_squared() <= 0.0001:
+				weapon_pose_direction = _resolve_unit_explicit_facing_direction(unit)
 			if weapon_pose_direction.length_squared() <= 0.0001:
 				weapon_pose_direction = _resolve_unit_aim_direction(unit, unit_world_position)
 			var next_position: Vector3 = _world_to_surface_3d_position(unit_world_position, 0.06)
@@ -7034,12 +7039,12 @@ func _get_unit_proxy_rotation_y(proxy: Node3D, unit: Node, current_world_positio
 	var contact_direction: Vector2 = _resolve_unit_visible_contact_direction(unit, current_world_position)
 	if contact_direction.length_squared() > 0.0001:
 		return _get_unit_world_direction_yaw(current_world_position, current_world_position + contact_direction, fallback_yaw)
-	var explicit_facing_direction: Vector2 = _resolve_unit_explicit_facing_direction(unit)
-	if explicit_facing_direction.length_squared() > 0.0001:
-		return _get_unit_world_direction_yaw(current_world_position, current_world_position + explicit_facing_direction, fallback_yaw)
 	var motion_or_target_direction: Vector2 = _resolve_unit_motion_or_target_direction(proxy, unit, current_world_position)
 	if motion_or_target_direction.length_squared() > 0.0001:
 		return _get_unit_world_direction_yaw(current_world_position, current_world_position + motion_or_target_direction, fallback_yaw)
+	var explicit_facing_direction: Vector2 = _resolve_unit_explicit_facing_direction(unit)
+	if explicit_facing_direction.length_squared() > 0.0001:
+		return _get_unit_world_direction_yaw(current_world_position, current_world_position + explicit_facing_direction, fallback_yaw)
 	var target_position: Variant = unit.call("get_target_position") if unit != null and unit.has_method("get_target_position") else null
 	if typeof(target_position) == TYPE_VECTOR2:
 		var target_world_position: Vector2 = Vector2(target_position)
@@ -7231,15 +7236,22 @@ func _add_unit_body_readability_core(root: Node3D, unit: Node) -> void:
 		return
 	var body := MeshInstance3D.new()
 	var mesh := CapsuleMesh.new()
-	mesh.radius = UNIT_FALLBACK_BODY_RADIUS * 0.46
-	mesh.height = UNIT_FALLBACK_BODY_HEIGHT * 0.72
+	var is_hostile: bool = _get_unit_team_id(unit) != "team_alpha"
+	var radius_factor: float = HOSTILE_READABILITY_BODY_RADIUS_FACTOR if is_hostile else 0.46
+	var height_factor: float = HOSTILE_READABILITY_BODY_HEIGHT_FACTOR if is_hostile else 0.72
+	var alpha: float = HOSTILE_READABILITY_BODY_ALPHA if is_hostile else 0.62
+	mesh.radius = UNIT_FALLBACK_BODY_RADIUS * radius_factor
+	mesh.height = UNIT_FALLBACK_BODY_HEIGHT * height_factor
 	body.name = "UnitBodyReadabilityCore"
 	body.mesh = mesh
 	var color: Color = _get_unit_color(unit)
-	body.material_override = _make_material(Color(color.r, color.g, color.b, 0.62), true)
-	body.position = Vector3(0.0, 0.38, 0.0)
+	body.material_override = _make_material(Color(color.r, color.g, color.b, alpha), true)
+	body.position = Vector3(0.0, HOSTILE_READABILITY_BODY_HEIGHT_OFFSET if is_hostile else 0.38, 0.0)
 	root.add_child(body)
 	root.set_meta("unit_body_readability_core_visible", true)
+	root.set_meta("unit_body_readability_core_radius", mesh.radius)
+	root.set_meta("unit_body_readability_core_height", mesh.height)
+	root.set_meta("unit_body_readability_core_alpha", alpha)
 	root.set_meta("unit_body_visual_visible", true)
 
 
@@ -8145,6 +8157,9 @@ func _get_unit_proxy_state_by_id() -> Dictionary:
 			"unit_body_visual_visible": bool(proxy.get_meta("unit_body_visual_visible", false)),
 			"unit_body_visual_kind": String(proxy.get_meta("unit_body_visual_kind", "")).strip_edges(),
 			"unit_body_readability_core_visible": bool(proxy.get_meta("unit_body_readability_core_visible", false)),
+			"unit_body_readability_core_radius": float(proxy.get_meta("unit_body_readability_core_radius", 0.0)),
+			"unit_body_readability_core_height": float(proxy.get_meta("unit_body_readability_core_height", 0.0)),
+			"unit_body_readability_core_alpha": float(proxy.get_meta("unit_body_readability_core_alpha", 0.0)),
 			"unit_visual_signature": String(proxy.get_meta("unit_visual_signature", "")).strip_edges(),
 			"unit_visual_archetype_id": String(proxy.get_meta("unit_visual_archetype_id", "")).strip_edges(),
 			"unit_visual_faction_id": String(proxy.get_meta("unit_visual_faction_id", "")).strip_edges(),
