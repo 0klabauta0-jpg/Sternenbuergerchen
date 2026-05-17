@@ -8,6 +8,7 @@ const DAMAGE_MODEL_SCRIPT: GDScript = preload("res://scripts/core/damage_model.g
 const OBJECTIVE_STATUS_SCRIPT: GDScript = preload("res://scripts/core/objective_status.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const CONTACT_PATH_RECOMPUTE_INTERVAL_MSEC: int = 600
+const LOCAL_AVOIDANCE_MIN_FORWARD_PROGRESS_FACTOR: float = 0.35
 const TERRAIN_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_pathfinder.gd")
 const HPA_NAVIGATION_GRAPH_SCRIPT: GDScript = preload("res://scripts/terrain/hpa_navigation_graph.gd")
 const HPA_PATHFINDER_SCRIPT: GDScript = preload("res://scripts/terrain/hpa_pathfinder.gd")
@@ -1802,8 +1803,8 @@ func _duplicate_dictionary_array(values: Array) -> Array:
 	return result
 
 
-func _prepare_local_avoidance_tick() -> void:
-	if not local_avoidance_enabled:
+func _prepare_local_avoidance_tick(force: bool = false) -> void:
+	if not local_avoidance_enabled and not force:
 		_local_avoidance_prepared_tick = -1
 		return
 	if _local_avoidance_prepared_tick == tick_counter:
@@ -1904,9 +1905,10 @@ func _resolve_local_avoidance_velocity(
 	delta: float,
 	terrain_registry
 ) -> Vector2:
-	if unit_node == null or not _is_local_avoidance_enabled_for_command(cmd) or desired_velocity.is_zero_approx():
+	var command_avoidance_enabled: bool = _is_local_avoidance_enabled_for_command(cmd)
+	if unit_node == null or not command_avoidance_enabled or desired_velocity.is_zero_approx():
 		return desired_velocity
-	_prepare_local_avoidance_tick()
+	_prepare_local_avoidance_tick(command_avoidance_enabled)
 	var unit_id: String = _extract_unit_id_for_path_recompute(unit_node)
 	var started_usec: int = Time.get_ticks_usec()
 	var result: Dictionary = Dictionary(_local_avoidance_resolver.call(
@@ -1919,6 +1921,7 @@ func _resolve_local_avoidance_velocity(
 		local_avoidance_max_neighbors
 	))
 	var safe_velocity: Vector2 = Vector2(result.get("safe_velocity", desired_velocity))
+	safe_velocity = _preserve_local_avoidance_forward_progress(desired_velocity, safe_velocity, max_speed)
 	var discarded_correction: bool = false
 	var discard_reason: String = ""
 	if terrain_registry != null:
@@ -1941,6 +1944,22 @@ func _resolve_local_avoidance_velocity(
 	return safe_velocity
 
 
+func _preserve_local_avoidance_forward_progress(desired_velocity: Vector2, safe_velocity: Vector2, max_speed: float) -> Vector2:
+	var desired_speed: float = desired_velocity.length()
+	if desired_speed <= 0.001 or max_speed <= 0.001:
+		return safe_velocity
+	var desired_direction: Vector2 = desired_velocity / desired_speed
+	var minimum_forward_speed: float = minf(desired_speed, max_speed) * LOCAL_AVOIDANCE_MIN_FORWARD_PROGRESS_FACTOR
+	var current_forward_speed: float = safe_velocity.dot(desired_direction)
+	if current_forward_speed >= minimum_forward_speed:
+		return safe_velocity
+	var lateral_velocity: Vector2 = safe_velocity - desired_direction * current_forward_speed
+	var next_velocity: Vector2 = desired_direction * minimum_forward_speed + lateral_velocity
+	if next_velocity.length() > max_speed:
+		next_velocity = next_velocity.normalized() * max_speed
+	return next_velocity
+
+
 func _is_local_avoidance_position_walkable(position: Vector2, terrain_registry) -> bool:
 	if terrain_registry == null or not terrain_registry.has_method("world_to_grid") or not terrain_registry.has_method("is_walkable"):
 		return true
@@ -1948,7 +1967,7 @@ func _is_local_avoidance_position_walkable(position: Vector2, terrain_registry) 
 
 
 func _update_local_avoidance_agent_position(unit_id: String, position: Vector2) -> void:
-	if unit_id.strip_edges().is_empty() or not local_avoidance_enabled:
+	if unit_id.strip_edges().is_empty():
 		return
 	if _local_avoidance_prepared_tick != tick_counter:
 		return
@@ -1990,6 +2009,7 @@ func _record_local_avoidance_debug(cmd: Dictionary, unit_id: String, result: Dic
 		"discarded_correction": bool(result.get("discarded_correction", false)),
 		"discard_reason": String(result.get("discard_reason", "")),
 		"duration_usec": int(result.get("duration_usec", 0)),
+		"command_local_avoidance_enabled": bool(cmd.get("local_avoidance_enabled", false)),
 	}
 
 

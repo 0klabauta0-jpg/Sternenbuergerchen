@@ -119,6 +119,7 @@ const FORMATION_BUDDY_PAIR_FORWARD_STEP: float = 0.65
 const FORMATION_TRAVEL_COMPACT_SLOT_SCALE: float = 0.72
 const MOVE_TRAVEL_MIN_TARGET_SPACING: float = 56.0
 const MOVE_CAUTIOUS_PARALLEL_TARGET_SPACING: float = 80.0
+const FIRETEAM_LOCAL_AVOIDANCE_SOURCE_ID: String = "fireteam_movement_controller"
 const MOVE_NORMAL_PARALLEL_TARGET_SPACING: float = 80.0
 const MOVE_AGGRESSIVE_PARALLEL_TARGET_SPACING: float = 112.0
 const ENGAGE_CAUTIOUS_FORMATION_SLOT_SPACING: float = 92.0
@@ -249,6 +250,7 @@ func start_execution(
 		"current_target_positions": {},
 		"current_moving_unit_ids": PackedStringArray(),
 		"current_covering_unit_ids": PackedStringArray(),
+		"local_avoidance_command_opt_in": true,
 		"command_revision": 0,
 		"groups_issued_for_anchor": 0,
 		"group_count_for_anchor": 1,
@@ -1179,9 +1181,19 @@ func _enqueue_unit_command(
 		unit.call("assign_unit_command", command)
 	var command_dict: Dictionary = command.to_dict()
 	_append_behavior_modifier_fields(command_dict, behavior_modifiers)
+	if _should_enable_fireteam_local_avoidance(command.command_type, command.move_speed_factor):
+		command_dict["local_avoidance_enabled"] = true
+		command_dict["local_avoidance_source"] = FIRETEAM_LOCAL_AVOIDANCE_SOURCE_ID
 	command_dict["requeue_until_target"] = command_type != UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION
 	simulation_root.call("enqueue_command", command_dict)
 	return true
+
+
+func _should_enable_fireteam_local_avoidance(command_type: String, move_speed_factor: float) -> bool:
+	var normalized_command_type: String = command_type.strip_edges().to_lower()
+	if move_speed_factor <= 0.0:
+		return false
+	return normalized_command_type == UNIT_COMMAND_SCRIPT.TYPE_MOVE_TO_POSITION or normalized_command_type == UNIT_COMMAND_SCRIPT.TYPE_ENGAGE_AREA
 
 
 func _resolve_unit_command_fire_status(command_type: String, source_command_type: String, weapon_posture: String) -> String:
@@ -1868,6 +1880,7 @@ func _build_public_state(state: Dictionary) -> Dictionary:
 		"formation_preset_key": String(state.get("formation_preset_key", "")),
 		"formation_slot_source": String(state.get("formation_slot_source", "runtime_fallback")),
 		"formation_leader_slot": String(state.get("formation_leader_slot", "")),
+		"local_avoidance_command_opt_in": bool(state.get("local_avoidance_command_opt_in", false)),
 		"move_speed_multiplier": float(state.get("move_speed_multiplier", 1.0)),
 		"engage_doctrine": _build_engage_doctrine_snapshot(state),
 		"take_doctrine": _build_take_doctrine_snapshot(state),

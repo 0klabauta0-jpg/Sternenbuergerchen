@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_460 - Fireteam Movement Avoidance Stability
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_460_fireteam_movement_avoidance_stability.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_459_fireteam_engage_orientation_enemy_proxy_fix.md`, `docs/tasks/TASK_446_fireteam_workbench_spacing_runtime_pass.md`
+- Stand: Fireteam-Move/Engage/Take-Bewegungscommands tragen jetzt command-lokal `local_avoidance_enabled = true` plus eine sichtbare Source-ID. Hold-/Cover-Commands bleiben reine Haltecommands.
+- Stand: `SimulationRoot` kann den Local-Avoidance-Resolver fuer command-lokales Opt-in vorbereiten, auch wenn der globale Root-Schalter aus ist. Der Debug-Snapshot markiert `command_local_avoidance_enabled`.
+- Stand: Der Avoidance-Pfad erhaelt eine kleine Mindest-Vorwaertsbewegung, damit Ausweichkorrekturen den Zielabschluss nicht dauerhaft verhindern.
+- Risiken/offen: Dieser Slice aktiviert und stabilisiert den vorhandenen Avoidance-Pfad, ersetzt aber keine spaetere Terrain-Engstellen-, Zielslot- oder Sequenzdiagnose. Enemy-Patrouille und Body-Rendering bleiben angrenzende Follow-ups.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_460_fireteam_movement_avoidance_stability.gd`, TASK_423/TASK_446 und `git diff --check`.
+- Naechster Schritt: Im Drill Move/Engage/Take erneut gegen die rechte Gegnergruppe laufen lassen und pruefen, ob weniger Gaensemarsch/Haenger entstehen; verbleibende Haenger dann nach Terrain-Path, Zielslot oder Sequenz trennen.
+
 ### TASK_459 - Fireteam Engage Orientation Enemy Proxy Fix
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_459_fireteam_engage_orientation_enemy_proxy_fix.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_458_fireteam_contact_decision_diagnostics.md`, `docs/tasks/TASK_438_fireteam_contact_visibility_attack_visuals.md`

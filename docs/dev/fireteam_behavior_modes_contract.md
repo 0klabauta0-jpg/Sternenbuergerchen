@@ -127,6 +127,18 @@ TASK_459 legt fuer die 3D-Lesbarkeit fest:
 - Defense-/Security-Facing bleibt nur dann sichtbar fuehrend, wenn kein aktiver Kontakt/Fire-Event fuer die Unit vorliegt.
 - Hostile Units muessen mindestens einen sichtbaren Body-/Readability-Core zeigen. Der Core ist ein Debug-/Lesbarkeitsfallback, keine neue Gameplay-Wahrheit.
 
+### TASK_460 Movement-/Avoidance-Stabilitaet
+
+TASK_460 bindet den vorhandenen Local-Avoidance-Pfad an die Fireteam-Bewegungscommands an:
+
+- Move-, Engage- und Take-Bewegungscommands setzen command-lokal `local_avoidance_enabled = true`.
+- Hold-/Cover-Commands bleiben ohne Movement-Avoidance-Opt-in.
+- `SimulationRoot` darf den Avoidance-Resolver fuer ein command-lokales Opt-in vorbereiten, auch wenn der globale Root-Schalter fuer Tests oder andere Szenen aus ist.
+- Der Debug-Snapshot markiert `command_local_avoidance_enabled`, damit im Playtest sichtbar wird, ob der Pfad wirklich aktiv ist.
+- Avoidance-Korrekturen behalten einen Mindestanteil Bewegung in Zielrichtung, damit das Team ausweicht, aber nicht dauerhaft am Zielabschluss vorbeischiebt.
+
+Das ist keine neue Pathfinding-Architektur. Wenn Einheiten danach weiter haengen, wird der Befund getrennt nach Terrain-Pfad, Zielslot, Sequenzfortschritt oder Kontakt-/Facing-Regel geschnitten.
+
 ## Kontakt-Initiative V0
 
 `Kontakt-Initiative` beschreibt die Zeit vom ersten sichtbaren oder suspekten Kontakt bis zum ersten koordinierten Schuss. Sie ersetzt nicht die Waffen-Feuerrate und nicht die harte Combat-Wahrheit. Ein Schuss bleibt nur moeglich, wenn LOS, Waffenreichweite, Vital-State, Fire-Status und Kontaktstatus passen.
