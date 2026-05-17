@@ -190,6 +190,17 @@ TASK_465 stabilisiert den Uebergang von einem abgeschlossenen Auto-`DEF 360` in 
 - `Defend` bedeutet Halten mit Feuer frei, nicht Feuerverbot. Wenn ein Gegner fit, sichtbar, in LOS, in Waffenreichweite und nach Contact-/Detection-Regel ausreichend bestaetigt ist, darf auch ein Fireteam in `DEF 360` schiessen.
 - Ein neuer `Engage` aus Auto-Defend muss den aktiven Behavior-/Movement-State uebernehmen, Bounds weiter takten und bei Close Contact einen Fire-Event erzeugen oder eine klare Contact-Diagnose liefern.
 
+### TASK_466 Live-Kontaktfeuer/Damage
+
+TASK_466 legt fest, dass der sichtbare Playtest-Pfad nicht nur eine vorbereitete Kontaktentscheidung testen darf. Der echte Live-Tick-Pfad muss funktionieren:
+
+- Friendly `DEF 360` und Friendly `Engage` duerfen bei einem fitten Gegner in LOS und Waffenreichweite feuern, sobald Detection/Contact den Kontakt freigibt.
+- Ein Schuss ist erst als erfolgreich diagnostiziert, wenn `MissionCombatLoopDriver` `reason = fired` meldet, ein Fire-Event fuer Muzzle/Trace erzeugt und ein Damage-Effect ueber `SimulationRoot` beim Ziel ankommt.
+- Gegner duerfen ebenfalls zurueckfeuern. Tests und Diagnosen muessen deshalb Angreifer-Team und Ziel-ID nennen, damit friendly fire on enemy nicht mit gegnerischem Gegenfeuer verwechselt wird.
+- #18/Mission Control muss im Playtest sichtbar bleiben und den Contact-Status zeigen: `CONTACT FIRE`, `CONTACT WAIT` oder `NO FIRE <Grund>`.
+- Wenn kein Feuer moeglich ist, ist ein leerer #18-Status unzulaessig. Die Diagnose muss konkret auf `no_los`, `out_of_range`, `cooldown`, `attacker_not_engage_ready`, Detection-/Contact-State oder fehlende aktive Gegner zeigen.
+- HP-/Damage-Wirkung ist Runtime-Wahrheit. `TestUnit.apply_damage()` setzt bei 0 HP `vital_state = down`; eine sichtbare Hit-/Down-Animation bleibt ein eigener Visual-Slice.
+
 ## Kontakt-Initiative V0
 
 `Kontakt-Initiative` beschreibt die Zeit vom ersten sichtbaren oder suspekten Kontakt bis zum ersten koordinierten Schuss. Sie ersetzt nicht die Waffen-Feuerrate und nicht die harte Combat-Wahrheit. Ein Schuss bleibt nur moeglich, wenn LOS, Waffenreichweite, Vital-State, Fire-Status und Kontaktstatus passen.

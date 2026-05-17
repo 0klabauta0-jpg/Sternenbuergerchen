@@ -8683,7 +8683,6 @@ func _apply_card_bound_mission_control_layout() -> void:
 	for path in [
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid",
-		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicStatusLabel",
 	]:
 		var control := get_node_or_null(path) as Control
 		if control == null:
@@ -8691,6 +8690,11 @@ func _apply_card_bound_mission_control_layout() -> void:
 		control.visible = false
 		control.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		control.set_meta("mission_control_card_bound_hidden", true)
+	var status_label := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicStatusLabel") as Control
+	if status_label != null:
+		status_label.visible = true
+		status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		status_label.set_meta("mission_control_card_bound_hidden", false)
 
 
 func _apply_command_grid_hierarchy_order(command_grid: GridContainer) -> void:

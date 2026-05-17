@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_466 - Fireteam Live Defend Contact Fire Damage
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_466_fireteam_live_defend_contact_fire_damage.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_458_fireteam_contact_decision_diagnostics.md`, `docs/tasks/TASK_464_fireteam_contact_scan_fire_feedback_readability.md`, `docs/tasks/TASK_465_fireteam_engage_resume_contact_progress.md`
+- Stand: Der neue Verifier prueft den echten Live-Tick-Pfad ohne forcierte Detection: `DEF 360` und `Engage` erkennen einen nahen Gegner, erzeugen `CONTACT FIRE`, schreiben einen Fire-Event und Damage erreicht das Ziel ueber `SimulationRoot`.
+- Stand: Die Mission-Control-Diagnose bleibt in #18 sichtbar. Das card-bound Layout versteckt weiter die grossen alten Action-/Approach-Flaechen, aber nicht mehr `StrategicStatusLabel`, damit `CONTACT FIRE`, `CONTACT WAIT` oder `NO FIRE <Grund>` im Playtest lesbar bleibt.
+- Stand: Der Test unterscheidet friendly fire on enemy von gegnerischem Gegenfeuer und akzeptiert Damage erst, wenn ein freundlicher Angreifer den Enemy tatsaechlich getroffen hat.
+- Risiken/offen: Treffer/Down-State existiert datenbasiert ueber HP und `vital_state = down`; eine gut sichtbare Umfall-/Hit-Animation ist nicht Teil dieses Slices. Wenn im Fenster weiter keine Schuesse sichtbar sind, ist #18 jetzt der erste Diagnosepunkt fuer `no_los`, `out_of_range`, `cooldown` oder Detection-State.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_466_fireteam_live_defend_contact_fire_damage.gd` plus relevante TASK_458/TASK_464/TASK_465-Regressionen und `git diff --check`.
+- Naechster Schritt: Im Drill `Move -> Engage -> Auto DEF` erneut testen und #18 lesen. Erwartet ist entweder sichtbares `CONTACT FIRE` mit Fire-Event/Damage oder ein konkreter `NO FIRE`-Grund.
+
 ### TASK_465 - Fireteam Engage Resume Contact Progress
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_465_fireteam_engage_resume_contact_progress.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_462_fireteam_auto_defend_completion_release.md`, `docs/tasks/TASK_463_fireteam_auto_defend_guard_enemy_model_visibility.md`, `docs/tasks/TASK_464_fireteam_contact_scan_fire_feedback_readability.md`
