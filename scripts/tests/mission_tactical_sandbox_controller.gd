@@ -1254,6 +1254,13 @@ func get_enemy_limbo_behavior_snapshot() -> Dictionary:
 	return Dictionary(combat_driver.call("get_enemy_limbo_behavior_snapshot")).duplicate(true)
 
 
+func get_contact_decision_diagnostics_snapshot() -> Dictionary:
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver == null or not combat_driver.has_method("get_contact_decision_diagnostics_snapshot"):
+		return {}
+	return Dictionary(combat_driver.call("get_contact_decision_diagnostics_snapshot")).duplicate(true)
+
+
 func _enrich_contact_entries_with_recon(contact_entries: Array, fallback_fireteam_id: String = "") -> Array:
 	var tactics_by_unit_id: Dictionary = _build_enemy_tactics_by_unit_id()
 	var result: Array = []
@@ -5490,11 +5497,61 @@ func _build_strategic_status_text() -> String:
 		ship_text = "Dropship outbound"
 	elif _drop_sequence_phase == DROP_SEQUENCE_COMPLETE:
 		ship_text = "Fireteam entladen"
-	var time_text: String = _build_mission_time_limit_text()
+	var lines: PackedStringArray = [
+		lz_text,
+		"Approach %s" % _get_approach_angle_name(),
+		ship_text,
+	]
 	var transfer_text: String = _build_meta_transfer_status_text()
-	if transfer_text.is_empty():
-		return "%s\nApproach %s\n%s\n%s" % [lz_text, _get_approach_angle_name(), ship_text, time_text]
-	return "%s\nApproach %s\n%s\n%s\n%s" % [lz_text, _get_approach_angle_name(), ship_text, transfer_text, time_text]
+	if not transfer_text.is_empty():
+		lines.append(transfer_text)
+	lines.append(_build_mission_time_limit_text())
+	var contact_diagnostics_text: String = _build_mission_control_contact_diagnostics_text()
+	if not contact_diagnostics_text.is_empty():
+		lines.append(contact_diagnostics_text)
+	return "\n".join(lines)
+
+
+func _build_mission_control_contact_diagnostics_text() -> String:
+	var diagnostics: Dictionary = get_contact_decision_diagnostics_snapshot()
+	if diagnostics.is_empty():
+		return ""
+	var reason: String = String(diagnostics.get("reason", "")).strip_edges().to_lower()
+	var attacker_id: String = String(diagnostics.get("attacker_unit_id", "")).strip_edges()
+	var target_id: String = String(diagnostics.get("target_unit_id", "")).strip_edges()
+	var pair_text: String = "%s->%s" % [_compact_unit_id_for_diagnostics(attacker_id), _compact_unit_id_for_diagnostics(target_id)]
+	var los_text: String = String(diagnostics.get("los_state", "")).strip_edges()
+	var range_text: String = String(diagnostics.get("range_state", "")).strip_edges()
+	var contact_state: String = String(diagnostics.get("contact_state", "")).strip_edges()
+	if reason == "fired":
+		return "CONTACT FIRE %s | %s | LOS %s | RNG %s" % [pair_text, contact_state.to_upper(), los_text.to_upper(), range_text.to_upper()]
+	if reason == "cooldown":
+		return "CONTACT WAIT %st | %s | LOS %s | RNG %s" % [int(diagnostics.get("cooldown_ticks_remaining", 0)), pair_text, los_text.to_upper(), range_text.to_upper()]
+	if reason == "no_contact_pair":
+		var candidate: Dictionary = Dictionary(diagnostics.get("candidate", {}))
+		var candidate_reason: String = String(candidate.get("candidate_reason", reason)).strip_edges()
+		return "NO FIRE %s | F%d/E%d | DET %d" % [
+			candidate_reason.to_upper(),
+			int(diagnostics.get("active_friendly_count", 0)),
+			int(diagnostics.get("active_enemy_count", 0)),
+			int(diagnostics.get("detection_pending_count", 0)),
+		]
+	if reason == "no_damage_effect" or reason == "invalid_contact_pair":
+		return "NO FIRE %s | %s | LOS %s | RNG %s" % [reason.to_upper(), pair_text, los_text.to_upper(), range_text.to_upper()]
+	return "CONTACT %s | F%d/E%d" % [
+		reason.to_upper(),
+		int(diagnostics.get("active_friendly_count", 0)),
+		int(diagnostics.get("active_enemy_count", 0)),
+	]
+
+
+func _compact_unit_id_for_diagnostics(unit_id: String) -> String:
+	var normalized: String = unit_id.strip_edges()
+	if normalized.is_empty():
+		return "?"
+	if normalized.length() <= 10:
+		return normalized
+	return normalized.substr(0, 10)
 
 
 func _build_meta_transfer_status_text() -> String:
@@ -10948,6 +11005,8 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"fire_sector_overlay": get_fire_sector_overlay_snapshot(),
 		"los_debug_overlay": get_los_debug_overlay_snapshot(),
 		"contact_density_heatmap": get_contact_density_heatmap_snapshot(),
+		"contact_decision_diagnostics": get_contact_decision_diagnostics_snapshot(),
+		"contact_decision_diagnostics_text": _build_mission_control_contact_diagnostics_text(),
 		"cover_effectiveness_readout": cover_effectiveness_readout,
 		"cover_effectiveness_text": String(cover_effectiveness_readout.get("readout_text", "")),
 		"enemy_limbo_behavior": get_enemy_limbo_behavior_snapshot(),

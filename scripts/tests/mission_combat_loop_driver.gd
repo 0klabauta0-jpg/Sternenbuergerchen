@@ -150,6 +150,7 @@ var _enemy_team_tactics_states_by_group_id: Dictionary = {}
 var _recent_fire_events: Array = []
 var _next_fire_event_sequence: int = 1
 var _combat_tick_budget_debug_snapshot: Dictionary = {}
+var _last_contact_decision_diagnostics: Dictionary = {}
 var _overwatch_controller = OVERWATCH_CONTROLLER_SCRIPT.new()
 var _contact_tracker = CONTACT_TRACKER_SCRIPT.new()
 var _flank_vulnerability_resolver = FLANK_VULNERABILITY_RESOLVER_SCRIPT.new()
@@ -201,6 +202,10 @@ func get_winning_team_id() -> String:
 
 func get_last_contact() -> Dictionary:
 	return _last_contact.duplicate(true)
+
+
+func get_contact_decision_diagnostics_snapshot() -> Dictionary:
+	return _last_contact_decision_diagnostics.duplicate(true)
 
 
 func get_mission_result() -> Dictionary:
@@ -859,6 +864,7 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 	var contact_pair: Dictionary = _find_first_contact_pair()
 	if contact_pair.is_empty():
 		_clear_contact_visuals()
+		_record_contact_decision_diagnostics("no_contact_pair", {"candidate": _build_first_fire_candidate_diagnostic()})
 		return
 
 	var attacker = contact_pair["attacker"]
@@ -868,6 +874,7 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 	var contact_state: String = String(contact_pair.get("contact_state", "")).strip_edges().to_lower()
 	if attacker_id.is_empty() or target_id.is_empty():
 		_clear_contact_visuals()
+		_record_contact_decision_diagnostics("invalid_contact_pair", _build_contact_pair_decision_diagnostic(contact_pair))
 		return
 
 	_last_contact = {
@@ -877,10 +884,12 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 	_set_contact_visuals(attacker, target)
 	_update_status_label("contact")
 	if _current_tick < _next_attack_tick:
+		_record_contact_decision_diagnostics("cooldown", _build_contact_pair_decision_diagnostic(contact_pair))
 		return
 
 	var decision: Dictionary = COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("build_damage_effect", contact_pair, _build_fire_decision_context())
 	if decision.is_empty():
+		_record_contact_decision_diagnostics("no_damage_effect", _build_contact_pair_decision_diagnostic(contact_pair))
 		return
 	var actual_target = decision.get("target", target)
 	var actual_target_id: String = String(decision.get("target_id", target_id))
@@ -914,6 +923,151 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 		_broadcast_remote_event("FRIENDLY FIRE %s" % actual_target_id, actual_target_id, MISIDENTIFICATION_EVENT_COLOR, 1.8, "FRIENDLY FIRE")
 		_record_friendly_fire_feedback(attacker, actual_target, attacker_id, target_id, actual_target_id)
 	_next_attack_tick = _current_tick + max(int(decision.get("weapon_ticks", 1)), 1)
+	var fired_diagnostic: Dictionary = _build_contact_pair_decision_diagnostic(contact_pair, decision)
+	fired_diagnostic["fire_event_id"] = fire_event_id
+	fired_diagnostic["actual_target_id"] = actual_target_id
+	fired_diagnostic["is_friendly_fire"] = is_friendly_fire
+	fired_diagnostic["hit_chance"] = float(damage_effect.get("hit_chance", 0.0))
+	fired_diagnostic["damage"] = int(damage_effect.get("damage", 0))
+	fired_diagnostic["weapon_ticks"] = int(decision.get("weapon_ticks", 1))
+	_record_contact_decision_diagnostics("fired", fired_diagnostic)
+
+
+func _record_contact_decision_diagnostics(reason: String, data: Dictionary = {}) -> void:
+	var normalized_reason: String = reason.strip_edges().to_lower()
+	var snapshot: Dictionary = {
+		"source": "MissionCombatLoopDriver",
+		"read_only": true,
+		"tick": _current_tick,
+		"reason": normalized_reason,
+		"status": _resolve_contact_decision_status(normalized_reason),
+		"current_tick": _current_tick,
+		"next_attack_tick": _next_attack_tick,
+		"cooldown_ticks_remaining": maxi(_next_attack_tick - _current_tick, 0),
+		"active_friendly_count": _get_units(friendly_unit_paths).size(),
+		"active_enemy_count": _get_active_enemy_units().size(),
+		"contact_count": get_contact_snapshot().size(),
+		"detection_pending_count": _detection_progress.size(),
+	}
+	var detection_snapshot: Dictionary = _build_first_detection_progress_snapshot()
+	if not detection_snapshot.is_empty():
+		snapshot["first_detection"] = detection_snapshot
+	for key in data.keys():
+		snapshot[key] = data[key]
+	_last_contact_decision_diagnostics = snapshot
+
+
+func _resolve_contact_decision_status(reason: String) -> String:
+	match reason:
+		"fired":
+			return "fired"
+		"cooldown":
+			return "waiting"
+		"no_contact_pair", "invalid_contact_pair", "no_damage_effect":
+			return "blocked"
+		_:
+			return "unknown"
+
+
+func _build_contact_pair_decision_diagnostic(contact_pair: Dictionary, decision: Dictionary = {}) -> Dictionary:
+	var attacker = contact_pair.get("attacker", null)
+	var target = contact_pair.get("target", null)
+	var contact_state: String = String(contact_pair.get("contact_state", "")).strip_edges().to_lower()
+	var readout: Dictionary = {}
+	if attacker != null and target != null:
+		readout = build_cover_effectiveness_readout_for_units(attacker, target, contact_state)
+	var effect: Dictionary = Dictionary(decision.get("effect", {})).duplicate(true) if typeof(decision.get("effect", {})) == TYPE_DICTIONARY else {}
+	var weapon_id: String = String(effect.get("weapon_id", readout.get("weapon_id", _get_unit_active_weapon_id(attacker)))).strip_edges()
+	return {
+		"attacker_unit_id": String(contact_pair.get("attacker_id", _get_unit_id_for_diagnostics(attacker))).strip_edges(),
+		"target_unit_id": String(contact_pair.get("target_id", _get_unit_id_for_diagnostics(target))).strip_edges(),
+		"attacker_team_id": _get_unit_team_id_for_diagnostics(attacker),
+		"target_team_id": _get_unit_team_id_for_diagnostics(target),
+		"attacker_fireteam_id": _get_unit_fireteam_id(attacker),
+		"contact_state": contact_state,
+		"weapon_id": weapon_id,
+		"weapon_range_world": float(effect.get("weapon_range_world", readout.get("weapon_range_world", 0.0))),
+		"distance_world": float(readout.get("distance_world", -1.0)),
+		"range_state": String(readout.get("range_state", "")).strip_edges(),
+		"los_state": String(readout.get("los_state", "")).strip_edges(),
+		"cover_state": String(readout.get("cover_state", "")).strip_edges(),
+		"combat_attackable": bool(readout.get("combat_attackable", false)),
+		"attack_quality_label": String(readout.get("attack_quality_label", "")).strip_edges(),
+	}
+
+
+func _build_first_fire_candidate_diagnostic() -> Dictionary:
+	var friendly_units: Array = _get_units(friendly_unit_paths)
+	var enemy_units: Array = _get_active_enemy_units()
+	if friendly_units.is_empty():
+		return {"candidate_reason": "no_friendly_units"}
+	if enemy_units.is_empty():
+		return {"candidate_reason": "no_active_enemy_units"}
+	var context: Dictionary = _build_fire_decision_context()
+	for friendly in friendly_units:
+		var attacker_ready: bool = bool(COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("can_unit_attack", friendly, context))
+		for enemy in enemy_units:
+			var readout: Dictionary = build_cover_effectiveness_readout_for_units(friendly, enemy, "")
+			var candidate: Dictionary = {
+				"candidate_reason": _resolve_candidate_block_reason(readout, attacker_ready, bool(COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("can_target_receive_attack", enemy))),
+				"attacker_ready": attacker_ready,
+				"target_receive_attack": bool(COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("can_target_receive_attack", enemy)),
+				"attacker_unit_id": _get_unit_id_for_diagnostics(friendly),
+				"target_unit_id": _get_unit_id_for_diagnostics(enemy),
+				"weapon_id": String(readout.get("weapon_id", _get_unit_active_weapon_id(friendly))).strip_edges(),
+				"weapon_range_world": float(readout.get("weapon_range_world", 0.0)),
+				"distance_world": float(readout.get("distance_world", -1.0)),
+				"range_state": String(readout.get("range_state", "")).strip_edges(),
+				"los_state": String(readout.get("los_state", "")).strip_edges(),
+				"combat_attackable": bool(readout.get("combat_attackable", false)),
+				"attack_quality_label": String(readout.get("attack_quality_label", "")).strip_edges(),
+			}
+			return candidate
+	return {"candidate_reason": "no_candidate"}
+
+
+func _resolve_candidate_block_reason(readout: Dictionary, attacker_ready: bool, target_receive_attack: bool) -> String:
+	if not attacker_ready:
+		return "attacker_not_engage_ready"
+	if not target_receive_attack:
+		return "target_not_attackable"
+	var attack_quality: String = String(readout.get("attack_quality_label", "")).strip_edges().to_lower()
+	if not attack_quality.is_empty() and attack_quality != "open" and attack_quality != "covered" and attack_quality != "flank_opportunity":
+		return attack_quality
+	if String(readout.get("range_state", "")).strip_edges().to_lower() == "out_of_range":
+		return "out_of_range"
+	if String(readout.get("los_state", "")).strip_edges().to_lower() == "blocked":
+		return "no_los"
+	if not bool(readout.get("combat_attackable", false)):
+		return "not_attackable"
+	return "candidate_pending_detection_or_contact_state"
+
+
+func _build_first_detection_progress_snapshot() -> Dictionary:
+	if _detection_progress.is_empty():
+		return {}
+	var keys: Array = _detection_progress.keys()
+	keys.sort()
+	var key: String = String(keys[0])
+	var parts: PackedStringArray = key.split(":")
+	return {
+		"key": key,
+		"attacker_unit_id": parts[0] if parts.size() > 0 else "",
+		"target_unit_id": parts[1] if parts.size() > 1 else "",
+		"ticks_remaining": int(_detection_progress.get(key, 0)),
+	}
+
+
+func _get_unit_id_for_diagnostics(unit) -> String:
+	if unit != null and unit.has_method("get_unit_id"):
+		return String(unit.call("get_unit_id")).strip_edges()
+	return ""
+
+
+func _get_unit_team_id_for_diagnostics(unit) -> String:
+	if unit != null and unit.has_method("get_team_id"):
+		return String(unit.call("get_team_id")).strip_edges()
+	return ""
 
 
 func _refresh_tactical_combat_visuals() -> void:
