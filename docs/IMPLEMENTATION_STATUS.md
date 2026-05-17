@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_457 - Fireteam Contact Engage Runtime Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_457_fireteam_contact_engage_runtime_pass.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_452_fireteam_runtime_baseline_visual_contact_pass.md`, `docs/tasks/TASK_438_fireteam_contact_visibility_attack_visuals.md`
+- Stand: `aim_readiness_percent` wirkt jetzt nicht nur im 3D-Posture-Snapshot, sondern auch auf die erste Kontakt-/Zielverzoegerung im Mission-Combat-Loop. Hohe Aim-Bereitschaft verkuerzt die Detection-Zeit, niedrige verlaengert sie.
+- Stand: Weapon-Fire-Events bleiben fuer ein kurzes Debug-Fenster im Fire-Event-Snapshot, damit Muzzleflash und rote Schusslinie im manuellen Fenster nicht sofort wieder verschwinden.
+- Stand: Ein per GO abgeschlossener Engage-Area-Befehl startet bei vorhandenem pending Waypoint zuerst diesen Wegpunkt, statt sofort die naechste Area/default Area zu aktivieren.
+- Stand: Der 3D Unit-Proxy-Snapshot exportiert Aim-Readiness und den sichtbaren Aim-Override, damit #17/#18/Dev-Diagnosen erkennen koennen, warum die Waffe oben ist.
+- Risiken/offen: Der Slice ist noch kein finaler Animations-Blend und keine neue Gegner-KI. Wenn Gegner im manuellen Fenster weiter nur teilweise sichtbar sind, muss der naechste Pass den konkreten FOW-/Proxy-/Szenariozustand im Fenster inspizieren.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_457_fireteam_contact_engage_runtime_pass.gd`, TASK_438/TASK_440/TASK_452 und `git diff --check`.
+- Naechster Schritt: Manueller Godot-Sichtcheck fuer Engage Area -> Take/Move, vier Gegner, rote Kontaktlinie und Muzzleflash; danach erst weitere Behavior-Feinheiten schneiden.
+
 ### TASK_455 - Terrain Truth Editor Overlay Visibility
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_455_terrain_truth_editor_overlay_visibility.md`, `docs/dev/terrain_truth_visual_audit_contract.md`, `docs/tasks/TASK_454_terrain_truth_visual_audit.md`
