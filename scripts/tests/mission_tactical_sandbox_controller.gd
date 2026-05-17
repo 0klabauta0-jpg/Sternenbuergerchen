@@ -1247,6 +1247,13 @@ func get_enemy_team_tactics_snapshot() -> Array:
 	return Array(combat_driver.call("get_enemy_team_tactics_snapshot")).duplicate(true)
 
 
+func get_enemy_limbo_behavior_snapshot() -> Dictionary:
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver == null or not combat_driver.has_method("get_enemy_limbo_behavior_snapshot"):
+		return {}
+	return Dictionary(combat_driver.call("get_enemy_limbo_behavior_snapshot")).duplicate(true)
+
+
 func _enrich_contact_entries_with_recon(contact_entries: Array, fallback_fireteam_id: String = "") -> Array:
 	var tactics_by_unit_id: Dictionary = _build_enemy_tactics_by_unit_id()
 	var result: Array = []
@@ -1511,6 +1518,7 @@ func refresh_fireteam_security_state() -> bool:
 		var behavior_profile_dict: Dictionary = get_active_behavior_profile(fireteam_id)
 		if not _is_fireteam_runtime_active(fireteam_id) or behavior_profile_dict.is_empty():
 			_fireteam_security_controller.call("reset_fireteam", fireteam_id)
+			_clear_fireteam_security_facing_meta(fireteam_id)
 			continue
 		_fireteam_security_controller.call(
 			"update_fireteam_state",
@@ -1524,6 +1532,7 @@ func refresh_fireteam_security_state() -> bool:
 			get_fireteam_contact_snapshot(fireteam_id),
 			_get_area_execution_security_context(fireteam_id)
 		)
+		_apply_fireteam_security_facing_from_state(Dictionary(_fireteam_security_controller.call("get_fireteam_state", fireteam_id)))
 	_sync_unit_overwatch_badges()
 	var next_snapshot_text: String = JSON.stringify(get_fireteam_security_snapshot())
 	if previous_snapshot_text == next_snapshot_text:
@@ -2941,6 +2950,7 @@ func _apply_fireteam_mini_card_status_context(card: Control, fireteam_id: String
 	card.set_meta("mission_fireteam_status_selected", bool(status_snapshot.get("selected", false)))
 	_apply_fireteam_mini_status_summary(card, status_snapshot)
 	_apply_fireteam_mini_suppression_indicator(card, status_snapshot)
+	_apply_fireteam_mini_security_coverage_indicator(card, normalized_fireteam_id)
 	_apply_fireteam_member_status_row(card, normalized_fireteam_id, units)
 	_apply_fireteam_mini_member_portrait_strip(card, normalized_fireteam_id, units)
 	_apply_fireteam_mini_readiness_footer(card, status_snapshot)
@@ -3008,6 +3018,120 @@ func _apply_fireteam_mini_suppression_indicator(card: Control, status_snapshot: 
 	bar.set_meta("mission_fireteam_mini_suppression_bar", true)
 	bar.set_meta("mission_fireteam_mini_suppression_bar_visible", true)
 	bar.set_meta("mission_fireteam_mini_suppression_snapshot", suppression_context.duplicate(true))
+
+
+func _apply_fireteam_mini_security_coverage_indicator(card: Control, fireteam_id: String) -> void:
+	if card == null:
+		return
+	var context: Dictionary = _build_fireteam_security_coverage_context(fireteam_id)
+	var bar := card.find_child("MiniSecurityCoverageBar", true, false) as Control
+	if bar == null:
+		bar = Control.new()
+		bar.name = "MiniSecurityCoverageBar"
+		bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var bar_host := card.get_node_or_null("Margin/VBox") as VBoxContainer
+	if bar_host != null and bar.get_parent() != bar_host:
+		if bar.get_parent() != null:
+			bar.get_parent().remove_child(bar)
+		bar_host.add_child(bar)
+		var suppression_bar := bar_host.get_node_or_null("MiniSuppressionBar") as Control
+		if suppression_bar != null:
+			bar_host.move_child(bar, mini(suppression_bar.get_index() + 1, bar_host.get_child_count() - 1))
+	elif bar.get_parent() == null:
+		card.add_child(bar)
+	bar.custom_minimum_size = Vector2(0.0, 8.0)
+	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bar.visible = bool(context.get("active", false))
+	bar.tooltip_text = String(context.get("tooltip_text", ""))
+	_clear_control_children(bar)
+	if bar.visible:
+		_add_security_coverage_bar_segments(bar, context)
+	bar.set_meta("mission_fireteam_mini_security_coverage_bar", true)
+	bar.set_meta("mission_fireteam_mini_security_coverage_snapshot", context.duplicate(true))
+
+
+func _build_fireteam_security_coverage_context(fireteam_id: String) -> Dictionary:
+	var state: Dictionary = get_fireteam_security_state(fireteam_id)
+	var active: bool = bool(state.get("is_active", false)) and not Array(state.get("member_assignments", [])).is_empty()
+	var role_counts: Dictionary = {}
+	for assignment_variant in Array(state.get("member_assignments", [])):
+		if typeof(assignment_variant) != TYPE_DICTIONARY:
+			continue
+		var role: String = String(Dictionary(assignment_variant).get("coverage_role", "front")).strip_edges().to_lower()
+		if role.is_empty():
+			role = "front"
+		role_counts[role] = int(role_counts.get(role, 0)) + 1
+	var mode: String = String(state.get("security_mode", "")).strip_edges().to_lower()
+	var coverage_shape: String = "inactive"
+	if active:
+		if mode == "360":
+			coverage_shape = "360"
+		elif int(role_counts.get("left_flank", 0)) > 0 and int(role_counts.get("right_flank", 0)) > 0:
+			coverage_shape = "front_both_flanks"
+		elif int(role_counts.get("left_flank", 0)) > 0:
+			coverage_shape = "front_left_flank"
+		elif int(role_counts.get("right_flank", 0)) > 0:
+			coverage_shape = "front_right_flank"
+		else:
+			coverage_shape = "front"
+	return {
+		"active": active,
+		"fireteam_id": fireteam_id.strip_edges().to_lower(),
+		"security_mode": mode,
+		"coverage_shape": coverage_shape,
+		"role_counts": role_counts.duplicate(true),
+		"member_count": Array(state.get("member_assignments", [])).size(),
+		"tooltip_text": "SEC %s" % coverage_shape.to_upper(),
+	}
+
+
+func _add_security_coverage_bar_segments(bar: Control, context: Dictionary) -> void:
+	var base := ColorRect.new()
+	base.name = "CoverageBase"
+	base.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	base.color = Color(0.10, 0.15, 0.18, 0.92)
+	base.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bar.add_child(base)
+	var shape: String = String(context.get("coverage_shape", "")).strip_edges().to_lower()
+	var color := Color(0.42, 0.92, 1.0, 0.92)
+	if shape == "360":
+		_add_security_coverage_segment(bar, "CoverageNorth", 0.06, 0.0, 0.88, 0.24, color)
+		_add_security_coverage_segment(bar, "CoverageSouth", 0.06, 0.76, 0.88, 0.24, color)
+		_add_security_coverage_segment(bar, "CoverageWest", 0.0, 0.16, 0.08, 0.68, color)
+		_add_security_coverage_segment(bar, "CoverageEast", 0.92, 0.16, 0.08, 0.68, color)
+		return
+	var role_counts: Dictionary = Dictionary(context.get("role_counts", {}))
+	var front_count: int = int(role_counts.get("front", 0)) + int(role_counts.get("front_left", 0)) + int(role_counts.get("front_right", 0))
+	var front_width: float = clampf(0.24 + float(front_count) * 0.12, 0.28, 0.70)
+	_add_security_coverage_segment(bar, "CoverageFront", 0.5 - front_width * 0.5, 0.18, front_width, 0.64, color)
+	if int(role_counts.get("left_flank", 0)) > 0 or int(role_counts.get("flank_extra", 0)) > 0:
+		_add_security_coverage_segment(bar, "CoverageLeftFlank", 0.02, 0.12, 0.22, 0.76, color.lightened(0.05))
+	if int(role_counts.get("right_flank", 0)) > 0 or int(role_counts.get("flank_extra", 0)) > 0:
+		_add_security_coverage_segment(bar, "CoverageRightFlank", 0.76, 0.12, 0.22, 0.76, color.lightened(0.05))
+
+
+func _add_security_coverage_segment(parent: Control, node_name: String, left: float, top: float, width: float, height: float, color: Color) -> void:
+	var segment := ColorRect.new()
+	segment.name = node_name
+	segment.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	segment.color = color
+	segment.anchor_left = clampf(left, 0.0, 1.0)
+	segment.anchor_top = clampf(top, 0.0, 1.0)
+	segment.anchor_right = clampf(left + width, 0.0, 1.0)
+	segment.anchor_bottom = clampf(top + height, 0.0, 1.0)
+	segment.offset_left = 0.0
+	segment.offset_right = 0.0
+	segment.offset_top = 0.0
+	segment.offset_bottom = 0.0
+	parent.add_child(segment)
+
+
+func _clear_control_children(parent: Control) -> void:
+	if parent == null:
+		return
+	for child in parent.get_children():
+		parent.remove_child(child)
+		child.queue_free()
 
 
 func _apply_fireteam_member_status_row(card: Control, fireteam_id: String, units: Array = []) -> void:
@@ -4962,6 +5086,8 @@ func _get_area_feedback_command_label(command_type: String) -> String:
 	match command_type.strip_edges().to_lower():
 		AREA_ORDER_SCRIPT.COMMAND_TYPE_DEFEND:
 			return "DEFEND"
+		AREA_ORDER_SCRIPT.COMMAND_TYPE_ENGAGE:
+			return "ENGAGE"
 		AREA_ORDER_SCRIPT.COMMAND_TYPE_TAKE:
 			return "TAKE"
 		AREA_ORDER_SCRIPT.COMMAND_TYPE_FLANK:
@@ -10824,6 +10950,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"contact_density_heatmap": get_contact_density_heatmap_snapshot(),
 		"cover_effectiveness_readout": cover_effectiveness_readout,
 		"cover_effectiveness_text": String(cover_effectiveness_readout.get("readout_text", "")),
+		"enemy_limbo_behavior": get_enemy_limbo_behavior_snapshot(),
 		"fireteam_orientation_count": get_fireteam_orientation_snapshot().size(),
 		"fireteam_orientations": get_fireteam_orientation_snapshot(),
 		"active_area_defense": get_active_area_defense_snapshot(),
@@ -12775,6 +12902,22 @@ func _append_behavior_modifier_fields(command_dict: Dictionary, modifiers: Dicti
 	command_dict["behavior_attack_bonus"] = float(modifiers.get("attack_bonus", 0.0))
 	command_dict["behavior_movement_posture"] = String(modifiers.get("movement_posture", ""))
 	command_dict["behavior_weapon_posture"] = String(modifiers.get("weapon_posture", ""))
+	var behavior_command_type: String = String(modifiers.get("command_type", "")).strip_edges().to_lower()
+	if modifiers.has("engagement_range_policy"):
+		command_dict["engagement_range_policy"] = String(modifiers.get("engagement_range_policy", ""))
+		command_dict["engagement_range_factor"] = float(modifiers.get("engagement_range_factor", 1.0))
+	if behavior_command_type == "engage":
+		command_dict["engage_doctrine_id"] = String(modifiers.get("engage_doctrine_id", "engage_control_v1"))
+		command_dict["engage_advance_mode"] = String(modifiers.get("engage_advance_mode", ""))
+		command_dict["engage_target_policy"] = String(modifiers.get("engage_target_policy", "weapon_range_area_priority"))
+		command_dict["engage_buddy_teams"] = bool(modifiers.get("engage_buddy_teams", true))
+		command_dict["engage_fire_on_weapon_range"] = bool(modifiers.get("engage_fire_on_weapon_range", true))
+	if behavior_command_type == "take":
+		command_dict["take_doctrine_id"] = String(modifiers.get("take_doctrine_id", "take_control_v1"))
+		command_dict["take_advance_mode"] = String(modifiers.get("take_advance_mode", ""))
+		command_dict["take_target_policy"] = String(modifiers.get("take_target_policy", "optimal_range_area_control"))
+		command_dict["take_buddy_teams"] = bool(modifiers.get("take_buddy_teams", true))
+		command_dict["take_area_control_required"] = bool(modifiers.get("take_area_control_required", true))
 
 
 func _set_unit_map_facing_angle(unit, facing_angle: float) -> void:
@@ -12782,6 +12925,47 @@ func _set_unit_map_facing_angle(unit, facing_angle: float) -> void:
 		return
 	(unit as Node).set_meta("facing_angle", facing_angle)
 	(unit as Node).set_meta("map_facing_angle", facing_angle)
+
+
+func _apply_fireteam_security_facing_from_state(security_state: Dictionary) -> void:
+	if security_state.is_empty() or not bool(security_state.get("is_active", false)):
+		_clear_fireteam_security_facing_meta(String(security_state.get("fireteam_id", "")))
+		return
+	var fireteam_id: String = String(security_state.get("fireteam_id", "")).strip_edges().to_lower()
+	if fireteam_id.is_empty():
+		return
+	var unit_by_id: Dictionary = {}
+	for unit in _get_fireteam_units(fireteam_id, true):
+		if unit == null or not (unit is Node) or not unit.has_method("get_unit_id"):
+			continue
+		unit_by_id[String(unit.call("get_unit_id")).strip_edges()] = unit
+	for assignment_variant in Array(security_state.get("member_assignments", [])):
+		if typeof(assignment_variant) != TYPE_DICTIONARY:
+			continue
+		var assignment: Dictionary = Dictionary(assignment_variant)
+		var unit_id: String = String(assignment.get("unit_id", "")).strip_edges()
+		var unit = unit_by_id.get(unit_id, null)
+		if unit == null or not (unit is Node):
+			continue
+		var facing_angle: float = float(assignment.get("center_angle", security_state.get("direction_angle", 0.0)))
+		(unit as Node).set_meta("security_facing_angle", facing_angle)
+		(unit as Node).set_meta("security_coverage_role", String(assignment.get("coverage_role", "")))
+		(unit as Node).set_meta("security_facing_active", true)
+
+
+func _clear_fireteam_security_facing_meta(fireteam_id: String) -> void:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return
+	for unit in _get_fireteam_units(normalized_fireteam_id, true):
+		if unit == null or not (unit is Node):
+			continue
+		if (unit as Node).has_meta("security_facing_angle"):
+			(unit as Node).remove_meta("security_facing_angle")
+		if (unit as Node).has_meta("security_coverage_role"):
+			(unit as Node).remove_meta("security_coverage_role")
+		if (unit as Node).has_meta("security_facing_active"):
+			(unit as Node).remove_meta("security_facing_active")
 
 
 func _issue_fireteam_hold_current_positions(fireteam_id: String, phase_index: int) -> bool:
@@ -13382,6 +13566,11 @@ func _issue_area_defense_unit_command(fireteam_id: String, assignment: Dictionar
 	command.weapon_posture = String(modifiers.get("weapon_posture", UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED))
 	command.posture_policy_id = String(modifiers.get("posture_policy_id", ""))
 	command.sight_range_factor = float(modifiers.get("sight_range_factor", 1.0))
+	command.engagement_range_policy = String(modifiers.get("engagement_range_policy", "")).strip_edges().to_lower()
+	command.engagement_range_factor = maxf(float(modifiers.get("engagement_range_factor", 1.0)), 0.0)
+	command.contact_initiative_seconds = float(modifiers.get("contact_initiative_seconds", 0.0))
+	command.aim_readiness_percent = float(modifiers.get("aim_readiness_percent", 0.0))
+	command.team_target_support_percent = float(modifiers.get("team_target_support_percent", 0.0))
 	if not bool(command.call("is_valid")):
 		return false
 	if unit.has_method("assign_unit_command"):
@@ -13439,13 +13628,17 @@ func _update_area_attack_execution(_delta: float) -> void:
 		var area_cleared: bool = _is_attack_area_cleared(target_area)
 		state["approach_assignments"] = Array(state.get("assignments", [])).duplicate(true)
 		if is_engage_order:
+			if not area_cleared:
+				var engage_assignments: Array = _build_attack_area_occupation_assignments(String(fireteam_id), state)
+				if not engage_assignments.is_empty():
+					state["assignments"] = engage_assignments.duplicate(true)
 			state["status"] = "engaging"
 			for assignment_variant in Array(state.get("assignments", [])):
 				_issue_area_attack_unit_command(
 					String(fireteam_id),
 					Dictionary(assignment_variant),
 					int(state.get("phase", _get_live_order_phase_index())),
-					true,
+					area_cleared,
 					String(state.get("area_order_id", "")),
 					command_type
 				)
@@ -13558,6 +13751,9 @@ func _issue_area_attack_unit_command(fireteam_id: String, assignment: Dictionary
 	command.weapon_posture = String(modifiers.get("weapon_posture", UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED))
 	command.posture_policy_id = String(modifiers.get("posture_policy_id", ""))
 	command.sight_range_factor = float(modifiers.get("sight_range_factor", 1.0))
+	command.contact_initiative_seconds = float(modifiers.get("contact_initiative_seconds", 0.0))
+	command.aim_readiness_percent = float(modifiers.get("aim_readiness_percent", 0.0))
+	command.team_target_support_percent = float(modifiers.get("team_target_support_percent", 0.0))
 	if not bool(command.call("is_valid")):
 		return false
 	if unit.has_method("assign_unit_command"):

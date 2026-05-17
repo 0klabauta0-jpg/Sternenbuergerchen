@@ -1,0 +1,974 @@
+{
+  "schema": "sternenbuergerchen.html_workbench.v1",
+  "report_id": "fireteam_formation_tuning",
+  "title": "Fireteam Formation Tuning Workbench",
+  "exported_at": "2026-05-16T22:37:17.506Z",
+  "controls": {
+    "formation": {
+      "command": "engage",
+      "auto_profile_preset": true,
+      "command_can_set_layout": false,
+      "security": "forward_flanks",
+      "candidate_name": "fireteam_base_candidate",
+      "selected_saved_candidate": "",
+      "use_saved_override": true,
+      "team_size": "4",
+      "pairing": "sequential_pairs",
+      "mode": "staggered_pairs",
+      "use_buddy_teams": true,
+      "leader_slot": "unit_3"
+    },
+    "character_hooks": {
+      "speed_scales_stance_speed": true,
+      "awareness_recognition_scale_sight_contact": true,
+      "initiative_scales_contact_time": true,
+      "leadership_speech_scale_team_support": true,
+      "accuracy_scales_target_support": true,
+      "contact_stability_scales_under_fire": true
+    },
+    "parameters": {
+      "buddy_spacing_world": 63,
+      "buddy_pair_spacing_world": 85,
+      "row_offset_world": 31,
+      "cohesion_radius_world": 216,
+      "tile_size_world": 48,
+      "speed_percent": 65,
+      "sight_percent": 120,
+      "weapon_range_world": 1200,
+      "security_arc_degrees": 44,
+      "cover_priority_percent": 75
+    },
+    "profile": {
+      "weapon_id": "rifle",
+      "base_sight_meters": 100
+    },
+    "checks": {
+      "move_less_single_file": false,
+      "buddy_pair_spacing_ok": false,
+      "security_forward_ok": false
+    }
+  },
+  "notes": {
+    "formation": {
+      "notes": ""
+    }
+  },
+  "active_choices": {
+    "formation": {
+      "stance": "cautious"
+    }
+  },
+  "computed": {
+    "anchor": {
+      "x": 260,
+      "y": 360
+    },
+    "target": {
+      "x": 716,
+      "y": 360
+    },
+    "direction": "1,0",
+    "manual_layout": true,
+    "formation_candidate": {
+      "export_meaning": "playtest_candidate_not_runtime_default",
+      "command_sets_profile": true,
+      "command_sets_layout": false,
+      "command": "engage",
+      "stance": "cautious",
+      "candidate_name": "fireteam_base_candidate",
+      "team_size": 4,
+      "use_saved_override": true,
+      "use_buddy_teams": true,
+      "formation_mode": "staggered_pairs",
+      "security": "forward_flanks",
+      "leader_slot": "unit_3",
+      "needs_runtime_import": true
+    },
+    "formation_library": {},
+    "formation_overrides": {
+      "move:cautious": {
+        "source": "command_stance_formation",
+        "saved_at": "2026-05-16T22:29:48.397Z",
+        "candidate_name": "fireteam_base_candidate",
+        "team_size": 4,
+        "use_buddy_teams": true,
+        "pairing": "sequential_pairs",
+        "formation_mode": "pair_line",
+        "leader_slot": "auto",
+        "buddy_spacing_world": 80,
+        "buddy_pair_spacing_world": 60,
+        "row_offset_world": 163,
+        "cohesion_radius_world": 216,
+        "slots_by_unit_id": {
+          "unit_1": {
+            "lateral": 47,
+            "forward": 173
+          },
+          "unit_2": {
+            "lateral": 54,
+            "forward": 93
+          },
+          "unit_3": {
+            "lateral": -33,
+            "forward": 3
+          },
+          "unit_4": {
+            "lateral": 14,
+            "forward": -63
+          }
+        },
+        "command": "move",
+        "stance": "cautious",
+        "source_library_key": ""
+      },
+      "move:normal": {
+        "source": "command_stance_formation",
+        "saved_at": "2026-05-16T22:32:34.157Z",
+        "candidate_name": "fireteam_base_candidate",
+        "team_size": 4,
+        "use_buddy_teams": true,
+        "pairing": "sequential_pairs",
+        "formation_mode": "pair_line",
+        "leader_slot": "auto",
+        "buddy_spacing_world": 117,
+        "buddy_pair_spacing_world": 48,
+        "row_offset_world": 162,
+        "cohesion_radius_world": 216,
+        "slots_by_unit_id": {
+          "unit_1": {
+            "lateral": 43,
+            "forward": 118
+          },
+          "unit_2": {
+            "lateral": -39,
+            "forward": 24
+          },
+          "unit_3": {
+            "lateral": 21,
+            "forward": -43
+          },
+          "unit_4": {
+            "lateral": -32,
+            "forward": -138
+          }
+        },
+        "command": "move",
+        "stance": "normal",
+        "source_library_key": ""
+      },
+      "move:aggressive": {
+        "source": "command_stance_formation",
+        "saved_at": "2026-05-16T22:33:49.565Z",
+        "candidate_name": "fireteam_base_candidate",
+        "team_size": 4,
+        "use_buddy_teams": true,
+        "pairing": "sequential_pairs",
+        "formation_mode": "pair_line",
+        "leader_slot": "auto",
+        "buddy_spacing_world": 117,
+        "buddy_pair_spacing_world": 48,
+        "row_offset_world": 162,
+        "cohesion_radius_world": 216,
+        "slots_by_unit_id": {
+          "unit_1": {
+            "lateral": 43,
+            "forward": 118
+          },
+          "unit_2": {
+            "lateral": -39,
+            "forward": 24
+          },
+          "unit_3": {
+            "lateral": 21,
+            "forward": -43
+          },
+          "unit_4": {
+            "lateral": -32,
+            "forward": -138
+          }
+        },
+        "command": "move",
+        "stance": "aggressive",
+        "source_library_key": ""
+      },
+      "engage:cautious": {
+        "source": "command_stance_formation",
+        "saved_at": "2026-05-16T22:37:15.914Z",
+        "candidate_name": "fireteam_base_candidate",
+        "team_size": 4,
+        "use_buddy_teams": true,
+        "pairing": "sequential_pairs",
+        "formation_mode": "staggered_pairs",
+        "leader_slot": "unit_3",
+        "buddy_spacing_world": 63,
+        "buddy_pair_spacing_world": 85,
+        "row_offset_world": 31,
+        "cohesion_radius_world": 216,
+        "slots_by_unit_id": {
+          "unit_1": {
+            "lateral": 8,
+            "forward": 104
+          },
+          "unit_2": {
+            "lateral": 62,
+            "forward": 56
+          },
+          "unit_3": {
+            "lateral": -32,
+            "forward": 69
+          },
+          "unit_4": {
+            "lateral": -69,
+            "forward": 29
+          }
+        },
+        "command": "engage",
+        "stance": "cautious",
+        "source_library_key": ""
+      }
+    },
+    "security_overrides": {
+      "move:cautious": {
+        "command": "move",
+        "stance": "cautious",
+        "team_size": 4,
+        "security_source": "manual_drag_handles",
+        "security_label": "all_round",
+        "unit_facings": [
+          {
+            "id": "unit_1",
+            "label": "1",
+            "facing_degrees": -11
+          },
+          {
+            "id": "unit_2",
+            "label": "2",
+            "facing_degrees": 20
+          },
+          {
+            "id": "unit_3",
+            "label": "3",
+            "facing_degrees": -40
+          },
+          {
+            "id": "unit_4",
+            "label": "4",
+            "facing_degrees": 165
+          }
+        ],
+        "facings_by_unit_id": {
+          "unit_1": -11,
+          "unit_2": 20,
+          "unit_3": -40,
+          "unit_4": 165
+        }
+      },
+      "move:normal": {
+        "command": "move",
+        "stance": "normal",
+        "team_size": 4,
+        "security_source": "manual_drag_handles",
+        "security_label": "forward_flanks",
+        "unit_facings": [
+          {
+            "id": "unit_1",
+            "label": "1",
+            "facing_degrees": -3
+          },
+          {
+            "id": "unit_2",
+            "label": "2",
+            "facing_degrees": -34
+          },
+          {
+            "id": "unit_3",
+            "label": "3",
+            "facing_degrees": 59
+          },
+          {
+            "id": "unit_4",
+            "label": "4",
+            "facing_degrees": -65
+          }
+        ],
+        "facings_by_unit_id": {
+          "unit_1": -3,
+          "unit_2": -34,
+          "unit_3": 59,
+          "unit_4": -65
+        }
+      },
+      "move:aggressive": {
+        "command": "move",
+        "stance": "aggressive",
+        "team_size": 4,
+        "security_source": "manual_drag_handles",
+        "security_label": "forward_flanks",
+        "unit_facings": [
+          {
+            "id": "unit_1",
+            "label": "1",
+            "facing_degrees": -21
+          },
+          {
+            "id": "unit_2",
+            "label": "2",
+            "facing_degrees": -5
+          },
+          {
+            "id": "unit_3",
+            "label": "3",
+            "facing_degrees": -73
+          },
+          {
+            "id": "unit_4",
+            "label": "4",
+            "facing_degrees": 47
+          }
+        ],
+        "facings_by_unit_id": {
+          "unit_1": -21,
+          "unit_2": -5,
+          "unit_3": -73,
+          "unit_4": 47
+        }
+      },
+      "engage:cautious": {
+        "command": "engage",
+        "stance": "cautious",
+        "team_size": 4,
+        "security_source": "manual_drag_handles",
+        "security_label": "forward_flanks",
+        "unit_facings": [
+          {
+            "id": "unit_1",
+            "label": "1",
+            "facing_degrees": -8
+          },
+          {
+            "id": "unit_2",
+            "label": "2",
+            "facing_degrees": 26
+          },
+          {
+            "id": "unit_3",
+            "label": "3",
+            "facing_degrees": -12
+          },
+          {
+            "id": "unit_4",
+            "label": "4",
+            "facing_degrees": -50
+          }
+        ],
+        "facings_by_unit_id": {
+          "unit_1": -8,
+          "unit_2": 26,
+          "unit_3": -12,
+          "unit_4": -50
+        }
+      }
+    },
+    "command_stance_preset_overrides": {
+      "meaning": "static_formation_and_security_only_no_temporal_sequence",
+      "formation": {
+        "move:cautious": {
+          "source": "command_stance_formation",
+          "saved_at": "2026-05-16T22:29:48.397Z",
+          "candidate_name": "fireteam_base_candidate",
+          "team_size": 4,
+          "use_buddy_teams": true,
+          "pairing": "sequential_pairs",
+          "formation_mode": "pair_line",
+          "leader_slot": "auto",
+          "buddy_spacing_world": 80,
+          "buddy_pair_spacing_world": 60,
+          "row_offset_world": 163,
+          "cohesion_radius_world": 216,
+          "slots_by_unit_id": {
+            "unit_1": {
+              "lateral": 47,
+              "forward": 173
+            },
+            "unit_2": {
+              "lateral": 54,
+              "forward": 93
+            },
+            "unit_3": {
+              "lateral": -33,
+              "forward": 3
+            },
+            "unit_4": {
+              "lateral": 14,
+              "forward": -63
+            }
+          },
+          "command": "move",
+          "stance": "cautious",
+          "source_library_key": ""
+        },
+        "move:normal": {
+          "source": "command_stance_formation",
+          "saved_at": "2026-05-16T22:32:34.157Z",
+          "candidate_name": "fireteam_base_candidate",
+          "team_size": 4,
+          "use_buddy_teams": true,
+          "pairing": "sequential_pairs",
+          "formation_mode": "pair_line",
+          "leader_slot": "auto",
+          "buddy_spacing_world": 117,
+          "buddy_pair_spacing_world": 48,
+          "row_offset_world": 162,
+          "cohesion_radius_world": 216,
+          "slots_by_unit_id": {
+            "unit_1": {
+              "lateral": 43,
+              "forward": 118
+            },
+            "unit_2": {
+              "lateral": -39,
+              "forward": 24
+            },
+            "unit_3": {
+              "lateral": 21,
+              "forward": -43
+            },
+            "unit_4": {
+              "lateral": -32,
+              "forward": -138
+            }
+          },
+          "command": "move",
+          "stance": "normal",
+          "source_library_key": ""
+        },
+        "move:aggressive": {
+          "source": "command_stance_formation",
+          "saved_at": "2026-05-16T22:33:49.565Z",
+          "candidate_name": "fireteam_base_candidate",
+          "team_size": 4,
+          "use_buddy_teams": true,
+          "pairing": "sequential_pairs",
+          "formation_mode": "pair_line",
+          "leader_slot": "auto",
+          "buddy_spacing_world": 117,
+          "buddy_pair_spacing_world": 48,
+          "row_offset_world": 162,
+          "cohesion_radius_world": 216,
+          "slots_by_unit_id": {
+            "unit_1": {
+              "lateral": 43,
+              "forward": 118
+            },
+            "unit_2": {
+              "lateral": -39,
+              "forward": 24
+            },
+            "unit_3": {
+              "lateral": 21,
+              "forward": -43
+            },
+            "unit_4": {
+              "lateral": -32,
+              "forward": -138
+            }
+          },
+          "command": "move",
+          "stance": "aggressive",
+          "source_library_key": ""
+        },
+        "engage:cautious": {
+          "source": "command_stance_formation",
+          "saved_at": "2026-05-16T22:37:15.914Z",
+          "candidate_name": "fireteam_base_candidate",
+          "team_size": 4,
+          "use_buddy_teams": true,
+          "pairing": "sequential_pairs",
+          "formation_mode": "staggered_pairs",
+          "leader_slot": "unit_3",
+          "buddy_spacing_world": 63,
+          "buddy_pair_spacing_world": 85,
+          "row_offset_world": 31,
+          "cohesion_radius_world": 216,
+          "slots_by_unit_id": {
+            "unit_1": {
+              "lateral": 8,
+              "forward": 104
+            },
+            "unit_2": {
+              "lateral": 62,
+              "forward": 56
+            },
+            "unit_3": {
+              "lateral": -32,
+              "forward": 69
+            },
+            "unit_4": {
+              "lateral": -69,
+              "forward": 29
+            }
+          },
+          "command": "engage",
+          "stance": "cautious",
+          "source_library_key": ""
+        }
+      },
+      "security": {
+        "move:cautious": {
+          "command": "move",
+          "stance": "cautious",
+          "team_size": 4,
+          "security_source": "manual_drag_handles",
+          "security_label": "all_round",
+          "unit_facings": [
+            {
+              "id": "unit_1",
+              "label": "1",
+              "facing_degrees": -11
+            },
+            {
+              "id": "unit_2",
+              "label": "2",
+              "facing_degrees": 20
+            },
+            {
+              "id": "unit_3",
+              "label": "3",
+              "facing_degrees": -40
+            },
+            {
+              "id": "unit_4",
+              "label": "4",
+              "facing_degrees": 165
+            }
+          ],
+          "facings_by_unit_id": {
+            "unit_1": -11,
+            "unit_2": 20,
+            "unit_3": -40,
+            "unit_4": 165
+          }
+        },
+        "move:normal": {
+          "command": "move",
+          "stance": "normal",
+          "team_size": 4,
+          "security_source": "manual_drag_handles",
+          "security_label": "forward_flanks",
+          "unit_facings": [
+            {
+              "id": "unit_1",
+              "label": "1",
+              "facing_degrees": -3
+            },
+            {
+              "id": "unit_2",
+              "label": "2",
+              "facing_degrees": -34
+            },
+            {
+              "id": "unit_3",
+              "label": "3",
+              "facing_degrees": 59
+            },
+            {
+              "id": "unit_4",
+              "label": "4",
+              "facing_degrees": -65
+            }
+          ],
+          "facings_by_unit_id": {
+            "unit_1": -3,
+            "unit_2": -34,
+            "unit_3": 59,
+            "unit_4": -65
+          }
+        },
+        "move:aggressive": {
+          "command": "move",
+          "stance": "aggressive",
+          "team_size": 4,
+          "security_source": "manual_drag_handles",
+          "security_label": "forward_flanks",
+          "unit_facings": [
+            {
+              "id": "unit_1",
+              "label": "1",
+              "facing_degrees": -21
+            },
+            {
+              "id": "unit_2",
+              "label": "2",
+              "facing_degrees": -5
+            },
+            {
+              "id": "unit_3",
+              "label": "3",
+              "facing_degrees": -73
+            },
+            {
+              "id": "unit_4",
+              "label": "4",
+              "facing_degrees": 47
+            }
+          ],
+          "facings_by_unit_id": {
+            "unit_1": -21,
+            "unit_2": -5,
+            "unit_3": -73,
+            "unit_4": 47
+          }
+        },
+        "engage:cautious": {
+          "command": "engage",
+          "stance": "cautious",
+          "team_size": 4,
+          "security_source": "manual_drag_handles",
+          "security_label": "forward_flanks",
+          "unit_facings": [
+            {
+              "id": "unit_1",
+              "label": "1",
+              "facing_degrees": -8
+            },
+            {
+              "id": "unit_2",
+              "label": "2",
+              "facing_degrees": 26
+            },
+            {
+              "id": "unit_3",
+              "label": "3",
+              "facing_degrees": -12
+            },
+            {
+              "id": "unit_4",
+              "label": "4",
+              "facing_degrees": -50
+            }
+          ],
+          "facings_by_unit_id": {
+            "unit_1": -8,
+            "unit_2": 26,
+            "unit_3": -12,
+            "unit_4": -50
+          }
+        }
+      }
+    },
+    "stance_profile_by_stance": {
+      "cautious": {
+        "speed_percent": 65,
+        "sight_percent": 120,
+        "cover_priority_percent": 75,
+        "aim_readiness_percent": 100,
+        "contact_seconds": -0.15,
+        "target_support_percent": 3
+      },
+      "normal": {
+        "speed_percent": 100,
+        "sight_percent": 100,
+        "cover_priority_percent": 45,
+        "aim_readiness_percent": 55,
+        "contact_seconds": 0,
+        "target_support_percent": 0
+      },
+      "aggressive": {
+        "speed_percent": 120,
+        "sight_percent": 75,
+        "cover_priority_percent": 20,
+        "aim_readiness_percent": 35,
+        "contact_seconds": 0.15,
+        "target_support_percent": -2
+      }
+    },
+    "active_stance_profile": {
+      "stance": "cautious",
+      "values": {
+        "speed_percent": 65,
+        "sight_percent": 120,
+        "cover_priority_percent": 75,
+        "aim_readiness_percent": 100,
+        "contact_seconds": -0.15,
+        "target_support_percent": 3
+      },
+      "applies_to_commands": [
+        "move",
+        "engage",
+        "take",
+        "defend"
+      ]
+    },
+    "distance_profile_by_stance": {
+      "cautious": {
+        "close_max_percent": 20,
+        "optimal_min_percent": 40,
+        "optimal_max_percent": 75,
+        "clear_sight_max_percent": 70,
+        "good_seconds": -0.35,
+        "good_target_percent": 6,
+        "close_seconds": 0.15,
+        "close_target_percent": -2,
+        "edge_seconds": 0.45,
+        "edge_target_percent": -3,
+        "outside_weapon_seconds": 0.85,
+        "outside_weapon_target_percent": -6,
+        "outside_sight_seconds": 0.95,
+        "outside_sight_target_percent": -8
+      },
+      "normal": {
+        "close_max_percent": 20,
+        "optimal_min_percent": 35,
+        "optimal_max_percent": 75,
+        "clear_sight_max_percent": 70,
+        "good_seconds": -0.25,
+        "good_target_percent": 4,
+        "close_seconds": 0.1,
+        "close_target_percent": -2,
+        "edge_seconds": 0.35,
+        "edge_target_percent": -3,
+        "outside_weapon_seconds": 0.8,
+        "outside_weapon_target_percent": -6,
+        "outside_sight_seconds": 0.95,
+        "outside_sight_target_percent": -8
+      },
+      "aggressive": {
+        "close_max_percent": 15,
+        "optimal_min_percent": 25,
+        "optimal_max_percent": 85,
+        "clear_sight_max_percent": 80,
+        "good_seconds": -0.15,
+        "good_target_percent": 2,
+        "close_seconds": 0,
+        "close_target_percent": -1,
+        "edge_seconds": 0.25,
+        "edge_target_percent": -4,
+        "outside_weapon_seconds": 0.7,
+        "outside_weapon_target_percent": -7,
+        "outside_sight_seconds": 0.9,
+        "outside_sight_target_percent": -9
+      }
+    },
+    "active_distance_profile": {
+      "stance": "cautious",
+      "values": {
+        "close_max_percent": 20,
+        "optimal_min_percent": 40,
+        "optimal_max_percent": 75,
+        "clear_sight_max_percent": 70,
+        "good_seconds": -0.35,
+        "good_target_percent": 6,
+        "close_seconds": 0.15,
+        "close_target_percent": -2,
+        "edge_seconds": 0.45,
+        "edge_target_percent": -3,
+        "outside_weapon_seconds": 0.85,
+        "outside_weapon_target_percent": -6,
+        "outside_sight_seconds": 0.95,
+        "outside_sight_target_percent": -8
+      },
+      "applies_to_commands": [
+        "move",
+        "engage",
+        "take",
+        "defend"
+      ]
+    },
+    "character_sheet_hook_locks": {
+      "speed": true,
+      "awareness_recognition": true,
+      "initiative": true,
+      "leadership_speech": true,
+      "accuracy": true,
+      "contact_stability": true
+    },
+    "buddy_pairs": [
+      {
+        "pair_id": "buddy_team_1",
+        "unit_ids": [
+          "unit_1",
+          "unit_2"
+        ],
+        "labels": [
+          "1",
+          "2"
+        ]
+      },
+      {
+        "pair_id": "buddy_team_2",
+        "unit_ids": [
+          "unit_3",
+          "unit_4"
+        ],
+        "labels": [
+          "3",
+          "4"
+        ]
+      }
+    ],
+    "members": [
+      {
+        "id": "unit_1",
+        "label": "1",
+        "leader": false,
+        "position": {
+          "x": 364,
+          "y": 369
+        },
+        "tile": {
+          "x": 8,
+          "y": 8
+        },
+        "facing_degrees": -8,
+        "slot": {
+          "lateral": -74,
+          "forward": 0
+        }
+      },
+      {
+        "id": "unit_2",
+        "label": "2",
+        "leader": false,
+        "position": {
+          "x": 316,
+          "y": 422
+        },
+        "tile": {
+          "x": 7,
+          "y": 9
+        },
+        "facing_degrees": 26,
+        "slot": {
+          "lateral": -11,
+          "forward": 0
+        }
+      },
+      {
+        "id": "unit_3",
+        "label": "3",
+        "leader": true,
+        "position": {
+          "x": 329,
+          "y": 328
+        },
+        "tile": {
+          "x": 7,
+          "y": 7
+        },
+        "facing_degrees": -12,
+        "slot": {
+          "lateral": 11,
+          "forward": -31
+        }
+      },
+      {
+        "id": "unit_4",
+        "label": "4",
+        "leader": false,
+        "position": {
+          "x": 289,
+          "y": 291
+        },
+        "tile": {
+          "x": 6,
+          "y": 6
+        },
+        "facing_degrees": -50,
+        "slot": {
+          "lateral": 74,
+          "forward": -31
+        }
+      }
+    ],
+    "derived_runtime_view": {
+      "weapon_id": "rifle",
+      "weapon_label": "Rifle",
+      "weapon_effective_tile_range": 25,
+      "weapon_range_meters_estimate": 37.5,
+      "weapon_data_legacy_range_meters": 180,
+      "weapon_range_board_units": 1200,
+      "base_sight_meters": 100,
+      "sight_factor_percent": 120,
+      "raw_sight_range_meters": 120,
+      "raw_sight_range_tiles_estimate": 80,
+      "fov_focus_factor": 1.144,
+      "fov_adjusted_sight_range_meters": 137,
+      "sight_range_tiles_estimate": 91.5,
+      "meters_per_tile_estimate": 1.5,
+      "fov_degrees": 44,
+      "sight_fov_coupling": "locked_inverse_workbench_model",
+      "fov_source": "global_stance_profile_or_manual_override",
+      "temporal_sequence_scope": "not_represented_in_this_static_formation_workbench",
+      "character_sheet_hook_locks": {
+        "speed": true,
+        "awareness_recognition": true,
+        "initiative": true,
+        "leadership_speech": true,
+        "accuracy": true,
+        "contact_stability": true
+      },
+      "effective_preview_range_board_units": 1200,
+      "contact_initiative_model": {
+        "source": "workbench_diagnostic_not_runtime_truth",
+        "seconds_to_first_coordinated_shot": 1.9,
+        "target_support_percent": 14,
+        "interpretation": "normale Kontaktreaktion",
+        "best_window": {
+          "unit_id": "unit_1",
+          "label": "1",
+          "distance_world": 351.5498905549805,
+          "distance_tiles": 7.32395605322876,
+          "facing_degrees": 352,
+          "target_degrees": 358.65437194169255,
+          "angle_offset_degrees": 6.6543719416925455,
+          "target_in_fov": true
+        },
+        "modifiers": {
+          "base_seconds": 2,
+          "movement_seconds": 0.1,
+          "stance_profile_seconds": -0.15,
+          "fov_seconds": -0.15,
+          "distance_seconds": 0.45,
+          "buddy_seconds": -0.35,
+          "fov_label": "7deg im Sektor",
+          "distance_label": "Randbereich",
+          "distance_profile_stance": "cautious",
+          "distance_profile_values": {
+            "close_max_percent": 20,
+            "optimal_min_percent": 40,
+            "optimal_max_percent": 75,
+            "clear_sight_max_percent": 70,
+            "good_seconds": -0.35,
+            "good_target_percent": 6,
+            "close_seconds": 0.15,
+            "close_target_percent": -2,
+            "edge_seconds": 0.45,
+            "edge_target_percent": -3,
+            "outside_weapon_seconds": 0.85,
+            "outside_weapon_target_percent": -6,
+            "outside_sight_seconds": 0.95,
+            "outside_sight_target_percent": -8
+          },
+          "paired_confirm": false,
+          "target_support_percent": 14
+        }
+      }
+    },
+    "metrics": {
+      "min_spacing_world": 53,
+      "min_spacing_tiles": 1.11,
+      "buddy_pair_spacing_world": 85,
+      "formation_width_world": 75,
+      "formation_depth_world": 131,
+      "max_units_per_tile": 1,
+      "cohesion_radius_world": 216,
+      "cover_priority_percent": 75,
+      "contact_initiative_seconds": 1.9,
+      "team_target_support_percent": 14
+    }
+  },
+  "metadata": {
+    "url": "file:///C:/dev/SternenBuergerchen/docs/reports/fireteam_formation_tuning_workbench.html",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"
+  }
+}

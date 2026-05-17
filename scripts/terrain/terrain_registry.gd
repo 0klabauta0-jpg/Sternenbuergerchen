@@ -259,10 +259,15 @@ func get_walkable_cover_tiles_in_radius(world_center: Vector2, radius: float) ->
 
 
 func world_to_grid(world_pos: Vector2) -> Vector2i:
+	var grid_position: Vector2 = world_to_grid_float(world_pos)
+	return Vector2i(roundi(grid_position.x), roundi(grid_position.y))
+
+
+func world_to_grid_float(world_pos: Vector2) -> Vector2:
 	var delta: Vector2 = world_pos - _grid_origin_world
 	var grid_x: float = ((delta.y / _half_tile_height) + (delta.x / _half_tile_width)) * 0.5
 	var grid_y: float = ((delta.y / _half_tile_height) - (delta.x / _half_tile_width)) * 0.5
-	return Vector2i(roundi(grid_x), roundi(grid_y))
+	return Vector2(grid_x, grid_y)
 
 
 func grid_to_world(grid_pos: Vector2i) -> Vector2:

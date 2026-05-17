@@ -15,6 +15,7 @@ const MAP_EDITOR_PATROL_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/ma
 const MAP_EDITOR_PATROL_PREVIEW_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_patrol_preview.gd")
 const MAP_EDITOR_TILE_PROPERTY_OVERLAY_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_tile_property_overlay.gd")
 const MAP_EDITOR_ADJACENCY_DEBUG_OVERLAY_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_adjacency_debug_overlay.gd")
+const TERRAIN_TRUTH_AUDIT_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_truth_audit.gd")
 const MAP_EDITOR_MARKER_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_marker_tool.gd")
 const MAP_EDITOR_MISSION_SCENARIO_PANEL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_mission_scenario_panel.gd")
 const MULTIPLAYER_MAP_MANIFEST_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_map_manifest.gd")
@@ -232,6 +233,7 @@ func _ready() -> void:
 	_ensure_editor_save_controls()
 	_ensure_map_name_controls()
 	_ensure_object_rotation_controls()
+	_ensure_terrain_truth_inspector_controls()
 	_ensure_editor_context_menu()
 	_populate_tile_palette()
 	_connect_ui_signals()
@@ -1424,6 +1426,26 @@ func _ensure_object_rotation_controls() -> void:
 		panel_parent.move_child(row, insert_after.get_index() + 1)
 
 
+func _ensure_terrain_truth_inspector_controls() -> void:
+	var panel_parent := get_node_or_null("UI/PropertyPanel/Margin/VBox") as VBoxContainer
+	if panel_parent == null:
+		return
+	var label := panel_parent.get_node_or_null("TerrainTruthInspectorLabel") as Label
+	if label == null:
+		label = Label.new()
+		label.name = "TerrainTruthInspectorLabel"
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.custom_minimum_size = Vector2(0.0, 96.0)
+		label.tooltip_text = "Read-only Terrain Truth: dieselben Tile-/LOS-Werte, die Debug-Overlay und Runtime-LOS lesen."
+		label.add_theme_font_size_override("font_size", 10)
+		label.add_theme_color_override("font_color", Color(0.78, 0.93, 0.98, 0.96))
+		panel_parent.add_child(label)
+	var insert_after := panel_parent.get_node_or_null("TypeLabel")
+	if insert_after != null:
+		panel_parent.move_child(label, insert_after.get_index() + 1)
+	_refresh_terrain_truth_inspector(_get_selected_tile())
+
+
 func _ensure_editor_context_menu() -> PopupMenu:
 	if _editor_context_menu != null and is_instance_valid(_editor_context_menu):
 		return _editor_context_menu
@@ -1661,8 +1683,9 @@ func _on_adjacency_debug_overlay_toggled(pressed: bool) -> void:
 func _on_clear_patrol_pressed() -> void:
 	if _terrain_map_data == null or _patrol_spawn_id.is_empty():
 		return
-	_terrain_map_data.call("set_patrol_path", _patrol_spawn_id, [])
+	_terrain_map_data.call("set_patrol_path", _resolve_patrol_edit_path_id(_patrol_spawn_id), [])
 	_mark_dirty(true)
+	preview_patrol_route_for_reference(_patrol_spawn_id, "selected_spawn")
 	_refresh_patrol_overlay()
 	_refresh_authoring_status_controls()
 
@@ -1700,6 +1723,7 @@ func _refresh_property_panel() -> void:
 					edge_idx = 2
 			edge_type_option_button.select(edge_idx)
 		_refresh_object_rotation_controls(null)
+		_refresh_terrain_truth_inspector(null)
 		_set_property_controls_enabled(false)
 		_is_refreshing_property_controls = false
 		_refresh_authoring_status_controls()
@@ -1723,6 +1747,7 @@ func _refresh_property_panel() -> void:
 				type_label.text = "Typ: %s%s" % [_tile_catalog.get_display_name(matched_type_id), object_label]
 		var stack_info: Dictionary = _build_tile_layer_stack_info(tile_data)
 		type_label.tooltip_text = String(stack_info.get("help_text", ""))
+	_refresh_terrain_truth_inspector(tile_data)
 	walkable_checkbox.button_pressed = bool(tile_data.walkable)
 	blocks_los_checkbox.button_pressed = bool(tile_data.blocks_los)
 	cover_spinbox.value = int(tile_data.cover_value)
@@ -1741,6 +1766,79 @@ func _refresh_property_panel() -> void:
 	_is_refreshing_property_controls = false
 	_refresh_authoring_status_controls()
 	_apply_inspector_section_visibility()
+
+
+func get_selected_tile_truth_debug_snapshot() -> Dictionary:
+	return _build_tile_truth_inspector_snapshot(_get_selected_tile())
+
+
+func _refresh_terrain_truth_inspector(tile_data) -> void:
+	var label := get_node_or_null("UI/PropertyPanel/Margin/VBox/TerrainTruthInspectorLabel") as Label
+	if label == null:
+		return
+	var snapshot: Dictionary = _build_tile_truth_inspector_snapshot(tile_data)
+	label.text = _format_tile_truth_inspector_text(snapshot)
+	label.tooltip_text = "Read-only Terrain Truth. Runtime-LOS nutzt Wandsegmente: %s." % str(bool(snapshot.get("combat_los_uses_segment_policy", false)))
+
+
+func _build_tile_truth_inspector_snapshot(tile_data) -> Dictionary:
+	var policy: Dictionary = Dictionary(TERRAIN_TRUTH_AUDIT_SCRIPT.call("build_policy_snapshot"))
+	if tile_data == null:
+		return {
+			"selected": false,
+			"visual_only": true,
+			"ui_sets_gameplay_truth": false,
+			"combat_los_uses_segment_policy": bool(policy.get("combat_los_uses_segment_policy", false)),
+			"wall_los_policy": String(policy.get("wall_los_policy", "")),
+		}
+	var entry: Dictionary = Dictionary(TERRAIN_TRUTH_AUDIT_SCRIPT.call("build_tile_truth_entry", tile_data))
+	var truth_label: String = String(MAP_EDITOR_TILE_PROPERTY_OVERLAY_SCRIPT.call("build_tile_truth_label", tile_data, entry))
+	entry["selected"] = true
+	entry["visual_only"] = true
+	entry["ui_sets_gameplay_truth"] = false
+	entry["grid_position"] = tile_data.grid_position
+	entry["world_position"] = tile_data.world_position
+	entry["truth_label"] = truth_label
+	entry["truth_issue_count"] = _get_variant_count(entry.get("issues", PackedStringArray()))
+	entry["combat_los_uses_segment_policy"] = bool(policy.get("combat_los_uses_segment_policy", false))
+	entry["combat_los_policy_source"] = String(policy.get("combat_los_policy_source", ""))
+	entry["wall_los_policy"] = String(policy.get("wall_los_policy", ""))
+	return entry
+
+
+func _format_tile_truth_inspector_text(snapshot: Dictionary) -> String:
+	if not bool(snapshot.get("selected", false)):
+		return "Terrain Truth\nKein Tile ausgewaehlt.\nRuntime LOS: %s" % String(snapshot.get("wall_los_policy", "-"))
+	var grid_position: Vector2i = Vector2i(snapshot.get("grid_position", Vector2i(-1, -1)))
+	var lines: PackedStringArray = PackedStringArray()
+	lines.append("Terrain Truth | %s" % String(snapshot.get("truth_label", "-")))
+	lines.append("Grid %d,%d | %s" % [grid_position.x, grid_position.y, String(snapshot.get("tile_id", ""))])
+	var object_type_id: String = String(snapshot.get("object_type_id", "")).strip_edges()
+	lines.append("Typ %s | Obj %s" % [String(snapshot.get("type_id", "")), object_type_id if not object_type_id.is_empty() else "-"])
+	lines.append("Layer %s | %s" % [String(snapshot.get("ground_layer_state", "")), String(snapshot.get("object_layer_state", ""))])
+	lines.append("Walk %s | LOS %s | C%d | H%d | ObjH%d" % [
+		str(bool(snapshot.get("walkable", false))),
+		str(bool(snapshot.get("blocks_los", false))),
+		int(snapshot.get("cover_value", 0)),
+		int(snapshot.get("height_level", 0)),
+		int(snapshot.get("object_height", 0)),
+	])
+	lines.append("Blocker %s | Seg %d | Runtime %s" % [
+		String(snapshot.get("blocker_type", "none")),
+		int(snapshot.get("wall_segment_count", 0)),
+		String(snapshot.get("wall_los_policy", "")),
+	])
+	if int(snapshot.get("truth_issue_count", 0)) > 0:
+		lines.append("Issues: %s" % ", ".join(PackedStringArray(snapshot.get("issues", PackedStringArray()))))
+	return "\n".join(lines)
+
+
+func _get_variant_count(value: Variant) -> int:
+	if value is PackedStringArray:
+		return value.size()
+	if value is Array:
+		return Array(value).size()
+	return 0
 
 
 func _refresh_map_settings_panel() -> void:
@@ -2144,6 +2242,7 @@ func _tile_property_controls_are_visible() -> bool:
 		get_node_or_null("UI/PropertyPanel/Margin/VBox/TitleLabel"),
 		get_node_or_null("UI/PropertyPanel/Margin/VBox/TileLabel"),
 		get_node_or_null("UI/PropertyPanel/Margin/VBox/TypeLabel"),
+		get_node_or_null("UI/PropertyPanel/Margin/VBox/TerrainTruthInspectorLabel"),
 		get_node_or_null("UI/PropertyPanel/Margin/VBox/WalkableCheckBox"),
 		get_node_or_null("UI/PropertyPanel/Margin/VBox/CoverRow"),
 		get_node_or_null("UI/PropertyPanel/Margin/VBox/HeightRow"),
@@ -2983,6 +3082,8 @@ func _build_inspector_snapshot() -> Dictionary:
 		"map_settings_visible": _is_inspector_section_visible(INSPECTOR_SECTION_MAP_SETTINGS),
 		"markers_visible": _is_inspector_section_visible(INSPECTOR_SECTION_MARKERS),
 		"mission_scenario_visible": _is_inspector_section_visible(INSPECTOR_SECTION_MISSION_SCENARIO),
+		"terrain_truth_visible": get_node_or_null("UI/PropertyPanel/Margin/VBox/TerrainTruthInspectorLabel") != null,
+		"selected_tile_terrain_truth": get_selected_tile_truth_debug_snapshot(),
 	}
 
 
@@ -3077,7 +3178,7 @@ func _get_brush_footprint_tile_count() -> int:
 func _get_patrol_waypoint_count(spawn_id: String) -> int:
 	if _terrain_map_data == null:
 		return 0
-	return Array(_terrain_map_data.call("get_patrol_path", spawn_id)).size()
+	return Array(_terrain_map_data.call("get_patrol_path", _resolve_patrol_edit_path_id(spawn_id))).size()
 
 
 func _build_selected_tile_context() -> Dictionary:
@@ -5133,6 +5234,17 @@ func _refresh_tile_property_overlay_cell(tile_data, fallback_grid: Vector2i = Ve
 	cell_root.name = "TileProperty_%d_%d" % [grid_position.x, grid_position.y]
 	cell_root.set_meta("grid_position", grid_position)
 	cell_root.set_meta("color_role", String(entry.get("color_role", "")))
+	cell_root.set_meta("blocker_type", String(entry.get("blocker_type", "none")))
+	cell_root.set_meta("wall_segment_count", int(entry.get("wall_segment_count", 0)))
+	cell_root.set_meta("object_layer_state", String(entry.get("object_layer_state", "")))
+	cell_root.set_meta("truth_label", String(entry.get("truth_label", "")))
+	var issues_variant: Variant = entry.get("issues", PackedStringArray())
+	var truth_issue_count: int = 0
+	if issues_variant is PackedStringArray:
+		truth_issue_count = issues_variant.size()
+	elif issues_variant is Array:
+		truth_issue_count = Array(issues_variant).size()
+	cell_root.set_meta("truth_issue_count", truth_issue_count)
 	var diamond := Polygon2D.new()
 	diamond.name = "Fill"
 	diamond.polygon = PackedVector2Array([
@@ -5143,13 +5255,30 @@ func _refresh_tile_property_overlay_cell(tile_data, fallback_grid: Vector2i = Ve
 	])
 	diamond.color = Color(entry.get("color", Color(1.0, 1.0, 1.0, 0.1)))
 	cell_root.add_child(diamond)
+	var wall_segments: Array = Array(entry.get("wall_segments", []))
+	if not wall_segments.is_empty():
+		var segment_root := Node2D.new()
+		segment_root.name = "WallSegments"
+		segment_root.z_index = 2
+		for segment_index in range(wall_segments.size()):
+			var segment: Dictionary = Dictionary(wall_segments[segment_index])
+			var segment_start: Vector2 = _tile_property_overlay_grid_point_to_world(center, grid_position, Vector2(segment.get("segment_start", Vector2.ZERO)), half_width, half_height)
+			var segment_end: Vector2 = _tile_property_overlay_grid_point_to_world(center, grid_position, Vector2(segment.get("segment_end", Vector2.ZERO)), half_width, half_height)
+			var segment_line := Line2D.new()
+			segment_line.name = "WallSegment_%d" % segment_index
+			segment_line.width = 3.0
+			segment_line.default_color = Color(1.0, 0.84, 0.16, 0.95)
+			segment_line.add_point(segment_start)
+			segment_line.add_point(segment_end)
+			segment_root.add_child(segment_line)
+		cell_root.add_child(segment_root)
 	var label_text: String = String(entry.get("label", ""))
 	if not label_text.is_empty():
 		var label := Label.new()
 		label.name = "Label"
 		label.text = label_text
-		label.position = center + Vector2(-half_width * 0.34, -8.0)
-		label.size = Vector2(half_width * 0.68, 16.0)
+		label.position = center + Vector2(-half_width * 0.42, -10.0)
+		label.size = Vector2(half_width * 0.84, 20.0)
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		label.add_theme_font_size_override("font_size", 9)
@@ -5157,6 +5286,11 @@ func _refresh_tile_property_overlay_cell(tile_data, fallback_grid: Vector2i = Ve
 		cell_root.add_child(label)
 	overlay.add_child(cell_root)
 	_tile_property_overlay_cells_by_grid[grid_position] = cell_root
+
+
+func _tile_property_overlay_grid_point_to_world(tile_center: Vector2, tile_grid_position: Vector2i, grid_point: Vector2, half_width: float, half_height: float) -> Vector2:
+	var offset: Vector2 = grid_point - Vector2(float(tile_grid_position.x), float(tile_grid_position.y))
+	return tile_center + Vector2((offset.x - offset.y) * half_width, (offset.x + offset.y) * half_height)
 
 
 func set_adjacency_debug_overlay_enabled(enabled: bool) -> bool:
@@ -5296,6 +5430,22 @@ func get_patrol_route_preview_snapshot() -> Dictionary:
 	return _last_patrol_preview_snapshot.duplicate(true)
 
 
+func get_patrol_authoring_reference_ids() -> PackedStringArray:
+	return _build_patrol_authoring_reference_ids()
+
+
+func set_patrol_authoring_reference(reference_id: String) -> bool:
+	var normalized_reference_id: String = reference_id.strip_edges()
+	if normalized_reference_id.is_empty() or not _build_patrol_authoring_reference_ids().has(normalized_reference_id):
+		return false
+	_patrol_spawn_id = normalized_reference_id
+	_refresh_patrol_spawn_selector()
+	preview_patrol_route_for_reference(_patrol_spawn_id, "selected_spawn")
+	_refresh_patrol_overlay()
+	_refresh_authoring_status_controls()
+	return true
+
+
 func _set_patrol_route_preview_from_snapshot(snapshot: Dictionary, queue_visual_refresh: bool = true) -> bool:
 	var is_active: bool = bool(snapshot.get("active", false))
 	var next_path_id: String = String(snapshot.get("patrol_path_id", "")).strip_edges() if is_active else ""
@@ -5348,11 +5498,12 @@ func _refresh_patrol_overlay() -> void:
 	var patrol_paths: Dictionary = Dictionary(_terrain_map_data.call("get_patrol_paths"))
 	var path_ids: Array = patrol_paths.keys()
 	path_ids.sort()
+	var active_path_id: String = _resolve_patrol_edit_path_id(_patrol_spawn_id)
 	for spawn_id_variant in path_ids:
 		var spawn_id: String = String(spawn_id_variant).strip_edges()
 		if spawn_id.is_empty():
 			continue
-		var is_active_spawn: bool = spawn_id == _patrol_spawn_id
+		var is_active_spawn: bool = spawn_id == active_path_id
 		var is_preview: bool = spawn_id == _patrol_preview_path_id
 		var base_color: Color = Color(0.25, 0.75, 0.3, 0.5)
 		if is_preview:
@@ -5425,15 +5576,63 @@ func _refresh_patrol_spawn_selector() -> void:
 	if spawn_selector == null:
 		return
 	spawn_selector.clear()
-	for spawn_id in PATROL_SPAWN_IDS:
+	var reference_ids: PackedStringArray = _build_patrol_authoring_reference_ids()
+	for spawn_id in reference_ids:
 		spawn_selector.add_item(spawn_id)
 		spawn_selector.set_item_metadata(spawn_selector.item_count - 1, spawn_id)
-	var selected_index: int = 0
+	var selected_index: int = -1
 	for index in range(spawn_selector.item_count):
 		if String(spawn_selector.get_item_metadata(index)) == _patrol_spawn_id:
 			selected_index = index
 			break
+	if selected_index < 0 and spawn_selector.item_count > 0:
+		selected_index = 0
+		_patrol_spawn_id = String(spawn_selector.get_item_metadata(selected_index)).strip_edges()
 	spawn_selector.select(selected_index)
+
+
+func _build_patrol_authoring_reference_ids() -> PackedStringArray:
+	var result: Array = []
+	var seen: Dictionary = {}
+	if _mission_scenario != null and _mission_scenario.has_method("get_enemy_ids"):
+		for enemy_id in PackedStringArray(_mission_scenario.call("get_enemy_ids")):
+			_append_unique_patrol_reference_id(result, seen, enemy_id)
+		for binding_variant in Array(_mission_scenario.get("patrol_bindings")):
+			if typeof(binding_variant) != TYPE_DICTIONARY:
+				continue
+			var binding: Dictionary = Dictionary(binding_variant)
+			_append_unique_patrol_reference_id(result, seen, binding.get("target_id", ""))
+			_append_unique_patrol_reference_id(result, seen, binding.get("binding_id", ""))
+			_append_unique_patrol_reference_id(result, seen, binding.get("patrol_path_id", ""))
+	if _terrain_map_data != null and _terrain_map_data.has_method("get_patrol_paths"):
+		var patrol_paths: Dictionary = Dictionary(_terrain_map_data.call("get_patrol_paths"))
+		var path_ids: Array = patrol_paths.keys()
+		path_ids.sort()
+		for path_id_variant in path_ids:
+			_append_unique_patrol_reference_id(result, seen, path_id_variant)
+	for fallback_id in PATROL_SPAWN_IDS:
+		_append_unique_patrol_reference_id(result, seen, fallback_id)
+	var packed := PackedStringArray()
+	for reference_id_variant in result:
+		packed.append(String(reference_id_variant))
+	return packed
+
+
+func _append_unique_patrol_reference_id(result: Array, seen: Dictionary, id_value: Variant) -> void:
+	var reference_id: String = String(id_value).strip_edges()
+	if reference_id.is_empty() or seen.has(reference_id):
+		return
+	result.append(reference_id)
+	seen[reference_id] = true
+
+
+func _resolve_patrol_edit_path_id(reference_id: String) -> String:
+	var normalized_reference_id: String = reference_id.strip_edges()
+	if normalized_reference_id.is_empty():
+		return ""
+	var resolved: Dictionary = Dictionary(MAP_EDITOR_PATROL_PREVIEW_SCRIPT.call("resolve_route_reference", _terrain_map_data, _mission_scenario, normalized_reference_id))
+	var patrol_path_id: String = String(resolved.get("patrol_path_id", "")).strip_edges()
+	return patrol_path_id if not patrol_path_id.is_empty() else normalized_reference_id
 
 
 func _update_patrol_topbar_state() -> void:
@@ -5461,16 +5660,17 @@ func _handle_patrol_left_click(world_position: Vector2, remove_mode: bool) -> vo
 
 
 func _find_patrol_waypoint_index_at(world_position: Vector2) -> int:
-	return int(MAP_EDITOR_PATROL_TOOL_SCRIPT.call("find_waypoint_index_at", _terrain_map_data, _patrol_spawn_id, world_position, PATROL_PICK_RADIUS))
+	return int(MAP_EDITOR_PATROL_TOOL_SCRIPT.call("find_waypoint_index_at", _terrain_map_data, _resolve_patrol_edit_path_id(_patrol_spawn_id), world_position, PATROL_PICK_RADIUS))
 
 
 func _add_patrol_waypoint(world_position: Vector2) -> void:
 	var snapped_position = _snap_world_position_to_tile_center(world_position)
 	if snapped_position == null:
 		return
-	if not bool(MAP_EDITOR_PATROL_TOOL_SCRIPT.call("add_waypoint", _terrain_map_data, _patrol_spawn_id, Vector2(snapped_position))):
+	if not bool(MAP_EDITOR_PATROL_TOOL_SCRIPT.call("add_waypoint", _terrain_map_data, _resolve_patrol_edit_path_id(_patrol_spawn_id), Vector2(snapped_position))):
 		return
 	_mark_dirty(true)
+	preview_patrol_route_for_reference(_patrol_spawn_id, "selected_spawn")
 	_refresh_patrol_overlay()
 	_queue_3d_map_refresh()
 
@@ -5479,17 +5679,19 @@ func _move_patrol_waypoint(index: int, world_position: Vector2) -> void:
 	var snapped_position = _snap_world_position_to_tile_center(world_position)
 	if snapped_position == null:
 		return
-	if not bool(MAP_EDITOR_PATROL_TOOL_SCRIPT.call("move_waypoint", _terrain_map_data, _patrol_spawn_id, index, Vector2(snapped_position))):
+	if not bool(MAP_EDITOR_PATROL_TOOL_SCRIPT.call("move_waypoint", _terrain_map_data, _resolve_patrol_edit_path_id(_patrol_spawn_id), index, Vector2(snapped_position))):
 		return
 	_mark_dirty(true)
+	preview_patrol_route_for_reference(_patrol_spawn_id, "selected_spawn")
 	_refresh_patrol_overlay()
 	_queue_3d_map_refresh()
 
 
 func _remove_patrol_waypoint(index: int) -> void:
-	if not bool(MAP_EDITOR_PATROL_TOOL_SCRIPT.call("remove_waypoint", _terrain_map_data, _patrol_spawn_id, index)):
+	if not bool(MAP_EDITOR_PATROL_TOOL_SCRIPT.call("remove_waypoint", _terrain_map_data, _resolve_patrol_edit_path_id(_patrol_spawn_id), index)):
 		return
 	_mark_dirty(true)
+	preview_patrol_route_for_reference(_patrol_spawn_id, "selected_spawn")
 	_refresh_patrol_overlay()
 	_queue_3d_map_refresh()
 

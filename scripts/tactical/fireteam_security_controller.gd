@@ -8,6 +8,8 @@ const SECURITY_MODE_DIRECTIONAL: String = "directional"
 const DIRECTIONAL_ARC_WIDTH: float = PI * 0.7
 const DEFENSE_SCAN_HALF_ANGLE: float = 0.13962634
 const DEFENSE_SCAN_CYCLE_MSEC: int = 2600
+const DIRECTIONAL_FRONT_PAIR_OFFSET: float = 0.13962634
+const DIRECTIONAL_FLANK_OFFSET: float = 1.04719755
 const MIN_SHIFT_DELAY_MSEC: int = 250
 const MAX_SHIFT_DELAY_MSEC: int = 1200
 
@@ -354,15 +356,15 @@ func _build_member_assignments(fit_members: Array, security_mode: String, direct
 				"scan_offset_angle": scan_offset,
 				"center_angle": wrapf(base_angle + scan_offset, -PI, PI),
 				"arc_width": sector_width,
+				"coverage_role": _resolve_360_coverage_role(index),
 				"security_radius_world": security_radius_world,
 			})
 		return assignments
 	var member_count: int = fit_members.size()
-	var max_spread: float = DIRECTIONAL_ARC_WIDTH * 0.34
 	for index in range(member_count):
 		var member: Dictionary = fit_members[index]
-		var spread_t: float = 0.5 if member_count <= 1 else float(index) / float(member_count - 1)
-		var base_angle: float = wrapf(direction_angle + lerpf(-max_spread, max_spread, spread_t), -PI, PI)
+		var assignment_offset: Dictionary = _resolve_directional_assignment_offset(index, member_count)
+		var base_angle: float = wrapf(direction_angle + float(assignment_offset.get("offset", 0.0)), -PI, PI)
 		var scan_offset: float = _build_defense_scan_offset(index, now_msec)
 		assignments.append({
 			"unit_id": String(member.get("unit_id", "")),
@@ -370,6 +372,7 @@ func _build_member_assignments(fit_members: Array, security_mode: String, direct
 			"scan_offset_angle": scan_offset,
 			"center_angle": wrapf(base_angle + scan_offset, -PI, PI),
 			"arc_width": DIRECTIONAL_ARC_WIDTH,
+			"coverage_role": String(assignment_offset.get("coverage_role", "front")),
 			"security_radius_world": security_radius_world,
 		})
 	return assignments
@@ -382,6 +385,50 @@ func _resolve_360_member_angle(index: int, member_count: int, direction_angle: f
 	if index < cardinal_angles.size():
 		return float(cardinal_angles[index])
 	return wrapf(direction_angle + (sector_width * float(index)), -PI, PI)
+
+
+func _resolve_360_coverage_role(index: int) -> String:
+	match index:
+		0:
+			return "north"
+		1:
+			return "east"
+		2:
+			return "south"
+		3:
+			return "west"
+		_:
+			return "360_extra"
+
+
+func _resolve_directional_assignment_offset(index: int, member_count: int) -> Dictionary:
+	if member_count <= 1:
+		return {"offset": 0.0, "coverage_role": "front"}
+	if member_count == 2:
+		return {
+			"offset": -DIRECTIONAL_FRONT_PAIR_OFFSET if index == 0 else DIRECTIONAL_FRONT_PAIR_OFFSET,
+			"coverage_role": "front_left" if index == 0 else "front_right",
+		}
+	if member_count == 3:
+		match index:
+			0:
+				return {"offset": 0.0, "coverage_role": "front"}
+			1:
+				return {"offset": -DIRECTIONAL_FLANK_OFFSET, "coverage_role": "left_flank"}
+			_:
+				return {"offset": DIRECTIONAL_FLANK_OFFSET, "coverage_role": "right_flank"}
+	match index:
+		0:
+			return {"offset": -DIRECTIONAL_FRONT_PAIR_OFFSET, "coverage_role": "front_left"}
+		1:
+			return {"offset": DIRECTIONAL_FRONT_PAIR_OFFSET, "coverage_role": "front_right"}
+		2:
+			return {"offset": -DIRECTIONAL_FLANK_OFFSET, "coverage_role": "left_flank"}
+		3:
+			return {"offset": DIRECTIONAL_FLANK_OFFSET, "coverage_role": "right_flank"}
+		_:
+			var side: float = -1.0 if index % 2 == 0 else 1.0
+			return {"offset": side * DIRECTIONAL_FLANK_OFFSET, "coverage_role": "flank_extra"}
 
 
 func _build_defense_scan_offset(index: int, now_msec: int) -> float:

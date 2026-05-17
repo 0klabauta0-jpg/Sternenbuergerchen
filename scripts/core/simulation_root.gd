@@ -1012,6 +1012,9 @@ func _copy_enemy_meta_to_snapshot(unit: Node, snapshot: Dictionary) -> void:
 		"enemy_movement_posture",
 		"enemy_weapon_posture",
 		"enemy_posture_policy_id",
+		"enemy_limbo_behavior_action",
+		"enemy_limbo_behavior_source",
+		"enemy_limbo_behavior_reason",
 	]:
 		if unit.has_meta(string_key):
 			snapshot[string_key] = String(unit.get_meta(string_key, ""))

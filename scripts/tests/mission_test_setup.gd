@@ -503,12 +503,12 @@ func _get_friendly_spawn_offset(index: int) -> Vector2:
 
 func _get_enemy_spawn_offset(index: int) -> Vector2:
 	var offsets: Array[Vector2] = [
-		Vector2(-48.0, -24.0),
-		Vector2(-16.0, 8.0),
-		Vector2(16.0, -8.0),
-		Vector2(48.0, 24.0),
-		Vector2(-72.0, 28.0),
-		Vector2(72.0, -28.0),
+		Vector2(-96.0, -48.0),
+		Vector2(-32.0, 16.0),
+		Vector2(32.0, -16.0),
+		Vector2(96.0, 48.0),
+		Vector2(-128.0, 52.0),
+		Vector2(128.0, -52.0),
 	]
 	if index >= 0 and index < offsets.size():
 		return offsets[index]

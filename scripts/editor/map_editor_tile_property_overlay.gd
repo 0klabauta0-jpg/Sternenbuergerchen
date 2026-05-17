@@ -1,6 +1,8 @@
 class_name MapEditorTilePropertyOverlay
 extends RefCounted
 
+const TERRAIN_TRUTH_AUDIT_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_truth_audit.gd")
+
 const ROLE_WALKABLE: String = "walkable"
 const ROLE_BLOCKED: String = "blocked"
 const ROLE_LOS_BLOCK: String = "los_block"
@@ -17,22 +19,24 @@ const COLOR_HEIGHT: Color = Color(1.0, 0.72, 0.18, 0.30)
 static func build_tile_entry(tile_data) -> Dictionary:
 	if tile_data == null:
 		return {}
+	var truth_entry: Dictionary = Dictionary(TERRAIN_TRUTH_AUDIT_SCRIPT.call("build_tile_truth_entry", tile_data))
 	var role: String = get_tile_color_role(tile_data)
 	var color: Color = get_tile_color(tile_data)
-	return {
+	var legacy_label: String = build_tile_label(tile_data)
+	var truth_label: String = build_tile_truth_label(tile_data, truth_entry)
+	var entry: Dictionary = {
 		"grid_position": tile_data.grid_position,
 		"world_position": tile_data.world_position,
-		"walkable": bool(tile_data.walkable),
-		"blocks_los": bool(tile_data.blocks_los),
-		"cover_value": int(tile_data.cover_value),
-		"height_level": int(tile_data.height_level),
-		"object_height": int(tile_data.object_height),
-		"surface_type": String(tile_data.surface_type),
 		"edge_type": String(tile_data.edge_type),
 		"color_role": role,
 		"color": color,
-		"label": build_tile_label(tile_data),
+		"legacy_label": legacy_label,
+		"truth_label": truth_label,
+		"label": truth_label if not truth_label.is_empty() else legacy_label,
 	}
+	for key in truth_entry.keys():
+		entry[key] = truth_entry[key]
+	return entry
 
 
 static func get_tile_color_role(tile_data) -> String:
@@ -81,6 +85,38 @@ static func build_tile_label(tile_data) -> String:
 	return " ".join(parts)
 
 
+static func build_tile_truth_label(tile_data, truth_entry: Dictionary = {}) -> String:
+	if tile_data == null:
+		return ""
+	var entry: Dictionary = truth_entry
+	if entry.is_empty():
+		entry = Dictionary(TERRAIN_TRUTH_AUDIT_SCRIPT.call("build_tile_truth_entry", tile_data))
+	var parts: PackedStringArray = PackedStringArray()
+	var base_label: String = build_tile_label(tile_data)
+	if not base_label.is_empty():
+		parts.append(base_label)
+	var blocker_type: String = String(entry.get("blocker_type", "none"))
+	match blocker_type:
+		"wall_segment_candidate":
+			parts.append("W%d" % maxi(int(entry.get("wall_segment_count", 0)), 1))
+		"wall_whole_tile_candidate":
+			parts.append("WT")
+		"tile_los_blocker":
+			if not base_label.contains("LOS"):
+				parts.append("LOS")
+		"object_height":
+			parts.append("OBJ H%d" % int(entry.get("object_height", tile_data.object_height)))
+		"cover":
+			if not base_label.contains("C"):
+				parts.append("C%d" % int(entry.get("cover_value", tile_data.cover_value)))
+	if bool(entry.get("has_object_layer", false)) and blocker_type != "object_height":
+		parts.append("OBJ")
+	var issue_count: int = _get_issue_count(entry)
+	if issue_count > 0:
+		parts.append("!%d" % issue_count)
+	return " ".join(parts)
+
+
 static func build_legend() -> Dictionary:
 	return {
 		ROLE_WALKABLE: {"label": "Walkable", "color": COLOR_WALKABLE},
@@ -101,6 +137,9 @@ static func build_overlay_snapshot(terrain_map_data, enabled: bool) -> Dictionar
 			"cell_count": 0,
 			"color_roles": {},
 			"legend": build_legend(),
+			"terrain_authority": TERRAIN_TRUTH_AUDIT_SCRIPT.TERRAIN_AUTHORITY,
+			"wall_los_policy": TERRAIN_TRUTH_AUDIT_SCRIPT.WALL_LOS_POLICY,
+			"dev_ui_fields": TERRAIN_TRUTH_AUDIT_SCRIPT.call("get_dev_ui_fields"),
 		}
 	var color_roles: Dictionary = {}
 	var cell_count: int = 0
@@ -111,7 +150,8 @@ static func build_overlay_snapshot(terrain_map_data, enabled: bool) -> Dictionar
 			cell_count += 1
 			var role: String = get_tile_color_role(tile_data)
 			color_roles[role] = int(color_roles.get(role, 0)) + 1
-	return {
+	var audit_snapshot: Dictionary = Dictionary(TERRAIN_TRUTH_AUDIT_SCRIPT.call("build_map_truth_snapshot", terrain_map_data))
+	var snapshot: Dictionary = {
 		"enabled": true,
 		"active": true,
 		"visual_only": true,
@@ -120,3 +160,17 @@ static func build_overlay_snapshot(terrain_map_data, enabled: bool) -> Dictionar
 		"color_roles": color_roles,
 		"legend": build_legend(),
 	}
+	for key in audit_snapshot.keys():
+		if snapshot.has(key):
+			continue
+		snapshot[key] = audit_snapshot[key]
+	return snapshot
+
+
+static func _get_issue_count(entry: Dictionary) -> int:
+	var issues: Variant = entry.get("issues", PackedStringArray())
+	if issues is PackedStringArray:
+		return issues.size()
+	if issues is Array:
+		return Array(issues).size()
+	return 0

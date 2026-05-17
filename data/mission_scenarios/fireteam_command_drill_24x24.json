@@ -15,32 +15,32 @@
 			],
 			"spawn_marker_id": "spawn_enemy_drill",
 			"tactics": {
-				"advance_style": "bounding",
-				"aim_move_speed_factor": 0.18,
+				"advance_style": "probe",
+				"aim_move_speed_factor": 0.12,
 				"air_asset_risk_profile": "none",
 				"allowed_weapon_roles": [
 					"rifle",
 					"smg",
-					"heavy"
+					"shotgun"
 				],
 				"anti_armor_threat": false,
 				"communication_intensity": "normal",
-				"contact_behavior": "suppress_from_cover",
-				"cover_behavior": "hold_best_cover",
-				"facing": "south_west",
+				"contact_behavior": "pin_then_report",
+				"cover_behavior": "break_to_cover_on_contact",
+				"facing": "auto",
 				"heavy_weapon_role": "none",
 				"lz_threat_zone_id": "",
-				"movement_posture_policy": "hold_ready",
-				"profile_id": "defensive_cover",
+				"movement_posture_policy": "travel_until_threat",
+				"profile_id": "patrol_probe",
 				"ready_distance_world": 640.0,
-				"ready_speed_factor": 0.24,
-				"security_mode": "cover_arc",
-				"sight_behavior": "cover_arc",
-				"stance": "defend",
-				"travel_speed_factor": 0.35,
+				"ready_speed_factor": 0.2,
+				"security_mode": "patrol",
+				"sight_behavior": "scan_waypoints",
+				"stance": "patrol",
+				"travel_speed_factor": 0.36,
 				"visual_archetype": "enemy_space_suit_orange",
 				"weapon_id": "",
-				"weapon_profile": "defensive_mid"
+				"weapon_profile": "standard_close"
 			},
 			"team_id": "team_red"
 		}
@@ -59,6 +59,21 @@
 			"mode": "pre_contact",
 			"patrol_path_id": "enemy_drill_watch_route",
 			"target_id": "enemy_delta"
+		},
+		{
+			"mode": "pre_contact",
+			"patrol_path_id": "enemy_drill_echo_route",
+			"target_id": "enemy_echo"
+		},
+		{
+			"mode": "pre_contact",
+			"patrol_path_id": "enemy_drill_foxtrot_route",
+			"target_id": "enemy_foxtrot"
+		},
+		{
+			"mode": "pre_contact",
+			"patrol_path_id": "enemy_drill_golf_route",
+			"target_id": "enemy_golf"
 		}
 	],
 	"scenario_id": "fireteam_command_drill",
@@ -80,8 +95,8 @@
 	"version": 1,
 	"wave_config": {
 		"first_wave_delay_seconds": 0.0,
-		"units_per_wave": 1,
-		"wave_count": 0,
+		"units_per_wave": 4,
+		"wave_count": 1,
 		"wave_delay_seconds": 0.0
 	}
 }

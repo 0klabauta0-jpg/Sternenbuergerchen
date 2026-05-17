@@ -1,0 +1,1821 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fireteam Behavior Playtest Workbench</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0f1418;
+      --surface: #171f27;
+      --surface-2: #202a34;
+      --surface-3: #26323e;
+      --line: #425466;
+      --line-soft: #2d3a46;
+      --text: #eaf1f7;
+      --muted: #aab8c4;
+      --faint: #7f8f9e;
+      --cyan: #67ddeb;
+      --cyan-soft: rgba(103, 221, 235, 0.18);
+      --yellow: #f5cf57;
+      --yellow-soft: rgba(245, 207, 87, 0.18);
+      --green: #6fe2a2;
+      --green-soft: rgba(111, 226, 162, 0.18);
+      --red: #ff806d;
+      --red-soft: rgba(255, 128, 109, 0.18);
+      --blue: #74adff;
+      --blue-soft: rgba(116, 173, 255, 0.18);
+      --tile-a: #74705a;
+      --tile-b: #998f72;
+      --tile-line: #0a1a20;
+      --shadow: rgba(0, 0, 0, 0.32);
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.48;
+    }
+
+    main {
+      width: min(1320px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 22px 0 44px;
+    }
+
+    h1, h2, h3, h4 {
+      margin: 0;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      font-size: clamp(28px, 3vw, 42px);
+      line-height: 1.08;
+    }
+
+    h2 {
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+
+    h3 {
+      font-size: 16px;
+      color: var(--cyan);
+      margin-bottom: 8px;
+    }
+
+    h4 {
+      font-size: 13px;
+      color: var(--text);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    p {
+      margin: 7px 0;
+      color: var(--muted);
+    }
+
+    a {
+      color: var(--cyan);
+    }
+
+    code {
+      background: #0a1116;
+      border: 1px solid var(--line-soft);
+      border-radius: 4px;
+      color: #dff9ff;
+      padding: 1px 5px;
+    }
+
+    .top {
+      border: 1px solid var(--line);
+      background: #121a21;
+      box-shadow: 0 16px 34px var(--shadow);
+      padding: 18px;
+    }
+
+    .top-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(360px, 0.8fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .kicker {
+      color: var(--yellow);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: 16px;
+      max-width: 900px;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .pill {
+      align-items: center;
+      border: 1px solid var(--line-soft);
+      background: #0d141a;
+      color: var(--muted);
+      display: inline-flex;
+      font-size: 12px;
+      gap: 6px;
+      min-height: 28px;
+      padding: 5px 9px;
+      white-space: nowrap;
+    }
+
+    .pill strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .pill.ok { border-color: #33684b; color: #c5f5d6; }
+    .pill.warn { border-color: #7c6630; color: #f3dda0; }
+    .pill.open { border-color: #6b4b47; color: #ffc1b8; }
+
+    .quick-panel {
+      border: 1px solid var(--line-soft);
+      background: var(--surface);
+      padding: 12px;
+      min-height: 100%;
+    }
+
+    .quick-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .quick-item {
+      border: 1px solid var(--line-soft);
+      background: #11181f;
+      padding: 9px;
+    }
+
+    .quick-item strong {
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .quick-item span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(15, 20, 24, 0.94);
+      border-bottom: 1px solid var(--line-soft);
+      padding: 10px 0;
+    }
+
+    button {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: #121a21;
+      color: var(--text);
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+      min-height: 36px;
+      padding: 8px 12px;
+    }
+
+    button:hover {
+      border-color: var(--cyan);
+      background: #17242d;
+    }
+
+    button.active,
+    button[data-active="true"] {
+      background: var(--cyan-soft);
+      border-color: var(--cyan);
+      color: #ecfdff;
+    }
+
+    button.yellow.active,
+    button.yellow[data-active="true"] {
+      background: var(--yellow-soft);
+      border-color: var(--yellow);
+      color: #fff3bf;
+    }
+
+    button.red.active,
+    button.red[data-active="true"] {
+      background: var(--red-soft);
+      border-color: var(--red);
+      color: #ffd6d0;
+    }
+
+    button.green.active,
+    button.green[data-active="true"] {
+      background: var(--green-soft);
+      border-color: var(--green);
+      color: #d7ffe4;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    .section {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      margin-bottom: 16px;
+      padding: 16px;
+    }
+
+    .section.tight {
+      padding: 12px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .cols-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .card {
+      border: 1px solid var(--line-soft);
+      background: #11181f;
+      padding: 12px;
+    }
+
+    .card h3 {
+      align-items: center;
+      display: flex;
+      gap: 8px;
+      justify-content: space-between;
+    }
+
+    .tag {
+      border: 1px solid var(--line-soft);
+      color: var(--muted);
+      display: inline-flex;
+      font-size: 11px;
+      min-height: 22px;
+      padding: 2px 7px;
+      text-transform: uppercase;
+    }
+
+    .tag.ok { border-color: #33684b; color: var(--green); }
+    .tag.warn { border-color: #7c6630; color: var(--yellow); }
+    .tag.open { border-color: #7c4d44; color: var(--red); }
+    .tag.info { border-color: #376472; color: var(--cyan); }
+
+    .mini-table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    .mini-table th,
+    .mini-table td {
+      border: 1px solid var(--line-soft);
+      padding: 7px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .mini-table th {
+      background: #0c1319;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .mini-table td {
+      color: var(--muted);
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(420px, 0.85fr);
+      gap: 14px;
+    }
+
+    .behavior-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    .behavior-head p {
+      max-width: 860px;
+    }
+
+    .rules {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .rule {
+      border-left: 3px solid var(--cyan);
+      background: #0d141a;
+      padding: 8px 10px;
+    }
+
+    .rule.yellow { border-left-color: var(--yellow); }
+    .rule.red { border-left-color: var(--red); }
+    .rule.green { border-left-color: var(--green); }
+    .rule strong {
+      color: var(--text);
+    }
+
+    .board {
+      border: 1px solid var(--line-soft);
+      background-color: var(--tile-a);
+      background-image:
+        linear-gradient(45deg, transparent 47%, var(--tile-line) 48%, var(--tile-line) 52%, transparent 53%),
+        linear-gradient(-45deg, transparent 47%, var(--tile-line) 48%, var(--tile-line) 52%, transparent 53%);
+      background-size: 46px 46px;
+      height: 250px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .board.small {
+      height: 210px;
+    }
+
+    .zone {
+      position: absolute;
+      border: 2px solid;
+      transform: rotate(45deg);
+    }
+
+    .zone.blue {
+      background: var(--blue-soft);
+      border-color: var(--blue);
+    }
+
+    .zone.red {
+      background: var(--red-soft);
+      border-color: var(--red);
+    }
+
+    .zone.yellow {
+      background: var(--yellow-soft);
+      border-color: var(--yellow);
+    }
+
+    .cover {
+      position: absolute;
+      width: 42px;
+      height: 26px;
+      background: #d9dde4;
+      border: 4px solid #8998a8;
+      box-shadow: 0 12px 0 rgba(0, 0, 0, 0.24);
+      transform: skew(-18deg);
+    }
+
+    .bush {
+      position: absolute;
+      width: 36px;
+      height: 28px;
+      background: #93d8d4;
+      border: 6px solid #e7ddba;
+      clip-path: polygon(15% 92%, 4% 48%, 38% 6%, 78% 18%, 96% 58%, 72% 96%);
+    }
+
+    .line {
+      position: absolute;
+      height: 2px;
+      left: var(--x);
+      top: var(--y);
+      width: var(--w);
+      transform: rotate(var(--r));
+      transform-origin: 0 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 10px rgba(103, 221, 235, 0.4);
+    }
+
+    .line.weapon {
+      background: var(--red);
+      box-shadow: 0 0 10px rgba(255, 128, 109, 0.5);
+    }
+
+    .line.sight {
+      background: var(--green);
+      box-shadow: 0 0 10px rgba(111, 226, 162, 0.45);
+    }
+
+    .line.move {
+      background: var(--blue);
+      box-shadow: 0 0 10px rgba(116, 173, 255, 0.45);
+    }
+
+    .arrow::after {
+      border-bottom: 5px solid transparent;
+      border-left: 9px solid currentColor;
+      border-top: 5px solid transparent;
+      content: "";
+      position: absolute;
+      right: -1px;
+      top: -4px;
+    }
+
+    .line.move { color: var(--blue); }
+    .line.weapon { color: var(--red); }
+    .line.sight { color: var(--green); }
+
+    .cone {
+      position: absolute;
+      left: var(--x);
+      top: var(--y);
+      width: var(--w);
+      height: var(--h);
+      background: var(--green-soft);
+      border: 1px solid rgba(111, 226, 162, 0.45);
+      clip-path: polygon(0 50%, 100% 0, 100% 100%);
+      transform: rotate(var(--r));
+      transform-origin: 0 50%;
+    }
+
+    .cone.red {
+      background: var(--red-soft);
+      border-color: rgba(255, 128, 109, 0.48);
+    }
+
+    .unit {
+      --team-color: var(--cyan);
+      height: 44px;
+      left: var(--x);
+      position: absolute;
+      top: var(--y);
+      transform: translate(-50%, -50%) rotate(var(--r, 0deg));
+      width: 30px;
+      z-index: 4;
+    }
+
+    .unit::before {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 50%;
+      bottom: -9px;
+      content: "";
+      height: 18px;
+      left: 2px;
+      position: absolute;
+      transform: rotate(-12deg);
+      width: 28px;
+      z-index: 0;
+    }
+
+    .unit .body {
+      background: #dfe7ec;
+      border: 3px solid #8aa0ad;
+      border-radius: 4px;
+      height: 25px;
+      left: 6px;
+      position: absolute;
+      top: 16px;
+      width: 18px;
+      z-index: 2;
+    }
+
+    .unit .head {
+      background: #f5f1e3;
+      border: 3px solid #cad2d8;
+      border-radius: 50%;
+      height: 20px;
+      left: 5px;
+      position: absolute;
+      top: 0;
+      width: 20px;
+      z-index: 3;
+    }
+
+    .unit .weapon {
+      background: #6c60d7;
+      height: 4px;
+      left: 18px;
+      position: absolute;
+      top: 20px;
+      transform: rotate(-5deg);
+      transform-origin: 0 50%;
+      width: 25px;
+      z-index: 5;
+    }
+
+    .unit.lower .weapon {
+      top: 27px;
+      transform: rotate(24deg);
+      width: 20px;
+    }
+
+    .unit.enemy {
+      --team-color: var(--red);
+    }
+
+    .unit.enemy .body {
+      background: #ff936f;
+      border-color: #854337;
+    }
+
+    .unit.enemy .head {
+      background: #3d4b35;
+      border-color: #273324;
+    }
+
+    .base {
+      background: var(--cyan-soft);
+      border: 2px solid var(--cyan);
+      border-radius: 50%;
+      height: 38px;
+      left: -4px;
+      position: absolute;
+      top: 23px;
+      width: 38px;
+      z-index: 1;
+    }
+
+    .unit.selected .base {
+      background: var(--yellow-soft);
+      border-color: var(--yellow);
+    }
+
+    .enemy .base {
+      background: var(--red-soft);
+      border-color: var(--red);
+    }
+
+    .label {
+      background: rgba(9, 13, 17, 0.78);
+      border: 1px solid var(--line-soft);
+      color: var(--text);
+      font-size: 11px;
+      left: var(--x);
+      padding: 3px 6px;
+      position: absolute;
+      top: var(--y);
+      z-index: 7;
+    }
+
+    .coverage {
+      border: 2px solid var(--yellow);
+      border-radius: 50%;
+      height: 84px;
+      left: var(--x);
+      opacity: 0.85;
+      position: absolute;
+      top: var(--y);
+      width: 84px;
+      z-index: 2;
+    }
+
+    .coverage.front {
+      border-radius: 0;
+      border-bottom-color: transparent;
+      border-left-color: transparent;
+      height: 84px;
+      transform: rotate(45deg);
+      width: 84px;
+    }
+
+    .coverage.u {
+      border-top-color: transparent;
+      height: 92px;
+      width: 92px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .legend span {
+      align-items: center;
+      color: var(--muted);
+      display: inline-flex;
+      font-size: 12px;
+      gap: 5px;
+    }
+
+    .swatch {
+      display: inline-block;
+      height: 10px;
+      width: 22px;
+    }
+
+    .swatch.blue { background: var(--blue); }
+    .swatch.green { background: var(--green); }
+    .swatch.red { background: var(--red); }
+    .swatch.yellow { background: var(--yellow); }
+
+    .status-workbench {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(420px, 1fr);
+      gap: 14px;
+    }
+
+    .seg {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 8px 0 12px;
+    }
+
+    .seg button {
+      min-height: 32px;
+      padding: 6px 9px;
+    }
+
+    .checklist {
+      display: grid;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    label.check {
+      align-items: flex-start;
+      border: 1px solid var(--line-soft);
+      background: #0d141a;
+      color: var(--muted);
+      display: flex;
+      gap: 8px;
+      padding: 8px;
+    }
+
+    label.check input {
+      margin-top: 3px;
+      accent-color: var(--cyan);
+    }
+
+    label.check strong {
+      color: var(--text);
+      display: block;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    textarea,
+    input[type="text"] {
+      background: #090f14;
+      border: 1px solid var(--line-soft);
+      color: var(--text);
+      font: inherit;
+      font-size: 13px;
+      min-height: 84px;
+      padding: 9px;
+      resize: vertical;
+      width: 100%;
+    }
+
+    textarea.json {
+      min-height: 210px;
+      white-space: pre;
+    }
+
+    .export-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0;
+    }
+
+    .notice {
+      background: #0c1319;
+      border: 1px solid var(--line-soft);
+      color: var(--muted);
+      padding: 10px;
+    }
+
+    .notice strong {
+      color: var(--text);
+    }
+
+    .callout {
+      border: 1px solid var(--yellow);
+      background: var(--yellow-soft);
+      color: #fff4c2;
+      padding: 10px;
+    }
+
+    .danger {
+      border-color: var(--red);
+      background: var(--red-soft);
+      color: #ffd5ce;
+    }
+
+    .todo-list {
+      counter-reset: item;
+      display: grid;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .todo {
+      border: 1px solid var(--line-soft);
+      background: #0d141a;
+      padding: 10px;
+    }
+
+    .todo::before {
+      counter-increment: item;
+      content: "T" counter(item);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      display: inline-flex;
+      font-size: 11px;
+      font-weight: 700;
+      margin-right: 8px;
+      min-width: 30px;
+      padding: 2px 4px;
+      justify-content: center;
+    }
+
+    .small-text {
+      color: var(--faint);
+      font-size: 12px;
+    }
+
+    @media (max-width: 980px) {
+      main {
+        width: min(100vw - 20px, 1320px);
+      }
+
+      .top-grid,
+      .split,
+      .status-workbench,
+      .cols-2,
+      .cols-3,
+      .cols-4 {
+        grid-template-columns: 1fr;
+      }
+
+      .nav {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="top">
+      <div class="top-grid">
+        <div>
+          <div class="kicker">TASK_444 - Fireteam Behavior Playtest Workbench</div>
+          <h1>Behavior-Regeln, Playtest-Plan und JSON-Rueckkanal</h1>
+          <p class="lead">
+            Diese Seite ist die Arbeitsflaeche fuer die naechsten Fireteam-Tests.
+            Sie trennt `Move`, `Engage`, `Take` und `Defend`, zeigt Beispiel-Formationen
+            und sammelt Entscheidungen, die wieder in Tasks und Code zurueckfliessen sollen.
+          </p>
+          <div class="meta-row">
+            <span class="pill ok"><strong>Move</strong> manuell getestet, weiter beobachten</span>
+            <span class="pill warn"><strong>Engage</strong> implementiert, einzelner Playtest offen</span>
+            <span class="pill warn"><strong>Take</strong> implementiert, einzelner Playtest offen</span>
+            <span class="pill open"><strong>Defend</strong> Baseline vorhanden, neuer Schnitt offen</span>
+            <span class="pill"><strong>Stand</strong> 2026-05-15</span>
+          </div>
+        </div>
+
+        <aside class="quick-panel">
+          <h3>Arbeitsstatus</h3>
+          <div class="quick-list">
+            <div class="quick-item">
+              <strong>Was ist diese HTML?</strong>
+              <span>Doku, Testplan und Entscheidungszettel. Keine Runtime-Wahrheit.</span>
+            </div>
+            <div class="quick-item">
+              <strong>Wie nutzt du sie?</strong>
+              <span>Buttons/Checkboxen setzen, Notizen eintragen, JSON exportieren und die Datei wieder an Codex geben.</span>
+            </div>
+            <div class="quick-item">
+              <strong>Naechster Code-Schnitt</strong>
+              <span>Sehr wahrscheinlich `Defend` sauber neu schneiden, danach Contact/Threat/Suppression.</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </header>
+
+    <nav class="nav" aria-label="Report Navigation">
+      <button type="button" data-tab="overview" class="active">Uebersicht</button>
+      <button type="button" data-tab="move">Move</button>
+      <button type="button" data-tab="engage">Engage</button>
+      <button type="button" data-tab="take">Take</button>
+      <button type="button" data-tab="defend">Defend Vorschlag</button>
+      <button type="button" data-tab="playtest">Playtest & JSON</button>
+      <button type="button" data-tab="decisions">Offene Entscheidungen</button>
+    </nav>
+
+    <section class="view active" data-view="overview">
+      <div class="section">
+        <h2>Gesamtbild</h2>
+        <div class="grid cols-4">
+          <div class="card">
+            <h3>Move <span class="tag ok">getestet</span></h3>
+            <p>Bewegung von Punkt zu Punkt. C/N/A steuern Tempo, Sicht und Waffenhaltung.</p>
+            <p class="small-text">Offen im Playtest: direkte Route, kein Gaensemarsch, Live-Umschaltung C/N/A, klares Aim in C.</p>
+          </div>
+          <div class="card">
+            <h3>Engage <span class="tag warn">Code da</span></h3>
+            <p>Kampfbewegung. Feinde auf dem Weg und im Zielgebiet werden so frueh wie moeglich bekaempft.</p>
+            <p class="small-text">Muss einzeln als Tile und Area getestet werden.</p>
+          </div>
+          <div class="card">
+            <h3>Take <span class="tag warn">Code da</span></h3>
+            <p>Besitz/Kontrolle. Ziel ist, Punkt oder Area zu kontrollieren und danach verteidigbar zu stehen.</p>
+            <p class="small-text">Muss einzeln als Tile und Area getestet werden.</p>
+          </div>
+          <div class="card">
+            <h3>Defend <span class="tag open">Vorschlag</span></h3>
+            <p>Baseline/Security ist vorhanden, aber noch nicht als sauberer neuer Behavior-Slice abgeschlossen.</p>
+            <p class="small-text">Naechster sinnvoller Runtime-Schnitt.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Von Klick bis Karte</h2>
+        <div class="split">
+          <div>
+            <p>
+              Aktiver Pfad: Die UI erzeugt Auswahl, Waypoints oder Areas. `MissionTacticalSandboxController`
+              aktiviert bei `GO` den naechsten Schritt. `FireteamMovementController` erzeugt
+              pro Mitglied `UnitCommand`-Daten. `SimulationRoot` fuehrt autoritativ aus.
+              Combat Loop und Terrain-View zeigen daraus Bewegung, Linien, Muzzle Flash und Feedback.
+            </p>
+            <div class="rules">
+              <div class="rule"><strong>UI ist nicht die Wahrheit.</strong> Buttons und Karten senden Commands und zeigen Diagnose, aber speichern keine zweite Mission.</div>
+              <div class="rule yellow"><strong>Behavior-Slices klein halten.</strong> Erst `Defend`, dann Kontakt/Threat/Suppression, dann Skill-Einfluss.</div>
+              <div class="rule red"><strong>Wenn altes Verhalten greift:</strong> Lieber Diagnose/Fehler sichtbar machen als still in Legacy-Modus ausweichen.</div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Aktuelle Trennung</h3>
+            <table class="mini-table">
+              <thead>
+                <tr>
+                  <th>Befehl</th>
+                  <th>Ziel</th>
+                  <th>Offener Punkt</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>Move</code></td>
+                  <td>Position erreichen</td>
+                  <td>Kein Feuerfokus, nur Sicherung in Marschrichtung.</td>
+                </tr>
+                <tr>
+                  <td><code>Engage</code></td>
+                  <td>Feinde bekaempfen</td>
+                  <td>Kontaktreaktion und Area-Flow sichtbar pruefen.</td>
+                </tr>
+                <tr>
+                  <td><code>Take</code></td>
+                  <td>Raum besitzen</td>
+                  <td>Optimalreichweite, Area besetzen, danach Auto-Defend.</td>
+                </tr>
+                <tr>
+                  <td><code>Defend</code></td>
+                  <td>Von dort sichern</td>
+                  <td>Sektoren, 360, Flanken, Fire-Gate festlegen.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>C/N/A Werte aus dem aktuellen Contract</h2>
+        <table class="mini-table">
+          <thead>
+            <tr>
+              <th>Befehl</th>
+              <th>Modus</th>
+              <th>Speed</th>
+              <th>Sicht</th>
+              <th>Deckung</th>
+              <th>Angriff</th>
+              <th>Waffe</th>
+              <th>Flow / Feuer</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Move</td><td>C</td><td>65%</td><td>120%</td><td>0</td><td>0</td><td>Aim</td><td>Vorsichtig bewegen, sichern in Marschrichtung</td></tr>
+            <tr><td>Move</td><td>N</td><td>100%</td><td>100%</td><td>0</td><td>0</td><td>Lowered</td><td>Gehen, normale Sicht, keine extra Kampfhaltung</td></tr>
+            <tr><td>Move</td><td>A</td><td>120%</td><td>65%</td><td>0</td><td>0</td><td>Lowered</td><td>Laufen, Wirkung/Sicherung nachrangig</td></tr>
+            <tr><td>Engage</td><td>C</td><td>75%</td><td>115%</td><td>+10</td><td>+2%</td><td>Aim</td><td>Buddy-Crawl, Feuer auf Waffenreichweite</td></tr>
+            <tr><td>Engage</td><td>N</td><td>100%</td><td>100%</td><td>0</td><td>0</td><td>Aim</td><td>Bounding, Feuer auf Waffenreichweite</td></tr>
+            <tr><td>Engage</td><td>A</td><td>115%</td><td>80%</td><td>-8</td><td>+8%</td><td>Aim</td><td>Fireline/Rush, Wirkung vor Deckung</td></tr>
+            <tr><td>Take</td><td>C</td><td>70%</td><td>115%</td><td>+10</td><td>0</td><td>Aim</td><td>Buddy-Crawl, Feuer ab 60% Waffenreichweite</td></tr>
+            <tr><td>Take</td><td>N</td><td>100%</td><td>100%</td><td>0</td><td>0</td><td>Aim</td><td>Bounding, Feuer ab 70% Waffenreichweite</td></tr>
+            <tr><td>Take</td><td>A</td><td>120%</td><td>75%</td><td>-12</td><td>+6%</td><td>Aim</td><td>Sturm/Fireline, Feuer ab 85% Waffenreichweite</td></tr>
+            <tr><td>Defend</td><td>C</td><td>80%</td><td>120%</td><td>+15</td><td>-3%</td><td>Aim</td><td>Stabil, Sektor halten, gute Wachsamkeit</td></tr>
+            <tr><td>Defend</td><td>N</td><td>100%</td><td>100%</td><td>0</td><td>0</td><td>Ready</td><td>Balanciert, Sektoren halten</td></tr>
+            <tr><td>Defend</td><td>A</td><td>110%</td><td>85%</td><td>-10</td><td>+4%</td><td>Aim</td><td>Aktiv, frontlastiger, Feuer schneller</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="view" data-view="move">
+      <div class="section">
+        <div class="behavior-head">
+          <div>
+            <h2>Move</h2>
+            <p>
+              `Move` bedeutet: Der Ort soll erreicht werden. Es ist kein Angriffsbefehl.
+              Grundsatz: Sicherung in Marschrichtung, links/rechts leicht mitdenken,
+              Buddy-Abstand halten, nicht im Gaensemarsch laufen.
+            </p>
+          </div>
+          <span class="tag ok">manuell angetestet</span>
+        </div>
+
+        <div class="grid cols-3">
+          <div class="card">
+            <h3>C - vorsichtig</h3>
+            <div class="board small">
+              <div class="line move arrow" style="--x: 18%; --y: 66%; --w: 58%; --r: -34deg;"></div>
+              <div class="cone" style="--x: 49%; --y: 44%; --w: 105px; --h: 54px; --r: -35deg;"></div>
+              <div class="unit selected" style="--x: 43%; --y: 57%; --r: -35deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 52%; --y: 54%; --r: -35deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 39%; --y: 70%; --r: -35deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 50%; --y: 68%; --r: -35deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="label" style="--x: 10%; --y: 9%;">Aim, 65% Speed, 120% Sicht</div>
+            </div>
+            <p>Waffe oben, langsam, bessere Sicht. Keine bewusste Kampfentscheidung, aber sichtbare Sicherung.</p>
+          </div>
+
+          <div class="card">
+            <h3>N - normal</h3>
+            <div class="board small">
+              <div class="line move arrow" style="--x: 18%; --y: 63%; --w: 58%; --r: -28deg;"></div>
+              <div class="unit lower selected" style="--x: 40%; --y: 58%; --r: -28deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit lower" style="--x: 51%; --y: 55%; --r: -28deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit lower" style="--x: 38%; --y: 71%; --r: -28deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit lower" style="--x: 51%; --y: 69%; --r: -28deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="label" style="--x: 10%; --y: 9%;">Walk, 100% Speed, 100% Sicht</div>
+            </div>
+            <p>Waffe unten, normale Geschwindigkeit. Alle bewegen parallel und halten Abstand.</p>
+          </div>
+
+          <div class="card">
+            <h3>A - aggressiv</h3>
+            <div class="board small">
+              <div class="line move arrow" style="--x: 16%; --y: 64%; --w: 64%; --r: -20deg;"></div>
+              <div class="line move arrow" style="--x: 18%; --y: 76%; --w: 60%; --r: -20deg;"></div>
+              <div class="unit lower selected" style="--x: 38%; --y: 58%; --r: -20deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit lower" style="--x: 50%; --y: 58%; --r: -20deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit lower" style="--x: 38%; --y: 74%; --r: -20deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit lower" style="--x: 50%; --y: 74%; --r: -20deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="label" style="--x: 10%; --y: 9%;">Run, 120% Speed, 65% Sicht</div>
+            </div>
+            <p>Schnell vorwaerts. Weniger Sicht, keine Aim-Haltung. Trotzdem nicht einzeln ausbrechen.</p>
+          </div>
+        </div>
+
+        <div class="section tight">
+          <h3>Move Testfokus</h3>
+          <div class="rules">
+            <div class="rule"><strong>Waypoint-Abschluss:</strong> Erreichter Waypoint wird entfernt, danach naechster Waypoint oder Auto-Defend.</div>
+            <div class="rule yellow"><strong>Formation:</strong> Alle vier bewegen gleichzeitig, vermeiden Gaensemarsch, bilden zwei nahe Buddy-Paare.</div>
+            <div class="rule red"><strong>Live-Umschaltung:</strong> C/N/A waehrend laufendem Move muss Geschwindigkeit, Sicht und Haltung sichtbar aendern.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" data-view="engage">
+      <div class="section">
+        <div class="behavior-head">
+          <div>
+            <h2>Engage</h2>
+            <p>
+              `Engage` bedeutet: Feinde auf dem Weg dorthin und im Zielgebiet bekaempfen.
+              Bei Sichtkontakt soll so frueh wie sinnvoll gefeuert werden, also grundsaetzlich bis zur maximalen Waffenreichweite.
+            </p>
+          </div>
+          <span class="tag warn">Einzel-Playtest offen</span>
+        </div>
+
+        <div class="grid cols-3">
+          <div class="card">
+            <h3>C - raupenartig</h3>
+            <div class="board small">
+              <div class="zone red" style="left: 66%; top: 20%; width: 58px; height: 58px;"></div>
+              <div class="cover" style="left: 22%; top: 61%;"></div>
+              <div class="cover" style="left: 44%; top: 46%;"></div>
+              <div class="line weapon arrow" style="--x: 50%; --y: 55%; --w: 34%; --r: -34deg;"></div>
+              <div class="line sight" style="--x: 35%; --y: 70%; --w: 42%; --r: -32deg;"></div>
+              <div class="unit enemy" style="--x: 75%; --y: 31%; --r: 146deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit selected" style="--x: 33%; --y: 69%; --r: -32deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 44%; --y: 63%; --r: -32deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 29%; --y: 82%; --r: -32deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 40%; --y: 80%; --r: -32deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="label" style="--x: 8%; --y: 8%;">2 bewegen, 2 decken</div>
+            </div>
+            <p>Langsam, Deckung wichtig. Buddy-Paar rueckt kurz vor, anderes Paar haelt Feuerbereitschaft.</p>
+          </div>
+
+          <div class="card">
+            <h3>N - ueberschlagend</h3>
+            <div class="board small">
+              <div class="zone red" style="left: 68%; top: 24%; width: 58px; height: 58px;"></div>
+              <div class="line weapon arrow" style="--x: 47%; --y: 55%; --w: 38%; --r: -24deg;"></div>
+              <div class="line move arrow" style="--x: 25%; --y: 74%; --w: 34%; --r: -26deg;"></div>
+              <div class="unit enemy" style="--x: 77%; --y: 35%; --r: 156deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit selected" style="--x: 40%; --y: 57%; --r: -25deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 51%; --y: 57%; --r: -25deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 33%; --y: 76%; --r: -25deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 44%; --y: 75%; --r: -25deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="label" style="--x: 8%; --y: 8%;">Bounding, Feuer bei LOS + Range</div>
+            </div>
+            <p>Normales ueberschlagenes Vorgehen. Kein Warten auf optimale Distanz, wenn LOS und Waffenreichweite passen.</p>
+          </div>
+
+          <div class="card">
+            <h3>A - Fireline</h3>
+            <div class="board small">
+              <div class="zone red" style="left: 72%; top: 26%; width: 60px; height: 60px;"></div>
+              <div class="line weapon arrow" style="--x: 38%; --y: 48%; --w: 47%; --r: -17deg;"></div>
+              <div class="line weapon arrow" style="--x: 38%; --y: 61%; --w: 45%; --r: -22deg;"></div>
+              <div class="line move arrow" style="--x: 26%; --y: 72%; --w: 48%; --r: -18deg;"></div>
+              <div class="unit enemy" style="--x: 80%; --y: 37%; --r: 162deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit selected" style="--x: 31%; --y: 55%; --r: -20deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 43%; --y: 55%; --r: -20deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 55%; --y: 55%; --r: -20deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 67%; --y: 55%; --r: -20deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="label" style="--x: 8%; --y: 8%;">Wirkung vor Deckung</div>
+            </div>
+            <p>Alle ruecken als Linie vor. Deckung bleibt relevant, aber nicht staerker als Wirkung und Tempo.</p>
+          </div>
+        </div>
+
+        <div class="grid cols-2">
+          <div class="card">
+            <h3>Tile gegen Area</h3>
+            <table class="mini-table">
+              <tbody>
+                <tr><th>Engage Tile</th><td>Zum Punkt arbeiten, Feinde unterwegs bekaempfen, am Punkt Richtung Kontakt sichern.</td></tr>
+                <tr><th>Engage Area</th><td>Area als Feindraum behandeln. Sichtbare Feinde in der Area priorisieren, danach Schritt fuer Schritt weiter.</td></tr>
+                <tr><th>Feuerdistanz</th><td>Maximale Waffenreichweite, sofern LOS, Zielstatus und Combat-Resolver es erlauben.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card">
+            <h3>Testfragen</h3>
+            <div class="rules">
+              <div class="rule"><strong>Wird rote Schusslinie sichtbar?</strong> Nur wenn Ziel gesehen und in Waffenreichweite ist.</div>
+              <div class="rule yellow"><strong>Gibt es Muzzle Flash?</strong> Muss beim tatsaechlichen Schuss sichtbar sein, nicht nur bei Aim.</div>
+              <div class="rule red"><strong>Flank darf nicht heimlich greifen.</strong> Fuer diesen Stand nur normale Angriffsbewegung.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" data-view="take">
+      <div class="section">
+        <div class="behavior-head">
+          <div>
+            <h2>Take</h2>
+            <p>
+              `Take` bedeutet: Punkt oder Area besitzen und kontrollieren. Es ist nicht nur Kampf.
+              Das Team will dort Leute drin haben, Gegner entfernen und danach in `Defend` uebergehen koennen.
+            </p>
+          </div>
+          <span class="tag warn">Einzel-Playtest offen</span>
+        </div>
+
+        <div class="grid cols-3">
+          <div class="card">
+            <h3>C - vorsichtig nehmen</h3>
+            <div class="board small">
+              <div class="zone yellow" style="left: 64%; top: 30%; width: 72px; height: 72px;"></div>
+              <div class="cover" style="left: 37%; top: 59%;"></div>
+              <div class="line move arrow" style="--x: 30%; --y: 78%; --w: 41%; --r: -36deg;"></div>
+              <div class="line weapon arrow" style="--x: 47%; --y: 66%; --w: 25%; --r: -31deg;"></div>
+              <div class="unit selected" style="--x: 37%; --y: 75%; --r: -34deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 47%; --y: 70%; --r: -34deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 31%; --y: 88%; --r: -34deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 42%; --y: 86%; --r: -34deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="label" style="--x: 8%; --y: 8%;">Feuer ab 60% Range</div>
+            </div>
+            <p>Von einer Seite eindringen, Deckung stark nutzen, erst bei besserer Distanz feuern.</p>
+          </div>
+
+          <div class="card">
+            <h3>N - kontrolliert nehmen</h3>
+            <div class="board small">
+              <div class="zone yellow" style="left: 64%; top: 28%; width: 76px; height: 76px;"></div>
+              <div class="line move arrow" style="--x: 28%; --y: 75%; --w: 45%; --r: -32deg;"></div>
+              <div class="line weapon arrow" style="--x: 45%; --y: 66%; --w: 30%; --r: -28deg;"></div>
+              <div class="unit selected" style="--x: 34%; --y: 74%; --r: -30deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 45%; --y: 72%; --r: -30deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 38%; --y: 86%; --r: -30deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 50%; --y: 84%; --r: -30deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="label" style="--x: 8%; --y: 8%;">Feuer ab 70% Range</div>
+            </div>
+            <p>Ueberschlagend vorgehen, in die Area kommen, gegenseitig decken, Kontrolle herstellen.</p>
+          </div>
+
+          <div class="card">
+            <h3>A - Sturm nehmen</h3>
+            <div class="board small">
+              <div class="zone yellow" style="left: 65%; top: 26%; width: 80px; height: 80px;"></div>
+              <div class="line move arrow" style="--x: 24%; --y: 76%; --w: 54%; --r: -25deg;"></div>
+              <div class="line weapon arrow" style="--x: 45%; --y: 62%; --w: 38%; --r: -24deg;"></div>
+              <div class="unit selected" style="--x: 30%; --y: 70%; --r: -24deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 43%; --y: 68%; --r: -24deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 56%; --y: 66%; --r: -24deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 68%; --y: 64%; --r: -24deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="label" style="--x: 8%; --y: 8%;">Feuer ab 85% Range</div>
+            </div>
+            <p>Vorstoss als Linie. Deckung ist nicht egal, aber deutlich nachrangiger als Tempo und Kontrolle.</p>
+          </div>
+        </div>
+
+        <div class="grid cols-2">
+          <div class="card">
+            <h3>Take Abschluss</h3>
+            <div class="rules">
+              <div class="rule"><strong>Waypoint:</strong> Punkt besetzen, Gegner im direkten Umfeld entfernen, dann abgeschlossen.</div>
+              <div class="rule yellow"><strong>Area:</strong> Mindestens Buddy-Paar in der Area, keine sichtbaren aktiven Gegner in der Area, danach Kontrolle melden.</div>
+              <div class="rule green"><strong>Danach:</strong> Ohne naechsten Waypoint automatisch in `Defend` wechseln.</div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Unterschied zu Engage</h3>
+            <p>
+              `Engage` will Gegner so frueh wie moeglich bekaempfen.
+              `Take` will den Raum besitzen. Deshalb ist bei Take die technische Feuerdistanz geringer
+              und die Area-Besetzung wichtiger.
+            </p>
+            <p class="small-text">Wenn das Team beschossen wird, soll es spaeter eine Kontakt-Ausnahme geben. Die ist noch nicht Teil dieses Slices.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" data-view="defend">
+      <div class="section">
+        <div class="behavior-head">
+          <div>
+            <h2>Defend Vorschlag</h2>
+            <p>
+              Antwort auf die offene Frage: `Defend` ist als Baseline/Security vorhanden, aber noch nicht als
+              sauberer neuer Behavior-Slice fertig. Ich wuerde ihn als naechsten Schritt so schneiden:
+              von aktueller Position oder Area aus sichern, Sektoren aufteilen, nicht alle auf denselben Punkt starren.
+            </p>
+          </div>
+          <span class="tag open">noch zu entscheiden</span>
+        </div>
+
+        <div class="grid cols-3">
+          <div class="card">
+            <h3>DEF Front + Flanken</h3>
+            <div class="board small">
+              <div class="coverage front" style="--x: 45%; --y: 35%;"></div>
+              <div class="cone" style="--x: 52%; --y: 49%; --w: 105px; --h: 50px; --r: -26deg;"></div>
+              <div class="cone" style="--x: 44%; --y: 61%; --w: 82px; --h: 42px; --r: -65deg;"></div>
+              <div class="cone" style="--x: 58%; --y: 61%; --w: 82px; --h: 42px; --r: 14deg;"></div>
+              <div class="unit selected" style="--x: 47%; --y: 54%; --r: -26deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 58%; --y: 54%; --r: -26deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 43%; --y: 70%; --r: -70deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 60%; --y: 70%; --r: 10deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="label" style="--x: 8%; --y: 8%;">2 vorne, 1 links, 1 rechts</div>
+            </div>
+            <p>Default nach Move: Hauptdeckung in letzter Marschrichtung, ein Buddy links/rechts wachsam.</p>
+          </div>
+
+          <div class="card">
+            <h3>DEF 360</h3>
+            <div class="board small">
+              <div class="coverage" style="--x: 42%; --y: 30%;"></div>
+              <div class="unit selected" style="--x: 51%; --y: 47%; --r: -90deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 66%; --y: 61%; --r: 0deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 51%; --y: 75%; --r: 90deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 36%; --y: 61%; --r: 180deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="label" style="--x: 8%; --y: 8%;">N / O / S / W</div>
+            </div>
+            <p>Default nach Take Area: vier Himmelsrichtungen, Kopf/Sichtlinie bewegt den Sektor leicht.</p>
+          </div>
+
+          <div class="card">
+            <h3>DEF beide Flanken</h3>
+            <div class="board small">
+              <div class="coverage u" style="--x: 40%; --y: 34%;"></div>
+              <div class="cone" style="--x: 44%; --y: 59%; --w: 92px; --h: 42px; --r: -76deg;"></div>
+              <div class="cone" style="--x: 59%; --y: 59%; --w: 92px; --h: 42px; --r: 16deg;"></div>
+              <div class="unit selected" style="--x: 46%; --y: 61%; --r: -76deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 57%; --y: 61%; --r: 16deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 41%; --y: 75%; --r: -76deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="unit" style="--x: 62%; --y: 75%; --r: 16deg;"><span class="base"></span><span class="head"></span><span class="body"></span><span class="weapon"></span></div>
+              <div class="label" style="--x: 8%; --y: 8%;">U-Form / Flankensicherung</div>
+            </div>
+            <p>Wenn Richtung bekannt ist, aber Flanken bedroht sind: links/rechts stark sichtbar decken.</p>
+          </div>
+        </div>
+
+        <div class="grid cols-2">
+          <div class="card">
+            <h3>Vorgeschlagene Regeln</h3>
+            <table class="mini-table">
+              <thead>
+                <tr><th>Modus</th><th>Verhalten</th><th>Feuerentscheidung</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>C</td>
+                  <td>Stabile Defensive, hohe Wachsamkeit, kleine Kopf-/Sektorbewegung, Deckung bevorzugen.</td>
+                  <td>Feuer bei bestaetigtem Kontakt im Sektor, bevorzugt bei sauberer LOS. Attack -3%, Deckung +15.</td>
+                </tr>
+                <tr>
+                  <td>N</td>
+                  <td>Balanciert. Sektoren halten, Buddy-Paare bleiben nah, nicht alle auf einen Punkt drehen.</td>
+                  <td>Feuer bei gesehenem Gegner in Waffenreichweite, wenn der eigene Sektor zustaendig ist.</td>
+                </tr>
+                <tr>
+                  <td>A</td>
+                  <td>Aktive Defensive. Frontlastiger, schneller drehen, kurze Positionskorrektur zur Feuerlinie erlaubt.</td>
+                  <td>Feuer frueh bei LOS + Reichweite. Attack +4%, Deckung -10, Sicht 85%.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>Auto-Defend nach Abschluss</h3>
+            <div class="rules">
+              <div class="rule"><strong>Nach Move ohne naechsten Waypoint:</strong> DEF Front + Flanken anhand letzter Marschrichtung.</div>
+              <div class="rule yellow"><strong>Nach Take:</strong> DEF 360, wenn Area kontrolliert ist; bei Punkt: Front + Flanken.</div>
+              <div class="rule red"><strong>Nach Engage:</strong> DEF Richtung letzter Kontakt oder Zielsektor, ein Buddy haelt Flanke.</div>
+              <div class="rule green"><strong>Nach Kontaktverlust:</strong> Nicht sofort alle drehen. Erst Sektorstatus halten, dann langsam neu verteilen.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section tight">
+          <h3>Visuelle Zielregeln fuer Defend</h3>
+          <div class="legend">
+            <span><i class="swatch green"></i>Sichtlinie am Kopf/Sektor</span>
+            <span><i class="swatch red"></i>Schusslinie nur bis Waffenreichweite</span>
+            <span><i class="swatch yellow"></i>Auswahl/Defense-Coverage gelb</span>
+            <span><i class="swatch blue"></i>Bewegung/Formation blau</span>
+          </div>
+          <p>
+            Die Sichtlinie sollte am Kopf haengen, weil Kopf/Aim den Suchsektor beschreibt.
+            Schusslinien sollten nie unendlich sein, sondern an der effektiven Waffenreichweite enden.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" data-view="playtest">
+      <div class="section">
+        <h2>Playtest & JSON Rueckkanal</h2>
+        <p>
+          Hier kannst du den Teststand markieren, Entscheidungen klicken und Notizen schreiben.
+          Mit `JSON exportieren` entsteht eine Datei, die du mir danach wieder geben kannst.
+        </p>
+
+        <div class="status-workbench">
+          <div class="card">
+            <h3>Arbeitsbuttons</h3>
+            <p class="small-text">Diese Werte werden lokal im Browser gespeichert und beim JSON-Export ausgegeben.</p>
+
+            <h4>Move</h4>
+            <div class="seg" data-key="commands.move.status">
+              <button type="button" data-choice="needs_retest">Nochmal testen</button>
+              <button type="button" class="green" data-choice="tested_ok">Getestet OK</button>
+              <button type="button" class="yellow" data-choice="tested_with_notes">OK mit Notizen</button>
+              <button type="button" class="red" data-choice="bug">Bug</button>
+            </div>
+            <textarea data-note="commands.move.notes" placeholder="Move-Notizen: Route, Formation, C/N/A, Aim, Waypoint-Loeschung..."></textarea>
+
+            <h4>Engage</h4>
+            <div class="seg" data-key="commands.engage.status">
+              <button type="button" data-choice="open">Offen</button>
+              <button type="button" class="yellow" data-choice="needs_playtest">Playtest starten</button>
+              <button type="button" class="green" data-choice="tested_ok">Getestet OK</button>
+              <button type="button" class="red" data-choice="bug">Bug</button>
+            </div>
+            <textarea data-note="commands.engage.notes" placeholder="Engage-Notizen: Feinde gesehen, rote Linie, Muzzle Flash, Area-Flow..."></textarea>
+
+            <h4>Take</h4>
+            <div class="seg" data-key="commands.take.status">
+              <button type="button" data-choice="open">Offen</button>
+              <button type="button" class="yellow" data-choice="needs_playtest">Playtest starten</button>
+              <button type="button" class="green" data-choice="tested_ok">Getestet OK</button>
+              <button type="button" class="red" data-choice="bug">Bug</button>
+            </div>
+            <textarea data-note="commands.take.notes" placeholder="Take-Notizen: Optimalreichweite, Area-Kontrolle, Auto-Defend..."></textarea>
+
+            <h4>Defend</h4>
+            <div class="seg" data-key="commands.defend.status">
+              <button type="button" data-choice="proposal">Vorschlag pruefen</button>
+              <button type="button" class="yellow" data-choice="ready_for_slice">Als naechsten Slice</button>
+              <button type="button" class="green" data-choice="rules_ok">Regeln OK</button>
+              <button type="button" class="red" data-choice="needs_rework">Regeln aendern</button>
+            </div>
+            <textarea data-note="commands.defend.notes" placeholder="Defend-Notizen: 360, Front, Flanken, Fire-Gate, Auto-Defend..."></textarea>
+          </div>
+
+          <div class="card">
+            <h3>JSON Export</h3>
+            <p>
+              Exportiert Status, Entscheidungen, Testhaken und Notizen. Die Datei ist bewusst lesbar,
+              damit wir daraus direkt Folge-Tasks ableiten koennen.
+            </p>
+            <div class="export-actions">
+              <button type="button" id="buildJson" class="yellow">JSON aktualisieren</button>
+              <button type="button" id="downloadJson" class="green">JSON exportieren</button>
+              <button type="button" id="copyJson">JSON kopieren</button>
+              <button type="button" id="resetState" class="red">Lokalen Stand loeschen</button>
+            </div>
+            <textarea id="jsonOutput" class="json" readonly spellcheck="false"></textarea>
+            <p id="exportStatus" class="small-text">Noch kein Export erstellt.</p>
+
+            <h3>JSON Import optional</h3>
+            <p class="small-text">Falls du spaeter einen exportierten Stand wieder laden willst, hier einfuegen und importieren.</p>
+            <textarea id="jsonInput" placeholder="Exportierte JSON hier einfuegen..." spellcheck="false"></textarea>
+            <div class="export-actions">
+              <button type="button" id="importJson">JSON importieren</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Testmatrix</h2>
+        <div class="grid cols-2">
+          <div class="card">
+            <h3>Move</h3>
+            <div class="checklist">
+              <label class="check"><input type="checkbox" data-check="tests.move.c_waypoint"><span><strong>C Move Waypoint</strong> Waffe im Aim, 65% Tempo, 120% Sicht, parallel statt einzeln.</span></label>
+              <label class="check"><input type="checkbox" data-check="tests.move.n_waypoint"><span><strong>N Move Waypoint</strong> Waffe unten, normale Geschwindigkeit, keine Einzel-Ausreisser.</span></label>
+              <label class="check"><input type="checkbox" data-check="tests.move.a_waypoint"><span><strong>A Move Waypoint</strong> Run, 120% Tempo, reduzierte Sicht, kein Combat-Fokus.</span></label>
+              <label class="check"><input type="checkbox" data-check="tests.move.live_switch"><span><strong>Live C/N/A</strong> Umschaltung waehrend laufendem Befehl aendert Bewegung sichtbar.</span></label>
+              <label class="check"><input type="checkbox" data-check="tests.move.waypoint_cleanup"><span><strong>Waypoint cleanup</strong> Erreichter Punkt wird geloescht, Team geht zum naechsten Punkt oder Defend.</span></label>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Engage</h3>
+            <div class="checklist">
+              <label class="check"><input type="checkbox" data-check="tests.engage.tile_cna"><span><strong>Tile C/N/A</strong> Kampfbewegung auf Punkt, Feuer bei LOS + Waffenreichweite.</span></label>
+              <label class="check"><input type="checkbox" data-check="tests.engage.area_c"><span><strong>Area C</strong> Raupenartig, Deckung wichtig, 2 bewegen/2 decken.</span></label>
+              <label class="check"><input type="checkbox" data-check="tests.engage.area_n"><span><strong>Area N</strong> Normales Bounding, kein heimliches Flank.</span></label>
+              <label class="check"><input type="checkbox" data-check="tests.engage.area_a"><span><strong>Area A</strong> Fireline/Rush, Wirkung vor Deckung.</span></label>
+              <label class="check"><input type="checkbox" data-check="tests.engage.visuals"><span><strong>Visuals</strong> Rote Schusslinie bei Ziel, Muzzle Flash bei Schuss, Feinde sichtbar.</span></label>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Take</h3>
+            <div class="checklist">
+              <label class="check"><input type="checkbox" data-check="tests.take.tile_cna"><span><strong>Tile C/N/A</strong> Punkt nehmen, nicht nur Gegner auf Max-Range beschiessen.</span></label>
+              <label class="check"><input type="checkbox" data-check="tests.take.area_c"><span><strong>Area C</strong> Langsam, Deckung, Feuer ab ca. 60% Waffenreichweite.</span></label>
+              <label class="check"><input type="checkbox" data-check="tests.take.area_n"><span><strong>Area N</strong> Bounding, Feuer ab ca. 70%, Area besetzen.</span></label>
+              <label class="check"><input type="checkbox" data-check="tests.take.area_a"><span><strong>Area A</strong> Sturm/Fireline, Feuer ab ca. 85%, Kontrolle priorisieren.</span></label>
+              <label class="check"><input type="checkbox" data-check="tests.take.secured_defend"><span><strong>Secured -> Defend</strong> Nach Kontrolle automatisch in passende Defense gehen.</span></label>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Defend / Visuals / Gegner</h3>
+            <div class="checklist">
+              <label class="check"><input type="checkbox" data-check="tests.defend.front_flanks"><span><strong>DEF Front + Flanken</strong> Zwei vorne, einer links, einer rechts; nicht alle auf denselben Punkt.</span></label>
+              <label class="check"><input type="checkbox" data-check="tests.defend.threesixty"><span><strong>DEF 360</strong> Vier Himmelsrichtungen, Sektoren sichtbar.</span></label>
+              <label class="check"><input type="checkbox" data-check="tests.visuals.range_caps"><span><strong>Linienlaenge</strong> Sichtlinie am Kopf, Schusslinie auf Waffenreichweite begrenzt.</span></label>
+              <label class="check"><input type="checkbox" data-check="tests.enemy.visibility"><span><strong>Gegner sichtbar</strong> Vier gegnerische NPCs sichtbar, patrouillieren, reagieren auf Kontakt.</span></label>
+              <label class="check"><input type="checkbox" data-check="tests.map.assets"><span><strong>Map Assets</strong> Buesche auf Bodentiles, keine Bodenteil-Luecken, Auswahl gelb.</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" data-view="decisions">
+      <div class="section">
+        <h2>Offene Entscheidungen</h2>
+        <p>Diese Auswahl landet ebenfalls im JSON. Ich habe jeweils eine sinnvolle Startannahme gesetzt.</p>
+
+        <div class="grid cols-2">
+          <div class="card">
+            <h3>Auto-Defend</h3>
+
+            <h4>Nach abgeschlossenem Move ohne naechsten Waypoint</h4>
+            <div class="seg" data-key="decisions.auto_defend_after_move">
+              <button type="button" class="yellow" data-choice="front_flanks">Front + Flanken</button>
+              <button type="button" data-choice="threesixty">360</button>
+              <button type="button" data-choice="last_command_sector">Nur letzter Sektor</button>
+            </div>
+
+            <h4>Nach Take Area</h4>
+            <div class="seg" data-key="decisions.auto_defend_after_take">
+              <button type="button" class="yellow" data-choice="threesixty">360 in Area</button>
+              <button type="button" data-choice="front_flanks">Front + Flanken</button>
+              <button type="button" data-choice="contact_direction">Letzter Kontakt</button>
+            </div>
+
+            <h4>Nach Engage</h4>
+            <div class="seg" data-key="decisions.auto_defend_after_engage">
+              <button type="button" class="yellow" data-choice="contact_direction_plus_flanks">Kontakt + Flanken</button>
+              <button type="button" data-choice="threesixty">360</button>
+              <button type="button" data-choice="target_area_front">Zielarea-Front</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Feuer- und Kontaktlogik</h3>
+
+            <h4>C Defend Fire-Gate</h4>
+            <div class="seg" data-key="decisions.c_defend_fire_gate">
+              <button type="button" class="yellow" data-choice="confirmed_in_sector">Bestaetigt im Sektor</button>
+              <button type="button" data-choice="any_spotted">Jeder gesehene Gegner</button>
+              <button type="button" data-choice="only_if_attacked">Nur wenn angegriffen</button>
+            </div>
+
+            <h4>Threat Level Start</h4>
+            <div class="seg" data-key="decisions.threat_level_source">
+              <button type="button" class="yellow" data-choice="spotted_los_range">Spotted + LOS + Range</button>
+              <button type="button" data-choice="enemy_fired">Enemy fired</button>
+              <button type="button" data-choice="area_presence">Feind in Zielarea</button>
+            </div>
+
+            <h4>Skill-Einfluss</h4>
+            <div class="seg" data-key="decisions.skill_influence">
+              <button type="button" class="yellow" data-choice="off_for_now">Erstmal aus</button>
+              <button type="button" data-choice="diagnostic_only">Nur Diagnose</button>
+              <button type="button" data-choice="light_modifiers">Leichte Modifier</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Area-Abschluss</h3>
+
+            <h4>Wann gilt Take Area als kontrolliert?</h4>
+            <div class="seg" data-key="decisions.take_area_complete">
+              <button type="button" class="yellow" data-choice="no_visible_enemy_two_inside">Keine sichtbaren Gegner + 2 innen</button>
+              <button type="button" data-choice="all_inside">Alle innen</button>
+              <button type="button" data-choice="timed_hold">Timer halten</button>
+            </div>
+
+            <h4>Engage Area Ende</h4>
+            <div class="seg" data-key="decisions.engage_area_complete">
+              <button type="button" class="yellow" data-choice="no_visible_enemy_in_area">Keine sichtbaren Gegner in Area</button>
+              <button type="button" data-choice="area_crossed">Area durchquert</button>
+              <button type="button" data-choice="manual_go_only">Nur per naechstem GO</button>
+            </div>
+
+            <h4>Bewusst alleine grossen Bogen laufen?</h4>
+            <div class="seg" data-key="decisions.solo_wide_route">
+              <button type="button" class="yellow" data-choice="not_now">Jetzt nicht</button>
+              <button type="button" data-choice="only_flank_later">Nur Flank spaeter</button>
+              <button type="button" data-choice="skill_based_later">Skill-basiert spaeter</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Debug und Sichtbarkeit</h3>
+
+            <h4>Was gehoert dauerhaft in #17?</h4>
+            <div class="seg" data-key="decisions.panel_17_debug">
+              <button type="button" class="yellow" data-choice="command_reason_contact">Command + Grund + Kontakt</button>
+              <button type="button" data-choice="minimal">Minimal</button>
+              <button type="button" data-choice="dev_mode_only">Nur Dev-Modus</button>
+            </div>
+
+            <h4>Defense-Coverage Visual</h4>
+            <div class="seg" data-key="decisions.defense_coverage_visual">
+              <button type="button" class="yellow" data-choice="bars_and_sector_lines">Balken + Sektorlinien</button>
+              <button type="button" data-choice="circle_only">Nur Kreis</button>
+              <button type="button" data-choice="lines_only">Nur Linien</button>
+            </div>
+
+            <h4>LimboAI Rolle</h4>
+            <div class="seg" data-key="decisions.limbo_role">
+              <button type="button" class="yellow" data-choice="enemy_adapter_now">Enemy Adapter jetzt</button>
+              <button type="button" data-choice="all_units_later">Alle Units spaeter pruefen</button>
+              <button type="button" data-choice="keep_custom_runtime">Custom Runtime behalten</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section tight">
+          <h3>Naechste sinnvolle Tasks</h3>
+          <div class="todo-list">
+            <div class="todo"><strong>Defend Behavior Control.</strong> Sektoren, Auto-Defend, 360/Front/Flanken, C/N/A und Tests schneiden.</div>
+            <div class="todo"><strong>Contact/Threat Gate.</strong> Wann wird aus gesehenem Gegner ein Ziel, wann wird gefeuert, wann bleibt nur Sicherung?</div>
+            <div class="todo"><strong>Engage/Take Manual Pass.</strong> Tile und Area getrennt testen, JSON exportieren, dann Bugs priorisieren.</div>
+            <div class="todo"><strong>Visual Regression.</strong> Muzzle Flash, rote Schusslinien, Linienlaenge, Kopfanker, gelbe Auswahl, eine Sprechblase.</div>
+            <div class="todo"><strong>Enemy Drill Baseline.</strong> Vier sichtbare Gegner, Patrouille, Kontaktreaktion und Diagnose in #18.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var STORAGE_KEY = "fireteam_behavior_playtest_workbench_v1";
+
+      function defaults() {
+        return {
+          version: 1,
+          report: "fireteam_behavior_playtest_workbench",
+          commands: {
+            move: { status: "tested_with_notes", notes: "" },
+            engage: { status: "needs_playtest", notes: "" },
+            take: { status: "needs_playtest", notes: "" },
+            defend: { status: "proposal", notes: "" }
+          },
+          decisions: {
+            auto_defend_after_move: "front_flanks",
+            auto_defend_after_take: "threesixty",
+            auto_defend_after_engage: "contact_direction_plus_flanks",
+            c_defend_fire_gate: "confirmed_in_sector",
+            threat_level_source: "spotted_los_range",
+            skill_influence: "off_for_now",
+            take_area_complete: "no_visible_enemy_two_inside",
+            engage_area_complete: "no_visible_enemy_in_area",
+            solo_wide_route: "not_now",
+            panel_17_debug: "command_reason_contact",
+            defense_coverage_visual: "bars_and_sector_lines",
+            limbo_role: "enemy_adapter_now"
+          },
+          tests: {},
+          notes: {
+            global: ""
+          }
+        };
+      }
+
+      function isObject(value) {
+        return value && typeof value === "object" && !Array.isArray(value);
+      }
+
+      function merge(base, next) {
+        if (!isObject(next)) {
+          return base;
+        }
+        Object.keys(next).forEach(function (key) {
+          if (isObject(base[key]) && isObject(next[key])) {
+            merge(base[key], next[key]);
+          } else {
+            base[key] = next[key];
+          }
+        });
+        return base;
+      }
+
+      function getByPath(obj, path) {
+        return path.split(".").reduce(function (acc, part) {
+          return acc ? acc[part] : undefined;
+        }, obj);
+      }
+
+      function setByPath(obj, path, value) {
+        var parts = path.split(".");
+        var cursor = obj;
+        for (var i = 0; i < parts.length - 1; i += 1) {
+          if (!isObject(cursor[parts[i]])) {
+            cursor[parts[i]] = {};
+          }
+          cursor = cursor[parts[i]];
+        }
+        cursor[parts[parts.length - 1]] = value;
+      }
+
+      function loadState() {
+        try {
+          return merge(defaults(), JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"));
+        } catch (error) {
+          return defaults();
+        }
+      }
+
+      var state = loadState();
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (error) {
+          setStatus("Lokales Speichern ist im Browser blockiert. JSON-Export funktioniert trotzdem.");
+        }
+        renderJson();
+      }
+
+      function activateTab(id) {
+        document.querySelectorAll("[data-tab]").forEach(function (button) {
+          button.classList.toggle("active", button.getAttribute("data-tab") === id);
+        });
+        document.querySelectorAll("[data-view]").forEach(function (view) {
+          view.classList.toggle("active", view.getAttribute("data-view") === id);
+        });
+      }
+
+      function renderControls() {
+        document.querySelectorAll(".seg").forEach(function (seg) {
+          var key = seg.getAttribute("data-key");
+          var value = getByPath(state, key);
+          seg.querySelectorAll("button[data-choice]").forEach(function (button) {
+            button.classList.toggle("active", button.getAttribute("data-choice") === value);
+          });
+        });
+
+        document.querySelectorAll("input[data-check]").forEach(function (input) {
+          input.checked = Boolean(getByPath(state, input.getAttribute("data-check")));
+        });
+
+        document.querySelectorAll("textarea[data-note]").forEach(function (input) {
+          var value = getByPath(state, input.getAttribute("data-note"));
+          input.value = value || "";
+        });
+      }
+
+      function exportSnapshot() {
+        return {
+          meta: {
+            report: "fireteam_behavior_playtest_workbench",
+            version: state.version,
+            exported_at: new Date().toISOString(),
+            source_url: window.location.href,
+            note: "Aus dem HTML exportierter Playtest-/Entscheidungsstand fuer Codex."
+          },
+          commands: state.commands,
+          decisions: state.decisions,
+          tests: state.tests,
+          notes: state.notes
+        };
+      }
+
+      function renderJson() {
+        var output = document.getElementById("jsonOutput");
+        if (!output) {
+          return "";
+        }
+        var json = JSON.stringify(exportSnapshot(), null, 2);
+        output.value = json;
+        return json;
+      }
+
+      function setStatus(text) {
+        var status = document.getElementById("exportStatus");
+        if (status) {
+          status.textContent = text;
+        }
+      }
+
+      document.querySelectorAll("[data-tab]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          activateTab(button.getAttribute("data-tab"));
+        });
+      });
+
+      document.querySelectorAll(".seg button[data-choice]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          var seg = button.closest(".seg");
+          setByPath(state, seg.getAttribute("data-key"), button.getAttribute("data-choice"));
+          renderControls();
+          saveState();
+        });
+      });
+
+      document.querySelectorAll("input[data-check]").forEach(function (input) {
+        input.addEventListener("change", function () {
+          setByPath(state, input.getAttribute("data-check"), input.checked);
+          saveState();
+        });
+      });
+
+      document.querySelectorAll("textarea[data-note]").forEach(function (input) {
+        input.addEventListener("input", function () {
+          setByPath(state, input.getAttribute("data-note"), input.value);
+          saveState();
+        });
+      });
+
+      document.getElementById("buildJson").addEventListener("click", function () {
+        renderJson();
+        setStatus("JSON aktualisiert: " + new Date().toLocaleString("de-DE"));
+      });
+
+      document.getElementById("downloadJson").addEventListener("click", function () {
+        var json = renderJson();
+        var blob = new Blob([json], { type: "application/json" });
+        var url = URL.createObjectURL(blob);
+        var link = document.createElement("a");
+        var stamp = new Date().toISOString().replace(/[:.]/g, "-");
+        link.href = url;
+        link.download = "fireteam_behavior_playtest_" + stamp + ".json";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        setStatus("Download gestartet: fireteam_behavior_playtest_" + stamp + ".json");
+      });
+
+      document.getElementById("copyJson").addEventListener("click", function () {
+        var json = renderJson();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(json).then(function () {
+            setStatus("JSON in die Zwischenablage kopiert.");
+          }).catch(function () {
+            document.getElementById("jsonOutput").select();
+            setStatus("Clipboard blockiert. JSON-Text wurde markiert.");
+          });
+        } else {
+          document.getElementById("jsonOutput").select();
+          setStatus("Clipboard nicht verfuegbar. JSON-Text wurde markiert.");
+        }
+      });
+
+      document.getElementById("resetState").addEventListener("click", function () {
+        if (!window.confirm("Lokalen Browser-Stand fuer diese Seite loeschen?")) {
+          return;
+        }
+        state = defaults();
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+        } catch (error) {
+          setStatus("Lokales Loeschen ist im Browser blockiert.");
+        }
+        renderControls();
+        saveState();
+        setStatus("Lokaler Stand geloescht.");
+      });
+
+      document.getElementById("importJson").addEventListener("click", function () {
+        var input = document.getElementById("jsonInput");
+        try {
+          var parsed = JSON.parse(input.value);
+          var imported = defaults();
+          merge(imported, {
+            commands: parsed.commands || {},
+            decisions: parsed.decisions || {},
+            tests: parsed.tests || {},
+            notes: parsed.notes || {}
+          });
+          state = imported;
+          renderControls();
+          saveState();
+          setStatus("JSON importiert.");
+        } catch (error) {
+          setStatus("Import fehlgeschlagen: " + error.message);
+        }
+      });
+
+      renderControls();
+      renderJson();
+    }());
+  </script>
+</body>
+</html>

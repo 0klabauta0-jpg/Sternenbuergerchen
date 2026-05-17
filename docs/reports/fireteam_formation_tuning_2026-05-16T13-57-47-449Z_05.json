@@ -1,0 +1,166 @@
+{
+  "schema": "sternenbuergerchen.html_workbench.v1",
+  "report_id": "fireteam_formation_tuning",
+  "title": "Fireteam Formation Tuning Workbench",
+  "exported_at": "2026-05-16T13:57:47.449Z",
+  "controls": {
+    "formation": {
+      "command": "engage",
+      "auto_preset": false,
+      "security": "forward_flanks",
+      "pairing": "lead_gold_blue_green",
+      "mode": "staggered_pairs"
+    },
+    "parameters": {
+      "speed_percent": 75,
+      "sight_percent": 115,
+      "buddy_spacing_world": 82,
+      "buddy_pair_spacing_world": 64,
+      "row_offset_world": 117,
+      "tile_size_world": 26,
+      "weapon_range_world": 846,
+      "security_arc_degrees": 62,
+      "cohesion_radius_world": 171,
+      "cover_priority_percent": 75
+    },
+    "checks": {
+      "move_less_single_file": false,
+      "buddy_pair_spacing_ok": false,
+      "security_forward_ok": false
+    }
+  },
+  "notes": {
+    "formation": {
+      "notes": ""
+    }
+  },
+  "active_choices": {
+    "formation": {
+      "stance": "cautious"
+    }
+  },
+  "computed": {
+    "anchor": {
+      "x": 260,
+      "y": 360
+    },
+    "target": {
+      "x": 847,
+      "y": 328
+    },
+    "direction": "1,0",
+    "manual_layout": true,
+    "buddy_pairs": [
+      {
+        "pair_id": "buddy_team_1",
+        "unit_ids": [
+          "lead",
+          "gold"
+        ],
+        "labels": [
+          "LD",
+          "B3"
+        ]
+      },
+      {
+        "pair_id": "buddy_team_2",
+        "unit_ids": [
+          "blue",
+          "green"
+        ],
+        "labels": [
+          "B1",
+          "B2"
+        ]
+      }
+    ],
+    "members": [
+      {
+        "id": "lead",
+        "label": "LD",
+        "leader": true,
+        "position": {
+          "x": 143,
+          "y": 326
+        },
+        "tile": {
+          "x": 5,
+          "y": 13
+        },
+        "facing_degrees": -28,
+        "slot": {
+          "lateral": -73,
+          "forward": 0
+        }
+      },
+      {
+        "id": "blue",
+        "label": "B1",
+        "leader": false,
+        "position": {
+          "x": 339,
+          "y": 357
+        },
+        "tile": {
+          "x": 13,
+          "y": 14
+        },
+        "facing_degrees": -5,
+        "slot": {
+          "lateral": -9,
+          "forward": -117
+        }
+      },
+      {
+        "id": "green",
+        "label": "B2",
+        "leader": false,
+        "position": {
+          "x": 258,
+          "y": 396
+        },
+        "tile": {
+          "x": 10,
+          "y": 15
+        },
+        "facing_degrees": 27,
+        "slot": {
+          "lateral": 73,
+          "forward": -117
+        }
+      },
+      {
+        "id": "gold",
+        "label": "B3",
+        "leader": false,
+        "position": {
+          "x": 215,
+          "y": 312
+        },
+        "tile": {
+          "x": 8,
+          "y": 12
+        },
+        "facing_degrees": -36,
+        "slot": {
+          "lateral": 9,
+          "forward": 0
+        }
+      }
+    ],
+    "metrics": {
+      "min_spacing_world": 73,
+      "min_spacing_tiles": 2.82,
+      "buddy_pair_spacing_world": 64,
+      "formation_width_world": 197,
+      "formation_depth_world": 84,
+      "max_units_per_tile": 1,
+      "cohesion_radius_world": 171,
+      "cover_priority_percent": 75
+    }
+  },
+  "metadata": {
+    "url": "file:///C:/dev/SternenBuergerchen/docs/reports/fireteam_formation_tuning_workbench.html",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0"
+  }
+}

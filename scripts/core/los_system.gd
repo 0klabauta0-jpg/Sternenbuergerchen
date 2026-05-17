@@ -1,6 +1,7 @@
 class_name LineOfSightSystem
 extends RefCounted
 
+const TERRAIN_TRUTH_AUDIT_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_truth_audit.gd")
 const DEFAULT_MAX_RANGE: float = 320.0
 
 var _los_step_buffer: Array[Vector2i] = []
@@ -59,6 +60,8 @@ func has_line_of_sight_with_terrain(
 
 	var source_grid: Vector2i = terrain_registry.call("world_to_grid", source_position)
 	var target_grid: Vector2i = terrain_registry.call("world_to_grid", target_position)
+	var source_grid_float: Vector2 = _world_to_grid_float(terrain_registry, source_position, source_grid)
+	var target_grid_float: Vector2 = _world_to_grid_float(terrain_registry, target_position, target_grid)
 	var source_height: int = int(terrain_registry.call("get_height_at_world", source_position))
 	var target_height: int = int(terrain_registry.call("get_height_at_world", target_position))
 	_build_grid_line_into(source_grid, target_grid, _los_step_buffer)
@@ -72,8 +75,21 @@ func has_line_of_sight_with_terrain(
 
 		var blocker_height: int = int(tile_data.height_level) + int(tile_data.object_height)
 		if blocker_height >= source_height and blocker_height >= target_height:
+			if _tile_uses_wall_segment_los(tile_data):
+				var crosses_wall_segment: bool = bool(TERRAIN_TRUTH_AUDIT_SCRIPT.call(
+					"does_tile_wall_block_los",
+					tile_data,
+					source_grid_float,
+					target_grid_float
+				))
+				if not crosses_wall_segment:
+					continue
 			return false
 
+	return true
+
+
+func uses_wall_segment_los() -> bool:
 	return true
 
 
@@ -103,3 +119,17 @@ func _build_grid_line_into(source_grid: Vector2i, target_grid: Vector2i, out: Ar
 
 		out.append(stepped_grid)
 		last_grid = stepped_grid
+
+
+func _tile_uses_wall_segment_los(tile_data) -> bool:
+	if tile_data == null:
+		return false
+	var type_id: String = String(tile_data.type_id)
+	var object_type_id: String = String(tile_data.object_type_id)
+	return bool(TERRAIN_TRUTH_AUDIT_SCRIPT.call("is_wall_type_id", type_id)) or bool(TERRAIN_TRUTH_AUDIT_SCRIPT.call("is_wall_type_id", object_type_id))
+
+
+func _world_to_grid_float(terrain_registry, world_position: Vector2, fallback_grid: Vector2i) -> Vector2:
+	if terrain_registry != null and terrain_registry.has_method("world_to_grid_float"):
+		return Vector2(terrain_registry.call("world_to_grid_float", world_position))
+	return Vector2(float(fallback_grid.x), float(fallback_grid.y))

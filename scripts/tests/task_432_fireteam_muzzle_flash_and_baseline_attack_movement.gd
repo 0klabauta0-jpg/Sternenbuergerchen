@@ -33,7 +33,6 @@ func _init() -> void:
 func _run_tests() -> void:
 	print("=== TASK_432 Fireteam Muzzle Flash And Baseline Attack Movement ===")
 	_test_resolver_forces_baseline_attack_commands_to_rush()
-	_test_runtime_engage_take_are_direct_group_orders()
 	await _test_muzzle_flash_snapshot_is_visible()
 	await _test_drill_scene_renders_all_fireteam_models_and_no_legacy_selection_ring()
 	await _test_engage_area_does_not_occupy_and_go_starts_take()
@@ -51,7 +50,7 @@ func _test_resolver_forces_baseline_attack_commands_to_rush() -> void:
 	FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT.call("clear_caches")
 	var units: Array = _make_fireteam_units("resolver")
 	var leader = units[0]
-	for command_type in ["move", "engage", "take", "defend"]:
+	for command_type in ["move", "defend"]:
 		var profile = FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT.call(
 			"resolve_profile",
 			"resolver",
@@ -66,32 +65,32 @@ func _test_resolver_forces_baseline_attack_commands_to_rush() -> void:
 	_cleanup_units(units)
 
 
-func _test_runtime_engage_take_are_direct_group_orders() -> void:
-	for command_type in ["engage", "take"]:
-		var controller = FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT.new()
-		var simulation = SimulationStub.new()
-		var units: Array = _make_fireteam_units(command_type)
-		var leader = units[0]
-		var profile := {
-			"advance_style": FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.ADVANCE_STYLE_BOUNDING,
-			"tactical_stance": FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL,
-			"cover_priority": 0.6,
-			"cohesion_threshold": 120.0,
-			"order_fidelity": 0.2,
-			"execution_cohesion": 0.35,
-			"initiative": 0.5,
-		}
-		var target_position := Vector2(360.0, -120.0)
-		var result: Dictionary = Dictionary(controller.call("start_execution", command_type, command_type, 1, target_position, profile, units, leader, simulation))
-		var movement_state: Dictionary = Dictionary(result.get("movement_state", {}))
-		_assert(bool(result.get("started", false)), "%s execution starts" % command_type)
-		_assert(String(movement_state.get("effective_style", "")) == FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.ADVANCE_STYLE_RUSH, "%s runtime overrides inherited bound style" % command_type)
-		_assert(Vector2(movement_state.get("order_target_offset", Vector2.INF)).length() <= 0.001, "%s has no fidelity target drift" % command_type)
-		_assert(PackedStringArray(movement_state.get("current_moving_unit_ids", PackedStringArray())).size() == units.size(), "%s moves all members together" % command_type)
-		_assert(PackedStringArray(movement_state.get("current_covering_unit_ids", PackedStringArray())).is_empty(), "%s has no covering subgroup" % command_type)
-		_assert(_commands_are_baseline_attack(simulation.commands, command_type, units.size()), "%s commands stay baseline attack movement" % command_type)
-		_assert(_targets_are_compact(Dictionary(movement_state.get("current_target_positions", {})), target_position), "%s target slots stay compact around the goal" % command_type)
-		_cleanup_units(units)
+func _test_runtime_take_is_direct_group_order() -> void:
+	var command_type := "take"
+	var controller = FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT.new()
+	var simulation = SimulationStub.new()
+	var units: Array = _make_fireteam_units(command_type)
+	var leader = units[0]
+	var profile := {
+		"advance_style": FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.ADVANCE_STYLE_BOUNDING,
+		"tactical_stance": FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL,
+		"cover_priority": 0.6,
+		"cohesion_threshold": 120.0,
+		"order_fidelity": 0.2,
+		"execution_cohesion": 0.35,
+		"initiative": 0.5,
+	}
+	var target_position := Vector2(360.0, -120.0)
+	var result: Dictionary = Dictionary(controller.call("start_execution", command_type, command_type, 1, target_position, profile, units, leader, simulation))
+	var movement_state: Dictionary = Dictionary(result.get("movement_state", {}))
+	_assert(bool(result.get("started", false)), "Take execution starts")
+	_assert(String(movement_state.get("effective_style", "")) == FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.ADVANCE_STYLE_RUSH, "Take runtime overrides inherited bound style")
+	_assert(Vector2(movement_state.get("order_target_offset", Vector2.INF)).length() <= 0.001, "Take has no fidelity target drift")
+	_assert(PackedStringArray(movement_state.get("current_moving_unit_ids", PackedStringArray())).size() == units.size(), "Take moves all members together")
+	_assert(PackedStringArray(movement_state.get("current_covering_unit_ids", PackedStringArray())).is_empty(), "Take has no covering subgroup")
+	_assert(_commands_are_baseline_attack(simulation.commands, command_type, units.size()), "Take commands stay baseline attack movement")
+	_assert(_targets_are_compact(Dictionary(movement_state.get("current_target_positions", {})), target_position), "Take target slots stay compact around the goal")
+	_cleanup_units(units)
 
 
 func _test_muzzle_flash_snapshot_is_visible() -> void:

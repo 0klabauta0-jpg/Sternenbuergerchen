@@ -10,6 +10,267 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_455 - Terrain Truth Editor Overlay Visibility
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_455_terrain_truth_editor_overlay_visibility.md`, `docs/dev/terrain_truth_visual_audit_contract.md`, `docs/tasks/TASK_454_terrain_truth_visual_audit.md`
+- Stand: Der Terrain-Truth-Audit ist im bestehenden MapEditor-DBG-Overlay sichtbar: kompakte Labels (`W1`, `WT`, `OBJ H1`, `LOS`, `Cxx`, `Hxx`), gelbe Wandsegment-Kanten und Draw-Node-Metadaten fuer spaetere Dev-Panels.
+- Stand: Der Slice bleibt visual-only. Er schaltet Combat-/Mission-LOS nicht auf Segment-LOS um und veraendert keine Fireteam-/Pathfinding-Regeln.
+- Risiken/offen: Die kompakte Tile-Beschriftung ersetzt kein vollstaendiges Detailpanel; fuer spaetere Playtests bleibt ein selektierter Tile-Inspector sinnvoll.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_455_terrain_truth_editor_overlay_visibility.gd`, `task_454_terrain_truth_visual_audit.gd`, `task_379_mapeditor_tile_property_grid_overlay.gd` und `git diff --check` laufen gruen.
+- Naechster Schritt: Im Godot-Fenster den MapEditor-DBG-Overlay visuell gegen die Drillmap/Props ansehen; danach entscheiden, ob zuerst ein Tile-Detailpanel oder Runtime-Segment-LOS geschnitten wird.
+
+### TASK_456 - Wall Segment LOS And Tile Truth Inspector
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_456_wall_segment_los_and_tile_truth_inspector.md`, `docs/dev/terrain_truth_visual_audit_contract.md`, `docs/tasks/TASK_454_terrain_truth_visual_audit.md`, `docs/tasks/TASK_455_terrain_truth_editor_overlay_visibility.md`
+- Stand: Die vorbereitete Wandsegmentregel ist im zentralen `LineOfSightSystem` aktiv. Sichtlinien, die ein Wandsegment schneiden, blocken; Sicht entlang derselben Wandseite bleibt frei. Nicht-Wand-Blocker bleiben Whole-Tile-Blocker.
+- Stand: Mission-/Fire-Sector-LOS-Debug nutzt dieselbe Segmententscheidung fuer sichtbare Blockerlinien, damit Anzeige und Runtime-Entscheidung nicht auseinanderlaufen.
+- Stand: Der MapEditor zeigt fuer selektierte Tiles einen read-only Terrain-Truth-Inspector mit Label, Layer-State, Blocker-Art, Segmentanzahl und Runtime-LOS-Policy.
+- Risiken/offen: Segment-LOS nutzt weiterhin die bestehende Grid-Line-Auswahl; fuer spaetere Spezialgeometrie kann ein feinerer Raycaster noetig werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_456_wall_segment_los_and_tile_truth_inspector.gd` laeuft gruen; TASK_455/TASK_454/TASK_379/Hill-Mechanics-Regressionen laufen gruen; `git diff --check` laeuft gruen.
+- Naechster Schritt: Im Godot-Fenster gezielt eine Wandkante ansehen: Fireteam/Gegner auf derselben Wandseite vs. echte Kreuzung, dazu selektierten Tile-Inspector gegen DBG-Overlay vergleichen.
+
+### TASK_454 - Terrain Truth Visual Audit
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_454_terrain_truth_visual_audit.md`, `docs/dev/terrain_truth_visual_audit_contract.md`, `docs/tasks/TASK_453_fireteam_terrain_los_sequence_direction_audit.md`
+- Stand: `TerrainTruthAudit` liefert eine kleine, read-only Diagnose fuer Tile-/Map-Wahrheit: Terrain-Autoritaet, Terrain3D-Rolle, Dev-UI-Felder, Objektlayer, Blocker-Art und Wandsegment-Kandidaten.
+- Stand: Die gewuenschte Mauerregel ist als pruefbarer Segment-Helfer vorbereitet: paralleles Entlangsehen blockt nicht, echter Segment-Schnitt blockt, reiner Eckpunkt-Touch blockt nicht automatisch.
+- Stand: `MapEditorTilePropertyOverlay` exportiert die dauerhaft gewuenschten Dev-UI-Felder im Tile-Eintrag und Overlay-Snapshot, bleibt aber visual-only und schreibt keine Gameplay-Wahrheit.
+- Risiken: Der aktive `LineOfSightSystem`-Pfad nutzt weiterhin ganze Tile-Blocker. Die Segmentregel ist bewusst Audit-/Contract-Vorbereitung und noch kein Combat-LOS-Umbau.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_454_terrain_truth_visual_audit.gd`; `git diff --check`.
+- Naechster Schritt: Den Terrain-Truth-Audit im Godot-Fenster sichtbar verdrahten oder gezielt die Drillmap/Visuals gegen die neuen Auditwerte pruefen.
+
+### TASK_453 - Fireteam Terrain LOS Sequence Direction Audit
+- Status: dokumentiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_453_fireteam_terrain_los_sequence_direction_audit.md`, `docs/reports/fireteam_terrain_los_sequence_audit.html`, `docs/dev/html_report_workbench_contract.md`, `docs/dev/fireteam_behavior_modes_contract.md`
+- Stand: Eine neue interaktive HTML-Workbench trennt Terrain-/LOS-Wahrheit, Terrain3D-Rolle, statische Formation und zeitabhaengige Fireteam-Sequenzen.
+- Stand: Die Empfehlung ist festgehalten: `TerrainRegistry`, Tile-Daten, LOS-System, Pathfinder und Combat Resolver bleiben Gameplay-Wahrheit. Terrain3D wird vorerst nur als Visual-/Authoring-Kandidat betrachtet.
+- Stand: Die Seite beschreibt, warum raupenartiges Vorgehen, ueberschlagendes Vorgehen, Bounding, Fireline, Regroup und Kontaktpausen nicht in die statische Formation-Workbench gehoeren, sondern eine eigene Doctrine-/Sequence-Workbench brauchen.
+- Stand: User-Entscheidungen sind nachgetragen: Area-Clearing spaeter, Terrain3D spaeter als Visual-Prototyp auf Drillmap-Kopie, Sequence-Workbench erst als Doku-JSON, Dev-UI mit dauerhaften Terrain-/LOS-Debugwerten.
+- Stand: Die Mauer-/LOS-Frage ist als Zielregel dokumentiert: Mauern sollen nicht als ganze Tile-Blocker behandelt werden, sondern als Kanten-/Segment-Blocker, damit Sicht entlang von Mauern moeglich bleibt und diagonale Blockade nur bei echtem Segment-Schnitt entsteht.
+- Stand: Die Workbench bietet Tabs fuer Uebersicht, Terrain/LOS, Sequenzen, naechsten Slice und Notizen sowie `JSON exportieren`, Ordner-Export, Kopie und Import.
+- Risiken: Der Slice aendert keine Runtime. Die naechste technische Arbeit muss entweder Terrain-Truth-Visual-Audit oder Sequence-Workbench-Contract werden, nicht beides gleichzeitig.
+- Lokale Pruefung: HTML-Datei angelegt; `git diff --check`.
+- Naechster Schritt: TASK_454 als Terrain Truth Visual Audit schneiden, damit Bodenplatten, Props, Hoehen, LOS-Blocker und Reichweiten sichtbar gegen die Tile-Daten geprueft werden.
+
+### TASK_452 - Fireteam Runtime Baseline Visual Contact Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_452_fireteam_runtime_baseline_visual_contact_pass.md`, `docs/tasks/TASK_451_fireteam_workbench_runtime_import.md`, `docs/dev/fireteam_behavior_modes_contract.md`
+- Stand: `FireteamMovementController` hat jetzt Runtime-Startpresets fuer `Take C`, `Take N` und `Defend C/N/A`. Diese Kombinationen melden Preset-Key, Quelle und vier Zielslots statt in den alten Fallback zu fallen.
+- Stand: `UnitRuntimeStatus` transportiert `aim_readiness_percent`. `TestUnit.assign_unit_command()` uebernimmt den Wert aus `UnitCommand`, und der 3D-Visualpfad liest ihn in den Runtime-Posture-Snapshot.
+- Stand: Hohe Aim-Bereitschaft kann im Visualpfad eine sonst gesenkte Waffe sichtbar auf `aimed` heben. Niedrige Werte bleiben gesenkt; damit bleibt `Move N/A` ohne hohen Aim-Wert visuell unten.
+- Stand: Area-Defense- und Area-Attack-Commands setzen Kontakt-Initiative, Aim-Bereitschaft und Team-Zielhilfe schon vor dem `assign_unit_command()`, damit Unit-Runtime und Simulation dieselbe Command-Wahrheit sehen.
+- Stand: Bestehende Kontakt-/Enemy-Visualtests bestaetigen rote Kontaktlinien, sichtbaren Muzzleflash, vier sichtbare Gegner und laufende Limbo-Kontaktdiagnose.
+- Risiken: Die neuen Take-/Defend-Formationen sind Startwerte, keine finalen Workbench-Exporte. Aim-Bereitschaft ist sichtbar angebunden, aber noch keine fein abgestufte Animationstiming-Formel.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_452_fireteam_runtime_baseline_visual_contact_pass.gd`, TASK_451/TASK_446/TASK_438/TASK_440/TASK_432-Regressionen und `git diff --check`.
+- Naechster Schritt: Im Godot-Fenster Take C/N und Defend C/N/A gegen die neue Baseline ansehen und bei Bedarf als echte Workbench-Presets exportieren.
+
+### TASK_451 - Fireteam Workbench Runtime Import
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_451_fireteam_workbench_runtime_import.md`, `docs/tasks/TASK_450_fireteam_stance_command_preset_workbench.md`, `docs/dev/fireteam_behavior_modes_contract.md`
+- Stand: Der Workbench-Export `fireteam_formation_tuning_2026-05-17T08-46-56-746Z_05` ist als erste Runtime-Baseline im `FireteamMovementController` hinterlegt.
+- Stand: Move C/N/A, Engage C/N/A und Take A nutzen die gespeicherten Workbench-Zielslots statt der aelteren Abstandskonstanten. Take C/N und Defend C/N/A bleiben bewusst auf der vorhandenen Runtime-Baseline, bis dafuer eigene Workbench-Exporte vorliegen.
+- Stand: Die globalen C/N/A-Stance-Werte aus `_05` wirken im Runtime-Befehlspfad auf Speed, Sicht, Deckungsprioritaet, Aim-Bereitschaft, Kontakt-Initiative und Team-Zielhilfe.
+- Stand: `UnitCommand` transportiert `contact_initiative_seconds`, `aim_readiness_percent` und `team_target_support_percent`. `team_target_support_percent` wirkt im `CombatFireDecisionResolver` als Trefferchancen-Hook, `contact_initiative_seconds` wirkt im Mission-Combat-Loop auf die Kontaktverzoegerung.
+- Stand: Movement-Snapshots melden `formation_preset_key`, `formation_slot_source` und `formation_leader_slot`, damit UI/Debug erkennen koennen, ob Workbench `_05` aktiv ist.
+- Risiken: `aim_readiness_percent` ist aktuell transportiert und diagnostiziert, aber noch keine finale Animations-/Aim-Timing-Formel. Defend- und Take-C/N-Formationen brauchen noch bewusste Workbench-Exporte.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_451_fireteam_workbench_runtime_import.gd`, TASK_429/TASK_446-Regressionen und `git diff --check`.
+- Naechster Schritt: Im Godot-Fenster Move/Engage/Take A gegen Workbench `_05` pruefen und danach Defend sowie Take C/N als eigene Formations-Exporte festziehen.
+
+### TASK_447 - Fireteam Contact Initiative Rules
+- Status: dokumentiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_447_fireteam_contact_initiative_rules.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/dev/html_report_workbench_contract.md`
+- Stand: Der Behavior-Contract definiert `Kontakt-Initiative` als Zeit vom sichtbaren/suspekten Kontakt bis zum ersten koordinierten Schuss. Die Regel trennt diese Reaktionszeit bewusst von Waffen-Feuerrate und Trefferchance.
+- Stand: `contact_initiative_seconds` und `team_target_support_percent` haben erste Startwerte fuer FOV-Lage, Waffen-/Sichtdistanz, Buddyteams, lose Wolke und Command/Stance-Bewegung.
+- Stand: Die Formation-Workbench zeigt Sekunden bis erster koordinierter Schuss, Kontaktentfernung, FOV-Lage, Buddy-Effekt und Team-Zielhilfe und exportiert die Modifikatoren als JSON-Diagnose.
+- Stand: Character-Sheet-Hilfetexte nennen jetzt Kontakt-Initiative und Team-Zielhilfe als spaetere Wirkung von Awareness, Recognition, Initiative, Leadership, Speech Quality und Accuracy.
+- Risiken: Die Formel ist noch ein Tuningmodell und keine Runtime-Wahrheit. Die spaetere Combat-Anbindung muss ueber CombatFireDecisionResolver, Kontaktstatus und Character-Sheet-Hooks laufen.
+- Lokale Pruefung: HTML-Script-Syntax der Formation-Workbench und `git diff --check`.
+- Naechster Schritt: Im Playtest Zielmarker/Facing/FOV mit Buddyteams und loser Wolke vergleichen; danach entscheiden, welche Werte in den Runtime-Contact-Resolver wandern.
+
+### TASK_448 - Fireteam Workbench Profile Clarity
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_448_fireteam_workbench_profile_clarity.md`, `docs/dev/html_report_workbench_contract.md`, `docs/dev/fireteam_behavior_modes_contract.md`
+- Stand: Die Formation-Workbench koppelt Sicht-% und FOV gegenlaeufig: breiteres FOV senkt Sicht-%, hoehere Sicht-% schmalert FOV.
+- Stand: Command/C/N/A zeigen jetzt eine Profilzusammenfassung mit Speed, Sicht, FOV, Deckung und kurzer Verhaltensbeschreibung. Manuelle Profilslider deaktivieren die Auto-Profil-Anzeige.
+- Stand: Sicherungs- und Formationsspeicher beziehen sich sprachlich auf das aktuelle Command/CNA. Benannte Formationen koennen in einer kleinen Workbench-Bibliothek gespeichert, geladen, geloescht und exportiert/importiert werden.
+- Stand: Basis-Sicht ist als Meterwert erklaert; Waffenreichweite zeigt WeaponData-Tiles plus Design-Meter-Schaetzung mit 1,5m pro Tile.
+- Risiken: Die Kopplung und Bibliothek bleiben Workbench-/Exportmodell und schreiben keine Runtime-Wahrheit.
+- Lokale Pruefung: HTML-Script-Syntax der Formation-Workbench und `git diff --check`.
+- Naechster Schritt: Im Browser die Bedienung einmal durchgehen: FOV/Sicht koppeln, benannte Formation speichern/laden, Command/CNA-Regel speichern und JSON exportieren.
+
+### TASK_449 - Fireteam Distance CNA Workbench Rules
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_449_fireteam_distance_cna_workbench_rules.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/dev/html_report_workbench_contract.md`
+- Stand: Der Behavior-Contract definiert ein gemeinsames Distanz-C/N/A-Profil. Move, Engage, Take und Defend nutzen fuer dieselbe Haltung dieselben Distanz-Mali und Distanz-Boni.
+- Stand: Die Formation-Workbench hat im Kontakt-Initiative-Bereich einen aufklappbaren Editor fuer Distanz-C/N/A. Die Werte steuern Nahbereich, gute Feuerdistanz, Randbereich, ausser Waffenreichweite und ausser Sicht.
+- Stand: Die Kontakt-Initiative liest die aktiven Distanzwerte aus dem gemeinsamen Profil statt aus hart kodierten Command-Distanzwerten.
+- Stand: JSON-Export und JSON-Import enthalten `distance_profile_by_stance` und `active_distance_profile`.
+- Risiken: Die Werte sind weiterhin Workbench-/Contract-Tuning und noch keine Runtime-Wahrheit. Die Uebernahme in CombatFireDecisionResolver bleibt ein separater Slice.
+- Lokale Pruefung: HTML-Script-Syntax der Formation-Workbench und `git diff --check`.
+- Naechster Schritt: In der Workbench C/N/A-Distanzwerte gegeneinander testen und danach entscheiden, welche Startwerte in den Runtime-Contact-Resolver wandern.
+
+### TASK_450 - Fireteam Stance Command Preset Workbench
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_450_fireteam_stance_command_preset_workbench.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/dev/html_report_workbench_contract.md`
+- Stand: Die Formation-Workbench trennt jetzt globale Stance-Grundwerte von statischer Command/CNA-Formation und Sicherung.
+- Stand: C/N/A-Grundwerte fuer Speed, Sicht, Deckung, Aim-Bereitschaft, Kontaktzeit und Zielhilfe koennen in einem aufklappbaren Editor geaendert werden. Bei aktivem Auto-Profil wirken sie live auf die sichtbaren Profilwerte.
+- Stand: Charakterbogen-Hooks werden als sortierte, exportierbare Checkliste vorgemerkt, ohne Runtime- oder Character-Sheet-Wahrheit zu schreiben.
+- Stand: Zeitabhaengige Begriffe wie raupenartig, ueberschlagend, Bounding und Fireline sind aus der statischen Formationsebene herausgenommen. Die Workbench speichert nur Standbild und Blickrichtung; echte Ablaufsequenzen brauchen einen eigenen Slice.
+- Stand: Stance- und Distanz-Editoren nutzen jetzt einspaltige Reglerzeilen mit eigener Label-/Wert-Zeile, damit Werte in der schmalen Sidebar nicht mehr auf Beschriftungen oder aus dem Panel laufen.
+- Stand: Die Editor-Seite gibt der rechten Tuning-Spalte mehr Breite und zeigt die drei C/N/A-Stance-Karten auf breiten Viewports nebeneinander; die Kartenflaeche wird dafuer kleiner.
+- Stand: Leader-Position markiert jetzt die gewaehlte Positionsnummer als FTL. Es werden keine Slots mehr getauscht; das Sternchen wandert auf Position 1-8.
+- Stand: Leader-Position ist keine Layout-Aenderung mehr. Eine manuell gezogene Formation bleibt stehen, wenn nur der FTL-Stern auf eine andere Positionsnummer gesetzt wird; beim Ziehen einzelner Positionen springt die Leader-Auswahl nicht mehr auf `auto`.
+- Stand: Nach Drag-and-drop verformen `Buddy`, `Teamabstand` und `Reihe` die bestehende manuelle Formation proportional, statt die Positionen auf das Formationspreset zurueckzusetzen.
+- Stand: Freie Klicks auf die Formation-Map setzen kein neues Ziel mehr. Ziel, Teamanker, Member und Blickrichtungen aendern sich nur beim Ziehen ihrer sichtbaren Griffe.
+- Stand: Speichern oder JSON-Export merkt den aktuellen Workbench-Stand lokal im Browser als Reload-Standard; `Zuruecksetzen` loescht diesen lokalen Workbench-Standard.
+- Stand: Die zuletzt exportierte Formationssammlung aus `_05` ist als eingebauter Workbench-Startsatz hinterlegt: Move C/N/A, Engage C/N/A und Take A sind beim Reload ohne JSON-Import vorhanden.
+- Stand: Die in `_05` gespeicherten Sicherungsbilder fuer Engage C/N/A und Take A sind ebenfalls als eingebauter Startsatz hinterlegt.
+- Stand: Die zuletzt bewusst getunten C/N/A-Stance-Grundwerte sind ebenfalls als eingebauter Workbench-Startsatz hinterlegt. Ein lokaler Reload-Standard mit den alten Reset-Defaults wird beim Laden auf diese Werte migriert.
+- Stand: Buddyteams sind in der Workbench fest als 1+2, 3+4, 5+6, 7+8 benannt. Der Reihenabstand kann bis 900 Welt-Einheiten eingestellt werden.
+- Stand: Speicher-/Loeschbuttons nennen jetzt die konkrete Kombination, z.B. `Formation fuer Move C speichern`.
+- Stand: JSON-Export enthaelt `stance_profile_by_stance`, `active_stance_profile`, `command_stance_preset_overrides` und `character_sheet_hook_locks`.
+- Risiken: Die Workbench bleibt ein Tuning-/Exportwerkzeug. Runtime-Uebernahme und Sequenzlogik sind bewusst nicht Teil dieses Slices.
+- Lokale Pruefung: HTML-Script-Syntax der Formation-Workbench, Browser-Smoke und `git diff --check`.
+- Naechster Schritt: Stance-Werte und statische Sicherungsbilder im Browser abstimmen; danach eigene Sequenz-Workbench fuer raupenartig/ueberschlagend entscheiden.
+
+### TASK_446 - Fireteam Workbench Spacing Runtime Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_446_fireteam_workbench_spacing_runtime_pass.md`, `docs/tasks/TASK_445_html_report_workbench_standard.md`, `docs/dev/fireteam_behavior_modes_contract.md`
+- Stand: Die neuesten Formation-Workbench-Exporte unter `docs/reports/fireteam_formation_tuning_*.json` wurden als Playtest-Input ausgewertet. Move C/N/A und Engage C/N/A bestaetigen groessere Abstaende, Buddy-Zweierteams, schmale FOV-/Waffenreichweiten-Diagnose und maximal 1 Einheit pro Tile als Zielbild.
+- Stand: `FireteamMovementController` nutzt fuer direkte Move-/Fireline-Zielslots jetzt symmetrische laterale Slots statt der alten einseitigen Slotreihe. Move C/N verwendet 80 Welt-Einheiten, Move A 112, Engage A 121; Engage/Take-Bounds nutzen groessere Slot-Abstaende und mehr Paar-Reihenversatz.
+- Stand: Der Movement-Snapshot exportiert `formation_slot_spacing_world` und `formation_parallel_spacing_world`, damit #17/Debug und Tests erkennen koennen, welche Runtime-Baseline aktiv ist.
+- Risiken: Dieser Slice setzt die gewollten Zielslots, ersetzt aber nicht Terrain-Pathing oder Local Avoidance. Wenn Units trotzdem im Engpass einfaedeln, muss der naechste Slice dort ansetzen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_446_fireteam_workbench_spacing_runtime_pass.gd`, TASK_442/TASK_443-Regressionen und `git diff --check`.
+- Naechster Schritt: Im Godot-Fenster Move C/N/A und Engage C/N/A gegen die exportierten Formationen testen; danach Local-Avoidance/Pathing nur anfassen, wenn die Zielslots korrekt sind, aber die Laufwege wieder zusammenfallen.
+
+### TASK_445 - HTML Report Workbench Standard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_445_html_report_workbench_standard.md`, `docs/dev/html_report_workbench_contract.md`, `AGENTS.md`
+- Stand: Neue oder groesser ueberarbeitete HTML-Arbeitsreports unter `docs/reports/` sollen ab jetzt als interaktive Workbench mit Uebersicht, Tests/Entscheidungen, Notizen und sichtbarem `JSON exportieren`-Button entstehen.
+- Stand: `docs/reports/_html_workbench_template.html` liefert eine lokale Vorlage mit Tabs, Statusfeldern, Choice-Buttons, Notizen, JSON-Export, Kopierfunktion und optionalem JSON-Import.
+- Stand: `docs/reports/fireteam_formation_tuning_workbench.html` ist als erstes nutzbares Tool angelegt: Fireteam/Ziel verschiebbar, Slider fuer Speed/Sicht/Abstaende/Reihenversatz, Formation-/Sektorvorschau und JSON-Export der eingestellten und berechneten Werte.
+- Stand: Die Formation-Workbench erlaubt jetzt direktes Ziehen einzelner Teammember. Aus den Member-Positionen werden Buddy-Abstand, Buddy-Team-Abstand und Reihenversatz in die Regler zurueckgerechnet; Buddy-Teams sind als Zweierteams sichtbar und im Export enthalten.
+- Stand: Zusaetzliche Regler fuer Formationstyp, Sicherungssektor, Cohesion-Radius und Deckungsprioritaet sind im Tool und im JSON-Export enthalten.
+- Stand: Die Parameter wurden fuer den Playtest klarer benannt: `FOV` fuer Sichtfeldbreite, `Waffen-RW` fuer Waffenreichweite, `Tile-Gr.` fuer sichtbare Rastergroesse und `Cohesion` fuer den Zusammenhaltsradius. Buddy/Team/Reihe haben groessere Wertebereiche.
+- Stand: Teammember haben jetzt einen gelben Drehgriff fuer Blick-/Waffenrichtung; manuell gesetzte Facing-Winkel werden im Export als `facing_degrees` gespeichert.
+- Stand: Template und Formation-Workbench bieten jetzt einen optionalen `Reports-Ordner verbinden`-Pfad. Wenn der Browser lokalen Schreibzugriff erlaubt, schreibt `JSON exportieren` mehrere eindeutige Zeitstempel-Dateien in den verbundenen Ordner; sonst bleibt der Browser-Download plus Textfeld aktiv.
+- Stand: In der Formation-Workbench ist `Sicherung` aus dem Command-Block herausgezogen, damit Command und Blick-/Waffenverteilung klar getrennt sind.
+- Stand: Die Formation-Workbench trennt jetzt `Grundformation`, `Sicherung` und `Abgeleitete Werte`: Waffenreichweite kommt aus der gewaehlten WeaponData-Waffe, Sicht wird als Meter-/Tile-Diagnose gerechnet und FOV bleibt ein Command-/Stance-Profilwert.
+- Stand: Ein neuer `C/N/A Matrix`-Tab zeigt Move, Engage, Take und Defend jeweils als drei kompakte Vergleichsbilder, damit die Presets ohne Umklicken gegeneinander geprueft werden koennen.
+- Stand: Command-/Stance-Automatik und Grundformation sind jetzt getrennt schaltbar. Exporte enthalten einen benannten `formation_candidate`, die Leader-Position und die Information, dass die JSON erst nach bewusster Uebernahme Runtime-Wahrheit wird.
+- Stand: FOV ist in der Workbench auf 10-90 Grad begrenzt; engere FOVs erzeugen nur als Tuning-Diagnose einen kleinen Sicht-Fokusfaktor.
+- Stand: Die Formation-Workbench unterstuetzt jetzt Fireteam-Groessen 2/4/6/8 mit nummerierten Positionen 1-8. Buddy-Paare koennen sequenziell, gekreuzt oder aussen/innen gebildet werden.
+- Stand: Sicherungsbilder koennen ueber die Drehgriffe manuell gesetzt und fuer den aktuellen Command/Stance als Override exportiert werden; Area-Regeln bleiben bewusst ausserhalb dieses Workbench-Slices.
+- Stand: Grundformationen koennen jetzt ebenfalls fuer den aktuellen Command/Stance als Override gemerkt, aktiviert/deaktiviert und exportiert werden. Buddyteams lassen sich abschalten, dann zeigt die Workbench eine lose Wolke ohne feste Zweierteams.
+- Stand: Die Leader-Position ist jetzt eine Positionsnummer 1-8; spaetere Roster-/NPC-Zuordnung bleibt getrennt von diesen Formationsplaetzen.
+- Risiken: Der Export ist nur Playtest-/Doku-Kommunikation und keine Gameplay-Wahrheit. Die Formation-Workbench ist ein Tuningmodell und noch nicht direkt an Runtime-Konstanten gebunden.
+- Lokale Pruefung: Template lokal im Browser oeffnen, Formation-Workbench bedienen, JSON exportieren/kopieren/importieren und `git diff --check`.
+- Naechster Schritt: Den naechsten Fireteam-Runtime-Fix mit dieser Workbench abstimmen: weniger Gaensemarsch, bessere Buddy-Abstaende, directional Security beim Vorruecken und sichtbare Enemy-/Leader-Visuals.
+
+### TASK_444 - Fireteam Behavior Playtest Workbench HTML
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_444_fireteam_behavior_playtest_workbench_html.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/tasks/TASK_442_fireteam_engage_behavior_control.md`, `docs/tasks/TASK_443_fireteam_take_behavior_control.md`
+- Stand: `docs/reports/fireteam_behavior_playtest_workbench.html` fasst Move, Engage, Take und Defend als bedienbare Playtest-Arbeitsseite mit Formationsbildern, C/N/A-Werten, Testmatrix, offenen Entscheidungen und JSON-Export zusammen.
+- Stand: Die Seite trennt klar zwischen umgesetztem Runtime-Stand und offenen manuellen Pruefungen. Defend ist als vorhandene Baseline, aber noch nicht final neu geschnittener Behavior-Slice markiert.
+- Risiken: Die HTML-Seite ist Doku/Playtest-Hilfe und fuehrt keine Runtime-Wahrheit ein. Defend-Regeln sind Vorschlag fuer den naechsten Implementierungsschritt.
+- Lokale Pruefung: HTML lokal oeffnen und `git diff --check`.
+- Naechster Schritt: Defend-Regeln entscheiden und danach als eigenen Runtime-Slice mit Tests umsetzen.
+
+### TASK_443 - Fireteam Take Behavior Control
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_443_fireteam_take_behavior_control.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/tasks/TASK_442_fireteam_engage_behavior_control.md`
+- Stand: `Take` wird im `FireteamMovementController` nicht mehr wie eine direkte Baseline-Bewegung behandelt. C und N laufen als Buddy-Bounds; A laeuft als gemeinsame Sturm-/Fireline-Bewegung.
+- Stand: Take-Commands tragen Diagnosefelder fuer Doktrin, Advance-Mode, Zielpolitik, Buddy-Teams, Area-Control-Pflicht und technische Optimalreichweite.
+- Stand: `UnitCommand` transportiert `engagement_range_policy` und `engagement_range_factor`; der Combat-Fire-Resolver begrenzt Attackability damit fuer Take auf die technische Optimalreichweite.
+- Stand: Area-Take-Kommandos aus `MissionTacticalSandboxController` nutzen dieselbe Take-Doktrin und Range-Policy wie Waypoint-Take.
+- Risiken: Die Optimalreichweiten-Faktoren sind erste technische Startwerte. "Wenn beschossen, frueher feuern" und feinere Raum-Clearing-Schritte bleiben eigene Folge-Slices.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_443_fireteam_take_behavior_control.gd`, relevante TASK_442/TASK_432/TASK_429/TASK_123-Regressionen und `git diff --check`.
+- Naechster Schritt: Im Godot-Fenster `Take Area` in C/N/A testen: Anmarsch, Feuerdistanz, Area-Besetzung, Secured-State und danach Defend/Security-Lesbarkeit.
+
+### TASK_442 - Fireteam Engage Behavior Control
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_442_fireteam_engage_behavior_control.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/tasks/TASK_432_fireteam_muzzle_flash_and_baseline_attack_movement.md`, `docs/tasks/TASK_441_fireteam_map_tool_drill_rebuild.md`
+- Stand: `Engage` wird im `FireteamMovementController` nicht mehr wie ein generischer Baseline-Move in `rush` gezwungen. C und N laufen als Buddy-Bounds; A laeuft als gemeinsame Fireline/Rush-Bewegung.
+- Stand: Engage-Commands tragen Diagnosefelder fuer Doktrin, Advance-Mode, Zielpolitik, Buddy-Teams und Waffenreichweiten-Feuer.
+- Stand: Der Combat-Loop nutzt fuer Engage-Kontakt-Los mindestens die Waffenreichweite, damit sichtbarer Engage-Kontakt nicht am alten kurzen Contact-Range-Gate haengen bleibt.
+- Stand: `Take` bleibt fuer diesen Slice bewusst Baseline und ist als naechste eigene Kontrollmatrix abgegrenzt.
+- Risiken: Grosse Engage-Areas nutzen weiterhin die bestehende Area-State-Maschine; feinere Crawl-/Bound-Phasen innerhalb der Area brauchen einen Folge-Task.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_442_fireteam_engage_behavior_control.gd`, relevante TASK_432/TASK_429/TASK_123-Regressionen und `git diff --check`.
+- Naechster Schritt: Im Godot-Fenster `Engage Area` in C/N/A testen: Zielwahl, rote Schusslinie, Muzzle Flash und ob die Buddy-Bounds auf der Drillmap lesbar sind.
+
+### TASK_441 - Fireteam Map Tool Drill Rebuild
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_441_fireteam_map_tool_drill_rebuild.md`, `docs/tasks/TASK_416_fireteam_command_drill_map.md`, `docs/tasks/TASK_439_fireteam_runtime_map_flow_limbo_review.md`, `docs/tasks/TASK_440_enemy_limbo_contact_diagnostics.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/dev/enemy_team_tactics_contract.md`
+- Stand: Der MapEditor-Patrol-Selector liest jetzt Enemy-IDs, Binding-IDs und Patrol-Route-IDs aus dem geladenen Szenario und der Karte, statt nur alte Platzhalter zu zeigen.
+- Stand: Patrol-Edits und Waypoint-Zaehler loesen eine Gegnerreferenz wie `enemy_foxtrot` auf die gebundene Route `enemy_drill_foxtrot_route` auf. Damit ist die aktuelle Drillmap im Tool mit allen vier Gegnern bearbeitbar.
+- Stand: `docs/reports/fireteam_map_tool_drill_rebuild_status.html` fasst den Map-Tool-Stand zusammen und benennt Engage/Take/Defend als vorhandene, aber weiter zu kontrollierende Baseline.
+- Risiken: Der MapEditor prueft Authoring-Konsistenz, nicht finales Combat-Verhalten. Engage, Take und Defend brauchen als naechsten Schritt eine Runtime-Matrix fuer Tile/Area, C/N/A und Kontaktlagen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tools/generate_fireteam_command_drill_24x24.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_441_fireteam_map_tool_drill_rebuild.gd`, `git diff --check`
+- Naechster Schritt: Engage, Take und Defend gezielt als Matrix kontrollieren: Tile vs. Area, kein Kontakt vs. sichtbarer Kontakt, C/N/A und Abschluss/Auto-Defend.
+
+### TASK_440 - Enemy Limbo Contact Diagnostics
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_440_enemy_limbo_contact_diagnostics.md`, `docs/tasks/TASK_439_fireteam_runtime_map_flow_limbo_review.md`, `docs/tasks/TASK_434_limboai_enemy_behavior_adapter_smoke.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/dev/enemy_team_tactics_contract.md`
+- Stand: `EnemyLimboBehaviorAdapter` liefert zu ausgewaehlten oder nicht ausgewaehlten Branches einen Diagnosegrund und spiegelt Kontakt-/Patrol-/Cover-Flags im Result.
+- Stand: `MissionCombatLoopDriver` speichert pro Enemy den letzten Limbo-Entscheid als Snapshot und setzt Action/Source/Reason-Meta fuer Unit-Snapshots.
+- Stand: Enemy-Limbo-Cover- und Contact-Hold-Commands tragen explizit `fire_at_will`, `enemy_bt_action` und `enemy_bt_reason`, bleiben aber normale Command-Dictionaries fuer `SimulationRoot`.
+- Stand: `MissionTacticalSandboxController.get_command_feedback_snapshot()` reicht den Enemy-Limbo-Snapshot als `enemy_limbo_behavior` fuer #18/Dev-Diagnose weiter.
+- Risiken: Der Snapshot erklaert Entscheidungen, ersetzt aber nicht LOS, Pathing, Damage oder Combat-Fire-Resolver.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_440_enemy_limbo_contact_diagnostics.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_434_limboai_enemy_behavior_adapter_smoke.gd`, `git diff --check`
+- Naechster Schritt: Im Godot-Fenster pruefen, ob Gegner bei sichtbarem Kontakt jetzt mit nachvollziehbarem Limbo-Grund in #18/Feedback auftauchen und ob der Schuss weiter am Combat-Fire-Resolver haengt.
+
+### TASK_439 - Fireteam Runtime Map Flow Limbo Review
+- Status: dokumentiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_439_fireteam_runtime_map_flow_limbo_review.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/enemy_team_tactics_contract.md`, `docs/tasks/TASK_434_limboai_enemy_behavior_adapter_smoke.md`, `docs/tasks/TASK_438_fireteam_contact_visibility_attack_visuals.md`
+- Stand: `docs/reports/fireteam_runtime_map_flow_limbo_review.html` beschreibt den aktiven Pfad von Input/GO ueber FireteamMovementController, SimulationRoot, CombatLoop und TerrainMap3DView.
+- Stand: Erwartetes Verhalten fuer Move/Defend/Take/Engage, Waypoint-Abschluss, Kontakt, Muzzle Flash und Debug-Feedback ist zusammengefasst.
+- Stand: User-Antworten sind als Arbeitsannahmen eingearbeitet: Produktionspfad fuer MissionTacticalSandboxController, Skills erstmal aus, Flanking spaeter paarweise, Sicherungsrichtungen stark sichtbar, Schusslinie bis Waffenreichweite, Sichtlinie als erster 100-m-/67-Tile-Wert plus LOS-Blocker.
+- Stand: LimboAI ist nach lokalem und offiziellem Doku-Blick als ernsthafter Hybrid-Kandidat bewertet: sinnvoll fuer Gegnerabsichten und Debug-Gruende, nicht fuer direkte Unit-/Damage-/Visual-Wahrheit; Full-Low-Level-Umstieg bleibt nicht empfohlen.
+- Risiken: Die HTML ist eine Debug- und Entscheidungsreferenz; Codezeilen koennen driften und ersetzen keine Contracts.
+- Lokale Pruefung: `git diff --check`
+- Naechster Schritt: Kontakt-/Enemy-Angriffsverhalten mit sichtbaren Debug-Gruenden und kleinem LimboAI-Hybrid-Verifier stabilisieren.
+
+### TASK_437 - Fireteam Selection Patrol Contact Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_437_fireteam_selection_patrol_contact_pass.md`, `docs/tasks/TASK_436_fireteam_sight_security_visuals.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Selected-Unit-Marker im 3D-Overlay sind gelb und flacher/bodennah; ausgewaehlte Fireteam- und #17-Member-Cards nutzen gelbe Auswahlrahmen.
+- Stand: Normale Move-Zielslots sind breiter/parallel gesetzt, und Move-Commands bleiben `fire_at_will`, damit Kontaktfeuer nicht mehr durch den Bewegungsbefehl selbst blockiert wird.
+- Stand: Die Drill-Gegner starten als vier aktive NPCs in einer Wave. Patrol-Bindings werden nach Wave-Aktivierung initialisiert und vor alten Team-Tactics ausgefuehrt, solange kein Kontakt Cover/Hold erzwingt.
+- Risiken: Kontaktfeuer auf Move ist jetzt eine Baseline-Regel; spaetere ROE-/Skill-Regeln muessen das explizit wieder einschraenken, statt still ueber Legacy-Hold-Fire zu blockieren.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tools/generate_fireteam_command_drill_24x24.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_437_fireteam_selection_patrol_contact_pass.gd`, relevante TASK_423/TASK_424/TASK_432/TASK_435/TASK_436-Regressionen und `git diff --check`.
+- Naechster Schritt: Im Godot-Fenster Move auf Feindkontakt, gelbe Auswahl und rote Patrol sichtbar gegen den aktuellen Playtest pruefen.
+
+### TASK_438 - Fireteam Contact Visibility Attack Visuals
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_438_fireteam_contact_visibility_attack_visuals.md`, `docs/tasks/TASK_437_fireteam_selection_patrol_contact_pass.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Sichtbare Fire-Lines wechseln bei `spotted`/`confirmed` Kontakt auf Rot; Live-Combat-Fire-Events synchronisieren den Primary-3D-View sofort, damit Muzzle Flash und roter Trace nicht erst auf einen spaeteren UI-Refresh warten.
+- Stand: Hostile 3D-Proxies tragen eine kleine Body-Readability-Core unter dem animierten Modell und rebuilden, wenn sich die Visual-Archetype/Loadout-Signatur nach Wave-/Tactics-Aktivierung aendert.
+- Stand: Drill-Buesche werden mit zusaetzlichem Objekt-Y-Offset ueber der Ground-Tile-Oberflaeche gerendert.
+- Risiken: Der rote Trace ist bewusst nur eine sichtbare Kontakt-/Schussdiagnose; Trefferwahrscheinlichkeit, Suppression und spaetere KI-Skillregeln bleiben unveraendert.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_438_fireteam_contact_visibility_attack_visuals.gd`, relevante TASK_435/TASK_436/TASK_437-Regressionen und `git diff --check`.
+- Naechster Schritt: Im Godot-Fenster testen, ob Gegner bei Sichtkontakt nun sichtbar schiessen, alle vier Koerper erkennbar sind und Buesche sichtbar auf den Tiles stehen.
+
+### TASK_436 - Fireteam Sight Security Visuals
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_436_fireteam_sight_security_visuals.md`, `docs/tasks/TASK_435_fireteam_manual_visual_regression_pass.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Friendly Sight-/Fire-Linien starten im 3D-Overlay am Head-Socket bzw. Head-Fallback und werden sichtbar auf eine lesbare Waffenreichweiten-Laenge begrenzt.
+- Stand: Directional Defense verteilt vier Mitglieder als zwei Front-Sicherer plus linke/rechte Flanke; `360` bleibt kardinal. Security-Assignments schreiben sichtbares Facing-Meta auf die Units, und die Fireteam-Mini-Card zeigt eine kleine Coverage-Bar.
+- Stand: HUD-FTL-Bubbles sind oben/linksbuendig und umbrechen eher in kurze Zeilen. Muzzle Flash, Bloom und Trace sind im Render-Snapshot groesser/lesbarer.
+- Stand: Die Drillmap setzt Buesche wieder als `nature_bush_cover`-Objekte auf normale Ground-Tiles; alle vier Gegner haben Patrol-Bindings und groessere Spawn-Abstaende.
+- Risiken: Die Coverage-Bar ist zunaechst eine kompakte Diagnose-Anzeige, kein neues Security-Datenmodell. Patrol ist nur Drillmap-Playtest-Hilfe.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tools/generate_fireteam_command_drill_24x24.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_436_fireteam_sight_security_visuals.gd`, relevante TASK_401/TASK_424/TASK_429/TASK_431/TASK_435-Regressionen und `git diff --check`.
+- Naechster Schritt: Im Godot-Fenster Defense 360/Front/Flanken, Muzzle Flash und Gegner-Patrol einmal sichtbar gegen die Screenshots pruefen.
+
+### TASK_435 - Fireteam Manual Visual Regression Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_435_fireteam_manual_visual_regression_pass.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_431_fireteam_aim_pose_and_card_ui_hotfix.md`, `docs/tasks/TASK_432_fireteam_muzzle_flash_and_baseline_attack_movement.md`
+- Stand: Eine kombinierte Drillmap-Regression prueft den sichtbaren Baseline-Pfad mit vier eigenen und vier gegnerischen 3D-Proxies, Ground-Auswahlmarkern, Cautious-Move-Aim, C/N/A-Livewechsel, Muzzle Flash und Engage-Area-zu-Take-Area-Folge.
+- Stand: 3D-Unit-Snapshots liefern jetzt das sichtbare Status-Badge mit; aktive `move`-/`engage`-Befehle gewinnen vor generischen `HOLD`-Labels.
+- Stand: Area-Feedback benennt `engage` explizit als `ENGAGE`, damit `#17` und FTL-Bubbles nicht auf generisches `ATTACK` zurueckfallen.
+- Risiken: Die Regression deckt die wichtigsten Fenster-Signale headless ab, ersetzt aber nicht den finalen Blick auf Kamera-Framing und Lesbarkeit im Godot-Fenster.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_435_fireteam_manual_visual_regression_pass.gd`, relevante TASK_424/TASK_425/TASK_426/TASK_431/TASK_432-Regressionen und `git diff --check`.
+- Naechster Schritt: Im Godot-Fenster einen kurzen manuellen Durchlauf `C -> Move -> GO`, `A/N live`, Feuerkontakt und `Engage Area -> GO -> Take Area` machen; danach erst wieder neue Taktiklogik schneiden.
+
 ### TASK_434 - LimboAI Enemy Behavior Adapter Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_434_limboai_enemy_behavior_adapter_smoke.md`, `docs/tasks/TASK_433_install_third_party_godot_plugins.md`, `docs/dev/enemy_team_tactics_contract.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `AGENTS.md`, `docs/PROJECT_BRIEF.md`, `docs/ARCHITECTURE.md`, `docs/CODEX_RULES.md`, `docs/TASK_ROADMAP.md`
@@ -69,7 +330,7 @@
 - Stand: Abgeschlossene Waypoints werden entfernt; ohne Folgeauftrag startet automatisch `Defend`. `defend` blockiert nicht mehr als dauerhaft wartender Waypoint.
 - Stand: Sichtbare Security nutzt `DEF 360` oder `DEF <Richtung>`. 360-Defense verteilt Mitglieder auf eigene Hauptsektoren und scannt leicht links/rechts.
 - Stand: Mission-Tactical-Befehle `move`, `defend`, `take` und `engage` fallen bei Startfehlern nicht still in alte Flow-Driver-Ausfuehrung zurueck, sondern melden `BEHAVIOR ERROR`.
-- Stand: Die Drillmap setzt Busch-Cover als Ground-Tiles und stabilisiert Prop-Rotationen, damit keine schiefen Objekt-Buesche oder Bodengaps entstehen.
+- Stand: Die Drillmap setzt Busch-Cover nach TASK_436 wieder als Objekt-Cover auf normalen Ground-Tiles, damit die Pflanzen nicht als Bodenersatz Luecken erzeugen.
 - Risiken: Die Werte sind erste Runtime-Konstanten; spaetere Charakterbogen-/Skill-Paesse muessen explizit entscheiden, wie sie diese Faktoren skalieren.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tools/generate_fireteam_command_drill_24x24.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_429_fireteam_behavior_modes_runtime.gd`, relevante TASK_421/TASK_424/TASK_425/TASK_426/TASK_427-Regressionen und `git diff --check`.
 - Naechster Schritt: Im Godot-Fenster Move/Engage/Take/Defend mit C/N/A auf der Drillmap durchklicken und danach Charakterbogen-Werte einzeln pruefen.
@@ -117,7 +378,7 @@
 ### TASK_424 - Fireteam Drill Enemy Visibility Grounding
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_424_fireteam_drill_enemy_visibility_grounding.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_416_fireteam_command_drill_map.md`, `docs/tasks/TASK_423_normal_move_parallel_spacing.md`
-- Stand: Die Drill-Map nutzt Busch-Cover jetzt als `nature_ground_grass_patch`-Ground-Tiles mit Cover-Wert; `nature_deco_logs` bleiben auf sauberen Ground-Tiles. Dadurch entstehen keine separaten Busch-Object-Props mit Rotationsluecken mehr.
+- Stand: Die Drill-Map nutzt Busch-Cover nach TASK_436 wieder als `nature_bush_cover`-Objekte auf sauberen `ground_flat`-Tiles mit Cover-Wert; `nature_deco_logs` bleiben ebenfalls auf sauberen Ground-Tiles.
 - Stand: Die Objective-Flaeche nutzt keine `station_set_floor_panel`-Tiles mehr; gameplay-seitig bleibt die komplette Drill-Karte auf `height_level == 0`.
 - Stand: Enemy-Proxies werden im Render-Snapshot pro Unit mit `uses_animated_character_model` und farbiger `unit_team_base_visible`-Diagnose gemeldet; die sichtbare Team-Basis macht gegnerische NPCs im Playtest besser lesbar.
 - Risiken: Die Korrektur verbessert die Drill-Map und Unit-Lesbarkeit, ohne Terrain-Asset-Bedeutungen fuer andere Karten umzudeuten.

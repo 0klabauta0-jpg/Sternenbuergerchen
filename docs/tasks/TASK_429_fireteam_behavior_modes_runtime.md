@@ -15,7 +15,7 @@ Der Playtest soll zuerst stabile Grundregeln pruefen: Geschwindigkeit, Sicht, Wa
 - Abgeschlossene Waypoints werden entfernt; ohne Folgeauftrag startet automatisch `Defend`.
 - Sichtbare Security wird als `DEF 360` oder `DEF <Richtung>` gefuehrt.
 - Neue Befehle fallen nicht still in alte Legacy-Ausfuehrung zurueck.
-- Drillmap-Buesche liegen als Ground-Tiles, nicht als falsch gedrehte Props mit Bodengaps.
+- Drillmap-Buesche liegen nach TASK_436 als Objekt-Cover auf Ground-Tiles, nicht als Bodenersatz mit Bodengaps.
 
 ## Nicht-Ziele
 
@@ -44,7 +44,7 @@ Der Playtest soll zuerst stabile Grundregeln pruefen: Geschwindigkeit, Sicht, Wa
 - [x] Ohne Folgeauftrag geht das Fireteam automatisch in `Defend`.
 - [x] `FireteamSecurityController` liefert `DEF 360`/Directional-Sektoren mit verteilten Blickwinkeln und leichter Scan-Bewegung.
 - [x] `move`, `defend`, `take` und `engage` melden einen Behavior-Fehler, wenn der neue Runtime-Pfad nicht starten kann.
-- [x] Drillmap-Busch-Cover ist als Ground-Tile authoriert und Scenario-/Generator-Ausgaben validieren nach dem Speichern.
+- [x] Drillmap-Busch-Cover ist nach TASK_436 als Objekt-Cover auf Ground-Tiles authoriert und Scenario-/Generator-Ausgaben validieren nach dem Speichern.
 
 ## Betroffene Dateien
 

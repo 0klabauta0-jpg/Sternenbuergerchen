@@ -131,7 +131,7 @@ func _apply_cover_and_objective(map_data) -> void:
 
 
 func _apply_shrub_ground_tile(map_data, position: Vector2i) -> void:
-	_set_tile(map_data, position, "nature_ground_grass_patch", "ground", 20, false, true)
+	_set_tile(map_data, position, "ground_flat", "ground", 25, false, true, "nature_bush_cover", 1, _resolve_object_rotation_degrees(position))
 
 
 func _apply_markers(map_data) -> void:
@@ -175,9 +175,24 @@ func _apply_markers(map_data) -> void:
 
 func _apply_patrol_paths(map_data) -> void:
 	map_data.call("set_patrol_path", "enemy_drill_watch_route", [
-		_tile_world(map_data, Vector2i(16, 8)),
-		_tile_world(map_data, Vector2i(17, 9)),
+		_tile_world(map_data, Vector2i(15, 8)),
+		_tile_world(map_data, Vector2i(14, 9)),
 		_tile_world(map_data, Vector2i(15, 10)),
+	])
+	map_data.call("set_patrol_path", "enemy_drill_echo_route", [
+		_tile_world(map_data, Vector2i(17, 7)),
+		_tile_world(map_data, Vector2i(18, 8)),
+		_tile_world(map_data, Vector2i(19, 7)),
+	])
+	map_data.call("set_patrol_path", "enemy_drill_foxtrot_route", [
+		_tile_world(map_data, Vector2i(19, 9)),
+		_tile_world(map_data, Vector2i(20, 10)),
+		_tile_world(map_data, Vector2i(18, 10)),
+	])
+	map_data.call("set_patrol_path", "enemy_drill_golf_route", [
+		_tile_world(map_data, Vector2i(21, 9)),
+		_tile_world(map_data, Vector2i(21, 11)),
+		_tile_world(map_data, Vector2i(20, 10)),
 	])
 
 
@@ -187,30 +202,30 @@ func _apply_enemy_tactics(map_data) -> void:
 		"visual_archetype": "enemy_space_suit_orange",
 	})
 	map_data.call("set_enemy_team_config", "default", default_config)
-	var red_config: Dictionary = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_default_config_for_map_size", GRID_SIZE, {
-		"profile_id": "defensive_cover",
-		"security_mode": "cover_arc",
-		"facing": "south_west",
+	var red_config: Dictionary = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("normalize_config", {
+		"profile_id": "patrol_probe",
+		"security_mode": "patrol",
+		"facing": "auto",
 		"visual_archetype": "enemy_space_suit_orange",
-		"weapon_profile": "defensive_mid",
-		"travel_speed_factor": 0.34,
-		"ready_speed_factor": 0.24,
-		"aim_move_speed_factor": 0.16,
-	})
+		"weapon_profile": "standard_close",
+		"travel_speed_factor": 0.36,
+		"ready_speed_factor": 0.20,
+		"aim_move_speed_factor": 0.12,
+	}, GRID_SIZE)
 	map_data.call("set_enemy_team_config", "red_drill_fireteam", red_config)
 
 
 func _build_scenario():
-	var red_tactics: Dictionary = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("get_default_config_for_map_size", GRID_SIZE, {
-		"profile_id": "defensive_cover",
-		"security_mode": "cover_arc",
-		"facing": "south_west",
+	var red_tactics: Dictionary = ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.call("normalize_config", {
+		"profile_id": "patrol_probe",
+		"security_mode": "patrol",
+		"facing": "auto",
 		"visual_archetype": "enemy_space_suit_orange",
-		"weapon_profile": "defensive_mid",
-		"travel_speed_factor": 0.34,
-		"ready_speed_factor": 0.24,
-		"aim_move_speed_factor": 0.16,
-	})
+		"weapon_profile": "standard_close",
+		"travel_speed_factor": 0.36,
+		"ready_speed_factor": 0.20,
+		"aim_move_speed_factor": 0.12,
+	}, GRID_SIZE)
 	return MISSION_SCENARIO_DATA_SCRIPT.call("from_dict", {
 		"version": 1,
 		"scenario_id": "fireteam_command_drill",
@@ -236,8 +251,8 @@ func _build_scenario():
 			},
 		],
 		"wave_config": {
-			"wave_count": 0,
-			"units_per_wave": 1,
+			"wave_count": 1,
+			"units_per_wave": 4,
 			"first_wave_delay_seconds": 0.0,
 			"wave_delay_seconds": 0.0,
 		},
@@ -245,6 +260,21 @@ func _build_scenario():
 			{
 				"target_id": "enemy_delta",
 				"patrol_path_id": "enemy_drill_watch_route",
+				"mode": "pre_contact",
+			},
+			{
+				"target_id": "enemy_echo",
+				"patrol_path_id": "enemy_drill_echo_route",
+				"mode": "pre_contact",
+			},
+			{
+				"target_id": "enemy_foxtrot",
+				"patrol_path_id": "enemy_drill_foxtrot_route",
+				"mode": "pre_contact",
+			},
+			{
+				"target_id": "enemy_golf",
+				"patrol_path_id": "enemy_drill_golf_route",
 				"mode": "pre_contact",
 			},
 		],

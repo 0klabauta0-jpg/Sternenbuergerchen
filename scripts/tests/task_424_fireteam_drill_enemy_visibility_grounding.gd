@@ -37,7 +37,7 @@ func _test_map_grounding() -> void:
 	_assert(map_data != null, "Drill map loads")
 	if map_data == null:
 		return
-	var shrub_ground_tiles: int = 0
+	var shrub_object_tiles: int = 0
 	var station_floor_panels: int = 0
 	var raised_tiles: int = 0
 	var los_blockers: int = 0
@@ -48,13 +48,15 @@ func _test_map_grounding() -> void:
 			raised_tiles += 1
 		if String(tile.type_id).begins_with("station_set_floor_panel"):
 			station_floor_panels += 1
-		if String(tile.type_id) == "nature_ground_grass_patch":
-			shrub_ground_tiles += 1
-			_assert(String(tile.surface_type) == "ground", "Shrub ground tile uses ground surface")
-			_assert(String(tile.object_type_id).is_empty(), "Shrub cover is not a separate object prop")
+		if String(tile.object_type_id) == "nature_bush_cover":
+			shrub_object_tiles += 1
+			_assert(String(tile.type_id) == "ground_flat", "Shrub cover sits on a normal ground tile")
+			_assert(String(tile.surface_type) == "ground", "Shrub cover keeps ground surface")
+			_assert(int(tile.cover_value) >= 25, "Shrub cover keeps cover value on the tile")
+			_assert(bool(tile.walkable), "Shrub cover remains walkable ground cover")
 		if bool(tile.blocks_los):
 			los_blockers += 1
-	_assert(shrub_ground_tiles >= 6, "Drill map has several shrub ground tiles")
+	_assert(shrub_object_tiles >= 6, "Drill map has several shrub object-cover tiles")
 	_assert(station_floor_panels == 0, "Objective does not use station floor panels")
 	_assert(raised_tiles == 0, "Drill map has no authored gameplay elevation")
 	_assert(los_blockers >= 4, "Drill map keeps visible LOS blockers around contact")
@@ -73,7 +75,8 @@ func _test_scenario_enemy_visibility_data() -> void:
 		return
 	var tactics: Dictionary = Dictionary(Dictionary(enemy_groups[0]).get("tactics", {}))
 	_assert(String(tactics.get("visual_archetype", "")) == "enemy_space_suit_orange", "Enemy fireteam uses visible orange archetype")
-	_assert(String(tactics.get("profile_id", "")) == "defensive_cover", "Enemy fireteam keeps defensive_cover tactics")
+	_assert(String(tactics.get("profile_id", "")) == "patrol_probe", "Enemy fireteam uses patrol_probe tactics for the drill baseline")
+	_assert(Array(scenario.get("patrol_bindings")).size() >= 4, "Scenario gives every drill enemy a patrol binding")
 
 
 func _test_drill_scene_enemy_presence() -> void:

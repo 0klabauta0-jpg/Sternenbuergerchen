@@ -29,32 +29,32 @@
 			"weapon_profile": ""
 		},
 		"red_drill_fireteam": {
-			"advance_style": "bounding",
-			"aim_move_speed_factor": 0.18,
+			"advance_style": "probe",
+			"aim_move_speed_factor": 0.12,
 			"air_asset_risk_profile": "none",
 			"allowed_weapon_roles": [
 				"rifle",
 				"smg",
-				"heavy"
+				"shotgun"
 			],
 			"anti_armor_threat": false,
 			"communication_intensity": "normal",
-			"contact_behavior": "suppress_from_cover",
-			"cover_behavior": "hold_best_cover",
-			"facing": "south_west",
+			"contact_behavior": "pin_then_report",
+			"cover_behavior": "break_to_cover_on_contact",
+			"facing": "auto",
 			"heavy_weapon_role": "none",
 			"lz_threat_zone_id": "",
-			"movement_posture_policy": "hold_ready",
-			"profile_id": "defensive_cover",
+			"movement_posture_policy": "travel_until_threat",
+			"profile_id": "patrol_probe",
 			"ready_distance_world": 640.0,
-			"ready_speed_factor": 0.24,
-			"security_mode": "cover_arc",
-			"sight_behavior": "cover_arc",
-			"stance": "defend",
-			"travel_speed_factor": 0.35,
+			"ready_speed_factor": 0.2,
+			"security_mode": "patrol",
+			"sight_behavior": "scan_waypoints",
+			"stance": "patrol",
+			"travel_speed_factor": 0.36,
 			"visual_archetype": "enemy_space_suit_orange",
 			"weapon_id": "",
-			"weapon_profile": "defensive_mid"
+			"weapon_profile": "standard_close"
 		}
 	},
 	"grid_origin": {
@@ -196,14 +196,56 @@
 	},
 	"mission_slot_count": 4,
 	"patrol_paths": {
-		"enemy_drill_watch_route": [
+		"enemy_drill_echo_route": [
 			{
-				"x": 1984,
+				"x": 2112,
 				"y": 864
 			},
 			{
-				"x": 1984,
+				"x": 2112,
 				"y": 928
+			},
+			{
+				"x": 2240,
+				"y": 928
+			}
+		],
+		"enemy_drill_foxtrot_route": [
+			{
+				"x": 2112,
+				"y": 992
+			},
+			{
+				"x": 2112,
+				"y": 1056
+			},
+			{
+				"x": 1984,
+				"y": 992
+			}
+		],
+		"enemy_drill_golf_route": [
+			{
+				"x": 2240,
+				"y": 1056
+			},
+			{
+				"x": 2112,
+				"y": 1120
+			},
+			{
+				"x": 2112,
+				"y": 1056
+			}
+		],
+		"enemy_drill_watch_route": [
+			{
+				"x": 1920,
+				"y": 832
+			},
+			{
+				"x": 1792,
+				"y": 832
 			},
 			{
 				"x": 1792,
@@ -1451,16 +1493,18 @@
 		},
 		{
 			"blocks_los": false,
-			"cover_value": 20,
+			"cover_value": 25,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 3,
 				"y": 16
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 1,
+			"object_rotation_degrees": 90.0,
+			"object_type_id": "nature_bush_cover",
 			"surface_type": "ground",
-			"type_id": "nature_ground_grass_patch",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -2417,16 +2461,18 @@
 		},
 		{
 			"blocks_los": false,
-			"cover_value": 20,
+			"cover_value": 25,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 6,
 				"y": 13
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 1,
+			"object_rotation_degrees": 270.0,
+			"object_type_id": "nature_bush_cover",
 			"surface_type": "ground",
-			"type_id": "nature_ground_grass_patch",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -3063,16 +3109,18 @@
 		},
 		{
 			"blocks_los": false,
-			"cover_value": 20,
+			"cover_value": 25,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 8,
 				"y": 11
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 1,
+			"object_rotation_degrees": 270.0,
+			"object_type_id": "nature_bush_cover",
 			"surface_type": "ground",
-			"type_id": "nature_ground_grass_patch",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -4390,16 +4438,18 @@
 		},
 		{
 			"blocks_los": false,
-			"cover_value": 20,
+			"cover_value": 25,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 12,
 				"y": 9
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 1,
+			"object_rotation_degrees": 90.0,
+			"object_type_id": "nature_bush_cover",
 			"surface_type": "ground",
-			"type_id": "nature_ground_grass_patch",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -5181,16 +5231,18 @@
 		},
 		{
 			"blocks_los": false,
-			"cover_value": 20,
+			"cover_value": 25,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 14,
 				"y": 17
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 1,
+			"object_rotation_degrees": 270.0,
+			"object_type_id": "nature_bush_cover",
 			"surface_type": "ground",
-			"type_id": "nature_ground_grass_patch",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -6171,16 +6223,18 @@
 		},
 		{
 			"blocks_los": false,
-			"cover_value": 20,
+			"cover_value": 25,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 17,
 				"y": 15
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 1,
+			"object_rotation_degrees": 180.0,
+			"object_type_id": "nature_bush_cover",
 			"surface_type": "ground",
-			"type_id": "nature_ground_grass_patch",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -7139,16 +7193,17 @@
 		},
 		{
 			"blocks_los": false,
-			"cover_value": 20,
+			"cover_value": 25,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 20,
 				"y": 12
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 1,
+			"object_type_id": "nature_bush_cover",
 			"surface_type": "ground",
-			"type_id": "nature_ground_grass_patch",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
@@ -7545,16 +7600,17 @@
 		},
 		{
 			"blocks_los": false,
-			"cover_value": 20,
+			"cover_value": 25,
 			"edge_type": "none",
 			"grid_position": {
 				"x": 21,
 				"y": 17
 			},
 			"height_level": 0,
-			"object_height": 0,
+			"object_height": 1,
+			"object_type_id": "nature_bush_cover",
 			"surface_type": "ground",
-			"type_id": "nature_ground_grass_patch",
+			"type_id": "ground_flat",
 			"walkable": true
 		},
 		{
