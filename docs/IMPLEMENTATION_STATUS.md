@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_465 - Fireteam Engage Resume Contact Progress
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_465_fireteam_engage_resume_contact_progress.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_462_fireteam_auto_defend_completion_release.md`, `docs/tasks/TASK_463_fireteam_auto_defend_guard_enemy_model_visibility.md`, `docs/tasks/TASK_464_fireteam_contact_scan_fire_feedback_readability.md`
+- Stand: Aktive Move-/Engage-/Take-/Defend-Movement-Executions zwingen die Security jetzt in ein directional Moving-Security-Bild aus der aktuellen Movement-Richtung. Ein vorheriges Auto-`DEF 360` bleibt damit nicht als sichtbarer 360-Defense-Zustand auf einem neuen Engage-Befehl liegen.
+- Stand: #17 zeigt fuer aktive Movement-Security `SEC MOV <Richtung>` statt `SEC DEF 360`; echtes Auto-Defend nach Zielabschluss bleibt weiter `DEF 360`.
+- Stand: Der neue Verifier stellt `Auto-DEF -> Engage in Kontakt` nach und prueft aktive Engage-Movement-State-Uebernahme, Bound-Fortschritt und Close-Contact-FireEvent.
+- Risiken/offen: Der Slice repariert den Security-/Resume-Uebergang und deckt Close-Contact-Fire ab. Wenn im Fenster weiter nicht geschossen wird, muss die sichtbare Contact-Diagnose konkret nach `no_los`, `out_of_range`, `cooldown` oder Detection-/Contact-State ausgewertet werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_465_fireteam_engage_resume_contact_progress.gd` sowie relevante TASK_462-464-Regressionen und `git diff --check`.
+- Naechster Schritt: Im Drill genau den User-Ablauf testen: Move/Engage vor Gegner, Auto-DEF, dann Engage direkt in Gegnergruppe. Erwartet: `SEC MOV <Richtung>`, weiterlaufende Bounds und sichtbares Feuer/Muzzleflash bei LOS/Reichweite.
+
 ### TASK_464 - Fireteam Contact Scan Fire Feedback Readability
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_464_fireteam_contact_scan_fire_feedback_readability.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_458_fireteam_contact_decision_diagnostics.md`, `docs/tasks/TASK_459_fireteam_engage_orientation_enemy_proxy_fix.md`, `docs/tasks/TASK_463_fireteam_auto_defend_guard_enemy_model_visibility.md`

@@ -179,6 +179,17 @@ TASK_464 trennt sichtbare UI-/FOW-Darstellung enger von Runtime-Combat-Wahrheit:
 - Rote Enemy-Bases sind Unter-Fuss-Markierungen. Sie duerfen Identifikation helfen, aber Modell, Waffe und Pose nicht ueberdecken.
 - #17-Karten sollen im Dev-/Playtest-Kontext lesbare Begriffe zeigen: Command, Feuerstatus, C/N/A-Haltung, Weapon-Posture, Movement-Posture und Aim-Bereitschaft.
 
+### TASK_465 Engage-Resume/Kontaktfortschritt
+
+TASK_465 stabilisiert den Uebergang von einem abgeschlossenen Auto-`DEF 360` in einen neuen aktiven Movement-/Engage-Auftrag:
+
+- Auto-`DEF 360` bleibt der korrekte Abschlusszustand, wenn kein Folgeauftrag aktiv ist.
+- Sobald ein neuer Move-/Engage-/Take-/Defend-Movement-Auftrag aktiv ist, darf der alte Defense-360-Sicherungsmodus die sichtbare Orientierung nicht weiter dominieren.
+- Aktive Bewegung nutzt ein directional Moving-Security-Bild in Marsch-/Zielrichtung. Bei vier Mitgliedern sichern zwei nach vorne und zwei in die Flanken, statt alle als Defense-360 in Himmelsrichtungen zu verteilen.
+- Die UI darf diesen Zustand als `SEC MOV <Richtung>` anzeigen. `SEC DEF 360` bleibt fuer echte Defense ohne laufende Movement-Execution reserviert.
+- `Defend` bedeutet Halten mit Feuer frei, nicht Feuerverbot. Wenn ein Gegner fit, sichtbar, in LOS, in Waffenreichweite und nach Contact-/Detection-Regel ausreichend bestaetigt ist, darf auch ein Fireteam in `DEF 360` schiessen.
+- Ein neuer `Engage` aus Auto-Defend muss den aktiven Behavior-/Movement-State uebernehmen, Bounds weiter takten und bei Close Contact einen Fire-Event erzeugen oder eine klare Contact-Diagnose liefern.
+
 ## Kontakt-Initiative V0
 
 `Kontakt-Initiative` beschreibt die Zeit vom ersten sichtbaren oder suspekten Kontakt bis zum ersten koordinierten Schuss. Sie ersetzt nicht die Waffen-Feuerrate und nicht die harte Combat-Wahrheit. Ein Schuss bleibt nur moeglich, wenn LOS, Waffenreichweite, Vital-State, Fire-Status und Kontaktstatus passen.

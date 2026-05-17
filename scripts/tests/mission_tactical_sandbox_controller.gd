@@ -12656,6 +12656,8 @@ func _format_security_state_text(state: Dictionary) -> String:
 	var mode_label: String = _format_compass_direction_label(direction, true)
 	if mode == "360":
 		mode_label = "360"
+	if bool(state.get("movement_security_active", false)):
+		return "MOV %s" % mode_label
 	return "DEF %s" % mode_label
 
 
