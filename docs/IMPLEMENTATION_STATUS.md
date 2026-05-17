@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_458 - Fireteam Contact Decision Diagnostics
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_458_fireteam_contact_decision_diagnostics.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_457_fireteam_contact_engage_runtime_pass.md`, `docs/tasks/TASK_438_fireteam_contact_visibility_attack_visuals.md`, `docs/tasks/TASK_440_enemy_limbo_contact_diagnostics.md`
+- Stand: Der Mission-Combat-Loop exportiert einen read-only Kontakt-/Fire-Decision-Diagnosesnapshot mit Reason, Status, Angreifer, Ziel, Waffe, Kontaktstatus, LOS, Range, Cooldown, Fire-Event und aktiven Friendly-/Enemy-Zaehlern.
+- Stand: `no_contact_pair`, `cooldown`, `no_damage_effect`, `invalid_contact_pair` und `fired` werden als letzte Combat-Entscheidung sichtbar. Fuer `no_contact_pair` wird ein erster Kandidat mit Blockgrund wie `attacker_not_engage_ready`, `no_los` oder `out_of_range` mitgeliefert.
+- Stand: Mission Control (#18) und der Command-Feedback-Snapshot lesen diese Diagnose kompakt als Text, ohne Gameplay-State in der UI zu mutieren.
+- Risiken/offen: Die Diagnose erklaert die Entscheidung, repariert aber nicht automatisch Pathing, LOS-Geometrie oder KI-Verhalten. Ein angezeigtes `no_los`/`out_of_range` muss bei Bedarf als separater Runtime-Slice geloest werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_458_fireteam_contact_decision_diagnostics.gd`, TASK_457/TASK_438/TASK_440 und `git diff --check`.
+- Naechster Schritt: Im Godot-Fenster Engage/Take gegen Gegner laufen lassen und #18/Feedback gezielt nach `CONTACT FIRE`, `CONTACT WAIT` oder `NO FIRE <Grund>` lesen.
+
 ### TASK_457 - Fireteam Contact Engage Runtime Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_457_fireteam_contact_engage_runtime_pass.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_452_fireteam_runtime_baseline_visual_contact_pass.md`, `docs/tasks/TASK_438_fireteam_contact_visibility_attack_visuals.md`

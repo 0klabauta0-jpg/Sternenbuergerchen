@@ -109,6 +109,16 @@ TASK_457 koppelt die vorhandenen Contact-Workbench-Werte enger an den sichtbaren
 - Nach einem abgeschlossenen Engage-Area-Befehl bekommt ein pending Waypoint im selben Plan Vorrang vor der naechsten Area/default Area.
 - Der 3D Unit-Proxy-Snapshot exportiert Aim-Readiness und sichtbaren Aim-Override als Diagnosewerte.
 
+### TASK_458 Contact-Decision-Diagnose
+
+TASK_458 macht die letzte Combat-Entscheidung sichtbar, ohne neue Gameplay-Wahrheit in UI oder HUD zu legen:
+
+- Der Mission-Combat-Loop exportiert `get_contact_decision_diagnostics_snapshot()` als read-only Diagnose.
+- Gruende sind unter anderem `fired`, `cooldown`, `no_contact_pair`, `no_damage_effect` und `invalid_contact_pair`.
+- Der Snapshot enthaelt Angreifer, Ziel, Waffe, Kontaktstatus, LOS-State, Range-State, Cooldown, aktiven Friendly-/Enemy-Count und bei Schuss den Fire-Event-Bezug.
+- Fuer `no_contact_pair` wird ein erster Kandidat mit Blockgrund dokumentiert, damit im Playtest sichtbar wird, ob eher Bereitschaft, LOS, Range oder Zielzustand blockiert.
+- Mission Control darf daraus nur Text bauen, z.B. `CONTACT FIRE`, `CONTACT WAIT` oder `NO FIRE <Grund>`.
+
 ## Kontakt-Initiative V0
 
 `Kontakt-Initiative` beschreibt die Zeit vom ersten sichtbaren oder suspekten Kontakt bis zum ersten koordinierten Schuss. Sie ersetzt nicht die Waffen-Feuerrate und nicht die harte Combat-Wahrheit. Ein Schuss bleibt nur moeglich, wenn LOS, Waffenreichweite, Vital-State, Fire-Status und Kontaktstatus passen.
