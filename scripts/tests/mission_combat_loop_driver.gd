@@ -33,6 +33,9 @@ const LEADERSHIP_BONUS_FACTOR: float = 0.15
 const LEADERSHIP_EVENT_COLOR: Color = Color(0.6, 0.85, 1.0, 1.0)
 const MAX_DETECTION_DELAY_TICKS: int = 15
 const CONTACT_INITIATIVE_BASELINE_SECONDS: float = 2.0
+const AIM_READINESS_BASELINE_PERCENT: float = 50.0
+const AIM_READINESS_MAX_DELAY_DELTA_TICKS: int = 4
+const RECENT_FIRE_EVENT_TTL_TICKS: int = 12
 const DETECTION_EVENT_COLOR: Color = Color(0.85, 0.85, 0.55, 1.0)
 const STEALTH_RANGE_REDUCTION_FACTOR: float = 0.5
 const SPOTTED_CONTACT_HIT_CHANCE_MALUS: float = -0.15
@@ -506,7 +509,7 @@ func _prune_recent_fire_events() -> void:
 		if typeof(event_variant) != TYPE_DICTIONARY:
 			continue
 		var event: Dictionary = Dictionary(event_variant)
-		if _current_tick - int(event.get("tick", _current_tick)) <= 4:
+		if _current_tick - int(event.get("tick", _current_tick)) <= RECENT_FIRE_EVENT_TTL_TICKS:
 			retained.append(event)
 	_recent_fire_events = retained
 
@@ -1370,7 +1373,7 @@ func _get_detection_delay_ticks(unit) -> int:
 		unit_awareness = clampf(float(unit.call("get_awareness")), 0.0, 1.0)
 
 	var base_delay: int = int(round((1.0 - unit_awareness) * float(MAX_DETECTION_DELAY_TICKS)))
-	return maxi(base_delay + _get_contact_initiative_delay_delta_ticks(unit), 0)
+	return maxi(base_delay + _get_contact_initiative_delay_delta_ticks(unit) + _get_aim_readiness_delay_delta_ticks(unit), 0)
 
 
 func _get_contact_initiative_delay_delta_ticks(unit) -> int:
@@ -1383,6 +1386,22 @@ func _get_contact_initiative_delay_delta_ticks(unit) -> int:
 	if typeof(raw_seconds) != TYPE_INT and typeof(raw_seconds) != TYPE_FLOAT:
 		return 0
 	return int(round((float(raw_seconds) / CONTACT_INITIATIVE_BASELINE_SECONDS) * float(MAX_DETECTION_DELAY_TICKS)))
+
+
+func _get_aim_readiness_delay_delta_ticks(unit) -> int:
+	if unit == null or not unit.has_method("get_current_unit_command"):
+		return 0
+	var command = unit.call("get_current_unit_command")
+	if command == null or not command.has_method("get"):
+		return 0
+	var raw_readiness: Variant = command.get("aim_readiness_percent")
+	if typeof(raw_readiness) != TYPE_INT and typeof(raw_readiness) != TYPE_FLOAT:
+		return 0
+	var readiness: float = clampf(float(raw_readiness), 0.0, 100.0)
+	if readiness <= 0.0:
+		return 0
+	var normalized_delta: float = clampf((AIM_READINESS_BASELINE_PERCENT - readiness) / AIM_READINESS_BASELINE_PERCENT, -1.0, 1.0)
+	return int(round(normalized_delta * float(AIM_READINESS_MAX_DELAY_DELTA_TICKS)))
 
 
 func _make_detection_key(attacker_id: String, target_id: String) -> String:

@@ -99,6 +99,16 @@ TASK_451 uebernimmt den Export `fireteam_formation_tuning_2026-05-17T08-46-56-74
 
 TASK_452 ergaenzt sinnvolle Runtime-Startpresets fuer `Take C/N` und `Defend C/N/A`, damit keine dieser Basis-Kombinationen mehr stumm auf die alte Fallback-Formation faellt. Diese Startwerte sind bewusst noch keine Workbench-Exporte, sondern pruefbare Baseline-Kandidaten fuer den naechsten Godot-Playtest.
 
+### TASK_457 Contact-/Engage-Runtime
+
+TASK_457 koppelt die vorhandenen Contact-Workbench-Werte enger an den sichtbaren Runtime-Pfad:
+
+- `aim_readiness_percent` wirkt im Combat-Loop als Delta auf die erste Kontakt-/Zielverzoegerung. Mehr Aim-Bereitschaft beschleunigt das Erfassen, weniger verzoegert es.
+- Ein Wert von `0` bleibt kompatibel als nicht gesetzter/neutraler Altwert, damit alte Commands ohne Workbench-Profil keinen stillen Malus bekommen.
+- Weapon-Fire-Events bleiben fuer ein kurzes Debug-Fenster im Snapshot, damit Muzzleflash und rote Schusslinie im manuellen Fenster lesbar sind.
+- Nach einem abgeschlossenen Engage-Area-Befehl bekommt ein pending Waypoint im selben Plan Vorrang vor der naechsten Area/default Area.
+- Der 3D Unit-Proxy-Snapshot exportiert Aim-Readiness und sichtbaren Aim-Override als Diagnosewerte.
+
 ## Kontakt-Initiative V0
 
 `Kontakt-Initiative` beschreibt die Zeit vom ersten sichtbaren oder suspekten Kontakt bis zum ersten koordinierten Schuss. Sie ersetzt nicht die Waffen-Feuerrate und nicht die harte Combat-Wahrheit. Ein Schuss bleibt nur moeglich, wenn LOS, Waffenreichweite, Vital-State, Fire-Status und Kontaktstatus passen.
@@ -106,7 +116,7 @@ TASK_452 ergaenzt sinnvolle Runtime-Startpresets fuer `Take C/N` und `Defend C/N
 Die Regel hat zwei Ausgaben:
 
 - `contact_initiative_seconds`: Sekunden bis zur ersten sinnvollen Feuerfreigabe.
-- `aim_readiness_percent`: Waffen-/Zielbereitschaft aus dem Haltungsprofil. Dieser Wert wird transportiert, im RuntimeStatus gehalten und im 3D-Visualpfad sichtbar ausgewertet. Hohe Werte koennen eine sonst gesenkte Waffe visuell auf Aim heben; die finale Animations-/Aim-Timing-Formel bleibt Folgearbeit.
+- `aim_readiness_percent`: Waffen-/Zielbereitschaft aus dem Haltungsprofil. Dieser Wert wird transportiert, im RuntimeStatus gehalten, im 3D-Visualpfad sichtbar ausgewertet und wirkt seit TASK_457 als Delta auf die erste Kontakt-/Zielverzoegerung. Hohe Werte koennen eine sonst gesenkte Waffe visuell auf Aim heben; die finale Animations-/Aim-Timing-Formel bleibt Folgearbeit.
 - `team_target_support_percent`: Zielhilfe-/Feuerleitbonus fuer den ersten koordinierten Burst. Dieser Wert wirkt seit TASK_451 als Runtime-Hook auf die Trefferchance im `CombatFireDecisionResolver`.
 
 Startformel fuer die Workbench und den naechsten Runtime-Slice:

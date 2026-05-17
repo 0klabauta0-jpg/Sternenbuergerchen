@@ -8117,6 +8117,8 @@ func _get_unit_proxy_state_by_id() -> Dictionary:
 			"unit_posture_policy_id": String(proxy.get_meta("unit_posture_policy_id", "")).strip_edges(),
 			"unit_sight_range_factor": float(proxy.get_meta("unit_sight_range_factor", 1.0)),
 			"unit_posture_source": String(proxy.get_meta("unit_posture_source", "")).strip_edges(),
+			"unit_aim_readiness_percent": float(proxy.get_meta("unit_aim_readiness_percent", 0.0)),
+			"unit_aim_readiness_visible_override": bool(proxy.get_meta("unit_aim_readiness_visible_override", false)),
 			"unit_security_facing_active": bool(proxy.get_meta("unit_security_facing_active", false)),
 			"unit_security_facing_angle": float(proxy.get_meta("unit_security_facing_angle", 0.0)),
 			"unit_security_coverage_role": String(proxy.get_meta("unit_security_coverage_role", "")).strip_edges(),

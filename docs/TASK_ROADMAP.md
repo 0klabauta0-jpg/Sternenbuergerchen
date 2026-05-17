@@ -86,6 +86,7 @@ git checkout -b batch/<batch-name>
 - TASK_454 - Terrain Truth Visual Audit
 - TASK_455 - Terrain Truth Editor Overlay Visibility
 - TASK_456 - Wall Segment LOS And Tile Truth Inspector
+- TASK_457 - Fireteam Contact Engage Runtime Pass
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

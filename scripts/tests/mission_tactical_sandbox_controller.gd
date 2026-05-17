@@ -12085,6 +12085,11 @@ func _try_continue_active_area_attack(fireteam_id: String) -> bool:
 		area_order.status = AREA_ORDER_SCRIPT.STATUS_COMPLETED
 	_area_attack_execution_by_fireteam.erase(normalized_fireteam_id)
 	_set_active_behavior_profile(normalized_fireteam_id, null)
+	if _has_pending_waypoint_order(normalized_fireteam_id, phase_index):
+		_last_command_text = "AREA COMPLETE %s" % normalized_fireteam_id.to_upper()
+		_refresh_order_visuals()
+		_refresh_fireteam_status_panel()
+		return true
 	var started_next_area: bool = _activate_next_attack_area_order(normalized_fireteam_id, phase_index)
 	if not started_next_area:
 		started_next_area = _activate_next_area_order_or_default(normalized_fireteam_id, phase_index)
