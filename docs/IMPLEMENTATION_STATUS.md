@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_463 - Fireteam Auto Defend Guard And Enemy Model Visibility
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_463_fireteam_auto_defend_guard_enemy_model_visibility.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_462_fireteam_auto_defend_completion_release.md`, `docs/tasks/TASK_461_fireteam_engage_visual_stuck_hotfix.md`
+- Stand: Die weiche Waypoint-Completion ist jetzt als Guard geschuetzt: aktive Movement-Executions duerfen nur nach einer Mindestlaufzeit ueber aktuelle Zielslots weich abschliessen. Anchor-/Center-Fallbacks greifen nicht mehr waehrend ein MovementController-Auftrag aktiv ist.
+- Stand: Auto-`DEF 360` bleibt der Abschlusszustand nach echtem Zielabschluss, richtet Hold-Commands aber sichtbar vom aktuellen Teamzentrum nach aussen aus und bewegt die Units dafuer nicht durch neue Zielslots.
+- Stand: Die Drill-Enemy-IDs `enemy_delta`, `enemy_echo`, `enemy_foxtrot` und `enemy_golf` nutzen explizite, groessere Enemy-Animated-Character-Modelle. Der Render-Snapshot meldet die Modellskala pro Proxy.
+- Risiken/offen: Der Slice verhindert den zu fruehen Auto-Defend-Rueckfall und verbessert Enemy-Lesbarkeit. Wenn Units danach weiter haengen, bleibt das ein eigener Zielslot-/Pathfinding-/Avoidance-Befund.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_463_fireteam_auto_defend_guard_enemy_model_visibility.gd`, TASK_462/TASK_461/TASK_438 und `git diff --check`.
+- Naechster Schritt: Im Drillfenster Move/Engage/Take erneut laufen lassen: Befehl darf nicht nach 0.5s in `DEF 360` kippen; danach Gegnergruppe visuell gegen vier klare Modelle pruefen.
+
 ### TASK_462 - Fireteam Auto Defend Completion Release
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_462_fireteam_auto_defend_completion_release.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_461_fireteam_engage_visual_stuck_hotfix.md`, `docs/tasks/TASK_422_go_continue_fireteam_hud_cleanup.md`

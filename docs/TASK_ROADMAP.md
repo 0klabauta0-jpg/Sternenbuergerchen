@@ -92,6 +92,7 @@ git checkout -b batch/<batch-name>
 - TASK_460 - Fireteam Movement Avoidance Stability
 - TASK_461 - Fireteam Engage Visual Stuck Hotfix
 - TASK_462 - Fireteam Auto Defend Completion Release
+- TASK_463 - Fireteam Auto Defend Guard And Enemy Model Visibility
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

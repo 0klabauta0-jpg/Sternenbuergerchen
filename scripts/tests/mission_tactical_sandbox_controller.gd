@@ -94,8 +94,9 @@ const AREA_ORDER_DRAG_THRESHOLD: float = 14.0
 const AREA_ORDER_ISO_TILE_HALF_WIDTH: float = 64.0
 const AREA_ORDER_ISO_TILE_HALF_HEIGHT: float = 32.0
 const PHASE_WAYPOINT_COMPLETE_RADIUS: float = 26.0
-const PHASE_WAYPOINT_SOFT_MEMBER_REACHED_RADIUS: float = 54.0
-const PHASE_WAYPOINT_SOFT_CENTER_REACHED_RADIUS: float = 72.0
+const PHASE_WAYPOINT_SOFT_MEMBER_REACHED_RADIUS: float = 30.0
+const PHASE_WAYPOINT_SOFT_CENTER_REACHED_RADIUS: float = 48.0
+const PHASE_WAYPOINT_SOFT_RELEASE_MIN_MSEC: int = 2500
 const AREA_DEFENSE_POSITION_REACHED_RADIUS: float = 24.0
 const AREA_ATTACK_APPROACH_REACHED_RADIUS: float = 30.0
 const AD_HOC_ORDER_COMPLETE_RADIUS: float = 28.0
@@ -12114,26 +12115,36 @@ func _is_active_waypoint_ready_for_go_continue(fireteam_id: String, execution_st
 	_ensure_fireteam_movement_controller()
 	if _fireteam_movement_controller != null and bool(_fireteam_movement_controller.call("has_active_execution", fireteam_id)):
 		var movement_result: Dictionary = _update_fireteam_movement_execution(fireteam_id)
-		if _is_phase_waypoint_target_reached(fireteam_id, resolved_target_position, movement_result):
-			return true
+		return _is_phase_waypoint_target_reached(fireteam_id, resolved_target_position, movement_result, execution_state, true)
 	var anchor := _get_selection_anchor_for_fireteam(fireteam_id)
 	if anchor == null:
 		return false
 	return anchor.global_position.distance_to(resolved_target_position) <= PHASE_WAYPOINT_COMPLETE_RADIUS
 
 
-func _is_phase_waypoint_target_reached(fireteam_id: String, resolved_target_position: Vector2, movement_result: Dictionary) -> bool:
+func _is_phase_waypoint_target_reached(fireteam_id: String, resolved_target_position: Vector2, movement_result: Dictionary, execution_state: Dictionary = {}, movement_was_active: bool = false) -> bool:
 	if bool(movement_result.get("finished", false)):
 		return true
 	var movement_state: Dictionary = Dictionary(movement_result.get("movement_state", {})).duplicate(true)
-	if _are_movement_state_targets_soft_reached(fireteam_id, movement_state):
-		return true
+	if not movement_state.is_empty():
+		if _is_phase_waypoint_soft_completion_allowed(execution_state) and _are_movement_state_targets_soft_reached(fireteam_id, movement_state):
+			return true
+		return false
+	if movement_was_active:
+		return false
 	var anchor := _get_selection_anchor_for_fireteam(fireteam_id)
 	if anchor != null and anchor.global_position.distance_to(resolved_target_position) <= PHASE_WAYPOINT_COMPLETE_RADIUS:
 		return true
-	if movement_state.is_empty() and _is_fireteam_center_near_position(fireteam_id, resolved_target_position, PHASE_WAYPOINT_SOFT_CENTER_REACHED_RADIUS):
+	if _is_fireteam_center_near_position(fireteam_id, resolved_target_position, PHASE_WAYPOINT_SOFT_CENTER_REACHED_RADIUS):
 		return true
 	return false
+
+
+func _is_phase_waypoint_soft_completion_allowed(execution_state: Dictionary) -> bool:
+	var started_msec: int = int(execution_state.get("started_msec", 0))
+	if started_msec <= 0:
+		return false
+	return Time.get_ticks_msec() - started_msec >= PHASE_WAYPOINT_SOFT_RELEASE_MIN_MSEC
 
 
 func _are_movement_state_targets_soft_reached(fireteam_id: String, movement_state: Dictionary) -> bool:
@@ -13105,6 +13116,7 @@ func _issue_fireteam_hold_current_positions(fireteam_id: String, phase_index: in
 	var sector_count: int = maxi(units.size(), 1)
 	var anchor = _get_selection_anchor_for_fireteam(fireteam_id)
 	var anchor_position: Vector2 = anchor.global_position if anchor != null else _get_target_position()
+	var team_center: Vector2 = _calculate_current_fireteam_center_from_units(units, anchor_position)
 	var objective_angle: float = _resolve_objective_security_angle_for_fireteam(fireteam_id, anchor_position)
 	var issued_count: int = 0
 	for index in range(units.size()):
@@ -13115,7 +13127,8 @@ func _issue_fireteam_hold_current_positions(fireteam_id: String, phase_index: in
 			continue
 		if not unit.has_method("get_unit_id"):
 			continue
-		var sector_angle: float = _resolve_default_defend_360_sector_angle(index, sector_count, objective_angle)
+		var unit_position: Vector2 = (unit as Node2D).global_position
+		var sector_angle: float = _resolve_default_defend_360_sector_angle(index, sector_count, objective_angle, unit_position, team_center)
 		var command = UNIT_COMMAND_SCRIPT.new()
 		command.command_type = UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION
 		command.priority = 11
@@ -13123,7 +13136,7 @@ func _issue_fireteam_hold_current_positions(fireteam_id: String, phase_index: in
 		command.team_id = FRIENDLY_TEAM_ID
 		if unit.has_method("get_team_id"):
 			command.team_id = String(unit.call("get_team_id"))
-		command.target_position = (unit as Node2D).global_position
+		command.target_position = unit_position
 		_set_unit_map_facing_angle(unit, sector_angle)
 		if unit is Node:
 			(unit as Node).set_meta("security_facing_angle", sector_angle)
@@ -13157,7 +13170,24 @@ func _issue_fireteam_hold_current_positions(fireteam_id: String, phase_index: in
 	return issued_count > 0
 
 
-func _resolve_default_defend_360_sector_angle(index: int, member_count: int, objective_angle: float) -> float:
+func _calculate_current_fireteam_center_from_units(units: Array, fallback_position: Vector2) -> Vector2:
+	var sum: Vector2 = Vector2.ZERO
+	var count: int = 0
+	for unit in units:
+		if not (unit is Node2D):
+			continue
+		if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
+			continue
+		sum += (unit as Node2D).global_position
+		count += 1
+	if count <= 0:
+		return fallback_position
+	return sum / float(count)
+
+
+func _resolve_default_defend_360_sector_angle(index: int, member_count: int, objective_angle: float, unit_position: Vector2 = Vector2.INF, team_center: Vector2 = Vector2.INF) -> float:
+	if unit_position.is_finite() and team_center.is_finite() and unit_position.distance_squared_to(team_center) > 16.0:
+		return (unit_position - team_center).angle()
 	if member_count <= 1:
 		return objective_angle
 	var cardinal_angles: Array[float] = [-PI * 0.5, 0.0, PI * 0.5, PI]
@@ -13489,6 +13519,7 @@ func _activate_next_waypoint_for_plan(plan, fireteam_id: String, waypoint_index:
 		"waypoint_index": waypoint_index,
 		"hold_elapsed": 0.0,
 		"resolved_target_position": resolved_target_position,
+		"started_msec": Time.get_ticks_msec(),
 	}
 	return _issue_waypoint_for_fireteam(fireteam_id, waypoint, int(plan.phase), behavior_profile)
 
@@ -13953,7 +13984,7 @@ func _update_active_phase_execution(delta: float) -> void:
 			did_change = true
 		if anchor == null or typeof(resolved_target_position) != TYPE_VECTOR2:
 			continue
-		var waypoint_target_reached: bool = _is_phase_waypoint_target_reached(String(fireteam_id), resolved_target_position, movement_result)
+		var waypoint_target_reached: bool = _is_phase_waypoint_target_reached(String(fireteam_id), resolved_target_position, movement_result, execution_state, had_movement_execution)
 		if had_movement_execution and not waypoint_target_reached:
 			continue
 		if not had_movement_execution and not waypoint_target_reached:

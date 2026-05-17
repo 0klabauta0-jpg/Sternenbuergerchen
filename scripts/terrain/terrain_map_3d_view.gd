@@ -7131,8 +7131,10 @@ func _create_unit_proxy(unit: Node) -> Node3D:
 			_normalize_asset_model_instance(model_instance)
 			var model_root := Node3D.new()
 			model_root.name = "UnitModel_%s" % _get_unit_visual_name(unit, unit_visual_entry)
-			model_root.scale = Vector3.ONE * _get_unit_model_scale(unit_visual_entry)
+			var model_scale: float = _get_unit_model_scale(unit_visual_entry)
+			model_root.scale = Vector3.ONE * model_scale
 			model_root.rotation_degrees.y = _get_unit_model_root_rotation_y(unit_visual_entry)
+			root.set_meta("unit_model_scale", model_scale)
 			root.set_meta("unit_model_root_rotation_y_degrees", model_root.rotation_degrees.y)
 			var material_applied: bool = _apply_unit_visual_material(model_instance, unit_visual_entry)
 			if not material_applied and _unit_visual_entry_has_skin(unit_visual_entry):
@@ -8163,6 +8165,7 @@ func _get_unit_proxy_state_by_id() -> Dictionary:
 			"unit_visual_signature": String(proxy.get_meta("unit_visual_signature", "")).strip_edges(),
 			"unit_visual_archetype_id": String(proxy.get_meta("unit_visual_archetype_id", "")).strip_edges(),
 			"unit_visual_faction_id": String(proxy.get_meta("unit_visual_faction_id", "")).strip_edges(),
+			"unit_model_scale": float(proxy.get_meta("unit_model_scale", 0.0)),
 			"unit_model_root_rotation_y_degrees": float(proxy.get_meta("unit_model_root_rotation_y_degrees", 0.0)),
 			"unit_visual_animation_name": String(proxy.get_meta("unit_visual_animation_name", "")).strip_edges(),
 			"unit_animation_raw_imported_count": int(proxy.get_meta("unit_animation_raw_imported_count", 0)),

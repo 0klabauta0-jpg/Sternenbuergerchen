@@ -81,13 +81,13 @@
 			"rotation_degrees_y": 270.0
 		},
 		"team_bravo": {
-			"visual_id": "enemy_space_suit_orange_small",
+			"visual_id": "enemy_space_suit_orange_medium",
 			"visual_archetype_id": "enemy_space_suit_orange",
 			"faction_id": "enemy",
-			"model_path": "res://Assets/used/npc/animated_characters/models/characterSmall.fbx",
-			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroFemaleB.png",
+			"model_path": "res://Assets/used/npc/animated_characters/models/characterMedium.fbx",
+			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroMaleB.png",
 			"visual_loadout_id": "compact_blaster",
-			"scale": 0.22,
+			"scale": 0.26,
 			"rotation_degrees_y": 270.0
 		},
 		"default": {
@@ -103,13 +103,13 @@
 	},
 	"unit_ids": {
 		"enemy_delta": {
-			"visual_id": "enemy_delta_space_suit_orange_small",
+			"visual_id": "enemy_delta_space_suit_orange_medium",
 			"visual_archetype_id": "enemy_space_suit_orange",
 			"faction_id": "enemy",
-			"model_path": "res://Assets/used/npc/animated_characters/models/characterSmall.fbx",
-			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroFemaleB.png",
+			"model_path": "res://Assets/used/npc/animated_characters/models/characterMedium.fbx",
+			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroMaleB.png",
 			"visual_loadout_id": "compact_blaster",
-			"scale": 0.22,
+			"scale": 0.26,
 			"rotation_degrees_y": 270.0
 		},
 		"enemy_echo": {
@@ -119,7 +119,27 @@
 			"model_path": "res://Assets/used/npc/animated_characters/models/characterMedium.fbx",
 			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroMaleB.png",
 			"visual_loadout_id": "heavy_blaster",
-			"scale": 0.22,
+			"scale": 0.26,
+			"rotation_degrees_y": 270.0
+		},
+		"enemy_foxtrot": {
+			"visual_id": "enemy_foxtrot_space_suit_orange_medium",
+			"visual_archetype_id": "enemy_space_suit_orange",
+			"faction_id": "enemy",
+			"model_path": "res://Assets/used/npc/animated_characters/models/characterMedium.fbx",
+			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroMaleB.png",
+			"visual_loadout_id": "compact_blaster",
+			"scale": 0.26,
+			"rotation_degrees_y": 270.0
+		},
+		"enemy_golf": {
+			"visual_id": "enemy_golf_space_suit_orange_medium",
+			"visual_archetype_id": "enemy_space_suit_orange",
+			"faction_id": "enemy",
+			"model_path": "res://Assets/used/npc/animated_characters/models/characterMedium.fbx",
+			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroMaleB.png",
+			"visual_loadout_id": "compact_blaster",
+			"scale": 0.26,
 			"rotation_degrees_y": 270.0
 		}
 	},
@@ -144,13 +164,13 @@
 			"display_name": "Enemy Space Suit Orange",
 			"faction_id": "enemy",
 			"visual_id": "enemy_space_suit_orange",
-			"model_path": "res://Assets/used/npc/animated_characters/models/characterSmall.fbx",
-			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroFemaleB.png",
+			"model_path": "res://Assets/used/npc/animated_characters/models/characterMedium.fbx",
+			"skin_path": "res://Assets/used/npc/animated_characters/skins/astroMaleB.png",
 			"alternate_skin_paths": [
-				"res://Assets/used/npc/animated_characters/skins/astroMaleB.png"
+				"res://Assets/used/npc/animated_characters/skins/astroFemaleB.png"
 			],
 			"visual_loadout_id": "compact_blaster",
-			"scale": 0.22,
+			"scale": 0.26,
 			"socket_compatibility": {
 				"helmet_socket": "HeadSocket",
 				"weapon_sockets": ["RightHandSocket", "BackSocket"],

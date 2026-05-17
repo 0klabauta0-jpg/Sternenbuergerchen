@@ -159,6 +159,16 @@ TASK_462 macht den Abschlusszustand explizit:
 - Default-Defend-Hold-Commands tragen `source_task_type = auto_defend`, `security_mode = 360`, `fire_at_will` und verteilte Facing-Winkel fuer die Mitglieder.
 - Dieser Default ist ein Abschluss-/Sicherungszustand, keine neue Area-Besitzlogik.
 
+### TASK_463 Auto-Defend Guard/Enemy-Modelle
+
+TASK_463 schraenkt den TASK_462-Abschluss bewusst ein:
+
+- Weiche Zielslot-Completion ist ein Unstick-Schutz, kein Sofortabschluss. Sie darf erst nach einer Mindestlaufzeit des aktiven Wegpunkts greifen.
+- Solange der MovementController einen aktiven Auftrag hat, zaehlen nicht Anchor- oder Center-Naehren, sondern `finished` oder die gealterte Zielslot-Completion.
+- Auto-`DEF 360` wird nur nach echtem Abschluss angewendet. Neue Move-/Engage-/Take-Befehle duerfen nicht nach wenigen Frames durch Default-Defend ueberschrieben werden.
+- Default-`DEF 360` haelt die aktuellen Unit-Positionen und richtet die sichtbaren Map-Facing-Winkel vom Teamzentrum nach aussen aus. Die Security-Snapshot-Rollen duerfen weiter 360-Abdeckung beschreiben; sie verschieben keine Units.
+- Die Drillmap muss vier Enemy-Unit-Proxies als sichtbare Animated-Character-Modelle zeigen. Rote Marker, Labels oder Readability-Cores duerfen helfen, ersetzen aber nicht das eigentliche NPC-Modell.
+
 ## Kontakt-Initiative V0
 
 `Kontakt-Initiative` beschreibt die Zeit vom ersten sichtbaren oder suspekten Kontakt bis zum ersten koordinierten Schuss. Sie ersetzt nicht die Waffen-Feuerrate und nicht die harte Combat-Wahrheit. Ein Schuss bleibt nur moeglich, wenn LOS, Waffenreichweite, Vital-State, Fire-Status und Kontaktstatus passen.
