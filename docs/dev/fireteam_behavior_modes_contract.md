@@ -201,6 +201,18 @@ TASK_466 legt fest, dass der sichtbare Playtest-Pfad nicht nur eine vorbereitete
 - Wenn kein Feuer moeglich ist, ist ein leerer #18-Status unzulaessig. Die Diagnose muss konkret auf `no_los`, `out_of_range`, `cooldown`, `attacker_not_engage_ready`, Detection-/Contact-State oder fehlende aktive Gegner zeigen.
 - HP-/Damage-Wirkung ist Runtime-Wahrheit. `TestUnit.apply_damage()` setzt bei 0 HP `vital_state = down`; eine sichtbare Hit-/Down-Animation bleibt ein eigener Visual-Slice.
 
+### TASK_467 Engage-Kontakthalt
+
+TASK_467 schneidet die erste harte Regel gegen das beobachtete "Engage laeuft zwischen Gegner und schiesst nicht":
+
+- Ein aktiver `Engage`-Movement-Auftrag darf einen sichtbaren, attackierbaren Kontakt in LOS und Waffenreichweite nicht ignorieren.
+- Sobald der Contact-Readout fuer mindestens ein Fireteam-Mitglied `combat_attackable = true`, `range_state = in_range` und `los_state = clear` meldet, pausiert `FireteamMovementController.update_execution()` die Bewegung.
+- Die Pause ist kein Auto-`DEF 360`: alle Mitglieder halten ihre aktuelle Position mit `command_type = hold_position`, `source_command_type = engage`, `fire_at_will`, Overwatch/Aim und den aktuellen C/N/A-Modifikatoren.
+- Waehrend `contact_halt_active` gilt, darf der aktive Waypoint nicht abgeschlossen oder durch Default-Defend ersetzt werden. Der Kampfkontakt muss erst als Feuer-/Kontaktzustand sichtbar werden.
+- Der Movement-Snapshot exportiert `contact_halt_active`, `contact_halt_unit_ids` und `contact_halt_context`, damit UI und Tests erkennen koennen, warum das Team haelt.
+
+Noch offen: Der Kontakthalt sucht nicht aktiv das beste Deckungsfeld. Der naechste Doctrine-Slice darf daraus "direkt schiessen" vs. "nahe Deckung nehmen und schiessen" ableiten.
+
 ## Kontakt-Initiative V0
 
 `Kontakt-Initiative` beschreibt die Zeit vom ersten sichtbaren oder suspekten Kontakt bis zum ersten koordinierten Schuss. Sie ersetzt nicht die Waffen-Feuerrate und nicht die harte Combat-Wahrheit. Ein Schuss bleibt nur moeglich, wenn LOS, Waffenreichweite, Vital-State, Fire-Status und Kontaktstatus passen.

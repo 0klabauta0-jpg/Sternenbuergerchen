@@ -96,6 +96,7 @@ git checkout -b batch/<batch-name>
 - TASK_464 - Fireteam Contact Scan Fire Feedback Readability
 - TASK_465 - Fireteam Engage Resume Contact Progress
 - TASK_466 - Fireteam Live Defend Contact Fire Damage
+- TASK_467 - Fireteam Engage Contact Halt Fire
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

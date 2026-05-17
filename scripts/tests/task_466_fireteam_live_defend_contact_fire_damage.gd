@@ -164,6 +164,7 @@ func _prepare_contact_units(controller: Node, fireteam_id: String, enemy_positio
 func _wait_for_live_friendly_fire_on_enemy(controller: Node, combat_loop: Node, enemy: Node2D, initial_health: int, max_physics_frames: int) -> Dictionary:
 	var fire_event_seen: bool = false
 	var last_diagnostics: Dictionary = {}
+	var last_friendly_fire_diagnostics: Dictionary = {}
 	var enemy_id: String = String(enemy.call("get_unit_id")) if enemy != null and enemy.has_method("get_unit_id") else ""
 	for _i in range(max_physics_frames):
 		await _wait_physics_frames(1)
@@ -178,10 +179,13 @@ func _wait_for_live_friendly_fire_on_enemy(controller: Node, combat_loop: Node, 
 			and String(last_diagnostics.get("attacker_team_id", "")) == "team_alpha"
 			and String(last_diagnostics.get("target_unit_id", "")) == enemy_id
 		)
-		if current_health < initial_health and friendly_fired_on_enemy:
-			last_diagnostics["fire_event_seen"] = fire_event_seen
-			last_diagnostics["current_health"] = current_health
-			return last_diagnostics
+		if friendly_fired_on_enemy:
+			last_friendly_fire_diagnostics = last_diagnostics.duplicate(true)
+		if current_health < initial_health and (friendly_fired_on_enemy or not last_friendly_fire_diagnostics.is_empty()):
+			var result: Dictionary = last_diagnostics if friendly_fired_on_enemy else last_friendly_fire_diagnostics
+			result["fire_event_seen"] = fire_event_seen
+			result["current_health"] = current_health
+			return result
 	last_diagnostics["fire_event_seen"] = fire_event_seen
 	last_diagnostics["current_health"] = int(enemy.call("get_health")) if enemy != null and enemy.has_method("get_health") else initial_health
 	return last_diagnostics

@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_467 - Fireteam Engage Contact Halt Fire
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_467_fireteam_engage_contact_halt_fire.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_465_fireteam_engage_resume_contact_progress.md`, `docs/tasks/TASK_466_fireteam_live_defend_contact_fire_damage.md`
+- Stand: Aktives `Engage` prueft vor der Waypoint-Completion sichtbare Kontakte auf LOS/Waffenreichweite. Wenn ein Kontakt attackierbar ist, pausiert der MovementController den Marsch und gibt allen Mitgliedern `hold_position` mit `source_command_type = engage`, `fire_at_will`, Overwatch/Aim und den aktuellen Stance-Modifikatoren.
+- Stand: `_update_active_phase_execution()` behandelt diesen Zustand als `contact_halt`, setzt den Wegpunkt nicht fertig und loest dadurch nicht sofort Auto-`DEF 360` aus.
+- Stand: Der Movement-Snapshot meldet `contact_halt_active`, `contact_halt_unit_ids` und `contact_halt_context`, damit #17/#18 den Haltegrund nachvollziehen koennen.
+- Stand: Der TASK_466-Live-Verifier merkt sich den letzten freundlichen `fired`-Snapshot, damit Damage-Apply-Timing nicht faelschlich als `cooldown`-Fehler gewertet wird.
+- Risiken/offen: Das ist noch keine finale Cover-Wahl. Die Regel entscheidet aktuell "halt and fire" bei attackierbarem Kontakt; ob ein nahes Cover besser ist als sofortiges Feuer bleibt ein eigener Doctrine-/Cover-Slice.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_467_fireteam_engage_contact_halt_fire.gd`, TASK_465/TASK_466-Regressionen und `git diff --check`.
+- Naechster Schritt: Im Drill `Move -> Engage vor Gegner -> Engage in Gegnergruppe` erneut testen. Erwartet ist kein Durchlaufen durch Gegner: bei sichtbarem Kontakt muss #17/#18 Contact-Halt/Feuerstatus zeigen und danach ein Fire-Event/Muzzle-Trace entstehen.
+
 ### TASK_466 - Fireteam Live Defend Contact Fire Damage
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_466_fireteam_live_defend_contact_fire_damage.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_458_fireteam_contact_decision_diagnostics.md`, `docs/tasks/TASK_464_fireteam_contact_scan_fire_feedback_readability.md`, `docs/tasks/TASK_465_fireteam_engage_resume_contact_progress.md`

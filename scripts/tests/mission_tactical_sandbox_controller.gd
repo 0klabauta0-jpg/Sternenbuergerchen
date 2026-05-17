@@ -12233,6 +12233,8 @@ func _is_active_waypoint_ready_for_go_continue(fireteam_id: String, execution_st
 
 
 func _is_phase_waypoint_target_reached(fireteam_id: String, resolved_target_position: Vector2, movement_result: Dictionary, execution_state: Dictionary = {}, movement_was_active: bool = false) -> bool:
+	if bool(movement_result.get("contact_halt", false)):
+		return false
 	if bool(movement_result.get("finished", false)):
 		return true
 	var movement_state: Dictionary = Dictionary(movement_result.get("movement_state", {})).duplicate(true)
@@ -13764,6 +13766,10 @@ func _update_fireteam_movement_execution(fireteam_id: String) -> Dictionary:
 	_ensure_fireteam_movement_controller()
 	if _fireteam_movement_controller == null:
 		return {}
+	var contact_context: Dictionary = {}
+	var active_movement_state: Dictionary = Dictionary(_fireteam_movement_controller.call("get_fireteam_state", fireteam_id)).duplicate(true)
+	if String(active_movement_state.get("command_type", "")).strip_edges().to_lower() == FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_ENGAGE:
+		contact_context = _build_fireteam_engage_contact_halt_context(fireteam_id)
 	var result: Dictionary = Dictionary(
 		_fireteam_movement_controller.call(
 			"update_execution",
@@ -13771,13 +13777,69 @@ func _update_fireteam_movement_execution(fireteam_id: String) -> Dictionary:
 			_get_fireteam_units(fireteam_id, true),
 			_resolve_fireteam_leader_for_behavior(fireteam_id),
 			get_node_or_null("../SimulationRoot"),
-			_get_terrain_registry()
+			_get_terrain_registry(),
+			contact_context
 		)
 	)
 	var bound_data: Dictionary = Dictionary(result.get("bound_complete", {})).duplicate(true)
 	if not bound_data.is_empty():
 		_notify_fireteam_bound_complete(fireteam_id, bound_data)
 	return result
+
+
+func _build_fireteam_engage_contact_halt_context(fireteam_id: String) -> Dictionary:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return {}
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver == null or not combat_driver.has_method("build_cover_effectiveness_readout"):
+		return {}
+	var units: Array = _get_fireteam_units(normalized_fireteam_id, true)
+	if units.is_empty():
+		return {}
+	var best_context: Dictionary = {}
+	var best_distance: float = INF
+	for contact_variant in get_fireteam_contact_snapshot(normalized_fireteam_id):
+		if typeof(contact_variant) != TYPE_DICTIONARY:
+			continue
+		var contact: Dictionary = Dictionary(contact_variant)
+		var detection_state: String = String(contact.get("detection_state", "")).strip_edges().to_lower()
+		if not _contact_state_allows_cover_effectiveness_detail(detection_state):
+			continue
+		var target_unit_id: String = String(contact.get("unit_id", contact.get("target_id", ""))).strip_edges()
+		if target_unit_id.is_empty():
+			continue
+		for unit in units:
+			if unit == null or not unit.has_method("get_unit_id"):
+				continue
+			var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+			if unit_id.is_empty():
+				continue
+			var readout: Dictionary = Dictionary(combat_driver.call("build_cover_effectiveness_readout", unit_id, target_unit_id, detection_state)).duplicate(true)
+			if not bool(readout.get("combat_attackable", false)):
+				continue
+			if String(readout.get("range_state", "")).strip_edges().to_lower() != "in_range":
+				continue
+			if String(readout.get("los_state", "")).strip_edges().to_lower() != "clear":
+				continue
+			var distance_world: float = float(readout.get("distance_world", INF))
+			if not best_context.is_empty() and distance_world >= best_distance:
+				continue
+			best_distance = distance_world
+			best_context = {
+				"should_halt": true,
+				"reason": "attackable_contact",
+				"fireteam_id": normalized_fireteam_id,
+				"target_unit_id": target_unit_id,
+				"attacker_unit_id": unit_id,
+				"contact_state": detection_state,
+				"readout": readout,
+			}
+			if typeof(contact.get("last_known_position", null)) == TYPE_VECTOR2:
+				best_context["target_position"] = Vector2(contact.get("last_known_position", Vector2.ZERO))
+			elif typeof(contact.get("position", null)) == TYPE_VECTOR2:
+				best_context["target_position"] = Vector2(contact.get("position", Vector2.ZERO))
+	return best_context
 
 
 func _notify_fireteam_bound_complete(fireteam_id: String, bound_data: Dictionary) -> void:
@@ -14094,6 +14156,22 @@ func _update_active_phase_execution(delta: float) -> void:
 		var movement_result: Dictionary = _update_fireteam_movement_execution(String(fireteam_id))
 		if not Dictionary(movement_result.get("bound_complete", {})).is_empty():
 			did_change = true
+		if bool(movement_result.get("contact_halt", false)):
+			var previous_halt_context: Dictionary = Dictionary(execution_state.get("contact_halt_context", {}))
+			var next_halt_context: Dictionary = Dictionary(movement_result.get("contact_halt_context", {})).duplicate(true)
+			var was_contact_halted: bool = bool(execution_state.get("contact_halt_active", false))
+			var previous_halt_target: String = String(previous_halt_context.get("target_unit_id", "")).strip_edges()
+			var next_halt_target: String = String(next_halt_context.get("target_unit_id", "")).strip_edges()
+			execution_state["contact_halt_active"] = true
+			execution_state["contact_halt_context"] = next_halt_context
+			execution_state["hold_elapsed"] = 0.0
+			_phase_execution_by_fireteam[fireteam_id] = execution_state
+			if not was_contact_halted or previous_halt_target != next_halt_target:
+				did_change = true
+			continue
+		if bool(execution_state.get("contact_halt_active", false)):
+			execution_state.erase("contact_halt_active")
+			execution_state.erase("contact_halt_context")
 		if anchor == null or typeof(resolved_target_position) != TYPE_VECTOR2:
 			continue
 		var waypoint_target_reached: bool = _is_phase_waypoint_target_reached(String(fireteam_id), resolved_target_position, movement_result, execution_state, had_movement_execution)

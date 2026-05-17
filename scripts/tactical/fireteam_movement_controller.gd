@@ -279,7 +279,7 @@ func start_execution(
 	return issue_result
 
 
-func update_execution(fireteam_id: String, units: Array, leader, simulation_root, terrain_registry = null) -> Dictionary:
+func update_execution(fireteam_id: String, units: Array, leader, simulation_root, terrain_registry = null, contact_context: Dictionary = {}) -> Dictionary:
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty():
 		return {}
@@ -290,6 +290,16 @@ func update_execution(fireteam_id: String, units: Array, leader, simulation_root
 	if member_records.is_empty():
 		_execution_by_fireteam.erase(normalized_fireteam_id)
 		return {"finished": true, "movement_state": {}}
+	if _should_pause_engage_for_contact(state, contact_context):
+		_issue_engage_contact_halt(state, member_records, simulation_root, contact_context)
+		_execution_by_fireteam[normalized_fireteam_id] = state
+		return {
+			"contact_halt": true,
+			"contact_halt_context": Dictionary(state.get("contact_halt_context", {})).duplicate(true),
+			"movement_state": _build_public_state(state),
+		}
+	if bool(state.get("contact_halt_active", false)):
+		_clear_engage_contact_halt_state(state)
 	if _are_current_targets_reached(state, member_records):
 		state["completed_stage_count"] = int(state.get("completed_stage_count", 0)) + 1
 		var bound_event: Dictionary = {
@@ -319,6 +329,75 @@ func update_execution(fireteam_id: String, units: Array, leader, simulation_root
 	_reissue_current_stage(state, member_records, simulation_root, terrain_registry)
 	_execution_by_fireteam[normalized_fireteam_id] = state
 	return {"movement_state": _build_public_state(state)}
+
+
+func _should_pause_engage_for_contact(state: Dictionary, contact_context: Dictionary) -> bool:
+	if String(state.get("command_type", "")).strip_edges().to_lower() != "engage":
+		return false
+	return bool(contact_context.get("should_halt", false))
+
+
+func _issue_engage_contact_halt(state: Dictionary, member_records: Array, simulation_root, contact_context: Dictionary) -> void:
+	if simulation_root == null:
+		return
+	var style: String = String(state.get("effective_style", ADVANCE_STYLE_RUSH))
+	var current_positions: Dictionary = _build_current_positions(member_records)
+	var modifiers: Dictionary = _resolve_stage_behavior_modifiers(state)
+	var halted_unit_ids: PackedStringArray = PackedStringArray()
+	var issued_count: int = 0
+	for record in member_records:
+		var unit_id: String = String(record.get("unit_id", ""))
+		if unit_id.is_empty():
+			continue
+		halted_unit_ids.append(unit_id)
+		if _enqueue_unit_command(
+			simulation_root,
+			String(record.get("team_id", "")),
+			unit_id,
+			UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION,
+			Vector2(current_positions.get(unit_id, state.get("current_anchor_target_position", Vector2.ZERO))),
+			0.0,
+			_resolve_stage_cover_score(state, float(state.get("cover_priority", 0.0))),
+			_resolve_stage_attack_bonus(state, style, true),
+			String(state.get("command_type", "")),
+			int(state.get("phase", -1)),
+			record.get("unit", null),
+			_build_stage_command_token(state, unit_id),
+			UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_OVERWATCH,
+			UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED,
+			_resolve_stage_posture_policy_id(state),
+			_resolve_stage_sight_range_factor(state),
+			modifiers
+		):
+			issued_count += 1
+	var readout: Dictionary = Dictionary(contact_context.get("readout", {})).duplicate(true)
+	var halt_context: Dictionary = {
+		"reason": String(contact_context.get("reason", "attackable_contact")).strip_edges().to_lower(),
+		"target_unit_id": String(contact_context.get("target_unit_id", readout.get("target_unit_id", ""))).strip_edges(),
+		"attacker_unit_id": String(contact_context.get("attacker_unit_id", readout.get("attacker_unit_id", ""))).strip_edges(),
+		"contact_state": String(contact_context.get("contact_state", readout.get("contact_state", ""))).strip_edges().to_lower(),
+		"range_state": String(readout.get("range_state", "")).strip_edges().to_lower(),
+		"los_state": String(readout.get("los_state", "")).strip_edges().to_lower(),
+		"distance_world": float(readout.get("distance_world", -1.0)),
+		"weapon_range_world": float(readout.get("weapon_range_world", 0.0)),
+		"attack_quality_label": String(readout.get("attack_quality_label", "")).strip_edges().to_lower(),
+	}
+	if typeof(contact_context.get("target_position", null)) == TYPE_VECTOR2:
+		halt_context["target_position"] = Vector2(contact_context.get("target_position", Vector2.ZERO))
+	state["contact_halt_active"] = true
+	state["contact_halt_unit_ids"] = halted_unit_ids
+	state["contact_halt_issued_count"] = issued_count
+	state["contact_halt_context"] = halt_context
+
+
+func _clear_engage_contact_halt_state(state: Dictionary) -> void:
+	for key in [
+		"contact_halt_active",
+		"contact_halt_unit_ids",
+		"contact_halt_issued_count",
+		"contact_halt_context",
+	]:
+		state.erase(key)
 
 
 func update_tactical_stance(fireteam_id: String, tactical_stance: String, units: Array, leader, simulation_root, terrain_registry = null) -> Dictionary:
@@ -1905,6 +1984,10 @@ func _build_public_state(state: Dictionary) -> Dictionary:
 		"formation_leader_slot": String(state.get("formation_leader_slot", "")),
 		"local_avoidance_command_opt_in": bool(state.get("local_avoidance_command_opt_in", false)),
 		"move_speed_multiplier": float(state.get("move_speed_multiplier", 1.0)),
+		"contact_halt_active": bool(state.get("contact_halt_active", false)),
+		"contact_halt_unit_ids": PackedStringArray(state.get("contact_halt_unit_ids", PackedStringArray())),
+		"contact_halt_issued_count": int(state.get("contact_halt_issued_count", 0)),
+		"contact_halt_context": Dictionary(state.get("contact_halt_context", {})).duplicate(true),
 		"engage_doctrine": _build_engage_doctrine_snapshot(state),
 		"take_doctrine": _build_take_doctrine_snapshot(state),
 	}
