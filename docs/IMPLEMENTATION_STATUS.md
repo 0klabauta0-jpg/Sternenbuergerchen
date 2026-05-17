@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_459 - Fireteam Engage Orientation Enemy Proxy Fix
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_459_fireteam_engage_orientation_enemy_proxy_fix.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_458_fireteam_contact_decision_diagnostics.md`, `docs/tasks/TASK_438_fireteam_contact_visibility_attack_visuals.md`
+- Stand: Die 3D-View priorisiert bei Aim-/Facing-Berechnung jetzt aktive Fire-Events und bestaetigte/spotted Kontakte vor altem Security-/Move-/Target-Facing. Dadurch soll `SEC DEF 360` einen laufenden Engage-Kontakt visuell nicht mehr nach hinten ueberstimmen.
+- Stand: Hostile Unit-Proxies bekommen immer einen sichtbaren `UnitBodyReadabilityCore`, falls der eigentliche Body/Animated-Model-Pfad im Fenster nicht lesbar ist. Damit sollen Gegner nicht nur als `IDLE`/Base-Marker sichtbar sein.
+- Risiken/offen: Dieser Slice behebt sichtbare Orientierung und Body-Lesbarkeit. Haenger durch Pathfinding, Zielslot-Auswahl oder Local Avoidance bleiben ein separater Slice, wenn sie nach diesem Test weiter auftreten.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_459_fireteam_engage_orientation_enemy_proxy_fix.gd`, TASK_438/TASK_457/TASK_458 und `git diff --check`.
+- Naechster Schritt: Im Drill `Engage A/N/C` gegen die rechte Gegnergruppe pruefen: schauen die Waffen/Koerper zum Kontakt und sind vier Gegnerkoerper sichtbar?
+
 ### TASK_458 - Fireteam Contact Decision Diagnostics
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_458_fireteam_contact_decision_diagnostics.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_457_fireteam_contact_engage_runtime_pass.md`, `docs/tasks/TASK_438_fireteam_contact_visibility_attack_visuals.md`, `docs/tasks/TASK_440_enemy_limbo_contact_diagnostics.md`
