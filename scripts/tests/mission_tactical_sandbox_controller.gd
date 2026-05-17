@@ -94,6 +94,8 @@ const AREA_ORDER_DRAG_THRESHOLD: float = 14.0
 const AREA_ORDER_ISO_TILE_HALF_WIDTH: float = 64.0
 const AREA_ORDER_ISO_TILE_HALF_HEIGHT: float = 32.0
 const PHASE_WAYPOINT_COMPLETE_RADIUS: float = 26.0
+const PHASE_WAYPOINT_SOFT_MEMBER_REACHED_RADIUS: float = 54.0
+const PHASE_WAYPOINT_SOFT_CENTER_REACHED_RADIUS: float = 72.0
 const AREA_DEFENSE_POSITION_REACHED_RADIUS: float = 24.0
 const AREA_ATTACK_APPROACH_REACHED_RADIUS: float = 30.0
 const AD_HOC_ORDER_COMPLETE_RADIUS: float = 28.0
@@ -1099,6 +1101,9 @@ func execute_selected_fireteam_orders() -> bool:
 				issued_fireteams.append(fireteam_id.to_upper())
 				continue
 			if _activate_next_attack_area_order(fireteam_id, target_phase_index):
+				issued_fireteams.append(fireteam_id.to_upper())
+				continue
+			if _apply_default_fireteam_behavior(fireteam_id, target_phase_index):
 				issued_fireteams.append(fireteam_id.to_upper())
 			continue
 		_reset_non_completed_waypoints_for_resume(plan)
@@ -12105,16 +12110,70 @@ func _is_active_waypoint_ready_for_go_continue(fireteam_id: String, execution_st
 	var command_type: String = String(waypoint.command_type).strip_edges().to_lower()
 	if command_type == FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_DEFEND:
 		return true
+	var resolved_target_position: Vector2 = Vector2(execution_state.get("resolved_target_position", waypoint.target_position))
 	_ensure_fireteam_movement_controller()
 	if _fireteam_movement_controller != null and bool(_fireteam_movement_controller.call("has_active_execution", fireteam_id)):
 		var movement_result: Dictionary = _update_fireteam_movement_execution(fireteam_id)
-		if bool(movement_result.get("finished", false)):
+		if _is_phase_waypoint_target_reached(fireteam_id, resolved_target_position, movement_result):
 			return true
 	var anchor := _get_selection_anchor_for_fireteam(fireteam_id)
 	if anchor == null:
 		return false
-	var resolved_target_position: Vector2 = Vector2(execution_state.get("resolved_target_position", waypoint.target_position))
 	return anchor.global_position.distance_to(resolved_target_position) <= PHASE_WAYPOINT_COMPLETE_RADIUS
+
+
+func _is_phase_waypoint_target_reached(fireteam_id: String, resolved_target_position: Vector2, movement_result: Dictionary) -> bool:
+	if bool(movement_result.get("finished", false)):
+		return true
+	var movement_state: Dictionary = Dictionary(movement_result.get("movement_state", {})).duplicate(true)
+	if _are_movement_state_targets_soft_reached(fireteam_id, movement_state):
+		return true
+	var anchor := _get_selection_anchor_for_fireteam(fireteam_id)
+	if anchor != null and anchor.global_position.distance_to(resolved_target_position) <= PHASE_WAYPOINT_COMPLETE_RADIUS:
+		return true
+	if movement_state.is_empty() and _is_fireteam_center_near_position(fireteam_id, resolved_target_position, PHASE_WAYPOINT_SOFT_CENTER_REACHED_RADIUS):
+		return true
+	return false
+
+
+func _are_movement_state_targets_soft_reached(fireteam_id: String, movement_state: Dictionary) -> bool:
+	var target_positions: Dictionary = Dictionary(movement_state.get("current_target_positions", {}))
+	if target_positions.is_empty():
+		return false
+	var checked_count: int = 0
+	for unit in _get_fireteam_units(fireteam_id, true):
+		if not (unit is Node2D):
+			continue
+		if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
+			continue
+		if not unit.has_method("get_unit_id"):
+			continue
+		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+		if unit_id.is_empty() or not target_positions.has(unit_id):
+			continue
+		var target_variant: Variant = target_positions.get(unit_id)
+		if typeof(target_variant) != TYPE_VECTOR2:
+			return false
+		checked_count += 1
+		if (unit as Node2D).global_position.distance_to(Vector2(target_variant)) > PHASE_WAYPOINT_SOFT_MEMBER_REACHED_RADIUS:
+			return false
+	return checked_count > 0
+
+
+func _is_fireteam_center_near_position(fireteam_id: String, target_position: Vector2, radius: float) -> bool:
+	var center: Vector2 = Vector2.ZERO
+	var count: int = 0
+	for unit in _get_fireteam_units(fireteam_id, true):
+		if not (unit is Node2D):
+			continue
+		if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
+			continue
+		center += (unit as Node2D).global_position
+		count += 1
+	if count <= 0:
+		return false
+	center /= float(count)
+	return center.distance_to(target_position) <= radius
 
 
 func _try_continue_active_area_defense(fireteam_id: String) -> bool:
@@ -12732,6 +12791,9 @@ func _apply_default_fireteam_behavior(fireteam_id: String, phase_index: int) -> 
 	_set_active_behavior_profile(fireteam_id, behavior_profile)
 	if _issue_fireteam_hold_current_positions(fireteam_id, phase_index):
 		_mirror_flow_driver_order_for_fireteam(fireteam_id, anchor_position, "defend", phase_index)
+		_record_fireteamleader_feedback_for_fireteam(fireteam_id, "defend", "cover", "auto_defend_after_order")
+		_last_command_text = "DEF 360 %s" % fireteam_id.to_upper()
+		refresh_fireteam_security_state()
 		return true
 	_record_mission_tactical_behavior_path_failure(fireteam_id, "defend", "auto_defend_issue_failed")
 	return false
@@ -13038,14 +13100,22 @@ func _issue_fireteam_hold_current_positions(fireteam_id: String, phase_index: in
 	if simulation_root == null:
 		return false
 	var modifiers: Dictionary = _get_fireteam_behavior_stance_modifiers("defend", fireteam_id)
+	var units: Array = _get_fireteam_units(fireteam_id, true)
+	units.sort_custom(Callable(self, "_sort_unit_nodes_for_cards"))
+	var sector_count: int = maxi(units.size(), 1)
+	var anchor = _get_selection_anchor_for_fireteam(fireteam_id)
+	var anchor_position: Vector2 = anchor.global_position if anchor != null else _get_target_position()
+	var objective_angle: float = _resolve_objective_security_angle_for_fireteam(fireteam_id, anchor_position)
 	var issued_count: int = 0
-	for unit in _get_fireteam_units(fireteam_id, true):
+	for index in range(units.size()):
+		var unit = units[index]
 		if not (unit is Node2D):
 			continue
 		if unit.has_method("get_vital_state") and String(unit.call("get_vital_state")) != "fit":
 			continue
 		if not unit.has_method("get_unit_id"):
 			continue
+		var sector_angle: float = _resolve_default_defend_360_sector_angle(index, sector_count, objective_angle)
 		var command = UNIT_COMMAND_SCRIPT.new()
 		command.command_type = UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION
 		command.priority = 11
@@ -13054,7 +13124,10 @@ func _issue_fireteam_hold_current_positions(fireteam_id: String, phase_index: in
 		if unit.has_method("get_team_id"):
 			command.team_id = String(unit.call("get_team_id"))
 		command.target_position = (unit as Node2D).global_position
-		_set_unit_map_facing_angle(unit, _resolve_objective_security_angle_for_fireteam(fireteam_id, command.target_position))
+		_set_unit_map_facing_angle(unit, sector_angle)
+		if unit is Node:
+			(unit as Node).set_meta("security_facing_angle", sector_angle)
+			(unit as Node).set_meta("security_facing_active", true)
 		command.move_speed_factor = 0.0
 		command.cover_score = 0.0
 		if unit.has_method("get_cover_score"):
@@ -13076,10 +13149,21 @@ func _issue_fireteam_hold_current_positions(fireteam_id: String, phase_index: in
 			unit.call("assign_unit_command", command)
 		var command_dict: Dictionary = command.to_dict()
 		command_dict["requeue_until_target"] = false
+		command_dict["security_mode"] = "360"
+		command_dict["facing_angle"] = sector_angle
 		_append_behavior_modifier_fields(command_dict, modifiers)
 		simulation_root.call("enqueue_command", command_dict)
 		issued_count += 1
 	return issued_count > 0
+
+
+func _resolve_default_defend_360_sector_angle(index: int, member_count: int, objective_angle: float) -> float:
+	if member_count <= 1:
+		return objective_angle
+	var cardinal_angles: Array[float] = [-PI * 0.5, 0.0, PI * 0.5, PI]
+	if index < cardinal_angles.size():
+		return float(cardinal_angles[index])
+	return wrapf(objective_angle + (TAU * float(index) / float(maxi(member_count, 1))), -PI, PI)
 
 
 func _start_active_phase_execution(active_phase_index: int) -> void:
@@ -13839,6 +13923,7 @@ func _update_active_phase_execution(delta: float) -> void:
 	if preview_mode or _phase_execution_by_fireteam.is_empty():
 		return
 	var did_change: bool = false
+	var did_apply_default_defense: bool = false
 	for fireteam_id in _phase_execution_by_fireteam.keys().duplicate():
 		if _ad_hoc_order_controller != null and bool(_ad_hoc_order_controller.call("has_active_order", String(fireteam_id))):
 			continue
@@ -13861,7 +13946,6 @@ func _update_active_phase_execution(delta: float) -> void:
 		var waypoint = plan.waypoints[waypoint_index]
 		var anchor := _get_selection_anchor_for_fireteam(String(fireteam_id))
 		var resolved_target_position: Vector2 = Vector2(execution_state.get("resolved_target_position", waypoint.target_position))
-		var command_type: String = String(waypoint.command_type).strip_edges().to_lower()
 		_ensure_fireteam_movement_controller()
 		var had_movement_execution: bool = _fireteam_movement_controller != null and bool(_fireteam_movement_controller.call("has_active_execution", String(fireteam_id)))
 		var movement_result: Dictionary = _update_fireteam_movement_execution(String(fireteam_id))
@@ -13869,12 +13953,10 @@ func _update_active_phase_execution(delta: float) -> void:
 			did_change = true
 		if anchor == null or typeof(resolved_target_position) != TYPE_VECTOR2:
 			continue
-		var movement_finished: bool = bool(movement_result.get("finished", false))
-		var anchor_reached_target: bool = anchor.global_position.distance_to(resolved_target_position) <= PHASE_WAYPOINT_COMPLETE_RADIUS
-		var anchor_can_release_combat_move: bool = anchor_reached_target and (command_type == FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_ENGAGE or command_type == FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_TAKE)
-		if had_movement_execution and not movement_finished and not anchor_can_release_combat_move:
+		var waypoint_target_reached: bool = _is_phase_waypoint_target_reached(String(fireteam_id), resolved_target_position, movement_result)
+		if had_movement_execution and not waypoint_target_reached:
 			continue
-		if not had_movement_execution and not anchor_reached_target:
+		if not had_movement_execution and not waypoint_target_reached:
 			continue
 		execution_state["hold_elapsed"] = float(execution_state.get("hold_elapsed", 0.0)) + delta
 		var required_hold: float = maxf(float(waypoint.hold_duration_seconds), 0.0)
@@ -13888,13 +13970,18 @@ func _update_active_phase_execution(delta: float) -> void:
 			_fireteam_movement_controller.call("reset_fireteam", String(fireteam_id))
 		_notify_fireteam_ready_for_coordination(String(fireteam_id))
 		if next_waypoint_index < 0:
-			_activate_next_area_order_or_default(String(fireteam_id), phase_index)
+			if _activate_next_defend_area_order(String(fireteam_id), phase_index):
+				pass
+			elif _activate_next_attack_area_order(String(fireteam_id), phase_index):
+				pass
+			elif _apply_default_fireteam_behavior(String(fireteam_id), phase_index):
+				did_apply_default_defense = true
 		else:
 			_activate_next_waypoint_for_plan(plan, String(fireteam_id), next_waypoint_index)
 		did_change = true
 	if not did_change:
 		return
-	if _phase_execution_by_fireteam.is_empty() and _area_defense_execution_by_fireteam.is_empty() and _area_attack_execution_by_fireteam.is_empty():
+	if not did_apply_default_defense and _phase_execution_by_fireteam.is_empty() and _area_defense_execution_by_fireteam.is_empty() and _area_attack_execution_by_fireteam.is_empty():
 		var phase_controller = _get_phase_controller()
 		if phase_controller != null and phase_controller.has_method("get_active_phase_name"):
 			_last_command_text = "%s COMPLETE" % String(phase_controller.call("get_active_phase_name"))

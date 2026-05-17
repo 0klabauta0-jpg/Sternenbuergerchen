@@ -91,6 +91,7 @@ git checkout -b batch/<batch-name>
 - TASK_459 - Fireteam Engage Orientation Enemy Proxy Fix
 - TASK_460 - Fireteam Movement Avoidance Stability
 - TASK_461 - Fireteam Engage Visual Stuck Hotfix
+- TASK_462 - Fireteam Auto Defend Completion Release
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

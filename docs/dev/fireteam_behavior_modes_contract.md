@@ -149,6 +149,16 @@ TASK_461 stabilisiert die sichtbare Engage-Runtime nach dem manuellen Drill-Befu
 - Hostile Units muessen im 3D-View-Fenster einen gut sichtbaren Readability-Core zeigen. Dieser Core bleibt ein Visual-Fallback, keine Gameplay-Wahrheit.
 - Weapon-Fire-VFX darf nicht komplett verschwinden, wenn die Muzzle-Textur fehlt. Bloom und Trace bleiben sichtbar; der Snapshot markiert `muzzle_texture_missing`.
 
+### TASK_462 Auto-Defend nach Zielabschluss
+
+TASK_462 macht den Abschlusszustand explizit:
+
+- Ein Fireteam-Wegpunkt darf abschliessen, wenn der MovementController `finished` meldet oder alle aktuellen Movement-Zielslots weich erreicht sind.
+- GO-Continue nutzt denselben Zielabschlussentscheid. Ein sichtbar erreichtes, aber noch klemmendes `Move`/`Engage` bleibt nicht dauerhaft `ACTIVE`.
+- Wenn danach kein weiterer Waypoint, Defend-Area oder Attack-Area existiert, wird automatisch `DEF 360` angewendet.
+- Default-Defend-Hold-Commands tragen `source_task_type = auto_defend`, `security_mode = 360`, `fire_at_will` und verteilte Facing-Winkel fuer die Mitglieder.
+- Dieser Default ist ein Abschluss-/Sicherungszustand, keine neue Area-Besitzlogik.
+
 ## Kontakt-Initiative V0
 
 `Kontakt-Initiative` beschreibt die Zeit vom ersten sichtbaren oder suspekten Kontakt bis zum ersten koordinierten Schuss. Sie ersetzt nicht die Waffen-Feuerrate und nicht die harte Combat-Wahrheit. Ein Schuss bleibt nur moeglich, wenn LOS, Waffenreichweite, Vital-State, Fire-Status und Kontaktstatus passen.

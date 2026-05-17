@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_462 - Fireteam Auto Defend Completion Release
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_462_fireteam_auto_defend_completion_release.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_461_fireteam_engage_visual_stuck_hotfix.md`, `docs/tasks/TASK_422_go_continue_fireteam_hud_cleanup.md`
+- Stand: Aktive Fireteam-Wegpunkte nutzen zusaetzlich zum harten MovementController-Finish eine weiche Abschlusspruefung auf die aktuellen Movement-Zielslots. Dadurch kann ein sichtbar erreichtes Ziel freigegeben werden, auch wenn ein Slot minimal ausserhalb des harten Radius klebt.
+- Stand: GO-Continue nutzt denselben Abschlussentscheid und kann einen weich erreichten aktiven Auftrag weiterfuehren, statt `ACTIVE` zu melden.
+- Stand: Wenn nach einem abgeschlossenen Wegpunkt kein weiterer Waypoint/Area-Auftrag existiert, wird automatisch `DEF 360` angewendet. Die Hold-Commands tragen `source_task_type = auto_defend`, `security_mode = 360` und verteilte Facing-Winkel.
+- Risiken/offen: Der Slice ist eine Completion-/Default-Defense-Stabilisierung. Echte Pfad-Engstellen, schlechte Zielslot-Auswahl oder Enemy-Kontaktentscheidungen bleiben eigene Follow-ups.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_462_fireteam_auto_defend_completion_release.gd`, TASK_422/TASK_461 und `git diff --check`.
+- Naechster Schritt: Im Drill Move/Engage bis zum letzten Wegpunkt laufen lassen und pruefen, dass das Fireteam danach sichtbar `DEF 360` statt `MOVE/ENGAGE ACTIVE` zeigt.
+
 ### TASK_461 - Fireteam Engage Visual Stuck Hotfix
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_461_fireteam_engage_visual_stuck_hotfix.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_459_fireteam_engage_orientation_enemy_proxy_fix.md`, `docs/tasks/TASK_460_fireteam_movement_avoidance_stability.md`
