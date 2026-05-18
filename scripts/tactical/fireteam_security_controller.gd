@@ -6,7 +6,7 @@ const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd"
 const SECURITY_MODE_360: String = "360"
 const SECURITY_MODE_DIRECTIONAL: String = "directional"
 const DIRECTIONAL_ARC_WIDTH: float = PI * 0.7
-const DEFENSE_SCAN_HALF_ANGLE: float = 0.13962634
+const DEFENSE_SCAN_HALF_ANGLE: float = 0.27925268
 const DEFENSE_SCAN_CYCLE_MSEC: int = 2600
 const DIRECTIONAL_FRONT_PAIR_OFFSET: float = 0.13962634
 const DIRECTIONAL_FLANK_OFFSET: float = 1.04719755
@@ -128,9 +128,14 @@ func update_fireteam_state(
 	var command_type: String = _extract_command_type(behavior_profile_dict, area_context)
 	var mode_override: String = _resolve_security_mode_override(behavior_profile_dict, area_context)
 	var mode: String = mode_override if not mode_override.is_empty() else _resolve_security_mode(leadership, trait_ids, threat_position)
+	var movement_security_active: bool = _is_moving_security_context(command_type, movement_state)
+	if movement_security_active:
+		mode = SECURITY_MODE_DIRECTIONAL
 	var security_radius_world: float = _extract_security_radius_world(behavior_profile_dict, area_context)
 	var security_radius_tiles: int = _extract_security_radius_tiles(behavior_profile_dict, area_context)
 	var direction_angle: float = float(previous_state.get("direction_angle", _extract_security_direction_angle(behavior_profile_dict, area_context)))
+	if movement_security_active:
+		direction_angle = _extract_movement_direction_angle(movement_state, direction_angle)
 	var now_msec: int = Time.get_ticks_msec()
 	if previous_state.is_empty() and typeof(threat_position) == TYPE_VECTOR2:
 		direction_angle = (Vector2(threat_position) - anchor_position).angle()
@@ -181,6 +186,7 @@ func update_fireteam_state(
 		"defense_ready": defense_ready,
 		"overwatch_ready": overwatch_ready,
 		"is_active": _is_security_active(command_type, fit_members),
+		"movement_security_active": movement_security_active,
 		"area_order_id": String(area_context.get("area_order_id", "")),
 		"area_center_position": Vector2(area_context.get("center_position", anchor_position)) if typeof(area_context.get("center_position", null)) == TYPE_VECTOR2 else null,
 		"area_status": String(area_context.get("status", "")),
@@ -442,10 +448,33 @@ func _is_security_active(command_type: String, fit_members: Array) -> bool:
 	if fit_members.is_empty():
 		return false
 	match command_type:
-		"defend", "defend_area", "take", "engage", "hold_position":
+		"move", "defend", "defend_area", "take", "engage", "hold_position":
 			return true
 		_:
 			return false
+
+
+func _is_moving_security_context(command_type: String, movement_state: Dictionary) -> bool:
+	if movement_state.is_empty():
+		return false
+	match command_type.strip_edges().to_lower():
+		"move", "engage", "take", "defend", "defend_area":
+			return true
+		_:
+			return false
+
+
+func _extract_movement_direction_angle(movement_state: Dictionary, fallback_angle: float) -> float:
+	var from_position: Vector2 = Vector2(movement_state.get("current_anchor_origin_position", movement_state.get("origin_anchor_position", Vector2.ZERO)))
+	var to_position: Vector2 = Vector2(movement_state.get("current_anchor_target_position", movement_state.get("final_target_position", from_position)))
+	var direction: Vector2 = to_position - from_position
+	if direction.length_squared() <= 0.001:
+		var final_target_position: Vector2 = Vector2(movement_state.get("final_target_position", to_position))
+		var progress_anchor_position: Vector2 = Vector2(movement_state.get("progress_anchor_position", from_position))
+		direction = final_target_position - progress_anchor_position
+	if direction.length_squared() <= 0.001:
+		return fallback_angle
+	return direction.angle()
 
 
 func _is_defense_ready(command_type: String, movement_state: Dictionary, suppression_state: Dictionary, ad_hoc_order: Dictionary, fit_members: Array) -> bool:
@@ -542,6 +571,7 @@ func _build_public_state(state: Dictionary) -> Dictionary:
 		"defense_ready": bool(state.get("defense_ready", false)),
 		"overwatch_ready": bool(state.get("overwatch_ready", false)),
 		"is_active": bool(state.get("is_active", false)),
+		"movement_security_active": bool(state.get("movement_security_active", false)),
 		"area_order_id": String(state.get("area_order_id", "")),
 		"area_center_position": state.get("area_center_position", null),
 		"area_status": String(state.get("area_status", "")),

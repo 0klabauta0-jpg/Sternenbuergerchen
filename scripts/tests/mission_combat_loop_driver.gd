@@ -36,6 +36,9 @@ const CONTACT_INITIATIVE_BASELINE_SECONDS: float = 2.0
 const AIM_READINESS_BASELINE_PERCENT: float = 50.0
 const AIM_READINESS_MAX_DELAY_DELTA_TICKS: int = 4
 const RECENT_FIRE_EVENT_TTL_TICKS: int = 12
+const DOWN_STATE_VISIBLE_MIN_SECONDS: float = 3.0
+const TACTICAL_COMBAT_VISUAL_REFRESH_INTERVAL_MSEC: int = 160
+const COMBAT_HOTPATH_AUDIT_BUCKET_CELL_SIZE: float = 256.0
 const DETECTION_EVENT_COLOR: Color = Color(0.85, 0.85, 0.55, 1.0)
 const STEALTH_RANGE_REDUCTION_FACTOR: float = 0.5
 const SPOTTED_CONTACT_HIT_CHANCE_MALUS: float = -0.15
@@ -112,9 +115,11 @@ signal combat_resolved(mission_result: Dictionary)
 @export var tactical_controller_path: NodePath
 @export var preview_mode: bool = false
 @export var combat_tick_budget_debug_enabled: bool = false
+@export var flank_vulnerability_enabled: bool = false
 
 var _los_system = LOS_SYSTEM_SCRIPT.new()
 var _queued_bleedout_by_unit_id: Dictionary = {}
+var _down_state_started_msec_by_unit_id: Dictionary = {}
 var _enemy_reposition_ready_at_msec: Dictionary = {}
 var _combat_finished: bool = false
 var _winning_team_id: String = ""
@@ -148,9 +153,26 @@ var _enemy_patrol_contact_locked: Dictionary = {}
 var _enemy_security_states_by_group_id: Dictionary = {}
 var _enemy_team_tactics_states_by_group_id: Dictionary = {}
 var _recent_fire_events: Array = []
+var _combat_outcome_by_fire_event_id: Dictionary = {}
 var _next_fire_event_sequence: int = 1
 var _combat_tick_budget_debug_snapshot: Dictionary = {}
 var _last_contact_decision_diagnostics: Dictionary = {}
+var _hotpath_unit_cache_active: bool = false
+var _hotpath_unit_cache_tick: int = -1
+var _hotpath_friendly_units: Array = []
+var _hotpath_enemy_units: Array = []
+var _hotpath_friendly_combat_units: Array = []
+var _hotpath_enemy_combat_units: Array = []
+var _last_contact_tracking_scan_pair_count: int = 0
+var _last_contact_tracking_los_check_count: int = 0
+var _last_fire_candidate_pair_scan_count: int = 0
+var _last_tactical_combat_visual_refresh_msec: int = 0
+var _tactical_combat_visual_refresh_pending: bool = false
+var _tactical_combat_visual_refresh_count: int = 0
+var _tactical_combat_visual_refresh_suppressed_count: int = 0
+var _has_seen_active_friendly_units: bool = false
+var _has_seen_active_enemy_units: bool = false
+var _resolved_without_seen_friendly: bool = false
 var _overwatch_controller = OVERWATCH_CONTROLLER_SCRIPT.new()
 var _contact_tracker = CONTACT_TRACKER_SCRIPT.new()
 var _flank_vulnerability_resolver = FLANK_VULNERABILITY_RESOLVER_SCRIPT.new()
@@ -186,6 +208,11 @@ func _ready() -> void:
 	if _runs_local_authority:
 		_sync_objective_countdown_state()
 
+	if _runs_local_authority and simulation_root.has_signal("damage_effect_resolved"):
+		var damage_resolved_callable := Callable(self, "_on_damage_effect_resolved")
+		if not simulation_root.is_connected("damage_effect_resolved", damage_resolved_callable):
+			simulation_root.connect("damage_effect_resolved", damage_resolved_callable)
+
 	if _runs_local_authority and not simulation_root.tick_processed.is_connected(_on_tick_processed):
 		simulation_root.tick_processed.connect(_on_tick_processed)
 
@@ -205,7 +232,31 @@ func get_last_contact() -> Dictionary:
 
 
 func get_contact_decision_diagnostics_snapshot() -> Dictionary:
-	return _last_contact_decision_diagnostics.duplicate(true)
+	var snapshot: Dictionary = _last_contact_decision_diagnostics.duplicate(true)
+	if snapshot.is_empty():
+		return snapshot
+	_refresh_contact_decision_snapshot_presence(snapshot)
+	return snapshot
+
+
+func _refresh_contact_decision_snapshot_presence(snapshot: Dictionary) -> void:
+	var active_friendly_count: int = _get_units(friendly_unit_paths).size()
+	var active_enemy_count: int = _get_active_enemy_units().size()
+	snapshot["active_friendly_count"] = active_friendly_count
+	snapshot["active_enemy_count"] = active_enemy_count
+	snapshot["contact_count"] = get_contact_snapshot().size()
+	snapshot["detection_pending_count"] = _detection_progress.size()
+
+	var reason: String = String(snapshot.get("reason", "")).strip_edges().to_lower()
+	if reason != "no_contact_pair":
+		return
+
+	var candidate: Dictionary = Dictionary(snapshot.get("candidate", {})).duplicate(true)
+	var candidate_reason: String = String(candidate.get("candidate_reason", "")).strip_edges().to_lower()
+	if ["no_friendly_units", "no_friendly_combat_units"].has(candidate_reason) and active_friendly_count > 0:
+		snapshot["candidate"] = _build_first_fire_candidate_diagnostic()
+	elif ["no_active_enemy_units", "no_enemy_combat_units"].has(candidate_reason) and active_enemy_count > 0:
+		snapshot["candidate"] = _build_first_fire_candidate_diagnostic()
 
 
 func get_mission_result() -> Dictionary:
@@ -254,13 +305,38 @@ func get_combat_tick_budget_debug_snapshot() -> Dictionary:
 
 
 func get_combat_hotpath_audit_snapshot() -> Dictionary:
+	var active_friendly_units: Array = _get_units(friendly_unit_paths)
+	var active_enemy_units: Array = _get_active_enemy_units()
+	var combat_friendly_units: Array = _get_friendly_combat_units()
+	var combat_enemy_units: Array = _get_enemy_combat_units()
 	return {
 		"authority_root": "SimulationRoot",
 		"combat_driver_role": "authoritative_tick_subscriber",
 		"unit_sources": "configured_unit_paths_with_unit_registry_active_filter",
+		"active_filter_policy": "UnitRegistry_has_unit_required_when_registry_available",
+		"combat_candidate_policy": "registered_Node2D_and_vital_fit",
 		"scene_tree_lookup_policy": "direct_NodePath_or_registry_lookup_only",
+		"per_unit_area2d_ai": false,
+		"navigation_authority": "existing_TerrainRegistry_HPA_AStar_path",
 		"client_viewer_paths_read_only": true,
 		"snapshot_publication": "SimulationRoot.set_multiplayer_snapshot_context",
+		"cache_active": _hotpath_unit_cache_active,
+		"cache_tick": _hotpath_unit_cache_tick,
+		"active_friendly_count": active_friendly_units.size(),
+		"active_enemy_count": active_enemy_units.size(),
+		"combat_friendly_count": combat_friendly_units.size(),
+		"combat_enemy_count": combat_enemy_units.size(),
+		"potential_combat_pair_count": combat_friendly_units.size() * combat_enemy_units.size(),
+		"last_contact_tracking_scan_pair_count": _last_contact_tracking_scan_pair_count,
+		"last_contact_tracking_los_check_count": _last_contact_tracking_los_check_count,
+		"last_fire_candidate_pair_scan_count": _last_fire_candidate_pair_scan_count,
+		"spatial_bucket_status": "diagnostic_next_step_not_runtime_filter",
+		"spatial_bucket_cell_size": COMBAT_HOTPATH_AUDIT_BUCKET_CELL_SIZE,
+		"down_linger_min_seconds": DOWN_STATE_VISIBLE_MIN_SECONDS,
+		"tactical_visual_refresh_interval_msec": TACTICAL_COMBAT_VISUAL_REFRESH_INTERVAL_MSEC,
+		"tactical_visual_refresh_count": _tactical_combat_visual_refresh_count,
+		"tactical_visual_refresh_pending": _tactical_combat_visual_refresh_pending,
+		"tactical_visual_refresh_suppressed_count": _tactical_combat_visual_refresh_suppressed_count,
 	}
 
 
@@ -273,12 +349,17 @@ func get_contact_snapshot() -> Array:
 func get_unit_presence_audit_snapshot() -> Dictionary:
 	var active_friendly_units: Array = _get_units(friendly_unit_paths)
 	var active_enemy_units: Array = _get_active_enemy_units()
+	var all_friendly_units: Array = _get_units_for_presence_audit(friendly_unit_paths)
 	var all_enemy_units: Array = _get_units_for_presence_audit(enemy_unit_paths)
+	var active_friendly_ids: Array = _extract_presence_audit_unit_ids(active_friendly_units)
 	var active_enemy_ids: Array = _extract_presence_audit_unit_ids(active_enemy_units)
 	return {
-		"active_friendly_unit_ids": _extract_presence_audit_unit_ids(active_friendly_units),
+		"active_friendly_unit_ids": active_friendly_ids,
 		"active_enemy_unit_ids": active_enemy_ids,
+		"inactive_friendly_unit_ids": _extract_inactive_presence_audit_unit_ids(all_friendly_units, active_friendly_ids),
 		"inactive_enemy_unit_ids": _extract_inactive_presence_audit_unit_ids(all_enemy_units, active_enemy_ids),
+		"combat_friendly_unit_ids": _extract_presence_audit_unit_ids(_get_friendly_combat_units()),
+		"combat_enemy_unit_ids": _extract_presence_audit_unit_ids(_get_enemy_combat_units()),
 		"current_wave_number": _get_enemy_wave_number("get_current_wave_number"),
 		"total_wave_count": _get_enemy_wave_number("get_total_wave_count"),
 		"all_waves_started": _enemy_waves_all_started(),
@@ -310,7 +391,7 @@ func _publish_multiplayer_snapshot_context(simulation_root: Node) -> void:
 
 
 func get_flank_vulnerability_snapshot() -> Array:
-	if _flank_vulnerability_resolver == null:
+	if not flank_vulnerability_enabled or _flank_vulnerability_resolver == null:
 		return []
 	return Array(_flank_vulnerability_resolver.call("get_state_snapshot", _current_tick)).duplicate(true)
 
@@ -390,7 +471,12 @@ func get_fire_event_snapshot() -> Array:
 	for event_variant in _recent_fire_events:
 		if typeof(event_variant) != TYPE_DICTIONARY:
 			continue
-		result.append(Dictionary(event_variant).duplicate(true))
+		var event: Dictionary = Dictionary(event_variant).duplicate(true)
+		var fire_event_id: String = String(event.get("event_id", "")).strip_edges()
+		if _combat_outcome_by_fire_event_id.has(fire_event_id):
+			for key in Dictionary(_combat_outcome_by_fire_event_id.get(fire_event_id, {})).keys():
+				event[key] = Dictionary(_combat_outcome_by_fire_event_id.get(fire_event_id, {})).get(key)
+		result.append(event)
 	return result
 
 
@@ -510,13 +596,53 @@ func _append_fire_event(event: Dictionary) -> String:
 
 func _prune_recent_fire_events() -> void:
 	var retained: Array = []
+	var retained_ids: Dictionary = {}
 	for event_variant in _recent_fire_events:
 		if typeof(event_variant) != TYPE_DICTIONARY:
 			continue
 		var event: Dictionary = Dictionary(event_variant)
 		if _current_tick - int(event.get("tick", _current_tick)) <= RECENT_FIRE_EVENT_TTL_TICKS:
 			retained.append(event)
+			retained_ids[String(event.get("event_id", "")).strip_edges()] = true
 	_recent_fire_events = retained
+	for fire_event_id in _combat_outcome_by_fire_event_id.keys().duplicate():
+		if not bool(retained_ids.get(String(fire_event_id), false)):
+			_combat_outcome_by_fire_event_id.erase(fire_event_id)
+
+
+func _on_damage_effect_resolved(result: Dictionary) -> void:
+	var fire_event_id: String = String(result.get("fire_event_id", "")).strip_edges()
+	if fire_event_id.is_empty():
+		return
+	var outcome: Dictionary = {
+		"combat_outcome": String(result.get("outcome", "miss")),
+		"combat_hit": bool(result.get("hit", false)),
+		"hit_chance_resolved": float(result.get("hit_chance_resolved", 0.0)),
+		"roll": float(result.get("roll", 0.0)),
+		"damage_resolved": int(result.get("damage_resolved", 0)),
+		"damage_multiplier_resolved": float(result.get("damage_multiplier_resolved", 0.0)),
+		"target_cover_score": float(result.get("target_cover_score", 0.0)),
+		"target_cover_ratio": float(result.get("target_cover_ratio", 0.0)),
+		"target_health_points": int(result.get("target_health_points", -1)),
+		"target_vital_state": String(result.get("target_vital_state", "")),
+	}
+	_combat_outcome_by_fire_event_id[fire_event_id] = outcome
+	for index in range(_recent_fire_events.size()):
+		var event_variant = _recent_fire_events[index]
+		if typeof(event_variant) != TYPE_DICTIONARY:
+			continue
+		var event: Dictionary = Dictionary(event_variant).duplicate(true)
+		if String(event.get("event_id", "")).strip_edges() != fire_event_id:
+			continue
+		for key in outcome.keys():
+			event[key] = outcome[key]
+		_recent_fire_events[index] = event
+		break
+	if bool(result.get("hit", false)):
+		_set_event_text("%s HIT %d" % [String(result.get("unit_id", result.get("target_unit_id", ""))), int(result.get("damage_resolved", 0))])
+	else:
+		_set_event_text("%s MISS %s%%" % [String(result.get("attacker_unit_id", "")), int(round(float(result.get("hit_chance_resolved", 0.0)) * 100.0))])
+	_refresh_tactical_combat_visuals()
 
 
 func _get_unit_world_position(unit) -> Vector2:
@@ -625,7 +751,7 @@ func _impact_type_for_weapon_id(weapon_id: String) -> String:
 
 
 func get_fireteam_flank_vulnerability_state(fireteam_id: String) -> Dictionary:
-	if _flank_vulnerability_resolver == null:
+	if not flank_vulnerability_enabled or _flank_vulnerability_resolver == null:
 		return {}
 	return Dictionary(_flank_vulnerability_resolver.call("get_fireteam_state", fireteam_id, _current_tick)).duplicate(true)
 
@@ -662,26 +788,34 @@ func _receive_remote_event(
 
 func _on_tick_processed(tick: int) -> void:
 	_current_tick = tick
+	_refresh_hotpath_unit_cache_for_tick()
 	var simulation_root = get_node_or_null(simulation_root_path)
 	var profile_enabled: bool = combat_tick_budget_debug_enabled
 	var tick_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var profile_scopes: Dictionary = {}
 	var scope_started_usec: int = 0
 	if _combat_finished:
-		_update_status_label("resolved")
-		_sync_objective_countdown_state()
-		if profile_enabled:
-			scope_started_usec = Time.get_ticks_usec()
-		_publish_multiplayer_snapshot_context(simulation_root)
-		if profile_enabled:
-			profile_scopes["multiplayer_snapshot_context_usec"] = Time.get_ticks_usec() - scope_started_usec
-			_record_combat_tick_budget_debug_snapshot(tick, tick_started_usec, profile_scopes, simulation_root, "resolved")
-		return
-
+		_update_presence_seen_flags()
+		if _try_recover_premature_startup_resolution():
+			pass
+		else:
+			_update_status_label("resolved")
+			_sync_objective_countdown_state()
+			if profile_enabled:
+				scope_started_usec = Time.get_ticks_usec()
+			_publish_multiplayer_snapshot_context(simulation_root)
+			if profile_enabled:
+				profile_scopes["multiplayer_snapshot_context_usec"] = Time.get_ticks_usec() - scope_started_usec
+				_record_combat_tick_budget_debug_snapshot(tick, tick_started_usec, profile_scopes, simulation_root, "resolved")
+			_close_hotpath_unit_cache_scope()
+			return
 	if simulation_root == null:
 		if profile_enabled:
 			_record_combat_tick_budget_debug_snapshot(tick, tick_started_usec, profile_scopes, simulation_root, "missing_simulation_root")
+		_close_hotpath_unit_cache_scope()
 		return
+
+	_update_presence_seen_flags()
 
 	if profile_enabled:
 		scope_started_usec = Time.get_ticks_usec()
@@ -760,7 +894,13 @@ func _on_tick_processed(tick: int) -> void:
 		if profile_enabled:
 			profile_scopes["status_update_usec"] = Time.get_ticks_usec() - scope_started_usec
 	if profile_enabled:
+		scope_started_usec = Time.get_ticks_usec()
+	_flush_pending_tactical_combat_visuals()
+	if profile_enabled:
+		profile_scopes["combat_visual_refresh_usec"] = Time.get_ticks_usec() - scope_started_usec
+	if profile_enabled:
 		_record_combat_tick_budget_debug_snapshot(tick, tick_started_usec, profile_scopes, simulation_root, "active")
+	_close_hotpath_unit_cache_scope()
 
 
 func _record_combat_tick_budget_debug_snapshot(tick: int, tick_started_usec: int, profile_scopes: Dictionary, simulation_root: Node, state: String) -> void:
@@ -796,40 +936,28 @@ func _record_combat_tick_budget_debug_snapshot(tick: int, tick_started_usec: int
 
 
 func _queue_bleedout_for_downed_enemy(simulation_root: Node) -> void:
-	for enemy in _get_units(enemy_unit_paths):
-		if enemy == null or not enemy.has_method("get_vital_state") or not enemy.has_method("get_unit_id"):
-			continue
-
-		var unit_id: String = String(enemy.call("get_unit_id"))
-		if unit_id.is_empty() or _queued_bleedout_by_unit_id.get(unit_id, false):
-			continue
-
-		if String(enemy.call("get_vital_state")) != "down":
-			continue
-
-		simulation_root.call(
-			"enqueue_effect",
-			{
-				"effect_type": "bleedout",
-				"priority": 20,
-				"unit_id": unit_id,
-			}
-		)
-		_queued_bleedout_by_unit_id[unit_id] = true
-		_set_event_text("%s BLEEDOUT" % unit_id)
-		return
+	_queue_bleedout_for_downed_units(simulation_root, _get_units(enemy_unit_paths))
 
 
 func _queue_bleedout_for_downed_friendly(simulation_root: Node) -> void:
-	for friendly in _get_units(friendly_unit_paths):
-		if friendly == null or not friendly.has_method("get_vital_state") or not friendly.has_method("get_unit_id"):
+	_queue_bleedout_for_downed_units(simulation_root, _get_units(friendly_unit_paths))
+
+
+func _queue_bleedout_for_downed_units(simulation_root: Node, units: Array) -> void:
+	if simulation_root == null:
+		return
+	for unit in units:
+		if unit == null or not unit.has_method("get_vital_state") or not unit.has_method("get_unit_id"):
 			continue
 
-		var unit_id: String = String(friendly.call("get_unit_id"))
+		var unit_id: String = String(unit.call("get_unit_id"))
 		if unit_id.is_empty() or _queued_bleedout_by_unit_id.get(unit_id, false):
 			continue
 
-		if String(friendly.call("get_vital_state")) != "down":
+		if String(unit.call("get_vital_state")) != "down":
+			continue
+
+		if not _has_down_state_linger_elapsed(unit_id):
 			continue
 
 		simulation_root.call(
@@ -843,6 +971,29 @@ func _queue_bleedout_for_downed_friendly(simulation_root: Node) -> void:
 		_queued_bleedout_by_unit_id[unit_id] = true
 		_set_event_text("%s BLEEDOUT" % unit_id)
 		return
+
+
+func _mark_unit_down_started(unit_id: String) -> void:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty() or _down_state_started_msec_by_unit_id.has(normalized_unit_id):
+		return
+	_down_state_started_msec_by_unit_id[normalized_unit_id] = Time.get_ticks_msec()
+
+
+func _clear_down_state_linger(unit_id: String) -> void:
+	_down_state_started_msec_by_unit_id.erase(unit_id.strip_edges())
+
+
+func _has_down_state_linger_elapsed(unit_id: String) -> bool:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return false
+	if not _down_state_started_msec_by_unit_id.has(normalized_unit_id):
+		_mark_unit_down_started(normalized_unit_id)
+		return false
+	var started_msec: int = int(_down_state_started_msec_by_unit_id.get(normalized_unit_id, Time.get_ticks_msec()))
+	var elapsed_seconds: float = float(Time.get_ticks_msec() - started_msec) / 1000.0
+	return elapsed_seconds >= DOWN_STATE_VISIBLE_MIN_SECONDS
 
 
 func _request_respawn_for_unit(unit, unit_id: String) -> void:
@@ -946,6 +1097,11 @@ func _record_contact_decision_diagnostics(reason: String, data: Dictionary = {})
 		"cooldown_ticks_remaining": maxi(_next_attack_tick - _current_tick, 0),
 		"active_friendly_count": _get_units(friendly_unit_paths).size(),
 		"active_enemy_count": _get_active_enemy_units().size(),
+		"combat_friendly_count": _get_friendly_combat_units().size(),
+		"combat_enemy_count": _get_enemy_combat_units().size(),
+		"potential_combat_pair_count": _get_friendly_combat_units().size() * _get_enemy_combat_units().size(),
+		"last_contact_tracking_scan_pair_count": _last_contact_tracking_scan_pair_count,
+		"last_contact_tracking_los_check_count": _last_contact_tracking_los_check_count,
 		"contact_count": get_contact_snapshot().size(),
 		"detection_pending_count": _detection_progress.size(),
 	}
@@ -997,19 +1153,22 @@ func _build_contact_pair_decision_diagnostic(contact_pair: Dictionary, decision:
 
 
 func _build_first_fire_candidate_diagnostic() -> Dictionary:
-	var friendly_units: Array = _get_units(friendly_unit_paths)
-	var enemy_units: Array = _get_active_enemy_units()
+	var friendly_units: Array = _get_friendly_combat_units()
+	var enemy_units: Array = _get_enemy_combat_units()
+	_last_fire_candidate_pair_scan_count = 0
 	if friendly_units.is_empty():
-		return {"candidate_reason": "no_friendly_units"}
+		return {"candidate_reason": "no_friendly_combat_units"}
 	if enemy_units.is_empty():
-		return {"candidate_reason": "no_active_enemy_units"}
+		return {"candidate_reason": "no_enemy_combat_units"}
 	var context: Dictionary = _build_fire_decision_context()
 	for friendly in friendly_units:
 		var attacker_ready: bool = bool(COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("can_unit_attack", friendly, context))
 		for enemy in enemy_units:
+			_last_fire_candidate_pair_scan_count += 1
 			var readout: Dictionary = build_cover_effectiveness_readout_for_units(friendly, enemy, "")
 			var candidate: Dictionary = {
 				"candidate_reason": _resolve_candidate_block_reason(readout, attacker_ready, bool(COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("can_target_receive_attack", enemy))),
+				"candidate_pair_scan_count": _last_fire_candidate_pair_scan_count,
 				"attacker_ready": attacker_ready,
 				"target_receive_attack": bool(COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("can_target_receive_attack", enemy)),
 				"attacker_unit_id": _get_unit_id_for_diagnostics(friendly),
@@ -1070,14 +1229,66 @@ func _get_unit_team_id_for_diagnostics(unit) -> String:
 	return ""
 
 
-func _refresh_tactical_combat_visuals() -> void:
+func _refresh_tactical_combat_visuals(force_refresh: bool = false) -> void:
+	var now_msec: int = Time.get_ticks_msec()
+	if not force_refresh and _last_tactical_combat_visual_refresh_msec > 0:
+		var elapsed_msec: int = now_msec - _last_tactical_combat_visual_refresh_msec
+		if elapsed_msec < TACTICAL_COMBAT_VISUAL_REFRESH_INTERVAL_MSEC:
+			_tactical_combat_visual_refresh_pending = true
+			_tactical_combat_visual_refresh_suppressed_count += 1
+			return
+
 	var tactical_controller = _get_tactical_controller()
 	if tactical_controller == null:
+		_tactical_combat_visual_refresh_pending = false
 		return
 	if tactical_controller.has_method("_sync_primary_3d_order_visuals"):
 		tactical_controller.call("_sync_primary_3d_order_visuals")
 	if tactical_controller.has_method("refresh_contact_overlay"):
 		tactical_controller.call("refresh_contact_overlay")
+	_last_tactical_combat_visual_refresh_msec = now_msec
+	_tactical_combat_visual_refresh_pending = false
+	_tactical_combat_visual_refresh_count += 1
+
+
+func _flush_pending_tactical_combat_visuals() -> void:
+	if not _tactical_combat_visual_refresh_pending:
+		return
+	var now_msec: int = Time.get_ticks_msec()
+	if _last_tactical_combat_visual_refresh_msec > 0:
+		var elapsed_msec: int = now_msec - _last_tactical_combat_visual_refresh_msec
+		if elapsed_msec < TACTICAL_COMBAT_VISUAL_REFRESH_INTERVAL_MSEC:
+			return
+	_refresh_tactical_combat_visuals(true)
+
+
+func _update_presence_seen_flags() -> void:
+	if not _has_seen_active_friendly_units and _count_fit_units(friendly_unit_paths) > 0:
+		_has_seen_active_friendly_units = true
+	if not _has_seen_active_enemy_units and _get_active_enemy_units().size() > 0:
+		_has_seen_active_enemy_units = true
+
+
+func _try_recover_premature_startup_resolution() -> bool:
+	if not _combat_finished or not _resolved_without_seen_friendly:
+		return false
+	if _count_fit_units(friendly_unit_paths) <= 0:
+		return false
+
+	_combat_finished = false
+	_winning_team_id = ""
+	_mission_result_condition_override = ""
+	_mission_result.clear()
+	_resolved_without_seen_friendly = false
+	_has_seen_active_friendly_units = true
+	_set_event_text("COMBAT ACTIVE")
+	_update_status_label("active")
+	_update_winner_label()
+	_record_contact_decision_diagnostics(
+		"startup_presence_recovered",
+		{"candidate": _build_first_fire_candidate_diagnostic()}
+	)
+	return true
 
 
 func _update_combat_resolution() -> void:
@@ -1092,7 +1303,11 @@ func _update_combat_resolution() -> void:
 		_resolve_combat("victory", friendly_team_id)
 		return
 
-	if _count_fit_units(friendly_unit_paths) > 0:
+	var friendly_fit_count: int = _count_fit_units(friendly_unit_paths)
+	if friendly_fit_count > 0:
+		return
+
+	if not _has_seen_active_friendly_units:
 		return
 
 	if _has_pending_friendly_insertions():
@@ -1101,9 +1316,31 @@ func _update_combat_resolution() -> void:
 	_resolve_combat("defeat", _get_enemy_team_id())
 
 
+func _refresh_hotpath_unit_cache_for_tick() -> void:
+	_hotpath_unit_cache_active = false
+	_hotpath_unit_cache_tick = _current_tick
+	_hotpath_friendly_units = _get_units_uncached(friendly_unit_paths)
+	_hotpath_enemy_units = _get_active_enemy_units_uncached()
+	_hotpath_friendly_combat_units = _filter_combat_candidate_units(_hotpath_friendly_units)
+	_hotpath_enemy_combat_units = _filter_combat_candidate_units(_hotpath_enemy_units)
+	_hotpath_unit_cache_active = true
+
+
+func _close_hotpath_unit_cache_scope() -> void:
+	_hotpath_unit_cache_active = false
+
+
 func _get_units(paths: Array[NodePath]) -> Array:
+	if _hotpath_unit_cache_active and _node_path_arrays_equal(paths, friendly_unit_paths):
+		return _hotpath_friendly_units.duplicate()
+	if _hotpath_unit_cache_active and _node_path_arrays_equal(paths, enemy_unit_paths):
+		return _hotpath_enemy_units.duplicate()
+	return _get_units_uncached(paths)
+
+
+func _get_units_uncached(paths: Array[NodePath]) -> Array:
 	var units: Array = []
-	var unit_registry = get_node_or_null("../UnitRegistry")
+	var unit_registry = _get_unit_registry()
 	for path in paths:
 		var unit = get_node_or_null(path)
 		if unit != null and unit is Node2D:
@@ -1113,7 +1350,101 @@ func _get_units(paths: Array[NodePath]) -> Array:
 					continue
 			units.append(unit)
 
+	var team_filter: String = _infer_registry_team_filter_for_paths(paths)
+	if not team_filter.is_empty():
+		units = _merge_units_by_id(units, _get_registered_units_for_team_filter(team_filter))
+
 	return units
+
+
+func _get_friendly_combat_units() -> Array:
+	if _hotpath_unit_cache_active:
+		return _hotpath_friendly_combat_units.duplicate()
+	return _filter_combat_candidate_units(_get_units_uncached(friendly_unit_paths))
+
+
+func _get_enemy_combat_units() -> Array:
+	if _hotpath_unit_cache_active:
+		return _hotpath_enemy_combat_units.duplicate()
+	return _filter_combat_candidate_units(_get_active_enemy_units_uncached())
+
+
+func _filter_combat_candidate_units(units: Array) -> Array:
+	var result: Array = []
+	for unit in units:
+		if unit == null or not (unit is Node2D) or not unit.has_method("get_unit_id"):
+			continue
+		if String(unit.call("get_unit_id")).strip_edges().is_empty():
+			continue
+		if not _can_target_receive_attack(unit):
+			continue
+		result.append(unit)
+	return result
+
+
+func _infer_registry_team_filter_for_paths(paths: Array[NodePath]) -> String:
+	var matches_friendly: bool = _node_path_arrays_equal(paths, friendly_unit_paths)
+	var matches_enemy: bool = _node_path_arrays_equal(paths, enemy_unit_paths)
+	if matches_friendly and not matches_enemy:
+		return friendly_team_id
+	if matches_enemy and not matches_friendly:
+		return "!%s" % friendly_team_id
+	return ""
+
+
+func _node_path_arrays_equal(left: Array[NodePath], right: Array[NodePath]) -> bool:
+	if left.size() != right.size():
+		return false
+	for index in range(left.size()):
+		if String(left[index]) != String(right[index]):
+			return false
+	return true
+
+
+func _get_registered_units_for_team_filter(team_filter: String) -> Array:
+	var registry = _get_unit_registry()
+	if registry == null or not registry.has_method("get_all_units"):
+		return []
+
+	var filter_text: String = team_filter.strip_edges()
+	var wants_enemy: bool = filter_text.begins_with("!")
+	var team_id: String = filter_text.substr(1).strip_edges() if wants_enemy else filter_text
+	if team_id.is_empty():
+		return []
+
+	var result: Array = []
+	for unit in Array(registry.call("get_all_units")):
+		if unit == null or not (unit is Node2D) or not unit.has_method("get_team_id"):
+			continue
+		var unit_team_id: String = String(unit.call("get_team_id")).strip_edges()
+		if wants_enemy:
+			if unit_team_id == team_id:
+				continue
+		elif unit_team_id != team_id:
+			continue
+		result.append(unit)
+
+	result.sort_custom(func(a, b): return _get_unit_id_for_diagnostics(a) < _get_unit_id_for_diagnostics(b))
+	return result
+
+
+func _merge_units_by_id(primary_units: Array, supplemental_units: Array) -> Array:
+	var result: Array = []
+	var seen_unit_ids: Dictionary = {}
+	for unit in primary_units:
+		var unit_id: String = _get_unit_id_for_diagnostics(unit)
+		if unit_id.is_empty() or seen_unit_ids.has(unit_id):
+			continue
+		result.append(unit)
+		seen_unit_ids[unit_id] = true
+	for unit in supplemental_units:
+		var unit_id: String = _get_unit_id_for_diagnostics(unit)
+		if unit_id.is_empty() or seen_unit_ids.has(unit_id):
+			continue
+		result.append(unit)
+		seen_unit_ids[unit_id] = true
+	result.sort_custom(func(a, b): return _get_unit_id_for_diagnostics(a) < _get_unit_id_for_diagnostics(b))
+	return result
 
 
 func _get_units_for_presence_audit(paths: Array[NodePath]) -> Array:
@@ -1685,7 +2016,7 @@ func _check_misidentification(attacker, attacker_id: String) -> Dictionary:
 	# Find nearest friendly unit (not self) as misidentified target
 	var nearest_friendly = null
 	var nearest_dist: float = INF
-	for friendly in _get_units(friendly_unit_paths):
+	for friendly in _get_friendly_combat_units():
 		if friendly == attacker:
 			continue
 		if not friendly.has_method("get_vital_state"):
@@ -1740,10 +2071,11 @@ func _update_contact_tracking() -> void:
 	if _contact_tracker == null:
 		return
 	var contact_observations: Array = []
-	var active_enemies: Array = _get_active_enemy_units()
-	for friendly in _get_units(friendly_unit_paths):
-		if not _can_target_receive_attack(friendly):
-			continue
+	var active_enemies: Array = _get_enemy_combat_units()
+	var active_friendlies: Array = _get_friendly_combat_units()
+	_last_contact_tracking_scan_pair_count = 0
+	_last_contact_tracking_los_check_count = 0
+	for friendly in active_friendlies:
 		if friendly == null or not friendly.has_method("get_fireteam_id") or not friendly.has_method("get_unit_id"):
 			continue
 		var fireteam_id: String = String(friendly.call("get_fireteam_id")).strip_edges().to_lower()
@@ -1751,6 +2083,8 @@ func _update_contact_tracking() -> void:
 		if fireteam_id.is_empty() or attacker_id.is_empty():
 			continue
 		for enemy in active_enemies:
+			_last_contact_tracking_scan_pair_count += 1
+			_last_contact_tracking_los_check_count += 1
 			if not _has_valid_los(friendly, enemy):
 				continue
 			var enemy_unit_id: String = String(enemy.call("get_unit_id")).strip_edges()
@@ -1781,7 +2115,7 @@ func _update_contact_tracking() -> void:
 
 
 func _advance_flank_vulnerability_state() -> void:
-	if _flank_vulnerability_resolver == null:
+	if not flank_vulnerability_enabled or _flank_vulnerability_resolver == null:
 		return
 	var did_change: bool = bool(_flank_vulnerability_resolver.call("advance", _current_tick))
 	if not did_change:
@@ -1940,8 +2274,8 @@ func _find_first_contact_pair() -> Dictionary:
 			"find_first_contact_pair",
 			_build_fire_decision_context(
 				{
-					"friendly_units": _get_units(friendly_unit_paths),
-					"enemy_units": _get_active_enemy_units(),
+					"friendly_units": _get_friendly_combat_units(),
+					"enemy_units": _get_enemy_combat_units(),
 				}
 			)
 		)
@@ -1949,7 +2283,7 @@ func _find_first_contact_pair() -> Dictionary:
 
 
 func resolve_flank_attack(attacker, target) -> Dictionary:
-	if attacker == null or target == null:
+	if not flank_vulnerability_enabled or attacker == null or target == null:
 		return {}
 	if target.has_method("get_team_id") and String(target.call("get_team_id")) != friendly_team_id:
 		var enemy_security_state: Dictionary = get_enemy_security_state_for_unit(String(target.call("get_unit_id")) if target.has_method("get_unit_id") else "")
@@ -1970,7 +2304,7 @@ func resolve_flank_attack(attacker, target) -> Dictionary:
 
 
 func resolve_flank_attack_with_state(fireteam_id: String, attacker, target, security_state: Dictionary) -> Dictionary:
-	if _flank_vulnerability_resolver == null or fireteam_id.strip_edges().is_empty():
+	if not flank_vulnerability_enabled or _flank_vulnerability_resolver == null or fireteam_id.strip_edges().is_empty():
 		return {}
 	var result: Dictionary = Dictionary(_flank_vulnerability_resolver.call("resolve_attack", fireteam_id, attacker, target, security_state, _current_tick)).duplicate(true)
 	if result.is_empty():
@@ -2018,7 +2352,7 @@ func build_cover_effectiveness_readout_for_contact(fireteam_id: String, target_u
 
 
 func resolve_flank_attack_preview(attacker, target) -> Dictionary:
-	if attacker == null or target == null or _flank_vulnerability_resolver == null:
+	if not flank_vulnerability_enabled or attacker == null or target == null or _flank_vulnerability_resolver == null:
 		return {}
 	if target.has_method("get_team_id") and String(target.call("get_team_id")) != friendly_team_id:
 		var enemy_security_state: Dictionary = get_enemy_security_state_for_unit(String(target.call("get_unit_id")) if target.has_method("get_unit_id") else "")
@@ -2039,7 +2373,7 @@ func resolve_flank_attack_preview(attacker, target) -> Dictionary:
 
 
 func resolve_flank_attack_preview_with_state(fireteam_id: String, attacker, target, security_state: Dictionary) -> Dictionary:
-	if _flank_vulnerability_resolver == null or fireteam_id.strip_edges().is_empty():
+	if not flank_vulnerability_enabled or _flank_vulnerability_resolver == null or fireteam_id.strip_edges().is_empty():
 		return {}
 	return Dictionary(_flank_vulnerability_resolver.call("preview_attack", fireteam_id, attacker, target, security_state, _current_tick)).duplicate(true)
 
@@ -2153,7 +2487,7 @@ func _get_attack_area_context_for_fireteam(fireteam_id: String) -> Dictionary:
 func is_area_cleared(area_context: Dictionary) -> bool:
 	if area_context.is_empty():
 		return true
-	for enemy in _get_active_enemy_units():
+	for enemy in _get_enemy_combat_units():
 		if not (enemy is Node2D):
 			continue
 		if bool(AREA_ORDER_RESOLVER_SCRIPT.call("is_position_in_area_context", area_context, (enemy as Node2D).global_position)):
@@ -2269,6 +2603,7 @@ func _connect_wave_controller_signals() -> void:
 
 func _on_unit_respawn_completed(unit_id: String) -> void:
 	_queued_bleedout_by_unit_id.erase(unit_id)
+	_clear_down_state_linger(unit_id)
 	_set_event_text("%s RESPAWN READY" % unit_id)
 	_broadcast_remote_event("%s RESPAWN READY" % unit_id, unit_id, RESPAWN_EVENT_COLOR, 1.6, "RESPAWN READY")
 
@@ -2342,8 +2677,10 @@ func _on_unit_vital_status_changed(vital_status, unit) -> void:
 	var vital_state: String = String(vital_status.get("state"))
 	if vital_state == "fit":
 		_queued_bleedout_by_unit_id.erase(unit_id)
+		_clear_down_state_linger(unit_id)
 	match vital_state:
 		"down":
+			_mark_unit_down_started(unit_id)
 			_set_event_text("%s DOWN" % unit_id)
 			if unit.has_method("show_event_text"):
 				unit.call("show_event_text", "DOWN", DOWN_EVENT_COLOR, 1.5)
@@ -2554,6 +2891,7 @@ func _resolve_combat(result: String, winning_team_id: String, result_condition_o
 	if _combat_finished:
 		return
 
+	_resolved_without_seen_friendly = result.strip_edges().to_lower() == "defeat" and not _has_seen_active_friendly_units
 	_combat_finished = true
 	_winning_team_id = winning_team_id
 	_mission_result_condition_override = result_condition_override.strip_edges()
@@ -2824,8 +3162,8 @@ func _build_enemy_watched_unit_ids(units: Array, state: Dictionary) -> PackedStr
 		var assignment: Dictionary = Dictionary(assignment_by_unit_id.get(enemy_id, {}))
 		if assignment.is_empty():
 			continue
-		for friendly in _get_units(friendly_unit_paths):
-			if friendly == null or not (friendly is Node2D) or not _can_target_receive_attack(friendly):
+		for friendly in _get_friendly_combat_units():
+			if friendly == null or not (friendly is Node2D):
 				continue
 			var friendly_id: String = String(friendly.call("get_unit_id")) if friendly.has_method("get_unit_id") else ""
 			if friendly_id.is_empty() or result.has(friendly_id):
@@ -2859,8 +3197,8 @@ func _resolve_enemy_security_focus_position(units: Array, fallback_position: Vec
 	for enemy in units:
 		if enemy == null or not (enemy is Node2D):
 			continue
-		for friendly in _get_units(friendly_unit_paths):
-			if friendly == null or not (friendly is Node2D) or not _can_target_receive_attack(friendly):
+		for friendly in _get_friendly_combat_units():
+			if friendly == null or not (friendly is Node2D):
 				continue
 			var distance: float = (enemy as Node2D).global_position.distance_to((friendly as Node2D).global_position)
 			if distance >= nearest_distance:
@@ -3331,7 +3669,7 @@ func _enemy_ready_triggered(unit, focus_position: Vector2, ready_distance_world:
 	var objective_position: Vector2 = _get_objective_position()
 	if not objective_position.is_equal_approx(Vector2.ZERO) and unit_position.distance_to(objective_position) <= ready_distance_world:
 		return true
-	for friendly in _get_units(friendly_unit_paths):
+	for friendly in _get_friendly_combat_units():
 		if friendly == null or not (friendly is Node2D) or not _can_target_receive_attack(friendly):
 			continue
 		if unit_position.distance_to((friendly as Node2D).global_position) <= ready_distance_world:
@@ -3807,7 +4145,7 @@ func _enemy_should_hold_position(enemy) -> bool:
 	if enemy == null or not (enemy is Node2D):
 		return true
 
-	for friendly in _get_units(friendly_unit_paths):
+	for friendly in _get_friendly_combat_units():
 		if friendly == null or not _can_target_receive_attack(friendly):
 			continue
 
@@ -3826,18 +4164,21 @@ func _pick_target_from_units(attacker, targets: Array):
 
 
 func _get_active_enemy_units() -> Array:
+	if _hotpath_unit_cache_active:
+		return _hotpath_enemy_units.duplicate()
+	return _get_active_enemy_units_uncached()
+
+
+func _get_active_enemy_units_uncached() -> Array:
 	var active_units: Array = []
 	var unit_registry = _get_unit_registry()
-	for enemy in _get_units(enemy_unit_paths):
+	for enemy in _get_units_uncached(enemy_unit_paths):
 		if enemy == null or not enemy.has_method("get_unit_id"):
 			continue
 
 		if unit_registry != null and unit_registry.has_method("has_unit"):
 			if not bool(unit_registry.call("has_unit", String(enemy.call("get_unit_id")))):
 				continue
-
-		if enemy is CanvasItem and not (enemy as CanvasItem).visible:
-			continue
 
 		active_units.append(enemy)
 
@@ -3979,7 +4320,7 @@ func _resolve_fireteam_readout_attacker(fireteam_id: String):
 		var member = _resolve_unit_by_id(String(member_id_variant).strip_edges())
 		if member != null:
 			return member
-	for friendly in _get_units(friendly_unit_paths):
+	for friendly in _get_friendly_combat_units():
 		if friendly == null or not friendly.has_method("get_fireteam_id"):
 			continue
 		if String(friendly.call("get_fireteam_id")).strip_edges().to_lower() == normalized_fireteam_id:
@@ -4017,7 +4358,7 @@ func _apply_friendly_standard_behavior(simulation_root: Node) -> void:
 	var tactical_controller = _get_tactical_controller()
 	if tactical_controller == null or not tactical_controller.has_method("get_active_behavior_profile"):
 		return
-	for friendly in _get_units(friendly_unit_paths):
+	for friendly in _get_friendly_combat_units():
 		if friendly == null or not (friendly is Node2D) or not friendly.has_method("get_vital_state"):
 			continue
 		if String(friendly.call("get_vital_state")) != "fit":
@@ -4071,7 +4412,7 @@ func _try_enqueue_overwatch(simulation_root: Node) -> Array:
 		return []
 	tactical_controller.call("refresh_fireteam_security_state")
 	var friendly_units_by_fireteam: Dictionary = {}
-	for friendly in _get_units(friendly_unit_paths):
+	for friendly in _get_friendly_combat_units():
 		if friendly == null or not friendly.has_method("get_fireteam_id"):
 			continue
 		var fireteam_id: String = String(friendly.call("get_fireteam_id")).strip_edges().to_lower()
@@ -4088,7 +4429,7 @@ func _try_enqueue_overwatch(simulation_root: Node) -> Array:
 			simulation_root,
 			Array(tactical_controller.call("get_fireteam_security_snapshot")),
 			friendly_units_by_fireteam,
-			_get_active_enemy_units(),
+			_get_enemy_combat_units(),
 			_get_terrain_registry(),
 			contact_range,
 			_current_tick
@@ -4103,6 +4444,17 @@ func _try_enqueue_overwatch(simulation_root: Node) -> Array:
 		var fire_event_id: String = _record_fire_event_from_shot(shot, attacker, target, "overwatch")
 		if attacker != null and target != null:
 			_set_contact_visuals(attacker, target)
+			var overwatch_diagnostic: Dictionary = _build_contact_pair_decision_diagnostic(
+				{
+					"attacker": attacker,
+					"target": target,
+					"attacker_id": String(shot.get("attacker_unit_id", "")),
+					"target_id": String(shot.get("target_unit_id", "")),
+					"contact_state": "overwatch",
+				}
+			)
+			overwatch_diagnostic["fire_event_id"] = fire_event_id
+			_record_contact_decision_diagnostics("fired", overwatch_diagnostic)
 		if not fire_event_id.is_empty():
 			_refresh_tactical_combat_visuals()
 		var event_text: String = "OVERWATCH %s -> %s" % [String(shot.get("attacker_unit_id", "")), String(shot.get("target_unit_id", ""))]

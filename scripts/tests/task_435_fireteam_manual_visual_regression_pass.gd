@@ -155,7 +155,8 @@ func _test_muzzle_flash_remains_readable_in_visual_payload() -> void:
 	_assert(int(snapshot.get("weapon_fire_vfx_visual_count", 0)) == 1, "Fire event creates one visible weapon-fire VFX")
 	_assert(bool(entry.get("muzzle_flash_visible", false)), "Muzzle flash is visible")
 	_assert(bool(entry.get("muzzle_bloom_visible", false)), "Muzzle bloom is visible")
-	_assert(float(entry.get("muzzle_flash_pixel_size", 0.0)) >= 0.026, "Muzzle flash is clamped to readable size")
+	_assert(float(entry.get("muzzle_flash_pixel_size", 0.0)) >= 0.006 and float(entry.get("muzzle_flash_pixel_size", 0.0)) <= 0.014, "Muzzle flash stays in the small debug baseline")
+	_assert(bool(entry.get("muzzle_texture_card_suppressed", false)) or bool(entry.get("muzzle_texture_missing", false)), "Large muzzle texture card is not rendered")
 	primary_view.queue_free()
 	await _wait_frames(2)
 
