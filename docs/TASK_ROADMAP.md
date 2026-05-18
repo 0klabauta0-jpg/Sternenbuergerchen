@@ -110,6 +110,7 @@ git checkout -b batch/<batch-name>
 - TASK_478 - Fireteam Soft Completion Final Stage Guard
 - TASK_479 - Fireteam Runtime Hotpath Guards
 - TASK_480 - Mission UI Hotpath Feedback Guard
+- TASK_481 - Loadout Heavy Weapon Selection
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

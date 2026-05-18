@@ -29,9 +29,9 @@ const WEAPON_LABELS: Dictionary = {
 	"none": "None",
 	"smg": "SMG",
 	"rifle": "Rifle",
-	"sniper": "Sniper",
+	"sniper": "Scharf",
 	"rail_gun": "Railgun",
-	"rocket_launcher": "Rocket",
+	"rocket_launcher": "Rakete",
 	"medictool": "Medictool",
 }
 
@@ -39,9 +39,9 @@ const COMPACT_WEAPON_LABELS: Dictionary = {
 	"none": "-",
 	"smg": "SMG",
 	"rifle": "Rifle",
-	"sniper": "Snip",
+	"sniper": "Scharf",
 	"rail_gun": "Rail",
-	"rocket_launcher": "Rkt",
+	"rocket_launcher": "Rak",
 	"medictool": "Med",
 }
 

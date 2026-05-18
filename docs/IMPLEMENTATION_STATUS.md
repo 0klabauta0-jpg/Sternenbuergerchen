@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_481 - Loadout Heavy Weapon Selection
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_481_loadout_heavy_weapon_selection.md`, `docs/dev/loadout_playability_rules.md`
+- Stand: Homebase- und FOB-Loadouts behalten das erweiterte Weapon-Set mit `sniper`, `rocket_launcher`, `rail_gun`, `medictool`, `rifle`, `smg` und `none` dort, wo der Contract es erlaubt.
+- Stand: `WeaponData` schaerft Sniper als laengere Praezisionswaffe und Rocket Launcher als schweren Anti-Armor-Pick; `LoadoutModifierResolver` spiegelt die Gewichte/Tempoauswirkungen.
+- Stand: FOB-Weapon-Previews lesen den Preview-Pfad jetzt aus `WeaponData`, statt Sniper/Rocket erneut im FOB-Skript zu duplizieren. Die vorhandenen Sniper-/Rocket-Preview-Texturen und GLB-Visual-Loadouts sind per Verifier abgesichert.
+- Risiken/offen: Der finale optische Sitz/Groesseneindruck von Sniper/Rocket an den 2.5D-Unit-Proxies braucht weiter einen manuellen Sichtcheck.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_481_loadout_heavy_weapon_selection.gd`, TASK_176/TASK_353/TASK_175, `scripts/tests/test_weapon_data.gd` und `git diff --check`.
+- Naechster Schritt: Im naechsten Vertical-Slice-Playtest pruefen, ob Sniper/Rocket-Auswahl im Loadout spuerbar genug ist und ob das Rocket-Visual fuer AA-/Outpost-Ziele gross genug wirkt.
+
 ### TASK_480 - Mission UI Hotpath Feedback Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_480_mission_ui_hotpath_feedback_guard.md`, `docs/tasks/TASK_399_dropship_flow_contract_performance_pass.md`, `docs/dev/loadout_playability_rules.md`

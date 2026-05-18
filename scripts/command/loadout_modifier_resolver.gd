@@ -32,12 +32,12 @@ const WEAPON_FORMULAS: Dictionary = {
 		"weight": 3.0,
 	},
 	"sniper": {
-		"accuracy_mod": 0.10,
-		"speed_mod": -0.06,
+		"accuracy_mod": 0.12,
+		"speed_mod": -0.07,
 		"toughness_mod": -0.02,
 		"cover_mod": 0.03,
 		"range_class": "long",
-		"weight": 4.0,
+		"weight": 4.2,
 	},
 	"special": {
 		"accuracy_mod": 0.02,
@@ -48,12 +48,12 @@ const WEAPON_FORMULAS: Dictionary = {
 		"weight": 4.5,
 	},
 	"rocket_launcher": {
-		"accuracy_mod": -0.02,
-		"speed_mod": -0.10,
-		"toughness_mod": 0.04,
+		"accuracy_mod": -0.04,
+		"speed_mod": -0.14,
+		"toughness_mod": 0.06,
 		"cover_mod": 0.05,
 		"range_class": "heavy",
-		"weight": 5.0,
+		"weight": 6.0,
 	},
 	"medictool": {
 		"accuracy_mod": -0.03,

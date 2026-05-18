@@ -1,7 +1,7 @@
 # Loadout Playability Rules
 
 ## Playable Items
-Playable loadout items are defined in `scripts/core/weapon_data.gd` and normalized through `scripts/command/loadout_contract.gd`. The current selectable weapon IDs are `smg`, `rifle`, `sniper`, `rail_gun`, `rocket_launcher`, `medictool`, and `none`.
+Playable loadout items are defined in `scripts/core/weapon_data.gd` and normalized through `scripts/command/loadout_contract.gd`. The current selectable weapon IDs are `smg`, `rifle`, `sniper`, `rail_gun`, `rocket_launcher`, `medictool`, and `none`. Sniper and rocket launcher previews must come from project-local `res://Assets/used/npc/...` assets; visual attachment loadouts remain display-only and must not replace the gameplay weapon IDs.
 
 ## Visual-Only Items
 Visual loadout IDs in `data/npc_unit_visual_mapping.json` are not gameplay item IDs unless the same ID also exists in `WeaponData`. Decorative IDs such as `compact_blaster`, `heavy_blaster`, `sniper_rifle`, and `medictool_blaster` must not appear as active selector metadata.
