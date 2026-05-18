@@ -11,6 +11,9 @@ const DEFAULT_BLOCKS_LOS: bool = false
 const DEFAULT_COVER_VALUE: int = 0
 const DEFAULT_HEIGHT_LEVEL: int = 0
 const DEFAULT_OBJECT_HEIGHT: int = 0
+const DEFAULT_OBJECT_SCALE: float = 1.0
+const MIN_OBJECT_SCALE: float = 0.25
+const MAX_OBJECT_SCALE: float = 2.5
 const DEFAULT_SURFACE_TYPE: String = SURFACE_GROUND
 
 const EDGE_CLIFF: String = "cliff"
@@ -28,6 +31,7 @@ var cover_value: int = DEFAULT_COVER_VALUE
 var height_level: int = DEFAULT_HEIGHT_LEVEL
 var object_height: int = DEFAULT_OBJECT_HEIGHT
 var object_rotation_degrees: float = 0.0
+var object_scale: float = DEFAULT_OBJECT_SCALE
 var surface_type: String = DEFAULT_SURFACE_TYPE
 var edge_type: String = EDGE_CLIFF
 
@@ -58,6 +62,7 @@ func to_dict() -> Dictionary:
 		"height_level": height_level,
 		"object_height": object_height,
 		"object_rotation_degrees": object_rotation_degrees,
+		"object_scale": object_scale,
 		"surface_type": surface_type,
 		"edge_type": edge_type,
 	}
@@ -136,6 +141,7 @@ func _apply_dict(data: Dictionary) -> void:
 	height_level = clampi(int(data.get("height_level", DEFAULT_HEIGHT_LEVEL)), 0, 2)
 	object_height = clampi(int(data.get("object_height", DEFAULT_OBJECT_HEIGHT)), 0, 3)
 	object_rotation_degrees = _normalize_object_rotation_degrees(float(data.get("object_rotation_degrees", 0.0)))
+	object_scale = _normalize_object_scale(float(data.get("object_scale", DEFAULT_OBJECT_SCALE)))
 	surface_type = _normalize_surface_type(String(data.get("surface_type", DEFAULT_SURFACE_TYPE)))
 	edge_type = _normalize_edge_type(String(data.get("edge_type", EDGE_CLIFF)))
 
@@ -145,6 +151,12 @@ static func _normalize_object_rotation_degrees(value: float) -> float:
 	if absf(normalized - 360.0) < 0.001:
 		return 0.0
 	return snappedf(normalized, 0.001)
+
+
+static func _normalize_object_scale(value: float) -> float:
+	if is_nan(value) or is_inf(value):
+		return DEFAULT_OBJECT_SCALE
+	return snappedf(clampf(value, MIN_OBJECT_SCALE, MAX_OBJECT_SCALE), 0.001)
 
 
 func _coerce_grid_position(value: Variant) -> Vector2i:

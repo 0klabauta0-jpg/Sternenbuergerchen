@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_483 - Map Editor Asset Workflow Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_483_map_editor_asset_workflow_polish.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/dev/map_editor_module_split.md`, `docs/dev/terrain_truth_visual_audit_contract.md`
+- Stand: Der Asset-Authoring-Hotspot hat jetzt groessere Palette-Vorschauen, sortierte Gruppenansicht, Selected-Asset-Preview, Platzierungs-Scale und per-Tile-`object_scale`.
+- Stand: `object_scale` wird in `TerrainTileData`, Save/Load, Undo, Snapshots, Terrain-Truth-Audit sowie 2D-/3D-Visuals gefuehrt; Mapping-Scale und Tile-Scale bleiben getrennt.
+- Stand: Wand-/Cliff-Ziehen, Auto-Snapping, Door-Open-Logik und Preset-Speicher bleiben bewusst Folgearbeit, damit keine UI-Sonderwahrheit entsteht.
+- Risiken/offen: Der Branch baut auf den noch nicht integrierten TASK_481/TASK_482-Arbeitsstaenden auf.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_483_map_editor_asset_workflow_polish.gd`, TASK_295, TASK_296, `bugfix_map_editor_asset_rotation_context_menu.gd`, TASK_298 und `git diff --check`.
+- Naechster Schritt: TASK_484 als Wand-/Cliff-Ziehwerkzeug mit Auto-Rotation/Snapping und klarer Segment-Preview schneiden.
+
 ### TASK_482 - Mission Briefing Data Contract
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_482_mission_briefing_data_contract.md`, `docs/dev/mission_briefing_contract.md`, `docs/dev/loadout_playability_rules.md`

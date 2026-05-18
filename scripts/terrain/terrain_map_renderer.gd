@@ -375,7 +375,9 @@ func _build_wall_overlays(terrain_map_data, wall_container: Node2D) -> Dictionar
 		sprite.texture = texture
 		sprite.centered = false
 		sprite.z_index = 0
-		sprite.position = tile_data.world_position - KENNEY_DIAMOND_CENTER + pos_offset
+		var object_scale: float = _get_tile_object_scale(tile_data)
+		sprite.scale = Vector2.ONE * object_scale
+		sprite.position = tile_data.world_position - (KENNEY_DIAMOND_CENTER * object_scale) + (pos_offset * object_scale)
 		wall_container.add_child(sprite)
 		wall_sprites_by_grid[tile_data.grid_position] = [sprite]
 
@@ -393,7 +395,9 @@ func _build_object_overlays(terrain_map_data, object_container: Node2D) -> Dicti
 		sprite.texture = texture
 		sprite.centered = false
 		sprite.z_index = 0
-		sprite.position = tile_data.world_position - KENNEY_DIAMOND_CENTER
+		var object_scale: float = _get_tile_object_scale(tile_data)
+		sprite.scale = Vector2.ONE * object_scale
+		sprite.position = tile_data.world_position - (KENNEY_DIAMOND_CENTER * object_scale)
 		object_container.add_child(sprite)
 		object_sprites_by_grid[tile_data.grid_position] = [sprite]
 
@@ -408,3 +412,9 @@ func _is_structure_type_id(type_id: String) -> bool:
 	if tile_catalog != null and tile_catalog.has_method("is_structure_layer_type") and bool(tile_catalog.call("is_structure_layer_type", normalized_type_id)):
 		return true
 	return normalized_type_id.begins_with("wall_") or normalized_type_id.begins_with("cliff_") or normalized_type_id.begins_with("slope_") or normalized_type_id.begins_with("rock_")
+
+
+func _get_tile_object_scale(tile_data) -> float:
+	if tile_data == null:
+		return 1.0
+	return clampf(float(tile_data.object_scale), 0.25, 2.5)

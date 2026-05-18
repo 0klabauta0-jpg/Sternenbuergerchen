@@ -106,7 +106,13 @@ const AUTHORING_TOOL_MARKER: String = "marker"
 const AUTHORING_TOOL_PATROL: String = "patrol"
 const TOOL_BUTTON_SIZE: Vector2 = Vector2(34.0, 30.0)
 const MAX_UNDO_STACK_SIZE: int = 32
-const PALETTE_PREVIEW_ICON_SIZE: Vector2i = Vector2i(20, 20)
+const PALETTE_PREVIEW_ICON_SIZE: Vector2i = Vector2i(44, 44)
+const PALETTE_PANEL_MIN_WIDTH: float = 300.0
+const PALETTE_SELECTED_PREVIEW_SIZE: Vector2 = Vector2(84.0, 84.0)
+const OBJECT_SCALE_DEFAULT: float = 1.0
+const OBJECT_SCALE_MIN: float = 0.25
+const OBJECT_SCALE_MAX: float = 2.5
+const OBJECT_SCALE_STEP: float = 0.05
 const PALETTE_ITEM_FG_COLOR: Color = Color(0.9, 0.93, 0.9, 1.0)
 const PALETTE_SELECTED_BG_COLOR: Color = Color(1.0, 0.86, 0.22, 0.84)
 const PALETTE_SELECTED_FG_COLOR: Color = Color(0.08, 0.06, 0.02, 1.0)
@@ -204,6 +210,7 @@ var _adjacency_debug_overlay_skipped_disabled_count: int = 0
 var _adjacency_debug_overlay_drawn_entries_by_grid: Dictionary = {}
 var _active_palette_group_id: String = ""
 var _palette_preview_textures: Dictionary = {}
+var _placement_object_scale: float = OBJECT_SCALE_DEFAULT
 var _last_dirty_neighborhood_snapshot: Dictionary = {}
 var _right_mouse_pressed: bool = false
 var _right_mouse_dragged: bool = false
@@ -233,6 +240,8 @@ func _ready() -> void:
 	_ensure_editor_save_controls()
 	_ensure_map_name_controls()
 	_ensure_object_rotation_controls()
+	_ensure_object_scale_controls()
+	_ensure_palette_workflow_controls()
 	_ensure_terrain_truth_inspector_controls()
 	_ensure_editor_context_menu()
 	_populate_tile_palette()
@@ -971,6 +980,8 @@ func _apply_brush_at_world_position(world_position: Vector2) -> void:
 			if not _selected_type_id.is_empty() and _tile_catalog != null and _tile_catalog.has_type(_selected_type_id):
 				_store_undo_state(target_tile)
 				if _tile_catalog.apply_type_to_tile(target_tile, _selected_type_id):
+					if _palette_type_uses_object_scale(_selected_type_id):
+						target_tile.object_scale = _placement_object_scale
 					any_changed = true
 					changed_grids.append(target_grid)
 					_refresh_tile_visual(target_tile, false)
@@ -1085,11 +1096,13 @@ func _erase_object_layer_from_tile(tile_data) -> bool:
 	if has_object_layer and not object_type_id.is_empty():
 		tile_data.object_type_id = ""
 		tile_data.object_rotation_degrees = 0.0
+		tile_data.object_scale = OBJECT_SCALE_DEFAULT
 		_restore_tile_base_gameplay_fields(tile_data)
 		return true
 
 	tile_data.object_type_id = ""
 	tile_data.object_rotation_degrees = 0.0
+	tile_data.object_scale = OBJECT_SCALE_DEFAULT
 	if (
 		(_tile_catalog != null and _tile_catalog.has_method("is_object_layer_type") and bool(_tile_catalog.call("is_object_layer_type", type_id)))
 		or has_structure_layer
@@ -1426,6 +1439,100 @@ func _ensure_object_rotation_controls() -> void:
 		panel_parent.move_child(row, insert_after.get_index() + 1)
 
 
+func _ensure_object_scale_controls() -> void:
+	var panel_parent := get_node_or_null("UI/PropertyPanel/Margin/VBox") as VBoxContainer
+	if panel_parent == null:
+		return
+	if panel_parent.get_node_or_null("ObjectScaleRow") != null:
+		return
+	var row := HBoxContainer.new()
+	row.name = "ObjectScaleRow"
+	row.custom_minimum_size = Vector2(0.0, 28.0)
+	var label := Label.new()
+	label.name = "ObjectScaleLabel"
+	label.text = "Scale"
+	label.custom_minimum_size = Vector2(72.0, 0.0)
+	row.add_child(label)
+	var scale_spinbox := SpinBox.new()
+	scale_spinbox.name = "ObjectScaleSpinBox"
+	scale_spinbox.min_value = OBJECT_SCALE_MIN
+	scale_spinbox.max_value = OBJECT_SCALE_MAX
+	scale_spinbox.step = OBJECT_SCALE_STEP
+	scale_spinbox.value = OBJECT_SCALE_DEFAULT
+	scale_spinbox.allow_greater = false
+	scale_spinbox.allow_lesser = false
+	scale_spinbox.custom_minimum_size = Vector2(92.0, 0.0)
+	scale_spinbox.tooltip_text = "Aendert den gespeicherten Scale des ausgewaehlten Assets."
+	row.add_child(scale_spinbox)
+	var reset_button := Button.new()
+	reset_button.name = "ObjectScaleResetButton"
+	reset_button.text = "1.0"
+	reset_button.tooltip_text = "Setzt den Scale des ausgewaehlten Assets auf 1.0 zurueck."
+	row.add_child(reset_button)
+	panel_parent.add_child(row)
+	var insert_after := panel_parent.get_node_or_null("ObjectRotationRow")
+	if insert_after != null:
+		panel_parent.move_child(row, insert_after.get_index() + 1)
+
+
+func _ensure_palette_workflow_controls() -> void:
+	var palette_parent := get_node_or_null("UI/PalettePanel/Margin/VBox") as VBoxContainer
+	if palette_parent == null:
+		return
+	if palette_parent.get_node_or_null("PaletteSelectedPreviewRow") != null:
+		_refresh_palette_workflow_controls()
+		return
+	var row := HBoxContainer.new()
+	row.name = "PaletteSelectedPreviewRow"
+	row.custom_minimum_size = Vector2(0.0, 92.0)
+	var preview_rect := TextureRect.new()
+	preview_rect.name = "PaletteSelectedPreviewTextureRect"
+	preview_rect.custom_minimum_size = PALETTE_SELECTED_PREVIEW_SIZE
+	preview_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	preview_rect.tooltip_text = "Groessere Vorschau fuer das aktuell gewaehlte Palette-Asset."
+	row.add_child(preview_rect)
+	var info_box := VBoxContainer.new()
+	info_box.name = "PaletteSelectedInfoBox"
+	info_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var info_label := Label.new()
+	info_label.name = "PaletteSelectedInfoLabel"
+	info_label.text = "Kein Asset"
+	info_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	info_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	info_label.tooltip_text = "Ausgewaehltes Asset, Palette-Gruppe und Platzierungs-Scale."
+	info_box.add_child(info_label)
+	var scale_row := HBoxContainer.new()
+	scale_row.name = "PalettePlacementScaleRow"
+	var scale_label := Label.new()
+	scale_label.name = "PalettePlacementScaleLabel"
+	scale_label.text = "Scale"
+	scale_label.custom_minimum_size = Vector2(44.0, 0.0)
+	scale_row.add_child(scale_label)
+	var placement_scale := SpinBox.new()
+	placement_scale.name = "PlacementObjectScaleSpinBox"
+	placement_scale.min_value = OBJECT_SCALE_MIN
+	placement_scale.max_value = OBJECT_SCALE_MAX
+	placement_scale.step = OBJECT_SCALE_STEP
+	placement_scale.value = _placement_object_scale
+	placement_scale.allow_greater = false
+	placement_scale.allow_lesser = false
+	placement_scale.custom_minimum_size = Vector2(88.0, 0.0)
+	placement_scale.tooltip_text = "Scale fuer neu gepinselte Assets. Default ist 1.0, Korrekturen wie 1.6 werden pro Tile gespeichert."
+	scale_row.add_child(placement_scale)
+	var reset_button := Button.new()
+	reset_button.name = "PlacementObjectScaleResetButton"
+	reset_button.text = "1.0"
+	reset_button.tooltip_text = "Setzt den Platzierungs-Scale fuer neue Assets auf 1.0."
+	scale_row.add_child(reset_button)
+	info_box.add_child(scale_row)
+	row.add_child(info_box)
+	palette_parent.add_child(row)
+	var insert_after := palette_parent.get_node_or_null("PaletteTitle")
+	if insert_after != null:
+		palette_parent.move_child(row, insert_after.get_index() + 1)
+	_refresh_palette_workflow_controls()
+
+
 func _ensure_terrain_truth_inspector_controls() -> void:
 	var panel_parent := get_node_or_null("UI/PropertyPanel/Margin/VBox") as VBoxContainer
 	if panel_parent == null:
@@ -1468,11 +1575,16 @@ func _apply_editor_control_panel_style() -> void:
 	_apply_panel_style(get_node_or_null("UI/TopBar") as PanelContainer, Color(0.06, 0.09, 0.11, 0.94), Color(0.32, 0.55, 0.62, 0.72))
 	_apply_panel_style(get_node_or_null("UI/PalettePanel") as PanelContainer, Color(0.055, 0.075, 0.085, 0.96), Color(0.28, 0.47, 0.52, 0.68))
 	_apply_panel_style(get_node_or_null("UI/PropertyPanel") as PanelContainer, Color(0.065, 0.075, 0.08, 0.96), Color(0.24, 0.39, 0.43, 0.62))
+	var palette_panel := get_node_or_null("UI/PalettePanel") as PanelContainer
+	if palette_panel != null:
+		palette_panel.custom_minimum_size = Vector2(PALETTE_PANEL_MIN_WIDTH, palette_panel.custom_minimum_size.y)
+		palette_panel.offset_right = maxf(palette_panel.offset_right, PALETTE_PANEL_MIN_WIDTH)
 	var tile_type_list := _get_tile_type_list()
 	if tile_type_list != null:
 		tile_type_list.fixed_icon_size = PALETTE_PREVIEW_ICON_SIZE
 		tile_type_list.icon_mode = ItemList.ICON_MODE_LEFT
 		tile_type_list.max_columns = 1
+		tile_type_list.custom_minimum_size = Vector2(PALETTE_PANEL_MIN_WIDTH - 36.0, 360.0)
 		tile_type_list.add_theme_color_override("font_color", PALETTE_ITEM_FG_COLOR)
 		tile_type_list.add_theme_color_override("font_selected_color", PALETTE_SELECTED_FG_COLOR)
 	var palette_title := get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteTitle") as Label
@@ -1723,6 +1835,7 @@ func _refresh_property_panel() -> void:
 					edge_idx = 2
 			edge_type_option_button.select(edge_idx)
 		_refresh_object_rotation_controls(null)
+		_refresh_object_scale_controls(null)
 		_refresh_terrain_truth_inspector(null)
 		_set_property_controls_enabled(false)
 		_is_refreshing_property_controls = false
@@ -1762,6 +1875,7 @@ func _refresh_property_panel() -> void:
 				edge_idx = 2
 		edge_type_option_button.select(edge_idx)
 	_refresh_object_rotation_controls(tile_data)
+	_refresh_object_scale_controls(tile_data)
 	_set_property_controls_enabled(true)
 	_is_refreshing_property_controls = false
 	_refresh_authoring_status_controls()
@@ -1822,6 +1936,10 @@ func _format_tile_truth_inspector_text(snapshot: Dictionary) -> String:
 		int(snapshot.get("cover_value", 0)),
 		int(snapshot.get("height_level", 0)),
 		int(snapshot.get("object_height", 0)),
+	])
+	lines.append("Rot %.0f | Scale %.2f" % [
+		float(snapshot.get("object_rotation_degrees", 0.0)),
+		float(snapshot.get("object_scale", OBJECT_SCALE_DEFAULT)),
 	])
 	lines.append("Blocker %s | Seg %d | Runtime %s" % [
 		String(snapshot.get("blocker_type", "none")),
@@ -3059,6 +3177,7 @@ func _build_toolbar_snapshot() -> Dictionary:
 
 func _build_palette_snapshot() -> Dictionary:
 	var visible_type_ids: PackedStringArray = PackedStringArray()
+	var visible_display_names: PackedStringArray = PackedStringArray()
 	var selected_items: PackedInt32Array = PackedInt32Array()
 	var preview_icon_count: int = 0
 	var tile_type_list := _get_tile_type_list()
@@ -3068,6 +3187,7 @@ func _build_palette_snapshot() -> Dictionary:
 			var type_id: String = String(tile_type_list.get_item_metadata(index)).strip_edges()
 			if not type_id.is_empty() and not type_id.begins_with("__group:"):
 				visible_type_ids.append(type_id)
+				visible_display_names.append(tile_type_list.get_item_text(index))
 			if tile_type_list.get_item_icon(index) != null:
 				preview_icon_count += 1
 	var group_ids: PackedStringArray = PackedStringArray()
@@ -3079,7 +3199,10 @@ func _build_palette_snapshot() -> Dictionary:
 		"active_group": _active_palette_group_id,
 		"group_ids": group_ids,
 		"visible_type_ids": visible_type_ids,
+		"visible_display_names": visible_display_names,
 		"selected_type_id": _selected_type_id,
+		"selected_display_name": _get_palette_type_display_name(_selected_type_id),
+		"selected_palette_group": _get_palette_group_for_type(_selected_type_id),
 		"selected_type_visible": visible_type_ids.has(_selected_type_id),
 		"selected_item_count": selected_items.size(),
 		"selected_item_index": int(selected_items[0]) if selected_items.size() > 0 else -1,
@@ -3087,6 +3210,9 @@ func _build_palette_snapshot() -> Dictionary:
 		"preview_icon_count": preview_icon_count,
 		"all_visible_items_have_preview_icons": tile_type_list != null and preview_icon_count == tile_type_list.item_count,
 		"preview_icon_size": PALETTE_PREVIEW_ICON_SIZE,
+		"placement_scale": _placement_object_scale,
+		"scale_min": OBJECT_SCALE_MIN,
+		"scale_max": OBJECT_SCALE_MAX,
 	}
 
 
@@ -3173,6 +3299,7 @@ func get_authoring_action_contract_snapshot() -> Dictionary:
 			"type_id",
 			"object_type_id",
 			"object_rotation_degrees",
+			"object_scale",
 		]),
 		"tool_action_fields": PackedStringArray([
 			"tool_id",
@@ -3231,6 +3358,8 @@ func _build_selected_tile_context() -> Dictionary:
 		"object_height": int(tile_data.object_height),
 		"object_rotation_degrees": _get_tile_object_rotation_degrees(tile_data),
 		"object_rotatable": _tile_has_rotatable_object(tile_data),
+		"object_scale": _get_tile_object_scale(tile_data),
+		"object_scalable": _tile_has_scalable_object(tile_data),
 		"surface_type": String(tile_data.surface_type),
 		"edge_type": String(tile_data.edge_type),
 	}
@@ -4304,6 +4433,20 @@ func _refresh_object_rotation_controls(tile_data) -> void:
 		value_label.text = "%d deg" % int(round(_get_tile_object_rotation_degrees(tile_data))) if has_rotatable_object else "-"
 
 
+func _refresh_object_scale_controls(tile_data) -> void:
+	var row := get_node_or_null("UI/PropertyPanel/Margin/VBox/ObjectScaleRow") as HBoxContainer
+	var scale_spinbox := _get_object_scale_spinbox()
+	var reset_button := _get_object_scale_reset_button()
+	var has_scalable_object: bool = _tile_has_scalable_object(tile_data)
+	if row != null:
+		row.visible = tile_data != null
+	if scale_spinbox != null:
+		scale_spinbox.editable = has_scalable_object
+		scale_spinbox.value = _get_tile_object_scale(tile_data)
+	if reset_button != null:
+		reset_button.disabled = not has_scalable_object
+
+
 func _tile_has_rotatable_object(tile_data) -> bool:
 	if tile_data == null:
 		return false
@@ -4322,10 +4465,40 @@ func _tile_has_rotatable_object(tile_data) -> bool:
 	return false
 
 
+func _tile_has_scalable_object(tile_data) -> bool:
+	return _tile_has_rotatable_object(tile_data)
+
+
+func _palette_type_uses_object_scale(type_id: String) -> bool:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty():
+		return false
+	if normalized_type_id == "station_floor_panel" or normalized_type_id == "modular_floor" or normalized_type_id == "modular_floor_big":
+		return true
+	if _tile_catalog != null:
+		if _tile_catalog.has_method("is_object_layer_type") and bool(_tile_catalog.call("is_object_layer_type", normalized_type_id)):
+			return true
+		if _tile_catalog.has_method("is_structure_layer_type") and bool(_tile_catalog.call("is_structure_layer_type", normalized_type_id)):
+			return true
+	return normalized_type_id.begins_with("station_") or normalized_type_id.begins_with("modular_") or normalized_type_id.begins_with("wall_") or normalized_type_id.begins_with("rock_")
+
+
 func _get_tile_object_rotation_degrees(tile_data) -> float:
 	if tile_data == null:
 		return 0.0
 	return fposmod(float(tile_data.object_rotation_degrees), 360.0)
+
+
+func _get_tile_object_scale(tile_data) -> float:
+	if tile_data == null:
+		return OBJECT_SCALE_DEFAULT
+	return _normalize_object_scale(float(tile_data.object_scale))
+
+
+func _normalize_object_scale(value: float) -> float:
+	if is_nan(value) or is_inf(value):
+		return OBJECT_SCALE_DEFAULT
+	return snappedf(clampf(value, OBJECT_SCALE_MIN, OBJECT_SCALE_MAX), 0.001)
 
 
 func _rotate_selected_object(delta_degrees: float) -> bool:
@@ -4341,6 +4514,58 @@ func _rotate_selected_object(delta_degrees: float) -> bool:
 	_mark_dirty(true)
 	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_PROPERTIES)
 	return true
+
+
+func set_selected_object_scale(value: float) -> bool:
+	var tile_data = _get_selected_tile()
+	if not _tile_has_scalable_object(tile_data):
+		return false
+	var normalized_scale: float = _normalize_object_scale(value)
+	if is_equal_approx(float(tile_data.object_scale), normalized_scale):
+		_refresh_object_scale_controls(tile_data)
+		return false
+	var owns_undo_transaction: bool = _ensure_undo_transaction("scale_object")
+	_store_undo_state(tile_data)
+	tile_data.object_scale = normalized_scale
+	_refresh_tile_visual(tile_data)
+	if owns_undo_transaction:
+		commit_undo_transaction()
+	_mark_dirty(true)
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_PROPERTIES)
+	return true
+
+
+func set_object_placement_scale(value: float) -> bool:
+	var normalized_scale: float = _normalize_object_scale(value)
+	var changed: bool = not is_equal_approx(_placement_object_scale, normalized_scale)
+	_placement_object_scale = normalized_scale
+	var placement_scale_spinbox := _get_placement_object_scale_spinbox()
+	if placement_scale_spinbox != null and not is_equal_approx(float(placement_scale_spinbox.value), _placement_object_scale):
+		placement_scale_spinbox.value = _placement_object_scale
+	_refresh_palette_workflow_controls()
+	return changed
+
+
+func get_object_placement_scale() -> float:
+	return _placement_object_scale
+
+
+func _on_object_scale_value_changed(value: float) -> void:
+	if _is_refreshing_property_controls:
+		return
+	set_selected_object_scale(value)
+
+
+func _on_object_scale_reset_pressed() -> void:
+	set_selected_object_scale(OBJECT_SCALE_DEFAULT)
+
+
+func _on_placement_object_scale_value_changed(value: float) -> void:
+	set_object_placement_scale(value)
+
+
+func _on_placement_object_scale_reset_pressed() -> void:
+	set_object_placement_scale(OBJECT_SCALE_DEFAULT)
 
 
 func _on_object_rotate_left_pressed() -> void:
@@ -4804,6 +5029,7 @@ func _restore_tile_from_undo_state(undo_state: Dictionary) -> Array[Vector2i]:
 		tile_data.edge_type = restored_tile.edge_type
 		tile_data.object_height = restored_tile.object_height
 		tile_data.object_rotation_degrees = restored_tile.object_rotation_degrees
+		tile_data.object_scale = restored_tile.object_scale
 		restored_grids.append(grid_position)
 	return restored_grids
 
@@ -4973,6 +5199,10 @@ func _connect_ui_signals() -> void:
 	var map_name_line_edit := _get_map_name_line_edit()
 	var object_rotate_left_button := _get_object_rotate_left_button()
 	var object_rotate_right_button := _get_object_rotate_right_button()
+	var object_scale_spinbox := _get_object_scale_spinbox()
+	var object_scale_reset_button := _get_object_scale_reset_button()
+	var placement_scale_spinbox := _get_placement_object_scale_spinbox()
+	var placement_scale_reset_button := _get_placement_object_scale_reset_button()
 	var file_dialog := get_node_or_null("UI/LoadDialog") as FileDialog
 	var confirm_dialog := get_node_or_null("UI/DirtyConfirmDialog") as ConfirmationDialog
 	var new_map_dialog := _get_new_map_dialog()
@@ -5016,6 +5246,14 @@ func _connect_ui_signals() -> void:
 		object_rotate_left_button.pressed.connect(_on_object_rotate_left_pressed)
 	if object_rotate_right_button != null and not object_rotate_right_button.pressed.is_connected(_on_object_rotate_right_pressed):
 		object_rotate_right_button.pressed.connect(_on_object_rotate_right_pressed)
+	if object_scale_spinbox != null and not object_scale_spinbox.value_changed.is_connected(_on_object_scale_value_changed):
+		object_scale_spinbox.value_changed.connect(_on_object_scale_value_changed)
+	if object_scale_reset_button != null and not object_scale_reset_button.pressed.is_connected(_on_object_scale_reset_pressed):
+		object_scale_reset_button.pressed.connect(_on_object_scale_reset_pressed)
+	if placement_scale_spinbox != null and not placement_scale_spinbox.value_changed.is_connected(_on_placement_object_scale_value_changed):
+		placement_scale_spinbox.value_changed.connect(_on_placement_object_scale_value_changed)
+	if placement_scale_reset_button != null and not placement_scale_reset_button.pressed.is_connected(_on_placement_object_scale_reset_pressed):
+		placement_scale_reset_button.pressed.connect(_on_placement_object_scale_reset_pressed)
 	if tile_type_list != null and not tile_type_list.item_selected.is_connected(_on_tile_type_selected):
 		tile_type_list.item_selected.connect(_on_tile_type_selected)
 	for marker_id in EDITABLE_MARKER_IDS:
@@ -5807,6 +6045,7 @@ func _on_tile_type_selected(index: int) -> void:
 	if index < 0 or index >= tile_type_list.item_count:
 		_selected_type_id = ""
 		_refresh_palette_selection_visual()
+		_refresh_palette_workflow_controls()
 		return
 
 	_selected_type_id = String(tile_type_list.get_item_metadata(index))
@@ -5833,7 +6072,29 @@ func _on_tile_type_selected(index: int) -> void:
 		if marker_tool_button != null and marker_tool_button.button_pressed:
 			marker_tool_button.button_pressed = false
 	_refresh_palette_selection_visual()
+	_refresh_palette_workflow_controls()
 	_refresh_authoring_status_controls()
+
+
+func set_palette_type_for_authoring(type_id: String) -> bool:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty() or _tile_catalog == null or not _tile_catalog.has_type(normalized_type_id):
+		return false
+	_selected_type_id = normalized_type_id
+	var type_group: String = _get_palette_group_for_type(normalized_type_id)
+	if not type_group.is_empty() and _active_palette_group_id != type_group:
+		_active_palette_group_id = type_group
+		_populate_tile_palette()
+	else:
+		_refresh_palette_selection_visual()
+		_refresh_palette_workflow_controls()
+	_clear_height_tool()
+	_eraser_tool_enabled = false
+	var brush_button := get_node_or_null("UI/TopBar/Margin/HBox/BrushButton") as Button
+	if brush_button != null and not brush_button.button_pressed:
+		brush_button.button_pressed = true
+	_refresh_authoring_status_controls()
+	return true
 
 
 # Deselect palette item to enter select mode
@@ -5845,6 +6106,7 @@ func _on_tile_type_deselected() -> void:
 	_selected_type_id = ""
 	_hide_hover_preview()
 	_refresh_palette_selection_visual()
+	_refresh_palette_workflow_controls()
 	_refresh_authoring_status_controls()
 
 
@@ -6026,6 +6288,30 @@ func _get_object_rotate_right_button() -> Button:
 
 func _get_object_rotation_value_label() -> Label:
 	return get_node_or_null("UI/PropertyPanel/Margin/VBox/ObjectRotationRow/ObjectRotationValueLabel") as Label
+
+
+func _get_object_scale_spinbox() -> SpinBox:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/ObjectScaleRow/ObjectScaleSpinBox") as SpinBox
+
+
+func _get_object_scale_reset_button() -> Button:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/ObjectScaleRow/ObjectScaleResetButton") as Button
+
+
+func _get_placement_object_scale_spinbox() -> SpinBox:
+	return get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteSelectedPreviewRow/PaletteSelectedInfoBox/PalettePlacementScaleRow/PlacementObjectScaleSpinBox") as SpinBox
+
+
+func _get_placement_object_scale_reset_button() -> Button:
+	return get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteSelectedPreviewRow/PaletteSelectedInfoBox/PalettePlacementScaleRow/PlacementObjectScaleResetButton") as Button
+
+
+func _get_palette_selected_preview_texture_rect() -> TextureRect:
+	return get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteSelectedPreviewRow/PaletteSelectedPreviewTextureRect") as TextureRect
+
+
+func _get_palette_selected_info_label() -> Label:
+	return get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteSelectedPreviewRow/PaletteSelectedInfoBox/PaletteSelectedInfoLabel") as Label
 
 
 func _get_add_marker_type_option_button() -> OptionButton:
@@ -6234,6 +6520,7 @@ func _populate_tile_palette() -> void:
 			palette_groups_root.add_child(group_button)
 
 	var visible_types: Array = Array(types_by_group.get(_active_palette_group_id, []))
+	visible_types.sort_custom(_sort_palette_type_dicts)
 	var visible_type_ids: PackedStringArray = PackedStringArray()
 	for tile_type in visible_types:
 		var type_id := String(Dictionary(tile_type).get("type_id", ""))
@@ -6245,12 +6532,81 @@ func _populate_tile_palette() -> void:
 	if not visible_type_ids.has(_selected_type_id):
 		_selected_type_id = String(visible_type_ids[0]) if not visible_type_ids.is_empty() else ""
 	_refresh_palette_selection_visual()
+	_refresh_palette_workflow_controls()
 
 
 func _on_palette_group_button_pressed(group_id: String) -> void:
 	_active_palette_group_id = group_id.strip_edges().to_lower()
 	_populate_tile_palette()
+	_refresh_palette_workflow_controls()
 	_refresh_authoring_status_controls()
+
+
+func _sort_palette_type_dicts(a: Dictionary, b: Dictionary) -> bool:
+	var a_type_id: String = String(a.get("type_id", "")).strip_edges().to_lower()
+	var b_type_id: String = String(b.get("type_id", "")).strip_edges().to_lower()
+	var a_name: String = String(a.get("display_name", a_type_id)).strip_edges().to_lower()
+	var b_name: String = String(b.get("display_name", b_type_id)).strip_edges().to_lower()
+	if a_name == b_name:
+		return a_type_id < b_type_id
+	return a_name < b_name
+
+
+func _get_palette_type_display_name(type_id: String) -> String:
+	var normalized_type_id: String = type_id.strip_edges()
+	if normalized_type_id.is_empty():
+		return ""
+	if _tile_catalog != null and _tile_catalog.has_method("get_display_name"):
+		return String(_tile_catalog.call("get_display_name", normalized_type_id))
+	return normalized_type_id
+
+
+func _get_palette_group_for_type(type_id: String) -> String:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty() or _tile_catalog == null or not _tile_catalog.has_method("get_type"):
+		return ""
+	var entry: Dictionary = Dictionary(_tile_catalog.call("get_type", normalized_type_id))
+	return String(entry.get("palette_group", "")).strip_edges().to_lower()
+
+
+func _get_palette_group_display_name(group_id: String) -> String:
+	var normalized_group_id: String = group_id.strip_edges().to_lower()
+	if normalized_group_id.is_empty():
+		return ""
+	if normalized_group_id == "all":
+		return "Alle"
+	if _tile_catalog != null:
+		for group in _tile_catalog.get_palette_groups():
+			var group_dict: Dictionary = Dictionary(group)
+			if String(group_dict.get("group_id", "")).strip_edges().to_lower() == normalized_group_id:
+				return String(group_dict.get("display_name", normalized_group_id.capitalize()))
+	return normalized_group_id.capitalize()
+
+
+func _refresh_palette_workflow_controls() -> void:
+	var preview_rect := _get_palette_selected_preview_texture_rect()
+	var info_label := _get_palette_selected_info_label()
+	var placement_scale_spinbox := _get_placement_object_scale_spinbox()
+	if placement_scale_spinbox != null and not is_equal_approx(float(placement_scale_spinbox.value), _placement_object_scale):
+		placement_scale_spinbox.value = _placement_object_scale
+	if preview_rect == null and info_label == null:
+		return
+	if _selected_type_id.is_empty():
+		if preview_rect != null:
+			preview_rect.texture = null
+		if info_label != null:
+			info_label.text = "Kein Asset"
+		return
+	var type_display_name: String = _get_palette_type_display_name(_selected_type_id)
+	var group_display_name: String = _get_palette_group_display_name(_get_palette_group_for_type(_selected_type_id))
+	if preview_rect != null:
+		preview_rect.texture = _get_palette_preview_texture(_selected_type_id)
+	if info_label != null:
+		info_label.text = "%s\n%s\nScale %.2f" % [
+			type_display_name,
+			group_display_name if not group_display_name.is_empty() else "Palette",
+			_placement_object_scale,
+		]
 
 
 func _configure_palette_group_button(button: Button, selected: bool) -> void:
@@ -7126,7 +7482,9 @@ func _update_hover_preview(world_position: Vector2) -> void:
 		add_child(_hover_preview)
 
 	_hover_preview.texture = preview_texture
-	_hover_preview.position = tile_data.world_position - KENNEY_DIAMOND_CENTER
+	var preview_scale: float = _placement_object_scale if _palette_type_uses_object_scale(_selected_type_id) else OBJECT_SCALE_DEFAULT
+	_hover_preview.scale = Vector2.ONE * preview_scale
+	_hover_preview.position = tile_data.world_position - (KENNEY_DIAMOND_CENTER * preview_scale)
 	_hover_preview.modulate = Color(1.0, 1.0, 1.0, 0.4)
 	_hover_preview.visible = true
 

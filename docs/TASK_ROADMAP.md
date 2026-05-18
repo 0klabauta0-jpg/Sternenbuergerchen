@@ -112,6 +112,7 @@ git checkout -b batch/<batch-name>
 - TASK_480 - Mission UI Hotpath Feedback Guard
 - TASK_481 - Loadout Heavy Weapon Selection
 - TASK_482 - Mission Briefing Data Contract
+- TASK_483 - Map Editor Asset Workflow Polish
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
