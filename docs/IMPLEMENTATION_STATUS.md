@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_482 - Mission Briefing Data Contract
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_482_mission_briefing_data_contract.md`, `docs/dev/mission_briefing_contract.md`, `docs/dev/loadout_playability_rules.md`
+- Stand: `MissionScenarioData` speichert und normalisiert ein `briefing`-Payload fuer Pre-Mission-Lagebild, Hintergrundbild, terrain-only Minimap-Modus, Ziele, Bedrohungen, Empfehlungen und vorbereitete Annotationen.
+- Stand: Briefing-Loadout-Empfehlungen nutzen kanonische `WeaponData`-IDs; visuelle Loadout-IDs werden nicht als Gameplay-Waffen uebernommen und Empfehlungen mutieren keine Loadouts.
+- Stand: Der Map Editor hat schlanke Authoring-API-Haken, damit der naechste UI-Task Bildauswahl und Briefing-Felder ohne neuen Save/Load-Pfad anbinden kann.
+- Stand: Leere optionale Air-Risk-Threat-Zone-Felder werden beim Serialisieren ausgelassen, damit alte Guards weiter zwischen Player-LZ und Bedrohungsmarker unterscheiden koennen.
+- Risiken/offen: Sichtbares Briefing-Panel, Bildauswahl, Minimap-Rendering und Painting bleiben Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_482_mission_briefing_data_contract.gd`, relevante Mission-Scenario-Regressionen und `git diff --check`.
+- Naechster Schritt: TASK_483 als Map-Editor-Briefing-Panel mit Hintergrundbild-Auswahl und erster terrain-only Minimap-Vorschau schneiden.
+
 ### TASK_481 - Loadout Heavy Weapon Selection
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_481_loadout_heavy_weapon_selection.md`, `docs/dev/loadout_playability_rules.md`

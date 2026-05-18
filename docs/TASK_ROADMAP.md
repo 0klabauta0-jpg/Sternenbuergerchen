@@ -111,6 +111,7 @@ git checkout -b batch/<batch-name>
 - TASK_479 - Fireteam Runtime Hotpath Guards
 - TASK_480 - Mission UI Hotpath Feedback Guard
 - TASK_481 - Loadout Heavy Weapon Selection
+- TASK_482 - Mission Briefing Data Contract
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

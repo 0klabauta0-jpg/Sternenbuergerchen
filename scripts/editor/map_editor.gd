@@ -2374,6 +2374,20 @@ func _create_default_mission_scenario():
 				"wave_delay_seconds": 90.0,
 			},
 			"patrol_bindings": _build_auto_patrol_bindings(enemy_ids),
+			"briefing": {
+				"title": scenario_id.capitalize(),
+				"summary": "Fuehre das Fireteam in den Einsatz und sichere das Zielgebiet.",
+				"minimap_mode": "terrain_only",
+				"objectives": ["Zielgebiet sichern"],
+				"threats": ["Feindkontakt im Einsatzgebiet"],
+				"recommended_loadout": [
+					{
+						"label": "Ausgewogenes Fireteam",
+						"weapon_ids": ["rifle", "sniper", "rocket_launcher", "medictool"],
+						"reason": "Reichweite, Anti-Armor und Support fuer den ersten Kontakt.",
+					},
+				],
+			},
 			"notes": ["Created by the tactical mission editor MVP."],
 		}
 	)
@@ -2810,6 +2824,15 @@ func set_tactical_profile_authoring_fields(data: Dictionary) -> void:
 	_refresh_mission_authoring_controls()
 
 
+func set_mission_briefing_authoring_fields(data: Dictionary) -> void:
+	var base_data: Dictionary = Dictionary(_ensure_mission_scenario().call("to_dict"))
+	base_data["briefing"] = data.duplicate(true)
+	_mission_scenario = MISSION_SCENARIO_DATA_SCRIPT.new(base_data)
+	_scenario_feedback_text = "Mission briefing updated."
+	_mark_scenario_dirty(true)
+	_refresh_mission_authoring_controls()
+
+
 func get_enemy_tactics_authoring_snapshot() -> Dictionary:
 	_ensure_mission_scenario()
 	var group: Dictionary = _get_primary_enemy_group()
@@ -2838,6 +2861,13 @@ func get_tactical_profile_authoring_snapshot() -> Dictionary:
 		"help_id": "map_editor.tactical_profile",
 		"ui_sets_gameplay_truth": false,
 	}
+
+
+func get_mission_briefing_authoring_snapshot() -> Dictionary:
+	var scenario = _ensure_mission_scenario()
+	if scenario == null:
+		return {}
+	return Dictionary(scenario.call("get_briefing")).duplicate(true)
 
 
 func get_current_mission_scenario_dict() -> Dictionary:
